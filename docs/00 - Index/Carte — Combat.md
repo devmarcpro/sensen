@@ -6,7 +6,7 @@ statut: décidé
 etape: 0
 ---
 
-Le cœur du jeu — et l'étape 0 de l'ordre de construction : *rien ne démarre avant un oui*. La spécification exécutable de l'étape 0 : **[[Prototype de combat — spécification]]**. 30 notes.
+Le cœur du jeu — et l'étape 0 de l'ordre de construction : *rien ne démarre avant un oui*. La spécification exécutable de l'étape 0 : **[[Prototype de combat — spécification]]**. 31 notes.
 
 **Le temps**
 - **[[Action-time à ticks]]** — pas de tours, une horloge que les actions font avancer. Réfléchir est gratuit.

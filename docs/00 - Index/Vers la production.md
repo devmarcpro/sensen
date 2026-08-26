@@ -8,6 +8,9 @@ etape: 0
 
 **Le design est complet et décidé.** Il ne reste ni question bloquante ni valeur à inventer : tout ce qui était ouvert porte une décision ou un défaut chiffré. Ce qui suit est l'état de production — ce qui est fait, et ce qui reste à *produire* (assets, code).
 
+> [!failure] Bloquant trouvé le 2026-08-26
+> **Le catalogue [[Modules]] n'est pas transcrivible en l'état** : 0/61 entrées portent un `cout_ticks`, et onze emploient des tours ou des mécaniques supprimées. Voir [[Décision — Transcription du catalogue de modules]]. C'est le premier travail avant l'étape 0, puisque le prototype de combat en dépend.
+
 ## 1. ✅ Validé — les 8 décisions post-pivot (2026-08-26, sur délégation)
 
 - [x] [[Décision — Structure de données de la grille]] · [[Décision — Budgets et critères de performance tactiques]] · [[Décision — Sculpture en pixel art]] · [[Décision — Prefabs de donjon en tuiles]] · [[Décision — Pièces en 2D]] · [[Décision — Altitude sur 21 niveaux]] · [[Décision — Minerais et strates après le pivot]] · [[Décision — Minimap en 2D]]

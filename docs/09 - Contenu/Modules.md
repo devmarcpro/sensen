@@ -1,12 +1,17 @@
 ---
-aliases: ["F.2", "Annexe F.2", "Modules", "Catalogue des modules", "48 modules", "53 modules"]
+aliases: ["F.2", "Annexe F.2", "Modules", "Catalogue des modules", "61 modules", "53 modules", "48 modules"]
 tags: [contenu, combat, catalogue, décidé]
 domaine: contenu
 statut: décidé
 etape: 0
 ---
 
-Les 53 modules du catalogue de départ, par domaine — le domaine Métal complète le pentagramme.
+Les **61 modules** du catalogue de départ, par domaine — le domaine Métal complète le pentagramme.
+
+> [!warning] Comptage corrigé le 2026-08-26 — et le format ne respecte pas encore son propre schéma
+> L'en-tête annonçait « 48 » puis « 53 » modules : **le décompte réel des entrées est 61** (44 grimoire + 17 manuel). Comme pour « Métaux (12) » qui en listait 21, c'est l'en-tête du GDD qui était faux — **la liste fait foi**.
+>
+> Plus important : les entrées ci-dessous sont dans le **format en prose du GDD d'origine**, antérieur au pivot tactique. Elles ne portent **pas** les champs qu'exige [[Vocabulaire des modules — six axes]] — en particulier `cout_ticks`, qui est l'économie centrale du combat. Détail du manque et plan de transcription : [[Décision — Transcription du catalogue de modules]].
 
 *Format : nom — type (effet/modificateur/déclencheur) — coût mana base — effet. Dés : notation [[Pipeline de résolution du combat]]. Élément Wu Xing ([[Wu Xing — cycles et vecteurs]]) : hérité du domaine (mapping [[Domaines de grimoires et manuels]]) — Feu→Feu, Eau/Glace→Eau, Terre→Terre, Foudre→Bois, Vie→Bois, Arcane/Espace/Corruption→neutre. Domaine Métal ajouté le 2026-08-26 (5 modules ci-dessous) — la rotation des cinq éléments est fermée pour les builds magiques.*
 

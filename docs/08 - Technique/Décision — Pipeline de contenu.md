@@ -41,7 +41,7 @@ Le registre complet vit dans `godot/data/README.md` (versionné avec les donnée
 
 ## Ce que ça garantit
 
-- **Le contenu du coffre `docs/09 - Contenu/` se transcrit tel quel** : chaque ligne des catalogues (153 matériaux, 53 modules, 19 races animales, 18 profils de PNJ…) devient un fichier, sans interprétation.
+- **Le contenu du coffre `docs/09 - Contenu/` se transcrit tel quel** : chaque ligne des catalogues (153 matériaux, 61 modules, 19 races animales, 18 profils de PNJ…) devient un fichier, sans interprétation.
 - **L'itération est instantanée** : éditer un JSON, F5, tester — la boucle de tuning des 3 arènes du prototype ([[Prototype de combat — spécification]]) repose dessus.
 - **Pas d'éditeur interne au lancement** ([[Data-driven design]], décision confirmée) : JSON à la main + templates + validation stricte suffisent ; un éditeur visuel ne sera envisagé que si le volume le justifie.
 
