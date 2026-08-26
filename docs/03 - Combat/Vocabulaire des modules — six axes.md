@@ -67,7 +67,9 @@ Le schéma de données d'un module et les six axes du vocabulaire commun — la 
 | `declencheur` | diffère la charge qui suit | `surcout_ticks` |
 | `liaison` | répète, disperse, propage | `surcout_ticks` |
 
-**Un noyau n'a jamais de `forme` ni de `portee`** — ces champs appartiennent aux modules de forme. Catalogue : [[Modules]].
+**Un noyau n'a jamais de `forme` ni de `portee`** — ces champs appartiennent aux modules de forme.
+
+**Et un seul type porte une monnaie.** `cout_mana` et `cout_endurance` n'existent **que** sur les noyaux. Les formes, conditions, déclencheurs et liaisons ne coûtent que des **ticks** ; le modificateur ajoute en plus un `surcout_ressource` **sans monnaie propre**, réglé dans celle du noyau qu'il sert. C'est ce qui permet à un seul *Concentration* de servir un mage et un guerrier. Détail et exemple chiffré : [[Modules]].
 - `book_type` : `"grimoire"` (sorts) ou `"manuel"` (armes).
 - **Aucun arbre de talents, aucun point à dépenser** : les modules s'obtiennent par le **loot et l'apprentissage** ([[Grimoires et manuels]]), montent de niveau **par l'usage** ([[Potentiel]]), et le build **émerge** de ce qu'on possède et de ce qu'on utilise.
 - **Infobulle exhaustive obligatoire** : chaque module affiche ses valeurs **calculées pour le personnage courant** — forme, portée, coûts, conditions, dégâts attendus avec le détail. Aucune information cachée, aucun « environ ».

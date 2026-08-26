@@ -34,14 +34,40 @@ Les **176 modules composants** — la charge, la géométrie, l'altération, le 
 
 ## Les règles de coût
 
-> **Le noyau porte le coût de base. Tout le reste est un surcoût.**
+> **Un seul module choisit la monnaie : le noyau. Les cinq autres types n'en ont aucune.**
+
+Une forme ne coûte **ni mana ni endurance** — elle coûte du **temps**. C'est vrai des cinq types non-noyau. Voici exactement qui porte quoi :
+
+| Type | Ticks | Mana | Endurance | Autre |
+|---|---|---|---|---|
+| **Noyau** | ✅ de base | ✅ **ou** | ✅ **ou** | PV, ou rend de la ressource |
+| **Forme** | ✅ surcoût | ❌ | ❌ | — |
+| **Modificateur** | ✅ surcoût | — | — | ✅ surcoût **dans la monnaie du noyau** |
+| **Condition** | 0 | ❌ | ❌ | paie par le **risque d'échec** |
+| **Déclencheur** | ✅ surcoût | ❌ | ❌ | — |
+| **Liaison** | ✅ surcoût | ❌ | ❌ | — |
 
 ```
-cout_ticks     = cout_ticks(noyau) + Σ surcout_ticks(autres modules)
-cout_ressource = cout(noyau) modifié, DANS LA MONNAIE DU NOYAU
+cout_ticks     = cout_ticks(noyau) + Σ surcout_ticks(tous les autres)
+cout_ressource = cout(noyau) + Σ surcout_ressource(modificateurs)
+                 le tout dans LA MONNAIE DU NOYAU
 ```
 
-**La monnaie vient du noyau** : élémentaire et arcane → **mana** ([[Mana]]) · physique, arme, saisie → **endurance** ([[Endurance]]) · quelques-uns coûtent des **PV** ou *rendent* de la ressource. Formes, modificateurs, conditions, déclencheurs et liaisons sont **neutres** : leur surcoût s'applique dans la monnaie du noyau qu'ils servent.
+**Le modificateur est le seul non-noyau qui touche à la ressource, et il n'a pas de monnaie propre** : son `surcout_ressource` s'applique dans celle du noyau qu'il sert. Le même *Concentration* coûte 4 **mana** derrière une Flamme et 4 **endurance** derrière une Frappe.
+
+**Deux séquences, les mêmes briques d'assemblage, deux monnaies :**
+
+| | `[Ligne]` + `[Flamme]` + `[Concentration]` | `[Ligne]` + `[Frappe]` + `[Concentration]` |
+|---|---|---|
+| Noyau | Flamme — 8 t, **8 mana** | Frappe — 5 t *(épée)*, **6 endurance** |
+| Ligne | +2 t, rien | +2 t, rien |
+| Concentration | +2 t, **+4 mana** | +2 t, **+4 endurance** |
+| **Total** | **12 ticks · 12 mana** | **9 ticks · 10 endurance** |
+| Résultat | 3d6 de Feu sur 4 tuiles en ligne | l'arme + 1 dé sur 4 tuiles en ligne |
+
+C'est ce qui évite de dupliquer le catalogue : **une seule *Ligne*, un seul *Concentration*** servent le mage et le guerrier. Sans cette règle il faudrait une version « physique » et une version « magique » de chacun des 92 modules non-noyau.
+
+**Quelle monnaie porte un noyau** : élémentaire et arcane → **mana** ([[Mana]], 60 noyaux) · arme, physique, saisie, rupture → **endurance** ([[Endurance]], 18 noyaux) · six coûtent des **PV** ou *rendent* de la ressource (Ponction, Offrande, Saignée, Méditation, Second souffle, Fiole).
 
 **La séquence entière est UNE action**, pose **un seul segment de chaîne** ([[Jauge de chaîne Wu Xing]]) et coûte une seule fois ([[Six types de modules et assemblage]]). Slots : [[Structure compétences-modules-slots]].
 
