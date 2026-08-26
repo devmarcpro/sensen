@@ -1,5 +1,5 @@
 ---
-aliases: ["C.3", "Annexe C.3", "Classes", "Classes de départ", "Le Sabre", "Le Souffle", "La Braise", "La Trace", "La Balance", "Le Vent"]
+aliases: ["C.3", "Annexe C.3", "Classes", "Classes de départ", "Le Sabre", "Le Souffle", "La Braise", "La Trace", "La Balance", "Le Vent", "La Paume", "Le Creuset"]
 tags: [progression, contenu, décidé]
 domaine: progression
 statut: décidé
@@ -9,7 +9,7 @@ etape: 4
 > [!success] Renommées le 2026-08-26
 > Les six classes passent de noms génériques (Guerrier, Mage, Artisan, Chasseur, Marchand, Vagabond) à des **noms français évocateurs**, cohérents avec [[Identité visuelle chinoise]] — *« ce qui distingue réellement Sensen, bien plus qu'une perspective »*. Chaque classe porte désormais un **talent** ([[Talents de classe]]).
 
-Les 6 classes visibles : un kit **et un talent** qui définit une façon de jouer.
+Les 8 classes visibles : un kit **et un talent** qui définit une façon de jouer.
 
 | Classe | Kit (stats + équipement + compétences de départ) | Talent |
 |---|---|---|
@@ -18,17 +18,23 @@ Les 6 classes visibles : un kit **et un talent** qui définit une façon de joue
 | **La Braise** | +2 Dex/+1 For ; outils complets qualité Correct ; niv. 5 en Forge et 1 métier au choix | **Main du métal** |
 | **La Trace** | +2 Dex/+1 Per ; arc, 20 flèches ; niv. 5 en Arc, Dressage | **Meute** |
 | **La Balance** | +2 Cha/+1 Per ; 500 or, étal portatif ; niv. 5 en Négociation, Lecture | **Œil du prix** |
+| **La Paume** | +2 Vol/+1 Cha ; herbes et bandages, 1 grimoire de Vie ; niv. 5 en domaine Vie, Alchimie | **Souffle rendu** |
+| **Le Creuset** | +2 Per/+1 Vol ; alambic portatif, 6 fioles ; niv. 5 en Alchimie, Herboristerie | **Fiole vive** |
 | **Le Vent** | +1 partout ; rien ; +15 points de création en plus | **Sans maître** (aucun, mais peut en apprendre un) |
 
 **Correspondance avec les anciens noms :** Guerrier → Le Sabre · Mage → Le Souffle · Artisan puis Forgeron → **La Braise** · Chasseur → La Trace · Marchand → La Balance · Vagabond → Le Vent.
 
+**Ajoutées le 2026-08-26 :** **La Paume** (soigneur) comble le trou signalé — le design promettait que *« les builds de soutien ont un accès plein au système central »* ([[Jauge de chaîne Wu Xing]] : un soin en position finale résout à ×0.7) sans qu'aucune classe ne l'incarne. **Le Creuset** (alchimiste) donne un porteur à l'Alambic et aux potions.
+
 > **Le renommage résout trois collisions de vocabulaire.** *Forgeron*, *Chasseur* et *Marchand* désignaient à la fois une classe, une créature ([[Créatures]]) et — pour les deux premiers — une fonction ([[Fonctions]]). Chaque mot ne désigne plus qu'une chose.
 
-## Les neuf classes cachées
+## Les onze classes cachées
 
 Elles ne sont pas au menu de création : **elles s'apprennent d'un PNJ qui les porte** (relation ≥ 75, comme les recettes exotiques). Détail et talents : [[Talents de classe]].
 
-**Le Passeur** (portails) · **Le Sablier** (tempo) · **Le Sceau** (glyphes) · **Le Masque** (postures) · **Le Porteur** (saisit et lance) · **L'Ombre** (dissimulation, pièges) · **L'Écarlate** (jauge de sang) · **Le Rieur** (dés) · **Le Fossoyeur** (relève les morts).
+**Le Passeur** (portails) · **Le Sablier** (tempo) · **Le Sceau** (glyphes) · **Le Masque** (postures) · **Le Porteur** (saisit et lance) · **L'Ombre** (dissimulation, pièges) · **L'Écarlate** (jauge de sang) · **Le Rieur** (dés) · **Le Fossoyeur** (relève les morts) · **La Mèche** (bombes) · **L'Engrenage** (tourelles).
+
+**Les deux dernières sont technologiques**, et c'est pour ça qu'elles sont cachées : la technologie du monde se **retrouve** dans les ruines profondes, comme les recettes du [[Palier industriel]]. Un tourellier s'apprend au même endroit qu'un haut fourneau.
 
 ## Ce qui a changé, ce qui n'a pas changé
 

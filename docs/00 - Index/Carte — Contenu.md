@@ -24,7 +24,8 @@ Les catalogues prêts à transcrire en JSON. 24 notes.
 
 **Les systèmes**
 - **[[Modules]]** (53) — le catalogue de départ par domaine, pentagramme complet.
-- **[[Créatures]]** (34) — animaux réels et humains uniquement, **définitivement**. *Un donjon est une ruine investie, pas une crypte magique.* Avec le drop rare universel : la statue 1:1.
+- **[[Créatures]]** (19 races animales) — le bestiaire, **définitivement réaliste**. *Un donjon est une ruine investie, pas une crypte magique.*
+- **[[Profils de PNJ]]** — les humains ne sont plus des espèces : ce sont des combinaisons race × classe × fonction × role, **tirées** et non énumérées. Avec le drop rare universel : la statue 1:1.
 - **[[Statuts]]** (14) · **[[Nourriture]]** (18) · **[[Meubles]]** (16)
 - **[[Effets d'équipement types]]** — les pools par slot pour le générateur de loot.
 - **[[Plantes]]** (22) · **[[Potions]]** (12) · **[[Composants]]** (14)

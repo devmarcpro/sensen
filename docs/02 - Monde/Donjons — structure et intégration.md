@@ -39,7 +39,7 @@ Les donjons sont une des sources principales de contenu du jeu, et le premier es
 - **Quêtes de guilde ([[Quêtes et guildes]]/[[Gabarit de quête]]) :** nouveau pattern `donjon` — nettoyer ou atteindre le fond d'un donjon désigné (cohérent avec les gabarits par guilde déjà posés).
 - **Grimoires/manuels ([[Grimoires et manuels]]) :** les donjons sont leur **source principale** (piédestaux, coffres, salles de bibliothèque thématiques).
 - **Artefacts ([[Trésors et artefacts]]) :** réservés à la salle boss/trésor des donjons majeurs.
-- **Créatures ([[Créatures]]) :** humains hostiles (bandits, pillards, ermites) et bêtes tanières peuplent les salles selon le profil du donjon — un ermite en salle isolée profonde, une bande organisée dans les grandes salles d'un étage supérieur.
+- **Créatures :** **humains hostiles** ([[Profils de PNJ]] : bandits, pillards, ermites) et **bêtes tanières** ([[Créatures]] : ours, loups) peuplent les salles selon le profil du donjon — un ermite en salle isolée profonde, une bande organisée dans les grandes salles d'un étage supérieur.
 
 **Décisions :**
 - **Après nettoyage complet : la cellule redevient normale et claimable après le délai de grâce de 1,5 jour** (ci-dessus) — pas de farm infini du même donjon, pas de disparition brutale non plus.

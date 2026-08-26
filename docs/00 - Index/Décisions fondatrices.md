@@ -66,6 +66,10 @@ La rupture du 2026-08-09 : ce qui a été abandonné, ce qui survit, et pourquoi
 | **Classes renommées et étendues** | 6 visibles en **français évocateur** — Le Sabre, Le Souffle, La Braise, La Trace, La Balance, Le Vent — et **9 cachées** : Le Passeur, Le Sablier, Le Sceau, Le Masque, Le Porteur, L'Ombre, L'Écarlate, Le Rieur, Le Fossoyeur ([[Classes]]) |
 | **Vocabulaire des modules élargi** | deux effets nouveaux, `tempo` et `saisie` ([[Vocabulaire des modules — six axes]]) + 3 statuts (Dissimulé, Saisi, Retardé) et la **jauge de classe** — tous génériques, aucune exception par classe |
 
+| **Bestiaire restructuré** | F.3 mélangeait des espèces (loup) et des humains à métier (forgeron, bandit, roi). [[Créatures]] ne garde que les **19 races animales** ; les humains deviennent des combinaisons **tirées** ([[Profils de PNJ]]) — ajouter un métier au monde n'ajoute plus une créature |
+| **4 classes de plus** | **La Paume** (soigneur — comble le trou du soutien) et **Le Creuset** (alchimiste) visibles ; **La Mèche** (bombes) et **L'Engrenage** (tourelles) cachées |
+| **La technologie existe** | ancrée sur le [[Palier industriel]] et les tourelles ; les classes techniques sont **cachées** parce que la technologie se *retrouve* dans les ruines profondes |
+
 **Le principe qui tient l'ensemble :** *le talent est un plancher, pas une cage*. Tous les slots restent libres, le build émerge par-dessus une identité au lieu d'émerger de rien.
 
 ### Reste ouvert, par nature

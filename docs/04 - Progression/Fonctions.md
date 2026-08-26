@@ -21,7 +21,7 @@ etape: 9
 | **commerçant** | **achète et revend.** Ne produit rien : sa marge vient de l'écart entre deux marchés ([[Prix suggéré]], douanes de [[Lois et infractions]]) |
 | mineur · bûcheron · herboriste | récolte par catégorie ([[Récolte]]) |
 | fermier · éleveur | [[Agriculture et élevage]], [[Élevage — intention et familles]] |
-| cuisinier | [[Cuisine et alchimie]] |
+| cuisinier | [[Cuisine et alchimie]] — tire *Le Creuset* ou *La Paume* |
 | couturier | tissage, [[Composants]] |
 | transporteur | déplace des biens entre claims et cellules |
 
@@ -31,7 +31,7 @@ etape: 9
 |---|---|
 | **garde** | patrouille, intercepte, applique les lois ([[Lois et infractions]]) — tire *Le Sabre* ou *La Trace* |
 | **aventurier** | ne réside nulle part — parcourt le monde, entre en donjon, prend des quêtes. **La fonction du joueur par défaut**, et la seule où toutes les classes sont possibles |
-| **dirigeant** | remplace `leadership_role` : roi, maître de guilde, prêtre. Porte la succession ([[Familles et succession]]) et le titre ([[Génération de noms]]) |
+| **dirigeant** | remplace `leadership_role` : roi, maître de guilde, prêtre. Porte la succession ([[Familles et succession]]) et le titre ([[Génération de noms]]). Un prêtre tire *La Paume* |
 | **oisif** | enfant, retraité, captif — présent, sans production |
 
 ## Les trois règles

@@ -12,7 +12,8 @@ Les chiffres de l'économie : portefeuilles PNJ, taxes de guilde, entretien du r
 PORTEFEUILLE PNJ (marchands ET clients, règle unifiée) :
   or_max = base(métier) * (1 + rang*0.5)
     base : villageois/client 30, marchand 300, maître de guilde 2000,
-    roi 15000 (cohérent avec les niveaux de F.3)
+    roi 15000 — indexé sur la FONCTION du PNJ (Fonctions), pas sur
+    son espèce (Profils de PNJ)
   recharge hebdomadaire : +15 % de or_max (plafonné à or_max)
   Vente du joueur refusée en or au-delà du stock du PNJ → PROPOSITION
     DE TROC automatique : objets de son inventaire ≈ valeur équivalente

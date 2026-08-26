@@ -15,7 +15,7 @@ Des gabarits instanciés depuis une source plutôt que des entrées fixes — un
 | Feuilles de [essence] | 1 | 1 | 1 | 80 | 40 | 90 | 40 | couleur dérivée de l'essence ; compost/fourrage ; bloc décoratif |
 | Pousse de [essence] | 1 | 1 | 3 | 60 | 30 | 85 | 30 | replantable → **sylviculture** : l'arbre repousse (vitesse selon essence, ×2 pour peuplier/eucalyptus) |
 
-**Parties de créatures (6 gabarits × créatures [[Créatures]]) — drops de mobs, paramétriques ([[Schéma matériau]]) ; ingrédients d'alchimie ([[Cuisine et alchimie]]) et de craft**
+**Parties de créatures (6 gabarits × races animales [[Créatures]]) — drops de mobs, paramétriques ([[Schéma matériau]]) ; ingrédients d'alchimie ([[Cuisine et alchimie]]) et de craft**
 
 | Gabarit | Usage principal | Dérivation |
 |---|---|---|

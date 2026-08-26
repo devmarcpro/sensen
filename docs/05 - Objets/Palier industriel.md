@@ -18,6 +18,8 @@ Le joueur **trouve et achète des recettes industrielles** (ruines profondes, ma
 
 **Combustibles concernés ([[Catalogue matériaux — Minéraux]]) :** Houille (carburant de forge), Lignite (médiocre), Anthracite (meilleur carburant), Tourbe compactée.
 
+**Les classes technologiques ([[Talents de classe]]) :** **La Mèche** (bombes) et **L'Engrenage** (tourelles) se découvrent aux mêmes endroits que ces recettes — ruines profondes, marchands des capitales, hauts rangs de guilde. La technologie a désormais des porteurs, pas seulement des plans.
+
 ## Liens
 - **Dépend de** : [[Craft compositionnel]], [[Composant et recette d'obtention]], [[Stations de transformation]]
 - **Alimente** : [[Wu Xing hors combat]], [[Jauge de chaîne Wu Xing]]

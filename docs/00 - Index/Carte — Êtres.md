@@ -9,6 +9,7 @@ etape: 9
 **Un roi et un mouton sont la même fiche, avec des blocs différents remplis.** C'est de là que tout découle. 16 notes.
 
 **Le socle, à lire en premier :**
+- **[[Profils de PNJ]]** — un forgeron n'est pas une espèce, c'est `humain · La Braise · artisan · résident`. Les PNJ se **génèrent**, ils ne s'énumèrent pas.
 - **[[Blocs de l'être]]** — le schéma unique en six blocs. *La différence n'est pas une branche dans le code, c'est un bloc vide dans la fiche.* Et sa conséquence : **rien n'est réservé** — le mouton ultime est une conséquence atteinte, pas une permission accordée.
 - **[[Apparence — données et équipement]]** — ce qui définit l'apparence : la silhouette de l'espèce, le génome (héritable), l'équipement. Jamais le type.
 - **[[Rôles de l'être]]** — sauvage → apprivoisé → résident → garde → bétail. Le prix, jamais l'interdiction. *(À ne pas confondre avec la [[Fonctions|fonction]], qui est le métier.)*

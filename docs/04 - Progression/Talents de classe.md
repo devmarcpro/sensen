@@ -1,5 +1,5 @@
 ---
-aliases: ["Talents de classe", "Talent de classe", "Classes cachées", "Passeur", "Capacité de classe", "Jauge de classe"]
+aliases: ["Talents de classe", "Talent de classe", "Classes cachées", "Passeur", "Capacité de classe", "Jauge de classe", "La Mèche", "L'Engrenage", "La Paume", "Le Creuset"]
 tags: [progression, combat, décidé]
 domaine: progression
 statut: décidé
@@ -9,7 +9,7 @@ etape: 4
 > [!warning] Amende une décision écrite
 > Le GDD disait : *« Classe : détermine **uniquement** des bonus de stats/équipement de départ »* ([[Création de personnage]]). **Amendé le 2026-08-26** : chaque classe porte un talent qui définit une façon de jouer — justifié par **ToME** ([[Piliers d'inspiration]]), où les classes ont une mécanique définissante dès le début et où le build émerge *à l'intérieur* de cette identité.
 
-Un talent de classe est **actif** : une capacité qu'on emploie. **15 classes** — 6 visibles, 9 cachées.
+Un talent de classe est **actif** : une capacité qu'on emploie. **19 classes** — 8 visibles, 11 cachées.
 
 ## Le mécanisme
 
@@ -19,7 +19,7 @@ Un talent de classe est **actif** : une capacité qu'on emploie. **15 classes** 
 
 **Certains talents portent une jauge de classe** — une barre propre à la classe, lue et remplie par ses propres règles, calquée sur la [[Jauge de chaîne Wu Xing]] (même objet de code, autres conditions de remplissage). C'est le mécanisme générique qui évite d'écrire une exception par classe.
 
-## Les six visibles
+## Les huit visibles
 
 | Classe | Talent | Ce que ça change |
 |---|---|---|
@@ -28,9 +28,11 @@ Un talent de classe est **actif** : une capacité qu'on emploie. **15 classes** 
 | **La Braise** | *Main du métal* — **reforge** un objet looté : remplacer un composant ([[Craft compositionnel]]) **sans perdre ses affixes** | l'atelier n'invente toujours pas d'affixes ([[Loot — affixes, gemmes et rareté]] : *loot-only*), mais il en change le support. Le loot mort disparaît |
 | **La Trace** | *Meute* — **son compagnon partage sa jauge de chaîne** : les coups du compagnon posent des segments ([[Compagnons]]) | deux corps, une chaîne — le seul build qui construit sa rotation à deux |
 | **La Balance** | *Œil du prix* — voit le **portefeuille réel** et le prix d'acceptation de chaque PNJ ([[Barèmes économiques]]) ; +1 place d'escorte | le commerce devient de l'information au lieu du tâtonnement |
+| **La Paume** | *Souffle rendu* — ses **soins posent un segment de chaîne de l'élément de la cible soignée** ([[Jauge de chaîne Wu Xing]]) | le soigneur devient un **tisseur de chaîne** : il construit la rotation de son groupe. Contrepartie : ses attaques d'arme ne posent **aucun** segment — il ne construit que par les autres |
+| **Le Creuset** | *Fiole vive* — ses potions deviennent **projetables en zone** (forme `carre r1`, tous les alliés dedans) et il porte **2 potions actives par famille** au lieu d'1 ([[Nourriture, potentiel et potions]]) | chaque potion lancée consomme **le double d'ingrédients** |
 | **Le Vent** | *Sans maître* — commence **sans talent**, mais peut en apprendre un auprès de n'importe quel maître — **et en changer** | le seul qui goûte à tout, jamais le meilleur nulle part |
 
-## Les neuf cachées
+## Les onze cachées
 
 **Elles ne sont pas au menu : elles s'apprennent d'un PNJ qui les porte.** Puisque chaque PNJ a une classe ([[Les trois axes — race, classe, fonction]]), un Passeur existe quelque part — le trouver *est* le déblocage. Mécanisme existant : **enseignement à relation ≥ 75** ([[L'information comme récompense]]).
 
@@ -45,8 +47,16 @@ Un talent de classe est **actif** : une capacité qu'on emploie. **15 classes** 
 | **L'Écarlate** | **jauge de sang** : les dégâts subis la remplissent, elle multiplie les dégâts infligés (jusqu'à ×1.8 pleine) | la jauge se vide en **soignant** — il doit choisir entre survivre et frapper | *Sacrieur* |
 | **Le Rieur** | **relance** un jet de dés par combat ([[Pipeline de résolution du combat]]) ; ses critiques s'étendent (19-20) | les échecs critiques s'étendent aussi (1-2) — il joue sur les deux queues | *Ecaflip* |
 | **Le Fossoyeur** | relève les cadavres du champ de bataille en **invocations temporaires** (occupent une tuile) | réputation en chute continue dans toute zone civilisée ([[Réputation et relations]]) | — |
+| **La Mèche** | *Chaîne d'amorces* — pose des bombes à retardement (`declencheur` après N ticks) qui **s'amorcent mutuellement** : une explosion déclenche les bombes adjacentes ([[Explosions]]) | **friendly fire intégral** ([[Décision — Projectiles]]) : ses bombes le blessent aussi | *Roublard* |
+| **L'Engrenage** | *Affût* — déploie une **tourelle portative** qui occupe une tuile, tire à chaque tick sur la cible la plus proche et **hérite de l'élément de l'arme équipée** | une seule tourelle déployée ; elle consomme les **munitions de son carquois** ([[Équipement — 14 slots]]) | *Steamer* |
 
 *(Le **Meneur** — invocateur permanent à la Osamodas — est écarté : il chevauchait *Meute* de La Trace.)*
+
+## La technologie existe
+
+**La Mèche et L'Engrenage établissent que Sensen a une couche technologique** — et elle a déjà son ancrage : le **palier industriel** ([[Palier industriel]]), avec ses aciers alliés, son haut fourneau, son laminoir et son combustible, plus les **tourelles** de [[Défense et raids]].
+
+**C'est pour ça que ces deux classes sont cachées.** La technologie du monde est *retrouvée*, pas connue : les recettes industrielles viennent des ruines profondes et des marchands des capitales. Un tourellier s'apprend au même endroit que le haut fourneau — ce qui donne à la découverte technique un visage, en plus d'une recette.
 
 ## Ce que ça demande aux systèmes
 

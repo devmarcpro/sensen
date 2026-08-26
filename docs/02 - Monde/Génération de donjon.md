@@ -45,7 +45,8 @@ GÉNÉRATION PAR ÉTAGE (graphe, façon Daggerfall) :
      garanti si donjon majeur, 3.1).
   6. Peuplement : chaque salle reçoit 0-N créatures (poids par
      `special_tags`, profil du donjon) et 0-N contenants de loot,
-     depuis les tables standards (F.3/F.7) modulées par la formule
+     depuis les tables standards (bestiaire F.3, profils de PNJ, effets F.7)
+     modulées par la formule
      de profondeur ci-dessous.
   Coût : génération en thread au premier accès à l'étage (paresseuse,
   comme le reste du monde, E.2) — un étage jamais atteint ne coûte
