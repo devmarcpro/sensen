@@ -11,5 +11,8 @@
   "tags": [
     "armure",
     "prototype"
-  ]
+  ],
+  "elements": {
+    "metal": 1.0
+  }
 }

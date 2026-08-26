@@ -63,6 +63,13 @@ JAUGE DE CHAÎNE — 5 SEGMENTS DE BASE, EXTENSIBLE JUSQU'À 10 :
 
 **Question ouverte :** [[Décision — Chaîne côté ennemis]].
 
+> [!success] Décidé le 2026-08-26 — ce que le code a fixé
+> - **Qui porte une jauge** : tout être dont la fiche a `chain_gauge: true` — l'aventurier du prototype (`creatures/aventurier.json`) comme le chef de bande. Même objet, même règles, zéro test de contrôle ([[Décision — Chaîne côté ennemis]]).
+> - **Décroissance déterministe** : la jauge mémorise le tick de la dernière pose ; à chaque lecture (attaque, prévisualisation) on retire un segment par tranche de 30 ticks écoulés, le dernier posé en premier. Aucun timer : c'est calculable par le joueur, et ça ne coûte rien par tick.
+> - **Le résolveur** est le coup qui pose le segment n° `capacité` : il reçoit `× (1 + Σ bonus de transition)` **en comptant sa propre transition** (rotation parfaite = 4 transitions × 0.35 → ×2.40), et la barre retombe à 0 sans le stocker. Le **gain intermédiaire** (+5 % par segment présent *avant* le coup) s'applique à toute attaque qui porte un élément.
+> - **Ce qui pose un segment** : un coup d'arme qui touche, une action de créature qui touche au moins une cible (une seule pose quel que soit le nombre de cibles), et — jalon 8 — tout module lancé. Un coup dans le vide (cible dérobée à l'échéance d'une lourde) ne pose rien.
+> - **Prévisualisation** : au survol, l'UI montre l'élément contre l'alignement de la cible et son ×, le remplissage de la jauge, et pour le coup envisagé sa position, sa transition et le multiplicateur s'il résout.
+
 ## Liens
 - **Dépend de** : [[Wu Xing — cycles et vecteurs]], [[Domination et multiplicateurs]], [[Action-time à ticks]]
 - **Alimente** : [[XP de combat]], [[Cinq accès au cycle]], [[Attaque lourde et télégraphe]]

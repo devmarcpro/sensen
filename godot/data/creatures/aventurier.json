@@ -30,7 +30,7 @@
     "proto_baton_magique",
     "proto_bouclier"
   ],
-  "chain_gauge": false,
+  "chain_gauge": true,
   "elements": null,
   "rare_chance": 0.0,
   "teinte": [

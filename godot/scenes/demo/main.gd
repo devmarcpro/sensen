@@ -50,6 +50,12 @@ func _charger() -> void:
 	telegraphes.clear()
 	journal.clear()
 	_log(tr("ui.aide"))
+	var j := joueur()
+	if not j.is_empty() and not j.ratelier.is_empty():
+		var noms: Array[String] = []
+		for k in j.ratelier.size():
+			noms.append("%d=%s" % [k + 1, tr(sim.items[j.ratelier[k]].name_key)])
+		_log(tr("ui.aide.armes").format({"liste": " · ".join(noms)}))
 	_recentrer()
 
 
@@ -139,6 +145,11 @@ func _unhandled_input(ev: InputEvent) -> void:
 			KEY_TAB:
 				arene_courante = (arene_courante + 1) % arenes.size()
 				_charger()
+			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7:
+				var k: int = ev.keycode - KEY_1
+				if not j.is_empty() and k < j.ratelier.size():
+					chemin_en_cours.clear()
+					sim.intention(joueur_id, {"type": "changer_arme", "item": j.ratelier[k]})
 
 
 func _clic(t: Vector2i, lourde: bool) -> void:
@@ -295,6 +306,22 @@ func _dessine_entite(e: Dictionary) -> void:
 	draw_rect(Rect2(c + Vector2(-w * 0.5, -32), Vector2(w, 3)), Color(0, 0, 0, 0.6))
 	draw_rect(Rect2(c + Vector2(-w * 0.5, -32), Vector2(w * e.sante / e.sante_max, 3)), Color(0.3, 0.9, 0.3))
 	draw_rect(Rect2(c + Vector2(-w * 0.5, -28), Vector2(w * e.endurance / e.endurance_max, 2)), Color(0.9, 0.8, 0.3))
+	if e.has("chaine"):   # la jauge de chaîne, toujours visible (pastilles colorées)
+		var segs := _segments(e)
+		var cap: int = e.chaine.capacite
+		for k in cap:
+			var p := c + Vector2(-w * 0.5 + 2 + k * (w - 2) / cap, 4)
+			if k < segs.size():
+				draw_circle(p, 2.6, sim.wuxing.teinte(segs[k].element))
+			else:
+				draw_circle(p, 2.2, Color(0, 0, 0, 0.5))
+
+
+## Les segments effectifs d'une jauge à l'instant présent (décroissance calculée, sans la modifier).
+func _segments(e: Dictionary) -> Array:
+	var copie: Dictionary = e.chaine.duplicate(true)
+	sim.wuxing.decroitre(copie, sim.horloge_de(e).ticks)
+	return copie.segments
 
 
 # ---------------------------------------------------------------- UI texte
@@ -307,7 +334,10 @@ func _maj_ui() -> void:
 	lignes.append(tr("ui.horloge").format({"horloge": sim.horloge_de(j).ticks, "mode": mode}))
 	for e in sim.vivants():
 		lignes.append("  " + tr("ui.entite.ligne").format({"nom": tr(e.name_key), "pv": e.sante, "pv_max": e.sante_max,
-			"end": e.endurance, "compteur": e.compteur, "h": g.h(e.pos)}) + (" · GARDE" if e.garde else ""))
+			"end": e.endurance, "compteur": e.compteur, "h": g.h(e.pos)}) + (" · GARDE" if e.garde else "")
+			+ (" · " + tr(sim.items[e.equipement.main_principale].name_key) if e.equipement.has("main_principale") else "")
+			+ (" + " + tr(sim.items[e.equipement.main_secondaire].name_key) if e.equipement.has("main_secondaire") else "")
+			+ (" · " + _texte_chaine(e) if e.has("chaine") else ""))
 	if survol.x >= 0 and not j.is_empty():
 		lignes.append("  " + tr("ui.case").format({"x": survol.x, "y": survol.y, "h": g.h(survol), "dh": g.h(survol) - g.h(j.pos)}))
 		var occ := g.occupant(survol)
@@ -341,14 +371,26 @@ func _preview(j: Dictionary, cible: Dictionary) -> Array[String]:
 	var piece := Etres.piece_zone(cible, zone.zone, sim.items)
 	var armure := sim.regles.armure_piece(piece, fonct.type_degats)
 	var a_zero: bool = j.endurance <= 0
-	var f := sim.regles.fourchette_arme(j.corps.stats, arme, fonct, false, zone.mult, armure, a_zero)
+	var vecteur := sim.vecteur_arme(arme)
+	var wx: Dictionary = sim._facteur_wuxing(j, cible, vecteur, sim.horloge_de(j).ticks)
+	var f := sim.regles.fourchette_arme(j.corps.stats, arme, fonct, false, zone.mult, armure, a_zero, wx.total)
 	var stat := int(j.corps.stats.force) / int(sim.regles.r.degats.stat_div)
 	res.append("  " + tr("ui.preview").format({"nom": tr(arme.name_key), "des": fonct.degats_des,
 		"dur": "%.2f" % (float(arme.durete_base) / float(sim.regles.r.degats.durete_reference) * float(arme.qualite)),
 		"stat": stat, "zone": zone.zone, "mult": zone.mult, "armure": "%.1f" % armure,
 		"min": f.x, "max": f.y, "ticks": sim.regles.ticks_attaque(fonct, false)}))
-	var fl := sim.regles.fourchette_arme(j.corps.stats, arme, fonct, true, zone.mult, armure, a_zero)
+	var fl := sim.regles.fourchette_arme(j.corps.stats, arme, fonct, true, zone.mult, armure, a_zero, wx.total)
 	res.append("  " + tr("ui.preview.lourde").format({"lourde": "%d–%d" % [fl.x, fl.y], "ticks": sim.regles.ticks_attaque(fonct, true)}))
+	if not vecteur.is_empty():
+		var contre: Array[String] = []
+		for k in wx.contre.keys():
+			contre.append("%s %d%%" % [tr("element." + k), roundi(float(wx.contre[k]) * 100.0)])
+		var prev: Dictionary = wx.prevision
+		res.append("  " + tr("ui.wuxing").format({"element": tr("element." + sim.wuxing.dominante(vecteur)),
+			"contre": " ".join(contre) if not contre.is_empty() else "—", "dom": "%.2f" % wx.dom,
+			"segments": _segments(j).size() if j.has("chaine") else 0, "capacite": j.chaine.capacite if j.has("chaine") else 0,
+			"gain": "%.2f" % wx.gain, "position": prev.get("position", 0),
+			"transition": "(+%.2f)" % prev.get("transition", 0.0), "chaine": ("RÉSOUT ×%.2f" % prev.multiplicateur) if prev.get("resout", false) else "%.2f" % wx.chaine}))
 	if not sim.regles.a_portee(fonct, Grille.distance(j.pos, cible.pos)) or not sim.grille.ligne_de_vue(j.pos, cible.pos):
 		res.append("  (hors de portée ou hors de vue)")
 	return res
@@ -356,3 +398,10 @@ func _preview(j: Dictionary, cible: Dictionary) -> Array[String]:
 
 func g_h(p: Vector2i) -> int:
 	return sim.grille.h(p)
+
+
+func _texte_chaine(e: Dictionary) -> String:
+	var noms: Array[String] = []
+	for s in _segments(e):
+		noms.append(tr("element." + s.element))
+	return tr("ui.chaine").format({"segments": " → ".join(noms) if not noms.is_empty() else "∅"})

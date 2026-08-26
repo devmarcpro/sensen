@@ -22,7 +22,10 @@
   "equipement": [],
   "ratelier": [],
   "chain_gauge": false,
-  "elements": null,
+  "elements": {
+    "terre": 0.6,
+    "metal": 0.4
+  },
   "rare_chance": 0.0,
   "teinte": [
     0.45,

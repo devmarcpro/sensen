@@ -11,5 +11,8 @@
   "tags": [
     "armure",
     "prototype"
-  ]
+  ],
+  "elements": {
+    "bois": 1.0
+  }
 }

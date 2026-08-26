@@ -23,7 +23,9 @@
   "equipement": [],
   "ratelier": [],
   "chain_gauge": false,
-  "elements": null,
+  "elements": {
+    "bois": 1.0
+  },
   "rare_chance": 0.0,
   "teinte": [
     0.55,

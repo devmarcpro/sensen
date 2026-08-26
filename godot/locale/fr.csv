@@ -80,6 +80,17 @@ journal.desengagement,plus d'hostile en vue — retour au temps réel
 journal.inaccessible,inaccessible — une falaise (Δ ≥ 3) ou un mur barre la route
 journal.endurance_zero,{nom} est à bout de souffle : dégâts à 60 %
 journal.action_creature,{att} : {action} sur {def} ({zone}) : {degats} dégâts
+journal.changer_arme,{nom} prend {objet} ({ticks} ticks)
+journal.chaine_segment,{nom} pose un segment {element} ({position}/{capacite}, +{transition})
+journal.chaine_resout,{nom} RÉSOUT sa chaîne : dégâts ×{mult}
+element.bois,Bois
+element.feu,Feu
+element.terre,Terre
+element.metal,Métal
+element.eau,Eau
+ui.aide.armes,1-7 : changer d'arme (4 ticks) — {liste}
+ui.wuxing,{element} contre {contre} : ×{dom} · jauge {segments}/{capacite} (gain ×{gain}) · ce coup : segment {position} {transition} → ×{chaine}
+ui.chaine,chaîne : {segments}
 journal.victoire,plus aucun hostile. Victoire.
 journal.defaite,tu es tombé. Tab : recommencer.
 module.a_l_impact.name,À l'impact

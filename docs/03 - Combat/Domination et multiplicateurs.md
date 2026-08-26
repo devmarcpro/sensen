@@ -51,6 +51,11 @@ DÉGÂTS PAR COMPOSANTES ET NIVEAUX :
 
 **Niveaux d'élément :** ils progressent par l'usage via [[XP de combat]] (l'élément du coup est l'une des trois pistes) et sont régulés par le [[Potentiel]].
 
+> [!success] Décidé le 2026-08-26 — ce que le code a fixé (`data/wuxing.json`, `systems/combat/wuxing.gd`)
+> - **Quelle table s'applique** : un coup se résout contre le **vecteur de la pièce d'armure de la zone touchée** avec les multiplicateurs **défensifs compressés** (×1.20 / ×0.85 / ×0.95) ; si la zone est nue, contre l'**alignement propre de la créature** (`elements` de sa fiche) avec les multiplicateurs **offensifs** (×1.5 / ×0.65 / ×0.8) ; sans vecteur d'un côté ou de l'autre : ×1.0. Une attaque sans élément (bâton magique nu, bandit désarmé) n'est jamais modulée.
+> - **Ordre des facteurs** : `bruts × Σ niveaux × domination × gain intermédiaire × (1 + Σ bonus) si résolveur`, puis zone de coup, garde, armure plate. Les **niveaux d'élément valent 0** dans le prototype (facteur 1) — ils arrivent avec la progression (étape 4).
+> - **Alignements du bestiaire du prototype**, dérivés des éléments de leurs actions : Loup `{bois: 1}` · Sanglier `{terre: 0.6, metal: 0.4}` · Aigle `{metal: 0.5, bois: 0.5}` · Scorpion `{eau: 0.6, metal: 0.4}` ; les humains n'ont pas d'alignement propre, c'est leur armure qui répond (cuir = Bois, fer = Métal — [[Décision — Surcharges Wu Xing des matériaux]]).
+
 ## Liens
 - **Dépend de** : [[Wu Xing — cycles et vecteurs]], [[Progression par l'usage]]
 - **Alimente** : [[Jauge de chaîne Wu Xing]], [[Pipeline de résolution du combat]], [[Armure par zone et constructions]], [[XP de combat]], [[Armes fantomatiques]]

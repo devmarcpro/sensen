@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "required": ["elements", "engendre", "domine", "offensif", "defensif", "chaine", "teintes"],
+  "properties": {
+    "elements": { "type": "array", "items": { "type": "string" }, "minItems": 5, "maxItems": 5 },
+    "engendre": { "type": "object" },
+    "domine": { "type": "object" },
+    "offensif": { "type": "object", "required": ["domine", "domine_par", "engendre", "neutre"] },
+    "defensif": { "type": "object", "required": ["domine", "domine_par", "engendre", "neutre"] },
+    "chaine": {
+      "type": "object",
+      "required": ["capacite_base", "bonus_meme_element", "bonus_hors_ordre", "bonus_engendrement", "gain_par_segment", "decroissance_ticks", "resolveur_non_offensif"]
+    },
+    "teintes": { "type": "object" }
+  }
+}

@@ -9,6 +9,7 @@ extends RefCounted
 var graine: int
 var des: Des
 var regles: Regles
+var wuxing: WuXing
 var grille: Grille
 var arene_id: String
 var entites: Dictionary = {}          # id → être (Etres.instancier)
@@ -28,6 +29,7 @@ func _init(p_graine: int) -> void:
 	graine = p_graine
 	des = Des.new(p_graine)
 	regles = Regles.new(GameData.config("combat_rules"))
+	wuxing = WuXing.new(GameData.config("wuxing"))
 	items = GameData.catalogues.get("items", {})
 	fonctionnalites = GameData.catalogues.get("functionalities", {})
 	actions_creatures = GameData.catalogues.get("creature_actions", {})
@@ -60,6 +62,8 @@ func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 	_n_entites += 1
 	var id := "%s_%d" % [def_id, _n_entites]
 	var e := Etres.instancier(id, GameData.entree("creatures", def_id), pos, controle, regles, items)
+	if e.chain_gauge:
+		e.chaine = wuxing.jauge_neuve()
 	entites[id] = e
 	ordre.append(id)
 	grille.placer(id, pos)
@@ -165,6 +169,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _prendre_garde(e, h.ticks)
 		"attendre":
 			ok = _attendre(e, h.ticks)
+		"changer_arme":
+			ok = _changer_arme(e, str(i.get("item", "")), h.ticks)
 	if ok:
 		attente.erase(id)
 		_fin_de_pas(e.horloge)
@@ -221,6 +227,31 @@ func _quitter_garde(e: Dictionary) -> void:
 	e.garde = false
 
 
+## Changer d'arme (4 ticks) : l'objet doit être au râtelier. Un bouclier va en main secondaire
+## (main principale à une main) ; une arme à deux mains range le bouclier.
+func _changer_arme(e: Dictionary, item_id: String, tick: int) -> bool:
+	if not (item_id in e.ratelier):
+		return false
+	var item: Dictionary = items.get(item_id, {})
+	if item.is_empty():
+		return false
+	if item.type == "bouclier":
+		var principale: Dictionary = items.get(e.equipement.get("main_principale", ""), {})
+		if int(principale.get("hands", 1)) > 1 or e.equipement.get("main_secondaire", "") == item_id:
+			return false
+		e.equipement["main_secondaire"] = item_id
+	else:
+		if e.equipement.get("main_principale", "") == item_id:
+			return false
+		e.equipement["main_principale"] = item_id
+		if int(item.get("hands", 1)) > 1:
+			e.equipement.erase("main_secondaire")
+	_quitter_garde(e)
+	e.compteur = tick + int(regles.r.actions.changer_arme)
+	EventBus.emettre(&"journal", [&"journal.changer_arme", {"nom": e.name_key, "objet": item.name_key, "ticks": regles.r.actions.changer_arme}])
+	return true
+
+
 ## Attaque à l'arme équipée. Une lourde est télégraphée : engagée maintenant, résolue à l'échéance.
 func _attaquer_arme(e: Dictionary, cible: Dictionary, lourde: bool, tick: int) -> bool:
 	var arme := Etres.arme(e, items)
@@ -248,10 +279,65 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 	var a_zero: bool = e.endurance <= 0
 	e.endurance = maxi(0, e.endurance - int(regles.r.endurance.lourde if lourde else regles.r.endurance.attaque))
 	var d := regles.degats_arme(e.corps.stats, arme, fonct, des, lourde, a_zero)
-	var res := _resoudre_coup(e, cible, d.bruts, fonct.type_degats, lourde, arme.get("element"))
+	var vecteur := vecteur_arme(arme)
+	var wx := _facteur_wuxing(e, cible, vecteur, tick_de(e))
+	var res := _resoudre_coup(e, cible, d.bruts * wx.total, fonct.type_degats, lourde, vecteur)
+	res.merge(wx)
 	var cle := &"journal.attaque_lourde" if lourde else &"journal.attaque"
 	EventBus.emettre(&"journal", [cle, {"att": e.name_key, "def": cible.name_key, "zone": res.zone, "degats": res.degats, "ticks": ticks}])
 	_appliquer_degats(cible, res.degats, e.id, res)
+	_poser_segment(e, vecteur, tick_de(e))
+
+
+func tick_de(e: Dictionary) -> int:
+	return horloge_de(e).ticks
+
+
+## Le vecteur d'une arme du prototype : son élément, pur ({} si elle n'en porte pas).
+func vecteur_arme(arme: Dictionary) -> Dictionary:
+	var el: Variant = arme.get("element")
+	return {el: 1.0} if el is String and not el.is_empty() else {}
+
+
+## L'alignement contre lequel un coup se résout : le vecteur de la pièce touchée (multiplicateurs
+## défensifs compressés), sinon l'alignement propre de la créature (offensifs), sinon neutre.
+func multiplicateur_domination(v_att: Dictionary, cible: Dictionary, zone: String) -> Dictionary:
+	if v_att.is_empty():
+		return {"mult": 1.0, "contre": {}, "table": "neutre"}
+	var piece := Etres.piece_zone(cible, zone, items)
+	if piece.has("elements") and piece.elements is Dictionary and not piece.elements.is_empty():
+		return {"mult": wuxing.multiplicateur(v_att, piece.elements, "defensif"), "contre": piece.elements, "table": "defensif"}
+	if cible.elements is Dictionary and not cible.elements.is_empty():
+		return {"mult": wuxing.multiplicateur(v_att, cible.elements, "offensif"), "contre": cible.elements, "table": "offensif"}
+	return {"mult": 1.0, "contre": {}, "table": "neutre"}
+
+
+## Domination × gain intermédiaire × bonus de résolution (Domination et multiplicateurs).
+func _facteur_wuxing(e: Dictionary, cible: Dictionary, v_att: Dictionary, tick: int) -> Dictionary:
+	var zone: Dictionary = regles.zone_de_coup(grille.h(e.pos), grille.h(cible.pos))
+	var dom := multiplicateur_domination(v_att, cible, zone.zone)
+	var gain := 1.0
+	var chaine := 1.0
+	var prev := {}
+	if e.has("chaine") and not v_att.is_empty():
+		wuxing.decroitre(e.chaine, tick)
+		prev = wuxing.prevoir(e.chaine, wuxing.dominante(v_att))
+		gain = prev.gain
+		chaine = prev.multiplicateur
+	return {"dom": dom.mult, "contre": dom.contre, "gain": gain, "chaine": chaine, "prevision": prev, "total": dom.mult * gain * chaine}
+
+
+## Un coup qui touche pose UN segment (Jauge de chaîne Wu Xing) — s'il résout, la barre retombe.
+func _poser_segment(e: Dictionary, v_att: Dictionary, tick: int) -> void:
+	if not e.has("chaine") or v_att.is_empty():
+		return
+	var element := wuxing.dominante(v_att)
+	var p := wuxing.poser(e.chaine, element, tick)
+	if p.resout:
+		EventBus.emettre(&"journal", [&"journal.chaine_resout", {"nom": e.name_key, "mult": "%.2f" % p.multiplicateur}])
+	else:
+		EventBus.emettre(&"journal", [&"journal.chaine_segment", {"nom": e.name_key, "element": "element." + element,
+			"position": p.position, "capacite": e.chaine.capacite, "transition": "%.2f" % p.transition}])
 
 
 ## Un coup contre une cible : zone par dénivelé, garde (frontale / bouclier), armure de zone.
@@ -348,9 +434,13 @@ func _executer_action_creature(e: Dictionary, action: Dictionary, cible: Diction
 						continue
 					var bonus := _bonus_des_conditions(e, c, action)
 					var d := regles.degats_action(e.corps.stats, action, des, a_zero, bonus)
-					var res := _resoudre_coup(e, c, d.bruts, str(action.get("type_degats", "contondant")), false, action.elements)
+					var wx := _facteur_wuxing(e, c, action.elements, tick_de(e))
+					var res := _resoudre_coup(e, c, d.bruts * wx.total, str(action.get("type_degats", "contondant")), false, action.elements)
+					res.merge(wx)
 					EventBus.emettre(&"journal", [&"journal.action_creature", {"att": e.name_key, "action": action.name_key, "def": c.name_key, "zone": res.zone, "degats": res.degats}])
 					_appliquer_degats(c, res.degats, e.id, res)
+				if not cibles.is_empty():
+					_poser_segment(e, action.elements, tick_de(e))
 			"deplacement":
 				_effet_deplacement(e, effet, cibles, cible)
 			"attaque_arme":

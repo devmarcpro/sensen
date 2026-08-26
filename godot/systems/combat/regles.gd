@@ -100,12 +100,13 @@ func degats_action(stats: Dictionary, action: Dictionary, des: Des, endurance_a_
 
 
 ## Fourchette [min, max] des dégâts finaux d'une arme (prévisualisation UI, détail du calcul).
-func fourchette_arme(stats: Dictionary, arme: Dictionary, fonct: Dictionary, lourde: bool, zone_mult: float, armure: float, endurance_a_zero: bool) -> Vector2i:
+## `k_ext` : facteur externe (Wu Xing : domination × gain × chaîne).
+func fourchette_arme(stats: Dictionary, arme: Dictionary, fonct: Dictionary, lourde: bool, zone_mult: float, armure: float, endurance_a_zero: bool, k_ext: float = 1.0) -> Vector2i:
 	var f := Des.fourchette(fonct.degats_des)
 	var mult := float(arme.durete_base) / float(r.degats.durete_reference) * float(arme.qualite)
 	var distance := int(fonct.get("portee_min", 1)) > 1
 	var stat := int(stats.dexterite if distance else stats.force) / int(r.degats.stat_div)
-	var k := (float(r.actions.lourde_mult_degats) if lourde else 1.0) * (float(r.endurance.a_zero_degats_mult) if endurance_a_zero else 1.0)
+	var k := (float(r.actions.lourde_mult_degats) if lourde else 1.0) * (float(r.endurance.a_zero_degats_mult) if endurance_a_zero else 1.0) * k_ext
 	return Vector2i(degats_finaux((f.x * mult + stat) * k, zone_mult, armure, false),
 		degats_finaux((f.y * mult + stat) * k, zone_mult, armure, false))
 

@@ -17,6 +17,9 @@ Comment le jeu se donne à voir : isométrique, tuiles teintées, billboards pap
 - **La lisibilité prime sur le réalisme** : contours nets, silhouettes distinctes, couleurs élémentaires cohérentes (les cinq éléments ont leurs teintes, partout — jauge, effets, gemmes, tooltips).
 - **Effets** : peu d'animation, beaucoup de feedback d'interface — chiffres flottants, flashs brefs, particules courtes. L'effort visuel passe dans l'**UI de lisibilité** (timeline, prévisualisations, journal), qui est le vrai game feel d'un tactique.
 
+> [!success] Décidé le 2026-08-26 — les teintes des cinq éléments
+> Les couleurs traditionnelles du Wu Xing, utilisées partout (jauge, effets, gemmes, tooltips) : **Bois** vert `(0.25, 0.70, 0.35)` · **Feu** rouge `(0.90, 0.25, 0.15)` · **Terre** jaune-ocre `(0.85, 0.70, 0.20)` · **Métal** blanc `(0.90, 0.90, 0.92)` · **Eau** bleu profond `(0.15, 0.30, 0.75)`. Déclarées dans `data/wuxing.json` (`teintes`), lues par le rendu — jamais recopiées dans le code.
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Piliers d'inspiration]]
 - **Alimente** : [[Squelette modulaire et points d'attache]], [[Écrans d'interface]], [[Palette de couleurs des matériaux]]

@@ -40,7 +40,8 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 		"ratelier": def.get("ratelier", []).duplicate(),
 		"actions": def.get("actions", []).duplicate(),
 		"ai_profile": def.ai_profile,
-		"chain_gauge": def.get("chain_gauge", false),
+		"chain_gauge": def.get("chain_gauge", false),   # porteurs de jauge : joueur, élites, boss
+		"elements": def.get("elements"),
 		"teinte": def.get("teinte", [0.8, 0.8, 0.8]),
 		"tags": def.get("tags", []).duplicate(),
 		"vivant": true,

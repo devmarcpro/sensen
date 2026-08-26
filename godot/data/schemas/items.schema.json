@@ -66,6 +66,12 @@
       "items": {
         "type": "string"
       }
+    },
+    "elements": {
+      "type": [
+        "object",
+        "null"
+      ]
     }
   },
   "required": [

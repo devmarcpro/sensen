@@ -15,6 +15,8 @@ func _ready() -> void:
 	test_simulation()
 	test_garde_et_lourde()
 	test_horloges()
+	test_wuxing()
+	test_ratelier()
 	test_arenes_autonomes()
 	if echecs == 0:
 		print("TESTS : tout passe")
@@ -309,3 +311,88 @@ func test_arenes_autonomes() -> void:
 			else:
 				s.horloge_monde.avancer(1)
 		verifier(engage and degats[0] > 0, "%s : combat engagé, %d dégâts échangés, joueur %s" % [arene, degats[0], "vivant" if j.vivant else "mort"])
+
+
+# ---------------------------------------------------------------- Wu Xing : domination, jauge de chaîne
+
+func test_wuxing() -> void:
+	var w := WuXing.new(GameData.config("wuxing"))
+	verifier(w.multiplicateur({"bois": 1.0}, {"terre": 1.0}) == 1.5, "Bois domine Terre : ×1.5")
+	verifier(w.multiplicateur({"terre": 1.0}, {"bois": 1.0}) == 0.65, "Terre dominée par Bois : ×0.65")
+	verifier(w.multiplicateur({"bois": 1.0}, {"feu": 1.0}) == 0.8, "Bois engendre Feu : ×0.8")
+	verifier(w.multiplicateur({"bois": 1.0}, {"metal": 1.0}) == 0.65 and w.multiplicateur({"metal": 1.0}, {"bois": 1.0}) == 1.5, "Métal tranche Bois")
+	verifier(w.multiplicateur({"bois": 1.0}, {"eau": 1.0}) == 1.0, "Bois vs Eau : neutre (l'eau nourrit le bois, pas l'inverse)")
+	verifier(is_equal_approx(w.multiplicateur({"metal": 0.75, "bois": 0.25}, {"bois": 1.0}), 0.75 * 1.5 + 0.25 * 0.1 * 10), "vecteur mixte : moyenne pondérée (0.75×1.5 + 0.25×0.10×10)")
+	verifier(w.multiplicateur({"bois": 1.0}, {"terre": 1.0}, "defensif") == 1.2, "défensif compressé : ×1.20")
+	verifier(w.multiplicateur({}, {"terre": 1.0}) == 1.0 and w.multiplicateur({"bois": 1.0}, null) == 1.0, "sans vecteur : ×1.0")
+	verifier(w.dominante({"metal": 0.75, "bois": 0.25}) == "metal", "dominante")
+	# Jauge : rotation parfaite → ×2.40 au 5e acte
+	var j := w.jauge_neuve()
+	var t := 0
+	for el in ["bois", "feu", "terre", "metal"]:
+		w.poser(j, el, t)
+		t += 5
+	verifier(j.segments.size() == 4, "4 segments posés")
+	var p := w.prevoir(j, "eau")
+	verifier(p.resout and is_equal_approx(p.bonus_total, 1.40) and is_equal_approx(p.multiplicateur, 2.40), "rotation parfaite : 4 × 0.35 → ×2.40")
+	verifier(is_equal_approx(p.gain, 1.20), "gain intermédiaire : +5 %% × 4 segments")
+	w.poser(j, "eau", t)
+	verifier(j.segments.is_empty(), "le résolveur vide la barre")
+	# Construction / détonation : 4 × même élément puis l'engendré → +0.65 → ×1.65
+	j = w.jauge_neuve()
+	for i in 4:
+		w.poser(j, "metal", i * 3)
+	p = w.prevoir(j, "eau")
+	verifier(p.resout and is_equal_approx(p.multiplicateur, 1.65), "construction/détonation : 3 × 0.10 + 0.35 → ×1.65")
+	verifier(is_equal_approx(w.prevoir(j, "feu").multiplicateur, 1.50), "hors ordre : 3 × 0.10 + 0.20 → ×1.50")
+	# Décroissance : un segment tous les 30 ticks, le dernier posé en premier
+	j = w.jauge_neuve()
+	w.poser(j, "bois", 0)
+	w.poser(j, "feu", 10)
+	w.decroitre(j, 39)
+	verifier(j.segments.size() == 2, "à 29 ticks du dernier segment : rien ne tombe")
+	w.decroitre(j, 40)
+	verifier(j.segments.size() == 1 and j.segments[0].element == "bois", "à 30 ticks : le dernier posé tombe")
+	w.decroitre(j, 70)
+	verifier(j.segments.is_empty(), "à 60 ticks : la barre est vide")
+	verifier(w.interrompre(j) == false, "interrompre une barre vide : rien")
+	# En simulation : l'aventurier porte une jauge (chain_gauge), un loup non ; un coup qui touche pose un segment
+	var s := nouvelle_sim("plaine_au_talus")
+	var joueur := joueur_de(s)
+	var loup: Dictionary = s.entites["loup_2"]
+	verifier(joueur.has("chaine") and not loup.has("chaine"), "jauge : le joueur (fiche chain_gauge) oui, le loup non")
+	s.grille.liberer(loup.pos)
+	loup.pos = joueur.pos + Vector2i(1, 0)
+	s.grille.placer(loup.id, loup.pos)
+	s._engager_combat(joueur, loup)
+	joueur.compteur = 0
+	loup.compteur = 500
+	s.pas(joueur.horloge)
+	var pv: int = loup.sante
+	s.intention(joueur.id, {"type": "attaquer", "cible": loup.id, "lourde": false})
+	verifier(joueur.chaine.segments.size() == 1 and joueur.chaine.segments[0].element == "metal", "l'épée (Métal) pose un segment Métal")
+	verifier(loup.sante < pv, "Métal tranche Bois : le loup (Bois) a pris des dégâts ×1.5")
+
+
+# ---------------------------------------------------------------- Râtelier et bouclier
+
+func test_ratelier() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	s.horloge_monde.avancer(1)
+	verifier(s.attente.has(j.id), "joueur dû")
+	var t: int = s.horloge_monde.ticks
+	verifier(s.intention(j.id, {"type": "changer_arme", "item": "proto_masse"}), "prendre la masse")
+	verifier(j.equipement.main_principale == "proto_masse" and j.compteur == t + 4, "swap : 4 ticks")
+	j.compteur = t
+	s.horloge_monde.avancer(1)
+	verifier(s.intention(j.id, {"type": "changer_arme", "item": "proto_bouclier"}), "prendre le bouclier")
+	verifier(j.equipement.get("main_secondaire", "") == "proto_bouclier", "bouclier en main secondaire")
+	j.compteur = s.horloge_monde.ticks
+	s.horloge_monde.avancer(1)
+	verifier(s.intention(j.id, {"type": "changer_arme", "item": "proto_lance"}), "prendre la lance (deux mains)")
+	verifier(not j.equipement.has("main_secondaire"), "une arme à deux mains range le bouclier")
+	j.compteur = s.horloge_monde.ticks
+	s.horloge_monde.avancer(1)
+	verifier(not s.intention(j.id, {"type": "changer_arme", "item": "proto_bouclier"}), "pas de bouclier avec une arme à deux mains")
+	verifier(not s.intention(j.id, {"type": "changer_arme", "item": "inconnu"}), "objet hors râtelier refusé")
