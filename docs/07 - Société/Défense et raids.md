@@ -18,7 +18,7 @@ Défendre son territoire avec des gardes, des tourelles et des murs — et le se
 - **Accords diplomatiques : résolu ([[Gouvernance, lois et diplomatie]])** — 4 types selon gouvernance.
 - **Déclencheurs et échelle des raids : résolu ([[Raids et menaces]]/[[Dérive de la corruption]])** — jet hebdomadaire, probabilité f(corruption effective, valeur du territoire, réputations négatives — roi capturé compris), force ∝ valeur du territoire, **jamais scalée sur le joueur**.
 - **Résolution en absence : résolu ([[Abstraction hors-site]])** — `defense_totale = Σ gardes(niveau_combat × équipement) + tourelles + bonus murs` vs `force_raid`, en un jet ; défaite = pertes proportionnelles, **jamais de wipe**.
-- **Postes de travail figés (11) :** mineur, bûcheron, fermier, éleveur, garde, vendeur, forgeron, couturier, cuisinier, herboriste, transporteur. Chaque poste mappe une compétence (rendement [[Abstraction hors-site]]) — extensible en données.
+- **Postes de travail → [[Fonctions]] :** le catalogue est désormais celui des fonctions (troisième axe de [[Les trois axes — race, classe, fonction]]) ; `vendeur` devient **commerçant**, `forgeron` devient **artisan**. Chaque fonction mappe une compétence (rendement [[Abstraction hors-site]]) — extensible en données.
 
 **Profil d'IA dédié ([[IA des créatures]]) :** `assaillant` — progresser vers le cœur du claim, détruire les obstacles (murs), attaquer les défenseurs.
 

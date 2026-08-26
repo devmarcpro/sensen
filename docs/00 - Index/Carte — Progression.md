@@ -13,6 +13,12 @@ Tout progresse par l'usage, sans plafond, régulé par le potentiel. Ni arbre de
 - **[[Potentiel]]** — le cœur d'Elin. Une sous-stat par stat et par compétence, qui s'épuise en montant. *Bien manger n'est pas de la survie, c'est de l'optimisation de croissance.*
 - **[[Double niveau combat et général]]** — deux agrégats calculés (moyenne des 5 meilleures), jamais des jauges qu'on remplit.
 
+**Les trois axes** *(2026-08-26)*
+- **[[Les trois axes — race, classe, fonction]]** — qui tu es / ce que tu sais / ce que tu fais. Tout être les porte, joueur compris.
+- **[[Talents de race]]** — passif, subi, avec contrepartie. Vampire, Spectre, et toute espèce du bestiaire en races cachées.
+- **[[Talents de classe]]** — actif, une capacité hors slots. *Le talent est un plancher, pas une cage.* Éliotrope et les autres classes cachées s'apprennent d'un PNJ qui les porte.
+- **[[Fonctions]]** — artisan, commerçant, garde, aventurier, dirigeant.
+
 **Le personnage**
 - **[[Création de personnage]]** — détaillée, pas un menu déroulant.
 - **[[Stats de personnage]]** — les 6 stats et ce que chacune pilote.

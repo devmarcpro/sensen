@@ -22,7 +22,7 @@ La liste de départ, ~30 compétences réparties en cinq familles.
 
 **Mappage catégorie → compétence de récolte :** [[Catégories de matériaux]].
 
-**Mappage poste de travail → compétence :** 11 postes figés ([[Défense et raids]]).
+**Mappage fonction → compétence :** voir [[Fonctions]] (troisième axe de [[Les trois axes — race, classe, fonction]], ex-postes de travail).
 
 ## Liens
 - **Dépend de** : [[Progression par l'usage]]

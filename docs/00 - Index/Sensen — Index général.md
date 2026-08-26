@@ -57,6 +57,7 @@ Si une seule chose devait être comprise avant de coder :
 - **[[Potentiel]]** — ce qui régule seul toute la progression.
 - **[[Data-driven design]]** — tout le contenu est de la donnée.
 - **[[Blocs de l'être]]** — un roi et un mouton sont la même fiche ; la différence est un bloc vide.
+- **[[Les trois axes — race, classe, fonction]]** — qui tu es, ce que tu sais, ce que tu fais. Tout être les porte.
 
 ---
 

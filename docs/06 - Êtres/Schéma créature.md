@@ -22,6 +22,8 @@ Le format de données unique de tout être vivant du jeu — monstre comme march
     "jambes": [6, 7]
   },
   "race": "humain",
+  "classe": "forgeron",
+  "fonction": "artisan",
   "base_stats": { "sante": 40, "force": 8, "volonte": 6, "vitesse": 10 },
   "equip_slots": "humanoide_standard",
   "inventory_table": "loot_villageois",
@@ -49,6 +51,8 @@ Le format de données unique de tout être vivant du jeu — monstre comme march
 **Champ `elements` ([[Wu Xing — cycles et vecteurs]]) :** l'alignement élémentaire d'une créature est dérivé de ce champ ou de ses tags.
 
 **Champ `equip_slots` ([[Équipement — 14 slots]]) :** emplacements par morphologie — quadrupède = tête, torse, selle, amulette, 2 accessoires · volant = tête, torse, amulette, 2 accessoires · amorphe = amulette, 2 accessoires.
+
+**Les trois axes ([[Les trois axes — race, classe, fonction]]) :** `race` (qui il est — **absorbe l'ancien champ `espece`**, un loup a pour race « loup ») · `classe` (ce qu'il sait, porteuse du talent — [[Talents de classe]] ; absente chez les êtres sans `esprit` suffisant) · `fonction` (ce qu'il fait — [[Fonctions]] ; **absorbe `jobs_compatible` et `leadership_role`**).
 
 **Extension Annexe H — les blocs et le génome ([[Blocs de l'être]]) :** le schéma ci-dessus est la forme « PNJ » du schéma unique. S'y ajoutent :
 - `role` : `sauvage` | `apprivoisé` | `résident` | `garde` | `bétail` ([[Rôles de l'être]]) — **absorbe et généralise** `housing_default` et complète `recruitable`.

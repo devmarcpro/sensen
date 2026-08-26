@@ -14,7 +14,7 @@ Le même schéma décrit un mouton, un bandit, un roi et un dragon. **La différ
 ## Le schéma unique
 
 ```js
-{ id, espece, nom, role,
+{ id, race, classe, fonction, nom, role,
   génome : { … },                              // les loci déclarés par l'espèce
   corps  : { stats, silhouette, taille, âge, sexe, slots },
   esprit : { intelligence, tempérament, dressabilité },
@@ -29,6 +29,8 @@ Le même schéma décrit un mouton, un bandit, un roi et un dragon. **La différ
 | bandit | corps, esprit, social, agenda |
 | roi | corps, esprit, social, agenda, repro |
 | dragon | tous |
+
+**Les trois axes ([[Les trois axes — race, classe, fonction]]) :** `race` remplace l'ancien `espece` (les deux faisaient le même travail), `classe` porte le talent ([[Talents de classe]]) et **est un bloc comme les autres — présent ou absent** : un mouton n'en a pas, jusqu'à ce que sa lignée monte assez d'Intelligence pour en apprendre une. `fonction` est ce qu'il fait de ses journées ([[Fonctions]]).
 
 **Les systèmes hebdomadaires parcourent tous les êtres et appliquent ceux dont le bloc est présent. Aucun test d'espèce.** Un système lit `si le bloc existe`, jamais `si c'est un mouton` — c'est la même discipline que les tags de [[Data-driven design]], appliquée au vivant.
 

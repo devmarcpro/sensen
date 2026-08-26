@@ -1,0 +1,17 @@
+{
+  "_doc": "Fonction — ce que l'être fait de ses journées (docs: Fonctions). Troisième axe avec race et classe. Absorbe les 11 postes de travail, agenda.métier et leadership_role.",
+  "name_key": "function.<id>.name",
+  "skill": "forge",
+  "rendement_base": 1.0,
+  "horaires": {
+    "6-20": "poste",
+    "20-22": "social",
+    "22-6": "lit"
+  },
+  "classes_possibles": [
+    "forgeron",
+    "marchand"
+  ],
+  "leadership": false,
+  "tags": []
+}

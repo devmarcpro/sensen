@@ -37,6 +37,8 @@ Chaque créature du jeu est un assemblage choisi dans ces bibliothèques de part
 
 **Même système pour le joueur :** le double niveau ([[Double niveau combat et général]]), le potentiel ([[Potentiel]]) et la progression par l'usage s'appliquent identiquement aux PNJ et compagnons.
 
+**Les trois axes ([[Les trois axes — race, classe, fonction]]) :** tout être porte une **race** (qui il est, talent passif), une **classe** (ce qu'il sait, talent actif — absente si l'esprit ne suffit pas) et une **fonction** (ce qu'il fait). *Un elfe · éliotrope · aventurier ; un humain · forgeron · artisan.*
+
 **Extension Annexe H :** le schéma se généralise en six blocs — `génome`, `corps`, `esprit`, `social`, `agenda`, `repro` ([[Blocs de l'être]]) — et le statut d'un être devient un champ `role` ([[Rôles de l'être]]). C'est ce qui rend l'élevage ([[Élevage — intention et familles]]) possible **sans aucun système parallèle** : un mouton est une fiche qui a `génome` et `repro` ; un bandit est une fiche qui a `esprit`, `social` et `agenda`.
 
 ## Liens

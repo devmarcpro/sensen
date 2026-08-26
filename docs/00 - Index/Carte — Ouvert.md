@@ -35,6 +35,10 @@ Chacun porte une valeur chiffrée que le code applique telle quelle ; les révis
 - [[Ouvert — Saisons]] — non incluses ; la question ne peut se trancher qu'après la boucle agricole (étape 10)
 - [[Ouvert — Interprétation dureté et qualité]] — **clos** (ambiguïté levée dans [[Qualité d'artisanat]])
 
+## Feature future — contrainte d'architecture immédiate
+
+- [[Ouvert — Changer de personnage]] — incarner un compagnon, jouer une bête qu'on a élevée. La [[Contraintes permanentes|5ᵉ contrainte]] existe pour que ce soit trivial le jour venu.
+
 ## Ouvert par l'Annexe H — non bloquant
 
 - [[Ouvert — Oiseaux chanteurs]] — le plus riche du catalogue, mais il faut une interface pour lire des chants. *À faire bien ou pas du tout.*

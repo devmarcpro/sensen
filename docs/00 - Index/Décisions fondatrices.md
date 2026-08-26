@@ -52,6 +52,19 @@ La rupture du 2026-08-09 : ce qui a été abandonné, ce qui survit, et pourquoi
 
 **Ce qui n'est pas touché :** le système de races est **intact** — réputation par race ([[Réputation et relations]]), race dominante d'un royaume ([[Génération des royaumes PNJ]]), `race_affinity` des cultures, `lifespan` par race ([[Âge des PNJ]]). La magie, le mana, les grimoires et le **Wu Xing** le sont aussi.
 
+### Décision du 2026-08-26 — les trois axes et les talents
+
+| Décision | Conséquence |
+|---|---|
+| **Trois axes pour tout être** | **race** (qui tu es) · **classe** (ce que tu sais) · **fonction** (ce que tu fais) — [[Les trois axes — race, classe, fonction]]. Tout PNJ les porte |
+| **La race porte un talent passif** | subi, avec contrepartie ([[Talents de race]]). Races **cachées** : Vampire, Spectre, Lycanthrope, et toute espèce du bestiaire — on ne les choisit pas, **on le devient** |
+| **La classe porte un talent actif** | une capacité **hors slots** ([[Talents de classe]]). **Amende** *« la classe détermine uniquement des bonus de départ »* — justifié par ToME, pilier déclaré. Classes **cachées** : Éliotrope, Nécromancien, Berserker, apprises d'un PNJ qui les porte |
+| **La race absorbe l'espèce** | un seul champ ; un loup a pour race « loup », et la réputation par race vaut pour les bêtes |
+| **La fonction absorbe les 11 postes** | `vendeur` → **commerçant**, `forgeron` → **artisan** ; la classe *Artisan* devient **Forgeron** ([[Fonctions]]) |
+| **5ᵉ contrainte permanente** | *le personnage joueur est une entité comme une autre ; le contrôle est un attribut, pas un type* ([[Contraintes permanentes]]) — rend possible [[Ouvert — Changer de personnage]] |
+
+**Le principe qui tient l'ensemble :** *le talent est un plancher, pas une cage*. Tous les slots restent libres, le build émerge par-dessus une identité au lieu d'émerger de rien.
+
 ### Reste ouvert, par nature
 
 - **Lore** : noms propres, textes d'ambiance, mythologie — à écrire au fil du contenu. → [[Ouvert — Lore]]

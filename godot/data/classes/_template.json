@@ -4,5 +4,13 @@
   "stat_bonuses": {},
   "starting_equipment": [],
   "starting_skills": {},
-  "base_potentials": {}
+  "base_potentials": {},
+  "talent": {
+    "id": "<id du talent>",
+    "hors_slot": true,
+    "module": "<id module ou null>",
+    "_doc": "Talent actif — capacité hors slots (docs: Talents de classe)"
+  },
+  "cachee": false,
+  "apprise_de": null
 }

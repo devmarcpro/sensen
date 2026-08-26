@@ -43,6 +43,13 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 - [ ] **Assets d'élevage** (étape 10) : silhouettes 13×13 des 32 espèces d'insectes, 20 motifs procéduraux, écran de registre.
 - [ ] Fiches `species/` des 6 groupes recommandés au lancement (un par famille).
 
+## 4 ter. Les trois axes et les talents *(décidé le 2026-08-26)*
+
+- [x] [[Les trois axes — race, classe, fonction]], [[Talents de race]], [[Talents de classe]], [[Fonctions]], [[Ouvert — Changer de personnage]] + 5ᵉ contrainte permanente.
+- [ ] **Talents des classes cachées** au-delà des 3 esquissées (Éliotrope, Nécromancien, Berserker) — contenu, étape 4+.
+- [ ] **Fiches de races cachées** : Vampire, Spectre, Lycanthrope (`data/races/`) — étape 4+.
+- [ ] **Pools de classes par fonction** pour la génération de PNJ ([[Talents de classe]] : classes cachées ≈ 2 %) — étape 9.
+
 ## 5. Assets à produire (aucun n'existe)
 
 - [ ] **Étape 0-1 :** une silhouette paperdoll + quelques pièces d'équipement visibles ; les teintes des cinq éléments (jauge, effets — [[Direction artistique]]) ; l'UI de lisibilité (timeline, prévisualisations, journal — c'est LE game feel).

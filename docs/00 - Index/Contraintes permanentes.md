@@ -29,6 +29,17 @@ Chacune avec un critère de sortie formulé **AVANT** de commencer. ([[Ordre de 
 
 Mais **toutes les chaînes affichables passent par `tr()` dès le premier écran**. ([[Localisation]])
 
+## 5. Le personnage joueur est une entité comme une autre
+
+**Le contrôle est un attribut, pas un type.** Aucune donnée de progression, d'inventaire, de compétence ou de relation ne vit ailleurs que dans l'entité elle-même.
+
+- Tout être porte les mêmes trois axes ([[Les trois axes — race, classe, fonction]]) et les mêmes blocs ([[Blocs de l'être]]) — le joueur n'a **aucun champ** qu'un PNJ n'a pas.
+- Corollaire direct de la règle 1 (*pas de singleton `Player`, pas de caméra qui pilote la logique*), poussé jusqu'au bout.
+- **Ce que ça permet plus tard :** changer de personnage principal, incarner un compagnon, jouer une bête qu'on a élevée ([[Ouvert — Changer de personnage]]).
+- **Coût aujourd'hui : nul. Coût si ajouté après : une réécriture.** Exactement le même raisonnement que la règle 1.
+
+*Ce qui reste légitimement une feature future : l'UI de bascule, le sort de l'ancien corps, la répartition compte/corps des données de sauvegarde.*
+
 ## 4. Tout le contenu est de la donnée
 
 Aucune valeur de gameplay codée en dur, validation des schémas au boot, rechargement à chaud. ([[Data-driven design]], [[Décisions d'architecture]])

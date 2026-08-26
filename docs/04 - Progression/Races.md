@@ -11,11 +11,13 @@ Les 3 races de lancement — **classiques et lisibles**.
 > [!warning] Trois races retirées le 2026-08-26
 > **Sylvide**, **Cendreux** et **Échomorphe** (les races « originales ») sont supprimées, ainsi que leurs 3 cultures dédiées ([[Cultures de nommage]]). Le monde garde Humain, Elfe et Nain — de la fantasy classique assumée, pas de peuples inventés. Tout le reste du système de races est **intact** : réputation par race, race dominante d'un royaume, `race_affinity`, `lifespan` par race.
 
-| Race | Bonus |
-|---|---|
-| Humain | +10 % XP de compétences (polyvalent) |
-| Elfe | +2 Volonté, +1 Perception, régén mana +20 % |
-| Nain | +2 Endurance, +1 Force, minage/forge +15 % |
+| Race | Bonus | Talent ([[Talents de race]]) |
+|---|---|---|
+| Humain | +10 % XP de compétences | **Polyvalent** — porte **deux** talents de classe |
+| Elfe | +2 Volonté, +1 Perception, régén mana +20 % | **Chair de mana** — la surchauffe coûte de l'endurance, pas de la santé |
+| Nain | +2 Endurance, +1 Force, minage/forge +15 % | **Œil de la pierre** — `detection_filons` permanent, ignore l'irrécoltabilité |
+
+**La race porte désormais un talent** qui change la façon de jouer ([[Talents de race]]) — passif, subi, avec sa contrepartie. Les races **cachées** (Vampire, Spectre, Lycanthrope, et toute espèce du bestiaire) ne se choisissent pas : **on le devient**.
 
 **Potentiels de base ([[Potentiel]]) :** chaque race ET chaque classe définit ses potentiels de base par stat et par familles de compétences (champ `base_potentials` en données) — ex. Nain : Forge/Minage 120, Magie 60 ; Mage : domaines de magie 120, armes lourdes 60. Les valeurs vivent dans `data/races/` et `data/classes/` ([[Décision — Pipeline de contenu]]).
 

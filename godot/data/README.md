@@ -32,7 +32,8 @@
 | recipes/ | transformations de matériaux | Stations de transformation (C.8) |
 | tutorials/ | tooltips contextuels | Tooltips contextuels (E.19) |
 | dialogue/ | répliques d'ambiance | Dialogue PNJ (E.23) |
-| races/, classes/ | races et classes | C.2, C.3 |
+| races/, classes/ | races et classes, **avec leur talent** | C.2, C.3, Talents de race, Talents de classe |
+| functions/ | fonctions (ex-postes de travail) | Fonctions |
 | weather_states/ | états météo | Météo (E.28) |
 | species/ | espèces d'élevage (loci, moteur, conditions, coûts) | Élevage — intention et familles (Annexe H) |
 | prototype_arenas/ | arènes de l'étape 0 | Prototype de combat — spécification |

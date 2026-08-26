@@ -6,16 +6,16 @@ statut: décidé
 etape: 4
 ---
 
-Les 6 kits de départ. Une classe n'est qu'un kit initial — aucune restriction durable ensuite.
+Les 6 classes de départ : un kit **et un talent** qui définit une façon de jouer ([[Talents de classe]]).
 
-| Classe | Kit (stats + équipement + compétences de départ) |
-|---|---|
-| Guerrier | +2 For/+1 End ; épée fer, bouclier bois ; niv. 5 en Épée, Bouclier |
-| Mage | +2 Vol/+1 Per ; bâton, 1 grimoire simple ; niv. 5 en Magie, Méditation, 3 modules de base |
-| Artisan | +2 Dex/+1 For ; outils complets qualité Correct ; niv. 5 en 2 métiers au choix |
-| Chasseur | +2 Dex/+1 Per ; arc, 20 flèches ; niv. 5 en Arc, Dressage |
-| Marchand | +2 Cha/+1 Per ; 500 or, étal portatif ; niv. 5 en Négociation, Lecture |
-| Vagabond | +1 partout ; rien ; +15 points de création en plus |
+| Classe | Kit (stats + équipement + compétences de départ) | Talent |
+|---|---|---|
+| Guerrier | +2 For/+1 End ; épée fer, bouclier bois ; niv. 5 en Épée, Bouclier | **Râtelier vivant** |
+| Mage | +2 Vol/+1 Per ; bâton, 1 grimoire simple ; niv. 5 en Magie, Méditation, 3 modules de base | **Communion des cinq** |
+| Forgeron | +2 Dex/+1 For ; outils complets qualité Correct ; niv. 5 en Forge et 1 métier au choix | **Main du métal** |
+| Chasseur | +2 Dex/+1 Per ; arc, 20 flèches ; niv. 5 en Arc, Dressage | **Meute** |
+| Marchand | +2 Cha/+1 Per ; 500 or, étal portatif ; niv. 5 en Négociation, Lecture | **Œil du prix** |
+| Vagabond | +1 partout ; rien ; +15 points de création en plus | **Sans maître** (aucun, mais peut en apprendre un) |
 
 **Potentiels de base ([[Potentiel]]) :** chaque race ET chaque classe définit ses potentiels de base par stat et par familles de compétences (champ `base_potentials` en données) — ex. Nain : Forge/Minage 120, Magie 60 ; Mage : domaines de magie 120, armes lourdes 60. Les valeurs vivent dans `data/races/` et `data/classes/` ([[Décision — Pipeline de contenu]]).
 
@@ -38,7 +38,11 @@ Les 6 kits de départ. Une classe n'est qu'un kit initial — aucune restriction
 
 Race et classe **s'additionnent** : le plancher final est la moyenne des deux valeurs quand elles diffèrent (un Nain Mage a 90 en Forge et 90 en magie — ni spécialiste ni nul). C'est ce qui rend les 36 combinaisons mécaniquement distinctes ([[Potentiel]]).
 
-**Aucune restriction durable ([[Création de personnage]]) :** la classe détermine **uniquement des bonus de stats/équipement de départ** — pas de plafond ni de pénalité liés à la classe une fois en jeu, cohérent avec la progression 100 % par l'usage.
+**Ce qui a changé (2026-08-26) :** la classe ne détermine plus *uniquement* le kit de départ — elle porte un **talent permanent** ([[Talents de classe]]). Ce qui reste vrai : **aucun plafond, aucune pénalité** liés à la classe. Le talent est *un plancher, pas une cage* — tous les slots restent libres, le build émerge par-dessus.
+
+**Classes cachées** ([[Talents de classe]]) : Éliotrope, Nécromancien, Berserker. Elles ne sont pas au menu — elles s'apprennent d'un PNJ qui les porte (relation ≥ 75, comme les recettes exotiques).
+
+**L'ancienne classe *Artisan* devient *Forgeron*** : « artisan » est désormais une **fonction** ([[Fonctions]] : craft et vend ce qu'il craft), pas une classe.
 
 **Équipement initial ([[Début de partie]]) :** kit de la classe, rien d'autre.
 

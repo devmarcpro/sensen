@@ -25,6 +25,8 @@ Cinq rôles, une seule échelle, valable du mouton au roi.
 
 **Un être change de rôle selon sa place dans le monde, jamais selon son espèce.** Aucune transition n'est interdite par type.
 
+> **`role` ≠ `fonction`.** Le rôle dit ta **place vis-à-vis du joueur** ; la [[Fonctions|fonction]] dit ton **occupation dans le monde**. Un forgeron peut être `résident` ou `sauvage` sans changer de métier. *(Le mot « garde » existe des deux côtés : un PNJ peut avoir le role `garde` — affecté à la défense — et la fonction `garde` — c'est son métier. Deux champs distincts.)*
+
 ## Ce qui décide d'une transition
 
 Deux valeurs du bloc `esprit` et une du bloc `social` ([[Blocs de l'être]]) :

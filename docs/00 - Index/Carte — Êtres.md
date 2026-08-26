@@ -11,7 +11,7 @@ etape: 9
 **Le socle, à lire en premier :**
 - **[[Blocs de l'être]]** — le schéma unique en six blocs. *La différence n'est pas une branche dans le code, c'est un bloc vide dans la fiche.* Et sa conséquence : **rien n'est réservé** — le mouton ultime est une conséquence atteinte, pas une permission accordée.
 - **[[Apparence — données et équipement]]** — ce qui définit l'apparence : la silhouette de l'espèce, le génome (héritable), l'équipement. Jamais le type.
-- **[[Rôles de l'être]]** — sauvage → apprivoisé → résident → garde → bétail. Le prix, jamais l'interdiction.
+- **[[Rôles de l'être]]** — sauvage → apprivoisé → résident → garde → bétail. Le prix, jamais l'interdiction. *(À ne pas confondre avec la [[Fonctions|fonction]], qui est le métier.)*
 
 **Le socle**
 - **[[Schéma unifié créature-PNJ]]** — pas de distinction technique entre monstre et villageois. *N'importe quelle créature peut devenir un compagnon.*
