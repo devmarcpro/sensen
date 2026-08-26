@@ -12,6 +12,7 @@ La grille de 14 slots — et le principe directeur : l'armure est permanente, l'
 
 **La grille (14 slots) :**
 - **Armure (5), mappée sur les zones de coup** ([[Zones de coup par dénivelé]]) : Casque (tête, la zone ×2.5) · Cuirasse (torse) · Brassards-gants (bras et mains) · Jambières (jambes) · Bottes (pieds, + effets de déplacement).
+  *Chaque slot peint exactement les segments du rig qu'il protège* ([[Squelette modulaire et points d'attache]]) : Casque → tête · Cuirasse → torse · Brassards-gants → bras haut, bras bas, main · Jambières → jambe haut, jambe bas · Bottes → pied. **L'affichage de l'équipement est gratuit** — le rig *est* la grille d'armure.
 - **Mains (2)** : principale et secondaire, chacune acceptant arme, bouclier, torche, lanterne, grimoire ou outil. Le combat lit **les slots**, jamais « l'objet en main ». Deux Mains occupe les deux ; dual wielding = deux armes ; bouclier en secondaire (règles de la garde-bouclier : [[Décision — Boucliers]]).
 - **Munitions (1)** : carquois (munitions compositionnelles : pointe + hampe — [[Composants]]).
 - **Bijoux (3)** : 2 anneaux (effets mineurs) · 1 amulette (effet majeur unique — le slot du build).

@@ -27,6 +27,8 @@ L'armure est une réduction plate par zone, et les « types » d'armure n'existe
 
 Le **matériau reste libre dans la construction** : la construction donne le profil, le matériau donne les chiffres (dureté, poids, isolation, élément). Le lourd/léger émerge de la densité, jamais d'une règle.
 
+**Côté rendu, la même règle vaut ([[Squelette modulaire et points d'attache]]) : la construction est la forme, le matériau est la teinte.** On ne dessine donc pas une armure par objet, mais **une par construction** — 5 formes × 8 segments ≈ **40 sprites pour la totalité de l'armure du jeu**, les variantes de matériau venant du remapping de palette en shader ([[Palette de couleurs des matériaux]]).
+
 **Vecteur défensif — par zone ET moyenne du personnage :**
 - **Par zone** : un coup ciblé se résout contre le vecteur de **la pièce touchée** — blinder une zone contre un élément est un vrai choix, mais avec des multiplicateurs **compressés** (×1.20 / ×0.85 / ×0.95) qui ne justifient jamais de transporter une seconde panoplie.
 - **Moyenne du personnage** (casque 0.20 · cuirasse 0.35 · brassards 0.15 · jambières 0.20 · bottes 0.10) : pour tout ce qui n'a pas de zone — explosions, sorts de zone, auras, environnement.

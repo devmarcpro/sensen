@@ -34,6 +34,7 @@
 | dialogue/ | répliques d'ambiance | Dialogue PNJ (E.23) |
 | races/, classes/ | races et classes, **avec leur talent** | C.2, C.3, Talents de race, Talents de classe |
 | functions/ | fonctions (ex-postes de travail) | Fonctions |
+| rigs/ | rigs de squelette (segments, ancrages, ordre de calque par direction) | Squelette modulaire et points d'attache |
 | weather_states/ | états météo | Météo (E.28) |
 | species/ | espèces d'élevage (loci, moteur, conditions, coûts) | Élevage — intention et familles (Annexe H) |
 | prototype_arenas/ | arènes de l'étape 0 | Prototype de combat — spécification |

@@ -55,7 +55,8 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 ## 5. Assets à produire (aucun n'existe)
 
 - [ ] **Étape 0-1 :** une silhouette paperdoll + quelques pièces d'équipement visibles ; les teintes des cinq éléments (jauge, effets — [[Direction artistique]]) ; l'UI de lisibilité (timeline, prévisualisations, journal — c'est LE game feel).
-- [ ] **Étape 1 :** bibliothèques de parties ([[Squelette modulaire et points d'attache]]) : humanoïde 12 têtes / 8 torses / 8 bras / 8 jambes, puis quadrupède/volant/amorphe.
+- [ ] **Étape 1 :** bibliothèque du **rig humanoïde 14 segments** ([[Squelette modulaire et points d'attache]]) ≈ **92 sprites** (12 têtes ×3 vues, torses, bras haut/bas, mains, jambes haut/bas, pieds) + **40 sprites d'armure** (5 constructions × 8 segments) = **≈ 130 sprites pour tous les humains du jeu**. Puis quadrupède/volant/amorphe.
+- [ ] **Étape 1 :** la table `data/rigs/humanoide.json` — ordre de calque et décalages d'ancrage pour 5 orientations (3 obtenues par miroir).
 - [ ] **Étape 2 :** premiers prefabs de donjon (2-3 salles + connecteurs suffisent pour valider le pipeline).
 - [ ] Police UI à couverture CJK (type Noto Sans CJK) testée dans les 4 langues ([[Localisation]]).
 
