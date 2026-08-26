@@ -1,0 +1,23 @@
+---
+aliases: ["14.3", "14.3 Halls de guilde", "Halls de guilde", "Hall de guilde"]
+tags: [société, endgame, décidé]
+domaine: société
+statut: décidé
+etape: 10
+---
+
+Le contenu de guilde vient au joueur.
+
+- Le joueur peut **construire les halls des guildes dans lesquelles il a un rang élevé** sur son propre territoire ([[Quêtes et guildes]]).
+- Bénéfice : prendre les quêtes de ces guildes **sans se déplacer** — le contenu de guilde vient au joueur.
+
+**Coût d'entretien ([[Barèmes économiques]]) :** un hall de guilde compte comme structure spéciale — 25 or/semaine.
+
+**Unicité par ville PNJ ([[Génération des royaumes PNJ]]) :** chaque ville tire aléatoirement ses halls parmi les 12, avec **maximum un exemplaire de chaque type par ville** — aucune ville n'a tout, ce qui rend l'information « quelle ville a quel hall » précieuse ([[L'information comme récompense]]).
+
+**Tables de sculpture ([[Tables de sculpture]]) :** l'accès aux tables des locaux de guilde (rang 3) précède l'obtention de la station personnelle (rang 4) — un hall sur son territoire donne cet accès sans déplacement.
+
+## Liens
+- **Dépend de** : [[Quêtes et guildes]], [[Expansion territoriale]], [[Construction cadrée]]
+- **Alimente** : [[Entretien et taxes]]
+- **Voir aussi** : [[Tables de sculpture]], [[Génération des royaumes PNJ]], [[L'information comme récompense]], [[Barèmes économiques]], [[Royaume du joueur]]

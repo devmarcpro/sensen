@@ -1,0 +1,33 @@
+---
+aliases: ["A.4", "Annexe A.4", "Stats d'un objet crafté", "Stats craft/sculpture"]
+tags: [objets, craft, formule, décidé]
+domaine: objets
+statut: décidé
+etape: 6
+---
+
+La règle de base : moyenne pondérée des matériaux, puis qualité appliquée une seule fois.
+
+```
+stat_finale = stat_base_materiaux * qualite_produite
+
+stat_base_materiaux (craft simple) = moyenne pondérée des stats des matériaux
+    selon les quantités de la recette
+stat_base_materiaux (sculpture)   = moyenne pondérée des stats des matériaux
+    selon le nombre de voxels de chaque matériau dans le modèle
+```
+
+- La sculpture n'ajoute **aucun bonus de stats** (déjà décidé : la forme est cosmétique) ; elle donne juste un contrôle exact de la pondération via la composition voxel ([[Tables de sculpture]]).
+
+**Décision (4.2) :** *Formule dureté/qualité : résolu* — dureté de base = moyenne pondérée des matériaux, **qualité appliquée une seule fois**.
+
+**Garde-fou anti-double-comptage ([[Stats d'armes]]) :** `durete_BASE` = moyenne pondérée des matériaux **AVANT** qualité. La qualité n'est appliquée qu'**UNE** fois ; ne jamais utiliser la dureté finale déjà multipliée.
+
+**Les 13 stats ne sont pas multipliées par la qualité ([[Application des stats de matériau]]) :** ce sont des propriétés physiques, pas des performances — seule la dureté → dégâts/protection passe par la qualité.
+
+**Craft compositionnel :** pour les objets assemblés depuis des composants, la formule est remplacée par celle de [[Stats et qualité de l'assemblage]] (somme pondérée par poids de slot).
+
+## Liens
+- **Dépend de** : [[Matériaux — 13 stats]], [[Qualité d'artisanat]]
+- **Alimente** : [[Stats d'armes]], [[Armures et poids porté]], [[Stats et qualité de l'assemblage]], [[Tables de sculpture]]
+- **Voir aussi** : [[Application des stats de matériau]], [[Éditeur de sculpture]], [[Schéma objet et recette]]

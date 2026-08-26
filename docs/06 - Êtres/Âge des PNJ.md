@@ -1,0 +1,28 @@
+---
+aliases: ["12.2", "12.2 Âge des PNJ", "Âge", "Vieillesse", "Naissances", "Démographie"]
+tags: [êtres, simulation, décidé]
+domaine: êtres
+statut: décidé
+etape: 9
+---
+
+La population du monde est un flux, pas un stock : les PNJ vieillissent, meurent, naissent — les rois aussi.
+
+- Chaque PNJ a un **âge** (champ d'instance, en années in-game), qui avance avec le calendrier (1 an in-game = valeur à calibrer, défaut **120 jours in-game**).
+- **Catégories d'âge** (modulent l'apparence via les parties .vox et les stats) : jeune → adulte → âgé. Les PNJ âgés perdent progressivement en stats physiques (**−10 % par tranche au-delà du seuil**) mais leurs compétences acquises restent — un vieux forgeron reste un maître.
+- **Mort de vieillesse :** au-delà de l'espérance de vie de sa race (donnée `lifespan` par race, avec variance **±15 %**), un PNJ a une chance croissante par semaine de mourir naturellement (hors écran : résolu à l'échéance, timer wheel [[Simulation du monde — performance]]). Sa mort déclenche la **succession** ([[Familles et succession]]) s'il portait un rôle, et l'héritage familial de ses biens.
+- **Naissances :** les couples de PNJ (champ `spouse`) peuvent avoir des enfants (nouvelle instance liée par `family`, catégorie jeune), qui grandissent et prennent des jobs à l'âge adulte — c'est le moteur démographique interne des villages, complémentaire de l'immigration ([[Conquête de village]]). Les jeunes PNJ ne sont ni recrutables ni assignables.
+- **Conséquence design :** la population du monde est un flux, pas un stock — les rois meurent aussi de vieillesse (la succession n'est pas qu'une affaire d'assassinat), les lignées existent réellement, et un compagnon mortel vieillit (son espérance de vie raciale s'applique — attachement et renouvellement).
+
+**Signe astrologique dérivé gratuitement ([[Astrologie — cycle sexagésimal]]) :** les PNJ ayant déjà un âge, leur signe (élément + animal) en dérive sans donnée supplémentaire.
+
+**Mariages et rivalités ([[Astrologie — cycle sexagésimal]]) :** les compatibilités s'appliquent **entre PNJ** — les mariages suivent statistiquement les trines, les rivalités les oppositions.
+
+**Nom de famille hérité ([[Génération de noms]]) :** un PNJ avec un parent hérite du nom de famille de celui-ci.
+
+**Information visible ([[L'information comme récompense]]) :** l'âge d'un PNJ se révèle au palier de relation 20-49 ; les liens familiaux à 50-74.
+
+## Liens
+- **Dépend de** : [[Schéma créature]], [[Races]], [[Boucle de tick]]
+- **Alimente** : [[Familles et succession]], [[Villages PNJ — repeuplement et décimation]], [[Génération de noms]], [[Compagnons]]
+- **Voir aussi** : [[Astrologie — cycle sexagésimal]], [[Squelette modulaire et points d'attache]], [[Simulation du monde — performance]], [[L'information comme récompense]], [[Population et exploitation]]

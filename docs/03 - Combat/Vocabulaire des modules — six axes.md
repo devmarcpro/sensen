@@ -1,0 +1,63 @@
+---
+aliases: ["B.4", "Annexe B.4", "Module de compétence", "Six axes", "data/modules"]
+tags: [combat, données, schéma, décidé]
+domaine: combat
+statut: décidé
+etape: 0
+---
+
+Le schéma de données d'un module et les six axes du vocabulaire commun — la clé du volume de contenu.
+
+**Le vocabulaire commun est la clé du volume** : des centaines de modules ne sont lisibles et produisibles que s'ils s'expriment tous dans le même petit ensemble de concepts. Un module ne « code » jamais un comportement particulier — il **compose** ces briques. Leçon de ToME : profondeur maximale, opacité nulle.
+
+`data/modules/*.json` :
+
+```json
+{
+  "id": "projectile_feu",
+  "name_key": "module.projectile_feu.name",
+  "elements": { "feu": 1.0 },
+  "module_type": "effet",
+  "forme": "ligne",
+  "portee": [1, 6],
+  "taille": 1,
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 10,
+  "cout_mana": 8,
+  "power_base": 12,
+  "conditions": [],
+  "tags": ["feu", "projectile"],
+  "grimoire_domains": ["feu", "destruction"],
+  "book_type": "grimoire"
+}
+```
+
+**Les six axes du vocabulaire :**
+
+**1. FORME** — la géométrie de l'effet sur la grille :
+`cible_unique` · `ligne` (droite, N tuiles) · `cone` (largeur croissante) · `croix` · `carre` (rayon N) · `anneau` (touche autour d'une tuile mais pas elle) · `diagonale` · `chemin` (suit le trajet du lanceur) · `soi` · `tuile` (au sol, pour les glyphes et zones persistantes)
+
+**2. PORTÉE** — `[min, max]` en tuiles. Un `min` supérieur à 1 crée une zone morte (un arc long est mauvais au contact — la contrepartie naturelle de la distance). `taille` donne le rayon ou la longueur de la forme.
+
+**3. CIBLE** — `ennemi` · `allie` · `soi` · `tuile` · `toute_entite`. Combiné à la forme, cela suffit à exprimer un soin de zone, un piège au sol ou une frappe unique.
+
+**4. COÛTS** — `cout_ticks` (le tempo : un module lent et dévastateur contre un rapide et faible pour construire sa chaîne — les modules entrent dans la même économie que les armes), `cout_mana`, éventuellement `cout_endurance`. Les trois économies coexistent et définissent des archétypes.
+
+**5. CONDITIONS** — prédicats positionnels et d'état, évalués avant application ; chacun peut être un prérequis ou un bonus :
+`hauteur_relative` (plus haut / plus bas que la cible) · `cible_isolee` (aucun allié adjacent) · `cible_adjacente_a_allie` · `dos_ou_flanc` · `ligne_de_vue_degagee` · `pv_porteur < X %` · `pv_cible < X %` · `element_cible` · `segment_chaine_present` · `vecteur_de_lieu`
+
+**6. EFFETS** — ce que le module produit, cumulables :
+`degats` · `soin` · `statut` (avec durée en ticks) · `deplacement` (poussée, attraction, échange, téléportation) · `terrain` (élever/abaisser une tuile, créer un obstacle) · `invocation` (occupe une tuile — mur, bloqueur de vue, menace de flanc) · `glyphe` (effet persistant sur une tuile, déclenché à l'entrée)
+
+**Les MODIFICATEURS (façon Noita) opèrent sur ces axes**, pas sur des chiffres seulement : `étend la forme d'une tuile` · `transforme la ligne en cône` · `double la portée, divise la puissance` · `ajoute une condition en échange d'un bonus` · `répète l'effet sur une tuile adjacente` · `convertit l'élément`. C'est ce qui rend l'assemblage réellement combinatoire.
+
+- `module_type` : `"effet"` (produit quelque chose), `"modificateur"` (altère le module suivant), `"declencheur"` (trigger sur impact, entrée sur une tuile, ou événement EventBus).
+- `book_type` : `"grimoire"` (sorts) ou `"manuel"` (armes).
+- **Aucun arbre de talents, aucun point à dépenser** : les modules s'obtiennent par le **loot et l'apprentissage** ([[Grimoires et manuels]]), montent de niveau **par l'usage** ([[Potentiel]]), et le build **émerge** de ce qu'on possède et de ce qu'on utilise.
+- **Infobulle exhaustive obligatoire** : chaque module affiche ses valeurs **calculées pour le personnage courant** — forme, portée, coûts, conditions, dégâts attendus avec le détail. Aucune information cachée, aucun « environ ».
+
+## Liens
+- **Dépend de** : [[Le vocabulaire des modules et l'absence d'arbre de talents]], [[Data-driven design]], [[Wu Xing — cycles et vecteurs]]
+- **Alimente** : [[Six types de modules et assemblage]], [[Modules]], [[Familles de capacités de la grille]]
+- **Voir aussi** : [[Structure compétences-modules-slots]], [[Mana]], [[Endurance]], [[Wu Xing hors combat]], [[Domaines de grimoires et manuels]], [[Localisation]]

@@ -1,0 +1,40 @@
+---
+aliases: ["6.4", "6.4 Potentiel", "A.1.1", "Annexe A.1.1", "Potentiel", "Potentiel de progression"]
+tags: [progression, formule, décidé]
+domaine: progression
+statut: décidé
+etape: 4
+---
+
+Le cœur d'Elin : une sous-stat de potentiel par stat et par compétence, qui accélère la progression et s'épuise en montant. La gestion du potentiel est une boucle de jeu à part entière.
+
+Chaque **stat** (les 6 de [[Stats de personnage]]) et chaque **compétence** possède une sous-stat de **Potentiel**, de 0 à 200 :
+
+- **Plus le potentiel est haut, plus la stat/compétence monte vite** : l'XP gagnée est multipliée par `potentiel/100` (potentiel 200 = progression ×2, potentiel 50 = ×0.5).
+- **Monter de niveau consomme du potentiel** : chaque level up de la stat/compétence fait baisser son potentiel — la progression s'essouffle d'elle-même si on ne l'entretient pas.
+- **Potentiel de base permanent** : chaque personnage a un plancher de potentiel par stat/compétence, déterminé par sa **race et sa classe** ([[Races]]/[[Classes]]) — le potentiel ne descend jamais sous ce plancher. C'est ce qui donne son identité mécanique durable à chaque combinaison race/classe (un nain garde toujours un bon potentiel de Forge, même sans l'entretenir).
+- **Restaurer/dépasser le potentiel :** principalement en **mangeant des plats cuisinés** ([[Cuisine et alchimie]] — chaque aliment porte des bonus de potentiel vers les stats concernées), en dormant (buff Reposé, [[Cycle jour-nuit et sommeil]]), et via des **entraîneurs PNJ** (service payant en ville ou PNJ entraîneur recruté sur sa base — un puits d'or supplémentaire, [[Économie — sources et puits]]).
+- La gestion du potentiel devient une **boucle de jeu à part entière** (le cœur d'Elin) : bien manger n'est pas de la survie, c'est de l'optimisation de croissance — et ça raccorde l'agriculture, la chasse, la cuisine et l'élevage à la progression du personnage.
+- S'applique aux **PNJ et compagnons** aussi (même système, [[Schéma unifié créature-PNJ]]) : nourrir ses compagnons avec de bons plats accélère leur croissance.
+
+**Formules (A.1.1) :**
+
+```
+xp_effective = xp_gagnée * (potentiel / 100)
+À chaque level up de la stat/compétence :
+  potentiel = max(potentiel_base, potentiel - (10 + niveau/10))
+potentiel_base : par race+classe (C.2/C.3), défaut 80, fourchette 50-130
+Sources de potentiel : plats (A.9.1, principal), sommeil (Reposé : +2
+  à toutes les stats consommées récemment), entraîneur PNJ (20 or *
+  niveau actuel → +10 de potentiel dans une compétence choisie)
+Cap : 200. Le potentiel est par-personnage (joueur, PNJ, compagnons).
+```
+
+**Le potentiel régule seul l'emballement ([[XP de combat]]) :** l'élément le plus monté épuise son potentiel et ralentit, les éléments frais gardent le leur — aucune règle anti-farm n'est nécessaire.
+
+**Astrologie ([[Astrologie — cycle sexagésimal]]) :** *tout passe par le potentiel, jamais par un bonus dur — la naissance donne une pente, pas un plafond.*
+
+## Liens
+- **Dépend de** : [[Progression par l'usage]], [[Races]], [[Classes]]
+- **Alimente** : [[XP de combat]], [[Cuisine et alchimie]], [[Astrologie — cycle sexagésimal]], [[Nourriture, potentiel et potions]]
+- **Voir aussi** : [[Stats de personnage]], [[Cycle jour-nuit et sommeil]], [[Économie — sources et puits]], [[Compagnons]], [[Le vocabulaire des modules et l'absence d'arbre de talents]]

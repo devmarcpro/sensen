@@ -1,0 +1,39 @@
+---
+aliases: ["A.4.2", "Annexe A.4.2", "Poids porté", "Capacité de poids", "Dés d'armure"]
+tags: [objets, équipement, formule, décidé]
+domaine: objets
+statut: décidé
+etape: 3
+---
+
+La formule de capacité de poids — et la formule historique de protection par dés, remplacée par la réduction plate.
+
+```
+protection : chaque pièce contribue des DÉS de réduction (mitigation à jet, E.3.4)
+  des_piece = 1dX  avec  X = round(durete_BASE * qualite * facteur_slot / 4)
+             (min 1d2 ; durete_BASE avant qualité, même règle qu'en A.4.1)
+  Exemple : cuirasse fer (durete 25) qualité 1.2, facteur 1.0 → 1d8
+facteur_slot : torse 1.0, tête 0.6, jambes 0.7, pieds 0.3, mains 0.3
+malus_vitesse_deplacement = f(poids_total_porté / capacite)
+    capacite = 30 + Force * 5 (inclut inventaire ET équipement)
+```
+
+- Optionnel (à activer si le combat en a besoin) : matrice type de dégâts × matériau d'armure via les tags (contondant efficace contre matériaux rigides, perçant contre souples).
+
+> **Note de cohérence :** la **mitigation par dés** ci-dessus est **remplacée** par la réduction plate par zone de [[Armure par zone et constructions]] — voir [[Décisions fondatrices]] : *« Armure par zone → supprime la mitigation par dés, cause structurelle de l'écrasement des dégâts »*. Le `facteur_slot` reste utilisé par [[Fonctionnalité]] (champ des armures). La formule de **capacité de poids** (`30 + Force × 5`) reste pleinement en vigueur.
+
+**Ce que la capacité de poids finance :**
+- le **râtelier** du guerrier ([[Cinq accès au cycle]]) — la capacité de port finance l'arsenal ;
+- le transport des **stations portatives** ([[Stations de transformation]] : forge 80, scierie 60, établi 35, autres 40-60) ;
+- le choix cape **OU** sac au slot dos ([[Équipement — 14 slots]]).
+
+**Règle de retrait ([[Effets d'équipement passifs]]) :** dépasser la capacité après retrait d'un objet applique simplement le malus de surcharge, rien n'est jeté.
+
+**Surcharge dans l'eau ([[Eau et liquides]]) :** le poids porté tire vers le fond — surcharge = on coule, largage d'objets possible.
+
+**Effets de loot ([[Effets d'équipement types]]) :** `capacite_poids +10..+40` ; affixe mécanique « +[10-30] capacité ».
+
+## Liens
+- **Dépend de** : [[Stats de personnage]], [[Qualité d'artisanat]], [[Matériaux — 13 stats]]
+- **Alimente** : [[Cinq accès au cycle]], [[Stations de transformation]], [[Équipement — 14 slots]], [[Eau et liquides]]
+- **Voir aussi** : [[Armure par zone et constructions]], [[Fonctionnalité]], [[Pipeline de résolution du combat]], [[Effets d'équipement passifs]], [[Décisions fondatrices]]
