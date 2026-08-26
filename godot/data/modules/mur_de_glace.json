@@ -1,0 +1,36 @@
+{
+  "id": "mur_de_glace",
+  "nom": "Mur de glace",
+  "name_key": "module.mur_de_glace.name",
+  "book_type": "grimoire",
+  "domaine": "Eau/Glace",
+  "elements": {
+    "eau": 1.0
+  },
+  "module_type": "effet",
+  "forme": "ligne",
+  "taille": 3,
+  "portee": [
+    1,
+    4
+  ],
+  "cible": "tuile",
+  "ligne_de_vue": true,
+  "cout_ticks": 14,
+  "cout_mana": 14,
+  "cout_endurance": 0,
+  "power_base": null,
+  "conditions": [],
+  "effets": [
+    "terrain"
+  ],
+  "description": "3 tuiles de glace réelles (friction 5), 100 ticks",
+  "grimoire_domains": [
+    "eau/glace"
+  ],
+  "tags": [
+    "grimoire",
+    "effet",
+    "eau"
+  ]
+}

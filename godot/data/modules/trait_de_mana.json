@@ -1,0 +1,33 @@
+{
+  "id": "trait_de_mana",
+  "nom": "Trait de mana",
+  "name_key": "module.trait_de_mana.name",
+  "book_type": "grimoire",
+  "domaine": "Arcane",
+  "elements": {},
+  "module_type": "effet",
+  "forme": "cible_unique",
+  "taille": 1,
+  "portee": [
+    1,
+    6
+  ],
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 5,
+  "cout_mana": 5,
+  "cout_endurance": 0,
+  "power_base": "1d8",
+  "conditions": [],
+  "effets": [
+    "degats"
+  ],
+  "description": "dégâts bruts, aucun élément — ne pose aucun segment de chaîne",
+  "grimoire_domains": [
+    "arcane"
+  ],
+  "tags": [
+    "grimoire",
+    "effet"
+  ]
+}

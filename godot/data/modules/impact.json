@@ -1,0 +1,26 @@
+{
+  "id": "impact",
+  "nom": "Impact",
+  "name_key": "module.impact.name",
+  "book_type": "manuel",
+  "domaine": "Maîtrise",
+  "elements": {},
+  "module_type": "modificateur",
+  "forme": null,
+  "taille": 0,
+  "portee": null,
+  "cible": null,
+  "ligne_de_vue": false,
+  "cout_ticks": 0,
+  "cout_mana": 0,
+  "cout_endurance": 8,
+  "power_base": null,
+  "conditions": [],
+  "effets": [],
+  "description": "la frappe suivante projette d'1d3 tuiles",
+  "grimoire_domains": [],
+  "tags": [
+    "manuel",
+    "modificateur"
+  ]
+}

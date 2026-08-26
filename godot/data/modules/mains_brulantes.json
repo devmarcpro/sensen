@@ -1,0 +1,36 @@
+{
+  "id": "mains_brulantes",
+  "nom": "Mains brûlantes",
+  "name_key": "module.mains_brulantes.name",
+  "book_type": "grimoire",
+  "domaine": "Feu",
+  "elements": {
+    "feu": 1.0
+  },
+  "module_type": "effet",
+  "forme": "cone",
+  "taille": 2,
+  "portee": [
+    1,
+    2
+  ],
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 6,
+  "cout_mana": 6,
+  "cout_endurance": 0,
+  "power_base": "2d4",
+  "conditions": [],
+  "effets": [
+    "degats"
+  ],
+  "description": "cône court, très bon marché en ticks",
+  "grimoire_domains": [
+    "feu"
+  ],
+  "tags": [
+    "grimoire",
+    "effet",
+    "feu"
+  ]
+}

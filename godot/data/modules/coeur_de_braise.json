@@ -1,0 +1,31 @@
+{
+  "id": "coeur_de_braise",
+  "nom": "Cœur de braise",
+  "name_key": "module.coeur_de_braise.name",
+  "book_type": "grimoire",
+  "domaine": "Feu",
+  "elements": {
+    "feu": 1.0
+  },
+  "module_type": "modificateur",
+  "forme": null,
+  "taille": 0,
+  "portee": null,
+  "cible": null,
+  "ligne_de_vue": false,
+  "cout_ticks": 0,
+  "cout_mana": 4,
+  "cout_endurance": 0,
+  "power_base": null,
+  "conditions": [],
+  "effets": [],
+  "description": "le noyau suivant enflamme le sol qu'il touche, 50 ticks",
+  "grimoire_domains": [
+    "feu"
+  ],
+  "tags": [
+    "grimoire",
+    "modificateur",
+    "feu"
+  ]
+}

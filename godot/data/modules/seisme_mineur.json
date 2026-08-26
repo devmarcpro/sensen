@@ -1,0 +1,37 @@
+{
+  "id": "seisme_mineur",
+  "nom": "Séisme mineur",
+  "name_key": "module.seisme_mineur.name",
+  "book_type": "grimoire",
+  "domaine": "Terre",
+  "elements": {
+    "terre": 1.0
+  },
+  "module_type": "effet",
+  "forme": "carre",
+  "taille": 2,
+  "portee": [
+    0,
+    4
+  ],
+  "cible": "toute_entite",
+  "ligne_de_vue": false,
+  "cout_ticks": 20,
+  "cout_mana": 22,
+  "cout_endurance": 0,
+  "power_base": "2d6",
+  "conditions": [],
+  "effets": [
+    "degats",
+    "deplacement"
+  ],
+  "description": "jet d'Athlétisme ou chute — dégâts de chute (hauteur-2)x5",
+  "grimoire_domains": [
+    "terre"
+  ],
+  "tags": [
+    "grimoire",
+    "effet",
+    "terre"
+  ]
+}

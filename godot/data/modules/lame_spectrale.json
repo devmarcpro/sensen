@@ -1,0 +1,36 @@
+{
+  "id": "lame_spectrale",
+  "nom": "Lame spectrale",
+  "name_key": "module.lame_spectrale.name",
+  "book_type": "grimoire",
+  "domaine": "Métal",
+  "elements": {
+    "métal": 1.0
+  },
+  "module_type": "effet",
+  "forme": "ligne",
+  "taille": 4,
+  "portee": [
+    1,
+    4
+  ],
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 9,
+  "cout_mana": 8,
+  "cout_endurance": 0,
+  "power_base": "2d6",
+  "conditions": [],
+  "effets": [
+    "degats"
+  ],
+  "description": "lame invoquée qui traverse la ligne",
+  "grimoire_domains": [
+    "metal"
+  ],
+  "tags": [
+    "grimoire",
+    "effet",
+    "métal"
+  ]
+}

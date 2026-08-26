@@ -1,0 +1,34 @@
+{
+  "id": "drain",
+  "nom": "Drain",
+  "name_key": "module.drain.name",
+  "book_type": "grimoire",
+  "domaine": "Corruption",
+  "elements": {},
+  "module_type": "effet",
+  "forme": "cible_unique",
+  "taille": 1,
+  "portee": [
+    1,
+    5
+  ],
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 10,
+  "cout_mana": 12,
+  "cout_endurance": 0,
+  "power_base": "2d4",
+  "conditions": [],
+  "effets": [
+    "degats",
+    "soin"
+  ],
+  "description": "soigne la moitié des dégâts infligés",
+  "grimoire_domains": [
+    "corruption"
+  ],
+  "tags": [
+    "grimoire",
+    "effet"
+  ]
+}

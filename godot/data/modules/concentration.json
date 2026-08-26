@@ -1,0 +1,28 @@
+{
+  "id": "concentration",
+  "nom": "Concentration",
+  "name_key": "module.concentration.name",
+  "book_type": "grimoire",
+  "domaine": "Arcane",
+  "elements": {},
+  "module_type": "modificateur",
+  "forme": null,
+  "taille": 0,
+  "portee": null,
+  "cible": null,
+  "ligne_de_vue": false,
+  "cout_ticks": 0,
+  "cout_mana": 4,
+  "cout_endurance": 0,
+  "power_base": null,
+  "conditions": [],
+  "effets": [],
+  "description": "+1 dé au noyau suivant",
+  "grimoire_domains": [
+    "arcane"
+  ],
+  "tags": [
+    "grimoire",
+    "modificateur"
+  ]
+}

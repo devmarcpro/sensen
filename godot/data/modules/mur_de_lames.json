@@ -1,0 +1,36 @@
+{
+  "id": "mur_de_lames",
+  "nom": "Mur de lames",
+  "name_key": "module.mur_de_lames.name",
+  "book_type": "grimoire",
+  "domaine": "Métal",
+  "elements": {
+    "métal": 1.0
+  },
+  "module_type": "effet",
+  "forme": "tuile",
+  "taille": 1,
+  "portee": [
+    1,
+    4
+  ],
+  "cible": "tuile",
+  "ligne_de_vue": true,
+  "cout_ticks": 14,
+  "cout_mana": 14,
+  "cout_endurance": 0,
+  "power_base": "2d4",
+  "conditions": [],
+  "effets": [
+    "invocation"
+  ],
+  "description": "tuile hérissée 50 ticks — bloque le passage, blesse au contact",
+  "grimoire_domains": [
+    "metal"
+  ],
+  "tags": [
+    "grimoire",
+    "effet",
+    "métal"
+  ]
+}

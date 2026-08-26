@@ -1,0 +1,33 @@
+{
+  "id": "pas_eclipse",
+  "nom": "Pas éclipsé",
+  "name_key": "module.pas_eclipse.name",
+  "book_type": "grimoire",
+  "domaine": "Espace",
+  "elements": {},
+  "module_type": "effet",
+  "forme": "soi",
+  "taille": 0,
+  "portee": [
+    1,
+    5
+  ],
+  "cible": "soi",
+  "ligne_de_vue": true,
+  "cout_ticks": 6,
+  "cout_mana": 10,
+  "cout_endurance": 0,
+  "power_base": null,
+  "conditions": [],
+  "effets": [
+    "deplacement"
+  ],
+  "description": "téléportation courte, en ligne de vue",
+  "grimoire_domains": [
+    "espace"
+  ],
+  "tags": [
+    "grimoire",
+    "effet"
+  ]
+}

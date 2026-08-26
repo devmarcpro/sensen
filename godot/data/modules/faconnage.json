@@ -1,0 +1,36 @@
+{
+  "id": "faconnage",
+  "nom": "Façonnage",
+  "name_key": "module.faconnage.name",
+  "book_type": "grimoire",
+  "domaine": "Terre",
+  "elements": {
+    "terre": 1.0
+  },
+  "module_type": "effet",
+  "forme": "tuile",
+  "taille": 1,
+  "portee": [
+    1,
+    3
+  ],
+  "cible": "tuile",
+  "ligne_de_vue": true,
+  "cout_ticks": 12,
+  "cout_mana": 10,
+  "cout_endurance": 0,
+  "power_base": null,
+  "conditions": [],
+  "effets": [
+    "terrain"
+  ],
+  "description": "élève ou abaisse une tuile d'un niveau",
+  "grimoire_domains": [
+    "terre"
+  ],
+  "tags": [
+    "grimoire",
+    "effet",
+    "terre"
+  ]
+}

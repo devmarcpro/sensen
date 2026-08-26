@@ -8,8 +8,8 @@ etape: 0
 
 **Le design est complet et décidé.** Il ne reste ni question bloquante ni valeur à inventer : tout ce qui était ouvert porte une décision ou un défaut chiffré. Ce qui suit est l'état de production — ce qui est fait, et ce qui reste à *produire* (assets, code).
 
-> [!failure] Bloquant trouvé le 2026-08-26
-> **Le catalogue [[Modules]] n'est pas transcrivible en l'état** : 0/61 entrées portent un `cout_ticks`, et onze emploient des tours ou des mécaniques supprimées. Voir [[Décision — Transcription du catalogue de modules]]. C'est le premier travail avant l'étape 0, puisque le prototype de combat en dépend.
+> [!success] Bloquant levé le 2026-08-26
+> Le catalogue [[Modules]] est **transcrit dans son schéma** — `cout_ticks` sur les 61 entrées, durées en ticks, économies séparées (mana pour les grimoires, **endurance** pour les manuels). Les 61 JSON sont écrits dans `godot/data/modules/`. Audit : [[Décision — Transcription du catalogue de modules]].
 
 ## 1. ✅ Validé — les 8 décisions post-pivot (2026-08-26, sur délégation)
 

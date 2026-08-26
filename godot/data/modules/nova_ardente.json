@@ -1,0 +1,36 @@
+{
+  "id": "nova_ardente",
+  "nom": "Nova ardente",
+  "name_key": "module.nova_ardente.name",
+  "book_type": "grimoire",
+  "domaine": "Feu",
+  "elements": {
+    "feu": 1.0
+  },
+  "module_type": "effet",
+  "forme": "carre",
+  "taille": 1,
+  "portee": [
+    0,
+    0
+  ],
+  "cible": "toute_entite",
+  "ligne_de_vue": false,
+  "cout_ticks": 18,
+  "cout_mana": 18,
+  "cout_endurance": 0,
+  "power_base": "3d6",
+  "conditions": [],
+  "effets": [
+    "degats"
+  ],
+  "description": "éclate autour du lanceur, alliés compris",
+  "grimoire_domains": [
+    "feu"
+  ],
+  "tags": [
+    "grimoire",
+    "effet",
+    "feu"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "desarmement",
+  "nom": "Désarmement",
+  "name_key": "module.desarmement.name",
+  "book_type": "manuel",
+  "domaine": "Techniques",
+  "elements": {},
+  "module_type": "effet",
+  "forme": "cible_unique",
+  "taille": 1,
+  "portee": [
+    1,
+    1.5
+  ],
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 10,
+  "cout_mana": 0,
+  "cout_endurance": 16,
+  "power_base": null,
+  "conditions": [],
+  "effets": [
+    "statut"
+  ],
+  "description": "jet opposé — l'arme de la cible tombe sur sa tuile",
+  "grimoire_domains": [],
+  "tags": [
+    "manuel",
+    "effet"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "frappe_lourde",
+  "nom": "Frappe lourde",
+  "name_key": "module.frappe_lourde.name",
+  "book_type": "manuel",
+  "domaine": "Frappes",
+  "elements": {},
+  "module_type": "effet",
+  "forme": "cible_unique",
+  "taille": 1,
+  "portee": [
+    1,
+    1.5
+  ],
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 8,
+  "cout_mana": 0,
+  "cout_endurance": 12,
+  "power_base": "1d6",
+  "conditions": [],
+  "effets": [
+    "degats"
+  ],
+  "description": "s'ajoute aux dégâts d'arme",
+  "grimoire_domains": [],
+  "tags": [
+    "manuel",
+    "effet"
+  ]
+}

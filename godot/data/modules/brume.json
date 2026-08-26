@@ -1,0 +1,37 @@
+{
+  "id": "brume",
+  "nom": "Brume",
+  "name_key": "module.brume.name",
+  "book_type": "grimoire",
+  "domaine": "Eau/Glace",
+  "elements": {
+    "eau": 1.0
+  },
+  "module_type": "effet",
+  "forme": "carre",
+  "taille": 2,
+  "portee": [
+    1,
+    5
+  ],
+  "cible": "tuile",
+  "ligne_de_vue": false,
+  "cout_ticks": 12,
+  "cout_mana": 10,
+  "cout_endurance": 0,
+  "power_base": null,
+  "conditions": [],
+  "effets": [
+    "terrain",
+    "statut"
+  ],
+  "description": "réduit la détection dans la zone, 100 ticks",
+  "grimoire_domains": [
+    "eau/glace"
+  ],
+  "tags": [
+    "grimoire",
+    "effet",
+    "eau"
+  ]
+}

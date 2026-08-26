@@ -1,0 +1,33 @@
+{
+  "id": "poche_dimensionnelle",
+  "nom": "Poche dimensionnelle",
+  "name_key": "module.poche_dimensionnelle.name",
+  "book_type": "grimoire",
+  "domaine": "Espace",
+  "elements": {},
+  "module_type": "effet",
+  "forme": "soi",
+  "taille": 0,
+  "portee": [
+    0,
+    0
+  ],
+  "cible": "soi",
+  "ligne_de_vue": false,
+  "cout_ticks": 12,
+  "cout_mana": 20,
+  "cout_endurance": 0,
+  "power_base": null,
+  "conditions": [],
+  "effets": [
+    "statut"
+  ],
+  "description": "+30 de capacité de poids pendant 10 minutes de temps monde",
+  "grimoire_domains": [
+    "espace"
+  ],
+  "tags": [
+    "grimoire",
+    "effet"
+  ]
+}

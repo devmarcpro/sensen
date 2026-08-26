@@ -1,12 +1,15 @@
 ---
 aliases: ["Transcription du catalogue de modules", "Modules — dette de format", "Décision — Transcription des modules"]
-tags: [combat, contenu, données, à-trancher]
+tags: [combat, contenu, données, décidé]
 domaine: combat
-statut: à-trancher
+statut: décidé
 etape: 0
 ---
 
-> [!failure] Défaut trouvé le 2026-08-26
+> [!success] Résolu le 2026-08-26 — la passe est faite
+> Les **61 modules** sont transcrits dans le schéma : `cout_ticks` sur les 61, `forme`/`portée`/`cible`/`ligne de vue` explicites, durées en ticks, quatre entrées périmées réécrites, et **les modules de manuel coûtent de l'endurance**. Catalogue à jour : [[Modules]] · JSON : `godot/data/modules/*.json`. Cette note conserve l'audit et les barèmes qui ont servi.
+
+> [!failure] Le défaut, tel qu'il a été trouvé le 2026-08-26
 > **Le catalogue [[Modules]] ne respecte pas le schéma que [[Vocabulaire des modules — six axes]] déclare pour lui.** Il a été converti *verbatim* depuis l'annexe F.2 du GDD, écrite **avant le pivot tactique** — donc en prose, en tours, et sans coût en ticks. C'est la dette de format la plus lourde du coffre.
 
 Ce qui manque au catalogue des 61 modules pour être transcrivible en JSON, et comment le combler.
@@ -20,7 +23,7 @@ Les modules sont décrits sur **quatre couches**, et les trois premières sont s
 | **Le pourquoi** | [[Le vocabulaire des modules et l'absence d'arbre de talents]] | ✅ |
 | **Le schéma** — six axes, JSON de référence | [[Vocabulaire des modules — six axes]] | ✅ |
 | **La grammaire** — six types, séquence lue de gauche à droite | [[Six types de modules et assemblage]] | ✅ |
-| **Le catalogue** — les 61 entrées | [[Modules]] | ❌ **format d'avant le pivot** |
+| **Le catalogue** — les 61 entrées | [[Modules]] | ❌ à l'audit · ✅ **depuis la transcription** |
 
 Autour : [[Structure compétences-modules-slots]] (combien de slots), [[Grimoires et manuels]] (comment on les obtient), [[Domaines de grimoires et manuels]] (les domaines), [[Mana]] et [[Endurance]] (les économies), [[Familles de capacités de la grille]] (ce que la grille rend possible).
 
@@ -52,9 +55,7 @@ Onze entrées emploient des unités ou des mécaniques que le pivot a supprimée
 | **« dés d'armure »** | Peau de pierre, Brise-garde | la mitigation par dés est **supprimée**, remplacée par la réduction plate par zone ([[Armure par zone et constructions]]) |
 | **« +2 toucher »** | Duelliste | le jet de toucher d'E.3 est superseded par le pivot ([[Pipeline de résolution du combat]]) |
 
-## Ce qu'il faut faire
-
-Transcrire les 61 entrées dans le schéma réel — une passe, six décisions par module :
+## Ce qui a été fait — la passe, six décisions par module
 
 1. **`forme`** — extraire la géométrie de la prose, ou la trancher (`cible_unique` par défaut).
 2. **`portee [min, max]`** — chiffrer ; un `min > 1` là où la contrepartie de la distance a du sens (l'arc long est mauvais au contact).
@@ -74,12 +75,12 @@ Transcrire les 61 entrées dans le schéma réel — une passe, six décisions p
 5. **Durées en ticks** — convertir. Proposition d'étalon : **1 tour du GDD = 10 ticks** (une attaque d'épée à 2.0 att./10 ticks). « brûlure 3 tours » → `30 ticks`.
 6. **Réécrire les quatre entrées périmées** — Peau de pierre et Brise-garde en réduction plate, Duelliste sans jet de toucher.
 
-## La question ouverte, à trancher avant la passe
+## La question qui a été tranchée
 
-> [!question] Les 17 modules de **manuel** (armes) coûtent-ils du mana ?
+> [!success] Tranché : **les modules de manuel coûtent de l'endurance, jamais du mana**
 > Le catalogue leur donne à tous un `cout_mana`. Mais [[Vocabulaire des modules — six axes]] déclare **trois économies** — ticks, mana, endurance — et dit qu'*« elles définissent des archétypes »*. Une Frappe lourde ou un Balayage qui coûtent du **mana** effacent la distinction entre le guerrier et le mage, et laissent `cout_endurance` sans emploi.
 >
-> **Recommandation :** les modules de manuel coûtent **de l'endurance**, les modules de grimoire du **mana**, et les rares hybrides les deux. Ça donne enfin son rôle à l'endurance, ça rend *Le Sabre* jouable sans Volonté, et ça fait de l'action « attendre » (5 ticks, rend 20 d'endurance — [[Endurance]]) une décision de combat au lieu d'un bouton.
+> **Décision retenue :** les modules de manuel coûtent **de l'endurance**, les modules de grimoire du **mana**, et les rares hybrides les deux. Ça donne enfin son rôle à l'endurance, ça rend *Le Sabre* jouable sans Volonté, et ça fait de l'action « attendre » (5 ticks, rend 20 d'endurance — [[Endurance]]) une décision de combat au lieu d'un bouton.
 
 ## Liens
 - **Dépend de** : [[Vocabulaire des modules — six axes]], [[Modules]], [[Action-time à ticks]]

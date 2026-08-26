@@ -1,0 +1,33 @@
+{
+  "id": "bouclier_arcanique",
+  "nom": "Bouclier arcanique",
+  "name_key": "module.bouclier_arcanique.name",
+  "book_type": "grimoire",
+  "domaine": "Arcane",
+  "elements": {},
+  "module_type": "effet",
+  "forme": "soi",
+  "taille": 0,
+  "portee": [
+    0,
+    0
+  ],
+  "cible": "soi",
+  "ligne_de_vue": false,
+  "cout_ticks": 8,
+  "cout_mana": 12,
+  "cout_endurance": 0,
+  "power_base": "2d8",
+  "conditions": [],
+  "effets": [
+    "statut"
+  ],
+  "description": "absorbe 2d8 dégâts jusqu'à épuisement",
+  "grimoire_domains": [
+    "arcane"
+  ],
+  "tags": [
+    "grimoire",
+    "effet"
+  ]
+}

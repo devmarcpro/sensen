@@ -1,0 +1,36 @@
+{
+  "id": "pluie_d_aiguilles",
+  "nom": "Pluie d'aiguilles",
+  "name_key": "module.pluie_d_aiguilles.name",
+  "book_type": "grimoire",
+  "domaine": "Métal",
+  "elements": {
+    "métal": 1.0
+  },
+  "module_type": "effet",
+  "forme": "carre",
+  "taille": 2,
+  "portee": [
+    1,
+    6
+  ],
+  "cible": "toute_entite",
+  "ligne_de_vue": false,
+  "cout_ticks": 16,
+  "cout_mana": 18,
+  "cout_endurance": 0,
+  "power_base": "2d4",
+  "conditions": [],
+  "effets": [
+    "degats"
+  ],
+  "description": "friendly fire intégral",
+  "grimoire_domains": [
+    "metal"
+  ],
+  "tags": [
+    "grimoire",
+    "effet",
+    "métal"
+  ]
+}

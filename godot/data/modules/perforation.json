@@ -1,0 +1,36 @@
+{
+  "id": "perforation",
+  "nom": "Perforation",
+  "name_key": "module.perforation.name",
+  "book_type": "grimoire",
+  "domaine": "Métal",
+  "elements": {
+    "métal": 1.0
+  },
+  "module_type": "effet",
+  "forme": "cible_unique",
+  "taille": 1,
+  "portee": [
+    1,
+    3
+  ],
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 10,
+  "cout_mana": 12,
+  "cout_endurance": 0,
+  "power_base": "2d8",
+  "conditions": [],
+  "effets": [
+    "degats"
+  ],
+  "description": "ignore intégralement la réduction d'armure de zone",
+  "grimoire_domains": [
+    "metal"
+  ],
+  "tags": [
+    "grimoire",
+    "effet",
+    "métal"
+  ]
+}

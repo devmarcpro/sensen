@@ -1,0 +1,28 @@
+{
+  "id": "contagion",
+  "nom": "Contagion",
+  "name_key": "module.contagion.name",
+  "book_type": "grimoire",
+  "domaine": "Corruption",
+  "elements": {},
+  "module_type": "modificateur",
+  "forme": null,
+  "taille": 0,
+  "portee": null,
+  "cible": null,
+  "ligne_de_vue": false,
+  "cout_ticks": 0,
+  "cout_mana": 8,
+  "cout_endurance": 0,
+  "power_base": null,
+  "conditions": [],
+  "effets": [],
+  "description": "les statuts du noyau suivant se propagent aux ennemis adjacents",
+  "grimoire_domains": [
+    "corruption"
+  ],
+  "tags": [
+    "grimoire",
+    "modificateur"
+  ]
+}

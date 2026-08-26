@@ -1,0 +1,31 @@
+{
+  "id": "affutage",
+  "nom": "Affûtage",
+  "name_key": "module.affutage.name",
+  "book_type": "grimoire",
+  "domaine": "Métal",
+  "elements": {
+    "métal": 1.0
+  },
+  "module_type": "modificateur",
+  "forme": null,
+  "taille": 0,
+  "portee": null,
+  "cible": null,
+  "ligne_de_vue": false,
+  "cout_ticks": 0,
+  "cout_mana": 5,
+  "cout_endurance": 0,
+  "power_base": null,
+  "conditions": [],
+  "effets": [],
+  "description": "+1 dé au noyau suivant et le rend perforant",
+  "grimoire_domains": [
+    "metal"
+  ],
+  "tags": [
+    "grimoire",
+    "modificateur",
+    "métal"
+  ]
+}

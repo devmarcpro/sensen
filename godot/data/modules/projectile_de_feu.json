@@ -1,0 +1,36 @@
+{
+  "id": "projectile_de_feu",
+  "nom": "Projectile de feu",
+  "name_key": "module.projectile_de_feu.name",
+  "book_type": "grimoire",
+  "domaine": "Feu",
+  "elements": {
+    "feu": 1.0
+  },
+  "module_type": "effet",
+  "forme": "ligne",
+  "taille": 1,
+  "portee": [
+    1,
+    6
+  ],
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 10,
+  "cout_mana": 8,
+  "cout_endurance": 0,
+  "power_base": "2d6",
+  "conditions": [],
+  "effets": [
+    "degats"
+  ],
+  "description": "lame de flamme qui file droit et perce la première cible",
+  "grimoire_domains": [
+    "feu"
+  ],
+  "tags": [
+    "grimoire",
+    "effet",
+    "feu"
+  ]
+}

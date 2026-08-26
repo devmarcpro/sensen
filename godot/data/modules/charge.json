@@ -1,0 +1,32 @@
+{
+  "id": "charge",
+  "nom": "Charge",
+  "name_key": "module.charge.name",
+  "book_type": "manuel",
+  "domaine": "Techniques",
+  "elements": {},
+  "module_type": "effet",
+  "forme": "chemin",
+  "taille": 4,
+  "portee": [
+    1,
+    4
+  ],
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 10,
+  "cout_mana": 0,
+  "cout_endurance": 16,
+  "power_base": "1d6",
+  "conditions": [],
+  "effets": [
+    "degats",
+    "deplacement"
+  ],
+  "description": "rue sur 4 tuiles, projette la cible",
+  "grimoire_domains": [],
+  "tags": [
+    "manuel",
+    "effet"
+  ]
+}

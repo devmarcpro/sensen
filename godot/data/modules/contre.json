@@ -1,0 +1,26 @@
+{
+  "id": "contre",
+  "nom": "Contre",
+  "name_key": "module.contre.name",
+  "book_type": "manuel",
+  "domaine": "Techniques",
+  "elements": {},
+  "module_type": "declencheur",
+  "forme": null,
+  "taille": 0,
+  "portee": null,
+  "cible": null,
+  "ligne_de_vue": false,
+  "cout_ticks": 0,
+  "cout_mana": 0,
+  "cout_endurance": 12,
+  "power_base": null,
+  "conditions": [],
+  "effets": [],
+  "description": "riposte automatique au prochain coup esquivé",
+  "grimoire_domains": [],
+  "tags": [
+    "manuel",
+    "declencheur"
+  ]
+}

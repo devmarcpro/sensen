@@ -1,0 +1,36 @@
+{
+  "id": "croissance",
+  "nom": "Croissance",
+  "name_key": "module.croissance.name",
+  "book_type": "grimoire",
+  "domaine": "Vie",
+  "elements": {
+    "bois": 1.0
+  },
+  "module_type": "effet",
+  "forme": "tuile",
+  "taille": 1,
+  "portee": [
+    1,
+    2
+  ],
+  "cible": "tuile",
+  "ligne_de_vue": true,
+  "cout_ticks": 15,
+  "cout_mana": 12,
+  "cout_endurance": 0,
+  "power_base": null,
+  "conditions": [],
+  "effets": [
+    "terrain"
+  ],
+  "description": "avance une culture d'un stade — hors combat",
+  "grimoire_domains": [
+    "vie"
+  ],
+  "tags": [
+    "grimoire",
+    "effet",
+    "bois"
+  ]
+}

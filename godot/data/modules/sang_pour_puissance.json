@@ -1,0 +1,28 @@
+{
+  "id": "sang_pour_puissance",
+  "nom": "Sang pour puissance",
+  "name_key": "module.sang_pour_puissance.name",
+  "book_type": "grimoire",
+  "domaine": "Corruption",
+  "elements": {},
+  "module_type": "modificateur",
+  "forme": null,
+  "taille": 0,
+  "portee": null,
+  "cible": null,
+  "ligne_de_vue": false,
+  "cout_ticks": 0,
+  "cout_mana": 0,
+  "cout_endurance": 0,
+  "power_base": null,
+  "conditions": [],
+  "effets": [],
+  "description": "le noyau suivant coûte des PV au lieu du mana, 2 PV pour 1 mana",
+  "grimoire_domains": [
+    "corruption"
+  ],
+  "tags": [
+    "grimoire",
+    "modificateur"
+  ]
+}

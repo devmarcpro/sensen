@@ -1,0 +1,26 @@
+{
+  "id": "allonge",
+  "nom": "Allonge",
+  "name_key": "module.allonge.name",
+  "book_type": "manuel",
+  "domaine": "Maîtrise",
+  "elements": {},
+  "module_type": "modificateur",
+  "forme": null,
+  "taille": 0,
+  "portee": null,
+  "cible": null,
+  "ligne_de_vue": false,
+  "cout_ticks": 0,
+  "cout_mana": 0,
+  "cout_endurance": 6,
+  "power_base": null,
+  "conditions": [],
+  "effets": [],
+  "description": "+1 tuile de portée sur la frappe suivante",
+  "grimoire_domains": [],
+  "tags": [
+    "manuel",
+    "modificateur"
+  ]
+}

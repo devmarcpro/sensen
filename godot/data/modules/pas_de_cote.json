@@ -1,0 +1,31 @@
+{
+  "id": "pas_de_cote",
+  "nom": "Pas de côté",
+  "name_key": "module.pas_de_cote.name",
+  "book_type": "manuel",
+  "domaine": "Techniques",
+  "elements": {},
+  "module_type": "effet",
+  "forme": "soi",
+  "taille": 0,
+  "portee": [
+    1,
+    2
+  ],
+  "cible": "soi",
+  "ligne_de_vue": false,
+  "cout_ticks": 4,
+  "cout_mana": 0,
+  "cout_endurance": 8,
+  "power_base": null,
+  "conditions": [],
+  "effets": [
+    "deplacement"
+  ],
+  "description": "esquive-déplacement de 2 tuiles",
+  "grimoire_domains": [],
+  "tags": [
+    "manuel",
+    "effet"
+  ]
+}

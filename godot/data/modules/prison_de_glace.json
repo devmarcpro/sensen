@@ -1,0 +1,36 @@
+{
+  "id": "prison_de_glace",
+  "nom": "Prison de glace",
+  "name_key": "module.prison_de_glace.name",
+  "book_type": "grimoire",
+  "domaine": "Eau/Glace",
+  "elements": {
+    "eau": 1.0
+  },
+  "module_type": "effet",
+  "forme": "cible_unique",
+  "taille": 1,
+  "portee": [
+    1,
+    5
+  ],
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 14,
+  "cout_mana": 16,
+  "cout_endurance": 0,
+  "power_base": null,
+  "conditions": [],
+  "effets": [
+    "statut"
+  ],
+  "description": "immobilise (1d4+1)x10 ticks — jet de Force pour briser ; compte dans le budget anti-stunlock",
+  "grimoire_domains": [
+    "eau/glace"
+  ],
+  "tags": [
+    "grimoire",
+    "effet",
+    "eau"
+  ]
+}

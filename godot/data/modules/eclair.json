@@ -1,0 +1,36 @@
+{
+  "id": "eclair",
+  "nom": "Éclair",
+  "name_key": "module.eclair.name",
+  "book_type": "grimoire",
+  "domaine": "Foudre",
+  "elements": {
+    "bois": 1.0
+  },
+  "module_type": "effet",
+  "forme": "cible_unique",
+  "taille": 1,
+  "portee": [
+    1,
+    7
+  ],
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 10,
+  "cout_mana": 10,
+  "cout_endurance": 0,
+  "power_base": "2d8",
+  "conditions": [],
+  "effets": [
+    "degats"
+  ],
+  "description": "multiplié par la conductivité électrique de l'armure de la cible",
+  "grimoire_domains": [
+    "foudre"
+  ],
+  "tags": [
+    "grimoire",
+    "effet",
+    "bois"
+  ]
+}
