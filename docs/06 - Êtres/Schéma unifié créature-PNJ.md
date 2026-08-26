@@ -8,6 +8,9 @@ etape: 9
 
 Il n'y a pas de distinction technique entre un monstre et un PNJ humain. C'est de là que vient l'implication gameplay majeure : n'importe quelle créature peut devenir un compagnon.
 
+> [!important] Le principe le plus structurant du jeu
+> **Tous les êtres sont construits de la même façon — un roi comme un mouton.** La différence n'est pas une branche dans le code, c'est **un bloc vide dans la fiche** ([[Blocs de l'être]]). Aucun système ne teste l'espèce ; il teste la présence d'un bloc.
+
 **Principe :** les PNJ (villageois, marchands, monstres...) sont tous construits de la **même manière**, à partir de parties de sprites assemblées de façon modulaire (pipeline hérité du `.vox`, [[Squelette modulaire et points d'attache]]) — il n'y a pas de distinction technique entre un "monstre" et un "PNJ humain".
 
 **Squelette modulaire :** une créature humanoïde est composée de parties interchangeables :
@@ -26,11 +29,15 @@ Chaque créature du jeu est un assemblage choisi dans ces bibliothèques de part
 
 **Parties du corps = cosmétiques :** les parties assemblées (tête, torse, bras, jambes, ou équivalents selon template) sont **purement visuelles**. Les stats de la créature viennent d'ailleurs (race, classe, niveau).
 
+**Précisé par l'Annexe H ([[Apparence — données et équipement]]) :** ce qui définit l'apparence, ce sont **les données de l'espèce et l'équipement** — silhouette déclarée par l'espèce, couleurs et motifs portés par le **génome** (donc héritables, [[Règle d'anneau]]), pièces visibles attachées aux points d'ancrage. **Un roi et un mouton passent par le même pipeline de rendu.** Un `parts_pool` fixe reste le comportement des êtres sans bloc `génome`.
+
 **Conditions de recrutement et apprivoisement :** voir [[Apprivoisement et recrutement]].
 
 **Conséquence d'architecture ([[Décisions d'architecture]]) :** *une seule scène `creature.tscn` pour tout être vivant* — elle se configure entièrement depuis un JSON de créature au spawn. **Ne jamais créer une scène par type de monstre.**
 
 **Même système pour le joueur :** le double niveau ([[Double niveau combat et général]]), le potentiel ([[Potentiel]]) et la progression par l'usage s'appliquent identiquement aux PNJ et compagnons.
+
+**Extension Annexe H :** le schéma se généralise en six blocs — `génome`, `corps`, `esprit`, `social`, `agenda`, `repro` ([[Blocs de l'être]]) — et le statut d'un être devient un champ `role` ([[Rôles de l'être]]). C'est ce qui rend l'élevage ([[Élevage — intention et familles]]) possible **sans aucun système parallèle** : un mouton est une fiche qui a `génome` et `repro` ; un bandit est une fiche qui a `esprit`, `social` et `agenda`.
 
 ## Liens
 - **Dépend de** : [[Data-driven design]], [[Direction artistique]]

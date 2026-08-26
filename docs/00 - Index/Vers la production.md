@@ -35,6 +35,14 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 - [x] **Pools de noms** : les 9 cultures restantes écrites ([[Pools de noms des cultures]], 2026-08-26).
 - [ ] Traductions en/ja/zh — les clés `tr()` existent dès le jour 1, les textes peuvent suivre ([[Localisation]]).
 
+## 4 bis. Annexe H — élevage, génétique et collection *(intégrée le 2026-08-26)*
+
+- [x] **15 notes** : mécanismes ([[Règle d'anneau]], [[Loci — les dix types]], [[Conditions de reproduction]]), contenu ([[Catalogue des groupes d'élevage]], vivarium ×3), moteur ([[Intégration de l'élevage au moteur]], [[Tests de conformité — élevage]]), et le socle des êtres ([[Blocs de l'être]], [[Apparence — données et équipement]], [[Rôles de l'être]]).
+- [x] **Catalogue `species/`** squeletté avec son template ([[Décision — Pipeline de contenu]]).
+- [x] **Saisons activées** à l'étape 10 — [[Décision — Saisons activées à l'étape 10]] renverse [[Ouvert — Saisons]].
+- [ ] **Assets d'élevage** (étape 10) : silhouettes 13×13 des 32 espèces d'insectes, 20 motifs procéduraux, écran de registre.
+- [ ] Fiches `species/` des 6 groupes recommandés au lancement (un par famille).
+
 ## 5. Assets à produire (aucun n'existe)
 
 - [ ] **Étape 0-1 :** une silhouette paperdoll + quelques pièces d'équipement visibles ; les teintes des cinq éléments (jauge, effets — [[Direction artistique]]) ; l'UI de lisibilité (timeline, prévisualisations, journal — c'est LE game feel).

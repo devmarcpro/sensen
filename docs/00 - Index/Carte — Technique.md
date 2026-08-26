@@ -34,6 +34,10 @@ L'architecture Godot et la stratégie de performance. 16 notes.
 - **[[Réseau et sauvegarde — performance]]**
 - **[[Ordre de vérification]]** — *un critère raté = on optimise AVANT d'empiler le système suivant.*
 
+**L'élevage** *(Annexe H)*
+- **[[Intégration de l'élevage au moteur]]** — *rien de nouveau côté moteur : tout existe.* 6 crochets, 0 test d'espèce.
+- **[[Tests de conformité — élevage]]** — sept tests, dont deux qui attrapent les erreurs de **contenu** plutôt que de code.
+
 **Les risques**
 - **[[Risques majeurs]]** — sept risques, dont un levé par la direction tactique.
 

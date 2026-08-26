@@ -29,6 +29,12 @@ De la relation individuelle au royaume : commerce, réputation, guildes, territo
 - **[[Quêtes et guildes]]** — 12 guildes, quêtes procédurales, 5 rangs.
 - **[[Gabarit de quête]]**
 
+**L'élevage — un jeu dans le jeu** *(Annexe H)*
+- **[[Élevage — intention et familles]]** — attraper, croiser, compléter. Six familles, un verbe chacune. *Aucun `if (espèce === 'x')`.*
+- **[[Règle d'anneau]]** — le mécanisme d'hérédité : 34/34/16/16. *Une valeur lointaine ne s'obtient jamais d'un coup, elle se marche.*
+- **[[Loci — les dix types]]** — dix mécaniques de transmission, une fonction chacune. Pas de plafond.
+- **[[Conditions de reproduction]]** — quinze prédicats, six coûts, et la règle : **afficher la raison, jamais un bouton grisé muet.**
+
 **La vie simulée**
 - **[[Agriculture et élevage]]** — et le principe transversal d'abstraction hors-site.
 - **[[Faim]]** · **[[Faim des PNJ]]**

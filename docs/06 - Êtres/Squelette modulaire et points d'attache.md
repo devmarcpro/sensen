@@ -28,6 +28,8 @@ Aucune ne figure dans la palette des matériaux ([[Palette de couleurs des maté
 - À l'assemblage d'une créature, le jeu aligne le point d'attache de chaque membre sur le point correspondant du torse — n'importe quelle partie de la bibliothèque se branche sur n'importe quelle autre, tant que les couleurs d'attache correspondent.
 - **Orientation :** chaque ancrage porte une direction et un ordre de calque, pour que la partie s'oriente et se superpose correctement selon l'angle de vue isométrique (4 ou 8 directions).
 
+**L'apparence vient des données ([[Apparence — données et équipement]]) :** la silhouette est déclarée par l'espèce, les couleurs et motifs viennent du **génome** ([[Loci — les dix types]]) — donc héritables et sélectionnables ([[Règle d'anneau]]) — et les pièces d'équipement s'attachent aux ancrages ci-dessous. Le même pipeline dessine un roi, un mouton et un papillon.
+
 **Bénéfices dérivés :**
 - Les templates de morphologie ([[Schéma unifié créature-PNJ]]) deviennent triviaux : un quadrupède est simplement un torse portant 4 attaches "patte" au lieu de 2 attaches bras + 2 attaches jambes.
 - Les points d'attache servent aussi de **pivots d'animation** (rotation de l'épaule = rotation autour de l'attache du bras).

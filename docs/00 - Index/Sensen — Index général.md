@@ -39,7 +39,7 @@ Puis, selon le besoin : **[[Vers la production]]** (ce qui reste avant de coder)
 | **[[Carte — Combat]]** | action-time, Wu Xing, chaîne, garde, modules | 26 |
 | **[[Carte — Progression]]** | usage, potentiel, races, classes, astrologie | 13 |
 | **[[Carte — Objets]]** | matériaux, craft compositionnel, équipement, loot | 24 |
-| **[[Carte — Êtres]]** | schéma unifié, IA, compagnons, familles, noms | 13 |
+| **[[Carte — Êtres]]** | l'être unique, apparence, IA, compagnons, familles | 16 |
 | **[[Carte — Société]]** | relations, guildes, économie, royaumes, lois | 27 |
 | **[[Carte — Technique]]** | architecture Godot, données, performance, réseau | 16 |
 | **[[Carte — Contenu]]** | les catalogues prêts à transcrire en JSON | 24 |
@@ -56,6 +56,7 @@ Si une seule chose devait être comprise avant de coder :
 - **[[Action-time à ticks]]** — le temps n'avance qu'à l'action.
 - **[[Potentiel]]** — ce qui régule seul toute la progression.
 - **[[Data-driven design]]** — tout le contenu est de la donnée.
+- **[[Blocs de l'être]]** — un roi et un mouton sont la même fiche ; la différence est un bloc vide.
 
 ---
 

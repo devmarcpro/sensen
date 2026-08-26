@@ -78,10 +78,10 @@ MATÉRIAUX : Glace et Neige ajoutés au catalogue (F.1) — matériaux
   transparente, glissante ; fond près des sources de chaleur).
 DONNÉES : data/weather_states.json (états, modificateurs, effets) —
   ajouter un état météo = une entrée, zéro code (section 10).
-SAISONS : non incluses pour l'instant ; la génération temporelle est
-  conçue pour accueillir une modulation saisonnière plus tard
-  (multiplier le bruit temporel par une courbe annuelle) — question
-  ouverte, gros impact agriculture si activé.
+SAISONS : ACTIVÉES à l'étape 10, avec l'élevage et l'agriculture
+  (Décision — Saisons activées à l'étape 10) : 1 an = 120 jours =
+  4 saisons de 30 jours, courbe annuelle sur la température, champ
+  `saison` exposé par l'horloge du monde. Aucun système nouveau.
 ```
 
 *Saisons : voir [[Ouvert — Saisons]].*

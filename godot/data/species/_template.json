@@ -1,0 +1,56 @@
+{
+  "_doc": "Espèce d'élevage (docs: Élevage — intention et familles / Annexe H). id = nom du fichier. Déclare ses loci, son moteur, ses conditions et ses coûts — AUCUN code par espèce.",
+  "name_key": "species.<id>.name",
+  "famille": "grille_a_remplir",
+  "groupe": "insectes",
+  "habitat": "vivarium",
+  "capture": {
+    "verbe": "filet",
+    "rarete": 1
+  },
+  "loci": {
+    "couleur": {
+      "type": "anneau",
+      "n": 16
+    },
+    "motif": {
+      "type": "anneau",
+      "n": 20
+    },
+    "couleur_motif": {
+      "type": "anneau",
+      "n": 16
+    },
+    "taille": {
+      "type": "nombre",
+      "min": 1,
+      "max": null,
+      "var": 0.06
+    }
+  },
+  "silhouette": "models/species/<id>.png",
+  "repro": {
+    "moteur": "anneau",
+    "conditions": [
+      {
+        "c": "habitat",
+        "v": "vivarium"
+      },
+      {
+        "c": "place"
+      },
+      {
+        "c": "temperature",
+        "min": 5,
+        "max": 30
+      }
+    ],
+    "portee": [
+      1,
+      2
+    ],
+    "couts": []
+  },
+  "registre": "grille",
+  "tags": []
+}

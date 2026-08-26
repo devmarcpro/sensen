@@ -34,6 +34,11 @@ Les catalogues prêts à transcrire en JSON. 24 notes.
 - **[[Pools de noms des cultures]]** — les 9 cultures restantes (la Sino vit dans son schéma).
 - **[[Décision — Surcharges Wu Xing des matériaux]]** · **[[Décision — Affinités de cuisine]]** — les vecteurs élémentaires du contenu.
 
+**L'élevage** *(Annexe H)*
+- **[[Catalogue des groupes d'élevage]]** (35 groupes, six familles) — chacun est une fiche de données.
+- **[[Vivarium — loci et variétés]]** — la référence implémentée : 32 espèces × 4 816 variétés, les unis qui émergent.
+- **[[Vivarium — capture et élevage]]** · **[[Vivarium — registre et paliers]]** — *on ne finit pas, et c'est voulu.*
+
 **Le monde et les cultures**
 - **[[Biomes de départ]]** (12, extensibles vers 20+)
 - **[[Cultures de nommage]]** (10) — purement phonétique et toponymique.

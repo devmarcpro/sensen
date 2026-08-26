@@ -50,6 +50,14 @@ Le format de données unique de tout être vivant du jeu — monstre comme march
 
 **Champ `equip_slots` ([[Équipement — 14 slots]]) :** emplacements par morphologie — quadrupède = tête, torse, selle, amulette, 2 accessoires · volant = tête, torse, amulette, 2 accessoires · amorphe = amulette, 2 accessoires.
 
+**Extension Annexe H — les blocs et le génome ([[Blocs de l'être]]) :** le schéma ci-dessus est la forme « PNJ » du schéma unique. S'y ajoutent :
+- `role` : `sauvage` | `apprivoisé` | `résident` | `garde` | `bétail` ([[Rôles de l'être]]) — **absorbe et généralise** `housing_default` et complète `recruitable`.
+- `genome` : dictionnaire de loci, **dont la forme est déclarée par l'espèce** ([[Loci — les dix types]]) — absent pour les êtres sans hérédité, auquel cas `parts_pool` gouverne l'apparence ([[Apparence — données et équipement]]).
+- `repro` : `{ moteur, conditions, portée, coûts }` ([[Conditions de reproduction]]) — absent pour les êtres non reproductibles.
+- `esprit` : `{ intelligence, tempérament, dressabilité }` — ce qui décide des transitions de rôle.
+
+**Aucun système ne teste l'espèce : il teste la présence du bloc** ([[Tests de conformité — élevage]], test 6).
+
 **Matériaux paramétriques dérivés ([[Schéma matériau]], [[Catalogue matériaux — Paramétriques]]) :** Viande de X, Peau de X, Os de X, Dent, Griffe, Œil — stats dérivées de la fiche de la créature.
 
 ## Liens

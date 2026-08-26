@@ -1,0 +1,91 @@
+---
+aliases: ["H.5", "Annexe H.5", "Catalogue des groupes d'élevage", "Groupes d'élevage", "35 groupes"]
+tags: [contenu, élevage, catalogue, décidé]
+domaine: contenu
+statut: décidé
+etape: 10
+---
+
+> [!success] Annexe H — intégré le 2026-08-26
+> Trente-cinq groupes, **zéro système** : chacun est une fiche de données ([[Décision — Pipeline de contenu]], catalogue `species/`). Six sont recommandés au lancement, un par famille ([[Élevage — intention et familles]]).
+
+Le catalogue complet, par famille de verbe.
+
+## Grille à remplir
+
+| Animal | Capture | Habitat | Moteur | Locus en plus | Condition clé | Registre |
+|---|---|---|---|---|---|---|
+| Insectes | filet | vivarium | anneau | — | place libre | grille |
+| Poissons | ligne | bassin | anneau | taille | eau 18-26°, taille min | records |
+| Grenouilles | filet | bassin | anneau + acquis | forme (acquis au têtard) | densité du bassin | grille |
+| Lézards | appât | terrarium | anneau | mue (âge) | chaleur 24-34° | grille |
+| Escargots | ramassage | terrarium | anneau | spirale (récessif) | humidité, **pas de sexe** | grille |
+| Volailles | achat | enclos | anneau | ponte (en tension avec le plumage) | grain en réserve | double grille |
+| Carpes koï | ligne | bassin | déformation | taches (carte) | bassin ≥ 4 cases | galerie |
+
+## Trait caché
+
+| Animal | Capture | Habitat | Moteur | Locus | Condition clé | Registre |
+|---|---|---|---|---|---|---|
+| Serpents | appât | terrarium | anneau + récessif | écailles | après une mue, sexes opposés | phénotypes + porteurs |
+| Chats | apprivoisement | foyer | lié au sexe | pelage | robes impossibles sur mâle | grille + généalogie |
+| Limaces | ramassage | terrarium | double croisé | — | hermaphrodite, **deux portées** | grille |
+
+## Coût par croisement
+
+| Animal | Capture | Habitat | Locus | Condition clé | Coût |
+|---|---|---|---|---|---|
+| Vers à soie | achat | clayette | finesse du fil | 4 mûriers | filer **tue** la chrysalide |
+| Araignées | filet | terrarium | venin | — | 40 % de perte du mâle |
+| Huîtres | ramassage | parc | orient | eau salée, courant | ouvrir tue la bête |
+| Chauves-souris | appât nocturne | grotte | écholocation | **un petit par an** | temps |
+| Crabes | casier | bassin | pince | fenêtre de 2 jours après mue | synchronisation |
+
+## Population autonome
+
+| Animal | Capture | Habitat | On collectionne | Condition clé | Produit en veille |
+|---|---|---|---|---|---|
+| Ruches | essaimage | rucher | les **miels** | fleurs à portée, saison | miel, cire |
+| Fourmilières | reine capturée | nid | les **compositions de castes** | alimentation des larves | matériaux |
+| Loups | apprivoisement | tanière | les **meutes** (rang hérité) | hiérarchie stable | viandes, peaux |
+| Pigeons | appât | colombier | orientation | deux claims reliés | transport entre cellules |
+| Moutons | achat | enclos | finesse de toison | pâture, tonte saisonnière | écheveaux millésimés |
+| Coraux | bouturage | bassin | les **architectures** | lumière, courant, 3 cases | volume |
+
+*La production en veille passe par [[Abstraction hors-site]] — résolution par formules, jamais de simulation.*
+
+## L'individu qui évolue
+
+| Animal | Capture | Habitat | Locus | Condition clé | Registre |
+|---|---|---|---|---|---|
+| Tortues | ramassage | enclos | dossière (âge) | maturité à 4 ans in-game | patrimoine |
+| Cervidés | apprivoisement | parc | ramure (âge) | rut d'automne | **bois tombés** |
+| Rapaces | prise au nid | volière | école (acquis) | heures de vol, faim tenue | écoles de dressage |
+| Montures | apprivoisement | écurie | endurance, vitesse, tempérament | maturité, épreuve | **studbook** |
+| Scarabées de combat | filet | arène | force, allonge | victoires enregistrées | palmarès |
+
+## Le monde décide
+
+| Animal | Capture | Habitat | Locus | Condition clé | Registre |
+|---|---|---|---|---|---|
+| Phalènes | piège lumineux | vivarium | mélanisme (acquis du lieu) | **la corruption locale sélectionne** | grille + carte |
+| Hirondelles | nichoir | nichoir | — | migrent une saison sur deux, **rapportent du génome d'ailleurs** | grille |
+| Anguilles | nasse | bassin | — | frayent **seulement relâchées** en mer | grille |
+| Champignons | ramassage | cave | — | **le substrat décide** de la couleur | familles de substrat |
+| Coquillages | ramassage | — | automate cellulaire | plage, marée · **aucune reproduction** | familles de règle |
+| Lucioles | filet nocturne | vivarium | rythme (séquence) | obscurité, colonie ≥ 6 | séquences |
+
+*Les phalènes lisent la corruption effective de [[Dérive de la corruption]] : une région que le joueur pacifie change la couleur de ses papillons. C'est le mélanisme industriel, mécanisé — et la démonstration la plus nette que le monde décide.*
+
+## Gestion et débordement
+
+| Animal | Habitat | Particularité |
+|---|---|---|
+| Lapins | clapier | la population **double** chaque semaine — trancher ou saturer |
+| Sangliers | enclos | les évadés forment des hardes qui ravagent tes champs |
+| Oiseaux chanteurs | volière | ne s'accouplent que si les **chants sont compatibles** ([[Ouvert — Oiseaux chanteurs]]) |
+
+## Liens
+- **Dépend de** : [[Élevage — intention et familles]], [[Loci — les dix types]], [[Conditions de reproduction]]
+- **Alimente** : [[Vivarium — loci et variétés]], [[Intégration de l'élevage au moteur]]
+- **Voir aussi** : [[Décision — Saisons activées à l'étape 10]], [[Abstraction hors-site]], [[Dérive de la corruption]], [[Créatures]], [[Ouvert — Oiseaux chanteurs]], [[Ouvert — Hybrides]]

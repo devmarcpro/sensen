@@ -12,6 +12,9 @@ Cultiver partout avec un rendement variable, un système de faim qui oblige à m
 - **Faim/nutrition :** un système de faim **oblige le joueur à manger régulièrement** — mécanique de survie active, pas un simple bonus optionnel. Voir [[Faim]].
 - **Élevage :** les animaux de ferme utilisent le **même système modulaire de créatures** que les monstres/PNJ ([[Schéma unifié créature-PNJ]]) — pas de système séparé.
 
+> [!success] Spécifié en profondeur par l'Annexe H
+> L'élevage est désormais **un jeu dans le jeu** — attraper, croiser, compléter — avec hérédité, génétique et collection : [[Élevage — intention et familles]]. Mécanismes : [[Règle d'anneau]], [[Loci — les dix types]], [[Conditions de reproduction]]. Contenu : [[Catalogue des groupes d'élevage]] (35 groupes), [[Vivarium — loci et variétés]] (référence implémentée). **Les saisons sont activées avec lui** ([[Décision — Saisons activées à l'étape 10]]).
+
 **Principe transversal : abstraction hors-site**
 
 Toute gestion de ville/village/base (cultures, élevage, boutique passive — [[Commerce et boutiques]], etc.) doit être **abstraite** quand le joueur n'est pas physiquement présent sur place, plutôt que simulée en temps réel dans le détail. Ce système d'abstraction est noté comme un **chantier à développer plus tard en profondeur**, mais il concerne déjà plusieurs mécaniques déjà posées : agriculture/élevage, boutiques passives, régénération des cases sauvages ([[Claims et persistance]]). Voir [[Abstraction hors-site]] et [[Risques majeurs]].

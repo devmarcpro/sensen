@@ -18,7 +18,7 @@ etape: 0
 → et la spécification exécutable de l'étape 0 : **[[Prototype de combat — spécification]]**
 
 **Architecture et contenu**
-[[Décision — Pipeline de contenu]] · [[Décision — Surcharges Wu Xing des matériaux]] · [[Décision — Affinités de cuisine]]
+[[Décision — Pipeline de contenu]] · [[Décision — Surcharges Wu Xing des matériaux]] · [[Décision — Affinités de cuisine]] · **[[Décision — Saisons activées à l'étape 10]]** *(renverse [[Ouvert — Saisons]] — l'Annexe H rend les saisons load-bearing)*
 Catalogues produits : [[Actions des créatures]] · [[Recettes de composants]] · [[Pools de noms des cultures]] · modules Métal et Onyx ([[Modules]], [[Catalogue matériaux — Gemmes]])
 
 ## Défauts fixés — révisables au playtest, jamais bloquants
@@ -34,6 +34,13 @@ Chacun porte une valeur chiffrée que le code applique telle quelle ; les révis
 - [[Ouvert — Taille des salles de donjon]] — 24 prefabs, PNG à deux couches
 - [[Ouvert — Saisons]] — non incluses ; la question ne peut se trancher qu'après la boucle agricole (étape 10)
 - [[Ouvert — Interprétation dureté et qualité]] — **clos** (ambiguïté levée dans [[Qualité d'artisanat]])
+
+## Ouvert par l'Annexe H — non bloquant
+
+- [[Ouvert — Oiseaux chanteurs]] — le plus riche du catalogue, mais il faut une interface pour lire des chants. *À faire bien ou pas du tout.*
+- [[Ouvert — Hybrides]] — ferait décoller la collection ; demande une table de paires compatibles.
+- [[Ouvert — Cinquième locus visuel]] — le surmotif : ×20 de variétés, mais le registre n'est plus représentable en 2D.
+- [[Ouvert — Équilibrage du contraste]] — 34/34/16/16 ou 40/40/20 ? Question **perceptuelle**, aucune simulation n'y répond.
 
 ## Ouvert par nature — hors périmètre du code
 

@@ -2,11 +2,14 @@
 aliases: ["Ouvert — Saisons", "Saisons"]
 tags: [ouvert, monde, décidé-par-défaut]
 domaine: monde
-statut: décidé-par-défaut
+statut: décidé
 etape: 8
 ---
 
-> [!success] Défaut fixé le 2026-08-26 — implémentable tel quel
+> [!warning] RENVERSÉ le 2026-08-26 par l'Annexe H
+> Ce défaut (« non incluses ») est **caduc** : l'élevage rend les saisons load-bearing. Voir [[Décision — Saisons activées à l'étape 10]]. Le raisonnement ci-dessous est conservé comme trace — il disait *« la question ne peut pas se trancher avant d'avoir joué la boucle agricole »*, et c'est bien le contenu de cette boucle qui l'a tranchée.
+
+> [!success] Défaut d'origine (caduc)
 > Sur délégation du designer : **le code part de cette valeur**, aucune question à se poser. La question reste légitimement ouverte au playtest — la réviser est une décision de tuning, pas de conception.
 
 **La question :** activer ou non les **saisons** — gros impact sur la boucle agricole.
