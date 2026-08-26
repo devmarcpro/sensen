@@ -12,12 +12,12 @@ Un générateur préfixe + suffixe piloté par culture — aucun nom écrit à l
 
 - **Chaque PNJ a un prénom ET un nom de famille**, générés à l'instanciation ([[Schéma créature]]). Le nom de famille est **hérité** : un PNJ fondateur (sans parent) tire un nom de famille dans le pool de sa culture, ses enfants ([[Âge des PNJ]], liens `family`) le portent automatiquement.
 - **Titre pour les PNJ importants** : tout PNJ à `leadership_role` ([[Familles et succession]]) reçoit en plus un **titre** tiré du pool de sa culture, adapté à son type de rôle (Roi/Reine pour une monarchie, Premier Ministre pour une république, Grand Maître pour une guilde...) — affiché avant son nom (ex. "Roi Aldric Sombreval").
-- **Culture ≠ race — deux axes indépendants** : une race peut porter plusieurs cultures possibles selon le royaume où elle est née (un royaume **humain** peut avoir une culture à sonorité chinoise, nordique, latine... — cf. exemple [[Culture de nommage — schéma]]). Chaque culture déclare des **affinités de tirage par race** (`race_affinity`) : les races "originales" (Sylvide, Cendreux, Échomorphe) ont chacune une culture qui leur est propre (peu ou pas partagée), tandis qu'Humain/Elfe/Nain piochent parmi un plus large éventail de cultures inspirées du monde réel.
+- **Culture ≠ race — deux axes indépendants** : une race peut porter plusieurs cultures possibles selon le royaume où elle est née (un royaume **humain** peut avoir une culture à sonorité chinoise, nordique, latine... — cf. exemple [[Culture de nommage — schéma]]). Chaque culture déclare des **affinités de tirage par race** (`race_affinity`) : les 3 races piochent parmi les 7 cultures, toutes inspirées du monde réel — l'Humain a le spectre le plus large, le Nain penche vers le nordique, l'Elfe vers le celte.
 - **Villes et villages** héritent de la culture de leur royaume ([[Génération des royaumes PNJ]]) — noms cohérents à l'échelle d'un même royaume.
 - **Ordre des noms** configurable par culture (`name_order`: `prenom_nom` ou `nom_prenom`) — certaines cultures nomment famille avant prénom.
 
 **Décisions :**
-- **Cultures de lancement : 10** (liste [[Cultures de nommage]]) — assez pour une vraie variété sans exploser le volume de contenu à la main.
+- **Cultures de lancement : 7** (liste [[Cultures de nommage]]) — assez pour une vraie variété sans exploser le volume de contenu à la main.
 - Détail technique complet (algorithme, formats) : **[[Génération de noms]]**.
 
 **Hors localisation ([[Localisation]]) :** les noms propres saisis par le joueur (modèles sculptés, PNJ renommés) et les ids internes.

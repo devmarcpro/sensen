@@ -24,7 +24,7 @@ Les catalogues prêts à transcrire en JSON. 24 notes.
 
 **Les systèmes**
 - **[[Modules]]** (53) — le catalogue de départ par domaine, pentagramme complet.
-- **[[Créatures]]** (34) — animaux réels et humains uniquement. *Un donjon est une ruine investie, pas une crypte magique.* Avec le drop rare universel : la statue 1:1.
+- **[[Créatures]]** (34) — animaux réels et humains uniquement, **définitivement**. *Un donjon est une ruine investie, pas une crypte magique.* Avec le drop rare universel : la statue 1:1.
 - **[[Statuts]]** (14) · **[[Nourriture]]** (18) · **[[Meubles]]** (16)
 - **[[Effets d'équipement types]]** — les pools par slot pour le générateur de loot.
 - **[[Plantes]]** (22) · **[[Potions]]** (12) · **[[Composants]]** (14)
@@ -41,7 +41,7 @@ Les catalogues prêts à transcrire en JSON. 24 notes.
 
 **Le monde et les cultures**
 - **[[Biomes de départ]]** (12, extensibles vers 20+)
-- **[[Cultures de nommage]]** (10) — purement phonétique et toponymique.
+- **[[Cultures de nommage]]** (7, toutes réelles) — purement phonétique et toponymique.
 
 ## Liens
 - **Voir aussi** : [[Sensen — Index général]], [[Carte — Objets]], [[Carte — Êtres]], [[Carte — Ouvert]]

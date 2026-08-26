@@ -47,11 +47,11 @@ IDENTITÉ (déterministe à la graine) :
     d'autres races, et TOUT rôle de gouvernance/leadership_role est
     exclusivement de la race dominante (12.2/B.9).
   - **Culture (12.5/B.11) :** tirage pondéré par `race_affinity` parmi
-    les 10 cultures (C.9) selon la race dominante du royaume — un
-    royaume humain peut tirer n'importe quelle culture à large spectre
-    (sino, nordique, latine...), un royaume sylvide tire toujours sa
-    culture dédiée. Détermine ensuite noms de PNJ, noms de villes et
-    titres des rôles de leadership (E.31).
+    les 7 cultures (C.9) selon la race dominante du royaume — un
+    royaume humain peut tirer n'importe quelle culture (sino,
+    nordique, latine...), un royaume nain penche vers le nordique.
+    Détermine ensuite noms de PNJ, noms de villes et titres des rôles
+    de leadership (E.31).
   - Gouvernance : tirage pondéré par la race/culture (données),
     puis taxes, tarifs, lois (dont absurdes, E.26), palette
     architecturale (9.2) et nom du royaume généré (gabarits par

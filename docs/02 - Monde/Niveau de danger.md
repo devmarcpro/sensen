@@ -23,4 +23,4 @@ Le danger est une propriété du lieu, jamais du joueur. Le monde ne scale pas.
 ## Liens
 - **Dépend de** : [[Génération par couches de bruit]], [[Catalogue des couches de bruit]]
 - **Alimente** : [[Dérive de la corruption]], [[Loot — affixes, gemmes et rareté]], [[Raids et menaces]], [[Génération de donjon]], [[Début de partie]]
-- **Voir aussi** : [[Minerais par profondeur]], [[Créatures]], [[Ouvert — Dark Continent]], [[Ouvert — Créatures fantastiques]]
+- **Voir aussi** : [[Minerais par profondeur]], [[Créatures]], [[Ouvert — Dark Continent]], [[Ouvert — Créatures fantastiques]] *(abandonné)*

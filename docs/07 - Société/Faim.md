@@ -19,7 +19,7 @@ Manger restaure selon l'aliment (valeur nutritive en données).
 
 **La nutrition est le multiplicateur ([[Cuisine et alchimie]]) :** la valeur de nutrition d'un plat remplit la faim **et** multiplie les bonus de potentiel — bien manger n'est pas de la survie, c'est de l'optimisation de croissance.
 
-**Race Sylvide ([[Races]]) :** Photosynthèse — faim ralentie de moitié le jour.
+*(La photosynthèse du Sylvide est retirée avec cette race — [[Races]]. Aucune race ne modifie plus la vitesse de faim ; seuls les effets d'équipement le font.)*
 
 **Effet d'équipement ([[Effets d'équipement types]]) :** `faim_vitesse ×0.7..0.9`.
 

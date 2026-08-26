@@ -8,7 +8,7 @@ etape: 9
 
 Les 34 créatures de départ — animaux réels et humains uniquement. La menace vient des bêtes, des humains hostiles et de l'environnement.
 
-*Format : nom — squelette — niv. combat approx — profil IA — recrutable — notes. Tous suivent le schéma [[Schéma créature]] ; les civils ont des `jobs_compatible`. Pas de créatures fantastiques pour l'instant.*
+*Format : nom — squelette — niv. combat approx — profil IA — recrutable — notes. Tous suivent le schéma [[Schéma créature]] ; les civils ont des `jobs_compatible`. **Aucune créature fantastique — décision ferme**, pas un état provisoire.*
 
 **Civils (humains, villages) :** Villageois (nv 3, civil, relation 60, jobs fermier/vendeur) · Fermier (nv 3, civil, relation 55, agriculture 15) · Forgeron (nv 6, civil, relation 65, forge 25) · Marchand ambulant (nv 5, civil, relation 70, négociation 20, caravanes inter-villages — pathfinding global [[IA des créatures]]) · Garde de village (nv 12, garde, relation 75) · Prêtre de sanctuaire (nv 8, civil, relation 80, ressuscite les compagnons [[Compagnons]]) · Maître de guilde (nv 20, civil, jamais) · Érudit (nv 4, civil, relation 60, lecture 30) · Tavernier (nv 5, civil, relation 65) · Chasseur (nv 9, civil, relation 60, arc 18, dressage 12) · Roi/Reine (nv 25, civil+escorte, dressage DD élevé — capturable, [[Population et exploitation]])
 
@@ -24,7 +24,7 @@ Les 34 créatures de départ — animaux réels et humains uniquement. La menace
 
 **Montagne :** Aigle (volant, nv 7, bete_sauvage, dressage) · Ours brun (quadrupède, nv 16, bete_sauvage, dressage) · Bouquetin (quadrupède, nv 4, fuit, dressage/élevage) · Lynx (quadrupède, nv 9, embuscade, dressage)
 
-*Note : les niches "créatures de donjon" sont occupées par les humains hostiles (bandits, pillards, ermites) et les bêtes tanières (ours, loups) — un donjon est une ruine investie, pas une crypte magique. Les créatures fantastiques pourront être réintroduites plus tard comme contenu des zones à haute corruption sans toucher aux systèmes — voir [[Ouvert — Créatures fantastiques]].*
+*Note : les niches "créatures de donjon" sont occupées par les humains hostiles (bandits, pillards, ermites) et les bêtes tanières (ours, loups) — un donjon est une ruine investie, pas une crypte magique. **Le bestiaire reste définitivement réaliste** : la réintroduction de créatures fantastiques est abandonnée ([[Ouvert — Créatures fantastiques]]) ; la haute corruption produit des bêtes réelles plus dangereuses, pas d'autres espèces.*
 
 **Drop rare universel — la statue 1:1 :** toute créature a une faible chance (défaut **0.5 %**, pondérable par créature) de dropper une **statue d'elle-même à l'échelle 1:1** — un meuble décoratif (posable, [[Meubles]]-like) généré automatiquement : le modèle assemblé exact de la créature (ses parties tirées, [[Schéma unifié créature-PNJ]]/[[Squelette modulaire et points d'attache]]), **recolorisé en pierre** via le remapping de palette existant ([[Entités et pathfinding — performance]] — zéro asset à produire). Trophée de chasse ultime, objet de collection et de prestige (humeur/déco), valeur de vente ∝ niveau de la créature.
 

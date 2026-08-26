@@ -16,7 +16,7 @@ Plaine tempérée, Forêt tempérée, Forêt de mana\*, Désert aride, Désert d
 
 **Créatures par biome ([[Créatures]]) :** plaines/forêts tempérées, désert, toundra/taïga, marécage, montagne — chaque groupe a son pool.
 
-**Races et biomes ([[Génération des royaumes PNJ]]) :** la race dominante d'un royaume est choisie selon le biome de sa capitale (nains → montagnes...). Le **Sylvide** est le peuple des forêts de mana, le **Cendreux** naît des zones volcaniques ([[Races]]).
+**Races et biomes ([[Génération des royaumes PNJ]]) :** la race dominante d'un royaume est choisie selon le biome de sa capitale (nains → montagnes...). Le **Nain** penche vers les montagnes, l'**Elfe** vers les forêts ([[Races]]).
 
 **Exemple canonique de schéma :** `foret_de_mana` — voir [[Biomes — schéma]].
 

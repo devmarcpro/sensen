@@ -16,7 +16,7 @@ Tout progresse par l'usage, sans plafond, régulé par le potentiel. Ni arbre de
 **Le personnage**
 - **[[Création de personnage]]** — détaillée, pas un menu déroulant.
 - **[[Stats de personnage]]** — les 6 stats et ce que chacune pilote.
-- **[[Races]]** — 3 classiques, 3 originales. Le potentiel de base donne l'identité durable.
+- **[[Races]]** — Humain, Elfe, Nain. Les 3 races « originales » sont retirées ; le potentiel de base donne l'identité durable.
 - **[[Classes]]** — un kit initial, aucune restriction ensuite.
 - **[[Astrologie — cycle sexagésimal]]** — 60 signes. *La naissance donne une pente, pas un plafond.*
 - **[[Compétences — liste]]** — ~30 compétences en cinq familles.

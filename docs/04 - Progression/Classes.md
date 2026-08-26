@@ -26,9 +26,6 @@ Les 6 kits de départ. Une classe n'est qu'un kit initial — aucune restriction
 | Humain | *(aucun — 90 partout : le polyvalent)* | — |
 | Elfe | domaines de magie, Méditation, Contrôle du Mana | Forge, Encaissement |
 | Nain | Forge, Minage, Taille de pierre, Encaissement | domaines de magie, Discrétion |
-| Sylvide | Herboristerie, Agriculture, domaine Vie, Alchimie | Forge, Encaissement |
-| Cendreux | Forge, domaine Feu, Encaissement | domaine Eau/Glace, Discrétion |
-| Échomorphe | Discrétion, Lecture, domaine Espace | *(tout le reste à 70 — le −10 % d'XP de C.2)* |
 
 | Classe | 120 | 60 |
 |---|---|---|

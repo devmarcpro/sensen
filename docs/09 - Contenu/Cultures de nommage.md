@@ -6,15 +6,18 @@ statut: décidé
 etape: 9
 ---
 
-Les 10 cultures de lancement — purement phonétiques et toponymiques.
+Les 7 cultures de lancement — purement phonétiques et toponymiques, **toutes inspirées de peuples réels**.
+
+> [!warning] Trois cultures retirées le 2026-08-26
+> **Sylvestre**, **Ignée** et **Résonance** étaient dédiées aux races inventées (Sylvide, Cendreux, Échomorphe), désormais supprimées ([[Races]]). Il ne reste que des cultures inspirées du monde réel — le mécanisme (`race_affinity`, tirage par race dominante) est inchangé.
 
 *Purement phonétique/toponymique — aucune donnée de gameplay différenciée par culture au-delà des pools de noms et titres ([[Culture de nommage — schéma]]). Affinité de race entre parenthèses.*
 
-Latine/romane (Humain) · Nordique/germanique (Nain, Humain) · Sino (Humain) · Nipponne (Humain) · Slave (Humain) · Arabo-berbère (Humain) · Celte (Elfe, Humain) · **Sylvestre** — sonorités végétales/fluides dédiées (Sylvide exclusivement) · **Ignée** — consonnes dures, sonorités volcaniques dédiées (Cendreux exclusivement) · **Résonance** — syllabes fragmentées/répétées, sonorité artificielle dédiée (Échomorphe exclusivement, cohérent avec sa nature mimétique du bruit, [[Races]]).
+Latine/romane (Humain) · Nordique/germanique (Nain, Humain) · Sino (Humain) · Nipponne (Humain) · Slave (Humain) · Arabo-berbère (Humain) · Celte (Elfe, Humain).
 
-**Décision ([[Noms culturels]]) :** *Cultures de lancement : 10 — assez pour une vraie variété sans exploser le volume de contenu à la main.*
+**Décision ([[Noms culturels]]) :** *Cultures de lancement : 7 — assez pour une vraie variété sans exploser le volume de contenu à la main.*
 
-**Culture ≠ race ([[Noms culturels]]) :** deux axes indépendants — un royaume humain peut tirer n'importe quelle culture à large spectre ; un royaume sylvide tire toujours sa culture dédiée. Le champ `race_affinity` porte les poids de tirage ([[Culture de nommage — schéma]]).
+**Culture ≠ race ([[Noms culturels]]) :** deux axes indépendants — un royaume humain peut tirer n'importe quelle culture, un royaume nain penche vers le nordique. Le champ `race_affinity` porte les poids de tirage ([[Culture de nommage — schéma]]).
 
 **Exemple canonique :** `culture_sino` — voir [[Culture de nommage — schéma]] (avec ses titres par gouvernance et son `name_order: "nom_prenom"`).
 

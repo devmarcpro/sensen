@@ -42,6 +42,16 @@ La rupture du 2026-08-09 : ce qui a été abandonné, ce qui survit, et pourquoi
 
 *Notes correspondantes : [[Identité visuelle chinoise]] · [[Hauteur de terrain ±10]] · [[Action-time à ticks]] · [[Zones de coup par dénivelé]] · [[Récolte]] · [[Construction cadrée]] · [[Wu Xing — cycles et vecteurs]] · [[Jauge de chaîne Wu Xing]] · [[Craft compositionnel]] · [[Armure par zone et constructions]] · [[Loot — affixes, gemmes et rareté]] · [[Palier industriel]] · [[XP de combat]].*
 
+### Décision du 2026-08-26 — retrait des peuples inventés et du bestiaire fantastique
+
+| Décision | Conséquence |
+|---|---|
+| **3 races « originales » supprimées** | Sylvide, Cendreux et Échomorphe disparaissent. Restent **Humain, Elfe, Nain** — fantasy classique assumée ([[Races]]) |
+| **3 cultures dédiées supprimées** | Sylvestre, Ignée, Résonance partaient avec leurs races — **7 cultures**, toutes inspirées du monde réel ([[Cultures de nommage]]) |
+| **Créatures fantastiques abandonnées** | le bestiaire reste **définitivement** réaliste ; la haute corruption produit des bêtes réelles plus dangereuses ([[Ouvert — Créatures fantastiques]]) |
+
+**Ce qui n'est pas touché :** le système de races est **intact** — réputation par race ([[Réputation et relations]]), race dominante d'un royaume ([[Génération des royaumes PNJ]]), `race_affinity` des cultures, `lifespan` par race ([[Âge des PNJ]]). La magie, le mana, les grimoires et le **Wu Xing** le sont aussi.
+
 ### Reste ouvert, par nature
 
 - **Lore** : noms propres, textes d'ambiance, mythologie — à écrire au fil du contenu. → [[Ouvert — Lore]]

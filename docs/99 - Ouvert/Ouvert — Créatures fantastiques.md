@@ -1,24 +1,25 @@
 ---
-aliases: ["Ouvert — Créatures fantastiques", "Créatures fantastiques"]
-tags: [ouvert, êtres, contenu-à-produire]
+aliases: ["Ouvert — Créatures fantastiques", "Créatures fantastiques", "Abandonné — créatures fantastiques"]
+tags: [ouvert, êtres, abandonné]
 domaine: êtres
-statut: à-trancher
+statut: abandonné
 etape: 9
 ---
 
-**La question :** réintroduire des **créatures fantastiques** en zones à haute corruption.
+> [!failure] Abandonné le 2026-08-26
+> Sur décision du designer : **plus de fantaisie dans le bestiaire**. La piste de réintroduction est fermée, pas seulement reportée.
 
-**Ce qui est posé ([[Créatures]]) :** *pas de créatures fantastiques pour l'instant : la menace vient des bêtes, des humains hostiles et de l'environnement.* Et : *les créatures fantastiques pourront être réintroduites plus tard comme contenu des zones à haute corruption **sans toucher aux systèmes**.*
+**Ce qui était envisagé :** réintroduire des créatures fantastiques comme contenu des zones à haute corruption, *sans changement de système* — le schéma unifié ([[Blocs de l'être]]) l'aurait absorbé sans une ligne de code.
 
-**Statut dans l'état du document ([[Décisions fondatrices]]) :** classé dans *« reste ouvert, par nature »* — **prévu sans changement de système**.
+**Ce qui est décidé à la place :** le bestiaire reste **exclusivement composé d'animaux réels et d'humains** ([[Créatures]]). La menace vient des **bêtes, des humains hostiles et de l'environnement** — c'était déjà l'état du catalogue, c'est désormais une règle et non un provisoire.
 
-**Pourquoi ça ne coûte aucun système :** [[Schéma unifié créature-PNJ]] ne distingue pas monstre et PNJ ; les 4 templates de squelette ([[Squelette modulaire et points d'attache]] : bipède, quadrupède, volant, amorphe) couvrent déjà les morphologies ; les profils d'IA ([[IA des créatures]]) sont data-driven ; le champ `elements` de [[Schéma créature]] donne l'alignement Wu Xing. **Une créature fantastique est une entrée JSON de plus.**
+**Ce que la haute corruption produit à la place** ([[Dérive de la corruption]], [[Niveau de danger]]) : des créatures **réelles de plus haut niveau**, des **variantes rares** ([[Monstres rares]] : stats ×2.5, teinte distincte, drop garanti), des **groupes plus nombreux**, une **météo plus dure** ([[Météo]]) et des **humains hostiles mieux équipés**. Le danger monte par les chiffres et la densité, pas par le bestiaire.
 
-**Le vrai coût :** les **assets** (parties de corps dans les bibliothèques) et l'équilibrage de leurs niveaux vis-à-vis de la corruption locale ([[Niveau de danger]]).
+**Note de cohérence :** les races jouables restent de la fantasy classique — Humain, Elfe, Nain ([[Races]]). Ce sont des **peuples**, pas des monstres : le bestiaire réaliste et les races classiques coexistent sans contradiction, comme la magie et les matériaux « monde réel uniquement » ([[Carte — Contenu]]).
 
-**Raccord naturel :** [[Ouvert — Dark Continent]], zone aux règles différentes au-delà de corruption 100.
+**Ce qui reste ouvert par nature :** [[Ouvert — Dark Continent]] — une zone aux **règles** différentes (corruption au-delà de 100, météo létale, statuts insoignables), ce qui n'exige aucune créature fantastique.
 
 ## Liens
-- **Dépend de** : [[Créatures]], [[Schéma unifié créature-PNJ]], [[Niveau de danger]]
-- **Alimente** : [[Génération de donjon]], [[Dérive de la corruption]]
-- **Voir aussi** : [[Squelette modulaire et points d'attache]], [[IA des créatures]], [[Ouvert — Dark Continent]], [[Décisions fondatrices]]
+- **Dépend de** : [[Créatures]], [[Décisions fondatrices]]
+- **Alimente** : [[Niveau de danger]], [[Dérive de la corruption]]
+- **Voir aussi** : [[Monstres rares]], [[Ouvert — Dark Continent]], [[Races]]

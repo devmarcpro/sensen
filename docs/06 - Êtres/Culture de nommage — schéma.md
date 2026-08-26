@@ -34,7 +34,7 @@ Le format de données d'une culture de nommage : des pools A/B, des affinités d
 ```
 
 - `prenom_a/b`, `famille_a/b`, `ville_a/b` : pools de la partie A et B, concaténées ([[Génération de noms]]). `famille_b: [""]` (chaîne vide) = culture à noms de famille "pleins" plutôt que composés (comme le sino ci-dessus) ; la plupart des autres cultures ont un vrai suffixe.
-- `race_affinity` : poids de tirage par race à la génération d'un royaume ([[Génération des royaumes PNJ]]) ; les races absentes ont un poids 0 (jamais tirées pour elles). Les cultures dédiées aux races originales (Sylvide, Cendreux, Échomorphe) n'ont qu'une seule entrée à 1.0 et rien d'autre.
+- `race_affinity` : poids de tirage par race à la génération d'un royaume ([[Génération des royaumes PNJ]]) ; les races absentes ont un poids 0 (jamais tirées pour elles). Les 7 cultures sont toutes partageables — l'Humain a le spectre le plus large, le Nain penche vers le nordique, l'Elfe vers le celte.
 - `titres` : une entrée par type de gouvernance ([[Schéma royaume]]) + `guilde_maitre` (utilisé indépendamment du royaume, pour tout maître de guilde, [[Quêtes et guildes]]) ; genré `m`/`f` selon le PNJ.
 
 **Contenu à produire :** [[Ouvert — Pools de noms des cultures]] — les pools des 10 cultures ([[Cultures de nommage]]).
