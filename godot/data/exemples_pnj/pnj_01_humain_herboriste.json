@@ -1,0 +1,211 @@
+{
+  "id": "pnj_01_humain_herboriste",
+  "name_key": "pnj.humain_herboriste.name",
+  "skeleton_template": "humanoide",
+  "race": "humain",
+  "classe": "La Trace",
+  "fonction": "herboriste",
+  "role": "resident",
+  "nom": {
+    "prenom": "Meiming",
+    "nom_famille": "Zhao",
+    "name_order": "nom_prenom",
+    "affichage": "Zhao Meiming",
+    "titre": null
+  },
+  "genome": {
+    "teint": {
+      "type": "nombre",
+      "valeur": 31,
+      "unite": "indice de mélanine 0-100",
+      "min": 0,
+      "max": 100,
+      "var": 0.08
+    },
+    "cheveux_couleur": {
+      "type": "anneau",
+      "valeur": 3,
+      "anneau": [
+        "noir",
+        "brun",
+        "châtain",
+        "blond",
+        "roux",
+        "auburn"
+      ],
+      "n": 6
+    },
+    "yeux_couleur": {
+      "type": "anneau",
+      "valeur": 0,
+      "anneau": [
+        "noir",
+        "brun",
+        "ambre",
+        "vert",
+        "gris",
+        "bleu"
+      ],
+      "n": 6
+    },
+    "taille": {
+      "type": "nombre",
+      "valeur": 163,
+      "unite": "cm",
+      "min": 110,
+      "max": 230,
+      "var": 0.04
+    },
+    "carrure": {
+      "type": "nombre",
+      "valeur": 31,
+      "unite": "indice 0-100",
+      "min": 0,
+      "max": 100,
+      "var": 0.06
+    },
+    "taches_rousseur": {
+      "type": "recessif",
+      "alleles": [
+        "R",
+        "r"
+      ]
+    },
+    "pilosite_faciale": {
+      "type": "lie_au_sexe",
+      "valeur": 53,
+      "exprime_si": "sexe == M"
+    },
+    "grisonnement": {
+      "type": "age",
+      "valeur": 0.03,
+      "seuil_ans": 39,
+      "exprime": "progressif après le seuil"
+    },
+    "traits_visage": {
+      "type": "carte",
+      "valeur": "carte_E073",
+      "mut": 0.12
+    }
+  },
+  "corps": {
+    "stats": {
+      "force": 7,
+      "dexterite": 10,
+      "endurance": 6,
+      "volonte": 5,
+      "perception": 8,
+      "charisme": 11
+    },
+    "derivees": {
+      "sante_max": 44,
+      "mana_max": 35,
+      "capacite_portee_kg": 65,
+      "places_escorte": 3,
+      "souffle_sous_eau_s": 42
+    },
+    "silhouette": "bipede_humanoide",
+    "taille_cm": 163,
+    "age": 40,
+    "lifespan_base": 80,
+    "lifespan_effectif": 85,
+    "sexe": "M",
+    "slots": "humanoide_standard",
+    "astrologie": {
+      "element": "Métal",
+      "animal": "Lapin",
+      "signe": "Métal-Lapin"
+    }
+  },
+  "esprit": {
+    "intelligence": 73,
+    "temperament": "calculateur",
+    "dressabilite": 22
+  },
+  "social": {
+    "culture": "sino",
+    "culture_nom": "Sino",
+    "foyer": null,
+    "lignee": "lignee_525E",
+    "rang": null,
+    "relations": {
+      "joueur": 40
+    },
+    "famille": {
+      "child_of": null,
+      "parent_of": [],
+      "spouse": null
+    }
+  },
+  "agenda": {
+    "metier": "herboriste",
+    "poste": null,
+    "ordre": null,
+    "territoire": null
+  },
+  "repro": {
+    "moteur": "couple",
+    "conditions": [
+      {
+        "c": "sexe"
+      },
+      {
+        "c": "age",
+        "min": 17
+      },
+      {
+        "c": "habitat",
+        "v": "logement"
+      },
+      {
+        "c": "place"
+      }
+    ],
+    "portee": {
+      "min": 1,
+      "max": 1,
+      "gestation_jours": 30
+    },
+    "couts": [
+      "portee_unique_annuelle"
+    ]
+  },
+  "base_potentials": {
+    "Arbalète": 105,
+    "Arc": 105,
+    "Discrétion": 105,
+    "Dressage": 105,
+    "Encaissement": 75,
+    "Esquive": 95,
+    "Forge": 85,
+    "Herboristerie": 115,
+    "Métal": 95,
+    "Taille de pierre": 95
+  },
+  "talents": {
+    "race": "Polyvalent",
+    "classe": "Meute",
+    "classe_note": null,
+    "classe_cachee": false,
+    "second_talent": "Fiole vive",
+    "second_talent_source": "Le Creuset"
+  },
+  "parts_pool": null,
+  "equip_slots": "humanoide_standard",
+  "inventory_table": "loot_herboriste",
+  "ai_profile": "civil",
+  "recruitable": {
+    "method": "relation",
+    "threshold": 60
+  },
+  "leadership_role": null,
+  "succession_rule": null,
+  "rare_chance": 0.0,
+  "elements": null,
+  "tags": [
+    "humanoide",
+    "civil",
+    "humain",
+    "herboriste"
+  ]
+}

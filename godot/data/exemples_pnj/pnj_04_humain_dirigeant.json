@@ -1,0 +1,213 @@
+{
+  "id": "pnj_04_humain_dirigeant",
+  "name_key": "pnj.humain_dirigeant.name",
+  "skeleton_template": "humanoide",
+  "race": "humain",
+  "classe": "La Balance",
+  "fonction": "dirigeant",
+  "role": "resident",
+  "nom": {
+    "prenom": "Yarka",
+    "nom_famille": "Volkic",
+    "name_order": "prenom_nom",
+    "affichage": "Yarka Volkic",
+    "titre": "titre.slave.monarchie.f"
+  },
+  "genome": {
+    "teint": {
+      "type": "nombre",
+      "valeur": 80,
+      "unite": "indice de mélanine 0-100",
+      "min": 0,
+      "max": 100,
+      "var": 0.08
+    },
+    "cheveux_couleur": {
+      "type": "anneau",
+      "valeur": 2,
+      "anneau": [
+        "noir",
+        "brun",
+        "châtain",
+        "blond",
+        "roux",
+        "auburn"
+      ],
+      "n": 6
+    },
+    "yeux_couleur": {
+      "type": "anneau",
+      "valeur": 0,
+      "anneau": [
+        "noir",
+        "brun",
+        "ambre",
+        "vert",
+        "gris",
+        "bleu"
+      ],
+      "n": 6
+    },
+    "taille": {
+      "type": "nombre",
+      "valeur": 165,
+      "unite": "cm",
+      "min": 110,
+      "max": 230,
+      "var": 0.04
+    },
+    "carrure": {
+      "type": "nombre",
+      "valeur": 39,
+      "unite": "indice 0-100",
+      "min": 0,
+      "max": 100,
+      "var": 0.06
+    },
+    "taches_rousseur": {
+      "type": "recessif",
+      "alleles": [
+        "R",
+        "r"
+      ]
+    },
+    "pilosite_faciale": {
+      "type": "lie_au_sexe",
+      "valeur": 0,
+      "exprime_si": "sexe == M"
+    },
+    "grisonnement": {
+      "type": "age",
+      "valeur": 0.0,
+      "seuil_ans": 39,
+      "exprime": "progressif après le seuil"
+    },
+    "traits_visage": {
+      "type": "carte",
+      "valeur": "carte_66C1",
+      "mut": 0.12
+    }
+  },
+  "corps": {
+    "stats": {
+      "force": 6,
+      "dexterite": 6,
+      "endurance": 8,
+      "volonte": 14,
+      "perception": 6,
+      "charisme": 14
+    },
+    "derivees": {
+      "sante_max": 52,
+      "mana_max": 62,
+      "capacite_portee_kg": 60,
+      "places_escorte": 3,
+      "souffle_sous_eau_s": 46
+    },
+    "silhouette": "bipede_humanoide",
+    "taille_cm": 165,
+    "age": 35,
+    "lifespan_base": 80,
+    "lifespan_effectif": 85,
+    "sexe": "F",
+    "slots": "humanoide_standard",
+    "astrologie": {
+      "element": "Terre",
+      "animal": "Cochon",
+      "signe": "Terre-Cochon"
+    }
+  },
+  "esprit": {
+    "intelligence": 59,
+    "temperament": "farouche",
+    "dressabilite": 26
+  },
+  "social": {
+    "culture": "slave",
+    "culture_nom": "Slave",
+    "foyer": null,
+    "lignee": "lignee_FFF2",
+    "rang": "souverain",
+    "relations": {
+      "joueur": 60
+    },
+    "famille": {
+      "child_of": null,
+      "parent_of": [],
+      "spouse": null
+    }
+  },
+  "agenda": {
+    "metier": "dirigeant",
+    "poste": null,
+    "ordre": null,
+    "territoire": null
+  },
+  "repro": {
+    "moteur": "couple",
+    "conditions": [
+      {
+        "c": "sexe"
+      },
+      {
+        "c": "age",
+        "min": 17
+      },
+      {
+        "c": "habitat",
+        "v": "logement"
+      },
+      {
+        "c": "place"
+      }
+    ],
+    "portee": {
+      "min": 1,
+      "max": 1,
+      "gestation_jours": 30
+    },
+    "couts": [
+      "portee_unique_annuelle"
+    ]
+  },
+  "base_potentials": {
+    "Charisme": 105,
+    "Construction": 95,
+    "Cuisine": 95,
+    "Deux Mains": 75,
+    "Encaissement": 95,
+    "Hache": 75,
+    "Leadership": 105,
+    "Lecture": 105,
+    "Masse": 75,
+    "Minage": 85,
+    "Négociation": 105,
+    "Terre": 95
+  },
+  "talents": {
+    "race": "Polyvalent",
+    "classe": "Œil du prix",
+    "classe_note": null,
+    "classe_cachee": false,
+    "second_talent": "Souffle rendu",
+    "second_talent_source": "La Paume"
+  },
+  "parts_pool": null,
+  "equip_slots": "humanoide_standard",
+  "inventory_table": "loot_dirigeant",
+  "ai_profile": "civil",
+  "recruitable": {
+    "method": "jamais",
+    "threshold": 90
+  },
+  "leadership_role": "roi_royaume_genere",
+  "succession_rule": "heir",
+  "rare_chance": 0.0,
+  "elements": null,
+  "tags": [
+    "humanoide",
+    "civil",
+    "humain",
+    "dirigeant"
+  ]
+}

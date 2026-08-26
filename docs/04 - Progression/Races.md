@@ -44,7 +44,15 @@ Race et classe **s'additionnent** : le plancher final est la moyenne des deux va
 
 **Race dominante d'un royaume ([[Génération des royaumes PNJ]]) :** choisie selon le biome de la capitale (affinités déclarées dans les données de race — ex. nains → montagnes) ; ~90 % de la population, et l'exclusivité des rôles de gouvernance.
 
-**Espérance de vie ([[Âge des PNJ]]) :** donnée `lifespan` par race, avec variance ±15 %.
+**Espérance de vie ([[Âge des PNJ]]) :** donnée `lifespan` par race, avec variance ±15 %. **Valeurs fixées le 2026-08-26** (elles manquaient) :
+
+| Race | `lifespan` | Maturité (`lifespan × 0.22`) | Grisonnement |
+|---|---|---|---|
+| Humain | **80 ans** | 17 ans | ~38 ans |
+| Nain | **250 ans** | 55 ans | ~110 ans |
+| Elfe | **350 ans** | 77 ans | ~210 ans |
+
+La **maturité** (22 % de l'espérance) est le plancher d'âge de toute fonction productive et la condition `age` de la reproduction ([[Conditions de reproduction]]) ; en dessous, la fonction est `oisif` (enfant) et les stats sont multipliées par un facteur de croissance.
 
 **Réputation par race ([[Réputation et relations]]) :** chaque race a sa propre perception du joueur ; les rivalités entre races sont déclarées en données (`rivals`).
 

@@ -46,6 +46,11 @@ L'Elfe joue le mage imprudent qui peut brûler sa barre de sorts sans mourir. Le
 
 Le mouton jouable **est** le mouton ultime. Et ses limitations sont le contenu : pas de mains, pas de lecture, un monde qui ne te parle pas. Comme le Spectre, c'est un défi, pas une blague.
 
+## Deux cas limites, tranchés
+
+- **Polyvalent sur Le Vent.** *Sans maître* ne donne aucun talent au départ : le champ `talents.classe` d'un **Le Vent** est donc `null`, pas *« Sans maître »*. Un **humain Le Vent** n'a donc pas deux talents — il peut en **apprendre deux au lieu d'un**, et en changer. C'est le seul empilement des deux talents, et il est cohérent : le polyvalent du polyvalent.
+- **Polyvalent et classe cachée.** Le second talent d'un humain est tiré dans les **classes visibles** uniquement. Une classe cachée s'apprend d'un porteur ([[Talents de classe]]) et occupe le slot principal — elle ne se distribue jamais gratuitement par la race.
+
 ## Liens
 - **Dépend de** : [[Les trois axes — race, classe, fonction]], [[Races]], [[Blocs de l'être]]
 - **Alimente** : [[Talents de classe]], [[Ouvert — Changer de personnage]], [[Schéma créature]]

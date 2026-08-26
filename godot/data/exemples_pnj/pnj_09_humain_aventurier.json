@@ -1,0 +1,214 @@
+{
+  "id": "pnj_09_humain_aventurier",
+  "name_key": "pnj.humain_aventurier.name",
+  "skeleton_template": "humanoide",
+  "race": "humain",
+  "classe": "Le Souffle",
+  "fonction": "aventurier",
+  "role": "sauvage",
+  "nom": {
+    "prenom": "Eirvald",
+    "nom_famille": "Stenberg",
+    "name_order": "prenom_nom",
+    "affichage": "Eirvald Stenberg",
+    "titre": null
+  },
+  "genome": {
+    "teint": {
+      "type": "nombre",
+      "valeur": 44,
+      "unite": "indice de mélanine 0-100",
+      "min": 0,
+      "max": 100,
+      "var": 0.08
+    },
+    "cheveux_couleur": {
+      "type": "anneau",
+      "valeur": 4,
+      "anneau": [
+        "noir",
+        "brun",
+        "châtain",
+        "blond",
+        "roux",
+        "auburn"
+      ],
+      "n": 6
+    },
+    "yeux_couleur": {
+      "type": "anneau",
+      "valeur": 3,
+      "anneau": [
+        "noir",
+        "brun",
+        "ambre",
+        "vert",
+        "gris",
+        "bleu"
+      ],
+      "n": 6
+    },
+    "taille": {
+      "type": "nombre",
+      "valeur": 174,
+      "unite": "cm",
+      "min": 110,
+      "max": 230,
+      "var": 0.04
+    },
+    "carrure": {
+      "type": "nombre",
+      "valeur": 62,
+      "unite": "indice 0-100",
+      "min": 0,
+      "max": 100,
+      "var": 0.06
+    },
+    "taches_rousseur": {
+      "type": "recessif",
+      "alleles": [
+        "r",
+        "r"
+      ]
+    },
+    "pilosite_faciale": {
+      "type": "lie_au_sexe",
+      "valeur": 59,
+      "exprime_si": "sexe == M"
+    },
+    "grisonnement": {
+      "type": "age",
+      "valeur": 0.38,
+      "seuil_ans": 38,
+      "exprime": "progressif après le seuil"
+    },
+    "traits_visage": {
+      "type": "carte",
+      "valeur": "carte_3BDD",
+      "mut": 0.12
+    }
+  },
+  "corps": {
+    "stats": {
+      "force": 14,
+      "dexterite": 8,
+      "endurance": 10,
+      "volonte": 8,
+      "perception": 8,
+      "charisme": 5
+    },
+    "derivees": {
+      "sante_max": 60,
+      "mana_max": 44,
+      "capacite_portee_kg": 100,
+      "places_escorte": 2,
+      "souffle_sous_eau_s": 50
+    },
+    "silhouette": "bipede_humanoide",
+    "taille_cm": 174,
+    "age": 53,
+    "lifespan_base": 80,
+    "lifespan_effectif": 89,
+    "sexe": "M",
+    "slots": "humanoide_standard",
+    "astrologie": {
+      "element": "Métal",
+      "animal": "Dragon",
+      "signe": "Métal-Dragon"
+    }
+  },
+  "esprit": {
+    "intelligence": 70,
+    "temperament": "curieux",
+    "dressabilite": 15
+  },
+  "social": {
+    "culture": "nordique",
+    "culture_nom": "Nordique/germanique",
+    "foyer": null,
+    "lignee": "lignee_FBD8",
+    "rang": null,
+    "relations": {
+      "joueur": 70
+    },
+    "famille": {
+      "child_of": null,
+      "parent_of": [],
+      "spouse": null
+    }
+  },
+  "agenda": {
+    "metier": "aventurier",
+    "poste": null,
+    "ordre": null,
+    "territoire": null
+  },
+  "repro": {
+    "moteur": "couple",
+    "conditions": [
+      {
+        "c": "sexe"
+      },
+      {
+        "c": "age",
+        "min": 17
+      },
+      {
+        "c": "habitat",
+        "v": "logement"
+      },
+      {
+        "c": "place"
+      }
+    ],
+    "portee": {
+      "min": 1,
+      "max": 1,
+      "gestation_jours": 30
+    },
+    "couts": [
+      "portee_unique_annuelle"
+    ]
+  },
+  "base_potentials": {
+    "Contrôle du Mana": 115,
+    "Deux Mains": 75,
+    "Eau/Glace": 105,
+    "Feu": 105,
+    "Forge": 95,
+    "Foudre/Vie": 105,
+    "Hache": 75,
+    "Leadership": 95,
+    "Masse": 75,
+    "Méditation": 105,
+    "Métal": 115,
+    "Taille de pierre": 95,
+    "Terre": 105
+  },
+  "talents": {
+    "race": "Polyvalent",
+    "classe": "Communion des cinq",
+    "classe_note": null,
+    "classe_cachee": false,
+    "second_talent": "Main du métal",
+    "second_talent_source": "La Braise"
+  },
+  "parts_pool": null,
+  "equip_slots": "humanoide_standard",
+  "inventory_table": "loot_aventurier",
+  "ai_profile": "hostile_neutre",
+  "recruitable": {
+    "method": "relation",
+    "threshold": 60
+  },
+  "leadership_role": null,
+  "succession_rule": null,
+  "rare_chance": 0.0,
+  "elements": null,
+  "tags": [
+    "humanoide",
+    "aventurier",
+    "humain",
+    "aventurier"
+  ]
+}

@@ -35,6 +35,8 @@ Le point technique qui fait tenir le volume ([[Vivarium — loci et variétés]]
 
 Le motif **épouse la silhouette**. C'est ce qui rend 32 espèces × 4 816 variétés visuellement distinctes sans dessiner 154 112 sprites — cohérent avec [[Direction artistique]] (*l'effort visuel passe dans l'UI de lisibilité, pas dans l'animation*) et avec le remapping de palette en shader déjà en place ([[Palette de couleurs des matériaux]], [[Entités et pathfinding — performance]] : recolorisation par instance, meshes partagés).
 
+**Les loci humanoïdes concrets** (teint, cheveux, yeux, taille, carrure, rousseur, pilosité, grisonnement, traits du visage — plus oreille pour l'elfe, barbe et tresses de clan pour le nain) sont déclarés et illustrés dans [[Exemples — dix PNJ générés]].
+
 ## Le pipeline de rendu, en une ligne
 
 ```

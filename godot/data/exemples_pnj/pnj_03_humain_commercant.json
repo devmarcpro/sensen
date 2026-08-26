@@ -1,0 +1,206 @@
+{
+  "id": "pnj_03_humain_commercant",
+  "name_key": "pnj.humain_commercant.name",
+  "skeleton_template": "humanoide",
+  "race": "humain",
+  "classe": "Le Vent",
+  "fonction": "commercant",
+  "role": "resident",
+  "nom": {
+    "prenom": "Freyvald",
+    "nom_famille": "Stensson",
+    "name_order": "prenom_nom",
+    "affichage": "Freyvald Stensson",
+    "titre": null
+  },
+  "genome": {
+    "teint": {
+      "type": "nombre",
+      "valeur": 51,
+      "unite": "indice de mélanine 0-100",
+      "min": 0,
+      "max": 100,
+      "var": 0.08
+    },
+    "cheveux_couleur": {
+      "type": "anneau",
+      "valeur": 5,
+      "anneau": [
+        "noir",
+        "brun",
+        "châtain",
+        "blond",
+        "roux",
+        "auburn"
+      ],
+      "n": 6
+    },
+    "yeux_couleur": {
+      "type": "anneau",
+      "valeur": 0,
+      "anneau": [
+        "noir",
+        "brun",
+        "ambre",
+        "vert",
+        "gris",
+        "bleu"
+      ],
+      "n": 6
+    },
+    "taille": {
+      "type": "nombre",
+      "valeur": 185,
+      "unite": "cm",
+      "min": 110,
+      "max": 230,
+      "var": 0.04
+    },
+    "carrure": {
+      "type": "nombre",
+      "valeur": 54,
+      "unite": "indice 0-100",
+      "min": 0,
+      "max": 100,
+      "var": 0.06
+    },
+    "taches_rousseur": {
+      "type": "recessif",
+      "alleles": [
+        "R",
+        "R"
+      ]
+    },
+    "pilosite_faciale": {
+      "type": "lie_au_sexe",
+      "valeur": 74,
+      "exprime_si": "sexe == M"
+    },
+    "grisonnement": {
+      "type": "age",
+      "valeur": 0.0,
+      "seuil_ans": 42,
+      "exprime": "progressif après le seuil"
+    },
+    "traits_visage": {
+      "type": "carte",
+      "valeur": "carte_73B3",
+      "mut": 0.12
+    }
+  },
+  "corps": {
+    "stats": {
+      "force": 9,
+      "dexterite": 10,
+      "endurance": 10,
+      "volonte": 8,
+      "perception": 12,
+      "charisme": 10
+    },
+    "derivees": {
+      "sante_max": 60,
+      "mana_max": 44,
+      "capacite_portee_kg": 75,
+      "places_escorte": 3,
+      "souffle_sous_eau_s": 50
+    },
+    "silhouette": "bipede_humanoide",
+    "taille_cm": 185,
+    "age": 40,
+    "lifespan_base": 80,
+    "lifespan_effectif": 74,
+    "sexe": "M",
+    "slots": "humanoide_standard",
+    "astrologie": {
+      "element": "Eau",
+      "animal": "Serpent",
+      "signe": "Eau-Serpent"
+    }
+  },
+  "esprit": {
+    "intelligence": 77,
+    "temperament": "loyal",
+    "dressabilite": 22
+  },
+  "social": {
+    "culture": "nordique",
+    "culture_nom": "Nordique/germanique",
+    "foyer": null,
+    "lignee": "lignee_1610",
+    "rang": null,
+    "relations": {
+      "joueur": 59
+    },
+    "famille": {
+      "child_of": null,
+      "parent_of": [],
+      "spouse": null
+    }
+  },
+  "agenda": {
+    "metier": "commercant",
+    "poste": null,
+    "ordre": null,
+    "territoire": null
+  },
+  "repro": {
+    "moteur": "couple",
+    "conditions": [
+      {
+        "c": "sexe"
+      },
+      {
+        "c": "age",
+        "min": 17
+      },
+      {
+        "c": "habitat",
+        "v": "logement"
+      },
+      {
+        "c": "place"
+      }
+    ],
+    "portee": {
+      "min": 1,
+      "max": 1,
+      "gestation_jours": 30
+    },
+    "couts": [
+      "portee_unique_annuelle"
+    ]
+  },
+  "base_potentials": {
+    "Alchimie": 115,
+    "Eau/Glace": 105,
+    "Navigation": 105,
+    "Perception": 105
+  },
+  "talents": {
+    "race": "Polyvalent",
+    "classe": null,
+    "classe_note": "Sans maître : aucun talent au départ, peut en apprendre un auprès de n'importe quel maître — et en changer — Polyvalent lui en accorde DEUX au lieu d'un",
+    "classe_cachee": false,
+    "second_talent": null,
+    "second_talent_source": null
+  },
+  "parts_pool": null,
+  "equip_slots": "humanoide_standard",
+  "inventory_table": "loot_commercant",
+  "ai_profile": "civil",
+  "recruitable": {
+    "method": "relation",
+    "threshold": 60
+  },
+  "leadership_role": null,
+  "succession_rule": null,
+  "rare_chance": 0.0,
+  "elements": null,
+  "tags": [
+    "humanoide",
+    "civil",
+    "humain",
+    "commercant",
+    "commerce_possible"
+  ]
+}

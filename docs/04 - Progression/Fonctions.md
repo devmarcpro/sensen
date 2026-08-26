@@ -34,6 +34,28 @@ etape: 9
 | **dirigeant** | remplace `leadership_role` : roi, maître de guilde, prêtre. Porte la succession ([[Familles et succession]]) et le titre ([[Génération de noms]]). Un prêtre tire *La Paume* |
 | **oisif** | enfant, retraité, captif — présent, sans production |
 
+## Le champ `classes_possibles`
+
+La classe d'un PNJ est tirée dans un **pool restreint par sa fonction** ([[Talents de classe]]). Le voici, fixé :
+
+| Fonction | `classes_possibles` |
+|---|---|
+| aventurier · oisif | **les 8 visibles** (la seule fonction sans restriction) |
+| artisan | La Braise · Le Creuset · La Paume · Le Souffle |
+| commerçant | La Balance · Le Vent · Le Creuset |
+| garde | Le Sabre · La Trace |
+| dirigeant | La Balance · Le Sabre · Le Souffle · La Paume |
+| mineur · bûcheron | La Braise · La Trace · Le Vent |
+| herboriste | Le Creuset · La Paume · La Trace |
+| fermier · éleveur | La Trace · Le Vent · La Braise |
+| cuisinier | Le Creuset · La Paume |
+| couturier | La Braise · Le Vent |
+| transporteur | Le Vent · La Balance |
+
+**Les classes cachées ignorent ce pool** : elles sont tirées à ≈ 2 % **avant** lui, sur n'importe quelle fonction. C'est ce qui rend possible le nain commerçant *L'Ombre* ou le mineur *Le Rieur* — et c'est ce qui rend les classes cachées trouvables ([[Exemples — dix PNJ générés]]).
+
+**Pondération des fonctions** dans une population générique : fermier 12 · artisan 14 · garde 12 · aventurier 10 · commerçant 9 · mineur 7 · éleveur 6 · bûcheron 5 · herboriste 5 · cuisinier 5 · couturier 4 · transporteur 4 · oisif 4 · dirigeant 3.
+
 ## Les trois règles
 
 1. **La fonction dit ce qu'on produit ; la classe dit comment.** *artisan · La Braise* sort du métal, *artisan · Le Souffle* des parchemins — même routine, autres objets.

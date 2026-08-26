@@ -1,0 +1,230 @@
+{
+  "id": "pnj_08_nain_eleveur",
+  "name_key": "pnj.nain_eleveur.name",
+  "skeleton_template": "humanoide",
+  "race": "nain",
+  "classe": "La Trace",
+  "fonction": "eleveur",
+  "role": "resident",
+  "nom": {
+    "prenom": "Bjordis",
+    "nom_famille": "Ulfberg",
+    "name_order": "prenom_nom",
+    "affichage": "Bjordis Ulfberg",
+    "titre": null
+  },
+  "genome": {
+    "teint": {
+      "type": "nombre",
+      "valeur": 45,
+      "unite": "indice de mélanine 0-100",
+      "min": 0,
+      "max": 100,
+      "var": 0.08
+    },
+    "cheveux_couleur": {
+      "type": "anneau",
+      "valeur": 4,
+      "anneau": [
+        "noir",
+        "brun",
+        "châtain",
+        "blond",
+        "roux",
+        "auburn"
+      ],
+      "n": 6
+    },
+    "yeux_couleur": {
+      "type": "anneau",
+      "valeur": 1,
+      "anneau": [
+        "noir",
+        "brun",
+        "ambre",
+        "vert",
+        "gris",
+        "bleu"
+      ],
+      "n": 6
+    },
+    "taille": {
+      "type": "nombre",
+      "valeur": 130,
+      "unite": "cm",
+      "min": 110,
+      "max": 230,
+      "var": 0.04
+    },
+    "carrure": {
+      "type": "nombre",
+      "valeur": 49,
+      "unite": "indice 0-100",
+      "min": 0,
+      "max": 100,
+      "var": 0.06
+    },
+    "taches_rousseur": {
+      "type": "recessif",
+      "alleles": [
+        "R",
+        "r"
+      ]
+    },
+    "pilosite_faciale": {
+      "type": "lie_au_sexe",
+      "valeur": 0,
+      "exprime_si": "sexe == M"
+    },
+    "grisonnement": {
+      "type": "age",
+      "valeur": 0.0,
+      "seuil_ans": 122,
+      "exprime": "progressif après le seuil"
+    },
+    "traits_visage": {
+      "type": "carte",
+      "valeur": "carte_BC8A",
+      "mut": 0.12
+    },
+    "barbe_densite": {
+      "type": "nombre",
+      "valeur": 86,
+      "unite": "indice 0-100",
+      "min": 0,
+      "max": 100,
+      "var": 0.05
+    },
+    "tresses_de_clan": {
+      "type": "acquis",
+      "valeur": "veine",
+      "herite": false
+    }
+  },
+  "corps": {
+    "stats": {
+      "force": 12,
+      "dexterite": 12,
+      "endurance": 10,
+      "volonte": 6,
+      "perception": 7,
+      "charisme": 10
+    },
+    "derivees": {
+      "sante_max": 60,
+      "mana_max": 38,
+      "capacite_portee_kg": 90,
+      "places_escorte": 3,
+      "souffle_sous_eau_s": 50
+    },
+    "silhouette": "bipede_humanoide",
+    "taille_cm": 130,
+    "age": 102,
+    "lifespan_base": 250,
+    "lifespan_effectif": 243,
+    "sexe": "F",
+    "slots": "humanoide_standard",
+    "astrologie": {
+      "element": "Métal",
+      "animal": "Tigre",
+      "signe": "Métal-Tigre"
+    }
+  },
+  "esprit": {
+    "intelligence": 79,
+    "temperament": "farouche",
+    "dressabilite": 35
+  },
+  "social": {
+    "culture": "nordique",
+    "culture_nom": "Nordique/germanique",
+    "foyer": null,
+    "lignee": "lignee_0F7C",
+    "rang": null,
+    "relations": {
+      "joueur": 62
+    },
+    "famille": {
+      "child_of": null,
+      "parent_of": [],
+      "spouse": null
+    }
+  },
+  "agenda": {
+    "metier": "eleveur",
+    "poste": null,
+    "ordre": null,
+    "territoire": null
+  },
+  "repro": {
+    "moteur": "couple",
+    "conditions": [
+      {
+        "c": "sexe"
+      },
+      {
+        "c": "age",
+        "min": 55
+      },
+      {
+        "c": "habitat",
+        "v": "logement"
+      },
+      {
+        "c": "place"
+      }
+    ],
+    "portee": {
+      "min": 1,
+      "max": 1,
+      "gestation_jours": 30
+    },
+    "couts": [
+      "portee_unique_annuelle"
+    ]
+  },
+  "base_potentials": {
+    "Arbalète": 100,
+    "Arc": 100,
+    "Athlétisme": 90,
+    "Deux Mains": 90,
+    "Discrétion": 90,
+    "Dressage": 100,
+    "Eau/Glace": 70,
+    "Encaissement": 90,
+    "Feu": 70,
+    "Forge": 100,
+    "Foudre/Vie": 70,
+    "Herboristerie": 100,
+    "Minage": 100,
+    "Métal": 80,
+    "Taille de pierre": 110,
+    "Terre": 70
+  },
+  "talents": {
+    "race": "Œil de la pierre",
+    "classe": "Meute",
+    "classe_note": null,
+    "classe_cachee": false,
+    "second_talent": null,
+    "second_talent_source": null
+  },
+  "parts_pool": null,
+  "equip_slots": "humanoide_standard",
+  "inventory_table": "loot_eleveur",
+  "ai_profile": "civil",
+  "recruitable": {
+    "method": "relation",
+    "threshold": 60
+  },
+  "leadership_role": null,
+  "succession_rule": null,
+  "rare_chance": 0.0,
+  "elements": null,
+  "tags": [
+    "humanoide",
+    "civil",
+    "nain",
+    "eleveur"
+  ]
+}

@@ -1,0 +1,216 @@
+{
+  "id": "pnj_06_elfe_fermier",
+  "name_key": "pnj.elfe_fermier.name",
+  "skeleton_template": "humanoide",
+  "race": "elfe",
+  "classe": "Le Vent",
+  "fonction": "fermier",
+  "role": "resident",
+  "nom": {
+    "prenom": "Taldre",
+    "nom_famille": "ApCormac",
+    "name_order": "prenom_nom",
+    "affichage": "Taldre ApCormac",
+    "titre": null
+  },
+  "genome": {
+    "teint": {
+      "type": "nombre",
+      "valeur": 58,
+      "unite": "indice de mélanine 0-100",
+      "min": 0,
+      "max": 100,
+      "var": 0.08
+    },
+    "cheveux_couleur": {
+      "type": "anneau",
+      "valeur": 0,
+      "anneau": [
+        "noir",
+        "brun",
+        "châtain",
+        "blond",
+        "roux",
+        "auburn"
+      ],
+      "n": 6
+    },
+    "yeux_couleur": {
+      "type": "anneau",
+      "valeur": 4,
+      "anneau": [
+        "noir",
+        "brun",
+        "ambre",
+        "vert",
+        "gris",
+        "bleu"
+      ],
+      "n": 6
+    },
+    "taille": {
+      "type": "nombre",
+      "valeur": 181,
+      "unite": "cm",
+      "min": 110,
+      "max": 230,
+      "var": 0.04
+    },
+    "carrure": {
+      "type": "nombre",
+      "valeur": 57,
+      "unite": "indice 0-100",
+      "min": 0,
+      "max": 100,
+      "var": 0.06
+    },
+    "taches_rousseur": {
+      "type": "recessif",
+      "alleles": [
+        "R",
+        "r"
+      ]
+    },
+    "grisonnement": {
+      "type": "age",
+      "valeur": 0.0,
+      "seuil_ans": 182,
+      "exprime": "progressif après le seuil"
+    },
+    "traits_visage": {
+      "type": "carte",
+      "valeur": "carte_6B4F",
+      "mut": 0.12
+    },
+    "oreille_longueur": {
+      "type": "nombre",
+      "valeur": 76,
+      "unite": "mm au-dessus du crâne",
+      "min": 0,
+      "max": 200,
+      "var": 0.05
+    }
+  },
+  "corps": {
+    "stats": {
+      "force": 11,
+      "dexterite": 9,
+      "endurance": 11,
+      "volonte": 8,
+      "perception": 9,
+      "charisme": 11
+    },
+    "derivees": {
+      "sante_max": 64,
+      "mana_max": 44,
+      "capacite_portee_kg": 85,
+      "places_escorte": 3,
+      "souffle_sous_eau_s": 52
+    },
+    "silhouette": "bipede_humanoide",
+    "taille_cm": 181,
+    "age": 167,
+    "lifespan_base": 350,
+    "lifespan_effectif": 358,
+    "sexe": "F",
+    "slots": "humanoide_standard",
+    "astrologie": {
+      "element": "Terre",
+      "animal": "Bœuf",
+      "signe": "Terre-Bœuf"
+    }
+  },
+  "esprit": {
+    "intelligence": 48,
+    "temperament": "curieux",
+    "dressabilite": 8
+  },
+  "social": {
+    "culture": "celte",
+    "culture_nom": "Celte",
+    "foyer": null,
+    "lignee": "lignee_E461",
+    "rang": null,
+    "relations": {
+      "joueur": 56
+    },
+    "famille": {
+      "child_of": null,
+      "parent_of": [],
+      "spouse": null
+    }
+  },
+  "agenda": {
+    "metier": "fermier",
+    "poste": null,
+    "ordre": null,
+    "territoire": null
+  },
+  "repro": {
+    "moteur": "couple",
+    "conditions": [
+      {
+        "c": "sexe"
+      },
+      {
+        "c": "age",
+        "min": 77
+      },
+      {
+        "c": "habitat",
+        "v": "logement"
+      },
+      {
+        "c": "place"
+      }
+    ],
+    "portee": {
+      "min": 1,
+      "max": 1,
+      "gestation_jours": 30
+    },
+    "couts": [
+      "portee_unique_annuelle"
+    ]
+  },
+  "base_potentials": {
+    "Agriculture": 100,
+    "Construction": 100,
+    "Contrôle du Mana": 110,
+    "Eau/Glace": 110,
+    "Encaissement": 90,
+    "Feu": 110,
+    "Forge": 80,
+    "Foudre/Vie": 110,
+    "Minage": 100,
+    "Méditation": 110,
+    "Métal": 110,
+    "Terre": 120
+  },
+  "talents": {
+    "race": "Chair de mana",
+    "classe": null,
+    "classe_note": "Sans maître : aucun talent au départ, peut en apprendre un auprès de n'importe quel maître — et en changer",
+    "classe_cachee": false,
+    "second_talent": null,
+    "second_talent_source": null
+  },
+  "parts_pool": null,
+  "equip_slots": "humanoide_standard",
+  "inventory_table": "loot_fermier",
+  "ai_profile": "civil",
+  "recruitable": {
+    "method": "relation",
+    "threshold": 60
+  },
+  "leadership_role": null,
+  "succession_rule": null,
+  "rare_chance": 0.0,
+  "elements": null,
+  "tags": [
+    "humanoide",
+    "civil",
+    "elfe",
+    "fermier"
+  ]
+}
