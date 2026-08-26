@@ -10,7 +10,7 @@ Défendre son territoire avec des gardes, des tourelles et des murs — et le se
 
 - Le joueur défend son territoire avec des **gardes** (PNJ assignés), des **tourelles** et des **murs**.
 - **Attaques réelles** : le territoire peut subir des raids (monstres, royaumes hostiles).
-  - **Joueur présent sur place** : l'attaque se joue en temps réel/tactique, dans le monde voxel.
+  - **Joueur présent sur place** : l'attaque se joue en tactique, sur la grille du monde.
   - **Joueur absent** : l'attaque est **simulée** via le système d'abstraction hors-site ([[Abstraction hors-site]]) — le résultat (dégâts, pertes, victoire des défenses) est calculé et rapporté au joueur.
 
 **Décisions :**

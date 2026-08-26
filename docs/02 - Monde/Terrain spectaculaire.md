@@ -8,7 +8,7 @@ etape: 8
 
 > [!warning] Héritage voxel
 > Les chiffres (« 200-400 blocs », « 30-80 blocs ») et le bruit 3D de cavernes sont héritage : la hauteur tactique est bornée à **21 niveaux** ([[Hauteur de terrain ±10]]). Les techniques de composition du bruit survivent ; leur quantification est à décider — voir [[Héritage voxel — audit]].
-> — Classement complet : [[Héritage voxel — audit]].
+> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Altitude sur 21 niveaux]]**.
 
 L'altitude n'est pas un bruit lissé : trois techniques de composition produisent des montagnes, des falaises et des côtes découpées. « Plat avec un peu de relief » est explicitement un anti-but.
 

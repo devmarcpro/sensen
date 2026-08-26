@@ -1,14 +1,13 @@
 ---
 aliases: ["E.11", "Annexe E.11", "Réseau", "Autorité", "Host autoritaire"]
-tags: [technique, réseau, décidé, héritage-voxel]
+tags: [technique, réseau, décidé]
 domaine: technique
 statut: décidé
 etape: 11
 ---
 
-> [!warning] Héritage voxel
-> `place_block`/`destroy_block` et « modifications voxel » : vocabulaire héritage — les mutations sont des mutations de **tuiles** ([[Destruction du terrain]] : événements discrets, encore plus simples à synchroniser). L'architecture (host autoritaire, intentions, RPC fiable/unreliable) tient telle quelle.
-> — Classement complet : [[Héritage voxel — audit]].
+> [!note] Adapté au pivot tactique
+> Adapté au pivot : les mutations du monde sont des mutations de **tuiles** (`place_tile`/`modify_tile` — [[Proposition — Structure de données de la grille]]). L'architecture host-autoritaire est inchangée.
 
 Le host est autoritaire, le client envoie des intentions. La règle qui tient dès le solo.
 

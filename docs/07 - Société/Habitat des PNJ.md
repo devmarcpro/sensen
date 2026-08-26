@@ -8,7 +8,7 @@ etape: 7
 
 > [!warning] Héritage voxel
 > La taille minimale « 2×2×2 blocs » et le bonus « volume ≥ 27 blocs » sont des critères volumétriques : en 2D, ils deviennent une **surface minimale en tuiles** — à re-décider ([[Détection de pièces]]).
-> — Classement complet : [[Héritage voxel — audit]].
+> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Pièces en 2D]]**.
 
 Les PNJ résidents ont des besoins de logement, et l'humeur qui en découle est LE levier de rendement du territoire.
 

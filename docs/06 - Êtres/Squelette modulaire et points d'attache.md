@@ -1,14 +1,13 @@
 ---
 aliases: ["12.1", "12.1 Points d'attache", "Points d'attache", "Paperdoll", "Couleurs réservées", "9.1", "9.2"]
-tags: [êtres, art, technique, décidé, héritage-voxel]
+tags: [êtres, art, technique, décidé]
 domaine: êtres
 statut: décidé
 etape: 1
 ---
 
-> [!warning] Héritage voxel
-> La note acte elle-même le pivot (*pipeline identique, en 2D*), mais ses Décisions gardent le vocabulaire `.vox` : les marqueurs d'attache et couleurs réservées s'appliquent désormais aux **sprites** du paperdoll, pas à des modèles voxel.
-> — Classement complet : [[Héritage voxel — audit]].
+> [!note] Adapté au pivot tactique
+> Adapté au pivot : le pipeline d'import (marqueurs de couleurs réservées, points d'attache typés) s'applique aux **sprites** du paperdoll — même principe que l'import .vox d'origine.
 
 Le pipeline d'assemblage : des points d'ancrage nommés encodés dans les sprites, une couleur réservée par type d'attache.
 
@@ -33,7 +32,7 @@ Le pipeline d'assemblage : des points d'ancrage nommés encodés dans les sprite
 
 **Même technique réutilisée par :** les prefabs de donjon ([[Salles et connecteurs]]), les modèles d'objets ([[Schéma objet et recette]] : `vox_slots`), les blocs fonctionnels de véhicules ([[Véhicules]], marqueurs visibles).
 
-**Import .vox ([[Décisions d'architecture]]) :** script d'import custom qui détecte les voxels-marqueurs de couleurs réservées, les retire du mesh visible, et les exporte comme liste de points d'attache typés `{type, position, direction}`.
+**Import des parties ([[Décisions d'architecture]] — pipeline hérité du `.vox`, même principe appliqué aux sprites) :** script d'import custom qui détecte les pixels-marqueurs de couleurs réservées, les retire du sprite visible, et les exporte comme liste de points d'attache typés `{type, position, direction}`.
 
 **Rendu partagé ([[Entités et pathfinding — performance]]) :** les parties sont des meshes **partagés** ; recolorisation par palette en shader (paramètre d'instance) — 100 villageois = ~6 meshes distincts en mémoire.
 

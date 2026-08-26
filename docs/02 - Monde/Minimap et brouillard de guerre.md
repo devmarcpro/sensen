@@ -8,7 +8,7 @@ etape: 8
 
 > [!warning] Héritage voxel
 > La « coupe au niveau Y » et le bitmask par bande verticale supposent un monde volumétrique : en surface, le monde tactique est une grille unique + hauteur — une seule carte suffit. Le découpage vertical ne garde de sens que **par étage de donjon**. À re-spécifier.
-> — Classement complet : [[Héritage voxel — audit]].
+> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Minimap en 2D]]**.
 
 Une minimap qui coupe au niveau Y du joueur, et un brouillard de guerre stocké à la résolution chunk.
 

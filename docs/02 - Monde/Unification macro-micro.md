@@ -8,7 +8,7 @@ etape: 8
 
 > [!warning] Héritage voxel
 > Les chiffres d'altitude (« pics à 200-400 blocs », « falaises de 30-80 blocs ») et le « bruit 3D de cavernes » sont héritage voxel : [[Hauteur de terrain ±10]] quantifie la hauteur sur **21 niveaux (0-20)**. La composition du bruit (continentalité, ridged, warping, terrasses, bassins) survit ; le **mapping altitude continue → 21 niveaux** est à décider, et les cavernes n'existent plus hors donjons.
-> — Classement complet : [[Héritage voxel — audit]].
+> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Altitude sur 21 niveaux]]**.
 
 Il n'existe qu'une seule génération : la carte du monde et la cellule sont deux fenêtres sur le même champ de bruit continu. Résout la question ouverte de [[Génération par couches de bruit]] (cohérence carte ↔ cellules ↔ transitions).
 

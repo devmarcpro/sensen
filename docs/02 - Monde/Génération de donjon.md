@@ -8,7 +8,7 @@ etape: 2
 
 > [!warning] Héritage voxel
 > Héritage : les tailles en cubes (petite 8³ … immense 32×32×16) et « offset vertical -16, aligné chunk » — à réexprimer en **tuiles par étage**. L'algorithme par graphe (attache → connecteur → salle → collision AABB → connexité par construction → boss au plus profond) survit intégralement, ainsi que la formule de profondeur.
-> — Classement complet : [[Héritage voxel — audit]].
+> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Prefabs de donjon en tuiles]]**.
 
 L'algorithme de génération par graphe, étage par étage, et la formule de difficulté par profondeur.
 

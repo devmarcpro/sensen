@@ -8,7 +8,7 @@ etape: 0
 
 > [!warning] Héritage voxel
 > Le point « chunks cubiques 16×16×16 indexés (x,y,z) + octree de subdivision » contredit [[Grille continue]] (chunk = **32×32 tuiles**, tuile = hauteur entière + matériau + contenu + occupant, « structure plate ») ; l'import `.vox` devient un pipeline de sprites ([[Squelette modulaire et points d'attache]]). La structure de données réelle de la grille (et des étages de donjon) est **à décider**. Le reste — GameData, EventBus, creature.tscn unique, sauvegarde différentielle, réseau, horloge — tient.
-> — Classement complet : [[Héritage voxel — audit]].
+> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Structure de données de la grille]]**.
 
 Les huit décisions d'architecture Godot qu'on ne peut pas rattraper après coup.
 

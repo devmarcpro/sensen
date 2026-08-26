@@ -20,7 +20,7 @@ Les 7 liquides — dont la viscosité dérive de la friction.
 | Boue | 1 | 12 | 1 | 8 | 0 | 30 | 40 | — | 0 | 40 | 5 | 10 | 15 |
 | Sève | 1 | 9 | 5 | 20 | 65 | 30 | 10 | — | 0 | 10 | 40 | 20 | 3 |
 
-**Viscosité ([[Eau et liquides]]) :** portée d'étalement 7 blocs pour l'eau, 3 pour les liquides visqueux (lave, boue, goudron, huile) — champ `viscosite` **dérivé de la friction**. Mise à jour tous les 5 ticks (eau) / 15 ticks (visqueux).
+**Viscosité ([[Eau et liquides]]) :** portée d'étalement 7 tuiles pour l'eau, 3 pour les liquides visqueux (lave, boue, goudron, huile) — champ `viscosite` **dérivé de la friction**. Mise à jour tous les 5 ticks (eau) / 15 ticks (visqueux).
 
 **Conductivité et foudre ([[Eau et liquides]]) :** la foudre frappant l'eau se propage à toutes les entités dans le volume d'eau connexe (rayon 5) — l'**eau salée** (CÉl 90) étend le rayon à 8.
 

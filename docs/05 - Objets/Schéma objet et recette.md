@@ -1,14 +1,13 @@
 ---
 aliases: ["B.3", "Annexe B.3", "Schéma objet", "data/items", "Recette"]
-tags: [objets, données, schéma, décidé, héritage-voxel]
+tags: [objets, données, schéma, décidé]
 domaine: objets
 statut: décidé
 etape: 6
 ---
 
-> [!warning] Héritage voxel
-> `vox_model` et `vox_slots` sont héritage : leurs équivalents sont des sprites 2D avec le même mécanisme de couleurs stand-in ([[Squelette modulaire et points d'attache]]). La structure du schéma tient.
-> — Classement complet : [[Héritage voxel — audit]].
+> [!note] Adapté au pivot tactique
+> Adapté au pivot : `vox_model`/`vox_slots` deviennent des références de **sprite 2D** avec le même mécanisme de couleurs stand-in — nommage des champs à fixer à l'implémentation ([[Proposition — Sculpture en pixel art]]).
 
 Le format de données d'un objet et de sa recette.
 
@@ -40,7 +39,7 @@ Le format de données d'un objet et de sa recette.
 
 - `vox_slots` : mapping couleur stand-in → catégorie de matériau ([[Squelette modulaire et points d'attache]]).
 - `effects` : liste d'effets passifs (voir [[Effets d'équipement passifs]]) — vide pour les objets craftés, remplie sur le loot généré.
-- Un objet sculpté par le joueur génère une entrée du même format, stockée dans la sauvegarde, avec `vox_model` pointant vers le modèle sauvegardé et `stat_weights` calculé depuis la composition voxel ([[Éditeur de sculpture]]).
+- Un objet sculpté par le joueur génère une entrée du même format, stockée dans la sauvegarde, avec le modèle sculpté référencé à la place de `vox_model` et `stat_weights` calculé depuis la composition en pixels ([[Éditeur de sculpture]]).
 
 **Slots du craft compositionnel ([[Composant et recette d'obtention]]) :** un objet déclare ses slots — `"slots": {"tete": "tete_pioche", "manche": "manche_court", "fixations": "fixations_std"}` avec les poids de [[Stats et qualité de l'assemblage]].
 

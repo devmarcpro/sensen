@@ -8,7 +8,7 @@ etape: 6
 
 Comment chacune des 13 stats de matériau entre dans les formules du jeu — et le principe d'équilibrage par profils.
 
-Les 13 stats de matériau ([[Matériaux — 13 stats]]) se transmettent aux objets craftés/sculptés par **moyenne pondérée** (quantités de recette ou comptage de voxels — même mécanisme que la dureté, [[Stats d'un objet crafté]]). La **qualité ne les multiplie PAS** : ce sont des propriétés physiques, pas des performances (seule la dureté → dégâts/protection passe par la qualité, via [[Stats d'armes]]/[[Armures et poids porté]]).
+Les 13 stats de matériau ([[Matériaux — 13 stats]]) se transmettent aux objets craftés/sculptés par **moyenne pondérée** (quantités de recette ou comptage de pixels — même mécanisme que la dureté, [[Stats d'un objet crafté]]). La **qualité ne les multiplie PAS** : ce sont des propriétés physiques, pas des performances (seule la dureté → dégâts/protection passe par la qualité, via [[Stats d'armes]]/[[Armures et poids porté]]).
 
 **Principe d'équilibrage (avec 120+ matériaux) :** la différenciation vient de **profils** (chaque matériau excelle quelque part et paie ailleurs — l'opale règne sur le mana mais casse, le jade tient par son élasticité, le basalte résiste mais conduit), pas d'une inflation générale des échelles ; et les **formules sont calibrées pour que ~30 points d'écart se ressentent en jeu** (~20-25 % d'effet). Les paliers serrés de dureté des roches sont VOULUS (stratification [[Stratification verticale]]) — ne pas les écarter.
 
@@ -36,8 +36,8 @@ Agriculture : rendement_final = rendement_biome (B.6) * (0.5 + fertilite_sol / 1
 Lumière émise par un bloc/objet : niveau = luminosite / 100 * 15
   (échelle de lumière 0-15 ; un objet lumineux porté éclaire mais
   augmente la détection par les ennemis — malus de Discrétion)
-Transparence : transparence >= 50 → le bloc laisse passer lumière et
-  regard (fenêtres, serres) — impact meshing : passe de rendu séparée
+Transparence : transparence >= 50 → la tuile laisse passer lumière et
+  regard (fenêtres, serres) — impact rendu : passe séparée
 ```
 
 **Usage par la météo ([[Météo]]) :** l'isolation contre la température ressentie, la conductivité électrique pour le ciblage de la foudre (paratonnerre émergent), la flammabilité pour l'ignition spontanée en canicule et l'arrachage des blocs `durete <= 3` en tempête.

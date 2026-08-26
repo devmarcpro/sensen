@@ -1,14 +1,13 @@
 ---
 aliases: ["D.1", "Annexe D.1", "Arborescence", "Arborescence du projet", "Structure de dossiers"]
-tags: [technique, architecture, décidé, héritage-voxel]
+tags: [technique, architecture, décidé]
 domaine: technique
 statut: décidé
 etape: 0
 ---
 
-> [!warning] Héritage voxel
-> `systems/voxel/` (chunks, meshing, subdivision octree) est héritage — à refondre en système de grille. Le reste de l'arborescence tient.
-> — Classement complet : [[Héritage voxel — audit]].
+> [!note] Adapté au pivot tactique
+> `systems/voxel/` renommé `systems/grid/` (chunks de tuiles, hauteur, nav-grille) ; `models/` héberge les sources graphiques 2D. Le reste de l'arborescence est inchangé.
 
 L'organisation du projet Godot : autoloads, données, systèmes purs, scènes.
 
@@ -26,7 +25,7 @@ res://
 │   ├── materials/  ├── items/  ├── modules/  ├── creatures/
 │   ├── biomes/     ├── quest_templates/  └── ...
 ├── systems/             # Logique pure, sans scène
-│   ├── voxel/           # Chunks, meshing, subdivision (octree par bloc)
+│   ├── grid/            # Chunks de tuiles, hauteur, nav-grille (ex-voxel/)
 │   ├── worldgen/        # Évaluation des couches de bruit, biomes, POI
 │   ├── crafting/        # Recettes, qualité, stations
 │   ├── combat/          # Résolution des modules, mana, dégâts
@@ -39,7 +38,7 @@ res://
 │   ├── ui/              # Inventaire, craft, carte du monde, sculpture
 │   └── main.tscn
 ├── locale/              # Traductions : fr.csv, en.csv... (voir 10.1)
-├── models/              # .vox sources (importés par script custom)
+├── models/              # sources graphiques 2D (parties paperdoll, prefabs)
 └── addons/
 ```
 

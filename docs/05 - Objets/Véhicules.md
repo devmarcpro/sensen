@@ -1,14 +1,13 @@
 ---
 aliases: ["E.24", "Annexe E.24", "Véhicules", "Bateaux", "Charrette"]
-tags: [objets, véhicules, décidé, héritage-voxel]
+tags: [objets, véhicules, décidé]
 domaine: objets
 statut: décidé
 etape: 6
 ---
 
-> [!warning] Héritage voxel
-> « Σ durete des voxels » et le modèle sculpté voxel sont héritage : les stats dérivent désormais du modèle **pixel art** ([[Tables de sculpture]]). L'entité rigide, les blocs fonctionnels, le pilotage en ticks et le voyage rapide survivent ; « 1 bloc de dénivelé » se lit « 1 niveau de hauteur ».
-> — Classement complet : [[Héritage voxel — audit]].
+> [!note] Adapté au pivot tactique
+> Adapté au pivot : stats dérivées des **pixels** du modèle sculpté, marqueurs fonctionnels en pixels, dénivelé en niveaux de hauteur. Pipeline 2D : [[Proposition — Sculpture en pixel art]].
 
 Un véhicule est une entité rigide, pas un morceau de monde qui bouge — et la seule exception à la règle forme-libre de la sculpture.
 
@@ -31,7 +30,7 @@ PROPULSION : mécanique/voiles — autonome, pas de traction animale.
   = lent ; compétence Navigation réduit le malus).
 
 BLOCS FONCTIONNELS À LA SCULPTURE — pendant la sculpture, le joueur
-place des blocs spéciaux (extension des marqueurs 12.1, ici visibles) :
+place des pixels-marqueurs typés (extension des marqueurs 12.1, ici visibles) :
   Siège de pilote (obligatoire, 1)   Sièges passagers (0-N)
   Gouvernail/timon (obligatoire)     Coffres intégrés (cargo)
   Mât+voile (véhicules à voiles — surface de voile ∝ vitesse)
@@ -41,7 +40,7 @@ c'est la seule "contrainte de forme" du jeu (exception assumée à la
 règle forme-libre de la section 13, car fonctionnelle et lisible).
 
 STATS DÉRIVÉES (A.4/A.4.5, aucune stat nouvelle de matériau) :
-  PV_vehicule = Σ durete des voxels * qualité
+  PV_vehicule = Σ durete des pixels du modèle * qualité
   vitesse = base(fonctionnalité) * f(poids total, surface de voile
             ou taille des roues) — matériaux légers = véhicule vif
   capacité de cargo = Σ volume des coffres intégrés
@@ -51,9 +50,9 @@ PILOTAGE — monter au siège (interaction) ; contrôles directs façon
 monture ; les compagnons/joueurs s'assoient aux sièges passagers.
 En mode tactique (5.0) : déplacer le véhicule coûte des ticks comme
 une entité (1 case de mouvement = coût f(vitesse)).
-TERRAIN — les terrestres franchissent 1 bloc de dénivelé, la pente
+TERRAIN — les terrestres franchissent 1 niveau de hauteur, la pente
 raide les arrête (les routes 9.2/friction des pavés prennent leur
-sens) ; les navals demandent >= 1 bloc d'eau de profondeur + tirant.
+sens) ; les navals demandent des tuiles d'eau + tirant.
 DÉGÂTS — les véhicules encaissent (PV) ; à 0 : épave récupérable
 (50 % des matériaux, façon A.11). Pas de dégâts de collision infligés
 aux entités percutées au lancement (simplicité), juste poussée.

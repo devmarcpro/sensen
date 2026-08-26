@@ -12,7 +12,7 @@ La nuit est dangereuse mais favorise la Discrétion ; dormir est un choix avanta
 CYCLE — 1 jour in-game = 24 000 ticks (E.1) : aube 5h-7h, jour 7h-19h,
 crépuscule 19h-21h, nuit 21h-5h (heures in-game). Lumière ambiante
 interpolée ; la nuit, seules les sources locales comptent (luminosite
-A.4.5 : torches, lanternes, blocs lumineux — l'éclairage de la base
+A.4.5 : torches, lanternes, tuiles lumineuses — l'éclairage de la base
 devient un vrai enjeu de construction).
 
 LA NUIT EST DANGEREUSE :

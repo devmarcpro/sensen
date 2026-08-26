@@ -33,8 +33,15 @@ Tout ce qui n'est pas tranché, par catégorie. 26 notes. La section 16 du GDD e
 - [[Ouvert — Recettes de composants par famille]] — la matrice composant × famille et les sources exotiques.
 - [[Ouvert — Pools de noms des cultures]] — 9 cultures sur 10 restent à écrire.
 
-**Héritage voxel** *(transversal — voir [[Héritage voxel — audit]])*
-- Le mapping altitude continue → 21 niveaux, la structure de données de la grille, les strates/minerais sans creusage, les critères de pièce en 2D, les périmètres de sculpture en pixel art, les dimensions des prefabs de donjon en tuiles, les budgets de perf du rendu tuiles+billboards, la minimap de surface, le format du diff de sauvegarde.
+**Héritage voxel — propositions à valider** *(voir [[Héritage voxel — audit]] ; catégories 1 et 3 déjà réécrites)*
+- [[Proposition — Altitude sur 21 niveaux]] — le mapping bruit continu → hauteur 0-20 (couvre aussi le mod_altitude météo).
+- [[Proposition — Structure de données de la grille]] — chunks de tuiles, étages de donjon, format du diff de sauvegarde, RPC.
+- [[Proposition — Minerais et strates après le pivot]] — tiers par corruption en surface, bandes d'étage en donjon, strates recyclées en palette de sol.
+- [[Proposition — Pièces en 2D]] — surface minimale, toit par empreinte, bétail.
+- [[Proposition — Sculpture en pixel art]] — périmètres, pipeline, billboard.
+- [[Proposition — Prefabs de donjon en tuiles]] — tailles, format de plan, escaliers inter-étages.
+- [[Proposition — Budgets et critères de performance tactiques]] — budgets du rendu tuiles+billboards, critères par étape.
+- [[Proposition — Minimap en 2D]] — une carte en surface, un fog par étage en donjon.
 
 **Ouvert par nature**
 - [[Ouvert — Lore]] — noms propres, textes d'ambiance, mythologie.

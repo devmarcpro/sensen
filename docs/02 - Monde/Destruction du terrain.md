@@ -19,7 +19,7 @@ La destruction reste tactiquement lisible — effondrer le pont, ouvrir une brè
 
 **Deux garde-fous de simulation ([[Sorts cataclysmiques]]) :** le **plancher et le plafond de hauteur** (0 et 20) bornent naturellement le vandalisme cumulé ; la **régénération des cases sauvages** ([[Claims et persistance]]) répare le terrain hors des claims — le joueur peut défigurer le monde, le monde se soigne. Sur les cases claim en revanche, les dégâts **persistent**, ce qui rend une attaque de royaume réellement traumatisante.
 
-**Gain technique ([[Décisions fondatrices]], [[Multijoueur]]) :** risque levé — destruction discrète à la tuile, beaucoup moins coûteuse et bien plus simple à synchroniser en réseau que la physique voxel fine. La destruction par blocs pleins se synchronise comme un événement discret (« ce bloc a été détruit »), exactement comme Terraria/Minecraft.
+**Gain technique ([[Décisions fondatrices]], [[Multijoueur]]) :** risque levé — destruction discrète à la tuile, beaucoup moins coûteuse et bien plus simple à synchroniser en réseau que la physique voxel fine. La destruction à la tuile se synchronise comme un événement discret (« cette tuile a été modifiée »), exactement comme Terraria/Minecraft.
 
 **Explosions :** voir [[Explosions]].
 

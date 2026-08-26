@@ -20,7 +20,7 @@ La séquence de démarrage : le joueur choisit lui-même son niveau de risque in
 
 **Décisions :**
 - **Heat-map : vague par défaut** — 3 niveaux lisibles (paisible / dangereuse / mortelle) ; la **valeur précise** de corruption se débloque par rang dans la guilde Exploration (récompense d'information, cohérent avec [[Quêtes et guildes]]).
-- **Garde-fou de spawn :** re-tirage automatique du point exact si la surface marchable connexe < 200 blocs (falaise, îlot) — jusqu'à trouver une zone viable dans la case choisie, sinon case adjacente la plus proche.
+- **Garde-fou de spawn :** re-tirage automatique du point exact si la surface marchable connexe < 200 tuiles (falaise, îlot) — jusqu'à trouver une zone viable dans la case choisie, sinon case adjacente la plus proche.
 
 ## Liens
 - **Dépend de** : [[Création de personnage]], [[Carte du monde]], [[Niveau de danger]], [[Classes]]

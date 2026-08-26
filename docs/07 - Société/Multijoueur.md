@@ -10,7 +10,7 @@ Coopératif host-and-join, 4 à 8 joueurs, PvP restreint au duel consenti.
 
 - **Mode :** coopératif, groupes de **4 à 8 joueurs**.
 - **Modèle réseau : host-and-join façon Terraria** — un joueur héberge la partie, les autres le rejoignent. Pas de serveur dédié requis, réaliste pour un développement solo.
-- **Simplifié par l'abandon de la physique de destruction fine ([[Construction cadrée]])** : la destruction par blocs pleins se synchronise comme un événement discret ("ce bloc a été détruit"), exactement comme Terraria/Minecraft — beaucoup plus simple qu'une simulation physique continue à synchroniser.
+- **Simplifié par l'abandon de la physique de destruction fine ([[Construction cadrée]])** : la destruction à la tuile se synchronise comme un événement discret (« cette tuile a été modifiée »), exactement comme Terraria/Minecraft — beaucoup plus simple qu'une simulation physique continue à synchroniser.
 - Recommandation technique : s'appuyer sur l'**API multijoueur haut niveau de Godot** (moteur confirmé — voir [[Data-driven design]]) plutôt que développer le réseau from scratch.
 - **PvP : restreint** — uniquement via duel accepté entre joueurs, pas de PvP ouvert/non consenti.
 

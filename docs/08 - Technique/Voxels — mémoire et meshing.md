@@ -1,16 +1,30 @@
 ---
-aliases: ["G.2", "Annexe G.2", "Voxels mémoire", "Meshing", "Subdivision", "LOD de distance"]
-tags: [technique, performance, décidé, héritage-voxel]
+aliases: ["G.2", "Annexe G.2", "Voxels mémoire", "Meshing", "Subdivision", "LOD de distance", "Rendu de la grille"]
+tags: [technique, performance, héritage-voxel, à-trancher]
 domaine: technique
-statut: décidé
+statut: à-trancher
 etape: 0
 ---
 
-> [!warning] Héritage voxel
-> Note **intégralement héritage** : stockage 3D, octrees, subdivision, greedy meshing, LOD 3D. [[Grille continue]] acte : « plus de meshing volumétrique, plus de LOD 3D, plus de streaming en volume » — le rendu tactique est tuiles instanciées teintées + billboards triés. Restent éventuellement transposables en 2D : chunks constants, cache LRU, éviction. Conservée comme référence historique.
-> — Classement complet : [[Héritage voxel — audit]].
+> [!warning] Référence historique
+> Cette note est la stratégie mémoire/meshing du moteur **voxel abandonné** — conservée intégralement ci-dessous comme référence. [[Grille continue]] acte : « plus de meshing volumétrique, plus de LOD 3D, plus de streaming en volume » ; le rendu tactique est **tuiles instanciées teintées par matériau + billboards triés en profondeur**. Le remplacement (structure de tuiles, budgets) : [[Proposition — Structure de données de la grille]] et [[Proposition — Budgets et critères de performance tactiques]].
 
-Stockage compact, greedy meshing en thread, et le LOD de distance — la parade au coût du 1px.
+La stratégie voxel d'origine (G.2) — et ce qui s'en transpose à la grille.
+
+## Ce qui se transpose à la grille tactique
+
+- **Chunks uniformes stockés comme constante** (mer, plaine nue) — même optimisation, appliquée aux chunks de tuiles.
+- **Cache LRU + éviction** : données gardées en cache, sérialisées si modifiées / jetées si vierges (regénérables par seed) — inchangé dans le principe.
+- **Données compactes en PackedByteArray** — repris par [[Proposition — Structure de données de la grille]] (~7 o/tuile).
+- **Textures de bruit jamais stockées** : le bruit par tuile est généré en shader depuis (position, id matériau, seed) — zéro mémoire, variation infinie gratuite ([[Palette de couleurs des matériaux]]).
+
+## Ce qui disparaît
+
+Le stockage 3D, les octrees, la subdivision et son budget de 512 blocs/chunk, le greedy meshing, la fusion de faces à travers les résolutions, le LOD de distance sur la subdivision — il n'y a plus de volume à mesher.
+
+---
+
+### Texte voxel d'origine (référence historique, G.2)
 
 ```
 STOCKAGE — chunk 16³ : PackedByteArray de 2 octets/bloc (id matériau,
@@ -42,13 +56,7 @@ LOD DE DISTANCE (rendu) — au-delà de N chunks (défaut 4) : les blocs
   jetées si vierges (regénérables par seed).
 ```
 
-**Gain de la direction tactique ([[Grille continue]]) :** plus de meshing volumétrique, plus de LOD 3D, plus de streaming en volume, plus de propagation de lumière en 3D. Le rendu est : tuiles instanciées teintées par matériau + billboards triés en profondeur.
-
-**Transparence ([[Application des stats de matériau]]) :** `transparence >= 50` → passe de rendu séparée.
-
-**Budget de subdivision et sculpture ([[Éditeur de sculpture]]) :** le garde-fou de 512 blocs subdivisés/chunk protège des méga-sculptures 1px.
-
 ## Liens
-- **Dépend de** : [[Optimisation — principes]], [[Décisions d'architecture]], [[Budgets de performance]]
-- **Alimente** : [[Éclairage]], [[Éditeur de sculpture]], [[Sauvegarde]]
-- **Voir aussi** : [[Grille continue]], [[Application des stats de matériau]], [[Palette de couleurs des matériaux]], [[Explosions]], [[Ordre de vérification]]
+- **Dépend de** : [[Optimisation — principes]], [[Décisions d'architecture]], [[Héritage voxel — audit]]
+- **Alimente** : [[Proposition — Structure de données de la grille]], [[Proposition — Budgets et critères de performance tactiques]]
+- **Voir aussi** : [[Grille continue]], [[Palette de couleurs des matériaux]], [[Sauvegarde]], [[Éclairage]]

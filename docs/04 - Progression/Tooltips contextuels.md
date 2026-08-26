@@ -1,14 +1,13 @@
 ---
 aliases: ["E.19", "Annexe E.19", "Tooltips contextuels", "Onboarding", "Tutoriel"]
-tags: [progression, interface, décidé, héritage-voxel]
+tags: [progression, interface, décidé]
 domaine: progression
 statut: décidé
 etape: 1
 ---
 
-> [!warning] Héritage voxel
-> Deux déclencheurs héritage : « premier bloc en main » (ghost preview, grille fine Shift) et « première subdivision » — à remplacer par les premières-fois de la direction tactique (première bascule en combat, première jauge pleine…).
-> — Classement complet : [[Héritage voxel — audit]].
+> [!note] Adapté au pivot tactique
+> Adapté au pivot : deux déclencheurs voxel retirés (« premier bloc en main + Shift grille fine », « première subdivision → explication des résolutions »), remplacés par le déclencheur de construction générique.
 
 L'onboarding sans script : des tooltips déclenchés par les événements, jamais un verrou de progression.
 
@@ -17,8 +16,7 @@ data/tutorials/*.json : { "id", "trigger": {signal EventBus + conditions},
   "text_key", "once": true, "delay_ticks", "category" }
 Exemples :
   premier arbre visé → tooltip récolte/outils
-  premier bloc en main → placement + ghost preview + Shift grille fine (4.1)
-  première subdivision → explication des résolutions
+  premier élément de construction en main → placement + ghost preview (4.1)
   premier livre ramassé → lecture, risque d'échec
   première créature hostile détectée → bascule mode tactique (5.0)
   faim < 60 la première fois → manger

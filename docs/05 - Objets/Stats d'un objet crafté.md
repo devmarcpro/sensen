@@ -1,14 +1,13 @@
 ---
 aliases: ["A.4", "Annexe A.4", "Stats d'un objet crafté", "Stats craft/sculpture"]
-tags: [objets, craft, formule, décidé, héritage-voxel]
+tags: [objets, craft, formule, décidé]
 domaine: objets
 statut: décidé
 etape: 6
 ---
 
-> [!warning] Héritage voxel
-> « Comptage de voxels » se lit désormais **comptage de pixels** du modèle sculpté ([[Tables de sculpture]]) — la formule de moyenne pondérée est inchangée.
-> — Classement complet : [[Héritage voxel — audit]].
+> [!note] Adapté au pivot tactique
+> Adapté au pivot : « comptage de voxels » corrigé en **comptage de pixels** — la formule de moyenne pondérée est inchangée.
 
 La règle de base : moyenne pondérée des matériaux, puis qualité appliquée une seule fois.
 
@@ -18,10 +17,10 @@ stat_finale = stat_base_materiaux * qualite_produite
 stat_base_materiaux (craft simple) = moyenne pondérée des stats des matériaux
     selon les quantités de la recette
 stat_base_materiaux (sculpture)   = moyenne pondérée des stats des matériaux
-    selon le nombre de voxels de chaque matériau dans le modèle
+    selon le nombre de pixels de chaque matériau dans le modèle
 ```
 
-- La sculpture n'ajoute **aucun bonus de stats** (déjà décidé : la forme est cosmétique) ; elle donne juste un contrôle exact de la pondération via la composition voxel ([[Tables de sculpture]]).
+- La sculpture n'ajoute **aucun bonus de stats** (déjà décidé : la forme est cosmétique) ; elle donne juste un contrôle exact de la pondération via la composition en pixels ([[Tables de sculpture]]).
 
 **Décision (4.2) :** *Formule dureté/qualité : résolu* — dureté de base = moyenne pondérée des matériaux, **qualité appliquée une seule fois**.
 

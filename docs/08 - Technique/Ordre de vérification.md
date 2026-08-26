@@ -8,7 +8,7 @@ etape: 0
 
 > [!warning] Héritage voxel
 > Les critères 3 (mutation de bloc) et surtout 4 (« façade 64 blocs 4px meshée < 4 ms ») sont voxel, et la liste suit l'ancien ordre D.3. À réécrire pour les 11 étapes tactiques de [[Ordre de construction]] — le principe (un critère de perf avant chaque étape suivante) est ce qui compte.
-> — Classement complet : [[Héritage voxel — audit]].
+> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Budgets et critères de performance tactiques]]**.
 
 Un critère de performance à valider avant de passer à l'étape suivante. Un critère raté = on optimise AVANT d'empiler le système suivant.
 

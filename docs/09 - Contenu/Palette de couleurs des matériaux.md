@@ -1,14 +1,13 @@
 ---
 aliases: ["F.1.1", "Annexe F.1.1", "Palette", "Couleurs des matériaux", "Palette de couleurs"]
-tags: [contenu, matériaux, art, catalogue, décidé, héritage-voxel]
+tags: [contenu, matériaux, art, catalogue, décidé]
 domaine: contenu
 statut: décidé
 etape: 1
 ---
 
-> [!warning] Héritage voxel
-> « Bruit par voxel en shader » se lit **par tuile** ; le remapping de palette en shader et la recolorisation par instance survivent tels quels en 2D.
-> — Classement complet : [[Héritage voxel — audit]].
+> [!note] Adapté au pivot tactique
+> Adapté au pivot : le bruit et le remapping de palette s'appliquent par tuile/pixel — mécanisme inchangé.
 
 Chaque hex est unique dans le catalogue — un doublon est une erreur bloquante de données.
 
@@ -40,7 +39,7 @@ Chaque hex est unique dans le catalogue — un doublon est une erreur bloquante 
 
 **Couleurs réservées à ne pas heurter ([[Squelette modulaire et points d'attache]]) :** #00FF00, #FF00FF, #00FFFF, #FFFF00. *Aucune de ces valeurs n'existe dans la palette F.1.1 (vérifié).*
 
-**Rendu ([[Voxels — mémoire et meshing]]) :** remapping des couleurs stand-in en shader (palette 256 entrées passée en uniform/texture 256×1). Le bruit par voxel est généré EN SHADER — zéro mémoire texture par bloc.
+**Rendu ([[Direction artistique]]) :** remapping des couleurs stand-in en shader (palette 256 entrées passée en uniform/texture 256×1). Le bruit par tuile/pixel est généré EN SHADER — zéro mémoire de texture.
 
 **Recolorisation par instance ([[Entités et pathfinding — performance]]) :** réutilisée par les monstres rares (or/argent/prismatique) et le drop de statue 1:1 (recolorisée en pierre).
 

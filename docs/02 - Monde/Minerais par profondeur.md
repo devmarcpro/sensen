@@ -8,7 +8,7 @@ etape: 8
 
 > [!warning] Héritage voxel
 > Les bandes en Y supposent qu'on creuse : héritage voxel. À remapper sur la **profondeur d'étage de donjon** ([[Génération de donjon]] : la corruption effective croît déjà avec l'étage) et la composition des **filons de surface** ([[Récolte]]) — ou à supprimer. La logique « risque/dureté/valeur montent ensemble » reste le principe à préserver.
-> — Classement complet : [[Héritage voxel — audit]].
+> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Minerais et strates après le pivot]]**.
 
 Les filons sont filtrés par bande de profondeur : plus c'est profond, meilleur c'est. Trois pressions (risque, dureté de la roche, valeur du minerai) montent ensemble sur la même verticale.
 

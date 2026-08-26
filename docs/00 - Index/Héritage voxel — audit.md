@@ -12,9 +12,17 @@ L'en-tête du GDD acte le pivot tactique (2026-08-09), mais les annexes D, E et 
 
 ---
 
+## État d'avancement (2026-08-26)
+
+- **Catégorie 1 : réécrite ✅** — les notes mènent désormais avec la version grille ; le texte voxel d'origine est conservé en fin de note comme « référence historique ».
+- **Catégorie 3 : appliquée ✅** — vocabulaire converti (blocs→tuiles, voxels→pixels, .vox→sprites) directement dans les notes.
+- **Catégorie 2 : propositions rédigées, à valider** — chaque conflit a sa proposition dans `99 - Ouvert/` : [[Proposition — Altitude sur 21 niveaux]] · [[Proposition — Structure de données de la grille]] · [[Proposition — Minerais et strates après le pivot]] · [[Proposition — Pièces en 2D]] · [[Proposition — Sculpture en pixel art]] · [[Proposition — Prefabs de donjon en tuiles]] · [[Proposition — Budgets et critères de performance tactiques]] · [[Proposition — Minimap en 2D]]. Les notes concernées gardent leur bandeau ⚠️ avec le lien vers la proposition ; il tombera à validation.
+
+---
+
 ## Catégorie 1 — Déjà tranché par le pivot, texte pas encore réécrit
 
-Le GDD post-pivot donne le remplacement ; la note contient encore l'ancien système. Réécriture mécanique possible sans nouvelle décision de design.
+Le GDD post-pivot donne le remplacement ; la note contenait encore l'ancien système. **Réécrit le 2026-08-26** — le texte voxel survit en annexe historique dans chaque note.
 
 | Note | Ce qui est obsolète | Ce que le pivot dit |
 |---|---|---|
@@ -30,7 +38,7 @@ Le GDD post-pivot donne le remplacement ; la note contient encore l'ancien syst�
 
 ## Catégorie 2 — Invalidé par le pivot, remplacement à décider
 
-L'ancien système ne tient plus, et le GDD ne dit pas ce qui le remplace. **Ce sont les vraies questions ouvertes de cet audit.**
+L'ancien système ne tient plus, et le GDD ne dit pas ce qui le remplace. **Chaque ligne a désormais sa proposition à valider** (liens dans l'état d'avancement ci-dessus) — sauf [[Explosions]], [[Tooltips contextuels]], [[Arborescence du projet]] et le vocabulaire de [[Véhicules]], finalement réglés mécaniquement (voir leurs bandeaux).
 
 | Note | Le conflit | La décision à prendre |
 |---|---|---|
@@ -51,7 +59,7 @@ L'ancien système ne tient plus, et le GDD ne dit pas ce qui le remplace. **Ce s
 
 ## Catégorie 3 — Vocabulaire seulement
 
-La mécanique tient sur la grille ; seules les unités et les mots datent. Remplacement systématique, sans décision :
+La mécanique tient sur la grille ; seules les unités et les mots dataient. **Appliqué le 2026-08-26** dans les notes concernées :
 
 - **« blocs » → « tuiles »** pour toute distance/portée : les modules de [[Modules]] (« téléporte 5 blocs », « cercle 3 blocs », « rue de 4 blocs »…), le spawn « 200 blocs » de [[Début de partie]], la propagation foudre « rayon 5 » de [[Eau et liquides]], « 1 bloc de dénivelé » → 1 niveau de hauteur ([[Véhicules]]), « −1/20 blocs » d'altitude…
 - **« .vox » → sprites 2D** : `vox_model`/`vox_slots` de [[Schéma objet et recette]], « comptage de voxels » → comptage de pixels ([[Stats d'un objet crafté]]), « bruit par voxel en shader » → par tuile ([[Palette de couleurs des matériaux]]), « impact meshing » de la transparence ([[Application des stats de matériau]], [[Catalogue matériaux — Synthétiques]]).

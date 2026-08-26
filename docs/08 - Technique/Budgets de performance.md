@@ -8,7 +8,7 @@ etape: 0
 
 > [!warning] Héritage voxel
 > Les chiffres de meshing (< 4 ms/chunk, 8 Ko/chunk) sont voxel ; les budgets de tick (< 8 ms) et d'entités (~64) restent valables. À rechiffrer pour le rendu tuiles + billboards.
-> — Classement complet : [[Héritage voxel — audit]].
+> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Budgets et critères de performance tactiques]]**.
 
 Les cibles chiffrées de performance.
 

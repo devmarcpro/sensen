@@ -8,7 +8,7 @@ etape: 8
 
 > [!warning] Héritage voxel
 > Trois détails héritage : `mod_altitude (-1/20 blocs)` et `mod_profondeur` (cavernes) à recalibrer sur les 21 niveaux et les étages de donjon ; la neige « bloc fin 4px » suppose la subdivision — en grille, un état de tuile suffit. Tout le reste (fonction pure, états, température, effets) tient.
-> — Classement complet : [[Héritage voxel — audit]].
+> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Altitude sur 21 niveaux]]**.
 
 La météo est une fonction pure du temps et du lieu, jamais une simulation — et elle porte de vraies mécaniques (température ressentie, foudre, gel, canicule).
 
@@ -43,40 +43,40 @@ EFFETS PAR ÉTAT :
              feux éteints, +1 niveau d'eau dans cavités (E.22),
              visibilité -20 % (détection E.16)
   Orage    : pluie + FOUDRE RÉELLE : impacts aléatoires, ciblage
-             pondéré par hauteur ET conductivité électrique du bloc
-             sommital (A.4.5) → un PARATONNERRE émergent : un mât de
+             pondéré par hauteur ET conductivité électrique de la tuile
+             la plus haute (A.4.5) → un PARATONNERRE émergent : un mât de
              fer/cuivre au point haut capte la foudre et protège
              (aucun système dédié — les stats des matériaux suffisent).
              Impact : dégâts zone 3d8, ignition (flammabilite), les
              entités dans l'eau connexe prennent la propagation (E.22).
-  Neige    : couche de NEIGE au sol (bloc fin 4px auto-posé sur les
+  Neige    : couche de NEIGE au sol (état de tuile auto-posé sur les
              surfaces exposées, paresseusement au chargement — comme
              la régénération 3.3), fond au redoux/sources de chaleur.
-  GEL      : température < -5 prolongée → la SURFACE des blocs d'eau
-             calmes devient GLACE (bloc réel, marchable, friction 5,
+  GEL      : température < -5 prolongée → les tuiles d'eau
+             calmes deviennent GLACE (tuile réelle, marchable, friction 5,
              cassable → re-eau) ; appliqué paresseusement au
              chargement de la zone selon la météo courante. Les lacs
              gelés ouvrent des raccourcis saisonniers ; la pêche/
              navigation s'arrêtent.
-  Blizzard : neige + froid extrême (-25) + visibilité 3 blocs +
+  Blizzard : neige + froid extrême (-25) + visibilité 3 tuiles +
              vent fort — voyager devient dangereux, s'abriter devient
              le gameplay.
   Canicule : +18, cultures flétrissent SANS arrosage manuel (7.4),
              l'eau peu profonde s'évapore (niveaux d'écoulement
              uniquement, jamais les sources, E.22), risque d'ignition
-             spontanée des blocs flammabilite >= 80 exposés.
+             spontanée des tuiles flammabilite >= 80 exposées.
   Tempête  : vent violent (véhicules à voiles ingouvernables, E.24),
-             projectiles déviés, arrachage des blocs très fragiles
-             exposés (durete <= 3 ET non-abrités : paille, chaume —
-             budget : quelques blocs/cellule max, jamais destructeur
+             projectiles déviés, arrachage des tuiles très fragiles
+             exposées (durete <= 3 ET non-abritées : paille, chaume —
+             budget : quelques tuiles/cellule max, jamais destructeur
              de bases en dur).
   Vent     : direction/force par cellule — DÉJÀ consommé par les
              voiles (E.24) ; la tempête/le calme plat en sont les
              extrêmes.
 
 MATÉRIAUX : Glace et Neige ajoutés au catalogue (F.1) — matériaux
-  réels à part entière (constructibles : la glace est un vrai bloc,
-  transparent, glissant ; fond près des sources de chaleur).
+  réels à part entière (constructibles : la glace est une vraie tuile,
+  transparente, glissante ; fond près des sources de chaleur).
 DONNÉES : data/weather_states.json (états, modificateurs, effets) —
   ajouter un état météo = une entrée, zéro code (section 10).
 SAISONS : non incluses pour l'instant ; la génération temporelle est

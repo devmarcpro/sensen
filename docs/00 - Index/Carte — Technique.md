@@ -8,7 +8,7 @@ etape: 0
 
 L'architecture Godot et la stratégie de performance. 16 notes.
 
-> [!warning] C'est le dossier le plus touché par l'**héritage voxel** : la plupart des notes de performance et plusieurs décisions d'architecture décrivent encore l'ancien moteur. Lire [[Héritage voxel — audit]] avant de s'appuyer sur ce dossier.
+> [!note] Ce dossier était le plus touché par l'**héritage voxel**. Nettoyé le 2026-08-26 : les notes corrigibles sont réécrites (texte d'origine en annexe historique), les conflits restants ont chacun leur proposition à valider — [[Héritage voxel — audit]].
 
 **Les fondations**
 - **[[Data-driven design]]** — *les systèmes réagissent aux tags présents, pas à des identifiants codés en dur.* Le principe qui permet l'interaction inter-systèmes.

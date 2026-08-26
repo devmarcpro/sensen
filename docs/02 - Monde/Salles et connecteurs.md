@@ -8,7 +8,7 @@ etape: 2
 
 > [!warning] Héritage voxel
 > `vox_model` et les positions 3D des connecteurs sont héritage : les prefabs deviennent des **plans de tuiles 2D par étage** (avec hauteurs de tuile pour estrades/fosses). Les points d'attache typés et `special_tags` survivent.
-> — Classement complet : [[Héritage voxel — audit]].
+> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Prefabs de donjon en tuiles]]**.
 
 Le format de données des prefabs de donjon : salles et connecteurs, avec leurs points d'attache typés.
 

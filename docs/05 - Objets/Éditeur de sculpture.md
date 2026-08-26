@@ -1,16 +1,40 @@
 ---
 aliases: ["E.9", "Annexe E.9", "Éditeur de sculpture", "Périmètres de sculpture"]
-tags: [objets, craft, technique, décidé, héritage-voxel]
+tags: [objets, craft, technique, décidé]
 domaine: objets
 statut: décidé
 etape: 6
 ---
 
-> [!warning] Héritage voxel
-> L'éditeur **voxel** (périmètres 16³ → 64×64×96, subdivision, ghost 3D) est héritage : [[Construction cadrée]] et [[Tables de sculpture]] passent la sculpture en **pixel art paramétrique**. Le principe (matériaux débités de l'inventaire, stats par comptage, modèle réutilisable, partage explicite) survit ; périmètres et résolution 2D **à re-décider**.
-> — Classement complet : [[Héritage voxel — audit]].
+> [!note] Adapté au pivot tactique
+> L'éditeur voxel d'origine est conservé en fin de note. La sculpture est désormais en **pixel art paramétrique** ([[Construction cadrée]], [[Tables de sculpture]]). Périmètres et pipeline 2D chiffrés : [[Proposition — Sculpture en pixel art]].
 
-L'éditeur EST le moteur voxel du jeu, dans un mini-espace isolé — avec les périmètres chiffrés par table.
+L'éditeur de sculpture : un canevas de pixels où le joueur pose ses vrais matériaux — le principe d'E.9 transposé en 2D.
+
+```
+L'éditeur est un canevas de PIXELS isolé (périmètre selon la table —
+valeurs proposées en [[Proposition — Sculpture en pixel art]] : items
+16×16, armes 16×48, meubles 32×32, blocs 16×16, structures 64×64,
+véhicules 96×64), avec pose/gomme/ghost preview.
+1 pixel = 1 unité de matériau, débitée de l'inventaire en temps réel
+(rendue si effacée) ; le pixel s'affiche à la couleur réelle du
+matériau (palette F.1.1) — pas de remapping pendant la sculpture.
+Validation → génère : sprite (vue isométrique de référence) +
+composition par matériau, stat_weights (comptage de pixels, A.4),
+entrée d'objet (B.3) sauvegardée dans le profil du joueur,
+partageable en coop (copie du modèle vers le catalogue du groupe,
+sur action explicite du créateur).
+```
+
+**Écran dédié ([[Écrans d'interface]]) :** *Fenêtre de sculpture*.
+
+**Sauvegarde ([[Sauvegarde]]) :** les modèles sculptés vivent dans `players/*.json` — inchangé.
+
+**Blocs fonctionnels des véhicules ([[Véhicules]]) :** des **pixels-marqueurs typés** visibles (siège de pilote, gouvernail, mât+voile, roues, coffres) — mêmes couleurs réservées que les points d'attache ([[Squelette modulaire et points d'attache]]). La validation vérifie les requis de la fonctionnalité choisie, seule « contrainte de forme » du jeu.
+
+---
+
+### Texte voxel d'origine (référence historique, E.9)
 
 ```
 L'éditeur EST le moteur voxel du jeu : un mini-espace voxel isolé
@@ -24,15 +48,7 @@ le profil du joueur, partageable en coop (copie du modèle vers le
 catalogue du groupe, sur action explicite du créateur).
 ```
 
-**Écran dédié ([[Écrans d'interface]]) :** *Fenêtre de sculpture*.
-
-**Sauvegarde ([[Sauvegarde]]) :** les modèles sculptés vivent dans `players/*.json`.
-
-**Blocs fonctionnels des véhicules ([[Véhicules]]) :** pendant la sculpture d'un véhicule, le joueur place des blocs spéciaux visibles (siège de pilote, gouvernail, mât+voile, roues, coffres) — la validation vérifie les requis de la fonctionnalité choisie, seule « contrainte de forme » du jeu.
-
-**Budget de subdivision ([[Voxels — mémoire et meshing]]) :** 512 blocs subdivisés par chunk — garde-fou qui évite qu'une méga-sculpture 1px fasse exploser mémoire et meshing.
-
 ## Liens
-- **Dépend de** : [[Tables de sculpture]], [[Voxels — mémoire et meshing]], [[Stats d'un objet crafté]]
+- **Dépend de** : [[Tables de sculpture]], [[Stats d'un objet crafté]], [[Proposition — Sculpture en pixel art]]
 - **Alimente** : [[Schéma objet et recette]], [[Véhicules]], [[Sauvegarde]]
-- **Voir aussi** : [[Écrans d'interface]], [[Multijoueur]], [[Construction cadrée]]
+- **Voir aussi** : [[Écrans d'interface]], [[Multijoueur]], [[Construction cadrée]], [[Palette de couleurs des matériaux]]

@@ -8,7 +8,7 @@ etape: 0
 
 > [!warning] Héritage voxel
 > `chunks/x_y_z.bin` et « octree sérialisé » sont héritage : le format du diff est à réexprimer sur la grille de tuiles. Le principe — jamais de sauvegarde complète, `seed + liste des modifications` — survit intégralement.
-> — Classement complet : [[Héritage voxel — audit]].
+> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Structure de données de la grille]]**.
 
 Le format de sauvegarde : un dossier par monde, seuls les chunks modifiés écrits.
 

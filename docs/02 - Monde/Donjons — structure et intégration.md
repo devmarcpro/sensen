@@ -1,14 +1,13 @@
 ---
 aliases: ["3.5", "3.5 Donjons", "Donjons", "Donjon"]
-tags: [monde, donjon, décidé, héritage-voxel]
+tags: [monde, donjon, décidé]
 domaine: monde
 statut: décidé
 etape: 2
 ---
 
-> [!warning] Héritage voxel
-> Le passage « l'intérieur occupe le volume de chunks sous/autour de la cellule » est héritage : [[Grille continue]] fait des donjons des **grilles séparées en étages discrets** reliés par escaliers. Tout le reste de la note (rôle, génération, persistance, intégration) est post-pivot et valide.
-> — Classement complet : [[Héritage voxel — audit]].
+> [!note] Adapté au pivot tactique
+> Adapté au pivot : chaque étage est une grille bornée indépendante ([[Grille continue]]) — le passage « volume de chunks » d'origine est conservé entre parenthèses dans le corps.
 
 Les donjons sont une des sources principales de contenu du jeu, et le premier espace jouable à construire — une grille bornée ne nécessite aucune génération de monde.
 
@@ -30,7 +29,7 @@ Les donjons sont une des sources principales de contenu du jeu, et le premier es
 **Occupation de la cellule sur la carte du monde :**
 - Le **terrain de surface** de la cellule où apparaît un donjon est remplacé par une structure d'entrée scellée (ruine effondrée, faille, gouffre, portail muré...) — non claimable ([[Claims et persistance]]), non cultivable ; le reste de la cellule est naturellement impraticable autour du point d'entrée unique.
 - **Voyage rapide restreint au point d'entrée** : la carte du monde ne peut cibler que l'entrée — jamais un point arbitraire à l'intérieur (les étages empilés n'ont pas de représentation 2D unique). Une fois entré, exploration entièrement à pied, façon roguelike classique.
-- Techniquement, l'intérieur occupe le volume de chunks sous/autour de la cellule — toujours le même monde continu, juste une structure très dense et fermée (aucune exception d'architecture, [[Décisions d'architecture]]/[[Voxels — mémoire et meshing]] s'appliquent tels quels).
+- Techniquement, chaque étage est une **grille bornée indépendante** ([[Grille continue]] : « grilles séparées en étages discrets », mêmes chunks de tuiles que la surface — [[Proposition — Structure de données de la grille]]). *(Texte voxel d'origine : « l'intérieur occupe le volume de chunks sous/autour de la cellule — toujours le même monde continu ».)*
 
 **Persistance et nettoyage (fixe, pas de repop avant nettoyage complet) :**
 - Mobs et loot générés sont **fixes** : explorer un donjon, c'est le vider progressivement — aucune régénération interne tant qu'il n'est pas entièrement nettoyé (contrairement à la surface, [[Claims et persistance]]). Les changements (morts, butin pris, blocs détruits) suivent exactement la sauvegarde différentielle standard ([[Sauvegarde]]) : rien de nouveau à construire.

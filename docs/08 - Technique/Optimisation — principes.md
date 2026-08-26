@@ -1,14 +1,13 @@
 ---
 aliases: ["G.1", "Annexe G.1", "Annexe G", "Optimisation", "Principes transversaux"]
-tags: [technique, performance, décidé, héritage-voxel]
+tags: [technique, performance, décidé]
 domaine: technique
 statut: décidé
 etape: 0
 ---
 
-> [!warning] Héritage voxel
-> Les principes transversaux (GDScript typé, zéro allocation, time-slicing, threads, tout seedé) restent valables tels quels. Héritage : les « candidats probables » meshing/éclairage 3D, et « PackedByteArray pour les données voxel » — à relire pour la grille 2D.
-> — Classement complet : [[Héritage voxel — audit]].
+> [!note] Adapté au pivot tactique
+> Adapté au pivot : candidats GDExtension et files de travail révisés pour la grille 2D (plus de meshing). Les principes transversaux sont inchangés.
 
 Les cinq principes transversaux d'optimisation — ceux qu'on ne peut pas rattraper après coup.
 
@@ -19,19 +18,19 @@ Les cinq principes transversaux d'optimisation — ceux qu'on ne peut pas rattra
 ```
 - GDScript TYPÉ partout (annotations de types : gain réel d'interpréteur,
   gratuit). Chemins chauds identifiés au profilage → GDExtension/Rust,
-  jamais préventivement. Candidats probables : meshing, éclairage,
-  bruit de génération, A*.
+  jamais préventivement. Candidats probables : bruit de génération, A*,
+  compositing de billboards, éclairage 2D.
 - AUCUNE allocation dans les boucles par tick : pools d'objets
   (entités, projectiles, particules), tableaux préalloués réutilisés,
-  PackedByteArray/PackedInt32Array pour les données voxel (jamais des
+  PackedByteArray/PackedInt32Array pour les données de grille (jamais des
   Array de Variant).
 - TIME-SLICING : chaque système lourd a un budget par tick et une file
-  de travail reportable (meshing, éclairage, nav-grille, pathfinding,
+  de travail reportable (éclairage, nav-grille, pathfinding,
   liquides, détection de pièces). Rien ne "finit coûte que coûte" dans
   la même frame.
-- Threads : génération, meshing, éclairage et sauvegarde HORS thread
+- Threads : génération, éclairage et sauvegarde HORS thread
   principal (WorkerThreadPool Godot). Le thread principal ne fait que :
-  tick de gameplay, upload de meshes prêts, rendu, UI.
+  tick de gameplay, upload des rendus prêts, rendu, UI.
 - Tout est SEEDÉ et déterministe → jamais besoin de stocker ce qui est
   regénérable (principe déjà acté E.10, il vaut pour tout).
 ```

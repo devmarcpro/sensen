@@ -1,14 +1,13 @@
 ---
 aliases: ["13", "13. Tables de sculpture", "Tables de sculpture", "Sculpture"]
-tags: [objets, craft, décidé, héritage-voxel]
+tags: [objets, craft, décidé]
 domaine: objets
 statut: décidé
 etape: 6
 ---
 
-> [!warning] Héritage voxel
-> Les mentions « voxel par voxel » et « pondération voxel » sont héritage : la sculpture est désormais en **pixel art paramétrique** ([[Construction cadrée]]). Tout le reste — déroulé, obtention par guilde, qualité, partage — survit tel quel.
-> — Classement complet : [[Héritage voxel — audit]].
+> [!note] Adapté au pivot tactique
+> Adapté au pivot : sculpture en **pixel art paramétrique** — « voxel par voxel » corrigé en « pixel par pixel ». Détail du pipeline 2D : [[Proposition — Sculpture en pixel art]].
 
 Des stations spéciales où le joueur designe lui-même la forme de ses objets — jamais obligatoire, toujours mérité par un rang de guilde.
 
@@ -26,7 +25,7 @@ Des stations spéciales où le joueur designe lui-même la forme de ses objets �
 7. Le joueur peut ensuite **refabriquer le même modèle à volonté**, tant qu'il dispose des matériaux nécessaires — le design sauvegardé devient une recette réutilisable.
 
 **Lien avec les autres systèmes :**
-- Se distingue des objets pré-modélisés par l'équipe (loot, PNJ marchands) qui utilisent la technique de couleurs "stand-in" remappées : ici, le joueur place directement les vrais matériaux voxel par voxel, donc pas besoin de remapping de couleur — la couleur/texture réelle du matériau s'affiche nativement pendant la sculpture.
+- Se distingue des objets pré-modélisés par l'équipe (loot, PNJ marchands) qui utilisent la technique de couleurs "stand-in" remappées : ici, le joueur place directement les vrais matériaux pixel par pixel, donc pas besoin de remapping de couleur — la couleur/texture réelle du matériau s'affiche nativement pendant la sculpture.
 - S'articule avec le système de matériaux et de compétence d'artisanat ([[Matériaux — 13 stats]], [[Qualité d'artisanat]]).
 
 **Taille du périmètre :** dépend de la table/fonctionnalité choisie (ex : la table à véhicules offre un périmètre bien plus grand qu'une table à items) — chiffres en [[Éditeur de sculpture]].
@@ -52,7 +51,7 @@ Les tables de sculpture ne s'achètent pas et ne se craftent pas librement : ell
 Ça renforce l'identité mécanique de chaque guilde (récompense désirable au-delà de l'or) et fait de la sculpture un privilège mérité, cohérent avec son statut optionnel.
 
 **Décisions :**
-- **Qualité sur les objets sculptés : oui** — même formule [[Qualité d'artisanat]], sur la compétence d'artisanat associée à la table utilisée. Un objet sculpté = stats des matériaux (pondération voxel) × qualité, exactement comme un craft simple.
+- **Qualité sur les objets sculptés : oui** — même formule [[Qualité d'artisanat]], sur la compétence d'artisanat associée à la table utilisée. Un objet sculpté = stats des matériaux (pondération par pixels) × qualité, exactement comme un craft simple.
 - **Contrainte de forme : aucune** — forme totalement libre, la fonctionnalité choisie fait foi. **Unique exception : les véhicules** ([[Véhicules]], blocs fonctionnels requis).
 - **Partage : échange manuel explicite** — le créateur pousse un design vers le **catalogue de groupe** sur action volontaire ([[Éditeur de sculpture]]) ; jamais de partage automatique.
 - **Rangs de déblocage (structure 5 rangs, [[Quêtes et guildes]]) :** accès aux tables des locaux de guilde au rang **3 (Adepte)** ; station personnelle au rang **4 (Expert)**.

@@ -17,7 +17,7 @@ Les 4 matériaux fabriqués en station — pas de récolte possible.
 | Chaume tressé | 3 | 2 | 2 | 5 | 90 | 65 | 3 | 88 | 0 | 0 | 0 | 55 | 60 | Atelier tissage (paille) |
 | Papier | 1 | 1 | 3 | 25 | 95 | 25 | 3 | 90 | 0 | 0 | 15 | 20 | 45 | Scierie (bois) |
 
-**Transparence ([[Application des stats de matériau]]) :** `transparence >= 50` → le bloc laisse passer lumière et regard (fenêtres, serres) — le **Verre** (95) est le matériau canonique. Impact meshing : passe de rendu séparée ([[Voxels — mémoire et meshing]]).
+**Transparence ([[Application des stats de matériau]]) :** `transparence >= 50` → le bloc laisse passer lumière et regard (fenêtres, serres) — le **Verre** (95) est le matériau canonique. Impact rendu : passe séparée ([[Éclairage]]).
 
 **Fragilité en tempête ([[Météo]]) :** le **Chaume tressé** (Dur 3) fait partie des blocs très fragiles arrachés par la tempête, avec la paille.
 
