@@ -1,0 +1,27 @@
+{
+  "name_key": "creature_action.becquetage.name",
+  "elements": {
+    "metal": 1.0
+  },
+  "forme": "cible_unique",
+  "portee": [
+    1,
+    1
+  ],
+  "taille": 1,
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 6,
+  "cout_endurance": 5,
+  "degats_des": "1d4",
+  "type_degats": "perforant",
+  "conditions": [],
+  "effets": [
+    {
+      "type": "degats"
+    }
+  ],
+  "tags": [
+    "coup"
+  ]
+}

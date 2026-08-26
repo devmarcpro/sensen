@@ -1,44 +1,29 @@
 {
-  "_doc": "Créature/PNJ (docs: Schéma créature / B.5). Tout être vivant, monstre comme marchand.",
+  "_doc": "Être (docs: Schéma créature / B.5, Blocs de l'être / H.7). Tout être vivant, monstre comme marchand comme joueur — le contrôle est décidé à l'instanciation, jamais ici. sante_max = 20 + endurance × 4 (combat_rules.stats).",
   "name_key": "creature.<id>.name",
-  "skeleton_template": "humanoide",
-  "parts_pool": {
-    "tete": [
-      1
-    ],
-    "torse": [
-      1
-    ],
-    "bras": [
-      1
-    ],
-    "jambes": [
-      1
-    ]
-  },
   "race": "humain",
-  "base_stats": {
-    "sante": 40,
-    "force": 8,
-    "volonte": 6,
-    "vitesse": 10
+  "classe": "Le Sabre",
+  "fonction": "aventurier",
+  "skeleton_template": "humanoide",
+  "corps": {
+    "stats": {
+      "force": 9,
+      "dexterite": 9,
+      "endurance": 9,
+      "volonte": 9,
+      "perception": 9,
+      "charisme": 9
+    },
+    "silhouette": "humanoide"
   },
-  "equip_slots": "humanoide_standard",
-  "inventory_table": null,
-  "ai_profile": "civil",
-  "actions": [
-    "<ids creature_actions>"
-  ],
-  "jobs_compatible": [],
-  "housing_default": "normal",
-  "recruitable": {
-    "method": "relation",
-    "threshold": 60
-  },
-  "leadership_role": null,
-  "succession_rule": null,
-  "rare_chance": 0.02,
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [],
+  "equipement": [],
+  "ratelier": [],
   "chain_gauge": false,
   "elements": null,
+  "rare_chance": 0.02,
+  "teinte": [0.8, 0.8, 0.8],
   "tags": []
 }

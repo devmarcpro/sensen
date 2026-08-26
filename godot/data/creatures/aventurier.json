@@ -1,0 +1,47 @@
+{
+  "name_key": "creature.aventurier.name",
+  "race": "humain",
+  "skeleton_template": "humanoide",
+  "corps": {
+    "stats": {
+      "force": 12,
+      "dexterite": 10,
+      "endurance": 12,
+      "volonte": 8,
+      "perception": 10,
+      "charisme": 8
+    },
+    "silhouette": "humanoide"
+  },
+  "esprit": null,
+  "ai_profile": "compagnon",
+  "actions": [],
+  "equipement": [
+    "proto_epee",
+    "proto_casque_cuir",
+    "proto_cuirasse_cuir"
+  ],
+  "ratelier": [
+    "proto_dague",
+    "proto_epee",
+    "proto_masse",
+    "proto_lance",
+    "proto_arc",
+    "proto_baton_magique",
+    "proto_bouclier"
+  ],
+  "chain_gauge": false,
+  "elements": null,
+  "rare_chance": 0.0,
+  "teinte": [
+    0.28,
+    0.62,
+    0.92
+  ],
+  "tags": [
+    "humanoide",
+    "aventurier"
+  ],
+  "classe": "Le Sabre",
+  "fonction": "aventurier"
+}

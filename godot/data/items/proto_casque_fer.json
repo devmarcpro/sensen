@@ -1,0 +1,15 @@
+{
+  "name_key": "item.proto_casque_fer.name",
+  "type": "armure",
+  "equip_slot": "casque",
+  "hands": 0,
+  "zone": "tete",
+  "construction": "plaque",
+  "durete_composite": 20,
+  "qualite": 1.0,
+  "niveau_construction": 0,
+  "tags": [
+    "armure",
+    "prototype"
+  ]
+}

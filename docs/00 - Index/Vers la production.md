@@ -8,7 +8,16 @@ etape: 0
 
 **Le design est complet et décidé.** Il ne reste ni question bloquante ni valeur à inventer : tout ce qui était ouvert porte une décision ou un défaut chiffré. Ce qui suit est l'état de production — ce qui est fait, et ce qui reste à *produire* (assets, code).
 
-> [!important] Le code a commencé — démo 0 jouable (2026-08-26)
+> [!important] Étape 0 en cours — jalons 1 à 4 codés (2026-08-26, soir)
+> La démo 0 est devenue le **prototype de combat** : `godot/scenes/demo/main.tscn` charge les **3 arènes** depuis `data/prototype_arenas/` (Tab pour changer), avec autoloads GameData/EventBus/TickManager, grille SoA + A* 8 directions + ligne de vue, simulation autoritaire (intentions → résolution), une horloge par combat, mêlée avec zones par dénivelé et armure plate, garde frontale, attaque lourde télégraphée, endurance, attendre, chute, IA utility en données et les 24 actions de créatures. Tests headless : `scenes/tests/test_combat.tscn`. Détail et jalons restants : [[Prototype de combat — spécification]].
+>
+> **À juger à l'œil (ouvrir `godot/` dans l'éditeur, F5) — questions à trancher :**
+> 1. *Lisibilité de l'iso 32×32 à 40×20 px par tuile* : le relief se lit-il ? Faut-il des ombres de flanc plus marquées ou une grille ? (molette : zoom, clic milieu : déplacer la vue)
+> 2. *Rythme des horloges de combat* : `DELAI_PAS = 0.12 s` entre deux pas — trop lent ? trop rapide pour suivre les loups ?
+> 3. *Le télégraphe* (« ! » + tuiles rouges pendant une lourde ou une charge) : est-il vu à temps ?
+> 4. *Les coûts sur les tuiles* (jaune, budget 12 ticks) : utiles ou bruit ?
+>
+> [!note] Démo 0 (2026-08-26, matin)
 > `godot/scenes/demo/main.tscn` : grille iso 24×24 générée (hauteurs 0-20, continentalité + crête ridged), tri de profondeur, déplacement au clic par A* qui applique les **coûts de pente** de [[Hauteur de terrain ±10]] (3/5/8/∞, descente 2), et l'**horloge à ticks** de [[Boucle de tick]] : 10 ticks/s en exploration, **0 tick sans action** en combat, chaque entité agit quand son compteur est le plus bas. Un loup chasse et mord (aggro à 6 tuiles). Aucun asset — tout est polygones. Validée en headless (Godot 4.6.3). **À juger à l'œil : ouvrir `godot/` dans l'éditeur et lancer.**
 
 > [!success] Bloquant levé le 2026-08-26
@@ -70,8 +79,8 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 
 - [x] **Pipeline de contenu décidé et squeletté** ([[Décision — Pipeline de contenu]]) : `godot/data/` contient les 24 catalogues avec leurs `_template.json` et son README — ajouter du contenu = ajouter un fichier JSON.
 
-- [ ] Projet Godot 4.x : squelette en place (`godot/`, arborescence D.1 — [[Arborescence du projet]]). À l'ouverture du chantier : autoloads GameData/EventBus/TickManager en premier ([[Décisions d'architecture]], [[Simulation à ticks]]), validation de schémas au boot, `tr()` dès le premier écran.
-- [ ] Les quatre [[Contraintes permanentes]] s'appliquent dès la première ligne — en particulier serveur autoritaire en solo et zéro `_process(delta)` dans la logique.
+- [x] Projet Godot 4.6 : autoloads **GameData/EventBus/TickManager** en place ([[Décisions d'architecture]], [[Simulation à ticks]]), validation de schémas au boot (bloquante en debug, F5 recharge), `tr()` sur toute chaîne affichée (`locale/fr.csv`, `en.csv`) — 2026-08-26.
+- [x] Les [[Contraintes permanentes]] tiennent dès la première ligne : `Simulation` autoritaire et `main.gd` client dans le même processus mais pas le même code ; aucune logique dans `_process` (le seul `delta` est converti en ticks par le TickManager) ; une horloge par combat ; le joueur est une fiche `creatures/aventurier.json` comme les autres.
 - [ ] Critère de perf avant chaque étape ([[Ordre de vérification]]).
 
 ## 7. Gouvernance du design
@@ -81,7 +90,7 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 
 ## Le chemin critique, en une ligne
 
-**~~Valider P2 + P7~~ ✅ → ~~écrire le document du prototype de combat (et trancher les 7 trous)~~ ✅ → ~~produire les 5 modules Métal + le catalogue d'actions de créatures~~ ✅ → **la silhouette paperdoll → coder l'étape 0**** ([[Prototype de combat — spécification]], jalon 1). Tout le reste peut suivre la cadence des 11 étapes.
+**~~Valider P2 + P7~~ ✅ → ~~écrire le document du prototype de combat~~ ✅ → ~~produire les 5 modules Métal + le catalogue d'actions~~ ✅ → ~~jalons 1-4 de l'étape 0~~ ✅ → **jalons 5-12 de l'étape 0** ([[Prototype de combat — spécification]] : Wu Xing, jauge, râtelier, modules, projectiles, élites, écran de fin) → juger le combat. Tout le reste peut suivre la cadence des 11 étapes.
 
 ## Liens
 - **Dépend de** : [[Ordre de construction]], [[Héritage voxel — audit]], [[Trous connus du combat]]

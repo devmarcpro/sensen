@@ -1,0 +1,55 @@
+{
+  "type": "object",
+  "properties": {
+    "deplacement": {
+      "type": "object"
+    },
+    "actions": {
+      "type": "object"
+    },
+    "endurance": {
+      "type": "object"
+    },
+    "garde": {
+      "type": "object"
+    },
+    "zones": {
+      "type": "object"
+    },
+    "armure": {
+      "type": "object"
+    },
+    "degats": {
+      "type": "object"
+    },
+    "stats": {
+      "type": "object"
+    },
+    "vision": {
+      "type": "object"
+    },
+    "engagement": {
+      "type": "object"
+    },
+    "ia": {
+      "type": "object"
+    },
+    "ticks_par_seconde_exploration": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "ticks_par_seconde_exploration",
+    "deplacement",
+    "actions",
+    "endurance",
+    "garde",
+    "zones",
+    "armure",
+    "degats",
+    "stats",
+    "vision",
+    "engagement",
+    "ia"
+  ]
+}

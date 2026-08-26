@@ -45,6 +45,9 @@ Le registre complet vit dans `godot/data/README.md` (versionné avec les donnée
 - **L'itération est instantanée** : éditer un JSON, F5, tester — la boucle de tuning des 3 arènes du prototype ([[Prototype de combat — spécification]]) repose dessus.
 - **Pas d'éditeur interne au lancement** ([[Data-driven design]], décision confirmée) : JSON à la main + templates + validation stricte suffisent ; un éditeur visuel ne sera envisagé que si le volume le justifie.
 
+> [!success] Précisé le 2026-08-26 — noms d'API et configurations
+> En GDScript `get()` est réservé par `Object` : les deux portes d'entrée s'appellent **`GameData.entree(catalogue, id)`** et **`GameData.par_tag(catalogue, tag)`** ; les configurations se lisent par **`GameData.config(nom)`** / **`GameData.regle("combat_rules/endurance/max")`**. Deux configurations ajoutées : **`combat_rules.json`** (toutes les constantes chiffrées du combat, chacune citant sa note) et **`tile_contents.json`** (contenus de tuile par tags). Un fichier dont le champ `id` diffère du nom est une erreur. Après un clone, `Godot --headless --path godot --import` construit le cache des classes (`.godot/`, ignoré par git).
+
 ## Liens
 - **Dépend de** : [[Data-driven design]], [[Décisions d'architecture]], [[Contraintes permanentes]]
 - **Alimente** : [[Arborescence du projet]], [[Prototype de combat — spécification]], tous les schémas de l'Annexe B

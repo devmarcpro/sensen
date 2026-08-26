@@ -1,0 +1,119 @@
+{
+  "type": "object",
+  "properties": {
+    "name_key": {
+      "type": "string"
+    },
+    "elements": {
+      "type": "object"
+    },
+    "forme": {
+      "type": "string",
+      "enum": [
+        "cible_unique",
+        "ligne",
+        "cone",
+        "croix",
+        "carre",
+        "anneau",
+        "diagonale",
+        "chemin",
+        "soi",
+        "tuile"
+      ]
+    },
+    "portee": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "taille": {
+      "type": "integer"
+    },
+    "cible": {
+      "type": "string",
+      "enum": [
+        "ennemi",
+        "allie",
+        "soi",
+        "tuile",
+        "toute_entite"
+      ]
+    },
+    "ligne_de_vue": {
+      "type": "boolean"
+    },
+    "cout_ticks": {
+      "type": "integer"
+    },
+    "cout_endurance": {
+      "type": "integer"
+    },
+    "degats_des": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "type_degats": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "tranchant",
+        "perforant",
+        "contondant",
+        null
+      ]
+    },
+    "conditions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      }
+    },
+    "effets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "name_key",
+    "elements",
+    "forme",
+    "portee",
+    "cible",
+    "cout_ticks",
+    "cout_endurance",
+    "effets",
+    "tags"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "name_key": "creature.loup.name",
+  "race": "loup",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 7,
+      "dexterite": 12,
+      "endurance": 5,
+      "volonte": 3,
+      "perception": 12,
+      "charisme": 2
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "morsure",
+    "harcelement_meute",
+    "hurlement"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": null,
+  "rare_chance": 0.0,
+  "teinte": [
+    0.55,
+    0.5,
+    0.45
+  ],
+  "tags": [
+    "bete",
+    "meute"
+  ]
+}

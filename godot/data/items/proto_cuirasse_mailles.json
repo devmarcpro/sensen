@@ -1,0 +1,15 @@
+{
+  "name_key": "item.proto_cuirasse_mailles.name",
+  "type": "armure",
+  "equip_slot": "cuirasse",
+  "hands": 0,
+  "zone": "torse",
+  "construction": "mailles",
+  "durete_composite": 20,
+  "qualite": 1.0,
+  "niveau_construction": 0,
+  "tags": [
+    "armure",
+    "prototype"
+  ]
+}

@@ -1,0 +1,673 @@
+class_name Simulation
+extends RefCounted
+## La simulation autoritaire — le « serveur », même en solo (Contraintes permanentes, règle 1).
+## Le client envoie des INTENTIONS (`intention()`), lit l'ÉTAT (`entites`, `grille`) et rythme
+## l'avancement (`pas()`) ; il ne décide de rien. Aucune lecture d'input ici.
+## Temps : une horloge du monde (temps réel) et une par combat (action) — Temporalités
+## parallèles. Ordre d'un tick : entités → systèmes → EventBus (Boucle de tick).
+
+var graine: int
+var des: Des
+var regles: Regles
+var grille: Grille
+var arene_id: String
+var entites: Dictionary = {}          # id → être (Etres.instancier)
+var ordre: Array[String] = []         # ordre stable des ids (départage des égalités de compteur)
+var items: Dictionary
+var fonctionnalites: Dictionary
+var actions_creatures: Dictionary
+var profils_ia: Dictionary
+var horloge_monde: Horloge
+var combats: Dictionary = {}          # nom → {"horloge": Horloge, "participants": Array[String]}
+var attente: Dictionary = {}          # id → true : une entité contrôlée attend une intention
+var _n_combats := 0
+var _n_entites := 0
+
+
+func _init(p_graine: int) -> void:
+	graine = p_graine
+	des = Des.new(p_graine)
+	regles = Regles.new(GameData.config("combat_rules"))
+	items = GameData.catalogues.get("items", {})
+	fonctionnalites = GameData.catalogues.get("functionalities", {})
+	actions_creatures = GameData.catalogues.get("creature_actions", {})
+	profils_ia = GameData.catalogues.get("ai_profiles", {})
+
+
+# ---------------------------------------------------------------- mise en place
+
+## Charge une arène de data/prototype_arenas et instancie ses êtres.
+func charger_arene(id: String) -> void:
+	arene_id = id
+	var arene := GameData.entree("prototype_arenas", id)
+	grille = Grille.depuis_arene(arene, GameData.config("tile_contents"),
+		regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
+	entites.clear()
+	ordre.clear()
+	combats.clear()
+	attente.clear()
+	for nom in TickManager.horloges.keys():
+		TickManager.retirer(nom)
+	horloge_monde = TickManager.creer("monde", Horloge.Mode.TEMPS_REEL, float(regles.r.ticks_par_seconde_exploration))
+	horloge_monde.avancee.connect(_sur_avancee_monde)
+	var j: Dictionary = arene.spawns.player
+	ajouter(j.creature, Vector2i(int(j.pos[0]), int(j.pos[1])), "joueur")
+	for s: Dictionary in arene.spawns.enemies:
+		ajouter(s.creature, Vector2i(int(s.pos[0]), int(s.pos[1])), "ia")
+
+
+func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
+	_n_entites += 1
+	var id := "%s_%d" % [def_id, _n_entites]
+	var e := Etres.instancier(id, GameData.entree("creatures", def_id), pos, controle, regles, items)
+	entites[id] = e
+	ordre.append(id)
+	grille.placer(id, pos)
+	return e
+
+
+func vivants() -> Array[Dictionary]:
+	var res: Array[Dictionary] = []
+	for id in ordre:
+		if entites[id].vivant:
+			res.append(entites[id])
+	return res
+
+
+func horloge_de(e: Dictionary) -> Horloge:
+	return horloge_monde if e.horloge == "monde" else combats[e.horloge].horloge
+
+
+func en_combat(e: Dictionary) -> bool:
+	return e.horloge != "monde"
+
+
+# ---------------------------------------------------------------- avancement
+
+## Fait agir la prochaine entité de l'horloge `nom`. Retourne false si l'horloge est bloquée
+## sur une entité contrôlée qui attend une intention (réfléchir est gratuit).
+func pas(nom: String) -> bool:
+	var h: Horloge = horloge_monde if nom == "monde" else combats[nom].horloge
+	var e := _prochaine(nom)
+	if e.is_empty():
+		return false
+	if h.mode == Horloge.Mode.ACTION:
+		h.sauter_a(e.compteur)
+	elif e.compteur > h.ticks:
+		return false
+	_regenerer(e, h.ticks)
+	if not e.action_en_cours.is_empty():
+		var a: Dictionary = e.action_en_cours
+		e.action_en_cours = {}
+		_resoudre_action_engagee(e, a)
+		_fin_de_pas(nom)
+		return true
+	if e.controle == "joueur":
+		attente[e.id] = true
+		return false
+	_decider_ia(e, h.ticks)
+	_fin_de_pas(nom)
+	return true
+
+
+## L'entité vivante de cette horloge au plus petit compteur (ordre d'ajout en cas d'égalité).
+func _prochaine(nom: String) -> Dictionary:
+	var meilleure := {}
+	for id in ordre:
+		var e: Dictionary = entites[id]
+		if e.vivant and e.horloge == nom and (meilleure.is_empty() or e.compteur < meilleure.compteur):
+			meilleure = e
+	return meilleure
+
+
+func _sur_avancee_monde(_de: int, _a: int) -> void:
+	# Temps réel : tout ce qui est dû agit, dans l'ordre des compteurs.
+	var garde_fou := 64
+	while garde_fou > 0 and pas("monde"):
+		garde_fou -= 1
+
+
+func _fin_de_pas(nom: String) -> void:
+	_verifier_desengagements()
+	EventBus.dispatcher()
+	if nom != "monde" and not combats.has(nom):
+		return
+
+
+## Régénération d'endurance : +2 par tick écoulé depuis la dernière application (Endurance).
+func _regenerer(e: Dictionary, tick: int) -> void:
+	var ecoules := tick - int(e.tick_endurance)
+	if ecoules > 0:
+		e.endurance = mini(e.endurance_max, e.endurance + ecoules * int(regles.r.endurance.regen_par_tick))
+	e.tick_endurance = tick
+
+
+# ---------------------------------------------------------------- intentions (client → serveur)
+
+## Une intention pour l'entité `id`, qui doit être en attente. Valide, exécute, retourne
+## vrai si elle a été consommée. Types : deplacer{vers} · attaquer{cible, lourde} · garde · attendre.
+func intention(id: String, i: Dictionary) -> bool:
+	if not attente.has(id) or not entites.has(id):
+		return false
+	var e: Dictionary = entites[id]
+	if not e.vivant:
+		return false
+	var h := horloge_de(e)
+	_regenerer(e, h.ticks)
+	var ok := false
+	match str(i.get("type", "")):
+		"deplacer":
+			ok = _deplacer(e, i.vers, h.ticks)
+		"attaquer":
+			if entites.has(i.cible):
+				ok = _attaquer_arme(e, entites[i.cible], bool(i.get("lourde", false)), h.ticks)
+		"garde":
+			ok = _prendre_garde(e, h.ticks)
+		"attendre":
+			ok = _attendre(e, h.ticks)
+	if ok:
+		attente.erase(id)
+		_fin_de_pas(e.horloge)
+	return ok
+
+
+# ---------------------------------------------------------------- actions
+
+## Déplacement d'une tuile (8 directions). Une chute volontaire (Δ ≤ −3) est autorisée : dégâts.
+func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	if Grille.distance(e.pos, vers) != 1 or not grille.occupant(vers).is_empty():
+		return false
+	var volant := Etres.est_volant(e)
+	var cout := grille.cout_pas(e.pos, vers, volant)
+	var chute := 0
+	if cout < 0:
+		if not volant and grille.est_chute(e.pos, vers):
+			chute = grille.h(e.pos) - grille.h(vers)
+			cout = int(regles.r.deplacement.descente)
+		else:
+			return false
+	_quitter_garde(e)
+	grille.liberer(e.pos)
+	e.orientation = vers - e.pos
+	e.pos = vers
+	grille.placer(e.id, vers)
+	e.compteur = tick + cout
+	EventBus.emettre(&"journal", [&"journal.deplacement", {"nom": e.name_key, "cout": cout}])
+	if chute > 0:
+		var d := grille.degats_chute(chute)
+		EventBus.emettre(&"journal", [&"journal.chute", {"nom": e.name_key, "niveaux": chute, "degats": d}])
+		_appliquer_degats(e, d, "", {"chute": true})
+	return true
+
+
+func _prendre_garde(e: Dictionary, tick: int) -> bool:
+	if e.endurance <= 0:
+		return false   # à zéro d'endurance, garde impossible
+	e.garde = true
+	e.compteur = tick + int(regles.r.actions.garde)
+	EventBus.emettre(&"journal", [&"journal.garde", {"nom": e.name_key}])
+	return true
+
+
+func _attendre(e: Dictionary, tick: int) -> bool:
+	_quitter_garde(e)
+	e.endurance = mini(e.endurance_max, e.endurance + int(regles.r.actions.attendre_endurance))
+	e.compteur = tick + int(regles.r.actions.attendre)
+	EventBus.emettre(&"journal", [&"journal.attendre", {"nom": e.name_key}])
+	return true
+
+
+func _quitter_garde(e: Dictionary) -> void:
+	e.garde = false
+
+
+## Attaque à l'arme équipée. Une lourde est télégraphée : engagée maintenant, résolue à l'échéance.
+func _attaquer_arme(e: Dictionary, cible: Dictionary, lourde: bool, tick: int) -> bool:
+	var arme := Etres.arme(e, items)
+	if arme.is_empty() or not cible.vivant:
+		return false
+	var fonct: Dictionary = fonctionnalites.get(arme.functionality, {})
+	if not _cible_atteignable(e, cible, regles.portee_de(fonct), true):
+		return false
+	_quitter_garde(e)
+	e.orientation = Vector2i(signi(cible.pos.x - e.pos.x), signi(cible.pos.y - e.pos.y))
+	var ticks := regles.ticks_attaque(fonct, lourde)
+	_engager_combat(e, cible)
+	if regles.est_telegraphee(ticks) or lourde:
+		e.action_en_cours = {"type": "arme", "cible": cible.id, "lourde": lourde, "ticks": ticks, "name_key": arme.name_key}
+		e.compteur = horloge_de(e).ticks + ticks
+		EventBus.emettre(&"journal", [&"journal.telegraphe", {"nom": e.name_key, "action": arme.name_key, "ticks": ticks}])
+		EventBus.emettre(&"action_engaged", [e.id, e.action_en_cours])
+		return true
+	e.compteur = horloge_de(e).ticks + ticks
+	_frapper_arme(e, cible, arme, fonct, false, ticks)
+	return true
+
+
+func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Dictionary, lourde: bool, ticks: int) -> void:
+	var a_zero: bool = e.endurance <= 0
+	e.endurance = maxi(0, e.endurance - int(regles.r.endurance.lourde if lourde else regles.r.endurance.attaque))
+	var d := regles.degats_arme(e.corps.stats, arme, fonct, des, lourde, a_zero)
+	var res := _resoudre_coup(e, cible, d.bruts, fonct.type_degats, lourde, arme.get("element"))
+	var cle := &"journal.attaque_lourde" if lourde else &"journal.attaque"
+	EventBus.emettre(&"journal", [cle, {"att": e.name_key, "def": cible.name_key, "zone": res.zone, "degats": res.degats, "ticks": ticks}])
+	_appliquer_degats(cible, res.degats, e.id, res)
+
+
+## Un coup contre une cible : zone par dénivelé, garde (frontale / bouclier), armure de zone.
+func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degats: String, lourde: bool, element: Variant) -> Dictionary:
+	var zone: Dictionary = regles.zone_de_coup(grille.h(att.pos), grille.h(cible.pos))
+	var piece := Etres.piece_zone(cible, zone.zone, items)
+	var armure := regles.armure_piece(piece, type_degats)
+	var direction := Regles.direction_relative(cible.orientation, att.pos - cible.pos)
+	var bouclier := Etres.a_bouclier(cible, items)
+	var tient: bool = cible.garde and regles.garde_tient(direction, bouclier, lourde)
+	var sans_garde := regles.degats_finaux(bruts, zone.mult, armure, false)
+	var degats := regles.degats_finaux(bruts, zone.mult, armure, tient)
+	if cible.garde:
+		if tient:
+			var cout := regles.cout_garde_impact(sans_garde, bouclier)
+			cible.endurance = maxi(0, cible.endurance - cout)
+			EventBus.emettre(&"journal", [&"journal.garde_tient", {"nom": cible.name_key, "avant": sans_garde, "apres": degats}])
+			if cible.endurance <= 0:
+				cible.garde = false
+		elif lourde and not bouclier:
+			cible.garde = false   # la lourde brise la garde
+	return {"zone": zone.zone, "mult": zone.mult, "armure": armure, "direction": direction,
+		"garde": tient, "degats": degats, "bruts": bruts, "type": type_degats, "element": element}
+
+
+func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: Dictionary) -> void:
+	cible.sante = maxi(0, cible.sante - degats)
+	EventBus.emettre(&"damage_dealt", [source, cible.id, degats, detail])
+	if cible.sante <= 0 and cible.vivant:
+		cible.vivant = false
+		grille.liberer(cible.pos)
+		EventBus.emettre(&"journal", [&"journal.mort", {"nom": cible.name_key}])
+		EventBus.emettre(&"creature_killed", [cible.id, source])
+
+
+## Résolution d'une action engagée (télégraphée) à son échéance.
+func _resoudre_action_engagee(e: Dictionary, a: Dictionary) -> void:
+	EventBus.emettre(&"action_resolved", [e.id, a])
+	var cible: Dictionary = entites.get(a.get("cible", ""), {})
+	match str(a.type):
+		"arme":
+			var arme := Etres.arme(e, items)
+			var fonct: Dictionary = fonctionnalites.get(arme.get("functionality", ""), {})
+			if cible.is_empty() or not cible.vivant or not _cible_atteignable(e, cible, regles.portee_de(fonct), true):
+				return   # la cible s'est dérobée : le coup passe dans le vide
+			_frapper_arme(e, cible, arme, fonct, a.lourde, a.ticks)
+		"creature":
+			_executer_action_creature(e, actions_creatures[a.action], cible)
+
+
+func _cible_atteignable(e: Dictionary, cible: Dictionary, portee: Vector2i, ldv: bool) -> bool:
+	var d := Grille.distance(e.pos, cible.pos)
+	if d < portee.x or d > portee.y:
+		return false
+	return not ldv or grille.ligne_de_vue(e.pos, cible.pos)
+
+
+# ---------------------------------------------------------------- actions de créatures
+
+func _action_creature_possible(e: Dictionary, action: Dictionary, cible: Dictionary) -> bool:
+	if "passive" in action.tags:
+		return false
+	if action.cible == "ennemi" and cible.is_empty():
+		return false
+	var p := Vector2i(int(action.portee[0]), int(action.portee[1]))
+	if action.cible == "ennemi":
+		return _cible_atteignable(e, cible, p, bool(action.ligne_de_vue))
+	return true   # anneau/soi : toujours lançable
+
+
+func _lancer_action_creature(e: Dictionary, action: Dictionary, cible: Dictionary, tick: int) -> void:
+	var ticks := int(action.cout_ticks)
+	if not cible.is_empty():
+		e.orientation = Vector2i(signi(cible.pos.x - e.pos.x), signi(cible.pos.y - e.pos.y))
+	_quitter_garde(e)
+	e.compteur = tick + ticks
+	if regles.est_telegraphee(ticks) or "telegraphe" in action.tags:
+		e.action_en_cours = {"type": "creature", "action": action.id, "cible": cible.get("id", ""), "ticks": ticks, "name_key": action.name_key}
+		EventBus.emettre(&"journal", [&"journal.telegraphe", {"nom": e.name_key, "action": action.name_key, "ticks": ticks}])
+		EventBus.emettre(&"action_engaged", [e.id, e.action_en_cours])
+		return
+	_executer_action_creature(e, action, cible)
+
+
+func _executer_action_creature(e: Dictionary, action: Dictionary, cible: Dictionary) -> void:
+	var a_zero: bool = e.endurance <= 0
+	e.endurance = maxi(0, e.endurance - int(action.cout_endurance))
+	var cibles: Array[Dictionary] = _cibles_de_forme(e, action, cible)
+	for effet: Dictionary in action.effets:
+		match str(effet.type):
+			"degats":
+				for c in cibles:
+					if not c.vivant:
+						continue
+					var bonus := _bonus_des_conditions(e, c, action)
+					var d := regles.degats_action(e.corps.stats, action, des, a_zero, bonus)
+					var res := _resoudre_coup(e, c, d.bruts, str(action.get("type_degats", "contondant")), false, action.elements)
+					EventBus.emettre(&"journal", [&"journal.action_creature", {"att": e.name_key, "action": action.name_key, "def": c.name_key, "zone": res.zone, "degats": res.degats}])
+					_appliquer_degats(c, res.degats, e.id, res)
+			"deplacement":
+				_effet_deplacement(e, effet, cibles, cible)
+			"attaque_arme":
+				var arme := Etres.arme(e, items)
+				if not arme.is_empty() and not cible.is_empty() and cible.vivant:
+					var fonct: Dictionary = fonctionnalites.get(arme.functionality, {})
+					if _cible_atteignable(e, cible, regles.portee_de(fonct), true):
+						_frapper_arme(e, cible, arme, fonct, false, int(action.cout_ticks))
+			"fuite":
+				e.fuite = true
+			_:
+				pass   # statut, bonus_premiere_attaque : jalons 8-10 (Statuts, embuscade)
+
+
+func _cibles_de_forme(e: Dictionary, action: Dictionary, cible: Dictionary) -> Array[Dictionary]:
+	var res: Array[Dictionary] = []
+	match str(action.forme):
+		"cible_unique":
+			if not cible.is_empty():
+				res.append(cible)
+		"ligne":
+			for p in grille.ligne(e.pos, cible.pos if not cible.is_empty() else e.pos + e.orientation, int(action.taille)):
+				var occ := grille.occupant(p)
+				if not occ.is_empty() and _cible_valide(e, entites[occ], action.cible):
+					res.append(entites[occ])
+		"anneau", "soi":
+			for p in grille.anneau(e.pos, int(action.taille)):
+				var occ := grille.occupant(p)
+				if not occ.is_empty() and _cible_valide(e, entites[occ], action.cible):
+					res.append(entites[occ])
+	return res
+
+
+func _cible_valide(e: Dictionary, c: Dictionary, type_cible: String) -> bool:
+	match type_cible:
+		"ennemi": return c.camp != e.camp
+		"allie": return c.camp == e.camp and c.id != e.id
+		"soi": return c.id == e.id
+	return true
+
+
+## Conditions à bonus (Vocabulaire des modules — six axes, axe 5) : dés supplémentaires.
+func _bonus_des_conditions(e: Dictionary, c: Dictionary, action: Dictionary) -> int:
+	var bonus := 0
+	for cond: Dictionary in action.get("conditions", []):
+		var vrai := false
+		match str(cond.type):
+			"hauteur_relative":
+				vrai = (grille.h(e.pos) > grille.h(c.pos)) if cond.get("valeur", "plus_haut") == "plus_haut" else (grille.h(e.pos) < grille.h(c.pos))
+			"cible_adjacente_a_allie":
+				for autre in vivants():
+					if autre.id != e.id and autre.camp == e.camp and Grille.distance(autre.pos, c.pos) == 1:
+						vrai = true
+			"cible_isolee":
+				vrai = true
+				for autre in vivants():
+					if autre.id != c.id and autre.camp == c.camp and Grille.distance(autre.pos, c.pos) == 1:
+						vrai = false
+		if vrai:
+			bonus += int(cond.get("bonus", {}).get("des", 0))
+	return bonus
+
+
+## Effets de déplacement : projection (la cible recule), au_contact (le lanceur avance).
+func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictionary], cible: Dictionary) -> void:
+	match str(effet.get("mode", "")):
+		"projection":
+			for c in cibles:
+				if not c.vivant:
+					continue
+				var d := Vector2i(signi(c.pos.x - e.pos.x), signi(c.pos.y - e.pos.y))
+				if d == Vector2i.ZERO:
+					continue
+				var n := des.jet(effet.get("distance", "1"))
+				for i in n:
+					var vers: Vector2i = c.pos + d
+					if not grille.dans(vers) or grille.bloque_passage(vers) or not grille.occupant(vers).is_empty():
+						break
+					var dh := grille.h(vers) - grille.h(c.pos)
+					if dh >= int(regles.r.deplacement.falaise_delta):
+						break
+					grille.liberer(c.pos)
+					c.pos = vers
+					grille.placer(c.id, vers)
+					if -dh >= int(regles.r.deplacement.chute_delta):
+						var deg := grille.degats_chute(-dh)
+						EventBus.emettre(&"journal", [&"journal.chute", {"nom": c.name_key, "niveaux": -dh, "degats": deg}])
+						_appliquer_degats(c, deg, e.id, {"chute": true})
+						break
+		"au_contact":
+			if cible.is_empty():
+				return
+			var chemin := grille.ligne(e.pos, cible.pos, Grille.distance(e.pos, cible.pos) - 1)
+			for p in chemin:
+				if grille.cout_pas(e.pos, p, Etres.est_volant(e)) < 0 or not grille.occupant(p).is_empty():
+					break
+				grille.liberer(e.pos)
+				e.pos = p
+				grille.placer(e.id, p)
+
+
+# ---------------------------------------------------------------- engagement (Temporalités parallèles)
+
+## Place `a` et `b` dans la même horloge de combat (créée au besoin), compteurs rebasés.
+func _engager_combat(a: Dictionary, b: Dictionary) -> void:
+	if a.camp == b.camp:
+		return
+	var nom := ""
+	if en_combat(a):
+		nom = a.horloge
+	elif en_combat(b):
+		nom = b.horloge
+	else:
+		_n_combats += 1
+		nom = "combat_%d" % _n_combats
+		var h := TickManager.creer(nom, Horloge.Mode.ACTION)
+		combats[nom] = {"horloge": h, "participants": []}
+		EventBus.emettre(&"combat_started", [nom, [a.id, b.id]])
+		EventBus.emettre(&"journal", [&"journal.engagement", {"nom": (a.name_key if a.controle != "joueur" else b.name_key)}])
+	for e in [a, b]:
+		if e.horloge != nom:
+			_rejoindre(e, nom)
+
+
+func _rejoindre(e: Dictionary, nom: String) -> void:
+	var de := horloge_de(e)
+	var vers: Horloge = combats[nom].horloge
+	e.compteur = vers.ticks + maxi(0, e.compteur - de.ticks)
+	e.tick_endurance = vers.ticks - maxi(0, de.ticks - e.tick_endurance)
+	if en_combat(e):
+		combats[e.horloge].participants.erase(e.id)
+	e.horloge = nom
+	combats[nom].participants.append(e.id)
+
+
+func _quitter_combat(e: Dictionary) -> void:
+	var de := horloge_de(e)
+	combats[e.horloge].participants.erase(e.id)
+	e.compteur = horloge_monde.ticks + maxi(0, e.compteur - de.ticks)
+	e.tick_endurance = horloge_monde.ticks
+	e.horloge = "monde"
+	e.action_en_cours = {}
+
+
+## Un combat se relâche quand plus aucun hostile n'y menace un participant contrôlé :
+## tous morts, ou à plus de 12 tuiles, ou hors de vue depuis 30 ticks (Décision — Fuite).
+func _verifier_desengagements() -> void:
+	for nom in combats.keys():
+		var c: Dictionary = combats[nom]
+		var h: Horloge = c.horloge
+		var menace := false
+		for id in c.participants:
+			var e: Dictionary = entites[id]
+			if not e.vivant or e.camp == "joueur":
+				continue
+			for id2 in c.participants:
+				var j: Dictionary = entites[id2]
+				if not j.vivant or j.camp != "joueur":
+					continue
+				var proche := Grille.distance(e.pos, j.pos) <= int(regles.r.engagement.sortie_distance)
+				var vue := grille.ligne_de_vue(e.pos, j.pos)
+				if vue:
+					e.tick_derniere_vue = h.ticks
+				var recemment_vu: bool = e.tick_derniere_vue >= 0 and h.ticks - int(e.tick_derniere_vue) < int(regles.r.engagement.sortie_ticks_sans_vue)
+				if proche and (vue or recemment_vu):
+					menace = true
+		if not menace:
+			for id in c.participants.duplicate():
+				_quitter_combat(entites[id])
+			TickManager.retirer(nom)
+			combats.erase(nom)
+			EventBus.emettre(&"combat_ended", [nom])
+			EventBus.emettre(&"journal", [&"journal.desengagement", {}])
+
+
+# ---------------------------------------------------------------- IA utility (IA des créatures)
+
+func _decider_ia(e: Dictionary, tick: int) -> void:
+	var profil: Dictionary = profils_ia.get(e.ai_profile, {})
+	var cible := _chercher_cible(e, tick)
+	var candidates := _actions_candidates(e, cible, profil, tick)
+	var meilleure := ""
+	var meilleur_score := -1.0
+	for nom in candidates.keys():
+		var score := 0.0
+		for consideration in profil.considerations.get(nom, {}).keys():
+			score += float(candidates[nom].get(consideration, 0.0)) * float(profil.considerations[nom][consideration])
+		if score > meilleur_score:
+			meilleur_score = score
+			meilleure = nom
+	match meilleure:
+		"attaquer":
+			_ia_attaquer(e, cible, tick)
+		"poursuivre":
+			_ia_pas_vers(e, cible.pos, tick, cible.id)
+		"fuir":
+			_ia_fuir(e, cible, tick)
+		"retour":
+			e.cible = ""
+			e.fuite = false
+			if e.pos == e.ancre:
+				_attendre(e, tick)
+			else:
+				_ia_pas_vers(e, e.ancre, tick, "")
+		_:
+			_attendre(e, tick)
+
+
+## Détection : un ennemi à portée de Perception et en ligne de vue devient la cible ;
+## la perte d'intérêt suit les seuils de Décision — Fuite et désengagement.
+func _chercher_cible(e: Dictionary, tick: int) -> Dictionary:
+	var portee := int(float(e.corps.stats.perception) * float(regles.r.engagement.detection_par_perception))
+	if not e.cible.is_empty():
+		var c: Dictionary = entites.get(e.cible, {})
+		if c.is_empty() or not c.vivant:
+			e.cible = ""
+		else:
+			if grille.ligne_de_vue(e.pos, c.pos):
+				e.tick_derniere_vue = tick
+				e.pos_connue = c.pos
+			elif tick - int(e.tick_derniere_vue) > int(regles.r.engagement.ia_ticks_sans_vue):
+				e.cible = ""
+			if Grille.distance(e.pos, e.ancre) > int(regles.r.engagement.ia_distance_ancre):
+				e.cible = ""
+	if e.cible.is_empty():
+		var meilleure := {}
+		var dmin := 1 << 30
+		for autre in vivants():
+			if autre.camp == e.camp:
+				continue
+			var d := Grille.distance(e.pos, autre.pos)
+			if d <= portee and d < dmin and grille.ligne_de_vue(e.pos, autre.pos):
+				dmin = d
+				meilleure = autre
+		if not meilleure.is_empty():
+			e.cible = meilleure.id
+			e.tick_derniere_vue = tick
+			e.pos_connue = meilleure.pos
+			_engager_combat(e, meilleure)
+	return entites.get(e.cible, {})
+
+
+## Considérations normalisées (0-1) par action candidate ; une action infaisable est absente.
+func _actions_candidates(e: Dictionary, cible: Dictionary, profil: Dictionary, tick: int) -> Dictionary:
+	var c := {}
+	var a_cible := not cible.is_empty()
+	var sante_basse := float(e.sante) / float(e.sante_max) < float(profil.get("seuil_fuite_sante", 0.25))
+	if a_cible and not _meilleure_attaque(e, cible).is_empty():
+		c["attaquer"] = {"cible_a_portee": 1.0, "agressivite": 1.0, "acculee": 1.0 if Grille.distance(e.pos, cible.pos) == 1 else 0.0}
+	if a_cible:
+		c["poursuivre"] = {"cible_visible": 1.0 if grille.ligne_de_vue(e.pos, cible.pos) else 0.5,
+			"distance_cible": clampf(1.0 - float(Grille.distance(e.pos, cible.pos)) / 20.0, 0.0, 1.0)}
+		c["fuir"] = {"sante_basse": 1.0 if (sante_basse or e.fuite) else 0.0,
+			"joueur_proche": 1.0 if Grille.distance(e.pos, cible.pos) <= 6 else 0.0}
+	if e.pos != e.ancre:
+		c["retour"] = {"loin_de_l_ancre": 1.0 if Grille.distance(e.pos, e.ancre) > int(regles.r.engagement.ia_distance_ancre) else 0.0,
+			"cible_perdue": 0.0 if a_cible else 1.0}
+	c["attendre"] = {"endurance_basse": 1.0 if e.endurance < 20 else 0.0, "calme": 0.0 if a_cible else 1.0}
+	return c
+
+
+## L'attaque faisable la plus forte (dégâts moyens) : action de créature ou arme.
+func _meilleure_attaque(e: Dictionary, cible: Dictionary) -> Dictionary:
+	var meilleure := {}
+	var moy := -1.0
+	for aid: String in e.actions:
+		var a: Dictionary = actions_creatures.get(aid, {})
+		if a.is_empty() or not _action_creature_possible(e, a, cible):
+			continue
+		var f := Des.fourchette(a.get("degats_des"))
+		var m := float(f.x + f.y) * 0.5
+		if m > moy:
+			moy = m
+			meilleure = {"type": "creature", "action": a}
+	var arme := Etres.arme(e, items)
+	if not arme.is_empty():
+		var fonct: Dictionary = fonctionnalites.get(arme.functionality, {})
+		if _cible_atteignable(e, cible, regles.portee_de(fonct), true):
+			var f := Des.fourchette(fonct.degats_des)
+			var m := float(f.x + f.y) * 0.5 * float(arme.durete_base) / float(regles.r.degats.durete_reference)
+			if m > moy:
+				meilleure = {"type": "arme", "arme": arme, "fonct": fonct}
+	return meilleure
+
+
+func _ia_attaquer(e: Dictionary, cible: Dictionary, tick: int) -> void:
+	var att := _meilleure_attaque(e, cible)
+	if att.is_empty():
+		_attendre(e, tick)
+		return
+	_engager_combat(e, cible)
+	if att.type == "creature":
+		_lancer_action_creature(e, att.action, cible, tick)
+	else:
+		# Un humanoïde armé utilise le système standard : garde si l'endurance manque, sinon frappe.
+		_attaquer_arme(e, cible, false, tick)
+
+
+func _ia_pas_vers(e: Dictionary, but: Vector2i, tick: int, ignorer: String) -> void:
+	var pas := grille.chemin(e.pos, but, Etres.est_volant(e), ignorer)
+	if pas.is_empty() or pas[0] == but and not grille.occupant(but).is_empty():
+		_attendre(e, tick)
+		return
+	if not _deplacer(e, pas[0], tick):
+		_attendre(e, tick)
+
+
+func _ia_fuir(e: Dictionary, cible: Dictionary, tick: int) -> void:
+	var meilleur: Vector2i = e.pos
+	var dmax := Grille.distance(e.pos, cible.pos)
+	for d in Grille.DIRS:
+		var v: Vector2i = e.pos + d
+		if grille.cout_pas(e.pos, v, Etres.est_volant(e)) < 0 or not grille.occupant(v).is_empty():
+			continue
+		var dist := Grille.distance(v, cible.pos)
+		if dist > dmax:
+			dmax = dist
+			meilleur = v
+	if meilleur == e.pos or not _deplacer(e, meilleur, tick):
+		_attendre(e, tick)

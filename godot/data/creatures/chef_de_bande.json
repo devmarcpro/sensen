@@ -1,0 +1,44 @@
+{
+  "name_key": "creature.chef_de_bande.name",
+  "race": "humain",
+  "skeleton_template": "humanoide",
+  "corps": {
+    "stats": {
+      "force": 13,
+      "dexterite": 12,
+      "endurance": 12,
+      "volonte": 9,
+      "perception": 10,
+      "charisme": 12
+    },
+    "silhouette": "humanoide"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "cri_de_ralliement",
+    "enchainement"
+  ],
+  "equipement": [
+    "proto_epee",
+    "proto_casque_fer",
+    "proto_cuirasse_mailles",
+    "proto_bouclier"
+  ],
+  "ratelier": [],
+  "chain_gauge": true,
+  "elements": null,
+  "rare_chance": 0.0,
+  "teinte": [
+    0.9,
+    0.2,
+    0.2
+  ],
+  "tags": [
+    "humanoide",
+    "hostile",
+    "elite"
+  ],
+  "classe": "Le Sabre",
+  "fonction": "aventurier"
+}

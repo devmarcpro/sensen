@@ -1,0 +1,14 @@
+{
+  "name_key": "functionality.epee.name",
+  "kind": "arme",
+  "hands": 1,
+  "combat_skill": "epee",
+  "degats_des": "2d6",
+  "crit_range": 20,
+  "vitesse_base": 2.0,
+  "portee": 1.5,
+  "portee_min": 1,
+  "type_degats": "tranchant",
+  "volume": 3.2,
+  "poids_reference": 3.84
+}

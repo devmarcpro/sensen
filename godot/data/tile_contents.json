@@ -1,0 +1,10 @@
+{
+  "_doc": "Contenus de tuile (configuration unique — Décision — Structure de données de la grille : champ content). Les systèmes lisent les tags, jamais l'id.",
+  "mur": {
+    "name_key": "tile_content.mur.name",
+    "bloque_passage": true,
+    "bloque_vue": true,
+    "hauteur_vue": 3,
+    "tags": ["mur", "solide"]
+  }
+}

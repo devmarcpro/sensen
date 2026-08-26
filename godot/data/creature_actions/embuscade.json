@@ -1,0 +1,26 @@
+{
+  "name_key": "creature_action.embuscade.name",
+  "elements": {},
+  "forme": "soi",
+  "portee": [
+    0,
+    0
+  ],
+  "taille": 0,
+  "cible": "soi",
+  "ligne_de_vue": false,
+  "cout_ticks": 0,
+  "cout_endurance": 0,
+  "degats_des": null,
+  "type_degats": null,
+  "conditions": [],
+  "effets": [
+    {
+      "type": "bonus_premiere_attaque",
+      "des": 2
+    }
+  ],
+  "tags": [
+    "passive"
+  ]
+}

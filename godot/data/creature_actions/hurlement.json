@@ -1,0 +1,30 @@
+{
+  "name_key": "creature_action.hurlement.name",
+  "elements": {
+    "bois": 1.0
+  },
+  "forme": "anneau",
+  "portee": [
+    0,
+    0
+  ],
+  "taille": 3,
+  "cible": "allie",
+  "ligne_de_vue": false,
+  "cout_ticks": 12,
+  "cout_endurance": 4,
+  "degats_des": null,
+  "type_degats": null,
+  "conditions": [],
+  "effets": [
+    {
+      "type": "statut",
+      "id": "hate_meute",
+      "duree_ticks": 30
+    }
+  ],
+  "tags": [
+    "meute",
+    "telegraphe"
+  ]
+}

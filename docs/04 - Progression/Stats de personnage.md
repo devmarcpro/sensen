@@ -31,6 +31,9 @@ Création : 30 points à répartir (base 5 par stat, max 15 à la création), + 
 
 **Potions de stat :** +3 stat pendant 10 min ([[Potions]]).
 
+> [!success] Décidé le 2026-08-26
+> Formule de santé, lue dans [[Exemples — dix PNJ générés]] (End 6 → 44, End 10 → 60, End 11 → 64) : **`sante_max = 20 + Endurance × 4`**. Elle vaut pour tout être, bêtes comprises (aucun test d'espèce — [[Blocs de l'être]]). Chiffrée dans `data/combat_rules.json` (`stats`).
+
 ## Liens
 - **Dépend de** : [[Création de personnage]]
 - **Alimente** : [[Mana]], [[Armures et poids porté]], [[Compagnons]], [[Potentiel]], [[Pipeline de résolution du combat]]

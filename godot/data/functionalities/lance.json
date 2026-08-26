@@ -1,0 +1,14 @@
+{
+  "name_key": "functionality.lance.name",
+  "kind": "arme",
+  "hands": 2,
+  "combat_skill": "lance",
+  "degats_des": "2d8",
+  "crit_range": 20,
+  "vitesse_base": 1.5,
+  "portee": 2.5,
+  "portee_min": 2,
+  "type_degats": "perforant",
+  "volume": 3.8,
+  "poids_reference": 4.56
+}

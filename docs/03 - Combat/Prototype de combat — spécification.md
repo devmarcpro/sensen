@@ -79,6 +79,10 @@ Potentiel, loot/affixes, craft, sauvegarde, monde/génération, PNJ civils, comp
 
 **La règle de décision :** tout « non » qualitatif → itérer sur le prototype (chiffres, UI, contenu) et rejuger. Le passage à l'étape 1 exige **tous les critères mesurables verts et zéro « non » qualitatif**. Si trois itérations n'y arrivent pas, le problème est structurel : remonter à [[Décisions fondatrices]] — et c'est précisément ce que le prototype existe pour découvrir avant d'avoir construit un monde autour.
 
+> [!success] Jalons 1 à 4 codés le 2026-08-26
+> `godot/` contient : autoloads **GameData** (validation de schéma, F5), **EventBus** (file + dispatch en fin de pas), **TickManager** (horloges multiples) ; `systems/grid/grille.gd` (SoA, A* 8 directions, ligne de vue, contenus) ; `systems/combat/` — `horloge.gd`, `des.gd`, `regles.gd` (toutes les formules, lues dans `data/combat_rules.json`), `etres.gd`, `simulation.gd` (l'autorité : intentions → résolution, une horloge par combat, IA utility, actions de créatures) ; `scenes/demo/main.gd` = le **client** (rendu polygonal, intentions, timeline, coûts sur les tuiles, prévisualisation avec détail du calcul, télégraphes, journal). Les **3 arènes** sont dans `data/prototype_arenas/` (`tools/gen_arenas.py` les pose), les **24 actions** dans `data/creature_actions/`, les 6 adversaires dans `data/creatures/`. Tests : `scenes/tests/test_combat.tscn` (headless, `assert`). **Schéma d'arène complété** : `spawns.player` est `{creature, pos}` — le joueur est une fiche comme les autres.
+> Restent : 5 (vecteurs Wu Xing), 6 (jauge), 7 (râtelier, bouclier — les données existent), 8 (mana, modules), 9 (projectiles), 10 (fuite IA complète, statuts), 11 (jauge des élites), 12 (écran de fin, polissage).
+
 ## Liens
 - **Dépend de** : [[Ordre de construction]], [[Contraintes permanentes]], [[Décisions d'architecture]], toutes les notes de combat (étape 0)
 - **Alimente** : [[Vers la production]], [[Ordre de vérification]]

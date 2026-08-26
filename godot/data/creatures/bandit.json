@@ -1,0 +1,38 @@
+{
+  "name_key": "creature.bandit.name",
+  "race": "humain",
+  "skeleton_template": "humanoide",
+  "corps": {
+    "stats": {
+      "force": 11,
+      "dexterite": 10,
+      "endurance": 9,
+      "volonte": 7,
+      "perception": 9,
+      "charisme": 8
+    },
+    "silhouette": "humanoide"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [],
+  "equipement": [
+    "proto_epee",
+    "proto_cuirasse_cuir"
+  ],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": null,
+  "rare_chance": 0.0,
+  "teinte": [
+    0.85,
+    0.33,
+    0.27
+  ],
+  "tags": [
+    "humanoide",
+    "hostile"
+  ],
+  "classe": "Le Sabre",
+  "fonction": "aventurier"
+}

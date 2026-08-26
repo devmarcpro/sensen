@@ -18,6 +18,21 @@ config/name="Sensen"
 run/main_scene="res://scenes/demo/main.tscn"
 config/features=PackedStringArray("4.6")
 
+[autoload]
+
+GameData="*res://autoload/game_data.gd"
+EventBus="*res://autoload/event_bus.gd"
+TickManager="*res://autoload/tick_manager.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=800
+
+[internationalization]
+
+locale/fallback="fr"
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0

@@ -1,0 +1,33 @@
+{
+  "name_key": "creature_action.nuee.name",
+  "elements": {
+    "eau": 1.0
+  },
+  "forme": "soi",
+  "portee": [
+    0,
+    0
+  ],
+  "taille": 1,
+  "cible": "toute_entite",
+  "ligne_de_vue": false,
+  "cout_ticks": 10,
+  "cout_endurance": 0,
+  "degats_des": "1",
+  "type_degats": "perforant",
+  "conditions": [],
+  "effets": [
+    {
+      "type": "degats"
+    },
+    {
+      "type": "statut",
+      "id": "infection",
+      "chance": 0.1
+    }
+  ],
+  "tags": [
+    "aura",
+    "continu"
+  ]
+}

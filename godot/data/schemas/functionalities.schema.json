@@ -1,0 +1,64 @@
+{
+  "type": "object",
+  "properties": {
+    "name_key": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "arme",
+        "armure",
+        "mobilier",
+        "vehicule",
+        "bouclier"
+      ]
+    },
+    "hands": {
+      "type": "integer"
+    },
+    "combat_skill": {
+      "type": "string"
+    },
+    "degats_des": {
+      "type": "string"
+    },
+    "crit_range": {
+      "type": "integer"
+    },
+    "vitesse_base": {
+      "type": "number"
+    },
+    "portee": {
+      "type": "number"
+    },
+    "portee_min": {
+      "type": "number"
+    },
+    "type_degats": {
+      "type": "string",
+      "enum": [
+        "tranchant",
+        "perforant",
+        "contondant"
+      ]
+    },
+    "volume": {
+      "type": "number"
+    },
+    "poids_reference": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "name_key",
+    "kind",
+    "hands",
+    "degats_des",
+    "vitesse_base",
+    "portee",
+    "portee_min",
+    "type_degats",
+    "volume"
+  ]
+}

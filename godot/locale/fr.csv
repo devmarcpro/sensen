@@ -1,0 +1,260 @@
+keys,fr
+arena.plaine_au_talus.name,Plaine au talus
+arena.gorge.name,Gorge
+arena.ruine_a_estrades.name,Ruine à estrades
+creature.aventurier.name,Aventurier
+creature.loup.name,Loup
+creature.sanglier.name,Sanglier
+creature.bandit.name,Bandit
+creature.chef_de_bande.name,Chef de bande
+creature.aigle.name,Aigle
+creature.scorpion.name,Scorpion
+creature_action.morsure.name,Morsure
+creature_action.morsure_puissante.name,Morsure puissante
+creature_action.morsure_venimeuse.name,Morsure venimeuse
+creature_action.griffure.name,Griffure
+creature_action.coup_de_patte.name,Coup de patte
+creature_action.charge.name,Charge
+creature_action.coup_de_defenses.name,Coup de défenses
+creature_action.coup_de_tete.name,Coup de tête
+creature_action.masse_ecrasante.name,Masse écrasante
+creature_action.ruade.name,Ruade
+creature_action.harcelement_meute.name,Harcèlement de meute
+creature_action.hurlement.name,Hurlement
+creature_action.dard_essaim.name,Dard d'essaim
+creature_action.nuee.name,Nuée
+creature_action.pique_venimeuse.name,Piqûre venimeuse
+creature_action.pinces.name,Pinces
+creature_action.machoire_verrouillee.name,Mâchoire verrouillée
+creature_action.embuscade.name,Embuscade
+creature_action.bond.name,Bond
+creature_action.pique_plongeant.name,Piqué plongeant
+creature_action.serres.name,Serres
+creature_action.becquetage.name,Becquetage
+creature_action.cri_de_ralliement.name,Cri de ralliement
+creature_action.enchainement.name,Enchaînement
+functionality.dague.name,Dague
+functionality.epee.name,Épée
+functionality.masse.name,Masse
+functionality.lance.name,Lance
+functionality.arc.name,Arc
+functionality.baton_magique.name,Bâton magique
+functionality.bouclier.name,Bouclier
+item.proto_dague.name,Dague
+item.proto_epee.name,Épée
+item.proto_masse.name,Masse
+item.proto_lance.name,Lance
+item.proto_arc.name,Arc
+item.proto_baton_magique.name,Bâton magique
+item.proto_bouclier.name,Bouclier
+item.proto_casque_cuir.name,Casque de cuir
+item.proto_cuirasse_cuir.name,Cuirasse de cuir
+item.proto_cuirasse_mailles.name,Cuirasse de mailles
+item.proto_casque_fer.name,Casque de fer
+item.proto_jambieres_cuir.name,Jambières de cuir
+ai_profile.hostile.name,Hostile
+ai_profile.bete_sauvage.name,Bête sauvage
+ai_profile.compagnon.name,Compagnon
+tile_content.mur.name,Mur
+ui.titre,SENSEN — prototype de combat
+ui.horloge,horloge {horloge} · {mode}
+ui.mode.exploration,exploration ({tps} ticks/s)
+ui.mode.combat,COMBAT — le temps n'avance qu'à l'action
+ui.aide,clic : se déplacer / frapper · maj+clic : attaque lourde · G : garde · espace : attendre · tab : arène suivante · F5 : recharger les données
+ui.entite.ligne,{nom} pv {pv}/{pv_max} · end {end} · agit à t={compteur} · h={h}
+ui.case,case ({x},{y}) h={h} · Δh vs toi : {dh}
+ui.timeline,prochaines actions :
+ui.preview,{nom} : {des}×{dur} +{stat} → zone {zone} ×{mult} − armure {armure} ⇒ {min}–{max} ({ticks} ticks)
+ui.preview.lourde,lourde : ×{lourde} dégâts · {ticks} ticks · brise la garde
+journal.deplacement,{nom} se déplace ({cout} ticks)
+journal.chute,{nom} chute de {niveaux} niveaux : {degats} dégâts
+journal.attaque,{att} frappe {def} à la {zone} : {degats} dégâts ({ticks} ticks)
+journal.attaque_lourde,{att} ATTAQUE LOURDE sur {def} ({zone}) : {degats} dégâts — garde brisée
+journal.telegraphe,{nom} prépare {action} ({ticks} ticks)
+journal.garde,{nom} prend la garde (2 ticks)
+journal.garde_tient,la garde de {nom} absorbe le coup : {avant} → {apres}
+journal.attendre,{nom} attend (5 ticks, +20 endurance)
+journal.mort,{nom} tombe.
+journal.engagement,{nom} t'a vu — COMBAT : le temps n'avance plus qu'à l'action
+journal.desengagement,plus d'hostile en vue — retour au temps réel
+journal.inaccessible,inaccessible — une falaise (Δ ≥ 3) ou un mur barre la route
+journal.endurance_zero,{nom} est à bout de souffle : dégâts à 60 %
+journal.action_creature,{att} : {action} sur {def} ({zone}) : {degats} dégâts
+journal.victoire,plus aucun hostile. Victoire.
+journal.defaite,tu es tombé. Tab : recommencer.
+module.a_l_impact.name,À l'impact
+module.absorption.name,Absorption
+module.accord.name,Accord
+module.achevement.name,Achèvement
+module.affinite.name,Affinité
+module.aiguille.name,Aiguille
+module.allonge.name,Allonge
+module.alternance.name,Alternance
+module.amorce.name,Amorce
+module.ampleur.name,Ampleur
+module.ancrage.name,Ancrage
+module.ancre.name,Ancre
+module.angle_mort.name,Angle mort
+module.anneau.name,Anneau
+module.attraction.name,Attraction
+module.aveuglement.name,Aveuglement
+module.balise.name,Balise
+module.banquise.name,Banquise
+module.barriere.name,Barrière
+module.baume.name,Baume
+module.bombe.name,Bombe
+module.botte.name,Botte
+module.boucle.name,Boucle
+module.brasier.name,Brasier
+module.bruine.name,Bruine
+module.cadence.name,Cadence
+module.canalisation.name,Canalisation
+module.carre.name,Carré
+module.celerite.name,Célérité
+module.chaine_pleine.name,Chaîne pleine
+module.champ_libre.name,Champ libre
+module.charge_d_epaule.name,Charge d'épaule
+module.chemin.name,Chemin
+module.colonne.name,Colonne
+module.communion.name,Communion
+module.concentration.name,Concentration
+module.cone.name,Cône
+module.contagion.name,Contagion
+module.contrebas.name,Contrebas
+module.convocation.name,Convocation
+module.corps_a_corps.name,Corps à corps
+module.corruption.name,Corruption
+module.croix.name,Croix
+module.curee.name,Curée
+module.dernier_souffle.name,Dernier souffle
+module.derobade.name,Dérobade
+module.desarmement.name,Désarmement
+module.detonation.name,Détonation
+module.diagonale.name,Diagonale
+module.dispersion.name,Dispersion
+module.eboulement.name,Éboulement
+module.ecaille_elementaire.name,Écaille élémentaire
+module.echo.name,Écho
+module.echo_de_chair.name,Écho de chair
+module.eclat.name,Éclat
+module.effroi.name,Effroi
+module.egide.name,Égide
+module.elan.name,Élan
+module.empoigne.name,Empoigne
+module.emprise.name,Emprise
+module.enchainement.name,Enchaînement
+module.entrave.name,Entrave
+module.entravee.name,Entravée
+module.envol.name,Envol
+module.epine.name,Épine
+module.epuisement.name,Épuisement
+module.escorte.name,Escorte
+module.estimation.name,Estimation
+module.estoc.name,Estoc
+module.etincelle.name,Étincelle
+module.etourdissement.name,Étourdissement
+module.evasement.name,Évasement
+module.exhaussement.name,Exhaussement
+module.fauchage.name,Fauchage
+module.feinte.name,Feinte
+module.fiole.name,Fiole
+module.flamme.name,Flamme
+module.focale.name,Focale
+module.fonte.name,Fonte
+module.fosse.name,Fosse
+module.foudroiement.name,Foudroiement
+module.fragmentation.name,Fragmentation
+module.frappe.name,Frappe
+module.gel.name,Gel
+module.gravier.name,Gravier
+module.gravite.name,Gravité
+module.heure.name,Heure
+module.horizon.name,Horizon
+module.intemperie.name,Intempérie
+module.isolement.name,Isolement
+module.levitation.name,Lévitation
+module.ligature.name,Ligature
+module.ligne.name,Ligne
+module.longue_vue.name,Longue vue
+module.meche.name,Mèche
+module.meditation.name,Méditation
+module.meute.name,Meute
+module.miroir.name,Miroir
+module.mur.name,Mur
+module.nappe.name,Nappe
+module.nuee.name,Nuée
+module.offrande.name,Offrande
+module.ombre.name,Ombre
+module.ouverture.name,Ouverture
+module.parade.name,Parade
+module.pari.name,Pari
+module.partage.name,Partage
+module.patience.name,Patience
+module.perforant.name,Perforant
+module.permutation.name,Permutation
+module.persistance.name,Persistance
+module.pied_ferme.name,Pied ferme
+module.pleine_garde.name,Pleine garde
+module.point.name,Point
+module.ponction.name,Ponction
+module.portail.name,Portail
+module.poussee.name,Poussée
+module.precipitation.name,Précipitation
+module.prise.name,Prise
+module.prisme.name,Prisme
+module.projection.name,Projection
+module.propagation.name,Propagation
+module.purete.name,Pureté
+module.purge.name,Purge
+module.racine.name,Racine
+module.rappel_a_la_vie.name,Rappel à la vie
+module.rapt_de_tempo.name,Rapt de tempo
+module.reflet.name,Reflet
+module.releve.name,Relève
+module.remanence.name,Rémanence
+module.repetition.name,Répétition
+module.repulsion.name,Répulsion
+module.reserve.name,Réserve
+module.resonance.name,Résonance
+module.retour.name,Retour
+module.ricochet.name,Ricochet
+module.ricochet_mural.name,Ricochet mural
+module.riposte.name,Riposte
+module.roche.name,Roche
+module.ronce.name,Ronce
+module.rupture.name,Rupture
+module.saignee.name,Saignée
+module.saignement.name,Saignement
+module.salve.name,Salve
+module.sans_angle_mort.name,Sans angle mort
+module.sans_trace.name,Sans trace
+module.sceau.name,Sceau
+module.second_souffle.name,Second souffle
+module.seve.name,Sève
+module.silence.name,Silence
+module.silencieux.name,Silencieux
+module.sillage.name,Sillage
+module.soi.name,Soi
+module.sol_vif.name,Sol vif
+module.souffle_rendu.name,Souffle rendu
+module.surcharge.name,Surcharge
+module.surplomb.name,Surplomb
+module.terroir.name,Terroir
+module.testament.name,Testament
+module.torpeur.name,Torpeur
+module.tourelle.name,Tourelle
+module.tracant.name,Traçant
+module.trait_nu.name,Trait nu
+module.transfert.name,Transfert
+module.transmutation.name,Transmutation
+module.traque.name,Traque
+module.traversee.name,Traversée
+module.trempe.name,Trempe
+module.tuile.name,Tuile
+module.vague.name,Vague
+module.vampirique.name,Vampirique
+module.vapeur.name,Vapeur
+module.veille.name,Veille
+module.vivacite.name,Vivacité
+module.voile.name,Voile
+module.voile_de_brume.name,Voile de brume

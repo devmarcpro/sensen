@@ -64,6 +64,9 @@ Le format de données unique de tout être vivant du jeu — monstre comme march
 
 **Matériaux paramétriques dérivés ([[Schéma matériau]], [[Catalogue matériaux — Paramétriques]]) :** Viande de X, Peau de X, Os de X, Dent, Griffe, Œil — stats dérivées de la fiche de la créature.
 
+> [!success] Décidé le 2026-08-26 — forme des fiches du prototype (`data/creatures/`)
+> Les fiches suivent la forme à blocs de [[Blocs de l'être]] : `corps.stats` porte les **six stats** de [[Stats de personnage]] (l'ancien `base_stats {sante, force, volonte, vitesse}` est retiré du template : la santé est **dérivée**, `sante_max = 20 + Endurance × 4`, la vitesse vient de l'arme et du dénivelé). S'ajoutent, tous génériques : `equipement` (ids d'objets portés — un bandit porte son épée comme le joueur), `ratelier` (armes de rechange, swap 4 ticks), `actions` (ids de [[Actions des créatures]]), `chain_gauge`, `teinte` (couleur du billboard placeholder — rendu, pas gameplay). Le **contrôle n'est pas dans la fiche** : c'est l'arène (ou la partie) qui dit qui est `joueur` et qui est `ia` à l'instanciation ([[Contraintes permanentes]], règle 5).
+
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Data-driven design]], [[Squelette modulaire et points d'attache]]
 - **Alimente** : [[IA des créatures]], [[Apprivoisement et recrutement]], [[Monstres rares]], [[Familles et succession]], [[Créatures]], [[Catalogue matériaux — Paramétriques]]

@@ -1,0 +1,30 @@
+{
+  "name_key": "creature_action.pinces.name",
+  "elements": {
+    "metal": 1.0
+  },
+  "forme": "cible_unique",
+  "portee": [
+    1,
+    1
+  ],
+  "taille": 1,
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 8,
+  "cout_endurance": 6,
+  "degats_des": "1d4",
+  "type_degats": "tranchant",
+  "conditions": [],
+  "effets": [
+    {
+      "type": "degats"
+    },
+    {
+      "type": "degats"
+    }
+  ],
+  "tags": [
+    "coup"
+  ]
+}

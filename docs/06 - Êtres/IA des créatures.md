@@ -66,6 +66,9 @@ Morphologies (12) : les volants ignorent les contraintes de dénivelé
 
 **Budget ([[Entités et pathfinding — performance]]) :** jamais plus de ~6 décisions utility/tick ; 2 requêtes A* résolues/tick max, résultats cachés et partagés.
 
+> [!success] Décidé le 2026-08-26 — l'utility du prototype
+> Le prototype implémente le noyau : profils dans `data/ai_profiles/` (`hostile`, `bete_sauvage`, `compagnon`), `score = Σ considération × poids` sur des considérations normalisées 0-1 (`cible_a_portee`, `cible_visible`, `distance_cible`, `sante_basse`, `loin_de_l_ancre`, `cible_perdue`, `endurance_basse`, `acculee`, `joueur_proche`, `calme`), une action infaisable est simplement absente des candidates. Actions : `attaquer` (l'action ou l'arme faisable aux dégâts moyens les plus hauts), `poursuivre`, `fuir`, `retour` (à l'ancrage), `attendre`. **Détection** = `Perception` tuiles (facteur `detection_par_perception` de `combat_rules.json`) **avec ligne de vue** ; le cône, la lumière et la Discrétion viennent plus tard. Une décision à chaque fois que l'entité est due (l'échelonnement « 1 tous les 10 ticks » viendra avec le LOD).
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Data-driven design]], [[Boucle de tick]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[LOD de simulation]], [[Compagnons]], [[Raids et menaces]], [[Lois et infractions]], [[Minimap et brouillard de guerre]]

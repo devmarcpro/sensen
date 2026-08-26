@@ -65,6 +65,9 @@ Le résultat du jet est ensuite modulé par matériaux/qualité (formule [[Pipel
 
 **Modulation par l'élasticité du bois ([[Application des stats de matériau]]) :** `Arc/arbalète : degats *= (0.8 + elasticite_bois / 250)`.
 
+> [!success] Décidé le 2026-08-26 — portées sur la grille
+> Le tableau donne des portées en « blocs » (1.5, 2.5) antérieures au pivot. Sur la grille, une portée se lit en **tuiles de Chebyshev** (les 8 voisines sont à distance 1), **arrondie à l'entier inférieur** : Dague/Épée/Masse/Bâton = 1, Lance = 2, Arc = 25, Arbalète = 30. Le `portee_min` est 1 par défaut, **2 pour la lance et l'arc** (zone morte au contact — *« une lance est mauvaise au contact »*). Le déplacement se fait en **8 directions au même coût** (3 ticks, modulé par le dénivelé). Le prototype fixe `durete_base = 20` (fer étalon) et `qualite = 1.0` sur ses armes, l'élément étant un champ de l'objet (`data/items/proto_*.json`) en attendant le craft.
+
 ## Liens
 - **Dépend de** : [[Fonctionnalité]], [[Stats d'un objet crafté]], [[Qualité d'artisanat]], [[Matériaux — 13 stats]]
 - **Alimente** : [[Pipeline de résolution du combat]], [[Action-time à ticks]], [[Combat tactique sur grille]]

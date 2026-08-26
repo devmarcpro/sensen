@@ -1,0 +1,14 @@
+{
+  "name_key": "item.proto_dague.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "functionality": "dague",
+  "durete_base": 20,
+  "qualite": 1.0,
+  "element": "metal",
+  "tags": [
+    "arme",
+    "prototype"
+  ]
+}

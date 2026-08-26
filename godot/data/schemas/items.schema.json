@@ -1,0 +1,77 @@
+{
+  "type": "object",
+  "properties": {
+    "name_key": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "arme",
+        "armure",
+        "bouclier",
+        "outil",
+        "consommable"
+      ]
+    },
+    "equip_slot": {
+      "type": "string"
+    },
+    "hands": {
+      "type": "integer"
+    },
+    "functionality": {
+      "type": "string"
+    },
+    "durete_base": {
+      "type": "number"
+    },
+    "qualite": {
+      "type": "number"
+    },
+    "element": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "zone": {
+      "type": "string",
+      "enum": [
+        "tete",
+        "torse",
+        "bras",
+        "jambes",
+        "pieds"
+      ]
+    },
+    "construction": {
+      "type": "string",
+      "enum": [
+        "matelasse",
+        "cuir",
+        "mailles",
+        "ecailles",
+        "plaque"
+      ]
+    },
+    "durete_composite": {
+      "type": "number"
+    },
+    "niveau_construction": {
+      "type": "integer"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "name_key",
+    "type",
+    "equip_slot",
+    "tags"
+  ]
+}

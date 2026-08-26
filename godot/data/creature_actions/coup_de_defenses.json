@@ -1,0 +1,27 @@
+{
+  "name_key": "creature_action.coup_de_defenses.name",
+  "elements": {
+    "metal": 1.0
+  },
+  "forme": "cible_unique",
+  "portee": [
+    1,
+    1
+  ],
+  "taille": 1,
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 10,
+  "cout_endurance": 8,
+  "degats_des": "1d8",
+  "type_degats": "perforant",
+  "conditions": [],
+  "effets": [
+    {
+      "type": "degats"
+    }
+  ],
+  "tags": [
+    "coup"
+  ]
+}

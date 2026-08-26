@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "properties": {
+    "name_key": {
+      "type": "string"
+    },
+    "degats_des": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "duree_ticks": {
+      "type": "integer"
+    },
+    "modifiers": {
+      "type": "array"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "name_key",
+    "duree_ticks",
+    "tags"
+  ]
+}

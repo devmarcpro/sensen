@@ -1,5 +1,5 @@
 {
-  "_doc": "Arène du prototype (docs: Prototype de combat — spécification). heights: 32 lignes de 32 valeurs 0-20.",
+  "_doc": "Arène du prototype (docs: Prototype de combat — spécification). heights: 32 lignes de 32 valeurs 0-20. contents: contenus de tuile (data/tile_contents.json). spawns: le joueur est une fiche creatures/ comme les autres — seul le contrôle diffère.",
   "name_key": "arena.<id>.name",
   "size": [
     32,
@@ -7,12 +7,13 @@
   ],
   "heights": [],
   "ground": [],
-  "contents": [],
+  "contents": [
+    { "pos": [0, 0], "type": "mur" }
+  ],
   "spawns": {
-    "player": [
-      16,
-      28
-    ],
-    "enemies": []
+    "player": { "creature": "aventurier", "pos": [16, 28] },
+    "enemies": [
+      { "creature": "loup", "pos": [16, 4] }
+    ]
   }
 }

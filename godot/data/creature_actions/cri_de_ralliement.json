@@ -1,0 +1,30 @@
+{
+  "name_key": "creature_action.cri_de_ralliement.name",
+  "elements": {
+    "feu": 1.0
+  },
+  "forme": "anneau",
+  "portee": [
+    0,
+    0
+  ],
+  "taille": 4,
+  "cible": "allie",
+  "ligne_de_vue": false,
+  "cout_ticks": 12,
+  "cout_endurance": 6,
+  "degats_des": null,
+  "type_degats": null,
+  "conditions": [],
+  "effets": [
+    {
+      "type": "statut",
+      "id": "ralliement",
+      "duree_ticks": 40
+    }
+  ],
+  "tags": [
+    "elite",
+    "telegraphe"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "name_key": "creature.scorpion.name",
+  "race": "scorpion",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 6,
+      "dexterite": 9,
+      "endurance": 6,
+      "volonte": 2,
+      "perception": 8,
+      "charisme": 1
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "pique_venimeuse",
+    "pinces"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": null,
+  "rare_chance": 0.0,
+  "teinte": [
+    0.3,
+    0.25,
+    0.2
+  ],
+  "tags": [
+    "bete",
+    "poison"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "name_key": "creature.aigle.name",
+  "race": "aigle",
+  "skeleton_template": "volant",
+  "corps": {
+    "stats": {
+      "force": 5,
+      "dexterite": 15,
+      "endurance": 4,
+      "volonte": 3,
+      "perception": 16,
+      "charisme": 2
+    },
+    "silhouette": "volant"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "serres",
+    "pique_plongeant"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": null,
+  "rare_chance": 0.0,
+  "teinte": [
+    0.6,
+    0.45,
+    0.25
+  ],
+  "tags": [
+    "bete",
+    "volant"
+  ]
+}

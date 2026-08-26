@@ -1,0 +1,29 @@
+{
+  "name_key": "creature_action.pique_plongeant.name",
+  "elements": {
+    "bois": 1.0
+  },
+  "forme": "ligne",
+  "portee": [
+    1,
+    4
+  ],
+  "taille": 4,
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 14,
+  "cout_endurance": 12,
+  "degats_des": "2d6",
+  "type_degats": "tranchant",
+  "conditions": [],
+  "effets": [
+    {
+      "type": "degats"
+    }
+  ],
+  "tags": [
+    "vol",
+    "ignore_denivele",
+    "telegraphe"
+  ]
+}

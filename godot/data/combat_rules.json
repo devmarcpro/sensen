@@ -1,0 +1,91 @@
+{
+  "_doc": "Règles chiffrées du combat (configuration unique). Chaque valeur cite sa note : aucune n'est inventée ici, aucune n'est en dur dans le code.",
+  "ticks_par_seconde_exploration": 10,
+  "deplacement": {
+    "_doc": "Hauteur de terrain ±10 · Boucle de tick",
+    "cout_base": 3,
+    "montee_1": 5,
+    "montee_2": 8,
+    "falaise_delta": 3,
+    "descente": 2,
+    "chute_delta": 3,
+    "chute_degats_par_niveau": 5,
+    "chute_franchise": 2
+  },
+  "actions": {
+    "_doc": "Boucle de tick · Attaque lourde et télégraphe · Décision — Vocabulaire d'attaque des créatures",
+    "attaque_base": 10,
+    "lourde_mult_ticks": 2,
+    "lourde_mult_degats": 2.2,
+    "changer_arme": 4,
+    "objet": 5,
+    "garde": 2,
+    "attendre": 5,
+    "attendre_endurance": 20,
+    "telegraphe_seuil_ticks": 10
+  },
+  "endurance": {
+    "_doc": "Endurance (A.6.1)",
+    "max": 100,
+    "attaque": 8,
+    "lourde": 18,
+    "garde_impact_base": 12,
+    "garde_impact_div": 4,
+    "regen_par_tick": 2,
+    "a_zero_degats_mult": 0.6
+  },
+  "garde": {
+    "_doc": "Garde en posture · Décision — Boucliers",
+    "reduction": 0.8,
+    "bouclier_impact_base": 6,
+    "bouclier_impact_div": 8
+  },
+  "zones": {
+    "_doc": "Zones de coup par dénivelé : l'attaquant plus haut → tête, plus bas → jambes",
+    "plus_haut": { "zone": "tete", "mult": 2.5 },
+    "egal": { "zone": "torse", "mult": 1.0 },
+    "plus_bas": { "zone": "jambes", "mult": 0.8 },
+    "moyenne": { "tete": 0.2, "torse": 0.35, "bras": 0.15, "jambes": 0.2, "pieds": 0.1 }
+  },
+  "armure": {
+    "_doc": "Armure par zone et constructions : armure_zone = dureté/4 × qualité × (1 + niv/100) × matrice",
+    "durete_div": 4,
+    "degats_min": 1,
+    "magie_facteur": 0.5,
+    "matrice": {
+      "matelasse": { "tranchant": 0.95, "perforant": 0.80, "contondant": 1.25 },
+      "cuir": { "tranchant": 1.10, "perforant": 0.85, "contondant": 1.00 },
+      "mailles": { "tranchant": 1.25, "perforant": 0.80, "contondant": 0.85 },
+      "ecailles": { "tranchant": 1.20, "perforant": 1.10, "contondant": 0.85 },
+      "plaque": { "tranchant": 1.30, "perforant": 1.20, "contondant": 0.95 }
+    }
+  },
+  "degats": {
+    "_doc": "Pipeline de résolution du combat (E.3, étape 3) · Stats d'armes (A.4.1)",
+    "durete_reference": 20,
+    "stat_div": 4
+  },
+  "stats": {
+    "_doc": "Stats de personnage · Exemples — dix PNJ générés (sante_max = 20 + End×4) · Mana",
+    "sante_max_base": 20,
+    "sante_max_par_endurance": 4,
+    "mana_max_base": 20,
+    "mana_max_par_volonte": 3
+  },
+  "vision": {
+    "_doc": "Hauteur de terrain ±10 : un relief plus haut que la ligne tireur→cible coupe la vue",
+    "hauteur_oeil": 1
+  },
+  "engagement": {
+    "_doc": "Décision — Fuite et désengagement · IA des créatures (détection = Perception en tuiles)",
+    "sortie_distance": 12,
+    "sortie_ticks_sans_vue": 30,
+    "ia_distance_ancre": 20,
+    "ia_ticks_sans_vue": 100,
+    "detection_par_perception": 1.0
+  },
+  "ia": {
+    "_doc": "IA des créatures : une décision tous les 10 ticks",
+    "ticks_entre_decisions": 10
+  }
+}

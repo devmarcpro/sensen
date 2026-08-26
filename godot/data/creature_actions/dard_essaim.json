@@ -1,0 +1,32 @@
+{
+  "name_key": "creature_action.dard_essaim.name",
+  "elements": {
+    "bois": 1.0
+  },
+  "forme": "anneau",
+  "portee": [
+    0,
+    0
+  ],
+  "taille": 1,
+  "cible": "toute_entite",
+  "ligne_de_vue": false,
+  "cout_ticks": 8,
+  "cout_endurance": 4,
+  "degats_des": "1d4",
+  "type_degats": "perforant",
+  "conditions": [],
+  "effets": [
+    {
+      "type": "degats"
+    },
+    {
+      "type": "statut",
+      "id": "poison",
+      "duree_ticks": 20
+    }
+  ],
+  "tags": [
+    "poison"
+  ]
+}

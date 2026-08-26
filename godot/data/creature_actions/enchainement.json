@@ -1,0 +1,29 @@
+{
+  "name_key": "creature_action.enchainement.name",
+  "elements": {},
+  "forme": "cible_unique",
+  "portee": [
+    1,
+    1
+  ],
+  "taille": 1,
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 14,
+  "cout_endurance": 12,
+  "degats_des": null,
+  "type_degats": null,
+  "conditions": [],
+  "effets": [
+    {
+      "type": "attaque_arme"
+    },
+    {
+      "type": "attaque_arme"
+    }
+  ],
+  "tags": [
+    "elite",
+    "telegraphe"
+  ]
+}

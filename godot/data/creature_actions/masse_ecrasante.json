@@ -1,0 +1,27 @@
+{
+  "name_key": "creature_action.masse_ecrasante.name",
+  "elements": {
+    "terre": 1.0
+  },
+  "forme": "cible_unique",
+  "portee": [
+    1,
+    1
+  ],
+  "taille": 1,
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 16,
+  "cout_endurance": 14,
+  "degats_des": "2d8",
+  "type_degats": "contondant",
+  "conditions": [],
+  "effets": [
+    {
+      "type": "degats"
+    }
+  ],
+  "tags": [
+    "coup"
+  ]
+}

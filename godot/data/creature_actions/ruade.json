@@ -1,0 +1,35 @@
+{
+  "name_key": "creature_action.ruade.name",
+  "elements": {
+    "terre": 1.0
+  },
+  "forme": "cible_unique",
+  "portee": [
+    1,
+    1
+  ],
+  "taille": 1,
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 10,
+  "cout_endurance": 8,
+  "degats_des": "1d6",
+  "type_degats": "contondant",
+  "conditions": [],
+  "effets": [
+    {
+      "type": "degats"
+    },
+    {
+      "type": "deplacement",
+      "mode": "projection",
+      "distance": "1"
+    },
+    {
+      "type": "fuite"
+    }
+  ],
+  "tags": [
+    "coup"
+  ]
+}

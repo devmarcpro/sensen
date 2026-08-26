@@ -1,0 +1,14 @@
+{
+  "name_key": "functionality.arc.name",
+  "kind": "arme",
+  "hands": 2,
+  "combat_skill": "arc",
+  "degats_des": "2d6",
+  "crit_range": 20,
+  "vitesse_base": 1.5,
+  "portee": 25.0,
+  "portee_min": 2,
+  "type_degats": "perforant",
+  "volume": 1.4,
+  "poids_reference": 1.68
+}

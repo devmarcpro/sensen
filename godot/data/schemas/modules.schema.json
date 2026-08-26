@@ -1,0 +1,72 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name_key": {
+      "type": "string"
+    },
+    "module_type": {
+      "type": "string",
+      "enum": [
+        "noyau",
+        "forme",
+        "modificateur",
+        "condition",
+        "declencheur",
+        "liaison"
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cout_ticks": {
+      "type": "integer"
+    },
+    "cout_mana": {
+      "type": "integer"
+    },
+    "cout_endurance": {
+      "type": "integer"
+    },
+    "surcout_ticks": {
+      "type": "integer"
+    },
+    "elements": {
+      "type": "object"
+    },
+    "effets": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "geometrie": {
+      "type": "string"
+    },
+    "portee_base": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "taille_base": {
+      "type": "integer"
+    },
+    "ligne_de_vue": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "id",
+    "name_key",
+    "module_type",
+    "tags"
+  ]
+}

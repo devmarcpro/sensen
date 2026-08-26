@@ -1,0 +1,33 @@
+{
+  "name_key": "creature_action.machoire_verrouillee.name",
+  "elements": {
+    "eau": 1.0
+  },
+  "forme": "cible_unique",
+  "portee": [
+    1,
+    1
+  ],
+  "taille": 1,
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 16,
+  "cout_endurance": 14,
+  "degats_des": "2d8",
+  "type_degats": "perforant",
+  "conditions": [],
+  "effets": [
+    {
+      "type": "degats"
+    },
+    {
+      "type": "statut",
+      "id": "enracinement",
+      "duree_ticks": 10
+    }
+  ],
+  "tags": [
+    "morsure",
+    "telegraphe"
+  ]
+}

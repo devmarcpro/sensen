@@ -1,0 +1,14 @@
+{
+  "name_key": "item.proto_lance.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 2,
+  "functionality": "lance",
+  "durete_base": 20,
+  "qualite": 1.0,
+  "element": "bois",
+  "tags": [
+    "arme",
+    "prototype"
+  ]
+}

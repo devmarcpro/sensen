@@ -54,6 +54,21 @@ Toute créature a une faible chance (défaut **0.5 %**, pondérable par race) de
 
 **Viandes et parties dérivées :** [[Catalogue matériaux — Paramétriques]].
 
+> [!success] Décidé le 2026-08-26 — les six adversaires du prototype, chiffrés
+> Aucune fiche ne donnait de stats : voici celles de `data/creatures/` (six stats, PV = 20 + End × 4 — [[Stats de personnage]]), valeurs de premier équilibrage à ajuster au playtest :
+>
+> | Fiche | For | Dex | End | Vol | Per | Cha | PV | Actions / arme | IA |
+> |---|---|---|---|---|---|---|---|---|---|
+> | Loup | 7 | 12 | 5 | 3 | 12 | 2 | 40 | morsure, harcelement_meute, hurlement | hostile |
+> | Sanglier | 12 | 6 | 10 | 4 | 8 | 2 | 60 | coup_de_defenses, charge | hostile |
+> | Bandit | 11 | 10 | 9 | 7 | 9 | 8 | 56 | épée + cuirasse de cuir | hostile |
+> | Chef de bande | 13 | 12 | 12 | 9 | 10 | 12 | 68 | épée, bouclier, casque de fer, mailles + cri_de_ralliement, enchainement (`chain_gauge`) | hostile |
+> | Aigle | 5 | 15 | 4 | 3 | 16 | 2 | 36 | serres, pique_plongeant (volant) | hostile |
+> | Scorpion | 6 | 9 | 6 | 2 | 8 | 1 | 44 | pique_venimeuse, pinces | hostile |
+> | *Aventurier (joueur)* | 12 | 10 | 12 | 8 | 10 | 8 | 68 | épée, casque et cuirasse de cuir ; râtelier des 6 armes + bouclier | — |
+>
+> **Profil IA des bêtes dans les arènes :** le catalogue donne `bete_sauvage` au loup et au sanglier ; le prototype les met en **`hostile`** — ce sont des loups **en chasse** ([[Cycle jour-nuit et sommeil]] : « loups en chasse » la nuit) et un sanglier **acculé** dans sa gorge, ce que la spec exige pour tester l'encerclement et la charge. Le profil est un champ de la fiche, changer d'avis = éditer un JSON. La **détection** est `Perception` tuiles avec ligne de vue ([[IA des créatures]]).
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Les trois axes — race, classe, fonction]], [[Squelette modulaire et points d'attache]]
 - **Alimente** : [[Profils de PNJ]], [[Catalogue matériaux — Paramétriques]], [[Monstres rares]], [[Actions des créatures]], [[Génération de donjon]]

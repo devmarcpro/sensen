@@ -24,6 +24,11 @@ La hauteur est **quantifiée sur 21 niveaux** (0 à 20, référence à 10) — f
 - **Les fluides coulent** : l'eau remplit les creux, la lave descend. [[Eau et liquides]] se simplifie en 2D + hauteur au lieu d'un volume.
 - **Destruction** : on peut **abaisser ou élever une tuile** (tranchée, talus), **détruire un mur ou un bâtiment** (la tuile redevient sol), **abattre un arbre**. La destruction reste tactiquement lisible — effondrer le pont, ouvrir une brèche, inonder la tranchée — sans permettre le tunnel arbitraire. *(Détail : [[Destruction du terrain]].)*
 
+> [!success] Décidé le 2026-08-26 — ce que le code a fixé
+> - **Ligne de vue** : ligne droite entre les deux tuiles, à hauteur des yeux (`hauteur_oeil = 1` au-dessus du sol, dans `combat_rules.json`) ; une tuile intermédiaire dont la hauteur (sol + contenu bloquant, un mur vaut 3 niveaux) dépasse la ligne interpolée coupe la vue.
+> - **Chute** : jamais choisie par le pathfinding ; un **pas volontaire** vers une tuile ≥ 3 en contrebas est autorisé, coûte le prix d'une descente (2 ticks) et applique `(hauteur − 2) × 5`. Les **volants** ignorent le dénivelé.
+> - **Murs** : un contenu de tuile (`data/tile_contents.json`, champ `content` de [[Décision — Structure de données de la grille]]) bloque le passage et la vue par ses tags — les systèmes lisent `bloque_passage` / `bloque_vue`, jamais l'id.
+
 ## Liens
 - **Dépend de** : [[Grille continue]], [[Terrain spectaculaire]], [[Décisions fondatrices]]
 - **Alimente** : [[Zones de coup par dénivelé]], [[Combat tactique sur grille]], [[Action-time à ticks]], [[Destruction du terrain]], [[Eau et liquides]], [[Sorts cataclysmiques]]

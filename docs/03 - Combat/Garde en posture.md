@@ -28,6 +28,9 @@ action, et elle est FRONTALE : flanc et dos l'ignorent.
 
 **Garde-bouclier ([[Décision — Boucliers]]) :** avec un bouclier en main secondaire, la garde couvre front + flancs, coûte moitié moins d'endurance à l'impact (`6 + dégâts/8`) et n'est pas brisée par l'attaque lourde. La contrepartie : pas de seconde arme.
 
+> [!success] Décidé le 2026-08-26 — le « front » sur une grille à 8 voisines
+> L'orientation d'un être est la direction de son dernier déplacement ou de sa dernière attaque. Un coup vient du **front** s'il arrive des **3 tuiles devant** (angle ≤ 45°), du **flanc** pour les **2 tuiles latérales** (90°), du **dos** pour les **3 tuiles arrière**. La garde simple ne tient que de front ; la garde-bouclier tient front + flancs. Tomber à **zéro d'endurance à l'impact** fait tomber la garde (et la reprendre est impossible tant qu'on est à zéro). La garde est levée par toute action de son porteur, déplacement compris.
+
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Endurance]], [[Action-time à ticks]]
 - **Alimente** : [[Attaque lourde et télégraphe]], [[Armure par zone et constructions]]

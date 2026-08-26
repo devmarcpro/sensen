@@ -1,0 +1,32 @@
+{
+  "name_key": "creature_action.morsure_puissante.name",
+  "elements": {
+    "bois": 1.0
+  },
+  "forme": "cible_unique",
+  "portee": [
+    1,
+    1
+  ],
+  "taille": 1,
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 12,
+  "cout_endurance": 10,
+  "degats_des": "2d6",
+  "type_degats": "perforant",
+  "conditions": [],
+  "effets": [
+    {
+      "type": "degats"
+    },
+    {
+      "type": "statut",
+      "id": "saignement",
+      "duree_ticks": 30
+    }
+  ],
+  "tags": [
+    "morsure"
+  ]
+}

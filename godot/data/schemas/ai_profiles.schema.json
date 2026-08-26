@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "name_key": {
+      "type": "string"
+    },
+    "considerations": {
+      "type": "object"
+    },
+    "seuil_fuite_sante": {
+      "type": "number"
+    },
+    "chute_max_degats": {
+      "type": "integer"
+    },
+    "horaires": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "chain_bonus": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "name_key",
+    "considerations",
+    "seuil_fuite_sante",
+    "chute_max_degats"
+  ]
+}

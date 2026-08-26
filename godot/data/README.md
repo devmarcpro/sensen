@@ -7,7 +7,7 @@
 1. **Un fichier par entrée** — l'id est le nom du fichier (`materials/chene.json` → id `chene`). Ajouter du contenu = ajouter un fichier, zéro code.
 2. **Copier le `_template.json`** du dossier, le renommer, le remplir. Le champ `_doc` est ignoré par le loader.
 3. **Validation au boot** (schémas dans `schemas/`, erreurs `fichier → champ` en console, bloquantes en debug) ; **F5 recharge tout** sans relancer. Les fichiers `_*` sont ignorés.
-4. **Les systèmes lisent des tags et des champs, jamais des ids** — `GameData.get(catalogue, id)` / `GameData.by_tag(catalogue, tag)`.
+4. **Les systèmes lisent des tags et des champs, jamais des ids** — `GameData.entree(catalogue, id)` / `GameData.par_tag(catalogue, tag)` (`get` est réservé par `Object` en GDScript) ; configurations : `GameData.config(nom)` / `GameData.regle("combat_rules/endurance/max")`.
 5. Nouvelle **entrée** = 1 fichier. Nouveau **champ** = schéma + système consommateur. Nouveau **catalogue** = 1 schéma + 1 ligne dans GameData.
 
 ## Registre
@@ -15,11 +15,11 @@
 | Dossier | Contenu | Spécification (docs/) |
 |---|---|---|
 | materials/ | 153 matériaux | Schéma matériau (B.1), catalogues 09 - Contenu |
-| items/ | objets et recettes | Schéma objet et recette (B.3) |
+| items/ | objets et recettes ; `proto_*` = objets du prototype (dureté, qualité et élément fixés à la main en attendant le craft) | Schéma objet et recette (B.3), Stats d'armes |
 | functionalities/ | profils d'armes/armures/véhicules | Fonctionnalité (B.3.1) |
 | modules/ | modules de capacités | Vocabulaire des modules (B.4), Modules (F.2) |
 | creatures/ | créatures et PNJ | Schéma créature (B.5), Créatures (F.3) |
-| creature_actions/ | actions des créatures | Décision — Vocabulaire d'attaque des créatures |
+| creature_actions/ | les 24 actions des créatures (`tools/gen_creature_actions.py` les transcrit) | Décision — Vocabulaire d'attaque des créatures, Actions des créatures |
 | ai_profiles/ | profils Utility AI | IA des créatures (E.16) |
 | biomes/ | biomes | Biomes — schéma (B.6), C.7 |
 | quest_templates/ | gabarits de quêtes | Gabarit de quête (B.7) |
@@ -37,11 +37,13 @@
 | rigs/ | rigs de squelette (segments, ancrages, ordre de calque par direction) | Squelette modulaire et points d'attache |
 | weather_states/ | états météo | Météo (E.28) |
 | species/ | espèces d'élevage (loci, moteur, conditions, coûts) | Élevage — intention et familles (Annexe H) |
-| prototype_arenas/ | arènes de l'étape 0 | Prototype de combat — spécification |
-| schemas/ | JSON Schema de chaque catalogue | Décision — Pipeline de contenu |
+| prototype_arenas/ | arènes de l'étape 0 (3 arènes, posées par `tools/gen_arenas.py`) | Prototype de combat — spécification |
+| schemas/ | JSON Schema (sous-ensemble : type, required, properties, items, enum, min/max) de chaque catalogue | Décision — Pipeline de contenu |
 
-**Configurations (fichier unique, à la racine de data/) :** `noise_layers.json` (B.8) · `material_categories.json` (B.2) · `reserved_colors.json` (12.1) · `strata.json` + `ore_bands.json` (Décision — Minerais et strates) · `reading_failures.json` (A.7) · `rare_epithets.json` (12.4) · `absurd_laws_pool.json` (E.26).
+**Configurations (fichier unique, à la racine de data/) :** `combat_rules.json` (toutes les constantes chiffrées du combat, chacune citant sa note — Boucle de tick, Endurance, Zones de coup, Armure par zone…) · `tile_contents.json` (contenus de tuile par tags) · `noise_layers.json` (B.8) · `material_categories.json` (B.2) · `reserved_colors.json` (12.1) · `strata.json` + `ore_bands.json` (Décision — Minerais et strates) · `reading_failures.json` (A.7) · `rare_epithets.json` (12.4) · `absurd_laws_pool.json` (E.26).
 
 **Élevage (Annexe H) :** `species/` déclare tout — les **types de loci** (10), les **conditions** (15) et les **coûts** (6) sont du code générique, jamais du code par espèce. Ajouter une espèce = **un fichier**, et les tests de conformité vérifient qu'elle est jouable (atteignabilité, faisabilité).
 
 **Textes :** aucun texte affichable ici — uniquement des `name_key`/`text_key`, résolues dans `godot/locale/*.csv` (fr, en, ja, zh).
+
+**Catalogues chargés par GameData (étape 0) :** `modules`, `creatures`, `creature_actions`, `ai_profiles`, `functionalities`, `items`, `status_effects`, `prototype_arenas`, plus les configurations `combat_rules` et `tile_contents`. Ajouter un catalogue = son schéma dans `schemas/` + une ligne dans `autoload/game_data.gd`. Les dossiers `exemples_*` sont des exemples générés, pas des catalogues.

@@ -1,0 +1,130 @@
+{
+  "type": "object",
+  "properties": {
+    "name_key": {
+      "type": "string"
+    },
+    "race": {
+      "type": "string"
+    },
+    "skeleton_template": {
+      "type": "string"
+    },
+    "corps": {
+      "type": "object",
+      "properties": {
+        "stats": {
+          "type": "object",
+          "properties": {
+            "force": {
+              "type": "integer"
+            },
+            "dexterite": {
+              "type": "integer"
+            },
+            "endurance": {
+              "type": "integer"
+            },
+            "volonte": {
+              "type": "integer"
+            },
+            "perception": {
+              "type": "integer"
+            },
+            "charisme": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "force",
+            "dexterite",
+            "endurance",
+            "volonte",
+            "perception",
+            "charisme"
+          ]
+        },
+        "silhouette": {
+          "type": "string",
+          "enum": [
+            "humanoide",
+            "quadrupede",
+            "volant",
+            "amorphe"
+          ]
+        }
+      },
+      "required": [
+        "stats",
+        "silhouette"
+      ]
+    },
+    "esprit": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "ai_profile": {
+      "type": "string"
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "equipement": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "ratelier": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "chain_gauge": {
+      "type": "boolean"
+    },
+    "elements": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "rare_chance": {
+      "type": "number"
+    },
+    "teinte": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "classe": {
+      "type": "string"
+    },
+    "fonction": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name_key",
+    "race",
+    "corps",
+    "ai_profile",
+    "actions",
+    "tags"
+  ]
+}

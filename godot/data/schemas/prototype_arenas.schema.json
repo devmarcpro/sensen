@@ -1,0 +1,113 @@
+{
+  "type": "object",
+  "properties": {
+    "name_key": {
+      "type": "string"
+    },
+    "size": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "heights": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "minItems": 32,
+        "maxItems": 32
+      },
+      "minItems": 32,
+      "maxItems": 32
+    },
+    "ground": {
+      "type": "array"
+    },
+    "contents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pos": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "pos",
+          "type"
+        ]
+      }
+    },
+    "spawns": {
+      "type": "object",
+      "properties": {
+        "player": {
+          "type": "object",
+          "properties": {
+            "creature": {
+              "type": "string"
+            },
+            "pos": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "creature",
+            "pos"
+          ]
+        },
+        "enemies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "creature": {
+                "type": "string"
+              },
+              "pos": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 2,
+                "maxItems": 2
+              }
+            },
+            "required": [
+              "creature",
+              "pos"
+            ]
+          }
+        }
+      },
+      "required": [
+        "player",
+        "enemies"
+      ]
+    }
+  },
+  "required": [
+    "name_key",
+    "size",
+    "heights",
+    "spawns"
+  ]
+}

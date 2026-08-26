@@ -10,7 +10,7 @@ Un **roguelike tactique** en monde infini, généré procéduralement et totalem
 
 | Chemin | Ce que c'est |
 |---|---|
-| [`godot/`](godot/) | Le projet Godot — squelette pour l'instant, arborescence conforme au design (D.1) |
+| [`godot/`](godot/) | Le projet Godot — prototype de combat (étape 0) en cours, arborescence conforme au design (D.1) |
 | [`docs/`](docs/) | Le design complet : un **coffre Obsidian** de 272 notes atomiques, reliées et navigables |
 | [`archive/`](archive/) | Le GDD source monolithique (v2.0) — archive de référence, les notes de `docs/` font foi |
 | [`tools/`](tools/) | Outillage du dépôt — `check_vault.py` valide liens, frontmatter et comptages du coffre |
@@ -18,7 +18,7 @@ Un **roguelike tactique** en monde infini, généré procéduralement et totalem
 
 ## État du projet — pré-production
 
-Le design est complet et nettoyé : le pivot **voxel → tactique isométrique** (2026-08-09, irrévocable) est intégralement répercuté dans les notes. **Aucune question de design ne reste bloquante** : tout ce qui était ouvert a reçu une décision ou un défaut chiffré implémentable — le code n'a rien à inventer. Ce qui reste avant de coder est listé dans **`docs/00 - Index/Vers la production.md`** — en tête : l'interface, les contrôles et la caméra, puis la transcription des catalogues en JSON.
+Le design est complet et nettoyé : le pivot **voxel → tactique isométrique** (2026-08-09, irrévocable) est intégralement répercuté dans les notes. **Aucune question de design ne reste bloquante** : tout ce qui était ouvert a reçu une décision ou un défaut chiffré implémentable — le code n'a rien à inventer. Le code de l'**étape 0** (prototype de combat) est en cours — l'état exact est dans **`docs/00 - Index/Vers la production.md`**.
 
 ### Ordre de construction (le donjon avant le monde)
 
@@ -57,6 +57,16 @@ Ouvrir [`docs/`](docs/) comme coffre dans **Obsidian**. Point d'entrée : `00 - 
 
 ## Développement
 
-Le projet `godot/` s'ouvre avec **Godot 4.5+** et se lance directement (F5) : la scène principale est la **démo 0** — grille isométrique générée avec relief, déplacement au clic (A* aux coûts de pente du design), et l'horloge action-time à ticks, avec un loup hostile pour la mettre à l'épreuve. Aucun asset : tout est dessiné en polygones.
+Le projet `godot/` s'ouvre avec **Godot 4.6** et se lance directement (F5) : la scène principale est le **prototype de combat** (étape 0) — trois arènes chargées depuis `godot/data/prototype_arenas/`, grille isométrique 32×32 avec relief, action-time à ticks (une horloge par combat), mêlée avec zones par dénivelé, garde, attaque lourde télégraphée, endurance, et une IA utility en données. Aucun asset : tout est dessiné en polygones.
 
-L'arborescence (autoload, data, systems, scenes, locale) suit la note *Arborescence du projet* du design. `godot/data/` contient déjà les 176 modules, les exemples de PNJ et d'objets générés. Prochaine étape : étendre la démo vers le **prototype de combat isolé** — voir `docs/00 - Index/Vers la production.md`.
+**Commandes :** clic — se déplacer / frapper · Maj+clic — attaque lourde · G — garde · Espace — attendre · Tab — arène suivante · F5 — recharger les données · molette — zoom · clic milieu — déplacer la vue.
+
+```powershell
+$godot = "C:\Users\ciryl\Documents\Godot_v4.6.3-stable_win64.exe"
+& $godot --headless --path godot --import                                            # une fois après un clone (cache des classes)
+& $godot --headless --path godot res://scenes/tests/test_combat.tscn --quit-after 3  # les tests (assert, headless)
+& $godot --headless --path godot res://scenes/demo/main.tscn --quit-after 120        # la scène tourne sans erreur
+python tools/check_vault.py                                                          # le coffre est intègre
+```
+
+L'arborescence (autoload, data, systems, scenes, locale) suit la note *Arborescence du projet*. `autoload/game_data.gd` charge et valide tout `data/` au boot (bloquant en debug) ; `systems/combat/simulation.gd` est l'autorité (le client `scenes/demo/main.gd` n'envoie que des intentions). État et prochaines étapes : `docs/00 - Index/Vers la production.md`.

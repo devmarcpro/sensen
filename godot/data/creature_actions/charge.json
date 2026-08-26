@@ -1,0 +1,38 @@
+{
+  "name_key": "creature_action.charge.name",
+  "elements": {
+    "terre": 1.0
+  },
+  "forme": "ligne",
+  "portee": [
+    1,
+    3
+  ],
+  "taille": 3,
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 14,
+  "cout_endurance": 12,
+  "degats_des": "2d6",
+  "type_degats": "contondant",
+  "conditions": [],
+  "effets": [
+    {
+      "type": "degats"
+    },
+    {
+      "type": "deplacement",
+      "mode": "projection",
+      "distance": "1d3"
+    },
+    {
+      "type": "deplacement",
+      "mode": "au_contact",
+      "cible": "soi"
+    }
+  ],
+  "tags": [
+    "charge",
+    "telegraphe"
+  ]
+}

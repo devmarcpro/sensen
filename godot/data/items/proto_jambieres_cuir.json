@@ -1,0 +1,15 @@
+{
+  "name_key": "item.proto_jambieres_cuir.name",
+  "type": "armure",
+  "equip_slot": "jambieres",
+  "hands": 0,
+  "zone": "jambes",
+  "construction": "cuir",
+  "durete_composite": 12,
+  "qualite": 1.0,
+  "niveau_construction": 0,
+  "tags": [
+    "armure",
+    "prototype"
+  ]
+}

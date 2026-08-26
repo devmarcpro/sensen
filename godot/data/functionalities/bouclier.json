@@ -1,0 +1,14 @@
+{
+  "name_key": "functionality.bouclier.name",
+  "kind": "bouclier",
+  "hands": 1,
+  "combat_skill": "bouclier",
+  "degats_des": "1d4",
+  "crit_range": 20,
+  "vitesse_base": 1.5,
+  "portee": 1.0,
+  "portee_min": 1,
+  "type_degats": "contondant",
+  "volume": 4.0,
+  "poids_reference": 4.8
+}

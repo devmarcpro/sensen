@@ -1,0 +1,35 @@
+{
+  "name_key": "creature.sanglier.name",
+  "race": "sanglier",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 12,
+      "dexterite": 6,
+      "endurance": 10,
+      "volonte": 4,
+      "perception": 8,
+      "charisme": 2
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "coup_de_defenses",
+    "charge"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": null,
+  "rare_chance": 0.0,
+  "teinte": [
+    0.45,
+    0.3,
+    0.2
+  ],
+  "tags": [
+    "bete"
+  ]
+}
