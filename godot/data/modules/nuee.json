@@ -1,0 +1,19 @@
+{
+  "id": "nuee",
+  "nom": "Nuée",
+  "name_key": "module.nuee.name",
+  "module_type": "forme",
+  "description": "4 tuiles **aléatoires** dans le rayon — imprévisible, bon marché",
+  "classe_signature": "Le Rieur",
+  "tags": [
+    "forme"
+  ],
+  "geometrie": "nuee",
+  "surcout_ticks": 3,
+  "portee_base": [
+    1,
+    6
+  ],
+  "taille_base": 4,
+  "ligne_de_vue": false
+}

@@ -1,0 +1,23 @@
+{
+  "id": "celerite",
+  "nom": "Célérité",
+  "name_key": "module.celerite.name",
+  "module_type": "noyau",
+  "description": "**−10 ticks** au compteur d'un allié — l'autre face du tempo, sans plafond",
+  "classe_signature": "Le Sablier",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 8,
+  "cout_mana": 14,
+  "cout_endurance": 0,
+  "effets": [
+    "tempo"
+  ],
+  "forme": null,
+  "portee": null
+}

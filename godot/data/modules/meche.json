@@ -4,6 +4,7 @@
   "name_key": "module.meche.name",
   "module_type": "declencheur",
   "description": "la charge part après **N ticks** (10 à 50, réglable à l'assemblage)",
+  "classe_signature": "La Mèche",
   "tags": [
     "declencheur"
   ],

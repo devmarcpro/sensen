@@ -1,0 +1,23 @@
+{
+  "id": "portail",
+  "nom": "Portail",
+  "name_key": "module.portail.name",
+  "module_type": "noyau",
+  "description": "pose **deux tuiles appairées** : y entrer sort par l'autre. Permanentes jusqu'au repositionnement",
+  "classe_signature": "Le Passeur",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Espace",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 14,
+  "cout_mana": 22,
+  "cout_endurance": 0,
+  "effets": [
+    "terrain"
+  ],
+  "forme": null,
+  "portee": null
+}

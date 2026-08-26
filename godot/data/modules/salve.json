@@ -1,0 +1,12 @@
+{
+  "id": "salve",
+  "nom": "Salve",
+  "name_key": "module.salve.name",
+  "module_type": "liaison",
+  "description": "lance **3 charges simultanées** à 60 %, réparties dans la forme",
+  "classe_signature": "L'Engrenage",
+  "tags": [
+    "liaison"
+  ],
+  "surcout_ticks": 4
+}

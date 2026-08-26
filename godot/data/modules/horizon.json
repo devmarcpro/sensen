@@ -1,0 +1,19 @@
+{
+  "id": "horizon",
+  "nom": "Horizon",
+  "name_key": "module.horizon.name",
+  "module_type": "forme",
+  "description": "**toutes** les entités en vue — le prix des ticks est le garde-fou",
+  "classe_signature": null,
+  "tags": [
+    "forme"
+  ],
+  "geometrie": "horizon",
+  "surcout_ticks": 10,
+  "portee_base": [
+    1,
+    12
+  ],
+  "taille_base": 99,
+  "ligne_de_vue": true
+}

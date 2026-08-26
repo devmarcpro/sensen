@@ -1,0 +1,14 @@
+{
+  "id": "detonation",
+  "nom": "Détonation",
+  "name_key": "module.detonation.name",
+  "module_type": "modificateur",
+  "description": "×2 dégâts contre les **invocations, tourelles, bombes et barrières**",
+  "classe_signature": "La Mèche",
+  "tags": [
+    "modificateur"
+  ],
+  "famille": "Effet",
+  "surcout_ticks": 1,
+  "surcout_ressource": "+4"
+}

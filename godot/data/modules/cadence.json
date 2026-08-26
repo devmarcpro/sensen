@@ -1,0 +1,12 @@
+{
+  "id": "cadence",
+  "nom": "Cadence",
+  "name_key": "module.cadence.name",
+  "module_type": "declencheur",
+  "description": "la charge part **tous les N emplois** de la capacité (2 à 5)",
+  "classe_signature": "L'Engrenage",
+  "tags": [
+    "declencheur"
+  ],
+  "surcout_ticks": 1
+}

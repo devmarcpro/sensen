@@ -1,0 +1,16 @@
+{
+  "id": "pleine_garde",
+  "nom": "Pleine garde",
+  "name_key": "module.pleine_garde.name",
+  "module_type": "condition",
+  "description": "le lanceur tient une posture",
+  "classe_signature": "Le Masque",
+  "tags": [
+    "condition"
+  ],
+  "famille": "Porteur",
+  "predicat": "porteur_en_posture",
+  "bonus": "−2 ticks, +1 dé",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "derobade",
+  "nom": "Dérobade",
+  "name_key": "module.derobade.name",
+  "module_type": "declencheur",
+  "description": "la charge part **quand le porteur esquive**",
+  "classe_signature": "L'Ombre",
+  "tags": [
+    "declencheur"
+  ],
+  "surcout_ticks": 2
+}

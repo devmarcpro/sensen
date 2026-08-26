@@ -4,9 +4,11 @@
   "name_key": "module.evasement.name",
   "module_type": "modificateur",
   "description": "transforme une Ligne en Cône, ou un Anneau en Carré",
+  "classe_signature": null,
   "tags": [
     "modificateur"
   ],
+  "famille": "Forme",
   "surcout_ticks": 1,
   "surcout_ressource": "+3"
 }

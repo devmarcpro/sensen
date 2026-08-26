@@ -3,12 +3,12 @@
   "nom": "Frappe",
   "name_key": "module.frappe.name",
   "module_type": "noyau",
-  "description": "les dégâts de l'arme équipée, à son élément et à son coût en ticks — c'est le noyau de toute capacité de manuel",
+  "description": "les dégâts de l'arme équipée, à son élément et à ses ticks",
+  "classe_signature": "Le Sabre",
   "tags": [
-    "noyau",
-    "dégâts"
+    "noyau"
   ],
-  "famille": "Dégâts",
+  "famille": "Arme",
   "elements": {},
   "element_special": "arme",
   "power_base": "arme",

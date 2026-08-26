@@ -4,9 +4,9 @@
   "name_key": "module.barriere.name",
   "module_type": "noyau",
   "description": "occupe la tuile et bloque le passage, 50 ticks",
+  "classe_signature": null,
   "tags": [
-    "noyau",
-    "terrain"
+    "noyau"
   ],
   "famille": "Terrain",
   "elements": {},

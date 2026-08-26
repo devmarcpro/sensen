@@ -1,0 +1,12 @@
+{
+  "id": "boucle",
+  "nom": "Boucle",
+  "name_key": "module.boucle.name",
+  "module_type": "liaison",
+  "description": "rejoue tant qu'il reste de la ressource, **−1 dé** cumulé par tour de boucle",
+  "classe_signature": null,
+  "tags": [
+    "liaison"
+  ],
+  "surcout_ticks": 6
+}

@@ -1,0 +1,23 @@
+{
+  "id": "reflet",
+  "nom": "Reflet",
+  "name_key": "module.reflet.name",
+  "module_type": "noyau",
+  "description": "renvoie **30 %** des dégâts subis à l'attaquant, 40 ticks",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Défense",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 9,
+  "cout_mana": 18,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

@@ -3,12 +3,12 @@
   "nom": "Attraction",
   "name_key": "module.attraction.name",
   "module_type": "noyau",
-  "description": "attire de 2 tuiles",
+  "description": "attire de 2 tuiles — la télékinésie de base",
+  "classe_signature": null,
   "tags": [
-    "noyau",
-    "déplacement"
+    "noyau"
   ],
-  "famille": "Déplacement",
+  "famille": "Espace",
   "elements": {},
   "element_special": null,
   "power_base": null,

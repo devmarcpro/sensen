@@ -1,0 +1,14 @@
+{
+  "id": "enchainement",
+  "nom": "Enchaînement",
+  "name_key": "module.enchainement.name",
+  "module_type": "modificateur",
+  "description": "si la capacité précédente a **touché**, celle-ci coûte **0 tick**",
+  "classe_signature": "Le Sabre",
+  "tags": [
+    "modificateur"
+  ],
+  "famille": "Tempo",
+  "surcout_ticks": 2,
+  "surcout_ressource": "+4"
+}

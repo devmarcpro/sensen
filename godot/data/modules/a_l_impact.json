@@ -4,6 +4,7 @@
   "name_key": "module.a_l_impact.name",
   "module_type": "declencheur",
   "description": "la charge qui suit part quand le noyau précédent touche",
+  "classe_signature": null,
   "tags": [
     "declencheur"
   ],

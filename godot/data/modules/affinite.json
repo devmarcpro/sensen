@@ -4,9 +4,11 @@
   "name_key": "module.affinite.name",
   "module_type": "condition",
   "description": "la cible porte l'élément désigné",
+  "classe_signature": null,
   "tags": [
     "condition"
   ],
+  "famille": "Cible",
   "predicat": "element_cible = X",
   "bonus": "×1.2 dégâts",
   "surcout_ticks": 0,

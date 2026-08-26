@@ -4,9 +4,11 @@
   "name_key": "module.surplomb.name",
   "module_type": "condition",
   "description": "le lanceur est plus haut que la cible",
+  "classe_signature": null,
   "tags": [
     "condition"
   ],
+  "famille": "Position",
   "predicat": "hauteur_relative > 0",
   "bonus": "+2 dés",
   "surcout_ticks": 0,

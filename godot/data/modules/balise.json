@@ -1,0 +1,23 @@
+{
+  "id": "balise",
+  "nom": "Balise",
+  "name_key": "module.balise.name",
+  "module_type": "noyau",
+  "description": "tuile marquée : les capacités du porteur y gagnent **+1 dé**, 80 ticks",
+  "classe_signature": "Le Sceau",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Terrain",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 6,
+  "cout_mana": 10,
+  "cout_endurance": 0,
+  "effets": [
+    "terrain"
+  ],
+  "forme": null,
+  "portee": null
+}

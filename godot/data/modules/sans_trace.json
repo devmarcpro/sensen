@@ -1,0 +1,14 @@
+{
+  "id": "sans_trace",
+  "nom": "Sans trace",
+  "name_key": "module.sans_trace.name",
+  "module_type": "modificateur",
+  "description": "la capacité **ne révèle pas** son lanceur — reste Dissimulé après le coup",
+  "classe_signature": "L'Ombre",
+  "tags": [
+    "modificateur"
+  ],
+  "famille": "Discrétion",
+  "surcout_ticks": 3,
+  "surcout_ressource": "+7"
+}

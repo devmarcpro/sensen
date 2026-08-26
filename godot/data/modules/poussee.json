@@ -3,12 +3,12 @@
   "nom": "Poussée",
   "name_key": "module.poussee.name",
   "module_type": "noyau",
-  "description": "repousse de 2 tuiles — chute si le vide suit",
+  "description": "repousse de 2 tuiles",
+  "classe_signature": null,
   "tags": [
-    "noyau",
-    "déplacement"
+    "noyau"
   ],
-  "famille": "Déplacement",
+  "famille": "Espace",
   "elements": {},
   "element_special": null,
   "power_base": null,

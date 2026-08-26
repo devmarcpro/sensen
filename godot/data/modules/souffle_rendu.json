@@ -1,0 +1,23 @@
+{
+  "id": "souffle_rendu",
+  "nom": "Souffle rendu",
+  "name_key": "module.souffle_rendu.name",
+  "module_type": "noyau",
+  "description": "pose un **segment de chaîne de l'élément de la cible soignée** ([[Jauge de chaîne Wu Xing]])",
+  "classe_signature": "La Paume",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Ressource",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 6,
+  "cout_mana": 12,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

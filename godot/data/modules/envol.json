@@ -1,0 +1,23 @@
+{
+  "id": "envol",
+  "nom": "Envol",
+  "name_key": "module.envol.name",
+  "module_type": "noyau",
+  "description": "le lanceur ignore le terrain, le dénivelé et les zones au sol, 40 ticks",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Espace",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 10,
+  "cout_mana": 20,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

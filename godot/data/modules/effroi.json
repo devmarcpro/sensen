@@ -4,9 +4,9 @@
   "name_key": "module.effroi.name",
   "module_type": "noyau",
   "description": "jet de Volonté ou la cible fuit 20 ticks · budget anti-stunlock",
+  "classe_signature": null,
   "tags": [
-    "noyau",
-    "contrôle"
+    "noyau"
   ],
   "famille": "Contrôle",
   "elements": {},

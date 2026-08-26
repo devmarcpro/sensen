@@ -1,0 +1,23 @@
+{
+  "id": "estimation",
+  "nom": "Estimation",
+  "name_key": "module.estimation.name",
+  "module_type": "noyau",
+  "description": "révèle les stats exactes, le vecteur, les résistances et la table de butin de la cible ([[Barèmes économiques]])",
+  "classe_signature": "La Balance",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Ressource",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 4,
+  "cout_mana": 6,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

@@ -1,0 +1,23 @@
+{
+  "id": "voile",
+  "nom": "Voile",
+  "name_key": "module.voile.name",
+  "module_type": "noyau",
+  "description": "le **prochain** coup subi est esquivé automatiquement",
+  "classe_signature": "L'Ombre",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Défense",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 5,
+  "cout_mana": 10,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

@@ -1,0 +1,23 @@
+{
+  "id": "ponction",
+  "nom": "Ponction",
+  "name_key": "module.ponction.name",
+  "module_type": "noyau",
+  "description": "vole 12 de mana à la cible et se les donne — coûte 8 PV",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Ressource",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 8,
+  "cout_mana": 0,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

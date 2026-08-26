@@ -1,0 +1,23 @@
+{
+  "id": "feinte",
+  "nom": "Feinte",
+  "name_key": "module.feinte.name",
+  "module_type": "noyau",
+  "description": "annule la garde de la cible 15 ticks ([[Garde en posture]])",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Arme",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 4,
+  "cout_mana": 0,
+  "cout_endurance": 7,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

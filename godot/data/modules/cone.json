@@ -4,6 +4,7 @@
   "name_key": "module.cone.name",
   "module_type": "forme",
   "description": "s'élargit avec la distance, 3 tuiles de profondeur",
+  "classe_signature": null,
   "tags": [
     "forme"
   ],
@@ -14,6 +15,5 @@
     3
   ],
   "taille_base": 3,
-  "cibles_valides": "tuile · s'élargit",
   "ligne_de_vue": true
 }

@@ -1,0 +1,23 @@
+{
+  "id": "pari",
+  "nom": "Pari",
+  "name_key": "module.pari.name",
+  "module_type": "noyau",
+  "description": "**relance** le jet de la capacité suivante, le second résultat s'applique quel qu'il soit",
+  "classe_signature": "Le Rieur",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Ressource",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 2,
+  "cout_mana": 6,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

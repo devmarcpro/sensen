@@ -1,0 +1,12 @@
+{
+  "id": "miroir",
+  "nom": "Miroir",
+  "name_key": "module.miroir.name",
+  "module_type": "liaison",
+  "description": "applique aussi la charge à la position **symétrique** par rapport au lanceur",
+  "classe_signature": null,
+  "tags": [
+    "liaison"
+  ],
+  "surcout_ticks": 3
+}

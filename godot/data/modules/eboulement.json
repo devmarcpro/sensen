@@ -1,0 +1,25 @@
+{
+  "id": "eboulement",
+  "nom": "Éboulement",
+  "name_key": "module.eboulement.name",
+  "module_type": "noyau",
+  "description": "charge lourde de Terre — un seul emploi coûte deux tours d'épée",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Dégâts · lourd",
+  "elements": {
+    "terre": 1.0
+  },
+  "element_special": null,
+  "power_base": "4d6",
+  "cout_ticks": 16,
+  "cout_mana": 20,
+  "cout_endurance": 0,
+  "effets": [
+    "degats"
+  ],
+  "forme": null,
+  "portee": null
+}

@@ -1,0 +1,16 @@
+{
+  "id": "ombre",
+  "nom": "Ombre",
+  "name_key": "module.ombre.name",
+  "module_type": "condition",
+  "description": "le lanceur est Dissimulé",
+  "classe_signature": "L'Ombre",
+  "tags": [
+    "condition"
+  ],
+  "famille": "Porteur",
+  "predicat": "porteur_dissimule",
+  "bonus": "+3 dés, +1 taille",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

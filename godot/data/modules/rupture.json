@@ -4,11 +4,11 @@
   "name_key": "module.rupture.name",
   "module_type": "noyau",
   "description": "la cible perd 50 % de sa réduction d'armure de zone, 20 ticks",
+  "classe_signature": null,
   "tags": [
-    "noyau",
-    "technique"
+    "noyau"
   ],
-  "famille": "Technique",
+  "famille": "Contrôle",
   "elements": {},
   "element_special": null,
   "power_base": null,

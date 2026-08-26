@@ -1,0 +1,23 @@
+{
+  "id": "traversee",
+  "nom": "Traversée",
+  "name_key": "module.traversee.name",
+  "module_type": "noyau",
+  "description": "le lanceur traverse murs et entités sur 4 tuiles",
+  "classe_signature": "Le Passeur",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Espace",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 7,
+  "cout_mana": 14,
+  "cout_endurance": 0,
+  "effets": [
+    "deplacement"
+  ],
+  "forme": null,
+  "portee": null
+}

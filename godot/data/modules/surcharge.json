@@ -4,9 +4,11 @@
   "name_key": "module.surcharge.name",
   "module_type": "modificateur",
   "description": "+2 dés",
+  "classe_signature": null,
   "tags": [
     "modificateur"
   ],
+  "famille": "Puissance",
   "surcout_ticks": 3,
   "surcout_ressource": "×1.5"
 }

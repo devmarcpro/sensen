@@ -1,0 +1,16 @@
+{
+  "id": "contrebas",
+  "nom": "Contrebas",
+  "name_key": "module.contrebas.name",
+  "module_type": "condition",
+  "description": "le lanceur est plus bas — la portée gagne à monter",
+  "classe_signature": null,
+  "tags": [
+    "condition"
+  ],
+  "famille": "Position",
+  "predicat": "hauteur_relative < 0",
+  "bonus": "+2 portée, −1 tick",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

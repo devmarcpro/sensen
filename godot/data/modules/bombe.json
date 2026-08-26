@@ -1,0 +1,23 @@
+{
+  "id": "bombe",
+  "nom": "Bombe",
+  "name_key": "module.bombe.name",
+  "module_type": "noyau",
+  "description": "pose une charge qui explose après N ticks et **amorce les bombes adjacentes** — friendly fire intégral",
+  "classe_signature": "La Mèche",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Terrain",
+  "elements": {},
+  "element_special": null,
+  "power_base": "3d6",
+  "cout_ticks": 8,
+  "cout_mana": 0,
+  "cout_endurance": 14,
+  "effets": [
+    "invocation"
+  ],
+  "forme": null,
+  "portee": null
+}

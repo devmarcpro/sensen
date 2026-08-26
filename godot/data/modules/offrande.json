@@ -1,0 +1,23 @@
+{
+  "id": "offrande",
+  "nom": "Offrande",
+  "name_key": "module.offrande.name",
+  "module_type": "noyau",
+  "description": "convertit 20 PV en 10 mana, immédiatement",
+  "classe_signature": "L'Écarlate",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Ressource",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 4,
+  "cout_mana": 0,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

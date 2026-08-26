@@ -1,0 +1,26 @@
+{
+  "id": "fosse",
+  "nom": "Fosse",
+  "name_key": "module.fosse.name",
+  "module_type": "noyau",
+  "description": "abaisse brutalement de 3 niveaux — ce qui est dessus chute",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Terrain",
+  "elements": {
+    "terre": 1.0
+  },
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 14,
+  "cout_mana": 14,
+  "cout_endurance": 0,
+  "effets": [
+    "terrain",
+    "degats"
+  ],
+  "forme": null,
+  "portee": null
+}

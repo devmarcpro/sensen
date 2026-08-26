@@ -1,0 +1,12 @@
+{
+  "id": "testament",
+  "nom": "Testament",
+  "name_key": "module.testament.name",
+  "module_type": "declencheur",
+  "description": "la charge part **quand le porteur tombe** — gratuite, il ne paiera pas les ticks",
+  "classe_signature": "Le Fossoyeur",
+  "tags": [
+    "declencheur"
+  ],
+  "surcout_ticks": 0
+}

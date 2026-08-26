@@ -1,0 +1,19 @@
+{
+  "id": "mur",
+  "nom": "Mur",
+  "name_key": "module.mur.name",
+  "module_type": "forme",
+  "description": "une ligne **perpendiculaire** à la visée — barre un couloir",
+  "classe_signature": null,
+  "tags": [
+    "forme"
+  ],
+  "geometrie": "mur",
+  "surcout_ticks": 3,
+  "portee_base": [
+    1,
+    5
+  ],
+  "taille_base": 3,
+  "ligne_de_vue": true
+}

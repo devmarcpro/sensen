@@ -3,10 +3,10 @@
   "nom": "Entrave",
   "name_key": "module.entrave.name",
   "module_type": "noyau",
-  "description": "immobilise 20 ticks — jet de Force pour briser · budget anti-stunlock",
+  "description": "immobilise 20 ticks — jet de Force · budget anti-stunlock",
+  "classe_signature": null,
   "tags": [
-    "noyau",
-    "contrôle"
+    "noyau"
   ],
   "famille": "Contrôle",
   "elements": {},

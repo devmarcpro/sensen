@@ -1,0 +1,25 @@
+{
+  "id": "nappe",
+  "nom": "Nappe",
+  "name_key": "module.nappe.name",
+  "module_type": "noyau",
+  "description": "la tuile devient glissante (friction 5) — glisse, chute, propage la foudre",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Terrain",
+  "elements": {
+    "eau": 1.0
+  },
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 10,
+  "cout_mana": 12,
+  "cout_endurance": 0,
+  "effets": [
+    "terrain"
+  ],
+  "forme": null,
+  "portee": null
+}

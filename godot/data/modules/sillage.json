@@ -1,0 +1,19 @@
+{
+  "id": "sillage",
+  "nom": "Sillage",
+  "name_key": "module.sillage.name",
+  "module_type": "forme",
+  "description": "les 3 tuiles **derrière** la cible — pour ce qui traverse",
+  "classe_signature": null,
+  "tags": [
+    "forme"
+  ],
+  "geometrie": "sillage",
+  "surcout_ticks": 2,
+  "portee_base": [
+    1,
+    6
+  ],
+  "taille_base": 3,
+  "ligne_de_vue": true
+}

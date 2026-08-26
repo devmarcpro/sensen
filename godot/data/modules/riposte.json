@@ -4,6 +4,7 @@
   "name_key": "module.riposte.name",
   "module_type": "declencheur",
   "description": "la charge part **quand le porteur est touché**",
+  "classe_signature": null,
   "tags": [
     "declencheur"
   ],

@@ -4,6 +4,7 @@
   "name_key": "module.tuile.name",
   "module_type": "forme",
   "description": "au sol, sans cible vivante — la forme des glyphes et des zones",
+  "classe_signature": null,
   "tags": [
     "forme"
   ],
@@ -14,6 +15,5 @@
     5
   ],
   "taille_base": 1,
-  "cibles_valides": "tuile",
   "ligne_de_vue": false
 }

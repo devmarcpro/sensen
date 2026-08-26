@@ -1,0 +1,14 @@
+{
+  "id": "repulsion",
+  "nom": "Répulsion",
+  "name_key": "module.repulsion.name",
+  "module_type": "modificateur",
+  "description": "toute cible touchée est **repoussée** d'une tuile",
+  "classe_signature": null,
+  "tags": [
+    "modificateur"
+  ],
+  "famille": "Effet",
+  "surcout_ticks": 2,
+  "surcout_ressource": "+5"
+}

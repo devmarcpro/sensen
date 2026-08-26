@@ -1,0 +1,23 @@
+{
+  "id": "meditation",
+  "nom": "Méditation",
+  "name_key": "module.meditation.name",
+  "module_type": "noyau",
+  "description": "immobile : rend 25 de mana ([[Mana]]) — se rompt si on est touché",
+  "classe_signature": "Le Souffle",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Ressource",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 20,
+  "cout_mana": 0,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

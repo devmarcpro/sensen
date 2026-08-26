@@ -1,0 +1,14 @@
+{
+  "id": "sans_angle_mort",
+  "nom": "Sans angle mort",
+  "name_key": "module.sans_angle_mort.name",
+  "module_type": "modificateur",
+  "description": "supprime la portée minimale — une lance devient bonne au contact",
+  "classe_signature": null,
+  "tags": [
+    "modificateur"
+  ],
+  "famille": "Portée",
+  "surcout_ticks": 1,
+  "surcout_ressource": "+2"
+}

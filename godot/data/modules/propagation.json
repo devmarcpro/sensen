@@ -3,7 +3,8 @@
   "nom": "Propagation",
   "name_key": "module.propagation.name",
   "module_type": "liaison",
-  "description": "la charge se propage **de proche en proche** tant qu'elle touche, −1 dé par pas",
+  "description": "se propage **de proche en proche** tant qu'elle touche, −1 dé par pas",
+  "classe_signature": null,
   "tags": [
     "liaison"
   ],

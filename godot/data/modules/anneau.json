@@ -4,6 +4,7 @@
   "name_key": "module.anneau.name",
   "module_type": "forme",
   "description": "tout autour d'une tuile, **sans toucher le centre**",
+  "classe_signature": null,
   "tags": [
     "forme"
   ],
@@ -14,6 +15,5 @@
     5
   ],
   "taille_base": 1,
-  "cibles_valides": "tuile",
   "ligne_de_vue": false
 }

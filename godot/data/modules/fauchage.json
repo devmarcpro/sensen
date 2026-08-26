@@ -1,0 +1,24 @@
+{
+  "id": "fauchage",
+  "nom": "Fauchage",
+  "name_key": "module.fauchage.name",
+  "module_type": "noyau",
+  "description": "jet opposé de Force — la cible tombe, se relever coûte 8 ticks",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Arme",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 6,
+  "cout_mana": 0,
+  "cout_endurance": 10,
+  "effets": [
+    "statut",
+    "deplacement"
+  ],
+  "forme": null,
+  "portee": null
+}

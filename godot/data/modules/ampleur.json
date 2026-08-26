@@ -4,9 +4,11 @@
   "name_key": "module.ampleur.name",
   "module_type": "modificateur",
   "description": "taille de la forme +1",
+  "classe_signature": null,
   "tags": [
     "modificateur"
   ],
+  "famille": "Taille",
   "surcout_ticks": 3,
   "surcout_ressource": "×1.4"
 }

@@ -1,0 +1,16 @@
+{
+  "id": "entravee",
+  "nom": "Entravée",
+  "name_key": "module.entravee.name",
+  "module_type": "condition",
+  "description": "la cible ne peut pas se déplacer",
+  "classe_signature": null,
+  "tags": [
+    "condition"
+  ],
+  "famille": "Cible",
+  "predicat": "cible_immobilisee",
+  "bonus": "+2 dés",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

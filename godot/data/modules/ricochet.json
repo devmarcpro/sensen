@@ -4,6 +4,7 @@
   "name_key": "module.ricochet.name",
   "module_type": "liaison",
   "description": "la charge saute à **1d3 cibles proches**, −1 dé par saut",
+  "classe_signature": null,
   "tags": [
     "liaison"
   ],

@@ -1,0 +1,12 @@
+{
+  "id": "accord",
+  "nom": "Accord",
+  "name_key": "module.accord.name",
+  "module_type": "declencheur",
+  "description": "la charge part quand un **segment de chaîne** se pose",
+  "classe_signature": "Le Souffle",
+  "tags": [
+    "declencheur"
+  ],
+  "surcout_ticks": 3
+}

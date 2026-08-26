@@ -3,10 +3,10 @@
   "nom": "Torpeur",
   "name_key": "module.torpeur.name",
   "module_type": "noyau",
-  "description": "repousse le compteur d'action de 10 ticks · budget anti-stunlock",
+  "description": "+10 ticks au compteur de la cible · budget anti-stunlock",
+  "classe_signature": "Le Sablier",
   "tags": [
-    "noyau",
-    "contrôle"
+    "noyau"
   ],
   "famille": "Contrôle",
   "elements": {},

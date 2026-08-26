@@ -1,0 +1,23 @@
+{
+  "id": "absorption",
+  "nom": "Absorption",
+  "name_key": "module.absorption.name",
+  "module_type": "noyau",
+  "description": "matelas de PV qui encaisse puis disparaît — bon contre un gros coup",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Défense",
+  "elements": {},
+  "element_special": null,
+  "power_base": "3d8",
+  "cout_ticks": 7,
+  "cout_mana": 14,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

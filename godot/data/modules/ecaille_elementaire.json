@@ -1,0 +1,23 @@
+{
+  "id": "ecaille_elementaire",
+  "nom": "Écaille élémentaire",
+  "name_key": "module.ecaille_elementaire.name",
+  "module_type": "noyau",
+  "description": "immunité **totale** à un élément au choix, 30 ticks — vulnérabilité +50 % à l'élément qu'il domine",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Défense",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 8,
+  "cout_mana": 16,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

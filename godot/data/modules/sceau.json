@@ -4,6 +4,7 @@
   "name_key": "module.sceau.name",
   "module_type": "declencheur",
   "description": "pose la charge au sol : elle part quand une entité **entre** sur la tuile, jusqu'à 100 ticks",
+  "classe_signature": "Le Sceau",
   "tags": [
     "declencheur"
   ],

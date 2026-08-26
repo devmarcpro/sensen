@@ -1,0 +1,12 @@
+{
+  "id": "contagion",
+  "nom": "Contagion",
+  "name_key": "module.contagion.name",
+  "module_type": "liaison",
+  "description": "les **statuts** du noyau se propagent aux ennemis adjacents des cibles touchées",
+  "classe_signature": null,
+  "tags": [
+    "liaison"
+  ],
+  "surcout_ticks": 4
+}

@@ -1,0 +1,16 @@
+{
+  "id": "prise",
+  "nom": "Prise",
+  "name_key": "module.prise.name",
+  "module_type": "condition",
+  "description": "la cible est saisie ou en lévitation",
+  "classe_signature": "Le Porteur",
+  "tags": [
+    "condition"
+  ],
+  "famille": "Cible",
+  "predicat": "cible_saisie_ou_levitee",
+  "bonus": "+2 dés, +1 taille",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

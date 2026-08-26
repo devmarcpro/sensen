@@ -1,0 +1,24 @@
+{
+  "id": "reserve",
+  "nom": "Réserve",
+  "name_key": "module.reserve.name",
+  "module_type": "noyau",
+  "description": "soin **dormant** : se déclenche tout seul quand la cible passe sous 30 % PV",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Soin",
+  "elements": {},
+  "element_special": null,
+  "power_base": "3d6",
+  "cout_ticks": 8,
+  "cout_mana": 18,
+  "cout_endurance": 0,
+  "effets": [
+    "soin",
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

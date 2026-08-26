@@ -1,252 +1,442 @@
 ---
-aliases: ["F.2", "Annexe F.2", "Modules", "Catalogue des modules", "70 modules", "Noyaux", "Formes", "Liaisons", "61 modules"]
+aliases: ["F.2", "Annexe F.2", "Modules", "Catalogue des modules", "176 modules", "Noyaux", "Formes", "Liaisons", "70 modules", "61 modules"]
 tags: [contenu, combat, catalogue, décidé]
 domaine: contenu
 statut: décidé
 etape: 0
 ---
 
-> [!success] Refonte en composants — 2026-08-26
-> L'ancien catalogue était une liste de **sorts finis** déguisée en système compositionnel : 47 modules sur 47 embarquaient leur propre géométrie, et `forme`, `condition` et `liaison` n'existaient que comme *champs*. Il est remplacé par **70 composants** répartis sur les **six types réels** de [[Six types de modules et assemblage]]. Aucun module n'est un sort. Audit du défaut : [[Décision — Transcription du catalogue de modules]].
+> [!success] Catalogue étendu — 2026-08-26
+> **176 composants**, aucun sort fini. L'extension vise trois choses explicitement : rendre **chaque classe jouable par ses briques** ([[Talents de classe]]), traiter l'**endurance** à parité du mana, et donner autant de place au **non-offensif** qu'aux dégâts. Historique du défaut : [[Décision — Transcription du catalogue de modules]].
 
-Les **70 modules composants** — la charge, la géométrie, l'altération, le verrou, le report et la répétition, chacun séparé des autres.
+Les **176 modules composants** — la charge, la géométrie, l'altération, le verrou, le report et la répétition, chacun séparé des autres.
 
-## Ce qui change, en une ligne
-
-> **Aucun noyau ne porte de forme, aucune forme ne porte de charge.** *Flamme* ne sait pas où elle va ; *Ligne* ne sait pas ce qu'elle transporte. C'est en les mettant côte à côte qu'on obtient un jet de flammes — et la même *Ligne* transporte aussi bien un soin, une poussée ou une invocation.
-
-| | Avant | Maintenant |
-|---|---|---|
-| Modules | 61 | **70** |
-| Types réellement employés | 3 / 6 | **6 / 6** |
-| Noyaux embarquant leur géométrie | **47 / 47** | **0 / 24** |
-| Capacités de base (noyau × forme) | — | **240**, avant le moindre modificateur |
-
-## Les six types
+## L'inventaire
 
 | Type | Combien | Ce qu'il apporte | Ce qu'il ne fait jamais |
 |---|---|---|---|
-| **Noyau** | 24 | la charge utile — dégâts, soin, contrôle, déplacement, terrain | choisir où ça tombe |
-| **Forme** | 10 | la géométrie sur la grille | décider de la charge |
-| **Modificateur** | 14 | altère les paramètres du noyau suivant | agir seul |
-| **Condition** | 10 | verrou qui accorde un bonus | agir seul |
-| **Déclencheur** | 6 | diffère la charge qui suit | agir seul |
-| **Liaison** | 6 | répète, disperse, propage | agir seul |
+| **Noyau** | 84 | la charge utile | choisir où ça tombe |
+| **Forme** | 16 | la géométrie sur la grille | décider de la charge |
+| **Modificateur** | 32 | altère le noyau suivant | agir seul |
+| **Condition** | 20 | verrou qui accorde un bonus | agir seul |
+| **Déclencheur** | 12 | diffère la charge qui suit | agir seul |
+| **Liaison** | 12 | répète, disperse, propage | agir seul |
+
+**84 × 16 = 1344 capacités de base** avant le moindre modificateur.
+
+| Équilibre voulu | Chiffre |
+|---|---|
+| Noyaux **non offensifs** (soin, défense, contrôle, espace, terrain, ressource) | **61 / 84** |
+| Noyaux payés en **endurance** | **18** |
+| Noyaux payés en **mana** | 60 |
+| Noyaux payés en **PV** ou qui *rendent* de la ressource | 6 |
+| Modules **signature** rattachés à une classe | 59 |
 
 ## Les règles de coût
 
 > **Le noyau porte le coût de base. Tout le reste est un surcoût.**
 
 ```
-cout_ticks    = cout_ticks(noyau) + Σ surcout_ticks(autres modules)
-cout_ressource= cout(noyau) modifié par les surcoûts, dans LA MONNAIE DU NOYAU
+cout_ticks     = cout_ticks(noyau) + Σ surcout_ticks(autres modules)
+cout_ressource = cout(noyau) modifié, DANS LA MONNAIE DU NOYAU
 ```
 
-**La monnaie vient du noyau, pas du contenant** : un noyau élémentaire ou arcane coûte du **mana** ([[Mana]]), un noyau physique (Frappe, Poussée, Empoigne, Élan, Rupture, Désarmement) coûte de l'**endurance** ([[Endurance]]). Les formes, modificateurs, conditions, déclencheurs et liaisons sont **neutres** : leur surcoût s'applique dans la monnaie du noyau qu'ils servent. Une seule règle, aucun doublon de catalogue.
+**La monnaie vient du noyau** : élémentaire et arcane → **mana** ([[Mana]]) · physique, arme, saisie → **endurance** ([[Endurance]]) · quelques-uns coûtent des **PV** ou *rendent* de la ressource. Formes, modificateurs, conditions, déclencheurs et liaisons sont **neutres** : leur surcoût s'applique dans la monnaie du noyau qu'ils servent.
 
-**La séquence entière est UNE action** ([[Six types de modules et assemblage]]) : elle se résout d'un bloc, elle pose **un seul segment de chaîne** ([[Jauge de chaîne Wu Xing]]), et elle coûte une seule fois. Les slots viennent de [[Structure compétences-modules-slots]].
-
-**L'élément** de la capacité dérive du vecteur de ses noyaux ([[Wu Xing — cycles et vecteurs]]). Un *Trait nu* ne pose **aucun** segment : c'est sa contrepartie.
+**La séquence entière est UNE action**, pose **un seul segment de chaîne** ([[Jauge de chaîne Wu Xing]]) et coûte une seule fois ([[Six types de modules et assemblage]]). Slots : [[Structure compétences-modules-slots]].
 
 ---
 
-## Noyaux — la charge utile (24)
+## Noyaux — la charge utile (84)
 
-Ils ne portent **ni forme ni portée**. Sans une forme à côté, un noyau vise la case adjacente par défaut.
+Ils ne portent **ni forme ni portée**. Sans forme à côté, un noyau vise l'adjacent.
 
-**Dégâts**
+### Dégâts · léger
 
-| Noyau | Élément | Dés | Ticks | Mana | Endurance | Effets | Ce que ça fait |
+| Noyau | Élément | Dés | Ticks | Mana | End. | Effets | Ce que ça fait |
 |---|---|---|---|---|---|---|---|
-| **Flamme** | Feu | 2d6 | 8 | 8 | — | `degats` | la charge de Feu |
-| **Gel** | Eau | 2d4 | 6 | 6 | — | `degats` | la charge d'Eau — la moins chère, la plus rapide |
-| **Ronce** | Bois | 2d6 | 8 | 8 | — | `degats` | la charge de Bois |
-| **Éclat** | Métal | 2d8 | 10 | 10 | — | `degats` | la charge de Métal — la plus lourde |
-| **Roche** | Terre | 3d4 | 9 | 8 | — | `degats` | la charge de Terre — forte moyenne, faible variance |
+| **Étincelle** | Feu | 1d4 | 3 | 3 | — | `degats` | charge légère de Feu — le noyau de la chaîne rapide |
+| **Bruine** | Eau | 1d4 | 3 | 3 | — | `degats` | charge légère de Eau — le noyau de la chaîne rapide |
+| **Épine** | Bois | 1d4 | 3 | 3 | — | `degats` | charge légère de Bois — le noyau de la chaîne rapide |
+| **Aiguille** | Métal | 1d4 | 3 | 3 | — | `degats` | charge légère de Métal — le noyau de la chaîne rapide |
+| **Gravier** | Terre | 1d4 | 3 | 3 | — | `degats` | charge légère de Terre — le noyau de la chaîne rapide |
+
+### Dégâts · moyen
+
+| Noyau | Élément | Dés | Ticks | Mana | End. | Effets | Ce que ça fait |
+|---|---|---|---|---|---|---|---|
+| **Flamme** | Feu | 2d6 | 8 | 8 | — | `degats` | charge standard de Feu |
+| **Gel** | Eau | 2d6 | 8 | 8 | — | `degats` | charge standard de Eau |
+| **Ronce** | Bois | 2d6 | 8 | 8 | — | `degats` | charge standard de Bois |
+| **Éclat** | Métal | 2d6 | 8 | 8 | — | `degats` | charge standard de Métal |
+| **Roche** | Terre | 2d6 | 8 | 8 | — | `degats` | charge standard de Terre |
 | **Trait nu** | Neutre | 1d8 | 5 | 4 | — | `degats` | sans élément : bon marché, mais **ne pose aucun segment de chaîne** |
-| **Frappe** | Arme | arme | arme | — | 6 | `degats` | les dégâts de l'arme équipée, à son élément et à son coût en ticks — c'est le noyau de toute capacité de manuel |
 
-**Soin**
+### Dégâts · lourd
 
-| Noyau | Élément | Dés | Ticks | Mana | Endurance | Effets | Ce que ça fait |
+| Noyau | Élément | Dés | Ticks | Mana | End. | Effets | Ce que ça fait |
 |---|---|---|---|---|---|---|---|
-| **Baume** | Neutre | 2d6 | 8 | 10 | — | `soin` | soin instantané |
-| **Sève** | Bois | 1d4 | 10 | 14 | — | `soin` · `statut` | 1d4 par tranche de 10 ticks pendant 50 ticks |
-| **Purge** | Neutre | — | 7 | 10 | — | `statut` | retire un statut négatif |
+| **Brasier** | Feu | 4d6 | 16 | 20 | — | `degats` | charge lourde de Feu — un seul emploi coûte deux tours d'épée |
+| **Banquise** | Eau | 4d6 | 16 | 20 | — | `degats` | charge lourde de Eau — un seul emploi coûte deux tours d'épée |
+| **Foudroiement** | Bois | 4d6 | 16 | 20 | — | `degats` | charge lourde de Bois — un seul emploi coûte deux tours d'épée |
+| **Fonte** | Métal | 4d6 | 16 | 20 | — | `degats` | charge lourde de Métal — un seul emploi coûte deux tours d'épée |
+| **Éboulement** | Terre | 4d6 | 16 | 20 | — | `degats` | charge lourde de Terre — un seul emploi coûte deux tours d'épée |
 
-**Contrôle**
+### Arme
 
-| Noyau | Élément | Dés | Ticks | Mana | Endurance | Effets | Ce que ça fait |
+| Noyau | Élément | Dés | Ticks | Mana | End. | Effets | Ce que ça fait |
 |---|---|---|---|---|---|---|---|
-| **Entrave** | Neutre | — | 12 | 14 | — | `statut` | immobilise 20 ticks — jet de Force pour briser · budget anti-stunlock |
+| **Frappe** · *Le Sabre* | Arme | arme | arme | — | 6 | `degats` | les dégâts de l'arme équipée, à son élément et à ses ticks |
+| **Estoc** | Arme | arme | arme | — | 9 | `degats` | comme Frappe, mais **perforante par nature** — ignore 4 points de réduction |
+| **Botte** | Arme | arme | arme | — | 8 | `degats` · `deplacement` | frappe puis recule d'une tuile — sortir de portée après le coup |
+| **Feinte** | Neutre | — | 4 | — | 7 | `statut` | annule la garde de la cible 15 ticks ([[Garde en posture]]) |
+| **Fauchage** | Neutre | — | 6 | — | 10 | `statut` · `deplacement` | jet opposé de Force — la cible tombe, se relever coûte 8 ticks |
+| **Étourdissement** | Neutre | — | 5 | — | 9 | `tempo` | coup de crosse : +6 ticks au compteur de la cible · budget anti-stunlock |
+| **Saignement** · *L'Écarlate* | Neutre | 1d4 | 4 | — | 7 | `statut` | hémorragie : 1d4 par tranche de 10 ticks, 40 ticks, **ne s'arrête pas seule** |
+| **Charge d'épaule** | Neutre | 1d6 | 6 | — | 11 | `degats` · `deplacement` | projette la cible de 2 tuiles — chute si le vide suit |
+
+### Soin
+
+| Noyau | Élément | Dés | Ticks | Mana | End. | Effets | Ce que ça fait |
+|---|---|---|---|---|---|---|---|
+| **Baume** · *La Paume* | Neutre | 2d6 | 8 | 10 | — | `soin` | soin instantané |
+| **Sève** · *La Paume* | Bois | 1d4 | 10 | 14 | — | `soin` · `statut` | 1d4 par tranche de 10 ticks pendant 50 ticks |
+| **Purge** · *La Paume* | Neutre | — | 7 | 10 | — | `statut` | retire un statut négatif |
+| **Transfert** | Neutre | — | 6 | 6 | — | `soin` | donne ses propres PV, 1:1 — le soin qui ne coûte presque pas de mana |
+| **Communion** · *La Paume* | Neutre | — | 9 | 16 | — | `statut` | pendant 60 ticks, le lanceur encaisse **la moitié** des dégâts subis par la cible |
+| **Réserve** | Neutre | 3d6 | 8 | 18 | — | `soin` · `statut` | soin **dormant** : se déclenche tout seul quand la cible passe sous 30 % PV |
+| **Rappel à la vie** · *La Paume* | Neutre | — | 40 | 45 | — | `soin` | relève un allié tombé à 25 % PV — hors combat ou très cher en combat |
+
+### Défense
+
+| Noyau | Élément | Dés | Ticks | Mana | End. | Effets | Ce que ça fait |
+|---|---|---|---|---|---|---|---|
+| **Égide** | Neutre | — | 7 | 12 | — | `statut` | **+6 de réduction plate** sur toutes les zones, 50 ticks ([[Armure par zone et constructions]]) |
+| **Absorption** | Neutre | 3d8 | 7 | 14 | — | `statut` | matelas de PV qui encaisse puis disparaît — bon contre un gros coup |
+| **Reflet** | Neutre | — | 9 | 18 | — | `statut` | renvoie **30 %** des dégâts subis à l'attaquant, 40 ticks |
+| **Écaille élémentaire** | Neutre | — | 8 | 16 | — | `statut` | immunité **totale** à un élément au choix, 30 ticks — vulnérabilité +50 % à l'élément qu'il domine |
+| **Ancrage** · *Le Porteur* | Neutre | — | 4 | — | 8 | `statut` | immunité aux projections, aux reculs et à la saisie, 40 ticks |
+| **Voile** · *L'Ombre* | Neutre | — | 5 | 10 | — | `statut` | le **prochain** coup subi est esquivé automatiquement |
+
+### Contrôle
+
+| Noyau | Élément | Dés | Ticks | Mana | End. | Effets | Ce que ça fait |
+|---|---|---|---|---|---|---|---|
+| **Entrave** | Neutre | — | 12 | 14 | — | `statut` | immobilise 20 ticks — jet de Force · budget anti-stunlock |
 | **Effroi** | Neutre | — | 11 | 14 | — | `statut` | jet de Volonté ou la cible fuit 20 ticks · budget anti-stunlock |
-| **Torpeur** | Neutre | — | 10 | 16 | — | `tempo` | repousse le compteur d'action de 10 ticks · budget anti-stunlock |
-| **Empoigne** | Neutre | — | 8 | — | 12 | `saisie` | saisit la cible adjacente : elle libère sa tuile et devient projetable |
-
-**Déplacement**
-
-| Noyau | Élément | Dés | Ticks | Mana | Endurance | Effets | Ce que ça fait |
-|---|---|---|---|---|---|---|---|
-| **Poussée** | Neutre | — | 6 | — | 8 | `deplacement` | repousse de 2 tuiles — chute si le vide suit |
-| **Attraction** | Neutre | — | 6 | 10 | — | `deplacement` | attire de 2 tuiles |
-| **Permutation** | Neutre | — | 8 | 14 | — | `deplacement` | échange sa position avec la cible |
-| **Élan** | Neutre | — | 4 | — | 8 | `deplacement` | **le lanceur** se déplace de 3 tuiles |
-
-**Terrain**
-
-| Noyau | Élément | Dés | Ticks | Mana | Endurance | Effets | Ce que ça fait |
-|---|---|---|---|---|---|---|---|
-| **Exhaussement** | Terre | — | 12 | 10 | — | `terrain` | élève ou abaisse la tuile d'un niveau ([[Hauteur de terrain ±10]]) |
-| **Barrière** | Neutre | — | 14 | 14 | — | `invocation` | occupe la tuile et bloque le passage, 50 ticks |
-| **Sol vif** | Neutre | 2d4 | 12 | 12 | — | `terrain` | la tuile blesse ce qui la traverse, 50 ticks |
-| **Écho de chair** | Neutre | — | 25 | 28 | — | `invocation` | invoque une créature alliée temporaire — occupe une tuile |
-
-**Technique**
-
-| Noyau | Élément | Dés | Ticks | Mana | Endurance | Effets | Ce que ça fait |
-|---|---|---|---|---|---|---|---|
+| **Torpeur** · *Le Sablier* | Neutre | — | 10 | 16 | — | `tempo` | +10 ticks au compteur de la cible · budget anti-stunlock |
+| **Célérité** · *Le Sablier* | Neutre | — | 8 | 14 | — | `tempo` | **−10 ticks** au compteur d'un allié — l'autre face du tempo, sans plafond |
+| **Rapt de tempo** · *Le Sablier* | Neutre | — | 12 | 20 | — | `tempo` | **vole** 8 ticks à la cible et se les donne — un seul transfert, deux effets |
+| **Empoigne** · *Le Porteur* | Neutre | — | 8 | — | 12 | `saisie` | saisit l'adjacent : il libère sa tuile et devient projetable |
+| **Silence** | Neutre | — | 10 | 18 | — | `statut` | la cible ne peut plus employer de noyau à coût en **mana**, 25 ticks |
+| **Épuisement** | Neutre | — | 10 | 16 | — | `statut` | la cible ne peut plus employer de noyau à coût en **endurance**, 25 ticks |
+| **Aveuglement** | Neutre | — | 9 | 14 | — | `statut` | portée et ligne de vue de la cible réduites à 1 tuile, 20 ticks |
 | **Rupture** | Neutre | — | 10 | — | 14 | `statut` | la cible perd 50 % de sa réduction d'armure de zone, 20 ticks |
 | **Désarmement** | Neutre | — | 10 | — | 16 | `statut` | jet opposé — l'arme de la cible tombe sur sa tuile |
 
-## Formes — la géométrie (10)
+### Espace
 
-Elles ne portent **aucune charge**. `surcoût` en ticks, `portée` et `taille` de base (modifiables).
+| Noyau | Élément | Dés | Ticks | Mana | End. | Effets | Ce que ça fait |
+|---|---|---|---|---|---|---|---|
+| **Poussée** | Neutre | — | 6 | — | 8 | `deplacement` | repousse de 2 tuiles |
+| **Attraction** | Neutre | — | 6 | 10 | — | `deplacement` | attire de 2 tuiles — la télékinésie de base |
+| **Permutation** | Neutre | — | 8 | 14 | — | `deplacement` | échange sa position avec la cible |
+| **Élan** | Neutre | — | 4 | — | 8 | `deplacement` | **le lanceur** se déplace de 3 tuiles |
+| **Lévitation** · *Le Porteur* | Neutre | — | 10 | 18 | — | `deplacement` · `statut` | **soulève** une entité : elle flotte, ne peut ni agir ni bloquer, 25 ticks — la vraie télékinésie |
+| **Projection** · *Le Porteur* | Neutre | (h−2)×5 | 5 | — | 10 | `deplacement` · `degats` | lance l'entité **saisie ou lévitée** sur 5 tuiles — dégâts de chute à l'arrivée |
+| **Ancre** | Neutre | — | 6 | 10 | — | `terrain` | pose un point de retour sur la tuile, 200 ticks |
+| **Retour** | Neutre | — | 3 | 8 | — | `deplacement` | revient instantanément à l'**Ancre** — 3 ticks, l'échappatoire la moins chère du jeu |
+| **Portail** · *Le Passeur* | Neutre | — | 14 | 22 | — | `terrain` | pose **deux tuiles appairées** : y entrer sort par l'autre. Permanentes jusqu'au repositionnement |
+| **Traversée** · *Le Passeur* | Neutre | — | 7 | 14 | — | `deplacement` | le lanceur traverse murs et entités sur 4 tuiles |
+| **Envol** | Neutre | — | 10 | 20 | — | `statut` | le lanceur ignore le terrain, le dénivelé et les zones au sol, 40 ticks |
+| **Convocation** · *Le Passeur* | Neutre | — | 12 | 24 | — | `deplacement` | attire un **allié consentant** à ses côtés, depuis n'importe où en vue |
 
-| Forme | Surcoût | Portée | Taille | Cibles valides | Ligne de vue | Ce que ça fait |
-|---|---|---|---|---|---|---|
-| **Point** | 0 t | 1–6 | 1 | ennemi · allié · toute entité | oui | une seule cible — la forme par défaut, gratuite en ticks |
-| **Ligne** | +2 t | 1–4 | 4 | tuile · traverse | oui | traverse tout sur 4 tuiles en ligne droite |
-| **Cône** | +3 t | 1–3 | 3 | tuile · s'élargit | oui | s'élargit avec la distance, 3 tuiles de profondeur |
-| **Croix** | +3 t | 0–5 | 1 | tuile | — | les quatre axes depuis une tuile — ignore la ligne de vue |
-| **Carré** | +4 t | 0–5 | 1 | tuile | — | zone pleine de rayon 1, centre compris — **friendly fire intégral** |
-| **Anneau** | +3 t | 0–5 | 1 | tuile | — | tout autour d'une tuile, **sans toucher le centre** |
-| **Diagonale** | +2 t | 1–4 | 4 | tuile · traverse | oui | les quatre obliques — le complément de la Croix |
-| **Chemin** | +2 t | 1–5 | 5 | tuile · trajet | — | suit le trajet du lanceur : tout ce qu'il longe est touché |
-| **Soi** | -2 t | soi | — | soi | — | sur soi-même — **rend 2 ticks** |
-| **Tuile** | +1 t | 1–5 | 1 | tuile | — | au sol, sans cible vivante — la forme des glyphes et des zones |
+### Terrain
 
-## Modificateurs — l'altération (14)
+| Noyau | Élément | Dés | Ticks | Mana | End. | Effets | Ce que ça fait |
+|---|---|---|---|---|---|---|---|
+| **Exhaussement** | Terre | — | 12 | 10 | — | `terrain` | élève ou abaisse la tuile d'un niveau ([[Hauteur de terrain ±10]]) |
+| **Fosse** | Terre | — | 14 | 14 | — | `terrain` · `degats` | abaisse brutalement de 3 niveaux — ce qui est dessus chute |
+| **Barrière** | Neutre | — | 14 | 14 | — | `invocation` | occupe la tuile et bloque le passage, 50 ticks |
+| **Sol vif** | Neutre | 2d4 | 12 | 12 | — | `terrain` | la tuile blesse ce qui la traverse, 50 ticks |
+| **Racine** | Bois | — | 11 | 12 | — | `terrain` · `statut` | la tuile entrave ce qui s'y arrête, 50 ticks |
+| **Nappe** | Eau | — | 10 | 12 | — | `terrain` | la tuile devient glissante (friction 5) — glisse, chute, propage la foudre |
+| **Voile de brume** · *L'Ombre* | Neutre | — | 10 | 12 | — | `terrain` | coupe la ligne de vue dans la zone, 60 ticks |
+| **Écho de chair** | Neutre | — | 25 | 28 | — | `invocation` | invoque une créature alliée temporaire — occupe une tuile |
+| **Relève** · *Le Fossoyeur* | Neutre | — | 18 | 20 | — | `invocation` | relève un **cadavre** présent en invocation temporaire — réputation en chute |
+| **Tourelle** · *L'Engrenage* | Arme | — | 16 | — | 20 | `invocation` | déploie une tourelle qui tire à chaque tick, **hérite de l'élément de l'arme**, consomme le carquois |
+| **Bombe** · *La Mèche* | Neutre | 3d6 | 8 | — | 14 | `invocation` | pose une charge qui explose après N ticks et **amorce les bombes adjacentes** — friendly fire intégral |
+| **Balise** · *Le Sceau* | Neutre | — | 6 | 10 | — | `terrain` | tuile marquée : les capacités du porteur y gagnent **+1 dé**, 80 ticks |
 
-Ils s'accumulent sur le **prochain noyau**. `surcoût ressource` : `+N` est un ajout plat, `×N` un facteur.
+### Ressource
 
-| Modificateur | Surcoût ticks | Surcoût ressource | Ce que ça fait |
+| Noyau | Élément | Dés | Ticks | Mana | End. | Effets | Ce que ça fait |
+|---|---|---|---|---|---|---|---|
+| **Ponction** | Neutre | — | 8 | — | — | `statut` | vole 12 de mana à la cible et se les donne — coûte 8 PV |
+| **Offrande** · *L'Écarlate* | Neutre | — | 4 | — | — | `statut` | convertit 20 PV en 10 mana, immédiatement |
+| **Saignée** · *L'Écarlate* | Neutre | — | 3 | — | — | `statut` | −15 PV : la **jauge de sang** monte d'un cran, les dégâts infligés ×1.15 par cran (max 4) |
+| **Méditation** · *Le Souffle* | Neutre | — | 20 | — | — | `statut` | immobile : rend 25 de mana ([[Mana]]) — se rompt si on est touché |
+| **Second souffle** | Neutre | — | 8 | — | — | `statut` | rend 30 d'endurance ([[Endurance]]) — le pendant physique de Méditation |
+| **Pari** · *Le Rieur* | Neutre | — | 2 | 6 | — | `statut` | **relance** le jet de la capacité suivante, le second résultat s'applique quel qu'il soit |
+| **Traque** · *La Trace* | Neutre | — | 4 | 8 | — | `statut` | marque une cible 100 ticks : les capacités du porteur la trouvent **sans ligne de vue** |
+| **Souffle rendu** · *La Paume* | Neutre | — | 6 | 12 | — | `statut` | pose un **segment de chaîne de l'élément de la cible soignée** ([[Jauge de chaîne Wu Xing]]) |
+| **Fiole** · *Le Creuset* | Neutre | 2d6 | 7 | — | — | `degats` · `soin` | projette une potion préparée : son effet s'applique **en zone** au lieu d'une gorgée ([[Potions]]) |
+| **Vapeur** · *Le Creuset* | Neutre | — | 10 | 14 | — | `terrain` · `statut` | nuage alchimique : applique le statut d'une potion à tout ce qui entre, 40 ticks |
+| **Trempe** · *La Braise* | Arme | — | 8 | — | 10 | `statut` | chauffe l'arme équipée : **+1 dé** et son élément passe à Feu, 60 ticks |
+| **Estimation** · *La Balance* | Neutre | — | 4 | 6 | — | `statut` | révèle les stats exactes, le vecteur, les résistances et la table de butin de la cible ([[Barèmes économiques]]) |
+
+## Formes — la géométrie (16)
+
+| Forme | Surcoût | Portée | Taille | LdV | Ce que ça fait |
+|---|---|---|---|---|---|
+| **Point** | 0 t | 1–6 | 1 | oui | une seule cible — gratuite en ticks, la forme par défaut |
+| **Ligne** | +2 t | 1–4 | 4 | oui | traverse tout sur 4 tuiles en ligne droite |
+| **Cône** | +3 t | 1–3 | 3 | oui | s'élargit avec la distance, 3 tuiles de profondeur |
+| **Croix** | +3 t | 0–5 | 1 | — | les quatre axes depuis une tuile — **ignore la ligne de vue** |
+| **Carré** | +4 t | 0–5 | 1 | — | zone pleine, centre compris — **friendly fire intégral** |
+| **Anneau** | +3 t | 0–5 | 1 | — | tout autour d'une tuile, **sans toucher le centre** |
+| **Diagonale** | +2 t | 1–4 | 4 | oui | les quatre obliques — le complément de la Croix |
+| **Chemin** | +2 t | 1–5 | 5 | — | suit le trajet du lanceur : tout ce qu'il longe est touché |
+| **Soi** | -2 t | soi | 0 | — | sur soi-même — **rend 2 ticks** |
+| **Tuile** | +1 t | 1–5 | 1 | — | au sol, sans cible vivante — la forme des glyphes et des zones |
+| **Mur** | +3 t | 1–5 | 3 | oui | une ligne **perpendiculaire** à la visée — barre un couloir |
+| **Vague** | +4 t | 1–2 | 5 | — | large et courte : tout le devant sur 2 tuiles de profondeur |
+| **Colonne** | +3 t | 0–4 | 1 | — | toute la **hauteur** d'une tuile — touche ce qui vole et ce qui est en contrebas |
+| **Nuée** · *Le Rieur* | +3 t | 1–6 | 4 | — | 4 tuiles **aléatoires** dans le rayon — imprévisible, bon marché |
+| **Sillage** | +2 t | 1–6 | 3 | oui | les 3 tuiles **derrière** la cible — pour ce qui traverse |
+| **Horizon** | +10 t | 1–12 | tout | oui | **toutes** les entités en vue — le prix des ticks est le garde-fou |
+
+## Modificateurs — l'altération (32)
+
+Ils s'accumulent sur le **prochain noyau**. `+N` est un ajout plat sur la ressource, `×N` un facteur.
+
+**Tempo**
+
+| Modificateur | Ticks | Ressource | Ce que ça fait |
 |---|---|---|---|
-| **Allonge** | +1 t | +2 | portée du noyau +2 tuiles |
-| **Longue vue** | +2 t | +4 | portée ×2, mais **−1 dé** |
-| **Ampleur** | +3 t | ×1.4 | taille de la forme +1 |
-| **Focale** | +0 t | 0 | taille de la forme −1, mais **+1 dé** |
-| **Concentration** | +2 t | +4 | +1 dé |
-| **Surcharge** | +3 t | ×1.5 | +2 dés |
+| **Enchaînement** · *Le Sabre* | +2 t | +4 | si la capacité précédente a **touché**, celle-ci coûte **0 tick** |
 | **Vivacité** | -3 t | ×1.3 | **−3 ticks** — le module du burst |
-| **Patience** | +5 t | ×0.6 | **+5 ticks**, coût de ressource réduit de 40 % — le module de l'attrition |
-| **Transmutation** | +2 t | +6 | convertit l'élément du noyau vers un élément au choix ([[Wu Xing — cycles et vecteurs]]) |
-| **Vampirique** | +2 t | +6 | le lanceur récupère 50 % des dégâts infligés |
+| **Patience** | +5 t | ×0.6 | **+5 ticks**, ressource −40 % — le module de l'attrition |
+| **Précipitation** · *Le Sablier* | -6 t | ×1.8 | **−6 ticks**, ressource ×1.8 et **−1 dé** — quand seul le tempo compte |
+
+**Effet**
+
+| Modificateur | Ticks | Ressource | Ce que ça fait |
+|---|---|---|---|
+| **Ligature** · *L'Engrenage* | +2 t | +5 | les invocations et tourelles alliées dans la forme **rejouent** leur attaque |
+| **Vampirique** · *L'Écarlate* | +2 t | +6 | le lanceur récupère 50 % des dégâts infligés |
 | **Perforant** | +2 t | +5 | ignore intégralement la réduction d'armure de zone |
 | **Persistance** | +2 t | +6 | toutes les durées du noyau ×2 |
+| **Rémanence** | +3 t | +8 | la zone touchée **reste active** 30 ticks et réapplique à l'entrée |
+| **Gravité** | +2 t | +5 | toute cible touchée est **attirée** d'une tuile vers le centre |
+| **Répulsion** | +2 t | +5 | toute cible touchée est **repoussée** d'une tuile |
+| **Emprise** | +2 t | +6 | toute cible touchée ne peut plus se déplacer 10 ticks |
+| **Détonation** · *La Mèche* | +1 t | +4 | ×2 dégâts contre les **invocations, tourelles, bombes et barrières** |
+
+**Portée**
+
+| Modificateur | Ticks | Ressource | Ce que ça fait |
+|---|---|---|---|
+| **Allonge** | +1 t | +2 | portée +2 tuiles |
+| **Longue vue** | +2 t | +4 | portée ×2, mais **−1 dé** |
+| **Corps à corps** | -1 t | −2 | portée forcée à 1, mais **+2 dés** — la récompense du risque |
+| **Sans angle mort** | +1 t | +2 | supprime la portée minimale — une lance devient bonne au contact |
+
+**Taille**
+
+| Modificateur | Ticks | Ressource | Ce que ça fait |
+|---|---|---|---|
+| **Ampleur** | +3 t | ×1.4 | taille de la forme +1 |
+| **Focale** | +0 t | 0 | taille −1, mais **+1 dé** |
+| **Fragmentation** | +2 t | +5 | divise la charge en 3 à 40 % chacune, réparties dans la forme |
+
+**Puissance**
+
+| Modificateur | Ticks | Ressource | Ce que ça fait |
+|---|---|---|---|
+| **Concentration** | +2 t | +4 | +1 dé |
+| **Surcharge** | +3 t | ×1.5 | +2 dés |
+| **Canalisation** | +6 t | ×1.2 | +1 dé **par tranche de 5 ticks** passés immobile avant de lâcher |
+
+**Élément**
+
+| Modificateur | Ticks | Ressource | Ce que ça fait |
+|---|---|---|---|
+| **Transmutation** | +2 t | +6 | convertit l'élément du noyau vers un élément au choix |
+| **Prisme** · *Le Souffle* | +3 t | +8 | le noyau prend l'élément qui **domine** la cible ([[Domination et multiplicateurs]]) |
+| **Pureté** | +2 t | ×1.3 | concentre le vecteur : +40 % de l'élément dominant, retire les autres |
+| **Amorce** | +4 t | +10 | la capacité pose **un segment de chaîne de plus** ([[Jauge de chaîne Wu Xing]]) — rare |
+
+**Forme**
+
+| Modificateur | Ticks | Ressource | Ce que ça fait |
+|---|---|---|---|
 | **Évasement** | +1 t | +3 | transforme une Ligne en Cône, ou un Anneau en Carré |
-| **Silencieux** | +2 t | +4 | aucun bruit : ne rompt pas Dissimulé, n'alerte pas les voisins |
+| **Traçant** | +2 t | +6 | la charge **suit** la cible : ignore le couvert et les obstacles |
+| **Ricochet mural** | +2 t | +4 | la charge **rebondit** sur les obstacles au lieu de s'arrêter |
 
-## Conditions — les verrous qui paient (10)
+**Discrétion**
 
-> **Une condition n'est pas un bonus gratuit : c'est un pari.** Si le prédicat est vrai, la capacité gagne le bonus. **S'il est faux, elle ne part pas et rend 50 % de ses ticks.** C'est ce qui fait de la position une décision au lieu d'un détail.
+| Modificateur | Ticks | Ressource | Ce que ça fait |
+|---|---|---|---|
+| **Silencieux** · *L'Ombre* | +2 t | +4 | aucun bruit : ne rompt pas Dissimulé, n'alerte pas les voisins |
+| **Sans trace** · *L'Ombre* | +3 t | +7 | la capacité **ne révèle pas** son lanceur — reste Dissimulé après le coup |
+
+## Conditions — les verrous qui paient (20)
+
+> **Une condition est un pari, pas un bonus gratuit.** Si le prédicat est vrai, la capacité gagne le bonus. **S'il est faux, elle ne part pas et rend 50 % de ses ticks.**
+
+**Position**
 
 | Condition | Prédicat | Bonus si vrai | Ce que ça veut dire |
 |---|---|---|---|
 | **Surplomb** | `hauteur_relative > 0` | +2 dés | le lanceur est plus haut que la cible |
+| **Contrebas** | `hauteur_relative < 0` | +2 portée, −1 tick | le lanceur est plus bas — la portée gagne à monter |
+| **Angle mort** · *L'Ombre* | `dos_ou_flanc` | **+3 dés** | frappe de dos ou de flanc — le plus gros bonus du jeu |
+| **Champ libre** | `ligne_de_vue_degagee` | −2 ticks | rien entre le lanceur et la cible |
+| **Pied ferme** | `porteur_immobile_depuis(20)` | +2 dés | le lanceur n'a pas bougé depuis 20 ticks |
+
+**Cible**
+
+| Condition | Prédicat | Bonus si vrai | Ce que ça veut dire |
+|---|---|---|---|
 | **Isolement** | `cible_isolee` | +2 dés | aucun allié adjacent à la cible |
 | **Escorte** | `cible_adjacente_a_allie` | +1 dé, +1 taille | la cible touche un de tes alliés |
-| **Angle mort** | `dos_ou_flanc` | +3 dés | frappe de dos ou de flanc — le plus gros bonus du jeu |
-| **Champ libre** | `ligne_de_vue_degagee` | −2 ticks | rien entre le lanceur et la cible |
-| **Dernier souffle** | `pv_porteur < 40 %` | +3 dés | le lanceur est bas |
 | **Achèvement** | `pv_cible < 30 %` | +3 dés | la cible est basse |
 | **Affinité** | `element_cible = X` | ×1.2 dégâts | la cible porte l'élément désigné |
-| **Résonance** | `segment_chaine_present` | +2 dés | le segment désigné est déjà posé dans la jauge ([[Jauge de chaîne Wu Xing]]) |
-| **Terroir** | `vecteur_de_lieu = X` | −25 % de ressource | le lieu porte l'élément du noyau ([[Wu Xing hors combat]]) |
+| **Prise** · *Le Porteur* | `cible_saisie_ou_levitee` | +2 dés, +1 taille | la cible est saisie ou en lévitation |
+| **Entravée** | `cible_immobilisee` | +2 dés | la cible ne peut pas se déplacer |
 
-## Déclencheurs — le report (6)
+**Porteur**
+
+| Condition | Prédicat | Bonus si vrai | Ce que ça veut dire |
+|---|---|---|---|
+| **Dernier souffle** · *L'Écarlate* | `pv_porteur < 40 %` | +3 dés | le lanceur est bas |
+| **Pleine garde** · *Le Masque* | `porteur_en_posture` | −2 ticks, +1 dé | le lanceur tient une posture |
+| **Ombre** · *L'Ombre* | `porteur_dissimule` | +3 dés, +1 taille | le lanceur est Dissimulé |
+| **Résonance** | `segment_chaine_present` | +2 dés | le segment désigné est posé dans la jauge |
+| **Chaîne pleine** · *Le Souffle* | `jauge_chaine_pleine` | +3 dés, −3 ticks | les 5 segments sont posés |
+
+**Monde**
+
+| Condition | Prédicat | Bonus si vrai | Ce que ça veut dire |
+|---|---|---|---|
+| **Terroir** | `vecteur_de_lieu = X` | −25 % de ressource | le lieu porte l'élément du noyau |
+| **Heure** | `cycle = nuit | jour` | +15 % dégâts | selon le [[Cycle jour-nuit et sommeil]] |
+| **Intempérie** | `meteo = pluie | orage | neige` | +2 dés | selon la [[Météo]] — l'orage nourrit la Foudre |
+| **Corruption** | `corruption_locale >= X` | +25 % dégâts | l'arme qui aime le danger ([[Niveau de danger]]) |
+
+## Déclencheurs — le report (12)
 
 Un déclencheur **encapsule tout ce qui le suit** comme charge utile. C'est ce qui permet l'imbrication façon Noita.
 
 | Déclencheur | Surcoût | Ce que ça fait |
 |---|---|---|
 | **À l'impact** | +1 t | la charge qui suit part quand le noyau précédent touche |
-| **Sceau** | +3 t | pose la charge au sol : elle part quand une entité **entre** sur la tuile, jusqu'à 100 ticks |
-| **Mèche** | +0 t | la charge part après **N ticks** (10 à 50, réglable à l'assemblage) |
+| **Sceau** · *Le Sceau* | +3 t | pose la charge au sol : elle part quand une entité **entre** sur la tuile, jusqu'à 100 ticks |
+| **Mèche** · *La Mèche* | +0 t | la charge part après **N ticks** (10 à 50, réglable à l'assemblage) |
 | **Curée** | +2 t | la charge part **à la mise à mort** |
 | **Riposte** | +2 t | la charge part **quand le porteur est touché** |
-| **Parade** | +2 t | la charge part **quand le porteur pare** ([[Garde en posture]]) |
+| **Parade** · *Le Masque* | +2 t | la charge part **quand le porteur pare** ([[Garde en posture]]) |
+| **Dérobade** · *L'Ombre* | +2 t | la charge part **quand le porteur esquive** |
+| **Testament** · *Le Fossoyeur* | +0 t | la charge part **quand le porteur tombe** — gratuite, il ne paiera pas les ticks |
+| **Veille** · *La Paume* | +3 t | la charge part quand un **allié** passe sous 40 % PV |
+| **Ouverture** | +2 t | la charge part **au premier contact du combat** |
+| **Cadence** · *L'Engrenage* | +1 t | la charge part **tous les N emplois** de la capacité (2 à 5) |
+| **Accord** · *Le Souffle* | +3 t | la charge part quand un **segment de chaîne** se pose |
 
-## Liaisons — la répétition (6)
+## Liaisons — la répétition (12)
 
 | Liaison | Surcoût | Ce que ça fait |
 |---|---|---|
 | **Répétition** | +4 t | rejoue la charge 2 fois, chacune à **−1 dé** |
 | **Ricochet** | +3 t | la charge saute à **1d3 cibles proches**, −1 dé par saut |
 | **Dispersion** | +3 t | répartit la charge sur **toutes** les cibles de la forme, divisée par leur nombre |
-| **Propagation** | +5 t | la charge se propage **de proche en proche** tant qu'elle touche, −1 dé par pas |
+| **Propagation** | +5 t | se propage **de proche en proche** tant qu'elle touche, −1 dé par pas |
 | **Alternance** | +2 t | alterne entre les **deux noyaux suivants** à chaque emploi |
 | **Écho** | +3 t | rejoue la charge à **50 %** après 20 ticks |
+| **Salve** · *L'Engrenage* | +4 t | lance **3 charges simultanées** à 60 %, réparties dans la forme |
+| **Miroir** | +3 t | applique aussi la charge à la position **symétrique** par rapport au lanceur |
+| **Partage** · *La Paume* | +2 t | la charge s'applique **aussi au lanceur** — pour les soins et les défenses |
+| **Meute** · *La Trace* | +3 t | la charge s'applique aussi depuis la position de ton **compagnon** ([[Compagnons]]) |
+| **Boucle** | +6 t | rejoue tant qu'il reste de la ressource, **−1 dé** cumulé par tour de boucle |
+| **Contagion** | +4 t | les **statuts** du noyau se propagent aux ennemis adjacents des cibles touchées |
 
 ---
 
-## Preuve de couverture — les anciens sorts, reconstruits
+## Chaque classe a ses briques
 
-Chaque sort fini de l'ancien catalogue se **réécrit** comme une séquence. Aucun contenu perdu, et chaque brique resservira ailleurs.
+Le talent d'une classe est **hors slots** ([[Talents de classe]]) ; ce tableau liste les modules qui **prolongent** ce talent en build. Ils ne sont pas réservés — un module signature se trouve, s'apprend et s'équipe par n'importe qui. Il est simplement **le premier que la classe recevra**.
 
-| Ancien sort fini | Séquence de composants |
+| Classe | Talent | Modules qui la prolongent |
+|---|---|---|
+| **Le Sabre** | Râtelier vivant | **Frappe** · **Enchaînement** |
+| **Le Souffle** | Communion des cinq | **Méditation** · **Prisme** · **Chaîne pleine** · **Accord** |
+| **La Braise** | Main du métal | **Trempe** |
+| **La Trace** | Meute | **Traque** · **Meute** |
+| **La Balance** | Œil du prix | **Estimation** |
+| **La Paume** | Souffle rendu | **Baume** · **Sève** · **Purge** · **Communion** · **Rappel à la vie** · **Souffle rendu** · **Veille** · **Partage** |
+| **Le Creuset** | Fiole vive | **Fiole** · **Vapeur** |
+| **Le Vent** | Sans maître | *aucun — et c'est voulu : il apprend ceux des autres* |
+| **Le Passeur** | portails permanents | **Portail** · **Traversée** · **Convocation** |
+| **Le Sablier** | tempo | **Torpeur** · **Célérité** · **Rapt de tempo** · **Précipitation** |
+| **Le Sceau** | glyphes | **Balise** · **Sceau** |
+| **Le Masque** | postures à 0 tick | **Pleine garde** · **Parade** |
+| **Le Porteur** | saisie | **Ancrage** · **Empoigne** · **Lévitation** · **Projection** · **Prise** |
+| **L'Ombre** | Dissimulé | **Voile** · **Voile de brume** · **Silencieux** · **Sans trace** · **Angle mort** · **Ombre** · **Dérobade** |
+| **L'Écarlate** | jauge de sang | **Saignement** · **Offrande** · **Saignée** · **Vampirique** · **Dernier souffle** |
+| **Le Rieur** | relance de dés | **Pari** · **Nuée** |
+| **Le Fossoyeur** | relève les morts | **Relève** · **Testament** |
+| **La Mèche** | bombes en chaîne | **Bombe** · **Détonation** · **Mèche** |
+| **L'Engrenage** | tourelle portative | **Tourelle** · **Ligature** · **Cadence** · **Salve** |
+
+> **Le Vent n'a aucun module signature**, exactement comme il n'a aucun talent au départ. Sa variété vient d'ailleurs : il prend ceux des autres.
+
+## Sept builds que ce catalogue rend possibles
+
+Aucun n'est écrit dans les données — tous **émergent** de l'assemblage.
+
+**Le tisseur de chaîne** — `[Point]` + `[Étincelle]` + `[Vivacité]`, cinq fois de suite en changeant d'élément
+
+> 3 ticks par charge, 5 éléments légers : la [[Jauge de chaîne Wu Xing]] se remplit avant que l'adversaire n'ait joué deux fois. Le build qui fait du **tempo** sa ressource principale.
+
+**Le télékinésiste** — `[Point]` + `[Lévitation]` → `[Prise]` + `[Point]` + `[Projection]` + `[Répulsion]`
+
+> Soulever, puis lancer. Les dégâts viennent de la **chute** ([[Hauteur de terrain ±10]]), pas de l'élément — un build qui ignore complètement la résistance élémentaire.
+
+**L'architecte de portails** — `[Tuile]` + `[Portail]` · `[Sceau]` + `[Tuile]` + `[Racine]` · `[Point]` + `[Convocation]`
+
+> Le champ de bataille devient un plan. On entrave à l'entrée du portail, on convoque un allié derrière la ligne ennemie, on ressort par l'autre bout.
+
+**Le voleur d'horloge** — `[Point]` + `[Rapt de tempo]` + `[Précipitation]` · `[Accord]` + `[Soi]` + `[Célérité]`
+
+> Ne tue presque pas : il **prend les tours**. Contre-jouable uniquement par le budget anti-stunlock ([[Statuts de contrôle et anti-stunlock]]).
+
+**Le saigneur** — `[Soi]` + `[Saignée]` ×3 → `[Angle mort]` + `[Point]` + `[Frappe]` + `[Vampirique]` + `[Surcharge]`
+
+> Se blesse pour frapper, se soigne en frappant. Tout en **endurance et en PV**, zéro mana : jouable avec 5 de Volonté.
+
+**Le jardinier de pièges** — `[Sceau]` + `[Tuile]` + `[Bombe]` + `[Détonation]`, plusieurs fois · `[Mèche]` + `[Propagation]`
+
+> Prépare le terrain avant le contact. Les bombes s'amorcent entre elles — **friendly fire intégral** ([[Décision — Projectiles]]), il faut sortir de sa propre zone.
+
+**Le soutien qui ne soigne jamais** — `[Carré]` + `[Égide]` + `[Partage]` · `[Veille]` + `[Point]` + `[Réserve]` · `[Soi]` + `[Célérité]`
+
+> Zéro soin actif : il **empêche** les dégâts au lieu de les rattraper, et accélère ses alliés. Le non-offensif comme rôle plein.
+
+## Ce que l'extension a spécifiquement visé
+
+| Reproche | Réponse |
 |---|---|
-| Projectile de feu | `[Ligne]` + `[Flamme]` |
-| Nova ardente | `[Carré]` + `[Ampleur]` + `[Flamme]` |
-| Mains brûlantes | `[Cône]` + `[Flamme]` |
-| Trait de givre | `[Point]` + `[Gel]` + `[Entrave]` |
-| Prison de glace | `[Point]` + `[Entrave]` + `[Persistance]` |
-| Éclair | `[Point]` + `[Ronce]` + `[Longue vue]` |
-| Chaîne | `[Ricochet]` — c'était déjà un composant, il est resté |
-| Orage local | `[Carré]` + `[Sol vif]` + `[Persistance]` |
-| Pique de pierre | `[Tuile]` + `[Roche]` + `[Perforant]` |
-| Peau de pierre | `[Soi]` + `[Baume]`… ou plus juste : `[Soi]` + `[Rupture]` inversée — voir la note ci-dessous |
-| Séisme mineur | `[Carré]` + `[Roche]` + `[Poussée]` |
-| Soin des eaux | `[Point]` + `[Baume]` |
-| Régénération | `[Point]` + `[Sève]` |
-| Lien vital | `[Point]` + `[Baume]` + `[Vampirique]` inversé |
-| Drain | `[Point]` + `[Flamme]` + `[Vampirique]` |
-| Terreur | `[Point]` + `[Effroi]` |
-| Contagion | `[Propagation]` |
-| Appel corrompu | `[Tuile]` + `[Écho de chair]` |
-| Lame spectrale | `[Ligne]` + `[Éclat]` |
-| Perforation | `[Point]` + `[Éclat]` + `[Perforant]` |
-| Pluie d'aiguilles | `[Carré]` + `[Ampleur]` + `[Éclat]` |
-| Mur de lames | `[Tuile]` + `[Barrière]` + `[Sol vif]` |
-| Pas éclipsé | `[Soi]` + `[Élan]` + `[Longue vue]` |
-| Échange | `[Point]` + `[Permutation]` |
-| Marque | `[À l'impact]` |
-| Double incantation | `[Répétition]` |
-| Balayage | `[Anneau]` + `[Frappe]` |
-| Frappe lourde | `[Point]` + `[Frappe]` + `[Concentration]` |
-| Fente | `[Point]` + `[Frappe]` + `[Élan]` |
-| Exécution | `[Achèvement]` + `[Point]` + `[Frappe]` + `[Surcharge]` |
-| Brise-garde | `[Point]` + `[Rupture]` |
-| Charge | `[Chemin]` + `[Élan]` + `[Frappe]` + `[Poussée]` |
-| Contre | `[Riposte]` + `[Point]` + `[Frappe]` |
-| Coups jumeaux | `[Répétition]` |
-| Allonge | `[Allonge]` |
-| Économie de geste | `[Vivacité]` |
-| Impact | `[Point]` + `[Frappe]` + `[Poussée]` |
+| L'endurance était négligée | **18 noyaux** en endurance : toute la famille *Arme*, la saisie, le déplacement physique, la rupture, le second souffle. Un build sans une goutte de mana est jouable de bout en bout |
+| Le non-offensif était négligé | **61 noyaux sur 84** ne font aucun dégât : soin (7), défense (6), contrôle (11), espace (12), terrain (12), ressource (11) |
+| Les classes cachées n'avaient rien | chacune a ses modules — portails, tempo, glyphes, saisie, dissimulation, sang, dés, relève, bombes, tourelles |
+| Pas assez de variété de gameplay | la **télékinésie** (Lévitation, Projection, Attraction, Gravité), les **portails** (Portail, Convocation, Traversée, Ancre, Retour), le **terrain** (Exhaussement, Fosse, Nappe, Racine), la **méta-ressource** (Ponction, Offrande, Saignée, Pari) |
+| Formes et conditions inertes | 16 formes et 20 conditions, toutes portées par des modules qu'on trouve et qu'on slotte |
 
-> [!warning] Trois anciens sorts n'ont **pas** de traduction directe, et c'est voulu
-> **Peau de pierre**, **Garde de fer** et **Bouclier arcanique** étaient des *buffs défensifs sur soi*. Il n'existe **aucun noyau défensif** dans ce catalogue — c'est un manque assumé à combler : il faut un noyau `Égide` (réduction plate temporaire) et un noyau `Absorption` (bouclier de PV). **Posés dans [[Ouvert — Noyaux défensifs]].** Les postures, elles, ne sont pas des modules : ce sont des états ([[Garde en posture]]).
-
-## Ce que ça débloque
-
-- **240 capacités de base** avant le moindre modificateur — contre 61 sorts figés.
-- **Les formes inutilisées reviennent** : `croix` et `diagonale` n'apparaissaient dans aucun sort de l'ancien catalogue ; elles sont maintenant des modules qu'on trouve et qu'on slotte.
-- **Les effets orphelins ont un porteur** : `glyphe` devient le déclencheur *Sceau*, `saisie` devient le noyau *Empoigne*.
-- **Les 10 conditions deviennent jouables** : elles n'étaient portées que par un seul sort (Exécution).
-- **Le loot redevient intéressant** : trouver `[Angle mort]` change toutes tes capacités d'un coup, au lieu d'ajouter un sort de plus à la liste.
-
-**Schéma :** [[Vocabulaire des modules — six axes]]. **Grammaire d'assemblage :** [[Six types de modules et assemblage]]. **Acquisition :** [[Grimoires et manuels]]. **Slots :** [[Structure compétences-modules-slots]]. **JSON :** `godot/data/modules/*.json`.
+**Schéma :** [[Vocabulaire des modules — six axes]]. **Grammaire :** [[Six types de modules et assemblage]]. **Acquisition :** [[Grimoires et manuels]]. **Slots :** [[Structure compétences-modules-slots]]. **JSON :** `godot/data/modules/*.json`.
 
 ## Liens
-- **Dépend de** : [[Vocabulaire des modules — six axes]], [[Six types de modules et assemblage]], [[Wu Xing — cycles et vecteurs]]
-- **Alimente** : [[Structure compétences-modules-slots]], [[Familles de capacités de la grille]], [[Statuts]], [[Prototype de combat — spécification]], [[Grimoires et manuels]]
-- **Voir aussi** : [[Décision — Transcription du catalogue de modules]], [[Ouvert — Noyaux défensifs]], [[Mana]], [[Endurance]], [[Boucle de tick]], [[Jauge de chaîne Wu Xing]], [[Armure par zone et constructions]], [[Domaines de grimoires et manuels]]
+- **Dépend de** : [[Vocabulaire des modules — six axes]], [[Six types de modules et assemblage]], [[Wu Xing — cycles et vecteurs]], [[Talents de classe]]
+- **Alimente** : [[Structure compétences-modules-slots]], [[Familles de capacités de la grille]], [[Statuts]], [[Prototype de combat — spécification]], [[Grimoires et manuels]], [[Classes]]
+- **Voir aussi** : [[Décision — Transcription du catalogue de modules]], [[Mana]], [[Endurance]], [[Boucle de tick]], [[Jauge de chaîne Wu Xing]], [[Armure par zone et constructions]], [[Statuts de contrôle et anti-stunlock]], [[Hauteur de terrain ±10]], [[Domaines de grimoires et manuels]]

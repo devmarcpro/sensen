@@ -4,9 +4,11 @@
   "name_key": "module.champ_libre.name",
   "module_type": "condition",
   "description": "rien entre le lanceur et la cible",
+  "classe_signature": null,
   "tags": [
     "condition"
   ],
+  "famille": "Position",
   "predicat": "ligne_de_vue_degagee",
   "bonus": "−2 ticks",
   "surcout_ticks": 0,

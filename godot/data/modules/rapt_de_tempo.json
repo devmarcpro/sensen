@@ -1,0 +1,23 @@
+{
+  "id": "rapt_de_tempo",
+  "nom": "Rapt de tempo",
+  "name_key": "module.rapt_de_tempo.name",
+  "module_type": "noyau",
+  "description": "**vole** 8 ticks à la cible et se les donne — un seul transfert, deux effets",
+  "classe_signature": "Le Sablier",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 12,
+  "cout_mana": 20,
+  "cout_endurance": 0,
+  "effets": [
+    "tempo"
+  ],
+  "forme": null,
+  "portee": null
+}

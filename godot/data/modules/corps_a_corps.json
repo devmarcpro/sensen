@@ -1,0 +1,14 @@
+{
+  "id": "corps_a_corps",
+  "nom": "Corps à corps",
+  "name_key": "module.corps_a_corps.name",
+  "module_type": "modificateur",
+  "description": "portée forcée à 1, mais **+2 dés** — la récompense du risque",
+  "classe_signature": null,
+  "tags": [
+    "modificateur"
+  ],
+  "famille": "Portée",
+  "surcout_ticks": -1,
+  "surcout_ressource": "−2"
+}

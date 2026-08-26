@@ -3,7 +3,8 @@
   "nom": "Carré",
   "name_key": "module.carre.name",
   "module_type": "forme",
-  "description": "zone pleine de rayon 1, centre compris — **friendly fire intégral**",
+  "description": "zone pleine, centre compris — **friendly fire intégral**",
+  "classe_signature": null,
   "tags": [
     "forme"
   ],
@@ -14,6 +15,5 @@
     5
   ],
   "taille_base": 1,
-  "cibles_valides": "tuile",
   "ligne_de_vue": false
 }

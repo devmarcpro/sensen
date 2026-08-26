@@ -1,0 +1,14 @@
+{
+  "id": "tracant",
+  "nom": "Traçant",
+  "name_key": "module.tracant.name",
+  "module_type": "modificateur",
+  "description": "la charge **suit** la cible : ignore le couvert et les obstacles",
+  "classe_signature": null,
+  "tags": [
+    "modificateur"
+  ],
+  "famille": "Forme",
+  "surcout_ticks": 2,
+  "surcout_ressource": "+6"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "amorce",
+  "nom": "Amorce",
+  "name_key": "module.amorce.name",
+  "module_type": "modificateur",
+  "description": "la capacité pose **un segment de chaîne de plus** ([[Jauge de chaîne Wu Xing]]) — rare",
+  "classe_signature": null,
+  "tags": [
+    "modificateur"
+  ],
+  "famille": "Élément",
+  "surcout_ticks": 4,
+  "surcout_ressource": "+10"
+}

@@ -4,9 +4,9 @@
   "name_key": "module.baume.name",
   "module_type": "noyau",
   "description": "soin instantané",
+  "classe_signature": "La Paume",
   "tags": [
-    "noyau",
-    "soin"
+    "noyau"
   ],
   "famille": "Soin",
   "elements": {},

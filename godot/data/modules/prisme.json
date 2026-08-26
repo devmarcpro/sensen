@@ -1,0 +1,14 @@
+{
+  "id": "prisme",
+  "nom": "Prisme",
+  "name_key": "module.prisme.name",
+  "module_type": "modificateur",
+  "description": "le noyau prend l'élément qui **domine** la cible ([[Domination et multiplicateurs]])",
+  "classe_signature": "Le Souffle",
+  "tags": [
+    "modificateur"
+  ],
+  "famille": "Élément",
+  "surcout_ticks": 3,
+  "surcout_ressource": "+8"
+}

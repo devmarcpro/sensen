@@ -4,11 +4,11 @@
   "name_key": "module.permutation.name",
   "module_type": "noyau",
   "description": "échange sa position avec la cible",
+  "classe_signature": null,
   "tags": [
-    "noyau",
-    "déplacement"
+    "noyau"
   ],
-  "famille": "Déplacement",
+  "famille": "Espace",
   "elements": {},
   "element_special": null,
   "power_base": null,

@@ -1,0 +1,23 @@
+{
+  "id": "epuisement",
+  "nom": "Épuisement",
+  "name_key": "module.epuisement.name",
+  "module_type": "noyau",
+  "description": "la cible ne peut plus employer de noyau à coût en **endurance**, 25 ticks",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 10,
+  "cout_mana": 16,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

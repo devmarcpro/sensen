@@ -6,7 +6,10 @@ statut: décidé
 etape: 0
 ---
 
-> [!success] Suite : refonte en composants — 2026-08-26
+> [!success] Étape 3 : extension — 2026-08-26
+> Le catalogue passe de 70 à **176 composants**, avec trois objectifs explicites : rendre chaque classe jouable par ses briques, traiter l'**endurance** à parité (18 noyaux), et donner au **non-offensif** 61 noyaux sur 84. Voir [[Modules]].
+
+> [!success] Étape 2 : refonte en composants — 2026-08-26
 > La transcription a révélé un défaut plus profond que le format : **le catalogue était une liste de sorts finis**. 47 modules sur 47 embarquaient leur géométrie, et `forme` / `condition` / `liaison` n'existaient pas comme modules. Le catalogue est **refait en 70 composants** sur les six types réels — voir [[Modules]]. La transcription ci-dessous reste l'étape qui a rendu le défaut visible.
 
 > [!success] Étape 1 — la transcription dans le schéma

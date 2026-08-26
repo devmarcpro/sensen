@@ -1,0 +1,23 @@
+{
+  "id": "silence",
+  "nom": "Silence",
+  "name_key": "module.silence.name",
+  "module_type": "noyau",
+  "description": "la cible ne peut plus employer de noyau à coût en **mana**, 25 ticks",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 10,
+  "cout_mana": 18,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

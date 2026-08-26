@@ -4,6 +4,7 @@
   "name_key": "module.parade.name",
   "module_type": "declencheur",
   "description": "la charge part **quand le porteur pare** ([[Garde en posture]])",
+  "classe_signature": "Le Masque",
   "tags": [
     "declencheur"
   ],

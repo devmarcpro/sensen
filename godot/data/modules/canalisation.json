@@ -1,0 +1,14 @@
+{
+  "id": "canalisation",
+  "nom": "Canalisation",
+  "name_key": "module.canalisation.name",
+  "module_type": "modificateur",
+  "description": "+1 dé **par tranche de 5 ticks** passés immobile avant de lâcher",
+  "classe_signature": null,
+  "tags": [
+    "modificateur"
+  ],
+  "famille": "Puissance",
+  "surcout_ticks": 6,
+  "surcout_ressource": "×1.2"
+}

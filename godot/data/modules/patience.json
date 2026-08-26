@@ -3,10 +3,12 @@
   "nom": "Patience",
   "name_key": "module.patience.name",
   "module_type": "modificateur",
-  "description": "**+5 ticks**, coût de ressource réduit de 40 % — le module de l'attrition",
+  "description": "**+5 ticks**, ressource −40 % — le module de l'attrition",
+  "classe_signature": null,
   "tags": [
     "modificateur"
   ],
+  "famille": "Tempo",
   "surcout_ticks": 5,
   "surcout_ressource": "×0.6"
 }

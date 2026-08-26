@@ -4,9 +4,11 @@
   "name_key": "module.achevement.name",
   "module_type": "condition",
   "description": "la cible est basse",
+  "classe_signature": null,
   "tags": [
     "condition"
   ],
+  "famille": "Cible",
   "predicat": "pv_cible < 30 %",
   "bonus": "+3 dés",
   "surcout_ticks": 0,

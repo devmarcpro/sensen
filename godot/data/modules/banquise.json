@@ -1,0 +1,25 @@
+{
+  "id": "banquise",
+  "nom": "Banquise",
+  "name_key": "module.banquise.name",
+  "module_type": "noyau",
+  "description": "charge lourde de Eau — un seul emploi coûte deux tours d'épée",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Dégâts · lourd",
+  "elements": {
+    "eau": 1.0
+  },
+  "element_special": null,
+  "power_base": "4d6",
+  "cout_ticks": 16,
+  "cout_mana": 20,
+  "cout_endurance": 0,
+  "effets": [
+    "degats"
+  ],
+  "forme": null,
+  "portee": null
+}

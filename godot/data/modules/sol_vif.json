@@ -4,9 +4,9 @@
   "name_key": "module.sol_vif.name",
   "module_type": "noyau",
   "description": "la tuile blesse ce qui la traverse, 50 ticks",
+  "classe_signature": null,
   "tags": [
-    "noyau",
-    "terrain"
+    "noyau"
   ],
   "famille": "Terrain",
   "elements": {},

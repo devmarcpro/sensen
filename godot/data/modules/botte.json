@@ -1,0 +1,24 @@
+{
+  "id": "botte",
+  "nom": "Botte",
+  "name_key": "module.botte.name",
+  "module_type": "noyau",
+  "description": "frappe puis recule d'une tuile — sortir de portée après le coup",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Arme",
+  "elements": {},
+  "element_special": "arme",
+  "power_base": "arme",
+  "cout_ticks": 0,
+  "cout_mana": 0,
+  "cout_endurance": 8,
+  "effets": [
+    "degats",
+    "deplacement"
+  ],
+  "forme": null,
+  "portee": null
+}

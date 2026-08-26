@@ -1,0 +1,12 @@
+{
+  "id": "meute",
+  "nom": "Meute",
+  "name_key": "module.meute.name",
+  "module_type": "liaison",
+  "description": "la charge s'applique aussi depuis la position de ton **compagnon** ([[Compagnons]])",
+  "classe_signature": "La Trace",
+  "tags": [
+    "liaison"
+  ],
+  "surcout_ticks": 3
+}

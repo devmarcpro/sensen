@@ -1,0 +1,23 @@
+{
+  "id": "communion",
+  "nom": "Communion",
+  "name_key": "module.communion.name",
+  "module_type": "noyau",
+  "description": "pendant 60 ticks, le lanceur encaisse **la moitié** des dégâts subis par la cible",
+  "classe_signature": "La Paume",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Soin",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 9,
+  "cout_mana": 16,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

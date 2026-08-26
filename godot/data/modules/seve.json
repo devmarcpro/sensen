@@ -4,10 +4,9 @@
   "name_key": "module.seve.name",
   "module_type": "noyau",
   "description": "1d4 par tranche de 10 ticks pendant 50 ticks",
+  "classe_signature": "La Paume",
   "tags": [
-    "noyau",
-    "soin",
-    "bois"
+    "noyau"
   ],
   "famille": "Soin",
   "elements": {

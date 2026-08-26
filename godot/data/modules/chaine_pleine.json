@@ -1,0 +1,16 @@
+{
+  "id": "chaine_pleine",
+  "nom": "Chaîne pleine",
+  "name_key": "module.chaine_pleine.name",
+  "module_type": "condition",
+  "description": "les 5 segments sont posés",
+  "classe_signature": "Le Souffle",
+  "tags": [
+    "condition"
+  ],
+  "famille": "Porteur",
+  "predicat": "jauge_chaine_pleine",
+  "bonus": "+3 dés, −3 ticks",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

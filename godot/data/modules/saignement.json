@@ -1,0 +1,23 @@
+{
+  "id": "saignement",
+  "nom": "Saignement",
+  "name_key": "module.saignement.name",
+  "module_type": "noyau",
+  "description": "hémorragie : 1d4 par tranche de 10 ticks, 40 ticks, **ne s'arrête pas seule**",
+  "classe_signature": "L'Écarlate",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Arme",
+  "elements": {},
+  "element_special": null,
+  "power_base": "1d4",
+  "cout_ticks": 4,
+  "cout_mana": 0,
+  "cout_endurance": 7,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

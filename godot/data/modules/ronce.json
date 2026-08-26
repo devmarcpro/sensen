@@ -3,13 +3,12 @@
   "nom": "Ronce",
   "name_key": "module.ronce.name",
   "module_type": "noyau",
-  "description": "la charge de Bois",
+  "description": "charge standard de Bois",
+  "classe_signature": null,
   "tags": [
-    "noyau",
-    "dégâts",
-    "bois"
+    "noyau"
   ],
-  "famille": "Dégâts",
+  "famille": "Dégâts · moyen",
   "elements": {
     "bois": 1.0
   },

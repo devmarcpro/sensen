@@ -1,12 +1,17 @@
 ---
 aliases: ["Ouvert — Noyaux défensifs", "Noyaux défensifs", "Égide", "Absorption"]
-tags: [ouvert, combat, contenu, à-trancher]
+tags: [ouvert, combat, contenu, décidé]
 domaine: combat
-statut: à-trancher
+statut: décidé
 etape: 0
 ---
 
-**Trouvé le 2026-08-26 en refondant [[Modules]] en composants :** il n'existe **aucun noyau défensif** dans les 24 noyaux.
+> [!success] Comblé le 2026-08-26 — six noyaux défensifs
+> **Égide** (+6 de réduction plate, 50 ticks) · **Absorption** (matelas de 3d8 PV) · **Reflet** (renvoie 30 %) · **Écaille élémentaire** (immunité totale à un élément, vulnérabilité +50 % à celui qu'il domine) · **Ancrage** (immunité projections et saisie) · **Voile** (le prochain coup est esquivé). Voir [[Modules]].
+>
+> Et le pari de départ est tenu : traversés par les **formes**, ils donnent gratuitement ce que l'ancien catalogue aurait écrit un par un — `[Carré]+[Égide]+[Partage]` est une aura de groupe, `[Riposte]+[Soi]+[Égide]` une garde réactive.
+
+**Le manque, tel qu'il a été trouvé le 2026-08-26 en refondant [[Modules]] en composants :** il n'existe **aucun noyau défensif** dans les 24 noyaux.
 
 Trois sorts de l'ancien catalogue n'ont donc pas de traduction — *Peau de pierre*, *Garde de fer*, *Bouclier arcanique*. Tous trois étaient des **buffs défensifs sur soi**, et la refonte n'a produit que de l'offensif, du soin, du contrôle, du déplacement et du terrain.
 
@@ -23,7 +28,7 @@ Les deux méritent d'exister parce qu'ils ne se remplacent pas : l'un est bon co
 
 **Ce qui n'en est pas :** les **postures** ([[Garde en posture]]) ne sont pas des modules — ce sont des **états** qu'on tient et qu'on entretient. *Garde de fer* relève d'elles, pas d'un noyau.
 
-**À trancher :** les valeurs, la durée, et si `Égide` accepte les modificateurs de forme sur autrui ou reste réservée à `[Soi]`.
+**Tranché :** `Égide` **accepte les formes** — c'est précisément ce qui la rend intéressante. Les valeurs sont fixées dans [[Modules]].
 
 ## Liens
 - **Dépend de** : [[Modules]], [[Armure par zone et constructions]]

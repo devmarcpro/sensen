@@ -1,0 +1,14 @@
+{
+  "id": "precipitation",
+  "nom": "Précipitation",
+  "name_key": "module.precipitation.name",
+  "module_type": "modificateur",
+  "description": "**−6 ticks**, ressource ×1.8 et **−1 dé** — quand seul le tempo compte",
+  "classe_signature": "Le Sablier",
+  "tags": [
+    "modificateur"
+  ],
+  "famille": "Tempo",
+  "surcout_ticks": -6,
+  "surcout_ressource": "×1.8"
+}

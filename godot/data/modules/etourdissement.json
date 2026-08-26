@@ -1,0 +1,23 @@
+{
+  "id": "etourdissement",
+  "nom": "Étourdissement",
+  "name_key": "module.etourdissement.name",
+  "module_type": "noyau",
+  "description": "coup de crosse : +6 ticks au compteur de la cible · budget anti-stunlock",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Arme",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 5,
+  "cout_mana": 0,
+  "cout_endurance": 9,
+  "effets": [
+    "tempo"
+  ],
+  "forme": null,
+  "portee": null
+}

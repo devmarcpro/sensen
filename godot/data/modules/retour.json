@@ -1,0 +1,23 @@
+{
+  "id": "retour",
+  "nom": "Retour",
+  "name_key": "module.retour.name",
+  "module_type": "noyau",
+  "description": "revient instantanément à l'**Ancre** — 3 ticks, l'échappatoire la moins chère du jeu",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Espace",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 3,
+  "cout_mana": 8,
+  "cout_endurance": 0,
+  "effets": [
+    "deplacement"
+  ],
+  "forme": null,
+  "portee": null
+}

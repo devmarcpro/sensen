@@ -4,10 +4,9 @@
   "name_key": "module.exhaussement.name",
   "module_type": "noyau",
   "description": "élève ou abaisse la tuile d'un niveau ([[Hauteur de terrain ±10]])",
+  "classe_signature": null,
   "tags": [
-    "noyau",
-    "terrain",
-    "terre"
+    "noyau"
   ],
   "famille": "Terrain",
   "elements": {

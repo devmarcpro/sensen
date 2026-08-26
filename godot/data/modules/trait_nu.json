@@ -4,11 +4,11 @@
   "name_key": "module.trait_nu.name",
   "module_type": "noyau",
   "description": "sans élément : bon marché, mais **ne pose aucun segment de chaîne**",
+  "classe_signature": null,
   "tags": [
-    "noyau",
-    "dégâts"
+    "noyau"
   ],
-  "famille": "Dégâts",
+  "famille": "Dégâts · moyen",
   "elements": {},
   "element_special": null,
   "power_base": "1d8",

@@ -1,0 +1,16 @@
+{
+  "id": "pied_ferme",
+  "nom": "Pied ferme",
+  "name_key": "module.pied_ferme.name",
+  "module_type": "condition",
+  "description": "le lanceur n'a pas bougé depuis 20 ticks",
+  "classe_signature": null,
+  "tags": [
+    "condition"
+  ],
+  "famille": "Position",
+  "predicat": "porteur_immobile_depuis(20)",
+  "bonus": "+2 dés",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

@@ -4,9 +4,11 @@
   "name_key": "module.dernier_souffle.name",
   "module_type": "condition",
   "description": "le lanceur est bas",
+  "classe_signature": "L'Écarlate",
   "tags": [
     "condition"
   ],
+  "famille": "Porteur",
   "predicat": "pv_porteur < 40 %",
   "bonus": "+3 dés",
   "surcout_ticks": 0,

@@ -4,6 +4,7 @@
   "name_key": "module.soi.name",
   "module_type": "forme",
   "description": "sur soi-même — **rend 2 ticks**",
+  "classe_signature": null,
   "tags": [
     "forme"
   ],
@@ -14,6 +15,5 @@
     0
   ],
   "taille_base": 0,
-  "cibles_valides": "soi",
   "ligne_de_vue": false
 }

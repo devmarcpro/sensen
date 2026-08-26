@@ -4,9 +4,11 @@
   "name_key": "module.longue_vue.name",
   "module_type": "modificateur",
   "description": "portée ×2, mais **−1 dé**",
+  "classe_signature": null,
   "tags": [
     "modificateur"
   ],
+  "famille": "Portée",
   "surcout_ticks": 2,
   "surcout_ressource": "+4"
 }

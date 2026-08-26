@@ -4,9 +4,9 @@
   "name_key": "module.echo_de_chair.name",
   "module_type": "noyau",
   "description": "invoque une créature alliée temporaire — occupe une tuile",
+  "classe_signature": null,
   "tags": [
-    "noyau",
-    "terrain"
+    "noyau"
   ],
   "famille": "Terrain",
   "elements": {},

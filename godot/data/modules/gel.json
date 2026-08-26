@@ -3,20 +3,19 @@
   "nom": "Gel",
   "name_key": "module.gel.name",
   "module_type": "noyau",
-  "description": "la charge d'Eau — la moins chère, la plus rapide",
+  "description": "charge standard de Eau",
+  "classe_signature": null,
   "tags": [
-    "noyau",
-    "dégâts",
-    "eau"
+    "noyau"
   ],
-  "famille": "Dégâts",
+  "famille": "Dégâts · moyen",
   "elements": {
     "eau": 1.0
   },
   "element_special": null,
-  "power_base": "2d4",
-  "cout_ticks": 6,
-  "cout_mana": 6,
+  "power_base": "2d6",
+  "cout_ticks": 8,
+  "cout_mana": 8,
   "cout_endurance": 0,
   "effets": [
     "degats"

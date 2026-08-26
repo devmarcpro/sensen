@@ -1,0 +1,23 @@
+{
+  "id": "trempe",
+  "nom": "Trempe",
+  "name_key": "module.trempe.name",
+  "module_type": "noyau",
+  "description": "chauffe l'arme équipée : **+1 dé** et son élément passe à Feu, 60 ticks",
+  "classe_signature": "La Braise",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Ressource",
+  "elements": {},
+  "element_special": "arme",
+  "power_base": null,
+  "cout_ticks": 8,
+  "cout_mana": 0,
+  "cout_endurance": 10,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

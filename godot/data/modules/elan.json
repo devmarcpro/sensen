@@ -4,11 +4,11 @@
   "name_key": "module.elan.name",
   "module_type": "noyau",
   "description": "**le lanceur** se déplace de 3 tuiles",
+  "classe_signature": null,
   "tags": [
-    "noyau",
-    "déplacement"
+    "noyau"
   ],
-  "famille": "Déplacement",
+  "famille": "Espace",
   "elements": {},
   "element_special": null,
   "power_base": null,

@@ -1,0 +1,16 @@
+{
+  "id": "intemperie",
+  "nom": "Intempérie",
+  "name_key": "module.intemperie.name",
+  "module_type": "condition",
+  "description": "selon la [[Météo]] — l'orage nourrit la Foudre",
+  "classe_signature": null,
+  "tags": [
+    "condition"
+  ],
+  "famille": "Monde",
+  "predicat": "meteo = pluie | orage | neige",
+  "bonus": "+2 dés",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

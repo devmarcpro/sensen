@@ -4,6 +4,7 @@
   "name_key": "module.curee.name",
   "module_type": "declencheur",
   "description": "la charge part **à la mise à mort**",
+  "classe_signature": null,
   "tags": [
     "declencheur"
   ],

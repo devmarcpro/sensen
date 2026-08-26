@@ -1,0 +1,23 @@
+{
+  "id": "egide",
+  "nom": "Égide",
+  "name_key": "module.egide.name",
+  "module_type": "noyau",
+  "description": "**+6 de réduction plate** sur toutes les zones, 50 ticks ([[Armure par zone et constructions]])",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Défense",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 7,
+  "cout_mana": 12,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

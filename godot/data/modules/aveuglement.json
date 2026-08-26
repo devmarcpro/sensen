@@ -1,0 +1,23 @@
+{
+  "id": "aveuglement",
+  "nom": "Aveuglement",
+  "name_key": "module.aveuglement.name",
+  "module_type": "noyau",
+  "description": "portée et ligne de vue de la cible réduites à 1 tuile, 20 ticks",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 9,
+  "cout_mana": 14,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

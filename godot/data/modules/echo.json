@@ -4,6 +4,7 @@
   "name_key": "module.echo.name",
   "module_type": "liaison",
   "description": "rejoue la charge à **50 %** après 20 ticks",
+  "classe_signature": null,
   "tags": [
     "liaison"
   ],

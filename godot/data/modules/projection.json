@@ -1,0 +1,24 @@
+{
+  "id": "projection",
+  "nom": "Projection",
+  "name_key": "module.projection.name",
+  "module_type": "noyau",
+  "description": "lance l'entité **saisie ou lévitée** sur 5 tuiles — dégâts de chute à l'arrivée",
+  "classe_signature": "Le Porteur",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Espace",
+  "elements": {},
+  "element_special": null,
+  "power_base": "(h−2)×5",
+  "cout_ticks": 5,
+  "cout_mana": 0,
+  "cout_endurance": 10,
+  "effets": [
+    "deplacement",
+    "degats"
+  ],
+  "forme": null,
+  "portee": null
+}

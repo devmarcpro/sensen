@@ -1,0 +1,14 @@
+{
+  "id": "gravite",
+  "nom": "Gravité",
+  "name_key": "module.gravite.name",
+  "module_type": "modificateur",
+  "description": "toute cible touchée est **attirée** d'une tuile vers le centre",
+  "classe_signature": null,
+  "tags": [
+    "modificateur"
+  ],
+  "famille": "Effet",
+  "surcout_ticks": 2,
+  "surcout_ressource": "+5"
+}

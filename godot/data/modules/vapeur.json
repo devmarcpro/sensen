@@ -1,0 +1,24 @@
+{
+  "id": "vapeur",
+  "nom": "Vapeur",
+  "name_key": "module.vapeur.name",
+  "module_type": "noyau",
+  "description": "nuage alchimique : applique le statut d'une potion à tout ce qui entre, 40 ticks",
+  "classe_signature": "Le Creuset",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Ressource",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 10,
+  "cout_mana": 14,
+  "cout_endurance": 0,
+  "effets": [
+    "terrain",
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

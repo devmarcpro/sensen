@@ -1,0 +1,24 @@
+{
+  "id": "charge_d_epaule",
+  "nom": "Charge d'épaule",
+  "name_key": "module.charge_d_epaule.name",
+  "module_type": "noyau",
+  "description": "projette la cible de 2 tuiles — chute si le vide suit",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Arme",
+  "elements": {},
+  "element_special": null,
+  "power_base": "1d6",
+  "cout_ticks": 6,
+  "cout_mana": 0,
+  "cout_endurance": 11,
+  "effets": [
+    "degats",
+    "deplacement"
+  ],
+  "forme": null,
+  "portee": null
+}

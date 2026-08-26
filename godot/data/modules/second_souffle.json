@@ -1,0 +1,23 @@
+{
+  "id": "second_souffle",
+  "nom": "Second souffle",
+  "name_key": "module.second_souffle.name",
+  "module_type": "noyau",
+  "description": "rend 30 d'endurance ([[Endurance]]) — le pendant physique de Méditation",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Ressource",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 8,
+  "cout_mana": 0,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

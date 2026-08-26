@@ -1,0 +1,14 @@
+{
+  "id": "ligature",
+  "nom": "Ligature",
+  "name_key": "module.ligature.name",
+  "module_type": "modificateur",
+  "description": "les invocations et tourelles alliées dans la forme **rejouent** leur attaque",
+  "classe_signature": "L'Engrenage",
+  "tags": [
+    "modificateur"
+  ],
+  "famille": "Effet",
+  "surcout_ticks": 2,
+  "surcout_ressource": "+5"
+}

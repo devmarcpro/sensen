@@ -1,0 +1,23 @@
+{
+  "id": "rappel_a_la_vie",
+  "nom": "Rappel à la vie",
+  "name_key": "module.rappel_a_la_vie.name",
+  "module_type": "noyau",
+  "description": "relève un allié tombé à 25 % PV — hors combat ou très cher en combat",
+  "classe_signature": "La Paume",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Soin",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 40,
+  "cout_mana": 45,
+  "cout_endurance": 0,
+  "effets": [
+    "soin"
+  ],
+  "forme": null,
+  "portee": null
+}

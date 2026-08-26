@@ -4,9 +4,11 @@
   "name_key": "module.vivacite.name",
   "module_type": "modificateur",
   "description": "**−3 ticks** — le module du burst",
+  "classe_signature": null,
   "tags": [
     "modificateur"
   ],
+  "famille": "Tempo",
   "surcout_ticks": -3,
   "surcout_ressource": "×1.3"
 }

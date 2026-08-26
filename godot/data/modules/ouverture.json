@@ -1,0 +1,12 @@
+{
+  "id": "ouverture",
+  "nom": "Ouverture",
+  "name_key": "module.ouverture.name",
+  "module_type": "declencheur",
+  "description": "la charge part **au premier contact du combat**",
+  "classe_signature": null,
+  "tags": [
+    "declencheur"
+  ],
+  "surcout_ticks": 2
+}

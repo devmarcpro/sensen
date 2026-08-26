@@ -4,6 +4,7 @@
   "name_key": "module.dispersion.name",
   "module_type": "liaison",
   "description": "répartit la charge sur **toutes** les cibles de la forme, divisée par leur nombre",
+  "classe_signature": null,
   "tags": [
     "liaison"
   ],

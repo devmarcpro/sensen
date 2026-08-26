@@ -4,11 +4,13 @@
   "name_key": "module.angle_mort.name",
   "module_type": "condition",
   "description": "frappe de dos ou de flanc — le plus gros bonus du jeu",
+  "classe_signature": "L'Ombre",
   "tags": [
     "condition"
   ],
+  "famille": "Position",
   "predicat": "dos_ou_flanc",
-  "bonus": "+3 dés",
+  "bonus": "**+3 dés**",
   "surcout_ticks": 0,
   "echec": "la capacité ne part pas et rend 50 % de ses ticks"
 }

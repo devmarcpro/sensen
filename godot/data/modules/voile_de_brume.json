@@ -1,0 +1,23 @@
+{
+  "id": "voile_de_brume",
+  "nom": "Voile de brume",
+  "name_key": "module.voile_de_brume.name",
+  "module_type": "noyau",
+  "description": "coupe la ligne de vue dans la zone, 60 ticks",
+  "classe_signature": "L'Ombre",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Terrain",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 10,
+  "cout_mana": 12,
+  "cout_endurance": 0,
+  "effets": [
+    "terrain"
+  ],
+  "forme": null,
+  "portee": null
+}

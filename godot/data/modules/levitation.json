@@ -1,0 +1,24 @@
+{
+  "id": "levitation",
+  "nom": "Lévitation",
+  "name_key": "module.levitation.name",
+  "module_type": "noyau",
+  "description": "**soulève** une entité : elle flotte, ne peut ni agir ni bloquer, 25 ticks — la vraie télékinésie",
+  "classe_signature": "Le Porteur",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Espace",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 10,
+  "cout_mana": 18,
+  "cout_endurance": 0,
+  "effets": [
+    "deplacement",
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

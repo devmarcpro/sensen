@@ -1,0 +1,12 @@
+{
+  "id": "partage",
+  "nom": "Partage",
+  "name_key": "module.partage.name",
+  "module_type": "liaison",
+  "description": "la charge s'applique **aussi au lanceur** — pour les soins et les défenses",
+  "classe_signature": "La Paume",
+  "tags": [
+    "liaison"
+  ],
+  "surcout_ticks": 2
+}

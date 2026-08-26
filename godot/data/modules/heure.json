@@ -1,0 +1,16 @@
+{
+  "id": "heure",
+  "nom": "Heure",
+  "name_key": "module.heure.name",
+  "module_type": "condition",
+  "description": "selon le [[Cycle jour-nuit et sommeil]]",
+  "classe_signature": null,
+  "tags": [
+    "condition"
+  ],
+  "famille": "Monde",
+  "predicat": "cycle = nuit | jour",
+  "bonus": "+15 % dégâts",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

@@ -4,11 +4,11 @@
   "name_key": "module.desarmement.name",
   "module_type": "noyau",
   "description": "jet opposé — l'arme de la cible tombe sur sa tuile",
+  "classe_signature": null,
   "tags": [
-    "noyau",
-    "technique"
+    "noyau"
   ],
-  "famille": "Technique",
+  "famille": "Contrôle",
   "elements": {},
   "element_special": null,
   "power_base": null,

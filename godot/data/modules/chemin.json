@@ -4,6 +4,7 @@
   "name_key": "module.chemin.name",
   "module_type": "forme",
   "description": "suit le trajet du lanceur : tout ce qu'il longe est touché",
+  "classe_signature": null,
   "tags": [
     "forme"
   ],
@@ -14,6 +15,5 @@
     5
   ],
   "taille_base": 5,
-  "cibles_valides": "tuile · trajet",
   "ligne_de_vue": false
 }

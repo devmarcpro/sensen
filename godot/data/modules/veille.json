@@ -1,0 +1,12 @@
+{
+  "id": "veille",
+  "nom": "Veille",
+  "name_key": "module.veille.name",
+  "module_type": "declencheur",
+  "description": "la charge part quand un **allié** passe sous 40 % PV",
+  "classe_signature": "La Paume",
+  "tags": [
+    "declencheur"
+  ],
+  "surcout_ticks": 3
+}

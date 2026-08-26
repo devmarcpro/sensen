@@ -3,13 +3,12 @@
   "nom": "Flamme",
   "name_key": "module.flamme.name",
   "module_type": "noyau",
-  "description": "la charge de Feu",
+  "description": "charge standard de Feu",
+  "classe_signature": null,
   "tags": [
-    "noyau",
-    "dégâts",
-    "feu"
+    "noyau"
   ],
-  "famille": "Dégâts",
+  "famille": "Dégâts · moyen",
   "elements": {
     "feu": 1.0
   },

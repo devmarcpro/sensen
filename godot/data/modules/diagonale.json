@@ -4,6 +4,7 @@
   "name_key": "module.diagonale.name",
   "module_type": "forme",
   "description": "les quatre obliques — le complément de la Croix",
+  "classe_signature": null,
   "tags": [
     "forme"
   ],
@@ -14,6 +15,5 @@
     4
   ],
   "taille_base": 4,
-  "cibles_valides": "tuile · traverse",
   "ligne_de_vue": true
 }

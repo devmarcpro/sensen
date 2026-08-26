@@ -1,0 +1,23 @@
+{
+  "id": "saignee",
+  "nom": "Saignée",
+  "name_key": "module.saignee.name",
+  "module_type": "noyau",
+  "description": "−15 PV : la **jauge de sang** monte d'un cran, les dégâts infligés ×1.15 par cran (max 4)",
+  "classe_signature": "L'Écarlate",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Ressource",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 3,
+  "cout_mana": 0,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

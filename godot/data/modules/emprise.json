@@ -1,0 +1,14 @@
+{
+  "id": "emprise",
+  "nom": "Emprise",
+  "name_key": "module.emprise.name",
+  "module_type": "modificateur",
+  "description": "toute cible touchée ne peut plus se déplacer 10 ticks",
+  "classe_signature": null,
+  "tags": [
+    "modificateur"
+  ],
+  "famille": "Effet",
+  "surcout_ticks": 2,
+  "surcout_ressource": "+6"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "fiole",
+  "nom": "Fiole",
+  "name_key": "module.fiole.name",
+  "module_type": "noyau",
+  "description": "projette une potion préparée : son effet s'applique **en zone** au lieu d'une gorgée ([[Potions]])",
+  "classe_signature": "Le Creuset",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Ressource",
+  "elements": {},
+  "element_special": null,
+  "power_base": "2d6",
+  "cout_ticks": 7,
+  "cout_mana": 0,
+  "cout_endurance": 0,
+  "effets": [
+    "degats",
+    "soin"
+  ],
+  "forme": null,
+  "portee": null
+}

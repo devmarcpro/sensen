@@ -1,0 +1,26 @@
+{
+  "id": "racine",
+  "nom": "Racine",
+  "name_key": "module.racine.name",
+  "module_type": "noyau",
+  "description": "la tuile entrave ce qui s'y arrête, 50 ticks",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Terrain",
+  "elements": {
+    "bois": 1.0
+  },
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 11,
+  "cout_mana": 12,
+  "cout_endurance": 0,
+  "effets": [
+    "terrain",
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

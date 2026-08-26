@@ -1,0 +1,23 @@
+{
+  "id": "tourelle",
+  "nom": "Tourelle",
+  "name_key": "module.tourelle.name",
+  "module_type": "noyau",
+  "description": "déploie une tourelle qui tire à chaque tick, **hérite de l'élément de l'arme**, consomme le carquois",
+  "classe_signature": "L'Engrenage",
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Terrain",
+  "elements": {},
+  "element_special": "arme",
+  "power_base": null,
+  "cout_ticks": 16,
+  "cout_mana": 0,
+  "cout_endurance": 20,
+  "effets": [
+    "invocation"
+  ],
+  "forme": null,
+  "portee": null
+}

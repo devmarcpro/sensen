@@ -1,0 +1,19 @@
+{
+  "id": "colonne",
+  "nom": "Colonne",
+  "name_key": "module.colonne.name",
+  "module_type": "forme",
+  "description": "toute la **hauteur** d'une tuile — touche ce qui vole et ce qui est en contrebas",
+  "classe_signature": null,
+  "tags": [
+    "forme"
+  ],
+  "geometrie": "colonne",
+  "surcout_ticks": 3,
+  "portee_base": [
+    0,
+    4
+  ],
+  "taille_base": 1,
+  "ligne_de_vue": false
+}

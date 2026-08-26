@@ -1,0 +1,14 @@
+{
+  "id": "purete",
+  "nom": "Pureté",
+  "name_key": "module.purete.name",
+  "module_type": "modificateur",
+  "description": "concentre le vecteur : +40 % de l'élément dominant, retire les autres",
+  "classe_signature": null,
+  "tags": [
+    "modificateur"
+  ],
+  "famille": "Élément",
+  "surcout_ticks": 2,
+  "surcout_ressource": "×1.3"
+}

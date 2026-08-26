@@ -4,9 +4,9 @@
   "name_key": "module.purge.name",
   "module_type": "noyau",
   "description": "retire un statut négatif",
+  "classe_signature": "La Paume",
   "tags": [
-    "noyau",
-    "soin"
+    "noyau"
   ],
   "famille": "Soin",
   "elements": {},

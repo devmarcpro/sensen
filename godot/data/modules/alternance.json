@@ -4,6 +4,7 @@
   "name_key": "module.alternance.name",
   "module_type": "liaison",
   "description": "alterne entre les **deux noyaux suivants** à chaque emploi",
+  "classe_signature": null,
   "tags": [
     "liaison"
   ],

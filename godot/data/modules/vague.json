@@ -1,0 +1,19 @@
+{
+  "id": "vague",
+  "nom": "Vague",
+  "name_key": "module.vague.name",
+  "module_type": "forme",
+  "description": "large et courte : tout le devant sur 2 tuiles de profondeur",
+  "classe_signature": null,
+  "tags": [
+    "forme"
+  ],
+  "geometrie": "vague",
+  "surcout_ticks": 4,
+  "portee_base": [
+    1,
+    2
+  ],
+  "taille_base": 5,
+  "ligne_de_vue": false
+}

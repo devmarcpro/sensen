@@ -1,0 +1,16 @@
+{
+  "id": "corruption",
+  "nom": "Corruption",
+  "name_key": "module.corruption.name",
+  "module_type": "condition",
+  "description": "l'arme qui aime le danger ([[Niveau de danger]])",
+  "classe_signature": null,
+  "tags": [
+    "condition"
+  ],
+  "famille": "Monde",
+  "predicat": "corruption_locale >= X",
+  "bonus": "+25 % dégâts",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}
