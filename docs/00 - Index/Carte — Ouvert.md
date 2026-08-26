@@ -28,8 +28,7 @@ Tout ce qui n'est pas tranché, par catégorie — 34 notes avec les 8 propositi
 
 **Contenu à produire**
 - [x] ~~Modules Métal~~ résolu ([[Modules]]) · ~~[[Décision — Affinités de cuisine]]~~ ✅ · ~~[[Décision — Surcharges Wu Xing des matériaux]]~~ ✅ · ~~actions de créatures~~ ✅ ([[Actions des créatures]])
-- [ ] [[Ouvert — Recettes de composants par famille]] — la matrice composant × famille et les sources exotiques.
-- [ ] [[Ouvert — Pools de noms des cultures]] — 9 cultures sur 10 restent à écrire.
+- [x] ~~Recettes de composants~~ ✅ ([[Recettes de composants]]) · ~~Pools de noms~~ ✅ ([[Pools de noms des cultures]])
 
 **Héritage voxel — propositions à valider** *(voir [[Héritage voxel — audit]] ; catégories 1 et 3 déjà réécrites)*
 - [[Décision — Altitude sur 21 niveaux]] — le mapping bruit continu → hauteur 0-20 (couvre aussi le mod_altitude météo).

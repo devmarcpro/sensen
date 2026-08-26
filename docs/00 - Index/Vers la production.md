@@ -28,10 +28,10 @@ Ce qui reste à modifier dans le design, et ce qui manque pour lancer la product
 - [x] **5 modules du domaine Métal** — au catalogue [[Modules]] (2026-08-26).
 - [x] **Catalogue des actions de créatures** : 24 actions + 2 règles, affectations pour les 34 créatures ([[Actions des créatures]], 2026-08-26).
 - [x] **Onyx** ajouté au catalogue des gemmes et à la palette (2026-08-26).
-- [ ] Recettes de composants × familles + sources exotiques ([[Ouvert — Recettes de composants par famille]]). Étape 6.
+- [x] **Recettes de composants** : matrice complète bases/exotiques/sources ([[Recettes de composants]], 2026-08-26).
 - [x] **Affinités de cuisine** : table complète, le Feu vient de la cuisson et le Métal du sel ([[Décision — Affinités de cuisine]], 2026-08-26).
 - [x] **Surcharges Wu Xing** : les 154 matériaux passés en revue, table complète ([[Décision — Surcharges Wu Xing des matériaux]], 2026-08-26).
-- [ ] Pools de noms des 9 cultures restantes ([[Ouvert — Pools de noms des cultures]]). Étape 9.
+- [x] **Pools de noms** : les 9 cultures restantes écrites ([[Pools de noms des cultures]], 2026-08-26).
 - [ ] Traductions en/ja/zh — les clés `tr()` existent dès le jour 1, les textes peuvent suivre ([[Localisation]]).
 
 ## 5. Assets à produire (aucun n'existe)

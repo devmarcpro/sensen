@@ -1,10 +1,12 @@
 ---
 aliases: ["Ouvert — Pools de noms des cultures", "Pools de noms"]
-tags: [ouvert, société, contenu-à-produire]
+tags: [ouvert, société, décidé]
 domaine: contenu
-statut: contenu-à-produire
+statut: décidé
 etape: 9
 ---
+
+> [!success] Résolu le 2026-08-26 — les pools des 9 cultures restantes sont écrits (premier jet phonétique, enrichissable en données) : [[Pools de noms des cultures]].
 
 **Contenu à produire ([[Décisions fondatrices]]) :** *pools de noms des **10 cultures** ([[Cultures de nommage]]).*
 

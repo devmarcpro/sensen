@@ -30,6 +30,8 @@ Les catalogues prêts à transcrire en JSON. 24 notes.
 - **[[Plantes]]** (22) · **[[Potions]]** (12) · **[[Composants]]** (14)
 
 - **[[Actions des créatures]]** (24) — les attaques des bêtes ; les humains utilisent le système standard.
+- **[[Recettes de composants]]** — la matrice composant × famille, bases et exotiques.
+- **[[Pools de noms des cultures]]** — les 9 cultures restantes (la Sino vit dans son schéma).
 - **[[Décision — Surcharges Wu Xing des matériaux]]** · **[[Décision — Affinités de cuisine]]** — les vecteurs élémentaires du contenu.
 
 **Le monde et les cultures**

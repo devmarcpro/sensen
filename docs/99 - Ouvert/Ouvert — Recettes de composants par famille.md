@@ -1,10 +1,12 @@
 ---
 aliases: ["Ouvert — Recettes de composants par famille", "Recettes de composants"]
-tags: [ouvert, craft, contenu-à-produire]
+tags: [ouvert, craft, décidé]
 domaine: contenu
-statut: contenu-à-produire
+statut: décidé
 etape: 6
 ---
+
+> [!success] Résolu le 2026-08-26 — la matrice complète composant × famille (bases + exotiques + sources) est produite : [[Recettes de composants]].
 
 **Contenu à produire ([[Décisions fondatrices]]) :** *recettes d'obtention par composant × famille ([[Composant et recette d'obtention]]) et leurs **sources exotiques**.*
 
