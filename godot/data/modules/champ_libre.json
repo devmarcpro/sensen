@@ -12,5 +12,14 @@
   "predicat": "ligne_de_vue_degagee",
   "bonus": "−2 ticks",
   "surcout_ticks": 0,
-  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks",
+  "effet": {
+    "predicat_structure": {
+      "type": "ligne_de_vue_degagee"
+    },
+    "bonus_structure": {
+      "ticks": -2
+    },
+    "echec_ticks_rendus": 0.5
+  }
 }

@@ -19,5 +19,10 @@
     "soin"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "soin": {
+      "source": "pv_porteur"
+    }
+  }
 }

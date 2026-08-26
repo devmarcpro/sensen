@@ -17,8 +17,8 @@
 | materials/ | 153 matériaux | Schéma matériau (B.1), catalogues 09 - Contenu |
 | items/ | objets et recettes ; `proto_*` = objets du prototype (dureté, qualité et élément fixés à la main en attendant le craft) | Schéma objet et recette (B.3), Stats d'armes |
 | functionalities/ | profils d'armes/armures/véhicules | Fonctionnalité (B.3.1) |
-| modules/ | modules de capacités | Vocabulaire des modules (B.4), Modules (F.2) |
-| creatures/ | créatures et PNJ | Schéma créature (B.5), Créatures (F.3) |
+| modules/ | les 176 composants ; `effet` = forme structurée des descriptions (`tools/structure_modules.py`) | Vocabulaire des modules (B.4), Modules (F.2) |
+| creatures/ | tout être (joueur compris) : `corps.stats`, `equipement`, `ratelier`, `actions`, `capacites` (séquences de modules) | Schéma créature (B.5), Blocs de l'être, Créatures (F.3) |
 | creature_actions/ | les 24 actions des créatures (`tools/gen_creature_actions.py` les transcrit) | Décision — Vocabulaire d'attaque des créatures, Actions des créatures |
 | ai_profiles/ | profils Utility AI | IA des créatures (E.16) |
 | biomes/ | biomes | Biomes — schéma (B.6), C.7 |

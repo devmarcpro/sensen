@@ -12,5 +12,15 @@
   "predicat": "porteur_immobile_depuis(20)",
   "bonus": "+2 dés",
   "surcout_ticks": 0,
-  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks",
+  "effet": {
+    "predicat_structure": {
+      "type": "porteur_immobile_depuis",
+      "ticks": 20
+    },
+    "bonus_structure": {
+      "des": 2
+    },
+    "echec_ticks_rendus": 0.5
+  }
 }

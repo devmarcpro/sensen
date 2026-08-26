@@ -12,5 +12,15 @@
   "predicat": "pv_porteur < 40 %",
   "bonus": "+3 dés",
   "surcout_ticks": 0,
-  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks",
+  "effet": {
+    "predicat_structure": {
+      "type": "pv_porteur_sous",
+      "pct": 40
+    },
+    "bonus_structure": {
+      "des": 3
+    },
+    "echec_ticks_rendus": 0.5
+  }
 }

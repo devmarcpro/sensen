@@ -19,5 +19,10 @@
     "deplacement"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "deplacement": {
+      "mode": "permutation"
+    }
+  }
 }

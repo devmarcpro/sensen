@@ -10,5 +10,8 @@
   ],
   "famille": "Taille",
   "surcout_ticks": 3,
-  "surcout_ressource": "×1.4"
+  "surcout_ressource": "×1.4",
+  "effet": {
+    "taille": 1
+  }
 }

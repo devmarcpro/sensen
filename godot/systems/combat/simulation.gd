@@ -10,6 +10,7 @@ var graine: int
 var des: Des
 var regles: Regles
 var wuxing: WuXing
+var capacites: Capacites
 var grille: Grille
 var arene_id: String
 var entites: Dictionary = {}          # id → être (Etres.instancier)
@@ -30,6 +31,7 @@ func _init(p_graine: int) -> void:
 	des = Des.new(p_graine)
 	regles = Regles.new(GameData.config("combat_rules"))
 	wuxing = WuXing.new(GameData.config("wuxing"))
+	capacites = Capacites.new(GameData.catalogues.get("modules", {}))
 	items = GameData.catalogues.get("items", {})
 	fonctionnalites = GameData.catalogues.get("functionalities", {})
 	actions_creatures = GameData.catalogues.get("creature_actions", {})
@@ -143,6 +145,12 @@ func _regenerer(e: Dictionary, tick: int) -> void:
 	var ecoules := tick - int(e.tick_endurance)
 	if ecoules > 0:
 		e.endurance = mini(e.endurance_max, e.endurance + ecoules * int(regles.r.endurance.regen_par_tick))
+		# Mana (A.5) : à chaque tranche de 10 ticks franchie, 1 chance sur 8 de rendre 1 + N_meditation × 0.2.
+		var periode := int(regles.r.mana.periode_ticks)
+		var tranches := tick / periode - int(e.tick_endurance) / periode
+		for i in tranches:
+			if des.reel() < float(regles.r.mana.chance):
+				e.mana = mini(e.mana_max, e.mana + roundi(float(regles.r.mana.regen_base)))
 	e.tick_endurance = tick
 
 
@@ -171,6 +179,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _attendre(e, h.ticks)
 		"changer_arme":
 			ok = _changer_arme(e, str(i.get("item", "")), h.ticks)
+		"capacite":
+			ok = _lancer_capacite(e, int(i.get("index", -1)), i.get("cible", Vector2i(-1, -1)), h.ticks)
 	if ok:
 		attente.erase(id)
 		_fin_de_pas(e.horloge)
@@ -386,6 +396,8 @@ func _resoudre_action_engagee(e: Dictionary, a: Dictionary) -> void:
 			_frapper_arme(e, cible, arme, fonct, a.lourde, a.ticks)
 		"creature":
 			_executer_action_creature(e, actions_creatures[a.action], cible)
+		"capacite":
+			_executer_capacite(e, a.plan, a.cible_pos)
 
 
 func _cible_atteignable(e: Dictionary, cible: Dictionary, portee: Vector2i, ldv: bool) -> bool:
@@ -540,6 +552,228 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 				grille.liberer(e.pos)
 				e.pos = p
 				grille.placer(e.id, p)
+
+
+# ---------------------------------------------------------------- capacités (modules assemblés)
+
+## Le plan d'une capacité de `e` : assemblage avec l'arme tenue (pour les noyaux « arme »).
+func plan_capacite(e: Dictionary, index: int) -> Dictionary:
+	var caps: Array = e.get("capacites", [])
+	if index < 0 or index >= caps.size():
+		return {}
+	var arme := Etres.arme(e, items)
+	var fonct: Dictionary = fonctionnalites.get(arme.get("functionality", ""), {})
+	var ticks_arme := regles.ticks_attaque(fonct, false) if not fonct.is_empty() else int(regles.r.actions.attaque_base)
+	var plan := capacites.assembler(caps[index].modules, ticks_arme, fonct.get("degats_des", "1d4"), vecteur_arme(arme))
+	plan["id"] = caps[index].id
+	plan["name_key"] = caps[index].get("name_key", "")
+	plan["arme"] = arme
+	plan["fonct"] = fonct
+	return plan
+
+
+## La cible d'une capacité est-elle valide (portée, ligne de vue) ?
+func capacite_visable(e: Dictionary, plan: Dictionary, cible: Vector2i) -> bool:
+	if not grille.dans(cible):
+		return false
+	if plan.geometrie == "soi":
+		return true
+	var d := Grille.distance(e.pos, cible)
+	if d < plan.portee.x or d > plan.portee.y:
+		return false
+	return not plan.ligne_de_vue or grille.ligne_de_vue(e.pos, cible)
+
+
+## Évalue les conditions du plan (Modules : un verrou qui paie — si faux, la capacité ne part pas
+## et rend 50 % de ses ticks). Applique les bonus des conditions vraies. Retourne la condition fausse ou {}.
+func _evaluer_conditions(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -> Dictionary:
+	var occ := grille.occupant(cible_pos)
+	var cible: Dictionary = entites.get(occ, {}) if not occ.is_empty() else {}
+	for c: Dictionary in plan.conditions:
+		var p: Dictionary = c.predicat
+		var vrai := false
+		match str(p.type):
+			"hauteur_relative":
+				var dh := grille.h(e.pos) - grille.h(cible_pos)
+				vrai = dh > 0 if p.get("signe", ">") == ">" else dh < 0
+			"dos_ou_flanc":
+				vrai = not cible.is_empty() and Regles.direction_relative(cible.orientation, e.pos - cible.pos) != "front"
+			"ligne_de_vue_degagee":
+				vrai = grille.ligne_de_vue(e.pos, cible_pos)
+			"cible_isolee":
+				vrai = not cible.is_empty()
+				for autre in vivants():
+					if not cible.is_empty() and autre.id != cible.id and autre.camp == cible.camp and Grille.distance(autre.pos, cible.pos) == 1:
+						vrai = false
+			"cible_adjacente_a_allie":
+				for autre in vivants():
+					if not cible.is_empty() and autre.id != e.id and autre.camp == e.camp and Grille.distance(autre.pos, cible.pos) == 1:
+						vrai = true
+			"pv_cible_sous":
+				vrai = not cible.is_empty() and float(cible.sante) / float(cible.sante_max) * 100.0 < float(p.pct)
+			"pv_porteur_sous":
+				vrai = float(e.sante) / float(e.sante_max) * 100.0 < float(p.pct)
+			"porteur_en_posture":
+				vrai = e.garde
+			"jauge_chaine_pleine":
+				vrai = e.has("chaine") and e.chaine.segments.size() >= int(e.chaine.capacite) - 1
+			"segment_chaine_present":
+				vrai = e.has("chaine") and not e.chaine.segments.is_empty()
+			_:
+				vrai = false
+		if not vrai:
+			return c
+		Capacites.appliquer_bonus(plan, c.bonus)
+	return {}
+
+
+## Lance la capacité n° `index` sur la tuile `cible` : coûts, conditions, télégraphe ou exécution.
+func _lancer_capacite(e: Dictionary, index: int, cible: Variant, tick: int) -> bool:
+	var plan := plan_capacite(e, index)
+	if plan.is_empty() or not plan.erreurs.is_empty():
+		return false
+	var cible_pos: Vector2i = e.pos if plan.geometrie == "soi" else cible
+	if not (cible is Vector2i) and plan.geometrie != "soi":
+		return false
+	if not capacite_visable(e, plan, cible_pos):
+		return false
+	_quitter_garde(e)
+	if cible_pos != e.pos:
+		e.orientation = Vector2i(signi(cible_pos.x - e.pos.x), signi(cible_pos.y - e.pos.y))
+	var fausse := _evaluer_conditions(e, plan, cible_pos)
+	if not fausse.is_empty():
+		# Le verrou est fermé : la capacité ne part pas et rend 50 % de ses ticks.
+		e.compteur = tick + maxi(1, roundi(float(plan.ticks) * (1.0 - float(fausse.ticks_rendus))))
+		EventBus.emettre(&"journal", [&"journal.condition_fausse", {"nom": e.name_key, "capacite": plan.name_key, "condition": fausse.name_key}])
+		return true
+	_payer(e, plan)
+	e.compteur = tick + int(plan.ticks)
+	if regles.est_telegraphee(int(plan.ticks)):
+		e.action_en_cours = {"type": "capacite", "plan": plan, "cible_pos": cible_pos, "cible": grille.occupant(cible_pos), "ticks": plan.ticks, "name_key": plan.name_key}
+		EventBus.emettre(&"journal", [&"journal.telegraphe", {"nom": e.name_key, "action": plan.name_key, "ticks": plan.ticks}])
+		EventBus.emettre(&"action_engaged", [e.id, e.action_en_cours])
+		return true
+	_executer_capacite(e, plan, cible_pos)
+	return true
+
+
+## Paie la monnaie du noyau. Mana insuffisant = surchauffe : le déficit est infligé en PV × 2 (Mana).
+func _payer(e: Dictionary, plan: Dictionary) -> void:
+	match str(plan.monnaie):
+		"mana":
+			var deficit: int = maxi(0, int(plan.ressource) - int(e.mana))
+			e.mana = maxi(0, int(e.mana) - int(plan.ressource))
+			if deficit > 0:
+				var degats := deficit * int(regles.r.mana.surchauffe_mult)
+				EventBus.emettre(&"journal", [&"journal.surchauffe", {"nom": e.name_key, "deficit": deficit, "degats": degats}])
+				_appliquer_degats(e, degats, "", {"surchauffe": true})
+		"endurance":
+			e.endurance = maxi(0, int(e.endurance) - int(plan.ressource))
+
+
+## Exécute une capacité : forme → cibles (friendly fire des zones), puis les effets du noyau.
+func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -> void:
+	var tick := tick_de(e)
+	var tuiles := Capacites.tuiles_de_forme(grille, plan.geometrie, e.pos, cible_pos, int(plan.taille))
+	var touchees: Array[Dictionary] = []
+	for t in tuiles:
+		var occ := grille.occupant(t)
+		if occ.is_empty():
+			continue
+		var c: Dictionary = entites[occ]
+		if not c.vivant:
+			continue
+		# Point : une cible unique ; les zones touchent tout ce qu'elles couvrent, alliés compris.
+		if plan.geometrie == "point" and c.id == e.id:
+			continue
+		if plan.ligne_de_vue and plan.geometrie != "point" and plan.geometrie != "soi" and not grille.ligne_de_vue(e.pos, t):
+			continue
+		touchees.append(c)
+	var elements: Dictionary = plan.elements
+	var a_touche := false
+	var non_offensif := true
+	var prev := {}
+	if e.has("chaine") and not elements.is_empty() and not plan.parametres.get("sans_segment", false):
+		wuxing.decroitre(e.chaine, tick)
+		prev = wuxing.prevoir(e.chaine, wuxing.dominante(elements))
+	for effet: String in plan.effets:
+		match effet:
+			"degats":
+				non_offensif = false
+				for c in touchees:
+					var d := _degats_capacite(e, c, plan, prev)
+					a_touche = true
+					EventBus.emettre(&"journal", [&"journal.capacite", {"att": e.name_key, "capacite": plan.name_key, "def": c.name_key, "zone": d.zone, "degats": d.degats}])
+					_appliquer_degats(c, d.degats, e.id, d)
+					if plan.drapeaux.has("vampirique"):
+						e.sante = mini(e.sante_max, e.sante + roundi(float(d.degats) * float(plan.drapeaux.vampirique)))
+			"soin":
+				for c in touchees:
+					if c.camp != e.camp:
+						continue
+					var soin := des.jet(plan.des, int(plan.des_bonus))
+					if not prev.is_empty() and prev.resout:
+						soin = roundi(float(soin) * float(prev.multiplicateur) * float(wuxing.w.chaine.resolveur_non_offensif))
+					var avant: int = c.sante
+					c.sante = mini(c.sante_max, c.sante + soin)
+					a_touche = true
+					EventBus.emettre(&"journal", [&"journal.soin", {"att": e.name_key, "capacite": plan.name_key, "def": c.name_key, "soin": c.sante - avant}])
+			"deplacement":
+				var dp: Dictionary = plan.parametres.get("deplacement", {})
+				if not dp.is_empty():
+					var occ := grille.occupant(cible_pos)
+					_effet_deplacement(e, dp, touchees, entites.get(occ, {}))
+					a_touche = a_touche or not touchees.is_empty()
+			_:
+				pass   # statut, terrain, invocation, tempo, saisie : jalons suivants
+	if plan.drapeaux.has("projection"):
+		_effet_deplacement(e, {"mode": "projection", "distance": str(plan.drapeaux.projection)}, touchees, {})
+	if a_touche and not elements.is_empty() and not plan.parametres.get("sans_segment", false):
+		_poser_segment(e, elements, tick)
+		var extra := int(plan.drapeaux.get("segments", 0))
+		for i in extra:
+			_poser_segment(e, elements, tick)
+	EventBus.emettre(&"action_resolved", [e.id, {"type": "capacite", "plan": plan}])
+
+
+## Dégâts d'un noyau sur une cible : noyau « arme » = formule de l'arme ; noyau magique = jet × niveau.
+## La réduction d'armure ne s'applique qu'à 50 % aux dégâts magiques (Armure par zone).
+func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dictionary) -> Dictionary:
+	var a_zero: bool = e.endurance <= 0 and plan.monnaie == "endurance"
+	var arme_noyau: bool = plan.noyau.get("power_base") == "arme"
+	var d: Dictionary
+	var type_degats := "magique"
+	if arme_noyau and not plan.arme.is_empty():
+		d = regles.degats_arme(e.corps.stats, plan.arme, plan.fonct, des, false, a_zero, int(plan.des_bonus))
+		type_degats = str(plan.fonct.type_degats)
+	else:
+		var jet := des.jet(plan.des, int(plan.des_bonus))
+		d = {"jet": jet, "bruts": float(jet)}
+	var bruts: float = d.bruts * float(plan.mult)
+	var zone: Dictionary = regles.zone_de_coup(grille.h(e.pos), grille.h(c.pos))
+	var dom := multiplicateur_domination(plan.elements, c, zone.zone)
+	var gain: float = float(prev.get("gain", 1.0)) if not prev.is_empty() else 1.0
+	var chaine: float = float(prev.get("multiplicateur", 1.0)) if not prev.is_empty() else 1.0
+	bruts *= float(dom.mult) * float(gain) * float(chaine)
+	var piece := Etres.piece_zone(c, zone.zone, items)
+	var armure := 0.0
+	if not plan.drapeaux.get("ignore_armure", false):
+		armure = regles.armure_piece(piece, type_degats if type_degats != "magique" else "contondant")
+		if type_degats == "magique":
+			armure *= float(regles.r.armure.magie_facteur)
+		armure = maxf(0.0, armure - float(plan.parametres.get("ignore_armure_points", 0)))
+	var direction := Regles.direction_relative(c.orientation, e.pos - c.pos)
+	var bouclier := Etres.a_bouclier(c, items)
+	var tient: bool = c.garde and regles.garde_tient(direction, bouclier, false)
+	var sans_garde := regles.degats_finaux(bruts, zone.mult, armure, false)
+	var degats := regles.degats_finaux(bruts, zone.mult, armure, tient)
+	if tient:
+		c.endurance = maxi(0, c.endurance - regles.cout_garde_impact(sans_garde, bouclier))
+		if c.endurance <= 0:
+			c.garde = false
+	return {"zone": zone.zone, "mult": zone.mult, "armure": armure, "direction": direction, "garde": tient,
+		"degats": degats, "bruts": bruts, "type": type_degats, "element": plan.elements, "dom": dom.mult,
+		"contre": dom.contre, "gain": gain, "chaine": chaine, "jet": d.jet}
 
 
 # ---------------------------------------------------------------- engagement (Temporalités parallèles)

@@ -12,5 +12,16 @@
   "predicat": "hauteur_relative < 0",
   "bonus": "+2 portée, −1 tick",
   "surcout_ticks": 0,
-  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks",
+  "effet": {
+    "predicat_structure": {
+      "type": "hauteur_relative",
+      "signe": "<"
+    },
+    "bonus_structure": {
+      "portee": 2,
+      "ticks": -1
+    },
+    "echec_ticks_rendus": 0.5
+  }
 }

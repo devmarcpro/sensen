@@ -91,6 +91,18 @@ element.eau,Eau
 ui.aide.armes,1-7 : changer d'arme (4 ticks) — {liste}
 ui.wuxing,{element} contre {contre} : ×{dom} · jauge {segments}/{capacite} (gain ×{gain}) · ce coup : segment {position} {transition} → ×{chaine}
 ui.chaine,chaîne : {segments}
+journal.capacite,{att} lance {capacite} sur {def} ({zone}) : {degats} dégâts
+journal.soin,{att} : {capacite} soigne {def} de {soin}
+journal.surchauffe,{nom} SURCHAUFFE : {deficit} de mana manquant → {degats} PV
+journal.condition_fausse,{capacite} ne part pas : {condition} n'est pas remplie (50 %% des ticks rendus)
+capacite.etincelle.name,Étincelle
+capacite.gel_en_ligne.name,Gel en ligne
+capacite.baume.name,Baume
+ui.aide.capacites,F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
+ui.capacite,{touche} {nom} [{modules}] : {forme} portée {pmin}-{pmax} taille {taille} · {ticks} ticks · {ressource} {monnaie} · {des}{bonus}
+ui.capacite.visee,VISÉE : {nom} — cliquer une tuile (Échap annule)
+ui.capacite.preview,{nom} sur {def} : {des}{bonus} ×{dom} → zone {zone} ×{mult} − armure {armure} ⇒ {min}–{max}
+ui.entite.mana,mana {mana}/{mana_max}
 journal.victoire,plus aucun hostile. Victoire.
 journal.defaite,tu es tombé. Tab : recommencer.
 module.a_l_impact.name,À l'impact

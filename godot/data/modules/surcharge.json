@@ -10,5 +10,8 @@
   ],
   "famille": "Puissance",
   "surcout_ticks": 3,
-  "surcout_ressource": "×1.5"
+  "surcout_ressource": "×1.5",
+  "effet": {
+    "des": 2
+  }
 }

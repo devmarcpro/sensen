@@ -72,6 +72,14 @@
     "mana_max_base": 20,
     "mana_max_par_volonte": 3
   },
+  "mana": {
+    "_doc": "Mana (A.5) : régénération tous les 10 ticks, 1 chance sur 8, 1 + N_meditation × 0.2 ; surchauffe = déficit × 2 en PV",
+    "periode_ticks": 10,
+    "chance": 0.125,
+    "regen_base": 1,
+    "regen_par_meditation": 0.2,
+    "surchauffe_mult": 2
+  },
   "vision": {
     "_doc": "Hauteur de terrain ±10 : un relief plus haut que la ligne tireur→cible coupe la vue",
     "hauteur_oeil": 1

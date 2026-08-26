@@ -19,5 +19,12 @@
     "deplacement"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "deplacement": {
+      "mode": "saut",
+      "cible": "soi",
+      "distance": "3"
+    }
+  }
 }

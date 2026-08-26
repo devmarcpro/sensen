@@ -39,6 +39,7 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 		"equipement": equip,
 		"ratelier": def.get("ratelier", []).duplicate(),
 		"actions": def.get("actions", []).duplicate(),
+		"capacites": def.get("capacites", []).duplicate(true),   # séquences de modules assemblées
 		"ai_profile": def.ai_profile,
 		"chain_gauge": def.get("chain_gauge", false),   # porteurs de jauge : joueur, élites, boss
 		"elements": def.get("elements"),

@@ -17,6 +17,7 @@ func _ready() -> void:
 	test_horloges()
 	test_wuxing()
 	test_ratelier()
+	test_capacites()
 	test_arenes_autonomes()
 	if echecs == 0:
 		print("TESTS : tout passe")
@@ -396,3 +397,82 @@ func test_ratelier() -> void:
 	s.horloge_monde.avancer(1)
 	verifier(not s.intention(j.id, {"type": "changer_arme", "item": "proto_bouclier"}), "pas de bouclier avec une arme à deux mains")
 	verifier(not s.intention(j.id, {"type": "changer_arme", "item": "inconnu"}), "objet hors râtelier refusé")
+
+
+# ---------------------------------------------------------------- Modules : assemblage, mana, formes
+
+func test_capacites() -> void:
+	var cap := Capacites.new(GameData.catalogues["modules"])
+	# L'exemple chiffré de la note Modules : [Ligne] + [Flamme] + [Concentration] = 12 ticks, 12 mana, 3d6
+	var p := cap.assembler(["ligne", "flamme", "concentration"], 5, "2d6", {"metal": 1.0})
+	verifier(p.erreurs.is_empty() and p.ticks == 12 and p.monnaie == "mana" and p.ressource == 12, "[Ligne]+[Flamme]+[Concentration] : 12 ticks · 12 mana")
+	verifier(p.des == "2d6" and p.des_bonus == 1 and p.geometrie == "ligne" and p.taille == 4 and p.elements == {"feu": 1.0}, "3d6 de Feu sur 4 tuiles en ligne")
+	# [Ligne] + [Frappe] + [Concentration] avec une épée : 9 ticks · 10 endurance, à l'élément de l'arme
+	p = cap.assembler(["ligne", "frappe", "concentration"], 5, "2d6", {"metal": 1.0})
+	verifier(p.ticks == 9 and p.monnaie == "endurance" and p.ressource == 10 and p.elements == {"metal": 1.0}, "[Ligne]+[Frappe]+[Concentration] : 9 ticks · 10 endurance · Métal")
+	# Vivacité : −3 ticks, ressource ×1.3 ; Soi rend 2 ticks
+	p = cap.assembler(["point", "etincelle", "vivacite"], 5, "1d4", {})
+	verifier(p.ticks == 1 and p.ressource == 4, "Étincelle + Vivacité : max(1, 3−3) tick · 3×1.3 ≈ 4 mana")
+	p = cap.assembler(["soi", "baume"], 5, "1d4", {})
+	verifier(p.ticks == 6 and p.ressource == 10 and p.geometrie == "soi", "[Soi]+[Baume] : 6 ticks · 10 mana")
+	verifier(not cap.assembler(["ligne", "flamme", "gel"], 5, "1d4", {}).erreurs.is_empty(), "deux noyaux = erreur")
+	verifier(Capacites.lire_surcout("×1.3").mult == 1.3 and Capacites.lire_surcout("−2").plus == -2, "lecture des surcoûts")
+	# Formes : la ligne de 4, le cône qui s'élargit, le carré plein
+	var s := nouvelle_sim("plaine_au_talus")
+	var g := s.grille
+	verifier(Capacites.tuiles_de_forme(g, "ligne", Vector2i(10, 10), Vector2i(10, 5), 4).size() == 4, "ligne : 4 tuiles")
+	verifier(Capacites.tuiles_de_forme(g, "cone", Vector2i(10, 10), Vector2i(10, 5), 3).size() == 1 + 3 + 5, "cône : 1 + 3 + 5 tuiles")
+	verifier(Capacites.tuiles_de_forme(g, "carre", Vector2i(10, 10), Vector2i(15, 15), 1).size() == 9, "carré r1 : 9 tuiles, centre compris")
+	verifier(Capacites.tuiles_de_forme(g, "anneau", Vector2i(10, 10), Vector2i(15, 15), 1).size() == 8, "anneau r1 : 8 tuiles, sans le centre")
+	# En simulation : Étincelle coûte 3 mana et 3 ticks, pose un segment Feu ; le loup (Bois) en prend ×0.8 (engendré)
+	var j := joueur_de(s)
+	var loup: Dictionary = s.entites["loup_2"]
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(0, -3)
+	s.grille.placer(loup.id, loup.pos)
+	s._engager_combat(j, loup)
+	var h := s.horloge_de(j)
+	loup.compteur = 500
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	var mana: int = j.mana
+	var pv: int = loup.sante
+	verifier(s.intention(j.id, {"type": "capacite", "index": 0, "cible": loup.pos}), "lancer Étincelle sur le loup à 3 tuiles")
+	verifier(j.mana == mana - 3 and j.compteur == h.ticks + 3, "Étincelle : 3 mana, 3 ticks")
+	verifier(loup.sante < pv and j.chaine.segments.size() == 1 and j.chaine.segments[0].element == "feu", "le loup est touché, un segment Feu est posé")
+	# Hors de portée (Point : 1-6) : refusé
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(not s.intention(j.id, {"type": "capacite", "index": 0, "cible": j.pos + Vector2i(0, -8)}), "au-delà de 6 tuiles : refusé")
+	# Surchauffe : sans mana, Gel en ligne (12 mana) coûte le déficit × 2 en PV
+	j.mana = 4
+	var pvj: int = j.sante
+	verifier(s.intention(j.id, {"type": "capacite", "index": 1, "cible": j.pos + Vector2i(0, -1)}), "Gel en ligne sans assez de mana")
+	verifier(j.mana == 0 and j.sante == pvj - 16, "surchauffe : déficit 8 × 2 = 16 PV")
+	verifier(not j.action_en_cours.is_empty(), "12 ticks : la capacité est télégraphée (engagée)")
+	# Baume sur soi : soigne
+	j.compteur = h.ticks
+	j.action_en_cours = {}
+	s.pas(j.horloge)
+	j.mana = 50
+	var avant: int = j.sante
+	verifier(s.intention(j.id, {"type": "capacite", "index": 2, "cible": j.pos}), "Baume sur soi")
+	verifier(j.sante > avant, "le Baume soigne")
+	# Une condition fausse ne part pas et rend 50 % des ticks
+	j.capacites.append({"id": "t", "name_key": "capacite.etincelle.name", "modules": ["surplomb", "point", "etincelle"]})
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	mana = j.mana
+	var t: int = h.ticks
+	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loup.pos}), "Surplomb + Étincelle à hauteur égale")
+	verifier(j.mana == mana and j.compteur == t + 2, "condition fausse : ne part pas, 50 % des ticks (3 → 2), rien payé")
+	# Friendly fire : un carré touche un allié dans la zone
+	j.capacites[3] = {"id": "c", "name_key": "capacite.etincelle.name", "modules": ["carre", "flamme"]}
+	var allie := s.ajouter("bandit", j.pos + Vector2i(1, -2), "joueur")
+	allie.camp = "joueur"
+	var pva: int = allie.sante
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": j.pos + Vector2i(0, -2)}), "Flamme en carré (12 ticks : télégraphée)")
+	s.pas(j.horloge)   # l'échéance : la charge part
+	verifier(allie.sante < pva, "friendly fire : l'allié dans le carré est touché")

@@ -20,5 +20,12 @@
     "deplacement"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "deplacement": {
+      "mode": "recul",
+      "cible": "soi",
+      "distance": "1"
+    }
+  }
 }

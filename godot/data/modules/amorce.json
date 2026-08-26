@@ -10,5 +10,8 @@
   ],
   "famille": "Élément",
   "surcout_ticks": 4,
-  "surcout_ressource": "+10"
+  "surcout_ressource": "+10",
+  "effet": {
+    "segments": 1
+  }
 }

@@ -12,5 +12,15 @@
   "predicat": "jauge_chaine_pleine",
   "bonus": "+3 dés, −3 ticks",
   "surcout_ticks": 0,
-  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks",
+  "effet": {
+    "predicat_structure": {
+      "type": "jauge_chaine_pleine"
+    },
+    "bonus_structure": {
+      "des": 3,
+      "ticks": -3
+    },
+    "echec_ticks_rendus": 0.5
+  }
 }

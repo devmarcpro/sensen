@@ -19,5 +19,8 @@
     "degats"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "sans_segment": true
+  }
 }

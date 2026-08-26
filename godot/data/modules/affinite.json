@@ -12,5 +12,15 @@
   "predicat": "element_cible = X",
   "bonus": "×1.2 dégâts",
   "surcout_ticks": 0,
-  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks",
+  "effet": {
+    "predicat_structure": {
+      "type": "element_cible",
+      "element": "X"
+    },
+    "bonus_structure": {
+      "mult": 1.2
+    },
+    "echec_ticks_rendus": 0.5
+  }
 }

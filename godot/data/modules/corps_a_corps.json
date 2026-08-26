@@ -10,5 +10,9 @@
   ],
   "famille": "Portée",
   "surcout_ticks": -1,
-  "surcout_ressource": "−2"
+  "surcout_ressource": "−2",
+  "effet": {
+    "des": 2,
+    "portee_fixe": 1
+  }
 }

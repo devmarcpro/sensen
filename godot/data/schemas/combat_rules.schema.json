@@ -34,6 +34,9 @@
     "ia": {
       "type": "object"
     },
+    "mana": {
+      "type": "object"
+    },
     "ticks_par_seconde_exploration": {
       "type": "number"
     }

@@ -22,6 +22,7 @@ var journal: Array[String] = []
 var telegraphes: Dictionary = {}   # id → action engagée
 var atteignables: Dictionary = {}
 var camera_offset := Vector2.ZERO
+var visee := -1                    # capacité en cours de visée (index), -1 sinon
 var zoom := 1.0
 
 @onready var ui: Label = $CanvasLayer/Info
@@ -56,6 +57,12 @@ func _charger() -> void:
 		for k in j.ratelier.size():
 			noms.append("%d=%s" % [k + 1, tr(sim.items[j.ratelier[k]].name_key)])
 		_log(tr("ui.aide.armes").format({"liste": " · ".join(noms)}))
+	if not j.is_empty() and not j.get("capacites", []).is_empty():
+		var caps: Array[String] = []
+		for k in j.capacites.size():
+			caps.append("F%d=%s" % [k + 1, tr(j.capacites[k].get("name_key", j.capacites[k].id))])
+		_log(tr("ui.aide.capacites").format({"liste": " · ".join(caps)}))
+	visee = -1
 	_recentrer()
 
 
@@ -145,6 +152,18 @@ func _unhandled_input(ev: InputEvent) -> void:
 			KEY_TAB:
 				arene_courante = (arene_courante + 1) % arenes.size()
 				_charger()
+			KEY_F1, KEY_F2, KEY_F3:
+				var k: int = ev.keycode - KEY_F1
+				if not j.is_empty() and k < j.get("capacites", []).size():
+					chemin_en_cours.clear()
+					var plan := sim.plan_capacite(j, k)
+					if plan.geometrie == "soi":
+						sim.intention(joueur_id, {"type": "capacite", "index": k, "cible": j.pos})
+						visee = -1
+					else:
+						visee = k
+			KEY_ESCAPE:
+				visee = -1
 			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7:
 				var k: int = ev.keycode - KEY_1
 				if not j.is_empty() and k < j.ratelier.size():
@@ -156,6 +175,13 @@ func _clic(t: Vector2i, lourde: bool) -> void:
 	if t.x < 0:
 		return
 	var j := joueur()
+	if visee >= 0:
+		if sim.attente.has(joueur_id):
+			if not sim.intention(joueur_id, {"type": "capacite", "index": visee, "cible": t}):
+				_log(tr("journal.inaccessible"))
+			else:
+				visee = -1
+		return
 	var occ := sim.grille.occupant(t)
 	if not occ.is_empty() and occ != joueur_id:
 		chemin_en_cours.clear()
@@ -214,6 +240,13 @@ func _draw() -> void:
 		for c in chemin_en_cours:
 			pts.append(_ecran(c, g.h(c)))
 		draw_polyline(pts, Color(1, 1, 1, 0.55), 2.0)
+	if visee >= 0 and survol.x >= 0 and not j.is_empty():
+		var plan := sim.plan_capacite(j, visee)
+		var ok := sim.capacite_visable(j, plan, survol)
+		for t in Capacites.tuiles_de_forme(g, plan.geometrie, j.pos, survol, int(plan.taille)):
+			var c := _ecran(t, g.h(t))
+			var losange := PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)])
+			draw_colored_polygon(losange, Color(0.3, 0.6, 1.0, 0.45) if ok else Color(0.5, 0.5, 0.5, 0.35))
 	for t in atteignables.keys():
 		if t == j.pos:
 			continue
@@ -343,6 +376,15 @@ func _maj_ui() -> void:
 		var occ := g.occupant(survol)
 		if not occ.is_empty() and occ != joueur_id and j.vivant:
 			lignes.append_array(_preview(j, sim.entites[occ]))
+	if not j.is_empty():
+		lignes.append("  " + tr("ui.entite.mana").format({"mana": j.mana, "mana_max": j.mana_max}))
+		for k in j.get("capacites", []).size():
+			lignes.append("  " + _texte_capacite(j, k))
+		if visee >= 0:
+			var plan := sim.plan_capacite(j, visee)
+			lignes.append("  " + tr("ui.capacite.visee").format({"nom": tr(plan.name_key)}))
+			if survol.x >= 0 and not g.occupant(survol).is_empty():
+				lignes.append("  " + _preview_capacite(j, plan, sim.entites[g.occupant(survol)]))
 	lignes.append("")
 	lignes.append_array(journal)
 	if not j.vivant:
@@ -398,6 +440,41 @@ func _preview(j: Dictionary, cible: Dictionary) -> Array[String]:
 
 func g_h(p: Vector2i) -> int:
 	return sim.grille.h(p)
+
+
+## L'infobulle exhaustive d'une capacité : forme, portée, coûts, dés — calculés pour le porteur.
+func _texte_capacite(j: Dictionary, k: int) -> String:
+	var plan := sim.plan_capacite(j, k)
+	var mods: Array[String] = []
+	for m in plan.modules:
+		mods.append(tr(sim.capacites.modules.get(m, {}).get("name_key", m)))
+	return tr("ui.capacite").format({"touche": "F%d" % (k + 1), "nom": tr(plan.name_key), "modules": " + ".join(mods),
+		"forme": plan.geometrie, "pmin": plan.portee.x, "pmax": plan.portee.y, "taille": plan.taille,
+		"ticks": plan.ticks, "ressource": plan.ressource, "monnaie": plan.monnaie if not plan.monnaie.is_empty() else "—",
+		"des": str(plan.des) if plan.des != null else "—", "bonus": (" +%d dé(s)" % plan.des_bonus) if plan.des_bonus > 0 else ""})
+
+
+func _preview_capacite(j: Dictionary, plan: Dictionary, cible: Dictionary) -> String:
+	if not ("degats" in plan.effets):
+		return ""
+	var zone: Dictionary = sim.regles.zone_de_coup(g_h(j.pos), g_h(cible.pos))
+	var dom: Dictionary = sim.multiplicateur_domination(plan.elements, cible, zone.zone)
+	var piece := Etres.piece_zone(cible, zone.zone, sim.items)
+	var arme_noyau: bool = plan.noyau.get("power_base") == "arme"
+	var armure := 0.0
+	if not plan.drapeaux.get("ignore_armure", false):
+		armure = sim.regles.armure_piece(piece, str(plan.fonct.get("type_degats", "contondant")) if arme_noyau else "contondant")
+		if not arme_noyau:
+			armure *= float(sim.regles.r.armure.magie_facteur)
+	var f := Des.fourchette(plan.des, int(plan.des_bonus))
+	var k: float = float(dom.mult) * float(plan.mult)
+	if j.has("chaine") and not plan.elements.is_empty():
+		var prev: Dictionary = sim.wuxing.prevoir(j.chaine, sim.wuxing.dominante(plan.elements))
+		k *= float(prev.gain) * float(prev.multiplicateur)
+	return tr("ui.capacite.preview").format({"nom": tr(plan.name_key), "def": tr(cible.name_key), "des": str(plan.des),
+		"bonus": (" +%d dé(s)" % plan.des_bonus) if plan.des_bonus > 0 else "", "dom": "%.2f" % dom.mult,
+		"zone": zone.zone, "mult": zone.mult, "armure": "%.1f" % armure,
+		"min": sim.regles.degats_finaux(f.x * k, zone.mult, armure, false), "max": sim.regles.degats_finaux(f.y * k, zone.mult, armure, false)})
 
 
 func _texte_chaine(e: Dictionary) -> String:

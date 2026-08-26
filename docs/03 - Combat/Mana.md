@@ -38,6 +38,9 @@ Monter un module en niveau le rend plus puissant ET moins coûteux (puissance : 
 
 **Régénération accélérée par le sommeil :** ×4 pendant le sommeil ([[Cycle jour-nuit et sommeil]]).
 
+> [!success] Décidé le 2026-08-26 — dans le prototype
+> La régénération est tirée par le RNG seedé de la simulation : à chaque tranche de 10 ticks franchie par une entité, 1 chance sur 8 de rendre `1 + N_meditation × 0.2` (N = 0 pour l'instant). La surchauffe est en place : le déficit est infligé en PV × 2 (`combat_rules.json`, bloc `mana`). Le `skill_factor` des modules vaut 1 jusqu'à la progression (étape 4).
+
 ## Liens
 - **Dépend de** : [[Stats de personnage]], [[Progression par l'usage]], [[Boucle de tick]]
 - **Alimente** : [[Structure compétences-modules-slots]], [[Pipeline de résolution du combat]], [[Armes fantomatiques]], [[Modules]]

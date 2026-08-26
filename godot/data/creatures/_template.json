@@ -1,5 +1,5 @@
 {
-  "_doc": "Être (docs: Schéma créature / B.5, Blocs de l'être / H.7). Tout être vivant, monstre comme marchand comme joueur — le contrôle est décidé à l'instanciation, jamais ici. sante_max = 20 + endurance × 4 (combat_rules.stats).",
+  "_doc": "Être (docs: Schéma créature / B.5, Blocs de l'être / H.7). Tout être vivant, monstre comme marchand comme joueur — le contrôle est décidé à l'instanciation, jamais ici. sante_max = 20 + endurance × 4 (combat_rules.stats). capacites : séquences de modules (grimoire/manuel) — 3 × 3 modules dans le prototype.",
   "name_key": "creature.<id>.name",
   "race": "humain",
   "classe": "Le Sabre",
@@ -24,6 +24,11 @@
   "chain_gauge": false,
   "elements": null,
   "rare_chance": 0.02,
-  "teinte": [0.8, 0.8, 0.8],
-  "tags": []
+  "teinte": [
+    0.8,
+    0.8,
+    0.8
+  ],
+  "tags": [],
+  "capacites": []
 }

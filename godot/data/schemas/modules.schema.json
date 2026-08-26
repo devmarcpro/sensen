@@ -61,6 +61,18 @@
     },
     "ligne_de_vue": {
       "type": "boolean"
+    },
+    "effet": {
+      "type": "object"
+    },
+    "surcout_ressource": {
+      "type": "string"
+    },
+    "power_base": {
+      "type": [
+        "string",
+        "null"
+      ]
     }
   },
   "required": [

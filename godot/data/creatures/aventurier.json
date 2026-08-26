@@ -43,5 +43,32 @@
     "aventurier"
   ],
   "classe": "Le Sabre",
-  "fonction": "aventurier"
+  "fonction": "aventurier",
+  "capacites": [
+    {
+      "id": "etincelle",
+      "name_key": "capacite.etincelle.name",
+      "modules": [
+        "point",
+        "etincelle"
+      ]
+    },
+    {
+      "id": "gel_en_ligne",
+      "name_key": "capacite.gel_en_ligne.name",
+      "modules": [
+        "ligne",
+        "gel",
+        "concentration"
+      ]
+    },
+    {
+      "id": "baume",
+      "name_key": "capacite.baume.name",
+      "modules": [
+        "soi",
+        "baume"
+      ]
+    }
+  ]
 }

@@ -12,5 +12,15 @@
   "predicat": "cible_adjacente_a_allie",
   "bonus": "+1 dé, +1 taille",
   "surcout_ticks": 0,
-  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks",
+  "effet": {
+    "predicat_structure": {
+      "type": "cible_adjacente_a_allie"
+    },
+    "bonus_structure": {
+      "des": 1,
+      "taille": 1
+    },
+    "echec_ticks_rendus": 0.5
+  }
 }

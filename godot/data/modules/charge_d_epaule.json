@@ -20,5 +20,11 @@
     "deplacement"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "deplacement": {
+      "mode": "projection",
+      "distance": "2"
+    }
+  }
 }
