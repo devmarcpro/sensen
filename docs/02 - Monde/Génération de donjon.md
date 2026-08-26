@@ -1,27 +1,27 @@
 ---
 aliases: ["E.29", "Annexe E.29", "Génération de donjon", "Génération procédurale des donjons"]
-tags: [monde, donjon, technique, décidé, héritage-voxel]
+tags: [monde, donjon, technique, décidé]
 domaine: monde
 statut: décidé
 etape: 2
 ---
 
-> [!warning] Héritage voxel
-> Héritage : les tailles en cubes (petite 8³ … immense 32×32×16) et « offset vertical -16, aligné chunk » — à réexprimer en **tuiles par étage**. L'algorithme par graphe (attache → connecteur → salle → collision AABB → connexité par construction → boss au plus profond) survit intégralement, ainsi que la formule de profondeur.
-> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Prefabs de donjon en tuiles]]**.
+> [!note] Adapté au pivot tactique
+> Tailles exprimées en tuiles par étage et escaliers en liens inter-étages (valeurs proposées, à valider : [[Proposition — Prefabs de donjon en tuiles]]). Les cubes voxel d'origine sont archivés dans le GDD source.
 
 L'algorithme de génération par graphe, étage par étage, et la formule de difficulté par profondeur.
 
 ```
-BIBLIOTHÈQUE — deux familles de prefabs .vox (schéma B.10) :
-  SALLES : catégories de taille (petite 8³, moyenne 16³, grande 24³,
-    immense 32×32×16), forme libre, sol NON obligatoirement plat
-    (fosses, marches, plateformes encodées dans le modèle voxel lui-
-    même). Points d'attache = voxels-marqueurs typés (même technique
-    que 12.1) : porte_nord/sud/est/ouest, cage_escalier_haut/bas.
+BIBLIOTHÈQUE — deux familles de prefabs 2D (schéma B.10) :
+  SALLES : catégories de taille en tuiles par étage (proposé : petite
+    8×8, moyenne 16×16, grande 24×24, immense 32×32), forme libre,
+    sol NON obligatoirement plat (fosses, marches, plateformes — la
+    hauteur de tuile 0-20 est encodée dans le plan du prefab).
+    Points d'attache = tuiles-marqueurs typées (même technique
+    que 12.1) : porte_nord/sud/est/ouest, cage_escalier.
   CONNECTEURS : corridor_droit, corridor_coude, corridor_T,
-    escalier_montant, escalier_descendant (offset vertical -16/+16,
-    aligné chunk), porte_simple, rampe.
+    escalier (lie (étage n, tuile a) → (étage n+1, tuile b)),
+    porte_simple, rampe.
 
 GÉNÉRATION PAR ÉTAGE (graphe, façon Daggerfall) :
   1. Placer la salle d'entrée à la position fixe (sous le point

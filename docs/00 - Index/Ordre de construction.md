@@ -31,56 +31,11 @@ Le donjon avant le monde. Chaque étape doit produire quelque chose de jouable e
 
 ---
 
-## Ordre de construction conseillé (D.3, aligné MVP historique)
+## D.3 et section 15 (MVP) — archivés
 
-1. GameData + 3 JSON de matériaux → afficher un chunk plat texturé par bruit. **Dès cette étape : pipeline de localisation en place (clés `name_key`, `locale/fr.csv` + `locale/en.csv`, validation des clés au boot) — aucune string affichable en dur, jamais.**
-2. Génération par couches (altitude/temp/humidité) + 4 biomes → monde continu streamé.
-3. Casser/poser des blocs, récolte avec XP, inventaire.
-4. Subdivision (2 niveaux d'abord : 16 et 8 px).
-5. Import .vox + remapping palette → premier outil crafté visible en main.
-6. Une créature générique data-driven + combat minimal (1 arme, 3 modules, mana).
-7. Carte du monde + voyage rapide + claim d'une case + minimap ([[Minimap et brouillard de guerre]]).
-8. Premier donjon ([[Génération de donjon]]) : 2-3 salles/connecteurs prefabs, un étage, validation du pipeline complet (génération → boss → disparition).
-9. Le reste (sculpture, guildes, boutiques, réseau) par itérations.
+L'ordre de construction conseillé **D.3** et le **MVP voxel** de la section 15 étaient écrits pour l'ancien moteur (subdivision, import .vox, monde voxel continu). Ils sont retirés — le texte intégral vit dans le GDD archivé (`archive/SENSEN_GDD.md`) et l'historique git. **La table des 11 étapes ci-dessus est l'unique ordre de construction.**
 
-**Critères de performance par étape :** [[Ordre de vérification]].
-
----
-
-## MVP : premier jalon jouable (section 15)
-
-*(Le MVP est redéfini par la direction tactique : prototype de combat isolé d'abord — document séparé — puis génération du monde en grille, ~30 matériaux, combat rapatrié, boucle de donjon. Voir l'en-tête du document, ci-dessus.)*
-
-**Contenu historique conservé pour référence :**
-
-**Objectif :** une **tranche verticale mince** qui touche à tous les piliers, avec un **focus fort sur le monde et la construction** — le pilier prioritaire à prouver en premier.
-
-**Inclus dans le MVP :**
-
-*Monde et construction (priorité) :*
-- Génération procédurale avec un jeu de couches de bruit réduit (altitude, température, humidité — les couches secondaires comme mana/danger/ressources peuvent être simplifiées ou reportées).
-- Monde voxel continu, carte du monde avec voyage rapide.
-- Une poignée de biomes de base.
-- Construction avec subdivision (au moins 2-3 niveaux pour valider la technique, sans forcément les 5 niveaux complets dès le départ).
-- Quelques catégories de matériaux et récolte de base.
-
-*Combat et magie (minimal) :*
-- Un ou deux types d'armes avec quelques slots de compétences.
-- Un petit nombre de modules pré-définis pour valider la boucle (le système complet de grimoires/manuels peut arriver après).
-- Système de mana basique.
-
-*Vie simulée (minimal) :*
-- PNJ de base utilisant le système modulaire ([[Schéma unifié créature-PNJ]]), sans forcément tout l'éventail de guildes/commerce dès le départ.
-
-**Reporté après le MVP :**
-- Les 12 guildes et leur système de quêtes complet.
-- Le système complet de réputation à 4 niveaux.
-- L'agriculture/élevage et l'abstraction hors-site.
-- Les tables de sculpture (peuvent venir juste après, comme feature de personnalisation).
-- Le multijoueur complet (même si l'architecture doit être pensée dès le départ pour ne pas bloquer son ajout plus tard).
-- Direction artistique poussée (une palette de base suffit pour le MVP).
-
-*(Répartition validée — l'ordre de construction exécutable est en D.3 ci-dessus, avec critères de perf par étape en [[Ordre de vérification]].)*
+Ce qui survivait de D.3 est intégré ailleurs : le pipeline de localisation dès la première ligne ([[Localisation]]), la validation de perf par étape ([[Ordre de vérification]]), le premier donjon comme validation du pipeline complet (étape 2).
 
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Contraintes permanentes]]

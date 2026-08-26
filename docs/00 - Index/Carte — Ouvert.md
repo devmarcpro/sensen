@@ -6,7 +6,7 @@ statut: à-trancher
 etape: 0
 ---
 
-Tout ce qui n'est pas tranché, par catégorie. 26 notes. La section 16 du GDD est intégralement dépeuplée ici.
+Tout ce qui n'est pas tranché, par catégorie — 34 notes avec les 8 propositions. La section 16 du GDD est intégralement dépeuplée ici. **Priorisation et chemin critique : [[Vers la production]].**
 
 **À trancher au playtest** *(implémentable sans)*
 - [[Ouvert — Axe des niveaux de recette]] — efficacité matière / vitesse et lots / stabilité du jet.

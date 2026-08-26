@@ -7,7 +7,7 @@ etape: 9
 ---
 
 > [!note] Adapté au pivot tactique
-> Le pathfinding « voxel 3D » d'origine est conservé en fin de note. Sur la grille, la traversabilité découle des règles de dénivelé de [[Hauteur de terrain ±10]] — c'est cette version qui fait foi.
+> Pathfinding réécrit pour la grille : la traversabilité découle des règles de dénivelé de [[Hauteur de terrain ±10]]. La version « voxel 3D » d'origine est archivée (GDD source, historique git).
 
 Une Utility AI data-driven : créer ou modifier un comportement = éditer un JSON, zéro code.
 
@@ -65,20 +65,6 @@ Morphologies (12) : les volants ignorent les contraintes de dénivelé
 **Signal :** `chunk_explored` alimente la minimap ([[Minimap et brouillard de guerre]]).
 
 **Budget ([[Entités et pathfinding — performance]]) :** jamais plus de ~6 décisions utility/tick ; 2 requêtes A* résolues/tick max, résultats cachés et partagés.
-
----
-
-### Texte voxel d'origine (référence historique, E.16 — bloc pathfinding)
-
-```
-LOCAL : A* sur grille de navigation dérivée des blocs — marchable =
-  bloc solide + 2 blocs d'air au-dessus ; liens de saut (1 bloc),
-  de chute (<= 3 blocs), échelles/portes. La nav-grille d'un chunk est
-  invalidée par `block_placed/destroyed` et reconstruite paresseusement :
-  le monde destructible est géré nativement.
-Morphologies (12) : volants ignorent la contrainte de sol (A* 3D volumique
-  simplifié) ; amorphes passent les ouvertures 1 bloc.
-```
 
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Data-driven design]], [[Boucle de tick]], [[Hauteur de terrain ±10]]

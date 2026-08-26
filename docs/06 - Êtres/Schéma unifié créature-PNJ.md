@@ -8,7 +8,7 @@ etape: 9
 
 Il n'y a pas de distinction technique entre un monstre et un PNJ humain. C'est de là que vient l'implication gameplay majeure : n'importe quelle créature peut devenir un compagnon.
 
-**Principe :** les PNJ (villageois, marchands, monstres...) sont tous construits de la **même manière**, à partir de blocs de construction `.vox` assemblés de façon modulaire — il n'y a pas de distinction technique entre un "monstre" et un "PNJ humain".
+**Principe :** les PNJ (villageois, marchands, monstres...) sont tous construits de la **même manière**, à partir de parties de sprites assemblées de façon modulaire (pipeline hérité du `.vox`, [[Squelette modulaire et points d'attache]]) — il n'y a pas de distinction technique entre un "monstre" et un "PNJ humain".
 
 **Squelette modulaire :** une créature humanoïde est composée de parties interchangeables :
 - 1 tête (parmi une bibliothèque de variantes, ex : têtes n°1, 4, 18, 32...)

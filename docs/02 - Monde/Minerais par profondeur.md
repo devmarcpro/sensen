@@ -1,50 +1,50 @@
 ---
-aliases: ["G.9 minerais", "ore_bands.json", "Minerais par profondeur", "Bandes de minerai"]
-tags: [monde, génération, données, décidé, héritage-voxel]
+aliases: ["G.9 minerais", "ore_bands.json", "Minerais par profondeur", "Bandes de minerai", "Tiers de minerai"]
+tags: [monde, génération, données, à-trancher]
 domaine: monde
-statut: décidé
+statut: à-trancher
 etape: 8
 ---
 
-> [!warning] Héritage voxel
-> Les bandes en Y supposent qu'on creuse : héritage voxel. À remapper sur la **profondeur d'étage de donjon** ([[Génération de donjon]] : la corruption effective croît déjà avec l'étage) et la composition des **filons de surface** ([[Récolte]]) — ou à supprimer. La logique « risque/dureté/valeur montent ensemble » reste le principe à préserver.
-> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Minerais et strates après le pivot]]**.
+> [!note] Adapté au pivot tactique
+> Les bandes en Y supposaient qu'on creuse — retirées comme clé de placement. Le remapping proposé (tiers par corruption en surface, bandes d'étage en donjon) est en [[Proposition — Minerais et strates après le pivot]] (à valider). La répartition d'origine est conservée ci-dessous comme donnée source des tiers.
 
-Les filons sont filtrés par bande de profondeur : plus c'est profond, meilleur c'est. Trois pressions (risque, dureté de la roche, valeur du minerai) montent ensemble sur la même verticale.
+Quels minerais apparaissent où : des tiers par corruption effective en surface, des bandes d'étage en donjon. Le principe préservé : *le risque, la dureté et la valeur montent ensemble*.
+
+**Le placement proposé ([[Proposition — Minerais et strates après le pivot]]) :**
+- **Filons de surface** ([[Récolte]]) : tiers 1 à 5 selon la **corruption effective** ([[Dérive de la corruption]]) et le biome — la richesse suit le danger ([[Niveau de danger]]).
+- **Donjons** : bandes d'**étage** — étages 1-2 : tiers 1-2 · 3-4 : tiers 2-3 · 5-6 : tiers 3-4 · 7+ : tiers 4-5, la kimberlite comme sol des salles à diamant.
+
+**La répartition d'origine (G.9, donnée source des tiers) :**
 
 ```
-MINERAIS PAR PROFONDEUR — les filons (couche ressources, B.8) sont
-filtrés par bande de profondeur : plus c'est profond, meilleur c'est
-(data/ore_bands.json, cf. valeurs F.1) :
-  0 → -55    : cuivre, étain, zinc, lignite, sel gemme, argile réfract.,
-               ocre, tourbe compactée, turquoise, ambre (côtes/forêts)
-  -30 → -120 : fer, nickel, manganèse, houille, pyrite, malachite,
-               soufre, mica, salpêtre, quartz, bitume, fluorine,
-               phosphorite, calcite    (l'ère du fer)
-  -80 → -220 : or, argent, cobalt, antimoine, anthracite, graphite,
-               cinabre, améthyste, topaze, grenat, lapis-lazuli,
-               géodes                  (richesse + acier)
-  -160 → -320: platine, titane, chrome, bismuth, opale, jade, rubis,
-               saphir, émeraude, kimberlite (roche-hôte du diamant)
-  -280 → fond: tungstène, diamant (dans la kimberlite) + filons GÉANTS
-FOSSILES : os/ammonites/coquillages dans les roches sédimentaires
-  (calcaire, schiste, grès) toutes profondeurs ; bois pétrifié dans
-  le tuf ; météorite ferreuse : poches ultra-rares à toute profondeur
-  + sites d'impact de surface (POI rare).
-Le guano se trouve dans les cavernes peu profondes (engrais, 7.4).
+tier 1 : cuivre, étain, zinc, lignite, sel gemme, argile réfractaire,
+         ocre, tourbe compactée, turquoise, ambre (côtes/forêts)
+tier 2 : fer, nickel, manganèse, houille, pyrite, malachite, soufre,
+         mica, salpêtre, quartz, bitume, fluorine, phosphorite,
+         calcite                        (l'ère du fer)
+tier 3 : or, argent, cobalt, antimoine, anthracite, graphite,
+         cinabre, améthyste, topaze, grenat, lapis-lazuli, géodes
+                                        (richesse + acier)
+tier 4 : platine, titane, chrome, bismuth, opale, jade, rubis,
+         saphir, émeraude, kimberlite   (roche-hôte du diamant)
+tier 5 : tungstène, diamant (dans la kimberlite) + filons GÉANTS
+FOSSILES : os/ammonites/coquillages dans les roches sédimentaires —
+  étages 1-3 des donjons + affleurements de falaise en surface ;
+  bois pétrifié dans le tuf ; météorite ferreuse : POI de surface
+  (sites d'impact).
+Le guano se trouve dans les donjons à thème « repaire » (engrais, 7.4).
 La kimberlite est le SIGNAL du diamant (le prospecteur avisé la
 reconnaît — et la guilde des Prospecteurs vend cette information).
-Les bandes se CHEVAUCHENT (transitions douces) ; densité et taille des
-filons augmentent avec la profondeur DANS chaque bande (un filon de
-fer à -100 est plus gros qu'à -40). La couche danger/corruption (3.0)
-s'intensifie aussi avec la profondeur (spawns souterrains plus durs) :
-le risque, la dureté de la roche et la valeur du minerai montent
-ensemble — trois pressions alignées sur la même verticale.
+Les tiers se CHEVAUCHENT (transitions douces) ; densité et taille des
+filons augmentent avec la corruption/l'étage DANS chaque tier.
+Le risque, la dureté de la roche et la valeur du minerai montent
+ensemble — trois pressions alignées.
 ```
 
-**Rappel :** le minage exploratoire souterrain a été écarté ([[Décisions fondatrices]]) — les ressources minérales se récoltent en **filons de surface** ([[Récolte]]). Ces bandes de profondeur restent la logique de placement du champ de bruit et valent pour les cavernes, les donjons et les filons profonds atteignables.
+**Rappel :** le minage exploratoire souterrain a été écarté ([[Décisions fondatrices]]) — les ressources se récoltent en **filons de surface** ([[Récolte]]) et en filons muraux de donjon.
 
 ## Liens
-- **Dépend de** : [[Stratification verticale]], [[Catalogue des couches de bruit]]
-- **Alimente** : [[Récolte]], [[Quêtes et guildes]], [[Catalogue matériaux — Minéraux]], [[Catalogue matériaux — Gemmes]], [[Catalogue matériaux — Fossiles]]
-- **Voir aussi** : [[Niveau de danger]], [[Génération par couches de bruit]]
+- **Dépend de** : [[Proposition — Minerais et strates après le pivot]], [[Dérive de la corruption]], [[Catalogue des couches de bruit]]
+- **Alimente** : [[Récolte]], [[Génération de donjon]], [[Quêtes et guildes]], [[Catalogue matériaux — Minéraux]], [[Catalogue matériaux — Gemmes]], [[Catalogue matériaux — Fossiles]]
+- **Voir aussi** : [[Niveau de danger]], [[Stratification verticale]], [[Génération par couches de bruit]]

@@ -6,7 +6,7 @@ statut: à-trancher
 etape: 0
 ---
 
-L'en-tête du GDD acte le pivot tactique (2026-08-09), mais les annexes D, E et G n'ont jamais été réécrites : elles décrivent encore le moteur voxel première personne. Cet audit classe tout ce qui est contaminé. Les notes concernées portent le tag `héritage-voxel` et un bandeau ⚠️.
+L'en-tête du GDD acte le pivot tactique (2026-08-09), mais les annexes D, E et G n'ont jamais été réécrites : elles décrivent encore le moteur voxel première personne. Cet audit a classé tout ce qui était contaminé, et documente le nettoyage. Seules les 8 propositions et cette note portent encore le tag `héritage-voxel`.
 
 **Règle de lecture :** en cas de conflit, **le pivot fait foi** ([[Décisions fondatrices]] — décision irrévocable) : vue isométrique sur grille, tuile = hauteur entière 0-20 + matériau + contenu + occupant ([[Grille continue]]), personnages en billboards paperdoll 2D, donjons en étages discrets, filons de surface, pas de volume souterrain.
 
@@ -14,9 +14,10 @@ L'en-tête du GDD acte le pivot tactique (2026-08-09), mais les annexes D, E et 
 
 ## État d'avancement (2026-08-26)
 
-- **Catégorie 1 : réécrite ✅** — les notes mènent désormais avec la version grille ; le texte voxel d'origine est conservé en fin de note comme « référence historique ».
+- **Catégorie 1 : réécrite ✅** — version grille en place ; le texte voxel d'origine est **retiré** (archivé dans `archive/SENSEN_GDD.md` et l'historique git).
 - **Catégorie 3 : appliquée ✅** — vocabulaire converti (blocs→tuiles, voxels→pixels, .vox→sprites) directement dans les notes.
-- **Catégorie 2 : propositions rédigées, à valider** — chaque conflit a sa proposition dans `99 - Ouvert/` : [[Proposition — Altitude sur 21 niveaux]] · [[Proposition — Structure de données de la grille]] · [[Proposition — Minerais et strates après le pivot]] · [[Proposition — Pièces en 2D]] · [[Proposition — Sculpture en pixel art]] · [[Proposition — Prefabs de donjon en tuiles]] · [[Proposition — Budgets et critères de performance tactiques]] · [[Proposition — Minimap en 2D]]. Les notes concernées gardent leur bandeau ⚠️ avec le lien vers la proposition ; il tombera à validation.
+- **Catégorie 2 : notes adaptées, chiffres en attente de validation** — chaque conflit a sa proposition dans `99 - Ouvert/` : [[Proposition — Altitude sur 21 niveaux]] · [[Proposition — Structure de données de la grille]] · [[Proposition — Minerais et strates après le pivot]] · [[Proposition — Pièces en 2D]] · [[Proposition — Sculpture en pixel art]] · [[Proposition — Prefabs de donjon en tuiles]] · [[Proposition — Budgets et critères de performance tactiques]] · [[Proposition — Minimap en 2D]]. Les notes concernées intègrent déjà la version grille, avec les valeurs marquées « proposé » — **valider (ou amender) les 8 propositions clôt définitivement l'héritage voxel.**
+- **Contenu voxel retiré du coffre** le 2026-08-26 sur décision du designer — la note purement historique *Voxels — mémoire et meshing* (G.2) est supprimée, ses alias repris par [[Proposition — Structure de données de la grille]]. Tout l'original reste lisible dans `archive/SENSEN_GDD.md`.
 
 ---
 
@@ -26,7 +27,7 @@ Le GDD post-pivot donne le remplacement ; la note contenait encore l'ancien syst
 
 | Note | Ce qui est obsolète | Ce que le pivot dit |
 |---|---|---|
-| [[Voxels — mémoire et meshing]] | stockage 3D, octrees, subdivision, greedy meshing, LOD 3D — **intégralement** | [[Grille continue]] : « plus de meshing volumétrique, plus de LOD 3D, plus de streaming en volume » — rendu = tuiles instanciées teintées + billboards triés |
+| [[Proposition — Structure de données de la grille]] | stockage 3D, octrees, subdivision, greedy meshing, LOD 3D — **intégralement** | [[Grille continue]] : « plus de meshing volumétrique, plus de LOD 3D, plus de streaming en volume » — rendu = tuiles instanciées teintées + billboards triés |
 | [[Éclairage]] | flood fill 3D, skylight par colonne | [[Risques majeurs]] : propagation **2D sur la grille** ; la modulation jour/nuit en shader survit |
 | [[Détection de pièces]] | flood fill **3D**, limite 4 096 blocs | [[Construction cadrée]] : « triviale en 2D » — empreinte de tuiles + hauteur de murs |
 | [[Eau et liquides]] | automate par blocs 3D, clause subdivision | [[Hauteur de terrain ±10]] : « E.22 se simplifie en **2D + hauteur** au lieu d'un volume » |

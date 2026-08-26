@@ -1,0 +1,18 @@
+; Engine configuration file.
+; Squelette du projet Sensen — Godot 4.x.
+; L'arborescence suit docs/08 - Technique/Arborescence du projet.md (D.1).
+
+config_version=5
+
+[application]
+
+config/name="Sensen"
+config/features=PackedStringArray("4.3")
+
+[internationalization]
+
+locale/translations_pot_files=PackedStringArray()
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0

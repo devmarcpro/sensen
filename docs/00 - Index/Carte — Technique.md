@@ -25,7 +25,7 @@ L'architecture Godot et la stratégie de performance. 16 notes.
 **La performance (Annexe G — fait autorité)**
 - **[[Budgets de performance]]** — les cibles chiffrées.
 - **[[Optimisation — principes]]** — *mesurer avant d'optimiser, mais architecturer pour l'optimisation dès le jour 1.*
-- **[[Voxels — mémoire et meshing]]** — le LOD de distance est LA parade au coût du 1px.
+- **[[Proposition — Structure de données de la grille]]** — le LOD de distance est LA parade au coût du 1px.
 - **[[Éclairage]]** — propagation incrémentale ; le cycle jour/nuit module en shader, donc ne coûte rien.
 - **[[Génération procédurale — performance]]** — le terrain spectaculaire coûte le prix du terrain plat.
 - **[[Entités et pathfinding — performance]]** — meshes partagés : 100 villageois = ~6 meshes.

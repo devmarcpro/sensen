@@ -4,3 +4,7 @@
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Godot
+godot/.godot/
+*.translation

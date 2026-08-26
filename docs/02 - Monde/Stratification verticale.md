@@ -1,42 +1,42 @@
 ---
-aliases: ["G.9", "Annexe G.9", "Stratification verticale", "strata.json"]
-tags: [monde, génération, données, décidé, héritage-voxel]
+aliases: ["G.9", "Annexe G.9", "Stratification verticale", "strata.json", "Palette de sol des donjons"]
+tags: [monde, génération, données, décidé]
 domaine: monde
-statut: décidé
-etape: 8
+statut: à-trancher
+etape: 2
 ---
 
-> [!warning] Héritage voxel
-> Système écrit pour le minage voxel : les strates ne sont plus creusables nulle part ([[Décisions fondatrices]] — minage exploratoire écarté, pas de volume souterrain). Survit éventuellement comme logique de matériaux **par étage de donjon** et de composition des **filons de surface** — à re-décider.
-> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Minerais et strates après le pivot]]**.
+> [!note] Adapté au pivot tactique
+> Le système de strates minables en Y est retiré — on ne creuse plus nulle part ([[Décisions fondatrices]]). Le recyclage proposé — palette de sol par étage de donjon — est en [[Proposition — Minerais et strates après le pivot]] (à valider). La table d'origine est conservée ci-dessous comme donnée source de cette palette.
 
-Plus on descend, plus la roche est dure : un verrou de progression naturel, piloté par une simple liste de strates en données.
+L'ancienne stratification par profondeur, recyclée en palette de sol des étages de donjon : la dureté du sol croît avec l'étage.
+
+**Le recyclage proposé ([[Proposition — Minerais et strates après le pivot]]) :**
 
 ```
-data/strata.json : liste ordonnée { "material", "y_max", "transition" }
-  — évaluée par colonne pendant la génération (G.4), bruit de
-  transition (±12 blocs) pour des frontières organiques, surchargée
-  par les biomes (un volcan fait remonter le basalte) et percée par
-  les cavernes/filons. Coût : nul (une lookup par bloc généré).
+étages 1-2 : calcaire/grès · 3-4 : ardoise/pierre · 5-6 : basalte
+étages 7+  : granit, puis granit noir
+```
+
+La dureté croissante du sol garde un sens tactique — sorts de terrain, [[Destruction du terrain]], [[Explosions]] — et préserve le principe d'origine : *le risque, la dureté et la valeur montent ensemble* (le risque étant désormais la corruption effective d'étage, [[Génération de donjon]]).
+
+**La table d'origine (G.9, donnée source de la palette) :**
+
+```
 Défaut : terre/grès 0→-12, calcaire -12→-55, ardoise -55→-80,
   pierre -80→-160, basalte -160→-260, granit -260→-380,
   granit noir -380→fond. Poches locales (bruit dédié) : ±1 strate.
+Variantes latérales : diorite/andésite/gneiss remplacent localement
+  granit/basalte par bruit ; quartzite près des filons de quartz ;
+  tuf/ponce près des zones volcaniques — la géologie varie aussi
+  horizontalement.
 ```
 
-**Variantes latérales :**
+Les **variantes latérales** restent applicables telles quelles aux étages de donjon (un donjon en zone volcanique tire tuf/ponce/basalte) et aux affleurements de surface par biome.
 
-```
-Les ROCHES suivent aussi des variantes latérales (diorite/andésite/
-gneiss remplacent localement granit/basalte par bruit ; quartzite près
-des filons de quartz ; tuf/ponce près des zones volcaniques 3.0) —
-la géologie varie horizontalement ET verticalement.
-```
-
-**Verrou de progression ([[Unification macro-micro]]) :** combiné à la règle d'irrécoltabilité de [[Récolte]] (outil trop faible = rebond), creuser profond exige de meilleurs outils, de meilleurs matériaux (trouvés... en profondeur : boucle de progression) ou des PNJ mineurs de haut niveau.
-
-*Les paliers serrés de dureté des roches sont **VOULUS** (stratification G.9) — ne pas les écarter (voir [[Application des stats de matériau]]).*
+**Paliers serrés voulus ([[Application des stats de matériau]]) :** les paliers de dureté des roches ([[Catalogue matériaux — Roches]]) sont VOULUS — ne pas les écarter.
 
 ## Liens
-- **Dépend de** : [[Unification macro-micro]], [[Terrain spectaculaire]], [[Catalogue matériaux — Roches]]
-- **Alimente** : [[Minerais par profondeur]], [[Récolte]]
-- **Voir aussi** : [[Application des stats de matériau]], [[Génération procédurale — performance]]
+- **Dépend de** : [[Proposition — Minerais et strates après le pivot]], [[Catalogue matériaux — Roches]]
+- **Alimente** : [[Génération de donjon]], [[Destruction du terrain]]
+- **Voir aussi** : [[Minerais par profondeur]], [[Application des stats de matériau]], [[Récolte]], [[Décisions fondatrices]]

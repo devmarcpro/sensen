@@ -1,48 +1,44 @@
 ---
 aliases: ["E.30", "Annexe E.30", "Minimap", "Brouillard de guerre"]
-tags: [monde, interface, technique, décidé, héritage-voxel]
+tags: [monde, interface, technique, décidé]
 domaine: monde
 statut: décidé
 etape: 8
 ---
 
-> [!warning] Héritage voxel
-> La « coupe au niveau Y » et le bitmask par bande verticale supposent un monde volumétrique : en surface, le monde tactique est une grille unique + hauteur — une seule carte suffit. Le découpage vertical ne garde de sens que **par étage de donjon**. À re-spécifier.
-> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Minimap en 2D]]**.
+> [!note] Adapté au pivot tactique
+> La « coupe au niveau Y » et le bitmask par bande verticale sont retirés — archivés dans le GDD source. Version 2D détaillée : [[Proposition — Minimap en 2D]] (à valider).
 
-Une minimap qui coupe au niveau Y du joueur, et un brouillard de guerre stocké à la résolution chunk.
+Une minimap toujours visible, un brouillard de guerre par chunk — une carte en surface, une par étage en donjon.
 
 ```
-AFFICHAGE — toujours visible à l'écran (coin, façon roguelike). Coupe
-  AU NIVEAU Y DU JOUEUR : le monde étant réellement 3D (grottes,
-  donjons multi-étages 3.5/E.29, tours), la minimap montre le plan de
-  la bande verticale où se trouve le joueur (± 1 chunk, ex. pour voir
-  un escalier proche), jamais une projection aplatie de toute la
-  colonne. Changer d'étage change ce qui s'affiche.
+AFFICHAGE — toujours visible à l'écran (coin, façon roguelike).
+  SURFACE : une seule carte — le monde tactique est une grille unique
+  + hauteur ; teinte par matériau dominant du chunk + ombrage dérivé
+  de la hauteur (le relief est une information tactique, 9).
+  DONJON : la minimap affiche l'étage courant ; changer d'étage change
+  la carte — chaque étage est une grille séparée (3.5).
 
 BROUILLARD DE GUERRE — seules les zones explorées sont visibles, le
   reste est noir. "Exploré" = traversé par le cône de détection/
   vision du joueur (E.16) au passage.
 
-STOCKAGE (perf, cohérent avec G) — résolution CHUNK (16×16), par
-  bande verticale (chunk_y, 16 blocs), PAS par bloc individuel :
-    explored[chunk_x, chunk_z, chunk_y] : 1 bit
+STOCKAGE (perf, cohérent avec G) — résolution CHUNK :
+    surface : explored[cx, cz]                  → 1 bit par chunk 32×32
+    donjon  : explored[dungeon_id, floor, chunk] → un bitmask par étage
   Bitmask compact, un set par joueur, sauvegardé dans le profil
-  (E.10) — persiste entre sessions. Un donjon (E.29) a ses propres
-  coordonnées chunk (même monde, volume dense) : chaque étage a donc
-  naturellement son propre bitmask d'exploration, sans système
-  séparé.
+  (E.10) — persiste entre sessions.
 
 RENDU — échantillonnage des chunks explorés dans un rayon autour du
-  joueur à la bande Y courante ; teinte simplifiée par matériau
-  dominant de surface du chunk (pas de rendu plein, juste une
-  couleur) ; PNJ/monstres détectés affichés en surcouche (icônes),
-  pas de mémoire dédiée (état live, pas de fog par entité).
-  Coût : mise à jour incrémentale sur `chunk_explored` (nouvel
-  événement EventBus, E.12) — jamais de recalcul de zone.
+  joueur ; teinte simplifiée par matériau dominant (pas de rendu
+  plein, juste une couleur) ; PNJ/monstres détectés affichés en
+  surcouche (icônes), pas de mémoire dédiée (état live, pas de fog
+  par entité).
+  Coût : mise à jour incrémentale sur `chunk_explored` (événement
+  EventBus, E.12) — jamais de recalcul de zone.
 ```
 
 ## Liens
 - **Dépend de** : [[Grille continue]], [[IA des créatures]], [[Sauvegarde]]
 - **Alimente** : [[Écrans d'interface]], [[Donjons — structure et intégration]]
-- **Voir aussi** : [[Carte du monde]], [[EventBus]], [[Ordre de construction]]
+- **Voir aussi** : [[Proposition — Minimap en 2D]], [[Carte du monde]], [[EventBus]], [[Ordre de construction]]

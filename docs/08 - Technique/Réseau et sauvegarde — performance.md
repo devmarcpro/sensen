@@ -28,4 +28,4 @@ structures modifiées pendant la sérialisation).
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Réseau]], [[Sauvegarde]]
 - **Alimente** : [[Multijoueur]], [[Ordre de vérification]]
-- **Voir aussi** : [[Voxels — mémoire et meshing]], [[Budgets de performance]], [[Décisions d'architecture]]
+- **Voir aussi** : [[Proposition — Structure de données de la grille]], [[Budgets de performance]], [[Décisions d'architecture]]

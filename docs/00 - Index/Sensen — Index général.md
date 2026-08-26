@@ -24,9 +24,9 @@ Trois notes à lire avant toutes les autres :
 2. **[[Ordre de construction]]** — les 11 étapes, du prototype de combat au multijoueur. *Le donjon avant le monde.*
 3. **[[Contraintes permanentes]]** — les 4 règles d'architecture à respecter dès la première ligne de code.
 
-**Héritage voxel :** les annexes techniques du GDD n'avaient pas été réécrites après le pivot. Le nettoyage est fait — les notes mécaniquement corrigibles sont réécrites (texte d'origine conservé en annexe historique), et les conflits qui demandent une décision ont chacun leur **proposition à valider** dans `99 - Ouvert/`. Classement et avancement : **[[Héritage voxel — audit]]**.
+**Héritage voxel :** nettoyé — le contenu voxel obsolète est retiré du coffre (archivé dans `archive/SENSEN_GDD.md` et l'historique git) ; les 8 **propositions à valider** vivent dans `99 - Ouvert/`. Détail : **[[Héritage voxel — audit]]**.
 
-Puis, selon le besoin : **[[Carte des dépendances]]** (ce qui repose sur quoi) et **[[Carte — Ouvert]]** (ce qui n'est pas tranché).
+Puis, selon le besoin : **[[Vers la production]]** (ce qui reste avant de coder), **[[Carte des dépendances]]** (ce qui repose sur quoi) et **[[Carte — Ouvert]]** (ce qui n'est pas tranché).
 
 ---
 

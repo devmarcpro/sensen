@@ -19,7 +19,7 @@ La couche stratégique : une vue abstraite de la même grille, servant de voyage
 
 **Décisions :**
 - **Biomes :** la liste de référence est **[[Biomes de départ]]** (12 au lancement, extensible vers 20+ par simple ajout de données [[Biomes — schéma]] — les conditions de couches y sont définies par biome).
-- **Points d'intérêt : hybride résolu ([[Unification macro-micro]])** — assemblés procéduralement à partir de **salles/bâtiments préfabriqués .vox faits main** (palettes remapables, [[Direction artistique]]) ; densités chiffrées en [[Unification macro-micro]] (village 4 %, donjon 6 %, camp 8 %, sanctuaire 3 %, filon majeur 6 % par cellule).
+- **Points d'intérêt : hybride résolu ([[Unification macro-micro]])** — assemblés procéduralement à partir de **salles/bâtiments préfabriqués faits main** (palettes remapables, [[Direction artistique]]) ; densités chiffrées en [[Unification macro-micro]] (village 4 %, donjon 6 %, camp 8 %, sanctuaire 3 %, filon majeur 6 % par cellule).
 
 **Voyage en véhicule :** voyager avec un véhicule accélère le voyage rapide (coût de temps in-game réduit : ×0.6 terrestre sur route, ×0.5 naval sur mer) et augmente le cargo transportable — voir [[Véhicules]].
 

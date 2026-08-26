@@ -1,14 +1,13 @@
 ---
 aliases: ["E.28", "Annexe E.28", "Météo", "Meteo"]
-tags: [monde, simulation, décidé, héritage-voxel]
+tags: [monde, simulation, décidé]
 domaine: monde
 statut: décidé
 etape: 8
 ---
 
-> [!warning] Héritage voxel
-> Trois détails héritage : `mod_altitude (-1/20 blocs)` et `mod_profondeur` (cavernes) à recalibrer sur les 21 niveaux et les étages de donjon ; la neige « bloc fin 4px » suppose la subdivision — en grille, un état de tuile suffit. Tout le reste (fonction pure, états, température, effets) tient.
-> — Classement : [[Héritage voxel — audit]] · **Proposition de remplacement à valider : [[Proposition — Altitude sur 21 niveaux]]**.
+> [!note] Adapté au pivot tactique
+> `mod_altitude` recalibré par classe d'altitude de cellule et `mod_profondeur` → `mod_donjon` (valeurs proposées : [[Proposition — Altitude sur 21 niveaux]], à valider). Neige/gel exprimés en états de tuile.
 
 La météo est une fonction pure du temps et du lieu, jamais une simulation — et elle porte de vraies mécaniques (température ressentie, foudre, gel, canicule).
 
@@ -27,9 +26,9 @@ GÉNÉRATION — la météo est une FONCTION PURE, jamais une simulation :
 
 TEMPÉRATURE RESSENTIE (joueur ET PNJ) :
   T = temp_biome (3.0) + mod_météo (neige -15, canicule +18...)
-      + mod_nuit (-8, E.21) + mod_altitude (-1/20 blocs au-dessus
-      de la surface de référence) + mod_profondeur (+stable sous
-      terre : les cavernes lissent vers une T moyenne)
+      + mod_nuit (-8, E.21) + mod_altitude (par classe d'altitude de
+      la cellule — Proposition — Altitude sur 21 niveaux)
+      + mod_donjon (+stable : les étages lissent vers une T moyenne)
   Zone de confort : [5, 30]. Hors zone : malus progressifs
   (vitesse, régén) puis dégâts froid/chaleur par palier — contrés par
   l'ISOLATION de l'équipement (A.4.5, formule déjà calibrée), les

@@ -30,16 +30,16 @@ Le format de données d'un objet et de sa recette.
     ]
   },
   "stat_weights": { "durete": { "minerai": 0.8, "bois": 0.2 } },
-  "vox_model": "models/tools/pioche.vox",
-  "vox_slots": { "#00FF00": "bois", "#FF00FF": "minerai" },
+  "sprite": "models/tools/pioche.png",
+  "sprite_slots": { "#00FF00": "bois", "#FF00FF": "minerai" },
   "effects": [],
   "tags": ["outil", "recolte"]
 }
 ```
 
-- `vox_slots` : mapping couleur stand-in → catégorie de matériau ([[Squelette modulaire et points d'attache]]).
+- `sprite_slots` : mapping couleur stand-in → catégorie de matériau ([[Squelette modulaire et points d'attache]]).
 - `effects` : liste d'effets passifs (voir [[Effets d'équipement passifs]]) — vide pour les objets craftés, remplie sur le loot généré.
-- Un objet sculpté par le joueur génère une entrée du même format, stockée dans la sauvegarde, avec le modèle sculpté référencé à la place de `vox_model` et `stat_weights` calculé depuis la composition en pixels ([[Éditeur de sculpture]]).
+- Un objet sculpté par le joueur génère une entrée du même format, stockée dans la sauvegarde, avec le modèle sculpté référencé dans `sprite` et `stat_weights` calculé depuis la composition en pixels ([[Éditeur de sculpture]]).
 
 **Slots du craft compositionnel ([[Composant et recette d'obtention]]) :** un objet déclare ses slots — `"slots": {"tete": "tete_pioche", "manche": "manche_court", "fixations": "fixations_std"}` avec les poids de [[Stats et qualité de l'assemblage]].
 

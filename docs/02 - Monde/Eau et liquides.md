@@ -7,7 +7,7 @@ etape: 8
 ---
 
 > [!note] Adapté au pivot tactique
-> Le modèle par blocs 3D d'origine est conservé en fin de note. [[Hauteur de terrain ±10]] acte : « E.22 se simplifie en **2D + hauteur** au lieu d'un volume » — c'est cette version qui fait foi.
+> Modèle réécrit en **2D + hauteur** ([[Hauteur de terrain ±10]]). L'automate par blocs 3D d'origine est archivé (GDD source, historique git).
 
 Un automate cellulaire sur la grille — l'eau remplit les creux du terrain, jamais une simulation de fluide.
 
@@ -61,23 +61,6 @@ standard (E.11) — rien de nouveau à synchroniser.
 ```
 
 **Coût ([[Simulation du monde — performance]]) :** file active uniquement — un lac stable coûte 0. Inchangé.
-
----
-
-### Texte voxel d'origine (référence historique, E.22 — extraits remplacés)
-
-```
-MODÈLE — automate cellulaire par blocs, PAS de simulation de fluide :
-- Un bloc de liquide est SOURCE (niveau 8/8) ou ÉCOULEMENT (niveau 7→1).
-- Propagation : un liquide s'écoule vers le bas en priorité (devient
-  source de chute), sinon s'étale horizontalement en perdant 1 niveau
-  par bloc (portée 7 blocs pour l'eau, 3 pour les liquides visqueux).
-- SUBDIVISION (4.1) : les liquides vivent à la résolution 16px
-  UNIQUEMENT — un bloc partiellement subdivisé compte comme solide
-  si >= 50 % de son volume est plein, sinon le liquide le traverse.
-  (Garde la physique simple ; l'étanchéité fine n'est pas simulée.)
-- Sous l'eau : (immersion volumétrique — remplacée par « dans l'eau »)
-```
 
 ## Liens
 - **Dépend de** : [[Hauteur de terrain ±10]], [[Application des stats de matériau]], [[Simulation à ticks]]

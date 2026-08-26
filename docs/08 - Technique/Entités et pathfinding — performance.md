@@ -18,10 +18,10 @@ Pathfinding : file globale, 2 requêtes A* résolues/tick max, résultats
 cachés et partagés (deux gardes vers le même point réutilisent le
 chemin). Nav-grille par chunk reconstruite PARESSEUSEMENT (au premier
 besoin après invalidation), en thread.
-Rendu des créatures : les parties .vox (12) sont des meshes PARTAGÉS
-(bibliothèque = ressources uniques) ; recolorisation par palette en
-shader (paramètre d'instance), pas de duplication de mesh —
-100 villageois = ~6 meshes distincts en mémoire. Animations simples
+Rendu des créatures : les parties de sprites (12) sont des ressources
+PARTAGÉES (bibliothèque = ressources uniques) ; recolorisation par
+palette en shader (paramètre d'instance), pas de duplication —
+100 villageois = ~6 jeux de parties distincts en mémoire. Animations simples
 par transform de parties (pivots 12.1), pas de skinning.
 ```
 

@@ -7,7 +7,7 @@ etape: 0
 ---
 
 > [!note] Adapté au pivot tactique
-> Le flood fill 3D d'origine est conservé en fin de note. [[Risques majeurs]] acte la propagation **2D sur la grille** — c'est cette version qui fait foi.
+> Réécrit en propagation **2D sur la grille** ([[Risques majeurs]]). Le flood fill 3D d'origine est archivé (GDD source, historique git).
 
 Propagation incrémentale de la lumière en 2D sur la grille, et un cycle jour/nuit qui ne coûte rien.
 
@@ -30,21 +30,6 @@ global), pas en re-propagation — changer l'heure ne coûte rien.
 **Détection modulée par la lumière ([[IA des créatures]]) :** le cône de vision est modulé par la lumière locale.
 
 **Enjeu de construction ([[Cycle jour-nuit et sommeil]]) :** la nuit, seules les sources locales comptent — l'éclairage de la base devient un vrai enjeu.
-
----
-
-### Texte voxel d'origine (référence historique, G.3)
-
-```
-Propagation 0-15 par flood fill INCRÉMENTAL : les mises à jour de
-lumière sont des deltas locaux (pose/destruction de bloc ou de source),
-jamais un recalcul de chunk complet ; file dédiée, budget par tick,
-en thread avec le meshing (la lumière est cuite dans les vertex).
-Lumière du jour : colonne skylight précalculée à la génération,
-propagée pareil. Le cycle jour/nuit (E.21) module en SHADER (uniform
-global), pas en re-propagation — changer l'heure ne coûte rien.
-Transparence : passe séparée, triée par chunk seulement (pas par face).
-```
 
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Application des stats de matériau]], [[Risques majeurs]]

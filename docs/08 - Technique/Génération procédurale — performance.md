@@ -7,7 +7,7 @@ etape: 8
 ---
 
 > [!note] Adapté au pivot tactique
-> Le « remplissage 3D » et le « bruit 3D de cavernes » d'origine sont conservés en fin de note — plus de volume à remplir. L'échantillonnage par colonne survit tel quel : la génération tactique EST une heightmap.
+> Le « remplissage 3D » et le « bruit 3D de cavernes » sont retirés (archivés — GDD source, historique git) : plus de volume à remplir. L'échantillonnage par position survit tel quel : la génération tactique EST une heightmap.
 
 Le terrain spectaculaire coûte le même prix que le terrain plat — à condition de rester à un niveau de domain warping.
 
@@ -31,18 +31,6 @@ la cellule uniquement (hash déterministe).
 **Royaumes paresseux ([[Génération des royaumes PNJ]]) :** un royaume « existe » en données dès que son secteur est interrogé, mais ses villes/PNJ ne sont instanciés qu'à l'approche du joueur. Un royaume jamais visité ne coûte rien.
 
 **Quantification de la hauteur :** le mapping altitude continue → 21 niveaux est spécifié en [[Proposition — Altitude sur 21 niveaux]] (le lissage local s'échantillonne aussi par tuile, cache par chunk).
-
----
-
-### Texte voxel d'origine (référence historique, G.4 — passages remplacés)
-
-```
-Les 8 couches sont échantillonnées PAR COLONNE
-(x,z) une fois, mises en cache par chunk-colonne ; le remplissage 3D
-ne réévalue pas le bruit 2D. Le bruit 3D de cavernes est évalué par
-pas de 4 blocs et interpolé (trilinéaire) — ×64 moins d'appels,
-différence invisible.
-```
 
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Unification macro-micro]], [[Catalogue des couches de bruit]]

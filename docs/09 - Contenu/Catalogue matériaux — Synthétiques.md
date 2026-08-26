@@ -32,4 +32,4 @@ Les 4 matériaux fabriqués en station — pas de récolte possible.
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Catégories de matériaux]], [[Stations de transformation]]
 - **Alimente** : [[Palier industriel]], [[Craft compositionnel]], [[Construction cadrée]]
-- **Voir aussi** : [[Application des stats de matériau]], [[Météo]], [[Biomes — schéma]], [[Palette de couleurs des matériaux]], [[Voxels — mémoire et meshing]], [[Catalogue matériaux — Terres]]
+- **Voir aussi** : [[Application des stats de matériau]], [[Météo]], [[Biomes — schéma]], [[Palette de couleurs des matériaux]], [[Proposition — Structure de données de la grille]], [[Catalogue matériaux — Terres]]

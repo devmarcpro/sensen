@@ -13,7 +13,7 @@ Les donjons sont une des sources principales de contenu du jeu, et le premier es
 
 **Rôle central :** les donjons sont une des sources principales de contenu du jeu — loot de tout type, **grimoires/manuels** (source première des modules de compétences, [[Grimoires et manuels]]), objectifs de quêtes de guilde ([[Quêtes et guildes]]/[[Gabarit de quête]]), trésors/artefacts ([[Trésors et artefacts]]), et terrain de combat pur. À développer en priorité.
 
-**Génération à la Daggerfall — modulaire, en salles et connecteurs .vox :**
+**Génération à la Daggerfall — modulaire, en salles et connecteurs préfabriqués :**
 - Un donjon est assemblé depuis une bibliothèque de **salles** (prefabs de grille — tailles petite/moyenne/grande/immense, formes variées, **jamais forcément planes** : le sol d'une salle utilise la hauteur de tuile ([[Hauteur de terrain ±10]]) pour ses estrades, fosses et gradins) et de **connecteurs** (corridors droits/coudés/en T, escaliers montants/descendants, portes, rampes).
 - **Points d'attache** : des tuiles-marqueurs typées dans les prefabs indiquent où les pièces se branchent (porte nord/sud/est/ouest, cage d'escalier vers l'étage suivant).
 - **Étages, verticalité réelle ("à étage")** : un donjon empile plusieurs niveaux reliés par des connecteurs escaliers — extension naturelle des chunks cubiques indexés `(x,y,z)` ([[Grille continue]]/[[Décisions d'architecture]]). Chaque étage a son propre graphe de salles, généré indépendamment.
@@ -29,7 +29,7 @@ Les donjons sont une des sources principales de contenu du jeu, et le premier es
 **Occupation de la cellule sur la carte du monde :**
 - Le **terrain de surface** de la cellule où apparaît un donjon est remplacé par une structure d'entrée scellée (ruine effondrée, faille, gouffre, portail muré...) — non claimable ([[Claims et persistance]]), non cultivable ; le reste de la cellule est naturellement impraticable autour du point d'entrée unique.
 - **Voyage rapide restreint au point d'entrée** : la carte du monde ne peut cibler que l'entrée — jamais un point arbitraire à l'intérieur (les étages empilés n'ont pas de représentation 2D unique). Une fois entré, exploration entièrement à pied, façon roguelike classique.
-- Techniquement, chaque étage est une **grille bornée indépendante** ([[Grille continue]] : « grilles séparées en étages discrets », mêmes chunks de tuiles que la surface — [[Proposition — Structure de données de la grille]]). *(Texte voxel d'origine : « l'intérieur occupe le volume de chunks sous/autour de la cellule — toujours le même monde continu ».)*
+- Techniquement, chaque étage est une **grille bornée indépendante** ([[Grille continue]] : « grilles séparées en étages discrets », mêmes chunks de tuiles que la surface — [[Proposition — Structure de données de la grille]]).
 
 **Persistance et nettoyage (fixe, pas de repop avant nettoyage complet) :**
 - Mobs et loot générés sont **fixes** : explorer un donjon, c'est le vider progressivement — aucune régénération interne tant qu'il n'est pas entièrement nettoyé (contrairement à la surface, [[Claims et persistance]]). Les changements (morts, butin pris, blocs détruits) suivent exactement la sauvegarde différentielle standard ([[Sauvegarde]]) : rien de nouveau à construire.

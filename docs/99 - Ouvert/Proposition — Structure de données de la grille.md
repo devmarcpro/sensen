@@ -1,5 +1,5 @@
 ---
-aliases: ["Proposition — Structure de données de la grille", "Structure de la grille", "Chunks de tuiles"]
+aliases: ["Proposition — Structure de données de la grille", "Structure de la grille", "Chunks de tuiles", "G.2", "Annexe G.2", "Voxels mémoire", "Meshing"]
 tags: [ouvert, proposition, héritage-voxel, technique, à-trancher]
 domaine: technique
 statut: à-trancher
@@ -47,5 +47,5 @@ La taille exacte de `c_data` (suffit-il pour l'état d'une culture, d'une porte,
 
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Grille continue]], [[Décisions d'architecture]]
-- **Alimente** : [[Sauvegarde]], [[Réseau]], [[Génération de donjon]], [[Voxels — mémoire et meshing]]
+- **Alimente** : [[Sauvegarde]], [[Réseau]], [[Génération de donjon]]
 - **Voir aussi** : [[Optimisation — principes]], [[Proposition — Budgets et critères de performance tactiques]]

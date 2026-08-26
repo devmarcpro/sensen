@@ -7,7 +7,7 @@ etape: 6
 ---
 
 > [!note] Adapté au pivot tactique
-> L'éditeur voxel d'origine est conservé en fin de note. La sculpture est désormais en **pixel art paramétrique** ([[Construction cadrée]], [[Tables de sculpture]]). Périmètres et pipeline 2D chiffrés : [[Proposition — Sculpture en pixel art]].
+> Réécrit pour le **pixel art paramétrique** ([[Construction cadrée]], [[Tables de sculpture]]). L'éditeur voxel d'origine est archivé (GDD source, historique git). Périmètres et pipeline 2D chiffrés : [[Proposition — Sculpture en pixel art]].
 
 L'éditeur de sculpture : un canevas de pixels où le joueur pose ses vrais matériaux — le principe d'E.9 transposé en 2D.
 
@@ -31,22 +31,6 @@ sur action explicite du créateur).
 **Sauvegarde ([[Sauvegarde]]) :** les modèles sculptés vivent dans `players/*.json` — inchangé.
 
 **Blocs fonctionnels des véhicules ([[Véhicules]]) :** des **pixels-marqueurs typés** visibles (siège de pilote, gouvernail, mât+voile, roues, coffres) — mêmes couleurs réservées que les points d'attache ([[Squelette modulaire et points d'attache]]). La validation vérifie les requis de la fonctionnalité choisie, seule « contrainte de forme » du jeu.
-
----
-
-### Texte voxel d'origine (référence historique, E.9)
-
-```
-L'éditeur EST le moteur voxel du jeu : un mini-espace voxel isolé
-(périmètre selon la table : items 16³, armes 16×16×48, meubles 32³,
-blocs 16³ par définition, structures 64³, véhicules 64×64×96 — en voxels
-de 1px), avec la même pose/subdivision/ghost preview que le monde.
-Les matériaux sont débités de l'inventaire en temps réel (rendus si
-effacés). Validation → génère : VoxModel (mesh + composition par matériau),
-stat_weights (comptage de voxels), entrée d'objet (B.3) sauvegardée dans
-le profil du joueur, partageable en coop (copie du modèle vers le
-catalogue du groupe, sur action explicite du créateur).
-```
 
 ## Liens
 - **Dépend de** : [[Tables de sculpture]], [[Stats d'un objet crafté]], [[Proposition — Sculpture en pixel art]]

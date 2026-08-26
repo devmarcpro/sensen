@@ -1,57 +1,57 @@
 # 森森 Sensen
 
-Game Design Document de **Sensen** — un roguelike tactique en monde infini généré procéduralement et totalement continu, en vue isométrique sur grille, dont le combat en action-time à ticks est structuré par les cinq éléments du **Wu Xing**.
+Un **roguelike tactique** en monde infini, généré procéduralement et totalement continu, en vue isométrique sur grille — combat en **action-time à ticks** structuré par les cinq éléments du **Wu Xing** et sa jauge de chaîne, progression par l'usage à la Elona/Elin, endgame de construction de royaume.
 
 > **L'identité du jeu tient en une phrase :** un jeu de **décisions**, pas de dextérité.
 
-## Contenu du dépôt
+**Moteur : Godot 4.x** · GDScript (GDExtension/Rust au profilage uniquement) · PC (Steam), solo et coop 4-8 en host-and-join.
+
+## Structure du dépôt
 
 | Chemin | Ce que c'est |
 |---|---|
-| [`SENSEN_GDD.md`](SENSEN_GDD.md) | Le GDD source, d'un seul tenant (v2.0, 2026-08-09) |
-| [`docs/`](docs/) | Le même contenu converti en **coffre Obsidian** — 229 notes atomiques, reliées et navigables |
+| [`godot/`](godot/) | Le projet Godot — squelette pour l'instant, arborescence conforme au design (D.1) |
+| [`docs/`](docs/) | Le design complet : un **coffre Obsidian** de ~240 notes atomiques, reliées et navigables |
+| [`archive/`](archive/) | Le GDD source monolithique (v2.0) — archive de référence, les notes de `docs/` font foi |
 
-Les deux sont équivalents en contenu : la conversion est sans perte. Le coffre ajoute le découpage, les liens et les métadonnées.
+## État du projet — pré-production
 
-## Le coffre Obsidian
+Le design est complet et nettoyé : le pivot **voxel → tactique isométrique** (2026-08-09, irrévocable) est intégralement répercuté dans les notes. Ce qui reste avant de coder est listé dans **`docs/00 - Index/Vers la production.md`** — en tête : valider 8 propositions techniques et écrire le document du prototype de combat.
 
-Ouvrir le dossier [`docs/`](docs/) comme coffre dans Obsidian. Point d'entrée : **`00 - Index/Sensen — Index général.md`**.
+### Ordre de construction (le donjon avant le monde)
 
-```
-00 - Index/       index général, cartes de domaine, décisions fondatrices,
-                  ordre de construction, contraintes, carte des dépendances
-01 - Vision/      pitch, identité, inspirations, direction artistique
-02 - Monde/       grille, hauteur, biomes, donjons, météo, corruption
-03 - Combat/      action-time, Wu Xing, jauge de chaîne, garde, modules
-04 - Progression/ usage, potentiel, races, classes, astrologie
-05 - Objets/      matériaux, craft compositionnel, équipement, loot
-06 - Êtres/       schéma unifié, IA, compagnons, familles, noms
-07 - Société/     relations, guildes, économie, royaumes, lois
-08 - Technique/   architecture Godot, données, performance, réseau
-09 - Contenu/     catalogues prêts à transcrire en JSON
-99 - Ouvert/      une note par question non tranchée
-```
+Chaque étape produit quelque chose de **jouable et jugeable**, jamais une brique invisible.
 
-### Navigation
+| # | Étape | Ce qu'on obtient |
+|---|---|---|
+| 0 | **Prototype de combat isolé** | *Le combat est-il bon ?* Rien ne démarre avant un oui. |
+| 1 | Combat rapatrié + pipeline paperdoll minimal | un combat propre dans le vrai projet |
+| 2 | Génération de donjon | un espace clos à explorer |
+| 3 | Loot (affixes, gemmes, rareté par profondeur) | une raison de descendre |
+| 4 | Progression (usage, potentiel) | une raison de recommencer |
+| 5 | ⭐ **Jalon — roguelike jouable de bout en bout** | entrer, combattre, looter, progresser, ressortir |
+| 6 | Matériaux + craft compositionnel | fabriquer ce qu'on n'a pas looté |
+| 7 | Camp de base | un point d'ancrage entre deux expéditions |
+| 8 | Génération du monde | un monde à parcourir entre les donjons |
+| 9 | PNJ et villages | un monde habité |
+| 10 | Royaumes, lois, économie, claims | l'endgame de territoire |
+| 11 | Coop | dernier chantier, jamais avant un solo bon |
 
-**Les alias résolvent les références du GDD.** Chaque note porte en alias toutes les références qui la désignent : `[[A.4.6]]` mène à la jauge de chaîne, `[[E.3]]` au pipeline de combat, `[[B.13]]` au schéma des composants. Les **154 sections numérotées** du GDD sont toutes adressables.
+### Contraintes permanentes (dès la première ligne de code)
 
-**Les métadonnées permettent de filtrer :**
+1. **Une partie solo EST une partie multijoueur hébergée** dont la porte est fermée — serveur autoritaire même en solo, intentions côté client, déterminisme par ticks.
+2. **Une brique à la fois**, avec un critère de sortie formulé avant de commencer.
+3. **`tr()` dès le premier écran** — aucune string affichable en dur, jamais (fr/en/ja/zh au lancement).
+4. **Tout le contenu est de la donnée** — JSON validé au boot, hot-reload, zéro valeur de gameplay en dur.
 
-- `statut` — `décidé` (200) · `à-trancher` (16) · `contenu-à-produire` (7) · `playtest` (6)
-- `etape` — l'étape de l'ordre de construction où la note devient nécessaire (0 à 11)
-- `domaine` — vision, monde, combat, progression, objets, êtres, société, technique, contenu, index
+## Lire le design
 
-Requêtes utiles : `statut: à-trancher` pour ce qui bloque · `etape: 0` pour tout ce qu'il faut avant le prototype de combat.
+Ouvrir [`docs/`](docs/) comme coffre dans **Obsidian**. Point d'entrée : `00 - Index/Sensen — Index général.md`.
 
-Chaque note se termine par une section `## Liens` — Dépend de / Alimente / Voir aussi.
+- Chaque note porte en **alias** les références du GDD (`A.4.6`, `E.3`, `B.13`…) — tous les renvois résolvent.
+- Frontmatter filtrable : `statut` (décidé / à-trancher / playtest / contenu-à-produire), `etape` (0-11), `domaine`.
+- Les questions non tranchées vivent dans `docs/99 - Ouvert/` — dont les 8 **propositions** issues du nettoyage de l'héritage voxel, à valider.
 
-## Par où commencer
+## Développement
 
-1. **Décisions fondatrices** — la rupture du 2026-08-09, ce qui a été abandonné et pourquoi
-2. **Ordre de construction** — les 11 étapes, du prototype de combat au multijoueur
-3. **Contraintes permanentes** — les 4 règles d'architecture à respecter dès la première ligne de code
-
-## État
-
-Toutes les décisions de design sont tranchées. Ce qui reste ouvert est isolé dans `99 - Ouvert/` : 26 questions, dont 7 trous connus du combat à traiter avant ou pendant le prototype.
+Le projet `godot/` s'ouvre avec Godot 4.x. L'arborescence (autoload, data, systems, scenes, locale) suit la note *Arborescence du projet* du design ; les dossiers sont vides en attendant l'étape 0. Prochaine étape concrète : le **prototype de combat isolé** — voir `docs/00 - Index/Vers la production.md`.
