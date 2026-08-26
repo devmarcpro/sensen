@@ -103,6 +103,35 @@ ui.capacite,{touche} {nom} [{modules}] : {forme} portée {pmin}-{pmax} taille {t
 ui.capacite.visee,VISÉE : {nom} — cliquer une tuile (Échap annule)
 ui.capacite.preview,{nom} sur {def} : {des}{bonus} ×{dom} → zone {zone} ×{mult} − armure {armure} ⇒ {min}–{max}
 ui.entite.mana,mana {mana}/{mana_max}
+journal.statut,{nom} subit {statut} ({duree} ticks)
+journal.statut_degats,{nom} souffre de {statut} : {degats} dégâts
+journal.chaine_interrompue,la chaîne de {nom} est INTERROMPUE : un segment tombe
+journal.tir_refuse,tir impossible : {raison}
+raison.munitions,plus de munitions
+raison.allie,un allié masque la cible
+status.brulure.name,Brûlure
+status.poison.name,Poison
+status.saignement.name,Saignement
+status.infection.name,Infection
+status.ralentissement.name,Ralentissement
+status.hate.name,Hâte
+status.hate_meute.name,Hâte de meute
+status.ralliement.name,Ralliement
+status.etourdi.name,Étourdi
+status.enracinement.name,Enracinement
+status.retarde.name,Retardé
+status.egide.name,Égide
+status.garde_annulee.name,Garde annulée
+status.terreur.name,Terreur
+item.proto_fleches.name,Flèches
+ai_profile.elite.name,Élite
+ui.munitions,flèches {n}
+ui.statuts,statuts : {liste}
+ui.fin.titre,=== FIN DU COMBAT — {issue} en {ticks} ticks ===
+ui.fin.victoire,victoire
+ui.fin.defaite,défaite
+ui.fin.piste,  {piste} : {detail}
+ui.fin.suite,(clic ou touche pour continuer)
 journal.victoire,plus aucun hostile. Victoire.
 journal.defaite,tu es tombé. Tab : recommencer.
 module.a_l_impact.name,À l'impact

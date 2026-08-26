@@ -1,0 +1,12 @@
+{
+  "name_key": "item.proto_fleches.name",
+  "type": "munition",
+  "equip_slot": "carquois",
+  "hands": 0,
+  "quantite": 20,
+  "element": "bois",
+  "tags": [
+    "munition",
+    "prototype"
+  ]
+}

@@ -20,13 +20,13 @@
 | modules/ | les 176 composants ; `effet` = forme structurée des descriptions (`tools/structure_modules.py`) | Vocabulaire des modules (B.4), Modules (F.2) |
 | creatures/ | tout être (joueur compris) : `corps.stats`, `equipement`, `ratelier`, `actions`, `capacites` (séquences de modules) | Schéma créature (B.5), Blocs de l'être, Créatures (F.3) |
 | creature_actions/ | les 24 actions des créatures (`tools/gen_creature_actions.py` les transcrit) | Décision — Vocabulaire d'attaque des créatures, Actions des créatures |
-| ai_profiles/ | profils Utility AI | IA des créatures (E.16) |
+| ai_profiles/ | profils Utility AI (`hostile`, `bete_sauvage`, `compagnon`, `elite`) | IA des créatures (E.16) |
 | biomes/ | biomes | Biomes — schéma (B.6), C.7 |
 | quest_templates/ | gabarits de quêtes | Gabarit de quête (B.7) |
 | kingdoms/ | royaumes scriptés/test | Schéma royaume (B.9) |
 | name_cultures/ | cultures de nommage | Culture de nommage (B.11), C.9 |
 | components/, component_recipes/ | craft compositionnel | B.13, Composants (F.11) |
-| status_effects/ | statuts | Statuts (F.4) |
+| status_effects/ | les 14 statuts du prototype (`tools/gen_status_effects.py`) : période, durée, contrôle, modifiers par cible générique | Statuts (F.4), Statuts de contrôle et anti-stunlock |
 | dungeon_rooms/, dungeon_connectors/ | prefabs de donjon | B.10, Décision — Prefabs de donjon en tuiles |
 | plants/ | plantes | Plantes (F.8) |
 | recipes/ | transformations de matériaux | Stations de transformation (C.8) |

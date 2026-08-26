@@ -1,0 +1,15 @@
+{
+  "name_key": "status.brulure.name",
+  "degats_des": "1d4",
+  "element": "feu",
+  "periode_ticks": 10,
+  "duree_ticks": 30,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [],
+  "tags": [
+    "dot",
+    "feu",
+    "negatif"
+  ]
+}

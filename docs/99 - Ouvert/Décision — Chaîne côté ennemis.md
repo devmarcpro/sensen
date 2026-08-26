@@ -16,6 +16,9 @@ etape: 0
 - **L'interruption devient un jeu défensif** : tout contrôle qui interrompt (Étourdi, Choc statique — [[Modules]]) **retire le dernier segment posé** de la jauge adverse. Lire la barre du boss et couper sa rotation avant le 5ᵉ acte est une décision tactique de premier ordre.
 - L'IA des porteurs de jauge privilégie les transitions d'engendrement dans son scoring utility (considération `chain_bonus` — une donnée du profil, pas du code).
 
+> [!success] Codé le 2026-08-26
+> Le chef de bande porte la même jauge que le joueur (fiche `chain_gauge: true`, profil IA `elite` avec `chain_bonus: 1.0` : son choix d'attaque ajoute `chain_bonus × bonus de transition × 10` aux dégâts moyens, ce qui le pousse vers les transitions d'engendrement). Tout statut tagué **`interrompt`** (Étourdi) coupe l'action engagée de la cible et retire le dernier segment de sa jauge — joueur compris, même code.
+
 ## Liens
 - **Dépend de** : [[Jauge de chaîne Wu Xing]], [[Schéma créature]], [[Trous connus du combat]]
 - **Alimente** : [[IA des créatures]], [[Écrans d'interface]], [[Génération de donjon]], [[Statuts de contrôle et anti-stunlock]]

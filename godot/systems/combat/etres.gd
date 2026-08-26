@@ -48,13 +48,60 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 		"vivant": true,
 		"garde": false,
 		"action_en_cours": {},                     # télégraphe : action engagée, résolue à l'échéance
-		"statuts": [],
+		"statuts": [],                             # [{id, fin, prochain, source}] — Statuts
+		"anti_stunlock_jusqua": -1,               # aucun contrôle dur avant ce tick (Statuts de contrôle)
+		"munitions": _munitions(equip, items),
+		"munitions_tirees": 0,
+		"xp": {"element": {}, "competence": {}, "type": {}, "construction": {}},   # XP de combat, trois pistes + défense
 		"cible": "",
 		"tick_derniere_vue": -1,
 		"pos_connue": pos,
 		"tick_decision": -1,
 		"fuite": false,
 	}
+
+
+## Les munitions du carquois équipé (Décision — Projectiles).
+static func _munitions(equip: Dictionary, items: Dictionary) -> int:
+	var id: String = equip.get("carquois", "")
+	return int(items.get(id, {}).get("quantite", 0)) if not id.is_empty() else 0
+
+
+## Un statut actif portant ce tag ?
+static func a_statut_tag(e: Dictionary, tag: String, defs: Dictionary) -> bool:
+	for s: Dictionary in e.statuts:
+		if tag in defs.get(s.id, {}).get("tags", []):
+			return true
+	return false
+
+
+## Produit des multiplicateurs des statuts actifs pour une cible de modificateur (cout_ticks, degats…).
+static func mult_statuts(e: Dictionary, cible: String, defs: Dictionary) -> float:
+	var m := 1.0
+	for s: Dictionary in e.statuts:
+		for mod: Dictionary in defs.get(s.id, {}).get("modifiers", []):
+			if mod.cible == cible and mod.has("mult"):
+				m *= float(mod.mult)
+	return m
+
+
+## Somme des ajouts des statuts actifs pour une cible de modificateur (armure…).
+static func add_statuts(e: Dictionary, cible: String, defs: Dictionary) -> float:
+	var a := 0.0
+	for s: Dictionary in e.statuts:
+		for mod: Dictionary in defs.get(s.id, {}).get("modifiers", []):
+			if mod.cible == cible and mod.has("add"):
+				a += float(mod.add)
+	return a
+
+
+## Un statut bloque-t-il cette action (deplacement, garde) ?
+static func bloque_statuts(e: Dictionary, cible: String, defs: Dictionary) -> bool:
+	for s: Dictionary in e.statuts:
+		for mod: Dictionary in defs.get(s.id, {}).get("modifiers", []):
+			if mod.cible == cible and mod.get("bloque", false):
+				return true
+	return false
 
 
 static func est_volant(e: Dictionary) -> bool:

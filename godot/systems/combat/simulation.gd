@@ -19,6 +19,8 @@ var items: Dictionary
 var fonctionnalites: Dictionary
 var actions_creatures: Dictionary
 var profils_ia: Dictionary
+var statuts_defs: Dictionary
+var dernier_combat: Dictionary = {}   # récapitulatif du dernier combat terminé (écran de fin)
 var horloge_monde: Horloge
 var combats: Dictionary = {}          # nom → {"horloge": Horloge, "participants": Array[String]}
 var attente: Dictionary = {}          # id → true : une entité contrôlée attend une intention
@@ -36,6 +38,7 @@ func _init(p_graine: int) -> void:
 	fonctionnalites = GameData.catalogues.get("functionalities", {})
 	actions_creatures = GameData.catalogues.get("creature_actions", {})
 	profils_ia = GameData.catalogues.get("ai_profiles", {})
+	statuts_defs = GameData.catalogues.get("status_effects", {})
 
 
 # ---------------------------------------------------------------- mise en place
@@ -134,10 +137,13 @@ func _sur_avancee_monde(_de: int, _a: int) -> void:
 
 
 func _fin_de_pas(nom: String) -> void:
+	# Phase 2 (Boucle de tick) : les statuts de tous les êtres de cette horloge.
+	var h: Horloge = horloge_monde if nom == "monde" else combats.get(nom, {}).get("horloge", horloge_monde)
+	for e in vivants():
+		if e.horloge == nom:
+			_tiquer_statuts(e, h.ticks)
 	_verifier_desengagements()
 	EventBus.dispatcher()
-	if nom != "monde" and not combats.has(nom):
-		return
 
 
 ## Régénération d'endurance : +2 par tick écoulé depuis la dernière application (Endurance).
@@ -202,12 +208,14 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 			cout = int(regles.r.deplacement.descente)
 		else:
 			return false
+	if Etres.bloque_statuts(e, "deplacement", statuts_defs):
+		return false
 	_quitter_garde(e)
 	grille.liberer(e.pos)
 	e.orientation = vers - e.pos
 	e.pos = vers
 	grille.placer(e.id, vers)
-	e.compteur = tick + cout
+	e.compteur = tick + _ticks_avec_statuts(e, cout)
 	EventBus.emettre(&"journal", [&"journal.deplacement", {"nom": e.name_key, "cout": cout}])
 	if chute > 0:
 		var d := grille.degats_chute(chute)
@@ -217,8 +225,8 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 
 
 func _prendre_garde(e: Dictionary, tick: int) -> bool:
-	if e.endurance <= 0:
-		return false   # à zéro d'endurance, garde impossible
+	if e.endurance <= 0 or Etres.bloque_statuts(e, "garde", statuts_defs):
+		return false   # à zéro d'endurance (ou feinté), garde impossible
 	e.garde = true
 	e.compteur = tick + int(regles.r.actions.garde)
 	EventBus.emettre(&"journal", [&"journal.garde", {"nom": e.name_key}])
@@ -270,9 +278,18 @@ func _attaquer_arme(e: Dictionary, cible: Dictionary, lourde: bool, tick: int) -
 	var fonct: Dictionary = fonctionnalites.get(arme.functionality, {})
 	if not _cible_atteignable(e, cible, regles.portee_de(fonct), true):
 		return false
+	if est_distance(fonct):
+		# Projectile (Décision — Projectiles) : munitions, trajectoire réelle, tir refusé si un allié masque.
+		if e.munitions <= 0:
+			return false
+		var masque := _premier_sur_trajectoire(e, cible)
+		if not masque.is_empty():
+			if masque.camp == e.camp:
+				return false
+			cible = masque   # un ennemi sur la trajectoire prend la flèche
 	_quitter_garde(e)
 	e.orientation = Vector2i(signi(cible.pos.x - e.pos.x), signi(cible.pos.y - e.pos.y))
-	var ticks := regles.ticks_attaque(fonct, lourde)
+	var ticks := _ticks_avec_statuts(e, regles.ticks_attaque(fonct, lourde))
 	_engager_combat(e, cible)
 	if regles.est_telegraphee(ticks) or lourde:
 		e.action_en_cours = {"type": "arme", "cible": cible.id, "lourde": lourde, "ticks": ticks, "name_key": arme.name_key}
@@ -285,14 +302,50 @@ func _attaquer_arme(e: Dictionary, cible: Dictionary, lourde: bool, tick: int) -
 	return true
 
 
+func est_distance(fonct: Dictionary) -> bool:
+	return int(fonct.get("portee_min", 1)) > 1
+
+
+## Coût en ticks modulé par les statuts (Ralentissement, Hâte) — Statuts.
+func _ticks_avec_statuts(e: Dictionary, ticks: int) -> int:
+	return maxi(1, roundi(float(ticks) * Etres.mult_statuts(e, "cout_ticks", statuts_defs)))
+
+
+## La première entité vivante sur la trajectoire e → cible (sans les extrémités), ou {}.
+func _premier_sur_trajectoire(e: Dictionary, cible: Dictionary) -> Dictionary:
+	for t in grille.trajectoire(e.pos, cible.pos):
+		var occ := grille.occupant(t)
+		if not occ.is_empty() and entites[occ].vivant:
+			return entites[occ]
+	return {}
+
+
+## Ce que verrait un tir : {ok, raison, bloqueur} — pour l'UI (la cible grisée, la tuile bloquante).
+func verifier_tir(e: Dictionary, cible: Dictionary) -> Dictionary:
+	var arme := Etres.arme(e, items)
+	var fonct: Dictionary = fonctionnalites.get(arme.get("functionality", ""), {})
+	if fonct.is_empty() or not est_distance(fonct):
+		return {"ok": true}
+	if e.munitions <= 0:
+		return {"ok": false, "raison": "munitions"}
+	var m := _premier_sur_trajectoire(e, cible)
+	if not m.is_empty() and m.camp == e.camp:
+		return {"ok": false, "raison": "allie", "bloqueur": m.pos}
+	return {"ok": true, "devie": m.get("id", "")}
+
+
 func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Dictionary, lourde: bool, ticks: int) -> void:
 	var a_zero: bool = e.endurance <= 0
 	e.endurance = maxi(0, e.endurance - int(regles.r.endurance.lourde if lourde else regles.r.endurance.attaque))
+	if est_distance(fonct):
+		e.munitions -= 1
+		e.munitions_tirees += 1
 	var d := regles.degats_arme(e.corps.stats, arme, fonct, des, lourde, a_zero)
 	var vecteur := vecteur_arme(arme)
 	var wx := _facteur_wuxing(e, cible, vecteur, tick_de(e))
-	var res := _resoudre_coup(e, cible, d.bruts * wx.total, fonct.type_degats, lourde, vecteur)
+	var res := _resoudre_coup(e, cible, d.bruts * wx.total * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur)
 	res.merge(wx)
+	res["competence"] = str(fonct.get("combat_skill", ""))
 	var cle := &"journal.attaque_lourde" if lourde else &"journal.attaque"
 	EventBus.emettre(&"journal", [cle, {"att": e.name_key, "def": cible.name_key, "zone": res.zone, "degats": res.degats, "ticks": ticks}])
 	_appliquer_degats(cible, res.degats, e.id, res)
@@ -354,10 +407,10 @@ func _poser_segment(e: Dictionary, v_att: Dictionary, tick: int) -> void:
 func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degats: String, lourde: bool, element: Variant) -> Dictionary:
 	var zone: Dictionary = regles.zone_de_coup(grille.h(att.pos), grille.h(cible.pos))
 	var piece := Etres.piece_zone(cible, zone.zone, items)
-	var armure := regles.armure_piece(piece, type_degats)
+	var armure := regles.armure_piece(piece, type_degats) + Etres.add_statuts(cible, "armure", statuts_defs)
 	var direction := Regles.direction_relative(cible.orientation, att.pos - cible.pos)
 	var bouclier := Etres.a_bouclier(cible, items)
-	var tient: bool = cible.garde and regles.garde_tient(direction, bouclier, lourde)
+	var tient: bool = cible.garde and regles.garde_tient(direction, bouclier, lourde) and not Etres.bloque_statuts(cible, "garde", statuts_defs)
 	var sans_garde := regles.degats_finaux(bruts, zone.mult, armure, false)
 	var degats := regles.degats_finaux(bruts, zone.mult, armure, tient)
 	if cible.garde:
@@ -370,10 +423,12 @@ func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degat
 		elif lourde and not bouclier:
 			cible.garde = false   # la lourde brise la garde
 	return {"zone": zone.zone, "mult": zone.mult, "armure": armure, "direction": direction,
-		"garde": tient, "degats": degats, "bruts": bruts, "type": type_degats, "element": element}
+		"garde": tient, "degats": degats, "bruts": bruts, "type": type_degats, "element": element,
+		"construction": str(piece.get("construction", "")), "evites": maxi(0, roundi(bruts * zone.mult) - degats)}
 
 
 func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: Dictionary) -> void:
+	_verser_xp(cible, degats, source, detail)
 	cible.sante = maxi(0, cible.sante - degats)
 	EventBus.emettre(&"damage_dealt", [source, cible.id, degats, detail])
 	if cible.sante <= 0 and cible.vivant:
@@ -381,6 +436,95 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		grille.liberer(cible.pos)
 		EventBus.emettre(&"journal", [&"journal.mort", {"nom": cible.name_key}])
 		EventBus.emettre(&"creature_killed", [cible.id, source])
+
+
+## XP de combat : les dégâts appliqués, plafonnés aux PV restants, versés à l'élément, à la
+## compétence et au type de dégâts ; l'armure de la cible gagne ce qu'elle épargne.
+func _verser_xp(cible: Dictionary, degats: int, source: String, detail: Dictionary) -> void:
+	var xp := mini(degats, int(cible.sante))
+	var att: Dictionary = entites.get(source, {})
+	if not att.is_empty() and att.has("xp") and xp > 0:
+		var el := wuxing.dominante(detail.get("element"))
+		if not el.is_empty():
+			att.xp.element[el] = int(att.xp.element.get(el, 0)) + xp
+		var comp := str(detail.get("competence", ""))
+		if not comp.is_empty():
+			att.xp.competence[comp] = int(att.xp.competence.get(comp, 0)) + xp
+		var type := str(detail.get("type", ""))
+		if not type.is_empty():
+			att.xp.type[type] = int(att.xp.type.get(type, 0)) + xp
+		EventBus.emettre(&"skill_xp_gained", [att.id, comp, xp])
+	var cons := str(detail.get("construction", ""))
+	if cible.has("xp") and not cons.is_empty() and int(detail.get("evites", 0)) > 0:
+		cible.xp.construction[cons] = int(cible.xp.construction.get(cons, 0)) + int(detail.evites)
+
+
+# ---------------------------------------------------------------- statuts (Statuts · anti-stunlock)
+
+## Applique un statut. Un contrôle dur est plafonné à 20 ticks et ne peut se réappliquer dans les
+## 50 ticks suivant sa fin (joueur comme créatures). Un statut « interrompt » coupe l'action engagée
+## et retire le dernier segment de chaîne (Décision — Chaîne côté ennemis).
+func appliquer_statut(cible: Dictionary, id: String, duree: int, source: String) -> bool:
+	var d: Dictionary = statuts_defs.get(id, {})
+	if d.is_empty() or not cible.vivant:
+		return false
+	var tick := tick_de(cible)
+	if d.get("controle", false):
+		if tick < int(cible.anti_stunlock_jusqua):
+			return false
+		duree = mini(duree, int(regles.r.anti_stunlock.max_ticks))
+		cible.anti_stunlock_jusqua = tick + duree + int(regles.r.anti_stunlock.verrou_ticks)
+	if not d.get("cumule", false):
+		for s: Dictionary in cible.statuts:
+			if s.id == id:
+				s.fin = maxi(int(s.fin), tick + duree)   # rafraîchi, jamais cumulé
+				return true
+	cible.statuts.append({"id": id, "fin": tick + duree, "prochain": tick + int(d.periode_ticks), "source": source})
+	for mod: Dictionary in d.get("modifiers", []):
+		if mod.cible == "compteur" and mod.has("add"):
+			cible.compteur = maxi(cible.compteur, tick) + int(mod.add)
+	if "interrompt" in d.get("tags", []):
+		_interrompre(cible)
+	EventBus.emettre(&"journal", [&"journal.statut", {"nom": cible.name_key, "statut": d.name_key, "duree": duree}])
+	return true
+
+
+func _interrompre(cible: Dictionary) -> void:
+	if not cible.action_en_cours.is_empty():
+		EventBus.emettre(&"action_resolved", [cible.id, cible.action_en_cours])
+		cible.action_en_cours = {}
+	if cible.has("chaine") and wuxing.interrompre(cible.chaine):
+		EventBus.emettre(&"journal", [&"journal.chaine_interrompue", {"nom": cible.name_key}])
+
+
+## Un contrôle de tempo (effet `tempo`) : retarde le compteur, dans le budget anti-stunlock.
+func _tempo(cible: Dictionary, ticks: int, source: String) -> int:
+	var tick := tick_de(cible)
+	if ticks <= 0:
+		cible.compteur = maxi(tick, cible.compteur + ticks)   # avancer : sans plafond
+		return ticks
+	if tick < int(cible.anti_stunlock_jusqua):
+		return 0
+	var n := mini(ticks, int(regles.r.anti_stunlock.max_ticks))
+	cible.anti_stunlock_jusqua = tick + n + int(regles.r.anti_stunlock.verrou_ticks)
+	cible.compteur += n
+	cible.statuts.append({"id": "retarde", "fin": tick + n, "prochain": tick + n, "source": source})
+	return n
+
+
+## Dégâts périodiques et expirations — appelé en fin de pas pour tous les êtres de l'horloge.
+func _tiquer_statuts(e: Dictionary, tick: int) -> void:
+	var restants: Array = []
+	for s: Dictionary in e.statuts:
+		var d: Dictionary = statuts_defs.get(s.id, {})
+		while e.vivant and int(s.prochain) <= tick and int(s.prochain) <= int(s.fin) and d.get("degats_des") != null:
+			var deg := des.jet(d.degats_des)
+			EventBus.emettre(&"journal", [&"journal.statut_degats", {"nom": e.name_key, "statut": d.name_key, "degats": deg}])
+			_appliquer_degats(e, deg, s.source, {"statut": s.id, "element": {d.element: 1.0} if d.get("element") else {}, "type": "statut"})
+			s.prochain = int(s.prochain) + int(d.periode_ticks)
+		if int(s.fin) > tick:
+			restants.append(s)
+	e.statuts = restants
 
 
 ## Résolution d'une action engagée (télégraphée) à son échéance.
@@ -447,8 +591,9 @@ func _executer_action_creature(e: Dictionary, action: Dictionary, cible: Diction
 					var bonus := _bonus_des_conditions(e, c, action)
 					var d := regles.degats_action(e.corps.stats, action, des, a_zero, bonus)
 					var wx := _facteur_wuxing(e, c, action.elements, tick_de(e))
-					var res := _resoudre_coup(e, c, d.bruts * wx.total, str(action.get("type_degats", "contondant")), false, action.elements)
+					var res := _resoudre_coup(e, c, d.bruts * wx.total * Etres.mult_statuts(e, "degats", statuts_defs), str(action.get("type_degats", "contondant")), false, action.elements)
 					res.merge(wx)
+					res["competence"] = action.id
 					EventBus.emettre(&"journal", [&"journal.action_creature", {"att": e.name_key, "action": action.name_key, "def": c.name_key, "zone": res.zone, "degats": res.degats}])
 					_appliquer_degats(c, res.degats, e.id, res)
 				if not cibles.is_empty():
@@ -463,8 +608,13 @@ func _executer_action_creature(e: Dictionary, action: Dictionary, cible: Diction
 						_frapper_arme(e, cible, arme, fonct, false, int(action.cout_ticks))
 			"fuite":
 				e.fuite = true
+			"statut":
+				for c in cibles:
+					if effet.has("chance") and des.reel() >= float(effet.chance):
+						continue
+					appliquer_statut(c, str(effet.id), int(effet.get("duree_ticks", statuts_defs.get(effet.id, {}).get("duree_ticks", 10))), e.id)
 			_:
-				pass   # statut, bonus_premiere_attaque : jalons 8-10 (Statuts, embuscade)
+				pass   # bonus_premiere_attaque (embuscade) : la détection du joueur n'existe pas encore
 
 
 func _cibles_de_forme(e: Dictionary, action: Dictionary, cible: Dictionary) -> Array[Dictionary]:
@@ -724,8 +874,28 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) ->
 					var occ := grille.occupant(cible_pos)
 					_effet_deplacement(e, dp, touchees, entites.get(occ, {}))
 					a_touche = a_touche or not touchees.is_empty()
+			"statut":
+				var st: Dictionary = plan.parametres.get("statut", {})
+				if not st.is_empty():
+					var pour_allie: bool = plan.parametres.get("cible", "ennemi") == "allie"
+					var duree := int(st.duree_ticks) * int(plan.drapeaux.get("durees_mult", 1))
+					if not prev.is_empty() and prev.resout and pour_allie:
+						duree = roundi(float(duree) * float(prev.multiplicateur) * float(wuxing.w.chaine.resolveur_non_offensif))
+					for c in touchees:
+						if (c.camp == e.camp) == pour_allie or plan.geometrie == "soi":
+							if appliquer_statut(c, str(st.id), duree, e.id):
+								a_touche = true
+			"tempo":
+				var n := int(plan.parametres.get("tempo", 0))
+				for c in touchees:
+					if c.camp == e.camp and n > 0:
+						continue
+					var applique := _tempo(c, n, e.id)
+					a_touche = a_touche or applique != 0
+					if plan.parametres.get("vol", false) and applique > 0:
+						e.compteur = maxi(tick, e.compteur - applique)
 			_:
-				pass   # statut, terrain, invocation, tempo, saisie : jalons suivants
+				pass   # terrain, invocation, saisie : étapes suivantes
 	if plan.drapeaux.has("projection"):
 		_effet_deplacement(e, {"mode": "projection", "distance": str(plan.drapeaux.projection)}, touchees, {})
 	if a_touche and not elements.is_empty() and not plan.parametres.get("sans_segment", false):
@@ -758,7 +928,7 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 	var piece := Etres.piece_zone(c, zone.zone, items)
 	var armure := 0.0
 	if not plan.drapeaux.get("ignore_armure", false):
-		armure = regles.armure_piece(piece, type_degats if type_degats != "magique" else "contondant")
+		armure = regles.armure_piece(piece, type_degats if type_degats != "magique" else "contondant") + Etres.add_statuts(c, "armure", statuts_defs)
 		if type_degats == "magique":
 			armure *= float(regles.r.armure.magie_facteur)
 		armure = maxf(0.0, armure - float(plan.parametres.get("ignore_armure_points", 0)))
@@ -773,7 +943,9 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 			c.garde = false
 	return {"zone": zone.zone, "mult": zone.mult, "armure": armure, "direction": direction, "garde": tient,
 		"degats": degats, "bruts": bruts, "type": type_degats, "element": plan.elements, "dom": dom.mult,
-		"contre": dom.contre, "gain": gain, "chaine": chaine, "jet": d.jet}
+		"contre": dom.contre, "gain": gain, "chaine": chaine, "jet": d.jet,
+		"competence": str(plan.fonct.get("combat_skill", "")) if arme_noyau else "magie_" + wuxing.dominante(plan.elements),
+		"construction": str(piece.get("construction", "")), "evites": maxi(0, roundi(bruts * zone.mult) - degats)}
 
 
 # ---------------------------------------------------------------- engagement (Temporalités parallèles)
@@ -842,8 +1014,16 @@ func _verifier_desengagements() -> void:
 				if proche and (vue or recemment_vu):
 					menace = true
 		if not menace:
+			dernier_combat = {"nom": nom, "ticks": h.ticks, "participants": c.participants.duplicate(), "victoire": true}
 			for id in c.participants.duplicate():
-				_quitter_combat(entites[id])
+				var p: Dictionary = entites[id]
+				if p.camp == "joueur" and not p.vivant:
+					dernier_combat.victoire = false
+				# 50 % des munitions tirées sont récupérées au sol (arrondi bas).
+				var recup := int(floorf(float(p.munitions_tirees) * float(regles.r.projectiles.recuperation)))
+				p.munitions += recup
+				p.munitions_tirees = 0
+				_quitter_combat(p)
 			TickManager.retirer(nom)
 			combats.erase(nom)
 			EventBus.emettre(&"combat_ended", [nom])
@@ -945,7 +1125,7 @@ func _meilleure_attaque(e: Dictionary, cible: Dictionary) -> Dictionary:
 		if a.is_empty() or not _action_creature_possible(e, a, cible):
 			continue
 		var f := Des.fourchette(a.get("degats_des"))
-		var m := float(f.x + f.y) * 0.5
+		var m := float(f.x + f.y) * 0.5 + _bonus_chaine_ia(e, a.get("elements", {}))
 		if m > moy:
 			moy = m
 			meilleure = {"type": "creature", "action": a}
@@ -954,10 +1134,19 @@ func _meilleure_attaque(e: Dictionary, cible: Dictionary) -> Dictionary:
 		var fonct: Dictionary = fonctionnalites.get(arme.functionality, {})
 		if _cible_atteignable(e, cible, regles.portee_de(fonct), true):
 			var f := Des.fourchette(fonct.degats_des)
-			var m := float(f.x + f.y) * 0.5 * float(arme.durete_base) / float(regles.r.degats.durete_reference)
+			var m := float(f.x + f.y) * 0.5 * float(arme.durete_base) / float(regles.r.degats.durete_reference) + _bonus_chaine_ia(e, vecteur_arme(arme))
 			if m > moy:
 				meilleure = {"type": "arme", "arme": arme, "fonct": fonct}
 	return meilleure
+
+
+## Les porteurs de jauge privilégient les transitions d'engendrement (considération `chain_bonus`).
+func _bonus_chaine_ia(e: Dictionary, elements: Dictionary) -> float:
+	if not e.has("chaine") or elements.is_empty():
+		return 0.0
+	var profil: Dictionary = profils_ia.get(e.ai_profile, {})
+	var p := wuxing.prevoir(e.chaine, wuxing.dominante(elements))
+	return float(profil.get("chain_bonus", 0.0)) * float(p.transition) * 10.0
 
 
 func _ia_attaquer(e: Dictionary, cible: Dictionary, tick: int) -> void:

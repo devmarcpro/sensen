@@ -1,0 +1,15 @@
+{
+  "name_key": "status.saignement.name",
+  "degats_des": "1d4",
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 40,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [],
+  "tags": [
+    "dot",
+    "saignement",
+    "negatif"
+  ]
+}

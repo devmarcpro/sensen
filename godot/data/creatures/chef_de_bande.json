@@ -14,7 +14,7 @@
     "silhouette": "humanoide"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "elite",
   "actions": [
     "cri_de_ralliement",
     "enchainement"

@@ -1,0 +1,14 @@
+{
+  "name_key": "status.infection.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 200,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [],
+  "tags": [
+    "maladie",
+    "negatif"
+  ]
+}

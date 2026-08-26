@@ -1,0 +1,20 @@
+{
+  "name_key": "status.etourdi.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 10,
+  "controle": true,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "compteur",
+      "add": 10
+    }
+  ],
+  "tags": [
+    "controle",
+    "interrompt",
+    "negatif"
+  ]
+}

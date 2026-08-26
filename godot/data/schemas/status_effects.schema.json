@@ -1,5 +1,13 @@
 {
   "type": "object",
+  "required": [
+    "name_key",
+    "duree_ticks",
+    "periode_ticks",
+    "controle",
+    "modifiers",
+    "tags"
+  ],
   "properties": {
     "name_key": {
       "type": "string"
@@ -10,11 +18,32 @@
         "null"
       ]
     },
+    "element": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "periode_ticks": {
+      "type": "integer"
+    },
     "duree_ticks": {
       "type": "integer"
     },
+    "controle": {
+      "type": "boolean"
+    },
+    "cumule": {
+      "type": "boolean"
+    },
     "modifiers": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "cible"
+        ]
+      }
     },
     "tags": {
       "type": "array",
@@ -22,10 +51,5 @@
         "type": "string"
       }
     }
-  },
-  "required": [
-    "name_key",
-    "duree_ticks",
-    "tags"
-  ]
+  }
 }

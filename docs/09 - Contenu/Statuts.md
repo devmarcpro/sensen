@@ -24,6 +24,9 @@ Brûlure (1d4 feu/tour, 3 tours, retiré par eau) · Ralentissement (−30 % vit
 
 **Durée modulée par gemme ([[Loot — affixes, gemmes et rareté]]) :** l'Opale taillée donne durée des statuts ou Volonté/Charisme.
 
+> [!success] Décidé le 2026-08-26 — les statuts en données (`data/status_effects/`, `tools/gen_status_effects.py`)
+> Le « tour » de l'ancien texte vaut **une période de 10 ticks** (`periode_ticks`). Un statut est `{degats_des, element, periode_ticks, duree_ticks, controle, cumule, modifiers, tags}` ; les `modifiers` visent une cible générique — `cout_ticks` (×), `degats` (×), `armure` (+), `compteur` (+ à l'application), `deplacement` / `garde` (bloqué) — et les systèmes lisent ces cibles et les tags (`dot`, `controle`, `interrompt`), jamais l'id. **14 statuts écrits** : Brûlure (1d4 Feu / 10 t, 30 t), Poison (1d3 / 10 t, 50 t, **cumule**), Saignement (1d4 / 10 t, 40 t), Infection (marqueur), Ralentissement (coûts ×1.3), Hâte (×0.8), Hâte de meute (×0.9 — le Hurlement), Ralliement (dégâts ×1.15 — le Cri), Étourdi (contrôle : +10 au compteur, **interrompt**), Enracinement (contrôle : déplacement bloqué), Retardé (marqueur du tempo subi), Égide (+6 d'armure), Garde annulée (la Feinte), Terreur (contrôle). Un statut non cumulable se **rafraîchit** (la fin est repoussée, jamais additionnée). Les dégâts périodiques sont tiqués en fin de pas pour tous les êtres de l'horloge (phase 2 de [[Boucle de tick]]), et versent l'XP à leur source.
+
 ## Liens
 - **Dépend de** : [[Data-driven design]], [[Pipeline de résolution du combat]], [[Statuts de contrôle et anti-stunlock]]
 - **Alimente** : [[Modules]], [[Potions]], [[Nourriture, potentiel et potions]]

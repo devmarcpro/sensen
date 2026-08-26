@@ -11,7 +11,8 @@
         "armure",
         "bouclier",
         "outil",
-        "consommable"
+        "consommable",
+        "munition"
       ]
     },
     "equip_slot": {
@@ -72,6 +73,9 @@
         "object",
         "null"
       ]
+    },
+    "quantite": {
+      "type": "integer"
     }
   },
   "required": [

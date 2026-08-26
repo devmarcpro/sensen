@@ -25,6 +25,9 @@ Parité totale avec les PNJ et compagnons qui progressent ([[Compagnons]]).
 
 **Multi-cibles ([[Trous connus du combat]]) :** la jauge se remplit d'un segment par attaque, **l'XP, elle, se somme par cible**.
 
+> [!success] Codé le 2026-08-26 — dans le prototype
+> Chaque être porte `xp: {element, competence, type, construction}`. À chaque dégât appliqué : `min(dégâts, PV restants)` versé à l'élément dominant du coup, à la compétence (`combat_skill` de l'arme ; pour un noyau magique, `magie_<élément>` en attendant le mappage des domaines de [[Domaines de grimoires et manuels]] ; pour une action de créature, son id) et au type de dégâts ; la cible verse `dégâts évités` (bruts × zone − finaux) à la construction de la pièce touchée. L'**écran de fin** (client) affiche l'issue, la durée du combat en ticks (le critère « 60 à 200 ticks » se lit directement) et les quatre pistes, puis les remet à zéro : non persistée, comme prévu par la spec.
+
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Jauge de chaîne Wu Xing]], [[Potentiel]], [[Progression par l'usage]]
 - **Alimente** : [[Armure par zone et constructions]], [[Double niveau combat et général]], [[Domination et multiplicateurs]]

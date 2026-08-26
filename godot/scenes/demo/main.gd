@@ -23,6 +23,7 @@ var telegraphes: Dictionary = {}   # id → action engagée
 var atteignables: Dictionary = {}
 var camera_offset := Vector2.ZERO
 var visee := -1                    # capacité en cours de visée (index), -1 sinon
+var ecran_fin: Array[String] = []  # récapitulatif du dernier combat (écran de fin), vide sinon
 var zoom := 1.0
 
 @onready var ui: Label = $CanvasLayer/Info
@@ -35,7 +36,7 @@ func _ready() -> void:
 	EventBus.journal.connect(_sur_journal)
 	EventBus.action_engaged.connect(func(id: String, a: Dictionary) -> void: telegraphes[id] = a)
 	EventBus.action_resolved.connect(func(id: String, _a: Dictionary) -> void: telegraphes.erase(id))
-	EventBus.combat_ended.connect(func(_n: String) -> void: telegraphes.clear())
+	EventBus.combat_ended.connect(_sur_fin_de_combat)
 	GameData.donnees_rechargees.connect(_charger)
 	_charger()
 
@@ -127,6 +128,12 @@ func _maj_atteignables() -> void:
 
 func _unhandled_input(ev: InputEvent) -> void:
 	var j := joueur()
+	if not ecran_fin.is_empty() and ((ev is InputEventMouseButton and ev.pressed) or (ev is InputEventKey and ev.pressed)):
+		ecran_fin.clear()
+		if ev is InputEventKey and ev.keycode == KEY_TAB:
+			arene_courante = (arene_courante + 1) % arenes.size()
+			_charger()
+		return
 	if ev is InputEventMouseMotion:
 		survol = _tuile_sous(get_local_mouse_position())
 		if ev.button_mask & MOUSE_BUTTON_MASK_MIDDLE:
@@ -188,7 +195,11 @@ func _clic(t: Vector2i, lourde: bool) -> void:
 		if not sim.attente.has(joueur_id):
 			return
 		if not sim.intention(joueur_id, {"type": "attaquer", "cible": occ, "lourde": lourde}):
-			_log(tr("journal.inaccessible"))
+			var tir := sim.verifier_tir(j, sim.entites[occ])
+			if not tir.ok:
+				_log(tr("journal.tir_refuse").format({"raison": tr("raison." + tir.raison)}))
+			else:
+				_log(tr("journal.inaccessible"))
 		return
 	if Grille.distance(j.pos, t) == 1:
 		chemin_en_cours = [t]   # un pas direct : autorise la chute volontaire
@@ -240,6 +251,11 @@ func _draw() -> void:
 		for c in chemin_en_cours:
 			pts.append(_ecran(c, g.h(c)))
 		draw_polyline(pts, Color(1, 1, 1, 0.55), 2.0)
+	if visee < 0 and survol.x >= 0 and not j.is_empty() and not g.occupant(survol).is_empty() and g.occupant(survol) != joueur_id:
+		var tir := sim.verifier_tir(j, sim.entites[g.occupant(survol)])
+		if tir.has("bloqueur"):
+			var cb := _ecran(tir.bloqueur, g.h(tir.bloqueur))
+			draw_colored_polygon(PackedVector2Array([cb + Vector2(0, -TH * 0.5), cb + Vector2(TW * 0.5, 0), cb + Vector2(0, TH * 0.5), cb + Vector2(-TW * 0.5, 0)]), Color(1, 0.2, 0.2, 0.45))
 	if visee >= 0 and survol.x >= 0 and not j.is_empty():
 		var plan := sim.plan_capacite(j, visee)
 		var ok := sim.capacite_visable(j, plan, survol)
@@ -370,14 +386,15 @@ func _maj_ui() -> void:
 			"end": e.endurance, "compteur": e.compteur, "h": g.h(e.pos)}) + (" · GARDE" if e.garde else "")
 			+ (" · " + tr(sim.items[e.equipement.main_principale].name_key) if e.equipement.has("main_principale") else "")
 			+ (" + " + tr(sim.items[e.equipement.main_secondaire].name_key) if e.equipement.has("main_secondaire") else "")
-			+ (" · " + _texte_chaine(e) if e.has("chaine") else ""))
+			+ (" · " + _texte_chaine(e) if e.has("chaine") else "")
+			+ (" · " + _texte_statuts(e) if not e.statuts.is_empty() else ""))
 	if survol.x >= 0 and not j.is_empty():
 		lignes.append("  " + tr("ui.case").format({"x": survol.x, "y": survol.y, "h": g.h(survol), "dh": g.h(survol) - g.h(j.pos)}))
 		var occ := g.occupant(survol)
 		if not occ.is_empty() and occ != joueur_id and j.vivant:
 			lignes.append_array(_preview(j, sim.entites[occ]))
 	if not j.is_empty():
-		lignes.append("  " + tr("ui.entite.mana").format({"mana": j.mana, "mana_max": j.mana_max}))
+		lignes.append("  " + tr("ui.entite.mana").format({"mana": j.mana, "mana_max": j.mana_max}) + " · " + tr("ui.munitions").format({"n": j.munitions}))
 		for k in j.get("capacites", []).size():
 			lignes.append("  " + _texte_capacite(j, k))
 		if visee >= 0:
@@ -386,6 +403,9 @@ func _maj_ui() -> void:
 			if survol.x >= 0 and not g.occupant(survol).is_empty():
 				lignes.append("  " + _preview_capacite(j, plan, sim.entites[g.occupant(survol)]))
 	lignes.append("")
+	if not ecran_fin.is_empty():
+		lignes.append_array(ecran_fin)
+		lignes.append("")
 	lignes.append_array(journal)
 	if not j.vivant:
 		lignes.append(tr("journal.defaite"))
@@ -475,6 +495,33 @@ func _preview_capacite(j: Dictionary, plan: Dictionary, cible: Dictionary) -> St
 		"bonus": (" +%d dé(s)" % plan.des_bonus) if plan.des_bonus > 0 else "", "dom": "%.2f" % dom.mult,
 		"zone": zone.zone, "mult": zone.mult, "armure": "%.1f" % armure,
 		"min": sim.regles.degats_finaux(f.x * k, zone.mult, armure, false), "max": sim.regles.degats_finaux(f.y * k, zone.mult, armure, false)})
+
+
+func _texte_statuts(e: Dictionary) -> String:
+	var noms: Array[String] = []
+	var tick := sim.horloge_de(e).ticks
+	for s in e.statuts:
+		noms.append("%s (%d)" % [tr(sim.statuts_defs.get(s.id, {}).get("name_key", s.id)), int(s.fin) - tick])
+	return tr("ui.statuts").format({"liste": ", ".join(noms)})
+
+
+## Écran de fin de combat : issue, durée en ticks, XP des trois pistes et de l'armure (XP de combat).
+func _sur_fin_de_combat(_nom: String) -> void:
+	telegraphes.clear()
+	var j := joueur()
+	var dc: Dictionary = sim.dernier_combat
+	if j.is_empty() or dc.is_empty():
+		return
+	ecran_fin = [tr("ui.fin.titre").format({"issue": tr("ui.fin.victoire") if dc.victoire else tr("ui.fin.defaite"), "ticks": dc.ticks})]
+	for piste in ["element", "competence", "type", "construction"]:
+		var parts: Array[String] = []
+		for k in j.xp[piste].keys():
+			var nom: String = tr("element." + k) if piste == "element" else str(k)
+			parts.append("%s %d" % [nom, j.xp[piste][k]])
+		ecran_fin.append(tr("ui.fin.piste").format({"piste": piste, "detail": ", ".join(parts) if not parts.is_empty() else "—"}))
+	ecran_fin.append(tr("ui.fin.suite"))
+	for piste in j.xp.keys():
+		j.xp[piste] = {}   # non persistée : l'écran la montre, la partie ne la garde pas (prototype)
 
 
 func _texte_chaine(e: Dictionary) -> String:

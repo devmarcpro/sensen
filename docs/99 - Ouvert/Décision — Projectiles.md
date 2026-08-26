@@ -23,6 +23,10 @@ etape: 0
 
 **Météo ([[Météo]]) :** en tempête, **portée effective des projectiles ÷ 2** — règle simple, lisible sur la prévisualisation de portée.
 
+> [!success] Complété le 2026-08-26 — dans le prototype
+> - **Un ennemi sur la trajectoire prend la flèche** (la note ne tranchait que le cas de l'allié) : la trajectoire est réelle dans les deux sens. L'UI grise la cible masquée par un allié et peint la tuile bloquante en rouge.
+> - **Munitions** : le carquois est un objet équipé (`items/proto_fleches.json`, `quantite`) ; l'être porte `munitions` et `munitions_tirees` ; la récupération de 50 % (arrondi bas) se fait à la sortie du combat, quand l'horloge de combat se dissout. La météo n'existe pas encore dans le prototype.
+
 ## Liens
 - **Dépend de** : [[Hauteur de terrain ±10]], [[Stats d'armes]], [[Vocabulaire des modules — six axes]], [[Trous connus du combat]]
 - **Alimente** : [[Combat tactique sur grille]], [[Multijoueur]], [[Équipement — 14 slots]]

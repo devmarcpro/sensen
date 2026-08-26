@@ -1,0 +1,15 @@
+{
+  "name_key": "status.poison.name",
+  "degats_des": "1d3",
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 50,
+  "controle": false,
+  "cumule": true,
+  "modifiers": [],
+  "tags": [
+    "dot",
+    "poison",
+    "negatif"
+  ]
+}

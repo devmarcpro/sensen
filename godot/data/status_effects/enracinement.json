@@ -1,0 +1,19 @@
+{
+  "name_key": "status.enracinement.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 10,
+  "controle": true,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "deplacement",
+      "bloque": true
+    }
+  ],
+  "tags": [
+    "controle",
+    "negatif"
+  ]
+}

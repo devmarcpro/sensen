@@ -39,6 +39,12 @@
     },
     "ticks_par_seconde_exploration": {
       "type": "number"
+    },
+    "anti_stunlock": {
+      "type": "object"
+    },
+    "projectiles": {
+      "type": "object"
     }
   },
   "required": [

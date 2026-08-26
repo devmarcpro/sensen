@@ -1,0 +1,19 @@
+{
+  "name_key": "status.hate_meute.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 30,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "cout_ticks",
+      "mult": 0.9
+    }
+  ],
+  "tags": [
+    "positif",
+    "meute"
+  ]
+}

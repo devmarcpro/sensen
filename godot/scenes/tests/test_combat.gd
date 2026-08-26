@@ -18,6 +18,8 @@ func _ready() -> void:
 	test_wuxing()
 	test_ratelier()
 	test_capacites()
+	test_projectiles()
+	test_statuts()
 	test_arenes_autonomes()
 	if echecs == 0:
 		print("TESTS : tout passe")
@@ -476,3 +478,134 @@ func test_capacites() -> void:
 	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": j.pos + Vector2i(0, -2)}), "Flamme en carré (12 ticks : télégraphée)")
 	s.pas(j.horloge)   # l'échéance : la charge part
 	verifier(allie.sante < pva, "friendly fire : l'allié dans le carré est touché")
+
+
+# ---------------------------------------------------------------- Projectiles (Décision — Projectiles)
+
+func test_projectiles() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	verifier(j.munitions == 20, "20 flèches au carquois")
+	var loup: Dictionary = s.entites["loup_2"]
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(0, -5)
+	s.grille.placer(loup.id, loup.pos)
+	s._engager_combat(j, loup)
+	var h := s.horloge_de(j)
+	loup.compteur = 500
+	for autre in ["loup_3", "loup_4"]:
+		s.entites[autre].compteur = 500
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	s.intention(j.id, {"type": "changer_arme", "item": "proto_arc"})
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false}), "tir à l'arc à 5 tuiles")
+	verifier(j.munitions == 19 and j.munitions_tirees == 1, "une flèche consommée")
+	verifier(j.compteur == h.ticks + 7, "arc : 10 / 1.5 ≈ 7 ticks")
+	# À portée 1 : le tir est impossible (portée minimale 2)
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(0, -1)
+	s.grille.placer(loup.id, loup.pos)
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(not s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false}), "arc au contact : refusé")
+	# Un allié sur la trajectoire masque la cible : refusé, la tuile bloquante est désignée
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(0, -6)
+	s.grille.placer(loup.id, loup.pos)
+	var allie := s.ajouter("bandit", j.pos + Vector2i(0, -3), "joueur")
+	verifier(not s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false}), "un allié masque : tir refusé")
+	var tir := s.verifier_tir(j, loup)
+	verifier(not tir.ok and tir.raison == "allie" and tir.bloqueur == allie.pos, "l'UI connaît la tuile bloquante")
+	# Un ennemi sur la trajectoire prend la flèche
+	s.grille.liberer(allie.pos)
+	allie.vivant = false
+	var loup3: Dictionary = s.entites["loup_3"]
+	s.grille.liberer(loup3.pos)
+	loup3.pos = j.pos + Vector2i(0, -3)
+	s.grille.placer(loup3.id, loup3.pos)
+	var pv3: int = loup3.sante
+	verifier(s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false}), "tir avec un ennemi sur la trajectoire")
+	verifier(loup3.sante < pv3, "l'ennemi interposé prend la flèche")
+	# Sans munitions : refusé ; en fin de combat, 50 % des flèches tirées reviennent (arrondi bas)
+	j.munitions = 0
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(not s.intention(j.id, {"type": "attaquer", "cible": loup3.id, "lourde": false}), "sans flèche : refusé")
+	j.munitions_tirees = 3
+	for id in ["loup_2", "loup_3", "loup_4"]:
+		s.entites[id].sante = 0
+		s.entites[id].vivant = false
+	s._verifier_desengagements()
+	verifier(j.munitions == 1 and not s.en_combat(j), "fin de combat : floor(3 × 0.5) = 1 flèche récupérée")
+	verifier(s.dernier_combat.victoire and s.dernier_combat.ticks == h.ticks, "récapitulatif du combat : victoire, durée en ticks")
+
+
+# ---------------------------------------------------------------- Statuts, anti-stunlock, interruption, XP
+
+func test_statuts() -> void:
+	var s := nouvelle_sim("ruine_a_estrades")
+	var j := joueur_de(s)
+	var chef: Dictionary = s.entites["chef_de_bande_2"]
+	s.grille.liberer(chef.pos)
+	chef.pos = j.pos + Vector2i(1, 0)
+	s.grille.placer(chef.id, chef.pos)
+	s._engager_combat(j, chef)
+	var h := s.horloge_de(j)
+	for e in s.vivants():
+		e.compteur = 500
+	j.compteur = h.ticks
+	# Poison : 1d3 par 10 ticks pendant 50 ticks — tiqué en fin de pas
+	verifier(s.appliquer_statut(j, "poison", 50, chef.id), "poison appliqué")
+	var pv: int = j.sante
+	chef.compteur = h.ticks + 10
+	j.compteur = h.ticks + 100
+	s.pas(j.horloge)   # le chef agit à t+10 : le poison tique
+	verifier(j.sante < pv and j.statuts.size() == 1, "le poison fait des dégâts périodiques")
+	# Anti-stunlock : un contrôle dur est plafonné à 20 ticks, puis verrouillé 50 ticks
+	verifier(s.appliquer_statut(j, "enracinement", 40, chef.id), "enracinement appliqué")
+	var enr: Dictionary = j.statuts.back()
+	verifier(int(enr.fin) - h.ticks <= 20, "contrôle dur plafonné à 20 ticks")
+	verifier(not s.appliquer_statut(j, "etourdi", 10, chef.id), "réapplication refusée (verrou 50 ticks)")
+	verifier(int(j.anti_stunlock_jusqua) == h.ticks + 20 + 50, "verrou = fin + 50")
+	# Enraciné : le déplacement est refusé
+	j.compteur = h.ticks
+	chef.compteur = h.ticks + 500
+	s.pas(j.horloge)
+	verifier(not s.intention(j.id, {"type": "deplacer", "vers": j.pos + Vector2i(0, 1)}), "enraciné : pas de déplacement")
+	verifier(s.intention(j.id, {"type": "attendre"}), "mais on peut attendre")
+	# Interruption : le chef (élite, jauge) engage une lourde ; Étourdi coupe l'action et retire un segment
+	chef.chaine.segments = [{"element": "metal", "tick": h.ticks}, {"element": "eau", "tick": h.ticks}]
+	chef.chaine.tick_ref = h.ticks
+	chef.anti_stunlock_jusqua = -1
+	chef.action_en_cours = {"type": "arme", "cible": j.id, "lourde": true, "ticks": 10, "name_key": "x"}
+	verifier(s.appliquer_statut(chef, "etourdi", 10, j.id), "Étourdi sur le chef")
+	verifier(chef.action_en_cours.is_empty() and chef.chaine.segments.size() == 1, "interruption : action coupée, dernier segment retiré")
+	# Ralliement : ×1.15 dégâts ; Ralentissement : coûts ticks ×1.3
+	s.appliquer_statut(j, "ralentissement", 30, chef.id)
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	var t: int = h.ticks
+	j.statuts = j.statuts.filter(func(x: Dictionary) -> bool: return x.id != "enracinement")
+	verifier(s.intention(j.id, {"type": "deplacer", "vers": j.pos + Vector2i(0, 1)}), "déplacement ralenti")
+	verifier(j.compteur == t + 4, "3 ticks × 1.3 ≈ 4")
+	# XP des trois pistes : un coup d'épée sur le chef verse aux pistes métal / epee / tranchant
+	j.statuts.clear()
+	s.grille.liberer(j.pos)
+	j.pos = chef.pos + Vector2i(0, 1)
+	s.grille.placer(j.id, j.pos)
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	var pvc: int = chef.sante
+	verifier(s.intention(j.id, {"type": "attaquer", "cible": chef.id, "lourde": false}), "coup d'épée")
+	var perdu: int = pvc - chef.sante
+	verifier(int(j.xp.element.get("metal", 0)) == perdu and int(j.xp.competence.get("epee", 0)) == perdu and int(j.xp.type.get("tranchant", 0)) == perdu, "XP = dégâts appliqués, trois pistes")
+	verifier(int(chef.xp.construction.get("mailles", 0)) >= 0, "l'armure du chef gagne ce qu'elle épargne")
+	# Un statut par module : Feinte annule la garde 15 ticks
+	chef.garde = true
+	j.capacites.append({"id": "f", "name_key": "capacite.etincelle.name", "modules": ["point", "feinte"]})
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": chef.pos}), "Feinte")
+	verifier(Etres.bloque_statuts(chef, "garde", s.statuts_defs), "garde annulée par la Feinte")

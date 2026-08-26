@@ -16,6 +16,9 @@ Les contrôles durs se mesurent en ticks, s'affichent, et ne peuvent jamais ench
 
 **Statuts et modificateurs :** les statuts passent par le résolveur unifié [[Résolveur de modificateurs]] — comme les potions ([[Nourriture, potentiel et potions]]) et les buffs de modules.
 
+> [!success] Décidé le 2026-08-26 — implémentation
+> Chaque être porte `anti_stunlock_jusqua` : un contrôle dur (statut `controle: true` ou effet `tempo` positif) est **refusé** avant ce tick ; sinon sa durée est plafonnée à **20 ticks** et le verrou est posé à `fin + 50`. Le tempo subi laisse un marqueur *Retardé* visible. Les tempos négatifs (Célérité, sur un allié) ne sont pas plafonnés. Chiffres dans `combat_rules.json` (`anti_stunlock`).
+
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Boucle de tick]]
 - **Alimente** : [[Statuts]], [[Familles de capacités de la grille]]

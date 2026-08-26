@@ -19,5 +19,8 @@
     "tempo"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "tempo": 10
+  }
 }

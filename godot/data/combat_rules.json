@@ -42,10 +42,25 @@
   },
   "zones": {
     "_doc": "Zones de coup par dénivelé : l'attaquant plus haut → tête, plus bas → jambes",
-    "plus_haut": { "zone": "tete", "mult": 2.5 },
-    "egal": { "zone": "torse", "mult": 1.0 },
-    "plus_bas": { "zone": "jambes", "mult": 0.8 },
-    "moyenne": { "tete": 0.2, "torse": 0.35, "bras": 0.15, "jambes": 0.2, "pieds": 0.1 }
+    "plus_haut": {
+      "zone": "tete",
+      "mult": 2.5
+    },
+    "egal": {
+      "zone": "torse",
+      "mult": 1.0
+    },
+    "plus_bas": {
+      "zone": "jambes",
+      "mult": 0.8
+    },
+    "moyenne": {
+      "tete": 0.2,
+      "torse": 0.35,
+      "bras": 0.15,
+      "jambes": 0.2,
+      "pieds": 0.1
+    }
   },
   "armure": {
     "_doc": "Armure par zone et constructions : armure_zone = dureté/4 × qualité × (1 + niv/100) × matrice",
@@ -53,11 +68,31 @@
     "degats_min": 1,
     "magie_facteur": 0.5,
     "matrice": {
-      "matelasse": { "tranchant": 0.95, "perforant": 0.80, "contondant": 1.25 },
-      "cuir": { "tranchant": 1.10, "perforant": 0.85, "contondant": 1.00 },
-      "mailles": { "tranchant": 1.25, "perforant": 0.80, "contondant": 0.85 },
-      "ecailles": { "tranchant": 1.20, "perforant": 1.10, "contondant": 0.85 },
-      "plaque": { "tranchant": 1.30, "perforant": 1.20, "contondant": 0.95 }
+      "matelasse": {
+        "tranchant": 0.95,
+        "perforant": 0.8,
+        "contondant": 1.25
+      },
+      "cuir": {
+        "tranchant": 1.1,
+        "perforant": 0.85,
+        "contondant": 1.0
+      },
+      "mailles": {
+        "tranchant": 1.25,
+        "perforant": 0.8,
+        "contondant": 0.85
+      },
+      "ecailles": {
+        "tranchant": 1.2,
+        "perforant": 1.1,
+        "contondant": 0.85
+      },
+      "plaque": {
+        "tranchant": 1.3,
+        "perforant": 1.2,
+        "contondant": 0.95
+      }
     }
   },
   "degats": {
@@ -95,5 +130,14 @@
   "ia": {
     "_doc": "IA des créatures : une décision tous les 10 ticks",
     "ticks_entre_decisions": 10
+  },
+  "anti_stunlock": {
+    "_doc": "Statuts de contrôle et anti-stunlock : aucun contrôle dur > 20 ticks, pas de réapplication dans les 50 ticks suivant la fin",
+    "max_ticks": 20,
+    "verrou_ticks": 50
+  },
+  "projectiles": {
+    "_doc": "Décision — Projectiles : trajectoire réelle, tir refusé si un allié masque, 50 % des munitions récupérées en fin de combat",
+    "recuperation": 0.5
   }
 }

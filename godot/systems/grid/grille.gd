@@ -215,6 +215,16 @@ func ligne_de_vue(a: Vector2i, b: Vector2i) -> bool:
 	return true
 
 
+## Les tuiles intermédiaires de la trajectoire a → b (sans les extrémités), dans l'ordre.
+func trajectoire(a: Vector2i, b: Vector2i) -> Array[Vector2i]:
+	var res: Array[Vector2i] = []
+	var n := maxi(absi(b.x - a.x), absi(b.y - a.y))
+	for i in range(1, n):
+		var t := float(i) / float(n)
+		res.append(Vector2i(roundi(lerpf(a.x, b.x, t)), roundi(lerpf(a.y, b.y, t))))
+	return res
+
+
 ## Tuiles d'une ligne de `longueur` depuis `origine` dans la direction (8-dir) de `vers`.
 func ligne(origine: Vector2i, vers: Vector2i, longueur: int) -> Array[Vector2i]:
 	var d := Vector2i(signi(vers.x - origine.x), signi(vers.y - origine.y))

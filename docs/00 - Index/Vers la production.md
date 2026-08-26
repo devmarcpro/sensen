@@ -8,8 +8,8 @@ etape: 0
 
 **Le design est complet et décidé.** Il ne reste ni question bloquante ni valeur à inventer : tout ce qui était ouvert porte une décision ou un défaut chiffré. Ce qui suit est l'état de production — ce qui est fait, et ce qui reste à *produire* (assets, code).
 
-> [!important] Étape 0 en cours — jalons 1 à 8 codés (2026-08-26, soir)
-> La démo 0 est devenue le **prototype de combat** : `godot/scenes/demo/main.tscn` charge les **3 arènes** depuis `data/prototype_arenas/` (Tab pour changer), avec autoloads GameData/EventBus/TickManager, grille SoA + A* 8 directions + ligne de vue, simulation autoritaire (intentions → résolution), une horloge par combat, mêlée avec zones par dénivelé et armure plate, garde frontale, attaque lourde télégraphée, endurance, attendre, chute, IA utility en données et les 24 actions de créatures ; **Wu Xing** (vecteurs, domination, jauge de chaîne avec décroissance et résolveur, prévisualisation au survol), **râtelier** (1-7) et **bouclier** ; **modules assemblés** (F1-F3 : trois capacités, mana, surchauffe, friendly fire des zones, conditions). Tests headless : `scenes/tests/test_combat.tscn`. Détail et jalons restants : [[Prototype de combat — spécification]].
+> [!important] Étape 0 — les 12 jalons sont codés, reste le jugement (2026-08-26, soir)
+> La démo 0 est devenue le **prototype de combat** : `godot/scenes/demo/main.tscn` charge les **3 arènes** depuis `data/prototype_arenas/` (Tab pour changer), avec autoloads GameData/EventBus/TickManager, grille SoA + A* 8 directions + ligne de vue, simulation autoritaire (intentions → résolution), une horloge par combat, mêlée avec zones par dénivelé et armure plate, garde frontale, attaque lourde télégraphée, endurance, attendre, chute, IA utility en données et les 24 actions de créatures ; **Wu Xing** (vecteurs, domination, jauge de chaîne avec décroissance et résolveur, prévisualisation au survol), **râtelier** (1-7) et **bouclier** ; **modules assemblés** (F1-F3 : trois capacités, mana, surchauffe, friendly fire des zones, conditions) ; **projectiles** (arc, munitions, trajectoire), **statuts** (14, anti-stunlock, interruption de la jauge des élites), **écran de fin** (durée en ticks, XP des pistes). Tests headless : `scenes/tests/test_combat.tscn`. Détail et jalons restants : [[Prototype de combat — spécification]].
 >
 > **À juger à l'œil (ouvrir `godot/` dans l'éditeur, F5) — questions à trancher :**
 > 1. *Lisibilité de l'iso 32×32 à 40×20 px par tuile* : le relief se lit-il ? Faut-il des ombres de flanc plus marquées ou une grille ? (molette : zoom, clic milieu : déplacer la vue)
@@ -17,6 +17,7 @@ etape: 0
 > 3. *Le télégraphe* (« ! » + tuiles rouges pendant une lourde ou une charge) : est-il vu à temps ?
 > 4. *Les coûts sur les tuiles* (jaune, budget 12 ticks) : utiles ou bruit ?
 > 6. *Les capacités* (F1 puis clic) : la forme bleue prévisualisée et l'infobulle suffisent-elles à comprendre ce qui va partir, pour qui, à quel prix ?
+> 7. *Les critères mesurables* : la durée d'une rencontre s'affiche à l'écran de fin (cible 60-200 ticks) ; les deux voies de chaîne (rotation ×2.40 vs construction/détonation ×1.65) et la rentabilité du swap se jugent en jouant — noter les totaux de dégâts par voie sur 10 combats.
 > 5. *La jauge de chaîne* (pastilles sous le personnage + ligne « chaîne : Métal → Métal ») : lit-on d'un coup d'œil où l'on en est et ce que le prochain coup fera ? Le swap d'arme (4 ticks pour +0.35) donne-t-il envie ?
 >
 > [!note] Démo 0 (2026-08-26, matin)
@@ -92,7 +93,7 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 
 ## Le chemin critique, en une ligne
 
-**~~Valider P2 + P7~~ ✅ → ~~écrire le document du prototype de combat~~ ✅ → ~~produire les 5 modules Métal + le catalogue d'actions~~ ✅ → ~~jalons 1-8 de l'étape 0~~ ✅ → **jalons 9-12 de l'étape 0** ([[Prototype de combat — spécification]] : projectiles, statuts, interruption des élites, écran de fin) → juger le combat. Tout le reste peut suivre la cadence des 11 étapes.
+**~~Valider P2 + P7~~ ✅ → ~~écrire le document du prototype de combat~~ ✅ → ~~produire les 5 modules Métal + le catalogue d'actions~~ ✅ → ~~les 12 jalons de l'étape 0~~ ✅ → **juger le combat** ([[Prototype de combat — spécification]] § 5 : 10 combats par arène, critères mesurables et grille qualitative) → itérer sur les chiffres (JSON + F5) → étape 1 → juger le combat. Tout le reste peut suivre la cadence des 11 étapes.
 
 ## Liens
 - **Dépend de** : [[Ordre de construction]], [[Héritage voxel — audit]], [[Trous connus du combat]]

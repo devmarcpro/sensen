@@ -19,7 +19,8 @@
   "equipement": [
     "proto_epee",
     "proto_casque_cuir",
-    "proto_cuirasse_cuir"
+    "proto_cuirasse_cuir",
+    "proto_fleches"
   ],
   "ratelier": [
     "proto_dague",
