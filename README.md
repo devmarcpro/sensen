@@ -11,7 +11,7 @@ Un **roguelike tactique** en monde infini, généré procéduralement et totalem
 | Chemin | Ce que c'est |
 |---|---|
 | [`godot/`](godot/) | Le projet Godot — squelette pour l'instant, arborescence conforme au design (D.1) |
-| [`docs/`](docs/) | Le design complet : un **coffre Obsidian** de 269 notes atomiques, reliées et navigables |
+| [`docs/`](docs/) | Le design complet : un **coffre Obsidian** de 270 notes atomiques, reliées et navigables |
 | [`archive/`](archive/) | Le GDD source monolithique (v2.0) — archive de référence, les notes de `docs/` font foi |
 | [`tools/`](tools/) | Outillage du dépôt — `check_vault.py` valide liens, frontmatter et comptages du coffre |
 

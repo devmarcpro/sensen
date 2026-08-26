@@ -1,0 +1,144 @@
+{
+  "id": "item_05_casque",
+  "name_key": "item.item_05_casque.name",
+  "type": "armure",
+  "rarete": "exceptionnel",
+  "piece": "Casque",
+  "construction": "Matelassé",
+  "equip_slot": "tete",
+  "hands": 0,
+  "nom_affiche": "Casque de l'orage",
+  "qualite": {
+    "valeur": 1.443,
+    "palier": "Bon",
+    "niveau_artisan_composants": 67,
+    "niveau_assembleur": 88,
+    "qualites_composants": {
+      "plaque": 1.306,
+      "sangles": 1.469,
+      "fixations": 1.281
+    },
+    "jet_assemblage": 1.079,
+    "formule": "(Somme qualite_composant_i * poids_slot_i) * jet_assemblage borne [0.7, 1.3]"
+  },
+  "slots": {
+    "plaque": {
+      "composant": "Plaque",
+      "materiau": "Soie",
+      "poids": 0.75
+    },
+    "sangles": {
+      "composant": "Sangles",
+      "materiau": "Cuir de loup",
+      "poids": 0.2
+    },
+    "fixations": {
+      "composant": "Fixations standard",
+      "materiau": "Bronze",
+      "poids": 0.05
+    }
+  },
+  "stats_composite_13": {
+    "durete": 6.55,
+    "densite": 2.65,
+    "valeur_base": 15.0,
+    "conductivite_mana": 23.6,
+    "flammabilite": 51.5,
+    "isolation": 39.25,
+    "conductivite_electrique": 8.85,
+    "flottabilite": 66.2,
+    "luminosite": 0.0,
+    "fertilite": 0.0,
+    "transparence": 15.0,
+    "elasticite": 56.6,
+    "friction": 31.75
+  },
+  "wuxing": {
+    "Bois": 0.95,
+    "Métal": 0.05
+  },
+  "element_dominant": "Bois",
+  "genre_grammatical": "ms",
+  "combat": {
+    "zone": "tete",
+    "zone_mult": 2.5,
+    "poids_dans_moyenne_perso": 0.2,
+    "niveau_construction": 61,
+    "armure_zone_base": 3.8,
+    "armure_zone_par_type": {
+      "tranchant": 3.61,
+      "perforant": 3.04,
+      "contondant": 4.76
+    },
+    "matrice_construction": {
+      "tranchant": 0.95,
+      "perforant": 0.8,
+      "contondant": 1.25
+    },
+    "formule": "durete_composite / 4 * qualite * (1 + niveau_construction / 100) * matrice[construction][type_degats]",
+    "fort_contre": "contondant",
+    "faible_contre": "perforant",
+    "reduction_magique": "50 % de armure_zone",
+    "volume": 6,
+    "poids_kg": 1.59
+  },
+  "affixes": [
+    {
+      "famille": "rythmique",
+      "gabarit": "tous les [4-7] coups : ignore [50-100] % d'armure",
+      "params": {
+        "n": 4,
+        "pct": 100
+      },
+      "texte": "tous les 4 coups : ignore 100 % d'armure",
+      "uid": "affixe:AF6097"
+    },
+    {
+      "famille": "conditionnel",
+      "gabarit": "sous [30-60] % PV : +[1-3] dés",
+      "params": {
+        "seuil_pv": 40,
+        "des": 1
+      },
+      "texte": "sous 40 % PV : +1 dés",
+      "uid": "affixe:A414A1"
+    }
+  ],
+  "sertissures": {
+    "nombre": 2,
+    "contenu": [
+      {
+        "slot": 1,
+        "gemme": null
+      },
+      {
+        "slot": 2,
+        "gemme": "Topaze",
+        "element": "Terre",
+        "qualite_taille": 1.402,
+        "palier": "Bon",
+        "effet": "+[1-3] dégâts Terre",
+        "valeur_tiree": 2
+      }
+    ]
+  },
+  "infusion": null,
+  "provenance": {
+    "donjon": "donjon_476A",
+    "etage": 1,
+    "source": "autel"
+  },
+  "craft": null,
+  "prix": {
+    "valeur_base_objet": 22.5,
+    "facteur_rarete": 5.2,
+    "prix_suggere_reput_neutre": 168.8,
+    "formule": "valeur_base_objet * qualite * facteur_rarete * facteur_reputation"
+  },
+  "effects": [],
+  "tags": [
+    "armure",
+    "exceptionnel",
+    "matelassé"
+  ]
+}

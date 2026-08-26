@@ -1,0 +1,95 @@
+{
+  "id": "item_01_dague",
+  "name_key": "item.item_01_dague.name",
+  "type": "arme",
+  "rarete": "commun",
+  "fonctionnalite": "Dague",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "nom_affiche": "Dague en cobalt",
+  "qualite": {
+    "valeur": 1.539,
+    "palier": "Bon",
+    "niveau_artisan_composants": 64,
+    "niveau_assembleur": 44,
+    "qualites_composants": {
+      "tete": 1.295,
+      "manche": 1.415,
+      "fixations": 1.543
+    },
+    "jet_assemblage": 1.151,
+    "formule": "(Somme qualite_composant_i * poids_slot_i) * jet_assemblage borne [0.7, 1.3]"
+  },
+  "slots": {
+    "tete": {
+      "composant": "Tête d'arme",
+      "materiau": "Cobalt",
+      "poids": 0.7
+    },
+    "manche": {
+      "composant": "Manche",
+      "materiau": "Hêtre",
+      "poids": 0.25
+    },
+    "fixations": {
+      "composant": "Fixations standard",
+      "materiau": "Bronze",
+      "poids": 0.05
+    }
+  },
+  "stats_composite_13": {
+    "durete": 20.1,
+    "densite": 10.45,
+    "valeur_base": 11.1,
+    "conductivite_mana": 20.5,
+    "flammabilite": 15.5,
+    "isolation": 12.25,
+    "conductivite_electrique": 45.35,
+    "flottabilite": 22.05,
+    "luminosite": 1.4,
+    "fertilite": 0.0,
+    "transparence": 0.0,
+    "elasticite": 16.7,
+    "friction": 30.75
+  },
+  "wuxing": {
+    "Métal": 0.75,
+    "Bois": 0.25
+  },
+  "element_dominant": "Métal",
+  "genre_grammatical": "fs",
+  "combat": {
+    "des_degats": "1d6",
+    "crit_range": "19-20",
+    "degats_moyens": 5.41,
+    "type_degats": "perçant",
+    "portee_tuiles": 1,
+    "vitesse_att_par_10_ticks": 3.33,
+    "ticks_par_attaque": 3.0,
+    "volume": 1.6,
+    "poids_reference_kg": 1.92,
+    "poids_kg": 1.67
+  },
+  "affixes": [],
+  "sertissures": {
+    "nombre": 0,
+    "contenu": []
+  },
+  "infusion": null,
+  "provenance": null,
+  "craft": {
+    "station": "Enclume (assemblage)",
+    "competence": "Forge"
+  },
+  "prix": {
+    "valeur_base_objet": 16.65,
+    "facteur_rarete": 1.0,
+    "prix_suggere_reput_neutre": 25.6,
+    "formule": "valeur_base_objet * qualite * facteur_rarete * facteur_reputation"
+  },
+  "effects": [],
+  "tags": [
+    "arme",
+    "commun"
+  ]
+}

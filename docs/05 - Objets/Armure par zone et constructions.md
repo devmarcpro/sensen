@@ -25,6 +25,22 @@ L'armure est une réduction plate par zone, et les « types » d'armure n'existe
 | Écailles | métal, os, écailles | tranchant, perforant | contondant |
 | Plaque | lingots, os massif | tranchant, perforant | — |
 
+**La matrice, chiffrée le 2026-08-26** (elle manquait — « fort contre » n'avait aucune valeur). Elle multiplie **`armure_zone`**, jamais les dégâts bruts, et reste dans la **même bande compressée** que les multiplicateurs élémentaires :
+
+| Construction | tranchant | perforant | contondant |
+|---|---|---|---|
+| Matelassé | 0.95 | **0.80** | **1.25** |
+| Cuir | 1.10 | **0.85** | 1.00 |
+| Mailles | **1.25** | **0.80** | 0.85 |
+| Écailles | 1.20 | 1.10 | 0.85 |
+| Plaque | **1.30** | 1.20 | 0.95 |
+
+La formule complète devient :
+
+`armure_zone = dureté_composite / 4 × qualité × (1 + niveau_construction / 100) × matrice[construction][type_dégâts]`
+
+Bande **0.80 – 1.30** : lisible, jamais décisive seule. C'est ce qui donne corps à *« les flèches percent les mailles, la plaque les arrête »* — mailles/perforant **0.80** contre plaque/perforant **1.20**.
+
 Le **matériau reste libre dans la construction** : la construction donne le profil, le matériau donne les chiffres (dureté, poids, isolation, élément). Le lourd/léger émerge de la densité, jamais d'une règle.
 
 **Côté rendu, la même règle vaut ([[Squelette modulaire et points d'attache]]) : la construction est la forme, le matériau est la teinte.** On ne dessine donc pas une armure par objet, mais **une par construction** — 5 formes × 8 segments ≈ **40 sprites pour la totalité de l'armure du jeu**, les variantes de matériau venant du remapping de palette en shader ([[Palette de couleurs des matériaux]]).

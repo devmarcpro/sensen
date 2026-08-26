@@ -177,6 +177,8 @@ Générer pour de vrai a trouvé cinq manques que la relecture n'avait pas vus. 
 
 > **C'est l'argument pour générer tôt.** Une spec se relit sans jamais buter ; un générateur bute à la première contradiction.
 
+**Pendant pour les objets :** [[Exemples — dix objets générés]].
+
 ## Liens
 - **Dépend de** : [[Blocs de l'être]], [[Schéma créature]], [[Les trois axes — race, classe, fonction]], [[Loci — les dix types]]
 - **Alimente** : [[Décision — Pipeline de contenu]], [[Profils de PNJ]], [[Apparence — données et équipement]]

@@ -25,6 +25,22 @@ portee  = fixe par fonctionnalité (non modulée par les matériaux)
 type_degats = fixe par fonctionnalité (tranchant / perçant / contondant)
 ```
 
+**Le poids, chiffré le 2026-08-26** — la formule de vitesse consomme `poids_reference` et `poids_reel`, dont aucun n'était défini. Les deux dérivent d'un seul champ déclaré, le **volume** :
+
+```
+volume            = champ déclaré par la fonctionnalité (data/functionalities/*.json)
+poids_reel_kg     = densite_composite * volume / 10
+poids_reference   = 12 * volume / 10          (12 = densité du FER, l'étalon)
+```
+
+| Fonctionnalité | Dague | Épée | Masse | Lance | Hache d'armes | Arc | Arbalète | Bâton |
+|---|---|---|---|---|---|---|---|---|
+| `volume` | 1.6 | 3.2 | 5.5 | 3.8 | 4.6 | 1.4 | 4.2 | 2.0 |
+
+**Pour l'armure**, `volume` est déclaré par pièce : Casque 6 · Cuirasse 12 · Brassards-gants 5 · Jambières 7 · Bottes 3. Le poids porté alimente `capacite = 30 + Force × 5` ([[Armures et poids porté]]).
+
+Conséquence voulue : **une épée en or pèse 5 kg et une en titane 2,6 kg** — le matériau se sent dans la main avant de se voir dans les chiffres.
+
 **Profils de fonctionnalité par défaut** (`data/functionalities/*.json`) :
 
 | Fonctionnalité | Dés de dégâts | Crit | Vitesse (att./10 ticks) | Portée (blocs) | Type |

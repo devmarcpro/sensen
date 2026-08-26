@@ -1,0 +1,116 @@
+{
+  "id": "item_04_arc",
+  "name_key": "item.item_04_arc.name",
+  "type": "arme",
+  "rarete": "rare",
+  "fonctionnalite": "Arc",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "nom_affiche": "Arc exact du guetteur",
+  "qualite": {
+    "valeur": 0.891,
+    "palier": "Correct",
+    "niveau_artisan_composants": 19,
+    "niveau_assembleur": 75,
+    "qualites_composants": {
+      "tete": 0.986,
+      "manche": 0.822,
+      "fixations": 0.829
+    },
+    "jet_assemblage": 0.951,
+    "formule": "(Somme qualite_composant_i * poids_slot_i) * jet_assemblage borne [0.7, 1.3]"
+  },
+  "slots": {
+    "tete": {
+      "composant": "Fût d'arc",
+      "materiau": "Chêne",
+      "poids": 0.7
+    },
+    "manche": {
+      "composant": "Manche",
+      "materiau": "Hêtre",
+      "poids": 0.25
+    },
+    "fixations": {
+      "composant": "Fixations standard",
+      "materiau": "Cuivre",
+      "poids": 0.05
+    }
+  },
+  "stats_composite_13": {
+    "durete": 12.2,
+    "densite": 6.2,
+    "valeur_base": 4.05,
+    "conductivite_mana": 10.5,
+    "flammabilite": 57.5,
+    "isolation": 33.25,
+    "conductivite_electrique": 9.0,
+    "flottabilite": 76.0,
+    "luminosite": 0.0,
+    "fertilite": 0.0,
+    "transparence": 0.0,
+    "elasticite": 25.25,
+    "friction": 44.75
+  },
+  "wuxing": {
+    "Bois": 0.95,
+    "Métal": 0.05
+  },
+  "element_dominant": "Bois",
+  "genre_grammatical": "ms",
+  "combat": {
+    "des_degats": "2d6",
+    "crit_range": "20",
+    "degats_moyens": 3.43,
+    "type_degats": "perçant",
+    "portee_tuiles": 25,
+    "vitesse_att_par_10_ticks": 2.46,
+    "ticks_par_attaque": 4.07,
+    "volume": 1.4,
+    "poids_reference_kg": 1.68,
+    "poids_kg": 0.87,
+    "mod_elasticite_bois": 0.901
+  },
+  "affixes": [
+    {
+      "famille": "wu_xing",
+      "gabarit": "+1 segment de chaîne",
+      "params": {},
+      "rare": true,
+      "texte": "+1 segment de chaîne",
+      "uid": "affixe:849488"
+    }
+  ],
+  "sertissures": {
+    "nombre": 1,
+    "contenu": [
+      {
+        "slot": 1,
+        "gemme": "Onyx",
+        "element": "Métal",
+        "qualite_taille": 1.353,
+        "palier": "Bon",
+        "effet": "+[1-3] dégâts Métal",
+        "valeur_tiree": 2
+      }
+    ]
+  },
+  "infusion": null,
+  "provenance": {
+    "donjon": "donjon_938D",
+    "etage": 7,
+    "source": "coffre"
+  },
+  "craft": null,
+  "prix": {
+    "valeur_base_objet": 6.07,
+    "facteur_rarete": 3.05,
+    "prix_suggere_reput_neutre": 16.5,
+    "formule": "valeur_base_objet * qualite * facteur_rarete * facteur_reputation"
+  },
+  "effects": [],
+  "tags": [
+    "arme",
+    "rare"
+  ]
+}

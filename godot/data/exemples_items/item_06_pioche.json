@@ -1,0 +1,98 @@
+{
+  "id": "item_06_pioche",
+  "name_key": "item.item_06_pioche.name",
+  "type": "outil",
+  "rarete": "commun",
+  "fonctionnalite": "Pioche",
+  "functionality": "recolte_minage",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "nom_affiche": "Pioche en fer",
+  "qualite": {
+    "valeur": 0.895,
+    "palier": "Correct",
+    "niveau_artisan_composants": 49,
+    "niveau_assembleur": 70,
+    "qualites_composants": {
+      "tete": 1.244,
+      "manche": 1.167,
+      "fixations": 1.202
+    },
+    "jet_assemblage": 0.732,
+    "formule": "(Somme qualite_composant_i * poids_slot_i) * jet_assemblage borne [0.7, 1.3]"
+  },
+  "slots": {
+    "tete": {
+      "composant": "Tête d'outil",
+      "materiau": "Fer",
+      "poids": 0.7
+    },
+    "manche": {
+      "composant": "Manche",
+      "materiau": "Bambou",
+      "poids": 0.25
+    },
+    "fixations": {
+      "composant": "Fixations standard",
+      "materiau": "Fer",
+      "poids": 0.05
+    }
+  },
+  "stats_composite_13": {
+    "durete": 20.5,
+    "densite": 9.75,
+    "valeur_base": 7.0,
+    "conductivite_mana": 11.25,
+    "flammabilite": 18.75,
+    "isolation": 11.25,
+    "conductivite_electrique": 57.5,
+    "flottabilite": 24.75,
+    "luminosite": 0.0,
+    "fertilite": 0.0,
+    "transparence": 0.0,
+    "elasticite": 26.25,
+    "friction": 28.75
+  },
+  "wuxing": {
+    "Métal": 0.75,
+    "Bois": 0.25
+  },
+  "element_dominant": "Métal",
+  "genre_grammatical": "fs",
+  "combat": {
+    "des_degats": "1d6",
+    "crit_range": "20",
+    "degats_moyens": 3.21,
+    "type_degats": "contondant",
+    "portee_tuiles": 1,
+    "vitesse_att_par_10_ticks": 1.76,
+    "ticks_par_attaque": 5.68,
+    "volume": 3.0,
+    "poids_reference_kg": 3.6,
+    "poids_kg": 2.92,
+    "competence_recolte": "Minage",
+    "seuil_irrecoltabilite": 20.5
+  },
+  "affixes": [],
+  "sertissures": {
+    "nombre": 0,
+    "contenu": []
+  },
+  "infusion": null,
+  "provenance": null,
+  "craft": {
+    "station": "Enclume (assemblage)",
+    "competence": "Forge"
+  },
+  "prix": {
+    "valeur_base_objet": 10.5,
+    "facteur_rarete": 1.0,
+    "prix_suggere_reput_neutre": 9.4,
+    "formule": "valeur_base_objet * qualite * facteur_rarete * facteur_reputation"
+  },
+  "effects": [],
+  "tags": [
+    "outil",
+    "commun"
+  ]
+}

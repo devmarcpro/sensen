@@ -1,0 +1,96 @@
+{
+  "id": "item_02_arc",
+  "name_key": "item.item_02_arc.name",
+  "type": "arme",
+  "rarete": "commun",
+  "fonctionnalite": "Arc",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "nom_affiche": "Arc en frêne",
+  "qualite": {
+    "valeur": 0.951,
+    "palier": "Correct",
+    "niveau_artisan_composants": 50,
+    "niveau_assembleur": 27,
+    "qualites_composants": {
+      "tete": 1.157,
+      "manche": 1.183,
+      "fixations": 1.408
+    },
+    "jet_assemblage": 0.809,
+    "formule": "(Somme qualite_composant_i * poids_slot_i) * jet_assemblage borne [0.7, 1.3]"
+  },
+  "slots": {
+    "tete": {
+      "composant": "Fût d'arc",
+      "materiau": "Frêne",
+      "poids": 0.7
+    },
+    "manche": {
+      "composant": "Manche",
+      "materiau": "Frêne",
+      "poids": 0.25
+    },
+    "fixations": {
+      "composant": "Fixations standard",
+      "materiau": "Acier",
+      "poids": 0.05
+    }
+  },
+  "stats_composite_13": {
+    "durete": 11.95,
+    "densite": 4.45,
+    "valeur_base": 5.35,
+    "conductivite_mana": 12.0,
+    "flammabilite": 57.0,
+    "isolation": 33.5,
+    "conductivite_electrique": 8.35,
+    "flottabilite": 79.95,
+    "luminosite": 0.0,
+    "fertilite": 0.0,
+    "transparence": 0.0,
+    "elasticite": 59.65,
+    "friction": 44.0
+  },
+  "wuxing": {
+    "Bois": 0.95,
+    "Métal": 0.05
+  },
+  "element_dominant": "Bois",
+  "genre_grammatical": "ms",
+  "combat": {
+    "des_degats": "2d6",
+    "crit_range": "20",
+    "degats_moyens": 4.13,
+    "type_degats": "perçant",
+    "portee_tuiles": 25,
+    "vitesse_att_par_10_ticks": 2.7,
+    "ticks_par_attaque": 3.7,
+    "volume": 1.4,
+    "poids_reference_kg": 1.68,
+    "poids_kg": 0.62,
+    "mod_elasticite_bois": 1.039
+  },
+  "affixes": [],
+  "sertissures": {
+    "nombre": 0,
+    "contenu": []
+  },
+  "infusion": null,
+  "provenance": null,
+  "craft": {
+    "station": "Enclume (assemblage)",
+    "competence": "Forge"
+  },
+  "prix": {
+    "valeur_base_objet": 8.02,
+    "facteur_rarete": 1.0,
+    "prix_suggere_reput_neutre": 7.6,
+    "formule": "valeur_base_objet * qualite * facteur_rarete * facteur_reputation"
+  },
+  "effects": [],
+  "tags": [
+    "arme",
+    "commun"
+  ]
+}

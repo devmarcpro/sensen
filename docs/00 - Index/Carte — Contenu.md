@@ -6,7 +6,7 @@ statut: décidé
 etape: 6
 ---
 
-Les catalogues prêts à transcrire en JSON. 33 notes.
+Les catalogues prêts à transcrire en JSON. 34 notes.
 
 *Toutes les valeurs sont fixées et implémentables telles quelles ; le playtest les ajuste, il n'a rien à inventer.*
 
@@ -45,6 +45,8 @@ Les catalogues prêts à transcrire en JSON. 33 notes.
 - **[[Cultures de nommage]]** (7, toutes réelles) — purement phonétique et toponymique.
 
 - **[[Exemples — dix PNJ générés]]** — dix fiches **produites par les règles**, tous blocs remplis : ce à quoi une fiche conforme ressemble. Le tirage a révélé cinq trous de spec, tous comblés.
+
+- **[[Exemples — dix objets générés]]** — dix objets **produits par les règles**, du craft compositionnel au prix suggéré. Le tirage a comblé cinq trous chiffrés.
 
 ## Liens
 - **Voir aussi** : [[Sensen — Index général]], [[Carte — Objets]], [[Carte — Êtres]], [[Carte — Ouvert]]
