@@ -6,7 +6,7 @@ statut: décidé
 etape: 10
 ---
 
-Des îlots de civilisation générés déterministiquement par secteur — un royaume est un événement, la majorité du monde est sauvage.
+Des îlots de civilisation générés déterministiquement par secteur — un royaume est un événement, la majorité du monde est sauvage, et la géographie décide de ses frontières.
 
 ```
 STRUCTURE DU MONDE — les royaumes sont des ÎLOTS DE CIVILISATION
@@ -14,8 +14,10 @@ séparés par de vastes terres sauvages sans lois (14.4 : hors royaume =
 aucune loi, aucune douane — la "wilderness" est l'anarchie de fait).
 La majorité du monde est sauvage ; un royaume est un événement.
 
-GÉNÉRATION DÉTERMINISTE PAR GRAINES DE CAPITALE (compatible infini) :
-  Le monde est découpé en SECTEURS de 64x64 cellules. Par secteur :
+GÉNÉRATION DÉTERMINISTE PAR GRAINES DE CAPITALE :
+  Le monde (16x16 secteurs, fini - Décision Monde fini) est découpé
+  en SECTEURS de 64x64 cellules. Les secteurs entièrement océaniques
+  ne portent aucune graine. Par secteur terrestre :
   hash(seed, secteur) → 0 à 2 "graines de capitale", placées sur les
   cellules du secteur les plus favorables : basse corruption (bruit
   danger), eau/côte à proximité, terrain praticable (altitude modérée),
@@ -39,6 +41,27 @@ TAILLE (tirée à la graine, toute la gamme voulue) :
   routes générées (E.2). Deux royaumes proches bornent leurs
   territoires l'un contre l'autre (frontière) ; sinon le territoire
   s'arrête et la wilderness commence.
+
+FRONTIÈRES NATURELLES (Décision — Monde fini, continents et océan) :
+  LE TERRITOIRE NE FRANCHIT JAMAIS L'EAU. Un royaume est une masse
+  terrestre contiguë ; sa frontière est une CÔTE, une CRÊTE ou le
+  voisin — jamais un rayon. Trois conséquences :
+   - UN CONTINENT EST UN THÉÂTRE POLITIQUE. Deux royaumes de la même
+     masse se touchent, se font la guerre par terre, partagent des
+     douanes (14.4). Deux royaumes séparés par la mer n'ont que le
+     commerce naval et la colonie : aucune invasion terrestre.
+     Le champ diplomacy (B.9) distingue donc voisin TERRESTRE
+     (tension, guerre, traité) et voisin MARITIME (commerce, embargo).
+   - ROYAUME INSULAIRE : une île portant une seule graine donne un
+     royaume isolé -> 100 % de race dominante au lieu de 90 %, une
+     seule culture, lois plus divergentes. C'est le mécanisme le plus
+     simple pour rendre une race lisible comme PEUPLE (12.2/B.9).
+   - DÉTROITS ET ISTHMES : les rares passages terrestres entre deux
+     masses et les bras de mer étroits sont des positions
+     stratégiques — un royaume qui en tient un lève un péage et
+     attire une guerre. Marqués comme POI de type "passage".
+  LA TERRE EST FINIE, DONC L'EXPANSION EST À SOMME NULLE : s'étendre,
+  c'est prendre à la wilderness ou à quelqu'un.
 
 IDENTITÉ (déterministe à la graine) :
   - Race dominante : choisie selon le biome de la capitale (affinités
@@ -78,6 +101,6 @@ LE ROYAUME DU JOUEUR naît différemment (14.4) : par ses claims —
 ```
 
 ## Liens
-- **Dépend de** : [[Unification macro-micro]], [[Schéma royaume]], [[Culture de nommage — schéma]], [[Races]], [[Niveau de danger]]
+- **Dépend de** : [[Décision — Monde fini, continents et océan]], [[Unification macro-micro]], [[Schéma royaume]], [[Culture de nommage — schéma]], [[Races]], [[Niveau de danger]]
 - **Alimente** : [[Gouvernance, lois et diplomatie]], [[Génération de noms]], [[Halls de guilde]], [[Villages PNJ — repeuplement et décimation]], [[L'information comme récompense]]
 - **Voir aussi** : [[Carte du monde]], [[LOD de simulation]], [[Quêtes et guildes]], [[Lois et infractions]], [[Cultures de nommage]], [[Localisation]], [[Direction artistique]]

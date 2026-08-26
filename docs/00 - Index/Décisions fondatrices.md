@@ -63,6 +63,7 @@ La rupture du 2026-08-09 : ce qui a été abandonné, ce qui survit, et pourquoi
 | **La fonction absorbe les 11 postes** | `vendeur` → **commerçant**, `forgeron` → **artisan** ; la classe *Artisan* devient **Forgeron** ([[Fonctions]]) |
 | **5ᵉ contrainte permanente** | *le personnage joueur est une entité comme une autre ; le contrôle est un attribut, pas un type* ([[Contraintes permanentes]]) — rend possible [[Ouvert — Changer de personnage]] |
 
+| **Monde fini, pas infini** | Le monde est une **planète** de 1024×1024 cellules : ~35 % de terres en **5 à 7 continents** et des îles, générés par **plaques tectoniques** déterministes. Les royaumes gagnent des frontières naturelles (côte, crête, détroit), l'expansion devient à somme nulle, et le bateau devient une **porte** au lieu d'un bonus de vitesse ([[Décision — Monde fini, continents et océan]]) |
 | **Classes renommées et étendues** | **8 visibles** en français évocateur — Le Sabre, Le Souffle, La Braise, La Trace, La Balance, La Paume, Le Creuset, Le Vent — et **11 cachées** : Le Passeur, Le Sablier, Le Sceau, Le Masque, Le Porteur, L'Ombre, L'Écarlate, Le Rieur, Le Fossoyeur, La Mèche, L'Engrenage ([[Classes]]) |
 | **Vocabulaire des modules élargi** | deux effets nouveaux, `tempo` et `saisie` ([[Vocabulaire des modules — six axes]]) + 3 statuts (Dissimulé, Saisi, Retardé) et la **jauge de classe** — tous génériques, aucune exception par classe |
 

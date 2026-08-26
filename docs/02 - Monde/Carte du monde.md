@@ -8,7 +8,8 @@ etape: 8
 
 La couche stratégique : une vue abstraite de la même grille, servant de voyage rapide et de tableau de bord des points d'intérêt.
 
-- Monde infini, généré procéduralement.
+- **Monde fini, structuré comme une planète** : continents, îles et océan ([[Décision — Monde fini, continents et océan]]) — 1024×1024 cellules, ~35 % de terres émergées, 5 à 7 continents. La carte du monde a donc des **bords**, et l'océan y est un obstacle réel plutôt qu'un décor.
+- Généré procéduralement et déterministiquement à la graine.
 - Déplacement case par case sur la carte du monde (façon roguelike).
 - **Biomes :** nombreux et nuancés (**20+**), émergeant des combinaisons variées des couches de bruit ([[Génération par couches de bruit]]) plutôt qu'un petit nombre de catégories larges façon Minecraft.
 - **Points d'intérêt :** donjons/ruines à explorer, camps de monstres/repaires, ressources rares à récolter, sanctuaires/autels magiques, villages/villes PNJ (voir [[Villages PNJ — repeuplement et décimation]]).
@@ -23,7 +24,9 @@ La couche stratégique : une vue abstraite de la même grille, servant de voyage
 
 **Voyage en véhicule :** voyager avec un véhicule accélère le voyage rapide (coût de temps in-game réduit : ×0.6 terrestre sur route, ×0.5 naval sur mer) et augmente le cargo transportable — voir [[Véhicules]].
 
+**Voyage maritime :** le voyage rapide en mer ne s'ouvre que sur les **routes maritimes déjà parcourues une fois** — même principe que le reste de la carte, qui n'est jamais qu'un raccourci par-dessus un monde réellement traversable. Atteindre un continent la première fois est donc toujours une navigation, jamais un clic.
+
 ## Liens
-- **Dépend de** : [[Grille continue]], [[Unification macro-micro]], [[Génération par couches de bruit]]
+- **Dépend de** : [[Décision — Monde fini, continents et océan]], [[Grille continue]], [[Unification macro-micro]], [[Génération par couches de bruit]]
 - **Alimente** : [[Début de partie]], [[Boucle de jeu]], [[Donjons — structure et intégration]], [[Minimap et brouillard de guerre]]
 - **Voir aussi** : [[Niveau de danger]], [[Dérive de la corruption]], [[Trésors et artefacts]], [[Biomes de départ]], [[Véhicules]]

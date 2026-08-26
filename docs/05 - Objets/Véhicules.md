@@ -65,11 +65,17 @@ modèle référencé, PV, contenu des coffres ; le host est autoritaire.
 
 **Craft compositionnel ([[Craft compositionnel]]) :** les véhicules fonctionnaient *déjà* selon ce paradigme (coque + roues + mât) — le craft entier du jeu devient un seul modèle compositionnel.
 
+**Le bateau est une porte, pas un bonus de vitesse ([[Décision — Monde fini, continents et océan]]).** Le monde est fini et fait de continents séparés par l'océan : un voilier est la **seule** façon d'atteindre une autre masse terrestre.
+
+- **Barque** — côtière, fluviale et lacustre. En haute mer, c'est un pari.
+- **Voilier** — ce qui ouvre un second continent. Le tirant d'eau, la surface de voile et la flottaison deviennent des arbitrages réels.
+- **La haute mer est dangereuse sans mécanique nouvelle :** c'est simplement l'endroit où l'on ne peut pas débarquer en attendant que la tempête passe.
+
 **Météo ([[Météo]]) :** en tempête, les véhicules à voiles deviennent ingouvernables.
 
 **Douanes ([[Lois et infractions]]) :** le cargo d'un véhicule est vérifié au franchissement de frontière.
 
 ## Liens
 - **Dépend de** : [[Tables de sculpture]], [[Éditeur de sculpture]], [[Fonctionnalité]], [[Application des stats de matériau]]
-- **Alimente** : [[Carte du monde]], [[Craft compositionnel]], [[Lois et infractions]]
+- **Alimente** : [[Décision — Monde fini, continents et océan]], [[Carte du monde]], [[Craft compositionnel]], [[Lois et infractions]]
 - **Voir aussi** : [[Météo]], [[Eau et liquides]], [[Explosions]], [[Quêtes et guildes]], [[Compétences — liste]], [[Sauvegarde]], [[Réseau]]

@@ -10,7 +10,7 @@ etape: 0
 
 *Conversion intégrale du Game Design Document — v2.0 (2026-08-09).*
 
-Un **roguelike tactique** en monde infini généré procéduralement et totalement continu, en vue isométrique sur grille, où le combat en **action-time à ticks** est structuré par les cinq éléments du **Wu Xing** et sa jauge de chaîne, avec une progression par l'usage à la Elona/Elin et un endgame de construction de royaume.
+Un **roguelike tactique** en **monde-planète** fini — continents, îles et océan — généré procéduralement et totalement continu, en vue isométrique sur grille, où le combat en **action-time à ticks** est structuré par les cinq éléments du **Wu Xing** et sa jauge de chaîne, avec une progression par l'usage à la Elona/Elin et un endgame de construction de royaume.
 
 > **L'identité du jeu tient en une phrase :** un jeu de **décisions**, pas de dextérité.
 
@@ -35,7 +35,7 @@ Puis, selon le besoin : **[[Vers la production]]** (ce qui reste avant de coder)
 | Carte | Ce qu'elle couvre | Notes |
 |---|---|---|
 | **[[Carte — Vision]]** | pitch, identité, inspirations, direction artistique | 6 |
-| **[[Carte — Monde]]** | grille, hauteur, biomes, donjons, météo, corruption | 26 |
+| **[[Carte — Monde]]** | grille, hauteur, biomes, donjons, météo, corruption | 27 |
 | **[[Carte — Combat]]** | action-time, Wu Xing, chaîne, garde, modules | 30 |
 | **[[Carte — Progression]]** | les trois axes, talents, potentiel, races, classes | 17 |
 | **[[Carte — Objets]]** | matériaux, craft compositionnel, équipement, loot | 26 |

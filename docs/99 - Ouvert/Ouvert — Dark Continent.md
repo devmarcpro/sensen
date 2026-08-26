@@ -1,6 +1,7 @@
 ---
 aliases: ["Ouvert — Dark Continent", "Dark Continent", "Endgame Dark Continent"]
 tags: [ouvert, monde, endgame, à-trancher]
+statut_barriere: résolu
 domaine: monde
 statut: à-trancher
 etape: 10
@@ -19,9 +20,12 @@ etape: 10
 
 **Le coût :** *coûte du contenu, presque aucun système* — toutes les règles listées sont des modulations de systèmes existants.
 
-**Ce qui reste à définir :** la nature de la barrière géographique, le mode de financement de l'expédition, et le contenu de la zone.
+> [!success] La barrière est trouvée — 2026-08-26
+> **C'est l'océan.** Depuis [[Décision — Monde fini, continents et océan]], le monde est une planète de 5 à 7 continents : le Dark Continent est **le plus lointain d'entre eux**, atteignable par une seule traversée hauturière. L'expédition financée par le royaume prend son sens littéral — il faut une flotte, des vivres et un équipage ([[Véhicules]]), pas un laissez-passer.
+
+**Ce qui reste à définir :** le mode de financement de l'expédition et le contenu de la zone.
 
 ## Liens
 - **Dépend de** : [[Trous connus du combat]], [[Niveau de danger]], [[Dérive de la corruption]]
 - **Alimente** : [[Royaume du joueur]], [[Boucle de jeu]]
-- **Voir aussi** : [[Météo]], [[Endurance]], [[Statuts]], [[Nourriture]], [[Entretien et taxes]], [[Ouvert — Créatures fantastiques]]
+- **Voir aussi** : [[Décision — Monde fini, continents et océan]], [[Météo]], [[Endurance]], [[Statuts]], [[Nourriture]], [[Entretien et taxes]], [[Ouvert — Créatures fantastiques]]

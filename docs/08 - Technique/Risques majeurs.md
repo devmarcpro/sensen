@@ -9,7 +9,7 @@ etape: 0
 Les sept risques identifiés — dont un levé par la direction tactique.
 
 - ~~Physique voxel fine en 3D~~ **Risque levé** : destruction discrète à la tuile (voir [[Hauteur de terrain ±10]]/[[Construction cadrée]]), beaucoup moins coûteuse et bien plus simple à synchroniser en réseau.
-- **Monde infini + persistance des claims** : besoin d'un système robuste de streaming de chunks et de sauvegarde différentielle (ne sauvegarder que ce qui a changé — [[Sauvegarde]]).
+- **Monde fini + persistance des claims** : besoin d'un système robuste de streaming de chunks et de sauvegarde différentiel. *Atténué le 2026-08-26 ([[Décision — Monde fini, continents et océan]]) : le monde étant borné à 1024×1024 cellules, les coordonnées ne débordent pas et la sauvegarde a une taille maximale connue — ce qui retire la partie « croissance non bornée » du risque, mais pas le streaming.*le (ne sauvegarder que ce qui a changé — [[Sauvegarde]]).
 - **Netcode coopératif (host-and-join, façon Terraria)** : bien plus simple maintenant que la destruction se fait par blocs pleins (événements discrets), mais reste un développement à part entière ([[Multijoueur]], [[Réseau]]).
 - **Scope très large** (4 inspirations combinées) : risque de dilution du développement → prioriser un MVP centré sur 1-2 piliers avant d'étendre ([[Ordre de construction]]).
 - **Architecture data-driven à grande échelle** : bien conçue dès le départ, sinon coûteuse à retrofit plus tard ([[Data-driven design]]).

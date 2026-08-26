@@ -11,13 +11,13 @@ Le principe fondateur de la génération : des couches de bruit superposées qui
 Le monde est généré par superposition de multiples couches de bruit (type Perlin/Simplex), qui se combinent pour définir à la fois les biomes et le contenu matériel du monde.
 
 **Couches de bruit :**
-- Altitude
+- Altitude — sa composante **continentalité** vient de la tectonique ([[Décision — Monde fini, continents et océan]]), pas d'un bruit libre
 - Température
 - Humidité
 - Densité de mana/magie
 - Densité de ressources/minerais
 - Densité de végétation
-- Activité sismique/volcanique
+- Activité sismique/volcanique — **dérivée**, non tirée : elle découle des frontières de plaque ([[Décision — Monde fini, continents et océan]])
 - Niveau de danger/corruption
 
 *(Paramètres chiffrés de chaque couche : [[Catalogue des couches de bruit]].)*
@@ -37,4 +37,4 @@ Le monde est généré par superposition de multiples couches de bruit (type Per
 ## Liens
 - **Dépend de** : [[Data-driven design]]
 - **Alimente** : [[Unification macro-micro]], [[Biomes — schéma]], [[Niveau de danger]], [[Terrain spectaculaire]], [[Météo]], [[Wu Xing hors combat]]
-- **Voir aussi** : [[Catalogue des couches de bruit]], [[Grille continue]], [[Génération procédurale — performance]]
+- **Voir aussi** : [[Décision — Monde fini, continents et océan]], [[Catalogue des couches de bruit]], [[Grille continue]], [[Génération procédurale — performance]]

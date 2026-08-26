@@ -23,8 +23,10 @@ continues f(x, z) sur les coordonnées MONDE (en tuiles).
   résumé, jamais une source de vérité.
 - Terrain SPECTACULAIRE — l'altitude n'est pas un simple bruit
   lissé ("plat avec un peu de relief" est explicitement un anti-but) :
-    altitude(x,z) = continentalité (bruit très basse fréquence :
-      grandes masses émergées / mers)
+    altitude(x,z) = continentalité (issue des PLAQUES TECTONIQUES,
+      pas d'un bruit libre : voir Décision — Monde fini, continents
+      et océan. Donne continents, îles et arcs insulaires ; les
+      chaînes de montagnes naissent sur les sutures convergentes)
       + relief modulé par une couche d'ÉROSION/PIC :
         * ridged noise (crêtes) → CHAÎNES DE MONTAGNES, arêtes vives
         * domain warping (le bruit déforme ses propres coordonnées)
@@ -61,5 +63,5 @@ continues f(x, z) sur les coordonnées MONDE (en tuiles).
 
 ## Liens
 - **Dépend de** : [[Génération par couches de bruit]], [[Catalogue des couches de bruit]], [[Grille continue]]
-- **Alimente** : [[Carte du monde]], [[Biomes — schéma]], [[Génération de donjon]], [[Génération des royaumes PNJ]], [[Eau et liquides]]
+- **Alimente** : [[Décision — Monde fini, continents et océan]], [[Carte du monde]], [[Biomes — schéma]], [[Génération de donjon]], [[Génération des royaumes PNJ]], [[Eau et liquides]]
 - **Voir aussi** : [[Décision — Altitude sur 21 niveaux]], [[Terrain spectaculaire]], [[Récolte]], [[Génération procédurale — performance]], [[Direction artistique]]
