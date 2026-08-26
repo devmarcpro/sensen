@@ -1,14 +1,14 @@
 ---
-aliases: ["F.2", "Annexe F.2", "Modules", "Catalogue des modules", "48 modules"]
-tags: [contenu, combat, catalogue, contenu-à-produire]
+aliases: ["F.2", "Annexe F.2", "Modules", "Catalogue des modules", "48 modules", "53 modules"]
+tags: [contenu, combat, catalogue, décidé]
 domaine: contenu
-statut: contenu-à-produire
+statut: décidé
 etape: 0
 ---
 
-Les 48 modules du catalogue de départ, par domaine — plus 5 modules Métal restant à produire.
+Les 53 modules du catalogue de départ, par domaine — le domaine Métal complète le pentagramme.
 
-*Format : nom — type (effet/modificateur/déclencheur) — coût mana base — effet. Dés : notation [[Pipeline de résolution du combat]]. Élément Wu Xing ([[Wu Xing — cycles et vecteurs]]) : hérité du domaine (mapping [[Domaines de grimoires et manuels]]) — Feu→Feu, Eau/Glace→Eau, Terre→Terre, Foudre→Bois, Vie→Bois, Arcane/Espace/Corruption→neutre. Un domaine Métal (5 modules) est à ajouter au catalogue — voir [[Ouvert — Modules du domaine Métal]].*
+*Format : nom — type (effet/modificateur/déclencheur) — coût mana base — effet. Dés : notation [[Pipeline de résolution du combat]]. Élément Wu Xing ([[Wu Xing — cycles et vecteurs]]) : hérité du domaine (mapping [[Domaines de grimoires et manuels]]) — Feu→Feu, Eau/Glace→Eau, Terre→Terre, Foudre→Bois, Vie→Bois, Arcane/Espace/Corruption→neutre. Domaine Métal ajouté le 2026-08-26 (5 modules ci-dessous) — la rotation des cinq éléments est fermée pour les builds magiques.*
 
 **Grimoires — Feu :** Projectile de feu (effet, 8, 2d6 feu à distance) · Nova ardente (effet, 18, 3d6 feu en cercle 3 tuiles) · Trait incendiaire (effet, 12, 1d4 + statut brûlure 3 tours) · Mains brûlantes (effet, 6, cône court 2d4) · Cœur de braise (modificateur, +4, le module suivant enflamme le sol 5 s)
 
@@ -25,6 +25,8 @@ Les 48 modules du catalogue de départ, par domaine — plus 5 modules Métal re
 **Espace :** Pas éclipsé (effet, 10, téléporte 5 tuiles en vue) · Échange (effet, 14, échange sa position avec la cible) · Portée étendue (modificateur, +5, portée ×2 du module suivant) · Rappel (effet, 30, téléporte au lit/claim — cooldown 1 jour) · Poche dimensionnelle (effet, 20, +30 capacité de poids 10 min)
 
 **Corruption :** Sang pour puissance (modificateur, +0, le module suivant coûte des PV au lieu du mana, 2:1) · Drain (effet, 12, 2d4 + soigne la moitié infligée) · Terreur (effet, 14, jet de Volonté ou la cible fuit 1d4 tours) · Contagion (modificateur, +8, les statuts du module suivant se propagent aux ennemis adjacents) · Appel corrompu (effet, 28, invoque 1 créature corrompue temporaire alliée)
+
+**Métal :** Lame spectrale (effet, 8, 2d6 métal en ligne — lame invoquée qui traverse) · Perforation (effet, 12, 2d8 métal cible unique, **ignore l'armure de zone**) · Pluie d'aiguilles (effet, 18, 2d4 métal en carré r2) · Mur de lames (effet, 14, invocation : tuile hérissée 5 tours — bloque le passage, 2d4 métal au contact) · Affûtage (modificateur, +5, le module/la frappe suivante gagne +1 dé et devient perforante)
 
 **Manuels — Frappes :** Frappe lourde (effet, 6, +1d6 au prochain coup) · Fente (effet, 8, attaque + avance d'1 tuile) · Balayage (effet, 12, touche toutes les cibles adjacentes) · Brise-garde (effet, 10, la cible perd ses dés d'armure 2 tours) · Exécution (effet, 15, +2d6 si cible < 30 % PV)
 

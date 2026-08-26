@@ -28,9 +28,9 @@ CUISINE (7.7) : un plat couvrant les 5 éléments : nutrition et
 
 **Condition de module associée ([[Vocabulaire des modules — six axes]]) :** `vecteur_de_lieu` est l'une des conditions positionnelles disponibles.
 
-**Contenu à produire :** [[Ouvert — Surcharges wuxing des matériaux]], [[Ouvert — Affinités élémentaires de cuisine]].
+**Contenu à produire :** [[Décision — Surcharges Wu Xing des matériaux]], [[Décision — Affinités de cuisine]].
 
 ## Liens
 - **Dépend de** : [[Wu Xing — cycles et vecteurs]], [[Génération par couches de bruit]], [[Matériaux — 13 stats]]
 - **Alimente** : [[Cuisine et alchimie]], [[Mana]], [[Craft compositionnel]], [[Palier industriel]]
-- **Voir aussi** : [[Biomes — schéma]], [[Météo]], [[Vocabulaire des modules — six axes]], [[Ouvert — Surcharges wuxing des matériaux]], [[Ouvert — Affinités élémentaires de cuisine]], [[Ouvert — Saisons]]
+- **Voir aussi** : [[Biomes — schéma]], [[Météo]], [[Vocabulaire des modules — six axes]], [[Décision — Surcharges Wu Xing des matériaux]], [[Décision — Affinités de cuisine]], [[Ouvert — Saisons]]

@@ -23,9 +23,9 @@ Cuisiner pour la croissance long terme, distiller pour la puissance court terme 
 
 **Boucle complète :** chasser (parties + viandes spécifiques) + cultiver (plantes, [[Agriculture et élevage]]) → cuisiner (croissance long terme via potentiel) + distiller (puissance court terme via buffs) → progresser → chasser plus grand. La chasse d'une créature précise pour sa viande/ses parties devient un objectif en soi.
 
-**Contenu à produire :** [[Ouvert — Affinités élémentaires de cuisine]].
+**Contenu à produire :** [[Décision — Affinités de cuisine]].
 
 ## Liens
 - **Dépend de** : [[Qualité d'artisanat]], [[Stations de transformation]], [[Potentiel]], [[Faim]]
 - **Alimente** : [[Nourriture, potentiel et potions]], [[Potions]], [[Nourriture]], [[Statuts]]
-- **Voir aussi** : [[Wu Xing hors combat]], [[Schéma créature]], [[Catalogue matériaux — Paramétriques]], [[Plantes]], [[Agriculture et élevage]], [[Résolveur de modificateurs]], [[Ouvert — Affinités élémentaires de cuisine]]
+- **Voir aussi** : [[Wu Xing hors combat]], [[Schéma créature]], [[Catalogue matériaux — Paramétriques]], [[Plantes]], [[Agriculture et élevage]], [[Résolveur de modificateurs]], [[Décision — Affinités de cuisine]]

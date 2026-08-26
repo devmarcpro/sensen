@@ -6,9 +6,9 @@ statut: décidé
 etape: 3
 ---
 
-Les 10 gemmes — chacune a un rôle, le choix n'est plus esthétique mais tactique.
+Les 11 gemmes — chacune a un rôle, le choix n'est plus esthétique mais tactique.
 
-**Gemmes & cristaux (10) — outil : pioche, compétence Minage, transformation : Table d'enchantement**
+**Gemmes & cristaux (11) — outil : pioche, compétence Minage, transformation : Table d'enchantement**
 
 | Matériau | Dur | Den | Val | CMa | Fla | Iso | CÉl | Flo | Lum | Fer | Tra | Éla | Fri | Notes |
 |---|--|--|--|--|--|--|--|--|--|--|--|--|--|---|
@@ -22,6 +22,7 @@ Les 10 gemmes — chacune a un rôle, le choix n'est plus esthétique mais tacti
 | Saphir | 27 | 9 | 40 | 78 | 0 | 80 | 28 | 3 | 12 | 0 | 66 | 2 | 30 | affinité froid (iso 80) |
 | Émeraude | 24 | 9 | 50 | 82 | 0 | 15 | 26 | 3 | 12 | 0 | 64 | 2 | 30 | mana haut, la + précieuse hors diamant |
 | Diamant | 40 | 9 | 80 | 55 | 0 | 15 | 12 | 3 | 20 | 0 | 85 | 1 | 28 | dureté inégalée, mana moyen |
+| Onyx | 26 | 9 | 30 | 65 | 0 | 12 | 20 | 3 | 5 | 0 | 30 | 2 | 30 | LA gemme de Métal (sertissage Métal) — ajoutée 2026-08-26 |
 
 *(Colonne "Notes" ajoutée : chaque gemme a désormais un rôle — le choix n'est plus esthétique mais tactique.)*
 
@@ -36,7 +37,7 @@ Les 10 gemmes — chacune a un rôle, le choix n'est plus esthétique mais tacti
 - Diamant : +[0.03-0.08] qualité · Améthyste : mana ou Méditation · Grenat : PV ou Force/Endurance · Opale : durée des statuts ou Volonté/Charisme · Ambre ([[Catalogue matériaux — Minéraux]]) : endurance ou compétence physique
 - **Taille en affinité** : ajout au vecteur Wu Xing selon la qualité (misérable +0.04 → mythique +0.28) — seule voie par laquelle l'atelier touche à l'identité élémentaire.
 
-> *Note : l'**Onyx** est cité dans la table de sertissage de [[Loot — affixes, gemmes et rareté]] (Onyx→Métal) mais n'apparaît pas dans la table F.1 des 10 gemmes ci-dessus ni dans la palette F.1.1. Signalé tel quel — à ajouter au catalogue.*
+> *L'**Onyx** (cité par la table de sertissage, Onyx→Métal) a été ajouté au catalogue et à la palette le 2026-08-26 — le trou signalé à la conversion est comblé.*
 
 **Résistance au feu ([[Application des stats de matériau]]) :** *le saphir contre le feu* (Iso 80) est décisif.
 

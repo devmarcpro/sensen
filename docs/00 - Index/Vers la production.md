@@ -25,11 +25,12 @@ Ce qui reste à modifier dans le design, et ce qui manque pour lancer la product
 
 ## 4. Contenu à produire (données — nécessaire par étape, pas au jour 1)
 
-- [ ] **5 modules du domaine Métal** ([[Ouvert — Modules du domaine Métal]]) — **nécessaire dès l'étape 0** si le prototype teste la rotation complète des cinq éléments.
-- [ ] L'**Onyx** manque au catalogue des gemmes et à la palette (cité par la table de sertissage — [[Catalogue matériaux — Gemmes]]). Étape 3.
+- [x] **5 modules du domaine Métal** — au catalogue [[Modules]] (2026-08-26).
+- [x] **Catalogue des actions de créatures** : 24 actions + 2 règles, affectations pour les 34 créatures ([[Actions des créatures]], 2026-08-26).
+- [x] **Onyx** ajouté au catalogue des gemmes et à la palette (2026-08-26).
 - [ ] Recettes de composants × familles + sources exotiques ([[Ouvert — Recettes de composants par famille]]). Étape 6.
-- [ ] Affinités élémentaires des ingrédients de cuisine ([[Ouvert — Affinités élémentaires de cuisine]]). Étape 10.
-- [ ] Surcharges `wuxing` des 153 matériaux ([[Ouvert — Surcharges wuxing des matériaux]]). Étape 6.
+- [x] **Affinités de cuisine** : table complète, le Feu vient de la cuisson et le Métal du sel ([[Décision — Affinités de cuisine]], 2026-08-26).
+- [x] **Surcharges Wu Xing** : les 154 matériaux passés en revue, table complète ([[Décision — Surcharges Wu Xing des matériaux]], 2026-08-26).
 - [ ] Pools de noms des 9 cultures restantes ([[Ouvert — Pools de noms des cultures]]). Étape 9.
 - [ ] Traductions en/ja/zh — les clés `tr()` existent dès le jour 1, les textes peuvent suivre ([[Localisation]]).
 
@@ -55,7 +56,7 @@ Ce qui reste à modifier dans le design, et ce qui manque pour lancer la product
 
 ## Le chemin critique, en une ligne
 
-**~~Valider P2 + P7~~ ✅ → ~~écrire le document du prototype de combat (et trancher les 7 trous)~~ ✅ → produire les 5 modules Métal + le catalogue d'actions de créatures + la silhouette paperdoll → coder l'étape 0** ([[Prototype de combat — spécification]], jalon 1). Tout le reste peut suivre la cadence des 11 étapes.
+**~~Valider P2 + P7~~ ✅ → ~~écrire le document du prototype de combat (et trancher les 7 trous)~~ ✅ → ~~produire les 5 modules Métal + le catalogue d'actions de créatures~~ ✅ → **la silhouette paperdoll → coder l'étape 0**** ([[Prototype de combat — spécification]], jalon 1). Tout le reste peut suivre la cadence des 11 étapes.
 
 ## Liens
 - **Dépend de** : [[Ordre de construction]], [[Héritage voxel — audit]], [[Trous connus du combat]]

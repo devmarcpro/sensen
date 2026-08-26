@@ -1,12 +1,14 @@
 ---
 aliases: ["Ouvert — Modules du domaine Métal", "Modules Métal"]
-tags: [ouvert, combat, contenu-à-produire]
+tags: [ouvert, combat, décidé]
 domaine: contenu
-statut: contenu-à-produire
+statut: décidé
 etape: 0
 ---
 
-**Contenu à produire ([[Décisions fondatrices]]) :** *5 modules du domaine **Métal** ([[Modules]]).*
+> [!success] Résolu le 2026-08-26 — les 5 modules Métal sont au catalogue [[Modules]] : Lame spectrale, Perforation, Pluie d'aiguilles, Mur de lames, Affûtage. La rotation des cinq éléments est fermée pour les builds magiques.
+
+**La demande d'origine ([[Décisions fondatrices]]) :** *5 modules du domaine **Métal** ([[Modules]]).*
 
 **Le contexte :** le domaine **Métal** a été ajouté aux domaines de grimoires *pour compléter le pentagramme Wu Xing* ([[Domaines de grimoires et manuels]]) — lames invoquées, perforation, affûtage. Son vecteur est `{metal: 1}` ([[Domination et multiplicateurs]]).
 

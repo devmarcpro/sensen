@@ -17,17 +17,20 @@ Les catalogues prêts à transcrire en JSON. 24 notes.
 - **[[Catalogue matériaux — Terres]]** (6) · **[[Catalogue matériaux — Végétaux et fibres]]** (8) · **[[Catalogue matériaux — Liquides]]** (7)
 - **[[Catalogue matériaux — Minéraux]]** — combustibles, pigments, engrais, isolants.
 - **[[Catalogue matériaux — Fossiles]]** (6) — objets de collection, vente aux érudits.
-- **[[Catalogue matériaux — Gemmes]]** (10) — *chaque gemme a un rôle : le choix n'est plus esthétique mais tactique.*
+- **[[Catalogue matériaux — Gemmes]]** (11, avec l'Onyx) — *chaque gemme a un rôle : le choix n'est plus esthétique mais tactique.*
 - **[[Catalogue matériaux — Synthétiques]]** (4) · **[[Catalogue matériaux — Météorologiques]]** (2)
 - **[[Catalogue matériaux — Paramétriques]]** — des gabarits, pas des entrées : les 40 essences ont leurs feuilles sans 40 entrées.
 - **[[Palette de couleurs des matériaux]]** — chaque hex est unique ; *un doublon = erreur bloquante de données*.
 
 **Les systèmes**
-- **[[Modules]]** (48 + 5 Métal à produire) — le catalogue de départ par domaine.
+- **[[Modules]]** (53) — le catalogue de départ par domaine, pentagramme complet.
 - **[[Créatures]]** (34) — animaux réels et humains uniquement. *Un donjon est une ruine investie, pas une crypte magique.* Avec le drop rare universel : la statue 1:1.
 - **[[Statuts]]** (14) · **[[Nourriture]]** (18) · **[[Meubles]]** (16)
 - **[[Effets d'équipement types]]** — les pools par slot pour le générateur de loot.
 - **[[Plantes]]** (22) · **[[Potions]]** (12) · **[[Composants]]** (14)
+
+- **[[Actions des créatures]]** (24) — les attaques des bêtes ; les humains utilisent le système standard.
+- **[[Décision — Surcharges Wu Xing des matériaux]]** · **[[Décision — Affinités de cuisine]]** — les vecteurs élémentaires du contenu.
 
 **Le monde et les cultures**
 - **[[Biomes de départ]]** (12, extensibles vers 20+)

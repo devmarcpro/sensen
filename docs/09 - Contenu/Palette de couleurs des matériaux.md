@@ -31,7 +31,7 @@ Chaque hex est unique dans le catalogue — un doublon est une erreur bloquante 
 
 **Fossiles :** Os fossile #D8CCAE · Ammonite #B79C74 · Bois pétrifié #7A6A58 · Coquillage fossile #D9CDBD · Géode #93A0B6 · Météorite ferreuse #443F45
 
-**Gemmes :** Quartz #E8E4EC · Améthyste #8A4FBF · Topaze #E8B33C · Grenat #8E1F2F · Opale #DCE8E4 · Jade #3D9B6B · Rubis #C81E3C · Saphir #1E4FA8 · Émeraude #1F9E5A · Diamant #EDF5F7
+**Gemmes :** Quartz #E8E4EC · Améthyste #8A4FBF · Topaze #E8B33C · Grenat #8E1F2F · Opale #DCE8E4 · Jade #3D9B6B · Rubis #C81E3C · Saphir #1E4FA8 · Émeraude #1F9E5A · Diamant #EDF5F7 · Onyx #2E3038
 
 **Synthétiques :** Verre #C6DEE4 · Brique #A9502F · Chaume tressé #D3B76A · Papier #F3EEDF
 

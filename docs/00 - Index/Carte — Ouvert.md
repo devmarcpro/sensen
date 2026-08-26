@@ -27,11 +27,9 @@ Tout ce qui n'est pas tranché, par catégorie — 34 notes avec les 8 propositi
 - [[Ouvert — Nomenclature des paliers de qualité]] — **résolu**, note conservée comme trace.
 
 **Contenu à produire**
-- [[Ouvert — Modules du domaine Métal]] — 5 modules manquants, bloquant pour la rotation complète des builds magiques.
-- [[Ouvert — Affinités élémentaires de cuisine]] — les affinités de chaque ingrédient.
-- [[Ouvert — Surcharges wuxing des matériaux]] — passer les 153 matériaux en revue.
-- [[Ouvert — Recettes de composants par famille]] — la matrice composant × famille et les sources exotiques.
-- [[Ouvert — Pools de noms des cultures]] — 9 cultures sur 10 restent à écrire.
+- [x] ~~Modules Métal~~ résolu ([[Modules]]) · ~~[[Décision — Affinités de cuisine]]~~ ✅ · ~~[[Décision — Surcharges Wu Xing des matériaux]]~~ ✅ · ~~actions de créatures~~ ✅ ([[Actions des créatures]])
+- [ ] [[Ouvert — Recettes de composants par famille]] — la matrice composant × famille et les sources exotiques.
+- [ ] [[Ouvert — Pools de noms des cultures]] — 9 cultures sur 10 restent à écrire.
 
 **Héritage voxel — propositions à valider** *(voir [[Héritage voxel — audit]] ; catégories 1 et 3 déjà réécrites)*
 - [[Décision — Altitude sur 21 niveaux]] — le mapping bruit continu → hauteur 0-20 (couvre aussi le mod_altitude météo).

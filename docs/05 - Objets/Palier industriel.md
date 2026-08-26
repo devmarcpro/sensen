@@ -21,4 +21,4 @@ Le joueur **trouve et achète des recettes industrielles** (ruines profondes, ma
 ## Liens
 - **Dépend de** : [[Craft compositionnel]], [[Composant et recette d'obtention]], [[Stations de transformation]]
 - **Alimente** : [[Wu Xing hors combat]], [[Jauge de chaîne Wu Xing]]
-- **Voir aussi** : [[Décisions fondatrices]], [[Catalogue matériaux — Minéraux]], [[Quêtes et guildes]], [[Ouvert — Surcharges wuxing des matériaux]]
+- **Voir aussi** : [[Décisions fondatrices]], [[Catalogue matériaux — Minéraux]], [[Quêtes et guildes]], [[Décision — Surcharges Wu Xing des matériaux]]

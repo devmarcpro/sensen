@@ -59,10 +59,10 @@ La rupture du 2026-08-09 : ce qui a été abandonné, ce qui survit, et pourquoi
 
 ### Contenu à produire
 
-- 5 modules du domaine **Métal** ([[Modules]]) → [[Ouvert — Modules du domaine Métal]] ; affinités élémentaires des ingrédients de cuisine → [[Ouvert — Affinités élémentaires de cuisine]].
+- 5 modules du domaine **Métal** ([[Modules]]) → [[Ouvert — Modules du domaine Métal]] ; affinités élémentaires des ingrédients de cuisine → [[Décision — Affinités de cuisine]].
 - Recettes d'obtention par composant × famille ([[Composant et recette d'obtention]]) et leurs sources exotiques. → [[Ouvert — Recettes de composants par famille]]
 - Pools de noms des 10 cultures ([[Cultures de nommage]]). → [[Ouvert — Pools de noms des cultures]]
-- Surcharges `wuxing` des matériaux dont la catégorie ment. → [[Ouvert — Surcharges wuxing des matériaux]]
+- Surcharges `wuxing` des matériaux dont la catégorie ment. → [[Décision — Surcharges Wu Xing des matériaux]]
 
 ### Trous connus du combat (à traiter avant ou pendant le prototype)
 
