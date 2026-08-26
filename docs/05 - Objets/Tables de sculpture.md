@@ -7,7 +7,7 @@ etape: 6
 ---
 
 > [!note] Adapté au pivot tactique
-> Adapté au pivot : sculpture en **pixel art paramétrique** — « voxel par voxel » corrigé en « pixel par pixel ». Détail du pipeline 2D : [[Proposition — Sculpture en pixel art]].
+> Adapté au pivot : sculpture en **pixel art paramétrique** — « voxel par voxel » corrigé en « pixel par pixel ». Détail du pipeline 2D : [[Décision — Sculpture en pixel art]].
 
 Des stations spéciales où le joueur designe lui-même la forme de ses objets — jamais obligatoire, toujours mérité par un rang de guilde.
 

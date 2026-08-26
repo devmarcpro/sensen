@@ -1,13 +1,13 @@
 ---
-aliases: ["Proposition — Structure de données de la grille", "Structure de la grille", "Chunks de tuiles", "G.2", "Annexe G.2", "Voxels mémoire", "Meshing"]
-tags: [ouvert, proposition, héritage-voxel, technique, à-trancher]
+aliases: ["Décision — Structure de données de la grille", "Proposition — Structure de données de la grille", "Structure de la grille", "Chunks de tuiles", "G.2", "Annexe G.2", "Voxels mémoire", "Meshing"]
+tags: [ouvert, proposition, héritage-voxel, technique, décidé]
 domaine: technique
-statut: à-trancher
+statut: décidé
 etape: 0
 ---
 
-> [!todo] Proposition à valider
-> Rédigée le 2026-08-26 pour remplacer l'héritage voxel. **Rien ici n'est une décision du GDD.**
+> [!success] Décidé le 2026-08-26
+> Rédigée pour remplacer l'héritage voxel, **validée sur délégation du designer** (« tout doit être rédigé et décidé avant production »). Le code s'appuie dessus ; révisable comme toute décision.
 
 **Le problème :** [[Décisions d'architecture]] spécifie des chunks cubiques 16×16×16 indexés `(x,y,z)` avec octrees de subdivision — contredit par [[Grille continue]] (chunk = 32×32 tuiles, tuile = « structure plate, lisible, sérialisable »). Il faut la structure de données réelle, y compris pour les étages de donjon et le format du diff de sauvegarde ([[Sauvegarde]]).
 
@@ -48,4 +48,4 @@ La taille exacte de `c_data` (suffit-il pour l'état d'une culture, d'une porte,
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Grille continue]], [[Décisions d'architecture]]
 - **Alimente** : [[Sauvegarde]], [[Réseau]], [[Génération de donjon]]
-- **Voir aussi** : [[Optimisation — principes]], [[Proposition — Budgets et critères de performance tactiques]]
+- **Voir aussi** : [[Optimisation — principes]], [[Décision — Budgets et critères de performance tactiques]]

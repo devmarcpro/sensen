@@ -28,4 +28,4 @@ Parité totale avec les PNJ et compagnons qui progressent ([[Compagnons]]).
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Jauge de chaîne Wu Xing]], [[Potentiel]], [[Progression par l'usage]]
 - **Alimente** : [[Armure par zone et constructions]], [[Double niveau combat et général]], [[Domination et multiplicateurs]]
-- **Voir aussi** : [[Le vocabulaire des modules et l'absence d'arbre de talents]], [[Compagnons]], [[Trous connus du combat]], [[Pipeline de résolution du combat]], [[Ouvert — Multi-ennemis et jauge]]
+- **Voir aussi** : [[Le vocabulaire des modules et l'absence d'arbre de talents]], [[Compagnons]], [[Trous connus du combat]], [[Pipeline de résolution du combat]], [[Décision — Multi-ennemis et jauge]]

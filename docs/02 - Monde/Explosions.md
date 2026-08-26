@@ -24,4 +24,4 @@ Les tuiles détruites droppent leur matériau avec 50 % de perte.
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Destruction du terrain]]
 - **Alimente** : [[Véhicules]], [[Sorts cataclysmiques]]
-- **Voir aussi** : [[Pas de durabilité]], [[Proposition — Structure de données de la grille]]
+- **Voir aussi** : [[Pas de durabilité]], [[Décision — Structure de données de la grille]]

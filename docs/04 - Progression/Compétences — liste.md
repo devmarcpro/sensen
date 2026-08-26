@@ -14,7 +14,7 @@ La liste de départ, ~30 compétences réparties en cinq familles.
 - **Artisanat :** Forge, Menuiserie, Taille de pierre, Tissage, Alchimie, Cuisine, Enchantement
 - **Vie :** Lecture, Négociation, Dressage, **Leadership** (capacité d'escorte, [[Compagnons]]), Agriculture, Élevage, Discrétion, Athlétisme (course/saut/nage)
 
-**Compétences supplémentaires citées ailleurs :** Esquive et Encaissement ([[Pipeline de résolution du combat]], [[Double niveau combat et général]]), Navigation ([[Véhicules]], [[Double niveau combat et général]]), et les **compétences de construction d'armure** — Matelassé, Cuir, Mailles, Écailles, Plaque ([[Armure par zone et constructions]], [[XP de combat]]).
+**Esquive — redéfinie ([[Décision — Esquive active]]) :** mobilité de combat — réduit le coût de déplacement en combat (`3 ticks × (1 − min(0.33, N × 0.005))`, min 2) ; XP en se déplaçant sous menace. **Compétences supplémentaires citées ailleurs :** Encaissement ([[Pipeline de résolution du combat]], [[Double niveau combat et général]]), Navigation ([[Véhicules]], [[Double niveau combat et général]]), et les **compétences de construction d'armure** — Matelassé, Cuir, Mailles, Écailles, Plaque ([[Armure par zone et constructions]], [[XP de combat]]).
 
 **Classification combat/général :** champ `category` par compétence — voir [[Double niveau combat et général]].
 

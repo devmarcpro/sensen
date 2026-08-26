@@ -7,13 +7,13 @@ etape: 2
 ---
 
 > [!note] Adapté au pivot tactique
-> Tailles exprimées en tuiles par étage et escaliers en liens inter-étages (valeurs proposées, à valider : [[Proposition — Prefabs de donjon en tuiles]]). Les cubes voxel d'origine sont archivés dans le GDD source.
+> Tailles exprimées en tuiles par étage et escaliers en liens inter-étages (valeurs décidées : [[Décision — Prefabs de donjon en tuiles]]). Les cubes voxel d'origine sont archivés dans le GDD source.
 
 L'algorithme de génération par graphe, étage par étage, et la formule de difficulté par profondeur.
 
 ```
 BIBLIOTHÈQUE — deux familles de prefabs 2D (schéma B.10) :
-  SALLES : catégories de taille en tuiles par étage (proposé : petite
+  SALLES : catégories de taille en tuiles par étage (petite
     8×8, moyenne 16×16, grande 24×24, immense 32×32), forme libre,
     sol NON obligatoirement plat (fosses, marches, plateformes — la
     hauteur de tuile 0-20 est encodée dans le plan du prefab).

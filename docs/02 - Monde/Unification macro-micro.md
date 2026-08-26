@@ -7,7 +7,7 @@ etape: 8
 ---
 
 > [!note] Adapté au pivot tactique
-> Les chiffres d'altitude voxel (« pics à 200-400 blocs », « falaises de 30-80 blocs ») et le bruit 3D de cavernes sont retirés — archivés dans le GDD source. La quantification sur les 21 niveaux de [[Hauteur de terrain ±10]] : [[Proposition — Altitude sur 21 niveaux]] (à valider).
+> Les chiffres d'altitude voxel (« pics à 200-400 blocs », « falaises de 30-80 blocs ») et le bruit 3D de cavernes sont retirés — archivés dans le GDD source. La quantification sur les 21 niveaux de [[Hauteur de terrain ±10]] : [[Décision — Altitude sur 21 niveaux]].
 
 Il n'existe qu'une seule génération : la carte du monde et la cellule sont deux fenêtres sur le même champ de bruit continu. Résout la question ouverte de [[Génération par couches de bruit]] (cohérence carte ↔ cellules ↔ transitions).
 
@@ -57,9 +57,9 @@ continues f(x, z) sur les coordonnées MONDE (en tuiles).
   par biome (9.2).
 ```
 
-*Détail du terrain : [[Terrain spectaculaire]]. Ressources : [[Proposition — Minerais et strates après le pivot]]. Règle d'irrécoltabilité : [[Récolte]].*
+*Détail du terrain : [[Terrain spectaculaire]]. Ressources : [[Décision — Minerais et strates après le pivot]]. Règle d'irrécoltabilité : [[Récolte]].*
 
 ## Liens
 - **Dépend de** : [[Génération par couches de bruit]], [[Catalogue des couches de bruit]], [[Grille continue]]
 - **Alimente** : [[Carte du monde]], [[Biomes — schéma]], [[Génération de donjon]], [[Génération des royaumes PNJ]], [[Eau et liquides]]
-- **Voir aussi** : [[Proposition — Altitude sur 21 niveaux]], [[Terrain spectaculaire]], [[Récolte]], [[Génération procédurale — performance]], [[Direction artistique]]
+- **Voir aussi** : [[Décision — Altitude sur 21 niveaux]], [[Terrain spectaculaire]], [[Récolte]], [[Génération procédurale — performance]], [[Direction artistique]]

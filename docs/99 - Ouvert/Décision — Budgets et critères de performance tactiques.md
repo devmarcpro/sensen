@@ -1,13 +1,13 @@
 ---
-aliases: ["Proposition — Budgets et critères de performance tactiques", "Budgets tactiques", "Critères tactiques"]
-tags: [ouvert, proposition, héritage-voxel, technique, à-trancher]
+aliases: ["Décision — Budgets et critères de performance tactiques", "Proposition — Budgets et critères de performance tactiques", "Budgets tactiques", "Critères tactiques"]
+tags: [ouvert, proposition, héritage-voxel, technique, décidé]
 domaine: technique
-statut: à-trancher
+statut: décidé
 etape: 0
 ---
 
-> [!todo] Proposition à valider
-> Rédigée le 2026-08-26 pour remplacer l'héritage voxel. **Rien ici n'est une décision du GDD.**
+> [!success] Décidé le 2026-08-26
+> Rédigée pour remplacer l'héritage voxel, **validée sur délégation du designer** (« tout doit être rédigé et décidé avant production »). Le code s'appuie dessus ; révisable comme toute décision.
 
 **Le problème :** [[Budgets de performance]] chiffre le meshing voxel (< 4 ms/chunk, 8 Ko/chunk) et [[Ordre de vérification]] valide des étapes voxel (« façade 64 blocs 4px meshée < 4 ms ») sur l'ancien ordre D.3. Il faut des budgets et des critères pour le rendu tuiles + billboards et les 11 étapes tactiques.
 
@@ -54,4 +54,4 @@ Tous les chiffres sont des ordres de grandeur à confronter à la machine cible 
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Budgets de performance]], [[Ordre de vérification]], [[Ordre de construction]]
 - **Alimente** : [[Optimisation — principes]], [[Entités et pathfinding — performance]]
-- **Voir aussi** : [[Proposition — Structure de données de la grille]], [[LOD de simulation]]
+- **Voir aussi** : [[Décision — Structure de données de la grille]], [[LOD de simulation]]

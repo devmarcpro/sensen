@@ -1,13 +1,13 @@
 ---
-aliases: ["Proposition — Altitude sur 21 niveaux", "Altitude 21 niveaux", "Mapping altitude"]
-tags: [ouvert, proposition, héritage-voxel, monde, à-trancher]
+aliases: ["Décision — Altitude sur 21 niveaux", "Proposition — Altitude sur 21 niveaux", "Altitude 21 niveaux", "Mapping altitude"]
+tags: [ouvert, proposition, héritage-voxel, monde, décidé]
 domaine: monde
-statut: à-trancher
+statut: décidé
 etape: 8
 ---
 
-> [!todo] Proposition à valider
-> Rédigée le 2026-08-26 pour remplacer l'héritage voxel. **Rien ici n'est une décision du GDD** — c'est un point de départ concret à amender ou rejeter.
+> [!success] Décidé le 2026-08-26
+> Rédigée pour remplacer l'héritage voxel, **validée sur délégation du designer** (« tout doit être rédigé et décidé avant production »). Le code s'appuie dessus ; révisable comme toute décision.
 
 **Le problème :** [[Unification macro-micro]] décrit une altitude continue voxel (« pics à 200-400 blocs », « falaises de 30-80 blocs », bruit 3D de cavernes), mais [[Hauteur de terrain ±10]] quantifie la hauteur sur **21 niveaux (0-20)**. Il faut décider comment le champ de bruit continu produit la hauteur de tuile.
 

@@ -1,13 +1,13 @@
 ---
-aliases: ["Proposition — Pièces en 2D", "Pièces 2D", "Critères de pièce"]
-tags: [ouvert, proposition, héritage-voxel, société, à-trancher]
+aliases: ["Décision — Pièces en 2D", "Proposition — Pièces en 2D", "Pièces 2D", "Critères de pièce"]
+tags: [ouvert, proposition, héritage-voxel, société, décidé]
 domaine: société
-statut: à-trancher
+statut: décidé
 etape: 7
 ---
 
-> [!todo] Proposition à valider
-> Rédigée le 2026-08-26 pour remplacer l'héritage voxel. **Rien ici n'est une décision du GDD.**
+> [!success] Décidé le 2026-08-26
+> Rédigée pour remplacer l'héritage voxel, **validée sur délégation du designer** (« tout doit être rédigé et décidé avant production »). Le code s'appuie dessus ; révisable comme toute décision.
 
 **Le problème :** [[Habitat des PNJ]] exige une pièce de « 2×2×2 blocs » et un bonus à « volume ≥ 27 blocs » ; [[Détection de pièces]] la valide par flood fill 3D. Critères volumétriques — or [[Construction cadrée]] déclare la détection « triviale en 2D » (empreinte de tuiles + hauteur de murs).
 

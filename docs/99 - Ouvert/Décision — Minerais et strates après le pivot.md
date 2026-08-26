@@ -1,13 +1,13 @@
 ---
-aliases: ["Proposition — Minerais et strates après le pivot", "Minerais après pivot", "Strates après pivot"]
-tags: [ouvert, proposition, héritage-voxel, monde, à-trancher]
+aliases: ["Décision — Minerais et strates après le pivot", "Proposition — Minerais et strates après le pivot", "Minerais après pivot", "Strates après pivot"]
+tags: [ouvert, proposition, héritage-voxel, monde, décidé]
 domaine: monde
-statut: à-trancher
+statut: décidé
 etape: 8
 ---
 
-> [!todo] Proposition à valider
-> Rédigée le 2026-08-26 pour remplacer l'héritage voxel. **Rien ici n'est une décision du GDD.**
+> [!success] Décidé le 2026-08-26
+> Rédigée pour remplacer l'héritage voxel, **validée sur délégation du designer** (« tout doit être rédigé et décidé avant production »). Le code s'appuie dessus ; révisable comme toute décision.
 
 **Le problème :** [[Stratification verticale]] et [[Minerais par profondeur]] placent roches et minerais par bandes de profondeur Y — mais on ne creuse plus nulle part ([[Décisions fondatrices]] : minage exploratoire écarté). Les ressources se récoltent en **filons de surface** ([[Récolte]]) et les donjons descendent en **étages discrets**. Le principe à sauver : *le risque, la dureté et la valeur montent ensemble*.
 

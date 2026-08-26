@@ -1,13 +1,13 @@
 ---
-aliases: ["Proposition — Prefabs de donjon en tuiles", "Prefabs en tuiles"]
-tags: [ouvert, proposition, héritage-voxel, monde, à-trancher]
+aliases: ["Décision — Prefabs de donjon en tuiles", "Proposition — Prefabs de donjon en tuiles", "Prefabs en tuiles"]
+tags: [ouvert, proposition, héritage-voxel, monde, décidé]
 domaine: monde
-statut: à-trancher
+statut: décidé
 etape: 2
 ---
 
-> [!todo] Proposition à valider
-> Rédigée le 2026-08-26 pour remplacer l'héritage voxel. **Rien ici n'est une décision du GDD.**
+> [!success] Décidé le 2026-08-26
+> Rédigée pour remplacer l'héritage voxel, **validée sur délégation du designer** (« tout doit être rédigé et décidé avant production »). Le code s'appuie dessus ; révisable comme toute décision.
 
 **Le problème :** [[Génération de donjon]] dimensionne les salles en cubes (« petite 8³ … immense 32×32×16 ») et les escaliers en « offset vertical −16, aligné chunk » ; [[Salles et connecteurs]] référence des `vox_model` avec positions 3D. Les donjons tactiques sont des **grilles séparées en étages discrets** ([[Grille continue]]).
 
@@ -41,4 +41,4 @@ Rejoint [[Ouvert — Taille des salles de donjon]] : taille de la bibliothèque 
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Génération de donjon]], [[Salles et connecteurs]], [[Grille continue]]
 - **Alimente** : [[Donjons — structure et intégration]], [[Ouvert — Taille des salles de donjon]]
-- **Voir aussi** : [[Proposition — Structure de données de la grille]], [[Hauteur de terrain ±10]]
+- **Voir aussi** : [[Décision — Structure de données de la grille]], [[Hauteur de terrain ±10]]

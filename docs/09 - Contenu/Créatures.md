@@ -39,4 +39,4 @@ Les 34 créatures de départ — animaux réels et humains uniquement. La menace
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Squelette modulaire et points d'attache]], [[IA des créatures]]
 - **Alimente** : [[Catalogue matériaux — Paramétriques]], [[Monstres rares]], [[Génération de donjon]], [[Meubles]], [[Cuisine et alchimie]]
-- **Voir aussi** : [[Apprivoisement et recrutement]], [[Population et exploitation]], [[Barèmes économiques]], [[Cycle jour-nuit et sommeil]], [[Statuts]], [[Ouvert — Créatures fantastiques]], [[Ouvert — Vocabulaire d'attaque des créatures]]
+- **Voir aussi** : [[Apprivoisement et recrutement]], [[Population et exploitation]], [[Barèmes économiques]], [[Cycle jour-nuit et sommeil]], [[Statuts]], [[Ouvert — Créatures fantastiques]], [[Décision — Vocabulaire d'attaque des créatures]]

@@ -30,9 +30,9 @@ la cellule uniquement (hash déterministe).
 
 **Royaumes paresseux ([[Génération des royaumes PNJ]]) :** un royaume « existe » en données dès que son secteur est interrogé, mais ses villes/PNJ ne sont instanciés qu'à l'approche du joueur. Un royaume jamais visité ne coûte rien.
 
-**Quantification de la hauteur :** le mapping altitude continue → 21 niveaux est spécifié en [[Proposition — Altitude sur 21 niveaux]] (le lissage local s'échantillonne aussi par tuile, cache par chunk).
+**Quantification de la hauteur :** le mapping altitude continue → 21 niveaux est spécifié en [[Décision — Altitude sur 21 niveaux]] (le lissage local s'échantillonne aussi par tuile, cache par chunk).
 
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Unification macro-micro]], [[Catalogue des couches de bruit]]
 - **Alimente** : [[Terrain spectaculaire]], [[Génération de donjon]], [[Génération des royaumes PNJ]]
-- **Voir aussi** : [[Proposition — Altitude sur 21 niveaux]], [[Biomes — schéma]], [[Météo]], [[Budgets de performance]], [[Ordre de vérification]]
+- **Voir aussi** : [[Décision — Altitude sur 21 niveaux]], [[Biomes — schéma]], [[Météo]], [[Budgets de performance]], [[Ordre de vérification]]

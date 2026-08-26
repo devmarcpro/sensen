@@ -7,7 +7,7 @@ etape: 7
 ---
 
 > [!note] Adapté au pivot tactique
-> Algorithme réécrit en 2D — [[Construction cadrée]] la déclare « triviale en 2D ». Le flood fill 3D d'origine est archivé (GDD source, historique git). Critères chiffrés : [[Proposition — Pièces en 2D]].
+> Algorithme réécrit en 2D — [[Construction cadrée]] la déclare « triviale en 2D ». Le flood fill 3D d'origine est archivé (GDD source, historique git). Critères chiffrés : [[Décision — Pièces en 2D]].
 
 L'algorithme qui pilote le logement des PNJ, la capacité des villages et les contrats de construction — trivial en 2D depuis le pivot.
 
@@ -37,4 +37,4 @@ Bétail : toute tuile sous une empreinte avec toit.
 ## Liens
 - **Dépend de** : [[Construction cadrée]], [[EventBus]], [[Claims et persistance]]
 - **Alimente** : [[Habitat des PNJ]], [[Villages PNJ — repeuplement et décimation]], [[Quêtes et guildes]], [[LOD de simulation]]
-- **Voir aussi** : [[Proposition — Pièces en 2D]], [[Conquête de village]], [[Simulation du monde — performance]], [[Meubles]], [[Arborescence du projet]], [[Écrans d'interface]]
+- **Voir aussi** : [[Décision — Pièces en 2D]], [[Conquête de village]], [[Simulation du monde — performance]], [[Meubles]], [[Arborescence du projet]], [[Écrans d'interface]]

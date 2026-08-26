@@ -12,7 +12,7 @@ La grille de 14 slots — et le principe directeur : l'armure est permanente, l'
 
 **La grille (14 slots) :**
 - **Armure (5), mappée sur les zones de coup** ([[Zones de coup par dénivelé]]) : Casque (tête, la zone ×2.5) · Cuirasse (torse) · Brassards-gants (bras et mains) · Jambières (jambes) · Bottes (pieds, + effets de déplacement).
-- **Mains (2)** : principale et secondaire, chacune acceptant arme, bouclier, torche, lanterne, grimoire ou outil. Le combat lit **les slots**, jamais « l'objet en main ». Deux Mains occupe les deux ; dual wielding = deux armes ; bouclier en secondaire.
+- **Mains (2)** : principale et secondaire, chacune acceptant arme, bouclier, torche, lanterne, grimoire ou outil. Le combat lit **les slots**, jamais « l'objet en main ». Deux Mains occupe les deux ; dual wielding = deux armes ; bouclier en secondaire (règles de la garde-bouclier : [[Décision — Boucliers]]).
 - **Munitions (1)** : carquois (munitions compositionnelles : pointe + hampe — [[Composants]]).
 - **Bijoux (3)** : 2 anneaux (effets mineurs) · 1 amulette (effet majeur unique — le slot du build).
 - **Utilitaires (3)** : dos (**cape** = stats/isolation **OU sac** = capacité, jamais les deux) · 2 accessoires portés.
@@ -30,4 +30,4 @@ La grille de 14 slots — et le principe directeur : l'armure est permanente, l'
 ## Liens
 - **Dépend de** : [[Zones de coup par dénivelé]], [[Craft compositionnel]]
 - **Alimente** : [[Armure par zone et constructions]], [[Effets d'équipement passifs]], [[Loot — affixes, gemmes et rareté]]
-- **Voir aussi** : [[Cinq accès au cycle]], [[Modificateurs d'affinité]], [[Schéma créature]], [[Armures et poids porté]], [[Composants]], [[Effets d'équipement types]], [[Ouvert — Boucliers]]
+- **Voir aussi** : [[Cinq accès au cycle]], [[Modificateurs d'affinité]], [[Schéma créature]], [[Armures et poids porté]], [[Composants]], [[Effets d'équipement types]], [[Décision — Boucliers]]

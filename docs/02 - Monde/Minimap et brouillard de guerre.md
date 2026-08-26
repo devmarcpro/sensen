@@ -7,7 +7,7 @@ etape: 8
 ---
 
 > [!note] Adapté au pivot tactique
-> La « coupe au niveau Y » et le bitmask par bande verticale sont retirés — archivés dans le GDD source. Version 2D détaillée : [[Proposition — Minimap en 2D]] (à valider).
+> La « coupe au niveau Y » et le bitmask par bande verticale sont retirés — archivés dans le GDD source. Version 2D détaillée : [[Décision — Minimap en 2D]].
 
 Une minimap toujours visible, un brouillard de guerre par chunk — une carte en surface, une par étage en donjon.
 
@@ -41,4 +41,4 @@ RENDU — échantillonnage des chunks explorés dans un rayon autour du
 ## Liens
 - **Dépend de** : [[Grille continue]], [[IA des créatures]], [[Sauvegarde]]
 - **Alimente** : [[Écrans d'interface]], [[Donjons — structure et intégration]]
-- **Voir aussi** : [[Proposition — Minimap en 2D]], [[Carte du monde]], [[EventBus]], [[Ordre de construction]]
+- **Voir aussi** : [[Décision — Minimap en 2D]], [[Carte du monde]], [[EventBus]], [[Ordre de construction]]

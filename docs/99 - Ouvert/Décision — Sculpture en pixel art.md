@@ -1,13 +1,13 @@
 ---
-aliases: ["Proposition — Sculpture en pixel art", "Sculpture pixel art", "Périmètres de sculpture"]
-tags: [ouvert, proposition, héritage-voxel, objets, à-trancher]
+aliases: ["Décision — Sculpture en pixel art", "Proposition — Sculpture en pixel art", "Sculpture pixel art", "Périmètres de sculpture"]
+tags: [ouvert, proposition, héritage-voxel, objets, décidé]
 domaine: objets
-statut: à-trancher
+statut: décidé
 etape: 6
 ---
 
-> [!todo] Proposition à valider
-> Rédigée le 2026-08-26 pour remplacer l'héritage voxel. **Rien ici n'est une décision du GDD.**
+> [!success] Décidé le 2026-08-26
+> Rédigée pour remplacer l'héritage voxel, **validée sur délégation du designer** (« tout doit être rédigé et décidé avant production »). Le code s'appuie dessus ; révisable comme toute décision.
 
 **Le problème :** [[Éditeur de sculpture]] décrit un mini-espace **voxel** (périmètres 16³ → 64×64×96, subdivision, ghost 3D), mais [[Construction cadrée]] et [[Tables de sculpture]] passent la sculpture en **pixel art paramétrique**. Il faut les périmètres et le pipeline 2D.
 

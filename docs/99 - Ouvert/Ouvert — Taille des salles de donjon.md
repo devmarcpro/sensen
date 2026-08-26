@@ -8,7 +8,7 @@ etape: 2
 
 **La question :** taille exacte des salles/connecteurs en blocs, et taille de la bibliothèque de prefabs au lancement.
 
-**Ce qui est déjà posé ([[Génération de donjon]], tailles en tuiles proposées par [[Proposition — Prefabs de donjon en tuiles]]) :** catégories — petite 8×8, moyenne 16×16, grande 24×24, immense 32×32 tuiles par étage. Connecteurs : corridor_droit, corridor_coude, corridor_T, escalier (lien inter-étages), porte_simple, rampe.
+**Ce qui est déjà posé ([[Génération de donjon]], tailles en tuiles proposées par [[Décision — Prefabs de donjon en tuiles]]) :** catégories — petite 8×8, moyenne 16×16, grande 24×24, immense 32×32 tuiles par étage. Connecteurs : corridor_droit, corridor_coude, corridor_T, escalier (lien inter-étages), porte_simple, rampe.
 
 **Ce qui reste à trancher :** les dimensions définitives et surtout **combien de prefabs produire au lancement** — l'arbitrage est entre variété perçue et coût de production d'assets faits main.
 

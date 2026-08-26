@@ -7,7 +7,7 @@ etape: 0
 ---
 
 > [!note] Adapté au pivot tactique
-> Le format voxel (`chunks/x_y_z.bin`, octree sérialisé) est retiré — archivé dans le GDD source. Le format du diff de tuiles proposé : [[Proposition — Structure de données de la grille]] (à valider). Le principe est inchangé.
+> Le format voxel (`chunks/x_y_z.bin`, octree sérialisé) est retiré — archivé dans le GDD source. Le format du diff de tuiles proposé : [[Décision — Structure de données de la grille]] ). Le principe est inchangé.
 
 Le format de sauvegarde : un dossier par monde, seuls les chunks modifiés écrits.
 
@@ -40,4 +40,4 @@ connexion, exporté à la déconnexion).
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Arborescence du projet]]
 - **Alimente** : [[Multijoueur]], [[Abstraction hors-site]], [[Minimap et brouillard de guerre]], [[Donjons — structure et intégration]]
-- **Voir aussi** : [[Proposition — Structure de données de la grille]], [[Réseau]], [[Réseau et sauvegarde — performance]], [[Optimisation — principes]], [[Contraintes permanentes]], [[Schéma créature]], [[Éditeur de sculpture]]
+- **Voir aussi** : [[Décision — Structure de données de la grille]], [[Réseau]], [[Réseau et sauvegarde — performance]], [[Optimisation — principes]], [[Contraintes permanentes]], [[Schéma créature]], [[Éditeur de sculpture]]

@@ -53,7 +53,7 @@ JAUGE DE CHAÎNE — 5 SEGMENTS DE BASE, EXTENSIBLE JUSQU'À 10 :
 
 **Règle d'application ([[Six types de modules et assemblage]]) :** *une capacité qui touche pose **UN** segment de chaîne, quel que soit le nombre de cibles.*
 
-**Multi-ennemis ([[Trous connus du combat]]) :** la jauge se remplit d'**un segment par ATTAQUE, jamais par cible touchée** (sinon les groupes deviennent des générateurs de chaîne triviaux — l'XP, elle, se somme par cible). Voir [[Ouvert — Multi-ennemis et jauge]].
+**Multi-ennemis ([[Trous connus du combat]]) :** la jauge se remplit d'**un segment par ATTAQUE, jamais par cible touchée** (sinon les groupes deviennent des générateurs de chaîne triviaux — l'XP, elle, se somme par cible). Voir [[Décision — Multi-ennemis et jauge]].
 
 **Glyphes positionnels ([[Familles de capacités de la grille]]) :** un glyphe élémentaire **pose un segment de chaîne** en se déclenchant — le Wu Xing devient positionnel.
 
@@ -61,9 +61,9 @@ JAUGE DE CHAÎNE — 5 SEGMENTS DE BASE, EXTENSIBLE JUSQU'À 10 :
 
 **Formule complète de dégâts (avec le bonus de chaîne) :** [[Domination et multiplicateurs]].
 
-**Question ouverte :** [[Ouvert — Chaîne côté ennemis]].
+**Question ouverte :** [[Décision — Chaîne côté ennemis]].
 
 ## Liens
 - **Dépend de** : [[Wu Xing — cycles et vecteurs]], [[Domination et multiplicateurs]], [[Action-time à ticks]]
 - **Alimente** : [[XP de combat]], [[Cinq accès au cycle]], [[Attaque lourde et télégraphe]]
-- **Voir aussi** : [[Modificateurs d'affinité]], [[Armes fantomatiques]], [[Loot — affixes, gemmes et rareté]], [[Familles de capacités de la grille]], [[Ouvert — Multi-ennemis et jauge]], [[Ouvert — Chaîne côté ennemis]]
+- **Voir aussi** : [[Modificateurs d'affinité]], [[Armes fantomatiques]], [[Loot — affixes, gemmes et rareté]], [[Familles de capacités de la grille]], [[Décision — Multi-ennemis et jauge]], [[Décision — Chaîne côté ennemis]]

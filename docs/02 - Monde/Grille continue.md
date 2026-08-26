@@ -18,9 +18,9 @@ Chaque tuile porte : une **hauteur entière** (0-20, voir [[Hauteur de terrain �
 - **Pas de volume souterrain.** Le souterrain n'existe plus comme espace continu : il devient les **donjons**, grilles séparées en étages discrets reliés par des escaliers ([[Donjons — structure et intégration]]). Les ressources minérales se récoltent en **filons de surface** (façon Elin), pas en creusant des tunnels — le minage exploratoire est explicitement écarté.
 - **Gain technique** : plus de meshing volumétrique, plus de LOD 3D, plus de streaming en volume, plus de propagation de lumière en 3D. Le rendu est : tuiles instanciées teintées par matériau + billboards triés en profondeur.
 
-*Note d'architecture : les chunks sont indexés en 3D `(x, y, z)` dès le premier jour — voir [[Décisions d'architecture]] et [[Proposition — Structure de données de la grille]].*
+*Note d'architecture : les chunks sont indexés en 3D `(x, y, z)` dès le premier jour — voir [[Décisions d'architecture]] et [[Décision — Structure de données de la grille]].*
 
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Unification macro-micro]]
 - **Alimente** : [[Hauteur de terrain ±10]], [[Carte du monde]], [[Claims et persistance]], [[Donjons — structure et intégration]], [[Combat tactique sur grille]]
-- **Voir aussi** : [[Décisions d'architecture]], [[Proposition — Structure de données de la grille]], [[Sauvegarde]], [[Risques majeurs]]
+- **Voir aussi** : [[Décisions d'architecture]], [[Décision — Structure de données de la grille]], [[Sauvegarde]], [[Risques majeurs]]

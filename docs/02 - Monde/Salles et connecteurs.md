@@ -7,7 +7,7 @@ etape: 2
 ---
 
 > [!note] Adapté au pivot tactique
-> `vox_model` devient un `plan` de tuiles 2D par étage, les positions 3D des coordonnées de tuile (format proposé, à valider : [[Proposition — Prefabs de donjon en tuiles]]). Le schéma voxel d'origine est archivé dans le GDD source.
+> `vox_model` devient un `plan` de tuiles 2D par étage, les positions 3D des coordonnées de tuile (format décidé : [[Décision — Prefabs de donjon en tuiles]]). Le schéma voxel d'origine est archivé dans le GDD source.
 
 Le format de données des prefabs de donjon : salles et connecteurs, avec leurs points d'attache typés.
 

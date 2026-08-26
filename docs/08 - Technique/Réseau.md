@@ -7,7 +7,7 @@ etape: 11
 ---
 
 > [!note] Adapté au pivot tactique
-> Adapté au pivot : les mutations du monde sont des mutations de **tuiles** (`place_tile`/`modify_tile` — [[Proposition — Structure de données de la grille]]). L'architecture host-autoritaire est inchangée.
+> Adapté au pivot : les mutations du monde sont des mutations de **tuiles** (`place_tile`/`modify_tile` — [[Décision — Structure de données de la grille]]). L'architecture host-autoritaire est inchangée.
 
 Le host est autoritaire, le client envoie des intentions. La règle qui tient dès le solo.
 

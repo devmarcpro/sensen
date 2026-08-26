@@ -30,7 +30,7 @@ Les règles générales du combat : pas de jet de toucher, la géométrie décid
 
 **Acquisition des modules :** voir [[Grimoires et manuels]].
 
-**Trous connus restant à traiter :** voir [[Trous connus du combat]].
+**Les sept trous du combat sont tranchés :** [[Décision — Multi-ennemis et jauge]] · [[Décision — Vocabulaire d'attaque des créatures]] · [[Décision — Fuite et désengagement]] · [[Décision — Chaîne côté ennemis]] · [[Décision — Boucliers]] · [[Décision — Projectiles]] · [[Décision — Esquive active]] (historique : [[Trous connus du combat]]).
 
 ## Liens
 - **Dépend de** : [[Action-time à ticks]], [[Grille continue]], [[Hauteur de terrain ±10]]

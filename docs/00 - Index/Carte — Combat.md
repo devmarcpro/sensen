@@ -6,7 +6,7 @@ statut: décidé
 etape: 0
 ---
 
-Le cœur du jeu — et l'étape 0 de l'ordre de construction : *rien ne démarre avant un oui*. 26 notes.
+Le cœur du jeu — et l'étape 0 de l'ordre de construction : *rien ne démarre avant un oui*. La spécification exécutable de l'étape 0 : **[[Prototype de combat — spécification]]**.
 
 **Le temps**
 - **[[Action-time à ticks]]** — pas de tours, une horloge que les actions font avancer. Réfléchir est gratuit.
@@ -42,7 +42,7 @@ Le cœur du jeu — et l'étape 0 de l'ordre de construction : *rien ne démarre
 
 **Progression**
 - **[[XP de combat]]** — l'XP vaut les dégâts appliqués, sur trois pistes. L'armure gagne ce qu'elle épargne.
-- **[[Trous connus du combat]]** — les sept points à traiter avant ou pendant le prototype.
+- **[[Trous connus du combat]]** — les sept points, **tous tranchés** : [[Décision — Multi-ennemis et jauge]], [[Décision — Vocabulaire d'attaque des créatures]], [[Décision — Fuite et désengagement]], [[Décision — Chaîne côté ennemis]], [[Décision — Boucliers]], [[Décision — Projectiles]], [[Décision — Esquive active]].
 
 ## Liens
 - **Voir aussi** : [[Sensen — Index général]], [[Carte — Progression]], [[Carte — Objets]], [[Ordre de construction]], [[Carte des dépendances]]

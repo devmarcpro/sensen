@@ -7,7 +7,7 @@ etape: 7
 ---
 
 > [!note] Adapté au pivot tactique
-> Critères volumétriques convertis en surfaces de tuiles (valeurs proposées : [[Proposition — Pièces en 2D]], à valider).
+> Critères volumétriques convertis en surfaces de tuiles (valeurs décidées : [[Décision — Pièces en 2D]]).
 
 Les PNJ résidents ont des besoins de logement, et l'humeur qui en découle est LE levier de rendement du territoire.
 
@@ -17,7 +17,7 @@ Les PNJ résidant sur la base/claim du joueur (compagnons recrutés, animaux —
   - Fermée, avec une **porte**
   - Au moins **un meuble** (n'importe lequel)
   - Un **toit**
-  - Surface minimale en tuiles ([[Proposition — Pièces en 2D]] : **≥ 4 tuiles** proposé)
+  - Surface minimale en tuiles ([[Décision — Pièces en 2D]] : **≥ 4 tuiles**)
 - **Statut "bétail"** — a juste besoin d'un **toit** (abri simple, pas de pièce fermée requise).
 
 **Implications techniques :** nécessite un algorithme de **détection de pièce** (espace clos + porte + toit) — à ranger dans `systems/` ([[Arborescence du projet]]). Voir [[Détection de pièces]]. Le statut bétail/normal est un champ modifiable de l'entité créature ([[Schéma créature]]).
@@ -29,7 +29,7 @@ Les PNJ résidant sur la base/claim du joueur (compagnons recrutés, animaux —
 
 **Décisions :**
 - **Malus chiffrés :** sans logement valide : humeur **−15** · pièce partagée : **−5** par co-occupant au-delà du premier. **Effet de l'humeur :** la productivité des jobs ([[Abstraction hors-site]]/[[Population et exploitation]]) est multipliée par `humeur/100 × 1.5` borné **[0.4, 1.2]** — l'humeur est LE levier de rendement.
-- **Meilleure chambre : oui** — **+1 humeur par type de meuble distinct** dans la pièce (max +10), **+5 si surface ≥ 9 tuiles** (proposé). Les meubles à bonus propres (tapis, trophée, [[Meubles]]) s'ajoutent.
+- **Meilleure chambre : oui** — **+1 humeur par type de meuble distinct** dans la pièce (max +10), **+5 si surface ≥ 9 tuiles**. Les meubles à bonus propres (tapis, trophée, [[Meubles]]) s'ajoutent.
 - **Rétrogradation en bétail : oui, le PNJ réagit** — relation **−30**, humeur **−20** (durables tant que le statut persiste). Traiter un roi en bétail a un prix relationnel, en plus du prix diplomatique ([[Population et exploitation]]).
 
 **Capacité des villages ([[Villages PNJ — repeuplement et décimation]]) :** le même algorithme de détection de pièces, appliqué aux bâtiments du village, donne sa capacité.

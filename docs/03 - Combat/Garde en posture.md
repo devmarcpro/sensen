@@ -26,9 +26,9 @@ action, et elle est FRONTALE : flanc et dos l'ignorent.
 
 **Contrôle et blocage ([[Familles de capacités de la grille]]) :** poussée et attraction servent notamment à *sortir un ennemi de sa garde frontale*.
 
-**Question ouverte liée :** [[Ouvert — Boucliers]].
+**Garde-bouclier ([[Décision — Boucliers]]) :** avec un bouclier en main secondaire, la garde couvre front + flancs, coûte moitié moins d'endurance à l'impact (`6 + dégâts/8`) et n'est pas brisée par l'attaque lourde. La contrepartie : pas de seconde arme.
 
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Endurance]], [[Action-time à ticks]]
 - **Alimente** : [[Attaque lourde et télégraphe]], [[Armure par zone et constructions]]
-- **Voir aussi** : [[Zones de coup par dénivelé]], [[Familles de capacités de la grille]], [[Loot — affixes, gemmes et rareté]], [[Ouvert — Boucliers]], [[Ouvert — Multi-ennemis et jauge]]
+- **Voir aussi** : [[Zones de coup par dénivelé]], [[Familles de capacités de la grille]], [[Loot — affixes, gemmes et rareté]], [[Décision — Boucliers]], [[Décision — Multi-ennemis et jauge]]

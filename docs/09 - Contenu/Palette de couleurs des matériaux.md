@@ -45,5 +45,5 @@ Chaque hex est unique dans le catalogue — un doublon est une erreur bloquante 
 
 ## Liens
 - **Dépend de** : [[Schéma matériau]], [[Direction artistique]]
-- **Alimente** : [[Proposition — Structure de données de la grille]], [[Squelette modulaire et points d'attache]], [[Monstres rares]]
+- **Alimente** : [[Décision — Structure de données de la grille]], [[Squelette modulaire et points d'attache]], [[Monstres rares]]
 - **Voir aussi** : [[Catalogue matériaux — Bois]], [[Catalogue matériaux — Métaux]], [[Catalogue matériaux — Roches]], [[Catalogue matériaux — Gemmes]], [[Catalogue matériaux — Paramétriques]], [[Entités et pathfinding — performance]]

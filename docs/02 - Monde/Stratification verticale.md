@@ -2,16 +2,16 @@
 aliases: ["G.9", "Annexe G.9", "Stratification verticale", "strata.json", "Palette de sol des donjons"]
 tags: [monde, génération, données, décidé]
 domaine: monde
-statut: à-trancher
+statut: décidé
 etape: 2
 ---
 
 > [!note] Adapté au pivot tactique
-> Le système de strates minables en Y est retiré — on ne creuse plus nulle part ([[Décisions fondatrices]]). Le recyclage proposé — palette de sol par étage de donjon — est en [[Proposition — Minerais et strates après le pivot]] (à valider). La table d'origine est conservée ci-dessous comme donnée source de cette palette.
+> Le système de strates minables en Y est retiré — on ne creuse plus nulle part ([[Décisions fondatrices]]). Le recyclage décidé — palette de sol par étage de donjon — est en [[Décision — Minerais et strates après le pivot]] ). La table d'origine est conservée ci-dessous comme donnée source de cette palette.
 
 L'ancienne stratification par profondeur, recyclée en palette de sol des étages de donjon : la dureté du sol croît avec l'étage.
 
-**Le recyclage proposé ([[Proposition — Minerais et strates après le pivot]]) :**
+**Le recyclage ([[Décision — Minerais et strates après le pivot]]) :**
 
 ```
 étages 1-2 : calcaire/grès · 3-4 : ardoise/pierre · 5-6 : basalte
@@ -37,6 +37,6 @@ Les **variantes latérales** restent applicables telles quelles aux étages de d
 **Paliers serrés voulus ([[Application des stats de matériau]]) :** les paliers de dureté des roches ([[Catalogue matériaux — Roches]]) sont VOULUS — ne pas les écarter.
 
 ## Liens
-- **Dépend de** : [[Proposition — Minerais et strates après le pivot]], [[Catalogue matériaux — Roches]]
+- **Dépend de** : [[Décision — Minerais et strates après le pivot]], [[Catalogue matériaux — Roches]]
 - **Alimente** : [[Génération de donjon]], [[Destruction du terrain]]
 - **Voir aussi** : [[Minerais par profondeur]], [[Application des stats de matériau]], [[Récolte]], [[Décisions fondatrices]]

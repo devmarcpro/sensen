@@ -52,4 +52,4 @@ Le résultat du jet est ensuite modulé par matériaux/qualité (formule [[Pipel
 ## Liens
 - **Dépend de** : [[Fonctionnalité]], [[Stats d'un objet crafté]], [[Qualité d'artisanat]], [[Matériaux — 13 stats]]
 - **Alimente** : [[Pipeline de résolution du combat]], [[Action-time à ticks]], [[Combat tactique sur grille]]
-- **Voir aussi** : [[Stats et qualité de l'assemblage]], [[Application des stats de matériau]], [[Compétences — liste]], [[Catalogue matériaux — Bois]], [[Ouvert — Projectiles]]
+- **Voir aussi** : [[Stats et qualité de l'assemblage]], [[Application des stats de matériau]], [[Compétences — liste]], [[Catalogue matériaux — Bois]], [[Décision — Projectiles]]

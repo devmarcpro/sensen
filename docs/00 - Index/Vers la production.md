@@ -8,25 +8,15 @@ etape: 0
 
 Ce qui reste à modifier dans le design, et ce qui manque pour lancer la production. État au 2026-08-26 — à cocher au fil de l'eau.
 
-## 1. À valider — les 8 propositions post-pivot
+## 1. ✅ Validé — les 8 décisions post-pivot (2026-08-26, sur délégation)
 
-Le nettoyage de l'héritage voxel ([[Héritage voxel — audit]]) laisse 8 propositions chiffrées, intégrées dans les notes avec la mention « proposé ». **Les valider (ou les amender) est la première décision à prendre** — aucune n'est bloquante pour commencer l'étape 0, mais P2, P5 et P7 le deviennent vite :
+- [x] [[Décision — Structure de données de la grille]] · [[Décision — Budgets et critères de performance tactiques]] · [[Décision — Sculpture en pixel art]] · [[Décision — Prefabs de donjon en tuiles]] · [[Décision — Pièces en 2D]] · [[Décision — Altitude sur 21 niveaux]] · [[Décision — Minerais et strates après le pivot]] · [[Décision — Minimap en 2D]]
 
-- [ ] [[Proposition — Structure de données de la grille]] — **bloquant étape 0-1** (c'est la fondation du code)
-- [ ] [[Proposition — Budgets et critères de performance tactiques]] — **bloquant étape 0** (le critère de sortie du prototype)
-- [ ] [[Proposition — Sculpture en pixel art]] — bloquant étape 1 (pipeline d'assets)
-- [ ] [[Proposition — Prefabs de donjon en tuiles]] — bloquant étape 2
-- [ ] [[Proposition — Pièces en 2D]] — bloquant étape 7
-- [ ] [[Proposition — Altitude sur 21 niveaux]] — bloquant étape 8
-- [ ] [[Proposition — Minerais et strates après le pivot]] — bloquant étape 8
-- [ ] [[Proposition — Minimap en 2D]] — bloquant étape 8
+## 2. Le document du prototype de combat (étape 0)
 
-## 2. À écrire — le document du prototype de combat (étape 0)
-
-[[Ordre de construction]] : *« Prototype de combat isolé (**document séparé**) — le combat est-il bon ? Rien ne démarre avant un oui. »* **Ce document n'existe pas encore.** C'est le vrai déclencheur de la production. Il doit fixer :
-- le périmètre exact du prototype (quelles armes, quels modules, quelles créatures, quelle grille) ;
-- le critère de « oui » — comment on jugera honnêtement que le combat est bon ;
-- et trancher au passage les **sept trous connus du combat** ([[Trous connus du combat]]) : [[Ouvert — Multi-ennemis et jauge]], [[Ouvert — Vocabulaire d'attaque des créatures]], [[Ouvert — Fuite et désengagement]], [[Ouvert — Chaîne côté ennemis]], [[Ouvert — Boucliers]], [[Ouvert — Projectiles]], [[Ouvert — Esquive active]].
+[[Ordre de construction]] : *« Prototype de combat isolé (**document séparé**) — le combat est-il bon ? Rien ne démarre avant un oui. »*
+- [x] **Les sept trous du combat sont tranchés** (2026-08-26) : [[Décision — Multi-ennemis et jauge]], [[Décision — Vocabulaire d'attaque des créatures]], [[Décision — Fuite et désengagement]], [[Décision — Chaîne côté ennemis]], [[Décision — Boucliers]], [[Décision — Projectiles]], [[Décision — Esquive active]].
+- [x] **Le document est rédigé** : [[Prototype de combat — spécification]] — périmètre, contenu exact, 12 jalons d'implémentation, critère de « oui » mesurable et qualitatif.
 
 ## 3. À trancher au playtest (implémentable sans — ne bloque pas)
 
@@ -63,7 +53,7 @@ Le nettoyage de l'héritage voxel ([[Héritage voxel — audit]]) laisse 8 propo
 
 ## Le chemin critique, en une ligne
 
-**Valider P2 + P7 → écrire le document du prototype de combat (et trancher les 7 trous) → produire les 5 modules Métal + la silhouette paperdoll → coder l'étape 0.** Tout le reste peut suivre la cadence des 11 étapes.
+**~~Valider P2 + P7~~ ✅ → ~~écrire le document du prototype de combat (et trancher les 7 trous)~~ ✅ → produire les 5 modules Métal + le catalogue d'actions de créatures + la silhouette paperdoll → coder l'étape 0** ([[Prototype de combat — spécification]], jalon 1). Tout le reste peut suivre la cadence des 11 étapes.
 
 ## Liens
 - **Dépend de** : [[Ordre de construction]], [[Héritage voxel — audit]], [[Trous connus du combat]]

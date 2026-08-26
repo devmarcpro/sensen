@@ -7,7 +7,7 @@ etape: 8
 ---
 
 > [!note] Adapté au pivot tactique
-> `mod_altitude` recalibré par classe d'altitude de cellule et `mod_profondeur` → `mod_donjon` (valeurs proposées : [[Proposition — Altitude sur 21 niveaux]], à valider). Neige/gel exprimés en états de tuile.
+> `mod_altitude` recalibré par classe d'altitude de cellule et `mod_profondeur` → `mod_donjon` (valeurs décidées : [[Décision — Altitude sur 21 niveaux]]). Neige/gel exprimés en états de tuile.
 
 La météo est une fonction pure du temps et du lieu, jamais une simulation — et elle porte de vraies mécaniques (température ressentie, foudre, gel, canicule).
 

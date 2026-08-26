@@ -7,13 +7,13 @@ etape: 0
 ---
 
 > [!note] Adapté au pivot tactique
-> Les critères voxel d'origine (mutation de bloc, « façade 64 blocs 4px meshée < 4 ms ») et l'ancien ordre D.3 sont retirés — archivés dans le GDD source. Les critères ci-dessous suivent les 11 étapes tactiques ; chiffres proposés en [[Proposition — Budgets et critères de performance tactiques]] (à valider).
+> Les critères voxel d'origine (mutation de bloc, « façade 64 blocs 4px meshée < 4 ms ») et l'ancien ordre D.3 sont retirés — archivés dans le GDD source. Les critères ci-dessous suivent les 11 étapes tactiques ; chiffres décidés en [[Décision — Budgets et critères de performance tactiques]].
 
 Un critère de performance à valider avant de passer à l'étape suivante. **Un critère raté = on optimise AVANT d'empiler le système suivant.**
 
 **Le principe (conservé de G.8) :** chaque étape de [[Ordre de construction]] a son critère de perf AVANT de passer à la suivante, sur machine moyenne cible.
 
-**Critères proposés par étape ([[Proposition — Budgets et critères de performance tactiques]]) :**
+**Critères par étape ([[Décision — Budgets et critères de performance tactiques]]) :**
 
 ```
 É0  Prototype de combat : grille 32×32 + 10 entités, 60 fps,
@@ -34,4 +34,4 @@ Un critère de performance à valider avant de passer à l'étape suivante. **Un
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Budgets de performance]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]
-- **Voir aussi** : [[Proposition — Budgets et critères de performance tactiques]], [[Contraintes permanentes]], [[Génération procédurale — performance]], [[Entités et pathfinding — performance]], [[Réseau et sauvegarde — performance]], [[LOD de simulation]]
+- **Voir aussi** : [[Décision — Budgets et critères de performance tactiques]], [[Contraintes permanentes]], [[Génération procédurale — performance]], [[Entités et pathfinding — performance]], [[Réseau et sauvegarde — performance]], [[LOD de simulation]]

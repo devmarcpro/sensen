@@ -52,7 +52,7 @@ La rupture du 2026-08-09 : ce qui a été abandonné, ce qui survit, et pourquoi
 ### À trancher au playtest (implémentable sans)
 
 - Axe unique des **niveaux de recette** (efficacité matière / vitesse et lots / stabilité). → [[Ouvert — Axe des niveaux de recette]]
-- **Esquive active** dédiée ou mouvement pur. → [[Ouvert — Esquive active]]
+- **Esquive active** dédiée ou mouvement pur. → [[Décision — Esquive active]]
 - Répartitions élémentaires exactes d'**Arcane, Espace, Corruption**. → [[Ouvert — Répartitions Arcane Espace Corruption]]
 - Fourchettes des **gemmes** et plafond +15 par compétence ; taille des pools d'**affixes**. → [[Ouvert — Fourchettes des gemmes]]
 - Ce qui compense réellement une **arme mixte** face à une arme pure (au-delà de l'amortissement des matchups et de la purification par gemmes). → [[Ouvert — Compensation de l'arme mixte]]
@@ -66,7 +66,7 @@ La rupture du 2026-08-09 : ce qui a été abandonné, ce qui survit, et pourquoi
 
 ### Trous connus du combat (à traiter avant ou pendant le prototype)
 
-Voir [[Trous connus du combat]] — sept points : [[Ouvert — Multi-ennemis et jauge]], [[Ouvert — Vocabulaire d'attaque des créatures]], [[Ouvert — Fuite et désengagement]], [[Ouvert — Chaîne côté ennemis]], [[Ouvert — Boucliers]], [[Ouvert — Projectiles]], [[Ouvert — Dark Continent]].
+Voir [[Trous connus du combat]] — sept points : [[Décision — Multi-ennemis et jauge]], [[Décision — Vocabulaire d'attaque des créatures]], [[Décision — Fuite et désengagement]], [[Décision — Chaîne côté ennemis]], [[Décision — Boucliers]], [[Décision — Projectiles]], [[Ouvert — Dark Continent]].
 
 ## Liens
 - **Alimente** : [[Ordre de construction]], [[Contraintes permanentes]], [[Pitch et identité]], tout le coffre

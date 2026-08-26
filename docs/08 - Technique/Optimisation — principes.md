@@ -35,9 +35,9 @@ Les cinq principes transversaux d'optimisation — ceux qu'on ne peut pas rattra
   regénérable (principe déjà acté E.10, il vaut pour tout).
 ```
 
-**Les huit sections de l'annexe G :** [[Optimisation — principes]] (G.1) · [[Proposition — Structure de données de la grille]] (ex-G.2) · [[Éclairage]] (G.3) · [[Génération procédurale — performance]] (G.4) · [[Entités et pathfinding — performance]] (G.5) · [[Simulation du monde — performance]] (G.6) · [[Réseau et sauvegarde — performance]] (G.7) · [[Ordre de vérification]] (G.8) · [[Stratification verticale]] et [[Minerais par profondeur]] (G.9).
+**Les huit sections de l'annexe G :** [[Optimisation — principes]] (G.1) · [[Décision — Structure de données de la grille]] (ex-G.2) · [[Éclairage]] (G.3) · [[Génération procédurale — performance]] (G.4) · [[Entités et pathfinding — performance]] (G.5) · [[Simulation du monde — performance]] (G.6) · [[Réseau et sauvegarde — performance]] (G.7) · [[Ordre de vérification]] (G.8) · [[Stratification verticale]] et [[Minerais par profondeur]] (G.9).
 
 ## Liens
 - **Dépend de** : [[Budgets de performance]], [[Décisions d'architecture]]
-- **Alimente** : [[Proposition — Structure de données de la grille]], [[Éclairage]], [[Génération procédurale — performance]], [[Entités et pathfinding — performance]], [[Simulation du monde — performance]], [[Réseau et sauvegarde — performance]], [[Ordre de vérification]]
+- **Alimente** : [[Décision — Structure de données de la grille]], [[Éclairage]], [[Génération procédurale — performance]], [[Entités et pathfinding — performance]], [[Simulation du monde — performance]], [[Réseau et sauvegarde — performance]], [[Ordre de vérification]]
 - **Voir aussi** : [[Sauvegarde]], [[Simulation à ticks]], [[Arborescence du projet]], [[Risques majeurs]]

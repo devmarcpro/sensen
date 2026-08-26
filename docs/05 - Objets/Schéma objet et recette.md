@@ -7,7 +7,7 @@ etape: 6
 ---
 
 > [!note] Adapté au pivot tactique
-> Adapté au pivot : `vox_model`/`vox_slots` deviennent des références de **sprite 2D** avec le même mécanisme de couleurs stand-in — nommage des champs à fixer à l'implémentation ([[Proposition — Sculpture en pixel art]]).
+> Adapté au pivot : `vox_model`/`vox_slots` deviennent des références de **sprite 2D** avec le même mécanisme de couleurs stand-in — nommage des champs à fixer à l'implémentation ([[Décision — Sculpture en pixel art]]).
 
 Le format de données d'un objet et de sa recette.
 

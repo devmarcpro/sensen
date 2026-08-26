@@ -7,7 +7,7 @@ etape: 6
 ---
 
 > [!note] Adapté au pivot tactique
-> Adapté au pivot : stats dérivées des **pixels** du modèle sculpté, marqueurs fonctionnels en pixels, dénivelé en niveaux de hauteur. Pipeline 2D : [[Proposition — Sculpture en pixel art]].
+> Adapté au pivot : stats dérivées des **pixels** du modèle sculpté, marqueurs fonctionnels en pixels, dénivelé en niveaux de hauteur. Pipeline 2D : [[Décision — Sculpture en pixel art]].
 
 Un véhicule est une entité rigide, pas un morceau de monde qui bouge — et la seule exception à la règle forme-libre de la sculpture.
 
