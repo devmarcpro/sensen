@@ -14,6 +14,7 @@ Un **roguelike tactique** en monde infini, généré procéduralement et totalem
 | [`docs/`](docs/) | Le design complet : un **coffre Obsidian** de 272 notes atomiques, reliées et navigables |
 | [`archive/`](archive/) | Le GDD source monolithique (v2.0) — archive de référence, les notes de `docs/` font foi |
 | [`tools/`](tools/) | Outillage du dépôt — `check_vault.py` valide liens, frontmatter et comptages du coffre |
+| [`AGENT.md`](AGENT.md) | Le prompt de développement autonome — règles de travail, boucle de validation, ordre |
 
 ## État du projet — pré-production
 
