@@ -67,6 +67,8 @@ $godot = "C:\Users\ciryl\Documents\Godot_v4.6.3-stable_win64.exe"
 & $godot --headless --path godot res://scenes/tests/test_combat.tscn --quit-after 3  # les tests (assert, headless)
 & $godot --headless --path godot res://scenes/demo/main.tscn --quit-after 120        # la scène tourne sans erreur
 python tools/check_vault.py                                                          # le coffre est intègre
+& $godot --headless --path godot res://scenes/tests/test_criteres.tscn --quit-after 3 # rapport des critères mesurables (§ 5 de la spec)
+& $godot --path godot res://scenes/tests/capture.tscn -- --sortie C:/tmp/c.png --arene 0 # capture d'écran (fenêtré)
 ```
 
 L'arborescence (autoload, data, systems, scenes, locale) suit la note *Arborescence du projet*. `autoload/game_data.gd` charge et valide tout `data/` au boot (bloquant en debug) ; `systems/combat/simulation.gd` est l'autorité (le client `scenes/demo/main.gd` n'envoie que des intentions). État et prochaines étapes : `docs/00 - Index/Vers la production.md`.

@@ -62,7 +62,7 @@ ui.mode.exploration,exploration ({tps} ticks/s)
 ui.mode.combat,COMBAT — le temps n'avance qu'à l'action
 ui.aide,clic : se déplacer / frapper · maj+clic : attaque lourde · G : garde · espace : attendre · tab : arène suivante · F5 : recharger les données
 ui.entite.ligne,{nom} pv {pv}/{pv_max} · end {end} · agit à t={compteur} · h={h}
-ui.case,case ({x},{y}) h={h} · Δh vs toi : {dh}
+ui.case,"case ({x},{y}) h={h} · Δh vs toi : {dh}"
 ui.timeline,prochaines actions :
 ui.preview,{nom} : {des}×{dur} +{stat} → zone {zone} ×{mult} − armure {armure} ⇒ {min}–{max} ({ticks} ticks)
 ui.preview.lourde,lourde : ×{lourde} dégâts · {ticks} ticks · brise la garde
@@ -73,7 +73,7 @@ journal.attaque_lourde,{att} ATTAQUE LOURDE sur {def} ({zone}) : {degats} dégâ
 journal.telegraphe,{nom} prépare {action} ({ticks} ticks)
 journal.garde,{nom} prend la garde (2 ticks)
 journal.garde_tient,la garde de {nom} absorbe le coup : {avant} → {apres}
-journal.attendre,{nom} attend (5 ticks, +20 endurance)
+journal.attendre,"{nom} attend (5 ticks, +20 endurance)"
 journal.mort,{nom} tombe.
 journal.engagement,{nom} t'a vu — COMBAT : le temps n'avance plus qu'à l'action
 journal.desengagement,plus d'hostile en vue — retour au temps réel
@@ -81,7 +81,7 @@ journal.inaccessible,inaccessible — une falaise (Δ ≥ 3) ou un mur barre la 
 journal.endurance_zero,{nom} est à bout de souffle : dégâts à 60 %
 journal.action_creature,{att} : {action} sur {def} ({zone}) : {degats} dégâts
 journal.changer_arme,{nom} prend {objet} ({ticks} ticks)
-journal.chaine_segment,{nom} pose un segment {element} ({position}/{capacite}, +{transition})
+journal.chaine_segment,"{nom} pose un segment {element} ({position}/{capacite}, +{transition})"
 journal.chaine_resout,{nom} RÉSOUT sa chaîne : dégâts ×{mult}
 element.bois,Bois
 element.feu,Feu
@@ -94,7 +94,7 @@ ui.chaine,chaîne : {segments}
 journal.capacite,{att} lance {capacite} sur {def} ({zone}) : {degats} dégâts
 journal.soin,{att} : {capacite} soigne {def} de {soin}
 journal.surchauffe,{nom} SURCHAUFFE : {deficit} de mana manquant → {degats} PV
-journal.condition_fausse,{capacite} ne part pas : {condition} n'est pas remplie (50 %% des ticks rendus)
+journal.condition_fausse,{capacite} ne part pas : {condition} n'est pas remplie (50 % des ticks rendus)
 capacite.etincelle.name,Étincelle
 capacite.gel_en_ligne.name,Gel en ligne
 capacite.baume.name,Baume
