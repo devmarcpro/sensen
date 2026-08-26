@@ -1,0 +1,12 @@
+{
+  "id": "surcharge",
+  "nom": "Surcharge",
+  "name_key": "module.surcharge.name",
+  "module_type": "modificateur",
+  "description": "+2 dés",
+  "tags": [
+    "modificateur"
+  ],
+  "surcout_ticks": 3,
+  "surcout_ressource": "×1.5"
+}

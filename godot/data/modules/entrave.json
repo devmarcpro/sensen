@@ -1,0 +1,23 @@
+{
+  "id": "entrave",
+  "nom": "Entrave",
+  "name_key": "module.entrave.name",
+  "module_type": "noyau",
+  "description": "immobilise 20 ticks — jet de Force pour briser · budget anti-stunlock",
+  "tags": [
+    "noyau",
+    "contrôle"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 12,
+  "cout_mana": 14,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

@@ -1,0 +1,23 @@
+{
+  "id": "echo_de_chair",
+  "nom": "Écho de chair",
+  "name_key": "module.echo_de_chair.name",
+  "module_type": "noyau",
+  "description": "invoque une créature alliée temporaire — occupe une tuile",
+  "tags": [
+    "noyau",
+    "terrain"
+  ],
+  "famille": "Terrain",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 25,
+  "cout_mana": 28,
+  "cout_endurance": 0,
+  "effets": [
+    "invocation"
+  ],
+  "forme": null,
+  "portee": null
+}

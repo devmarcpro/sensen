@@ -1,0 +1,26 @@
+{
+  "id": "flamme",
+  "nom": "Flamme",
+  "name_key": "module.flamme.name",
+  "module_type": "noyau",
+  "description": "la charge de Feu",
+  "tags": [
+    "noyau",
+    "dégâts",
+    "feu"
+  ],
+  "famille": "Dégâts",
+  "elements": {
+    "feu": 1.0
+  },
+  "element_special": null,
+  "power_base": "2d6",
+  "cout_ticks": 8,
+  "cout_mana": 8,
+  "cout_endurance": 0,
+  "effets": [
+    "degats"
+  ],
+  "forme": null,
+  "portee": null
+}

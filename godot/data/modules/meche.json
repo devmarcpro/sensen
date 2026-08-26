@@ -1,0 +1,11 @@
+{
+  "id": "meche",
+  "nom": "Mèche",
+  "name_key": "module.meche.name",
+  "module_type": "declencheur",
+  "description": "la charge part après **N ticks** (10 à 50, réglable à l'assemblage)",
+  "tags": [
+    "declencheur"
+  ],
+  "surcout_ticks": 0
+}

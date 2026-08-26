@@ -1,0 +1,23 @@
+{
+  "id": "elan",
+  "nom": "Élan",
+  "name_key": "module.elan.name",
+  "module_type": "noyau",
+  "description": "**le lanceur** se déplace de 3 tuiles",
+  "tags": [
+    "noyau",
+    "déplacement"
+  ],
+  "famille": "Déplacement",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 4,
+  "cout_mana": 0,
+  "cout_endurance": 8,
+  "effets": [
+    "deplacement"
+  ],
+  "forme": null,
+  "portee": null
+}

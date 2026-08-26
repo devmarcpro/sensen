@@ -1,0 +1,12 @@
+{
+  "id": "persistance",
+  "nom": "Persistance",
+  "name_key": "module.persistance.name",
+  "module_type": "modificateur",
+  "description": "toutes les durées du noyau ×2",
+  "tags": [
+    "modificateur"
+  ],
+  "surcout_ticks": 2,
+  "surcout_ressource": "+6"
+}

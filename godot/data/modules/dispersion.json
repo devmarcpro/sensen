@@ -1,0 +1,11 @@
+{
+  "id": "dispersion",
+  "nom": "Dispersion",
+  "name_key": "module.dispersion.name",
+  "module_type": "liaison",
+  "description": "répartit la charge sur **toutes** les cibles de la forme, divisée par leur nombre",
+  "tags": [
+    "liaison"
+  ],
+  "surcout_ticks": 3
+}

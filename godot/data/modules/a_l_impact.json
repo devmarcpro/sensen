@@ -1,0 +1,11 @@
+{
+  "id": "a_l_impact",
+  "nom": "À l'impact",
+  "name_key": "module.a_l_impact.name",
+  "module_type": "declencheur",
+  "description": "la charge qui suit part quand le noyau précédent touche",
+  "tags": [
+    "declencheur"
+  ],
+  "surcout_ticks": 1
+}

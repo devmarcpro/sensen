@@ -1,0 +1,14 @@
+{
+  "id": "affinite",
+  "nom": "Affinité",
+  "name_key": "module.affinite.name",
+  "module_type": "condition",
+  "description": "la cible porte l'élément désigné",
+  "tags": [
+    "condition"
+  ],
+  "predicat": "element_cible = X",
+  "bonus": "×1.2 dégâts",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

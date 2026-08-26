@@ -1,0 +1,14 @@
+{
+  "id": "escorte",
+  "nom": "Escorte",
+  "name_key": "module.escorte.name",
+  "module_type": "condition",
+  "description": "la cible touche un de tes alliés",
+  "tags": [
+    "condition"
+  ],
+  "predicat": "cible_adjacente_a_allie",
+  "bonus": "+1 dé, +1 taille",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

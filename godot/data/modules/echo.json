@@ -1,0 +1,11 @@
+{
+  "id": "echo",
+  "nom": "Écho",
+  "name_key": "module.echo.name",
+  "module_type": "liaison",
+  "description": "rejoue la charge à **50 %** après 20 ticks",
+  "tags": [
+    "liaison"
+  ],
+  "surcout_ticks": 3
+}

@@ -1,0 +1,11 @@
+{
+  "id": "sceau",
+  "nom": "Sceau",
+  "name_key": "module.sceau.name",
+  "module_type": "declencheur",
+  "description": "pose la charge au sol : elle part quand une entité **entre** sur la tuile, jusqu'à 100 ticks",
+  "tags": [
+    "declencheur"
+  ],
+  "surcout_ticks": 3
+}

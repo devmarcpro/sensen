@@ -6,7 +6,10 @@ statut: décidé
 etape: 0
 ---
 
-> [!success] Résolu le 2026-08-26 — la passe est faite
+> [!success] Suite : refonte en composants — 2026-08-26
+> La transcription a révélé un défaut plus profond que le format : **le catalogue était une liste de sorts finis**. 47 modules sur 47 embarquaient leur géométrie, et `forme` / `condition` / `liaison` n'existaient pas comme modules. Le catalogue est **refait en 70 composants** sur les six types réels — voir [[Modules]]. La transcription ci-dessous reste l'étape qui a rendu le défaut visible.
+
+> [!success] Étape 1 — la transcription dans le schéma
 > Les **61 modules** sont transcrits dans le schéma : `cout_ticks` sur les 61, `forme`/`portée`/`cible`/`ligne de vue` explicites, durées en ticks, quatre entrées périmées réécrites, et **les modules de manuel coûtent de l'endurance**. Catalogue à jour : [[Modules]] · JSON : `godot/data/modules/*.json`. Cette note conserve l'audit et les barèmes qui ont servi.
 
 > [!failure] Le défaut, tel qu'il a été trouvé le 2026-08-26

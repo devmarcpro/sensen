@@ -1,0 +1,11 @@
+{
+  "id": "ricochet",
+  "nom": "Ricochet",
+  "name_key": "module.ricochet.name",
+  "module_type": "liaison",
+  "description": "la charge saute à **1d3 cibles proches**, −1 dé par saut",
+  "tags": [
+    "liaison"
+  ],
+  "surcout_ticks": 3
+}

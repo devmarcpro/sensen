@@ -1,0 +1,23 @@
+{
+  "id": "permutation",
+  "nom": "Permutation",
+  "name_key": "module.permutation.name",
+  "module_type": "noyau",
+  "description": "échange sa position avec la cible",
+  "tags": [
+    "noyau",
+    "déplacement"
+  ],
+  "famille": "Déplacement",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 8,
+  "cout_mana": 14,
+  "cout_endurance": 0,
+  "effets": [
+    "deplacement"
+  ],
+  "forme": null,
+  "portee": null
+}

@@ -1,0 +1,23 @@
+{
+  "id": "sol_vif",
+  "nom": "Sol vif",
+  "name_key": "module.sol_vif.name",
+  "module_type": "noyau",
+  "description": "la tuile blesse ce qui la traverse, 50 ticks",
+  "tags": [
+    "noyau",
+    "terrain"
+  ],
+  "famille": "Terrain",
+  "elements": {},
+  "element_special": null,
+  "power_base": "2d4",
+  "cout_ticks": 12,
+  "cout_mana": 12,
+  "cout_endurance": 0,
+  "effets": [
+    "terrain"
+  ],
+  "forme": null,
+  "portee": null
+}

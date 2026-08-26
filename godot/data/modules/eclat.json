@@ -1,0 +1,26 @@
+{
+  "id": "eclat",
+  "nom": "Éclat",
+  "name_key": "module.eclat.name",
+  "module_type": "noyau",
+  "description": "la charge de Métal — la plus lourde",
+  "tags": [
+    "noyau",
+    "dégâts",
+    "métal"
+  ],
+  "famille": "Dégâts",
+  "elements": {
+    "métal": 1.0
+  },
+  "element_special": null,
+  "power_base": "2d8",
+  "cout_ticks": 10,
+  "cout_mana": 10,
+  "cout_endurance": 0,
+  "effets": [
+    "degats"
+  ],
+  "forme": null,
+  "portee": null
+}

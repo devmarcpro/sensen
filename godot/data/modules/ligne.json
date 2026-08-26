@@ -1,0 +1,19 @@
+{
+  "id": "ligne",
+  "nom": "Ligne",
+  "name_key": "module.ligne.name",
+  "module_type": "forme",
+  "description": "traverse tout sur 4 tuiles en ligne droite",
+  "tags": [
+    "forme"
+  ],
+  "geometrie": "ligne",
+  "surcout_ticks": 2,
+  "portee_base": [
+    1,
+    4
+  ],
+  "taille_base": 4,
+  "cibles_valides": "tuile · traverse",
+  "ligne_de_vue": true
+}

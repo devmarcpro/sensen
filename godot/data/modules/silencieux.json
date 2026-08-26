@@ -1,0 +1,12 @@
+{
+  "id": "silencieux",
+  "nom": "Silencieux",
+  "name_key": "module.silencieux.name",
+  "module_type": "modificateur",
+  "description": "aucun bruit : ne rompt pas Dissimulé, n'alerte pas les voisins",
+  "tags": [
+    "modificateur"
+  ],
+  "surcout_ticks": 2,
+  "surcout_ressource": "+4"
+}

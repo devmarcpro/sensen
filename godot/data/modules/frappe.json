@@ -1,0 +1,23 @@
+{
+  "id": "frappe",
+  "nom": "Frappe",
+  "name_key": "module.frappe.name",
+  "module_type": "noyau",
+  "description": "les dégâts de l'arme équipée, à son élément et à son coût en ticks — c'est le noyau de toute capacité de manuel",
+  "tags": [
+    "noyau",
+    "dégâts"
+  ],
+  "famille": "Dégâts",
+  "elements": {},
+  "element_special": "arme",
+  "power_base": "arme",
+  "cout_ticks": 0,
+  "cout_mana": 0,
+  "cout_endurance": 6,
+  "effets": [
+    "degats"
+  ],
+  "forme": null,
+  "portee": null
+}

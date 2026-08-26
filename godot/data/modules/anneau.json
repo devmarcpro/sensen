@@ -1,0 +1,19 @@
+{
+  "id": "anneau",
+  "nom": "Anneau",
+  "name_key": "module.anneau.name",
+  "module_type": "forme",
+  "description": "tout autour d'une tuile, **sans toucher le centre**",
+  "tags": [
+    "forme"
+  ],
+  "geometrie": "anneau",
+  "surcout_ticks": 3,
+  "portee_base": [
+    0,
+    5
+  ],
+  "taille_base": 1,
+  "cibles_valides": "tuile",
+  "ligne_de_vue": false
+}

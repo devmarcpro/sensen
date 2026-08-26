@@ -1,0 +1,11 @@
+{
+  "id": "alternance",
+  "nom": "Alternance",
+  "name_key": "module.alternance.name",
+  "module_type": "liaison",
+  "description": "alterne entre les **deux noyaux suivants** à chaque emploi",
+  "tags": [
+    "liaison"
+  ],
+  "surcout_ticks": 2
+}

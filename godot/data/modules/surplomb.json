@@ -1,0 +1,14 @@
+{
+  "id": "surplomb",
+  "nom": "Surplomb",
+  "name_key": "module.surplomb.name",
+  "module_type": "condition",
+  "description": "le lanceur est plus haut que la cible",
+  "tags": [
+    "condition"
+  ],
+  "predicat": "hauteur_relative > 0",
+  "bonus": "+2 dés",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

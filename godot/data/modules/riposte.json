@@ -1,0 +1,11 @@
+{
+  "id": "riposte",
+  "nom": "Riposte",
+  "name_key": "module.riposte.name",
+  "module_type": "declencheur",
+  "description": "la charge part **quand le porteur est touché**",
+  "tags": [
+    "declencheur"
+  ],
+  "surcout_ticks": 2
+}

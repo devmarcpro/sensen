@@ -1,0 +1,12 @@
+{
+  "id": "transmutation",
+  "nom": "Transmutation",
+  "name_key": "module.transmutation.name",
+  "module_type": "modificateur",
+  "description": "convertit l'élément du noyau vers un élément au choix ([[Wu Xing — cycles et vecteurs]])",
+  "tags": [
+    "modificateur"
+  ],
+  "surcout_ticks": 2,
+  "surcout_ressource": "+6"
+}

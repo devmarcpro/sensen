@@ -1,0 +1,23 @@
+{
+  "id": "trait_nu",
+  "nom": "Trait nu",
+  "name_key": "module.trait_nu.name",
+  "module_type": "noyau",
+  "description": "sans élément : bon marché, mais **ne pose aucun segment de chaîne**",
+  "tags": [
+    "noyau",
+    "dégâts"
+  ],
+  "famille": "Dégâts",
+  "elements": {},
+  "element_special": null,
+  "power_base": "1d8",
+  "cout_ticks": 5,
+  "cout_mana": 4,
+  "cout_endurance": 0,
+  "effets": [
+    "degats"
+  ],
+  "forme": null,
+  "portee": null
+}

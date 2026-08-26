@@ -1,0 +1,14 @@
+{
+  "id": "achevement",
+  "nom": "Achèvement",
+  "name_key": "module.achevement.name",
+  "module_type": "condition",
+  "description": "la cible est basse",
+  "tags": [
+    "condition"
+  ],
+  "predicat": "pv_cible < 30 %",
+  "bonus": "+3 dés",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

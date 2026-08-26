@@ -1,0 +1,14 @@
+{
+  "id": "dernier_souffle",
+  "nom": "Dernier souffle",
+  "name_key": "module.dernier_souffle.name",
+  "module_type": "condition",
+  "description": "le lanceur est bas",
+  "tags": [
+    "condition"
+  ],
+  "predicat": "pv_porteur < 40 %",
+  "bonus": "+3 dés",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

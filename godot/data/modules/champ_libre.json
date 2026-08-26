@@ -1,0 +1,14 @@
+{
+  "id": "champ_libre",
+  "nom": "Champ libre",
+  "name_key": "module.champ_libre.name",
+  "module_type": "condition",
+  "description": "rien entre le lanceur et la cible",
+  "tags": [
+    "condition"
+  ],
+  "predicat": "ligne_de_vue_degagee",
+  "bonus": "−2 ticks",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

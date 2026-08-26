@@ -1,0 +1,12 @@
+{
+  "id": "patience",
+  "nom": "Patience",
+  "name_key": "module.patience.name",
+  "module_type": "modificateur",
+  "description": "**+5 ticks**, coût de ressource réduit de 40 % — le module de l'attrition",
+  "tags": [
+    "modificateur"
+  ],
+  "surcout_ticks": 5,
+  "surcout_ressource": "×0.6"
+}

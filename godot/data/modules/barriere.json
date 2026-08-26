@@ -1,0 +1,23 @@
+{
+  "id": "barriere",
+  "nom": "Barrière",
+  "name_key": "module.barriere.name",
+  "module_type": "noyau",
+  "description": "occupe la tuile et bloque le passage, 50 ticks",
+  "tags": [
+    "noyau",
+    "terrain"
+  ],
+  "famille": "Terrain",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 14,
+  "cout_mana": 14,
+  "cout_endurance": 0,
+  "effets": [
+    "invocation"
+  ],
+  "forme": null,
+  "portee": null
+}

@@ -1,0 +1,19 @@
+{
+  "id": "carre",
+  "nom": "Carré",
+  "name_key": "module.carre.name",
+  "module_type": "forme",
+  "description": "zone pleine de rayon 1, centre compris — **friendly fire intégral**",
+  "tags": [
+    "forme"
+  ],
+  "geometrie": "carre",
+  "surcout_ticks": 4,
+  "portee_base": [
+    0,
+    5
+  ],
+  "taille_base": 1,
+  "cibles_valides": "tuile",
+  "ligne_de_vue": false
+}

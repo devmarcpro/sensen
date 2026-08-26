@@ -1,9 +1,9 @@
 {
-  "id": "desarmement",
-  "nom": "Désarmement",
-  "name_key": "module.desarmement.name",
+  "id": "rupture",
+  "nom": "Rupture",
+  "name_key": "module.rupture.name",
   "module_type": "noyau",
-  "description": "jet opposé — l'arme de la cible tombe sur sa tuile",
+  "description": "la cible perd 50 % de sa réduction d'armure de zone, 20 ticks",
   "tags": [
     "noyau",
     "technique"
@@ -14,7 +14,7 @@
   "power_base": null,
   "cout_ticks": 10,
   "cout_mana": 0,
-  "cout_endurance": 16,
+  "cout_endurance": 14,
   "effets": [
     "statut"
   ],

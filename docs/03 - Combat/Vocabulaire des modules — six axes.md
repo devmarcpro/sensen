@@ -14,20 +14,16 @@ Le schéma de données d'un module et les six axes du vocabulaire commun — la 
 
 ```json
 {
-  "id": "projectile_feu",
-  "name_key": "module.projectile_feu.name",
+  "id": "flamme",
+  "name_key": "module.flamme.name",
   "elements": { "feu": 1.0 },
-  "module_type": "effet",
-  "forme": "ligne",
-  "portee": [1, 6],
-  "taille": 1,
-  "cible": "ennemi",
-  "ligne_de_vue": true,
-  "cout_ticks": 10,
+  "module_type": "noyau",
+  "cout_ticks": 8,
   "cout_mana": 8,
-  "power_base": 12,
-  "conditions": [],
-  "tags": ["feu", "projectile"],
+  "cout_endurance": 0,
+  "power_base": "2d6",
+  "effets": ["degats"],
+  "tags": ["noyau", "degats", "feu"],
   "grimoire_domains": ["feu", "destruction"],
   "book_type": "grimoire"
 }
@@ -60,7 +56,18 @@ Le schéma de données d'un module et les six axes du vocabulaire commun — la 
 
 **Les MODIFICATEURS (façon Noita) opèrent sur ces axes**, pas sur des chiffres seulement : `étend la forme d'une tuile` · `transforme la ligne en cône` · `double la portée, divise la puissance` · `ajoute une condition en échange d'un bonus` · `répète l'effet sur une tuile adjacente` · `convertit l'élément`. C'est ce qui rend l'assemblage réellement combinatoire.
 
-- `module_type` : `"effet"` (produit quelque chose), `"modificateur"` (altère le module suivant), `"declencheur"` (trigger sur impact, entrée sur une tuile, ou événement EventBus).
+- **`module_type` — six valeurs, corrigé le 2026-08-26.** Le champ n'en acceptait que trois (`effet`, `modificateur`, `declencheur`), ce qui obligeait chaque module d'effet à embarquer sa propre géométrie — l'exact contraire de la décision fondatrice de [[Six types de modules et assemblage]]. Les six types y sont désormais tous représentables :
+
+| Valeur | Rôle | Champs propres |
+|---|---|---|
+| `noyau` | la charge utile *(remplace `effet`)* | `power_base`, `cout_ticks`, `cout_mana` **ou** `cout_endurance`, `effets` |
+| `forme` | la géométrie seule | `geometrie`, `portee_base`, `taille_base`, `cibles_valides`, `ligne_de_vue` |
+| `modificateur` | altère le noyau suivant | `surcout_ticks`, `surcout_ressource` |
+| `condition` | verrou qui accorde un bonus | `predicat`, `bonus`, `echec` |
+| `declencheur` | diffère la charge qui suit | `surcout_ticks` |
+| `liaison` | répète, disperse, propage | `surcout_ticks` |
+
+**Un noyau n'a jamais de `forme` ni de `portee`** — ces champs appartiennent aux modules de forme. Catalogue : [[Modules]].
 - `book_type` : `"grimoire"` (sorts) ou `"manuel"` (armes).
 - **Aucun arbre de talents, aucun point à dépenser** : les modules s'obtiennent par le **loot et l'apprentissage** ([[Grimoires et manuels]]), montent de niveau **par l'usage** ([[Potentiel]]), et le build **émerge** de ce qu'on possède et de ce qu'on utilise.
 - **Infobulle exhaustive obligatoire** : chaque module affiche ses valeurs **calculées pour le personnage courant** — forme, portée, coûts, conditions, dégâts attendus avec le détail. Aucune information cachée, aucun « environ ».

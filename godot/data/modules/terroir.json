@@ -1,0 +1,14 @@
+{
+  "id": "terroir",
+  "nom": "Terroir",
+  "name_key": "module.terroir.name",
+  "module_type": "condition",
+  "description": "le lieu porte l'élément du noyau ([[Wu Xing hors combat]])",
+  "tags": [
+    "condition"
+  ],
+  "predicat": "vecteur_de_lieu = X",
+  "bonus": "−25 % de ressource",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

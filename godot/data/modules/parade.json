@@ -1,0 +1,11 @@
+{
+  "id": "parade",
+  "nom": "Parade",
+  "name_key": "module.parade.name",
+  "module_type": "declencheur",
+  "description": "la charge part **quand le porteur pare** ([[Garde en posture]])",
+  "tags": [
+    "declencheur"
+  ],
+  "surcout_ticks": 2
+}

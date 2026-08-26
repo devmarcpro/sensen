@@ -1,0 +1,12 @@
+{
+  "id": "longue_vue",
+  "nom": "Longue vue",
+  "name_key": "module.longue_vue.name",
+  "module_type": "modificateur",
+  "description": "portée ×2, mais **−1 dé**",
+  "tags": [
+    "modificateur"
+  ],
+  "surcout_ticks": 2,
+  "surcout_ressource": "+4"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "cone",
+  "nom": "Cône",
+  "name_key": "module.cone.name",
+  "module_type": "forme",
+  "description": "s'élargit avec la distance, 3 tuiles de profondeur",
+  "tags": [
+    "forme"
+  ],
+  "geometrie": "cone",
+  "surcout_ticks": 3,
+  "portee_base": [
+    1,
+    3
+  ],
+  "taille_base": 3,
+  "cibles_valides": "tuile · s'élargit",
+  "ligne_de_vue": true
+}

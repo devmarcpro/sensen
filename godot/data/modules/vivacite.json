@@ -1,0 +1,12 @@
+{
+  "id": "vivacite",
+  "nom": "Vivacité",
+  "name_key": "module.vivacite.name",
+  "module_type": "modificateur",
+  "description": "**−3 ticks** — le module du burst",
+  "tags": [
+    "modificateur"
+  ],
+  "surcout_ticks": -3,
+  "surcout_ressource": "×1.3"
+}

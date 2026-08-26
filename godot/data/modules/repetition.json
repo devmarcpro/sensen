@@ -1,0 +1,11 @@
+{
+  "id": "repetition",
+  "nom": "Répétition",
+  "name_key": "module.repetition.name",
+  "module_type": "liaison",
+  "description": "rejoue la charge 2 fois, chacune à **−1 dé**",
+  "tags": [
+    "liaison"
+  ],
+  "surcout_ticks": 4
+}

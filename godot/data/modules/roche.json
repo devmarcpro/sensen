@@ -1,0 +1,26 @@
+{
+  "id": "roche",
+  "nom": "Roche",
+  "name_key": "module.roche.name",
+  "module_type": "noyau",
+  "description": "la charge de Terre — forte moyenne, faible variance",
+  "tags": [
+    "noyau",
+    "dégâts",
+    "terre"
+  ],
+  "famille": "Dégâts",
+  "elements": {
+    "terre": 1.0
+  },
+  "element_special": null,
+  "power_base": "3d4",
+  "cout_ticks": 9,
+  "cout_mana": 8,
+  "cout_endurance": 0,
+  "effets": [
+    "degats"
+  ],
+  "forme": null,
+  "portee": null
+}

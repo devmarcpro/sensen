@@ -1,0 +1,12 @@
+{
+  "id": "vampirique",
+  "nom": "Vampirique",
+  "name_key": "module.vampirique.name",
+  "module_type": "modificateur",
+  "description": "le lanceur récupère 50 % des dégâts infligés",
+  "tags": [
+    "modificateur"
+  ],
+  "surcout_ticks": 2,
+  "surcout_ressource": "+6"
+}

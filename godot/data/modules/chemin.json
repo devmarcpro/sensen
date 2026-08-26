@@ -1,0 +1,19 @@
+{
+  "id": "chemin",
+  "nom": "Chemin",
+  "name_key": "module.chemin.name",
+  "module_type": "forme",
+  "description": "suit le trajet du lanceur : tout ce qu'il longe est touché",
+  "tags": [
+    "forme"
+  ],
+  "geometrie": "chemin",
+  "surcout_ticks": 2,
+  "portee_base": [
+    1,
+    5
+  ],
+  "taille_base": 5,
+  "cibles_valides": "tuile · trajet",
+  "ligne_de_vue": false
+}

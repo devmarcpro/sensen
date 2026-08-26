@@ -1,22 +1,22 @@
 {
-  "id": "purge",
-  "nom": "Purge",
-  "name_key": "module.purge.name",
+  "id": "attraction",
+  "nom": "Attraction",
+  "name_key": "module.attraction.name",
   "module_type": "noyau",
-  "description": "retire un statut négatif",
+  "description": "attire de 2 tuiles",
   "tags": [
     "noyau",
-    "soin"
+    "déplacement"
   ],
-  "famille": "Soin",
+  "famille": "Déplacement",
   "elements": {},
   "element_special": null,
   "power_base": null,
-  "cout_ticks": 7,
+  "cout_ticks": 6,
   "cout_mana": 10,
   "cout_endurance": 0,
   "effets": [
-    "statut"
+    "deplacement"
   ],
   "forme": null,
   "portee": null

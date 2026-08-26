@@ -1,0 +1,19 @@
+{
+  "id": "point",
+  "nom": "Point",
+  "name_key": "module.point.name",
+  "module_type": "forme",
+  "description": "une seule cible — la forme par défaut, gratuite en ticks",
+  "tags": [
+    "forme"
+  ],
+  "geometrie": "point",
+  "surcout_ticks": 0,
+  "portee_base": [
+    1,
+    6
+  ],
+  "taille_base": 1,
+  "cibles_valides": "ennemi · allié · toute entité",
+  "ligne_de_vue": true
+}

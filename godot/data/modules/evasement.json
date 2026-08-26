@@ -1,0 +1,12 @@
+{
+  "id": "evasement",
+  "nom": "Évasement",
+  "name_key": "module.evasement.name",
+  "module_type": "modificateur",
+  "description": "transforme une Ligne en Cône, ou un Anneau en Carré",
+  "tags": [
+    "modificateur"
+  ],
+  "surcout_ticks": 1,
+  "surcout_ressource": "+3"
+}

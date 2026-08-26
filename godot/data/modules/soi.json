@@ -1,0 +1,19 @@
+{
+  "id": "soi",
+  "nom": "Soi",
+  "name_key": "module.soi.name",
+  "module_type": "forme",
+  "description": "sur soi-même — **rend 2 ticks**",
+  "tags": [
+    "forme"
+  ],
+  "geometrie": "soi",
+  "surcout_ticks": -2,
+  "portee_base": [
+    0,
+    0
+  ],
+  "taille_base": 0,
+  "cibles_valides": "soi",
+  "ligne_de_vue": false
+}

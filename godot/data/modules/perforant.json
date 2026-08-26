@@ -1,0 +1,12 @@
+{
+  "id": "perforant",
+  "nom": "Perforant",
+  "name_key": "module.perforant.name",
+  "module_type": "modificateur",
+  "description": "ignore intégralement la réduction d'armure de zone",
+  "tags": [
+    "modificateur"
+  ],
+  "surcout_ticks": 2,
+  "surcout_ressource": "+5"
+}

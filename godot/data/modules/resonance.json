@@ -1,0 +1,14 @@
+{
+  "id": "resonance",
+  "nom": "Résonance",
+  "name_key": "module.resonance.name",
+  "module_type": "condition",
+  "description": "le segment désigné est déjà posé dans la jauge ([[Jauge de chaîne Wu Xing]])",
+  "tags": [
+    "condition"
+  ],
+  "predicat": "segment_chaine_present",
+  "bonus": "+2 dés",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

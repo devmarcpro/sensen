@@ -1,0 +1,12 @@
+{
+  "id": "focale",
+  "nom": "Focale",
+  "name_key": "module.focale.name",
+  "module_type": "modificateur",
+  "description": "taille de la forme −1, mais **+1 dé**",
+  "tags": [
+    "modificateur"
+  ],
+  "surcout_ticks": 0,
+  "surcout_ressource": "0"
+}

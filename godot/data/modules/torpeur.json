@@ -1,0 +1,23 @@
+{
+  "id": "torpeur",
+  "nom": "Torpeur",
+  "name_key": "module.torpeur.name",
+  "module_type": "noyau",
+  "description": "repousse le compteur d'action de 10 ticks · budget anti-stunlock",
+  "tags": [
+    "noyau",
+    "contrôle"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 10,
+  "cout_mana": 16,
+  "cout_endurance": 0,
+  "effets": [
+    "tempo"
+  ],
+  "forme": null,
+  "portee": null
+}

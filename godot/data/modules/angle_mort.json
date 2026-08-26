@@ -1,0 +1,14 @@
+{
+  "id": "angle_mort",
+  "nom": "Angle mort",
+  "name_key": "module.angle_mort.name",
+  "module_type": "condition",
+  "description": "frappe de dos ou de flanc — le plus gros bonus du jeu",
+  "tags": [
+    "condition"
+  ],
+  "predicat": "dos_ou_flanc",
+  "bonus": "+3 dés",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+}

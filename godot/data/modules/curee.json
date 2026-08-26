@@ -1,0 +1,11 @@
+{
+  "id": "curee",
+  "nom": "Curée",
+  "name_key": "module.curee.name",
+  "module_type": "declencheur",
+  "description": "la charge part **à la mise à mort**",
+  "tags": [
+    "declencheur"
+  ],
+  "surcout_ticks": 2
+}

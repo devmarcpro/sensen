@@ -1,0 +1,23 @@
+{
+  "id": "empoigne",
+  "nom": "Empoigne",
+  "name_key": "module.empoigne.name",
+  "module_type": "noyau",
+  "description": "saisit la cible adjacente : elle libère sa tuile et devient projetable",
+  "tags": [
+    "noyau",
+    "contrôle"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 8,
+  "cout_mana": 0,
+  "cout_endurance": 12,
+  "effets": [
+    "saisie"
+  ],
+  "forme": null,
+  "portee": null
+}

@@ -1,0 +1,27 @@
+{
+  "id": "seve",
+  "nom": "Sève",
+  "name_key": "module.seve.name",
+  "module_type": "noyau",
+  "description": "1d4 par tranche de 10 ticks pendant 50 ticks",
+  "tags": [
+    "noyau",
+    "soin",
+    "bois"
+  ],
+  "famille": "Soin",
+  "elements": {
+    "bois": 1.0
+  },
+  "element_special": null,
+  "power_base": "1d4",
+  "cout_ticks": 10,
+  "cout_mana": 14,
+  "cout_endurance": 0,
+  "effets": [
+    "soin",
+    "statut"
+  ],
+  "forme": null,
+  "portee": null
+}

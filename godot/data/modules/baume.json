@@ -1,9 +1,9 @@
 {
-  "id": "purge",
-  "nom": "Purge",
-  "name_key": "module.purge.name",
+  "id": "baume",
+  "nom": "Baume",
+  "name_key": "module.baume.name",
   "module_type": "noyau",
-  "description": "retire un statut négatif",
+  "description": "soin instantané",
   "tags": [
     "noyau",
     "soin"
@@ -11,12 +11,12 @@
   "famille": "Soin",
   "elements": {},
   "element_special": null,
-  "power_base": null,
-  "cout_ticks": 7,
+  "power_base": "2d6",
+  "cout_ticks": 8,
   "cout_mana": 10,
   "cout_endurance": 0,
   "effets": [
-    "statut"
+    "soin"
   ],
   "forme": null,
   "portee": null
