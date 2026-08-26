@@ -6,7 +6,7 @@ statut: décidé
 etape: 0
 ---
 
-L'architecture Godot et la stratégie de performance. 16 notes.
+L'architecture Godot et la stratégie de performance. 22 notes.
 
 > [!note] Ce dossier était le plus touché par l'**héritage voxel**. Nettoyé le 2026-08-26 : les notes corrigibles sont réécrites (texte d'origine en annexe historique), les conflits restants ont chacun leur proposition à valider — [[Héritage voxel — audit]].
 

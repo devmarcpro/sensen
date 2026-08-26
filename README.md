@@ -11,12 +11,13 @@ Un **roguelike tactique** en monde infini, généré procéduralement et totalem
 | Chemin | Ce que c'est |
 |---|---|
 | [`godot/`](godot/) | Le projet Godot — squelette pour l'instant, arborescence conforme au design (D.1) |
-| [`docs/`](docs/) | Le design complet : un **coffre Obsidian** de ~240 notes atomiques, reliées et navigables |
+| [`docs/`](docs/) | Le design complet : un **coffre Obsidian** de 267 notes atomiques, reliées et navigables |
 | [`archive/`](archive/) | Le GDD source monolithique (v2.0) — archive de référence, les notes de `docs/` font foi |
+| [`tools/`](tools/) | Outillage du dépôt — `check_vault.py` valide liens, frontmatter et comptages du coffre |
 
 ## État du projet — pré-production
 
-Le design est complet et nettoyé : le pivot **voxel → tactique isométrique** (2026-08-09, irrévocable) est intégralement répercuté dans les notes. Ce qui reste avant de coder est listé dans **`docs/00 - Index/Vers la production.md`** — en tête : valider 8 propositions techniques et écrire le document du prototype de combat.
+Le design est complet et nettoyé : le pivot **voxel → tactique isométrique** (2026-08-09, irrévocable) est intégralement répercuté dans les notes. **Aucune question de design ne reste bloquante** : tout ce qui était ouvert a reçu une décision ou un défaut chiffré implémentable — le code n'a rien à inventer. Ce qui reste avant de coder est listé dans **`docs/00 - Index/Vers la production.md`** — en tête : l'interface, les contrôles et la caméra, puis la transcription des catalogues en JSON.
 
 ### Ordre de construction (le donjon avant le monde)
 
@@ -50,7 +51,8 @@ Ouvrir [`docs/`](docs/) comme coffre dans **Obsidian**. Point d'entrée : `00 - 
 
 - Chaque note porte en **alias** les références du GDD (`A.4.6`, `E.3`, `B.13`…) — tous les renvois résolvent.
 - Frontmatter filtrable : `statut` (décidé / à-trancher / playtest / contenu-à-produire), `etape` (0-11), `domaine`.
-- Les questions non tranchées vivent dans `docs/99 - Ouvert/` — dont les 8 **propositions** issues du nettoyage de l'héritage voxel, à valider.
+- `docs/99 - Ouvert/` archive les questions *tranchées depuis* : chaque note y porte sa décision et sa date.
+- **Vérifier le coffre :** `python tools/check_vault.py` — liens morts, frontmatter incomplet, comptages périmés. Sortie non nulle si erreur.
 
 ## Développement
 

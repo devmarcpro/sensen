@@ -12,7 +12,7 @@ etape: 9
 - l'**identité chinoise assumée** ([[Identité visuelle chinoise]]) — palette d'encre et de brumes, calligraphie dans l'UI, pentagramme Wu Xing ;
 - le **Wu Xing daoïste** comme cosmologie mécanique réelle du monde ([[Wu Xing — cycles et vecteurs]]) ;
 - l'**astrologie sexagésimale** ([[Astrologie — cycle sexagésimal]]) — 60 signes, trines et oppositions ;
-- **10 cultures de nommage** ([[Cultures de nommage]]) dont trois dédiées aux races originales ;
+- **7 cultures de nommage** ([[Cultures de nommage]]), toutes inspirées de peuples réels ;
 - des **noms propres générés**, jamais écrits à la main ([[Génération de noms]]) — le lore ne peut donc pas s'appuyer sur des personnages nommés fixes ;
 - les **répliques d'ambiance** data-driven ([[Dialogue PNJ]]) : ~15-20 gabarits génériques + 3-5 par métier au départ, *conçu pour en absorber des centaines sans code* — c'est le principal véhicule de lore.
 

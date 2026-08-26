@@ -37,7 +37,7 @@ Le format de données d'une culture de nommage : des pools A/B, des affinités d
 - `race_affinity` : poids de tirage par race à la génération d'un royaume ([[Génération des royaumes PNJ]]) ; les races absentes ont un poids 0 (jamais tirées pour elles). Les 7 cultures sont toutes partageables — l'Humain a le spectre le plus large, le Nain penche vers le nordique, l'Elfe vers le celte.
 - `titres` : une entrée par type de gouvernance ([[Schéma royaume]]) + `guilde_maitre` (utilisé indépendamment du royaume, pour tout maître de guilde, [[Quêtes et guildes]]) ; genré `m`/`f` selon le PNJ.
 
-**Contenu à produire :** [[Ouvert — Pools de noms des cultures]] — les pools des 10 cultures ([[Cultures de nommage]]).
+**Les pools sont écrits :** [[Pools de noms des cultures]] — les 7 cultures ([[Cultures de nommage]]).
 
 ## Liens
 - **Dépend de** : [[Noms culturels]], [[Data-driven design]]

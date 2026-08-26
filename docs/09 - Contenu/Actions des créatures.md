@@ -9,7 +9,7 @@ etape: 0
 > [!success] Rédigé le 2026-08-26
 > Catalogue produit sur délégation — schéma et règles en [[Décision — Vocabulaire d'attaque des créatures]]. Valeurs de premier équilibrage, à ajuster au prototype.
 
-Les actions des 34 créatures — 24 actions partagées par famille, deux règles qui économisent tout le reste.
+Les actions du bestiaire — **24 actions** partagées par famille, deux règles qui économisent tout le reste.
 
 ## Deux règles structurantes
 
@@ -69,7 +69,7 @@ Les actions des 34 créatures — 24 actions partagées par famille, deux règle
 | `cri_de_ralliement` | anneau · r4 · 12 | alliés : +15 % dégâts 40 ticks | Feu |
 | `enchainement` | cible_unique · 1 · 14 | deux attaques d'arme consécutives (chacune pose son segment) | *(arme)* |
 
-## Affectations par créature ([[Créatures]])
+## Affectations par race animale ([[Créatures]])
 
 - **Loup / Loup blanc** : morsure, harcelement_meute, hurlement · **Sanglier** : coup_de_defenses, charge · **Cerf / Renard / Renne / Chameau** : morsure (renard), ruade · **Essaim d'abeilles** : dard_essaim · **Scorpion** : pique_venimeuse, pinces · **Vautour** : becquetage, pique_plongeant · **Ours brun / polaire** : griffure, morsure_puissante, coup_de_patte · **Morse** : masse_ecrasante, coup_de_defenses · **Crocodile** : morsure, machoire_verrouillee, embuscade · **Nuée de moustiques** : nuee · **Serpent venimeux** : morsure_venimeuse, embuscade · **Aigle** : serres, pique_plongeant · **Bouquetin** : coup_de_tete, ruade · **Lynx** : bond, griffure, embuscade
 - **Humains** (villageois → roi, bandits, pillards…) : système standard (arme + garde + lourde + tir) · **Chef de bande** (élite) : + cri_de_ralliement, enchainement · **Ermite** : modules de grimoire ([[Modules]]) · **Garde / Pillard** : standard, profil IA dédié.

@@ -6,7 +6,7 @@ statut: décidé
 etape: 0
 ---
 
-Ce que Sensen est, pour qui, et à quoi il ressemble. Six notes.
+Ce que Sensen est, pour qui, et à quoi il ressemble. 6 notes.
 
 - **[[Pitch et identité]]** — le jeu en une phrase, et la promesse : un jeu de décisions, pas de dextérité.
 - **[[Piliers d'inspiration]]** — les sept références et ce qu'on prélève exactement dans chacune. La table à relire quand on doute d'une direction.

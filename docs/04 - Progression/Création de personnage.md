@@ -14,7 +14,7 @@ Une création détaillée, pas un menu déroulant : stats à répartir, race, cl
 - **Création de personnage détaillée :** répartition de points, choix multiples — pas un simple menu déroulant simplifié.
 
 **Décisions (résolu, Annexe C) :**
-- **Races : [[Races]]** est la liste de lancement (6 races avec bonus). **Classes : [[Classes]]** (6 kits complets). **Création : [[Stats de personnage]]** — 6 stats, 30 points à répartir (base 5, max 15 à la création), + race, classe, apparence (choix des parties du corps, [[Schéma unifié créature-PNJ]]).
+- **Races : [[Races]]** est la liste de lancement (3 races, chacune avec son talent — [[Talents de race]]). **Classes : [[Classes]]** (8 visibles, kit + talent — [[Talents de classe]]). **Création : [[Stats de personnage]]** — 6 stats, 30 points à répartir (base 5, max 15 à la création), + race, classe, apparence (choix des parties du corps, [[Schéma unifié créature-PNJ]]).
 - **Date de naissance choisie librement** (sélecteur avec aperçu des effets) : voir [[Astrologie — cycle sexagésimal]].
 
 **Les trois axes ([[Les trois axes — race, classe, fonction]]) :** race (qui tu es) · classe (ce que tu sais) · fonction (ce que tu fais). **Tout PNJ les porte aussi** — un *elfe · éliotrope · aventurier*, un *humain · forgeron · artisan*.

@@ -63,7 +63,7 @@ La rupture du 2026-08-09 : ce qui a été abandonné, ce qui survit, et pourquoi
 | **La fonction absorbe les 11 postes** | `vendeur` → **commerçant**, `forgeron` → **artisan** ; la classe *Artisan* devient **Forgeron** ([[Fonctions]]) |
 | **5ᵉ contrainte permanente** | *le personnage joueur est une entité comme une autre ; le contrôle est un attribut, pas un type* ([[Contraintes permanentes]]) — rend possible [[Ouvert — Changer de personnage]] |
 
-| **Classes renommées et étendues** | 6 visibles en **français évocateur** — Le Sabre, Le Souffle, La Braise, La Trace, La Balance, Le Vent — et **9 cachées** : Le Passeur, Le Sablier, Le Sceau, Le Masque, Le Porteur, L'Ombre, L'Écarlate, Le Rieur, Le Fossoyeur ([[Classes]]) |
+| **Classes renommées et étendues** | **8 visibles** en français évocateur — Le Sabre, Le Souffle, La Braise, La Trace, La Balance, La Paume, Le Creuset, Le Vent — et **11 cachées** : Le Passeur, Le Sablier, Le Sceau, Le Masque, Le Porteur, L'Ombre, L'Écarlate, Le Rieur, Le Fossoyeur, La Mèche, L'Engrenage ([[Classes]]) |
 | **Vocabulaire des modules élargi** | deux effets nouveaux, `tempo` et `saisie` ([[Vocabulaire des modules — six axes]]) + 3 statuts (Dissimulé, Saisi, Retardé) et la **jauge de classe** — tous génériques, aucune exception par classe |
 
 | **Bestiaire restructuré** | F.3 mélangeait des espèces (loup) et des humains à métier (forgeron, bandit, roi). [[Créatures]] ne garde que les **19 races animales** ; les humains deviennent des combinaisons **tirées** ([[Profils de PNJ]]) — ajouter un métier au monde n'ajoute plus une créature |
@@ -91,7 +91,7 @@ La rupture du 2026-08-09 : ce qui a été abandonné, ce qui survit, et pourquoi
 
 - 5 modules du domaine **Métal** ([[Modules]]) → [[Ouvert — Modules du domaine Métal]] ; affinités élémentaires des ingrédients de cuisine → [[Décision — Affinités de cuisine]].
 - Recettes d'obtention par composant × famille ([[Composant et recette d'obtention]]) et leurs sources exotiques. → [[Ouvert — Recettes de composants par famille]]
-- Pools de noms des 10 cultures ([[Cultures de nommage]]). → [[Ouvert — Pools de noms des cultures]]
+- ~~Pools de noms des cultures~~ ✅ **fait** — les 7 cultures ([[Pools de noms des cultures]]). → [[Ouvert — Pools de noms des cultures]]
 - Surcharges `wuxing` des matériaux dont la catégorie ment. → [[Décision — Surcharges Wu Xing des matériaux]]
 
 ### Trous connus du combat (à traiter avant ou pendant le prototype)

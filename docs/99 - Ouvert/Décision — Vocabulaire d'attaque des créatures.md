@@ -18,7 +18,7 @@ etape: 0
 - **Télégraphe** : toute action de coût **> 10 ticks** affiche son icône d'intention ET sa zone d'effet sur la grille dès que le compteur de la créature l'engage — cohérent avec [[Attaque lourde et télégraphe]] (*le télégraphe est une information d'interface*). Les actions ≤ 10 ticks s'exécutent sans préavis (le tempo rapide est leur identité).
 - L'IA ([[IA des créatures]]) choisit parmi `actions` via ses considérations utility — l'action est une donnée, le choix est le profil.
 
-**Le catalogue des actions des 34 créatures** ([[Créatures]]) : produit dans [[Actions des créatures]] — ~30 actions couvrent les 34 créatures par partage familial.
+**Le catalogue** ([[Créatures]] : 19 races animales) : produit dans [[Actions des créatures]] — **24 actions** les couvrent toutes par partage familial. Les **humains** n'ont pas d'actions dédiées : ils utilisent le système standard du joueur ([[Profils de PNJ]]).
 
 ## Liens
 - **Dépend de** : [[Vocabulaire des modules — six axes]], [[Schéma créature]], [[IA des créatures]], [[Trous connus du combat]]

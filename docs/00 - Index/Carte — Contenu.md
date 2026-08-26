@@ -6,7 +6,7 @@ statut: décidé
 etape: 6
 ---
 
-Les catalogues prêts à transcrire en JSON. 24 notes.
+Les catalogues prêts à transcrire en JSON. 32 notes.
 
 *Toutes les valeurs sont fixées et implémentables telles quelles ; le playtest les ajuste, il n'a rien à inventer.*
 

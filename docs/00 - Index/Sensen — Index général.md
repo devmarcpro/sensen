@@ -36,14 +36,14 @@ Puis, selon le besoin : **[[Vers la production]]** (ce qui reste avant de coder)
 |---|---|---|
 | **[[Carte — Vision]]** | pitch, identité, inspirations, direction artistique | 6 |
 | **[[Carte — Monde]]** | grille, hauteur, biomes, donjons, météo, corruption | 26 |
-| **[[Carte — Combat]]** | action-time, Wu Xing, chaîne, garde, modules | 26 |
-| **[[Carte — Progression]]** | usage, potentiel, races, classes, astrologie | 13 |
-| **[[Carte — Objets]]** | matériaux, craft compositionnel, équipement, loot | 24 |
-| **[[Carte — Êtres]]** | l'être unique, apparence, IA, compagnons, familles | 16 |
-| **[[Carte — Société]]** | relations, guildes, économie, royaumes, lois | 27 |
-| **[[Carte — Technique]]** | architecture Godot, données, performance, réseau | 16 |
-| **[[Carte — Contenu]]** | les catalogues prêts à transcrire en JSON | 24 |
-| **[[Carte — Ouvert]]** | les 26 questions non tranchées | 26 |
+| **[[Carte — Combat]]** | action-time, Wu Xing, chaîne, garde, modules | 30 |
+| **[[Carte — Progression]]** | les trois axes, talents, potentiel, races, classes | 17 |
+| **[[Carte — Objets]]** | matériaux, craft compositionnel, équipement, loot | 26 |
+| **[[Carte — Êtres]]** | l'être unique, apparence, IA, compagnons, familles | 17 |
+| **[[Carte — Société]]** | relations, guildes, économie, royaumes, lois | 34 |
+| **[[Carte — Technique]]** | architecture Godot, données, performance, réseau | 22 |
+| **[[Carte — Contenu]]** | les catalogues prêts à transcrire en JSON | 32 |
+| **[[Carte — Ouvert]]** | décisions, défauts fixés, et ce qui reste ouvert | 40 |
 
 ---
 

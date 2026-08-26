@@ -1,5 +1,5 @@
 ---
-aliases: ["C.9", "Annexe C.9", "Cultures de nommage", "10 cultures", "Cultures"]
+aliases: ["C.9", "Annexe C.9", "Cultures de nommage", "7 cultures", "10 cultures", "Cultures"]
 tags: [contenu, société, catalogue, décidé]
 domaine: contenu
 statut: décidé

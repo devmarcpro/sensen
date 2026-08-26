@@ -6,7 +6,7 @@ statut: décidé
 etape: 6
 ---
 
-Matériaux, craft, équipement, loot — et la règle d'or qui les articule : *l'atelier améliore, le donjon transforme*. 24 notes.
+Matériaux, craft, équipement, loot — et la règle d'or qui les articule : *l'atelier améliore, le donjon transforme*. 26 notes.
 
 **Les matériaux**
 - **[[Matériaux — 13 stats]]** — le choix du matériau est un arbitrage multidimensionnel, pas dureté/poids.

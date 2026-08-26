@@ -7,7 +7,7 @@ etape: 4
 ---
 
 > [!success] Renommées le 2026-08-26
-> Les six classes passent de noms génériques (Guerrier, Mage, Artisan, Chasseur, Marchand, Vagabond) à des **noms français évocateurs**, cohérents avec [[Identité visuelle chinoise]] — *« ce qui distingue réellement Sensen, bien plus qu'une perspective »*. Chaque classe porte désormais un **talent** ([[Talents de classe]]).
+> Les classes de départ passent de noms génériques (Guerrier, Mage, Artisan, Chasseur, Marchand, Vagabond) à des **noms français évocateurs**, cohérents avec [[Identité visuelle chinoise]] — *« ce qui distingue réellement Sensen, bien plus qu'une perspective »*. Chaque classe porte désormais un **talent** ([[Talents de classe]]).
 
 Les 8 classes visibles : un kit **et un talent** qui définit une façon de jouer.
 

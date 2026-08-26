@@ -35,7 +35,7 @@ Prouver que le cœur du jeu — **action-time à ticks + Wu Xing + jauge de cha�
 **Contenu :**
 - **6 armes** au râtelier (swap 4 ticks) : Dague (Métal), Épée (Métal), Masse (Terre), Lance (Bois), Arc (Bois, distance), Bâton magique (support des modules) — profils de [[Stats d'armes]], vecteurs mono-élément préconfigurés (le craft n'existe pas encore : l'élément est une donnée de l'arme du prototype). Un **bouclier**.
 - **17 modules** : les 5 de Feu, 5 d'Eau/Glace, 4 de Foudre, les **5 de Métal** ([[Modules]], [[Ouvert — Modules du domaine Métal]] → catalogue) — de quoi fermer la rotation des cinq éléments par la magie — plus Frappe lourde et Balayage (manuels).
-- **6 créatures** ([[Créatures]], actions dans [[Actions des créatures]]) : Loup ×3 (meute — teste le multi-ennemis et l'encerclement), Sanglier (charge télégraphiée), Bandit ×2 (humain armé, garde), Chef de bande (**élite à jauge de chaîne** — teste l'interruption), Aigle (volant), Scorpion (poison).
+- **6 adversaires** (bêtes : [[Créatures]] · humains : [[Profils de PNJ]] · actions dans [[Actions des créatures]]) : Loup ×3 (meute — teste le multi-ennemis et l'encerclement), Sanglier (charge télégraphiée), Bandit ×2 (humain armé, garde), Chef de bande (**élite à jauge de chaîne** — teste l'interruption), Aigle (volant), Scorpion (poison).
 - **3 arènes fixes en données** (`data/prototype_arenas/*.json`, grilles 32×32 avec hauteurs 0-20 posées à la main) : *Plaine au talus* (dénivelés doux, initiation), *Gorge* (falaises Δ≥3, lignes de vue coupées, chutes), *Ruine à estrades* (combat vertical dense, escalier, glyphes).
 
 **UI — c'est LE livrable de game feel ([[Combat tactique sur grille]] : la lisibilité EST le game feel) :**

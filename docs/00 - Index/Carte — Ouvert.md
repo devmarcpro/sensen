@@ -6,7 +6,7 @@ statut: décidé
 etape: 0
 ---
 
-**Il ne reste aucune question bloquante.** Tout ce qui était ouvert a reçu soit une décision, soit un **défaut chiffré implémentable** — le code n'a rien à inventer. Cette carte liste ce qui reste révisable, et à quel titre.
+**Il ne reste aucune question bloquante.** Tout ce qui était ouvert a reçu soit une décision, soit un **défaut chiffré implémentable** — le code n'a rien à inventer. Cette carte liste ce qui reste révisable, et à quel titre. 40 notes.
 
 ## Décisions prises (le code s'appuie dessus)
 

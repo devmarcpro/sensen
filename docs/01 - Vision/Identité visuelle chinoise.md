@@ -17,7 +17,7 @@ Cette identité n'est pas seulement cosmétique :
 - l'**astrologie du cycle sexagésimal chinois** pilote le potentiel de départ et les compatibilités relationnelles ([[Astrologie — cycle sexagésimal]]) ;
 - l'**harmonie des cinq éléments dans l'assiette** est mécanisée en cuisine ([[Cuisine et alchimie]]).
 
-La culture de nommage **Sino** est l'une des 10 cultures de lancement ([[Cultures de nommage]]), et sert d'exemple canonique du schéma [[Culture de nommage — schéma]].
+La culture de nommage **Sino** est l'une des 7 cultures de lancement ([[Cultures de nommage]]), et sert d'exemple canonique du schéma [[Culture de nommage — schéma]].
 
 ## Liens
 - **Dépend de** : [[Direction artistique]]

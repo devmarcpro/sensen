@@ -27,7 +27,7 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 ## 4. Contenu à produire (données — nécessaire par étape, pas au jour 1)
 
 - [x] **5 modules du domaine Métal** — au catalogue [[Modules]] (2026-08-26).
-- [x] **Catalogue des actions de créatures** : 24 actions + 2 règles, affectations pour les 34 créatures ([[Actions des créatures]], 2026-08-26).
+- [x] **Catalogue des actions de créatures** : 24 actions + 2 règles, affectations pour les 19 races animales ([[Actions des créatures]], 2026-08-26).
 - [x] **Onyx** ajouté au catalogue des gemmes et à la palette (2026-08-26).
 - [x] **Recettes de composants** : matrice complète bases/exotiques/sources ([[Recettes de composants]], 2026-08-26).
 - [x] **Affinités de cuisine** : table complète, le Feu vient de la cuisson et le Métal du sel ([[Décision — Affinités de cuisine]], 2026-08-26).

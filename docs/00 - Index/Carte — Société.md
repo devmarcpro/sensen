@@ -6,7 +6,7 @@ statut: décidé
 etape: 10
 ---
 
-De la relation individuelle au royaume : commerce, réputation, guildes, territoire. 27 notes.
+De la relation individuelle au royaume : commerce, réputation, guildes, territoire. 34 notes.
 
 *Les cinq systèmes annoncés en tête de la section 7 du GDD :*
 - Quêtes de guilde
