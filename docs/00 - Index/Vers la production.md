@@ -8,6 +8,9 @@ etape: 0
 
 **Le design est complet et décidé.** Il ne reste ni question bloquante ni valeur à inventer : tout ce qui était ouvert porte une décision ou un défaut chiffré. Ce qui suit est l'état de production — ce qui est fait, et ce qui reste à *produire* (assets, code).
 
+> [!important] Le code a commencé — démo 0 jouable (2026-08-26)
+> `godot/scenes/demo/main.tscn` : grille iso 24×24 générée (hauteurs 0-20, continentalité + crête ridged), tri de profondeur, déplacement au clic par A* qui applique les **coûts de pente** de [[Hauteur de terrain ±10]] (3/5/8/∞, descente 2), et l'**horloge à ticks** de [[Boucle de tick]] : 10 ticks/s en exploration, **0 tick sans action** en combat, chaque entité agit quand son compteur est le plus bas. Un loup chasse et mord (aggro à 6 tuiles). Aucun asset — tout est polygones. Validée en headless (Godot 4.6.3). **À juger à l'œil : ouvrir `godot/` dans l'éditeur et lancer.**
+
 > [!success] Bloquant levé le 2026-08-26
 > Le catalogue [[Modules]] est **transcrit dans son schéma** — `cout_ticks` sur les 61 entrées, durées en ticks, économies séparées (mana pour les grimoires, **endurance** pour les manuels). Les 61 JSON sont écrits dans `godot/data/modules/`. Audit : [[Décision — Transcription du catalogue de modules]].
 

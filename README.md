@@ -56,4 +56,6 @@ Ouvrir [`docs/`](docs/) comme coffre dans **Obsidian**. Point d'entrée : `00 - 
 
 ## Développement
 
-Le projet `godot/` s'ouvre avec Godot 4.x. L'arborescence (autoload, data, systems, scenes, locale) suit la note *Arborescence du projet* du design ; les dossiers sont vides en attendant l'étape 0. Prochaine étape concrète : le **prototype de combat isolé** — voir `docs/00 - Index/Vers la production.md`.
+Le projet `godot/` s'ouvre avec **Godot 4.5+** et se lance directement (F5) : la scène principale est la **démo 0** — grille isométrique générée avec relief, déplacement au clic (A* aux coûts de pente du design), et l'horloge action-time à ticks, avec un loup hostile pour la mettre à l'épreuve. Aucun asset : tout est dessiné en polygones.
+
+L'arborescence (autoload, data, systems, scenes, locale) suit la note *Arborescence du projet* du design. `godot/data/` contient déjà les 176 modules, les exemples de PNJ et d'objets générés. Prochaine étape : étendre la démo vers le **prototype de combat isolé** — voir `docs/00 - Index/Vers la production.md`.
