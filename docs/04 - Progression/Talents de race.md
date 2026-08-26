@@ -21,7 +21,7 @@ Un talent de race est **passif et subi** : un état du corps, avec sa contrepart
 
 | Race | Talent | Contrepartie |
 |---|---|---|
-| **Humain — Polyvalent** | porte **deux talents de classe** au lieu d'un ([[Talents de classe]]) | aucun talent propre : sa force est de porter celle des autres |
+| **Humain — Polyvalent** | porte **deux talents de classe** au lieu d'un ([[Talents de classe]]) — le seul qui peut être *Le Sabre* **et** *Le Passeur* | aucun talent propre : sa force est de porter celle des autres |
 | **Elfe — Chair de mana** | la **surchauffe** ([[Mana]] : lancer sans mana suffisant) coûte de l'**endurance** au lieu de la santé ; +20 % de régén de mana | endurance basse en permanence (−20 max) : il ne tient pas la durée en mêlée |
 | **Nain — Œil de la pierre** | `detection_filons` permanent ; **ignore la règle d'irrécoltabilité** ([[Récolte]]) — peut extraire n'importe quel matériau, très lentement | vitesse de récolte ÷ 3 sur les matériaux au-dessus de son seuil normal ; −20 % de portée de vision (yeux de sous-sol) |
 

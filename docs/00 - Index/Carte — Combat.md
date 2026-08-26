@@ -34,7 +34,7 @@ Le cœur du jeu — et l'étape 0 de l'ordre de construction : *rien ne démarre
 
 **Les capacités**
 - **[[Le vocabulaire des modules et l'absence d'arbre de talents]]** — le principe gravé : *le build émerge, il ne se planifie pas dans un écran*.
-- **[[Structure compétences-modules-slots]]** · **[[Vocabulaire des modules — six axes]]**
+- **[[Structure compétences-modules-slots]]** — dont les **capacités hors slots** des talents de classe · **[[Vocabulaire des modules — six axes]]** — six axes, plus les effets `tempo` (les compteurs d'action) et `saisie`
 - **[[Six types de modules et assemblage]]** — la décision structurante : la FORME est séparée de l'EFFET.
 - **[[Familles de capacités de la grille]]** — ce que le temps réel ne permettait pas.
 - **[[Sorts cataclysmiques]]** — autorisés et souhaitables ; trois leviers, aucun cooldown.

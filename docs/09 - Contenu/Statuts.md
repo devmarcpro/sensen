@@ -6,11 +6,13 @@ statut: décidé
 etape: 0
 ---
 
-Les 14 statuts de départ, en données.
+Les 17 statuts de départ, en données.
 
-`data/status_effects/` (14) :
+`data/status_effects/` (17) :
 
-Brûlure (1d4 feu/tour, 3 tours, retiré par eau) · Ralentissement (−30 % vitesse/coûts ticks +30 %) · Gel (immobilisé, jet de Force/tour) · Poison (1d3/tour jusqu'à purge, cumule) · Saignement (1d4/tour, stoppé par soin ou bandage) · Étourdi (perd son prochain tour de décision) · Confusion (30 % d'agir au hasard) · Terreur (fuit la source) · Infection (Endurance −2/jour jusqu'à soin — maladie longue) · Affaibli (−20 % stats, post-résurrection [[Compagnons]]) · Régénération (+1d4 PV/tour) · Peau de pierre (+2d4 armure) · Hâte (coûts ticks −20 %) · Béni (+1 à tous les jets, sanctuaires)
+**Ajoutés le 2026-08-26** ([[Talents de classe]]) : **Dissimulé** (hors du cône de détection tant qu'on n'attaque pas ; rompu par l'attaque — [[IA des créatures]]) · **Saisi** (porté par un autre : ne peut agir, libère sa tuile, projetable — effet `saisie`) · **Retardé** (marqueur visible d'un compteur repoussé — effet `tempo` ; **compte dans le budget anti-stunlock**, [[Statuts de contrôle et anti-stunlock]]).
+
+Brûlure (1d4 feu/tour, 3 tours, retiré par eau) · Ralentissement (−30 % vitesse/coûts ticks +30 %) · Gel (immobilisé, jet de Force/tour) · Poison (1d3/tour jusqu'à purge, cumule) · Saignement (1d4/tour, stoppé par soin ou bandage) · Étourdi (perd son prochain tour de décision) · Confusion (30 % d'agir au hasard) · Terreur (fuit la source) · Infection (Endurance −2/jour jusqu'à soin — maladie longue) · Affaibli (−20 % stats, post-résurrection [[Compagnons]]) · Régénération (+1d4 PV/tour) · Peau de pierre (+2d4 armure) · Hâte (coûts ticks −20 %) · Béni (+1 à tous les jets, sanctuaires) · **Dissimulé** · **Saisi** · **Retardé**
 
 **Application ([[Pipeline de résolution du combat]]) :** appliqués par tags des modules, tickés en phase 2 de la [[Boucle de tick]].
 

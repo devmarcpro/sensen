@@ -16,7 +16,7 @@ Tout progresse par l'usage, sans plafond, régulé par le potentiel. Ni arbre de
 **Les trois axes** *(2026-08-26)*
 - **[[Les trois axes — race, classe, fonction]]** — qui tu es / ce que tu sais / ce que tu fais. Tout être les porte, joueur compris.
 - **[[Talents de race]]** — passif, subi, avec contrepartie. Vampire, Spectre, et toute espèce du bestiaire en races cachées.
-- **[[Talents de classe]]** — actif, une capacité hors slots. *Le talent est un plancher, pas une cage.* Éliotrope et les autres classes cachées s'apprennent d'un PNJ qui les porte.
+- **[[Talents de classe]]** — actif, une capacité hors slots. *Le talent est un plancher, pas une cage.* **15 classes** : 6 visibles (Le Sabre, Le Souffle, La Braise, La Trace, La Balance, Le Vent) et 9 cachées, apprises d'un PNJ qui les porte.
 - **[[Fonctions]]** — artisan, commerçant, garde, aventurier, dirigeant.
 
 **Le personnage**

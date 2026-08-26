@@ -28,6 +28,10 @@ cout_module_effectif = cout_base_module / skill_factor(N_module)
 ```
 Monter un module en niveau le rend plus puissant ET moins coûteux (puissance : `effet_base * skill_factor(N_module)`).
 
+**Les capacités hors slots ([[Talents de classe]]) :** un **talent de classe** est un module qui **n'occupe aucun emplacement** et n'a pas besoin d'être trouvé. Il monte par l'usage comme les autres. C'est la seule chose qui échappe au compte de slots — et c'est volontaire : *le talent est un plancher, pas une cage*, les slots restent entièrement libres pour ce qu'on ramasse.
+
+**Les jauges de classe ([[Talents de classe]]) :** certains talents portent une barre propre à la classe (la jauge de sang de L'Écarlate), calquée sur la [[Jauge de chaîne Wu Xing]] — **même objet de code, autres conditions de remplissage**. Aucun système parallèle.
+
 **Règles d'assemblage détaillées :** voir [[Six types de modules et assemblage]].
 
 **Écran dédié ([[Écrans d'interface]]) :** *Assemblage de compétences (slots armes/modules, coûts mana)*.

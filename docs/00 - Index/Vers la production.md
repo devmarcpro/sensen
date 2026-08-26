@@ -46,7 +46,8 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 ## 4 ter. Les trois axes et les talents *(décidé le 2026-08-26)*
 
 - [x] [[Les trois axes — race, classe, fonction]], [[Talents de race]], [[Talents de classe]], [[Fonctions]], [[Ouvert — Changer de personnage]] + 5ᵉ contrainte permanente.
-- [ ] **Talents des classes cachées** au-delà des 3 esquissées (Éliotrope, Nécromancien, Berserker) — contenu, étape 4+.
+- [x] **15 classes nommées et dotées d'un talent** ([[Classes]], [[Talents de classe]]) — 6 visibles renommées en français évocateur, 9 cachées.
+- [ ] **Modules signature** de chaque classe cachée (au-delà du talent) — contenu, étape 4+.
 - [ ] **Fiches de races cachées** : Vampire, Spectre, Lycanthrope (`data/races/`) — étape 4+.
 - [ ] **Pools de classes par fonction** pour la génération de PNJ ([[Talents de classe]] : classes cachées ≈ 2 %) — étape 9.
 

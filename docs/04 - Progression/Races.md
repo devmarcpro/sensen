@@ -31,12 +31,12 @@ Les 3 races de lancement — **classiques et lisibles**.
 
 | Classe | 120 | 60 |
 |---|---|---|
-| Guerrier | Épée, Bouclier, Deux Mains, Encaissement | domaines de magie, Alchimie |
-| Mage | domaines de magie, Méditation, Contrôle du Mana | armes lourdes (Masse, Hache, Deux Mains) |
-| Artisan | Forge, Menuiserie, Tissage, Taille de pierre, Cuisine | armes lourdes, domaines de magie |
-| Chasseur | Arc, Arbalète, Dressage, Discrétion, Herboristerie | Forge, Encaissement |
-| Marchand | Négociation, Leadership, Lecture, Charisme | armes lourdes, Minage |
-| Vagabond | *(aucun — 100 partout : la polyvalence brute)* | — |
+| Le Sabre | Épée, Bouclier, Deux Mains, Encaissement | domaines de magie, Alchimie |
+| Le Souffle | domaines de magie, Méditation, Contrôle du Mana | armes lourdes (Masse, Hache, Deux Mains) |
+| La Braise | Forge, Menuiserie, Tissage, Taille de pierre, Cuisine | armes lourdes, domaines de magie |
+| La Trace | Arc, Arbalète, Dressage, Discrétion, Herboristerie | Forge, Encaissement |
+| La Balance | Négociation, Leadership, Lecture, Charisme | armes lourdes, Minage |
+| Le Vent | *(aucun — 100 partout : la polyvalence brute)* | — |
 
 Race et classe **s'additionnent** : le plancher final est la moyenne des deux valeurs quand elles diffèrent (un Nain Mage a 90 en Forge et 90 en magie — ni spécialiste ni nul). C'est ce qui rend les 36 combinaisons mécaniquement distinctes ([[Potentiel]]).
 

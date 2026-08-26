@@ -48,7 +48,15 @@ Le schéma de données d'un module et les six axes du vocabulaire commun — la 
 `hauteur_relative` (plus haut / plus bas que la cible) · `cible_isolee` (aucun allié adjacent) · `cible_adjacente_a_allie` · `dos_ou_flanc` · `ligne_de_vue_degagee` · `pv_porteur < X %` · `pv_cible < X %` · `element_cible` · `segment_chaine_present` · `vecteur_de_lieu`
 
 **6. EFFETS** — ce que le module produit, cumulables :
-`degats` · `soin` · `statut` (avec durée en ticks) · `deplacement` (poussée, attraction, échange, téléportation) · `terrain` (élever/abaisser une tuile, créer un obstacle) · `invocation` (occupe une tuile — mur, bloqueur de vue, menace de flanc) · `glyphe` (effet persistant sur une tuile, déclenché à l'entrée)
+`degats` · `soin` · `statut` (avec durée en ticks) · `deplacement` (poussée, attraction, échange, téléportation) · `terrain` (élever/abaisser une tuile, créer un obstacle) · `invocation` (occupe une tuile — mur, bloqueur de vue, menace de flanc) · `glyphe` (effet persistant sur une tuile, déclenché à l'entrée) · **`tempo`** · **`saisie`**
+
+**Les deux effets ajoutés le 2026-08-26** ([[Talents de classe]]) :
+
+- **`tempo`** — agit sur les **compteurs d'action** de [[Boucle de tick]] : retarder (`compteur += N`), avancer (`compteur -= N`), voler (transfert d'un compteur à l'autre). C'est l'effet le plus puissant du vocabulaire, parce que le combat *est* une horloge.
+  > ⚠️ **Garde-fou obligatoire :** un retard est un contrôle dur déguisé. Le tempo subi entre dans le **budget anti-stunlock** ([[Statuts de contrôle et anti-stunlock]]) — jamais plus de **20 ticks cumulés** sur une entité, pas de réapplication dans les **50 ticks** suivant la fin. Sans cette règle, une classe à tempo verrouille un adversaire indéfiniment.
+- **`saisie`** — l'attaquant prend le contrôle du **déplacement** d'une entité adjacente. La cible **libère sa tuile** (elle est portée), ne peut plus agir (statut **Saisi**), et devient **projetable** : la lancer est un `deplacement` qui applique les dégâts de chute de [[Hauteur de terrain ±10]] — `(hauteur − 2) × 5`. La cible se débat par un jet de Force ([[Jet de compétence universel]]).
+
+*Les deux respectent la règle du vocabulaire : ce sont des **briques génériques**, utilisables par n'importe quel module ou action de créature ([[Actions des créatures]]), pas des exceptions de classe.*
 
 **Les MODIFICATEURS (façon Noita) opèrent sur ces axes**, pas sur des chiffres seulement : `étend la forme d'une tuile` · `transforme la ligne en cône` · `double la portée, divise la puissance` · `ajoute une condition en échange d'un bonus` · `répète l'effet sur une tuile adjacente` · `convertit l'élément`. C'est ce qui rend l'assemblage réellement combinatoire.
 

@@ -17,7 +17,7 @@ etape: 9
 
 | Fonction | Ce qu'elle fait |
 |---|---|
-| **artisan** | **craft, et vend ce qu'il craft.** Ce qu'il produit dépend de sa **classe** — un artisan *Forgeron* fait du métal, un artisan *Mage* des parchemins |
+| **artisan** | **craft, et vend ce qu'il craft.** Ce qu'il produit dépend de sa **classe** — un artisan *La Braise* fait du métal, un artisan *Le Souffle* des parchemins |
 | **commerçant** | **achète et revend.** Ne produit rien : sa marge vient de l'écart entre deux marchés ([[Prix suggéré]], douanes de [[Lois et infractions]]) |
 | mineur · bûcheron · herboriste | récolte par catégorie ([[Récolte]]) |
 | fermier · éleveur | [[Agriculture et élevage]], [[Élevage — intention et familles]] |
@@ -29,14 +29,14 @@ etape: 9
 
 | Fonction | Ce qu'elle fait |
 |---|---|
-| **garde** | patrouille, intercepte, applique les lois ([[Lois et infractions]]) |
-| **aventurier** | ne réside nulle part — parcourt le monde, entre en donjon, prend des quêtes. **La fonction du joueur par défaut** |
+| **garde** | patrouille, intercepte, applique les lois ([[Lois et infractions]]) — tire *Le Sabre* ou *La Trace* |
+| **aventurier** | ne réside nulle part — parcourt le monde, entre en donjon, prend des quêtes. **La fonction du joueur par défaut**, et la seule où toutes les classes sont possibles |
 | **dirigeant** | remplace `leadership_role` : roi, maître de guilde, prêtre. Porte la succession ([[Familles et succession]]) et le titre ([[Génération de noms]]) |
 | **oisif** | enfant, retraité, captif — présent, sans production |
 
 ## Les trois règles
 
-1. **La fonction dit ce qu'on produit ; la classe dit comment.** *Artisan · Forgeron* et *artisan · Couturier* ont la même routine et ne sortent pas les mêmes objets.
+1. **La fonction dit ce qu'on produit ; la classe dit comment.** *artisan · La Braise* sort du métal, *artisan · Le Souffle* des parchemins — même routine, autres objets.
 2. **La fonction change librement**, par assignation ([[Population et exploitation]]) ou par choix. Ce n'est ni une identité ni un acquis.
 3. **Ne pas la confondre avec le `role`** ([[Rôles de l'être]] : sauvage → apprivoisé → résident → garde → bétail), qui dit la place vis-à-vis du joueur. Un forgeron peut être `résident` ou `sauvage` sans changer de fonction.
 

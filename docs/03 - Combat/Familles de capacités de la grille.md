@@ -8,7 +8,7 @@ etape: 0
 
 Ce que le temps réel ne permettait pas de concevoir proprement, et qui devient évident sur une grille — tout est de la donnée, aucun coût de production supplémentaire.
 
-- **Placement** : téléportation, échange de position avec un allié (le sortir d'un encerclement), bond par-dessus un obstacle, **portails appairés** (façon Éliotrope — deux tuiles reliées qui modifient la topologie de la carte : les distances changent, les lignes de vue changent, toute la valeur est dans l'anticipation).
+- **Placement** : téléportation, échange de position avec un allié (le sortir d'un encerclement), bond par-dessus un obstacle, **portails appairés** (deux tuiles reliées qui modifient la topologie de la carte : les distances changent, les lignes de vue changent, toute la valeur est dans l'anticipation). C'est le talent de classe du **Passeur** ([[Talents de classe]]), qui les porte en permanence.
 - **Contrôle et blocage** : poussée et attraction (sortir un ennemi de sa garde frontale, le pousser dans le vide — les chutes font des dégâts), **murs invoqués** (des tuiles surélevées temporaires qui bloquent le passage et la ligne de vue), zones de ralentissement, enracinement.
 - **Invocations** : une créature invoquée **occupe une tuile** — elle est donc un mur, un bloqueur de vue et une menace de flanc autant qu'un allié. Raccord direct avec les compagnons ([[Compagnons]]) et les [[Armes fantomatiques]].
 - **Glyphes et pièges** : effets persistants posés sur une tuile, déclenchés à l'entrée. Un glyphe élémentaire **pose un segment de chaîne** en se déclenchant : le Wu Xing devient positionnel ([[Jauge de chaîne Wu Xing]]).
