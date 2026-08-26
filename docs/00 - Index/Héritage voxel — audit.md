@@ -1,8 +1,8 @@
 ---
 aliases: ["Héritage voxel", "Audit voxel", "Héritage voxel — audit"]
-tags: [index, héritage-voxel, à-trancher]
+tags: [index, héritage-voxel, décidé]
 domaine: index
-statut: à-trancher
+statut: décidé
 etape: 0
 ---
 
@@ -16,7 +16,7 @@ L'en-tête du GDD acte le pivot tactique (2026-08-09), mais les annexes D, E et 
 
 - **Catégorie 1 : réécrite ✅** — version grille en place ; le texte voxel d'origine est **retiré** (archivé dans `archive/SENSEN_GDD.md` et l'historique git).
 - **Catégorie 3 : appliquée ✅** — vocabulaire converti (blocs→tuiles, voxels→pixels, .vox→sprites) directement dans les notes.
-- **Catégorie 2 : notes adaptées, chiffres en attente de validation** — chaque conflit a sa proposition dans `99 - Ouvert/` : [[Décision — Altitude sur 21 niveaux]] · [[Décision — Structure de données de la grille]] · [[Décision — Minerais et strates après le pivot]] · [[Décision — Pièces en 2D]] · [[Décision — Sculpture en pixel art]] · [[Décision — Prefabs de donjon en tuiles]] · [[Décision — Budgets et critères de performance tactiques]] · [[Décision — Minimap en 2D]]. Les notes concernées intègrent déjà la version grille, avec les valeurs marquées « proposé » — **valider (ou amender) les 8 propositions clôt définitivement l'héritage voxel.**
+- **Catégorie 2 : ✅ close** — les 8 propositions ont été **validées et gravées en décisions** le 2026-08-26 (renommées `Décision — …`), leurs zones « à calibrer » comprises. Historique : — chaque conflit a sa proposition dans `99 - Ouvert/` : [[Décision — Altitude sur 21 niveaux]] · [[Décision — Structure de données de la grille]] · [[Décision — Minerais et strates après le pivot]] · [[Décision — Pièces en 2D]] · [[Décision — Sculpture en pixel art]] · [[Décision — Prefabs de donjon en tuiles]] · [[Décision — Budgets et critères de performance tactiques]] · [[Décision — Minimap en 2D]]. Les notes concernées intègrent déjà la version grille, avec les valeurs marquées « proposé » — **c'est fait : l'héritage voxel est clos.**
 - **Contenu voxel retiré du coffre** le 2026-08-26 sur décision du designer — la note purement historique *Voxels — mémoire et meshing* (G.2) est supprimée, ses alias repris par [[Décision — Structure de données de la grille]]. Tout l'original reste lisible dans `archive/SENSEN_GDD.md`.
 
 ---
@@ -56,7 +56,7 @@ L'ancien système ne tient plus, et le GDD ne dit pas ce qui le remplace. **Chaq
 | [[Véhicules]] | « Σ durete des **voxels** », modèle sculpté voxel | stats dérivées du modèle **pixel art** ; l'entité rigide et les blocs fonctionnels survivent |
 | [[Explosions]] | « la subdivision est respectée : chaque sous-bloc testé » | rayon en tuiles + seuil de dureté suffisent — clause subdivision à supprimer |
 | [[Tooltips contextuels]] | déclencheurs « premier bloc en main », « première subdivision » | premières-fois de la direction tactique |
-| [[Arborescence du projet]] | `systems/voxel/` (chunks, meshing, subdivision octree) | système de grille à nommer |
+| [[Arborescence du projet]] | `systems/voxel/` (chunks, meshing, subdivision octree) | **fait** — renommé `systems/grid/` |
 
 ## Catégorie 3 — Vocabulaire seulement
 

@@ -34,9 +34,10 @@ Le sol reste **jamais forcément plat** : chaque tuile du prefab porte sa hauteu
 
 L'algorithme par graphe intégral (attache → connecteur → salle → collision AABB en 2D → connexité par construction → boss au plus profond), la formule de profondeur, le thème/palette, la génération paresseuse par étage.
 
-## Ce qui reste à trancher
+## Les derniers points, fixés
 
-Rejoint [[Ouvert — Taille des salles de donjon]] : taille de la bibliothèque de prefabs au lancement, et le format retenu (PNG indexé vs JSON — le PNG s'édite dans n'importe quel éditeur pixel art, cohérent avec la production des sprites).
+- **Format : PNG indexé**, deux fichiers par prefab — `<id>.png` (couche matériau en couleurs stand-in + tuiles-marqueurs d'attache) et `<id>_h.png` (couche hauteur, niveaux de gris 0-20). S'édite dans n'importe quel éditeur pixel art, se diffe visuellement, se relit à chaud (F5, [[Décision — Pipeline de contenu]]).
+- **Bibliothèque au lancement : 24 prefabs** — 12 salles (3 petites, 4 moyennes, 3 grandes, 2 immenses dont une éligible boss) + 8 connecteurs (droit ×2, coudé ×2, T, escalier, porte simple, rampe) + 4 entrées de surface. Assez pour que la variété tienne, grâce au remapping de palette par thème ([[Donjons — structure et intégration]] : *un petit nombre de prefabs, une grande variété visuelle*).
 
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Génération de donjon]], [[Salles et connecteurs]], [[Grille continue]]

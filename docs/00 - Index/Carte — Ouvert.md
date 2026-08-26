@@ -2,48 +2,45 @@
 aliases: ["Carte — Ouvert", "Carte Ouvert", "Questions ouvertes"]
 tags: [index, carte]
 domaine: index
-statut: à-trancher
+statut: décidé
 etape: 0
 ---
 
-Tout ce qui n'est pas tranché, par catégorie — 34 notes avec les 8 propositions. La section 16 du GDD est intégralement dépeuplée ici. **Priorisation et chemin critique : [[Vers la production]].**
+**Il ne reste aucune question bloquante.** Tout ce qui était ouvert a reçu soit une décision, soit un **défaut chiffré implémentable** — le code n'a rien à inventer. Cette carte liste ce qui reste révisable, et à quel titre.
 
-**À trancher au playtest** *(implémentable sans)*
-- [[Ouvert — Axe des niveaux de recette]] — efficacité matière / vitesse et lots / stabilité du jet.
-- [[Décision — Esquive active]] — esquive dédiée ou mouvement pur ?
-- [[Ouvert — Répartitions Arcane Espace Corruption]] — les vecteurs des trois domaines hors cycle.
-- [[Ouvert — Fourchettes des gemmes]] — fourchettes, plafond +15, taille des pools d'affixes.
-- [[Ouvert — Compensation de l'arme mixte]] — que gagne vraiment le mixte face au pur ?
-- [[Ouvert — Saisons]] — gros impact agricole, après playtest de la boucle.
+## Décisions prises (le code s'appuie dessus)
 
-**Trous du combat — tous tranchés le 2026-08-26**
-- [[Décision — Multi-ennemis et jauge]] · [[Décision — Vocabulaire d'attaque des créatures]] · [[Décision — Fuite et désengagement]] · [[Décision — Chaîne côté ennemis]] · [[Décision — Boucliers]] · [[Décision — Projectiles]] · [[Décision — Esquive active]] — et la spécification de l'étape 0 est rédigée : [[Prototype de combat — spécification]]. Reste ouvert par nature : [[Ouvert — Dark Continent]].
+**Post-pivot voxel — 8 décisions** ([[Héritage voxel — audit]])
+[[Décision — Altitude sur 21 niveaux]] · [[Décision — Structure de données de la grille]] · [[Décision — Minerais et strates après le pivot]] · [[Décision — Pièces en 2D]] · [[Décision — Sculpture en pixel art]] · [[Décision — Prefabs de donjon en tuiles]] · [[Décision — Budgets et critères de performance tactiques]] · [[Décision — Minimap en 2D]]
 
-**Questions de systèmes**
-- [[Ouvert — Taille des salles de donjon]] — dimensions et taille de la bibliothèque de prefabs.
-- [[Ouvert — Réapparition d'un donjon]] — un donjon disparu est-il remplacé ?
-- [[Ouvert — Tiers de monstres rares]] — un tier ou trois au lancement ?
-- [[Ouvert — Interprétation dureté et qualité]] — formulation « à confirmer » en tension avec la décision qui la suit.
-- [[Ouvert — Nomenclature des paliers de qualité]] — **résolu**, note conservée comme trace.
+**Combat — les 7 trous + l'esquive** ([[Trous connus du combat]])
+[[Décision — Multi-ennemis et jauge]] · [[Décision — Vocabulaire d'attaque des créatures]] · [[Décision — Fuite et désengagement]] · [[Décision — Chaîne côté ennemis]] · [[Décision — Boucliers]] · [[Décision — Projectiles]] · [[Décision — Esquive active]]
+→ et la spécification exécutable de l'étape 0 : **[[Prototype de combat — spécification]]**
 
-**Contenu à produire**
-- [x] ~~Modules Métal~~ résolu ([[Modules]]) · ~~[[Décision — Affinités de cuisine]]~~ ✅ · ~~[[Décision — Surcharges Wu Xing des matériaux]]~~ ✅ · ~~actions de créatures~~ ✅ ([[Actions des créatures]])
-- [x] ~~Recettes de composants~~ ✅ ([[Recettes de composants]]) · ~~Pools de noms~~ ✅ ([[Pools de noms des cultures]])
+**Architecture et contenu**
+[[Décision — Pipeline de contenu]] · [[Décision — Surcharges Wu Xing des matériaux]] · [[Décision — Affinités de cuisine]]
+Catalogues produits : [[Actions des créatures]] · [[Recettes de composants]] · [[Pools de noms des cultures]] · modules Métal et Onyx ([[Modules]], [[Catalogue matériaux — Gemmes]])
 
-**Héritage voxel — propositions à valider** *(voir [[Héritage voxel — audit]] ; catégories 1 et 3 déjà réécrites)*
-- [[Décision — Altitude sur 21 niveaux]] — le mapping bruit continu → hauteur 0-20 (couvre aussi le mod_altitude météo).
-- [[Décision — Structure de données de la grille]] — chunks de tuiles, étages de donjon, format du diff de sauvegarde, RPC.
-- [[Décision — Minerais et strates après le pivot]] — tiers par corruption en surface, bandes d'étage en donjon, strates recyclées en palette de sol.
-- [[Décision — Pièces en 2D]] — surface minimale, toit par empreinte, bétail.
-- [[Décision — Sculpture en pixel art]] — périmètres, pipeline, billboard.
-- [[Décision — Prefabs de donjon en tuiles]] — tailles, format de plan, escaliers inter-étages.
-- [[Décision — Budgets et critères de performance tactiques]] — budgets du rendu tuiles+billboards, critères par étape.
-- [[Décision — Minimap en 2D]] — une carte en surface, un fog par étage en donjon.
+## Défauts fixés — révisables au playtest, jamais bloquants
 
-**Ouvert par nature**
-- [[Ouvert — Lore]] — noms propres, textes d'ambiance, mythologie.
+Chacun porte une valeur chiffrée que le code applique telle quelle ; les réviser est du **tuning**, pas de la conception.
+
+- [[Ouvert — Axe des niveaux de recette]] — stabilité du jet (variance resserrée, moyenne inchangée)
+- [[Ouvert — Compensation de l'arme mixte]] — choix du segment + amortissement, test à ±15 %
+- [[Ouvert — Répartitions Arcane Espace Corruption]] — vecteurs de A.4.6 retenus tels quels
+- [[Ouvert — Fourchettes des gemmes]] — fourchettes de A.12 + 36 gabarits d'affixes
+- [[Ouvert — Tiers de monstres rares]] — un seul tier (2 %, ×2.5, or)
+- [[Ouvert — Réapparition d'un donjon]] — repeuplement par la règle des foyers, nouvelle seed
+- [[Ouvert — Taille des salles de donjon]] — 24 prefabs, PNG à deux couches
+- [[Ouvert — Saisons]] — non incluses ; la question ne peut se trancher qu'après la boucle agricole (étape 10)
+- [[Ouvert — Interprétation dureté et qualité]] — **clos** (ambiguïté levée dans [[Qualité d'artisanat]])
+
+## Ouvert par nature — hors périmètre du code
+
+- [[Ouvert — Lore]] — noms propres, textes d'ambiance, mythologie : s'écrit au fil du contenu, le système l'absorbe sans code ([[Dialogue PNJ]]).
 - [[Ouvert — Audio et musique]] — hors périmètre du document.
-- [[Ouvert — Créatures fantastiques]] — prévu sans changement de système.
+- [[Ouvert — Créatures fantastiques]] — extension de contenu pour les zones à haute corruption, *prévu sans changement de système*.
+- [[Ouvert — Dark Continent]] — endgame retenu, non spécifié : *coûte du contenu, presque aucun système*.
 
 ## Liens
-- **Voir aussi** : [[Sensen — Index général]], [[Décisions fondatrices]], [[Trous connus du combat]]
+- **Voir aussi** : [[Sensen — Index général]], [[Vers la production]], [[Décisions fondatrices]], [[Héritage voxel — audit]]

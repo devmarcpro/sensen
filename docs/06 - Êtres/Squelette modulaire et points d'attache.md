@@ -14,7 +14,16 @@ Le pipeline d'assemblage : des points d'ancrage nommés encodés dans les sprite
 **Principe :** l'assemblage des parties du corps est un **paperdoll en couches de sprites** ([[Direction artistique]]) — chaque partie est un sprite avec ses **points d'ancrage nommés** (épaule, hanche, main, dos) et son ordre de superposition. Le pipeline modulaire est identique à celui prévu en voxel, en 2D :
 
 - Sur chaque partie (torse, membre, tête...), l'artiste place des **points d'ancrage nommés** aux emplacements de connexion.
-- **Une couleur réservée par type d'attache** : ex. vert fluo = bras, cyan fluo = jambe, jaune fluo = tête/cou, magenta structurel = main/arme... (nomenclature exacte des couleurs réservées à figer dans les données).
+- **Une couleur réservée par type d'attache**, nomenclature **figée** (`data/reserved_colors.json`, section `anchors`) :
+
+| Couleur | Attache | | Couleur | Attache |
+|---|---|---|---|---|
+| `#00FF7F` | bras / patte avant | | `#00BFFF` | jambe / patte arrière |
+| `#FFFF00` | tête / cou | | `#FF00BF` | main (arme, outil) |
+| `#FF7F00` | dos (cape, sac) | | `#7F00FF` | aile |
+| `#FF0000` | queue / appendice | | `#00FFBF` | monture (selle) |
+
+Aucune ne figure dans la palette des matériaux ([[Palette de couleurs des matériaux]]) ni dans les stand-in de recette (#00FF00, #FF00FF, #00FFFF, #FFFF00 — voir Décisions ci-dessous), **sauf `#FFFF00`** qui est partagé : les marqueurs d'attache vivent dans les sprites de **parties de corps**, les stand-in dans les sprites d'**objets et de prefabs** — deux pipelines d'import distincts, aucune collision possible. GameData le vérifie au boot.
 - À l'import, le script détecte ces marqueurs, **les retire du modèle visible**, et enregistre leur position comme **point d'attache** dans la ressource.
 - À l'assemblage d'une créature, le jeu aligne le point d'attache de chaque membre sur le point correspondant du torse — n'importe quelle partie de la bibliothèque se branche sur n'importe quelle autre, tant que les couleurs d'attache correspondent.
 - **Orientation :** chaque ancrage porte une direction et un ordre de calque, pour que la partie s'oriente et se superpose correctement selon l'angle de vue isométrique (4 ou 8 directions).

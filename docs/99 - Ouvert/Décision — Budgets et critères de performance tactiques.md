@@ -47,9 +47,9 @@ Un critère de perf **avant** de passer à l'étape suivante — le principe de 
 
 La règle de [[Ordre de vérification]] (*un critère raté = on optimise avant d'empiler*), les budgets de simulation de [[Budgets de performance]], et tous les principes de [[Optimisation — principes]] — dont « GDExtension/Rust au profilage, jamais préventivement » (candidats probables révisés : bruit de génération, A*, compositing de billboards).
 
-## Ce qui reste à calibrer
+## Machine cible (fixée)
 
-Tous les chiffres sont des ordres de grandeur à confronter à la machine cible — c'est le rôle du profilage, pas du document.
+Les chiffres ci-dessus sont des **cibles à tenir sur la machine de référence** : *PC de milieu de gamme 2020 — CPU 4 cœurs ~3 GHz, 8 Go de RAM, GPU intégré récent, 1080p*. C'est le profil du public visé ([[Public visé]] : joueurs de RPG bac-à-sable, pas de matériel haut de gamme requis). Un budget raté sur cette machine déclenche l'optimisation avant l'étape suivante ([[Ordre de vérification]]) ; les mesurer ailleurs n'a pas de valeur.
 
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Budgets de performance]], [[Ordre de vérification]], [[Ordre de construction]]

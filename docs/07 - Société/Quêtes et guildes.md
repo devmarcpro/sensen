@@ -36,7 +36,7 @@ Douze guildes, des quêtes entièrement procédurales, et une progression de ran
 - **Multi-guildes : toutes cumulables** au lancement (les taxes hebdomadaires par guilde, [[Barèmes économiques]], sont le coût naturel du cumul).
 - **Guilde développement de ville/royaume :** ses quêtes sont des **contrats de construction réels** (bâtir/réparer des structures sur des sites concrets, validées par la détection de pièces [[Détection de pièces]]) et des financements (apporter N matériaux à un projet communal contre or + XP de guilde).
 
-*(Détail de l'apprivoisement — au-delà de ce qui est déjà couvert en [[Schéma unifié créature-PNJ]] et [[Apprivoisement et recrutement]] — à développer ultérieurement.)*
+*(L'apprivoisement est intégralement spécifié en [[Apprivoisement et recrutement]] — approcher, tenter, entretenir.)*
 
 **Source de recettes exotiques ([[Craft compositionnel]]) :** enseignement de guilde (secrets d'artisans par rang) — l'une des trois sources, avec le loot et l'achat.
 

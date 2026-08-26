@@ -32,9 +32,11 @@ blocs      : 16×16      structures : 64×64      véhicules  : 96×64
 
 Tout le contrat de [[Tables de sculpture]] : la sculpture optionnelle, le déblocage par rang de guilde, la qualité standard, le modèle réutilisable et nommé, le partage manuel explicite.
 
-## Ce qui reste à trancher
+## Les derniers points, fixés
 
-La résolution des véhicules (96×64 suffit-il pour un voilier lisible ?) ; si une seconde vue (profil/face) est offerte pour les objets tenus en main ; l'outillage de l'éditeur (symétrie, pipette, remplissage).
+- **Véhicules : 128×96** (au lieu de 96×64) — un voilier avec mât, voile et coque a besoin de la hauteur ; c'est la seule table où la lisibilité l'exige.
+- **Une seule vue par modèle.** Pas de seconde vue : l'orientation se fait par **miroir horizontal**, et les objets tenus en main s'attachent au marqueur main du paperdoll ([[Squelette modulaire et points d'attache]]) — le sprite est le même vu de chaque côté. Cohérent avec *peu d'animation, beaucoup de feedback d'interface* ([[Direction artistique]]).
+- **Outillage de l'éditeur (v1)** : crayon, gomme, **pipette**, **pot de remplissage**, **symétrie verticale** (bascule), grille et aperçu à l'échelle du jeu. Pas de calques, pas de sélection rectangulaire — ce n'est pas un logiciel de dessin, c'est un éditeur de pièces de jeu.
 
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Éditeur de sculpture]], [[Tables de sculpture]], [[Direction artistique]]

@@ -1,12 +1,12 @@
 ---
 aliases: ["Vers la production", "Roadmap de pré-production", "Ce qui manque"]
-tags: [index, production, à-trancher]
+tags: [index, production, décidé]
 domaine: index
-statut: à-trancher
+statut: décidé
 etape: 0
 ---
 
-Ce qui reste à modifier dans le design, et ce qui manque pour lancer la production. État au 2026-08-26 — à cocher au fil de l'eau.
+**Le design est complet et décidé.** Il ne reste ni question bloquante ni valeur à inventer : tout ce qui était ouvert porte une décision ou un défaut chiffré. Ce qui suit est l'état de production — ce qui est fait, et ce qui reste à *produire* (assets, code).
 
 ## 1. ✅ Validé — les 8 décisions post-pivot (2026-08-26, sur délégation)
 
@@ -18,10 +18,11 @@ Ce qui reste à modifier dans le design, et ce qui manque pour lancer la product
 - [x] **Les sept trous du combat sont tranchés** (2026-08-26) : [[Décision — Multi-ennemis et jauge]], [[Décision — Vocabulaire d'attaque des créatures]], [[Décision — Fuite et désengagement]], [[Décision — Chaîne côté ennemis]], [[Décision — Boucliers]], [[Décision — Projectiles]], [[Décision — Esquive active]].
 - [x] **Le document est rédigé** : [[Prototype de combat — spécification]] — périmètre, contenu exact, 12 jalons d'implémentation, critère de « oui » mesurable et qualitatif.
 
-## 3. À trancher au playtest (implémentable sans — ne bloque pas)
+## 3. ✅ Défauts fixés pour toutes les questions de playtest
 
-- [ ] [[Ouvert — Axe des niveaux de recette]] · [[Ouvert — Répartitions Arcane Espace Corruption]] · [[Ouvert — Fourchettes des gemmes]] · [[Ouvert — Compensation de l'arme mixte]] · [[Ouvert — Saisons]]
-- [ ] Questions de contenu différables : [[Ouvert — Taille des salles de donjon]], [[Ouvert — Réapparition d'un donjon]], [[Ouvert — Tiers de monstres rares]], [[Ouvert — Interprétation dureté et qualité]] (à formaliser).
+Chacune porte désormais une **valeur chiffrée implémentable** — le code ne se pose aucune question, le playtest ajuste ([[Carte — Ouvert]]) :
+- [x] [[Ouvert — Axe des niveaux de recette]] (stabilité du jet) · [[Ouvert — Compensation de l'arme mixte]] (choix du segment) · [[Ouvert — Répartitions Arcane Espace Corruption]] (vecteurs A.4.6) · [[Ouvert — Fourchettes des gemmes]] (A.12 + 36 gabarits) · [[Ouvert — Saisons]] (non incluses)
+- [x] [[Ouvert — Taille des salles de donjon]] (24 prefabs) · [[Ouvert — Réapparition d'un donjon]] (règle des foyers) · [[Ouvert — Tiers de monstres rares]] (un tier) · [[Ouvert — Interprétation dureté et qualité]] (clos)
 
 ## 4. Contenu à produire (données — nécessaire par étape, pas au jour 1)
 

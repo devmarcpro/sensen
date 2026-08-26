@@ -40,9 +40,24 @@ Les **terrasses conditionnelles** (quantification locale là où la couche sismi
 
 Le relief reste spectaculaire *à l'échelle qui compte* : une cellule de montagne utilise toute l'amplitude 0-20 avec de nombreux Δ infranchissables, des cols, des terrasses — c'est exactement ce que le combat tactique consomme ([[Zones de coup par dénivelé]], ligne de vue). La continuité entre cellules est garantie par construction (`alt_lissée` est continue).
 
-## Ce qui reste à calibrer
+## Les valeurs (fixées)
 
-Le rayon de lissage (64 tuiles ?), les seuils de classe macro, les `échelle_relief` par biome, le barème de température.
+```
+rayon_lissage = 64 tuiles (moyenne locale de alt)
+
+CLASSES MACRO (sur alt normalisée 0..1) :
+  mer 0.00-0.30 · littoral 0.30-0.38 · plaine 0.38-0.55
+  colline 0.55-0.70 · montagne 0.70-0.85 · haute montagne 0.85-1.00
+
+ÉCHELLE_RELIEF par classe (amplitude ± autour du niveau 10) :
+  mer/littoral 1 · plaine 2 · colline 5 · montagne 8 · haute mont. 10
+  (surchargeable par biome via un champ `relief_scale` de B.6 ;
+   défaut = valeur de la classe)
+
+mod_altitude (température, E.28) :
+  mer 0 · littoral 0 · plaine 0 · colline -3 · montagne -6
+  · haute montagne -10
+```
 
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Hauteur de terrain ±10]], [[Unification macro-micro]]

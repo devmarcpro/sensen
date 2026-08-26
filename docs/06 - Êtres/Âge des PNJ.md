@@ -8,7 +8,7 @@ etape: 9
 
 La population du monde est un flux, pas un stock : les PNJ vieillissent, meurent, naissent — les rois aussi.
 
-- Chaque PNJ a un **âge** (champ d'instance, en années in-game), qui avance avec le calendrier (1 an in-game = valeur à calibrer, défaut **120 jours in-game**).
+- Chaque PNJ a un **âge** (champ d'instance, en années in-game), qui avance avec le calendrier : **1 an in-game = 120 jours in-game** (soit 80 heures de temps réel à 40 min/jour, [[Boucle de tick]]) — **valeur fixée**.
 - **Catégories d'âge** (modulent l'apparence via les parties de sprites et les stats) : jeune → adulte → âgé. Les PNJ âgés perdent progressivement en stats physiques (**−10 % par tranche au-delà du seuil**) mais leurs compétences acquises restent — un vieux forgeron reste un maître.
 - **Mort de vieillesse :** au-delà de l'espérance de vie de sa race (donnée `lifespan` par race, avec variance **±15 %**), un PNJ a une chance croissante par semaine de mourir naturellement (hors écran : résolu à l'échéance, timer wheel [[Simulation du monde — performance]]). Sa mort déclenche la **succession** ([[Familles et succession]]) s'il portait un rôle, et l'héritage familial de ses biens.
 - **Naissances :** les couples de PNJ (champ `spouse`) peuvent avoir des enfants (nouvelle instance liée par `family`, catégorie jeune), qui grandissent et prennent des jobs à l'âge adulte — c'est le moteur démographique interne des villages, complémentaire de l'immigration ([[Conquête de village]]). Les jeunes PNJ ne sont ni recrutables ni assignables.

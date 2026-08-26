@@ -1,10 +1,13 @@
 ---
 aliases: ["Ouvert — Saisons", "Saisons"]
-tags: [ouvert, monde, playtest]
+tags: [ouvert, monde, décidé-par-défaut]
 domaine: monde
-statut: playtest
+statut: décidé-par-défaut
 etape: 8
 ---
+
+> [!success] Défaut fixé le 2026-08-26 — implémentable tel quel
+> Sur délégation du designer : **le code part de cette valeur**, aucune question à se poser. La question reste légitimement ouverte au playtest — la réviser est une décision de tuning, pas de conception.
 
 **La question :** activer ou non les **saisons** — gros impact sur la boucle agricole.
 
@@ -17,6 +20,14 @@ etape: 8
 **Ce qui en dépend :** [[Agriculture et élevage]] au premier chef (cycles de culture, rendements variables dans l'année), la disponibilité des matériaux météorologiques ([[Catalogue matériaux — Météorologiques]] : Glace, Neige), et le gel des lacs ([[Météo]] : *les lacs gelés ouvrent des raccourcis saisonniers*).
 
 **Coût technique :** faible — *multiplier le bruit temporel par une courbe annuelle*. L'architecture les accueille déjà.
+
+## Le défaut : pas de saisons au lancement
+
+**Décision confirmée : non incluses.** L'architecture les accueille (multiplier le bruit temporel par une courbe annuelle — [[Météo]]), le calendrier existe (**1 an = 120 jours in-game**, [[Âge des PNJ]]), mais **rien n'est activé**.
+
+**Pourquoi c'est un défaut sûr :** activer les saisons change la boucle agricole ([[Agriculture et élevage]]) — un système qui n'existera pas avant l'étape 10. La question ne peut pas se trancher avant d'avoir joué cette boucle ; la trancher maintenant serait deviner.
+
+**Si activé plus tard :** courbe annuelle sur `temperature`, 4 saisons de 30 jours, alignées sur les éléments du Wu Xing (printemps→Bois, été→Feu, fin d'été→Terre, automne→Métal, hiver→Eau — l'attribution daoïste traditionnelle, [[Identité visuelle chinoise]]).
 
 ## Liens
 - **Dépend de** : [[Météo]], [[Agriculture et élevage]]

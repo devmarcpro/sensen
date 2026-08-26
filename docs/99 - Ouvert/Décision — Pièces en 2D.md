@@ -30,9 +30,10 @@ etape: 7
 
 Tous les malus/bonus chiffrés de [[Habitat des PNJ]] (−15 sans logement, −5 par co-occupant, l'humeur comme levier de rendement), le throttling et le déclenchement par EventBus de [[Détection de pièces]], et les trois usages de l'algorithme (habitat, capacité de village, contrats de construction).
 
-## Ce qui reste à trancher
+## Les derniers points, fixés
 
-La surface minimale exacte (4 tuiles est le strict équivalent ; 6 serait plus lisible visuellement en isométrique) ; le seuil du bonus (9 ? 12 ?).
+- **Surface minimale : 6 tuiles** (et non 4). En isométrique, une pièce de 2×2 avec un meuble et une porte est illisible ; 6 tuiles (2×3) est le plus petit espace qui se lit comme une chambre. Le strict équivalent volumétrique cède devant la lisibilité — c'est le principe de [[Direction artistique]].
+- **Bonus de taille : +5 à partir de 12 tuiles** (3×4) — assez grand pour se distinguer nettement du minimum.
 
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Détection de pièces]], [[Habitat des PNJ]], [[Construction cadrée]]

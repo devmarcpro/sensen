@@ -50,9 +50,11 @@ tier 5 (corruption ≥ 90)  : tungstène, diamant (signalé par la
 
 Les trois pressions alignées (risque = corruption/étage, dureté du sol, valeur du minerai), la kimberlite comme signal du diamant vendu par les Prospecteurs, et l'intégralité des données de [[Minerais par profondeur]] — seule la **clé de placement** change (Y → corruption/étage).
 
-## Ce qui reste à trancher
+## Les derniers points, fixés
 
-Les seuils exacts des tiers ; la densité de filons muraux par salle ; si la règle d'irrécoltabilité ([[Récolte]]) suffit comme second verrou ou si certains tiers exigent un outil minimum.
+- **Seuils des tiers** : ceux de la table ci-dessus font foi (0 / 20 / 45 / 70 / 90 de corruption effective).
+- **Densité de filons muraux en donjon** : `0-2 par salle`, tirage pondéré par `size_category` ([[Salles et connecteurs]]) — petite 0-1, moyenne 0-1, grande 1-2, immense 1-2. Une salle sur trois environ en porte.
+- **Verrou d'outil : la règle d'irrécoltabilité suffit**, aucun gate supplémentaire ([[Récolte]] : `durete_outil × qualite_outil < durete_materiau × 0.5` → l'outil rebondit). Elle est déjà exactement le verrou voulu — les tiers profonds sont durs (tungstène 42, diamant 40), donc inaccessibles sans progression matérielle. **Aucune règle à écrire.**
 
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Minerais par profondeur]], [[Stratification verticale]], [[Dérive de la corruption]]

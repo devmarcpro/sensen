@@ -1,10 +1,13 @@
 ---
 aliases: ["Ouvert — Axe des niveaux de recette", "Niveaux de recette"]
-tags: [ouvert, craft, playtest]
+tags: [ouvert, craft, décidé-par-défaut]
 domaine: objets
-statut: playtest
+statut: décidé-par-défaut
 etape: 6
 ---
+
+> [!success] Défaut fixé le 2026-08-26 — implémentable tel quel
+> Sur délégation du designer : **le code part de cette valeur**, aucune question à se poser. La question reste légitimement ouverte au playtest — la réviser est une décision de tuning, pas de conception.
 
 **La question :** sur quel axe unique portent les 5 niveaux d'une recette de composant ?
 
@@ -18,6 +21,17 @@ etape: 6
 **Ce qui en dépend :** [[Craft compositionnel]] (les doublons de parchemins ne doivent jamais être du loot mort), la valeur relative de l'enseignement par un artisan à haute relation ([[L'information comme récompense]]), l'équilibrage de [[Qualité d'artisanat]].
 
 **Implémentable sans :** oui — la mécanique des 5 niveaux et du coût croissant (N doublons pour passer au niveau N, 10 au total) est posée ; seul le bonus reste à trancher.
+
+## Le défaut : la stabilité du jet
+
+**Niveau de recette N (1-5) → resserre le tirage de qualité du composant** ([[Qualité d'artisanat]]) :
+
+```
+random(0.85, 1.15)  →  random(0.85 + 0.03×(N−1), 1.15 − 0.03×(N−1))
+N1 : 0.85–1.15  ·  N3 : 0.91–1.09  ·  N5 : 0.97–1.03
+```
+
+**Pourquoi celui-là :** c'est le seul des trois axes qui **ne multiplie jamais la qualité** (la contrainte non négociable) — la moyenne reste identique, seule la variance baisse. Un artisan qui maîtrise sa recette rate moins, il ne fait pas mieux. Les deux autres axes (efficacité matière, vitesse/lots) restent disponibles comme bonus secondaires si le playtest les réclame.
 
 ## Liens
 - **Dépend de** : [[Craft compositionnel]], [[Composant et recette d'obtention]]

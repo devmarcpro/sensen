@@ -13,7 +13,7 @@ La formule de qualité unique du jeu, ses 8 paliers nommés, et la règle « la 
 - La qualité est un **multiplicateur** allant de 0 à théoriquement l'infini, avec une difficulté croissante pour monter chaque palier supplémentaire (rendements décroissants).
 - Chaque palier de qualité porte un **nom** (ex : pauvre, médiocre, correct... jusqu'à des qualités exceptionnelles).
 - Pour un objet crafté, la qualité dépend du niveau de la compétence d'artisanat associée du joueur.
-- *(Interprétation à confirmer : la dureté de base d'un outil crafté vient des stats fixes des matériaux utilisés ; la qualité vient ensuite multiplier ces stats de base pour obtenir les stats finales de l'objet.)* → [[Ouvert — Interprétation dureté et qualité]]
+- **Confirmé** ([[Stats d'un objet crafté]]) : la dureté de base vient des stats fixes des matériaux ; la qualité les multiplie ensuite, **une seule fois** — ne jamais réappliquer la qualité sur une dureté déjà multipliée ([[Stats d'armes]] : ce serait un double comptage).
 
 **Formule (A.3) :**
 

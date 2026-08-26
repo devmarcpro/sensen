@@ -19,9 +19,10 @@ etape: 8
 
 **Inchangé :** « exploré » = traversé par le cône de vision ([[IA des créatures]]) ; mise à jour incrémentale sur `chunk_explored` ([[EventBus]]) ; PNJ/monstres détectés en surcouche d'icônes, état live sans mémoire dédiée.
 
-## Ce qui reste à trancher
+## Les derniers points, fixés
 
-Si l'ombrage de hauteur se calcule au chargement du chunk ou en shader ; la taille d'affichage et le zoom.
+- **Ombrage de hauteur : calculé au chargement du chunk**, stocké avec la teinte dominante (une valeur par chunk, recalculée à la mutation). La minimap n'a pas besoin d'un shader dédié — c'est une texture mise à jour incrémentalement ([[Décision — Structure de données de la grille]]).
+- **Affichage : 3 niveaux de zoom** (×1 proche ≈ 32 chunks visibles, ×2, ×4), coin haut-droit, taille fixe 256×256 px, masquable. Le zoom ×4 rejoint visuellement l'échelle de la carte du monde ([[Carte du monde]]) — la transition entre les deux est lisible.
 
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Minimap et brouillard de guerre]], [[Grille continue]]

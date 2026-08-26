@@ -1,10 +1,13 @@
 ---
 aliases: ["Ouvert — Taille des salles de donjon", "Taille des salles"]
-tags: [ouvert, monde, donjon, à-trancher]
+tags: [ouvert, monde, donjon, décidé-par-défaut]
 domaine: monde
-statut: à-trancher
+statut: décidé-par-défaut
 etape: 2
 ---
+
+> [!success] Défaut fixé le 2026-08-26 — implémentable tel quel
+> Sur délégation du designer : **le code part de cette valeur**, aucune question à se poser. La question reste légitimement ouverte au playtest — la réviser est une décision de tuning, pas de conception.
 
 **La question :** taille exacte des salles/connecteurs en blocs, et taille de la bibliothèque de prefabs au lancement.
 
@@ -15,6 +18,10 @@ etape: 2
 **Ce qui atténue le problème ([[Donjons — structure et intégration]]) :** la **palette remapable** — les mêmes salles génériques servent tous les thèmes (ruine, crypte, mine effondrée, repaire) via le remapping de couleurs stand-in. *Un petit nombre de prefabs, une grande variété visuelle.*
 
 **Ce qui en dépend :** [[Ordre de construction]] étape 2 (génération de donjon) et le critère de validation de l'étape 8 de [[Ordre de vérification]] (*2-3 salles/connecteurs prefabs, un étage*).
+
+## Le défaut : fixé
+
+Tailles et bibliothèque sont désormais fixées en [[Décision — Prefabs de donjon en tuiles]] : salles **8×8 / 16×16 / 24×24 / 32×32** tuiles par étage, bibliothèque de lancement de **24 prefabs** (12 salles, 8 connecteurs, 4 entrées de surface), format **PNG indexé** à deux couches (matériau + hauteur).
 
 ## Liens
 - **Dépend de** : [[Génération de donjon]], [[Salles et connecteurs]]

@@ -8,7 +8,7 @@ etape: 6
 
 Les catalogues prêts à transcrire en JSON. 24 notes.
 
-*Valeurs = premières propositions d'équilibrage, à ajuster en playtest.*
+*Toutes les valeurs sont fixées et implémentables telles quelles ; le playtest les ajuste, il n'a rien à inventer.*
 
 **Les matériaux (153, monde réel uniquement)**
 - **[[Catalogue matériaux — Bois]]** (40) — *chaque essence a un rôle : l'essence se choisit comme la gemme.*

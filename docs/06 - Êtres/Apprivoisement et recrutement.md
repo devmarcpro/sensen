@@ -28,7 +28,12 @@ Comment on transforme n'importe quelle créature en compagnon : une action dédi
 
 **Option de dialogue ([[Dialogue PNJ]]) :** « Recruter » s'affiche quand les conditions de `recruitable` sont approchées/remplies.
 
-*(Détail de l'apprivoisement — au-delà de ce qui est déjà couvert ici — à développer ultérieurement, cf. [[Quêtes et guildes]].)*
+**Le cycle complet est spécifié — rien à développer de plus :**
+1. **Approcher** — une créature `bete_sauvage` fuit si détectée ([[IA des créatures]]) ; la Discrétion ou l'appât (nourriture jetée au sol, [[Nourriture]]) permet d'arriver au contact.
+2. **Tenter** — action dédiée au contact, jet universel ci-dessus. **Cible affaiblie = bonus : +5 au jet sous 50 % PV, +10 sous 25 %.** Échec → la créature devient hostile ou fuit (selon son profil) ; **une seule tentative par créature et par jour in-game**.
+3. **Entretenir** — succès = la créature devient un compagnon à relation 0 ([[Compagnons]]) ; la relation évolue ensuite comme pour tout PNJ ([[Réputation et relations]]) : nourrir (+, plats cuisinés [[Cuisine et alchimie]]), combattre ensemble (+), la laisser mourir (−).
+
+Aucune quête d'apprivoisement dédiée : `recruitable.method: "quete"` est réservé aux PNJ uniques ([[Schéma créature]]).
 
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Schéma créature]], [[Jet de compétence universel]], [[Réputation et relations]]

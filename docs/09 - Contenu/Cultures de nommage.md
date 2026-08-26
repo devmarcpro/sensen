@@ -1,8 +1,8 @@
 ---
 aliases: ["C.9", "Annexe C.9", "Cultures de nommage", "10 cultures", "Cultures"]
-tags: [contenu, société, catalogue, contenu-à-produire]
+tags: [contenu, société, catalogue, décidé]
 domaine: contenu
-statut: contenu-à-produire
+statut: décidé
 etape: 9
 ---
 
@@ -20,7 +20,7 @@ Latine/romane (Humain) · Nordique/germanique (Nain, Humain) · Sino (Humain) ·
 
 **Tirage à la génération d'un royaume ([[Génération des royaumes PNJ]]) :** pondéré par `race_affinity` selon la race dominante.
 
-**Contenu à produire :** [[Ouvert — Pools de noms des cultures]] — les pools de noms des 10 cultures.
+**Les pools sont écrits :** [[Pools de noms des cultures]] (les 9 cultures restantes ; la Sino vit dans [[Culture de nommage — schéma]]).
 
 ## Liens
 - **Dépend de** : [[Noms culturels]], [[Culture de nommage — schéma]], [[Races]]

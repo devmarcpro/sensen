@@ -41,9 +41,10 @@ Le principe `seed + liste des modifications` est inchangé. Plus d'octree séria
 
 **Ce qui disparaît partout :** la subdivision, les octrees, l'indexation `(x,y,z)`, le budget « 512 blocs subdivisés/chunk ».
 
-## Ce qui reste à trancher
+## Les derniers points, fixés
 
-La taille exacte de `c_data` (suffit-il pour l'état d'une culture, d'une porte, d'un glyphe ?) ; si les glyphes/effets persistants de combat ([[Familles de capacités de la grille]]) vivent dans `content` ou dans une couche d'overlay séparée.
+- **`c_data` reste en u16** : il code l'état du contenu **persistant** (stade de croissance 0-15, orientation 0-3, ouvert/fermé, dégâts) — largement suffisant. Ce qui déborde d'un u16 n'a rien à faire dans la tuile.
+- **Les glyphes et effets persistants de combat ne vivent PAS dans la tuile** : ils sont dans une **couche d'overlay runtime** `Dictionary[index_tuile] → [effets]`, propre à la grille courante. Raison : ils sont temporaires, portent une source (le lanceur), une durée en ticks et un vecteur élémentaire — et **ils ne doivent jamais être sauvegardés** ([[Sauvegarde]] : seuls les diffs de terrain persistent). Un combat qui se termine vide l'overlay.
 
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Grille continue]], [[Décisions d'architecture]]
