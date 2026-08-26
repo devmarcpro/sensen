@@ -1,0 +1,14 @@
+{
+  "_doc": "Fonctionnalité (docs: Fonctionnalité / B.3.1). kind: arme|armure|mobilier|vehicule.",
+  "name_key": "functionality.<id>.name",
+  "kind": "arme",
+  "hands": 1,
+  "combat_skill": "epee",
+  "degats_des": "2d6",
+  "crit_range": 20,
+  "vitesse_base": 2.0,
+  "portee": 1.5,
+  "portee_min": 1,
+  "type_degats": "tranchant",
+  "poids_reference": 40
+}

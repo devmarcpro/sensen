@@ -1,0 +1,36 @@
+{
+  "_doc": "Objet (docs: Schéma objet et recette / B.3).",
+  "name_key": "item.<id>.name",
+  "type": "outil",
+  "equip_slot": "arme",
+  "hands": 1,
+  "functionality": "<id fonctionnalité>",
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie",
+    "inputs": [
+      {
+        "category": "bois",
+        "amount": 2
+      }
+    ]
+  },
+  "slots": {
+    "tete": "<id composant>",
+    "manche": "<id composant>",
+    "fixations": "fixations_std"
+  },
+  "stat_weights": {
+    "durete": {
+      "minerai": 0.8,
+      "bois": 0.2
+    }
+  },
+  "sprite": "models/<...>.png",
+  "sprite_slots": {
+    "#00FF00": "bois",
+    "#FF00FF": "minerai"
+  },
+  "effects": [],
+  "tags": []
+}

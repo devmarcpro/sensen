@@ -1,0 +1,7 @@
+{
+  "_doc": "État météo (docs: Météo / E.28).",
+  "name_key": "weather.<id>.name",
+  "temp_mod": 0,
+  "visibility_mult": 1.0,
+  "effects": []
+}

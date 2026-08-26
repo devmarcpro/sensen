@@ -1,0 +1,11 @@
+{
+  "_doc": "Plante (docs: Plantes / F.8).",
+  "name_key": "plant.<id>.name",
+  "categorie": "culture",
+  "nutrition": 10,
+  "bonus_potentiel": {},
+  "wuxing": {
+    "bois": 1.0
+  },
+  "tags": []
+}

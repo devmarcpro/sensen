@@ -1,0 +1,11 @@
+{
+  "_doc": "Tooltip contextuel (docs: Tooltips contextuels / E.19).",
+  "trigger": {
+    "signal": "<signal EventBus>",
+    "conditions": {}
+  },
+  "text_key": "tutorial.<id>.text",
+  "once": true,
+  "delay_ticks": 0,
+  "category": "general"
+}

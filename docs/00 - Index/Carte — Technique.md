@@ -12,6 +12,7 @@ L'architecture Godot et la stratégie de performance. 16 notes.
 
 **Les fondations**
 - **[[Data-driven design]]** — *les systèmes réagissent aux tags présents, pas à des identifiants codés en dur.* Le principe qui permet l'interaction inter-systèmes.
+- **[[Décision — Pipeline de contenu]]** — le pipeline concret : un fichier JSON par entrée, templates, validation au boot, F5. *Ajouter du contenu = ajouter un fichier.*
 - **[[Localisation]]** — contrainte du jour 1. *Trivial au jour 1, cauchemar à retrofit.*
 - **[[Arborescence du projet]]** — autoloads, data, systems, scenes.
 - **[[Décisions d'architecture]]** — les huit décisions qu'on ne peut pas rattraper après coup.

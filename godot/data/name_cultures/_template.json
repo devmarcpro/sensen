@@ -1,0 +1,26 @@
+{
+  "_doc": "Culture de nommage (docs: Culture de nommage — schéma / B.11).",
+  "name_key": "culture.<id>.name",
+  "name_order": "prenom_nom",
+  "race_affinity": {
+    "humain": 1.0
+  },
+  "prenom_a": [],
+  "prenom_b": [],
+  "famille_a": [],
+  "famille_b": [
+    ""
+  ],
+  "ville_a": [],
+  "ville_b": [],
+  "titres": {
+    "monarchie_hereditaire": {
+      "m": "Roi",
+      "f": "Reine"
+    },
+    "guilde_maitre": {
+      "m": "Grand Maître",
+      "f": "Grande Maîtresse"
+    }
+  }
+}

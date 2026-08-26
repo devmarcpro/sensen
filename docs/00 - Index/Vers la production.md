@@ -42,6 +42,8 @@ Ce qui reste à modifier dans le design, et ce qui manque pour lancer la product
 
 ## 6. Chantier technique (le squelette existe, le code non)
 
+- [x] **Pipeline de contenu décidé et squeletté** ([[Décision — Pipeline de contenu]]) : `godot/data/` contient les 24 catalogues avec leurs `_template.json` et son README — ajouter du contenu = ajouter un fichier JSON.
+
 - [ ] Projet Godot 4.x : squelette en place (`godot/`, arborescence D.1 — [[Arborescence du projet]]). À l'ouverture du chantier : autoloads GameData/EventBus/TickManager en premier ([[Décisions d'architecture]], [[Simulation à ticks]]), validation de schémas au boot, `tr()` dès le premier écran.
 - [ ] Les quatre [[Contraintes permanentes]] s'appliquent dès la première ligne — en particulier serveur autoritaire en solo et zéro `_process(delta)` dans la logique.
 - [ ] Critère de perf avant chaque étape ([[Ordre de vérification]]).

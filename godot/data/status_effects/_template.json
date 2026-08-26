@@ -1,0 +1,8 @@
+{
+  "_doc": "Statut (docs: Statuts / F.4). duree en ticks ; contrôles durs <= 20 ticks, réapplication interdite 50 ticks (anti-stunlock).",
+  "name_key": "status.<id>.name",
+  "degats_des": null,
+  "duree_ticks": 30,
+  "modifiers": [],
+  "tags": []
+}

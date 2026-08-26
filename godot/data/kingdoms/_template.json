@@ -1,0 +1,16 @@
+{
+  "_doc": "Royaume (docs: Schéma royaume / B.9). Générés par E.27 ; ce template sert aux royaumes scriptés/de test.",
+  "name_key": "kingdom.<id>.name",
+  "government_type": "monarchie_hereditaire",
+  "culture": "culture_latine",
+  "capital_poi": null,
+  "territory_cells": [],
+  "taxes": {
+    "base_rate": 0.08,
+    "tariff_default": 0.1
+  },
+  "tariffs": {},
+  "laws": [],
+  "diplomacy": {},
+  "tags": []
+}

@@ -1,0 +1,6 @@
+{
+  "_doc": "Composant logique (docs: Composant et recette d'obtention / B.13).",
+  "name_key": "component.<id>.name",
+  "slot_type": "tete",
+  "used_by": []
+}

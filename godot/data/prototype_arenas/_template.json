@@ -1,0 +1,18 @@
+{
+  "_doc": "Arène du prototype (docs: Prototype de combat — spécification). heights: 32 lignes de 32 valeurs 0-20.",
+  "name_key": "arena.<id>.name",
+  "size": [
+    32,
+    32
+  ],
+  "heights": [],
+  "ground": [],
+  "contents": [],
+  "spawns": {
+    "player": [
+      16,
+      28
+    ],
+    "enemies": []
+  }
+}

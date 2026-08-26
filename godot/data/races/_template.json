@@ -1,0 +1,10 @@
+{
+  "_doc": "Race (docs: Races / C.2).",
+  "name_key": "race.<id>.name",
+  "stat_bonuses": {},
+  "special": [],
+  "base_potentials": {},
+  "lifespan": 80,
+  "rivals": [],
+  "biome_affinity": []
+}

@@ -1,0 +1,10 @@
+{
+  "_doc": "Réplique d'ambiance (docs: Dialogue PNJ / E.23).",
+  "text_key": "dialogue.<id>.text",
+  "conditions": {
+    "metier": null,
+    "humeur_min": null,
+    "relation_min": null,
+    "heure": null
+  }
+}

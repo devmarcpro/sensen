@@ -21,6 +21,8 @@ L'intégralité du jeu est pilotée par des données, pas par du code en dur. Le
 
 **Portée :** le data-driven vise avant tout à accélérer le développement interne (ajout rapide de contenu par l'équipe) — pas une priorité de support au moddage communautaire pour l'instant.
 
+**Le pipeline concret est décidé : [[Décision — Pipeline de contenu]]** — un fichier par entrée, `_template.json` par dossier, validation de schéma au boot, hot-reload F5, ajout d'une entrée = zéro code. Le squelette des catalogues existe dans `godot/data/`.
+
 **Décisions :**
 - **Format : JSON confirmé** (tous les schémas de l'Annexe B font foi — voir [[Schéma matériau]], [[Schéma objet et recette]], [[Vocabulaire des modules — six axes]], [[Schéma créature]], [[Biomes — schéma]], [[Gabarit de quête]], [[Catalogue des couches de bruit]], [[Schéma royaume]], [[Salles et connecteurs]], [[Culture de nommage — schéma]], [[Composant et recette d'obtention]]).
 - **Éditeur de contenu interne : non au lancement** — JSON édité à la main, avec la validation de schéma au boot + hot-reload F5 ([[Décisions d'architecture]]) comme filet ; un éditeur visuel n'est envisagé que si le volume de contenu le justifie plus tard.

@@ -1,0 +1,24 @@
+{
+  "_doc": "Gabarit de quête (docs: Gabarit de quête / B.7).",
+  "guild": "guerriers",
+  "rank_min": 1,
+  "pattern": "tuer",
+  "target_selector": {
+    "tags_any": [
+      "hostile"
+    ],
+    "combat_level_range_around_player": [
+      0.8,
+      1.2
+    ]
+  },
+  "count_range": [
+    3,
+    8
+  ],
+  "reward": {
+    "gold_per_target_level": 15,
+    "guild_xp": 10
+  },
+  "text_key": "quest.<id>.text"
+}

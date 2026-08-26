@@ -1,0 +1,24 @@
+{
+  "_doc": "Salle de donjon (docs: Salles et connecteurs / B.10). plan = PNG indexé (couche matériau stand-in + couche hauteur).",
+  "kind": "salle",
+  "size_category": "moyenne",
+  "floor_theme": [
+    "ruine"
+  ],
+  "plan": "models/dungeon/rooms/<id>.png",
+  "flat_floor": false,
+  "connectors": [
+    {
+      "type": "porte",
+      "position": [
+        0,
+        8
+      ],
+      "direction": "nord"
+    }
+  ],
+  "special_tags": [],
+  "sprite_slots": {
+    "#00FF00": "roche"
+  }
+}

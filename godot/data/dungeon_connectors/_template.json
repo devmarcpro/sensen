@@ -1,0 +1,16 @@
+{
+  "_doc": "Connecteur de donjon (docs: B.10). links_floors: true pour un escalier.",
+  "kind": "connecteur",
+  "type": "corridor_droit",
+  "plan": "models/dungeon/connectors/<id>.png",
+  "links_floors": false,
+  "connectors": [
+    {
+      "type": "porte",
+      "position": [
+        0,
+        0
+      ]
+    }
+  ]
+}

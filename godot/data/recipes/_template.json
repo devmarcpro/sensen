@@ -1,0 +1,16 @@
+{
+  "_doc": "Recette de transformation ou consommable (docs: Stations de transformation / C.8). Les objets finaux passent par items+components.",
+  "station": "forge",
+  "craft_skill": "forge",
+  "inputs": [
+    {
+      "material": "<id>",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "material": "<id>",
+    "amount": 1
+  },
+  "fuel": null
+}

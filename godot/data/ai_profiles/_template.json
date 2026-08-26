@@ -1,0 +1,14 @@
+{
+  "_doc": "Profil Utility AI (docs: IA des créatures / E.16). considerations: {action:{consideration:poids}}.",
+  "considerations": {
+    "attaquer": {
+      "portee": 1.0,
+      "agressivite": 0.8
+    },
+    "fuir": {
+      "sante_basse": 1.5
+    }
+  },
+  "horaires": null,
+  "chain_bonus": 0.0
+}
