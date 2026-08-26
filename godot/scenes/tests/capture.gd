@@ -7,6 +7,8 @@ var frames := 0
 var cible := 60
 var sortie := "user://capture.png"
 var arene := 0
+var temps_max := 0.0
+var temps_total := 0.0
 
 
 func _ready() -> void:
@@ -20,6 +22,8 @@ func _ready() -> void:
 			arene = int(args[i + 1])
 	var scene: Node = load("res://scenes/demo/main.tscn").instantiate()
 	add_child(scene)
+	scene.profil_sans_ui = "--sans-ui" in args
+	scene.profil_sans_terrain = "--sans-terrain" in args
 	if arene > 0:
 		scene.arene_courante = arene
 		scene._charger()
@@ -31,10 +35,14 @@ func _ready() -> void:
 			break
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	frames += 1
+	if frames > 5:   # les premières images chargent ; on mesure ensuite (critère É0 : 60 fps)
+		temps_max = maxf(temps_max, delta)
+		temps_total += delta
 	if frames == cible:
 		var img := get_viewport().get_texture().get_image()
 		img.save_png(sortie)
 		print("capture : ", sortie)
+		print("image : moyenne %.1f ms, pire %.1f ms sur %d images" % [temps_total / float(frames - 5) * 1000.0, temps_max * 1000.0, frames - 5])
 		get_tree().quit()

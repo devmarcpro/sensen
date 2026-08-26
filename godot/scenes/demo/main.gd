@@ -17,20 +17,36 @@ var arene_courante := 0
 var joueur_id := ""
 var chemin_en_cours: Array[Vector2i] = []
 var minuterie_pas := 0.0
+var minuterie_ui := 0.0
 var survol := Vector2i(-1, -1)
 var journal: Array[String] = []
 var telegraphes: Dictionary = {}   # id → action engagée
 var atteignables: Dictionary = {}
 var camera_offset := Vector2.ZERO
+var profil_sans_ui := false        # mesure de perf : saute la mise à jour du texte
+var profil_sans_terrain := false   # mesure de perf : saute le dessin des tuiles
 var visee := -1                    # capacité en cours de visée (index), -1 sinon
 var ecran_fin: Array[String] = []  # récapitulatif du dernier combat (écran de fin), vide sinon
 var zoom := 1.0
+
+var terrain: Terrain              # couche statique : les tuiles, dessinées une fois (perf É0)
 
 @onready var ui: Label = $CanvasLayer/Info
 @onready var ui_droite: Label = $CanvasLayer/Droite
 
 
+## La couche statique du terrain : ses commandes de dessin persistent d'une image à l'autre.
+class Terrain extends Node2D:
+	var proprio: Node2D
+	func _draw() -> void:
+		proprio._dessiner_terrain(self)
+
+
 func _ready() -> void:
+	terrain = Terrain.new()
+	terrain.proprio = self
+	terrain.z_index = -1
+	add_child(terrain)
 	arenes.assign(GameData.catalogues.get("prototype_arenas", {}).keys())
 	arenes.sort()
 	EventBus.journal.connect(_sur_journal)
@@ -51,6 +67,7 @@ func _charger() -> void:
 	chemin_en_cours.clear()
 	telegraphes.clear()
 	journal.clear()
+	terrain.queue_redraw()
 	_log(tr("ui.aide"))
 	var j := joueur()
 	if not j.is_empty() and not j.ratelier.is_empty():
@@ -113,7 +130,10 @@ func _process(delta: float) -> void:
 		for nom in sim.combats.keys():
 			sim.pas(nom)
 	_maj_atteignables()
-	_maj_ui()
+	minuterie_ui -= delta
+	if minuterie_ui <= 0.0 and not profil_sans_ui:
+		minuterie_ui = 0.05
+		_maj_ui()
 	queue_redraw()
 
 
@@ -235,39 +255,60 @@ func _draw() -> void:
 		return
 	var g := sim.grille
 	var j := joueur()
-	var zones_telegraphe := _zones_telegraphes()
-	for s in range(g.largeur + g.hauteur_grille - 1):     # tri de profondeur : diagonales x+y
-		for x in g.largeur:
-			var y := s - x
-			if y < 0 or y >= g.hauteur_grille:
-				continue
-			var t := Vector2i(x, y)
-			_dessine_tuile(t, zones_telegraphe.has(t))
-			var occ := g.occupant(t)
-			if not occ.is_empty():
-				_dessine_entite(sim.entites[occ])
+	# Superpositions translucides sur les tuiles (atteignables, télégraphes, survol, forme visée).
+	for t in atteignables.keys():
+		_losange(t, Color(0.9, 0.9, 0.5, 0.28))
+	for t in _zones_telegraphes().keys():
+		_losange(t, Color(1.0, 0.2, 0.1, 0.5))
+	if survol.x >= 0:
+		_losange(survol, Color(1, 1, 1, 0.22))
+	if visee < 0 and survol.x >= 0 and not j.is_empty() and not g.occupant(survol).is_empty() and g.occupant(survol) != joueur_id:
+		var tir := sim.verifier_tir(j, sim.entites[g.occupant(survol)])
+		if tir.has("bloqueur"):
+			_losange(tir.bloqueur, Color(1, 0.2, 0.2, 0.45))
+	if visee >= 0 and survol.x >= 0 and not j.is_empty():
+		var plan := sim.plan_capacite(j, visee)
+		var ok := sim.capacite_visable(j, plan, survol)
+		for t in Capacites.tuiles_de_forme(g, plan.geometrie, j.pos, survol, int(plan.taille)):
+			_losange(t, Color(0.3, 0.6, 1.0, 0.45) if ok else Color(0.5, 0.5, 0.5, 0.35))
 	if not chemin_en_cours.is_empty() and not j.is_empty():
 		var pts := PackedVector2Array([_ecran(j.pos, g.h(j.pos))])
 		for c in chemin_en_cours:
 			pts.append(_ecran(c, g.h(c)))
 		draw_polyline(pts, Color(1, 1, 1, 0.55), 2.0)
-	if visee < 0 and survol.x >= 0 and not j.is_empty() and not g.occupant(survol).is_empty() and g.occupant(survol) != joueur_id:
-		var tir := sim.verifier_tir(j, sim.entites[g.occupant(survol)])
-		if tir.has("bloqueur"):
-			var cb := _ecran(tir.bloqueur, g.h(tir.bloqueur))
-			draw_colored_polygon(PackedVector2Array([cb + Vector2(0, -TH * 0.5), cb + Vector2(TW * 0.5, 0), cb + Vector2(0, TH * 0.5), cb + Vector2(-TW * 0.5, 0)]), Color(1, 0.2, 0.2, 0.45))
-	if visee >= 0 and survol.x >= 0 and not j.is_empty():
-		var plan := sim.plan_capacite(j, visee)
-		var ok := sim.capacite_visable(j, plan, survol)
-		for t in Capacites.tuiles_de_forme(g, plan.geometrie, j.pos, survol, int(plan.taille)):
-			var c := _ecran(t, g.h(t))
-			var losange := PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)])
-			draw_colored_polygon(losange, Color(0.3, 0.6, 1.0, 0.45) if ok else Color(0.5, 0.5, 0.5, 0.35))
+	# Entités par profondeur (x+y croissant) ; les tuiles plus hautes devant elles sont redessinées
+	# par-dessus, pour que le relief les occulte comme dans la passe unique.
+	var acteurs := sim.vivants()
+	acteurs.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.pos.x + a.pos.y < b.pos.x + b.pos.y)
+	for e in acteurs:
+		_dessine_entite(e)
+		var he := g.h(e.pos)
+		for d in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 0), Vector2i(0, 2), Vector2i(2, 1), Vector2i(1, 2)]:
+			var t: Vector2i = e.pos + d
+			if g.dans(t) and (g.h(t) > he or g.bloque_passage(t)):
+				_dessine_tuile(self, t)
 	for t in atteignables.keys():
 		if t == j.pos:
 			continue
 		var c := _ecran(t, g.h(t)) + Vector2(-6, 4)
 		draw_string(ThemeDB.fallback_font, c, str(atteignables[t]), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1, 1, 0.8, 0.8))
+
+
+func _losange(t: Vector2i, col: Color) -> void:
+	var c := _ecran(t, sim.grille.h(t))
+	draw_colored_polygon(PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)]), col)
+
+
+## La passe statique : toutes les tuiles, une seule fois (appelée par la couche Terrain).
+func _dessiner_terrain(ci: CanvasItem) -> void:
+	if sim == null or profil_sans_terrain:
+		return
+	var g := sim.grille
+	for s in range(g.largeur + g.hauteur_grille - 1):     # tri de profondeur : diagonales x+y
+		for x in g.largeur:
+			var y := s - x
+			if y >= 0 and y < g.hauteur_grille:
+				_dessine_tuile(ci, Vector2i(x, y))
 
 
 func _zones_telegraphes() -> Dictionary:
@@ -293,7 +334,7 @@ func _zones_telegraphes() -> Dictionary:
 	return zones
 
 
-func _dessine_tuile(t: Vector2i, telegraphe: bool) -> void:
+func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 	var g := sim.grille
 	var h := g.h(t)
 	var c := _ecran(t, h)
@@ -302,33 +343,27 @@ func _dessine_tuile(t: Vector2i, telegraphe: bool) -> void:
 		c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)])
 	var k := clampf((h - 4) / 12.0, 0.0, 1.0)   # gradient : bas sombre, sommets clairs
 	var col := Color(0.20, 0.34, 0.18).lerp(Color(0.62, 0.66, 0.42), k)
-	if atteignables.has(t):
-		col = col.lerp(Color(0.9, 0.9, 0.5), 0.25)
-	if telegraphe:
-		col = col.lerp(Color(1.0, 0.2, 0.1), 0.55)
-	if t == survol:
-		col = col.lightened(0.25)
-	draw_colored_polygon(haut, col)
+	ci.draw_colored_polygon(haut, col)
 	var flanc := col.darkened(0.35)
 	var hs := g.h(t + Vector2i(0, 1)) if g.dans(t + Vector2i(0, 1)) else 0
 	if hs < h:
 		var d := (h - hs) * HSTEP
-		draw_colored_polygon(PackedVector2Array([
+		ci.draw_colored_polygon(PackedVector2Array([
 			c + Vector2(-TW * 0.5, 0), c + Vector2(0, TH * 0.5),
 			c + Vector2(0, TH * 0.5 + d), c + Vector2(-TW * 0.5, d)]), flanc)
 	var he := g.h(t + Vector2i(1, 0)) if g.dans(t + Vector2i(1, 0)) else 0
 	if he < h:
 		var d2 := (h - he) * HSTEP
-		draw_colored_polygon(PackedVector2Array([
+		ci.draw_colored_polygon(PackedVector2Array([
 			c + Vector2(0, TH * 0.5), c + Vector2(TW * 0.5, 0),
 			c + Vector2(TW * 0.5, d2), c + Vector2(0, TH * 0.5 + d2)]), flanc.darkened(0.15))
 	if g.bloque_passage(t):   # un mur : un bloc sombre posé sur la tuile
 		var hm := 3 * HSTEP
-		draw_colored_polygon(PackedVector2Array([
+		ci.draw_colored_polygon(PackedVector2Array([
 			c + Vector2(-TW * 0.5, 0), c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0),
 			c + Vector2(TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm), c + Vector2(-TW * 0.5, -hm)]),
 			Color(0.35, 0.32, 0.30))
-		draw_colored_polygon(PackedVector2Array([
+		ci.draw_colored_polygon(PackedVector2Array([
 			c + Vector2(-TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm),
 			c + Vector2(TW * 0.5, -hm), c + Vector2(0, TH * 0.5 - hm)]), Color(0.5, 0.47, 0.44))
 
