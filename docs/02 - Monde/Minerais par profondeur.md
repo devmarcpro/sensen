@@ -1,10 +1,14 @@
 ---
 aliases: ["G.9 minerais", "ore_bands.json", "Minerais par profondeur", "Bandes de minerai"]
-tags: [monde, génération, données, décidé]
+tags: [monde, génération, données, décidé, héritage-voxel]
 domaine: monde
 statut: décidé
 etape: 8
 ---
+
+> [!warning] Héritage voxel
+> Les bandes en Y supposent qu'on creuse : héritage voxel. À remapper sur la **profondeur d'étage de donjon** ([[Génération de donjon]] : la corruption effective croît déjà avec l'étage) et la composition des **filons de surface** ([[Récolte]]) — ou à supprimer. La logique « risque/dureté/valeur montent ensemble » reste le principe à préserver.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Les filons sont filtrés par bande de profondeur : plus c'est profond, meilleur c'est. Trois pressions (risque, dureté de la roche, valeur du minerai) montent ensemble sur la même verticale.
 

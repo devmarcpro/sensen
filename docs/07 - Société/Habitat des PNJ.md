@@ -1,10 +1,14 @@
 ---
 aliases: ["7.5", "7.5 Habitat des PNJ", "Habitat", "Logement", "Humeur", "Bétail"]
-tags: [société, décidé]
+tags: [société, décidé, héritage-voxel]
 domaine: société
 statut: décidé
 etape: 7
 ---
+
+> [!warning] Héritage voxel
+> La taille minimale « 2×2×2 blocs » et le bonus « volume ≥ 27 blocs » sont des critères volumétriques : en 2D, ils deviennent une **surface minimale en tuiles** — à re-décider ([[Détection de pièces]]).
+> — Classement complet : [[Héritage voxel — audit]].
 
 Les PNJ résidents ont des besoins de logement, et l'humeur qui en découle est LE levier de rendement du territoire.
 

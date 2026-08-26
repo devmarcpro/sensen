@@ -1,10 +1,14 @@
 ---
 aliases: ["E.9", "Annexe E.9", "Éditeur de sculpture", "Périmètres de sculpture"]
-tags: [objets, craft, technique, décidé]
+tags: [objets, craft, technique, décidé, héritage-voxel]
 domaine: objets
 statut: décidé
 etape: 6
 ---
+
+> [!warning] Héritage voxel
+> L'éditeur **voxel** (périmètres 16³ → 64×64×96, subdivision, ghost 3D) est héritage : [[Construction cadrée]] et [[Tables de sculpture]] passent la sculpture en **pixel art paramétrique**. Le principe (matériaux débités de l'inventaire, stats par comptage, modèle réutilisable, partage explicite) survit ; périmètres et résolution 2D **à re-décider**.
+> — Classement complet : [[Héritage voxel — audit]].
 
 L'éditeur EST le moteur voxel du jeu, dans un mini-espace isolé — avec les périmètres chiffrés par table.
 

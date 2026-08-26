@@ -1,10 +1,14 @@
 ---
 aliases: ["B.3", "Annexe B.3", "Schéma objet", "data/items", "Recette"]
-tags: [objets, données, schéma, décidé]
+tags: [objets, données, schéma, décidé, héritage-voxel]
 domaine: objets
 statut: décidé
 etape: 6
 ---
+
+> [!warning] Héritage voxel
+> `vox_model` et `vox_slots` sont héritage : leurs équivalents sont des sprites 2D avec le même mécanisme de couleurs stand-in ([[Squelette modulaire et points d'attache]]). La structure du schéma tient.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Le format de données d'un objet et de sa recette.
 

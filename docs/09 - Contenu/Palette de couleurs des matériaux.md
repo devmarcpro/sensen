@@ -1,10 +1,14 @@
 ---
 aliases: ["F.1.1", "Annexe F.1.1", "Palette", "Couleurs des matériaux", "Palette de couleurs"]
-tags: [contenu, matériaux, art, catalogue, décidé]
+tags: [contenu, matériaux, art, catalogue, décidé, héritage-voxel]
 domaine: contenu
 statut: décidé
 etape: 1
 ---
+
+> [!warning] Héritage voxel
+> « Bruit par voxel en shader » se lit **par tuile** ; le remapping de palette en shader et la recolorisation par instance survivent tels quels en 2D.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Chaque hex est unique dans le catalogue — un doublon est une erreur bloquante de données.
 

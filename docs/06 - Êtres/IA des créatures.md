@@ -1,10 +1,14 @@
 ---
 aliases: ["E.16", "Annexe E.16", "IA", "Utility AI", "Pathfinding", "Détection"]
-tags: [êtres, technique, décidé]
+tags: [êtres, technique, décidé, héritage-voxel]
 domaine: êtres
 statut: décidé
 etape: 9
 ---
+
+> [!warning] Héritage voxel
+> Le bloc « pathfinding voxel 3D » (2 blocs d'air au-dessus, liens de saut/chute, A* volumique) est héritage : sur la grille, la traversabilité découle des règles de dénivelé de [[Hauteur de terrain ±10]] (+1/+2 franchissable à surcoût, ±3 infranchissable, chute avec dégâts). L'Utility AI, les routines, la détection et le graphe global survivent. Volants/amorphes à re-spécifier.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Une Utility AI data-driven : créer ou modifier un comportement = éditer un JSON, zéro code.
 

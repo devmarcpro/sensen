@@ -1,10 +1,14 @@
 ---
 aliases: ["G.2", "Annexe G.2", "Voxels mémoire", "Meshing", "Subdivision", "LOD de distance"]
-tags: [technique, performance, décidé]
+tags: [technique, performance, décidé, héritage-voxel]
 domaine: technique
 statut: décidé
 etape: 0
 ---
+
+> [!warning] Héritage voxel
+> Note **intégralement héritage** : stockage 3D, octrees, subdivision, greedy meshing, LOD 3D. [[Grille continue]] acte : « plus de meshing volumétrique, plus de LOD 3D, plus de streaming en volume » — le rendu tactique est tuiles instanciées teintées + billboards triés. Restent éventuellement transposables en 2D : chunks constants, cache LRU, éviction. Conservée comme référence historique.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Stockage compact, greedy meshing en thread, et le LOD de distance — la parade au coût du 1px.
 

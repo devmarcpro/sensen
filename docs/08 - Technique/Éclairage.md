@@ -1,10 +1,14 @@
 ---
 aliases: ["G.3", "Annexe G.3", "Éclairage", "Lumière", "Transparence rendu"]
-tags: [technique, performance, décidé]
+tags: [technique, performance, décidé, héritage-voxel]
 domaine: technique
 statut: décidé
 etape: 0
 ---
+
+> [!warning] Héritage voxel
+> Le flood fill **3D** et la skylight par colonne sont héritage : [[Risques majeurs]] acte la propagation **2D sur la grille**. La modulation jour/nuit en shader (coût nul) survit telle quelle.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Propagation incrémentale de la lumière, et un cycle jour/nuit qui ne coûte rien.
 

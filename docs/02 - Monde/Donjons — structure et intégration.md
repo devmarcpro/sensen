@@ -1,10 +1,14 @@
 ---
 aliases: ["3.5", "3.5 Donjons", "Donjons", "Donjon"]
-tags: [monde, donjon, décidé]
+tags: [monde, donjon, décidé, héritage-voxel]
 domaine: monde
 statut: décidé
 etape: 2
 ---
+
+> [!warning] Héritage voxel
+> Le passage « l'intérieur occupe le volume de chunks sous/autour de la cellule » est héritage : [[Grille continue]] fait des donjons des **grilles séparées en étages discrets** reliés par escaliers. Tout le reste de la note (rôle, génération, persistance, intégration) est post-pivot et valide.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Les donjons sont une des sources principales de contenu du jeu, et le premier espace jouable à construire — une grille bornée ne nécessite aucune génération de monde.
 

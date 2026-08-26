@@ -1,10 +1,14 @@
 ---
 aliases: ["G.9", "Annexe G.9", "Stratification verticale", "strata.json"]
-tags: [monde, génération, données, décidé]
+tags: [monde, génération, données, décidé, héritage-voxel]
 domaine: monde
 statut: décidé
 etape: 8
 ---
+
+> [!warning] Héritage voxel
+> Système écrit pour le minage voxel : les strates ne sont plus creusables nulle part ([[Décisions fondatrices]] — minage exploratoire écarté, pas de volume souterrain). Survit éventuellement comme logique de matériaux **par étage de donjon** et de composition des **filons de surface** — à re-décider.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Plus on descend, plus la roche est dure : un verrou de progression naturel, piloté par une simple liste de strates en données.
 

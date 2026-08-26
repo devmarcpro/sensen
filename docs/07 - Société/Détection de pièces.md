@@ -1,10 +1,14 @@
 ---
 aliases: ["E.5", "Annexe E.5", "Détection de pièces", "Détection de pièce", "Flood fill"]
-tags: [société, technique, décidé]
+tags: [société, technique, décidé, héritage-voxel]
 domaine: société
 statut: décidé
 etape: 7
 ---
+
+> [!warning] Héritage voxel
+> Le flood fill **3D** (limite 4 096 blocs, toit par plafond) est héritage : [[Construction cadrée]] la déclare « triviale en 2D » — un bâtiment est une empreinte de tuiles + une hauteur de murs. Le critère 2×2×2 devient une surface minimale en tuiles, **à re-décider**.
+> — Classement complet : [[Héritage voxel — audit]].
 
 L'algorithme qui pilote le logement des PNJ, la capacité des villages et les contrats de construction.
 

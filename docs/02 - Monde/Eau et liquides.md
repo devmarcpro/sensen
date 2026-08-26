@@ -1,10 +1,14 @@
 ---
 aliases: ["E.22", "Annexe E.22", "Eau et liquides", "Liquides", "Eau"]
-tags: [monde, simulation, décidé]
+tags: [monde, simulation, décidé, héritage-voxel]
 domaine: monde
 statut: décidé
 etape: 8
 ---
+
+> [!warning] Héritage voxel
+> L'automate par blocs **3D** et la clause subdivision sont héritage : [[Hauteur de terrain ±10]] acte « E.22 se simplifie en **2D + hauteur** au lieu d'un volume ». Les interactions (lave, foudre, statuts), la nage et les bateaux se transposent ; le modèle source/écoulement est à réexprimer sur la grille.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Un automate cellulaire par blocs, pas une simulation de fluide — et tout ce qui en découle : nage, foudre dans l'eau, bateaux.
 

@@ -1,10 +1,14 @@
 ---
 aliases: ["E.30", "Annexe E.30", "Minimap", "Brouillard de guerre"]
-tags: [monde, interface, technique, décidé]
+tags: [monde, interface, technique, décidé, héritage-voxel]
 domaine: monde
 statut: décidé
 etape: 8
 ---
+
+> [!warning] Héritage voxel
+> La « coupe au niveau Y » et le bitmask par bande verticale supposent un monde volumétrique : en surface, le monde tactique est une grille unique + hauteur — une seule carte suffit. Le découpage vertical ne garde de sens que **par étage de donjon**. À re-spécifier.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Une minimap qui coupe au niveau Y du joueur, et un brouillard de guerre stocké à la résolution chunk.
 

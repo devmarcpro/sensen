@@ -1,10 +1,14 @@
 ---
 aliases: ["G.1", "Annexe G.1", "Annexe G", "Optimisation", "Principes transversaux"]
-tags: [technique, performance, décidé]
+tags: [technique, performance, décidé, héritage-voxel]
 domaine: technique
 statut: décidé
 etape: 0
 ---
+
+> [!warning] Héritage voxel
+> Les principes transversaux (GDScript typé, zéro allocation, time-slicing, threads, tout seedé) restent valables tels quels. Héritage : les « candidats probables » meshing/éclairage 3D, et « PackedByteArray pour les données voxel » — à relire pour la grille 2D.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Les cinq principes transversaux d'optimisation — ceux qu'on ne peut pas rattraper après coup.
 

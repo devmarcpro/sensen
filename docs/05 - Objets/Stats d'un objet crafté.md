@@ -1,10 +1,14 @@
 ---
 aliases: ["A.4", "Annexe A.4", "Stats d'un objet crafté", "Stats craft/sculpture"]
-tags: [objets, craft, formule, décidé]
+tags: [objets, craft, formule, décidé, héritage-voxel]
 domaine: objets
 statut: décidé
 etape: 6
 ---
+
+> [!warning] Héritage voxel
+> « Comptage de voxels » se lit désormais **comptage de pixels** du modèle sculpté ([[Tables de sculpture]]) — la formule de moyenne pondérée est inchangée.
+> — Classement complet : [[Héritage voxel — audit]].
 
 La règle de base : moyenne pondérée des matériaux, puis qualité appliquée une seule fois.
 

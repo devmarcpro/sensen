@@ -1,10 +1,14 @@
 ---
 aliases: ["G.7", "Annexe G.7", "Réseau performance", "Sauvegarde performance", "zstd"]
-tags: [technique, performance, réseau, décidé]
+tags: [technique, performance, réseau, décidé, héritage-voxel]
 domaine: technique
 statut: décidé
 etape: 11
 ---
+
+> [!warning] Héritage voxel
+> Compression, deltas, batching et quantification restent valables ; « + octrees » est héritage.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Deltas compressés, positions quantifiées, sauvegarde en thread qui ne bloque jamais.
 

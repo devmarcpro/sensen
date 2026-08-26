@@ -1,10 +1,14 @@
 ---
 aliases: ["E.19", "Annexe E.19", "Tooltips contextuels", "Onboarding", "Tutoriel"]
-tags: [progression, interface, décidé]
+tags: [progression, interface, décidé, héritage-voxel]
 domaine: progression
 statut: décidé
 etape: 1
 ---
+
+> [!warning] Héritage voxel
+> Deux déclencheurs héritage : « premier bloc en main » (ghost preview, grille fine Shift) et « première subdivision » — à remplacer par les premières-fois de la direction tactique (première bascule en combat, première jauge pleine…).
+> — Classement complet : [[Héritage voxel — audit]].
 
 L'onboarding sans script : des tooltips déclenchés par les événements, jamais un verrou de progression.
 

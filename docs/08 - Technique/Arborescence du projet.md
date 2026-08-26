@@ -1,10 +1,14 @@
 ---
 aliases: ["D.1", "Annexe D.1", "Arborescence", "Arborescence du projet", "Structure de dossiers"]
-tags: [technique, architecture, décidé]
+tags: [technique, architecture, décidé, héritage-voxel]
 domaine: technique
 statut: décidé
 etape: 0
 ---
+
+> [!warning] Héritage voxel
+> `systems/voxel/` (chunks, meshing, subdivision octree) est héritage — à refondre en système de grille. Le reste de l'arborescence tient.
+> — Classement complet : [[Héritage voxel — audit]].
 
 L'organisation du projet Godot : autoloads, données, systèmes purs, scènes.
 

@@ -1,10 +1,14 @@
 ---
 aliases: ["E.14", "Annexe E.14", "Budgets de performance", "Cibles de performance"]
-tags: [technique, performance, décidé]
+tags: [technique, performance, décidé, héritage-voxel]
 domaine: technique
 statut: décidé
 etape: 0
 ---
+
+> [!warning] Héritage voxel
+> Les chiffres de meshing (< 4 ms/chunk, 8 Ko/chunk) sont voxel ; les budgets de tick (< 8 ms) et d'entités (~64) restent valables. À rechiffrer pour le rendu tuiles + billboards.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Les cibles chiffrées de performance.
 

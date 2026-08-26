@@ -1,10 +1,14 @@
 ---
 aliases: ["12.1", "12.1 Points d'attache", "Points d'attache", "Paperdoll", "Couleurs réservées", "9.1", "9.2"]
-tags: [êtres, art, technique, décidé]
+tags: [êtres, art, technique, décidé, héritage-voxel]
 domaine: êtres
 statut: décidé
 etape: 1
 ---
+
+> [!warning] Héritage voxel
+> La note acte elle-même le pivot (*pipeline identique, en 2D*), mais ses Décisions gardent le vocabulaire `.vox` : les marqueurs d'attache et couleurs réservées s'appliquent désormais aux **sprites** du paperdoll, pas à des modèles voxel.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Le pipeline d'assemblage : des points d'ancrage nommés encodés dans les sprites, une couleur réservée par type d'attache.
 

@@ -1,10 +1,14 @@
 ---
 aliases: ["E.24", "Annexe E.24", "Véhicules", "Bateaux", "Charrette"]
-tags: [objets, véhicules, décidé]
+tags: [objets, véhicules, décidé, héritage-voxel]
 domaine: objets
 statut: décidé
 etape: 6
 ---
+
+> [!warning] Héritage voxel
+> « Σ durete des voxels » et le modèle sculpté voxel sont héritage : les stats dérivent désormais du modèle **pixel art** ([[Tables de sculpture]]). L'entité rigide, les blocs fonctionnels, le pilotage en ticks et le voyage rapide survivent ; « 1 bloc de dénivelé » se lit « 1 niveau de hauteur ».
+> — Classement complet : [[Héritage voxel — audit]].
 
 Un véhicule est une entité rigide, pas un morceau de monde qui bouge — et la seule exception à la règle forme-libre de la sculpture.
 

@@ -1,10 +1,14 @@
 ---
 aliases: ["E.29", "Annexe E.29", "Génération de donjon", "Génération procédurale des donjons"]
-tags: [monde, donjon, technique, décidé]
+tags: [monde, donjon, technique, décidé, héritage-voxel]
 domaine: monde
 statut: décidé
 etape: 2
 ---
+
+> [!warning] Héritage voxel
+> Héritage : les tailles en cubes (petite 8³ … immense 32×32×16) et « offset vertical -16, aligné chunk » — à réexprimer en **tuiles par étage**. L'algorithme par graphe (attache → connecteur → salle → collision AABB → connexité par construction → boss au plus profond) survit intégralement, ainsi que la formule de profondeur.
+> — Classement complet : [[Héritage voxel — audit]].
 
 L'algorithme de génération par graphe, étage par étage, et la formule de difficulté par profondeur.
 

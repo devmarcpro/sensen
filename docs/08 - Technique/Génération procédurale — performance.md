@@ -1,10 +1,14 @@
 ---
 aliases: ["G.4", "Annexe G.4", "Génération performance", "FastNoiseLite"]
-tags: [technique, performance, décidé]
+tags: [technique, performance, décidé, héritage-voxel]
 domaine: technique
 statut: décidé
 etape: 8
 ---
+
+> [!warning] Héritage voxel
+> L'échantillonnage du bruit **par colonne** reste juste (c'est une heightmap). Héritage : le « remplissage 3D » et le « bruit 3D de cavernes évalué par pas de 4 blocs » — plus de volume à remplir.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Le terrain spectaculaire coûte le même prix que le terrain plat — à condition de rester à un niveau de domain warping.
 

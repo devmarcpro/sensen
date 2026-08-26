@@ -1,10 +1,14 @@
 ---
 aliases: ["13", "13. Tables de sculpture", "Tables de sculpture", "Sculpture"]
-tags: [objets, craft, décidé]
+tags: [objets, craft, décidé, héritage-voxel]
 domaine: objets
 statut: décidé
 etape: 6
 ---
+
+> [!warning] Héritage voxel
+> Les mentions « voxel par voxel » et « pondération voxel » sont héritage : la sculpture est désormais en **pixel art paramétrique** ([[Construction cadrée]]). Tout le reste — déroulé, obtention par guilde, qualité, partage — survit tel quel.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Des stations spéciales où le joueur designe lui-même la forme de ses objets — jamais obligatoire, toujours mérité par un rang de guilde.
 

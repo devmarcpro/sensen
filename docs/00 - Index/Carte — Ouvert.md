@@ -33,6 +33,9 @@ Tout ce qui n'est pas tranché, par catégorie. 26 notes. La section 16 du GDD e
 - [[Ouvert — Recettes de composants par famille]] — la matrice composant × famille et les sources exotiques.
 - [[Ouvert — Pools de noms des cultures]] — 9 cultures sur 10 restent à écrire.
 
+**Héritage voxel** *(transversal — voir [[Héritage voxel — audit]])*
+- Le mapping altitude continue → 21 niveaux, la structure de données de la grille, les strates/minerais sans creusage, les critères de pièce en 2D, les périmètres de sculpture en pixel art, les dimensions des prefabs de donjon en tuiles, les budgets de perf du rendu tuiles+billboards, la minimap de surface, le format du diff de sauvegarde.
+
 **Ouvert par nature**
 - [[Ouvert — Lore]] — noms propres, textes d'ambiance, mythologie.
 - [[Ouvert — Audio et musique]] — hors périmètre du document.

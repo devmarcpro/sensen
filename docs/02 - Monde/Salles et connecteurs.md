@@ -1,10 +1,14 @@
 ---
 aliases: ["B.10", "Annexe B.10", "Salle de donjon", "Connecteur de donjon", "dungeon_rooms"]
-tags: [monde, donjon, données, schéma, décidé]
+tags: [monde, donjon, données, schéma, décidé, héritage-voxel]
 domaine: monde
 statut: décidé
 etape: 2
 ---
+
+> [!warning] Héritage voxel
+> `vox_model` et les positions 3D des connecteurs sont héritage : les prefabs deviennent des **plans de tuiles 2D par étage** (avec hauteurs de tuile pour estrades/fosses). Les points d'attache typés et `special_tags` survivent.
+> — Classement complet : [[Héritage voxel — audit]].
 
 Le format de données des prefabs de donjon : salles et connecteurs, avec leurs points d'attache typés.
 

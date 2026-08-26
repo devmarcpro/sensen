@@ -1,10 +1,14 @@
 ---
 aliases: ["A.11", "Annexe A.11", "Explosions"]
-tags: [monde, combat, formule, décidé]
+tags: [monde, combat, formule, décidé, héritage-voxel]
 domaine: monde
 statut: décidé
 etape: 3
 ---
+
+> [!warning] Héritage voxel
+> La clause « la subdivision est respectée : chaque sous-bloc est testé » est héritage — plus de subdivision. Rayon en tuiles + seuil de dureté + drop à 50 % suffisent sur la grille.
+> — Classement complet : [[Héritage voxel — audit]].
 
 La formule de destruction par explosion.
 

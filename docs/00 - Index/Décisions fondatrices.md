@@ -20,7 +20,7 @@ La rupture du 2026-08-09 : ce qui a été abandonné, ce qui survit, et pourquoi
 
 ## État du document
 
-**Toutes les décisions de design sont tranchées.** Chaque section porte ses Décisions, les formules vivent en Annexe A, les schémas de données en B, le contenu de lancement en C et F, l'architecture Godot en D, les intégrations système en E, la performance en G.
+**Toutes les décisions de design sont tranchées.** *Nuance découverte à la conversion : les annexes D, E et G n'ont pas été réécrites après le pivot et décrivent encore par endroits le moteur voxel — voir [[Héritage voxel — audit]].* Chaque section porte ses Décisions, les formules vivent en Annexe A, les schémas de données en B, le contenu de lancement en C et F, l'architecture Godot en D, les intégrations système en E, la performance en G.
 
 ### Décisions structurantes du 2026-08-09 (rupture avec le prototype Voxen)
 

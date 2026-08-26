@@ -1,10 +1,14 @@
 ---
 aliases: ["E.28", "Annexe E.28", "Météo", "Meteo"]
-tags: [monde, simulation, décidé]
+tags: [monde, simulation, décidé, héritage-voxel]
 domaine: monde
 statut: décidé
 etape: 8
 ---
+
+> [!warning] Héritage voxel
+> Trois détails héritage : `mod_altitude (-1/20 blocs)` et `mod_profondeur` (cavernes) à recalibrer sur les 21 niveaux et les étages de donjon ; la neige « bloc fin 4px » suppose la subdivision — en grille, un état de tuile suffit. Tout le reste (fonction pure, états, température, effets) tient.
+> — Classement complet : [[Héritage voxel — audit]].
 
 La météo est une fonction pure du temps et du lieu, jamais une simulation — et elle porte de vraies mécaniques (température ressentie, foudre, gel, canicule).
 
