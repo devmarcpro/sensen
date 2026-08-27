@@ -97,6 +97,9 @@
     "elevage": {
       "type": "object"
     },
+    "talents": {
+      "type": "object"
+    },
     "camp": {
       "type": "object"
     }

@@ -51,6 +51,9 @@ Le mouton jouable **est** le mouton ultime. Et ses limitations sont le contenu :
 - **Polyvalent sur Le Vent.** *Sans maître* ne donne aucun talent au départ : le champ `talents.classe` d'un **Le Vent** est donc `null`, pas *« Sans maître »*. Un **humain Le Vent** n'a donc pas deux talents — il peut en **apprendre deux au lieu d'un**, et en changer. C'est le seul empilement des deux talents, et il est cohérent : le polyvalent du polyvalent.
 - **Polyvalent et classe cachée.** Le second talent d'un humain est tiré dans les **classes visibles** uniquement. Une classe cachée s'apprend d'un porteur ([[Talents de classe]]) et occupe le slot principal — elle ne se distribue jamais gratuitement par la race.
 
+> [!success] Codé le 2026-08-28 — les trois visibles
+> **Polyvalent** (Humain : peut apprendre un second talent de classe auprès d'un PNJ, comme Le Vent, sans perdre le sien), **Chair de mana** (Elfe : la surchauffe coûte de l'endurance au lieu de la santé, régénération de mana ×1,2, endurance max −20), **Œil de la pierre** (Nain : la règle d'irrécoltabilité ne s'applique plus — vitesse ÷ 3 sur ce qui dépassait son seuil —, vision −20 %, tag `detection_filons`). Les races cachées attendent.
+
 ## Liens
 - **Dépend de** : [[Les trois axes — race, classe, fonction]], [[Races]], [[Blocs de l'être]]
 - **Alimente** : [[Talents de classe]], [[Ouvert — Changer de personnage]], [[Schéma créature]]

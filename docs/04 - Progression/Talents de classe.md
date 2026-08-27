@@ -74,6 +74,9 @@ Et trois statuts nouveaux ([[Statuts]]) : **Dissimulé**, **Saisi**, **Retardé*
 - Les **classes cachées sont rares** (≈ 2 % des PNJ à fonction compatible) : le bandit-Passeur est un événement, pas un tirage.
 - **C'est ce qui rend l'apprentissage possible** — sans porteurs, aucune classe cachée ne serait trouvable.
 
+> [!success] Codé le 2026-08-28 — le cadre et cinq talents visibles
+> Catalogue `data/talents/` (nom, description, `classe`/`race`, `cache`) ; `Simulation.talents_de(e)` = talent de la classe + talent de la race + `talents_appris`. Codés : **Râtelier vivant** (Le Sabre : un changement d'arme à 0 tick par chaîne, le compteur se réarme quand la chaîne se résout), **Souffle rendu** (La Paume : chaque soin pose un segment de l'élément dominant de la cible ; ses coups d'arme n'en posent aucun), **Meute** (La Trace : les coups de ses compagnons posent des segments sur **sa** jauge), **Œil du prix** (La Balance : +1 place d'escorte ; la bourse des marchands n'est lisible que par elle — les autres voient « ? »), **Sans maître** (Le Vent : commence sans talent, apprend celui d'un PNJ à relation ≥ 75 — option *Apprendre* du dialogue — et peut en changer). Les PNJ portent désormais une **classe** tirée parmi `classes_possibles` de leur fonction : trouver un Passeur reste possible quand ses talents existeront. Attendent : Communion des cinq, Main du métal, Fiole vive, les onze cachés (jauges de classe, portails, glyphes…).
+
 ## Liens
 - **Dépend de** : [[Les trois axes — race, classe, fonction]], [[Classes]], [[Structure compétences-modules-slots]], [[Vocabulaire des modules — six axes]]
 - **Alimente** : [[Fonctions]], [[Création de personnage]], [[Schéma créature]], [[Statuts]]

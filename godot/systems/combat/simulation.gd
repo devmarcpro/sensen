@@ -398,11 +398,17 @@ func _creuser(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 		var rr: Dictionary = regles.r.recolte
 		var force := float(outil.get("durete_base", rr.mains_nues_durete)) * float(outil.get("qualite", 1.0))
 		var durete := float(mat.stats.durete)
+		var lent := false
 		if force < durete * float(rr.seuil_irrecoltable):
-			EventBus.emettre(&"journal", [&"journal.rebondit", {"materiau": mat.name_key}])
-			return false
+			if a_talent(e, "oeil_de_la_pierre"):   # Œil de la pierre (Talents de race) : rien n'est irrécoltable, mais ÷ 3
+				lent = true
+			else:
+				EventBus.emettre(&"journal", [&"journal.rebondit", {"materiau": mat.name_key}])
+				return false
 		var n := regles.niveau(e.competences_eff, str(mat.harvest.skill))
 		ticks = maxi(1, ceili(durete / (force * regles.skill_factor(n)) * float(rr.ticks_par_seconde)))
+		if lent:
+			ticks = ticks * int(regles.r.talents.oeil_de_la_pierre.recolte_div)
 	_quitter_garde(e)
 	e.orientation = vers - e.pos
 	grille.contenu[grille.idx(vers)] = 0
@@ -1285,6 +1291,44 @@ func retirer_stock(e: Dictionary, cle: String) -> bool:
 func _puissance_de(valeur: int) -> float:
 	var al: Dictionary = regles.r.alchimie
 	return snappedf(clampf(float(valeur) / float(al.puissance_div), float(al.puissance_bornes[0]), float(al.puissance_bornes[1])), 0.1)
+
+
+# ---------------------------------------------------------------- talents (Talents de classe, Talents de race)
+
+## Les talents d'un être : celui de sa classe, celui de sa race, ceux qu'il a appris.
+func talents_de(e: Dictionary) -> Array:
+	var res: Array = []
+	var t_cl = GameData.catalogues.classes.get(str(e.get("classe", "")), {}).get("talent")
+	if t_cl != null and not str(t_cl).is_empty():
+		res.append(str(t_cl))
+	var t_ra = GameData.catalogues.races.get(str(e.get("race", "")), {}).get("talent")
+	if t_ra != null and not str(t_ra).is_empty():
+		res.append(str(t_ra))
+	for t in e.get("talents_appris", []):
+		if not (str(t) in res):
+			res.append(str(t))
+	return res
+
+
+func a_talent(e: Dictionary, id: String) -> bool:
+	return id in talents_de(e)
+
+
+## Apprendre le talent de classe d'un PNJ (Sans maître, Polyvalent) : relation ≥ 75, une place.
+func _apprendre_talent(e: Dictionary, pnj_id: String, tick: int) -> bool:
+	var pnj: Dictionary = entites.get(pnj_id, {})
+	if pnj.is_empty() or Grille.distance(e.pos, pnj.pos) > 2:
+		return false
+	var t = GameData.catalogues.classes.get(str(pnj.get("classe", "")), {}).get("talent")
+	var talent := str(t) if t != null else ""
+	var peut := a_talent(e, "sans_maitre") or a_talent(e, "polyvalent")
+	if talent.is_empty() or talent == "sans_maitre" or not peut or relation_de(pnj, e) < int(regles.r.talents.apprendre_relation) or a_talent(e, talent):
+		EventBus.emettre(&"journal", [&"journal.talent_refuse", {}])
+		return false
+	e["talents_appris"] = [talent]   # une seule place : le nouveau remplace l'ancien
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.talent_appris", {"nom": pnj.name_key, "talent": GameData.entree("talents", talent).name_key}])
+	return true
 
 
 # ---------------------------------------------------------------- entraîneur (Potentiel) et commandes de collectionneurs
@@ -2657,7 +2701,7 @@ func _rapport_absence() -> void:
 ## Places d'escorte (Compagnons) : 1 + Charisme/5 + Leadership/10.
 func places_escorte(e: Dictionary) -> int:
 	var c: Dictionary = regles.r.compagnons
-	return int(c.places_base) + int(e.stats_eff.charisme) / int(c.par_charisme) + regles.niveau(e.competences_eff, "leadership") / int(c.par_leadership)
+	return int(c.places_base) + int(e.stats_eff.charisme) / int(c.par_charisme) + regles.niveau(e.competences_eff, "leadership") / int(c.par_leadership) + (1 if a_talent(e, "oeil_du_prix") else 0)
 
 
 func compagnons_de(e: Dictionary) -> Array:
@@ -3834,6 +3878,10 @@ func _habiller_pnj(e: Dictionary, def: Dictionary, culture_id: String = "") -> v
 	GameData.enregistrer_nom(e.name_key, Noms.afficher(e.nom))
 	e["fonction"] = str(def.get("fonction", "oisif"))
 	e["role"] = str(def.get("role", "resident"))
+	if str(e.get("classe", "")).is_empty():   # une classe tirée parmi celles de sa fonction (Les trois axes)
+		var possibles: Array = GameData.catalogues.functions.get(e.fonction, {}).get("classes_possibles", [])
+		if not possibles.is_empty():
+			e.classe = str(possibles[rng.randi() % possibles.size()])
 	e["social"] = {"culture": culture_id, "relations": {}}
 	var f: Dictionary = GameData.catalogues.functions.get(e.fonction, {})
 	e["or_max"] = int(float(f.get("portefeuille", 30)) * (1.0 + float(e.get("rang", 0)) * 0.5))
@@ -4581,6 +4629,8 @@ func maj_vision() -> void:
 		if e.controle != "joueur":
 			continue
 		var portee := int(float(e.stats_eff.perception) * float(regles.r.engagement.detection_par_perception))
+		if a_talent(e, "oeil_de_la_pierre"):
+			portee = maxi(1, roundi(float(portee) * float(regles.r.talents.oeil_de_la_pierre.vision_mult)))
 		if lieu == "camp" and monde != null:
 			var facteur := 1.0
 			if est_nuit() and not ("vision_nocturne" in e.get("tags_acquis", [])):
@@ -4695,7 +4745,7 @@ func _regenerer(e: Dictionary, tick: int) -> void:
 		var tranches := tick / periode - int(e.tick_endurance) / periode
 		for i in tranches:
 			if des.reel() < float(regles.r.mana.chance):
-				e.mana = mini(e.mana_max, e.mana + roundi(float(regles.r.mana.regen_base) + float(e.competences_eff.get("meditation", 0)) * float(regles.r.mana.regen_par_meditation)))
+				e.mana = mini(e.mana_max, e.mana + roundi((float(regles.r.mana.regen_base) + float(e.competences_eff.get("meditation", 0)) * float(regles.r.mana.regen_par_meditation)) * (float(regles.r.talents.chair_de_mana.mana_regen_mult) if a_talent(e, "chair_de_mana") else 1.0)))
 				gagner_xp(e, "meditation", 1)
 	e.tick_endurance = tick
 
@@ -4787,6 +4837,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _capturer(e, h.ticks)
 		"entrainer":
 			ok = _entrainer(e, str(i.get("pnj", "")), str(i.get("competence", "")), h.ticks)
+		"apprendre_talent":
+			ok = _apprendre_talent(e, str(i.get("pnj", "")), h.ticks)
 		"livrer":
 			ok = _livrer_commande(e, str(i.get("pnj", "")), h.ticks)
 		"planter":
@@ -4890,8 +4942,13 @@ func _changer_arme(e: Dictionary, item_id: String, tick: int) -> bool:
 			e.equipement.erase("main_secondaire")
 	Etres.recalculer(e, items, affixes_defs, regles)
 	_quitter_garde(e)
-	e.compteur = tick + int(regles.r.actions.changer_arme)
-	EventBus.emettre(&"journal", [&"journal.changer_arme", {"nom": e.name_key, "objet": item.name_key, "ticks": regles.r.actions.changer_arme}])
+	var cout := int(regles.r.actions.changer_arme)
+	if a_talent(e, "ratelier_vivant") and not bool(e.get("swap_gratuit_pris", false)):   # Râtelier vivant (Talents de classe)
+		cout = 0
+		e["swap_gratuit_pris"] = true
+		EventBus.emettre(&"journal", [&"journal.swap_gratuit", {"nom": e.name_key}])
+	e.compteur = tick + cout
+	EventBus.emettre(&"journal", [&"journal.changer_arme", {"nom": e.name_key, "objet": item.name_key, "ticks": cout}])
 	return true
 
 
@@ -5119,13 +5176,21 @@ func _facteur_wuxing(e: Dictionary, cible: Dictionary, v_att: Dictionary, tick: 
 
 
 ## Un coup qui touche pose UN segment (Jauge de chaîne Wu Xing) — s'il résout, la barre retombe.
-func _poser_segment(e: Dictionary, v_att: Dictionary, tick: int) -> void:
-	if not e.has("chaine") or v_att.is_empty():
+func _poser_segment(e: Dictionary, v_att: Dictionary, tick: int, origine: String = "arme") -> void:
+	if v_att.is_empty():
+		return
+	if origine == "arme" and a_talent(e, "souffle_rendu"):   # Souffle rendu : les coups d'arme ne tissent pas
+		return
+	if e.has("maitre") and entites.has(str(e.maitre)) and a_talent(entites[str(e.maitre)], "meute"):   # Meute : la jauge du maître
+		_poser_segment(entites[str(e.maitre)], v_att, tick, "meute")
+		return
+	if not e.has("chaine"):
 		return
 	var element := wuxing.dominante(v_att)
 	_declencher(e, "accord", e.derniere_cible_pos)
 	var p := wuxing.poser(e.chaine, element, tick)
 	if p.resout:
+		e.erase("swap_gratuit_pris")
 		EventBus.emettre(&"journal", [&"journal.chaine_resout", {"nom": e.name_key, "mult": "%.2f" % p.multiplicateur}])
 	else:
 		EventBus.emettre(&"journal", [&"journal.chaine_segment", {"nom": e.name_key, "element": "element." + element,
@@ -5667,7 +5732,10 @@ func _payer(e: Dictionary, plan: Dictionary) -> void:
 			if deficit > 0:
 				var degats := deficit * int(regles.r.mana.surchauffe_mult)
 				EventBus.emettre(&"journal", [&"journal.surchauffe", {"nom": e.name_key, "deficit": deficit, "degats": degats}])
-				_appliquer_degats(e, degats, "", {"surchauffe": true})
+				if a_talent(e, "chair_de_mana"):   # Chair de mana (Talents de race) : le corps paie en endurance
+					e.endurance = maxi(0, int(e.endurance) - degats)
+				else:
+					_appliquer_degats(e, degats, "", {"surchauffe": true})
 		"endurance":
 			e.endurance = maxi(0, int(e.endurance) - int(plan.ressource))
 
@@ -5887,6 +5955,9 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 					var avant: int = c.sante
 					c.sante = mini(c.sante_max, c.sante + soin)
 					a_touche = true
+					if a_talent(e, "souffle_rendu") and c.sante > avant:   # Souffle rendu : un segment de l'élément de la cible
+						var el_c: Dictionary = c.get("elements", {}) if c.get("elements") is Dictionary else {}
+						_poser_segment(e, el_c if not el_c.is_empty() else {"bois": 1.0}, tick, "soin")
 					if premiere.is_empty():
 						premiere = c
 					EventBus.emettre(&"journal", [&"journal.soin", {"att": e.name_key, "capacite": plan.name_key, "def": c.name_key, "soin": c.sante - avant}])

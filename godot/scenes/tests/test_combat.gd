@@ -60,6 +60,7 @@ func _ready() -> void:
 	test_routes()
 	test_habitat_pnj()
 	test_artefacts()
+	test_talents()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -2291,6 +2292,60 @@ func test_pretre_et_tourelle() -> void:
 	verifier(int(pretre.or) == int(pretre.or_max), "sa bourse est finie : le surplus sort du jeu")
 	verifier(float(v.get("affaibli_mult", 1.0)) < 1.0, "le ressuscité revient Affaibli")
 	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Talents de classe et de race
+
+func test_talents() -> void:
+	var s := Simulation.new(113)
+	s.charger_donjon("ruine", 113, 8, 1)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	verifier(GameData.catalogues.talents.size() >= 11, "onze talents en données (%d)" % GameData.catalogues.talents.size())
+	# Le Sabre : un changement d'arme gratuit par chaîne.
+	j.classe = "le_sabre"
+	verifier(s.a_talent(j, "ratelier_vivant"), "Le Sabre porte Râtelier vivant")
+	var autre := ""
+	for uid in j.ratelier:
+		if uid != j.equipement.get("main_principale", "") and s.items[uid].type == "arme":
+			autre = uid
+	if not autre.is_empty():
+		var t0: int = int(j.compteur)
+		s.attente[j.id] = true
+		s.intention(j.id, {"type": "changer_arme", "item": autre})
+		var gratuit: bool = int(j.compteur) == t0 or int(j.compteur) == s.horloge_monde.ticks or bool(j.get("swap_gratuit_pris", false))
+		verifier(gratuit and bool(j.get("swap_gratuit_pris", false)), "premier changement d'arme : 0 tick, le suivant paiera")
+	# La Balance : +1 place d'escorte.
+	j.classe = "la_balance"
+	var places_b := s.places_escorte(j)
+	j.classe = "le_sabre"
+	verifier(places_b == s.places_escorte(j) + 1, "Œil du prix : +1 place d'escorte")
+	# L'Elfe : la surchauffe coûte de l'endurance, pas de santé.
+	j.race = "elfe"
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	var end0 := int(j.endurance_max)
+	verifier(s.a_talent(j, "chair_de_mana") and end0 == int(s.regles.r.endurance.max) - 20, "Chair de mana : endurance max −20 (%d)" % end0)
+	j.mana = 0
+	var sante0 := int(j.sante)
+	j.endurance = 50
+	s._payer(j, {"monnaie": "mana", "ressource": 5, "charge_suivante": {}})
+	verifier(int(j.sante) == sante0 and int(j.endurance) == 50 - 10, "surchauffe de 5 : −10 d'endurance, santé intacte")
+	# Le Nain : rien n'est irrécoltable.
+	j.race = "nain"
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	verifier(s.a_talent(j, "oeil_de_la_pierre") and "detection_filons" in j.tags_acquis, "Œil de la pierre : sent les filons")
+	# Le Vent apprend le talent d'un PNJ à relation ≥ 75.
+	j.race = "humain"
+	j.classe = "le_vent"
+	var m := s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
+	s._habiller_pnj(m, GameData.entree("creatures", "villageois"))
+	m.classe = "la_paume"
+	m.social.relations[j.id] = 50
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "apprendre_talent", "pnj": m.id}), "à 50 de relation : refus")
+	m.social.relations[j.id] = 80
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "apprendre_talent", "pnj": m.id}) and s.a_talent(j, "souffle_rendu"), "à 80 : Le Vent apprend Souffle rendu")
+	verifier(not m.get("classe", "").is_empty(), "les PNJ portent une classe (%s)" % str(m.classe))
 
 
 # ---------------------------------------------------------------- Trésors et artefacts

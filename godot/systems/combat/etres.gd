@@ -190,6 +190,11 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 	e.stats_eff = stats
 	e.competences_eff = comp
 	e.tags_acquis = tags
+	var talent_race = GameData.catalogues.get("races", {}).get(str(e.get("race", "")), {}).get("talent")
+	if talent_race != null and str(talent_race) == "chair_de_mana":   # Chair de mana (Talents de race)
+		endurance_bonus += int(regles.r.get("talents", {}).get("chair_de_mana", {}).get("endurance_max", -20))
+	if talent_race != null and str(talent_race) == "oeil_de_la_pierre" and not ("detection_filons" in tags):
+		tags.append("detection_filons")
 	var end_max: int = int(regles.r.endurance.max) + endurance_bonus
 	e.endurance = mini(int(e.endurance), end_max) if int(e.endurance_max) != end_max else int(e.endurance)
 	e.endurance_max = end_max

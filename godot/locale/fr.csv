@@ -401,6 +401,35 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+talent.ratelier_vivant.name,Râtelier vivant
+talent.ratelier_vivant.desc,"Une fois par chaîne, changer d'arme coûte 0 tick."
+talent.communion_des_cinq.name,Communion des cinq
+talent.communion_des_cinq.desc,"L'élément de son arme tourne seul dans le cycle. (en attente)"
+talent.main_du_metal.name,Main du métal
+talent.main_du_metal.desc,"Reforger un objet looté sans perdre ses affixes. (en attente)"
+talent.meute.name,Meute
+talent.meute.desc,"Les coups de ses compagnons posent des segments sur sa jauge de chaîne."
+talent.oeil_du_prix.name,Œil du prix
+talent.oeil_du_prix.desc,"Voit la bourse réelle des marchands ; +1 place d'escorte."
+talent.souffle_rendu.name,Souffle rendu
+talent.souffle_rendu.desc,"Ses soins posent un segment de l'élément de la cible ; ses coups d'arme n'en posent aucun."
+talent.fiole_vive.name,Fiole vive
+talent.fiole_vive.desc,"Potions projetables en zone, deux actives par famille. (en attente)"
+talent.sans_maitre.name,Sans maître
+talent.sans_maitre.desc,"Commence sans talent ; apprend celui d'un PNJ (relation ≥ 75) et peut en changer."
+talent.polyvalent.name,Polyvalent
+talent.polyvalent.desc,"Porte deux talents de classe : le sien et un appris."
+talent.chair_de_mana.name,Chair de mana
+talent.chair_de_mana.desc,"La surchauffe coûte de l'endurance ; mana ×1,2 ; endurance max −20."
+talent.oeil_de_la_pierre.name,Œil de la pierre
+talent.oeil_de_la_pierre.desc,"Rien n'est irrécoltable (÷ 3 au-dessus du seuil) ; vision −20 % ; sent les filons."
+ui.feuille.talents,Talents
+ui.feuille.talent,"{nom} — {desc}"
+ui.ecran.apprendre,Apprendre son talent (Q)
+journal.talent_appris,"{nom} t'enseigne : {talent}"
+journal.talent_refuse,il faut une relation d'au moins 75, et une place pour un talent
+ui.commerce.bourse_cachee,?
+journal.swap_gratuit,"{nom} change d'arme sans perdre un tick (Râtelier vivant)"
 journal.artefact,"un artefact repose sur la dépouille de {nom}"
 journal.objet_fini,"cet objet est fini par nature : ni sertissure ni infusion"
 journal.pnj_affame,"{nom} n'a rien trouvé au garde-manger (humeur −10)"

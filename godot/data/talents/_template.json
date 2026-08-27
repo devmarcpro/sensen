@@ -1,0 +1,9 @@
+{
+  "_doc": "Talent (docs: Talents de classe, Talents de race) : porté par une classe ou une race ; cache = s'apprend d'un PNJ seulement. Le code teste des ids de talents via Simulation.a_talent — aucune machinerie par talent hors des crochets existants.",
+  "name_key": "talent.<id>.name",
+  "desc_key": "talent.<id>.desc",
+  "classe": null,
+  "race": null,
+  "cache": false,
+  "tags": []
+}

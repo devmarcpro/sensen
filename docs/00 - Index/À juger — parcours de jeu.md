@@ -32,6 +32,7 @@ etape: 10
 
 - **Rythme** : `DELAI_PAS = 0.12 s` entre deux pas — trop lent, trop rapide pour suivre les loups ? Durée d'une rencontre (cible 60-200 ticks, affichée à l'écran de fin)
 - **Télégraphe** (« ! » + tuiles rouges) vu à temps ? **Coûts sur les tuiles** (jaune) utiles ou bruit ? **Capacités** (F1 + clic) : la prévisualisation suffit-elle ?
+- **Talents** : Le Sabre (un swap gratuit par chaîne), La Paume (soins qui tissent), La Trace (la meute pose sur ta jauge), l'Elfe (surchauffe en endurance), le Nain (tout se récolte, lentement) — chacun se sent-il ? — [[Talents de classe]], [[Talents de race]]
 - **Chaîne Wu Xing** : les deux voies sont hors cible (écart 36 % ; le swap ne paie jamais) — **chiffres à trancher** (+0,35 → +0,45 sur l'engendrement ? une charge moyenne dans la rotation ?) — [[Wu Xing — cycles et vecteurs]]
 - **Labyrinthe** : lisibilité des salles murées de roche, variété des étages, densité des couloirs, taille des salles — [[Donjons — structure et intégration]]
 - **Artefact** du boss d'un donjon majeur (≥ 4 étages) : +25 % hors fourchette, sans sertissure — se sent-il exceptionnel ? — [[Trésors et artefacts]]

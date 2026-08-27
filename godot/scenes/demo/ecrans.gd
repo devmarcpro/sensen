@@ -187,6 +187,10 @@ func touche(ev: InputEventKey) -> bool:
 			if courant == "dialogue":
 				_option("ressusciter")
 				return true
+		KEY_Q:
+			if courant == "dialogue":
+				_option("apprendre_talent")
+				return true
 		KEY_D:
 			if courant == "gestion":
 				main.sim.deposer(main.joueur(), 50)
@@ -415,6 +419,10 @@ func _construire_dialogue(j: Dictionary) -> void:
 	if "entraineur" in pnj.get("tags", []):
 		liste.add_item(tr("ui.ecran.entrainer"))
 		entrees.append({"kind": "option", "option": "entrainer"})
+	var t_pnj = GameData.catalogues.classes.get(str(pnj.get("classe", "")), {}).get("talent")
+	if t_pnj != null and str(t_pnj) != "sans_maitre" and (main.sim.a_talent(j, "sans_maitre") or main.sim.a_talent(j, "polyvalent")):
+		liste.add_item(tr("ui.ecran.apprendre") + " — " + tr(GameData.entree("talents", str(t_pnj)).name_key))
+		entrees.append({"kind": "option", "option": "apprendre_talent"})
 	if "pretre" in pnj.get("tags", []):
 		var ame: String = main.sim.ame_dans_sac(j)
 		liste.add_item(tr("ui.ecran.ressusciter").format({"cout": main.sim.cout_resurrection(j, ame, true)}) if not ame.is_empty() else tr("ui.ecran.ressusciter_rien"), null, not ame.is_empty())
@@ -456,6 +464,9 @@ func _option(opt: String) -> void:
 			ouvrir("entrainer")
 		"livrer":
 			main.sim.intention(j.id, {"type": "livrer", "pnj": pnj_id})
+			rafraichir()
+		"apprendre_talent":
+			main.sim.intention(j.id, {"type": "apprendre_talent", "pnj": pnj_id})
 			rafraichir()
 		"ressusciter":
 			var ame: String = main.sim.ame_dans_sac(j)
@@ -525,7 +536,7 @@ func _construire_commerce(j: Dictionary) -> void:
 		fermer()
 		return
 	var cm: Dictionary = main.sim.regles.r.commerce
-	titre.text = tr("ui.ecran.commerce").format({"nom": tr(pnj.name_key), "or": int(pnj.get("or", 0)), "joueur": int(j.get("or", 0))})
+	titre.text = tr("ui.ecran.commerce").format({"nom": tr(pnj.name_key), "or": str(int(pnj.get("or", 0))) if main.sim.a_talent(j, "oeil_du_prix") else tr("ui.commerce.bourse_cachee"), "joueur": int(j.get("or", 0))})
 	liste.add_item(tr("ui.commerce.stock"), null, false)
 	entrees.append({"kind": "texte", "texte": ""})
 	for uid in pnj.get("stock", []):
@@ -1080,6 +1091,12 @@ func _construire_feuille(j: Dictionary) -> void:
 	l.append("[b]" + tr("ui.feuille.stats") + "[/b]")
 	for st in ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]:
 		l.append(tr("ui.feuille.stat").format({"stat": tr("stat." + st), "valeur": j.corps.stats[st], "potentiel": int(j.potentiels.get(st, 80))}))
+	var lt: Array[String] = ["[b]" + tr("ui.feuille.talents") + "[/b]"]
+	for tid in sim.talents_de(j):
+		var td: Dictionary = GameData.entree("talents", str(tid))
+		lt.append(tr("ui.feuille.talent").format({"nom": tr(td.name_key), "desc": tr(td.desc_key)}))
+	l.append("")
+	l.append_array(lt)
 	liste.add_item(tr("ui.feuille.stats"))
 	entrees.append({"kind": "texte", "texte": "\n".join(l)})
 	var cles: Array = j.competences.keys()

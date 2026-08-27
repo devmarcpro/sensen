@@ -14,7 +14,7 @@
   "base_potentials": {
     "_defaut": 100
   },
-  "talent": null,
+  "talent": "sans_maitre",
   "points_creation_bonus": 15,
   "tags": [
     "visible"

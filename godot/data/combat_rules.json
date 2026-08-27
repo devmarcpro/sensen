@@ -797,5 +797,17 @@
       "commande_chance": 0.1,
       "commande_mult": 3.0
     }
+  },
+  "talents": {
+    "_doc": "Talents (Talents de classe / de race) : relation minimale pour apprendre ; Chair de mana : mana_regen_mult, endurance_max ; Œil de la pierre : recolte_div, vision_mult.",
+    "apprendre_relation": 75,
+    "chair_de_mana": {
+      "mana_regen_mult": 1.2,
+      "endurance_max": -20
+    },
+    "oeil_de_la_pierre": {
+      "recolte_div": 3.0,
+      "vision_mult": 0.8
+    }
   }
 }
