@@ -845,6 +845,14 @@
       "tempo_vole": 8,
       "sante": 5,
       "portee": 3
+    },
+    "masques": {
+      "max": 2
+    },
+    "graveur": {
+      "mana_mult": 2,
+      "gravure_ticks": 6,
+      "portee_declenchement": 8
     }
   },
   "bombes": {

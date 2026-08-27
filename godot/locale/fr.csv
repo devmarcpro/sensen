@@ -400,6 +400,21 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+classe.le_masque.name,Le Masque
+classe.le_sceau.name,Le Sceau
+talent.masques.name,Masques
+talent.masques.desc,"Deux masques à la fois, changés à 0 tick ; jamais de garde."
+talent.graveur.name,Graveur
+talent.graveur.desc,"Glyphes permanents déclenchés à distance ; 2× mana, immobile pendant la gravure."
+status.masque_du_taureau.name,Masque du Taureau
+status.masque_du_renard.name,Masque du Renard
+status.masque_du_hibou.name,Masque du Hibou
+status.gravure.name,Gravure
+option.masque,"Porter / retirer : {nom}"
+option.declencher_glyphe,Déclencher le glyphe
+journal.masque,"{nom} change de masque : {masque}"
+journal.glyphe_distance,"{nom} déclenche un glyphe à distance"
+journal.garde_masque,le masque occupe la main : pas de garde
 classe.le_passeur.name,Le Passeur
 classe.le_sablier.name,Le Sablier
 talent.breche.name,Brèche

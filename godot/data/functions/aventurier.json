@@ -10,7 +10,9 @@
   "classes_possibles": [
     "l_ombre",
     "le_passeur",
-    "le_sablier"
+    "le_sablier",
+    "le_masque",
+    "le_sceau"
   ],
   "leadership": false,
   "portefeuille": 30,

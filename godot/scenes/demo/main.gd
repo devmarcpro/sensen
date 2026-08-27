@@ -664,6 +664,15 @@ func _options_tuile(t: Vector2i) -> Array:
 		res.append({"id": "lancer_etre", "vers": t})
 	if d == 0 and sim.portails.has(g.idx(t)):
 		res.append({"id": "traverser"})
+	if d == 0 and sim.a_talent(j, "masques"):
+		for sid in sim.statuts_defs.keys():
+			if "masque" in sim.statuts_defs[sid].get("tags", []):
+				res.append({"id": "masque", "masque": str(sid), "nom": tr(sim.statuts_defs[sid].name_key)})
+	if sim.a_talent(j, "graveur") and d <= int(sim.regles.r.talents.graveur.portee_declenchement):
+		for gl in sim.glyphes:
+			if gl.pos == t and str(gl.source) == j.id:
+				res.append({"id": "declencher_glyphe", "cible": t})
+				break
 	if sim.a_talent(j, "breche") and d == 1 and g.dans(t) and not g.bloque_passage(t) and g.occupant(t).is_empty() and not sim.portails.has(g.idx(t)):
 		res.append({"id": "poser_portail", "cible": t})
 	if d != 1:
@@ -724,6 +733,10 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "tempo", "cible": str(opt.cible)})
 		"traverser":
 			sim.intention(joueur_id, {"type": "traverser"})
+		"masque":
+			sim.intention(joueur_id, {"type": "masque", "masque": str(opt.masque)})
+		"declencher_glyphe":
+			sim.intention(joueur_id, {"type": "declencher_glyphe", "cible": opt.cible})
 		"poser_portail":
 			sim.intention(joueur_id, {"type": "poser_portail", "cible": opt.cible})
 		"lancer_etre":

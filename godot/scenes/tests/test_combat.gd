@@ -69,6 +69,7 @@ func _ready() -> void:
 	test_ombre_et_rieur()
 	test_ecarlate_et_porteur()
 	test_passeur_et_sablier()
+	test_masque_et_sceau()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2450,6 +2451,54 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Le Masque et Le Sceau
+
+func test_masque_et_sceau() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	j.classe = "le_masque"
+	var force0 := int(j.stats_eff.force)
+	s.attente[j.id] = true
+	var c0 := int(j.compteur)
+	verifier(s.intention(j.id, {"type": "masque", "masque": "masque_du_taureau"}) and int(j.stats_eff.force) == force0 + 3 and int(j.compteur) == c0, "Taureau : +3 Force, à 0 tick")
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "masque", "masque": "masque_du_renard"})
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "masque", "masque": "masque_du_hibou"})
+	var portes: Array = j.statuts.filter(func(s0: Dictionary) -> bool: return "masque" in s.statuts_defs[str(s0.id)].get("tags", []))
+	verifier(portes.size() == 2 and str(portes[0].id) == "masque_du_renard" and int(j.stats_eff.force) == force0, "le troisième masque remplace le Taureau : Renard + Hibou")
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "garde"}), "Le Masque ne prend pas la garde")
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "masque", "masque": "masque_du_hibou"})
+	verifier(j.statuts.filter(func(s0: Dictionary) -> bool: return str(s0.id) == "masque_du_hibou").is_empty(), "reporter le même masque le retire")
+	# Le Sceau : glyphe permanent à 2× mana, immobile, déclenché à distance
+	j.classe = "le_sceau"
+	var loup: Dictionary = s.entites["loup_2"]
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(0, -4)
+	s.grille.placer(loup.id, loup.pos)
+	for id in ["loup_2", "loup_3", "loup_4"]:
+		s.entites[id].compteur = 500
+	s._engager_combat(j, loup)
+	var h := s.horloge_de(j)
+	j.mana = 300
+	j.capacites.append({"id": "g", "name_key": "capacite.etincelle.name", "modules": ["sceau", "tuile", "racine"]})
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	var glyphe_pos: Vector2i = j.pos + Vector2i(0, -2)
+	var mana0 := int(j.mana)
+	verifier(s.intention(j.id, {"type": "capacite", "index": j.capacites.size() - 1, "cible": glyphe_pos}), "poser le glyphe")
+	s.pas(j.horloge)
+	verifier(s.glyphes.size() == 1 and int(s.glyphes[0].fin) > h.ticks + 100000 and Etres.bloque_statuts(j, "deplacement", s.statuts_defs), "glyphe permanent, graveur immobile (mana %d → %d)" % [mana0, int(j.mana)])
+	s.grille.liberer(loup.pos)
+	loup.pos = glyphe_pos
+	s.grille.placer(loup.id, glyphe_pos)
+	j.compteur = h.ticks
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "declencher_glyphe", "cible": glyphe_pos}) and s.glyphes.is_empty() and Etres.bloque_statuts(loup, "deplacement", s.statuts_defs), "déclenché à distance : le loup est enraciné")
 
 
 # ---------------------------------------------------------------- Le Passeur et Le Sablier

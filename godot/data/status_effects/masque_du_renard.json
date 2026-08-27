@@ -1,0 +1,23 @@
+{
+  "name_key": "status.masque_du_renard.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 1000,
+  "duree_ticks": 1000000,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "stat:dexterite",
+      "add": 3
+    },
+    {
+      "cible": "stat:agilite",
+      "add": 2
+    }
+  ],
+  "tags": [
+    "positif",
+    "masque"
+  ]
+}

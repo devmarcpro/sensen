@@ -1081,6 +1081,42 @@ func pieces_de_cellule(cell: Vector2i) -> Array:
 	return res
 
 
+## Le Masque (Talents de classe) : porter ou retirer un masque — un statut, à 0 tick, deux au plus.
+func _porter_masque(e: Dictionary, id: String, _tick: int) -> bool:
+	var d: Dictionary = statuts_defs.get(id, {})
+	if not a_talent(e, "masques") or d.is_empty() or not ("masque" in d.get("tags", [])):
+		return false
+	var portes: Array = e.statuts.filter(func(s0: Dictionary) -> bool: return "masque" in statuts_defs.get(str(s0.id), {}).get("tags", []))
+	for s0 in portes:
+		if str(s0.id) == id:
+			e.statuts.erase(s0)
+			Etres.recalculer(e, items, affixes_defs, regles)
+			EventBus.emettre(&"journal", [&"journal.masque", {"nom": e.name_key, "masque": d.name_key}])
+			return true
+	while portes.size() >= int(regles.r.talents.masques.max):
+		e.statuts.erase(portes.pop_front())
+	appliquer_statut(e, id, int(d.duree_ticks), e.id)
+	EventBus.emettre(&"journal", [&"journal.masque", {"nom": e.name_key, "masque": d.name_key}])
+	return true
+
+
+## Le Sceau : déclencher à distance l'un de ses glyphes — la charge part sur la tuile, occupée ou non.
+func _declencher_glyphe_distance(e: Dictionary, pos: Vector2i, tick: int) -> bool:
+	if not a_talent(e, "graveur") or Grille.distance(e.pos, pos) > int(regles.r.talents.graveur.portee_declenchement):
+		return false
+	for gl in glyphes.duplicate():
+		if gl.pos != pos or str(gl.source) != e.id:
+			continue
+		glyphes.erase(gl)
+		var charge: Dictionary = gl.plan.duplicate()
+		charge.geometrie = "point"
+		e.compteur = tick + int(regles.r.actions.objet)
+		EventBus.emettre(&"journal", [&"journal.glyphe_distance", {"nom": e.name_key}])
+		_executer_capacite(e, charge, pos, true)
+		return true
+	return false
+
+
 ## Contreparties permanentes des talents (Talents de classe) : posées sur l'être, lues par Etres.recalculer.
 func _contreparties(e: Dictionary) -> void:
 	if a_talent(e, "breche"):
@@ -5263,6 +5299,10 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _poser_portail(e, i.get("cible", e.pos), h.ticks)
 		"traverser":
 			ok = _traverser(e, h.ticks)
+		"masque":
+			ok = _porter_masque(e, str(i.get("masque", "")), h.ticks)
+		"declencher_glyphe":
+			ok = _declencher_glyphe_distance(e, i.get("cible", e.pos), h.ticks)
 		"tempo":
 			ok = _voler_tempo(e, str(i.get("cible", "")), h.ticks)
 		"lancer_etre":
@@ -5331,6 +5371,9 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 func _prendre_garde(e: Dictionary, tick: int) -> bool:
 	if e.endurance <= 0 or Etres.bloque_statuts(e, "garde", statuts_defs):
 		return false   # à zéro d'endurance (ou feinté), garde impossible
+	if a_talent(e, "masques"):   # Le Masque : la main secondaire est prise
+		EventBus.emettre(&"journal", [&"journal.garde_masque", {}])
+		return false
 	e.garde = true
 	e.compteur = tick + int(regles.r.actions.garde)
 	EventBus.emettre(&"journal", [&"journal.garde", {"nom": e.name_key}])
@@ -6348,6 +6391,10 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 			"entree":
 				# Sceau : la charge attend au sol, jusqu'à 100 ticks — overlay runtime, jamais sauvegardé.
 				var duree := int(suite.get("duree_declencheur", 100))
+				if a_talent(e, "graveur"):   # Le Sceau : permanent, 2× mana, immobile pendant la gravure
+					duree = 1 << 30
+					e.mana = maxi(0, int(e.mana) - int(plan.ressource) * (int(regles.r.talents.graveur.mana_mult) - 1))
+					appliquer_statut(e, "gravure", int(regles.r.talents.graveur.gravure_ticks), e.id)
 				glyphes.append({"pos": cible_pos, "plan": suite, "source": e.id, "fin": tick + duree, "elements": suite.elements})
 				EventBus.emettre(&"journal", [&"journal.glyphe_pose", {"nom": e.name_key, "capacite": suite.noyau.name_key, "x": cible_pos.x, "y": cible_pos.y}])
 				var occ := grille.occupant(cible_pos)
