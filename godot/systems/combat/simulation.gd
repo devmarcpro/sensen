@@ -2271,6 +2271,7 @@ func _tiquer_raid(tick: int) -> void:
 		if entites.has(str(id)) and bool(entites[str(id)].vivant):
 			vivants_raid += 1
 	if vivants_raid > 0 and tick < int(rd.fin):
+		_tirs_de_tourelles(tick)
 		return
 	var r: Dictionary = _ry().raids
 	var n := maxi(1, int(rd.n))
@@ -2289,6 +2290,37 @@ func _tiquer_raid(tick: int) -> void:
 	if not victoire:
 		EventBus.emettre(&"journal", [&"journal.raid_pertes", {"perte": int(round(perte * 100.0)), "structures": detruites}])
 	EventBus.emettre(&"raid_resolved", [victoire, perte])
+
+
+## Les tourelles tirent pendant un raid réel (Défense et raids) : l'assaillant le plus proche à portée, en ligne de vue.
+func _tirs_de_tourelles(tick: int) -> void:
+	var d: Dictionary = _ry().defense
+	var tt: Dictionary = d.get("tourelle_tir", {})
+	if tt.is_empty() or int(territoire.semaines_dette) >= int(d.dette_tourelles):
+		return
+	if tick < int(territoire.raid.get("prochain_tir", 0)):
+		return
+	territoire.raid["prochain_tir"] = tick + int(tt.cadence_ticks)
+	for gi in grille.meubles.keys():
+		if str(GameData.entree("meubles", str(grille.meubles[gi])).type_meuble) != "tourelle":
+			continue
+		var pos := grille.pos_de(int(gi))
+		if not monde.claims.has(_cell_de(pos)):
+			continue
+		var cible: Dictionary = {}
+		var dmin := int(tt.portee) + 1
+		for x in vivants():
+			if x.camp != "raid":
+				continue
+			var dist := Grille.distance(pos, x.pos)
+			if dist < dmin and grille.ligne_de_vue(pos, x.pos):
+				dmin = dist
+				cible = x
+		if cible.is_empty():
+			continue
+		var deg := des.jet(str(tt.degats))
+		_appliquer_degats(cible, deg, "tourelle", {"type": str(tt.get("type", "perforant")), "element": {}, "tourelle": true})
+		EventBus.emettre(&"journal", [&"journal.tourelle_tire", {"nom": cible.name_key, "degats": deg}])
 
 
 ## L'assaut : vers le cœur du claim ; un mur construit qui bloque se creuse.

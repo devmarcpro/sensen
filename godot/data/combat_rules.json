@@ -517,7 +517,13 @@
       "mur_par": 10,
       "mur_max": 10.0,
       "dette_tourelles": 2,
-      "dette_gardes": 4
+      "dette_gardes": 4,
+      "tourelle_tir": {
+        "portee": 6,
+        "cadence_ticks": 20,
+        "degats": "1d6",
+        "type": "perforant"
+      }
     },
     "raids": {
       "proba_base": 0.05,

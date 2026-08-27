@@ -401,6 +401,7 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+journal.tourelle_tire,"une tourelle touche {nom} : {degats}"
 ui.specimen.chatoyant," chatoyant"
 journal.chatoyant,"un spécimen chatoyant : {espece} !"
 ui.registre.chatoyants," · chatoyants vus {n}"

@@ -52,7 +52,7 @@ etape: 10
 - **Semaine** (= 21 nuits) : la production d'un résident se voit-elle ? L'écran de gestion (K) en liste suffit-il ? — [[Population et exploitation]]
 - **Parcelles** : un jour de pousse à 24 000 ticks est-il long ? La récolte au clic ? — [[Agriculture et élevage]]
 - **Boutique passive** : caisse séparée du trésor (à relever sur l'étal) — bon ou agaçant ? **Troc d'office** des marchands à sec sans écran d'acceptation ? — [[Boutique passive]], [[Économie — sources et puits]]
-- **Raids** : probabilité de base 0,05 et échelle `valeur/20` ; un raid qui tombe pendant la nuit sautée se lit-il ? La tourelle (4 planches + 2 lingots) qui compte sans tirer. La punition d'une dette de 4 semaines quand un raid tombe — [[Défense et raids]], [[Raids et menaces]]
+- **Raids** : probabilité de base 0,05 et échelle `valeur/20` ; un raid qui tombe pendant la nuit sautée se lit-il ? La tourelle (4 planches + 2 lingots) : 1d6 toutes les 20 ticks à 6 tuiles — assez ? trop ? La punition d'une dette de 4 semaines quand un raid tombe — [[Défense et raids]], [[Raids et menaces]]
 - **Conquête** (clic sur la place d'un village) : lisible en un jet et un message ? La **vacance de trône** se remarque-t-elle ? — [[Conquête de village]], [[Familles et succession]]
 
 ## 6. Alchimie et élevage (5 min)

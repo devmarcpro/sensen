@@ -36,6 +36,9 @@ Défendre son territoire avec des gardes, des tourelles et des murs — et le se
 > [!success] Codé le 2026-08-28 — la tourelle a une recette
 > `meuble_tourelle` à l'établi : 4 planches + 2 lingots de métal ; se pose comme un meuble, compte 5 de défense (hors service à 2 semaines de dette). Portée et dégâts en combat réel : non codés (la tourelle ne tire pas — elle pèse dans la défense totale).
 
+> [!success] Codé le 2026-08-28 — la tourelle tire
+> Pendant un **raid réel**, chaque tourelle du territoire (fenêtre chargée, hors service à 2 semaines de dette) tire toutes les `cadence_ticks` (20) sur l'assaillant le plus proche à portée (6 tuiles, ligne de vue) : `1d6` de dégâts perforants (`combat_rules.royaume.defense.tourelle_tir`), source « tourelle » — le journal le dit. Décision : pas de munitions, pas d'usure ; la tourelle ne tire que sur le camp `raid`. Véhicules : la note demande la sculpture (pixels-marqueurs) — hors de portée d'un incrément, en attente.
+
 ## Liens
 - **Dépend de** : [[Population et exploitation]], [[Expansion territoriale]], [[Abstraction hors-site]], [[Construction cadrée]]
 - **Alimente** : [[Raids et menaces]], [[Gouvernance, lois et diplomatie]], [[Schéma royaume]], [[Entretien et taxes]]

@@ -1572,6 +1572,28 @@ func test_defense_et_raids() -> void:
 		s.horloge_monde.avancer(100)
 	var d1 := Grille.distance(s.entites[str(rd.ids[0])].pos, coeur)
 	verifier(d1 < d0, "l'assaillant avance vers le cœur (%d → %d)" % [d0, d1])
+	# Une tourelle près de l'assaillant : elle tire pendant le raid.
+	var ass: Dictionary = s.entites[str(rd.ids[0])]
+	var pt: Vector2i = ass.pos + Vector2i(2, 0)
+	for dd in [Vector2i(2, 0), Vector2i(-2, 0), Vector2i(0, 2), Vector2i(0, -2)]:
+		var c: Vector2i = ass.pos + dd
+		if s.grille.dans(c) and s.grille.occupant(c).is_empty():
+			pt = c
+			break
+	s.grille.contenu[s.grille.idx(pt)] = 0
+	s.grille.poser_contenu(pt, "meuble")
+	s.grille.meubles[s.grille.idx(pt)] = "tourelle"
+	s.monde.claims[s._cell_de(pt)] = {"role": "base"}
+	var sante_avant := 0
+	for id in rd.ids:
+		sante_avant += int(s.entites[str(id)].sante)
+	s.territoire.raid["prochain_tir"] = 0
+	for k in 4:
+		s.horloge_monde.avancer(20)
+	var sante_apres := 0
+	for id in rd.ids:
+		sante_apres += int(s.entites[str(id)].sante)
+	verifier(sante_apres < sante_avant, "la tourelle a tiré : santé des assaillants %d → %d" % [sante_avant, sante_apres])
 	s.territoire.raid.fin = s.horloge_monde.ticks
 	s.horloge_monde.avancer(1)
 	verifier(s.territoire.raid.is_empty() and not bool(s.territoire.dernier_raid.victoire) and s.entites[str(rd.ids[0])].ai_profile == "hostile", "à l'échéance le raid est résolu, les survivants restent hostiles")
