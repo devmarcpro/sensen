@@ -33,6 +33,7 @@ var lieu: String = "arene"           # "arene" | "camp" | "donjon"
 var prochain_donjon: int = 1         # id du prochain donjon lancé depuis le camp
 var monde: Monde = null              # la surface comme fenêtre glissante (étape 8.2a)
 var bombes: Array = []               # les bombes posées, en attente d'explosion (Explosions)
+var portails: Dictionary = {}   # idx de tuile → id du Passeur qui l'a ouvert (Talents de classe)
 var territoire: Dictionary = {"tresor": 0, "dette": 0, "semaines_dette": 0, "stocks": {}, "rapports": [], "gains_quetes": 0, "royaume": false,
 	"cultures": {}, "fertilite": {}, "etals": {}, "caisse": 0, "marge": 1.0, "clients": 0.0, "heure_resolue": -1, "absence": {"ventes": 0, "or": 0, "mures": 0},
 	"gouvernance": "", "gouvernance_cible": "", "transition": 0, "raid": {}, "dernier_raid": {}, "accords": {}}   # le royaume du joueur (étape 10)
@@ -1080,6 +1081,73 @@ func pieces_de_cellule(cell: Vector2i) -> Array:
 	return res
 
 
+## Contreparties permanentes des talents (Talents de classe) : posées sur l'être, lues par Etres.recalculer.
+func _contreparties(e: Dictionary) -> void:
+	if a_talent(e, "breche"):
+		e["mana_max_mult"] = float(regles.r.talents.breche.mana_max_mult)
+	else:
+		e.erase("mana_max_mult")
+	Etres.recalculer(e, items, affixes_defs, regles)
+
+
+## Le Passeur : poser un portail sur une tuile libre adjacente ; le troisième déplace le plus ancien.
+func _poser_portail(e: Dictionary, t: Vector2i, tick: int) -> bool:
+	if not a_talent(e, "breche") or Grille.distance(e.pos, t) != 1 or not grille.dans(t) or grille.bloque_passage(t) or not grille.occupant(t).is_empty():
+		return false
+	var idx := grille.idx(t)
+	if portails.has(idx):
+		return false
+	if not e.has("portails"):
+		e["portails"] = []
+	while e.portails.size() >= int(regles.r.talents.breche.portails_max):
+		portails.erase(int(e.portails.pop_front()))
+	e.portails.append(idx)
+	portails[idx] = e.id
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.portail_pose", {"nom": e.name_key}])
+	return true
+
+
+## Traverser : debout sur un portail, vers son jumeau s'il est libre (ouvert à tous).
+func _traverser(e: Dictionary, tick: int) -> bool:
+	var idx := grille.idx(e.pos)
+	if not portails.has(idx):
+		return false
+	var p: Dictionary = entites.get(str(portails[idx]), {})
+	if p.is_empty():
+		return false
+	for j in p.get("portails", []):
+		if int(j) != idx and portails.has(int(j)):
+			var vers := grille.pos_de(int(j))
+			if not grille.occupant(vers).is_empty():
+				return false
+			grille.liberer(e.pos)
+			e.pos = vers
+			grille.placer(e.id, vers)
+			e["vue_sale"] = true
+			e.compteur = tick + int(regles.r.actions.objet)
+			EventBus.emettre(&"journal", [&"journal.traverse", {"nom": e.name_key}])
+			return true
+	return false
+
+
+## Le Sablier : voler du tempo — l'ennemi recule, le Sablier avance d'autant, et paie en santé.
+func _voler_tempo(e: Dictionary, cible_id: String, tick: int) -> bool:
+	var c: Dictionary = entites.get(cible_id, {})
+	var st: Dictionary = regles.r.talents.maitre_du_tempo
+	if not a_talent(e, "maitre_du_tempo") or c.is_empty() or not c.vivant or Grille.distance(e.pos, c.pos) > int(st.portee) or int(e.sante) <= int(st.sante):
+		return false
+	var n := _tempo(c, int(st.tempo_vole), e.id)
+	if n <= 0:
+		EventBus.emettre(&"journal", [&"journal.tempo_refuse", {}])
+		return false
+	e.sante = maxi(1, int(e.sante) - int(st.sante))
+	e.compteur = tick + int(regles.r.actions.objet)
+	_tempo(e, -n, e.id)
+	EventBus.emettre(&"journal", [&"journal.tempo_vole", {"nom": e.name_key, "cible": c.name_key, "n": n, "sante": int(st.sante)}])
+	return true
+
+
 ## Le Porteur (Talents de classe) : saisir un être adjacent — il est immobilisé, le Porteur ne frappe ni ne se garde.
 func _saisir(e: Dictionary, cible_id: String, tick: int) -> bool:
 	var c: Dictionary = entites.get(cible_id, {})
@@ -1528,6 +1596,7 @@ func _apprendre_talent(e: Dictionary, pnj_id: String, tick: int) -> bool:
 	e["talents_appris"] = [talent]   # une seule place : le nouveau remplace l'ancien
 	e.compteur = tick + int(regles.r.actions.objet)
 	EventBus.emettre(&"journal", [&"journal.talent_appris", {"nom": pnj.name_key, "talent": GameData.entree("talents", talent).name_key}])
+	_contreparties(e)
 	return true
 
 
@@ -4040,6 +4109,7 @@ func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 			for m in cap.get("modules", []):
 				if not (str(m) in e.modules_connus):
 					e.modules_connus.append(str(m))
+	_contreparties(e)
 	e["or"] = 0
 	if controle != "joueur" and "civil" in def.get("tags", []):
 		_habiller_pnj(e, def)
@@ -5189,6 +5259,12 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _statut_habitat(e, str(i.get("pnj", "")), str(i.get("statut", "normal")), h.ticks)
 		"saisir":
 			ok = _saisir(e, str(i.get("cible", "")), h.ticks)
+		"poser_portail":
+			ok = _poser_portail(e, i.get("cible", e.pos), h.ticks)
+		"traverser":
+			ok = _traverser(e, h.ticks)
+		"tempo":
+			ok = _voler_tempo(e, str(i.get("cible", "")), h.ticks)
 		"lancer_etre":
 			ok = _lancer_etre(e, i.get("vers", e.pos), h.ticks)
 		"livrer":

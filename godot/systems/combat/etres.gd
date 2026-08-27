@@ -202,6 +202,8 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 	e.sante_max = regles.sante_max(stats) + sante_bonus
 	e.sante = clampi(int(e.sante), 1, int(e.sante_max)) if int(e.sante) > 0 else int(e.sante)
 	e.mana_max = regles.mana_max(stats) + mana_bonus
+	if e.has("mana_max_mult"):   # contrepartie d'un talent (Le Passeur)
+		e.mana_max = maxi(1, roundi(float(e.mana_max) * float(e.mana_max_mult)))
 	e.mana = mini(int(e.mana), int(e.mana_max))
 	if e.has("chaine"):
 		e.chaine.capacite = int(GameData.config("wuxing").chaine.capacite_base) + segments_bonus

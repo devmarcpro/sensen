@@ -400,6 +400,19 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+classe.le_passeur.name,Le Passeur
+classe.le_sablier.name,Le Sablier
+talent.breche.name,Brèche
+talent.breche.desc,"Deux portails appairés, repositionnables ; mana max −30 %."
+talent.maitre_du_tempo.name,Maître du tempo
+talent.maitre_du_tempo.desc,"Voler du tempo à un ennemi : il est retardé, tu avances — contre de la santé."
+option.poser_portail,Poser un portail
+option.traverser,Traverser le portail
+option.tempo,Voler du tempo
+journal.portail_pose,"{nom} ouvre une brèche"
+journal.traverse,"{nom} traverse la brèche"
+journal.tempo_vole,"{nom} vole {n} ticks à {cible} (−{sante} PV)"
+journal.tempo_refuse,le temps résiste (anti-stunlock)
 classe.l_ecarlate.name,L'Écarlate
 classe.le_porteur.name,Le Porteur
 talent.jauge_de_sang.name,Jauge de sang

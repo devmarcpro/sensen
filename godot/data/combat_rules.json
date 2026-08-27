@@ -836,6 +836,15 @@
     "saisie": {
       "distance_lancer": 3,
       "degats_lancer": "1d6"
+    },
+    "breche": {
+      "portails_max": 2,
+      "mana_max_mult": 0.7
+    },
+    "maitre_du_tempo": {
+      "tempo_vole": 8,
+      "sante": 5,
+      "portee": 3
     }
   },
   "bombes": {

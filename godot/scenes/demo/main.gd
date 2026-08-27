@@ -647,6 +647,8 @@ func _options_tuile(t: Vector2i) -> Array:
 			res.append({"id": "apprivoiser", "cible": occ})
 		if sim.a_talent(j, "saisie") and d == 1 and str(j.get("porte", "")).is_empty():
 			res.append({"id": "saisir", "cible": occ})
+		if sim.a_talent(j, "maitre_du_tempo") and x.camp != j.camp and d <= int(sim.regles.r.talents.maitre_du_tempo.portee):
+			res.append({"id": "tempo", "cible": occ})
 		res.append({"id": "attaquer", "cible": occ})
 		res.append({"id": "lourde", "cible": occ})
 		return res
@@ -660,6 +662,10 @@ func _options_tuile(t: Vector2i) -> Array:
 		return res
 	if not str(j.get("porte", "")).is_empty() and d >= 1 and d <= 3:
 		res.append({"id": "lancer_etre", "vers": t})
+	if d == 0 and sim.portails.has(g.idx(t)):
+		res.append({"id": "traverser"})
+	if sim.a_talent(j, "breche") and d == 1 and g.dans(t) and not g.bloque_passage(t) and g.occupant(t).is_empty() and not sim.portails.has(g.idx(t)):
+		res.append({"id": "poser_portail", "cible": t})
 	if d != 1:
 		return res
 	var tags: Array = g.contenu_de(t).get("tags", [])
@@ -714,6 +720,12 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "apprivoiser", "cible": str(opt.cible)})
 		"saisir":
 			sim.intention(joueur_id, {"type": "saisir", "cible": str(opt.cible)})
+		"tempo":
+			sim.intention(joueur_id, {"type": "tempo", "cible": str(opt.cible)})
+		"traverser":
+			sim.intention(joueur_id, {"type": "traverser"})
+		"poser_portail":
+			sim.intention(joueur_id, {"type": "poser_portail", "cible": opt.cible})
 		"lancer_etre":
 			sim.intention(joueur_id, {"type": "lancer_etre", "vers": opt.vers})
 		"descendre", "remonter":
@@ -898,6 +910,8 @@ func _draw() -> void:
 		_losange(survol, Color(1, 1, 1, 0.22))
 	for b in sim.bombes:
 		_losange(b.pos, Color(1.0, 0.4, 0.1, 0.7))
+	for pi in sim.portails.keys():   # les brèches du Passeur
+		_losange(sim.grille.pos_de(int(pi)), Color(0.6, 0.3, 0.9, 0.7))
 	if not sim.donjon.is_empty() and sim.donjon.escalier != null:
 		_losange(sim.donjon.escalier, Color(0.9, 0.7, 0.2, 0.6))
 	if not sim.donjon.is_empty() and sim.donjon.has("entree"):

@@ -68,6 +68,7 @@ func _ready() -> void:
 	test_betail()
 	test_ombre_et_rieur()
 	test_ecarlate_et_porteur()
+	test_passeur_et_sablier()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2449,6 +2450,45 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Le Passeur et Le Sablier
+
+func test_passeur_et_sablier() -> void:
+	var s := Simulation.new(132)
+	s.charger_donjon("ruine", 132, 15, 1)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var mana0 := int(j.mana_max)
+	j.classe = "le_passeur"
+	s._contreparties(j)
+	verifier(int(j.mana_max) == maxi(1, roundi(mana0 * 0.7)), "Le Passeur : mana max %d → %d" % [mana0, int(j.mana_max)])
+	for d in range(1, 5):
+		s.grille.contenu[s.grille.idx(j.pos + Vector2i(d, 0))] = 0
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "poser_portail", "cible": j.pos + Vector2i(1, 0)}), "portail 1 posé")
+	s.grille.contenu[s.grille.idx(j.pos + Vector2i(0, 1))] = 0
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "poser_portail", "cible": j.pos + Vector2i(0, 1)}) and s.portails.size() == 2, "portail 2 posé")
+	s.grille.contenu[s.grille.idx(j.pos + Vector2i(-1, 0))] = 0
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "poser_portail", "cible": j.pos + Vector2i(-1, 0)}) and s.portails.size() == 2 and not s.portails.has(s.grille.idx(j.pos + Vector2i(1, 0))), "le troisième déplace le plus ancien")
+	var depart: Vector2i = j.pos
+	s.grille.liberer(j.pos)
+	j.pos = depart + Vector2i(0, 1)
+	s.grille.placer(j.id, j.pos)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "traverser"}) and j.pos == depart + Vector2i(-1, 0), "traversée vers le jumeau")
+	# Le Sablier
+	j.classe = "le_sablier"
+	s._contreparties(j)
+	verifier(int(j.mana_max) == mana0, "la contrepartie du Passeur est levée")
+	var loup := s.ajouter("loup", depart + Vector2i(2, 0), "ia")
+	var c0 := int(loup.compteur)
+	var sante0 := int(j.sante)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "tempo", "cible": loup.id}) and int(loup.compteur) == c0 + 8 and int(j.sante) == sante0 - 5, "tempo volé : loup +8, −5 PV")
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "tempo", "cible": loup.id}), "le verrou anti-stunlock refuse le second vol")
 
 
 # ---------------------------------------------------------------- L'Écarlate et Le Porteur

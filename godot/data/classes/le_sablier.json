@@ -1,0 +1,20 @@
+{
+  "name_key": "classe.le_sablier.name",
+  "bonus_stats": {
+    "esprit": 3
+  },
+  "equipement": [],
+  "ratelier": [],
+  "competences": {
+    "arcanes": 4,
+    "perception": 4
+  },
+  "base_potentials": {
+    "_defaut": 100
+  },
+  "talent": "maitre_du_tempo",
+  "points_creation_bonus": 15,
+  "tags": [
+    "cache"
+  ]
+}
