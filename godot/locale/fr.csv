@@ -400,6 +400,7 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+journal.communion,"{nom} : l'élément tourne vers {element} (Communion des cinq)"
 module.renaissance.name,Renaissance
 ui.menu.capacites,Capacités
 ui.ecran.capacites,"CAPACITÉS — {n}/{max} (Entrée : supprimer · modules par capacité : {modules})"

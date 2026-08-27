@@ -86,6 +86,9 @@ Et trois statuts nouveaux ([[Statuts]]) : **Dissimulé**, **Saisi**, **Retardé*
 > [!success] Codé le 2026-08-28 — La Mèche, première classe cachée
 > `classes/la_meche.json` (tag `cache`, hors création : s'apprend d'un PNJ qui la porte, comme les autres) et le talent **Chaîne d'amorces** : quand une bombe explose, **les bombes en attente dans son rayon explosent aussitôt** (en chaîne, dans l'ordre de proximité), et la classe porte le **friendly fire intégral** que toutes les bombes ont déjà. Les PNJ tirent leur classe parmi `classes_possibles` — pour qu'un Passeur ou une Mèche existe quelque part, une fonction doit lister la classe : l'artisan et le mineur peuvent être La Mèche. Reste des cachées : Passeur, Sablier, Sceau, Masque, Porteur, Ombre, Écarlate, Rieur, Fossoyeur, Engrenage. **Constat** : les capacités du joueur sont encore les trois de la fiche `aventurier` — l'assemblage de capacités depuis `modules_connus` (Structure compétences-modules-slots) n'a pas d'écran ; c'est le prochain chantier, préalable au domaine de Vie.
 
+> [!success] Codé le 2026-08-28 — Communion des cinq
+> Le Souffle : l'élément de son arme **tourne seul** dans le cycle d'engendrement (bois → feu → terre → metal → eau) à chaque coup qui pose un segment — `e.element_communion` remplace l'élément de l'arme dans `_affixes_offensifs` ; chaque rotation coûte `combat_rules.talents.communion_des_cinq.mana` (2) de mana d'entretien, sans mana l'élément reste. Accès n° 2 des [[Cinq accès au cycle]] ; l'enchantement déclencheur, les anneaux de transmutation et les armes fantomatiques attendent.
+
 ## Liens
 - **Dépend de** : [[Les trois axes — race, classe, fonction]], [[Classes]], [[Structure compétences-modules-slots]], [[Vocabulaire des modules — six axes]]
 - **Alimente** : [[Fonctions]], [[Création de personnage]], [[Schéma créature]], [[Statuts]]

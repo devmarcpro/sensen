@@ -5264,6 +5264,7 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 	_appliquer_degats(cible, res.degats, e.id, res)
 	_affixes_apres_coup(e, arme, cible, res)
 	_poser_segment(e, vecteur, tick_de(e))
+	_communion_tourner(e, arme)
 
 
 ## Portée de l'arme, allongée par l'affixe « +N allonge ».
@@ -5277,7 +5278,7 @@ func _portee_effective(e: Dictionary, arme: Dictionary, fonct: Dictionary) -> Ve
 ## Ce que les affixes de l'arme changent AVANT le jet : {vecteur, des, mult, ignore_armure}.
 ## Les compteurs rythmiques avancent ici (une attaque = un cran, jamais par cible).
 func _affixes_offensifs(e: Dictionary, arme: Dictionary, cible: Dictionary) -> Dictionary:
-	var r := {"vecteur": vecteur_arme(arme), "des": 0, "mult": 1.0, "ignore_armure": 0.0, "plat": 0}
+	var r := {"vecteur": _vecteur_arme_de(e, arme), "des": 0, "mult": 1.0, "ignore_armure": 0.0, "plat": 0}
 	# Gemmes de l'arme : la taille en affinité déplace le vecteur (AJOUT normalisé), les dégâts
 	# élémentaires plats s'ajoutent si le coup porte cet élément.
 	for el in e.get("affinites", {}).keys():
@@ -5365,6 +5366,28 @@ func tick_de(e: Dictionary) -> int:
 
 
 ## Le vecteur d'une arme du prototype : son élément, pur ({} si elle n'en porte pas).
+## Le vecteur de l'arme pour un être : Communion des cinq (Le Souffle) remplace l'élément par celui qui tourne.
+func _vecteur_arme_de(e: Dictionary, arme: Dictionary) -> Dictionary:
+	if a_talent(e, "communion_des_cinq") and e.has("element_communion"):
+		return {str(e.element_communion): 1.0}
+	return vecteur_arme(arme)
+
+
+## Après un coup qui pose un segment : l'élément tourne dans le cycle d'engendrement, contre du mana.
+func _communion_tourner(e: Dictionary, arme: Dictionary) -> void:
+	if not a_talent(e, "communion_des_cinq"):
+		return
+	var actuel := str(e.get("element_communion", arme.get("element", "")))
+	if actuel.is_empty() or not wuxing.w.engendre.has(actuel):
+		return
+	var cout := int(regles.r.talents.get("communion_des_cinq", {}).get("mana", 2))
+	if int(e.mana) < cout:
+		return
+	e.mana = int(e.mana) - cout
+	e["element_communion"] = str(wuxing.w.engendre[actuel])
+	EventBus.emettre(&"journal", [&"journal.communion", {"nom": e.name_key, "element": "element." + str(e.element_communion)}])
+
+
 func vecteur_arme(arme: Dictionary) -> Dictionary:
 	var el: Variant = arme.get("element")
 	return {el: 1.0} if el is String and not el.is_empty() else {}

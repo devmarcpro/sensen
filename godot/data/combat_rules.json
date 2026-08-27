@@ -808,6 +808,9 @@
     "oeil_de_la_pierre": {
       "recolte_div": 3.0,
       "vision_mult": 0.8
+    },
+    "communion_des_cinq": {
+      "mana": 2
     }
   },
   "bombes": {

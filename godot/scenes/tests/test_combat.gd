@@ -62,6 +62,7 @@ func _ready() -> void:
 	test_artefacts()
 	test_talents()
 	test_reforge_et_fiole()
+	test_communion()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2443,6 +2444,32 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Communion des cinq
+
+func test_communion() -> void:
+	var s := Simulation.new(121)
+	s.charger_donjon("ruine", 121, 12, 1)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	j.classe = "le_souffle"
+	verifier(s.a_talent(j, "communion_des_cinq"), "Le Souffle porte Communion des cinq")
+	var loup := s.ajouter("loup", j.pos + Vector2i(1, 0), "ia")
+	loup.sante = 999
+	loup.sante_max = 999
+	var arme := Etres.arme(j, s.items)
+	var el0 := str(arme.get("element", ""))
+	j.mana = 10
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false}), "un coup d'arme")
+	verifier(str(j.get("element_communion", "")) == str(s.wuxing.w.engendre.get(el0, "")) and int(j.mana) == 8, "l'élément tourne %s → %s, 2 de mana" % [el0, str(j.get("element_communion", "?"))])
+	var v := s._vecteur_arme_de(j, arme)
+	verifier(v.has(str(j.element_communion)), "le prochain coup porte l'élément tourné")
+	j.mana = 0
+	var avant := str(j.element_communion)
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false})
+	verifier(str(j.element_communion) == avant, "sans mana, l'élément ne tourne plus")
 
 
 # ---------------------------------------------------------------- Main du métal, Fiole vive
