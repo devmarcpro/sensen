@@ -49,6 +49,20 @@
       "budget": 0.67,
       "nom": true,
       "sertissure_occupee": 1
+    },
+    "artefact": {
+      "affixes": [
+        2,
+        3
+      ],
+      "sertissures": [
+        0,
+        0
+      ],
+      "budget": 1.0,
+      "nom": true,
+      "depassement": 1.25,
+      "fini": true
     }
   },
   "poids_par_profondeur": {
@@ -174,7 +188,11 @@
     "_doc": "Monstres rares : drop garanti au budget renforcé ; tout-venant : chance de drop",
     "chance_tout_venant": 0.25,
     "rare_affixes": 3,
-    "rare_rarete": "exceptionnel"
+    "rare_rarete": "exceptionnel",
+    "artefact": {
+      "etages_majeur": 4,
+      "chance_boss": 0.25
+    }
   },
   "monstres_rares": {
     "_doc": "Ouvert — Tiers de monstres rares : un seul tier au lancement",

@@ -59,6 +59,7 @@ func _ready() -> void:
 	test_chatoyant()
 	test_routes()
 	test_habitat_pnj()
+	test_artefacts()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -2290,6 +2291,43 @@ func test_pretre_et_tourelle() -> void:
 	verifier(int(pretre.or) == int(pretre.or_max), "sa bourse est finie : le surplus sort du jeu")
 	verifier(float(v.get("affaibli_mult", 1.0)) < 1.0, "le ressuscité revient Affaibli")
 	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Trésors et artefacts
+
+func test_artefacts() -> void:
+	var s := Simulation.new(111)
+	s.charger_donjon("ruine", 111, 7, 1)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var art := s.generer_objet("proto_epee", 3, {}, "artefact")
+	verifier(art.rarete == "artefact" and art.affixes.size() >= 2 and art.affixes.size() <= 3 and bool(art.get("fini", false)) and not art.has("sertissures"), "un artefact : %d affixes, fini, sans sertissure" % art.affixes.size())
+	# Au-dessus des fourchettes : sur 40 tirages, au moins un paramètre dépasse sa borne haute déclarée.
+	var depasse := false
+	for k in 40:
+		var a := s.generer_objet("proto_epee", 3, {}, "artefact")
+		for ax in a.affixes:
+			var def: Dictionary = GameData.entree("affixes", str(ax.id))
+			for nom in ax.params.keys():
+				var spec = def.parametres.get(nom)
+				if spec is Array and spec.size() == 2 and not (spec[0] is String) and str(def.meilleur.get(nom, "")) == "haut" and int(ax.params[nom]) > int(spec[1]):
+					depasse = true
+	verifier(depasse, "des paramètres au-dessus de la fourchette normale")
+	# Le boss d'un donjon majeur (7 étages) laisse un artefact garanti.
+	s.donjon.etages = 5
+	var boss := s.ajouter("loup", j.pos + Vector2i(2, 0), "ia")
+	boss["chain_gauge"] = true
+	s._appliquer_degats(boss, 9999, j.id, {})
+	var trouve := false
+	for uid in s.contenants.get(s.grille.idx(boss.pos), []):
+		trouve = trouve or str(s.items[uid].get("rarete", "")) == "artefact"
+	verifier(trouve, "le boss d'un donjon majeur laisse un artefact")
+	# Sertir un artefact est refusé.
+	j.sac.append(art.uid)
+	var gemme := s.generer_objet("gemme_brute", 1, {}, "commun", 0) if GameData.catalogues.items.has("gemme_brute") else {}
+	if not gemme.is_empty():
+		j.sac.append(gemme.uid)
+		s.attente[j.id] = true
+		verifier(not s.intention(j.id, {"type": "sertir", "objet": art.uid, "gemme": gemme.uid}), "un artefact ne se sertit pas")
 
 
 # ---------------------------------------------------------------- Habitat et faim des PNJ

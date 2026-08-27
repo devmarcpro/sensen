@@ -401,6 +401,8 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+journal.artefact,"un artefact repose sur la dépouille de {nom}"
+journal.objet_fini,"cet objet est fini par nature : ni sertissure ni infusion"
 journal.pnj_affame,"{nom} n'a rien trouvé au garde-manger (humeur −10)"
 ui.gestion.pieces,"pièces valides : {n} ({logees} résidents logés)"
 journal.tourelle_tire,"une tourelle touche {nom} : {degats}"

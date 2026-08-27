@@ -62,15 +62,17 @@ func generer(base_id: String, profondeur: int, rng: RandomNumberGenerator, prove
 	var valides := _affixes_pour(str(base.get("equip_slot", "")))
 	var pris := {}
 	for k in n:
-		var candidats := valides.filter(func(a: Dictionary) -> bool: return not pris.has(a.id) and not ("tres_rare" in a.tags and rarete != "exceptionnel") and not ("rare" in a.tags and rarete in ["commun", "inhabituel"]))
+		var candidats := valides.filter(func(a: Dictionary) -> bool: return not pris.has(a.id) and not ("tres_rare" in a.tags and not (rarete in ["exceptionnel", "artefact"])) and not ("rare" in a.tags and rarete in ["commun", "inhabituel"]))
 		if candidats.is_empty():
 			break
 		var a: Dictionary = candidats[rng.randi_range(0, candidats.size() - 1)]
 		pris[a.id] = true
-		inst.affixes.append({"id": a.id, "params": _tirer_parametres(a, float(r.budget), rng), "compteur": 0, "etat": {}})
+		inst.affixes.append({"id": a.id, "params": _tirer_parametres(a, float(r.budget), rng, float(r.get("depassement", 1.0))), "compteur": 0, "etat": {}})
+	if bool(r.get("fini", false)):   # un artefact (Trésors et artefacts) : fini par nature
+		inst["fini"] = true
 	# Sertissures : des emplacements, éventuellement un occupé (exceptionnel).
 	var slots := rng.randi_range(int(r.sertissures[0]), int(r.sertissures[1]))
-	if base.get("type", "") in ["arme", "armure", "bijou"]:
+	if base.get("type", "") in ["arme", "armure", "bijou"] and not bool(r.get("fini", false)):
 		inst["sertissures"] = {"nombre": slots, "contenu": []}
 	# Nom : tout loot rare+ reçoit un nom généré depuis les paramètres tirés.
 	if bool(r.nom) and not inst.affixes.is_empty():
@@ -168,7 +170,7 @@ func _affixes_pour(slot: String) -> Array[Dictionary]:
 
 ## Tire chaque paramètre dans sa fourchette ; avec un budget, une chance `budget` de piocher
 ## dans le meilleur tiers (dans le sens déclaré par `meilleur`).
-func _tirer_parametres(a: Dictionary, budget: float, rng: RandomNumberGenerator) -> Dictionary:
+func _tirer_parametres(a: Dictionary, budget: float, rng: RandomNumberGenerator, depassement: float = 1.0) -> Dictionary:
 	var res := {}
 	for nom: String in a.parametres.keys():
 		var spec: Variant = a.parametres[nom]
@@ -178,6 +180,11 @@ func _tirer_parametres(a: Dictionary, budget: float, rng: RandomNumberGenerator)
 			var lo := int(spec[0])
 			var hi := int(spec[1])
 			var sens: String = a.meilleur.get(nom, "")
+			if depassement > 1.0 and not sens.is_empty():   # au-dessus des fourchettes (artefacts)
+				if sens == "haut":
+					hi = maxi(hi + 1, roundi(float(hi) * depassement))
+				else:
+					lo = maxi(1, mini(lo - 1, roundi(float(lo) / depassement)))
 			if budget > 0.0 and not sens.is_empty() and rng.randf() < budget and hi - lo >= 2:
 				var tiers := maxi(1, (hi - lo + 1) / 3)
 				if sens == "haut":

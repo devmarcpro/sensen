@@ -4159,6 +4159,9 @@ func _sertir(e: Dictionary, objet: String, gemme: String, tick: int) -> bool:
 		return false
 	var porte: bool = objet in e.sac or objet in e.equipement.values()
 	var it: Dictionary = items[objet]
+	if bool(it.get("fini", false)):
+		EventBus.emettre(&"journal", [&"journal.objet_fini", {}])
+		return false
 	if not porte or not it.has("sertissures") or it.sertissures.contenu.size() >= int(it.sertissures.nombre):
 		return false
 	e.sac.erase(gemme)
@@ -4247,6 +4250,14 @@ func _drop(cible: Dictionary, source: String) -> void:
 		var o := generer_objet(str(loot._base_pour(rng)), profondeur, {"creature": cible.name_key})
 		if not o.is_empty():
 			uids.append(o.uid)
+	# Le boss d'un donjon : un artefact, garanti si le donjon est majeur (Trésors et artefacts).
+	if bool(cible.get("chain_gauge", false)) and lieu != "camp" and lr.drops.has("artefact"):
+		var majeur := int(donjon.get("etages", 1)) >= int(lr.drops.artefact.etages_majeur)
+		if majeur or rng.randf() < float(lr.drops.artefact.chance_boss):
+			var art := generer_objet(str(loot._base_pour(rng)), profondeur, {"boss": cible.name_key}, "artefact")
+			if not art.is_empty():
+				uids.append(art.uid)
+				EventBus.emettre(&"journal", [&"journal.artefact", {"nom": cible.name_key}])
 	# La dépouille (Nourriture : la viande crue des animaux, en attendant les viandes paramétriques).
 	var def_c: Dictionary = GameData.catalogues.creatures.get(str(cible.def), {})
 	var stats_c: Dictionary = def_c.get("corps", {}).get("stats", {})

@@ -21,6 +21,9 @@ Une catégorie d'objets à part : très rares, non craftables, non sculptables, 
 
 **Placement :** réservés à la salle boss/trésor des **donjons majeurs** ([[Donjons — structure et intégration]], [[Génération de donjon]] : artefact garanti si donjon majeur).
 
+> [!success] Codé le 2026-08-28
+> Rareté **`artefact`** dans `loot_rules.raretes` : 2-3 affixes (les « très rares » autorisés), **budget 1** (toujours le meilleur tiers) et **dépassement ×1,25** de la fourchette dans le bon sens — « au-dessus des fourchettes normales » —, **aucune sertissure**, `fini: true` (ni sertir ni infuser), nom généré, prix ×10. Jamais tiré par la grille des étages : seulement à la mort du **boss** d'un donjon — **garanti si le donjon est majeur** (décision : `etages ≥ 4`, `loot_rules.drops.artefact.etages_majeur`), sinon une chance sur quatre. Les « effets uniques hors pools » attendent : ce sont pour l'instant les pools d'affixes poussés au-delà de leurs bornes.
+
 ## Liens
 - **Dépend de** : [[Carte du monde]], [[Donjons — structure et intégration]]
 - **Alimente** : [[Loot — affixes, gemmes et rareté]], [[Quêtes et guildes]]
