@@ -1,0 +1,129 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "category",
+    "stats",
+    "tags",
+    "color",
+    "harvest"
+  ],
+  "properties": {
+    "name_key": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "bois",
+        "metal",
+        "roche",
+        "mineral",
+        "fossile",
+        "gemme",
+        "terre",
+        "vegetal",
+        "liquide",
+        "meteorologique",
+        "synthetique"
+      ]
+    },
+    "stats": {
+      "type": "object",
+      "required": [
+        "durete",
+        "densite",
+        "valeur_base",
+        "conductivite_mana",
+        "flammabilite",
+        "isolation",
+        "conductivite_electrique",
+        "flottabilite",
+        "luminosite",
+        "fertilite",
+        "transparence",
+        "elasticite",
+        "friction"
+      ],
+      "properties": {
+        "durete": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "densite": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "valeur_base": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "conductivite_mana": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "flammabilite": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "isolation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "conductivite_electrique": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "flottabilite": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "luminosite": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fertilite": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "transparence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "elasticite": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "friction": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "tags": {
+      "type": "array"
+    },
+    "color": {
+      "type": "string"
+    },
+    "harvest": {
+      "type": "object",
+      "required": [
+        "tool_category",
+        "skill"
+      ]
+    },
+    "wuxing": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "composition": {
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  }
+}

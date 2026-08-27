@@ -1,0 +1,40 @@
+{
+  "name_key": "material.coquillage_fossile.name",
+  "category": "fossile",
+  "stats": {
+    "durete": 7,
+    "densite": 8,
+    "valeur_base": 8,
+    "conductivite_mana": 10,
+    "flammabilite": 0,
+    "isolation": 22,
+    "conductivite_electrique": 6,
+    "flottabilite": 18,
+    "luminosite": 0,
+    "fertilite": 3,
+    "transparence": 0,
+    "elasticite": 4,
+    "friction": 44
+  },
+  "tags": [],
+  "color": "#D9CDBD",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 147,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": {
+    "terre": 0.7,
+    "eau": 0.3
+  },
+  "composition": null
+}

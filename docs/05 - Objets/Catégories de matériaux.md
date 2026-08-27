@@ -35,6 +35,9 @@ Les catégories de matériaux, chacune liée à un outil, une compétence de ré
 
 **Tarifs douaniers par catégorie :** [[Gouvernance, lois et diplomatie]] (`tariffs` de [[Schéma royaume]]).
 
+> [!success] Codé le 2026-08-28 — `data/material_categories.json`, les 11 catégories
+> Complété pour les trois catégories que la table ne donnait pas : `mineral` et `fossile` → pioche / Minage (comme leurs en-têtes de catalogue) ; **`meteorologique` → pelle / Terrassement** (décidé ici : on pellette la neige et la glace). Ids des stations en snake_case (`tailleur_de_pierre`, `atelier_tissage`, `table_enchantement`, `etabli`).
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Schéma matériau]]
 - **Alimente** : [[Récolte]], [[Stations de transformation]], [[Composants]], [[Wu Xing hors combat]]

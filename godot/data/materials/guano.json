@@ -1,0 +1,40 @@
+{
+  "name_key": "material.guano.name",
+  "category": "mineral",
+  "stats": {
+    "durete": 2,
+    "densite": 5,
+    "valeur_base": 6,
+    "conductivite_mana": 3,
+    "flammabilite": 40,
+    "isolation": 25,
+    "conductivite_electrique": 10,
+    "flottabilite": 30,
+    "luminosite": 0,
+    "fertilite": 95,
+    "transparence": 0,
+    "elasticite": 10,
+    "friction": 50
+  },
+  "tags": [],
+  "color": "#8F8358",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 101,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": {
+    "bois": 0.5,
+    "terre": 0.5
+  },
+  "composition": null
+}

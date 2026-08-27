@@ -49,6 +49,9 @@ Le format de données d'un matériau, avec ses stats, son bruit, sa récolte et 
 
 > **Note (B.12) :** la référence « chaque élément porte les 13 stats standard (B.12) » de [[Composants]] renvoie au même jeu de 13 stats défini ici et en [[Matériaux — 13 stats]] ; l'annexe B ne porte pas de section B.12 distincte (héritage de la chimie élémentaire supprimée — voir [[Craft compositionnel]]).
 
+> [!success] Codé le 2026-08-28 — chargement et validation
+> `GameData` charge `data/materials/` et `data/material_categories.json` ; au boot : **couleur unique** (erreur bloquante en debug), **tags dérivés** au seuil ≥ 50 (`inflammable`, `conducteur_mana`, `flottant`, `isolant`, `luminescent`, `transparent`, `conducteur`), **vecteur `wuxing` résolu** (surcharge, sinon règle de la catégorie). **Décision** : `composition` reste optionnel (null) — la chimie élémentaire ayant été supprimée le 2026-08-09, rien ne le lit encore ; `reserved_colors.json` attend le pipeline de sprites (étape 1 n'a pas de stand-ins bitmap, les couleurs viennent de la palette).
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Data-driven design]]
 - **Alimente** : [[Catégories de matériaux]], [[Palette de couleurs des matériaux]], [[Récolte]], [[Catalogue matériaux — Paramétriques]]

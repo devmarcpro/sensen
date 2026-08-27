@@ -1,0 +1,37 @@
+{
+  "name_key": "material.quartzite.name",
+  "category": "roche",
+  "stats": {
+    "durete": 30,
+    "densite": 16,
+    "valeur_base": 8,
+    "conductivite_mana": 20,
+    "flammabilite": 0,
+    "isolation": 22,
+    "conductivite_electrique": 12,
+    "flottabilite": 1,
+    "luminosite": 2,
+    "fertilite": 0,
+    "transparence": 8,
+    "elasticite": 2,
+    "friction": 45
+  },
+  "tags": [],
+  "color": "#D8CFC7",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 71,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}

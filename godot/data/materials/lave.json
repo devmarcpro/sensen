@@ -1,0 +1,42 @@
+{
+  "name_key": "material.lave.name",
+  "category": "liquide",
+  "stats": {
+    "durete": 0,
+    "densite": 25,
+    "valeur_base": 8,
+    "conductivite_mana": 20,
+    "flammabilite": 0,
+    "isolation": 0,
+    "conductivite_electrique": 30,
+    "flottabilite": 0,
+    "luminosite": 90,
+    "fertilite": 0,
+    "transparence": 15,
+    "elasticite": 0,
+    "friction": 20
+  },
+  "tags": [
+    "liquide"
+  ],
+  "color": "#E2531F",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 139,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "seau",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": {
+    "feu": 0.8,
+    "terre": 0.2
+  },
+  "composition": null
+}

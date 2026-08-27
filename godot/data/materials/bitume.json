@@ -1,0 +1,40 @@
+{
+  "name_key": "material.bitume.name",
+  "category": "mineral",
+  "stats": {
+    "durete": 4,
+    "densite": 10,
+    "valeur_base": 7,
+    "conductivite_mana": 4,
+    "flammabilite": 92,
+    "isolation": 30,
+    "conductivite_electrique": 6,
+    "flottabilite": 8,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 15,
+    "friction": 4
+  },
+  "tags": [],
+  "color": "#1C1A18",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 103,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": {
+    "feu": 0.5,
+    "terre": 0.5
+  },
+  "composition": null
+}

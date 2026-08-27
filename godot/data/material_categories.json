@@ -1,0 +1,14 @@
+{
+  "_doc": "Catégories de matériaux (docs: Catégories de matériaux — 11 catégories figées). tool : catégorie d'outil de récolte ; harvest_skill : compétence (data/competences/) ; station_transform : station de transformation (Stations de transformation). mineral, fossile : pioche/minage comme les en-têtes de catalogue ; meteorologique : pelle/terrassement (décidé le 2026-08-28, la note ne précisait pas).",
+  "bois":           { "tool": "hache",    "harvest_skill": "bucheronnage",  "station_transform": "scierie" },
+  "metal":          { "tool": "pioche",   "harvest_skill": "minage",        "station_transform": "forge" },
+  "roche":          { "tool": "pioche",   "harvest_skill": "minage",        "station_transform": "tailleur_de_pierre" },
+  "mineral":        { "tool": "pioche",   "harvest_skill": "minage",        "station_transform": "forge" },
+  "fossile":        { "tool": "pioche",   "harvest_skill": "minage",        "station_transform": null },
+  "gemme":          { "tool": "pioche",   "harvest_skill": "minage",        "station_transform": "table_enchantement" },
+  "terre":          { "tool": "pelle",    "harvest_skill": "terrassement",  "station_transform": null },
+  "vegetal":        { "tool": "faucille", "harvest_skill": "herboristerie", "station_transform": "atelier_tissage" },
+  "liquide":        { "tool": "seau",     "harvest_skill": "collecte",      "station_transform": "alambic" },
+  "meteorologique": { "tool": "pelle",    "harvest_skill": "terrassement",  "station_transform": null },
+  "synthetique":    { "tool": null,       "harvest_skill": null,            "station_transform": "etabli" }
+}

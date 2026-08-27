@@ -1,0 +1,40 @@
+{
+  "name_key": "material.saphir.name",
+  "category": "gemme",
+  "stats": {
+    "durete": 27,
+    "densite": 9,
+    "valeur_base": 40,
+    "conductivite_mana": 78,
+    "flammabilite": 0,
+    "isolation": 80,
+    "conductivite_electrique": 28,
+    "flottabilite": 3,
+    "luminosite": 12,
+    "fertilite": 0,
+    "transparence": 66,
+    "elasticite": 2,
+    "friction": 30
+  },
+  "tags": [],
+  "color": "#1E4FA8",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 119,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": {
+    "eau": 0.6,
+    "terre": 0.4
+  },
+  "composition": null
+}

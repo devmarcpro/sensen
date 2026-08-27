@@ -16,9 +16,17 @@ const CATALOGUES: Array[String] = [
 	"modules", "creatures", "creature_actions", "ai_profiles", "functionalities",
 	"items", "status_effects", "prototype_arenas", "rigs", "tutorials",
 	"dungeon_rooms", "dungeon_connectors", "dungeon_themes", "affixes", "competences", "races", "classes",
+	"materials",
 ]
+## Tags dérivés des stats d'un matériau au seuil ≥ 50 (Schéma matériau).
+const TAGS_DERIVES := {"flammabilite": "inflammable", "conductivite_mana": "conducteur_mana", "flottabilite": "flottant",
+	"isolation": "isolant", "luminosite": "luminescent", "transparence": "transparent", "conductivite_electrique": "conducteur"}
+## Vecteur Wu Xing par catégorie quand le matériau n'a pas de surcharge (Décision — Surcharges Wu Xing).
+const WUXING_CATEGORIE := {"metal": {"metal": 1.0}, "bois": {"bois": 1.0}, "vegetal": {"bois": 1.0}, "roche": {"terre": 1.0},
+	"terre": {"terre": 1.0}, "mineral": {"terre": 1.0}, "fossile": {"terre": 1.0}, "gemme": {"terre": 1.0},
+	"liquide": {"eau": 1.0}, "meteorologique": {"eau": 1.0}, "synthetique": {"terre": 1.0}}
 ## Configurations (fichier unique à la racine de data/).
-const CONFIGS: Array[String] = ["combat_rules", "tile_contents", "wuxing", "palette_materiaux", "loot_rules", "rare_epithets", "reading_failures", "astrologie"]
+const CONFIGS: Array[String] = ["combat_rules", "tile_contents", "wuxing", "palette_materiaux", "loot_rules", "rare_epithets", "reading_failures", "astrologie", "material_categories"]
 
 var catalogues: Dictionary = {}   # nom → { id → Dictionary }
 var configs: Dictionary = {}      # nom → Dictionary
@@ -49,7 +57,32 @@ func charger() -> void:
 		catalogues[nom] = _charger_dossier(nom)
 	for nom in CONFIGS:
 		configs[nom] = _charger_config(nom)
+	_finir_materiaux()
 	_rapport()
+
+
+## Matériaux (Schéma matériau) : couleur unique, tags dérivés au seuil 50, vecteur Wu Xing résolu,
+## catégorie connue et compétence de récolte existante.
+func _finir_materiaux() -> void:
+	var couleurs := {}
+	var cats: Dictionary = configs.get("material_categories", {})
+	for id in catalogues.get("materials", {}).keys():
+		var m: Dictionary = catalogues.materials[id]
+		var fichier := "materials/%s.json" % id
+		if couleurs.has(m.color):
+			erreurs.append("%s → color → « %s » déjà prise par %s" % [fichier, m.color, couleurs[m.color]])
+		couleurs[m.color] = id
+		if not cats.has(m.category):
+			erreurs.append("%s → category → « %s » absente de material_categories.json" % [fichier, m.category])
+		var tags: Array = m.tags
+		for stat in TAGS_DERIVES.keys():
+			if int(m.stats.get(stat, 0)) >= 50 and not TAGS_DERIVES[stat] in tags:
+				tags.append(TAGS_DERIVES[stat])
+		if m.get("wuxing") == null:
+			m["wuxing"] = WUXING_CATEGORIE.get(m.category, {"terre": 1.0}).duplicate()
+		var skill: Variant = m.harvest.get("skill")
+		if skill != null and not catalogues.get("competences", {}).has(skill):
+			erreurs.append("%s → harvest.skill → compétence « %s » inconnue" % [fichier, str(skill)])
 
 
 # ---------------------------------------------------------------- accès

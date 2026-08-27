@@ -35,6 +35,9 @@ Le choix du matériau dans un craft est donc un **arbitrage multidimensionnel**,
 
 **Vecteur Wu Xing dérivé de la catégorie :** voir [[Wu Xing hors combat]].
 
+> [!success] Codé le 2026-08-28 — `data/materials/` (155 fichiers), `tools/gen_materials.py`
+> Les **155 lignes des 11 tables de catalogue** (la table fait foi, pas l'en-tête) sont transcrites par `tools/gen_materials.py` : 13 stats, couleur de la palette (unique, vérifiée au boot), outil/compétence de la catégorie, surcharge `wuxing` de [[Décision — Surcharges Wu Xing des matériaux]] (44 matériaux), clés `material.<id>.name` dans `locale/fr.csv`. Les gabarits paramétriques (feuilles, pousses, parties de créatures) attendent leurs sources (arbres, dépeçage). L'id est le slug du nom sans parenthèse : `aluminium`, `chrome`, `guano`.
+
 ## Liens
 - **Dépend de** : [[Data-driven design]]
 - **Alimente** : [[Application des stats de matériau]], [[Schéma matériau]], [[Stats d'un objet crafté]], [[Récolte]], [[Craft compositionnel]]

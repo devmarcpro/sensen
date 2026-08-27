@@ -1,0 +1,40 @@
+{
+  "name_key": "material.anthracite.name",
+  "category": "mineral",
+  "stats": {
+    "durete": 9,
+    "densite": 9,
+    "valeur_base": 6,
+    "conductivite_mana": 2,
+    "flammabilite": 90,
+    "isolation": 28,
+    "conductivite_electrique": 18,
+    "flottabilite": 10,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 4,
+    "friction": 45
+  },
+  "tags": [],
+  "color": "#17171C",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 92,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": {
+    "feu": 0.7,
+    "terre": 0.3
+  },
+  "composition": null
+}

@@ -1,0 +1,37 @@
+{
+  "name_key": "material.phosphorite.name",
+  "category": "mineral",
+  "stats": {
+    "durete": 6,
+    "densite": 10,
+    "valeur_base": 9,
+    "conductivite_mana": 10,
+    "flammabilite": 25,
+    "isolation": 22,
+    "conductivite_electrique": 12,
+    "flottabilite": 8,
+    "luminosite": 8,
+    "fertilite": 80,
+    "transparence": 0,
+    "elasticite": 4,
+    "friction": 48
+  },
+  "tags": [],
+  "color": "#97917B",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 111,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}

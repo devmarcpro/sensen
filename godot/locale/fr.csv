@@ -540,3 +540,160 @@ module.veille.name,Veille
 module.vivacite.name,Vivacité
 module.voile.name,Voile
 module.voile_de_brume.name,Voile de brume
+# --- matériaux (tools/gen_materials.py) ---
+material.pin.name,Pin
+material.sapin.name,Sapin
+material.epicea.name,Épicéa
+material.meleze.name,Mélèze
+material.cedre.name,Cèdre
+material.chene.name,Chêne
+material.hetre.name,Hêtre
+material.bouleau.name,Bouleau
+material.erable.name,Érable
+material.frene.name,Frêne
+material.orme.name,Orme
+material.if.name,If
+material.noyer.name,Noyer
+material.cerisier.name,Cerisier
+material.olivier.name,Olivier
+material.ebene.name,Ébène
+material.gaiac.name,Gaïac
+material.acajou.name,Acajou
+material.teck.name,Teck
+material.balsa.name,Balsa
+material.bambou.name,Bambou
+material.saule.name,Saule
+material.liege.name,Liège (chêne-liège)
+material.peuplier.name,Peuplier
+material.tilleul.name,Tilleul
+material.charme.name,Charme
+material.robinier.name,Robinier (faux acacia)
+material.chataignier.name,Châtaignier
+material.platane.name,Platane
+material.aulne.name,Aulne
+material.buis.name,Buis
+material.cypres.name,Cyprès
+material.sequoia.name,Séquoia
+material.palmier.name,Palmier (stipe)
+material.acacia.name,Acacia
+material.eucalyptus.name,Eucalyptus
+material.pommier.name,Pommier
+material.noisetier.name,Noisetier
+material.bois_flotte.name,Bois flotté
+material.bois_calcine.name,Bois calciné
+material.cuivre.name,Cuivre
+material.etain.name,Étain
+material.zinc.name,Zinc
+material.bronze.name,Bronze
+material.laiton.name,Laiton
+material.fer.name,Fer
+material.acier.name,Acier
+material.acier_trempe.name,Acier trempé
+material.argent.name,Argent
+material.or.name,Or
+material.platine.name,Platine
+material.plomb.name,Plomb
+material.nickel.name,Nickel
+material.cobalt.name,Cobalt
+material.titane.name,Titane
+material.tungstene.name,Tungstène
+material.aluminium.name,Aluminium (bauxite)
+material.chrome.name,Chrome (chromite)
+material.manganese.name,Manganèse
+material.bismuth.name,Bismuth
+material.antimoine.name,Antimoine
+material.pierre.name,Pierre
+material.granit.name,Granit
+material.granit_noir.name,Granit noir (gabbro)
+material.diorite.name,Diorite
+material.andesite.name,Andésite
+material.calcaire.name,Calcaire
+material.dolomie.name,Dolomie
+material.craie.name,Craie
+material.marbre.name,Marbre
+material.quartzite.name,Quartzite
+material.schiste.name,Schiste
+material.gneiss.name,Gneiss
+material.basalte.name,Basalte
+material.tuf_volcanique.name,Tuf volcanique
+material.pierre_ponce.name,Pierre ponce
+material.obsidienne.name,Obsidienne
+material.silex.name,Silex
+material.gres.name,Grès
+material.ardoise.name,Ardoise
+material.gypse.name,Gypse
+material.rhyolite.name,Rhyolite
+material.peridotite.name,Péridotite
+material.serpentinite.name,Serpentinite
+material.travertin.name,Travertin
+material.conglomerat.name,Conglomérat
+material.breche_volcanique.name,Brèche volcanique
+material.kimberlite.name,Kimberlite
+material.calcite.name,Calcite (spath)
+material.houille.name,Houille
+material.lignite.name,Lignite
+material.anthracite.name,Anthracite
+material.soufre.name,Soufre
+material.salpetre.name,Salpêtre
+material.sel_gemme.name,Sel gemme
+material.graphite.name,Graphite
+material.mica.name,Mica
+material.pyrite.name,Pyrite
+material.malachite.name,Malachite
+material.argile_refractaire.name,Argile réfractaire
+material.guano.name,Guano/salpêtre de grotte
+material.tourbe_compactee.name,Tourbe compactée
+material.bitume.name,Bitume
+material.cinabre.name,Cinabre
+material.ocre.name,Ocre
+material.lapis_lazuli.name,Lapis-lazuli
+material.turquoise.name,Turquoise
+material.ambre.name,Ambre
+material.fluorine.name,Fluorine
+material.amiante.name,Amiante
+material.phosphorite.name,Phosphorite
+material.quartz.name,Quartz
+material.amethyste.name,Améthyste
+material.topaze.name,Topaze
+material.grenat.name,Grenat
+material.opale.name,Opale
+material.jade.name,Jade
+material.rubis.name,Rubis
+material.saphir.name,Saphir
+material.emeraude.name,Émeraude
+material.diamant.name,Diamant
+material.onyx.name,Onyx
+material.terre.name,Terre
+material.terre_fertile.name,Terre fertile
+material.tourbe.name,Tourbe
+material.sable.name,Sable
+material.argile.name,Argile
+material.gravier.name,Gravier
+material.lin.name,Lin
+material.coton.name,Coton
+material.paille.name,Paille
+material.chanvre.name,Chanvre
+material.laine.name,Laine
+material.soie.name,Soie
+material.cuir.name,Cuir
+material.fourrure.name,Fourrure
+material.eau.name,Eau
+material.eau_salee.name,Eau salée
+material.lave.name,Lave
+material.huile.name,Huile
+material.goudron.name,Goudron
+material.boue.name,Boue
+material.seve.name,Sève
+material.os_fossile.name,Os fossile
+material.ammonite.name,Ammonite
+material.bois_petrifie.name,Bois pétrifié
+material.coquillage_fossile.name,Coquillage fossile
+material.geode.name,Géode
+material.meteorite_ferreuse.name,Météorite ferreuse
+material.glace.name,Glace
+material.neige.name,Neige
+material.verre.name,Verre
+material.brique.name,Brique
+material.chaume_tresse.name,Chaume tressé
+material.papier.name,Papier
+# --- fin matériaux ---

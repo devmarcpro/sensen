@@ -1,0 +1,40 @@
+{
+  "name_key": "material.onyx.name",
+  "category": "gemme",
+  "stats": {
+    "durete": 26,
+    "densite": 9,
+    "valeur_base": 30,
+    "conductivite_mana": 65,
+    "flammabilite": 0,
+    "isolation": 12,
+    "conductivite_electrique": 20,
+    "flottabilite": 3,
+    "luminosite": 5,
+    "fertilite": 0,
+    "transparence": 30,
+    "elasticite": 2,
+    "friction": 30
+  },
+  "tags": [],
+  "color": "#2E3038",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 122,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": {
+    "metal": 0.6,
+    "terre": 0.4
+  },
+  "composition": null
+}

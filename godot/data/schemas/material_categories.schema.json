@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "required": [
+      "tool",
+      "harvest_skill",
+      "station_transform"
+    ],
+    "properties": {
+      "tool": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "harvest_skill": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "station_transform": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    }
+  }
+}

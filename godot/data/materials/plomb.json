@@ -1,0 +1,37 @@
+{
+  "name_key": "material.plomb.name",
+  "category": "metal",
+  "stats": {
+    "durete": 9,
+    "densite": 18,
+    "valeur_base": 5,
+    "conductivite_mana": 2,
+    "flammabilite": 0,
+    "isolation": 15,
+    "conductivite_electrique": 40,
+    "flottabilite": 2,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 25,
+    "friction": 30
+  },
+  "tags": [],
+  "color": "#5F6470",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 52,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}

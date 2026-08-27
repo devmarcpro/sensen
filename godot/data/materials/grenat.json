@@ -1,0 +1,40 @@
+{
+  "name_key": "material.grenat.name",
+  "category": "gemme",
+  "stats": {
+    "durete": 24,
+    "densite": 10,
+    "valeur_base": 18,
+    "conductivite_mana": 55,
+    "flammabilite": 0,
+    "isolation": 12,
+    "conductivite_electrique": 24,
+    "flottabilite": 3,
+    "luminosite": 10,
+    "fertilite": 0,
+    "transparence": 58,
+    "elasticite": 2,
+    "friction": 30
+  },
+  "tags": [],
+  "color": "#8E1F2F",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 115,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": {
+    "terre": 0.6,
+    "feu": 0.4
+  },
+  "composition": null
+}

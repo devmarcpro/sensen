@@ -25,6 +25,7 @@ func _ready() -> void:
 	test_evenements()
 	test_niveaux()
 	test_paperdoll_et_tutoriels()
+	test_materiaux()
 	test_donjon()
 	test_loot()
 	test_coffres_et_rares()
@@ -905,6 +906,27 @@ func test_paperdoll_et_tutoriels() -> void:
 	EventBus.dispatcher()
 	verifier(vus.size() == 1, "once : pas de seconde fois")
 	tuto.queue_free()
+
+
+# ---------------------------------------------------------------- Étape 6 : matériaux
+
+func test_materiaux() -> void:
+	var mats: Dictionary = GameData.catalogues.materials
+	verifier(mats.size() == 155, "les 155 matériaux des catalogues sont chargés (%d)" % mats.size())
+	var fer: Dictionary = mats.fer
+	verifier(int(fer.stats.durete) == 25 and int(fer.stats.conductivite_electrique) == 75, "le Fer suit sa table (Dur 25, CÉl 75)")
+	verifier("conducteur" in fer.tags and not ("inflammable" in fer.tags), "tags dérivés au seuil 50 (fer : conducteur)")
+	verifier(mats.paille.tags.has("inflammable") and mats.verre.tags.has("transparent"), "paille inflammable, verre transparent")
+	verifier(mats.chene.wuxing == {"bois": 1.0}, "chêne : vecteur de sa catégorie (Bois)")
+	verifier(is_equal_approx(float(mats.obsidienne.wuxing.terre), 0.6) and is_equal_approx(float(mats.obsidienne.wuxing.feu), 0.4), "obsidienne : surcharge Terre 0.6 / Feu 0.4")
+	verifier(mats.saphir.wuxing.has("eau") and mats.meteorite_ferreuse.wuxing.has("metal"), "gemmes et météorite : surcharges lues")
+	var couleurs := {}
+	for id in mats.keys():
+		couleurs[mats[id].color] = true
+	verifier(couleurs.size() == mats.size(), "155 couleurs uniques")
+	verifier(mats.chene.harvest.tool_category == "hache" and mats.chene.harvest.skill == "bucheronnage", "récolte : outil et compétence de la catégorie")
+	verifier(GameData.config("material_categories").size() == 11, "11 catégories de matériaux")
+	verifier(tr("material.acier_trempe.name") == "Acier trempé", "nom localisé")
 
 
 # ---------------------------------------------------------------- brouillard de guerre
