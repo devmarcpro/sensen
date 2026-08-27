@@ -279,6 +279,10 @@ func _unhandled_input(ev: InputEvent) -> void:
 			KEY_TAB:
 				arene_courante = (arene_courante + 1) % (arenes.size() + 1)
 				_charger()
+			KEY_R:
+				if sim.attente.has(joueur_id):
+					if not sim.intention(joueur_id, {"type": "ramasser"}):
+						_log(tr("journal.rien_a_ramasser"))
 			KEY_E:
 				if sim.attente.has(joueur_id):
 					if not sim.intention(joueur_id, {"type": "descendre"}):
@@ -297,9 +301,12 @@ func _unhandled_input(ev: InputEvent) -> void:
 						visee = k
 			KEY_ESCAPE:
 				visee = -1
-			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7:
+			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
 				var k: int = ev.keycode - KEY_1
-				if not j.is_empty() and k < j.ratelier.size():
+				if ev.shift_pressed:
+					if not j.is_empty() and k < j.sac.size() and sim.attente.has(joueur_id):
+						sim.intention(joueur_id, {"type": "equiper", "objet": j.sac[k]})
+				elif not j.is_empty() and k < j.ratelier.size():
 					chemin_en_cours.clear()
 					sim.intention(joueur_id, {"type": "changer_arme", "item": j.ratelier[k]})
 
@@ -470,6 +477,11 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 		ci.draw_colored_polygon(PackedVector2Array([
 			c + Vector2(0, TH * 0.5), c + Vector2(TW * 0.5, 0),
 			c + Vector2(TW * 0.5, d2), c + Vector2(0, TH * 0.5 + d2)]), flanc.darkened(0.15))
+	var contenu := g.contenu_de(t)
+	if "contenant" in contenu.get("tags", []):   # coffre ou butin : une caisse
+		var cc := Color(0.55, 0.38, 0.18) if "coffre" in contenu.tags else Color(0.75, 0.65, 0.3)
+		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc)
+		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc.darkened(0.5), false, 1.0)
 	if g.bloque_passage(t):   # un mur : un bloc sombre posé sur la tuile
 		var hm := int(g.contenu_de(t).get("hauteur_vue", 3)) * HSTEP
 		ci.draw_colored_polygon(PackedVector2Array([
@@ -530,7 +542,7 @@ func _maj_ui() -> void:
 	var proches := sim.vivants().filter(func(e: Dictionary) -> bool: return e.id == joueur_id or Grille.distance(e.pos, j.pos) <= 12)
 	proches = proches.slice(0, 10)   # les êtres en vue seulement : l'écran n'est pas un registre
 	for e in proches:
-		lignes.append("  " + tr("ui.entite.ligne").format({"nom": tr(e.name_key), "pv": e.sante, "pv_max": e.sante_max,
+		lignes.append("  " + tr("ui.entite.ligne").format({"nom": tr(e.name_key) + ((" " + tr(e.epithete)) if e.get("rare", false) else ""), "pv": e.sante, "pv_max": e.sante_max,
 			"end": e.endurance, "compteur": e.compteur, "h": g.h(e.pos)}) + (" · GARDE" if e.garde else "")
 			+ (" · " + tr(sim.items[e.equipement.main_principale].name_key) if e.equipement.has("main_principale") else "")
 			+ (" + " + tr(sim.items[e.equipement.main_secondaire].name_key) if e.equipement.has("main_secondaire") else "")
@@ -552,6 +564,11 @@ func _maj_ui() -> void:
 				lignes.append("  " + _preview_capacite(j, plan, sim.entites[g.occupant(survol)]))
 	ui.text = "\n".join(lignes)
 	var bas: Array[String] = []
+	if not j.is_empty() and not j.sac.is_empty():
+		var objets: Array[String] = []
+		for k in mini(9, j.sac.size()):
+			objets.append("⇧%d %s" % [k + 1, nom_objet(sim.nom_objet(j.sac[k]))])
+		bas.append(tr("ui.sac").format({"liste": " · ".join(objets)}))
 	if not ecran_fin.is_empty():
 		bas.append_array(ecran_fin)
 		bas.append("")

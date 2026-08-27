@@ -24,6 +24,9 @@ Des variantes rares façon Phantasy Star Online — repérables de loin, à drop
 
 **Métadonnée de provenance ([[Loot — affixes, gemmes et rareté]]) :** tout loot rare+ porte son origine — donjon, date, **monstre rare**.
 
+> [!success] Codé le 2026-08-27
+> Tirage à l'instanciation d'un être contrôlé par l'IA (`rare_chance` de la fiche, défaut 2 % — `loot_rules.json`) : stats de base ×2.5, teinte or via la teinte d'instance du paperdoll, épithète tirée de `data/rare_epithets.json` (un seul tier, [[Ouvert — Tiers de monstres rares]]), drop garanti **exceptionnel à 3 affixes** avec provenance « monstre rare ». Le glow attend les sprites.
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[IA des créatures]], [[Effets d'équipement passifs]]
 - **Alimente** : [[Loot — affixes, gemmes et rareté]]

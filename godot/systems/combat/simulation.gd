@@ -24,6 +24,7 @@ var statuts_defs: Dictionary
 var affixes_defs: Dictionary
 var loot: Loot
 var objets: Dictionary = {}          # uid → instance générée (le catalogue reste dans `items`, fusionné)
+var contenants: Dictionary = {}      # index de tuile → [uids] (coffres, butin au sol)
 var dernier_combat: Dictionary = {}   # récapitulatif du dernier combat terminé (écran de fin)
 var glyphes: Array[Dictionary] = []   # couche d'overlay runtime : {pos, plan, source, fin} — jamais sauvegardée
 var differes: Array[Dictionary] = []  # charges différées : {tick, source, plan, pos}
@@ -94,6 +95,13 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 	for s: Dictionary in e.spawns:
 		if grille.occupant(s.pos).is_empty():
 			ajouter(s.creature, s.pos, "ia")
+	for c: Dictionary in e.coffres:
+		var uids: Array = []
+		for base in c.bases:
+			var o := generer_objet(str(base), etage, {"donjon": theme_id, "etage": etage})
+			if not o.is_empty():
+				uids.append(o.uid)
+		_poser_contenant(c.pos, uids, "coffre")
 
 
 func _reinitialiser() -> void:
@@ -102,6 +110,7 @@ func _reinitialiser() -> void:
 	combats.clear()
 	attente.clear()
 	glyphes.clear()
+	contenants.clear()
 	differe_clear()
 	for nom in TickManager.horloges.keys():
 		TickManager.retirer(nom)
@@ -142,7 +151,15 @@ func _descendre(e: Dictionary) -> bool:
 func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 	_n_entites += 1
 	var id := "%s_%d" % [def_id, _n_entites]
-	var e := Etres.instancier(id, GameData.entree("creatures", def_id), pos, controle, regles, items)
+	var def := GameData.entree("creatures", def_id)
+	var e := Etres.instancier(id, def, pos, controle, regles, items)
+	# Variante rare (Monstres rares) : tirage à la résolution du spawn, stats ×2.5, teinte or, épithète, drop garanti.
+	if controle == "ia":
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash([graine, "rare", _n_entites, def_id])
+		var chance := float(def.get("rare_chance", regles.r.get("monstres_rares", {}).get("chance_defaut", 0.02)))
+		if rng.randf() < chance:
+			_rendre_rare(e, rng)
 	if e.chain_gauge:
 		e.chaine = wuxing.jauge_neuve()
 	Etres.recalculer(e, items, affixes_defs, regles)
@@ -206,6 +223,72 @@ func _equiper(e: Dictionary, uid: String, tick: int) -> bool:
 	e.compteur = tick + int(regles.r.actions.objet if it.get("type", "") != "arme" else regles.r.actions.changer_arme)
 	EventBus.emettre(&"journal", [&"journal.equipe", {"nom": e.name_key, "objet": nom_objet(uid)}])
 	return true
+
+
+func _rendre_rare(e: Dictionary, rng: RandomNumberGenerator) -> void:
+	var mr: Dictionary = GameData.config("loot_rules").monstres_rares
+	e.rare = true
+	for k in e.corps.stats.keys():
+		e.corps.stats[k] = roundi(float(e.corps.stats[k]) * float(mr.mult_stats))
+	e.teinte = mr.teinte.duplicate()
+	var pool: Array = GameData.config("rare_epithets").get("or", [])
+	e.epithete = str(pool[rng.randi_range(0, pool.size() - 1)]) if not pool.is_empty() else ""
+	Etres.recalculer(e, items, affixes_defs, regles)
+	e.sante = e.sante_max
+	EventBus.emettre(&"journal", [&"journal.rare", {"nom": e.name_key, "epithete": e.epithete}])
+
+
+## Pose un contenant (coffre, butin) sur une tuile ; s'il y en a déjà un, le contenu s'ajoute.
+func _poser_contenant(pos: Vector2i, uids: Array, type: String) -> void:
+	if uids.is_empty():
+		return
+	var idx := grille.idx(pos)
+	if contenants.has(idx):
+		contenants[idx].append_array(uids)
+	else:
+		contenants[idx] = uids.duplicate()
+		grille.poser_contenu(pos, type)
+	EventBus.emettre(&"tile_changed", [pos])
+
+
+## Ramasser : tout ce qui est sur sa tuile va au sac (utiliser un objet : 5 ticks).
+func _ramasser(e: Dictionary, tick: int) -> bool:
+	var idx := grille.idx(e.pos)
+	if not contenants.has(idx):
+		return false
+	for uid in contenants[idx]:
+		donner(e, str(uid))
+	contenants.erase(idx)
+	grille.contenu[idx] = 0
+	EventBus.emettre(&"tile_changed", [e.pos])
+	e.compteur = tick + int(regles.r.actions.objet)
+	return true
+
+
+## À la mort : un drop (chance du tout-venant ; garanti et renforcé pour une variante rare).
+func _drop(cible: Dictionary, source: String) -> void:
+	var lr: Dictionary = GameData.config("loot_rules")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "drop", cible.id])
+	var profondeur: int = int(donjon.get("etage", 0))
+	var uids: Array = []
+	if cible.get("rare", false):
+		var base := str(loot._base_pour(rng))
+		var o := generer_objet(base, profondeur, {"monstre_rare": cible.name_key}, str(lr.drops.rare_rarete), int(lr.drops.rare_affixes))
+		if not o.is_empty():
+			uids.append(o.uid)
+	elif cible.controle == "ia" and rng.randf() < float(lr.drops.chance_tout_venant):
+		var o := generer_objet(str(loot._base_pour(rng)), profondeur, {"creature": cible.name_key})
+		if not o.is_empty():
+			uids.append(o.uid)
+	# Ce que le mort portait tombe aussi (l'équipement est une donnée d'instance).
+	for slot in cible.equipement.keys():
+		var uid: String = str(cible.equipement[slot])
+		if objets.has(uid):
+			uids.append(uid)
+	for uid in cible.sac:
+		uids.append(str(uid))
+	_poser_contenant(cible.pos, uids, "butin")
 
 
 func vivants() -> Array[Dictionary]:
@@ -376,6 +459,8 @@ func intention(id: String, i: Dictionary) -> bool:
 				return true   # la grille a changé : plus rien à finir sur l'ancienne
 		"equiper":
 			ok = _equiper(e, str(i.get("objet", "")), h.ticks)
+		"ramasser":
+			ok = _ramasser(e, h.ticks)
 	if ok:
 		attente.erase(id)
 		_fin_de_pas(e.horloge)
@@ -746,6 +831,7 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		EventBus.emettre(&"journal", [&"journal.mort", {"nom": cible.name_key}])
 		EventBus.emettre(&"creature_killed", [cible.id, source])
 		_declencher(cible, "testament", cible.pos)   # la charge part quand le porteur tombe
+		_drop(cible, source)
 	# Déclencheurs à événement (Modules) : Ouverture au premier contact, Riposte quand le porteur est
 	# touché, Veille quand un allié passe sous le seuil.
 	if not att.is_empty():

@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "required": [
+    "or"
+  ],
+  "properties": {
+    "or": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    }
+  }
+}

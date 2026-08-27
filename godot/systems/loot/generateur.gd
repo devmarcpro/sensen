@@ -111,6 +111,26 @@ func _tirer_parametres(a: Dictionary, budget: float, rng: RandomNumberGenerator)
 	return res
 
 
+## Une base d'objet tirée selon les poids de catégorie de `contenants` (armes, armures, bijoux…).
+func _base_pour(rng: RandomNumberGenerator) -> String:
+	var lr: Dictionary = regles.contenants
+	var cats: Dictionary = lr.poids_categories
+	var total := 0.0
+	for c in cats.keys():
+		total += float(cats[c])
+	var t := rng.randf() * total
+	var cat := "armes"
+	for c in cats.keys():
+		t -= float(cats[c])
+		if t < 0.0:
+			cat = c
+			break
+	var bases: Array = lr.get("bases_" + cat, [])
+	if bases.is_empty():
+		bases = lr.bases_armes
+	return str(bases[rng.randi_range(0, bases.size() - 1)])
+
+
 ## Les affixes d'une instance dont l'effet est d'un type donné (avec leurs paramètres).
 static func affixes_de_type(inst: Dictionary, defs: Dictionary, type: String) -> Array[Dictionary]:
 	var res: Array[Dictionary] = []

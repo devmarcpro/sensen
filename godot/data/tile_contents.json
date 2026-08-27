@@ -30,5 +30,25 @@
       "roche",
       "solide"
     ]
+  },
+  "coffre": {
+    "name_key": "tile_content.coffre.name",
+    "bloque_passage": false,
+    "bloque_vue": false,
+    "hauteur_vue": 0,
+    "tags": [
+      "contenant",
+      "coffre"
+    ]
+  },
+  "butin": {
+    "name_key": "tile_content.butin.name",
+    "bloque_passage": false,
+    "bloque_vue": false,
+    "hauteur_vue": 0,
+    "tags": [
+      "contenant",
+      "butin"
+    ]
   }
 }

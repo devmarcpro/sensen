@@ -60,7 +60,7 @@ ui.titre,SENSEN — prototype de combat
 ui.horloge,horloge {horloge} · {mode}
 ui.mode.exploration,exploration ({tps} ticks/s)
 ui.mode.combat,COMBAT — le temps n'avance qu'à l'action
-ui.aide,ZQSD : se déplacer (8 directions) · clic : se déplacer / frapper · maj+clic : attaque lourde · G : garde · espace : attendre · tab : arène suivante · F5 : recharger les données
+ui.aide,ZQSD : se déplacer (8 directions) · R : ramasser · clic : se déplacer / frapper · maj+clic : attaque lourde · G : garde · espace : attendre · tab : arène suivante · F5 : recharger les données
 ui.entite.ligne,{nom} pv {pv}/{pv_max} · end {end} · agit à t={compteur} · h={h}
 ui.case,"case ({x},{y}) h={h} · Δh vs toi : {dh}"
 ui.timeline,prochaines actions :
@@ -215,6 +215,10 @@ epithete_rare.ancestral,Ancestral
 epithete_rare.dore,Doré
 epithete_rare.sans_ombre,Sans ombre
 epithete_rare.affame,Affamé
+tile_content.coffre.name,Coffre
+tile_content.butin.name,Butin
+journal.rien_a_ramasser,rien à ramasser ici
+ui.sac,"sac : {liste} (⇧chiffre : équiper · R : ramasser)"
 journal.victoire,plus aucun hostile. Victoire.
 journal.defaite,tu es tombé. Tab : recommencer.
 module.a_l_impact.name,À l'impact

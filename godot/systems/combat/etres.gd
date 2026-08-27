@@ -45,6 +45,8 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 		"competences_eff": def.get("competences", {}).duplicate(),
 		"sac": [],                                                  # uids des objets portés non équipés
 		"tags_acquis": [],                                          # grant_tag des effets passifs
+		"rare": false,                                              # variante rare (Monstres rares)
+		"epithete": "",
 		"ai_profile": def.ai_profile,
 		"chain_gauge": def.get("chain_gauge", false),   # porteurs de jauge : joueur, élites, boss
 		"elements": def.get("elements"),

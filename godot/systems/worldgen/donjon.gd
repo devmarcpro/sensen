@@ -29,7 +29,7 @@ func _init(p_salles: Dictionary, p_connecteurs: Dictionary, p_theme: Dictionary)
 func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dernier: bool, taille: int = 96) -> Dictionary:
 	rng.seed = hash([graine, id_donjon, etage])
 	var e := {"largeur": taille, "hauteur": taille, "hauteurs": PackedByteArray(), "murs": {}, "sol": {},
-		"pieces": [], "entree": Vector2i.ZERO, "escalier": null, "boss": null, "spawns": [], "graphe": {}, "etage": etage}
+		"pieces": [], "entree": Vector2i.ZERO, "escalier": null, "boss": null, "spawns": [], "coffres": [], "graphe": {}, "etage": etage}
 	e.hauteurs.resize(taille * taille)
 	e.hauteurs.fill(H_BASE)
 	# 1. La salle d'entrée, à position fixe (sous le point d'entrée de surface).
@@ -74,8 +74,9 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 				e.boss = _centre_libre(e, p)
 				p["boss_room"] = true
 				break
-	# 6. Peuplement par le thème, modulé par la profondeur.
+	# 6. Peuplement par le thème, modulé par la profondeur ; contenants de loot (tables standards).
 	_peupler(e, etage)
+	_poser_coffres(e)
 	return e
 
 
@@ -306,6 +307,50 @@ func _centre_libre(e: Dictionary, piece: Dictionary) -> Vector2i:
 				if r.has_point(p) and e.sol.has(p.y * e.largeur + p.x):
 					return p
 	return c
+
+
+## Chaque salle reçoit 0-N contenants de loot (Génération de donjon, étape 6) : une tuile de sol libre,
+## des bases d'objets tirées par catégorie — le contenu réel est généré par la simulation à la profondeur.
+func _poser_coffres(e: Dictionary) -> void:
+	var lr: Dictionary = GameData.config("loot_rules").contenants
+	var occupees := {}
+	for sp in e.spawns:
+		occupees[sp.pos] = true
+	for i in e.pieces.size():
+		var p: Dictionary = e.pieces[i]
+		if p.kind != "salle" or i == 0:
+			continue
+		var r: Rect2i = p.rect
+		var n := int(floorf(float(r.size.x * r.size.y) / float(lr.tuiles_par_coffre)))
+		if p.get("boss_room", false):
+			n += 1
+		for k in n:
+			var pos := Vector2i(r.position.x + rng.randi_range(1, r.size.x - 2), r.position.y + rng.randi_range(1, r.size.y - 2))
+			if not e.sol.has(pos.y * e.largeur + pos.x) or occupees.has(pos) or pos == e.boss or pos == e.escalier:
+				continue
+			occupees[pos] = true
+			var objets: Array = []
+			for j in rng.randi_range(int(lr.objets_par_coffre[0]), int(lr.objets_par_coffre[1])):
+				objets.append(_base_aleatoire(lr))
+			e.coffres.append({"pos": pos, "bases": objets})
+
+
+func _base_aleatoire(lr: Dictionary) -> String:
+	var cats: Dictionary = lr.poids_categories
+	var total := 0.0
+	for c in cats.keys():
+		total += float(cats[c])
+	var t := rng.randf() * total
+	var cat := "armes"
+	for c in cats.keys():
+		t -= float(cats[c])
+		if t < 0.0:
+			cat = c
+			break
+	var bases: Array = lr.get("bases_" + cat, [])
+	if bases.is_empty():
+		bases = lr.bases_armes
+	return bases[rng.randi_range(0, bases.size() - 1)]
 
 
 ## Chaque salle reçoit 0-N créatures du pool du thème, davantage en profondeur (E.29, étape 6).

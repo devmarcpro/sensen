@@ -27,6 +27,7 @@ func _ready() -> void:
 	test_paperdoll_et_tutoriels()
 	test_donjon()
 	test_loot()
+	test_coffres_et_rares()
 	test_arenes_autonomes()
 	if echecs == 0:
 		print("TESTS : tout passe")
@@ -1051,3 +1052,47 @@ func test_loot() -> void:
 	# Nom généré côté client : gabarit + paramètres
 	var n := s.nom_objet(ex.uid)
 	verifier(n.affixe == ex.affixes[0].id and n.rarete == "exceptionnel", "le nom porte l'affixe et la rareté")
+
+
+# ---------------------------------------------------------------- Étape 3 (b) : coffres, ramassage, drops, monstres rares
+
+func test_coffres_et_rares() -> void:
+	var s := Simulation.new(11)
+	s.charger_donjon("ruine", 11, 2, 1)
+	var j := joueur_de(s)
+	verifier(not s.contenants.is_empty(), "des coffres dans le donjon (%d)" % s.contenants.size())
+	var idx: int = s.contenants.keys()[0]
+	var pos := Vector2i(idx % s.grille.largeur, idx / s.grille.largeur)
+	verifier("contenant" in s.grille.contenu_de(pos).tags and not s.grille.bloque_passage(pos), "un coffre est un contenu de tuile franchissable")
+	var n_objets: int = s.contenants[idx].size()
+	s.grille.liberer(j.pos)
+	j.pos = pos
+	s.grille.placer(j.id, pos)
+	s.horloge_monde.avancer(1)
+	verifier(s.intention(j.id, {"type": "ramasser"}), "ramasser sur la tuile du coffre")
+	verifier(j.sac.size() == n_objets and not s.contenants.has(idx) and s.grille.contenu[idx] == 0, "le contenu va au sac, le coffre disparaît")
+	j.compteur = s.horloge_monde.ticks
+	s.horloge_monde.avancer(1)
+	verifier(not s.intention(j.id, {"type": "ramasser"}), "rien à ramasser : refusé")
+	# Monstre rare forcé : stats ×2.5, teinte or, épithète, drop garanti exceptionnel à 3 affixes
+	var a := nouvelle_sim("plaine_au_talus")
+	var loup: Dictionary = a.entites["loup_2"]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 3
+	var end_avant: int = loup.corps.stats.endurance
+	a._rendre_rare(loup, rng)
+	verifier(loup.rare and loup.corps.stats.endurance == roundi(end_avant * 2.5) and not loup.epithete.is_empty() and loup.sante == loup.sante_max, "variante rare : stats ×2.5, épithète, PV pleins")
+	loup.sante = 1
+	a._appliquer_degats(loup, 5, joueur_de(a).id, {})
+	var idx2 := a.grille.idx(loup.pos)
+	verifier(not loup.vivant and a.contenants.has(idx2), "à sa mort, un butin tombe sur sa tuile")
+	var uid: String = str(a.contenants[idx2][0])
+	verifier(a.items[uid].rarete == "exceptionnel" and a.items[uid].affixes.size() == 3 and a.items[uid].provenance.has("monstre_rare"), "drop garanti : exceptionnel, 3 affixes, provenance = le monstre")
+	# Un bandit qui meurt lâche son épée (l'équipement est une donnée d'instance)
+	var g := nouvelle_sim("gorge")
+	var bandit: Dictionary = g.entites["bandit_3"]
+	bandit.equipement["main_principale"] = g.generer_objet("proto_epee", 1, {}, "rare", 1).uid
+	bandit.sante = 1
+	g._appliquer_degats(bandit, 5, joueur_de(g).id, {})
+	var idx3 := g.grille.idx(bandit.pos)
+	verifier(g.contenants.has(idx3) and bandit.equipement.main_principale in g.contenants[idx3], "le mort lâche ce qu'il portait")

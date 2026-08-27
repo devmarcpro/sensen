@@ -1,0 +1,9 @@
+{
+  "_doc": "Épithètes des monstres rares (docs: Monstres rares ; Ouvert — Tiers : un seul tier « or » au lancement). Clés localisées.",
+  "or": [
+    "epithete_rare.ancestral",
+    "epithete_rare.dore",
+    "epithete_rare.sans_ombre",
+    "epithete_rare.affame"
+  ]
+}
