@@ -1,0 +1,43 @@
+{
+  "name_key": "material.acier_inox.name",
+  "category": "metal",
+  "stats": {
+    "durete": 42,
+    "densite": 13,
+    "valeur_base": 45,
+    "conductivite_mana": 8,
+    "flammabilite": 0,
+    "isolation": 5,
+    "conductivite_electrique": 40,
+    "flottabilite": 3,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 18,
+    "friction": 20
+  },
+  "tags": [
+    "industriel"
+  ],
+  "color": "#d5d9de",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 161,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": null,
+    "skill": null
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": {
+    "metal": 0.6,
+    "feu": 0.25,
+    "eau": 0.15
+  },
+  "composition": null
+}

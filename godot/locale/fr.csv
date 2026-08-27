@@ -473,6 +473,12 @@ journal.statut_resident,"{nom} est désormais traité en résident"
 journal.retrogradation,"{nom} le prend mal (relation −30, humeur −20)"
 ui.gestion.betail, · bétail
 material.verre_trempe.name,Verre trempé
+material.acier_inox.name,Acier inoxydable
+material.acier_tungstene.name,Acier au tungstène
+material.caoutchouc.name,Caoutchouc
+recipe.allier_inox.name,Allier l'acier inoxydable
+recipe.allier_acier_tungstene.name,Allier l'acier au tungstène
+recipe.vulcaniser_caoutchouc.name,Vulcaniser le caoutchouc
 material.brique_refractaire.name,Brique réfractaire
 material.beton.name,Béton
 recipe.tremper_verre.name,Tremper le verre

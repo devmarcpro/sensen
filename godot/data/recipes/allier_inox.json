@@ -1,0 +1,34 @@
+{
+  "name_key": "recipe.allier_inox.name",
+  "station": "forge",
+  "craft_skill": "forge",
+  "inputs": [
+    {
+      "material": "acier",
+      "forme": "brut",
+      "amount": 2
+    },
+    {
+      "material": "chrome",
+      "forme": "brut",
+      "amount": 1
+    },
+    {
+      "material": "nickel",
+      "forme": "brut",
+      "amount": 1
+    },
+    {
+      "material": "anthracite",
+      "forme": "brut",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "material": "acier_inox",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null,
+  "industrielle": true
+}

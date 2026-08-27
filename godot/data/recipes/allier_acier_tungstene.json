@@ -1,0 +1,29 @@
+{
+  "name_key": "recipe.allier_acier_tungstene.name",
+  "station": "forge",
+  "craft_skill": "forge",
+  "inputs": [
+    {
+      "material": "acier",
+      "forme": "brut",
+      "amount": 2
+    },
+    {
+      "material": "tungstene",
+      "forme": "brut",
+      "amount": 1
+    },
+    {
+      "material": "anthracite",
+      "forme": "brut",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "material": "acier_tungstene",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null,
+  "industrielle": true
+}

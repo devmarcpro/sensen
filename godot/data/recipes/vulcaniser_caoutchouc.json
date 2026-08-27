@@ -1,0 +1,29 @@
+{
+  "name_key": "recipe.vulcaniser_caoutchouc.name",
+  "station": "forge",
+  "craft_skill": "forge",
+  "inputs": [
+    {
+      "material": "seve",
+      "forme": "brut",
+      "amount": 3
+    },
+    {
+      "material": "soufre",
+      "forme": "brut",
+      "amount": 1
+    },
+    {
+      "material": "houille",
+      "forme": "brut",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "material": "caoutchouc",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null,
+  "industrielle": true
+}

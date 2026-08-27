@@ -72,6 +72,7 @@ func _ready() -> void:
 	test_masque_et_sceau()
 	test_fossoyeur_et_engrenage()
 	test_propagation_lumiere()
+	test_aciers_allies()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -962,7 +963,7 @@ func test_paperdoll_et_tutoriels() -> void:
 
 func test_materiaux() -> void:
 	var mats: Dictionary = GameData.catalogues.materials
-	verifier(mats.size() == 160, "les 160 matériaux des catalogues sont chargés (%d)" % mats.size())
+	verifier(mats.size() == 163, "les 163 matériaux des catalogues sont chargés (%d)" % mats.size())
 	var fer: Dictionary = mats.fer
 	verifier(int(fer.stats.durete) == 25 and int(fer.stats.conductivite_electrique) == 75, "le Fer suit sa table (Dur 25, CÉl 75)")
 	verifier("conducteur" in fer.tags and not ("inflammable" in fer.tags), "tags dérivés au seuil 50 (fer : conducteur)")
@@ -1055,7 +1056,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 54, "9 stations, 54 recettes plates (14 transformations, 23 meubles, 9 stations, 3 plats, 5 potions)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 57, "9 stations, 57 recettes plates (17 transformations, 23 meubles, 9 stations, 3 plats, 5 potions)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -2453,6 +2454,27 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Aciers alliés et caoutchouc
+
+func test_aciers_allies() -> void:
+	var inox: Dictionary = GameData.entree("materials", "acier_inox")
+	var tung: Dictionary = GameData.entree("materials", "acier_tungstene")
+	var caou: Dictionary = GameData.entree("materials", "caoutchouc")
+	verifier(inox.category == "metal" and int(inox.stats.durete) > int(GameData.entree("materials", "acier_trempe").stats.durete) and tung.category == "metal" and caou.category == "synthetique", "inox et tungstène sont des métaux plus durs que l'acier trempé, le caoutchouc un synthétique")
+	var r: Dictionary = GameData.entree("recipes", "allier_inox")
+	verifier(bool(r.get("industrielle", false)) and r.station == "forge" and r.output.material == "acier_inox", "allier_inox : recette industrielle à la forge")
+	var s := Simulation.new(134)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	s.grille.stations_fixes[s.grille.idx(j.pos)] = "forge"
+	verifier(not ("allier_inox" in s.recettes_disponibles(j).map(func(x: Dictionary) -> String: return str(x.get("id", "")))), "inconnue : invisible à la forge")
+	if not j.has("recettes_connues"):
+		j["recettes_connues"] = []
+	j.recettes_connues.append("allier_inox")
+	verifier("allier_inox" in s.recettes_disponibles(j).map(func(x: Dictionary) -> String: return str(x.get("id", ""))), "apprise : visible à la forge")
+	s.monde.fermer()
 
 
 # ---------------------------------------------------------------- Éclairage : la propagation 0-15
