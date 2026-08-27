@@ -2475,7 +2475,7 @@ func test_terrasser() -> void:
 	j.equipement.erase("main_principale")
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "terrasser", "vers": t, "sens": 1}), "élever sans pioche : refusé")
-	var pioche := s.generer_objet("proto_pioche_fer", 1, {}, "commun", 0) if GameData.catalogues.items.has("proto_pioche_fer") else {}
+	var pioche := s.generer_objet("proto_pioche", 1, {}, "commun", 0)
 	if not pioche.is_empty():
 		j.sac.append(pioche.uid)
 		j.equipement["main_principale"] = pioche.uid
