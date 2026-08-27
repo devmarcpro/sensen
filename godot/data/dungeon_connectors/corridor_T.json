@@ -1,0 +1,36 @@
+{
+ "kind": "connecteur",
+ "type": "corridor_T",
+ "plan": [
+  "##N##",
+  "W...E",
+  "#####"
+ ],
+ "links_floors": false,
+ "connectors": [
+  {
+   "type": "porte",
+   "position": [
+    2,
+    0
+   ],
+   "direction": "nord"
+  },
+  {
+   "type": "porte",
+   "position": [
+    0,
+    1
+   ],
+   "direction": "ouest"
+  },
+  {
+   "type": "porte",
+   "position": [
+    4,
+    1
+   ],
+   "direction": "est"
+  }
+ ]
+}

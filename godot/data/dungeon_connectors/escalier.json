@@ -1,0 +1,28 @@
+{
+ "kind": "connecteur",
+ "type": "escalier",
+ "plan": [
+  "#N#",
+  "#X#",
+  "###"
+ ],
+ "links_floors": true,
+ "connectors": [
+  {
+   "type": "porte",
+   "position": [
+    1,
+    0
+   ],
+   "direction": "nord"
+  },
+  {
+   "type": "cage_escalier",
+   "position": [
+    1,
+    1
+   ],
+   "direction": "bas"
+  }
+ ]
+}

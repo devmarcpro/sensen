@@ -1,0 +1,28 @@
+{
+  "name_key": "dungeon_theme.repaire.name",
+  "creatures": [
+    {
+      "id": "loup"
+    },
+    {
+      "id": "loup"
+    },
+    {
+      "id": "sanglier"
+    },
+    {
+      "id": "aigle"
+    }
+  ],
+  "boss": "chef_de_bande",
+  "tuiles_par_creature": 160,
+  "croissance_par_etage": 0.25,
+  "etages": [
+    2,
+    3
+  ],
+  "salles_par_etage": [
+    8,
+    15
+  ]
+}

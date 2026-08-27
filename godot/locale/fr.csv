@@ -154,6 +154,12 @@ tutorial.bascule_tactique.text,"Un hostile vous a vu : le temps ne passe plus qu
 tutorial.telegraphe.text,"Un « ! » et des tuiles rouges : une attaque est engagée et se résoudra à l'échéance. Bougez, prenez la garde (G) ou frappez avant."
 tutorial.premier_segment.text,"Un coup qui touche pose un segment de chaîne (les pastilles sous vous). Enchaînez cinq éléments dans l'ordre d'engendrement — ou quatre coups rapides puis une lourde — pour résoudre."
 tutorial.fin_de_combat.text,"Le combat se relâche : l'écran de fin montre la durée en ticks et l'XP des pistes (élément, arme, type de dégâts, armure)."
+tile_content.roche.name,Roche
+dungeon_theme.ruine.name,Ruine
+dungeon_theme.repaire.name,Repaire
+ui.donjon,DONJON {theme} · étage {etage}/{etages} · salles {salles} · E : descendre (sur la cage d'escalier)
+journal.descente,vous descendez à l'étage {etage}
+journal.pas_escalier,pas de cage d'escalier ici
 journal.victoire,plus aucun hostile. Victoire.
 journal.defaite,tu es tombé. Tab : recommencer.
 module.a_l_impact.name,À l'impact

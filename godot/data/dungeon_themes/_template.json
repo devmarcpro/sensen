@@ -1,0 +1,20 @@
+{
+  "_doc": "Thème de donjon (docs: Génération de donjon — THÈME ET PALETTE). creatures : pool tiré au peuplement ; boss : la créature de la boss_room ; tuiles_par_creature et croissance_par_etage modulent la densité par profondeur.",
+  "name_key": "dungeon_theme.<id>.name",
+  "creatures": [
+    {
+      "id": "bandit"
+    }
+  ],
+  "boss": "chef_de_bande",
+  "tuiles_par_creature": 200,
+  "croissance_par_etage": 0.25,
+  "etages": [
+    2,
+    3
+  ],
+  "salles_par_etage": [
+    8,
+    15
+  ]
+}

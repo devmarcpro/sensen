@@ -1,0 +1,51 @@
+{
+ "kind": "salle",
+ "size_category": "petite",
+ "floor_theme": [
+  "ruine",
+  "crypte",
+  "mine",
+  "repaire"
+ ],
+ "plan": [
+  "####N###",
+  "#......#",
+  "#......#",
+  "W......#",
+  "#......E",
+  "#......#",
+  "#......#",
+  "########"
+ ],
+ "flat_floor": true,
+ "connectors": [
+  {
+   "type": "porte",
+   "position": [
+    4,
+    0
+   ],
+   "direction": "nord"
+  },
+  {
+   "type": "porte",
+   "position": [
+    0,
+    3
+   ],
+   "direction": "ouest"
+  },
+  {
+   "type": "porte",
+   "position": [
+    7,
+    4
+   ],
+   "direction": "est"
+  }
+ ],
+ "special_tags": [],
+ "sprite_slots": {
+  "#00FF00": "roche"
+ }
+}

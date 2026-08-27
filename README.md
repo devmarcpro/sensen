@@ -59,7 +59,7 @@ Ouvrir [`docs/`](docs/) comme coffre dans **Obsidian**. Point d'entrée : `00 - 
 
 Le projet `godot/` s'ouvre avec **Godot 4.6** et se lance directement (F5) : la scène principale est le **prototype de combat** (étape 0) — trois arènes chargées depuis `godot/data/prototype_arenas/`, grille isométrique 32×32 avec relief, action-time à ticks (une horloge par combat), mêlée avec zones par dénivelé, garde, attaque lourde télégraphée, endurance, et une IA utility en données. Aucun asset : tout est dessiné en polygones.
 
-**Commandes :** clic — se déplacer / frapper · Maj+clic — attaque lourde · G — garde · Espace — attendre · 1-7 — changer d'arme · F1-F3 puis clic — lancer une capacité (Échap annule) · Tab — arène suivante · F5 — recharger les données · molette — zoom · clic milieu — déplacer la vue.
+**Commandes :** clic — se déplacer / frapper · Maj+clic — attaque lourde · G — garde · Espace — attendre · 1-7 — changer d'arme · F1-F3 puis clic — lancer une capacité (Échap annule) · Tab — arène suivante (puis le donjon généré) · E — descendre l'escalier · F5 — recharger les données · molette — zoom · clic milieu — déplacer la vue.
 
 ```powershell
 $godot = "C:\Users\ciryl\Documents\Godot_v4.6.3-stable_win64.exe"
@@ -71,4 +71,4 @@ python tools/check_vault.py                                                     
 & $godot --path godot res://scenes/tests/capture.tscn -- --sortie C:/tmp/c.png --arene 0 # capture d'écran (fenêtré)
 ```
 
-L'arborescence (autoload, data, systems, scenes, locale) suit la note *Arborescence du projet*. `autoload/game_data.gd` charge et valide tout `data/` au boot (bloquant en debug) ; `systems/combat/simulation.gd` est l'autorité (le client `scenes/demo/main.gd` n'envoie que des intentions). État et prochaines étapes : `docs/00 - Index/Vers la production.md`.
+L'arborescence (autoload, data, systems, scenes, locale) suit la note *Arborescence du projet*. `autoload/game_data.gd` charge et valide tout `data/` au boot (bloquant en debug) ; `systems/combat/simulation.gd` est l'autorité (le client `scenes/demo/main.gd` n'envoie que des intentions) ; `scenes/entities/creature.tscn` est la scène unique de tout être (rig en données, équipement visible, sans asset). État et prochaines étapes : `docs/00 - Index/Vers la production.md`.

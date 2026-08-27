@@ -1,0 +1,62 @@
+{
+ "kind": "salle",
+ "size_category": "moyenne",
+ "floor_theme": [
+  "ruine",
+  "crypte",
+  "mine",
+  "repaire"
+ ],
+ "plan": [
+  "#######N########",
+  "#..............#",
+  "#..............#",
+  "#..............#",
+  "#....11111111..#",
+  "#....11111111..#",
+  "#....12222221..#",
+  "W....12222221..#",
+  "#....12222221..#",
+  "#....12222221..#",
+  "#....11111111..#",
+  "#....11111111..#",
+  "#..............#",
+  "#..............#",
+  "#..............#",
+  "#######S########"
+ ],
+ "flat_floor": false,
+ "connectors": [
+  {
+   "type": "porte",
+   "position": [
+    7,
+    0
+   ],
+   "direction": "nord"
+  },
+  {
+   "type": "porte",
+   "position": [
+    0,
+    7
+   ],
+   "direction": "ouest"
+  },
+  {
+   "type": "porte",
+   "position": [
+    7,
+    15
+   ],
+   "direction": "sud"
+  }
+ ],
+ "special_tags": [
+  "boss_room_eligible",
+  "treasure_eligible"
+ ],
+ "sprite_slots": {
+  "#00FF00": "roche"
+ }
+}

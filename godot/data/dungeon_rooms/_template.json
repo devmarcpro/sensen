@@ -1,20 +1,35 @@
 {
-  "_doc": "Salle de donjon (docs: Salles et connecteurs / B.10). plan = PNG indexé (couche matériau stand-in + couche hauteur).",
+  "_doc": "Salle de donjon (docs: Salles et connecteurs / B.10, Décision — Prefabs de donjon en tuiles). plan = grille JSON en caractères : '.' sol, '#' mur, ' ' hors prefab, N/S/E/W porte sur le bord, X cage d'escalier, chiffre = hauteur relative. Générés par tools/gen_dungeon_prefabs.py.",
   "kind": "salle",
-  "size_category": "moyenne",
+  "size_category": "petite",
   "floor_theme": [
     "ruine"
   ],
-  "plan": "models/dungeon/rooms/<id>.png",
-  "flat_floor": false,
+  "plan": [
+    "##N###",
+    "#....#",
+    "#....#",
+    "W....#",
+    "#....#",
+    "######"
+  ],
+  "flat_floor": true,
   "connectors": [
     {
       "type": "porte",
       "position": [
-        0,
-        8
+        2,
+        0
       ],
       "direction": "nord"
+    },
+    {
+      "type": "porte",
+      "position": [
+        0,
+        3
+      ],
+      "direction": "ouest"
     }
   ],
   "special_tags": [],

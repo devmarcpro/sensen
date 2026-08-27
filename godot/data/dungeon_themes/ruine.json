@@ -1,0 +1,28 @@
+{
+  "name_key": "dungeon_theme.ruine.name",
+  "creatures": [
+    {
+      "id": "bandit"
+    },
+    {
+      "id": "bandit"
+    },
+    {
+      "id": "loup"
+    },
+    {
+      "id": "scorpion"
+    }
+  ],
+  "boss": "chef_de_bande",
+  "tuiles_par_creature": 200,
+  "croissance_par_etage": 0.25,
+  "etages": [
+    2,
+    3
+  ],
+  "salles_par_etage": [
+    8,
+    15
+  ]
+}

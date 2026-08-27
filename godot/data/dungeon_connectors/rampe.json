@@ -1,0 +1,29 @@
+{
+ "kind": "connecteur",
+ "type": "rampe",
+ "plan": [
+  "#N#",
+  "#2#",
+  "#1#",
+  "#S#"
+ ],
+ "links_floors": false,
+ "connectors": [
+  {
+   "type": "porte",
+   "position": [
+    1,
+    0
+   ],
+   "direction": "nord"
+  },
+  {
+   "type": "porte",
+   "position": [
+    1,
+    3
+   ],
+   "direction": "sud"
+  }
+ ]
+}

@@ -27,7 +27,7 @@
 | name_cultures/ | cultures de nommage | Culture de nommage (B.11), C.9 |
 | components/, component_recipes/ | craft compositionnel | B.13, Composants (F.11) |
 | status_effects/ | les 14 statuts du prototype (`tools/gen_status_effects.py`) : période, durée, contrôle, modifiers par cible générique | Statuts (F.4), Statuts de contrôle et anti-stunlock |
-| dungeon_rooms/, dungeon_connectors/ | prefabs de donjon | B.10, Décision — Prefabs de donjon en tuiles |
+| dungeon_rooms/, dungeon_connectors/, dungeon_themes/ | 12 salles + 8 connecteurs en grilles de caractères (`tools/gen_dungeon_prefabs.py`), thèmes (pool, boss, densité, étages) | B.10, Décision — Prefabs de donjon en tuiles, Génération de donjon |
 | plants/ | plantes | Plantes (F.8) |
 | recipes/ | transformations de matériaux | Stations de transformation (C.8) |
 | tutorials/ | tooltips contextuels (signal EventBus + conditions → text_key) | Tooltips contextuels (E.19) |

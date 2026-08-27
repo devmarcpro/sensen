@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "required": [
+    "kind",
+    "type",
+    "plan",
+    "links_floors",
+    "connectors"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "connecteur"
+      ]
+    },
+    "type": {
+      "type": "string"
+    },
+    "plan": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 2
+    },
+    "links_floors": {
+      "type": "boolean"
+    },
+    "connectors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "position"
+        ]
+      }
+    }
+  }
+}

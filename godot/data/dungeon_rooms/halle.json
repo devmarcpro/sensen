@@ -1,0 +1,69 @@
+{
+ "kind": "salle",
+ "size_category": "moyenne",
+ "floor_theme": [
+  "ruine",
+  "crypte",
+  "mine",
+  "repaire"
+ ],
+ "plan": [
+  "#######N########",
+  "#..............#",
+  "#..............#",
+  "#..............#",
+  "#..............#",
+  "#..............#",
+  "#..............#",
+  "#..............E",
+  "W..............#",
+  "#..............#",
+  "#..............#",
+  "#..............#",
+  "#..............#",
+  "#..............#",
+  "#..............#",
+  "########S#######"
+ ],
+ "flat_floor": true,
+ "connectors": [
+  {
+   "type": "porte",
+   "position": [
+    7,
+    0
+   ],
+   "direction": "nord"
+  },
+  {
+   "type": "porte",
+   "position": [
+    15,
+    7
+   ],
+   "direction": "est"
+  },
+  {
+   "type": "porte",
+   "position": [
+    0,
+    8
+   ],
+   "direction": "ouest"
+  },
+  {
+   "type": "porte",
+   "position": [
+    8,
+    15
+   ],
+   "direction": "sud"
+  }
+ ],
+ "special_tags": [
+  "entree_eligible"
+ ],
+ "sprite_slots": {
+  "#00FF00": "roche"
+ }
+}

@@ -49,6 +49,19 @@ static func depuis_arene(arene: Dictionary, contenus: Dictionary, regles_dep: Di
 	return g
 
 
+## Construit la grille d'un étage de donjon généré (Donjon.generer_etage) : le plein est de la roche.
+static func depuis_etage(etage: Dictionary, contenus: Dictionary, regles_dep: Dictionary, oeil: int) -> Grille:
+	var g := Grille.new(int(etage.largeur), int(etage.hauteur))
+	g.contenu_defs = contenus
+	g.dep = regles_dep
+	g.hauteur_oeil = oeil
+	g.hauteurs = etage.hauteurs.duplicate()
+	for i in g.largeur * g.hauteur_grille:
+		if not etage.sol.has(i):
+			g.poser_contenu(Vector2i(i % g.largeur, i / g.largeur), "roche")
+	return g
+
+
 # ---------------------------------------------------------------- accès
 
 func idx(p: Vector2i) -> int:

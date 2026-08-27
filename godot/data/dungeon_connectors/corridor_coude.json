@@ -1,0 +1,28 @@
+{
+ "kind": "connecteur",
+ "type": "corridor_coude",
+ "plan": [
+  "#N###",
+  "#...E",
+  "#####"
+ ],
+ "links_floors": false,
+ "connectors": [
+  {
+   "type": "porte",
+   "position": [
+    1,
+    0
+   ],
+   "direction": "nord"
+  },
+  {
+   "type": "porte",
+   "position": [
+    4,
+    1
+   ],
+   "direction": "est"
+  }
+ ]
+}

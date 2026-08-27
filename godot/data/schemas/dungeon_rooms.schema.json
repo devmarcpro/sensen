@@ -1,0 +1,64 @@
+{
+  "type": "object",
+  "required": [
+    "kind",
+    "size_category",
+    "floor_theme",
+    "plan",
+    "connectors",
+    "special_tags"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "salle"
+      ]
+    },
+    "size_category": {
+      "type": "string",
+      "enum": [
+        "petite",
+        "moyenne",
+        "grande",
+        "immense"
+      ]
+    },
+    "floor_theme": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "plan": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 2
+    },
+    "flat_floor": {
+      "type": "boolean"
+    },
+    "connectors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "position",
+          "direction"
+        ]
+      }
+    },
+    "special_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sprite_slots": {
+      "type": "object"
+    }
+  }
+}

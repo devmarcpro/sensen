@@ -81,7 +81,10 @@ func _ready() -> void:
 
 func _charger() -> void:
 	sim = Simulation.new(0x68EE)
-	sim.charger_arene(arenes[arene_courante])
+	if arene_courante >= arenes.size():
+		sim.charger_donjon("ruine", 0x68EE, 1, 1)   # Tab après les arènes : le donjon
+	else:
+		sim.charger_arene(arenes[arene_courante])
 	joueur_id = ""
 	for e in sim.vivants():
 		if e.controle == "joueur":
@@ -107,6 +110,16 @@ func _charger() -> void:
 		_log(tr("ui.aide.capacites").format({"liste": " · ".join(caps)}))
 	visee = -1
 	_recentrer()
+
+
+## La simulation a changé de grille (descente) : la vue statique et les nœuds repartent de zéro.
+func _apres_changement_de_grille() -> void:
+	terrain.queue_redraw()
+	for n in noeuds.values():
+		n.queue_free()
+	noeuds.clear()
+	chemin_en_cours.clear()
+	telegraphes.clear()
 
 
 func _recentrer() -> void:
@@ -238,7 +251,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 	if not ecran_fin.is_empty() and ((ev is InputEventMouseButton and ev.pressed) or (ev is InputEventKey and ev.pressed)):
 		ecran_fin.clear()
 		if ev is InputEventKey and ev.keycode == KEY_TAB:
-			arene_courante = (arene_courante + 1) % arenes.size()
+			arene_courante = (arene_courante + 1) % (arenes.size() + 1)
 			_charger()
 		return
 	if ev is InputEventMouseMotion:
@@ -261,8 +274,14 @@ func _unhandled_input(ev: InputEvent) -> void:
 				chemin_en_cours.clear()
 				sim.intention(joueur_id, {"type": "attendre"})
 			KEY_TAB:
-				arene_courante = (arene_courante + 1) % arenes.size()
+				arene_courante = (arene_courante + 1) % (arenes.size() + 1)
 				_charger()
+			KEY_E:
+				if sim.attente.has(joueur_id):
+					if not sim.intention(joueur_id, {"type": "descendre"}):
+						_log(tr("journal.pas_escalier"))
+					else:
+						_apres_changement_de_grille()
 			KEY_F1, KEY_F2, KEY_F3:
 				var k: int = ev.keycode - KEY_F1
 				if not j.is_empty() and k < j.get("capacites", []).size():
@@ -346,6 +365,8 @@ func _draw() -> void:
 		_losange(t, Color(1.0, 0.2, 0.1, 0.5))
 	if survol.x >= 0:
 		_losange(survol, Color(1, 1, 1, 0.22))
+	if not sim.donjon.is_empty() and sim.donjon.escalier != null:
+		_losange(sim.donjon.escalier, Color(0.9, 0.7, 0.2, 0.6))
 	for gl in sim.glyphes:   # les glyphes : un losange cerclé à la teinte de leur élément
 		var cg := _ecran(gl.pos, g.h(gl.pos))
 		var teinte := sim.wuxing.teinte(sim.wuxing.dominante(gl.elements)) if not gl.elements.is_empty() else Color(0.8, 0.8, 0.9)
@@ -384,8 +405,20 @@ func _dessiner_terrain(ci: CanvasItem) -> void:
 	for s in range(g.largeur + g.hauteur_grille - 1):     # tri de profondeur : diagonales x+y
 		for x in g.largeur:
 			var y := s - x
-			if y >= 0 and y < g.hauteur_grille:
+			if y >= 0 and y < g.hauteur_grille and not _plein_invisible(g, Vector2i(x, y)):
 				_dessine_tuile(ci, Vector2i(x, y))
+
+
+## Le plein d'un donjon (roche) n'est dessiné que s'il borde une tuile franchissable : le reste
+## est du fond — 9 000 blocs de roche par image, c'est 80 ms ; une centaine, c'est rien.
+func _plein_invisible(g: Grille, t: Vector2i) -> bool:
+	if not g.bloque_passage(t):
+		return false
+	for d in Grille.DIRS:
+		var v: Vector2i = t + d
+		if g.dans(v) and not g.bloque_passage(v):
+			return false
+	return true
 
 
 func _zones_telegraphes() -> Dictionary:
@@ -435,7 +468,7 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 			c + Vector2(0, TH * 0.5), c + Vector2(TW * 0.5, 0),
 			c + Vector2(TW * 0.5, d2), c + Vector2(0, TH * 0.5 + d2)]), flanc.darkened(0.15))
 	if g.bloque_passage(t):   # un mur : un bloc sombre posé sur la tuile
-		var hm := 3 * HSTEP
+		var hm := int(g.contenu_de(t).get("hauteur_vue", 3)) * HSTEP
 		ci.draw_colored_polygon(PackedVector2Array([
 			c + Vector2(-TW * 0.5, 0), c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0),
 			c + Vector2(TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm), c + Vector2(-TW * 0.5, -hm)]),
@@ -487,10 +520,13 @@ func _segments(e: Dictionary) -> Array:
 func _maj_ui() -> void:
 	var j := joueur()
 	var g := sim.grille
-	var lignes: Array[String] = [tr("ui.titre") + " · " + tr(GameData.entree("prototype_arenas", arenes[arene_courante]).name_key)]
+	var titre: String = tr(GameData.entree("prototype_arenas", arenes[arene_courante]).name_key) if sim.donjon.is_empty() else tr("ui.donjon").format({"theme": tr(GameData.entree("dungeon_themes", sim.donjon.theme).name_key), "etage": sim.donjon.etage, "etages": sim.donjon.etages, "salles": sim.donjon.salles})
+	var lignes: Array[String] = [tr("ui.titre") + " · " + titre]
 	var mode := tr("ui.mode.combat") if sim.en_combat(j) else tr("ui.mode.exploration").format({"tps": sim.regles.r.ticks_par_seconde_exploration})
 	lignes.append(tr("ui.horloge").format({"horloge": sim.horloge_de(j).ticks, "mode": mode}))
-	for e in sim.vivants():
+	var proches := sim.vivants().filter(func(e: Dictionary) -> bool: return e.id == joueur_id or Grille.distance(e.pos, j.pos) <= 12)
+	proches = proches.slice(0, 10)   # les êtres en vue seulement : l'écran n'est pas un registre
+	for e in proches:
 		lignes.append("  " + tr("ui.entite.ligne").format({"nom": tr(e.name_key), "pv": e.sante, "pv_max": e.sante_max,
 			"end": e.endurance, "compteur": e.compteur, "h": g.h(e.pos)}) + (" · GARDE" if e.garde else "")
 			+ (" · " + tr(sim.items[e.equipement.main_principale].name_key) if e.equipement.has("main_principale") else "")
@@ -522,9 +558,9 @@ func _maj_ui() -> void:
 	ui_bas.text = "\n".join(bas)
 	# Timeline : les prochaines actions de l'horloge du joueur, par compteur croissant.
 	var timeline: Array[String] = [tr("ui.timeline")]
-	var acteurs := sim.vivants().filter(func(e: Dictionary) -> bool: return e.horloge == j.horloge)
+	var acteurs := sim.vivants().filter(func(e: Dictionary) -> bool: return e.horloge == j.horloge and (e.id == joueur_id or Grille.distance(e.pos, j.pos) <= 12))
 	acteurs.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.compteur < b.compteur)
-	for e in acteurs:
+	for e in acteurs.slice(0, 12):
 		var suffixe := ""
 		if not e.action_en_cours.is_empty():
 			suffixe = " ← " + tr(e.action_en_cours.name_key)

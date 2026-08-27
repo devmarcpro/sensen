@@ -13,6 +13,7 @@ var wuxing: WuXing
 var capacites: Capacites
 var grille: Grille
 var arene_id: String
+var donjon: Dictionary = {}           # {theme, graine, id, etage, etages, salles} quand la grille est un étage de donjon
 var entites: Dictionary = {}          # id → être (Etres.instancier)
 var ordre: Array[String] = []         # ordre stable des ids (départage des égalités de compteur)
 var items: Dictionary
@@ -51,9 +52,46 @@ func _init(p_graine: int) -> void:
 ## Charge une arène de data/prototype_arenas et instancie ses êtres.
 func charger_arene(id: String) -> void:
 	arene_id = id
+	donjon = {}
 	var arene := GameData.entree("prototype_arenas", id)
 	grille = Grille.depuis_arene(arene, GameData.config("tile_contents"),
 		regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
+	_reinitialiser()
+	var j: Dictionary = arene.spawns.player
+	ajouter(j.creature, Vector2i(int(j.pos[0]), int(j.pos[1])), "joueur")
+	for s: Dictionary in arene.spawns.enemies:
+		ajouter(s.creature, Vector2i(int(s.pos[0]), int(s.pos[1])), "ia")
+
+
+## Génère et charge l'étage `etage` d'un donjon (Génération de donjon). `joueur` : la fiche du
+## joueur au premier étage, ou son état courant pour le faire descendre avec ses PV et son sac.
+func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, joueur: Dictionary = {}) -> void:
+	var theme := GameData.entree("dungeon_themes", theme_id)
+	var etages: int = donjon.get("etages", 0)
+	if etages == 0:
+		var r := RandomNumberGenerator.new()
+		r.seed = hash([graine, id_donjon])
+		etages = r.randi_range(int(theme.etages[0]), int(theme.etages[1]))
+	var gen := Donjon.new(GameData.catalogues.get("dungeon_rooms", {}), GameData.catalogues.get("dungeon_connectors", {}), theme)
+	var r2 := RandomNumberGenerator.new()
+	r2.seed = hash([graine, id_donjon, etage, "salles"])
+	var nb := r2.randi_range(int(theme.salles_par_etage[0]), int(theme.salles_par_etage[1]))
+	var e := gen.generer_etage(graine, id_donjon, etage, nb, etage == etages)
+	arene_id = "donjon"
+	donjon = {"theme": theme_id, "graine": graine, "id": id_donjon, "etage": etage, "etages": etages,
+		"salles": gen._nb_salles(e), "escalier": e.escalier, "boss": e.boss}
+	grille = Grille.depuis_etage(e, GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
+	_reinitialiser()
+	if joueur.is_empty():
+		ajouter(theme.get("joueur", "aventurier"), e.entree, "joueur")
+	else:
+		_reprendre(joueur, e.entree)
+	for s: Dictionary in e.spawns:
+		if grille.occupant(s.pos).is_empty():
+			ajouter(s.creature, s.pos, "ia")
+
+
+func _reinitialiser() -> void:
 	entites.clear()
 	ordre.clear()
 	combats.clear()
@@ -64,10 +102,36 @@ func charger_arene(id: String) -> void:
 		TickManager.retirer(nom)
 	horloge_monde = TickManager.creer("monde", Horloge.Mode.TEMPS_REEL, float(regles.r.ticks_par_seconde_exploration))
 	horloge_monde.avancee.connect(_sur_avancee_monde)
-	var j: Dictionary = arene.spawns.player
-	ajouter(j.creature, Vector2i(int(j.pos[0]), int(j.pos[1])), "joueur")
-	for s: Dictionary in arene.spawns.enemies:
-		ajouter(s.creature, Vector2i(int(s.pos[0]), int(s.pos[1])), "ia")
+
+
+## Un être qui change d'étage garde son état (PV, mana, sac, XP, compétences) — instance ≠ définition.
+func _reprendre(e: Dictionary, pos: Vector2i) -> void:
+	_n_entites += 1
+	e.pos = pos
+	e.ancre = pos
+	e.compteur = 0
+	e.horloge = "monde"
+	e.tick_endurance = 0
+	e.action_en_cours = {}
+	e.statuts = []
+	e.declencheurs_armes = []
+	e.cible = ""
+	e.contact = false
+	entites[e.id] = e
+	ordre.append(e.id)
+	grille.placer(e.id, pos)
+
+
+## Descendre : l'être doit être sur la cage d'escalier de l'étage (Donjons : escalier = lien).
+func _descendre(e: Dictionary) -> bool:
+	if donjon.is_empty() or donjon.escalier == null or e.pos != donjon.escalier:
+		return false
+	if int(donjon.etage) >= int(donjon.etages):
+		return false
+	var prochain: int = int(donjon.etage) + 1
+	EventBus.emettre(&"journal", [&"journal.descente", {"etage": prochain}])
+	charger_donjon(donjon.theme, int(donjon.graine), int(donjon.id), prochain, e)
+	return true
 
 
 func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
@@ -245,6 +309,9 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _changer_arme(e, str(i.get("item", "")), h.ticks)
 		"capacite":
 			ok = _lancer_capacite(e, int(i.get("index", -1)), i.get("cible", Vector2i(-1, -1)), h.ticks)
+		"descendre":
+			if _descendre(e):
+				return true   # la grille a changé : plus rien à finir sur l'ancienne
 	if ok:
 		attente.erase(id)
 		_fin_de_pas(e.horloge)

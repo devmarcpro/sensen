@@ -39,6 +39,9 @@ L'algorithme par graphe intégral (attache → connecteur → salle → collisio
 - **Format : PNG indexé**, deux fichiers par prefab — `<id>.png` (couche matériau en couleurs stand-in + tuiles-marqueurs d'attache) et `<id>_h.png` (couche hauteur, niveaux de gris 0-20). S'édite dans n'importe quel éditeur pixel art, se diffe visuellement, se relit à chaud (F5, [[Décision — Pipeline de contenu]]).
 - **Bibliothèque au lancement : 24 prefabs** — 12 salles (3 petites, 4 moyennes, 3 grandes, 2 immenses dont une éligible boss) + 8 connecteurs (droit ×2, coudé ×2, T, escalier, porte simple, rampe) + 4 entrées de surface. Assez pour que la variété tienne, grâce au remapping de palette par thème ([[Donjons — structure et intégration]] : *un petit nombre de prefabs, une grande variété visuelle*).
 
+> [!success] Complété le 2026-08-27 — grille JSON en caractères, le PNG attendra un éditeur
+> La note admettait « image indexée (PNG) ou grille JSON » avant de fixer le PNG. Sans éditeur pixel art dans la boucle autonome, le prototype prend la **grille JSON en caractères** (`plan: ["##N##", "#...#", …]` : `.` sol, `#` mur, ` ` hors prefab, `N/S/E/W` porte sur le bord, `X` cage d'escalier, chiffre = hauteur relative 0-9) — même contenu que les deux couches PNG, diffable en texte, généré par `tools/gen_dungeon_prefabs.py`. L'import PNG viendra quand un artiste en aura besoin ; le loader acceptera les deux. **Bibliothèque : 12 salles + 8 connecteurs écrits** (les 4 entrées de surface attendent l'étape 8). Les `connectors[]` sont dérivés des marqueurs du plan.
+
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Génération de donjon]], [[Salles et connecteurs]], [[Grille continue]]
 - **Alimente** : [[Donjons — structure et intégration]], [[Ouvert — Taille des salles de donjon]]

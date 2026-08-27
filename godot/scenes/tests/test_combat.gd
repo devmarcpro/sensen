@@ -25,6 +25,7 @@ func _ready() -> void:
 	test_evenements()
 	test_niveaux()
 	test_paperdoll_et_tutoriels()
+	test_donjon()
 	test_arenes_autonomes()
 	if echecs == 0:
 		print("TESTS : tout passe")
@@ -899,3 +900,54 @@ func test_paperdoll_et_tutoriels() -> void:
 	EventBus.dispatcher()
 	verifier(vus.size() == 1, "once : pas de seconde fois")
 	tuto.queue_free()
+
+
+# ---------------------------------------------------------------- Étape 2 : génération de donjon
+
+func test_donjon() -> void:
+	var gen := Donjon.new(GameData.catalogues["dungeon_rooms"], GameData.catalogues["dungeon_connectors"], GameData.entree("dungeon_themes", "ruine"))
+	verifier(GameData.catalogues["dungeon_rooms"].size() == 12 and GameData.catalogues["dungeon_connectors"].size() == 8, "bibliothèque : 12 salles + 8 connecteurs")
+	var t0 := Time.get_ticks_usec()
+	var e := gen.generer_etage(42, 1, 1, 12, false)
+	var dt := (Time.get_ticks_usec() - t0) / 1000.0
+	var e2 := gen.generer_etage(42, 1, 1, 12, false)
+	verifier(e.pieces.size() == e2.pieces.size() and e.spawns.size() == e2.spawns.size() and e.hauteurs == e2.hauteurs, "déterministe à seed égale")
+	verifier(gen._nb_salles(e) >= 4, "au moins 4 salles placées (%d)" % gen._nb_salles(e))
+	verifier(dt < 100.0, "étage généré en %.1f ms (< 100 ms, critère É2)" % dt)
+	# Aucun chevauchement de pièces
+	var ok := true
+	for i in e.pieces.size():
+		for k in range(i + 1, e.pieces.size()):
+			if e.pieces[i].rect.intersects(e.pieces[k].rect):
+				ok = false
+	verifier(ok, "aucun chevauchement de pièces")
+	# Connexité : toutes les tuiles de sol de toutes les salles sont atteignables depuis l'entrée
+	var g := Grille.depuis_etage(e, GameData.config("tile_contents"), GameData.config("combat_rules").deplacement, 1)
+	var atteint := g.atteignables(e.entree, 100000)
+	var manquantes := 0
+	for p in e.pieces:
+		var c := gen._centre_libre(e, p)
+		if not atteint.has(c):
+			manquantes += 1
+	verifier(manquantes == 0, "connexité par construction : chaque pièce est atteignable depuis l'entrée (%d manquantes)" % manquantes)
+	verifier(e.escalier != null and atteint.has(e.escalier), "un escalier vers l'étage suivant, atteignable")
+	# Dernier étage : boss dans la salle la plus lointaine
+	var fin := gen.generer_etage(42, 1, 2, 10, true)
+	verifier(fin.boss != null and fin.escalier == null, "dernier étage : boss, pas d'escalier")
+	var a_boss := false
+	for sp in fin.spawns:
+		if sp.creature == "chef_de_bande":
+			a_boss = true
+	verifier(a_boss and fin.spawns.size() > 1, "le boss du thème et des créatures du pool sont posés")
+	# En simulation : charger, descendre avec son état
+	var s := Simulation.new(7)
+	s.charger_donjon("ruine", 7, 1, 1)
+	var j := joueur_de(s)
+	verifier(not j.is_empty() and s.donjon.etage == 1 and s.grille.bloque_passage(Vector2i(0, 0)), "donjon chargé : le plein est de la roche, le joueur à l'entrée")
+	j.sante = 30
+	s.grille.liberer(j.pos)
+	j.pos = s.donjon.escalier
+	s.grille.placer(j.id, j.pos)
+	s.horloge_monde.avancer(1)
+	verifier(s.intention(j.id, {"type": "descendre"}), "descendre depuis la cage d'escalier")
+	verifier(s.donjon.etage == 2 and joueur_de(s).sante == 30 and joueur_de(s).id == j.id, "étage 2, le même être avec ses PV")

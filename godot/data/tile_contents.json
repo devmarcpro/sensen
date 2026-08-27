@@ -20,5 +20,15 @@
       "invocation",
       "solide"
     ]
+  },
+  "roche": {
+    "name_key": "tile_content.roche.name",
+    "bloque_passage": true,
+    "bloque_vue": true,
+    "hauteur_vue": 4,
+    "tags": [
+      "roche",
+      "solide"
+    ]
   }
 }

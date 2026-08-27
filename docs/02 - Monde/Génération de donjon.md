@@ -79,6 +79,9 @@ NETTOYAGE ET DISPARITION (3.5) : à la mort du boss (`creature_killed`
 
 **Signal :** `dungeon_cleared` sur l'EventBus, écouté par le timer de disparition et les quêtes de guilde ([[EventBus]]).
 
+> [!success] Codé le 2026-08-27 — `systems/worldgen/donjon.gd`
+> L'algorithme par graphe tel quel : salle d'entrée au centre d'une grille de 96×96 (le « point fixe » — la surface n'existe pas encore), attache libre au hasard → connecteur (hors escalier) dont une porte fait face → salle dont une porte fait face à l'autre bout → collision AABB avec **1 tuile de marge** contre tout le déjà-placé (max 8 essais, 32 échecs consécutifs arrêtent l'étage), connexité par construction, escalier posé sur la salle de distance de graphe maximale, boss au plus loin de l'entrée au dernier étage, peuplement par le **thème** (`data/dungeon_themes/` : pool de créatures, boss, `tuiles_par_creature`, `croissance_par_etage` = +25 % par étage, nombre d'étages et de salles). Le plein de l'étage est un contenu de tuile `roche` (bloque passage et vue). Déterministe par `hash(graine, id_donjon, étage)`. Mesuré : un étage de 12 salles en **quelques ms** (critère É2 : < 100 ms). L'escalier est une intention `descendre` sur la cage : l'être **change de grille avec son état** (PV, mana, sac, XP, compétences) — instance ≠ définition. La formule de profondeur (`corruption + étage × 8`) attend le niveau des créatures (étape 4) ; en attendant, la profondeur augmente seulement la densité.
+
 ## Liens
 - **Dépend de** : [[Donjons — structure et intégration]], [[Salles et connecteurs]], [[Unification macro-micro]], [[Dérive de la corruption]]
 - **Alimente** : [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Créatures]], [[Gabarit de quête]]

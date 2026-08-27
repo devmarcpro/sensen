@@ -1,0 +1,27 @@
+{
+ "kind": "connecteur",
+ "type": "porte_simple",
+ "plan": [
+  "#N#",
+  "#S#"
+ ],
+ "links_floors": false,
+ "connectors": [
+  {
+   "type": "porte",
+   "position": [
+    1,
+    0
+   ],
+   "direction": "nord"
+  },
+  {
+   "type": "porte",
+   "position": [
+    1,
+    1
+   ],
+   "direction": "sud"
+  }
+ ]
+}
