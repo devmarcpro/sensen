@@ -1,0 +1,39 @@
+{
+  "name_key": "status.sang_de_la_nuit.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 1000,
+  "duree_ticks": 200,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "stat:force",
+      "add": 3
+    },
+    {
+      "cible": "stat:dexterite",
+      "add": 3
+    },
+    {
+      "cible": "stat:endurance",
+      "add": 3
+    },
+    {
+      "cible": "stat:volonte",
+      "add": 3
+    },
+    {
+      "cible": "stat:perception",
+      "add": 3
+    },
+    {
+      "cible": "stat:charisme",
+      "add": 3
+    }
+  ],
+  "tags": [
+    "positif",
+    "vampire"
+  ]
+}

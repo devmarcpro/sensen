@@ -663,6 +663,8 @@ func _options_tuile(t: Vector2i) -> Array:
 			res.append({"id": "apprivoiser", "cible": occ})
 		if sim.a_talent(j, "saisie") and d == 1 and str(j.get("porte", "")).is_empty():
 			res.append({"id": "saisir", "cible": occ})
+		if sim.a_talent(j, "soif_de_sang") and d == 1:
+			res.append({"id": "mordre", "cible": occ})
 		if sim.a_talent(j, "maitre_du_tempo") and x.camp != j.camp and d <= int(sim.regles.r.talents.maitre_du_tempo.portee):
 			res.append({"id": "tempo", "cible": occ})
 		res.append({"id": "attaquer", "cible": occ})
@@ -760,6 +762,8 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "masque", "masque": str(opt.masque)})
 		"relever":
 			sim.intention(joueur_id, {"type": "relever", "cible": str(opt.cible)})
+		"mordre":
+			sim.intention(joueur_id, {"type": "mordre", "cible": str(opt.cible)})
 		"affut":
 			sim.intention(joueur_id, {"type": "affut", "cible": opt.cible})
 		"declencher_glyphe":

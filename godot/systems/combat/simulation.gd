@@ -1082,6 +1082,62 @@ func pieces_de_cellule(cell: Vector2i) -> Array:
 	return res
 
 
+## Le Vampire (Talents de race) : la nuit le porte, le jour le brûle ; les mordus s'éveillent à l'aube.
+func _tiquer_vampires(nom: String, tick: int) -> void:
+	var nuit := est_nuit()
+	var refresh := int(regles.r.talents.get("soif_de_sang", {}).get("refresh_ticks", 200))
+	for e in vivants():
+		if e.horloge != nom and a_talent(e, "soif_de_sang"):
+			continue
+		if a_talent(e, "soif_de_sang"):
+			if nuit:
+				appliquer_statut(e, "sang_de_la_nuit", refresh, e.id)
+				_retirer_statut(e, "soleil")
+			else:
+				_retirer_statut(e, "sang_de_la_nuit")
+				if lieu != "donjon":
+					appliquer_statut(e, "soleil", refresh, e.id)
+		elif not nuit and Etres.a_statut_tag(e, "morsure", statuts_defs):
+			_devenir_vampire(e)
+
+
+func _retirer_statut(e: Dictionary, id: String) -> void:
+	var avant: int = e.statuts.size()
+	e.statuts = e.statuts.filter(func(s0: Dictionary) -> bool: return str(s0.id) != id)
+	if e.statuts.size() != avant and Etres.statut_touche_stats(id, statuts_defs):
+		Etres.recalculer(e, items, affixes_defs, regles)
+
+
+func _devenir_vampire(e: Dictionary) -> void:
+	_retirer_statut(e, "morsure")
+	e["race_origine"] = str(e.get("race", ""))
+	e.race = "vampire"
+	e["tags_acquis_race"] = GameData.catalogues.races.vampire.get("tags_acquis", []).duplicate()   # vision nocturne, relu par Etres.recalculer
+	_contreparties(e)
+	e["vue_sale"] = true
+	EventBus.emettre(&"journal", [&"journal.vampire", {"nom": e.name_key}])
+
+
+## Mordre un être adjacent : des dégâts, la jauge pleine de son élément, et la Morsure aux humanoïdes.
+func _mordre(e: Dictionary, cible_id: String, tick: int) -> bool:
+	var c: Dictionary = entites.get(cible_id, {})
+	if not a_talent(e, "soif_de_sang") or c.is_empty() or not c.vivant or Grille.distance(e.pos, c.pos) != 1:
+		return false
+	var deg := des.jet(str(regles.r.talents.soif_de_sang.degats_morsure))
+	_appliquer_degats(c, deg, e.id, {"type": "perforant", "element": {}, "morsure": true})
+	if e.has("chaine"):
+		var elem := wuxing.dominante(c.get("elements", {}) if c.get("elements") != null else {})
+		if elem.is_empty():
+			elem = "eau"
+		while e.chaine.segments.size() < int(e.chaine.capacite) - 1:
+			wuxing.poser(e.chaine, elem, tick)
+	if c.vivant and "humanoide" in c.get("tags", []):
+		appliquer_statut(c, "morsure", int(statuts_defs.morsure.duree_ticks), e.id)
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.morsure", {"nom": e.name_key, "cible": c.name_key, "degats": deg}])
+	return true
+
+
 ## Le Fossoyeur (Talents de classe) : relever un cadavre en invocation temporaire, contre de la réputation.
 func _relever(e: Dictionary, cible_id: String, tick: int) -> bool:
 	var c: Dictionary = entites.get(cible_id, {})
@@ -5096,6 +5152,9 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 	if not e.has("faim"):
 		e["faim"] = 100
 		e["faim_tick"] = tick
+	if a_talent(e, "soif_de_sang") and "plat" in it.get("tags", []):   # le Vampire ne mange plus de plats
+		EventBus.emettre(&"journal", [&"journal.plat_refuse", {}])
+		return false
 	var cru := bool(it.get("cru", false))
 	var nutrition := float(it.get("nutrition", 0)) * (float(regles.r.cru_facteur) if cru else 1.0) * float(it.get("harmonie", 1.0))
 	var extra: Array[String] = []
@@ -5242,6 +5301,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 			grille.liberer(x.pos)
 			EventBus.emettre(&"journal", [&"journal.releve_fin", {"nom": x.name_key}])
 	_tirs_d_affuts(nom, tick)
+	_tiquer_vampires(nom, tick)
 	var o_restants: Array[Dictionary] = []
 	for o in obstacles:
 		var src: Dictionary = entites.get(o.source, {})
@@ -5391,6 +5451,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _porter_masque(e, str(i.get("masque", "")), h.ticks)
 		"relever":
 			ok = _relever(e, str(i.get("cible", "")), h.ticks)
+		"mordre":
+			ok = _mordre(e, str(i.get("cible", "")), h.ticks)
 		"affut":
 			ok = _deployer_affut(e, i.get("cible", e.pos), h.ticks)
 		"declencher_glyphe":

@@ -1,0 +1,20 @@
+{
+  "name_key": "race.vampire.name",
+  "bonus_stats": {
+    "charisme": 1,
+    "perception": 1
+  },
+  "xp_mult": 1.1,
+  "base_potentials": {
+    "_defaut": 90
+  },
+  "talent": "soif_de_sang",
+  "lifespan": 80,
+  "tags": [
+    "cache",
+    "humanoide"
+  ],
+  "tags_acquis": [
+    "vision_nocturne"
+  ]
+}

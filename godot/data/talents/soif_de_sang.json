@@ -1,0 +1,8 @@
+{
+  "name_key": "talent.soif_de_sang.name",
+  "desc_key": "talent.soif_de_sang.desc",
+  "classe": null,
+  "race": "vampire",
+  "cache": true,
+  "tags": []
+}

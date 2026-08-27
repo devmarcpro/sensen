@@ -73,6 +73,7 @@ func _ready() -> void:
 	test_fossoyeur_et_engrenage()
 	test_propagation_lumiere()
 	test_aciers_allies()
+	test_vampire()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2454,6 +2455,41 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Le Vampire
+
+func test_vampire() -> void:
+	var s := Simulation.new(135)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var jour := int(s._cycle().ticks_par_jour)
+	s.horloge_monde.ticks = 0   # minuit
+	var v := s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
+	s._habiller_pnj(v, GameData.entree("creatures", "villageois"))
+	j.race = "vampire"
+	s._contreparties(j)
+	verifier(s.a_talent(j, "soif_de_sang"), "le joueur est vampire")
+	var force0 := int(j.stats_eff.force)
+	s._tiquer_vampires(j.horloge, 0)
+	verifier(int(j.stats_eff.force) == force0 + 3 and not Etres.a_statut_tag(j, "vampire", s.statuts_defs) == false, "la nuit : +3 Force (%d → %d)" % [force0, int(j.stats_eff.force)])
+	var seg0: int = j.chaine.segments.size()
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "mordre", "cible": v.id}) and j.chaine.segments.size() >= int(j.chaine.capacite) - 1 and Etres.a_statut_tag(v, "morsure", s.statuts_defs), "mordre : jauge pleine (%d → %d), le villageois porte la Morsure" % [seg0, j.chaine.segments.size()])
+	var plat := s.generer_objet("plat_ragout", 1, {}, "commun", 0) if GameData.catalogues.items.has("plat_ragout") else {}
+	if plat.is_empty():
+		var it := {"uid": "plat_test", "type": "consommable", "tags": ["plat"], "nutrition": 30, "name_key": "x"}
+		s.items["plat_test"] = it
+		plat = it
+	j.sac.append(plat.uid)
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "manger", "objet": plat.uid}), "un plat est refusé")
+	s.horloge_monde.ticks = jour / 2   # midi
+	j.sante = j.sante_max
+	s._tiquer_vampires(j.horloge, jour / 2)
+	verifier(int(j.stats_eff.force) == force0 and j.statuts.filter(func(s0: Dictionary) -> bool: return str(s0.id) == "soleil").size() == 1, "le jour : +3 retiré, le Soleil brûle")
+	verifier(v.race == "vampire" and "vision_nocturne" in v.tags_acquis and s.a_talent(v, "soif_de_sang"), "le villageois mordu s'éveille vampire à l'aube")
+	s.monde.fermer()
 
 
 # ---------------------------------------------------------------- Aciers alliés et caoutchouc

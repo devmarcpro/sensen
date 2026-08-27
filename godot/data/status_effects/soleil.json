@@ -1,0 +1,14 @@
+{
+  "name_key": "status.soleil.name",
+  "degats_des": "1d2",
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 200,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [],
+  "tags": [
+    "negatif",
+    "vampire"
+  ]
+}

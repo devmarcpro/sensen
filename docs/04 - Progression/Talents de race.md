@@ -54,6 +54,9 @@ Le mouton jouable **est** le mouton ultime. Et ses limitations sont le contenu :
 > [!success] Codé le 2026-08-28 — les trois visibles
 > **Polyvalent** (Humain : peut apprendre un second talent de classe auprès d'un PNJ, comme Le Vent, sans perdre le sien), **Chair de mana** (Elfe : la surchauffe coûte de l'endurance au lieu de la santé, régénération de mana ×1,2, endurance max −20), **Œil de la pierre** (Nain : la règle d'irrécoltabilité ne s'applique plus — vitesse ÷ 3 sur ce qui dépassait son seuil —, vision −20 %, tag `detection_filons`). Les races cachées attendent.
 
+> [!success] Codé le 2026-08-28 — le Vampire, première race cachée
+> `races/vampire.json` (tag `cache`, hors création) et le talent **Soif de sang**. **Devenir** : un être `humanoide` **mordu** porte le statut *Morsure* (un jour) ; **à l'aube suivante**, s'il vit encore, il devient vampire (`race_origine` conservé, `race = vampire`, tag acquis `vision_nocturne`, journal) — joueur compris, aucun cas particulier ; la source maudite attend un meuble de donjon. **La nuit** : statut *Sang de la nuit* (**+3 aux six stats**), posé et rafraîchi à chaque pas, retiré au jour. **Le jour, hors donjon** : statut *Soleil* (`1d2` toutes les 10 ticks, rafraîchi tant qu'il fait jour) — décision : le « 1 % des PV max / 10 ticks » de la note devient un dé fixe, les statuts ne connaissant pas les pourcentages ; à 100 PV c'est équivalent. **Mordre** (clic droit sur un être adjacent) : `1d6` de dégâts perforants, **la jauge de chaîne se remplit entièrement** de l'élément dominant de la victime, la victime humanoïde reçoit *Morsure*. **Ne mange plus de plats** (objets tag `plat` : refusés, journal) — les potions passent.
+
 ## Liens
 - **Dépend de** : [[Les trois axes — race, classe, fonction]], [[Races]], [[Blocs de l'être]]
 - **Alimente** : [[Talents de classe]], [[Ouvert — Changer de personnage]], [[Schéma créature]]

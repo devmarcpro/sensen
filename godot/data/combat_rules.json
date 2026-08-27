@@ -864,6 +864,10 @@
       "cadence_ticks": 4,
       "degats": "1d6",
       "type": "perforant"
+    },
+    "soif_de_sang": {
+      "degats_morsure": "1d6",
+      "refresh_ticks": 200
     }
   },
   "bombes": {

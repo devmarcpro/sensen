@@ -400,6 +400,16 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+race.vampire.name,Vampire
+talent.soif_de_sang.name,Soif de sang
+talent.soif_de_sang.desc,"+3 à toutes les stats la nuit, brûle au jour ; une morsure remplit la jauge ; plus de plats."
+status.morsure.name,Morsure
+status.sang_de_la_nuit.name,Sang de la nuit
+status.soleil.name,Soleil
+option.mordre,Mordre
+journal.morsure,"{nom} mord {cible} ({degats}) — la jauge se remplit"
+journal.vampire,"{nom} s'éveille vampire à l'aube"
+journal.plat_refuse,un vampire ne mange plus de plats
 classe.le_fossoyeur.name,Le Fossoyeur
 classe.l_engrenage.name,L'Engrenage
 talent.releveur.name,Releveur
