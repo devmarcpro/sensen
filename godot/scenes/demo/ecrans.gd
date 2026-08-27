@@ -282,7 +282,7 @@ func _montrer_detail() -> void:
 	match str(en.get("kind", "")):
 		"objet":
 			detail.text = texte_objet(str(en.uid))
-		"recette":
+		"recette", "ingredient":
 			detail.text = texte_recette(en.plan)
 		"texte":
 			detail.text = str(en.texte)
@@ -309,6 +309,8 @@ func _action_principale() -> void:
 				main.sim.intention(j.id, {"type": "equiper", "objet": str(en.uid)})
 		"recette":
 			main.sim.intention(j.id, {"type": "fabriquer", "recette": str(en.plan.id)})
+		"ingredient":
+			main.sim.basculer_ingredient(j, str(en.rid), str(en.uid))
 		"option":
 			_option(str(en.option))
 			return
@@ -855,6 +857,10 @@ func _construire_atelier(j: Dictionary) -> void:
 		if not pl.faisable:
 			liste.set_item_custom_fg_color(liste.item_count - 1, Color(0.6, 0.6, 0.6))
 		entrees.append({"kind": "recette", "plan": pl})
+		if str(pl.kind) == "plate":   # les ingrédients optionnels d'un plat : à cocher (Décision — Affinités de cuisine)
+			for cand in main.sim.candidats_optionnels(j, pl.recette):
+				liste.add_item(tr("ui.atelier.ingredient").format({"coche": "☑" if cand.inclus else "☐", "nom": main.nom_objet(main.sim.nom_objet(str(cand.uid)))}))
+				entrees.append({"kind": "ingredient", "rid": str(pl.id), "uid": str(cand.uid), "plan": pl})
 	if plans.is_empty():
 		liste.add_item(tr("ui.atelier.vide"))
 		entrees.append({"kind": "texte", "texte": tr("ui.atelier.vide")})
@@ -884,7 +890,15 @@ func texte_recette(pl: Dictionary) -> String:
 				l.append("   1 × %s — %s" % [tr("famille." + en.filtre), _nom_pile(en)])
 				l.append_array(_obtention_famille(str(en.filtre), "      "))
 			_:
-				l.append("   %d × %s — %s" % [int(en.besoin), _nom_filtre(en), _nom_pile(en)])
+				l.append("   %d × %s — %s%s" % [int(en.besoin), _nom_filtre(en), _nom_pile(en), tr("ui.recette.optionnel") if bool(en.get("optionnel", false)) else ""])
+	if str(pl.kind) == "plate" and GameData.catalogues.items.has(str(pl.sortie.get("item", ""))) and GameData.catalogues.items[str(pl.sortie.item)].get("type", "") == "consommable":
+		var hp: Dictionary = main.sim.harmonie_prevue(pl)
+		if not hp.is_empty():
+			var parts: Array[String] = []
+			for el in hp.vecteur.keys():
+				if float(hp.vecteur[el]) > 0.0:
+					parts.append("%s %.2f" % [tr("element." + str(el)), float(hp.vecteur[el])])
+			l.append(tr("ui.recette.harmonie").format({"vecteur": " · ".join(parts), "harmonie": tr("ui.recette.harmonie_oui") if bool(hp.harmonie) else tr("ui.recette.harmonie_non").format({"n": int(hp.elements)})}))
 	l.append(tr("ui.recette.sortie"))
 	match str(pl.kind):
 		"plate":

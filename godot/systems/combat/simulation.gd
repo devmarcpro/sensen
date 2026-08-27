@@ -3161,9 +3161,10 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 		var besoin := int(entree.amount)
 		var forme := str(entree.get("forme", "brut"))
 		var trouvee := {}
+		var exclus: Array = e.get("exclusions_recette", {}).get(str(r.get("id", "")), [])
 		for uid in e.sac:
 			var it: Dictionary = items.get(uid, {})
-			if deja.has(uid):
+			if deja.has(uid) or (bool(entree.get("optionnel", false)) and uid in exclus):
 				continue
 			if entree.has("item"):   # une entrée par objet (viande crue, baies…) : la pile de cette base
 				if str(it.get("base", "")) == str(entree.item) and int(it.get("quantite", 1)) >= besoin:
@@ -3193,6 +3194,8 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 			if trouvee.is_empty():
 				continue
 			deja[str(trouvee.uid)] = true
+			plan.entrees.append({"pile": trouvee, "besoin": besoin, "forme": forme, "optionnel": true, "filtre": str(entree.get("material", entree.get("category", entree.get("item", entree.get("tag", entree.get("espece", ""))))))})
+			continue
 		plan.entrees.append({"pile": trouvee, "besoin": besoin, "forme": forme, "filtre": str(entree.get("material", entree.get("category", entree.get("item", entree.get("tag", entree.get("espece", ""))))))})
 		if trouvee.is_empty():
 			plan.faisable = false
@@ -3204,6 +3207,62 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 			if entree.pile.has("genome"):
 				plan.sortie.quantite = maxi(1, roundi(float(entree.pile.genome.get(str(r.output.par_locus), 1)) * float(r.output.amount)))
 	return plan
+
+
+## Les ingrédients optionnels candidats d'une recette (Décision — Affinités de cuisine) : chaque pile du sac
+## qui correspond à une entrée optionnelle, incluse ou exclue par le joueur.
+func candidats_optionnels(e: Dictionary, r: Dictionary) -> Array:
+	var res: Array = []
+	var exclus: Array = e.get("exclusions_recette", {}).get(str(r.get("id", "")), [])
+	for uid in e.sac:
+		var it: Dictionary = items.get(uid, {})
+		var ok := false
+		for entree in r.get("inputs", []):
+			if not bool(entree.get("optionnel", false)):
+				continue
+			if entree.has("tag") and str(entree.tag) in it.get("tags", []):
+				ok = true
+			elif entree.has("item") and str(it.get("base", "")) == str(entree.item):
+				ok = true
+			elif entree.has("material") and it.get("type", "") == "materiau" and str(it.get("materiau", "")) == str(entree.material) and str(it.get("forme", "brut")) == str(entree.get("forme", "brut")):
+				ok = true
+		if ok:
+			res.append({"uid": uid, "inclus": not (uid in exclus)})
+	return res
+
+
+func basculer_ingredient(e: Dictionary, rid: String, uid: String) -> void:
+	if not e.has("exclusions_recette"):
+		e["exclusions_recette"] = {}
+	if not e.exclusions_recette.has(rid):
+		e.exclusions_recette[rid] = []
+	if uid in e.exclusions_recette[rid]:
+		e.exclusions_recette[rid].erase(uid)
+	else:
+		e.exclusions_recette[rid].append(uid)
+
+
+## Le vecteur et l'harmonie qu'un plan de plat donnerait (aperçu de l'atelier).
+func harmonie_prevue(plan: Dictionary) -> Dictionary:
+	var wx := {}
+	for entree in plan.entrees:
+		var v: Dictionary = entree.pile.get("wuxing", {})
+		if v.is_empty() and entree.pile.get("type", "") == "materiau":
+			v = regles.r.craft.harmonie.ingredients_materiaux.get(str(entree.pile.get("materiau", "")), GameData.catalogues.materials.get(str(entree.pile.get("materiau", "")), {}).get("wuxing", {}))
+		for el in v.keys():
+			wx[el] = float(wx.get(el, 0.0)) + float(v[el])
+	if wx.is_empty():
+		return {}
+	wx["feu"] = float(wx.get("feu", 0.0)) + float(regles.r.craft.harmonie.feu_cuisson)
+	var total := 0.0
+	for el in wx.keys():
+		total += float(wx[el])
+	var n := 0
+	for el in wuxing.w.elements:
+		if float(wx.get(el, 0.0)) > 0.0:
+			n += 1
+		wx[el] = snappedf(float(wx.get(el, 0.0)) / total, 0.01)
+	return {"vecteur": wx, "elements": n, "harmonie": n >= wuxing.w.elements.size()}
 
 
 ## Fabriquer : consomme les entrées, produit la sortie ; ticks = ticks_base / skill_factor(N) ;

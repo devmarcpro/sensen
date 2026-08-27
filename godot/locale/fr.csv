@@ -401,6 +401,11 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+ui.atelier.ingredient,"      {coche} {nom} — ingrédient optionnel (Entrée : basculer)"
+ui.recette.optionnel," (optionnel)"
+ui.recette.harmonie,"Vecteur prévu : {vecteur} — harmonie {harmonie}"
+ui.recette.harmonie_oui,"×1,2 : les cinq éléments"
+ui.recette.harmonie_non,"aucune ({n}/5 éléments)"
 journal.naissance,"{village} : {nom} met au monde un enfant"
 journal.vacance_guilde,"le hall de la {guilde} n'a plus de maître"
 journal.succession_guilde,"{nom} devient maître de la {guilde}"

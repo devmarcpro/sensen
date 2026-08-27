@@ -59,6 +59,9 @@ Les affinités élémentaires des ingrédients de cuisine ([[Cuisine et alchimie
 > [!success] Codé le 2026-08-28
 > Les ingrédients portent `wuxing` (cultures, baies, miel, champignon, pain ; **viandes** : vecteur `elements` de la créature source, défaut bois 0,5 / eau 0,5 ; **sel gemme** : `combat_rules.craft.harmonie.ingredients_materiaux` — metal 0,5 / eau 0,5 en cuisine, sans toucher au vecteur de combat du matériau). Les recettes de plats acceptent des **entrées optionnelles** (`optionnel: true` — toute pile taguée `ingredient` ou le sel gemme brut, consommées si présentes dans le sac, jusqu'à trois). Le vecteur du plat = Σ ingrédients + `feu 0,15` (cuisson), normalisé ; **cinq éléments > 0 → `harmonie` 1,2** sur la nutrition et le potentiel à l'ingestion (journal « assiette harmonieuse »). Décision : les entrées optionnelles sont prises d'office dans l'ordre du sac — le choix fin des ingrédients attend un écran.
 
+> [!success] Codé le 2026-08-28 — la composition de l'assiette
+> Dans l'atelier, une recette à entrées optionnelles déplie ses **ingrédients candidats** (☑ / ☐, Entrée pour basculer) ; les exclusions sont mémorisées par recette sur le joueur (`exclusions_recette`, sauvegardées avec lui). Le détail de la recette annonce le vecteur et l'harmonie **prévus** avant de cuisiner — le puzzle des cinq éléments se joue donc à l'écran, plus d'office.
+
 ## Liens
 - **Dépend de** : [[Cuisine et alchimie]], [[Wu Xing hors combat]], [[Plantes]]
 - **Alimente** : [[Nourriture, potentiel et potions]], [[Potentiel]], [[Nourriture]]
