@@ -28,6 +28,9 @@ Les liens familiaux ne sont pas décoratifs : ils pilotent la succession. Et tou
 
 **Titre attribué à l'obtention du rôle ([[Génération de noms]]) :** le nouveau titulaire reçoit le titre de sa culture selon le type de gouvernance.
 
+> [!success] Codé le 2026-08-28 — étape 10.5, la succession sans famille
+> La capitale d'un royaume à `leadership` accueille un PNJ **dirigeant** (fonction `dirigeant`, portefeuille 2 000) près de la place. Sa mort (`creature_killed`) ouvre une **vacance** de 4 semaines (`Monde.vacances[royaume]`) ; à l'échéance, le successeur est le PNJ vivant du même royaume au **niveau général le plus haut** parmi ceux instanciés (« next_in_rank » — l'héritier familial attend les familles) ; sans candidat la vacance se prolonge. Signal `leadership_changed`. Pendant la vacance : DD de conquête −25 %, aucun raid de ce royaume. Le nommage est unifié : **la fonction `dirigeant` est `leadership_role`**.
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Âge des PNJ]], [[Réputation et relations]]
 - **Alimente** : [[Conquête de village]], [[Gouvernance, lois et diplomatie]], [[Génération de noms]], [[Quêtes et guildes]]

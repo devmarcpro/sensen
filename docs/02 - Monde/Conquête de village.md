@@ -67,6 +67,12 @@ Coût : ces trois systèmes ne tournent que sur des POI/entités
   concernés, cadence hebdomadaire — négligeable (cohérent avec G.6).
 ```
 
+> [!success] Codé le 2026-08-28 — étape 10.5
+> Intention `conquerir` : le joueur adjacent à la **place** d'un village (centre) hors de son territoire. Condition : `Σ niveau de combat des gardes vivants du village < 25 % de la valeur nominale` (valeur nominale = `2 × population` ; +50 % sur les gardes pendant 2 semaines après un échec). Jet `1d20 + Leadership/2 + Charisme/4` contre `DD = 2 × population` (−25 % si le royaume d'origine est en vacance de trône). Succès : la cellule rejoint le territoire (rôle habitation), le village porte `conquis_par`, ses PNJ deviennent **assignables** (dialogue → Assigner) sans changer de camp ; réputation envers le royaume d'origine : **−30** (agression) si la relation était neutre ou mieux, **+20** (libération) si elle était hostile. Échec : réputation locale −10, défenses +50 % deux semaines. **Reconquête** : un royaume d'origine resté hostile ajoute +0,1 au jet de raid ; un raid abstrait perdu rend le village (la cellule quitte le territoire). Population comptée sur les PNJ instanciés (la cellule doit avoir été visitée).
+
+> [!success] Codé le 2026-08-28 — étape 10.5, repeuplement et décimation
+> Au passage de semaine, pour chaque village instancié de la fenêtre : `capacité = nombre de lits initiaux`, `chance = 0,15 × (1 − population/capacité) × (1 − corruption/100)` → un villageois générique naît sur un lit libre. Population 0 → village **abandonné** (`abandonne` sur la cellule, journal), plus de repeuplement ; ses bâtiments restent.
+
 ## Liens
 - **Dépend de** : [[Villages PNJ — repeuplement et décimation]], [[Jet de compétence universel]], [[Détection de pièces]]
 - **Alimente** : [[Expansion territoriale]], [[Familles et succession]], [[Réputation et relations]]

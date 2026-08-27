@@ -28,6 +28,8 @@ var semaine_courante: int = 0          # dernière semaine passée (ticks / tick
 var grille_active: Grille = null       # la fenêtre courante, pour effacer une entrée après la grâce
 var peuplees: Dictionary = {}          # Vector2i (cellule) → true : ses PNJ ont été instanciés (première visite)
 var claims: Dictionary = {}            # Vector2i (cellule) → {role} : le territoire du joueur (Expansion territoriale)
+var vacances: Dictionary = {}          # id de royaume → semaine de résolution : trône vacant (Familles et succession)
+var villages: Dictionary = {}          # nom de village → {cellule, royaume, conquis_par, defense_jusqua, abandonne} (Conquête de village)
 var mutex := Mutex.new()
 var tache: int = -1                    # tâche WorkerThreadPool de pré-génération en cours (−1 : aucune)
 

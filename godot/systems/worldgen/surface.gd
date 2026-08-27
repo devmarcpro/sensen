@@ -603,6 +603,8 @@ func _poser_village(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator) -
 		if bat.id == "maison" and rng.randf() < float(vc.get("forgeron_chance", 0.5)) and not bat.lits.is_empty():
 			e.village.pnj[e.village.pnj.size() - 1].creature = "forgeron"
 	e.village.pnj.append({"creature": str(vc.garde), "pos": centre, "lit": centre})
+	if not roy.is_empty() and roy.capital_poi == cell and bool(GameData.entree("governments", str(roy.government_type)).leadership):
+		e.village.pnj.append({"creature": str(GameData.config("combat_rules").royaume.succession.creature_dirigeant), "pos": centre + Vector2i(1, 1), "lit": centre + Vector2i(1, 1), "fonction": "dirigeant"})
 
 
 func _degager(e: Dictionary, i: int) -> void:

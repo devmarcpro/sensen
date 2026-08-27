@@ -681,6 +681,10 @@ func _clic(t: Vector2i, lourde: bool) -> void:
 				if int(m.capacite_slots) > 0 and sim.contenants.get(sim.grille.idx(t), []).size() > 0:   # un coffre : tout prendre
 					sim.intention(joueur_id, {"type": "prendre", "vers": t})
 					return
+			var vil: Dictionary = sim.village_a(t)
+			if not vil.is_empty() and sim.monde.pos_monde(sim._cell_de(t), vil.centre) == t and not sim.monde.claims.has(sim._cell_de(t)):   # la place d'un village : conquérir
+				sim.intention(joueur_id, {"type": "conquerir", "vers": t})
+				return
 			if "parcelle" in tags:   # une parcelle : récolter si mûre, sinon fertiliser (engrais dans le sac)
 				if "mure" in tags:
 					sim.intention(joueur_id, {"type": "prendre", "vers": t})

@@ -610,6 +610,26 @@
         "recoit": 20
       },
       "raid_hostile": 0.1
+    },
+    "conquete": {
+      "gardes_pct": 0.25,
+      "valeur_par_habitant": 2.0,
+      "dd_par_habitant": 2.0,
+      "vacance_dd_mult": 0.75,
+      "echec_reputation": 10,
+      "echec_defense_mult": 1.5,
+      "echec_semaines": 2,
+      "reputation_agression": -30,
+      "reputation_liberation": 20,
+      "raid_reconquete": 0.1
+    },
+    "succession": {
+      "semaines": 4,
+      "creature_dirigeant": "villageois"
+    },
+    "repeuplement": {
+      "chance": 0.15,
+      "creature": "villageois"
     }
   }
 }

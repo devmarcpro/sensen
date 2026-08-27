@@ -920,10 +920,12 @@ func _assigner(e: Dictionary, pnj_id: String, fonction: String, tick: int) -> bo
 	if x.is_empty() or monde == null or not GameData.catalogues.functions.has(fonction):
 		return false
 	var cell := _cell_de(x.pos)
-	if not monde.claims.has(cell) or (str(x.get("maitre", "")) != e.id and x.camp != "joueur"):
+	var conquis: bool = str(monde.villages.get(str(x.get("village", "")), {}).get("conquis_par", "")) == e.id
+	if not monde.claims.has(cell) or (str(x.get("maitre", "")) != e.id and x.camp != "joueur" and not conquis):
 		return false
 	x.erase("maitre")
-	x.camp = "joueur"
+	if not conquis:
+		x.camp = "joueur"
 	x.ai_profile = "civil" if fonction != "garde" else "garde"
 	x["fonction"] = fonction
 	x["role"] = "resident"
@@ -1123,6 +1125,153 @@ func retirer_stock(e: Dictionary, cle: String) -> bool:
 	territoire.stocks.erase(cle)
 	EventBus.emettre(&"journal", [&"journal.stock_retire", {"nom": parts[0], "n": n}])
 	return true
+
+
+# ---------------------------------------------------------------- conquête, succession, repeuplement (étape 10.5)
+
+func village_a(vers: Vector2i) -> Dictionary:
+	if monde == null or lieu != "camp":
+		return {}
+	var v: Dictionary = monde.cellule(_cell_de(vers)).get("village", {})
+	return v
+
+
+func population_village(nom: String) -> Array:
+	var res: Array = []
+	for x in vivants():
+		if str(x.get("village", "")) == nom and x.camp == "civil":
+			res.append(x)
+	return res
+
+
+## Conquérir un village (Conquête de village) : gardes affaiblis, puis un jet de Leadership/Charisme contre 2 × population.
+func _conquerir(e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	var v := village_a(vers)
+	if v.is_empty() or e.controle != "joueur":
+		return false
+	var cell := _cell_de(vers)
+	var centre: Vector2i = monde.pos_monde(cell, v.centre)
+	if Grille.distance(e.pos, centre) > 2 or monde.claims.has(cell):
+		return false
+	var cq: Dictionary = _ry().conquete
+	var info: Dictionary = monde.villages.get(str(v.nom), {})
+	var pop := population_village(str(v.nom))
+	var gardes := 0.0
+	for x in pop:
+		if x.ai_profile == "garde":
+			gardes += float(progression.niveaux_derives(x).combat) + 1.0
+	if monde.semaine_courante < int(info.get("defense_jusqua", 0)):
+		gardes *= float(cq.echec_defense_mult)
+	var seuil := float(cq.gardes_pct) * float(cq.valeur_par_habitant) * float(pop.size())
+	if gardes >= seuil:
+		EventBus.emettre(&"journal", [&"journal.conquete_gardes", {"gardes": "%.1f" % gardes, "seuil": "%.1f" % seuil}])
+		return false
+	var roy_id := str(v.get("royaume", ""))
+	var dd := float(cq.dd_par_habitant) * float(pop.size())
+	if monde.vacances.has(roy_id):
+		dd *= float(cq.vacance_dd_mult)
+	var jet := des.jet("1d20") + regles.niveau(e.competences_eff, "leadership") / 2 + int(e.corps.stats.charisme) / 4
+	e.compteur = tick + int(regles.r.actions.objet)
+	var roy: Dictionary = monde.surface.royaume_de(cell)
+	if float(jet) < dd:
+		if not e.has("reputations"):
+			e["reputations"] = {}
+		e.reputations[str(v.nom)] = clampi(int(e.reputations.get(str(v.nom), 0)) - int(cq.echec_reputation), -100, 100)
+		info["defense_jusqua"] = monde.semaine_courante + int(cq.echec_semaines)
+		monde.villages[str(v.nom)] = info
+		EventBus.emettre(&"journal", [&"journal.conquete_echec", {"village": v.nom, "jet": jet, "dd": int(dd)}])
+		return true
+	monde.claims[cell] = {"role": "habitation"}
+	info["conquis_par"] = e.id
+	monde.villages[str(v.nom)] = info
+	if not roy.is_empty():
+		var hostile := relation_royaume(e, roy) == "hostile"
+		var n := int(cq.reputation_liberation) if hostile else int(cq.reputation_agression)
+		_baisser_reputation(e, roy_id, -n)
+		EventBus.emettre(&"journal", [&"journal.conquete_liberation" if hostile else &"journal.conquete_agression", {"royaume": roy.nom, "n": n}])
+	EventBus.emettre(&"journal", [&"journal.conquete_reussie", {"village": v.nom, "jet": jet, "dd": int(dd)}])
+	EventBus.emettre(&"cell_claimed", [cell])
+	EventBus.emettre(&"village_conquered", [cell, e.id])
+	_verifier_royaume(e)
+	return true
+
+
+## Un village conquis retourne à son royaume (raid de reconquête perdu).
+func _rendre_village(nom: String) -> void:
+	var info: Dictionary = monde.villages.get(nom, {})
+	if info.is_empty() or str(info.get("conquis_par", "")).is_empty():
+		return
+	monde.claims.erase(info.cellule)
+	info.conquis_par = ""
+	EventBus.emettre(&"journal", [&"journal.village_rendu", {"village": nom, "royaume": monde.surface.royaume_de(info.cellule).get("nom", "—")}])
+
+
+## La semaine des royaumes : successions, repeuplement, décimation.
+func _semaine_royaumes_pnj() -> void:
+	if monde == null:
+		return
+	for roy_id in monde.vacances.keys().duplicate():
+		if monde.semaine_courante < int(monde.vacances[roy_id]):
+			continue
+		var meilleur: Dictionary = {}
+		var niv := -1.0
+		for x in vivants():
+			if str(x.get("royaume", "")) == roy_id and x.camp == "civil" and str(x.get("fonction", "")) != "dirigeant":
+				var g := float(progression.niveaux_derives(x).general)
+				if g > niv:
+					niv = g
+					meilleur = x
+		var nom_roy: String = str(roy_id)
+		for sect in monde.surface.royaumes_cache.values():
+			if sect.has(roy_id):
+				nom_roy = str(sect[roy_id].nom)
+		if meilleur.is_empty():
+			EventBus.emettre(&"journal", [&"journal.vacance_prolongee", {"royaume": nom_roy}])
+			continue
+		meilleur.fonction = "dirigeant"
+		meilleur["or_max"] = int(GameData.entree("functions", "dirigeant").portefeuille)
+		monde.vacances.erase(roy_id)
+		EventBus.emettre(&"journal", [&"journal.succession", {"royaume": nom_roy, "nom": meilleur.name_key}])
+		EventBus.emettre(&"leadership_changed", [roy_id, meilleur.id])
+	var rp: Dictionary = _ry().repeuplement
+	for nom in monde.villages.keys():
+		var info: Dictionary = monde.villages[nom]
+		if bool(info.get("abandonne", false)) or not monde.peuplees.has(info.cellule) or lieu != "camp":
+			continue
+		var cell: Vector2i = info.cellule
+		if absi(cell.x - monde.centre.x) > monde.rayon or absi(cell.y - monde.centre.y) > monde.rayon:
+			continue
+		var pop := population_village(nom).size()
+		var cap := int(info.get("capacite", 1))
+		if pop == 0:
+			info.abandonne = true
+			EventBus.emettre(&"journal", [&"journal.village_abandonne", {"village": nom}])
+			continue
+		if pop >= cap:
+			continue
+		var chance := float(rp.chance) * (1.0 - float(pop) / float(cap)) * (1.0 - monde.corruption_de(cell) / 100.0)
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash([graine, "repop", nom, monde.semaine_courante])
+		if rng.randf() >= chance:
+			continue
+		var v: Dictionary = monde.cellule(cell).get("village", {})
+		for pj in v.get("pnj", []):
+			var lit: Vector2i = monde.pos_monde(cell, pj.lit)
+			var libre := true
+			for x in population_village(nom):
+				if x.get("lit", Vector2i(-1, -1)) == lit:
+					libre = false
+			if libre and grille.dans(lit) and grille.occupant(lit).is_empty():
+				var x := ajouter(str(rp.creature), lit, "ia")
+				_habiller_pnj(x, GameData.entree("creatures", str(rp.creature)), str(v.culture))
+				x["lit"] = lit
+				x["poste"] = lit
+				x["place"] = monde.pos_monde(cell, v.centre)
+				x["village"] = nom
+				x["royaume"] = str(v.get("royaume", ""))
+				x.ancre = lit
+				EventBus.emettre(&"journal", [&"journal.repeuplement", {"village": nom}])
+				break
 
 
 # ---------------------------------------------------------------- royaumes PNJ : lois, douanes, accords (étape 10.4)
@@ -1364,9 +1513,18 @@ func _jet_raid(e: Dictionary, tick: int) -> void:
 	if bool(territoire.royaume):   # les royaumes hostiles n'attaquent qu'un royaume reconnu (Raids et menaces)
 		for roy in royaumes_voisins():
 			var accord := str(territoire.accords.get(str(roy.id), ""))
-			if relation_royaume(e, roy) == "hostile" and not (accord in ["non_agression", "alliance", "tribut_paie", "tribut_recoit"]):
+			if relation_royaume(e, roy) == "hostile" and not monde.vacances.has(str(roy.id)) and not (accord in ["non_agression", "alliance", "tribut_paie", "tribut_recoit"]):
 				proba = minf(float(r.proba_max), proba + float(_ry().accords.raid_hostile))
 				hostile = roy
+	var reconquete := ""   # un royaume d'origine hostile veut reprendre son village (Conquête de village)
+	for nom in monde.villages.keys():
+		var info: Dictionary = monde.villages[nom]
+		if str(info.get("conquis_par", "")) == e.id:
+			var roy0 := monde.surface.royaume_de(info.cellule)
+			if not roy0.is_empty() and relation_royaume(e, roy0) == "hostile" and not monde.vacances.has(str(roy0.id)):
+				proba = minf(float(r.proba_max), proba + float(_ry().conquete.raid_reconquete))
+				reconquete = nom
+				hostile = roy0
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([graine, "raid", monde.semaine_courante])
 	if rng.randf() >= proba:
@@ -1378,6 +1536,8 @@ func _jet_raid(e: Dictionary, tick: int) -> void:
 		_lancer_raid_reel(force, tick)
 	else:
 		_resoudre_raid_abstrait(force, tick)
+		if not reconquete.is_empty() and not bool(territoire.dernier_raid.get("victoire", true)):
+			_rendre_village(reconquete)
 
 
 ## Les pertes d'un raid (jamais de wipe) : stocks, caisse, structures de la fenêtre.
@@ -2187,7 +2347,7 @@ func sauvegarder(nom: String = "monde") -> bool:
 		contenants_monde[grille.pos_de(int(gi))] = contenants[gi]
 	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "graine": graine, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
 		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores,
-		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire})
+		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire, "vacances": monde.vacances, "villages": monde.villages})
 	ok = Sauvegarde.ecrire(nom, "surface.json", surface) and ok
 	ok = Sauvegarde.ecrire(nom, "entities.json", {"entites": autres, "ordre": ordre_autres, "contenants": contenants_monde}) and ok
 	ok = Sauvegarde.ecrire(nom, "items.json", instances) and ok
@@ -2224,6 +2384,8 @@ func charger_sauvegarde(nom: String = "monde") -> bool:
 	monde.semaine_courante = int(w.get("semaine", 0))
 	monde.peuplees = w.get("peuplees", {})
 	monde.claims = w.get("claims", {})
+	monde.vacances = w.get("vacances", {})
+	monde.villages = w.get("villages", {})
 	territoire = w.get("territoire", territoire)
 	for cell in surface.keys():
 		var sc: Dictionary = surface[cell]
@@ -2821,6 +2983,8 @@ func _peupler_fenetre() -> void:
 				var pos: Vector2i = monde.pos_monde(cell, pj.pos)
 				if grille.occupant(pos).is_empty():
 					var x := ajouter(str(pj.creature), pos, "ia")
+					if pj.has("fonction"):
+						x.fonction = str(pj.fonction)
 					_habiller_pnj(x, GameData.entree("creatures", str(pj.creature)), str(v.culture))
 					x["lit"] = monde.pos_monde(cell, pj.lit)
 					x["poste"] = pos
@@ -2828,6 +2992,8 @@ func _peupler_fenetre() -> void:
 					x["village"] = str(v.nom)
 					x["royaume"] = str(v.get("royaume", ""))
 					x.ancre = pos
+			if not monde.villages.has(str(v.nom)):
+				monde.villages[str(v.nom)] = {"cellule": cell, "royaume": str(v.get("royaume", "")), "conquis_par": "", "defense_jusqua": 0, "abandonne": false, "capacite": v.pnj.size()}
 			EventBus.emettre(&"journal", [&"journal.village", {"nom": v.nom}])
 
 
@@ -3254,6 +3420,7 @@ func _tiquer_monde(tick: int) -> void:
 		var touchees := monde.semaine(tick)
 		var derive := int(regles.r.reputation.derive_hebdo)
 		_vieillir_semaine(tick)
+		_semaine_royaumes_pnj()
 		for x in entites.values():
 			if x.controle == "joueur":
 				_semaine_territoire(x)
@@ -3573,6 +3740,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _recruter(e, str(i.get("pnj", "")), h.ticks)
 		"assigner":
 			ok = _assigner(e, str(i.get("pnj", "")), str(i.get("fonction", "")), h.ticks)
+		"conquerir":
+			ok = _conquerir(e, i.get("vers", e.pos), h.ticks)
 		"planter":
 			ok = _planter(e, str(i.get("base", "")), h.ticks)
 		"fertiliser":
@@ -3975,6 +4144,9 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		_quetes_sur_mort(cible, source)
 		if not att.is_empty() and att.controle == "joueur" and cible.camp == "civil":
 			_infraction(att, "comportement", "meurtre", cible.pos, "")
+		if str(cible.get("fonction", "")) == "dirigeant" and not str(cible.get("royaume", "")).is_empty() and monde != null:
+			monde.vacances[str(cible.royaume)] = monde.semaine_courante + int(_ry().succession.semaines)
+			EventBus.emettre(&"journal", [&"journal.vacance", {"royaume": monde.surface.royaume_de(_cell_de(cible.pos)).get("nom", cible.royaume)}])
 		if cible.has("maitre"):
 			_mort_compagnon(cible)
 		_declencher(cible, "testament", cible.pos)   # la charge part quand le porteur tombe

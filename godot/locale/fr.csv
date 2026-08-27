@@ -401,6 +401,19 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+ui.ecran.conquerir,Conquérir ce village
+journal.conquete_gardes,"les gardes tiennent encore ({gardes} contre {seuil}) — affaiblis-les d'abord"
+journal.conquete_reussie,"{village} passe sous ta bannière ({jet} contre DD {dd})"
+journal.conquete_echec,"{village} te repousse ({jet} contre DD {dd}) : ses défenses se renforcent"
+journal.conquete_liberation,"{royaume} : libération saluée (+{n})"
+journal.conquete_agression,"{royaume} : agression ({n})"
+journal.village_rendu,"{village} retourne à {royaume}"
+journal.vacance,"{royaume} : le trône est vacant"
+journal.succession,"{royaume} : {nom} prend la tête du royaume"
+journal.vacance_prolongee,"{royaume} : personne pour reprendre le trône"
+journal.repeuplement,"{village} : un nouvel habitant s'installe"
+journal.village_abandonne,"{village} est abandonné"
+function.dirigeant.name,Dirigeant
 ui.gestion.voisin,"{nom} ({gouv}, {n} cellules) — réputation {rep} · relation {rel} · accord : {accord}"
 ui.gestion.voisin_aide,T : proposer l'accord suivant (commercial ≥ 20 · non-agression ≥ 40 · alliance ≥ 60 · tribut)
 accord.aucun,aucun

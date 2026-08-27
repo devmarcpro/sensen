@@ -43,6 +43,7 @@ func _ready() -> void:
 	test_agriculture_et_boutique()
 	test_defense_et_raids()
 	test_royaumes_pnj()
+	test_conquete_et_succession()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1639,6 +1640,75 @@ func test_royaumes_pnj() -> void:
 	verifier(not s.proposer_accord(j, "royaume_test", "alliance"), "alliance refusée à 25 de réputation")
 	verifier(s.proposer_accord(j, "royaume_test", "commercial") and absf(s.tarif_de(lingot.uid, m) - 0.25) < 0.01, "accord commercial : tarif du fer 25 %%")
 	verifier(s.relation_royaume(j, r) == "neutre", "relation neutre entre 0 et 30")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Étape 10.5 : conquête, succession, repeuplement
+
+func test_conquete_et_succession() -> void:
+	var s := Simulation.new(79)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	# Un village scripté sur la cellule voisine : trois habitants, un garde de niveau 0, un dirigeant.
+	var camp: Vector2i = s.monde.cellule_camp
+	var cell: Vector2i = camp + Vector2i(1, 0)
+	var e: Dictionary = s.monde.cellule(cell)
+	var centre_l := Vector2i(6, 64)
+	var centre: Vector2i = s.monde.pos_monde(cell, centre_l)
+	for dy in range(-3, 4):
+		for dx in range(-3, 6):
+			var q: Vector2i = centre + Vector2i(dx, dy)
+			s.grille.contenu[s.grille.idx(q)] = 0
+			s.grille.meubles.erase(s.grille.idx(q))
+	j.pos = centre + Vector2i(-1, 0)
+	e["village"] = {"nom": "Bourg-Test", "culture": "latine", "centre": centre_l, "batiments": [], "pnj": [], "royaume": "roy_test"}
+	s.monde.villages["Bourg-Test"] = {"cellule": cell, "royaume": "roy_test", "conquis_par": "", "defense_jusqua": 0, "abandonne": false, "capacite": 6}
+	var r := {"id": "roy_test", "nom": "Testonie", "government_type": "monarchie_hereditaire", "culture": "latine", "race": "humain", "taille": "hameau", "capital_poi": cell, "territory_cells": [cell],
+		"taxes": {"base_rate": 0.08, "tariff_default": 0.1}, "tariffs": {}, "laws": [], "diplomacy": {}, "rivals": [], "tags": []}
+	s.monde.surface.royaumes_cache[s.monde.surface.secteur_de(cell)] = {"roy_test": r}
+	s.monde.surface.royaume_par_cellule[cell] = "roy_test"
+	var habitants: Array = []
+	for k in 3:
+		var x := s.ajouter("villageois", centre + Vector2i(1 + k, 2), "ia")
+		s._habiller_pnj(x, GameData.entree("creatures", "villageois"))
+		x["village"] = "Bourg-Test"
+		x["royaume"] = "roy_test"
+		habitants.append(x)
+	var garde := s.ajouter("garde_village", centre + Vector2i(1, -2), "ia")
+	s._habiller_pnj(garde, GameData.entree("creatures", "garde_village"))
+	garde["village"] = "Bourg-Test"
+	garde["royaume"] = "roy_test"
+	garde.ai_profile = "garde"
+	var chef := s.ajouter("villageois", centre + Vector2i(2, -2), "ia")
+	s._habiller_pnj(chef, GameData.entree("creatures", "villageois"))
+	chef["village"] = "Bourg-Test"
+	chef["royaume"] = "roy_test"
+	chef.fonction = "dirigeant"
+	# Le joueur va au pied de la place ; le garde (niveau 0 → 1 point) contre un seuil de 0,25 × 2 × 5 = 2,5 : conquérable.
+	j.corps.stats.charisme = 80   # +20 au jet : la conquête réussit contre DD 10
+	s.attente[j.id] = true
+	for cle in garde.competences.keys():
+		garde.competences[cle] = 0
+	var ok := s.intention(j.id, {"type": "conquerir", "vers": centre})
+	verifier(ok and s.monde.claims.has(cell) and s.monde.villages["Bourg-Test"].conquis_par == j.id, "conquête réussie : la cellule rejoint le territoire")
+	verifier(int(j.reputations.get("roy_test", 0)) == -30, "agression : −30 envers Testonie (%d)" % int(j.get("reputations", {}).get("roy_test", 0)))
+	# Les habitants deviennent assignables.
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "assigner", "pnj": habitants[0].id, "fonction": "fermier"}) and habitants[0].has("assignation") and habitants[0].camp == "civil", "un habitant conquis est assignable sans changer de camp")
+	# Succession : le dirigeant meurt, vacance de 4 semaines, puis le plus haut niveau général reprend.
+	s._appliquer_degats(chef, 9999, j.id, {})
+	verifier(s.monde.vacances.has("roy_test"), "la mort du dirigeant ouvre une vacance")
+	habitants[1].competences["negociation"] = 30
+	s.monde.semaine_courante += 4
+	s._semaine_royaumes_pnj()
+	verifier(not s.monde.vacances.has("roy_test") and str(habitants[1].fonction) == "dirigeant", "quatre semaines plus tard, le plus haut niveau général succède")
+	# Repeuplement : un lit libre, chance forcée à 1.
+	e.village.pnj.append({"creature": "villageois", "pos": centre_l + Vector2i(0, 2), "lit": centre_l + Vector2i(0, 2)})
+	s.monde.peuplees[cell] = true
+	s.regles.r.royaume.repeuplement.chance = 10.0
+	var pop0 := s.population_village("Bourg-Test").size()
+	s._semaine_royaumes_pnj()
+	verifier(s.population_village("Bourg-Test").size() == pop0 + 1, "repeuplement : un habitant de plus (%d → %d)" % [pop0, s.population_village("Bourg-Test").size()])
 	s.monde.fermer()
 
 
