@@ -43,6 +43,9 @@ Automne   → Métal  ·  Hiver → Eau
 
 **Extension gratuite :** les saisons alignées sur les éléments deviennent disponibles comme modificateur de lieu ([[Wu Xing hors combat]] : *saisons alignées sur les éléments, extension future naturelle*) — à activer ou non séparément, ce n'est pas dans cette décision.
 
+> [!success] Codé le 2026-08-28
+> `planete.cycle.saisons` : année de 120 jours, printemps / été / fin d'été (les 10 derniers jours de l'été) / automne / hiver, chacune son élément et son **écart de température** (+0 / +8 / +6 / −2 / −10 °C) ; `Simulation.saison()` lit l'horloge du monde ; la météo et la température ressentie ajoutent cet écart à la couche `temperature` (le blizzard et la neige suivent). La saison s'affiche dans l'en-tête. Les cultures ne suivent pas encore la saison (équilibrage à faire).
+
 ## Liens
 - **Dépend de** : [[Élevage — intention et familles]], [[Météo]], [[Ouvert — Saisons]]
 - **Alimente** : [[Conditions de reproduction]], [[Agriculture et élevage]], [[Catalogue des groupes d'élevage]]

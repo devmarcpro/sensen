@@ -401,6 +401,31 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+species.carpe.name,Carpe de bassin
+meuble.vivarium.name,Vivarium
+recipe.meuble_vivarium.name,Assembler un vivarium
+item.specimen.name,Spécimen
+saison.printemps,printemps
+saison.ete,été
+saison.fin_ete,fin d'été
+saison.automne,automne
+saison.hiver,hiver
+journal.capture_reussie,"{nom} capture {espece} (couleur {couleur}, motif {motif})"
+journal.capture_ratee,"le filet remonte vide ({jet} contre {dd})"
+journal.capture_rien,pas d'eau à portée du filet
+journal.couvee,"{espece} : une couvée de {n} (couleur {couleur}, motif {motif})"
+journal.couvee_refusee,"{espece} : pas de couvée — {raison}"
+raison.habitat,il faut un {v}
+raison.place,plus de place
+raison.temperature,"{temp} °C, il en faut entre {min} et {max}"
+raison.saison,pas la saison
+raison.sexe,il faut un mâle et une femelle
+raison.age,trop jeunes
+raison.stat,{k} insuffisante
+raison.ressource,il faut {n} {k}
+raison.espece,espèces différentes
+ui.gestion.elevage,"élevage : {n} variétés au registre ({especes})"
+ui.ecran.capturer,Filet (Y) — capturer sur une tuile d'eau voisine
 guilde.chasseurs.name,Guilde des Chasseurs
 guilde.mages.name,Cercle des Mages
 guilde.enchanteurs.name,Guilde des Enchanteurs
@@ -734,7 +759,7 @@ weather.vent_fort.name,Vent fort
 weather.tempete.name,Tempête
 weather.blizzard.name,Blizzard
 weather.canicule.name,Canicule
-ui.heure,"{heure} h · {phase} · {meteo} · {temp} °C{confort}"
+ui.heure,"{heure} h · {phase} · {saison} · {meteo} · {temp} °C{confort}"
 phase.aube,aube
 phase.jour,jour
 phase.crepuscule,crépuscule

@@ -530,6 +530,13 @@ func _construire_gestion(j: Dictionary) -> void:
 	entrees.append({"kind": "texte", "texte": ""})
 	liste.add_item(tr("ui.gestion.parcelles").format({"n": t.cultures.size(), "mures": mures}), null, false)
 	entrees.append({"kind": "texte", "texte": ""})
+	var nv := 0
+	var especes: Array[String] = []
+	for esp in t.get("registre", {}).keys():
+		nv += t.registre[esp].size()
+		especes.append(tr(GameData.entree("species", str(esp)).name_key))
+	liste.add_item(tr("ui.gestion.elevage").format({"n": nv, "especes": ", ".join(especes) if not especes.is_empty() else "—"}), null, false)
+	entrees.append({"kind": "texte", "texte": ""})
 	_bouton(tr("ui.ecran.deposer"), func() -> void: main.sim.deposer(main.joueur(), 50); rafraichir())
 	_bouton(tr("ui.ecran.retirer"), func() -> void: main.sim.retirer(main.joueur(), 50); rafraichir())
 

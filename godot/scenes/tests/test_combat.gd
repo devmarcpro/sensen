@@ -46,6 +46,7 @@ func _ready() -> void:
 	test_conquete_et_succession()
 	test_alchimie()
 	test_villes_et_halls()
+	test_saisons_et_elevage()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1027,7 +1028,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 43, "9 stations, 43 recettes plates (9 transformations, 17 meubles, 9 stations, 3 plats, 5 potions)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 44, "9 stations, 44 recettes plates (9 transformations, 18 meubles, 9 stations, 3 plats, 5 potions)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -1832,6 +1833,54 @@ func test_villes_et_halls() -> void:
 		if x.get("hall", Vector2i(-1, -1)) == vers:
 			maitre_j = x
 	verifier(not maitre_j.is_empty() and str(maitre_j.guilde) == "guerriers" and s._structures_speciales() == avant + 1, "un maître des Guerriers s'installe, structure spéciale +1")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Saisons et élevage
+
+func test_saisons_et_elevage() -> void:
+	var s := Simulation.new(85)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var jour := int(s._cycle().ticks_par_jour)
+	verifier(s.saison(0) == "printemps" and s.saison(35 * jour) == "ete" and s.saison(55 * jour) == "fin_ete" and s.saison(70 * jour) == "automne" and s.saison(100 * jour) == "hiver" and s.saison(125 * jour) == "printemps", "cinq saisons sur 120 jours, puis l'année recommence")
+	verifier(s._saison_info(100 * jour).temp == -10.0 and s._saison_info(35 * jour).temp == 8.0, "l'écart de température : hiver −10, été +8")
+	# Capture : une tuile d'eau voisine, un jet forcé.
+	var eau: Vector2i = j.pos + Vector2i(1, 0)
+	s.grille.poser_contenu(eau, "eau")
+	j.competences["collecte"] = 40
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "capturer"}), "lancer le filet")
+	var specimens: Array = []
+	for uid in j.sac:
+		if s.items[uid].has("genome"):
+			specimens.append(s.items[uid])
+	verifier(specimens.size() == 1 and specimens[0].espece == "carpe" and specimens[0].genome.has("couleur"), "une carpe capturée, avec son génome")
+	# Un couple dans un vivarium : la couvée hebdomadaire hérite locus par locus.
+	var a := s._nouveau_specimen("carpe", {"couleur": 3, "motif": 2, "taille": 2.0}, "m")
+	var b := s._nouveau_specimen("carpe", {"couleur": 5, "motif": 6, "taille": 4.0}, "f")
+	var viv: Vector2i = j.pos + Vector2i(0, 1)
+	for d in [Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)]:
+		var c: Vector2i = j.pos + d
+		if s.grille.dans(c) and s.grille.occupant(c).is_empty():
+			viv = c
+			break
+	s.grille.contenu[s.grille.idx(viv)] = 0
+	s.grille.poser_contenu(viv, "meuble")
+	s.grille.meubles[s.grille.idx(viv)] = "vivarium"
+	s.contenants[s.grille.idx(viv)] = [a.uid, b.uid]
+	var meme_sexe := s.conditions_repro(a, s._nouveau_specimen("carpe", {"couleur": 0, "motif": 0, "taille": 1.0}, "m"), {"habitat": "vivarium", "libre": 2, "temp": 18.0, "saison": "ete"})
+	verifier(not meme_sexe.ok and str(meme_sexe.raisons[0].cle) == "raison.sexe", "deux mâles : l'évaluateur dit pourquoi")
+	s._semaine_elevage()
+	var enfants: Array = s.contenants[s.grille.idx(viv)].filter(func(u: String) -> bool: return u != a.uid and u != b.uid)
+	verifier(enfants.size() >= 1, "une couvée dans le vivarium (%d)" % enfants.size())
+	if not enfants.is_empty():
+		var g: Dictionary = s.items[enfants[0]].genome
+		var c_ok: bool = int(g.couleur) in [2, 3, 4, 5, 6]
+		var m_ok: bool = int(g.motif) in [1, 2, 3, 5, 6, 7]
+		verifier(c_ok and m_ok and float(g.taille) > 2.0 and float(g.taille) < 4.5, "l'enfant : couleur %d, motif %d, taille %.2f — un parent ou une voisine, moyenne dérivée" % [int(g.couleur), int(g.motif), float(g.taille)])
+	verifier(int(s.territoire.registre.carpe.size()) >= 3, "le registre compte les variétés (%d)" % int(s.territoire.registre.carpe.size()))
 	s.monde.fermer()
 
 

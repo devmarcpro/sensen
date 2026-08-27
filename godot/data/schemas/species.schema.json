@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "famille",
+    "habitat",
+    "capture",
+    "loci",
+    "repro",
+    "registre"
+  ]
+}

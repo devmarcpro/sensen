@@ -1,0 +1,56 @@
+{
+  "name_key": "species.carpe.name",
+  "famille": "grille_a_remplir",
+  "groupe": "poissons",
+  "habitat": "vivarium",
+  "capture": {
+    "verbe": "filet",
+    "milieu": "eau",
+    "dd": 8,
+    "rarete": 1
+  },
+  "loci": {
+    "couleur": {
+      "type": "anneau",
+      "n": 16
+    },
+    "motif": {
+      "type": "anneau",
+      "n": 8
+    },
+    "taille": {
+      "type": "nombre",
+      "min": 1,
+      "max": null,
+      "var": 0.06
+    }
+  },
+  "silhouette": "",
+  "repro": {
+    "moteur": "anneau",
+    "conditions": [
+      {
+        "c": "habitat",
+        "v": "vivarium"
+      },
+      {
+        "c": "place"
+      },
+      {
+        "c": "temperature",
+        "min": 5,
+        "max": 32
+      },
+      {
+        "c": "sexe"
+      }
+    ],
+    "portee": [
+      1,
+      2
+    ],
+    "couts": []
+  },
+  "registre": "grille",
+  "tags": []
+}

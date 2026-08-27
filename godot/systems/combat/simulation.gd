@@ -1169,6 +1169,203 @@ func retirer_stock(e: Dictionary, cle: String) -> bool:
 	return true
 
 
+# ---------------------------------------------------------------- élevage (Annexe H) : capture, hérédité, couvées, registre
+
+func _elv() -> Dictionary:
+	return regles.r.elevage
+
+
+## Un génome tiré au hasard selon les loci de l'espèce (aucune connaissance de l'espèce dans le code).
+func _genome_aleatoire(esp: Dictionary, rng: RandomNumberGenerator) -> Dictionary:
+	var g := {}
+	for nom in esp.loci.keys():
+		var L: Dictionary = esp.loci[nom]
+		match str(L.type):
+			"anneau":
+				g[nom] = rng.randi() % int(L.n)
+			"nombre":
+				g[nom] = snappedf(rng.randf_range(float(L.get("min", 1)), float(L.get("min", 1)) * 3.0), 0.01)
+			"recessif":
+				g[nom] = [rng.randi() % 2, rng.randi() % 2]
+			"sequence":
+				var seq: Array = []
+				for k in int(L.get("n", 4)):
+					seq.append(rng.randi() % int(L.get("valeurs", 2)))
+				g[nom] = seq
+			_:
+				g[nom] = null
+	return g
+
+
+## L'hérédité, locus par locus (Loci — les dix types) : une fonction par type, aucune ne connaît d'espèce.
+func _heriter(a: Variant, b: Variant, L: Dictionary, rng: RandomNumberGenerator) -> Variant:
+	match str(L.type):
+		"anneau":   # Règle d'anneau : 34 % A, 34 % B, 16 % une voisine de A, 16 % une voisine de B
+			var pr: Array = _elv().anneau
+			var r := rng.randf()
+			if r < float(pr[0]):
+				return a
+			if r < float(pr[0]) + float(pr[1]):
+				return b
+			var s: int = int(a) if rng.randf() < 0.5 else int(b)
+			return posmod(s + (1 if rng.randf() < 0.5 else -1), int(L.n))
+		"nombre":   # moyenne des parents × dérive gaussienne, sans plafond si max est null
+			var v := (float(a) + float(b)) / 2.0 * (1.0 + rng.randfn(0.0, 1.0) * float(L.get("var", 0.05)))
+			v = maxf(float(L.get("min", 0)), v)
+			if L.get("max") != null:
+				v = minf(float(L.max), v)
+			return snappedf(v, 0.01)
+		"recessif":
+			return [a[rng.randi() % 2], b[rng.randi() % 2]]
+		"sequence":
+			var seq: Array = []
+			for i in a.size():
+				seq.append(a[i] if rng.randf() < 0.5 else b[i])
+			return seq
+		_:
+			return null
+
+
+## Les conditions de reproduction (Conditions de reproduction) : un seul évaluateur, qui dit pourquoi.
+func conditions_repro(a: Dictionary, b: Dictionary, ctx: Dictionary) -> Dictionary:
+	var raisons: Array = []
+	if str(a.espece) != str(b.espece):
+		raisons.append({"cle": "raison.espece"})
+	var esp: Dictionary = GameData.catalogues.species.get(str(a.espece), {})
+	for c in esp.get("repro", {}).get("conditions", []):
+		match str(c.c):
+			"habitat":
+				if str(ctx.get("habitat", "")) != str(c.v):
+					raisons.append({"cle": "raison.habitat", "v": str(c.v)})
+			"place":
+				if int(ctx.get("libre", 0)) <= 0:
+					raisons.append({"cle": "raison.place"})
+			"temperature":
+				var t := float(ctx.get("temp", 18.0))
+				if t < float(c.min) or t > float(c.max):
+					raisons.append({"cle": "raison.temperature", "temp": int(round(t)), "min": c.min, "max": c.max})
+			"saison":
+				if not (str(ctx.get("saison", "")) in c.v):
+					raisons.append({"cle": "raison.saison"})
+			"sexe":
+				if str(a.sexe) == str(b.sexe):
+					raisons.append({"cle": "raison.sexe"})
+			"age":
+				if mini(int(a.get("age_semaines", 0)), int(b.get("age_semaines", 0))) < int(c.min):
+					raisons.append({"cle": "raison.age"})
+			"stat":
+				if minf(float(a.genome.get(str(c.k), 0)), float(b.genome.get(str(c.k), 0))) < float(c.min):
+					raisons.append({"cle": "raison.stat", "k": str(c.k)})
+			"ressource":
+				if int(territoire.stocks.get(str(c.k), 0)) < int(c.n):
+					raisons.append({"cle": "raison.ressource", "k": str(c.k), "n": int(c.n)})
+	return {"ok": raisons.is_empty(), "raisons": raisons}
+
+
+## Capturer au filet sur une tuile d'eau adjacente : jet 1d20 + Collecte contre le dd de l'espèce.
+func _capturer(e: Dictionary, tick: int) -> bool:
+	if monde == null or lieu != "camp":
+		return false
+	var eau := false
+	for d in Grille.DIRS:
+		var q: Vector2i = e.pos + d
+		if grille.dans(q) and "eau" in grille.contenu_de(q).get("tags", []):
+			eau = true
+	if not eau:
+		EventBus.emettre(&"journal", [&"journal.capture_rien", {}])
+		return false
+	var ids: Array = GameData.catalogues.species.keys()
+	ids.sort()
+	var esp: Dictionary = {}
+	var esp_id := ""
+	for sid in ids:
+		if str(GameData.catalogues.species[sid].capture.get("milieu", "")) == "eau":
+			esp = GameData.catalogues.species[sid]
+			esp_id = str(sid)
+			break
+	if esp.is_empty():
+		return false
+	e.compteur = tick + int(regles.r.actions.objet) * 2
+	var jet := des.jet("1d20") + regles.niveau(e.competences_eff, str(_elv().competence_capture))
+	var dd := int(esp.capture.get("dd", 10))
+	gagner_xp(e, str(_elv().competence_capture), 5)
+	if jet < dd:
+		EventBus.emettre(&"journal", [&"journal.capture_ratee", {"jet": jet, "dd": dd}])
+		return true
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "capture", tick, e.id])
+	var sp := _nouveau_specimen(esp_id, _genome_aleatoire(esp, rng), "m" if rng.randf() < 0.5 else "f")
+	donner(e, sp.uid)
+	EventBus.emettre(&"journal", [&"journal.capture_reussie", {"nom": e.name_key, "espece": esp.name_key, "couleur": str(sp.genome.get("couleur", "-")), "motif": str(sp.genome.get("motif", "-"))}])
+	return true
+
+
+func _nouveau_specimen(esp_id: String, genome: Dictionary, sexe: String) -> Dictionary:
+	var sp := generer_objet("specimen", 1, {"espece": esp_id}, "commun", 0)
+	sp["espece"] = esp_id
+	sp["genome"] = genome
+	sp["sexe"] = sexe
+	sp["age_semaines"] = 0
+	sp["nom"] = {"params": {"espece": GameData.catalogues.species[esp_id].name_key, "couleur": str(genome.get("couleur", "")), "motif": str(genome.get("motif", ""))}}
+	sp.tags = sp.tags.duplicate()
+	sp.tags.erase("empilable")
+	_enregistrer_variete(sp)
+	return sp
+
+
+func _enregistrer_variete(sp: Dictionary) -> void:
+	if not territoire.has("registre"):
+		territoire["registre"] = {}
+	var esp := str(sp.espece)
+	if not territoire.registre.has(esp):
+		territoire.registre[esp] = {}
+	var cle := "%s|%s" % [str(sp.genome.get("couleur", "")), str(sp.genome.get("motif", ""))]
+	territoire.registre[esp][cle] = true
+
+
+## Le passage hebdomadaire de l'élevage : dans chaque vivarium de la fenêtre, le premier couple valide donne une couvée.
+func _semaine_elevage() -> void:
+	if monde == null or lieu != "camp":
+		return
+	for gi in grille.meubles.keys():
+		var m: Dictionary = GameData.entree("meubles", str(grille.meubles[gi]))
+		var specimens: Array = []
+		for uid in contenants.get(gi, []):
+			var it: Dictionary = items.get(uid, {})
+			if it.has("genome"):
+				it.age_semaines = int(it.get("age_semaines", 0)) + 1
+				specimens.append(it)
+		if specimens.size() < 2:
+			continue
+		var pos := grille.pos_de(int(gi))
+		var ctx := {"habitat": str(m.type_meuble), "libre": int(m.capacite_slots) - contenants[gi].size(), "temp": float(temperature_ressentie({"pos": pos}).temp), "saison": saison()}
+		var fait := false
+		var derniere: Array = []
+		for i in specimens.size():
+			for j in range(i + 1, specimens.size()):
+				if fait:
+					break
+				var res := conditions_repro(specimens[i], specimens[j], ctx)
+				if not res.ok:
+					derniere = res.raisons
+					continue
+				var esp: Dictionary = GameData.catalogues.species[str(specimens[i].espece)]
+				var rng := RandomNumberGenerator.new()
+				rng.seed = hash([graine, "couvee", gi, monde.semaine_courante])
+				var n := mini(rng.randi_range(int(esp.repro.portee[0]), int(esp.repro.portee[1])), int(ctx.libre))
+				for k in n:
+					var g := {}
+					for nom in esp.loci.keys():
+						g[nom] = _heriter(specimens[i].genome.get(nom), specimens[j].genome.get(nom), esp.loci[nom], rng)
+					var enfant := _nouveau_specimen(str(specimens[i].espece), g, "m" if rng.randf() < 0.5 else "f")
+					contenants[gi].append(enfant.uid)
+					EventBus.emettre(&"journal", [&"journal.couvee", {"espece": esp.name_key, "n": n, "couleur": str(g.get("couleur", "-")), "motif": str(g.get("motif", "-"))}])
+				fait = true
+		if not fait and not derniere.is_empty():
+			var r0: Dictionary = derniere[0]
+			EventBus.emettre(&"journal", [&"journal.couvee_refusee", {"espece": GameData.catalogues.species[str(specimens[0].espece)].name_key, "raison": str(r0.cle)}])
+
+
 # ---------------------------------------------------------------- conquête, succession, repeuplement (étape 10.5)
 
 func village_a(vers: Vector2i) -> Dictionary:
@@ -2248,9 +2445,22 @@ func est_nuit(tick: int = -1) -> bool:
 	return phase(tick) == "nuit"
 
 
-## La saison (Décision — Saisons activées à l'étape 10) : exposée, inerte.
-func saison() -> int:
-	return 0
+## La saison (Décision — Saisons activées à l'étape 10) : 120 jours, cinq saisons Wu Xing, un écart de température.
+func saison(tick: int = -1) -> String:
+	return _saison_info(tick).id
+
+
+func _saison_info(tick: int = -1) -> Dictionary:
+	var t := horloge_monde.ticks if tick < 0 else tick
+	var c := _cycle()
+	var sa: Dictionary = c.get("saisons", {})
+	if sa.is_empty():
+		return {"id": "printemps", "element": "bois", "temp": 0.0}
+	var jour := (t / int(c.get("ticks_par_jour", 24000))) % int(sa.jours_par_an)
+	for s in sa.liste:
+		if jour >= int(s[1]) and jour < int(s[2]):
+			return {"id": str(s[0]), "element": str(s[3]), "temp": float(s[4])}
+	return {"id": str(sa.liste[0][0]), "element": str(sa.liste[0][3]), "temp": float(sa.liste[0][4])}
 
 
 ## La météo d'une cellule à un instant : une fonction pure du bruit spatial lent, du temps, de la
@@ -2272,7 +2482,7 @@ func meteo(cell: Vector2i, tick: int = -1) -> String:
 	var cy := float(cell.y * taille)
 	var front := float(t) / float(m.get("ticks_par_front", 24000)) * 900.0   # le front se déplace : le bruit défile
 	var p := clampf((n.get_noise_2d(cx + front, cy - front * 0.4) + 1.0) * 0.5, 0.0, 1.0)
-	var temp := monde.surface.valeur("temperature", int(cx) + taille / 2, int(cy) + taille / 2)
+	var temp: float = monde.surface.valeur("temperature", int(cx) + taille / 2, int(cy) + taille / 2) + float(_saison_info(t).temp) / 40.0   # l'écart saisonnier, en fraction de la plage
 	var hum := monde.surface.valeur("humidite", int(cx) + taille / 2, int(cy) + taille / 2)
 	var s: Dictionary = m.seuils
 	if p >= float(s.extreme):
@@ -2297,7 +2507,7 @@ func temperature_ressentie(e: Dictionary) -> Dictionary:
 		return {"temp": 18.0, "ecart": 0.0, "meteo": "clair"}
 	var cell := monde.cellule_de(e.pos)
 	var temp01 := monde.surface.valeur("temperature", e.pos.x, e.pos.y)
-	var temp := lerpf(float(m.temp_min), float(m.temp_max), temp01)
+	var temp: float = lerpf(float(m.temp_min), float(m.temp_max), temp01) + float(_saison_info().temp)
 	var etat_id := meteo(cell)
 	var etat: Dictionary = GameData.catalogues.weather_states.get(etat_id, {})
 	temp += float(etat.get("temp_mod", 0))
@@ -2305,6 +2515,8 @@ func temperature_ressentie(e: Dictionary) -> Dictionary:
 		temp += float(_cycle().get("mod_nuit", -8))
 	var alt: float = float(monde.surface.tectonique_a(e.pos.x, e.pos.y).altitude)
 	var ma: Dictionary = m.mod_altitude
+	if not e.has("corps"):   # un point du monde, pas un être : la température brute
+		return {"temp": temp, "ecart": 0.0, "meteo": etat_id}
 	if alt >= 0.85:
 		temp += float(ma.haute_montagne)
 	elif alt >= 0.70:
@@ -3493,6 +3705,7 @@ func _tiquer_monde(tick: int) -> void:
 		var derive := int(regles.r.reputation.derive_hebdo)
 		_vieillir_semaine(tick)
 		_semaine_royaumes_pnj()
+		_semaine_elevage()
 		for x in entites.values():
 			if x.controle == "joueur":
 				_semaine_territoire(x)
@@ -3814,6 +4027,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _assigner(e, str(i.get("pnj", "")), str(i.get("fonction", "")), h.ticks)
 		"conquerir":
 			ok = _conquerir(e, i.get("vers", e.pos), h.ticks)
+		"capturer":
+			ok = _capturer(e, h.ticks)
 		"planter":
 			ok = _planter(e, str(i.get("base", "")), h.ticks)
 		"fertiliser":

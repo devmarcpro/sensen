@@ -182,6 +182,46 @@
         0.6,
         0.55
       ]
+    },
+    "saisons": {
+      "jours_par_an": 120,
+      "liste": [
+        [
+          "printemps",
+          0,
+          30,
+          "bois",
+          0
+        ],
+        [
+          "ete",
+          30,
+          50,
+          "feu",
+          8
+        ],
+        [
+          "fin_ete",
+          50,
+          60,
+          "terre",
+          6
+        ],
+        [
+          "automne",
+          60,
+          90,
+          "metal",
+          -2
+        ],
+        [
+          "hiver",
+          90,
+          120,
+          "eau",
+          -10
+        ]
+      ]
     }
   },
   "meteo": {

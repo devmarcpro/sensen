@@ -94,6 +94,9 @@
     "alchimie": {
       "type": "object"
     },
+    "elevage": {
+      "type": "object"
+    },
     "camp": {
       "type": "object"
     }

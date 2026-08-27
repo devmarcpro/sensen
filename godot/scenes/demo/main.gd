@@ -580,6 +580,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 			KEY_K:
 				if sim.lieu == "camp":
 					ecrans.basculer("gestion")
+			KEY_Y:
+				sim.intention(joueur_id, {"type": "capturer"})
 			KEY_N:
 				if ev.shift_pressed:
 					minimap.visible = not minimap.visible
@@ -1044,7 +1046,7 @@ func _maj_ui() -> void:
 	if not j.is_empty():
 		if sim.lieu == "camp" and sim.monde != null:
 			var tr_: Dictionary = sim.temperature_ressentie(j)
-			lignes.append("  " + tr("ui.heure").format({"heure": "%02d:%02d" % [int(sim.heure()), int(fmod(sim.heure(), 1.0) * 60.0)], "phase": tr("phase." + sim.phase()),
+			lignes.append("  " + tr("ui.heure").format({"heure": "%02d:%02d" % [int(sim.heure()), int(fmod(sim.heure(), 1.0) * 60.0)], "phase": tr("phase." + sim.phase()), "saison": tr("saison." + sim.saison()),
 				"meteo": tr(GameData.entree("weather_states", str(tr_.meteo)).name_key), "temp": "%.0f" % float(tr_.temp),
 				"confort": tr("ui.confort.froid") if float(tr_.ecart) < 0.0 else (tr("ui.confort.chaud") if float(tr_.ecart) > 0.0 else "")}))
 		var pd: Dictionary = sim.poids_de(j)
