@@ -144,7 +144,7 @@ func _ready() -> void:
 ## L'écran de création : R race, C classe, ↑↓ stat, +/− points, ← → année de naissance, Entrée.
 func _texte_creation() -> String:
 	var races: Array = GameData.catalogues.races.keys()
-	var classes: Array = GameData.catalogues.classes.keys()
+	var classes: Array = _classes_visibles()
 	races.sort()
 	classes.sort()
 	var race: String = races[creation.race % races.size()]
@@ -170,7 +170,7 @@ func _texte_creation() -> String:
 
 func _creer_personnage() -> void:
 	var races: Array = GameData.catalogues.races.keys()
-	var classes: Array = GameData.catalogues.classes.keys()
+	var classes: Array = _classes_visibles()
 	races.sort()
 	classes.sort()
 	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
@@ -479,6 +479,16 @@ func _maj_atteignables() -> void:
 
 # ---------------------------------------------------------------- entrées → intentions
 
+## Les classes proposées à la création : sans les cachées (Talents de classe).
+func _classes_visibles() -> Array:
+	var res: Array = []
+	for id in GameData.catalogues.classes.keys():
+		if not ("cache" in GameData.catalogues.classes[id].get("tags", [])):
+			res.append(id)
+	res.sort()
+	return res
+
+
 func _unhandled_input(ev: InputEvent) -> void:
 	if not creation.is_empty():
 		if ev is InputEventKey and ev.pressed and not ev.echo:
@@ -491,7 +501,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 				KEY_RIGHT: creation.annee += 1
 				KEY_KP_ADD, KEY_EQUAL, KEY_PLUS:
 					var st: String = STATS[creation.stat]
-					var cl: Dictionary = GameData.entree("classes", GameData.catalogues.classes.keys()[creation.classe % GameData.catalogues.classes.size()])
+					var cl: Dictionary = GameData.entree("classes", _classes_visibles()[creation.classe % GameData.catalogues.classes.size()])
 					var total := 30 + int(cl.get("points_creation_bonus", 0))
 					var utilises := 0
 					for s2 in STATS:

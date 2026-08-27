@@ -2378,6 +2378,22 @@ func test_bombes() -> void:
 	verifier(s.bombes.is_empty(), "la bombe a explosé")
 	verifier(s.grille.contenu_de(mur).is_empty(), "le mur de chêne (dureté < 40 × 1/2) est soufflé")
 	verifier(int(loup.sante) < sante0 or not loup.vivant, "le loup dans le rayon est blessé (%d → %d)" % [sante0, int(loup.sante)])
+	# La Mèche : deux bombes posées à une tuile l'une de l'autre ; la première amorce la seconde.
+	j.classe = "la_meche"
+	verifier(s.a_talent(j, "chaine_d_amorces"), "La Mèche porte Chaîne d'amorces")
+	var b2 := s.generer_objet("bombe", 1, {}, "commun", 0)
+	b2.quantite = 2
+	j.sac.append(b2.uid)
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "lancer", "objet": b2.uid, "cible": j.pos + Vector2i(2, 2)})
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "lancer", "objet": b2.uid, "cible": j.pos + Vector2i(3, 2)})
+	verifier(s.bombes.size() == 2, "deux bombes en attente")
+	s.bombes[0].fin = s.horloge_monde.ticks
+	s.bombes[1].fin = s.horloge_monde.ticks + 1000
+	s.attente.erase(j.id)
+	s.pas("monde")
+	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
 
 
 # ---------------------------------------------------------------- Main du métal, Fiole vive

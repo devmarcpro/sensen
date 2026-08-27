@@ -400,6 +400,10 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+classe.la_meche.name,La Mèche
+talent.chaine_d_amorces.name,Chaîne d'amorces
+talent.chaine_d_amorces.desc,"Une explosion amorce les bombes dans son rayon — les tiennes aussi."
+journal.amorce,"l'explosion amorce une autre bombe"
 item.bombe.name,Bombe
 recipe.fabriquer_bombe.name,Fabriquer une bombe
 journal.bombe_lancee,"{nom} lance une bombe ({retard} ticks)"

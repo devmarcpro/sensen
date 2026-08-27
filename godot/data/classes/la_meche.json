@@ -1,0 +1,28 @@
+{
+  "name_key": "classe.la_meche.name",
+  "bonus_stats": {
+    "dexterite": 2,
+    "perception": 1
+  },
+  "equipement": [
+    "proto_masse"
+  ],
+  "ratelier": [
+    "proto_masse"
+  ],
+  "competences": {
+    "forge": 3,
+    "terrassement": 5
+  },
+  "base_potentials": {
+    "_defaut": 80,
+    "forge": 110,
+    "terrassement": 120,
+    "athletisme": 100
+  },
+  "talent": "chaine_d_amorces",
+  "points_creation_bonus": 0,
+  "tags": [
+    "cache"
+  ]
+}

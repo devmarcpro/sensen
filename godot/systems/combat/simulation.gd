@@ -4539,6 +4539,19 @@ func _exploser(b: Dictionary) -> void:
 				etres += 1
 	EventBus.emettre(&"journal", [&"journal.explosion", {"tuiles": tuiles, "etres": etres}])
 	EventBus.emettre(&"explosion", [pos, R, str(b.source)])
+	# Chaîne d'amorces (La Mèche) : les bombes en attente dans le rayon explosent aussitôt.
+	var lanceur: Dictionary = entites.get(str(b.source), {})
+	if not lanceur.is_empty() and a_talent(lanceur, "chaine_d_amorces"):
+		var voisines: Array = []
+		for autre in bombes:
+			if Grille.distance(pos, autre.pos) <= R:
+				voisines.append(autre)
+		voisines.sort_custom(func(x: Dictionary, y: Dictionary) -> bool: return Grille.distance(pos, x.pos) < Grille.distance(pos, y.pos))
+		for autre in voisines:
+			if autre in bombes:
+				bombes.erase(autre)
+				EventBus.emettre(&"journal", [&"journal.amorce", {}])
+				_exploser(autre)
 	for x in vivants():
 		if x.controle == "joueur":
 			x["vue_sale"] = true
