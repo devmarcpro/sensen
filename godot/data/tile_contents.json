@@ -4,7 +4,7 @@
     "name_key": "tile_content.mur.name",
     "bloque_passage": true,
     "bloque_vue": true,
-    "hauteur_vue": 3,
+    "hauteur_vue": 2,
     "tags": [
       "mur",
       "solide",

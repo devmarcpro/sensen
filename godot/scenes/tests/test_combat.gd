@@ -918,11 +918,13 @@ func test_donjon() -> void:
 	var e2 := gen.generer_etage(42, 1, 1, 8, false)
 	verifier(e.pieces.size() == e2.pieces.size() and e.spawns.size() == e2.spawns.size() and e.sol.size() == e2.sol.size(), "déterministe à seed égale")
 	verifier(e.largeur == 64 and e.hauteur == 64, "un étage = une cellule de 64×64")
-	verifier(gen._nb_salles(e) >= 4, "au moins 4 salles procédurales posées dans le labyrinthe (%d)" % gen._nb_salles(e))
-	var portes := 0
+	verifier(gen._nb_salles(e) >= 4, "au moins 4 salles procédurales posées (%d)" % gen._nb_salles(e))
+	var tailles := {}
 	for pc in e.pieces:
-		portes += pc.attaches.size()
-	verifier(portes >= e.pieces.size(), "chaque salle a au moins une porte (%d portes)" % portes)
+		tailles[str(pc.id).split("_")[1]] = true
+	verifier(tailles.size() >= 2, "des salles de tailles différentes (%s)" % str(tailles.keys()))
+	var e3 := gen.generer_etage(42, 1, 2, 8, false)
+	verifier(e3.sol.size() != e.sol.size() or e3.entree != e.entree, "chaque étage est différent")
 	verifier(dt < 100.0, "étage généré en %.1f ms (< 100 ms, critère É2)" % dt)
 	var ok := true
 	for i in e.pieces.size():
@@ -930,7 +932,7 @@ func test_donjon() -> void:
 			if e.pieces[i].rect.intersects(e.pieces[k].rect):
 				ok = false
 	verifier(ok, "aucun chevauchement de salles")
-	verifier(e.sol.size() > 64 * 64 / 4, "le labyrinthe remplit la cellule (%d tuiles de sol)" % e.sol.size())
+	verifier(e.sol.size() > 64 * 64 / 10 and e.sol.size() < 64 * 64 * 3 / 4, "salles et couloirs, avec du plein à creuser (%d tuiles de sol)" % e.sol.size())
 	# Connexité : toutes les salles et les deux escaliers sont atteignables depuis l'arrivée
 	var g := Grille.depuis_etage(e, GameData.config("tile_contents"), GameData.config("combat_rules").deplacement, 1)
 	var atteint := g.atteignables(e.entree, 100000)

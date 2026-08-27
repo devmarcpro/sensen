@@ -10,7 +10,7 @@ const TH := 20            # hauteur du losange
 const HSTEP := 8          # pixels par niveau de hauteur
 const DELAI_PAS := 0.12   # secondes réelles entre deux pas d'une horloge de combat (lisibilité)
 const BUDGET_ATTEIGNABLE := 12   # ticks : rayon des coûts affichés
-const RAYON_VUE := 24            # tuiles dessinées autour du joueur (une cellule fait 64×64)
+const RAYON_VUE := 20            # tuiles dessinées autour du joueur (une cellule fait 64×64)
 var centre_terrain := Vector2i(-99, -99)   # centre de la dernière passe statique du terrain
 
 var sim: Simulation
@@ -263,9 +263,14 @@ func _process(delta: float) -> void:
 ## Un nœud creature.tscn par être vivant, configuré depuis sa fiche : position, profondeur, rig.
 func _maj_noeuds() -> void:
 	var vivants := {}
+	var j := joueur()
 	for e in sim.vivants():
 		vivants[e.id] = true
 		var n: Paperdoll = noeuds.get(e.id)
+		# Hors de la fenêtre de vue : le nœud reste, mais n'est ni dessiné ni redessiné.
+		if n != null and not j.is_empty() and Grille.distance(e.pos, j.pos) > RAYON_VUE:
+			n.visible = false
+			continue
 		if n == null:
 			n = SCENE_CREATURE.instantiate()
 			var rig: Dictionary = GameData.entree("rigs", str(e.corps.silhouette))
@@ -274,6 +279,7 @@ func _maj_noeuds() -> void:
 			add_child(n)
 			noeuds[e.id] = n
 		n.e = e
+		n.visible = true
 		n.position = _ecran(e.pos, sim.grille.h(e.pos))
 		n.z_index = e.pos.x + e.pos.y + 1
 		n.queue_redraw()
@@ -562,6 +568,9 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 	var g := sim.grille
 	var h := g.h(t)
 	var c := _ecran(t, h)
+	if g.bloque_passage(t):   # un mur : un bloc plein sur la tuile — le sol dessous est caché
+		_dessine_bloc(ci, g, t, c)
+		return
 	var haut := PackedVector2Array([
 		c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0),
 		c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)])
@@ -586,19 +595,25 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 		var cc := Color(0.55, 0.38, 0.18) if "coffre" in contenu.tags else Color(0.75, 0.65, 0.3)
 		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc)
 		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc.darkened(0.5), false, 1.0)
-	if g.bloque_passage(t):   # un mur : un bloc sombre posé sur la tuile
-		var hm := int(g.contenu_de(t).get("hauteur_vue", 3)) * HSTEP
-		ci.draw_colored_polygon(PackedVector2Array([
-			c + Vector2(-TW * 0.5, 0), c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0),
-			c + Vector2(TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm), c + Vector2(-TW * 0.5, -hm)]),
-			Color(0.35, 0.32, 0.30))
-		ci.draw_colored_polygon(PackedVector2Array([
-			c + Vector2(-TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm),
-			c + Vector2(TW * 0.5, -hm), c + Vector2(0, TH * 0.5 - hm)]), Color(0.5, 0.47, 0.44))
-		# L'arête du dessus : les blocs contigus se lisent comme des blocs, pas comme une nappe.
-		ci.draw_polyline(PackedVector2Array([
-			c + Vector2(-TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm), c + Vector2(TW * 0.5, -hm),
-			c + Vector2(0, TH * 0.5 - hm), c + Vector2(-TW * 0.5, -hm)]), Color(0.28, 0.25, 0.23), 1.0)
+
+## Un bloc de mur : le dessus et les deux faces avant (sud-ouest, sud-est) ; une face n'est
+## dessinée que si la tuile devant n'est pas elle-même un mur (elle la cacherait entièrement).
+func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2) -> void:
+	var hm := int(g.contenu_de(t).get("hauteur_vue", 3)) * HSTEP
+	var haut_bloc := Color(0.5, 0.47, 0.44)
+	var sud := t + Vector2i(0, 1)
+	if not g.dans(sud) or not g.bloque_passage(sud):
+		ci.draw_colored_polygon(PackedVector2Array([   # face sud-ouest (gauche)
+			c + Vector2(-TW * 0.5, 0), c + Vector2(0, TH * 0.5),
+			c + Vector2(0, TH * 0.5 - hm), c + Vector2(-TW * 0.5, -hm)]), haut_bloc.darkened(0.35))
+	var est := t + Vector2i(1, 0)
+	if not g.dans(est) or not g.bloque_passage(est):
+		ci.draw_colored_polygon(PackedVector2Array([   # face sud-est (droite)
+			c + Vector2(0, TH * 0.5), c + Vector2(TW * 0.5, 0),
+			c + Vector2(TW * 0.5, -hm), c + Vector2(0, TH * 0.5 - hm)]), haut_bloc.darkened(0.5))
+	ci.draw_colored_polygon(PackedVector2Array([   # dessus
+		c + Vector2(-TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm),
+		c + Vector2(TW * 0.5, -hm), c + Vector2(0, TH * 0.5 - hm)]), haut_bloc)
 
 
 ## La couche d'interface : barres, garde, télégraphe et jauge de chaîne de chaque être.

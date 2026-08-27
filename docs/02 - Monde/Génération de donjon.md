@@ -90,6 +90,9 @@ NETTOYAGE ET DISPARITION (3.5) : à la mort du boss (`creature_killed`
 > **Densité** : les salles étant petites, `tuiles_par_creature` passe à 30 (ruine) / 24 (repaire) et `tuiles_par_coffre` à 40, avec **au moins un occupant par salle** hors arrivée.
 > **Rendu** : les murs sont des **blocs pleins** (dessus + deux flancs) sur toute la fenêtre de vue, plus seulement les murs qui bordent un couloir — le designer avait remarqué des murs « incomplets ».
 
+> [!success] Décidé le 2026-08-27 (nuit) — procédural façon Elin / Tales of Maj'Eyal, **remplace le labyrinthe**
+> Précision du designer : « générer procéduralement aléatoire, pas des boîtes en séries, donc des couloirs, des petites et grandes salles, et que chaque étage soit différent ». Le labyrinthe sur trame et les salles alignées sont abandonnés. Un étage (cellule 64×64) : des **salles de trois tailles** (`tailles_salles` du thème : petites 3-5, moyennes 6-9, grandes 10-16, tirées selon `poids_salles`), posées au hasard sans chevauchement ; des **couloirs sinueux** de 2 à 3 tuiles (`couloirs` du thème : chance de virage, boucles, impasses) qui relient chaque salle à la précédente, puis quelques boucles et impasses ; connexité vérifiée par BFS. Le reste est du mur destructible. Deux escaliers par étage, seed(monde, id, étage) : chaque étage est différent, stable au retour.
+
 ## Liens
 - **Dépend de** : [[Donjons — structure et intégration]], [[Salles et connecteurs]], [[Unification macro-micro]], [[Dérive de la corruption]]
 - **Alimente** : [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Créatures]], [[Gabarit de quête]]

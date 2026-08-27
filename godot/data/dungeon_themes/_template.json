@@ -14,11 +14,45 @@
     3
   ],
   "salles_par_etage": [
-    4,
-    8
-  ],
-  "taille_salles": [
-    4,
+    5,
     9
-  ]
+  ],
+  "tailles_salles": {
+    "petite": [
+      3,
+      5
+    ],
+    "moyenne": [
+      6,
+      9
+    ],
+    "grande": [
+      10,
+      16
+    ]
+  },
+  "poids_salles": {
+    "petite": 4,
+    "moyenne": 3,
+    "grande": 1
+  },
+  "couloirs": {
+    "largeur": [
+      2,
+      3
+    ],
+    "virage": 0.25,
+    "boucles": [
+      1,
+      3
+    ],
+    "impasses": [
+      2,
+      5
+    ],
+    "impasse_longueur": [
+      4,
+      12
+    ]
+  }
 }

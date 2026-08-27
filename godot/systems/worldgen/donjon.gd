@@ -1,21 +1,21 @@
 class_name Donjon
 extends RefCounted
-## Génération d'un étage : **un labyrinthe avec des salles, contenu dans une cellule** (64×64 tuiles —
-## Grille continue), à étages, deux escaliers par étage (un vers le haut, un vers le bas), murs
-## destructibles, **salles procédurales façon Elin** (décisions du designer, 2026-08-27 — Génération de donjon).
-##   1. des salles rectangulaires tirées au hasard (`taille_salles` du thème) sont posées sans
-##      chevauchement, avec 1 à 3 portes ;
-##   2. le labyrinthe (backtracker sur une trame de 4 tuiles) remplit tout le reste ;
-##   3. chaque porte s'ouvre sur le couloir voisin ; connexité vérifiée par BFS et réparée par une
-##      tranchée droite si besoin ;
+## Génération d'un étage de donjon, **procédurale façon Elin / Tales of Maj'Eyal** (décisions du
+## designer, 2026-08-27 — Génération de donjon) : une cellule de 64×64 (Grille continue), à étages,
+## deux escaliers par étage (un vers le haut, un vers le bas), murs destructibles.
+##   1. des salles de tailles variées (petites, moyennes, grandes — `tailles_salles` du thème,
+##      tirées selon `poids_salles`) sont posées au hasard sans chevauchement ;
+##   2. des **couloirs sinueux** relient chaque salle à la précédente (marche vers la cible avec
+##      des virages), puis quelques boucles entre salles au hasard et quelques impasses ;
+##   3. connexité vérifiée par BFS et réparée par une tranchée droite si besoin ;
 ##   4. l'escalier montant (l'arrivée) dans une salle, l'escalier descendant dans la salle la plus
 ##      lointaine ; le boss au dernier étage y remplace l'escalier ;
 ##   5. peuplement par le thème, contenants de loot.
-## Déterministe par seed(monde, id_donjon, étage). Le plein est du mur (destructible) ; le bord
-## de la cellule est de la roche (indestructible). La bibliothèque de prefabs reste en données.
+## Déterministe par seed(monde, id_donjon, étage) : chaque étage est différent, stable au retour.
+## Le plein est du mur (destructible) ; le bord de la cellule est de la roche (indestructible).
+## La bibliothèque de prefabs (salles, connecteurs) reste en données, non posée.
 
 const H_BASE := 10                 # hauteur de référence d'un étage (Hauteur de terrain ±10)
-const PAS := 4                     # trame du labyrinthe : 3 tuiles de couloir + 1 de mur
 const ESSAIS_SALLE := 12
 
 var salles: Dictionary             # bibliothèque de prefabs, conservée mais non posée
@@ -41,26 +41,34 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 	for i in taille:
 		for b in [Vector2i(i, 0), Vector2i(i, taille - 1), Vector2i(0, i), Vector2i(taille - 1, i)]:
 			e.bord[b.y * taille + b.x] = true
-	# 1. Les salles : des rectangles au hasard (façon Elin), alignés sur la trame, sans chevauchement.
-	var tailles: Array = theme.get("taille_salles", [4, 9])
+	# 1. Les salles : petites, moyennes, grandes, posées au hasard sans chevauchement.
 	var essais := 0
 	while _nb_salles(e) < nb_salles and essais < nb_salles * ESSAIS_SALLE:
 		essais += 1
-		var w := rng.randi_range(int(tailles[0]), int(tailles[1]))
-		var h := rng.randi_range(int(tailles[0]), int(tailles[1]))
-		var origine := Vector2i(rng.randi_range(2, taille - w - 3), rng.randi_range(2, taille - h - 3))
-		origine = Vector2i(origine.x - origine.x % PAS + 1, origine.y - origine.y % PAS + 1)   # aligné sur la trame
-		var r := Rect2i(origine, Vector2i(w, h))
+		var dim := _dimension_salle()
+		if dim.x > taille - 6 or dim.y > taille - 6:
+			continue
+		var origine := Vector2i(rng.randi_range(2, taille - dim.x - 3), rng.randi_range(2, taille - dim.y - 3))
+		var r := Rect2i(origine, dim)
 		if not _libre(e, r):
 			continue
 		_placer_rectangle(e, r)
-	# 2. Le labyrinthe dans tout ce qui reste.
-	_labyrinthe(e)
-	# 3. Les portes des salles s'ouvrent sur le couloir voisin ; connexité réparée si besoin.
-	for p in e.pieces:
-		for a in p.attaches:
-			if a.type == "porte":
-				_ouvrir_porte(e, a)
+	# 2. Les couloirs : chaque salle vers la précédente, puis des boucles et des impasses.
+	var couloirs: Dictionary = theme.get("couloirs", {})
+	for i in range(1, e.pieces.size()):
+		_tunnel(e, _centre_libre(e, e.pieces[i - 1]), _centre_libre(e, e.pieces[i]), couloirs)
+	var f_boucles: Array = couloirs.get("boucles", [1, 3])
+	for k in rng.randi_range(int(f_boucles[0]), int(f_boucles[1])):
+		if e.pieces.size() < 2:
+			break
+		var a := rng.randi_range(0, e.pieces.size() - 1)
+		var b := rng.randi_range(0, e.pieces.size() - 1)
+		if a != b:
+			_tunnel(e, _centre_libre(e, e.pieces[a]), _centre_libre(e, e.pieces[b]), couloirs)
+	var f_impasses: Array = couloirs.get("impasses", [2, 5])
+	for k in rng.randi_range(int(f_impasses[0]), int(f_impasses[1])):
+		_impasse(e, couloirs)
+	# 3. Connexité.
 	_reparer_connexite(e)
 	# 4. Les escaliers : l'arrivée dans la première salle, la descente dans la plus lointaine.
 	var p0: Dictionary = e.pieces[0]
@@ -80,13 +88,22 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 
 # ---------------------------------------------------------------- salles
 
-func _salles_du_theme() -> Array[Dictionary]:
-	var res: Array[Dictionary] = []
-	for s: Dictionary in salles.values():
-		var themes: Array = s.get("floor_theme", [])
-		if themes.is_empty() or theme.id in themes:
-			res.append(s)
-	return res
+## Tire une catégorie de salle selon `poids_salles`, puis une dimension dans sa fourchette.
+func _dimension_salle() -> Vector2i:
+	var tailles: Dictionary = theme.get("tailles_salles", {"petite": [3, 5], "moyenne": [6, 9], "grande": [10, 16]})
+	var poids: Dictionary = theme.get("poids_salles", {"petite": 4, "moyenne": 3, "grande": 1})
+	var total := 0.0
+	for k in tailles.keys():
+		total += float(poids.get(k, 1))
+	var t := rng.randf() * total
+	var cat: String = tailles.keys()[0]
+	for k in tailles.keys():
+		t -= float(poids.get(k, 1))
+		if t < 0.0:
+			cat = k
+			break
+	var f: Array = tailles[cat]
+	return Vector2i(rng.randi_range(int(f[0]), int(f[1])), rng.randi_range(int(f[0]), int(f[1])))
 
 
 func _libre(e: Dictionary, r: Rect2i) -> bool:
@@ -98,48 +115,14 @@ func _libre(e: Dictionary, r: Rect2i) -> bool:
 	return true
 
 
-## Pose un prefab (sols, hauteurs, attaches) ; ses murs sont le plein. Retourne la pièce.
-func _placer(e: Dictionary, prefab: Dictionary, origine: Vector2i, kind: String) -> Dictionary:
-	var plan: Array = prefab.plan
-	var attaches: Array = []
-	for y in plan.size():
-		var ligne: String = plan[y]
-		for x in ligne.length():
-			var c := ligne[x]
-			if c == " " or c == "#":
-				continue
-			var p := origine + Vector2i(x, y)
-			var idx: int = p.y * e.largeur + p.x
-			e.sol[idx] = true
-			e.hauteurs[idx] = H_BASE + (int(c) if c.is_valid_int() else 0)
-			if c in "NSEW":
-				attaches.append({"type": "porte", "pos": p, "direction": {"N": Vector2i(0, -1), "S": Vector2i(0, 1), "E": Vector2i(1, 0), "W": Vector2i(-1, 0)}[c], "libre": true})
-	var piece := {"id": prefab.id, "kind": kind, "rect": Rect2i(origine, Vector2i(plan[0].length(), plan.size())), "attaches": attaches}
-	e.pieces.append(piece)
-	return piece
-
-
-## Une salle procédurale : un rectangle de sol, 1 à 3 portes sur des côtés distincts.
+## Une salle procédurale : un rectangle de sol.
 func _placer_rectangle(e: Dictionary, r: Rect2i) -> Dictionary:
 	for y in range(r.position.y, r.end.y):
 		for x in range(r.position.x, r.end.x):
 			e.sol[y * e.largeur + x] = true
-	var attaches: Array = []
-	var nb := rng.randi_range(1, 3)
-	var pris := {}
-	for k in nb:
-		var i := rng.randi_range(0, 3)
-		while pris.has(i):
-			i = (i + 1) % 4
-		pris[i] = true
-		var d: Vector2i = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(1, 0), Vector2i(-1, 0)][i]
-		var pos: Vector2i
-		if d.y != 0:
-			pos = Vector2i(rng.randi_range(r.position.x, r.end.x - 1), r.position.y if d.y < 0 else r.end.y - 1)
-		else:
-			pos = Vector2i(r.position.x if d.x < 0 else r.end.x - 1, rng.randi_range(r.position.y, r.end.y - 1))
-		attaches.append({"type": "porte", "pos": pos, "direction": d, "libre": true})
-	var piece := {"id": "salle_%dx%d" % [r.size.x, r.size.y], "kind": "salle", "rect": r, "attaches": attaches}
+	var taille_max: int = maxi(r.size.x, r.size.y)
+	var cat := "petite" if taille_max <= 5 else ("moyenne" if taille_max <= 9 else "grande")
+	var piece := {"id": "salle_%s_%dx%d" % [cat, r.size.x, r.size.y], "kind": "salle", "rect": r, "attaches": []}
 	e.pieces.append(piece)
 	return piece
 
@@ -152,84 +135,55 @@ func _nb_salles(e: Dictionary) -> int:
 	return n
 
 
-# ---------------------------------------------------------------- labyrinthe
+# ---------------------------------------------------------------- couloirs
 
-## Backtracker récursif sur une trame de PAS tuiles : chaque nœud est un carré de 3 tuiles de sol,
-## chaque arête ouverte creuse la tuile de mur entre deux nœuds. Les nœuds sous une salle sont exclus.
-func _labyrinthe(e: Dictionary) -> void:
-	var n: int = (e.largeur - 1) / PAS
-	var ok := {}
-	for gy in n:
-		for gx in n:
-			var r := Rect2i(Vector2i(gx * PAS + 1, gy * PAS + 1), Vector2i(3, 3))
-			var libre := true
-			for p in e.pieces:
-				if p.rect.grow(1).intersects(r):
-					libre = false
-			if libre:
-				ok[Vector2i(gx, gy)] = true
-	if ok.is_empty():
+## Un couloir sinueux de `de` vers `vers` : à chaque pas on avance sur l'axe courant, avec une
+## chance de `virage` de changer d'axe ; largeur 1 ou 2 tuiles.
+func _tunnel(e: Dictionary, de: Vector2i, vers: Vector2i, couloirs: Dictionary) -> void:
+	var virage: float = float(couloirs.get("virage", 0.25))
+	var largeurs: Array = couloirs.get("largeur", [1, 2])
+	var largeur := rng.randi_range(int(largeurs[0]), int(largeurs[1]))
+	var p := de
+	var axe_x := absi(vers.x - p.x) >= absi(vers.y - p.y)
+	var garde := 0
+	while p != vers and garde < e.largeur * e.hauteur:
+		garde += 1
+		if rng.randf() < virage:
+			axe_x = not axe_x
+		if axe_x and p.x == vers.x:
+			axe_x = false
+		elif not axe_x and p.y == vers.y:
+			axe_x = true
+		p += Vector2i(signi(vers.x - p.x), 0) if axe_x else Vector2i(0, signi(vers.y - p.y))
+		_creuser(e, p)
+		if largeur > 1:
+			_creuser(e, p + (Vector2i(0, 1) if axe_x else Vector2i(1, 0)))
+
+
+## Une impasse : une marche au hasard depuis une tuile de sol.
+func _impasse(e: Dictionary, couloirs: Dictionary) -> void:
+	if e.sol.is_empty():
 		return
-	var visites := {}
-	var pile: Array[Vector2i] = []
-	var depart: Vector2i = ok.keys()[rng.randi_range(0, ok.size() - 1)]
-	visites[depart] = true
-	pile.append(depart)
-	_creuser_noeud(e, depart)
-	var dirs := [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
-	while not pile.is_empty():
-		var c: Vector2i = pile.back()
-		var voisins: Array[Vector2i] = []
-		for d in dirs:
-			var v: Vector2i = c + d
-			if ok.has(v) and not visites.has(v):
-				voisins.append(v)
-		if voisins.is_empty():
-			pile.pop_back()
-			# Les nœuds jamais reliés (îlots entre salles) repartent d'un nouveau départ.
-			if pile.is_empty():
-				for k in ok.keys():
-					if not visites.has(k):
-						visites[k] = true
-						pile.append(k)
-						_creuser_noeud(e, k)
-						break
-			continue
-		var v: Vector2i = voisins[rng.randi_range(0, voisins.size() - 1)]
-		visites[v] = true
-		_creuser_noeud(e, v)
-		_creuser_arete(e, c, v)
-		pile.append(v)
-
-
-func _creuser_noeud(e: Dictionary, g: Vector2i) -> void:
-	for y in 3:
-		for x in 3:
-			var p := Vector2i(g.x * PAS + 1 + x, g.y * PAS + 1 + y)
-			e.sol[p.y * e.largeur + p.x] = true
-
-
-func _creuser_arete(e: Dictionary, a: Vector2i, b: Vector2i) -> void:
-	var d := b - a
-	var base := Vector2i(a.x * PAS + 2, a.y * PAS + 2)   # centre du nœud a
-	for k in range(1, PAS + 1):
-		var p := base + d * k
-		if p.x > 0 and p.y > 0 and p.x < e.largeur - 1 and p.y < e.hauteur - 1:
-			e.sol[p.y * e.largeur + p.x] = true
-
-
-## Une porte s'ouvre : on creuse droit devant elle jusqu'au premier sol (au plus PAS + 1 tuiles).
-func _ouvrir_porte(e: Dictionary, a: Dictionary) -> void:
-	var p: Vector2i = a.pos
-	for k in range(1, PAS + 2):
-		var q: Vector2i = p + a.direction * k
-		if q.x <= 0 or q.y <= 0 or q.x >= e.largeur - 1 or q.y >= e.hauteur - 1:
+	var cles: Array = e.sol.keys()
+	var idx: int = cles[rng.randi_range(0, cles.size() - 1)]
+	var p := Vector2i(idx % e.largeur, idx / e.largeur)
+	var longueurs: Array = couloirs.get("impasse_longueur", [4, 12])
+	var d: Vector2i = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)][rng.randi_range(0, 3)]
+	for k in rng.randi_range(int(longueurs[0]), int(longueurs[1])):
+		if rng.randf() < float(couloirs.get("virage", 0.25)):
+			d = Vector2i(d.y, d.x) * (1 if rng.randf() < 0.5 else -1)
+		p += d
+		if p.x <= 1 or p.y <= 1 or p.x >= e.largeur - 2 or p.y >= e.hauteur - 2:
 			return
-		var idx: int = q.y * e.largeur + q.x
-		if e.sol.has(idx):
-			return
-		e.sol[idx] = true
+		_creuser(e, p)
 
+
+func _creuser(e: Dictionary, p: Vector2i) -> void:
+	if p.x > 0 and p.y > 0 and p.x < e.largeur - 1 and p.y < e.hauteur - 1:
+		e.sol[p.y * e.largeur + p.x] = true
+
+
+# ---------------------------------------------------------------- connexité
 
 ## Connexité : BFS depuis la première salle ; toute salle isolée reçoit une tranchée droite.
 func _reparer_connexite(e: Dictionary) -> void:

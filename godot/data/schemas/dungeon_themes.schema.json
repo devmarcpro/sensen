@@ -8,7 +8,9 @@
     "croissance_par_etage",
     "etages",
     "salles_par_etage",
-    "taille_salles"
+    "tailles_salles",
+    "poids_salles",
+    "couloirs"
   ],
   "properties": {
     "name_key": {
@@ -40,13 +42,21 @@
       "minItems": 2,
       "maxItems": 2
     },
-    "taille_salles": {
-      "type": "array",
-      "items": {
-        "type": "integer"
-      },
-      "minItems": 2,
-      "maxItems": 2
+    "tailles_salles": {
+      "type": "object"
+    },
+    "poids_salles": {
+      "type": "object"
+    },
+    "couloirs": {
+      "type": "object",
+      "required": [
+        "largeur",
+        "virage",
+        "boucles",
+        "impasses",
+        "impasse_longueur"
+      ]
     },
     "salles_par_etage": {
       "type": "array",
