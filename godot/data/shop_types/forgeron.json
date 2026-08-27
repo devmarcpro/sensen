@@ -5,7 +5,8 @@
     "proto_hache",
     "proto_pioche",
     "proto_faucille",
-    "huile_d_arme"
+    "huile_d_arme",
+    "plan_industriel"
   ],
   "tags": []
 }

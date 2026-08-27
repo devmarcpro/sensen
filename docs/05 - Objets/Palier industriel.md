@@ -20,6 +20,9 @@ Le joueur **trouve et achète des recettes industrielles** (ruines profondes, ma
 
 **Les classes technologiques ([[Talents de classe]]) :** **La Mèche** (bombes) et **L'Engrenage** (tourelles) se découvrent aux mêmes endroits que ces recettes — ruines profondes, marchands des capitales, hauts rangs de guilde. La technologie a désormais des porteurs, pas seulement des plans.
 
+> [!success] Codé le 2026-08-28
+> Recettes marquées `industrielle: true` (`recipes/tremper_verre`, `cuire_brique_refractaire`, `couler_beton`) : **invisibles à l'atelier tant qu'elles ne sont pas connues** (`e.recettes_connues`). On les apprend en lisant un **plan industriel** (objet `plan_industriel`, type manuel, tag `plan` : le générateur lui donne une recette industrielle au lieu de modules ; même jet de lecture que les livres) — trouvé dans les **ruines profondes** (`loot_rules.drops.plan` : étage ≥ 3, 8 % des drops du tout-venant) ou acheté chez les **forgerons** de ville (inventaire du type de boutique). Matériaux ajoutés au catalogue synthétique : **verre trempé** (30), **brique réfractaire** (32), **béton** (40) — vecteurs plats (terre/feu/eau à parts proches), statistiquement forts, élémentairement muets. Combustible : la houille. Aciers alliés et caoutchouc attendent (l'acier et l'acier trempé existaient déjà comme métaux).
+
 ## Liens
 - **Dépend de** : [[Craft compositionnel]], [[Composant et recette d'obtention]], [[Stations de transformation]]
 - **Alimente** : [[Wu Xing hors combat]], [[Jauge de chaîne Wu Xing]]

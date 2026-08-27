@@ -1,0 +1,43 @@
+{
+  "name_key": "material.brique_refractaire.name",
+  "category": "synthetique",
+  "stats": {
+    "durete": 32,
+    "densite": 12,
+    "valeur_base": 24,
+    "conductivite_mana": 5,
+    "flammabilite": 0,
+    "isolation": 35,
+    "conductivite_electrique": 10,
+    "flottabilite": 2,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 3,
+    "friction": 50
+  },
+  "tags": [
+    "industriel"
+  ],
+  "color": "#a35a3a",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 153,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": null,
+    "skill": null
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": {
+    "terre": 0.45,
+    "feu": 0.4,
+    "metal": 0.15
+  },
+  "composition": null
+}

@@ -1,0 +1,24 @@
+{
+  "name_key": "recipe.tremper_verre.name",
+  "station": "forge",
+  "craft_skill": "forge",
+  "inputs": [
+    {
+      "material": "verre",
+      "forme": "brut",
+      "amount": 2
+    },
+    {
+      "material": "houille",
+      "forme": "brut",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "material": "verre_trempe",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null,
+  "industrielle": true
+}

@@ -400,6 +400,16 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+material.verre_trempe.name,Verre trempé
+material.brique_refractaire.name,Brique réfractaire
+material.beton.name,Béton
+recipe.tremper_verre.name,Tremper le verre
+recipe.cuire_brique_refractaire.name,Cuire une brique réfractaire
+recipe.couler_beton.name,Couler du béton
+item.plan_industriel.name,Plan industriel
+journal.plan_appris,"{nom} déchiffre le plan : {recette}"
+journal.plan_deja,"ce plan ne t'apprend rien de neuf"
+ui.objet.plan,"plan : {recette} (difficulté {difficulte})"
 journal.communion,"{nom} : l'élément tourne vers {element} (Communion des cinq)"
 module.renaissance.name,Renaissance
 ui.menu.capacites,Capacités

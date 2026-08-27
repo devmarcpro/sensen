@@ -64,6 +64,7 @@ func _ready() -> void:
 	test_reforge_et_fiole()
 	test_communion()
 	test_lumiere()
+	test_palier_industriel()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -954,7 +955,7 @@ func test_paperdoll_et_tutoriels() -> void:
 
 func test_materiaux() -> void:
 	var mats: Dictionary = GameData.catalogues.materials
-	verifier(mats.size() == 157, "les 157 matériaux des catalogues sont chargés (%d)" % mats.size())
+	verifier(mats.size() == 160, "les 160 matériaux des catalogues sont chargés (%d)" % mats.size())
 	var fer: Dictionary = mats.fer
 	verifier(int(fer.stats.durete) == 25 and int(fer.stats.conductivite_electrique) == 75, "le Fer suit sa table (Dur 25, CÉl 75)")
 	verifier("conducteur" in fer.tags and not ("inflammable" in fer.tags), "tags dérivés au seuil 50 (fer : conducteur)")
@@ -965,7 +966,7 @@ func test_materiaux() -> void:
 	var couleurs := {}
 	for id in mats.keys():
 		couleurs[mats[id].color] = true
-	verifier(couleurs.size() == mats.size(), "157 couleurs uniques")
+	verifier(couleurs.size() == mats.size(), "160 couleurs uniques")
 	verifier(mats.chene.harvest.tool_category == "hache" and mats.chene.harvest.skill == "bucheronnage", "récolte : outil et compétence de la catégorie")
 	verifier(GameData.config("material_categories").size() == 11, "11 catégories de matériaux")
 	verifier(tr("material.acier_trempe.name") == "Acier trempé", "nom localisé")
@@ -1047,7 +1048,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 51, "9 stations, 51 recettes plates (11 transformations, 23 meubles, 9 stations, 3 plats, 5 potions)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 54, "9 stations, 54 recettes plates (14 transformations, 23 meubles, 9 stations, 3 plats, 5 potions)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -2445,6 +2446,49 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Palier industriel
+
+func test_palier_industriel() -> void:
+	var s := Simulation.new(125)
+	s.charger_donjon("ruine", 125, 13, 1)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var forge := s.generer_objet("station_forge", 1, {}, "commun", 0)
+	j.sac.append(forge.uid)
+	s._donner_materiau(j, "verre", 4, "brut")
+	s._donner_materiau(j, "houille", 2, "brut")
+	var visibles: Array = []
+	for pl in s.recettes_disponibles(j):
+		visibles.append(str(pl.id))
+	verifier(not ("tremper_verre" in visibles), "sans le plan, tremper le verre est invisible")
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "tremper_verre"}), "et refusée à la fabrication")
+	var plan := s.generer_objet("plan_industriel", 4, {}, "commun", 0)
+	verifier(bool(GameData.catalogues.recipes.get(str(plan.get("recette", "")), {}).get("industrielle", false)) and plan.modules.is_empty(), "un plan porte une recette industrielle (%s)" % str(plan.get("recette", "?")))
+	plan.recette = "tremper_verre"
+	j.sac.append(plan.uid)
+	j.competences["lecture"] = 100
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "lire", "objet": plan.uid}) and ("tremper_verre" in j.get("recettes_connues", [])), "lire le plan : la recette est connue")
+	visibles = []
+	for pl in s.recettes_disponibles(j):
+		visibles.append(str(pl.id))
+	verifier("tremper_verre" in visibles, "elle apparaît à l'atelier")
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "fabriquer", "recette": "tremper_verre"}) and not s._pile(j, "verre_trempe", "brut").is_empty(), "tremper le verre : du verre trempé")
+	# Un plan tombe parfois dans les ruines profondes.
+	var trouve := false
+	for k in 80:
+		var loup := s.ajouter("loup", j.pos + Vector2i(3 + (k % 5), 3), "ia")
+		s.donjon.profondeur = 4
+		s._appliquer_degats(loup, 9999, j.id, {})
+		for uid in s.contenants.get(s.grille.idx(loup.pos), []):
+			trouve = trouve or str(s.items[uid].base) == "plan_industriel"
+		s.contenants.erase(s.grille.idx(loup.pos))
+		s.grille.contenu[s.grille.idx(loup.pos)] = 0
+	verifier(trouve, "un plan industriel est tombé en profondeur (80 morts, 8 %)")
 
 
 # ---------------------------------------------------------------- Éclairage : lumière locale, vision, détection

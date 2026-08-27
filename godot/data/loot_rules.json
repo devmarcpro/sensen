@@ -192,6 +192,10 @@
     "artefact": {
       "etages_majeur": 4,
       "chance_boss": 0.25
+    },
+    "plan": {
+      "profondeur_min": 3,
+      "chance": 0.08
     }
   },
   "monstres_rares": {

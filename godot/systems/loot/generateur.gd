@@ -106,6 +106,19 @@ func _tailler(inst: Dictionary, base: Dictionary, profondeur: int, rng: RandomNu
 ## Un livre : domaine tiré, difficulté par profondeur, 2-4 modules du catalogue filtrés par le domaine.
 func _composer_livre(inst: Dictionary, base: Dictionary, profondeur: int, rng: RandomNumberGenerator) -> void:
 	var lv: Dictionary = regles.livres
+	if "plan" in base.get("tags", []):   # un plan industriel (Palier industriel) : une recette industrielle, pas de modules
+		var indus: Array = []
+		var ids_r: Array = GameData.catalogues.recipes.keys()
+		ids_r.sort()
+		for rid in ids_r:
+			if bool(GameData.catalogues.recipes[rid].get("industrielle", false)):
+				indus.append(str(rid))
+		inst["recette"] = str(indus[rng.randi_range(0, indus.size() - 1)]) if not indus.is_empty() else ""
+		inst["difficulte"] = int(lv.difficulte_base) + maxi(0, profondeur - 2) * int(lv.difficulte_par_etage)
+		inst["modules"] = []
+		inst["domaine"] = "industriel"
+		inst["nom"] = {"affixe": "", "params": {"recette": GameData.catalogues.recipes.get(inst.recette, {}).get("name_key", "")}}
+		return
 	var grimoire: bool = base.type == "grimoire"
 	var domaine := ""
 	if grimoire:

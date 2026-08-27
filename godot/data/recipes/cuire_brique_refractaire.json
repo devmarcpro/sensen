@@ -1,0 +1,24 @@
+{
+  "name_key": "recipe.cuire_brique_refractaire.name",
+  "station": "forge",
+  "craft_skill": "forge",
+  "inputs": [
+    {
+      "material": "brique",
+      "forme": "brut",
+      "amount": 2
+    },
+    {
+      "material": "houille",
+      "forme": "brut",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "material": "brique_refractaire",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null,
+  "industrielle": true
+}

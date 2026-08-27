@@ -3576,6 +3576,8 @@ func recettes_disponibles(e: Dictionary) -> Array[Dictionary]:
 	ids.sort()
 	for rid in ids:
 		var r: Dictionary = GameData.catalogues.recipes[rid]
+		if bool(r.get("industrielle", false)) and not (str(rid) in e.get("recettes_connues", [])):   # Palier industriel : il faut le plan
+			continue
 		if stations.has(str(r.station)):
 			var pl := _plan_recette(e, r)
 			pl["kind"] = "plate"
@@ -3770,6 +3772,8 @@ func _fabriquer(e: Dictionary, rid: String, tick: int) -> bool:
 		return _assembler(e, GameData.catalogues.items[rid], tick)
 	var r: Dictionary = GameData.catalogues.recipes.get(rid, {})
 	if r.is_empty():
+		return false
+	if bool(r.get("industrielle", false)) and not (rid in e.get("recettes_connues", [])):
 		return false
 	if not stations_de(e).has(str(r.station)):
 		EventBus.emettre(&"journal", [&"journal.pas_de_station", {"recette": r.name_key}])
@@ -4351,6 +4355,18 @@ func _lire(e: Dictionary, objet: String, tick: int) -> bool:
 	e.sac.erase(objet)   # consommé dans tous les cas
 	var succes := marge >= 0 and jet != 1
 	var appris: Array = []
+	if succes and livre.has("recette") and not str(livre.recette).is_empty():   # un plan industriel : une recette apprise
+		if not e.has("recettes_connues"):
+			e["recettes_connues"] = []
+		if str(livre.recette) in e.recettes_connues:
+			EventBus.emettre(&"journal", [&"journal.plan_deja", {}])
+		else:
+			e.recettes_connues.append(str(livre.recette))
+			EventBus.emettre(&"journal", [&"journal.plan_appris", {"nom": e.name_key, "recette": GameData.catalogues.recipes[str(livre.recette)].name_key}])
+		gagner_xp(e, "lecture", int(livre.difficulte) * int(lv.xp_succes))
+		e.compteur = tick + int(regles.r.actions.objet)
+		EventBus.emettre(&"book_read", [e.id, objet, true])
+		return true
 	if succes:
 		var n: int = livre.modules.size()
 		if marge < 10:
@@ -4415,6 +4431,11 @@ func _drop(cible: Dictionary, source: String) -> void:
 		var o := generer_objet(str(loot._base_pour(rng)), profondeur, {"creature": cible.name_key})
 		if not o.is_empty():
 			uids.append(o.uid)
+	# Un plan industriel dans les ruines profondes (Palier industriel).
+	if cible.controle == "ia" and lr.drops.has("plan") and profondeur >= int(lr.drops.plan.profondeur_min) and rng.randf() < float(lr.drops.plan.chance):
+		var plan_i := generer_objet("plan_industriel", profondeur, {"creature": cible.name_key}, "commun", 0)
+		if not plan_i.is_empty():
+			uids.append(plan_i.uid)
 	# Le boss d'un donjon : un artefact, garanti si le donjon est majeur (Trésors et artefacts).
 	if bool(cible.get("chain_gauge", false)) and lieu != "camp" and lr.drops.has("artefact"):
 		var majeur := int(donjon.get("etages", 1)) >= int(lr.drops.artefact.etages_majeur)

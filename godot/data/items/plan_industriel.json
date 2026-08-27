@@ -1,0 +1,12 @@
+{
+  "name_key": "item.plan_industriel.name",
+  "type": "manuel",
+  "equip_slot": "",
+  "hands": 0,
+  "materiau": "papier",
+  "tags": [
+    "livre",
+    "manuel",
+    "plan"
+  ]
+}
