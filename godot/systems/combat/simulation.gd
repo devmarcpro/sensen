@@ -1152,7 +1152,7 @@ func _invoquer_arme_fantome(e: Dictionary, element: String, tick: int) -> bool:
 	var uid := "fantome_%s" % e.id
 	var niveau := regles.niveau(e.competences_eff, str(af.competence))
 	var durete := float(regles.r.degats.durete_reference) * (1.0 + float(e.stats_eff.volonte) / float(af.volonte_div) + float(niveau) / float(af.niveau_div))
-	items[uid] = {"uid": uid, "name_key": "item.arme_fantome.name", "type": "arme", "equip_slot": "main_principale", "hands": 1, "functionality": str(af.functionality), "durete_base": durete, "qualite": 1.0, "element": element, "tags": ["arme", "fantome"], "materiau": "", "fantome": true, "fini": true, "dernier_tick": tick, "affixes": [], "sertissures": []}
+	items[uid] = {"uid": uid, "name_key": "item.arme_fantome.name", "type": "arme", "equip_slot": "main_principale", "hands": 1, "functionality": str(af.functionality), "durete_base": durete, "qualite": 1.0, "element": element, "tags": ["arme", "fantome"], "materiau": "", "fantome": true, "fini": true, "dernier_tick": tick, "affixes": [], "sertissures": {"nombre": 0, "contenu": []}}
 	var portee: String = e.equipement.get("main_principale", "")
 	if not portee.is_empty():
 		e.sac.append(portee)
