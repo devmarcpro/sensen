@@ -49,5 +49,19 @@
   "tags": [
     "tempere",
     "plaine"
+  ],
+  "plantes": [
+    {
+      "id": "lin",
+      "density": 0.02
+    },
+    {
+      "id": "paille",
+      "density": 0.03
+    },
+    {
+      "id": "chanvre",
+      "density": 0.01
+    }
   ]
 }

@@ -10,7 +10,8 @@
     "rochers",
     "poi_weights",
     "farming_yield",
-    "tags"
+    "tags",
+    "plantes"
   ],
   "properties": {
     "conditions": {

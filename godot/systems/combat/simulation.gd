@@ -121,6 +121,9 @@ func charger_camp(joueur: Dictionary = {}) -> void:
 	for idx in e.filons.keys():
 		grille.materiaux[idx] = e.filons[idx]
 		grille.poser_contenu(Vector2i(int(idx) % grille.largeur, int(idx) / grille.largeur), "filon")
+	for idx in e.get("plantes", {}).keys():
+		grille.materiaux[idx] = e.plantes[idx]
+		grille.poser_contenu(Vector2i(int(idx) % grille.largeur, int(idx) / grille.largeur), "plante")
 	grille.poser_contenu(e.entree_donjon, "entree_donjon")
 	for i in grille.largeur * grille.hauteur_grille:   # sa cellule, on la connaît : pas de brouillard sur le camp
 		grille.decouvert[i] = true

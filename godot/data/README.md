@@ -21,6 +21,7 @@
 | creatures/ | tout être (joueur compris) : `corps.stats`, `equipement`, `ratelier`, `actions`, `capacites` (séquences de modules) | Schéma créature (B.5), Blocs de l'être, Créatures (F.3) |
 | creature_actions/ | les 24 actions des créatures (`tools/gen_creature_actions.py` les transcrit) | Décision — Vocabulaire d'attaque des créatures, Actions des créatures |
 | ai_profiles/ | profils Utility AI (`hostile`, `bete_sauvage`, `compagnon`, `elite`) | IA des créatures (E.16) |
+| vegetaux/ | silhouettes des arbres et plantes récoltables (billboards par code) | Direction artistique (callout du 2026-08-28) |
 | biomes/ | les biomes (4 sur 12 en 8.1) : conditions sur les couches, priorité, matériau de sol, végétation, rochers | Biomes — schéma (B.6), C.7 |
 | quest_templates/ | gabarits de quêtes | Gabarit de quête (B.7) |
 | kingdoms/ | royaumes scriptés/test | Schéma royaume (B.9) |

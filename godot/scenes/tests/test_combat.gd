@@ -1137,6 +1137,14 @@ func test_surface() -> void:
 		if not GameData.catalogues.materials.has(e.arbres[i]):
 			mat_ok = false
 	verifier(mat_ok and (e.arbres.size() + e.rochers.size() + e.filons.size()) > 20, "arbres, rochers et filons posés (%d / %d / %d)" % [e.arbres.size(), e.rochers.size(), e.filons.size()])
+	var veg_ok := true
+	for i in e.arbres.keys():
+		if not GameData.catalogues.vegetaux.has(e.arbres[i]):
+			veg_ok = false
+	for i in e.plantes.keys():
+		if not GameData.catalogues.vegetaux.has(e.plantes[i]) or not e.sol.has(i):
+			veg_ok = false
+	verifier(veg_ok and e.plantes.size() > 0, "chaque arbre et plante a sa silhouette ; les plantes restent franchissables (%d plantes)" % e.plantes.size())
 	var t0 := Time.get_ticks_usec()
 	surf.generer_cellule(513, 512)
 	var dt := (Time.get_ticks_usec() - t0) / 1000.0
@@ -1170,7 +1178,21 @@ func test_camp() -> void:
 			entree = t
 	verifier(arbres >= 5 and entree != Vector2i(-1, -1), "des arbres (%d) et l'entrée du donjon" % arbres)
 	var coffre := Vector2i(64 - 2, 64)
-	verifier(s.contenants.get(s.grille.idx(coffre), []).size() == 3, "le coffre de départ : hache, pioche, lit de paille")
+	verifier(s.contenants.get(s.grille.idx(coffre), []).size() == 4, "le coffre de départ : hache, pioche, faucille, lit de paille")
+	# Une plante se récolte à la faucille par un clic adjacent (Récolte).
+	var plante := Vector2i(64 + 3, 64 + 3)
+	s.grille.poser_contenu(plante, "plante")
+	s.grille.materiaux[s.grille.idx(plante)] = "lin"
+	var faucille := s.generer_objet("proto_faucille", 1, {}, "commun", 0)
+	j.sac.append(faucille.uid)
+	j.pos = plante + Vector2i(1, 0)
+	s.grille.placer(j.id, j.pos)
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "equiper", "objet": faucille.uid})
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "creuser", "vers": plante}) and not s._pile(j, "lin", "brut").is_empty() and s.grille.contenu_de(plante).is_empty(), "récolter du lin à la faucille")
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "desequiper", "slot": "main_principale"})
 	# Prendre le coffre depuis une tuile adjacente.
 	j.pos = coffre + Vector2i(1, 0)
 	s.grille.placer(j.id, j.pos)

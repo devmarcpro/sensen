@@ -83,7 +83,7 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}) -> Dictionary:
 	var taille: int = int(planete.taille_cellule)
 	rng.seed = hash([graine, cx, cy, "cellule"])
 	var e := {"largeur": taille, "hauteur": taille, "hauteurs": PackedByteArray(), "sol": {}, "bord": {}, "sols": {}, "filons": {},
-		"arbres": {}, "rochers": {}, "cellule": Vector2i(cx, cy), "biome": "", "biomes_vus": {}, "accidents": [],
+		"arbres": {}, "rochers": {}, "plantes": {}, "cellule": Vector2i(cx, cy), "biome": "", "biomes_vus": {}, "accidents": [],
 		"entree": Vector2i(taille / 2, taille / 2), "entree_donjon": Vector2i(taille / 2 + 10, taille / 2), "coffre_depart": Vector2i(taille / 2 - 2, taille / 2),
 		"pieces": [], "spawns": [], "coffres": [], "escalier": null, "boss": null, "etage": 0}
 	e.hauteurs.resize(taille * taille)
@@ -134,6 +134,13 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}) -> Dictionary:
 				break
 		if pose:
 			continue
+		for pl in b.get("plantes", []):
+			if tire < float(pl.density) * veg * 2.0:
+				e.plantes[i] = str(pl.id)
+				pose = true
+				break
+		if pose:
+			continue
 		for r in b.get("rochers", []):
 			if tire < float(r.density) * (1.0 - res):
 				e.rochers[i] = str(r.id)
@@ -154,7 +161,7 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}) -> Dictionary:
 	for d in [e.arbres, e.rochers, e.filons]:
 		for i in d.keys():
 			e.sol.erase(i)
-	return e
+	return e   # les plantes restent du sol (franchissables) : la simulation les pose comme contenu
 
 
 ## Les accidents de relief d'une cellule (planete.relief) : chacun un modificateur 2D paramétrique.

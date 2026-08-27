@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "required": [
+    "silhouette",
+    "hauteur",
+    "largeur",
+    "couleur_feuillage"
+  ],
+  "properties": {
+    "silhouette": {
+      "type": "string",
+      "enum": [
+        "feuillu",
+        "conifere",
+        "palme",
+        "buisson",
+        "herbe"
+      ]
+    }
+  }
+}

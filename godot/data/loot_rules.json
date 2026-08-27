@@ -139,7 +139,8 @@
     ],
     "bases_outils": [
       "proto_pioche",
-      "proto_hache"
+      "proto_hache",
+      "proto_faucille"
     ],
     "bases_stations": [
       "station_forge",

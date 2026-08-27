@@ -1,0 +1,15 @@
+{
+  "name_key": "item.proto_faucille.name",
+  "type": "outil",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "functionality": "faucille",
+  "durete_base": 25,
+  "qualite": 1.0,
+  "element": "metal",
+  "tags": [
+    "outil",
+    "prototype"
+  ],
+  "materiau": "fer"
+}

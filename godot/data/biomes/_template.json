@@ -33,5 +33,6 @@
   "tags": [],
   "relief_scale": 0,
   "rochers": [],
-  "filons_mult": 1.0
+  "filons_mult": 1.0,
+  "plantes": []
 }

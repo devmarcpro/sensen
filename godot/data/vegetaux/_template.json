@@ -1,0 +1,7 @@
+{
+  "_doc": "Végétal récoltable en billboard (docs: Direction artistique, callout du 2026-08-28). id = matériau (essence ou plante) ; silhouette : feuillu | conifere | palme | buisson | herbe ; hauteur/largeur en pixels ; couleur_feuillage : hex.",
+  "silhouette": "feuillu",
+  "hauteur": 40,
+  "largeur": 28,
+  "couleur_feuillage": "#3f6f2a"
+}

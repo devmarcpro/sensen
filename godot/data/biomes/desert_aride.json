@@ -45,5 +45,11 @@
   "tags": [
     "chaud",
     "desert"
+  ],
+  "plantes": [
+    {
+      "id": "coton",
+      "density": 0.008
+    }
   ]
 }

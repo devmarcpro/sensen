@@ -139,5 +139,16 @@
       "entree_donjon"
     ],
     "couleur": "#20161a"
+  },
+  "plante": {
+    "name_key": "tile_content.plante.name",
+    "bloque_passage": false,
+    "bloque_vue": false,
+    "hauteur_vue": 0,
+    "tags": [
+      "plante",
+      "destructible",
+      "vegetation"
+    ]
   }
 }

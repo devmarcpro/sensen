@@ -53,5 +53,15 @@
   "tags": [
     "tempere",
     "foret"
+  ],
+  "plantes": [
+    {
+      "id": "chanvre",
+      "density": 0.02
+    },
+    {
+      "id": "lin",
+      "density": 0.005
+    }
   ]
 }

@@ -40,6 +40,7 @@ var zoom := 1.0
 var terrain: Terrain              # couche statique : les tuiles, dessinées une fois (perf É0)
 var hud: Hud                      # couche au-dessus des êtres : barres, garde, télégraphes, jauges
 var brouillard: Brouillard        # couche du brouillard de guerre, au-dessus du terrain et des êtres
+var noeuds_vegetaux: Dictionary = {}   # index de tuile → Vegetal (billboards des arbres et plantes de la fenêtre)
 var noeuds: Dictionary = {}       # id d'être → nœud creature.tscn (le paperdoll)
 const SCENE_CREATURE := preload("res://scenes/entities/creature.tscn")
 
@@ -93,7 +94,12 @@ func _ready() -> void:
 	EventBus.action_resolved.connect(func(id: String, _a: Dictionary) -> void: telegraphes.erase(id))
 	EventBus.combat_ended.connect(_sur_fin_de_combat)
 	EventBus.expedition_terminee.connect(_sur_fin_d_expedition)
-	EventBus.tile_changed.connect(func(_p: Vector2i) -> void: terrain.queue_redraw())
+	EventBus.tile_changed.connect(func(p: Vector2i) -> void:
+		terrain.queue_redraw()
+		var i := sim.grille.idx(p) if sim != null else -1
+		if noeuds_vegetaux.has(i):
+			noeuds_vegetaux[i].queue_free()
+			noeuds_vegetaux.erase(i))
 	GameData.donnees_rechargees.connect(_charger)
 	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": 1000}
 	ecrans = Ecrans.new()
@@ -185,6 +191,9 @@ func _charger(fiche: Dictionary = {}) -> void:
 ## La simulation a changé de grille (descente) : la vue statique et les nœuds repartent de zéro.
 func _apres_changement_de_grille() -> void:
 	terrain.queue_redraw()
+	for v in noeuds_vegetaux.values():
+		v.queue_free()
+	noeuds_vegetaux.clear()
 	for n in noeuds.values():
 		n.queue_free()
 	noeuds.clear()
@@ -326,7 +335,7 @@ func _dessiner_occulteurs(n: Paperdoll) -> void:
 	var base := _ecran(e.pos, he)
 	for d in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 0), Vector2i(0, 2), Vector2i(2, 1), Vector2i(1, 2)]:
 		var t: Vector2i = e.pos + d
-		if g.dans(t) and (g.h(t) > he or g.bloque_passage(t)):
+		if g.dans(t) and (g.h(t) > he or (g.bloque_passage(t) and not ("vegetation" in g.contenu_de(t).get("tags", [])))):
 			n.draw_set_transform(-base)
 			_dessine_tuile(n, t)
 			n.draw_set_transform(Vector2.ZERO)
@@ -487,6 +496,10 @@ func _clic(t: Vector2i, lourde: bool) -> void:
 				if int(m.capacite_slots) > 0 and sim.contenants.get(sim.grille.idx(t), []).size() > 0:   # un coffre : tout prendre
 					sim.intention(joueur_id, {"type": "prendre", "vers": t})
 					return
+			if "plante" in tags:   # une plante : récolte à la faucille (ou l'arracher)
+				if not sim.intention(joueur_id, {"type": "creuser", "vers": t}):
+					_log(tr("journal.increusable"))
+				return
 			if "construit" in tags:   # ce qui a été posé se démonte au clic
 				sim.intention(joueur_id, {"type": "demonter", "vers": t})
 				return
@@ -585,10 +598,39 @@ func _dessiner_terrain(ci: CanvasItem) -> void:
 	var x1 := mini(g.largeur - 1, c.x + RAYON_VUE)
 	var y0 := maxi(0, c.y - RAYON_VUE)
 	var y1 := mini(g.hauteur_grille - 1, c.y + RAYON_VUE)
+	var garder := {}
 	for s in range(x0 + y0, x1 + y1 + 1):     # tri de profondeur : diagonales x+y, dans la fenêtre
 		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
 			var y := s - x
-			_dessine_tuile(ci, Vector2i(x, y))   # tous les murs de la fenêtre, en blocs pleins
+			var t := Vector2i(x, y)
+			_dessine_tuile(ci, t)   # tous les murs de la fenêtre, en blocs pleins
+			if "vegetation" in g.contenu_de(t).get("tags", []):
+				garder[g.idx(t)] = true
+				_assurer_vegetal(t)
+	for idx in noeuds_vegetaux.keys().duplicate():   # hors de la fenêtre : on libère
+		if not garder.has(idx):
+			noeuds_vegetaux[idx].queue_free()
+			noeuds_vegetaux.erase(idx)
+
+
+## Un billboard pour le végétal d'une tuile (Direction artistique : les ressources récoltables sont des sprites).
+func _assurer_vegetal(t: Vector2i) -> void:
+	var g := sim.grille
+	var idx := g.idx(t)
+	if noeuds_vegetaux.has(idx):
+		return
+	var v := Vegetal.new()
+	var mat_id := g.materiau_de(t)
+	v.configurer(mat_id, GameData.catalogues.vegetaux.get(mat_id, {}), GameData.catalogues.materials.get(mat_id, {}), hash([t.x, t.y]))
+	v.position = _ecran(t, g.h(t))
+	v.z_index = t.x + t.y + 1
+	var j := joueur()
+	if not g.decouvert.has(idx):
+		v.modulate = Color(0, 0, 0, 0)
+	elif not j.is_empty() and not sim.voit(j, t):
+		v.modulate = Color(0.45, 0.45, 0.5)
+	add_child(v)
+	noeuds_vegetaux[idx] = v
 
 
 func _zones_telegraphes() -> Dictionary:
@@ -619,7 +661,7 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 	var h := g.h(t)
 	var c := _ecran(t, h)
 	var teinte := Color.WHITE   # le brouillard est une couche à part (_dessiner_brouillard)
-	if g.bloque_passage(t):   # un mur : un bloc plein sur la tuile — le sol dessous est caché
+	if g.bloque_passage(t) and not ("vegetation" in g.contenu_de(t).get("tags", [])):   # un mur : un bloc plein — le sol dessous est caché
 		_dessine_bloc(ci, g, t, c, teinte)
 		return
 	var haut := PackedVector2Array([
@@ -681,9 +723,16 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 			var idx := g.idx(t)
 			var vu := g.decouvert.has(idx)
 			if vu and sim.voit(j, t):
+				if noeuds_vegetaux.has(idx):
+					noeuds_vegetaux[idx].modulate = Color.WHITE
 				continue
 			var c := _ecran(t, g.h(t))
-			var hm := (int(g.contenu_de(t).get("hauteur_vue", 0)) * HSTEP) if g.bloque_passage(t) else 0
+			var ct := g.contenu_de(t)
+			var hm := (int(ct.get("hauteur_vue", 0)) * HSTEP) if g.bloque_passage(t) else 0
+			if "vegetation" in ct.get("tags", []):
+				hm = 0   # un billboard : on le voile lui-même (modulate), pas un pavé par-dessus
+				if noeuds_vegetaux.has(idx):
+					noeuds_vegetaux[idx].modulate = Color(0.45, 0.45, 0.5) if vu else Color(0, 0, 0, 0)
 			ci.draw_colored_polygon(PackedVector2Array([
 				c + Vector2(-TW * 0.5, 0), c + Vector2(-TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm),
 				c + Vector2(TW * 0.5, -hm), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5)]), voile if vu else fond)

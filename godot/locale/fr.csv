@@ -399,6 +399,9 @@ journal.pas_de_station,aucune station dans le sac pour {recette}
 ui.atelier,=== ATELIER (F pour fermer) — chiffre : fabriquer ===
 ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
+tile_content.plante.name,Plante
+item.proto_faucille.name,Faucille de fer
+functionality.faucille.name,Faucille
 biome.plaine_temperee.name,Plaine tempérée
 biome.foret_temperee.name,Forêt tempérée
 biome.desert_aride.name,Désert aride

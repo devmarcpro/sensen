@@ -1,0 +1,16 @@
+{
+  "name_key": "functionality.faucille.name",
+  "kind": "outil",
+  "hands": 1,
+  "combat_skill": "tranchant",
+  "degats_des": "1d4",
+  "crit_range": 20,
+  "vitesse_base": 4.0,
+  "portee": 1.0,
+  "portee_min": 1,
+  "type_degats": "tranchant",
+  "volume": 1.2,
+  "poids_reference": 1.2,
+  "outil": "faucille",
+  "genre_grammatical": "fs"
+}
