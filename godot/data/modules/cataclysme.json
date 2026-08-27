@@ -1,0 +1,34 @@
+{
+  "id": "cataclysme",
+  "nom": "Cataclysme",
+  "name_key": "module.cataclysme.name",
+  "module_type": "noyau",
+  "description": "creuse un cratère : −4 niveaux, chute, toute l'endurance, une fois par combat",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "cataclysme"
+  ],
+  "famille": "Terrain",
+  "elements": {
+    "terre": 1.0
+  },
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 60,
+  "cout_mana": 40,
+  "cout_endurance": 0,
+  "effets": [
+    "terrain",
+    "degats"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "terrain": {
+      "delta": -4,
+      "chute": true
+    }
+  },
+  "unique_par_combat": true
+}

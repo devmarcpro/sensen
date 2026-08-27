@@ -80,6 +80,7 @@ func _ready() -> void:
 	test_terrasser()
 	test_empoigne()
 	test_armes_fantomes()
+	test_cataclysme()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2461,6 +2462,38 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Sorts cataclysmiques
+
+func test_cataclysme() -> void:
+	var cap := Capacites.new(GameData.catalogues["modules"])
+	var plan := cap.assembler(["carre", "cataclysme", "ampleur", "ampleur"], 5, "1d4", {})
+	verifier(plan.erreurs.is_empty() and int(plan.taille) == 3 and int(plan.ticks) >= 60, "[Carré]+[Cataclysme]+2×[Ampleur] : 7 × 7, %d ticks" % int(plan.ticks))
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var loup: Dictionary = s.entites["loup_2"]
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(0, -4)
+	s.grille.placer(loup.id, loup.pos)
+	for id in ["loup_2", "loup_3", "loup_4"]:
+		s.entites[id].compteur = 500
+	s._engager_combat(j, loup)
+	var h := s.horloge_de(j)
+	j.mana = 300
+	j.endurance = j.endurance_max
+	j.capacites.append({"id": "k", "name_key": "capacite.etincelle.name", "modules": ["carre", "cataclysme", "ampleur", "ampleur"]})
+	var centre: Vector2i = j.pos + Vector2i(0, -3)
+	var h0 := s.grille.h(centre)
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(s.intention(j.id, {"type": "capacite", "index": j.capacites.size() - 1, "cible": centre}), "le cataclysme est canalisé (télégraphié)")
+	verifier(not j.action_en_cours.is_empty(), "la canalisation est visible : une action en cours")
+	s.pas(j.horloge)
+	verifier(s.grille.h(centre) == maxi(0, h0 - 4) and int(j.endurance) == 0 and s.modifs_terrain.has(s.grille.idx(centre)), "cratère : %d → %d, endurance vidée, terrain mémorisé" % [h0, s.grille.h(centre)])
+	j.mana = 300
+	j.compteur = h.ticks
+	verifier(not s.intention(j.id, {"type": "capacite", "index": j.capacites.size() - 1, "cible": centre}), "un seul cataclysme par combat")
 
 
 # ---------------------------------------------------------------- Armes fantomatiques

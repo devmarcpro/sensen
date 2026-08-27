@@ -1488,6 +1488,9 @@ module.flamme.name,Flamme
 module.focale.name,Focale
 module.fonte.name,Fonte
 module.fosse.name,Fosse
+module.cataclysme.name,Cataclysme
+journal.cataclysme_unique,un cataclysme par combat — le corps ne suit pas
+journal.cataclysme,"{nom} déchaîne un cataclysme : l'endurance est vidée"
 module.foudroiement.name,Foudroiement
 module.fragmentation.name,Fragmentation
 module.frappe.name,Frappe

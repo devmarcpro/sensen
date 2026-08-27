@@ -16,6 +16,9 @@ Les sorts spectaculaires sont autorisés et souhaitables ; trois leviers suffise
 
 **Le critère de design qui prime :** un cratère doit être **tactiquement intéressant, pas seulement impressionnant**. Sur la grille, il crée une zone infranchissable, coupe des lignes de vue, piège des ennemis, se remplit d'eau. Le sort ne fait pas que des dégâts — il **réécrit le champ de bataille**. C'est cela qui justifie ses 60 ticks, pas ses chiffres.
 
+> [!success] Codé le 2026-08-28 — le module Cataclysme et les trois leviers
+> Noyau **Cataclysme** (`modules/cataclysme.json`, domaine Terre, effets `terrain` −4 avec chute + `degats`, **60 ticks**, **40 de mana**) : avec *Carré* et deux *Ampleur*, un cratère de 7 × 7. Les trois leviers : (1) **le coût en ticks** — 60 ticks franchissent le seuil de télégraphie, la canalisation est visible et interruptible comme toute charge lourde ; (2) **le coût qui mord** — tag `cataclysme` : **l'endurance est vidée** à l'exécution, et `unique_par_combat: true` : **une fois par combat** (`e.cataclysmes_combat`, remis à zéro à l'engagement), refusé sinon avec journal ; (3) **la destruction** : `terrain` abaisse des entiers, et mémorise désormais l'état d'origine (`_memoriser_terrain`) — **le monde se soigne hors claim**, le cratère persiste sur un claim. Décision : pas de coût persistant (fatigue, corruption) pour l'instant ; le cratère se remplit d'eau quand les liquides existeront.
+
 ## Liens
 - **Dépend de** : [[Familles de capacités de la grille]], [[Action-time à ticks]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[Destruction du terrain]], [[Modules]]

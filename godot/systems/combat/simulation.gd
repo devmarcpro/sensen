@@ -6659,6 +6659,9 @@ func _lancer_capacite(e: Dictionary, index: int, cible: Variant, tick: int) -> b
 		return false
 	if not capacite_visable(e, plan, cible_pos):
 		return false
+	if bool(plan.noyau.get("unique_par_combat", false)) and en_combat(e) and str(plan.noyau.id) in e.get("cataclysmes_combat", []):   # Sorts cataclysmiques : une fois par combat
+		EventBus.emettre(&"journal", [&"journal.cataclysme_unique", {}])
+		return false
 	_quitter_garde(e)
 	if cible_pos != e.pos:
 		e.orientation = Vector2i(signi(cible_pos.x - e.pos.x), signi(cible_pos.y - e.pos.y))
@@ -6702,6 +6705,13 @@ func _payer(e: Dictionary, plan: Dictionary) -> void:
 ## Exécute une capacité : forme → cibles (friendly fire des zones), puis les effets du noyau.
 func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, segment: bool = true) -> void:
 	var tick := tick_de(e)
+	if "cataclysme" in plan.noyau.get("tags", []):   # Sorts cataclysmiques : le coût mord — l'endurance est vidée, et c'est noté pour le combat
+		e.endurance = 0
+		if not e.has("cataclysmes_combat"):
+			e["cataclysmes_combat"] = []
+		if not (str(plan.noyau.id) in e.cataclysmes_combat):
+			e.cataclysmes_combat.append(str(plan.noyau.id))
+		EventBus.emettre(&"journal", [&"journal.cataclysme", {"nom": e.name_key}])
 	var tuiles := Capacites.tuiles_de_forme(grille, plan.geometrie, e.pos, cible_pos, int(plan.taille))
 	var touchees := _entites_dans(e, plan, tuiles)
 	# Liaisons qui étendent les cibles : Miroir (position symétrique), Partage (le lanceur aussi).
@@ -6971,6 +6981,7 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 						var apres := clampi(avant + int(tp.delta), 0, 20)
 						if apres == avant:
 							continue
+						_memoriser_terrain(t)   # le monde se soigne hors claim (Destruction du terrain)
 						grille.hauteurs[grille.idx(t)] = apres
 						a_touche = true
 						EventBus.emettre(&"journal", [&"journal.terrain", {"x": t.x, "y": t.y, "avant": avant, "apres": apres}])
@@ -7050,6 +7061,8 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 func _engager_combat(a: Dictionary, b: Dictionary) -> void:
 	a.erase("relance_utilisee")   # Le Rieur : une relance par combat
 	b.erase("relance_utilisee")
+	a.erase("cataclysmes_combat")   # Sorts cataclysmiques : un par combat
+	b.erase("cataclysmes_combat")
 	if a.get("huile_feu", false) and not en_combat(a):
 		a.erase("huile_feu")
 		a["degats_element_bonus"] = {"feu": "1d4"}   # consommé par le premier combat (Nourriture : huile d'arme)
