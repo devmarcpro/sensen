@@ -30,6 +30,9 @@ Défendre son territoire avec des gardes, des tourelles et des murs — et le se
 
 **Alliance défensive ([[Gouvernance, lois et diplomatie]]) :** renforts PNJ lors des raids subis.
 
+> [!success] Codé le 2026-08-28 — étape 10.3
+> `defense_totale = Σ gardes × (1 + niveau mêlée/5) × (1 + 0,25 × pièces équipées) + 5 × tourelles + murs construits/10 (plafond 10)`, × `defense_mult` de la gouvernance (anarchie 0,5, dictature militaire 1,5). Les gardes sont les résidents assignés à la fonction *garde* ; les tourelles un meuble `tourelle` (**pas encore de recette** — à ajouter avec les modules) ; les murs comptés dans la fenêtre chargée. Dette : 2 semaines → tourelles hors service ; 4 → les gardes ne comptent plus. **Joueur présent** (au camp) : `n = force/2` assaillants (bandits, un chef) apparaissent au **bord de la cellule du camp**, camp `raid`, profil `assaillant` (avancer vers le cœur = l'entrée du camp, creuser un mur qui bloque, attaquer ce qui se présente) ; le raid se résout quand ils sont tous morts ou après 6 000 ticks : victoire si au moins la moitié est tombée, sinon pertes proportionnelles aux survivants ; les survivants restent hostiles sur place. Un raid **réveille le dormeur** (le saut de nuit s'interrompt). **Absent** : un seul jet `force vs défense`.
+
 ## Liens
 - **Dépend de** : [[Population et exploitation]], [[Expansion territoriale]], [[Abstraction hors-site]], [[Construction cadrée]]
 - **Alimente** : [[Raids et menaces]], [[Gouvernance, lois et diplomatie]], [[Schéma royaume]], [[Entretien et taxes]]

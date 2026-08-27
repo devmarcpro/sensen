@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.tourelle.name",
+  "type_meuble": "tourelle",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 0,
+  "luminosite": 0,
+  "bonus_humeur": 0,
+  "couleur": "#6a6a78"
+}

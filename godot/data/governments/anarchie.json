@@ -1,0 +1,9 @@
+{
+  "name_key": "government.anarchie.name",
+  "base_rate": 0.0,
+  "defense_mult": 0.5,
+  "succession": "aucune",
+  "meurtre_legal": true,
+  "leadership": false,
+  "tags": []
+}

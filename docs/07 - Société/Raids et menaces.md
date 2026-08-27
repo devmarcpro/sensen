@@ -30,6 +30,9 @@ d'assaut vers le cœur du claim. Absent : résolution E.6.
 
 **Coût ([[Simulation du monde — performance]]) :** passages hebdomadaires sur listes filtrées — déjà bon marché par conception.
 
+> [!success] Codé le 2026-08-28 — étape 10.3, le jet hebdomadaire
+> Dans le passage de semaine du territoire : `proba = 0,05 + 0,3 × corruption effective du camp + 0,0001 × valeur du territoire + 0,002 × réputation globale négative`, plafond 0,6 ; `valeur = trésor + caisse + 2 × stocks + 25 × structures + 50 × cellules` ; `force = valeur × aléa(0,8 ; 1,2) / 20` — jamais le niveau du joueur. Composition : bandits (les royaumes hostiles viendront avec 10.4). Défaite : `perte = (force − défense)/force` bornée [0,1 ; 0,5] sur les stocks, la caisse et les stations fixes de la fenêtre (jamais de wipe) ; victoire : −5 % de stocks (« dégâts mineurs »). Signal `raid_resolved(victoire, perte)`, journal, dernier raid visible dans l'écran de gestion.
+
 ## Liens
 - **Dépend de** : [[Défense et raids]], [[Dérive de la corruption]], [[Abstraction hors-site]], [[IA des créatures]]
 - **Alimente** : [[Conquête de village]], [[Gouvernance, lois et diplomatie]]

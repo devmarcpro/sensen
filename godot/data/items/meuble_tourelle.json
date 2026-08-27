@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.tourelle.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "tourelle",
+  "tags": [
+    "meuble",
+    "posable"
+  ]
+}

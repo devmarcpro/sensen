@@ -1,0 +1,9 @@
+{
+  "name_key": "government.monarchie_hereditaire.name",
+  "base_rate": 0.08,
+  "defense_mult": 1.0,
+  "succession": "heritier",
+  "meurtre_legal": false,
+  "leadership": true,
+  "tags": []
+}

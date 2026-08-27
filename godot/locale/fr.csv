@@ -401,6 +401,33 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+government.monarchie_hereditaire.name,Monarchie héréditaire
+government.republique_elue.name,République élue
+government.theocratie.name,Théocratie
+government.ploutocratie.name,Ploutocratie
+government.dictature_militaire.name,Dictature militaire
+government.anarchie.name,Anarchie
+ai_profile.assaillant.name,Assaillant
+meuble.tourelle.name,Tourelle
+ui.gestion.royaume,"{statut} · gouvernance : {gouv}{transition} · défense {defense} · valeur {valeur} · dernier raid : {raid}"
+ui.gestion.campement,campement
+ui.gestion.royaume_statut,royaume
+ui.gestion.transition," (→ {cible} dans {n} sem.)"
+ui.gestion.aucun_raid,aucun
+ui.gestion.raid,"force {force} vs défense {defense} — {issue} (pertes {perte} %)"
+ui.gestion.victoire,repoussé
+ui.gestion.defaite,subi
+ui.gestion.gouv_aide,G : changer de gouvernance (4 semaines de transition, −10 d'humeur)
+journal.royaume_fonde,"ton territoire est reconnu comme un royaume — gouvernance : {gouv}"
+journal.gouvernance,"transition vers {gouv} : 4 semaines, la population grogne (−10)"
+journal.gouvernance_faite,"le régime est désormais : {gouv}"
+journal.gouvernance_refuse,il faut un royaume (8 cellules, 5 résidents) pour changer de régime
+journal.raid_commence,"RAID ! {n} assaillants approchent du camp (force {force})"
+journal.raid_abstrait,"un raid a frappé le territoire en ton absence : force {force} contre défense {defense} — {issue}"
+journal.raid_fin,"le raid est terminé : {issue} ({morts}/{n} assaillants tombés)"
+journal.raid_pertes,"pertes : {perte} % des stocks et de la caisse, {structures} structure(s) détruite(s)"
+journal.raid_mineur,dégâts mineurs : quelques stocks piétinés
+journal.raid_reveil,des cris te réveillent : le camp est attaqué
 plant.ble.name,Blé
 item.ble.name,Blé
 plant.orge.name,Orge

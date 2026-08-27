@@ -39,6 +39,9 @@ Le territoire du joueur devient mécaniquement un royaume à part entière — a
 
 **Fenêtre d'opportunité ([[Familles et succession]]) :** pendant une vacance de trône, une conquête bénéficie d'un DD réduit de 25 %.
 
+> [!success] Codé le 2026-08-28 — étape 10.3, la gouvernance du joueur
+> Les six types sont un catalogue `data/governments/` (`base_rate`, `defense_mult`, `succession`, `meurtre_legal`, `leadership`) — décision : un catalogue à part, les royaumes (`data/kingdoms/`) y font référence par `government_type`. Au seuil 8 cellules + 5 résidents, le territoire devient royaume en **monarchie héréditaire** par défaut ; changement dans l'écran de gestion (G) : **transition de 4 semaines**, **−10 d'humeur** immédiat ; l'entretien est multiplié par `base_rate / 0,08`. Lois, douanes, diplomatie : 10.4.
+
 ## Liens
 - **Dépend de** : [[Expansion territoriale]], [[Schéma royaume]], [[Familles et succession]], [[Réputation et relations]]
 - **Alimente** : [[Lois et infractions]], [[Défense et raids]], [[Génération des royaumes PNJ]], [[Raids et menaces]]

@@ -1,0 +1,9 @@
+{
+  "name_key": "government.ploutocratie.name",
+  "base_rate": 0.12,
+  "defense_mult": 0.9,
+  "succession": "plus_riche",
+  "meurtre_legal": false,
+  "leadership": true,
+  "tags": []
+}

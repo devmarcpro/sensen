@@ -180,6 +180,14 @@ func touche(ev: InputEventKey) -> bool:
 				main.sim.deposer(main.joueur(), 50)
 				rafraichir()
 				return true
+		KEY_G:
+			if courant == "gestion":
+				var ids: Array = GameData.catalogues.governments.keys()
+				ids.sort()
+				var actuel: String = str(main.sim.territoire.gouvernance_cible) if not str(main.sim.territoire.gouvernance_cible).is_empty() else str(main.sim.territoire.gouvernance)
+				main.sim.changer_gouvernance(str(ids[(ids.find(actuel) + 1) % ids.size()]))
+				rafraichir()
+				return true
 		KEY_PLUS, KEY_KP_ADD, KEY_EQUAL:
 			if courant == "gestion":
 				main.sim.regler_marge(float(main.sim.regles.r.royaume.boutique.marge_pas))
@@ -489,6 +497,12 @@ func _construire_gestion(j: Dictionary) -> void:
 	for r in t.rapports:
 		liste.add_item(tr("ui.gestion.rapport").format({"texte": tr("journal.rapport_semaine").format(r)}), null, false)
 		entrees.append({"kind": "texte", "texte": tr("journal.rapport_semaine").format(r)})
+	var gouv: String = tr(GameData.entree("governments", str(t.gouvernance)).name_key) if not str(t.gouvernance).is_empty() else "—"
+	var trans: String = tr("ui.gestion.transition").format({"cible": tr(GameData.entree("governments", str(t.gouvernance_cible)).name_key), "n": int(t.transition)}) if int(t.transition) > 0 else ""
+	var dr: Dictionary = t.dernier_raid
+	var raid_txt: String = tr("ui.gestion.aucun_raid") if dr.is_empty() else tr("ui.gestion.raid").format({"force": dr.force, "defense": dr.defense, "issue": tr("ui.gestion.victoire" if bool(dr.victoire) else "ui.gestion.defaite"), "perte": int(round(float(dr.perte) * 100.0))})
+	liste.add_item(tr("ui.gestion.royaume").format({"statut": tr("ui.gestion.royaume_statut" if bool(t.royaume) else "ui.gestion.campement"), "gouv": gouv, "transition": trans, "defense": "%.1f" % sim.defense_totale(), "valeur": int(sim.valeur_territoire()), "raid": raid_txt}), null, false)
+	entrees.append({"kind": "texte", "texte": tr("ui.gestion.gouv_aide")})
 	var mures := 0
 	for c in t.cultures.values():
 		if bool(c.mure):

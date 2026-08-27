@@ -33,7 +33,8 @@ var lieu: String = "arene"           # "arene" | "camp" | "donjon"
 var prochain_donjon: int = 1         # id du prochain donjon lancé depuis le camp
 var monde: Monde = null              # la surface comme fenêtre glissante (étape 8.2a)
 var territoire: Dictionary = {"tresor": 0, "dette": 0, "semaines_dette": 0, "stocks": {}, "rapports": [], "gains_quetes": 0, "royaume": false,
-	"cultures": {}, "fertilite": {}, "etals": {}, "caisse": 0, "marge": 1.0, "clients": 0.0, "heure_resolue": -1, "absence": {"ventes": 0, "or": 0, "mures": 0}}   # le royaume du joueur (étape 10)
+	"cultures": {}, "fertilite": {}, "etals": {}, "caisse": 0, "marge": 1.0, "clients": 0.0, "heure_resolue": -1, "absence": {"ventes": 0, "or": 0, "mures": 0},
+	"gouvernance": "", "gouvernance_cible": "", "transition": 0, "raid": {}, "dernier_raid": {}}   # le royaume du joueur (étape 10)
 var objets: Dictionary = {}          # uid → instance générée (le catalogue reste dans `items`, fusionné)
 var contenants: Dictionary = {}      # index de tuile → [uids] (coffres, butin au sol)
 var dernier_combat: Dictionary = {}   # récapitulatif du dernier combat terminé (écran de fin)
@@ -650,6 +651,10 @@ func _dormir(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 		horloge_monde.avancer(n)
 		reste -= n
 		pas_max -= 1
+		if not territoire.raid.is_empty():   # un raid réveille le dormeur (Défense et raids)
+			EventBus.emettre(&"journal", [&"journal.raid_reveil", {}])
+			e.compteur = horloge_monde.ticks
+			break
 	if not e.vivant:
 		return true
 	e.sante = e.sante_max
@@ -944,7 +949,9 @@ func _verifier_royaume(e: Dictionary) -> void:
 	var seuil: Dictionary = _ry().seuil_royaume
 	if not bool(territoire.royaume) and monde != null and monde.claims.size() >= int(seuil.cellules) and residents().size() >= int(seuil.pnj):
 		territoire.royaume = true
+		territoire.gouvernance = str(_ry().gouvernance.defaut)
 		EventBus.emettre(&"journal", [&"journal.royaume", {}])
+		EventBus.emettre(&"journal", [&"journal.royaume_fonde", {"gouv": GameData.entree("governments", territoire.gouvernance).name_key}])
 
 
 ## La production hebdomadaire d'un résident (Abstraction hors-site) : rendement × heures × humeur.
@@ -986,6 +993,9 @@ func _semaine_territoire(e: Dictionary) -> void:
 		if str(monde.claims[cell].role) == "ressources":
 			monde.modifications.erase(cell)
 	var entretien := int(ry.entretien_pnj) * residents().size() + int(ry.entretien_structure) * _structures_speciales()
+	if not str(territoire.gouvernance).is_empty():
+		var g: Dictionary = GameData.entree("governments", str(territoire.gouvernance))
+		entretien = int(round(float(entretien) * float(g.base_rate) / float(ry.gouvernance.base_rate_ref)))
 	var du := entretien + int(territoire.dette)
 	if int(territoire.tresor) >= du:
 		territoire.tresor = int(territoire.tresor) - du
@@ -1024,6 +1034,14 @@ func _semaine_territoire(e: Dictionary) -> void:
 		territoire.gains_quetes = 0
 		if taxe > 0:
 			EventBus.emettre(&"journal", [&"journal.taxe_guilde", {"n": taxe}])
+	# Transition de gouvernance (Gouvernance, lois et diplomatie).
+	if int(territoire.transition) > 0:
+		territoire.transition = int(territoire.transition) - 1
+		if int(territoire.transition) == 0:
+			territoire.gouvernance = str(territoire.gouvernance_cible)
+			territoire.gouvernance_cible = ""
+			EventBus.emettre(&"journal", [&"journal.gouvernance_faite", {"gouv": GameData.entree("governments", str(territoire.gouvernance)).name_key}])
+	_jet_raid(e, horloge_monde.ticks)
 	var rapport := {"prod": " · ".join(prod_txt) if not prod_txt.is_empty() else "—", "entretien": entretien, "tresor": int(territoire.tresor), "dette": int(territoire.dette)}
 	territoire.rapports.append(rapport)
 	while territoire.rapports.size() > 8:
@@ -1087,6 +1105,213 @@ func retirer_stock(e: Dictionary, cle: String) -> bool:
 	territoire.stocks.erase(cle)
 	EventBus.emettre(&"journal", [&"journal.stock_retire", {"nom": parts[0], "n": n}])
 	return true
+
+
+# ---------------------------------------------------------------- défense, raids, gouvernance (étape 10.3)
+
+func changer_gouvernance(id: String) -> bool:
+	if not bool(territoire.royaume):
+		EventBus.emettre(&"journal", [&"journal.gouvernance_refuse", {}])
+		return false
+	if not GameData.catalogues.governments.has(id) or id == str(territoire.gouvernance) or id == str(territoire.gouvernance_cible):
+		return false
+	var gv: Dictionary = _ry().gouvernance
+	territoire.gouvernance_cible = id
+	territoire.transition = int(gv.transition_semaines)
+	for x in residents():
+		x.humeur = int(x.get("humeur", _ry().humeur_base)) + int(gv.malus_humeur)
+	EventBus.emettre(&"journal", [&"journal.gouvernance", {"gouv": GameData.entree("governments", id).name_key}])
+	return true
+
+
+## La défense totale (Défense et raids) : gardes × niveau × équipement + tourelles + murs, × gouvernance.
+func defense_totale() -> float:
+	if monde == null:
+		return 0.0
+	var d: Dictionary = _ry().defense
+	var total := 0.0
+	var dette := int(territoire.semaines_dette)
+	if dette < int(d.dette_gardes):
+		for x in residents():
+			if str(x.assignation.fonction) != "garde":
+				continue
+			var niv := regles.niveau(x.competences_eff, "melee")
+			total += float(d.garde_base) * (1.0 + float(niv) / float(d.niveau_div)) * (1.0 + float(d.equipement_par_piece) * float(x.equipement.size()))
+	var murs := 0
+	var tourelles := 0
+	if lieu == "camp":
+		for gi in grille.meubles.keys():
+			if str(GameData.entree("meubles", str(grille.meubles[gi])).type_meuble) == "tourelle" and monde.claims.has(_cell_de(grille.pos_de(int(gi)))):
+				tourelles += 1
+		for i in grille.contenu.size():
+			if grille.contenu[i] > 0 and grille.contenu_ids[grille.contenu[i]] == "mur_construit" and monde.claims.has(_cell_de(grille.pos_de(i))):
+				murs += 1
+	if dette < int(d.dette_tourelles):
+		total += float(d.tourelle) * float(tourelles)
+	total += minf(float(d.mur_max), float(murs) / float(d.mur_par))
+	if not str(territoire.gouvernance).is_empty():
+		total *= float(GameData.entree("governments", str(territoire.gouvernance)).defense_mult)
+	return total
+
+
+## La valeur du territoire (Raids et menaces) : ce qui attire les pillards.
+func valeur_territoire() -> float:
+	if monde == null:
+		return 0.0
+	var r: Dictionary = _ry().raids
+	var stocks := 0
+	for n in territoire.stocks.values():
+		stocks += int(n)
+	return float(int(territoire.tresor) + int(territoire.caisse)) + float(r.valeur_par_stock) * float(stocks) + float(r.valeur_par_structure) * float(_structures_speciales()) + float(r.valeur_par_cellule) * float(monde.claims.size())
+
+
+## Le jet hebdomadaire de raid : probabilité par corruption, valeur et réputation ; force = valeur × aléa / échelle.
+func _jet_raid(e: Dictionary, tick: int) -> void:
+	if monde == null or not territoire.raid.is_empty():
+		return
+	var r: Dictionary = _ry().raids
+	var rep := int(e.get("reputations", {}).get("_globale", 0))
+	var valeur := valeur_territoire()
+	var proba := clampf(float(r.proba_base) + float(r.par_corruption) * monde.corruption_de(monde.cellule_camp) / 100.0 + float(r.par_valeur) * valeur + float(r.par_reputation) * float(maxi(0, -rep)), 0.0, float(r.proba_max))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "raid", monde.semaine_courante])
+	if rng.randf() >= proba:
+		return
+	var force := valeur * rng.randf_range(float(r.force_bornes[0]), float(r.force_bornes[1])) / float(r.echelle_force)
+	if lieu == "camp":
+		_lancer_raid_reel(force, tick)
+	else:
+		_resoudre_raid_abstrait(force, tick)
+
+
+## Les pertes d'un raid (jamais de wipe) : stocks, caisse, structures de la fenêtre.
+func _appliquer_pertes(perte: float) -> int:
+	for cle in territoire.stocks.keys():
+		territoire.stocks[cle] = int(floor(float(territoire.stocks[cle]) * (1.0 - perte)))
+		if int(territoire.stocks[cle]) <= 0:
+			territoire.stocks.erase(cle)
+	territoire.caisse = int(floor(float(territoire.caisse) * (1.0 - perte)))
+	var detruites := 0
+	if lieu == "camp":
+		var cibles: Array = []
+		for gi in grille.stations_fixes.keys():
+			if monde.claims.has(_cell_de(grille.pos_de(int(gi)))):
+				cibles.append(int(gi))
+		var n := int(floor(perte * float(cibles.size())))
+		for k in n:
+			var idx: int = cibles[k]
+			var pos := grille.pos_de(idx)
+			grille.contenu[idx] = 0
+			grille.marquer(pos)
+			grille.stations_fixes.erase(idx)
+			detruites += 1
+			EventBus.emettre(&"tile_changed", [pos])
+	return detruites
+
+
+## Joueur absent : un seul jet, force contre défense (Abstraction hors-site).
+func _resoudre_raid_abstrait(force: float, tick: int) -> void:
+	var r: Dictionary = _ry().raids
+	var defense := defense_totale()
+	var victoire := defense >= force
+	var perte := float(r.perte_victoire) if victoire else clampf((force - defense) / maxf(force, 0.001), float(r.perte_bornes[0]), float(r.perte_bornes[1]))
+	var detruites := _appliquer_pertes(perte)
+	territoire.dernier_raid = {"force": snappedf(force, 0.1), "defense": snappedf(defense, 0.1), "victoire": victoire, "perte": perte, "tick": tick}
+	EventBus.emettre(&"journal", [&"journal.raid_abstrait", {"force": "%.1f" % force, "defense": "%.1f" % defense, "issue": "ui.gestion.victoire" if victoire else "ui.gestion.defaite"}])
+	if victoire:
+		EventBus.emettre(&"journal", [&"journal.raid_mineur", {}])
+	else:
+		EventBus.emettre(&"journal", [&"journal.raid_pertes", {"perte": int(round(perte * 100.0)), "structures": detruites}])
+	EventBus.emettre(&"raid_resolved", [victoire, perte])
+
+
+## Joueur présent : des assaillants apparaissent au bord de la cellule du camp, profil `assaillant`.
+func _lancer_raid_reel(force: float, tick: int) -> void:
+	var r: Dictionary = _ry().raids
+	var n := clampi(roundi(force / 2.0), int(r.assaillants_bornes[0]), int(r.assaillants_bornes[1]))
+	var cell: Vector2i = monde.cellule_camp
+	var coeur: Vector2i = camp_sauve.get("entree", monde.pos_monde(cell, Vector2i(monde.taille / 2, monde.taille / 2)))
+	var bord: Array[Vector2i] = []
+	for i in monde.taille:
+		for p in [Vector2i(0, i), Vector2i(monde.taille - 1, i), Vector2i(i, 0), Vector2i(i, monde.taille - 1)]:
+			var q := monde.pos_monde(cell, p)
+			if grille.dans(q) and not grille.bloque_passage(q) and grille.occupant(q).is_empty():
+				bord.append(q)
+	if bord.is_empty():
+		_resoudre_raid_abstrait(force, tick)
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "raid_reel", tick])
+	var depart: Vector2i = bord[rng.randi() % bord.size()]
+	var ids: Array = []
+	for k in n:
+		var pos := depart
+		for essai in 30:
+			var c := depart + Vector2i(rng.randi_range(-3, 3), rng.randi_range(-3, 3))
+			if grille.dans(c) and not grille.bloque_passage(c) and grille.occupant(c).is_empty():
+				pos = c
+				break
+		var x := ajouter(str(r.chef) if k == 0 else str(r.creature), pos, "ia")
+		if x.is_empty():
+			continue
+		x.camp = "raid"
+		x.ai_profile = "assaillant"
+		x.ancre = coeur
+		x["raid"] = true
+		ids.append(x.id)
+	territoire.raid = {"fin": tick + int(r.duree_ticks), "n": ids.size(), "ids": ids, "force": force}
+	EventBus.emettre(&"journal", [&"journal.raid_commence", {"n": ids.size(), "force": "%.1f" % force}])
+
+
+## Le raid réel se termine quand tous sont tombés ou à l'échéance : victoire si la moitié au moins est tombée.
+func _tiquer_raid(tick: int) -> void:
+	if territoire.raid.is_empty() or lieu != "camp":
+		return
+	var rd: Dictionary = territoire.raid
+	var vivants_raid := 0
+	for id in rd.ids:
+		if entites.has(str(id)) and bool(entites[str(id)].vivant):
+			vivants_raid += 1
+	if vivants_raid > 0 and tick < int(rd.fin):
+		return
+	var r: Dictionary = _ry().raids
+	var n := maxi(1, int(rd.n))
+	var morts := n - vivants_raid
+	var victoire := morts * 2 >= n
+	var perte := float(r.perte_victoire) if victoire else clampf(float(vivants_raid) / float(n) * float(r.perte_bornes[1]), float(r.perte_bornes[0]), float(r.perte_bornes[1]))
+	var detruites := _appliquer_pertes(perte)
+	for id in rd.ids:   # les survivants restent hostiles sur place
+		if entites.has(str(id)):
+			entites[str(id)].erase("raid")
+			entites[str(id)].ai_profile = "hostile"
+			entites[str(id)].ancre = entites[str(id)].pos
+	territoire.dernier_raid = {"force": snappedf(float(rd.force), 0.1), "defense": snappedf(defense_totale(), 0.1), "victoire": victoire, "perte": perte, "tick": tick}
+	territoire.raid = {}
+	EventBus.emettre(&"journal", [&"journal.raid_fin", {"issue": "ui.gestion.victoire" if victoire else "ui.gestion.defaite", "morts": morts, "n": n}])
+	if not victoire:
+		EventBus.emettre(&"journal", [&"journal.raid_pertes", {"perte": int(round(perte * 100.0)), "structures": detruites}])
+	EventBus.emettre(&"raid_resolved", [victoire, perte])
+
+
+## L'assaut : vers le cœur du claim ; un mur construit qui bloque se creuse.
+func _ia_assaut(e: Dictionary, tick: int) -> void:
+	var coeur: Vector2i = e.ancre
+	if Grille.distance(e.pos, coeur) <= 1:
+		_attendre(e, tick)
+		return
+	var avant: Vector2i = e.pos
+	_ia_pas_routine(e, coeur, tick)
+	if e.pos != avant:
+		return
+	var meilleur := Vector2i(-1, -1)
+	var dmin := Grille.distance(e.pos, coeur)
+	for d in Grille.DIRS:
+		var q: Vector2i = e.pos + d
+		if grille.dans(q) and Grille.distance(q, coeur) < dmin and "construit" in grille.contenu_de(q).get("tags", []) and "destructible" in grille.contenu_de(q).get("tags", []):
+			dmin = Grille.distance(q, coeur)
+			meilleur = q
+	if meilleur != Vector2i(-1, -1):
+		_creuser(e, meilleur, tick)
 
 
 # ---------------------------------------------------------------- parcelles et boutique passive (étape 10.2)
@@ -2739,6 +2964,7 @@ func _sur_avancee_monde(_de: int, _a: int) -> void:
 	_tiquer_faim(horloge_monde.ticks)
 	_tiquer_monde(horloge_monde.ticks)
 	_tiquer_territoire(horloge_monde.ticks)
+	_tiquer_raid(horloge_monde.ticks)
 	_tiquer_meteo(horloge_monde.ticks)
 	_tiquer_faune(horloge_monde.ticks)
 
@@ -4450,6 +4676,8 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 			_ia_pas_routine(e, _cible_routine(e, profil), tick)
 		"errer":
 			_ia_errer(e, tick)
+		"assaut":
+			_ia_assaut(e, tick)
 		"retour":
 			e.cible = ""
 			e.fuite = false
@@ -4515,6 +4743,8 @@ func _actions_candidates(e: Dictionary, cible: Dictionary, profil: Dictionary, t
 		var m: Dictionary = entites[str(e.maitre)]
 		var loin := Grille.distance(e.pos, m.pos) > int(regles.r.compagnons.distance_suivi)
 		c["suivre"] = {"loin_du_maitre": 1.0 if (loin and str(e.get("ordre", "suivre")) == "suivre") else 0.0}
+	if e.ai_profile == "assaillant" and not a_cible:
+		c["assaut"] = {"vers_le_coeur": 1.0}
 	if not a_cible and not e.has("maitre"):
 		c["errer"] = {"calme": 1.0}
 		if profil.get("horaires") != null and lieu == "camp":

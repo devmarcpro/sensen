@@ -1,0 +1,26 @@
+{
+  "name_key": "ai_profile.assaillant.name",
+  "considerations": {
+    "attaquer": {
+      "cible_a_portee": 1.0,
+      "agressivite": 0.8
+    },
+    "poursuivre": {
+      "cible_visible": 0.6,
+      "distance_cible": 0.3
+    },
+    "fuir": {
+      "sante_basse": 1.5
+    },
+    "attendre": {
+      "endurance_basse": 0.7
+    },
+    "assaut": {
+      "vers_le_coeur": 1.2
+    }
+  },
+  "seuil_fuite_sante": 0.1,
+  "chute_max_degats": 10,
+  "horaires": null,
+  "chain_bonus": 0.0
+}

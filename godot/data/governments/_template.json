@@ -1,0 +1,10 @@
+{
+  "_doc": "Type de gouvernance (docs: Gouvernance, lois et diplomatie / 14.4). base_rate module l'entretien (÷ 0,08) ; defense_mult la défense totale ; succession : heritier | second | clerge | plus_riche | general | aucune.",
+  "name_key": "government.<id>.name",
+  "base_rate": 0.08,
+  "defense_mult": 1.0,
+  "succession": "heritier",
+  "meurtre_legal": false,
+  "leadership": true,
+  "tags": []
+}

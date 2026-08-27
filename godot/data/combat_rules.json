@@ -485,6 +485,49 @@
         3.0
       ],
       "heures_max_rattrapage": 720
+    },
+    "defense": {
+      "garde_base": 1.0,
+      "niveau_div": 5.0,
+      "equipement_par_piece": 0.25,
+      "tourelle": 5.0,
+      "mur_par": 10,
+      "mur_max": 10.0,
+      "dette_tourelles": 2,
+      "dette_gardes": 4
+    },
+    "raids": {
+      "proba_base": 0.05,
+      "par_corruption": 0.3,
+      "par_valeur": 0.0001,
+      "par_reputation": 0.002,
+      "proba_max": 0.6,
+      "force_bornes": [
+        0.8,
+        1.2
+      ],
+      "echelle_force": 20.0,
+      "valeur_par_cellule": 50,
+      "valeur_par_structure": 25,
+      "valeur_par_stock": 2,
+      "assaillants_bornes": [
+        2,
+        8
+      ],
+      "duree_ticks": 6000,
+      "perte_bornes": [
+        0.1,
+        0.5
+      ],
+      "perte_victoire": 0.05,
+      "creature": "bandit",
+      "chef": "chef_de_bande"
+    },
+    "gouvernance": {
+      "defaut": "monarchie_hereditaire",
+      "transition_semaines": 4,
+      "malus_humeur": -10,
+      "base_rate_ref": 0.08
     }
   }
 }

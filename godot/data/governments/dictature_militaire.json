@@ -1,0 +1,9 @@
+{
+  "name_key": "government.dictature_militaire.name",
+  "base_rate": 0.12,
+  "defense_mult": 1.5,
+  "succession": "general",
+  "meurtre_legal": false,
+  "leadership": true,
+  "tags": []
+}

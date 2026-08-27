@@ -41,6 +41,7 @@ func _ready() -> void:
 	test_compagnons()
 	test_territoire()
 	test_agriculture_et_boutique()
+	test_defense_et_raids()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1514,6 +1515,62 @@ func test_agriculture_et_boutique() -> void:
 	m.stock.append(b.uid)
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "vendre", "pnj": m.id, "objet": a.uid}) and (b.uid in j.sac) and (a.uid in m.stock), "marchand à sec : troc automatique")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Étape 10.3 : défense, raids, gouvernance
+
+func test_defense_et_raids() -> void:
+	var s := Simulation.new(75)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	verifier(s.defense_totale() == 0.0, "sans garde ni mur : défense nulle")
+	var v := s.ajouter("villageois", j.pos + Vector2i(1, 1), "ia")
+	s._habiller_pnj(v, GameData.entree("creatures", "villageois"))
+	v.social.relations[j.id] = 80
+	j.corps.stats.charisme = 25
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "recruter", "pnj": v.id})
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "assigner", "pnj": v.id, "fonction": "garde"})
+	verifier(s.defense_totale() >= 1.0, "un garde assigné : défense %.2f" % s.defense_totale())
+	# Raid abstrait : force 40 contre une défense faible → pertes bornées.
+	s.territoire.stocks["chene|planche"] = 100
+	s.territoire.caisse = 100
+	s.lieu = "expedition"
+	s._resoudre_raid_abstrait(40.0, s.horloge_monde.ticks)
+	s.lieu = "camp"
+	var st: int = int(s.territoire.stocks.get("chene|planche", 0))
+	verifier(st >= 50 and st <= 90 and not s.territoire.dernier_raid.is_empty() and not bool(s.territoire.dernier_raid.victoire), "raid subi en absence : stocks %d/100 (pertes bornées)" % st)
+	s._resoudre_raid_abstrait(0.5, s.horloge_monde.ticks)
+	verifier(bool(s.territoire.dernier_raid.victoire), "un raid faible est repoussé")
+	# Raid réel : des assaillants au bord de la cellule, qui avancent vers le cœur.
+	s._lancer_raid_reel(8.0, s.horloge_monde.ticks)
+	var rd: Dictionary = s.territoire.raid
+	verifier(not rd.is_empty() and int(rd.n) >= 2 and s.entites[str(rd.ids[0])].ai_profile == "assaillant" and s.entites[str(rd.ids[0])].camp == "raid", "%d assaillants apparus" % int(rd.get("n", 0)))
+	var coeur: Vector2i = s.camp_sauve.entree
+	var d0 := Grille.distance(s.entites[str(rd.ids[0])].pos, coeur)
+	s.attente[j.id] = true
+	for k in 6:
+		s.horloge_monde.avancer(100)
+	var d1 := Grille.distance(s.entites[str(rd.ids[0])].pos, coeur)
+	verifier(d1 < d0, "l'assaillant avance vers le cœur (%d → %d)" % [d0, d1])
+	s.territoire.raid.fin = s.horloge_monde.ticks
+	s.horloge_monde.avancer(1)
+	verifier(s.territoire.raid.is_empty() and not bool(s.territoire.dernier_raid.victoire) and s.entites[str(rd.ids[0])].ai_profile == "hostile", "à l'échéance le raid est résolu, les survivants restent hostiles")
+	# Gouvernance : royaume, transition de 4 semaines, −10 d'humeur.
+	verifier(not s.changer_gouvernance("dictature_militaire"), "pas de royaume : pas de régime")
+	s.territoire.royaume = true
+	s.territoire.gouvernance = "monarchie_hereditaire"
+	var h0 := int(v.humeur)
+	verifier(s.changer_gouvernance("dictature_militaire") and int(s.territoire.transition) == 4 and int(v.humeur) == h0 - 10, "transition lancée : 4 semaines, −10 d'humeur")
+	s.territoire.tresor = 1000
+	s.regles.r.royaume.raids.proba_max = 0.0
+	for k in 4:
+		s._semaine_territoire(j)
+	verifier(s.territoire.gouvernance == "dictature_militaire" and int(s.territoire.transition) == 0, "quatre semaines plus tard : dictature militaire")
+	verifier(s.defense_totale() > 1.0, "dictature : défense ×1,5 (%.2f)" % s.defense_totale())
 	s.monde.fermer()
 
 

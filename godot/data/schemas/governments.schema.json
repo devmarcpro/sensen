@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "base_rate",
+    "defense_mult",
+    "succession",
+    "meurtre_legal",
+    "leadership"
+  ],
+  "properties": {
+    "base_rate": {
+      "type": "number",
+      "minimum": 0
+    },
+    "defense_mult": {
+      "type": "number",
+      "minimum": 0
+    },
+    "succession": {
+      "type": "string"
+    }
+  }
+}
