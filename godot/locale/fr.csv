@@ -157,7 +157,7 @@ tutorial.fin_de_combat.text,"Le combat se relâche : l'écran de fin montre la d
 tile_content.roche.name,Roche
 dungeon_theme.ruine.name,Ruine
 dungeon_theme.repaire.name,Repaire
-ui.donjon,DONJON {theme} · étage {etage}/{etages} · salles {salles} · E : descendre (sur la cage d'escalier)
+ui.donjon,DONJON {theme} · étage {etage}/{etages} · salles {salles} · E : descendre (cage dorée) / remonter et sortir (entrée verte)
 journal.descente,vous descendez à l'étage {etage}
 journal.pas_escalier,pas de cage d'escalier ici
 item.proto_anneau.name,Anneau
@@ -356,6 +356,10 @@ ui.creation.points,Points à répartir : {restants} / {total}
 ui.creation.signe,"Année de naissance {annee} : signe {element}-{animal} (← →)"
 ui.creation.aide,"↑↓ choisir une stat · + / − répartir (max +10) · Entrée : commencer"
 journal.respawn,{nom} se relève au point d'entrée ({perdus} objet(s) perdu(s))
+journal.remontee,vous remontez à l'étage {etage}
+journal.sortie,"{nom} ressort du donjon : {tues} ennemis, {objets} objets, étage {etage_max}"
+ui.expedition.titre,=== EXPÉDITION TERMINÉE — {theme} ===
+ui.expedition.ligne,"  étage max {etage_max} · {tues} ennemis vaincus · {objets} objets ramassés ({sac} au sac) · boss : {boss} · niveau de combat {combat}, général {general} — une nouvelle expédition commence"
 journal.victoire,plus aucun hostile. Victoire.
 journal.defaite,tu es tombé. Une touche : te relever au point d'entrée (Mort et pénalité).
 module.a_l_impact.name,À l'impact

@@ -30,6 +30,7 @@ func _ready() -> void:
 	test_coffres_et_rares()
 	test_gemmes_et_livres()
 	test_progression()
+	test_expedition()
 	test_arenes_autonomes()
 	if echecs == 0:
 		print("TESTS : tout passe")
@@ -1236,3 +1237,49 @@ func test_progression() -> void:
 	verifier(not jp.vivant, "mort")
 	verifier(p.intention(jp.id, {"type": "respawn"}), "respawn")
 	verifier(jp.vivant and jp.sante == jp.sante_max and jp.pos == spawn and jp.equipement.has("main_principale"), "relevé au point d'entrée, PV pleins, équipement conservé")
+
+
+# ---------------------------------------------------------------- Étape 5 : entrer, combattre, looter, progresser, ressortir
+
+func test_expedition() -> void:
+	var s := Simulation.new(21)
+	s.charger_donjon("ruine", 21, 3, 1)
+	var j := joueur_de(s)
+	var loup := {}
+	for e in s.vivants():
+		if e.id != j.id:
+			loup = e
+			break
+	verifier(not loup.is_empty(), "un ennemi à l'étage 1")
+	loup.sante = 1
+	s._appliquer_degats(loup, 5, j.id, {})
+	verifier(not loup.vivant and s.expedition.tues == 1, "tué par le joueur : compté")
+	var n_ent: int = s.ordre.size()
+	# Descendre puis remonter : l'étage 1 revient dans l'état laissé (le loup reste mort)
+	s.grille.liberer(j.pos)
+	j.pos = s.donjon.escalier
+	s.grille.placer(j.id, j.pos)
+	s.horloge_monde.avancer(1)
+	verifier(s.intention(j.id, {"type": "descendre"}), "descendre")
+	verifier(s.donjon.etage == 2 and s.etages_visites.has(1), "l'étage 1 est mis de côté")
+	j.compteur = s.horloge_monde.ticks
+	s.grille.liberer(j.pos)
+	j.pos = s.donjon.entree
+	s.grille.placer(j.id, j.pos)
+	s.horloge_monde.avancer(1)
+	verifier(s.intention(j.id, {"type": "remonter"}), "remonter")
+	verifier(s.donjon.etage == 1 and s.ordre.size() == n_ent and not s.entites[loup.id].vivant and j.pos == s.donjon.escalier, "étage 1 restauré : mêmes êtres, le loup toujours mort, joueur sur la cage")
+	# Sortir depuis l'entrée de l'étage 1 : expédition terminée, nouvelle expédition, même être
+	var recap := [{}]
+	EventBus.expedition_terminee.connect(func(r: Dictionary) -> void: recap[0] = r)
+	var o := s.generer_objet("proto_dague", 1)
+	s.donner(j, o.uid)
+	j.competences["epee"] = 7
+	s.grille.liberer(j.pos)
+	j.pos = s.donjon.entree
+	s.grille.placer(j.id, j.pos)
+	j.compteur = s.horloge_monde.ticks
+	s.horloge_monde.avancer(1)
+	verifier(s.intention(j.id, {"type": "remonter"}), "sortir par l'entrée de l'étage 1")
+	verifier(not recap[0].is_empty() and recap[0].tues == 1 and recap[0].sac == 1, "récapitulatif : 1 tué, 1 objet au sac")
+	verifier(s.donjon.id == 4 and s.donjon.etage == 1 and s.etages_visites.is_empty() and joueur_de(s).competences.epee == 7 and o.uid in joueur_de(s).sac, "nouvelle expédition (donjon 4), le même être avec son sac et ses niveaux")

@@ -50,6 +50,9 @@ Les donjons sont une des sources principales de contenu du jeu, et le premier es
 > [!success] Codé le 2026-08-27 — contenants et butin
 > Les salles reçoivent des **coffres** (une tuile de sol par tranche de 120 tuiles, +1 en salle du boss — `loot_rules.contenants`), remplis à la profondeur de l'étage par le générateur de loot ; contenus de tuile `coffre` / `butin` franchissables, ramassés par l'intention `ramasser` (R, 5 ticks) sur la tuile. À sa mort, un être lâche ce qu'il portait (équipement d'instance et sac) plus, pour le tout-venant, un objet avec 25 % de chance. Le loot et les mobs sont **fixes** : aucun repop, le sac et les contenants suivent l'état de la grille.
 
+> [!success] Codé le 2026-08-27 — remonter, ressortir, étages fixes
+> Chaque étage quitté est **mis de côté tel quel** (grille, êtres morts ou vivants, contenants) et revient dans cet état quand on y remonte — *pas de repop, explorer vide réellement le donjon*. La tuile d'entrée (verte) sert d'escalier montant ; à l'étage 1 elle est la **sortie** : l'expédition se termine (récapitulatif : étage max, tués, objets, boss, niveaux dérivés — signal `expedition_terminee`) et une nouvelle expédition commence avec le même être, son sac, ses niveaux et ses potentiels. La surface, le délai de grâce de 1,5 jour et la cellule qui redevient claimable attendent l'étape 8.
+
 ## Liens
 - **Dépend de** : [[Grille continue]], [[Hauteur de terrain ±10]], [[Décisions fondatrices]]
 - **Alimente** : [[Génération de donjon]], [[Salles et connecteurs]], [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Grimoires et manuels]]

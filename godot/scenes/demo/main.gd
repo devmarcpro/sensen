@@ -74,6 +74,7 @@ func _ready() -> void:
 	EventBus.action_engaged.connect(func(id: String, a: Dictionary) -> void: telegraphes[id] = a)
 	EventBus.action_resolved.connect(func(id: String, _a: Dictionary) -> void: telegraphes.erase(id))
 	EventBus.combat_ended.connect(_sur_fin_de_combat)
+	EventBus.expedition_terminee.connect(_sur_fin_d_expedition)
 	EventBus.tile_changed.connect(func(_p: Vector2i) -> void: terrain.queue_redraw())
 	GameData.donnees_rechargees.connect(_charger)
 	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": 1000}
@@ -382,10 +383,10 @@ func _unhandled_input(ev: InputEvent) -> void:
 						_log(tr("journal.rien_a_ramasser"))
 			KEY_E:
 				if sim.attente.has(joueur_id):
-					if not sim.intention(joueur_id, {"type": "descendre"}):
-						_log(tr("journal.pas_escalier"))
-					else:
+					if sim.intention(joueur_id, {"type": "descendre"}) or sim.intention(joueur_id, {"type": "remonter"}):
 						_apres_changement_de_grille()
+					else:
+						_log(tr("journal.pas_escalier"))
 			KEY_F1, KEY_F2, KEY_F3:
 				var k: int = ev.keycode - KEY_F1
 				if not j.is_empty() and k < j.get("capacites", []).size():
@@ -474,6 +475,8 @@ func _draw() -> void:
 		_losange(survol, Color(1, 1, 1, 0.22))
 	if not sim.donjon.is_empty() and sim.donjon.escalier != null:
 		_losange(sim.donjon.escalier, Color(0.9, 0.7, 0.2, 0.6))
+	if not sim.donjon.is_empty() and sim.donjon.has("entree"):
+		_losange(sim.donjon.entree, Color(0.3, 0.9, 0.5, 0.5))   # la sortie / l'escalier montant
 	for gl in sim.glyphes:   # les glyphes : un losange cerclé à la teinte de leur élément
 		var cg := _ecran(gl.pos, g.h(gl.pos))
 		var teinte := sim.wuxing.teinte(sim.wuxing.dominante(gl.elements)) if not gl.elements.is_empty() else Color(0.8, 0.8, 0.9)
@@ -780,6 +783,14 @@ func _texte_statuts(e: Dictionary) -> String:
 	for s in e.statuts:
 		noms.append("%s (%d)" % [tr(sim.statuts_defs.get(s.id, {}).get("name_key", s.id)), int(s.fin) - tick])
 	return tr("ui.statuts").format({"liste": ", ".join(noms)})
+
+
+## Le jalon « ressortir » : l'écran d'expédition.
+func _sur_fin_d_expedition(recap: Dictionary) -> void:
+	ecran_fin = [tr("ui.expedition.titre").format({"theme": tr(GameData.entree("dungeon_themes", recap.theme).name_key)}),
+		tr("ui.expedition.ligne").format({"etage_max": recap.etage_max, "tues": recap.tues, "objets": recap.objets, "sac": recap.sac,
+			"boss": tr("ui.fin.victoire") if recap.boss_vaincu else "—", "combat": "%.1f" % recap.niveaux.combat, "general": "%.1f" % recap.niveaux.general}),
+		tr("ui.fin.suite")]
 
 
 ## Écran de fin de combat : issue, durée en ticks, XP des trois pistes et de l'armure (XP de combat).

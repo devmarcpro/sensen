@@ -26,6 +26,8 @@ var loot: Loot
 var progression: Progression
 var niveaux_gagnes: Array = []       # [{id, competence, niveau}] depuis le dernier écran de fin
 var fiche_joueur: Dictionary = {}    # la fiche créée (Création de personnage), sinon l'aventurier du catalogue
+var etages_visites: Dictionary = {}  # étage → état sauvé (grille, êtres, contenants) : mobs et loot sont FIXES (Donjons)
+var expedition: Dictionary = {}      # compteurs de l'expédition en cours : tués, objets, étage max
 var objets: Dictionary = {}          # uid → instance générée (le catalogue reste dans `items`, fusionné)
 var contenants: Dictionary = {}      # index de tuile → [uids] (coffres, butin au sol)
 var dernier_combat: Dictionary = {}   # récapitulatif du dernier combat terminé (écran de fin)
@@ -87,10 +89,30 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 	var r2 := RandomNumberGenerator.new()
 	r2.seed = hash([graine, id_donjon, etage, "salles"])
 	var nb := r2.randi_range(int(theme.salles_par_etage[0]), int(theme.salles_par_etage[1]))
-	var e := gen.generer_etage(graine, id_donjon, etage, nb, etage == etages)
+	if not joueur.is_empty() and not donjon.is_empty() and int(donjon.get("id", -1)) == id_donjon:
+		_sauver_etage(joueur)
+	if expedition.is_empty() or int(expedition.get("id", -1)) != id_donjon:
+		expedition = {"id": id_donjon, "theme": theme_id, "tues": 0, "objets": 0, "etage_max": 1, "ticks": 0}
+	expedition.etage_max = maxi(int(expedition.etage_max), etage)
 	arene_id = "donjon"
+	if etages_visites.has(etage):
+		# Un étage déjà visité revient dans l'état où on l'a laissé.
+		var sauve: Dictionary = etages_visites[etage]
+		donjon = sauve.donjon
+		grille = sauve.grille
+		_reinitialiser()
+		for id in sauve.ordre:
+			entites[id] = sauve.entites[id]
+			ordre.append(id)
+			if entites[id].vivant:
+				grille.placer(id, entites[id].pos)
+		contenants = sauve.contenants
+		var ou: Vector2i = sauve.donjon.escalier if (not joueur.is_empty() and int(joueur.get("etage_depuis", 0)) > etage and sauve.donjon.escalier != null) else sauve.donjon.entree
+		_reprendre(joueur, ou)
+		return
+	var e := gen.generer_etage(graine, id_donjon, etage, nb, etage == etages)
 	donjon = {"theme": theme_id, "graine": graine, "id": id_donjon, "etage": etage, "etages": etages,
-		"salles": gen._nb_salles(e), "escalier": e.escalier, "boss": e.boss}
+		"salles": gen._nb_salles(e), "escalier": e.escalier, "boss": e.boss, "entree": e.entree}
 	grille = Grille.depuis_etage(e, GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
 	_reinitialiser()
 	if joueur.is_empty():
@@ -126,6 +148,11 @@ func _reinitialiser() -> void:
 ## Un être qui change d'étage garde son état (PV, mana, sac, XP, compétences) — instance ≠ définition.
 func _reprendre(e: Dictionary, pos: Vector2i) -> void:
 	_n_entites += 1
+	if not grille.occupant(pos).is_empty():
+		for d in Grille.DIRS:
+			if grille.dans(pos + d) and grille.occupant(pos + d).is_empty() and not grille.bloque_passage(pos + d):
+				pos = pos + d
+				break
 	e.pos = pos
 	e.ancre = pos
 	e.compteur = 0
@@ -141,6 +168,17 @@ func _reprendre(e: Dictionary, pos: Vector2i) -> void:
 	grille.placer(e.id, pos)
 
 
+## L'état de l'étage courant, sans le joueur, mis de côté : rien ne repop, tout reste où c'est.
+func _sauver_etage(joueur: Dictionary) -> void:
+	var sauve := {"donjon": donjon.duplicate(), "grille": grille, "entites": {}, "ordre": [], "contenants": contenants}
+	for id in ordre:
+		if id != joueur.id:
+			sauve.entites[id] = entites[id]
+			sauve.ordre.append(id)
+	grille.liberer(joueur.pos)
+	etages_visites[int(donjon.etage)] = sauve
+
+
 ## Descendre : l'être doit être sur la cage d'escalier de l'étage (Donjons : escalier = lien).
 func _descendre(e: Dictionary) -> bool:
 	if donjon.is_empty() or donjon.escalier == null or e.pos != donjon.escalier:
@@ -148,9 +186,52 @@ func _descendre(e: Dictionary) -> bool:
 	if int(donjon.etage) >= int(donjon.etages):
 		return false
 	var prochain: int = int(donjon.etage) + 1
+	e.etage_depuis = int(donjon.etage)
 	EventBus.emettre(&"journal", [&"journal.descente", {"etage": prochain}])
 	charger_donjon(donjon.theme, int(donjon.graine), int(donjon.id), prochain, e)
 	return true
+
+
+## Remonter : sur la tuile d'entrée de l'étage. À l'étage 1, c'est la sortie du donjon — le jalon
+## « entrer, combattre, looter, progresser, ressortir » se ferme ici.
+func _remonter(e: Dictionary) -> bool:
+	if donjon.is_empty() or e.pos != Vector2i(donjon.get("entree", Vector2i(-1, -1))):
+		return false
+	if int(donjon.etage) <= 1:
+		return _sortir(e)
+	var precedent: int = int(donjon.etage) - 1
+	e.etage_depuis = int(donjon.etage)
+	EventBus.emettre(&"journal", [&"journal.remontee", {"etage": precedent}])
+	charger_donjon(donjon.theme, int(donjon.graine), int(donjon.id), precedent, e)
+	return true
+
+
+## Sortir du donjon : récapitulatif de l'expédition, puis une nouvelle expédition (graine suivante)
+## avec le même être — son sac, ses niveaux, ses potentiels.
+func _sortir(e: Dictionary) -> bool:
+	var recap := expedition.duplicate()
+	recap["sac"] = e.sac.size()
+	recap["niveaux"] = progression.niveaux_derives(e)
+	recap["boss_vaincu"] = _boss_vaincu()
+	EventBus.emettre(&"journal", [&"journal.sortie", {"nom": e.name_key, "tues": recap.tues, "objets": recap.objets, "etage_max": recap.etage_max}])
+	EventBus.emettre(&"expedition_terminee", [recap])
+	etages_visites.clear()
+	var suivant: int = int(donjon.id) + 1
+	expedition = {}
+	charger_donjon(donjon.theme, int(donjon.graine), suivant, 1, e)
+	return true
+
+
+func _boss_vaincu() -> bool:
+	for etage in etages_visites.keys():
+		for id in etages_visites[etage].ordre:
+			var x: Dictionary = etages_visites[etage].entites[id]
+			if x.get("chain_gauge", false) and not x.vivant:
+				return true
+	for x in entites.values():
+		if x.get("chain_gauge", false) and x.controle == "ia" and not x.vivant:
+			return true
+	return false
 
 
 func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
@@ -264,6 +345,8 @@ func _ramasser(e: Dictionary, tick: int) -> bool:
 		return false
 	for uid in contenants[idx]:
 		donner(e, str(uid))
+		if not expedition.is_empty() and e.controle == "joueur":
+			expedition.objets = int(expedition.objets) + 1
 	contenants.erase(idx)
 	grille.contenu[idx] = 0
 	EventBus.emettre(&"tile_changed", [e.pos])
@@ -571,7 +654,12 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _lancer_capacite(e, int(i.get("index", -1)), i.get("cible", Vector2i(-1, -1)), h.ticks)
 		"descendre":
 			if _descendre(e):
+				EventBus.dispatcher()
 				return true   # la grille a changé : plus rien à finir sur l'ancienne
+		"remonter":
+			if _remonter(e):
+				EventBus.dispatcher()
+				return true
 		"equiper":
 			ok = _equiper(e, str(i.get("objet", "")), h.ticks)
 		"ramasser":
@@ -966,6 +1054,8 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		EventBus.emettre(&"creature_killed", [cible.id, source])
 		_declencher(cible, "testament", cible.pos)   # la charge part quand le porteur tombe
 		_drop(cible, source)
+		if not expedition.is_empty() and entites.get(source, {}).get("controle", "") == "joueur":
+			expedition.tues = int(expedition.tues) + 1
 	# Déclencheurs à événement (Modules) : Ouverture au premier contact, Riposte quand le porteur est
 	# touché, Veille quand un allié passe sous le seuil.
 	if not att.is_empty():

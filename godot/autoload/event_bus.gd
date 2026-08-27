@@ -11,6 +11,7 @@ signal skill_xp_gained(id: String, competence: String, xp: int)
 signal skill_level_up(id: String, competence: String, niveau: int)
 signal combat_started(horloge: String, participants: Array)
 signal combat_ended(horloge: String)
+signal expedition_terminee(recap: Dictionary)             # sortie du donjon : le jalon « ressortir »
 signal action_engaged(id: String, action: Dictionary)      # télégraphe : intention visible
 signal action_resolved(id: String, action: Dictionary)
 signal journal(cle: String, params: Dictionary)             # une ligne de journal, localisée côté client
