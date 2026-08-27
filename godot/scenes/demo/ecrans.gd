@@ -599,13 +599,34 @@ func _construire_gestion(j: Dictionary) -> void:
 
 
 func _lois_txt(roy: Dictionary) -> String:
+	var sim = main.sim
 	var l: Array[String] = []
+	# Le dirigeant, la vacance, les villages connus, la diplomatie (Familles et succession, Gouvernance).
+	var dirigeant := ""
+	for x in sim.vivants():
+		if str(x.get("royaume", "")) == str(roy.id) and str(x.get("fonction", "")) == "dirigeant":
+			dirigeant = tr(x.name_key) + ((" — " + tr(str(x.titre))) if not str(x.get("titre", "")).is_empty() else "")
+	if sim.monde.vacances.has(str(roy.id)):
+		dirigeant = tr("ui.carte.vacance") + " (%d sem.)" % maxi(0, int(sim.monde.vacances[str(roy.id)]) - int(sim.monde.semaine_courante))
+	if dirigeant.is_empty():
+		dirigeant = tr("ui.royaume.dirigeant_inconnu")
+	var villages: Array[String] = []
+	for nom in sim.monde.villages.keys():
+		if str(sim.monde.villages[nom].get("royaume", "")) == str(roy.id):
+			villages.append(str(nom) + (" (conquis)" if not str(sim.monde.villages[nom].get("conquis_par", "")).is_empty() else ""))
+	var diplo: Array[String] = []
+	for autre in roy.get("diplomacy", {}).keys():
+		diplo.append("%s : %s" % [str(autre), tr("relation." + str(roy.diplomacy[autre]))])
+	l.append(tr("ui.royaume.fiche").format({"race": tr("race.%s.name" % str(roy.get("race", "humain"))), "culture": str(roy.get("culture", "")), "capitale": "(%d,%d)" % [roy.capital_poi.x, roy.capital_poi.y], "dirigeant": dirigeant,
+		"villages": ", ".join(villages) if not villages.is_empty() else "—", "diplomatie": " · ".join(diplo) if not diplo.is_empty() else "—", "base_rate": int(round(float(roy.taxes.base_rate) * 100.0))}))
 	for loi in roy.laws:
 		l.append("%s → %s" % [str(loi.target), str(loi.consequence)])
 	var tarifs: Array[String] = []
 	for cat in roy.tariffs.keys():
 		tarifs.append("%s %d %%" % [str(cat), int(round(float(roy.tariffs[cat]) * 100.0))])
-	return "lois : " + (" · ".join(l) if not l.is_empty() else "aucune") + "\ndouanes : " + (" · ".join(tarifs) if not tarifs.is_empty() else "—") + " (défaut %d %%)" % int(round(float(roy.taxes.tariff_default) * 100.0))
+	var fiche: String = l[0]
+	l.remove_at(0)
+	return fiche + "\nlois : " + (" · ".join(l) if not l.is_empty() else "aucune") + "\ndouanes : " + (" · ".join(tarifs) if not tarifs.is_empty() else "—") + " (défaut %d %%)" % int(round(float(roy.taxes.tariff_default) * 100.0))
 
 
 ## Le registre d'élevage (Vivarium — registre et paliers) : une ligne par espèce, le détail d'une seule à la fois.

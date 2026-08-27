@@ -55,6 +55,7 @@ func _ready() -> void:
 	test_entraineur_et_commandes()
 	test_gabarits_guildes()
 	test_pretre_et_tourelle()
+	test_regle_anneau_mesure()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -2264,6 +2265,56 @@ func test_pretre_et_tourelle() -> void:
 	verifier(int(pretre.or) == int(pretre.or_max), "sa bourse est finie : le surplus sort du jeu")
 	verifier(float(v.get("affaibli_mult", 1.0)) < 1.0, "le ressuscité revient Affaibli")
 	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Règle d'anneau : la mesure (sélection dirigée contre hasard)
+
+func test_regle_anneau_mesure() -> void:
+	var s := Simulation.new(103)
+	var L := {"type": "anneau", "n": 16}
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 103
+	var cible := 8   # l'opposé sur un anneau de 16, départ à 0
+	var essais := 60
+	var dirige := 0
+	var hasard := 0
+	for k in essais:
+		# Dirigé : deux parents, on garde le couple le plus proche de la cible.
+		var a := 0
+		var b := 0
+		var n := 0
+		while n < 5000:
+			n += 1
+			var enfant: int = s._heriter(a, b, L, rng)
+			if enfant == cible:
+				break
+			var da: int = mini(posmod(a - cible, 16), posmod(cible - a, 16))
+			var db: int = mini(posmod(b - cible, 16), posmod(cible - b, 16))
+			var de: int = mini(posmod(enfant - cible, 16), posmod(cible - enfant, 16))
+			if de < maxi(da, db):
+				if da >= db:
+					a = enfant
+				else:
+					b = enfant
+		dirige += n
+		# Hasard : on remplace un parent au hasard, sans regarder.
+		a = 0
+		b = 0
+		n = 0
+		while n < 20000:
+			n += 1
+			var enfant2: int = s._heriter(a, b, L, rng)
+			if enfant2 == cible:
+				break
+			if rng.randf() < 0.5:
+				a = enfant2
+			else:
+				b = enfant2
+		hasard += n
+	var moy_d := float(dirige) / float(essais)
+	var moy_h := float(hasard) / float(essais)
+	print("  mesure Règle d'anneau : dirigé %.0f couvées, hasard %.0f couvées, facteur ×%.1f" % [moy_d, moy_h, moy_h / maxf(1.0, moy_d)])
+	verifier(moy_d < moy_h and moy_h / maxf(1.0, moy_d) >= 4.0, "sélection dirigée contre hasard : facteur ×%.1f (attendu ≈ ×15, au moins ×4)" % (moy_h / maxf(1.0, moy_d)))
 
 
 # ---------------------------------------------------------------- Étape 9.D : compagnons, apprivoisement, âge

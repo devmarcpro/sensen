@@ -401,6 +401,8 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+ui.royaume.fiche,"peuple : {race} · culture : {culture} · capitale {capitale} · taxes {base_rate} %\ndirigeant : {dirigeant}\nvillages connus : {villages}\ndiplomatie : {diplomatie}"
+ui.royaume.dirigeant_inconnu,inconnu (capitale non visitée)
 creature.pretre.name,Prêtre
 function.pretre.name,Prêtre
 recipe.meuble_tourelle.name,Bâtir une tourelle

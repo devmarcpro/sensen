@@ -59,6 +59,9 @@ anneau: (a, b, L) => {
 
 Avec trois loci qui bougent à chaque couvée, **216 issues possibles** ([[Vivarium — loci et variétés]]). Si le résultat paraît aléatoire au lieu de dirigé, passer de **34/34/16/16** à **40/40/20** — à trancher au playtest, pas en simulation ([[Ouvert — Équilibrage du contraste]]).
 
+> [!success] Mesuré le 2026-08-28 — `test_regle_anneau_mesure`
+> Modèle : deux parents à 0, cible 8 sur un anneau de 16, une couvée = un enfant ; **dirigé** = l'enfant remplace le parent le plus éloigné s'il est plus proche de la cible ; **hasard** = l'enfant remplace un parent au hasard. Sur 60 essais : **dirigé 51 couvées** (la note prévoyait 57 — conforme), **hasard 291 couvées** (la note prévoyait 833), **facteur ×5,7** au lieu de ×15. Le hasard converge plus vite que prévu parce qu'un parent remplacé dérive lui aussi vers l'opposé (marche aléatoire sur un anneau court). Le critère « ×15 » n'est donc pas atteint avec 34/34/16/16 — **point de tuning à trancher au playtest** (la note propose 40/40/20 ; ou un anneau plus long ; ou définir « au hasard » comme « on ne remplace jamais les parents », qui donne bien ≈ 833). Le test exige au moins ×4 pour ne pas régresser.
+
 ## Liens
 - **Dépend de** : [[Loci — les dix types]], [[Élevage — intention et familles]]
 - **Alimente** : [[Vivarium — loci et variétés]], [[Vivarium — capture et élevage]], [[Apparence — données et équipement]]
