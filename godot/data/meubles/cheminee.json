@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.cheminee.name",
+  "type_meuble": "cheminee",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 0,
+  "luminosite": 40,
+  "bonus_humeur": 0,
+  "couleur": "#6f6f6f"
+}

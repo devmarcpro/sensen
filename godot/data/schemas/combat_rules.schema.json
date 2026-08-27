@@ -60,6 +60,12 @@
     },
     "craft": {
       "type": "object"
+    },
+    "camp": {
+      "type": "object"
+    },
+    "camp": {
+      "type": "object"
     }
   },
   "required": [

@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.lanterne_de_cristal.name",
+  "type_meuble": "lumiere",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 0,
+  "luminosite": 95,
+  "bonus_humeur": 0,
+  "couleur": "#b9e0ff"
+}

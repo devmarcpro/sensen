@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.etal_de_vente.name",
+  "type_meuble": "etal",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 12,
+  "luminosite": 0,
+  "bonus_humeur": 0,
+  "couleur": "#b08a4a"
+}

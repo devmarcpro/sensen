@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.autel_domestique.name",
+  "type_meuble": "autel",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 0,
+  "luminosite": 10,
+  "bonus_humeur": 0,
+  "couleur": "#d8d0c0"
+}

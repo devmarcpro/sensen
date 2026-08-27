@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.tapis.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "tapis",
+  "tags": [
+    "meuble",
+    "posable"
+  ]
+}

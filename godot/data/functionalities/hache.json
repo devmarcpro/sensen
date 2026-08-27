@@ -1,0 +1,16 @@
+{
+  "name_key": "functionality.hache.name",
+  "kind": "outil",
+  "hands": 1,
+  "combat_skill": "hache_d_armes",
+  "degats_des": "1d6",
+  "crit_range": 20,
+  "vitesse_base": 3.5,
+  "portee": 1.0,
+  "portee_min": 1,
+  "type_degats": "tranchant",
+  "volume": 1.8,
+  "poids_reference": 2.2,
+  "outil": "hache",
+  "genre_grammatical": "fs"
+}

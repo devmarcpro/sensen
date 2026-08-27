@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.grand_coffre.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "grand_coffre",
+  "tags": [
+    "meuble",
+    "posable"
+  ]
+}

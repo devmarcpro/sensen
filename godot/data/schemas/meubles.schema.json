@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "type_meuble",
+    "bloque_passage",
+    "dormir",
+    "capacite_slots",
+    "luminosite",
+    "bonus_humeur",
+    "couleur"
+  ]
+}

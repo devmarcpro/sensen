@@ -97,5 +97,9 @@
   "seve": {
     "material": "seve",
     "forme": "brut"
+  },
+  "brique": {
+    "material": "brique",
+    "forme": "brut"
   }
 }

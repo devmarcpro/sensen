@@ -50,6 +50,9 @@ ou hors combat ; le temps saute pour tout le monde.
 
 **Rendu ([[Éclairage]]) :** le cycle jour/nuit module en SHADER (uniform global), pas en re-propagation — changer l'heure ne coûte rien.
 
+> [!success] Codé le 2026-08-28 — le sommeil seul (le cycle attend l'étape 8)
+> `dormir` sur un lit adjacent, refusé si un hostile est en vue : le monde **avance de `camp.dormir_ticks` (8 000 ticks = 8 h à 24 000 ticks/jour)** pendant que le dormeur ne fait rien (vulnérable : les êtres agissent), puis santé, mana et endurance **pleins** (la régénération ×4 sur 8 h revient au même — décision), buff **Reposé** : `xp_mult` 1,05 pendant `repose_ticks` (4 000 = 4 h), **+2 de potentiel** aux cinq compétences ou stats qui ont reçu le plus d'XP depuis le dernier repos (« consommées récemment »), cap 200. Le lit devient le point de respawn. Le saut de nuit, le vote, la lumière et les spawns nocturnes attendent le cycle.
+
 ## Liens
 - **Dépend de** : [[Boucle de tick]], [[Simulation à ticks]], [[Application des stats de matériau]]
 - **Alimente** : [[IA des créatures]], [[Potentiel]], [[Abstraction hors-site]], [[Créatures]]

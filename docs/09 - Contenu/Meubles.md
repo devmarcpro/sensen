@@ -29,6 +29,9 @@ Lit (dormir, assignation PNJ) · Lit de paille (idem, malus humeur −3) · Tabl
 > [!success] Précisé le 2026-08-28
 > Sculpture abandonnée ([[Tables de sculpture]]) : les meubles viennent de recettes, pas d'un éditeur.
 
+> [!success] Codé le 2026-08-28 — `data/meubles/` (les 16 + la statue), objets `meuble_<id>`, recettes à l'Établi
+> Un meuble est un **contenu de tuile** (`meuble`, ou `meuble_sol` pour le tapis, franchissable) portant l'id de sa fiche — pas une entité (tranché : [[Grille continue]] fait foi sur [[Détection de pièces]]). Fiche : `type_meuble`, `bloque_passage`, `dormir`, `capacite_slots`, `luminosite`, `bonus_humeur`, `couleur`. Recettes plates à l'Établi en planches, pierre taillée, tissu, lingots, gemmes taillées (`data/recipes/meuble_*`) ; le trophée attend le dépeçage (recette provisoire en planches), la statue reste un drop. **Coffre** = un contenant de tuile de `capacite_slots` (30 / 60) : `ranger` (un objet du sac dans un coffre adjacent), `prendre` (tout le coffre), ou R dessus. **Lit** : `dormir` ([[Cycle jour-nuit et sommeil]]) et **point de respawn** ([[Mort et pénalité]]). Humeur, PNJ et garde-manger automatique attendent les PNJ (étape 9).
+
 ## Liens
 - **Dépend de** : [[Construction cadrée]], [[Tables de sculpture]], [[Fabrication d'outils]]
 - **Alimente** : [[Habitat des PNJ]], [[Détection de pièces]], [[LOD de simulation]], [[Commerce et boutiques]], [[Boutique passive]]

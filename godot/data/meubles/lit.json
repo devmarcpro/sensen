@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.lit.name",
+  "type_meuble": "lit",
+  "bloque_passage": true,
+  "dormir": true,
+  "capacite_slots": 0,
+  "luminosite": 0,
+  "bonus_humeur": 0,
+  "couleur": "#8a5a3c"
+}

@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.station_atelier_tissage.name",
+  "station": "etabli",
+  "craft_skill": "menuiserie",
+  "inputs": [
+    {
+      "category": "bois",
+      "forme": "planche",
+      "amount": 4
+    },
+    {
+      "category": "vegetal",
+      "forme": "tissu",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "item": "station_atelier_tissage",
+    "amount": 1
+  },
+  "fuel": null
+}

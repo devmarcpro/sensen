@@ -137,7 +137,8 @@
       "manuel"
     ],
     "bases_outils": [
-      "proto_pioche"
+      "proto_pioche",
+      "proto_hache"
     ],
     "bases_stations": [
       "station_forge",

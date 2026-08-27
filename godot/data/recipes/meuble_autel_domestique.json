@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.meuble_autel_domestique.name",
+  "station": "etabli",
+  "craft_skill": "menuiserie",
+  "inputs": [
+    {
+      "category": "roche",
+      "forme": "pierre_taillee",
+      "amount": 4
+    },
+    {
+      "category": "gemme",
+      "forme": "taillee",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "meuble_autel_domestique",
+    "amount": 1
+  },
+  "fuel": null
+}

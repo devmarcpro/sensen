@@ -137,7 +137,7 @@ func _charger(fiche: Dictionary = {}) -> void:
 	sim = Simulation.new(0x68EE)
 	sim.fiche_joueur = fiche
 	if arene_courante >= arenes.size():
-		sim.charger_donjon("ruine", 0x68EE, 1, 1)   # Tab après les arènes : le donjon
+		sim.charger_camp()   # Tab après les arènes : le camp de base (E sur l'entrée : le donjon)
 	else:
 		sim.charger_arene(arenes[arene_courante])
 	joueur_id = ""
@@ -453,6 +453,22 @@ func _clic(t: Vector2i, lourde: bool) -> void:
 				_log(tr("journal.inaccessible"))
 		return
 	if Grille.distance(j.pos, t) == 1:
+		var tags: Array = sim.grille.contenu_de(t).get("tags", [])
+		if sim.attente.has(joueur_id):
+			if "meuble" in tags and sim.grille.meubles.has(sim.grille.idx(t)):
+				var m: Dictionary = GameData.entree("meubles", str(sim.grille.meubles[sim.grille.idx(t)]))
+				if bool(m.dormir):   # un lit : dormir
+					sim.intention(joueur_id, {"type": "dormir", "vers": t})
+					return
+				if int(m.capacite_slots) > 0 and sim.contenants.get(sim.grille.idx(t), []).size() > 0:   # un coffre : tout prendre
+					sim.intention(joueur_id, {"type": "prendre", "vers": t})
+					return
+			if "construit" in tags:   # ce qui a été posé se démonte au clic
+				sim.intention(joueur_id, {"type": "demonter", "vers": t})
+				return
+			if "contenant" in tags and sim.contenants.get(sim.grille.idx(t), []).size() > 0:
+				sim.intention(joueur_id, {"type": "prendre", "vers": t})
+				return
 		if sim.grille.bloque_passage(t):
 			if sim.attente.has(joueur_id) and not sim.intention(joueur_id, {"type": "creuser", "vers": t}):
 				_log(tr("journal.increusable"))
@@ -606,6 +622,10 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 			c + Vector2(0, TH * 0.5), c + Vector2(TW * 0.5, 0),
 			c + Vector2(TW * 0.5, d2), c + Vector2(0, TH * 0.5 + d2)]), flanc.darkened(0.15))
 	var contenu := g.contenu_de(t)
+	if not contenu.is_empty() and not g.bloque_passage(t) and (contenu.has("couleur") or "meuble" in contenu.get("tags", [])):
+		# contenu franchissable (porte, entrée du donjon, tapis) : un losange plat coloré
+		var cf := Color.html(str(GameData.entree("meubles", str(g.meubles.get(g.idx(t), "tapis"))).couleur)) if "meuble" in contenu.get("tags", []) else Color.html(str(contenu.couleur))
+		ci.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -TH * 0.35), c + Vector2(TW * 0.35, 0), c + Vector2(0, TH * 0.35), c + Vector2(-TW * 0.35, 0)]), cf * teinte)
 	if "contenant" in contenu.get("tags", []):   # coffre ou butin : une caisse
 		var cc := (Color(0.55, 0.38, 0.18) if "coffre" in contenu.tags else Color(0.75, 0.65, 0.3)) * teinte
 		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc)
@@ -616,8 +636,16 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: Color = Color.WHITE) -> void:
 	var hm := int(g.contenu_de(t).get("hauteur_vue", 3)) * HSTEP
 	var haut_bloc := Color(0.5, 0.47, 0.44)
+	var contenu_t := g.contenu_de(t)
+	var tags_t: Array = contenu_t.get("tags", [])
 	var mat: Dictionary = GameData.catalogues.materials.get(g.materiau_de(t), {})
-	if not mat.is_empty():   # la couleur de la palette du matériau (filon ou mur du thème)
+	if "meuble" in tags_t and g.meubles.has(g.idx(t)):
+		haut_bloc = Color.html(str(GameData.entree("meubles", str(g.meubles[g.idx(t)])).couleur))
+	elif contenu_t.has("couleur"):
+		haut_bloc = Color.html(str(contenu_t.couleur))
+	elif "arbre" in tags_t:
+		haut_bloc = Color(0.22, 0.45, 0.18).lerp(Color.html(mat.color) if not mat.is_empty() else haut_bloc, 0.2)   # la cime
+	elif not mat.is_empty():   # la couleur de la palette du matériau (filon ou mur du thème)
 		haut_bloc = haut_bloc.lerp(Color.html(mat.color), 0.55 if g.materiaux.has(g.idx(t)) else 0.35)
 	haut_bloc *= teinte
 	var sud := t + Vector2i(0, 1)
@@ -679,7 +707,7 @@ func _segments(e: Dictionary) -> Array:
 func _maj_ui() -> void:
 	var j := joueur()
 	var g := sim.grille
-	var titre: String = tr(GameData.entree("prototype_arenas", arenes[arene_courante]).name_key) if sim.donjon.is_empty() else tr("ui.donjon").format({"theme": tr(GameData.entree("dungeon_themes", sim.donjon.theme).name_key), "etage": sim.donjon.etage, "etages": sim.donjon.etages, "salles": sim.donjon.salles})
+	var titre: String = tr("ui.camp") if sim.lieu == "camp" else (tr(GameData.entree("prototype_arenas", arenes[arene_courante]).name_key) if sim.donjon.is_empty() else tr("ui.donjon").format({"theme": tr(GameData.entree("dungeon_themes", sim.donjon.theme).name_key), "etage": sim.donjon.etage, "etages": sim.donjon.etages, "salles": sim.donjon.salles}))
 	var lignes: Array[String] = [tr("ui.titre") + " · " + titre]
 	var mode := tr("ui.mode.combat") if sim.en_combat(j) else tr("ui.mode.exploration").format({"tps": sim.regles.r.ticks_par_seconde_exploration})
 	lignes.append(tr("ui.horloge").format({"horloge": sim.horloge_de(j).ticks, "mode": mode}))

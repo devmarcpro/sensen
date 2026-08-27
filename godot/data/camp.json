@@ -1,0 +1,41 @@
+{
+  "_doc": "Le camp de base (docs: Claims et persistance, callout du 2026-08-28) : une cellule plate, ses arbres, rochers et filons de surface, le coffre de départ.",
+  "taille": 128,
+  "arbres": {
+    "essences": [
+      "chene",
+      "pin",
+      "frene",
+      "bouleau",
+      "hetre"
+    ],
+    "nombre": 40,
+    "bosquet": 5
+  },
+  "rochers": {
+    "materiaux": [
+      "pierre",
+      "granit",
+      "calcaire",
+      "gres"
+    ],
+    "nombre": 14,
+    "amas": 4
+  },
+  "filons": {
+    "materiaux": [
+      "cuivre",
+      "etain",
+      "fer",
+      "argile",
+      "sable"
+    ],
+    "nombre": 10,
+    "amas": 3
+  },
+  "coffre_depart": [
+    "proto_hache",
+    "proto_pioche",
+    "meuble_lit_de_paille"
+  ]
+}

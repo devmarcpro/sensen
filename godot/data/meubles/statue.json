@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.statue.name",
+  "type_meuble": "statue",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 0,
+  "luminosite": 0,
+  "bonus_humeur": 3,
+  "couleur": "#9a9a9a"
+}

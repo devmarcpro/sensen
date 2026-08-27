@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.garde_manger.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "garde_manger",
+  "tags": [
+    "meuble",
+    "posable"
+  ]
+}

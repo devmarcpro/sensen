@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.ratelier_d_armes.name",
+  "type_meuble": "ratelier",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 8,
+  "luminosite": 0,
+  "bonus_humeur": 0,
+  "couleur": "#5a4a3a"
+}

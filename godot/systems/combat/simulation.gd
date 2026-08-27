@@ -28,6 +28,9 @@ var niveaux_gagnes: Array = []       # [{id, competence, niveau}] depuis le dern
 var fiche_joueur: Dictionary = {}    # la fiche créée (Création de personnage), sinon l'aventurier du catalogue
 var etages_visites: Dictionary = {}  # étage → état sauvé (grille, êtres, contenants) : mobs et loot sont FIXES (Donjons)
 var expedition: Dictionary = {}      # compteurs de l'expédition en cours : tués, objets, étage max
+var camp_sauve: Dictionary = {}      # le camp mis de côté pendant une expédition (Claims et persistance)
+var lieu: String = "arene"           # "arene" | "camp" | "donjon"
+var prochain_donjon: int = 1         # id du prochain donjon lancé depuis le camp
 var objets: Dictionary = {}          # uid → instance générée (le catalogue reste dans `items`, fusionné)
 var contenants: Dictionary = {}      # index de tuile → [uids] (coffres, butin au sol)
 var dernier_combat: Dictionary = {}   # récapitulatif du dernier combat terminé (écran de fin)
@@ -66,6 +69,7 @@ func _init(p_graine: int) -> void:
 func charger_arene(id: String) -> void:
 	arene_id = id
 	donjon = {}
+	lieu = "arene"
 	var arene := GameData.entree("prototype_arenas", id)
 	grille = Grille.depuis_arene(arene, GameData.config("tile_contents"),
 		regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
@@ -75,6 +79,88 @@ func charger_arene(id: String) -> void:
 	for s: Dictionary in arene.spawns.enemies:
 		ajouter(s.creature, Vector2i(int(s.pos[0]), int(s.pos[1])), "ia")
 	maj_vision()
+
+
+## Le camp de base (Claims et persistance, étape 7) : une cellule plate revendiquée d'office. Restauré
+## tel quel s'il a déjà été visité ; sinon généré, avec le coffre de départ. `joueur` : l'être qui
+## revient d'expédition (vide au premier chargement : créé depuis la fiche).
+func charger_camp(joueur: Dictionary = {}) -> void:
+	arene_id = "camp"
+	lieu = "camp"
+	donjon = {}
+	if not camp_sauve.is_empty():
+		var sauve: Dictionary = camp_sauve
+		grille = sauve.grille
+		_reinitialiser()
+		for id in sauve.ordre:
+			entites[id] = sauve.entites[id]
+			ordre.append(id)
+			if entites[id].vivant:
+				grille.placer(id, entites[id].pos)
+		contenants = sauve.contenants
+		if not joueur.is_empty():
+			var ou: Vector2i = joueur.get("lit", sauve.entree) if joueur.get("mort_en_expedition", false) else sauve.entree
+			joueur.erase("mort_en_expedition")
+			_reprendre(joueur, ou)
+			joueur.spawn = joueur.get("lit", sauve.entree)
+		maj_vision()
+		return
+	var cfg: Dictionary = GameData.config("camp")
+	var e := Camp.new(cfg).generer(graine)
+	grille = Grille.depuis_etage(e, GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
+	grille.materiau_defaut = "pierre"
+	for idx in e.arbres.keys():
+		grille.materiaux[idx] = e.arbres[idx]
+		grille.poser_contenu(Vector2i(int(idx) % grille.largeur, int(idx) / grille.largeur), "arbre")
+	for idx in e.rochers.keys():
+		grille.materiaux[idx] = e.rochers[idx]
+		grille.poser_contenu(Vector2i(int(idx) % grille.largeur, int(idx) / grille.largeur), "mur")
+	for idx in e.filons.keys():
+		grille.materiaux[idx] = e.filons[idx]
+		grille.poser_contenu(Vector2i(int(idx) % grille.largeur, int(idx) / grille.largeur), "filon")
+	grille.poser_contenu(e.entree_donjon, "entree_donjon")
+	for i in grille.largeur * grille.hauteur_grille:   # sa cellule, on la connaît : pas de brouillard sur le camp
+		grille.decouvert[i] = true
+	_reinitialiser()
+	if joueur.is_empty():
+		var j := ajouter("aventurier", e.entree, "joueur")
+		j.spawn = e.entree
+	else:
+		_reprendre(joueur, e.entree)
+		joueur.spawn = e.entree
+	var uids: Array = []
+	for base in cfg.coffre_depart:
+		var o := generer_objet(str(base), 1, {}, "commun", 0)
+		if not o.is_empty():
+			uids.append(o.uid)
+	_poser_contenant(e.coffre_depart, uids, "coffre")
+	camp_sauve = {"entree": e.entree}
+	maj_vision()
+
+
+## Met le camp de côté avant une expédition : grille, meubles, coffres, êtres — tout reste.
+func _sauver_camp(joueur: Dictionary) -> void:
+	var sauve := {"entree": camp_sauve.get("entree", joueur.pos), "grille": grille, "entites": {}, "ordre": [], "contenants": contenants}
+	for id in ordre:
+		if id != joueur.id:
+			sauve.entites[id] = entites[id]
+			sauve.ordre.append(id)
+	grille.liberer(joueur.pos)
+	camp_sauve = sauve
+
+
+## Partir en expédition depuis l'entrée du donjon du camp.
+func _partir_en_expedition(e: Dictionary) -> bool:
+	if lieu != "camp" or not ("entree_donjon" in grille.contenu_de(e.pos).get("tags", [])):
+		return false
+	_sauver_camp(e)
+	expedition = {}
+	etages_visites.clear()
+	var id := prochain_donjon
+	prochain_donjon += 1
+	EventBus.emettre(&"journal", [&"journal.expedition_depart", {}])
+	charger_donjon("ruine", graine, id, 1, e)
+	return true
 
 
 ## Génère et charge l'étage `etage` d'un donjon (Génération de donjon). `joueur` : la fiche du
@@ -96,6 +182,7 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 		expedition = {"id": id_donjon, "theme": theme_id, "tues": 0, "objets": 0, "etage_max": 1, "ticks": 0}
 	expedition.etage_max = maxi(int(expedition.etage_max), etage)
 	arene_id = "donjon"
+	lieu = "donjon"
 	if etages_visites.has(etage):
 		# Un étage déjà visité revient dans l'état où on l'a laissé.
 		var sauve: Dictionary = etages_visites[etage]
@@ -143,7 +230,7 @@ func _reinitialiser() -> void:
 	combats.clear()
 	attente.clear()
 	glyphes.clear()
-	contenants.clear()
+	contenants = {}   # jamais clear() : un lieu mis de côté garde la référence à ses contenants
 	differe_clear()
 	for nom in TickManager.horloges.keys():
 		TickManager.retirer(nom)
@@ -254,6 +341,186 @@ func _retirer_materiau(e: Dictionary, pile: Dictionary, quantite: int) -> void:
 	if int(pile.quantite) <= 0:
 		e.sac.erase(pile.uid)
 		items.erase(pile.uid)
+
+
+# ---------------------------------------------------------------- le camp : poser, coffres, dormir
+
+func _tuile_libre_pour_poser(e: Dictionary, vers: Vector2i) -> bool:
+	return lieu == "camp" and grille.dans(vers) and Grille.distance(e.pos, vers) == 1 and grille.contenu_de(vers).is_empty() \
+		and grille.occupant(vers).is_empty() and not contenants.has(grille.idx(vers))
+
+
+## Poser un meuble ou une station portative du sac sur une tuile adjacente (Construction cadrée).
+func _poser(e: Dictionary, uid: String, vers: Vector2i, tick: int) -> bool:
+	var it: Dictionary = items.get(uid, {})
+	if not (uid in e.sac) or not it.get("type", "") in ["meuble", "station"]:
+		return false
+	if not _tuile_libre_pour_poser(e, vers):
+		EventBus.emettre(&"journal", [&"journal.rien_a_poser", {}])
+		return false
+	var idx := grille.idx(vers)
+	if it.type == "meuble":
+		var m: Dictionary = GameData.entree("meubles", str(it.meuble))
+		grille.poser_contenu(vers, "meuble" if bool(m.bloque_passage) else "meuble_sol")
+		grille.meubles[idx] = str(it.meuble)
+		if int(m.capacite_slots) > 0:
+			contenants[idx] = []
+	else:
+		grille.poser_contenu(vers, "station_fixe")
+		grille.stations_fixes[idx] = str(it.station)
+	e.sac.erase(uid)
+	e["objets_poses"] = e.get("objets_poses", {})
+	e.objets_poses[idx] = uid
+	e.compteur = tick + int(regles.r.camp.poser_ticks)
+	EventBus.emettre(&"journal", [&"journal.pose", {"nom": e.name_key, "objet": nom_objet(uid)}])
+	EventBus.emettre(&"tile_changed", [vers])
+	return true
+
+
+## Un mur (1 unité de pierre taillée / planche / brique) ou une porte (1 planche) sur une tuile adjacente.
+func _poser_mur(e: Dictionary, vers: Vector2i, porte: bool, tick: int) -> bool:
+	if not _tuile_libre_pour_poser(e, vers):
+		EventBus.emettre(&"journal", [&"journal.rien_a_poser", {}])
+		return false
+	var familles: Array = [str(regles.r.camp.porte_famille)] if porte else regles.r.camp.mur_familles
+	var pile := {}
+	for f in familles:
+		pile = _pile_famille(e, GameData.config("material_families").get(str(f), {}))
+		if not pile.is_empty():
+			break
+	if pile.is_empty():
+		EventBus.emettre(&"journal", [&"journal.pas_de_materiau_mur", {}])
+		return false
+	var mat_id := str(pile.materiau)
+	_retirer_materiau(e, pile, 1)
+	grille.poser_contenu(vers, "porte" if porte else "mur_construit")
+	grille.materiaux[grille.idx(vers)] = mat_id
+	e.compteur = tick + int(regles.r.camp.poser_ticks)
+	EventBus.emettre(&"journal", [&"journal.pose", {"nom": e.name_key, "objet": {"base": "tile_content.%s.name" % ("porte" if porte else "mur_construit")}}])
+	EventBus.emettre(&"tile_changed", [vers])
+	return true
+
+
+## Démonter ce qui a été construit sur une tuile adjacente : meuble et station reviennent au sac.
+func _demonter(e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	if not grille.dans(vers) or Grille.distance(e.pos, vers) != 1:
+		return false
+	var c := grille.contenu_de(vers)
+	if not ("construit" in c.get("tags", [])):
+		return false
+	var idx := grille.idx(vers)
+	if contenants.has(idx) and not contenants[idx].is_empty():
+		_prendre(e, vers, tick)   # on vide le coffre d'abord
+	var uid: String = str(e.get("objets_poses", {}).get(idx, ""))
+	if not uid.is_empty() and items.has(uid):
+		e.sac.append(uid)
+		e.objets_poses.erase(idx)
+		EventBus.emettre(&"journal", [&"journal.demonte", {"nom": e.name_key, "objet": nom_objet(uid)}])
+	else:
+		EventBus.emettre(&"journal", [&"journal.demonte", {"nom": e.name_key, "objet": {"base": str(c.name_key)}}])
+	grille.contenu[idx] = 0
+	grille.meubles.erase(idx)
+	grille.stations_fixes.erase(idx)
+	grille.materiaux.erase(idx)
+	contenants.erase(idx)
+	e.compteur = tick + int(regles.r.camp.poser_ticks)
+	EventBus.emettre(&"tile_changed", [vers])
+	return true
+
+
+func _coffre_a(vers: Vector2i) -> Dictionary:
+	if not grille.dans(vers) or not grille.meubles.has(grille.idx(vers)):
+		return {}
+	var m: Dictionary = GameData.entree("meubles", str(grille.meubles[grille.idx(vers)]))
+	return m if int(m.capacite_slots) > 0 else {}
+
+
+## Ranger un objet du sac dans un coffre adjacent (capacité du meuble).
+func _ranger(e: Dictionary, uid: String, vers: Vector2i, tick: int) -> bool:
+	var m := _coffre_a(vers)
+	if m.is_empty() or Grille.distance(e.pos, vers) > 1 or not (uid in e.sac):
+		return false
+	var idx := grille.idx(vers)
+	if contenants.get(idx, []).size() >= int(m.capacite_slots):
+		EventBus.emettre(&"journal", [&"journal.coffre_plein", {}])
+		return false
+	e.sac.erase(uid)
+	e.ratelier.erase(uid)
+	if not contenants.has(idx):
+		contenants[idx] = []
+	contenants[idx].append(uid)
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.range", {"nom": e.name_key, "objet": nom_objet(uid)}])
+	return true
+
+
+## Prendre tout ce qu'un coffre adjacent contient.
+func _prendre(e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	if not grille.dans(vers) or Grille.distance(e.pos, vers) > 1:
+		return false
+	var idx := grille.idx(vers)
+	if not contenants.has(idx) or contenants[idx].is_empty():
+		return false
+	var n := 0
+	for uid in contenants[idx]:
+		if not (uid in e.sac):
+			e.sac.append(uid)
+			n += 1
+	contenants[idx] = []
+	if not grille.meubles.has(idx):   # un butin au sol disparaît ; un coffre reste
+		grille.contenu[idx] = 0
+		contenants.erase(idx)
+		EventBus.emettre(&"tile_changed", [vers])
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.prend", {"nom": e.name_key, "n": n}])
+	return true
+
+
+## Dormir sur un lit adjacent (Cycle jour-nuit et sommeil, la partie sommeil) : le monde avance de
+## dormir_ticks, puis vitaux pleins, buff Reposé (xp_mult) et +potentiel aux compétences les plus
+## travaillées depuis le dernier repos ; le lit devient le point de respawn.
+func _dormir(e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	var lit: String = str(grille.meubles.get(grille.idx(vers), "")) if grille.dans(vers) else ""
+	if lit.is_empty() or not bool(GameData.entree("meubles", str(lit)).dormir) or Grille.distance(e.pos, vers) > 1:
+		EventBus.emettre(&"journal", [&"journal.pas_de_lit", {}])
+		return false
+	for x in vivants():
+		if x.camp != e.camp and voit(e, x.pos):
+			EventBus.emettre(&"journal", [&"journal.hostile_en_vue", {}])
+			return false
+	var cp: Dictionary = regles.r.camp
+	var duree := int(cp.dormir_ticks)
+	e.compteur = tick + duree
+	e["lit"] = vers
+	e["spawn"] = vers
+	# Le monde avance pendant le sommeil (les êtres agissent ; le dormeur est vulnérable).
+	var pas_max := 200
+	var reste := duree
+	while reste > 0 and pas_max > 0:
+		var n := mini(reste, 100)
+		horloge_monde.avancer(n)
+		reste -= n
+		pas_max -= 1
+	if not e.vivant:
+		return true
+	e.sante = e.sante_max
+	e.mana = e.mana_max
+	e.endurance = e.endurance_max
+	e.tick_endurance = horloge_monde.ticks
+	e["repose_jusqua"] = horloge_monde.ticks + int(cp.repose_ticks)
+	e["xp_mult"] = float(cp.repose_xp_mult)
+	# +potentiel aux compétences consommées récemment (Potentiel : Reposé).
+	var travail: Dictionary = e.get("xp_depuis_repos", {})
+	var cles: Array = travail.keys()
+	cles.sort_custom(func(a: String, b: String) -> bool: return int(travail[a]) > int(travail[b]))
+	var cap := int(regles.r.progression.potentiel_max)
+	var liste: Array[String] = []
+	for cle in cles.slice(0, int(cp.repose_top)):
+		e.potentiels[cle] = mini(cap, int(e.potentiels.get(cle, int(regles.r.progression.potentiel_defaut))) + int(cp.repose_potentiel))
+		liste.append(_nom_competence(cle))
+	e["xp_depuis_repos"] = {}
+	EventBus.emettre(&"journal", [&"journal.dort", {"nom": e.name_key, "heures": duree / 1000, "potentiel": int(cp.repose_potentiel), "liste": ", ".join(liste) if not liste.is_empty() else "—"}])
+	return true
 
 
 # ---------------------------------------------------------------- craft compositionnel
@@ -367,6 +634,12 @@ func stations_de(e: Dictionary) -> Dictionary:
 		var it: Dictionary = items.get(uid, {})
 		if it.get("type", "") == "station":
 			res[str(it.station)] = uid
+	# Les stations fixes sous le joueur ou adjacentes (Stations de transformation : la version fixe).
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var t: Vector2i = e.pos + Vector2i(dx, dy)
+			if grille.dans(t) and grille.stations_fixes.has(grille.idx(t)):
+				res[str(grille.stations_fixes[grille.idx(t)])] = "fixe"
 	return res
 
 
@@ -474,7 +747,7 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 			plan.faisable = false
 		elif mat_sortie.is_empty():
 			mat_sortie = str(trouvee.materiau)   # la sortie garde le matériau de l'entrée (lingot de fer…)
-	plan.sortie = {"materiau": mat_sortie, "forme": str(r.output.get("forme", "brut")), "quantite": int(r.output.amount)}
+	plan.sortie = {"materiau": mat_sortie, "forme": str(r.output.get("forme", "brut")), "quantite": int(r.output.amount), "item": str(r.output.get("item", ""))}
 	return plan
 
 
@@ -495,12 +768,24 @@ func _fabriquer(e: Dictionary, rid: String, tick: int) -> bool:
 	if not plan.faisable:
 		EventBus.emettre(&"journal", [&"journal.manque", {"recette": r.name_key}])
 		return false
+	var durete_entrees := 0
 	for entree in plan.entrees:
+		durete_entrees += int(GameData.catalogues.materials.get(str(entree.pile.materiau), {}).get("stats", {}).get("durete", 1))
 		_retirer_materiau(e, entree.pile, int(entree.besoin))
 	var sortie: Dictionary = plan.sortie
-	_donner_materiau(e, sortie.materiau, int(sortie.quantite), sortie.forme)
 	var n := regles.niveau(e.competences_eff, str(r.craft_skill))
 	e.compteur = tick + _ticks_avec_statuts(e, maxi(1, ceili(float(regles.r.craft.ticks_base) / regles.skill_factor(n))))
+	if r.output.has("item"):   # un objet fini (meuble, station) : XP = dureté des entrées
+		var nom_obj := ""
+		for k in int(sortie.quantite):
+			var inst := generer_objet(str(r.output.item), 1, {}, "commun", 0)
+			if not inst.is_empty():
+				e.sac.append(inst.uid)
+				nom_obj = inst.name_key
+		gagner_xp(e, str(r.craft_skill), durete_entrees)
+		EventBus.emettre(&"journal", [&"journal.fabrique", {"nom": e.name_key, "quantite": int(sortie.quantite), "objet": nom_obj, "recette": r.name_key}])
+		return true
+	_donner_materiau(e, sortie.materiau, int(sortie.quantite), sortie.forme)
 	var mat: Dictionary = GameData.catalogues.materials.get(str(sortie.materiau), {})
 	gagner_xp(e, str(r.craft_skill), int(mat.get("stats", {}).get("durete", 1)))
 	EventBus.emettre(&"journal", [&"journal.fabrique", {"nom": e.name_key, "quantite": int(sortie.quantite), "objet": mat.get("name_key", sortie.materiau), "recette": r.name_key}])
@@ -520,6 +805,8 @@ func _sauver_etage(joueur: Dictionary) -> void:
 
 ## Descendre : l'être doit être sur la cage d'escalier de l'étage (Donjons : escalier = lien).
 func _descendre(e: Dictionary) -> bool:
+	if lieu == "camp":
+		return _partir_en_expedition(e)
 	if donjon.is_empty() or donjon.escalier == null or e.pos != donjon.escalier:
 		return false
 	if int(donjon.etage) >= int(donjon.etages):
@@ -555,8 +842,12 @@ func _sortir(e: Dictionary) -> bool:
 	EventBus.emettre(&"journal", [&"journal.sortie", {"nom": e.name_key, "tues": recap.tues, "objets": recap.objets, "etage_max": recap.etage_max}])
 	EventBus.emettre(&"expedition_terminee", [recap])
 	etages_visites.clear()
-	var suivant: int = int(donjon.id) + 1
 	expedition = {}
+	if not camp_sauve.is_empty():   # le camp est le point d'ancrage entre deux expéditions (étape 7)
+		EventBus.emettre(&"journal", [&"journal.retour_camp", {}])
+		charger_camp(e)
+		return true
+	var suivant: int = int(donjon.id) + 1
 	charger_donjon(donjon.theme, int(donjon.graine), suivant, 1, e)
 	return true
 
@@ -739,9 +1030,6 @@ func _respawn(e: Dictionary) -> bool:
 			e.sac.erase(uid)
 			perdus.append(uid)
 	_poser_contenant(e.pos, perdus, "butin")
-	var spawn: Vector2i = e.get("spawn", e.pos)
-	if not grille.occupant(spawn).is_empty() or grille.bloque_passage(spawn):
-		spawn = e.pos
 	if en_combat(e):
 		_quitter_combat(e)
 	e.vivant = true
@@ -749,6 +1037,18 @@ func _respawn(e: Dictionary) -> bool:
 	e.endurance = e.endurance_max
 	e.statuts = []
 	e.action_en_cours = {}
+	if lieu == "donjon" and not camp_sauve.is_empty() and e.has("lit"):
+		# Mort en expédition : on se relève au dernier lit, au camp (Mort et pénalité) ; l'expédition est finie.
+		grille.liberer(e.pos)
+		e["mort_en_expedition"] = true
+		etages_visites.clear()
+		expedition = {}
+		charger_camp(e)
+		EventBus.emettre(&"journal", [&"journal.respawn", {"nom": e.name_key, "perdus": perdus.size()}])
+		return true
+	var spawn: Vector2i = e.get("spawn", e.pos)
+	if not grille.occupant(spawn).is_empty() or grille.bloque_passage(spawn):
+		spawn = e.pos
 	e.pos = spawn
 	grille.placer(e.id, spawn)
 	e.compteur = horloge_monde.ticks
@@ -953,6 +1253,10 @@ func voit(e: Dictionary, t: Vector2i) -> bool:
 
 func _fin_de_pas(nom: String) -> void:
 	maj_vision()
+	for e in vivants():   # fin du buff Reposé
+		if e.has("repose_jusqua") and int(e.repose_jusqua) <= horloge_de(e).ticks:
+			e.erase("repose_jusqua")
+			e["xp_mult"] = 1.0
 	# Phase 2 (Boucle de tick) : les statuts de tous les êtres de cette horloge.
 	var h: Horloge = horloge_monde if nom == "monde" else combats.get(nom, {}).get("horloge", horloge_monde)
 	for e in vivants():
@@ -1081,6 +1385,20 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _fabriquer(e, str(i.get("recette", "")), h.ticks)
 		"desequiper":
 			ok = _desequiper(e, str(i.get("slot", "")), h.ticks)
+		"poser":
+			ok = _poser(e, str(i.get("objet", "")), i.get("vers", Vector2i(-1, -1)), h.ticks)
+		"poser_mur":
+			ok = _poser_mur(e, i.get("vers", Vector2i(-1, -1)), false, h.ticks)
+		"poser_porte":
+			ok = _poser_mur(e, i.get("vers", Vector2i(-1, -1)), true, h.ticks)
+		"demonter":
+			ok = _demonter(e, i.get("vers", Vector2i(-1, -1)), h.ticks)
+		"ranger":
+			ok = _ranger(e, str(i.get("objet", "")), i.get("vers", Vector2i(-1, -1)), h.ticks)
+		"prendre":
+			ok = _prendre(e, i.get("vers", Vector2i(-1, -1)), h.ticks)
+		"dormir":
+			ok = _dormir(e, i.get("vers", Vector2i(-1, -1)), h.ticks)
 		"jeter":
 			ok = _jeter(e, str(i.get("objet", "")), h.ticks)
 	if ok:
@@ -1529,6 +1847,9 @@ func _verser_xp(cible: Dictionary, degats: int, source: String, detail: Dictiona
 func gagner_xp(e: Dictionary, cle: String, xp: int) -> void:
 	if xp <= 0 or not e.has("xp_competences"):
 		return
+	if not e.has("xp_depuis_repos"):
+		e["xp_depuis_repos"] = {}
+	e.xp_depuis_repos[cle] = int(e.xp_depuis_repos.get(cle, 0)) + xp   # « consommées récemment » (sommeil)
 	var gagnes := progression.verser(e, cle, xp)
 	var stat := progression.stat_associee(cle)
 	if not stat.is_empty() and e.corps.stats.has(stat):

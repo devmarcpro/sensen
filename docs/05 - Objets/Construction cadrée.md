@@ -21,6 +21,9 @@ La construction libre à la Minecraft est **écartée** : elle n'a pas de sens s
 
 **Signal :** `block_placed/destroyed` sur l'EventBus, écouté par la détection de pièces, les quêtes bâtisseur et le réseau ([[EventBus]]).
 
+> [!success] Codé le 2026-08-28 — poser à la tuile sur le camp
+> Intentions `poser` (un meuble ou une station portative du sac devient un contenu de tuile adjacente : `meuble`, `station_fixe`), `poser_mur` (**1 unité de pierre taillée, de planche ou de brique** → un mur construit, destructible, portant son matériau — décision : la note dit « coût en ressources et en temps » sans chiffre), `poser_porte` (1 planche → une porte, franchissable, qui coupe la vue), `demonter` (un meuble ou une station revient au sac ; un mur construit se démonte sans rendre son matériau, comme creuser). **Pas d'orientation** : tout se pose à la tuile, un mur est un bloc plein (décision). Les tuiles construites portent le tag `construit`. Coût en temps : `camp.poser_ticks` (10). Le modelage du terrain (élever/abaisser) attend la surface.
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Claims et persistance]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[Détection de pièces]], [[Habitat des PNJ]], [[Expansion territoriale]], [[Destruction du terrain]]

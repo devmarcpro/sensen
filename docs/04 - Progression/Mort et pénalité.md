@@ -29,6 +29,9 @@ usage-based rend la perte d'XP très punitive, on pénalise l'économie à la pl
 > [!success] Codé le 2026-08-27
 > Le joueur mort attend une touche : intention `respawn` → relevé au **point d'entrée** (arène ou étage — pas encore de lit ni de claim), PV et endurance pleins, statuts effacés, sorti de l'horloge de combat ; **10 % de chance par objet du sac** de tomber en butin sur le lieu de mort (`combat_rules.mort`) ; équipement et XP conservés ; l'or n'existe pas encore (−10 % en données, en attente).
 
+> [!success] Précisé le 2026-08-28
+> Le respawn se fait désormais **au dernier lit où l'on a dormi** (le camp) : mourir en donjon termine l'expédition et ramène au camp, les pertes du sac tombant sur le lieu de mort. Sans lit activé, l'ancien comportement (point d'entrée) reste.
+
 ## Liens
 - **Dépend de** : [[Progression par l'usage]]
 - **Alimente** : [[Économie — sources et puits]]

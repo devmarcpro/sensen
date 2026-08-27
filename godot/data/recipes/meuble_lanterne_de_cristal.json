@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.meuble_lanterne_de_cristal.name",
+  "station": "etabli",
+  "craft_skill": "menuiserie",
+  "inputs": [
+    {
+      "category": "gemme",
+      "forme": "taillee",
+      "amount": 1
+    },
+    {
+      "category": "metal",
+      "forme": "lingot",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "meuble_lanterne_de_cristal",
+    "amount": 1
+  },
+  "fuel": null
+}

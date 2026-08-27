@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.meuble_grand_coffre.name",
+  "station": "etabli",
+  "craft_skill": "menuiserie",
+  "inputs": [
+    {
+      "category": "bois",
+      "forme": "planche",
+      "amount": 6
+    },
+    {
+      "category": "metal",
+      "forme": "lingot",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "item": "meuble_grand_coffre",
+    "amount": 1
+  },
+  "fuel": null
+}

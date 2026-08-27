@@ -62,6 +62,9 @@ Les donjons sont une des sources principales de contenu du jeu, et le premier es
 > [!success] Précisé le 2026-08-28
 > Retour à 128×128 par étage ([[Grille continue]]), 14 à 24 salles reliées en réseau maillé.
 
+> [!success] Précisé le 2026-08-28 — le camp entre deux expéditions
+> Sortir par l'escalier de l'étage 1 (`expedition_terminee`) **ramène au camp** ([[Claims et persistance]]) ; l'expédition suivante part de la tuile `entree_donjon` du camp (E), avec un nouvel id de donjon — un nouveau donjon à chaque fois, en attendant la surface et ses entrées.
+
 ## Liens
 - **Dépend de** : [[Grille continue]], [[Hauteur de terrain ±10]], [[Décisions fondatrices]]
 - **Alimente** : [[Génération de donjon]], [[Salles et connecteurs]], [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Grimoires et manuels]]

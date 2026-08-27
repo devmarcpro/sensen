@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.bibliotheque.name",
+  "type_meuble": "bibliotheque",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 20,
+  "luminosite": 0,
+  "bonus_humeur": 0,
+  "couleur": "#6b4a2b"
+}

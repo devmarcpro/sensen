@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.cheminee.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "cheminee",
+  "tags": [
+    "meuble",
+    "posable"
+  ]
+}

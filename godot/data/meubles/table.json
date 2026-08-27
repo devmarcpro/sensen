@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.table.name",
+  "type_meuble": "table",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 0,
+  "luminosite": 0,
+  "bonus_humeur": 0,
+  "couleur": "#9c6b3f"
+}

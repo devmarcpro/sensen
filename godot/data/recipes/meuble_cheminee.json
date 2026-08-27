@@ -1,0 +1,17 @@
+{
+  "name_key": "recipe.meuble_cheminee.name",
+  "station": "etabli",
+  "craft_skill": "menuiserie",
+  "inputs": [
+    {
+      "category": "roche",
+      "forme": "pierre_taillee",
+      "amount": 4
+    }
+  ],
+  "output": {
+    "item": "meuble_cheminee",
+    "amount": 1
+  },
+  "fuel": null
+}

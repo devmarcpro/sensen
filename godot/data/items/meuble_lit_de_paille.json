@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.lit_de_paille.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "lit_de_paille",
+  "tags": [
+    "meuble",
+    "posable"
+  ]
+}

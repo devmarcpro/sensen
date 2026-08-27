@@ -125,6 +125,22 @@ func touche(ev: InputEventKey) -> bool:
 			if courant == "inventaire":
 				_sertir()
 				return true
+		KEY_P:
+			if courant == "inventaire":
+				_poser()
+				return true
+		KEY_M:
+			if courant == "inventaire":
+				_mur(false)
+				return true
+		KEY_O:
+			if courant == "inventaire":
+				_mur(true)
+				return true
+		KEY_R:
+			if courant == "inventaire":
+				_ranger()
+				return true
 	return false
 
 
@@ -218,6 +234,11 @@ func _construire_inventaire(j: Dictionary) -> void:
 	_bouton(tr("ui.ecran.jeter"), _jeter)
 	_bouton(tr("ui.ecran.lire"), _lire)
 	_bouton(tr("ui.ecran.sertir"), _sertir)
+	if main.sim.lieu == "camp":
+		_bouton(tr("ui.ecran.poser"), _poser)
+		_bouton(tr("ui.ecran.mur"), func() -> void: _mur(false))
+		_bouton(tr("ui.ecran.porte"), func() -> void: _mur(true))
+		_bouton(tr("ui.ecran.ranger"), _ranger)
 
 
 func _nom_court(uid: String) -> String:
@@ -255,6 +276,46 @@ func _sertir() -> void:
 		if not main.sim.intention(j.id, {"type": "sertir", "objet": j.equipement.main_principale, "gemme": uid}):
 			main._log(tr("journal.pas_de_sertissure"))
 		rafraichir()
+
+
+## La tuile devant le joueur (son orientation), sinon la première adjacente libre.
+func _devant(j: Dictionary) -> Vector2i:
+	var g: Grille = main.sim.grille
+	var t: Vector2i = j.pos + j.orientation
+	if g.dans(t) and g.contenu_de(t).is_empty() and g.occupant(t).is_empty():
+		return t
+	for d in Grille.DIRS:
+		var v: Vector2i = j.pos + d
+		if g.dans(v) and g.contenu_de(v).is_empty() and g.occupant(v).is_empty():
+			return v
+	return t
+
+
+func _poser() -> void:
+	var uid := _uid_selection()
+	var j: Dictionary = main.joueur()
+	if not uid.is_empty():
+		main.sim.intention(j.id, {"type": "poser", "objet": uid, "vers": _devant(j)})
+		rafraichir()
+
+
+func _mur(porte: bool) -> void:
+	var j: Dictionary = main.joueur()
+	main.sim.intention(j.id, {"type": "poser_porte" if porte else "poser_mur", "vers": _devant(j)})
+	rafraichir()
+
+
+func _ranger() -> void:
+	var uid := _uid_selection()
+	var j: Dictionary = main.joueur()
+	if uid.is_empty():
+		return
+	for d in Grille.DIRS:
+		var t: Vector2i = j.pos + d
+		if main.sim.grille.dans(t) and not main.sim._coffre_a(t).is_empty():
+			main.sim.intention(j.id, {"type": "ranger", "objet": uid, "vers": t})
+			break
+	rafraichir()
 
 
 ## Le détail exhaustif d'un objet (Infobulle exhaustive : aucune information cachée).
@@ -317,6 +378,16 @@ func texte_objet(uid: String) -> String:
 		l.append(tr("ui.objet.sertissures").format({"n": int(s.nombre), "contenu": str(s.contenu.size())}))
 	if it.has("livre"):
 		l.append(tr("ui.objet.livre").format({"domaine": tr("domaine." + str(it.livre.domaine)), "difficulte": int(it.livre.difficulte), "n": int(it.livre.n)}))
+	if it.get("type", "") == "meuble":
+		var mb: Dictionary = GameData.entree("meubles", str(it.meuble))
+		var det: Array[String] = []
+		if bool(mb.dormir):
+			det.append(tr("ui.objet.meuble.lit"))
+		if int(mb.capacite_slots) > 0:
+			det.append(tr("ui.objet.meuble.slots").format({"n": int(mb.capacite_slots)}))
+		if int(mb.luminosite) > 0:
+			det.append(tr("ui.objet.meuble.lumiere").format({"n": int(mb.luminosite)}))
+		l.append(tr("ui.objet.meuble").format({"type": str(mb.type_meuble), "details": " · ".join(det) if not det.is_empty() else "—"}))
 	if it.get("type", "") == "station":
 		var stn: Dictionary = GameData.entree("stations", str(it.station))
 		l.append(tr("ui.objet.station").format({"poids": int(stn.poids), "competence": tr(sim._nom_competence(str(stn.craft_skill)))}))

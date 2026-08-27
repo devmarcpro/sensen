@@ -19,7 +19,9 @@
         "manuel",
         "materiau",
         "station",
-        "composant"
+        "composant",
+        "meuble",
+        "meuble"
       ]
     },
     "equip_slot": {
@@ -122,6 +124,9 @@
     },
     "composants": {
       "type": "object"
+    },
+    "meuble": {
+      "type": "string"
     }
   },
   "required": [

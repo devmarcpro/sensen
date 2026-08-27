@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.trophee.name",
+  "type_meuble": "trophee",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 0,
+  "luminosite": 0,
+  "bonus_humeur": 1,
+  "couleur": "#cfc4a0"
+}

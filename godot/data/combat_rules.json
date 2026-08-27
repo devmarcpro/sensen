@@ -242,5 +242,20 @@
         "mythique"
       ]
     ]
+  },
+  "camp": {
+    "_doc": "Camp de base : poser_ticks (poser/démonter) ; dormir_ticks = durée du sommeil (8 h à 24 000 ticks/jour) ; repose_ticks / repose_xp_mult = buff Reposé ; repose_potentiel / repose_top = +potentiel aux N compétences les plus travaillées depuis le dernier repos ; mur_familles : ce qui fait un mur.",
+    "poser_ticks": 10,
+    "dormir_ticks": 8000,
+    "repose_ticks": 4000,
+    "repose_xp_mult": 1.05,
+    "repose_potentiel": 2,
+    "repose_top": 5,
+    "mur_familles": [
+      "roche_taillee",
+      "bois",
+      "brique"
+    ],
+    "porte_famille": "bois"
   }
 }

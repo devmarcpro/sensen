@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.lit.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "lit",
+  "tags": [
+    "meuble",
+    "posable"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.etal_de_vente.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "etal_de_vente",
+  "tags": [
+    "meuble",
+    "posable"
+  ]
+}

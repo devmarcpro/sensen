@@ -30,6 +30,7 @@ func _ready() -> void:
 	test_fabrication()
 	test_assemblage()
 	test_desequiper_jeter()
+	test_camp()
 	test_donjon()
 	test_loot()
 	test_coffres_et_rares()
@@ -1009,7 +1010,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 9, "9 stations, 9 transformations plates")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 34, "9 stations, 34 recettes plates (9 transformations, 16 meubles, 9 stations)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -1102,6 +1103,93 @@ func test_desequiper_jeter() -> void:
 	verifier(j.sac.size() == n0 - 1 and s.contenants.has(s.grille.idx(j.pos)) and arme in s.contenants[s.grille.idx(j.pos)], "elle est en butin sur la tuile")
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "ramasser"}) and arme in j.sac, "et se ramasse (R)")
+
+
+# ---------------------------------------------------------------- Étape 7.1 : le camp de base
+
+func test_camp() -> void:
+	var s := Simulation.new(23)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	verifier(s.lieu == "camp" and s.grille.largeur == 128, "le camp : une cellule de 128×128")
+	var arbres := 0
+	var entree := Vector2i(-1, -1)
+	for i in s.grille.largeur * s.grille.hauteur_grille:
+		var t := Vector2i(i % s.grille.largeur, i / s.grille.largeur)
+		var tags: Array = s.grille.contenu_de(t).get("tags", [])
+		if "arbre" in tags:
+			arbres += 1
+		if "entree_donjon" in tags:
+			entree = t
+	verifier(arbres >= 40 and entree != Vector2i(-1, -1), "des arbres (%d) et l'entrée du donjon" % arbres)
+	var coffre := Vector2i(64 - 2, 64)
+	verifier(s.contenants.get(s.grille.idx(coffre), []).size() == 3, "le coffre de départ : hache, pioche, lit de paille")
+	# Prendre le coffre depuis une tuile adjacente.
+	j.pos = coffre + Vector2i(1, 0)
+	s.grille.placer(j.id, j.pos)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "prendre", "vers": coffre}), "prendre le coffre de départ")
+	var lit := ""
+	var hache := ""
+	var pioche := ""
+	for uid in j.sac:
+		if s.items[uid].get("meuble", "") == "lit_de_paille":
+			lit = uid
+		if s.items[uid].get("functionality", "") == "hache":
+			hache = uid
+		if s.items[uid].get("functionality", "") == "pioche":
+			pioche = uid
+	verifier(not lit.is_empty() and not hache.is_empty(), "le lit et la hache sont dans le sac")
+	# Poser le lit devant soi, y dormir : Reposé, potentiel, respawn.
+	var devant: Vector2i = j.pos + Vector2i(0, 1)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "poser", "objet": lit, "vers": devant}), "poser le lit de paille")
+	verifier(s.grille.meubles.get(s.grille.idx(devant), "") == "lit_de_paille" and s.grille.bloque_passage(devant), "le lit est un contenu de tuile qui bloque")
+	s.gagner_xp(j, "minage", 30)
+	s.gagner_xp(j, "forge", 10)
+	var pot0: int = int(j.potentiels.get("minage", 80))
+	var t0: int = s.horloge_monde.ticks
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "dormir", "vers": devant}), "dormir sur le lit")
+	verifier(s.horloge_monde.ticks - t0 == int(GameData.config("combat_rules").camp.dormir_ticks), "le monde a avancé de 8 000 ticks")
+	verifier(int(j.potentiels.minage) == pot0 + 2 and is_equal_approx(float(j.xp_mult), 1.05) and j.has("repose_jusqua"), "Reposé : +2 de potentiel en Minage, XP ×1,05")
+	verifier(j.spawn == devant and j.lit == devant, "le lit est le point de respawn")
+	# Un mur en planches : il faut du bois — récolter un arbre à la hache, scier.
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "equiper", "objet": hache}), "équiper la hache")
+	var arbre: Vector2i = j.pos + Vector2i(1, 0)
+	s.grille.poser_contenu(arbre, "arbre")
+	s.grille.materiaux[s.grille.idx(arbre)] = "chene"
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "creuser", "vers": arbre}), "abattre un chêne à la hache")
+	verifier(not s._pile(j, "chene", "brut").is_empty(), "du chêne brut dans le sac")
+	s._donner_materiau(j, "chene", 2, "planche")
+	var mur: Vector2i = j.pos + Vector2i(-1, 0)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "poser_mur", "vers": mur}), "poser un mur en planches")
+	verifier("construit" in s.grille.contenu_de(mur).tags and s.grille.materiau_de(mur) == "chene" and int(s._pile(j, "chene", "planche").quantite) == 1, "un mur construit en chêne, une planche consommée")
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "demonter", "vers": mur}), "démonter le mur")
+	verifier(s.grille.contenu_de(mur).is_empty(), "la tuile est libre")
+	# Coffre : ranger, capacité.
+	var coffre_it := s.generer_objet("meuble_coffre", 1, {}, "commun", 0)
+	j.sac.append(coffre_it.uid)
+	var ou: Vector2i = j.pos + Vector2i(0, -1)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "poser", "objet": coffre_it.uid, "vers": ou}), "poser un coffre")
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "ranger", "objet": pioche, "vers": ou}) and s.contenants[s.grille.idx(ou)] == [pioche] and not (pioche in j.sac), "ranger la pioche dans le coffre")
+	# Partir en expédition depuis l'entrée, ressortir : le camp revient tel quel.
+	j.pos = entree
+	s.grille.placer(j.id, entree)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "descendre"}), "E sur l'entrée : expédition")
+	verifier(s.lieu == "donjon" and not s.donjon.is_empty() and s.camp_sauve.has("grille"), "on est au donjon, le camp est mis de côté")
+	j.pos = s.donjon.entree
+	s.grille.placer(j.id, j.pos)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "remonter"}), "ressortir par l'entrée de l'étage 1")
+	verifier(s.lieu == "camp" and s.grille.meubles.get(s.grille.idx(devant), "") == "lit_de_paille" and s.contenants[s.grille.idx(ou)] == [pioche], "retour au camp : le lit et le coffre sont toujours là")
 
 
 # ---------------------------------------------------------------- brouillard de guerre

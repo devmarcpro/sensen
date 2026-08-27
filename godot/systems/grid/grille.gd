@@ -25,6 +25,8 @@ var hauteur_oeil: int = 1
 var decouvert: Dictionary = {}            # index de tuile → true : tuiles déjà vues (brouillard de guerre)
 var materiaux: Dictionary = {}            # index de tuile → id de matériau (filons) ; sinon materiau_defaut
 var materiau_defaut: String = ""          # le matériau des murs ordinaires (materiau_mur du thème)
+var meubles: Dictionary = {}              # index de tuile → id de meuble (data/meubles/)
+var stations_fixes: Dictionary = {}       # index de tuile → id de station posée
 
 
 ## Le matériau d'une tuile de mur : le filon s'il y en a un, sinon celui du thème.

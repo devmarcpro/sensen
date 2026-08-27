@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.torchere.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "torchere",
+  "tags": [
+    "meuble",
+    "posable"
+  ]
+}

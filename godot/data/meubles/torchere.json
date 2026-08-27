@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.torchere.name",
+  "type_meuble": "lumiere",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 0,
+  "luminosite": 80,
+  "bonus_humeur": 0,
+  "couleur": "#e0a040"
+}

@@ -1,0 +1,15 @@
+{
+  "name_key": "item.proto_hache.name",
+  "type": "outil",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "functionality": "hache",
+  "durete_base": 25,
+  "qualite": 1.0,
+  "element": "metal",
+  "tags": [
+    "outil",
+    "prototype"
+  ],
+  "materiau": "fer"
+}

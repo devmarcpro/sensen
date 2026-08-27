@@ -1,0 +1,11 @@
+{
+  "_doc": "Meuble (docs: Meubles, F.6) : un contenu de tuile. type_meuble compte pour la variété d'une pièce ; dormir : c'est un lit ; capacite_slots : contenant ; luminosite / bonus_humeur : effets ; couleur : rendu.",
+  "name_key": "meuble.<id>.name",
+  "type_meuble": "table",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 0,
+  "luminosite": 0,
+  "bonus_humeur": 0,
+  "couleur": "#888888"
+}

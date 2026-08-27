@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.grand_coffre.name",
+  "type_meuble": "coffre",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 60,
+  "luminosite": 0,
+  "bonus_humeur": 0,
+  "couleur": "#5e3818"
+}

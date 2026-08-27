@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.lanterne_de_cristal.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "lanterne_de_cristal",
+  "tags": [
+    "meuble",
+    "posable"
+  ]
+}

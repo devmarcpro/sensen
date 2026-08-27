@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.lit_de_paille.name",
+  "type_meuble": "lit",
+  "bloque_passage": true,
+  "dormir": true,
+  "capacite_slots": 0,
+  "luminosite": 0,
+  "bonus_humeur": -3,
+  "couleur": "#c9b26b"
+}

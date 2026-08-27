@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.coffre.name",
+  "type_meuble": "coffre",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 30,
+  "luminosite": 0,
+  "bonus_humeur": 0,
+  "couleur": "#7a4a25"
+}

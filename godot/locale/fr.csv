@@ -60,7 +60,7 @@ ui.titre,SENSEN — prototype de combat
 ui.horloge,horloge {horloge} · {mode}
 ui.mode.exploration,exploration ({tps} ticks/s)
 ui.mode.combat,COMBAT — le temps n'avance qu'à l'action
-ui.aide,ZQSD : se déplacer (8 directions) · R : ramasser · clic : se déplacer / frapper / creuser un mur adjacent (la pioche en main récolte) · maj+clic : attaque lourde · G : garde · espace : attendre · tab : arène suivante · F5 : recharger les données
+ui.aide,ZQSD : se déplacer (8 directions) · R : ramasser · clic : se déplacer / frapper / creuser un mur adjacent (la pioche en main récolte) · maj+clic : attaque lourde · G : garde · espace : attendre · tab : arène suivante puis le camp · F5 : recharger les données
 ui.entite.ligne,{nom} pv {pv}/{pv_max} · end {end} · agit à t={compteur} · h={h}
 ui.case,"case ({x},{y}) h={h} · Δh vs toi : {dh}"
 ui.timeline,prochaines actions :
@@ -399,6 +399,78 @@ journal.pas_de_station,aucune station dans le sac pour {recette}
 ui.atelier,=== ATELIER (F pour fermer) — chiffre : fabriquer ===
 ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
+meuble.lit.name,Lit
+recipe.meuble_lit.name,Fabriquer : Lit
+meuble.lit_de_paille.name,Lit de paille
+recipe.meuble_lit_de_paille.name,Fabriquer : Lit de paille
+meuble.table.name,Table
+recipe.meuble_table.name,Fabriquer : Table
+meuble.chaise.name,Chaise
+recipe.meuble_chaise.name,Fabriquer : Chaise
+meuble.coffre.name,Coffre
+recipe.meuble_coffre.name,Fabriquer : Coffre
+meuble.grand_coffre.name,Grand coffre
+recipe.meuble_grand_coffre.name,Fabriquer : Grand coffre
+meuble.garde_manger.name,Garde-manger
+recipe.meuble_garde_manger.name,Fabriquer : Garde-manger
+meuble.etal_de_vente.name,Étal de vente
+recipe.meuble_etal_de_vente.name,Fabriquer : Étal de vente
+meuble.torchere.name,Torchère
+recipe.meuble_torchere.name,Fabriquer : Torchère
+meuble.lanterne_de_cristal.name,Lanterne de cristal
+recipe.meuble_lanterne_de_cristal.name,Fabriquer : Lanterne de cristal
+meuble.cheminee.name,Cheminée
+recipe.meuble_cheminee.name,Fabriquer : Cheminée
+meuble.bibliotheque.name,Bibliothèque
+recipe.meuble_bibliotheque.name,Fabriquer : Bibliothèque
+meuble.ratelier_d_armes.name,Râtelier d'armes
+recipe.meuble_ratelier_d_armes.name,Fabriquer : Râtelier d'armes
+meuble.tapis.name,Tapis
+recipe.meuble_tapis.name,Fabriquer : Tapis
+meuble.trophee.name,Trophée
+recipe.meuble_trophee.name,Fabriquer : Trophée
+meuble.autel_domestique.name,Autel domestique
+recipe.meuble_autel_domestique.name,Fabriquer : Autel domestique
+meuble.statue.name,Statue
+recipe.station_etabli.name,Fabriquer : Établi
+recipe.station_forge.name,Fabriquer : Forge
+recipe.station_enclume.name,Fabriquer : Enclume
+recipe.station_scierie.name,Fabriquer : Scierie
+recipe.station_tailleur_de_pierre.name,Fabriquer : Tailleur de pierre
+recipe.station_atelier_tissage.name,Fabriquer : Atelier de tissage
+recipe.station_alambic.name,Fabriquer : Alambic
+recipe.station_cuisine.name,Fabriquer : Cuisine
+recipe.station_table_enchantement.name,Fabriquer : Table d'enchantement
+item.proto_hache.name,Hache de fer
+functionality.hache.name,Hache
+tile_content.arbre.name,Arbre
+tile_content.mur_construit.name,Mur construit
+tile_content.porte.name,Porte
+tile_content.meuble.name,Meuble
+tile_content.station_fixe.name,Station
+tile_content.entree_donjon.name,Entrée du donjon
+ui.camp,CAMP DE BASE · E sur l'entrée : partir en expédition
+journal.pose,"{nom} pose {objet}"
+journal.demonte,"{nom} démonte {objet}"
+journal.rien_a_poser,rien à poser ici (tuile occupée ou hors du camp)
+journal.pas_de_materiau_mur,il faut une pierre taillée / une planche / une brique pour un mur
+journal.range,"{nom} range {objet} dans le coffre"
+journal.coffre_plein,le coffre est plein
+journal.prend,{nom} vide le coffre ({n} objets)
+journal.dort,"{nom} dort {heures} h : reposé (+{potentiel} de potentiel à : {liste})"
+journal.pas_de_lit,il faut un lit adjacent pour dormir
+journal.hostile_en_vue,impossible de dormir : un hostile est en vue
+journal.retour_camp,retour au camp
+journal.expedition_depart,une nouvelle expédition commence
+ui.ecran.poser,Poser (P)
+ui.ecran.mur,Mur (M)
+ui.ecran.porte,Porte (O)
+ui.ecran.ranger,Ranger (R)
+ui.objet.meuble,"meuble : {type} · {details}"
+ui.objet.meuble.lit,on peut y dormir
+ui.objet.meuble.slots,{n} emplacements
+ui.objet.meuble.lumiere,luminosité {n}
+statut.repose,Reposé
 slot.main_principale,Main principale
 slot.main_secondaire,Main secondaire
 slot.casque,Casque
@@ -488,7 +560,7 @@ slotc.plaque,plaque
 slotc.sangles,sangles
 slotc.divers,divers
 ui.ecran.fermer,Fermer (Échap)
-ui.ecran.inventaire,"INVENTAIRE — {n} objets dans le sac (E : équiper/retirer · J : jeter · L : lire · T : sertir)"
+ui.ecran.inventaire,"INVENTAIRE — {n} objets dans le sac (E : équiper/retirer · J : jeter · L : lire · T : sertir · au camp : P poser, M mur, O porte, R ranger)"
 ui.ecran.sac,sac
 ui.ecran.slot_vide,(emplacement vide)
 ui.ecran.equiper,Équiper / retirer (E)

@@ -1,0 +1,17 @@
+{
+  "name_key": "recipe.station_tailleur_de_pierre.name",
+  "station": "etabli",
+  "craft_skill": "menuiserie",
+  "inputs": [
+    {
+      "category": "roche",
+      "forme": "pierre_taillee",
+      "amount": 3
+    }
+  ],
+  "output": {
+    "item": "station_tailleur_de_pierre",
+    "amount": 1
+  },
+  "fuel": null
+}

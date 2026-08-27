@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.autel_domestique.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "autel_domestique",
+  "tags": [
+    "meuble",
+    "posable"
+  ]
+}

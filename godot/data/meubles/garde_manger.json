@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.garde_manger.name",
+  "type_meuble": "garde_manger",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 30,
+  "luminosite": 0,
+  "bonus_humeur": 0,
+  "couleur": "#8d7a4e"
+}

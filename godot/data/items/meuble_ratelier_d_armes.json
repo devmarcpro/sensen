@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.ratelier_d_armes.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "ratelier_d_armes",
+  "tags": [
+    "meuble",
+    "posable"
+  ]
+}

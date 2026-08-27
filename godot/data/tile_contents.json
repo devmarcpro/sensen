@@ -63,5 +63,81 @@
       "destructible",
       "filon"
     ]
+  },
+  "arbre": {
+    "name_key": "tile_content.arbre.name",
+    "bloque_passage": true,
+    "bloque_vue": true,
+    "hauteur_vue": 3,
+    "tags": [
+      "arbre",
+      "solide",
+      "destructible",
+      "vegetation"
+    ]
+  },
+  "mur_construit": {
+    "name_key": "tile_content.mur_construit.name",
+    "bloque_passage": true,
+    "bloque_vue": true,
+    "hauteur_vue": 2,
+    "tags": [
+      "mur",
+      "solide",
+      "destructible",
+      "construit"
+    ]
+  },
+  "porte": {
+    "name_key": "tile_content.porte.name",
+    "bloque_passage": false,
+    "bloque_vue": true,
+    "hauteur_vue": 2,
+    "tags": [
+      "porte",
+      "construit"
+    ],
+    "couleur": "#8a6a3a"
+  },
+  "meuble": {
+    "name_key": "tile_content.meuble.name",
+    "bloque_passage": true,
+    "bloque_vue": false,
+    "hauteur_vue": 1,
+    "tags": [
+      "meuble",
+      "construit"
+    ]
+  },
+  "meuble_sol": {
+    "name_key": "tile_content.meuble.name",
+    "bloque_passage": false,
+    "bloque_vue": false,
+    "hauteur_vue": 0,
+    "tags": [
+      "meuble",
+      "construit"
+    ]
+  },
+  "station_fixe": {
+    "name_key": "tile_content.station_fixe.name",
+    "bloque_passage": true,
+    "bloque_vue": false,
+    "hauteur_vue": 1,
+    "tags": [
+      "station",
+      "construit"
+    ],
+    "couleur": "#6a6a7a"
+  },
+  "entree_donjon": {
+    "name_key": "tile_content.entree_donjon.name",
+    "bloque_passage": false,
+    "bloque_vue": false,
+    "hauteur_vue": 0,
+    "tags": [
+      "entree_donjon"
+    ],
+    "couleur": "#20161a"
   }
 }

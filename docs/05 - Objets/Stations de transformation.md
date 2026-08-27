@@ -33,6 +33,9 @@ Les 8 stations de transformation, leurs recettes principales, et le principe por
 > [!success] Codé le 2026-08-28 — `data/stations/` (9), `data/recipes/` (9 transformations plates), intention `fabriquer`
 > Les 8 stations de base + l'Enclume en données (poids de la note : établi 35, forge 80, scierie 60, autres 40-60 ; compétence de la station). **Portative** = un objet `station_<id>` (type `station`) dans le sac : ses recettes apparaissent (touche **F**, chiffre pour fabriquer) ; la version **fixe** attend le claim (étape 7), le poids porté attend [[Armures et poids porté]]. **Décisions** : chaque personnage part avec un **établi portatif** (« le jeu démarre sans forge », la voie pierre/os est connue d'office) ; les autres stations se trouvent dans les coffres de donjon en attendant le camp. Une recette plate transforme des matériaux bruts en **formes** (`brut`, `lingot`, `planche`, `pierre_taillee`, `tissu`, `taillee`) ou en un autre matériau (sable → verre, argile → brique, bois → papier, paille → chaume) ; ses entrées se disent par matériau ou par catégorie (`fondre_lingot` vaut pour tous les métaux). Durée = `craft.ticks_base / skill_factor(N)` ; XP à la compétence de la station = dureté du matériau produit. Aucune qualité sur ces transformations (les matériaux n'en ont pas — [[Qualité d'artisanat]]).
 
+> [!success] Précisé le 2026-08-28 — stations fixes
+> Une station portative **posée** (`poser`) devient une tuile `station_fixe` ; ses recettes sont disponibles quand le joueur est **adjacent ou dessus**. Les stations se fabriquent aussi à l'Établi (`data/recipes/station_*`, en pierre taillée, planches, lingots).
+
 ## Liens
 - **Dépend de** : [[Catégories de matériaux]], [[Claims et persistance]]
 - **Alimente** : [[Craft compositionnel]], [[Palier industriel]], [[Tables de sculpture]], [[Cuisine et alchimie]]
