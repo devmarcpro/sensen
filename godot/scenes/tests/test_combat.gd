@@ -78,6 +78,7 @@ func _ready() -> void:
 	test_lycanthrope()
 	test_incarnation()
 	test_terrasser()
+	test_empoigne()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2459,6 +2460,28 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Empoigne : l'effet saisie
+
+func test_empoigne() -> void:
+	var cap := Capacites.new(GameData.catalogues["modules"])
+	var plan := cap.assembler(["point", "empoigne"], 5, "1d4", {})
+	verifier(plan.erreurs.is_empty() and "saisie" in plan.noyau.effets, "[Point]+[Empoigne] : un plan de saisie")
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var loup: Dictionary = s.entites["loup_2"]
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(1, 0)
+	s.grille.placer(loup.id, loup.pos)
+	for d in range(2, 5):
+		s.grille.contenu[s.grille.idx(j.pos + Vector2i(d, 0))] = 0
+	s._executer_capacite(j, plan, loup.pos, false)
+	verifier(str(j.get("porte", "")) == loup.id and Etres.a_statut_tag(loup, "saisi", s.statuts_defs), "sans talent : le loup est saisi par la capacité")
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "garde"}), "en portant : pas de garde")
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "lancer_etre", "vers": j.pos + Vector2i(3, 0)}) and not j.has("porte") and Grille.distance(j.pos, loup.pos) >= 2, "lancé à %d tuiles" % Grille.distance(j.pos, loup.pos))
 
 
 # ---------------------------------------------------------------- Terrasser et régénération

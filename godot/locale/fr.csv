@@ -400,6 +400,7 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+journal.garde_porte,tu portes quelqu'un : pas de garde
 option.abaisser,Abaisser (tranchée)
 option.elever,Élever (talus)
 journal.terrasse,"{nom} terrasse ({x},{y}) : hauteur {h}"

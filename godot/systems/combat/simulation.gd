@@ -1501,9 +1501,9 @@ func _voler_tempo(e: Dictionary, cible_id: String, tick: int) -> bool:
 
 
 ## Le Porteur (Talents de classe) : saisir un être adjacent — il est immobilisé, le Porteur ne frappe ni ne se garde.
-func _saisir(e: Dictionary, cible_id: String, tick: int) -> bool:
+func _saisir(e: Dictionary, cible_id: String, tick: int, par_talent: bool = true) -> bool:
 	var c: Dictionary = entites.get(cible_id, {})
-	if not a_talent(e, "saisie") or c.is_empty() or not c.vivant or Grille.distance(e.pos, c.pos) != 1 or not str(e.get("porte", "")).is_empty():
+	if (par_talent and not a_talent(e, "saisie")) or c.is_empty() or not c.vivant or c.id == e.id or Grille.distance(e.pos, c.pos) != 1 or not str(e.get("porte", "")).is_empty():
 		return false
 	e["porte"] = cible_id
 	c["saisi_par"] = e.id
@@ -5736,6 +5736,9 @@ func _prendre_garde(e: Dictionary, tick: int) -> bool:
 	if a_talent(e, "masques"):   # Le Masque : la main secondaire est prise
 		EventBus.emettre(&"journal", [&"journal.garde_masque", {}])
 		return false
+	if not str(e.get("porte", "")).is_empty():   # on porte quelqu'un : pas de garde
+		EventBus.emettre(&"journal", [&"journal.garde_porte", {}])
+		return false
 	e.garde = true
 	e.compteur = tick + int(regles.r.actions.garde)
 	EventBus.emettre(&"journal", [&"journal.garde", {"nom": e.name_key}])
@@ -6924,8 +6927,13 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 						a_touche = true
 						EventBus.emettre(&"journal", [&"journal.invocation", {"nom": e.name_key, "contenu": "tile_content." + str(iv.contenu) + ".name", "x": t.x, "y": t.y, "ticks": iv.duree_ticks}])
 						EventBus.emettre(&"tile_changed", [t])
+			"saisie":   # Empoigne : la première cible vivante adjacente est saisie (Talents de classe — Le Porteur)
+				for c in touchees:
+					if c.vivant and c.id != e.id and _saisir(e, c.id, tick_de(e), false):
+						a_touche = true
+						break
 			_:
-				pass   # saisie : étape suivante
+				pass
 	return {"a_touche": a_touche, "premiere": premiere, "tuee": tuee}
 
 
