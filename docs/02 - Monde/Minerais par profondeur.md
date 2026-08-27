@@ -44,6 +44,9 @@ ensemble — trois pressions alignées.
 
 **Rappel :** le minage exploratoire souterrain a été écarté ([[Décisions fondatrices]]) — les ressources se récoltent en **filons de surface** ([[Récolte]]) et en filons muraux de donjon.
 
+> [!success] Codé le 2026-08-28 — `data/minerais_par_etage.json`, filons dans les murs du donjon
+> Les cinq tiers de G.9 en données (ids de `data/materials/`), les **bandes d'étage** de cette note (1-2 → tiers 1-2, 3-4 → 2-3, 5-6 → 3-4, 7+ → 4-5), les fossiles (os, ammonite, coquillage) aux étages 1-3, le guano dans le thème « repaire ». Un filon = un amas de 3 à 8 tuiles de mur (`tile_contents.filon`, destructible) portant un matériau ; 8 à 16 filons par étage, +25 % par étage. Le mur ordinaire porte le matériau du thème (`materiau_mur` : pierre pour la ruine, calcaire pour le repaire) et se récolte aussi. Le client teinte les blocs à la couleur de leur matériau.
+
 ## Liens
 - **Dépend de** : [[Décision — Minerais et strates après le pivot]], [[Dérive de la corruption]], [[Catalogue des couches de bruit]]
 - **Alimente** : [[Récolte]], [[Génération de donjon]], [[Quêtes et guildes]], [[Catalogue matériaux — Minéraux]], [[Catalogue matériaux — Gemmes]], [[Catalogue matériaux — Fossiles]]

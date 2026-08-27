@@ -51,5 +51,17 @@
       "contenant",
       "butin"
     ]
+  },
+  "filon": {
+    "name_key": "tile_content.filon.name",
+    "bloque_passage": true,
+    "bloque_vue": true,
+    "hauteur_vue": 2,
+    "tags": [
+      "mur",
+      "solide",
+      "destructible",
+      "filon"
+    ]
   }
 }

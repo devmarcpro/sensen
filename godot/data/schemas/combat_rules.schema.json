@@ -54,6 +54,9 @@
     },
     "creuser": {
       "type": "object"
+    },
+    "recolte": {
+      "type": "object"
     }
   },
   "required": [

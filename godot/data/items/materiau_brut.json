@@ -1,0 +1,11 @@
+{
+  "name_key": "item.materiau_brut.name",
+  "type": "materiau",
+  "equip_slot": "",
+  "tags": [
+    "materiau",
+    "empilable"
+  ],
+  "quantite": 1,
+  "materiau": ""
+}

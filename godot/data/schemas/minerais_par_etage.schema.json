@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": [
+    "tiers",
+    "bandes_etage",
+    "fossiles",
+    "filons_par_etage",
+    "taille_filon",
+    "croissance_par_etage"
+  ]
+}

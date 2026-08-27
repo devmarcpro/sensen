@@ -1,0 +1,15 @@
+{
+  "name_key": "functionality.pioche.name",
+  "kind": "outil",
+  "hands": 1,
+  "combat_skill": "contondant",
+  "degats_des": "1d4",
+  "crit_range": 20,
+  "vitesse_base": 4.0,
+  "portee": 1.0,
+  "portee_min": 1,
+  "type_degats": "perforant",
+  "volume": 2.0,
+  "poids_reference": 2.5,
+  "outil": "pioche"
+}

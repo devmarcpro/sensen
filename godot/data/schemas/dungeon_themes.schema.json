@@ -8,6 +8,7 @@
     "croissance_par_etage",
     "etages",
     "salles_par_etage",
+    "materiau_mur",
     "tailles_salles",
     "poids_salles",
     "couloirs"
@@ -41,6 +42,9 @@
       },
       "minItems": 2,
       "maxItems": 2
+    },
+    "materiau_mur": {
+      "type": "string"
     },
     "tailles_salles": {
       "type": "object"

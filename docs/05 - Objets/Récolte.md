@@ -35,6 +35,9 @@ XP gagnée par bloc récolté = durete_materiau
 
 **Rôle de case dédié ([[Rôles de cases]]) :** « Ressources naturelles » — la case garde la régénération hebdomadaire malgré le claim, réserve d'exploitation renouvelable.
 
+> [!success] Codé le 2026-08-28 — la récolte en donjon (filons muraux), `combat_rules.recolte`
+> Les formules de la note telles quelles, en ticks : `ticks = ⌈durete_materiau / (durete_outil × qualite_outil × skill_factor(N)) × 10⌉` (10 ticks par seconde d'exploration), `quantite = 1 + ⌊N/10⌋`, XP = dureté du matériau versée à la compétence de la catégorie (Minage pour un filon). **Décisions** : `skill_factor(N)` = celui de [[Progression par l'usage]] (1 + 0,02 N) ; **l'outil** = l'objet en main principale dont la fonctionnalité est l'outil de la catégorie (`pioche` pour métaux, roches, minéraux, gemmes, fossiles), dureté = sa `durete_base`, qualité = sa `qualite` ; sans outil adapté, on peut toujours **creuser** un mur (décision du 2026-08-27, 10 ticks) mais le matériau s'effrite — rien n'est récolté ; avec un outil trop faible (`durete × qualite < durete_materiau × 0,5`), « l'outil rebondit » et rien ne se passe. Le matériau récolté est un objet `materiau_brut` empilable dans le sac (un par matériau, `quantite`). Première pioche : `proto_pioche` (tête de fer, dureté 25) dans le loot des coffres de donjon — la voie pierre/os de l'Établi arrive avec les stations.
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Catégories de matériaux]], [[Progression par l'usage]], [[Qualité d'artisanat]]
 - **Alimente** : [[Stratification verticale]], [[Rôles de cases]], [[Population et exploitation]]

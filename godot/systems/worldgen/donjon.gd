@@ -35,7 +35,7 @@ func _init(p_salles: Dictionary, p_connecteurs: Dictionary, p_theme: Dictionary)
 func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dernier: bool, taille: int = 128) -> Dictionary:
 	rng.seed = hash([graine, id_donjon, etage])
 	var e := {"largeur": taille, "hauteur": taille, "hauteurs": PackedByteArray(), "murs": {}, "sol": {}, "bord": {},
-		"pieces": [], "entree": Vector2i.ZERO, "escalier": null, "boss": null, "spawns": [], "coffres": [], "graphe": {}, "etage": etage}
+		"pieces": [], "entree": Vector2i.ZERO, "escalier": null, "boss": null, "spawns": [], "coffres": [], "filons": {}, "graphe": {}, "etage": etage}
 	e.hauteurs.resize(taille * taille)
 	e.hauteurs.fill(H_BASE)
 	for i in taille:
@@ -95,9 +95,10 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 		e.pieces[loin]["boss_room"] = true
 	else:
 		e.escalier = _centre_libre(e, e.pieces[loin])
-	# 5. Peuplement et contenants.
+	# 5. Peuplement, contenants, filons.
 	_peupler(e, etage)
 	_poser_coffres(e)
+	_poser_filons(e, etage)
 	return e
 
 
@@ -341,6 +342,41 @@ func _poser_coffres(e: Dictionary) -> void:
 			for j in rng.randi_range(int(lr.objets_par_coffre[0]), int(lr.objets_par_coffre[1])):
 				objets.append(_base_aleatoire(lr))
 			e.coffres.append({"pos": pos, "bases": objets})
+
+
+## Filons muraux (Minerais par profondeur) : les tiers de la bande d'étage, plus les fossiles aux
+## premiers étages et les matériaux propres au thème. Un filon = un amas de tuiles de mur.
+func _poser_filons(e: Dictionary, etage: int) -> void:
+	var mp: Dictionary = GameData.config("minerais_par_etage")
+	var pool: Array = []
+	for b in mp.bandes_etage:
+		if etage >= int(b.etages[0]) and etage <= int(b.etages[1]):
+			for t in range(int(b.tiers[0]), int(b.tiers[1]) + 1):
+				pool.append_array(mp.tiers[str(t)])
+	var fo: Dictionary = mp.fossiles
+	if etage >= int(fo.etages[0]) and etage <= int(fo.etages[1]):
+		pool.append_array(fo.materiaux)
+	pool.append_array(mp.get("par_theme", {}).get(theme.id, []))
+	if pool.is_empty():
+		return
+	var facteur := 1.0 + float(etage - 1) * float(mp.croissance_par_etage)
+	var nb := int(float(rng.randi_range(int(mp.filons_par_etage[0]), int(mp.filons_par_etage[1]))) * facteur)
+	var dirs := [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
+	for k in nb:
+		var mat: String = pool[rng.randi_range(0, pool.size() - 1)]
+		var p := Vector2i(rng.randi_range(2, e.largeur - 3), rng.randi_range(2, e.hauteur - 3))
+		var taille := rng.randi_range(int(mp.taille_filon[0]), int(mp.taille_filon[1]))
+		for pas in taille * 3:
+			var idx: int = p.y * e.largeur + p.x
+			if not e.sol.has(idx) and not e.bord.has(idx) and not e.filons.has(idx):
+				e.filons[idx] = mat
+				taille -= 1
+				if taille <= 0:
+					break
+			var d: Vector2i = dirs[rng.randi_range(0, 3)]
+			p += d
+			if p.x < 2 or p.y < 2 or p.x > e.largeur - 3 or p.y > e.hauteur - 3:
+				break
 
 
 func _base_aleatoire(lr: Dictionary) -> String:

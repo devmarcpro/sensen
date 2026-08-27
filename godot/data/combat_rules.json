@@ -168,5 +168,12 @@
     "ticks": 10,
     "xp": 5,
     "endurance": 6
+  },
+  "recolte": {
+    "_doc": "Récolte : ticks = ceil(durete_mat / (durete_outil × qualite × skill_factor(N)) × ticks_par_seconde) ; irrécoltable si durete_outil × qualite < durete_mat × seuil_irrecoltable ; quantite = 1 + N / niveaux_par_unite ; XP = durete_mat.",
+    "ticks_par_seconde": 10,
+    "seuil_irrecoltable": 0.5,
+    "niveaux_par_unite": 10,
+    "mains_nues_durete": 1
   }
 }

@@ -26,6 +26,7 @@ func _ready() -> void:
 	test_niveaux()
 	test_paperdoll_et_tutoriels()
 	test_materiaux()
+	test_recolte()
 	test_donjon()
 	test_loot()
 	test_coffres_et_rares()
@@ -927,6 +928,76 @@ func test_materiaux() -> void:
 	verifier(mats.chene.harvest.tool_category == "hache" and mats.chene.harvest.skill == "bucheronnage", "récolte : outil et compétence de la catégorie")
 	verifier(GameData.config("material_categories").size() == 11, "11 catégories de matériaux")
 	verifier(tr("material.acier_trempe.name") == "Acier trempé", "nom localisé")
+
+
+# ---------------------------------------------------------------- Étape 6.2 : récolte en donjon
+
+func test_recolte() -> void:
+	var s := Simulation.new(11)
+	s.charger_donjon("ruine", 11, 5, 1)
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var filons := {}
+	for idx in s.grille.materiaux.keys():
+		filons[s.grille.materiaux[idx]] = true
+	verifier(s.grille.materiaux.size() >= 24, "des filons dans les murs de l'étage 1 (%d tuiles)" % s.grille.materiaux.size())
+	var mp: Dictionary = GameData.config("minerais_par_etage")
+	var permis: Array = mp.tiers["1"] + mp.tiers["2"] + mp.fossiles.materiaux
+	var hors_tier := false
+	for m in filons.keys():
+		if not (m in permis):
+			hors_tier = true
+	verifier(not hors_tier, "étage 1 : seulement les tiers 1-2 et les fossiles (%s)" % str(filons.keys()))
+	verifier(s.grille.materiau_defaut == "pierre", "les murs de la ruine sont en pierre")
+	# Un mur adjacent au joueur, à mains nues : on creuse, rien n'est récolté.
+	var mur := Vector2i(-1, -1)
+	for d in Grille.DIRS:
+		var t: Vector2i = j.pos + d
+		if s.grille.dans(t) and s.grille.bloque_passage(t) and Grille.distance(j.pos, t) == 1:
+			mur = t
+			break
+	if mur == Vector2i(-1, -1):
+		# la salle d'arrivée peut être large : on pose un mur à côté
+		mur = j.pos + Vector2i(1, 0)
+		s.grille.poser_contenu(mur, "mur")
+	var sac0: int = j.sac.size()
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "creuser", "vers": mur}), "creuser à mains nues")
+	verifier(j.sac.size() == sac0 and j.compteur == int(GameData.config("combat_rules").creuser.ticks), "sans outil : 10 ticks, rien récolté")
+	# Avec la pioche de fer (dureté 25) : la pierre (dureté 15) se récolte en ⌈15 / 25 × 10⌉ = 6 ticks.
+	var pioche := s.generer_objet("proto_pioche", 1, {}, "commun", 0)
+	j.sac.append(pioche.uid)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "equiper", "objet": pioche.uid}), "équiper la pioche")
+	s.grille.poser_contenu(mur, "mur")
+	s.attente[j.id] = true
+	var xp0: int = int(j.xp_competences.get("minage", 0))
+	verifier(s.intention(j.id, {"type": "creuser", "vers": mur}), "récolter le mur de pierre à la pioche")
+	verifier(j.compteur == 6, "pierre à la pioche de fer : 6 ticks (%d)" % j.compteur)
+	var brut := {}
+	for uid in j.sac:
+		var it: Dictionary = s.items[uid]
+		if it.get("type", "") == "materiau":
+			brut = it
+	verifier(not brut.is_empty() and brut.materiau == "pierre" and int(brut.quantite) == 1, "1 × pierre dans le sac")
+	verifier(int(j.xp_competences.get("minage", 0)) - xp0 > 0, "XP de Minage = dureté")
+	s.grille.poser_contenu(mur, "mur")
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "creuser", "vers": mur})
+	verifier(int(brut.quantite) == 2, "la pierre s'empile (×2)")
+	# Un filon de tungstène (dureté 42) : 25 × 1.0 ≥ 21, récoltable ; le diamant (40) aussi ; une pioche de cuivre (16) rebondit sur le tungstène.
+	s.grille.poser_contenu(mur, "filon")
+	s.grille.materiaux[s.grille.idx(mur)] = "tungstene"
+	pioche.durete_base = 16
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "creuser", "vers": mur}), "outil trop faible : l'outil rebondit (16 < 42 × 0,5)")
+	pioche.durete_base = 25
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "creuser", "vers": mur}), "la pioche de fer entame le tungstène")
+	var tung := false
+	for uid in j.sac:
+		if s.items[uid].get("materiau", "") == "tungstene":
+			tung = true
+	verifier(tung, "le filon donne son matériau")
 
 
 # ---------------------------------------------------------------- brouillard de guerre

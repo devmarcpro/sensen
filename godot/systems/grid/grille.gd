@@ -23,6 +23,13 @@ var occupants: Dictionary = {}            # index de tuile → id d'entité
 var dep: Dictionary = {}                  # combat_rules/deplacement
 var hauteur_oeil: int = 1
 var decouvert: Dictionary = {}            # index de tuile → true : tuiles déjà vues (brouillard de guerre)
+var materiaux: Dictionary = {}            # index de tuile → id de matériau (filons) ; sinon materiau_defaut
+var materiau_defaut: String = ""          # le matériau des murs ordinaires (materiau_mur du thème)
+
+
+## Le matériau d'une tuile de mur : le filon s'il y en a un, sinon celui du thème.
+func materiau_de(p: Vector2i) -> String:
+	return str(materiaux.get(idx(p), materiau_defaut))
 
 
 func _init(l: int, h: int) -> void:

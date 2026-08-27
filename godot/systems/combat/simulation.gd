@@ -115,6 +115,10 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 	donjon = {"theme": theme_id, "graine": graine, "id": id_donjon, "etage": etage, "etages": etages,
 		"salles": gen._nb_salles(e), "escalier": e.escalier, "boss": e.boss, "entree": e.entree}
 	grille = Grille.depuis_etage(e, GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
+	grille.materiau_defaut = str(theme.get("materiau_mur", ""))
+	for idx in e.filons.keys():
+		grille.materiaux[idx] = e.filons[idx]
+		grille.poser_contenu(Vector2i(int(idx) % grille.largeur, int(idx) / grille.largeur), "filon")
 	_reinitialiser()
 	if joueur.is_empty():
 		ajouter(theme.get("joueur", "aventurier"), e.entree, "joueur")
@@ -180,16 +184,60 @@ func _creuser(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	if not ("destructible" in contenu.get("tags", [])):
 		return false
 	var cr: Dictionary = regles.r.creuser
+	var mat_id := grille.materiau_de(vers)
+	var mat: Dictionary = GameData.catalogues.materials.get(mat_id, {})
+	var outil := Etres.arme(e, items)
+	var fonct: Dictionary = fonctionnalites.get(str(outil.get("functionality", "")), {})
+	var recolte := not mat.is_empty() and str(fonct.get("outil", "")) == str(mat.harvest.tool_category)
+	var ticks := int(cr.ticks)
+	if recolte:
+		# Récolte (Récolte) : l'outil adapté est en main — la formule de la note, en ticks.
+		var rr: Dictionary = regles.r.recolte
+		var force := float(outil.get("durete_base", rr.mains_nues_durete)) * float(outil.get("qualite", 1.0))
+		var durete := float(mat.stats.durete)
+		if force < durete * float(rr.seuil_irrecoltable):
+			EventBus.emettre(&"journal", [&"journal.rebondit", {"materiau": mat.name_key}])
+			return false
+		var n := regles.niveau(e.competences_eff, str(mat.harvest.skill))
+		ticks = maxi(1, ceili(durete / (force * regles.skill_factor(n)) * float(rr.ticks_par_seconde)))
 	_quitter_garde(e)
 	e.orientation = vers - e.pos
 	grille.contenu[grille.idx(vers)] = 0
+	grille.materiaux.erase(grille.idx(vers))
 	grille.hauteurs[grille.idx(vers)] = grille.h(e.pos)   # la brèche est au niveau de celui qui creuse
 	e.endurance = maxi(0, int(e.endurance) - int(cr.endurance))
-	e.compteur = tick + _ticks_avec_statuts(e, int(cr.ticks))
-	gagner_xp(e, "terrassement", int(cr.xp))
-	EventBus.emettre(&"journal", [&"journal.creuse", {"nom": e.name_key, "x": vers.x, "y": vers.y}])
+	e.compteur = tick + _ticks_avec_statuts(e, ticks)
+	if recolte:
+		var rr2: Dictionary = regles.r.recolte
+		var n2 := regles.niveau(e.competences_eff, str(mat.harvest.skill))
+		var quantite := 1 + n2 / int(rr2.niveaux_par_unite)
+		_donner_materiau(e, mat_id, quantite)
+		gagner_xp(e, str(mat.harvest.skill), int(mat.stats.durete))
+		EventBus.emettre(&"journal", [&"journal.recolte", {"nom": e.name_key, "quantite": quantite, "materiau": mat.name_key}])
+	else:
+		gagner_xp(e, "terrassement", int(cr.xp))
+		if mat.is_empty():
+			EventBus.emettre(&"journal", [&"journal.creuse", {"nom": e.name_key, "x": vers.x, "y": vers.y}])
+		else:
+			EventBus.emettre(&"journal", [&"journal.effrite", {"nom": e.name_key, "materiau": mat.name_key}])
 	EventBus.emettre(&"tile_changed", [vers])
 	return true
+
+
+## Un matériau brut dans le sac : une pile par matériau (`quantite`), l'objet `materiau_brut` en base.
+func _donner_materiau(e: Dictionary, mat_id: String, quantite: int) -> void:
+	for uid in e.sac:
+		var it: Dictionary = items.get(uid, {})
+		if it.get("type", "") == "materiau" and it.get("materiau", "") == mat_id:
+			it.quantite = int(it.quantite) + quantite
+			return
+	var inst := generer_objet("materiau_brut", 1, {}, "commun", 0)
+	if inst.is_empty():
+		return
+	inst.materiau = mat_id
+	inst.quantite = quantite
+	inst.name_key = GameData.entree("materials", mat_id).name_key
+	e.sac.append(inst.uid)
 
 
 ## L'état de l'étage courant, sans le joueur, mis de côté : rien ne repop, tout reste où c'est.

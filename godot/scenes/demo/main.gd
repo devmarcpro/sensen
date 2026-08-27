@@ -606,7 +606,11 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 ## dessinée que si la tuile devant n'est pas elle-même un mur (elle la cacherait entièrement).
 func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: Color = Color.WHITE) -> void:
 	var hm := int(g.contenu_de(t).get("hauteur_vue", 3)) * HSTEP
-	var haut_bloc := Color(0.5, 0.47, 0.44) * teinte
+	var haut_bloc := Color(0.5, 0.47, 0.44)
+	var mat: Dictionary = GameData.catalogues.materials.get(g.materiau_de(t), {})
+	if not mat.is_empty():   # la couleur de la palette du matériau (filon ou mur du thème)
+		haut_bloc = haut_bloc.lerp(Color.html(mat.color), 0.55 if g.materiaux.has(g.idx(t)) else 0.35)
+	haut_bloc *= teinte
 	var sud := t + Vector2i(0, 1)
 	if not g.dans(sud) or not g.bloque_passage(sud):
 		ci.draw_colored_polygon(PackedVector2Array([   # face sud-ouest (gauche)
@@ -711,7 +715,8 @@ func _maj_ui() -> void:
 	if not j.is_empty() and not j.sac.is_empty():
 		var objets: Array[String] = []
 		for k in mini(9, j.sac.size()):
-			objets.append("⇧%d %s" % [k + 1, nom_objet(sim.nom_objet(j.sac[k]))])
+			var it_k: Dictionary = sim.items[j.sac[k]]
+			objets.append("⇧%d %s%s" % [k + 1, nom_objet(sim.nom_objet(j.sac[k])), (" ×%d" % int(it_k.quantite)) if it_k.get("type", "") == "materiau" else ""])
 		bas.append(tr("ui.sac").format({"liste": " · ".join(objets)}))
 	if not ecran_fin.is_empty():
 		bas.append_array(ecran_fin)

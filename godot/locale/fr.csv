@@ -60,7 +60,7 @@ ui.titre,SENSEN — prototype de combat
 ui.horloge,horloge {horloge} · {mode}
 ui.mode.exploration,exploration ({tps} ticks/s)
 ui.mode.combat,COMBAT — le temps n'avance qu'à l'action
-ui.aide,ZQSD : se déplacer (8 directions) · R : ramasser · clic : se déplacer / frapper / creuser un mur adjacent · maj+clic : attaque lourde · G : garde · espace : attendre · tab : arène suivante · F5 : recharger les données
+ui.aide,ZQSD : se déplacer (8 directions) · R : ramasser · clic : se déplacer / frapper / creuser un mur adjacent (la pioche en main récolte) · maj+clic : attaque lourde · G : garde · espace : attendre · tab : arène suivante · F5 : recharger les données
 ui.entite.ligne,{nom} pv {pv}/{pv_max} · end {end} · agit à t={compteur} · h={h}
 ui.case,"case ({x},{y}) h={h} · Δh vs toi : {dh}"
 ui.timeline,prochaines actions :
@@ -362,6 +362,13 @@ ui.expedition.titre,=== EXPÉDITION TERMINÉE — {theme} ===
 ui.expedition.ligne,"  étage max {etage_max} · {tues} ennemis vaincus · {objets} objets ramassés ({sac} au sac) · boss : {boss} · niveau de combat {combat}, général {general} — une nouvelle expédition commence"
 journal.creuse,"{nom} abat le mur en ({x},{y})"
 journal.increusable,ce mur ne se creuse pas (la roche de la cellule)
+journal.recolte,"{nom} récolte {quantite} × {materiau}"
+journal.rebondit,"l'outil rebondit : {materiau} est trop dur pour lui"
+journal.effrite,"{nom} abat le mur ; sans outil, {materiau} s'effrite"
+item.materiau_brut.name,Matériau brut
+item.proto_pioche.name,Pioche de fer
+functionality.pioche.name,Pioche
+tile_content.filon.name,Filon
 journal.victoire,plus aucun hostile. Victoire.
 journal.defaite,tu es tombé. Une touche : te relever au point d'entrée (Mort et pénalité).
 module.a_l_impact.name,À l'impact

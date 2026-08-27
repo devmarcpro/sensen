@@ -115,7 +115,8 @@
       "armures": 4,
       "bijoux": 2,
       "gemmes": 2,
-      "grimoires": 2
+      "grimoires": 2,
+      "outils": 2
     },
     "bases_gemmes": [
       "gemme_rubis",
@@ -133,6 +134,9 @@
       "grimoire",
       "grimoire",
       "manuel"
+    ],
+    "bases_outils": [
+      "proto_pioche"
     ]
   },
   "drops": {
