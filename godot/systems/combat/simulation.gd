@@ -3927,6 +3927,13 @@ func _drop(cible: Dictionary, source: String) -> void:
 			partie["puissance"] = _puissance_de(int(stats_c.get(str(al.parties[pid]), 10)))
 			partie["nom"] = {"params": {"creature": cible.name_key}}
 			uids.append(partie.uid)
+		if GameData.catalogues.materials.has(pid):   # la même partie comme matériau brut (l'os des pointes — Catalogue matériaux — Paramétriques)
+			var brut := generer_objet("materiau_brut", profondeur, {"creature": cible.name_key}, "commun", 0)
+			if not brut.is_empty():
+				brut.materiau = pid
+				brut["forme"] = "brut"
+				brut.quantite = 1
+				uids.append(brut.uid)
 	# Ce que le mort portait tombe aussi (l'équipement est une donnée d'instance).
 	for slot in cible.equipement.keys():
 		var uid: String = str(cible.equipement[slot])
