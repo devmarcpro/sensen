@@ -218,7 +218,6 @@ epithete_rare.affame,Affamé
 tile_content.coffre.name,Coffre
 tile_content.butin.name,Butin
 journal.rien_a_ramasser,rien à ramasser ici
-ui.sac,"sac : {liste} (⇧chiffre : équiper · R : ramasser)"
 item.gemme_rubis.name,Rubis
 item.gemme_saphir.name,Saphir
 item.gemme_emeraude.name,Émeraude
@@ -401,6 +400,50 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+ui.sac,"sac : {liste}"
+ui.hotbar,"{liste}"
+ui.hotbar.lourde,Attaque lourde
+ui.hotbar.garde,Garde
+ui.hotbar.attendre,Attendre
+ui.hotbar.selection,"[{k} {nom}]"
+ui.ecran.menu,MENU (Tab / Échap ferme)
+ui.menu.inventaire,Inventaire
+ui.menu.atelier,Atelier
+ui.menu.feuille,Feuille de personnage
+ui.menu.carte,Carte du monde
+ui.menu.gestion,Territoire
+ui.menu.registre,Registre d'élevage
+ui.menu.sauvegarder,Sauvegarder
+ui.menu.charger,Charger
+ui.menu.minimap_zoom,Minimap : zoom
+ui.menu.minimap_masquer,Minimap : afficher / masquer
+ui.menu.arene,Débogage : arène suivante puis le camp
+ui.menu.recharger,Débogage : recharger les données
+ui.menu.fermer,Fermer
+ui.ecran.contexte,"OPTIONS — ({x},{y}) (Entrée : choisir · Échap : fermer)"
+ui.contexte.aucune,rien à faire ici
+option.deplacer,Se déplacer ici
+option.parler,Parler
+option.attaquer,Attaquer
+option.lourde,Attaque lourde
+option.prendre,Prendre le contenu
+option.dormir,Dormir
+option.descendre,Descendre l'escalier
+option.remonter,Remonter l'escalier
+option.recolter,Récolter la parcelle
+option.fertiliser,Fertiliser la parcelle
+option.conquerir,Conquérir ce village
+option.capturer,Lancer le filet
+option.apprivoiser,Apprivoiser
+option.creuser,Creuser / récolter
+option.demonter,Démonter
+option.caisse,Relever la caisse
+option.recruter,Recruter
+journal.rien_a_interagir,rien avec quoi interagir autour de toi
+ui.ecran.reforger,"Reforger (B) — d'abord l'objet, puis le composant"
+journal.reforge,"{nom} reforge {objet} : {composant} — les affixes tiennent"
+journal.reforge_refuse,reforger : il faut Main du métal, la station de l'objet, et un composant du bon slot
+journal.fiole_vive,"{nom} partage la potion avec {n} allié(s)"
 talent.ratelier_vivant.name,Râtelier vivant
 talent.ratelier_vivant.desc,"Une fois par chaîne, changer d'arme coûte 0 tick."
 talent.communion_des_cinq.name,Communion des cinq
@@ -1115,7 +1158,7 @@ slotc.plaque,plaque
 slotc.sangles,sangles
 slotc.divers,divers
 ui.ecran.fermer,Fermer (Échap)
-ui.ecran.inventaire,"INVENTAIRE — {n} objets dans le sac (E : équiper/retirer · J : jeter · L : lire · T : sertir · au camp : P poser, M mur, O porte, R ranger, H planter · G : manger)"
+ui.ecran.inventaire,"INVENTAIRE — {n} objets dans le sac (E : équiper/retirer · J : jeter · L : lire · T : sertir · B : reforger · au camp : P poser, M mur, O porte, R ranger, H planter · G : manger)"
 ui.ecran.sac,sac
 ui.ecran.slot_vide,(emplacement vide)
 ui.ecran.equiper,Équiper / retirer (E)

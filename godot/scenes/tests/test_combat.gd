@@ -61,6 +61,7 @@ func _ready() -> void:
 	test_habitat_pnj()
 	test_artefacts()
 	test_talents()
+	test_reforge_et_fiole()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -2346,6 +2347,54 @@ func test_talents() -> void:
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "apprendre_talent", "pnj": m.id}) and s.a_talent(j, "souffle_rendu"), "à 80 : Le Vent apprend Souffle rendu")
 	verifier(not m.get("classe", "").is_empty(), "les PNJ portent une classe (%s)" % str(m.classe))
+
+
+# ---------------------------------------------------------------- Main du métal, Fiole vive
+
+func test_reforge_et_fiole() -> void:
+	var s := Simulation.new(115)
+	s.charger_donjon("ruine", 115, 9, 1)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	j.classe = "la_braise"
+	var etabli := s.generer_objet("station_etabli", 1, {}, "commun", 0)
+	j.sac.append(etabli.uid)
+	# Une épée assemblée (fer) avec un affixe, reforgée avec une lame de cuivre.
+	var epee := s.generer_objet("craft_epee", 2, {}, "rare", 1)
+	epee["composants"] = {"tete": {"composant": "lame_longue", "materiau": "fer", "qualite": 1.0}, "manche": {"composant": "poignee", "materiau": "chene", "qualite": 1.0}, "fixations": {"composant": "fixations_std", "materiau": "fer", "qualite": 1.0}}
+	epee.materiau = "fer"
+	j.sac.append(epee.uid)
+	var n_aff: int = epee.affixes.size()
+	var lame := s.generer_objet("composant", 1, {}, "commun", 0)
+	lame.composant = "lame_longue"
+	lame.materiau = "cuivre"
+	lame.stats = GameData.entree("materials", "cuivre").stats.duplicate()
+	lame.elements = {}
+	lame.qualite = 1.4
+	j.sac.append(lame.uid)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "reforger", "objet": epee.uid, "composant": lame.uid}), "reforger l'épée avec une lame de cuivre")
+	verifier(epee.composants.tete.materiau == "cuivre" and epee.materiau == "cuivre" and epee.affixes.size() == n_aff and not (lame.uid in j.sac), "la lame remplacée, le matériau suit, les affixes tiennent (%d), le composant consommé" % epee.affixes.size())
+	j.classe = "le_sabre"
+	var lame2 := s.generer_objet("composant", 1, {}, "commun", 0)
+	lame2.composant = "lame_longue"
+	lame2.materiau = "fer"
+	j.sac.append(lame2.uid)
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "reforger", "objet": epee.uid, "composant": lame2.uid}), "sans Main du métal : refus")
+	# Fiole vive : la potion touche l'allié adjacent ; la recette demande le double.
+	j.classe = "le_creuset"
+	var ami := s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
+	ami.camp = j.camp
+	var pot := s.generer_objet("potion_force", 1, {}, "commun", 0)
+	j.sac.append(pot.uid)
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "manger", "objet": pot.uid})
+	var touche := false
+	for st in ami.statuts:
+		touche = touche or str(st.id).begins_with("potion_force")
+	verifier(touche, "Fiole vive : l'allié adjacent reçoit la potion")
+	var plan := s._plan_recette(j, GameData.catalogues.recipes.distiller_griffe)
+	verifier(int(plan.entrees[0].besoin) == 2, "Fiole vive : la distillation demande le double (%d)" % int(plan.entrees[0].besoin))
 
 
 # ---------------------------------------------------------------- Trésors et artefacts

@@ -1314,6 +1314,64 @@ func a_talent(e: Dictionary, id: String) -> bool:
 	return id in talents_de(e)
 
 
+## Main du métal (La Braise) : remplacer un composant d'un objet assemblé sans perdre ses affixes.
+func _reforger(e: Dictionary, objet: String, composant: String, tick: int) -> bool:
+	var it: Dictionary = items.get(objet, {})
+	var c: Dictionary = items.get(composant, {})
+	var def: Dictionary = GameData.catalogues.items.get(str(it.get("base", "")), {})
+	if not a_talent(e, "main_du_metal") or it.is_empty() or c.is_empty() or not (composant in e.sac) or not (objet in e.sac or objet in e.equipement.values()) or not def.has("slots") or c.get("type", "") != "composant":
+		EventBus.emettre(&"journal", [&"journal.reforge_refuse", {}])
+		return false
+	if not stations_de(e).has(str(def.get("recipe", {}).get("station", ""))):
+		EventBus.emettre(&"journal", [&"journal.reforge_refuse", {}])
+		return false
+	var slot := ""
+	for s0 in def.slots.keys():
+		if str(def.slots[s0]) == str(c.composant):
+			slot = str(s0)
+	if slot.is_empty():
+		EventBus.emettre(&"journal", [&"journal.reforge_refuse", {}])
+		return false
+	if not it.has("composants"):
+		it["composants"] = {}
+	it.composants[slot] = {"composant": c.composant, "materiau": c.materiau, "qualite": c.qualite}
+	# Recalcul depuis les matériaux des composants présents, pondéré ; les affixes ne bougent pas.
+	var poids: Dictionary = regles.r.craft.poids.armure if def.get("type", "") == "armure" else regles.r.craft.poids.arme
+	var stats := {}
+	var elements := {}
+	var q := 0.0
+	var wt := 0.0
+	for s1 in it.composants.keys():
+		var mat: Dictionary = GameData.catalogues.materials.get(str(it.composants[s1].materiau), {})
+		var w := float(poids.get(s1, 0.0))
+		wt += w
+		for st in mat.get("stats", {}).keys():
+			stats[st] = float(stats.get(st, 0.0)) + float(mat.stats[st]) * w
+		var wx = mat.get("wuxing")
+		if wx is Dictionary:
+			for el in wx.keys():
+				elements[el] = float(elements.get(el, 0.0)) + float(wx[el]) * w
+		q += float(it.composants[s1].qualite) * w
+	if wt > 0.0:
+		for st in stats.keys():
+			stats[st] = float(stats[st]) / wt
+		for el in elements.keys():
+			elements[el] = float(elements[el]) / wt
+		it.qualite = snappedf(q / wt, 0.01)
+	it.stats = stats
+	it.durete_base = roundi(float(stats.get("durete", it.get("durete_base", 0))))
+	it.elements = elements
+	it.element = wuxing.dominante(elements)
+	if slot in ["tete", "plaque"]:
+		it.materiau = str(c.materiau)
+	e.sac.erase(composant)
+	items.erase(composant)
+	Etres.recalculer(e, items, affixes_defs, regles)
+	e.compteur = tick + int(regles.r.craft.ticks_base)
+	EventBus.emettre(&"journal", [&"journal.reforge", {"nom": e.name_key, "objet": nom_objet(objet), "composant": GameData.entree("components", str(c.composant)).name_key}])
+	return true
+
+
 ## Apprendre le talent de classe d'un PNJ (Sans maître, Polyvalent) : relation ≥ 75, une place.
 func _apprendre_talent(e: Dictionary, pnj_id: String, tick: int) -> bool:
 	var pnj: Dictionary = entites.get(pnj_id, {})
@@ -3544,8 +3602,9 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 	var plan := {"id": r.id, "recette": r, "station": str(r.station), "faisable": true, "entrees": [], "sortie": {}}
 	var mat_sortie := str(r.output.get("material", ""))
 	var deja: Dictionary = {}   # les piles déjà retenues par une entrée optionnelle
+	var potion_double: bool = a_talent(e, "fiole_vive") and "potion" in GameData.catalogues.items.get(str(r.get("output", {}).get("item", "")), {}).get("tags", [])
 	for entree in r.inputs:
-		var besoin := int(entree.amount)
+		var besoin := int(entree.amount) * (2 if potion_double else 1)   # Fiole vive : le double d'ingrédients
 		var forme := str(entree.get("forme", "brut"))
 		var trouvee := {}
 		var exclus: Array = e.get("exclusions_recette", {}).get(str(r.get("id", "")), [])
@@ -4601,6 +4660,14 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 		EventBus.emettre(&"journal", [&"journal.huile", {"nom": e.name_key}])
 	elif not statut.is_empty():
 		appliquer_statut(e, statut, int(float(it.get("statut_ticks", 0)) * float(it.get("qualite", 1.0))), e.id, float(it.get("puissance", 1.0)))
+		if "potion" in it.get("tags", []) and a_talent(e, "fiole_vive"):   # Fiole vive (Talents de classe) : les alliés adjacents aussi
+			var n_all := 0
+			for x in vivants():
+				if x.id != e.id and x.camp == e.camp and Grille.distance(e.pos, x.pos) <= 1:
+					appliquer_statut(x, statut, int(float(it.get("statut_ticks", 0)) * float(it.get("qualite", 1.0))), e.id, float(it.get("puissance", 1.0)))
+					n_all += 1
+			if n_all > 0:
+				EventBus.emettre(&"journal", [&"journal.fiole_vive", {"nom": e.name_key, "n": n_all}])
 	for risque in it.get("risque", {}).keys():
 		if des.reel() < float(it.risque[risque]):
 			appliquer_statut(e, str(risque), 0, e.id)
@@ -4839,6 +4906,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _entrainer(e, str(i.get("pnj", "")), str(i.get("competence", "")), h.ticks)
 		"apprendre_talent":
 			ok = _apprendre_talent(e, str(i.get("pnj", "")), h.ticks)
+		"reforger":
+			ok = _reforger(e, str(i.get("objet", "")), str(i.get("composant", "")), h.ticks)
 		"livrer":
 			ok = _livrer_commande(e, str(i.get("pnj", "")), h.ticks)
 		"planter":

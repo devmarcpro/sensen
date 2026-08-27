@@ -3,7 +3,7 @@ extends Node
 ## Règles : docs/08 - Technique/Décision — Pipeline de contenu.md · Décisions d'architecture.md
 ##   · un fichier = une entrée, l'id est le nom du fichier ; les fichiers `_*` sont ignorés ;
 ##   · validation `fichier → champ → erreur`, BLOQUANTE en debug, warning en release ;
-##   · F5 recharge tout sans relancer (signal `donnees_rechargees`) ;
+##   · le menu recharge tout sans relancer (signal `donnees_rechargees`) ;
 ##   · les systèmes lisent des tags et des champs, jamais des ids : `entree()` et `par_tag()`.
 ## Les textes passent par `tr()` : les CSV de `locale/` sont chargés ici (Localisation).
 
@@ -40,11 +40,7 @@ func _ready() -> void:
 	charger()
 
 
-func _unhandled_input(ev: InputEvent) -> void:
-	# Rechargement à chaud en debug (Décisions d'architecture : F5 recharge les données).
-	if OS.is_debug_build() and ev is InputEventKey and ev.pressed and ev.keycode == KEY_F5:
-		charger()
-		donnees_rechargees.emit()
+# Le rechargement à chaud passe par le menu (Tab → Débogage : recharger les données) — plus de touche F5 (contrôles tranchés le 2026-08-28).
 
 
 ## Recharge tout. Bloquant en debug si une erreur de schéma est trouvée.

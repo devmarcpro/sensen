@@ -6,6 +6,15 @@ Un **roguelike tactique** en monde infini, généré procéduralement et totalem
 
 **Moteur : Godot 4.x** · GDScript (GDExtension/Rust au profilage uniquement) · PC (Steam), solo et coop 4-8 en host-and-join.
 
+## Contrôles (tranchés le 2026-08-28)
+
+- **ZQSD** / **clic gauche** : se déplacer (cliquer un ennemi l'attaque avec l'action sélectionnée ; un PNJ ouvre le dialogue).
+- **E** : interagir (ce qui est sous la souris si adjacent, sinon la première chose interactive autour : PNJ, coffre, lit, escalier, parcelle, place de village, eau, bête, plante, mur).
+- **R** : ramasser. **Tab** : le menu (inventaire, atelier, feuille, carte, territoire, registre, sauvegarder, charger, minimap, débogage). **Échap** : fermer / annuler.
+- **Clic droit** : toutes les options possibles sur la tuile ou l'être visé.
+- **1 → 0** : la hotbar (armes du râtelier, capacités, attaque lourde, garde, attendre) — la touche sélectionne, la ligne de vue vers la souris s'affiche, le clic lance.
+- Dans les écrans : flèches, Entrée, et les raccourcis lettres affichés dans l'en-tête.
+
 ## Juger le jeu
 
 Les questions qui attendent un œil humain, dans l'ordre d'une session : `docs/00 - Index/À juger — parcours de jeu.md`.

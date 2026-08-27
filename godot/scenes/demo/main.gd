@@ -23,6 +23,8 @@ var chemin_en_cours: Array[Vector2i] = []
 var minuterie_pas := 0.0
 var minuterie_ui := 0.0
 var minuterie_clavier := 0.0        # cadence des pas au clavier (ZQSD maintenu)
+var hotbar_sel := -1                 # l'action sélectionnée dans la hotbar (1 → 0), −1 = aucune
+var lourde_armee := false            # la prochaine attaque au clic est une lourde
 var survol := Vector2i(-1, -1)
 var journal: Array[String] = []
 var telegraphes: Dictionary = {}   # id → action engagée
@@ -239,18 +241,7 @@ func _charger(fiche: Dictionary = {}) -> void:
 	vue_version = -1
 	centre_brouillard = Vector2i(-99, -99)
 	brouillard.queue_redraw()
-	_log(tr("ui.aide"))
-	var j := joueur()
-	if not j.is_empty() and not j.ratelier.is_empty():
-		var noms: Array[String] = []
-		for k in j.ratelier.size():
-			noms.append("%d=%s" % [k + 1, tr(sim.items[j.ratelier[k]].name_key)])
-		_log(tr("ui.aide.armes").format({"liste": " · ".join(noms), "ticks": sim.regles.r.actions.changer_arme}))
-	if not j.is_empty() and not j.get("capacites", []).is_empty():
-		var caps: Array[String] = []
-		for k in j.capacites.size():
-			caps.append("F%d=%s" % [k + 1, tr(j.capacites[k].get("name_key", j.capacites[k].id))])
-		_log(tr("ui.aide.capacites").format({"liste": " · ".join(caps)}))
+	# Les rappels de touches ne s'affichent plus à l'écran (demande du designer, 2026-08-28) : ils vivent dans le README.
 	visee = -1
 	_recentrer()
 
@@ -520,9 +511,6 @@ func _unhandled_input(ev: InputEvent) -> void:
 		return
 	if not ecran_fin.is_empty() and ((ev is InputEventMouseButton and ev.pressed) or (ev is InputEventKey and ev.pressed)):
 		ecran_fin.clear()
-		if ev is InputEventKey and ev.keycode == KEY_TAB:
-			arene_courante = (arene_courante + 1) % (arenes.size() + 1)
-			_charger()
 		return
 	if ev is InputEventMouseMotion:
 		survol = _tuile_sous(get_local_mouse_position())
@@ -534,7 +522,9 @@ func _unhandled_input(ev: InputEvent) -> void:
 			zoom = maxf(0.5, zoom / 1.1)
 			scale = Vector2.ONE * zoom
 		elif ev.button_index == MOUSE_BUTTON_LEFT and not j.is_empty() and j.vivant:
-			_clic(_tuile_sous(get_local_mouse_position()), ev.shift_pressed)
+			_clic(_tuile_sous(get_local_mouse_position()), lourde_armee)
+		elif ev.button_index == MOUSE_BUTTON_RIGHT and not j.is_empty() and j.vivant:
+			_contexte(_tuile_sous(get_local_mouse_position()))
 	elif ev is InputEventKey and ev.pressed and not ev.echo:
 		if ecrans.est_ouvert() and ecrans.touche(ev):
 			return
@@ -547,106 +537,249 @@ func _unhandled_input(ev: InputEvent) -> void:
 			carte.touche(ev)
 			return
 		match ev.keycode:
-			KEY_M:
-				if sim.lieu == "camp":
-					carte.ouvrir("voyage")
-			KEY_V:
-				if sim.attente.has(joueur_id):
-					var bete := ""
-					for d in Grille.DIRS:
-						var occ_v := sim.grille.occupant(j.pos + d)
-						if not occ_v.is_empty() and "bete" in sim.entites[occ_v].get("tags", []) and not sim.entites[occ_v].has("maitre"):
-							bete = occ_v
-							break
-					if bete.is_empty():
-						_log(tr("journal.pas_de_bete"))
-					else:
-						sim.intention(joueur_id, {"type": "apprivoiser", "cible": bete})
-			KEY_G:
-				chemin_en_cours.clear()
-				sim.intention(joueur_id, {"type": "garde"})
-			KEY_SPACE:
-				chemin_en_cours.clear()
-				sim.intention(joueur_id, {"type": "attendre"})
 			KEY_TAB:
-				arene_courante = (arene_courante + 1) % (arenes.size() + 1)
-				_charger()
-			KEY_C:
-				ecrans.basculer("feuille")
-			KEY_F:
-				ecrans.basculer("atelier")
-			KEY_I:
-				ecrans.basculer("inventaire")
-			KEY_K:
-				if sim.lieu == "camp":
-					ecrans.basculer("gestion")
-			KEY_Y:
-				sim.intention(joueur_id, {"type": "capturer"})
-			KEY_B:
-				ecrans.basculer("registre")
-			KEY_N:
-				if ev.shift_pressed:
-					minimap.visible = not minimap.visible
-				else:
-					minimap.cycler_zoom()
-				minimap.rafraichir(true)
-			KEY_F6:
-				if not sim.sauvegarder():
-					_log(tr("journal.sauvegarde_impossible"))
-			KEY_F7:
-				if sim.charger_sauvegarde():
-					joueur_id = ""
-					for e in sim.vivants():
-						if e.controle == "joueur":
-							joueur_id = e.id
-					_apres_changement_de_grille()
-					_log(tr("journal.chargement"))
-				else:
-					_log(tr("journal.pas_de_sauvegarde"))
-			KEY_L:
-				if sim.attente.has(joueur_id) and not j.is_empty():
-					for uid in j.sac:
-						if sim.items[uid].get("type", "") in ["grimoire", "manuel"]:
-							sim.intention(joueur_id, {"type": "lire", "objet": uid})
-							break
-			KEY_T:
-				if sim.attente.has(joueur_id) and not j.is_empty() and j.equipement.has("main_principale"):
-					for uid in j.sac:
-						if sim.items[uid].get("type", "") == "gemme":
-							if not sim.intention(joueur_id, {"type": "sertir", "objet": j.equipement.main_principale, "gemme": uid}):
-								_log(tr("journal.pas_de_sertissure"))
-							break
+				ecrans.basculer("menu")
+			KEY_E:
+				_interagir()
 			KEY_R:
 				if sim.attente.has(joueur_id):
 					if not sim.intention(joueur_id, {"type": "ramasser"}):
 						_log(tr("journal.rien_a_ramasser"))
-			KEY_E:
-				if sim.attente.has(joueur_id):
-					if sim.intention(joueur_id, {"type": "descendre"}) or sim.intention(joueur_id, {"type": "remonter"}):
-						_apres_changement_de_grille()
-					else:
-						_log(tr("journal.pas_escalier"))
-			KEY_F1, KEY_F2, KEY_F3:
-				var k: int = ev.keycode - KEY_F1
-				if not j.is_empty() and k < j.get("capacites", []).size():
-					chemin_en_cours.clear()
-					var plan := sim.plan_capacite(j, k)
-					if plan.geometrie == "soi":
-						sim.intention(joueur_id, {"type": "capacite", "index": k, "cible": j.pos})
-						visee = -1
-					else:
-						visee = k
 			KEY_ESCAPE:
 				visee = -1
-			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
-				var k: int = ev.keycode - KEY_1
-				if ev.shift_pressed:
-					if not j.is_empty() and k < j.sac.size() and sim.attente.has(joueur_id):
-						sim.intention(joueur_id, {"type": "equiper", "objet": j.sac[k]})
-				elif not j.is_empty() and k < j.ratelier.size():
-					chemin_en_cours.clear()
-					sim.intention(joueur_id, {"type": "changer_arme", "item": j.ratelier[k]})
+				hotbar_sel = -1
+				lourde_armee = false
+			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_0:
+				_hotbar(9 if ev.keycode == KEY_0 else ev.keycode - KEY_1)
 
+
+## La hotbar (Écrans d'interface, contrôles) : armes du râtelier, capacités, lourde, garde, attendre — dix cases.
+func hotbar_entrees(j: Dictionary) -> Array:
+	var res: Array = []
+	for k in j.ratelier.size():
+		res.append({"type": "arme", "ref": j.ratelier[k], "nom": tr(sim.items[j.ratelier[k]].name_key)})
+	for k in j.get("capacites", []).size():
+		res.append({"type": "capacite", "ref": k, "nom": tr(j.capacites[k].get("name_key", j.capacites[k].id))})
+	res.append({"type": "lourde", "ref": "", "nom": tr("ui.hotbar.lourde")})
+	res.append({"type": "garde", "ref": "", "nom": tr("ui.hotbar.garde")})
+	res.append({"type": "attendre", "ref": "", "nom": tr("ui.hotbar.attendre")})
+	return res.slice(0, 10)
+
+
+## La touche 1 → 0 sélectionne une action : une arme s'équipe et arme le clic, une capacité se vise, la lourde s'arme.
+func _hotbar(k: int) -> void:
+	var j := joueur()
+	if j.is_empty():
+		return
+	var entrees := hotbar_entrees(j)
+	if k >= entrees.size():
+		return
+	var en: Dictionary = entrees[k]
+	chemin_en_cours.clear()
+	match str(en.type):
+		"arme":
+			if j.equipement.get("main_principale", "") != str(en.ref) and j.equipement.get("main_secondaire", "") != str(en.ref):
+				sim.intention(joueur_id, {"type": "changer_arme", "item": str(en.ref)})
+			hotbar_sel = k
+			visee = -1
+			lourde_armee = false
+		"capacite":
+			var plan := sim.plan_capacite(j, int(en.ref))
+			if plan.geometrie == "soi":
+				sim.intention(joueur_id, {"type": "capacite", "index": int(en.ref), "cible": j.pos})
+				visee = -1
+			else:
+				visee = int(en.ref)
+				hotbar_sel = k
+			lourde_armee = false
+		"lourde":
+			lourde_armee = true
+			hotbar_sel = k
+			visee = -1
+		"garde":
+			sim.intention(joueur_id, {"type": "garde"})
+		"attendre":
+			sim.intention(joueur_id, {"type": "attendre"})
+
+
+## Les options possibles sur une tuile (E et clic droit) : dans l'ordre de priorité de E.
+func _options_tuile(t: Vector2i) -> Array:
+	var res: Array = []
+	var j := joueur()
+	if j.is_empty() or t.x < 0 or not sim.grille.dans(t):
+		return res
+	var g := sim.grille
+	var d := Grille.distance(j.pos, t)
+	var occ := g.occupant(t)
+	if not occ.is_empty() and occ != joueur_id:
+		var x: Dictionary = sim.entites[occ]
+		if ("civil" in x.get("tags", []) or x.has("maitre")) and d <= 2:
+			res.append({"id": "parler", "cible": occ})
+		if "bete" in x.get("tags", []) and not x.has("maitre") and d <= 1:
+			res.append({"id": "apprivoiser", "cible": occ})
+		res.append({"id": "attaquer", "cible": occ})
+		res.append({"id": "lourde", "cible": occ})
+		return res
+	if t == j.pos:
+		if not sim.donjon.is_empty() and sim.donjon.get("escalier") != null and sim.donjon.escalier == t:
+			res.append({"id": "descendre", "vers": t})
+		if not sim.donjon.is_empty() and sim.donjon.has("entree") and sim.donjon.entree == t:
+			res.append({"id": "remonter", "vers": t})
+		if sim.lieu == "camp" and sim.monde != null and sim.monde.cellule(sim._cell_de(t)).get("a_donjon", false) and sim.monde.pos_monde(sim._cell_de(t), sim.monde.cellule(sim._cell_de(t)).entree_donjon) == t:
+			res.append({"id": "descendre", "vers": t})
+		return res
+	if d != 1:
+		return res
+	var tags: Array = g.contenu_de(t).get("tags", [])
+	var idx := g.idx(t)
+	if "meuble" in tags and g.meubles.has(idx):
+		var m: Dictionary = GameData.entree("meubles", str(g.meubles[idx]))
+		if bool(m.dormir):
+			res.append({"id": "dormir", "vers": t})
+		if str(m.type_meuble) == "etal" and int(sim.territoire.caisse) > 0:
+			res.append({"id": "caisse", "vers": t})
+		if int(m.capacite_slots) > 0 and sim.contenants.get(idx, []).size() > 0:
+			res.append({"id": "prendre", "vers": t})
+	if "contenant" in tags and sim.contenants.get(idx, []).size() > 0:
+		res.append({"id": "prendre", "vers": t})
+	if "parcelle" in tags:
+		res.append({"id": "recolter" if "mure" in tags else "fertiliser", "vers": t})
+	if sim.lieu == "camp" and sim.monde != null:
+		var vil: Dictionary = sim.village_a(t)
+		if not vil.is_empty() and sim.monde.pos_monde(sim._cell_de(t), vil.centre) == t and not sim.monde.claims.has(sim._cell_de(t)):
+			res.append({"id": "conquerir", "vers": t})
+		if "eau" in tags:
+			res.append({"id": "capturer", "vers": t})
+	if "plante" in tags or "arbre" in tags:
+		res.append({"id": "creuser", "vers": t})
+	if "construit" in tags:
+		res.append({"id": "demonter", "vers": t})
+	if g.bloque_passage(t) and not ("meuble" in tags) and not ("plante" in tags) and not ("arbre" in tags) and not ("eau" in tags):
+		res.append({"id": "creuser", "vers": t})
+	return res
+
+
+## Exécute une option (E, clic droit).
+func _executer_option(opt: Dictionary) -> void:
+	var j := joueur()
+	if j.is_empty():
+		return
+	chemin_en_cours.clear()
+	match str(opt.id):
+		"parler":
+			ecrans.ouvrir_dialogue(str(opt.cible))
+			return
+		"deplacer":
+			_clic(opt.vers, false)
+			return
+	if not sim.attente.has(joueur_id):
+		return
+	match str(opt.id):
+		"attaquer", "lourde":
+			if not sim.intention(joueur_id, {"type": "attaquer", "cible": str(opt.cible), "lourde": str(opt.id) == "lourde"}):
+				_log(tr("journal.inaccessible"))
+		"apprivoiser":
+			sim.intention(joueur_id, {"type": "apprivoiser", "cible": str(opt.cible)})
+		"descendre", "remonter":
+			if sim.intention(joueur_id, {"type": str(opt.id)}):
+				_apres_changement_de_grille()
+			else:
+				_log(tr("journal.pas_escalier"))
+		"dormir":
+			sim.intention(joueur_id, {"type": "dormir", "vers": opt.vers})
+		"prendre", "caisse", "recolter":
+			sim.intention(joueur_id, {"type": "prendre", "vers": opt.vers})
+		"fertiliser":
+			if not sim.intention(joueur_id, {"type": "fertiliser", "vers": opt.vers}):
+				_log(tr("journal.culture_pas_mure"))
+		"conquerir":
+			sim.intention(joueur_id, {"type": "conquerir", "vers": opt.vers})
+		"capturer":
+			sim.intention(joueur_id, {"type": "capturer"})
+		"creuser":
+			if not sim.intention(joueur_id, {"type": "creuser", "vers": opt.vers}):
+				_log(tr("journal.increusable"))
+		"demonter":
+			sim.intention(joueur_id, {"type": "demonter", "vers": opt.vers})
+
+
+## E : la première option de la tuile sous la souris si elle est adjacente, sinon la première autour du joueur.
+func _interagir() -> void:
+	var j := joueur()
+	if j.is_empty():
+		return
+	var candidates: Array = []
+	if survol.x >= 0 and Grille.distance(j.pos, survol) <= 2:
+		candidates = _options_tuile(survol)
+	if candidates.is_empty():
+		candidates = _options_tuile(j.pos)
+	if candidates.is_empty():
+		for d in Grille.DIRS:
+			candidates = _options_tuile(j.pos + d)
+			if not candidates.is_empty():
+				break
+	if candidates.is_empty():
+		_log(tr("journal.rien_a_interagir"))
+		return
+	_executer_option(candidates[0])
+
+
+## Clic droit : toutes les options de la tuile, dans une liste.
+func _contexte(t: Vector2i) -> void:
+	var j := joueur()
+	if j.is_empty() or t.x < 0:
+		return
+	var options: Array = _options_tuile(t)
+	if Grille.distance(j.pos, t) >= 1 and sim.grille.occupant(t).is_empty():
+		options.append({"id": "deplacer", "vers": t})
+	ecrans.ouvrir_contexte(t, options)
+
+
+## Le menu (Tab) : écrans et actions générales.
+func _action_menu(id: String) -> void:
+	var j := joueur()
+	match id:
+		"inventaire", "atelier", "feuille", "registre":
+			ecrans.ouvrir(id)
+		"gestion":
+			if sim.lieu == "camp":
+				ecrans.ouvrir("gestion")
+		"carte":
+			ecrans.fermer()
+			if sim.lieu == "camp":
+				carte.ouvrir("voyage")
+		"sauvegarder":
+			ecrans.fermer()
+			if not sim.sauvegarder():
+				_log(tr("journal.sauvegarde_impossible"))
+		"charger":
+			ecrans.fermer()
+			if sim.charger_sauvegarde():
+				joueur_id = ""
+				for e in sim.vivants():
+					if e.controle == "joueur":
+						joueur_id = e.id
+				_apres_changement_de_grille()
+				_log(tr("journal.chargement"))
+			else:
+				_log(tr("journal.pas_de_sauvegarde"))
+		"minimap_zoom":
+			minimap.cycler_zoom()
+			minimap.rafraichir(true)
+		"minimap_masquer":
+			minimap.visible = not minimap.visible
+			minimap.rafraichir(true)
+		"arene":
+			ecrans.fermer()
+			arene_courante = (arene_courante + 1) % (arenes.size() + 1)
+			_charger()
+		"recharger":
+			ecrans.fermer()
+			GameData.charger()
+			GameData.donnees_rechargees.emit()
+			_charger()
+		"fermer":
+			ecrans.fermer()
 
 func _clic(t: Vector2i, lourde: bool) -> void:
 	if t.x < 0:
@@ -658,66 +791,33 @@ func _clic(t: Vector2i, lourde: bool) -> void:
 				_log(tr("journal.inaccessible"))
 			else:
 				visee = -1
+				hotbar_sel = -1
 		return
 	var occ := sim.grille.occupant(t)
-	if not occ.is_empty() and occ != joueur_id and not lourde and ("civil" in sim.entites[occ].get("tags", []) or sim.entites[occ].has("maitre")) and Grille.distance(j.pos, t) <= 2:
-		ecrans.ouvrir_dialogue(occ)   # un civil : on lui parle (Maj + clic pour frapper)
-		return
-	if not occ.is_empty() and occ != joueur_id:
+	if not occ.is_empty() and occ != joueur_id:   # un être : l'attaque avec l'action sélectionnée (les PNJ : clic droit ou E)
 		chemin_en_cours.clear()
 		if not sim.attente.has(joueur_id):
 			return
+		var x: Dictionary = sim.entites[occ]
+		if not lourde and ("civil" in x.get("tags", []) or x.has("maitre")):
+			ecrans.ouvrir_dialogue(occ)
+			return
 		if not sim.intention(joueur_id, {"type": "attaquer", "cible": occ, "lourde": lourde}):
-			var tir := sim.verifier_tir(j, sim.entites[occ])
+			var tir := sim.verifier_tir(j, x)
 			if not tir.ok:
 				_log(tr("journal.tir_refuse").format({"raison": tr("raison." + tir.raison)}))
 			else:
 				_log(tr("journal.inaccessible"))
+		lourde_armee = false
 		return
 	if Grille.distance(j.pos, t) == 1:
-		var tags: Array = sim.grille.contenu_de(t).get("tags", [])
-		if sim.attente.has(joueur_id):
-			if "meuble" in tags and sim.grille.meubles.has(sim.grille.idx(t)):
-				var m: Dictionary = GameData.entree("meubles", str(sim.grille.meubles[sim.grille.idx(t)]))
-				if bool(m.dormir):   # un lit : dormir
-					sim.intention(joueur_id, {"type": "dormir", "vers": t})
-					return
-				if int(m.capacite_slots) > 0 and sim.contenants.get(sim.grille.idx(t), []).size() > 0:   # un coffre : tout prendre
-					sim.intention(joueur_id, {"type": "prendre", "vers": t})
-					return
-			var vil: Dictionary = sim.village_a(t)
-			if not vil.is_empty() and sim.monde.pos_monde(sim._cell_de(t), vil.centre) == t and not sim.monde.claims.has(sim._cell_de(t)):   # la place d'un village : conquérir
-				sim.intention(joueur_id, {"type": "conquerir", "vers": t})
-				return
-			if "parcelle" in tags:   # une parcelle : récolter si mûre, sinon fertiliser (engrais dans le sac)
-				if "mure" in tags:
-					sim.intention(joueur_id, {"type": "prendre", "vers": t})
-				elif not sim.intention(joueur_id, {"type": "fertiliser", "vers": t}):
-					_log(tr("journal.culture_pas_mure"))
-				return
-			if "meuble" in tags and sim.grille.meubles.has(sim.grille.idx(t)) and int(sim.territoire.caisse) > 0 and str(GameData.entree("meubles", str(sim.grille.meubles[sim.grille.idx(t)])).type_meuble) == "etal":
-				sim.intention(joueur_id, {"type": "prendre", "vers": t})
-				return
-			if "plante" in tags:   # une plante : récolte à la faucille (ou l'arracher)
-				if not sim.intention(joueur_id, {"type": "creuser", "vers": t}):
-					_log(tr("journal.increusable"))
-				return
-			if "construit" in tags:   # ce qui a été posé se démonte au clic
-				sim.intention(joueur_id, {"type": "demonter", "vers": t})
-				return
-			if "contenant" in tags and sim.contenants.get(sim.grille.idx(t), []).size() > 0:
-				sim.intention(joueur_id, {"type": "prendre", "vers": t})
-				return
 		if sim.grille.bloque_passage(t):
-			if sim.attente.has(joueur_id) and not sim.intention(joueur_id, {"type": "creuser", "vers": t}):
-				_log(tr("journal.increusable"))
 			return
 		chemin_en_cours = [t]   # un pas direct : autorise la chute volontaire
 		return
 	chemin_en_cours = sim.grille.chemin(j.pos, t, Etres.est_volant(j))
 	if chemin_en_cours.is_empty() and t != j.pos:
 		_log(tr("journal.inaccessible"))
-
 
 func _tuile_sous(p: Vector2) -> Vector2i:
 	var meilleur := Vector2i(-1, -1)
@@ -766,6 +866,9 @@ func _draw() -> void:
 		var tir := sim.verifier_tir(j, sim.entites[g.occupant(survol)])
 		if tir.has("bloqueur"):
 			_losange(tir.bloqueur, Color(1, 0.2, 0.2, 0.45))
+	if (hotbar_sel >= 0 or lourde_armee) and survol.x >= 0 and not j.is_empty() and survol != j.pos:   # la ligne de vue (hotbar)
+		var vue_ok := g.ligne_de_vue(j.pos, survol)
+		draw_line(_ecran(j.pos, g.h(j.pos)), _ecran(survol, g.h(survol)), Color(0.3, 1.0, 0.4, 0.8) if vue_ok else Color(1.0, 0.25, 0.2, 0.8), 2.0)
 	if visee >= 0 and survol.x >= 0 and not j.is_empty():
 		var plan := sim.plan_capacite(j, visee)
 		var ok := sim.capacite_visable(j, plan, survol)
@@ -784,8 +887,11 @@ func _draw() -> void:
 
 
 func _losange(t: Vector2i, col: Color) -> void:
+	# draw_primitive (deux triangles, sans triangulation) : les coordonnées monde sont grandes (~1e6 px) et la
+	# triangulation en float32 de draw_colored_polygon jugeait le losange dégénéré (« Invalid polygon data »).
 	var c := _ecran(t, sim.grille.h(t))
-	draw_colored_polygon(PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)]), col)
+	var pts := PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)])
+	draw_primitive(pts, PackedColorArray([col, col, col, col]), PackedVector2Array())
 
 
 ## La passe statique : toutes les tuiles, une seule fois (appelée par la couche Terrain).
@@ -1056,8 +1162,12 @@ func _maj_ui() -> void:
 			+ " · " + tr("ui.or").format({"n": int(j.get("or", 0))}) + " · " + tr("ui.faim").format({"faim": int(j.get("faim", 100))}) + " · " + tr("ui.poids").format({"poids": "%.0f" % pd.poids, "capacite": "%.0f" % pd.capacite, "surcharge": tr("ui.poids.surcharge").format({"facteur": "%.1f" % pd.facteur}) if pd.facteur > 1.0 else ""}))
 		var nd := sim.progression.niveaux_derives(j)
 		lignes.append("  " + tr("ui.niveaux").format({"combat": "%.1f" % nd.combat, "general": "%.1f" % nd.general}))
-		for k in j.get("capacites", []).size():
-			lignes.append("  " + _texte_capacite(j, k))
+		var hb: Array[String] = []
+		var ent := hotbar_entrees(j)
+		for k in ent.size():
+			var ch: String = str((k + 1) % 10)
+			hb.append(tr("ui.hotbar.selection").format({"k": ch, "nom": ent[k].nom}) if k == hotbar_sel else "%s %s" % [ch, ent[k].nom])
+		lignes.append("  " + tr("ui.hotbar").format({"liste": " · ".join(hb)}))
 		if visee >= 0:
 			var plan := sim.plan_capacite(j, visee)
 			lignes.append("  " + tr("ui.capacite.visee").format({"nom": tr(plan.name_key)}))
@@ -1072,7 +1182,7 @@ func _maj_ui() -> void:
 			var nom_k := nom_objet(sim.nom_objet(j.sac[k]))
 			if it_k.get("type", "") == "materiau":
 				nom_k = tr("forme." + str(it_k.get("forme", "brut"))).format({"materiau": nom_k}) + " ×%d" % int(it_k.quantite)
-			objets.append("⇧%d %s" % [k + 1, nom_k])
+			objets.append(nom_k)
 		bas.append(tr("ui.sac").format({"liste": " · ".join(objets)}))
 	if not ecran_fin.is_empty():
 		bas.append_array(ecran_fin)

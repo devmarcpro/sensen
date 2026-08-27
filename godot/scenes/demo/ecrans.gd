@@ -64,6 +64,19 @@ func _ready() -> void:
 	v.add_child(boutons)
 
 
+var reforge_objet := ""   # Main du métal : l'objet choisi, en attente de son composant
+
+
+var contexte_tuile := Vector2i(-1, -1)   # clic droit : la tuile et ses options
+var contexte_options: Array = []
+
+
+func ouvrir_contexte(t: Vector2i, options: Array) -> void:
+	contexte_tuile = t
+	contexte_options = options
+	ouvrir("contexte")
+
+
 func est_ouvert() -> bool:
 	return not courant.is_empty()
 
@@ -98,6 +111,9 @@ func _process(delta: float) -> void:
 
 ## Touches quand un écran est ouvert ; true si consommée.
 func touche(ev: InputEventKey) -> bool:
+	if ev.keycode == KEY_TAB:
+		fermer()
+		return true
 	match ev.keycode:
 		KEY_ESCAPE:
 			fermer()
@@ -225,6 +241,18 @@ func touche(ev: InputEventKey) -> bool:
 				main.sim.regler_marge(-float(main.sim.regles.r.royaume.boutique.marge_pas))
 				rafraichir()
 				return true
+		KEY_B:
+			if courant == "inventaire":
+				var en: Dictionary = entrees[liste.get_selected_items()[0]] if not liste.get_selected_items().is_empty() and liste.get_selected_items()[0] < entrees.size() else {}
+				if en.get("kind", "") == "objet":
+					if reforge_objet.is_empty() or reforge_objet == str(en.uid):
+						reforge_objet = str(en.uid)
+						main._log(tr("ui.ecran.reforger"))
+					else:
+						main.sim.intention(main.joueur().id, {"type": "reforger", "objet": reforge_objet, "composant": str(en.uid)})
+						reforge_objet = ""
+						rafraichir()
+				return true
 		KEY_H:
 			if courant == "inventaire":
 				var en: Dictionary = entrees[liste.get_selected_items()[0]] if not liste.get_selected_items().is_empty() and liste.get_selected_items()[0] < entrees.size() else {}
@@ -264,6 +292,10 @@ func rafraichir() -> void:
 			_construire_quetes(j)
 		"gestion":
 			_construire_gestion(j)
+		"menu":
+			_construire_menu(j)
+		"contexte":
+			_construire_contexte(j)
 		"registre":
 			_construire_registre(j)
 		"assigner":
@@ -304,7 +336,7 @@ func _montrer_detail() -> void:
 			detail.text = texte_recette(en.plan)
 		"texte":
 			detail.text = str(en.texte)
-		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer":
+		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer", "menu", "contexte":
 			detail.text = str(en.get("texte", ""))
 		"achat", "vente":
 			var p: Dictionary = en.prix
@@ -357,6 +389,13 @@ func _action_principale() -> void:
 			return
 		"competence_entrainer":
 			main.sim.intention(j.id, {"type": "entrainer", "pnj": pnj_id, "competence": str(en.competence)})
+		"menu":
+			main._action_menu(str(en.id))
+			return
+		"contexte":
+			fermer()
+			main._executer_option(en.opt)
+			return
 	rafraichir()
 
 
@@ -723,6 +762,29 @@ func _construire_entrainer(j: Dictionary) -> void:
 
 func _texte_quete(q: Dictionary) -> String:
 	return tr(q.text_key).format({"count": int(q.count), "objet": tr(GameData.entree("items", str(q.objet)).name_key) if q.has("objet") else "", "destination": str(q.get("destination", ""))})
+
+
+## Le menu (Tab) : les écrans et les actions générales (Écrans d'interface, contrôles).
+func _construire_menu(_j: Dictionary) -> void:
+	titre.text = tr("ui.ecran.menu")
+	var ids: Array = ["inventaire", "atelier", "feuille", "carte", "gestion", "registre", "sauvegarder", "charger", "minimap_zoom", "minimap_masquer", "arene", "recharger", "fermer"]
+	for id in ids:
+		if id in ["carte", "gestion"] and main.sim.lieu != "camp":
+			continue
+		liste.add_item(tr("ui.menu." + str(id)))
+		entrees.append({"kind": "menu", "id": str(id), "texte": ""})
+
+
+## Le clic droit : toutes les options de la tuile visée.
+func _construire_contexte(_j: Dictionary) -> void:
+	titre.text = tr("ui.ecran.contexte").format({"x": contexte_tuile.x, "y": contexte_tuile.y})
+	if contexte_options.is_empty():
+		liste.add_item(tr("ui.contexte.aucune"), null, false)
+		entrees.append({"kind": "texte", "texte": ""})
+		return
+	for opt in contexte_options:
+		liste.add_item(tr("option." + str(opt.id)))
+		entrees.append({"kind": "contexte", "opt": opt, "texte": ""})
 
 
 func _construire_assigner(j: Dictionary) -> void:
