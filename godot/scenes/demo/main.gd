@@ -106,6 +106,9 @@ func _ready() -> void:
 	EventBus.expedition_terminee.connect(_sur_fin_d_expedition)
 	EventBus.tile_changed.connect(func(p: Vector2i) -> void:
 		terrain.queue_redraw()
+		if sim != null:
+			sim.lumiere_sale = true
+		lumieres.queue_redraw()
 		var i := sim.grille.idx(p) if sim != null else -1
 		if noeuds_vegetaux.has(i):
 			noeuds_vegetaux[i].queue_free()
@@ -330,11 +333,24 @@ func _maj_ambiance() -> void:
 
 ## Les halos des sources locales (meubles lumineux, torche en main), visibles quand l'ambiance baisse.
 func _dessiner_lumieres() -> void:
-	if sim == null or sim.lieu != "camp" or ambiance.color.r > 0.9:
+	if sim == null:
 		return
 	var g := sim.grille
 	var j := joueur()
 	if j.is_empty():
+		return
+	if sim.lieu == "donjon":   # l'ambiante n'entre pas : un voile par tuile, creusé par la carte de lumière (Éclairage)
+		for gi in j.get("vue", {}).keys():
+			var t := g.pos_de(int(gi))
+			if Grille.distance(t, j.pos) > RAYON_VUE:
+				continue
+			var a := 0.8 * (1.0 - float(sim.niveau_lumiere(t)) / 15.0)
+			if a > 0.02:
+				var c := _ecran(t, g.h(t))
+				var col := Color(0.02, 0.02, 0.05, a)
+				lumieres.draw_primitive(PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)]), PackedColorArray([col, col, col, col]), PackedVector2Array())
+		return
+	if sim.lieu != "camp" or ambiance.color.r > 0.9:
 		return
 	var force := 1.0 - ambiance.color.r
 	for gi in g.meubles.keys():

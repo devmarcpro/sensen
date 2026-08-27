@@ -6906,20 +6906,67 @@ func lumiere_de(e: Dictionary) -> int:
 	return lum
 
 
-## La lumière locale d'une tuile (Éclairage) : meubles lumineux à portée, et ce que porte l'occupant.
-func lumiere_a(pos: Vector2i) -> int:
-	var lum := 0
-	var r := int(regles.r.engagement.get("lumiere_rayon", 3))
-	for dy in range(-r, r + 1):
-		for dx in range(-r, r + 1):
-			var t := pos + Vector2i(dx, dy)
-			if not grille.dans(t):
+## La carte de lumière 0-15 (Éclairage) : flood fill 2D depuis les sources, −1 par tuile ; les contenus
+## qui bloquent la vue reçoivent la lumière sans la propager (sauf transparence ≥ 50). Recalcul paresseux.
+var carte_lumiere := PackedByteArray()
+var lumiere_tick := -1
+var lumiere_sale := true
+
+
+func _recalculer_lumiere() -> void:
+	var n := grille.largeur * grille.hauteur_grille
+	carte_lumiere.resize(n)
+	carte_lumiere.fill(0)
+	var file: Array[int] = []
+	for gi in grille.meubles.keys():
+		var l := int(GameData.entree("meubles", str(grille.meubles[gi])).get("luminosite", 0))
+		if l > 0:
+			var niv := clampi(roundi(float(l) / 100.0 * 15.0), 1, 15)
+			if niv > carte_lumiere[int(gi)]:
+				carte_lumiere[int(gi)] = niv
+				file.append(int(gi))
+	for e in vivants():
+		var l := lumiere_de(e)
+		if l > 0:
+			var gi := grille.idx(e.pos)
+			var niv := clampi(roundi(float(l) / 100.0 * 15.0), 1, 15)
+			if niv > carte_lumiere[gi]:
+				carte_lumiere[gi] = niv
+				file.append(gi)
+	# Propagation : file simple (les sources sont peu nombreuses, la décroissance borne le front à 15 tuiles).
+	var tete := 0
+	while tete < file.size():
+		var gi := file[tete]
+		tete += 1
+		var niv := int(carte_lumiere[gi])
+		if niv <= 1:
+			continue
+		var p := grille.pos_de(gi)
+		var c := grille.contenu_de(p)
+		if c.get("bloque_vue", false) and int(c.get("transparence", 0)) < 50 and not grille.meubles.has(gi):
+			continue   # un mur est éclairé mais ne laisse rien passer
+		for d in Grille.DIRS:
+			var q: Vector2i = p + d
+			if not grille.dans(q):
 				continue
-			var idx := grille.idx(t)
-			if grille.meubles.has(idx):
-				var l := int(GameData.entree("meubles", str(grille.meubles[idx])).get("luminosite", 0))
-				if l > 0:
-					lum = maxi(lum, roundi(float(l) * (1.0 - float(Grille.distance(pos, t)) / float(r + 1))))
+			var qi := grille.idx(q)
+			if niv - 1 > int(carte_lumiere[qi]):
+				carte_lumiere[qi] = niv - 1
+				file.append(qi)
+	lumiere_sale = false
+	lumiere_tick = horloge_monde.ticks
+
+
+## Le niveau 0-15 d'une tuile (recalcul au plus une fois par tick de monde, et seulement quand on lit).
+func niveau_lumiere(pos: Vector2i) -> int:
+	if lumiere_sale or lumiere_tick != horloge_monde.ticks or carte_lumiere.size() != grille.largeur * grille.hauteur_grille:
+		_recalculer_lumiere()
+	return int(carte_lumiere[grille.idx(pos)]) if grille.dans(pos) else 0
+
+
+## La lumière locale d'une tuile, 0-100 (Éclairage) : la carte propagée, et ce que porte l'occupant.
+func lumiere_a(pos: Vector2i) -> int:
+	var lum := roundi(float(niveau_lumiere(pos)) * 100.0 / 15.0)
 	var occ := grille.occupant(pos)
 	if not occ.is_empty() and entites.has(occ):
 		lum = maxi(lum, lumiere_de(entites[occ]))

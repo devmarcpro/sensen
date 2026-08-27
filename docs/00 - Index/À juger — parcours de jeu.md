@@ -18,6 +18,7 @@ etape: 10
 - **Le camp a-t-il l'air d'un lieu ?** Les accidents de relief sont-ils assez nombreux, la couleur de sol par biome suffit-elle ? Le camp vide au départ est-il lisible (récolter à la hache, scier, poser) ? — [[Génération par couches de bruit]], [[Claims et persistance]]
 - **Végétaux en billboards** : silhouettes assez lisibles et variées, taille des arbres vs personnages, occultation d'un être derrière un arbre (les sprites définitifs sont pour plus tard, décision du designer) — [[Direction artistique]]
 - **Faim et poids** : vitesse de la faim (2 h 30 de jeu actif), −10 % de stats sous 25, capacité de charge — [[Faim]], [[Armures et poids porté]]
+- **Donjon dans le noir** : sans torche, le donjon n'est qu'un voile ; une torche en main creuse un trou de lumière — oppressant ou illisible ? — [[Éclairage]]
 - **Lumière** : une torche en main rend la vue la nuit mais te fait repérer de plus loin ; les torchères éclairent le camp — l'enjeu se sent-il ? — [[Éclairage]]
 - **Nuit et météo** : obscurité de la nuit (trop ? pas assez ?), fréquence des pluies et orages, sévérité du froid/chaud sans vêtements — [[Cycle jour-nuit et sommeil]], [[Météo]]
 

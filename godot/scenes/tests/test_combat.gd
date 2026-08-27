@@ -71,6 +71,7 @@ func _ready() -> void:
 	test_passeur_et_sablier()
 	test_masque_et_sceau()
 	test_fossoyeur_et_engrenage()
+	test_propagation_lumiere()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2452,6 +2453,34 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Éclairage : la propagation 0-15
+
+func test_propagation_lumiere() -> void:
+	var s := Simulation.new(133)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	for d in range(-2, 7):
+		s.grille.contenu[s.grille.idx(j.pos + Vector2i(d, 2))] = 0
+		s.grille.contenu[s.grille.idx(j.pos + Vector2i(d, 3))] = 0
+	var src: Vector2i = j.pos + Vector2i(0, 2)
+	s.grille.poser_contenu(src, "meuble")
+	s.grille.meubles[s.grille.idx(src)] = "torchere"
+	s.lumiere_sale = true
+	var n0 := s.niveau_lumiere(src)
+	verifier(n0 >= 9 and s.niveau_lumiere(src + Vector2i(1, 0)) == n0 - 1 and s.niveau_lumiere(src + Vector2i(3, 0)) == n0 - 3, "torchère : niveau %d, −1 par tuile" % n0)
+	verifier(s.lumiere_a(src + Vector2i(1, 0)) == roundi(float(n0 - 1) * 100.0 / 15.0), "lumiere_a = niveau × 100 / 15")
+	# Un mur : éclairé, mais rien ne passe derrière (la lumière contourne par les côtés, plus faible)
+	var mur: Vector2i = src + Vector2i(2, 0)
+	s.grille.poser_contenu(mur, "mur")
+	for dy in [-1, 1]:
+		s.grille.poser_contenu(src + Vector2i(2, dy), "mur")
+		s.grille.poser_contenu(src + Vector2i(2, 2 * dy), "mur")
+	s.lumiere_sale = true
+	var derriere := s.niveau_lumiere(src + Vector2i(3, 0))
+	verifier(s.niveau_lumiere(mur) == n0 - 2 and derriere < n0 - 3, "le mur est éclairé (%d) mais derrière il reste %d (< %d)" % [s.niveau_lumiere(mur), derriere, n0 - 3])
+	s.monde.fermer()
 
 
 # ---------------------------------------------------------------- Le Fossoyeur et L'Engrenage
