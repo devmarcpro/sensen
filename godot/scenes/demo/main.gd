@@ -13,6 +13,7 @@ const BUDGET_ATTEIGNABLE := 12   # ticks : rayon des coûts affichés
 const RAYON_VUE := 20            # tuiles dessinées autour du joueur (une cellule fait 128×128)
 var centre_terrain := Vector2i(-99, -99)   # centre de la dernière passe statique du terrain
 var vue_version := -1                      # version du champ de vue dessiné (brouillard de guerre)
+var centre_brouillard := Vector2i(-99, -99) # centre de la dernière passe du brouillard
 
 var sim: Simulation
 var arenes: Array[String] = []
@@ -38,6 +39,7 @@ var zoom := 1.0
 
 var terrain: Terrain              # couche statique : les tuiles, dessinées une fois (perf É0)
 var hud: Hud                      # couche au-dessus des êtres : barres, garde, télégraphes, jauges
+var brouillard: Brouillard        # couche du brouillard de guerre, au-dessus du terrain et des êtres
 var noeuds: Dictionary = {}       # id d'être → nœud creature.tscn (le paperdoll)
 const SCENE_CREATURE := preload("res://scenes/entities/creature.tscn")
 
@@ -53,6 +55,14 @@ class Terrain extends Node2D:
 		proprio._dessiner_terrain(self)
 
 
+## Le brouillard de guerre : une couche à part, redessinée seule quand le champ de vue change
+## (le terrain, lui, reste statique) — opaque sur le jamais-vu, translucide sur le mémorisé.
+class Brouillard extends Node2D:
+	var proprio: Node2D
+	func _draw() -> void:
+		proprio._dessiner_brouillard(self)
+
+
 ## La couche d'interface au-dessus des êtres (z fixe, toujours visible).
 class Hud extends Node2D:
 	var proprio: Node2D
@@ -65,6 +75,11 @@ func _ready() -> void:
 	terrain.proprio = self
 	terrain.z_index = -1
 	add_child(terrain)
+	brouillard = Brouillard.new()
+	brouillard.proprio = self
+	brouillard.z_as_relative = false
+	brouillard.z_index = 150
+	add_child(brouillard)
 	hud = Hud.new()
 	hud.proprio = self
 	hud.z_as_relative = false
@@ -183,8 +198,10 @@ func _recentrer() -> void:
 	if j.is_empty():
 		return
 	var taille := get_viewport_rect().size
-	# Le joueur est centré à l'écran, la vue le suit (Écrans d'interface, décision du 2026-08-27).
-	position = taille * 0.5 - _ecran(j.pos, sim.grille.h(j.pos)) * zoom
+	# Le joueur est centré à l'écran, la vue le suit (Écrans d'interface, décision du 2026-08-27) ;
+	# elle suit le paperdoll qui glisse, pas la tuile, pour ne pas sauter.
+	var p: Vector2 = noeuds[joueur_id].position if noeuds.has(joueur_id) else _ecran(j.pos, sim.grille.h(j.pos))
+	position = taille * 0.5 - p * zoom
 
 
 func joueur() -> Dictionary:
@@ -235,7 +252,7 @@ func _process(delta: float) -> void:
 		dir = Vector2i(signi(dir.x), signi(dir.y))
 		if dir != Vector2i.ZERO:
 			chemin_en_cours.clear()
-			minuterie_clavier = 0.15
+			minuterie_clavier = 0.05
 			if not sim.intention(joueur_id, {"type": "deplacer", "vers": j.pos + dir}):
 				_log(tr("journal.inaccessible"))
 	# En attente d'intention : on consomme la file d'ordres du joueur (un pas par décision).
@@ -252,9 +269,11 @@ func _process(delta: float) -> void:
 		minuterie_pas = DELAI_PAS
 		for nom in sim.combats.keys():
 			sim.pas(nom)
-	_maj_noeuds()
-	if Grille.distance(j.pos, centre_terrain) > RAYON_VUE / 3 or int(j.get("vue_version", 0)) != vue_version:
-		terrain.queue_redraw()   # le joueur s'éloigne du centre de la passe statique, ou son champ de vue a changé
+	_maj_noeuds(delta)
+	if Grille.distance(j.pos, centre_terrain) > RAYON_VUE / 3:
+		terrain.queue_redraw()   # le joueur s'éloigne du centre de la passe statique
+	if int(j.get("vue_version", 0)) != vue_version or Grille.distance(j.pos, centre_brouillard) > RAYON_VUE / 3:
+		brouillard.queue_redraw()   # son champ de vue a changé : seul le brouillard se redessine
 	hud.queue_redraw()
 	_maj_atteignables()
 	minuterie_ui -= delta
@@ -265,9 +284,10 @@ func _process(delta: float) -> void:
 
 
 ## Un nœud creature.tscn par être vivant, configuré depuis sa fiche : position, profondeur, rig.
-func _maj_noeuds() -> void:
+func _maj_noeuds(delta: float = 0.0) -> void:
 	var vivants := {}
 	var j := joueur()
+	var k := 1.0 - exp(-delta * 12.0)   # glissement exponentiel : ≈ 0,2 s pour rejoindre la tuile
 	for e in sim.vivants():
 		vivants[e.id] = true
 		var n: Paperdoll = noeuds.get(e.id)
@@ -283,8 +303,12 @@ func _maj_noeuds() -> void:
 			add_child(n)
 			noeuds[e.id] = n
 		n.e = e
+		var cible := _ecran(e.pos, sim.grille.h(e.pos))
+		if not n.visible or n.position.distance_to(cible) > TW * 3.0:
+			n.position = cible   # apparition ou saut (changement de grille, respawn) : pas de glissement
+		else:
+			n.position = n.position.lerp(cible, k)
 		n.visible = true
-		n.position = _ecran(e.pos, sim.grille.h(e.pos))
 		n.z_index = e.pos.x + e.pos.y + 1
 		n.queue_redraw()
 	for id in noeuds.keys().duplicate():
@@ -557,7 +581,6 @@ func _dessiner_terrain(ci: CanvasItem) -> void:
 	var j := joueur()
 	var c: Vector2i = j.pos if not j.is_empty() else Vector2i(g.largeur / 2, g.hauteur_grille / 2)
 	centre_terrain = c
-	vue_version = int(j.get("vue_version", 0))
 	var x0 := maxi(0, c.x - RAYON_VUE)
 	var x1 := mini(g.largeur - 1, c.x + RAYON_VUE)
 	var y0 := maxi(0, c.y - RAYON_VUE)
@@ -593,12 +616,9 @@ func _zones_telegraphes() -> Dictionary:
 
 func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 	var g := sim.grille
-	if not g.decouvert.has(g.idx(t)):   # brouillard de guerre : jamais vue → rien
-		return
 	var h := g.h(t)
 	var c := _ecran(t, h)
-	var j := joueur()
-	var teinte := Color.WHITE if j.is_empty() or sim.voit(j, t) else Color(0.45, 0.45, 0.5)   # mémorisée : grisée
+	var teinte := Color.WHITE   # le brouillard est une couche à part (_dessiner_brouillard)
 	if g.bloque_passage(t):   # un mur : un bloc plein sur la tuile — le sol dessous est caché
 		_dessine_bloc(ci, g, t, c, teinte)
 		return
@@ -636,6 +656,38 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 		var cc := (Color(0.55, 0.38, 0.18) if "coffre" in contenu.tags else Color(0.75, 0.65, 0.3)) * teinte
 		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc)
 		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc.darkened(0.5), false, 1.0)
+
+## La passe du brouillard : sur la fenêtre du terrain, un voile opaque (couleur du fond) sur les tuiles
+## jamais vues, un voile translucide sur les tuiles mémorisées hors du champ de vue. Chaque voile couvre
+## le losange de la tuile et la hauteur de son bloc éventuel.
+func _dessiner_brouillard(ci: CanvasItem) -> void:
+	if sim == null or profil_sans_terrain:
+		return
+	var g := sim.grille
+	var j := joueur()
+	if j.is_empty():
+		return
+	centre_brouillard = j.pos
+	vue_version = int(j.get("vue_version", 0))
+	var fond := Color(0.3, 0.3, 0.3)   # la couleur de fond de la scène (clear color)
+	var voile := Color(0.05, 0.05, 0.08, 0.55)
+	var x0 := maxi(0, j.pos.x - RAYON_VUE)
+	var x1 := mini(g.largeur - 1, j.pos.x + RAYON_VUE)
+	var y0 := maxi(0, j.pos.y - RAYON_VUE)
+	var y1 := mini(g.hauteur_grille - 1, j.pos.y + RAYON_VUE)
+	for s in range(x0 + y0, x1 + y1 + 1):
+		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
+			var t := Vector2i(x, s - x)
+			var idx := g.idx(t)
+			var vu := g.decouvert.has(idx)
+			if vu and sim.voit(j, t):
+				continue
+			var c := _ecran(t, g.h(t))
+			var hm := (int(g.contenu_de(t).get("hauteur_vue", 0)) * HSTEP) if g.bloque_passage(t) else 0
+			ci.draw_colored_polygon(PackedVector2Array([
+				c + Vector2(-TW * 0.5, 0), c + Vector2(-TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm),
+				c + Vector2(TW * 0.5, -hm), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5)]), voile if vu else fond)
+
 
 ## Un bloc de mur : le dessus et les deux faces avant (sud-ouest, sud-est) ; une face n'est
 ## dessinée que si la tuile devant n'est pas elle-même un mur (elle la cacherait entièrement).
