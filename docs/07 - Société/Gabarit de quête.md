@@ -30,6 +30,9 @@ Le format d'un gabarit de quête procédurale, avec son sélecteur de cible et s
 
 **Écoute d'événements ([[EventBus]]) :** le système de quêtes écoute `creature_killed`, `item_crafted`, `block_placed/destroyed`, `dungeon_cleared` sans que ces systèmes connaissent les quêtes.
 
+> [!success] Codé le 2026-08-28 — sept patterns, douze guildes servies
+> `tuer` et `donjon` (existants) + **`livrer`** (transporteurs : un objet tiré de `target_selector.items_any`, à remettre en parlant à un PNJ d'un **autre village connu** — `{objet}`, `{destination}` dans le texte), **`construire`** (bâtisseurs : poser N meubles, stations ou murs sur son territoire), **`fabriquer`** (artisans : composants et objets ; enchanteurs : composants ; alchimistes : potions ; cuisiniers : plats — `target_selector.kinds_any`), **`vendre`** (marchands : N objets vendus à des PNJ), **`explorer`** (éclaireurs : N chunks découverts). Les mages chassent des hostiles à prime relevée. Un seul progresseur générique (`_progresser_quetes(pattern, tags)`) branché sur pose, fabrication, vente, récolte, exploration et dialogue — les systèmes ne connaissent pas les quêtes.
+
 ## Liens
 - **Dépend de** : [[Quêtes et guildes]], [[Data-driven design]], [[Double niveau combat et général]]
 - **Alimente** : [[Donjons — structure et intégration]], [[Économie — sources et puits]]

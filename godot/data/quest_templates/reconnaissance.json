@@ -1,0 +1,15 @@
+{
+  "guild": "eclaireurs",
+  "rank_min": 1,
+  "pattern": "explorer",
+  "target_selector": {},
+  "count_range": [
+    4,
+    8
+  ],
+  "reward": {
+    "gold_per_target_level": 10,
+    "guild_xp": 8
+  },
+  "text_key": "quest.reconnaissance.text"
+}

@@ -1,0 +1,15 @@
+{
+  "guild": "marchands",
+  "rank_min": 1,
+  "pattern": "vendre",
+  "target_selector": {},
+  "count_range": [
+    3,
+    6
+  ],
+  "reward": {
+    "gold_per_target_level": 8,
+    "guild_xp": 8
+  },
+  "text_key": "quest.negoce.text"
+}

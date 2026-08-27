@@ -53,6 +53,7 @@ func _ready() -> void:
 	test_registre_elevage()
 	test_familles()
 	test_entraineur_et_commandes()
+	test_gabarits_guildes()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -2181,6 +2182,56 @@ func test_entraineur_et_commandes() -> void:
 	var or0: int = int(j.or)
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "livrer", "pnj": m.id}) and int(j.or) == or0 + int(cmd.or) and not s.territoire.has("commande"), "commande livrée : %d or" % int(cmd.or))
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Gabarits : livrer, construire, fabriquer, vendre, explorer
+
+func test_gabarits_guildes() -> void:
+	var s := Simulation.new(99)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var guildes_servies: Dictionary = {}
+	for gid in GameData.catalogues.quest_templates.keys():
+		guildes_servies[str(GameData.catalogues.quest_templates[gid].guild)] = true
+	verifier(guildes_servies.size() >= 12, "les douze guildes ont au moins un gabarit (%d)" % guildes_servies.size())
+	# Construire : trois structures sur le territoire.
+	j["quetes"] = [{"uid": "q1", "pattern": "construire", "selector": {"tags_any": ["meuble", "station", "mur"]}, "count": 2, "fait": 0, "etat": "en_cours", "text_key": "quest.chantier.text", "or": 10, "xp": 5, "guild": "batisseurs", "donneur": "x"}]
+	var lit := s.generer_objet("meuble_lit_de_paille", 1, {}, "commun", 0)
+	j.sac.append(lit.uid)
+	var vers: Vector2i = j.pos + Vector2i(0, 1)
+	for d in [Vector2i(0, 1), Vector2i(1, 0), Vector2i(0, -1), Vector2i(-1, 0)]:
+		var c: Vector2i = j.pos + d
+		if s.grille.dans(c) and s.grille.occupant(c).is_empty():
+			s.grille.contenu[s.grille.idx(c)] = 0
+			s.grille.meubles.erase(s.grille.idx(c))
+			s.contenants.erase(s.grille.idx(c))
+			vers = c
+			break
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "poser", "objet": lit.uid, "vers": vers})
+	verifier(int(j.quetes[0].fait) == 1, "un meuble posé sur le territoire : 1/2")
+	# Fabriquer un plat : la quête du banquet avance, pas celle des potions.
+	j.quetes.append({"uid": "q2", "pattern": "fabriquer", "selector": {"kinds_any": ["plat"]}, "count": 1, "fait": 0, "etat": "en_cours", "text_key": "quest.banquet.text", "or": 10, "xp": 5, "guild": "cuisiniers", "donneur": "x"})
+	j.quetes.append({"uid": "q3", "pattern": "fabriquer", "selector": {"kinds_any": ["potion"]}, "count": 1, "fait": 0, "etat": "en_cours", "text_key": "quest.elixirs.text", "or": 10, "xp": 5, "guild": "alchimistes", "donneur": "x"})
+	var cuisine := s.generer_objet("station_cuisine", 1, {}, "commun", 0)
+	j.sac.append(cuisine.uid)
+	var v := s.generer_objet("viande_crue", 1, {}, "commun", 0)
+	v.quantite = 2
+	j.sac.append(v.uid)
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "fabriquer", "recette": "plat_ragout"})
+	verifier(j.quetes[1].etat == "terminee" and int(j.quetes[2].fait) == 0, "un ragoût : le banquet est servi, les élixirs attendent")
+	# Livrer : parler à un PNJ du village de destination avec l'objet.
+	var pnj := s.ajouter("villageois", j.pos + Vector2i(1, 1), "ia")
+	s._habiller_pnj(pnj, GameData.entree("creatures", "villageois"))
+	pnj["village"] = "Port-Test"
+	j.quetes.append({"uid": "q4", "pattern": "livrer", "selector": {}, "count": 1, "fait": 0, "etat": "en_cours", "text_key": "quest.livraison.text", "or": 40, "xp": 12, "guild": "transporteurs", "donneur": "x", "objet": "pain", "destination": "Port-Test"})
+	var pain := s.generer_objet("pain", 1, {}, "commun", 0)
+	j.sac.append(pain.uid)
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "parler", "pnj": pnj.id})
+	verifier(j.quetes[3].etat == "terminee" and s._pile_objet(j, "pain").is_empty(), "le pain livré à Port-Test : quête terminée, pain remis")
 	s.monde.fermer()
 
 

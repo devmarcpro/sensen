@@ -495,11 +495,11 @@ func _construire_quetes(j: Dictionary) -> void:
 	for q in offertes:
 		if q.etat != "offerte":
 			continue
-		liste.add_item(tr("ui.quetes.offerte").format({"texte": tr(q.text_key).format({"count": int(q.count)})}))
-		entrees.append({"kind": "quete", "quete": q, "texte": tr(q.text_key).format({"count": int(q.count)}) + "\n" + tr("ui.quetes.recompense").format({"or": int(q.or), "xp": int(q.xp)})})
+		liste.add_item(tr("ui.quetes.offerte").format({"texte": _texte_quete(q)}))
+		entrees.append({"kind": "quete", "quete": q, "texte": _texte_quete(q) + "\n" + tr("ui.quetes.recompense").format({"or": int(q.or), "xp": int(q.xp)})})
 	for q in j.get("quetes", []):
 		if q.etat == "en_cours" or q.etat == "terminee":
-			var texte: String = tr(q.text_key).format({"count": int(q.count)})
+			var texte: String = _texte_quete(q)
 			liste.add_item((tr("ui.quetes.terminee") if q.etat == "terminee" else tr("ui.quetes.en_cours")).format({"texte": texte, "fait": int(q.fait), "count": int(q.count)}))
 			entrees.append({"kind": "quete", "quete": q, "texte": texte + "\n" + tr("ui.quetes.recompense").format({"or": int(q.or), "xp": int(q.xp)})})
 	_bouton(tr("ui.ecran.accepter"), _action_principale)
@@ -663,6 +663,10 @@ func _construire_entrainer(j: Dictionary) -> void:
 	if n == 0:
 		liste.add_item(tr("ui.entrainer.aucune"), null, false)
 		entrees.append({"kind": "texte", "texte": ""})
+
+
+func _texte_quete(q: Dictionary) -> String:
+	return tr(q.text_key).format({"count": int(q.count), "objet": tr(GameData.entree("items", str(q.objet)).name_key) if q.has("objet") else "", "destination": str(q.get("destination", ""))})
 
 
 func _construire_assigner(j: Dictionary) -> void:

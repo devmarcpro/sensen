@@ -485,6 +485,8 @@ func _poser(e: Dictionary, uid: String, vers: Vector2i, tick: int) -> bool:
 		EventBus.emettre(&"journal", [&"journal.rien_a_poser", {}])
 		return false
 	var idx := grille.idx(vers)
+	if monde != null and monde.claims.has(_cell_de(vers)):
+		_progresser_quetes(e, "construire", ["meuble" if it.type == "meuble" else "station"])
 	if it.type == "meuble":
 		var m: Dictionary = GameData.entree("meubles", str(it.meuble))
 		grille.poser_contenu(vers, "meuble" if bool(m.bloque_passage) else "meuble_sol")
@@ -548,6 +550,8 @@ func _poser_mur(e: Dictionary, vers: Vector2i, porte: bool, tick: int) -> bool:
 	var mat_id := str(pile.materiau)
 	_retirer_materiau(e, pile, 1)
 	grille.poser_contenu(vers, "porte" if porte else "mur_construit")
+	if monde != null and monde.claims.has(_cell_de(vers)):
+		_progresser_quetes(e, "construire", ["mur"])
 	grille.materiaux[grille.idx(vers)] = mat_id
 	e.compteur = tick + int(regles.r.camp.poser_ticks)
 	EventBus.emettre(&"journal", [&"journal.pose", {"nom": e.name_key, "objet": {"base": "tile_content.%s.name" % ("porte" if porte else "mur_construit")}}])
@@ -784,6 +788,7 @@ func _parler(e: Dictionary, pnj_id: String, tick: int) -> bool:
 		return false
 	var texte := replique(pnj, e)
 	EventBus.emettre(&"journal", [&"journal.parle", {"nom": pnj.name_key, "texte": texte}])
+	_livraisons(e, pnj)
 	var jour := int(tick / int(_cycle().get("ticks_par_jour", 24000)))
 	if int(pnj.get("dernier_parler_jour", -1)) != jour:
 		pnj["dernier_parler_jour"] = jour
@@ -891,6 +896,7 @@ func _vendre(e: Dictionary, pnj_id: String, uid: String, tick: int) -> bool:
 	e.compteur = tick + int(regles.r.actions.objet)
 	EventBus.emettre(&"journal", [&"journal.vend", {"nom": e.name_key, "objet": nom_objet(uid), "n": int(p.achat)}])
 	EventBus.emettre(&"item_sold", [uid, e.id, int(p.achat)])
+	_progresser_quetes(e, "vendre", [])
 	return true
 
 
@@ -2689,9 +2695,19 @@ func quetes_offertes(pnj: Dictionary, e: Dictionary) -> Array:
 			var g: Dictionary = GameData.catalogues.quest_templates[gid]
 			var count := rng.randi_range(int(g.count_range[0]), int(g.count_range[1]))
 			var niveau := maxi(1, int(round(monde.corruption_de(monde.cellule_de(pnj.pos)) / 20.0))) if monde != null else 1
-			pnj.quetes.append({"uid": "q_%s_%d_%d" % [pnj.id, semaine, k], "gabarit": gid, "guild": str(g.guild), "pattern": str(g.pattern), "selector": g.target_selector,
+			var q := {"uid": "q_%s_%d_%d" % [pnj.id, semaine, k], "gabarit": gid, "guild": str(g.guild), "pattern": str(g.pattern), "selector": g.target_selector,
 				"count": count, "fait": 0, "niveau": niveau, "or": int(g.reward.gold_per_target_level) * niveau * count, "xp": int(g.reward.guild_xp) * count,
-				"text_key": str(g.text_key), "donneur": pnj.id, "village": str(pnj.get("village", "")), "cellule": monde.cellule_de(pnj.pos) if monde != null else Vector2i.ZERO, "etat": "offerte"})
+				"text_key": str(g.text_key), "donneur": pnj.id, "village": str(pnj.get("village", "")), "cellule": monde.cellule_de(pnj.pos) if monde != null else Vector2i.ZERO, "etat": "offerte"}
+			if str(g.pattern) == "livrer":   # une livraison : un objet du pool, vers un autre village connu (sinon le sien)
+				var pool: Array = g.target_selector.get("items_any", ["pain"])
+				q["objet"] = str(pool[rng.randi() % pool.size()])
+				var autres: Array = []
+				for nom_v in monde.villages.keys():
+					if nom_v != str(pnj.get("village", "")):
+						autres.append(nom_v)
+				autres.sort()
+				q["destination"] = str(autres[rng.randi() % autres.size()]) if not autres.is_empty() else str(pnj.get("village", ""))
+			pnj.quetes.append(q)
 	return pnj.quetes
 
 
@@ -2728,6 +2744,47 @@ func _quetes_sur_mort(cible: Dictionary, tueur: String) -> void:
 			EventBus.emettre(&"journal", [&"journal.quete_progres", {"fait": int(q.fait), "count": int(q.count)}])
 			if int(q.fait) >= int(q.count):
 				q.etat = "terminee"
+
+
+## Le progresseur générique des quêtes (Gabarit de quête) : un pattern, des tags de contexte, le sélecteur décide.
+func _progresser_quetes(e: Dictionary, pattern: String, tags: Array) -> void:
+	if e.controle != "joueur":
+		return
+	for q in e.get("quetes", []):
+		if q.etat != "en_cours" or str(q.pattern) != pattern:
+			continue
+		var sel: Dictionary = q.selector
+		var ok := true
+		if sel.has("tags_any"):
+			ok = false
+			for t in sel.tags_any:
+				if t in tags:
+					ok = true
+		if sel.has("kinds_any"):
+			ok = false
+			for t in sel.kinds_any:
+				if t in tags:
+					ok = true
+		if not ok:
+			continue
+		q.fait = int(q.fait) + 1
+		EventBus.emettre(&"journal", [&"journal.quete_progres", {"fait": int(q.fait), "count": int(q.count)}])
+		if int(q.fait) >= int(q.count):
+			q.etat = "terminee"
+
+
+## Une livraison : parler à un PNJ du village de destination avec l'objet dans le sac.
+func _livraisons(e: Dictionary, pnj: Dictionary) -> void:
+	for q in e.get("quetes", []):
+		if q.etat != "en_cours" or str(q.pattern) != "livrer" or str(pnj.get("village", "")) != str(q.get("destination", "")):
+			continue
+		var pile := _pile_objet(e, str(q.objet))
+		if pile.is_empty():
+			continue
+		_consommer_pile(e, pile)
+		q.fait = int(q.count)
+		q.etat = "terminee"
+		EventBus.emettre(&"journal", [&"journal.livraison", {"nom": e.name_key, "objet": GameData.entree("items", str(q.objet)).name_key}])
 
 
 ## Un donjon vidé : les quêtes « donjon » de cette cellule sont terminées.
@@ -3086,6 +3143,7 @@ func _faconner(e: Dictionary, r: Dictionary, tick: int) -> bool:
 	e.compteur = tick + _ticks_avec_statuts(e, maxi(1, ceili(float(regles.r.craft.ticks_base) / regles.skill_factor(n))))
 	gagner_xp(e, skill, int(mat.stats.durete))
 	EventBus.emettre(&"journal", [&"journal.faconne", {"nom": e.name_key, "objet": nom_objet(inst.uid), "qualite": "qualite." + regles.palier_qualite(inst.qualite)}])
+	_progresser_quetes(e, "fabriquer", ["composant"])
 	return true
 
 
@@ -3148,6 +3206,7 @@ func _assembler(e: Dictionary, def: Dictionary, tick: int) -> bool:
 	e.compteur = tick + _ticks_avec_statuts(e, maxi(1, ceili(float(regles.r.craft.ticks_base) / regles.skill_factor(n))))
 	gagner_xp(e, skill, inst.durete_base)
 	EventBus.emettre(&"journal", [&"journal.assemble", {"nom": e.name_key, "objet": nom_objet(inst.uid), "qualite": "qualite." + regles.palier_qualite(inst.qualite)}])
+	_progresser_quetes(e, "fabriquer", ["objet"])
 	return true
 
 
@@ -3434,11 +3493,17 @@ func _fabriquer(e: Dictionary, rid: String, tick: int) -> bool:
 				e.sac.append(inst.uid)
 				nom_obj = inst.name_key
 		gagner_xp(e, str(r.craft_skill), maxi(10, durete_entrees))
+		var genre_obj: Dictionary = GameData.catalogues.items.get(str(r.output.item), {})
+		var tags_q: Array = ["objet"]
+		if genre_obj.get("type", "") == "consommable":
+			tags_q = ["plat"] if not ("potion" in genre_obj.get("tags", [])) else ["potion"]
+		_progresser_quetes(e, "fabriquer", tags_q)
 		EventBus.emettre(&"journal", [&"journal.fabrique", {"nom": e.name_key, "quantite": int(sortie.quantite), "objet": nom_obj, "recette": r.name_key}])
 		return true
 	_donner_materiau(e, sortie.materiau, int(sortie.quantite), sortie.forme)
 	var mat: Dictionary = GameData.catalogues.materials.get(str(sortie.materiau), {})
 	gagner_xp(e, str(r.craft_skill), int(mat.get("stats", {}).get("durete", 1)))
+	_progresser_quetes(e, "fabriquer", ["materiau"])
 	EventBus.emettre(&"journal", [&"journal.fabrique", {"nom": e.name_key, "quantite": int(sortie.quantite), "objet": mat.get("name_key", sortie.materiau), "recette": r.name_key}])
 	return true
 
@@ -4338,6 +4403,7 @@ func maj_vision() -> void:
 			if lieu == "camp" and monde != null:   # exploration à résolution chunk (minimap)
 				for ch in monde.explorer(vue, grille):
 					EventBus.emettre(&"chunk_explored", [ch])
+					_progresser_quetes(e, "explorer", [])
 		e["vue"] = vue
 		e["vue_pos"] = e.pos
 		e["vue_sale"] = false

@@ -1,0 +1,19 @@
+{
+  "guild": "alchimistes",
+  "rank_min": 1,
+  "pattern": "fabriquer",
+  "target_selector": {
+    "kinds_any": [
+      "potion"
+    ]
+  },
+  "count_range": [
+    1,
+    2
+  ],
+  "reward": {
+    "gold_per_target_level": 40,
+    "guild_xp": 12
+  },
+  "text_key": "quest.elixirs.text"
+}

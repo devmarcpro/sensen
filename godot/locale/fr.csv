@@ -401,6 +401,16 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+quest.livraison.text,"Livrez {objet} à quelqu'un de {destination}."
+quest.chantier.text,"Bâtissez {count} structures (meubles, stations ou murs) sur votre territoire."
+quest.commande_artisan.text,"Façonnez {count} composants ou objets à l'atelier."
+quest.enchantement.text,"Façonnez {count} composants pour les Enchanteurs."
+quest.elixirs.text,"Distillez {count} potions à l'Alambic."
+quest.banquet.text,"Cuisinez {count} plats pour le banquet de la Confrérie."
+quest.negoce.text,"Vendez {count} objets aux marchands du pays."
+quest.reconnaissance.text,"Reconnaissez {count} nouveaux secteurs de terrain."
+quest.arcanes.text,"Le Cercle veut {count} hostiles de moins entre le monde et ses tours."
+journal.livraison,"{nom} remet {objet} : la livraison est faite"
 ui.ecran.entrainer,S'entraîner (U)
 ui.entrainer.titre,"ENTRAÎNEMENT avec {nom} — 20 or × niveau, +10 de potentiel (tu as {or} or)"
 ui.entrainer.competence,"{nom} — niveau {niveau} · potentiel {potentiel} · {cout} or"

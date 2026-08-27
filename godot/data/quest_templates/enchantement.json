@@ -1,0 +1,19 @@
+{
+  "guild": "enchanteurs",
+  "rank_min": 1,
+  "pattern": "fabriquer",
+  "target_selector": {
+    "kinds_any": [
+      "composant"
+    ]
+  },
+  "count_range": [
+    2,
+    3
+  ],
+  "reward": {
+    "gold_per_target_level": 25,
+    "guild_xp": 12
+  },
+  "text_key": "quest.enchantement.text"
+}

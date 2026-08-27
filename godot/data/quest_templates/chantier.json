@@ -1,0 +1,21 @@
+{
+  "guild": "batisseurs",
+  "rank_min": 1,
+  "pattern": "construire",
+  "target_selector": {
+    "tags_any": [
+      "meuble",
+      "station",
+      "mur"
+    ]
+  },
+  "count_range": [
+    3,
+    6
+  ],
+  "reward": {
+    "gold_per_target_level": 12,
+    "guild_xp": 10
+  },
+  "text_key": "quest.chantier.text"
+}
