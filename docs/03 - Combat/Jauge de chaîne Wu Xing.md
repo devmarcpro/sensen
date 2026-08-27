@@ -70,6 +70,9 @@ JAUGE DE CHAÎNE — 5 SEGMENTS DE BASE, EXTENSIBLE JUSQU'À 10 :
 > - **Ce qui pose un segment** : un coup d'arme qui touche, une action de créature qui touche au moins une cible (une seule pose quel que soit le nombre de cibles), et — jalon 8 — tout module lancé. Un coup dans le vide (cible dérobée à l'échéance d'une lourde) ne pose rien.
 > - **Prévisualisation** : au survol, l'UI montre l'élément contre l'alignement de la cible et son ×, le remplissage de la jauge, et pour le coup envisagé sa position, sa transition et le multiplicateur s'il résout.
 
+> [!warning] Premier réglage le 2026-08-27 — « on ajustera plus tard »
+> Balayage de 48 jeux de valeurs avec `test_criteres` (dégâts moyens, vraies données) : **aucun** jeu de bonus de transition ne ramène les deux voies à ±15 %, parce que l'écart ne vient pas des transitions mais des **bases** — la lourde ×2.2 sur une masse (construction lourde : +30 % au-dessus de la rotation) et la dague à 1d6 (construction légère : −40 % en dessous). La rotation se place entre les deux. Valeurs retenues en attendant le playtest : **engendrement +0.45** (au lieu de +0.35 ; rotation ×2.80), même élément +0.10 et hors ordre +0.20 inchangés, **swap d'arme 3 ticks** (au lieu de 4 — [[Boucle de tick]]) : avec 3 ticks le swap devient rentable pour dague→épée lourde et reste perdant pour épée→masse→épée, ce qui est exactement « dans certains cas seulement ». Le critère « ±15 % » devra préciser ce qu'est la *construction* de référence (arme légère → lourde de l'élément engendré, avec quelle arme) avant d'être rejugé — [[Vers la production]].
+
 ## Liens
 - **Dépend de** : [[Wu Xing — cycles et vecteurs]], [[Domination et multiplicateurs]], [[Action-time à ticks]]
 - **Alimente** : [[XP de combat]], [[Cinq accès au cycle]], [[Attaque lourde et télégraphe]]

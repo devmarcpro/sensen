@@ -341,7 +341,8 @@ func test_wuxing() -> void:
 		t += 5
 	verifier(j.segments.size() == 4, "4 segments posés")
 	var p := w.prevoir(j, "eau")
-	verifier(p.resout and is_equal_approx(p.bonus_total, 1.40) and is_equal_approx(p.multiplicateur, 2.40), "rotation parfaite : 4 × 0.35 → ×2.40")
+	var be: float = float(w.w.chaine.bonus_engendrement)
+	verifier(p.resout and is_equal_approx(p.bonus_total, 4.0 * be) and is_equal_approx(p.multiplicateur, 1.0 + 4.0 * be), "rotation parfaite : 4 × engendrement (%.2f) → ×%.2f" % [be, 1.0 + 4.0 * be])
 	verifier(is_equal_approx(p.gain, 1.20), "gain intermédiaire : +5 %% × 4 segments")
 	w.poser(j, "eau", t)
 	verifier(j.segments.is_empty(), "le résolveur vide la barre")
@@ -350,8 +351,9 @@ func test_wuxing() -> void:
 	for i in 4:
 		w.poser(j, "metal", i * 3)
 	p = w.prevoir(j, "eau")
-	verifier(p.resout and is_equal_approx(p.multiplicateur, 1.65), "construction/détonation : 3 × 0.10 + 0.35 → ×1.65")
-	verifier(is_equal_approx(w.prevoir(j, "feu").multiplicateur, 1.50), "hors ordre : 3 × 0.10 + 0.20 → ×1.50")
+	var bm: float = float(w.w.chaine.bonus_meme_element)
+	verifier(p.resout and is_equal_approx(p.multiplicateur, 1.0 + 3.0 * bm + be), "construction/détonation : 3 × même élément + engendrement → ×%.2f" % (1.0 + 3.0 * bm + be))
+	verifier(is_equal_approx(w.prevoir(j, "feu").multiplicateur, 1.0 + 3.0 * bm + float(w.w.chaine.bonus_hors_ordre)), "hors ordre : 3 × même élément + hors ordre")
 	# Décroissance : un segment tous les 30 ticks, le dernier posé en premier
 	j = w.jauge_neuve()
 	w.poser(j, "bois", 0)
@@ -390,7 +392,8 @@ func test_ratelier() -> void:
 	verifier(s.attente.has(j.id), "joueur dû")
 	var t: int = s.horloge_monde.ticks
 	verifier(s.intention(j.id, {"type": "changer_arme", "item": "proto_masse"}), "prendre la masse")
-	verifier(j.equipement.main_principale == "proto_masse" and j.compteur == t + 4, "swap : 4 ticks")
+	var ts: int = int(s.regles.r.actions.changer_arme)
+	verifier(j.equipement.main_principale == "proto_masse" and j.compteur == t + ts, "swap : %d ticks (combat_rules)" % ts)
 	j.compteur = t
 	s.horloge_monde.avancer(1)
 	verifier(s.intention(j.id, {"type": "changer_arme", "item": "proto_bouclier"}), "prendre le bouclier")

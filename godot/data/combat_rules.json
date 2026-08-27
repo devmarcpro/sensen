@@ -17,7 +17,7 @@
     "attaque_base": 10,
     "lourde_mult_ticks": 2,
     "lourde_mult_degats": 2.2,
-    "changer_arme": 4,
+    "changer_arme": 3,
     "objet": 5,
     "garde": 2,
     "attendre": 5,

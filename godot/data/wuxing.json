@@ -1,25 +1,73 @@
 {
   "_doc": "Le Wu Xing chiffré (configuration unique) — Wu Xing — cycles et vecteurs · Domination et multiplicateurs · Jauge de chaîne Wu Xing. Les teintes sont les couleurs traditionnelles des cinq éléments (Direction artistique, décidé le 2026-08-26).",
-  "elements": ["bois", "feu", "terre", "metal", "eau"],
-  "engendre": { "bois": "feu", "feu": "terre", "terre": "metal", "metal": "eau", "eau": "bois" },
-  "domine": { "bois": "terre", "terre": "eau", "eau": "feu", "feu": "metal", "metal": "bois" },
-  "offensif": { "domine": 1.5, "domine_par": 0.65, "engendre": 0.8, "neutre": 1.0 },
-  "defensif": { "domine": 1.20, "domine_par": 0.85, "engendre": 0.95, "neutre": 1.0 },
+  "elements": [
+    "bois",
+    "feu",
+    "terre",
+    "metal",
+    "eau"
+  ],
+  "engendre": {
+    "bois": "feu",
+    "feu": "terre",
+    "terre": "metal",
+    "metal": "eau",
+    "eau": "bois"
+  },
+  "domine": {
+    "bois": "terre",
+    "terre": "eau",
+    "eau": "feu",
+    "feu": "metal",
+    "metal": "bois"
+  },
+  "offensif": {
+    "domine": 1.5,
+    "domine_par": 0.65,
+    "engendre": 0.8,
+    "neutre": 1.0
+  },
+  "defensif": {
+    "domine": 1.2,
+    "domine_par": 0.85,
+    "engendre": 0.95,
+    "neutre": 1.0
+  },
   "chaine": {
     "capacite_base": 5,
     "capacite_max": 10,
-    "bonus_meme_element": 0.10,
-    "bonus_hors_ordre": 0.20,
-    "bonus_engendrement": 0.35,
+    "bonus_meme_element": 0.1,
+    "bonus_hors_ordre": 0.2,
+    "bonus_engendrement": 0.45,
     "gain_par_segment": 0.05,
     "decroissance_ticks": 30,
     "resolveur_non_offensif": 0.7
   },
   "teintes": {
-    "bois": [0.25, 0.70, 0.35],
-    "feu": [0.90, 0.25, 0.15],
-    "terre": [0.85, 0.70, 0.20],
-    "metal": [0.90, 0.90, 0.92],
-    "eau": [0.15, 0.30, 0.75]
+    "bois": [
+      0.25,
+      0.7,
+      0.35
+    ],
+    "feu": [
+      0.9,
+      0.25,
+      0.15
+    ],
+    "terre": [
+      0.85,
+      0.7,
+      0.2
+    ],
+    "metal": [
+      0.9,
+      0.9,
+      0.92
+    ],
+    "eau": [
+      0.15,
+      0.3,
+      0.75
+    ]
   }
 }
