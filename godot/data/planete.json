@@ -229,5 +229,22 @@
     },
     "garde": "garde_village",
     "forgeron_chance": 0.5
+  },
+  "faune": {
+    "_doc": "Faune de surface (Créatures, Cycle jour-nuit) : intervalle entre tirages, budget de bêtes dans la fenêtre, anneau de spawn hors de vue, despawn, densité ×nuit_mult la nuit (volet faune_nuit en plus).",
+    "intervalle_ticks": 200,
+    "budget": 12,
+    "anneau": [
+      12,
+      40
+    ],
+    "despawn": 60,
+    "nuit_mult": 2.0,
+    "chance_base": 0.5
+  },
+  "routine": {
+    "_doc": "Routines des PNJ (IA des créatures) : rayon de patrouille des gardes, distance à laquelle l'A* remplace le pas glouton.",
+    "rayon_patrouille": 8,
+    "astar_sous": 20
   }
 }

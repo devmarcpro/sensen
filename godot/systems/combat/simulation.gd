@@ -1527,6 +1527,8 @@ func _peupler_fenetre() -> void:
 					var x := ajouter(str(pj.creature), pos, "ia")
 					_habiller_pnj(x, GameData.entree("creatures", str(pj.creature)), str(v.culture))
 					x["lit"] = monde.pos_monde(cell, pj.lit)
+					x["poste"] = pos
+					x["place"] = monde.pos_monde(cell, v.centre)
 					x["village"] = str(v.nom)
 					x.ancre = pos
 			EventBus.emettre(&"journal", [&"journal.village", {"nom": v.nom}])
@@ -1865,6 +1867,79 @@ func _sur_avancee_monde(_de: int, _a: int) -> void:
 	_tiquer_faim(horloge_monde.ticks)
 	_tiquer_monde(horloge_monde.ticks)
 	_tiquer_meteo(horloge_monde.ticks)
+	_tiquer_faune(horloge_monde.ticks)
+
+
+## La faune de surface (Créatures) : un tirage toutes les intervalle_ticks — sous le budget, une bête
+## (ou une meute) apparaît dans l'anneau hors de vue, dans la faune du biome ; ×2 et volet nuit la nuit ;
+## les bêtes trop loin et hors combat disparaissent.
+var _dernier_tick_faune: int = -1
+func _tiquer_faune(tick: int) -> void:
+	if lieu != "camp" or monde == null:
+		return
+	var fa: Dictionary = GameData.config("planete").faune
+	if _dernier_tick_faune >= 0 and tick / int(fa.intervalle_ticks) == _dernier_tick_faune / int(fa.intervalle_ticks):
+		return
+	_dernier_tick_faune = tick
+	var j := {}
+	var betes: Array = []
+	for x in vivants():
+		if x.controle == "joueur":
+			j = x
+		elif "bete" in x.get("tags", []) and x.controle == "ia":
+			betes.append(x)
+	if j.is_empty():
+		return
+	for b in betes:   # despawn au loin, hors combat
+		if Grille.distance(b.pos, j.pos) > int(fa.despawn) and not en_combat(b):
+			grille.liberer(b.pos)
+			b.vivant = false
+			ordre.erase(b.id)
+			entites.erase(b.id)
+	if betes.size() >= int(fa.budget):
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "faune", tick])
+	var nuit := est_nuit()
+	if rng.randf() > float(fa.chance_base) * (float(fa.nuit_mult) if nuit else 1.0):
+		return
+	for essai in 12:
+		var d := rng.randi_range(int(fa.anneau[0]), int(fa.anneau[1]))
+		var a := rng.randf() * TAU
+		var q: Vector2i = j.pos + Vector2i(roundi(cos(a) * d), roundi(sin(a) * d))
+		if not grille.dans(q) or grille.bloque_passage(q) or not grille.occupant(q).is_empty() or grille.ligne_de_vue(j.pos, q) or grille.contenu_de(q).get("tags", []).has("liquide"):
+			continue
+		var b: Dictionary = GameData.catalogues.biomes.get(monde.surface.biome_a(q.x, q.y), {})
+		var pool: Array = b.get("faune", []).duplicate()
+		if nuit:
+			pool.append_array(b.get("faune_nuit", []))
+		if pool.is_empty():
+			return
+		var total := 0.0
+		for f in pool:
+			total += float(f.density)
+		var t := rng.randf() * total
+		var choix := ""
+		for f in pool:
+			t -= float(f.density)
+			if t <= 0.0:
+				choix = str(f.id)
+				break
+		if choix.is_empty():
+			choix = str(pool.back().id)
+		var def: Dictionary = GameData.catalogues.creatures.get(choix, {})
+		var n := 1
+		if def.has("meute") and (nuit or def.get("ai_profile", "") == "hostile"):
+			n = des.jet(str(def.meute))
+		for k in n:
+			var pos: Vector2i = q + Vector2i(rng.randi_range(-2, 2), rng.randi_range(-2, 2)) if k > 0 else q
+			if grille.dans(pos) and not grille.bloque_passage(pos) and grille.occupant(pos).is_empty():
+				var x := ajouter(choix, pos, "ia")
+				# De jour, une bête est une bête sauvage ; la nuit, le loup chasse (hostile) — Créatures.
+				if def.get("ai_profile", "") == "hostile" and "bete" in def.get("tags", []) and not nuit:
+					x.ai_profile = "bete_sauvage"
+				x["spawn_faune"] = true
+		return
 
 
 ## La dérive de la corruption sur l'horloge du monde : le passage hebdomadaire, les grâces échues.
@@ -3465,7 +3540,11 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 		"poursuivre":
 			_ia_pas_vers(e, cible.pos, tick, cible.id)
 		"fuir":
-			_ia_fuir(e, cible, tick)
+			_ia_fuir(e, cible if not cible.is_empty() else entites.get(str(e.get("menace", "")), {}), tick)
+		"routine":
+			_ia_pas_routine(e, _cible_routine(e, profil), tick)
+		"errer":
+			_ia_errer(e, tick)
 		"retour":
 			e.cible = ""
 			e.fuite = false
@@ -3527,7 +3606,88 @@ func _actions_candidates(e: Dictionary, cible: Dictionary, profil: Dictionary, t
 		c["retour"] = {"loin_de_l_ancre": 1.0 if Grille.distance(e.pos, e.ancre) > int(regles.r.engagement.ia_distance_ancre) else 0.0,
 			"cible_perdue": 0.0 if a_cible else 1.0}
 	c["attendre"] = {"endurance_basse": 1.0 if e.endurance < 20 else 0.0, "calme": 0.0 if a_cible else 1.0}
+	if not a_cible:
+		c["errer"] = {"calme": 1.0}
+		if profil.get("horaires") != null and lieu == "camp":
+			var cible_r := _cible_routine(e, profil)
+			c["routine"] = {"hors_poste": 1.0 if cible_r != e.pos else 0.0}
+	if not a_cible and not e.get("fuite", false) and lieu == "camp":
+		for autre in vivants():   # une menace en vue sans être engagé : les proies et les civils fuient
+			if ennemis(e, autre) and Grille.distance(e.pos, autre.pos) <= 8 and voit_ia(e, autre):
+				c["fuir"] = {"menace_en_vue": 1.0, "joueur_proche": 1.0 if Grille.distance(e.pos, autre.pos) <= 6 else 0.0, "sante_basse": 1.0 if sante_basse else 0.0}
+				e["menace"] = autre.id
+				break
 	return c
+
+
+## Une IA voit-elle un être ? (portée de Perception et ligne de vue)
+func voit_ia(e: Dictionary, autre: Dictionary) -> bool:
+	var portee := int(float(e.corps.stats.perception) * float(regles.r.engagement.detection_par_perception))
+	return Grille.distance(e.pos, autre.pos) <= portee and grille.ligne_de_vue(e.pos, autre.pos)
+
+
+## La cible de la routine horaire d'un PNJ (IA des créatures) : poste, place ou lit selon l'heure.
+func _cible_routine(e: Dictionary, profil: Dictionary) -> Vector2i:
+	var h := heure()
+	var activite := "poste"
+	for plage in profil.horaires.keys():
+		var parts: PackedStringArray = str(plage).split("-")
+		var a := float(parts[0])
+		var b := float(parts[1])
+		if (a <= b and h >= a and h < b) or (a > b and (h >= a or h < b)):
+			activite = str(profil.horaires[plage])
+	match activite:
+		"lit":
+			return e.get("lit", e.ancre)
+		"social":
+			return e.get("place", e.ancre)
+		_:
+			if e.ai_profile == "garde":   # le garde patrouille autour de son ancrage
+				var pat: Vector2i = e.get("patrouille", e.ancre)
+				if pat == e.pos or pat == e.ancre:
+					var r := int(GameData.config("planete").routine.rayon_patrouille)
+					var rng := RandomNumberGenerator.new()
+					rng.seed = hash([graine, e.id, horloge_monde.ticks])
+					for essai in 8:
+						var q: Vector2i = e.ancre + Vector2i(rng.randi_range(-r, r), rng.randi_range(-r, r))
+						if grille.dans(q) and not grille.bloque_passage(q):
+							pat = q
+							break
+					e["patrouille"] = pat
+				return pat
+			return e.get("poste", e.ancre)
+
+
+## Un pas de routine : glouton (la case adjacente libre la plus proche de la cible), A* sous 20 tuiles.
+func _ia_pas_routine(e: Dictionary, cible: Vector2i, tick: int) -> void:
+	if cible == e.pos:
+		_attendre(e, tick)
+		return
+	if Grille.distance(e.pos, cible) <= int(GameData.config("planete").routine.astar_sous):
+		var chemin := grille.chemin(e.pos, cible, Etres.est_volant(e))
+		if chemin.size() > 0:
+			if _deplacer(e, chemin[0], tick):
+				return
+	var meilleur: Vector2i = e.pos
+	var dmin := Grille.distance(e.pos, cible)
+	for d in Grille.DIRS:
+		var q: Vector2i = e.pos + d
+		if grille.dans(q) and not grille.bloque_passage(q) and grille.occupant(q).is_empty() and Grille.distance(q, cible) < dmin:
+			dmin = Grille.distance(q, cible)
+			meilleur = q
+	if meilleur == e.pos or not _deplacer(e, meilleur, tick):
+		_attendre(e, tick)
+
+
+## Errer : un pas au hasard sur une case libre, sans s'éloigner de plus de 12 tuiles de l'ancrage.
+func _ia_errer(e: Dictionary, tick: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, e.id, tick])
+	var d: Vector2i = Grille.DIRS[rng.randi_range(0, Grille.DIRS.size() - 1)]
+	var q: Vector2i = e.pos + d
+	if grille.dans(q) and not grille.bloque_passage(q) and grille.occupant(q).is_empty() and Grille.distance(q, e.ancre) <= 12 and _deplacer(e, q, tick):
+		return
+	_attendre(e, tick)
 
 
 ## L'attaque faisable la plus forte (dégâts moyens) : action de créature ou arme.

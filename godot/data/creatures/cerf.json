@@ -1,24 +1,22 @@
 {
-  "name_key": "creature.loup.name",
-  "race": "loup",
+  "name_key": "creature.cerf.name",
+  "race": "cerf",
   "skeleton_template": "quadrupede",
   "corps": {
     "stats": {
-      "force": 7,
+      "force": 6,
       "dexterite": 12,
-      "endurance": 5,
+      "endurance": 6,
       "volonte": 3,
       "perception": 12,
-      "charisme": 2
+      "charisme": 3
     },
     "silhouette": "quadrupede"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "proie",
   "actions": [
-    "morsure",
-    "harcelement_meute",
-    "hurlement"
+    "coup_de_defenses"
   ],
   "equipement": [],
   "ratelier": [],
@@ -28,19 +26,18 @@
   },
   "rare_chance": 0.0,
   "teinte": [
-    0.55,
+    0.6,
     0.5,
-    0.45
+    0.35
   ],
   "tags": [
     "bete",
-    "meute"
+    "proie"
   ],
   "competences": {
-    "athletisme": 25
+    "athletisme": 30
   },
   "depouille": [
     "viande_crue"
-  ],
-  "meute": "1d4+1"
+  ]
 }

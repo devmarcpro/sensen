@@ -401,6 +401,9 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+creature.cerf.name,Cerf
+creature.renard.name,Renard
+ai_profile.proie.name,Proie
 function.oisif.name,Villageois
 function.fermier.name,Fermier
 function.artisan.name,Artisan

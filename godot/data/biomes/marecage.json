@@ -49,5 +49,21 @@
     "humide",
     "marecage"
   ],
-  "couleur": "#5a6a3a"
+  "couleur": "#5a6a3a",
+  "faune": [
+    {
+      "id": "sanglier",
+      "density": 0.3
+    },
+    {
+      "id": "scorpion",
+      "density": 0.1
+    }
+  ],
+  "faune_nuit": [
+    {
+      "id": "loup",
+      "density": 0.3
+    }
+  ]
 }

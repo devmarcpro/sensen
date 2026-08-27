@@ -58,5 +58,21 @@
     "magique",
     "foret"
   ],
-  "couleur": "#4a8fa0"
+  "couleur": "#4a8fa0",
+  "faune": [
+    {
+      "id": "cerf",
+      "density": 0.4
+    },
+    {
+      "id": "renard",
+      "density": 0.2
+    }
+  ],
+  "faune_nuit": [
+    {
+      "id": "loup",
+      "density": 0.5
+    }
+  ]
 }

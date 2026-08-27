@@ -1,24 +1,22 @@
 {
-  "name_key": "creature.loup.name",
-  "race": "loup",
+  "name_key": "creature.renard.name",
+  "race": "renard",
   "skeleton_template": "quadrupede",
   "corps": {
     "stats": {
-      "force": 7,
-      "dexterite": 12,
-      "endurance": 5,
+      "force": 3,
+      "dexterite": 13,
+      "endurance": 4,
       "volonte": 3,
-      "perception": 12,
-      "charisme": 2
+      "perception": 13,
+      "charisme": 3
     },
     "silhouette": "quadrupede"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "proie",
   "actions": [
-    "morsure",
-    "harcelement_meute",
-    "hurlement"
+    "morsure"
   ],
   "equipement": [],
   "ratelier": [],
@@ -28,19 +26,18 @@
   },
   "rare_chance": 0.0,
   "teinte": [
-    0.55,
+    0.6,
     0.5,
-    0.45
+    0.35
   ],
   "tags": [
     "bete",
-    "meute"
+    "proie"
   ],
   "competences": {
-    "athletisme": 25
+    "athletisme": 28
   },
   "depouille": [
     "viande_crue"
-  ],
-  "meute": "1d4+1"
+  ]
 }

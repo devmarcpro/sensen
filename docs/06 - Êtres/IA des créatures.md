@@ -72,6 +72,9 @@ Morphologies (12) : les volants ignorent les contraintes de dénivelé
 > [!success] Codé le 2026-08-28 — profils `civil` et `garde`
 > `civil` : attend (calme), fuit dès qu'une menace est en vue (`fuir` pondéré par la santé et la proximité), ne poursuit ni n'attaque ; `garde` : attaque et poursuit les hostiles, retourne à son poste. **Camps** : `joueur`, `civil` et `hostile` — un civil et le joueur ne sont pas ennemis (`Simulation.ennemis(a, b)` : deux camps différents sont ennemis sauf joueur/civil ; la réputation qui retourne un village attend 9.C). Les `horaires` des fonctions (6-20 h poste, 20-22 h social, nuit lit) sont en données mais pas encore joués (9.B).
 
+> [!success] Codé le 2026-08-28 — étape 9.B : routines horaires, patrouilles, `errer`
+> Les profils à `horaires` (civil, garde) jouent leur **routine** sur l'horloge du monde : `"6-20": "poste"` → le PNJ rejoint son poste (là où il est né : étal, forge, champ), `"20-22": "social"` → la place du village, `"22-6": "lit"` → son lit ; le garde **patrouille** pendant son poste (un point au hasard autour de son ancrage, renouvelé à l'arrivée). Action `routine` (considération `hors_poste`) et `errer` (un pas au hasard, considération `calme`) ajoutées à l'utility ; en surface seulement. Décision : le pas de routine est **glouton** (la case adjacente la plus proche de la cible, A* sous 20 tuiles) — le graphe de POI du LOD 2 attend.
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Data-driven design]], [[Boucle de tick]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[LOD de simulation]], [[Compagnons]], [[Raids et menaces]], [[Lois et infractions]], [[Minimap et brouillard de guerre]]

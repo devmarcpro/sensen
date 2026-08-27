@@ -36,6 +36,7 @@ func _ready() -> void:
 	test_corruption()
 	test_cycle_et_meteo()
 	test_village()
+	test_village_vivant()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1382,6 +1383,84 @@ func test_village() -> void:
 	var lingot2: String = s._pile(j, "fer", "lingot").uid
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "vendre", "pnj": marchand.id, "objet": lingot2}), "le marchand à sec refuse d'acheter")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Étape 9.B : routines, patrouilles, faune
+
+func test_village_vivant() -> void:
+	var planete: Dictionary = GameData.config("planete")
+	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
+	var cell_v := Vector2i(-1, -1)
+	for y in range(480, 560):
+		for x in range(480, 560):
+			var c := Vector2i(x, y)
+			if surf.terre_a(c) and surf.poi_de(c).get("village", false):
+				cell_v = c
+				break
+		if cell_v != Vector2i(-1, -1):
+			break
+	var s := Simulation.new(4242)
+	s.charger_camp({}, cell_v)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var civils: Array = s.vivants().filter(func(x: Dictionary) -> bool: return "civil" in x.get("tags", []) and x.ai_profile == "civil")
+	verifier(civils.size() >= 2 and civils[0].has("lit") and civils[0].has("place") and civils[0].has("poste"), "les villageois ont un lit, un poste et la place")
+	# À 23 h, la routine vise le lit ; à midi, le poste ; à 21 h, la place.
+	var v: Dictionary = civils[0]
+	var profil: Dictionary = s.profils_ia.civil
+	s.horloge_monde.ticks = 23000
+	verifier(s._cible_routine(v, profil) == v.lit, "23 h : au lit")
+	s.horloge_monde.ticks = 12000
+	verifier(s._cible_routine(v, profil) == v.poste, "midi : au poste")
+	s.horloge_monde.ticks = 21000
+	verifier(s._cible_routine(v, profil) == v.place, "21 h : sur la place")
+	# Un villageois loin de sa cible s'en rapproche par la routine.
+	var loin: Vector2i = v.place + Vector2i(6, 0)
+	if s.grille.dans(loin) and not s.grille.bloque_passage(loin) and s.grille.occupant(loin).is_empty():
+		s.grille.liberer(v.pos)
+		v.pos = loin
+		s.grille.placer(v.id, loin)
+		var d0 := Grille.distance(v.pos, v.place)
+		for k in 6:
+			s._decider_ia(v, s.horloge_monde.ticks + k * 10)
+		verifier(Grille.distance(v.pos, v.place) < d0, "la routine rapproche le villageois de la place (%d → %d)" % [d0, Grille.distance(v.pos, v.place)])
+	# Le garde patrouille de jour.
+	var gardes: Array = s.vivants().filter(func(x: Dictionary) -> bool: return x.ai_profile == "garde")
+	if not gardes.is_empty():
+		var g: Dictionary = gardes[0]
+		s.horloge_monde.ticks = 12000
+		var p0: Vector2i = g.pos
+		for k in 8:
+			s._decider_ia(g, s.horloge_monde.ticks + k * 10)
+		verifier(g.pos != p0 or g.has("patrouille"), "le garde patrouille (cible de patrouille posée)")
+	# La faune : après quelques tirages, des bêtes hors de vue, sous le budget ; la nuit, plus de loups.
+	var fa: Dictionary = planete.faune
+	var n0: int = s.vivants().filter(func(x: Dictionary) -> bool: return "bete" in x.get("tags", [])).size()
+	s.horloge_monde.ticks = 12000
+	for k in 40:
+		s._tiquer_faune(12000 + k * int(fa.intervalle_ticks))
+	var betes: Array = s.vivants().filter(func(x: Dictionary) -> bool: return "bete" in x.get("tags", []) and x.get("spawn_faune", false))
+	verifier(betes.size() > 0 and betes.size() <= int(fa.budget), "des bêtes de surface sont apparues (%d, budget %d)" % [betes.size(), int(fa.budget)])
+	var en_vue := 0
+	for b in betes:
+		if s.voit(j, b.pos):
+			en_vue += 1
+	verifier(en_vue <= betes.size() / 2 + 1, "la plupart sont apparues hors de vue (%d en vue)" % en_vue)
+	var loups_jour := betes.filter(func(x: Dictionary) -> bool: return x.def == "loup").size()
+	var ok_jour := true
+	for b in betes:
+		if b.def == "loup" and b.ai_profile != "bete_sauvage":
+			ok_jour = false
+	verifier(ok_jour, "de jour, les loups sont des bêtes sauvages")
+	# Despawn : une bête éloignée hors combat disparaît.
+	if not betes.is_empty():
+		var b0: Dictionary = betes[0]
+		s.grille.liberer(b0.pos)
+		b0.pos = j.pos + Vector2i(90, 0)
+		if s.grille.dans(b0.pos):
+			s.grille.placer(b0.id, b0.pos)
+			s._tiquer_faune(12000 + 100 * int(fa.intervalle_ticks))
+			verifier(not s.entites.has(b0.id), "une bête à 90 tuiles hors combat disparaît")
 	s.monde.fermer()
 
 

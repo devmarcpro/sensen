@@ -62,5 +62,25 @@
     "froid",
     "foret"
   ],
-  "couleur": "#2f5a3a"
+  "couleur": "#2f5a3a",
+  "faune": [
+    {
+      "id": "cerf",
+      "density": 0.3
+    },
+    {
+      "id": "loup",
+      "density": 0.2
+    },
+    {
+      "id": "sanglier",
+      "density": 0.2
+    }
+  ],
+  "faune_nuit": [
+    {
+      "id": "loup",
+      "density": 0.9
+    }
+  ]
 }

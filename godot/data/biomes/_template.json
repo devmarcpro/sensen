@@ -36,5 +36,7 @@
   "filons_mult": 1.0,
   "plantes": [],
   "accidents_mult": 1.0,
-  "couleur": "#7fa64a"
+  "couleur": "#7fa64a",
+  "faune": [],
+  "faune_nuit": []
 }

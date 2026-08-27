@@ -1,0 +1,23 @@
+{
+  "name_key": "ai_profile.proie.name",
+  "considerations": {
+    "fuir": {
+      "joueur_proche": 1.2,
+      "menace_en_vue": 1.0,
+      "sante_basse": 1.0
+    },
+    "errer": {
+      "calme": 0.6
+    },
+    "attendre": {
+      "calme": 0.4
+    },
+    "retour": {
+      "loin_de_l_ancre": 0.8
+    }
+  },
+  "seuil_fuite_sante": 1.0,
+  "chute_max_degats": 5,
+  "horaires": null,
+  "chain_bonus": 0.0
+}

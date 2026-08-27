@@ -168,6 +168,9 @@
     },
     "genre": {
       "type": "string"
+    },
+    "meute": {
+      "type": "string"
     }
   },
   "required": [

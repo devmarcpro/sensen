@@ -49,5 +49,21 @@
     "froid",
     "toundra"
   ],
-  "couleur": "#dfe6ea"
+  "couleur": "#dfe6ea",
+  "faune": [
+    {
+      "id": "renard",
+      "density": 0.2
+    },
+    {
+      "id": "loup",
+      "density": 0.2
+    }
+  ],
+  "faune_nuit": [
+    {
+      "id": "loup",
+      "density": 0.8
+    }
+  ]
 }

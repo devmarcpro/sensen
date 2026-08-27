@@ -69,6 +69,9 @@ Toute créature a une faible chance (défaut **0.5 %**, pondérable par race) de
 >
 > **Profil IA des bêtes dans les arènes :** le catalogue donne `bete_sauvage` au loup et au sanglier ; le prototype les met en **`hostile`** — ce sont des loups **en chasse** ([[Cycle jour-nuit et sommeil]] : « loups en chasse » la nuit) et un sanglier **acculé** dans sa gorge, ce que la spec exige pour tester l'encerclement et la charge. Le profil est un champ de la fiche, changer d'avis = éditer un JSON. La **détection** est `Perception` tuiles avec ligne de vue ([[IA des créatures]]).
 
+> [!success] Codé le 2026-08-28 — étape 9.B : la faune de surface (`planete.faune`, biomes `faune` / `faune_nuit`)
+> Champ `faune` (`[{id, density}]`) et `faune_nuit` par biome, sur le modèle de `vegetation` ; nouveaux : cerf et renard (profil `proie` : fuient, errent), le loup et le sanglier reprennent `bete_sauvage` de jour et le loup redevient `hostile` en **meute (1d4+1)** la nuit. Spawn (décision, la note ne chiffrait rien) : toutes les 200 ticks, si moins de **12 bêtes** dans la fenêtre, une bête (ou une meute) apparaît dans l'anneau **12-40 tuiles** hors ligne de vue, tirée dans la faune du biome de la tuile — **densité ×2 la nuit** avec le volet nuit ; **despawn** au-delà de 60 tuiles hors combat (jamais de suppression brutale sous les yeux). La Discrétion +4 attend la Discrétion. Les 15 autres races du bestiaire s'ajoutent en données.
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Les trois axes — race, classe, fonction]], [[Squelette modulaire et points d'attache]]
 - **Alimente** : [[Profils de PNJ]], [[Catalogue matériaux — Paramétriques]], [[Monstres rares]], [[Actions des créatures]], [[Génération de donjon]]

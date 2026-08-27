@@ -58,5 +58,21 @@
     }
   ],
   "accidents_mult": 1.0,
-  "couleur": "#d9c27a"
+  "couleur": "#d9c27a",
+  "faune": [
+    {
+      "id": "scorpion",
+      "density": 0.4
+    },
+    {
+      "id": "aigle",
+      "density": 0.2
+    }
+  ],
+  "faune_nuit": [
+    {
+      "id": "scorpion",
+      "density": 0.6
+    }
+  ]
 }

@@ -49,5 +49,17 @@
     "desert",
     "chaud"
   ],
-  "couleur": "#5a4a4a"
+  "couleur": "#5a4a4a",
+  "faune": [
+    {
+      "id": "scorpion",
+      "density": 0.5
+    }
+  ],
+  "faune_nuit": [
+    {
+      "id": "scorpion",
+      "density": 0.6
+    }
+  ]
 }

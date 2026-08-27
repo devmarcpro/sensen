@@ -50,5 +50,25 @@
     "marecage",
     "corrompu"
   ],
-  "couleur": "#4a2a5a"
+  "couleur": "#4a2a5a",
+  "faune": [
+    {
+      "id": "scorpion",
+      "density": 0.3
+    },
+    {
+      "id": "loup",
+      "density": 0.2
+    }
+  ],
+  "faune_nuit": [
+    {
+      "id": "loup",
+      "density": 0.8
+    },
+    {
+      "id": "scorpion",
+      "density": 0.3
+    }
+  ]
 }

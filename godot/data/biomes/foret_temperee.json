@@ -70,5 +70,29 @@
     }
   ],
   "accidents_mult": 1.0,
-  "couleur": "#3f6f2a"
+  "couleur": "#3f6f2a",
+  "faune": [
+    {
+      "id": "cerf",
+      "density": 0.5
+    },
+    {
+      "id": "renard",
+      "density": 0.3
+    },
+    {
+      "id": "sanglier",
+      "density": 0.3
+    },
+    {
+      "id": "loup",
+      "density": 0.1
+    }
+  ],
+  "faune_nuit": [
+    {
+      "id": "loup",
+      "density": 0.8
+    }
+  ]
 }

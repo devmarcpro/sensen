@@ -12,7 +12,9 @@
     "farming_yield",
     "tags",
     "plantes",
-    "couleur"
+    "couleur",
+    "faune",
+    "faune_nuit"
   ],
   "properties": {
     "conditions": {

@@ -49,5 +49,25 @@
     "montagne",
     "froid"
   ],
-  "couleur": "#8a8a86"
+  "couleur": "#8a8a86",
+  "faune": [
+    {
+      "id": "aigle",
+      "density": 0.4
+    },
+    {
+      "id": "cerf",
+      "density": 0.2
+    }
+  ],
+  "faune_nuit": [
+    {
+      "id": "loup",
+      "density": 0.5
+    },
+    {
+      "id": "aigle",
+      "density": 0.2
+    }
+  ]
 }

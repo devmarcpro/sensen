@@ -49,5 +49,17 @@
     "montagne",
     "magique"
   ],
-  "couleur": "#b9a6e0"
+  "couleur": "#b9a6e0",
+  "faune": [
+    {
+      "id": "aigle",
+      "density": 0.4
+    }
+  ],
+  "faune_nuit": [
+    {
+      "id": "loup",
+      "density": 0.4
+    }
+  ]
 }
