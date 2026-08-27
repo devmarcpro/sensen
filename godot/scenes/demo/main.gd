@@ -12,6 +12,7 @@ const DELAI_PAS := 0.12   # secondes réelles entre deux pas d'une horloge de co
 const BUDGET_ATTEIGNABLE := 12   # ticks : rayon des coûts affichés
 const RAYON_VUE := 20            # tuiles dessinées autour du joueur (une cellule fait 128×128)
 var centre_terrain := Vector2i(-99, -99)   # centre de la dernière passe statique du terrain
+var vue_version := -1                      # version du champ de vue dessiné (brouillard de guerre)
 
 var sim: Simulation
 var arenes: Array[String] = []
@@ -249,8 +250,8 @@ func _process(delta: float) -> void:
 		for nom in sim.combats.keys():
 			sim.pas(nom)
 	_maj_noeuds()
-	if Grille.distance(j.pos, centre_terrain) > RAYON_VUE / 3:
-		terrain.queue_redraw()   # le joueur s'éloigne du centre de la passe statique
+	if Grille.distance(j.pos, centre_terrain) > RAYON_VUE / 3 or int(j.get("vue_version", 0)) != vue_version:
+		terrain.queue_redraw()   # le joueur s'éloigne du centre de la passe statique, ou son champ de vue a changé
 	hud.queue_redraw()
 	_maj_atteignables()
 	minuterie_ui -= delta
@@ -268,8 +269,8 @@ func _maj_noeuds() -> void:
 		vivants[e.id] = true
 		var n: Paperdoll = noeuds.get(e.id)
 		# Hors de la fenêtre de vue : le nœud reste, mais n'est ni dessiné ni redessiné.
-		if n != null and not j.is_empty() and Grille.distance(e.pos, j.pos) > RAYON_VUE:
-			n.visible = false
+		if n != null and not j.is_empty() and (Grille.distance(e.pos, j.pos) > RAYON_VUE or not sim.voit(j, e.pos)):
+			n.visible = false   # hors fenêtre, ou hors du champ de vue (brouillard de guerre)
 			continue
 		if n == null:
 			n = SCENE_CREATURE.instantiate()
@@ -531,6 +532,7 @@ func _dessiner_terrain(ci: CanvasItem) -> void:
 	var j := joueur()
 	var c: Vector2i = j.pos if not j.is_empty() else Vector2i(g.largeur / 2, g.hauteur_grille / 2)
 	centre_terrain = c
+	vue_version = int(j.get("vue_version", 0))
 	var x0 := maxi(0, c.x - RAYON_VUE)
 	var x1 := mini(g.largeur - 1, c.x + RAYON_VUE)
 	var y0 := maxi(0, c.y - RAYON_VUE)
@@ -566,16 +568,20 @@ func _zones_telegraphes() -> Dictionary:
 
 func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 	var g := sim.grille
+	if not g.decouvert.has(g.idx(t)):   # brouillard de guerre : jamais vue → rien
+		return
 	var h := g.h(t)
 	var c := _ecran(t, h)
+	var j := joueur()
+	var teinte := Color.WHITE if j.is_empty() or sim.voit(j, t) else Color(0.45, 0.45, 0.5)   # mémorisée : grisée
 	if g.bloque_passage(t):   # un mur : un bloc plein sur la tuile — le sol dessous est caché
-		_dessine_bloc(ci, g, t, c)
+		_dessine_bloc(ci, g, t, c, teinte)
 		return
 	var haut := PackedVector2Array([
 		c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0),
 		c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)])
 	var k := clampf((h - 4) / 12.0, 0.0, 1.0)   # gradient : bas sombre, sommets clairs
-	var col := Color(0.20, 0.34, 0.18).lerp(Color(0.62, 0.66, 0.42), k)
+	var col := Color(0.20, 0.34, 0.18).lerp(Color(0.62, 0.66, 0.42), k) * teinte
 	ci.draw_colored_polygon(haut, col)
 	var flanc := col.darkened(0.35)
 	var hs := g.h(t + Vector2i(0, 1)) if g.dans(t + Vector2i(0, 1)) else 0
@@ -592,15 +598,15 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 			c + Vector2(TW * 0.5, d2), c + Vector2(0, TH * 0.5 + d2)]), flanc.darkened(0.15))
 	var contenu := g.contenu_de(t)
 	if "contenant" in contenu.get("tags", []):   # coffre ou butin : une caisse
-		var cc := Color(0.55, 0.38, 0.18) if "coffre" in contenu.tags else Color(0.75, 0.65, 0.3)
+		var cc := (Color(0.55, 0.38, 0.18) if "coffre" in contenu.tags else Color(0.75, 0.65, 0.3)) * teinte
 		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc)
 		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc.darkened(0.5), false, 1.0)
 
 ## Un bloc de mur : le dessus et les deux faces avant (sud-ouest, sud-est) ; une face n'est
 ## dessinée que si la tuile devant n'est pas elle-même un mur (elle la cacherait entièrement).
-func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2) -> void:
+func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: Color = Color.WHITE) -> void:
 	var hm := int(g.contenu_de(t).get("hauteur_vue", 3)) * HSTEP
-	var haut_bloc := Color(0.5, 0.47, 0.44)
+	var haut_bloc := Color(0.5, 0.47, 0.44) * teinte
 	var sud := t + Vector2i(0, 1)
 	if not g.dans(sud) or not g.bloque_passage(sud):
 		ci.draw_colored_polygon(PackedVector2Array([   # face sud-ouest (gauche)
@@ -620,8 +626,10 @@ func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2) -> void:
 func _dessiner_hud(ci: CanvasItem) -> void:
 	if sim == null:
 		return
+	var j := joueur()
 	for e in sim.vivants():
-		_dessine_hud_entite(ci, e)
+		if j.is_empty() or sim.voit(j, e.pos):
+			_dessine_hud_entite(ci, e)
 
 
 func _dessine_hud_entite(ci: CanvasItem, e: Dictionary) -> void:
@@ -662,7 +670,7 @@ func _maj_ui() -> void:
 	var lignes: Array[String] = [tr("ui.titre") + " · " + titre]
 	var mode := tr("ui.mode.combat") if sim.en_combat(j) else tr("ui.mode.exploration").format({"tps": sim.regles.r.ticks_par_seconde_exploration})
 	lignes.append(tr("ui.horloge").format({"horloge": sim.horloge_de(j).ticks, "mode": mode}))
-	var proches := sim.vivants().filter(func(e: Dictionary) -> bool: return e.id == joueur_id or Grille.distance(e.pos, j.pos) <= 12)
+	var proches := sim.vivants().filter(func(e: Dictionary) -> bool: return e.id == joueur_id or (Grille.distance(e.pos, j.pos) <= 12 and sim.voit(j, e.pos)))
 	proches = proches.slice(0, 10)   # les êtres en vue seulement : l'écran n'est pas un registre
 	for e in proches:
 		lignes.append("  " + tr("ui.entite.ligne").format({"nom": tr(e.name_key) + ((" " + tr(e.epithete)) if e.get("rare", false) else ""), "pv": e.sante, "pv_max": e.sante_max,
@@ -714,7 +722,7 @@ func _maj_ui() -> void:
 	ui_bas.text = "\n".join(bas)
 	# Timeline : les prochaines actions de l'horloge du joueur, par compteur croissant.
 	var timeline: Array[String] = [tr("ui.timeline")]
-	var acteurs := sim.vivants().filter(func(e: Dictionary) -> bool: return e.horloge == j.horloge and (e.id == joueur_id or Grille.distance(e.pos, j.pos) <= 12))
+	var acteurs := sim.vivants().filter(func(e: Dictionary) -> bool: return e.horloge == j.horloge and (e.id == joueur_id or (Grille.distance(e.pos, j.pos) <= 12 and sim.voit(j, e.pos))))
 	acteurs.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.compteur < b.compteur)
 	for e in acteurs.slice(0, 12):
 		var suffixe := ""

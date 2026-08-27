@@ -74,6 +74,7 @@ func charger_arene(id: String) -> void:
 	ajouter(j.creature, Vector2i(int(j.pos[0]), int(j.pos[1])), "joueur")
 	for s: Dictionary in arene.spawns.enemies:
 		ajouter(s.creature, Vector2i(int(s.pos[0]), int(s.pos[1])), "ia")
+	maj_vision()
 
 
 ## Génère et charge l'étage `etage` d'un donjon (Génération de donjon). `joueur` : la fiche du
@@ -129,6 +130,7 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 			if not o.is_empty():
 				uids.append(o.uid)
 		_poser_contenant(c.pos, uids, "coffre")
+	maj_vision()
 
 
 func _reinitialiser() -> void:
@@ -171,6 +173,7 @@ func _reprendre(e: Dictionary, pos: Vector2i) -> void:
 ## Creuser : détruire un mur adjacent (Destruction du terrain) — la tuile redevient sol.
 ## Le bord de la cellule (roche) ne se creuse pas. Coût en ticks et en endurance, XP de Terrassement.
 func _creuser(e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	e["vue_sale"] = true
 	if not grille.dans(vers) or Grille.distance(e.pos, vers) != 1:
 		return false
 	var contenu := grille.contenu_de(vers)
@@ -568,7 +571,38 @@ func _sur_avancee_monde(_de: int, _a: int) -> void:
 		garde_fou -= 1
 
 
+## Brouillard de guerre (Minimap et brouillard de guerre) : le champ de vue de chaque être contrôlé
+## par un joueur — portée Perception × detection_par_perception, ligne de vue — est recalculé et
+## mémorisé sur la grille (`decouvert`). `e.vue` : index de tuile → true ; `e.vue_version` change
+## quand le champ change (le client redessine le terrain sur ce signal).
+func maj_vision() -> void:
+	for e in vivants():
+		if e.controle != "joueur":
+			continue
+		var portee := int(float(e.stats_eff.perception) * float(regles.r.engagement.detection_par_perception))
+		var vue := {}
+		for dy in range(-portee, portee + 1):
+			for dx in range(-portee, portee + 1):
+				var t: Vector2i = e.pos + Vector2i(dx, dy)
+				if grille.dans(t) and Grille.distance(e.pos, t) <= portee and grille.ligne_de_vue(e.pos, t):
+					var idx := grille.idx(t)
+					vue[idx] = true
+					grille.decouvert[idx] = true
+		if vue.size() != e.get("vue", {}).size() or e.get("vue_pos", Vector2i(-1, -1)) != e.pos or e.get("vue_sale", false):
+			e["vue_version"] = int(e.get("vue_version", 0)) + 1
+		e["vue"] = vue
+		e["vue_pos"] = e.pos
+		e["vue_sale"] = false
+
+
+## Un être voit-il la tuile `t` ? (les êtres sans champ de vue calculé — IA — voient tout : leur
+## détection a sa propre règle)
+func voit(e: Dictionary, t: Vector2i) -> bool:
+	return not e.has("vue") or e.vue.has(grille.idx(t))
+
+
 func _fin_de_pas(nom: String) -> void:
+	maj_vision()
 	# Phase 2 (Boucle de tick) : les statuts de tous les êtres de cette horloge.
 	var h: Horloge = horloge_monde if nom == "monde" else combats.get(nom, {}).get("horloge", horloge_monde)
 	for e in vivants():

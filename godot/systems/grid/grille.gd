@@ -22,6 +22,7 @@ var contenu_defs: Dictionary = {}         # id → définition (tile_contents.js
 var occupants: Dictionary = {}            # index de tuile → id d'entité
 var dep: Dictionary = {}                  # combat_rules/deplacement
 var hauteur_oeil: int = 1
+var decouvert: Dictionary = {}            # index de tuile → true : tuiles déjà vues (brouillard de guerre)
 
 
 func _init(l: int, h: int) -> void:

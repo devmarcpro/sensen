@@ -907,6 +907,34 @@ func test_paperdoll_et_tutoriels() -> void:
 	tuto.queue_free()
 
 
+# ---------------------------------------------------------------- brouillard de guerre
+
+func test_brouillard() -> void:
+	var s := Simulation.new(7)
+	s.charger_donjon("ruine", 7, 3, 1)
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	verifier(j.has("vue") and j.vue.has(s.grille.idx(j.pos)), "le joueur voit sa propre tuile")
+	verifier(s.grille.decouvert.size() == j.vue.size() and j.vue.size() > 1, "les tuiles vues sont mémorisées (%d)" % j.vue.size())
+	verifier(s.grille.decouvert.size() < s.grille.largeur * s.grille.hauteur_grille / 4, "l'étage n'est pas découvert d'emblée")
+	var portee := int(float(j.stats_eff.perception) * float(s.regles.r.engagement.detection_par_perception))
+	var trop_loin := true
+	for idx in j.vue.keys():
+		var t := Vector2i(int(idx) % s.grille.largeur, int(idx) / s.grille.largeur)
+		if Grille.distance(t, j.pos) > portee:
+			trop_loin = false
+	verifier(trop_loin, "rien au-delà de la portée de Perception (%d)" % portee)
+	var loin := Vector2i(j.pos.x + portee * 3, j.pos.y)
+	if s.grille.dans(loin):
+		verifier(not s.voit(j, loin), "une tuile lointaine n'est pas vue")
+	var v0: int = j.vue_version
+	var d0 := s.grille.decouvert.size()
+	s.maj_vision()
+	verifier(s.grille.decouvert.size() == d0 and j.vue_version == v0, "sans bouger, rien ne change (mémoire conservée, version stable)")
+	j.pos = loin if s.grille.dans(loin) and not s.grille.bloque_passage(loin) else j.pos + Vector2i(1, 0)
+	s.maj_vision()
+	verifier(s.grille.decouvert.size() >= d0 and j.vue_version == v0 + 1, "après un déplacement, la mémoire grandit et la version change")
+
+
 # ---------------------------------------------------------------- Étape 2 : génération de donjon
 
 func test_donjon() -> void:
