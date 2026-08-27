@@ -10,12 +10,29 @@ script = ExtResource("1")
 [node name="Info" type="Label" parent="CanvasLayer"]
 offset_left = 12.0
 offset_top = 10.0
-offset_right = 700.0
-offset_bottom = 400.0
+offset_right = 560.0
+offset_bottom = 380.0
+autowrap_mode = 3
 theme_override_colors/font_color = Color(0.92, 0.92, 0.88, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
 theme_override_font_sizes/font_size = 13
 text = "..."
+
+[node name="Bas" type="Label" parent="CanvasLayer"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -230.0
+offset_right = 1268.0
+offset_bottom = -8.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.92, 0.92, 0.88, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
+theme_override_font_sizes/font_size = 13
+text = "..."
+autowrap_mode = 3
+vertical_alignment = 2
 
 [node name="Droite" type="Label" parent="CanvasLayer"]
 anchors_preset = 1

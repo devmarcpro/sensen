@@ -34,6 +34,7 @@ var terrain: Terrain              # couche statique : les tuiles, dessinées une
 
 @onready var ui: Label = $CanvasLayer/Info
 @onready var ui_droite: Label = $CanvasLayer/Droite
+@onready var ui_bas: Label = $CanvasLayer/Bas   # journal + aide en bas : le centre de l'écran reste au joueur
 
 
 ## La couche statique du terrain : ses commandes de dessin persistent d'une image à l'autre.
@@ -462,14 +463,15 @@ func _maj_ui() -> void:
 			lignes.append("  " + tr("ui.capacite.visee").format({"nom": tr(plan.name_key)}))
 			if survol.x >= 0 and not g.occupant(survol).is_empty():
 				lignes.append("  " + _preview_capacite(j, plan, sim.entites[g.occupant(survol)]))
-	lignes.append("")
-	if not ecran_fin.is_empty():
-		lignes.append_array(ecran_fin)
-		lignes.append("")
-	lignes.append_array(journal)
-	if not j.vivant:
-		lignes.append(tr("journal.defaite"))
 	ui.text = "\n".join(lignes)
+	var bas: Array[String] = []
+	if not ecran_fin.is_empty():
+		bas.append_array(ecran_fin)
+		bas.append("")
+	bas.append_array(journal)
+	if not j.vivant:
+		bas.append(tr("journal.defaite"))
+	ui_bas.text = "\n".join(bas)
 	# Timeline : les prochaines actions de l'horloge du joueur, par compteur croissant.
 	var timeline: Array[String] = [tr("ui.timeline")]
 	var acteurs := sim.vivants().filter(func(e: Dictionary) -> bool: return e.horloge == j.horloge)
