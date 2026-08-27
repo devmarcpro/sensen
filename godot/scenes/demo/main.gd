@@ -33,6 +33,8 @@ var profil_sans_terrain := false   # mesure de perf : saute le dessin des tuiles
 var visee := -1                    # capacité en cours de visée (index), -1 sinon
 var ecran_fin: Array[String] = []  # récapitulatif du dernier combat (écran de fin), vide sinon
 var ecrans: Ecrans                 # inventaire, atelier, feuille (scenes/demo/ecrans.gd)
+var minimap: Minimap               # coin haut-droit (Décision — Minimap en 2D)
+var minuterie_autosave := 300.0    # autosave toutes les 5 minutes réelles (Sauvegarde)
 var creation: Dictionary = {}      # l'écran de création, tant que le personnage n'existe pas
 const STATS := ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]
 var zoom := 1.0
@@ -106,6 +108,11 @@ func _ready() -> void:
 	ecrans = Ecrans.new()
 	ecrans.main = self
 	add_child(ecrans)
+	minimap = Minimap.new()
+	minimap.main = self
+	$CanvasLayer.add_child(minimap)
+	EventBus.chunk_explored.connect(func(_c: Vector2i) -> void: minimap.rafraichir(true))
+	EventBus.sauvegarde_faite.connect(func(nom: String) -> void: _log(tr("journal.sauvegarde").format({"nom": nom})))
 	var tutoriels := Tutoriels.new()
 	tutoriels.afficher = func(texte: String) -> void: _log("💡 " + texte)
 	add_child(tutoriels)
@@ -305,6 +312,11 @@ func _process(delta: float) -> void:
 	if minuterie_ui <= 0.0 and not profil_sans_ui:
 		minuterie_ui = 0.05
 		_maj_ui()
+		minimap.rafraichir()
+	minuterie_autosave -= delta
+	if minuterie_autosave <= 0.0:
+		minuterie_autosave = 300.0
+		sim.sauvegarder()
 	queue_redraw()
 
 
@@ -433,6 +445,25 @@ func _unhandled_input(ev: InputEvent) -> void:
 				ecrans.basculer("atelier")
 			KEY_I:
 				ecrans.basculer("inventaire")
+			KEY_N:
+				if ev.shift_pressed:
+					minimap.visible = not minimap.visible
+				else:
+					minimap.cycler_zoom()
+				minimap.rafraichir(true)
+			KEY_F6:
+				if not sim.sauvegarder():
+					_log(tr("journal.sauvegarde_impossible"))
+			KEY_F7:
+				if sim.charger_sauvegarde():
+					joueur_id = ""
+					for e in sim.vivants():
+						if e.controle == "joueur":
+							joueur_id = e.id
+					_apres_changement_de_grille()
+					_log(tr("journal.chargement"))
+				else:
+					_log(tr("journal.pas_de_sauvegarde"))
 			KEY_L:
 				if sim.attente.has(joueur_id) and not j.is_empty():
 					for uid in j.sac:

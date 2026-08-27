@@ -98,7 +98,7 @@ journal.condition_fausse,{capacite} ne part pas : {condition} n'est pas remplie 
 capacite.etincelle.name,Étincelle
 capacite.gel_en_ligne.name,Gel en ligne
 capacite.baume.name,Baume
-ui.aide.capacites,I : inventaire · F : atelier · C : feuille (Échap ferme) · F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
+ui.aide.capacites,I : inventaire · F : atelier · C : feuille (Échap ferme) · N : zoom minimap (⇧N : masquer) · F6 sauvegarder · F7 charger · F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
 ui.capacite,{touche} {nom} [{modules}] : {forme} portée {pmin}-{pmax} taille {taille} · {ticks} ticks · {ressource} {monnaie} · {des}{bonus}
 ui.capacite.visee,VISÉE : {nom} — cliquer une tuile (Échap annule)
 ui.capacite.preview,{nom} sur {def} : {des}{bonus} ×{dom} → zone {zone} ×{mult} − armure {armure} ⇒ {min}–{max}
@@ -401,6 +401,10 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+journal.sauvegarde,partie sauvegardée ({nom})
+journal.sauvegarde_impossible,on ne sauvegarde qu'en surface (au camp ou à pied)
+journal.chargement,partie chargée
+journal.pas_de_sauvegarde,aucune sauvegarde
 biome.foret_de_mana.name,Forêt de mana
 biome.desert_de_cendres.name,Désert de cendres
 biome.toundra.name,Toundra

@@ -37,6 +37,9 @@ connexion, exporté à la déconnexion).
 
 **Performance ([[Réseau et sauvegarde — performance]]) :** sérialisation en thread, écriture atomique, l'autosave ne bloque jamais le jeu (copie-sur-écriture).
 
+> [!success] Codé le 2026-08-28 — étape 8.2c, `systems/sauvegarde.gd`, `Simulation.sauvegarder / charger_sauvegarde`
+> Le principe tel quel : **seed + liste des modifications**, un dossier par monde (`user://sauvegardes/<nom>/`), écriture atomique (tmp + rename). Fichiers : `world.json` (graine, temps en ticks, compteurs, cellule du camp), `surface.json` (par cellule : modifications de tuiles, tuiles découvertes, contenants, êtres endormis, chunks explorés — jamais ce qui se regénère), `entities.json` (les êtres et contenants de la fenêtre courante), `items.json` (les instances d'objets), `players/joueur.json` (fiche et être du joueur). **Décisions** : JSON lisible plutôt que `.bin` tant qu'on prototype (les Vector2i et clés non textuelles sont encodés explicitement) ; on ne sauvegarde **qu'en surface** (au camp ou à pied) — un donjon en cours n'est pas persisté, l'expédition reprend au camp ; **autosave toutes les 5 minutes réelles** et à chaque retour d'expédition ; F6 sauvegarde, F7 charge. Le profil multi-joueurs et les modèles sculptés n'existent pas.
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Arborescence du projet]]
 - **Alimente** : [[Multijoueur]], [[Abstraction hors-site]], [[Minimap et brouillard de guerre]], [[Donjons — structure et intégration]]

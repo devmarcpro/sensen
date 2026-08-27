@@ -13,6 +13,8 @@ signal combat_started(horloge: String, participants: Array)
 signal combat_ended(horloge: String)
 signal expedition_terminee(recap: Dictionary)             # sortie du donjon : le jalon « ressortir »
 signal fenetre_recentree(origine: Vector2i)               # la fenêtre du monde s'est recentrée (Monde) : le client rebâtit
+signal chunk_explored(chunk: Vector2i)                    # un chunk de 32×32 vient d'être vu (minimap)
+signal sauvegarde_faite(nom: String)                      # la partie a été écrite sur disque
 signal action_engaged(id: String, action: Dictionary)      # télégraphe : intention visible
 signal action_resolved(id: String, action: Dictionary)
 signal journal(cle: String, params: Dictionary)             # une ligne de journal, localisée côté client

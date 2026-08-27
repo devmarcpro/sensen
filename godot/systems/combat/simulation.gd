@@ -611,6 +611,120 @@ func _dormir(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	return true
 
 
+# ---------------------------------------------------------------- sauvegarde (Sauvegarde, E.10)
+
+## Sauvegarde la partie (surface seulement : au camp ou à pied). Retourne vrai si tout est écrit.
+func sauvegarder(nom: String = "monde") -> bool:
+	if lieu != "camp" or monde == null:
+		return false
+	monde.capturer(grille)
+	var j := {}
+	for e in entites.values():
+		if e.controle == "joueur":
+			j = e
+	var instances := {}
+	for uid in objets.keys():
+		instances[uid] = objets[uid]
+	var surface := {}
+	for cell in monde.modifications.keys():
+		surface[cell] = {"modifications": monde.modifications[cell], "decouvert": monde.decouvert.get(cell, {}), "contenants": monde.contenants_hors.get(cell, {}), "dormants": monde.dormants.get(cell, [])}
+	for cell in monde.decouvert.keys():
+		if not surface.has(cell):
+			surface[cell] = {"modifications": {}, "decouvert": monde.decouvert[cell], "contenants": monde.contenants_hors.get(cell, {}), "dormants": monde.dormants.get(cell, [])}
+	for cell in monde.contenants_hors.keys():
+		if not surface.has(cell):
+			surface[cell] = {"modifications": {}, "decouvert": {}, "contenants": monde.contenants_hors[cell], "dormants": monde.dormants.get(cell, [])}
+	for cell in monde.dormants.keys():
+		if not surface.has(cell):
+			surface[cell] = {"modifications": {}, "decouvert": {}, "contenants": {}, "dormants": monde.dormants[cell]}
+	var autres := {}
+	var ordre_autres: Array = []
+	for id in ordre:
+		if entites[id].controle != "joueur":
+			autres[id] = entites[id]
+			ordre_autres.append(id)
+	var contenants_monde := {}
+	for gi in contenants.keys():
+		contenants_monde[grille.pos_de(int(gi))] = contenants[gi]
+	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "graine": graine, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
+		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores})
+	ok = Sauvegarde.ecrire(nom, "surface.json", surface) and ok
+	ok = Sauvegarde.ecrire(nom, "entities.json", {"entites": autres, "ordre": ordre_autres, "contenants": contenants_monde}) and ok
+	ok = Sauvegarde.ecrire(nom, "items.json", instances) and ok
+	ok = Sauvegarde.ecrire(nom, "players/joueur.json", {"fiche": fiche_joueur, "etre": j}) and ok
+	if ok:
+		EventBus.emettre(&"sauvegarde_faite", [nom])
+	return ok
+
+
+## Recharge une partie : le monde depuis la graine, puis les modifications, les êtres et le joueur.
+func charger_sauvegarde(nom: String = "monde") -> bool:
+	var w: Variant = Sauvegarde.lire(nom, "world.json")
+	if w == null:
+		return false
+	var surface: Dictionary = Sauvegarde.lire(nom, "surface.json")
+	var ent: Dictionary = Sauvegarde.lire(nom, "entities.json")
+	var instances: Dictionary = Sauvegarde.lire(nom, "items.json")
+	var pj: Dictionary = Sauvegarde.lire(nom, "players/joueur.json")
+	graine = int(w.graine)
+	des = Des.new(graine)
+	fiche_joueur = pj.get("fiche", {})
+	camp_sauve = {}
+	etages_visites.clear()
+	expedition = {}
+	charger_camp()   # regénère le monde depuis la graine
+	# Les objets d'abord (les êtres y font référence par uid).
+	for uid in instances.keys():
+		objets[uid] = instances[uid]
+		items[uid] = instances[uid]
+	monde.cellule_camp = w.cellule_camp
+	monde.explores = w.get("explores", {})
+	for cell in surface.keys():
+		var sc: Dictionary = surface[cell]
+		if not sc.modifications.is_empty():
+			monde.modifications[cell] = sc.modifications
+		if not sc.decouvert.is_empty():
+			monde.decouvert[cell] = sc.decouvert
+		if not sc.contenants.is_empty():
+			monde.contenants_hors[cell] = sc.contenants
+		if not sc.dormants.is_empty():
+			monde.dormants[cell] = sc.dormants
+	# Le joueur, puis la fenêtre autour de lui (les cellules mémorisées y sont rejouées).
+	var joueur_sauve: Dictionary = pj.etre
+	_reinitialiser()
+	monde.centre = Vector2i(-1, -1)
+	grille = monde.fenetre(monde.cellule_de(joueur_sauve.pos), GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
+	entites[joueur_sauve.id] = joueur_sauve
+	ordre.append(joueur_sauve.id)
+	for id in ent.ordre:
+		entites[id] = ent.entites[id]
+		ordre.append(id)
+	for pos in ent.contenants.keys():
+		if grille.dans(pos):
+			contenants[grille.idx(pos)] = ent.contenants[pos]
+			if grille.contenu_de(pos).is_empty():
+				grille.poser_contenu(pos, "butin")
+	for cell in monde.contenants_hors.keys().duplicate():
+		if absi(cell.x - monde.centre.x) <= monde.rayon and absi(cell.y - monde.centre.y) <= monde.rayon:
+			for li in monde.contenants_hors[cell].keys():
+				var pos: Vector2i = monde.pos_monde(cell, Vector2i(int(li) % monde.taille, int(li) / monde.taille))
+				contenants[grille.idx(pos)] = monde.contenants_hors[cell][li]
+			monde.contenants_hors.erase(cell)
+	for id in ordre:
+		if entites[id].vivant:
+			grille.placer(id, entites[id].pos)
+	grille.modifies.clear()
+	horloge_monde.ticks = int(w.ticks)
+	prochain_donjon = int(w.prochain_donjon)
+	_n_entites = int(w.n_entites)
+	camp_sauve = {"entree": w.camp.entree, "biome": str(w.camp.biome), "cellule": w.camp.cellule}
+	lieu = "camp"
+	maj_vision()
+	monde.pregenerer_voisins()
+	EventBus.emettre(&"fenetre_recentree", [grille.origine])
+	return true
+
+
 # ---------------------------------------------------------------- craft compositionnel
 
 ## Façonner un composant : une unité de la famille, à la station de la recette ; le composant porte les
@@ -949,6 +1063,7 @@ func _sortir(e: Dictionary) -> bool:
 	if not camp_sauve.is_empty():   # le camp est le point d'ancrage entre deux expéditions (étape 7)
 		EventBus.emettre(&"journal", [&"journal.retour_camp", {}])
 		charger_camp(e)
+		sauvegarder()   # autosave au retour (Sauvegarde : sur événements clés)
 		return true
 	var suivant: int = int(donjon.id) + 1
 	charger_donjon(donjon.theme, int(donjon.graine), suivant, 1, e)
@@ -1448,6 +1563,9 @@ func maj_vision() -> void:
 					grille.decouvert[idx] = true
 		if vue.size() != e.get("vue", {}).size() or e.get("vue_pos", Vector2i(-1, -1)) != e.pos or e.get("vue_sale", false):
 			e["vue_version"] = int(e.get("vue_version", 0)) + 1
+			if lieu == "camp" and monde != null:   # exploration à résolution chunk (minimap)
+				for ch in monde.explorer(vue, grille):
+					EventBus.emettre(&"chunk_explored", [ch])
 		e["vue"] = vue
 		e["vue_pos"] = e.pos
 		e["vue_sale"] = false

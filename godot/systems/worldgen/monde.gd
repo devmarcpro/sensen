@@ -20,6 +20,8 @@ var modifications: Dictionary = {}     # Vector2i → {idx local: {h, contenu, m
 var decouvert: Dictionary = {}         # Vector2i → {idx local: true}
 var contenants_hors: Dictionary = {}   # Vector2i → {idx local: [uids]}
 var dormants: Dictionary = {}          # Vector2i → [êtres] hors fenêtre
+var explores: Dictionary = {}          # Vector2i (chunk de 32) → true : bit d'exploration (minimap, sauvegardé)
+var teintes: Dictionary = {}           # Vector2i (chunk) → Color : teinte dominante, calculée une fois
 var mutex := Mutex.new()
 var tache: int = -1                    # tâche WorkerThreadPool de pré-génération en cours (−1 : aucune)
 
@@ -151,6 +153,58 @@ func capturer(g: Grille) -> void:
 			decouvert[cell] = {}
 		decouvert[cell][idx_local(p)] = true
 	g.modifies.clear()
+
+
+## Marque explorés les chunks touchés par un champ de vue ; retourne ceux qui viennent de l'être.
+func explorer(vue: Dictionary, g: Grille) -> Array[Vector2i]:
+	var nouveaux: Array[Vector2i] = []
+	for gi in vue.keys():
+		var p := g.pos_de(int(gi))
+		var ch := Vector2i(floori(float(p.x) / 32.0), floori(float(p.y) / 32.0))
+		if not explores.has(ch):
+			explores[ch] = true
+			nouveaux.append(ch)
+	return nouveaux
+
+
+## La teinte dominante d'un chunk de 32×32 : matériau de sol majoritaire (eau : bleu), ombré par la
+## hauteur moyenne ; calculée une fois depuis la cellule générée.
+func couleur_chunk(ch: Vector2i) -> Color:
+	if teintes.has(ch):
+		return teintes[ch]
+	var cell := Vector2i(floori(float(ch.x * 32) / float(taille)), floori(float(ch.y * 32) / float(taille)))
+	var e := cellule(cell)
+	var base := ch * 32 - cell * taille
+	var comptes := {}
+	var eau := 0
+	var somme_h := 0
+	for y in 32:
+		for x in 32:
+			var i := (base.y + y) * taille + base.x + x
+			somme_h += int(e.hauteurs[i])
+			if e.eau.has(i):
+				eau += 1
+			else:
+				var m: String = str(e.sols.get(i, "terre"))
+				comptes[m] = int(comptes.get(m, 0)) + 1
+	var col := Color(0.18, 0.35, 0.6)
+	if eau < 512:
+		var meilleur := ""
+		var n := -1
+		for m in comptes.keys():
+			if int(comptes[m]) > n:
+				n = int(comptes[m])
+				meilleur = m
+		var mat: Dictionary = GameData.catalogues.materials.get(meilleur, {})
+		col = Color.html(str(mat.color)) if not mat.is_empty() else Color(0.4, 0.5, 0.3)
+		if meilleur.begins_with("terre"):
+			col = col.lerp(Color(0.35, 0.5, 0.25), 0.35)
+		if e.arbres.size() > 300:
+			col = col.lerp(Color(0.2, 0.4, 0.15), 0.3)
+	var h_moy := float(somme_h) / 1024.0
+	col = col.darkened(clampf((10.0 - h_moy) * 0.06, -0.3, 0.4)) if h_moy < 10.0 else col.lightened(clampf((h_moy - 10.0) * 0.05, 0.0, 0.3))
+	teintes[ch] = col
+	return col
 
 
 func dans_fenetre(p: Vector2i) -> bool:

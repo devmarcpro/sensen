@@ -24,6 +24,9 @@ etape: 8
 - **Ombrage de hauteur : calculé au chargement du chunk**, stocké avec la teinte dominante (une valeur par chunk, recalculée à la mutation). La minimap n'a pas besoin d'un shader dédié — c'est une texture mise à jour incrémentalement ([[Décision — Structure de données de la grille]]).
 - **Affichage : 3 niveaux de zoom** (×1 proche ≈ 32 chunks visibles, ×2, ×4), coin haut-droit, taille fixe 256×256 px, masquable. Le zoom ×4 rejoint visuellement l'échelle de la carte du monde ([[Carte du monde]]) — la transition entre les deux est lisible.
 
+> [!success] Codé le 2026-08-28 — `scenes/demo/minimap.gd`
+> Coin haut-droit, **256×256**, masquable (⇧N), **trois zooms** (N : ×1 = 32 chunks visibles, ×2, ×4), une **teinte dominante par chunk** (matériau de sol majoritaire, bleu pour l'eau, ombrage par la hauteur moyenne — calculée une fois par chunk depuis la cellule générée, `Monde.couleur_chunk`), **un bit d'exploration par chunk** (`Monde.explores`, posé quand le champ de vue touche le chunk, signal `chunk_explored`), les êtres en vue en points (état live). Surface seulement pour l'instant ; le fog par étage de donjon et la transition vers la carte du monde attendent 8.3.
+
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Minimap et brouillard de guerre]], [[Grille continue]]
 - **Alimente** : [[Écrans d'interface]], [[Sauvegarde]]

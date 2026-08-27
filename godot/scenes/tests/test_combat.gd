@@ -31,6 +31,7 @@ func _ready() -> void:
 	test_assemblage()
 	test_desequiper_jeter()
 	test_surface()
+	test_sauvegarde()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1181,6 +1182,47 @@ func test_surface() -> void:
 		if int(s.grille.hauteurs[i]) != 10:
 			accidente = true
 	verifier(accidente, "le camp a du relief posé")
+
+
+# ---------------------------------------------------------------- Étape 8.2c : minimap (exploration par chunk) et sauvegarde
+
+func test_sauvegarde() -> void:
+	var s := Simulation.new(37)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	verifier(s.monde.explores.size() > 0, "des chunks explorés dès l'arrivée (%d)" % s.monde.explores.size())
+	var ch: Vector2i = s.monde.explores.keys()[0]
+	var col: Color = s.monde.couleur_chunk(ch)
+	verifier(col.a == 1.0 and (col.r + col.g + col.b) > 0.0 and s.monde.couleur_chunk(ch) == col, "une teinte dominante par chunk, calculée une fois")
+	# On modifie le monde, on remplit le sac, on avance le temps, on sauvegarde.
+	s._donner_materiau(j, "chene", 2, "planche")
+	var mur: Vector2i = j.pos + Vector2i(0, -1)
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "poser_mur", "vers": mur})
+	var dague := s.generer_objet("proto_dague", 1, {}, "commun", 0)
+	j.sac.append(dague.uid)
+	s.horloge_monde.avancer(1234)
+	var pos0: Vector2i = j.pos
+	var sac0: int = j.sac.size()
+	verifier(s.sauvegarder("test_sensen"), "sauvegarder au camp")
+	verifier(Sauvegarde.existe("test_sensen"), "le dossier user://sauvegardes/test_sensen/ existe")
+	var w: Dictionary = Sauvegarde.lire("test_sensen", "world.json")
+	verifier(int(w.graine) == 37 and int(w.ticks) == s.horloge_monde.ticks and w.cellule_camp == s.monde.cellule_camp, "world.json : graine, ticks, cellule du camp")
+	# Une simulation neuve recharge : le mur, le sac, la position, le temps, l'exploration.
+	var s2 := Simulation.new(1)
+	verifier(s2.charger_sauvegarde("test_sensen"), "charger la sauvegarde dans une simulation neuve")
+	var j2: Dictionary = s2.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	verifier(j2.pos == pos0 and j2.sac.size() == sac0 and dague.uid in j2.sac and s2.items.has(dague.uid), "le joueur, son sac et ses objets sont revenus")
+	verifier(s2.grille.contenu_de(mur).get("tags", []).has("construit") and s2.grille.materiau_de(mur) == "chene", "le mur posé est là (seed + modifications)")
+	verifier(s2.horloge_monde.ticks == s.horloge_monde.ticks and s2.graine == 37, "le temps et la graine")
+	verifier(s2.monde.explores.size() == s.monde.explores.size(), "les chunks explorés (%d)" % s2.monde.explores.size())
+	verifier(s2.grille.decouvert.size() > 10000, "la cellule du camp reste découverte")
+	# Impossible en donjon.
+	var s3 := Simulation.new(2)
+	s3.charger_donjon("ruine", 2, 9, 1)
+	verifier(not s3.sauvegarder("test_sensen"), "pas de sauvegarde en donjon")
+	s.monde.fermer()
+	s2.monde.fermer()
 
 
 # ---------------------------------------------------------------- Étape 7.1 : le camp de base
