@@ -1,0 +1,12 @@
+{
+  "name_key": "boutique.herboriste.name",
+  "inventaire": [
+    "baies",
+    "baies",
+    "champignon_bleu",
+    "tomate",
+    "chou",
+    "antidote"
+  ],
+  "tags": []
+}

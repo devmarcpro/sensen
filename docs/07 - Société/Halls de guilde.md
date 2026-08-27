@@ -20,6 +20,9 @@ Le contenu de guilde vient au joueur.
 > [!success] Précisé le 2026-08-28
 > Les tables de sculpture sont abandonnées ([[Tables de sculpture]]) : les rangs 3 et 4 ne débloquent plus d'accès à ces tables ; leurs autres récompenses restent.
 
+> [!success] Codé le 2026-08-28
+> **Sur son territoire** : le meuble *Hall de guilde* (objet `meuble_hall_de_guilde`, recette à l'établi : 6 planches) se pose si le joueur est au moins **Adepte (rang 3)** dans une guilde ; il prend la guilde du rang le plus haut, fait apparaître un maître de guilde à côté (les quêtes de cette guilde sans se déplacer) et compte comme **structure spéciale (25 or/semaine)**. Démonter le hall renvoie le maître. Gabarits par guilde : guerriers (`chasse_prime`, `donjon`), chasseurs (`chasse_bete`, `traque`), prospecteurs (`purge`) ; les autres guildes attendent leurs patterns (transport, construction…).
+
 ## Liens
 - **Dépend de** : [[Quêtes et guildes]], [[Expansion territoriale]], [[Construction cadrée]]
 - **Alimente** : [[Entretien et taxes]]

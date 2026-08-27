@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.hall_de_guilde.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "hall_de_guilde",
+  "tags": [
+    "meuble",
+    "posable"
+  ]
+}

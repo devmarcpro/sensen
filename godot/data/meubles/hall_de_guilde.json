@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.hall_de_guilde.name",
+  "type_meuble": "hall",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 0,
+  "luminosite": 1,
+  "bonus_humeur": 2,
+  "couleur": "#8a5a9a"
+}

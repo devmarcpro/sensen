@@ -1,0 +1,19 @@
+{
+  "guild": "prospecteurs",
+  "rank_min": 1,
+  "pattern": "donjon",
+  "target_selector": {
+    "tags_any": [
+      "donjon"
+    ]
+  },
+  "count_range": [
+    1,
+    1
+  ],
+  "reward": {
+    "gold_per_target_level": 60,
+    "guild_xp": 25
+  },
+  "text_key": "quest.purge.text"
+}

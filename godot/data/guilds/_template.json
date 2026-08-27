@@ -1,0 +1,5 @@
+{
+  "_doc": "Guilde (docs: Quêtes et guildes, Halls de guilde). Les gabarits de quêtes portent `guild` ; un hall n'offre que les gabarits de sa guilde.",
+  "name_key": "guilde.<id>.name",
+  "tags": []
+}

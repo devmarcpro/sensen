@@ -493,6 +493,29 @@ func _poser(e: Dictionary, uid: String, vers: Vector2i, tick: int) -> bool:
 			contenants[idx] = []
 		if str(m.type_meuble) == "etal" and monde != null:
 			territoire.etals[_pm(vers)] = true
+		if str(m.type_meuble) == "hall":
+			var guilde := _meilleure_guilde(e)
+			if guilde.is_empty():
+				grille.contenu[idx] = 0
+				grille.meubles.erase(idx)
+				EventBus.emettre(&"journal", [&"journal.hall_refuse", {}])
+				return false
+			var vil: Dictionary = _ry().villes
+			for d in Grille.DIRS:
+				var q: Vector2i = vers + d
+				if grille.dans(q) and not grille.bloque_passage(q) and grille.occupant(q).is_empty():
+					var maitre := ajouter(str(vil.creature_hall), q, "ia")
+					_habiller_pnj(maitre, GameData.entree("creatures", str(vil.creature_hall)))
+					maitre["guilde"] = guilde
+					maitre["hall"] = vers
+					maitre["lit"] = q
+					maitre["poste"] = q
+					maitre.ancre = q
+					break
+			if not territoire.has("halls"):
+				territoire["halls"] = {}
+			territoire.halls[_pm(vers)] = guilde
+			EventBus.emettre(&"journal", [&"journal.hall_pose", {"guilde": "guilde.%s.name" % guilde}])
 	else:
 		if monde != null and str(monde.claims.get(monde.cellule_de(vers), {}).get("role", "base")) == "champs" and str(it.station) in _ry().stations_lourdes:
 			EventBus.emettre(&"journal", [&"journal.station_refusee", {}])
@@ -554,6 +577,13 @@ func _demonter(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	if monde != null:
 		territoire.etals.erase(_pm(vers))
 		territoire.cultures.erase(_pm(vers))
+		if territoire.get("halls", {}).has(_pm(vers)):
+			for x in vivants():
+				if x.get("hall", Vector2i(-1, -1)) == vers:
+					x.vivant = false
+					grille.liberer(x.pos)
+			EventBus.emettre(&"journal", [&"journal.hall_demonte", {"guilde": "guilde.%s.name" % str(territoire.halls[_pm(vers)])}])
+			territoire.halls.erase(_pm(vers))
 	grille.meubles.erase(idx)
 	grille.stations_fixes.erase(idx)
 	grille.materiaux.erase(idx)
@@ -954,6 +984,18 @@ func _assigner(e: Dictionary, pnj_id: String, fonction: String, tick: int) -> bo
 	return true
 
 
+## La guilde où le joueur a le rang le plus haut, si ce rang atteint le minimum d'un hall (Halls de guilde).
+func _meilleure_guilde(e: Dictionary) -> String:
+	var meilleure := ""
+	var rang_max := -1
+	for gid in e.get("guildes", {}).keys():
+		var rang := int(e.guildes[gid].get("rang", 0))
+		if rang > rang_max:
+			rang_max = rang
+			meilleure = str(gid)
+	return meilleure if rang_max >= int(_ry().villes.hall_rang_min) else ""
+
+
 func desassigner(e: Dictionary, pnj_id: String) -> bool:
 	var x: Dictionary = entites.get(pnj_id, {})
 	if x.is_empty() or not x.has("assignation"):
@@ -1070,7 +1112,7 @@ func _semaine_territoire(e: Dictionary) -> void:
 
 
 func _structures_speciales() -> int:
-	var n := 0
+	var n: int = territoire.get("halls", {}).size()
 	if monde == null:
 		return 0
 	for gi in grille.stations_fixes.keys():
@@ -2084,8 +2126,13 @@ func quetes_offertes(pnj: Dictionary, e: Dictionary) -> Array:
 		pnj["quetes"] = []
 		var rng := RandomNumberGenerator.new()
 		rng.seed = hash([graine, "quetes", pnj.id, semaine])
-		var ids: Array = GameData.catalogues.quest_templates.keys()
+		var ids: Array = []
+		for gid0 in GameData.catalogues.quest_templates.keys():
+			if not pnj.has("guilde") or str(GameData.catalogues.quest_templates[gid0].guild) == str(pnj.guilde):
+				ids.append(gid0)
 		ids.sort()
+		if ids.is_empty():
+			return pnj.quetes
 		for k in int(regles.r.guildes.quetes_par_semaine):
 			var gid: String = ids[rng.randi_range(0, ids.size() - 1)]
 			var g: Dictionary = GameData.catalogues.quest_templates[gid]
@@ -2993,6 +3040,15 @@ func _peupler_fenetre() -> void:
 					if pj.has("fonction"):
 						x.fonction = str(pj.fonction)
 					_habiller_pnj(x, GameData.entree("creatures", str(pj.creature)), str(v.culture))
+					if not str(pj.get("boutique", "")).is_empty():   # une boutique typée : le stock du type
+						x["boutique"] = str(pj.boutique)
+						x.stock = []
+						for base in GameData.entree("shop_types", str(pj.boutique)).inventaire:
+							var ob := generer_objet(str(base), 1, {}, "commun", 0)
+							if not ob.is_empty():
+								x.stock.append(ob.uid)
+					if not str(pj.get("guilde", "")).is_empty():
+						x["guilde"] = str(pj.guilde)
 					x["lit"] = monde.pos_monde(cell, pj.lit)
 					x["poste"] = pos
 					x["place"] = monde.pos_monde(cell, v.centre)

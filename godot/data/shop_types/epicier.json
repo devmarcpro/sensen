@@ -1,0 +1,14 @@
+{
+  "name_key": "boutique.epicier.name",
+  "inventaire": [
+    "pain",
+    "pain",
+    "ration_de_voyage",
+    "ration_de_voyage",
+    "ble",
+    "carotte",
+    "oignon",
+    "pomme_de_terre"
+  ],
+  "tags": []
+}

@@ -549,21 +549,52 @@ func _poser_village(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator) -
 				e.hauteurs[i] = H_BASE
 				_degager(e, i)
 	# Les bâtiments autour de la place, dans les 8 directions, sans chevauchement.
-	var ids: Array = bats.keys()
+	var ids: Array = []
+	for bid0 in bats.keys():
+		if not ("ville" in bats[bid0].get("tags", [])):
+			ids.append(bid0)
 	ids.sort()
-	var nb := rng.randi_range(int(vc.batiments[0]), int(vc.batiments[1]))
+	# La taille de l'agglomération : celle du royaume pour sa capitale, un hameau sinon (Génération des royaumes PNJ).
+	var villes: Dictionary = GameData.config("combat_rules").royaume.villes
+	var taille_ville := "hameau"
+	if not roy.is_empty() and roy.capital_poi == cell and villes.has(str(roy.taille)):
+		taille_ville = str(roy.taille)
+	var tv: Dictionary = villes[taille_ville]
+	e.village["taille"] = taille_ville
+	var nb := rng.randi_range(int(tv.batiments[0]), int(tv.batiments[1]))
+	var nb_boutiques := rng.randi_range(int(tv.boutiques[0]), int(tv.boutiques[1]))
+	var nb_halls := rng.randi_range(int(tv.halls[0]), int(tv.halls[1]))
+	var types_boutiques: Array = GameData.catalogues.shop_types.keys()
+	types_boutiques.sort()
+	var guildes: Array = GameData.catalogues.guilds.keys()
+	guildes.sort()
+	var plan_bats: Array = []   # [bid, boutique, guilde] — sans doublon de type par ville
+	for k in nb_boutiques:
+		if types_boutiques.is_empty():
+			break
+		var t: String = str(types_boutiques[rng.randi() % types_boutiques.size()])
+		types_boutiques.erase(t)
+		plan_bats.append(["echoppe", t, ""])
+	for k in nb_halls:
+		if guildes.is_empty():
+			break
+		var g: String = str(guildes[rng.randi() % guildes.size()])
+		guildes.erase(g)
+		plan_bats.append(["hall", "", g])
+	if plan_bats.is_empty():
+		plan_bats.append(["echoppe", "", ""])
+	while plan_bats.size() < nb:
+		plan_bats.append([str(ids[rng.randi_range(0, ids.size() - 1)]), "", ""])
 	var dirs := [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(1, 1), Vector2i(-1, -1)]
 	var pris: Array[Rect2i] = []
-	var a_echoppe := false
-	for k in nb:
-		var bid: String = "echoppe" if not a_echoppe else str(ids[rng.randi_range(0, ids.size() - 1)])
-		if bid == "echoppe":
-			a_echoppe = true
+	for k in plan_bats.size():
+		var bid: String = str(plan_bats[k][0])
 		var plan: Array = bats[bid].plan
 		var w: int = str(plan[0]).length()
 		var h: int = plan.size()
 		var d: Vector2i = dirs[k % dirs.size()]
-		var origine := centre + d * (rayon + 3) - Vector2i(w / 2, h / 2) + Vector2i(rng.randi_range(-2, 2), rng.randi_range(-2, 2))
+		var anneau: int = rayon + 3 + 9 * (k / dirs.size())   # au-delà de huit bâtiments, un second anneau
+		var origine := centre + d * anneau - Vector2i(w / 2, h / 2) + Vector2i(rng.randi_range(-2, 2), rng.randi_range(-2, 2))
 		var r := Rect2i(origine, Vector2i(w, h))
 		if origine.x < 2 or origine.y < 2 or r.end.x >= taille - 2 or r.end.y >= taille - 2:
 			continue
@@ -580,6 +611,8 @@ func _poser_village(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator) -
 			continue
 		pris.append(r)
 		_poser_batiment(e, bats[bid], origine, palette, bid)
+		e.village.batiments.back()["boutique"] = str(plan_bats[k][1])
+		e.village.batiments.back()["guilde"] = str(plan_bats[k][2])
 		# Le chemin du bâtiment à la place.
 		var porte: Vector2i = e.village.batiments.back().porte
 		var q := porte + Vector2i(0, 1)
@@ -596,8 +629,12 @@ func _poser_village(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator) -
 	var residents: Dictionary = vc.residents
 	for bat in e.village.batiments:
 		var fiche := str(residents.get(bat.id, "villageois"))
+		if not str(bat.get("guilde", "")).is_empty():
+			fiche = str(villes.creature_hall)
+		elif not str(bat.get("boutique", "")).is_empty():
+			fiche = str(villes.creature_boutique)
 		for lit in bat.lits:
-			e.village.pnj.append({"creature": fiche, "pos": lit, "lit": lit})
+			e.village.pnj.append({"creature": fiche, "pos": lit, "lit": lit, "boutique": str(bat.get("boutique", "")), "guilde": str(bat.get("guilde", ""))})
 			if bat.id == "echoppe":
 				break
 		if bat.id == "maison" and rng.randf() < float(vc.get("forgeron_chance", 0.5)) and not bat.lits.is_empty():

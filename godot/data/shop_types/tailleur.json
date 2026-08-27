@@ -1,0 +1,10 @@
+{
+  "name_key": "boutique.tailleur.name",
+  "inventaire": [
+    "meuble_tapis",
+    "meuble_lit",
+    "bandage",
+    "torche"
+  ],
+  "tags": []
+}

@@ -401,6 +401,34 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+guilde.chasseurs.name,Guilde des Chasseurs
+guilde.mages.name,Cercle des Mages
+guilde.enchanteurs.name,Guilde des Enchanteurs
+guilde.transporteurs.name,Guilde des Transporteurs
+guilde.batisseurs.name,Guilde des Bâtisseurs
+guilde.prospecteurs.name,Guilde des Prospecteurs
+guilde.artisans.name,Guilde des Artisans
+guilde.alchimistes.name,Guilde des Alchimistes
+guilde.marchands.name,Guilde des Marchands
+guilde.eclaireurs.name,Guilde des Éclaireurs
+guilde.cuisiniers.name,Confrérie des Cuisiniers
+boutique.forgeron.name,Forgeron
+boutique.armurier.name,Armurier
+boutique.alchimiste.name,Alchimiste
+boutique.epicier.name,Épicier
+boutique.tailleur.name,Tailleur
+boutique.herboriste.name,Herboriste
+function.maitre_de_guilde.name,Maître de guilde
+creature.maitre_de_guilde.name,Maître de guilde
+meuble.hall_de_guilde.name,Hall de guilde
+recipe.meuble_hall_de_guilde.name,Bâtir un hall de guilde
+quest.traque.text,Traquer {count} bêtes pour la Guilde des Chasseurs
+quest.purge.text,Purger le donjon voisin pour les Prospecteurs
+journal.hall_pose,"un hall de la {guilde} : son maître s'installe"
+journal.hall_refuse,il faut le rang Adepte dans une guilde pour bâtir un hall
+journal.hall_demonte,"le maître de la {guilde} s'en va"
+ui.dialogue.boutique," — {boutique}"
+ui.dialogue.guilde," — {guilde}"
 item.oeil.name,Œil
 item.potion_perception.name,Potion de perception
 status.potion_perception.name,Potion de perception

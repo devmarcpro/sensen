@@ -1,0 +1,8 @@
+{
+  "_doc": "Type de boutique PNJ (docs: Génération des royaumes PNJ, Commerce et boutiques) : l'inventaire de départ du marchand qui la tient.",
+  "name_key": "boutique.<id>.name",
+  "inventaire": [
+    "pain"
+  ],
+  "tags": []
+}

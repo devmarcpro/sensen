@@ -8,12 +8,12 @@
     ]
   },
   "count_range": [
-    3,
+    4,
     8
   ],
   "reward": {
-    "gold_per_target_level": 10,
+    "gold_per_target_level": 8,
     "guild_xp": 8
   },
-  "text_key": "quest.chasse_bete.text"
+  "text_key": "quest.traque.text"
 }

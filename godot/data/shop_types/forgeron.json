@@ -1,0 +1,11 @@
+{
+  "name_key": "boutique.forgeron.name",
+  "inventaire": [
+    "proto_epee",
+    "proto_hache",
+    "proto_pioche",
+    "proto_faucille",
+    "huile_d_arme"
+  ],
+  "tags": []
+}

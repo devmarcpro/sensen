@@ -351,6 +351,10 @@ func _construire_dialogue(j: Dictionary) -> void:
 		fermer()
 		return
 	titre.text = tr("ui.ecran.dialogue").format({"nom": tr(pnj.name_key), "fonction": tr(GameData.entree("functions", str(pnj.get("fonction", "oisif"))).name_key)})
+	if pnj.has("boutique"):
+		titre.text += tr("ui.dialogue.boutique").format({"boutique": tr(GameData.entree("shop_types", str(pnj.boutique)).name_key)})
+	if pnj.has("guilde"):
+		titre.text += tr("ui.dialogue.guilde").format({"guilde": tr("guilde.%s.name" % str(pnj.guilde))})
 	var rel := int(pnj.get("social", {}).get("relations", {}).get(j.id, 0))
 	liste.add_item(tr("ui.ecran.parler"))
 	entrees.append({"kind": "option", "option": "parler"})

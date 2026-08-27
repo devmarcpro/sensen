@@ -45,6 +45,7 @@ func _ready() -> void:
 	test_royaumes_pnj()
 	test_conquete_et_succession()
 	test_alchimie()
+	test_villes_et_halls()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1026,7 +1027,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 42, "9 stations, 42 recettes plates (9 transformations, 16 meubles, 9 stations, 3 plats, 5 potions)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 43, "9 stations, 43 recettes plates (9 transformations, 17 meubles, 9 stations, 3 plats, 5 potions)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -1757,6 +1758,83 @@ func test_alchimie() -> void:
 	s.monde.fermer()
 
 
+# ---------------------------------------------------------------- Villes, boutiques, halls
+
+func test_villes_et_halls() -> void:
+	var s := Simulation.new(83)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var surf = s.monde.surface
+	var cell: Vector2i = s.monde.cellule_camp + Vector2i(1, 0)
+	var r := {"id": "roy_ville", "nom": "Grandia", "government_type": "monarchie_hereditaire", "culture": "latine", "race": "humain", "taille": "grand", "capital_poi": cell, "territory_cells": [cell],
+		"taxes": {"base_rate": 0.08, "tariff_default": 0.1}, "tariffs": {}, "laws": [], "diplomacy": {}, "rivals": [], "tags": []}
+	surf.royaumes_cache[surf.secteur_de(cell)] = {"roy_ville": r}
+	surf.royaume_par_cellule[cell] = "roy_ville"
+	var e: Dictionary = s.monde.cellule(cell)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 83
+	surf._poser_village(e, cell, rng)
+	var v: Dictionary = e.village
+	var boutiques: Dictionary = {}
+	var halls: Dictionary = {}
+	for b in v.batiments:
+		if not str(b.get("boutique", "")).is_empty():
+			boutiques[str(b.boutique)] = int(boutiques.get(str(b.boutique), 0)) + 1
+		if not str(b.get("guilde", "")).is_empty():
+			halls[str(b.guilde)] = int(halls.get(str(b.guilde), 0)) + 1
+	verifier(v.taille == "grand" and v.batiments.size() >= 6, "capitale d'un grand royaume : %d bâtiments" % v.batiments.size())
+	verifier(boutiques.size() >= 3 and halls.size() >= 1, "%d boutiques typées, %d halls" % [boutiques.size(), halls.size()])
+	var doublon := false
+	for n in boutiques.values():
+		doublon = doublon or int(n) > 1
+	for n in halls.values():
+		doublon = doublon or int(n) > 1
+	verifier(not doublon, "jamais deux boutiques ou deux halls du même type")
+	# Les PNJ de la ville : un marchand au stock de son type, un maître qui n'offre que sa guilde.
+	s.monde.peuplees.erase(cell)
+	s._peupler_fenetre()
+	var marchand: Dictionary = {}
+	var maitre: Dictionary = {}
+	for x in s.vivants():
+		if x.has("boutique") and marchand.is_empty():
+			marchand = x
+		if x.has("guilde") and maitre.is_empty():
+			maitre = x
+	verifier(not marchand.is_empty() and not marchand.stock.is_empty(), "un marchand tient sa boutique (%s, %d objets)" % [str(marchand.get("boutique", "?")), marchand.get("stock", []).size()])
+	if not maitre.is_empty():
+		var qs: Array = s.quetes_offertes(maitre, j)
+		var bonne := true
+		for q in qs:
+			bonne = bonne and str(q.guild) == str(maitre.guilde)
+		verifier(bonne, "le maître de la guilde %s n'offre que ses quêtes (%d)" % [str(maitre.guilde), qs.size()])
+	else:
+		verifier(false, "un maître de guilde instancié")
+	# Le hall du joueur : refusé sans rang, accepté au rang Adepte, un maître apparaît, structure spéciale.
+	var hall := s.generer_objet("meuble_hall_de_guilde", 1, {}, "commun", 0)
+	j.sac.append(hall.uid)
+	var vers: Vector2i = j.pos + Vector2i(0, 1)
+	for d in [Vector2i(0, 1), Vector2i(1, 0), Vector2i(0, -1), Vector2i(-1, 0)]:
+		var c: Vector2i = j.pos + d
+		if s.grille.dans(c) and s.grille.occupant(c).is_empty():
+			s.grille.contenu[s.grille.idx(c)] = 0
+			s.grille.meubles.erase(s.grille.idx(c))
+			s.contenants.erase(s.grille.idx(c))
+			vers = c
+			break
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "poser", "objet": hall.uid, "vers": vers}), "sans rang : pas de hall")
+	j["guildes"] = {"guerriers": {"xp": 300, "rang": 3}}
+	s.attente[j.id] = true
+	var avant := s._structures_speciales()
+	verifier(s.intention(j.id, {"type": "poser", "objet": hall.uid, "vers": vers}) and s.territoire.halls.size() == 1, "au rang Adepte le hall se pose")
+	var maitre_j: Dictionary = {}
+	for x in s.vivants():
+		if x.get("hall", Vector2i(-1, -1)) == vers:
+			maitre_j = x
+	verifier(not maitre_j.is_empty() and str(maitre_j.guilde) == "guerriers" and s._structures_speciales() == avant + 1, "un maître des Guerriers s'installe, structure spéciale +1")
+	s.monde.fermer()
+
+
 # ---------------------------------------------------------------- Étape 9.D : compagnons, apprivoisement, âge
 
 func test_compagnons() -> void:
@@ -1896,7 +1974,7 @@ func test_reputation_et_quetes() -> void:
 	garde.social.relations[j.id] = 0
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "rendre_quete", "pnj": garde.id, "quete": q_chasse.uid}), "rendre la quête")
-	verifier(int(j.or) == or0 + int(q_chasse.or) and int(j.guildes.guerriers.xp) == int(q_chasse.xp) and int(garde.social.relations[j.id]) == 10, "or, XP de guilde, +10 de relation avec le donneur")
+	verifier(int(j.or) == or0 + int(q_chasse.or) and int(j.guildes[str(q_chasse.guild)].xp) == int(q_chasse.xp) and int(garde.social.relations[j.id]) == 10, "or, XP de guilde, +10 de relation avec le donneur")
 	j.reputations[villageois.village] = -25
 	verifier(s.quetes_offertes(garde, j).is_empty(), "sous −20 de réputation : pas de quête")
 	# Rumeur : à ≥ 50, parler révèle une cellule à POI non explorée.
