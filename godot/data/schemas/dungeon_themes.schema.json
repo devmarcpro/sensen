@@ -53,6 +53,7 @@
       "required": [
         "largeur",
         "virage",
+        "voisins_relies",
         "boucles",
         "impasses",
         "impasse_longueur"

@@ -1,12 +1,12 @@
 class_name Donjon
 extends RefCounted
 ## Génération d'un étage de donjon, **procédurale façon Elin / Tales of Maj'Eyal** (décisions du
-## designer, 2026-08-27 — Génération de donjon) : une cellule de 64×64 (Grille continue), à étages,
+## designer, 2026-08-27 — Génération de donjon) : une cellule de 128×128 (Grille continue), à étages,
 ## deux escaliers par étage (un vers le haut, un vers le bas), murs destructibles.
 ##   1. des salles de tailles variées (petites, moyennes, grandes — `tailles_salles` du thème,
 ##      tirées selon `poids_salles`) sont posées au hasard sans chevauchement ;
-##   2. des **couloirs sinueux** relient chaque salle à la précédente (marche vers la cible avec
-##      des virages), puis quelques boucles entre salles au hasard et quelques impasses ;
+##   2. des **couloirs sinueux** relient chaque salle à ses `voisins_relies` plus proches voisines
+##      (réseau maillé, pas une chaîne), puis des boucles entre salles au hasard et des impasses ;
 ##   3. connexité vérifiée par BFS et réparée par une tranchée droite si besoin ;
 ##   4. l'escalier montant (l'arrivée) dans une salle, l'escalier descendant dans la salle la plus
 ##      lointaine ; le boss au dernier étage y remplace l'escalier ;
@@ -32,7 +32,7 @@ func _init(p_salles: Dictionary, p_connecteurs: Dictionary, p_theme: Dictionary)
 
 ## Génère un étage : {largeur, hauteur, hauteurs, murs, sol, bord, pieces: [{id, kind, rect, attaches}],
 ##  entree (escalier montant), escalier (descendant, null au dernier), boss, spawns, coffres, graphe}.
-func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dernier: bool, taille: int = 64) -> Dictionary:
+func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dernier: bool, taille: int = 128) -> Dictionary:
 	rng.seed = hash([graine, id_donjon, etage])
 	var e := {"largeur": taille, "hauteur": taille, "hauteurs": PackedByteArray(), "murs": {}, "sol": {}, "bord": {},
 		"pieces": [], "entree": Vector2i.ZERO, "escalier": null, "boss": null, "spawns": [], "coffres": [], "graphe": {}, "etage": etage}
@@ -53,10 +53,25 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 		if not _libre(e, r):
 			continue
 		_placer_rectangle(e, r)
-	# 2. Les couloirs : chaque salle vers la précédente, puis des boucles et des impasses.
+	# 2. Les couloirs : chaque salle vers ses plus proches voisines (réseau maillé), puis des
+	#    boucles et des impasses — plusieurs chemins mènent partout.
 	var couloirs: Dictionary = theme.get("couloirs", {})
-	for i in range(1, e.pieces.size()):
-		_tunnel(e, _centre_libre(e, e.pieces[i - 1]), _centre_libre(e, e.pieces[i]), couloirs)
+	var nb_voisins: int = int(couloirs.get("voisins_relies", 3))
+	var relies := {}
+	for i in e.pieces.size():
+		var ci := _centre_libre(e, e.pieces[i])
+		var autres: Array = []
+		for k in e.pieces.size():
+			if k != i:
+				var ck := _centre_libre(e, e.pieces[k])
+				autres.append({"k": k, "d": absi(ck.x - ci.x) + absi(ck.y - ci.y)})
+		autres.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.d < b.d)
+		for v in autres.slice(0, nb_voisins):
+			var cle := Vector2i(mini(i, v.k), maxi(i, v.k))
+			if relies.has(cle):
+				continue
+			relies[cle] = true
+			_tunnel(e, ci, _centre_libre(e, e.pieces[v.k]), couloirs)
 	var f_boucles: Array = couloirs.get("boucles", [1, 3])
 	for k in rng.randi_range(int(f_boucles[0]), int(f_boucles[1])):
 		if e.pieces.size() < 2:

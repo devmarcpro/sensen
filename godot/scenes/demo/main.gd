@@ -10,7 +10,7 @@ const TH := 20            # hauteur du losange
 const HSTEP := 8          # pixels par niveau de hauteur
 const DELAI_PAS := 0.12   # secondes réelles entre deux pas d'une horloge de combat (lisibilité)
 const BUDGET_ATTEIGNABLE := 12   # ticks : rayon des coûts affichés
-const RAYON_VUE := 20            # tuiles dessinées autour du joueur (une cellule fait 64×64)
+const RAYON_VUE := 20            # tuiles dessinées autour du joueur (une cellule fait 128×128)
 var centre_terrain := Vector2i(-99, -99)   # centre de la dernière passe statique du terrain
 
 var sim: Simulation

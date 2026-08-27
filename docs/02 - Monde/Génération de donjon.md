@@ -93,6 +93,9 @@ NETTOYAGE ET DISPARITION (3.5) : à la mort du boss (`creature_killed`
 > [!success] Décidé le 2026-08-27 (nuit) — procédural façon Elin / Tales of Maj'Eyal, **remplace le labyrinthe**
 > Précision du designer : « générer procéduralement aléatoire, pas des boîtes en séries, donc des couloirs, des petites et grandes salles, et que chaque étage soit différent ». Le labyrinthe sur trame et les salles alignées sont abandonnés. Un étage (cellule 64×64) : des **salles de trois tailles** (`tailles_salles` du thème : petites 3-5, moyennes 6-9, grandes 10-16, tirées selon `poids_salles`), posées au hasard sans chevauchement ; des **couloirs sinueux** de 2 à 3 tuiles (`couloirs` du thème : chance de virage, boucles, impasses) qui relient chaque salle à la précédente, puis quelques boucles et impasses ; connexité vérifiée par BFS. Le reste est du mur destructible. Deux escaliers par étage, seed(monde, id, étage) : chaque étage est différent, stable au retour.
 
+> [!success] Décidé le 2026-08-28 — plus de salles, plus de couloirs, **beaucoup moins linéaire, plus labyrinthe**
+> Instruction du designer. Cellule de **128×128** ([[Grille continue]]), **14 à 24 salles** par étage. Le réseau n'est plus une chaîne : chaque salle est reliée à ses **3 plus proches voisines** (`couloirs.voisins_relies`), puis 6 à 12 boucles entre salles au hasard, puis 10 à 20 impasses de 6 à 24 pas ; les couloirs virent plus souvent (`virage` 0.35) et font 1 à 3 tuiles. Le résultat est un réseau maillé où plusieurs chemins mènent à l'escalier — le sens du labyrinthe vient des boucles et des impasses, pas d'une trame.
+
 ## Liens
 - **Dépend de** : [[Donjons — structure et intégration]], [[Salles et connecteurs]], [[Unification macro-micro]], [[Dérive de la corruption]]
 - **Alimente** : [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Créatures]], [[Gabarit de quête]]

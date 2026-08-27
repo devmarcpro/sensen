@@ -59,6 +59,9 @@ Les donjons sont une des sources principales de contenu du jeu, et le premier es
 > [!success] Précisé le 2026-08-27 (soir)
 > La cellule fait désormais 64×64 ([[Grille continue]]) : un étage = 64×64 tuiles, 4 à 8 salles procédurales.
 
+> [!success] Précisé le 2026-08-28
+> Retour à 128×128 par étage ([[Grille continue]]), 14 à 24 salles reliées en réseau maillé.
+
 ## Liens
 - **Dépend de** : [[Grille continue]], [[Hauteur de terrain ±10]], [[Décisions fondatrices]]
 - **Alimente** : [[Génération de donjon]], [[Salles et connecteurs]], [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Grimoires et manuels]]

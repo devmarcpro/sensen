@@ -14,8 +14,8 @@
     3
   ],
   "salles_par_etage": [
-    5,
-    9
+    14,
+    24
   ],
   "tailles_salles": {
     "petite": [
@@ -38,21 +38,22 @@
   },
   "couloirs": {
     "largeur": [
-      2,
-      3
-    ],
-    "virage": 0.25,
-    "boucles": [
       1,
       3
     ],
+    "virage": 0.35,
+    "voisins_relies": 3,
+    "boucles": [
+      6,
+      12
+    ],
     "impasses": [
-      2,
-      5
+      10,
+      20
     ],
     "impasse_longueur": [
-      4,
-      12
+      6,
+      24
     ]
   }
 }
