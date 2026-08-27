@@ -737,6 +737,9 @@ func _options_tuile(t: Vector2i) -> Array:
 		res.append({"id": "creuser", "vers": t})
 	if "construit" in tags:
 		res.append({"id": "demonter", "vers": t})
+	if not g.bloque_passage(t) and g.occupant(t).is_empty() and not g.meubles.has(g.idx(t)) and not g.stations_fixes.has(g.idx(t)):
+		res.append({"id": "abaisser", "vers": t})
+		res.append({"id": "elever", "vers": t})
 	if g.bloque_passage(t) and not ("meuble" in tags) and not ("plante" in tags) and not ("arbre" in tags) and not ("eau" in tags):
 		res.append({"id": "creuser", "vers": t})
 	return res
@@ -777,6 +780,10 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "mordre", "cible": str(opt.cible)})
 		"traverser_mur":
 			sim.intention(joueur_id, {"type": "traverser_mur", "cible": opt.cible})
+		"abaisser":
+			sim.intention(joueur_id, {"type": "terrasser", "vers": opt.vers, "sens": -1})
+		"elever":
+			sim.intention(joueur_id, {"type": "terrasser", "vers": opt.vers, "sens": 1})
 		"transformer":
 			sim.intention(joueur_id, {"type": "transformer"})
 		"affut":

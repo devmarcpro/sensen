@@ -400,6 +400,11 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+option.abaisser,Abaisser (tranchée)
+option.elever,Élever (talus)
+journal.terrasse,"{nom} terrasse ({x},{y}) : hauteur {h}"
+journal.terrasser_outil,il faut une pioche en main pour élever le sol
+journal.regeneration,"le monde se soigne : {n} tuile(s) rendue(s)"
 ui.ecran.incarner,Prendre le contrôle
 journal.incarne,"tu incarnes {nom} ; {ancien} te suit"
 journal.incarner_refuse,il faut une relation de 75 pour qu un être te cède sa place

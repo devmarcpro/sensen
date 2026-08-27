@@ -77,6 +77,7 @@ func _ready() -> void:
 	test_spectre()
 	test_lycanthrope()
 	test_incarnation()
+	test_terrasser()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2458,6 +2459,42 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Terrasser et régénération
+
+func test_terrasser() -> void:
+	var s := Simulation.new(137)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var t: Vector2i = j.pos + Vector2i(1, 0)
+	s.grille.contenu[s.grille.idx(t)] = 0
+	var h0 := s.grille.h(t)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "terrasser", "vers": t, "sens": -1}) and s.grille.h(t) == h0 - 1, "abaisser à mains nues : %d → %d" % [h0, s.grille.h(t)])
+	j.equipement.erase("main_principale")
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "terrasser", "vers": t, "sens": 1}), "élever sans pioche : refusé")
+	var pioche := s.generer_objet("proto_pioche_fer", 1, {}, "commun", 0) if GameData.catalogues.items.has("proto_pioche_fer") else {}
+	if not pioche.is_empty():
+		j.sac.append(pioche.uid)
+		j.equipement["main_principale"] = pioche.uid
+		s.attente[j.id] = true
+		verifier(s.intention(j.id, {"type": "terrasser", "vers": t, "sens": 1}) and s.grille.h(t) == h0, "élever avec la pioche : %d" % s.grille.h(t))
+		s.attente[j.id] = true
+		s.intention(j.id, {"type": "terrasser", "vers": t, "sens": 1})
+	verifier(s.modifs_terrain.has(s.grille.idx(t)) and int(s.modifs_terrain[s.grille.idx(t)].h) == h0, "l'état d'origine est mémorisé (h %d)" % h0)
+	# Hors claim, la semaine rend la tuile ; sur un claim, elle persiste
+	var cell := s._cell_de(t)
+	s.monde.claims.erase(cell)
+	s._regenerer_terrain_sauvage()
+	verifier(s.grille.h(t) == h0 and not s.modifs_terrain.has(s.grille.idx(t)), "hors claim : le monde rend la hauteur %d" % h0)
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "terrasser", "vers": t, "sens": -1})
+	s.monde.claims[cell] = {"proprietaire": j.id}
+	s._regenerer_terrain_sauvage()
+	verifier(s.grille.h(t) == h0 - 1, "sur un claim : la tranchée persiste")
+	s.monde.fermer()
 
 
 # ---------------------------------------------------------------- Incarnation : jouer une bête

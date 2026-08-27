@@ -914,5 +914,14 @@
     "modules_base": 2,
     "par_niveau_modules": 25,
     "modules_max": 5
+  },
+  "terrasser": {
+    "_doc": "Destruction du terrain : abaisser ou élever une tuile de ±1 (Hauteur de terrain ±10, plancher 0, plafond 20) ; l'élévation demande une pioche en main. XP à Terrassement.",
+    "ticks": 12,
+    "endurance": 8,
+    "xp": 5,
+    "h_min": 0,
+    "h_max": 20,
+    "outil_elever": "pioche"
   }
 }

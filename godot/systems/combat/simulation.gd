@@ -34,6 +34,7 @@ var prochain_donjon: int = 1         # id du prochain donjon lancé depuis le ca
 var monde: Monde = null              # la surface comme fenêtre glissante (étape 8.2a)
 var bombes: Array = []               # les bombes posées, en attente d'explosion (Explosions)
 var affuts: Array[Dictionary] = []   # tourelles portatives de L'Engrenage : {pos, source, prochain}
+var modifs_terrain: Dictionary = {}   # idx → {h, contenu} d'origine : ce que le monde rendra hors claim (Destruction du terrain)
 var portails: Dictionary = {}   # idx de tuile → id du Passeur qui l'a ouvert (Talents de classe)
 var territoire: Dictionary = {"tresor": 0, "dette": 0, "semaines_dette": 0, "stocks": {}, "rapports": [], "gains_quetes": 0, "royaume": false,
 	"cultures": {}, "fertilite": {}, "etals": {}, "caisse": 0, "marge": 1.0, "clients": 0.0, "heure_resolue": -1, "absence": {"ventes": 0, "or": 0, "mures": 0},
@@ -382,6 +383,61 @@ func _reprendre(e: Dictionary, pos: Vector2i) -> void:
 
 ## Creuser : détruire un mur adjacent (Destruction du terrain) — la tuile redevient sol.
 ## Le bord de la cellule (roche) ne se creuse pas. Coût en ticks et en endurance, XP de Terrassement.
+## Mémoriser l'état d'origine d'une tuile avant de la modifier (régénération des cases sauvages).
+func _memoriser_terrain(t: Vector2i) -> void:
+	var idx := grille.idx(t)
+	if not modifs_terrain.has(idx):
+		modifs_terrain[idx] = {"h": grille.h(t), "contenu": int(grille.contenu[idx])}
+
+
+## Terrasser (Destruction du terrain) : ±1 de hauteur sur une tuile de sol adjacente ; élever demande une pioche.
+func _terrasser(e: Dictionary, vers: Vector2i, sens: int, tick: int) -> bool:
+	var tr: Dictionary = regles.r.terrasser
+	if not grille.dans(vers) or Grille.distance(e.pos, vers) != 1 or sens == 0:
+		return false
+	if grille.bloque_passage(vers) or not grille.occupant(vers).is_empty() or grille.meubles.has(grille.idx(vers)) or grille.stations_fixes.has(grille.idx(vers)):
+		return false
+	var h := grille.h(vers) + signi(sens)
+	if h < int(tr.h_min) or h > int(tr.h_max):
+		return false
+	if sens > 0:
+		var fonct: Dictionary = fonctionnalites.get(str(Etres.arme(e, items).get("functionality", "")), {})
+		if str(fonct.get("outil", "")) != str(tr.outil_elever):
+			EventBus.emettre(&"journal", [&"journal.terrasser_outil", {}])
+			return false
+	if e.endurance < int(tr.endurance):
+		return false
+	_memoriser_terrain(vers)
+	grille.hauteurs[grille.idx(vers)] = h
+	e.endurance -= int(tr.endurance)
+	e.compteur = tick + int(tr.ticks)
+	e["vue_sale"] = true
+	gagner_xp(e, "terrassement", int(tr.xp))
+	EventBus.emettre(&"journal", [&"journal.terrasse", {"nom": e.name_key, "x": vers.x, "y": vers.y, "h": h}])
+	EventBus.emettre(&"tile_changed", [vers])
+	return true
+
+
+## Chaque semaine, le monde efface les modifications de terrain hors des claims (Claims et persistance).
+func _regenerer_terrain_sauvage() -> void:
+	var n := 0
+	for idx in modifs_terrain.keys():
+		var t := grille.pos_de(int(idx))
+		if monde != null and monde.claims.has(_cell_de(t)):
+			continue
+		if not grille.occupant(t).is_empty() or grille.meubles.has(int(idx)) or grille.stations_fixes.has(int(idx)):
+			continue
+		var o: Dictionary = modifs_terrain[idx]
+		grille.hauteurs[int(idx)] = int(o.h)
+		grille.contenu[int(idx)] = int(o.contenu)
+		modifs_terrain.erase(idx)
+		lumiere_sale = true
+		EventBus.emettre(&"tile_changed", [t])
+		n += 1
+	if n > 0:
+		EventBus.emettre(&"journal", [&"journal.regeneration", {"n": n}])
+
+
 func _creuser(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	e["vue_sale"] = true
 	if not grille.dans(vers) or Grille.distance(e.pos, vers) != 1:
@@ -414,6 +470,7 @@ func _creuser(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 			ticks = ticks * int(regles.r.talents.oeil_de_la_pierre.recolte_div)
 	_quitter_garde(e)
 	e.orientation = vers - e.pos
+	_memoriser_terrain(vers)
 	grille.contenu[grille.idx(vers)] = 0
 	grille.materiaux.erase(grille.idx(vers))
 	grille.hauteurs[grille.idx(vers)] = grille.h(e.pos)   # la brèche est au niveau de celui qui creuse
@@ -5219,6 +5276,7 @@ func _tiquer_monde(tick: int) -> void:
 		for x in entites.values():
 			if x.controle == "joueur":
 				_semaine_territoire(x)
+		_regenerer_terrain_sauvage()
 		for x in entites.values():   # les bourses des PNJ se rechargent (+15 % par semaine, Barèmes économiques)
 			if x.has("or_max"):
 				x.or = mini(int(x.or_max), int(x.or) + int(ceil(float(x.or_max) * float(regles.r.commerce.recharge_hebdo))))
@@ -5526,6 +5584,8 @@ func intention(id: String, i: Dictionary) -> bool:
 				return true
 		"creuser":
 			ok = _creuser(e, i.get("vers", Vector2i(-1, -1)), h.ticks)
+		"terrasser":
+			ok = _terrasser(e, i.get("vers", Vector2i(-1, -1)), int(i.get("sens", -1)), h.ticks)
 		"equiper":
 			ok = _equiper(e, str(i.get("objet", "")), h.ticks)
 		"ramasser":
