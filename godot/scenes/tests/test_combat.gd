@@ -79,6 +79,7 @@ func _ready() -> void:
 	test_incarnation()
 	test_terrasser()
 	test_empoigne()
+	test_armes_fantomes()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2460,6 +2461,37 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Armes fantomatiques
+
+func test_armes_fantomes() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	j.mana = 30
+	var arme0: String = j.equipement.get("main_principale", "")
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "arme_fantome", "element": "feu"}) and str(j.equipement.main_principale) == "fantome_" + j.id and int(j.mana) == 20, "une lame de Feu en main, 10 de mana")
+	verifier(s.vecteur_arme(Etres.arme(j, s.items)) == {"feu": 1.0} and (arme0.is_empty() or arme0 in j.sac), "vecteur pur {feu: 1}, l'ancienne arme au sac")
+	var loup: Dictionary = s.entites["loup_2"]
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(1, 0)
+	s.grille.placer(loup.id, loup.pos)
+	var pv0 := int(loup.sante)
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false})
+	var h := s.horloge_de(j)
+	for k in 3:
+		j.compteur = h.ticks
+		s.pas(j.horloge)
+	verifier(int(loup.sante) < pv0, "la lame frappe (%d → %d)" % [pv0, int(loup.sante)])
+	verifier(not s._sertir(j, "fantome_" + j.id, "", h.ticks), "ni sertissable ni enchantable")
+	var mana1 := int(j.mana)
+	s._tiquer_armes_fantomes(j.horloge, int(s.items["fantome_" + j.id].dernier_tick) + 100)
+	verifier(int(j.mana) == mana1 - 10, "entretien : 100 ticks = −10 mana (%d → %d)" % [mana1, int(j.mana)])
+	j.mana = 0
+	s._tiquer_armes_fantomes(j.horloge, int(s.items["fantome_" + j.id].dernier_tick) + 10)
+	verifier(not s.items.has("fantome_" + j.id) and not j.equipement.has("main_principale"), "à mana 0, la lame se dissipe")
 
 
 # ---------------------------------------------------------------- Empoigne : l'effet saisie

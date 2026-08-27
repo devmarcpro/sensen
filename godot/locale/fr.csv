@@ -400,6 +400,11 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+item.arme_fantome.name,Lame fantôme
+option.arme_fantome,"Invoquer une lame de {element}"
+journal.arme_fantome,"{nom} invoque une lame de {element}"
+journal.arme_fantome_dissipee,la lame fantôme se dissipe
+journal.arme_fantome_mana,pas assez de mana pour invoquer une lame
 journal.garde_porte,tu portes quelqu'un : pas de garde
 option.abaisser,Abaisser (tranchée)
 option.elever,Élever (talus)

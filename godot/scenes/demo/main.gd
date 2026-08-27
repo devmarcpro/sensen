@@ -698,6 +698,9 @@ func _options_tuile(t: Vector2i) -> Array:
 			res.append({"id": "traverser_mur", "cible": t})
 	if sim.a_talent(j, "affut") and d == 1 and g.dans(t) and not g.bloque_passage(t) and g.occupant(t).is_empty():
 		res.append({"id": "affut", "cible": t})
+	if d == 0 and str(j.corps.get("silhouette", "humanoide")) == "humanoide":
+		for el in sim.regles.r.armes_fantomes.elements:
+			res.append({"id": "arme_fantome", "element": str(el), "nom": tr("element." + str(el))})
 	if d == 0 and sim.a_talent(j, "lune"):
 		res.append({"id": "transformer", "forme_humaine": bool(j.get("forme_bestiale", false))})
 	if d == 0 and sim.a_talent(j, "masques"):
@@ -786,6 +789,8 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "terrasser", "vers": opt.vers, "sens": 1})
 		"transformer":
 			sim.intention(joueur_id, {"type": "transformer"})
+		"arme_fantome":
+			sim.intention(joueur_id, {"type": "arme_fantome", "element": str(opt.element)})
 		"affut":
 			sim.intention(joueur_id, {"type": "affut", "cible": opt.cible})
 		"declencher_glyphe":

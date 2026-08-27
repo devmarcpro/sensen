@@ -923,5 +923,24 @@
     "h_min": 0,
     "h_max": 20,
     "outil_elever": "pioche"
+  },
+  "armes_fantomes": {
+    "_doc": "Armes fantomatiques : lame invoquée d'élément pur, ×degats_mult, cout_mana à l'invocation, entretien_mana toutes les entretien_ticks ; durete = durete_reference × (1 + volonte/volonte_div + niveau(competence)/niveau_div).",
+    "cout_mana": 10,
+    "ticks": 4,
+    "entretien_mana": 1,
+    "entretien_ticks": 10,
+    "degats_mult": 0.7,
+    "functionality": "epee",
+    "competence": "magie",
+    "volonte_div": 50.0,
+    "niveau_div": 100.0,
+    "elements": [
+      "feu",
+      "eau",
+      "bois",
+      "metal",
+      "terre"
+    ]
   }
 }

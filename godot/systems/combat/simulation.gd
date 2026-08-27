@@ -1139,6 +1139,66 @@ func pieces_de_cellule(cell: Vector2i) -> Array:
 	return res
 
 
+## Armes fantomatiques : une lame d'élément pur invoquée en main principale, entretenue en mana.
+func _invoquer_arme_fantome(e: Dictionary, element: String, tick: int) -> bool:
+	var af: Dictionary = regles.r.armes_fantomes
+	if not (element in af.elements) or str(e.corps.get("silhouette", "humanoide")) != "humanoide":
+		return false
+	if int(e.mana) < int(af.cout_mana):
+		EventBus.emettre(&"journal", [&"journal.arme_fantome_mana", {}])
+		return false
+	_dissiper_arme_fantome(e, false)
+	e.mana -= int(af.cout_mana)
+	var uid := "fantome_%s" % e.id
+	var niveau := regles.niveau(e.competences_eff, str(af.competence))
+	var durete := float(regles.r.degats.durete_reference) * (1.0 + float(e.stats_eff.volonte) / float(af.volonte_div) + float(niveau) / float(af.niveau_div))
+	items[uid] = {"uid": uid, "name_key": "item.arme_fantome.name", "type": "arme", "equip_slot": "main_principale", "hands": 1, "functionality": str(af.functionality), "durete_base": durete, "qualite": 1.0, "element": element, "tags": ["arme", "fantome"], "materiau": "", "fantome": true, "fini": true, "dernier_tick": tick, "affixes": [], "sertissures": []}
+	var portee: String = e.equipement.get("main_principale", "")
+	if not portee.is_empty():
+		e.sac.append(portee)
+	e.equipement["main_principale"] = uid
+	Etres.recalculer(e, items, affixes_defs, regles)
+	e.compteur = tick + int(af.ticks)
+	EventBus.emettre(&"journal", [&"journal.arme_fantome", {"nom": e.name_key, "element": "element." + element}])
+	return true
+
+
+func _dissiper_arme_fantome(e: Dictionary, journal: bool = true) -> void:
+	var uid := "fantome_%s" % e.id
+	if not items.has(uid):
+		return
+	for slot in e.equipement.keys():
+		if str(e.equipement[slot]) == uid:
+			e.equipement.erase(slot)
+	e.sac.erase(uid)
+	items.erase(uid)
+	Etres.recalculer(e, items, affixes_defs, regles)
+	if journal:
+		EventBus.emettre(&"journal", [&"journal.arme_fantome_dissipee", {}])
+
+
+## L'entretien des lames fantômes (au pas de leur horloge) : du mana à intervalles, sinon la lame se dissipe.
+func _tiquer_armes_fantomes(nom: String, tick: int) -> void:
+	var af: Dictionary = regles.r.armes_fantomes
+	for e in vivants():
+		if e.horloge != nom:
+			continue
+		var uid := "fantome_%s" % e.id
+		if not items.has(uid):
+			continue
+		if str(e.equipement.get("main_principale", "")) != uid:   # rangée : elle n'existe qu'en main
+			_dissiper_arme_fantome(e)
+			continue
+		var it: Dictionary = items[uid]
+		var n := (tick - int(it.dernier_tick)) / int(af.entretien_ticks)
+		if n <= 0:
+			continue
+		it.dernier_tick = int(it.dernier_tick) + n * int(af.entretien_ticks)
+		e.mana = maxi(0, int(e.mana) - n * int(af.entretien_mana))
+		if int(e.mana) <= 0:
+			_dissiper_arme_fantome(e)
+
+
 ## Incarner un compagnon (Changer de personnage) : le contrôle est un attribut — on l'échange.
 func _incarner(e: Dictionary, pnj_id: String, tick: int) -> bool:
 	var c: Dictionary = entites.get(pnj_id, {})
@@ -5494,6 +5554,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 			EventBus.emettre(&"journal", [&"journal.releve_fin", {"nom": x.name_key}])
 	_tirs_d_affuts(nom, tick)
 	_tiquer_vampires(nom, tick)
+	_tiquer_armes_fantomes(nom, tick)
 	var o_restants: Array[Dictionary] = []
 	for o in obstacles:
 		var src: Dictionary = entites.get(o.source, {})
@@ -5563,6 +5624,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _transformer(e, h.ticks)
 		"incarner":
 			ok = _incarner(e, str(i.get("pnj", "")), h.ticks)
+		"arme_fantome":
+			ok = _invoquer_arme_fantome(e, str(i.get("element", "")), h.ticks)
 		"garde":
 			ok = _prendre_garde(e, h.ticks)
 		"attendre":
@@ -5882,6 +5945,8 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 		mult_coup = float(regles.r.degats.get("crit_mult", 1.5))
 		e["coups_critiques"] = int(e.get("coups_critiques", 0)) + 1
 		EventBus.emettre(&"journal", [&"journal.critique", {"att": e.name_key, "mult": "%.1f" % mult_coup}])
+	if bool(arme.get("fantome", false)):   # Armes fantomatiques : pures, mais ×0,7
+		mult_coup *= float(regles.r.armes_fantomes.degats_mult)
 	if a_talent(e, "jauge_de_sang"):   # L'Écarlate : jusqu'à ×1,8 la jauge pleine
 		mult_coup *= 1.0 + (float(regles.r.talents.jauge_de_sang.mult_max) - 1.0) * float(e.get("sang", 0)) / float(regles.r.talents.jauge_de_sang.max)
 	if a_talent(e, "dissimulation"):   # L'Ombre : −25 % de face ; attaquer lève la dissimulation
