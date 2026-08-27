@@ -40,6 +40,9 @@ Cap : 200. Le potentiel est par-personnage (joueur, PNJ, compagnons).
 > [!success] Précisé le 2026-08-28
 > Première source de restauration codée : le **sommeil** (+2 aux cinq compétences/stats les plus travaillées depuis le dernier repos, [[Cycle jour-nuit et sommeil]]). Les plats et l'entraîneur suivent.
 
+> [!success] Codé le 2026-08-28 — l'entraîneur
+> Les PNJ tagués `entraineur` (maîtres de guilde, gardes de village) offrent *Entraîner* dans le dialogue : un écran liste les compétences du joueur, `coût = 20 or × niveau actuel` (20 au minimum), **+10 de potentiel** (plafond `potentiel_max`) ; l'or va au PNJ (puits partiel : il le dépense en rachats, sa bourse est finie). Décision : un garde n'entraîne que les compétences de combat (`category` ≠ general), un maître de guilde toutes.
+
 ## Liens
 - **Dépend de** : [[Progression par l'usage]], [[Races]], [[Classes]]
 - **Alimente** : [[XP de combat]], [[Cuisine et alchimie]], [[Astrologie — cycle sexagésimal]], [[Nourriture, potentiel et potions]]

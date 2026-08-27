@@ -1175,6 +1175,102 @@ func _puissance_de(valeur: int) -> float:
 	return snappedf(clampf(float(valeur) / float(al.puissance_div), float(al.puissance_bornes[0]), float(al.puissance_bornes[1])), 0.1)
 
 
+# ---------------------------------------------------------------- entraîneur (Potentiel) et commandes de collectionneurs
+
+func cout_entrainement(e: Dictionary, competence: String) -> int:
+	var en: Dictionary = regles.r.progression.entraineur
+	return maxi(int(en.or_min), int(en.or_par_niveau) * regles.niveau(e.competences, competence))
+
+
+func peut_entrainer(pnj: Dictionary, competence: String) -> bool:
+	if not ("entraineur" in pnj.get("tags", [])):
+		return false
+	if str(pnj.get("fonction", "")) == "maitre_de_guilde":
+		return true
+	return str(GameData.catalogues.competences.get(competence, {}).get("category", "combat")) != "general"
+
+
+func _entrainer(e: Dictionary, pnj_id: String, competence: String, tick: int) -> bool:
+	var pnj: Dictionary = entites.get(pnj_id, {})
+	if pnj.is_empty() or Grille.distance(e.pos, pnj.pos) > 2 or not peut_entrainer(pnj, competence) or not GameData.catalogues.competences.has(competence):
+		return false
+	var cout := cout_entrainement(e, competence)
+	if int(e.or) < cout:
+		EventBus.emettre(&"journal", [&"journal.entraine_refuse", {}])
+		return false
+	var cap := int(regles.r.progression.potentiel_max)
+	var actuel := int(e.potentiels.get(competence, int(regles.r.progression.potentiel_defaut)))
+	if actuel >= cap:
+		EventBus.emettre(&"journal", [&"journal.entraine_plafond", {}])
+		return false
+	e.or = int(e.or) - cout
+	pnj.or = int(pnj.or) + cout
+	e.potentiels[competence] = mini(cap, actuel + int(regles.r.progression.entraineur.potentiel))
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.entraine", {"nom": pnj.name_key, "competence": _nom_competence(competence), "potentiel": int(e.potentiels[competence]), "cout": cout}])
+	return true
+
+
+## La commande hebdomadaire d'un collectionneur : une variété possédée, décalée d'un ou deux pas de couleur.
+func _tirer_commande() -> void:
+	var reg: Dictionary = territoire.get("registre", {})
+	if reg.is_empty():
+		return
+	var cm: Dictionary = _elv().commandes
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "commande", monde.semaine_courante])
+	var especes: Array = reg.keys()
+	especes.sort()
+	var esp_id: String = especes[rng.randi() % especes.size()]
+	var esp: Dictionary = GameData.catalogues.species[esp_id]
+	if not esp.loci.has("couleur"):
+		return
+	var cles: Array = reg[esp_id].keys()
+	cles.sort()
+	var parts: PackedStringArray = str(cles[rng.randi() % cles.size()]).split("|")
+	var pas := rng.randi_range(1, int(cm.pas_max))
+	var couleur := posmod(int(parts[0]) + pas * (1 if rng.randf() < 0.5 else -1), int(esp.loci.couleur.n))
+	var mult := 2.0 if _total_varietes() >= int(cm.palier_double) else 1.0
+	var or_ := int(round((float(cm.base) + float(cm.par_rarete) * float(esp.capture.get("rarete", 1)) + float(cm.par_pas) * float(pas)) * mult))
+	territoire["commande"] = {"espece": esp_id, "couleur": couleur, "motif": parts[1] if parts.size() > 1 else "", "or": or_, "semaine": monde.semaine_courante}
+	EventBus.emettre(&"journal", [&"journal.commande", {"espece": esp.name_key, "couleur": couleur, "motif": territoire.commande.motif, "or": or_}])
+
+
+func _total_varietes() -> int:
+	var n := 0
+	for esp in territoire.get("registre", {}).keys():
+		n += territoire.registre[esp].size()
+	return n
+
+
+func _livrer_commande(e: Dictionary, pnj_id: String, tick: int) -> bool:
+	var cmd: Dictionary = territoire.get("commande", {})
+	var pnj: Dictionary = entites.get(pnj_id, {})
+	if cmd.is_empty() or pnj.is_empty() or Grille.distance(e.pos, pnj.pos) > 2 or not ("commerce_possible" in pnj.get("tags", [])):
+		return false
+	var uid := ""
+	for u in e.sac:
+		var it: Dictionary = items.get(u, {})
+		if str(it.get("espece", "")) == str(cmd.espece) and str(it.get("genome", {}).get("couleur", "")) == str(cmd.couleur) and str(it.get("genome", {}).get("motif", "")) == str(cmd.motif):
+			uid = u
+			break
+	if uid.is_empty():
+		EventBus.emettre(&"journal", [&"journal.commande_manque", {}])
+		return false
+	if int(pnj.or) < int(cmd.or):
+		EventBus.emettre(&"journal", [&"journal.commande_bourse", {}])
+		return false
+	pnj.or = int(pnj.or) - int(cmd.or)
+	e.or = int(e.or) + int(cmd.or)
+	e.sac.erase(uid)
+	items.erase(uid)
+	territoire.erase("commande")
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.commande_livree", {"or": int(cmd.or)}])
+	EventBus.emettre(&"item_sold", [uid, e.id, int(cmd.or)])
+	return true
+
+
 # ---------------------------------------------------------------- élevage (Annexe H) : capture, hérédité, couvées, registre
 
 func _elv() -> Dictionary:
@@ -1450,6 +1546,7 @@ func varietes_possibles(esp_id: String) -> int:
 func _semaine_elevage() -> void:
 	if monde == null or lieu != "camp":
 		return
+	_tirer_commande()
 	for gi in grille.meubles.keys():
 		var m: Dictionary = GameData.entree("meubles", str(grille.meubles[gi]))
 		var specimens: Array = []
@@ -4424,6 +4521,10 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _conquerir(e, i.get("vers", e.pos), h.ticks)
 		"capturer":
 			ok = _capturer(e, h.ticks)
+		"entrainer":
+			ok = _entrainer(e, str(i.get("pnj", "")), str(i.get("competence", "")), h.ticks)
+		"livrer":
+			ok = _livrer_commande(e, str(i.get("pnj", "")), h.ticks)
 		"planter":
 			ok = _planter(e, str(i.get("base", "")), h.ticks)
 		"fertiliser":

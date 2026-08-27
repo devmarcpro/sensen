@@ -55,6 +55,9 @@ or = (80 + rareté×70 + distance_en_pas×45) × (chatoyant ? 3 : 1) × multipli
 
 *Même cadence hebdomadaire que le reste du monde ([[Dérive de la corruption]], [[Économie — sources et puits]]) ; le multiplicateur vient des paliers de [[Vivarium — registre et paliers]]. Le portefeuille fini du PNJ s'applique ([[Barèmes économiques]]).*
 
+> [!success] Codé le 2026-08-28 — les commandes
+> Chaque semaine (`_semaine_elevage`), si le registre n'est pas vide, une **commande** est tirée : une variété possédée, décalée d'**un ou deux pas** de couleur sur l'anneau (le motif conservé) — `or = (80 + rareté × 70 + pas × 45) × multiplicateur` (rareté = `capture.rarete` de l'espèce ; multiplicateur = 2 au palier 3 000 variétés ; chatoyant non codé). La commande s'affiche dans l'écran K ; on la **livre à un marchand** (option *Livrer la commande* du dialogue, bourse finie : il refuse s'il n'a pas l'or) avec un spécimen exact du sac. Une commande non livrée est remplacée la semaine suivante.
+
 ## Liens
 - **Dépend de** : [[Vivarium — loci et variétés]], [[Règle d'anneau]], [[Conditions de reproduction]]
 - **Alimente** : [[Vivarium — registre et paliers]], [[Commerce et boutiques]]

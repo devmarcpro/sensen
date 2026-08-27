@@ -56,6 +56,8 @@ etape: 10
 
 ## 6. Alchimie et élevage (5 min)
 
+- **Entraîneur et commandes** : 20 or × niveau pour +10 de potentiel — un vrai puits ? La commande du collectionneur (une variété à un ou deux pas) donne-t-elle envie de croiser ? — [[Potentiel]], [[Vivarium — capture et élevage]]
+
 - **Assiette harmonieuse** : cocher ses ingrédients dans l'atelier et lire l'harmonie prévue — le puzzle des cinq éléments est-il lisible ? — [[Décision — Affinités de cuisine]]
 
 - **Potions** : +3 / +6 × puissance de la partie (stat de la créature / 10) pendant 3 000 ticks — sensible ? La différence loup / chef de bande se sent-elle ? — [[Cuisine et alchimie]]

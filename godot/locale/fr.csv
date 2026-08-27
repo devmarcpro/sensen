@@ -401,6 +401,20 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+ui.ecran.entrainer,S'entraîner (U)
+ui.entrainer.titre,"ENTRAÎNEMENT avec {nom} — 20 or × niveau, +10 de potentiel (tu as {or} or)"
+ui.entrainer.competence,"{nom} — niveau {niveau} · potentiel {potentiel} · {cout} or"
+ui.entrainer.aucune,rien à entraîner ici
+journal.entraine,"{nom} entraîne {competence} : potentiel {potentiel} (−{cout} or)"
+journal.entraine_refuse,pas assez d'or pour cet entraînement
+journal.entraine_plafond,le potentiel est déjà au plafond
+ui.gestion.commande,"commande : {espece} couleur {couleur} motif {motif} — {or} or (livrer à un marchand)"
+ui.gestion.commande_aucune,commande : aucune (le registre est vide)
+ui.ecran.livrer,Livrer la commande (Z)
+journal.commande,"un collectionneur demande : {espece} couleur {couleur} motif {motif} — {or} or"
+journal.commande_livree,"commande livrée : {or} or"
+journal.commande_manque,tu n'as pas le spécimen demandé
+journal.commande_bourse,le marchand n'a pas l'or de la commande
 ui.carte.survol,"({x},{y}) · {biome} · danger {danger}"
 ui.carte.survol_royaume," · {nom}{capitale} — {gouv}, {taille}, {n} cellules · {etat}"
 ui.carte.capitale," (capitale)"

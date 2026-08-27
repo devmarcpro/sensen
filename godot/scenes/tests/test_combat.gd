@@ -52,6 +52,7 @@ func _ready() -> void:
 	test_harmonie()
 	test_registre_elevage()
 	test_familles()
+	test_entraineur_et_commandes()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -2141,6 +2142,45 @@ func test_familles() -> void:
 		if str(x.get("guilde", "")) == "chasseurs" and str(x.fonction) == "maitre_de_guilde" and x.id != maitre.id:
 			repris = true
 	verifier(repris and not s.monde.vacances_guildes.has("chasseurs|Bourg-Fam"), "deux semaines plus tard, un villageois est maître des Chasseurs")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Entraîneur et commandes
+
+func test_entraineur_et_commandes() -> void:
+	var s := Simulation.new(97)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var m := s.ajouter("maitre_de_guilde", j.pos + Vector2i(1, 0), "ia")
+	s._habiller_pnj(m, GameData.entree("creatures", "maitre_de_guilde"))
+	j.competences["epee"] = 5
+	var pot0 := int(j.potentiels.get("epee", s.regles.r.progression.potentiel_defaut))
+	verifier(s.cout_entrainement(j, "epee") == 100, "épée niveau 5 : 100 or")
+	j.or = 50
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "entrainer", "pnj": m.id, "competence": "epee"}), "50 or : refusé")
+	j.or = 150
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "entrainer", "pnj": m.id, "competence": "epee"}) and int(j.potentiels.epee) == pot0 + 10 and int(j.or) == 50, "150 or : +10 de potentiel, 100 or au maître")
+	var g := s.ajouter("garde_village", j.pos + Vector2i(0, 1), "ia")
+	s._habiller_pnj(g, GameData.entree("creatures", "garde_village"))
+	verifier(s.peut_entrainer(g, "epee") and not s.peut_entrainer(g, "cuisine"), "un garde entraîne l'épée, pas la cuisine")
+	# Une commande tirée du registre, livrée à un marchand contre son or.
+	var a := s._nouveau_specimen("carpe", {"couleur": 4, "motif": 2, "taille": 2.0}, "m")
+	s.items.erase(a.uid)
+	s._tirer_commande()
+	var cmd: Dictionary = s.territoire.get("commande", {})
+	verifier(not cmd.is_empty() and cmd.espece == "carpe" and int(cmd.couleur) != 4 and absi(int(cmd.couleur) - 4) <= 2 and int(cmd.or) >= 195, "commande : une carpe à un ou deux pas (couleur %s, %d or)" % [str(cmd.get("couleur", "?")), int(cmd.get("or", 0))])
+	m.tags.append("commerce_possible")
+	m.or = 0
+	var sp := s._nouveau_specimen("carpe", {"couleur": int(cmd.couleur), "motif": 2, "taille": 2.0}, "f")
+	j.sac.append(sp.uid)
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "livrer", "pnj": m.id}), "marchand sans or : refus")
+	m.or = 1000
+	var or0: int = int(j.or)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "livrer", "pnj": m.id}) and int(j.or) == or0 + int(cmd.or) and not s.territoire.has("commande"), "commande livrée : %d or" % int(cmd.or))
 	s.monde.fermer()
 
 

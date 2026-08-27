@@ -175,6 +175,14 @@ func touche(ev: InputEventKey) -> bool:
 			if courant == "dialogue":
 				_option("assigner")
 				return true
+		KEY_U:
+			if courant == "dialogue":
+				_option("entrainer")
+				return true
+		KEY_Z:
+			if courant == "dialogue":
+				_option("livrer")
+				return true
 		KEY_D:
 			if courant == "gestion":
 				main.sim.deposer(main.joueur(), 50)
@@ -252,6 +260,8 @@ func rafraichir() -> void:
 			_construire_registre(j)
 		"assigner":
 			_construire_assigner(j)
+		"entrainer":
+			_construire_entrainer(j)
 		"commerce":
 			_construire_commerce(j)
 	selection = clampi(sel, 0, maxi(0, entrees.size() - 1))
@@ -286,7 +296,7 @@ func _montrer_detail() -> void:
 			detail.text = texte_recette(en.plan)
 		"texte":
 			detail.text = str(en.texte)
-		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin":
+		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer":
 			detail.text = str(en.get("texte", ""))
 		"achat", "vente":
 			var p: Dictionary = en.prix
@@ -337,6 +347,8 @@ func _action_principale() -> void:
 			main.sim.intention(j.id, {"type": "assigner", "pnj": pnj_id, "fonction": str(en.fonction)})
 			fermer()
 			return
+		"competence_entrainer":
+			main.sim.intention(j.id, {"type": "entrainer", "pnj": pnj_id, "competence": str(en.competence)})
 	rafraichir()
 
 
@@ -396,6 +408,12 @@ func _construire_dialogue(j: Dictionary) -> void:
 		if (str(rc.get("method", "")) == "relation" and rel >= int(rc.get("threshold", 60)) - 10) or bool(pnj.get("recrutable_hors_condition", false)):
 			liste.add_item(tr("ui.ecran.recruter"))
 			entrees.append({"kind": "option", "option": "recruter"})
+	if "entraineur" in pnj.get("tags", []):
+		liste.add_item(tr("ui.ecran.entrainer"))
+		entrees.append({"kind": "option", "option": "entrainer"})
+	if "commerce_possible" in pnj.get("tags", []) and not main.sim.territoire.get("commande", {}).is_empty():
+		liste.add_item(tr("ui.ecran.livrer"))
+		entrees.append({"kind": "option", "option": "livrer"})
 	liste.add_item(tr("ui.ecran.partir"))
 	entrees.append({"kind": "option", "option": "partir"})
 	for en in entrees:
@@ -426,6 +444,11 @@ func _option(opt: String) -> void:
 			rafraichir()
 		"assigner":
 			ouvrir("assigner")
+		"entrainer":
+			ouvrir("entrainer")
+		"livrer":
+			main.sim.intention(j.id, {"type": "livrer", "pnj": pnj_id})
+			rafraichir()
 		"partir":
 			fermer()
 
@@ -555,6 +578,9 @@ func _construire_gestion(j: Dictionary) -> void:
 		especes.append(tr(GameData.entree("species", str(esp)).name_key))
 	liste.add_item(tr("ui.gestion.elevage").format({"n": nv, "especes": ", ".join(especes) if not especes.is_empty() else "—"}), null, false)
 	entrees.append({"kind": "texte", "texte": ""})
+	var cmd: Dictionary = t.get("commande", {})
+	liste.add_item(tr("ui.gestion.commande").format({"espece": tr(GameData.entree("species", str(cmd.espece)).name_key), "couleur": cmd.couleur, "motif": cmd.motif, "or": int(cmd.or)}) if not cmd.is_empty() else tr("ui.gestion.commande_aucune"), null, false)
+	entrees.append({"kind": "texte", "texte": ""})
 	_bouton(tr("ui.ecran.deposer"), func() -> void: main.sim.deposer(main.joueur(), 50); rafraichir())
 	_bouton(tr("ui.ecran.retirer"), func() -> void: main.sim.retirer(main.joueur(), 50); rafraichir())
 
@@ -616,6 +642,27 @@ func _construire_registre(_j: Dictionary) -> void:
 			ms.sort()
 			lignes.append(tr("ui.registre.grille_ligne").format({"c": c, "motifs": ", ".join(ms)}))
 		entrees.append({"kind": "texte", "texte": "\n".join(lignes)})
+
+
+func _construire_entrainer(j: Dictionary) -> void:
+	var pnj: Dictionary = main.sim.entites.get(pnj_id, {})
+	if pnj.is_empty():
+		fermer()
+		return
+	titre.text = tr("ui.entrainer.titre").format({"nom": tr(pnj.name_key), "or": int(j.or)})
+	var ids: Array = j.competences.keys()
+	ids.sort()
+	var n := 0
+	for cid in ids:
+		if not main.sim.peut_entrainer(pnj, str(cid)):
+			continue
+		n += 1
+		var cout: int = main.sim.cout_entrainement(j, str(cid))
+		liste.add_item(tr("ui.entrainer.competence").format({"nom": tr(main.sim._nom_competence(str(cid))), "niveau": int(j.competences[cid]), "potentiel": int(j.potentiels.get(cid, main.sim.regles.r.progression.potentiel_defaut)), "cout": cout}))
+		entrees.append({"kind": "competence_entrainer", "competence": str(cid), "texte": tr("ui.entrainer.competence").format({"nom": tr(main.sim._nom_competence(str(cid))), "niveau": int(j.competences[cid]), "potentiel": int(j.potentiels.get(cid, main.sim.regles.r.progression.potentiel_defaut)), "cout": cout})})
+	if n == 0:
+		liste.add_item(tr("ui.entrainer.aucune"), null, false)
+		entrees.append({"kind": "texte", "texte": ""})
 
 
 func _construire_assigner(j: Dictionary) -> void:

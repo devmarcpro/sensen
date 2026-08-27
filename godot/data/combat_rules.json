@@ -156,7 +156,12 @@
     "potentiel_cout_base": 10,
     "potentiel_cout_div": 10,
     "top_n": 5,
-    "part_stat": 0.5
+    "part_stat": 0.5,
+    "entraineur": {
+      "or_par_niveau": 20,
+      "or_min": 20,
+      "potentiel": 10
+    }
   },
   "mort": {
     "_doc": "Mort et pénalité : respawn, −10 % d'or (pas d'or encore), 10 % de chance par objet du sac de tomber, équipement et XP conservés",
@@ -757,6 +762,13 @@
         ]
       ],
       "bestiaire_complet_capture": 4
+    },
+    "commandes": {
+      "base": 80,
+      "par_rarete": 70,
+      "par_pas": 45,
+      "pas_max": 2,
+      "palier_double": 3000
     }
   }
 }
