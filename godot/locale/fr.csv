@@ -138,6 +138,14 @@ journal.glyphe_declenche,{nom} déclenche le glyphe de {source} !
 journal.differe,{nom} : {capacite} partira dans {ticks} ticks
 journal.terrain,"la tuile ({x},{y}) passe de h={avant} à h={apres}"
 journal.invocation,"{nom} dresse {contenu} sur ({x},{y}) pour {ticks} ticks"
+journal.arme,{nom} arme {capacite} ({evenement})
+journal.declencheur,{nom} : {evenement} — {capacite} part !
+declencheur.riposte,riposte
+declencheur.parade,parade
+declencheur.ouverture,ouverture
+declencheur.veille,veille
+declencheur.testament,testament
+declencheur.accord,accord
 journal.victoire,plus aucun hostile. Victoire.
 journal.defaite,tu es tombé. Tab : recommencer.
 module.a_l_impact.name,À l'impact

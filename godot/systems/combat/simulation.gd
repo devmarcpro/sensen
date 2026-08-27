@@ -346,6 +346,7 @@ func _attaquer_arme(e: Dictionary, cible: Dictionary, lourde: bool, tick: int) -
 			cible = masque   # un ennemi sur la trajectoire prend la flèche
 	_quitter_garde(e)
 	e.orientation = Vector2i(signi(cible.pos.x - e.pos.x), signi(cible.pos.y - e.pos.y))
+	e.derniere_cible_pos = cible.pos
 	var ticks := _ticks_avec_statuts(e, regles.ticks_attaque(fonct, lourde))
 	_engager_combat(e, cible)
 	if regles.est_telegraphee(ticks) or lourde:
@@ -452,6 +453,7 @@ func _poser_segment(e: Dictionary, v_att: Dictionary, tick: int) -> void:
 	if not e.has("chaine") or v_att.is_empty():
 		return
 	var element := wuxing.dominante(v_att)
+	_declencher(e, "accord", e.derniere_cible_pos)
 	var p := wuxing.poser(e.chaine, element, tick)
 	if p.resout:
 		EventBus.emettre(&"journal", [&"journal.chaine_resout", {"nom": e.name_key, "mult": "%.2f" % p.multiplicateur}])
@@ -474,6 +476,7 @@ func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degat
 		if tient:
 			var cout := regles.cout_garde_impact(sans_garde, bouclier)
 			cible.endurance = maxi(0, cible.endurance - cout)
+			_declencher(cible, "parade", att.pos)
 			EventBus.emettre(&"journal", [&"journal.garde_tient", {"nom": cible.name_key, "avant": sans_garde, "apres": degats}])
 			if cible.endurance <= 0:
 				cible.garde = false
@@ -486,13 +489,40 @@ func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degat
 
 func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: Dictionary) -> void:
 	_verser_xp(cible, degats, source, detail)
+	var avant_pct := float(cible.sante) / float(cible.sante_max)
 	cible.sante = maxi(0, cible.sante - degats)
 	EventBus.emettre(&"damage_dealt", [source, cible.id, degats, detail])
+	var att: Dictionary = entites.get(source, {})
 	if cible.sante <= 0 and cible.vivant:
 		cible.vivant = false
 		grille.liberer(cible.pos)
 		EventBus.emettre(&"journal", [&"journal.mort", {"nom": cible.name_key}])
 		EventBus.emettre(&"creature_killed", [cible.id, source])
+		_declencher(cible, "testament", cible.pos)   # la charge part quand le porteur tombe
+	# Déclencheurs à événement (Modules) : Ouverture au premier contact, Riposte quand le porteur est
+	# touché, Veille quand un allié passe sous le seuil.
+	if not att.is_empty():
+		for e in [att, cible]:
+			if not e.contact:
+				e.contact = true
+				_declencher(e, "ouverture", cible.pos if e.id == att.id else att.pos)
+		if cible.vivant:
+			_declencher(cible, "riposte", att.pos)
+	for p in vivants():
+		if p.id != cible.id and p.camp == cible.camp:
+			for d in p.declencheurs_armes.duplicate():
+				if d.evenement == "veille" and avant_pct * 100.0 >= float(d.plan.pct_declencheur) and float(cible.sante) / float(cible.sante_max) * 100.0 < float(d.plan.pct_declencheur):
+					p.declencheurs_armes.erase(d)
+					_executer_capacite(p, d.plan, cible.pos, false)
+
+
+## Fait partir les charges armées sur `e` pour cet événement (chacune une seule fois).
+func _declencher(e: Dictionary, evenement: String, pos: Vector2i) -> void:
+	for d in e.declencheurs_armes.duplicate():
+		if d.evenement == evenement:
+			e.declencheurs_armes.erase(d)
+			EventBus.emettre(&"journal", [&"journal.declencheur", {"nom": e.name_key, "evenement": "declencheur." + evenement, "capacite": d.plan.noyau.name_key}])
+			_executer_capacite(e, d.plan, pos, false)
 
 
 ## XP de combat : les dégâts appliqués, plafonnés aux PV restants, versés à l'élément, à la
@@ -847,6 +877,7 @@ func _lancer_capacite(e: Dictionary, index: int, cible: Variant, tick: int) -> b
 	_quitter_garde(e)
 	if cible_pos != e.pos:
 		e.orientation = Vector2i(signi(cible_pos.x - e.pos.x), signi(cible_pos.y - e.pos.y))
+		e.derniere_cible_pos = cible_pos
 	var fausse := _evaluer_conditions(e, plan, cible_pos)
 	if not fausse.is_empty():
 		# Le verrou est fermé : la capacité ne part pas et rend 50 % de ses ticks.
@@ -905,9 +936,58 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 			charge = plan.duplicate()
 			charge.mult = float(plan.mult) / float(touchees.size())   # la charge répartie, divisée par leur nombre
 	var res := {"a_touche": false, "premiere": {}, "tuee": {}}
-	if not plan.noyau.is_empty():
+	var salve := {}
+	for l: Dictionary in plan.liaisons:
+		if l.has("salve"):
+			salve = l
+	if not plan.noyau.is_empty() and not salve.is_empty() and not touchees.is_empty():
+		# Salve : 3 charges simultanées à 60 %, réparties dans la forme (une cible chacune, à tour de rôle).
+		for k in int(salve.salve):
+			var tir := plan.duplicate()
+			tir.mult = float(plan.mult) * float(salve.mult)
+			tir.liaisons = []
+			var r := _appliquer_charge(e, tir, [touchees[k % touchees.size()]], tuiles, cible_pos, prev if k == 0 else {})
+			res.a_touche = res.a_touche or r.a_touche
+			if res.premiere.is_empty():
+				res.premiere = r.premiere
+	elif not plan.noyau.is_empty():
 		res = _appliquer_charge(e, charge, touchees, tuiles, cible_pos, prev)
 	var a_touche: bool = res.a_touche
+	for l: Dictionary in plan.liaisons:
+		if l.get("propagation", false) and a_touche:
+			# De proche en proche tant que ça touche, −1 dé par pas.
+			var deja: Array[Dictionary] = touchees.duplicate()
+			var depuis: Dictionary = touchees.back()
+			var pas := 1
+			while true:
+				var suivante := _voisine_non_touchee(e, depuis, deja, 1)
+				if suivante.is_empty():
+					break
+				var saut := plan.duplicate()
+				saut.des_bonus = int(plan.des_bonus) + int(l.get("des", -1)) * pas
+				saut.liaisons = []
+				_appliquer_charge(e, saut, [suivante], [suivante.pos], suivante.pos, {})
+				deja.append(suivante)
+				depuis = suivante
+				pas += 1
+		if l.get("boucle", false) and a_touche and plan.monnaie == "mana":
+			# Rejoue tant qu'il reste de la ressource, −1 dé cumulé par tour ; jamais de surchauffe.
+			var tour := 1
+			while int(e.mana) >= int(plan.ressource) and tour < 20:
+				e.mana -= int(plan.ressource)
+				var rejeu := plan.duplicate()
+				rejeu.des_bonus = int(plan.des_bonus) + int(l.get("des", -1)) * tour
+				rejeu.liaisons = []
+				if not _appliquer_charge(e, rejeu, touchees, tuiles, cible_pos, {}).a_touche:
+					break
+				tour += 1
+		if l.get("contagion", false) and plan.parametres.has("statut"):
+			# Les statuts du noyau se propagent aux ennemis adjacents des cibles touchées.
+			var st: Dictionary = plan.parametres.statut
+			for c in touchees.duplicate():
+				for v in vivants():
+					if v.camp != e.camp and not touchees.has(v) and Grille.distance(v.pos, c.pos) == 1:
+						appliquer_statut(v, str(st.id), int(st.duree_ticks), e.id)
 	for l: Dictionary in plan.liaisons:
 		if l.has("echo"):   # Écho : rejoue la charge à 50 % après 20 ticks
 			var rejeu := plan.duplicate()
@@ -966,6 +1046,16 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 				var n := int(suite.get("ticks_declencheur", 20))
 				differes.append({"tick": tick + n, "source": e.id, "plan": suite, "pos": ou})
 				EventBus.emettre(&"journal", [&"journal.differe", {"nom": e.name_key, "capacite": suite.noyau.name_key, "ticks": n}])
+			"cadence":
+				# Tous les N emplois de la capacité, la charge qui suit part aussi.
+				var cle := str(plan.get("id", ""))
+				e.emplois[cle] = int(e.emplois.get(cle, 0)) + 1
+				if int(e.emplois[cle]) % int(suite.get("n_declencheur", 3)) == 0:
+					_executer_capacite(e, suite, ou, false)
+			"riposte", "parade", "ouverture", "veille", "testament", "accord":
+				# La charge attend l'événement sur le porteur — armée une fois.
+				e.declencheurs_armes.append({"evenement": str(suite.declencheur), "plan": suite})
+				EventBus.emettre(&"journal", [&"journal.arme", {"nom": e.name_key, "capacite": suite.noyau.name_key, "evenement": "declencheur." + str(suite.declencheur)}])
 	EventBus.emettre(&"action_resolved", [e.id, {"type": "capacite", "plan": plan}])
 
 
@@ -1218,6 +1308,8 @@ func _verifier_desengagements() -> void:
 				var recup := int(floorf(float(p.munitions_tirees) * float(regles.r.projectiles.recuperation)))
 				p.munitions += recup
 				p.munitions_tirees = 0
+				p.declencheurs_armes.clear()
+				p.contact = false
 				_quitter_combat(p)
 			TickManager.retirer(nom)
 			combats.erase(nom)

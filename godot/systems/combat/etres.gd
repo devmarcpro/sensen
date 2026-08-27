@@ -52,6 +52,10 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 		"anti_stunlock_jusqua": -1,               # aucun contrôle dur avant ce tick (Statuts de contrôle)
 		"munitions": _munitions(equip, items),
 		"munitions_tirees": 0,
+		"declencheurs_armes": [],                 # charges armées sur le porteur : [{evenement, plan}] — une fois chacune
+		"emplois": {},                             # nombre d'emplois par capacité (Cadence)
+		"derniere_cible_pos": pos,
+		"contact": false,                          # a-t-il déjà touché ou été touché dans ce combat ? (Ouverture)
 		"xp": {"element": {}, "competence": {}, "type": {}, "construction": {}},   # XP de combat, trois pistes + défense
 		"cible": "",
 		"tick_derniere_vue": -1,

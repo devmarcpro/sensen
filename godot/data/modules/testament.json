@@ -8,5 +8,8 @@
   "tags": [
     "declencheur"
   ],
-  "surcout_ticks": 0
+  "surcout_ticks": 0,
+  "effet": {
+    "declencheur": "testament"
+  }
 }

@@ -22,6 +22,7 @@ func _ready() -> void:
 	test_statuts()
 	test_liaisons()
 	test_glyphes_terrain()
+	test_evenements()
 	test_arenes_autonomes()
 	if echecs == 0:
 		print("TESTS : tout passe")
@@ -751,3 +752,76 @@ func test_glyphes_terrain() -> void:
 	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loup.pos}), "Fosse sous le loup")
 	s.pas(j.horloge)
 	verifier(s.grille.h(loup.pos) == h_avant - 3 and loup.sante == pv - 5, "la tuile s'effondre de 3 : le loup chute (5 dégâts)")
+
+
+# ---------------------------------------------------------------- Déclencheurs à événement, Salve, Propagation, Boucle
+
+func test_evenements() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var loups: Array[Dictionary] = [s.entites["loup_2"], s.entites["loup_3"], s.entites["loup_4"]]
+	var positions := [Vector2i(0, -1), Vector2i(1, -1), Vector2i(2, -1)]
+	for i in 3:
+		s.grille.liberer(loups[i].pos)
+		loups[i].pos = j.pos + positions[i]
+		s.grille.placer(loups[i].id, loups[i].pos)
+		loups[i].compteur = 500
+		loups[i].sante = 400
+		loups[i].sante_max = 400
+	s._engager_combat(j, loups[0])
+	var h := s.horloge_de(j)
+	j.mana = 300
+	# Riposte : armée sur soi, part quand le porteur est touché
+	j.capacites.append({"id": "r", "name_key": "capacite.etincelle.name", "modules": ["riposte", "point", "etincelle"]})
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": j.pos}), "armer une Riposte")
+	verifier(j.declencheurs_armes.size() == 1 and j.declencheurs_armes[0].evenement == "riposte", "la Riposte attend")
+	var pv0: int = loups[0].sante
+	loups[0].compteur = h.ticks
+	j.compteur = h.ticks + 500
+	s.pas(j.horloge)   # le loup mord
+	verifier(j.declencheurs_armes.is_empty() and loups[0].sante < pv0, "touché : l'Étincelle part sur l'attaquant")
+	# Cadence : tous les 3 emplois, la charge qui suit part aussi
+	j.capacites[3] = {"id": "cad", "name_key": "capacite.etincelle.name", "modules": ["point", "etincelle", "cadence", "point", "bruine"]}
+	var coups := [0]
+	EventBus.damage_dealt.connect(func(src: String, _c: String, _d: int, _det: Dictionary) -> void: if src == j.id: coups[0] += 1)
+	for k in 3:
+		j.compteur = h.ticks
+		loups[0].compteur = h.ticks + 500
+		s.pas(j.horloge)
+		s.intention(j.id, {"type": "capacite", "index": 3, "cible": loups[0].pos})
+	verifier(coups[0] == 4, "3 emplois → 3 Étincelles + 1 Bruine (%d coups)" % coups[0])
+	# Salve : 3 charges à 60 % réparties sur les cibles d'une ligne
+	coups[0] = 0
+	j.capacites[3] = {"id": "sv", "name_key": "capacite.etincelle.name", "modules": ["ligne", "etincelle", "salve"]}
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	# la ligne part vers (0,-1) : seul loups[0] est dessus → les 3 charges tombent sur lui
+	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loups[0].pos}), "Salve en ligne")
+	verifier(coups[0] == 3, "3 charges (%d coups)" % coups[0])
+	# Propagation : de proche en proche (les trois loups sont contigus)
+	coups[0] = 0
+	j.capacites[3] = {"id": "pr", "name_key": "capacite.etincelle.name", "modules": ["point", "etincelle", "propagation"]}
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loups[0].pos}), "Étincelle + Propagation")
+	verifier(coups[0] == 3, "la charge se propage aux trois loups (%d coups)" % coups[0])
+	# Boucle : rejoue tant qu'il reste du mana
+	coups[0] = 0
+	j.mana = 10   # Étincelle = 3 mana : 1 + 3 rejeux (10 → 7 → 4 → 1)
+	j.capacites[3] = {"id": "bo", "name_key": "capacite.etincelle.name", "modules": ["point", "etincelle", "boucle"]}
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loups[0].pos}), "Étincelle + Boucle")
+	verifier(coups[0] == 3 and j.mana == 1, "la boucle rejoue jusqu'à épuisement du mana (%d coups, mana %d)" % [coups[0], j.mana])
+	# Testament : la charge part quand le porteur tombe
+	loups[0].capacites = [{"id": "t", "name_key": "capacite.etincelle.name", "modules": ["testament", "anneau", "etincelle"]}]
+	loups[0].mana = 50
+	loups[0].declencheurs_armes.append({"evenement": "testament", "plan": s.plan_capacite(loups[0], 0).charge_suivante})
+	var pvj: int = j.sante
+	loups[0].sante = 1
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	s.intention(j.id, {"type": "attaquer", "cible": loups[0].id, "lourde": false})
+	verifier(not loups[0].vivant and j.sante < pvj, "le loup tombe : son Testament en anneau frappe le joueur")

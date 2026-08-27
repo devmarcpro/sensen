@@ -8,5 +8,9 @@
   "tags": [
     "liaison"
   ],
-  "surcout_ticks": 5
+  "surcout_ticks": 5,
+  "effet": {
+    "propagation": true,
+    "des": -1
+  }
 }

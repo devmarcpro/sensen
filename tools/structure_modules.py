@@ -80,12 +80,23 @@ LIAISONS = {
     "miroir": {"miroir": True},
     "partage": {"partage": True},
     "echo": {"echo": 0.5, "apres_ticks": 20},
+    "propagation": {"propagation": True, "des": -1},
+    "salve": {"salve": 3, "mult": 0.6},
+    "contagion": {"contagion": True},
+    "boucle": {"boucle": True, "des": -1},
 }
 DECLENCHEURS = {
     "a_l_impact": {"declencheur": "impact"},
     "curee": {"declencheur": "mise_a_mort"},
     "sceau": {"declencheur": "entree", "duree_ticks": 100},
     "meche": {"declencheur": "apres_ticks", "ticks": 20},
+    "riposte": {"declencheur": "riposte"},
+    "parade": {"declencheur": "parade"},
+    "ouverture": {"declencheur": "ouverture"},
+    "veille": {"declencheur": "veille", "pct": 40},
+    "testament": {"declencheur": "testament"},
+    "accord": {"declencheur": "accord"},
+    "cadence": {"declencheur": "cadence", "n": 3},
 }
 
 n = 0
