@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "poids",
+    "craft_skill"
+  ],
+  "properties": {
+    "poids": {
+      "type": "integer"
+    },
+    "craft_skill": {
+      "type": "string"
+    }
+  }
+}

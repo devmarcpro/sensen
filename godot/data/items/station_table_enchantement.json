@@ -1,0 +1,10 @@
+{
+  "name_key": "station.table_enchantement.name",
+  "type": "station",
+  "equip_slot": "",
+  "station": "table_enchantement",
+  "tags": [
+    "station",
+    "portative"
+  ]
+}

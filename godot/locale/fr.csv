@@ -98,7 +98,7 @@ journal.condition_fausse,{capacite} ne part pas : {condition} n'est pas remplie 
 capacite.etincelle.name,Étincelle
 capacite.gel_en_ligne.name,Gel en ligne
 capacite.baume.name,Baume
-ui.aide.capacites,F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
+ui.aide.capacites,F : atelier (fabriquer) · F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
 ui.capacite,{touche} {nom} [{modules}] : {forme} portée {pmin}-{pmax} taille {taille} · {ticks} ticks · {ressource} {monnaie} · {des}{bonus}
 ui.capacite.visee,VISÉE : {nom} — cliquer une tuile (Échap annule)
 ui.capacite.preview,{nom} sur {def} : {des}{bonus} ×{dom} → zone {zone} ×{mult} − armure {armure} ⇒ {min}–{max}
@@ -369,6 +369,36 @@ item.materiau_brut.name,Matériau brut
 item.proto_pioche.name,Pioche de fer
 functionality.pioche.name,Pioche
 tile_content.filon.name,Filon
+station.etabli.name,Établi
+station.forge.name,Forge
+station.enclume.name,Enclume
+station.scierie.name,Scierie
+station.tailleur_de_pierre.name,Tailleur de pierre
+station.atelier_tissage.name,Atelier de tissage
+station.alambic.name,Alambic
+station.cuisine.name,Cuisine
+station.table_enchantement.name,Table d'enchantement
+recipe.fondre_lingot.name,Fondre un lingot
+recipe.scier_planche.name,Scier des planches
+recipe.tailler_pierre.name,Tailler la pierre
+recipe.tisser_tissu.name,Tisser
+recipe.tailler_gemme.name,Tailler une gemme
+recipe.fondre_verre.name,Fondre du verre
+recipe.cuire_brique.name,Cuire des briques
+recipe.faire_papier.name,Faire du papier
+recipe.tresser_chaume.name,Tresser du chaume
+forme.brut,{materiau}
+forme.lingot,{materiau} (lingot)
+forme.planche,{materiau} (planche)
+forme.pierre_taillee,{materiau} (pierre taillée)
+forme.tissu,{materiau} (tissu)
+forme.taillee,{materiau} (taillée)
+journal.fabrique,"{nom} fabrique {quantite} × {objet} ({recette})"
+journal.manque,il manque des matériaux pour {recette}
+journal.pas_de_station,aucune station dans le sac pour {recette}
+ui.atelier,=== ATELIER (F pour fermer) — chiffre : fabriquer ===
+ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
+ui.atelier.vide,  (aucune station dans le sac)
 journal.victoire,plus aucun hostile. Victoire.
 journal.defaite,tu es tombé. Une touche : te relever au point d'entrée (Mort et pénalité).
 module.a_l_impact.name,À l'impact

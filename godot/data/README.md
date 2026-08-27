@@ -29,7 +29,8 @@
 | status_effects/ | les 14 statuts du prototype (`tools/gen_status_effects.py`) : période, durée, contrôle, modifiers par cible générique | Statuts (F.4), Statuts de contrôle et anti-stunlock |
 | dungeon_rooms/, dungeon_connectors/, dungeon_themes/ | 12 salles + 8 connecteurs en grilles de caractères (`tools/gen_dungeon_prefabs.py`), thèmes (pool, boss, densité, étages) | B.10, Décision — Prefabs de donjon en tuiles, Génération de donjon |
 | plants/ | plantes | Plantes (F.8) |
-| recipes/ | transformations de matériaux | Stations de transformation (C.8) |
+| recipes/ | les 9 transformations plates (fondre, scier, tailler, tisser…) | Stations de transformation (C.8) |
+| stations/ | les 9 stations (poids, compétence) ; portatives = objets `station_<id>` | Stations de transformation (C.8) |
 | tutorials/ | tooltips contextuels (signal EventBus + conditions → text_key) | Tooltips contextuels (E.19) |
 | dialogue/ | répliques d'ambiance | Dialogue PNJ (E.23) |
 | races/, classes/ | les 3 races et 8 classes visibles : bonus, kit, potentiels de base, talent (`tools/gen_progression_data.py`) | C.2, C.3, Talents de race, Talents de classe |

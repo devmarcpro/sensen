@@ -101,6 +101,7 @@ static func creer_personnage(nom_key: String, race_id: String, classe_id: String
 		"id": "joueur", "name_key": nom_key, "race": race_id, "classe": classe_id, "fonction": "aventurier", "skeleton_template": "humanoide",
 		"corps": {"stats": stats, "silhouette": "humanoide"}, "esprit": null, "ai_profile": "compagnon",
 		"actions": [], "equipement": classe.get("equipement", []).duplicate(), "ratelier": classe.get("ratelier", []).duplicate(),
+		"sac": ["station_etabli"],   # chaque personnage part avec un établi portatif (Stations de transformation, décidé le 2026-08-28)
 		"competences": classe.get("competences", {}).duplicate(), "capacites": [], "chain_gauge": true, "elements": null,
 		"rare_chance": 0.0, "teinte": [0.28, 0.62, 0.92], "tags": ["humanoide", "joueur"] + race.get("tags", []),
 		"potentiels": pot_base.duplicate(), "potentiels_base": pot_base, "xp_mult": float(race.get("xp_mult", 1.0)), "signe": signe,

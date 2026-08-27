@@ -175,5 +175,9 @@
     "seuil_irrecoltable": 0.5,
     "niveaux_par_unite": 10,
     "mains_nues_durete": 1
+  },
+  "craft": {
+    "_doc": "Fabrication : ticks = ceil(ticks_base / skill_factor(N)) ; XP = dureté du matériau produit (transformations plates).",
+    "ticks_base": 20
   }
 }

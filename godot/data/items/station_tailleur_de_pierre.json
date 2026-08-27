@@ -1,0 +1,10 @@
+{
+  "name_key": "station.tailleur_de_pierre.name",
+  "type": "station",
+  "equip_slot": "",
+  "station": "tailleur_de_pierre",
+  "tags": [
+    "station",
+    "portative"
+  ]
+}

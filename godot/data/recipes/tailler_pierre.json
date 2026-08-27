@@ -1,0 +1,17 @@
+{
+  "name_key": "recipe.tailler_pierre.name",
+  "station": "tailleur_de_pierre",
+  "craft_skill": "taille_de_pierre",
+  "inputs": [
+    {
+      "category": "roche",
+      "forme": "brut",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "forme": "pierre_taillee",
+    "amount": 1
+  },
+  "fuel": null
+}

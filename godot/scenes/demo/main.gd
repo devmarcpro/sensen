@@ -32,6 +32,7 @@ var profil_sans_terrain := false   # mesure de perf : saute le dessin des tuiles
 var visee := -1                    # capacité en cours de visée (index), -1 sinon
 var ecran_fin: Array[String] = []  # récapitulatif du dernier combat (écran de fin), vide sinon
 var feuille := false               # la feuille de personnage est affichée
+var atelier := false               # l'atelier (recettes des stations du sac) est affiché
 var creation: Dictionary = {}      # l'écran de création, tant que le personnage n'existe pas
 const STATS := ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]
 var zoom := 1.0
@@ -375,6 +376,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 				_charger()
 			KEY_C:
 				feuille = not feuille
+			KEY_F:
+				atelier = not atelier
 			KEY_L:
 				if sim.attente.has(joueur_id) and not j.is_empty():
 					for uid in j.sac:
@@ -412,7 +415,11 @@ func _unhandled_input(ev: InputEvent) -> void:
 				visee = -1
 			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
 				var k: int = ev.keycode - KEY_1
-				if ev.shift_pressed:
+				if atelier and not j.is_empty():
+					var recettes := sim.recettes_disponibles(j)
+					if k < recettes.size() and sim.attente.has(joueur_id):
+						sim.intention(joueur_id, {"type": "fabriquer", "recette": recettes[k].id})
+				elif ev.shift_pressed:
 					if not j.is_empty() and k < j.sac.size() and sim.attente.has(joueur_id):
 						sim.intention(joueur_id, {"type": "equiper", "objet": j.sac[k]})
 				elif not j.is_empty() and k < j.ratelier.size():
@@ -703,6 +710,20 @@ func _maj_ui() -> void:
 					continue
 				lignes.append(tr("ui.feuille.ligne").format({"competence": tr(sim._nom_competence(cle)), "niveau": int(j.competences[cle]),
 					"xp": int(j.xp_competences.get(cle, 0.0)), "suivant": sim.progression.xp_next(int(j.competences[cle])), "potentiel": int(j.potentiels.get(cle, 80))}))
+		if atelier:
+			lignes.append(tr("ui.atelier"))
+			var recettes := sim.recettes_disponibles(j)
+			if recettes.is_empty():
+				lignes.append(tr("ui.atelier.vide"))
+			for k in mini(9, recettes.size()):
+				var pl: Dictionary = recettes[k]
+				var entrees: Array[String] = []
+				for en in pl.entrees:
+					var nom_e: String = tr(GameData.entree("materials", en.pile.materiau).name_key) if not en.pile.is_empty() else tr("material.%s.name" % en.filtre) if GameData.catalogues.materials.has(en.filtre) else en.filtre
+					entrees.append("%d × %s" % [int(en.besoin), tr("forme." + str(en.forme)).format({"materiau": nom_e})])
+				var mat_s: String = tr(GameData.entree("materials", pl.sortie.materiau).name_key) if GameData.catalogues.materials.has(pl.sortie.materiau) else "?"
+				lignes.append(tr("ui.atelier.ligne").format({"n": k + 1, "recette": tr(pl.recette.name_key), "station": tr(GameData.entree("stations", pl.station).name_key),
+					"entrees": " + ".join(entrees), "sortie": "%d × %s" % [int(pl.sortie.quantite), tr("forme." + str(pl.sortie.forme)).format({"materiau": mat_s})], "ok": "" if pl.faisable else " ✗"}))
 		for k in j.get("capacites", []).size():
 			lignes.append("  " + _texte_capacite(j, k))
 		if visee >= 0:
@@ -716,7 +737,10 @@ func _maj_ui() -> void:
 		var objets: Array[String] = []
 		for k in mini(9, j.sac.size()):
 			var it_k: Dictionary = sim.items[j.sac[k]]
-			objets.append("⇧%d %s%s" % [k + 1, nom_objet(sim.nom_objet(j.sac[k])), (" ×%d" % int(it_k.quantite)) if it_k.get("type", "") == "materiau" else ""])
+			var nom_k := nom_objet(sim.nom_objet(j.sac[k]))
+			if it_k.get("type", "") == "materiau":
+				nom_k = tr("forme." + str(it_k.get("forme", "brut"))).format({"materiau": nom_k}) + " ×%d" % int(it_k.quantite)
+			objets.append("⇧%d %s" % [k + 1, nom_k])
 		bas.append(tr("ui.sac").format({"liste": " · ".join(objets)}))
 	if not ecran_fin.is_empty():
 		bas.append_array(ecran_fin)

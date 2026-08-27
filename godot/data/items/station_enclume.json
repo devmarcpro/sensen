@@ -1,0 +1,10 @@
+{
+  "name_key": "station.enclume.name",
+  "type": "station",
+  "equip_slot": "",
+  "station": "enclume",
+  "tags": [
+    "station",
+    "portative"
+  ]
+}

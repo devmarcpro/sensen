@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "station",
+    "craft_skill",
+    "inputs",
+    "output"
+  ],
+  "properties": {
+    "station": {
+      "type": "string"
+    },
+    "craft_skill": {
+      "type": "string"
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "forme",
+          "amount"
+        ]
+      }
+    },
+    "output": {
+      "type": "object",
+      "required": [
+        "amount"
+      ]
+    }
+  }
+}

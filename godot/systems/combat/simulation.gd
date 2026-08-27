@@ -224,20 +224,117 @@ func _creuser(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	return true
 
 
-## Un matériau brut dans le sac : une pile par matériau (`quantite`), l'objet `materiau_brut` en base.
-func _donner_materiau(e: Dictionary, mat_id: String, quantite: int) -> void:
-	for uid in e.sac:
-		var it: Dictionary = items.get(uid, {})
-		if it.get("type", "") == "materiau" and it.get("materiau", "") == mat_id:
-			it.quantite = int(it.quantite) + quantite
-			return
+## Un matériau dans le sac : une pile par (matériau, forme) — `quantite` ; l'objet `materiau_brut` en base.
+func _donner_materiau(e: Dictionary, mat_id: String, quantite: int, forme: String = "brut") -> void:
+	var pile := _pile(e, mat_id, forme)
+	if not pile.is_empty():
+		pile.quantite = int(pile.quantite) + quantite
+		return
 	var inst := generer_objet("materiau_brut", 1, {}, "commun", 0)
 	if inst.is_empty():
 		return
 	inst.materiau = mat_id
+	inst.forme = forme
 	inst.quantite = quantite
 	inst.name_key = GameData.entree("materials", mat_id).name_key
 	e.sac.append(inst.uid)
+
+
+func _pile(e: Dictionary, mat_id: String, forme: String) -> Dictionary:
+	for uid in e.sac:
+		var it: Dictionary = items.get(uid, {})
+		if it.get("type", "") == "materiau" and it.get("materiau", "") == mat_id and str(it.get("forme", "brut")) == forme:
+			return it
+	return {}
+
+
+## Retire `quantite` d'une pile ; la pile vide disparaît du sac.
+func _retirer_materiau(e: Dictionary, pile: Dictionary, quantite: int) -> void:
+	pile.quantite = int(pile.quantite) - quantite
+	if int(pile.quantite) <= 0:
+		e.sac.erase(pile.uid)
+		items.erase(pile.uid)
+
+
+# ---------------------------------------------------------------- fabrication (Stations de transformation)
+
+## Les stations portées : id de station → uid de l'objet.
+func stations_de(e: Dictionary) -> Dictionary:
+	var res := {}
+	for uid in e.sac:
+		var it: Dictionary = items.get(uid, {})
+		if it.get("type", "") == "station":
+			res[str(it.station)] = uid
+	return res
+
+
+## Les recettes plates que les stations du sac permettent, avec leur faisabilité.
+## [{id, recette, station, faisable, entrees: [{pile ou {}, besoin, materiau}], sortie: {materiau, forme, quantite}}]
+func recettes_disponibles(e: Dictionary) -> Array[Dictionary]:
+	var res: Array[Dictionary] = []
+	var stations := stations_de(e)
+	var ids: Array = GameData.catalogues.recipes.keys()
+	ids.sort()
+	for rid in ids:
+		var r: Dictionary = GameData.catalogues.recipes[rid]
+		if not stations.has(str(r.station)):
+			continue
+		res.append(_plan_recette(e, r))
+	return res
+
+
+## Le plan d'une recette pour cet être : les piles du sac qui satisfont chaque entrée (par matériau
+## ou par catégorie — la première pile suffisante, dans l'ordre du sac).
+func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
+	var plan := {"id": r.id, "recette": r, "station": str(r.station), "faisable": true, "entrees": [], "sortie": {}}
+	var mat_sortie := str(r.output.get("material", ""))
+	for entree in r.inputs:
+		var besoin := int(entree.amount)
+		var forme := str(entree.get("forme", "brut"))
+		var trouvee := {}
+		for uid in e.sac:
+			var it: Dictionary = items.get(uid, {})
+			if it.get("type", "") != "materiau" or str(it.get("forme", "brut")) != forme or int(it.quantite) < besoin:
+				continue
+			var mat: Dictionary = GameData.catalogues.materials.get(str(it.materiau), {})
+			if entree.has("material") and str(it.materiau) != str(entree.material):
+				continue
+			if entree.has("category") and str(mat.get("category", "")) != str(entree.category):
+				continue
+			trouvee = it
+			break
+		plan.entrees.append({"pile": trouvee, "besoin": besoin, "forme": forme, "filtre": str(entree.get("material", entree.get("category", "")))})
+		if trouvee.is_empty():
+			plan.faisable = false
+		elif mat_sortie.is_empty():
+			mat_sortie = str(trouvee.materiau)   # la sortie garde le matériau de l'entrée (lingot de fer…)
+	plan.sortie = {"materiau": mat_sortie, "forme": str(r.output.get("forme", "brut")), "quantite": int(r.output.amount)}
+	return plan
+
+
+## Fabriquer : consomme les entrées, produit la sortie ; ticks = ticks_base / skill_factor(N) ;
+## XP à la compétence de la station = dureté du matériau produit.
+func _fabriquer(e: Dictionary, rid: String, tick: int) -> bool:
+	var r: Dictionary = GameData.catalogues.recipes.get(rid, {})
+	if r.is_empty():
+		return false
+	if not stations_de(e).has(str(r.station)):
+		EventBus.emettre(&"journal", [&"journal.pas_de_station", {"recette": r.name_key}])
+		return false
+	var plan := _plan_recette(e, r)
+	if not plan.faisable:
+		EventBus.emettre(&"journal", [&"journal.manque", {"recette": r.name_key}])
+		return false
+	for entree in plan.entrees:
+		_retirer_materiau(e, entree.pile, int(entree.besoin))
+	var sortie: Dictionary = plan.sortie
+	_donner_materiau(e, sortie.materiau, int(sortie.quantite), sortie.forme)
+	var n := regles.niveau(e.competences_eff, str(r.craft_skill))
+	e.compteur = tick + _ticks_avec_statuts(e, maxi(1, ceili(float(regles.r.craft.ticks_base) / regles.skill_factor(n))))
+	var mat: Dictionary = GameData.catalogues.materials.get(str(sortie.materiau), {})
+	gagner_xp(e, str(r.craft_skill), int(mat.get("stats", {}).get("durete", 1)))
+	EventBus.emettre(&"journal", [&"journal.fabrique", {"nom": e.name_key, "quantite": int(sortie.quantite), "objet": mat.get("name_key", sortie.materiau), "recette": r.name_key}])
+	return true
 
 
 ## L'état de l'étage courant, sans le joueur, mis de côté : rien ne repop, tout reste où c'est.
@@ -311,6 +408,10 @@ func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 	var id := "%s_%d" % [def_id, _n_entites]
 	var def := fiche_joueur if (controle == "joueur" and not fiche_joueur.is_empty()) else GameData.entree("creatures", def_id)
 	var e := Etres.instancier(id, def, pos, controle, regles, items)
+	for base in def.get("sac", []):   # objets de départ (bases) : instanciés dans le sac
+		var inst := generer_objet(str(base), 1, {}, "commun", 0)
+		if not inst.is_empty():
+			e.sac.append(inst.uid)
 	# Variante rare (Monstres rares) : tirage à la résolution du spawn, stats ×2.5, teinte or, épithète, drop garanti.
 	if controle == "ia":
 		var rng := RandomNumberGenerator.new()
@@ -775,6 +876,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _sertir(e, str(i.get("objet", "")), str(i.get("gemme", "")), h.ticks)
 		"lire":
 			ok = _lire(e, str(i.get("objet", "")), h.ticks)
+		"fabriquer":
+			ok = _fabriquer(e, str(i.get("recette", "")), h.ticks)
 	if ok:
 		attente.erase(id)
 		_fin_de_pas(e.horloge)

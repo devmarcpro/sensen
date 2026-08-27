@@ -1,0 +1,10 @@
+{
+  "name_key": "station.cuisine.name",
+  "type": "station",
+  "equip_slot": "",
+  "station": "cuisine",
+  "tags": [
+    "station",
+    "portative"
+  ]
+}

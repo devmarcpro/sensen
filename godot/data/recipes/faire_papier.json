@@ -1,0 +1,18 @@
+{
+  "name_key": "recipe.faire_papier.name",
+  "station": "scierie",
+  "craft_skill": "menuiserie",
+  "inputs": [
+    {
+      "category": "bois",
+      "forme": "brut",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "material": "papier",
+    "forme": "brut",
+    "amount": 2
+  },
+  "fuel": null
+}

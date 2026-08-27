@@ -1,15 +1,17 @@
 {
-  "_doc": "Recette de transformation ou consommable (docs: Stations de transformation / C.8). Les objets finaux passent par items+components.",
+  "_doc": "Recette de transformation plate (docs: Stations de transformation / C.8). inputs : par material ou par category, forme (brut, lingot, planche, pierre_taillee, tissu, taillee), amount ; output : forme (même matériau que l'entrée) ou material. Les objets finaux passent par components.",
+  "name_key": "recipe.<id>.name",
   "station": "forge",
   "craft_skill": "forge",
   "inputs": [
     {
-      "material": "<id>",
-      "amount": 1
+      "category": "metal",
+      "forme": "brut",
+      "amount": 2
     }
   ],
   "output": {
-    "material": "<id>",
+    "forme": "lingot",
     "amount": 1
   },
   "fuel": null

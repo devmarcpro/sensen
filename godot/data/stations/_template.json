@@ -1,0 +1,6 @@
+{
+  "_doc": "Station de transformation (docs: Stations de transformation / C.8). poids : capacité portée ; craft_skill : compétence des recettes qu'elle héberge.",
+  "name_key": "station.<id>.name",
+  "poids": 40,
+  "craft_skill": "menuiserie"
+}

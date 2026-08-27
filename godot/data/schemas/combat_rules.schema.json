@@ -57,6 +57,9 @@
     },
     "recolte": {
       "type": "object"
+    },
+    "craft": {
+      "type": "object"
     }
   },
   "required": [

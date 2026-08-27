@@ -1,0 +1,10 @@
+{
+  "name_key": "station.forge.name",
+  "type": "station",
+  "equip_slot": "",
+  "station": "forge",
+  "tags": [
+    "station",
+    "portative"
+  ]
+}

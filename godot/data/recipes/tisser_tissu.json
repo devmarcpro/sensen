@@ -1,0 +1,17 @@
+{
+  "name_key": "recipe.tisser_tissu.name",
+  "station": "atelier_tissage",
+  "craft_skill": "tissage",
+  "inputs": [
+    {
+      "category": "vegetal",
+      "forme": "brut",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "forme": "tissu",
+    "amount": 1
+  },
+  "fuel": null
+}

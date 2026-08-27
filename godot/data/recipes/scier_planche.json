@@ -1,0 +1,17 @@
+{
+  "name_key": "recipe.scier_planche.name",
+  "station": "scierie",
+  "craft_skill": "menuiserie",
+  "inputs": [
+    {
+      "category": "bois",
+      "forme": "brut",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "forme": "planche",
+    "amount": 2
+  },
+  "fuel": null
+}

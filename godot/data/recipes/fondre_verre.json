@@ -1,0 +1,18 @@
+{
+  "name_key": "recipe.fondre_verre.name",
+  "station": "forge",
+  "craft_skill": "forge",
+  "inputs": [
+    {
+      "material": "sable",
+      "forme": "brut",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "material": "verre",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null
+}

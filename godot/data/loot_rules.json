@@ -116,7 +116,8 @@
       "bijoux": 2,
       "gemmes": 2,
       "grimoires": 2,
-      "outils": 2
+      "outils": 2,
+      "stations": 1
     },
     "bases_gemmes": [
       "gemme_rubis",
@@ -137,6 +138,16 @@
     ],
     "bases_outils": [
       "proto_pioche"
+    ],
+    "bases_stations": [
+      "station_forge",
+      "station_enclume",
+      "station_scierie",
+      "station_tailleur_de_pierre",
+      "station_atelier_tissage",
+      "station_alambic",
+      "station_cuisine",
+      "station_table_enchantement"
     ]
   },
   "drops": {

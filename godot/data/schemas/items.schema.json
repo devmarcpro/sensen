@@ -17,7 +17,8 @@
         "gemme",
         "grimoire",
         "manuel",
-        "materiau"
+        "materiau",
+        "station"
       ]
     },
     "equip_slot": {
@@ -87,6 +88,12 @@
     },
     "tailles": {
       "type": "array"
+    },
+    "station": {
+      "type": "string"
+    },
+    "forme": {
+      "type": "string"
     }
   },
   "required": [

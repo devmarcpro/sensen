@@ -1,0 +1,10 @@
+{
+  "name_key": "station.atelier_tissage.name",
+  "type": "station",
+  "equip_slot": "",
+  "station": "atelier_tissage",
+  "tags": [
+    "station",
+    "portative"
+  ]
+}

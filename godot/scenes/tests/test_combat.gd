@@ -27,6 +27,7 @@ func _ready() -> void:
 	test_paperdoll_et_tutoriels()
 	test_materiaux()
 	test_recolte()
+	test_fabrication()
 	test_donjon()
 	test_loot()
 	test_coffres_et_rares()
@@ -998,6 +999,41 @@ func test_recolte() -> void:
 		if s.items[uid].get("materiau", "") == "tungstene":
 			tung = true
 	verifier(tung, "le filon donne son matériau")
+
+
+# ---------------------------------------------------------------- Étape 6.3 : stations et transformations plates
+
+func test_fabrication() -> void:
+	var s := Simulation.new(13)
+	s.charger_donjon("ruine", 13, 6, 1)
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 9, "9 stations, 9 transformations plates")
+	s._donner_materiau(j, "fer", 3)
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
+	var forge := s.generer_objet("station_forge", 1, {}, "commun", 0)
+	j.sac.append(forge.uid)
+	var dispo := s.recettes_disponibles(j)
+	var ids: Array = dispo.map(func(p: Dictionary) -> String: return p.id)
+	verifier("fondre_lingot" in ids and "fondre_verre" in ids and not ("scier_planche" in ids), "la forge ouvre ses recettes, pas celles de la scierie (%s)" % str(ids))
+	var fondre: Dictionary = dispo.filter(func(p: Dictionary) -> bool: return p.id == "fondre_lingot")[0]
+	verifier(fondre.faisable and fondre.sortie.materiau == "fer" and fondre.sortie.forme == "lingot", "fondre : faisable, sortie = lingot de fer")
+	var verre: Dictionary = dispo.filter(func(p: Dictionary) -> bool: return p.id == "fondre_verre")[0]
+	verifier(not verre.faisable, "pas de sable : verre infaisable")
+	s.attente[j.id] = true
+	var xp0: int = int(j.xp_competences.get("forge", 0))
+	verifier(s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "fondre un lingot")
+	verifier(int(s._pile(j, "fer", "brut").quantite) == 1 and int(s._pile(j, "fer", "lingot").quantite) == 1, "2 fer brut consommés, 1 lingot de fer produit")
+	verifier(j.compteur == 20, "20 ticks au niveau 0 (%d)" % j.compteur)
+	var dxp: int = int(j.xp_competences.get("forge", 0)) - xp0
+	verifier(dxp > 0 and dxp <= 25, "XP de Forge = dureté du fer (25) × potentiel (%d)" % dxp)
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "il ne reste qu'un fer brut : il en manque")
+	verifier(s._pile(j, "fer", "brut").size() > 0 and s._pile(j, "cuivre", "brut").is_empty(), "les piles sont par matériau et par forme")
+	# Le personnage créé part avec un établi portatif.
+	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
+	var fiche := Etres.creer_personnage("creature.aventurier.name", "humain", GameData.catalogues.classes.keys()[0], {}, 1000, prog)
+	verifier("station_etabli" in fiche.get("sac", []), "le personnage part avec un établi")
 
 
 # ---------------------------------------------------------------- brouillard de guerre

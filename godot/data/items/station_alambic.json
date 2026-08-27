@@ -1,0 +1,10 @@
+{
+  "name_key": "station.alambic.name",
+  "type": "station",
+  "equip_slot": "",
+  "station": "alambic",
+  "tags": [
+    "station",
+    "portative"
+  ]
+}

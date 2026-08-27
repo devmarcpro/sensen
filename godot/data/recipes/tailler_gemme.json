@@ -1,0 +1,17 @@
+{
+  "name_key": "recipe.tailler_gemme.name",
+  "station": "table_enchantement",
+  "craft_skill": "enchantement",
+  "inputs": [
+    {
+      "category": "gemme",
+      "forme": "brut",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "forme": "taillee",
+    "amount": 1
+  },
+  "fuel": null
+}
