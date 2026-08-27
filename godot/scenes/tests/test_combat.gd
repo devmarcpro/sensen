@@ -1731,6 +1731,15 @@ func test_alchimie() -> void:
 		if "partie" in s.items[uid].get("tags", []):
 			partie = str(s.items[uid].base)
 	verifier(not partie.is_empty(), "une partie de bête dans la dépouille (%s)" % partie)
+	var puiss := 0.0
+	var viande_pot: Dictionary = {}
+	for uid in butin:
+		if "partie" in s.items[uid].get("tags", []):
+			puiss = float(s.items[uid].get("puissance", 0.0))
+		if str(s.items[uid].base) == "viande_crue":
+			viande_pot = s.items[uid].get("potentiel", {})
+	verifier(puiss >= 0.5 and puiss <= 4.0, "la partie porte la puissance de la stat du loup (%.1f)" % puiss)
+	verifier(not viande_pot.is_empty(), "la viande porte le potentiel de la stat dominante (%s)" % str(viande_pot))
 	# Distiller : griffe + blé à l'Alambic → potion de force.
 	var griffe := s.generer_objet("griffe", 1, {}, "commun", 0)
 	var ble := s.generer_objet("ble", 1, {}, "commun", 0)
@@ -1743,6 +1752,7 @@ func test_alchimie() -> void:
 	var potion := s._pile_objet(j, "potion_force")
 	potion.qualite = 1.5
 	potion.statut = "potion_force_forte"
+	potion["puissance"] = 2.0
 	var force0 := int(j.corps.stats.force)
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "manger", "objet": potion.uid}), "boire la potion")
@@ -1753,7 +1763,7 @@ func test_alchimie() -> void:
 			actif = true
 			fin = int(st.fin)
 	verifier(actif and fin - s.horloge_monde.ticks >= 4400, "statut fort actif, durée × qualité (%d ticks)" % (fin - s.horloge_monde.ticks))
-	verifier(int(j.stats_eff.force) == force0 + 6, "+6 de Force pendant l'effet (%d → %d)" % [force0, int(j.stats_eff.force)])
+	verifier(int(j.stats_eff.force) == force0 + 12, "+6 × puissance 2 de Force pendant l'effet (%d → %d)" % [force0, int(j.stats_eff.force)])
 	j.statuts[0].fin = s.horloge_monde.ticks
 	s._tiquer_statuts(j, s.horloge_monde.ticks)
 	verifier(int(j.stats_eff.force) == force0, "à l'expiration la Force revient (%d)" % int(j.stats_eff.force))

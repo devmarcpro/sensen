@@ -703,7 +703,12 @@
       "os": "volonte"
     },
     "seuil_forte": 1.3,
-    "tag_bete": "bete"
+    "tag_bete": "bete",
+    "puissance_div": 10.0,
+    "puissance_bornes": [
+      0.5,
+      4.0
+    ]
   },
   "elevage": {
     "_doc": "Élevage (Annexe H) : capture au filet (jet 1d20 + compétence contre dd de l'espèce), hérédité d'anneau 34/34/16/16, une couvée par vivarium et par semaine.",

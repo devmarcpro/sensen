@@ -56,7 +56,7 @@ etape: 10
 
 ## 6. Alchimie et élevage (5 min)
 
-- **Potions** : +3 / +6 sur une stat pendant 3 000 ticks — sensible ? Porter la valeur de la créature source (matériaux paramétriques) ? — [[Cuisine et alchimie]]
+- **Potions** : +3 / +6 × puissance de la partie (stat de la créature / 10) pendant 3 000 ticks — sensible ? La différence loup / chef de bande se sent-elle ? — [[Cuisine et alchimie]]
 - **Élevage** : le facteur **×15** entre qui sélectionne et qui laisse faire ([[Règle d'anneau]]) — à mesurer sur une dizaine de couvées de carpes ; le nom des spécimens (indices bruts) ; une espèce par famille suffit-elle à sentir les six verbes ? Le miel (1 par 4 abeilles) est-il trop lent ? — [[Catalogue des groupes d'élevage]]
 
 ## Comment répondre

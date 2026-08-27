@@ -1169,6 +1169,12 @@ func retirer_stock(e: Dictionary, cle: String) -> bool:
 	return true
 
 
+## La puissance d'un matériau paramétrique : stat de la créature / 10, bornée.
+func _puissance_de(valeur: int) -> float:
+	var al: Dictionary = regles.r.alchimie
+	return snappedf(clampf(float(valeur) / float(al.puissance_div), float(al.puissance_bornes[0]), float(al.puissance_bornes[1])), 0.1)
+
+
 # ---------------------------------------------------------------- élevage (Annexe H) : capture, hérédité, couvées, registre
 
 func _elv() -> Dictionary:
@@ -3023,6 +3029,13 @@ func _fabriquer(e: Dictionary, rid: String, tick: int) -> bool:
 					inst.qualite = snappedf(regles.qualite_craft(regles.niveau(e.competences_eff, str(r.craft_skill)), rng), 0.01)
 					if "potion" in inst.get("tags", []) and float(inst.qualite) >= float(regles.r.alchimie.seuil_forte) and statuts_defs.has(str(inst.get("statut", "")) + "_forte"):
 						inst.statut = str(inst.statut) + "_forte"   # une potion forte (Cuisine et alchimie)
+					var pot: Dictionary = inst.get("potentiel", {}).duplicate()
+					for entree in plan.entrees:   # ingrédients paramétriques : la puissance de la partie, les potentiels des viandes
+						if entree.pile.has("puissance") and "potion" in inst.get("tags", []):
+							inst["puissance"] = float(entree.pile.puissance)
+						for st in entree.pile.get("potentiel", {}).keys():
+							pot[st] = int(pot.get(st, 0)) + int(entree.pile.potentiel[st])
+					inst.potentiel = pot
 					var pile := _pile_objet(e, str(r.output.item))
 					if not pile.is_empty():
 						pile.quantite = int(pile.quantite) + 1
@@ -3335,6 +3348,10 @@ func donner(e: Dictionary, uid: String) -> void:
 		var it: Dictionary = items[uid]
 		if "empilable" in it.get("tags", []) and it.get("type", "") == "consommable":
 			var pile := _pile_objet(e, str(it.get("base", "")))
+			if not pile.is_empty() and float(pile.get("puissance", 1.0)) != float(it.get("puissance", 1.0)):
+				pile = {}   # une pile ne mêle pas deux puissances (viande d'ours, viande de renard)
+			if not pile.is_empty() and pile.get("potentiel", {}) != it.get("potentiel", {}):
+				pile = {}
 			if not pile.is_empty():
 				pile.quantite = int(pile.quantite) + int(it.get("quantite", 1))
 				items.erase(uid)
@@ -3588,9 +3605,20 @@ func _drop(cible: Dictionary, source: String) -> void:
 		if not o.is_empty():
 			uids.append(o.uid)
 	# La dépouille (Nourriture : la viande crue des animaux, en attendant les viandes paramétriques).
-	for base in GameData.catalogues.creatures.get(str(cible.def), {}).get("depouille", []):
+	var def_c: Dictionary = GameData.catalogues.creatures.get(str(cible.def), {})
+	var stats_c: Dictionary = def_c.get("corps", {}).get("stats", {})
+	var top_stat := ""
+	for st in stats_c.keys():
+		if top_stat.is_empty() or int(stats_c[st]) > int(stats_c[top_stat]):
+			top_stat = str(st)
+	var al: Dictionary = regles.r.alchimie
+	for base in def_c.get("depouille", []):
 		var v := generer_objet(str(base), profondeur, {"creature": cible.name_key}, "commun", 0)
 		if not v.is_empty():
+			if not top_stat.is_empty():   # viande paramétrique (Cuisine et alchimie) : la stat dominante de la bête
+				v["potentiel"] = {top_stat: 1}
+				v["puissance"] = _puissance_de(int(stats_c[top_stat]))
+				v["nom"] = {"params": {"creature": cible.name_key}}
 			uids.append(v.uid)
 	# Une partie de bête pour l'alchimie (Cuisine et alchimie) : œil, peau, griffe, dent ou os.
 	if str(regles.r.alchimie.tag_bete) in cible.get("tags", []):
@@ -3598,8 +3626,11 @@ func _drop(cible: Dictionary, source: String) -> void:
 		parties.sort()
 		var rp := RandomNumberGenerator.new()
 		rp.seed = hash([graine, "partie", cible.id])
-		var partie := generer_objet(str(parties[rp.randi() % parties.size()]), profondeur, {"creature": cible.name_key}, "commun", 0)
+		var pid: String = str(parties[rp.randi() % parties.size()])
+		var partie := generer_objet(pid, profondeur, {"creature": cible.name_key}, "commun", 0)
 		if not partie.is_empty():
+			partie["puissance"] = _puissance_de(int(stats_c.get(str(al.parties[pid]), 10)))
+			partie["nom"] = {"params": {"creature": cible.name_key}}
 			uids.append(partie.uid)
 	# Ce que le mort portait tombe aussi (l'équipement est une donnée d'instance).
 	for slot in cible.equipement.keys():
@@ -3854,7 +3885,7 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 		e["huile_feu"] = true
 		EventBus.emettre(&"journal", [&"journal.huile", {"nom": e.name_key}])
 	elif not statut.is_empty():
-		appliquer_statut(e, statut, int(float(it.get("statut_ticks", 0)) * float(it.get("qualite", 1.0))), e.id)
+		appliquer_statut(e, statut, int(float(it.get("statut_ticks", 0)) * float(it.get("qualite", 1.0))), e.id, float(it.get("puissance", 1.0)))
 	for risque in it.get("risque", {}).keys():
 		if des.reel() < float(it.risque[risque]):
 			appliquer_statut(e, str(risque), 0, e.id)
@@ -4598,7 +4629,7 @@ func _nom_competence(cle: String) -> String:
 ## Applique un statut. Un contrôle dur est plafonné à 20 ticks et ne peut se réappliquer dans les
 ## 50 ticks suivant sa fin (joueur comme créatures). Un statut « interrompt » coupe l'action engagée
 ## et retire le dernier segment de chaîne (Décision — Chaîne côté ennemis).
-func appliquer_statut(cible: Dictionary, id: String, duree: int, source: String) -> bool:
+func appliquer_statut(cible: Dictionary, id: String, duree: int, source: String, puissance: float = 1.0) -> bool:
 	var d: Dictionary = statuts_defs.get(id, {})
 	if d.is_empty() or not cible.vivant:
 		return false
@@ -4613,7 +4644,7 @@ func appliquer_statut(cible: Dictionary, id: String, duree: int, source: String)
 			if s.id == id:
 				s.fin = maxi(int(s.fin), tick + duree)   # rafraîchi, jamais cumulé
 				return true
-	cible.statuts.append({"id": id, "fin": tick + duree, "prochain": tick + int(d.periode_ticks), "source": source})
+	cible.statuts.append({"id": id, "fin": tick + duree, "prochain": tick + int(d.periode_ticks), "source": source, "puissance": puissance})
 	if Etres.statut_touche_stats(id, statuts_defs):
 		Etres.recalculer(cible, items, affixes_defs, regles)
 	for mod: Dictionary in d.get("modifiers", []):

@@ -121,7 +121,7 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 		for mod: Dictionary in defs_statuts.get(s.id, {}).get("modifiers", []):
 			if str(mod.cible).begins_with("stat:") and mod.has("add"):
 				var nom_stat := str(mod.cible).trim_prefix("stat:")
-				stats[nom_stat] = int(stats.get(nom_stat, 0)) + int(mod.add)
+				stats[nom_stat] = int(stats.get(nom_stat, 0)) + roundi(float(mod.add) * float(s.get("puissance", 1.0)))
 	var comp: Dictionary = e.competences.duplicate()
 	var tags: Array = e.get("tags_acquis_race", []).duplicate()
 	var segments_bonus := 0
