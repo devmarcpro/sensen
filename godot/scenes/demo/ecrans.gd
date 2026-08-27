@@ -180,6 +180,23 @@ func touche(ev: InputEventKey) -> bool:
 				main.sim.deposer(main.joueur(), 50)
 				rafraichir()
 				return true
+		KEY_PLUS, KEY_KP_ADD, KEY_EQUAL:
+			if courant == "gestion":
+				main.sim.regler_marge(float(main.sim.regles.r.royaume.boutique.marge_pas))
+				rafraichir()
+				return true
+		KEY_MINUS, KEY_KP_SUBTRACT:
+			if courant == "gestion":
+				main.sim.regler_marge(-float(main.sim.regles.r.royaume.boutique.marge_pas))
+				rafraichir()
+				return true
+		KEY_L:
+			if courant == "inventaire":
+				var en: Dictionary = entrees[liste.get_selected_items()[0]] if not liste.get_selected_items().is_empty() and liste.get_selected_items()[0] < entrees.size() else {}
+				if en.get("kind", "") == "objet":
+					main.sim.intention(main.joueur().id, {"type": "planter", "base": str(main.sim.items[str(en.uid)].base)})
+					rafraichir()
+				return true
 		KEY_W:
 			if courant == "gestion":
 				main.sim.retirer(main.joueur(), 50)
@@ -329,7 +346,7 @@ func _construire_dialogue(j: Dictionary) -> void:
 		entrees.append({"kind": "option", "option": "suivre"})
 		liste.add_item(tr("ui.ecran.attendre"))
 		entrees.append({"kind": "option", "option": "attendre"})
-		if main.sim.monde != null and main.sim.monde.claims.has(main.sim.monde.cellule_de(pnj.pos)):
+		if main.sim.monde != null and main.sim.monde.claims.has(main.sim._cell_de(pnj.pos)):
 			liste.add_item(tr("ui.ecran.assigner"))
 			entrees.append({"kind": "option", "option": "assigner"})
 	else:
@@ -472,6 +489,14 @@ func _construire_gestion(j: Dictionary) -> void:
 	for r in t.rapports:
 		liste.add_item(tr("ui.gestion.rapport").format({"texte": tr("journal.rapport_semaine").format(r)}), null, false)
 		entrees.append({"kind": "texte", "texte": tr("journal.rapport_semaine").format(r)})
+	var mures := 0
+	for c in t.cultures.values():
+		if bool(c.mure):
+			mures += 1
+	liste.add_item(tr("ui.gestion.boutique").format({"caisse": int(t.caisse), "marge": "%.2f" % float(t.marge), "etals": t.etals.size(), "clients": "%.1f" % float(t.clients)}), null, false)
+	entrees.append({"kind": "texte", "texte": ""})
+	liste.add_item(tr("ui.gestion.parcelles").format({"n": t.cultures.size(), "mures": mures}), null, false)
+	entrees.append({"kind": "texte", "texte": ""})
 	_bouton(tr("ui.ecran.deposer"), func() -> void: main.sim.deposer(main.joueur(), 50); rafraichir())
 	_bouton(tr("ui.ecran.retirer"), func() -> void: main.sim.retirer(main.joueur(), 50); rafraichir())
 

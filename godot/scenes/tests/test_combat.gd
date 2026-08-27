@@ -40,6 +40,7 @@ func _ready() -> void:
 	test_reputation_et_quetes()
 	test_compagnons()
 	test_territoire()
+	test_agriculture_et_boutique()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1385,7 +1386,10 @@ func test_village() -> void:
 	s._donner_materiau(j, "fer", 1, "lingot")
 	var lingot2: String = s._pile(j, "fer", "lingot").uid
 	s.attente[j.id] = true
-	verifier(not s.intention(j.id, {"type": "vendre", "pnj": marchand.id, "objet": lingot2}), "le marchand à sec refuse d'acheter")
+	var stock_avant: Array = marchand.stock.duplicate()
+	marchand.stock = []
+	verifier(not s.intention(j.id, {"type": "vendre", "pnj": marchand.id, "objet": lingot2}), "le marchand à sec (sans stock à troquer) refuse d'acheter")
+	marchand.stock = stock_avant
 	s.monde.fermer()
 
 
@@ -1431,6 +1435,85 @@ func test_territoire() -> void:
 	verifier(s.retirer_stock(j, "chene|planche") and not s._pile(j, "chene", "planche").is_empty(), "retirer les planches du stock dans le sac")
 	var or0: int = int(j.or)
 	verifier(s.retirer(j, 20) and int(j.or) == or0 + 20 and int(s.territoire.tresor) == 0, "retirer 20 or du trésor")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Étape 10.2 : parcelles, boutique passive, troc
+
+func test_agriculture_et_boutique() -> void:
+	var s := Simulation.new(73)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var camp: Vector2i = s.monde.cellule_camp
+	s.changer_role(camp, "champs")
+	var o := s.generer_objet("ble", 1, {}, "commun", 0)
+	o.quantite = 2
+	s.donner(j, o.uid)
+	# Une tuile libre voisine : on la libère au besoin.
+	var vers: Vector2i = j.pos + Vector2i(1, 0)
+	s.grille.contenu[s.grille.idx(vers)] = 0
+	s.grille.meubles.erase(s.grille.idx(vers))
+	s.grille.h_set(vers, s.grille.h(j.pos)) if s.grille.has_method("h_set") else null
+	var avant_h := s.grille.h(vers) == s.grille.h(j.pos)
+	s.attente[j.id] = true
+	var ok := s.intention(j.id, {"type": "planter", "base": "ble"})
+	verifier(ok or not avant_h, "planter du blé sur une tuile voisine (%s)" % str(ok))
+	if ok:
+		verifier(s.territoire.cultures.size() == 1 and int(s._pile_objet(j, "ble").get("quantite", 0)) == 1, "une parcelle, une graine consommée")
+		var pm: Vector2i = s.territoire.cultures.keys()[0]
+		var loc: Vector2i = pm
+		s.attente[j.id] = true
+		verifier(not s.intention(j.id, {"type": "prendre", "vers": loc}), "pas mûre : la récolte est refusée")
+		var ech: int = int(s.territoire.cultures[pm].echeance)
+		var reste := ech - s.horloge_monde.ticks + 1000
+		while reste > 0:
+			var n := mini(reste, 4000)
+			s.horloge_monde.avancer(n)
+			reste -= n
+		verifier(bool(s.territoire.cultures[pm].mure) and "mure" in s.grille.contenu_de(loc).get("tags", []), "à l'échéance la parcelle est mûre")
+		s.attente[j.id] = true
+		j.pos = loc + Vector2i(-1, 0)
+		verifier(s.intention(j.id, {"type": "prendre", "vers": loc}) and int(s._pile_objet(j, "ble").get("quantite", 0)) >= 2, "récolter : du blé revient (%d)" % int(s._pile_objet(j, "ble").get("quantite", 0)))
+	# Boutique : un étal posé, trois objets rangés, des heures passent, la caisse se remplit.
+	var et: Vector2i = j.pos + Vector2i(0, 1)
+	for d in [Vector2i(0, 1), Vector2i(1, 0), Vector2i(0, -1), Vector2i(-1, 0)]:
+		var cand: Vector2i = j.pos + d
+		if s.grille.dans(cand) and s.grille.occupant(cand).is_empty():
+			s.grille.contenu[s.grille.idx(cand)] = 0
+			s.grille.meubles.erase(s.grille.idx(cand))
+			s.contenants.erase(s.grille.idx(cand))
+			et = cand
+			break
+	var meuble := s.generer_objet("meuble_etal_de_vente", 1, {}, "commun", 0)
+	s.donner(j, meuble.uid)
+	s.attente[j.id] = true
+	var pose := s.intention(j.id, {"type": "poser", "objet": meuble.uid, "vers": et})
+	verifier(pose and s.territoire.etals.size() == 1, "poser l'étal : il est suivi (%s)" % str(pose))
+	if pose:
+		for k in 3:
+			var ob := s.generer_objet("pain", 1, {}, "commun", 0)
+			j.sac.append(ob.uid)
+			s.attente[j.id] = true
+			s.intention(j.id, {"type": "ranger", "objet": ob.uid, "vers": et})
+		verifier(s._stock_etal(s._pm(et)).size() == 3, "trois pains à l'étal")
+		s.regles.r.royaume.boutique.clients_base = 3.0
+		s.horloge_monde.avancer(4000)
+		verifier(int(s.territoire.caisse) > 0 and s._stock_etal(s._pm(et)).size() < 3, "des clients ont acheté : caisse %d or" % int(s.territoire.caisse))
+		var or0: int = int(j.or)
+		var caisse: int = int(s.territoire.caisse)
+		s.attente[j.id] = true
+		verifier(s.intention(j.id, {"type": "prendre", "vers": et}) and int(j.or) == or0 + caisse and int(s.territoire.caisse) == 0, "relever la caisse")
+	# Troc : un marchand à sec échange un objet de valeur proche.
+	var m := s.ajouter("villageois", j.pos + Vector2i(-1, -1), "ia")
+	s._habiller_pnj(m, GameData.entree("creatures", "villageois"))
+	m.tags.append("commerce_possible")
+	m.or = 0
+	var a := s.generer_objet("proto_hache", 1, {}, "commun", 0)
+	var b := s.generer_objet("proto_hache", 1, {}, "commun", 0)
+	j.sac.append(a.uid)
+	m.stock.append(b.uid)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "vendre", "pnj": m.id, "objet": a.uid}) and (b.uid in j.sac) and (a.uid in m.stock), "marchand à sec : troc automatique")
 	s.monde.fermer()
 
 
@@ -1773,7 +1856,7 @@ func test_camp() -> void:
 	verifier(arbres >= 5 and entree != Vector2i(-1, -1), "des arbres (%d) et l'entrée du donjon" % arbres)
 	var base := Vector2i(512 * 128, 512 * 128)
 	var coffre := base + Vector2i(64 - 2, 64)
-	verifier(s.contenants.get(s.grille.idx(coffre), []).size() == 4, "le coffre de départ : hache, pioche, faucille, lit de paille")
+	verifier(s.contenants.get(s.grille.idx(coffre), []).size() >= 4, "le coffre de départ : hache, pioche, faucille, lit de paille, graines, étal")
 	# Une plante se récolte à la faucille par un clic adjacent (Récolte).
 	var plante := base + Vector2i(64 + 3, 64 + 3)
 	s.grille.poser_contenu(plante, "plante")

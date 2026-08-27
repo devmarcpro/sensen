@@ -1,0 +1,16 @@
+{
+  "name_key": "plant.carotte.name",
+  "categorie": "culture",
+  "nutrition": 7,
+  "bonus_potentiel": {
+    "perception": 1
+  },
+  "wuxing": {
+    "bois": 1.0
+  },
+  "duree_jours": 3,
+  "recolte_base": 4,
+  "tags": [
+    "culture"
+  ]
+}

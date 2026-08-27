@@ -681,6 +681,15 @@ func _clic(t: Vector2i, lourde: bool) -> void:
 				if int(m.capacite_slots) > 0 and sim.contenants.get(sim.grille.idx(t), []).size() > 0:   # un coffre : tout prendre
 					sim.intention(joueur_id, {"type": "prendre", "vers": t})
 					return
+			if "parcelle" in tags:   # une parcelle : récolter si mûre, sinon fertiliser (engrais dans le sac)
+				if "mure" in tags:
+					sim.intention(joueur_id, {"type": "prendre", "vers": t})
+				elif not sim.intention(joueur_id, {"type": "fertiliser", "vers": t}):
+					_log(tr("journal.culture_pas_mure"))
+				return
+			if "meuble" in tags and sim.grille.meubles.has(sim.grille.idx(t)) and int(sim.territoire.caisse) > 0 and str(GameData.entree("meubles", str(sim.grille.meubles[sim.grille.idx(t)])).type_meuble) == "etal":
+				sim.intention(joueur_id, {"type": "prendre", "vers": t})
+				return
 			if "plante" in tags:   # une plante : récolte à la faucille (ou l'arracher)
 				if not sim.intention(joueur_id, {"type": "creuser", "vers": t}):
 					_log(tr("journal.increusable"))

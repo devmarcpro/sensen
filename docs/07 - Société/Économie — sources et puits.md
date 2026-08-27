@@ -26,6 +26,9 @@ Avec récolte infinie et progression sans plafond, l'inflation est structurellem
 - **Barèmes : résolu ([[Barèmes économiques]])** — portefeuilles par métier/rang, taxe 5 % pondérée par rang, entretien 10 or/PNJ + 25 or/structure.
 - **Trésor : visible et gérable** — écran de gestion de claim ([[Écrans d'interface]]) : solde, prévisionnel hebdomadaire (revenus boutiques vs entretien), dépôts/retraits libres du joueur (constituer une réserve est permis et encouragé, cf. [[Entretien et taxes]]).
 
+> [!success] Codé le 2026-08-28 — étape 10.2
+> Puits en place : entretien du territoire, taxe de guilde `0,05 × gains de quêtes × (1 + 0,1 × (rang − 1))`, résurrection, mort. **Troc automatique** : un marchand à sec propose en échange un objet de son stock dont le prix est à ±15 % de la valeur de vente ; l'échange est fait d'office avec une ligne de journal (pas d'écran d'acceptation — à juger). Entraîneurs PNJ non codés.
+
 ## Liens
 - **Dépend de** : [[Récolte]], [[Commerce et boutiques]], [[Prix suggéré]]
 - **Alimente** : [[Barèmes économiques]], [[Entretien et taxes]], [[Boutique passive]], [[Quêtes et guildes]]

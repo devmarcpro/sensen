@@ -162,5 +162,28 @@
       "source"
     ],
     "couleur": "#2f5f9a"
+  },
+  "culture": {
+    "name_key": "tile_content.culture.name",
+    "bloque_passage": false,
+    "bloque_vue": false,
+    "hauteur_vue": 0,
+    "couleur": "#6d9a3a",
+    "tags": [
+      "culture",
+      "parcelle"
+    ]
+  },
+  "culture_mure": {
+    "name_key": "tile_content.culture_mure.name",
+    "bloque_passage": false,
+    "bloque_vue": false,
+    "hauteur_vue": 0,
+    "couleur": "#d8b03a",
+    "tags": [
+      "culture",
+      "parcelle",
+      "mure"
+    ]
   }
 }

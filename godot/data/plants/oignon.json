@@ -1,0 +1,16 @@
+{
+  "name_key": "plant.oignon.name",
+  "categorie": "culture",
+  "nutrition": 6,
+  "bonus_potentiel": {
+    "volonte": 1
+  },
+  "wuxing": {
+    "feu": 1.0
+  },
+  "duree_jours": 3,
+  "recolte_base": 4,
+  "tags": [
+    "culture"
+  ]
+}

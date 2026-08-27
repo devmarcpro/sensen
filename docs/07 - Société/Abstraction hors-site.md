@@ -38,6 +38,9 @@ Un rapport (journal) est présenté au joueur à son retour.
 
 **Coût ([[Simulation du monde — performance]]) :** résolution par formules à l'échéance ou au retour du joueur — jamais de simulation de fond.
 
+> [!success] Codé le 2026-08-28 — étape 10.2, le rythme des formules
+> Deux échéances : la **semaine** (production des résidents, entretien, dette, régénération — 10.1) et l'**heure** (boutiques, mûrissement des parcelles). Les heures dues sont rattrapées en boucle par `_tiquer_monde` — donc pendant une nuit sautée ou un voyage — et, pendant une expédition (l'horloge du monde continue mais la surface est déchargée), **au retour** : un rapport d'absence (ventes, or encaissé, parcelles mûries) est écrit au journal, une clé de gabarit par langue. Aucune entité n'est désinstanciée : les résidents n'ont pas d'IA hors fenêtre, leurs rendements sont de pures formules. Raids : 10.3.
+
 ## Liens
 - **Dépend de** : [[LOD de simulation]], [[Habitat des PNJ]], [[Agriculture et élevage]]
 - **Alimente** : [[Défense et raids]], [[Raids et menaces]], [[Boutique passive]], [[Population et exploitation]], [[Cycle jour-nuit et sommeil]]

@@ -28,6 +28,9 @@ consultation à distance = extension future, pas MVP).
 
 **Résolution pendant une nuit sautée ([[Cycle jour-nuit et sommeil]]) :** les boutiques hors-site vendent pendant la durée sautée.
 
+> [!success] Codé le 2026-08-28 — étape 10.2
+> L'étal de vente (meuble, 12 emplacements) se remplit comme un coffre (ranger). **Chaque heure de jeu** : `trafic = clients_base + par_habitant × population PNJ dans un rayon de 3 cellules`, × `(1 + réputation globale/100)` — l'accessibilité par route n'est pas codée (pas de routes). Les clients fractionnaires s'accumulent ; chaque client tire un objet de l'étal au hasard (la demande locale par type n'est pas différenciée — simplification) et achète si `prix_affiché ≤ prix_suggéré × aléa(0,9 ; 1,3)`, où `prix_affiché = prix_suggéré × marge` (marge réglable dans l'écran de gestion, +/−). L'or va dans la **caisse** de la boutique, relevée sur place d'un clic sur l'étal (le clic reprend les objets si la caisse est vide) — elle n'alimente pas directement le trésor : c'est au joueur de déposer. Hors-site : pendant une expédition les heures sont **résolues au retour** ; pendant une nuit sautée, heure par heure.
+
 ## Liens
 - **Dépend de** : [[Commerce et boutiques]], [[Prix suggéré]], [[Meubles]]
 - **Alimente** : [[Économie — sources et puits]], [[Entretien et taxes]], [[Abstraction hors-site]]

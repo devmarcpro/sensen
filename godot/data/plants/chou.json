@@ -1,0 +1,16 @@
+{
+  "name_key": "plant.chou.name",
+  "categorie": "culture",
+  "nutrition": 8,
+  "bonus_potentiel": {
+    "endurance": 1
+  },
+  "wuxing": {
+    "bois": 1.0
+  },
+  "duree_jours": 4,
+  "recolte_base": 4,
+  "tags": [
+    "culture"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "categorie",
+    "nutrition",
+    "duree_jours",
+    "recolte_base"
+  ],
+  "properties": {
+    "categorie": {
+      "type": "string"
+    },
+    "nutrition": {
+      "type": "number"
+    },
+    "duree_jours": {
+      "type": "number",
+      "minimum": 1
+    },
+    "recolte_base": {
+      "type": "number",
+      "minimum": 1
+    }
+  }
+}

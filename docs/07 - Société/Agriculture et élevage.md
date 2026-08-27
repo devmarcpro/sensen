@@ -35,6 +35,9 @@ Toute gestion de ville/village/base (cultures, élevage, boutique passive — [[
 
 **Timers ([[Simulation du monde — performance]]) :** les cultures ne tournent PAS par tick — chaque instance stocke son échéance dans une timer wheel globale. 10 000 cultures plantées = coût nul entre deux échéances.
 
+> [!success] Codé le 2026-08-28 — étape 10.2, les parcelles
+> Les 8 cultures sont en données (`data/plants/`, et un consommable du même id) ; **la graine est la récolte** : planter consomme 1 unité (le coffre de départ en contient, les marchands en vendent). Planter (inventaire, touche L sur une culture) sur une tuile libre adjacente d'une cellule **Champs** — décision : le rôle Champs est requis (« parcelles agricoles actives »). Chaque parcelle stocke son **échéance** (`duree_jours × ticks_par_jour`, −15 % si pluie au semis) : rien ne tourne par tick, une seule vérification horaire. À l'échéance la parcelle mûrit ; la récolte (clic) donne `recolte_base × farming_yield(biome) × (0,5 + fertilité/100)` ; **canicule au moment de la récolte → ×0,5** (le flétrissement sans arrosage est simplifié ainsi ; l'arrosage manuel n'est pas codé). Fertilité = `stats.fertilite` du sol de la tuile (terre 45, terre fertile 75) ; **engrais** : clic sur une parcelle avec Guano (95), Phosphorite (80) ou Tourbe compactée (55) brut dans le sac. L'élevage (Annexe H) et les saisons restent à faire.
+
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Biomes — schéma]], [[Rôles de cases]], [[Application des stats de matériau]]
 - **Alimente** : [[Faim]], [[Cuisine et alchimie]], [[Abstraction hors-site]], [[Population et exploitation]], [[Plantes]]

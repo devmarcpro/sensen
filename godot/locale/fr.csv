@@ -401,6 +401,38 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+plant.ble.name,Blé
+item.ble.name,Blé
+plant.orge.name,Orge
+item.orge.name,Orge
+plant.carotte.name,Carotte
+item.carotte.name,Carotte
+plant.pomme_de_terre.name,Pomme de terre
+item.pomme_de_terre.name,Pomme de terre
+plant.chou.name,Chou
+item.chou.name,Chou
+plant.oignon.name,Oignon
+item.oignon.name,Oignon
+plant.citrouille.name,Citrouille
+item.citrouille.name,Citrouille
+plant.tomate.name,Tomate
+item.tomate.name,Tomate
+tile_content.culture.name,Parcelle
+tile_content.culture_mure.name,Parcelle mûre
+ui.ecran.planter,Planter (L) — sur une tuile libre voisine d'une cellule Champs
+ui.gestion.boutique,"boutique : caisse {caisse} or · marge ×{marge} (+/−) · {etals} étal(s) · clients en attente {clients}"
+ui.gestion.parcelles,"parcelles : {n} ({mures} mûres)"
+journal.plante,"{nom} plante {plante}"
+journal.planter_refuse,planter : il faut une tuile libre voisine dans une cellule Champs
+journal.culture_mure,"une parcelle de {plante} est mûre"
+journal.culture_pas_mure,la parcelle n'est pas mûre
+journal.recolte_culture,"{nom} récolte {plante} ×{n}"
+journal.fertilise,"parcelle fertilisée ({fertilite})"
+journal.vente_boutique,"la boutique vend {objet} pour {n} or"
+journal.caisse,"{nom} relève la caisse : {n} or"
+journal.rapport_absence,"pendant ton absence : {ventes} ventes pour {or} or · {mures} parcelles mûries"
+journal.troc,"{nom} est à sec : troc contre {objet}"
+journal.marge,"marge de la boutique : ×{marge}"
 function.mineur.name,Mineur
 function.bucheron.name,Bûcheron
 function.herboriste.name,Herboriste

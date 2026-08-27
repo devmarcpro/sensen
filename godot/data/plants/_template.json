@@ -1,5 +1,5 @@
 {
-  "_doc": "Plante (docs: Plantes / F.8).",
+  "_doc": "Plante (docs: Plantes / F.8 ; Agriculture et élevage). duree_jours = jours de pousse ; recolte_base = unités par parcelle avant biome et fertilité.",
   "name_key": "plant.<id>.name",
   "categorie": "culture",
   "nutrition": 10,
@@ -7,5 +7,7 @@
   "wuxing": {
     "bois": 1.0
   },
+  "duree_jours": 4,
+  "recolte_base": 4,
   "tags": []
 }
