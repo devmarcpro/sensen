@@ -172,6 +172,14 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 	if int(e.get("faim", 100)) < int(regles.r.faim.seuil_stats):   # Faim < 25 : −10 % à toutes les stats
 		for k in stats.keys():
 			stats[k] = maxi(1, roundi(float(stats[k]) * float(regles.r.faim.malus_stats)))
+	var mult := 1.0
+	for s in e.get("statuts", []):   # Compagnons : ressuscité → affaibli (−20 % un jour)
+		if str(s.get("id", "")) == "affaibli":
+			mult *= float(e.get("affaibli_mult", 0.8))
+	mult *= float(e.get("age_mult", 1.0))   # Âge des PNJ : les âgés perdent des stats physiques
+	if mult != 1.0:
+		for k in ["force", "dexterite", "endurance"]:
+			stats[k] = maxi(1, roundi(float(stats[k]) * mult))
 	e.stats_eff = stats
 	e.competences_eff = comp
 	e.tags_acquis = tags

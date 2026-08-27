@@ -378,5 +378,42 @@
       1500
     ],
     "quetes_par_semaine": 2
+  },
+  "compagnons": {
+    "_doc": "Compagnons : places_escorte = base + Charisme/par_charisme + Leadership/par_leadership ; distance de suivi ; résurrection à l'autel : or_par_niveau × niveau × autel_mult ; affaibli : malus et durée.",
+    "places_base": 1,
+    "par_charisme": 5,
+    "par_leadership": 10,
+    "distance_suivi": 2,
+    "or_par_niveau": 20,
+    "autel_mult": 1.5,
+    "affaibli_mult": 0.8,
+    "affaibli_ticks": 24000
+  },
+  "apprivoisement": {
+    "_doc": "Jet universel : 1d20 + Dressage/2 + Charisme/4 ≥ 10 + niveau/2 ; bonus sous 50 % / 25 % de PV ; une tentative par créature et par jour.",
+    "dd_base": 10,
+    "bonus_50": 5,
+    "bonus_25": 10
+  },
+  "age": {
+    "_doc": "Âge des PNJ : 1 an = jours_par_an jours ; seuils adulte/âgé ; espérance par race (±variance) ; malus par tranche au-delà de âgé ; chance de mort de vieillesse par an d'écart, tirée chaque semaine.",
+    "jours_par_an": 120,
+    "adulte": 18,
+    "age": 60,
+    "depart": [
+      18,
+      60
+    ],
+    "esperance": {
+      "humain": 80,
+      "elfe": 300,
+      "nain": 200,
+      "_defaut": 80
+    },
+    "variance": 0.15,
+    "malus_par_tranche": 0.1,
+    "tranche": 10,
+    "chance_mort_par_an": 0.05
   }
 }

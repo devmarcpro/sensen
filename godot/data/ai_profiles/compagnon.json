@@ -5,10 +5,14 @@
       "cible_a_portee": 1.0
     },
     "poursuivre": {
-      "cible_visible": 0.5
+      "cible_visible": 0.5,
+      "distance_cible": 0.3
     },
     "attendre": {
       "calme": 1.0
+    },
+    "suivre": {
+      "loin_du_maitre": 1.2
     }
   },
   "seuil_fuite_sante": 0.0,

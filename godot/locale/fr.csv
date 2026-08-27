@@ -98,7 +98,7 @@ journal.condition_fausse,{capacite} ne part pas : {condition} n'est pas remplie 
 capacite.etincelle.name,Étincelle
 capacite.gel_en_ligne.name,Gel en ligne
 capacite.baume.name,Baume
-ui.aide.capacites,I : inventaire · F : atelier · C : feuille (Échap ferme) · M : carte du monde · N : zoom minimap (⇧N : masquer) · F6 sauvegarder · F7 charger · F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
+ui.aide.capacites,I : inventaire · F : atelier · C : feuille (Échap ferme) · M : carte du monde · V : apprivoiser · N : zoom minimap (⇧N : masquer) · F6 sauvegarder · F7 charger · F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
 ui.capacite,{touche} {nom} [{modules}] : {forme} portée {pmin}-{pmax} taille {taille} · {ticks} ticks · {ressource} {monnaie} · {des}{bonus}
 ui.capacite.visee,VISÉE : {nom} — cliquer une tuile (Échap annule)
 ui.capacite.preview,{nom} sur {def} : {des}{bonus} ×{dom} → zone {zone} ×{mult} − armure {armure} ⇒ {min}–{max}
@@ -401,6 +401,30 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+item.ame.name,Âme d'un compagnon
+status.affaibli.name,Affaibli
+ui.ecran.recruter,Recruter (R)
+ui.ecran.suivre,Suis-moi (S)
+ui.ecran.attendre,Attends ici (A)
+ui.dialogue.compagnon,"compagnon · ordre : {ordre}"
+ordre.suivre,suis-moi
+ordre.attendre,attends ici
+journal.recrute,"{nom} rejoint l'équipe ({places} places d'escorte)"
+journal.pas_de_place,plus de place dans l'escorte
+journal.pas_recrutable,{nom} ne te suivra pas (relation insuffisante)
+journal.ordre,"{nom} : {ordre}"
+journal.apprivoise,"{nom} est apprivoisé ! (jet {jet} ≥ {dd})"
+journal.apprivoisement_rate,"{nom} résiste (jet {jet} < {dd})"
+journal.deja_tente,{nom} : déjà tenté aujourd'hui
+journal.pas_de_bete,il faut une bête adjacente à apprivoiser
+journal.compagnon_mort,"{nom} est mort — son âme est dans ton sac ; un autel domestique peut le rappeler"
+journal.ressuscite,"{nom} revient à la vie, affaibli ({or} or)"
+journal.pas_d_autel,il faut un autel domestique adjacent et l'âme dans le sac
+journal.mort_vieillesse,{nom} s'est éteint de vieillesse
+ui.fiche.age,"{genre} · {age} ans ({categorie}) · signe {signe} · niveau ≈ {niveau}"
+age.jeune,jeune
+age.adulte,adulte
+age.age,âgé
 quest.chasse_prime.text,"Éliminez {count} brigands ou bêtes hostiles aux alentours."
 quest.chasse_bete.text,"Abattez {count} bêtes qui rôdent autour du village."
 quest.donjon.text,"Videz le donjon voisin : vainquez ce qui y règne."
@@ -429,7 +453,6 @@ journal.rumeur,"{nom} te confie une rumeur : quelque chose en ({x},{y})"
 journal.hostile_a_vue,{nom} te traite en ennemi
 ui.fiche.apparence,Un inconnu. On ne sait rien de lui.
 ui.fiche.base,"{nom} · {fonction} · {village}"
-ui.fiche.age,"{genre} · signe {signe} · niveau ≈ {niveau}"
 ui.fiche.competences,compétences : {liste} · équipement : {equip}
 ui.fiche.gouts,aime : {tags}
 ui.fiche.tout,historique complet · recrutable

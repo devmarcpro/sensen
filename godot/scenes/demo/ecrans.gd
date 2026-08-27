@@ -159,6 +159,18 @@ func touche(ev: InputEventKey) -> bool:
 			if courant == "dialogue":
 				_option("quetes")
 				return true
+		KEY_R:
+			if courant == "dialogue":
+				_option("recruter")
+				return true
+		KEY_S:
+			if courant == "dialogue":
+				_option("suivre")
+				return true
+		KEY_A:
+			if courant == "dialogue":
+				_option("attendre")
+				return true
 	return false
 
 
@@ -281,10 +293,21 @@ func _construire_dialogue(j: Dictionary) -> void:
 	if "quetes" in pnj.get("tags", []):
 		liste.add_item(tr("ui.ecran.quetes"))
 		entrees.append({"kind": "option", "option": "quetes"})
+	if pnj.has("maitre"):
+		liste.add_item(tr("ui.ecran.suivre"))
+		entrees.append({"kind": "option", "option": "suivre"})
+		liste.add_item(tr("ui.ecran.attendre"))
+		entrees.append({"kind": "option", "option": "attendre"})
+	else:
+		var def: Dictionary = GameData.catalogues.creatures.get(str(pnj.def), {})
+		var rc: Dictionary = def.get("recruitable", {"method": "jamais"})
+		if (str(rc.get("method", "")) == "relation" and rel >= int(rc.get("threshold", 60)) - 10) or bool(pnj.get("recrutable_hors_condition", false)):
+			liste.add_item(tr("ui.ecran.recruter"))
+			entrees.append({"kind": "option", "option": "recruter"})
 	liste.add_item(tr("ui.ecran.partir"))
 	entrees.append({"kind": "option", "option": "partir"})
 	for en in entrees:
-		en["texte"] = "[b]%s[/b]\n« %s »\n\n%s\n\n%s" % [tr(pnj.name_key), tr(replique_key), tr("ui.dialogue.relation").format({"n": rel}), fiche_pnj(pnj, j)]
+		en["texte"] = "[b]%s[/b]\n« %s »\n\n%s\n\n%s" % [tr(pnj.name_key), tr(replique_key), tr("ui.dialogue.relation").format({"n": rel}) + (("  ·  " + tr("ui.dialogue.compagnon").format({"ordre": tr("ordre." + str(pnj.get("ordre", "suivre")))})) if pnj.has("maitre") else ""), fiche_pnj(pnj, j)]
 	_bouton(tr("ui.ecran.parler"), func() -> void: _option("parler"))
 	if "commerce_possible" in pnj.get("tags", []):
 		_bouton(tr("ui.ecran.commercer"), func() -> void: _option("commercer"))
@@ -303,6 +326,12 @@ func _option(opt: String) -> void:
 			ouvrir("commerce")
 		"quetes":
 			ouvrir("quetes")
+		"recruter":
+			main.sim.intention(j.id, {"type": "recruter", "pnj": pnj_id})
+			rafraichir()
+		"suivre", "attendre":
+			main.sim.ordonner(j, pnj_id, opt)
+			rafraichir()
 		"partir":
 			fermer()
 
@@ -316,7 +345,7 @@ func fiche_pnj(pnj: Dictionary, j: Dictionary) -> String:
 	var l: Array[String] = [tr("ui.fiche.base").format({"nom": tr(pnj.name_key), "fonction": tr(GameData.entree("functions", str(pnj.get("fonction", "oisif"))).name_key), "village": str(pnj.get("village", "—"))})]
 	if palier >= 2:
 		var nd: Dictionary = sim.progression.niveaux_derives(pnj)
-		l.append(tr("ui.fiche.age").format({"genre": tr("genre." + str(pnj.get("genre", "m"))), "signe": str(pnj.get("nom", {}).get("culture", "—")), "niveau": int(round(maxf(nd.combat, nd.general)))}))
+		l.append(tr("ui.fiche.age").format({"genre": tr("genre." + str(pnj.get("genre", "m"))), "age": int(pnj.get("age", 30)), "categorie": tr("age." + sim.categorie_age(pnj)), "signe": str(pnj.get("nom", {}).get("culture", "—")), "niveau": int(round(maxf(nd.combat, nd.general)))}))
 	if palier >= 3:
 		var comps: Array[String] = []
 		for cle in pnj.competences.keys():
@@ -437,7 +466,11 @@ func _jeter() -> void:
 func _lire() -> void:
 	var uid := _uid_selection()
 	if not uid.is_empty():
-		main.sim.intention(main.joueur().id, {"type": "lire", "objet": uid})
+		var it: Dictionary = main.sim.items.get(uid, {})
+		if "ame" in it.get("tags", []):   # l'âme d'un compagnon : le rappeler à l'autel domestique
+			main.sim.intention(main.joueur().id, {"type": "ressusciter", "ame": uid})
+		else:
+			main.sim.intention(main.joueur().id, {"type": "lire", "objet": uid})
 		rafraichir()
 
 

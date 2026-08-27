@@ -546,6 +546,18 @@ func _unhandled_input(ev: InputEvent) -> void:
 			KEY_M:
 				if sim.lieu == "camp":
 					carte.ouvrir("voyage")
+			KEY_V:
+				if sim.attente.has(joueur_id):
+					var bete := ""
+					for d in Grille.DIRS:
+						var occ_v := sim.grille.occupant(j.pos + d)
+						if not occ_v.is_empty() and "bete" in sim.entites[occ_v].get("tags", []) and not sim.entites[occ_v].has("maitre"):
+							bete = occ_v
+							break
+					if bete.is_empty():
+						_log(tr("journal.pas_de_bete"))
+					else:
+						sim.intention(joueur_id, {"type": "apprivoiser", "cible": bete})
 			KEY_G:
 				chemin_en_cours.clear()
 				sim.intention(joueur_id, {"type": "garde"})
@@ -637,7 +649,7 @@ func _clic(t: Vector2i, lourde: bool) -> void:
 				visee = -1
 		return
 	var occ := sim.grille.occupant(t)
-	if not occ.is_empty() and occ != joueur_id and not lourde and "civil" in sim.entites[occ].get("tags", []) and Grille.distance(j.pos, t) <= 2:
+	if not occ.is_empty() and occ != joueur_id and not lourde and ("civil" in sim.entites[occ].get("tags", []) or sim.entites[occ].has("maitre")) and Grille.distance(j.pos, t) <= 2:
 		ecrans.ouvrir_dialogue(occ)   # un civil : on lui parle (Maj + clic pour frapper)
 		return
 	if not occ.is_empty() and occ != joueur_id:

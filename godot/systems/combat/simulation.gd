@@ -810,6 +810,203 @@ func _vendre(e: Dictionary, pnj_id: String, uid: String, tick: int) -> bool:
 	return true
 
 
+# ---------------------------------------------------------------- compagnons, apprivoisement, âge
+
+## Places d'escorte (Compagnons) : 1 + Charisme/5 + Leadership/10.
+func places_escorte(e: Dictionary) -> int:
+	var c: Dictionary = regles.r.compagnons
+	return int(c.places_base) + int(e.stats_eff.charisme) / int(c.par_charisme) + regles.niveau(e.competences_eff, "leadership") / int(c.par_leadership)
+
+
+func compagnons_de(e: Dictionary) -> Array:
+	var res: Array = []
+	for x in vivants():
+		if str(x.get("maitre", "")) == e.id:
+			res.append(x)
+	return res
+
+
+## Faire d'un être un compagnon du joueur.
+func _devenir_compagnon(e: Dictionary, x: Dictionary) -> void:
+	x.camp = "joueur"
+	x.ai_profile = "compagnon"
+	x["maitre"] = e.id
+	x["ordre"] = "suivre"
+	x.cible = ""
+	x.fuite = false
+	if not x.has("social"):
+		x["social"] = {"culture": "", "relations": {}}
+	if not x.social.relations.has(e.id):
+		x.social.relations[e.id] = 0
+	EventBus.emettre(&"creature_recruited", [x.id, e.id])
+
+
+## Recruter un PNJ par la relation (recruitable.method relation, seuil, ou faveur du palier 90).
+func _recruter(e: Dictionary, pnj_id: String, tick: int) -> bool:
+	var pnj: Dictionary = entites.get(pnj_id, {})
+	if pnj.is_empty() or not pnj.vivant or pnj.has("maitre") or Grille.distance(e.pos, pnj.pos) > 2:
+		return false
+	var def: Dictionary = GameData.catalogues.creatures.get(str(pnj.def), {})
+	var rc: Dictionary = def.get("recruitable", {"method": "jamais"})
+	var ok := false
+	if str(rc.get("method", "jamais")) == "relation" and relation_de(pnj, e) >= int(rc.get("threshold", 60)):
+		ok = true
+	if bool(pnj.get("recrutable_hors_condition", false)):
+		ok = true
+	if not ok:
+		EventBus.emettre(&"journal", [&"journal.pas_recrutable", {"nom": pnj.name_key}])
+		return false
+	if compagnons_de(e).size() >= places_escorte(e):
+		EventBus.emettre(&"journal", [&"journal.pas_de_place", {}])
+		return false
+	_devenir_compagnon(e, pnj)
+	EventBus.emettre(&"journal", [&"journal.recrute", {"nom": pnj.name_key, "places": places_escorte(e)}])
+	return true
+
+
+## Un ordre à un compagnon : sans coût de ticks (Compagnons).
+func ordonner(e: Dictionary, id: String, ordre: String) -> bool:
+	var x: Dictionary = entites.get(id, {})
+	if x.is_empty() or str(x.get("maitre", "")) != e.id or not (ordre in ["suivre", "attendre"]):
+		return false
+	x.ordre = ordre
+	if ordre == "attendre":
+		x.ancre = x.pos
+	EventBus.emettre(&"journal", [&"journal.ordre", {"nom": x.name_key, "ordre": "ordre." + ordre}])
+	return true
+
+
+## Apprivoiser une bête adjacente (Apprivoisement et recrutement) : le jet universel.
+func _apprivoiser(e: Dictionary, cible_id: String, tick: int) -> bool:
+	var c: Dictionary = entites.get(cible_id, {})
+	if c.is_empty() or not c.vivant or not ("bete" in c.get("tags", [])) or Grille.distance(e.pos, c.pos) > 1 or c.has("maitre"):
+		EventBus.emettre(&"journal", [&"journal.pas_de_bete", {}])
+		return false
+	var def: Dictionary = GameData.catalogues.creatures.get(str(c.def), {})
+	if str(def.get("recruitable", {}).get("method", "dressage")) == "jamais":
+		return false
+	var jour := tick / int(_cycle().get("ticks_par_jour", 24000))
+	if int(c.get("dernier_apprivoisement", -1)) == jour:
+		EventBus.emettre(&"journal", [&"journal.deja_tente", {"nom": c.name_key}])
+		return false
+	c["dernier_apprivoisement"] = jour
+	var ap: Dictionary = regles.r.apprivoisement
+	var jet := des.jet("1d20") + regles.niveau(e.competences_eff, "dressage") / 2 + int(e.stats_eff.charisme) / 4
+	var pv := float(c.sante) / float(c.sante_max)
+	if pv < 0.25:
+		jet += int(ap.bonus_25)
+	elif pv < 0.5:
+		jet += int(ap.bonus_50)
+	var niveau := int(round(progression.niveaux_derives(c).combat))
+	var dd := int(ap.dd_base) + niveau / 2
+	gagner_xp(e, "dressage", 5)
+	e.compteur = tick + int(regles.r.actions.objet)
+	if jet >= dd:
+		if compagnons_de(e).size() >= places_escorte(e):
+			EventBus.emettre(&"journal", [&"journal.pas_de_place", {}])
+			return false
+		_devenir_compagnon(e, c)
+		EventBus.emettre(&"journal", [&"journal.apprivoise", {"nom": c.name_key, "jet": jet, "dd": dd}])
+		return true
+	EventBus.emettre(&"journal", [&"journal.apprivoisement_rate", {"nom": c.name_key, "jet": jet, "dd": dd}])
+	if c.ai_profile in ["proie"]:
+		c.fuite = true
+	else:
+		c.ai_profile = "hostile"
+		c.cible = e.id
+	return true
+
+
+## Un compagnon mort laisse son âme dans le sac du maître (Compagnons).
+func _mort_compagnon(x: Dictionary) -> void:
+	var maitre: Dictionary = entites.get(str(x.get("maitre", "")), {})
+	if maitre.is_empty():
+		return
+	var ame := generer_objet("ame", 1, {}, "commun", 0)
+	if ame.is_empty():
+		return
+	ame["compagnon"] = x.id
+	ame["name_key"] = x.name_key
+	maitre.sac.append(ame.uid)
+	x["corps_pos"] = x.pos
+	EventBus.emettre(&"journal", [&"journal.compagnon_mort", {"nom": x.name_key}])
+
+
+## Ressusciter un compagnon : l'âme dans le sac, un autel domestique adjacent, l'or ; il revient affaibli.
+func _ressusciter(e: Dictionary, uid_ame: String, tick: int) -> bool:
+	var ame: Dictionary = items.get(uid_ame, {})
+	if ame.is_empty() or not (uid_ame in e.sac) or not ame.has("compagnon"):
+		return false
+	var autel := false
+	for d in Grille.DIRS:
+		var t: Vector2i = e.pos + d
+		if grille.dans(t) and str(grille.meubles.get(grille.idx(t), "")) == "autel_domestique":
+			autel = true
+	if not autel:
+		EventBus.emettre(&"journal", [&"journal.pas_d_autel", {}])
+		return false
+	var x: Dictionary = entites.get(str(ame.compagnon), {})
+	if x.is_empty():
+		return false
+	var c: Dictionary = regles.r.compagnons
+	var niveau := maxi(1, int(round(progression.niveaux_derives(x).combat)))
+	var cout := int(float(c.or_par_niveau) * niveau * float(c.autel_mult))
+	if int(e.or) < cout:
+		EventBus.emettre(&"journal", [&"journal.pas_assez_or", {}])
+		return false
+	e.or = int(e.or) - cout
+	e.sac.erase(uid_ame)
+	items.erase(uid_ame)
+	x.vivant = true
+	x.sante = maxi(1, int(x.sante_max) / 2)
+	x.statuts = []
+	x.action_en_cours = {}
+	var ou: Vector2i = e.pos
+	for d in Grille.DIRS:
+		var t: Vector2i = e.pos + d
+		if grille.dans(t) and not grille.bloque_passage(t) and grille.occupant(t).is_empty():
+			ou = t
+			break
+	x.pos = ou
+	grille.placer(x.id, ou)
+	x.compteur = tick
+	x.horloge = "monde"
+	if not (x.id in ordre):
+		ordre.append(x.id)
+	appliquer_statut(x, "affaibli", int(c.affaibli_ticks), e.id)
+	x["affaibli_mult"] = float(c.affaibli_mult)
+	Etres.recalculer(x, items, affixes_defs, regles)
+	EventBus.emettre(&"journal", [&"journal.ressuscite", {"nom": x.name_key, "or": cout}])
+	return true
+
+
+## L'âge (Âge des PNJ) : le passage hebdomadaire fait vieillir ; au-delà de l'espérance, une chance
+## croissante de mourir ; les âgés perdent des stats physiques par tranche.
+func _vieillir_semaine(tick: int) -> void:
+	var ag: Dictionary = regles.r.age
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "age", tick])
+	for x in entites.values():
+		if not x.has("age") or not x.vivant:
+			continue
+		x.age = float(x.age) + 7.0 / float(ag.jours_par_an)
+		if float(x.age) > float(x.get("lifespan", 80.0)):
+			var ecart := float(x.age) - float(x.lifespan)
+			if rng.randf() < float(ag.chance_mort_par_an) * ecart:
+				x.vivant = false
+				grille.liberer(x.pos)
+				EventBus.emettre(&"journal", [&"journal.mort_vieillesse", {"nom": x.name_key}])
+				continue
+		var tranches := int(maxf(0.0, float(x.age) - float(ag.age)) / float(ag.tranche))
+		x["age_mult"] = maxf(0.3, 1.0 - float(ag.malus_par_tranche) * tranches)
+
+
+func categorie_age(x: Dictionary) -> String:
+	var ag: Dictionary = regles.r.age
+	var a := float(x.get("age", 30.0))
+	return "jeune" if a < float(ag.adulte) else ("age" if a >= float(ag.age) else "adulte")
+
+
 # ---------------------------------------------------------------- quêtes et guildes (Gabarit de quête)
 
 ## Les quêtes qu'un donneur offre cette semaine (générées depuis les gabarits, jusqu'à quetes_par_semaine).
@@ -1602,6 +1799,10 @@ func _habiller_pnj(e: Dictionary, def: Dictionary, culture_id: String = "") -> v
 			e.stock.append(o.uid)
 	e["dernieres_repliques"] = []
 	e["dernier_parler_jour"] = -1
+	var ag: Dictionary = regles.r.age
+	e["age"] = float(rng.randi_range(int(ag.depart[0]), int(ag.depart[1])))
+	var esp := float(ag.esperance.get(str(def.get("race", "humain")), ag.esperance._defaut))
+	e["lifespan"] = esp * rng.randf_range(1.0 - float(ag.variance), 1.0 + float(ag.variance))
 
 
 ## Deux êtres sont-ils ennemis ? Deux camps différents, sauf le joueur et les civils (IA des créatures).
@@ -2137,6 +2338,7 @@ func _tiquer_monde(tick: int) -> void:
 		monde.semaine_courante += 1
 		var touchees := monde.semaine(tick)
 		var derive := int(regles.r.reputation.derive_hebdo)
+		_vieillir_semaine(tick)
 		for x in entites.values():   # les bourses des PNJ se rechargent (+15 % par semaine, Barèmes économiques)
 			if x.has("or_max"):
 				x.or = mini(int(x.or_max), int(x.or) + int(ceil(float(x.or_max) * float(regles.r.commerce.recharge_hebdo))))
@@ -2449,6 +2651,12 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _vendre(e, str(i.get("pnj", "")), str(i.get("objet", "")), h.ticks)
 		"accepter_quete":
 			ok = _accepter_quete(e, str(i.get("pnj", "")), str(i.get("quete", "")), h.ticks)
+		"recruter":
+			ok = _recruter(e, str(i.get("pnj", "")), h.ticks)
+		"apprivoiser":
+			ok = _apprivoiser(e, str(i.get("cible", "")), h.ticks)
+		"ressusciter":
+			ok = _ressusciter(e, str(i.get("ame", "")), h.ticks)
 		"rendre_quete":
 			ok = _rendre_quete(e, str(i.get("pnj", "")), str(i.get("quete", "")), h.ticks)
 		"jeter":
@@ -2841,6 +3049,8 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		EventBus.emettre(&"journal", [&"journal.mort", {"nom": cible.name_key}])
 		EventBus.emettre(&"creature_killed", [cible.id, source])
 		_quetes_sur_mort(cible, source)
+		if cible.has("maitre"):
+			_mort_compagnon(cible)
 		_declencher(cible, "testament", cible.pos)   # la charge part quand le porteur tombe
 		_drop(cible, source)
 		if not expedition.is_empty() and entites.get(source, {}).get("controle", "") == "joueur":
@@ -3738,6 +3948,8 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 			_ia_pas_vers(e, cible.pos, tick, cible.id)
 		"fuir":
 			_ia_fuir(e, cible if not cible.is_empty() else entites.get(str(e.get("menace", "")), {}), tick)
+		"suivre":
+			_ia_pas_routine(e, entites[str(e.maitre)].pos, tick)
 		"routine":
 			_ia_pas_routine(e, _cible_routine(e, profil), tick)
 		"errer":
@@ -3803,7 +4015,11 @@ func _actions_candidates(e: Dictionary, cible: Dictionary, profil: Dictionary, t
 		c["retour"] = {"loin_de_l_ancre": 1.0 if Grille.distance(e.pos, e.ancre) > int(regles.r.engagement.ia_distance_ancre) else 0.0,
 			"cible_perdue": 0.0 if a_cible else 1.0}
 	c["attendre"] = {"endurance_basse": 1.0 if e.endurance < 20 else 0.0, "calme": 0.0 if a_cible else 1.0}
-	if not a_cible:
+	if e.has("maitre") and entites.has(str(e.maitre)):
+		var m: Dictionary = entites[str(e.maitre)]
+		var loin := Grille.distance(e.pos, m.pos) > int(regles.r.compagnons.distance_suivi)
+		c["suivre"] = {"loin_du_maitre": 1.0 if (loin and str(e.get("ordre", "suivre")) == "suivre") else 0.0}
+	if not a_cible and not e.has("maitre"):
 		c["errer"] = {"calme": 1.0}
 		if profil.get("horaires") != null and lieu == "camp":
 			var cible_r := _cible_routine(e, profil)

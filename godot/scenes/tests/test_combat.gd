@@ -38,6 +38,7 @@ func _ready() -> void:
 	test_village()
 	test_village_vivant()
 	test_reputation_et_quetes()
+	test_compagnons()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1384,6 +1385,70 @@ func test_village() -> void:
 	var lingot2: String = s._pile(j, "fer", "lingot").uid
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "vendre", "pnj": marchand.id, "objet": lingot2}), "le marchand à sec refuse d'acheter")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Étape 9.D : compagnons, apprivoisement, âge
+
+func test_compagnons() -> void:
+	var s := Simulation.new(61)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	verifier(s.places_escorte(j) == 1 + int(j.stats_eff.charisme) / 5, "places d'escorte = 1 + Charisme/5 (%d)" % s.places_escorte(j))
+	# Apprivoiser un cerf adjacent : jet universel, une tentative par jour.
+	var cerf := s.ajouter("cerf", j.pos + Vector2i(1, 0), "ia")
+	j.competences.dressage = 40
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	cerf.sante = 1   # sous 25 % : +10
+	s.attente[j.id] = true
+	var ok := s.intention(j.id, {"type": "apprivoiser", "cible": cerf.id})
+	verifier(ok, "tentative d'apprivoisement jouée")
+	if cerf.has("maitre"):
+		verifier(cerf.camp == "joueur" and cerf.ai_profile == "compagnon" and s.compagnons_de(j).size() == 1, "le cerf est un compagnon")
+	else:
+		s.attente[j.id] = true
+		verifier(not s.intention(j.id, {"type": "apprivoiser", "cible": cerf.id}) or int(cerf.dernier_apprivoisement) >= 0, "une seule tentative par jour")
+	# Recruter un civil : refusé sous le seuil, accepté au seuil ; il suit.
+	var v := s.ajouter("villageois", j.pos + Vector2i(-1, 0), "ia")
+	s._habiller_pnj(v, GameData.entree("creatures", "villageois"))
+	verifier(v.has("age") and v.has("lifespan") and s.categorie_age(v) in ["jeune", "adulte", "age"], "le PNJ a un âge (%d ans, %s) et une espérance" % [int(v.age), s.categorie_age(v)])
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "recruter", "pnj": v.id}), "relation 0 : pas recrutable")
+	v.social.relations[j.id] = 60
+	j.corps.stats.charisme = 25
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "recruter", "pnj": v.id}) and v.camp == "joueur" and v.maitre == j.id, "relation 60 : recruté, il est au camp du joueur")
+	s.grille.liberer(j.pos)
+	j.pos = j.pos + Vector2i(6, 0)
+	s.grille.placer(j.id, j.pos)
+	var d0 := Grille.distance(v.pos, j.pos)
+	for k in 5:
+		s._decider_ia(v, s.horloge_monde.ticks + k * 10)
+	verifier(Grille.distance(v.pos, j.pos) < d0, "le compagnon suit (%d → %d)" % [d0, Grille.distance(v.pos, j.pos)])
+	verifier(s.ordonner(j, v.id, "attendre") and v.ordre == "attendre", "ordre : attends ici (sans coût)")
+	# Mort et résurrection à l'autel.
+	s._appliquer_degats(v, 999, "loup_test", {"type": "test"})
+	var ame := ""
+	for uid in j.sac:
+		if "ame" in s.items[uid].get("tags", []):
+			ame = uid
+	verifier(not v.vivant and not ame.is_empty(), "compagnon mort : son âme est dans le sac")
+	var autel: Vector2i = j.pos + Vector2i(0, 1)
+	s.grille.poser_contenu(autel, "meuble")
+	s.grille.meubles[s.grille.idx(autel)] = "autel_domestique"
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "ressusciter", "ame": ame}), "sans or, pas de résurrection")
+	j.or = 500
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "ressusciter", "ame": ame}) and v.vivant and int(j.or) < 500 and v.statuts.size() > 0, "ressuscité à l'autel, affaibli, l'or payé")
+	# Vieillesse : bien au-delà de l'espérance, la mort finit par venir.
+	var vieux := s.ajouter("villageois", j.pos + Vector2i(-2, -2), "ia")
+	s._habiller_pnj(vieux, GameData.entree("creatures", "villageois"))
+	vieux.age = float(vieux.lifespan) + 30.0
+	for k in 60:
+		s._vieillir_semaine(k * 1000 + 7)
+	verifier(not vieux.vivant, "un PNJ de 30 ans au-delà de son espérance meurt de vieillesse")
 	s.monde.fermer()
 
 

@@ -22,6 +22,9 @@ La population du monde est un flux, pas un stock : les PNJ vieillissent, meurent
 
 **Information visible ([[L'information comme récompense]]) :** l'âge d'un PNJ se révèle au palier de relation 20-49 ; les liens familiaux à 50-74.
 
+> [!success] Codé le 2026-08-28 — étape 9.D
+> `age` (années) et `lifespan` (espérance raciale ±15 %) tirés à l'instanciation des PNJ civils (`combat_rules.age` : humain 80, adulte à 18, âgé à 60 ; âge de départ 18-60), **1 an = 120 jours** ; le passage hebdomadaire fait vieillir (+7/120 an) ; au-delà de l'espérance, **chance croissante par semaine** de mourir de vieillesse (5 % par an d'écart) ; les âgés perdent **10 % de stats physiques par tranche de 10 ans** au-delà du seuil, leurs compétences restent. L'âge et la catégorie s'affichent au palier 20-49. Naissances, mariages et succession attendent l'étape 10.
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Races]], [[Boucle de tick]]
 - **Alimente** : [[Familles et succession]], [[Villages PNJ — repeuplement et décimation]], [[Génération de noms]], [[Compagnons]]

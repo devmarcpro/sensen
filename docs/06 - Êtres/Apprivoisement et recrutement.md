@@ -35,6 +35,9 @@ Comment on transforme n'importe quelle créature en compagnon : une action dédi
 
 Aucune quête d'apprivoisement dédiée : `recruitable.method: "quete"` est réservé aux PNJ uniques ([[Schéma créature]]).
 
+> [!success] Codé le 2026-08-28 — étape 9.D, intention `apprivoiser` (touche **V** face à une bête adjacente)
+> Le jet universel tel quel : `1d20 + Dressage/2 + Charisme/4 ≥ DD = 10 + niveau_combat_cible/2`, **+5 sous 50 % de PV, +10 sous 25 %**, **une tentative par créature et par jour** ; succès → compagnon à relation 0 (camp du joueur, profil `compagnon`, il suit) ; échec → la bête devient hostile (profil `hostile`) ou fuit selon son profil. Règle par type : humanoïdes intelligents → `relation` (dialogue), bêtes → `dressage`, `jamais` respecté, `quete` réservé aux uniques. Signal `creature_recruited`. L'appât (nourriture au sol) et la Discrétion attendent.
+
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Schéma créature]], [[Jet de compétence universel]], [[Réputation et relations]]
 - **Alimente** : [[Compagnons]], [[Population et exploitation]], [[Habitat des PNJ]]

@@ -79,6 +79,15 @@
     "guildes": {
       "type": "object"
     },
+    "compagnons": {
+      "type": "object"
+    },
+    "apprivoisement": {
+      "type": "object"
+    },
+    "age": {
+      "type": "object"
+    },
     "camp": {
       "type": "object"
     }
