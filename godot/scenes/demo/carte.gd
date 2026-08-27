@@ -11,6 +11,7 @@ const N := 33                 # cellules par côté
 
 var main: Node
 var ouverte := false
+var survol := Vector2i(-1, -1)   # la cellule sous la souris
 var mode := "voyage"          # "voyage" | "depart"
 var centre := Vector2i.ZERO   # cellule au centre de la carte
 var dessin: Control
@@ -105,9 +106,32 @@ func _dessiner() -> void:
 			if cell == cj:
 				dessin.draw_rect(r.grow(-3), Color(0.3, 0.8, 1.0), false, 2.0)
 	dessin.draw_string(ThemeDB.fallback_font, o + Vector2(0, N * CASE + 20), tr("ui.carte.legende"), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.85, 0.85, 0.8))
+	# Les noms des royaumes sur leur capitale (la carte politique se lit avant toute visite — Génération des royaumes PNJ).
+	for y in N:
+		for x in N:
+			var cell := centre + Vector2i(x, y) - Vector2i(N / 2, N / 2)
+			var roy: Dictionary = surf.royaume_de(cell) if surf.terre_a(cell) else {}
+			if not roy.is_empty() and roy.capital_poi == cell:
+				dessin.draw_string(ThemeDB.fallback_font, o + Vector2(x * CASE - 10, y * CASE - 3), str(roy.nom), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1.0, 0.95, 0.7))
+	# Le survol : biome, danger, royaume, dirigeant, relation.
+	if survol != Vector2i(-1, -1):
+		var info_s: Dictionary = surf.resume_cellule(survol)
+		var texte := tr("ui.carte.survol").format({"x": survol.x, "y": survol.y, "biome": tr(GameData.entree("biomes", str(info_s.biome)).name_key) if info_s.terre else tr("ui.carte.mer"), "danger": int(sim.monde.danger_de(survol))})
+		var roy_s: Dictionary = surf.royaume_de(survol) if info_s.terre else {}
+		if not roy_s.is_empty():
+			var jr: Dictionary = main.joueur()
+			var etat := tr("ui.carte.vacance") if sim.monde.vacances.has(str(roy_s.id)) else tr("relation." + sim.relation_royaume(jr, roy_s))
+			texte += tr("ui.carte.survol_royaume").format({"nom": roy_s.nom, "gouv": tr(GameData.entree("governments", str(roy_s.government_type)).name_key), "taille": tr("kingdom.taille." + str(roy_s.taille)), "n": roy_s.territory_cells.size(), "etat": etat, "capitale": tr("ui.carte.capitale") if roy_s.capital_poi == survol else ""})
+		dessin.draw_string(ThemeDB.fallback_font, o + Vector2(0, N * CASE + 38), texte, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.95, 0.9, 0.7))
 
 
 func _entree(ev: InputEvent) -> void:
+	if ev is InputEventMouseMotion:
+		var c := _cellule_sous(ev.position)
+		if c != survol:
+			survol = c
+			dessin.queue_redraw()
+		return
 	if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
 		var cell := _cellule_sous(ev.position)
 		if cell == Vector2i(-1, -1):

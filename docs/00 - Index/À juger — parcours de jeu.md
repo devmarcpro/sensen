@@ -22,7 +22,7 @@ etape: 10
 
 ## 2. Le monde — carte, biomes, voyage (10 min)
 
-- **Carte du monde (M)** : une couleur par biome suffit-elle ? La règle « voyage seulement vers l'exploré » ? Le coût en temps du voyage ? Les **territoires teintés** des royaumes se lisent-ils (à vérifier avec un royaume en vue — aucun ne tombait près du camp sur la capture) — [[Carte du monde]], [[Génération des royaumes PNJ]]
+- **Carte du monde (M)** : une couleur par biome suffit-elle ? La règle « voyage seulement vers l'exploré » ? Le coût en temps du voyage ? Les **territoires teintés** des royaumes, le nom sur la capitale et la ligne de survol se lisent-ils ? — [[Carte du monde]], [[Génération des royaumes PNJ]]
 - **Côtes et mer** : forme des côtes, part de mer visible depuis le camp, lisibilité des 12 biomes par le sol et les arbres — [[Biomes — schéma]]
 - **Minimap** : teintes par matériau, place à l'écran ; on ne sauvegarde qu'en surface — [[Sauvegarde]]
 - **Dérive de la corruption** : on ne la voit qu'en dormant beaucoup (une semaine = 21 nuits) — faut-il afficher le delta ? — [[Dérive de la corruption]]

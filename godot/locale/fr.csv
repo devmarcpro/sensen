@@ -401,6 +401,11 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+ui.carte.survol,"({x},{y}) · {biome} · danger {danger}"
+ui.carte.survol_royaume," · {nom}{capitale} — {gouv}, {taille}, {n} cellules · {etat}"
+ui.carte.capitale," (capitale)"
+ui.carte.vacance,trône vacant
+ui.carte.mer,mer
 ui.atelier.ingredient,"      {coche} {nom} — ingrédient optionnel (Entrée : basculer)"
 ui.recette.optionnel," (optionnel)"
 ui.recette.harmonie,"Vecteur prévu : {vecteur} — harmonie {harmonie}"
