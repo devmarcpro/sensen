@@ -1,0 +1,21 @@
+{
+  "name_key": "classe.l_ombre.name",
+  "bonus_stats": {
+    "dexterite": 2,
+    "perception": 1
+  },
+  "equipement": [],
+  "ratelier": [],
+  "competences": {
+    "discretion": 6,
+    "dague": 4
+  },
+  "base_potentials": {
+    "_defaut": 100
+  },
+  "talent": "dissimulation",
+  "points_creation_bonus": 15,
+  "tags": [
+    "cache"
+  ]
+}

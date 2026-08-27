@@ -10,7 +10,8 @@
   "classes_possibles": [
     "la_balance",
     "le_vent",
-    "le_creuset"
+    "le_creuset",
+    "le_rieur"
   ],
   "leadership": false,
   "portefeuille": 300,

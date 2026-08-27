@@ -1,0 +1,21 @@
+{
+  "name_key": "classe.le_rieur.name",
+  "bonus_stats": {
+    "charisme": 2,
+    "dexterite": 1
+  },
+  "equipement": [],
+  "ratelier": [],
+  "competences": {
+    "negociation": 3,
+    "dague": 3
+  },
+  "base_potentials": {
+    "_defaut": 100
+  },
+  "talent": "deux_queues",
+  "points_creation_bonus": 15,
+  "tags": [
+    "cache"
+  ]
+}

@@ -7,7 +7,9 @@
     "20-22": "social",
     "22-6": "lit"
   },
-  "classes_possibles": [],
+  "classes_possibles": [
+    "l_ombre"
+  ],
   "leadership": false,
   "portefeuille": 30,
   "tags": [],

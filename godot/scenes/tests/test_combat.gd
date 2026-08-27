@@ -66,6 +66,7 @@ func _ready() -> void:
 	test_lumiere()
 	test_palier_industriel()
 	test_betail()
+	test_ombre_et_rieur()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2447,6 +2448,53 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- L'Ombre, Le Rieur, le jet de coup
+
+func test_ombre_et_rieur() -> void:
+	var s := Simulation.new(129)
+	s.charger_donjon("ruine", 129, 14, 1)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	# Le jet de coup : sur 200 attaques, des critiques et des ratés apparaissent.
+	var loup := s.ajouter("loup", j.pos + Vector2i(1, 0), "ia")
+	loup.sante_max = 100000
+	loup.sante = 100000
+	for k in 200:
+		loup.sante = loup.sante_max   # le loup encaisse 200 coups : on le soigne entre deux
+		s.attente[j.id] = true
+		s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false})
+	var crit: int = int(j.get("coups_critiques", 0))
+	var rate: int = int(j.get("coups_rates", 0))
+	verifier(crit >= 3 and rate >= 3, "200 coups : %d critiques, %d ratés (≈5 %% chacun)" % [crit, rate])
+	# Le Rieur : la relance se réarme à l'engagement.
+	j.classe = "le_rieur"
+	verifier(s.a_talent(j, "deux_queues"), "Le Rieur porte Deux queues")
+	j["relance_utilisee"] = true
+	s._engager_combat(j, loup)
+	verifier(not j.has("relance_utilisee"), "l'engagement réarme la relance")
+	# L'Ombre : dissimulé après une mise à mort, invisible à distance, visible adjacent.
+	j.classe = "l_ombre"
+	var proie := s.ajouter("renard", j.pos + Vector2i(0, 1), "ia")
+	proie.sante = 1
+	s._appliquer_degats(proie, 10, j.id, {})
+	verifier(Etres.a_statut_tag(j, "dissimule", s.statuts_defs), "après la mise à mort : Dissimulé")
+	var guetteur := s.ajouter("bandit", j.pos + Vector2i(4, 0), "ia")
+	for d in range(1, 4):
+		s.grille.contenu[s.grille.idx(j.pos + Vector2i(d, 0))] = 0
+	guetteur.corps.stats.perception = 12
+	verifier(not s.voit_ia(guetteur, j), "à 4 tuiles : le guetteur ne le voit pas")
+	var proche := s.ajouter("bandit", j.pos + Vector2i(-1, 0), "ia")
+	proche.corps.stats.perception = 12
+	verifier(s.voit_ia(proche, j), "adjacent : vu")
+	var frappe := false
+	for k in 5:   # un coup raté ne lève pas la dissimulation : on frappe jusqu'à toucher
+		loup.sante = loup.sante_max
+		s.attente[j.id] = true
+		frappe = frappe or s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false})
+		if not Etres.a_statut_tag(j, "dissimule", s.statuts_defs):
+			break
+	verifier(frappe and not Etres.a_statut_tag(j, "dissimule", s.statuts_defs), "attaquer lève la dissimulation")
 
 
 # ---------------------------------------------------------------- Statut bétail

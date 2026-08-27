@@ -89,6 +89,9 @@ Et trois statuts nouveaux ([[Statuts]]) : **Dissimulé**, **Saisi**, **Retardé*
 > [!success] Codé le 2026-08-28 — Communion des cinq
 > Le Souffle : l'élément de son arme **tourne seul** dans le cycle d'engendrement (bois → feu → terre → metal → eau) à chaque coup qui pose un segment — `e.element_communion` remplace l'élément de l'arme dans `_affixes_offensifs` ; chaque rotation coûte `combat_rules.talents.communion_des_cinq.mana` (2) de mana d'entretien, sans mana l'élément reste. Accès n° 2 des [[Cinq accès au cycle]] ; l'enchantement déclencheur, les anneaux de transmutation et les armes fantomatiques attendent.
 
+> [!success] Codé le 2026-08-28 — L'Ombre et Le Rieur, et le jet de coup
+> Un **jet de d20 par coup d'arme** est ajouté au pipeline (il n'existait pas ; `crit_range` des fonctionnalités le prévoyait) : `≥ crit_range` (20) → **critique ×1,5** (`combat_rules.degats.crit_mult`) ; `≤ fumble_max` (1) → **coup raté** (0 dégâts, journal). **Le Rieur** (classe cachée, talent *Deux queues*) : critiques 19-20 **et** échecs 1-2, plus **une relance par combat** d'un jet raté (réarmée à chaque engagement). **L'Ombre** (classe cachée, talent *Dissimulation*) : statut **Dissimulé** (`status_effects/dissimule`, un jour) après chaque mise à mort — les IA ne le voient qu'adjacent ; attaquer le lève ; ses coups **de face** font −25 % (dos et flancs intacts). Le « hors combat » de la note n'est pas encore un déclencheur (seule la mise à mort dissimule) ; les pièges invisibles attendent les pièges.
+
 ## Liens
 - **Dépend de** : [[Les trois axes — race, classe, fonction]], [[Classes]], [[Structure compétences-modules-slots]], [[Vocabulaire des modules — six axes]]
 - **Alimente** : [[Fonctions]], [[Création de personnage]], [[Schéma créature]], [[Statuts]]

@@ -96,9 +96,11 @@
     }
   },
   "degats": {
-    "_doc": "Pipeline de résolution du combat (E.3, étape 3) · Stats d'armes (A.4.1)",
+    "_doc": "Pipeline de résolution du combat (E.3, étape 3) · Stats d'armes (A.4.1) · jet de coup : d20 ≥ crit_range → ×crit_mult ; ≤ fumble_max → raté.",
     "durete_reference": 20,
-    "stat_div": 4
+    "stat_div": 4,
+    "crit_mult": 1.5,
+    "fumble_max": 1
   },
   "stats": {
     "_doc": "Stats de personnage · Exemples — dix PNJ générés (sante_max = 20 + End×4) · Mana",
@@ -818,6 +820,14 @@
     },
     "communion_des_cinq": {
       "mana": 2
+    },
+    "deux_queues": {
+      "crit_bonus": 1,
+      "fumble_bonus": 1
+    },
+    "dissimulation": {
+      "face_mult": 0.75,
+      "vu_a": 1
     }
   },
   "bombes": {

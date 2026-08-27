@@ -400,6 +400,17 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+classe.l_ombre.name,L'Ombre
+classe.le_rieur.name,Le Rieur
+talent.dissimulation.name,Dissimulation
+talent.dissimulation.desc,"Dissimulé après chaque mise à mort (vu seulement adjacent) ; −25 % de face."
+talent.deux_queues.name,Deux queues
+talent.deux_queues.desc,"Critiques 19-20, échecs 1-2, une relance par combat."
+status.dissimule.name,Dissimulé
+journal.critique,"{att} : coup critique (×{mult}) !"
+journal.rate,"{att} rate son coup"
+journal.relance,"{att} relance le dé (Le Rieur)"
+journal.dissimule,"{nom} se fond dans l'ombre"
 ui.ecran.betail,Traiter en bétail
 ui.ecran.resident,Traiter en résident
 journal.statut_betail,"{nom} est désormais traité en bétail"

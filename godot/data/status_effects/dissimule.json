@@ -1,0 +1,14 @@
+{
+  "name_key": "status.dissimule.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 100,
+  "duree_ticks": 24000,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [],
+  "tags": [
+    "positif",
+    "dissimule"
+  ]
+}

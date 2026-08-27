@@ -5311,10 +5311,31 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 	# Affixes de l'arme (Loot — affixes) : vecteur, dés, armure ignorée, multiplicateurs — avant le jet.
 	var ax := _affixes_offensifs(e, arme, cible)
 	var vecteur: Dictionary = ax.vecteur
+	# Le jet de coup (Pipeline de résolution du combat) : critique ≥ crit_range, raté ≤ fumble_max ; Le Rieur élargit les deux queues.
+	var jet_coup := des.jet("1d20")
+	var crit_seuil := int(fonct.get("crit_range", 20)) - (int(regles.r.talents.deux_queues.crit_bonus) if a_talent(e, "deux_queues") else 0)
+	var fumble := int(regles.r.degats.get("fumble_max", 1)) + (int(regles.r.talents.deux_queues.fumble_bonus) if a_talent(e, "deux_queues") else 0)
+	if jet_coup <= fumble and a_talent(e, "deux_queues") and not bool(e.get("relance_utilisee", false)):
+		e["relance_utilisee"] = true
+		jet_coup = des.jet("1d20")
+		EventBus.emettre(&"journal", [&"journal.relance", {"att": e.name_key}])
+	var mult_coup := 1.0
+	if jet_coup <= fumble:
+		e["coups_rates"] = int(e.get("coups_rates", 0)) + 1
+		EventBus.emettre(&"journal", [&"journal.rate", {"att": e.name_key}])
+		return
+	if jet_coup >= crit_seuil:
+		mult_coup = float(regles.r.degats.get("crit_mult", 1.5))
+		e["coups_critiques"] = int(e.get("coups_critiques", 0)) + 1
+		EventBus.emettre(&"journal", [&"journal.critique", {"att": e.name_key, "mult": "%.1f" % mult_coup}])
+	if a_talent(e, "dissimulation"):   # L'Ombre : −25 % de face ; attaquer lève la dissimulation
+		if Regles.direction_relative(cible.orientation, e.pos - cible.pos) == "front":
+			mult_coup *= float(regles.r.talents.dissimulation.face_mult)
+		e.statuts = e.statuts.filter(func(s0: Dictionary) -> bool: return str(s0.id) != "dissimule")
 	var d := regles.degats_arme(e.stats_eff, arme, fonct, des, lourde, a_zero, int(ax.des), e.competences_eff, vecteur)
 	var wx := _facteur_wuxing(e, cible, vecteur, tick_de(e))
 	var plat := int(e.get("degats_element", {}).get(wuxing.dominante(vecteur), 0))
-	var res := _resoudre_coup(e, cible, (d.bruts + float(plat)) * wx.total * float(ax.mult) * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur, float(ax.ignore_armure))
+	var res := _resoudre_coup(e, cible, (d.bruts + float(plat)) * wx.total * float(ax.mult) * mult_coup * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur, float(ax.ignore_armure))
 	res.merge(wx)
 	res["competence"] = str(fonct.get("combat_skill", ""))
 	var cle := &"journal.attaque_lourde" if lourde else &"journal.attaque"
@@ -5562,6 +5583,9 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		EventBus.emettre(&"journal", [&"journal.mort", {"nom": cible.name_key}])
 		EventBus.emettre(&"creature_killed", [cible.id, source])
 		_quetes_sur_mort(cible, source)
+		if not att.is_empty() and a_talent(att, "dissimulation"):   # L'Ombre : dissimulé après chaque mise à mort
+			appliquer_statut(att, "dissimule", int(statuts_defs.get("dissimule", {}).get("duree_ticks", 24000)), att.id)
+			EventBus.emettre(&"journal", [&"journal.dissimule", {"nom": att.name_key}])
 		if not att.is_empty() and att.controle == "joueur" and cible.camp == "civil":
 			_infraction(att, "comportement", "meurtre", cible.pos, "")
 		if str(cible.get("fonction", "")) == "dirigeant" and not str(cible.get("royaume", "")).is_empty() and monde != null:
@@ -6386,6 +6410,8 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 
 ## Place `a` et `b` dans la même horloge de combat (créée au besoin), compteurs rebasés.
 func _engager_combat(a: Dictionary, b: Dictionary) -> void:
+	a.erase("relance_utilisee")   # Le Rieur : une relance par combat
+	b.erase("relance_utilisee")
 	if a.get("huile_feu", false) and not en_combat(a):
 		a.erase("huile_feu")
 		a["degats_element_bonus"] = {"feu": "1d4"}   # consommé par le premier combat (Nourriture : huile d'arme)
@@ -6611,6 +6637,8 @@ func lumiere_a(pos: Vector2i) -> int:
 
 ## Une IA voit-elle un être ? (portée de Perception et ligne de vue ; la nuit, la lumière locale module — Éclairage)
 func voit_ia(e: Dictionary, autre: Dictionary) -> bool:
+	if Etres.a_statut_tag(autre, "dissimule", statuts_defs) and Grille.distance(e.pos, autre.pos) > int(regles.r.talents.dissimulation.vu_a):   # L'Ombre
+		return false
 	var portee := float(e.corps.stats.perception) * float(regles.r.engagement.detection_par_perception)
 	if lieu == "camp" and est_nuit() and not ("vision_nocturne" in e.get("tags_acquis", [])):
 		var lum := lumiere_a(autre.pos)
