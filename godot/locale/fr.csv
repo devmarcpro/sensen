@@ -400,6 +400,12 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+ui.ecran.incarner,Prendre le contrôle
+journal.incarne,"tu incarnes {nom} ; {ancien} te suit"
+journal.incarner_refuse,il faut une relation de 75 pour qu un être te cède sa place
+journal.pas_de_mains,pas de mains : seules la barde et les bijoux s'équipent
+journal.pas_de_lecture,cette forme ne lit pas
+journal.monde_muet,le monde ne parle pas à une bête
 race.lycanthrope.name,Lycanthrope
 talent.lune.name,Lune
 talent.lune.desc,"Forme bestiale à volonté : stats ×1,5, griffes et crocs, ni arme, ni capacité, ni parole ; forcée une nuit sur trente."

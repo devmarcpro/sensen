@@ -888,6 +888,16 @@
       ],
       "ticks_transformation": 4,
       "nuit_forcee_toutes_les": 30
+    },
+    "incarnation": {
+      "relation_min": 75,
+      "slots_bete": [
+        "amulette",
+        "anneau",
+        "anneau_1",
+        "anneau_2",
+        "cuirasse"
+      ]
     }
   },
   "bombes": {

@@ -33,6 +33,9 @@ Tout est en place : [[Blocs de l'être]] fait de chaque être la même fiche, [[
 
 **Les limitations comme contenu.** Incarner un quadrupède, c'est perdre les mains, la lecture et le dialogue. Il faut que l'interface le dise proprement plutôt que de griser dix boutons sans explication ([[Conditions de reproduction]] pose déjà la règle : *afficher la raison, jamais un bouton grisé muet*).
 
+> [!success] Codé le 2026-08-28 — l'incarnation, tranchée au plus simple (réversible)
+> Dialogue d'un **compagnon** (`maitre` = toi) → *Prendre le contrôle* : `Simulation._incarner` échange le drapeau `controle` — le nouveau corps devient `joueur`, **l'ancien corps devient un compagnon IA** (`maitre` = le nouveau corps, ordre *suivre*) qui vit, suit et peut mourir en ton absence (LOD logique, comme tout compagnon). **Ce qui suit le corps** : tout ce qui est sur l'entité (inventaire, compétences, réputations, talents) ; **ce qui reste au compte** : les claims, le territoire, les rangs de guilde — ils sont sur `Simulation.territoire`/`monde`, pas sur l'être, donc rien à déplacer. **Coût** : gratuit pour une bête (elle n'a pas d'avis), **relation ≥ 75** pour un humanoïde (il consent, c'est le seuil de l'enseignement). Le client suit le signal `controle_change`. **Les limitations comme contenu** : une silhouette non humanoïde n'équipe que `talents.incarnation.slots_bete` (amulette, anneaux, cuirasse = la barde), **ne lit pas** et **ne parle pas** — chaque refus a son message de journal (jamais un bouton grisé muet). Point de respawn : le nouveau corps hérite du `spawn` de l'ancien s'il n'en a pas.
+
 ## Liens
 - **Dépend de** : [[Contraintes permanentes]], [[Blocs de l'être]], [[Les trois axes — race, classe, fonction]]
 - **Alimente** : [[Talents de race]], [[Sauvegarde]], [[Multijoueur]]

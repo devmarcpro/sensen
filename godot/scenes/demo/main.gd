@@ -104,6 +104,11 @@ func _ready() -> void:
 	EventBus.action_resolved.connect(func(id: String, _a: Dictionary) -> void: telegraphes.erase(id))
 	EventBus.combat_ended.connect(_sur_fin_de_combat)
 	EventBus.expedition_terminee.connect(_sur_fin_d_expedition)
+	EventBus.controle_change.connect(func(id: String) -> void:
+		joueur_id = id
+		vue_version = -1
+		terrain.queue_redraw()
+		queue_redraw())
 	EventBus.tile_changed.connect(func(p: Vector2i) -> void:
 		terrain.queue_redraw()
 		if sim != null:

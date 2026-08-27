@@ -462,6 +462,8 @@ func _construire_dialogue(j: Dictionary) -> void:
 		liste.add_item(tr("ui.ecran.quetes"))
 		entrees.append({"kind": "option", "option": "quetes"})
 	if pnj.has("maitre"):
+		liste.add_item(tr("ui.ecran.incarner"))
+		entrees.append({"kind": "option", "option": "incarner"})
 		liste.add_item(tr("ui.ecran.suivre"))
 		entrees.append({"kind": "option", "option": "suivre"})
 		liste.add_item(tr("ui.ecran.attendre"))
@@ -521,6 +523,11 @@ func _option(opt: String) -> void:
 		"suivre", "attendre":
 			main.sim.ordonner(j, pnj_id, opt)
 			rafraichir()
+		"incarner":
+			if main.sim.intention(j.id, {"type": "incarner", "pnj": pnj_id}):
+				fermer()
+			else:
+				rafraichir()
 		"assigner":
 			ouvrir("assigner")
 		"entrainer":

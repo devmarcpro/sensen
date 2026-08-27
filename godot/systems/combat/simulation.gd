@@ -1082,6 +1082,33 @@ func pieces_de_cellule(cell: Vector2i) -> Array:
 	return res
 
 
+## Incarner un compagnon (Changer de personnage) : le contrôle est un attribut — on l'échange.
+func _incarner(e: Dictionary, pnj_id: String, tick: int) -> bool:
+	var c: Dictionary = entites.get(pnj_id, {})
+	if c.is_empty() or not c.vivant or str(c.get("maitre", "")) != e.id or Grille.distance(e.pos, c.pos) > 2:
+		return false
+	if "humanoide" in c.get("tags", []) and relation_de(c, e) < int(regles.r.talents.incarnation.relation_min):
+		EventBus.emettre(&"journal", [&"journal.incarner_refuse", {}])
+		return false
+	c.controle = e.controle
+	c.erase("maitre")
+	c.camp = e.camp
+	if not c.has("spawn") and e.has("spawn"):
+		c["spawn"] = e.spawn
+	e.controle = "ia"
+	e["maitre"] = c.id
+	e["ordre"] = "suivre"
+	e["ai_profile"] = "compagnon"
+	c["vue_sale"] = true
+	if attente.has(e.id):
+		attente.erase(e.id)
+	attente[c.id] = true
+	c.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.incarne", {"nom": c.name_key, "ancien": e.name_key}])
+	EventBus.emettre(&"controle_change", [c.id])
+	return true
+
+
 ## Le Lycanthrope (Talents de race) : la forme bestiale, à volonté ou sous la lune.
 func _transformer(e: Dictionary, tick: int) -> bool:
 	if not a_talent(e, "lune"):
@@ -1110,7 +1137,8 @@ func _poser_forme(e: Dictionary, bestiale: bool) -> void:
 func _attaquer_bete(e: Dictionary, cible: Dictionary, tick: int) -> bool:
 	if not cible.vivant:
 		return false
-	for aid in regles.r.talents.lune.actions:
+	var jeu: Array = regles.r.talents.lune.actions if bool(e.get("forme_bestiale", false)) else e.get("actions", [])
+	for aid in jeu:
 		var action: Dictionary = actions_creatures.get(str(aid), {})
 		if not action.is_empty() and _action_creature_possible(e, action, cible):
 			if not en_combat(e):
@@ -4626,6 +4654,9 @@ func _equiper(e: Dictionary, uid: String, tick: int) -> bool:
 	var slot := str(it.get("equip_slot", ""))
 	if slot.is_empty():
 		return false
+	if str(e.corps.get("silhouette", "humanoide")) != "humanoide" and not (slot in regles.r.talents.incarnation.slots_bete):   # pas de mains (Changer de personnage)
+		EventBus.emettre(&"journal", [&"journal.pas_de_mains", {}])
+		return false
 	if a_talent(e, "sans_chair") and slot in regles.r.talents.sans_chair.slots_refuses:   # le Spectre ne porte aucune armure
 		EventBus.emettre(&"journal", [&"journal.armure_refusee", {}])
 		return false
@@ -4780,6 +4811,9 @@ func _sertir(e: Dictionary, objet: String, gemme: String, tick: int) -> bool:
 ## Lire un livre (Lecture des livres) : jet universel, modules appris, échec à effet, livre consommé.
 func _lire(e: Dictionary, objet: String, tick: int) -> bool:
 	if not (objet in e.sac) or not items.get(objet, {}).get("type", "") in ["grimoire", "manuel"]:
+		return false
+	if str(e.corps.get("silhouette", "humanoide")) != "humanoide":   # une bête ne lit pas (Changer de personnage)
+		EventBus.emettre(&"journal", [&"journal.pas_de_lecture", {}])
 		return false
 	var livre: Dictionary = items[objet]
 	var lv: Dictionary = GameData.config("loot_rules").livres
@@ -5466,9 +5500,11 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _deplacer(e, i.vers, h.ticks)
 		"attaquer":
 			if entites.has(i.cible):
-				ok = _attaquer_bete(e, entites[i.cible], h.ticks) if bool(e.get("forme_bestiale", false)) else _attaquer_arme(e, entites[i.cible], bool(i.get("lourde", false)), h.ticks)
+				ok = _attaquer_bete(e, entites[i.cible], h.ticks) if (bool(e.get("forme_bestiale", false)) or (Etres.arme(e, items).is_empty() and not e.get("actions", []).is_empty())) else _attaquer_arme(e, entites[i.cible], bool(i.get("lourde", false)), h.ticks)
 		"transformer":
 			ok = _transformer(e, h.ticks)
+		"incarner":
+			ok = _incarner(e, str(i.get("pnj", "")), h.ticks)
 		"garde":
 			ok = _prendre_garde(e, h.ticks)
 		"attendre":
@@ -5521,7 +5557,9 @@ func intention(id: String, i: Dictionary) -> bool:
 		"manger":
 			ok = _manger(e, str(i.get("objet", "")), h.ticks)
 		"parler":
-			if bool(e.get("forme_bestiale", false)):
+			if str(e.corps.get("silhouette", "humanoide")) != "humanoide":
+				EventBus.emettre(&"journal", [&"journal.monde_muet", {}])
+			elif bool(e.get("forme_bestiale", false)):
 				EventBus.emettre(&"journal", [&"journal.bete_refus", {}])
 			else:
 				ok = _parler(e, str(i.get("pnj", "")), h.ticks)

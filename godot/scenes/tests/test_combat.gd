@@ -76,6 +76,7 @@ func _ready() -> void:
 	test_vampire()
 	test_spectre()
 	test_lycanthrope()
+	test_incarnation()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2457,6 +2458,39 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Incarnation : jouer une bête
+
+func test_incarnation() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var cerf := s.ajouter("cerf", j.pos + Vector2i(0, 1), "ia")
+	cerf["maitre"] = j.id
+	cerf.camp = j.camp
+	var ancien_id: String = j.id
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "incarner", "pnj": cerf.id}) and cerf.controle == "joueur" and j.controle == "ia" and str(j.maitre) == cerf.id, "le contrôle passe au cerf ; l'ancien corps devient compagnon")
+	verifier(s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur").size() == 1, "un seul corps contrôlé")
+	var casque := s.generer_objet("proto_casque_cuir", 1, {}, "commun", 0)
+	cerf.sac.append(casque.uid)
+	s.attente[cerf.id] = true
+	verifier(not s.intention(cerf.id, {"type": "equiper", "objet": casque.uid}), "pas de mains : le casque est refusé")
+	s.attente[cerf.id] = true
+	verifier(not s.intention(cerf.id, {"type": "parler", "pnj": ancien_id}), "le monde ne parle pas à une bête")
+	# Attaquer sans arme : les actions de créature du cerf
+	var loup: Dictionary = s.entites["loup_2"]
+	s.grille.liberer(loup.pos)
+	loup.pos = cerf.pos + Vector2i(1, 0)
+	s.grille.placer(loup.id, loup.pos)
+	var pv0 := int(loup.sante)
+	s.attente[cerf.id] = true
+	verifier(s.intention(cerf.id, {"type": "attaquer", "cible": loup.id, "lourde": false}), "le cerf attaque avec ses actions de créature")
+	var h := s.horloge_de(cerf)
+	for k in 3:
+		cerf.compteur = h.ticks
+		s.pas(cerf.horloge)
+	verifier(int(loup.sante) < pv0, "le loup encaisse (%d → %d)" % [pv0, int(loup.sante)])
 
 
 # ---------------------------------------------------------------- Le Lycanthrope
