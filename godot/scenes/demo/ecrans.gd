@@ -357,6 +357,20 @@ func _construire_dialogue(j: Dictionary) -> void:
 		titre.text += tr("ui.dialogue.boutique").format({"boutique": tr(GameData.entree("shop_types", str(pnj.boutique)).name_key)})
 	if pnj.has("guilde"):
 		titre.text += tr("ui.dialogue.guilde").format({"guilde": tr("guilde.%s.name" % str(pnj.guilde))})
+	if not str(pnj.get("titre", "")).is_empty():
+		titre.text += tr("ui.dialogue.titre").format({"titre": tr(str(pnj.titre))})
+	var fam: Dictionary = pnj.get("family", {})
+	var ftxt: Array[String] = []
+	if not str(fam.get("spouse", "")).is_empty() and main.sim.entites.has(str(fam.spouse)):
+		ftxt.append(tr("famille.conjoint").format({"nom": tr(main.sim.entites[str(fam.spouse)].name_key)}))
+	for pid in fam.get("child_of", []):
+		if main.sim.entites.has(str(pid)):
+			ftxt.append(tr("famille.enfant").format({"nom": tr(main.sim.entites[str(pid)].name_key)}))
+	if not fam.get("parent_of", []).is_empty():
+		ftxt.append(tr("famille.parent").format({"n": fam.parent_of.size()}))
+	if not ftxt.is_empty():
+		liste.add_item(tr("ui.dialogue.famille").format({"texte": " · ".join(ftxt)}), null, false)
+		entrees.append({"kind": "texte", "texte": ""})
 	var rel := int(pnj.get("social", {}).get("relations", {}).get(j.id, 0))
 	liste.add_item(tr("ui.ecran.parler"))
 	entrees.append({"kind": "option", "option": "parler"})

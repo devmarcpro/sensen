@@ -401,6 +401,15 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+journal.naissance,"{village} : {nom} met au monde un enfant"
+journal.vacance_guilde,"le hall de la {guilde} n'a plus de maître"
+journal.succession_guilde,"{nom} devient maître de la {guilde}"
+journal.succession_heritier,"{royaume} : {nom}, héritier, monte sur le trône"
+ui.dialogue.titre," — {titre}"
+ui.dialogue.famille,"famille : {texte}"
+famille.conjoint,conjoint(e) de {nom}
+famille.enfant,enfant de {nom}
+famille.parent,parent de {n} enfant(s)
 ui.ecran.registre,"REGISTRE — {n} variétés · {especes}/{total} espèces · paliers : {paliers}"
 ui.registre.espece,"{nom} — {mode} · {n}/{possibles} variétés{records}"
 ui.registre.aucun,aucune espèce au registre — capture (Y) ou couvée

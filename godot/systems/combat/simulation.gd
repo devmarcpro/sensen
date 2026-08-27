@@ -1590,6 +1590,69 @@ func _rendre_village(nom: String) -> void:
 	EventBus.emettre(&"journal", [&"journal.village_rendu", {"village": nom, "royaume": monde.surface.royaume_de(info.cellule).get("nom", "—")}])
 
 
+## Les familles d'un village (Familles et succession) : par bâtiment, le plus âgé est le parent, le second adulte
+## son conjoint, les autres ses enfants.
+func _former_familles(cell: Vector2i, v: Dictionary) -> void:
+	var sc: Dictionary = _ry().succession
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "familles", cell])
+	for bat in v.get("batiments", []):
+		var lits: Dictionary = {}
+		for l in bat.get("lits", []):
+			lits[monde.pos_monde(cell, l)] = true
+		var membres: Array = []
+		for x in vivants():
+			if str(x.get("village", "")) == str(v.nom) and lits.has(x.get("lit", Vector2i(-1, -1))):
+				membres.append(x)
+		if membres.size() < 2:
+			continue
+		membres.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a.get("age", 0)) > float(b.get("age", 0)))
+		var parent: Dictionary = membres[0]
+		var conjoint: Dictionary = membres[1] if float(membres[1].get("age", 0)) >= float(regles.r.age.adulte) else {}
+		if not conjoint.is_empty():
+			parent.family.spouse = conjoint.id
+			conjoint.family.spouse = parent.id
+		for k in range(1 if conjoint.is_empty() else 2, membres.size()):
+			var enfant: Dictionary = membres[k]
+			enfant.age = float(rng.randi_range(int(sc.enfant_age[0]), int(sc.enfant_age[1])))
+			enfant.family.child_of = [parent.id] + ([conjoint.id] if not conjoint.is_empty() else [])
+			parent.family.parent_of.append(enfant.id)
+			if not conjoint.is_empty():
+				conjoint.family.parent_of.append(enfant.id)
+	for x in vivants():
+		if str(x.get("village", "")) == str(v.nom) and str(x.get("fonction", "")) in ["dirigeant", "maitre_de_guilde"]:
+			x["titre"] = titre_de(x)
+
+
+## Le titre culturel d'un PNJ à rôle (Génération de noms) : la culture, la gouvernance de son royaume, son genre.
+func titre_de(x: Dictionary) -> String:
+	var culture: Dictionary = GameData.catalogues.name_cultures.get(str(x.get("social", {}).get("culture", "")), {})
+	var titres: Dictionary = culture.get("titres", {})
+	var gouv := ""
+	if monde != null and not str(x.get("royaume", "")).is_empty():
+		for sect in monde.surface.royaumes_cache.values():
+			if sect.has(str(x.royaume)):
+				gouv = str(sect[str(x.royaume)].government_type)
+	if str(x.get("fonction", "")) == "maitre_de_guilde":
+		gouv = "guilde"
+	for cle in titres.keys():
+		if gouv.begins_with(str(cle)):
+			return str(titres[cle].get(str(x.get("genre", "m")), titres[cle].get("m", "")))
+	return ""
+
+
+## L'héritier d'un PNJ : l'aîné vivant de ses enfants.
+func heritier_de(x: Dictionary) -> String:
+	var meilleur := ""
+	var age := -1.0
+	for id in x.get("family", {}).get("parent_of", []):
+		var enfant: Dictionary = entites.get(str(id), {})
+		if not enfant.is_empty() and bool(enfant.vivant) and float(enfant.get("age", 0)) > age:
+			age = float(enfant.age)
+			meilleur = str(id)
+	return meilleur
+
+
 ## La semaine des royaumes : successions, repeuplement, décimation.
 func _semaine_royaumes_pnj() -> void:
 	if monde == null:
@@ -1599,24 +1662,59 @@ func _semaine_royaumes_pnj() -> void:
 			continue
 		var meilleur: Dictionary = {}
 		var niv := -1.0
-		for x in vivants():
-			if str(x.get("royaume", "")) == roy_id and x.camp == "civil" and str(x.get("fonction", "")) != "dirigeant":
-				var g := float(progression.niveaux_derives(x).general)
-				if g > niv:
-					niv = g
-					meilleur = x
 		var nom_roy: String = str(roy_id)
+		var gouv_id := ""
 		for sect in monde.surface.royaumes_cache.values():
 			if sect.has(roy_id):
 				nom_roy = str(sect[roy_id].nom)
+				gouv_id = str(sect[roy_id].government_type)
+		var par_heritier := false
+		if str(GameData.catalogues.governments.get(gouv_id, {}).get("succession", "")) == "heritier" and monde.heritiers.has(roy_id):
+			var h: Dictionary = entites.get(str(monde.heritiers[roy_id]), {})
+			if not h.is_empty() and bool(h.vivant):
+				meilleur = h
+				par_heritier = true
+		monde.heritiers.erase(roy_id)
+		if meilleur.is_empty():
+			for x in vivants():
+				if str(x.get("royaume", "")) == roy_id and x.camp == "civil" and str(x.get("fonction", "")) != "dirigeant":
+					var g := float(progression.niveaux_derives(x).general)
+					if g > niv:
+						niv = g
+						meilleur = x
 		if meilleur.is_empty():
 			EventBus.emettre(&"journal", [&"journal.vacance_prolongee", {"royaume": nom_roy}])
 			continue
 		meilleur.fonction = "dirigeant"
 		meilleur["or_max"] = int(GameData.entree("functions", "dirigeant").portefeuille)
+		meilleur["titre"] = titre_de(meilleur)
 		monde.vacances.erase(roy_id)
-		EventBus.emettre(&"journal", [&"journal.succession", {"royaume": nom_roy, "nom": meilleur.name_key}])
+		EventBus.emettre(&"journal", [&"journal.succession_heritier" if par_heritier else &"journal.succession", {"royaume": nom_roy, "nom": meilleur.name_key}])
 		EventBus.emettre(&"leadership_changed", [roy_id, meilleur.id])
+	# Les halls sans maître : le plus haut niveau général du village reprend le hall (2 semaines).
+	for cle in monde.vacances_guildes.keys().duplicate():
+		if monde.semaine_courante < int(monde.vacances_guildes[cle]):
+			continue
+		var parts: PackedStringArray = str(cle).split("|")
+		var candidat: Dictionary = {}
+		var niv_g := -1.0
+		for x in vivants():
+			if str(x.get("village", "")) == parts[1] and x.camp == "civil" and str(x.get("fonction", "")) in ["villageois", "oisif", "fermier", "artisan", "commercant"] and not x.has("guilde"):
+				var g := float(progression.niveaux_derives(x).general)
+				if g > niv_g:
+					niv_g = g
+					candidat = x
+		if candidat.is_empty():
+			continue
+		candidat.fonction = "maitre_de_guilde"
+		candidat["guilde"] = parts[0]
+		candidat["titre"] = titre_de(candidat)
+		if not ("quetes" in candidat.tags):
+			candidat.tags.append("quetes")
+		candidat["or_max"] = int(GameData.entree("functions", "maitre_de_guilde").portefeuille)
+		monde.vacances_guildes.erase(cle)
+		EventBus.emettre(&"journal", [&"journal.succession_guilde", {"nom": candidat.name_key, "guilde": "guilde.%s.name" % parts[0]}])
+		EventBus.emettre(&"leadership_changed", [parts[0], candidat.id])
 	var rp: Dictionary = _ry().repeuplement
 	for nom in monde.villages.keys():
 		var info: Dictionary = monde.villages[nom]
@@ -1654,7 +1752,21 @@ func _semaine_royaumes_pnj() -> void:
 				x["village"] = nom
 				x["royaume"] = str(v.get("royaume", ""))
 				x.ancre = lit
-				EventBus.emettre(&"journal", [&"journal.repeuplement", {"village": nom}])
+				# Une naissance (Familles et succession) : l'enfant d'un couple du village, sinon un arrivant.
+				var mere: Dictionary = {}
+				for p in population_village(nom):
+					if p.id != x.id and not str(p.get("family", {}).get("spouse", "")).is_empty():
+						mere = p
+						break
+				if not mere.is_empty():
+					x.age = 0.0
+					x.family.child_of = [mere.id, str(mere.family.spouse)]
+					mere.family.parent_of.append(x.id)
+					if entites.has(str(mere.family.spouse)):
+						entites[str(mere.family.spouse)].family.parent_of.append(x.id)
+					EventBus.emettre(&"journal", [&"journal.naissance", {"village": nom, "nom": mere.name_key}])
+				else:
+					EventBus.emettre(&"journal", [&"journal.repeuplement", {"village": nom}])
 				break
 
 
@@ -2751,7 +2863,7 @@ func sauvegarder(nom: String = "monde") -> bool:
 		contenants_monde[grille.pos_de(int(gi))] = contenants[gi]
 	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "graine": graine, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
 		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores,
-		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire, "vacances": monde.vacances, "villages": monde.villages})
+		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire, "vacances": monde.vacances, "villages": monde.villages, "heritiers": monde.heritiers, "vacances_guildes": monde.vacances_guildes})
 	ok = Sauvegarde.ecrire(nom, "surface.json", surface) and ok
 	ok = Sauvegarde.ecrire(nom, "entities.json", {"entites": autres, "ordre": ordre_autres, "contenants": contenants_monde}) and ok
 	ok = Sauvegarde.ecrire(nom, "items.json", instances) and ok
@@ -2789,6 +2901,8 @@ func charger_sauvegarde(nom: String = "monde") -> bool:
 	monde.peuplees = w.get("peuplees", {})
 	monde.claims = w.get("claims", {})
 	monde.vacances = w.get("vacances", {})
+	monde.heritiers = w.get("heritiers", {})
+	monde.vacances_guildes = w.get("vacances_guildes", {})
 	monde.villages = w.get("villages", {})
 	territoire = w.get("territoire", territoire)
 	for cell in surface.keys():
@@ -3323,6 +3437,7 @@ func _habiller_pnj(e: Dictionary, def: Dictionary, culture_id: String = "") -> v
 			e.stock.append(o.uid)
 	e["dernieres_repliques"] = []
 	e["dernier_parler_jour"] = -1
+	e["family"] = {"parent_of": [], "child_of": [], "spouse": ""}
 	var ag: Dictionary = regles.r.age
 	e["age"] = float(rng.randi_range(int(ag.depart[0]), int(ag.depart[1])))
 	var esp := float(ag.esperance.get(str(def.get("race", "humain")), ag.esperance._defaut))
@@ -3458,6 +3573,7 @@ func _peupler_fenetre() -> void:
 					x.ancre = pos
 			if not monde.villages.has(str(v.nom)):
 				monde.villages[str(v.nom)] = {"cellule": cell, "royaume": str(v.get("royaume", "")), "conquis_par": "", "defense_jusqua": 0, "abandonne": false, "capacite": v.pnj.size()}
+			_former_familles(cell, v)
 			EventBus.emettre(&"journal", [&"journal.village", {"nom": v.nom}])
 
 
@@ -4643,7 +4759,13 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 			_infraction(att, "comportement", "meurtre", cible.pos, "")
 		if str(cible.get("fonction", "")) == "dirigeant" and not str(cible.get("royaume", "")).is_empty() and monde != null:
 			monde.vacances[str(cible.royaume)] = monde.semaine_courante + int(_ry().succession.semaines)
+			var h := heritier_de(cible)
+			if not h.is_empty():
+				monde.heritiers[str(cible.royaume)] = h
 			EventBus.emettre(&"journal", [&"journal.vacance", {"royaume": monde.surface.royaume_de(_cell_de(cible.pos)).get("nom", cible.royaume)}])
+		if str(cible.get("fonction", "")) == "maitre_de_guilde" and cible.has("guilde") and monde != null and not str(cible.get("village", "")).is_empty():
+			monde.vacances_guildes["%s|%s" % [str(cible.guilde), str(cible.village)]] = monde.semaine_courante + int(_ry().succession.semaines_guilde)
+			EventBus.emettre(&"journal", [&"journal.vacance_guilde", {"guilde": "guilde.%s.name" % str(cible.guilde)}])
 		if cible.has("maitre"):
 			_mort_compagnon(cible)
 		_declencher(cible, "testament", cible.pos)   # la charge part quand le porteur tombe

@@ -640,7 +640,12 @@
     },
     "succession": {
       "semaines": 4,
-      "creature_dirigeant": "villageois"
+      "creature_dirigeant": "villageois",
+      "semaines_guilde": 2,
+      "enfant_age": [
+        5,
+        17
+      ]
     },
     "repeuplement": {
       "chance": 0.15,

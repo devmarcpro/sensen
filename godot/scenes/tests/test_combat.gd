@@ -51,6 +51,7 @@ func _ready() -> void:
 	test_loci_et_soie()
 	test_harmonie()
 	test_registre_elevage()
+	test_familles()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -2076,6 +2077,62 @@ func test_registre_elevage() -> void:
 	var pal := s.paliers_elevage()
 	verifier(int(pal.couvees) == 0 or GameData.catalogues.species.size() >= 10, "moins de 10 espèces : pas de couvée en plus (%d espèces)" % GameData.catalogues.species.size())
 	verifier("palier.bestiaire" in pal.atteints and int(pal.capture) == 6, "bestiaire complet : captures +6 au total")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Familles, héritier, maîtres de guilde, titres
+
+func test_familles() -> void:
+	var s := Simulation.new(95)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var camp: Vector2i = s.monde.cellule_camp
+	var cell: Vector2i = camp + Vector2i(1, 0)
+	var r := {"id": "roy_fam", "nom": "Famillia", "government_type": "monarchie_hereditaire", "culture": "latine", "race": "humain", "taille": "hameau", "capital_poi": cell, "territory_cells": [cell],
+		"taxes": {"base_rate": 0.08, "tariff_default": 0.1}, "tariffs": {}, "laws": [], "diplomacy": {}, "rivals": [], "tags": []}
+	s.monde.surface.royaumes_cache[s.monde.surface.secteur_de(cell)] = {"roy_fam": r}
+	s.monde.surface.royaume_par_cellule[cell] = "roy_fam"
+	# Une maison de trois : le roi (50 ans), sa reine (40), un enfant.
+	var base: Vector2i = s.monde.pos_monde(cell, Vector2i(10, 64))
+	var membres: Array = []
+	for k in 3:
+		var x := s.ajouter("villageois", base + Vector2i(k, 0), "ia")
+		s._habiller_pnj(x, GameData.entree("creatures", "villageois"), "latine")
+		x["village"] = "Bourg-Fam"
+		x["royaume"] = "roy_fam"
+		x["lit"] = base + Vector2i(k, 0)
+		x.age = [50.0, 40.0, 30.0][k]
+		x.genre = ["m", "f", "m"][k]
+		membres.append(x)
+	membres[0].fonction = "dirigeant"
+	var v := {"nom": "Bourg-Fam", "batiments": [{"lits": [Vector2i(10, 64), Vector2i(11, 64), Vector2i(12, 64)]}]}
+	s._former_familles(cell, v)
+	verifier(membres[0].family.spouse == membres[1].id and membres[1].family.spouse == membres[0].id, "le roi et la reine sont conjoints")
+	verifier(membres[2].family.child_of.has(membres[0].id) and membres[0].family.parent_of.has(membres[2].id) and float(membres[2].age) < 18.0, "le troisième est leur enfant (%d ans)" % int(membres[2].age))
+	verifier(str(membres[0].titre) == "titre.latine.monarchie_hereditaire.m", "le roi porte le titre latin (%s)" % str(membres[0].titre))
+	# Le roi meurt : l'héritier est mémorisé ; quatre semaines plus tard il monte sur le trône, titré.
+	s._appliquer_degats(membres[0], 9999, j.id, {})
+	verifier(s.monde.heritiers.get("roy_fam", "") == membres[2].id, "l'héritier désigné est l'enfant")
+	s.monde.semaine_courante += 4
+	s._semaine_royaumes_pnj()
+	verifier(str(membres[2].fonction) == "dirigeant" and str(membres[2].titre) == "titre.latine.monarchie_hereditaire.m" and not s.monde.vacances.has("roy_fam"), "l'enfant règne, avec le titre")
+	# Un maître de guilde meurt : deux semaines, puis un villageois reprend le hall.
+	var maitre := s.ajouter("maitre_de_guilde", base + Vector2i(0, 2), "ia")
+	s._habiller_pnj(maitre, GameData.entree("creatures", "maitre_de_guilde"), "latine")
+	maitre["village"] = "Bourg-Fam"
+	maitre["guilde"] = "chasseurs"
+	var vill := s.ajouter("villageois", base + Vector2i(1, 2), "ia")
+	s._habiller_pnj(vill, GameData.entree("creatures", "villageois"), "latine")
+	vill["village"] = "Bourg-Fam"
+	s._appliquer_degats(maitre, 9999, j.id, {})
+	verifier(s.monde.vacances_guildes.has("chasseurs|Bourg-Fam"), "la mort du maître ouvre une vacance de guilde")
+	s.monde.semaine_courante += 2
+	s._semaine_royaumes_pnj()
+	var repris := false
+	for x in s.vivants():
+		if str(x.get("guilde", "")) == "chasseurs" and str(x.fonction) == "maitre_de_guilde" and x.id != maitre.id:
+			repris = true
+	verifier(repris and not s.monde.vacances_guildes.has("chasseurs|Bourg-Fam"), "deux semaines plus tard, un villageois est maître des Chasseurs")
 	s.monde.fermer()
 
 
