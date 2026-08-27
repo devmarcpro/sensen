@@ -4857,7 +4857,7 @@ func maj_vision() -> void:
 		if lieu == "camp" and monde != null:
 			var facteur := 1.0
 			if est_nuit() and not ("vision_nocturne" in e.get("tags_acquis", [])):
-				facteur *= float(_cycle().get("vision_nuit", 0.6))   # la nuit : malus de vision pour tous
+				facteur *= maxf(float(_cycle().get("vision_nuit", 0.6)), float(lumiere_de(e)) / 100.0)   # la nuit : malus de vision, sauf une lumière en main (Éclairage)
 			var etat: Dictionary = GameData.catalogues.weather_states.get(str(e.get("meteo_locale", meteo(monde.cellule_de(e.pos)))), {})
 			facteur *= float(etat.get("visibility_mult", 1.0))
 			portee = maxi(1, roundi(float(portee) * facteur))
@@ -6523,10 +6523,44 @@ func _actions_candidates(e: Dictionary, cible: Dictionary, profil: Dictionary, t
 	return c
 
 
-## Une IA voit-elle un être ? (portée de Perception et ligne de vue)
+## La lumière qu'un être porte (Éclairage) : le plus lumineux de ses objets en main, 0-100.
+func lumiere_de(e: Dictionary) -> int:
+	var lum := 0
+	for slot in ["main_principale", "main_secondaire"]:
+		lum = maxi(lum, int(items.get(e.get("equipement", {}).get(slot, ""), {}).get("luminosite", 0)))
+	return lum
+
+
+## La lumière locale d'une tuile (Éclairage) : meubles lumineux à portée, et ce que porte l'occupant.
+func lumiere_a(pos: Vector2i) -> int:
+	var lum := 0
+	var r := int(regles.r.engagement.get("lumiere_rayon", 3))
+	for dy in range(-r, r + 1):
+		for dx in range(-r, r + 1):
+			var t := pos + Vector2i(dx, dy)
+			if not grille.dans(t):
+				continue
+			var idx := grille.idx(t)
+			if grille.meubles.has(idx):
+				var l := int(GameData.entree("meubles", str(grille.meubles[idx])).get("luminosite", 0))
+				if l > 0:
+					lum = maxi(lum, roundi(float(l) * (1.0 - float(Grille.distance(pos, t)) / float(r + 1))))
+	var occ := grille.occupant(pos)
+	if not occ.is_empty() and entites.has(occ):
+		lum = maxi(lum, lumiere_de(entites[occ]))
+	return lum
+
+
+## Une IA voit-elle un être ? (portée de Perception et ligne de vue ; la nuit, la lumière locale module — Éclairage)
 func voit_ia(e: Dictionary, autre: Dictionary) -> bool:
-	var portee := int(float(e.corps.stats.perception) * float(regles.r.engagement.detection_par_perception))
-	return Grille.distance(e.pos, autre.pos) <= portee and grille.ligne_de_vue(e.pos, autre.pos)
+	var portee := float(e.corps.stats.perception) * float(regles.r.engagement.detection_par_perception)
+	if lieu == "camp" and est_nuit() and not ("vision_nocturne" in e.get("tags_acquis", [])):
+		var lum := lumiere_a(autre.pos)
+		if lum <= 0:
+			portee *= float(_cycle().get("vision_nuit", 0.6))
+		else:
+			portee *= 1.0 + float(lum) / 100.0 * float(regles.r.engagement.get("lumiere_detection", 0.5))
+	return Grille.distance(e.pos, autre.pos) <= int(portee) and grille.ligne_de_vue(e.pos, autre.pos)
 
 
 ## La cible de la routine horaire d'un PNJ (IA des créatures) : poste, place ou lit selon l'heure.

@@ -63,6 +63,7 @@ func _ready() -> void:
 	test_talents()
 	test_reforge_et_fiole()
 	test_communion()
+	test_lumiere()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2444,6 +2445,40 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Éclairage : lumière locale, vision, détection
+
+func test_lumiere() -> void:
+	var s := Simulation.new(123)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var jour := int(s._cycle().ticks_par_jour)
+	s.horloge_monde.ticks = 0   # minuit
+	verifier(s.est_nuit(), "il fait nuit")
+	var g := s.ajouter("villageois", j.pos + Vector2i(8, 0), "ia")
+	s._habiller_pnj(g, GameData.entree("creatures", "villageois"))
+	g.corps.stats.perception = 10
+	for d in range(1, 9):
+		var q: Vector2i = j.pos + Vector2i(d, 0)
+		s.grille.contenu[s.grille.idx(q)] = 0
+	verifier(not s.voit_ia(g, j), "dans le noir, à 8 tuiles : invisible (portée 10 × 0,6)")
+	var torche := s.generer_objet("torche", 1, {}, "commun", 0)
+	j.sac.append(torche.uid)
+	j.equipement["main_secondaire"] = torche.uid
+	verifier(s.lumiere_de(j) == 70 and s.lumiere_a(j.pos) == 70, "une torche en main : lumière 70")
+	verifier(s.voit_ia(g, j), "avec la torche : vu de plus loin (portée × 1,35)")
+	j.equipement.erase("main_secondaire")
+	j["vue_sale"] = true
+	s.maj_vision()
+	var vue0: int = j.vue.size()
+	j.equipement["main_secondaire"] = torche.uid
+	j["vue_sale"] = true
+	s.maj_vision()
+	verifier(j.vue.size() > vue0, "la torche rend la vue la nuit (%d → %d tuiles)" % [vue0, j.vue.size()])
+	s.horloge_monde.ticks = jour / 2
+	verifier(not s.est_nuit() and s.voit_ia(g, j), "à midi, vu sans lumière")
+	s.monde.fermer()
 
 
 # ---------------------------------------------------------------- Communion des cinq

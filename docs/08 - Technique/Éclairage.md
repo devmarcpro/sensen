@@ -31,6 +31,9 @@ global), pas en re-propagation — changer l'heure ne coûte rien.
 
 **Enjeu de construction ([[Cycle jour-nuit et sommeil]]) :** la nuit, seules les sources locales comptent — l'éclairage de la base devient un vrai enjeu.
 
+> [!success] Codé le 2026-08-28 — la lumière locale, sans propagation
+> Décision : pas de flood fill 0-15 pour l'instant — une **lumière locale** suffit aux trois usages. `Simulation.lumiere_a(pos)` = max des meubles lumineux à 3 tuiles (`luminosite × (1 − d/4)`) et de l'objet lumineux en main de l'occupant ; `lumiere_de(e)` = ce qu'un être porte. **Vision** : la nuit, `facteur = max(vision_nuit, lumière portée/100)` — une torche en main rend la vue. **Détection** (`voit_ia`) : la nuit au camp, une cible **non éclairée** n'est vue qu'à `portée × vision_nuit` ; une cible **éclairée** (torche, lanterne à côté) à `portée × (1 + lumière/100 × lumiere_detection)` — l'objet lumineux porté augmente la détection (malus de Discrétion de la note), y compris pour les témoins des infractions. Les halos du client existaient déjà ; la propagation en thread et le shader jour/nuit attendent.
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Application des stats de matériau]], [[Risques majeurs]]
 - **Alimente** : [[Cycle jour-nuit et sommeil]], [[IA des créatures]], [[Minimap et brouillard de guerre]]
