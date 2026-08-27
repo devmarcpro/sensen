@@ -6,6 +6,10 @@ Un **roguelike tactique** en monde infini, généré procéduralement et totalem
 
 **Moteur : Godot 4.x** · GDScript (GDExtension/Rust au profilage uniquement) · PC (Steam), solo et coop 4-8 en host-and-join.
 
+## Juger le jeu
+
+Les questions qui attendent un œil humain, dans l'ordre d'une session : `docs/00 - Index/À juger — parcours de jeu.md`.
+
 ## Structure du dépôt
 
 | Chemin | Ce que c'est |
