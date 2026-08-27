@@ -31,8 +31,7 @@ var profil_sans_ui := false        # mesure de perf : saute la mise à jour du t
 var profil_sans_terrain := false   # mesure de perf : saute le dessin des tuiles
 var visee := -1                    # capacité en cours de visée (index), -1 sinon
 var ecran_fin: Array[String] = []  # récapitulatif du dernier combat (écran de fin), vide sinon
-var feuille := false               # la feuille de personnage est affichée
-var atelier := false               # l'atelier (recettes des stations du sac) est affiché
+var ecrans: Ecrans                 # inventaire, atelier, feuille (scenes/demo/ecrans.gd)
 var creation: Dictionary = {}      # l'écran de création, tant que le personnage n'existe pas
 const STATS := ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]
 var zoom := 1.0
@@ -82,6 +81,9 @@ func _ready() -> void:
 	EventBus.tile_changed.connect(func(_p: Vector2i) -> void: terrain.queue_redraw())
 	GameData.donnees_rechargees.connect(_charger)
 	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": 1000}
+	ecrans = Ecrans.new()
+	ecrans.main = self
+	add_child(ecrans)
 	var tutoriels := Tutoriels.new()
 	tutoriels.afficher = func(texte: String) -> void: _log("💡 " + texte)
 	add_child(tutoriels)
@@ -364,6 +366,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 		elif ev.button_index == MOUSE_BUTTON_LEFT and not j.is_empty() and j.vivant:
 			_clic(_tuile_sous(get_local_mouse_position()), ev.shift_pressed)
 	elif ev is InputEventKey and ev.pressed and not ev.echo:
+		if ecrans.est_ouvert() and ecrans.touche(ev):
+			return
 		match ev.keycode:
 			KEY_G:
 				chemin_en_cours.clear()
@@ -375,9 +379,11 @@ func _unhandled_input(ev: InputEvent) -> void:
 				arene_courante = (arene_courante + 1) % (arenes.size() + 1)
 				_charger()
 			KEY_C:
-				feuille = not feuille
+				ecrans.basculer("feuille")
 			KEY_F:
-				atelier = not atelier
+				ecrans.basculer("atelier")
+			KEY_I:
+				ecrans.basculer("inventaire")
 			KEY_L:
 				if sim.attente.has(joueur_id) and not j.is_empty():
 					for uid in j.sac:
@@ -415,12 +421,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 				visee = -1
 			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
 				var k: int = ev.keycode - KEY_1
-				if atelier and not j.is_empty():
-					var recettes := sim.recettes_disponibles(j)
-					recettes = recettes.filter(func(pl: Dictionary) -> bool: return pl.faisable)
-					if k < recettes.size() and sim.attente.has(joueur_id):
-						sim.intention(joueur_id, {"type": "fabriquer", "recette": recettes[k].id})
-				elif ev.shift_pressed:
+				if ev.shift_pressed:
 					if not j.is_empty() and k < j.sac.size() and sim.attente.has(joueur_id):
 						sim.intention(joueur_id, {"type": "equiper", "objet": j.sac[k]})
 				elif not j.is_empty() and k < j.ratelier.size():
@@ -700,45 +701,6 @@ func _maj_ui() -> void:
 		lignes.append("  " + tr("ui.entite.mana").format({"mana": j.mana, "mana_max": j.mana_max}) + " · " + tr("ui.munitions").format({"n": j.munitions}) + " · " + tr("ui.modules_connus").format({"n": j.modules_connus.size()}))
 		var nd := sim.progression.niveaux_derives(j)
 		lignes.append("  " + tr("ui.niveaux").format({"combat": "%.1f" % nd.combat, "general": "%.1f" % nd.general}))
-		if feuille:
-			lignes.append(tr("ui.feuille"))
-			for st in STATS:
-				lignes.append(tr("ui.feuille.stat").format({"stat": tr("stat." + st), "valeur": j.corps.stats[st], "potentiel": int(j.potentiels.get(st, 80))}))
-			var cles: Array = j.competences.keys()
-			cles.sort()
-			for cle in cles:
-				if int(j.competences[cle]) <= 0 and float(j.xp_competences.get(cle, 0.0)) <= 0.0:
-					continue
-				lignes.append(tr("ui.feuille.ligne").format({"competence": tr(sim._nom_competence(cle)), "niveau": int(j.competences[cle]),
-					"xp": int(j.xp_competences.get(cle, 0.0)), "suivant": sim.progression.xp_next(int(j.competences[cle])), "potentiel": int(j.potentiels.get(cle, 80))}))
-		if atelier:
-			lignes.append(tr("ui.atelier"))
-			var recettes := sim.recettes_disponibles(j)
-			if recettes.is_empty():
-				lignes.append(tr("ui.atelier.vide"))
-			# Les faisables d'abord, numérotées (chiffre = fabriquer) ; les autres à la suite, sans numéro.
-			recettes.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.faisable and not b.faisable)
-			for k in mini(24, recettes.size()):
-				var pl: Dictionary = recettes[k]
-				var entrees: Array[String] = []
-				for en in pl.entrees:
-					if pl.kind == "objet":
-						entrees.append(tr(GameData.entree("components", en.filtre).name_key) + ("" if not en.pile.is_empty() else " ?"))
-						continue
-					var nom_e: String = tr(GameData.entree("materials", en.pile.materiau).name_key) if not en.pile.is_empty() else (tr("material.%s.name" % en.filtre) if GameData.catalogues.materials.has(en.filtre) else en.filtre)
-					entrees.append("%d × %s" % [int(en.besoin), tr("forme." + str(en.forme)).format({"materiau": nom_e}) if not str(en.forme).is_empty() else nom_e])
-				var sortie := ""
-				match str(pl.kind):
-					"plate":
-						var mat_s: String = tr(GameData.entree("materials", pl.sortie.materiau).name_key) if GameData.catalogues.materials.has(pl.sortie.materiau) else "?"
-						sortie = "%d × %s" % [int(pl.sortie.quantite), tr("forme." + str(pl.sortie.forme)).format({"materiau": mat_s})]
-					"composant":
-						sortie = tr(GameData.entree("components", pl.sortie.composant).name_key)
-					"objet":
-						sortie = tr(pl.recette.name_key)
-				var titre_r: String = tr(pl.recette.name_key) if pl.kind != "composant" else tr(GameData.entree("components", pl.recette.component).name_key) + " ← " + str(pl.recette.material_family)
-				lignes.append(tr("ui.atelier.ligne").format({"n": str(k + 1) if pl.faisable and k < 9 else "·", "recette": titre_r, "station": tr(GameData.entree("stations", pl.station).name_key),
-					"entrees": " + ".join(entrees), "sortie": sortie, "ok": "" if pl.faisable else " ✗"}))
 		for k in j.get("capacites", []).size():
 			lignes.append("  " + _texte_capacite(j, k))
 		if visee >= 0:

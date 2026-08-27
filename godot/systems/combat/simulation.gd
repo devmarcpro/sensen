@@ -660,6 +660,32 @@ func _equiper(e: Dictionary, uid: String, tick: int) -> bool:
 	return true
 
 
+## Retirer une pièce : elle retourne au sac (utiliser un objet : le coût de `actions.objet`).
+func _desequiper(e: Dictionary, slot: String, tick: int) -> bool:
+	if not e.equipement.has(slot):
+		return false
+	var uid: String = e.equipement[slot]
+	e.equipement.erase(slot)
+	e.sac.append(uid)
+	Etres.recalculer(e, items, affixes_defs, regles)
+	_quitter_garde(e)
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.desequipe", {"nom": e.name_key, "objet": nom_objet(uid)}])
+	return true
+
+
+## Jeter un objet du sac : il tombe en butin sur la tuile (ramassable, R).
+func _jeter(e: Dictionary, uid: String, tick: int) -> bool:
+	if not (uid in e.sac) or not items.has(uid):
+		return false
+	e.sac.erase(uid)
+	e.ratelier.erase(uid)
+	_poser_contenant(e.pos, [uid], "butin")
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.jette", {"nom": e.name_key, "objet": nom_objet(uid)}])
+	return true
+
+
 func _rendre_rare(e: Dictionary, rng: RandomNumberGenerator) -> void:
 	var mr: Dictionary = GameData.config("loot_rules").monstres_rares
 	e.rare = true
@@ -1053,6 +1079,10 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _lire(e, str(i.get("objet", "")), h.ticks)
 		"fabriquer":
 			ok = _fabriquer(e, str(i.get("recette", "")), h.ticks)
+		"desequiper":
+			ok = _desequiper(e, str(i.get("slot", "")), h.ticks)
+		"jeter":
+			ok = _jeter(e, str(i.get("objet", "")), h.ticks)
 	if ok:
 		attente.erase(id)
 		_fin_de_pas(e.horloge)

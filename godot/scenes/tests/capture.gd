@@ -26,7 +26,9 @@ func _ready() -> void:
 	scene.profil_sans_terrain = "--sans-terrain" in args
 	if not scene.creation.is_empty():
 		scene._creer_personnage()   # la capture saute l'écran de création
-	scene.atelier = "--atelier" in args   # l'atelier ouvert (recettes des stations du sac)
+	for i2 in args.size():   # --ecran inventaire|atelier|feuille : l'écran ouvert
+		if args[i2] == "--ecran" and i2 + 1 < args.size():
+			scene.ecrans.ouvrir(args[i2 + 1])
 	if arene > 0:
 		scene.arene_courante = arene
 		scene._charger()

@@ -29,6 +29,7 @@ func _ready() -> void:
 	test_recolte()
 	test_fabrication()
 	test_assemblage()
+	test_desequiper_jeter()
 	test_donjon()
 	test_loot()
 	test_coffres_et_rares()
@@ -1081,6 +1082,26 @@ func test_assemblage() -> void:
 	verifier(s.regles.ticks_attaque(fonct, false, dague) == roundi(10.0 / 3.0 * 0.94), "le manche pèse sur les ticks d'attaque")
 	var n := s.nom_objet(dague.uid)
 	verifier(n.has("materiau") and n.materiau == "material.fer.name", "le nom se décrit par le matériau de la tête")
+
+
+# ---------------------------------------------------------------- écrans : desequiper, jeter
+
+func test_desequiper_jeter() -> void:
+	var s := Simulation.new(19)
+	s.charger_arene("plaine_au_talus")
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var arme: String = j.equipement.main_principale
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "desequiper", "slot": "main_principale"}), "retirer l'arme en main")
+	verifier(not j.equipement.has("main_principale") and arme in j.sac, "l'arme retirée est dans le sac")
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "desequiper", "slot": "main_principale"}), "rien à retirer : refus")
+	var n0: int = j.sac.size()
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "jeter", "objet": arme}), "jeter l'arme")
+	verifier(j.sac.size() == n0 - 1 and s.contenants.has(s.grille.idx(j.pos)) and arme in s.contenants[s.grille.idx(j.pos)], "elle est en butin sur la tuile")
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "ramasser"}) and arme in j.sac, "et se ramasse (R)")
 
 
 # ---------------------------------------------------------------- brouillard de guerre

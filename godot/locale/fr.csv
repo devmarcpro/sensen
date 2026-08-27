@@ -98,7 +98,7 @@ journal.condition_fausse,{capacite} ne part pas : {condition} n'est pas remplie 
 capacite.etincelle.name,Étincelle
 capacite.gel_en_ligne.name,Gel en ligne
 capacite.baume.name,Baume
-ui.aide.capacites,F : atelier (fabriquer) · F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
+ui.aide.capacites,I : inventaire · F : atelier · C : feuille (Échap ferme) · F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
 ui.capacite,{touche} {nom} [{modules}] : {forme} portée {pmin}-{pmax} taille {taille} · {ticks} ticks · {ressource} {monnaie} · {des}{bonus}
 ui.capacite.visee,VISÉE : {nom} — cliquer une tuile (Échap annule)
 ui.capacite.preview,{nom} sur {def} : {des}{bonus} ×{dom} → zone {zone} ×{mult} − armure {armure} ⇒ {min}–{max}
@@ -328,7 +328,7 @@ classe.le_vent.name,Le Vent
 journal.niveau,{nom} : {competence} passe au niveau {niveau} (potentiel {potentiel})
 ui.niveaux,niveau de combat {combat} · général {general}
 ui.fin.niveaux,  niveaux gagnés : {liste}
-ui.feuille,=== FEUILLE (C pour fermer) ===
+ui.feuille,=== FEUILLE ===
 ui.feuille.ligne,  {competence} {niveau} (XP {xp}/{suivant} · potentiel {potentiel})
 ui.feuille.stat,  {stat} {valeur} (potentiel {potentiel})
 animal.rat,Rat
@@ -399,6 +399,136 @@ journal.pas_de_station,aucune station dans le sac pour {recette}
 ui.atelier,=== ATELIER (F pour fermer) — chiffre : fabriquer ===
 ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
+slot.main_principale,Main principale
+slot.main_secondaire,Main secondaire
+slot.casque,Casque
+slot.cuirasse,Cuirasse
+slot.jambieres,Jambières
+slot.anneau_1,Anneau (1)
+slot.anneau_2,Anneau (2)
+slot.anneau,Anneau
+slot.amulette,Amulette
+slot.carquois,Carquois
+slot.arme,Arme
+slot.sertissure,Sertissure
+type.arme,arme
+type.armure,armure
+type.bouclier,bouclier
+type.outil,outil
+type.consommable,consommable
+type.munition,munition
+type.bijou,bijou
+type.gemme,gemme
+type.grimoire,grimoire
+type.manuel,manuel
+type.materiau,matériau
+type.station,station portative
+type.composant,composant
+degats.contondant,contondant
+degats.perforant,perforant
+degats.tranchant,tranchant
+zone.tete,tête
+zone.torse,torse
+zone.jambes,jambes
+zone.bras,bras
+zone.mains,mains
+zone.pieds,pieds
+categorie.bois,bois
+categorie.metal,métal
+categorie.roche,roche
+categorie.mineral,minéral
+categorie.fossile,fossile
+categorie.gemme,gemme
+categorie.terre,terre
+categorie.vegetal,végétal et fibre
+categorie.liquide,liquide
+categorie.meteorologique,météorologique
+categorie.synthetique,synthétique
+famille.bois,bois (planche)
+famille.lingot_metal,lingot de métal
+famille.roche_taillee,roche taillée
+famille.silex,silex taillé
+famille.os,os
+famille.os_massif,os massif
+famille.dent_croc,dent ou croc
+famille.ecaille,écaille
+famille.ivoire,ivoire
+famille.obsidienne,obsidienne taillée
+famille.verre,verre
+famille.granit_noir,granit noir taillé
+famille.meteorite,météorite (lingot)
+famille.or_argent,or ou argent (lingot)
+famille.or,or (lingot)
+famille.plomb,plomb (lingot)
+famille.tungstene,tungstène (lingot)
+famille.cuir,cuir
+famille.fibre,fibre (lin, chanvre, coton)
+famille.tissu,tissu
+famille.laine,laine
+famille.fourrure,fourrure
+famille.soie,soie
+famille.seve,sève
+mstat.durete,dureté
+mstat.densite,densité
+mstat.valeur_base,valeur
+mstat.conductivite_mana,cond. mana
+mstat.flammabilite,flammabilité
+mstat.isolation,isolation
+mstat.conductivite_electrique,cond. électrique
+mstat.flottabilite,flottabilité
+mstat.luminosite,luminosité
+mstat.fertilite,fertilité
+mstat.transparence,transparence
+mstat.elasticite,élasticité
+mstat.friction,friction
+slotc.tete,tête
+slotc.manche,manche
+slotc.fixations,fixations
+slotc.plaque,plaque
+slotc.sangles,sangles
+slotc.divers,divers
+ui.ecran.fermer,Fermer (Échap)
+ui.ecran.inventaire,"INVENTAIRE — {n} objets dans le sac (E : équiper/retirer · J : jeter · L : lire · T : sertir)"
+ui.ecran.sac,sac
+ui.ecran.slot_vide,(emplacement vide)
+ui.ecran.equiper,Équiper / retirer (E)
+ui.ecran.jeter,Jeter (J)
+ui.ecran.lire,Lire (L)
+ui.ecran.sertir,Sertir (T)
+ui.ecran.atelier,"ATELIER — stations du sac : {stations} (Entrée : fabriquer)"
+ui.ecran.fabriquer,Fabriquer (Entrée)
+ui.ecran.feuille,FEUILLE — {nom}
+ui.objet.type,"{type} · {slot} · {rarete}"
+ui.objet.qualite,"qualité : {palier} ({valeur})"
+ui.objet.arme,"arme : {des} {type} · {ticks} ticks · portée {portee}"
+ui.objet.durete,"dureté de base {durete} / référence {ref} × qualité ⇒ dégâts ×{facteur}"
+ui.objet.armure,"armure : {zone} · {construction} · dureté composite {durete} · construction niveau {niveau}"
+ui.objet.elements,Wu Xing : {liste}
+ui.objet.vitesse,manche : ticks d'attaque ×{facteur}
+ui.objet.composants,composants :
+ui.objet.composant,composant en {materiau}
+ui.objet.materiau,"{categorie} · {forme} · ×{quantite}"
+ui.objet.stats,stats : {liste}
+ui.objet.sertissures,"sertissures : {contenu}/{n}"
+ui.objet.livre,"livre : {domaine} · difficulté {difficulte} · {n} modules"
+ui.objet.station,"station portative : poids {poids} · compétence {competence}"
+ui.recette.station,"à : {station} · compétence : {competence}"
+ui.recette.entrees,entrées :
+ui.recette.sortie,sortie :
+ui.recette.manque,manque
+ui.recette.inconnue,recette inconnue
+ui.recette.sans_source,(pas de source encore : parties de créatures)
+ui.recette.recolte,← récolte (pioche sur un mur ou un filon)
+ui.recette.qualite_composant,(qualité A.3 sur la compétence de la station)
+ui.recette.assemblage,(qualité = Σ composants × poids × jet d'assemblage)
+ui.feuille.vitaux,"PV {pv}/{pv_max} · endurance {end} · mana {mana}/{mana_max}"
+ui.feuille.stats,Stats
+ui.feuille.cat.combat,Compétences de combat
+ui.feuille.cat.general,Compétences générales
+ui.feuille.aucune,(aucune)
+ui.feuille.equipement,Équipement
+journal.desequipe,"{nom} retire {objet}"
+journal.jette,"{nom} jette {objet}"
 component.manche_court.name,Manche court
 component.manche_long.name,Manche long
 component.poignee.name,Poignée
