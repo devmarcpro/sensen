@@ -606,7 +606,13 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 		c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0),
 		c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)])
 	var k := clampf((h - 4) / 12.0, 0.0, 1.0)   # gradient : bas sombre, sommets clairs
-	var col := Color(0.20, 0.34, 0.18).lerp(Color(0.62, 0.66, 0.42), k) * teinte
+	var col := Color(0.20, 0.34, 0.18).lerp(Color(0.62, 0.66, 0.42), k)
+	var sol_id := g.materiau_sol(t)
+	if not sol_id.is_empty():   # surface : la couleur du matériau de sol du biome, nuancée par la hauteur
+		var ms: Dictionary = GameData.catalogues.materials.get(sol_id, {})
+		if not ms.is_empty():
+			col = Color.html(str(ms.color)).lerp(Color(0.35, 0.5, 0.25), 0.35 if sol_id.begins_with("terre") else 0.0).darkened(0.25 - k * 0.3)
+	col *= teinte
 	ci.draw_colored_polygon(haut, col)
 	var flanc := col.darkened(0.35)
 	var hs := g.h(t + Vector2i(0, 1)) if g.dans(t + Vector2i(0, 1)) else 0
@@ -707,7 +713,7 @@ func _segments(e: Dictionary) -> Array:
 func _maj_ui() -> void:
 	var j := joueur()
 	var g := sim.grille
-	var titre: String = tr("ui.camp") if sim.lieu == "camp" else (tr(GameData.entree("prototype_arenas", arenes[arene_courante]).name_key) if sim.donjon.is_empty() else tr("ui.donjon").format({"theme": tr(GameData.entree("dungeon_themes", sim.donjon.theme).name_key), "etage": sim.donjon.etage, "etages": sim.donjon.etages, "salles": sim.donjon.salles}))
+	var titre: String = tr("ui.camp").format({"biome": tr(GameData.entree("biomes", str(sim.camp_sauve.get("biome", "plaine_temperee"))).name_key)}) if sim.lieu == "camp" else (tr(GameData.entree("prototype_arenas", arenes[arene_courante]).name_key) if sim.donjon.is_empty() else tr("ui.donjon").format({"theme": tr(GameData.entree("dungeon_themes", sim.donjon.theme).name_key), "etage": sim.donjon.etage, "etages": sim.donjon.etages, "salles": sim.donjon.salles}))
 	var lignes: Array[String] = [tr("ui.titre") + " · " + titre]
 	var mode := tr("ui.mode.combat") if sim.en_combat(j) else tr("ui.mode.exploration").format({"tps": sim.regles.r.ticks_par_seconde_exploration})
 	lignes.append(tr("ui.horloge").format({"horloge": sim.horloge_de(j).ticks, "mode": mode}))

@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "required": [
+    "taille_cellule",
+    "monde_cellules",
+    "cellule_depart",
+    "graine",
+    "relief",
+    "filons",
+    "tiers_corruption"
+  ]
+}

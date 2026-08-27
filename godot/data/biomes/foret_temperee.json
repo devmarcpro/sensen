@@ -1,0 +1,57 @@
+{
+  "name_key": "biome.foret_temperee.name",
+  "relief_scale": 0,
+  "village_palette": {
+    "mur": "chene",
+    "toit": "chaume_tresse",
+    "sol": "calcaire"
+  },
+  "poi_weights": {
+    "donjon": 1,
+    "camp": 1
+  },
+  "conditions": {
+    "temperature": [
+      0.3,
+      0.75
+    ],
+    "humidite": [
+      0.55,
+      1.0
+    ]
+  },
+  "priority": 2,
+  "element": "bois",
+  "surface_material": "terre",
+  "subsurface_material": "terre",
+  "vegetation": [
+    {
+      "id": "chene",
+      "density": 0.06
+    },
+    {
+      "id": "hetre",
+      "density": 0.04
+    },
+    {
+      "id": "pin",
+      "density": 0.02
+    },
+    {
+      "id": "bouleau",
+      "density": 0.02
+    }
+  ],
+  "rochers": [
+    {
+      "id": "pierre",
+      "density": 0.003
+    }
+  ],
+  "filons_mult": 0.8,
+  "farming_yield": 0.9,
+  "tags": [
+    "tempere",
+    "foret"
+  ]
+}

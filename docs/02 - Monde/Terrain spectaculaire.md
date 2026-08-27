@@ -25,6 +25,9 @@ Trois techniques de composition du bruit produisent montagnes, falaises et côte
 
 **Conséquence tactique :** ce relief est directement lu par [[Hauteur de terrain ±10]] — les falaises deviennent infranchissables, les surplombs coupent la ligne de vue, et les zones de coup dérivent du dénivelé ([[Zones de coup par dénivelé]]).
 
+> [!success] Précisé le 2026-08-28
+> Les **formations rares** (gorge, piton, cratère, talus, estrade) sont codées comme des modificateurs 2D paramétriques (`planete.relief`) — c'est le seul relief en 8.1, conformément à la décision du 2026-08-27. Continentalité, ridged noise et domain warping attendent la tectonique (8.2).
+
 ## Liens
 - **Dépend de** : [[Unification macro-micro]], [[Catalogue des couches de bruit]], [[Décision — Altitude sur 21 niveaux]]
 - **Alimente** : [[Hauteur de terrain ±10]], [[Eau et liquides]]

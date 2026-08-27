@@ -1,0 +1,41 @@
+{
+  "name_key": "biome.cote_plage.name",
+  "relief_scale": 0,
+  "village_palette": {
+    "mur": "chene",
+    "toit": "chaume_tresse",
+    "sol": "calcaire"
+  },
+  "poi_weights": {
+    "donjon": 1,
+    "camp": 1
+  },
+  "conditions": {
+    "altitude": [
+      0.3,
+      0.38
+    ]
+  },
+  "priority": 3,
+  "element": "eau",
+  "surface_material": "sable",
+  "subsurface_material": "sable",
+  "vegetation": [
+    {
+      "id": "pin",
+      "density": 0.01
+    }
+  ],
+  "rochers": [
+    {
+      "id": "calcaire",
+      "density": 0.006
+    }
+  ],
+  "filons_mult": 0.6,
+  "farming_yield": 0.6,
+  "tags": [
+    "cote",
+    "littoral"
+  ]
+}

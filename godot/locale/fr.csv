@@ -399,6 +399,11 @@ journal.pas_de_station,aucune station dans le sac pour {recette}
 ui.atelier,=== ATELIER (F pour fermer) — chiffre : fabriquer ===
 ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
+biome.plaine_temperee.name,Plaine tempérée
+biome.foret_temperee.name,Forêt tempérée
+biome.desert_aride.name,Désert aride
+biome.cote_plage.name,Côte
+ui.camp,"CAMP DE BASE · {biome} · E sur l'entrée : partir en expédition"
 item.pain.name,Pain
 item.ragout.name,Ragoût
 item.viande_grillee.name,Viande grillée
@@ -484,7 +489,6 @@ tile_content.porte.name,Porte
 tile_content.meuble.name,Meuble
 tile_content.station_fixe.name,Station
 tile_content.entree_donjon.name,Entrée du donjon
-ui.camp,CAMP DE BASE · E sur l'entrée : partir en expédition
 journal.pose,"{nom} pose {objet}"
 journal.demonte,"{nom} démonte {objet}"
 journal.rien_a_poser,rien à poser ici (tuile occupée ou hors du camp)

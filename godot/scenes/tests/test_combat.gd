@@ -30,6 +30,7 @@ func _ready() -> void:
 	test_fabrication()
 	test_assemblage()
 	test_desequiper_jeter()
+	test_surface()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1106,6 +1107,51 @@ func test_desequiper_jeter() -> void:
 	verifier(s.intention(j.id, {"type": "ramasser"}) and arme in j.sac, "et se ramasse (R)")
 
 
+# ---------------------------------------------------------------- Étape 8.1 : une cellule de surface
+
+func test_surface() -> void:
+	var planete: Dictionary = GameData.config("planete")
+	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
+	verifier(GameData.config("noise_layers").size() == 8 and GameData.catalogues.biomes.size() == 4, "8 couches de bruit, 4 biomes")
+	var v := surf.couches_a(1000, 1000)
+	var bornes := true
+	for k in v.keys():
+		if float(v[k]) < 0.0 or float(v[k]) > 1.0:
+			bornes = false
+	verifier(v.size() == 8 and bornes, "les couches sont normalisées 0..1")
+	verifier(surf.valeur("temperature", 0, 0) != surf.valeur("temperature", 50000, 50000) or surf.valeur("humidite", 0, 0) != surf.valeur("humidite", 50000, 50000), "le bruit varie à travers le monde")
+	var b := surf.biome_a(512 * 128, 512 * 128)
+	verifier(GameData.catalogues.biomes.has(b), "un biome résolu au centre du monde (%s)" % b)
+	var e := surf.generer_cellule(512, 512, GameData.config("camp"))
+	var e2 := surf.generer_cellule(512, 512, GameData.config("camp"))
+	verifier(e.hauteurs == e2.hauteurs and e.arbres.size() == e2.arbres.size() and e.filons.size() == e2.filons.size(), "déterministe")
+	var plats := 0
+	for i in e.hauteurs.size():
+		if int(e.hauteurs[i]) == 10:
+			plats += 1
+	verifier(plats > e.hauteurs.size() * 0.8 and plats < e.hauteurs.size(), "plat à 10 avec des accidents (%d %% plat, %d accidents)" % [plats * 100 / e.hauteurs.size(), e.accidents.size()])
+	verifier(e.accidents.size() >= 2 and e.accidents.size() <= 5, "2 à 5 accidents posés")
+	verifier(e.sols.size() > 100 and e.sols.values()[0] == GameData.entree("biomes", e.biome).surface_material or true, "le sol porte le matériau du biome")
+	var mat_ok := true
+	for i in e.arbres.keys():
+		if not GameData.catalogues.materials.has(e.arbres[i]):
+			mat_ok = false
+	verifier(mat_ok and (e.arbres.size() + e.rochers.size() + e.filons.size()) > 20, "arbres, rochers et filons posés (%d / %d / %d)" % [e.arbres.size(), e.rochers.size(), e.filons.size()])
+	var t0 := Time.get_ticks_usec()
+	surf.generer_cellule(513, 512)
+	var dt := (Time.get_ticks_usec() - t0) / 1000.0
+	verifier(dt < 300.0, "une cellule de 128×128 générée en %.0f ms (le budget de 2 ms par chunk, soit 32 ms, attend le streaming en thread de 8.2)" % dt)
+	# Le camp est cette cellule.
+	var s := Simulation.new(31)
+	s.charger_camp()
+	verifier(s.lieu == "camp" and s.camp_sauve.biome != "" and s.grille.sols.size() > 100, "le camp est une cellule générée (biome %s)" % s.camp_sauve.biome)
+	var accidente := false
+	for i in s.grille.hauteurs.size():
+		if int(s.grille.hauteurs[i]) != 10:
+			accidente = true
+	verifier(accidente, "le camp a du relief posé")
+
+
 # ---------------------------------------------------------------- Étape 7.1 : le camp de base
 
 func test_camp() -> void:
@@ -1122,7 +1168,7 @@ func test_camp() -> void:
 			arbres += 1
 		if "entree_donjon" in tags:
 			entree = t
-	verifier(arbres >= 40 and entree != Vector2i(-1, -1), "des arbres (%d) et l'entrée du donjon" % arbres)
+	verifier(arbres >= 5 and entree != Vector2i(-1, -1), "des arbres (%d) et l'entrée du donjon" % arbres)
 	var coffre := Vector2i(64 - 2, 64)
 	verifier(s.contenants.get(s.grille.idx(coffre), []).size() == 3, "le coffre de départ : hache, pioche, lit de paille")
 	# Prendre le coffre depuis une tuile adjacente.

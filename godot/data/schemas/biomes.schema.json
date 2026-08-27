@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "conditions",
+    "priority",
+    "surface_material",
+    "subsurface_material",
+    "vegetation",
+    "rochers",
+    "poi_weights",
+    "farming_yield",
+    "tags"
+  ],
+  "properties": {
+    "conditions": {
+      "type": "object"
+    },
+    "priority": {
+      "type": "integer"
+    },
+    "vegetation": {
+      "type": "array"
+    },
+    "rochers": {
+      "type": "array"
+    },
+    "farming_yield": {
+      "type": "number"
+    }
+  }
+}

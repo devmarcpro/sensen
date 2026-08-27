@@ -22,6 +22,9 @@ La séquence de démarrage : le joueur choisit lui-même son niveau de risque in
 - **Heat-map : vague par défaut** — 3 niveaux lisibles (paisible / dangereuse / mortelle) ; la **valeur précise** de corruption se débloque par rang dans la guilde Exploration (récompense d'information, cohérent avec [[Quêtes et guildes]]).
 - **Garde-fou de spawn :** re-tirage automatique du point exact si la surface marchable connexe < 200 tuiles (falaise, îlot) — jusqu'à trouver une zone viable dans la case choisie, sinon case adjacente la plus proche.
 
+> [!success] Précisé le 2026-08-28
+> En attendant la carte du monde (8.3), le personnage créé apparaît sur la **cellule de départ** `planete.cellule_depart` (le centre du monde), qui est son camp ([[Claims et persistance]]) ; le choix de la case viendra avec la carte.
+
 ## Liens
 - **Dépend de** : [[Création de personnage]], [[Carte du monde]], [[Niveau de danger]], [[Classes]]
 - **Alimente** : [[Tooltips contextuels]], [[Boucle de jeu]]

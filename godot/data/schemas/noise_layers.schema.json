@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "required": [
+      "type",
+      "octaves",
+      "frequency",
+      "seed_offset"
+    ]
+  }
+}

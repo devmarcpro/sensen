@@ -1,0 +1,75 @@
+{
+  "_doc": "La planète (docs: Décision — Monde fini, continents et océan ; Génération par couches de bruit). taille_cellule : tuiles ; monde : cellules de côté (1024) ; cellule_depart : la cellule du camp tant que la carte n'existe pas ; relief : les accidents posés par cellule (décision du 2026-08-27, plat + exceptions) ; filons : densité de filons de surface ; tiers_corruption : seuils (en %) des tiers de minerai (Décision — Minerais et strates).",
+  "taille_cellule": 128,
+  "monde_cellules": 1024,
+  "cellule_depart": [
+    512,
+    512
+  ],
+  "graine": 68333,
+  "relief": {
+    "par_cellule": [
+      2,
+      5
+    ],
+    "types": {
+      "talus": {
+        "poids": 3,
+        "forme": "disque",
+        "delta": 2,
+        "rayon": [
+          4,
+          8
+        ]
+      },
+      "estrade": {
+        "poids": 2,
+        "forme": "disque",
+        "delta": 1,
+        "rayon": [
+          3,
+          6
+        ]
+      },
+      "piton": {
+        "poids": 2,
+        "forme": "disque",
+        "delta": 8,
+        "rayon": [
+          1,
+          2
+        ]
+      },
+      "cratere": {
+        "poids": 1,
+        "forme": "disque",
+        "delta": -4,
+        "rayon": [
+          3,
+          5
+        ]
+      },
+      "gorge": {
+        "poids": 2,
+        "forme": "saignee",
+        "delta": -6,
+        "longueur": [
+          8,
+          20
+        ],
+        "largeur": 2
+      }
+    }
+  },
+  "filons": {
+    "seuil": 0.6,
+    "densite": 0.03
+  },
+  "tiers_corruption": [
+    0,
+    20,
+    45,
+    70,
+    90
+  ]
+}

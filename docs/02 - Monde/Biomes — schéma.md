@@ -43,6 +43,9 @@ Le format de données d'un biome : des conditions sur les couches de bruit, une 
 
 **Attention ([[Wu Xing hors combat]]) :** le vecteur élémentaire d'un **lieu** est dérivé des **couches de bruit**, jamais de l'étiquette de biome — le champ `element` ci-dessus est une propriété descriptive du biome, pas la source du vecteur de lieu.
 
+> [!success] Codé le 2026-08-28 — `data/biomes/` (4 des 12), résolution par conditions + priorité
+> Champs ajoutés au schéma, tous en données : `relief_scale` (prévu par [[Décision — Altitude sur 21 niveaux]], inerte tant que le sol est plat), `rochers` (`[{id, density}]`, comme `vegetation`), `filons_mult` (densité de filons de surface × celle de la planète). `vegetation[].id` est une essence de `data/materials/` (l'arbre posé porte ce matériau, récoltable à la hache). Les 4 premiers biomes : plaine tempérée (générique, priorité basse), forêt tempérée, désert aride, côte/plage ; les 8 autres arrivent avec l'eau, la montagne et le mana (8.2).
+
 ## Liens
 - **Dépend de** : [[Génération par couches de bruit]], [[Catalogue des couches de bruit]], [[Data-driven design]]
 - **Alimente** : [[Biomes de départ]], [[Agriculture et élevage]], [[Unification macro-micro]], [[Créatures]]

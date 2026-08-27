@@ -27,6 +27,11 @@ var materiaux: Dictionary = {}            # index de tuile → id de matériau (
 var materiau_defaut: String = ""          # le matériau des murs ordinaires (materiau_mur du thème)
 var meubles: Dictionary = {}              # index de tuile → id de meuble (data/meubles/)
 var stations_fixes: Dictionary = {}       # index de tuile → id de station posée
+var sols: Dictionary = {}                 # index de tuile → id de matériau de sol (surface) ; vide = sol par défaut
+
+
+func materiau_sol(p: Vector2i) -> String:
+	return str(sols.get(idx(p), ""))
 
 
 ## Le matériau d'une tuile de mur : le filon s'il y en a un, sinon celui du thème.
@@ -66,6 +71,7 @@ static func depuis_etage(etage: Dictionary, contenus: Dictionary, regles_dep: Di
 	g.dep = regles_dep
 	g.hauteur_oeil = oeil
 	g.hauteurs = etage.hauteurs.duplicate()
+	g.sols = etage.get("sols", {}).duplicate()
 	for i in g.largeur * g.hauteur_grille:
 		if not etage.sol.has(i):
 			g.poser_contenu(Vector2i(i % g.largeur, i / g.largeur), "roche" if etage.get("bord", {}).has(i) else "mur")

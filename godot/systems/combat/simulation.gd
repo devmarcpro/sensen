@@ -106,9 +106,12 @@ func charger_camp(joueur: Dictionary = {}) -> void:
 		maj_vision()
 		return
 	var cfg: Dictionary = GameData.config("camp")
-	var e := Camp.new(cfg).generer(graine)
+	var planete: Dictionary = GameData.config("planete")
+	var surface := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, int(planete.graine))
+	var e := surface.generer_cellule(int(planete.cellule_depart[0]), int(planete.cellule_depart[1]), cfg)
 	grille = Grille.depuis_etage(e, GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
 	grille.materiau_defaut = "pierre"
+	camp_sauve = {"entree": e.entree, "biome": e.biome, "cellule": e.cellule}
 	for idx in e.arbres.keys():
 		grille.materiaux[idx] = e.arbres[idx]
 		grille.poser_contenu(Vector2i(int(idx) % grille.largeur, int(idx) / grille.largeur), "arbre")
@@ -134,13 +137,13 @@ func charger_camp(joueur: Dictionary = {}) -> void:
 		if not o.is_empty():
 			uids.append(o.uid)
 	_poser_contenant(e.coffre_depart, uids, "coffre")
-	camp_sauve = {"entree": e.entree}
+	camp_sauve = {"entree": e.entree, "biome": e.biome, "cellule": e.cellule}
 	maj_vision()
 
 
 ## Met le camp de côté avant une expédition : grille, meubles, coffres, êtres — tout reste.
 func _sauver_camp(joueur: Dictionary) -> void:
-	var sauve := {"entree": camp_sauve.get("entree", joueur.pos), "grille": grille, "entites": {}, "ordre": [], "contenants": contenants}
+	var sauve := {"entree": camp_sauve.get("entree", joueur.pos), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO), "grille": grille, "entites": {}, "ordre": [], "contenants": contenants}
 	for id in ordre:
 		if id != joueur.id:
 			sauve.entites[id] = entites[id]

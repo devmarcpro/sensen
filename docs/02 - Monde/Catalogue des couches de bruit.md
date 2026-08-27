@@ -25,6 +25,9 @@ Les paramètres chiffrés des 8 couches de bruit, en données.
 
 Toutes dérivées d'une seed monde unique + `seed_offset` (reproductibilité totale).
 
+> [!success] Transcrit le 2026-08-28 — `data/noise_layers.json`
+> Les 8 couches avec leurs valeurs telles quelles (type, octaves, fréquence, seed_offset). `altitude` et `sismique` sont pour l'instant des bruits libres : la tectonique qui doit les dériver attend 8.2.
+
 ## Liens
 - **Dépend de** : [[Génération par couches de bruit]], [[Data-driven design]]
 - **Alimente** : [[Biomes — schéma]], [[Terrain spectaculaire]], [[Dérive de la corruption]], [[Minerais par profondeur]]

@@ -37,6 +37,9 @@ Le monde est généré par superposition de multiples couches de bruit (type Per
 > [!success] Décidé le 2026-08-27 — terrain plat, reliefs en exception
 > Tranché par le designer : pas de bruit de relief permanent. Le sol est **plat à la référence** (hauteur 10) et le relief est une **exception posée** — talus, gorge, colline, estrade, éboulis — comme les trois arènes du prototype le font à la main. À l'étape 8, la couche de hauteur produit donc des accidents localisés sur une plaine, pas une ondulation continue ; les couches de bruit servent aux biomes et aux matériaux, pas à faire onduler le sol.
 
+> [!success] Codé le 2026-08-28 — étape 8.1 : une cellule de surface générée (`systems/worldgen/surface.gd`)
+> Les 8 couches de [[Catalogue des couches de bruit]] en `data/noise_layers.json`, `FastNoiseLite` natif (simplex lisse / Perlin fBm), une seed monde + `seed_offset`, échantillonnées une fois par tuile et normalisées 0..1. **La décision du 2026-08-27 prime** : le sol est plat à 10, le relief est une **exception posée** — `planete.relief` tire par cellule 2 à 5 **accidents** paramétriques (talus +2, estrade +1, piton +8, cratère −4, gorge −6 en saignée sinueuse), hors de la zone d'arrivée du camp. Les couches servent aux **biomes** (conditions + priorité) et aux **matériaux** (sol, arbres × couche `vegetation`, rochers, filons × couche `ressources`, tiers par la couche `danger` aux seuils 0/20/45/70/90 de [[Décision — Minerais et strates après le pivot]]). La cellule est adressée (cx, cy) dans le monde de `data/planete.json` ; sans carte encore, le camp est la cellule de départ `cellule_depart` (le centre du monde). La tectonique, l'eau, le streaming et les autres biomes viennent en 8.2-8.3.
+
 ## Liens
 - **Dépend de** : [[Data-driven design]]
 - **Alimente** : [[Unification macro-micro]], [[Biomes — schéma]], [[Niveau de danger]], [[Terrain spectaculaire]], [[Météo]], [[Wu Xing hors combat]]

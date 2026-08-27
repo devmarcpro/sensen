@@ -59,6 +59,9 @@ mod_altitude (température, E.28) :
   · haute montagne -10
 ```
 
+> [!success] Précisé le 2026-08-28 — calibrée sur « plat, reliefs en exception »
+> Codée avec `échelle_relief = 0` partout (le sol à 10) et des **accidents** posés par cellule ([[Génération par couches de bruit]], `planete.relief`) ; la double lecture du bruit et `relief_scale` restent en données pour le jour où le designer voudra du relief continu.
+
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Hauteur de terrain ±10]], [[Unification macro-micro]]
 - **Alimente** : [[Terrain spectaculaire]], [[Météo]], [[Carte du monde]], [[Biomes — schéma]]

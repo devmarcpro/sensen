@@ -1,0 +1,53 @@
+{
+  "name_key": "biome.plaine_temperee.name",
+  "relief_scale": 0,
+  "village_palette": {
+    "mur": "chene",
+    "toit": "chaume_tresse",
+    "sol": "calcaire"
+  },
+  "poi_weights": {
+    "donjon": 1,
+    "camp": 1
+  },
+  "conditions": {
+    "temperature": [
+      0.0,
+      1.0
+    ],
+    "humidite": [
+      0.0,
+      1.0
+    ]
+  },
+  "priority": 0,
+  "element": "terre",
+  "surface_material": "terre_fertile",
+  "subsurface_material": "terre",
+  "vegetation": [
+    {
+      "id": "chene",
+      "density": 0.01
+    },
+    {
+      "id": "frene",
+      "density": 0.005
+    }
+  ],
+  "rochers": [
+    {
+      "id": "pierre",
+      "density": 0.004
+    },
+    {
+      "id": "calcaire",
+      "density": 0.002
+    }
+  ],
+  "filons_mult": 1.0,
+  "farming_yield": 1.0,
+  "tags": [
+    "tempere",
+    "plaine"
+  ]
+}

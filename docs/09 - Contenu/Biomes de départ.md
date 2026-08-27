@@ -22,6 +22,9 @@ Plaine tempérée, Forêt tempérée, Forêt de mana\*, Désert aride, Désert d
 
 **Températures extrêmes ([[Météo]]) :** *la toundra exige la fourrure, le désert tue à midi en canicule*.
 
+> [!success] Précisé le 2026-08-28
+> 4 biomes sur 12 codés en 8.1 (plaine tempérée, forêt tempérée, désert aride, côte/plage) — les autres exigent l'altitude tectonique, l'eau ou la couche mana à l'échelle du monde (8.2).
+
 ## Liens
 - **Dépend de** : [[Biomes — schéma]], [[Génération par couches de bruit]]
 - **Alimente** : [[Carte du monde]], [[Créatures]], [[Génération des royaumes PNJ]], [[Agriculture et élevage]]

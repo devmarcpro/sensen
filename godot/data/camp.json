@@ -1,5 +1,5 @@
 {
-  "_doc": "Le camp de base (docs: Claims et persistance, callout du 2026-08-28) : une cellule plate, ses arbres, rochers et filons de surface, le coffre de départ.",
+  "_doc": "Le camp de base (docs: Claims et persistance, callout du 2026-08-28) : ce qui se greffe sur la cellule de départ générée par la surface — le coffre de départ. arbres/rochers/filons ne servent plus (le biome décide) et restent pour mémoire.",
   "taille": 128,
   "arbres": {
     "essences": [

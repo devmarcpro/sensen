@@ -1,5 +1,5 @@
 {
-  "_doc": "Biome (docs: Biomes — schéma / B.6).",
+  "_doc": "Biome (docs: Biomes — schéma / B.6). conditions : fourchettes 0..1 sur les couches de noise_layers.json ; priority : le plus haut gagne ; vegetation/rochers : [{id de matériau, density}] ; relief_scale : amplitude de relief continu (inerte : plat + exceptions) ; filons_mult : densité de filons de surface.",
   "name_key": "biome.<id>.name",
   "conditions": {
     "altitude": [
@@ -30,5 +30,8 @@
     "camp": 1
   },
   "farming_yield": 1.0,
-  "tags": []
+  "tags": [],
+  "relief_scale": 0,
+  "rochers": [],
+  "filons_mult": 1.0
 }
