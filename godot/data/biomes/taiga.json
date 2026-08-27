@@ -1,0 +1,64 @@
+{
+  "name_key": "biome.taiga.name",
+  "conditions": {
+    "altitude": [
+      0.3,
+      0.75
+    ],
+    "temperature": [
+      0.25,
+      0.45
+    ],
+    "humidite": [
+      0.45,
+      1.0
+    ]
+  },
+  "priority": 2,
+  "element": "bois",
+  "surface_material": "terre",
+  "subsurface_material": "terre",
+  "relief_scale": 0,
+  "vegetation": [
+    {
+      "id": "sapin",
+      "density": 0.05
+    },
+    {
+      "id": "epicea",
+      "density": 0.04
+    },
+    {
+      "id": "pin",
+      "density": 0.02
+    }
+  ],
+  "plantes": [
+    {
+      "id": "lin",
+      "density": 0.005
+    }
+  ],
+  "rochers": [
+    {
+      "id": "granit",
+      "density": 0.004
+    }
+  ],
+  "filons_mult": 0.9,
+  "accidents_mult": 1.0,
+  "village_palette": {
+    "mur": "chene",
+    "toit": "chaume_tresse",
+    "sol": "calcaire"
+  },
+  "poi_weights": {
+    "donjon": 1,
+    "camp": 1
+  },
+  "farming_yield": 0.8,
+  "tags": [
+    "froid",
+    "foret"
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "name_key": "biome.marecage_corrompu.name",
+  "conditions": {
+    "altitude": [
+      0.3,
+      0.45
+    ],
+    "humidite": [
+      0.75,
+      1.0
+    ],
+    "danger": [
+      0.7,
+      1.0
+    ]
+  },
+  "priority": 6,
+  "element": "eau",
+  "surface_material": "boue",
+  "subsurface_material": "argile",
+  "relief_scale": 0,
+  "vegetation": [
+    {
+      "id": "saule",
+      "density": 0.02
+    }
+  ],
+  "plantes": [
+    {
+      "id": "paille",
+      "density": 0.02
+    }
+  ],
+  "rochers": [],
+  "filons_mult": 1.4,
+  "accidents_mult": 1.0,
+  "village_palette": {
+    "mur": "chene",
+    "toit": "chaume_tresse",
+    "sol": "calcaire"
+  },
+  "poi_weights": {
+    "donjon": 1,
+    "camp": 1
+  },
+  "farming_yield": 0.4,
+  "tags": [
+    "humide",
+    "marecage",
+    "corrompu"
+  ]
+}

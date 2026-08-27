@@ -1,0 +1,51 @@
+{
+  "name_key": "biome.montagne.name",
+  "conditions": {
+    "altitude": [
+      0.7,
+      1.0
+    ]
+  },
+  "priority": 4,
+  "element": "terre",
+  "surface_material": "pierre",
+  "subsurface_material": "granit",
+  "relief_scale": 0,
+  "vegetation": [
+    {
+      "id": "pin",
+      "density": 0.01
+    },
+    {
+      "id": "meleze",
+      "density": 0.008
+    }
+  ],
+  "plantes": [],
+  "rochers": [
+    {
+      "id": "granit",
+      "density": 0.03
+    },
+    {
+      "id": "pierre",
+      "density": 0.02
+    }
+  ],
+  "filons_mult": 1.5,
+  "accidents_mult": 2.5,
+  "village_palette": {
+    "mur": "chene",
+    "toit": "chaume_tresse",
+    "sol": "calcaire"
+  },
+  "poi_weights": {
+    "donjon": 1,
+    "camp": 1
+  },
+  "farming_yield": 0.2,
+  "tags": [
+    "montagne",
+    "froid"
+  ]
+}

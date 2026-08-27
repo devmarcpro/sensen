@@ -18,6 +18,10 @@
     "humidite": [
       0.55,
       1.0
+    ],
+    "altitude": [
+      0.3,
+      0.7
     ]
   },
   "priority": 2,
@@ -63,5 +67,6 @@
       "id": "lin",
       "density": 0.005
     }
-  ]
+  ],
+  "accidents_mult": 1.0
 }

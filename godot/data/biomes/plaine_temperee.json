@@ -18,6 +18,10 @@
     "humidite": [
       0.0,
       1.0
+    ],
+    "altitude": [
+      0.3,
+      0.7
     ]
   },
   "priority": 0,
@@ -63,5 +67,6 @@
       "id": "chanvre",
       "density": 0.01
     }
-  ]
+  ],
+  "accidents_mult": 1.0
 }

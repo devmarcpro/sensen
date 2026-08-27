@@ -18,6 +18,10 @@
     "humidite": [
       0.0,
       0.35
+    ],
+    "altitude": [
+      0.3,
+      0.7
     ]
   },
   "priority": 2,
@@ -51,5 +55,6 @@
       "id": "coton",
       "density": 0.008
     }
-  ]
+  ],
+  "accidents_mult": 1.0
 }

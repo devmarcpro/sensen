@@ -114,6 +114,9 @@ Le bateau passe de **bonus de vitesse** à **porte**.
 - **La matérialisation reste paresseuse** ([[LOD de simulation]]) : un continent jamais visité ne coûte rien.
 - **Tous les chiffres de densité** de [[Unification macro-micro]] (village 4 %, donjon 6 %, camp 8 %, sanctuaire 3 %, filon 6 % par cellule) s'appliquent inchangés — aux cellules **terrestres**.
 
+> [!success] Codé le 2026-08-28 — étape 8.2b, `Surface._tectonique` (`planete.tectonique`)
+> La séquence de la note : **24 germes** de plaques (Voronoï, hash de la seed), **40 % continentales / 60 % océaniques**, forcées océaniques à moins de **2 secteurs** du bord, vecteur de dérive tiré (inutilisé pour l'instant) ; `continentalite = base(±1) × (0,35 + 0,65 × bordure) + bruit lent`, **domain warping** obligatoire (un niveau, amplitude 6 000 tuiles) ; **8 à 14 points chauds** qui relèvent la continentalité en plein océan ; **seuil de mer calibré** pour **35 %** de terres par quantile sur une grille de 48×48 échantillons (`calibrage_echantillons`). Relief de suture : convergente continentale → **ridged noise** sur la suture (chaîne), continentale/océanique → cordillère côtière ; les arcs insulaires, dorsales et failles attendent. Tout est déterministe et sans état ; les couches `altitude` et `sismique` en sont dérivées (plus des bruits libres). Les mers : altitude < 0,30 → tuile `eau` à hauteur 8 ([[Eau et liquides]]).
+
 ## Liens
 - **Dépend de** : [[Grille continue]], [[Unification macro-micro]], [[Génération par couches de bruit]]
 - **Alimente** : [[Carte du monde]], [[Génération des royaumes PNJ]], [[Véhicules]], [[Ouvert — Dark Continent]], [[Royaume du joueur]], [[Risques majeurs]]

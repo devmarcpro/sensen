@@ -1,0 +1,60 @@
+{
+  "name_key": "biome.foret_de_mana.name",
+  "conditions": {
+    "altitude": [
+      0.3,
+      0.7
+    ],
+    "humidite": [
+      0.5,
+      1.0
+    ],
+    "mana": [
+      0.7,
+      1.0
+    ]
+  },
+  "priority": 5,
+  "element": "bois",
+  "surface_material": "terre_fertile",
+  "subsurface_material": "terre",
+  "relief_scale": 0,
+  "vegetation": [
+    {
+      "id": "if",
+      "density": 0.05
+    },
+    {
+      "id": "chene",
+      "density": 0.03
+    }
+  ],
+  "plantes": [
+    {
+      "id": "chanvre",
+      "density": 0.02
+    }
+  ],
+  "rochers": [
+    {
+      "id": "pierre",
+      "density": 0.002
+    }
+  ],
+  "filons_mult": 1.2,
+  "accidents_mult": 1.0,
+  "village_palette": {
+    "mur": "chene",
+    "toit": "chaume_tresse",
+    "sol": "calcaire"
+  },
+  "poi_weights": {
+    "donjon": 1,
+    "camp": 1
+  },
+  "farming_yield": 1.2,
+  "tags": [
+    "magique",
+    "foret"
+  ]
+}

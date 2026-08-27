@@ -1112,7 +1112,28 @@ func test_desequiper_jeter() -> void:
 func test_surface() -> void:
 	var planete: Dictionary = GameData.config("planete")
 	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
-	verifier(GameData.config("noise_layers").size() == 8 and GameData.catalogues.biomes.size() == 4, "8 couches de bruit, 4 biomes")
+	verifier(GameData.config("noise_layers").size() == 8 and GameData.catalogues.biomes.size() == 12, "8 couches de bruit, 12 biomes")
+	# Tectonique : 24 plaques, ~35 % de terres (quantile calibré), mers et montagnes déterministes.
+	verifier(surf.plaques.size() == 24 and surf.points_chauds.size() >= 8 and surf.points_chauds.size() <= 14, "24 plaques, 8 à 14 points chauds")
+	var terres := 0
+	var n_ech := 40
+	var monde_t := 1024 * 128
+	for j2 in n_ech:
+		for i2 in n_ech:
+			if float(surf.tectonique_a(int((i2 + 0.5) / n_ech * monde_t), int((j2 + 0.5) / n_ech * monde_t)).altitude) >= 0.30:
+				terres += 1
+	var part := float(terres) / float(n_ech * n_ech)
+	verifier(part > 0.22 and part < 0.48, "part de terres émergées ≈ 35 %% (%.0f %%)" % (part * 100.0))
+	var t1 := surf.tectonique_a(1000, 1000)
+	verifier(t1.altitude == surf.tectonique_a(1000, 1000).altitude and t1.sismique >= 0.0 and t1.sismique <= 1.0, "tectonique déterministe, sismique 0..1")
+	var cell_mer := Vector2i(-1, -1)
+	for j3 in 1024:
+		if not surf.terre_a(Vector2i(j3, 3)):
+			cell_mer = Vector2i(j3, 3)
+			break
+	if cell_mer != Vector2i(-1, -1):
+		var em := surf.generer_cellule(cell_mer.x, cell_mer.y, {}, false)
+		verifier(em.eau.size() > 0 and int(em.hauteurs[em.eau.keys()[0]]) == 8, "une cellule en mer : des tuiles d'eau à hauteur 8 (%d)" % em.eau.size())
 	var v := surf.couches_a(1000, 1000)
 	var bornes := true
 	for k in v.keys():
@@ -1130,7 +1151,7 @@ func test_surface() -> void:
 		if int(e.hauteurs[i]) == 10:
 			plats += 1
 	verifier(plats > e.hauteurs.size() * 0.8 and plats < e.hauteurs.size(), "plat à 10 avec des accidents (%d %% plat, %d accidents)" % [plats * 100 / e.hauteurs.size(), e.accidents.size()])
-	verifier(e.accidents.size() >= 2 and e.accidents.size() <= 5, "2 à 5 accidents posés")
+	verifier(e.accidents.size() >= 2 and e.accidents.size() <= 13, "2 à 5 accidents posés (× accidents_mult du biome : %d)" % e.accidents.size())
 	verifier(e.sols.size() > 100 and e.sols.values()[0] == GameData.entree("biomes", e.biome).surface_material or true, "le sol porte le matériau du biome")
 	var mat_ok := true
 	for i in e.arbres.keys():
@@ -1153,6 +1174,7 @@ func test_surface() -> void:
 	var s := Simulation.new(31)
 	s.charger_camp()
 	verifier(s.lieu == "camp" and s.camp_sauve.biome != "" and s.grille.sols.size() > 100, "le camp est une cellule générée (biome %s)" % s.camp_sauve.biome)
+	verifier(surf.terre_a(s.camp_sauve.cellule), "la cellule de départ est de la terre ferme")
 	s.monde.fermer()
 	var accidente := false
 	for i in s.grille.hauteurs.size():

@@ -1,5 +1,5 @@
 {
-  "_doc": "La planète (docs: Décision — Monde fini, continents et océan ; Génération par couches de bruit). taille_cellule : tuiles ; monde : cellules de côté (1024) ; cellule_depart : la cellule du camp tant que la carte n'existe pas ; relief : les accidents posés par cellule (décision du 2026-08-27, plat + exceptions) ; filons : densité de filons de surface ; tiers_corruption : seuils (en %) des tiers de minerai (Décision — Minerais et strates).",
+  "_doc": "La planète (docs: Décision — Monde fini, continents et océan ; Génération par couches de bruit). taille_cellule : tuiles ; monde : cellules de côté (1024) ; cellule_depart : la cellule du camp tant que la carte n'existe pas ; relief : les accidents posés par cellule (décision du 2026-08-27, plat + exceptions) ; filons : densité de filons de surface ; tiers_corruption : seuils (en %) des tiers de minerai (Décision — Minerais et strates). tectonique : Décision — Monde fini (plaques Voronoï, seuil calibré) ; mer : altitude sous laquelle une tuile est de l'eau, et sa hauteur.",
   "taille_cellule": 128,
   "monde_cellules": 1024,
   "cellule_depart": [
@@ -71,5 +71,27 @@
     45,
     70,
     90
-  ]
+  ],
+  "tectonique": {
+    "plaques": 24,
+    "continentales": 0.4,
+    "terres": 0.35,
+    "bord_secteurs": 2,
+    "points_chauds": [
+      8,
+      14
+    ],
+    "point_chaud_rayon": 9000.0,
+    "warp_frequence": 0.00025,
+    "warp_amplitude": 6000.0,
+    "continentalite_frequence": 0.00012,
+    "ridged_frequence": 0.0015,
+    "bordure_tuiles": 20000.0,
+    "suture_tuiles": 6000.0,
+    "calibrage_echantillons": 48
+  },
+  "mer": {
+    "altitude": 0.3,
+    "hauteur": 8
+  }
 }

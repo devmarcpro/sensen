@@ -112,6 +112,27 @@ func charger_camp(joueur: Dictionary = {}) -> void:
 	var surface := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, int(planete.graine))
 	monde = Monde.new(surface, planete, cfg)
 	var depart := monde.cellule_camp
+	# Garde-fou (Début de partie) : si la cellule de départ est en mer, la première cellule de terre en spirale.
+	var essais := 0
+	while essais < 400 and not surface.terre_a(depart):
+		essais += 1
+		var r := 1
+		var trouve := false
+		while r < 20 and not trouve:
+			for dy in range(-r, r + 1):
+				for dx in range(-r, r + 1):
+					if absi(dx) != r and absi(dy) != r:
+						continue
+					var c := monde.cellule_camp + Vector2i(dx, dy)
+					if surface.terre_a(c):
+						depart = c
+						trouve = true
+						break
+				if trouve:
+					break
+			r += 1
+		break
+	monde.cellule_camp = depart
 	grille = monde.fenetre(depart, GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
 	var e := monde.cellule(depart)
 	var entree := monde.pos_monde(depart, e.entree)

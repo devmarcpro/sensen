@@ -21,6 +21,12 @@ var biomes: Dictionary
 var planete: Dictionary
 var bruits: Dictionary = {}   # nom de couche → FastNoiseLite
 var graine: int = 0
+var plaques: Array = []       # tectonique (Décision — Monde fini) : [{centre: Vector2 (tuiles), continentale: bool, derive}]
+var points_chauds: Array = [] # [Vector2] : chapelets d'îles en plein océan
+var seuil_mer: float = 0.0    # continentalité au-dessus de laquelle la terre émerge (calibré sur planete.tectonique.terres)
+var warp: FastNoiseLite       # domain warping (un seul niveau)
+var conti: FastNoiseLite      # bruit basse fréquence de la continentalité
+var ridged: FastNoiseLite     # chaînes de montagnes sur les sutures
 
 
 func _init(p_couches: Dictionary, p_biomes: Dictionary, p_planete: Dictionary, p_graine: int) -> void:
@@ -37,6 +43,7 @@ func _init(p_couches: Dictionary, p_biomes: Dictionary, p_planete: Dictionary, p
 		n.fractal_type = FastNoiseLite.FRACTAL_FBM
 		n.fractal_octaves = int(c.octaves)
 		bruits[nom] = n
+	_tectonique()
 
 
 ## La valeur d'une couche en un point du monde, normalisée 0..1.
@@ -45,12 +52,131 @@ func valeur(nom: String, x: int, y: int) -> float:
 	return clampf((n.get_noise_2d(float(x), float(y)) + 1.0) * 0.5, 0.0, 1.0)
 
 
-## Les 8 couches en un point.
+## Les 8 couches en un point ; `altitude` et `sismique` sont dérivées de la tectonique, pas tirées.
 func couches_a(x: int, y: int) -> Dictionary:
 	var v := {}
 	for nom in bruits.keys():
 		v[nom] = valeur(nom, x, y)
+	var t := tectonique_a(x, y)
+	v["altitude"] = t.altitude
+	v["sismique"] = t.sismique
 	return v
+
+
+## La cellule est-elle de la terre ferme (son centre et ses quatre quarts au-dessus du niveau de la mer) ?
+func terre_a(c: Vector2i) -> bool:
+	var taille: int = int(planete.taille_cellule)
+	var seuil := float(planete.get("mer", {}).get("altitude", 0.30))
+	for off in [Vector2i(64, 64), Vector2i(32, 32), Vector2i(96, 32), Vector2i(32, 96), Vector2i(96, 96)]:
+		if float(tectonique_a(c.x * taille + off.x, c.y * taille + off.y).altitude) < seuil:
+			return false
+	return true
+
+
+# ---------------------------------------------------------------- tectonique (Décision — Monde fini, continents et océan)
+
+## Les plaques (Voronoï de germes), 40 % continentales, forcées océaniques près du bord ; les points chauds ;
+## le seuil de mer calibré pour la part de terres émergées demandée.
+func _tectonique() -> void:
+	var tc: Dictionary = planete.get("tectonique", {})
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "tectonique"])
+	var monde_tuiles := float(int(planete.monde_cellules) * int(planete.taille_cellule))
+	var bord := float(int(tc.get("bord_secteurs", 2)) * 64 * int(planete.taille_cellule))
+	plaques.clear()
+	for k in int(tc.get("plaques", 24)):
+		var c := Vector2(rng.randf() * monde_tuiles, rng.randf() * monde_tuiles)
+		var pres_du_bord := c.x < bord or c.y < bord or c.x > monde_tuiles - bord or c.y > monde_tuiles - bord
+		plaques.append({"centre": c, "continentale": (rng.randf() < float(tc.get("continentales", 0.4))) and not pres_du_bord,
+			"derive": Vector2.from_angle(rng.randf() * TAU) * rng.randf_range(0.3, 1.0)})
+	points_chauds.clear()
+	var pc: Array = tc.get("points_chauds", [8, 14])
+	for k in rng.randi_range(int(pc[0]), int(pc[1])):
+		points_chauds.append(Vector2(rng.randf() * monde_tuiles, rng.randf() * monde_tuiles))
+	warp = FastNoiseLite.new()
+	warp.seed = graine + 101
+	warp.frequency = float(tc.get("warp_frequence", 0.00025))
+	warp.fractal_octaves = 2
+	conti = FastNoiseLite.new()
+	conti.seed = graine + 102
+	conti.frequency = float(tc.get("continentalite_frequence", 0.00012))
+	conti.fractal_octaves = 3
+	ridged = FastNoiseLite.new()
+	ridged.seed = graine + 103
+	ridged.frequency = float(tc.get("ridged_frequence", 0.0015))
+	ridged.fractal_type = FastNoiseLite.FRACTAL_RIDGED
+	ridged.fractal_octaves = 3
+	# Calibrage du seuil : le quantile de la continentalité sur une grille d'échantillons.
+	var n: int = int(tc.get("calibrage_echantillons", 48))
+	var valeurs: Array[float] = []
+	for j in n:
+		for i in n:
+			valeurs.append(_continentalite(Vector2((i + 0.5) / n * monde_tuiles, (j + 0.5) / n * monde_tuiles)))
+	valeurs.sort()
+	var part_terres: float = float(tc.get("terres", 0.35))
+	seuil_mer = valeurs[clampi(int(float(valeurs.size()) * (1.0 - part_terres)), 0, valeurs.size() - 1)]
+
+
+func _warpe(p: Vector2) -> Vector2:
+	var amp := float(planete.get("tectonique", {}).get("warp_amplitude", 6000.0))
+	return p + Vector2(warp.get_noise_2d(p.x, p.y), warp.get_noise_2d(p.x + 7919.0, p.y - 1013.0)) * amp
+
+
+## Les deux plaques les plus proches d'un point warpé : [i1, d1, i2, d2].
+func _plaques_proches(q: Vector2) -> Array:
+	var d1 := INF
+	var d2 := INF
+	var i1 := -1
+	var i2 := -1
+	for k in plaques.size():
+		var d: float = q.distance_to(plaques[k].centre)
+		if d < d1:
+			d2 = d1
+			i2 = i1
+			d1 = d
+			i1 = k
+		elif d < d2:
+			d2 = d
+			i2 = k
+	return [i1, d1, i2, d2]
+
+
+## Continentalité en un point (tuiles) : base ±1 de la plaque, bordure adoucie, warp obligatoire, bruit lent, points chauds.
+func _continentalite(p: Vector2) -> float:
+	var q := _warpe(p)
+	var pp := _plaques_proches(q)
+	var base: float = 1.0 if plaques[pp[0]].continentale else -1.0
+	var bordure: float = clampf((float(pp[3]) - float(pp[1])) / float(planete.get("tectonique", {}).get("bordure_tuiles", 20000.0)), 0.0, 1.0)
+	var c := base * (0.35 + 0.65 * bordure) + conti.get_noise_2d(q.x, q.y) * 0.6
+	var r := float(planete.get("tectonique", {}).get("point_chaud_rayon", 9000.0))
+	for pc in points_chauds:
+		var dp: float = q.distance_to(pc)
+		if dp < r:
+			c += (1.0 - dp / r) * 1.4
+	return c
+
+
+## Altitude 0..1 (classes macro : mer < 0,30 · littoral 0,30-0,38 · plaine · colline · montagne) et
+## sismicité 0..1 (proximité d'une suture), déterministes.
+func tectonique_a(x: int, y: int) -> Dictionary:
+	var p := Vector2(float(x), float(y))
+	var c := _continentalite(p)
+	var q := _warpe(p)
+	var pp := _plaques_proches(q)
+	var i1: int = pp[0]
+	var i2: int = pp[2]
+	var suture := 1.0 - clampf((float(pp[3]) - float(pp[1])) / float(planete.get("tectonique", {}).get("suture_tuiles", 6000.0)), 0.0, 1.0)
+	var alt: float
+	if c < seuil_mer:
+		alt = clampf(0.30 * (1.0 - (seuil_mer - c) / 1.5), 0.0, 0.30)   # mer : 0 au large, 0,30 au rivage
+	else:
+		var terre := clampf((c - seuil_mer) / 1.2, 0.0, 1.0)             # 0 au rivage, 1 au cœur
+		alt = 0.30 + 0.25 * terre                                        # littoral → plaine
+		if i1 >= 0 and i2 >= 0 and plaques[i1].continentale and plaques[i2].continentale:
+			alt += suture * ((ridged.get_noise_2d(q.x, q.y) + 1.0) * 0.5) * 0.45   # chaîne de montagnes sur la suture
+		elif i1 >= 0 and i2 >= 0 and plaques[i1].continentale != plaques[i2].continentale:
+			alt += suture * ((ridged.get_noise_2d(q.x, q.y) + 1.0) * 0.5) * 0.2    # cordillère côtière
+	return {"altitude": clampf(alt, 0.0, 1.0), "sismique": suture, "continentalite": c}
 
 
 ## Le biome d'un point : toutes les conditions satisfaites, priorité la plus haute (Biomes — schéma).
@@ -83,7 +209,7 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 	var rng := RandomNumberGenerator.new()   # local : la génération peut tourner en thread (Monde)
 	rng.seed = hash([graine, cx, cy, "cellule"])
 	var e := {"largeur": taille, "hauteur": taille, "hauteurs": PackedByteArray(), "sol": {}, "bord": {}, "sols": {}, "filons": {},
-		"arbres": {}, "rochers": {}, "plantes": {}, "cellule": Vector2i(cx, cy), "biome": "", "biomes_vus": {}, "accidents": [],
+		"arbres": {}, "rochers": {}, "plantes": {}, "eau": {}, "cellule": Vector2i(cx, cy), "biome": "", "biomes_vus": {}, "accidents": [],
 		"entree": Vector2i(taille / 2, taille / 2), "entree_donjon": Vector2i(taille / 2 + 10, taille / 2), "coffre_depart": Vector2i(taille / 2 - 2, taille / 2),
 		"pieces": [], "spawns": [], "coffres": [], "escalier": null, "boss": null, "etage": 0}
 	e.hauteurs.resize(taille * taille)
@@ -110,6 +236,9 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 			par_tuile[i] = cle
 			e.biomes_vus[b] = true
 			e.sols[i] = str(biomes.get(b, {}).get("surface_material", "terre"))
+			if float(par_bloc[cle].couches.altitude) < float(planete.get("mer", {}).get("altitude", 0.30)):
+				e.eau[i] = true   # la mer (Eau et liquides : une source, niveau 8/8 — statique tant que l'automate attend)
+				e.hauteurs[i] = int(planete.get("mer", {}).get("hauteur", 8))
 	# 2. Le relief : des accidents posés, hors de la zone d'arrivée si un camp s'y greffe.
 	var reserve := Rect2i(e.entree - Vector2i(8, 8), Vector2i(24, 16)) if not camp.is_empty() else Rect2i(-1, -1, 0, 0)
 	_poser_accidents(e, reserve, rng)
@@ -119,7 +248,7 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 	for i in e.sol.keys():
 		var x: int = i % taille
 		var y: int = i / taille
-		if reserve.has_point(Vector2i(x, y)):
+		if reserve.has_point(Vector2i(x, y)) or e.eau.has(i):
 			continue
 		var bloc: Dictionary = par_bloc[par_tuile[i]]
 		var b: Dictionary = biomes.get(str(bloc.biome), {})
@@ -158,7 +287,7 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 			for t in range(1, tier + 1):
 				pool.append_array(mp.tiers[str(t)])
 			e.filons[i] = str(pool[rng.randi_range(0, pool.size() - 1)])
-	for d in [e.arbres, e.rochers, e.filons]:
+	for d in [e.arbres, e.rochers, e.filons, e.eau]:
 		for i in d.keys():
 			e.sol.erase(i)
 	return e   # les plantes restent du sol (franchissables) : la simulation les pose comme contenu
@@ -168,7 +297,7 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 func _poser_accidents(e: Dictionary, reserve: Rect2i, rng: RandomNumberGenerator) -> void:
 	var rel: Dictionary = planete.relief
 	var taille: int = e.largeur
-	var nb := rng.randi_range(int(rel.par_cellule[0]), int(rel.par_cellule[1]))
+	var nb := int(float(rng.randi_range(int(rel.par_cellule[0]), int(rel.par_cellule[1]))) * float(biomes.get(e.biome, {}).get("accidents_mult", 1.0)))
 	var types: Dictionary = rel.types
 	var total := 0.0
 	for t in types.keys():

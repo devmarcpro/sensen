@@ -683,7 +683,12 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 	var h := g.h(t)
 	var c := _ecran(t, h)
 	var teinte := Color.WHITE   # le brouillard est une couche à part (_dessiner_brouillard)
-	if g.bloque_passage(t) and not ("vegetation" in g.contenu_de(t).get("tags", [])):   # un mur : un bloc plein — le sol dessous est caché
+	var tags_c: Array = g.contenu_de(t).get("tags", [])
+	if "liquide" in tags_c:   # la mer : un losange d'eau à sa hauteur, les flancs de la rive sont ceux des tuiles voisines
+		ci.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)]),
+			Color.html(str(g.contenu_de(t).get("couleur", "#2f5f9a"))) * teinte)
+		return
+	if g.bloque_passage(t) and not ("vegetation" in tags_c):   # un mur : un bloc plein — le sol dessous est caché
 		_dessine_bloc(ci, g, t, c, teinte)
 		return
 	var haut := PackedVector2Array([

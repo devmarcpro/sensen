@@ -62,6 +62,9 @@ standard (E.11) — rien de nouveau à synchroniser.
 
 **Coût ([[Simulation du monde — performance]]) :** file active uniquement — un lac stable coûte 0. Inchangé.
 
+> [!success] Codé le 2026-08-28 — la mer, statique
+> Les tuiles de mer (altitude < `planete.mer.altitude` = 0,30) sont un contenu `eau` (source, niveau 8/8), **hauteur 8** (décision : la note ne chiffre pas le niveau de la mer ; la référence du sol étant 10, la mer est deux niveaux sous la plaine, un talus la borde). L'eau bloque le passage tant que la nage attend ; elle ne bloque pas la vue. L'automate (écoulement, lacs, rivières, pluie) et les interactions (lave, foudre, évaporation) attendent.
+
 ## Liens
 - **Dépend de** : [[Hauteur de terrain ±10]], [[Application des stats de matériau]], [[Simulation à ticks]]
 - **Alimente** : [[Véhicules]], [[Catalogue matériaux — Liquides]], [[Météo]]

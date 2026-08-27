@@ -150,5 +150,17 @@
       "destructible",
       "vegetation"
     ]
+  },
+  "eau": {
+    "name_key": "tile_content.eau.name",
+    "bloque_passage": true,
+    "bloque_vue": false,
+    "hauteur_vue": 0,
+    "tags": [
+      "eau",
+      "liquide",
+      "source"
+    ],
+    "couleur": "#2f5f9a"
   }
 }

@@ -1,0 +1,51 @@
+{
+  "name_key": "biome.desert_de_cendres.name",
+  "conditions": {
+    "altitude": [
+      0.3,
+      1.0
+    ],
+    "temperature": [
+      0.6,
+      1.0
+    ],
+    "sismique": [
+      0.75,
+      1.0
+    ]
+  },
+  "priority": 5,
+  "element": "feu",
+  "surface_material": "tuf_volcanique",
+  "subsurface_material": "basalte",
+  "relief_scale": 0,
+  "vegetation": [],
+  "plantes": [],
+  "rochers": [
+    {
+      "id": "basalte",
+      "density": 0.015
+    },
+    {
+      "id": "pierre_ponce",
+      "density": 0.006
+    }
+  ],
+  "filons_mult": 1.6,
+  "accidents_mult": 1.0,
+  "village_palette": {
+    "mur": "chene",
+    "toit": "chaume_tresse",
+    "sol": "calcaire"
+  },
+  "poi_weights": {
+    "donjon": 1,
+    "camp": 1
+  },
+  "farming_yield": 0.3,
+  "tags": [
+    "volcanique",
+    "desert",
+    "chaud"
+  ]
+}

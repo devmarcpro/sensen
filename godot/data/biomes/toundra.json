@@ -1,0 +1,51 @@
+{
+  "name_key": "biome.toundra.name",
+  "conditions": {
+    "altitude": [
+      0.3,
+      0.75
+    ],
+    "temperature": [
+      0.0,
+      0.25
+    ]
+  },
+  "priority": 2,
+  "element": "eau",
+  "surface_material": "neige",
+  "subsurface_material": "terre",
+  "relief_scale": 0,
+  "vegetation": [
+    {
+      "id": "bouleau",
+      "density": 0.008
+    }
+  ],
+  "plantes": [],
+  "rochers": [
+    {
+      "id": "pierre",
+      "density": 0.008
+    },
+    {
+      "id": "granit",
+      "density": 0.004
+    }
+  ],
+  "filons_mult": 0.8,
+  "accidents_mult": 1.0,
+  "village_palette": {
+    "mur": "chene",
+    "toit": "chaume_tresse",
+    "sol": "calcaire"
+  },
+  "poi_weights": {
+    "donjon": 1,
+    "camp": 1
+  },
+  "farming_yield": 0.3,
+  "tags": [
+    "froid",
+    "toundra"
+  ]
+}

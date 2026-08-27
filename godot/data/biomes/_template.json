@@ -34,5 +34,6 @@
   "relief_scale": 0,
   "rochers": [],
   "filons_mult": 1.0,
-  "plantes": []
+  "plantes": [],
+  "accidents_mult": 1.0
 }
