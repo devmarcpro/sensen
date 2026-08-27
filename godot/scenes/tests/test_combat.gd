@@ -65,6 +65,7 @@ func _ready() -> void:
 	test_communion()
 	test_lumiere()
 	test_palier_industriel()
+	test_betail()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2446,6 +2447,43 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Statut bétail
+
+func test_betail() -> void:
+	var s := Simulation.new(127)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var v := s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
+	s._habiller_pnj(v, GameData.entree("creatures", "villageois"))
+	v["assignation"] = {"fonction": "fermier", "cellule": s._cell_de(v.pos)}
+	v.camp = "joueur"
+	v.social.relations[j.id] = 40
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "statut_habitat", "pnj": v.id, "statut": "betail"}) and v.statut_habitat == "betail" and int(v.social.relations[j.id]) == 10, "un PNJ traité en bétail : relation −30")
+	s._recalculer_humeurs()
+	verifier(int(v.humeur) == 60 - 15 - 20, "bétail sans abri, rétrogradé : 60 −15 −20 = %d (il ne mange pas au garde-manger)" % int(v.humeur))
+	var enc: Vector2i = j.pos + Vector2i(0, 2)
+	s.grille.contenu[s.grille.idx(enc)] = 0
+	s.grille.poser_contenu(enc, "meuble")
+	s.grille.meubles[s.grille.idx(enc)] = "enclos"
+	s._recalculer_humeurs()
+	verifier(int(v.humeur) == 60 - 20, "avec un enclos à portée : abrité (%d)" % int(v.humeur))
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "statut_habitat", "pnj": v.id, "statut": "normal"}) and v.statut_habitat == "normal", "redevenu résident")
+	# Une bête apprivoisée est bétail sans malus.
+	var b := s.ajouter("cerf", j.pos + Vector2i(-1, 0), "ia")
+	b["maitre"] = j.id
+	b.camp = "joueur"
+	b["assignation"] = {"fonction": "oisif", "cellule": s._cell_de(b.pos)}
+	if not b.has("social"):
+		b["social"] = {"relations": {}}
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "statut_habitat", "pnj": b.id, "statut": "betail"})
+	s._recalculer_humeurs()
+	verifier(int(b.humeur) == 60, "une bête bétail abritée : 60, sans malus (%d)" % int(b.humeur))
+	s.monde.fermer()
 
 
 # ---------------------------------------------------------------- Palier industriel

@@ -1079,6 +1079,34 @@ func pieces_de_cellule(cell: Vector2i) -> Array:
 	return res
 
 
+## Un abri pour le bétail (Habitat des PNJ) : un enclos à portée.
+func _abri_a(pos: Vector2i) -> bool:
+	var r := int(_ry().betail.abri_rayon)
+	for gi in grille.meubles.keys():
+		if str(GameData.entree("meubles", str(grille.meubles[gi])).type_meuble) == "enclos" and Grille.distance(pos, grille.pos_de(int(gi))) <= r:
+			return true
+	return false
+
+
+## Changer le statut d'habitat d'un compagnon ou d'un résident (Habitat des PNJ) : bétail ou normal.
+func _statut_habitat(e: Dictionary, pnj_id: String, statut: String, tick: int) -> bool:
+	var x: Dictionary = entites.get(pnj_id, {})
+	if x.is_empty() or Grille.distance(e.pos, x.pos) > 2 or not (str(x.get("maitre", "")) == e.id or x.has("assignation")):
+		return false
+	if str(x.get("statut_habitat", "normal")) == statut:
+		return false
+	x["statut_habitat"] = statut
+	e.compteur = tick + int(regles.r.actions.objet)
+	if statut == "betail":
+		EventBus.emettre(&"journal", [&"journal.statut_betail", {"nom": x.name_key}])
+		if not ("bete" in x.get("tags", [])):
+			x.social.relations[e.id] = int(x.social.relations.get(e.id, 0)) + int(_ry().betail.retrogradation_relation)
+			EventBus.emettre(&"journal", [&"journal.retrogradation", {"nom": x.name_key}])
+	else:
+		EventBus.emettre(&"journal", [&"journal.statut_resident", {"nom": x.name_key}])
+	return true
+
+
 ## La pièce d'un lit (ou vide).
 func _piece_du_lit(lit: Vector2i, pieces: Array) -> Dictionary:
 	for pi in pieces:
@@ -1104,6 +1132,13 @@ func _recalculer_humeurs() -> void:
 		if not pieces_par_cell.has(cell):
 			pieces_par_cell[cell] = pieces_de_cellule(cell) if cell != Vector2i(-9999, -9999) else []
 		var piece := _piece_du_lit(lit, pieces_par_cell[cell]) if lit != Vector2i(-1, -1) else {}
+		if str(x.get("statut_habitat", "normal")) == "betail":   # bétail (Habitat des PNJ) : un abri suffit, il broute
+			if not _abri_a(x.pos) and piece.is_empty():
+				h += int(ry.sans_logement)
+			if not ("bete" in x.get("tags", [])):
+				h += int(ry.betail.retrogradation_humeur)
+			x.humeur = h
+			continue
 		if piece.is_empty():
 			h += int(ry.sans_logement)
 		else:
@@ -5087,6 +5122,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _reforger(e, str(i.get("objet", "")), str(i.get("composant", "")), h.ticks)
 		"lancer":
 			ok = _lancer(e, str(i.get("objet", "")), i.get("cible", e.pos), h.ticks)
+		"statut_habitat":
+			ok = _statut_habitat(e, str(i.get("pnj", "")), str(i.get("statut", "normal")), h.ticks)
 		"livrer":
 			ok = _livrer_commande(e, str(i.get("pnj", "")), h.ticks)
 		"planter":

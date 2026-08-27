@@ -737,7 +737,12 @@
       "co_occupant": -5,
       "fill_max": 1024
     },
-    "faim_pnj": -10
+    "faim_pnj": -10,
+    "betail": {
+      "abri_rayon": 3,
+      "retrogradation_relation": -30,
+      "retrogradation_humeur": -20
+    }
   },
   "alchimie": {
     "_doc": "Alchimie (Cuisine et alchimie) : parties droppées par les bêtes (une par mort), stat orientée ; qualité ≥ seuil_forte → statut fort ; durée des potions × qualité.",

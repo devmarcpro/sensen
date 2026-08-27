@@ -400,6 +400,12 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+ui.ecran.betail,Traiter en bétail
+ui.ecran.resident,Traiter en résident
+journal.statut_betail,"{nom} est désormais traité en bétail"
+journal.statut_resident,"{nom} est désormais traité en résident"
+journal.retrogradation,"{nom} le prend mal (relation −30, humeur −20)"
+ui.gestion.betail, · bétail
 material.verre_trempe.name,Verre trempé
 material.brique_refractaire.name,Brique réfractaire
 material.beton.name,Béton
@@ -798,7 +804,7 @@ function.herboriste.name,Herboriste
 ui.ecran.gestion,"TERRITOIRE — {n} cellules · {pnj} résidents · trésor {tresor} or · dette {dette} · prévisionnel {prev} or/semaine"
 ui.gestion.cellule,"cellule ({x},{y}) — {role}{camp}"
 ui.gestion.camp," · camp"
-ui.gestion.resident,"{nom} — {fonction} · humeur {humeur} · rendement ×{facteur}"
+ui.gestion.resident,"{nom} — {fonction}{betail} · humeur {humeur} · rendement ×{facteur}"
 ui.gestion.stock,"stock : {nom} ×{n}"
 ui.gestion.rapport,{texte}
 ui.gestion.role_aide,"Entrée : changer de rôle (base → habitation → champs → ressources naturelles ; ressources naturelles efface les constructions au passage de la semaine)"

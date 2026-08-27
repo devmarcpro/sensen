@@ -41,6 +41,9 @@ Les PNJ résidant sur la base/claim du joueur (compagnons recrutés, animaux —
 > [!success] Codé le 2026-08-28
 > Au passage de semaine, l'humeur d'un résident est **recalculée** : `60 − 15 sans pièce valide autour de son lit` ; pièce valide : **+1 par type de meuble distinct** (max +10), **+5 à 12 tuiles**, **−5 par co-occupant** au-delà du premier (autres résidents dont le lit est dans la même pièce) ; puis la faim (−10 sans nourriture au garde-manger) et la dette. Le statut bétail et la rétrogradation attendent (pas de bétail-résident pour l'instant).
 
+> [!success] Codé le 2026-08-28 — le statut bétail
+> Dialogue d'un compagnon ou d'un résident → *Traiter en bétail* / *Traiter en résident* (`statut_habitat` sur l'entité, assigné par le joueur). Un **bétail** n'a besoin que d'un **abri** : décision, faute d'empreintes de bâtiment — être à 3 tuiles d'un **enclos** ou dans une pièce valide ; sans abri, −15 comme un résident sans pièce. Il ne mange pas au garde-manger (il broute), ne subit ni bonus de chambre ni co-occupants. **Rétrogradation** d'un PNJ (non-bête) en bétail : **relation −30**, **humeur −20** tant que le statut persiste ; une bête apprivoisée est bétail sans malus. L'écran K affiche le statut.
+
 ## Liens
 - **Dépend de** : [[Détection de pièces]], [[Construction cadrée]], [[Rôles de cases]], [[Schéma créature]]
 - **Alimente** : [[Population et exploitation]], [[Abstraction hors-site]], [[Villages PNJ — repeuplement et décimation]], [[Entretien et taxes]]

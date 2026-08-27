@@ -475,6 +475,10 @@ func _construire_dialogue(j: Dictionary) -> void:
 		if (str(rc.get("method", "")) == "relation" and rel >= int(rc.get("threshold", 60)) - 10) or bool(pnj.get("recrutable_hors_condition", false)):
 			liste.add_item(tr("ui.ecran.recruter"))
 			entrees.append({"kind": "option", "option": "recruter"})
+	if str(pnj.get("maitre", "")) == j.id or pnj.has("assignation"):
+		var betail: bool = str(pnj.get("statut_habitat", "normal")) == "betail"
+		liste.add_item(tr("ui.ecran.resident" if betail else "ui.ecran.betail"))
+		entrees.append({"kind": "option", "option": "statut_habitat"})
 	if "entraineur" in pnj.get("tags", []):
 		liste.add_item(tr("ui.ecran.entrainer"))
 		entrees.append({"kind": "option", "option": "entrainer"})
@@ -526,6 +530,10 @@ func _option(opt: String) -> void:
 			rafraichir()
 		"apprendre_talent":
 			main.sim.intention(j.id, {"type": "apprendre_talent", "pnj": pnj_id})
+			rafraichir()
+		"statut_habitat":
+			var pnj_s: Dictionary = main.sim.entites.get(pnj_id, {})
+			main.sim.intention(j.id, {"type": "statut_habitat", "pnj": pnj_id, "statut": "normal" if str(pnj_s.get("statut_habitat", "normal")) == "betail" else "betail"})
 			rafraichir()
 		"ressusciter":
 			var ame: String = main.sim.ame_dans_sac(j)
@@ -627,7 +635,7 @@ func _construire_gestion(j: Dictionary) -> void:
 		liste.add_item(tr("ui.gestion.cellule").format({"x": cell.x, "y": cell.y, "role": tr("role." + str(sim.monde.claims[cell].role)), "camp": tr("ui.gestion.camp") if cell == sim.monde.cellule_camp else ""}))
 		entrees.append({"kind": "cellule", "cellule": cell, "texte": tr("ui.gestion.role_aide")})
 	for x in sim.residents():
-		liste.add_item(tr("ui.gestion.resident").format({"nom": tr(x.name_key), "fonction": tr(GameData.entree("functions", str(x.assignation.fonction)).name_key), "humeur": int(x.get("humeur", 60)), "facteur": "%.2f" % sim.facteur_humeur(x)}))
+		liste.add_item(tr("ui.gestion.resident").format({"nom": tr(x.name_key), "fonction": tr(GameData.entree("functions", str(x.assignation.fonction)).name_key), "betail": tr("ui.gestion.betail") if str(x.get("statut_habitat", "normal")) == "betail" else "", "humeur": int(x.get("humeur", 60)), "facteur": "%.2f" % sim.facteur_humeur(x)}))
 		var pr: Dictionary = sim.production_de(x)
 		entrees.append({"kind": "resident", "id": x.id, "texte": tr("ui.gestion.resident_aide") + "\n" + str(pr)})
 	for cle in t.stocks.keys():
