@@ -940,7 +940,7 @@ func test_paperdoll_et_tutoriels() -> void:
 
 func test_materiaux() -> void:
 	var mats: Dictionary = GameData.catalogues.materials
-	verifier(mats.size() == 155, "les 155 matériaux des catalogues sont chargés (%d)" % mats.size())
+	verifier(mats.size() == 157, "les 157 matériaux des catalogues sont chargés (%d)" % mats.size())
 	var fer: Dictionary = mats.fer
 	verifier(int(fer.stats.durete) == 25 and int(fer.stats.conductivite_electrique) == 75, "le Fer suit sa table (Dur 25, CÉl 75)")
 	verifier("conducteur" in fer.tags and not ("inflammable" in fer.tags), "tags dérivés au seuil 50 (fer : conducteur)")
@@ -951,7 +951,7 @@ func test_materiaux() -> void:
 	var couleurs := {}
 	for id in mats.keys():
 		couleurs[mats[id].color] = true
-	verifier(couleurs.size() == mats.size(), "155 couleurs uniques")
+	verifier(couleurs.size() == mats.size(), "157 couleurs uniques")
 	verifier(mats.chene.harvest.tool_category == "hache" and mats.chene.harvest.skill == "bucheronnage", "récolte : outil et compétence de la catégorie")
 	verifier(GameData.config("material_categories").size() == 11, "11 catégories de matériaux")
 	verifier(tr("material.acier_trempe.name") == "Acier trempé", "nom localisé")

@@ -3930,7 +3930,10 @@ func _drop(cible: Dictionary, source: String) -> void:
 		if GameData.catalogues.materials.has(pid):   # la même partie comme matériau brut (l'os des pointes — Catalogue matériaux — Paramétriques)
 			var brut := generer_objet("materiau_brut", profondeur, {"creature": cible.name_key}, "commun", 0)
 			if not brut.is_empty():
-				brut.materiau = pid
+				var mat_id := pid
+				if GameData.catalogues.materials.has(pid + "_massif") and partie.get("puissance", 1.0) >= 2.0:
+					mat_id = pid + "_massif"
+				brut.materiau = mat_id
 				brut["forme"] = "brut"
 				brut.quantite = 1
 				uids.append(brut.uid)

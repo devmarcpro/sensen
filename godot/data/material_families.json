@@ -1,5 +1,5 @@
 {
-  "_doc": "Familles de matériaux des recettes de composants (docs: Recettes de composants). Filtre : category ou material(s) + forme ; tag : familles paramétriques (parties de créatures) sans source pour l'instant.",
+  "_doc": "Familles de matériaux des recettes de composants (docs: Recettes de composants). Filtre : category ou material(s) + forme ; tag : familles paramétriques — os / os_massif tombent des dépouilles (os massif quand la bête a une puissance ≥ 2).",
   "bois": {
     "category": "bois",
     "forme": "planche"

@@ -1435,6 +1435,8 @@ material.chanvre.name,Chanvre
 material.laine.name,Laine
 material.soie.name,Soie
 material.cuir.name,Cuir
+material.os.name,Os
+material.os_massif.name,Os massif
 material.fourrure.name,Fourrure
 material.eau.name,Eau
 material.eau_salee.name,Eau salée

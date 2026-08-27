@@ -14,7 +14,7 @@
 
 | Dossier | Contenu | Spécification (docs/) |
 |---|---|---|
-| materials/ | les 155 matériaux des 11 catalogues (`tools/gen_materials.py`), 13 stats, couleur, Wu Xing | Schéma matériau (B.1), catalogues 09 - Contenu |
+| materials/ | les 157 matériaux des 11 catalogues (`tools/gen_materials.py`, + os et os massif des dépouilles), 13 stats, couleur, Wu Xing | Schéma matériau (B.1), catalogues 09 - Contenu |
 | items/ | objets et recettes ; `proto_*` = objets du prototype (dureté, qualité et élément fixés à la main en attendant le craft) | Schéma objet et recette (B.3), Stats d'armes |
 | functionalities/ | profils d'armes/armures/véhicules | Fonctionnalité (B.3.1) |
 | modules/ | les 176 composants ; `effet` = forme structurée des descriptions (`tools/structure_modules.py`) | Vocabulaire des modules (B.4), Modules (F.2) |
