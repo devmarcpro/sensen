@@ -66,6 +66,7 @@ func couches_a(x: int, y: int) -> Dictionary:
 ## Les royaumes PNJ d'un secteur (Génération des royaumes PNJ) : déterministes, lecture pure des bruits.
 var royaumes_cache: Dictionary = {}   # Vector2i (secteur) → {id: royaume}
 var royaume_par_cellule: Dictionary = {}   # Vector2i (cellule) → id
+var routes_par_cellule: Dictionary = {}    # Vector2i (cellule) → Array[Vector2i] : les cellules voisines reliées par une route
 
 
 func secteur_de(c: Vector2i) -> Vector2i:
@@ -81,7 +82,17 @@ func royaume_de(c: Vector2i) -> Dictionary:
 	return royaumes_cache[sect].get(id, {}) if not id.is_empty() else {}
 
 
+var mutex_roy := Mutex.new()   # les threads de pré-génération lisent les royaumes
+
+
 func royaumes_secteur(sect: Vector2i) -> Dictionary:
+	mutex_roy.lock()
+	var res0: Dictionary = _royaumes_secteur_calc(sect)
+	mutex_roy.unlock()
+	return res0
+
+
+func _royaumes_secteur_calc(sect: Vector2i) -> Dictionary:
 	if royaumes_cache.has(sect):
 		return royaumes_cache[sect]
 	var cfg: Dictionary = GameData.config("combat_rules").royaume.pnj
@@ -173,6 +184,45 @@ func royaumes_secteur(sect: Vector2i) -> Dictionary:
 				var cout := 1.0 + float(cfg.cout_danger) * valeur("danger", v.x * taille + taille / 2, v.y * taille + taille / 2) + float(cfg.cout_altitude) * maxf(0.0, valeur("altitude", v.x * taille + taille / 2, v.y * taille + taille / 2) - 0.5)
 				couts[v] = float(couts[c]) + cout
 				ouverts.append(v)
+	# Les routes : chaque village du territoire rejoint la capitale par le plus court chemin à coût (Unification macro-micro).
+	for id in ordre:
+		var r: Dictionary = res[id]
+		var cap: Vector2i = r.capital_poi
+		var dans_t: Dictionary = {}
+		for c in r.territory_cells:
+			dans_t[c] = true
+		var couts: Dictionary = {cap: 0.0}
+		var pred: Dictionary = {}
+		var ouverts: Array = [cap]
+		while not ouverts.is_empty():
+			var mi := 0
+			for i in ouverts.size():
+				if float(couts[ouverts[i]]) < float(couts[ouverts[mi]]):
+					mi = i
+			var c: Vector2i = ouverts[mi]
+			ouverts.remove_at(mi)
+			for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var v: Vector2i = c + d
+				if not dans_t.has(v):
+					continue
+				var cout := 1.0 + float(cfg.cout_danger) * valeur("danger", v.x * taille + taille / 2, v.y * taille + taille / 2) + float(cfg.cout_altitude) * maxf(0.0, valeur("altitude", v.x * taille + taille / 2, v.y * taille + taille / 2) - 0.5)
+				if not couts.has(v) or float(couts[c]) + cout < float(couts[v]):
+					couts[v] = float(couts[c]) + cout
+					pred[v] = c
+					ouverts.append(v)
+		r["routes"] = []
+		for c in r.territory_cells:
+			if c == cap or not bool(poi_de(c).get("village", false)):
+				continue
+			var q: Vector2i = c
+			while pred.has(q):
+				var p0: Vector2i = pred[q]
+				_relier(q, p0)
+				if not (q in r.routes):
+					r.routes.append(q)
+				q = p0
+			if not (cap in r.routes):
+				r.routes.append(cap)
 	# Diplomatie initiale entre royaumes du secteur : compatibilité de gouvernance et de race.
 	for i in ordre.size():
 		for j in ordre.size():
@@ -190,6 +240,48 @@ func royaumes_secteur(sect: Vector2i) -> Dictionary:
 			score += rng.randf_range(-0.3, 0.3)
 			a.diplomacy[b2.id] = "hostile" if score < -0.3 else ("tension" if score < 0.0 else ("cordial" if score < 0.4 else "allie"))
 	return res
+
+
+func _relier(a: Vector2i, b: Vector2i) -> void:
+	for paire in [[a, b], [b, a]]:
+		if not routes_par_cellule.has(paire[0]):
+			routes_par_cellule[paire[0]] = []
+		if not (paire[1] in routes_par_cellule[paire[0]]):
+			routes_par_cellule[paire[0]].append(paire[1])
+
+
+## Les cellules voisines reliées à celle-ci par une route (vide si aucune).
+func route_de(c: Vector2i) -> Array:
+	royaumes_secteur(secteur_de(c))
+	return routes_par_cellule.get(c, [])
+
+
+## Le chemin de sol d'une route dans la cellule : de la place (ou du centre) vers le milieu du bord de chaque voisine reliée.
+func _poser_route(e: Dictionary, cell: Vector2i) -> void:
+	var voisines: Array = route_de(cell)
+	if voisines.is_empty():
+		return
+	var taille: int = e.largeur
+	var b: Dictionary = biomes.get(e.biome, {})
+	var sol := str(b.get("village_palette", {}).get("sol", "calcaire"))
+	var depart: Vector2i = Vector2i(e.village.centre) if not e.village.is_empty() and e.village.has("centre") else Vector2i(taille / 2, taille / 2)
+	e["route"] = {}
+	for v in voisines:
+		var d: Vector2i = v - cell
+		var arrivee := Vector2i(taille / 2 + d.x * (taille / 2), taille / 2 + d.y * (taille / 2))
+		arrivee = Vector2i(clampi(arrivee.x, 0, taille - 1), clampi(arrivee.y, 0, taille - 1))
+		var q := depart
+		var garde := 0
+		while q != arrivee and garde < taille * 3:
+			garde += 1
+			q += Vector2i(signi(arrivee.x - q.x), 0) if absi(arrivee.x - q.x) > absi(arrivee.y - q.y) else Vector2i(0, signi(arrivee.y - q.y))
+			for dx in range(-1, 1):   # deux tuiles de large
+				var t := q + Vector2i(dx, 0) if d.y != 0 else q + Vector2i(0, dx)
+				var i := t.y * taille + t.x
+				if _dans(t, taille) and not e.eau.has(i) and not e.murs.has(i):
+					e.sols[i] = sol
+					_degager(e, i)
+					e.route[i] = true
 
 
 func _tirer_pondere(poids: Dictionary, rng: RandomNumberGenerator) -> String:
@@ -514,6 +606,7 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 	e["village"] = {}
 	if bool(poi.get("village", false)):
 		_poser_village(e, Vector2i(cx, cy), rng)
+	_poser_route(e, Vector2i(cx, cy))
 	for d in [e.arbres, e.rochers, e.filons, e.eau]:
 		for i in d.keys():
 			e.sol.erase(i)

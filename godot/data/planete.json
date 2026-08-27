@@ -113,7 +113,9 @@
     ]
   },
   "voyage": {
-    "ticks_par_cellule": 384
+    "ticks_par_cellule": 384,
+    "route_mult": 0.6,
+    "_doc": "Voyage rapide (Carte du monde) : ticks par cellule ; route_mult quand départ et arrivée sont sur une route."
   },
   "corruption": {
     "_doc": "Dérive de la corruption (E.20) : delta borné, infection par foyer actif, plafonds mineur/majeur, nettoyage, répit, décroissance, civilisation, grâce après nettoyage.",

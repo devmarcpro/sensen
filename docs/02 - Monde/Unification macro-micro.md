@@ -64,6 +64,9 @@ continues f(x, z) sur les coordonnées MONDE (en tuiles).
 > [!success] Codé le 2026-08-28 — les POI par cellule (`Surface.poi_de`)
 > Tirage déterministe `hash(seed, cx, cy)` sur les cellules terrestres, aux **densités par défaut** de la note pondérées par `poi_weights` du biome : **donjon 6 %**, **filon majeur 6 %** (un amas de 20 à 40 tuiles de filon) — codés ; villages, camps de monstres et sanctuaires attendent les PNJ (étape 9) et sont notés dans `planete.poi` avec leur densité. La cellule de départ porte toujours un donjon (décision : la boucle d'expédition doit être à portée dès la première heure).
 
+> [!success] Codé le 2026-08-28 — les routes
+> Décision (la note ne disait que « routes générées, bruit + A* sur les pentes ») : les routes sont **à l'échelle des cellules**, dans un royaume — chaque village du territoire est relié à la capitale par le **plus court chemin à coût** (danger et altitude renchérissent, même coût que la croissance du territoire), calculé avec le secteur (`Surface.routes_par_cellule`, `route_de(cell)` = cellules voisines reliées). **Dans la cellule**, `_poser_route` trace un **chemin de sol** (le sol de la palette de village du biome, arbres et rochers dégagés, sans toucher au relief) de la place du village — ou du centre — vers le milieu du bord de chaque voisine reliée. La carte du monde dessine les routes en traits ocre. Les routes entre royaumes attendent (les frontières de secteur aussi).
+
 ## Liens
 - **Dépend de** : [[Génération par couches de bruit]], [[Catalogue des couches de bruit]], [[Grille continue]]
 - **Alimente** : [[Décision — Monde fini, continents et océan]], [[Carte du monde]], [[Biomes — schéma]], [[Génération de donjon]], [[Génération des royaumes PNJ]], [[Eau et liquides]]

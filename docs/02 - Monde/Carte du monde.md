@@ -29,6 +29,9 @@ La couche stratégique : une vue abstraite de la même grille, servant de voyage
 > [!success] Codé le 2026-08-28 — étape 8.3a, `scenes/demo/carte.gd` (touche **M**)
 > Une case par cellule, **33×33 cellules** autour du joueur (flèches pour défiler), le **biome échantillonné au centre** de la cellule (`couleur` du biome), la **heat-map de danger en trois niveaux** (paisible / dangereuse / mortelle, seuils `planete.danger`, teinte orange puis rouge), les **icônes des POI** (donjon : carré cerclé d'or ; filon majeur : point clair), le camp et la cellule courante cerclés. Les cellules jamais explorées sont assombries. **Voyage rapide** : cliquer une cellule **de terre déjà explorée** (au moins un chunk vu) — le joueur y arrive au centre marchable, le temps in-game avance de `planete.voyage.ticks_par_cellule` × distance (décision : 384 ticks par cellule, soit 128 tuiles à 3 ticks ; le ×0,6 des routes attend les routes) ; la mer reste un obstacle. La carte est un résumé, jamais une source de vérité : elle relit la surface.
 
+> [!success] Codé le 2026-08-28 — les routes sur la carte et le voyage
+> Traits ocre entre cellules reliées ; **voyage rapide ×0,6** quand départ et arrivée sont sur une route (sans véhicule — le facteur des véhicules attend).
+
 ## Liens
 - **Dépend de** : [[Décision — Monde fini, continents et océan]], [[Grille continue]], [[Unification macro-micro]], [[Génération par couches de bruit]]
 - **Alimente** : [[Début de partie]], [[Boucle de jeu]], [[Donjons — structure et intégration]], [[Minimap et brouillard de guerre]]

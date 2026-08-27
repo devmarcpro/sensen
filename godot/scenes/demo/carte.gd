@@ -106,6 +106,16 @@ func _dessiner() -> void:
 			if cell == cj:
 				dessin.draw_rect(r.grow(-3), Color(0.3, 0.8, 1.0), false, 2.0)
 	dessin.draw_string(ThemeDB.fallback_font, o + Vector2(0, N * CASE + 20), tr("ui.carte.legende"), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.85, 0.85, 0.8))
+	# Les routes : un trait ocre entre cellules reliées (Unification macro-micro).
+	for y in N:
+		for x in N:
+			var cell := centre + Vector2i(x, y) - Vector2i(N / 2, N / 2)
+			if not surf.terre_a(cell):
+				continue
+			var c0 := o + Vector2(x * CASE + CASE * 0.5, y * CASE + CASE * 0.5)
+			for v in surf.route_de(cell):
+				var dv: Vector2i = v - cell
+				dessin.draw_line(c0, c0 + Vector2(dv.x, dv.y) * CASE * 0.5, Color(0.85, 0.7, 0.4, 0.9), 2.0)
 	# Les noms des royaumes sur leur capitale (la carte politique se lit avant toute visite — Génération des royaumes PNJ).
 	for y in N:
 		for x in N:

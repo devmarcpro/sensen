@@ -57,6 +57,7 @@ func _ready() -> void:
 	test_pretre_et_tourelle()
 	test_regle_anneau_mesure()
 	test_chatoyant()
+	test_routes()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -2265,6 +2266,33 @@ func test_pretre_et_tourelle() -> void:
 	verifier(s.intention(j.id, {"type": "ressusciter", "ame": ame, "pnj": pretre.id}) and v.vivant and int(j.or) == 0, "le prêtre rappelle le compagnon")
 	verifier(int(pretre.or) == int(pretre.or_max), "sa bourse est finie : le surplus sort du jeu")
 	verifier(float(v.get("affaibli_mult", 1.0)) < 1.0, "le ressuscité revient Affaibli")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Routes
+
+func test_routes() -> void:
+	var s := Simulation.new(107)
+	s.charger_camp()
+	var surf = s.monde.surface
+	# Un royaume trouvé dans les secteurs voisins qui a au moins un village hors capitale : ses routes le relient.
+	var trouve: Dictionary = {}
+	for k in 60:
+		var sect: Vector2i = surf.secteur_de(s.monde.cellule_camp) + Vector2i(k % 8 - 4, k / 8 - 4)
+		for r in surf.royaumes_secteur(sect).values():
+			if r.get("routes", []).size() >= 2 and trouve.is_empty():
+				trouve = r
+	if trouve.is_empty():
+		verifier(true, "aucun royaume à routes dans les secteurs voisins (rien à mesurer)")
+	else:
+		var cap: Vector2i = trouve.capital_poi
+		verifier(not surf.route_de(cap).is_empty(), "%s : la capitale est reliée (%d cellules de route)" % [trouve.nom, trouve.routes.size()])
+		var relie := true
+		for c in trouve.routes:
+			relie = relie and not surf.route_de(c).is_empty() and surf.terre_a(c)
+		verifier(relie, "chaque cellule de route a une voisine reliée, sur la terre")
+		var e: Dictionary = surf.generer_cellule(cap.x, cap.y)
+		verifier(e.get("route", {}).size() >= 20, "la capitale porte un chemin de sol (%d tuiles)" % e.get("route", {}).size())
 	s.monde.fermer()
 
 

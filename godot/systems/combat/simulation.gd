@@ -723,6 +723,8 @@ func voyager(e: Dictionary, cell: Vector2i) -> bool:
 		return false
 	var d := maxi(absi(cell.x - monde.cellule_de(e.pos).x), absi(cell.y - monde.cellule_de(e.pos).y))
 	var cout := d * int(GameData.config("planete").voyage.ticks_par_cellule)
+	if not monde.surface.route_de(cell).is_empty() and not monde.surface.route_de(monde.cellule_de(e.pos)).is_empty():   # par la route (Carte du monde)
+		cout = int(round(float(cout) * float(GameData.config("planete").voyage.get("route_mult", 1.0))))
 	var ec := monde.cellule(cell)
 	var ou: Vector2i = monde.pos_monde(cell, ec.entree_donjon + Vector2i(0, 1)) if bool(ec.get("a_donjon", false)) else monde.point_marchable(cell)
 	grille.liberer(e.pos)
@@ -2482,6 +2484,8 @@ func _heure_boutique(t: int) -> void:
 		if stock.is_empty():
 			continue
 		var trafic := (float(b.clients_base) + float(b.par_habitant) * float(population_autour(monde.cellule_de(pm)))) * (1.0 + float(rep) / 100.0)
+		if not monde.surface.route_de(monde.cellule_de(pm)).is_empty():   # l'accessibilité (Boutique passive)
+			trafic *= float(b.get("route_mult", 1.0))
 		territoire.clients = float(territoire.clients) + trafic
 		var rng := RandomNumberGenerator.new()
 		rng.seed = hash([graine, t, pm])

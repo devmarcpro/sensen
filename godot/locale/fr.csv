@@ -863,7 +863,7 @@ journal.donjon_disparu,"l'entrée du donjon s'est effondrée en ({x},{y})"
 journal.donjon_reapparu,"un donjon est réapparu en ({x},{y})"
 ui.carte.titre,=== CARTE DU MONDE — clic : voyage rapide vers une cellule explorée · flèches : défiler · M/Échap : fermer ===
 ui.carte.depart,=== CHOISIS TA CASE DE DÉPART — clic sur une cellule de terre (couleur : biome · orange/rouge : danger · carré doré : donjon) ===
-ui.carte.legende,"vert cerclé : ton camp · bleu cerclé : ici · carré doré : donjon · point clair : filon majeur · sombre : jamais explorée"
+ui.carte.legende,"trait ocre : route · vert cerclé : ton camp · bleu cerclé : ici · carré doré : donjon · point clair : filon majeur · sombre : jamais explorée"
 journal.voyage,"{nom} voyage jusqu'en ({x},{y}) : {ticks} ticks"
 journal.voyage_impossible,voyage impossible : cellule inexplorée ou en mer
 journal.depart_choisi,"le camp est établi en ({x},{y}) — {biome}"
