@@ -33,6 +33,9 @@ malus_vitesse_deplacement = f(poids_total_porté / capacite)
 
 **Effets de loot ([[Effets d'équipement types]]) :** `capacite_poids +10..+40` ; affixe mécanique « +[10-30] capacité ».
 
+> [!success] Codé le 2026-08-28 — capacité et surcharge (`combat_rules.poids`)
+> `capacite = 30 + Force × 5`, sac et équipement compris. Poids d'un objet : son champ `poids` s'il existe, sinon `poids_reference` de sa fonctionnalité, le poids de sa station, et pour un matériau **densité / 4 par unité** (un lingot de fer 3, une planche de chêne 1,5) ; meuble 8, armure 6, autre 1 (décision — les notes ne pèsent pas les objets). **Décision sur `f`** (jamais définie) : sans malus jusqu'à la capacité, puis `ticks de déplacement × (1 + (ratio − 1) × 2)`, plafonné ×3 — appliqué sur les ticks issus d'Athlétisme, jamais sur une stat. Dépasser après un retrait n'éjecte rien. Affiché dans l'en-tête et l'inventaire ; les affixes `capacite_poids` viennent avec le loot.
+
 ## Liens
 - **Dépend de** : [[Stats de personnage]], [[Qualité d'artisanat]], [[Matériaux — 13 stats]]
 - **Alimente** : [[Cinq accès au cycle]], [[Stations de transformation]], [[Équipement — 14 slots]], [[Eau et liquides]]

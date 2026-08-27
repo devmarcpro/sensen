@@ -29,6 +29,9 @@ Manger restaure selon l'aliment (valeur nutritive en données).
 
 **Tooltip contextuel ([[Tooltips contextuels]]) :** *faim < 60 la première fois → manger*.
 
+> [!success] Codé le 2026-08-28 — `combat_rules.faim`, `Simulation._tiquer_faim`
+> La jauge telle quelle : 0-100, départ 100, **−1 par 900 ticks** (90 s à 10 ticks/s d'exploration), tickée en phase 2 sur l'horloge du monde, jamais par delta d'image. Seuils : `< 50` régénération de santé −10 % (il n'y a pas encore de régénération de santé hors sommeil : l'effet est en données, sans prise), `< 25` **−10 % à toutes les stats** (appliqué dans `Etres.recalculer`, donc aussi aux maxima dérivés), `= 0` −1 % de santé max par 300 ticks, jamais sous 1 PV. `faim_vitesse` d'équipement : le multiplicateur est lu sur `e.faim_vitesse` (les affixes qui le posent viennent avec le loot). Manger : intention `manger`, valeur nutritive en données.
+
 ## Liens
 - **Dépend de** : [[Agriculture et élevage]], [[Boucle de tick]]
 - **Alimente** : [[Cuisine et alchimie]], [[Nourriture, potentiel et potions]], [[Faim des PNJ]]

@@ -257,5 +257,27 @@
       "brique"
     ],
     "porte_famille": "bois"
-  }
+  },
+  "faim": {
+    "_doc": "Faim (docs: Faim) : jauge 0-100, −1 par ticks_par_point ; seuils : sous_50 → régén santé ×0.9 (sans prise encore), sous_25 → stats ×0.9, zero → −pct_sante_max % de santé max par periode_zero ticks.",
+    "ticks_par_point": 900,
+    "seuil_regen": 50,
+    "seuil_stats": 25,
+    "malus_stats": 0.9,
+    "periode_zero": 300,
+    "pct_sante_max": 1,
+    "tooltip_seuil": 60
+  },
+  "poids": {
+    "_doc": "Poids porté (docs: Armures et poids porté) : capacite = base + force × par_force ; poids d'un matériau = densité / densite_div par unité ; surcharge : ticks × (1 + (ratio − 1) × pente), plafond.",
+    "base": 30,
+    "par_force": 5,
+    "densite_div": 4.0,
+    "meuble": 8,
+    "armure": 6,
+    "defaut": 1,
+    "pente": 2.0,
+    "plafond": 3.0
+  },
+  "cru_facteur": 0.5
 }

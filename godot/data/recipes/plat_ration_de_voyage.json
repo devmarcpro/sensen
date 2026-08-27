@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.plat_ration_de_voyage.name",
+  "station": "cuisine",
+  "craft_skill": "cuisine",
+  "inputs": [
+    {
+      "item": "viande_grillee",
+      "forme": "",
+      "amount": 1
+    },
+    {
+      "item": "baies",
+      "forme": "",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "ration_de_voyage",
+    "amount": 2
+  },
+  "fuel": null
+}

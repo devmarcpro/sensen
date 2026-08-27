@@ -38,5 +38,8 @@
   ],
   "competences": {
     "athletisme": 40
-  }
+  },
+  "depouille": [
+    "viande_crue"
+  ]
 }

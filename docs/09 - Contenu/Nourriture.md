@@ -20,6 +20,9 @@ Pain (+20 faim) · Ragoût (+35 faim, +5 PV) · Viande grillée (+30 faim) · Vi
 
 **Plats cuisinés :** les recettes de cuisine combinent des ingrédients en plats, dont les bonus de potentiel dérivent des ingrédients — voir [[Cuisine et alchimie]] et [[Plantes]].
 
+> [!success] Codé le 2026-08-28 — les 18 consommables en `data/items/` (type `consommable`)
+> Champs : `nutrition` (faim rendue), `soin_des`, `mana`, `statut` + `statut_ticks` (Hâte, Saignement stoppé…), `risque` (Infection 20 % pour la viande crue, Poison 30 % pour la ration moisie), `potentiel` (bonus par stat, les plats seulement — [[Nourriture, potentiel et potions]]), `cru` (50 % de nutrition, aucun potentiel). La torche reste un objet de main (luminosité) sans durée. **Sources** : la viande crue est la **dépouille** des animaux (`depouille` dans `data/creatures/` : loup, sanglier, aigle, scorpion — les viandes paramétriques attendent l'étape 10), le reste tombe des coffres de donjon (`loot_rules.bases_consommables`). Plats à la **Cuisine** (`data/recipes/plat_*`) : viande grillée, ragoût, ration de voyage, avec une **qualité A.3** sur la compétence Cuisine qui multiplie le potentiel (formule de [[Nourriture, potentiel et potions]] : `potentiel × nutrition/100 × qualité`).
+
 ## Liens
 - **Dépend de** : [[Faim]], [[Cuisine et alchimie]], [[Nourriture, potentiel et potions]]
 - **Alimente** : [[Statuts]], [[Potentiel]], [[Faim des PNJ]]

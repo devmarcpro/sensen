@@ -127,6 +127,36 @@
     },
     "meuble": {
       "type": "string"
+    },
+    "nutrition": {
+      "type": "integer"
+    },
+    "soin_des": {
+      "type": "string"
+    },
+    "mana": {
+      "type": "integer"
+    },
+    "statut": {
+      "type": "string"
+    },
+    "statut_ticks": {
+      "type": "integer"
+    },
+    "risque": {
+      "type": "object"
+    },
+    "potentiel": {
+      "type": "object"
+    },
+    "cru": {
+      "type": "boolean"
+    },
+    "poids": {
+      "type": "number"
+    },
+    "luminosite": {
+      "type": "integer"
     }
   },
   "required": [

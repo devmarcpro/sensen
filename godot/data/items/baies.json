@@ -1,0 +1,19 @@
+{
+  "name_key": "item.baies.name",
+  "type": "consommable",
+  "equip_slot": "",
+  "nutrition": 8,
+  "soin_des": "",
+  "mana": 0,
+  "statut": "",
+  "statut_ticks": 0,
+  "risque": {},
+  "potentiel": {},
+  "cru": false,
+  "poids": 0,
+  "quantite": 1,
+  "tags": [
+    "consommable",
+    "empilable"
+  ]
+}

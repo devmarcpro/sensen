@@ -399,6 +399,41 @@ journal.pas_de_station,aucune station dans le sac pour {recette}
 ui.atelier,=== ATELIER (F pour fermer) — chiffre : fabriquer ===
 ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
+item.pain.name,Pain
+item.ragout.name,Ragoût
+item.viande_grillee.name,Viande grillée
+item.viande_crue.name,Viande crue
+item.poisson_grille.name,Poisson grillé
+item.baies.name,Baies
+item.champignon_bleu.name,Champignon bleu
+item.fruit_de_mana.name,Fruit de mana
+item.ration_de_voyage.name,Ration de voyage
+item.ration_moisie.name,Ration moisie
+item.fiole_de_soin.name,Fiole de soin
+item.grande_fiole_de_soin.name,Grande fiole de soin
+item.essence_de_mana.name,Essence de mana
+item.antidote.name,Antidote
+item.bandage.name,Bandage
+item.elixir_de_hate.name,Élixir de hâte
+item.huile_d_arme.name,Huile d'arme
+item.torche.name,Torche
+recipe.plat_viande_grillee.name,Griller la viande
+recipe.plat_ragout.name,Mijoter un ragoût
+recipe.plat_ration_de_voyage.name,Préparer des rations
+ui.faim,faim {faim}/100
+ui.poids,"poids {poids}/{capacite}{surcharge}"
+ui.poids.surcharge," · SURCHARGE ×{facteur}"
+ui.ecran.manger,Manger (G)
+journal.mange,"{nom} mange {objet} : faim {faim}/100{extra}"
+journal.pas_comestible,ce n'est pas comestible
+journal.potentiel_plat,"{nom} : +{n} de potentiel en {stat} (le plat)"
+journal.affame,{nom} est affamé : la faim ronge la santé
+journal.faim_stats,{nom} a faim : −10 % à toutes les stats
+ui.objet.consommable,"consommable : nutrition {nutrition} · soin {soin} · mana {mana} · {statut} · potentiel {potentiel}{cru}"
+ui.objet.consommable.cru," · cru (50 %, sans potentiel, risque)"
+ui.objet.poids,poids {poids}
+journal.huile,{nom} huile son arme : +1d4 feu au prochain combat
+journal.purge,{nom} est soigné de : {statut}
 meuble.lit.name,Lit
 recipe.meuble_lit.name,Fabriquer : Lit
 meuble.lit_de_paille.name,Lit de paille
@@ -560,7 +595,7 @@ slotc.plaque,plaque
 slotc.sangles,sangles
 slotc.divers,divers
 ui.ecran.fermer,Fermer (Échap)
-ui.ecran.inventaire,"INVENTAIRE — {n} objets dans le sac (E : équiper/retirer · J : jeter · L : lire · T : sertir · au camp : P poser, M mur, O porte, R ranger)"
+ui.ecran.inventaire,"INVENTAIRE — {n} objets dans le sac (E : équiper/retirer · J : jeter · L : lire · T : sertir · au camp : P poser, M mur, O porte, R ranger · G : manger)"
 ui.ecran.sac,sac
 ui.ecran.slot_vide,(emplacement vide)
 ui.ecran.equiper,Équiper / retirer (E)

@@ -29,6 +29,9 @@ POTION : intensité = effet_base * qualite_potion (A.3, Alchimie)
 
 **Statut Infection ([[Statuts]]) :** Endurance −2/jour jusqu'à soin — maladie longue. Viande crue = 20 % de risque d'infection ([[Nourriture]]).
 
+> [!success] Précisé le 2026-08-28
+> La formule du plat est codée à l'étape 7 avec des bonus **fixes** en données (`potentiel` du consommable) : `potentiel_gagné = Σ bonus × nutrition/100 × qualité(A.3 Cuisine)`, cap 200. Les viandes paramétriques, le ×1,2 des cinq éléments et les potions attendent l'étape 10.
+
 ## Liens
 - **Dépend de** : [[Cuisine et alchimie]], [[Qualité d'artisanat]], [[Potentiel]], [[Faim]]
 - **Alimente** : [[Potions]], [[Nourriture]], [[Statuts]]

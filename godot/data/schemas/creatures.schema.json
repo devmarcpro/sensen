@@ -147,6 +147,9 @@
     },
     "competences": {
       "type": "object"
+    },
+    "depouille": {
+      "type": "array"
     }
   },
   "required": [

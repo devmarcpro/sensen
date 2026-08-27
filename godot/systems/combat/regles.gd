@@ -62,6 +62,37 @@ func ticks_attaque(fonct: Dictionary, lourde: bool, arme: Dictionary = {}) -> in
 	return maxi(1, t) * int(r.actions.lourde_mult_ticks) if lourde else maxi(1, t)
 
 
+## Poids porté (Armures et poids porté) : capacité = base + Force × par_force.
+func capacite_poids(stats: Dictionary) -> float:
+	return float(r.poids.base) + float(stats.force) * float(r.poids.par_force)
+
+
+## Le poids d'un objet : champ `poids`, sinon la fonctionnalité, la station, la densité du matériau.
+func poids_objet(it: Dictionary, fonctionnalites: Dictionary) -> float:
+	if it.has("poids"):
+		return float(it.poids) * float(it.get("quantite", 1))
+	match str(it.get("type", "")):
+		"materiau":
+			var mat: Dictionary = GameData.catalogues.materials.get(str(it.get("materiau", "")), {})
+			return float(mat.get("stats", {}).get("densite", 4)) / float(r.poids.densite_div) * float(it.get("quantite", 1))
+		"station":
+			return float(GameData.catalogues.stations.get(str(it.get("station", "")), {}).get("poids", r.poids.defaut))
+		"meuble":
+			return float(r.poids.meuble)
+		"armure":
+			return float(r.poids.armure)
+		_:
+			var f: Dictionary = fonctionnalites.get(str(it.get("functionality", "")), {})
+			return float(f.get("poids_reference", r.poids.defaut))
+
+
+## Le facteur de surcharge sur les ticks de déplacement : 1 jusqu'à la capacité, puis croissant, plafonné.
+func facteur_surcharge(poids: float, capacite: float) -> float:
+	if capacite <= 0.0 or poids <= capacite:
+		return 1.0
+	return minf(float(r.poids.plafond), 1.0 + (poids / capacite - 1.0) * float(r.poids.pente))
+
+
 ## Qualité d'artisanat (A.3) : max(min, N/(N+pivot) × max × aléa[a, b]) — composants, plats, potions.
 func qualite_craft(niveau: int, rng: RandomNumberGenerator) -> float:
 	var q: Dictionary = r.craft.qualite

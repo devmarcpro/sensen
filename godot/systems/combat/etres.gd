@@ -50,6 +50,7 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 		"classe": def.get("classe", ""),
 		"competences_eff": def.get("competences", {}).duplicate(),
 		"sac": [],                                                  # uids des objets portés non équipés
+		"faim": 100, "faim_tick": 0,                                # la jauge de faim (Faim), tickée par la simulation
 		"tags_acquis": [],                                          # grant_tag des effets passifs
 		"tags_acquis_race": def.get("tags_acquis_race", []).duplicate(),   # ceux du talent de race
 		"rare": false,                                              # variante rare (Monstres rares)
@@ -168,6 +169,9 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 					mana_bonus += int(t.valeur)
 				"endurance_max":
 					endurance_bonus += int(t.valeur)
+	if int(e.get("faim", 100)) < int(regles.r.faim.seuil_stats):   # Faim < 25 : −10 % à toutes les stats
+		for k in stats.keys():
+			stats[k] = maxi(1, roundi(float(stats[k]) * float(regles.r.faim.malus_stats)))
 	e.stats_eff = stats
 	e.competences_eff = comp
 	e.tags_acquis = tags

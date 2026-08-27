@@ -31,6 +31,7 @@ func _ready() -> void:
 	test_assemblage()
 	test_desequiper_jeter()
 	test_camp()
+	test_faim_et_poids()
 	test_donjon()
 	test_loot()
 	test_coffres_et_rares()
@@ -1010,7 +1011,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 34, "9 stations, 34 recettes plates (9 transformations, 16 meubles, 9 stations)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 37, "9 stations, 37 recettes plates (9 transformations, 16 meubles, 9 stations, 3 plats)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -1190,6 +1191,71 @@ func test_camp() -> void:
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "remonter"}), "ressortir par l'entrée de l'étage 1")
 	verifier(s.lieu == "camp" and s.grille.meubles.get(s.grille.idx(devant), "") == "lit_de_paille" and s.contenants[s.grille.idx(ou)] == [pioche], "retour au camp : le lit et le coffre sont toujours là")
+
+
+# ---------------------------------------------------------------- Étape 7.2 : faim, nourriture, poids porté
+
+func test_faim_et_poids() -> void:
+	var s := Simulation.new(29)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var f: Dictionary = GameData.config("combat_rules").faim
+	verifier(int(j.faim) == 100, "la faim part à 100")
+	s.horloge_monde.avancer(int(f.ticks_par_point) * 3)
+	verifier(int(j.faim) == 97, "−1 par 900 ticks (%d)" % int(j.faim))
+	var force0: int = int(j.stats_eff.force)
+	j.faim = 30
+	s.horloge_monde.avancer(int(f.ticks_par_point) * 10)
+	verifier(int(j.faim) == 20 and int(j.stats_eff.force) == maxi(1, roundi(force0 * 0.9)), "sous 25 : −10 %% aux stats (Force %d → %d)" % [force0, int(j.stats_eff.force)])
+	j.faim = 0
+	var pv0: int = int(j.sante)
+	s.horloge_monde.avancer(int(f.periode_zero) * 3)
+	verifier(int(j.sante) < pv0 and int(j.sante) >= 1, "à zéro : la santé max s'érode, jamais sous 1 PV (%d → %d)" % [pv0, int(j.sante)])
+	# Manger : une viande crue (cru : 50 %), puis un ragoût (potentiel).
+	var viande := s.generer_objet("viande_crue", 1, {}, "commun", 0)
+	j.sac.append(viande.uid)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "manger", "objet": viande.uid}), "manger la viande crue")
+	verifier(int(j.faim) == 7 or int(j.faim) == 8, "cru : la moitié de 15 (%d)" % int(j.faim))
+	var ragout := s.generer_objet("ragout", 1, {}, "commun", 0)
+	ragout.qualite = 1.0
+	j.sac.append(ragout.uid)
+	var pot_force: int = int(j.potentiels.get("force", 80))
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "manger", "objet": ragout.uid}), "manger le ragoût")
+	verifier(int(j.faim) >= 42 and int(j.stats_eff.force) == force0, "le ragoût nourrit (+35) et lève le malus")
+	verifier(int(j.potentiels.get("force", 80)) == pot_force + roundi(1.0 * 35.0 / 100.0 * 1.0) or int(j.potentiels.get("force", 80)) == pot_force, "potentiel du plat : bonus × nutrition/100 × qualité (arrondi)")
+	# Cuisiner : viande crue → viande grillée à la Cuisine.
+	j.sac.append(s.generer_objet("station_cuisine", 1, {}, "commun", 0).uid)
+	var v2 := s.generer_objet("viande_crue", 1, {}, "commun", 0)
+	j.sac.append(v2.uid)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "fabriquer", "recette": "plat_viande_grillee"}), "griller la viande")
+	var grillee := s._pile_objet(j, "viande_grillee")
+	verifier(not grillee.is_empty() and float(grillee.qualite) > 0.0 and s._pile_objet(j, "viande_crue").is_empty(), "une viande grillée avec sa qualité Cuisine, la crue consommée")
+	# Poids porté : capacité 30 + Force × 5 ; une forge (80) écrase un humain Force 5.
+	var pd: Dictionary = s.poids_de(j)
+	verifier(is_equal_approx(pd.capacite, 30.0 + float(j.stats_eff.force) * 5.0), "capacité = 30 + Force × 5 (%.0f)" % pd.capacite)
+	verifier(pd.facteur == 1.0, "pas de surcharge au départ (poids %.1f)" % pd.poids)
+	j.sac.append(s.generer_objet("station_forge", 1, {}, "commun", 0).uid)
+	pd = s.poids_de(j)
+	verifier(pd.facteur > 1.0 and pd.facteur <= 3.0, "avec une forge : surcharge ×%.2f" % pd.facteur)
+	var libre: Vector2i = j.pos + Vector2i(1, 0)
+	s.attente[j.id] = true
+	var t0: int = s.horloge_monde.ticks
+	s.intention(j.id, {"type": "deplacer", "vers": libre})
+	var ticks_charge: int = j.compteur - t0
+	verifier(ticks_charge > int(s.regles.ticks_deplacement(s.grille.cout_pas(libre - Vector2i(1, 0), libre), j.competences_eff, false)), "le déplacement coûte plus de ticks en surcharge (%d)" % ticks_charge)
+	# La dépouille : un loup mort laisse de la viande crue.
+	var loup := s.ajouter("loup", j.pos + Vector2i(3, 3), "ia")
+	loup.sante = 1
+	s._appliquer_degats(loup, 5, j.id, {"type": "test"})
+	var idx := s.grille.idx(loup.pos)
+	var viande_au_sol := false
+	for uid in s.contenants.get(idx, []):
+		if s.items[uid].get("base", "") == "viande_crue":
+			viande_au_sol = true
+	verifier(viande_au_sol, "un loup mort laisse sa viande")
 
 
 # ---------------------------------------------------------------- brouillard de guerre

@@ -141,6 +141,10 @@ func touche(ev: InputEventKey) -> bool:
 			if courant == "inventaire":
 				_ranger()
 				return true
+		KEY_G:
+			if courant == "inventaire":
+				_manger()
+				return true
 	return false
 
 
@@ -234,6 +238,7 @@ func _construire_inventaire(j: Dictionary) -> void:
 	_bouton(tr("ui.ecran.jeter"), _jeter)
 	_bouton(tr("ui.ecran.lire"), _lire)
 	_bouton(tr("ui.ecran.sertir"), _sertir)
+	_bouton(tr("ui.ecran.manger"), _manger)
 	if main.sim.lieu == "camp":
 		_bouton(tr("ui.ecran.poser"), _poser)
 		_bouton(tr("ui.ecran.mur"), func() -> void: _mur(false))
@@ -246,6 +251,8 @@ func _nom_court(uid: String) -> String:
 	var nom: String = main.nom_objet(main.sim.nom_objet(uid))
 	if it.get("type", "") == "materiau":
 		nom = tr("forme." + str(it.get("forme", "brut"))).format({"materiau": nom}) + " ×%d" % int(it.quantite)
+	elif int(it.get("quantite", 1)) > 1:
+		nom += " ×%d" % int(it.quantite)
 	return nom
 
 
@@ -289,6 +296,13 @@ func _devant(j: Dictionary) -> Vector2i:
 		if g.dans(v) and g.contenu_de(v).is_empty() and g.occupant(v).is_empty():
 			return v
 	return t
+
+
+func _manger() -> void:
+	var uid := _uid_selection()
+	if not uid.is_empty():
+		main.sim.intention(main.joueur().id, {"type": "manger", "objet": uid})
+		rafraichir()
 
 
 func _poser() -> void:
@@ -378,6 +392,13 @@ func texte_objet(uid: String) -> String:
 		l.append(tr("ui.objet.sertissures").format({"n": int(s.nombre), "contenu": str(s.contenu.size())}))
 	if it.has("livre"):
 		l.append(tr("ui.objet.livre").format({"domaine": tr("domaine." + str(it.livre.domaine)), "difficulte": int(it.livre.difficulte), "n": int(it.livre.n)}))
+	if it.get("type", "") == "consommable":
+		var pot: Array[String] = []
+		for stt in it.get("potentiel", {}).keys():
+			pot.append("%s +%d" % [tr(sim._nom_competence(str(stt))), int(it.potentiel[stt])])
+		l.append(tr("ui.objet.consommable").format({"nutrition": int(it.get("nutrition", 0)), "soin": str(it.get("soin_des", "")) if not str(it.get("soin_des", "")).is_empty() else "—", "mana": int(it.get("mana", 0)),
+			"statut": str(it.get("statut", "")) if not str(it.get("statut", "")).is_empty() else "—", "potentiel": " · ".join(pot) if not pot.is_empty() else "—", "cru": tr("ui.objet.consommable.cru") if bool(it.get("cru", false)) else ""}))
+	l.append(tr("ui.objet.poids").format({"poids": "%.1f" % sim.regles.poids_objet(it, sim.fonctionnalites)}))
 	if it.get("type", "") == "meuble":
 		var mb: Dictionary = GameData.entree("meubles", str(it.meuble))
 		var det: Array[String] = []

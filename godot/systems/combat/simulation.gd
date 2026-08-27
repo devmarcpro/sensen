@@ -327,6 +327,15 @@ func _donner_materiau(e: Dictionary, mat_id: String, quantite: int, forme: Strin
 	e.sac.append(inst.uid)
 
 
+## La pile d'objets empilables d'une base (consommables) dans le sac.
+func _pile_objet(e: Dictionary, base: String) -> Dictionary:
+	for uid in e.sac:
+		var it: Dictionary = items.get(uid, {})
+		if str(it.get("base", "")) == base and "empilable" in it.get("tags", []):
+			return it
+	return {}
+
+
 func _pile(e: Dictionary, mat_id: String, forme: String) -> Dictionary:
 	for uid in e.sac:
 		var it: Dictionary = items.get(uid, {})
@@ -733,6 +742,11 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 		var trouvee := {}
 		for uid in e.sac:
 			var it: Dictionary = items.get(uid, {})
+			if entree.has("item"):   # une entrée par objet (viande crue, baies…) : la pile de cette base
+				if str(it.get("base", "")) == str(entree.item) and int(it.get("quantite", 1)) >= besoin:
+					trouvee = it
+					break
+				continue
 			if it.get("type", "") != "materiau" or str(it.get("forme", "brut")) != forme or int(it.quantite) < besoin:
 				continue
 			var mat: Dictionary = GameData.catalogues.materials.get(str(it.materiau), {})
@@ -742,10 +756,10 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 				continue
 			trouvee = it
 			break
-		plan.entrees.append({"pile": trouvee, "besoin": besoin, "forme": forme, "filtre": str(entree.get("material", entree.get("category", "")))})
+		plan.entrees.append({"pile": trouvee, "besoin": besoin, "forme": forme, "filtre": str(entree.get("material", entree.get("category", entree.get("item", ""))))})
 		if trouvee.is_empty():
 			plan.faisable = false
-		elif mat_sortie.is_empty():
+		elif mat_sortie.is_empty() and trouvee.has("materiau"):
 			mat_sortie = str(trouvee.materiau)   # la sortie garde le matériau de l'entrée (lingot de fer…)
 	plan.sortie = {"materiau": mat_sortie, "forme": str(r.output.get("forme", "brut")), "quantite": int(r.output.amount), "item": str(r.output.get("item", ""))}
 	return plan
@@ -770,19 +784,29 @@ func _fabriquer(e: Dictionary, rid: String, tick: int) -> bool:
 		return false
 	var durete_entrees := 0
 	for entree in plan.entrees:
-		durete_entrees += int(GameData.catalogues.materials.get(str(entree.pile.materiau), {}).get("stats", {}).get("durete", 1))
+		durete_entrees += int(GameData.catalogues.materials.get(str(entree.pile.get("materiau", "")), {}).get("stats", {}).get("durete", 1))
 		_retirer_materiau(e, entree.pile, int(entree.besoin))
 	var sortie: Dictionary = plan.sortie
 	var n := regles.niveau(e.competences_eff, str(r.craft_skill))
 	e.compteur = tick + _ticks_avec_statuts(e, maxi(1, ceili(float(regles.r.craft.ticks_base) / regles.skill_factor(n))))
-	if r.output.has("item"):   # un objet fini (meuble, station) : XP = dureté des entrées
+	if r.output.has("item"):   # un objet fini (meuble, station, plat) : XP = dureté des entrées (10 par plat)
 		var nom_obj := ""
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash([graine, "plat", objets.size(), r.id])
 		for k in int(sortie.quantite):
 			var inst := generer_objet(str(r.output.item), 1, {}, "commun", 0)
 			if not inst.is_empty():
+				if inst.get("type", "") == "consommable":   # un plat : qualité A.3 sur Cuisine, empilé
+					inst.qualite = snappedf(regles.qualite_craft(regles.niveau(e.competences_eff, str(r.craft_skill)), rng), 0.01)
+					var pile := _pile_objet(e, str(r.output.item))
+					if not pile.is_empty():
+						pile.quantite = int(pile.quantite) + 1
+						items.erase(inst.uid)
+						nom_obj = pile.name_key
+						continue
 				e.sac.append(inst.uid)
 				nom_obj = inst.name_key
-		gagner_xp(e, str(r.craft_skill), durete_entrees)
+		gagner_xp(e, str(r.craft_skill), maxi(10, durete_entrees))
 		EventBus.emettre(&"journal", [&"journal.fabrique", {"nom": e.name_key, "quantite": int(sortie.quantite), "objet": nom_obj, "recette": r.name_key}])
 		return true
 	_donner_materiau(e, sortie.materiau, int(sortie.quantite), sortie.forme)
@@ -905,6 +929,14 @@ func generer_objet(base_id: String, profondeur: int, provenance: Dictionary = {}
 ## Donne un objet à un être (dans son sac).
 func donner(e: Dictionary, uid: String) -> void:
 	if items.has(uid) and not (uid in e.sac):
+		var it: Dictionary = items[uid]
+		if "empilable" in it.get("tags", []) and it.get("type", "") == "consommable":
+			var pile := _pile_objet(e, str(it.get("base", "")))
+			if not pile.is_empty():
+				pile.quantite = int(pile.quantite) + int(it.get("quantite", 1))
+				items.erase(uid)
+				EventBus.emettre(&"journal", [&"journal.loot", {"nom": e.name_key, "objet": nom_objet(pile.uid)}])
+				return
 		e.sac.append(uid)
 		EventBus.emettre(&"journal", [&"journal.loot", {"nom": e.name_key, "objet": nom_objet(uid)}])
 
@@ -1150,6 +1182,11 @@ func _drop(cible: Dictionary, source: String) -> void:
 		var o := generer_objet(str(loot._base_pour(rng)), profondeur, {"creature": cible.name_key})
 		if not o.is_empty():
 			uids.append(o.uid)
+	# La dépouille (Nourriture : la viande crue des animaux, en attendant les viandes paramétriques).
+	for base in GameData.catalogues.creatures.get(str(cible.def), {}).get("depouille", []):
+		var v := generer_objet(str(base), profondeur, {"creature": cible.name_key}, "commun", 0)
+		if not v.is_empty():
+			uids.append(v.uid)
 	# Ce que le mort portait tombe aussi (l'équipement est une donnée d'instance).
 	for slot in cible.equipement.keys():
 		var uid: String = str(cible.equipement[slot])
@@ -1219,6 +1256,98 @@ func _sur_avancee_monde(_de: int, _a: int) -> void:
 	var garde_fou := 64
 	while garde_fou > 0 and pas("monde"):
 		garde_fou -= 1
+	_tiquer_faim(horloge_monde.ticks)
+
+
+## La faim (Faim) : −1 par `ticks_par_point` sur l'horloge du monde, pour les êtres qui ont une jauge
+## (les joueurs) ; à zéro, la santé max s'érode ; sous le seuil, les stats baissent (Etres.recalculer).
+func _tiquer_faim(tick: int) -> void:
+	var f: Dictionary = regles.r.faim
+	for e in vivants():
+		if e.controle != "joueur":
+			continue
+		if not e.has("faim"):
+			e["faim"] = 100
+			e["faim_tick"] = tick
+		var periode := int(float(f.ticks_par_point) / float(e.get("faim_vitesse", 1.0)))
+		var points := tick / periode - int(e.faim_tick) / periode
+		if points > 0:
+			var avant := int(e.faim)
+			e.faim = maxi(0, int(e.faim) - points)
+			if avant >= int(f.seuil_stats) and int(e.faim) < int(f.seuil_stats):
+				Etres.recalculer(e, items, affixes_defs, regles)
+				EventBus.emettre(&"journal", [&"journal.faim_stats", {"nom": e.name_key}])
+			if avant > 0 and int(e.faim) == 0:
+				EventBus.emettre(&"journal", [&"journal.affame", {"nom": e.name_key}])
+		if int(e.faim) == 0:
+			var pz := int(f.periode_zero)
+			var coups := tick / pz - int(e.faim_tick) / pz
+			if coups > 0:
+				e.sante = maxi(1, int(e.sante) - coups * maxi(1, int(e.sante_max) * int(f.pct_sante_max) / 100))
+		e.faim_tick = tick
+
+
+## Le poids porté et la capacité d'un être (Armures et poids porté).
+func poids_de(e: Dictionary) -> Dictionary:
+	var total := 0.0
+	for uid in e.sac:
+		total += regles.poids_objet(items.get(uid, {}), fonctionnalites)
+	for slot in e.equipement.keys():
+		total += regles.poids_objet(items.get(e.equipement[slot], {}), fonctionnalites)
+	var cap := regles.capacite_poids(e.stats_eff)
+	return {"poids": total, "capacite": cap, "facteur": regles.facteur_surcharge(total, cap)}
+
+
+## Manger un consommable du sac (Nourriture) : nutrition, soin, mana, statut, risque, potentiel du plat.
+func _manger(e: Dictionary, uid: String, tick: int) -> bool:
+	var it: Dictionary = items.get(uid, {})
+	if not (uid in e.sac) or it.get("type", "") != "consommable":
+		EventBus.emettre(&"journal", [&"journal.pas_comestible", {}])
+		return false
+	if not e.has("faim"):
+		e["faim"] = 100
+		e["faim_tick"] = tick
+	var cru := bool(it.get("cru", false))
+	var nutrition := float(it.get("nutrition", 0)) * (float(regles.r.cru_facteur) if cru else 1.0)
+	var extra: Array[String] = []
+	var avant := int(e.faim)
+	e.faim = mini(100, int(e.faim) + roundi(nutrition))
+	if avant < int(regles.r.faim.seuil_stats) and int(e.faim) >= int(regles.r.faim.seuil_stats):
+		Etres.recalculer(e, items, affixes_defs, regles)
+	if not str(it.get("soin_des", "")).is_empty():
+		var soin := des.jet(str(it.soin_des))
+		e.sante = mini(e.sante_max, int(e.sante) + soin)
+		extra.append("+%d PV" % soin)
+	if int(it.get("mana", 0)) > 0:
+		e.mana = mini(e.mana_max, int(e.mana) + int(it.mana))
+		extra.append("+%d mana" % int(it.mana))
+	var statut := str(it.get("statut", ""))
+	if statut.begins_with("purge:"):
+		var cible := statut.trim_prefix("purge:")
+		e.statuts = e.statuts.filter(func(s: Dictionary) -> bool: return str(s.id) != cible)
+		EventBus.emettre(&"journal", [&"journal.purge", {"nom": e.name_key, "statut": "status.%s.name" % cible}])
+	elif statut == "huile_feu":
+		e["huile_feu"] = true
+		EventBus.emettre(&"journal", [&"journal.huile", {"nom": e.name_key}])
+	elif not statut.is_empty():
+		appliquer_statut(e, statut, int(it.get("statut_ticks", 0)), e.id)
+	for risque in it.get("risque", {}).keys():
+		if des.reel() < float(it.risque[risque]):
+			appliquer_statut(e, str(risque), 0, e.id)
+	if not cru:
+		var q := float(it.get("qualite", 1.0))
+		for stat in it.get("potentiel", {}).keys():
+			var gain := roundi(float(it.potentiel[stat]) * nutrition / 100.0 * q)
+			if gain > 0:
+				e.potentiels[stat] = mini(int(regles.r.progression.potentiel_max), int(e.potentiels.get(stat, int(regles.r.progression.potentiel_defaut))) + gain)
+				EventBus.emettre(&"journal", [&"journal.potentiel_plat", {"nom": e.name_key, "n": gain, "stat": _nom_competence(stat)}])
+	it.quantite = int(it.get("quantite", 1)) - 1
+	if int(it.quantite) <= 0:
+		e.sac.erase(uid)
+		items.erase(uid)
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.mange", {"nom": e.name_key, "objet": nom_objet(uid) if items.has(uid) else {"base": it.name_key}, "faim": int(e.faim), "extra": (" · " + " · ".join(extra)) if not extra.is_empty() else ""}])
+	return true
 
 
 ## Brouillard de guerre (Minimap et brouillard de guerre) : le champ de vue de chaque être contrôlé
@@ -1399,6 +1528,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _prendre(e, i.get("vers", Vector2i(-1, -1)), h.ticks)
 		"dormir":
 			ok = _dormir(e, i.get("vers", Vector2i(-1, -1)), h.ticks)
+		"manger":
+			ok = _manger(e, str(i.get("objet", "")), h.ticks)
 		"jeter":
 			ok = _jeter(e, str(i.get("objet", "")), h.ticks)
 	if ok:
@@ -1429,7 +1560,10 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	e.orientation = vers - e.pos
 	e.pos = vers
 	grille.placer(e.id, vers)
-	e.compteur = tick + _ticks_avec_statuts(e, regles.ticks_deplacement(cout, e.competences_eff, en_combat(e)))
+	var ticks_dep := regles.ticks_deplacement(cout, e.competences_eff, en_combat(e))
+	if e.controle == "joueur":   # surcharge (Armures et poids porté) : sur les ticks d'Athlétisme, jamais sur une stat
+		ticks_dep = ceili(float(ticks_dep) * poids_de(e).facteur)
+	e.compteur = tick + _ticks_avec_statuts(e, ticks_dep)
 	_declencher_glyphe(e, vers)
 	if en_combat(e):
 		for autre in vivants():
@@ -2574,6 +2708,9 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 
 ## Place `a` et `b` dans la même horloge de combat (créée au besoin), compteurs rebasés.
 func _engager_combat(a: Dictionary, b: Dictionary) -> void:
+	if a.get("huile_feu", false) and not en_combat(a):
+		a.erase("huile_feu")
+		a["degats_element_bonus"] = {"feu": "1d4"}   # consommé par le premier combat (Nourriture : huile d'arme)
 	if a.camp == b.camp:
 		return
 	var nom := ""

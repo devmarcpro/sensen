@@ -64,6 +64,12 @@
     "camp": {
       "type": "object"
     },
+    "faim": {
+      "type": "object"
+    },
+    "poids": {
+      "type": "object"
+    },
     "camp": {
       "type": "object"
     }

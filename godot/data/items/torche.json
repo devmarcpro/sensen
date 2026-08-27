@@ -1,0 +1,12 @@
+{
+  "name_key": "item.torche.name",
+  "type": "outil",
+  "equip_slot": "main_secondaire",
+  "hands": 1,
+  "luminosite": 70,
+  "poids": 1,
+  "tags": [
+    "outil",
+    "lumiere"
+  ]
+}

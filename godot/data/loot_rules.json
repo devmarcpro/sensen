@@ -117,7 +117,8 @@
       "gemmes": 2,
       "grimoires": 2,
       "outils": 2,
-      "stations": 1
+      "stations": 1,
+      "consommables": 4
     },
     "bases_gemmes": [
       "gemme_rubis",
@@ -149,6 +150,23 @@
       "station_alambic",
       "station_cuisine",
       "station_table_enchantement"
+    ],
+    "bases_consommables": [
+      "pain",
+      "baies",
+      "champignon_bleu",
+      "fruit_de_mana",
+      "ration_de_voyage",
+      "ration_moisie",
+      "fiole_de_soin",
+      "fiole_de_soin",
+      "grande_fiole_de_soin",
+      "essence_de_mana",
+      "antidote",
+      "bandage",
+      "elixir_de_hate",
+      "huile_d_arme",
+      "torche"
     ]
   },
   "drops": {

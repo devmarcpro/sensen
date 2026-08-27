@@ -1,0 +1,17 @@
+{
+  "name_key": "recipe.plat_viande_grillee.name",
+  "station": "cuisine",
+  "craft_skill": "cuisine",
+  "inputs": [
+    {
+      "item": "viande_crue",
+      "forme": "",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "viande_grillee",
+    "amount": 1
+  },
+  "fuel": null
+}
