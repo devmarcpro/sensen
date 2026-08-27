@@ -1,0 +1,19 @@
+{
+  "name_key": "function.artisan.name",
+  "skill": "forge",
+  "rendement_base": 1.0,
+  "horaires": {
+    "6-20": "poste",
+    "20-22": "social",
+    "22-6": "lit"
+  },
+  "classes_possibles": [
+    "la_braise",
+    "le_creuset",
+    "la_paume",
+    "le_souffle"
+  ],
+  "leadership": false,
+  "portefeuille": 60,
+  "tags": []
+}

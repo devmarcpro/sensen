@@ -1,0 +1,11 @@
+{
+  "text_key": "dialogue.garde_2.text",
+  "conditions": {
+    "metier": "garde",
+    "phase": null,
+    "relation_min": null,
+    "relation_max": null,
+    "meteo": null
+  },
+  "poids": 3
+}

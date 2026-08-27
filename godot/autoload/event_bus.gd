@@ -15,6 +15,7 @@ signal expedition_terminee(recap: Dictionary)             # sortie du donjon : l
 signal fenetre_recentree(origine: Vector2i)               # la fenêtre du monde s'est recentrée (Monde) : le client rebâtit
 signal chunk_explored(chunk: Vector2i)                    # un chunk de 32×32 vient d'être vu (minimap)
 signal sauvegarde_faite(nom: String)                      # la partie a été écrite sur disque
+signal item_sold(uid: String, acheteur: String, prix: int)   # un objet a changé de mains contre de l'or (Commerce)
 signal action_engaged(id: String, action: Dictionary)      # télégraphe : intention visible
 signal action_resolved(id: String, action: Dictionary)
 signal journal(cle: String, params: Dictionary)             # une ligne de journal, localisée côté client

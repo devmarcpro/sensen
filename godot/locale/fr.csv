@@ -401,6 +401,70 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+function.oisif.name,Villageois
+function.fermier.name,Fermier
+function.artisan.name,Artisan
+function.commercant.name,Commerçant
+function.garde.name,Garde
+function.dirigeant.name,Dirigeant
+function.aventurier.name,Aventurier
+creature.villageois.name,Villageois
+creature.fermier.name,Fermier
+creature.forgeron.name,Forgeron
+creature.marchand.name,Marchand
+creature.garde_village.name,Garde de village
+ai_profile.civil.name,Civil
+ai_profile.garde.name,Garde
+dialogue.salut.text,"Bonjour, voyageur. Le temps est calme par ici."
+dialogue.meteo_pluie.text,"Cette pluie n'en finit pas… restez au sec."
+dialogue.meteo_orage.text,"Un orage pareil, on ferme les volets."
+dialogue.meteo_neige.text,"La neige tient. Couvrez-vous."
+dialogue.nuit.text,"Vous marchez de nuit ? Les loups aussi."
+dialogue.aube.text,"Le jour se lève à peine. Tôt levé, comme moi."
+dialogue.soir.text,"La journée a été longue. Le repas m'attend."
+dialogue.donjon.text,"On dit que la ruine, là-bas, n'a jamais été vidée."
+dialogue.inconnu.text,"Je ne vous connais pas. Restez à distance."
+dialogue.connaissance.text,"Ah, c'est vous. Que puis-je pour vous ?"
+dialogue.ami.text,"Mon ami ! Asseyez-vous, racontez-moi vos voyages."
+dialogue.rumeur.text,"Un colporteur parlait d'un filon plus au nord… enfin, ce sont des rumeurs."
+dialogue.faim.text,"Vous avez l'air affamé. Le marchand vend du pain."
+dialogue.village.text,"Petit hameau, mais on y vit bien."
+dialogue.corruption.text,"Les nuits sont de plus en plus mauvaises par ici."
+dialogue.travail.text,"Le travail ne manque pas. Il manque des bras."
+dialogue.marchand_1.text,"Regardez ma marchandise, tout est de qualité."
+dialogue.marchand_2.text,"J'achète aussi, si vous avez quelque chose à vendre."
+dialogue.marchand_3.text,"Les prix montent avec le danger, ce n'est pas moi qui les fais."
+dialogue.forgeron_1.text,"La forge chauffe depuis l'aube."
+dialogue.forgeron_2.text,"Du bon fer, c'est tout ce que je demande."
+dialogue.forgeron_3.text,"Un manche en frêne, rien ne vaut ça."
+dialogue.garde_1.text,"Circulez. Pas d'ennuis ici."
+dialogue.garde_2.text,"Les bandits rôdent au-delà des champs. Je veille."
+dialogue.garde_3.text,"La nuit, restez près des feux."
+dialogue.fermier_1.text,"La terre est bonne cette année."
+dialogue.fermier_2.text,"Un sanglier a encore retourné mon champ."
+dialogue.fermier_3.text,"Il faudrait de la pluie."
+ui.or,or {n}
+ui.ecran.dialogue,"{nom} — {fonction}"
+ui.ecran.parler,Parler (P)
+ui.ecran.commercer,Commercer (C)
+ui.ecran.partir,Partir (Échap)
+ui.dialogue.relation,relation {n}
+ui.ecran.commerce,"COMMERCE — {nom} · sa bourse : {or} or · la tienne : {joueur} or"
+ui.ecran.acheter,Acheter (Entrée)
+ui.ecran.vendre,Vendre (Entrée)
+ui.commerce.stock,— À VENDRE —
+ui.commerce.sac,— TON SAC (il achète à {pct} %) —
+ui.prix.detail,"prix suggéré {prix} or = matériaux {base} × marge {marge} × qualité {qualite} × rareté {rarete} × réputation {rep}"
+ui.prix.achat,il t'en donne {n} or
+ui.prix.vente,il le vend {n} or
+journal.parle,"{nom} : « {texte} »"
+journal.relation,"{nom} t'apprécie un peu plus (relation {n})"
+journal.achete,"{nom} achète {objet} pour {n} or"
+journal.vend,"{nom} vend {objet} pour {n} or"
+journal.pas_assez_or,pas assez d'or
+journal.marchand_a_sec,{nom} n'a plus d'or pour acheter
+journal.village,"un hameau : {nom}"
+ui.village,{nom}
 weather.clair.name,Ciel clair
 weather.nuageux.name,Nuageux
 weather.brouillard.name,Brouillard
@@ -1063,3 +1127,96 @@ material.brique.name,Brique
 material.chaume_tresse.name,Chaume tressé
 material.papier.name,Papier
 # --- fin matériaux ---
+# --- cultures de nommage (tools/gen_name_cultures.py) ---
+titre.latine.monarchie_hereditaire.m,Roi
+titre.latine.monarchie_hereditaire.f,Reine
+titre.latine.republique.m,Consul
+titre.latine.republique.f,Consule
+titre.latine.theocratie.m,Grand Pontife
+titre.latine.theocratie.f,Grande Pontife
+titre.latine.ploutocratie.m,Magnat
+titre.latine.ploutocratie.f,Magnate
+titre.latine.dictature.m,Imperator
+titre.latine.dictature.f,Imperatrix
+titre.latine.guilde_maitre.m,Grand Maître
+titre.latine.guilde_maitre.f,Grande Maîtresse
+culture.latine.name,Latine/romane
+titre.nordique.monarchie_hereditaire.m,Haut-Roi
+titre.nordique.monarchie_hereditaire.f,Haute-Reine
+titre.nordique.republique.m,Premier Jarl
+titre.nordique.republique.f,Première Jarl
+titre.nordique.theocratie.m,Godi
+titre.nordique.theocratie.f,Gydja
+titre.nordique.ploutocratie.m,Maître des Guildes
+titre.nordique.ploutocratie.f,Maîtresse des Guildes
+titre.nordique.dictature.m,Seigneur de Guerre
+titre.nordique.dictature.f,Dame de Guerre
+titre.nordique.guilde_maitre.m,Grand Maître
+titre.nordique.guilde_maitre.f,Grande Maîtresse
+culture.nordique.name,Nordique/germanique
+titre.nipponne.monarchie_hereditaire.m,Empereur
+titre.nipponne.monarchie_hereditaire.f,Impératrice
+titre.nipponne.republique.m,Chancelier
+titre.nipponne.republique.f,Chancelière
+titre.nipponne.theocratie.m,Grand Kannushi
+titre.nipponne.theocratie.f,Grande Miko
+titre.nipponne.ploutocratie.m,Marchand Suprême
+titre.nipponne.ploutocratie.f,Marchande Suprême
+titre.nipponne.dictature.m,Shōgun
+titre.nipponne.dictature.f,Shōgun
+titre.nipponne.guilde_maitre.m,Grand Maître
+titre.nipponne.guilde_maitre.f,Grande Maîtresse
+culture.nipponne.name,Nipponne
+titre.slave.monarchie_hereditaire.m,Tsar
+titre.slave.monarchie_hereditaire.f,Tsarine
+titre.slave.republique.m,Starosta
+titre.slave.republique.f,Starosta
+titre.slave.theocratie.m,Patriarche
+titre.slave.theocratie.f,Matriarche
+titre.slave.ploutocratie.m,Boyard des Marchés
+titre.slave.ploutocratie.f,Boyarde des Marchés
+titre.slave.dictature.m,Voïvode
+titre.slave.dictature.f,Voïvode
+titre.slave.guilde_maitre.m,Grand Maître
+titre.slave.guilde_maitre.f,Grande Maîtresse
+culture.slave.name,Slave
+titre.arabo_berbere.monarchie_hereditaire.m,Sultan
+titre.arabo_berbere.monarchie_hereditaire.f,Sultane
+titre.arabo_berbere.republique.m,Cheikh du Conseil
+titre.arabo_berbere.republique.f,Cheikha du Conseil
+titre.arabo_berbere.theocratie.m,Calife
+titre.arabo_berbere.theocratie.f,Califa
+titre.arabo_berbere.ploutocratie.m,Grand Vizir des Marchés
+titre.arabo_berbere.ploutocratie.f,Grande Vizir des Marchés
+titre.arabo_berbere.dictature.m,Émir de Guerre
+titre.arabo_berbere.dictature.f,Émira de Guerre
+titre.arabo_berbere.guilde_maitre.m,Grand Maître
+titre.arabo_berbere.guilde_maitre.f,Grande Maîtresse
+culture.arabo_berbere.name,Arabo-berbère
+titre.celte.monarchie_hereditaire.m,Haut-Roi
+titre.celte.monarchie_hereditaire.f,Haute-Reine
+titre.celte.republique.m,Brehon
+titre.celte.republique.f,Brehon
+titre.celte.theocratie.m,Archidruide
+titre.celte.theocratie.f,Archidruidesse
+titre.celte.ploutocratie.m,Prince des Foires
+titre.celte.ploutocratie.f,Princesse des Foires
+titre.celte.dictature.m,Champion-Régent
+titre.celte.dictature.f,Championne-Régente
+titre.celte.guilde_maitre.m,Grand Maître
+titre.celte.guilde_maitre.f,Grande Maîtresse
+culture.celte.name,Celte
+titre.sino.monarchie_hereditaire.m,Empereur
+titre.sino.monarchie_hereditaire.f,Impératrice
+titre.sino.republique.m,Chancelier
+titre.sino.republique.f,Chancelière
+titre.sino.theocratie.m,Grand Prêtre
+titre.sino.theocratie.f,Grande Prêtresse
+titre.sino.ploutocratie.m,Grand Marchand
+titre.sino.ploutocratie.f,Grande Marchande
+titre.sino.dictature.m,Généralissime
+titre.sino.dictature.f,Généralissime
+titre.sino.guilde_maitre.m,Grand Maître
+titre.sino.guilde_maitre.f,Grande Maîtresse
+culture.sino.name,Sino
+# --- fin cultures ---

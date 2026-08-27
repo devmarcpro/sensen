@@ -1,0 +1,17 @@
+{
+  "name_key": "function.garde.name",
+  "skill": "epee",
+  "rendement_base": 1.0,
+  "horaires": {
+    "6-20": "poste",
+    "20-22": "social",
+    "22-6": "lit"
+  },
+  "classes_possibles": [
+    "le_sabre",
+    "la_trace"
+  ],
+  "leadership": false,
+  "portefeuille": 60,
+  "tags": []
+}

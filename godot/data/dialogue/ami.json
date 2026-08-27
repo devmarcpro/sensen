@@ -1,0 +1,11 @@
+{
+  "text_key": "dialogue.ami.text",
+  "conditions": {
+    "metier": null,
+    "phase": null,
+    "relation_min": 40,
+    "relation_max": null,
+    "meteo": null
+  },
+  "poids": 4
+}

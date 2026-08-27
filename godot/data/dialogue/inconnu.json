@@ -1,0 +1,11 @@
+{
+  "text_key": "dialogue.inconnu.text",
+  "conditions": {
+    "metier": null,
+    "phase": null,
+    "relation_min": null,
+    "relation_max": 9,
+    "meteo": null
+  },
+  "poids": 3
+}

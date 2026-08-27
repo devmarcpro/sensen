@@ -1,0 +1,11 @@
+{
+  "text_key": "dialogue.marchand_3.text",
+  "conditions": {
+    "metier": "commercant",
+    "phase": null,
+    "relation_min": null,
+    "relation_max": null,
+    "meteo": null
+  },
+  "poids": 2
+}

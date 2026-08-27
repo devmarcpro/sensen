@@ -69,6 +69,9 @@ Morphologies (12) : les volants ignorent les contraintes de dénivelé
 > [!success] Décidé le 2026-08-26 — l'utility du prototype
 > Le prototype implémente le noyau : profils dans `data/ai_profiles/` (`hostile`, `bete_sauvage`, `compagnon`), `score = Σ considération × poids` sur des considérations normalisées 0-1 (`cible_a_portee`, `cible_visible`, `distance_cible`, `sante_basse`, `loin_de_l_ancre`, `cible_perdue`, `endurance_basse`, `acculee`, `joueur_proche`, `calme`), une action infaisable est simplement absente des candidates. Actions : `attaquer` (l'action ou l'arme faisable aux dégâts moyens les plus hauts), `poursuivre`, `fuir`, `retour` (à l'ancrage), `attendre`. **Détection** = `Perception` tuiles (facteur `detection_par_perception` de `combat_rules.json`) **avec ligne de vue** ; le cône, la lumière et la Discrétion viennent plus tard. Une décision à chaque fois que l'entité est due (l'échelonnement « 1 tous les 10 ticks » viendra avec le LOD).
 
+> [!success] Codé le 2026-08-28 — profils `civil` et `garde`
+> `civil` : attend (calme), fuit dès qu'une menace est en vue (`fuir` pondéré par la santé et la proximité), ne poursuit ni n'attaque ; `garde` : attaque et poursuit les hostiles, retourne à son poste. **Camps** : `joueur`, `civil` et `hostile` — un civil et le joueur ne sont pas ennemis (`Simulation.ennemis(a, b)` : deux camps différents sont ennemis sauf joueur/civil ; la réputation qui retourne un village attend 9.C). Les `horaires` des fonctions (6-20 h poste, 20-22 h social, nuit lit) sont en données mais pas encore joués (9.B).
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Data-driven design]], [[Boucle de tick]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[LOD de simulation]], [[Compagnons]], [[Raids et menaces]], [[Lois et infractions]], [[Minimap et brouillard de guerre]]

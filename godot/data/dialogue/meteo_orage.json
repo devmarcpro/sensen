@@ -1,0 +1,11 @@
+{
+  "text_key": "dialogue.meteo_orage.text",
+  "conditions": {
+    "metier": null,
+    "phase": null,
+    "relation_min": null,
+    "relation_max": null,
+    "meteo": "orage"
+  },
+  "poids": 4
+}

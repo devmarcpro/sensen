@@ -56,6 +56,9 @@ langues.
 
 **Écran dédié ([[Écrans d'interface]]) :** *Dialogue PNJ*.
 
+> [!success] Codé le 2026-08-28 — étape 9.A, `data/dialogue/` (28 gabarits), écran Dialogue
+> Un **menu contextuel** : la réplique d'ambiance en haut (tirage pondéré parmi les gabarits dont les `conditions` matchent — `metier`, `phase` du jour, `relation_min/max`, `meteo` —, **anti-répétition** sur les 3 dernières par PNJ), les options en dessous : **Parler** (+1 de relation une fois par jour et par PNJ, +1 de plus sur un jet de Charisme réussi : 1d20 + Charisme/4 ≥ 15 — décision), **Commercer** (tag `commerce_possible`), **Partir**. Cadeau, quêtes, recruter, ordres, assigner, négocier attendent 9.C-9.D. Un clic sur un PNJ civil adjacent ouvre le dialogue (Maj + clic pour frapper). Schéma des gabarits complété : `poids`, `relation_max`, `phase`, `meteo`.
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Réputation et relations]], [[Data-driven design]]
 - **Alimente** : [[L'information comme récompense]], [[Apprivoisement et recrutement]], [[Commerce et boutiques]], [[Compagnons]]

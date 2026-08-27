@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "name_order",
+    "race_affinity",
+    "prenom_a",
+    "prenom_b_m",
+    "prenom_b_f",
+    "famille_a",
+    "famille_b_m",
+    "famille_b_f",
+    "ville_a",
+    "ville_b",
+    "titres"
+  ]
+}

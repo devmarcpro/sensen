@@ -1,0 +1,27 @@
+{
+  "name_key": "ai_profile.garde.name",
+  "considerations": {
+    "attaquer": {
+      "cible_a_portee": 1.0,
+      "agressivite": 0.8
+    },
+    "poursuivre": {
+      "cible_visible": 0.7,
+      "distance_cible": 0.5
+    },
+    "retour": {
+      "loin_de_l_ancre": 1.0,
+      "cible_perdue": 0.8
+    },
+    "attendre": {
+      "calme": 1.0
+    }
+  },
+  "seuil_fuite_sante": 0.1,
+  "chute_max_degats": 5,
+  "horaires": {
+    "6-22": "poste",
+    "22-6": "lit"
+  },
+  "chain_bonus": 0.0
+}

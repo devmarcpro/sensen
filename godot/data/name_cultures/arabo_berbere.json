@@ -1,0 +1,101 @@
+{
+  "name_key": "culture.arabo_berbere.name",
+  "name_order": "prenom_nom",
+  "race_affinity": {
+    "humain": 1.0
+  },
+  "prenom_a": [
+    "Am",
+    "Yas",
+    "Kar",
+    "Nad",
+    "Sal",
+    "Tar",
+    "Zah",
+    "Far",
+    "Ras",
+    "Lay"
+  ],
+  "prenom_b_m": [
+    "ir",
+    "im",
+    "iq",
+    "id"
+  ],
+  "prenom_b_f": [
+    "mine",
+    "ia",
+    "ah",
+    "ra"
+  ],
+  "famille_a": [
+    "al-Rash",
+    "Ben",
+    "Aït",
+    "al-Mans",
+    "Bou",
+    "al-Fas",
+    "Tazi",
+    "Idris"
+  ],
+  "famille_b_m": [
+    "id",
+    "ani",
+    "oui",
+    "our",
+    "si",
+    ""
+  ],
+  "famille_b_f": [
+    "id",
+    "ani",
+    "oui",
+    "our",
+    "si",
+    ""
+  ],
+  "ville_a": [
+    "Al-Qas",
+    "Marra",
+    "Tam",
+    "Ouar",
+    "Beni",
+    "Sidi",
+    "Aza",
+    "Tin"
+  ],
+  "ville_b": [
+    "bah",
+    "kech",
+    "azert",
+    "zazate",
+    "mellal",
+    "ghir"
+  ],
+  "titres": {
+    "monarchie_hereditaire": {
+      "m": "titre.arabo_berbere.monarchie_hereditaire.m",
+      "f": "titre.arabo_berbere.monarchie_hereditaire.f"
+    },
+    "republique": {
+      "m": "titre.arabo_berbere.republique.m",
+      "f": "titre.arabo_berbere.republique.f"
+    },
+    "theocratie": {
+      "m": "titre.arabo_berbere.theocratie.m",
+      "f": "titre.arabo_berbere.theocratie.f"
+    },
+    "ploutocratie": {
+      "m": "titre.arabo_berbere.ploutocratie.m",
+      "f": "titre.arabo_berbere.ploutocratie.f"
+    },
+    "dictature": {
+      "m": "titre.arabo_berbere.dictature.m",
+      "f": "titre.arabo_berbere.dictature.f"
+    },
+    "guilde_maitre": {
+      "m": "titre.arabo_berbere.guilde_maitre.m",
+      "f": "titre.arabo_berbere.guilde_maitre.f"
+    }
+  }
+}

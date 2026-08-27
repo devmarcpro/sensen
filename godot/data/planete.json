@@ -213,5 +213,21 @@
     "endurance_regen_hors_confort": 0.5,
     "degats_hors_confort_ecart": 10.0,
     "degats_periode": 300
+  },
+  "village": {
+    "_doc": "Hameau (Villages PNJ) : batiments [min, max], rayon de la place, presets de population (fonction → fiche), le marchand habite l'échoppe, le garde tient la place.",
+    "batiments": [
+      3,
+      5
+    ],
+    "rayon_place": 6,
+    "residents": {
+      "maison": "villageois",
+      "chaumiere": "fermier",
+      "grange": "fermier",
+      "echoppe": "marchand"
+    },
+    "garde": "garde_village",
+    "forgeron_chance": 0.5
   }
 }

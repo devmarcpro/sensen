@@ -279,5 +279,45 @@
     "pente": 2.0,
     "plafond": 3.0
   },
-  "cru_facteur": 0.5
+  "cru_facteur": 0.5,
+  "commerce": {
+    "_doc": "Commerce (Prix suggéré) : prix = valeur_base_objet × qualite × facteur_rarete × facteur_reputation ; valeur_base_objet = Σ valeur_base matériaux × quantités × marge_artisanat ; facteur_rarete par rareté, + par affixe / sertissure ; reputation : 1 + rel/200 borné ; paliers ; achat_ratio : ce que paie un marchand ; recharge hebdo.",
+    "marge_artisanat": 1.5,
+    "valeur_par_defaut": 5,
+    "facteur_rarete": {
+      "commun": 1.0,
+      "inhabituel": 1.4,
+      "rare": 2.2,
+      "exceptionnel": 4.0,
+      "artefact": 10.0
+    },
+    "bonus_affixe": 0.35,
+    "bonus_sertissure": 0.5,
+    "reputation_bornes": [
+      0.5,
+      2.0
+    ],
+    "paliers": [
+      [
+        -100,
+        -50,
+        0.0
+      ],
+      [
+        -49,
+        -20,
+        1.25
+      ],
+      [
+        20,
+        49,
+        0.9
+      ]
+    ],
+    "achat_ratio": 0.5,
+    "recharge_hebdo": 0.15,
+    "parler_relation": 1,
+    "parler_charisme_dd": 15,
+    "parler_bonus": 1
+  }
 }

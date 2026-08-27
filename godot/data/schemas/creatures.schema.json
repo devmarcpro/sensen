@@ -150,6 +150,24 @@
     },
     "depouille": {
       "type": "array"
+    },
+    "role": {
+      "type": "string"
+    },
+    "social": {
+      "type": "object"
+    },
+    "agenda": {
+      "type": "object"
+    },
+    "recruitable": {
+      "type": "object"
+    },
+    "inventaire_marchand": {
+      "type": "array"
+    },
+    "genre": {
+      "type": "string"
     }
   },
   "required": [

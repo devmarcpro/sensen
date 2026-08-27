@@ -6,21 +6,21 @@
     "humain": 1.0
   },
   "prenom_a": [],
-  "prenom_b": [],
   "famille_a": [],
-  "famille_b": [
-    ""
-  ],
   "ville_a": [],
   "ville_b": [],
   "titres": {
     "monarchie_hereditaire": {
-      "m": "Roi",
-      "f": "Reine"
-    },
-    "guilde_maitre": {
-      "m": "Grand Maître",
-      "f": "Grande Maîtresse"
+      "m": "titre.<id>.monarchie_hereditaire.m",
+      "f": "titre.<id>.monarchie_hereditaire.f"
     }
-  }
+  },
+  "prenom_b_m": [],
+  "prenom_b_f": [],
+  "famille_b_m": [
+    ""
+  ],
+  "famille_b_f": [
+    ""
+  ]
 }

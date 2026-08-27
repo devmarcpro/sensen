@@ -17,6 +17,7 @@ const CATALOGUES: Array[String] = [
 	"items", "status_effects", "prototype_arenas", "rigs", "tutorials",
 	"dungeon_rooms", "dungeon_connectors", "dungeon_themes", "affixes", "competences", "races", "classes",
 	"materials", "stations", "recipes", "components", "component_recipes", "meubles", "biomes", "vegetaux", "weather_states",
+	"functions", "dialogue", "name_cultures", "village_buildings",
 ]
 ## Tags dérivés des stats d'un matériau au seuil ≥ 50 (Schéma matériau).
 const TAGS_DERIVES := {"flammabilite": "inflammable", "conductivite_mana": "conducteur_mana", "flottabilite": "flottant",
@@ -309,6 +310,16 @@ func _charger_locales() -> void:
 		for t in traductions:
 			TranslationServer.add_translation(t)
 	TranslationServer.set_locale("fr")
+
+
+## Un nom propre généré devient une clé de traduction : tout ce qui affiche `name_key` affiche le nom.
+var _traduction_dynamique: Translation = null
+func enregistrer_nom(cle: String, texte: String) -> void:
+	if _traduction_dynamique == null:
+		_traduction_dynamique = Translation.new()
+		_traduction_dynamique.locale = "fr"
+		TranslationServer.add_translation(_traduction_dynamique)
+	_traduction_dynamique.add_message(cle, texte)
 
 
 # ---------------------------------------------------------------- rapport

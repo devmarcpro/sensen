@@ -26,6 +26,9 @@ Vendre aux marchands, ou tenir sa propre boutique passive sur son claim — faç
 
 **Écran dédié ([[Écrans d'interface]]) :** *Commerce (achat/vente, gestion d'étal)*.
 
+> [!success] Codé le 2026-08-28 — étape 9.A, l'or, le marchand, l'écran Commerce
+> **L'or** existe : `e.or` sur tout être (le joueur part à 0), portefeuille du PNJ = `base(fonction) × (1 + rang × 0,5)` (`data/functions/*.portefeuille` : villageois 30, marchand 300 — [[Barèmes économiques]]), recharge +15 % par semaine (`Monde.semaine`). **Prix suggéré** tel quel : `valeur_base_objet × qualité × facteur_rareté × facteur_réputation`, `valeur_base_objet = Σ valeur_base des matériaux × quantités × 1,5` (objet assemblé : ses composants ; matériau brut : sa valeur ; objet du prototype : son matériau × `valeur_par_defaut`), table `facteur_rarete` de [[Prix suggéré]] (1 / 1,4 / 2,2 / 4 / 10, +0,35 par affixe, +0,5 par sertissure occupée), `facteur_reputation = 1 + relation/200` borné [0,5 ; 2], paliers −49..−20 : +25 %, +20..+49 : −10 %. **Décision** : le marchand **achète à 50 %** du prix suggéré et **refuse quand il est à sec** (le troc automatique attend) ; il vend son stock au prix suggéré. L'écran montre **le détail du calcul**. Signal `item_sold`. La boutique passive, l'étal du joueur, les douanes attendent.
+
 ## Liens
 - **Dépend de** : [[Qualité d'artisanat]], [[Claims et persistance]]
 - **Alimente** : [[Prix suggéré]], [[Boutique passive]], [[Économie — sources et puits]]

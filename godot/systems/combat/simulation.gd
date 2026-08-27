@@ -152,6 +152,7 @@ func charger_camp(joueur: Dictionary = {}, cellule_choisie: Vector2i = Vector2i(
 			uids.append(o.uid)
 	_poser_contenant(monde.pos_monde(depart, e.coffre_depart), uids, "coffre")
 	camp_sauve = {"entree": entree, "biome": e.biome, "cellule": depart}
+	_peupler_fenetre()
 	maj_vision()
 	monde.pregenerer_voisins()
 
@@ -209,6 +210,7 @@ func _verifier_fenetre(e: Dictionary) -> void:
 	for id in ordre:
 		if entites[id].vivant:
 			grille.placer(id, entites[id].pos)
+	_peupler_fenetre()
 	maj_vision()
 	monde.pregenerer_voisins()
 	EventBus.emettre(&"fenetre_recentree", [grille.origine])
@@ -608,7 +610,7 @@ func _dormir(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 		EventBus.emettre(&"journal", [&"journal.pas_de_lit", {}])
 		return false
 	for x in vivants():
-		if x.camp != e.camp and voit(e, x.pos):
+		if ennemis(e, x) and voit(e, x.pos):
 			EventBus.emettre(&"journal", [&"journal.hostile_en_vue", {}])
 			return false
 	var cp: Dictionary = regles.r.camp
@@ -675,6 +677,135 @@ func voyager(e: Dictionary, cell: Vector2i) -> bool:
 	horloge_monde.avancer(cout)
 	maj_vision()
 	EventBus.emettre(&"journal", [&"journal.voyage", {"nom": e.name_key, "x": cell.x, "y": cell.y, "ticks": cout}])
+	return true
+
+
+# ---------------------------------------------------------------- dialogue (E.23) et commerce (Prix suggéré)
+
+## La réplique d'ambiance d'un PNJ pour le joueur : tirage pondéré parmi les gabarits dont les
+## conditions matchent, anti-répétition sur les 3 dernières.
+func replique(pnj: Dictionary, j: Dictionary) -> String:
+	var rel := int(pnj.get("social", {}).get("relations", {}).get(j.id, 0))
+	var ph := phase()
+	var met := meteo(monde.cellule_de(pnj.pos)) if (monde != null and lieu == "camp") else "clair"
+	var candidats: Array = []
+	var total := 0.0
+	var recentes: Array = pnj.get("dernieres_repliques", [])
+	for did in GameData.catalogues.dialogue.keys():
+		var d: Dictionary = GameData.catalogues.dialogue[did]
+		var c: Dictionary = d.conditions
+		if c.get("metier") != null and str(c.metier) != str(pnj.get("fonction", "")):
+			continue
+		if c.get("phase") != null and str(c.phase) != ph:
+			continue
+		if c.get("meteo") != null and str(c.meteo) != met:
+			continue
+		if c.get("relation_min") != null and rel < int(c.relation_min):
+			continue
+		if c.get("relation_max") != null and rel > int(c.relation_max):
+			continue
+		if did in recentes:
+			continue
+		candidats.append(d)
+		total += float(d.get("poids", 1))
+	if candidats.is_empty():
+		return "dialogue.salut.text"
+	var t := des.reel() * total
+	for d in candidats:
+		t -= float(d.get("poids", 1))
+		if t <= 0.0:
+			recentes.append(d.id)
+			while recentes.size() > 3:
+				recentes.pop_front()
+			pnj["dernieres_repliques"] = recentes
+			return str(d.text_key)
+	return str(candidats.back().text_key)
+
+
+## Parler : la réplique, +1 de relation une fois par jour et par PNJ, +1 sur un jet de Charisme.
+func _parler(e: Dictionary, pnj_id: String, tick: int) -> bool:
+	var pnj: Dictionary = entites.get(pnj_id, {})
+	if pnj.is_empty() or not pnj.vivant or not ("civil" in pnj.get("tags", [])) or Grille.distance(e.pos, pnj.pos) > 2:
+		return false
+	var texte := replique(pnj, e)
+	EventBus.emettre(&"journal", [&"journal.parle", {"nom": pnj.name_key, "texte": texte}])
+	var jour := int(tick / int(_cycle().get("ticks_par_jour", 24000)))
+	if int(pnj.get("dernier_parler_jour", -1)) != jour:
+		pnj["dernier_parler_jour"] = jour
+		var cm: Dictionary = regles.r.commerce
+		var gain := int(cm.parler_relation)
+		if des.jet("1d20") + int(e.stats_eff.charisme) / 4 >= int(cm.parler_charisme_dd):
+			gain += int(cm.parler_bonus)
+		pnj.social.relations[e.id] = clampi(int(pnj.social.relations.get(e.id, 0)) + gain, -100, 100)
+		EventBus.emettre(&"journal", [&"journal.relation", {"nom": pnj.name_key, "n": int(pnj.social.relations[e.id])}])
+	e.compteur = tick + int(regles.r.actions.objet)
+	return true
+
+
+## Le prix suggéré d'un objet face à un PNJ, avec le détail du calcul (Prix suggéré).
+func prix_suggere(uid: String, pnj: Dictionary, acheteur: Dictionary) -> Dictionary:
+	var cm: Dictionary = regles.r.commerce
+	var it: Dictionary = items.get(uid, {})
+	var mats: Dictionary = GameData.catalogues.materials
+	var base := 0.0
+	if it.has("composants"):
+		for slot in it.composants.keys():
+			base += float(mats.get(str(it.composants[slot].materiau), {}).get("stats", {}).get("valeur_base", 1))
+	elif it.get("type", "") == "materiau":
+		base = float(mats.get(str(it.materiau), {}).get("stats", {}).get("valeur_base", 1)) * float(it.get("quantite", 1)) / float(cm.marge_artisanat)
+	elif it.has("materiau") and mats.has(str(it.materiau)):
+		base = float(mats[str(it.materiau)].stats.valeur_base) * float(cm.valeur_par_defaut) / float(cm.marge_artisanat)
+	else:
+		base = float(it.get("valeur", cm.valeur_par_defaut)) * float(it.get("quantite", 1)) / float(cm.marge_artisanat)
+	var qualite := float(it.get("qualite", 1.0)) if it.get("type", "") != "materiau" else 1.0
+	var rarete := float(cm.facteur_rarete.get(str(it.get("rarete", "commun")), 1.0))
+	rarete += float(cm.bonus_affixe) * float(it.get("affixes", []).size()) + float(cm.bonus_sertissure) * float(it.get("sertissures", {}).get("contenu", []).size())
+	var rel := int(pnj.get("social", {}).get("relations", {}).get(acheteur.id, 0))
+	var rep := clampf(1.0 + float(rel) / 200.0, float(cm.reputation_bornes[0]), float(cm.reputation_bornes[1]))
+	for pal in cm.paliers:
+		if rel >= int(pal[0]) and rel <= int(pal[1]):
+			rep *= float(pal[2])
+	var prix := maxi(1, roundi(base * float(cm.marge_artisanat) * qualite * rarete * rep))
+	return {"prix": prix, "base": snappedf(base, 0.1), "marge": float(cm.marge_artisanat), "qualite": snappedf(qualite, 0.01), "rarete": snappedf(rarete, 0.01), "rep": snappedf(rep, 0.01),
+		"achat": maxi(1, roundi(float(prix) * float(cm.achat_ratio)))}
+
+
+## Acheter un objet du stock d'un marchand.
+func _acheter(e: Dictionary, pnj_id: String, uid: String, tick: int) -> bool:
+	var pnj: Dictionary = entites.get(pnj_id, {})
+	if pnj.is_empty() or not (uid in pnj.get("stock", [])) or Grille.distance(e.pos, pnj.pos) > 2:
+		return false
+	var p := prix_suggere(uid, pnj, e)
+	if int(e.or) < int(p.prix):
+		EventBus.emettre(&"journal", [&"journal.pas_assez_or", {}])
+		return false
+	e.or = int(e.or) - int(p.prix)
+	pnj.or = int(pnj.or) + int(p.prix)
+	pnj.stock.erase(uid)
+	e.sac.append(uid)
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.achete", {"nom": e.name_key, "objet": nom_objet(uid), "n": int(p.prix)}])
+	EventBus.emettre(&"item_sold", [uid, pnj.id, int(p.prix)])
+	return true
+
+
+## Vendre un objet du sac à un marchand : il paie achat_ratio du prix suggéré, s'il a l'or.
+func _vendre(e: Dictionary, pnj_id: String, uid: String, tick: int) -> bool:
+	var pnj: Dictionary = entites.get(pnj_id, {})
+	if pnj.is_empty() or not (uid in e.sac) or Grille.distance(e.pos, pnj.pos) > 2 or not ("commerce_possible" in pnj.get("tags", [])):
+		return false
+	var p := prix_suggere(uid, pnj, e)
+	if int(pnj.or) < int(p.achat):
+		EventBus.emettre(&"journal", [&"journal.marchand_a_sec", {"nom": pnj.name_key}])
+		return false
+	pnj.or = int(pnj.or) - int(p.achat)
+	e.or = int(e.or) + int(p.achat)
+	e.sac.erase(uid)
+	e.ratelier.erase(uid)
+	pnj.stock.append(uid)
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.vend", {"nom": e.name_key, "objet": nom_objet(uid), "n": int(p.achat)}])
+	EventBus.emettre(&"item_sold", [uid, e.id, int(p.achat)])
 	return true
 
 
@@ -853,7 +984,7 @@ func sauvegarder(nom: String = "monde") -> bool:
 		contenants_monde[grille.pos_de(int(gi))] = contenants[gi]
 	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "graine": graine, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
 		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores,
-		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante})
+		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees})
 	ok = Sauvegarde.ecrire(nom, "surface.json", surface) and ok
 	ok = Sauvegarde.ecrire(nom, "entities.json", {"entites": autres, "ordre": ordre_autres, "contenants": contenants_monde}) and ok
 	ok = Sauvegarde.ecrire(nom, "items.json", instances) and ok
@@ -888,6 +1019,7 @@ func charger_sauvegarde(nom: String = "monde") -> bool:
 	monde.delta = w.get("delta", {})
 	monde.foyers = w.get("foyers", {})
 	monde.semaine_courante = int(w.get("semaine", 0))
+	monde.peuplees = w.get("peuplees", {})
 	for cell in surface.keys():
 		var sc: Dictionary = surface[cell]
 		if not sc.modifications.is_empty():
@@ -1301,6 +1433,9 @@ func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 	var id := "%s_%d" % [def_id, _n_entites]
 	var def := fiche_joueur if (controle == "joueur" and not fiche_joueur.is_empty()) else GameData.entree("creatures", def_id)
 	var e := Etres.instancier(id, def, pos, controle, regles, items)
+	e["or"] = 0
+	if controle != "joueur" and "civil" in def.get("tags", []):
+		_habiller_pnj(e, def)
 	for base in def.get("sac", []):   # objets de départ (bases) : instanciés dans le sac
 		var inst := generer_objet(str(base), 1, {}, "commun", 0)
 		if not inst.is_empty():
@@ -1332,6 +1467,69 @@ func generer_objet(base_id: String, profondeur: int, provenance: Dictionary = {}
 	objets[inst.uid] = inst
 	items[inst.uid] = inst
 	return inst
+
+
+## Un PNJ civil : son camp, son nom (culture du village ou de sa race), sa bourse (fonction), son stock.
+func _habiller_pnj(e: Dictionary, def: Dictionary, culture_id: String = "") -> void:
+	e.camp = "civil"
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "pnj", e.id])
+	var cultures: Dictionary = GameData.catalogues.name_cultures
+	if culture_id.is_empty():
+		culture_id = str(def.get("social", {}).get("culture", ""))
+	if culture_id.is_empty() or not cultures.has(culture_id):
+		culture_id = Noms.culture_pour(str(def.get("race", "humain")), cultures, rng)
+	var genre := str(def.get("genre", "m" if rng.randf() < 0.5 else "f"))
+	e["nom"] = Noms.generer(culture_id, cultures.get(culture_id, {}), genre, rng)
+	e["genre"] = genre
+	e["name_key"] = "pnj.%s.name" % e.id
+	GameData.enregistrer_nom(e.name_key, Noms.afficher(e.nom))
+	e["fonction"] = str(def.get("fonction", "oisif"))
+	e["role"] = str(def.get("role", "resident"))
+	e["social"] = {"culture": culture_id, "relations": {}}
+	var f: Dictionary = GameData.catalogues.functions.get(e.fonction, {})
+	e["or_max"] = int(float(f.get("portefeuille", 30)) * (1.0 + float(e.get("rang", 0)) * 0.5))
+	e.or = e.or_max
+	e["stock"] = []
+	for base in def.get("inventaire_marchand", []):
+		var o := generer_objet(str(base), 1, {}, "commun", 0)
+		if not o.is_empty():
+			e.stock.append(o.uid)
+	e["dernieres_repliques"] = []
+	e["dernier_parler_jour"] = -1
+
+
+## Deux êtres sont-ils ennemis ? Deux camps différents, sauf le joueur et les civils (IA des créatures).
+func ennemis(a: Dictionary, b: Dictionary) -> bool:
+	if a.camp == b.camp:
+		return false
+	var doux := ["joueur", "civil"]
+	return not (a.camp in doux and b.camp in doux)
+
+
+## Peuple les cellules à hameau de la fenêtre à leur première visite (Villages PNJ).
+func _peupler_fenetre() -> void:
+	if monde == null:
+		return
+	for dy in range(-monde.rayon, monde.rayon + 1):
+		for dx in range(-monde.rayon, monde.rayon + 1):
+			var cell: Vector2i = monde.centre + Vector2i(dx, dy)
+			if monde.peuplees.has(cell):
+				continue
+			var e := monde.cellule(cell)
+			var v: Dictionary = e.get("village", {})
+			if v.is_empty():
+				continue
+			monde.peuplees[cell] = true
+			for pj in v.pnj:
+				var pos: Vector2i = monde.pos_monde(cell, pj.pos)
+				if grille.occupant(pos).is_empty():
+					var x := ajouter(str(pj.creature), pos, "ia")
+					_habiller_pnj(x, GameData.entree("creatures", str(pj.creature)), str(v.culture))
+					x["lit"] = monde.pos_monde(cell, pj.lit)
+					x["village"] = str(v.nom)
+					x.ancre = pos
+			EventBus.emettre(&"journal", [&"journal.village", {"nom": v.nom}])
 
 
 ## Donne un objet à un être (dans son sac).
@@ -1678,6 +1876,9 @@ func _tiquer_monde(tick: int) -> void:
 	while monde.semaine_courante < semaine:
 		monde.semaine_courante += 1
 		var touchees := monde.semaine(tick)
+		for x in entites.values():   # les bourses des PNJ se rechargent (+15 % par semaine, Barèmes économiques)
+			if x.has("or_max"):
+				x.or = mini(int(x.or_max), int(x.or) + int(ceil(float(x.or_max) * float(regles.r.commerce.recharge_hebdo))))
 		EventBus.emettre(&"journal", [&"journal.semaine", {"n": touchees.size()}])
 		for cell in touchees:
 			if monde.foyer(cell).get("generation", 0) > 0 and bool(monde.foyer(cell).actif):
@@ -1975,6 +2176,12 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _dormir(e, i.get("vers", Vector2i(-1, -1)), h.ticks)
 		"manger":
 			ok = _manger(e, str(i.get("objet", "")), h.ticks)
+		"parler":
+			ok = _parler(e, str(i.get("pnj", "")), h.ticks)
+		"acheter":
+			ok = _acheter(e, str(i.get("pnj", "")), str(i.get("objet", "")), h.ticks)
+		"vendre":
+			ok = _vendre(e, str(i.get("pnj", "")), str(i.get("objet", "")), h.ticks)
 		"jeter":
 			ok = _jeter(e, str(i.get("objet", "")), h.ticks)
 	if ok:
@@ -2641,8 +2848,8 @@ func _cibles_de_forme(e: Dictionary, action: Dictionary, cible: Dictionary) -> A
 
 func _cible_valide(e: Dictionary, c: Dictionary, type_cible: String) -> bool:
 	match type_cible:
-		"ennemi": return c.camp != e.camp
-		"allie": return c.camp == e.camp and c.id != e.id
+		"ennemi": return ennemis(e, c)
+		"allie": return not ennemis(e, c) and c.id != e.id
 		"soi": return c.id == e.id
 	return true
 
@@ -3156,7 +3363,7 @@ func _engager_combat(a: Dictionary, b: Dictionary) -> void:
 	if a.get("huile_feu", false) and not en_combat(a):
 		a.erase("huile_feu")
 		a["degats_element_bonus"] = {"feu": "1d4"}   # consommé par le premier combat (Nourriture : huile d'arme)
-	if a.camp == b.camp:
+	if not ennemis(a, b):
 		return
 	var nom := ""
 	if en_combat(a):
@@ -3290,7 +3497,7 @@ func _chercher_cible(e: Dictionary, tick: int) -> Dictionary:
 		var meilleure := {}
 		var dmin := 1 << 30
 		for autre in vivants():
-			if autre.camp == e.camp:
+			if not ennemis(e, autre):
 				continue
 			var d := Grille.distance(e.pos, autre.pos)
 			if d <= portee and d < dmin and grille.ligne_de_vue(e.pos, autre.pos):
@@ -3315,7 +3522,7 @@ func _actions_candidates(e: Dictionary, cible: Dictionary, profil: Dictionary, t
 		c["poursuivre"] = {"cible_visible": 1.0 if grille.ligne_de_vue(e.pos, cible.pos) else 0.5,
 			"distance_cible": clampf(1.0 - float(Grille.distance(e.pos, cible.pos)) / 20.0, 0.0, 1.0)}
 		c["fuir"] = {"sante_basse": 1.0 if (sante_basse or e.fuite) else 0.0,
-			"joueur_proche": 1.0 if Grille.distance(e.pos, cible.pos) <= 6 else 0.0}
+			"joueur_proche": 1.0 if Grille.distance(e.pos, cible.pos) <= 6 else 0.0, "menace_en_vue": 1.0}
 	if e.pos != e.ancre:
 		c["retour"] = {"loin_de_l_ancre": 1.0 if Grille.distance(e.pos, e.ancre) > int(regles.r.engagement.ia_distance_ancre) else 0.0,
 			"cible_perdue": 0.0 if a_cible else 1.0}

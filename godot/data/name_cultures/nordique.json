@@ -1,0 +1,100 @@
+{
+  "name_key": "culture.nordique.name",
+  "name_order": "prenom_nom",
+  "race_affinity": {
+    "nain": 1.0,
+    "humain": 1.0
+  },
+  "prenom_a": [
+    "Bjor",
+    "Sig",
+    "Thor",
+    "Ast",
+    "Ing",
+    "Rag",
+    "Eir",
+    "Gun",
+    "Hal",
+    "Frey"
+  ],
+  "prenom_b_m": [
+    "n",
+    "vald",
+    "nar",
+    "mund"
+  ],
+  "prenom_b_f": [
+    "rid",
+    "a",
+    "hild",
+    "dis"
+  ],
+  "famille_a": [
+    "Sten",
+    "Ulf",
+    "Harald",
+    "Grim",
+    "Dal",
+    "Eken",
+    "Bryn",
+    "Kol"
+  ],
+  "famille_b_m": [
+    "sson",
+    "gard",
+    "strand",
+    "berg",
+    "vik"
+  ],
+  "famille_b_f": [
+    "sdottir",
+    "gard",
+    "strand",
+    "berg",
+    "vik"
+  ],
+  "ville_a": [
+    "Nord",
+    "Frost",
+    "Jarn",
+    "Hav",
+    "Skog",
+    "Sten",
+    "Ulfs",
+    "Vind"
+  ],
+  "ville_b": [
+    "heim",
+    "vik",
+    "borg",
+    "fjord",
+    "dal",
+    "gard"
+  ],
+  "titres": {
+    "monarchie_hereditaire": {
+      "m": "titre.nordique.monarchie_hereditaire.m",
+      "f": "titre.nordique.monarchie_hereditaire.f"
+    },
+    "republique": {
+      "m": "titre.nordique.republique.m",
+      "f": "titre.nordique.republique.f"
+    },
+    "theocratie": {
+      "m": "titre.nordique.theocratie.m",
+      "f": "titre.nordique.theocratie.f"
+    },
+    "ploutocratie": {
+      "m": "titre.nordique.ploutocratie.m",
+      "f": "titre.nordique.ploutocratie.f"
+    },
+    "dictature": {
+      "m": "titre.nordique.dictature.m",
+      "f": "titre.nordique.dictature.f"
+    },
+    "guilde_maitre": {
+      "m": "titre.nordique.guilde_maitre.m",
+      "f": "titre.nordique.guilde_maitre.f"
+    }
+  }
+}

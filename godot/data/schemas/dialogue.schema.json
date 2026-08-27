@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "required": [
+    "text_key",
+    "conditions",
+    "poids"
+  ]
+}

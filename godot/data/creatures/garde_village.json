@@ -1,0 +1,65 @@
+{
+  "name_key": "creature.garde_village.name",
+  "race": "humain",
+  "fonction": "garde",
+  "role": "garde",
+  "skeleton_template": "humanoide",
+  "corps": {
+    "stats": {
+      "force": 12,
+      "dexterite": 11,
+      "endurance": 12,
+      "volonte": 8,
+      "perception": 10,
+      "charisme": 7
+    },
+    "silhouette": "humanoide"
+  },
+  "esprit": {
+    "intelligence": 60,
+    "temperament": "calme",
+    "dressabilite": 20
+  },
+  "social": {
+    "culture": "",
+    "relations": {}
+  },
+  "agenda": {
+    "metier": "garde"
+  },
+  "recruitable": {
+    "method": "relation",
+    "threshold": 75
+  },
+  "ai_profile": "garde",
+  "actions": [],
+  "equipement": [
+    "proto_epee",
+    "proto_bouclier",
+    "proto_casque_fer",
+    "proto_cuirasse_mailles"
+  ],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.85,
+    0.75,
+    0.6
+  ],
+  "tags": [
+    "humanoide",
+    "civil",
+    "humain",
+    "garde"
+  ],
+  "capacites": [],
+  "competences": {
+    "epee": 12,
+    "bouclier": 8,
+    "athletisme": 10
+  }
+}

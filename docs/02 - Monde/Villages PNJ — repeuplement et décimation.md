@@ -20,6 +20,9 @@ Comment un village vit, se repeuple, et ce qui arrive quand on le vide entièrem
 
 *Le moteur démographique interne (naissances, lignées) est complémentaire de l'immigration — voir [[Âge des PNJ]].*
 
+> [!success] Codé le 2026-08-28 — étape 9.A, le hameau (`Surface._poser_village`, `data/village_buildings/`)
+> Cellule à POI **village (4 %)** : un **hameau** — une place centrale, **3 à 5 bâtiments préfab** (grilles de caractères comme les salles de donjon : maison, échoppe, grange) posés autour de la place et reliés par des **chemins** en `sol` de la palette du biome, murs en `mur` de la palette (`village_palette`), portes, meubles (lits, tables, étal). Population : 1 résident par lit + un **marchand** dans l'échoppe + un **garde** sur la place (presets de [[Profils de PNJ]]), nommés par la culture du village (tirée par la race dominante — humain — parmi les 7 cultures), le village lui-même nommé (`ville_a + ville_b`). Les PNJ sont instanciés à la **première visite** de la cellule puis persistent (endormis hors fenêtre). Routes par A*, tailles ville/capitale, repeuplement et décimation attendent 9.B-10.
+
 ## Liens
 - **Dépend de** : [[Détection de pièces]], [[Dérive de la corruption]], [[Habitat des PNJ]]
 - **Alimente** : [[Conquête de village]], [[Population et exploitation]], [[Génération des royaumes PNJ]]

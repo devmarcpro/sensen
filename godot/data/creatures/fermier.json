@@ -1,0 +1,58 @@
+{
+  "name_key": "creature.fermier.name",
+  "race": "humain",
+  "fonction": "fermier",
+  "role": "resident",
+  "skeleton_template": "humanoide",
+  "corps": {
+    "stats": {
+      "force": 8,
+      "dexterite": 6,
+      "endurance": 8,
+      "volonte": 5,
+      "perception": 6,
+      "charisme": 5
+    },
+    "silhouette": "humanoide"
+  },
+  "esprit": {
+    "intelligence": 60,
+    "temperament": "calme",
+    "dressabilite": 20
+  },
+  "social": {
+    "culture": "",
+    "relations": {}
+  },
+  "agenda": {
+    "metier": "fermier"
+  },
+  "recruitable": {
+    "method": "relation",
+    "threshold": 60
+  },
+  "ai_profile": "civil",
+  "actions": [],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.85,
+    0.75,
+    0.6
+  ],
+  "tags": [
+    "humanoide",
+    "civil",
+    "humain"
+  ],
+  "capacites": [],
+  "competences": {
+    "agriculture": 15,
+    "athletisme": 8
+  }
+}

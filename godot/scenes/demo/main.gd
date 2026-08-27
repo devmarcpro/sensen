@@ -637,6 +637,9 @@ func _clic(t: Vector2i, lourde: bool) -> void:
 				visee = -1
 		return
 	var occ := sim.grille.occupant(t)
+	if not occ.is_empty() and occ != joueur_id and not lourde and "civil" in sim.entites[occ].get("tags", []) and Grille.distance(j.pos, t) <= 2:
+		ecrans.ouvrir_dialogue(occ)   # un civil : on lui parle (Maj + clic pour frapper)
+		return
 	if not occ.is_empty() and occ != joueur_id:
 		chemin_en_cours.clear()
 		if not sim.attente.has(joueur_id):
@@ -1014,7 +1017,7 @@ func _maj_ui() -> void:
 				"confort": tr("ui.confort.froid") if float(tr_.ecart) < 0.0 else (tr("ui.confort.chaud") if float(tr_.ecart) > 0.0 else "")}))
 		var pd: Dictionary = sim.poids_de(j)
 		lignes.append("  " + tr("ui.entite.mana").format({"mana": j.mana, "mana_max": j.mana_max}) + " · " + tr("ui.munitions").format({"n": j.munitions}) + " · " + tr("ui.modules_connus").format({"n": j.modules_connus.size()})
-			+ " · " + tr("ui.faim").format({"faim": int(j.get("faim", 100))}) + " · " + tr("ui.poids").format({"poids": "%.0f" % pd.poids, "capacite": "%.0f" % pd.capacite, "surcharge": tr("ui.poids.surcharge").format({"facteur": "%.1f" % pd.facteur}) if pd.facteur > 1.0 else ""}))
+			+ " · " + tr("ui.or").format({"n": int(j.get("or", 0))}) + " · " + tr("ui.faim").format({"faim": int(j.get("faim", 100))}) + " · " + tr("ui.poids").format({"poids": "%.0f" % pd.poids, "capacite": "%.0f" % pd.capacite, "surcharge": tr("ui.poids.surcharge").format({"facteur": "%.1f" % pd.facteur}) if pd.facteur > 1.0 else ""}))
 		var nd := sim.progression.niveaux_derives(j)
 		lignes.append("  " + tr("ui.niveaux").format({"combat": "%.1f" % nd.combat, "general": "%.1f" % nd.general}))
 		for k in j.get("capacites", []).size():

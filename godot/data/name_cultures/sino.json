@@ -1,0 +1,86 @@
+{
+  "name_key": "culture.sino.name",
+  "name_order": "nom_prenom",
+  "race_affinity": {
+    "humain": 1.0
+  },
+  "prenom_a": [
+    "Li",
+    "Wang",
+    "Zh",
+    "Xi",
+    "Mei",
+    "Jian",
+    "Hu",
+    "Chen"
+  ],
+  "prenom_b_m": [
+    "ang",
+    "ong",
+    "ing",
+    "un"
+  ],
+  "prenom_b_f": [
+    "ei",
+    "an",
+    "ao",
+    "ua"
+  ],
+  "famille_a": [
+    "Li",
+    "Wang",
+    "Zhang",
+    "Chen",
+    "Liu",
+    "Yang",
+    "Huang"
+  ],
+  "famille_b_m": [
+    ""
+  ],
+  "famille_b_f": [
+    ""
+  ],
+  "ville_a": [
+    "Bei",
+    "Nan",
+    "Shang",
+    "Hang",
+    "Chang",
+    "Guang"
+  ],
+  "ville_b": [
+    "jing",
+    "hai",
+    "zhou",
+    "yang",
+    "an",
+    "sha"
+  ],
+  "titres": {
+    "monarchie_hereditaire": {
+      "m": "titre.sino.monarchie_hereditaire.m",
+      "f": "titre.sino.monarchie_hereditaire.f"
+    },
+    "republique": {
+      "m": "titre.sino.republique.m",
+      "f": "titre.sino.republique.f"
+    },
+    "theocratie": {
+      "m": "titre.sino.theocratie.m",
+      "f": "titre.sino.theocratie.f"
+    },
+    "ploutocratie": {
+      "m": "titre.sino.ploutocratie.m",
+      "f": "titre.sino.ploutocratie.f"
+    },
+    "dictature": {
+      "m": "titre.sino.dictature.m",
+      "f": "titre.sino.dictature.f"
+    },
+    "guilde_maitre": {
+      "m": "titre.sino.guilde_maitre.m",
+      "f": "titre.sino.guilde_maitre.f"
+    }
+  }
+}

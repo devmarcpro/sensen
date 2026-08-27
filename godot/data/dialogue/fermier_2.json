@@ -1,0 +1,11 @@
+{
+  "text_key": "dialogue.fermier_2.text",
+  "conditions": {
+    "metier": "fermier",
+    "phase": null,
+    "relation_min": null,
+    "relation_max": null,
+    "meteo": null
+  },
+  "poids": 3
+}

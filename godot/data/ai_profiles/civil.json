@@ -1,0 +1,24 @@
+{
+  "name_key": "ai_profile.civil.name",
+  "considerations": {
+    "fuir": {
+      "menace_en_vue": 1.0,
+      "joueur_proche": 0.5
+    },
+    "attendre": {
+      "calme": 1.0
+    },
+    "retour": {
+      "loin_de_l_ancre": 0.8,
+      "cible_perdue": 0.6
+    }
+  },
+  "seuil_fuite_sante": 1.0,
+  "chute_max_degats": 5,
+  "horaires": {
+    "6-20": "poste",
+    "20-22": "social",
+    "22-6": "lit"
+  },
+  "chain_bonus": 0.0
+}

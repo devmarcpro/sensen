@@ -1,0 +1,101 @@
+{
+  "name_key": "culture.nipponne.name",
+  "name_order": "nom_prenom",
+  "race_affinity": {
+    "humain": 1.0
+  },
+  "prenom_a": [
+    "Hana",
+    "Kei",
+    "Aki",
+    "Yori",
+    "Masa",
+    "Tomo",
+    "Hiro",
+    "Kazu",
+    "Rin",
+    "Sato"
+  ],
+  "prenom_b_m": [
+    "to",
+    "shi",
+    "ki",
+    "o"
+  ],
+  "prenom_b_f": [
+    "ko",
+    "mi",
+    "ra",
+    "e"
+  ],
+  "famille_a": [
+    "Yama",
+    "Kawa",
+    "Fuji",
+    "Naka",
+    "Taka",
+    "Mori",
+    "Ishi",
+    "Hoshi"
+  ],
+  "famille_b_m": [
+    "moto",
+    "mura",
+    "shima",
+    "da",
+    "no",
+    "saki"
+  ],
+  "famille_b_f": [
+    "moto",
+    "mura",
+    "shima",
+    "da",
+    "no",
+    "saki"
+  ],
+  "ville_a": [
+    "Naga",
+    "Yoko",
+    "Kane",
+    "Aki",
+    "Fuku",
+    "Matsu",
+    "Kuro",
+    "Shiro"
+  ],
+  "ville_b": [
+    "saki",
+    "hama",
+    "zawa",
+    "oka",
+    "yama",
+    "kawa"
+  ],
+  "titres": {
+    "monarchie_hereditaire": {
+      "m": "titre.nipponne.monarchie_hereditaire.m",
+      "f": "titre.nipponne.monarchie_hereditaire.f"
+    },
+    "republique": {
+      "m": "titre.nipponne.republique.m",
+      "f": "titre.nipponne.republique.f"
+    },
+    "theocratie": {
+      "m": "titre.nipponne.theocratie.m",
+      "f": "titre.nipponne.theocratie.f"
+    },
+    "ploutocratie": {
+      "m": "titre.nipponne.ploutocratie.m",
+      "f": "titre.nipponne.ploutocratie.f"
+    },
+    "dictature": {
+      "m": "titre.nipponne.dictature.m",
+      "f": "titre.nipponne.dictature.f"
+    },
+    "guilde_maitre": {
+      "m": "titre.nipponne.guilde_maitre.m",
+      "f": "titre.nipponne.guilde_maitre.f"
+    }
+  }
+}

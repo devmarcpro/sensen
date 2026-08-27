@@ -1,0 +1,11 @@
+{
+  "text_key": "dialogue.forgeron_1.text",
+  "conditions": {
+    "metier": "artisan",
+    "phase": "jour",
+    "relation_min": null,
+    "relation_max": null,
+    "meteo": null
+  },
+  "poids": 4
+}

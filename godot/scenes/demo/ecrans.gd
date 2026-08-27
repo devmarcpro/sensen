@@ -17,6 +17,8 @@ var boutons: HBoxContainer
 var entrees: Array = []                 # ce que chaque ligne de la liste représente
 var selection := 0
 var minuterie := 0.0
+var pnj_id := ""                     # le PNJ du dialogue / du commerce en cours
+var replique_key := ""
 
 
 func _ready() -> void:
@@ -145,6 +147,14 @@ func touche(ev: InputEventKey) -> bool:
 			if courant == "inventaire":
 				_manger()
 				return true
+		KEY_P:
+			if courant == "dialogue":
+				_option("parler")
+				return true
+		KEY_C:
+			if courant == "dialogue":
+				_option("commercer")
+				return true
 	return false
 
 
@@ -166,6 +176,10 @@ func rafraichir() -> void:
 			_construire_atelier(j)
 		"feuille":
 			_construire_feuille(j)
+		"dialogue":
+			_construire_dialogue(j)
+		"commerce":
+			_construire_commerce(j)
 	selection = clampi(sel, 0, maxi(0, entrees.size() - 1))
 	if entrees.size() > 0:
 		liste.select(selection)
@@ -198,6 +212,12 @@ func _montrer_detail() -> void:
 			detail.text = texte_recette(en.plan)
 		"texte":
 			detail.text = str(en.texte)
+		"option":
+			detail.text = str(en.get("texte", ""))
+		"achat", "vente":
+			var p: Dictionary = en.prix
+			detail.text = texte_objet(str(en.uid)) + "\n\n" + tr("ui.prix.detail").format({"prix": int(p.prix), "base": p.base, "marge": p.marge, "qualite": p.qualite, "rarete": p.rarete, "rep": p.rep}) \
+				+ "\n" + (tr("ui.prix.vente").format({"n": int(p.prix)}) if en.kind == "achat" else tr("ui.prix.achat").format({"n": int(p.achat)}))
 		_:
 			detail.text = ""
 
@@ -215,7 +235,82 @@ func _action_principale() -> void:
 				main.sim.intention(j.id, {"type": "equiper", "objet": str(en.uid)})
 		"recette":
 			main.sim.intention(j.id, {"type": "fabriquer", "recette": str(en.plan.id)})
+		"option":
+			_option(str(en.option))
+			return
+		"achat":
+			main.sim.intention(j.id, {"type": "acheter", "pnj": pnj_id, "objet": str(en.uid)})
+		"vente":
+			main.sim.intention(j.id, {"type": "vendre", "pnj": pnj_id, "objet": str(en.uid)})
 	rafraichir()
+
+
+# ---------------------------------------------------------------- dialogue et commerce (E.23, Prix suggéré)
+
+func ouvrir_dialogue(id: String) -> void:
+	pnj_id = id
+	var j: Dictionary = main.joueur()
+	replique_key = main.sim.replique(main.sim.entites[id], j)
+	ouvrir("dialogue")
+
+
+func _construire_dialogue(j: Dictionary) -> void:
+	var pnj: Dictionary = main.sim.entites.get(pnj_id, {})
+	if pnj.is_empty():
+		fermer()
+		return
+	titre.text = tr("ui.ecran.dialogue").format({"nom": tr(pnj.name_key), "fonction": tr(GameData.entree("functions", str(pnj.get("fonction", "oisif"))).name_key)})
+	var rel := int(pnj.get("social", {}).get("relations", {}).get(j.id, 0))
+	liste.add_item(tr("ui.ecran.parler"))
+	entrees.append({"kind": "option", "option": "parler"})
+	if "commerce_possible" in pnj.get("tags", []):
+		liste.add_item(tr("ui.ecran.commercer"))
+		entrees.append({"kind": "option", "option": "commercer"})
+	liste.add_item(tr("ui.ecran.partir"))
+	entrees.append({"kind": "option", "option": "partir"})
+	for en in entrees:
+		en["texte"] = "[b]%s[/b]\n« %s »\n\n%s" % [tr(pnj.name_key), tr(replique_key), tr("ui.dialogue.relation").format({"n": rel})]
+	_bouton(tr("ui.ecran.parler"), func() -> void: _option("parler"))
+	if "commerce_possible" in pnj.get("tags", []):
+		_bouton(tr("ui.ecran.commercer"), func() -> void: _option("commercer"))
+
+
+func _option(opt: String) -> void:
+	var j: Dictionary = main.joueur()
+	match opt:
+		"parler":
+			if main.sim.intention(j.id, {"type": "parler", "pnj": pnj_id}):
+				replique_key = main.sim.replique(main.sim.entites[pnj_id], j) if false else replique_key
+				var pnj: Dictionary = main.sim.entites[pnj_id]
+				replique_key = str(main.sim.replique(pnj, j))
+			rafraichir()
+		"commercer":
+			ouvrir("commerce")
+		"partir":
+			fermer()
+
+
+func _construire_commerce(j: Dictionary) -> void:
+	var pnj: Dictionary = main.sim.entites.get(pnj_id, {})
+	if pnj.is_empty():
+		fermer()
+		return
+	var cm: Dictionary = main.sim.regles.r.commerce
+	titre.text = tr("ui.ecran.commerce").format({"nom": tr(pnj.name_key), "or": int(pnj.get("or", 0)), "joueur": int(j.get("or", 0))})
+	liste.add_item(tr("ui.commerce.stock"), null, false)
+	entrees.append({"kind": "texte", "texte": ""})
+	for uid in pnj.get("stock", []):
+		var p: Dictionary = main.sim.prix_suggere(uid, pnj, j)
+		liste.add_item("%s — %d or" % [_nom_court(uid), int(p.prix)])
+		entrees.append({"kind": "achat", "uid": uid, "prix": p})
+	liste.add_item(tr("ui.commerce.sac").format({"pct": int(float(cm.achat_ratio) * 100.0)}), null, false)
+	entrees.append({"kind": "texte", "texte": ""})
+	for uid in j.sac:
+		var p2: Dictionary = main.sim.prix_suggere(uid, pnj, j)
+		liste.add_item("%s — %d or" % [_nom_court(uid), int(p2.achat)])
+		entrees.append({"kind": "vente", "uid": uid, "prix": p2})
+	_bouton(tr("ui.ecran.acheter"), _action_principale)
+	_bouton(tr("ui.ecran.vendre"), _action_principale)
 
 
 # ---------------------------------------------------------------- inventaire

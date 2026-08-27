@@ -1,0 +1,11 @@
+{
+  "text_key": "dialogue.connaissance.text",
+  "conditions": {
+    "metier": null,
+    "phase": null,
+    "relation_min": 10,
+    "relation_max": 39,
+    "meteo": null
+  },
+  "poids": 3
+}

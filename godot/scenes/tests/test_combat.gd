@@ -35,6 +35,7 @@ func _ready() -> void:
 	test_carte_et_voyage()
 	test_corruption()
 	test_cycle_et_meteo()
+	test_village()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1294,6 +1295,93 @@ func test_corruption() -> void:
 	verifier(s.intention(j.id, {"type": "descendre"}), "entrer dans le donjon réapparu")
 	var gen: int = int(m.foyer(camp).generation)
 	verifier(gen >= 1 and int(s.donjon.id) == int(hash([s.graine, camp.x, camp.y, "donjon", gen]) & 0x7fffffff) and float(s.donjon.corruption) > 0.0 and int(s.donjon.profondeur) >= 1, "id de la génération %d, corruption %.0f et profondeur %d portées par le donjon" % [gen, float(s.donjon.corruption), int(s.donjon.profondeur)])
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Étape 9.A : hameau, PNJ nommés, dialogue, commerce
+
+func test_village() -> void:
+	var planete: Dictionary = GameData.config("planete")
+	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
+	verifier(GameData.catalogues.name_cultures.size() == 7 and GameData.catalogues.dialogue.size() == 28 and GameData.catalogues.functions.size() >= 6, "7 cultures, 28 répliques, les fonctions")
+	# Un nom par culture, genré ; la fonction d'affichage unique.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	var nord: Dictionary = GameData.catalogues.name_cultures.nordique
+	var nf := Noms.generer("nordique", nord, "f", rng)
+	verifier(nf.prenom.length() >= 3 and (nf.nom_famille.ends_with("sdottir") or nf.nom_famille.length() >= 4) and Noms.afficher(nf) == nf.prenom + " " + nf.nom_famille, "un nom nordique féminin (%s)" % Noms.afficher(nf))
+	var nip: Dictionary = GameData.catalogues.name_cultures.nipponne
+	var nm := Noms.generer("nipponne", nip, "m", rng)
+	verifier(Noms.afficher(nm) == nm.nom_famille + " " + nm.prenom, "nom puis prénom pour la culture nipponne (%s)" % Noms.afficher(nm))
+	# Un hameau quelque part : on cherche une cellule à POI village.
+	var cell_v := Vector2i(-1, -1)
+	for y in range(480, 560):
+		for x in range(480, 560):
+			var c := Vector2i(x, y)
+			if surf.terre_a(c) and surf.poi_de(c).get("village", false):
+				cell_v = c
+				break
+		if cell_v != Vector2i(-1, -1):
+			break
+	verifier(cell_v != Vector2i(-1, -1), "un POI village dans 80×80 cellules (4 %%)")
+	var e := surf.generer_cellule(cell_v.x, cell_v.y, {}, false)
+	var v: Dictionary = e.village
+	verifier(not v.is_empty() and v.nom.length() >= 3 and v.batiments.size() >= 2 and v.pnj.size() >= 3, "un hameau nommé « %s » : %d bâtiments, %d PNJ" % [v.get("nom", "?"), v.get("batiments", []).size(), v.get("pnj", []).size()])
+	verifier(e.murs.size() > 20 and e.portes.size() >= 2 and e.meubles.size() >= 3, "murs, portes et meubles de la palette (%d / %d / %d)" % [e.murs.size(), e.portes.size(), e.meubles.size()])
+	var a_marchand := false
+	for pj in v.pnj:
+		if pj.creature == "marchand":
+			a_marchand = true
+	verifier(a_marchand, "un marchand dans l'échoppe")
+	# On y va : les PNJ sont instanciés à la première visite, nommés, dotés d'or et d'un stock.
+	var s := Simulation.new(4242)
+	s.charger_camp({}, cell_v)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var civils: Array = s.vivants().filter(func(x: Dictionary) -> bool: return "civil" in x.get("tags", []))
+	verifier(civils.size() >= 3, "les PNJ du hameau sont là (%d)" % civils.size())
+	var marchand := {}
+	for x in civils:
+		if x.get("fonction", "") == "commercant":
+			marchand = x
+	verifier(not marchand.is_empty() and marchand.has("nom") and tr(marchand.name_key) == Noms.afficher(marchand.nom) and int(marchand.or) == 300 and marchand.stock.size() >= 8, "le marchand a un nom (%s), 300 or et un stock" % tr(marchand.get("name_key", "?")))
+	verifier(not s.ennemis(j, marchand) and s.ennemis(marchand, {"camp": "hostile"}), "un civil n'est pas l'ennemi du joueur, mais celui des hostiles")
+	# Dialogue : réplique conditionnée, pas trois fois la même ; Parler : +1 de relation une fois par jour.
+	s.grille.liberer(j.pos)
+	j.pos = marchand.pos + Vector2i(1, 0)
+	s.grille.placer(j.id, j.pos)
+	var vues := {}
+	for k in 6:
+		vues[s.replique(marchand, j)] = true
+	verifier(vues.size() >= 3, "les répliques varient (%d différentes en 6 tirages)" % vues.size())
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "parler", "pnj": marchand.id}), "parler au marchand")
+	var rel1: int = int(marchand.social.relations.get(j.id, 0))
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "parler", "pnj": marchand.id})
+	verifier(rel1 >= 1 and int(marchand.social.relations.get(j.id, 0)) == rel1, "+1 (ou +2) de relation, une seule fois par jour")
+	# Commerce : acheter du pain, vendre un lingot, le marchand à sec refuse.
+	var pain := ""
+	for uid in marchand.stock:
+		if s.items[uid].get("base", "") == "pain":
+			pain = uid
+	var p := s.prix_suggere(pain, marchand, j)
+	verifier(int(p.prix) >= 1 and p.has("base") and p.has("rarete"), "prix suggéré du pain : %d or (détail présent)" % int(p.prix))
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "acheter", "pnj": marchand.id, "objet": pain}), "sans or, pas d'achat")
+	j.or = 100
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "acheter", "pnj": marchand.id, "objet": pain}) and pain in j.sac and int(j.or) == 100 - int(p.prix) and int(marchand.or) == 300 + int(p.prix), "acheter le pain")
+	s._donner_materiau(j, "fer", 1, "lingot")
+	var lingot: String = s._pile(j, "fer", "lingot").uid
+	var pl := s.prix_suggere(lingot, marchand, j)
+	verifier(int(pl.prix) == 8, "un lingot de fer : sa valeur de base, %d or" % int(pl.prix))
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "vendre", "pnj": marchand.id, "objet": lingot}) and lingot in marchand.stock and int(j.or) == 100 - int(p.prix) + int(pl.achat), "vendre le lingot à 50 %%")
+	marchand.or = 0
+	s._donner_materiau(j, "fer", 1, "lingot")
+	var lingot2: String = s._pile(j, "fer", "lingot").uid
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "vendre", "pnj": marchand.id, "objet": lingot2}), "le marchand à sec refuse d'acheter")
 	s.monde.fermer()
 
 

@@ -26,6 +26,7 @@ var delta: Dictionary = {}             # Vector2i (cellule) → int : dérive de
 var foyers: Dictionary = {}            # Vector2i (cellule) → {actif, majeur, generation, repit, nettoye_tick} (donjons connus)
 var semaine_courante: int = 0          # dernière semaine passée (ticks / ticks_par_semaine)
 var grille_active: Grille = null       # la fenêtre courante, pour effacer une entrée après la grâce
+var peuplees: Dictionary = {}          # Vector2i (cellule) → true : ses PNJ ont été instanciés (première visite)
 var mutex := Mutex.new()
 var tache: int = -1                    # tâche WorkerThreadPool de pré-génération en cours (−1 : aucune)
 
@@ -111,6 +112,17 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 		g.poser_contenu(p, "plante")
 	for i in e.get("eau", {}).keys():
 		g.poser_contenu(base + Vector2i(int(i) % taille, int(i) / taille), "eau")
+	for i in e.get("murs", {}).keys():   # les bâtiments du hameau
+		var p := base + Vector2i(int(i) % taille, int(i) / taille)
+		g.materiaux[g.idx(p)] = e.murs[i]
+		g.poser_contenu(p, "mur_construit")
+	for i in e.get("portes", {}).keys():
+		g.poser_contenu(base + Vector2i(int(i) % taille, int(i) / taille), "porte")
+	for i in e.get("meubles", {}).keys():
+		var p := base + Vector2i(int(i) % taille, int(i) / taille)
+		var m: Dictionary = GameData.catalogues.meubles.get(str(e.meubles[i]), {})
+		g.meubles[g.idx(p)] = str(e.meubles[i])
+		g.poser_contenu(p, "meuble" if bool(m.get("bloque_passage", true)) else "meuble_sol")
 	if bool(e.get("a_donjon", false)):
 		g.poser_contenu(base + e.entree_donjon, "entree_donjon")
 		foyer(cell)   # le donjon devient un foyer connu de la dérive

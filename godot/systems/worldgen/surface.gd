@@ -77,6 +77,7 @@ func poi_de(c: Vector2i, camp: bool = false) -> Dictionary:
 	if not camp:
 		res.donjon = rng.randf() < float(dens.get("donjon", 0.06)) * float(poids.get("donjon", 1))
 	res.filon_majeur = rng.randf() < float(dens.get("filon_majeur", 0.06)) * float(poids.get("filon_majeur", 1))
+	res["village"] = (not camp) and rng.randf() < float(dens.get("village", 0.04)) * float(poids.get("village", 1))
 	return res
 
 
@@ -364,10 +365,136 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 			pf += [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)][rng.randi_range(0, 3)]
 			if not _dans(pf, taille):
 				break
+	e["murs"] = {}
+	e["portes"] = {}
+	e["meubles"] = {}
+	e["village"] = {}
+	if bool(poi.get("village", false)):
+		_poser_village(e, Vector2i(cx, cy), rng)
 	for d in [e.arbres, e.rochers, e.filons, e.eau]:
 		for i in d.keys():
 			e.sol.erase(i)
 	return e   # les plantes restent du sol (franchissables) : la simulation les pose comme contenu
+
+
+## Un hameau (Villages PNJ) : une place, 3 à 5 bâtiments préfab autour, des chemins, la palette du biome.
+func _poser_village(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator) -> void:
+	var vc: Dictionary = planete.get("village", {})
+	var taille: int = e.largeur
+	var bats: Dictionary = GameData.catalogues.village_buildings
+	var b: Dictionary = biomes.get(e.biome, {})
+	var palette: Dictionary = b.get("village_palette", {"mur": "chene", "toit": "chaume_tresse", "sol": "calcaire"})
+	var centre := Vector2i(taille / 2 + rng.randi_range(-25, 25), taille / 2 + rng.randi_range(-25, 25))
+	var rayon: int = int(vc.get("rayon_place", 6))
+	if e.has("a_donjon") and bool(e.a_donjon) and Vector2i(e.entree_donjon).distance_to(centre) < 20:
+		centre = Vector2i(e.entree_donjon) + Vector2i(30, 0)
+	# La culture et le nom du village : la race dominante (humain) tire parmi ses cultures.
+	var cultures: Dictionary = GameData.catalogues.name_cultures
+	var culture_id := Noms.culture_pour("humain", cultures, rng)
+	var nom_village := Noms.ville(cultures.get(culture_id, {}), rng) if not culture_id.is_empty() else "Hameau"
+	e.village = {"nom": nom_village, "culture": culture_id, "centre": centre, "batiments": [], "pnj": []}
+	# La place : sol de la palette, dégagée.
+	for dy in range(-rayon, rayon + 1):
+		for dx in range(-rayon, rayon + 1):
+			var p := centre + Vector2i(dx, dy)
+			var i := p.y * taille + p.x
+			if _dans(p, taille) and not e.eau.has(i):
+				e.sols[i] = str(palette.sol)
+				e.hauteurs[i] = H_BASE
+				_degager(e, i)
+	# Les bâtiments autour de la place, dans les 8 directions, sans chevauchement.
+	var ids: Array = bats.keys()
+	ids.sort()
+	var nb := rng.randi_range(int(vc.batiments[0]), int(vc.batiments[1]))
+	var dirs := [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(1, 1), Vector2i(-1, -1)]
+	var pris: Array[Rect2i] = []
+	var a_echoppe := false
+	for k in nb:
+		var bid: String = "echoppe" if not a_echoppe else str(ids[rng.randi_range(0, ids.size() - 1)])
+		if bid == "echoppe":
+			a_echoppe = true
+		var plan: Array = bats[bid].plan
+		var w: int = str(plan[0]).length()
+		var h: int = plan.size()
+		var d: Vector2i = dirs[k % dirs.size()]
+		var origine := centre + d * (rayon + 3) - Vector2i(w / 2, h / 2) + Vector2i(rng.randi_range(-2, 2), rng.randi_range(-2, 2))
+		var r := Rect2i(origine, Vector2i(w, h))
+		if origine.x < 2 or origine.y < 2 or r.end.x >= taille - 2 or r.end.y >= taille - 2:
+			continue
+		var libre := true
+		for pr in pris:
+			if pr.grow(1).intersects(r):
+				libre = false
+		var mouille := false
+		for y in h:
+			for x in w:
+				if e.eau.has((origine.y + y) * taille + origine.x + x):
+					mouille = true
+		if not libre or mouille:
+			continue
+		pris.append(r)
+		_poser_batiment(e, bats[bid], origine, palette, bid)
+		# Le chemin du bâtiment à la place.
+		var porte: Vector2i = e.village.batiments.back().porte
+		var q := porte + Vector2i(0, 1)
+		var garde := 0
+		while Grille.distance(q, centre) > rayon and garde < 80:
+			garde += 1
+			var i := q.y * taille + q.x
+			if _dans(q, taille) and not e.eau.has(i) and not e.murs.has(i):
+				e.sols[i] = str(palette.sol)
+				e.hauteurs[i] = H_BASE
+				_degager(e, i)
+			q += Vector2i(signi(centre.x - q.x), 0) if absi(centre.x - q.x) > absi(centre.y - q.y) else Vector2i(0, signi(centre.y - q.y))
+	# La population : un résident par lit, le marchand dans l'échoppe, un garde sur la place.
+	var residents: Dictionary = vc.residents
+	for bat in e.village.batiments:
+		var fiche := str(residents.get(bat.id, "villageois"))
+		for lit in bat.lits:
+			e.village.pnj.append({"creature": fiche, "pos": lit, "lit": lit})
+			if bat.id == "echoppe":
+				break
+		if bat.id == "maison" and rng.randf() < float(vc.get("forgeron_chance", 0.5)) and not bat.lits.is_empty():
+			e.village.pnj[e.village.pnj.size() - 1].creature = "forgeron"
+	e.village.pnj.append({"creature": str(vc.garde), "pos": centre, "lit": centre})
+
+
+func _degager(e: Dictionary, i: int) -> void:
+	e.arbres.erase(i)
+	e.rochers.erase(i)
+	e.filons.erase(i)
+	e.plantes.erase(i)
+	e.sol[i] = true
+
+
+## Pose un bâtiment préfab : murs de la palette, sol, porte, meubles ; note ses lits.
+func _poser_batiment(e: Dictionary, bat: Dictionary, origine: Vector2i, palette: Dictionary, bid: String) -> void:
+	var taille: int = e.largeur
+	var plan: Array = bat.plan
+	var meubles: Dictionary = bat.meubles
+	var info := {"id": bid, "origine": origine, "porte": origine, "lits": []}
+	for y in plan.size():
+		var ligne: String = plan[y]
+		for x in ligne.length():
+			var c := ligne[x]
+			if c == " ":
+				continue
+			var p := origine + Vector2i(x, y)
+			var i := p.y * taille + p.x
+			_degager(e, i)
+			e.hauteurs[i] = H_BASE
+			e.sols[i] = str(palette.sol)
+			if c == "#":
+				e.murs[i] = str(palette.mur)
+				e.sol.erase(i)
+			elif c == "P":
+				e.portes[i] = true
+				info.porte = p
+			elif meubles.has(c):
+				e.meubles[i] = str(meubles[c])
+				if str(meubles[c]).begins_with("lit"):
+					info.lits.append(p)
+	e.village.batiments.append(info)
 
 
 ## Les accidents de relief d'une cellule (planete.relief) : chacun un modificateur 2D paramétrique.

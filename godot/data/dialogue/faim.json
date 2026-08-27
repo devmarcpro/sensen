@@ -1,0 +1,11 @@
+{
+  "text_key": "dialogue.faim.text",
+  "conditions": {
+    "metier": null,
+    "phase": null,
+    "relation_min": null,
+    "relation_max": null,
+    "meteo": null
+  },
+  "poids": 1
+}

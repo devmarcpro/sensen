@@ -1,0 +1,96 @@
+{
+  "name_key": "culture.slave.name",
+  "name_order": "prenom_nom",
+  "race_affinity": {
+    "humain": 1.0
+  },
+  "prenom_a": [
+    "Mir",
+    "Bog",
+    "Vlad",
+    "Svet",
+    "Rad",
+    "Stan",
+    "Dra",
+    "Lud",
+    "Yar",
+    "Zor"
+  ],
+  "prenom_b_m": [
+    "oslav",
+    "omir",
+    "imir",
+    "ek",
+    "an"
+  ],
+  "prenom_b_f": [
+    "ana",
+    "oslava",
+    "ka"
+  ],
+  "famille_a": [
+    "Nov",
+    "Volk",
+    "Kov",
+    "Petr",
+    "Sokol",
+    "Bel",
+    "Cern",
+    "Zeman"
+  ],
+  "famille_b_m": [
+    "ov",
+    "ic",
+    "ek",
+    "sky"
+  ],
+  "famille_b_f": [
+    "ova",
+    "ic",
+    "ska"
+  ],
+  "ville_a": [
+    "Novo",
+    "Belo",
+    "Staro",
+    "Volko",
+    "Zlato",
+    "Cerno",
+    "Vyso",
+    "Mokro"
+  ],
+  "ville_b": [
+    "grad",
+    "gorod",
+    "pol",
+    "slav",
+    "vice",
+    "dol"
+  ],
+  "titres": {
+    "monarchie_hereditaire": {
+      "m": "titre.slave.monarchie_hereditaire.m",
+      "f": "titre.slave.monarchie_hereditaire.f"
+    },
+    "republique": {
+      "m": "titre.slave.republique.m",
+      "f": "titre.slave.republique.f"
+    },
+    "theocratie": {
+      "m": "titre.slave.theocratie.m",
+      "f": "titre.slave.theocratie.f"
+    },
+    "ploutocratie": {
+      "m": "titre.slave.ploutocratie.m",
+      "f": "titre.slave.ploutocratie.f"
+    },
+    "dictature": {
+      "m": "titre.slave.dictature.m",
+      "f": "titre.slave.dictature.f"
+    },
+    "guilde_maitre": {
+      "m": "titre.slave.guilde_maitre.m",
+      "f": "titre.slave.guilde_maitre.f"
+    }
+  }
+}

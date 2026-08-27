@@ -1,0 +1,102 @@
+{
+  "name_key": "culture.celte.name",
+  "name_order": "prenom_nom",
+  "race_affinity": {
+    "elfe": 1.0,
+    "humain": 1.0
+  },
+  "prenom_a": [
+    "Bran",
+    "Aoif",
+    "Cael",
+    "Deir",
+    "Fionn",
+    "Gwen",
+    "Mael",
+    "Rhi",
+    "Tal",
+    "Eil"
+  ],
+  "prenom_b_m": [
+    "an",
+    "ys",
+    "iesin",
+    "in"
+  ],
+  "prenom_b_f": [
+    "wen",
+    "e",
+    "dre",
+    "annon"
+  ],
+  "famille_a": [
+    "Mac",
+    "O'",
+    "Pen",
+    "Caer",
+    "Ap",
+    "Dun",
+    "Kil",
+    "Glen"
+  ],
+  "famille_b_m": [
+    "Bran",
+    "Cormac",
+    "Gwyn",
+    "Dara",
+    "Owen",
+    "more"
+  ],
+  "famille_b_f": [
+    "Bran",
+    "Cormac",
+    "Gwyn",
+    "Dara",
+    "Owen",
+    "more"
+  ],
+  "ville_a": [
+    "Dun",
+    "Caer",
+    "Inver",
+    "Bally",
+    "Glen",
+    "Kil",
+    "Aber",
+    "Llan"
+  ],
+  "ville_b": [
+    "more",
+    "keld",
+    "wyn",
+    "dara",
+    "loch",
+    "brae"
+  ],
+  "titres": {
+    "monarchie_hereditaire": {
+      "m": "titre.celte.monarchie_hereditaire.m",
+      "f": "titre.celte.monarchie_hereditaire.f"
+    },
+    "republique": {
+      "m": "titre.celte.republique.m",
+      "f": "titre.celte.republique.f"
+    },
+    "theocratie": {
+      "m": "titre.celte.theocratie.m",
+      "f": "titre.celte.theocratie.f"
+    },
+    "ploutocratie": {
+      "m": "titre.celte.ploutocratie.m",
+      "f": "titre.celte.ploutocratie.f"
+    },
+    "dictature": {
+      "m": "titre.celte.dictature.m",
+      "f": "titre.celte.dictature.f"
+    },
+    "guilde_maitre": {
+      "m": "titre.celte.guilde_maitre.m",
+      "f": "titre.celte.guilde_maitre.f"
+    }
+  }
+}

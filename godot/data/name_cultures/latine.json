@@ -1,0 +1,96 @@
+{
+  "name_key": "culture.latine.name",
+  "name_order": "prenom_nom",
+  "race_affinity": {
+    "humain": 1.0
+  },
+  "prenom_a": [
+    "Mar",
+    "Luc",
+    "Aur",
+    "Val",
+    "Cass",
+    "Jul",
+    "Oct",
+    "Fla",
+    "Tib",
+    "Sev"
+  ],
+  "prenom_b_m": [
+    "ius",
+    "ianus",
+    "io",
+    "us"
+  ],
+  "prenom_b_f": [
+    "ia",
+    "illa",
+    "ine",
+    "a"
+  ],
+  "famille_a": [
+    "Val",
+    "Corn",
+    "Aem",
+    "Claud",
+    "Flav",
+    "Jul",
+    "Marc",
+    "Cass"
+  ],
+  "famille_b_m": [
+    "erius",
+    "ianus",
+    "ius",
+    "inus"
+  ],
+  "famille_b_f": [
+    "elia",
+    "ella",
+    "ia"
+  ],
+  "ville_a": [
+    "Alta",
+    "Nova",
+    "Porta",
+    "Villa",
+    "Aqua",
+    "Castra",
+    "Monte",
+    "Terra"
+  ],
+  "ville_b": [
+    "rium",
+    "lia",
+    "num",
+    "ona",
+    "ensis",
+    "ura"
+  ],
+  "titres": {
+    "monarchie_hereditaire": {
+      "m": "titre.latine.monarchie_hereditaire.m",
+      "f": "titre.latine.monarchie_hereditaire.f"
+    },
+    "republique": {
+      "m": "titre.latine.republique.m",
+      "f": "titre.latine.republique.f"
+    },
+    "theocratie": {
+      "m": "titre.latine.theocratie.m",
+      "f": "titre.latine.theocratie.f"
+    },
+    "ploutocratie": {
+      "m": "titre.latine.ploutocratie.m",
+      "f": "titre.latine.ploutocratie.f"
+    },
+    "dictature": {
+      "m": "titre.latine.dictature.m",
+      "f": "titre.latine.dictature.f"
+    },
+    "guilde_maitre": {
+      "m": "titre.latine.guilde_maitre.m",
+      "f": "titre.latine.guilde_maitre.f"
+    }
+  }
+}

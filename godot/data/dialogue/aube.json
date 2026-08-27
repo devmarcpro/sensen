@@ -1,0 +1,11 @@
+{
+  "text_key": "dialogue.aube.text",
+  "conditions": {
+    "metier": null,
+    "phase": "aube",
+    "relation_min": null,
+    "relation_max": null,
+    "meteo": null
+  },
+  "poids": 3
+}

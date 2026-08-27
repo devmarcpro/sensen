@@ -1,0 +1,11 @@
+{
+  "text_key": "dialogue.soir.text",
+  "conditions": {
+    "metier": null,
+    "phase": "crepuscule",
+    "relation_min": null,
+    "relation_max": null,
+    "meteo": null
+  },
+  "poids": 3
+}
