@@ -73,6 +73,12 @@
     "commerce": {
       "type": "object"
     },
+    "reputation": {
+      "type": "object"
+    },
+    "guildes": {
+      "type": "object"
+    },
     "camp": {
       "type": "object"
     }

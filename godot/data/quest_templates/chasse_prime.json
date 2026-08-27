@@ -1,0 +1,19 @@
+{
+  "guild": "guerriers",
+  "rank_min": 1,
+  "pattern": "tuer",
+  "target_selector": {
+    "tags_any": [
+      "hostile"
+    ]
+  },
+  "count_range": [
+    3,
+    6
+  ],
+  "reward": {
+    "gold_per_target_level": 15,
+    "guild_xp": 10
+  },
+  "text_key": "quest.chasse_prime.text"
+}

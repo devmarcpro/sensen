@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "required": [
+    "guild",
+    "rank_min",
+    "pattern",
+    "target_selector",
+    "count_range",
+    "reward",
+    "text_key"
+  ]
+}

@@ -155,6 +155,10 @@ func touche(ev: InputEventKey) -> bool:
 			if courant == "dialogue":
 				_option("commercer")
 				return true
+		KEY_Q:
+			if courant == "dialogue":
+				_option("quetes")
+				return true
 	return false
 
 
@@ -178,6 +182,8 @@ func rafraichir() -> void:
 			_construire_feuille(j)
 		"dialogue":
 			_construire_dialogue(j)
+		"quetes":
+			_construire_quetes(j)
 		"commerce":
 			_construire_commerce(j)
 	selection = clampi(sel, 0, maxi(0, entrees.size() - 1))
@@ -212,7 +218,7 @@ func _montrer_detail() -> void:
 			detail.text = texte_recette(en.plan)
 		"texte":
 			detail.text = str(en.texte)
-		"option":
+		"option", "quete":
 			detail.text = str(en.get("texte", ""))
 		"achat", "vente":
 			var p: Dictionary = en.prix
@@ -242,6 +248,12 @@ func _action_principale() -> void:
 			main.sim.intention(j.id, {"type": "acheter", "pnj": pnj_id, "objet": str(en.uid)})
 		"vente":
 			main.sim.intention(j.id, {"type": "vendre", "pnj": pnj_id, "objet": str(en.uid)})
+		"quete":
+			var q: Dictionary = en.quete
+			if q.etat == "offerte":
+				main.sim.intention(j.id, {"type": "accepter_quete", "pnj": pnj_id, "quete": str(q.uid)})
+			elif q.etat == "terminee":
+				main.sim.intention(j.id, {"type": "rendre_quete", "pnj": pnj_id, "quete": str(q.uid)})
 	rafraichir()
 
 
@@ -266,10 +278,13 @@ func _construire_dialogue(j: Dictionary) -> void:
 	if "commerce_possible" in pnj.get("tags", []):
 		liste.add_item(tr("ui.ecran.commercer"))
 		entrees.append({"kind": "option", "option": "commercer"})
+	if "quetes" in pnj.get("tags", []):
+		liste.add_item(tr("ui.ecran.quetes"))
+		entrees.append({"kind": "option", "option": "quetes"})
 	liste.add_item(tr("ui.ecran.partir"))
 	entrees.append({"kind": "option", "option": "partir"})
 	for en in entrees:
-		en["texte"] = "[b]%s[/b]\n« %s »\n\n%s" % [tr(pnj.name_key), tr(replique_key), tr("ui.dialogue.relation").format({"n": rel})]
+		en["texte"] = "[b]%s[/b]\n« %s »\n\n%s\n\n%s" % [tr(pnj.name_key), tr(replique_key), tr("ui.dialogue.relation").format({"n": rel}), fiche_pnj(pnj, j)]
 	_bouton(tr("ui.ecran.parler"), func() -> void: _option("parler"))
 	if "commerce_possible" in pnj.get("tags", []):
 		_bouton(tr("ui.ecran.commercer"), func() -> void: _option("commercer"))
@@ -286,8 +301,63 @@ func _option(opt: String) -> void:
 			rafraichir()
 		"commercer":
 			ouvrir("commerce")
+		"quetes":
+			ouvrir("quetes")
 		"partir":
 			fermer()
+
+
+## La fiche d'un PNJ, révélée par paliers de relation (L'information comme récompense).
+func fiche_pnj(pnj: Dictionary, j: Dictionary) -> String:
+	var sim = main.sim
+	var palier: int = sim.palier_info(pnj, j)
+	if palier == 0:
+		return tr("ui.fiche.apparence")
+	var l: Array[String] = [tr("ui.fiche.base").format({"nom": tr(pnj.name_key), "fonction": tr(GameData.entree("functions", str(pnj.get("fonction", "oisif"))).name_key), "village": str(pnj.get("village", "—"))})]
+	if palier >= 2:
+		var nd: Dictionary = sim.progression.niveaux_derives(pnj)
+		l.append(tr("ui.fiche.age").format({"genre": tr("genre." + str(pnj.get("genre", "m"))), "signe": str(pnj.get("nom", {}).get("culture", "—")), "niveau": int(round(maxf(nd.combat, nd.general)))}))
+	if palier >= 3:
+		var comps: Array[String] = []
+		for cle in pnj.competences.keys():
+			if int(pnj.competences[cle]) > 0:
+				comps.append("%s %d" % [tr(sim._nom_competence(cle)), int(pnj.competences[cle])])
+		var equip: Array[String] = []
+		for slot in pnj.equipement.keys():
+			equip.append(main.nom_objet(sim.nom_objet(pnj.equipement[slot])))
+		l.append(tr("ui.fiche.competences").format({"liste": " · ".join(comps) if not comps.is_empty() else "—", "equip": " · ".join(equip) if not equip.is_empty() else "—"}))
+	if palier >= 4:
+		l.append(tr("ui.fiche.gouts").format({"tags": " · ".join(pnj.get("tags", []))}))
+	if palier >= 5:
+		l.append(tr("ui.fiche.tout"))
+		pnj["recrutable_hors_condition"] = true
+	return "\n".join(l)
+
+
+func _construire_quetes(j: Dictionary) -> void:
+	var sim = main.sim
+	var pnj: Dictionary = sim.entites.get(pnj_id, {})
+	if pnj.is_empty():
+		fermer()
+		return
+	var g: Dictionary = j.get("guildes", {}).get("guerriers", {"xp": 0, "rang": 0})
+	titre.text = tr("ui.quetes.titre").format({"nom": tr(pnj.name_key), "guilde": tr("guilde.guerriers.name"), "rang": tr("rang." + str(sim.regles.r.guildes.rangs[int(g.rang)])), "xp": int(g.xp)})
+	var offertes: Array = sim.quetes_offertes(pnj, j)
+	if offertes.is_empty():
+		liste.add_item(tr("ui.quetes.refus") if sim.relation_de(pnj, j) < int(sim.regles.r.reputation.quetes_seuil) else tr("ui.quetes.aucune"))
+		entrees.append({"kind": "texte", "texte": ""})
+	for q in offertes:
+		if q.etat != "offerte":
+			continue
+		liste.add_item(tr("ui.quetes.offerte").format({"texte": tr(q.text_key).format({"count": int(q.count)})}))
+		entrees.append({"kind": "quete", "quete": q, "texte": tr(q.text_key).format({"count": int(q.count)}) + "\n" + tr("ui.quetes.recompense").format({"or": int(q.or), "xp": int(q.xp)})})
+	for q in j.get("quetes", []):
+		if q.etat == "en_cours" or q.etat == "terminee":
+			var texte: String = tr(q.text_key).format({"count": int(q.count)})
+			liste.add_item((tr("ui.quetes.terminee") if q.etat == "terminee" else tr("ui.quetes.en_cours")).format({"texte": texte, "fait": int(q.fait), "count": int(q.count)}))
+			entrees.append({"kind": "quete", "quete": q, "texte": texte + "\n" + tr("ui.quetes.recompense").format({"or": int(q.or), "xp": int(q.xp)})})
+	_bouton(tr("ui.ecran.accepter"), _action_principale)
+	_bouton(tr("ui.ecran.rendre"), _action_principale)
 
 
 func _construire_commerce(j: Dictionary) -> void:

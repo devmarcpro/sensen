@@ -37,6 +37,7 @@ func _ready() -> void:
 	test_cycle_et_meteo()
 	test_village()
 	test_village_vivant()
+	test_reputation_et_quetes()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1383,6 +1384,94 @@ func test_village() -> void:
 	var lingot2: String = s._pile(j, "fer", "lingot").uid
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "vendre", "pnj": marchand.id, "objet": lingot2}), "le marchand à sec refuse d'acheter")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Étape 9.C : réputation, information, quêtes
+
+func test_reputation_et_quetes() -> void:
+	var planete: Dictionary = GameData.config("planete")
+	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
+	var cell_v := Vector2i(-1, -1)
+	for y in range(480, 560):
+		for x in range(480, 560):
+			var c := Vector2i(x, y)
+			if surf.terre_a(c) and surf.poi_de(c).get("village", false):
+				cell_v = c
+				break
+		if cell_v != Vector2i(-1, -1):
+			break
+	var s := Simulation.new(4242)
+	s.charger_camp({}, cell_v)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var civils: Array = s.vivants().filter(func(x: Dictionary) -> bool: return "civil" in x.get("tags", []))
+	var garde := {}
+	var villageois := {}
+	for x in civils:
+		if x.ai_profile == "garde":
+			garde = x
+		elif villageois.is_empty():
+			villageois = x
+	verifier(not garde.is_empty() and not villageois.is_empty(), "un garde et un villageois")
+	# Paliers d'information : inconnu (0-19) → nom ; à 50, compétences ; à 90, tout.
+	verifier(s.palier_info(villageois, j) == 1, "relation 0 : palier 1 (nom, métier, village)")
+	villageois.social.relations[j.id] = 55
+	verifier(s.palier_info(villageois, j) == 3, "relation 55 : palier 3 (compétences, équipement)")
+	villageois.social.relations[j.id] = -5
+	verifier(s.palier_info(villageois, j) == 0, "relation négative : apparence seule")
+	# Frapper un civil : relation −30, village −10, globale −3 ; le tuer rend hostile à vue.
+	villageois.social.relations[j.id] = 0
+	s.reputation(j, villageois, "frapper")
+	verifier(int(villageois.social.relations[j.id]) == -30 and int(j.reputations.get(villageois.village, 0)) == -10 and int(j.reputations._globale) == -3, "frapper : −30 / −10 / −3")
+	verifier(not s.ennemis(villageois, j), "à −30, pas encore hostile à vue")
+	s.reputation(j, villageois, "frapper")
+	verifier(int(villageois.social.relations[j.id]) == -60 and s.ennemis(villageois, j), "à −60 : hostile à vue")
+	# Un autre villageois hérite de la réputation du village (−20 : quêtes refusées, prix +25 %).
+	var autre := {}
+	for x in civils:
+		if x.id != villageois.id and x.ai_profile == "civil":
+			autre = x
+	if not autre.is_empty():
+		verifier(s.relation_de(autre, j) == -20, "un autre villageois lit la réputation du village (−20)")
+	# Rédemption : une semaine, +1 vers 0.
+	s._tiquer_monde(int(planete.corruption.ticks_par_semaine) + 1)
+	verifier(int(villageois.social.relations[j.id]) == -59 and int(j.reputations.get(villageois.village, 0)) == -19, "dérive hebdomadaire +1 vers 0")
+	# Quêtes : le garde en offre 2 ; refusées sous −20 ; accepter, tuer, rendre.
+	j.reputations[villageois.village] = 0
+	var q_refus := s.quetes_offertes(garde, j)
+	verifier(q_refus.size() == 2, "le garde offre 2 quêtes par semaine (%d)" % q_refus.size())
+	var q_chasse := {}
+	for q in q_refus:
+		if q.pattern == "tuer":
+			q_chasse = q
+	if q_chasse.is_empty():
+		q_chasse = q_refus[0]
+		q_chasse.pattern = "tuer"
+		q_chasse.selector = {"tags_any": ["bete"]}
+		q_chasse.count = 2
+	q_chasse.selector = {"tags_any": ["bete", "hostile"]}
+	q_chasse.count = 2
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "accepter_quete", "pnj": garde.id, "quete": q_chasse.uid}) and j.quetes.size() == 1 and j.quetes[0].etat == "en_cours", "accepter la quête de chasse")
+	var or0: int = int(j.or)
+	for k in 2:
+		var loup := s.ajouter("loup", j.pos + Vector2i(3 + k, 3), "ia")
+		loup.sante = 1
+		s._appliquer_degats(loup, 5, j.id, {"type": "test"})
+	verifier(int(j.quetes[0].fait) == 2 and j.quetes[0].etat == "terminee", "deux loups tués : la quête est terminée")
+	garde.social.relations[j.id] = 0
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "rendre_quete", "pnj": garde.id, "quete": q_chasse.uid}), "rendre la quête")
+	verifier(int(j.or) == or0 + int(q_chasse.or) and int(j.guildes.guerriers.xp) == int(q_chasse.xp) and int(garde.social.relations[j.id]) == 10, "or, XP de guilde, +10 de relation avec le donneur")
+	j.reputations[villageois.village] = -25
+	verifier(s.quetes_offertes(garde, j).is_empty(), "sous −20 de réputation : pas de quête")
+	# Rumeur : à ≥ 50, parler révèle une cellule à POI non explorée.
+	j.reputations[villageois.village] = 0
+	garde.social.relations[j.id] = 60
+	var n0: int = s.monde.explores.size()
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "parler", "pnj": garde.id})
+	verifier(s.monde.explores.size() >= n0, "la rumeur d'un garde peut révéler un donjon (%d chunks explorés)" % s.monde.explores.size())
 	s.monde.fermer()
 
 

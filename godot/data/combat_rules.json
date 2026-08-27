@@ -319,5 +319,64 @@
     "parler_relation": 1,
     "parler_charisme_dd": 15,
     "parler_bonus": 1
+  },
+  "reputation": {
+    "_doc": "Réputation et relations : paliers (hostile ≤ hostile_seuil ; quêtes refusées sous quetes_seuil ; confidences ≥ confidences_seuil) ; gains par acte [pnj, village, globale] ; vitesse ×0.5 / ×1.5 selon la réputation du village ; dérive +1/semaine vers 0.",
+    "hostile_seuil": -50,
+    "quetes_seuil": -20,
+    "confidences_seuil": 50,
+    "frapper": [
+      -30,
+      -10,
+      -3
+    ],
+    "tuer": [
+      -50,
+      -20,
+      -5
+    ],
+    "quete": [
+      10,
+      5,
+      1
+    ],
+    "vitesse": [
+      [
+        -100,
+        -20,
+        0.5
+      ],
+      [
+        50,
+        100,
+        1.5
+      ]
+    ],
+    "derive_hebdo": 1,
+    "paliers_info": [
+      0,
+      20,
+      50,
+      75,
+      90
+    ],
+    "rumeur_rayon": 6
+  },
+  "guildes": {
+    "rangs": [
+      "novice",
+      "compagnon",
+      "adepte",
+      "expert",
+      "maitre"
+    ],
+    "seuils_xp": [
+      0,
+      100,
+      300,
+      700,
+      1500
+    ],
+    "quetes_par_semaine": 2
   }
 }

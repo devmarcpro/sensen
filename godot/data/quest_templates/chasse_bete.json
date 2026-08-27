@@ -1,0 +1,19 @@
+{
+  "guild": "guerriers",
+  "rank_min": 1,
+  "pattern": "tuer",
+  "target_selector": {
+    "tags_any": [
+      "bete"
+    ]
+  },
+  "count_range": [
+    3,
+    8
+  ],
+  "reward": {
+    "gold_per_target_level": 10,
+    "guild_xp": 8
+  },
+  "text_key": "quest.chasse_bete.text"
+}

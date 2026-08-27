@@ -51,6 +51,9 @@ Douze guildes, des quêtes entièrement procédurales, et une progression de ran
 > [!success] Précisé le 2026-08-28
 > Sculpture abandonnée ([[Tables de sculpture]]) : les paliers de guilde qui y donnaient accès sont à réaffecter (recettes exotiques, station personnelle) — à préciser à l'étape 9.
 
+> [!success] Codé le 2026-08-28 — étape 9.C, `data/quest_templates/` (3 gabarits), écran Quêtes
+> **Génération procédurale** depuis les gabarits (`chasse_prime` : éliminer des hostiles ; `chasse_bete` : des bêtes ; `donjon` : vider le donjon de la cellule), **jamais de questline écrite**. Le **garde du village** est le donneur (tag `quetes`) : jusqu'à 2 quêtes offertes par semaine, refusées sous −20 de réputation. Le système écoute `creature_killed` et `dungeon_cleared` sans que ces systèmes le connaissent ; rendre la quête donne l'or (`gold_per_target_level × niveau × count`), **+XP de guilde** (`e.guildes.guerriers`) et de la relation. **Les 5 rangs** — Novice, Compagnon, Adepte, Expert, Maître — aux seuils 0 / 100 / 300 / 700 / 1500 XP (décision). Les 12 guildes, les halls, les taxes hebdomadaires et le pattern construction attendent l'étape 10.
+
 ## Liens
 - **Dépend de** : [[Data-driven design]], [[Gabarit de quête]], [[Double niveau combat et général]]
 - **Alimente** : [[Tables de sculpture]], [[Halls de guilde]], [[Craft compositionnel]], [[Barèmes économiques]], [[Économie — sources et puits]]

@@ -738,6 +738,7 @@ func _parler(e: Dictionary, pnj_id: String, tick: int) -> bool:
 			gain += int(cm.parler_bonus)
 		pnj.social.relations[e.id] = clampi(int(pnj.social.relations.get(e.id, 0)) + gain, -100, 100)
 		EventBus.emettre(&"journal", [&"journal.relation", {"nom": pnj.name_key, "n": int(pnj.social.relations[e.id])}])
+	_rumeur(pnj, e, tick)
 	e.compteur = tick + int(regles.r.actions.objet)
 	return true
 
@@ -807,6 +808,108 @@ func _vendre(e: Dictionary, pnj_id: String, uid: String, tick: int) -> bool:
 	EventBus.emettre(&"journal", [&"journal.vend", {"nom": e.name_key, "objet": nom_objet(uid), "n": int(p.achat)}])
 	EventBus.emettre(&"item_sold", [uid, e.id, int(p.achat)])
 	return true
+
+
+# ---------------------------------------------------------------- quêtes et guildes (Gabarit de quête)
+
+## Les quêtes qu'un donneur offre cette semaine (générées depuis les gabarits, jusqu'à quetes_par_semaine).
+func quetes_offertes(pnj: Dictionary, e: Dictionary) -> Array:
+	if not ("quetes" in pnj.get("tags", [])):
+		return []
+	# Refusées sous −20 : la relation du donneur, ou la réputation de son village (le collectif compte).
+	if mini(relation_de(pnj, e), int(e.get("reputations", {}).get(str(pnj.get("village", "")), 0))) < int(regles.r.reputation.quetes_seuil):
+		return []
+	var semaine := horloge_monde.ticks / int(GameData.config("planete").corruption.ticks_par_semaine)
+	if int(pnj.get("quetes_semaine", -1)) != semaine:
+		pnj["quetes_semaine"] = semaine
+		pnj["quetes"] = []
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash([graine, "quetes", pnj.id, semaine])
+		var ids: Array = GameData.catalogues.quest_templates.keys()
+		ids.sort()
+		for k in int(regles.r.guildes.quetes_par_semaine):
+			var gid: String = ids[rng.randi_range(0, ids.size() - 1)]
+			var g: Dictionary = GameData.catalogues.quest_templates[gid]
+			var count := rng.randi_range(int(g.count_range[0]), int(g.count_range[1]))
+			var niveau := maxi(1, int(round(monde.corruption_de(monde.cellule_de(pnj.pos)) / 20.0))) if monde != null else 1
+			pnj.quetes.append({"uid": "q_%s_%d_%d" % [pnj.id, semaine, k], "gabarit": gid, "guild": str(g.guild), "pattern": str(g.pattern), "selector": g.target_selector,
+				"count": count, "fait": 0, "niveau": niveau, "or": int(g.reward.gold_per_target_level) * niveau * count, "xp": int(g.reward.guild_xp) * count,
+				"text_key": str(g.text_key), "donneur": pnj.id, "village": str(pnj.get("village", "")), "cellule": monde.cellule_de(pnj.pos) if monde != null else Vector2i.ZERO, "etat": "offerte"})
+	return pnj.quetes
+
+
+func _accepter_quete(e: Dictionary, pnj_id: String, uid: String, tick: int) -> bool:
+	var pnj: Dictionary = entites.get(pnj_id, {})
+	if pnj.is_empty():
+		return false
+	for q in quetes_offertes(pnj, e):
+		if q.uid == uid and q.etat == "offerte":
+			q.etat = "en_cours"
+			if not e.has("quetes"):
+				e["quetes"] = []
+			e.quetes.append(q)
+			EventBus.emettre(&"journal", [&"journal.quete_acceptee", {"texte": q.text_key}])
+			e.compteur = tick + int(regles.r.actions.objet)
+			return true
+	return false
+
+
+## Une créature tuée par le joueur : les quêtes « tuer » dont le sélecteur matche avancent.
+func _quetes_sur_mort(cible: Dictionary, tueur: String) -> void:
+	var e: Dictionary = entites.get(tueur, {})
+	if e.is_empty() or e.controle != "joueur":
+		return
+	for q in e.get("quetes", []):
+		if q.etat != "en_cours" or q.pattern != "tuer":
+			continue
+		var ok := false
+		for t in q.selector.get("tags_any", []):
+			if t in cible.get("tags", []) or (t == "hostile" and cible.camp == "hostile"):
+				ok = true
+		if ok:
+			q.fait = int(q.fait) + 1
+			EventBus.emettre(&"journal", [&"journal.quete_progres", {"fait": int(q.fait), "count": int(q.count)}])
+			if int(q.fait) >= int(q.count):
+				q.etat = "terminee"
+
+
+## Un donjon vidé : les quêtes « donjon » de cette cellule sont terminées.
+func _quetes_sur_donjon(cellule: Vector2i, joueur: String) -> void:
+	var e: Dictionary = entites.get(joueur, {})
+	for q in e.get("quetes", []):
+		if q.etat == "en_cours" and q.pattern == "donjon" and Vector2i(q.cellule).distance_to(cellule) <= 6.0:
+			q.fait = int(q.count)
+			q.etat = "terminee"
+
+
+## Rendre une quête terminée à son donneur : or, XP de guilde (rangs), relation.
+func _rendre_quete(e: Dictionary, pnj_id: String, uid: String, tick: int) -> bool:
+	var pnj: Dictionary = entites.get(pnj_id, {})
+	if pnj.is_empty():
+		return false
+	for q in e.get("quetes", []):
+		if q.uid == uid and q.etat == "terminee" and q.donneur == pnj_id:
+			q.etat = "rendue"
+			e.or = int(e.or) + int(q.or)
+			if not e.has("guildes"):
+				e["guildes"] = {}
+			var g: Dictionary = e.guildes.get(q.guild, {"xp": 0, "rang": 0})
+			g.xp = int(g.xp) + int(q.xp)
+			var seuils: Array = regles.r.guildes.seuils_xp
+			var rang := 0
+			for k in seuils.size():
+				if int(g.xp) >= int(seuils[k]):
+					rang = k
+			if rang > int(g.rang):
+				EventBus.emettre(&"journal", [&"journal.rang_guilde", {"guilde": "guilde.%s.name" % q.guild, "rang": "rang." + str(regles.r.guildes.rangs[rang])}])
+			g.rang = rang
+			e.guildes[q.guild] = g
+			reputation(e, pnj, "quete")
+			EventBus.emettre(&"journal", [&"journal.quete_rendue", {"or": int(q.or), "xp": int(q.xp), "guilde": "guilde.%s.name" % q.guild}])
+			EventBus.emettre(&"quest_completed", [q])
+			e.compteur = tick + int(regles.r.actions.objet)
+			return true
+	return false
 
 
 # ---------------------------------------------------------------- cycle jour-nuit (E.21) et météo (E.28)
@@ -1409,6 +1512,8 @@ func _sortir(e: Dictionary) -> bool:
 		if recap.boss_vaincu and monde != null and cell_donjon != Vector2i(-9999, -9999):
 			monde.nettoyer(cell_donjon, horloge_monde.ticks)   # Dérive de la corruption : foyer nettoyé
 			EventBus.emettre(&"journal", [&"journal.donjon_nettoye", {}])
+			_quetes_sur_donjon(cell_donjon, e.id)
+			EventBus.emettre(&"dungeon_cleared", [cell_donjon, e.id])
 		sauvegarder()   # autosave au retour (Sauvegarde : sur événements clés)
 		return true
 	var suivant: int = int(donjon.id) + 1
@@ -1504,7 +1609,87 @@ func ennemis(a: Dictionary, b: Dictionary) -> bool:
 	if a.camp == b.camp:
 		return false
 	var doux := ["joueur", "civil"]
-	return not (a.camp in doux and b.camp in doux)
+	if a.camp in doux and b.camp in doux:
+		# Réputation et relations : ≤ −50, hostile à vue.
+		var seuil := int(regles.r.reputation.hostile_seuil)
+		if a.camp == "civil" and b.camp == "joueur":
+			return relation_de(a, b) <= seuil
+		if b.camp == "civil" and a.camp == "joueur":
+			return relation_de(b, a) <= seuil
+		return false
+	return true
+
+
+## La relation d'un PNJ envers un être (−100..+100), la réputation de son village en repli.
+func relation_de(pnj: Dictionary, e: Dictionary) -> int:
+	var rels: Dictionary = pnj.get("social", {}).get("relations", {})
+	if rels.has(e.id):
+		return int(rels[e.id])
+	return int(e.get("reputations", {}).get(str(pnj.get("village", "")), 0))
+
+
+## Un acte du joueur envers un PNJ : gains [pnj, village, globale] (Réputation et relations), modulés
+## par la vitesse liée à la réputation du village.
+func reputation(e: Dictionary, pnj: Dictionary, acte: String) -> void:
+	var rp: Dictionary = regles.r.reputation
+	var gains: Array = rp.get(acte, [0, 0, 0])
+	var village := str(pnj.get("village", ""))
+	if not e.has("reputations"):
+		e["reputations"] = {}
+	var rep_v := int(e.reputations.get(village, 0))
+	var vitesse := 1.0
+	for v in rp.vitesse:
+		if rep_v >= int(v[0]) and rep_v <= int(v[1]):
+			vitesse = float(v[2])
+	var g0 := int(round(float(gains[0]) * (vitesse if int(gains[0]) > 0 else 1.0)))
+	pnj.social.relations[e.id] = clampi(relation_de(pnj, e) + g0, -100, 100)
+	if not village.is_empty():
+		e.reputations[village] = clampi(rep_v + int(gains[1]), -100, 100)
+	e.reputations["_globale"] = clampi(int(e.reputations.get("_globale", 0)) + int(gains[2]), -100, 100)
+	EventBus.emettre(&"journal", [&"journal.reputation", {"nom": pnj.name_key, "pnj": int(pnj.social.relations[e.id]), "village": village if not village.is_empty() else "—", "rep": int(e.reputations.get(village, 0))}])
+	if relation_de(pnj, e) <= int(rp.hostile_seuil):
+		EventBus.emettre(&"journal", [&"journal.hostile_a_vue", {"nom": pnj.name_key}])
+
+
+## Le palier d'information d'un PNJ pour le joueur (L'information comme récompense) : 0..5.
+func palier_info(pnj: Dictionary, e: Dictionary) -> int:
+	var rel := relation_de(pnj, e)
+	if rel < 0:
+		return 0
+	var paliers: Array = regles.r.reputation.paliers_info
+	var p := 0
+	for k in paliers.size():
+		if rel >= int(paliers[k]):
+			p = k + 1
+	return p
+
+
+## Une rumeur (≥ 50) : révèle une cellule à POI non explorée dans le rayon, filtrée par le métier.
+func _rumeur(pnj: Dictionary, e: Dictionary, tick: int) -> bool:
+	if monde == null or relation_de(pnj, e) < int(regles.r.reputation.confidences_seuil):
+		return false
+	var semaine := tick / int(GameData.config("planete").corruption.ticks_par_semaine)
+	if int(pnj.get("derniere_rumeur", -1)) == semaine:
+		return false
+	var centre := monde.cellule_de(pnj.pos)
+	var r := int(regles.r.reputation.rumeur_rayon)
+	var cle := "filon_majeur" if str(pnj.get("fonction", "")) == "artisan" else "donjon"
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "rumeur", pnj.id, semaine])
+	var candidats: Array[Vector2i] = []
+	for dy in range(-r, r + 1):
+		for dx in range(-r, r + 1):
+			var c := centre + Vector2i(dx, dy)
+			if c != centre and monde.surface.terre_a(c) and not monde.cellule_exploree(c) and bool(monde.surface.poi_de(c).get(cle, false)):
+				candidats.append(c)
+	if candidats.is_empty():
+		return false
+	var c: Vector2i = candidats[rng.randi_range(0, candidats.size() - 1)]
+	monde.explores[Vector2i(c.x * (monde.taille / 32) + 1, c.y * (monde.taille / 32) + 1)] = true
+	pnj["derniere_rumeur"] = semaine
+	EventBus.emettre(&"journal", [&"journal.rumeur", {"nom": pnj.name_key, "x": c.x, "y": c.y}])
+	EventBus.emettre(&"chunk_explored", [Vector2i(c.x * (monde.taille / 32) + 1, c.y * (monde.taille / 32) + 1)])
+	return true
 
 
 ## Peuple les cellules à hameau de la fenêtre à leur première visite (Villages PNJ).
@@ -1951,9 +2136,14 @@ func _tiquer_monde(tick: int) -> void:
 	while monde.semaine_courante < semaine:
 		monde.semaine_courante += 1
 		var touchees := monde.semaine(tick)
+		var derive := int(regles.r.reputation.derive_hebdo)
 		for x in entites.values():   # les bourses des PNJ se rechargent (+15 % par semaine, Barèmes économiques)
 			if x.has("or_max"):
 				x.or = mini(int(x.or_max), int(x.or) + int(ceil(float(x.or_max) * float(regles.r.commerce.recharge_hebdo))))
+			for rels in [x.get("social", {}).get("relations", {}), x.get("reputations", {})]:   # Voie de rédemption : +1/semaine vers 0
+				for cle in rels.keys():
+					if int(rels[cle]) < 0:
+						rels[cle] = mini(0, int(rels[cle]) + derive)
 		EventBus.emettre(&"journal", [&"journal.semaine", {"n": touchees.size()}])
 		for cell in touchees:
 			if monde.foyer(cell).get("generation", 0) > 0 and bool(monde.foyer(cell).actif):
@@ -2257,6 +2447,10 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _acheter(e, str(i.get("pnj", "")), str(i.get("objet", "")), h.ticks)
 		"vendre":
 			ok = _vendre(e, str(i.get("pnj", "")), str(i.get("objet", "")), h.ticks)
+		"accepter_quete":
+			ok = _accepter_quete(e, str(i.get("pnj", "")), str(i.get("quete", "")), h.ticks)
+		"rendre_quete":
+			ok = _rendre_quete(e, str(i.get("pnj", "")), str(i.get("quete", "")), h.ticks)
 		"jeter":
 			ok = _jeter(e, str(i.get("objet", "")), h.ticks)
 	if ok:
@@ -2639,11 +2833,14 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 	cible.sante = maxi(0, cible.sante - degats)
 	EventBus.emettre(&"damage_dealt", [source, cible.id, degats, detail])
 	var att: Dictionary = entites.get(source, {})
+	if not att.is_empty() and att.controle == "joueur" and cible.camp == "civil" and "civil" in cible.get("tags", []):
+		reputation(att, cible, "tuer" if cible.sante <= 0 else "frapper")
 	if cible.sante <= 0 and cible.vivant:
 		cible.vivant = false
 		grille.liberer(cible.pos)
 		EventBus.emettre(&"journal", [&"journal.mort", {"nom": cible.name_key}])
 		EventBus.emettre(&"creature_killed", [cible.id, source])
+		_quetes_sur_mort(cible, source)
 		_declencher(cible, "testament", cible.pos)   # la charge part quand le porteur tombe
 		_drop(cible, source)
 		if not expedition.is_empty() and entites.get(source, {}).get("controle", "") == "joueur":

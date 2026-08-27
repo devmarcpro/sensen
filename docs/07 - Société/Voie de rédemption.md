@@ -21,6 +21,9 @@ La partie négative de la réputation doit avoir une sortie — un joueur ne peu
 
 **Ermite ([[Créatures]]) :** *ermite (nv 14, neutre→hostile si dérangé, relation 85, donjons/ruines)* — l'un des profils qui peuvent servir de canal marginal.
 
+> [!success] Codé le 2026-08-28
+> La dérive **+1 par semaine vers 0** des relations et réputations négatives (passage hebdomadaire). Les quêtes de rachat et le canal marginal (ermite) attendent.
+
 ## Liens
 - **Dépend de** : [[Réputation et relations]]
 - **Alimente** : [[Quêtes et guildes]], [[Dialogue PNJ]]

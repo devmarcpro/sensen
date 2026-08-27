@@ -30,6 +30,9 @@ Les informations débloquées sont **persistées** et **partageables en coop**.
 
 **Ciblage volontaire d'une recette ([[Craft compositionnel]]) :** l'enseignement par un artisan à haute relation est le moyen **volontaire** de cibler une recette précise (contre le hasard du loot).
 
+> [!success] Codé le 2026-08-28 — étape 9.C
+> La fiche d'un PNJ s'ouvre par paliers dans l'écran de dialogue : < 0 apparence seule ; 0-19 nom, métier, village ; 20-49 âge, signe, niveau approximatif ; 50-74 compétences chiffrées, équipement ; 75-89 préférences (tags aimés) ; 90-100 tout, et **recrutable hors condition** (drapeau posé, le recrutement lui-même attend 9.D). Ce qu'il sait du monde : à **≥ 50**, *Parler* peut livrer une **rumeur** (une fois par semaine et par PNJ) qui **révèle une cellule à POI** non explorée dans un rayon de 6 cellules (donjon ou filon majeur — filtré par métier : un garde parle de donjons, un forgeron de filons) ; l'enseignement de recettes exotiques par un artisan à ≥ 75 est branché sur `e.recettes_connues`.
+
 ## Liens
 - **Dépend de** : [[Réputation et relations]], [[Dialogue PNJ]]
 - **Alimente** : [[Craft compositionnel]], [[Apprivoisement et recrutement]], [[Génération par couches de bruit]]

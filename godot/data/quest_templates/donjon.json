@@ -1,0 +1,17 @@
+{
+  "guild": "guerriers",
+  "rank_min": 1,
+  "pattern": "donjon",
+  "target_selector": {
+    "poi": "donjon"
+  },
+  "count_range": [
+    1,
+    1
+  ],
+  "reward": {
+    "gold_per_target_level": 60,
+    "guild_xp": 40
+  },
+  "text_key": "quest.donjon.text"
+}

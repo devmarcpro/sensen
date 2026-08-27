@@ -16,6 +16,8 @@ signal fenetre_recentree(origine: Vector2i)               # la fenêtre du monde
 signal chunk_explored(chunk: Vector2i)                    # un chunk de 32×32 vient d'être vu (minimap)
 signal sauvegarde_faite(nom: String)                      # la partie a été écrite sur disque
 signal item_sold(uid: String, acheteur: String, prix: int)   # un objet a changé de mains contre de l'or (Commerce)
+signal dungeon_cleared(cellule: Vector2i, joueur: String)     # un donjon vidé (boss vaincu) à la sortie — les quêtes écoutent
+signal quest_completed(quete: Dictionary)
 signal action_engaged(id: String, action: Dictionary)      # télégraphe : intention visible
 signal action_resolved(id: String, action: Dictionary)
 signal journal(cle: String, params: Dictionary)             # une ligne de journal, localisée côté client

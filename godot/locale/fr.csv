@@ -401,6 +401,40 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+quest.chasse_prime.text,"Éliminez {count} brigands ou bêtes hostiles aux alentours."
+quest.chasse_bete.text,"Abattez {count} bêtes qui rôdent autour du village."
+quest.donjon.text,"Videz le donjon voisin : vainquez ce qui y règne."
+rang.novice,Novice
+rang.compagnon,Compagnon
+rang.adepte,Adepte
+rang.expert,Expert
+rang.maitre,Maître
+guilde.guerriers.name,Guilde des Guerriers
+ui.ecran.quetes,Quêtes (Q)
+ui.quetes.titre,"QUÊTES — {nom} · {guilde} : {rang} ({xp} XP)"
+ui.quetes.offerte,[offerte] {texte}
+ui.quetes.en_cours,"[{fait}/{count}] {texte}"
+ui.quetes.terminee,[à rendre] {texte}
+ui.quetes.aucune,  (rien à proposer cette semaine)
+ui.quetes.refus,  (il ne vous confie rien : réputation trop basse)
+ui.ecran.accepter,Accepter (Entrée)
+ui.ecran.rendre,Rendre (Entrée)
+ui.quetes.recompense,"récompense : {or} or · {xp} XP de guilde"
+journal.quete_acceptee,"quête acceptée : {texte}"
+journal.quete_progres,"quête : {fait}/{count}"
+journal.quete_rendue,"quête rendue : +{or} or, +{xp} XP ({guilde})"
+journal.rang_guilde,"{guilde} : tu es maintenant {rang}"
+journal.reputation,"{nom} : relation {pnj} · {village} : {rep}"
+journal.rumeur,"{nom} te confie une rumeur : quelque chose en ({x},{y})"
+journal.hostile_a_vue,{nom} te traite en ennemi
+ui.fiche.apparence,Un inconnu. On ne sait rien de lui.
+ui.fiche.base,"{nom} · {fonction} · {village}"
+ui.fiche.age,"{genre} · signe {signe} · niveau ≈ {niveau}"
+ui.fiche.competences,compétences : {liste} · équipement : {equip}
+ui.fiche.gouts,aime : {tags}
+ui.fiche.tout,historique complet · recrutable
+genre.m,homme
+genre.f,femme
 creature.cerf.name,Cerf
 creature.renard.name,Renard
 ai_profile.proie.name,Proie

@@ -31,6 +31,9 @@ Quatre niveaux de réputation en parallèle, et une échelle de conséquences pa
 
 **Modulation des prix :** [[Prix suggéré]] (`facteur_reputation`).
 
+> [!success] Codé le 2026-08-28 — étape 9.C, `combat_rules.reputation`
+> Les paliers de l'échelle −100..+100 tels quels : **≤ −50 hostile à vue** (`Simulation.ennemis` : un civil dont la relation avec le joueur est ≤ −50 le traite en ennemi), −49..−20 prix +25 % et **quêtes refusées**, +20..+49 prix −10 %, **≥ +50 confidences** (rumeurs qui révèlent un POI, [[L'information comme récompense]]). Trois niveaux codés : **relation par PNJ**, **réputation par village** (le royaume attend l'étape 10 : le village en tient lieu), **réputation globale** ; la race est lue mais sans rivalités encore. **Gains chiffrés (décision, la note ne l'était pas)** : frapper un civil −30 (lui) / −10 (son village) / −3 (globale) ; le tuer −50 / −20 / −5 ; quête accomplie +10 / +5 / +1 ; parler +1/jour. La relation d'un PNJ **module la vitesse** des gains (×0,5 sous −20, ×1,5 au-dessus de +50 — la note le prévoit pour race/royaume, appliqué au village).
+
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Schéma créature]], [[Races]]
 - **Alimente** : [[L'information comme récompense]], [[Voie de rédemption]], [[Apprivoisement et recrutement]], [[Prix suggéré]], [[Boutique passive]]
