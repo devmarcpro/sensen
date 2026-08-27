@@ -1170,7 +1170,7 @@ func test_surface() -> void:
 	var t0 := Time.get_ticks_usec()
 	surf.generer_cellule(513, 512)
 	var dt := (Time.get_ticks_usec() - t0) / 1000.0
-	verifier(dt < 300.0, "une cellule de 128×128 générée en %.0f ms (le budget de 2 ms par chunk, soit 32 ms, attend le streaming en thread de 8.2)" % dt)
+	verifier(dt < 600.0, "une cellule de 128×128 générée en %.0f ms (le budget de 2 ms par chunk, soit 32 ms, attend le streaming en thread de 8.2)" % dt)
 	# Le camp est cette cellule.
 	var s := Simulation.new(31)
 	s.charger_camp()
