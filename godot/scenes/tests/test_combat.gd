@@ -916,45 +916,69 @@ func test_donjon() -> void:
 	var e := gen.generer_etage(42, 1, 1, 12, false)
 	var dt := (Time.get_ticks_usec() - t0) / 1000.0
 	var e2 := gen.generer_etage(42, 1, 1, 12, false)
-	verifier(e.pieces.size() == e2.pieces.size() and e.spawns.size() == e2.spawns.size() and e.hauteurs == e2.hauteurs, "déterministe à seed égale")
-	verifier(gen._nb_salles(e) >= 4, "au moins 4 salles placées (%d)" % gen._nb_salles(e))
+	verifier(e.pieces.size() == e2.pieces.size() and e.spawns.size() == e2.spawns.size() and e.sol.size() == e2.sol.size(), "déterministe à seed égale")
+	verifier(e.largeur == 128 and e.hauteur == 128, "un étage = une cellule de 128×128")
+	verifier(gen._nb_salles(e) >= 6, "au moins 6 salles posées dans le labyrinthe (%d)" % gen._nb_salles(e))
 	verifier(dt < 100.0, "étage généré en %.1f ms (< 100 ms, critère É2)" % dt)
-	# Aucun chevauchement de pièces
 	var ok := true
 	for i in e.pieces.size():
 		for k in range(i + 1, e.pieces.size()):
 			if e.pieces[i].rect.intersects(e.pieces[k].rect):
 				ok = false
-	verifier(ok, "aucun chevauchement de pièces")
-	# Connexité : toutes les tuiles de sol de toutes les salles sont atteignables depuis l'entrée
+	verifier(ok, "aucun chevauchement de salles")
+	verifier(e.sol.size() > 128 * 128 / 4, "le labyrinthe remplit la cellule (%d tuiles de sol)" % e.sol.size())
+	# Connexité : toutes les salles et les deux escaliers sont atteignables depuis l'arrivée
 	var g := Grille.depuis_etage(e, GameData.config("tile_contents"), GameData.config("combat_rules").deplacement, 1)
 	var atteint := g.atteignables(e.entree, 100000)
 	var manquantes := 0
 	for p in e.pieces:
-		var c := gen._centre_libre(e, p)
-		if not atteint.has(c):
+		if not atteint.has(gen._centre_libre(e, p)):
 			manquantes += 1
-	verifier(manquantes == 0, "connexité par construction : chaque pièce est atteignable depuis l'entrée (%d manquantes)" % manquantes)
-	verifier(e.escalier != null and atteint.has(e.escalier), "un escalier vers l'étage suivant, atteignable")
-	# Dernier étage : boss dans la salle la plus lointaine
+	verifier(manquantes == 0, "connexité : chaque salle est atteignable (%d manquantes)" % manquantes)
+	verifier(e.escalier != null and atteint.has(e.escalier) and e.entree != e.escalier, "deux escaliers par étage : montant (arrivée) et descendant, distincts et reliés")
+	verifier(g.bloque_passage(Vector2i(0, 0)) and "roche" in g.contenu_de(Vector2i(0, 0)).tags, "le bord de la cellule est de la roche")
 	var fin := gen.generer_etage(42, 1, 2, 10, true)
-	verifier(fin.boss != null and fin.escalier == null, "dernier étage : boss, pas d'escalier")
+	verifier(fin.boss != null and fin.escalier == null, "dernier étage : boss, pas d'escalier descendant")
 	var a_boss := false
 	for sp in fin.spawns:
 		if sp.creature == "chef_de_bande":
 			a_boss = true
 	verifier(a_boss and fin.spawns.size() > 1, "le boss du thème et des créatures du pool sont posés")
-	# En simulation : charger, descendre avec son état
+	# En simulation : charger, creuser un mur, descendre avec son état
 	var s := Simulation.new(7)
 	s.charger_donjon("ruine", 7, 1, 1)
 	var j := joueur_de(s)
-	verifier(not j.is_empty() and s.donjon.etage == 1 and s.grille.bloque_passage(Vector2i(0, 0)), "donjon chargé : le plein est de la roche, le joueur à l'entrée")
+	verifier(not j.is_empty() and s.donjon.etage == 1 and s.grille.bloque_passage(Vector2i(0, 0)), "donjon chargé, le joueur à l'arrivée")
+	var mur := Vector2i(-1, -1)
+	for d in Grille.DIRS:
+		var v: Vector2i = j.pos + d
+		if s.grille.dans(v) and "destructible" in s.grille.contenu_de(v).get("tags", []):
+			mur = v
+			break
+	if mur.x < 0:
+		# on s'approche d'un mur : le premier mur destructible de la ligne
+		for k in range(1, 40):
+			var v: Vector2i = j.pos + Vector2i(k, 0)
+			if s.grille.dans(v) and "destructible" in s.grille.contenu_de(v).get("tags", []):
+				mur = v
+				s.grille.liberer(j.pos)
+				j.pos = v - Vector2i(1, 0)
+				s.grille.placer(j.id, j.pos)
+				break
+	s.horloge_monde.avancer(1)
+	var t: int = s.horloge_monde.ticks
+	verifier(mur.x >= 0 and s.intention(j.id, {"type": "creuser", "vers": mur}), "creuser un mur adjacent")
+	verifier(not s.grille.bloque_passage(mur) and j.compteur == t + 10 and float(j.xp_competences.get("terrassement", 0.0)) > 0.0, "la tuile redevient sol, 10 ticks, XP de Terrassement")
+	j.compteur = t
+	s.horloge_monde.avancer(1)
+	verifier(not s.intention(j.id, {"type": "creuser", "vers": Vector2i(0, j.pos.y)}) , "la roche du bord ne se creuse pas (hors adjacence ou indestructible)")
 	j.sante = 30
 	s.grille.liberer(j.pos)
 	j.pos = s.donjon.escalier
 	s.grille.placer(j.id, j.pos)
+	j.compteur = s.horloge_monde.ticks
 	s.horloge_monde.avancer(1)
-	verifier(s.intention(j.id, {"type": "descendre"}), "descendre depuis la cage d'escalier")
+	verifier(s.intention(j.id, {"type": "descendre"}), "descendre depuis l'escalier descendant")
 	verifier(s.donjon.etage == 2 and joueur_de(s).sante == 30 and joueur_de(s).id == j.id, "étage 2, le même être avec ses PV")
 
 

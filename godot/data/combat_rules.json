@@ -162,5 +162,11 @@
     "_doc": "Mort et pénalité : respawn, −10 % d'or (pas d'or encore), 10 % de chance par objet du sac de tomber, équipement et XP conservés",
     "chance_perte_objet": 0.1,
     "perte_or": 0.1
+  },
+  "creuser": {
+    "_doc": "Destruction du terrain : détruire un mur (la tuile redevient sol). Coût en ticks d'une tuile de mur ; XP versée à Terrassement. Décision du 2026-08-27.",
+    "ticks": 10,
+    "xp": 5,
+    "endurance": 6
   }
 }

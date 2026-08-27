@@ -58,7 +58,7 @@ static func depuis_etage(etage: Dictionary, contenus: Dictionary, regles_dep: Di
 	g.hauteurs = etage.hauteurs.duplicate()
 	for i in g.largeur * g.hauteur_grille:
 		if not etage.sol.has(i):
-			g.poser_contenu(Vector2i(i % g.largeur, i / g.largeur), "roche")
+			g.poser_contenu(Vector2i(i % g.largeur, i / g.largeur), "roche" if etage.get("bord", {}).has(i) else "mur")
 	return g
 
 

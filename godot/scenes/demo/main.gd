@@ -10,6 +10,8 @@ const TH := 20            # hauteur du losange
 const HSTEP := 8          # pixels par niveau de hauteur
 const DELAI_PAS := 0.12   # secondes réelles entre deux pas d'une horloge de combat (lisibilité)
 const BUDGET_ATTEIGNABLE := 12   # ticks : rayon des coûts affichés
+const RAYON_VUE := 24            # tuiles dessinées autour du joueur (une cellule fait 128×128)
+var centre_terrain := Vector2i(-99, -99)   # centre de la dernière passe statique du terrain
 
 var sim: Simulation
 var arenes: Array[String] = []
@@ -247,6 +249,8 @@ func _process(delta: float) -> void:
 		for nom in sim.combats.keys():
 			sim.pas(nom)
 	_maj_noeuds()
+	if Grille.distance(j.pos, centre_terrain) > RAYON_VUE / 3:
+		terrain.queue_redraw()   # le joueur s'éloigne du centre de la passe statique
 	hud.queue_redraw()
 	_maj_atteignables()
 	minuterie_ui -= delta
@@ -433,6 +437,10 @@ func _clic(t: Vector2i, lourde: bool) -> void:
 				_log(tr("journal.inaccessible"))
 		return
 	if Grille.distance(j.pos, t) == 1:
+		if sim.grille.bloque_passage(t):
+			if sim.attente.has(joueur_id) and not sim.intention(joueur_id, {"type": "creuser", "vers": t}):
+				_log(tr("journal.increusable"))
+			return
 		chemin_en_cours = [t]   # un pas direct : autorise la chute volontaire
 		return
 	chemin_en_cours = sim.grille.chemin(j.pos, t, Etres.est_volant(j))
@@ -444,8 +452,10 @@ func _tuile_sous(p: Vector2) -> Vector2i:
 	var meilleur := Vector2i(-1, -1)
 	var meilleure_d := 1e9
 	var g := sim.grille
-	for y in g.hauteur_grille:
-		for x in g.largeur:
+	var j := joueur()
+	var cj: Vector2i = j.pos if not j.is_empty() else Vector2i.ZERO
+	for y in range(maxi(0, cj.y - RAYON_VUE), mini(g.hauteur_grille, cj.y + RAYON_VUE + 1)):
+		for x in range(maxi(0, cj.x - RAYON_VUE), mini(g.largeur, cj.x + RAYON_VUE + 1)):
 			var t := Vector2i(x, y)
 			var c := _ecran(t, g.h(t))
 			var d := c.distance_squared_to(p)
@@ -512,10 +522,17 @@ func _dessiner_terrain(ci: CanvasItem) -> void:
 	if sim == null or profil_sans_terrain:
 		return
 	var g := sim.grille
-	for s in range(g.largeur + g.hauteur_grille - 1):     # tri de profondeur : diagonales x+y
-		for x in g.largeur:
+	var j := joueur()
+	var c: Vector2i = j.pos if not j.is_empty() else Vector2i(g.largeur / 2, g.hauteur_grille / 2)
+	centre_terrain = c
+	var x0 := maxi(0, c.x - RAYON_VUE)
+	var x1 := mini(g.largeur - 1, c.x + RAYON_VUE)
+	var y0 := maxi(0, c.y - RAYON_VUE)
+	var y1 := mini(g.hauteur_grille - 1, c.y + RAYON_VUE)
+	for s in range(x0 + y0, x1 + y1 + 1):     # tri de profondeur : diagonales x+y, dans la fenêtre
+		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
 			var y := s - x
-			if y >= 0 and y < g.hauteur_grille and not _plein_invisible(g, Vector2i(x, y)):
+			if not _plein_invisible(g, Vector2i(x, y)):
 				_dessine_tuile(ci, Vector2i(x, y))
 
 

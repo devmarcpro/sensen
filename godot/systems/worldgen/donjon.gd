@@ -1,18 +1,24 @@
 class_name Donjon
 extends RefCounted
-## Génération d'un étage de donjon par graphe, façon Daggerfall (Génération de donjon, E.29) :
-## salle d'entrée à position fixe → attache libre → connecteur compatible → salle compatible →
-## collision AABB → placement ; connexité par construction ; escalier vers l'étage suivant sur
-## la salle la plus profonde ; boss au plus loin de l'entrée ; peuplement par le thème.
-## Déterministe par seed(monde, id_donjon, étage). Les prefabs sont des grilles JSON
-## (Décision — Prefabs de donjon en tuiles ; plans en caractères, voir tools/gen_dungeon_prefabs.py).
+## Génération d'un étage de donjon : **un labyrinthe avec des salles, contenu dans une cellule**
+## (128×128 tuiles — Grille continue), à étages, deux escaliers par étage (un vers le haut, un vers
+## le bas), murs destructibles (décision du designer, 2026-08-27 — Génération de donjon).
+##   1. les salles de la bibliothèque (Salles et connecteurs) sont posées sans chevauchement ;
+##   2. le labyrinthe (backtracker sur une trame de 4 tuiles) remplit tout le reste ;
+##   3. chaque porte de salle s'ouvre sur le couloir voisin ; connexité vérifiée par BFS et
+##      réparée par une tranchée droite si besoin ;
+##   4. l'escalier montant (l'arrivée) dans une salle, l'escalier descendant dans la salle la plus
+##      lointaine ; le boss au dernier étage y remplace l'escalier ;
+##   5. peuplement par le thème, contenants de loot.
+## Déterministe par seed(monde, id_donjon, étage). Le plein est du mur (destructible) ; le bord
+## de la cellule est de la roche (indestructible).
 
 const H_BASE := 10                 # hauteur de référence d'un étage (Hauteur de terrain ±10)
-const ESSAIS_MAX := 8              # essais de placement par attache (E.29, étape 2)
-const MARGE := 1                   # tuiles vides gardées entre deux pièces
+const PAS := 4                     # trame du labyrinthe : 3 tuiles de couloir + 1 de mur
+const ESSAIS_SALLE := 12
 
 var salles: Dictionary
-var connecteurs: Dictionary
+var connecteurs: Dictionary        # conservés pour la bibliothèque ; le labyrinthe remplace les corridors
 var theme: Dictionary
 var rng := RandomNumberGenerator.new()
 
@@ -23,79 +29,76 @@ func _init(p_salles: Dictionary, p_connecteurs: Dictionary, p_theme: Dictionary)
 	theme = p_theme
 
 
-## Génère un étage : {largeur, hauteur, hauteurs: PackedByteArray, murs: Dictionary(idx→true),
-##  pieces: [{id, kind, rect, attaches}], entree: Vector2i, escalier: Vector2i|null, boss: Vector2i|null,
-##  spawns: [{creature, pos}], graphe: {index → [voisins]}}
-func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dernier: bool, taille: int = 96) -> Dictionary:
+## Génère un étage : {largeur, hauteur, hauteurs, murs, sol, bord, pieces: [{id, kind, rect, attaches}],
+##  entree (escalier montant), escalier (descendant, null au dernier), boss, spawns, coffres, graphe}.
+func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dernier: bool, taille: int = 128) -> Dictionary:
 	rng.seed = hash([graine, id_donjon, etage])
-	var e := {"largeur": taille, "hauteur": taille, "hauteurs": PackedByteArray(), "murs": {}, "sol": {},
+	var e := {"largeur": taille, "hauteur": taille, "hauteurs": PackedByteArray(), "murs": {}, "sol": {}, "bord": {},
 		"pieces": [], "entree": Vector2i.ZERO, "escalier": null, "boss": null, "spawns": [], "coffres": [], "graphe": {}, "etage": etage}
 	e.hauteurs.resize(taille * taille)
 	e.hauteurs.fill(H_BASE)
-	# 1. La salle d'entrée, à position fixe (sous le point d'entrée de surface).
-	var entrees := _salles_par(func(s: Dictionary) -> bool: return "entree_eligible" in s.special_tags)
-	var s0: Dictionary = entrees[rng.randi_range(0, entrees.size() - 1)]
-	var origine := Vector2i(taille / 2 - s0.plan[0].length() / 2, taille / 2 - s0.plan.size() / 2)
-	var p0 := _placer(e, s0, origine, "salle")
-	e.entree = _premiere_tuile_libre(e, p0)
-	e.graphe[0] = []
-	# 2. Extension par graphe.
-	var echecs := 0
-	while _nb_salles(e) < nb_salles and echecs < ESSAIS_MAX * 4:
-		var libres := _attaches_libres(e)
-		if libres.is_empty():
-			break
-		var att: Dictionary = libres[rng.randi_range(0, libres.size() - 1)]
-		if not _etendre(e, att):
-			echecs += 1
-	# 4. L'escalier : une attache libre de la salle la plus profonde (distance de graphe maximale).
-	var distances := _distances_graphe(e)
-	if not dernier:
-		for idx in _pieces_par_profondeur(e, distances):
-			if e.escalier != null or e.pieces[idx].kind != "salle":
-				continue
-			for a in e.pieces[idx].attaches:
-				if a.libre and a.type == "porte":
-					var att: Dictionary = a.duplicate()
-					att["piece"] = idx
-					if _etendre(e, att, "escalier"):
-						break
-		if e.escalier == null:
-			# Aucune porte libre ne laisse passer un connecteur : la cage s'ouvre dans la salle la plus profonde.
-			for idx in _pieces_par_profondeur(e, distances):
-				if e.pieces[idx].kind == "salle":
-					e.escalier = _centre_libre(e, e.pieces[idx])
-					break
-	# 5. La salle du boss : la plus distante de l'entrée, au dernier étage.
+	for i in taille:
+		for b in [Vector2i(i, 0), Vector2i(i, taille - 1), Vector2i(0, i), Vector2i(taille - 1, i)]:
+			e.bord[b.y * taille + b.x] = true
+	# 1. Les salles, posées au hasard sans chevauchement (marge : un mur et un couloir).
+	var candidates := _salles_du_theme()
+	var essais := 0
+	while _nb_salles(e) < nb_salles and essais < nb_salles * ESSAIS_SALLE:
+		essais += 1
+		var s: Dictionary = candidates[rng.randi_range(0, candidates.size() - 1)]
+		var w: int = s.plan[0].length()
+		var h: int = s.plan.size()
+		var origine := Vector2i(rng.randi_range(2, taille - w - 3), rng.randi_range(2, taille - h - 3))
+		origine = Vector2i(origine.x - origine.x % PAS + 1, origine.y - origine.y % PAS + 1)   # aligné sur la trame
+		var r := Rect2i(origine, Vector2i(w, h))
+		if not _libre(e, r):
+			continue
+		_placer(e, s, origine, "salle")
+	# 2. Le labyrinthe dans tout ce qui reste.
+	_labyrinthe(e)
+	# 3. Les portes des salles s'ouvrent sur le couloir voisin ; connexité réparée si besoin.
+	for p in e.pieces:
+		for a in p.attaches:
+			if a.type == "porte":
+				_ouvrir_porte(e, a)
+	_reparer_connexite(e)
+	# 4. Les escaliers : l'arrivée dans la première salle, la descente dans la plus lointaine.
+	var p0: Dictionary = e.pieces[0]
+	e.entree = _centre_libre(e, p0)
+	e.sol[e.entree.y * taille + e.entree.x] = true
+	var loin := _piece_la_plus_loin(e, e.entree)
 	if dernier:
-		for idx in _pieces_par_profondeur(e, distances):
-			var p: Dictionary = e.pieces[idx]
-			if p.kind == "salle" and idx != 0:
-				e.boss = _centre_libre(e, p)
-				p["boss_room"] = true
-				break
-	# 6. Peuplement par le thème, modulé par la profondeur ; contenants de loot (tables standards).
+		e.boss = _centre_libre(e, e.pieces[loin])
+		e.pieces[loin]["boss_room"] = true
+	else:
+		e.escalier = _centre_libre(e, e.pieces[loin])
+	# 5. Peuplement et contenants.
 	_peupler(e, etage)
 	_poser_coffres(e)
 	return e
 
 
-# ---------------------------------------------------------------- placement
+# ---------------------------------------------------------------- salles
 
-func _salles_par(filtre: Callable) -> Array[Dictionary]:
+func _salles_du_theme() -> Array[Dictionary]:
 	var res: Array[Dictionary] = []
 	for s: Dictionary in salles.values():
-		if _theme_ok(s) and filtre.call(s):
+		var themes: Array = s.get("floor_theme", [])
+		if themes.is_empty() or theme.id in themes:
 			res.append(s)
 	return res
 
 
-func _theme_ok(s: Dictionary) -> bool:
-	var themes: Array = s.get("floor_theme", [])
-	return themes.is_empty() or theme.id in themes
+func _libre(e: Dictionary, r: Rect2i) -> bool:
+	if r.position.x < 2 or r.position.y < 2 or r.end.x > e.largeur - 2 or r.end.y > e.hauteur - 2:
+		return false
+	for p in e.pieces:
+		if p.rect.grow(2).intersects(r):
+			return false
+	return true
 
 
-## Pose un prefab (ses murs, ses sols, ses hauteurs) à `origine` ; retourne la pièce enregistrée.
+## Pose un prefab (sols, hauteurs, attaches) ; ses murs sont le plein. Retourne la pièce.
 func _placer(e: Dictionary, prefab: Dictionary, origine: Vector2i, kind: String) -> Dictionary:
 	var plan: Array = prefab.plan
 	var attaches: Array = []
@@ -103,23 +106,14 @@ func _placer(e: Dictionary, prefab: Dictionary, origine: Vector2i, kind: String)
 		var ligne: String = plan[y]
 		for x in ligne.length():
 			var c := ligne[x]
-			if c == " ":
+			if c == " " or c == "#":
 				continue
 			var p := origine + Vector2i(x, y)
 			var idx: int = p.y * e.largeur + p.x
-			if c == "#":
-				e.murs[idx] = true
-				continue
 			e.sol[idx] = true
-			var h := H_BASE
-			if c.is_valid_int():
-				h = H_BASE + int(c)
-			e.hauteurs[idx] = h
+			e.hauteurs[idx] = H_BASE + (int(c) if c.is_valid_int() else 0)
 			if c in "NSEW":
 				attaches.append({"type": "porte", "pos": p, "direction": {"N": Vector2i(0, -1), "S": Vector2i(0, 1), "E": Vector2i(1, 0), "W": Vector2i(-1, 0)}[c], "libre": true})
-			elif c == "X":
-				attaches.append({"type": "cage_escalier", "pos": p, "direction": Vector2i.ZERO, "libre": true})
-				e.escalier = p
 	var piece := {"id": prefab.id, "kind": kind, "rect": Rect2i(origine, Vector2i(plan[0].length(), plan.size())), "attaches": attaches}
 	e.pieces.append(piece)
 	return piece
@@ -133,168 +127,161 @@ func _nb_salles(e: Dictionary) -> int:
 	return n
 
 
-func _attaches_libres(e: Dictionary) -> Array[Dictionary]:
-	var res: Array[Dictionary] = []
-	for i in e.pieces.size():
-		for a in e.pieces[i].attaches:
-			if a.libre and a.type == "porte":
-				var copie: Dictionary = a.duplicate()
-				copie["piece"] = i
-				res.append(copie)
-	return res
+# ---------------------------------------------------------------- labyrinthe
 
-
-func _attache_libre_de(e: Dictionary, idx: int) -> Dictionary:
-	for a in e.pieces[idx].attaches:
-		if a.libre and a.type == "porte":
-			var copie: Dictionary = a.duplicate()
-			copie["piece"] = idx
-			return copie
-	return {}
-
-
-## Depuis une porte libre : tire un connecteur compatible puis une salle compatible, teste la
-## collision, place les deux. `force_type` : un type de connecteur imposé (escalier).
-func _etendre(e: Dictionary, att: Dictionary, force_type: String = "") -> bool:
-	var candidats: Array[Dictionary] = []
-	for c: Dictionary in connecteurs.values():
-		if force_type.is_empty() and c.type == "escalier":
+## Backtracker récursif sur une trame de PAS tuiles : chaque nœud est un carré de 3 tuiles de sol,
+## chaque arête ouverte creuse la tuile de mur entre deux nœuds. Les nœuds sous une salle sont exclus.
+func _labyrinthe(e: Dictionary) -> void:
+	var n: int = (e.largeur - 1) / PAS
+	var ok := {}
+	for gy in n:
+		for gx in n:
+			var r := Rect2i(Vector2i(gx * PAS + 1, gy * PAS + 1), Vector2i(3, 3))
+			var libre := true
+			for p in e.pieces:
+				if p.rect.grow(1).intersects(r):
+					libre = false
+			if libre:
+				ok[Vector2i(gx, gy)] = true
+	if ok.is_empty():
+		return
+	var visites := {}
+	var pile: Array[Vector2i] = []
+	var depart: Vector2i = ok.keys()[rng.randi_range(0, ok.size() - 1)]
+	visites[depart] = true
+	pile.append(depart)
+	_creuser_noeud(e, depart)
+	var dirs := [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
+	while not pile.is_empty():
+		var c: Vector2i = pile.back()
+		var voisins: Array[Vector2i] = []
+		for d in dirs:
+			var v: Vector2i = c + d
+			if ok.has(v) and not visites.has(v):
+				voisins.append(v)
+		if voisins.is_empty():
+			pile.pop_back()
+			# Les nœuds jamais reliés (îlots entre salles) repartent d'un nouveau départ.
+			if pile.is_empty():
+				for k in ok.keys():
+					if not visites.has(k):
+						visites[k] = true
+						pile.append(k)
+						_creuser_noeud(e, k)
+						break
 			continue
-		if not force_type.is_empty() and c.type != force_type:
-			continue
-		candidats.append(c)
-	if candidats.is_empty():
-		return false
-	for essai in ESSAIS_MAX:
-		var conn: Dictionary = candidats[rng.randi_range(0, candidats.size() - 1)]
-		# La porte du connecteur qui fait face à la direction de l'attache.
-		var porte_conn := _porte_opposee(conn, att.direction)
-		if porte_conn.is_empty():
-			continue
-		var origine_conn: Vector2i = att.pos + att.direction - _v(porte_conn.position)
-		var rect_conn := Rect2i(origine_conn, Vector2i(conn.plan[0].length(), conn.plan.size()))
-		if not _libre(e, rect_conn, att.piece):
-			continue
-		if conn.type == "escalier":
-			var p := _placer(e, conn, origine_conn, "connecteur")
-			_marquer(att, e, p, _v(porte_conn.position) + origine_conn)
-			_lier(e, att.piece, e.pieces.size() - 1)
-			return true
-		# L'autre bout du connecteur, puis une salle qui s'y attache.
-		var autres := _autres_portes(conn, porte_conn)
-		if autres.is_empty():
-			continue
-		var sortie: Dictionary = autres[rng.randi_range(0, autres.size() - 1)]
-		var dir_sortie: Vector2i = _dir(sortie.direction)
-		var salles_ok := _salles_par(func(s: Dictionary) -> bool: return not ("entree_eligible" in s.special_tags and e.pieces.size() > 6) and not _porte_opposee(s, dir_sortie).is_empty())
-		if salles_ok.is_empty():
-			continue
-		var s: Dictionary = salles_ok[rng.randi_range(0, salles_ok.size() - 1)]
-		var porte_salle := _porte_opposee(s, dir_sortie)
-		var origine_salle: Vector2i = origine_conn + _v(sortie.position) + dir_sortie - _v(porte_salle.position)
-		var rect_salle := Rect2i(origine_salle, Vector2i(s.plan[0].length(), s.plan.size()))
-		# La salle touche son connecteur par la porte : pas de marge entre eux, mais aucun chevauchement.
-		if rect_salle.intersects(rect_conn) or not _libre(e, rect_salle, -1):
-			continue
-		var pc := _placer(e, conn, origine_conn, "connecteur")
-		var ic: int = e.pieces.size() - 1
-		var ps := _placer(e, s, origine_salle, "salle")
-		var i_s: int = e.pieces.size() - 1
-		_marquer(att, e, pc, origine_conn + _v(porte_conn.position))
-		_consommer(ps, origine_salle + _v(porte_salle.position))
-		_consommer(pc, origine_conn + _v(sortie.position))
-		_lier(e, att.piece, ic)
-		_lier(e, ic, i_s)
-		return true
-	return false
+		var v: Vector2i = voisins[rng.randi_range(0, voisins.size() - 1)]
+		visites[v] = true
+		_creuser_noeud(e, v)
+		_creuser_arete(e, c, v)
+		pile.append(v)
 
 
-## La porte d'un prefab dont la direction est l'opposée de `dir` (pour se brancher face à face).
-func _porte_opposee(prefab: Dictionary, dir: Vector2i) -> Dictionary:
-	for c in prefab.connectors:
-		if c.type == "porte" and _dir(c.direction) == -dir:
-			return c
-	return {}
+func _creuser_noeud(e: Dictionary, g: Vector2i) -> void:
+	for y in 3:
+		for x in 3:
+			var p := Vector2i(g.x * PAS + 1 + x, g.y * PAS + 1 + y)
+			e.sol[p.y * e.largeur + p.x] = true
 
 
-func _autres_portes(prefab: Dictionary, sauf: Dictionary) -> Array:
-	var res := []
-	for c in prefab.connectors:
-		if c.type == "porte" and c != sauf:
-			res.append(c)
-	return res
+func _creuser_arete(e: Dictionary, a: Vector2i, b: Vector2i) -> void:
+	var d := b - a
+	var base := Vector2i(a.x * PAS + 2, a.y * PAS + 2)   # centre du nœud a
+	for k in range(1, PAS + 1):
+		var p := base + d * k
+		if p.x > 0 and p.y > 0 and p.x < e.largeur - 1 and p.y < e.hauteur - 1:
+			e.sol[p.y * e.largeur + p.x] = true
 
 
-static func _v(a: Array) -> Vector2i:
-	return Vector2i(int(a[0]), int(a[1]))
+## Une porte s'ouvre : on creuse droit devant elle jusqu'au premier sol (au plus PAS + 1 tuiles).
+func _ouvrir_porte(e: Dictionary, a: Dictionary) -> void:
+	var p: Vector2i = a.pos
+	for k in range(1, PAS + 2):
+		var q: Vector2i = p + a.direction * k
+		if q.x <= 0 or q.y <= 0 or q.x >= e.largeur - 1 or q.y >= e.hauteur - 1:
+			return
+		var idx: int = q.y * e.largeur + q.x
+		if e.sol.has(idx):
+			return
+		e.sol[idx] = true
 
 
-static func _dir(nom: String) -> Vector2i:
-	return {"nord": Vector2i(0, -1), "sud": Vector2i(0, 1), "est": Vector2i(1, 0), "ouest": Vector2i(-1, 0)}.get(nom, Vector2i.ZERO)
+## Connexité : BFS depuis la première salle ; toute salle isolée reçoit une tranchée droite.
+func _reparer_connexite(e: Dictionary) -> void:
+	if e.pieces.is_empty():
+		return
+	var origine: Vector2i = _centre_libre(e, e.pieces[0])
+	for essai in 4:
+		var atteint := _bfs(e, origine)
+		var repare := false
+		for p in e.pieces:
+			var c := _centre_libre(e, p)
+			if not atteint.has(c.y * e.largeur + c.x):
+				_tranchee(e, c, _plus_proche_atteint(e, c, atteint))
+				repare = true
+		if not repare:
+			return
 
 
-## Le rectangle est-il libre (dans la grille, sans chevaucher une pièce existante, marge comprise) ?
-func _libre(e: Dictionary, r: Rect2i, ignorer: int) -> bool:
-	if r.position.x < 1 or r.position.y < 1 or r.end.x >= e.largeur - 1 or r.end.y >= e.hauteur - 1:
-		return false
-	for i in e.pieces.size():
-		var autre: Rect2i = e.pieces[i].rect
-		if i == ignorer:
-			# La pièce d'origine peut toucher le connecteur (ils partagent la porte), pas le chevaucher.
-			if autre.intersects(r):
-				return false
-			continue
-		if autre.grow(MARGE).intersects(r):
-			return false
-	return true
-
-
-## Une attache consommée des deux côtés ; les tuiles de porte deviennent du sol.
-func _marquer(att: Dictionary, e: Dictionary, piece_conn: Dictionary, porte_conn_pos: Vector2i) -> void:
-	for a in e.pieces[att.piece].attaches:
-		if a.pos == att.pos:
-			a.libre = false
-	_consommer(piece_conn, porte_conn_pos)
-
-
-func _consommer(piece: Dictionary, pos: Vector2i) -> void:
-	for a in piece.attaches:
-		if a.pos == pos:
-			a.libre = false
-
-
-func _lier(e: Dictionary, a: int, b: int) -> void:
-	if not e.graphe.has(a):
-		e.graphe[a] = []
-	if not e.graphe.has(b):
-		e.graphe[b] = []
-	e.graphe[a].append(b)
-	e.graphe[b].append(a)
-
-
-# ---------------------------------------------------------------- profondeur, boss, peuplement
-
-## Distances de graphe depuis l'entrée (BFS sur les pièces).
-func _distances_graphe(e: Dictionary) -> Dictionary:
-	var dist := {0: 0}
-	var file := [0]
+func _bfs(e: Dictionary, depart: Vector2i) -> Dictionary:
+	var vu := {depart.y * e.largeur + depart.x: true}
+	var file: Array[Vector2i] = [depart]
+	var dirs := [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
 	while not file.is_empty():
-		var i: int = file.pop_front()
-		for v in e.graphe.get(i, []):
-			if not dist.has(v):
-				dist[v] = dist[i] + 1
+		var c: Vector2i = file.pop_front()
+		for d in dirs:
+			var v: Vector2i = c + d
+			var idx: int = v.y * e.largeur + v.x
+			if v.x >= 0 and v.y >= 0 and v.x < e.largeur and v.y < e.hauteur and e.sol.has(idx) and not vu.has(idx):
+				vu[idx] = true
 				file.append(v)
-	return dist
+	return vu
 
 
-func _pieces_par_profondeur(e: Dictionary, dist: Dictionary) -> Array:
-	var idx := dist.keys()
-	idx.sort_custom(func(a: int, b: int) -> bool: return dist[a] > dist[b])
-	return idx
+func _plus_proche_atteint(e: Dictionary, c: Vector2i, atteint: Dictionary) -> Vector2i:
+	var meilleur := c
+	var dmin := 1 << 30
+	for idx in atteint.keys():
+		var p := Vector2i(idx % e.largeur, idx / e.largeur)
+		var d := absi(p.x - c.x) + absi(p.y - c.y)
+		if d < dmin:
+			dmin = d
+			meilleur = p
+	return meilleur
 
 
-func _premiere_tuile_libre(e: Dictionary, piece: Dictionary) -> Vector2i:
-	return _centre_libre(e, piece)
+func _tranchee(e: Dictionary, de: Vector2i, vers: Vector2i) -> void:
+	var p := de
+	while p != vers:
+		var d := Vector2i(signi(vers.x - p.x), signi(vers.y - p.y))
+		p += Vector2i(d.x, 0) if d.x != 0 else Vector2i(0, d.y)
+		if p.x > 0 and p.y > 0 and p.x < e.largeur - 1 and p.y < e.hauteur - 1:
+			e.sol[p.y * e.largeur + p.x] = true
+
+
+func _piece_la_plus_loin(e: Dictionary, depart: Vector2i) -> int:
+	# Distance de marche (BFS) : la salle la plus lointaine reçoit l'escalier ou le boss.
+	var dist := {depart.y * e.largeur + depart.x: 0}
+	var file: Array[Vector2i] = [depart]
+	var dirs := [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
+	while not file.is_empty():
+		var c: Vector2i = file.pop_front()
+		var dc: int = dist[c.y * e.largeur + c.x]
+		for d in dirs:
+			var v: Vector2i = c + d
+			var idx: int = v.y * e.largeur + v.x
+			if v.x >= 0 and v.y >= 0 and v.x < e.largeur and v.y < e.hauteur and e.sol.has(idx) and not dist.has(idx):
+				dist[idx] = dc + 1
+				file.append(v)
+	var meilleur := 0
+	var dmax := -1
+	for i in range(1, e.pieces.size()):
+		var c := _centre_libre(e, e.pieces[i])
+		var d: int = int(dist.get(c.y * e.largeur + c.x, -1))
+		if d > dmax:
+			dmax = d
+			meilleur = i
+	return meilleur
 
 
 func _centre_libre(e: Dictionary, piece: Dictionary) -> Vector2i:
@@ -309,8 +296,35 @@ func _centre_libre(e: Dictionary, piece: Dictionary) -> Vector2i:
 	return c
 
 
-## Chaque salle reçoit 0-N contenants de loot (Génération de donjon, étape 6) : une tuile de sol libre,
-## des bases d'objets tirées par catégorie — le contenu réel est généré par la simulation à la profondeur.
+# ---------------------------------------------------------------- peuplement et contenants
+
+## Chaque salle reçoit 0-N créatures du pool du thème, davantage en profondeur (E.29, étape 6).
+func _peupler(e: Dictionary, etage: int) -> void:
+	var pool: Array = theme.get("creatures", [])
+	if pool.is_empty():
+		return
+	var facteur: float = 1.0 + float(etage) * float(theme.get("croissance_par_etage", 0.25))
+	for i in e.pieces.size():
+		var p: Dictionary = e.pieces[i]
+		if i == 0:
+			continue
+		var r: Rect2i = p.rect
+		var n := int(floorf(float(r.size.x * r.size.y) / float(theme.get("tuiles_par_creature", 64)) * facteur))
+		if p.get("boss_room", false):
+			var boss: String = str(theme.get("boss", ""))
+			if not boss.is_empty():
+				e.spawns.append({"creature": boss, "pos": e.boss})
+		var poses := {}
+		for k in n:
+			var c: Dictionary = pool[rng.randi_range(0, pool.size() - 1)]
+			var pos := Vector2i(r.position.x + rng.randi_range(1, r.size.x - 2), r.position.y + rng.randi_range(1, r.size.y - 2))
+			if not e.sol.has(pos.y * e.largeur + pos.x) or poses.has(pos) or pos == e.boss or pos == e.escalier:
+				continue
+			poses[pos] = true
+			e.spawns.append({"creature": c.id, "pos": pos})
+
+
+## Contenants de loot par salle (Génération de donjon, étape 6) ; le contenu est généré par la simulation.
 func _poser_coffres(e: Dictionary) -> void:
 	var lr: Dictionary = GameData.config("loot_rules").contenants
 	var occupees := {}
@@ -318,7 +332,7 @@ func _poser_coffres(e: Dictionary) -> void:
 		occupees[sp.pos] = true
 	for i in e.pieces.size():
 		var p: Dictionary = e.pieces[i]
-		if p.kind != "salle" or i == 0:
+		if i == 0:
 			continue
 		var r: Rect2i = p.rect
 		var n := int(floorf(float(r.size.x * r.size.y) / float(lr.tuiles_par_coffre)))
@@ -326,7 +340,7 @@ func _poser_coffres(e: Dictionary) -> void:
 			n += 1
 		for k in n:
 			var pos := Vector2i(r.position.x + rng.randi_range(1, r.size.x - 2), r.position.y + rng.randi_range(1, r.size.y - 2))
-			if not e.sol.has(pos.y * e.largeur + pos.x) or occupees.has(pos) or pos == e.boss or pos == e.escalier:
+			if not e.sol.has(pos.y * e.largeur + pos.x) or occupees.has(pos) or pos == e.boss or pos == e.escalier or pos == e.entree:
 				continue
 			occupees[pos] = true
 			var objets: Array = []
@@ -351,29 +365,3 @@ func _base_aleatoire(lr: Dictionary) -> String:
 	if bases.is_empty():
 		bases = lr.bases_armes
 	return bases[rng.randi_range(0, bases.size() - 1)]
-
-
-## Chaque salle reçoit 0-N créatures du pool du thème, davantage en profondeur (E.29, étape 6).
-func _peupler(e: Dictionary, etage: int) -> void:
-	var pool: Array = theme.get("creatures", [])
-	if pool.is_empty():
-		return
-	var facteur: float = 1.0 + float(etage) * float(theme.get("croissance_par_etage", 0.25))
-	for i in e.pieces.size():
-		var p: Dictionary = e.pieces[i]
-		if p.kind != "salle" or i == 0:
-			continue
-		var r: Rect2i = p.rect
-		var n := int(floorf(float(r.size.x * r.size.y) / float(theme.get("tuiles_par_creature", 64)) * facteur))
-		if p.get("boss_room", false):
-			var boss: String = str(theme.get("boss", ""))
-			if not boss.is_empty():
-				e.spawns.append({"creature": boss, "pos": e.boss})
-		var poses := {}
-		for k in n:
-			var c: Dictionary = pool[rng.randi_range(0, pool.size() - 1)]
-			var pos := Vector2i(r.position.x + rng.randi_range(1, r.size.x - 2), r.position.y + rng.randi_range(1, r.size.y - 2))
-			if not e.sol.has(pos.y * e.largeur + pos.x) or poses.has(pos) or pos == e.boss:
-				continue
-			poses[pos] = true
-			e.spawns.append({"creature": c.id, "pos": pos})

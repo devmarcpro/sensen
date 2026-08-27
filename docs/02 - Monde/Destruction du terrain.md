@@ -23,6 +23,9 @@ La destruction reste tactiquement lisible — effondrer le pont, ouvrir une brè
 
 **Explosions :** voir [[Explosions]].
 
+> [!success] Décidé le 2026-08-27 — creuser dans le donjon
+> Les murs du labyrinthe portent le tag `destructible` (`data/tile_contents.json`) ; le bord de la cellule est de la `roche` sans ce tag. Intention `creuser` (clic sur un mur adjacent) : **10 ticks, 6 d'endurance, 5 XP de Terrassement** (`combat_rules.creuser`), la tuile devient du sol. Pas encore de ressource récoltée ni d'outil requis (attend l'artisanat, étape 7) — le joueur peut donc tracer son propre chemin dans le labyrinthe au prix du temps et de l'endurance.
+
 ## Liens
 - **Dépend de** : [[Hauteur de terrain ±10]], [[Grille continue]]
 - **Alimente** : [[Sorts cataclysmiques]], [[Construction cadrée]], [[Défense et raids]]

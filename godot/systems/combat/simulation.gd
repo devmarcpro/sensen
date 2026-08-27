@@ -168,6 +168,27 @@ func _reprendre(e: Dictionary, pos: Vector2i) -> void:
 	grille.placer(e.id, pos)
 
 
+## Creuser : détruire un mur adjacent (Destruction du terrain) — la tuile redevient sol.
+## Le bord de la cellule (roche) ne se creuse pas. Coût en ticks et en endurance, XP de Terrassement.
+func _creuser(e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	if not grille.dans(vers) or Grille.distance(e.pos, vers) != 1:
+		return false
+	var contenu := grille.contenu_de(vers)
+	if not ("destructible" in contenu.get("tags", [])):
+		return false
+	var cr: Dictionary = regles.r.creuser
+	_quitter_garde(e)
+	e.orientation = vers - e.pos
+	grille.contenu[grille.idx(vers)] = 0
+	grille.hauteurs[grille.idx(vers)] = grille.h(e.pos)   # la brèche est au niveau de celui qui creuse
+	e.endurance = maxi(0, int(e.endurance) - int(cr.endurance))
+	e.compteur = tick + _ticks_avec_statuts(e, int(cr.ticks))
+	gagner_xp(e, "terrassement", int(cr.xp))
+	EventBus.emettre(&"journal", [&"journal.creuse", {"nom": e.name_key, "x": vers.x, "y": vers.y}])
+	EventBus.emettre(&"tile_changed", [vers])
+	return true
+
+
 ## L'état de l'étage courant, sans le joueur, mis de côté : rien ne repop, tout reste où c'est.
 func _sauver_etage(joueur: Dictionary) -> void:
 	var sauve := {"donjon": donjon.duplicate(), "grille": grille, "entites": {}, "ordre": [], "contenants": contenants}
@@ -660,6 +681,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			if _remonter(e):
 				EventBus.dispatcher()
 				return true
+		"creuser":
+			ok = _creuser(e, i.get("vers", Vector2i(-1, -1)), h.ticks)
 		"equiper":
 			ok = _equiper(e, str(i.get("objet", "")), h.ticks)
 		"ramasser":

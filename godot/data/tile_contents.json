@@ -7,7 +7,8 @@
     "hauteur_vue": 3,
     "tags": [
       "mur",
-      "solide"
+      "solide",
+      "destructible"
     ]
   },
   "barriere": {

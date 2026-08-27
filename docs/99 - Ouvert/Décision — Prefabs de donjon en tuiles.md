@@ -42,6 +42,9 @@ L'algorithme par graphe intégral (attache → connecteur → salle → collisio
 > [!success] Complété le 2026-08-27 — grille JSON en caractères, le PNG attendra un éditeur
 > La note admettait « image indexée (PNG) ou grille JSON » avant de fixer le PNG. Sans éditeur pixel art dans la boucle autonome, le prototype prend la **grille JSON en caractères** (`plan: ["##N##", "#...#", …]` : `.` sol, `#` mur, ` ` hors prefab, `N/S/E/W` porte sur le bord, `X` cage d'escalier, chiffre = hauteur relative 0-9) — même contenu que les deux couches PNG, diffable en texte, généré par `tools/gen_dungeon_prefabs.py`. L'import PNG viendra quand un artiste en aura besoin ; le loader acceptera les deux. **Bibliothèque : 12 salles + 8 connecteurs écrits** (les 4 entrées de surface attendent l'étape 8). Les `connectors[]` sont dérivés des marqueurs du plan.
 
+> [!success] Précisé le 2026-08-27
+> Les prefabs de salles sont réutilisés tels quels dans le labyrinthe ([[Génération de donjon]]) ; les prefabs de connecteurs sont conservés en données mais ne sont plus posés — le labyrinthe relie les salles.
+
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Génération de donjon]], [[Salles et connecteurs]], [[Grille continue]]
 - **Alimente** : [[Donjons — structure et intégration]], [[Ouvert — Taille des salles de donjon]]

@@ -53,6 +53,9 @@ Les donjons sont une des sources principales de contenu du jeu, et le premier es
 > [!success] Codé le 2026-08-27 — remonter, ressortir, étages fixes
 > Chaque étage quitté est **mis de côté tel quel** (grille, êtres morts ou vivants, contenants) et revient dans cet état quand on y remonte — *pas de repop, explorer vide réellement le donjon*. La tuile d'entrée (verte) sert d'escalier montant ; à l'étage 1 elle est la **sortie** : l'expédition se termine (récapitulatif : étage max, tués, objets, boss, niveaux dérivés — signal `expedition_terminee`) et une nouvelle expédition commence avec le même être, son sac, ses niveaux et ses potentiels. La surface, le délai de grâce de 1,5 jour et la cellule qui redevient claimable attendent l'étape 8.
 
+> [!success] Décidé le 2026-08-27 — un étage = une cellule
+> Chaque étage tient dans **une cellule de 128×128** (la taille de cellule du monde, [[Grille continue]]) ; l'entrée en surface, à l'étape 8, occupera donc exactement une cellule de la carte. Deux escaliers par étage, un montant et un descendant ; le premier étage remonte vers la surface ([[Génération de donjon]]).
+
 ## Liens
 - **Dépend de** : [[Grille continue]], [[Hauteur de terrain ±10]], [[Décisions fondatrices]]
 - **Alimente** : [[Génération de donjon]], [[Salles et connecteurs]], [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Grimoires et manuels]]

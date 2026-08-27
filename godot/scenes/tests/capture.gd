@@ -24,6 +24,8 @@ func _ready() -> void:
 	add_child(scene)
 	scene.profil_sans_ui = "--sans-ui" in args
 	scene.profil_sans_terrain = "--sans-terrain" in args
+	if not scene.creation.is_empty():
+		scene._creer_personnage()   # la capture saute l'écran de création
 	if arene > 0:
 		scene.arene_courante = arene
 		scene._charger()

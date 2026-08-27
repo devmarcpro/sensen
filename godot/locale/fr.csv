@@ -60,7 +60,7 @@ ui.titre,SENSEN — prototype de combat
 ui.horloge,horloge {horloge} · {mode}
 ui.mode.exploration,exploration ({tps} ticks/s)
 ui.mode.combat,COMBAT — le temps n'avance qu'à l'action
-ui.aide,ZQSD : se déplacer (8 directions) · R : ramasser · clic : se déplacer / frapper · maj+clic : attaque lourde · G : garde · espace : attendre · tab : arène suivante · F5 : recharger les données
+ui.aide,ZQSD : se déplacer (8 directions) · R : ramasser · clic : se déplacer / frapper / creuser un mur adjacent · maj+clic : attaque lourde · G : garde · espace : attendre · tab : arène suivante · F5 : recharger les données
 ui.entite.ligne,{nom} pv {pv}/{pv_max} · end {end} · agit à t={compteur} · h={h}
 ui.case,"case ({x},{y}) h={h} · Δh vs toi : {dh}"
 ui.timeline,prochaines actions :
@@ -157,7 +157,7 @@ tutorial.fin_de_combat.text,"Le combat se relâche : l'écran de fin montre la d
 tile_content.roche.name,Roche
 dungeon_theme.ruine.name,Ruine
 dungeon_theme.repaire.name,Repaire
-ui.donjon,DONJON {theme} · étage {etage}/{etages} · salles {salles} · E : descendre (cage dorée) / remonter et sortir (entrée verte)
+ui.donjon,DONJON {theme} · étage {etage}/{etages} · salles {salles} · E : descendre (escalier doré) / remonter et sortir (escalier vert)
 journal.descente,vous descendez à l'étage {etage}
 journal.pas_escalier,pas de cage d'escalier ici
 item.proto_anneau.name,Anneau
@@ -360,6 +360,8 @@ journal.remontee,vous remontez à l'étage {etage}
 journal.sortie,"{nom} ressort du donjon : {tues} ennemis, {objets} objets, étage {etage_max}"
 ui.expedition.titre,=== EXPÉDITION TERMINÉE — {theme} ===
 ui.expedition.ligne,"  étage max {etage_max} · {tues} ennemis vaincus · {objets} objets ramassés ({sac} au sac) · boss : {boss} · niveau de combat {combat}, général {general} — une nouvelle expédition commence"
+journal.creuse,"{nom} abat le mur en ({x},{y})"
+journal.increusable,ce mur ne se creuse pas (la roche de la cellule)
 journal.victoire,plus aucun hostile. Victoire.
 journal.defaite,tu es tombé. Une touche : te relever au point d'entrée (Mort et pénalité).
 module.a_l_impact.name,À l'impact

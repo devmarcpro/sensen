@@ -51,6 +51,9 @@
     },
     "mort": {
       "type": "object"
+    },
+    "creuser": {
+      "type": "object"
     }
   },
   "required": [
