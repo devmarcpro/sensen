@@ -1,0 +1,52 @@
+{
+  "name_key": "species.coquillage.name",
+  "famille": "le_monde_decide",
+  "groupe": "coquillages",
+  "habitat": "vivarium",
+  "capture": {
+    "verbe": "ramassage",
+    "milieu": "eau",
+    "dd": 5,
+    "rarete": 1
+  },
+  "loci": {
+    "couleur": {
+      "type": "anneau",
+      "n": 10
+    },
+    "spirale": {
+      "type": "recessif"
+    },
+    "motif_coquille": {
+      "type": "automate",
+      "n": 12
+    }
+  },
+  "silhouette": "",
+  "repro": {
+    "moteur": "anneau",
+    "conditions": [
+      {
+        "c": "habitat",
+        "v": "vivarium"
+      },
+      {
+        "c": "place"
+      },
+      {
+        "c": "saison",
+        "v": [
+          "printemps",
+          "ete"
+        ]
+      }
+    ],
+    "portee": [
+      2,
+      3
+    ],
+    "couts": []
+  },
+  "registre": "grille",
+  "tags": []
+}

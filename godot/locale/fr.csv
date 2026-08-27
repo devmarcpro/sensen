@@ -401,6 +401,9 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+species.chat.name,Chat des ruelles
+species.coquillage.name,Coquillage nacré
+recipe.filer_soie.name,Filer la soie (tue la chrysalide)
 species.serpent.name,Serpent des dunes
 species.ver_a_soie.name,Ver à soie
 species.ruche.name,Ruche

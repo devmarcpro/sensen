@@ -23,6 +23,11 @@
       "min": 1,
       "max": null,
       "var": 0.06
+    },
+    "taches": {
+      "type": "carte",
+      "n": 4,
+      "mut": 0.15
     }
   },
   "silhouette": "",

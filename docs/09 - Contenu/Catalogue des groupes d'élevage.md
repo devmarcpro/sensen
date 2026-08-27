@@ -88,6 +88,9 @@ Le catalogue complet, par famille de verbe.
 > [!success] Codé le 2026-08-28 — les six familles, une espèce chacune, en données
 > `data/species/` : **carpe** (grille à remplir, filet sur l'eau, vivarium), **serpent** (trait caché : locus `ecailles` récessif, appât — une viande crue du sac — sur toute tuile, terrarium, couvée après 1 semaine d'âge), **ver à soie** (coût par croisement : `couts` [4 choux du stock du territoire], ramassage sur un arbre, clayette), **ruche** (population autonome : locus `colonie` qui croît chaque semaine jusqu'à 10, `production` = miel × population/4 au printemps-été-fin d'été, essaimage = ramassage sur une plante), **tortue** (individu qui évolue : locus `dossiere` de type `age`, +1 par semaine, couvée à 4 semaines d'âge, enclos), **phalène** (le monde décide : locus `melanisme` **acquis** de la corruption effective de la cellule à la naissance ou à la capture, piège lumineux la nuit sur une plante, vivarium). Registre : les loci `age`/`colonie`/`acquis` s'expriment au passage hebdomadaire ; `lie_au_sexe`, `carte`, `automate` attendent. Le filage de la soie (tue la chrysalide) n'est pas codé.
 
+> [!success] Codé le 2026-08-28 — chat, coquillage, filage
+> Deux espèces de plus pour les trois derniers loci : le **chat** (pelage lié au sexe, appât, enclos) et le **coquillage** (spirale récessive, motif automate, ramassage sur l'eau, vivarium). **Filer la soie** : recette `filer_soie` à l'atelier de tissage — entrée « un spécimen de ver à soie » (entrée de recette par `espece`), sortie **soie brute**, quantité = finesse du ver arrondie ; le ver est consommé (« filer tue la chrysalide »).
+
 ## Liens
 - **Dépend de** : [[Élevage — intention et familles]], [[Loci — les dix types]], [[Conditions de reproduction]]
 - **Alimente** : [[Vivarium — loci et variétés]], [[Intégration de l'élevage au moteur]]

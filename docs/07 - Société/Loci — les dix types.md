@@ -61,6 +61,9 @@ C'est exactement ce qui rend possible le mouton ultime de [[Blocs de l'être]] �
 
 C'est la déclinaison exacte de [[Data-driven design]] au vivant, et c'est vérifié par [[Tests de conformité — élevage]].
 
+> [!success] Codé le 2026-08-28 — les dix types
+> `anneau`, `nombre`, `recessif`, `sequence`, `acquis`, `age`, `colonie` (précédents) + **`lie_au_sexe`** (deux allèles chez une femelle, un chez un mâle : l'enfant reçoit un allèle de la mère, plus un du père s'il est femelle — `chat`, pelage écaille-de-tortue), **`carte`** (une grille `n × n` de 0/1 héritée d'un parent avec une fraction `mut` de cases retournées — `carpe`, taches), **`automate`** (jamais tiré : `hash` des autres loci modulo `n`, recalculé à chaque expression — `coquillage`, motif de coquille). Les fonctions ne connaissent aucune espèce.
+
 ## Liens
 - **Dépend de** : [[Élevage — intention et familles]], [[Data-driven design]], [[Blocs de l'être]]
 - **Alimente** : [[Règle d'anneau]], [[Conditions de reproduction]], [[Apparence — données et équipement]], [[Catalogue des groupes d'élevage]]

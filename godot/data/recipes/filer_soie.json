@@ -1,0 +1,19 @@
+{
+  "name_key": "recipe.filer_soie.name",
+  "station": "atelier_tissage",
+  "craft_skill": "tissage",
+  "inputs": [
+    {
+      "espece": "ver_a_soie",
+      "forme": "",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "material": "soie",
+    "forme": "brut",
+    "amount": 1,
+    "par_locus": "finesse"
+  },
+  "fuel": null
+}

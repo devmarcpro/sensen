@@ -1,5 +1,5 @@
 {
-  "_doc": "Recette de transformation plate (docs: Stations de transformation / C.8). inputs : par material, par category, par item (base) ou par tag (d'objet, ex. culture), forme (brut, lingot, planche, pierre_taillee, tissu, taillee), amount ; output : forme (même matériau que l'entrée) ou material. Les objets finaux passent par components.",
+  "_doc": "Recette de transformation plate (docs: Stations de transformation / C.8). inputs : par material, par category, par item (base), par tag (d'objet, ex. culture) ou par espece (un spécimen d'élevage), forme ; output.par_locus : la quantité suit ce locus du spécimen consommé (brut, lingot, planche, pierre_taillee, tissu, taillee), amount ; output : forme (même matériau que l'entrée) ou material. Les objets finaux passent par components.",
   "name_key": "recipe.<id>.name",
   "station": "forge",
   "craft_skill": "forge",

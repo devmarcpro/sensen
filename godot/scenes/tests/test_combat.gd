@@ -48,6 +48,7 @@ func _ready() -> void:
 	test_villes_et_halls()
 	test_saisons_et_elevage()
 	test_elevage_familles()
+	test_loci_et_soie()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1029,7 +1030,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 48, "9 stations, 48 recettes plates (9 transformations, 22 meubles, 9 stations, 3 plats, 5 potions)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 49, "9 stations, 49 recettes plates (10 transformations, 22 meubles, 9 stations, 3 plats, 5 potions)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -1867,7 +1868,7 @@ func test_saisons_et_elevage() -> void:
 	for uid in j.sac:
 		if s.items[uid].has("genome"):
 			specimens.append(s.items[uid])
-	verifier(specimens.size() == 1 and specimens[0].espece == "carpe" and specimens[0].genome.has("couleur"), "une carpe capturée, avec son génome")
+	verifier(specimens.size() == 1 and specimens[0].genome.has("couleur"), "un spécimen d'eau capturé (%s), avec son génome" % str(specimens[0].espece if not specimens.is_empty() else "-"))
 	# Un couple dans un vivarium : la couvée hebdomadaire hérite locus par locus.
 	var a := s._nouveau_specimen("carpe", {"couleur": 3, "motif": 2, "taille": 2.0}, "m")
 	var b := s._nouveau_specimen("carpe", {"couleur": 5, "motif": 6, "taille": 4.0}, "f")
@@ -1963,6 +1964,53 @@ func test_elevage_familles() -> void:
 		if s.items[uid].has("genome"):
 			pris += 1
 	verifier(ok and pris >= 1, "capturer : le milieu voisin (ou l'appât) décide de l'espèce, un spécimen pris")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Élevage : les dix loci, la soie
+
+func test_loci_et_soie() -> void:
+	var s := Simulation.new(89)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 89
+	# lie_au_sexe : un mâle ne porte qu'un allèle, une femelle deux.
+	var chat: Dictionary = GameData.catalogues.species.chat
+	var m := s._nouveau_specimen("chat", s._genome_aleatoire(chat, rng), "m")
+	s._exprimer_loci(m, s.monde.cellule_camp, true)
+	var f := s._nouveau_specimen("chat", s._genome_aleatoire(chat, rng), "f")
+	s._exprimer_loci(f, s.monde.cellule_camp, true)
+	verifier(m.genome.pelage.size() == 1 and f.genome.pelage.size() == 2, "pelage lié au sexe : 1 allèle chez le mâle, 2 chez la femelle")
+	var enfant: Array = s._heriter(f.genome.pelage, m.genome.pelage, chat.loci.pelage, rng)
+	verifier(enfant.size() == 2 and (int(enfant[0]) in f.genome.pelage) and int(enfant[1]) == int(m.genome.pelage[0]), "l'enfant reçoit un allèle de la mère et celui du père")
+	# carte : la carte d'un parent, quelques cases retournées.
+	var carpe: Dictionary = GameData.catalogues.species.carpe
+	var ca: Array = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+	var cb: Array = ca.duplicate()
+	var carte: Array = s._heriter(ca, cb, carpe.loci.taches, rng)
+	var un := 0
+	for v in carte:
+		un += int(v)
+	verifier(carte.size() == 16 and un >= 10 and un <= 16, "taches : 16 cases, %d gardées d'un parent tout blanc" % un)
+	# automate : jamais tiré, déterminé par les autres loci.
+	var coq: Dictionary = GameData.catalogues.species.coquillage
+	var c1 := s._nouveau_specimen("coquillage", {"couleur": 3, "spirale": [0, 1], "motif_coquille": null}, "f")
+	s._exprimer_loci(c1, s.monde.cellule_camp, true)
+	var c2 := s._nouveau_specimen("coquillage", {"couleur": 3, "spirale": [0, 1], "motif_coquille": null}, "f")
+	s._exprimer_loci(c2, s.monde.cellule_camp, true)
+	var c3 := s._nouveau_specimen("coquillage", {"couleur": 7, "spirale": [1, 1], "motif_coquille": null}, "f")
+	s._exprimer_loci(c3, s.monde.cellule_camp, true)
+	verifier(c1.genome.motif_coquille != null and c1.genome.motif_coquille == c2.genome.motif_coquille and int(c1.genome.motif_coquille) < int(coq.loci.motif_coquille.n), "motif automate : mêmes loci → même motif (%s), borné" % str(c1.genome.motif_coquille))
+	# Filer la soie : un ver de finesse 3 → 3 soie brute, le ver disparaît.
+	var ver := s._nouveau_specimen("ver_a_soie", {"finesse": 3.0, "couleur": 1}, "f")
+	j.sac.append(ver.uid)
+	var atelier := s.generer_objet("station_atelier_tissage", 1, {}, "commun", 0)
+	j.sac.append(atelier.uid)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "fabriquer", "recette": "filer_soie"}), "filer la soie à l'atelier de tissage")
+	var soie := s._pile(j, "soie", "brut")
+	verifier(not soie.is_empty() and int(soie.quantite) == 3 and not (ver.uid in j.sac), "3 soie brute (finesse 3), la chrysalide est morte")
 	s.monde.fermer()
 
 

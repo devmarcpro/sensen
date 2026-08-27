@@ -1,0 +1,56 @@
+{
+  "name_key": "species.chat.name",
+  "famille": "trait_cache",
+  "groupe": "chats",
+  "habitat": "enclos",
+  "capture": {
+    "verbe": "appat",
+    "milieu": "sol",
+    "appat": "viande_crue",
+    "dd": 9,
+    "rarete": 1
+  },
+  "loci": {
+    "couleur": {
+      "type": "anneau",
+      "n": 8
+    },
+    "pelage": {
+      "type": "lie_au_sexe",
+      "n": 3
+    },
+    "taille": {
+      "type": "nombre",
+      "min": 1,
+      "max": null,
+      "var": 0.05
+    }
+  },
+  "silhouette": "",
+  "repro": {
+    "moteur": "anneau",
+    "conditions": [
+      {
+        "c": "habitat",
+        "v": "enclos"
+      },
+      {
+        "c": "place"
+      },
+      {
+        "c": "sexe"
+      },
+      {
+        "c": "age",
+        "min": 2
+      }
+    ],
+    "portee": [
+      2,
+      4
+    ],
+    "couts": []
+  },
+  "registre": "phenotypes",
+  "tags": []
+}

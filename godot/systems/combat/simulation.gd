@@ -1202,6 +1202,13 @@ func _genome_aleatoire(esp: Dictionary, rng: RandomNumberGenerator) -> Dictionar
 				g[nom] = 0
 			"colonie":
 				g[nom] = 1
+			"lie_au_sexe":   # deux allèles (femelle) ou un (mâle) : tranché à la naissance par _exprimer_loci, ici deux
+				g[nom] = [rng.randi() % int(L.get("n", 2)), rng.randi() % int(L.get("n", 2))]
+			"carte":
+				var carte: Array = []
+				for k in int(L.get("n", 4)) * int(L.get("n", 4)):
+					carte.append(1 if rng.randf() < 0.5 else 0)
+				g[nom] = carte
 			_:
 				g[nom] = null
 	return g
@@ -1221,6 +1228,15 @@ func _exprimer_loci(sp: Dictionary, cell: Vector2i, naissance: bool) -> void:
 			"colonie":
 				if not naissance:
 					sp.genome[nom] = mini(int(L.get("max", 10)), int(sp.genome.get(nom, 1)) + int(L.get("par_semaine", 1)))
+			"lie_au_sexe":   # un mâle ne porte qu'un allèle
+				if naissance and str(sp.get("sexe", "f")) == "m" and sp.genome.get(nom) is Array and sp.genome[nom].size() > 1:
+					sp.genome[nom] = [sp.genome[nom][0]]
+			"automate":   # jamais tiré : une règle sur les autres loci
+				var autres: Array = []
+				for k in esp.loci.keys():
+					if k != nom and str(esp.loci[k].type) != "automate":
+						autres.append(str(sp.genome.get(k)))
+				sp.genome[nom] = posmod(hash("|".join(autres)), int(L.get("n", 8)))
 
 
 ## L'hérédité, locus par locus (Loci — les dix types) : une fonction par type, aucune ne connaît d'espèce.
@@ -1248,6 +1264,18 @@ func _heriter(a: Variant, b: Variant, L: Dictionary, rng: RandomNumberGenerator)
 			for i in a.size():
 				seq.append(a[i] if rng.randf() < 0.5 else b[i])
 			return seq
+		"carte":   # la carte d'un parent, déformée : une fraction mut de cases retournées
+			if a == null or b == null:
+				return a if b == null else b
+			var src: Array = (a if rng.randf() < 0.5 else b).duplicate()
+			for i in src.size():
+				if rng.randf() < float(L.get("mut", 0.1)):
+					src[i] = 1 - int(src[i])
+			return src
+		"lie_au_sexe":   # un allèle de la mère (a) toujours ; un du père (b) si l'enfant est femelle — tranché ensuite
+			if a == null or b == null:
+				return a if b == null else b
+			return [a[rng.randi() % a.size()], b[rng.randi() % b.size()]]
 		_:
 			return null
 
@@ -1341,6 +1369,7 @@ func _capturer(e: Dictionary, tick: int) -> bool:
 	rng.seed = hash([graine, "capture", tick, e.id])
 	var sp := _nouveau_specimen(esp_id, _genome_aleatoire(esp, rng), "m" if rng.randf() < 0.5 else "f")
 	_exprimer_loci(sp, _cell_de(e.pos), true)
+	_enregistrer_variete(sp)
 	donner(e, sp.uid)
 	EventBus.emettre(&"journal", [&"journal.capture_reussie", {"nom": e.name_key, "espece": esp.name_key, "couleur": str(sp.genome.get("couleur", "-")), "motif": str(sp.genome.get("motif", "-"))}])
 	return true
@@ -1421,6 +1450,7 @@ func _semaine_elevage() -> void:
 						g[nom] = _heriter(specimens[i].genome.get(nom), specimens[j].genome.get(nom), esp.loci[nom], rng)
 					var enfant := _nouveau_specimen(str(specimens[i].espece), g, "m" if rng.randf() < 0.5 else "f")
 					_exprimer_loci(enfant, _cell_de(pos), true)
+					_enregistrer_variete(enfant)
 					contenants[gi].append(enfant.uid)
 					EventBus.emettre(&"journal", [&"journal.couvee", {"espece": esp.name_key, "n": n, "couleur": str(g.get("couleur", "-")), "motif": str(g.get("motif", "-"))}])
 				fait = true
@@ -2976,6 +3006,11 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 					trouvee = it
 					break
 				continue
+			if entree.has("espece"):   # un spécimen d'élevage de cette espèce (filer la soie)
+				if str(it.get("espece", "")) == str(entree.espece):
+					trouvee = it
+					break
+				continue
 			if it.get("type", "") != "materiau" or str(it.get("forme", "brut")) != forme or int(it.quantite) < besoin:
 				continue
 			var mat: Dictionary = GameData.catalogues.materials.get(str(it.materiau), {})
@@ -2985,12 +3020,16 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 				continue
 			trouvee = it
 			break
-		plan.entrees.append({"pile": trouvee, "besoin": besoin, "forme": forme, "filtre": str(entree.get("material", entree.get("category", entree.get("item", entree.get("tag", "")))))})
+		plan.entrees.append({"pile": trouvee, "besoin": besoin, "forme": forme, "filtre": str(entree.get("material", entree.get("category", entree.get("item", entree.get("tag", entree.get("espece", ""))))))})
 		if trouvee.is_empty():
 			plan.faisable = false
 		elif mat_sortie.is_empty() and trouvee.has("materiau"):
 			mat_sortie = str(trouvee.materiau)   # la sortie garde le matériau de l'entrée (lingot de fer…)
 	plan.sortie = {"materiau": mat_sortie, "forme": str(r.output.get("forme", "brut")), "quantite": int(r.output.amount), "item": str(r.output.get("item", ""))}
+	if r.output.has("par_locus") and plan.faisable:   # la quantité suit un locus du spécimen consommé (finesse du fil)
+		for entree in plan.entrees:
+			if entree.pile.has("genome"):
+				plan.sortie.quantite = maxi(1, roundi(float(entree.pile.genome.get(str(r.output.par_locus), 1)) * float(r.output.amount)))
 	return plan
 
 
