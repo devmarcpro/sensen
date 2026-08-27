@@ -1,0 +1,22 @@
+{
+  "name_key": "affixe.cond_element_cible.nom",
+  "famille": "conditionnel",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {
+    "element": "element",
+    "pct": [
+      15,
+      35
+    ]
+  },
+  "effet": {
+    "type": "cond_element_cible"
+  },
+  "meilleur": {
+    "pct": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

@@ -1,0 +1,25 @@
+{
+  "name_key": "affixe.decl_zone_etourdit.nom",
+  "famille": "declencheur",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {
+    "zone": [
+      "tete"
+    ],
+    "duree_ticks": [
+      6,
+      12
+    ]
+  },
+  "effet": {
+    "type": "decl_zone_statut",
+    "statut": "etourdi"
+  },
+  "meilleur": {
+    "duree_ticks": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

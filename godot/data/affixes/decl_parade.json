@@ -1,0 +1,25 @@
+{
+  "name_key": "affixe.decl_parade.nom",
+  "famille": "declencheur",
+  "slots_valides": [
+    "casque",
+    "cuirasse",
+    "brassards",
+    "jambieres",
+    "bottes"
+  ],
+  "parametres": {
+    "endurance": [
+      3,
+      8
+    ]
+  },
+  "effet": {
+    "type": "decl_parade_endurance"
+  },
+  "meilleur": {
+    "endurance": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

@@ -1,0 +1,16 @@
+{
+  "name_key": "affixe.wuxing_combo.nom",
+  "famille": "wuxing",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {},
+  "effet": {
+    "type": "wuxing_combo_des"
+  },
+  "meilleur": {},
+  "inerte": false,
+  "tags": [
+    "tres_rare"
+  ]
+}

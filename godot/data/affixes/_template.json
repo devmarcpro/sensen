@@ -1,0 +1,23 @@
+{
+  "_doc": "Gabarit d'affixe (docs: Loot — affixes, gemmes et rareté). parametres = fourchettes tirées à la génération ({n:[min,max]}, {element:'element'}, {stat:[liste]}) ; effet.type = ce que le résolveur exécute ; meilleur = sens du bon tirage par paramètre (le budget de rareté pioche dans le meilleur tiers) ; inerte = prédicat en attente d'un système. Générés par tools/gen_affixes.py.",
+  "name_key": "affixe.<id>.nom",
+  "famille": "rythmique",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {
+    "n": [
+      2,
+      4
+    ],
+    "element": "element"
+  },
+  "effet": {
+    "type": "cadence_element"
+  },
+  "meilleur": {
+    "n": "bas"
+  },
+  "inerte": false,
+  "tags": []
+}

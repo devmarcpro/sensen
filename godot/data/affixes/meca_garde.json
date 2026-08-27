@@ -1,0 +1,25 @@
+{
+  "name_key": "affixe.meca_garde.nom",
+  "famille": "mecanique",
+  "slots_valides": [
+    "casque",
+    "cuirasse",
+    "brassards",
+    "jambieres",
+    "bottes"
+  ],
+  "parametres": {
+    "pct": [
+      20,
+      40
+    ]
+  },
+  "effet": {
+    "type": "meca_garde_endurance"
+  },
+  "meilleur": {
+    "pct": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

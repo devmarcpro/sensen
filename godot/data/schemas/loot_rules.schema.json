@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": [
+    "raretes",
+    "poids_par_profondeur",
+    "contenants",
+    "drops",
+    "monstres_rares",
+    "gemmes"
+  ]
+}

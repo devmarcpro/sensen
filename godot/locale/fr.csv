@@ -160,6 +160,61 @@ dungeon_theme.repaire.name,Repaire
 ui.donjon,DONJON {theme} · étage {etage}/{etages} · salles {salles} · E : descendre (sur la cage d'escalier)
 journal.descente,vous descendez à l'étage {etage}
 journal.pas_escalier,pas de cage d'escalier ici
+item.proto_anneau.name,Anneau
+item.proto_amulette.name,Amulette
+rarete.commun,commun
+rarete.inhabituel,inhabituel
+rarete.rare,rare
+rarete.exceptionnel,exceptionnel
+rarete.artefact,artefact
+epithete.bois,de sève
+epithete.feu,de braise
+epithete.terre,de roc
+epithete.metal,d'acier
+epithete.eau,de givre
+affixe.cadence_element.nom,{base} {epithete} (une attaque sur {n} porte {element})
+affixe.cadence_des.nom,{base} fervent (une sur {n} : +{des} dé)
+affixe.cadence_percant.nom,{base} perçant (tous les {n} coups : ignore {pct} % d'armure)
+affixe.cadence_saignee.nom,{base} sanglant (un coup sur {n} saigne)
+affixe.cadence_parade.nom,{base} du parieur (une parade sur {n} rend {endurance} endurance)
+affixe.cadence_riposte.nom,{base} vengeur (un coup reçu sur {n} : riposte +{des} dé)
+affixe.cond_pv_bas.nom,{base} du dernier souffle (sous {pct_pv} % PV : +{des} dé)
+affixe.cond_element_cible.nom,{base} du chasseur (contre {element} : +{pct} %)
+affixe.cond_profondeur.nom,{base} des profondeurs (étage ≥ {etage} : +{des} dé)
+affixe.cond_nuit.nom,{base} nocturne (la nuit : +{pct} % vitesse — en attente du cycle)
+affixe.cond_corruption.nom,{base} du danger (corruption ≥ {seuil} : +{pct} % — en attente)
+affixe.cond_mana.nom,{base} des sources (densité de mana : −{pct} % coût — en attente)
+affixe.wuxing_cycle.nom,{base} tournant (les coups touchés avancent l'élément dans le cycle)
+affixe.wuxing_ajout.nom,{base} {epithete} (+{pct} % {element} au vecteur)
+affixe.wuxing_segment.nom,{base} de la chaîne (+1 segment de chaîne)
+affixe.wuxing_combo.nom,{base} du combo (les combos donnent +2 dés)
+affixe.wuxing_purete.nom,{base} pur (+{pct} % à l'élément dominant)
+affixe.wuxing_domination.nom,{base} accordé (matchups défensifs +{pct} %)
+affixe.decl_zone_etourdit.nom,{base} assommant (au coup en {zone} : étourdit {duree_ticks} ticks)
+affixe.decl_zone_saigne.nom,{base} cruel (au coup en {zone} : saigne {duree_ticks} ticks)
+affixe.decl_parade.nom,{base} du rempart (à la parade : rend {endurance} endurance)
+affixe.decl_mise_a_mort.nom,{base} du prédateur (à la mise à mort : +{pct} % vitesse {ticks} ticks)
+affixe.decl_touche_etourdit.nom,{base} hérissé (touché : {chance} % d'étourdir {duree_ticks} ticks)
+affixe.decl_touche_saigne.nom,{base} épineux (touché : {chance} % de faire saigner)
+affixe.meca_vol_de_vie.nom,{base} vampirique (vol de vie {pct} %)
+affixe.meca_allonge.nom,{base} long (+{n} allonge)
+affixe.meca_garde.nom,{base} de la garde (garde −{pct} % d'endurance)
+affixe.meca_capacite.nom,{base} du porteur (+{kg} capacité — en attente)
+affixe.meca_endurance_max.nom,{base} du souffle (+{n} endurance max)
+affixe.meca_armure.nom,{base} renforcé (+{n} armure)
+affixe.passif_stat.nom,{base} de {stat} (+{n})
+affixe.passif_competence.nom,{base} de {competence} (+{n})
+affixe.passif_surchauffe.nom,{base} du mage (surchauffe ×{mult} %)
+affixe.passif_regen.nom,{base} vivace (régénération +{pct} % — en attente)
+affixe.passif_vitesse.nom,{base} du coureur (+{pct} % vitesse)
+affixe.passif_tag.nom,{base} de {tag}
+journal.loot,{nom} trouve : {objet}
+journal.equipe,{nom} équipe {objet}
+journal.rare,un {nom} RARE apparaît — {epithete} !
+epithete_rare.ancestral,Ancestral
+epithete_rare.dore,Doré
+epithete_rare.sans_ombre,Sans ombre
+epithete_rare.affame,Affamé
 journal.victoire,plus aucun hostile. Victoire.
 journal.defaite,tu es tombé. Tab : recommencer.
 module.a_l_impact.name,À l'impact

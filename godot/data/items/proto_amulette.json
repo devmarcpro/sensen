@@ -1,0 +1,11 @@
+{
+  "name_key": "item.proto_amulette.name",
+  "type": "bijou",
+  "equip_slot": "amulette",
+  "hands": 0,
+  "materiau": "or",
+  "tags": [
+    "bijou",
+    "prototype"
+  ]
+}

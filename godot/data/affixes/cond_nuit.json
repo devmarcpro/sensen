@@ -1,0 +1,26 @@
+{
+  "name_key": "affixe.cond_nuit.nom",
+  "famille": "conditionnel",
+  "slots_valides": [
+    "main_principale",
+    "casque",
+    "cuirasse",
+    "brassards",
+    "jambieres",
+    "bottes"
+  ],
+  "parametres": {
+    "pct": [
+      10,
+      20
+    ]
+  },
+  "effet": {
+    "type": "cond_nuit_vitesse"
+  },
+  "meilleur": {
+    "pct": "haut"
+  },
+  "inerte": true,
+  "tags": []
+}

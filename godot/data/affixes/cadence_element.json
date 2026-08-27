@@ -1,0 +1,22 @@
+{
+  "name_key": "affixe.cadence_element.nom",
+  "famille": "rythmique",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {
+    "n": [
+      2,
+      4
+    ],
+    "element": "element"
+  },
+  "effet": {
+    "type": "cadence_element"
+  },
+  "meilleur": {
+    "n": "bas"
+  },
+  "inerte": false,
+  "tags": []
+}

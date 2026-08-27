@@ -1,0 +1,35 @@
+{
+  "name_key": "affixe.passif_competence.nom",
+  "famille": "passif",
+  "slots_valides": [
+    "anneau",
+    "amulette",
+    "casque",
+    "cuirasse",
+    "brassards",
+    "jambieres",
+    "bottes"
+  ],
+  "parametres": {
+    "competence": [
+      "meditation",
+      "esquive",
+      "discretion",
+      "athletisme",
+      "lecture",
+      "leadership"
+    ],
+    "n": [
+      2,
+      6
+    ]
+  },
+  "effet": {
+    "type": "passif_competence"
+  },
+  "meilleur": {
+    "n": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

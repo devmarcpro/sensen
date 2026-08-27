@@ -1,0 +1,21 @@
+{
+  "name_key": "affixe.meca_allonge.nom",
+  "famille": "mecanique",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {
+    "n": [
+      1,
+      2
+    ]
+  },
+  "effet": {
+    "type": "meca_allonge"
+  },
+  "meilleur": {
+    "n": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

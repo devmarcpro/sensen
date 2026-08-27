@@ -1,0 +1,23 @@
+{
+  "name_key": "affixe.cadence_saignee.nom",
+  "famille": "rythmique",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {
+    "n": [
+      3,
+      6
+    ]
+  },
+  "effet": {
+    "type": "cadence_statut",
+    "statut": "saignement",
+    "duree_ticks": 30
+  },
+  "meilleur": {
+    "n": "bas"
+  },
+  "inerte": false,
+  "tags": []
+}

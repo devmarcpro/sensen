@@ -15,10 +15,10 @@ const RACINE_LOCALE := "res://locale/"
 const CATALOGUES: Array[String] = [
 	"modules", "creatures", "creature_actions", "ai_profiles", "functionalities",
 	"items", "status_effects", "prototype_arenas", "rigs", "tutorials",
-	"dungeon_rooms", "dungeon_connectors", "dungeon_themes",
+	"dungeon_rooms", "dungeon_connectors", "dungeon_themes", "affixes",
 ]
 ## Configurations (fichier unique à la racine de data/).
-const CONFIGS: Array[String] = ["combat_rules", "tile_contents", "wuxing", "palette_materiaux"]
+const CONFIGS: Array[String] = ["combat_rules", "tile_contents", "wuxing", "palette_materiaux", "loot_rules"]
 
 var catalogues: Dictionary = {}   # nom → { id → Dictionary }
 var configs: Dictionary = {}      # nom → Dictionary

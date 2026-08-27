@@ -140,7 +140,10 @@ func _sur_journal(cle: String, params: Dictionary) -> void:
 	var p := {}
 	for k in params.keys():
 		var v: Variant = params[k]
-		p[k] = tr(v) if (v is String and v.contains(".")) else v
+		if v is Dictionary and v.has("base"):
+			p[k] = nom_objet(v)
+		else:
+			p[k] = tr(v) if (v is String and v.contains(".")) else v
 	_log(tr(cle).format(p))
 
 
@@ -581,13 +584,13 @@ func _preview(j: Dictionary, cible: Dictionary) -> Array[String]:
 	var a_zero: bool = j.endurance <= 0
 	var vecteur := sim.vecteur_arme(arme)
 	var wx: Dictionary = sim._facteur_wuxing(j, cible, vecteur, sim.horloge_de(j).ticks)
-	var f := sim.regles.fourchette_arme(j.corps.stats, arme, fonct, false, zone.mult, armure, a_zero, wx.total, j.competences, vecteur)
-	var stat := int(j.corps.stats.force) / int(sim.regles.r.degats.stat_div)
+	var f := sim.regles.fourchette_arme(j.stats_eff, arme, fonct, false, zone.mult, armure, a_zero, wx.total, j.competences_eff, vecteur)
+	var stat := int(j.stats_eff.force) / int(sim.regles.r.degats.stat_div)
 	res.append("  " + tr("ui.preview").format({"nom": tr(arme.name_key), "des": fonct.degats_des,
 		"dur": "%.2f" % (float(arme.durete_base) / float(sim.regles.r.degats.durete_reference) * float(arme.qualite)),
 		"stat": stat, "zone": zone.zone, "mult": zone.mult, "armure": "%.1f" % armure,
 		"min": f.x, "max": f.y, "ticks": sim.regles.ticks_attaque(fonct, false)}))
-	var fl := sim.regles.fourchette_arme(j.corps.stats, arme, fonct, true, zone.mult, armure, a_zero, wx.total, j.competences, vecteur)
+	var fl := sim.regles.fourchette_arme(j.stats_eff, arme, fonct, true, zone.mult, armure, a_zero, wx.total, j.competences_eff, vecteur)
 	res.append("  " + tr("ui.preview.lourde").format({"lourde": "%d–%d" % [fl.x, fl.y], "ticks": sim.regles.ticks_attaque(fonct, true)}))
 	if not vecteur.is_empty():
 		var contre: Array[String] = []
@@ -669,6 +672,21 @@ func _sur_fin_de_combat(_nom: String) -> void:
 	ecran_fin.append(tr("ui.fin.suite"))
 	for piste in j.xp.keys():
 		j.xp[piste] = {}   # non persistée : l'écran la montre, la partie ne la garde pas (prototype)
+
+
+## Le nom d'un objet : « Épée de braise (une attaque sur 2 porte Feu) » — gabarit localisé,
+## paramètres tirés (Loot — affixes : NOM ET PROVENANCE).
+func nom_objet(n: Dictionary) -> String:
+	var base := tr(str(n.base))
+	if str(n.get("affixe", "")).is_empty():
+		return base
+	var p: Dictionary = n.params.duplicate()
+	for k in p.keys():
+		if k == "element":
+			p["epithete"] = tr("epithete." + str(p[k]))
+			p[k] = tr("element." + str(p[k]))
+	p["base"] = base
+	return tr("affixe." + str(n.affixe) + ".nom").format(p) + " [" + tr("rarete." + str(n.get("rarete", "commun"))) + "]"
 
 
 func _texte_chaine(e: Dictionary) -> String:

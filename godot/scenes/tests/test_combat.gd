@@ -26,6 +26,7 @@ func _ready() -> void:
 	test_niveaux()
 	test_paperdoll_et_tutoriels()
 	test_donjon()
+	test_loot()
 	test_arenes_autonomes()
 	if echecs == 0:
 		print("TESTS : tout passe")
@@ -951,3 +952,102 @@ func test_donjon() -> void:
 	s.horloge_monde.avancer(1)
 	verifier(s.intention(j.id, {"type": "descendre"}), "descendre depuis la cage d'escalier")
 	verifier(s.donjon.etage == 2 and joueur_de(s).sante == 30 and joueur_de(s).id == j.id, "étage 2, le même être avec ses PV")
+
+
+# ---------------------------------------------------------------- Étape 3 (a) : affixes générateurs, rareté, effets passifs
+
+func test_loot() -> void:
+	verifier(GameData.catalogues["affixes"].size() == 36, "36 gabarits d'affixes (6 familles × 6)")
+	var s := nouvelle_sim("plaine_au_talus")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1
+	# Rareté par profondeur : à l'étage 4, plus de rares qu'à l'étage 0
+	var rares0 := 0
+	var rares4 := 0
+	for i in 400:
+		if s.loot.rarete_pour(0, rng) in ["rare", "exceptionnel"]:
+			rares0 += 1
+		if s.loot.rarete_pour(4, rng) in ["rare", "exceptionnel"]:
+			rares4 += 1
+	verifier(rares4 > rares0 * 3, "la rareté suit la profondeur (%d vs %d rares+ sur 400)" % [rares0, rares4])
+	# Un objet exceptionnel : 2-3 affixes, 2-3 sertissures, un nom
+	var ex := s.generer_objet("proto_epee", 3, {"donjon": "ruine"}, "exceptionnel")
+	verifier(ex.affixes.size() >= 2 and ex.affixes.size() <= 3 and ex.sertissures.nombre >= 2 and ex.has("nom"), "exceptionnel : %d affixes, %d sertissures, nommé" % [ex.affixes.size(), ex.sertissures.nombre])
+	verifier(s.items.has(ex.uid) and ex.functionality == "epee" and "loot" in ex.tags, "l'instance rejoint le catalogue fusionné")
+	var com := s.generer_objet("proto_epee", 0, {}, "commun")
+	verifier(com.affixes.is_empty() and not com.has("nom"), "commun : aucun affixe, pas de nom")
+	# Les paramètres sont tirés dans leurs fourchettes
+	var ok := true
+	for i in 30:
+		var o := s.generer_objet("proto_dague", 2, {}, "rare", 2)
+		for ax in o.affixes:
+			var d: Dictionary = GameData.entree("affixes", ax.id)
+			for k in d.parametres.keys():
+				var spec: Variant = d.parametres[k]
+				if spec is Array and spec.size() == 2 and not (spec[0] is String):
+					if int(ax.params[k]) < int(spec[0]) or int(ax.params[k]) > int(spec[1]):
+						ok = false
+	verifier(ok, "chaque paramètre est dans sa fourchette")
+	# Effets passifs : un anneau +Force change la stat effective, pas la stat de base
+	var j := joueur_de(s)
+	var anneau := s.generer_objet("proto_anneau", 2, {}, "rare", 1)
+	anneau.affixes = [{"id": "passif_stat", "params": {"stat": "force", "n": 3}, "compteur": 0, "etat": {}}]
+	s.donner(j, anneau.uid)
+	s.horloge_monde.avancer(1)
+	var t: int = s.horloge_monde.ticks
+	verifier(s.intention(j.id, {"type": "equiper", "objet": anneau.uid}), "équiper l'anneau")
+	verifier(j.equipement.anneau_1 == anneau.uid and j.stats_eff.force == 15 and j.corps.stats.force == 12, "Force effective 15, base 12 (Résolveur : base + Σ add)")
+	verifier(j.compteur == t + int(s.regles.r.actions.objet), "équiper un bijou : 5 ticks")
+	# Endurance max +N et +1 segment de chaîne
+	var amulette := s.generer_objet("proto_amulette", 2, {}, "rare", 1)
+	amulette.affixes = [{"id": "meca_endurance_max", "params": {"n": 10}, "compteur": 0, "etat": {}}, {"id": "wuxing_segment", "params": {}, "compteur": 0, "etat": {}}]
+	s.donner(j, amulette.uid)
+	j.compteur = s.horloge_monde.ticks
+	s.horloge_monde.avancer(1)
+	s.intention(j.id, {"type": "equiper", "objet": amulette.uid})
+	verifier(j.endurance_max == 110 and j.chaine.capacite == 6, "endurance max 110, jauge à 6 segments")
+	# Affixe rythmique : « une attaque sur 2 porte Feu » — le 2e coup pose un segment Feu
+	var epee := s.generer_objet("proto_epee", 2, {}, "rare", 1)
+	epee.affixes = [{"id": "cadence_element", "params": {"n": 2, "element": "feu"}, "compteur": 0, "etat": {}}]
+	s.donner(j, epee.uid)
+	j.compteur = s.horloge_monde.ticks
+	s.horloge_monde.avancer(1)
+	verifier(s.intention(j.id, {"type": "equiper", "objet": epee.uid}), "équiper l'épée rare")
+	verifier(j.equipement.main_principale == epee.uid and "proto_epee" in j.sac, "l'ancienne épée va au sac")
+	var loup: Dictionary = s.entites["loup_2"]
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(1, 0)
+	s.grille.placer(loup.id, loup.pos)
+	loup.sante = 500
+	loup.sante_max = 500
+	s._engager_combat(j, loup)
+	var h := s.horloge_de(j)
+	for autre in ["loup_3", "loup_4"]:
+		s.entites[autre].compteur = 900
+	loup.compteur = 900
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false})
+	verifier(j.chaine.segments.back().element == "metal", "1er coup : Métal")
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false})
+	verifier(j.chaine.segments.back().element == "feu" and epee.affixes[0].compteur == 2, "2e coup : Feu (une attaque sur 2)")
+	# Vol de vie
+	epee.affixes = [{"id": "meca_vol_de_vie", "params": {"pct": 8}, "compteur": 0, "etat": {}}]
+	j.sante = 30
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false})
+	verifier(j.sante > 30, "vol de vie")
+	# Allonge : +1 portée
+	epee.affixes = [{"id": "meca_allonge", "params": {"n": 1}, "compteur": 0, "etat": {}}]
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(2, 0)
+	s.grille.placer(loup.id, loup.pos)
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false}), "épée +1 allonge : frappe à 2 tuiles")
+	# Nom généré côté client : gabarit + paramètres
+	var n := s.nom_objet(ex.uid)
+	verifier(n.affixe == ex.affixes[0].id and n.rarete == "exceptionnel", "le nom porte l'affixe et la rareté")

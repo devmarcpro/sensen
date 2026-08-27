@@ -1,0 +1,42 @@
+{
+  "_doc": "Règles du loot (configuration unique) — Loot — affixes, gemmes et rareté (grille de rareté, budget), Effets d'équipement types (0-1 effet armes/armures, 1-2 bijoux), Trésors et artefacts, Monstres rares (Ouvert — Tiers : un tier, ×2.5, 3 effets), Génération de donjon (profondeur).",
+  "raretes": {
+    "commun":       { "affixes": [0, 0], "sertissures": [0, 0], "budget": 0.0, "nom": false },
+    "inhabituel":   { "affixes": [1, 1], "sertissures": [0, 1], "budget": 0.0, "nom": false },
+    "rare":         { "affixes": [1, 2], "sertissures": [1, 2], "budget": 0.33, "nom": true },
+    "exceptionnel": { "affixes": [2, 3], "sertissures": [2, 3], "budget": 0.67, "nom": true, "sertissure_occupee": 1 }
+  },
+  "poids_par_profondeur": {
+    "_doc": "poids de tirage [commun, inhabituel, rare, exceptionnel] par étage ; au-delà du dernier, la dernière ligne",
+    "0": [70, 25, 5, 0],
+    "1": [60, 30, 9, 1],
+    "2": [45, 35, 16, 4],
+    "3": [30, 38, 24, 8],
+    "4": [20, 35, 30, 15]
+  },
+  "contenants": {
+    "_doc": "coffres par salle : tuiles de sol par coffre ; objets par coffre",
+    "tuiles_par_coffre": 120,
+    "objets_par_coffre": [1, 2],
+    "bases_armes": ["proto_dague", "proto_epee", "proto_masse", "proto_lance", "proto_arc", "proto_baton_magique"],
+    "bases_armures": ["proto_casque_cuir", "proto_cuirasse_cuir", "proto_cuirasse_mailles", "proto_casque_fer", "proto_jambieres_cuir"],
+    "bases_bijoux": ["proto_anneau", "proto_amulette"],
+    "poids_categories": { "armes": 4, "armures": 4, "bijoux": 2, "gemmes": 2, "grimoires": 2 }
+  },
+  "drops": {
+    "_doc": "Monstres rares : drop garanti au budget renforcé ; tout-venant : chance de drop",
+    "chance_tout_venant": 0.25,
+    "rare_affixes": 3,
+    "rare_rarete": "exceptionnel"
+  },
+  "monstres_rares": {
+    "_doc": "Ouvert — Tiers de monstres rares : un seul tier au lancement",
+    "chance_defaut": 0.02,
+    "mult_stats": 2.5,
+    "teinte": [0.95, 0.8, 0.2]
+  },
+  "gemmes": {
+    "_doc": "Ouvert — Fourchettes des gemmes : +15 par compétence toutes gemmes confondues",
+    "plafond_par_competence": 15
+  }
+}

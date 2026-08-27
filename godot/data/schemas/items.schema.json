@@ -12,7 +12,11 @@
         "bouclier",
         "outil",
         "consommable",
-        "munition"
+        "munition",
+        "bijou",
+        "gemme",
+        "grimoire",
+        "manuel"
       ]
     },
     "equip_slot": {

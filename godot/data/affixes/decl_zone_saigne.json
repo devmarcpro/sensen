@@ -1,0 +1,26 @@
+{
+  "name_key": "affixe.decl_zone_saigne.nom",
+  "famille": "declencheur",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {
+    "zone": [
+      "torse",
+      "jambes"
+    ],
+    "duree_ticks": [
+      20,
+      40
+    ]
+  },
+  "effet": {
+    "type": "decl_zone_statut",
+    "statut": "saignement"
+  },
+  "meilleur": {
+    "duree_ticks": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

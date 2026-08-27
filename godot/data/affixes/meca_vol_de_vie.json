@@ -1,0 +1,21 @@
+{
+  "name_key": "affixe.meca_vol_de_vie.nom",
+  "famille": "mecanique",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {
+    "pct": [
+      3,
+      8
+    ]
+  },
+  "effet": {
+    "type": "meca_vol_de_vie"
+  },
+  "meilleur": {
+    "pct": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

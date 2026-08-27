@@ -1,0 +1,26 @@
+{
+  "name_key": "affixe.cond_pv_bas.nom",
+  "famille": "conditionnel",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {
+    "pct_pv": [
+      30,
+      60
+    ],
+    "des": [
+      1,
+      3
+    ]
+  },
+  "effet": {
+    "type": "cond_pv"
+  },
+  "meilleur": {
+    "pct_pv": "haut",
+    "des": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

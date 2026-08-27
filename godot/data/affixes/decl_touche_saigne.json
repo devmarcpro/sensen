@@ -1,0 +1,31 @@
+{
+  "name_key": "affixe.decl_touche_saigne.nom",
+  "famille": "declencheur",
+  "slots_valides": [
+    "casque",
+    "cuirasse",
+    "brassards",
+    "jambieres",
+    "bottes"
+  ],
+  "parametres": {
+    "duree_ticks": [
+      20,
+      40
+    ],
+    "chance": [
+      15,
+      35
+    ]
+  },
+  "effet": {
+    "type": "decl_touche_statut",
+    "statut": "saignement"
+  },
+  "meilleur": {
+    "duree_ticks": "haut",
+    "chance": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

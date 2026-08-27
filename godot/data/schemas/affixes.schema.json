@@ -1,0 +1,53 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "famille",
+    "slots_valides",
+    "parametres",
+    "effet",
+    "meilleur",
+    "inerte",
+    "tags"
+  ],
+  "properties": {
+    "name_key": {
+      "type": "string"
+    },
+    "famille": {
+      "type": "string",
+      "enum": [
+        "rythmique",
+        "conditionnel",
+        "wuxing",
+        "declencheur",
+        "mecanique",
+        "passif"
+      ]
+    },
+    "slots_valides": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "parametres": {
+      "type": "object"
+    },
+    "effet": {
+      "type": "object",
+      "required": [
+        "type"
+      ]
+    },
+    "meilleur": {
+      "type": "object"
+    },
+    "inerte": {
+      "type": "boolean"
+    },
+    "tags": {
+      "type": "array"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name_key": "affixe.wuxing_purete.nom",
+  "famille": "wuxing",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {
+    "pct": [
+      10,
+      25
+    ]
+  },
+  "effet": {
+    "type": "wuxing_purification"
+  },
+  "meilleur": {
+    "pct": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

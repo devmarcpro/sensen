@@ -1,0 +1,31 @@
+{
+  "name_key": "affixe.cond_profondeur.nom",
+  "famille": "conditionnel",
+  "slots_valides": [
+    "main_principale",
+    "casque",
+    "cuirasse",
+    "brassards",
+    "jambieres",
+    "bottes"
+  ],
+  "parametres": {
+    "etage": [
+      2,
+      4
+    ],
+    "des": [
+      1,
+      2
+    ]
+  },
+  "effet": {
+    "type": "cond_profondeur"
+  },
+  "meilleur": {
+    "etage": "bas",
+    "des": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

@@ -1,0 +1,26 @@
+{
+  "name_key": "affixe.cadence_percant.nom",
+  "famille": "rythmique",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {
+    "n": [
+      4,
+      7
+    ],
+    "pct": [
+      50,
+      100
+    ]
+  },
+  "effet": {
+    "type": "cadence_percant"
+  },
+  "meilleur": {
+    "n": "bas",
+    "pct": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

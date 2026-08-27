@@ -1,0 +1,23 @@
+{
+  "name_key": "affixe.passif_surchauffe.nom",
+  "famille": "passif",
+  "slots_valides": [
+    "anneau",
+    "amulette"
+  ],
+  "parametres": {
+    "mult": [
+      60,
+      90
+    ]
+  },
+  "effet": {
+    "type": "passif_mecanique",
+    "mecanique": "surchauffe_mult"
+  },
+  "meilleur": {
+    "mult": "bas"
+  },
+  "inerte": false,
+  "tags": []
+}

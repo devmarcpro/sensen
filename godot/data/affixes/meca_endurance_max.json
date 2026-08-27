@@ -1,0 +1,27 @@
+{
+  "name_key": "affixe.meca_endurance_max.nom",
+  "famille": "mecanique",
+  "slots_valides": [
+    "casque",
+    "cuirasse",
+    "brassards",
+    "jambieres",
+    "bottes",
+    "anneau",
+    "amulette"
+  ],
+  "parametres": {
+    "n": [
+      5,
+      15
+    ]
+  },
+  "effet": {
+    "type": "meca_endurance_max"
+  },
+  "meilleur": {
+    "n": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

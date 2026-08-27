@@ -1,0 +1,24 @@
+{
+  "name_key": "affixe.passif_vitesse.nom",
+  "famille": "passif",
+  "slots_valides": [
+    "bottes",
+    "anneau",
+    "amulette"
+  ],
+  "parametres": {
+    "pct": [
+      5,
+      15
+    ]
+  },
+  "effet": {
+    "type": "passif_mecanique",
+    "mecanique": "vitesse_deplacement"
+  },
+  "meilleur": {
+    "pct": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

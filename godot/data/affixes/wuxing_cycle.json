@@ -1,0 +1,14 @@
+{
+  "name_key": "affixe.wuxing_cycle.nom",
+  "famille": "wuxing",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {},
+  "effet": {
+    "type": "wuxing_avance"
+  },
+  "meilleur": {},
+  "inerte": false,
+  "tags": []
+}

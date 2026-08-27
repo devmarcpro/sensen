@@ -1,0 +1,30 @@
+{
+  "name_key": "affixe.cadence_parade.nom",
+  "famille": "rythmique",
+  "slots_valides": [
+    "casque",
+    "cuirasse",
+    "brassards",
+    "jambieres",
+    "bottes"
+  ],
+  "parametres": {
+    "n": [
+      2,
+      4
+    ],
+    "endurance": [
+      4,
+      10
+    ]
+  },
+  "effet": {
+    "type": "cadence_garde_endurance"
+  },
+  "meilleur": {
+    "n": "bas",
+    "endurance": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

@@ -1,0 +1,26 @@
+{
+  "name_key": "affixe.cond_corruption.nom",
+  "famille": "conditionnel",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {
+    "seuil": [
+      40,
+      70
+    ],
+    "pct": [
+      15,
+      30
+    ]
+  },
+  "effet": {
+    "type": "cond_corruption"
+  },
+  "meilleur": {
+    "seuil": "bas",
+    "pct": "haut"
+  },
+  "inerte": true,
+  "tags": []
+}

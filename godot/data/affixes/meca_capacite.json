@@ -1,0 +1,27 @@
+{
+  "name_key": "affixe.meca_capacite.nom",
+  "famille": "mecanique",
+  "slots_valides": [
+    "casque",
+    "cuirasse",
+    "brassards",
+    "jambieres",
+    "bottes",
+    "anneau",
+    "amulette"
+  ],
+  "parametres": {
+    "kg": [
+      10,
+      30
+    ]
+  },
+  "effet": {
+    "type": "meca_capacite"
+  },
+  "meilleur": {
+    "kg": "haut"
+  },
+  "inerte": true,
+  "tags": []
+}

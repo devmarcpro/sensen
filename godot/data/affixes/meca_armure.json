@@ -1,0 +1,25 @@
+{
+  "name_key": "affixe.meca_armure.nom",
+  "famille": "mecanique",
+  "slots_valides": [
+    "casque",
+    "cuirasse",
+    "brassards",
+    "jambieres",
+    "bottes"
+  ],
+  "parametres": {
+    "n": [
+      1,
+      3
+    ]
+  },
+  "effet": {
+    "type": "meca_armure"
+  },
+  "meilleur": {
+    "n": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

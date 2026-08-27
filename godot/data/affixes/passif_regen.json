@@ -1,0 +1,23 @@
+{
+  "name_key": "affixe.passif_regen.nom",
+  "famille": "passif",
+  "slots_valides": [
+    "anneau",
+    "amulette"
+  ],
+  "parametres": {
+    "pct": [
+      50,
+      100
+    ]
+  },
+  "effet": {
+    "type": "passif_mecanique",
+    "mecanique": "regen_sante"
+  },
+  "meilleur": {
+    "pct": "haut"
+  },
+  "inerte": true,
+  "tags": []
+}

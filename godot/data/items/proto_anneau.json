@@ -1,0 +1,11 @@
+{
+  "name_key": "item.proto_anneau.name",
+  "type": "bijou",
+  "equip_slot": "anneau",
+  "hands": 0,
+  "materiau": "argent",
+  "tags": [
+    "bijou",
+    "prototype"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name_key": "affixe.cond_mana.nom",
+  "famille": "conditionnel",
+  "slots_valides": [
+    "main_principale",
+    "anneau",
+    "amulette"
+  ],
+  "parametres": {
+    "pct": [
+      15,
+      30
+    ]
+  },
+  "effet": {
+    "type": "cond_densite_mana_cout"
+  },
+  "meilleur": {
+    "pct": "haut"
+  },
+  "inerte": true,
+  "tags": []
+}

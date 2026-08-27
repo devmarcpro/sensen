@@ -1,0 +1,25 @@
+{
+  "name_key": "affixe.wuxing_domination.nom",
+  "famille": "wuxing",
+  "slots_valides": [
+    "casque",
+    "cuirasse",
+    "brassards",
+    "jambieres",
+    "bottes"
+  ],
+  "parametres": {
+    "pct": [
+      5,
+      15
+    ]
+  },
+  "effet": {
+    "type": "wuxing_defense"
+  },
+  "meilleur": {
+    "pct": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

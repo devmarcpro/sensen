@@ -26,6 +26,9 @@ Un objet porté peut avoir une liste d'**effets passifs** (champ `effects`, sch�
 
 **Résolution :** tous ces effets passent par le résolveur unique [[Résolveur de modificateurs]].
 
+> [!success] Codé le 2026-08-27
+> Les effets passifs du prototype sont des **affixes de famille `passif`** ([[Loot — affixes, gemmes et rareté]]) : `passif_stat`, `passif_competence`, `passif_mecanique`, `passif_tag`. `Etres.recalculer()` est le résolveur : stats et compétences effectives = base + Σ add (× qualité de l'objet), tags acquis, maxima recalculés et valeurs courantes clampées (plancher 1 PV). Le champ `effects` du schéma objet reste réservé à l'enchantement.
+
 ## Liens
 - **Dépend de** : [[Schéma objet et recette]], [[Qualité d'artisanat]], [[Data-driven design]]
 - **Alimente** : [[Effets d'équipement types]], [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Monstres rares]], [[Mana]]

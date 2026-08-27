@@ -1,0 +1,30 @@
+{
+  "name_key": "affixe.cadence_riposte.nom",
+  "famille": "rythmique",
+  "slots_valides": [
+    "casque",
+    "cuirasse",
+    "brassards",
+    "jambieres",
+    "bottes"
+  ],
+  "parametres": {
+    "n": [
+      3,
+      5
+    ],
+    "des": [
+      1,
+      2
+    ]
+  },
+  "effet": {
+    "type": "cadence_riposte_des"
+  },
+  "meilleur": {
+    "n": "bas",
+    "des": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

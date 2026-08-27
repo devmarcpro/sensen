@@ -41,6 +41,10 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 		"actions": def.get("actions", []).duplicate(),
 		"capacites": def.get("capacites", []).duplicate(true),   # séquences de modules assemblées
 		"competences": def.get("competences", {}).duplicate(),     # niveaux (Progression par l'usage) — modificateur de race au départ
+		"stats_eff": stats.duplicate(),                            # (base + Σ add) × Π mult — Résolveur de modificateurs
+		"competences_eff": def.get("competences", {}).duplicate(),
+		"sac": [],                                                  # uids des objets portés non équipés
+		"tags_acquis": [],                                          # grant_tag des effets passifs
 		"ai_profile": def.ai_profile,
 		"chain_gauge": def.get("chain_gauge", false),   # porteurs de jauge : joueur, élites, boss
 		"elements": def.get("elements"),
@@ -64,6 +68,59 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 		"tick_decision": -1,
 		"fuite": false,
 	}
+
+
+## Recalcule ce que l'équipement change (Résolveur de modificateurs : (base + Σ add) × Π mult) :
+## stats et compétences effectives (les affixes passifs des bijoux et armures), endurance max,
+## capacité de jauge, tags acquis. À appeler à l'instanciation et à chaque changement d'équipement.
+static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionary, regles: Regles) -> void:
+	var stats: Dictionary = e.corps.stats.duplicate()
+	var comp: Dictionary = e.competences.duplicate()
+	var tags: Array = []
+	var segments_bonus := 0
+	var endurance_bonus := 0
+	for slot: String in e.equipement.keys():
+		var it: Dictionary = items.get(e.equipement[slot], {})
+		var q := float(it.get("qualite", 1.0))
+		for ax: Dictionary in it.get("affixes", []):
+			var d: Dictionary = affixes_defs.get(ax.id, {})
+			if d.is_empty() or d.get("inerte", false):
+				continue
+			match str(d.effet.type):
+				"passif_stat":
+					stats[ax.params.stat] = int(stats.get(ax.params.stat, 0)) + roundi(float(ax.params.n) * q)
+				"passif_competence":
+					comp[ax.params.competence] = int(comp.get(ax.params.competence, 0)) + roundi(float(ax.params.n) * q)
+				"passif_tag":
+					tags.append(str(ax.params.tag))
+				"wuxing_segment":
+					segments_bonus += 1
+				"meca_endurance_max":
+					endurance_bonus += int(ax.params.n)
+	e.stats_eff = stats
+	e.competences_eff = comp
+	e.tags_acquis = tags
+	var end_max: int = int(regles.r.endurance.max) + endurance_bonus
+	e.endurance = mini(int(e.endurance), end_max) if int(e.endurance_max) != end_max else int(e.endurance)
+	e.endurance_max = end_max
+	# Les maxima dérivés des stats effectives ; la valeur courante est clampée, plancher 1 pour la santé.
+	e.sante_max = regles.sante_max(stats)
+	e.sante = clampi(int(e.sante), 1, int(e.sante_max)) if int(e.sante) > 0 else int(e.sante)
+	e.mana_max = regles.mana_max(stats)
+	e.mana = mini(int(e.mana), int(e.mana_max))
+	if e.has("chaine"):
+		e.chaine.capacite = int(GameData.config("wuxing").chaine.capacite_base) + segments_bonus
+
+
+## Les affixes actifs d'un type sur l'équipement de `e` (toutes pièces), avec la pièce porteuse.
+static func affixes_equipes(e: Dictionary, items: Dictionary, affixes_defs: Dictionary, type: String) -> Array[Dictionary]:
+	var res: Array[Dictionary] = []
+	for slot: String in e.equipement.keys():
+		var it: Dictionary = items.get(e.equipement[slot], {})
+		for ax in Loot.affixes_de_type(it, affixes_defs, type):
+			ax["piece"] = it
+			res.append(ax)
+	return res
 
 
 ## Les munitions du carquois équipé (Décision — Projectiles).

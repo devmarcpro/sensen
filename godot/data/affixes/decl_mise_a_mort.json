@@ -1,0 +1,26 @@
+{
+  "name_key": "affixe.decl_mise_a_mort.nom",
+  "famille": "declencheur",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {
+    "pct": [
+      8,
+      15
+    ],
+    "ticks": [
+      30,
+      60
+    ]
+  },
+  "effet": {
+    "type": "decl_mise_a_mort_hate"
+  },
+  "meilleur": {
+    "pct": "haut",
+    "ticks": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

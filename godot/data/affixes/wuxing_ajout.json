@@ -1,0 +1,27 @@
+{
+  "name_key": "affixe.wuxing_ajout.nom",
+  "famille": "wuxing",
+  "slots_valides": [
+    "main_principale",
+    "casque",
+    "cuirasse",
+    "brassards",
+    "jambieres",
+    "bottes"
+  ],
+  "parametres": {
+    "element": "element",
+    "pct": [
+      20,
+      40
+    ]
+  },
+  "effet": {
+    "type": "wuxing_ajout"
+  },
+  "meilleur": {
+    "pct": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

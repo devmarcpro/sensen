@@ -21,6 +21,9 @@ var fonctionnalites: Dictionary
 var actions_creatures: Dictionary
 var profils_ia: Dictionary
 var statuts_defs: Dictionary
+var affixes_defs: Dictionary
+var loot: Loot
+var objets: Dictionary = {}          # uid → instance générée (le catalogue reste dans `items`, fusionné)
 var dernier_combat: Dictionary = {}   # récapitulatif du dernier combat terminé (écran de fin)
 var glyphes: Array[Dictionary] = []   # couche d'overlay runtime : {pos, plan, source, fin} — jamais sauvegardée
 var differes: Array[Dictionary] = []  # charges différées : {tick, source, plan, pos}
@@ -40,11 +43,13 @@ func _init(p_graine: int) -> void:
 	capacites = Capacites.new(GameData.catalogues.get("modules", {}))
 	capacites.par_niveau = float(regles.r.progression.skill_factor_par_niveau)
 	capacites.plancher = float(regles.r.progression.ticks_plancher_module)
-	items = GameData.catalogues.get("items", {})
+	items = GameData.catalogues.get("items", {}).duplicate()   # catalogue + instances de loot (uid)
+	affixes_defs = GameData.catalogues.get("affixes", {})
 	fonctionnalites = GameData.catalogues.get("functionalities", {})
 	actions_creatures = GameData.catalogues.get("creature_actions", {})
 	profils_ia = GameData.catalogues.get("ai_profiles", {})
 	statuts_defs = GameData.catalogues.get("status_effects", {})
+	loot = Loot.new(GameData.config("loot_rules"), affixes_defs, GameData.catalogues.get("items", {}), GameData.config("wuxing").elements)
 
 
 # ---------------------------------------------------------------- mise en place
@@ -140,10 +145,67 @@ func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 	var e := Etres.instancier(id, GameData.entree("creatures", def_id), pos, controle, regles, items)
 	if e.chain_gauge:
 		e.chaine = wuxing.jauge_neuve()
+	Etres.recalculer(e, items, affixes_defs, regles)
 	entites[id] = e
 	ordre.append(id)
 	grille.placer(id, pos)
 	return e
+
+
+## Génère un objet de loot et l'enregistre (son uid devient une clé de `items`).
+func generer_objet(base_id: String, profondeur: int, provenance: Dictionary = {}, rarete: String = "", nb_affixes: int = -1) -> Dictionary:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "loot", objets.size(), base_id, profondeur])
+	var inst := loot.generer(base_id, profondeur, rng, provenance, rarete, nb_affixes)
+	if inst.is_empty():
+		return {}
+	objets[inst.uid] = inst
+	items[inst.uid] = inst
+	return inst
+
+
+## Donne un objet à un être (dans son sac).
+func donner(e: Dictionary, uid: String) -> void:
+	if items.has(uid) and not (uid in e.sac):
+		e.sac.append(uid)
+		EventBus.emettre(&"journal", [&"journal.loot", {"nom": e.name_key, "objet": nom_objet(uid)}])
+
+
+## Le nom affichable d'un objet : {"base": name_key, "affixe": id ou "", "params": {}} — le client formate.
+func nom_objet(uid: String) -> Dictionary:
+	var it: Dictionary = items.get(uid, {})
+	var nom: Dictionary = it.get("nom", {})
+	return {"base": it.get("name_key", uid), "affixe": nom.get("affixe", ""), "params": nom.get("params", {}), "rarete": it.get("rarete", "commun")}
+
+
+## Équiper un objet du sac : le slot de l'objet (anneau : premier libre des deux) ; l'ancien va au sac.
+func _equiper(e: Dictionary, uid: String, tick: int) -> bool:
+	if not (uid in e.sac) or not items.has(uid):
+		return false
+	var it: Dictionary = items[uid]
+	var slot := str(it.get("equip_slot", ""))
+	if slot.is_empty():
+		return false
+	if slot == "anneau":
+		slot = "anneau_1" if not e.equipement.has("anneau_1") else ("anneau_2" if not e.equipement.has("anneau_2") else "anneau_1")
+	if slot == "main_secondaire":
+		var principale: Dictionary = items.get(e.equipement.get("main_principale", ""), {})
+		if int(principale.get("hands", 1)) > 1:
+			return false
+	e.sac.erase(uid)
+	if e.equipement.has(slot):
+		e.sac.append(e.equipement[slot])
+	e.equipement[slot] = uid
+	if slot == "main_principale" and int(it.get("hands", 1)) > 1 and e.equipement.has("main_secondaire"):
+		e.sac.append(e.equipement.main_secondaire)
+		e.equipement.erase("main_secondaire")
+	if not (uid in e.ratelier) and it.get("type", "") in ["arme", "bouclier"]:
+		e.ratelier.append(uid)
+	Etres.recalculer(e, items, affixes_defs, regles)
+	_quitter_garde(e)
+	e.compteur = tick + int(regles.r.actions.objet if it.get("type", "") != "arme" else regles.r.actions.changer_arme)
+	EventBus.emettre(&"journal", [&"journal.equipe", {"nom": e.name_key, "objet": nom_objet(uid)}])
+	return true
 
 
 func vivants() -> Array[Dictionary]:
@@ -312,6 +374,8 @@ func intention(id: String, i: Dictionary) -> bool:
 		"descendre":
 			if _descendre(e):
 				return true   # la grille a changé : plus rien à finir sur l'ancienne
+		"equiper":
+			ok = _equiper(e, str(i.get("objet", "")), h.ticks)
 	if ok:
 		attente.erase(id)
 		_fin_de_pas(e.horloge)
@@ -340,7 +404,7 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	e.orientation = vers - e.pos
 	e.pos = vers
 	grille.placer(e.id, vers)
-	e.compteur = tick + _ticks_avec_statuts(e, regles.ticks_deplacement(cout, e.competences, en_combat(e)))
+	e.compteur = tick + _ticks_avec_statuts(e, regles.ticks_deplacement(cout, e.competences_eff, en_combat(e)))
 	_declencher_glyphe(e, vers)
 	EventBus.emettre(&"journal", [&"journal.deplacement", {"nom": e.name_key, "cout": e.compteur - tick}])
 	if chute > 0:
@@ -390,6 +454,7 @@ func _changer_arme(e: Dictionary, item_id: String, tick: int) -> bool:
 		e.equipement["main_principale"] = item_id
 		if int(item.get("hands", 1)) > 1:
 			e.equipement.erase("main_secondaire")
+	Etres.recalculer(e, items, affixes_defs, regles)
 	_quitter_garde(e)
 	e.compteur = tick + int(regles.r.actions.changer_arme)
 	EventBus.emettre(&"journal", [&"journal.changer_arme", {"nom": e.name_key, "objet": item.name_key, "ticks": regles.r.actions.changer_arme}])
@@ -402,7 +467,7 @@ func _attaquer_arme(e: Dictionary, cible: Dictionary, lourde: bool, tick: int) -
 	if arme.is_empty() or not cible.vivant:
 		return false
 	var fonct: Dictionary = fonctionnalites.get(arme.functionality, {})
-	if not _cible_atteignable(e, cible, regles.portee_de(fonct), true):
+	if not _cible_atteignable(e, cible, _portee_effective(e, arme, fonct), true):
 		return false
 	if est_distance(fonct):
 		# Projectile (Décision — Projectiles) : munitions, trajectoire réelle, tir refusé si un allié masque.
@@ -467,16 +532,109 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 	if est_distance(fonct):
 		e.munitions -= 1
 		e.munitions_tirees += 1
-	var vecteur := vecteur_arme(arme)
-	var d := regles.degats_arme(e.corps.stats, arme, fonct, des, lourde, a_zero, 0, e.competences, vecteur)
+	# Affixes de l'arme (Loot — affixes) : vecteur, dés, armure ignorée, multiplicateurs — avant le jet.
+	var ax := _affixes_offensifs(e, arme, cible)
+	var vecteur: Dictionary = ax.vecteur
+	var d := regles.degats_arme(e.stats_eff, arme, fonct, des, lourde, a_zero, int(ax.des), e.competences_eff, vecteur)
 	var wx := _facteur_wuxing(e, cible, vecteur, tick_de(e))
-	var res := _resoudre_coup(e, cible, d.bruts * wx.total * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur)
+	var res := _resoudre_coup(e, cible, d.bruts * wx.total * float(ax.mult) * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur, float(ax.ignore_armure))
 	res.merge(wx)
 	res["competence"] = str(fonct.get("combat_skill", ""))
 	var cle := &"journal.attaque_lourde" if lourde else &"journal.attaque"
 	EventBus.emettre(&"journal", [cle, {"att": e.name_key, "def": cible.name_key, "zone": res.zone, "degats": res.degats, "ticks": ticks}])
 	_appliquer_degats(cible, res.degats, e.id, res)
+	_affixes_apres_coup(e, arme, cible, res)
 	_poser_segment(e, vecteur, tick_de(e))
+
+
+## Portée de l'arme, allongée par l'affixe « +N allonge ».
+func _portee_effective(e: Dictionary, arme: Dictionary, fonct: Dictionary) -> Vector2i:
+	var p := regles.portee_de(fonct)
+	for ax in Loot.affixes_de_type(arme, affixes_defs, "meca_allonge"):
+		p.y += int(ax.params.n)
+	return p
+
+
+## Ce que les affixes de l'arme changent AVANT le jet : {vecteur, des, mult, ignore_armure}.
+## Les compteurs rythmiques avancent ici (une attaque = un cran, jamais par cible).
+func _affixes_offensifs(e: Dictionary, arme: Dictionary, cible: Dictionary) -> Dictionary:
+	var r := {"vecteur": vecteur_arme(arme), "des": 0, "mult": 1.0, "ignore_armure": 0.0}
+	if arme.get("affixes", []).is_empty():
+		return r
+	for ax: Dictionary in arme.affixes:
+		var d: Dictionary = affixes_defs.get(ax.id, {})
+		if d.is_empty() or d.get("inerte", false):
+			continue
+		var p: Dictionary = ax.params
+		match str(d.effet.type):
+			"cadence_element", "cadence_des", "cadence_percant", "cadence_statut":
+				ax.compteur = int(ax.compteur) + 1
+				if int(ax.compteur) % int(p.n) == 0:
+					match str(d.effet.type):
+						"cadence_element": r.vecteur = {str(p.element): 1.0}
+						"cadence_des": r.des += int(p.des)
+						"cadence_percant": r.ignore_armure = maxf(r.ignore_armure, float(p.pct) / 100.0)
+						"cadence_statut": ax.etat["declenche"] = true
+			"cond_pv":
+				if float(e.sante) / float(e.sante_max) * 100.0 < float(p.pct_pv):
+					r.des += int(p.des)
+			"cond_element_cible":
+				if wuxing.dominante(cible.get("elements")) == str(p.element):
+					r.mult *= 1.0 + float(p.pct) / 100.0
+			"cond_profondeur":
+				if not donjon.is_empty() and int(donjon.etage) >= int(p.etage):
+					r.des += int(p.des)
+			"wuxing_avance":
+				# L'élément avance dans le cycle d'engendrement à chaque coup touché (état sur l'objet).
+				var courant: String = str(ax.etat.get("element", wuxing.dominante(r.vecteur)))
+				if not courant.is_empty():
+					r.vecteur = {courant: 1.0}
+					ax.etat["element"] = str(wuxing.w.engendre[courant])
+			"wuxing_ajout":
+				r.vecteur = _ajouter_element(r.vecteur, str(p.element), float(p.pct) / 100.0)
+			"wuxing_purification":
+				var dom := wuxing.dominante(r.vecteur)
+				if not dom.is_empty():
+					r.vecteur = _ajouter_element(r.vecteur, dom, float(p.pct) / 100.0)
+	return r
+
+
+## Modificateur d'affinité AJOUT puis normalisation à somme 1 (Modificateurs d'affinité).
+func _ajouter_element(v: Dictionary, element: String, part: float) -> Dictionary:
+	var res := v.duplicate()
+	res[element] = float(res.get(element, 0.0)) + part
+	var total := 0.0
+	for k in res.keys():
+		total += float(res[k])
+	if total <= 0.0:
+		return res
+	for k in res.keys():
+		res[k] = float(res[k]) / total
+	return res
+
+
+## Ce que les affixes de l'arme font APRÈS le coup : vol de vie, statuts par zone ou cadence,
+## hâte à la mise à mort.
+func _affixes_apres_coup(e: Dictionary, arme: Dictionary, cible: Dictionary, res: Dictionary) -> void:
+	for ax: Dictionary in arme.get("affixes", []):
+		var d: Dictionary = affixes_defs.get(ax.id, {})
+		if d.is_empty() or d.get("inerte", false):
+			continue
+		var p: Dictionary = ax.params
+		match str(d.effet.type):
+			"meca_vol_de_vie":
+				e.sante = mini(e.sante_max, e.sante + roundi(float(res.degats) * float(p.pct) / 100.0))
+			"decl_zone_statut":
+				if res.zone == str(p.zone) and cible.vivant:
+					appliquer_statut(cible, str(d.effet.statut), int(p.duree_ticks), e.id)
+			"cadence_statut":
+				if ax.etat.get("declenche", false):
+					ax.etat.erase("declenche")
+					if cible.vivant:
+						appliquer_statut(cible, str(d.effet.statut), int(d.effet.get("duree_ticks", 30)), e.id)
+			"decl_mise_a_mort_hate":
+				if not cible.vivant:
+					appliquer_statut(e, "hate", int(p.ticks), e.id)
 
 
 func tick_de(e: Dictionary) -> int:
@@ -496,7 +654,11 @@ func multiplicateur_domination(v_att: Dictionary, cible: Dictionary, zone: Strin
 		return {"mult": 1.0, "contre": {}, "table": "neutre"}
 	var piece := Etres.piece_zone(cible, zone, items)
 	if piece.has("elements") and piece.elements is Dictionary and not piece.elements.is_empty():
-		return {"mult": wuxing.multiplicateur(v_att, piece.elements, "defensif"), "contre": piece.elements, "table": "defensif"}
+		var m := wuxing.multiplicateur(v_att, piece.elements, "defensif")
+		for ax in Loot.affixes_de_type(piece, affixes_defs, "wuxing_defense"):
+			if m < 1.0:
+				m = 1.0 - (1.0 - m) * (1.0 + float(ax.params.pct) / 100.0)   # un bon matchup défensif l'est un peu plus
+		return {"mult": m, "contre": piece.elements, "table": "defensif"}
 	if cible.elements is Dictionary and not cible.elements.is_empty():
 		return {"mult": wuxing.multiplicateur(v_att, cible.elements, "offensif"), "contre": cible.elements, "table": "offensif"}
 	return {"mult": 1.0, "contre": {}, "table": "neutre"}
@@ -532,10 +694,13 @@ func _poser_segment(e: Dictionary, v_att: Dictionary, tick: int) -> void:
 
 
 ## Un coup contre une cible : zone par dénivelé, garde (frontale / bouclier), armure de zone.
-func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degats: String, lourde: bool, element: Variant) -> Dictionary:
+func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degats: String, lourde: bool, element: Variant, ignore_armure: float = 0.0) -> Dictionary:
 	var zone: Dictionary = regles.zone_de_coup(grille.h(att.pos), grille.h(cible.pos))
 	var piece := Etres.piece_zone(cible, zone.zone, items)
 	var armure := regles.armure_piece(piece, type_degats) + Etres.add_statuts(cible, "armure", statuts_defs)
+	for ax in Etres.affixes_equipes(cible, items, affixes_defs, "meca_armure"):
+		armure += float(ax.params.n)
+	armure *= 1.0 - ignore_armure
 	var direction := Regles.direction_relative(cible.orientation, att.pos - cible.pos)
 	var bouclier := Etres.a_bouclier(cible, items)
 	var tient: bool = cible.garde and regles.garde_tient(direction, bouclier, lourde) and not Etres.bloque_statuts(cible, "garde", statuts_defs)
@@ -544,13 +709,26 @@ func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degat
 	if cible.garde:
 		if tient:
 			var cout := regles.cout_garde_impact(sans_garde, bouclier)
+			for ax in Etres.affixes_equipes(cible, items, affixes_defs, "meca_garde_endurance"):
+				cout = roundi(float(cout) * (1.0 - float(ax.params.pct) / 100.0))   # garde −N % d'endurance
 			cible.endurance = maxi(0, cible.endurance - cout)
+			for ax in Etres.affixes_equipes(cible, items, affixes_defs, "decl_parade_endurance"):
+				cible.endurance = mini(cible.endurance_max, cible.endurance + int(ax.params.endurance))
+			for ax in Etres.affixes_equipes(cible, items, affixes_defs, "cadence_garde_endurance"):
+				ax.instance.compteur = int(ax.instance.compteur) + 1
+				if int(ax.instance.compteur) % int(ax.params.n) == 0:
+					cible.endurance = mini(cible.endurance_max, cible.endurance + int(ax.params.endurance))
 			_declencher(cible, "parade", att.pos)
 			EventBus.emettre(&"journal", [&"journal.garde_tient", {"nom": cible.name_key, "avant": sans_garde, "apres": degats}])
 			if cible.endurance <= 0:
 				cible.garde = false
 		elif lourde and not bouclier:
 			cible.garde = false   # la lourde brise la garde
+	# Inversés en armure : « quand le porteur est touché » (Loot — affixes, déclencheurs)
+	if att.has("id"):
+		for ax in Etres.affixes_equipes(cible, items, affixes_defs, "decl_touche_statut"):
+			if des.reel() * 100.0 < float(ax.params.chance):
+				appliquer_statut(att, str(ax.effet.statut), int(ax.params.duree_ticks), cible.id)
 	return {"zone": zone.zone, "mult": zone.mult, "armure": armure, "direction": direction,
 		"garde": tient, "degats": degats, "bruts": bruts, "type": type_degats, "element": element,
 		"construction": str(piece.get("construction", "")), "evites": maxi(0, roundi(bruts * zone.mult) - degats)}
@@ -691,7 +869,7 @@ func _resoudre_action_engagee(e: Dictionary, a: Dictionary) -> void:
 		"arme":
 			var arme := Etres.arme(e, items)
 			var fonct: Dictionary = fonctionnalites.get(arme.get("functionality", ""), {})
-			if cible.is_empty() or not cible.vivant or not _cible_atteignable(e, cible, regles.portee_de(fonct), true):
+			if cible.is_empty() or not cible.vivant or not _cible_atteignable(e, cible, _portee_effective(e, arme, fonct), true):
 				return   # la cible s'est dérobée : le coup passe dans le vide
 			_frapper_arme(e, cible, arme, fonct, a.lourde, a.ticks)
 		"creature":
@@ -745,7 +923,7 @@ func _executer_action_creature(e: Dictionary, action: Dictionary, cible: Diction
 					if not c.vivant:
 						continue
 					var bonus := _bonus_des_conditions(e, c, action)
-					var d := regles.degats_action(e.corps.stats, action, des, a_zero, bonus)
+					var d := regles.degats_action(e.stats_eff, action, des, a_zero, bonus)
 					var wx := _facteur_wuxing(e, c, action.elements, tick_de(e))
 					var res := _resoudre_coup(e, c, d.bruts * wx.total * Etres.mult_statuts(e, "degats", statuts_defs), str(action.get("type_degats", "contondant")), false, action.elements)
 					res.merge(wx)
@@ -870,7 +1048,7 @@ func plan_capacite(e: Dictionary, index: int) -> Dictionary:
 	var arme := Etres.arme(e, items)
 	var fonct: Dictionary = fonctionnalites.get(arme.get("functionality", ""), {})
 	var ticks_arme := regles.ticks_attaque(fonct, false) if not fonct.is_empty() else int(regles.r.actions.attaque_base)
-	var plan := capacites.assembler(caps[index].modules, ticks_arme, fonct.get("degats_des", "1d4"), vecteur_arme(arme), e.competences)
+	var plan := capacites.assembler(caps[index].modules, ticks_arme, fonct.get("degats_des", "1d4"), vecteur_arme(arme), e.competences_eff)
 	plan["id"] = caps[index].id
 	plan["name_key"] = caps[index].get("name_key", "")
 	plan["arme"] = arme
@@ -1268,7 +1446,7 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 	var d: Dictionary
 	var type_degats := "magique"
 	if arme_noyau and not plan.arme.is_empty():
-		d = regles.degats_arme(e.corps.stats, plan.arme, plan.fonct, des, false, a_zero, int(plan.des_bonus), e.competences, plan.elements)
+		d = regles.degats_arme(e.stats_eff, plan.arme, plan.fonct, des, false, a_zero, int(plan.des_bonus), e.competences_eff, plan.elements)
 		type_degats = str(plan.fonct.type_degats)
 	else:
 		var jet := des.jet(plan.des, int(plan.des_bonus))

@@ -1,0 +1,30 @@
+{
+  "name_key": "affixe.passif_stat.nom",
+  "famille": "passif",
+  "slots_valides": [
+    "anneau",
+    "amulette"
+  ],
+  "parametres": {
+    "stat": [
+      "force",
+      "dexterite",
+      "endurance",
+      "volonte",
+      "perception",
+      "charisme"
+    ],
+    "n": [
+      1,
+      3
+    ]
+  },
+  "effet": {
+    "type": "passif_stat"
+  },
+  "meilleur": {
+    "n": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

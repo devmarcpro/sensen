@@ -1,0 +1,26 @@
+{
+  "name_key": "affixe.cadence_des.nom",
+  "famille": "rythmique",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {
+    "n": [
+      3,
+      5
+    ],
+    "des": [
+      1,
+      3
+    ]
+  },
+  "effet": {
+    "type": "cadence_des"
+  },
+  "meilleur": {
+    "n": "bas",
+    "des": "haut"
+  },
+  "inerte": false,
+  "tags": []
+}

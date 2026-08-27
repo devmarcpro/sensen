@@ -1,0 +1,22 @@
+{
+  "name_key": "affixe.passif_tag.nom",
+  "famille": "passif",
+  "slots_valides": [
+    "anneau",
+    "amulette"
+  ],
+  "parametres": {
+    "tag": [
+      "vision_nocturne",
+      "pas_silencieux",
+      "immunite_poison",
+      "detection_tresors"
+    ]
+  },
+  "effet": {
+    "type": "passif_tag"
+  },
+  "meilleur": {},
+  "inerte": false,
+  "tags": []
+}
