@@ -28,6 +28,7 @@ func _ready() -> void:
 	test_donjon()
 	test_loot()
 	test_coffres_et_rares()
+	test_gemmes_et_livres()
 	test_arenes_autonomes()
 	if echecs == 0:
 		print("TESTS : tout passe")
@@ -1096,3 +1097,74 @@ func test_coffres_et_rares() -> void:
 	g._appliquer_degats(bandit, 5, joueur_de(g).id, {})
 	var idx3 := g.grille.idx(bandit.pos)
 	verifier(g.contenants.has(idx3) and bandit.equipement.main_principale in g.contenants[idx3], "le mort lâche ce qu'il portait")
+
+
+# ---------------------------------------------------------------- Étape 3 (c) : gemmes et sertissage, grimoires et lecture
+
+func test_gemmes_et_livres() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var rubis := s.generer_objet("gemme_rubis", 3)
+	verifier(rubis.has("taille") and rubis.taille.type in ["degats_element", "competence", "affinite"], "une gemme est taillée à la génération (%s)" % rubis.taille.type)
+	# Sertir dans l'épée tenue : la taille en compétence est plafonnée à +15 toutes gemmes confondues
+	var epee := s.generer_objet("proto_epee", 3, {}, "exceptionnel")
+	epee.sertissures.nombre = 3
+	s.donner(j, epee.uid)
+	s.horloge_monde.avancer(1)
+	s.intention(j.id, {"type": "equiper", "objet": epee.uid})
+	var g1 := s.generer_objet("gemme_onyx", 3)
+	g1.taille = {"type": "competence", "competence": "magie_metal", "valeur": 10, "qualite": 1.5}
+	var g2 := s.generer_objet("gemme_onyx", 3)
+	g2.taille = {"type": "competence", "competence": "magie_metal", "valeur": 10, "qualite": 1.5}
+	var g3 := s.generer_objet("gemme_rubis", 3)
+	g3.taille = {"type": "degats_element", "element": "metal", "valeur": 3, "qualite": 1.5}
+	for g in [g1, g2, g3]:
+		s.donner(j, g.uid)
+	for g in [g1, g2, g3]:
+		j.compteur = s.horloge_monde.ticks
+		s.horloge_monde.avancer(1)
+		verifier(s.intention(j.id, {"type": "sertir", "objet": epee.uid, "gemme": g.uid}), "sertir " + g.base)
+	verifier(epee.sertissures.contenu.size() == 3 and j.sac.size() == 1, "trois gemmes serties, l'ancienne épée reste au sac")
+	verifier(int(j.competences_eff.get("magie_metal", 0)) == 15, "plafond : +15 par compétence toutes gemmes confondues (10 + 10 → 15)")
+	verifier(int(j.degats_element.get("metal", 0)) == 3, "+3 dégâts Métal plats")
+	j.compteur = s.horloge_monde.ticks
+	s.horloge_monde.avancer(1)
+	var g4 := s.generer_objet("gemme_saphir", 3)
+	s.donner(j, g4.uid)
+	verifier(not s.intention(j.id, {"type": "sertir", "objet": epee.uid, "gemme": g4.uid}), "plus d'emplacement : refusé")
+	# Affinité : la taille déplace le vecteur de l'arme (ajout normalisé)
+	var g5 := s.generer_objet("gemme_rubis", 3)
+	g5.taille = {"type": "affinite", "element": "feu", "valeur": 0.28, "qualite": 2.0}
+	epee.sertissures.contenu[2] = g5.uid
+	epee.affixes = []   # les affixes de l'épée exceptionnelle pourraient aussi toucher le vecteur
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	var ax := s._affixes_offensifs(j, epee, s.entites["loup_2"])
+	verifier(is_equal_approx(float(ax.vecteur.feu), 0.28 / 1.28) and is_equal_approx(float(ax.vecteur.metal), 1.0 / 1.28), "affinité Feu +0.28 : vecteur {métal 0.78, feu 0.22}")
+	# Livres : un grimoire tire domaine, difficulté et modules ; la lecture réussit avec Lecture haute
+	var livre := s.generer_objet("grimoire", 2)
+	verifier(livre.modules.size() >= 2 and livre.difficulte == 10 + 2 * 10 and not livre.domaine.is_empty(), "grimoire : %d modules, difficulté 30, domaine %s" % [livre.modules.size(), livre.domaine])
+	var manuel := s.generer_objet("manuel", 1)
+	verifier(manuel.modules.size() >= 2 and manuel.domaine in ["frappes", "postures", "techniques", "maitrise"], "manuel : domaine %s" % manuel.domaine)
+	j.competences["lecture"] = 100
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	s.donner(j, livre.uid)
+	j.compteur = s.horloge_monde.ticks
+	s.horloge_monde.avancer(1)
+	var lus := [0]
+	EventBus.book_read.connect(func(_id: String, _l: String, _ok: bool) -> void: lus[0] += 1)
+	verifier(s.intention(j.id, {"type": "lire", "objet": livre.uid}), "lire le grimoire")
+	verifier(not (livre.uid in j.sac) and j.modules_connus.size() == livre.modules.size() and lus[0] == 1, "Lecture 100 : tous les modules appris, livre consommé, book_read")
+	# Échec forcé : Lecture 0, difficulté 200 → DD 110, impossible ; effet d'échec, livre perdu
+	j.competences["lecture"] = 0
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	var dur := s.generer_objet("grimoire", 4)
+	dur.difficulte = 200
+	s.donner(j, dur.uid)
+	var pv: int = j.sante
+	var mana: int = j.mana
+	j.compteur = s.horloge_monde.ticks
+	s.horloge_monde.avancer(1)
+	var connus_avant: int = j.modules_connus.size()
+	verifier(s.intention(j.id, {"type": "lire", "objet": dur.uid}), "tenter un livre impossible")
+	verifier(not (dur.uid in j.sac) and j.modules_connus.size() == connus_avant, "échec : livre perdu, rien d'appris")
+	verifier(int(j.xp.competence.get("lecture", 0)) == 30 * 5 + 200 * 2, "XP de Lecture : difficulté × 5 (succès) + × 2 (échec)")

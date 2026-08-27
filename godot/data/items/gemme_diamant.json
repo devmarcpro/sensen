@@ -1,0 +1,21 @@
+{
+  "name_key": "item.gemme_diamant.name",
+  "type": "gemme",
+  "equip_slot": "sertissure",
+  "hands": 0,
+  "materiau": "diamant",
+  "element": null,
+  "tailles": [
+    {
+      "type": "qualite",
+      "fourchette": [
+        0.03,
+        0.08
+      ]
+    }
+  ],
+  "tags": [
+    "gemme",
+    "prototype"
+  ]
+}

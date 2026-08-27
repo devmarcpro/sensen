@@ -1,0 +1,37 @@
+{
+  "name_key": "item.gemme_grenat.name",
+  "type": "gemme",
+  "equip_slot": "sertissure",
+  "hands": 0,
+  "materiau": "grenat",
+  "element": null,
+  "tailles": [
+    {
+      "type": "sante_max",
+      "fourchette": [
+        5,
+        15
+      ]
+    },
+    {
+      "type": "stat",
+      "stat": "force",
+      "fourchette": [
+        1,
+        3
+      ]
+    },
+    {
+      "type": "stat",
+      "stat": "endurance",
+      "fourchette": [
+        1,
+        3
+      ]
+    }
+  ],
+  "tags": [
+    "gemme",
+    "prototype"
+  ]
+}

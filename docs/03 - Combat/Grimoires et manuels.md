@@ -30,6 +30,9 @@ Les modules ne se craftent pas : ils s'obtiennent en lisant des livres à usage 
 
 **Aide de mobilier ([[Meubles]]) :** la Bibliothèque stocke les livres et donne **+5 % de réussite de lecture** à proximité.
 
+> [!success] Codé le 2026-08-27
+> Deux bases (`items/grimoire.json`, `items/manuel.json`) que le générateur de loot **compose** : domaine tiré (grimoires : les 5 éléments + arcane + vie, mappés au Wu Xing ; manuels : frappes / postures / techniques / maîtrise), difficulté `10 + étage × 10`, 2-4 modules du catalogue filtrés par le domaine (noyaux à mana de l'élément, noyaux neutres pour l'arcane ; frappes = noyaux à endurance, postures = conditions, techniques = déclencheurs et liaisons, maîtrise = modificateurs et formes — `loot_rules.livres`). Lire (`L`, 5 ticks) applique le jet de [[Lecture des livres]] ; les modules appris rejoignent `modules_connus` de l'être. L'**écran d'assemblage** qui les mettra en slots est l'étape 4 : d'ici là les capacités restent déclarées dans la fiche.
+
 ## Liens
 - **Dépend de** : [[Vocabulaire des modules — six axes]], [[Donjons — structure et intégration]]
 - **Alimente** : [[Lecture des livres]], [[Modules]], [[Structure compétences-modules-slots]]

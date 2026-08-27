@@ -219,6 +219,43 @@ tile_content.coffre.name,Coffre
 tile_content.butin.name,Butin
 journal.rien_a_ramasser,rien à ramasser ici
 ui.sac,"sac : {liste} (⇧chiffre : équiper · R : ramasser)"
+item.gemme_rubis.name,Rubis
+item.gemme_saphir.name,Saphir
+item.gemme_emeraude.name,Émeraude
+item.gemme_topaze.name,Topaze
+item.gemme_onyx.name,Onyx
+item.gemme_diamant.name,Diamant
+item.gemme_amethyste.name,Améthyste
+item.gemme_grenat.name,Grenat
+item.gemme_opale.name,Opale
+item.gemme_ambre.name,Ambre
+item.grimoire.name,Grimoire
+item.manuel.name,Manuel
+taille.degats_element,dégâts élémentaires +
+taille.competence,compétence +
+taille.affinite,affinité +
+taille.qualite,qualité +
+taille.mana_max,mana max +
+taille.sante_max,PV max +
+taille.endurance_max,endurance max +
+taille.duree_statuts,durée des statuts +
+taille.stat,stat +
+domaine.feu,de Feu
+domaine.eau,d'Eau et de Glace
+domaine.terre,de Terre
+domaine.metal,de Métal
+domaine.bois,de Foudre et de Vie
+domaine.arcane,d'Arcane
+domaine.vie,de Vie
+domaine.frappes,des Frappes
+domaine.postures,des Postures
+domaine.techniques,des Techniques
+domaine.maitrise,de Maîtrise
+journal.serti,{nom} sertit {gemme} dans {objet}
+journal.pas_de_sertissure,pas d'emplacement libre (ou pas de gemme)
+journal.lecture_reussie,{nom} lit {livre} : {n} module(s) appris
+journal.lecture_echouee,"{nom} échoue à lire {livre} — le livre est perdu ({grave})"
+ui.modules_connus,modules connus {n} (L : lire · T : sertir)
 journal.victoire,plus aucun hostile. Victoire.
 journal.defaite,tu es tombé. Tab : recommencer.
 module.a_l_impact.name,À l'impact

@@ -18,7 +18,7 @@ const CATALOGUES: Array[String] = [
 	"dungeon_rooms", "dungeon_connectors", "dungeon_themes", "affixes",
 ]
 ## Configurations (fichier unique à la racine de data/).
-const CONFIGS: Array[String] = ["combat_rules", "tile_contents", "wuxing", "palette_materiaux", "loot_rules", "rare_epithets"]
+const CONFIGS: Array[String] = ["combat_rules", "tile_contents", "wuxing", "palette_materiaux", "loot_rules", "rare_epithets", "reading_failures"]
 
 var catalogues: Dictionary = {}   # nom → { id → Dictionary }
 var configs: Dictionary = {}      # nom → Dictionary

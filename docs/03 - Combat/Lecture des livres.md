@@ -26,6 +26,9 @@ Le livre est consommé dans tous les cas (section 5).
 
 **Statuts déclenchés en cas d'échec :** Étourdi, Confusion ([[Statuts]]).
 
+> [!success] Codé le 2026-08-27
+> `1d20 + N_lecture/2 + Perception/4` contre `10 + difficulté/2` ; réussite → `max(1, floor(n × min(1, N/difficulté)))` modules, 10+ → tous ; échec → un effet de `data/reading_failures.json` (mineur : Étourdi 20 ticks ou −15 mana ; grave sur 10+ ou 1 naturel : étourdi et −30 mana, téléportation sur une tuile libre, invocation d'un loup adjacent) ; XP de Lecture `difficulté × 5` ou `× 2` ; livre consommé dans tous les cas ; signal `book_read`. « Étourdissement 5 s » passe par le plafond anti-stunlock (20 ticks).
+
 ## Liens
 - **Dépend de** : [[Jet de compétence universel]], [[Grimoires et manuels]], [[Stats de personnage]]
 - **Alimente** : [[Modules]], [[Statuts]]

@@ -1,0 +1,11 @@
+{
+  "name_key": "item.grimoire.name",
+  "type": "grimoire",
+  "equip_slot": "",
+  "hands": 0,
+  "materiau": "papier",
+  "tags": [
+    "livre",
+    "grimoire"
+  ]
+}

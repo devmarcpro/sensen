@@ -1,0 +1,37 @@
+{
+  "name_key": "item.gemme_ambre.name",
+  "type": "gemme",
+  "equip_slot": "sertissure",
+  "hands": 0,
+  "materiau": "ambre",
+  "element": null,
+  "tailles": [
+    {
+      "type": "endurance_max",
+      "fourchette": [
+        5,
+        15
+      ]
+    },
+    {
+      "type": "competence",
+      "competence": "athletisme",
+      "fourchette": [
+        4,
+        10
+      ]
+    },
+    {
+      "type": "competence",
+      "competence": "esquive",
+      "fourchette": [
+        4,
+        10
+      ]
+    }
+  ],
+  "tags": [
+    "gemme",
+    "prototype"
+  ]
+}

@@ -46,6 +46,9 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 		"sac": [],                                                  # uids des objets portés non équipés
 		"tags_acquis": [],                                          # grant_tag des effets passifs
 		"rare": false,                                              # variante rare (Monstres rares)
+		"degats_element": {},                                       # bonus plats des gemmes
+		"affinites": {},                                            # tailles en affinité de l'arme tenue
+		"modules_connus": [],                                       # appris par la lecture (Grimoires et manuels)
 		"epithete": "",
 		"ai_profile": def.ai_profile,
 		"chain_gauge": def.get("chain_gauge", false),   # porteurs de jauge : joueur, élites, boss
@@ -81,6 +84,12 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 	var tags: Array = []
 	var segments_bonus := 0
 	var endurance_bonus := 0
+	var sante_bonus := 0
+	var mana_bonus := 0
+	var par_competence := {}   # plafond +15 par compétence toutes gemmes confondues
+	var plafond := int(GameData.config("loot_rules").gemmes.plafond_par_competence)
+	e.degats_element = {}
+	e.affinites = {}
 	for slot: String in e.equipement.keys():
 		var it: Dictionary = items.get(e.equipement[slot], {})
 		var q := float(it.get("qualite", 1.0))
@@ -99,6 +108,32 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 					segments_bonus += 1
 				"meca_endurance_max":
 					endurance_bonus += int(ax.params.n)
+		# Gemmes serties : tous les bonus plats (Loot — GEMMES = TOUS LES BONUS PLATS, jamais une règle).
+		for uid in it.get("sertissures", {}).get("contenu", []):
+			var gemme: Dictionary = items.get(uid, {})
+			var t: Dictionary = gemme.get("taille", {})
+			if t.is_empty():
+				continue
+			match str(t.type):
+				"stat":
+					stats[t.stat] = int(stats.get(t.stat, 0)) + int(t.valeur)
+				"competence":
+					var deja := int(par_competence.get(t.competence, 0))
+					var ajout := mini(int(t.valeur), plafond - deja)
+					if ajout > 0:
+						par_competence[t.competence] = deja + ajout
+						comp[t.competence] = int(comp.get(t.competence, 0)) + ajout
+				"degats_element":
+					e.degats_element[t.element] = int(e.degats_element.get(t.element, 0)) + int(t.valeur)
+				"affinite":
+					if slot == "main_principale":
+						e.affinites[t.element] = float(e.affinites.get(t.element, 0.0)) + float(t.valeur)
+				"sante_max":
+					sante_bonus += int(t.valeur)
+				"mana_max":
+					mana_bonus += int(t.valeur)
+				"endurance_max":
+					endurance_bonus += int(t.valeur)
 	e.stats_eff = stats
 	e.competences_eff = comp
 	e.tags_acquis = tags
@@ -106,9 +141,9 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 	e.endurance = mini(int(e.endurance), end_max) if int(e.endurance_max) != end_max else int(e.endurance)
 	e.endurance_max = end_max
 	# Les maxima dérivés des stats effectives ; la valeur courante est clampée, plancher 1 pour la santé.
-	e.sante_max = regles.sante_max(stats)
+	e.sante_max = regles.sante_max(stats) + sante_bonus
 	e.sante = clampi(int(e.sante), 1, int(e.sante_max)) if int(e.sante) > 0 else int(e.sante)
-	e.mana_max = regles.mana_max(stats)
+	e.mana_max = regles.mana_max(stats) + mana_bonus
 	e.mana = mini(int(e.mana), int(e.mana_max))
 	if e.has("chaine"):
 		e.chaine.capacite = int(GameData.config("wuxing").chaine.capacite_base) + segments_bonus

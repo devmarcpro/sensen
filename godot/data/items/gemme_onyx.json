@@ -1,0 +1,38 @@
+{
+  "name_key": "item.gemme_onyx.name",
+  "type": "gemme",
+  "equip_slot": "sertissure",
+  "hands": 0,
+  "materiau": "onyx",
+  "element": "metal",
+  "tailles": [
+    {
+      "type": "degats_element",
+      "element": "metal",
+      "fourchette": [
+        1,
+        3
+      ]
+    },
+    {
+      "type": "competence",
+      "competence": "magie_metal",
+      "fourchette": [
+        4,
+        10
+      ]
+    },
+    {
+      "type": "affinite",
+      "element": "metal",
+      "fourchette": [
+        0.04,
+        0.28
+      ]
+    }
+  ],
+  "tags": [
+    "gemme",
+    "prototype"
+  ]
+}

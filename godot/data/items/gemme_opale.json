@@ -1,0 +1,37 @@
+{
+  "name_key": "item.gemme_opale.name",
+  "type": "gemme",
+  "equip_slot": "sertissure",
+  "hands": 0,
+  "materiau": "opale",
+  "element": null,
+  "tailles": [
+    {
+      "type": "duree_statuts",
+      "fourchette": [
+        10,
+        30
+      ]
+    },
+    {
+      "type": "stat",
+      "stat": "volonte",
+      "fourchette": [
+        1,
+        3
+      ]
+    },
+    {
+      "type": "stat",
+      "stat": "charisme",
+      "fourchette": [
+        1,
+        3
+      ]
+    }
+  ],
+  "tags": [
+    "gemme",
+    "prototype"
+  ]
+}

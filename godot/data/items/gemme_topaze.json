@@ -1,0 +1,38 @@
+{
+  "name_key": "item.gemme_topaze.name",
+  "type": "gemme",
+  "equip_slot": "sertissure",
+  "hands": 0,
+  "materiau": "topaze",
+  "element": "terre",
+  "tailles": [
+    {
+      "type": "degats_element",
+      "element": "terre",
+      "fourchette": [
+        1,
+        3
+      ]
+    },
+    {
+      "type": "competence",
+      "competence": "magie_terre",
+      "fourchette": [
+        4,
+        10
+      ]
+    },
+    {
+      "type": "affinite",
+      "element": "terre",
+      "fourchette": [
+        0.04,
+        0.28
+      ]
+    }
+  ],
+  "tags": [
+    "gemme",
+    "prototype"
+  ]
+}

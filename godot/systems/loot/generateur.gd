@@ -9,6 +9,7 @@ var regles: Dictionary      # loot_rules.json
 var affixes: Dictionary     # catalogue data/affixes
 var items: Dictionary       # catalogue data/items (les bases)
 var elements: Array         # les cinq éléments (wuxing.json)
+var modules: Dictionary = {}    # le catalogue des modules (pour les livres)
 var _n := 0
 
 
@@ -74,7 +75,87 @@ func generer(base_id: String, profondeur: int, rng: RandomNumberGenerator, prove
 	# Nom : tout loot rare+ reçoit un nom généré depuis les paramètres tirés.
 	if bool(r.nom) and not inst.affixes.is_empty():
 		inst["nom"] = {"affixe": inst.affixes[0].id, "params": inst.affixes[0].params}
+	# Une gemme est taillée à la génération : sa spécialisation et sa qualité de taille (A.3).
+	if base.get("type", "") == "gemme" and base.has("tailles"):
+		_tailler(inst, base, profondeur, rng)
+	# Un livre tire son domaine, sa difficulté et ses modules (Grimoires et manuels).
+	if base.get("type", "") in ["grimoire", "manuel"]:
+		_composer_livre(inst, base, profondeur, rng)
 	return inst
+
+
+## Tailler une gemme CHOISIT sa spécialisation ; la qualité de taille place la valeur dans la fourchette.
+func _tailler(inst: Dictionary, base: Dictionary, profondeur: int, rng: RandomNumberGenerator) -> void:
+	var qt: Dictionary = regles.gemmes.qualite_taille
+	var q: float = clampf(float(qt.base) + float(profondeur) * float(qt.par_etage) + rng.randf() * float(qt.alea), float(qt.min), float(qt.max))
+	var t: Dictionary = base.tailles[rng.randi_range(0, base.tailles.size() - 1)]
+	var frac: float = clampf((q - float(qt.min)) / (float(qt.max) - float(qt.min)), 0.0, 1.0)
+	var lo := float(t.fourchette[0])
+	var hi := float(t.fourchette[1])
+	var v := lo + (hi - lo) * frac
+	var taille: Dictionary = t.duplicate()
+	taille.erase("fourchette")
+	taille["valeur"] = v if t.type in ["affinite", "qualite"] else float(roundi(v))
+	taille["qualite"] = q
+	inst["taille"] = taille
+	inst["nom"] = {"affixe": "", "params": {}, "taille": taille}
+
+
+## Un livre : domaine tiré, difficulté par profondeur, 2-4 modules du catalogue filtrés par le domaine.
+func _composer_livre(inst: Dictionary, base: Dictionary, profondeur: int, rng: RandomNumberGenerator) -> void:
+	var lv: Dictionary = regles.livres
+	var grimoire: bool = base.type == "grimoire"
+	var domaine := ""
+	if grimoire:
+		var doms: Array = lv.domaines_grimoire.keys()
+		domaine = str(doms[rng.randi_range(0, doms.size() - 1)])
+	else:
+		domaine = str(lv.domaines_manuel[rng.randi_range(0, lv.domaines_manuel.size() - 1)])
+	var candidats: Array[String] = []
+	for id: String in modules.keys():
+		var m: Dictionary = modules[id]
+		if grimoire:
+			var el := str(lv.domaines_grimoire[domaine])
+			if m.module_type == "noyau":
+				var dom_m := _dominante(m.get("elements", {}))
+				if int(m.get("cout_mana", 0)) > 0 and (dom_m == el or (el == "neutre" and dom_m.is_empty())):
+					candidats.append(id)
+			elif m.module_type in ["forme", "modificateur"] and el == "neutre":
+				candidats.append(id)
+		else:
+			match domaine:
+				"frappes":
+					if m.module_type == "noyau" and int(m.get("cout_endurance", 0)) > 0:
+						candidats.append(id)
+				"postures":
+					if m.module_type == "condition":
+						candidats.append(id)
+				"techniques":
+					if m.module_type in ["declencheur", "liaison"]:
+						candidats.append(id)
+				"maitrise":
+					if m.module_type in ["modificateur", "forme"]:
+						candidats.append(id)
+	var n := rng.randi_range(int(lv.modules_par_livre[0]), int(lv.modules_par_livre[1]))
+	var choisis: Array = []
+	while choisis.size() < n and not candidats.is_empty():
+		var k := rng.randi_range(0, candidats.size() - 1)
+		choisis.append(candidats[k])
+		candidats.remove_at(k)
+	inst["domaine"] = domaine
+	inst["difficulte"] = int(lv.difficulte_base) + profondeur * int(lv.difficulte_par_etage)
+	inst["modules"] = choisis
+	inst["nom"] = {"affixe": "", "params": {}, "livre": {"domaine": domaine, "difficulte": inst.difficulte, "n": choisis.size()}}
+
+
+static func _dominante(v: Dictionary) -> String:
+	var meilleur := ""
+	var part := 0.0
+	for k in v.keys():
+		if float(v[k]) > part:
+			part = float(v[k])
+			meilleur = str(k)
+	return meilleur
 
 
 func _affixes_pour(slot: String) -> Array[Dictionary]:

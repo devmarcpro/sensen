@@ -1,0 +1,25 @@
+{
+  "_doc": "Effets d'échec de lecture (docs: Lecture des livres). mineur : échec simple ; grave : échec de 10+ ou 1 naturel. Un effet = {statut, duree_ticks} | {mana} | {teleportation} | {invocation}.",
+  "mineur": [
+    {
+      "statut": "etourdi",
+      "duree_ticks": 20
+    },
+    {
+      "mana": -15
+    }
+  ],
+  "grave": [
+    {
+      "statut": "etourdi",
+      "duree_ticks": 20,
+      "mana": -30
+    },
+    {
+      "teleportation": true
+    },
+    {
+      "invocation": "loup"
+    }
+  ]
+}

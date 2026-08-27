@@ -1,0 +1,38 @@
+{
+  "name_key": "item.gemme_rubis.name",
+  "type": "gemme",
+  "equip_slot": "sertissure",
+  "hands": 0,
+  "materiau": "rubis",
+  "element": "feu",
+  "tailles": [
+    {
+      "type": "degats_element",
+      "element": "feu",
+      "fourchette": [
+        1,
+        3
+      ]
+    },
+    {
+      "type": "competence",
+      "competence": "magie_feu",
+      "fourchette": [
+        4,
+        10
+      ]
+    },
+    {
+      "type": "affinite",
+      "element": "feu",
+      "fourchette": [
+        0.04,
+        0.28
+      ]
+    }
+  ],
+  "tags": [
+    "gemme",
+    "prototype"
+  ]
+}

@@ -51,6 +51,7 @@ func _init(p_graine: int) -> void:
 	profils_ia = GameData.catalogues.get("ai_profiles", {})
 	statuts_defs = GameData.catalogues.get("status_effects", {})
 	loot = Loot.new(GameData.config("loot_rules"), affixes_defs, GameData.catalogues.get("items", {}), GameData.config("wuxing").elements)
+	loot.modules = GameData.catalogues.get("modules", {})
 
 
 # ---------------------------------------------------------------- mise en place
@@ -265,6 +266,82 @@ func _ramasser(e: Dictionary, tick: int) -> bool:
 	return true
 
 
+## Sertir une gemme du sac dans un emplacement libre d'un objet porté ou du sac (5 ticks).
+func _sertir(e: Dictionary, objet: String, gemme: String, tick: int) -> bool:
+	if not (gemme in e.sac) or not items.has(objet) or items.get(gemme, {}).get("type", "") != "gemme":
+		return false
+	var porte: bool = objet in e.sac or objet in e.equipement.values()
+	var it: Dictionary = items[objet]
+	if not porte or not it.has("sertissures") or it.sertissures.contenu.size() >= int(it.sertissures.nombre):
+		return false
+	e.sac.erase(gemme)
+	it.sertissures.contenu.append(gemme)
+	Etres.recalculer(e, items, affixes_defs, regles)
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.serti", {"nom": e.name_key, "gemme": nom_objet(gemme), "objet": nom_objet(objet)}])
+	return true
+
+
+## Lire un livre (Lecture des livres) : jet universel, modules appris, échec à effet, livre consommé.
+func _lire(e: Dictionary, objet: String, tick: int) -> bool:
+	if not (objet in e.sac) or not items.get(objet, {}).get("type", "") in ["grimoire", "manuel"]:
+		return false
+	var livre: Dictionary = items[objet]
+	var lv: Dictionary = GameData.config("loot_rules").livres
+	var n_lecture := int(e.competences_eff.get("lecture", 0))
+	var jet := des.jet("1d20")
+	var total := jet + n_lecture / 2 + int(e.stats_eff.perception) / 4
+	var dd := int(lv.dd_base) + int(livre.difficulte) / 2
+	var marge := total - dd
+	e.sac.erase(objet)   # consommé dans tous les cas
+	var succes := marge >= 0 and jet != 1
+	var appris: Array = []
+	if succes:
+		var n: int = livre.modules.size()
+		if marge < 10:
+			n = maxi(1, int(floorf(float(livre.modules.size()) * minf(1.0, float(n_lecture) / float(livre.difficulte)))))
+		for k in n:
+			var m: String = str(livre.modules[k])
+			if not (m in e.modules_connus):
+				e.modules_connus.append(m)
+			appris.append(m)
+		e.xp.competence["lecture"] = int(e.xp.competence.get("lecture", 0)) + int(livre.difficulte) * int(lv.xp_succes)
+		EventBus.emettre(&"journal", [&"journal.lecture_reussie", {"nom": e.name_key, "n": appris.size(), "livre": nom_objet(objet)}])
+	else:
+		e.xp.competence["lecture"] = int(e.xp.competence.get("lecture", 0)) + int(livre.difficulte) * int(lv.xp_echec)
+		var grave := marge <= -10 or jet == 1
+		_effet_echec_lecture(e, grave, tick)
+		EventBus.emettre(&"journal", [&"journal.lecture_echouee", {"nom": e.name_key, "livre": nom_objet(objet), "grave": grave}])
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"book_read", [e.id, objet, succes])
+	return true
+
+
+func _effet_echec_lecture(e: Dictionary, grave: bool, tick: int) -> void:
+	var table: Array = GameData.config("reading_failures").get("grave" if grave else "mineur", [])
+	if table.is_empty():
+		return
+	var ef: Dictionary = table[des.entier(0, table.size() - 1)]
+	if ef.has("statut"):
+		appliquer_statut(e, str(ef.statut), int(ef.get("duree_ticks", 20)), "")
+	if ef.has("mana"):
+		e.mana = maxi(0, int(e.mana) + int(ef.mana))
+	if ef.get("teleportation", false):
+		for essai in 50:
+			var p := Vector2i(des.entier(0, grille.largeur - 1), des.entier(0, grille.hauteur_grille - 1))
+			if not grille.bloque_passage(p) and grille.occupant(p).is_empty():
+				grille.liberer(e.pos)
+				e.pos = p
+				grille.placer(e.id, p)
+				break
+	if ef.has("invocation"):
+		for d in Grille.DIRS:
+			var p: Vector2i = e.pos + d
+			if grille.dans(p) and not grille.bloque_passage(p) and grille.occupant(p).is_empty():
+				ajouter(str(ef.invocation), p, "ia")
+				break
+
+
 ## À la mort : un drop (chance du tout-venant ; garanti et renforcé pour une variante rare).
 func _drop(cible: Dictionary, source: String) -> void:
 	var lr: Dictionary = GameData.config("loot_rules")
@@ -461,6 +538,10 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _equiper(e, str(i.get("objet", "")), h.ticks)
 		"ramasser":
 			ok = _ramasser(e, h.ticks)
+		"sertir":
+			ok = _sertir(e, str(i.get("objet", "")), str(i.get("gemme", "")), h.ticks)
+		"lire":
+			ok = _lire(e, str(i.get("objet", "")), h.ticks)
 	if ok:
 		attente.erase(id)
 		_fin_de_pas(e.horloge)
@@ -622,7 +703,8 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 	var vecteur: Dictionary = ax.vecteur
 	var d := regles.degats_arme(e.stats_eff, arme, fonct, des, lourde, a_zero, int(ax.des), e.competences_eff, vecteur)
 	var wx := _facteur_wuxing(e, cible, vecteur, tick_de(e))
-	var res := _resoudre_coup(e, cible, d.bruts * wx.total * float(ax.mult) * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur, float(ax.ignore_armure))
+	var plat := int(e.get("degats_element", {}).get(wuxing.dominante(vecteur), 0))
+	var res := _resoudre_coup(e, cible, (d.bruts + float(plat)) * wx.total * float(ax.mult) * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur, float(ax.ignore_armure))
 	res.merge(wx)
 	res["competence"] = str(fonct.get("combat_skill", ""))
 	var cle := &"journal.attaque_lourde" if lourde else &"journal.attaque"
@@ -643,7 +725,11 @@ func _portee_effective(e: Dictionary, arme: Dictionary, fonct: Dictionary) -> Ve
 ## Ce que les affixes de l'arme changent AVANT le jet : {vecteur, des, mult, ignore_armure}.
 ## Les compteurs rythmiques avancent ici (une attaque = un cran, jamais par cible).
 func _affixes_offensifs(e: Dictionary, arme: Dictionary, cible: Dictionary) -> Dictionary:
-	var r := {"vecteur": vecteur_arme(arme), "des": 0, "mult": 1.0, "ignore_armure": 0.0}
+	var r := {"vecteur": vecteur_arme(arme), "des": 0, "mult": 1.0, "ignore_armure": 0.0, "plat": 0}
+	# Gemmes de l'arme : la taille en affinité déplace le vecteur (AJOUT normalisé), les dégâts
+	# élémentaires plats s'ajoutent si le coup porte cet élément.
+	for el in e.get("affinites", {}).keys():
+		r.vecteur = _ajouter_element(r.vecteur, str(el), float(e.affinites[el]))
 	if arme.get("affixes", []).is_empty():
 		return r
 	for ax: Dictionary in arme.affixes:

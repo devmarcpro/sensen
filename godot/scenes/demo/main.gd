@@ -279,6 +279,19 @@ func _unhandled_input(ev: InputEvent) -> void:
 			KEY_TAB:
 				arene_courante = (arene_courante + 1) % (arenes.size() + 1)
 				_charger()
+			KEY_L:
+				if sim.attente.has(joueur_id) and not j.is_empty():
+					for uid in j.sac:
+						if sim.items[uid].get("type", "") in ["grimoire", "manuel"]:
+							sim.intention(joueur_id, {"type": "lire", "objet": uid})
+							break
+			KEY_T:
+				if sim.attente.has(joueur_id) and not j.is_empty() and j.equipement.has("main_principale"):
+					for uid in j.sac:
+						if sim.items[uid].get("type", "") == "gemme":
+							if not sim.intention(joueur_id, {"type": "sertir", "objet": j.equipement.main_principale, "gemme": uid}):
+								_log(tr("journal.pas_de_sertissure"))
+							break
 			KEY_R:
 				if sim.attente.has(joueur_id):
 					if not sim.intention(joueur_id, {"type": "ramasser"}):
@@ -554,7 +567,7 @@ func _maj_ui() -> void:
 		if not occ.is_empty() and occ != joueur_id and j.vivant:
 			lignes.append_array(_preview(j, sim.entites[occ]))
 	if not j.is_empty():
-		lignes.append("  " + tr("ui.entite.mana").format({"mana": j.mana, "mana_max": j.mana_max}) + " · " + tr("ui.munitions").format({"n": j.munitions}))
+		lignes.append("  " + tr("ui.entite.mana").format({"mana": j.mana, "mana_max": j.mana_max}) + " · " + tr("ui.munitions").format({"n": j.munitions}) + " · " + tr("ui.modules_connus").format({"n": j.modules_connus.size()}))
 		for k in j.get("capacites", []).size():
 			lignes.append("  " + _texte_capacite(j, k))
 		if visee >= 0:
@@ -695,6 +708,11 @@ func _sur_fin_de_combat(_nom: String) -> void:
 ## paramètres tirés (Loot — affixes : NOM ET PROVENANCE).
 func nom_objet(n: Dictionary) -> String:
 	var base := tr(str(n.base))
+	if n.has("taille"):
+		var t: Dictionary = n.taille
+		return "%s (%s %s)" % [base, tr("taille." + str(t.type)), ("%.2f" % float(t.valeur)) if t.type in ["affinite", "qualite"] else str(int(t.valeur))]
+	if n.has("livre"):
+		return "%s %s (difficulté %d, %d modules)" % [base, tr("domaine." + str(n.livre.domaine)), int(n.livre.difficulte), int(n.livre.n)]
 	if str(n.get("affixe", "")).is_empty():
 		return base
 	var p: Dictionary = n.params.duplicate()

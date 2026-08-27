@@ -1,0 +1,29 @@
+{
+  "name_key": "item.gemme_amethyste.name",
+  "type": "gemme",
+  "equip_slot": "sertissure",
+  "hands": 0,
+  "materiau": "amethyste",
+  "element": null,
+  "tailles": [
+    {
+      "type": "mana_max",
+      "fourchette": [
+        5,
+        15
+      ]
+    },
+    {
+      "type": "competence",
+      "competence": "meditation",
+      "fourchette": [
+        4,
+        10
+      ]
+    }
+  ],
+  "tags": [
+    "gemme",
+    "prototype"
+  ]
+}

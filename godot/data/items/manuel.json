@@ -1,0 +1,11 @@
+{
+  "name_key": "item.manuel.name",
+  "type": "manuel",
+  "equip_slot": "",
+  "hands": 0,
+  "materiau": "papier",
+  "tags": [
+    "livre",
+    "manuel"
+  ]
+}

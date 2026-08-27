@@ -83,6 +83,9 @@
     },
     "materiau": {
       "type": "string"
+    },
+    "tailles": {
+      "type": "array"
     }
   },
   "required": [

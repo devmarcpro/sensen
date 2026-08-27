@@ -1,0 +1,38 @@
+{
+  "name_key": "item.gemme_saphir.name",
+  "type": "gemme",
+  "equip_slot": "sertissure",
+  "hands": 0,
+  "materiau": "saphir",
+  "element": "eau",
+  "tailles": [
+    {
+      "type": "degats_element",
+      "element": "eau",
+      "fourchette": [
+        1,
+        3
+      ]
+    },
+    {
+      "type": "competence",
+      "competence": "magie_eau",
+      "fourchette": [
+        4,
+        10
+      ]
+    },
+    {
+      "type": "affinite",
+      "element": "eau",
+      "fourchette": [
+        0.04,
+        0.28
+      ]
+    }
+  ],
+  "tags": [
+    "gemme",
+    "prototype"
+  ]
+}
