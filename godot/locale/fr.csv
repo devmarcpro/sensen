@@ -401,6 +401,40 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+ui.gestion.voisin,"{nom} ({gouv}, {n} cellules) — réputation {rep} · relation {rel} · accord : {accord}"
+ui.gestion.voisin_aide,T : proposer l'accord suivant (commercial ≥ 20 · non-agression ≥ 40 · alliance ≥ 60 · tribut)
+accord.aucun,aucun
+accord.commercial,accord commercial
+accord.non_agression,non-agression
+accord.alliance,alliance défensive
+accord.tribut_paie,tribut versé
+accord.tribut_recoit,tribut reçu
+relation.hostile,hostile
+relation.tension,tension
+relation.neutre,neutre
+relation.cordial,cordial
+relation.allie,allié
+journal.accord,"{nom} accepte : {accord}"
+journal.accord_refuse,"{nom} refuse : {accord} (réputation insuffisante ou régime incompatible)"
+journal.tribut,"tribut : {n} or ({sens})"
+tribut.verse,versé
+tribut.recu,reçu
+journal.infraction,"{royaume} : {loi} — {consequence} {detail}"
+loi.meurtre,meurtre
+loi.vol,vol
+loi.objet,"objet interdit ({objet})"
+consequence.amende,amende
+consequence.confiscation,confiscation
+consequence.gardes_hostiles,les gardes te traquent
+journal.infraction_ignoree,personne n'a rien vu
+journal.douane,"douane : {pct} % sur {objet}"
+journal.douane_interdit,"{objet} est interdit ici"
+journal.raid_royaume,"les troupes de {nom} sont derrière ce raid"
+ui.carte.royaume,"{nom} — {gouv}, {n} cellules"
+kingdom.taille.hameau,hameau-État
+kingdom.taille.cite,cité-État
+kingdom.taille.petit,petit royaume
+kingdom.taille.grand,grand royaume
 government.monarchie_hereditaire.name,Monarchie héréditaire
 government.republique_elue.name,République élue
 government.theocratie.name,Théocratie

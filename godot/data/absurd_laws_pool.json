@@ -1,0 +1,21 @@
+{
+  "_doc": "Lois absurdes (Lois et infractions, E.26) : à la génération d'un royaume, 15 % de chance d'en tirer 0-2 — un objet courant devient illégal, conséquence mineure.",
+  "chance": 0.15,
+  "max": 2,
+  "objets": [
+    "pomme_de_terre",
+    "carotte",
+    "oignon",
+    "chou",
+    "tomate",
+    "citrouille",
+    "baies",
+    "pain",
+    "champignon_bleu",
+    "orge"
+  ],
+  "consequences": [
+    "confiscation",
+    "amende:10"
+  ]
+}

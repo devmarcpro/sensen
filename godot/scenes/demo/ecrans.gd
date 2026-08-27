@@ -180,6 +180,17 @@ func touche(ev: InputEventKey) -> bool:
 				main.sim.deposer(main.joueur(), 50)
 				rafraichir()
 				return true
+		KEY_T:
+			if courant == "gestion":
+				var en: Dictionary = entrees[liste.get_selected_items()[0]] if not liste.get_selected_items().is_empty() and liste.get_selected_items()[0] < entrees.size() else {}
+				if en.get("kind", "") == "voisin":
+					var types: Array = ["commercial", "non_agression", "alliance", "tribut"]
+					var actuel: String = str(main.sim.territoire.accords.get(str(en.id), ""))
+					if actuel.begins_with("tribut"):
+						actuel = "tribut"
+					main.sim.proposer_accord(main.joueur(), str(en.id), str(types[(types.find(actuel) + 1) % types.size()]))
+					rafraichir()
+				return true
 		KEY_G:
 			if courant == "gestion":
 				var ids: Array = GameData.catalogues.governments.keys()
@@ -273,7 +284,7 @@ func _montrer_detail() -> void:
 			detail.text = texte_recette(en.plan)
 		"texte":
 			detail.text = str(en.texte)
-		"option", "quete", "cellule", "resident", "stock", "fonction":
+		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin":
 			detail.text = str(en.get("texte", ""))
 		"achat", "vente":
 			var p: Dictionary = en.prix
@@ -503,6 +514,10 @@ func _construire_gestion(j: Dictionary) -> void:
 	var raid_txt: String = tr("ui.gestion.aucun_raid") if dr.is_empty() else tr("ui.gestion.raid").format({"force": dr.force, "defense": dr.defense, "issue": tr("ui.gestion.victoire" if bool(dr.victoire) else "ui.gestion.defaite"), "perte": int(round(float(dr.perte) * 100.0))})
 	liste.add_item(tr("ui.gestion.royaume").format({"statut": tr("ui.gestion.royaume_statut" if bool(t.royaume) else "ui.gestion.campement"), "gouv": gouv, "transition": trans, "defense": "%.1f" % sim.defense_totale(), "valeur": int(sim.valeur_territoire()), "raid": raid_txt}), null, false)
 	entrees.append({"kind": "texte", "texte": tr("ui.gestion.gouv_aide")})
+	for roy in sim.royaumes_voisins():
+		var accord: String = str(t.accords.get(str(roy.id), ""))
+		liste.add_item(tr("ui.gestion.voisin").format({"nom": roy.nom, "gouv": tr(GameData.entree("governments", str(roy.government_type)).name_key), "n": roy.territory_cells.size(), "rep": int(j.get("reputations", {}).get(str(roy.id), 0)), "rel": tr("relation." + sim.relation_royaume(j, roy)), "accord": tr("accord." + accord) if not accord.is_empty() else tr("accord.aucun")}))
+		entrees.append({"kind": "voisin", "id": str(roy.id), "texte": tr("ui.gestion.voisin_aide") + "\n" + _lois_txt(roy)})
 	var mures := 0
 	for c in t.cultures.values():
 		if bool(c.mure):
@@ -513,6 +528,16 @@ func _construire_gestion(j: Dictionary) -> void:
 	entrees.append({"kind": "texte", "texte": ""})
 	_bouton(tr("ui.ecran.deposer"), func() -> void: main.sim.deposer(main.joueur(), 50); rafraichir())
 	_bouton(tr("ui.ecran.retirer"), func() -> void: main.sim.retirer(main.joueur(), 50); rafraichir())
+
+
+func _lois_txt(roy: Dictionary) -> String:
+	var l: Array[String] = []
+	for loi in roy.laws:
+		l.append("%s → %s" % [str(loi.target), str(loi.consequence)])
+	var tarifs: Array[String] = []
+	for cat in roy.tariffs.keys():
+		tarifs.append("%s %d %%" % [str(cat), int(round(float(roy.tariffs[cat]) * 100.0))])
+	return "lois : " + (" · ".join(l) if not l.is_empty() else "aucune") + "\ndouanes : " + (" · ".join(tarifs) if not tarifs.is_empty() else "—") + " (défaut %d %%)" % int(round(float(roy.taxes.tariff_default) * 100.0))
 
 
 func _construire_assigner(j: Dictionary) -> void:

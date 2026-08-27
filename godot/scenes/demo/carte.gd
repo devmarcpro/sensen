@@ -83,6 +83,12 @@ func _dessiner() -> void:
 			if mode == "voyage" and not exploree:
 				col = col.darkened(0.55)
 			dessin.draw_rect(r, col)
+			var roy: Dictionary = surf.royaume_de(cell) if info.terre else {}
+			if not roy.is_empty():
+				var teinte := Color.from_hsv(float(hash(str(roy.id)) % 360) / 360.0, 0.7, 0.9, 0.35)
+				dessin.draw_rect(r, teinte)
+				if roy.capital_poi == cell:
+					dessin.draw_rect(r.grow(-2), Color(1.0, 0.95, 0.6), false, 2.0)
 			# Heat-map de danger : trois niveaux lisibles (Niveau de danger : vague par défaut).
 			match int(sim.monde.danger_de(cell)):
 				1: dessin.draw_rect(r, Color(1.0, 0.5, 0.1, 0.25))

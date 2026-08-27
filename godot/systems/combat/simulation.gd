@@ -34,7 +34,7 @@ var prochain_donjon: int = 1         # id du prochain donjon lancé depuis le ca
 var monde: Monde = null              # la surface comme fenêtre glissante (étape 8.2a)
 var territoire: Dictionary = {"tresor": 0, "dette": 0, "semaines_dette": 0, "stocks": {}, "rapports": [], "gains_quetes": 0, "royaume": false,
 	"cultures": {}, "fertilite": {}, "etals": {}, "caisse": 0, "marge": 1.0, "clients": 0.0, "heure_resolue": -1, "absence": {"ventes": 0, "or": 0, "mures": 0},
-	"gouvernance": "", "gouvernance_cible": "", "transition": 0, "raid": {}, "dernier_raid": {}}   # le royaume du joueur (étape 10)
+	"gouvernance": "", "gouvernance_cible": "", "transition": 0, "raid": {}, "dernier_raid": {}, "accords": {}}   # le royaume du joueur (étape 10)
 var objets: Dictionary = {}          # uid → instance générée (le catalogue reste dans `items`, fusionné)
 var contenants: Dictionary = {}      # index de tuile → [uids] (coffres, butin au sol)
 var dernier_combat: Dictionary = {}   # récapitulatif du dernier combat terminé (écran de fin)
@@ -610,6 +610,8 @@ func _prendre(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 			e.sac.append(uid)
 			n += 1
 	contenants[idx] = []
+	if grille.meubles.has(idx) and monde != null and lieu == "camp" and e.controle == "joueur" and not monde.claims.has(_cell_de(vers)) and bool(monde.cellule(_cell_de(vers)).has("village")):
+		_infraction(e, "comportement", "vol", vers, "")
 	if not grille.meubles.has(idx):   # un butin au sol disparaît ; un coffre reste
 		grille.contenu[idx] = 0
 		grille.marquer(vers)
@@ -800,11 +802,19 @@ func _acheter(e: Dictionary, pnj_id: String, uid: String, tick: int) -> bool:
 	if pnj.is_empty() or not (uid in pnj.get("stock", [])) or Grille.distance(e.pos, pnj.pos) > 2:
 		return false
 	var p := prix_suggere(uid, pnj, e)
+	var tarif := tarif_de(uid, pnj)
+	if tarif >= 1.0:
+		EventBus.emettre(&"journal", [&"journal.douane_interdit", {"objet": nom_objet(uid)}])
+		return false
+	p.prix = maxi(1, roundi(float(p.prix) * (1.0 + tarif)))
 	if int(e.or) < int(p.prix):
 		EventBus.emettre(&"journal", [&"journal.pas_assez_or", {}])
 		return false
 	e.or = int(e.or) - int(p.prix)
 	pnj.or = int(pnj.or) + int(p.prix)
+	if tarif > 0.0:
+		EventBus.emettre(&"journal", [&"journal.douane", {"pct": int(round(tarif * 100.0)), "objet": nom_objet(uid)}])
+	_infraction(e, "objet", str(items[uid].get("base", "")), e.pos, uid)
 	pnj.stock.erase(uid)
 	e.sac.append(uid)
 	e.compteur = tick + int(regles.r.actions.objet)
@@ -819,6 +829,13 @@ func _vendre(e: Dictionary, pnj_id: String, uid: String, tick: int) -> bool:
 	if pnj.is_empty() or not (uid in e.sac) or Grille.distance(e.pos, pnj.pos) > 2 or not ("commerce_possible" in pnj.get("tags", [])):
 		return false
 	var p := prix_suggere(uid, pnj, e)
+	var tarif := tarif_de(uid, pnj)
+	if tarif >= 1.0:
+		EventBus.emettre(&"journal", [&"journal.douane_interdit", {"objet": nom_objet(uid)}])
+		return false
+	p.achat = maxi(1, roundi(float(p.achat) * (1.0 - tarif)))
+	if tarif > 0.0:
+		EventBus.emettre(&"journal", [&"journal.douane", {"pct": int(round(tarif * 100.0)), "objet": nom_objet(uid)}])
 	if int(pnj.or) < int(p.achat):
 		# Troc automatique (Économie — sources et puits) : un objet du stock à ±15 % de la valeur.
 		var tol := float(regles.r.commerce.get("troc_tolerance", 0.15))
@@ -1041,6 +1058,7 @@ func _semaine_territoire(e: Dictionary) -> void:
 			territoire.gouvernance = str(territoire.gouvernance_cible)
 			territoire.gouvernance_cible = ""
 			EventBus.emettre(&"journal", [&"journal.gouvernance_faite", {"gouv": GameData.entree("governments", str(territoire.gouvernance)).name_key}])
+	_semaine_accords()
 	_jet_raid(e, horloge_monde.ticks)
 	var rapport := {"prod": " · ".join(prod_txt) if not prod_txt.is_empty() else "—", "entretien": entretien, "tresor": int(territoire.tresor), "dette": int(territoire.dette)}
 	territoire.rapports.append(rapport)
@@ -1107,6 +1125,172 @@ func retirer_stock(e: Dictionary, cle: String) -> bool:
 	return true
 
 
+# ---------------------------------------------------------------- royaumes PNJ : lois, douanes, accords (étape 10.4)
+
+func royaume_a(vers: Vector2i) -> Dictionary:
+	if monde == null or lieu != "camp":
+		return {}
+	return monde.surface.royaume_de(_cell_de(vers))
+
+
+## Le tarif douanier d'un objet chez un PNJ (Gouvernance, lois et diplomatie) : catégorie du matériau dominant.
+func tarif_de(uid: String, pnj: Dictionary) -> float:
+	var roy: Dictionary = {}
+	if monde != null and lieu == "camp":
+		roy = monde.surface.royaume_de(_cell_de(pnj.pos))
+	if roy.is_empty():
+		return 0.0
+	var it: Dictionary = items.get(uid, {})
+	var mat := ""
+	if it.has("composants") and not it.composants.is_empty():
+		mat = str(it.composants[it.composants.keys()[0]].materiau)
+	elif it.has("materiau"):
+		mat = str(it.materiau)
+	var cat := str(GameData.catalogues.materials.get(mat, {}).get("category", ""))
+	var tarif := float(roy.tariffs.get(cat, roy.taxes.tariff_default)) if not cat.is_empty() else float(roy.taxes.tariff_default)
+	if str(territoire.accords.get(str(roy.id), "")) == "commercial":
+		tarif *= float(_ry().accords.commercial.tarif_mult)
+	return tarif
+
+
+## Une infraction (Lois et infractions) : lookup des lois, détection par témoin, conséquence, réputation.
+func _infraction(e: Dictionary, type: String, cible: String, pos: Vector2i, uid: String) -> bool:
+	var roy := royaume_a(pos)
+	if roy.is_empty():
+		return false
+	var loi: Dictionary = {}
+	for l in roy.laws:
+		if str(l.type) == type and str(l.target) == cible and str(l.status) == "illegal":
+			loi = l
+	if loi.is_empty():
+		return false
+	# Détection : le témoin civil le plus proche qui voit le joueur, jet opposé Perception vs Discrétion.
+	var temoin: Dictionary = {}
+	for x in vivants():
+		if x.id == e.id or x.camp != "civil" or Grille.distance(x.pos, pos) > int(_ry().lois.portee_temoin_max) or not voit_ia(x, e):
+			continue
+		if temoin.is_empty() or Grille.distance(x.pos, pos) < Grille.distance(temoin.pos, pos):
+			temoin = x
+	if temoin.is_empty():
+		return false
+	var jet_temoin := des.jet("1d20") + int(temoin.corps.stats.perception) / 2
+	var jet_joueur := des.jet("1d20") + regles.niveau(e.competences_eff, "discretion")
+	if jet_joueur >= jet_temoin:
+		EventBus.emettre(&"journal", [&"journal.infraction_ignoree", {}])
+		return false
+	var cons := str(loi.consequence)
+	var sev: Dictionary = _ry().lois.severite
+	var texte := ""
+	var detail := ""
+	if cons.begins_with("amende:"):
+		var n := int(cons.split(":")[1])
+		if int(e.or) >= n:
+			e.or = int(e.or) - n
+		elif not e.sac.is_empty():
+			e.sac.erase(e.sac[0])
+		texte = "consequence.amende"
+		detail = "(%d or)" % n
+		_baisser_reputation(e, str(roy.id), int(sev.amende))
+	elif cons == "confiscation":
+		if not uid.is_empty() and uid in e.sac:
+			e.sac.erase(uid)
+			e.ratelier.erase(uid)
+		texte = "consequence.confiscation"
+		_baisser_reputation(e, str(roy.id), int(sev.confiscation))
+	else:
+		for x in vivants():
+			if x.camp == "civil" and str(x.get("royaume", "")) == str(roy.id) and x.ai_profile == "garde":
+				x.social.relations[e.id] = -100
+		texte = "consequence.gardes_hostiles"
+		_baisser_reputation(e, str(roy.id), int(sev.gardes_hostiles))
+	var loi_txt: String = "loi.meurtre" if cible == "meurtre" else ("loi.vol" if cible == "vol" else "loi.objet")
+	EventBus.emettre(&"journal", [&"journal.infraction", {"royaume": roy.nom, "loi": loi_txt, "consequence": texte, "objet": cible, "detail": detail}])
+	return true
+
+
+func _baisser_reputation(e: Dictionary, roy_id: String, n: int) -> void:
+	if not e.has("reputations"):
+		e["reputations"] = {}
+	e.reputations[roy_id] = clampi(int(e.reputations.get(roy_id, 0)) - n, -100, 100)
+
+
+## Les royaumes voisins du territoire (à moins de rayon_voisin cellules d'une cellule revendiquée).
+func royaumes_voisins() -> Array:
+	var res: Array = []
+	if monde == null:
+		return res
+	var r := int(_ry().pnj.rayon_voisin)
+	var vus: Dictionary = {}
+	for cell in monde.claims.keys():
+		for dx in range(-r, r + 1):
+			for dy in range(-r, r + 1):
+				var roy := monde.surface.royaume_de(cell + Vector2i(dx, dy))
+				if not roy.is_empty() and not vus.has(str(roy.id)):
+					vus[str(roy.id)] = true
+					res.append(roy)
+	return res
+
+
+func relation_royaume(e: Dictionary, roy: Dictionary) -> String:
+	var rep := int(e.get("reputations", {}).get(str(roy.id), 0))
+	if str(territoire.accords.get(str(roy.id), "")) == "alliance":
+		return "allie"
+	if rep <= -30:
+		return "hostile"
+	if rep < 0:
+		return "tension"
+	if rep >= 30:
+		return "cordial"
+	return "neutre"
+
+
+## Proposer un accord à un royaume voisin (Gouvernance, lois et diplomatie) : réputation et régime décident.
+func proposer_accord(e: Dictionary, roy_id: String, type: String) -> bool:
+	var roy: Dictionary = {}
+	for v in royaumes_voisins():
+		if str(v.id) == roy_id:
+			roy = v
+	if roy.is_empty():
+		return false
+	var ac: Dictionary = _ry().accords
+	var rep := int(e.get("reputations", {}).get(roy_id, 0))
+	var gouv := str(roy.government_type)
+	var ok := false
+	match type:
+		"commercial":
+			ok = rep >= int(ac.commercial.reputation)
+		"non_agression":
+			ok = rep >= int(ac.non_agression.reputation) and not (gouv in ac.non_agression.exclut)
+		"alliance":
+			ok = rep >= int(ac.alliance.reputation) and (gouv in ac.alliance.gouvernances)
+		"tribut":
+			ok = true
+			type = "tribut_recoit" if defense_totale() > float(_ry().pnj.force_par_cellule) * float(roy.territory_cells.size()) else "tribut_paie"
+	if not ok:
+		EventBus.emettre(&"journal", [&"journal.accord_refuse", {"nom": roy.nom, "accord": "accord." + type}])
+		return false
+	territoire.accords[roy_id] = type
+	EventBus.emettre(&"journal", [&"journal.accord", {"nom": roy.nom, "accord": "accord." + type}])
+	return true
+
+
+## Les tributs hebdomadaires et les renforts d'alliance.
+func _semaine_accords() -> void:
+	var ac: Dictionary = _ry().accords
+	for roy_id in territoire.accords.keys():
+		match str(territoire.accords[roy_id]):
+			"tribut_paie":
+				var n := int(ac.tribut.paie)
+				if int(territoire.tresor) >= n:
+					territoire.tresor = int(territoire.tresor) - n
+					EventBus.emettre(&"journal", [&"journal.tribut", {"n": n, "sens": "tribut.verse"}])
+				else:
+					territoire.accords.erase(roy_id)   # tribut impayé : la paix tombe
+			"tribut_recoit":
+				territoire.tresor = int(territoire.tresor) + int(ac.tribut.recoit)
+				EventBus.emettre(&"journal", [&"journal.tribut", {"n": int(ac.tribut.recoit), "sens": "tribut.recu"}])
+
+
 # ---------------------------------------------------------------- défense, raids, gouvernance (étape 10.3)
 
 func changer_gouvernance(id: String) -> bool:
@@ -1151,6 +1335,9 @@ func defense_totale() -> float:
 	total += minf(float(d.mur_max), float(murs) / float(d.mur_par))
 	if not str(territoire.gouvernance).is_empty():
 		total *= float(GameData.entree("governments", str(territoire.gouvernance)).defense_mult)
+	for roy_id in territoire.accords.keys():
+		if str(territoire.accords[roy_id]) == "alliance":
+			total += float(_ry().accords.alliance.defense)
 	return total
 
 
@@ -1173,11 +1360,20 @@ func _jet_raid(e: Dictionary, tick: int) -> void:
 	var rep := int(e.get("reputations", {}).get("_globale", 0))
 	var valeur := valeur_territoire()
 	var proba := clampf(float(r.proba_base) + float(r.par_corruption) * monde.corruption_de(monde.cellule_camp) / 100.0 + float(r.par_valeur) * valeur + float(r.par_reputation) * float(maxi(0, -rep)), 0.0, float(r.proba_max))
+	var hostile: Dictionary = {}
+	if bool(territoire.royaume):   # les royaumes hostiles n'attaquent qu'un royaume reconnu (Raids et menaces)
+		for roy in royaumes_voisins():
+			var accord := str(territoire.accords.get(str(roy.id), ""))
+			if relation_royaume(e, roy) == "hostile" and not (accord in ["non_agression", "alliance", "tribut_paie", "tribut_recoit"]):
+				proba = minf(float(r.proba_max), proba + float(_ry().accords.raid_hostile))
+				hostile = roy
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([graine, "raid", monde.semaine_courante])
 	if rng.randf() >= proba:
 		return
 	var force := valeur * rng.randf_range(float(r.force_bornes[0]), float(r.force_bornes[1])) / float(r.echelle_force)
+	if not hostile.is_empty():
+		EventBus.emettre(&"journal", [&"journal.raid_royaume", {"nom": hostile.nom}])
 	if lieu == "camp":
 		_lancer_raid_reel(force, tick)
 	else:
@@ -2557,6 +2753,9 @@ func reputation(e: Dictionary, pnj: Dictionary, acte: String) -> void:
 	pnj.social.relations[e.id] = clampi(relation_de(pnj, e) + g0, -100, 100)
 	if not village.is_empty():
 		e.reputations[village] = clampi(rep_v + int(gains[1]), -100, 100)
+	var roy := str(pnj.get("royaume", ""))
+	if not roy.is_empty():
+		e.reputations[roy] = clampi(int(e.reputations.get(roy, 0)) + int(gains[1]), -100, 100)
 	e.reputations["_globale"] = clampi(int(e.reputations.get("_globale", 0)) + int(gains[2]), -100, 100)
 	EventBus.emettre(&"journal", [&"journal.reputation", {"nom": pnj.name_key, "pnj": int(pnj.social.relations[e.id]), "village": village if not village.is_empty() else "—", "rep": int(e.reputations.get(village, 0))}])
 	if relation_de(pnj, e) <= int(rp.hostile_seuil):
@@ -2627,6 +2826,7 @@ func _peupler_fenetre() -> void:
 					x["poste"] = pos
 					x["place"] = monde.pos_monde(cell, v.centre)
 					x["village"] = str(v.nom)
+					x["royaume"] = str(v.get("royaume", ""))
 					x.ancre = pos
 			EventBus.emettre(&"journal", [&"journal.village", {"nom": v.nom}])
 
@@ -2644,6 +2844,8 @@ func donner(e: Dictionary, uid: String) -> void:
 				return
 		e.sac.append(uid)
 		EventBus.emettre(&"journal", [&"journal.loot", {"nom": e.name_key, "objet": nom_objet(uid)}])
+		if e.controle == "joueur" and lieu == "camp":
+			_infraction(e, "objet", str(it.get("base", "")), e.pos, uid)
 
 
 ## Le nom affichable d'un objet : {"base": name_key, "affixe": id ou "", "params": {}} — le client formate.
@@ -3771,6 +3973,8 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		EventBus.emettre(&"journal", [&"journal.mort", {"nom": cible.name_key}])
 		EventBus.emettre(&"creature_killed", [cible.id, source])
 		_quetes_sur_mort(cible, source)
+		if not att.is_empty() and att.controle == "joueur" and cible.camp == "civil":
+			_infraction(att, "comportement", "meurtre", cible.pos, "")
 		if cible.has("maitre"):
 			_mort_compagnon(cible)
 		_declencher(cible, "testament", cible.pos)   # la charge part quand le porteur tombe

@@ -58,6 +58,9 @@ Génération des lois arbitraires (flavor, 14.4) : au moment de générer
 
 **Information locale ([[L'information comme récompense]]) :** au palier 20-49, un PNJ renseigne *les lois du royaume et leurs sévérités*.
 
+> [!success] Codé le 2026-08-28 — étape 10.4
+> `Simulation._infraction(e, type, cible, pos)` : lookup des `laws` du royaume de la cellule ; **détection** = le PNJ témoin le plus proche qui voit le joueur (portée de Perception, ligne de vue) fait un jet opposé `1d20 + Perception/2` contre `1d20 + niveau de Discrétion` ; sans témoin, rien. Conséquences : `amende:N` (débit, sinon confiscation d'un objet), `confiscation`, `gardes_hostiles` (les gardes du royaume passent à −100 de relation) ; réputation envers le royaume −sévérité (amende 5, confiscation 10, gardes 30). Événements branchés : meurtre d'un civil, vol (prendre dans un contenant d'une cellule-village hors territoire), objet interdit au ramassage/achat. Anarchie : `laws` vide.
+
 ## Liens
 - **Dépend de** : [[Gouvernance, lois et diplomatie]], [[Schéma royaume]], [[IA des créatures]], [[Jet de compétence universel]]
 - **Alimente** : [[Réputation et relations]], [[Prix suggéré]], [[Véhicules]], [[Voie de rédemption]]

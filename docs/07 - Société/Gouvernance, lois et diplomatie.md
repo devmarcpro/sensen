@@ -42,6 +42,9 @@ Le territoire du joueur devient mécaniquement un royaume à part entière — a
 > [!success] Codé le 2026-08-28 — étape 10.3, la gouvernance du joueur
 > Les six types sont un catalogue `data/governments/` (`base_rate`, `defense_mult`, `succession`, `meurtre_legal`, `leadership`) — décision : un catalogue à part, les royaumes (`data/kingdoms/`) y font référence par `government_type`. Au seuil 8 cellules + 5 résidents, le territoire devient royaume en **monarchie héréditaire** par défaut ; changement dans l'écran de gestion (G) : **transition de 4 semaines**, **−10 d'humeur** immédiat ; l'entretien est multiplié par `base_rate / 0,08`. Lois, douanes, diplomatie : 10.4.
 
+> [!success] Codé le 2026-08-28 — étape 10.4, douanes et accords
+> **Douanes** : à l'achat comme à la vente chez un PNJ d'un royaume, `prix = prix suggéré × (1 − tarif[catégorie])` à la vente, `× (1 + tarif)` à l'achat ; `tarif ≥ 1` → refus ; catégorie = celle du matériau dominant de l'objet, sinon `tariff_default`. L'origine du bien n'est pas suivie (simplification : toute transaction est taxée). **Accords** (écran de gestion, touche T sur un royaume voisin — voisin = territoire à moins de 3 cellules du tien) : commercial (réputation ≥ 20, tarifs −50 %), non-agression (≥ 40, pas anarchie, plus de raids de ce royaume), alliance défensive (≥ 60, république ou monarchie, +5 de défense), tribut (tu paies 50 or/semaine sur le trésor contre la paix ; si ta défense dépasse la force du royaume — 3 × ses cellules — c'est lui qui te verse 20 or/semaine). Voisin maritime / terrestre : non distingué (les territoires ne franchissent pas l'eau, un voisin est donc toujours terrestre).
+
 ## Liens
 - **Dépend de** : [[Expansion territoriale]], [[Schéma royaume]], [[Familles et succession]], [[Réputation et relations]]
 - **Alimente** : [[Lois et infractions]], [[Défense et raids]], [[Génération des royaumes PNJ]], [[Raids et menaces]]

@@ -63,6 +63,149 @@ func couches_a(x: int, y: int) -> Dictionary:
 	return v
 
 
+## Les royaumes PNJ d'un secteur (Génération des royaumes PNJ) : déterministes, lecture pure des bruits.
+var royaumes_cache: Dictionary = {}   # Vector2i (secteur) → {id: royaume}
+var royaume_par_cellule: Dictionary = {}   # Vector2i (cellule) → id
+
+
+func secteur_de(c: Vector2i) -> Vector2i:
+	var s: int = int(GameData.config("combat_rules").royaume.pnj.secteur)
+	return Vector2i(floori(float(c.x) / float(s)), floori(float(c.y) / float(s)))
+
+
+func royaume_de(c: Vector2i) -> Dictionary:
+	var sect := secteur_de(c)
+	if not royaumes_cache.has(sect):
+		royaumes_secteur(sect)
+	var id: String = str(royaume_par_cellule.get(c, ""))
+	return royaumes_cache[sect].get(id, {}) if not id.is_empty() else {}
+
+
+func royaumes_secteur(sect: Vector2i) -> Dictionary:
+	if royaumes_cache.has(sect):
+		return royaumes_cache[sect]
+	var cfg: Dictionary = GameData.config("combat_rules").royaume.pnj
+	var s: int = int(cfg.secteur)
+	var taille: int = int(planete.taille_cellule)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, sect.x, sect.y, "royaumes"])
+	var res: Dictionary = {}
+	royaumes_cache[sect] = res
+	# Les cellules-villages du secteur, triées par danger croissant.
+	var villages: Array = []
+	for y in s:
+		for x in s:
+			var c := Vector2i(sect.x * s + x, sect.y * s + y)
+			if terre_a(c) and bool(poi_de(c).get("village", false)):
+				villages.append({"c": c, "danger": valeur("danger", c.x * taille + taille / 2, c.y * taille + taille / 2)})
+	if villages.is_empty():
+		return res
+	villages.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a.danger) < float(b.danger))
+	var n := rng.randi_range(0, int(cfg.capitales_max))
+	var gouvs: Dictionary = GameData.catalogues.governments
+	var cultures: Dictionary = GameData.catalogues.name_cultures
+	var pool: Dictionary = GameData.config("absurd_laws_pool")
+	var ordre: Array = []
+	for k in mini(n, villages.size()):
+		var cap: Vector2i = villages[k].c
+		var id := "royaume_%d_%d_%d" % [sect.x, sect.y, k]
+		# Taille.
+		var tirage := rng.randf()
+		var cumul := 0.0
+		var taille_id := "hameau"
+		var cellules_max := 1
+		for t in cfg.tailles:
+			cumul += float(t[2])
+			if tirage <= cumul:
+				taille_id = str(t[0])
+				cellules_max = int(t[1])
+				break
+		# Identité : race par le biome de la capitale, culture par affinité, gouvernance pondérée.
+		var b: Dictionary = biomes.get(biome_a(cap.x * taille + taille / 2, cap.y * taille + taille / 2), {})
+		var race := str(b.get("race_dominante", "humain"))
+		var culture := Noms.culture_pour(race, cultures, rng)
+		var gouv := _tirer_pondere(cfg.gouvernances, rng)
+		var g: Dictionary = gouvs.get(gouv, {})
+		var lois: Array = []
+		if not bool(g.get("meurtre_legal", false)):
+			lois.append({"id": "loi_meurtre", "type": "comportement", "target": "meurtre", "status": "illegal", "consequence": "gardes_hostiles"})
+			lois.append({"id": "loi_vol", "type": "comportement", "target": "vol", "status": "illegal", "consequence": "amende:50"})
+		if rng.randf() < float(pool.chance):
+			for a in rng.randi_range(1, int(pool.max)):
+				var obj: String = str(pool.objets[rng.randi() % pool.objets.size()])
+				lois.append({"id": "loi_" + obj, "type": "objet", "target": obj, "status": "illegal", "consequence": str(pool.consequences[rng.randi() % pool.consequences.size()])})
+		var tarifs: Dictionary = {}
+		for k2 in rng.randi_range(1, 2):
+			var cat: String = str(cfg.tarif_categories[rng.randi() % cfg.tarif_categories.size()])
+			tarifs[cat] = snappedf(rng.randf_range(float(cfg.tarif_bornes[0]), float(cfg.tarif_bornes[1])), 0.05)
+		var nom := Noms.ville(cultures.get(culture, {}), rng) if cultures.has(culture) else "Royaume"
+		var r := {"id": id, "nom": nom, "government_type": gouv, "culture": culture, "race": race, "taille": taille_id, "capital_poi": cap, "territory_cells": [cap],
+			"taxes": {"base_rate": float(g.get("base_rate", 0.08)), "tariff_default": 0.1}, "tariffs": tarifs, "laws": lois, "diplomacy": {}, "rivals": [], "tags": []}
+		res[id] = r
+		royaume_par_cellule[cap] = id
+		ordre.append(id)
+	# Croissance par coût : Dijkstra borné depuis la capitale, dans le secteur, jamais l'eau ni un autre royaume.
+	for id in ordre:
+		var r: Dictionary = res[id]
+		var cap: Vector2i = r.capital_poi
+		var cellules_max := 1
+		for t in cfg.tailles:
+			if str(t[0]) == str(r.taille):
+				cellules_max = int(t[1])
+		var couts: Dictionary = {cap: 0.0}
+		var ouverts: Array = [cap]
+		while r.territory_cells.size() < cellules_max and not ouverts.is_empty():
+			var meilleur_i := 0
+			for i in ouverts.size():
+				if float(couts[ouverts[i]]) < float(couts[ouverts[meilleur_i]]):
+					meilleur_i = i
+			var c: Vector2i = ouverts[meilleur_i]
+			ouverts.remove_at(meilleur_i)
+			if c != cap:
+				if royaume_par_cellule.has(c):
+					continue
+				r.territory_cells.append(c)
+				royaume_par_cellule[c] = id
+			for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var v: Vector2i = c + d
+				if secteur_de(v) != sect or couts.has(v) or not terre_a(v) or royaume_par_cellule.has(v):
+					continue
+				var cout := 1.0 + float(cfg.cout_danger) * valeur("danger", v.x * taille + taille / 2, v.y * taille + taille / 2) + float(cfg.cout_altitude) * maxf(0.0, valeur("altitude", v.x * taille + taille / 2, v.y * taille + taille / 2) - 0.5)
+				couts[v] = float(couts[c]) + cout
+				ouverts.append(v)
+	# Diplomatie initiale entre royaumes du secteur : compatibilité de gouvernance et de race.
+	for i in ordre.size():
+		for j in ordre.size():
+			if i == j:
+				continue
+			var a: Dictionary = res[ordre[i]]
+			var b2: Dictionary = res[ordre[j]]
+			var score := 0.0
+			score += 0.3 if a.race == b2.race else -0.2
+			score += 0.2 if a.government_type == b2.government_type else 0.0
+			if a.government_type == "dictature_militaire" and b2.government_type == "dictature_militaire":
+				score -= 0.6
+			if a.government_type == "anarchie" or b2.government_type == "anarchie":
+				score -= 0.3
+			score += rng.randf_range(-0.3, 0.3)
+			a.diplomacy[b2.id] = "hostile" if score < -0.3 else ("tension" if score < 0.0 else ("cordial" if score < 0.4 else "allie"))
+	return res
+
+
+func _tirer_pondere(poids: Dictionary, rng: RandomNumberGenerator) -> String:
+	var total := 0.0
+	var ids: Array = poids.keys()
+	ids.sort()
+	for k in ids:
+		total += float(poids[k])
+	var t := rng.randf() * total
+	for k in ids:
+		t -= float(poids[k])
+		if t <= 0.0:
+			return str(k)
+	return str(ids[0])
+
+
 ## Les POI d'une cellule (Unification macro-micro) : hash(seed, cx, cy), densités de la planète × poids du biome.
 func poi_de(c: Vector2i, camp: bool = false) -> Dictionary:
 	var res := {"donjon": camp, "filon_majeur": false}
@@ -391,8 +534,11 @@ func _poser_village(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator) -
 	# La culture et le nom du village : la race dominante (humain) tire parmi ses cultures.
 	var cultures: Dictionary = GameData.catalogues.name_cultures
 	var culture_id := Noms.culture_pour("humain", cultures, rng)
+	var roy := royaume_de(cell)
+	if not roy.is_empty() and cultures.has(str(roy.culture)):
+		culture_id = str(roy.culture)
 	var nom_village := Noms.ville(cultures.get(culture_id, {}), rng) if not culture_id.is_empty() else "Hameau"
-	e.village = {"nom": nom_village, "culture": culture_id, "centre": centre, "batiments": [], "pnj": []}
+	e.village = {"nom": nom_village, "culture": culture_id, "centre": centre, "batiments": [], "pnj": [], "royaume": str(roy.get("id", ""))}
 	# La place : sol de la palette, dégagée.
 	for dy in range(-rayon, rayon + 1):
 		for dx in range(-rayon, rayon + 1):

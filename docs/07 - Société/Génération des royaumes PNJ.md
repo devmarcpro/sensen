@@ -100,6 +100,9 @@ LE ROYAUME DU JOUEUR naît différemment (14.4) : par ses claims —
   même schéma B.9, gouvernance choisie par le joueur à la fondation (14.4).
 ```
 
+> [!success] Codé le 2026-08-28 — étape 10.4, une première génération
+> `Surface.royaumes_secteur(secteur)` : le monde (1 024 cellules de côté) est découpé en **secteurs de 32 × 32 cellules** (décision : l'échelle du monde actuel, pas 64) ; par secteur, `hash(seed, secteur)` tire **0 à 2 capitales** parmi les cellules-villages du secteur les moins corrompues (lecture pure des couches de bruit et de `poi_de` — connaissable sans terrain). Taille tirée 40/30/20/10 % → territoire de 1 / 4 / 10 / 20 cellules par **croissance par coût** (danger et altitude renchérissent, **jamais l'eau**, jamais une cellule d'un autre royaume ; **le territoire reste dans son secteur** — simplification, les frontières de secteur valent frontière). Identité : race dominante par le biome de la capitale (affinités `race_affinity` des cultures), culture, gouvernance (tirage), taxes, tarifs (une à deux catégories renchéries), lois (meurtre et vol illégaux sauf anarchie, **0-2 lois absurdes à 15 %** depuis `data/absurd_laws_pool.json`), diplomatie initiale entre royaumes d'un même secteur (compatibilité de gouvernance). Les villages d'un territoire prennent la culture du royaume ; les PNJ portent `royaume`. Villes, halls et boutiques par taille, race à 100 % des îles, POI « passage » : **à faire**. La carte du monde teinte les territoires.
+
 ## Liens
 - **Dépend de** : [[Décision — Monde fini, continents et océan]], [[Unification macro-micro]], [[Schéma royaume]], [[Culture de nommage — schéma]], [[Races]], [[Niveau de danger]]
 - **Alimente** : [[Gouvernance, lois et diplomatie]], [[Génération de noms]], [[Halls de guilde]], [[Villages PNJ — repeuplement et décimation]], [[L'information comme récompense]]

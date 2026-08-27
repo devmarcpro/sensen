@@ -1,5 +1,5 @@
 {
-  "_doc": "Royaume (docs: Schéma royaume / B.9). Générés par E.27 ; ce template sert aux royaumes scriptés/de test.",
+  "_doc": "Royaume (docs: Schéma royaume / B.9). Générés par E.27 (Surface.royaumes_secteur) ; ce template sert aux royaumes scriptés/de test. rivals : rivalités déclarées (Réputation et relations).",
   "name_key": "kingdom.<id>.name",
   "government_type": "monarchie_hereditaire",
   "culture": "culture_latine",
@@ -12,5 +12,6 @@
   "tariffs": {},
   "laws": [],
   "diplomacy": {},
-  "tags": []
+  "tags": [],
+  "rivals": []
 }

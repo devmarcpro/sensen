@@ -42,6 +42,7 @@ func _ready() -> void:
 	test_territoire()
 	test_agriculture_et_boutique()
 	test_defense_et_raids()
+	test_royaumes_pnj()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1571,6 +1572,73 @@ func test_defense_et_raids() -> void:
 		s._semaine_territoire(j)
 	verifier(s.territoire.gouvernance == "dictature_militaire" and int(s.territoire.transition) == 0, "quatre semaines plus tard : dictature militaire")
 	verifier(s.defense_totale() > 1.0, "dictature : défense ×1,5 (%.2f)" % s.defense_totale())
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Étape 10.4 : royaumes PNJ, lois, douanes, accords
+
+func test_royaumes_pnj() -> void:
+	var s := Simulation.new(77)
+	s.charger_camp()
+	var surf = s.monde.surface
+	# Des royaumes déterministes : on parcourt des secteurs jusqu'à en trouver.
+	var trouve: Dictionary = {}
+	var sect := Vector2i.ZERO
+	for k in 40:
+		sect = surf.secteur_de(s.monde.cellule_camp) + Vector2i(k % 7 - 3, k / 7 - 3)
+		var rs: Dictionary = surf.royaumes_secteur(sect)
+		if not rs.is_empty():
+			trouve = rs
+			break
+	verifier(not trouve.is_empty(), "des royaumes existent dans les secteurs voisins (%d dans le secteur %s)" % [trouve.size(), str(sect)])
+	if not trouve.is_empty():
+		var roy: Dictionary = trouve.values()[0]
+		verifier(roy.territory_cells.size() >= 1 and surf.royaume_de(roy.capital_poi).id == roy.id, "%s (%s, %s) : %d cellules, capitale attribuée" % [roy.nom, roy.taille, roy.government_type, roy.territory_cells.size()])
+		var terre := true
+		for c in roy.territory_cells:
+			terre = terre and surf.terre_a(c)
+		verifier(terre, "le territoire ne franchit jamais l'eau")
+		var meme: Dictionary = surf.royaumes_secteur(sect)
+		verifier(meme.size() == trouve.size() and str(meme.values()[0].nom) == str(roy.nom), "génération déterministe et mise en cache")
+	# Un royaume scripté pour tester lois, douanes et accords.
+	var camp: Vector2i = s.monde.cellule_camp
+	var voisine: Vector2i = camp + Vector2i(1, 0)
+	var r := {"id": "royaume_test", "nom": "Testia", "government_type": "monarchie_hereditaire", "culture": "latine", "race": "humain", "taille": "hameau", "capital_poi": voisine, "territory_cells": [voisine],
+		"taxes": {"base_rate": 0.08, "tariff_default": 0.1}, "tariffs": {"metal": 0.5}, "laws": [{"id": "loi_pdt", "type": "objet", "target": "pomme_de_terre", "status": "illegal", "consequence": "confiscation"}, {"id": "loi_meurtre", "type": "comportement", "target": "meurtre", "status": "illegal", "consequence": "gardes_hostiles"}], "diplomacy": {}, "rivals": [], "tags": []}
+	surf.royaumes_cache[surf.secteur_de(voisine)] = {"royaume_test": r}
+	surf.royaume_par_cellule[voisine] = "royaume_test"
+	surf.royaume_par_cellule[camp] = "royaume_test"   # pour le test, le camp est en Testia
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	# Douane : un marchand de Testia taxe le métal à 50 %.
+	var m := s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
+	s._habiller_pnj(m, GameData.entree("creatures", "villageois"))
+	m.tags.append("commerce_possible")
+	m["royaume"] = "royaume_test"
+	m.or = 500
+	var lingot := s.generer_objet("materiau_brut", 1, {}, "commun", 0)
+	lingot.materiau = "fer"
+	lingot["forme"] = "lingot"
+	j.sac.append(lingot.uid)
+	verifier(absf(s.tarif_de(lingot.uid, m) - 0.5) < 0.01, "tarif du fer : 50 %%")
+	var p0 := s.prix_suggere(lingot.uid, m, j)
+	var or0: int = int(j.or)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "vendre", "pnj": m.id, "objet": lingot.uid}) and int(j.or) == or0 + maxi(1, roundi(float(p0.achat) * 0.5)), "vendre du fer : la douane retient la moitié")
+	# Loi absurde : la pomme de terre est confisquée si un témoin le voit (Perception 30 contre Discrétion 0 → détecté, sauf jet).
+	m.corps.stats.perception = 40
+	var detecte := 0
+	for k in 6:
+		var pdt := s.generer_objet("pomme_de_terre", 1, {}, "commun", 0)
+		s.donner(j, pdt.uid)
+		if not (pdt.uid in j.sac) and s._pile_objet(j, "pomme_de_terre").is_empty():
+			detecte += 1
+	verifier(detecte >= 1, "objet interdit : confisqué au moins une fois sur six (%d)" % detecte)
+	verifier(int(j.get("reputations", {}).get("royaume_test", 0)) < 0, "la réputation envers Testia a baissé (%d)" % int(j.get("reputations", {}).get("royaume_test", 0)))
+	# Accords : à 20 de réputation l'accord commercial passe et divise les tarifs par deux.
+	j.reputations["royaume_test"] = 25
+	verifier(not s.proposer_accord(j, "royaume_test", "alliance"), "alliance refusée à 25 de réputation")
+	verifier(s.proposer_accord(j, "royaume_test", "commercial") and absf(s.tarif_de(lingot.uid, m) - 0.25) < 0.01, "accord commercial : tarif du fer 25 %%")
+	verifier(s.relation_royaume(j, r) == "neutre", "relation neutre entre 0 et 30")
 	s.monde.fermer()
 
 

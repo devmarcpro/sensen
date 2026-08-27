@@ -528,6 +528,88 @@
       "transition_semaines": 4,
       "malus_humeur": -10,
       "base_rate_ref": 0.08
+    },
+    "pnj": {
+      "secteur": 32,
+      "capitales_max": 2,
+      "tailles": [
+        [
+          "hameau",
+          1,
+          0.4
+        ],
+        [
+          "cite",
+          4,
+          0.3
+        ],
+        [
+          "petit",
+          10,
+          0.2
+        ],
+        [
+          "grand",
+          20,
+          0.1
+        ]
+      ],
+      "cout_danger": 4.0,
+      "cout_altitude": 2.0,
+      "gouvernances": {
+        "monarchie_hereditaire": 3,
+        "republique_elue": 2,
+        "theocratie": 1,
+        "ploutocratie": 1,
+        "dictature_militaire": 1,
+        "anarchie": 1
+      },
+      "tarif_categories": [
+        "gemme",
+        "metal",
+        "bois",
+        "vegetal",
+        "mineral"
+      ],
+      "tarif_bornes": [
+        0.15,
+        0.5
+      ],
+      "force_par_cellule": 3.0,
+      "rayon_voisin": 3
+    },
+    "lois": {
+      "severite": {
+        "amende": 5,
+        "confiscation": 10,
+        "gardes_hostiles": 30
+      },
+      "portee_temoin_max": 12
+    },
+    "accords": {
+      "commercial": {
+        "reputation": 20,
+        "tarif_mult": 0.5
+      },
+      "non_agression": {
+        "reputation": 40,
+        "exclut": [
+          "anarchie"
+        ]
+      },
+      "alliance": {
+        "reputation": 60,
+        "gouvernances": [
+          "republique_elue",
+          "monarchie_hereditaire"
+        ],
+        "defense": 5.0
+      },
+      "tribut": {
+        "paie": 50,
+        "recoit": 20
+      },
+      "raid_hostile": 0.1
     }
   }
 }
