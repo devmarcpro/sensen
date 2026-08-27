@@ -25,6 +25,9 @@ Cuisiner pour la croissance long terme, distiller pour la puissance court terme 
 
 **Contenu à produire :** [[Décision — Affinités de cuisine]].
 
+> [!success] Codé le 2026-08-28 — l'alchimie (reliquat de l'étape 10)
+> **Parties de créatures** : toute bête tuée laisse, avec sa dépouille, **une partie** tirée parmi œil, peau, griffe, dent, os (`combat_rules.alchimie.parties`, chacune orientée vers une stat : œil → Perception, griffe → Force, dent → Dextérité, peau → Endurance, os → Volonté). Ce sont des consommables empilables (`items/oeil.json`…) — pas encore des matériaux paramétriques (la valeur de la stat de la créature source n'est pas portée : simplification). **Distiller** à l'Alambic (compétence Alchimie) : une partie + une culture (toute plante cultivée, entrée `tag: culture` des recettes) → une **potion** de la stat correspondante ; qualité d'artisanat (A.3) sur Alchimie : **durée = 3 000 ticks × qualité**, **intensité** : qualité ≥ 1,3 → potion *forte* (+6 au lieu de +3). Les statuts portent désormais des modificateurs `stat:<nom>` (add) pris en compte par `Etres.recalculer` à l'application et à l'expiration.
+
 ## Liens
 - **Dépend de** : [[Qualité d'artisanat]], [[Stations de transformation]], [[Potentiel]], [[Faim]]
 - **Alimente** : [[Nourriture, potentiel et potions]], [[Potions]], [[Nourriture]], [[Statuts]]

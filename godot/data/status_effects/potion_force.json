@@ -1,0 +1,19 @@
+{
+  "name_key": "status.potion_force.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 100,
+  "duree_ticks": 3000,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "stat:force",
+      "add": 3
+    }
+  ],
+  "tags": [
+    "positif",
+    "potion"
+  ]
+}

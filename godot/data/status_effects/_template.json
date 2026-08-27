@@ -1,5 +1,5 @@
 {
-  "_doc": "Statut (docs: Statuts / F.4, Statuts de contrôle et anti-stunlock). Un « tour » = periode_ticks (10). controle=true : contrôle dur, plafonné à 20 ticks, pas de réapplication dans les 50 ticks (combat_rules.anti_stunlock). modifiers : {cible: cout_ticks|degats|armure|compteur|deplacement|garde, mult|add|bloque}.",
+  "_doc": "Statut (docs: Statuts / F.4, Statuts de contrôle et anti-stunlock). Un « tour » = periode_ticks (10). controle=true : contrôle dur, plafonné à 20 ticks, pas de réapplication dans les 50 ticks (combat_rules.anti_stunlock). modifiers : {cible: cout_ticks|degats|armure|compteur|deplacement|garde|stat:<force|dexterite|endurance|volonte|perception|charisme>, mult|add|bloque}.",
   "name_key": "status.<id>.name",
   "degats_des": null,
   "element": null,

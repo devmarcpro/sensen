@@ -1,0 +1,20 @@
+{
+  "name_key": "item.potion_volonte.name",
+  "type": "consommable",
+  "equip_slot": "",
+  "nutrition": 0,
+  "soin_des": "",
+  "mana": 0,
+  "statut": "potion_volonte",
+  "statut_ticks": 3000,
+  "risque": {},
+  "potentiel": {},
+  "cru": false,
+  "poids": 0,
+  "quantite": 1,
+  "tags": [
+    "consommable",
+    "empilable",
+    "potion"
+  ]
+}

@@ -91,6 +91,9 @@
     "royaume": {
       "type": "object"
     },
+    "alchimie": {
+      "type": "object"
+    },
     "camp": {
       "type": "object"
     }

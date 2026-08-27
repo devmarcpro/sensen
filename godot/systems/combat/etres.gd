@@ -115,6 +115,13 @@ static func creer_personnage(nom_key: String, race_id: String, classe_id: String
 ## capacité de jauge, tags acquis. À appeler à l'instanciation et à chaque changement d'équipement.
 static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionary, regles: Regles) -> void:
 	var stats: Dictionary = e.corps.stats.duplicate()
+	# Les statuts qui touchent une stat (potions : modifiers cible "stat:<nom>", add).
+	var defs_statuts: Dictionary = GameData.catalogues.get("status_effects", {})
+	for s: Dictionary in e.get("statuts", []):
+		for mod: Dictionary in defs_statuts.get(s.id, {}).get("modifiers", []):
+			if str(mod.cible).begins_with("stat:") and mod.has("add"):
+				var nom_stat := str(mod.cible).trim_prefix("stat:")
+				stats[nom_stat] = int(stats.get(nom_stat, 0)) + int(mod.add)
 	var comp: Dictionary = e.competences.duplicate()
 	var tags: Array = e.get("tags_acquis_race", []).duplicate()
 	var segments_bonus := 0
@@ -213,6 +220,13 @@ static func _munitions(equip: Dictionary, items: Dictionary) -> int:
 
 
 ## Un statut actif portant ce tag ?
+static func statut_touche_stats(id: String, defs: Dictionary) -> bool:
+	for mod: Dictionary in defs.get(id, {}).get("modifiers", []):
+		if str(mod.cible).begins_with("stat:"):
+			return true
+	return false
+
+
 static func a_statut_tag(e: Dictionary, tag: String, defs: Dictionary) -> bool:
 	for s: Dictionary in e.statuts:
 		if tag in defs.get(s.id, {}).get("tags", []):

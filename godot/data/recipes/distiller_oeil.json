@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.distiller_oeil.name",
+  "station": "alambic",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "item": "oeil",
+      "forme": "",
+      "amount": 1
+    },
+    {
+      "tag": "culture",
+      "forme": "",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "potion_perception",
+    "amount": 1
+  },
+  "fuel": null
+}

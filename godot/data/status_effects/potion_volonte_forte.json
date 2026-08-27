@@ -1,0 +1,19 @@
+{
+  "name_key": "status.potion_volonte_forte.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 100,
+  "duree_ticks": 3000,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "stat:volonte",
+      "add": 6
+    }
+  ],
+  "tags": [
+    "positif",
+    "potion"
+  ]
+}

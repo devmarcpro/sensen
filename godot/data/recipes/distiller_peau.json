@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.distiller_peau.name",
+  "station": "alambic",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "item": "peau",
+      "forme": "",
+      "amount": 1
+    },
+    {
+      "tag": "culture",
+      "forme": "",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "potion_endurance",
+    "amount": 1
+  },
+  "fuel": null
+}

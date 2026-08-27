@@ -44,6 +44,7 @@ func _ready() -> void:
 	test_defense_et_raids()
 	test_royaumes_pnj()
 	test_conquete_et_succession()
+	test_alchimie()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1025,7 +1026,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 37, "9 stations, 37 recettes plates (9 transformations, 16 meubles, 9 stations, 3 plats)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 42, "9 stations, 42 recettes plates (9 transformations, 16 meubles, 9 stations, 3 plats, 5 potions)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -1709,6 +1710,50 @@ func test_conquete_et_succession() -> void:
 	var pop0 := s.population_village("Bourg-Test").size()
 	s._semaine_royaumes_pnj()
 	verifier(s.population_village("Bourg-Test").size() == pop0 + 1, "repeuplement : un habitant de plus (%d → %d)" % [pop0, s.population_village("Bourg-Test").size()])
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Alchimie : parties, Alambic, potions
+
+func test_alchimie() -> void:
+	var s := Simulation.new(81)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	# Un loup meurt : sa dépouille porte une partie.
+	var loup := s.ajouter("loup", j.pos + Vector2i(2, 0), "ia")
+	s._appliquer_degats(loup, 9999, j.id, {})
+	var butin: Array = s.contenants.get(s.grille.idx(loup.pos), [])
+	var partie := ""
+	for uid in butin:
+		if "partie" in s.items[uid].get("tags", []):
+			partie = str(s.items[uid].base)
+	verifier(not partie.is_empty(), "une partie de bête dans la dépouille (%s)" % partie)
+	# Distiller : griffe + blé à l'Alambic → potion de force.
+	var griffe := s.generer_objet("griffe", 1, {}, "commun", 0)
+	var ble := s.generer_objet("ble", 1, {}, "commun", 0)
+	var alambic := s.generer_objet("station_alambic", 1, {}, "commun", 0)
+	for o in [griffe, ble, alambic]:
+		j.sac.append(o.uid)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "fabriquer", "recette": "distiller_griffe"}) and not s._pile_objet(j, "potion_force").is_empty(), "distiller une griffe et du blé : une potion de force")
+	verifier(not (griffe.uid in j.sac) and not (ble.uid in j.sac), "les ingrédients sont consommés")
+	var potion := s._pile_objet(j, "potion_force")
+	potion.qualite = 1.5
+	potion.statut = "potion_force_forte"
+	var force0 := int(j.corps.stats.force)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "manger", "objet": potion.uid}), "boire la potion")
+	var actif := false
+	var fin := 0
+	for st in j.statuts:
+		if st.id == "potion_force_forte":
+			actif = true
+			fin = int(st.fin)
+	verifier(actif and fin - s.horloge_monde.ticks >= 4400, "statut fort actif, durée × qualité (%d ticks)" % (fin - s.horloge_monde.ticks))
+	verifier(int(j.stats_eff.force) == force0 + 6, "+6 de Force pendant l'effet (%d → %d)" % [force0, int(j.stats_eff.force)])
+	j.statuts[0].fin = s.horloge_monde.ticks
+	s._tiquer_statuts(j, s.horloge_monde.ticks)
+	verifier(int(j.stats_eff.force) == force0, "à l'expiration la Force revient (%d)" % int(j.stats_eff.force))
 	s.monde.fermer()
 
 

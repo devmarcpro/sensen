@@ -2649,6 +2649,11 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 					trouvee = it
 					break
 				continue
+			if entree.has("tag"):   # une entrée par tag d'objet (toute culture pour une potion)
+				if str(entree.tag) in it.get("tags", []) and int(it.get("quantite", 1)) >= besoin:
+					trouvee = it
+					break
+				continue
 			if it.get("type", "") != "materiau" or str(it.get("forme", "brut")) != forme or int(it.quantite) < besoin:
 				continue
 			var mat: Dictionary = GameData.catalogues.materials.get(str(it.materiau), {})
@@ -2658,7 +2663,7 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 				continue
 			trouvee = it
 			break
-		plan.entrees.append({"pile": trouvee, "besoin": besoin, "forme": forme, "filtre": str(entree.get("material", entree.get("category", entree.get("item", ""))))})
+		plan.entrees.append({"pile": trouvee, "besoin": besoin, "forme": forme, "filtre": str(entree.get("material", entree.get("category", entree.get("item", entree.get("tag", "")))))})
 		if trouvee.is_empty():
 			plan.faisable = false
 		elif mat_sortie.is_empty() and trouvee.has("materiau"):
@@ -2700,6 +2705,8 @@ func _fabriquer(e: Dictionary, rid: String, tick: int) -> bool:
 			if not inst.is_empty():
 				if inst.get("type", "") == "consommable":   # un plat : qualité A.3 sur Cuisine, empilé
 					inst.qualite = snappedf(regles.qualite_craft(regles.niveau(e.competences_eff, str(r.craft_skill)), rng), 0.01)
+					if "potion" in inst.get("tags", []) and float(inst.qualite) >= float(regles.r.alchimie.seuil_forte) and statuts_defs.has(str(inst.get("statut", "")) + "_forte"):
+						inst.statut = str(inst.statut) + "_forte"   # une potion forte (Cuisine et alchimie)
 					var pile := _pile_objet(e, str(r.output.item))
 					if not pile.is_empty():
 						pile.quantite = int(pile.quantite) + 1
@@ -3260,6 +3267,15 @@ func _drop(cible: Dictionary, source: String) -> void:
 		var v := generer_objet(str(base), profondeur, {"creature": cible.name_key}, "commun", 0)
 		if not v.is_empty():
 			uids.append(v.uid)
+	# Une partie de bête pour l'alchimie (Cuisine et alchimie) : œil, peau, griffe, dent ou os.
+	if str(regles.r.alchimie.tag_bete) in cible.get("tags", []):
+		var parties: Array = regles.r.alchimie.parties.keys()
+		parties.sort()
+		var rp := RandomNumberGenerator.new()
+		rp.seed = hash([graine, "partie", cible.id])
+		var partie := generer_objet(str(parties[rp.randi() % parties.size()]), profondeur, {"creature": cible.name_key}, "commun", 0)
+		if not partie.is_empty():
+			uids.append(partie.uid)
 	# Ce que le mort portait tombe aussi (l'équipement est une donnée d'instance).
 	for slot in cible.equipement.keys():
 		var uid: String = str(cible.equipement[slot])
@@ -3512,7 +3528,7 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 		e["huile_feu"] = true
 		EventBus.emettre(&"journal", [&"journal.huile", {"nom": e.name_key}])
 	elif not statut.is_empty():
-		appliquer_statut(e, statut, int(it.get("statut_ticks", 0)), e.id)
+		appliquer_statut(e, statut, int(float(it.get("statut_ticks", 0)) * float(it.get("qualite", 1.0))), e.id)
 	for risque in it.get("risque", {}).keys():
 		if des.reel() < float(it.risque[risque]):
 			appliquer_statut(e, str(risque), 0, e.id)
@@ -4270,6 +4286,8 @@ func appliquer_statut(cible: Dictionary, id: String, duree: int, source: String)
 				s.fin = maxi(int(s.fin), tick + duree)   # rafraîchi, jamais cumulé
 				return true
 	cible.statuts.append({"id": id, "fin": tick + duree, "prochain": tick + int(d.periode_ticks), "source": source})
+	if Etres.statut_touche_stats(id, statuts_defs):
+		Etres.recalculer(cible, items, affixes_defs, regles)
 	for mod: Dictionary in d.get("modifiers", []):
 		if mod.cible == "compteur" and mod.has("add"):
 			cible.compteur = maxi(cible.compteur, tick) + int(mod.add)
@@ -4314,6 +4332,9 @@ func _tiquer_statuts(e: Dictionary, tick: int) -> void:
 			s.prochain = int(s.prochain) + int(d.periode_ticks)
 		if int(s.fin) > tick:
 			restants.append(s)
+		elif Etres.statut_touche_stats(str(s.id), statuts_defs):
+			e.statuts = restants
+			Etres.recalculer(e, items, affixes_defs, regles)
 	e.statuts = restants
 
 
