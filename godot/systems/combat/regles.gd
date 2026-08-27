@@ -56,9 +56,26 @@ func mana_max(stats: Dictionary) -> int:
 # ---------------------------------------------------------------- tempo
 
 ## `attaque : 10 / vitesse_arme` ticks, ×2 pour la lourde (Boucle de tick).
-func ticks_attaque(fonct: Dictionary, lourde: bool) -> int:
-	var t := roundi(float(r.actions.attaque_base) / float(fonct.vitesse_base))
-	return t * int(r.actions.lourde_mult_ticks) if lourde else t
+func ticks_attaque(fonct: Dictionary, lourde: bool, arme: Dictionary = {}) -> int:
+	# la densité du manche pilote la vitesse (Stats et qualité de l'assemblage) : facteur porté par l'objet
+	var t := roundi(float(r.actions.attaque_base) / float(fonct.vitesse_base) * float(arme.get("vitesse_facteur", 1.0)))
+	return maxi(1, t) * int(r.actions.lourde_mult_ticks) if lourde else maxi(1, t)
+
+
+## Qualité d'artisanat (A.3) : max(min, N/(N+pivot) × max × aléa[a, b]) — composants, plats, potions.
+func qualite_craft(niveau: int, rng: RandomNumberGenerator) -> float:
+	var q: Dictionary = r.craft.qualite
+	var brut := float(niveau) / float(niveau + int(q.pivot)) * float(q.max) * rng.randf_range(float(q.alea[0]), float(q.alea[1]))
+	return maxf(float(q.min), brut)
+
+
+## Le palier de nom d'une qualité (Qualité d'artisanat : 8 paliers).
+func palier_qualite(q: float) -> String:
+	var nom := "miserable"
+	for p in r.craft.paliers_qualite:
+		if q >= float(p[0]):
+			nom = str(p[1])
+	return nom
 
 
 ## Portée en tuiles de Chebyshev : [min, floor(max)] (décision du 2026-08-26, Stats d'armes).

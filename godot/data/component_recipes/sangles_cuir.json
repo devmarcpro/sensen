@@ -1,0 +1,7 @@
+{
+  "component": "sangles",
+  "material_family": "cuir",
+  "station": "atelier_tissage",
+  "unlocked_by_default": true,
+  "unlock_sources": []
+}

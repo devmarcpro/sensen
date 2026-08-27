@@ -1,0 +1,7 @@
+{
+  "component": "rembourrage",
+  "material_family": "fourrure",
+  "station": "atelier_tissage",
+  "unlocked_by_default": true,
+  "unlock_sources": []
+}

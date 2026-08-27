@@ -48,6 +48,9 @@ qualite_produite = clamp_min(0.1,
 > [!success] Précisé le 2026-08-28
 > Les tables de sculpture sont abandonnées ([[Tables de sculpture]]) : la formule A.3 ne s'applique plus qu'aux composants, à l'assemblage, aux plats, aux potions et à la taille de gemme — la mention « objet sculpté » est caduque.
 
+> [!success] Codé le 2026-08-28 — `Regles.qualite_craft`
+> `qualite = max(0,1 ; N/(N+25) × 2 × aléa[0,85 ; 1,15])` (`combat_rules.craft.qualite`) sur la compétence de la station du composant ; le jet d'assemblage réutilise la formule, borné [0,7 ; 1,3]. Les 8 paliers de nom sont en locale (`qualite.<palier>`) et affichés dans le sac.
+
 ## Liens
 - **Dépend de** : [[Progression par l'usage]], [[Matériaux — 13 stats]]
 - **Alimente** : [[Stats d'un objet crafté]], [[Stats et qualité de l'assemblage]], [[Stats d'armes]], [[Armures et poids porté]], [[Prix suggéré]], [[Loot — affixes, gemmes et rareté]]

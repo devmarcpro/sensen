@@ -44,6 +44,9 @@ RECETTES EXOTIQUES : aucune différence de formule — un manche en or
 
 **Vecteur défensif du personnage ([[Wu Xing — cycles et vecteurs]]) :** l'alignement d'un personnage équipé est le **vecteur composite de ses composants**.
 
+> [!success] Codé le 2026-08-28 — `Simulation._assembler`, `combat_rules.craft`
+> `stat_finale = Σ stat_composant × poids` (poids de la note : tête 0,70 / manche 0,25 / fixations 0,05 ; plaque 0,75 / sangles 0,20 / fixations 0,05) sur les 13 stats ; `durete_base` = cette moyenne **avant** qualité ([[Ouvert — Interprétation dureté et qualité]]) ; `qualite_objet = Σ qualite_composant × poids × jet_assemblage`, jet = A.3 sur la compétence d'assemblage borné [0,7 ; 1,3] ; Wu Xing composite au prorata des poids, `element` = la dominante (celui de la tête). **Décision** (la note dit « la densité du manche pilote la vitesse » sans chiffre) : `ticks d'attaque × (1 + (densite_manche − 8) × 0,03)` — pin (4) 0,88, ébène (13) 1,15, soit l'écart de ~25-30 % de [[Stats d'armes]]. Une armure assemblée est de construction `plaque` (cuir/matelassé/mailles attendent leurs propres recettes), `durete_composite` = la moyenne pondérée.
+
 ## Liens
 - **Dépend de** : [[Craft compositionnel]], [[Qualité d'artisanat]], [[Application des stats de matériau]], [[Composant et recette d'obtention]]
 - **Alimente** : [[Stats d'armes]], [[Armure par zone et constructions]], [[Domination et multiplicateurs]], [[Armes fantomatiques]]

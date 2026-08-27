@@ -1,0 +1,7 @@
+{
+  "component": "rembourrage",
+  "material_family": "laine",
+  "station": "atelier_tissage",
+  "unlocked_by_default": true,
+  "unlock_sources": []
+}

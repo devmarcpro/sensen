@@ -1,0 +1,7 @@
+{
+  "component": "pointe",
+  "material_family": "silex",
+  "station": "tailleur_de_pierre",
+  "unlocked_by_default": true,
+  "unlock_sources": []
+}

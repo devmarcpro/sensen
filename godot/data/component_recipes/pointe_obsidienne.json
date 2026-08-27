@@ -1,0 +1,9 @@
+{
+  "component": "pointe",
+  "material_family": "obsidienne",
+  "station": "tailleur_de_pierre",
+  "unlocked_by_default": false,
+  "unlock_sources": [
+    "loot_donjon"
+  ]
+}

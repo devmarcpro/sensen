@@ -1,0 +1,9 @@
+{
+  "component": "manche_long",
+  "material_family": "lingot_metal",
+  "station": "enclume",
+  "unlocked_by_default": false,
+  "unlock_sources": [
+    "guilde_forgerons_rang_3"
+  ]
+}

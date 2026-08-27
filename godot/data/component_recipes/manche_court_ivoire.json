@@ -1,0 +1,9 @@
+{
+  "component": "manche_court",
+  "material_family": "ivoire",
+  "station": "etabli",
+  "unlocked_by_default": false,
+  "unlock_sources": [
+    "marchand_specialise"
+  ]
+}

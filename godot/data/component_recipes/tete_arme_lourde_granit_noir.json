@@ -1,0 +1,9 @@
+{
+  "component": "tete_arme_lourde",
+  "material_family": "granit_noir",
+  "station": "tailleur_de_pierre",
+  "unlocked_by_default": false,
+  "unlock_sources": [
+    "guilde_forgerons_rang_3"
+  ]
+}

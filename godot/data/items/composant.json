@@ -1,0 +1,11 @@
+{
+  "name_key": "item.composant.name",
+  "type": "composant",
+  "equip_slot": "",
+  "tags": [
+    "composant"
+  ],
+  "composant": "",
+  "materiau": "",
+  "qualite": 1.0
+}

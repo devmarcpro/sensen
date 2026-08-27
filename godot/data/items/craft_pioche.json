@@ -1,0 +1,21 @@
+{
+  "name_key": "item.craft_pioche.name",
+  "type": "outil",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "slots": {
+    "tete": "tete_outil",
+    "manche": "manche_court",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie"
+  },
+  "genre_grammatical": "fs",
+  "tags": [
+    "outil",
+    "assemble"
+  ],
+  "functionality": "pioche"
+}

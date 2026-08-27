@@ -1,0 +1,7 @@
+{
+  "name_key": "component.tete_arme_lourde.name",
+  "slot_type": "tete",
+  "used_by": [
+    "masse"
+  ]
+}

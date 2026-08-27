@@ -399,6 +399,46 @@ journal.pas_de_station,aucune station dans le sac pour {recette}
 ui.atelier,=== ATELIER (F pour fermer) — chiffre : fabriquer ===
 ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
+component.manche_court.name,Manche court
+component.manche_long.name,Manche long
+component.poignee.name,Poignée
+component.tete_outil.name,Tête d'outil
+component.lame_courte.name,Lame courte
+component.lame_longue.name,Lame longue
+component.tete_arme_lourde.name,Tête d'arme lourde
+component.pointe.name,Pointe
+component.plaque.name,Plaque
+component.sangles.name,Sangles
+component.rembourrage.name,Rembourrage
+component.fixations_std.name,Fixations standard
+component.garde.name,Garde
+component.contrepoids.name,Contrepoids
+item.craft_dague.name,Dague
+item.craft_epee.name,Épée
+item.craft_masse.name,Masse
+item.craft_lance.name,Lance
+item.craft_pioche.name,Pioche
+item.craft_casque.name,Casque
+item.craft_cuirasse.name,Cuirasse
+item.craft_jambieres.name,Jambières
+item.composant.name,Composant
+qualite.miserable,misérable
+qualite.pauvre,pauvre
+qualite.correct,correct
+qualite.bon,bon
+qualite.excellent,excellent
+qualite.chef_d_oeuvre,chef-d'œuvre
+qualite.legendaire,légendaire
+qualite.mythique,mythique
+nom.arme_en,{base} en {materiau}
+nom.armure_en,{base} de {construction} en {materiau}
+nom.composant,{base} en {materiau}
+construction.plaque.nom,plaque
+journal.faconne,"{nom} façonne {objet} ({qualite})"
+journal.assemble,"{nom} assemble {objet} ({qualite})"
+ui.atelier.kind.plate,transformation
+ui.atelier.kind.composant,composant
+ui.atelier.kind.objet,assemblage
 journal.victoire,plus aucun hostile. Victoire.
 journal.defaite,tu es tombé. Une touche : te relever au point d'entrée (Mort et pénalité).
 module.a_l_impact.name,À l'impact

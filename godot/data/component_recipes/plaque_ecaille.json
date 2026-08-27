@@ -1,0 +1,9 @@
+{
+  "component": "plaque",
+  "material_family": "ecaille",
+  "station": "etabli",
+  "unlocked_by_default": false,
+  "unlock_sources": [
+    "enseignement_pnj"
+  ]
+}

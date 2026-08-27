@@ -1,0 +1,21 @@
+{
+  "name_key": "item.craft_masse.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "slots": {
+    "tete": "tete_arme_lourde",
+    "manche": "manche_court",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "fs",
+  "tags": [
+    "arme",
+    "assemble"
+  ],
+  "functionality": "masse"
+}

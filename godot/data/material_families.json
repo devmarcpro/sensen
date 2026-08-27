@@ -1,0 +1,101 @@
+{
+  "_doc": "Familles de matériaux des recettes de composants (docs: Recettes de composants). Filtre : category ou material(s) + forme ; tag : familles paramétriques (parties de créatures) sans source pour l'instant.",
+  "bois": {
+    "category": "bois",
+    "forme": "planche"
+  },
+  "lingot_metal": {
+    "category": "metal",
+    "forme": "lingot"
+  },
+  "roche_taillee": {
+    "category": "roche",
+    "forme": "pierre_taillee"
+  },
+  "silex": {
+    "material": "silex",
+    "forme": "pierre_taillee"
+  },
+  "os": {
+    "tag": "os"
+  },
+  "os_massif": {
+    "tag": "os_massif"
+  },
+  "dent_croc": {
+    "tag": "dent_croc"
+  },
+  "ecaille": {
+    "tag": "ecaille"
+  },
+  "ivoire": {
+    "tag": "ivoire"
+  },
+  "obsidienne": {
+    "material": "obsidienne",
+    "forme": "pierre_taillee"
+  },
+  "verre": {
+    "material": "verre",
+    "forme": "brut"
+  },
+  "granit_noir": {
+    "material": "granit_noir",
+    "forme": "pierre_taillee"
+  },
+  "meteorite": {
+    "material": "meteorite_ferreuse",
+    "forme": "lingot"
+  },
+  "or_argent": {
+    "materials": [
+      "or",
+      "argent"
+    ],
+    "forme": "lingot"
+  },
+  "or": {
+    "material": "or",
+    "forme": "lingot"
+  },
+  "plomb": {
+    "material": "plomb",
+    "forme": "lingot"
+  },
+  "tungstene": {
+    "material": "tungstene",
+    "forme": "lingot"
+  },
+  "cuir": {
+    "material": "cuir",
+    "forme": "brut"
+  },
+  "fibre": {
+    "materials": [
+      "lin",
+      "chanvre",
+      "coton"
+    ],
+    "forme": "brut"
+  },
+  "tissu": {
+    "category": "vegetal",
+    "forme": "tissu"
+  },
+  "laine": {
+    "material": "laine",
+    "forme": "brut"
+  },
+  "fourrure": {
+    "material": "fourrure",
+    "forme": "brut"
+  },
+  "soie": {
+    "material": "soie",
+    "forme": "brut"
+  },
+  "seve": {
+    "material": "seve",
+    "forme": "brut"
+  }
+}

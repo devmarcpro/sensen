@@ -1,0 +1,9 @@
+{
+  "component": "lame_longue",
+  "material_family": "verre",
+  "station": "enclume",
+  "unlocked_by_default": false,
+  "unlock_sources": [
+    "guilde_forgerons_rang_4"
+  ]
+}

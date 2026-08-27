@@ -62,6 +62,9 @@ Les pools d'adjectifs des gabarits de nom sont donc déclarés en **quatre forme
 
 **Slots du craft compositionnel ([[Composant et recette d'obtention]]) :** un objet déclare ses slots — `"slots": {"tete": "tete_pioche", "manche": "manche_court", "fixations": "fixations_std"}` avec les poids de [[Stats et qualité de l'assemblage]].
 
+> [!success] Codé le 2026-08-28 — nommage et `genre_grammatical`
+> Les objets assemblés se **décrivent** : « Dague en fer », « Casque de plaque en cuivre » (`nom.arme_en`, `nom.armure_en` en locale, le client formate ; le manche est dans l'infobulle du sac). `genre_grammatical` est porté par chaque fonctionnalité (`data/functionalities/`) et chaque pièce assemblée (`data/items/craft_*`), selon la table de la note ; les pools d'adjectifs en quatre formes attendent les gabarits de noms du loot rare. Les champs `sprite`/`sprite_slots` restent inutilisés (le paperdoll teinte par matériau).
+
 ## Liens
 - **Dépend de** : [[Fabrication d'outils]], [[Fonctionnalité]], [[Data-driven design]]
 - **Alimente** : [[Effets d'équipement passifs]], [[Composant et recette d'obtention]], [[Éditeur de sculpture]]

@@ -43,6 +43,9 @@ Un objet n'est plus une recette monolithique mais un assemblage de composants, c
 
 **Contenu à produire :** [[Ouvert — Recettes de composants par famille]].
 
+> [!success] Codé le 2026-08-28 — `data/components/` (14), `data/component_recipes/` (la matrice), objets assemblés `data/items/craft_*`
+> Le modèle de la note tel quel : un objet = ses **slots** de composants (`slots` de la fiche d'objet) + une recette d'assemblage (station, compétence) ; un composant = une recette d'obtention par **famille de matériaux** (`data/material_families.json` traduit chaque famille en filtre : catégorie/matériau + forme — `lingot_metal` = tout métal en lingot, `bois` = toute essence en planche…). Un composant consomme **une unité** de la famille et porte les 13 stats et le vecteur Wu Xing de son matériau, plus sa **qualité** (A.3 sur la compétence de sa station). Les recettes exotiques (`unlocked_by_default: false`) attendent leurs sources (`e.recettes_connues`) — parchemins, marchands, guildes viennent avec les étapes 3-9. **Décisions** : l'assemblage se fait à l'**Établi** (la « table d'assemblage » de la note), avec la compétence de la recette d'objet (Forge pour les armes et armures de métal, Menuiserie pour les outils) ; les niveaux de recette restent ouverts ([[Ouvert — Axe des niveaux de recette]]) et ne sont pas codés. Le laminoir (contrepoids en tungstène) attend le [[Palier industriel]].
+
 ## Liens
 - **Dépend de** : [[Composants]], [[Composant et recette d'obtention]], [[Stations de transformation]], [[Qualité d'artisanat]]
 - **Alimente** : [[Stats et qualité de l'assemblage]], [[Palier industriel]], [[Équipement — 14 slots]], [[Armure par zone et constructions]], [[Véhicules]]

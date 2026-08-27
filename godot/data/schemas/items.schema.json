@@ -18,7 +18,8 @@
         "grimoire",
         "manuel",
         "materiau",
-        "station"
+        "station",
+        "composant"
       ]
     },
     "equip_slot": {
@@ -94,6 +95,33 @@
     },
     "forme": {
       "type": "string"
+    },
+    "slots": {
+      "type": "object"
+    },
+    "recipe": {
+      "type": "object"
+    },
+    "genre_grammatical": {
+      "type": "string",
+      "enum": [
+        "ms",
+        "fs",
+        "mp",
+        "fp"
+      ]
+    },
+    "composant": {
+      "type": "string"
+    },
+    "stats": {
+      "type": "object"
+    },
+    "vitesse_facteur": {
+      "type": "number"
+    },
+    "composants": {
+      "type": "object"
     }
   },
   "required": [

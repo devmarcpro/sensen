@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "slot_type",
+    "used_by"
+  ],
+  "properties": {
+    "slot_type": {
+      "type": "string",
+      "enum": [
+        "tete",
+        "manche",
+        "fixations",
+        "plaque",
+        "sangles",
+        "divers"
+      ]
+    }
+  }
+}

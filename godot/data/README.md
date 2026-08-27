@@ -30,6 +30,7 @@
 | dungeon_rooms/, dungeon_connectors/, dungeon_themes/ | 12 salles + 8 connecteurs en grilles de caractères (`tools/gen_dungeon_prefabs.py`), thèmes (pool, boss, densité, étages) | B.10, Décision — Prefabs de donjon en tuiles, Génération de donjon |
 | plants/ | plantes | Plantes (F.8) |
 | recipes/ | les 9 transformations plates (fondre, scier, tailler, tisser…) | Stations de transformation (C.8) |
+| components/, component_recipes/ | les 14 composants et la matrice de leurs recettes par famille (`material_families.json`) ; objets assemblés `items/craft_*` | Composants, Recettes de composants, Craft compositionnel |
 | stations/ | les 9 stations (poids, compétence) ; portatives = objets `station_<id>` | Stations de transformation (C.8) |
 | tutorials/ | tooltips contextuels (signal EventBus + conditions → text_key) | Tooltips contextuels (E.19) |
 | dialogue/ | répliques d'ambiance | Dialogue PNJ (E.23) |

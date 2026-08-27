@@ -10,5 +10,6 @@
   "portee_min": 1,
   "type_degats": "tranchant",
   "volume": 3.2,
-  "poids_reference": 3.84
+  "poids_reference": 3.84,
+  "genre_grammatical": "fs"
 }

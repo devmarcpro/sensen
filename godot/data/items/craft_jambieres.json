@@ -1,0 +1,22 @@
+{
+  "name_key": "item.craft_jambieres.name",
+  "type": "armure",
+  "equip_slot": "jambieres",
+  "hands": 0,
+  "slots": {
+    "plaque": "plaque",
+    "sangles": "sangles",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "fp",
+  "tags": [
+    "armure",
+    "assemble"
+  ],
+  "zone": "jambes",
+  "construction": "plaque"
+}

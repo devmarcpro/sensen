@@ -16,7 +16,7 @@ const CATALOGUES: Array[String] = [
 	"modules", "creatures", "creature_actions", "ai_profiles", "functionalities",
 	"items", "status_effects", "prototype_arenas", "rigs", "tutorials",
 	"dungeon_rooms", "dungeon_connectors", "dungeon_themes", "affixes", "competences", "races", "classes",
-	"materials", "stations", "recipes",
+	"materials", "stations", "recipes", "components", "component_recipes",
 ]
 ## Tags dérivés des stats d'un matériau au seuil ≥ 50 (Schéma matériau).
 const TAGS_DERIVES := {"flammabilite": "inflammable", "conductivite_mana": "conducteur_mana", "flottabilite": "flottant",
@@ -26,7 +26,7 @@ const WUXING_CATEGORIE := {"metal": {"metal": 1.0}, "bois": {"bois": 1.0}, "vege
 	"terre": {"terre": 1.0}, "mineral": {"terre": 1.0}, "fossile": {"terre": 1.0}, "gemme": {"terre": 1.0},
 	"liquide": {"eau": 1.0}, "meteorologique": {"eau": 1.0}, "synthetique": {"terre": 1.0}}
 ## Configurations (fichier unique à la racine de data/).
-const CONFIGS: Array[String] = ["combat_rules", "tile_contents", "wuxing", "palette_materiaux", "loot_rules", "rare_epithets", "reading_failures", "astrologie", "material_categories", "minerais_par_etage"]
+const CONFIGS: Array[String] = ["combat_rules", "tile_contents", "wuxing", "palette_materiaux", "loot_rules", "rare_epithets", "reading_failures", "astrologie", "material_categories", "minerais_par_etage", "material_families"]
 
 var catalogues: Dictionary = {}   # nom → { id → Dictionary }
 var configs: Dictionary = {}      # nom → Dictionary
@@ -58,7 +58,27 @@ func charger() -> void:
 	for nom in CONFIGS:
 		configs[nom] = _charger_config(nom)
 	_finir_materiaux()
+	_verifier_craft()
 	_rapport()
+
+
+## Craft compositionnel : chaque recette de composant vise un composant, une famille et une station
+## connus (le laminoir du palier industriel est toléré) ; chaque objet à slots vise des composants connus.
+func _verifier_craft() -> void:
+	var fam: Dictionary = configs.get("material_families", {})
+	for id in catalogues.get("component_recipes", {}).keys():
+		var r: Dictionary = catalogues.component_recipes[id]
+		if not catalogues.components.has(r.component):
+			erreurs.append("component_recipes/%s.json → component → « %s » inconnu" % [id, r.component])
+		if not fam.has(r.material_family):
+			erreurs.append("component_recipes/%s.json → material_family → « %s » absente de material_families.json" % [id, r.material_family])
+		if not catalogues.stations.has(r.station) and r.station != "laminoir":
+			erreurs.append("component_recipes/%s.json → station → « %s » inconnue" % [id, r.station])
+	for id in catalogues.get("items", {}).keys():
+		var it: Dictionary = catalogues.items[id]
+		for slot in it.get("slots", {}).keys():
+			if not catalogues.components.has(it.slots[slot]):
+				erreurs.append("items/%s.json → slots.%s → composant « %s » inconnu" % [id, slot, it.slots[slot]])
 
 
 ## Matériaux (Schéma matériau) : couleur unique, tags dérivés au seuil 50, vecteur Wu Xing résolu,

@@ -1,0 +1,7 @@
+{
+  "component": "fixations_std",
+  "material_family": "lingot_metal",
+  "station": "enclume",
+  "unlocked_by_default": true,
+  "unlock_sources": []
+}

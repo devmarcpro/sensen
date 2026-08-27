@@ -1,0 +1,8 @@
+{
+  "name_key": "component.pointe.name",
+  "slot_type": "tete",
+  "used_by": [
+    "lance",
+    "arc"
+  ]
+}

@@ -37,6 +37,9 @@ Quelles familles de matériaux fabriquent quel composant, où, et comment on app
 
 **Rappel niveaux de recette ([[Craft compositionnel]]) :** chaque recette a 5 niveaux par doublons ; l'axe du bonus est en [[Ouvert — Axe des niveaux de recette]] (défaut au balayage final).
 
+> [!success] Transcrit le 2026-08-28 — `data/component_recipes/` (56 recettes)
+> La matrice ligne par ligne ; bases connues d'office, exotiques avec leurs `unlock_sources`. « Or » seul (contrepoids) est la famille `or` ; « rivets/ligatures/colle » sont trois recettes de `fixations_std`.
+
 ## Liens
 - **Dépend de** : [[Composants]], [[Composant et recette d'obtention]], [[Stations de transformation]]
 - **Alimente** : [[Craft compositionnel]], [[Armure par zone et constructions]], [[Stats et qualité de l'assemblage]]

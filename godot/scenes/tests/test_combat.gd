@@ -28,6 +28,7 @@ func _ready() -> void:
 	test_materiaux()
 	test_recolte()
 	test_fabrication()
+	test_assemblage()
 	test_donjon()
 	test_loot()
 	test_coffres_et_rares()
@@ -1034,6 +1035,52 @@ func test_fabrication() -> void:
 	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
 	var fiche := Etres.creer_personnage("creature.aventurier.name", "humain", GameData.catalogues.classes.keys()[0], {}, 1000, prog)
 	verifier("station_etabli" in fiche.get("sac", []), "le personnage part avec un établi")
+
+
+# ---------------------------------------------------------------- Étape 6.4 : composants et assemblage
+
+func test_assemblage() -> void:
+	var s := Simulation.new(17)
+	s.charger_donjon("ruine", 17, 8, 1)
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	verifier(GameData.catalogues.components.size() == 14 and GameData.catalogues.component_recipes.size() == 56, "14 composants, 56 recettes d'obtention")
+	for st in ["etabli", "enclume", "scierie"]:   # l'aventurier des donjons de test n'est pas un personnage créé
+		j.sac.append(s.generer_objet("station_" + st, 1, {}, "commun", 0).uid)
+	s._donner_materiau(j, "fer", 3, "lingot")
+	s._donner_materiau(j, "chene", 1, "planche")
+	var ids: Array = s.recettes_disponibles(j).filter(func(pl: Dictionary) -> bool: return pl.faisable).map(func(pl: Dictionary) -> String: return pl.id)
+	verifier("lame_courte_lingot_metal" in ids and "poignee_bois" in ids and "fixations_std_lingot_metal" in ids and not ("lame_courte_obsidienne" in ids), "recettes de composants faisables : lame (lingot), poignée (planche) ; l'obsidienne non (%s)" % str(ids))
+	verifier(not ("lame_courte_or_argent" in s.recettes_disponibles(j).map(func(pl: Dictionary) -> String: return pl.id)), "les recettes exotiques non apprises ne sont pas listées")
+	for rid in ["lame_courte_lingot_metal", "poignee_bois", "fixations_std_lingot_metal"]:
+		s.attente[j.id] = true
+		verifier(s.intention(j.id, {"type": "fabriquer", "recette": rid}), "façonner " + rid)
+	var comps: Array = j.sac.filter(func(uid: String) -> bool: return s.items[uid].get("type", "") == "composant")
+	verifier(comps.size() == 3, "3 composants dans le sac (%d)" % comps.size())
+	var lame: Dictionary = s.items[comps[0]]
+	verifier(lame.composant == "lame_courte" and lame.materiau == "fer" and int(lame.stats.durete) == 25 and lame.elements.has("metal"), "la lame porte les stats et l'élément du fer")
+	verifier(float(lame.qualite) >= 0.1 and float(lame.qualite) <= 0.1 + 0.0001 or float(lame.qualite) <= 2.3, "qualité A.3 au niveau 0 : plancher 0,1 (%.2f)" % float(lame.qualite))
+	verifier(int(s._pile(j, "fer", "lingot").quantite) == 1 and s._pile(j, "chene", "planche").is_empty(), "les unités consommées : 1 lingot restant, plus de planche")
+	var dague_plan: Array = s.recettes_disponibles(j).filter(func(pl: Dictionary) -> bool: return pl.id == "craft_dague")
+	verifier(dague_plan.size() == 1 and dague_plan[0].faisable, "l'assemblage de la dague est faisable à l'établi")
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "fabriquer", "recette": "craft_dague"}), "assembler la dague")
+	var dague := {}
+	for uid in j.sac:
+		if s.items[uid].get("base", "") == "craft_dague":
+			dague = s.items[uid]
+	verifier(not dague.is_empty() and dague.materiau == "fer" and dague.element == "metal", "Dague en fer, élément Métal (la tête domine)")
+	# durete_base = 0,7 × 25 (lame fer) + 0,25 × 12 (poignée chêne) + 0,05 × 25 (fixations fer) = 21,75 → 22
+	verifier(int(dague.durete_base) == 22, "durete_base = moyenne pondérée avant qualité (%d)" % int(dague.durete_base))
+	verifier(is_equal_approx(float(dague.elements.metal), 0.75) and is_equal_approx(float(dague.elements.bois), 0.25), "Wu Xing composite Métal 0,75 / Bois 0,25")
+	verifier(is_equal_approx(float(dague.vitesse_facteur), 0.94), "manche en chêne (densité 6) : vitesse ×0,94 (%.2f)" % float(dague.vitesse_facteur))
+	verifier(float(dague.qualite) > 0.0 and dague.composants.has("tete") and dague.composants.has("manche"), "qualité posée, composants mémorisés pour l'infobulle")
+	verifier(j.sac.filter(func(uid: String) -> bool: return s.items[uid].get("type", "") == "composant").is_empty(), "les composants sont consommés")
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "equiper", "objet": dague.uid}), "la dague assemblée s'équipe")
+	var fonct: Dictionary = s.fonctionnalites.dague
+	verifier(s.regles.ticks_attaque(fonct, false, dague) == roundi(10.0 / 3.0 * 0.94), "le manche pèse sur les ticks d'attaque")
+	var n := s.nom_objet(dague.uid)
+	verifier(n.has("materiau") and n.materiau == "material.fer.name", "le nom se décrit par le matériau de la tête")
 
 
 # ---------------------------------------------------------------- brouillard de guerre

@@ -1,0 +1,9 @@
+{
+  "component": "pointe",
+  "material_family": "dent_croc",
+  "station": "etabli",
+  "unlocked_by_default": false,
+  "unlock_sources": [
+    "enseignement_pnj"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "component": "poignee",
+  "material_family": "os",
+  "station": "etabli",
+  "unlocked_by_default": false,
+  "unlock_sources": [
+    "loot_donjon"
+  ]
+}

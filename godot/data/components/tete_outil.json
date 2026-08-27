@@ -1,0 +1,7 @@
+{
+  "name_key": "component.tete_outil.name",
+  "slot_type": "tete",
+  "used_by": [
+    "pioche"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name_key": "item.craft_cuirasse.name",
+  "type": "armure",
+  "equip_slot": "cuirasse",
+  "hands": 0,
+  "slots": {
+    "plaque": "plaque",
+    "sangles": "sangles",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "fs",
+  "tags": [
+    "armure",
+    "assemble"
+  ],
+  "zone": "torse",
+  "construction": "plaque"
+}

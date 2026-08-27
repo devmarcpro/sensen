@@ -10,5 +10,6 @@
   "portee_min": 2,
   "type_degats": "perforant",
   "volume": 3.8,
-  "poids_reference": 4.56
+  "poids_reference": 4.56,
+  "genre_grammatical": "fs"
 }

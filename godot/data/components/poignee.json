@@ -1,0 +1,8 @@
+{
+  "name_key": "component.poignee.name",
+  "slot_type": "manche",
+  "used_by": [
+    "epee",
+    "dague"
+  ]
+}

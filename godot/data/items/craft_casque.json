@@ -1,0 +1,22 @@
+{
+  "name_key": "item.craft_casque.name",
+  "type": "armure",
+  "equip_slot": "casque",
+  "hands": 0,
+  "slots": {
+    "plaque": "plaque",
+    "sangles": "sangles",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "ms",
+  "tags": [
+    "armure",
+    "assemble"
+  ],
+  "zone": "tete",
+  "construction": "plaque"
+}

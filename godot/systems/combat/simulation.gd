@@ -256,6 +256,108 @@ func _retirer_materiau(e: Dictionary, pile: Dictionary, quantite: int) -> void:
 		items.erase(pile.uid)
 
 
+# ---------------------------------------------------------------- craft compositionnel
+
+## Façonner un composant : une unité de la famille, à la station de la recette ; le composant porte les
+## 13 stats et le vecteur Wu Xing de son matériau, et une qualité A.3 sur la compétence de la station.
+func _faconner(e: Dictionary, r: Dictionary, tick: int) -> bool:
+	if not stations_de(e).has(str(r.station)):
+		EventBus.emettre(&"journal", [&"journal.pas_de_station", {"recette": GameData.entree("components", r.component).name_key}])
+		return false
+	if not bool(r.unlocked_by_default) and not (str(r.id) in e.get("recettes_connues", [])):
+		return false
+	var plan := _plan_composant(e, r)
+	if not plan.faisable:
+		EventBus.emettre(&"journal", [&"journal.manque", {"recette": GameData.entree("components", r.component).name_key}])
+		return false
+	var pile: Dictionary = plan.entrees[0].pile
+	var mat_id := str(pile.materiau)
+	_retirer_materiau(e, pile, 1)
+	var comp: Dictionary = GameData.entree("components", r.component)
+	var station: Dictionary = GameData.entree("stations", r.station)
+	var skill := str(station.craft_skill)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "craft", objets.size(), r.id])
+	var inst := generer_objet("composant", 1, {}, "commun", 0)
+	if inst.is_empty():
+		return false
+	var mat: Dictionary = GameData.entree("materials", mat_id)
+	inst.composant = str(r.component)
+	inst.materiau = mat_id
+	inst.name_key = comp.name_key
+	inst.stats = mat.stats.duplicate()
+	inst.elements = mat.wuxing.duplicate()
+	inst.qualite = regles.qualite_craft(regles.niveau(e.competences_eff, skill), rng)
+	e.sac.append(inst.uid)
+	var n := regles.niveau(e.competences_eff, skill)
+	e.compteur = tick + _ticks_avec_statuts(e, maxi(1, ceili(float(regles.r.craft.ticks_base) / regles.skill_factor(n))))
+	gagner_xp(e, skill, int(mat.stats.durete))
+	EventBus.emettre(&"journal", [&"journal.faconne", {"nom": e.name_key, "objet": nom_objet(inst.uid), "qualite": "qualite." + regles.palier_qualite(inst.qualite)}])
+	return true
+
+
+## Assembler un objet depuis ses composants (Stats et qualité de l'assemblage) : stats = Σ stat × poids,
+## durete_base avant qualité, qualité = Σ q × poids × jet borné, Wu Xing composite, vitesse du manche.
+func _assembler(e: Dictionary, def: Dictionary, tick: int) -> bool:
+	var st := str(def.recipe.station)
+	if not stations_de(e).has(st):
+		EventBus.emettre(&"journal", [&"journal.pas_de_station", {"recette": def.name_key}])
+		return false
+	var plan := _plan_objet(e, def)
+	if not plan.faisable:
+		EventBus.emettre(&"journal", [&"journal.manque", {"recette": def.name_key}])
+		return false
+	var poids: Dictionary = regles.r.craft.poids.armure if def.type == "armure" else regles.r.craft.poids.arme
+	var stats := {}
+	var elements := {}
+	var q_somme := 0.0
+	var composants := {}
+	var tete: Dictionary = {}
+	var manche: Dictionary = {}
+	for en in plan.entrees:
+		var c: Dictionary = en.pile
+		var w := float(poids.get(en.slot, 0.0))
+		for s in c.stats.keys():
+			stats[s] = float(stats.get(s, 0.0)) + float(c.stats[s]) * w
+		for el in c.elements.keys():
+			elements[el] = float(elements.get(el, 0.0)) + float(c.elements[el]) * w
+		q_somme += float(c.qualite) * w
+		composants[en.slot] = {"composant": c.composant, "materiau": c.materiau, "qualite": c.qualite}
+		if en.slot in ["tete", "plaque"]:
+			tete = c
+		elif en.slot == "manche":
+			manche = c
+		e.sac.erase(c.uid)
+		items.erase(c.uid)
+	var skill := str(def.recipe.craft_skill)
+	var n := regles.niveau(e.competences_eff, skill)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "assemblage", objets.size(), def.id])
+	var borne: Array = regles.r.craft.qualite.jet_assemblage
+	var jet := clampf(regles.qualite_craft(n, rng), float(borne[0]), float(borne[1]))
+	var inst := generer_objet(def.id, 1, {}, "commun", 0)
+	if inst.is_empty():
+		return false
+	inst.stats = stats
+	inst.durete_base = roundi(float(stats.get("durete", 0.0)))   # la moyenne pondérée AVANT qualité
+	inst.qualite = snappedf(q_somme * jet, 0.01)
+	inst.elements = elements
+	inst.element = wuxing.dominante(elements)
+	inst.materiau = str(tete.get("materiau", ""))
+	inst.composants = composants
+	if not manche.is_empty():
+		var v: Dictionary = regles.r.craft.vitesse
+		inst.vitesse_facteur = snappedf(1.0 + (float(manche.stats.densite) - float(v.densite_reference)) * float(v.par_point), 0.01)
+	if def.type == "armure":
+		inst.durete_composite = inst.durete_base
+		inst.niveau_construction = 0
+	e.sac.append(inst.uid)
+	e.compteur = tick + _ticks_avec_statuts(e, maxi(1, ceili(float(regles.r.craft.ticks_base) / regles.skill_factor(n))))
+	gagner_xp(e, skill, inst.durete_base)
+	EventBus.emettre(&"journal", [&"journal.assemble", {"nom": e.name_key, "objet": nom_objet(inst.uid), "qualite": "qualite." + regles.palier_qualite(inst.qualite)}])
+	return true
+
+
 # ---------------------------------------------------------------- fabrication (Stations de transformation)
 
 ## Les stations portées : id de station → uid de l'objet.
@@ -268,8 +370,8 @@ func stations_de(e: Dictionary) -> Dictionary:
 	return res
 
 
-## Les recettes plates que les stations du sac permettent, avec leur faisabilité.
-## [{id, recette, station, faisable, entrees: [{pile ou {}, besoin, materiau}], sortie: {materiau, forme, quantite}}]
+## Tout ce que les stations du sac permettent : transformations plates, composants (recettes connues),
+## objets assemblés. [{id, kind, recette, station, faisable, entrees, sortie}]
 func recettes_disponibles(e: Dictionary) -> Array[Dictionary]:
 	var res: Array[Dictionary] = []
 	var stations := stations_de(e)
@@ -277,10 +379,74 @@ func recettes_disponibles(e: Dictionary) -> Array[Dictionary]:
 	ids.sort()
 	for rid in ids:
 		var r: Dictionary = GameData.catalogues.recipes[rid]
+		if stations.has(str(r.station)):
+			var pl := _plan_recette(e, r)
+			pl["kind"] = "plate"
+			res.append(pl)
+	ids = GameData.catalogues.component_recipes.keys()
+	ids.sort()
+	for rid in ids:
+		var r: Dictionary = GameData.catalogues.component_recipes[rid]
 		if not stations.has(str(r.station)):
 			continue
-		res.append(_plan_recette(e, r))
+		if not bool(r.unlocked_by_default) and not (rid in e.get("recettes_connues", [])):
+			continue
+		res.append(_plan_composant(e, r))
+	ids = GameData.catalogues.items.keys()
+	ids.sort()
+	for iid in ids:
+		var it: Dictionary = GameData.catalogues.items[iid]
+		if it.has("slots") and stations.has(str(it.get("recipe", {}).get("station", ""))):
+			res.append(_plan_objet(e, it))
 	return res
+
+
+## Le plan d'une recette de composant : une unité de la famille de matériaux, prise dans le sac.
+func _plan_composant(e: Dictionary, r: Dictionary) -> Dictionary:
+	var fam: Dictionary = GameData.config("material_families").get(str(r.material_family), {})
+	var pile := _pile_famille(e, fam)
+	return {"id": r.id, "kind": "composant", "recette": r, "station": str(r.station), "faisable": not pile.is_empty(),
+		"entrees": [{"pile": pile, "besoin": 1, "forme": str(fam.get("forme", "brut")), "filtre": str(r.material_family)}],
+		"sortie": {"composant": str(r.component), "materiau": str(pile.get("materiau", "")), "quantite": 1}}
+
+
+## La première pile du sac qui appartient à la famille (catégorie ou matériau(x), et forme).
+func _pile_famille(e: Dictionary, fam: Dictionary) -> Dictionary:
+	if fam.is_empty() or fam.has("tag"):
+		return {}   # familles paramétriques (os, écailles…) : pas de source encore
+	var forme := str(fam.get("forme", "brut"))
+	for uid in e.sac:
+		var it: Dictionary = items.get(uid, {})
+		if it.get("type", "") != "materiau" or str(it.get("forme", "brut")) != forme or int(it.quantite) < 1:
+			continue
+		var m := str(it.materiau)
+		var mat: Dictionary = GameData.catalogues.materials.get(m, {})
+		if fam.has("category") and str(mat.get("category", "")) != str(fam.category):
+			continue
+		if fam.has("material") and m != str(fam.material):
+			continue
+		if fam.has("materials") and not (m in fam.materials):
+			continue
+		return it
+	return {}
+
+
+## Le plan d'un objet assemblé : un composant du sac par slot.
+func _plan_objet(e: Dictionary, it: Dictionary) -> Dictionary:
+	var plan := {"id": it.id, "kind": "objet", "recette": it, "station": str(it.recipe.station), "faisable": true, "entrees": [], "sortie": {"objet": it.id, "quantite": 1}}
+	var pris := {}
+	for slot in it.slots.keys():
+		var trouve := {}
+		for uid in e.sac:
+			var c: Dictionary = items.get(uid, {})
+			if c.get("type", "") == "composant" and str(c.composant) == str(it.slots[slot]) and not pris.has(uid):
+				trouve = c
+				pris[uid] = true
+				break
+		plan.entrees.append({"pile": trouve, "besoin": 1, "forme": "", "filtre": str(it.slots[slot]), "slot": slot})
+		if trouve.is_empty():
+			plan.faisable = false
+	return plan
 
 
 ## Le plan d'une recette pour cet être : les piles du sac qui satisfont chaque entrée (par matériau
@@ -315,6 +481,10 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 ## Fabriquer : consomme les entrées, produit la sortie ; ticks = ticks_base / skill_factor(N) ;
 ## XP à la compétence de la station = dureté du matériau produit.
 func _fabriquer(e: Dictionary, rid: String, tick: int) -> bool:
+	if GameData.catalogues.component_recipes.has(rid):
+		return _faconner(e, GameData.catalogues.component_recipes[rid], tick)
+	if GameData.catalogues.items.has(rid) and GameData.catalogues.items[rid].has("slots"):
+		return _assembler(e, GameData.catalogues.items[rid], tick)
 	var r: Dictionary = GameData.catalogues.recipes.get(rid, {})
 	if r.is_empty():
 		return false
@@ -452,7 +622,12 @@ func donner(e: Dictionary, uid: String) -> void:
 func nom_objet(uid: String) -> Dictionary:
 	var it: Dictionary = items.get(uid, {})
 	var nom: Dictionary = it.get("nom", {})
-	return {"base": it.get("name_key", uid), "affixe": nom.get("affixe", ""), "params": nom.get("params", {}), "rarete": it.get("rarete", "commun")}
+	var res := {"base": it.get("name_key", uid), "affixe": nom.get("affixe", ""), "params": nom.get("params", {}), "rarete": it.get("rarete", "commun")}
+	if it.get("type", "") == "composant" or it.has("composants"):   # craft : l'objet se décrit par son matériau
+		res["materiau"] = GameData.catalogues.materials.get(str(it.get("materiau", "")), {}).get("name_key", "")
+		res["construction"] = str(it.get("construction", ""))
+		res["qualite"] = float(it.get("qualite", 1.0))
+	return res
 
 
 ## Équiper un objet du sac : le slot de l'objet (anneau : premier libre des deux) ; l'ancien va au sac.
@@ -989,7 +1164,7 @@ func _attaquer_arme(e: Dictionary, cible: Dictionary, lourde: bool, tick: int) -
 	_quitter_garde(e)
 	e.orientation = Vector2i(signi(cible.pos.x - e.pos.x), signi(cible.pos.y - e.pos.y))
 	e.derniere_cible_pos = cible.pos
-	var ticks := _ticks_avec_statuts(e, regles.ticks_attaque(fonct, lourde))
+	var ticks := _ticks_avec_statuts(e, regles.ticks_attaque(fonct, lourde, arme))
 	_engager_combat(e, cible)
 	if regles.est_telegraphee(ticks) or lourde:
 		e.action_en_cours = {"type": "arme", "cible": cible.id, "lourde": lourde, "ticks": ticks, "name_key": arme.name_key}
@@ -1611,7 +1786,7 @@ func plan_capacite(e: Dictionary, index: int) -> Dictionary:
 		return {}
 	var arme := Etres.arme(e, items)
 	var fonct: Dictionary = fonctionnalites.get(arme.get("functionality", ""), {})
-	var ticks_arme := regles.ticks_attaque(fonct, false) if not fonct.is_empty() else int(regles.r.actions.attaque_base)
+	var ticks_arme := regles.ticks_attaque(fonct, false, arme) if not fonct.is_empty() else int(regles.r.actions.attaque_base)
 	var plan := capacites.assembler(caps[index].modules, ticks_arme, fonct.get("degats_des", "1d4"), vecteur_arme(arme), e.competences_eff)
 	plan["id"] = caps[index].id
 	plan["name_key"] = caps[index].get("name_key", "")

@@ -1,0 +1,7 @@
+{
+  "component": "poignee",
+  "material_family": "bois",
+  "station": "scierie",
+  "unlocked_by_default": true,
+  "unlock_sources": []
+}

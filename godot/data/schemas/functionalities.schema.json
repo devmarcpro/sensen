@@ -49,6 +49,15 @@
     },
     "poids_reference": {
       "type": "number"
+    },
+    "genre_grammatical": {
+      "type": "string",
+      "enum": [
+        "ms",
+        "fs",
+        "mp",
+        "fp"
+      ]
     }
   },
   "required": [

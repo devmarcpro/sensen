@@ -417,6 +417,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 				var k: int = ev.keycode - KEY_1
 				if atelier and not j.is_empty():
 					var recettes := sim.recettes_disponibles(j)
+					recettes = recettes.filter(func(pl: Dictionary) -> bool: return pl.faisable)
 					if k < recettes.size() and sim.attente.has(joueur_id):
 						sim.intention(joueur_id, {"type": "fabriquer", "recette": recettes[k].id})
 				elif ev.shift_pressed:
@@ -715,15 +716,29 @@ func _maj_ui() -> void:
 			var recettes := sim.recettes_disponibles(j)
 			if recettes.is_empty():
 				lignes.append(tr("ui.atelier.vide"))
-			for k in mini(9, recettes.size()):
+			# Les faisables d'abord, numérotées (chiffre = fabriquer) ; les autres à la suite, sans numéro.
+			recettes.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.faisable and not b.faisable)
+			for k in mini(24, recettes.size()):
 				var pl: Dictionary = recettes[k]
 				var entrees: Array[String] = []
 				for en in pl.entrees:
-					var nom_e: String = tr(GameData.entree("materials", en.pile.materiau).name_key) if not en.pile.is_empty() else tr("material.%s.name" % en.filtre) if GameData.catalogues.materials.has(en.filtre) else en.filtre
-					entrees.append("%d × %s" % [int(en.besoin), tr("forme." + str(en.forme)).format({"materiau": nom_e})])
-				var mat_s: String = tr(GameData.entree("materials", pl.sortie.materiau).name_key) if GameData.catalogues.materials.has(pl.sortie.materiau) else "?"
-				lignes.append(tr("ui.atelier.ligne").format({"n": k + 1, "recette": tr(pl.recette.name_key), "station": tr(GameData.entree("stations", pl.station).name_key),
-					"entrees": " + ".join(entrees), "sortie": "%d × %s" % [int(pl.sortie.quantite), tr("forme." + str(pl.sortie.forme)).format({"materiau": mat_s})], "ok": "" if pl.faisable else " ✗"}))
+					if pl.kind == "objet":
+						entrees.append(tr(GameData.entree("components", en.filtre).name_key) + ("" if not en.pile.is_empty() else " ?"))
+						continue
+					var nom_e: String = tr(GameData.entree("materials", en.pile.materiau).name_key) if not en.pile.is_empty() else (tr("material.%s.name" % en.filtre) if GameData.catalogues.materials.has(en.filtre) else en.filtre)
+					entrees.append("%d × %s" % [int(en.besoin), tr("forme." + str(en.forme)).format({"materiau": nom_e}) if not str(en.forme).is_empty() else nom_e])
+				var sortie := ""
+				match str(pl.kind):
+					"plate":
+						var mat_s: String = tr(GameData.entree("materials", pl.sortie.materiau).name_key) if GameData.catalogues.materials.has(pl.sortie.materiau) else "?"
+						sortie = "%d × %s" % [int(pl.sortie.quantite), tr("forme." + str(pl.sortie.forme)).format({"materiau": mat_s})]
+					"composant":
+						sortie = tr(GameData.entree("components", pl.sortie.composant).name_key)
+					"objet":
+						sortie = tr(pl.recette.name_key)
+				var titre_r: String = tr(pl.recette.name_key) if pl.kind != "composant" else tr(GameData.entree("components", pl.recette.component).name_key) + " ← " + str(pl.recette.material_family)
+				lignes.append(tr("ui.atelier.ligne").format({"n": str(k + 1) if pl.faisable and k < 9 else "·", "recette": titre_r, "station": tr(GameData.entree("stations", pl.station).name_key),
+					"entrees": " + ".join(entrees), "sortie": sortie, "ok": "" if pl.faisable else " ✗"}))
 		for k in j.get("capacites", []).size():
 			lignes.append("  " + _texte_capacite(j, k))
 		if visee >= 0:
@@ -779,9 +794,9 @@ func _preview(j: Dictionary, cible: Dictionary) -> Array[String]:
 	res.append("  " + tr("ui.preview").format({"nom": tr(arme.name_key), "des": fonct.degats_des,
 		"dur": "%.2f" % (float(arme.durete_base) / float(sim.regles.r.degats.durete_reference) * float(arme.qualite)),
 		"stat": stat, "zone": zone.zone, "mult": zone.mult, "armure": "%.1f" % armure,
-		"min": f.x, "max": f.y, "ticks": sim.regles.ticks_attaque(fonct, false)}))
+		"min": f.x, "max": f.y, "ticks": sim.regles.ticks_attaque(fonct, false, arme)}))
 	var fl := sim.regles.fourchette_arme(j.stats_eff, arme, fonct, true, zone.mult, armure, a_zero, wx.total, j.competences_eff, vecteur)
-	res.append("  " + tr("ui.preview.lourde").format({"lourde": "%d–%d" % [fl.x, fl.y], "ticks": sim.regles.ticks_attaque(fonct, true)}))
+	res.append("  " + tr("ui.preview.lourde").format({"lourde": "%d–%d" % [fl.x, fl.y], "ticks": sim.regles.ticks_attaque(fonct, true, arme)}))
 	if not vecteur.is_empty():
 		var contre: Array[String] = []
 		for k in wx.contre.keys():
@@ -882,6 +897,12 @@ func _sur_fin_de_combat(_nom: String) -> void:
 ## paramètres tirés (Loot — affixes : NOM ET PROVENANCE).
 func nom_objet(n: Dictionary) -> String:
 	var base := tr(str(n.base))
+	if n.has("materiau"):   # craft : « Dague en fer », « Casque de plaque en cuivre », « Lame courte en fer »
+		var mat := tr(str(n.materiau))
+		var q := " (%s %.2f)" % [tr("qualite." + sim.regles.palier_qualite(float(n.qualite))), float(n.qualite)]
+		if not str(n.construction).is_empty():
+			return tr("nom.armure_en").format({"base": base, "construction": tr("construction.%s.nom" % n.construction), "materiau": mat}) + q
+		return tr("nom.arme_en").format({"base": base, "materiau": mat}) + q
 	if n.has("taille"):
 		var t: Dictionary = n.taille
 		return "%s (%s %s)" % [base, tr("taille." + str(t.type)), ("%.2f" % float(t.valeur)) if t.type in ["affinite", "qualite"] else str(int(t.valeur))]

@@ -11,5 +11,6 @@
   "type_degats": "perforant",
   "volume": 2.0,
   "poids_reference": 2.5,
-  "outil": "pioche"
+  "outil": "pioche",
+  "genre_grammatical": "fs"
 }

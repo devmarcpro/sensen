@@ -1,0 +1,7 @@
+{
+  "component": "fixations_std",
+  "material_family": "seve",
+  "station": "alambic",
+  "unlocked_by_default": true,
+  "unlock_sources": []
+}

@@ -10,5 +10,6 @@
   "portee_min": 1,
   "type_degats": "contondant",
   "volume": 2.0,
-  "poids_reference": 2.4
+  "poids_reference": 2.4,
+  "genre_grammatical": "ms"
 }

@@ -1,0 +1,21 @@
+{
+  "name_key": "item.craft_lance.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 2,
+  "slots": {
+    "tete": "pointe",
+    "manche": "manche_long",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "fs",
+  "tags": [
+    "arme",
+    "assemble"
+  ],
+  "functionality": "lance"
+}

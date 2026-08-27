@@ -1,0 +1,7 @@
+{
+  "name_key": "component.garde.name",
+  "slot_type": "divers",
+  "used_by": [
+    "epee"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name_key": "component.manche_court.name",
+  "slot_type": "manche",
+  "used_by": [
+    "pioche",
+    "masse",
+    "dague"
+  ]
+}

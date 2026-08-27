@@ -1,0 +1,9 @@
+{
+  "component": "rembourrage",
+  "material_family": "soie",
+  "station": "atelier_tissage",
+  "unlocked_by_default": false,
+  "unlock_sources": [
+    "marchand_specialise"
+  ]
+}
