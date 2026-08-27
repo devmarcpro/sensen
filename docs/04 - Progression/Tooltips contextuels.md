@@ -31,6 +31,9 @@ pure, jamais de progression conditionnée.
 
 **Même principe pour l'UI de craft ([[Craft compositionnel]]) :** *la recette EST le tutoriel — cohérent avec E.19 (information pure, jamais de verrou).*
 
+> [!success] Codé le 2026-08-27
+> `scenes/ui/tutoriels.gd` s'abonne aux signaux EventBus cités par `data/tutorials/*.json` (`trigger.signal` + `conditions`, `text_key`, `once`, `category`) et affiche le texte via un rappel du client (dans le journal, préfixé 💡). Quatre tooltips de combat : bascule tactique, télégraphe, premier segment, fin de combat. L'état « vu » tient la session en attendant le profil joueur ([[Sauvegarde]]).
+
 ## Liens
 - **Dépend de** : [[Début de partie]], [[EventBus]], [[Data-driven design]]
 - **Alimente** : [[Craft compositionnel]], [[Écrans d'interface]]

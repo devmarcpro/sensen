@@ -1,0 +1,10 @@
+{
+  "trigger": {
+    "signal": "combat_ended",
+    "conditions": {}
+  },
+  "text_key": "tutorial.fin_de_combat.text",
+  "once": true,
+  "delay_ticks": 0,
+  "category": "combat"
+}

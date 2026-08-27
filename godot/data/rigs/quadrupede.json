@@ -1,0 +1,246 @@
+{
+ "name_key": "rig.quadrupede.name",
+ "racine": "torse",
+ "hauteur_pieds": 10,
+ "segments": {
+  "torse": {
+   "parent": null,
+   "ancrage": null,
+   "longueur": 20,
+   "largeur": 8,
+   "angle": 0,
+   "ancrages": {
+    "cou": [
+     20,
+     -3
+    ],
+    "epaule_AV_G": [
+     17,
+     2
+    ],
+    "epaule_AV_D": [
+     17,
+     -2
+    ],
+    "epaule_AR_G": [
+     3,
+     2
+    ],
+    "epaule_AR_D": [
+     3,
+     -2
+    ],
+    "dos": [
+     10,
+     -4
+    ]
+   },
+   "zone": "torse"
+  },
+  "tete": {
+   "parent": "torse",
+   "ancrage": "cou",
+   "longueur": 7,
+   "largeur": 6,
+   "angle": -20,
+   "ancrages": {},
+   "zone": "tete"
+  },
+  "patte_AV_G": {
+   "parent": "torse",
+   "ancrage": "epaule_AV_G",
+   "longueur": 6,
+   "largeur": 2.5,
+   "angle": 95,
+   "ancrages": {
+    "pied": [
+     6,
+     0
+    ]
+   },
+   "zone": "jambes"
+  },
+  "patte_AV_D": {
+   "parent": "torse",
+   "ancrage": "epaule_AV_D",
+   "longueur": 6,
+   "largeur": 2.5,
+   "angle": 85,
+   "ancrages": {
+    "pied": [
+     6,
+     0
+    ]
+   },
+   "zone": "jambes"
+  },
+  "patte_AR_G": {
+   "parent": "torse",
+   "ancrage": "epaule_AR_G",
+   "longueur": 6,
+   "largeur": 2.5,
+   "angle": 95,
+   "ancrages": {
+    "pied": [
+     6,
+     0
+    ]
+   },
+   "zone": "jambes"
+  },
+  "patte_AR_D": {
+   "parent": "torse",
+   "ancrage": "epaule_AR_D",
+   "longueur": 6,
+   "largeur": 2.5,
+   "angle": 85,
+   "ancrages": {
+    "pied": [
+     6,
+     0
+    ]
+   },
+   "zone": "jambes"
+  },
+  "pied_AV_G": {
+   "parent": "patte_AV_G",
+   "ancrage": "pied",
+   "longueur": 4,
+   "largeur": 2.5,
+   "angle": 90,
+   "ancrages": {},
+   "zone": "pieds"
+  },
+  "pied_AV_D": {
+   "parent": "patte_AV_D",
+   "ancrage": "pied",
+   "longueur": 4,
+   "largeur": 2.5,
+   "angle": 90,
+   "ancrages": {},
+   "zone": "pieds"
+  },
+  "pied_AR_G": {
+   "parent": "patte_AR_G",
+   "ancrage": "pied",
+   "longueur": 4,
+   "largeur": 2.5,
+   "angle": 90,
+   "ancrages": {},
+   "zone": "pieds"
+  },
+  "pied_AR_D": {
+   "parent": "patte_AR_D",
+   "ancrage": "pied",
+   "longueur": 4,
+   "largeur": 2.5,
+   "angle": 90,
+   "ancrages": {},
+   "zone": "pieds"
+  }
+ },
+ "facings": {
+  "S": {
+   "ordre": [
+    "patte_AR_D",
+    "pied_AR_D",
+    "patte_AV_D",
+    "pied_AV_D",
+    "torse",
+    "patte_AR_G",
+    "pied_AR_G",
+    "patte_AV_G",
+    "pied_AV_G",
+    "tete"
+   ],
+   "offsets": {},
+   "vue_tete": "face"
+  },
+  "SE": {
+   "ordre": [
+    "patte_AR_D",
+    "pied_AR_D",
+    "patte_AV_D",
+    "pied_AV_D",
+    "torse",
+    "patte_AR_G",
+    "pied_AR_G",
+    "patte_AV_G",
+    "pied_AV_G",
+    "tete"
+   ],
+   "offsets": {},
+   "vue_tete": "face"
+  },
+  "E": {
+   "ordre": [
+    "patte_AR_D",
+    "pied_AR_D",
+    "patte_AV_D",
+    "pied_AV_D",
+    "torse",
+    "tete",
+    "patte_AR_G",
+    "pied_AR_G",
+    "patte_AV_G",
+    "pied_AV_G"
+   ],
+   "offsets": {},
+   "vue_tete": "profil"
+  },
+  "NE": {
+   "ordre": [
+    "tete",
+    "patte_AR_D",
+    "pied_AR_D",
+    "patte_AV_D",
+    "pied_AV_D",
+    "torse",
+    "patte_AR_G",
+    "pied_AR_G",
+    "patte_AV_G",
+    "pied_AV_G"
+   ],
+   "offsets": {},
+   "vue_tete": "dos"
+  },
+  "N": {
+   "ordre": [
+    "tete",
+    "patte_AR_D",
+    "pied_AR_D",
+    "patte_AV_D",
+    "pied_AV_D",
+    "torse",
+    "patte_AR_G",
+    "pied_AR_G",
+    "patte_AV_G",
+    "pied_AV_G"
+   ],
+   "offsets": {},
+   "vue_tete": "dos"
+  },
+  "SW": {
+   "miroir": "SE"
+  },
+  "W": {
+   "miroir": "E"
+  },
+  "NW": {
+   "miroir": "NE"
+  }
+ },
+ "slots_segments": {
+  "casque": [
+   "tete"
+  ],
+  "cuirasse": [
+   "torse"
+  ],
+  "selle": [
+   "torse"
+  ]
+ },
+ "prise_arme": null,
+ "prise_bouclier": null
+}

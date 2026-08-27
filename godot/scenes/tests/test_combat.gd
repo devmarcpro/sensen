@@ -24,6 +24,7 @@ func _ready() -> void:
 	test_glyphes_terrain()
 	test_evenements()
 	test_niveaux()
+	test_paperdoll_et_tutoriels()
 	test_arenes_autonomes()
 	if echecs == 0:
 		print("TESTS : tout passe")
@@ -858,3 +859,43 @@ func test_niveaux() -> void:
 	verifier(p.ticks == 4 + 1 + 1 and p.ressource == 4 + 4, "niveau 50 partout : (8+2+2)/2 = 6 ticks · 8/2 + 4 = 8 mana")
 	p = cap.assembler(["ligne", "flamme"], 5, "2d6", {}, {"flamme": 1000})
 	verifier(p.ticks == 4 + 2, "plancher : Flamme ne descend jamais sous 4 ticks")
+
+
+# ---------------------------------------------------------------- Étape 1 : rigs, paperdoll, tutoriels
+
+func test_paperdoll_et_tutoriels() -> void:
+	for id in ["humanoide", "quadrupede", "volant", "amorphe"]:
+		var rig: Dictionary = GameData.entree("rigs", id)
+		verifier(rig.segments.has(rig.racine) and rig.facings.has("S") and rig.facings.SW.miroir == "SE", "rig %s : racine, facings, miroir" % id)
+	var h: Dictionary = GameData.entree("rigs", "humanoide")
+	verifier(h.segments.size() == 14 and h.slots_segments.casque == ["tete"] and h.prise_arme == "main_D", "rig humanoïde : 14 segments, le casque peint la tête, l'arme à la main droite")
+	verifier(GameData.config("palette_materiaux").has("cuir") and GameData.config("palette_materiaux").cuir.hex == "#8A5A33", "palette : Cuir #8A5A33")
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var pd := Paperdoll.new()
+	pd.configurer(j, h, s.items, s.fonctionnalites, GameData.config("palette_materiaux"))
+	var peints := pd._segments_peints()
+	verifier(peints.has("torse") and peints.has("tete") and not peints.has("pied_G"), "l'équipement peint torse (cuirasse) et tête (casque), pas les pieds")
+	verifier(peints.torse.construction == "cuir" and peints.torse.couleur == Color.html("#8A5A33"), "la construction donne la forme, le matériau la teinte")
+	var monde := pd._poser_segments(h.facings.S, false)
+	verifier(monde.size() == 14 and monde.has("main_D"), "les 14 segments se placent depuis la racine")
+	var miroir := pd._poser_segments(h.facings.SE, true)
+	var droit := pd._poser_segments(h.facings.SE, false)
+	verifier(is_equal_approx(miroir.main_D.origine.x, -droit.main_D.origine.x), "le miroir inverse l'axe horizontal")
+	pd.free()
+	# Tutoriels : le premier combat déclenche « bascule tactique », une seule fois
+	var tuto := Tutoriels.new()
+	var vus: Array = []
+	tuto.afficher = func(t: String) -> void: vus.append(t)
+	add_child(tuto)
+	var loup: Dictionary = s.entites["loup_2"]
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(1, 0)   # au contact : le combat tient
+	s.grille.placer(loup.id, loup.pos)
+	s._engager_combat(j, loup)
+	s._fin_de_pas(j.horloge)
+	verifier(vus.size() == 1 and tuto.vus.has("bascule_tactique"), "combat_started → tutoriel affiché une fois")
+	EventBus.emettre(&"combat_started", ["x", []])
+	EventBus.dispatcher()
+	verifier(vus.size() == 1, "once : pas de seconde fois")
+	tuto.queue_free()

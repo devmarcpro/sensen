@@ -1,0 +1,86 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "racine",
+    "hauteur_pieds",
+    "segments",
+    "facings",
+    "slots_segments"
+  ],
+  "properties": {
+    "name_key": {
+      "type": "string"
+    },
+    "racine": {
+      "type": "string"
+    },
+    "hauteur_pieds": {
+      "type": "number"
+    },
+    "segments": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "parent",
+          "ancrage",
+          "longueur",
+          "largeur",
+          "angle",
+          "ancrages"
+        ],
+        "properties": {
+          "parent": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ancrage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "longueur": {
+            "type": "number"
+          },
+          "largeur": {
+            "type": "number"
+          },
+          "angle": {
+            "type": "number"
+          },
+          "ancrages": {
+            "type": "object"
+          },
+          "zone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "facings": {
+      "type": "object"
+    },
+    "slots_segments": {
+      "type": "object"
+    },
+    "prise_arme": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "prise_bouclier": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

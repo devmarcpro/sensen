@@ -1,0 +1,10 @@
+{
+  "trigger": {
+    "signal": "combat_started",
+    "conditions": {}
+  },
+  "text_key": "tutorial.bascule_tactique.text",
+  "once": true,
+  "delay_ticks": 0,
+  "category": "combat"
+}

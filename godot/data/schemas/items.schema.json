@@ -76,6 +76,9 @@
     },
     "quantite": {
       "type": "integer"
+    },
+    "materiau": {
+      "type": "string"
     }
   },
   "required": [

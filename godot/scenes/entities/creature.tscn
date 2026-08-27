@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://sensen_creature"]
+
+[ext_resource type="Script" path="res://scenes/entities/paperdoll.gd" id="1"]
+
+[node name="Creature" type="Node2D"]
+z_as_relative = false
+script = ExtResource("1")

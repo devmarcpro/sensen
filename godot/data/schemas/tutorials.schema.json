@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "required": [
+    "trigger",
+    "text_key",
+    "once",
+    "category"
+  ],
+  "properties": {
+    "trigger": {
+      "type": "object",
+      "required": [
+        "signal"
+      ],
+      "properties": {
+        "signal": {
+          "type": "string"
+        },
+        "conditions": {
+          "type": "object"
+        }
+      }
+    },
+    "text_key": {
+      "type": "string"
+    },
+    "once": {
+      "type": "boolean"
+    },
+    "delay_ticks": {
+      "type": "integer"
+    },
+    "category": {
+      "type": "string"
+    }
+  }
+}

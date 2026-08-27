@@ -1,0 +1,65 @@
+{
+ "name_key": "rig.amorphe.name",
+ "racine": "torse",
+ "hauteur_pieds": 2,
+ "segments": {
+  "torse": {
+   "parent": null,
+   "ancrage": null,
+   "longueur": 12,
+   "largeur": 12,
+   "angle": -90,
+   "ancrages": {},
+   "zone": "torse"
+  }
+ },
+ "facings": {
+  "S": {
+   "ordre": [
+    "torse"
+   ],
+   "offsets": {},
+   "vue_tete": "face"
+  },
+  "SE": {
+   "ordre": [
+    "torse"
+   ],
+   "offsets": {},
+   "vue_tete": "face"
+  },
+  "E": {
+   "ordre": [
+    "torse"
+   ],
+   "offsets": {},
+   "vue_tete": "face"
+  },
+  "NE": {
+   "ordre": [
+    "torse"
+   ],
+   "offsets": {},
+   "vue_tete": "face"
+  },
+  "N": {
+   "ordre": [
+    "torse"
+   ],
+   "offsets": {},
+   "vue_tete": "face"
+  },
+  "SW": {
+   "miroir": "SE"
+  },
+  "W": {
+   "miroir": "E"
+  },
+  "NW": {
+   "miroir": "NE"
+  }
+ },
+ "slots_segments": {},
+ "prise_arme": null,
+ "prise_bouclier": null
+}

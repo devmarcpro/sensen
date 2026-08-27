@@ -88,7 +88,7 @@ element.feu,Feu
 element.terre,Terre
 element.metal,Métal
 element.eau,Eau
-ui.aide.armes,1-7 : changer d'arme (4 ticks) — {liste}
+ui.aide.armes,1-7 : changer d'arme ({ticks} ticks) — {liste}
 ui.wuxing,{element} contre {contre} : ×{dom} · jauge {segments}/{capacite} (gain ×{gain}) · ce coup : segment {position} {transition} → ×{chaine}
 ui.chaine,chaîne : {segments}
 journal.capacite,{att} lance {capacite} sur {def} ({zone}) : {degats} dégâts
@@ -146,6 +146,14 @@ declencheur.ouverture,ouverture
 declencheur.veille,veille
 declencheur.testament,testament
 declencheur.accord,accord
+rig.humanoide.name,Humanoïde
+rig.quadrupede.name,Quadrupède
+rig.volant.name,Volant
+rig.amorphe.name,Amorphe
+tutorial.bascule_tactique.text,"Un hostile vous a vu : le temps ne passe plus qu'à vos actions. Réfléchir est gratuit — lisez la timeline à droite avant d'agir."
+tutorial.telegraphe.text,"Un « ! » et des tuiles rouges : une attaque est engagée et se résoudra à l'échéance. Bougez, prenez la garde (G) ou frappez avant."
+tutorial.premier_segment.text,"Un coup qui touche pose un segment de chaîne (les pastilles sous vous). Enchaînez cinq éléments dans l'ordre d'engendrement — ou quatre coups rapides puis une lourde — pour résoudre."
+tutorial.fin_de_combat.text,"Le combat se relâche : l'écran de fin montre la durée en ticks et l'XP des pistes (élément, arme, type de dégâts, armure)."
 journal.victoire,plus aucun hostile. Victoire.
 journal.defaite,tu es tombé. Tab : recommencer.
 module.a_l_impact.name,À l'impact

@@ -1,0 +1,10 @@
+{
+  "trigger": {
+    "signal": "action_engaged",
+    "conditions": {}
+  },
+  "text_key": "tutorial.telegraphe.text",
+  "once": true,
+  "delay_ticks": 0,
+  "category": "combat"
+}

@@ -1,11 +1,11 @@
 {
-  "_doc": "Tooltip contextuel (docs: Tooltips contextuels / E.19).",
+  "_doc": "Tooltip contextuel (docs: Tooltips contextuels / E.19). trigger.signal = un signal EventBus ; conditions optionnelles ; once = une seule fois par profil ; information pure, jamais un verrou.",
   "trigger": {
-    "signal": "<signal EventBus>",
+    "signal": "combat_started",
     "conditions": {}
   },
   "text_key": "tutorial.<id>.text",
   "once": true,
   "delay_ticks": 0,
-  "category": "general"
+  "category": "combat"
 }

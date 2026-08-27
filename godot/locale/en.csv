@@ -9,4 +9,73 @@ creature.bandit.name,Bandit
 creature.chef_de_bande.name,Gang leader
 creature.aigle.name,Eagle
 creature.scorpion.name,Scorpion
+functionality.dague.name,Dagger
+functionality.epee.name,Sword
+functionality.masse.name,Mace
+functionality.lance.name,Spear
+functionality.arc.name,Bow
+functionality.baton_magique.name,Magic staff
+functionality.bouclier.name,Shield
+item.proto_dague.name,Dagger
+item.proto_epee.name,Sword
+item.proto_masse.name,Mace
+item.proto_lance.name,Spear
+item.proto_arc.name,Bow
+item.proto_baton_magique.name,Magic staff
+item.proto_bouclier.name,Shield
+item.proto_casque_cuir.name,Leather helm
+item.proto_cuirasse_cuir.name,Leather cuirass
+item.proto_cuirasse_mailles.name,Mail cuirass
+item.proto_casque_fer.name,Iron helm
+item.proto_jambieres_cuir.name,Leather greaves
 ui.titre,SENSEN — combat prototype
+ui.horloge,clock {horloge} · {mode}
+ui.mode.exploration,exploration ({tps} ticks/s)
+ui.mode.combat,COMBAT — time only moves when you act
+ui.aide,ZQSD: move (8 directions) · click: move / strike · shift+click: heavy attack · G: guard · space: wait · tab: next arena · F5: reload data
+ui.timeline,next actions:
+journal.deplacement,{nom} moves ({cout} ticks)
+journal.chute,{nom} falls {niveaux} levels: {degats} damage
+journal.attaque,{att} strikes {def} on the {zone}: {degats} damage ({ticks} ticks)
+journal.attaque_lourde,{att} HEAVY ATTACK on {def} ({zone}): {degats} damage — guard broken
+journal.telegraphe,{nom} prepares {action} ({ticks} ticks)
+journal.garde,{nom} takes guard (2 ticks)
+journal.attendre,"{nom} waits (5 ticks, +20 stamina)"
+journal.mort,{nom} falls.
+journal.engagement,{nom} saw you — COMBAT: time only moves when you act
+journal.desengagement,no hostile in sight — back to real time
+journal.chaine_segment,"{nom} sets a {element} segment ({position}/{capacite}, +{transition})"
+journal.chaine_resout,{nom} RESOLVES the chain: damage ×{mult}
+element.bois,Wood
+element.feu,Fire
+element.terre,Earth
+element.metal,Metal
+element.eau,Water
+status.brulure.name,Burn
+status.poison.name,Poison
+status.saignement.name,Bleeding
+status.infection.name,Infection
+status.ralentissement.name,Slow
+status.hate.name,Haste
+status.hate_meute.name,Pack haste
+status.ralliement.name,Rally
+status.etourdi.name,Stunned
+status.enracinement.name,Rooted
+status.retarde.name,Delayed
+status.egide.name,Aegis
+status.garde_annulee.name,Guard broken
+status.terreur.name,Terror
+item.proto_fleches.name,Arrows
+ui.fin.titre,=== END OF COMBAT — {issue} in {ticks} ticks ===
+ui.fin.victoire,victory
+ui.fin.defaite,defeat
+rig.humanoide.name,Humanoid
+rig.quadrupede.name,Quadruped
+rig.volant.name,Flying
+rig.amorphe.name,Amorphous
+tutorial.bascule_tactique.text,A hostile saw you: time now only moves when you act. Thinking is free — read the timeline on the right before acting.
+tutorial.telegraphe.text,"A “!” and red tiles: an attack is engaged and resolves when its counter comes up. Move, guard (G) or strike first."
+tutorial.premier_segment.text,A hit sets a chain segment (the dots below you). Chain five elements in generation order — or four quick hits then a heavy one — to resolve.
+tutorial.fin_de_combat.text,"Combat releases: the end screen shows the duration in ticks and the XP of each track (element, weapon, damage type, armour)."
+journal.victoire,no hostile left. Victory.
+journal.defaite,you fell. Tab: restart.

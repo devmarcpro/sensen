@@ -31,6 +31,9 @@ var ecran_fin: Array[String] = []  # récapitulatif du dernier combat (écran de
 var zoom := 1.0
 
 var terrain: Terrain              # couche statique : les tuiles, dessinées une fois (perf É0)
+var hud: Hud                      # couche au-dessus des êtres : barres, garde, télégraphes, jauges
+var noeuds: Dictionary = {}       # id d'être → nœud creature.tscn (le paperdoll)
+const SCENE_CREATURE := preload("res://scenes/entities/creature.tscn")
 
 @onready var ui: Label = $CanvasLayer/Info
 @onready var ui_droite: Label = $CanvasLayer/Droite
@@ -44,11 +47,24 @@ class Terrain extends Node2D:
 		proprio._dessiner_terrain(self)
 
 
+## La couche d'interface au-dessus des êtres (z fixe, toujours visible).
+class Hud extends Node2D:
+	var proprio: Node2D
+	func _draw() -> void:
+		proprio._dessiner_hud(self)
+
+
 func _ready() -> void:
 	terrain = Terrain.new()
 	terrain.proprio = self
 	terrain.z_index = -1
 	add_child(terrain)
+	hud = Hud.new()
+	hud.proprio = self
+	hud.z_as_relative = false
+	hud.z_index = 200
+	add_child(hud)
+	EventBus.damage_dealt.connect(func(src: String, _c: String, _d: int, _det: Dictionary) -> void: if noeuds.has(src): noeuds[src].frapper())
 	arenes.assign(GameData.catalogues.get("prototype_arenas", {}).keys())
 	arenes.sort()
 	EventBus.journal.connect(_sur_journal)
@@ -57,6 +73,9 @@ func _ready() -> void:
 	EventBus.combat_ended.connect(_sur_fin_de_combat)
 	EventBus.tile_changed.connect(func(_p: Vector2i) -> void: terrain.queue_redraw())
 	GameData.donnees_rechargees.connect(_charger)
+	var tutoriels := Tutoriels.new()
+	tutoriels.afficher = func(texte: String) -> void: _log("💡 " + texte)
+	add_child(tutoriels)
 	_charger()
 
 
@@ -71,13 +90,16 @@ func _charger() -> void:
 	telegraphes.clear()
 	journal.clear()
 	terrain.queue_redraw()
+	for n in noeuds.values():
+		n.queue_free()
+	noeuds.clear()
 	_log(tr("ui.aide"))
 	var j := joueur()
 	if not j.is_empty() and not j.ratelier.is_empty():
 		var noms: Array[String] = []
 		for k in j.ratelier.size():
 			noms.append("%d=%s" % [k + 1, tr(sim.items[j.ratelier[k]].name_key)])
-		_log(tr("ui.aide.armes").format({"liste": " · ".join(noms)}))
+		_log(tr("ui.aide.armes").format({"liste": " · ".join(noms), "ticks": sim.regles.r.actions.changer_arme}))
 	if not j.is_empty() and not j.get("capacites", []).is_empty():
 		var caps: Array[String] = []
 		for k in j.capacites.size():
@@ -154,12 +176,52 @@ func _process(delta: float) -> void:
 		minuterie_pas = DELAI_PAS
 		for nom in sim.combats.keys():
 			sim.pas(nom)
+	_maj_noeuds()
+	hud.queue_redraw()
 	_maj_atteignables()
 	minuterie_ui -= delta
 	if minuterie_ui <= 0.0 and not profil_sans_ui:
 		minuterie_ui = 0.05
 		_maj_ui()
 	queue_redraw()
+
+
+## Un nœud creature.tscn par être vivant, configuré depuis sa fiche : position, profondeur, rig.
+func _maj_noeuds() -> void:
+	var vivants := {}
+	for e in sim.vivants():
+		vivants[e.id] = true
+		var n: Paperdoll = noeuds.get(e.id)
+		if n == null:
+			n = SCENE_CREATURE.instantiate()
+			var rig: Dictionary = GameData.entree("rigs", str(e.corps.silhouette))
+			n.configurer(e, rig, sim.items, sim.fonctionnalites, GameData.config("palette_materiaux"))
+			n.dessine_apres = _dessiner_occulteurs
+			add_child(n)
+			noeuds[e.id] = n
+		n.e = e
+		n.position = _ecran(e.pos, sim.grille.h(e.pos))
+		n.z_index = e.pos.x + e.pos.y + 1
+		n.queue_redraw()
+	for id in noeuds.keys().duplicate():
+		if not vivants.has(id):
+			noeuds[id].queue_free()
+			noeuds.erase(id)
+
+
+## Les tuiles plus hautes devant un être sont redessinées par-dessus lui, à sa profondeur :
+## le relief l'occulte comme dans une passe unique (appelé par le paperdoll après son dessin).
+func _dessiner_occulteurs(n: Paperdoll) -> void:
+	var g := sim.grille
+	var e: Dictionary = n.e
+	var he := g.h(e.pos)
+	var base := _ecran(e.pos, he)
+	for d in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 0), Vector2i(0, 2), Vector2i(2, 1), Vector2i(1, 2)]:
+		var t: Vector2i = e.pos + d
+		if g.dans(t) and (g.h(t) > he or g.bloque_passage(t)):
+			n.draw_set_transform(-base)
+			_dessine_tuile(n, t)
+			n.draw_set_transform(Vector2.ZERO)
 
 
 func _maj_atteignables() -> void:
@@ -302,17 +364,6 @@ func _draw() -> void:
 		for c in chemin_en_cours:
 			pts.append(_ecran(c, g.h(c)))
 		draw_polyline(pts, Color(1, 1, 1, 0.55), 2.0)
-	# Entités par profondeur (x+y croissant) ; les tuiles plus hautes devant elles sont redessinées
-	# par-dessus, pour que le relief les occulte comme dans la passe unique.
-	var acteurs := sim.vivants()
-	acteurs.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.pos.x + a.pos.y < b.pos.x + b.pos.y)
-	for e in acteurs:
-		_dessine_entite(e)
-		var he := g.h(e.pos)
-		for d in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 0), Vector2i(0, 2), Vector2i(2, 1), Vector2i(1, 2)]:
-			var t: Vector2i = e.pos + d
-			if g.dans(t) and (g.h(t) > he or g.bloque_passage(t)):
-				_dessine_tuile(self, t)
 	for t in atteignables.keys():
 		if t == j.pos:
 			continue
@@ -394,37 +445,34 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 			c + Vector2(TW * 0.5, -hm), c + Vector2(0, TH * 0.5 - hm)]), Color(0.5, 0.47, 0.44))
 
 
-## Billboard placeholder : une silhouette teintée dont la forme vient de la morphologie.
-func _dessine_entite(e: Dictionary) -> void:
+## La couche d'interface : barres, garde, télégraphe et jauge de chaîne de chaque être.
+func _dessiner_hud(ci: CanvasItem) -> void:
+	if sim == null:
+		return
+	for e in sim.vivants():
+		_dessine_hud_entite(ci, e)
+
+
+func _dessine_hud_entite(ci: CanvasItem, e: Dictionary) -> void:
 	var c := _ecran(e.pos, sim.grille.h(e.pos))
-	var teinte := Color(e.teinte[0], e.teinte[1], e.teinte[2])
-	match str(e.corps.silhouette):
-		"quadrupede":
-			draw_rect(Rect2(c + Vector2(-10, -12), Vector2(20, 9)), teinte)
-			draw_circle(c + Vector2(e.orientation.x * 8, -13), 4.0, teinte.darkened(0.2))
-		"volant":
-			draw_colored_polygon(PackedVector2Array([c + Vector2(-12, -20), c + Vector2(0, -14), c + Vector2(12, -20), c + Vector2(0, -8)]), teinte)
-		_:
-			draw_rect(Rect2(c + Vector2(-5, -20), Vector2(10, 16)), teinte)
-			draw_circle(c + Vector2(0, -24), 4.5, teinte.lightened(0.2))
 	if e.garde:   # la garde : un arc devant l'orientation
 		var o := Vector2(e.orientation.x - e.orientation.y, (e.orientation.x + e.orientation.y) * 0.5).normalized()
-		draw_arc(c + Vector2(0, -10), 14.0, o.angle() - 0.9, o.angle() + 0.9, 8, Color(0.6, 0.85, 1.0), 2.0)
+		ci.draw_arc(c + Vector2(0, -10), 16.0, o.angle() - 0.9, o.angle() + 0.9, 8, Color(0.6, 0.85, 1.0), 2.0)
 	if telegraphes.has(e.id):   # intention visible : le télégraphe est une information d'interface
-		draw_string(ThemeDB.fallback_font, c + Vector2(-4, -30), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(1, 0.3, 0.2))
+		ci.draw_string(ThemeDB.fallback_font, c + Vector2(-4, -40), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(1, 0.3, 0.2))
 	var w := 22.0
-	draw_rect(Rect2(c + Vector2(-w * 0.5, -32), Vector2(w, 3)), Color(0, 0, 0, 0.6))
-	draw_rect(Rect2(c + Vector2(-w * 0.5, -32), Vector2(w * e.sante / e.sante_max, 3)), Color(0.3, 0.9, 0.3))
-	draw_rect(Rect2(c + Vector2(-w * 0.5, -28), Vector2(w * e.endurance / e.endurance_max, 2)), Color(0.9, 0.8, 0.3))
+	ci.draw_rect(Rect2(c + Vector2(-w * 0.5, -42), Vector2(w, 3)), Color(0, 0, 0, 0.6))
+	ci.draw_rect(Rect2(c + Vector2(-w * 0.5, -42), Vector2(w * e.sante / e.sante_max, 3)), Color(0.3, 0.9, 0.3))
+	ci.draw_rect(Rect2(c + Vector2(-w * 0.5, -38), Vector2(w * e.endurance / e.endurance_max, 2)), Color(0.9, 0.8, 0.3))
 	if e.has("chaine"):   # la jauge de chaîne, toujours visible (pastilles colorées)
 		var segs := _segments(e)
 		var cap: int = e.chaine.capacite
 		for k in cap:
-			var p := c + Vector2(-w * 0.5 + 2 + k * (w - 2) / cap, 4)
+			var p := c + Vector2(-w * 0.5 + 2 + k * (w - 2) / cap, 5)
 			if k < segs.size():
-				draw_circle(p, 2.6, sim.wuxing.teinte(segs[k].element))
+				ci.draw_circle(p, 2.6, sim.wuxing.teinte(segs[k].element))
 			else:
-				draw_circle(p, 2.2, Color(0, 0, 0, 0.5))
+				ci.draw_circle(p, 2.2, Color(0, 0, 0, 0.5))
 
 
 ## Les segments effectifs d'une jauge à l'instant présent (décroissance calculée, sans la modifier).

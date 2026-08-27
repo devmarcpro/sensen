@@ -142,6 +142,9 @@ Aucune ne figure dans la palette des matériaux ([[Palette de couleurs des maté
 
 **Rendu partagé ([[Entités et pathfinding — performance]]) :** les parties sont des ressources **partagées** ; recolorisation par palette en shader (paramètre d'instance) — 100 villageois = ~8 jeux de parties distincts en mémoire.
 
+> [!success] Codé le 2026-08-27 — le rig avant les sprites
+> `data/rigs/{humanoide, quadrupede, volant, amorphe}.json` (`tools/gen_rigs.py`) portent le **vrai rig** : segments accrochés à l'ancrage de leur parent (longueur, largeur, angle de repos, ancrages portés `[le long, en travers]`, zone de coup), **facings** (ordre de calque + décalages d'ancrage pour S/SE/E/NE/N, W/NW/SW par **miroir**), `slots_segments` (quel slot d'armure peint quels segments) et `prise_arme` / `prise_bouclier`. `scenes/entities/creature.tscn` (`paperdoll.gd`) est la scène unique de tout être : elle lit la fiche (silhouette → rig), l'équipement (pièce → segments peints, contour selon la **construction**, teinte selon le **matériau** — `data/palette_materiaux.json`, transcrit de [[Palette de couleurs des matériaux]]), l'arme à `prise`. **Sans aucun asset** : chaque segment est un rectangle procédural — quand les sprites arriveront, ils remplaceront le rectangle ; le rig, les facings et les ancrages restent. L'animation par pivots existe (la frappe fait tourner le bras d'arme). Les **3 vues de tête** sont notées (`vue_tete`) mais indiscernables sur un cercle : à confirmer au premier essai visuel, comme prévu. Le génome n'existant pas encore sur les fiches, la couleur du corps est la `teinte` de la fiche.
+
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Direction artistique]], [[Décisions d'architecture]]
 - **Alimente** : [[Schéma créature]], [[Apparence — données et équipement]], [[Équipement — 14 slots]], [[Armure par zone et constructions]], [[Monstres rares]]

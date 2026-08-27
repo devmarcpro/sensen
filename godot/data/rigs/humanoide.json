@@ -1,0 +1,398 @@
+{
+ "name_key": "rig.humanoide.name",
+ "racine": "torse",
+ "hauteur_pieds": 13,
+ "segments": {
+  "torse": {
+   "parent": null,
+   "ancrage": null,
+   "longueur": 14,
+   "largeur": 9,
+   "angle": -90,
+   "ancrages": {
+    "cou": [
+     14,
+     0
+    ],
+    "epaule_G": [
+     12,
+     -5
+    ],
+    "epaule_D": [
+     12,
+     5
+    ],
+    "hanche_G": [
+     0,
+     -2.5
+    ],
+    "hanche_D": [
+     0,
+     2.5
+    ],
+    "dos": [
+     8,
+     0
+    ]
+   },
+   "zone": "torse"
+  },
+  "tete": {
+   "parent": "torse",
+   "ancrage": "cou",
+   "longueur": 8,
+   "largeur": 8,
+   "angle": -90,
+   "ancrages": {},
+   "zone": "tete"
+  },
+  "bras_haut_G": {
+   "parent": "torse",
+   "ancrage": "epaule_G",
+   "longueur": 8,
+   "largeur": 3,
+   "angle": 100,
+   "ancrages": {
+    "coude": [
+     8,
+     0
+    ]
+   },
+   "zone": "bras"
+  },
+  "bras_haut_D": {
+   "parent": "torse",
+   "ancrage": "epaule_D",
+   "longueur": 8,
+   "largeur": 3,
+   "angle": 80,
+   "ancrages": {
+    "coude": [
+     8,
+     0
+    ]
+   },
+   "zone": "bras"
+  },
+  "bras_bas_G": {
+   "parent": "bras_haut_G",
+   "ancrage": "coude",
+   "longueur": 7,
+   "largeur": 3,
+   "angle": 95,
+   "ancrages": {
+    "poignet": [
+     7,
+     0
+    ]
+   },
+   "zone": "bras"
+  },
+  "bras_bas_D": {
+   "parent": "bras_haut_D",
+   "ancrage": "coude",
+   "longueur": 7,
+   "largeur": 3,
+   "angle": 85,
+   "ancrages": {
+    "poignet": [
+     7,
+     0
+    ]
+   },
+   "zone": "bras"
+  },
+  "main_G": {
+   "parent": "bras_bas_G",
+   "ancrage": "poignet",
+   "longueur": 3,
+   "largeur": 3,
+   "angle": 90,
+   "ancrages": {
+    "prise": [
+     2,
+     0
+    ]
+   },
+   "zone": "bras"
+  },
+  "main_D": {
+   "parent": "bras_bas_D",
+   "ancrage": "poignet",
+   "longueur": 3,
+   "largeur": 3,
+   "angle": 90,
+   "ancrages": {
+    "prise": [
+     2,
+     0
+    ]
+   },
+   "zone": "bras"
+  },
+  "jambe_haut_G": {
+   "parent": "torse",
+   "ancrage": "hanche_G",
+   "longueur": 7,
+   "largeur": 4,
+   "angle": 95,
+   "ancrages": {
+    "genou": [
+     7,
+     0
+    ]
+   },
+   "zone": "jambes"
+  },
+  "jambe_haut_D": {
+   "parent": "torse",
+   "ancrage": "hanche_D",
+   "longueur": 7,
+   "largeur": 4,
+   "angle": 85,
+   "ancrages": {
+    "genou": [
+     7,
+     0
+    ]
+   },
+   "zone": "jambes"
+  },
+  "jambe_bas_G": {
+   "parent": "jambe_haut_G",
+   "ancrage": "genou",
+   "longueur": 6,
+   "largeur": 3.5,
+   "angle": 90,
+   "ancrages": {
+    "cheville": [
+     6,
+     0
+    ]
+   },
+   "zone": "jambes"
+  },
+  "jambe_bas_D": {
+   "parent": "jambe_haut_D",
+   "ancrage": "genou",
+   "longueur": 6,
+   "largeur": 3.5,
+   "angle": 90,
+   "ancrages": {
+    "cheville": [
+     6,
+     0
+    ]
+   },
+   "zone": "jambes"
+  },
+  "pied_G": {
+   "parent": "jambe_bas_G",
+   "ancrage": "cheville",
+   "longueur": 4,
+   "largeur": 3,
+   "angle": 0,
+   "ancrages": {},
+   "zone": "pieds"
+  },
+  "pied_D": {
+   "parent": "jambe_bas_D",
+   "ancrage": "cheville",
+   "longueur": 4,
+   "largeur": 3,
+   "angle": 0,
+   "ancrages": {},
+   "zone": "pieds"
+  }
+ },
+ "facings": {
+  "S": {
+   "ordre": [
+    "bras_haut_G",
+    "bras_bas_G",
+    "main_G",
+    "jambe_haut_G",
+    "jambe_bas_G",
+    "pied_G",
+    "jambe_haut_D",
+    "jambe_bas_D",
+    "pied_D",
+    "torse",
+    "tete",
+    "bras_haut_D",
+    "bras_bas_D",
+    "main_D"
+   ],
+   "offsets": {},
+   "vue_tete": "face"
+  },
+  "SE": {
+   "ordre": [
+    "bras_haut_G",
+    "bras_bas_G",
+    "main_G",
+    "jambe_haut_G",
+    "jambe_bas_G",
+    "pied_G",
+    "torse",
+    "jambe_haut_D",
+    "jambe_bas_D",
+    "pied_D",
+    "tete",
+    "bras_haut_D",
+    "bras_bas_D",
+    "main_D"
+   ],
+   "offsets": {
+    "epaule_G": [
+     0,
+     2
+    ],
+    "epaule_D": [
+     0,
+     -1
+    ],
+    "hanche_G": [
+     0,
+     1
+    ],
+    "hanche_D": [
+     0,
+     -0.5
+    ]
+   },
+   "vue_tete": "face"
+  },
+  "E": {
+   "ordre": [
+    "bras_haut_G",
+    "bras_bas_G",
+    "main_G",
+    "jambe_haut_G",
+    "jambe_bas_G",
+    "pied_G",
+    "torse",
+    "jambe_haut_D",
+    "jambe_bas_D",
+    "pied_D",
+    "tete",
+    "bras_haut_D",
+    "bras_bas_D",
+    "main_D"
+   ],
+   "offsets": {
+    "epaule_G": [
+     0,
+     4
+    ],
+    "epaule_D": [
+     0,
+     -3
+    ],
+    "hanche_G": [
+     0,
+     2
+    ],
+    "hanche_D": [
+     0,
+     -1.5
+    ]
+   },
+   "vue_tete": "profil"
+  },
+  "NE": {
+   "ordre": [
+    "bras_haut_D",
+    "bras_bas_D",
+    "main_D",
+    "tete",
+    "jambe_haut_D",
+    "jambe_bas_D",
+    "pied_D",
+    "torse",
+    "jambe_haut_G",
+    "jambe_bas_G",
+    "pied_G",
+    "bras_haut_G",
+    "bras_bas_G",
+    "main_G"
+   ],
+   "offsets": {
+    "epaule_G": [
+     0,
+     2
+    ],
+    "epaule_D": [
+     0,
+     -1
+    ],
+    "hanche_G": [
+     0,
+     1
+    ],
+    "hanche_D": [
+     0,
+     -0.5
+    ]
+   },
+   "vue_tete": "dos"
+  },
+  "N": {
+   "ordre": [
+    "bras_haut_D",
+    "bras_bas_D",
+    "main_D",
+    "bras_haut_G",
+    "bras_bas_G",
+    "main_G",
+    "tete",
+    "jambe_haut_D",
+    "jambe_bas_D",
+    "pied_D",
+    "jambe_haut_G",
+    "jambe_bas_G",
+    "pied_G",
+    "torse"
+   ],
+   "offsets": {},
+   "vue_tete": "dos"
+  },
+  "SW": {
+   "miroir": "SE"
+  },
+  "W": {
+   "miroir": "E"
+  },
+  "NW": {
+   "miroir": "NE"
+  }
+ },
+ "slots_segments": {
+  "casque": [
+   "tete"
+  ],
+  "cuirasse": [
+   "torse"
+  ],
+  "brassards": [
+   "bras_haut_G",
+   "bras_haut_D",
+   "bras_bas_G",
+   "bras_bas_D",
+   "main_G",
+   "main_D"
+  ],
+  "jambieres": [
+   "jambe_haut_G",
+   "jambe_haut_D",
+   "jambe_bas_G",
+   "jambe_bas_D"
+  ],
+  "bottes": [
+   "pied_G",
+   "pied_D"
+  ]
+ },
+ "prise_arme": "main_D",
+ "prise_bouclier": "main_G"
+}

@@ -1,95 +1,21 @@
 {
-  "_doc": "Rig d'un template de squelette (docs: Squelette modulaire et points d'attache). Les DIRECTIONS ne sont pas redessinées : elles viennent de l'ordre de calque, des décalages d'ancrage et du miroir horizontal.",
+  "_doc": "Rig d'un template de squelette (docs: Squelette modulaire et points d'attache). Généré par tools/gen_rigs.py. Un segment = {parent, ancrage (sur le parent), longueur, largeur, angle de repos (90 = vers le bas de l'écran), ancrages portés [le_long, en_travers], zone de coup}. facings : ordre de calque (du fond vers l'avant) + décalages d'ancrage ; W/NW/SW par miroir. slots_segments : quel slot d'armure peint quels segments. Les sprites remplaceront les rectangles, le rig reste.",
   "name_key": "rig.<id>.name",
-  "segments": [
-    "tete",
-    "torse",
-    "bras_haut_G",
-    "bras_haut_D",
-    "bras_bas_G",
-    "bras_bas_D",
-    "main_G",
-    "main_D",
-    "jambe_haut_G",
-    "jambe_haut_D",
-    "jambe_bas_G",
-    "jambe_bas_D",
-    "pied_G",
-    "pied_D"
-  ],
-  "ancrages": {
-    "cou": [
-      "torse",
-      "tete"
-    ],
-    "epaule": [
-      "torse",
-      "bras_haut"
-    ],
-    "coude": [
-      "bras_haut",
-      "bras_bas"
-    ],
-    "poignet": [
-      "bras_bas",
-      "main"
-    ],
-    "prise": [
-      "main",
-      "<arme>"
-    ],
-    "hanche": [
-      "torse",
-      "jambe_haut"
-    ],
-    "genou": [
-      "jambe_haut",
-      "jambe_bas"
-    ],
-    "cheville": [
-      "jambe_bas",
-      "pied"
-    ],
-    "dos": [
-      "torse",
-      "<cape|sac>"
-    ]
+  "racine": "torse",
+  "hauteur_pieds": 13,
+  "segments": {
+    "torse": { "parent": null, "ancrage": null, "longueur": 14, "largeur": 9, "angle": -90, "ancrages": { "cou": [14, 0], "epaule_G": [12, -5], "epaule_D": [12, 5] }, "zone": "torse" },
+    "tete": { "parent": "torse", "ancrage": "cou", "longueur": 8, "largeur": 8, "angle": -90, "ancrages": {}, "zone": "tete" }
   },
-  "miroir_par_defaut": true,
   "facings": {
-    "S": {
-      "ordre": [],
-      "offsets": {}
-    },
-    "SE": {
-      "ordre": [],
-      "offsets": {}
-    },
-    "E": {
-      "ordre": [],
-      "offsets": {}
-    },
-    "NE": {
-      "ordre": [],
-      "offsets": {}
-    },
-    "N": {
-      "ordre": [],
-      "offsets": {}
-    },
-    "SW": {
-      "miroir": "SE"
-    },
-    "W": {
-      "miroir": "E"
-    },
-    "NW": {
-      "miroir": "NE"
-    }
+    "S": { "ordre": ["torse", "tete"], "offsets": {}, "vue_tete": "face" },
+    "SE": { "ordre": ["torse", "tete"], "offsets": {}, "vue_tete": "face" },
+    "E": { "ordre": ["torse", "tete"], "offsets": {}, "vue_tete": "profil" },
+    "NE": { "ordre": ["tete", "torse"], "offsets": {}, "vue_tete": "dos" },
+    "N": { "ordre": ["tete", "torse"], "offsets": {}, "vue_tete": "dos" },
+    "SW": { "miroir": "SE" }, "W": { "miroir": "E" }, "NW": { "miroir": "NE" }
   },
-  "vues_tete": [
-    "face",
-    "profil",
-    "dos"
-  ]
+  "slots_segments": { "casque": ["tete"], "cuirasse": ["torse"] },
+  "prise_arme": null,
+  "prise_bouclier": null
 }

@@ -1,0 +1,127 @@
+{
+ "name_key": "rig.volant.name",
+ "racine": "torse",
+ "hauteur_pieds": 18,
+ "segments": {
+  "torse": {
+   "parent": null,
+   "ancrage": null,
+   "longueur": 10,
+   "largeur": 6,
+   "angle": 0,
+   "ancrages": {
+    "cou": [
+     10,
+     -1
+    ],
+    "aile_G": [
+     5,
+     2
+    ],
+    "aile_D": [
+     5,
+     -2
+    ]
+   },
+   "zone": "torse"
+  },
+  "tete": {
+   "parent": "torse",
+   "ancrage": "cou",
+   "longueur": 4,
+   "largeur": 4,
+   "angle": -10,
+   "ancrages": {},
+   "zone": "tete"
+  },
+  "aile_G": {
+   "parent": "torse",
+   "ancrage": "aile_G",
+   "longueur": 14,
+   "largeur": 5,
+   "angle": 150,
+   "ancrages": {},
+   "zone": "bras"
+  },
+  "aile_D": {
+   "parent": "torse",
+   "ancrage": "aile_D",
+   "longueur": 14,
+   "largeur": 5,
+   "angle": -150,
+   "ancrages": {},
+   "zone": "bras"
+  }
+ },
+ "facings": {
+  "S": {
+   "ordre": [
+    "aile_D",
+    "torse",
+    "tete",
+    "aile_G"
+   ],
+   "offsets": {},
+   "vue_tete": "face"
+  },
+  "SE": {
+   "ordre": [
+    "aile_D",
+    "torse",
+    "tete",
+    "aile_G"
+   ],
+   "offsets": {},
+   "vue_tete": "face"
+  },
+  "E": {
+   "ordre": [
+    "aile_D",
+    "torse",
+    "tete",
+    "aile_G"
+   ],
+   "offsets": {},
+   "vue_tete": "profil"
+  },
+  "NE": {
+   "ordre": [
+    "tete",
+    "aile_D",
+    "torse",
+    "aile_G"
+   ],
+   "offsets": {},
+   "vue_tete": "dos"
+  },
+  "N": {
+   "ordre": [
+    "tete",
+    "aile_D",
+    "torse",
+    "aile_G"
+   ],
+   "offsets": {},
+   "vue_tete": "dos"
+  },
+  "SW": {
+   "miroir": "SE"
+  },
+  "W": {
+   "miroir": "E"
+  },
+  "NW": {
+   "miroir": "NE"
+  }
+ },
+ "slots_segments": {
+  "casque": [
+   "tete"
+  ],
+  "cuirasse": [
+   "torse"
+  ]
+ },
+ "prise_arme": null,
+ "prise_bouclier": null
+}
