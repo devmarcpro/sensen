@@ -1153,6 +1153,7 @@ func test_surface() -> void:
 	var s := Simulation.new(31)
 	s.charger_camp()
 	verifier(s.lieu == "camp" and s.camp_sauve.biome != "" and s.grille.sols.size() > 100, "le camp est une cellule générée (biome %s)" % s.camp_sauve.biome)
+	s.monde.fermer()
 	var accidente := false
 	for i in s.grille.hauteurs.size():
 		if int(s.grille.hauteurs[i]) != 10:
@@ -1166,21 +1167,22 @@ func test_camp() -> void:
 	var s := Simulation.new(23)
 	s.charger_camp()
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(s.lieu == "camp" and s.grille.largeur == 128, "le camp : une cellule de 128×128")
+	verifier(s.lieu == "camp" and s.grille.largeur == 384 and s.grille.origine == Vector2i(511 * 128, 511 * 128), "le camp : la fenêtre de 3×3 cellules du monde, en coordonnées monde")
 	var arbres := 0
 	var entree := Vector2i(-1, -1)
 	for i in s.grille.largeur * s.grille.hauteur_grille:
-		var t := Vector2i(i % s.grille.largeur, i / s.grille.largeur)
+		var t := s.grille.pos_de(i)
 		var tags: Array = s.grille.contenu_de(t).get("tags", [])
 		if "arbre" in tags:
 			arbres += 1
 		if "entree_donjon" in tags:
 			entree = t
 	verifier(arbres >= 5 and entree != Vector2i(-1, -1), "des arbres (%d) et l'entrée du donjon" % arbres)
-	var coffre := Vector2i(64 - 2, 64)
+	var base := Vector2i(512 * 128, 512 * 128)
+	var coffre := base + Vector2i(64 - 2, 64)
 	verifier(s.contenants.get(s.grille.idx(coffre), []).size() == 4, "le coffre de départ : hache, pioche, faucille, lit de paille")
 	# Une plante se récolte à la faucille par un clic adjacent (Récolte).
-	var plante := Vector2i(64 + 3, 64 + 3)
+	var plante := base + Vector2i(64 + 3, 64 + 3)
 	s.grille.poser_contenu(plante, "plante")
 	s.grille.materiaux[s.grille.idx(plante)] = "lin"
 	var faucille := s.generer_objet("proto_faucille", 1, {}, "commun", 0)
@@ -1259,6 +1261,32 @@ func test_camp() -> void:
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "remonter"}), "ressortir par l'entrée de l'étage 1")
 	verifier(s.lieu == "camp" and s.grille.meubles.get(s.grille.idx(devant), "") == "lit_de_paille" and s.contenants[s.grille.idx(ou)] == [pioche], "retour au camp : le lit et le coffre sont toujours là")
+	# 8.2a : traverser à pied vers la cellule voisine — la fenêtre se recentre, rien ne bouge, tout revient.
+	var mur2: Vector2i = j.pos + Vector2i(0, 2)
+	s._donner_materiau(j, "chene", 1, "planche")
+	j.pos = mur2 + Vector2i(1, 0)
+	s.grille.placer(j.id, j.pos)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "poser_mur", "vers": mur2}), "un mur posé au camp avant de partir")
+	var origine0: Vector2i = s.grille.origine
+	var loin: Vector2i = base + Vector2i(128 + 20, 64)   # dans la cellule (513, 512)
+	s.grille.liberer(j.pos)
+	j.pos = loin
+	s._fin_de_pas("monde")
+	verifier(s.grille.origine == origine0 + Vector2i(128, 0) and s.grille.dans(loin) and j.pos == loin, "la fenêtre s'est recentrée d'une cellule, le joueur n'a pas bougé")
+	verifier(s.grille.contenu_de(mur2).get("tags", []).has("construit"), "le mur est encore dans la fenêtre (cellule de départ toujours chargée)")
+	var tres_loin: Vector2i = base + Vector2i(128 * 2 + 20, 64)   # cellule (514, 512) : le camp sort de la fenêtre
+	s.grille.liberer(j.pos)
+	j.pos = tres_loin
+	s._fin_de_pas("monde")
+	verifier(s.grille.origine == origine0 + Vector2i(256, 0) and not s.grille.dans(mur2), "deux cellules plus loin : le camp est hors fenêtre")
+	verifier(s.monde.modifications.has(Vector2i(512, 512)) and not s.monde.modifications[Vector2i(512, 512)].is_empty(), "ses modifications sont capturées par cellule")
+	s.grille.liberer(j.pos)
+	j.pos = base + Vector2i(64, 70)
+	s._fin_de_pas("monde")
+	verifier(s.grille.origine == origine0 and s.grille.contenu_de(mur2).get("tags", []).has("construit") and s.grille.meubles.get(s.grille.idx(devant), "") == "lit_de_paille" and s.contenants.get(s.grille.idx(ou), []) == [pioche], "de retour au camp : mur, lit et coffre sont là (seed + modifications)")
+	verifier(s.grille.decouvert.has(s.grille.idx(base + Vector2i(3, 3))), "la cellule du camp reste entièrement découverte")
+	s.monde.fermer()
 
 
 # ---------------------------------------------------------------- Étape 7.2 : faim, nourriture, poids porté

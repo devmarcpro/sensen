@@ -12,6 +12,7 @@ signal skill_level_up(id: String, competence: String, niveau: int)
 signal combat_started(horloge: String, participants: Array)
 signal combat_ended(horloge: String)
 signal expedition_terminee(recap: Dictionary)             # sortie du donjon : le jalon « ressortir »
+signal fenetre_recentree(origine: Vector2i)               # la fenêtre du monde s'est recentrée (Monde) : le client rebâtit
 signal action_engaged(id: String, action: Dictionary)      # télégraphe : intention visible
 signal action_resolved(id: String, action: Dictionary)
 signal journal(cle: String, params: Dictionary)             # une ligne de journal, localisée côté client

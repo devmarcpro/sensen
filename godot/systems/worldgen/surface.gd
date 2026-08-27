@@ -21,7 +21,6 @@ var biomes: Dictionary
 var planete: Dictionary
 var bruits: Dictionary = {}   # nom de couche → FastNoiseLite
 var graine: int = 0
-var rng := RandomNumberGenerator.new()
 
 
 func _init(p_couches: Dictionary, p_biomes: Dictionary, p_planete: Dictionary, p_graine: int) -> void:
@@ -79,8 +78,9 @@ func _biome_de(v: Dictionary) -> String:
 
 ## Génère la cellule (cx, cy) : {largeur, hauteur, hauteurs, sol, bord, sols, arbres, rochers, filons,
 ## biome, biomes_vus, entree, ...}. `camp` : la configuration du camp à y greffer (coffre, entrée).
-func generer_cellule(cx: int, cy: int, camp: Dictionary = {}) -> Dictionary:
+func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true) -> Dictionary:
 	var taille: int = int(planete.taille_cellule)
+	var rng := RandomNumberGenerator.new()   # local : la génération peut tourner en thread (Monde)
 	rng.seed = hash([graine, cx, cy, "cellule"])
 	var e := {"largeur": taille, "hauteur": taille, "hauteurs": PackedByteArray(), "sol": {}, "bord": {}, "sols": {}, "filons": {},
 		"arbres": {}, "rochers": {}, "plantes": {}, "cellule": Vector2i(cx, cy), "biome": "", "biomes_vus": {}, "accidents": [],
@@ -98,7 +98,7 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}) -> Dictionary:
 	for y in taille:
 		for x in taille:
 			var i := y * taille + x
-			if x == 0 or y == 0 or x == taille - 1 or y == taille - 1:
+			if bord and (x == 0 or y == 0 or x == taille - 1 or y == taille - 1):
 				e.bord[i] = true
 				continue
 			e.sol[i] = true
@@ -112,7 +112,7 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}) -> Dictionary:
 			e.sols[i] = str(biomes.get(b, {}).get("surface_material", "terre"))
 	# 2. Le relief : des accidents posés, hors de la zone d'arrivée si un camp s'y greffe.
 	var reserve := Rect2i(e.entree - Vector2i(8, 8), Vector2i(24, 16)) if not camp.is_empty() else Rect2i(-1, -1, 0, 0)
-	_poser_accidents(e, reserve)
+	_poser_accidents(e, reserve, rng)
 	# 3. Arbres, rochers, filons selon le biome de chaque tuile et les couches vegetation / ressources.
 	var mp: Dictionary = GameData.config("minerais_par_etage")
 	var seuils: Array = planete.tiers_corruption
@@ -165,7 +165,7 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}) -> Dictionary:
 
 
 ## Les accidents de relief d'une cellule (planete.relief) : chacun un modificateur 2D paramétrique.
-func _poser_accidents(e: Dictionary, reserve: Rect2i) -> void:
+func _poser_accidents(e: Dictionary, reserve: Rect2i, rng: RandomNumberGenerator) -> void:
 	var rel: Dictionary = planete.relief
 	var taille: int = e.largeur
 	var nb := rng.randi_range(int(rel.par_cellule[0]), int(rel.par_cellule[1]))

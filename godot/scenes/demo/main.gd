@@ -90,6 +90,7 @@ func _ready() -> void:
 	arenes.assign(GameData.catalogues.get("prototype_arenas", {}).keys())
 	arenes.sort()
 	EventBus.journal.connect(_sur_journal)
+	EventBus.fenetre_recentree.connect(func(_o: Vector2i) -> void: _apres_changement_de_grille())
 	EventBus.action_engaged.connect(func(id: String, a: Dictionary) -> void: telegraphes[id] = a)
 	EventBus.action_resolved.connect(func(id: String, _a: Dictionary) -> void: telegraphes.erase(id))
 	EventBus.combat_ended.connect(_sur_fin_de_combat)
@@ -172,6 +173,12 @@ func _charger(fiche: Dictionary = {}) -> void:
 	for n in noeuds.values():
 		n.queue_free()
 	noeuds.clear()
+	for v in noeuds_vegetaux.values():
+		v.queue_free()
+	noeuds_vegetaux.clear()
+	vue_version = -1
+	centre_brouillard = Vector2i(-99, -99)
+	brouillard.queue_redraw()
 	_log(tr("ui.aide"))
 	var j := joueur()
 	if not j.is_empty() and not j.ratelier.is_empty():
@@ -194,6 +201,9 @@ func _apres_changement_de_grille() -> void:
 	for v in noeuds_vegetaux.values():
 		v.queue_free()
 	noeuds_vegetaux.clear()
+	vue_version = -1
+	centre_brouillard = Vector2i(-99, -99)
+	brouillard.queue_redraw()
 	for n in noeuds.values():
 		n.queue_free()
 	noeuds.clear()
@@ -235,6 +245,12 @@ func _log(t: String) -> void:
 
 
 # ---------------------------------------------------------------- rythme (client)
+
+## À la fermeture : attendre la pré-génération en thread (elle lit GameData, qui va disparaître).
+func _exit_tree() -> void:
+	if sim != null and sim.monde != null:
+		sim.monde.fermer()
+
 
 func _process(delta: float) -> void:
 	if not creation.is_empty():
@@ -318,7 +334,7 @@ func _maj_noeuds(delta: float = 0.0) -> void:
 		else:
 			n.position = n.position.lerp(cible, k)
 		n.visible = true
-		n.z_index = e.pos.x + e.pos.y + 1
+		n.z_index = _profondeur(e.pos)
 		n.queue_redraw()
 	for id in noeuds.keys().duplicate():
 		if not vivants.has(id):
@@ -523,8 +539,8 @@ func _tuile_sous(p: Vector2) -> Vector2i:
 	var g := sim.grille
 	var j := joueur()
 	var cj: Vector2i = j.pos if not j.is_empty() else Vector2i.ZERO
-	for y in range(maxi(0, cj.y - RAYON_VUE), mini(g.hauteur_grille, cj.y + RAYON_VUE + 1)):
-		for x in range(maxi(0, cj.x - RAYON_VUE), mini(g.largeur, cj.x + RAYON_VUE + 1)):
+	for y in range(maxi(g.origine.y, cj.y - RAYON_VUE), mini(g.origine.y + g.hauteur_grille, cj.y + RAYON_VUE + 1)):
+		for x in range(maxi(g.origine.x, cj.x - RAYON_VUE), mini(g.origine.x + g.largeur, cj.x + RAYON_VUE + 1)):
 			var t := Vector2i(x, y)
 			var c := _ecran(t, g.h(t))
 			var d := c.distance_squared_to(p)
@@ -592,12 +608,12 @@ func _dessiner_terrain(ci: CanvasItem) -> void:
 		return
 	var g := sim.grille
 	var j := joueur()
-	var c: Vector2i = j.pos if not j.is_empty() else Vector2i(g.largeur / 2, g.hauteur_grille / 2)
+	var c: Vector2i = j.pos if not j.is_empty() else g.origine + Vector2i(g.largeur / 2, g.hauteur_grille / 2)
 	centre_terrain = c
-	var x0 := maxi(0, c.x - RAYON_VUE)
-	var x1 := mini(g.largeur - 1, c.x + RAYON_VUE)
-	var y0 := maxi(0, c.y - RAYON_VUE)
-	var y1 := mini(g.hauteur_grille - 1, c.y + RAYON_VUE)
+	var x0 := maxi(g.origine.x, c.x - RAYON_VUE)
+	var x1 := mini(g.origine.x + g.largeur - 1, c.x + RAYON_VUE)
+	var y0 := maxi(g.origine.y, c.y - RAYON_VUE)
+	var y1 := mini(g.origine.y + g.hauteur_grille - 1, c.y + RAYON_VUE)
 	var garder := {}
 	for s in range(x0 + y0, x1 + y1 + 1):     # tri de profondeur : diagonales x+y, dans la fenêtre
 		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
@@ -613,6 +629,12 @@ func _dessiner_terrain(ci: CanvasItem) -> void:
 			noeuds_vegetaux.erase(idx)
 
 
+## La profondeur d'un billboard (z relatif) : x + y, ramené à la fenêtre (les coordonnées monde dépassent CANVAS_ITEM_Z_MAX).
+func _profondeur(t: Vector2i) -> int:
+	var o: Vector2i = sim.grille.origine
+	return clampi((t.x - o.x) + (t.y - o.y) + 1, 1, 4000)
+
+
 ## Un billboard pour le végétal d'une tuile (Direction artistique : les ressources récoltables sont des sprites).
 func _assurer_vegetal(t: Vector2i) -> void:
 	var g := sim.grille
@@ -623,7 +645,7 @@ func _assurer_vegetal(t: Vector2i) -> void:
 	var mat_id := g.materiau_de(t)
 	v.configurer(mat_id, GameData.catalogues.vegetaux.get(mat_id, {}), GameData.catalogues.materials.get(mat_id, {}), hash([t.x, t.y]))
 	v.position = _ecran(t, g.h(t))
-	v.z_index = t.x + t.y + 1
+	v.z_index = _profondeur(t)
 	var j := joueur()
 	if not g.decouvert.has(idx):
 		v.modulate = Color(0, 0, 0, 0)
@@ -713,10 +735,10 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 	vue_version = int(j.get("vue_version", 0))
 	var fond := Color(0.3, 0.3, 0.3)   # la couleur de fond de la scène (clear color)
 	var voile := Color(0.05, 0.05, 0.08, 0.55)
-	var x0 := maxi(0, j.pos.x - RAYON_VUE)
-	var x1 := mini(g.largeur - 1, j.pos.x + RAYON_VUE)
-	var y0 := maxi(0, j.pos.y - RAYON_VUE)
-	var y1 := mini(g.hauteur_grille - 1, j.pos.y + RAYON_VUE)
+	var x0 := maxi(g.origine.x, j.pos.x - RAYON_VUE)
+	var x1 := mini(g.origine.x + g.largeur - 1, j.pos.x + RAYON_VUE)
+	var y0 := maxi(g.origine.y, j.pos.y - RAYON_VUE)
+	var y1 := mini(g.origine.y + g.hauteur_grille - 1, j.pos.y + RAYON_VUE)
 	for s in range(x0 + y0, x1 + y1 + 1):
 		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
 			var t := Vector2i(x, s - x)

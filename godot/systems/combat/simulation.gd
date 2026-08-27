@@ -31,6 +31,7 @@ var expedition: Dictionary = {}      # compteurs de l'expédition en cours : tu�
 var camp_sauve: Dictionary = {}      # le camp mis de côté pendant une expédition (Claims et persistance)
 var lieu: String = "arene"           # "arene" | "camp" | "donjon"
 var prochain_donjon: int = 1         # id du prochain donjon lancé depuis le camp
+var monde: Monde = null              # la surface comme fenêtre glissante (étape 8.2a)
 var objets: Dictionary = {}          # uid → instance générée (le catalogue reste dans `items`, fusionné)
 var contenants: Dictionary = {}      # index de tuile → [uids] (coffres, butin au sol)
 var dernier_combat: Dictionary = {}   # récapitulatif du dernier combat terminé (écran de fin)
@@ -105,48 +106,96 @@ func charger_camp(joueur: Dictionary = {}) -> void:
 			joueur.spawn = joueur.get("lit", sauve.entree)
 		maj_vision()
 		return
+	# Première venue : le monde (fenêtre glissante) centré sur la cellule de départ.
 	var cfg: Dictionary = GameData.config("camp")
 	var planete: Dictionary = GameData.config("planete")
 	var surface := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, int(planete.graine))
-	var e := surface.generer_cellule(int(planete.cellule_depart[0]), int(planete.cellule_depart[1]), cfg)
-	grille = Grille.depuis_etage(e, GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
-	grille.materiau_defaut = "pierre"
-	camp_sauve = {"entree": e.entree, "biome": e.biome, "cellule": e.cellule}
-	for idx in e.arbres.keys():
-		grille.materiaux[idx] = e.arbres[idx]
-		grille.poser_contenu(Vector2i(int(idx) % grille.largeur, int(idx) / grille.largeur), "arbre")
-	for idx in e.rochers.keys():
-		grille.materiaux[idx] = e.rochers[idx]
-		grille.poser_contenu(Vector2i(int(idx) % grille.largeur, int(idx) / grille.largeur), "mur")
-	for idx in e.filons.keys():
-		grille.materiaux[idx] = e.filons[idx]
-		grille.poser_contenu(Vector2i(int(idx) % grille.largeur, int(idx) / grille.largeur), "filon")
-	for idx in e.get("plantes", {}).keys():
-		grille.materiaux[idx] = e.plantes[idx]
-		grille.poser_contenu(Vector2i(int(idx) % grille.largeur, int(idx) / grille.largeur), "plante")
-	grille.poser_contenu(e.entree_donjon, "entree_donjon")
-	for i in grille.largeur * grille.hauteur_grille:   # sa cellule, on la connaît : pas de brouillard sur le camp
-		grille.decouvert[i] = true
+	monde = Monde.new(surface, planete, cfg)
+	var depart := monde.cellule_camp
+	grille = monde.fenetre(depart, GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
+	var e := monde.cellule(depart)
+	var entree := monde.pos_monde(depart, e.entree)
 	_reinitialiser()
 	if joueur.is_empty():
-		var j := ajouter("aventurier", e.entree, "joueur")
-		j.spawn = e.entree
+		var j := ajouter("aventurier", entree, "joueur")
+		j.spawn = entree
 	else:
-		_reprendre(joueur, e.entree)
-		joueur.spawn = e.entree
+		_reprendre(joueur, entree)
+		joueur.spawn = entree
 	var uids: Array = []
 	for base in cfg.coffre_depart:
 		var o := generer_objet(str(base), 1, {}, "commun", 0)
 		if not o.is_empty():
 			uids.append(o.uid)
-	_poser_contenant(e.coffre_depart, uids, "coffre")
-	camp_sauve = {"entree": e.entree, "biome": e.biome, "cellule": e.cellule}
+	_poser_contenant(monde.pos_monde(depart, e.coffre_depart), uids, "coffre")
+	camp_sauve = {"entree": entree, "biome": e.biome, "cellule": depart}
 	maj_vision()
+	monde.pregenerer_voisins()
+
+
+## Le joueur a changé de cellule : la fenêtre se recentre (Monde). Les positions sont en coordonnées
+## monde : rien ne bouge ; ce que l'ancienne fenêtre avait de non regénérable est capturé.
+func _verifier_fenetre(e: Dictionary) -> void:
+	if lieu != "camp" or monde == null:
+		return
+	var c := monde.cellule_de(e.pos)
+	if c == monde.centre:
+		return
+	monde.capturer(grille)
+	# Contenants et êtres : ce qui reste dans la nouvelle fenêtre est remappé, le reste est mis de côté.
+	var anciens := {}
+	for gi in contenants.keys():
+		anciens[grille.pos_de(int(gi))] = contenants[gi]
+	var nouvelle := monde.fenetre(c, GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
+	contenants = {}
+	for pos in anciens.keys():
+		if nouvelle.dans(pos):
+			contenants[nouvelle.idx(pos)] = anciens[pos]
+			if anciens[pos].size() > 0 and nouvelle.contenu_de(pos).is_empty():
+				nouvelle.poser_contenu(pos, "butin")
+		else:
+			var cell := monde.cellule_de(pos)
+			if not monde.contenants_hors.has(cell):
+				monde.contenants_hors[cell] = {}
+			monde.contenants_hors[cell][monde.idx_local(pos)] = anciens[pos]
+	for cell in monde.contenants_hors.keys().duplicate():
+		if absi(cell.x - c.x) <= monde.rayon and absi(cell.y - c.y) <= monde.rayon:
+			for li in monde.contenants_hors[cell].keys():
+				var pos: Vector2i = monde.pos_monde(cell, Vector2i(int(li) % monde.taille, int(li) / monde.taille))
+				contenants[nouvelle.idx(pos)] = monde.contenants_hors[cell][li]
+				if nouvelle.contenu_de(pos).is_empty():
+					nouvelle.poser_contenu(pos, "butin")
+			monde.contenants_hors.erase(cell)
+	for id in ordre.duplicate():
+		var x: Dictionary = entites[id]
+		if x.id != e.id and not nouvelle.dans(x.pos):
+			var cell := monde.cellule_de(x.pos)
+			if not monde.dormants.has(cell):
+				monde.dormants[cell] = []
+			monde.dormants[cell].append(x)
+			ordre.erase(id)
+			entites.erase(id)
+	for cell in monde.dormants.keys().duplicate():
+		if absi(cell.x - c.x) <= monde.rayon and absi(cell.y - c.y) <= monde.rayon:
+			for x in monde.dormants[cell]:
+				entites[x.id] = x
+				ordre.append(x.id)
+			monde.dormants.erase(cell)
+	grille = nouvelle
+	nouvelle.modifies.clear()
+	for id in ordre:
+		if entites[id].vivant:
+			grille.placer(id, entites[id].pos)
+	maj_vision()
+	monde.pregenerer_voisins()
+	EventBus.emettre(&"fenetre_recentree", [grille.origine])
 
 
 ## Met le camp de côté avant une expédition : grille, meubles, coffres, êtres — tout reste.
 func _sauver_camp(joueur: Dictionary) -> void:
 	var sauve := {"entree": camp_sauve.get("entree", joueur.pos), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO), "grille": grille, "entites": {}, "ordre": [], "contenants": contenants}
+	if monde != null:
+		monde.capturer(grille)
 	for id in ordre:
 		if id != joueur.id:
 			sauve.entites[id] = entites[id]
@@ -298,6 +347,7 @@ func _creuser(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	grille.contenu[grille.idx(vers)] = 0
 	grille.materiaux.erase(grille.idx(vers))
 	grille.hauteurs[grille.idx(vers)] = grille.h(e.pos)   # la brèche est au niveau de celui qui creuse
+	grille.marquer(vers)
 	e.endurance = maxi(0, int(e.endurance) - int(cr.endurance))
 	e.compteur = tick + _ticks_avec_statuts(e, ticks)
 	if recolte:
@@ -434,6 +484,7 @@ func _demonter(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	else:
 		EventBus.emettre(&"journal", [&"journal.demonte", {"nom": e.name_key, "objet": {"base": str(c.name_key)}}])
 	grille.contenu[idx] = 0
+	grille.marquer(vers)
 	grille.meubles.erase(idx)
 	grille.stations_fixes.erase(idx)
 	grille.materiaux.erase(idx)
@@ -484,6 +535,7 @@ func _prendre(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	contenants[idx] = []
 	if not grille.meubles.has(idx):   # un butin au sol disparaît ; un coffre reste
 		grille.contenu[idx] = 0
+		grille.marquer(vers)
 		contenants.erase(idx)
 		EventBus.emettre(&"tile_changed", [vers])
 	e.compteur = tick + int(regles.r.actions.objet)
@@ -1387,6 +1439,9 @@ func voit(e: Dictionary, t: Vector2i) -> bool:
 
 
 func _fin_de_pas(nom: String) -> void:
+	for e in vivants():
+		if e.controle == "joueur":
+			_verifier_fenetre(e)
 	maj_vision()
 	for e in vivants():   # fin du buff Reposé
 		if e.has("repose_jusqua") and int(e.repose_jusqua) <= horloge_de(e).ticks:

@@ -29,6 +29,9 @@ Chaque tuile porte : une **hauteur entière** (0-20, voir [[Hauteur de terrain �
 > [!success] Décidé le 2026-08-28 — retour à la cellule de 128×128 (instruction du designer)
 > « On va repasser à 128 tuiles par cellule. » La cellule redevient **128×128** ; le callout du 2026-08-27 (64×64) est annulé, la note d'origine et [[Décision — Monde fini, continents et océan]] redeviennent exactes. Un étage de donjon = une cellule de 128×128.
 
+> [!success] Codé le 2026-08-28 — étape 8.2a : la fenêtre glissante (`systems/worldgen/monde.gd`)
+> La grille active est une **fenêtre de 3×3 cellules** (384×384 tuiles) autour de la cellule du joueur, en **coordonnées monde** (`Grille.origine`) : quand le joueur change de cellule, la fenêtre se recentre sans qu'aucune position ne bouge ; les cellules sont **générées à la demande et mises en cache**, les voisines **pré-générées en thread** ; ce qui n'est pas regénérable est **capturé par cellule** — tuiles modifiées (`Grille.modifies`, marquées à chaque mutation), tuiles découvertes, contenants, êtres endormis hors fenêtre (« seed + liste des modifications », [[Sauvegarde]]). Les cellules ne se touchent par aucune couture : plus de bord de roche en surface. **Décision** : rayon 1 (3×3) plutôt que les 8 chunks de la note — c'est la fenêtre de rendu (rayon 20 tuiles) qui coûte, pas la grille ; on élargira au profilage. Les chunks 32×32 SoA de [[Décision — Structure de données de la grille]] restent la cible de la sauvegarde ; la grille garde ses tableaux compacts (`PackedByteArray`, `PackedInt32Array`).
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Unification macro-micro]]
 - **Alimente** : [[Décision — Monde fini, continents et océan]], [[Hauteur de terrain ±10]], [[Carte du monde]], [[Claims et persistance]], [[Donjons — structure et intégration]], [[Combat tactique sur grille]]

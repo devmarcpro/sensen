@@ -28,6 +28,8 @@ var materiau_defaut: String = ""          # le matériau des murs ordinaires (ma
 var meubles: Dictionary = {}              # index de tuile → id de meuble (data/meubles/)
 var stations_fixes: Dictionary = {}       # index de tuile → id de station posée
 var sols: Dictionary = {}                 # index de tuile → id de matériau de sol (surface) ; vide = sol par défaut
+var origine := Vector2i.ZERO              # coordonnée monde de la tuile locale (0, 0) — fenêtre glissante (Monde)
+var modifies: Dictionary = {}             # index de tuile → true : tuiles modifiées depuis la construction (capture par cellule)
 
 
 func materiau_sol(p: Vector2i) -> String:
@@ -81,11 +83,21 @@ static func depuis_etage(etage: Dictionary, contenus: Dictionary, regles_dep: Di
 # ---------------------------------------------------------------- accès
 
 func idx(p: Vector2i) -> int:
-	return p.y * largeur + p.x
+	return (p.y - origine.y) * largeur + (p.x - origine.x)
+
+
+## La position monde d'un index de tuile.
+func pos_de(i: int) -> Vector2i:
+	return origine + Vector2i(i % largeur, i / largeur)
+
+
+## Marque une tuile modifiée (Monde.capturer la mémorise par cellule).
+func marquer(p: Vector2i) -> void:
+	modifies[idx(p)] = true
 
 
 func dans(p: Vector2i) -> bool:
-	return p.x >= 0 and p.x < largeur and p.y >= 0 and p.y < hauteur_grille
+	return p.x >= origine.x and p.y >= origine.y and p.x < origine.x + largeur and p.y < origine.y + hauteur_grille
 
 
 func h(p: Vector2i) -> int:
@@ -98,6 +110,7 @@ func poser_contenu(p: Vector2i, id: String) -> void:
 		contenu_ids.append(id)
 		i = contenu_ids.size() - 1
 	contenu[idx(p)] = i
+	modifies[idx(p)] = true
 
 
 func contenu_de(p: Vector2i) -> Dictionary:
