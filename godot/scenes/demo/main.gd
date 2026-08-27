@@ -25,6 +25,7 @@ var minuterie_ui := 0.0
 var minuterie_clavier := 0.0        # cadence des pas au clavier (ZQSD maintenu)
 var hotbar_sel := -1                 # l'action sélectionnée dans la hotbar (1 → 0), −1 = aucune
 var lourde_armee := false            # la prochaine attaque au clic est une lourde
+var visee_objet := ""                # une bombe sélectionnée dans la hotbar, à lancer au clic
 var survol := Vector2i(-1, -1)
 var journal: Array[String] = []
 var telegraphes: Dictionary = {}   # id → action engagée
@@ -549,6 +550,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 				visee = -1
 				hotbar_sel = -1
 				lourde_armee = false
+				visee_objet = ""
 			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_0:
 				_hotbar(9 if ev.keycode == KEY_0 else ev.keycode - KEY_1)
 
@@ -560,6 +562,10 @@ func hotbar_entrees(j: Dictionary) -> Array:
 		res.append({"type": "arme", "ref": j.ratelier[k], "nom": tr(sim.items[j.ratelier[k]].name_key)})
 	for k in j.get("capacites", []).size():
 		res.append({"type": "capacite", "ref": k, "nom": tr(j.capacites[k].get("name_key", j.capacites[k].id))})
+	for uid in j.sac:   # les bombes du sac (Explosions)
+		var it: Dictionary = sim.items.get(uid, {})
+		if it.has("bombe"):
+			res.append({"type": "objet", "ref": uid, "nom": tr("ui.hotbar.objet").format({"nom": tr(it.name_key), "n": int(it.get("quantite", 1))})})
 	res.append({"type": "lourde", "ref": "", "nom": tr("ui.hotbar.lourde")})
 	res.append({"type": "garde", "ref": "", "nom": tr("ui.hotbar.garde")})
 	res.append({"type": "attendre", "ref": "", "nom": tr("ui.hotbar.attendre")})
@@ -592,10 +598,16 @@ func _hotbar(k: int) -> void:
 				visee = int(en.ref)
 				hotbar_sel = k
 			lourde_armee = false
+		"objet":
+			visee_objet = str(en.ref)
+			visee = -1
+			hotbar_sel = k
+			lourde_armee = false
 		"lourde":
 			lourde_armee = true
 			hotbar_sel = k
 			visee = -1
+			visee_objet = ""
 		"garde":
 			sim.intention(joueur_id, {"type": "garde"})
 		"attendre":
@@ -785,6 +797,12 @@ func _clic(t: Vector2i, lourde: bool) -> void:
 	if t.x < 0:
 		return
 	var j := joueur()
+	if not visee_objet.is_empty():   # une bombe visée : le clic la lance
+		if sim.attente.has(joueur_id):
+			if sim.intention(joueur_id, {"type": "lancer", "objet": visee_objet, "cible": t}):
+				visee_objet = ""
+				hotbar_sel = -1
+		return
 	if visee >= 0:
 		if sim.attente.has(joueur_id):
 			if not sim.intention(joueur_id, {"type": "capacite", "index": visee, "cible": t}):
@@ -854,6 +872,8 @@ func _draw() -> void:
 		_losange(t, Color(1.0, 0.2, 0.1, 0.5))
 	if survol.x >= 0:
 		_losange(survol, Color(1, 1, 1, 0.22))
+	for b in sim.bombes:
+		_losange(b.pos, Color(1.0, 0.4, 0.1, 0.7))
 	if not sim.donjon.is_empty() and sim.donjon.escalier != null:
 		_losange(sim.donjon.escalier, Color(0.9, 0.7, 0.2, 0.6))
 	if not sim.donjon.is_empty() and sim.donjon.has("entree"):
@@ -869,6 +889,14 @@ func _draw() -> void:
 	if (hotbar_sel >= 0 or lourde_armee) and survol.x >= 0 and not j.is_empty() and survol != j.pos:   # la ligne de vue (hotbar)
 		var vue_ok := g.ligne_de_vue(j.pos, survol)
 		draw_line(_ecran(j.pos, g.h(j.pos)), _ecran(survol, g.h(survol)), Color(0.3, 1.0, 0.4, 0.8) if vue_ok else Color(1.0, 0.25, 0.2, 0.8), 2.0)
+	if not visee_objet.is_empty() and survol.x >= 0 and not j.is_empty() and sim.items.has(visee_objet):   # le rayon d'une bombe visée
+		var rb: int = int(sim.items[visee_objet].bombe.rayon)
+		var ok_b: bool = Grille.distance(j.pos, survol) <= int(sim.regles.r.bombes.portee) and g.ligne_de_vue(j.pos, survol)
+		for dy in range(-rb, rb + 1):
+			for dx in range(-rb, rb + 1):
+				var tb := survol + Vector2i(dx, dy)
+				if g.dans(tb):
+					_losange(tb, Color(1.0, 0.5, 0.1, 0.4) if ok_b else Color(0.5, 0.5, 0.5, 0.3))
 	if visee >= 0 and survol.x >= 0 and not j.is_empty():
 		var plan := sim.plan_capacite(j, visee)
 		var ok := sim.capacite_visable(j, plan, survol)

@@ -809,5 +809,11 @@
       "recolte_div": 3.0,
       "vision_mult": 0.8
     }
+  },
+  "bombes": {
+    "_doc": "Explosions : portée du lancer, dureté par défaut d'une tuile sans matériau, chance de laisser une unité brute (50 % de perte).",
+    "portee": 6,
+    "durete_defaut": 10,
+    "chance_drop": 0.5
   }
 }

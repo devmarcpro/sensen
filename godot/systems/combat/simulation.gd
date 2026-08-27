@@ -32,6 +32,7 @@ var camp_sauve: Dictionary = {}      # le camp mis de côté pendant une expédi
 var lieu: String = "arene"           # "arene" | "camp" | "donjon"
 var prochain_donjon: int = 1         # id du prochain donjon lancé depuis le camp
 var monde: Monde = null              # la surface comme fenêtre glissante (étape 8.2a)
+var bombes: Array = []               # les bombes posées, en attente d'explosion (Explosions)
 var territoire: Dictionary = {"tresor": 0, "dette": 0, "semaines_dette": 0, "stocks": {}, "rapports": [], "gains_quetes": 0, "royaume": false,
 	"cultures": {}, "fertilite": {}, "etals": {}, "caisse": 0, "marge": 1.0, "clients": 0.0, "heure_resolue": -1, "absence": {"ventes": 0, "or": 0, "mures": 0},
 	"gouvernance": "", "gouvernance_cible": "", "transition": 0, "raid": {}, "dernier_raid": {}, "accords": {}}   # le royaume du joueur (étape 10)
@@ -4437,6 +4438,17 @@ func en_combat(e: Dictionary) -> bool:
 func pas(nom: String) -> bool:
 	var h: Horloge = horloge_monde if nom == "monde" else combats[nom].horloge
 	var e := _prochaine(nom)
+	# Les bombes de cette horloge dues avant l'entité suivante explosent d'abord (Explosions).
+	var prochaine_bombe := _prochaine_bombe(nom)
+	var bombe_due := false
+	if not prochaine_bombe.is_empty():
+		bombe_due = (e.is_empty() or int(prochaine_bombe.fin) <= int(e.compteur)) if h.mode == Horloge.Mode.ACTION else int(prochaine_bombe.fin) <= h.ticks
+	if bombe_due:
+		if h.mode == Horloge.Mode.ACTION:
+			h.sauter_a(int(prochaine_bombe.fin))
+		bombes.erase(prochaine_bombe)
+		_exploser(prochaine_bombe)
+		return true
 	if e.is_empty():
 		return false
 	if h.mode == Horloge.Mode.ACTION:
@@ -4456,6 +4468,80 @@ func pas(nom: String) -> bool:
 	_decider_ia(e, h.ticks)
 	_fin_de_pas(nom)
 	return true
+
+
+func _prochaine_bombe(nom: String) -> Dictionary:
+	var meilleure := {}
+	for b in bombes:
+		if str(b.horloge) == nom and (meilleure.is_empty() or int(b.fin) < int(meilleure.fin)):
+			meilleure = b
+	return meilleure
+
+
+## Lancer une bombe du sac sur une tuile (Explosions) : portée, ligne de vue ; elle attend sur l'horloge du lanceur.
+func _lancer(e: Dictionary, uid: String, cible: Vector2i, tick: int) -> bool:
+	var it: Dictionary = items.get(uid, {})
+	if it.is_empty() or not (uid in e.sac) or not it.has("bombe") or not grille.dans(cible):
+		return false
+	var bc: Dictionary = regles.r.bombes
+	if Grille.distance(e.pos, cible) > int(bc.portee) or not grille.ligne_de_vue(e.pos, cible):
+		EventBus.emettre(&"journal", [&"journal.bombe_refusee", {}])
+		return false
+	var b: Dictionary = it.bombe
+	_consommer_pile(e, it)
+	bombes.append({"pos": cible, "fin": tick + int(b.retard_ticks), "horloge": str(e.horloge), "puissance": float(b.puissance), "rayon": int(b.rayon), "degats": str(b.degats), "source": e.id})
+	_quitter_garde(e)
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.bombe_lancee", {"nom": e.name_key, "retard": int(b.retard_ticks)}])
+	return true
+
+
+## L'explosion : les tuiles détruites si durete < P × (1 − d/R), 50 % de matériau brut ; dégâts × (1 − d/R) à tout être.
+func _exploser(b: Dictionary) -> void:
+	var bc: Dictionary = regles.r.bombes
+	var pos: Vector2i = b.pos
+	var R: int = int(b.rayon)
+	var P: float = float(b.puissance)
+	var tuiles := 0
+	var etres := 0
+	for dy in range(-R, R + 1):
+		for dx in range(-R, R + 1):
+			var t := pos + Vector2i(dx, dy)
+			if not grille.dans(t):
+				continue
+			var d := Grille.distance(pos, t)
+			var f := 1.0 - float(d) / float(R)
+			if f <= 0.0:
+				continue
+			var contenu := grille.contenu_de(t)
+			if "destructible" in contenu.get("tags", []):
+				var mat_id := grille.materiau_de(t)
+				var mat: Dictionary = GameData.catalogues.materials.get(mat_id, {})
+				var durete := float(mat.get("stats", {}).get("durete", bc.durete_defaut))
+				if durete < P * f:
+					grille.contenu[grille.idx(t)] = 0
+					grille.materiaux.erase(grille.idx(t))
+					grille.marquer(t)
+					tuiles += 1
+					if not mat.is_empty() and des.reel() < float(bc.chance_drop):
+						var brut := generer_objet("materiau_brut", 1, {}, "commun", 0)
+						if not brut.is_empty():
+							brut.materiau = mat_id
+							brut["forme"] = "brut"
+							brut.quantite = 1
+							_poser_contenant(t, [brut.uid], "butin")
+					EventBus.emettre(&"tile_changed", [t])
+			var occ := grille.occupant(t)
+			if not occ.is_empty() and entites.has(occ) and bool(entites[occ].vivant):
+				var deg := maxi(1, roundi(float(des.jet(str(b.degats))) * f))
+				EventBus.emettre(&"journal", [&"journal.explosion_degats", {"degats": deg, "nom": entites[occ].name_key}])
+				_appliquer_degats(entites[occ], deg, str(b.source), {"type": "explosion", "element": {"feu": 1.0}, "explosion": true})
+				etres += 1
+	EventBus.emettre(&"journal", [&"journal.explosion", {"tuiles": tuiles, "etres": etres}])
+	EventBus.emettre(&"explosion", [pos, R, str(b.source)])
+	for x in vivants():
+		if x.controle == "joueur":
+			x["vue_sale"] = true
 
 
 ## L'entité vivante de cette horloge au plus petit compteur (ordre d'ajout en cas d'égalité).
@@ -4908,6 +4994,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _apprendre_talent(e, str(i.get("pnj", "")), h.ticks)
 		"reforger":
 			ok = _reforger(e, str(i.get("objet", "")), str(i.get("composant", "")), h.ticks)
+		"lancer":
+			ok = _lancer(e, str(i.get("objet", "")), i.get("cible", e.pos), h.ticks)
 		"livrer":
 			ok = _livrer_commande(e, str(i.get("pnj", "")), h.ticks)
 		"planter":

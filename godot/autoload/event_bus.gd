@@ -24,6 +24,7 @@ signal cell_role_changed(cellule: Vector2i, role: String)  # rôle de case chang
 signal raid_resolved(victoire: bool, perte: float)         # un raid résolu, réel ou abstrait (Raids et menaces)
 signal leadership_changed(royaume: String, id: String)     # un nouveau dirigeant (Familles et succession)
 signal village_conquered(cellule: Vector2i, par: String)   # un village change d'allégeance (Conquête de village)
+signal explosion(pos: Vector2i, rayon: int, source: String)  # une bombe a explosé (Explosions)
 signal action_engaged(id: String, action: Dictionary)      # télégraphe : intention visible
 signal action_resolved(id: String, action: Dictionary)
 signal journal(cle: String, params: Dictionary)             # une ligne de journal, localisée côté client

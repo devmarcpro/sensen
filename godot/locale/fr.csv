@@ -400,6 +400,14 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+item.bombe.name,Bombe
+recipe.fabriquer_bombe.name,Fabriquer une bombe
+journal.bombe_lancee,"{nom} lance une bombe ({retard} ticks)"
+journal.bombe_refusee,lancer : à 6 tuiles au plus, en ligne de vue
+journal.explosion,"BOUM — {tuiles} tuile(s) soufflée(s), {etres} être(s) touché(s)"
+journal.explosion_degats,"l'explosion inflige {degats} à {nom}"
+ui.hotbar.objet,"{nom} ×{n}"
+ui.objet.visee,"VISÉE : {nom} — cliquer une tuile"
 ui.ecran.reforger,"Reforger (B) — d'abord l'objet, puis le composant"
 journal.reforge,"{nom} reforge {objet} : {composant} — les affixes tiennent"
 journal.reforge_refuse,reforger : il faut Main du métal, la station de l'objet, et un composant du bon slot

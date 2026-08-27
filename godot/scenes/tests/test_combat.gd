@@ -62,6 +62,7 @@ func _ready() -> void:
 	test_artefacts()
 	test_talents()
 	test_reforge_et_fiole()
+	test_bombes()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1043,7 +1044,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 50, "9 stations, 50 recettes plates (10 transformations, 23 meubles, 9 stations, 3 plats, 5 potions)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 51, "9 stations, 51 recettes plates (11 transformations, 23 meubles, 9 stations, 3 plats, 5 potions)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -2347,6 +2348,36 @@ func test_talents() -> void:
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "apprendre_talent", "pnj": m.id}) and s.a_talent(j, "souffle_rendu"), "à 80 : Le Vent apprend Souffle rendu")
 	verifier(not m.get("classe", "").is_empty(), "les PNJ portent une classe (%s)" % str(m.classe))
+
+
+# ---------------------------------------------------------------- Bombes et explosions
+
+func test_bombes() -> void:
+	var s := Simulation.new(117)
+	s.charger_donjon("ruine", 117, 10, 1)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var bombe := s.generer_objet("bombe", 1, {}, "commun", 0)
+	bombe.quantite = 2
+	j.sac.append(bombe.uid)
+	# Une cible : un mur destructible à 3 tuiles (on le pose), un loup à 2 tuiles.
+	var cible: Vector2i = j.pos + Vector2i(3, 0)
+	var mur: Vector2i = cible + Vector2i(1, 0)
+	for q in [cible, mur, cible + Vector2i(0, 1)]:
+		s.grille.contenu[s.grille.idx(q)] = 0
+	s.grille.poser_contenu(mur, "mur_construit")
+	s.grille.materiaux[s.grille.idx(mur)] = "chene"
+	var loup := s.ajouter("loup", cible + Vector2i(0, 1), "ia")
+	var sante0 := int(loup.sante)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "lancer", "objet": bombe.uid, "cible": cible}) and s.bombes.size() == 1 and int(bombe.quantite) == 1, "lancer une bombe : elle attend, la pile baisse")
+	verifier(not s.intention(j.id, {"type": "lancer", "objet": bombe.uid, "cible": j.pos + Vector2i(9, 0)}), "à 9 tuiles : refusé")
+	# À l'échéance, pas() fait exploser la bombe avant l'entité suivante : le mur de chêne saute, le loup est blessé.
+	s.bombes[0].fin = s.horloge_monde.ticks
+	s.attente.erase(j.id)
+	s.pas("monde")
+	verifier(s.bombes.is_empty(), "la bombe a explosé")
+	verifier(s.grille.contenu_de(mur).is_empty(), "le mur de chêne (dureté < 40 × 1/2) est soufflé")
+	verifier(int(loup.sante) < sante0 or not loup.vivant, "le loup dans le rayon est blessé (%d → %d)" % [sante0, int(loup.sante)])
 
 
 # ---------------------------------------------------------------- Main du métal, Fiole vive
