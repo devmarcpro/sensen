@@ -1294,6 +1294,53 @@ func _puissance_de(valeur: int) -> float:
 	return snappedf(clampf(float(valeur) / float(al.puissance_div), float(al.puissance_bornes[0]), float(al.puissance_bornes[1])), 0.1)
 
 
+# ---------------------------------------------------------------- capacités : slots et assemblage (Structure compétences-modules-slots)
+
+func niveau_arme(e: Dictionary) -> int:
+	var arme := Etres.arme(e, items)
+	var fonct: Dictionary = fonctionnalites.get(str(arme.get("functionality", "")), {})
+	return regles.niveau(e.competences_eff, str(fonct.get("combat_skill", "")))
+
+
+func slots_capacites(e: Dictionary) -> Dictionary:
+	var c: Dictionary = regles.r.capacites
+	var n := niveau_arme(e)
+	return {"capacites": mini(int(c.capacites_max), int(c.capacites_base) + n / int(c.par_niveau_capacites)), "modules": mini(int(c.modules_max), int(c.modules_base) + n / int(c.par_niveau_modules))}
+
+
+## Composer une capacité depuis des modules connus : l'assembleur juge la séquence, les slots la bornent.
+func composer_capacite(e: Dictionary, sequence: Array) -> bool:
+	var slots := slots_capacites(e)
+	if sequence.is_empty() or sequence.size() > int(slots.modules) or e.get("capacites", []).size() >= int(slots.capacites):
+		EventBus.emettre(&"journal", [&"journal.capacite_refusee", {}])
+		return false
+	for m in sequence:
+		if not (str(m) in e.get("modules_connus", [])):
+			EventBus.emettre(&"journal", [&"journal.capacite_refusee", {}])
+			return false
+	var plan := capacites.assembler(sequence.duplicate(), 10, "1d4", {}, e.competences_eff)
+	if not plan.erreurs.is_empty():
+		EventBus.emettre(&"journal", [&"journal.capacite_refusee", {}])
+		return false
+	var noyau: Dictionary = plan.noyau
+	var nom_key := str(noyau.get("name_key", "capacite.etincelle.name"))
+	var cap := {"id": "cap_%d_%d" % [e.get("capacites", []).size(), sequence.hash()], "name_key": nom_key, "modules": sequence.duplicate()}
+	if not e.has("capacites"):
+		e["capacites"] = []
+	e.capacites.append(cap)
+	EventBus.emettre(&"journal", [&"journal.capacite_creee", {"nom": nom_key}])
+	return true
+
+
+func supprimer_capacite(e: Dictionary, index: int) -> bool:
+	if index < 0 or index >= e.get("capacites", []).size():
+		return false
+	var cap: Dictionary = e.capacites[index]
+	e.capacites.remove_at(index)
+	EventBus.emettre(&"journal", [&"journal.capacite_supprimee", {"nom": cap.get("name_key", "")}])
+	return true
+
+
 # ---------------------------------------------------------------- talents (Talents de classe, Talents de race)
 
 ## Les talents d'un être : celui de sa classe, celui de sa race, ceux qu'il a appris.
@@ -2878,7 +2925,7 @@ func _mort_compagnon(x: Dictionary) -> void:
 
 
 ## Ressusciter un compagnon : l'âme dans le sac, un autel domestique adjacent, l'or ; il revient affaibli.
-func _ressusciter(e: Dictionary, uid_ame: String, tick: int, pnj_id: String = "") -> bool:
+func _ressusciter(e: Dictionary, uid_ame: String, tick: int, pnj_id: String = "", par_sort: bool = false) -> bool:
 	var ame: Dictionary = items.get(uid_ame, {})
 	if ame.is_empty() or not (uid_ame in e.sac) or not ame.has("compagnon"):
 		return false
@@ -2890,7 +2937,7 @@ func _ressusciter(e: Dictionary, uid_ame: String, tick: int, pnj_id: String = ""
 		var t: Vector2i = e.pos + d
 		if grille.dans(t) and str(grille.meubles.get(grille.idx(t), "")) == "autel_domestique":
 			autel = true
-	if not autel and pretre.is_empty():
+	if not autel and pretre.is_empty() and not par_sort:
 		EventBus.emettre(&"journal", [&"journal.pas_d_autel", {}])
 		return false
 	var x: Dictionary = entites.get(str(ame.compagnon), {})
@@ -2899,6 +2946,8 @@ func _ressusciter(e: Dictionary, uid_ame: String, tick: int, pnj_id: String = ""
 	var c: Dictionary = regles.r.compagnons
 	var niveau := maxi(1, int(round(progression.niveaux_derives(x).combat)))
 	var cout := int(float(c.or_par_niveau) * niveau * (float(c.get("pretre_mult", 1.0)) if not pretre.is_empty() else float(c.autel_mult)))
+	if par_sort:
+		cout = 0   # le sort de Vie paie en mana, pas en or (Compagnons)
 	if int(e.or) < cout:
 		EventBus.emettre(&"journal", [&"journal.pas_assez_or", {}])
 		return false
@@ -6131,6 +6180,15 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 					if premiere.is_empty():
 						premiere = c
 					EventBus.emettre(&"journal", [&"journal.soin", {"att": e.name_key, "capacite": plan.name_key, "def": c.name_key, "soin": c.sante - avant}])
+			"resurrection":   # Renaissance (Domaines de grimoires et manuels) : l'âme portée rappelle le compagnon
+				var ame := ame_dans_sac(e)
+				if ame.is_empty():
+					EventBus.emettre(&"journal", [&"journal.renaissance_rien", {}])
+				else:
+					var comp: Dictionary = entites.get(str(items[ame].get("compagnon", "")), {})
+					if _ressusciter(e, ame, tick, "", true):
+						a_touche = true
+						EventBus.emettre(&"journal", [&"journal.renaissance", {"nom": e.name_key, "compagnon": comp.get("name_key", "")}])
 			"deplacement":
 				var dp: Dictionary = plan.parametres.get("deplacement", {})
 				if not dp.is_empty():

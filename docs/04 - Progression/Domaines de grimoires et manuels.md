@@ -32,6 +32,9 @@ Les 9 domaines de grimoires et 4 de manuels, avec leur mapping vers le Wu Xing.
 
 **Question ouverte :** [[Ouvert — Répartitions Arcane Espace Corruption]].
 
+> [!success] Codé le 2026-08-28 — le domaine Vie, première pierre
+> Module **Renaissance** (`modules/renaissance.json`, noyau Bois → domaine Vie, 40 de mana, 20 ticks, effet `resurrection`) : assemblé avec la forme *Soi*, la capacité rappelle le compagnon dont l'**âme est dans le sac**, gratuitement — c'est le « sort de Vie de haut niveau » de [[Compagnons]] ; le ressuscité revient Affaibli. Le module se trouve dans les grimoires du domaine Vie.
+
 ## Liens
 - **Dépend de** : [[Wu Xing — cycles et vecteurs]], [[Domination et multiplicateurs]]
 - **Alimente** : [[Grimoires et manuels]], [[Modules]], [[Compétences — liste]]

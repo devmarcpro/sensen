@@ -63,6 +63,7 @@ func _ready() -> void:
 	test_talents()
 	test_reforge_et_fiole()
 	test_bombes()
+	test_composer_capacites()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -2348,6 +2349,54 @@ func test_talents() -> void:
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "apprendre_talent", "pnj": m.id}) and s.a_talent(j, "souffle_rendu"), "à 80 : Le Vent apprend Souffle rendu")
 	verifier(not m.get("classe", "").is_empty(), "les PNJ portent une classe (%s)" % str(m.classe))
+
+
+# ---------------------------------------------------------------- Assemblage de capacités, Renaissance
+
+func test_composer_capacites() -> void:
+	var s := Simulation.new(119)
+	s.charger_donjon("ruine", 119, 11, 1)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	j.modules_connus = ["point", "etincelle", "ligne", "renaissance", "soi"]
+	var slots := s.slots_capacites(j)
+	verifier(int(slots.capacites) >= 2 and int(slots.modules) >= 2, "slots : %d capacités, %d modules" % [int(slots.capacites), int(slots.modules)])
+	var n0: int = j.capacites.size()
+	j.capacites = []
+	verifier(not s.composer_capacite(j, ["point"]), "sans noyau : refusé")
+	verifier(not s.composer_capacite(j, ["point", "brasier"]), "un module inconnu : refusé")
+	verifier(s.composer_capacite(j, ["ligne", "etincelle"]) and j.capacites.size() == 1 and j.capacites[0].modules == ["ligne", "etincelle"], "ligne + Étincelle : une capacité assemblée")
+	var plan := s.plan_capacite(j, 0)
+	verifier(plan.erreurs.is_empty() and plan.geometrie == "ligne", "son plan : géométrie ligne, sans erreur")
+	verifier(s.composer_capacite(j, ["soi", "renaissance"]) and j.capacites.size() == 2, "soi + Renaissance : une capacité sur soi")
+	for k in 6:
+		s.composer_capacite(j, ["point", "etincelle"])
+	verifier(j.capacites.size() <= int(slots.capacites), "les capacités sont bornées par les slots (%d)" % j.capacites.size())
+	verifier(s.supprimer_capacite(j, 0) and j.capacites.size() >= 1, "supprimer une capacité")
+	# Renaissance : un compagnon mort, son âme dans le sac, le sort le rappelle contre du mana.
+	var v := s.ajouter("villageois", j.pos + Vector2i(1, 1), "ia")
+	s._habiller_pnj(v, GameData.entree("creatures", "villageois"))
+	v.social.relations[j.id] = 80
+	j.corps.stats.charisme = 25
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "recruter", "pnj": v.id})
+	s._appliquer_degats(v, 9999, j.id, {})
+	verifier(not s.ame_dans_sac(j).is_empty() and not v.vivant, "le compagnon est mort, son âme portée")
+	var idx := -1
+	for k in j.capacites.size():
+		if j.capacites[k].modules == ["soi", "renaissance"]:
+			idx = k
+	j.mana = 100
+	j.or = 0
+	s.attente[j.id] = true
+	verifier(idx >= 0 and s.intention(j.id, {"type": "capacite", "index": idx, "cible": j.pos}), "lancer Renaissance sur soi")
+	for k in 20:   # la capacité est engagée (18 ticks) : l'horloge du monde avance jusqu'à sa résolution
+		s.attente.erase(j.id)
+		s.horloge_monde.avancer(5)
+		if j.action_en_cours.is_empty():
+			break
+	verifier(v.vivant and int(j.mana) < 100 and int(j.or) == 0, "le compagnon revient, payé en mana (%d), pas en or" % int(j.mana))
+	verifier(n0 >= 0, "")
 
 
 # ---------------------------------------------------------------- Bombes et explosions

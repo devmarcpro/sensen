@@ -39,6 +39,9 @@ Monter un module en niveau le rend plus puissant ET moins coûteux (puissance : 
 > [!success] Décidé le 2026-08-27 — le niveau d'un module réduit aussi ses ticks
 > Tranché par le designer : « plus une attaque est complexe, plus elle coûte de ressources et de ticks ; moins si les modules employés sont haut niveau ». En plus de `cout_module_effectif = cout_base / skill_factor(N_module)` (ressource, sans plancher), chaque module de la séquence contribue `ticks_effectifs = max(ticks_base × 0,5, ticks_base / skill_factor(N_module))` — **plancher à 50 %** : la complexité coûte toujours du temps, un module de niveau 100 ne devient jamais gratuit. Les surcoûts en ticks des formes, modificateurs, conditions, déclencheurs et liaisons suivent la même règle, chacun avec son propre niveau.
 
+> [!success] Codé le 2026-08-28 — l'assemblage de capacités
+> Menu (Tab) → **Capacités** : la liste des capacités du joueur (Entrée : supprimer), puis **Nouvelle capacité** → écran de composition : les modules appris (`modules_connus`, groupés par type ; les modules des trois capacités de départ sont connus d'office) s'ajoutent à la **séquence** dans l'ordre choisi (Entrée ajoute / retire), l'aperçu montre le plan assemblé (géométrie, coût, dés, erreurs) ; *Valider* crée la capacité, nommée d'après son noyau, qui arrive dans la hotbar. **Slots** : `capacités max = 2 + ⌊N_arme/20⌋` (max 6), `modules par capacité = 2 + ⌊N_arme/25⌋` (max 5), N_arme = niveau de la compétence de l'arme en main (`combat_rules.capacites`). Une séquence sans noyau ou avec deux noyaux est refusée par l'assembleur existant. Les slots « par type d'arme » sont simplifiés en une liste unique du joueur (décision : la hotbar est l'unique râtelier de capacités).
+
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Progression par l'usage]]
 - **Alimente** : [[Six types de modules et assemblage]], [[Mana]], [[Vocabulaire des modules — six axes]]

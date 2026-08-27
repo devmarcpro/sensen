@@ -103,6 +103,9 @@
     "bombes": {
       "type": "object"
     },
+    "capacites": {
+      "type": "object"
+    },
     "camp": {
       "type": "object"
     }

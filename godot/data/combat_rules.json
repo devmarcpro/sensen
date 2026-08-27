@@ -815,5 +815,14 @@
     "portee": 6,
     "durete_defaut": 10,
     "chance_drop": 0.5
+  },
+  "capacites": {
+    "_doc": "Structure compétences-modules-slots : capacités max = base + N_arme/par_niveau_capacites (max), modules par capacité = base + N_arme/par_niveau_modules (max).",
+    "capacites_base": 2,
+    "par_niveau_capacites": 20,
+    "capacites_max": 6,
+    "modules_base": 2,
+    "par_niveau_modules": 25,
+    "modules_max": 5
   }
 }

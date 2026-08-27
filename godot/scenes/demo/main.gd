@@ -176,6 +176,10 @@ func _creer_personnage() -> void:
 	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
 	var fiche := Etres.creer_personnage("creature.aventurier.name", races[creation.race % races.size()], classes[creation.classe % classes.size()], creation.points, int(creation.annee), prog)
 	fiche.capacites = GameData.entree("creatures", "aventurier").get("capacites", []).duplicate(true)
+	for cap in fiche.capacites:   # les modules des capacités de départ sont connus : on peut les recombiner (Structure compétences-modules-slots)
+		for m in cap.get("modules", []):
+			if not (str(m) in fiche.modules_connus):
+				fiche.modules_connus.append(str(m))
 	creation = {}
 	var interactif := DisplayServer.get_name() != "headless" and not OS.get_cmdline_user_args().has("--sans-creation")
 	if interactif:
@@ -761,7 +765,7 @@ func _contexte(t: Vector2i) -> void:
 func _action_menu(id: String) -> void:
 	var j := joueur()
 	match id:
-		"inventaire", "atelier", "feuille", "registre":
+		"inventaire", "atelier", "feuille", "registre", "capacites":
 			ecrans.ouvrir(id)
 		"gestion":
 			if sim.lieu == "camp":

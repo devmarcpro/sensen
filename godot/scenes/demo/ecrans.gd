@@ -67,6 +67,7 @@ func _ready() -> void:
 var reforge_objet := ""   # Main du métal : l'objet choisi, en attente de son composant
 
 
+var sequence_composee: Array = []   # la séquence en cours de composition (écran composer)
 var contexte_tuile := Vector2i(-1, -1)   # clic droit : la tuile et ses options
 var contexte_options: Array = []
 
@@ -253,6 +254,10 @@ func touche(ev: InputEventKey) -> bool:
 						reforge_objet = ""
 						rafraichir()
 				return true
+		KEY_V:
+			if courant == "composer":
+				_valider_composition()
+				return true
 		KEY_H:
 			if courant == "inventaire":
 				var en: Dictionary = entrees[liste.get_selected_items()[0]] if not liste.get_selected_items().is_empty() and liste.get_selected_items()[0] < entrees.size() else {}
@@ -294,6 +299,10 @@ func rafraichir() -> void:
 			_construire_gestion(j)
 		"menu":
 			_construire_menu(j)
+		"capacites":
+			_construire_capacites(j)
+		"composer":
+			_construire_composer(j)
 		"contexte":
 			_construire_contexte(j)
 		"registre":
@@ -336,7 +345,7 @@ func _montrer_detail() -> void:
 			detail.text = texte_recette(en.plan)
 		"texte":
 			detail.text = str(en.texte)
-		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer", "menu", "contexte":
+		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer", "menu", "contexte", "capacite", "nouvelle_capacite", "module_composer":
 			detail.text = str(en.get("texte", ""))
 		"achat", "vente":
 			var p: Dictionary = en.prix
@@ -392,6 +401,17 @@ func _action_principale() -> void:
 		"menu":
 			main._action_menu(str(en.id))
 			return
+		"capacite":
+			main.sim.supprimer_capacite(j, int(en.index))
+		"nouvelle_capacite":
+			sequence_composee = []
+			ouvrir("composer")
+			return
+		"module_composer":
+			if str(en.module) in sequence_composee:
+				sequence_composee.erase(str(en.module))
+			else:
+				sequence_composee.append(str(en.module))
 		"contexte":
 			fermer()
 			main._executer_option(en.opt)
@@ -764,10 +784,85 @@ func _texte_quete(q: Dictionary) -> String:
 	return tr(q.text_key).format({"count": int(q.count), "objet": tr(GameData.entree("items", str(q.objet)).name_key) if q.has("objet") else "", "destination": str(q.get("destination", ""))})
 
 
+## Les capacités du joueur (Structure compétences-modules-slots) : la liste, et la porte vers la composition.
+func _construire_capacites(j: Dictionary) -> void:
+	var slots: Dictionary = main.sim.slots_capacites(j)
+	titre.text = tr("ui.ecran.capacites").format({"n": j.get("capacites", []).size(), "max": int(slots.capacites), "modules": int(slots.modules)})
+	for k in j.get("capacites", []).size():
+		var cap: Dictionary = j.capacites[k]
+		var noms: Array[String] = []
+		for m in cap.get("modules", []):
+			noms.append(tr(GameData.catalogues.modules.get(str(m), {}).get("name_key", str(m))))
+		liste.add_item(tr("ui.capacites.ligne").format({"nom": tr(str(cap.get("name_key", cap.id))), "modules": " → ".join(noms)}))
+		entrees.append({"kind": "capacite", "index": k, "texte": _texte_capacite_plan(j, k)})
+	liste.add_item(tr("ui.capacites.nouvelle"))
+	entrees.append({"kind": "nouvelle_capacite", "texte": ""})
+
+
+func _texte_capacite_plan(j: Dictionary, k: int) -> String:
+	var plan: Dictionary = main.sim.plan_capacite(j, k)
+	if plan.is_empty():
+		return ""
+	return _apercu_plan(plan)
+
+
+func _apercu_plan(plan: Dictionary) -> String:
+	var effets: Array[String] = []
+	for ef in plan.get("effets", []):
+		effets.append(str(ef))
+	var err: Array[String] = []
+	for er in plan.get("erreurs", []):
+		err.append(str(er))
+	return tr("ui.composer.apercu").format({"geometrie": str(plan.get("geometrie", "")), "portee": str(plan.get("portee", "")), "taille": int(plan.get("taille", 1)), "ticks": int(plan.get("ticks", 0)), "ressource": int(plan.get("ressource", 0)), "monnaie": str(plan.get("monnaie", "")),
+		"des": str(plan.get("des", "—")), "effets": ", ".join(effets) if not effets.is_empty() else "—", "erreurs": tr("ui.composer.erreurs").format({"liste": " ; ".join(err)}) if not err.is_empty() else ""})
+
+
+## Composer : les modules connus, groupés par type ; Entrée les ajoute à la séquence (ou les en retire) ; V valide.
+func _construire_composer(j: Dictionary) -> void:
+	var slots: Dictionary = main.sim.slots_capacites(j)
+	var noms: Array[String] = []
+	for m in sequence_composee:
+		noms.append(tr(GameData.catalogues.modules.get(str(m), {}).get("name_key", str(m))))
+	titre.text = tr("ui.ecran.composer").format({"sequence": " → ".join(noms) if not noms.is_empty() else "—", "n": sequence_composee.size(), "max": int(slots.modules)})
+	var connus: Array = j.get("modules_connus", []).duplicate()
+	if connus.is_empty():
+		liste.add_item(tr("ui.composer.vide"), null, false)
+		entrees.append({"kind": "texte", "texte": ""})
+		return
+	var apercu := ""
+	if not sequence_composee.is_empty():
+		apercu = _apercu_plan(main.sim.capacites.assembler(sequence_composee.duplicate(), 10, "1d4", {}, j.competences_eff))
+	for type in ["forme", "noyau", "modificateur", "condition", "declencheur", "liaison"]:
+		var du_type: Array = []
+		for m in connus:
+			if str(GameData.catalogues.modules.get(str(m), {}).get("module_type", "")) == type:
+				du_type.append(str(m))
+		if du_type.is_empty():
+			continue
+		du_type.sort()
+		liste.add_item(tr("ui.composer.type").format({"type": type}), null, false)
+		entrees.append({"kind": "texte", "texte": apercu})
+		for m in du_type:
+			var md: Dictionary = GameData.catalogues.modules[m]
+			var dans: bool = m in sequence_composee
+			liste.add_item(("☑ " if dans else "☐ ") + tr(md.name_key))
+			entrees.append({"kind": "module_composer", "module": m, "texte": tr("ui.composer.module").format({"nom": tr(md.name_key), "desc": str(md.get("description", ""))}) + "\n\n" + apercu})
+	_bouton(tr("ui.composer.valider"), _valider_composition)
+
+
+func _valider_composition() -> void:
+	var j: Dictionary = main.joueur()
+	if main.sim.composer_capacite(j, sequence_composee):
+		sequence_composee = []
+		ouvrir("capacites")
+	else:
+		rafraichir()
+
+
 ## Le menu (Tab) : les écrans et les actions générales (Écrans d'interface, contrôles).
 func _construire_menu(_j: Dictionary) -> void:
 	titre.text = tr("ui.ecran.menu")
-	var ids: Array = ["inventaire", "atelier", "feuille", "carte", "gestion", "registre", "sauvegarder", "charger", "minimap_zoom", "minimap_masquer", "arene", "recharger", "fermer"]
+	var ids: Array = ["inventaire", "atelier", "feuille", "capacites", "carte", "gestion", "registre", "sauvegarder", "charger", "minimap_zoom", "minimap_masquer", "arene", "recharger", "fermer"]
 	for id in ids:
 		if id in ["carte", "gestion"] and main.sim.lieu != "camp":
 			continue

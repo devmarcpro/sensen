@@ -400,6 +400,23 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+module.renaissance.name,Renaissance
+ui.menu.capacites,Capacités
+ui.ecran.capacites,"CAPACITÉS — {n}/{max} (Entrée : supprimer · modules par capacité : {modules})"
+ui.capacites.nouvelle,+ Nouvelle capacité
+ui.capacites.ligne,"{nom} — {modules}"
+ui.ecran.composer,"COMPOSER — séquence : {sequence} ({n}/{max}) · Entrée : ajouter / retirer · V : valider"
+ui.composer.type,[{type}]
+ui.composer.module,"{nom} — {desc}"
+ui.composer.valider,Valider (V)
+ui.composer.vide,(aucun module appris : lis des grimoires et des manuels)
+ui.composer.apercu,"Aperçu : {geometrie} · portée {portee} · taille {taille} · {ticks} ticks · {ressource} {monnaie} · dés {des} · effets {effets}{erreurs}"
+ui.composer.erreurs," · ERREURS : {liste}"
+journal.capacite_creee,"nouvelle capacité : {nom}"
+journal.capacite_refusee,capacité refusée : séquence invalide ou plus de place
+journal.capacite_supprimee,"capacité retirée : {nom}"
+journal.renaissance,"{nom} rappelle {compagnon} par la Renaissance"
+journal.renaissance_rien,aucune âme à rappeler
 classe.la_meche.name,La Mèche
 talent.chaine_d_amorces.name,Chaîne d'amorces
 talent.chaine_d_amorces.desc,"Une explosion amorce les bombes dans son rayon — les tiennes aussi."

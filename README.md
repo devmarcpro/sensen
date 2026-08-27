@@ -12,6 +12,7 @@ Un **roguelike tactique** en monde infini, généré procéduralement et totalem
 - **E** : interagir (ce qui est sous la souris si adjacent, sinon la première chose interactive autour : PNJ, coffre, lit, escalier, parcelle, place de village, eau, bête, plante, mur).
 - **R** : ramasser. **Tab** : le menu (inventaire, atelier, feuille, carte, territoire, registre, sauvegarder, charger, minimap, débogage). **Échap** : fermer / annuler.
 - **Clic droit** : toutes les options possibles sur la tuile ou l'être visé.
+- **Tab → Capacités** : composer ses capacités depuis les modules appris (forme + noyau + modificateurs), slots par niveau d'arme.
 - **1 → 0** : la hotbar (armes du râtelier, capacités, bombes du sac, attaque lourde, garde, attendre) — la touche sélectionne, la ligne de vue vers la souris s'affiche, le clic lance.
 - Dans les écrans : flèches, Entrée, et les raccourcis lettres affichés dans l'en-tête.
 
