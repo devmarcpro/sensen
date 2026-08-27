@@ -108,11 +108,14 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 		g.poser_contenu(base + Vector2i(int(i) % taille, int(i) / taille), "eau")
 	if cell == cellule_camp:
 		g.poser_contenu(base + e.entree_donjon, "entree_donjon")
-		if not decouvert.has(cell):   # sa cellule, on la connaît (Claims et persistance)
+		if not decouvert.has(cell):   # sa cellule, on la connaît (Claims et persistance) — tuiles et chunks
 			var tout := {}
 			for i in taille * taille:
 				tout[i] = true
 			decouvert[cell] = tout
+			for cy in taille / 32:
+				for cx in taille / 32:
+					explores[Vector2i(cell.x * (taille / 32) + cx, cell.y * (taille / 32) + cy)] = true
 	# Les modifications (seed + liste des modifications) puis les découvertes.
 	for i in modifications.get(cell, {}).keys():
 		var m: Dictionary = modifications[cell][i]
