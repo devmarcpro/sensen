@@ -1,0 +1,14 @@
+{
+  "name_key": "status.morsure_lunaire.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 1000,
+  "duree_ticks": 24000,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [],
+  "tags": [
+    "negatif",
+    "morsure_lune"
+  ]
+}

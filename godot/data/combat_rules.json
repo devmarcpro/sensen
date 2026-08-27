@@ -879,6 +879,15 @@
         "cuirasse",
         "jambieres"
       ]
+    },
+    "lune": {
+      "stats_mult": 1.5,
+      "actions": [
+        "griffure",
+        "morsure_puissante"
+      ],
+      "ticks_transformation": 4,
+      "nuit_forcee_toutes_les": 30
     }
   },
   "bombes": {

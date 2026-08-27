@@ -1082,6 +1082,53 @@ func pieces_de_cellule(cell: Vector2i) -> Array:
 	return res
 
 
+## Le Lycanthrope (Talents de race) : la forme bestiale, à volonté ou sous la lune.
+func _transformer(e: Dictionary, tick: int) -> bool:
+	if not a_talent(e, "lune"):
+		return false
+	if bool(e.get("forme_bestiale", false)) and bool(e.get("forme_forcee", false)):
+		EventBus.emettre(&"journal", [&"journal.forme_forcee", {}])
+		return false
+	_poser_forme(e, not bool(e.get("forme_bestiale", false)))
+	e.compteur = tick + int(regles.r.talents.lune.ticks_transformation)
+	return true
+
+
+func _poser_forme(e: Dictionary, bestiale: bool) -> void:
+	e["forme_bestiale"] = bestiale
+	if bestiale:
+		e["forme_mult"] = float(regles.r.talents.lune.stats_mult)
+		_quitter_garde(e)
+	else:
+		e.erase("forme_mult")
+		e.erase("forme_forcee")
+	Etres.recalculer(e, items, affixes_defs, regles)
+	EventBus.emettre(&"journal", [&"journal.transformation" if bestiale else &"journal.forme_humaine", {"nom": e.name_key}])
+
+
+## Attaquer sous forme bestiale : la première action de créature de la forme qui atteint la cible.
+func _attaquer_bete(e: Dictionary, cible: Dictionary, tick: int) -> bool:
+	if not cible.vivant:
+		return false
+	for aid in regles.r.talents.lune.actions:
+		var action: Dictionary = actions_creatures.get(str(aid), {})
+		if not action.is_empty() and _action_creature_possible(e, action, cible):
+			if not en_combat(e):
+				_engager_combat(e, cible)
+			_lancer_action_creature(e, action, cible, tick)
+			return true
+	return false
+
+
+func _devenir_lycanthrope(e: Dictionary) -> void:
+	_retirer_statut(e, "morsure_lunaire")
+	e["race_origine"] = str(e.get("race", ""))
+	e.race = "lycanthrope"
+	e["tags_acquis_race"] = GameData.catalogues.races.lycanthrope.get("tags_acquis", []).duplicate()
+	_contreparties(e)
+	EventBus.emettre(&"journal", [&"journal.lycanthrope", {"nom": e.name_key}])
+
+
 ## Le Spectre (Talents de race) : se relever spectre, traverser un mur d'une tuile.
 func _devenir_spectre(e: Dictionary) -> void:
 	e["race_origine"] = str(e.get("race", ""))
@@ -1134,6 +1181,17 @@ func _tiquer_vampires(nom: String, tick: int) -> void:
 					appliquer_statut(e, "soleil", refresh, e.id)
 		elif not nuit and Etres.a_statut_tag(e, "morsure", statuts_defs):
 			_devenir_vampire(e)
+		if a_talent(e, "lune"):   # la lune : une nuit sur trente, la bête s'impose
+			var jour_idx := int(horloge_monde.ticks / int(_cycle().get("ticks_par_jour", 24000)))
+			if nuit and jour_idx > 0 and jour_idx % int(regles.r.talents.lune.nuit_forcee_toutes_les) == 0 and not bool(e.get("forme_forcee", false)):   # jamais la première nuit
+				if not bool(e.get("forme_bestiale", false)):
+					_poser_forme(e, true)
+				e["forme_forcee"] = true
+				EventBus.emettre(&"journal", [&"journal.forme_forcee", {}])
+			elif not nuit and bool(e.get("forme_forcee", false)):
+				_poser_forme(e, false)
+		elif not nuit and Etres.a_statut_tag(e, "morsure_lune", statuts_defs):
+			_devenir_lycanthrope(e)
 
 
 func _retirer_statut(e: Dictionary, id: String) -> void:
@@ -5408,7 +5466,9 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _deplacer(e, i.vers, h.ticks)
 		"attaquer":
 			if entites.has(i.cible):
-				ok = _attaquer_arme(e, entites[i.cible], bool(i.get("lourde", false)), h.ticks)
+				ok = _attaquer_bete(e, entites[i.cible], h.ticks) if bool(e.get("forme_bestiale", false)) else _attaquer_arme(e, entites[i.cible], bool(i.get("lourde", false)), h.ticks)
+		"transformer":
+			ok = _transformer(e, h.ticks)
 		"garde":
 			ok = _prendre_garde(e, h.ticks)
 		"attendre":
@@ -5416,7 +5476,10 @@ func intention(id: String, i: Dictionary) -> bool:
 		"changer_arme":
 			ok = _changer_arme(e, str(i.get("item", "")), h.ticks)
 		"capacite":
-			ok = _lancer_capacite(e, int(i.get("index", -1)), i.get("cible", Vector2i(-1, -1)), h.ticks)
+			if bool(e.get("forme_bestiale", false)):
+				EventBus.emettre(&"journal", [&"journal.bete_refus", {}])
+			else:
+				ok = _lancer_capacite(e, int(i.get("index", -1)), i.get("cible", Vector2i(-1, -1)), h.ticks)
 		"descendre":
 			if _descendre(e):
 				EventBus.dispatcher()
@@ -5458,7 +5521,10 @@ func intention(id: String, i: Dictionary) -> bool:
 		"manger":
 			ok = _manger(e, str(i.get("objet", "")), h.ticks)
 		"parler":
-			ok = _parler(e, str(i.get("pnj", "")), h.ticks)
+			if bool(e.get("forme_bestiale", false)):
+				EventBus.emettre(&"journal", [&"journal.bete_refus", {}])
+			else:
+				ok = _parler(e, str(i.get("pnj", "")), h.ticks)
 		"acheter":
 			ok = _acheter(e, str(i.get("pnj", "")), str(i.get("objet", "")), h.ticks)
 		"vendre":
@@ -6234,6 +6300,8 @@ func _executer_action_creature(e: Dictionary, action: Dictionary, cible: Diction
 					res["competence"] = action.id
 					EventBus.emettre(&"journal", [&"journal.action_creature", {"att": e.name_key, "action": action.name_key, "def": c.name_key, "zone": res.zone, "degats": res.degats}])
 					_appliquer_degats(c, res.degats, e.id, res)
+					if c.vivant and a_talent(e, "lune") and bool(e.get("forme_bestiale", false)) and ("morsure" in action.tags or str(action.id).begins_with("morsure")) and "humanoide" in c.get("tags", []):
+						appliquer_statut(c, "morsure_lunaire", int(statuts_defs.morsure_lunaire.duree_ticks), e.id)   # la lycanthropie se transmet
 				if not cibles.is_empty():
 					_poser_segment(e, action.elements, tick_de(e))
 			"deplacement":

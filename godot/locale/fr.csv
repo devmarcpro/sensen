@@ -400,6 +400,17 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+race.lycanthrope.name,Lycanthrope
+talent.lune.name,Lune
+talent.lune.desc,"Forme bestiale à volonté : stats ×1,5, griffes et crocs, ni arme, ni capacité, ni parole ; forcée une nuit sur trente."
+status.morsure_lunaire.name,Morsure lunaire
+option.transformer,Se transformer
+option.forme_humaine,Reprendre forme humaine
+journal.transformation,"{nom} se transforme"
+journal.forme_humaine,"{nom} reprend forme humaine"
+journal.forme_forcee,la lune impose la bête cette nuit
+journal.bete_refus,sous forme bestiale : ni capacité, ni parole
+journal.lycanthrope,"{nom} s'éveille lycanthrope à l'aube"
 race.spectre.name,Spectre
 talent.sans_chair.name,Sans chair
 talent.sans_chair.desc,"Dégâts physiques ×0,3, traverse un mur ; ni armure, ni soins de bouche ; les civils fuient."

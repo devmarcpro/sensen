@@ -1,0 +1,17 @@
+{
+  "name_key": "race.lycanthrope.name",
+  "bonus_stats": {
+    "force": 1,
+    "perception": 1
+  },
+  "xp_mult": 1.1,
+  "base_potentials": {
+    "_defaut": 90
+  },
+  "talent": "lune",
+  "lifespan": 80,
+  "tags": [
+    "cache",
+    "humanoide"
+  ]
+}

@@ -187,6 +187,9 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 	if mult != 1.0:
 		for k in ["force", "dexterite", "endurance"]:
 			stats[k] = maxi(1, roundi(float(stats[k]) * mult))
+	if float(e.get("forme_mult", 1.0)) != 1.0:   # Lycanthrope : la forme bestiale multiplie toutes les stats
+		for k in stats.keys():
+			stats[k] = maxi(1, roundi(float(stats[k]) * float(e.forme_mult)))
 	e.stats_eff = stats
 	e.competences_eff = comp
 	e.tags_acquis = tags

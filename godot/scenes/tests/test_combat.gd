@@ -75,6 +75,7 @@ func _ready() -> void:
 	test_aciers_allies()
 	test_vampire()
 	test_spectre()
+	test_lycanthrope()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2456,6 +2457,54 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Le Lycanthrope
+
+func test_lycanthrope() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	j.race = "lycanthrope"
+	s._contreparties(j)
+	var force0 := int(j.stats_eff.force)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "transformer"}) and bool(j.forme_bestiale) and int(j.stats_eff.force) == maxi(1, roundi(force0 * 1.5)), "forme bestiale : Force %d → %d" % [force0, int(j.stats_eff.force)])
+	var loup: Dictionary = s.entites["loup_2"]
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(1, 0)
+	s.grille.placer(loup.id, loup.pos)
+	var pv0 := int(loup.sante)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false}), "attaquer sous forme bestiale : une action de créature")
+	var h := s.horloge_de(j)
+	for k in 3:
+		j.compteur = h.ticks
+		s.pas(j.horloge)
+	verifier(int(loup.sante) < pv0, "le loup est griffé (%d → %d)" % [pv0, int(loup.sante)])
+	j.compteur = h.ticks
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "capacite", "index": 0, "cible": loup.pos}), "capacité refusée sous forme bestiale")
+	j.compteur = h.ticks
+	s.attente[j.id] = true
+	var ok_tr := s.intention(j.id, {"type": "transformer"})
+	verifier(ok_tr and not bool(j.forme_bestiale) and int(j.stats_eff.force) == force0, "forme humaine : Force %d" % int(j.stats_eff.force))
+	# La nuit forcée : jour 30, minuit
+	var jour := int(s._cycle().ticks_par_jour)
+	s.horloge_monde.ticks = 30 * jour
+	s._tiquer_vampires(j.horloge, s.horloge_monde.ticks)
+	verifier(bool(j.forme_bestiale) and bool(j.forme_forcee), "nuit 30 : la bête s'impose")
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "transformer"}), "impossible de la quitter cette nuit")
+	# Transmission : un villageois mordu s'éveille lycanthrope
+	var v := s.ajouter("villageois", j.pos + Vector2i(0, 1), "ia")
+	s._habiller_pnj(v, GameData.entree("creatures", "villageois"))
+	v.sante = 500
+	v.sante_max = 500
+	s._executer_action_creature(j, s.actions_creatures.morsure_puissante, v)
+	verifier(Etres.a_statut_tag(v, "morsure_lune", s.statuts_defs), "le villageois porte la Morsure lunaire")
+	s.horloge_monde.ticks = 30 * jour + jour / 2
+	s._tiquer_vampires(j.horloge, s.horloge_monde.ticks)
+	verifier(not bool(j.forme_bestiale) and v.race == "lycanthrope", "à l'aube : forme humaine rendue, le villageois s'éveille lycanthrope")
 
 
 # ---------------------------------------------------------------- Le Spectre
