@@ -5,6 +5,9 @@ domaine: objets
 statut: décidé
 etape: 6
 ---
+> [!success] Abandonné le 2026-08-28 — instruction du designer
+> « On abandonne complètement les tables de sculpture. » Cette note est conservée comme trace ; **rien de ce qu'elle décrit ne sera codé** : ni tables, ni éditeur, ni modèles sculptés, ni objets nommés par le joueur. Les objets viennent uniquement des recettes ([[Craft compositionnel]], craft simple) et du loot. La pondération des stats d'un objet est celle des composants et des recettes, jamais un comptage de pixels. Les accès par rang de guilde prévus ici disparaissent avec elles ([[Halls de guilde]], [[Quêtes et guildes]]).
+
 
 > [!note] Adapté au pivot tactique
 > Réécrit pour le **pixel art paramétrique** ([[Construction cadrée]], [[Tables de sculpture]]). L'éditeur voxel d'origine est archivé (GDD source, historique git). Périmètres et pipeline 2D chiffrés : [[Décision — Sculpture en pixel art]].

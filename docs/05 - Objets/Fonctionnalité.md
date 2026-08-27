@@ -32,6 +32,9 @@ Pour une armure : `"kind": "armure"`, avec `"equip_slot"` et `"facteur_slot"` à
 
 **Table des profils d'armes de lancement :** [[Stats d'armes]].
 
+> [!success] Précisé le 2026-08-28
+> Sculpture abandonnée ([[Tables de sculpture]]) : une fonctionnalité n'est plus choisie à une table de sculpture ; elle est portée par la recette de l'objet.
+
 ## Liens
 - **Dépend de** : [[Schéma objet et recette]], [[Data-driven design]]
 - **Alimente** : [[Stats d'armes]], [[Armures et poids porté]], [[Tables de sculpture]], [[Véhicules]]

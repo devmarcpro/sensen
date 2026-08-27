@@ -37,6 +37,9 @@ L'ordre de construction conseillé **D.3** et le **MVP voxel** de la section 15 
 
 Ce qui survivait de D.3 est intégré ailleurs : le pipeline de localisation dès la première ligne ([[Localisation]]), la validation de perf par étape ([[Ordre de vérification]]), le premier donjon comme validation du pipeline complet (étape 2).
 
+> [!success] Précisé le 2026-08-28
+> Étape 6 : les [[Tables de sculpture]] sont **abandonnées** (instruction du designer) — l'étape se limite aux matériaux, à la récolte, aux stations, aux composants et à l'assemblage.
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Contraintes permanentes]]
 - **Alimente** : tout le coffre, par le champ `etape` de chaque note

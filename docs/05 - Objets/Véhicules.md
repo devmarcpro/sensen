@@ -75,6 +75,9 @@ modèle référencé, PV, contenu des coffres ; le host est autoritaire.
 
 **Douanes ([[Lois et infractions]]) :** le cargo d'un véhicule est vérifié au franchissement de frontière.
 
+> [!success] Précisé le 2026-08-28
+> Sculpture abandonnée ([[Tables de sculpture]]) : les véhicules viennent de recettes compositionnelles (coque + roues + mât, [[Composants]]), pas d'un éditeur.
+
 ## Liens
 - **Dépend de** : [[Tables de sculpture]], [[Éditeur de sculpture]], [[Fonctionnalité]], [[Application des stats de matériau]]
 - **Alimente** : [[Décision — Monde fini, continents et océan]], [[Carte du monde]], [[Craft compositionnel]], [[Lois et infractions]]

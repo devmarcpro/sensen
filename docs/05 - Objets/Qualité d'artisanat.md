@@ -45,6 +45,9 @@ qualite_produite = clamp_min(0.1,
 
 **Localisation :** les noms de paliers sont des textes générés — une clé par langue ([[Localisation]]).
 
+> [!success] Précisé le 2026-08-28
+> Les tables de sculpture sont abandonnées ([[Tables de sculpture]]) : la formule A.3 ne s'applique plus qu'aux composants, à l'assemblage, aux plats, aux potions et à la taille de gemme — la mention « objet sculpté » est caduque.
+
 ## Liens
 - **Dépend de** : [[Progression par l'usage]], [[Matériaux — 13 stats]]
 - **Alimente** : [[Stats d'un objet crafté]], [[Stats et qualité de l'assemblage]], [[Stats d'armes]], [[Armures et poids porté]], [[Prix suggéré]], [[Loot — affixes, gemmes et rareté]]

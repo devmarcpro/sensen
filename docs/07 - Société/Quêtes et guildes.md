@@ -48,6 +48,9 @@ Douze guildes, des quêtes entièrement procédurales, et une progression de ran
 
 **Succession du maître de guilde ([[Familles et succession]]) :** l'officier de plus haut rang après le maître devient le nouveau maître ; délai de transition 2 semaines.
 
+> [!success] Précisé le 2026-08-28
+> Sculpture abandonnée ([[Tables de sculpture]]) : les paliers de guilde qui y donnaient accès sont à réaffecter (recettes exotiques, station personnelle) — à préciser à l'étape 9.
+
 ## Liens
 - **Dépend de** : [[Data-driven design]], [[Gabarit de quête]], [[Double niveau combat et général]]
 - **Alimente** : [[Tables de sculpture]], [[Halls de guilde]], [[Craft compositionnel]], [[Barèmes économiques]], [[Économie — sources et puits]]

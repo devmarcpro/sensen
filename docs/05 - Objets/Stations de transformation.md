@@ -27,6 +27,9 @@ Les 8 stations de transformation, leurs recettes principales, et le principe por
 
 **Entretien du royaume ([[Entretien et taxes]]) :** chaque station compte comme structure spéciale (25 or/semaine).
 
+> [!success] Précisé le 2026-08-28
+> Les 5 tables de sculpture sont abandonnées ([[Tables de sculpture]]) : les stations sont les 8 de base plus l'Enclume.
+
 ## Liens
 - **Dépend de** : [[Catégories de matériaux]], [[Claims et persistance]]
 - **Alimente** : [[Craft compositionnel]], [[Palier industriel]], [[Tables de sculpture]], [[Cuisine et alchimie]]

@@ -30,6 +30,9 @@ stat_base_materiaux (sculpture)   = moyenne pondérée des stats des matériaux
 
 **Craft compositionnel :** pour les objets assemblés depuis des composants, la formule est remplacée par celle de [[Stats et qualité de l'assemblage]] (somme pondérée par poids de slot).
 
+> [!success] Précisé le 2026-08-28
+> Sculpture abandonnée ([[Tables de sculpture]]) : la pondération par nombre de pixels n'existe plus ; seules restent la moyenne pondérée des quantités de recette (craft simple) et les poids de slots (craft compositionnel).
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Qualité d'artisanat]]
 - **Alimente** : [[Stats d'armes]], [[Armures et poids porté]], [[Stats et qualité de l'assemblage]], [[Tables de sculpture]]

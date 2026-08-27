@@ -17,6 +17,9 @@ Le contenu de guilde vient au joueur.
 
 **Tables de sculpture ([[Tables de sculpture]]) :** l'accès aux tables des locaux de guilde (rang 3) précède l'obtention de la station personnelle (rang 4) — un hall sur son territoire donne cet accès sans déplacement.
 
+> [!success] Précisé le 2026-08-28
+> Les tables de sculpture sont abandonnées ([[Tables de sculpture]]) : les rangs 3 et 4 ne débloquent plus d'accès à ces tables ; leurs autres récompenses restent.
+
 ## Liens
 - **Dépend de** : [[Quêtes et guildes]], [[Expansion territoriale]], [[Construction cadrée]]
 - **Alimente** : [[Entretien et taxes]]

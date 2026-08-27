@@ -5,6 +5,9 @@ domaine: objets
 statut: décidé
 etape: 6
 ---
+> [!success] Abandonné le 2026-08-28 — instruction du designer
+> « On abandonne complètement les tables de sculpture. » Cette note est conservée comme trace ; **rien de ce qu'elle décrit ne sera codé** : ni tables, ni éditeur, ni modèles sculptés, ni objets nommés par le joueur. Les objets viennent uniquement des recettes ([[Craft compositionnel]], craft simple) et du loot. La pondération des stats d'un objet est celle des composants et des recettes, jamais un comptage de pixels. Les accès par rang de guilde prévus ici disparaissent avec elles ([[Halls de guilde]], [[Quêtes et guildes]]).
+
 
 > [!success] Décidé le 2026-08-26
 > Rédigée pour remplacer l'héritage voxel, **validée sur délégation du designer** (« tout doit être rédigé et décidé avant production »). Le code s'appuie dessus ; révisable comme toute décision.

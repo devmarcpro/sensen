@@ -26,6 +26,9 @@ Lit (dormir, assignation PNJ) · Lit de paille (idem, malus humeur −3) · Tabl
 
 **Le râtelier ([[Cinq accès au cycle]]) :** le râtelier d'armes est l'ancrage matériel de la voie du guerrier vers le cycle Wu Xing.
 
+> [!success] Précisé le 2026-08-28
+> Sculpture abandonnée ([[Tables de sculpture]]) : les meubles viennent de recettes, pas d'un éditeur.
+
 ## Liens
 - **Dépend de** : [[Construction cadrée]], [[Tables de sculpture]], [[Fabrication d'outils]]
 - **Alimente** : [[Habitat des PNJ]], [[Détection de pièces]], [[LOD de simulation]], [[Commerce et boutiques]], [[Boutique passive]]
