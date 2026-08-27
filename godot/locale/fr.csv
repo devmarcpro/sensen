@@ -100,7 +100,7 @@ capacite.gel_en_ligne.name,Gel en ligne
 capacite.baume.name,Baume
 ui.aide.capacites,I : inventaire · F : atelier · C : feuille (Échap ferme) · M : carte du monde (clic sur une cellule voisine : revendiquer) · K : territoire · B : registre d'élevage · V : apprivoiser · N : zoom minimap (⇧N : masquer) · F6 sauvegarder · F7 charger · F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
 ui.capacite,{touche} {nom} [{modules}] : {forme} portée {pmin}-{pmax} taille {taille} · {ticks} ticks · {ressource} {monnaie} · {des}{bonus}
-ui.capacite.visee,VISÉE : {nom} — cliquer une tuile (Échap annule)
+ui.capacite.visee,VISÉE : {nom} — cliquer une tuile
 ui.capacite.preview,{nom} sur {def} : {des}{bonus} ×{dom} → zone {zone} ×{mult} − armure {armure} ⇒ {min}–{max}
 ui.entite.mana,mana {mana}/{mana_max}
 journal.statut,{nom} subit {statut} ({duree} ticks)
@@ -254,7 +254,7 @@ journal.serti,{nom} sertit {gemme} dans {objet}
 journal.pas_de_sertissure,pas d'emplacement libre (ou pas de gemme)
 journal.lecture_reussie,{nom} lit {livre} : {n} module(s) appris
 journal.lecture_echouee,"{nom} échoue à lire {livre} — le livre est perdu ({grave})"
-ui.modules_connus,modules connus {n} (L : lire · T : sertir)
+ui.modules_connus,modules connus {n}
 competence.epee.name,Épée
 competence.hache_d_armes.name,Hache d'armes
 competence.masse.name,Masse
@@ -938,7 +938,7 @@ journal.semaine,"une semaine passe : la corruption dérive ({n} cellules)"
 journal.donjon_nettoye,"le donjon est nettoyé : il restera ouvert un jour et demi"
 journal.donjon_disparu,"l'entrée du donjon s'est effondrée en ({x},{y})"
 journal.donjon_reapparu,"un donjon est réapparu en ({x},{y})"
-ui.carte.titre,=== CARTE DU MONDE — clic : voyage rapide vers une cellule explorée · flèches : défiler · M/Échap : fermer ===
+ui.carte.titre,=== CARTE DU MONDE — clic : voyage rapide vers une cellule explorée, ou revendiquer une voisine · flèches : défiler · Échap : fermer ===
 ui.carte.depart,=== CHOISIS TA CASE DE DÉPART — clic sur une cellule de terre (couleur : biome · orange/rouge : danger · carré doré : donjon) ===
 ui.carte.legende,"trait ocre : route · vert cerclé : ton camp · bleu cerclé : ici · carré doré : donjon · point clair : filon majeur · sombre : jamais explorée"
 journal.voyage,"{nom} voyage jusqu'en ({x},{y}) : {ticks} ticks"
@@ -962,7 +962,7 @@ biome.plaine_temperee.name,Plaine tempérée
 biome.foret_temperee.name,Forêt tempérée
 biome.desert_aride.name,Désert aride
 biome.cote_plage.name,Côte
-ui.camp,"CAMP DE BASE · {biome} · E sur l'entrée : partir en expédition"
+ui.camp,"CAMP DE BASE · {biome}"
 item.pain.name,Pain
 item.ragout.name,Ragoût
 item.viande_grillee.name,Viande grillée

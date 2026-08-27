@@ -158,7 +158,7 @@ func _entree(ev: InputEvent) -> void:
 ## Touches quand la carte est ouverte (flèches : faire défiler la carte).
 func touche(ev: InputEventKey) -> bool:
 	match ev.keycode:
-		KEY_ESCAPE, KEY_M:
+		KEY_ESCAPE, KEY_TAB:
 			if mode != "depart":
 				fermer()
 			return true
