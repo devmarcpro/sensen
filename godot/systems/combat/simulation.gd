@@ -3934,6 +3934,14 @@ func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 	var id := "%s_%d" % [def_id, _n_entites]
 	var def := fiche_joueur if (controle == "joueur" and not fiche_joueur.is_empty()) else GameData.entree("creatures", def_id)
 	var e := Etres.instancier(id, def, pos, controle, regles, items)
+	if controle == "joueur":   # les modules des capacités de départ sont connus (Structure compétences-modules-slots)
+		for m in def.get("modules_connus", []):
+			if not (str(m) in e.modules_connus):
+				e.modules_connus.append(str(m))
+		for cap in e.get("capacites", []):
+			for m in cap.get("modules", []):
+				if not (str(m) in e.modules_connus):
+					e.modules_connus.append(str(m))
 	e["or"] = 0
 	if controle != "joueur" and "civil" in def.get("tags", []):
 		_habiller_pnj(e, def)

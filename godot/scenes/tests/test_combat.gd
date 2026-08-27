@@ -3510,7 +3510,10 @@ func test_gemmes_et_livres() -> void:
 	var lus := [0]
 	EventBus.book_read.connect(func(_id: String, _l: String, _ok: bool) -> void: lus[0] += 1)
 	verifier(s.intention(j.id, {"type": "lire", "objet": livre.uid}), "lire le grimoire")
-	verifier(not (livre.uid in j.sac) and j.modules_connus.size() == livre.modules.size() and lus[0] == 1, "Lecture 100 : tous les modules appris, livre consommé, book_read")
+	var tous_appris := true
+	for m in livre.modules:
+		tous_appris = tous_appris and (str(m) in j.modules_connus)
+	verifier(not (livre.uid in j.sac) and tous_appris and lus[0] == 1, "Lecture 100 : tous les modules appris, livre consommé, book_read")
 	# Échec forcé : Lecture 0, difficulté 200 → DD 110, impossible ; effet d'échec, livre perdu
 	j.competences["lecture"] = 0
 	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
