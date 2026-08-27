@@ -50,11 +50,13 @@
   },
   "poi_weights": {
     "donjon": 1,
+    "filon_majeur": 1,
     "camp": 1
   },
   "farming_yield": 1.2,
   "tags": [
     "magique",
     "foret"
-  ]
+  ],
+  "couleur": "#4a8fa0"
 }

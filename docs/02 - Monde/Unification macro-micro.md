@@ -61,6 +61,9 @@ continues f(x, z) sur les coordonnées MONDE (en tuiles).
 
 *Détail du terrain : [[Terrain spectaculaire]]. Ressources : [[Décision — Minerais et strates après le pivot]]. Règle d'irrécoltabilité : [[Récolte]].*
 
+> [!success] Codé le 2026-08-28 — les POI par cellule (`Surface.poi_de`)
+> Tirage déterministe `hash(seed, cx, cy)` sur les cellules terrestres, aux **densités par défaut** de la note pondérées par `poi_weights` du biome : **donjon 6 %**, **filon majeur 6 %** (un amas de 20 à 40 tuiles de filon) — codés ; villages, camps de monstres et sanctuaires attendent les PNJ (étape 9) et sont notés dans `planete.poi` avec leur densité. La cellule de départ porte toujours un donjon (décision : la boucle d'expédition doit être à portée dès la première heure).
+
 ## Liens
 - **Dépend de** : [[Génération par couches de bruit]], [[Catalogue des couches de bruit]], [[Grille continue]]
 - **Alimente** : [[Décision — Monde fini, continents et océan]], [[Carte du monde]], [[Biomes — schéma]], [[Génération de donjon]], [[Génération des royaumes PNJ]], [[Eau et liquides]]

@@ -85,7 +85,7 @@ func charger_arene(id: String) -> void:
 ## Le camp de base (Claims et persistance, étape 7) : une cellule plate revendiquée d'office. Restauré
 ## tel quel s'il a déjà été visité ; sinon généré, avec le coffre de départ. `joueur` : l'être qui
 ## revient d'expédition (vide au premier chargement : créé depuis la fiche).
-func charger_camp(joueur: Dictionary = {}) -> void:
+func charger_camp(joueur: Dictionary = {}, cellule_choisie: Vector2i = Vector2i(-1, -1)) -> void:
 	arene_id = "camp"
 	lieu = "camp"
 	donjon = {}
@@ -100,8 +100,9 @@ func charger_camp(joueur: Dictionary = {}) -> void:
 				grille.placer(id, entites[id].pos)
 		contenants = sauve.contenants
 		if not joueur.is_empty():
-			var ou: Vector2i = joueur.get("lit", sauve.entree) if joueur.get("mort_en_expedition", false) else sauve.entree
+			var ou: Vector2i = joueur.get("lit", sauve.entree) if joueur.get("mort_en_expedition", false) else joueur.get("retour", sauve.entree)
 			joueur.erase("mort_en_expedition")
+			joueur.erase("retour")
 			_reprendre(joueur, ou)
 			joueur.spawn = joueur.get("lit", sauve.entree)
 		maj_vision()
@@ -111,9 +112,10 @@ func charger_camp(joueur: Dictionary = {}) -> void:
 	var planete: Dictionary = GameData.config("planete")
 	var surface := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, int(planete.graine))
 	monde = Monde.new(surface, planete, cfg)
-	var depart := monde.cellule_camp
+	var depart := monde.cellule_camp if cellule_choisie == Vector2i(-1, -1) else cellule_choisie
 	# Garde-fou (Début de partie) : si la cellule de départ est en mer, la première cellule de terre en spirale.
 	var essais := 0
+	var origine_spirale := depart
 	while essais < 400 and not surface.terre_a(depart):
 		essais += 1
 		var r := 1
@@ -123,7 +125,7 @@ func charger_camp(joueur: Dictionary = {}) -> void:
 				for dx in range(-r, r + 1):
 					if absi(dx) != r and absi(dy) != r:
 						continue
-					var c := monde.cellule_camp + Vector2i(dx, dy)
+					var c := origine_spirale + Vector2i(dx, dy)
 					if surface.terre_a(c):
 						depart = c
 						trouve = true
@@ -135,7 +137,7 @@ func charger_camp(joueur: Dictionary = {}) -> void:
 	monde.cellule_camp = depart
 	grille = monde.fenetre(depart, GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
 	var e := monde.cellule(depart)
-	var entree := monde.pos_monde(depart, e.entree)
+	var entree := monde.point_marchable(depart)   # le point marchable le plus proche du centre (Début de partie)
 	_reinitialiser()
 	if joueur.is_empty():
 		var j := ajouter("aventurier", entree, "joueur")
@@ -229,13 +231,17 @@ func _sauver_camp(joueur: Dictionary) -> void:
 func _partir_en_expedition(e: Dictionary) -> bool:
 	if lieu != "camp" or not ("entree_donjon" in grille.contenu_de(e.pos).get("tags", [])):
 		return false
+	var cell := monde.cellule_de(e.pos)
+	e["retour"] = e.pos   # ressortir ramène devant l'entrée (Donjons — structure et intégration)
 	_sauver_camp(e)
 	expedition = {}
 	etages_visites.clear()
-	var id := prochain_donjon
-	prochain_donjon += 1
+	# Le donjon de cette cellule : id déterministe, thème selon le biome (repaire en marécage/zone corrompue).
+	var id := int(hash([graine, cell.x, cell.y, "donjon"]) & 0x7fffffff)
+	var b: Dictionary = GameData.catalogues.biomes.get(str(monde.surface.resume_cellule(cell).biome), {})
+	var theme := "repaire" if ("marecage" in b.get("tags", []) or "corrompu" in b.get("tags", [])) else "ruine"
 	EventBus.emettre(&"journal", [&"journal.expedition_depart", {}])
-	charger_donjon("ruine", graine, id, 1, e)
+	charger_donjon(theme, graine, id, 1, e)
 	return true
 
 
@@ -608,6 +614,32 @@ func _dormir(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 		liste.append(_nom_competence(cle))
 	e["xp_depuis_repos"] = {}
 	EventBus.emettre(&"journal", [&"journal.dort", {"nom": e.name_key, "heures": duree / 1000, "potentiel": int(cp.repose_potentiel), "liste": ", ".join(liste) if not liste.is_empty() else "—"}])
+	return true
+
+
+## Voyage rapide (Carte du monde) : vers une cellule de terre déjà explorée ; le temps avance de
+## ticks_par_cellule × distance ; le joueur arrive au point marchable du centre (ou à l'entrée du donjon).
+func voyager(e: Dictionary, cell: Vector2i) -> bool:
+	if lieu != "camp" or monde == null or e.controle != "joueur":
+		return false
+	if not monde.surface.terre_a(cell) or not monde.cellule_exploree(cell):
+		EventBus.emettre(&"journal", [&"journal.voyage_impossible", {}])
+		return false
+	var d := maxi(absi(cell.x - monde.cellule_de(e.pos).x), absi(cell.y - monde.cellule_de(e.pos).y))
+	var cout := d * int(GameData.config("planete").voyage.ticks_par_cellule)
+	var ec := monde.cellule(cell)
+	var ou: Vector2i = monde.pos_monde(cell, ec.entree_donjon + Vector2i(0, 1)) if bool(ec.get("a_donjon", false)) else monde.point_marchable(cell)
+	grille.liberer(e.pos)
+	e.pos = ou
+	_verifier_fenetre(e)
+	if not grille.occupant(ou).is_empty() or grille.bloque_passage(ou):
+		ou = monde.point_marchable(cell)
+		e.pos = ou
+	grille.placer(e.id, ou)
+	e.compteur = horloge_monde.ticks + cout
+	horloge_monde.avancer(cout)
+	maj_vision()
+	EventBus.emettre(&"journal", [&"journal.voyage", {"nom": e.name_key, "x": cell.x, "y": cell.y, "ticks": cout}])
 	return true
 
 

@@ -98,7 +98,7 @@ journal.condition_fausse,{capacite} ne part pas : {condition} n'est pas remplie 
 capacite.etincelle.name,Étincelle
 capacite.gel_en_ligne.name,Gel en ligne
 capacite.baume.name,Baume
-ui.aide.capacites,I : inventaire · F : atelier · C : feuille (Échap ferme) · N : zoom minimap (⇧N : masquer) · F6 sauvegarder · F7 charger · F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
+ui.aide.capacites,I : inventaire · F : atelier · C : feuille (Échap ferme) · M : carte du monde · N : zoom minimap (⇧N : masquer) · F6 sauvegarder · F7 charger · F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
 ui.capacite,{touche} {nom} [{modules}] : {forme} portée {pmin}-{pmax} taille {taille} · {ticks} ticks · {ressource} {monnaie} · {des}{bonus}
 ui.capacite.visee,VISÉE : {nom} — cliquer une tuile (Échap annule)
 ui.capacite.preview,{nom} sur {def} : {des}{bonus} ×{dom} → zone {zone} ×{mult} − armure {armure} ⇒ {min}–{max}
@@ -401,6 +401,12 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+ui.carte.titre,=== CARTE DU MONDE — clic : voyage rapide vers une cellule explorée · flèches : défiler · M/Échap : fermer ===
+ui.carte.depart,=== CHOISIS TA CASE DE DÉPART — clic sur une cellule de terre (couleur : biome · orange/rouge : danger · carré doré : donjon) ===
+ui.carte.legende,"vert cerclé : ton camp · bleu cerclé : ici · carré doré : donjon · point clair : filon majeur · sombre : jamais explorée"
+journal.voyage,"{nom} voyage jusqu'en ({x},{y}) : {ticks} ticks"
+journal.voyage_impossible,voyage impossible : cellule inexplorée ou en mer
+journal.depart_choisi,"le camp est établi en ({x},{y}) — {biome}"
 journal.sauvegarde,partie sauvegardée ({nom})
 journal.sauvegarde_impossible,on ne sauvegarde qu'en surface (au camp ou à pied)
 journal.chargement,partie chargée

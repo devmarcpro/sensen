@@ -8,6 +8,7 @@
   },
   "poi_weights": {
     "donjon": 1,
+    "filon_majeur": 1,
     "camp": 1
   },
   "conditions": {
@@ -68,5 +69,6 @@
       "density": 0.01
     }
   ],
-  "accidents_mult": 1.0
+  "accidents_mult": 1.0,
+  "couleur": "#7fa64a"
 }

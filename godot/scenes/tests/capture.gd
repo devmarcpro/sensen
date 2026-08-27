@@ -26,6 +26,10 @@ func _ready() -> void:
 	scene.profil_sans_terrain = "--sans-terrain" in args
 	if not scene.creation.is_empty():
 		scene._creer_personnage()   # la capture saute l'écran de création
+		scene.fiche_en_attente = {}
+		scene.carte.fermer()
+	if "--carte" in args:
+		scene.carte.ouvrir("voyage")
 	for i2 in args.size():   # --ecran inventaire|atelier|feuille : l'écran ouvert
 		if args[i2] == "--ecran" and i2 + 1 < args.size():
 			scene.ecrans.ouvrir(args[i2 + 1])

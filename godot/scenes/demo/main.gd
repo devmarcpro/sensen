@@ -34,6 +34,8 @@ var visee := -1                    # capacité en cours de visée (index), -1 si
 var ecran_fin: Array[String] = []  # récapitulatif du dernier combat (écran de fin), vide sinon
 var ecrans: Ecrans                 # inventaire, atelier, feuille (scenes/demo/ecrans.gd)
 var minimap: Minimap               # coin haut-droit (Décision — Minimap en 2D)
+var carte: Carte                   # la carte du monde (M), aussi le choix de la case de départ
+var fiche_en_attente: Dictionary = {}   # la fiche créée, en attendant le choix de la case de départ
 var minuterie_autosave := 300.0    # autosave toutes les 5 minutes réelles (Sauvegarde)
 var creation: Dictionary = {}      # l'écran de création, tant que le personnage n'existe pas
 const STATS := ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]
@@ -111,6 +113,9 @@ func _ready() -> void:
 	minimap = Minimap.new()
 	minimap.main = self
 	$CanvasLayer.add_child(minimap)
+	carte = Carte.new()
+	carte.main = self
+	add_child(carte)
 	EventBus.chunk_explored.connect(func(_c: Vector2i) -> void: minimap.rafraichir(true))
 	EventBus.sauvegarde_faite.connect(func(nom: String) -> void: _log(tr("journal.sauvegarde").format({"nom": nom})))
 	var tutoriels := Tutoriels.new()
@@ -157,7 +162,39 @@ func _creer_personnage() -> void:
 	var fiche := Etres.creer_personnage("creature.aventurier.name", races[creation.race % races.size()], classes[creation.classe % classes.size()], creation.points, int(creation.annee), prog)
 	fiche.capacites = GameData.entree("creatures", "aventurier").get("capacites", []).duplicate(true)
 	creation = {}
+	var interactif := DisplayServer.get_name() != "headless" and not OS.get_cmdline_user_args().has("--sans-creation")
+	if interactif:
+		arene_courante = arenes.size()   # une partie commence au camp, sur le monde (Début de partie)
 	_charger(fiche)
+	if interactif:
+		# Début de partie : la carte s'ouvre pour choisir sa case ; la cellule proposée est déjà chargée.
+		fiche_en_attente = fiche
+		carte.ouvrir("depart")
+
+
+## Le joueur a cliqué sa case de départ (Début de partie) : le camp y est établi.
+func _choisir_depart(cell: Vector2i) -> void:
+	if fiche_en_attente.is_empty() or sim.monde == null or not sim.monde.surface.terre_a(cell):
+		return
+	sim.monde.fermer()
+	sim = Simulation.new(0x68EE)
+	sim.fiche_joueur = fiche_en_attente
+	sim.charger_camp({}, cell)
+	fiche_en_attente = {}
+	joueur_id = ""
+	for e in sim.vivants():
+		if e.controle == "joueur":
+			joueur_id = e.id
+	_apres_changement_de_grille()
+	carte.fermer()
+	_log(tr("journal.depart_choisi").format({"x": cell.x, "y": cell.y, "biome": tr(GameData.entree("biomes", str(sim.camp_sauve.biome)).name_key)}))
+
+
+## Voyage rapide depuis la carte.
+func _voyager(cell: Vector2i) -> void:
+	if sim.voyager(joueur(), cell):
+		carte.fermer()
+		_apres_changement_de_grille()
 
 
 func _charger(fiche: Dictionary = {}) -> void:
@@ -429,7 +466,18 @@ func _unhandled_input(ev: InputEvent) -> void:
 	elif ev is InputEventKey and ev.pressed and not ev.echo:
 		if ecrans.est_ouvert() and ecrans.touche(ev):
 			return
+		if carte.ouverte:
+			if ev.keycode == KEY_ENTER or ev.keycode == KEY_KP_ENTER:
+				if carte.mode == "depart":
+					fiche_en_attente = {}
+					carte.fermer()
+				return
+			carte.touche(ev)
+			return
 		match ev.keycode:
+			KEY_M:
+				if sim.lieu == "camp":
+					carte.ouvrir("voyage")
 			KEY_G:
 				chemin_en_cours.clear()
 				sim.intention(joueur_id, {"type": "garde"})

@@ -106,8 +106,9 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 		g.poser_contenu(p, "plante")
 	for i in e.get("eau", {}).keys():
 		g.poser_contenu(base + Vector2i(int(i) % taille, int(i) / taille), "eau")
-	if cell == cellule_camp:
+	if bool(e.get("a_donjon", false)):
 		g.poser_contenu(base + e.entree_donjon, "entree_donjon")
+	if cell == cellule_camp:
 		if not decouvert.has(cell):   # sa cellule, on la connaît (Claims et persistance) — tuiles et chunks
 			var tout := {}
 			for i in taille * taille:
@@ -208,6 +209,32 @@ func couleur_chunk(ch: Vector2i) -> Color:
 	col = col.darkened(clampf((10.0 - h_moy) * 0.06, -0.3, 0.4)) if h_moy < 10.0 else col.lightened(clampf((h_moy - 10.0) * 0.05, 0.0, 0.3))
 	teintes[ch] = col
 	return col
+
+
+## Une cellule est explorée si l'un de ses chunks l'est (carte du monde, voyage rapide).
+func cellule_exploree(cell: Vector2i) -> bool:
+	var n := taille / 32
+	for cy in n:
+		for cx in n:
+			if explores.has(Vector2i(cell.x * n + cx, cell.y * n + cy)):
+				return true
+	return false
+
+
+## Le point marchable le plus proche du centre d'une cellule (Début de partie), en coordonnées monde.
+func point_marchable(cell: Vector2i) -> Vector2i:
+	var e := cellule(cell)
+	var centre_l := Vector2i(taille / 2, taille / 2)
+	for r in 40:
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				var l := centre_l + Vector2i(dx, dy)
+				if l.x < 1 or l.y < 1 or l.x >= taille - 1 or l.y >= taille - 1:
+					continue
+				var i := l.y * taille + l.x
+				if e.sol.has(i) and not e.get("plantes", {}).has(i):
+					return pos_monde(cell, l)
+	return pos_monde(cell, centre_l)
 
 
 func dans_fenetre(p: Vector2i) -> bool:

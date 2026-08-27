@@ -32,6 +32,7 @@ func _ready() -> void:
 	test_desequiper_jeter()
 	test_surface()
 	test_sauvegarde()
+	test_carte_et_voyage()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1182,6 +1183,55 @@ func test_surface() -> void:
 		if int(s.grille.hauteurs[i]) != 10:
 			accidente = true
 	verifier(accidente, "le camp a du relief posé")
+
+
+# ---------------------------------------------------------------- Étape 8.3a : POI, donjons de surface, carte, voyage rapide
+
+func test_carte_et_voyage() -> void:
+	var planete: Dictionary = GameData.config("planete")
+	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
+	var donjons := 0
+	var terres := 0
+	for y in range(500, 520):
+		for x in range(500, 520):
+			var c := Vector2i(x, y)
+			if surf.terre_a(c):
+				terres += 1
+				if surf.poi_de(c).donjon:
+					donjons += 1
+	verifier(terres == 0 or (float(donjons) / float(terres) < 0.2), "POI donjon à ~6 %% des cellules terrestres (%d / %d)" % [donjons, terres])
+	verifier(surf.poi_de(Vector2i(512, 512)) == surf.poi_de(Vector2i(512, 512)), "POI déterministes")
+	var r := surf.resume_cellule(Vector2i(512, 512), true)
+	verifier(r.has("biome") and r.has("danger") and int(r.danger) >= 0 and int(r.danger) <= 2 and r.poi.donjon, "résumé de cellule : biome, danger 0-2, POI (le camp a son donjon)")
+	var s := Simulation.new(41)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var camp := s.monde.cellule_camp
+	var e := s.monde.cellule(camp)
+	var entree: Vector2i = s.monde.pos_monde(camp, e.entree_donjon)
+	verifier(s.grille.contenu_de(entree).get("tags", []).has("entree_donjon") and s.grille.bloque_passage(entree + Vector2i(0, -1)) and not s.grille.bloque_passage(entree + Vector2i(0, 1)), "l'entrée scellée : anneau de roche ouvert au sud")
+	# Voyage rapide : refusé vers l'inexploré, accepté vers une cellule explorée ; le temps avance.
+	var voisine := camp + Vector2i(1, 0)
+	var t0: int = s.horloge_monde.ticks
+	verifier(not s.voyager(j, voisine) or not s.monde.surface.terre_a(voisine) or s.monde.cellule_exploree(voisine), "pas de voyage vers une cellule jamais explorée")
+	s.monde.explores[Vector2i(voisine.x * 4, voisine.y * 4)] = true
+	if s.monde.surface.terre_a(voisine):
+		verifier(s.voyager(j, voisine), "voyage rapide vers la cellule voisine explorée")
+		verifier(s.monde.cellule_de(j.pos) == voisine and s.horloge_monde.ticks - t0 == int(planete.voyage.ticks_par_cellule), "arrivé dans la cellule, %d ticks de voyage" % (s.horloge_monde.ticks - t0))
+	# Partir d'un donjon de surface : id de la cellule, retour devant l'entrée.
+	s.grille.liberer(j.pos)
+	j.pos = entree
+	s._verifier_fenetre(j)
+	s.grille.placer(j.id, entree)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "descendre"}), "entrer dans le donjon de la cellule")
+	verifier(s.lieu == "donjon" and int(s.donjon.id) == int(hash([s.graine, camp.x, camp.y, "donjon"]) & 0x7fffffff), "le donjon a l'id de sa cellule")
+	j.pos = s.donjon.entree
+	s.grille.placer(j.id, j.pos)
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "remonter"})
+	verifier(s.lieu == "camp" and j.pos == entree, "ressortir ramène devant l'entrée")
+	s.monde.fermer()
 
 
 # ---------------------------------------------------------------- Étape 8.2c : minimap (exploration par chunk) et sauvegarde

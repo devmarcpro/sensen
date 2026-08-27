@@ -41,11 +41,13 @@
   },
   "poi_weights": {
     "donjon": 1,
+    "filon_majeur": 2,
     "camp": 1
   },
   "farming_yield": 0.2,
   "tags": [
     "montagne",
     "froid"
-  ]
+  ],
+  "couleur": "#8a8a86"
 }

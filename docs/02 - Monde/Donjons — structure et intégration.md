@@ -65,6 +65,9 @@ Les donjons sont une des sources principales de contenu du jeu, et le premier es
 > [!success] Précisé le 2026-08-28 — le camp entre deux expéditions
 > Sortir par l'escalier de l'étage 1 (`expedition_terminee`) **ramène au camp** ([[Claims et persistance]]) ; l'expédition suivante part de la tuile `entree_donjon` du camp (E), avec un nouvel id de donjon — un nouveau donjon à chaque fois, en attendant la surface et ses entrées.
 
+> [!success] Codé le 2026-08-28 — les donjons de surface (8.3a)
+> Une cellule à POI donjon porte une **entrée scellée** : la tuile `entree_donjon` entourée d'un anneau de roche ouvert au sud, posée hors de l'eau. Entrer (E) lance l'expédition dans le donjon **de cette cellule** (`id = hash(seed, cellule)`, thème selon le biome : `repaire` en marécage ou zone corrompue, `ruine` ailleurs) ; ressortir **ramène devant l'entrée** (`e.retour`), pas au camp. Le voyage rapide vers une cellule à donjon dépose au point d'entrée. La cellule reste claimable dans ce prototype (pas encore de claim au-delà du camp) ; le nettoyage, le délai de grâce et la réapparition viennent avec la corruption hebdomadaire (8.3b).
+
 ## Liens
 - **Dépend de** : [[Grille continue]], [[Hauteur de terrain ±10]], [[Décisions fondatrices]]
 - **Alimente** : [[Génération de donjon]], [[Salles et connecteurs]], [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Grimoires et manuels]]

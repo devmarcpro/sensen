@@ -11,7 +11,8 @@
     "poi_weights",
     "farming_yield",
     "tags",
-    "plantes"
+    "plantes",
+    "couleur"
   ],
   "properties": {
     "conditions": {

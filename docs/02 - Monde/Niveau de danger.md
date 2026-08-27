@@ -20,6 +20,9 @@ Le danger est une propriété du lieu, jamais du joueur. Le monde ne scale pas.
 
 **Extension future non spécifiée — le « Dark Continent » :** voir [[Ouvert — Dark Continent]].
 
+> [!success] Codé le 2026-08-28
+> Le danger d'une cellule = la couche `danger` échantillonnée à son centre (le delta hebdomadaire de [[Dérive de la corruption]] attend 8.3b), affiché en **trois niveaux** (`planete.danger.seuils` : 0,45 et 0,75) sur la carte — jamais la valeur précise.
+
 ## Liens
 - **Dépend de** : [[Génération par couches de bruit]], [[Catalogue des couches de bruit]]
 - **Alimente** : [[Dérive de la corruption]], [[Loot — affixes, gemmes et rareté]], [[Raids et menaces]], [[Génération de donjon]], [[Début de partie]]

@@ -63,6 +63,39 @@ func couches_a(x: int, y: int) -> Dictionary:
 	return v
 
 
+## Les POI d'une cellule (Unification macro-micro) : hash(seed, cx, cy), densités de la planète × poids du biome.
+func poi_de(c: Vector2i, camp: bool = false) -> Dictionary:
+	var res := {"donjon": camp, "filon_majeur": false}
+	if not terre_a(c):
+		return res
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, c.x, c.y, "poi"])
+	var taille: int = int(planete.taille_cellule)
+	var b: Dictionary = biomes.get(biome_a(c.x * taille + taille / 2, c.y * taille + taille / 2), {})
+	var poids: Dictionary = b.get("poi_weights", {})
+	var dens: Dictionary = planete.get("poi", {})
+	if not camp:
+		res.donjon = rng.randf() < float(dens.get("donjon", 0.06)) * float(poids.get("donjon", 1))
+	res.filon_majeur = rng.randf() < float(dens.get("filon_majeur", 0.06)) * float(poids.get("filon_majeur", 1))
+	return res
+
+
+## Le niveau de danger d'une cellule : 0 paisible, 1 dangereuse, 2 mortelle (couche danger au centre).
+func danger_de(c: Vector2i) -> int:
+	var taille: int = int(planete.taille_cellule)
+	var d := valeur("danger", c.x * taille + taille / 2, c.y * taille + taille / 2)
+	var seuils: Array = planete.get("danger", {}).get("seuils", [0.45, 0.75])
+	return 2 if d >= float(seuils[1]) else (1 if d >= float(seuils[0]) else 0)
+
+
+## Le résumé d'une cellule pour la carte du monde : biome au centre, terre, danger, POI, couleur.
+func resume_cellule(c: Vector2i, camp: bool = false) -> Dictionary:
+	var taille: int = int(planete.taille_cellule)
+	var b := biome_a(c.x * taille + taille / 2, c.y * taille + taille / 2)
+	var terre := terre_a(c)
+	return {"biome": b, "terre": terre, "danger": danger_de(c), "poi": poi_de(c, camp), "couleur": str(biomes.get(b, {}).get("couleur", "#7fa64a"))}
+
+
 ## La cellule est-elle de la terre ferme (son centre et ses quatre quarts au-dessus du niveau de la mer) ?
 func terre_a(c: Vector2i) -> bool:
 	var taille: int = int(planete.taille_cellule)
@@ -287,6 +320,50 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 			for t in range(1, tier + 1):
 				pool.append_array(mp.tiers[str(t)])
 			e.filons[i] = str(pool[rng.randi_range(0, pool.size() - 1)])
+	# 4. Les POI : l'entrée scellée d'un donjon (anneau de roche ouvert au sud), un filon majeur.
+	var poi := poi_de(Vector2i(cx, cy), not camp.is_empty())
+	e["poi"] = poi
+	e["a_donjon"] = bool(poi.donjon)
+	if bool(poi.donjon):
+		var pe: Vector2i = e.entree_donjon if not camp.is_empty() else Vector2i(taille / 2 + rng.randi_range(-30, 30), taille / 2 + rng.randi_range(-30, 30))
+		var essais := 0
+		while essais < 40 and (e.eau.has(pe.y * taille + pe.x) or reserve.has_point(pe)):
+			essais += 1
+			pe = Vector2i(rng.randi_range(8, taille - 9), rng.randi_range(8, taille - 9))
+		e.entree_donjon = pe
+		for dy in range(-1, 2):
+			for dx in range(-1, 2):
+				var q := pe + Vector2i(dx, dy)
+				var qi := q.y * taille + q.x
+				if (dx == 0 and dy == 0) or (dx == 0 and dy == 1) or not _dans(q, taille):
+					continue
+				e.rochers[qi] = "pierre"
+				e.arbres.erase(qi)
+				e.plantes.erase(qi)
+				e.filons.erase(qi)
+	if bool(poi.filon_majeur):
+		var fm: Array = planete.get("poi", {}).get("filon_majeur_taille", [20, 40])
+		var danger := valeur("danger", ox + taille / 2, oy + taille / 2) * 100.0
+		var tier := 1
+		for k in range(1, seuils.size()):
+			if danger >= float(seuils[k]):
+				tier = k + 1
+		var pool: Array = mp.tiers[str(tier)]
+		var mat: String = str(pool[rng.randi_range(0, pool.size() - 1)])
+		var pf := Vector2i(rng.randi_range(10, taille - 11), rng.randi_range(10, taille - 11))
+		var reste := rng.randi_range(int(fm[0]), int(fm[1]))
+		for pas in reste * 4:
+			var fi := pf.y * taille + pf.x
+			if e.sol.has(fi) and not e.eau.has(fi) and not reserve.has_point(pf) and not e.filons.has(fi):
+				e.filons[fi] = mat
+				e.arbres.erase(fi)
+				e.plantes.erase(fi)
+				reste -= 1
+				if reste <= 0:
+					break
+			pf += [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)][rng.randi_range(0, 3)]
+			if not _dans(pf, taille):
+				break
 	for d in [e.arbres, e.rochers, e.filons, e.eau]:
 		for i in d.keys():
 			e.sol.erase(i)

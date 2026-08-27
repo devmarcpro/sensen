@@ -9,6 +9,9 @@
     "filons",
     "tiers_corruption",
     "tectonique",
-    "mer"
+    "mer",
+    "poi",
+    "danger",
+    "voyage"
   ]
 }

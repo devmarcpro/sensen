@@ -93,5 +93,26 @@
   "mer": {
     "altitude": 0.3,
     "hauteur": 8
+  },
+  "poi": {
+    "_doc": "Densités par cellule terrestre (Unification macro-micro), pondérées par poi_weights du biome ; village, camp et sanctuaire attendent l'étape 9.",
+    "donjon": 0.06,
+    "filon_majeur": 0.06,
+    "village": 0.04,
+    "camp": 0.08,
+    "sanctuaire": 0.03,
+    "filon_majeur_taille": [
+      20,
+      40
+    ]
+  },
+  "danger": {
+    "seuils": [
+      0.45,
+      0.75
+    ]
+  },
+  "voyage": {
+    "ticks_par_cellule": 384
   }
 }

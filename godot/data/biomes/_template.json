@@ -35,5 +35,6 @@
   "rochers": [],
   "filons_mult": 1.0,
   "plantes": [],
-  "accidents_mult": 1.0
+  "accidents_mult": 1.0,
+  "couleur": "#7fa64a"
 }

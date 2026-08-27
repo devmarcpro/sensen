@@ -40,6 +40,7 @@
   },
   "poi_weights": {
     "donjon": 1,
+    "filon_majeur": 1,
     "camp": 1
   },
   "farming_yield": 0.3,
@@ -47,5 +48,6 @@
     "volcanique",
     "desert",
     "chaud"
-  ]
+  ],
+  "couleur": "#5a4a4a"
 }
