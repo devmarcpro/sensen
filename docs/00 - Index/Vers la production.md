@@ -23,6 +23,8 @@ etape: 0
 > **Tranché le 2026-08-27 par le designer** (notes datées) : pas de rotation de caméra, ZQSD 8 directions, joueur centré ([[Écrans d'interface]]) · terrain plat, reliefs en exception ([[Génération par couches de bruit]]) · exploration en temps réel conservée · vitesse de déplacement = Athlétisme + modificateur de race, jamais une stat fixe ([[Boucle de tick]]) · dégâts d'arme × skill_factor(arme) × skill_factor(type) × niveaux d'élément pondérés ([[Pipeline de résolution du combat]]) · niveau de module → ticks / skill_factor, plancher 50 % ([[Structure compétences-modules-slots]]). Tout est codé (crochets de niveaux à 0 jusqu'à l'étape 4).
 > [!important] Main du métal et Fiole vive (2026-08-28)
 > Reforger un composant sans perdre les affixes ; potions partagées aux alliés adjacents au double d'ingrédients. **À juger** : la reforge sans écran dédié (inventaire, deux sélections) est-elle compréhensible ?
+> [!important] Main du métal et Fiole vive (2026-08-28)
+> Reforger un composant sans perdre les affixes ; potions partagées aux alliés adjacents au double d'ingrédients. **À juger** : la reforge sans écran dédié (inventaire, deux sélections) est-elle compréhensible ?
 > [!important] Talents de classe et de race (2026-08-28)
 > Cadre des talents, cinq talents de classe visibles et les trois de race, apprentissage auprès d'un PNJ (Le Vent, l'Humain). **À juger** : le Sabre sent-il sa rotation gratuite ? la Paume tisse-t-elle vraiment la chaîne d'un groupe ?
 > [!important] Trésors et artefacts (2026-08-28)

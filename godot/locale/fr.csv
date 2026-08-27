@@ -400,6 +400,10 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+ui.ecran.reforger,"Reforger (B) — d'abord l'objet, puis le composant"
+journal.reforge,"{nom} reforge {objet} : {composant} — les affixes tiennent"
+journal.reforge_refuse,reforger : il faut Main du métal, la station de l'objet, et un composant du bon slot
+journal.fiole_vive,"{nom} partage la potion avec {n} allié(s)"
 ui.sac,"sac : {liste}"
 ui.hotbar,"{liste}"
 ui.hotbar.lourde,Attaque lourde
