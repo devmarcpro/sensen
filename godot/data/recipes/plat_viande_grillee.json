@@ -7,6 +7,30 @@
       "item": "viande_crue",
       "forme": "",
       "amount": 1
+    },
+    {
+      "tag": "ingredient",
+      "forme": "",
+      "amount": 1,
+      "optionnel": true
+    },
+    {
+      "tag": "ingredient",
+      "forme": "",
+      "amount": 1,
+      "optionnel": true
+    },
+    {
+      "tag": "ingredient",
+      "forme": "",
+      "amount": 1,
+      "optionnel": true
+    },
+    {
+      "material": "sel_gemme",
+      "forme": "brut",
+      "amount": 1,
+      "optionnel": true
     }
   ],
   "output": {

@@ -49,6 +49,7 @@ func _ready() -> void:
 	test_saisons_et_elevage()
 	test_elevage_familles()
 	test_loci_et_soie()
+	test_harmonie()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -2011,6 +2012,45 @@ func test_loci_et_soie() -> void:
 	verifier(s.intention(j.id, {"type": "fabriquer", "recette": "filer_soie"}), "filer la soie à l'atelier de tissage")
 	var soie := s._pile(j, "soie", "brut")
 	verifier(not soie.is_empty() and int(soie.quantite) == 3 and not (ver.uid in j.sac), "3 soie brute (finesse 3), la chrysalide est morte")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Harmonie Wu Xing des plats
+
+func test_harmonie() -> void:
+	var s := Simulation.new(91)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var cuisine := s.generer_objet("station_cuisine", 1, {}, "commun", 0)
+	j.sac.append(cuisine.uid)
+	# Un ragoût sans rien d'autre : viande (bois/eau) + cuisson (feu) → trois éléments, pas d'harmonie.
+	var v := s.generer_objet("viande_crue", 1, {}, "commun", 0)
+	v.quantite = 2
+	j.sac.append(v.uid)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "fabriquer", "recette": "plat_ragout"}), "mijoter un ragoût nu")
+	var r1 := s._pile_objet(j, "ragout")
+	verifier(not r1.is_empty() and float(r1.get("harmonie", 1.0)) == 1.0 and r1.get("wuxing", {}).has("feu"), "ragoût nu : du feu de cuisson, pas d'harmonie (%s)" % str(r1.get("wuxing", {})))
+	s.items.erase(r1.uid)
+	j.sac.erase(r1.uid)
+	# Viande + pomme de terre (terre) + oignon (feu) + sel gemme (métal) → cinq éléments.
+	var v2 := s.generer_objet("viande_crue", 1, {}, "commun", 0)
+	v2.quantite = 2
+	j.sac.append(v2.uid)
+	for base in ["pomme_de_terre", "oignon"]:
+		var o := s.generer_objet(base, 1, {}, "commun", 0)
+		j.sac.append(o.uid)
+	s._donner_materiau(j, "sel_gemme", 1, "brut")
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "fabriquer", "recette": "plat_ragout"}), "mijoter un ragoût complet")
+	var r2 := s._pile_objet(j, "ragout")
+	verifier(not r2.is_empty() and float(r2.get("harmonie", 1.0)) == 1.2, "les cinq éléments : harmonie ×1,2 (%s)" % str(r2.get("wuxing", {})))
+	verifier(s._pile(j, "sel_gemme", "brut").is_empty() and s._pile_objet(j, "oignon").is_empty(), "les ingrédients optionnels sont consommés")
+	j.faim = 50
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "manger", "objet": r2.uid})
+	var attendu: int = 50 + roundi(float(GameData.entree("items", "ragout").nutrition) * 1.2)
+	verifier(int(j.faim) == mini(100, attendu), "manger l'assiette harmonieuse : nutrition ×1,2 (%d)" % int(j.faim))
 	s.monde.fermer()
 
 

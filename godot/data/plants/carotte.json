@@ -6,7 +6,8 @@
     "perception": 1
   },
   "wuxing": {
-    "bois": 1.0
+    "terre": 0.6,
+    "bois": 0.4
   },
   "duree_jours": 3,
   "recolte_base": 4,

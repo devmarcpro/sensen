@@ -6,7 +6,8 @@
     "volonte": 1
   },
   "wuxing": {
-    "feu": 1.0
+    "feu": 0.5,
+    "terre": 0.5
   },
   "duree_jours": 3,
   "recolte_base": 4,

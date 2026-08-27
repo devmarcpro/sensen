@@ -16,6 +16,11 @@
   "quantite": 1,
   "tags": [
     "consommable",
-    "empilable"
-  ]
+    "empilable",
+    "ingredient"
+  ],
+  "wuxing": {
+    "bois": 0.6,
+    "terre": 0.4
+  }
 }

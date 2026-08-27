@@ -2990,12 +2990,15 @@ func _plan_objet(e: Dictionary, it: Dictionary) -> Dictionary:
 func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 	var plan := {"id": r.id, "recette": r, "station": str(r.station), "faisable": true, "entrees": [], "sortie": {}}
 	var mat_sortie := str(r.output.get("material", ""))
+	var deja: Dictionary = {}   # les piles déjà retenues par une entrée optionnelle
 	for entree in r.inputs:
 		var besoin := int(entree.amount)
 		var forme := str(entree.get("forme", "brut"))
 		var trouvee := {}
 		for uid in e.sac:
 			var it: Dictionary = items.get(uid, {})
+			if deja.has(uid):
+				continue
 			if entree.has("item"):   # une entrée par objet (viande crue, baies…) : la pile de cette base
 				if str(it.get("base", "")) == str(entree.item) and int(it.get("quantite", 1)) >= besoin:
 					trouvee = it
@@ -3020,6 +3023,10 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 				continue
 			trouvee = it
 			break
+		if bool(entree.get("optionnel", false)):
+			if trouvee.is_empty():
+				continue
+			deja[str(trouvee.uid)] = true
 		plan.entrees.append({"pile": trouvee, "besoin": besoin, "forme": forme, "filtre": str(entree.get("material", entree.get("category", entree.get("item", entree.get("tag", entree.get("espece", ""))))))})
 		if trouvee.is_empty():
 			plan.faisable = false
@@ -3068,6 +3075,27 @@ func _fabriquer(e: Dictionary, rid: String, tick: int) -> bool:
 					inst.qualite = snappedf(regles.qualite_craft(regles.niveau(e.competences_eff, str(r.craft_skill)), rng), 0.01)
 					if "potion" in inst.get("tags", []) and float(inst.qualite) >= float(regles.r.alchimie.seuil_forte) and statuts_defs.has(str(inst.get("statut", "")) + "_forte"):
 						inst.statut = str(inst.statut) + "_forte"   # une potion forte (Cuisine et alchimie)
+					var wx := {}   # le vecteur du plat : Σ ingrédients + la cuisson (Décision — Affinités de cuisine)
+					for entree in plan.entrees:
+						var v: Dictionary = entree.pile.get("wuxing", {})
+						if v.is_empty() and entree.pile.get("type", "") == "materiau":   # un matériau en cuisine : son vecteur de cuisine (le sel), sinon celui du matériau
+							v = regles.r.craft.harmonie.ingredients_materiaux.get(str(entree.pile.get("materiau", "")), GameData.catalogues.materials.get(str(entree.pile.get("materiau", "")), {}).get("wuxing", {}))
+						for el in v.keys():
+							wx[el] = float(wx.get(el, 0.0)) + float(v[el])
+					if not wx.is_empty():
+						var ha: Dictionary = regles.r.craft.harmonie
+						wx["feu"] = float(wx.get("feu", 0.0)) + float(ha.feu_cuisson)
+						var total := 0.0
+						for el in wx.keys():
+							total += float(wx[el])
+						for el in wx.keys():
+							wx[el] = snappedf(float(wx[el]) / total, 0.01)
+						inst["wuxing"] = wx
+						var cinq := true
+						for el in wuxing.w.elements:
+							cinq = cinq and float(wx.get(el, 0.0)) > 0.0
+						if cinq:
+							inst["harmonie"] = float(ha.mult)
 					var pot: Dictionary = inst.get("potentiel", {}).duplicate()
 					for entree in plan.entrees:   # ingrédients paramétriques : la puissance de la partie, les potentiels des viandes
 						if entree.pile.has("puissance") and "potion" in inst.get("tags", []):
@@ -3656,6 +3684,7 @@ func _drop(cible: Dictionary, source: String) -> void:
 		if not v.is_empty():
 			if not top_stat.is_empty():   # viande paramétrique (Cuisine et alchimie) : la stat dominante de la bête
 				v["potentiel"] = {top_stat: 1}
+				v["wuxing"] = def_c.elements.duplicate() if def_c.get("elements") is Dictionary else regles.r.craft.harmonie.viande_defaut.duplicate()
 				v["puissance"] = _puissance_de(int(stats_c[top_stat]))
 				v["nom"] = {"params": {"creature": cible.name_key}}
 			uids.append(v.uid)
@@ -3902,8 +3931,10 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 		e["faim"] = 100
 		e["faim_tick"] = tick
 	var cru := bool(it.get("cru", false))
-	var nutrition := float(it.get("nutrition", 0)) * (float(regles.r.cru_facteur) if cru else 1.0)
+	var nutrition := float(it.get("nutrition", 0)) * (float(regles.r.cru_facteur) if cru else 1.0) * float(it.get("harmonie", 1.0))
 	var extra: Array[String] = []
+	if float(it.get("harmonie", 1.0)) > 1.0:
+		EventBus.emettre(&"journal", [&"journal.harmonie", {}])
 	var avant := int(e.faim)
 	e.faim = mini(100, int(e.faim) + roundi(nutrition))
 	if avant < int(regles.r.faim.seuil_stats) and int(e.faim) >= int(regles.r.faim.seuil_stats):

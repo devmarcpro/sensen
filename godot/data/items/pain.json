@@ -15,5 +15,10 @@
   "tags": [
     "consommable",
     "empilable"
-  ]
+  ],
+  "wuxing": {
+    "bois": 0.6,
+    "terre": 0.25,
+    "feu": 0.15
+  }
 }

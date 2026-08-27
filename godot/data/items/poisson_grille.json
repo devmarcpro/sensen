@@ -17,5 +17,9 @@
   "tags": [
     "consommable",
     "empilable"
-  ]
+  ],
+  "wuxing": {
+    "eau": 0.8,
+    "bois": 0.2
+  }
 }

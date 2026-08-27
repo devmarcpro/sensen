@@ -17,6 +17,11 @@
   "tags": [
     "consommable",
     "empilable",
-    "culture"
-  ]
+    "culture",
+    "ingredient"
+  ],
+  "wuxing": {
+    "terre": 0.5,
+    "bois": 0.5
+  }
 }

@@ -401,6 +401,8 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+journal.harmonie,"assiette harmonieuse : les cinq éléments (×1,2)"
+ui.objet.harmonie," · harmonie ×{n}"
 species.chat.name,Chat des ruelles
 species.coquillage.name,Coquillage nacré
 recipe.filer_soie.name,Filer la soie (tue la chrysalide)

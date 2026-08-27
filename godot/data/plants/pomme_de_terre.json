@@ -6,7 +6,8 @@
     "force": 1
   },
   "wuxing": {
-    "terre": 1.0
+    "terre": 0.7,
+    "bois": 0.3
   },
   "duree_jours": 4,
   "recolte_base": 4,

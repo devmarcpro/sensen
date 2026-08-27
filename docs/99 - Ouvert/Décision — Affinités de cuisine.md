@@ -56,6 +56,9 @@ Les affinités élémentaires des ingrédients de cuisine ([[Cuisine et alchimie
 
 **Exemple d'assiette harmonieuse :** ragoût = viande (Bois/Eau) + pomme de terre (Terre) + oignon (Feu) + **sel (Métal)** + cuisson (+Feu) → les cinq éléments couverts, ×1.2. Sans sel, pas de Métal : le sel gemme devient un ingrédient recherché — cohérent avec son rôle de conservation ([[Catalogue matériaux — Minéraux]]).
 
+> [!success] Codé le 2026-08-28
+> Les ingrédients portent `wuxing` (cultures, baies, miel, champignon, pain ; **viandes** : vecteur `elements` de la créature source, défaut bois 0,5 / eau 0,5 ; **sel gemme** : le matériau, metal 0,5 / eau 0,5). Les recettes de plats acceptent des **entrées optionnelles** (`optionnel: true` — toute pile taguée `ingredient` ou le sel gemme brut, consommées si présentes dans le sac, jusqu'à trois). Le vecteur du plat = Σ ingrédients + `feu 0,15` (cuisson), normalisé ; **cinq éléments > 0 → `harmonie` 1,2** sur la nutrition et le potentiel à l'ingestion (journal « assiette harmonieuse »). Décision : les entrées optionnelles sont prises d'office dans l'ordre du sac — le choix fin des ingrédients attend un écran.
+
 ## Liens
 - **Dépend de** : [[Cuisine et alchimie]], [[Wu Xing hors combat]], [[Plantes]]
 - **Alimente** : [[Nourriture, potentiel et potions]], [[Potentiel]], [[Nourriture]]

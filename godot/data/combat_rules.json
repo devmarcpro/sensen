@@ -241,7 +241,22 @@
         5.0,
         "mythique"
       ]
-    ]
+    ],
+    "harmonie": {
+      "feu_cuisson": 0.15,
+      "mult": 1.2,
+      "viande_defaut": {
+        "bois": 0.5,
+        "eau": 0.5
+      },
+      "ingredients_materiaux": {
+        "sel_gemme": {
+          "metal": 0.5,
+          "eau": 0.5
+        }
+      },
+      "_doc": "Harmonie des plats (Décision — Affinités de cuisine) : feu_cuisson ajouté avant normalisation ; mult à cinq éléments ; ingredients_materiaux = vecteur de cuisine d'un matériau (le sel gemme apporte le Métal en cuisine, sans toucher son vecteur de combat)."
+    }
   },
   "camp": {
     "_doc": "Camp de base : poser_ticks (poser/démonter) ; dormir_ticks = durée du sommeil (8 h à 24 000 ticks/jour) ; repose_ticks / repose_xp_mult = buff Reposé ; repose_potentiel / repose_top = +potentiel aux N compétences les plus travaillées depuis le dernier repos ; mur_familles : ce qui fait un mur.",
