@@ -8,5 +8,8 @@
   "tags": [
     "liaison"
   ],
-  "surcout_ticks": 3
+  "surcout_ticks": 3,
+  "effet": {
+    "dispersion": true
+  }
 }

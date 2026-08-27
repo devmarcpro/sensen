@@ -8,5 +8,9 @@
   "tags": [
     "liaison"
   ],
-  "surcout_ticks": 4
+  "surcout_ticks": 4,
+  "effet": {
+    "rejoue": 2,
+    "des": -1
+  }
 }

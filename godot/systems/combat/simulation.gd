@@ -809,6 +809,8 @@ func _lancer_capacite(e: Dictionary, index: int, cible: Variant, tick: int) -> b
 
 ## Paie la monnaie du noyau. Mana insuffisant = surchauffe : le déficit est infligé en PV × 2 (Mana).
 func _payer(e: Dictionary, plan: Dictionary) -> void:
+	if not plan.charge_suivante.is_empty():
+		_payer(e, plan.charge_suivante)   # la charge différée paie aussi, dans sa propre monnaie
 	match str(plan.monnaie):
 		"mana":
 			var deficit: int = maxi(0, int(plan.ressource) - int(e.mana))
@@ -822,10 +824,77 @@ func _payer(e: Dictionary, plan: Dictionary) -> void:
 
 
 ## Exécute une capacité : forme → cibles (friendly fire des zones), puis les effets du noyau.
-func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -> void:
+func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, segment: bool = true) -> void:
 	var tick := tick_de(e)
 	var tuiles := Capacites.tuiles_de_forme(grille, plan.geometrie, e.pos, cible_pos, int(plan.taille))
-	var touchees: Array[Dictionary] = []
+	var touchees := _entites_dans(e, plan, tuiles)
+	# Liaisons qui étendent les cibles : Miroir (position symétrique), Partage (le lanceur aussi).
+	for l: Dictionary in plan.liaisons:
+		if l.get("miroir", false):
+			var sym: Vector2i = e.pos - (cible_pos - e.pos)
+			for c in _entites_dans(e, plan, Capacites.tuiles_de_forme(grille, plan.geometrie, e.pos, sym, int(plan.taille))):
+				if not touchees.has(c):
+					touchees.append(c)
+		if l.get("partage", false) and not touchees.has(e):
+			touchees.append(e)
+	var elements: Dictionary = plan.elements
+	var prev := {}
+	if segment and e.has("chaine") and not elements.is_empty() and not plan.parametres.get("sans_segment", false):
+		wuxing.decroitre(e.chaine, tick)
+		prev = wuxing.prevoir(e.chaine, wuxing.dominante(elements))
+	var charge := plan
+	for l: Dictionary in plan.liaisons:
+		if l.get("dispersion", false) and touchees.size() > 1:
+			charge = plan.duplicate()
+			charge.mult = float(plan.mult) / float(touchees.size())   # la charge répartie, divisée par leur nombre
+	var res := _appliquer_charge(e, charge, touchees, cible_pos, prev)
+	var a_touche: bool = res.a_touche
+	# Liaisons qui rejouent : Répétition (2 fois, −1 dé), Ricochet (1d3 cibles proches, −1 dé par saut).
+	for l: Dictionary in plan.liaisons:
+		if l.has("rejoue"):
+			for i in int(l.rejoue):
+				var rejeu := plan.duplicate()
+				rejeu.des_bonus = int(plan.des_bonus) + int(l.get("des", -1))
+				rejeu.liaisons = []
+				a_touche = _appliquer_charge(e, rejeu, touchees, cible_pos, {}).a_touche or a_touche
+		if l.has("sauts") and not touchees.is_empty():
+			var deja: Array[Dictionary] = touchees.duplicate()
+			var depuis: Dictionary = touchees.back()
+			for k in des.jet(l.sauts):
+				var suivante := _voisine_non_touchee(e, depuis, deja, int(l.get("portee", 2)))
+				if suivante.is_empty():
+					break
+				var saut := plan.duplicate()
+				saut.des_bonus = int(plan.des_bonus) + int(l.get("des", -1)) * (k + 1)
+				saut.liaisons = []
+				a_touche = _appliquer_charge(e, saut, [suivante], suivante.pos, {}).a_touche or a_touche
+				deja.append(suivante)
+				depuis = suivante
+	if plan.drapeaux.has("projection"):
+		_effet_deplacement(e, {"mode": "projection", "distance": str(plan.drapeaux.projection)}, touchees, {})
+	if segment and a_touche and not elements.is_empty() and not plan.parametres.get("sans_segment", false):
+		_poser_segment(e, elements, tick)
+		var extra := int(plan.drapeaux.get("segments", 0))
+		for i in extra:
+			_poser_segment(e, elements, tick)
+	# Déclencheur : la charge qui suit part à l'impact, ou à la mise à mort — sans second segment.
+	var suite: Dictionary = plan.charge_suivante
+	if not suite.is_empty() and suite.erreurs.is_empty():
+		var ou: Vector2i = res.premiere.pos if not res.premiere.is_empty() else cible_pos
+		match str(suite.declencheur):
+			"impact":
+				if a_touche:
+					_executer_capacite(e, suite, ou, false)
+			"mise_a_mort":
+				if not res.tuee.is_empty():
+					_executer_capacite(e, suite, res.tuee.pos, false)
+	EventBus.emettre(&"action_resolved", [e.id, {"type": "capacite", "plan": plan}])
+
+
+## Les entités vivantes couvertes par des tuiles (Point : une cible unique, jamais le lanceur ;
+## les zones touchent tout ce qu'elles couvrent, alliés compris).
+func _entites_dans(e: Dictionary, plan: Dictionary, tuiles: Array[Vector2i]) -> Array[Dictionary]:
+	var res: Array[Dictionary] = []
 	for t in tuiles:
 		var occ := grille.occupant(t)
 		if occ.is_empty():
@@ -833,28 +902,48 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) ->
 		var c: Dictionary = entites[occ]
 		if not c.vivant:
 			continue
-		# Point : une cible unique ; les zones touchent tout ce qu'elles couvrent, alliés compris.
 		if plan.geometrie == "point" and c.id == e.id:
 			continue
 		if plan.ligne_de_vue and plan.geometrie != "point" and plan.geometrie != "soi" and not grille.ligne_de_vue(e.pos, t):
 			continue
-		touchees.append(c)
-	var elements: Dictionary = plan.elements
+		res.append(c)
+	return res
+
+
+## L'ennemi vivant le plus proche de `depuis` (≤ portée), pas encore touché.
+func _voisine_non_touchee(e: Dictionary, depuis: Dictionary, deja: Array[Dictionary], portee: int) -> Dictionary:
+	var meilleure := {}
+	var dmin := 1 << 30
+	for c in vivants():
+		if c.camp == e.camp or deja.has(c):
+			continue
+		var d := Grille.distance(c.pos, depuis.pos)
+		if d <= portee and d < dmin:
+			dmin = d
+			meilleure = c
+	return meilleure
+
+
+## Applique les effets du noyau à des cibles. Retourne {a_touche, premiere, tuee}.
+func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictionary], cible_pos: Vector2i, prev: Dictionary) -> Dictionary:
+	var tick := tick_de(e)
 	var a_touche := false
-	var non_offensif := true
-	var prev := {}
-	if e.has("chaine") and not elements.is_empty() and not plan.parametres.get("sans_segment", false):
-		wuxing.decroitre(e.chaine, tick)
-		prev = wuxing.prevoir(e.chaine, wuxing.dominante(elements))
+	var premiere := {}
+	var tuee := {}
 	for effet: String in plan.effets:
 		match effet:
 			"degats":
-				non_offensif = false
 				for c in touchees:
+					if c.id == e.id:
+						continue
 					var d := _degats_capacite(e, c, plan, prev)
 					a_touche = true
+					if premiere.is_empty():
+						premiere = c
 					EventBus.emettre(&"journal", [&"journal.capacite", {"att": e.name_key, "capacite": plan.name_key, "def": c.name_key, "zone": d.zone, "degats": d.degats}])
 					_appliquer_degats(c, d.degats, e.id, d)
+					if not c.vivant and tuee.is_empty():
+						tuee = c
 					if plan.drapeaux.has("vampirique"):
 						e.sante = mini(e.sante_max, e.sante + roundi(float(d.degats) * float(plan.drapeaux.vampirique)))
 			"soin":
@@ -867,6 +956,8 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) ->
 					var avant: int = c.sante
 					c.sante = mini(c.sante_max, c.sante + soin)
 					a_touche = true
+					if premiere.is_empty():
+						premiere = c
 					EventBus.emettre(&"journal", [&"journal.soin", {"att": e.name_key, "capacite": plan.name_key, "def": c.name_key, "soin": c.sante - avant}])
 			"deplacement":
 				var dp: Dictionary = plan.parametres.get("deplacement", {})
@@ -885,6 +976,8 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) ->
 						if (c.camp == e.camp) == pour_allie or plan.geometrie == "soi":
 							if appliquer_statut(c, str(st.id), duree, e.id):
 								a_touche = true
+								if premiere.is_empty():
+									premiere = c
 			"tempo":
 				var n := int(plan.parametres.get("tempo", 0))
 				for c in touchees:
@@ -896,14 +989,7 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) ->
 						e.compteur = maxi(tick, e.compteur - applique)
 			_:
 				pass   # terrain, invocation, saisie : étapes suivantes
-	if plan.drapeaux.has("projection"):
-		_effet_deplacement(e, {"mode": "projection", "distance": str(plan.drapeaux.projection)}, touchees, {})
-	if a_touche and not elements.is_empty() and not plan.parametres.get("sans_segment", false):
-		_poser_segment(e, elements, tick)
-		var extra := int(plan.drapeaux.get("segments", 0))
-		for i in extra:
-			_poser_segment(e, elements, tick)
-	EventBus.emettre(&"action_resolved", [e.id, {"type": "capacite", "plan": plan}])
+	return {"a_touche": a_touche, "premiere": premiere, "tuee": tuee}
 
 
 ## Dégâts d'un noyau sur une cible : noyau « arme » = formule de l'arme ; noyau magique = jet × niveau.

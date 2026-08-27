@@ -8,5 +8,8 @@
   "tags": [
     "declencheur"
   ],
-  "surcout_ticks": 2
+  "surcout_ticks": 2,
+  "effet": {
+    "declencheur": "mise_a_mort"
+  }
 }

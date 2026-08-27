@@ -8,5 +8,8 @@
   "tags": [
     "declencheur"
   ],
-  "surcout_ticks": 1
+  "surcout_ticks": 1,
+  "effet": {
+    "declencheur": "impact"
+  }
 }

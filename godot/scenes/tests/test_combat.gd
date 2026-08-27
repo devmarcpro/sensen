@@ -20,6 +20,7 @@ func _ready() -> void:
 	test_capacites()
 	test_projectiles()
 	test_statuts()
+	test_liaisons()
 	test_arenes_autonomes()
 	if echecs == 0:
 		print("TESTS : tout passe")
@@ -609,3 +610,63 @@ func test_statuts() -> void:
 	s.pas(j.horloge)
 	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": chef.pos}), "Feinte")
 	verifier(Etres.bloque_statuts(chef, "garde", s.statuts_defs), "garde annulée par la Feinte")
+
+
+# ---------------------------------------------------------------- Liaisons et déclencheurs
+
+func test_liaisons() -> void:
+	var cap := Capacites.new(GameData.catalogues["modules"])
+	var p := cap.assembler(["point", "etincelle", "a_l_impact", "croix", "bruine"], 5, "1d4", {})
+	verifier(p.erreurs.is_empty() and p.charge_suivante.declencheur == "impact" and p.charge_suivante.geometrie == "croix", "À l'impact encapsule [Croix]+[Bruine]")
+	verifier(p.ticks == 3 + 1 + (3 + 3) and p.ressource == 3 and p.charge_suivante.ressource == 3, "ticks : 3 + 1 + 6 ; chaque charge paie son mana")
+	p = cap.assembler(["point", "flamme", "repetition"], 5, "1d4", {})
+	verifier(p.ticks == 12 and p.liaisons.size() == 1 and p.liaisons[0].rejoue == 2, "[Point]+[Flamme]+[Répétition] : 12 ticks, rejoue 2 fois")
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var loups: Array[Dictionary] = [s.entites["loup_2"], s.entites["loup_3"], s.entites["loup_4"]]
+	var positions := [Vector2i(0, -3), Vector2i(1, -4), Vector2i(-1, -3)]
+	for i in 3:
+		s.grille.liberer(loups[i].pos)
+		loups[i].pos = j.pos + positions[i]
+		s.grille.placer(loups[i].id, loups[i].pos)
+		loups[i].compteur = 500
+		loups[i].sante = 400
+		loups[i].sante_max = 400
+	s._engager_combat(j, loups[0])
+	var h := s.horloge_de(j)
+	j.mana = 200
+	var coups := [0]
+	EventBus.damage_dealt.connect(func(src: String, _c: String, _d: int, _det: Dictionary) -> void: if src == j.id: coups[0] += 1)
+	# Répétition : trois applications sur la même cible
+	j.capacites.append({"id": "r", "name_key": "capacite.etincelle.name", "modules": ["point", "flamme", "repetition"]})
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loups[0].pos}), "Flamme + Répétition (12 ticks : télégraphée)")
+	s.pas(j.horloge)
+	verifier(coups[0] == 3 and j.chaine.segments.size() == 1, "3 coups appliqués, un seul segment")
+	# À l'impact : Étincelle touche, puis la Bruine en croix part de la cible et touche le loup voisin
+	coups[0] = 0
+	j.capacites[3] = {"id": "i", "name_key": "capacite.etincelle.name", "modules": ["point", "etincelle", "a_l_impact", "croix", "bruine"]}
+	j.compteur = h.ticks
+	j.action_en_cours = {}
+	s.pas(j.horloge)
+	var pv2: int = loups[2].sante
+	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loups[0].pos}), "Étincelle → À l'impact → Croix + Bruine")
+	verifier(coups[0] >= 2 and loups[2].sante < pv2, "la charge différée part de la cible touchée et frappe la croix (%d coups)" % coups[0])
+	verifier(j.chaine.segments.size() == 2, "une capacité = un segment, même avec deux noyaux")
+	# Ricochet : la charge saute vers les cibles proches
+	coups[0] = 0
+	j.capacites[3] = {"id": "c", "name_key": "capacite.etincelle.name", "modules": ["point", "etincelle", "ricochet"]}
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loups[0].pos}), "Étincelle + Ricochet")
+	verifier(coups[0] >= 2, "au moins un saut (%d coups)" % coups[0])
+	# Partage : le Baume sur un allié soigne aussi le lanceur
+	var allie := s.ajouter("bandit", j.pos + Vector2i(1, 0), "joueur")
+	allie.sante = 10
+	j.sante = 10
+	j.capacites[3] = {"id": "p", "name_key": "capacite.baume.name", "modules": ["point", "baume", "partage"]}
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": allie.pos}), "Baume + Partage")
+	verifier(allie.sante > 10 and j.sante > 10, "l'allié et le lanceur sont soignés")

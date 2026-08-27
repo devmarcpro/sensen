@@ -506,7 +506,8 @@ func _texte_capacite(j: Dictionary, k: int) -> String:
 	return tr("ui.capacite").format({"touche": "F%d" % (k + 1), "nom": tr(plan.name_key), "modules": " + ".join(mods),
 		"forme": plan.geometrie, "pmin": plan.portee.x, "pmax": plan.portee.y, "taille": plan.taille,
 		"ticks": plan.ticks, "ressource": plan.ressource, "monnaie": plan.monnaie if not plan.monnaie.is_empty() else "—",
-		"des": str(plan.des) if plan.des != null else "—", "bonus": (" +%d dé(s)" % plan.des_bonus) if plan.des_bonus > 0 else ""})
+		"des": str(plan.des) if plan.des != null else "—", "bonus": (" +%d dé(s)" % plan.des_bonus) if plan.des_bonus > 0 else ""}) \
+		+ ((" → " + tr(plan.charge_suivante.name_key) + " : " + tr(plan.charge_suivante.noyau.get("name_key", ""))) if not plan.charge_suivante.is_empty() else "")
 
 
 func _preview_capacite(j: Dictionary, plan: Dictionary, cible: Dictionary) -> String:

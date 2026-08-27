@@ -68,6 +68,19 @@ NOYAUX = {
     "trait_nu": {"sans_segment": True},
 }
 
+# Liaisons et déclencheurs résolus par le prototype (décision du 2026-08-27).
+LIAISONS = {
+    "repetition": {"rejoue": 2, "des": -1},
+    "ricochet": {"sauts": "1d3", "des": -1, "portee": 2},
+    "dispersion": {"dispersion": True},
+    "miroir": {"miroir": True},
+    "partage": {"partage": True},
+}
+DECLENCHEURS = {
+    "a_l_impact": {"declencheur": "impact"},
+    "curee": {"declencheur": "mise_a_mort"},
+}
+
 n = 0
 for p in sorted(glob.glob(os.path.join(ROOT, "*.json"))):
     d = json.load(open(p, encoding="utf-8"))
@@ -80,6 +93,10 @@ for p in sorted(glob.glob(os.path.join(ROOT, "*.json"))):
         effet = {"predicat_structure": pred, "bonus_structure": bonus, "echec_ticks_rendus": 0.5}
     elif d["module_type"] == "noyau" and id_ in NOYAUX:
         effet = NOYAUX[id_]
+    elif d["module_type"] == "liaison" and id_ in LIAISONS:
+        effet = LIAISONS[id_]
+    elif d["module_type"] == "declencheur" and id_ in DECLENCHEURS:
+        effet = DECLENCHEURS[id_]
     if effet is not None:
         d["effet"] = effet
         n += 1

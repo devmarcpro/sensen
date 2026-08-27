@@ -33,14 +33,30 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 		"geometrie": "point", "portee": Vector2i(1, 1), "taille": 1, "ligne_de_vue": true,
 		"ticks": 0, "monnaie": "", "ressource": 0, "des": null, "des_bonus": 0, "mult": 1.0,
 		"elements": {}, "effets": [], "conditions": [], "drapeaux": {}, "parametres": {},
+		"liaisons": [], "charge_suivante": {},
 	}
 	var plus := 0
 	var mult := 1.0
-	for id: String in sequence:
+	for k in sequence.size():
+		var id: String = sequence[k]
 		var m: Dictionary = modules.get(id, {})
 		if m.is_empty():
 			plan.erreurs.append("module inconnu : " + id)
 			continue
+		if str(m.module_type) == "declencheur":
+			# Un déclencheur encapsule tout ce qui le suit comme charge utile (Six types de modules).
+			var ef: Dictionary = m.get("effet", {})
+			if ef.is_empty():
+				plan.avertissements.append("déclencheur non résolu dans le prototype : " + id)
+				plan.ticks += int(m.get("surcout_ticks", 0))
+				break
+			var suite := assembler(sequence.slice(k + 1), ticks_arme, des_arme, element_arme)
+			suite["declencheur"] = str(ef.declencheur)
+			suite["name_key"] = m.name_key
+			plan.charge_suivante = suite
+			plan.ticks += int(m.get("surcout_ticks", 0)) + int(suite.ticks)
+			plan.erreurs.append_array(suite.erreurs)
+			break
 		match str(m.module_type):
 			"noyau":
 				if not plan.noyau.is_empty():
@@ -97,8 +113,14 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				plan.conditions.append({"id": id, "name_key": m.name_key, "predicat": ef.predicat_structure,
 					"bonus": ef.bonus_structure, "ticks_rendus": float(ef.get("echec_ticks_rendus", 0.5))})
 				plan.ticks += int(m.get("surcout_ticks", 0))
+			"liaison":
+				plan.ticks += int(m.get("surcout_ticks", 0))
+				var ef: Dictionary = m.get("effet", {})
+				if ef.is_empty():
+					plan.avertissements.append("liaison non résolue dans le prototype : " + id)
+				else:
+					plan.liaisons.append(ef.duplicate())
 			_:
-				# Déclencheurs et liaisons : hors du prototype (jalons suivants) — ticks comptés, effet ignoré.
 				plan.ticks += int(m.get("surcout_ticks", 0))
 				plan.avertissements.append("type non résolu dans le prototype : " + id)
 	if plan.noyau.is_empty():

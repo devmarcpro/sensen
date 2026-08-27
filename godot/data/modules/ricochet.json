@@ -8,5 +8,10 @@
   "tags": [
     "liaison"
   ],
-  "surcout_ticks": 3
+  "surcout_ticks": 3,
+  "effet": {
+    "sauts": "1d3",
+    "des": -1,
+    "portee": 2
+  }
 }
