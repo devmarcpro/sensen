@@ -42,6 +42,9 @@ places_escorte = 1 + floor(Charisme / 5) + floor(N_leadership / 10)
 > [!success] Codé le 2026-08-28 — étape 9.D, `combat_rules.compagnons`
 > `places_escorte = 1 + ⌊Charisme/5⌋ + ⌊Leadership/10⌋` tel quel. **Recruter** (dialogue, option affichée quand la relation atteint `recruitable.threshold` ou la faveur du palier 90) : le PNJ passe au camp du joueur, profil `compagnon`, relation conservée ; les **ordres** (dialogue : *Suis-moi* / *Attends ici*) ne coûtent aucun tick, seul l'agir en coûte (action d'utility `suivre` : rejoindre le maître au-delà de 2 tuiles). Parité d'XP : un compagnon progresse par l'usage comme le joueur (déjà le cas). **Mort** : le compagnon reste mort sur place ; son **âme** (objet `ame`, poids symbolique) va dans le sac du joueur ; **résurrection** sur un **autel domestique** adjacent (meuble) contre `or_par_niveau × niveau × 1,5` (décision : 20 or par niveau ; le prêtre attend le sanctuaire), il revient **affaibli** (−20 % de stats un jour in-game, statut `affaibli`) et sa relation ne change pas. Postures de combat, échange d'équipement et suiveurs territoriaux attendent.
 
+> [!success] Codé le 2026-08-28 — le prêtre
+> Bâtiment **chapelle** (autel + lit) dans le pool des villages, tenu par un **prêtre** (créature `pretre`, fonction `pretre`, bourse 500). Dialogue → *Ressusciter* (N) avec une âme dans le sac : `coût = 20 or × niveau` (**sans** le ×1,5 de l'autel domestique), payé au prêtre — sa bourse est finie : ce qui dépasse `or_max` sort du jeu (puits). À la résurrection, chez le prêtre comme à l'autel, le compagnon revient **Affaibli** (−20 % de stats, mécanisme existant). Le sort de Vie attend.
+
 ## Liens
 - **Dépend de** : [[Apprivoisement et recrutement]], [[Stats de personnage]], [[Compétences — liste]], [[IA des créatures]]
 - **Alimente** : [[Population et exploitation]], [[Économie — sources et puits]], [[XP de combat]]

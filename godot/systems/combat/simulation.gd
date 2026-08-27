@@ -1183,6 +1183,24 @@ func _puissance_de(valeur: int) -> float:
 
 # ---------------------------------------------------------------- entraîneur (Potentiel) et commandes de collectionneurs
 
+## L'âme d'un compagnon dans le sac, s'il y en a une (dialogue du prêtre).
+func ame_dans_sac(e: Dictionary) -> String:
+	for uid in e.sac:
+		if items.get(uid, {}).has("compagnon"):
+			return str(uid)
+	return ""
+
+
+func cout_resurrection(e: Dictionary, uid_ame: String, chez_pretre: bool) -> int:
+	var ame: Dictionary = items.get(uid_ame, {})
+	var x: Dictionary = entites.get(str(ame.get("compagnon", "")), {})
+	if x.is_empty():
+		return 0
+	var c: Dictionary = regles.r.compagnons
+	var niveau := maxi(1, int(round(progression.niveaux_derives(x).combat)))
+	return int(float(c.or_par_niveau) * niveau * (float(c.get("pretre_mult", 1.0)) if chez_pretre else float(c.autel_mult)))
+
+
 func cout_entrainement(e: Dictionary, competence: String) -> int:
 	var en: Dictionary = regles.r.progression.entraineur
 	return maxi(int(en.or_min), int(en.or_par_niveau) * regles.niveau(e.competences, competence))
@@ -2594,16 +2612,19 @@ func _mort_compagnon(x: Dictionary) -> void:
 
 
 ## Ressusciter un compagnon : l'âme dans le sac, un autel domestique adjacent, l'or ; il revient affaibli.
-func _ressusciter(e: Dictionary, uid_ame: String, tick: int) -> bool:
+func _ressusciter(e: Dictionary, uid_ame: String, tick: int, pnj_id: String = "") -> bool:
 	var ame: Dictionary = items.get(uid_ame, {})
 	if ame.is_empty() or not (uid_ame in e.sac) or not ame.has("compagnon"):
 		return false
+	var pretre: Dictionary = entites.get(pnj_id, {})   # chez un prêtre (Compagnons) : sans le ×1,5 de l'autel, l'or va à sa bourse finie
+	if not pretre.is_empty() and (not ("pretre" in pretre.get("tags", [])) or Grille.distance(e.pos, pretre.pos) > 2):
+		pretre = {}
 	var autel := false
 	for d in Grille.DIRS:
 		var t: Vector2i = e.pos + d
 		if grille.dans(t) and str(grille.meubles.get(grille.idx(t), "")) == "autel_domestique":
 			autel = true
-	if not autel:
+	if not autel and pretre.is_empty():
 		EventBus.emettre(&"journal", [&"journal.pas_d_autel", {}])
 		return false
 	var x: Dictionary = entites.get(str(ame.compagnon), {})
@@ -2611,11 +2632,14 @@ func _ressusciter(e: Dictionary, uid_ame: String, tick: int) -> bool:
 		return false
 	var c: Dictionary = regles.r.compagnons
 	var niveau := maxi(1, int(round(progression.niveaux_derives(x).combat)))
-	var cout := int(float(c.or_par_niveau) * niveau * float(c.autel_mult))
+	var cout := int(float(c.or_par_niveau) * niveau * (float(c.get("pretre_mult", 1.0)) if not pretre.is_empty() else float(c.autel_mult)))
 	if int(e.or) < cout:
 		EventBus.emettre(&"journal", [&"journal.pas_assez_or", {}])
 		return false
 	e.or = int(e.or) - cout
+	if not pretre.is_empty():
+		pretre.or = mini(int(pretre.get("or_max", cout)), int(pretre.or) + cout)   # ce qui dépasse sa bourse sort du jeu
+		EventBus.emettre(&"journal", [&"journal.resurrection_pretre", {"pretre": pretre.name_key, "nom": x.name_key, "cout": cout}])
 	e.sac.erase(uid_ame)
 	items.erase(uid_ame)
 	x.vivant = true
@@ -4598,7 +4622,7 @@ func intention(id: String, i: Dictionary) -> bool:
 		"apprivoiser":
 			ok = _apprivoiser(e, str(i.get("cible", "")), h.ticks)
 		"ressusciter":
-			ok = _ressusciter(e, str(i.get("ame", "")), h.ticks)
+			ok = _ressusciter(e, str(i.get("ame", "")), h.ticks, str(i.get("pnj", "")))
 		"rendre_quete":
 			ok = _rendre_quete(e, str(i.get("pnj", "")), str(i.get("quete", "")), h.ticks)
 		"jeter":

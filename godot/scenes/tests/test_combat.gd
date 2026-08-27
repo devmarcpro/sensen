@@ -54,6 +54,7 @@ func _ready() -> void:
 	test_familles()
 	test_entraineur_et_commandes()
 	test_gabarits_guildes()
+	test_pretre_et_tourelle()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1035,7 +1036,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 49, "9 stations, 49 recettes plates (10 transformations, 22 meubles, 9 stations, 3 plats, 5 potions)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 50, "9 stations, 50 recettes plates (10 transformations, 23 meubles, 9 stations, 3 plats, 5 potions)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -2232,6 +2233,36 @@ func test_gabarits_guildes() -> void:
 	s.attente[j.id] = true
 	s.intention(j.id, {"type": "parler", "pnj": pnj.id})
 	verifier(j.quetes[3].etat == "terminee" and s._pile_objet(j, "pain").is_empty(), "le pain livré à Port-Test : quête terminée, pain remis")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Prêtre et tourelle
+
+func test_pretre_et_tourelle() -> void:
+	var s := Simulation.new(101)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	verifier(GameData.catalogues.recipes.has("meuble_tourelle") and GameData.catalogues.village_buildings.has("chapelle") and GameData.catalogues.creatures.has("pretre"), "recette de tourelle, chapelle et prêtre en données")
+	var v := s.ajouter("villageois", j.pos + Vector2i(1, 1), "ia")
+	s._habiller_pnj(v, GameData.entree("creatures", "villageois"))
+	v.social.relations[j.id] = 80
+	j.corps.stats.charisme = 25
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "recruter", "pnj": v.id})
+	s._appliquer_degats(v, 9999, j.id, {})
+	var ame: String = s.ame_dans_sac(j)
+	verifier(not ame.is_empty(), "l'âme du compagnon est dans le sac")
+	var pretre := s.ajouter("pretre", j.pos + Vector2i(-1, 0), "ia")
+	s._habiller_pnj(pretre, GameData.entree("creatures", "pretre"))
+	var cout := s.cout_resurrection(j, ame, true)
+	verifier(cout == 20 * maxi(1, int(round(s.progression.niveaux_derives(v).combat))) and s.cout_resurrection(j, ame, false) == int(float(cout) * 1.5), "coût chez le prêtre %d or, ×1,5 à l'autel" % cout)
+	j.or = cout
+	pretre.or = int(pretre.or_max) - 5
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "ressusciter", "ame": ame, "pnj": pretre.id}) and v.vivant and int(j.or) == 0, "le prêtre rappelle le compagnon")
+	verifier(int(pretre.or) == int(pretre.or_max), "sa bourse est finie : le surplus sort du jeu")
+	verifier(float(v.get("affaibli_mult", 1.0)) < 1.0, "le ressuscité revient Affaibli")
 	s.monde.fermer()
 
 

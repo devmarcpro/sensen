@@ -265,7 +265,8 @@
       "maison": "villageois",
       "chaumiere": "fermier",
       "grange": "fermier",
-      "echoppe": "marchand"
+      "echoppe": "marchand",
+      "chapelle": "pretre"
     },
     "garde": "garde_village",
     "forgeron_chance": 0.5

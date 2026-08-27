@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.meuble_tourelle.name",
+  "station": "etabli",
+  "craft_skill": "menuiserie",
+  "inputs": [
+    {
+      "category": "bois",
+      "forme": "planche",
+      "amount": 4
+    },
+    {
+      "category": "metal",
+      "forme": "lingot",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "item": "meuble_tourelle",
+    "amount": 1
+  },
+  "fuel": null
+}

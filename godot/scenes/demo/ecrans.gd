@@ -183,6 +183,10 @@ func touche(ev: InputEventKey) -> bool:
 			if courant == "dialogue":
 				_option("livrer")
 				return true
+		KEY_N:
+			if courant == "dialogue":
+				_option("ressusciter")
+				return true
 		KEY_D:
 			if courant == "gestion":
 				main.sim.deposer(main.joueur(), 50)
@@ -411,6 +415,10 @@ func _construire_dialogue(j: Dictionary) -> void:
 	if "entraineur" in pnj.get("tags", []):
 		liste.add_item(tr("ui.ecran.entrainer"))
 		entrees.append({"kind": "option", "option": "entrainer"})
+	if "pretre" in pnj.get("tags", []):
+		var ame: String = main.sim.ame_dans_sac(j)
+		liste.add_item(tr("ui.ecran.ressusciter").format({"cout": main.sim.cout_resurrection(j, ame, true)}) if not ame.is_empty() else tr("ui.ecran.ressusciter_rien"), null, not ame.is_empty())
+		entrees.append({"kind": "option", "option": "ressusciter"})
 	if "commerce_possible" in pnj.get("tags", []) and not main.sim.territoire.get("commande", {}).is_empty():
 		liste.add_item(tr("ui.ecran.livrer"))
 		entrees.append({"kind": "option", "option": "livrer"})
@@ -448,6 +456,11 @@ func _option(opt: String) -> void:
 			ouvrir("entrainer")
 		"livrer":
 			main.sim.intention(j.id, {"type": "livrer", "pnj": pnj_id})
+			rafraichir()
+		"ressusciter":
+			var ame: String = main.sim.ame_dans_sac(j)
+			if not ame.is_empty():
+				main.sim.intention(j.id, {"type": "ressusciter", "ame": ame, "pnj": pnj_id})
 			rafraichir()
 		"partir":
 			fermer()

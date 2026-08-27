@@ -401,6 +401,12 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+creature.pretre.name,Prêtre
+function.pretre.name,Prêtre
+recipe.meuble_tourelle.name,Bâtir une tourelle
+ui.ecran.ressusciter,"Ressusciter un compagnon (N) — {cout} or"
+ui.ecran.ressusciter_rien,(pas d'âme dans le sac)
+journal.resurrection_pretre,"{pretre} rappelle {nom} d'entre les morts ({cout} or)"
 quest.livraison.text,"Livrez {objet} à quelqu'un de {destination}."
 quest.chantier.text,"Bâtissez {count} structures (meubles, stations ou murs) sur votre territoire."
 quest.commande_artisan.text,"Façonnez {count} composants ou objets à l'atelier."

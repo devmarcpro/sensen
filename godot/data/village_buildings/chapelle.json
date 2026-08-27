@@ -1,0 +1,19 @@
+{
+  "plan": [
+    "#######",
+    "#..A..#",
+    "#.....#",
+    "#L....#",
+    "###P###"
+  ],
+  "meubles": {
+    "L": "lit_de_paille",
+    "A": "autel_domestique",
+    "T": "table",
+    "C": "coffre"
+  },
+  "tags": [
+    "hameau",
+    "chapelle"
+  ]
+}

@@ -409,7 +409,9 @@
     "or_par_niveau": 20,
     "autel_mult": 1.5,
     "affaibli_mult": 0.8,
-    "affaibli_ticks": 24000
+    "affaibli_ticks": 24000,
+    "pretre_mult": 1.0,
+    "statut_resurrection": "affaibli"
   },
   "apprivoisement": {
     "_doc": "Jet universel : 1d20 + Dressage/2 + Charisme/4 ≥ 10 + niveau/2 ; bonus sous 50 % / 25 % de PV ; une tentative par créature et par jour.",
