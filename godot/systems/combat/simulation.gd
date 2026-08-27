@@ -1359,7 +1359,7 @@ func _capturer(e: Dictionary, tick: int) -> bool:
 	if esp.capture.has("appat"):
 		_consommer_pile(e, _pile_objet(e, str(esp.capture.appat)))
 	e.compteur = tick + int(regles.r.actions.objet) * 2
-	var jet := des.jet("1d20") + regles.niveau(e.competences_eff, str(_elv().competence_capture))
+	var jet := des.jet("1d20") + regles.niveau(e.competences_eff, str(_elv().competence_capture)) + int(paliers_elevage().capture)
 	var dd := int(esp.capture.get("dd", 10))
 	gagner_xp(e, str(_elv().competence_capture), 5)
 	if jet < dd:
@@ -1396,6 +1396,54 @@ func _enregistrer_variete(sp: Dictionary) -> void:
 		territoire.registre[esp] = {}
 	var cle := "%s|%s" % [str(sp.genome.get("couleur", "")), str(sp.genome.get("motif", ""))]
 	territoire.registre[esp][cle] = true
+	# Records des loci nombre et allèles vus (Vivarium — registre et paliers).
+	if not territoire.has("records"):
+		territoire["records"] = {}
+	if not territoire.records.has(esp):
+		territoire.records[esp] = {}
+	var loci: Dictionary = GameData.catalogues.species.get(esp, {}).get("loci", {})
+	for nom in loci.keys():
+		var t := str(loci[nom].type)
+		var v = sp.genome.get(nom)
+		if t == "nombre" and v != null:
+			territoire.records[esp][nom] = maxf(float(territoire.records[esp].get(nom, 0.0)), float(v))
+		elif t in ["recessif", "lie_au_sexe"] and v is Array:
+			var vus: Dictionary = territoire.records[esp].get(nom, {})
+			for al in v:
+				vus[str(al)] = true
+			territoire.records[esp][nom] = vus
+
+
+## Les paliers du registre (Vivarium — registre et paliers) : bonus de capture, couvées supplémentaires.
+func paliers_elevage() -> Dictionary:
+	var res := {"capture": 0, "couvees": 0, "atteints": []}
+	var pal: Dictionary = _elv().get("paliers", {})
+	var nv := 0
+	for esp in territoire.get("registre", {}).keys():
+		nv += territoire.registre[esp].size()
+	var ne: int = territoire.get("registre", {}).size()
+	for s in pal.get("varietes", []):
+		if nv >= int(s[0]):
+			res[str(s[1])] = int(res.get(str(s[1]), 0)) + int(s[2])
+			res.atteints.append("palier." + str(s[1]))
+	for s in pal.get("especes", []):
+		if ne >= int(s[0]):
+			res[str(s[1])] = int(res.get(str(s[1]), 0)) + int(s[2])
+			res.atteints.append("palier." + str(s[1]))
+	if ne >= GameData.catalogues.species.size() and ne > 0:
+		res.capture = int(res.capture) + int(pal.get("bestiaire_complet_capture", 0))
+		res.atteints.append("palier.bestiaire")
+	return res
+
+
+## Les variétés possibles d'une espèce : le produit des anneaux couleur × motif, sinon des loci qualitatifs.
+func varietes_possibles(esp_id: String) -> int:
+	var loci: Dictionary = GameData.catalogues.species.get(esp_id, {}).get("loci", {})
+	var n := 1
+	for nom in ["couleur", "motif"]:
+		if loci.has(nom) and str(loci[nom].type) == "anneau":
+			n *= int(loci[nom].n)
+	return n
 
 
 ## Le passage hebdomadaire de l'élevage : dans chaque vivarium de la fenêtre, le premier couple valide donne une couvée.
@@ -1426,10 +1474,12 @@ func _semaine_elevage() -> void:
 			continue
 		var ctx := {"habitat": str(m.type_meuble), "libre": int(m.capacite_slots) - contenants[gi].size(), "temp": float(temperature_ressentie({"pos": pos}).temp), "saison": saison()}
 		var fait := false
+		var couvees := 0
+		var couvees_max: int = int(_elv().couvees_par_semaine) + int(paliers_elevage().couvees)
 		var derniere: Array = []
 		for i in specimens.size():
 			for j in range(i + 1, specimens.size()):
-				if fait:
+				if couvees >= couvees_max:
 					break
 				var res := conditions_repro(specimens[i], specimens[j], ctx)
 				if not res.ok:
@@ -1452,8 +1502,10 @@ func _semaine_elevage() -> void:
 					_exprimer_loci(enfant, _cell_de(pos), true)
 					_enregistrer_variete(enfant)
 					contenants[gi].append(enfant.uid)
+					ctx.libre = int(ctx.libre) - 1
 					EventBus.emettre(&"journal", [&"journal.couvee", {"espece": esp.name_key, "n": n, "couleur": str(g.get("couleur", "-")), "motif": str(g.get("motif", "-"))}])
 				fait = true
+				couvees += 1
 		if not fait and not derniere.is_empty():
 			var r0: Dictionary = derniere[0]
 			EventBus.emettre(&"journal", [&"journal.couvee_refusee", {"espece": GameData.catalogues.species[str(specimens[0].espece)].name_key, "raison": str(r0.cle)}])

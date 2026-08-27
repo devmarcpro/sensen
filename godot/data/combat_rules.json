@@ -735,6 +735,23 @@
       0.16
     ],
     "couvees_par_semaine": 1,
-    "age_adulte_semaines": 1
+    "age_adulte_semaines": 1,
+    "paliers": {
+      "varietes": [
+        [
+          75,
+          "capture",
+          2
+        ]
+      ],
+      "especes": [
+        [
+          10,
+          "couvees",
+          2
+        ]
+      ],
+      "bestiaire_complet_capture": 4
+    }
   }
 }

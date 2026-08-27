@@ -582,6 +582,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 					ecrans.basculer("gestion")
 			KEY_Y:
 				sim.intention(joueur_id, {"type": "capturer"})
+			KEY_B:
+				ecrans.basculer("registre")
 			KEY_N:
 				if ev.shift_pressed:
 					minimap.visible = not minimap.visible

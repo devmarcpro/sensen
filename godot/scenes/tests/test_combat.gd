@@ -50,6 +50,7 @@ func _ready() -> void:
 	test_elevage_familles()
 	test_loci_et_soie()
 	test_harmonie()
+	test_registre_elevage()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -2051,6 +2052,30 @@ func test_harmonie() -> void:
 	s.intention(j.id, {"type": "manger", "objet": r2.uid})
 	var attendu: int = 50 + roundi(float(GameData.entree("items", "ragout").nutrition) * 1.2)
 	verifier(int(j.faim) == mini(100, attendu), "manger l'assiette harmonieuse : nutrition ×1,2 (%d)" % int(j.faim))
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Registre d'élevage et paliers
+
+func test_registre_elevage() -> void:
+	var s := Simulation.new(93)
+	s.charger_camp()
+	verifier(s.varietes_possibles("carpe") == 128 and s.varietes_possibles("ver_a_soie") == 6, "variétés possibles : carpe 16 × 8, ver à soie 6")
+	var a := s._nouveau_specimen("carpe", {"couleur": 1, "motif": 2, "taille": 3.5}, "m")
+	var b := s._nouveau_specimen("carpe", {"couleur": 1, "motif": 2, "taille": 5.0}, "f")
+	var c := s._nouveau_specimen("serpent", {"couleur": 0, "ecailles": [0, 1], "taille": 1.0}, "f")
+	verifier(s.territoire.registre.carpe.size() == 1 and float(s.territoire.records.carpe.taille) == 5.0, "deux carpes de la même variété : 1 variété, record de taille 5")
+	verifier(s.territoire.records.serpent.ecailles.has("0") and s.territoire.records.serpent.ecailles.has("1"), "serpent : allèles 0 et 1 vus")
+	verifier(int(s.paliers_elevage().capture) == 0, "sans palier : pas de bonus de capture")
+	for k in 80:
+		s.territoire.registre.carpe["%d|%d" % [k % 16, k / 16]] = true
+	verifier(int(s.paliers_elevage().capture) == 2, "75 variétés : captures +2")
+	for esp in GameData.catalogues.species.keys():
+		if not s.territoire.registre.has(esp):
+			s.territoire.registre[esp] = {"0|0": true}
+	var pal := s.paliers_elevage()
+	verifier(int(pal.couvees) == 0 or GameData.catalogues.species.size() >= 10, "moins de 10 espèces : pas de couvée en plus (%d espèces)" % GameData.catalogues.species.size())
+	verifier("palier.bestiaire" in pal.atteints and int(pal.capture) == 6, "bestiaire complet : captures +6 au total")
 	s.monde.fermer()
 
 

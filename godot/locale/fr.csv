@@ -98,7 +98,7 @@ journal.condition_fausse,{capacite} ne part pas : {condition} n'est pas remplie 
 capacite.etincelle.name,Étincelle
 capacite.gel_en_ligne.name,Gel en ligne
 capacite.baume.name,Baume
-ui.aide.capacites,I : inventaire · F : atelier · C : feuille (Échap ferme) · M : carte du monde (clic sur une cellule voisine : revendiquer) · K : territoire · V : apprivoiser · N : zoom minimap (⇧N : masquer) · F6 sauvegarder · F7 charger · F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
+ui.aide.capacites,I : inventaire · F : atelier · C : feuille (Échap ferme) · M : carte du monde (clic sur une cellule voisine : revendiquer) · K : territoire · B : registre d'élevage · V : apprivoiser · N : zoom minimap (⇧N : masquer) · F6 sauvegarder · F7 charger · F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
 ui.capacite,{touche} {nom} [{modules}] : {forme} portée {pmin}-{pmax} taille {taille} · {ticks} ticks · {ressource} {monnaie} · {des}{bonus}
 ui.capacite.visee,VISÉE : {nom} — cliquer une tuile (Échap annule)
 ui.capacite.preview,{nom} sur {def} : {des}{bonus} ×{dom} → zone {zone} ×{mult} − armure {armure} ⇒ {min}–{max}
@@ -401,6 +401,16 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+ui.ecran.registre,"REGISTRE — {n} variétés · {especes}/{total} espèces · paliers : {paliers}"
+ui.registre.espece,"{nom} — {mode} · {n}/{possibles} variétés{records}"
+ui.registre.aucun,aucune espèce au registre — capture (Y) ou couvée
+ui.registre.grille_ligne,"couleur {c} : motifs {motifs}"
+ui.registre.record," · record {locus} {v}"
+ui.registre.paliers_aucun,aucun
+palier.capture,captures +{n}
+palier.couvees,couvées +{n}
+palier.bestiaire,bestiaire complet
+ui.ecran.planter,Planter (H) — sur une tuile libre voisine d'une cellule Champs
 journal.harmonie,"assiette harmonieuse : les cinq éléments (×1,2)"
 ui.objet.harmonie," · harmonie ×{n}"
 species.chat.name,Chat des ruelles
@@ -593,7 +603,6 @@ plant.tomate.name,Tomate
 item.tomate.name,Tomate
 tile_content.culture.name,Parcelle
 tile_content.culture_mure.name,Parcelle mûre
-ui.ecran.planter,Planter (L) — sur une tuile libre voisine d'une cellule Champs
 ui.gestion.boutique,"boutique : caisse {caisse} or · marge ×{marge} (+/−) · {etals} étal(s) · clients en attente {clients}"
 ui.gestion.parcelles,"parcelles : {n} ({mures} mûres)"
 journal.plante,"{nom} plante {plante}"
@@ -1017,7 +1026,7 @@ slotc.plaque,plaque
 slotc.sangles,sangles
 slotc.divers,divers
 ui.ecran.fermer,Fermer (Échap)
-ui.ecran.inventaire,"INVENTAIRE — {n} objets dans le sac (E : équiper/retirer · J : jeter · L : lire · T : sertir · au camp : P poser, M mur, O porte, R ranger · G : manger)"
+ui.ecran.inventaire,"INVENTAIRE — {n} objets dans le sac (E : équiper/retirer · J : jeter · L : lire · T : sertir · au camp : P poser, M mur, O porte, R ranger, H planter · G : manger)"
 ui.ecran.sac,sac
 ui.ecran.slot_vide,(emplacement vide)
 ui.ecran.equiper,Équiper / retirer (E)

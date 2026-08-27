@@ -58,6 +58,9 @@ Joueur qui vise les cases vides, sur toutes les espèces en parallèle :
 
 C'est la même philosophie que la progression sans plafond du jeu ([[Progression par l'usage]], [[Loci — les dix types]] : *pas de plafond*) : l'asymptote est le but, pas le mur.
 
+> [!success] Codé le 2026-08-28 — l'écran de registre (B) et deux paliers
+> Écran **Registre** (touche B) : une ligne par espèce — mode de registre, variétés obtenues / possibles (produit des anneaux `couleur × motif`, sinon des loci qualitatifs), **records** des loci `nombre` (le plus gros spécimen jamais vu) ; le détail liste, par couleur, les motifs obtenus (`grille`), les records (`records`) ou les allèles vus (`phenotypes`, `patrimoine`). En-tête : total de variétés, espèces découvertes, paliers atteints. **Paliers codés** (`combat_rules.elevage.paliers`) : 75 variétés → **+2 aux captures** ; 10 espèces → **deux couvées de plus** par habitat ; bestiaire complet → **+4**. Les paliers de potentiel, d'éclosion, de chatoyants et de prix attendent (chatoyants et collectionneurs ne sont pas codés). Une seule espèce à la fois dans le détail, comme le veut la note.
+
 ## Liens
 - **Dépend de** : [[Vivarium — loci et variétés]], [[Vivarium — capture et élevage]]
 - **Alimente** : [[Potentiel]], [[Écrans d'interface]], [[Commerce et boutiques]]

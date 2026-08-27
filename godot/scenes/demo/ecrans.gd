@@ -209,7 +209,7 @@ func touche(ev: InputEventKey) -> bool:
 				main.sim.regler_marge(-float(main.sim.regles.r.royaume.boutique.marge_pas))
 				rafraichir()
 				return true
-		KEY_L:
+		KEY_H:
 			if courant == "inventaire":
 				var en: Dictionary = entrees[liste.get_selected_items()[0]] if not liste.get_selected_items().is_empty() and liste.get_selected_items()[0] < entrees.size() else {}
 				if en.get("kind", "") == "objet":
@@ -248,6 +248,8 @@ func rafraichir() -> void:
 			_construire_quetes(j)
 		"gestion":
 			_construire_gestion(j)
+		"registre":
+			_construire_registre(j)
 		"assigner":
 			_construire_assigner(j)
 		"commerce":
@@ -549,6 +551,55 @@ func _lois_txt(roy: Dictionary) -> String:
 	for cat in roy.tariffs.keys():
 		tarifs.append("%s %d %%" % [str(cat), int(round(float(roy.tariffs[cat]) * 100.0))])
 	return "lois : " + (" · ".join(l) if not l.is_empty() else "aucune") + "\ndouanes : " + (" · ".join(tarifs) if not tarifs.is_empty() else "—") + " (défaut %d %%)" % int(round(float(roy.taxes.tariff_default) * 100.0))
+
+
+## Le registre d'élevage (Vivarium — registre et paliers) : une ligne par espèce, le détail d'une seule à la fois.
+func _construire_registre(_j: Dictionary) -> void:
+	var sim = main.sim
+	var t: Dictionary = sim.territoire
+	var reg: Dictionary = t.get("registre", {})
+	var nv := 0
+	for esp in reg.keys():
+		nv += reg[esp].size()
+	var pal: Dictionary = sim.paliers_elevage()
+	var atteints: Array[String] = []
+	for a in pal.atteints:
+		atteints.append(tr(str(a)).format({"n": pal.get(str(a).trim_prefix("palier."), 0)}))
+	titre.text = tr("ui.ecran.registre").format({"n": nv, "especes": reg.size(), "total": GameData.catalogues.species.size(), "paliers": ", ".join(atteints) if not atteints.is_empty() else tr("ui.registre.paliers_aucun")})
+	if reg.is_empty():
+		liste.add_item(tr("ui.registre.aucun"), null, false)
+		entrees.append({"kind": "texte", "texte": ""})
+		return
+	var ids: Array = reg.keys()
+	ids.sort()
+	for esp in ids:
+		var e: Dictionary = GameData.entree("species", str(esp))
+		var recs: Dictionary = t.get("records", {}).get(esp, {})
+		var rtxt := ""
+		var lignes: Array[String] = []
+		for nom in recs.keys():
+			if recs[nom] is float:
+				rtxt += tr("ui.registre.record").format({"locus": str(nom), "v": "%.2f" % float(recs[nom])})
+				lignes.append("%s : record %.2f" % [str(nom), float(recs[nom])])
+			elif recs[nom] is Dictionary:
+				var als: Array = recs[nom].keys()
+				als.sort()
+				lignes.append("%s : allèles vus %s" % [str(nom), ", ".join(als)])
+		liste.add_item(tr("ui.registre.espece").format({"nom": tr(e.name_key), "mode": str(e.get("registre", "grille")), "n": reg[esp].size(), "possibles": sim.varietes_possibles(str(esp)), "records": rtxt}))
+		# Le détail : par couleur, les motifs obtenus.
+		var par_couleur: Dictionary = {}
+		for cle in reg[esp].keys():
+			var parts: PackedStringArray = str(cle).split("|")
+			if not par_couleur.has(parts[0]):
+				par_couleur[parts[0]] = []
+			par_couleur[parts[0]].append(parts[1] if parts.size() > 1 else "")
+		var couleurs: Array = par_couleur.keys()
+		couleurs.sort_custom(func(a: String, b: String) -> bool: return int(a) < int(b))
+		for c in couleurs:
+			var ms: Array = par_couleur[c]
+			ms.sort()
+			lignes.append(tr("ui.registre.grille_ligne").format({"c": c, "motifs": ", ".join(ms)}))
+		entrees.append({"kind": "texte", "texte": "\n".join(lignes)})
 
 
 func _construire_assigner(j: Dictionary) -> void:
