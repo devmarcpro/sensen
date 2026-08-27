@@ -34,6 +34,8 @@ var visee := -1                    # capacité en cours de visée (index), -1 si
 var ecran_fin: Array[String] = []  # récapitulatif du dernier combat (écran de fin), vide sinon
 var ecrans: Ecrans                 # inventaire, atelier, feuille (scenes/demo/ecrans.gd)
 var minimap: Minimap               # coin haut-droit (Décision — Minimap en 2D)
+var ambiance: CanvasModulate       # la lumière du cycle jour-nuit (un « uniform global »)
+var lumieres: Node2D               # halos additifs des sources locales la nuit
 var carte: Carte                   # la carte du monde (M), aussi le choix de la case de départ
 var fiche_en_attente: Dictionary = {}   # la fiche créée, en attendant le choix de la case de départ
 var minuterie_autosave := 300.0    # autosave toutes les 5 minutes réelles (Sauvegarde)
@@ -110,6 +112,16 @@ func _ready() -> void:
 	ecrans = Ecrans.new()
 	ecrans.main = self
 	add_child(ecrans)
+	ambiance = CanvasModulate.new()
+	add_child(ambiance)
+	lumieres = Node2D.new()
+	lumieres.z_as_relative = false
+	lumieres.z_index = 140
+	var mat_add := CanvasItemMaterial.new()
+	mat_add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	lumieres.material = mat_add
+	lumieres.draw.connect(_dessiner_lumieres)
+	add_child(lumieres)
 	minimap = Minimap.new()
 	minimap.main = self
 	$CanvasLayer.add_child(minimap)
@@ -290,6 +302,61 @@ func _log(t: String) -> void:
 
 # ---------------------------------------------------------------- rythme (client)
 
+## La lumière ambiante du cycle (interpolée entre les phases) ; en donjon et en arène, il fait jour.
+func _maj_ambiance() -> void:
+	if sim == null or sim.lieu != "camp" or sim.monde == null:
+		ambiance.color = Color.WHITE
+		lumieres.queue_redraw()
+		return
+	var c: Dictionary = GameData.config("planete").cycle
+	var h := sim.heure()
+	var l: Dictionary = c.lumiere
+	var jour := Color(l.jour[0], l.jour[1], l.jour[2])
+	var nuit := Color(l.nuit[0], l.nuit[1], l.nuit[2])
+	var aube := Color(l.aube[0], l.aube[1], l.aube[2])
+	var crep := Color(l.crepuscule[0], l.crepuscule[1], l.crepuscule[2])
+	var col := nuit
+	if h >= float(c.aube[0]) and h < float(c.aube[1]):
+		col = nuit.lerp(aube, (h - float(c.aube[0])) / (float(c.aube[1]) - float(c.aube[0]))).lerp(jour, maxf(0.0, (h - float(c.aube[0])) / (float(c.aube[1]) - float(c.aube[0])) - 0.5) * 2.0)
+	elif h >= float(c.jour[0]) and h < float(c.jour[1]):
+		col = jour
+	elif h >= float(c.crepuscule[0]) and h < float(c.crepuscule[1]):
+		col = jour.lerp(crep, (h - float(c.crepuscule[0])) / (float(c.crepuscule[1]) - float(c.crepuscule[0])) * 0.5).lerp(nuit, maxf(0.0, (h - float(c.crepuscule[0])) / (float(c.crepuscule[1]) - float(c.crepuscule[0])) - 0.5) * 2.0)
+	ambiance.color = col
+	lumieres.queue_redraw()
+
+
+## Les halos des sources locales (meubles lumineux, torche en main), visibles quand l'ambiance baisse.
+func _dessiner_lumieres() -> void:
+	if sim == null or sim.lieu != "camp" or ambiance.color.r > 0.9:
+		return
+	var g := sim.grille
+	var j := joueur()
+	if j.is_empty():
+		return
+	var force := 1.0 - ambiance.color.r
+	for gi in g.meubles.keys():
+		var m: Dictionary = GameData.entree("meubles", str(g.meubles[gi]))
+		var lum := int(m.get("luminosite", 0))
+		if lum <= 0:
+			continue
+		var t := g.pos_de(int(gi))
+		if Grille.distance(t, j.pos) > RAYON_VUE:
+			continue
+		_halo(_ecran(t, g.h(t)), float(lum) / 100.0 * force)
+	for slot in ["main_principale", "main_secondaire"]:
+		var it: Dictionary = sim.items.get(j.equipement.get(slot, ""), {})
+		if int(it.get("luminosite", 0)) > 0:
+			_halo(_ecran(j.pos, g.h(j.pos)), float(it.luminosite) / 100.0 * force)
+
+
+func _halo(c: Vector2, intensite: float) -> void:
+	var r := 22.0 + 60.0 * intensite
+	for k in 4:
+		var f := 1.0 - float(k) / 4.0
+		lumieres.draw_circle(c + Vector2(0, -6), r * f, Color(1.0, 0.85, 0.55, 0.12 * intensite))
+
+
 ## À la fermeture : attendre la pré-génération en thread (elle lit GameData, qui va disparaître).
 func _exit_tree() -> void:
 	if sim != null and sim.monde != null:
@@ -350,6 +417,7 @@ func _process(delta: float) -> void:
 		minuterie_ui = 0.05
 		_maj_ui()
 		minimap.rafraichir()
+		_maj_ambiance()
 	minuterie_autosave -= delta
 	if minuterie_autosave <= 0.0:
 		minuterie_autosave = 300.0
@@ -939,6 +1007,11 @@ func _maj_ui() -> void:
 		if not occ.is_empty() and occ != joueur_id and j.vivant:
 			lignes.append_array(_preview(j, sim.entites[occ]))
 	if not j.is_empty():
+		if sim.lieu == "camp" and sim.monde != null:
+			var tr_: Dictionary = sim.temperature_ressentie(j)
+			lignes.append("  " + tr("ui.heure").format({"heure": "%02d:%02d" % [int(sim.heure()), int(fmod(sim.heure(), 1.0) * 60.0)], "phase": tr("phase." + sim.phase()),
+				"meteo": tr(GameData.entree("weather_states", str(tr_.meteo)).name_key), "temp": "%.0f" % float(tr_.temp),
+				"confort": tr("ui.confort.froid") if float(tr_.ecart) < 0.0 else (tr("ui.confort.chaud") if float(tr_.ecart) > 0.0 else "")}))
 		var pd: Dictionary = sim.poids_de(j)
 		lignes.append("  " + tr("ui.entite.mana").format({"mana": j.mana, "mana_max": j.mana_max}) + " · " + tr("ui.munitions").format({"n": j.munitions}) + " · " + tr("ui.modules_connus").format({"n": j.modules_connus.size()})
 			+ " · " + tr("ui.faim").format({"faim": int(j.get("faim", 100))}) + " · " + tr("ui.poids").format({"poids": "%.0f" % pd.poids, "capacite": "%.0f" % pd.capacite, "surcharge": tr("ui.poids.surcharge").format({"facteur": "%.1f" % pd.facteur}) if pd.facteur > 1.0 else ""}))

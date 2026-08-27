@@ -401,6 +401,28 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+weather.clair.name,Ciel clair
+weather.nuageux.name,Nuageux
+weather.brouillard.name,Brouillard
+weather.pluie.name,Pluie
+weather.orage.name,Orage
+weather.neige.name,Neige
+weather.vent_fort.name,Vent fort
+weather.tempete.name,Tempête
+weather.blizzard.name,Blizzard
+weather.canicule.name,Canicule
+ui.heure,"{heure} h · {phase} · {meteo} · {temp} °C{confort}"
+phase.aube,aube
+phase.jour,jour
+phase.crepuscule,crépuscule
+phase.nuit,nuit
+ui.confort.froid," · FROID"
+ui.confort.chaud," · CHALEUR"
+journal.meteo,"le temps change : {meteo}"
+journal.meteo_annonce,"le ciel annonce pour demain : {meteo}"
+journal.froid,{nom} souffre du froid
+journal.chaud,{nom} souffre de la chaleur
+journal.dort_nuit,"{nom} dort jusqu'à l'aube"
 journal.semaine,"une semaine passe : la corruption dérive ({n} cellules)"
 journal.donjon_nettoye,"le donjon est nettoyé : il restera ouvert un jour et demi"
 journal.donjon_disparu,"l'entrée du donjon s'est effondrée en ({x},{y})"

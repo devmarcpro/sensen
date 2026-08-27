@@ -1,0 +1,8 @@
+{
+  "name_key": "weather.brouillard.name",
+  "temp_mod": -1,
+  "visibility_mult": 0.5,
+  "effects": [
+    "brouillard"
+  ]
+}

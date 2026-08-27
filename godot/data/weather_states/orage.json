@@ -1,0 +1,11 @@
+{
+  "name_key": "weather.orage.name",
+  "temp_mod": -5,
+  "visibility_mult": 0.7,
+  "effects": [
+    "pluie",
+    "foudre",
+    "eteint_feux",
+    "arrose"
+  ]
+}

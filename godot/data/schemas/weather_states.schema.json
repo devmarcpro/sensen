@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "temp_mod",
+    "visibility_mult",
+    "effects"
+  ]
+}

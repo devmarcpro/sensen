@@ -1,0 +1,11 @@
+{
+  "name_key": "weather.tempete.name",
+  "temp_mod": -6,
+  "visibility_mult": 0.6,
+  "effects": [
+    "pluie",
+    "vent",
+    "tempete",
+    "arrache_fragiles"
+  ]
+}

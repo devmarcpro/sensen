@@ -1,0 +1,8 @@
+{
+  "name_key": "weather.vent_fort.name",
+  "temp_mod": -3,
+  "visibility_mult": 0.9,
+  "effects": [
+    "vent"
+  ]
+}

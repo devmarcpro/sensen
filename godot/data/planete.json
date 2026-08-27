@@ -141,5 +141,77 @@
     ],
     "corruption_par_etage": 8,
     "profondeur_par_corruption": 25
+  },
+  "cycle": {
+    "_doc": "Cycle jour-nuit (E.21) : 1 jour = ticks_par_jour ; phases en heures ; nuit : corruption +10 %, vision × vision_nuit ; saut de nuit jusqu'à heure_reveil.",
+    "ticks_par_jour": 24000,
+    "aube": [
+      5,
+      7
+    ],
+    "jour": [
+      7,
+      19
+    ],
+    "crepuscule": [
+      19,
+      21
+    ],
+    "heure_reveil": 5,
+    "corruption_nuit": 0.1,
+    "vision_nuit": 0.6,
+    "mod_nuit": -8,
+    "lumiere": {
+      "jour": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "nuit": [
+        0.28,
+        0.3,
+        0.45
+      ],
+      "aube": [
+        0.75,
+        0.65,
+        0.6
+      ],
+      "crepuscule": [
+        0.8,
+        0.6,
+        0.55
+      ]
+    }
+  },
+  "meteo": {
+    "_doc": "Météo (E.28) : bruit spatial lent (frequence_spatiale) + temporel (ticks_par_front) ; seuils de précipitation ; températures en °C depuis la couche temperature ; confort ; isolation.",
+    "frequence_spatiale": 0.0003,
+    "ticks_par_front": 24000,
+    "seed_offset": 77,
+    "seuils": {
+      "couvert": 0.45,
+      "precipitation": 0.58,
+      "violent": 0.78,
+      "extreme": 0.92
+    },
+    "neige_temp": 0.25,
+    "canicule_temp": 0.85,
+    "brouillard_humidite": 0.7,
+    "temp_min": -15.0,
+    "temp_max": 40.0,
+    "confort": [
+      5.0,
+      30.0
+    ],
+    "isolation_div": 10.0,
+    "mod_altitude": {
+      "colline": -3,
+      "montagne": -6,
+      "haute_montagne": -10
+    },
+    "endurance_regen_hors_confort": 0.5,
+    "degats_hors_confort_ecart": 10.0,
+    "degats_periode": 300
   }
 }

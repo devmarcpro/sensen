@@ -34,6 +34,7 @@ func _ready() -> void:
 	test_sauvegarde()
 	test_carte_et_voyage()
 	test_corruption()
+	test_cycle_et_meteo()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1296,6 +1297,55 @@ func test_corruption() -> void:
 	s.monde.fermer()
 
 
+# ---------------------------------------------------------------- Étape 8.4 : cycle jour-nuit et météo
+
+func test_cycle_et_meteo() -> void:
+	var s := Simulation.new(47)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	verifier(is_equal_approx(s.heure(0), 0.0) and is_equal_approx(s.heure(12000), 12.0) and s.phase(12000) == "jour" and s.phase(0) == "nuit" and s.phase(6000) == "aube", "l'heure et les phases (24 000 ticks par jour)")
+	verifier(GameData.catalogues.weather_states.size() == 10, "10 états météo en données")
+	var cell: Vector2i = s.monde.cellule_de(j.pos)
+	var m1 := s.meteo(cell, 5000)
+	verifier(GameData.catalogues.weather_states.has(m1) and m1 == s.meteo(cell, 5000), "la météo est un état connu, déterministe")
+	var varie := false
+	for k in 40:
+		if s.meteo(cell, k * 24000) != m1:
+			varie = true
+	verifier(varie, "la météo change avec le temps")
+	var tr_ := s.temperature_ressentie(j)
+	verifier(tr_.temp >= -60.0 and tr_.temp <= 70.0 and tr_.has("ecart"), "température ressentie calculée (%.0f °C)" % float(tr_.temp))
+	# La nuit réduit la vue, le jour non.
+	s.horloge_monde.ticks = 12000
+	s.maj_vision()
+	var vue_jour: int = j.vue.size()
+	s.horloge_monde.ticks = 0
+	s.maj_vision()
+	var vue_nuit: int = j.vue.size()
+	verifier(vue_nuit < vue_jour, "la nuit, le champ de vue rétrécit (%d → %d)" % [vue_jour, vue_nuit])
+	# Dormir la nuit saute à l'aube (5 h).
+	var lit := s.generer_objet("meuble_lit_de_paille", 1, {}, "commun", 0)
+	j.sac.append(lit.uid)
+	var devant: Vector2i = j.pos + Vector2i(0, 1)
+	if not s.grille.contenu_de(devant).is_empty():
+		s.grille.contenu[s.grille.idx(devant)] = 0
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "poser", "objet": lit.uid, "vers": devant})
+	s.horloge_monde.ticks = 22 * 1000   # 22 h
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "dormir", "vers": devant}), "dormir à 22 h")
+	verifier(is_equal_approx(s.heure(), 5.0) or absf(s.heure() - 5.0) < 0.2, "réveil à l'aube, 5 h (%.1f h)" % s.heure())
+	# Le froid : un être nu par −20 °C prend des dégâts par palier.
+	j.equipement.clear()
+	j["ecart_confort"] = -25.0
+	var end0: int = j.endurance
+	j.endurance = 0
+	j.tick_endurance = s.horloge_monde.ticks
+	s._regenerer(j, s.horloge_monde.ticks + 10)
+	verifier(int(j.endurance) <= 10, "hors confort, l'endurance régénère moitié moins (%d)" % int(j.endurance))
+	s.monde.fermer()
+
+
 # ---------------------------------------------------------------- Étape 8.2c : minimap (exploration par chunk) et sauvegarde
 
 func test_sauvegarde() -> void:
@@ -1395,6 +1445,7 @@ func test_camp() -> void:
 	s.gagner_xp(j, "minage", 30)
 	s.gagner_xp(j, "forge", 10)
 	var pot0: int = int(j.potentiels.get("minage", 80))
+	s.horloge_monde.ticks = 12000   # midi : pas de saut de nuit, un sommeil de 8 h
 	var t0: int = s.horloge_monde.ticks
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "dormir", "vers": devant}), "dormir sur le lit")

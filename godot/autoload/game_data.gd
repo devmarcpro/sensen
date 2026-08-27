@@ -16,7 +16,7 @@ const CATALOGUES: Array[String] = [
 	"modules", "creatures", "creature_actions", "ai_profiles", "functionalities",
 	"items", "status_effects", "prototype_arenas", "rigs", "tutorials",
 	"dungeon_rooms", "dungeon_connectors", "dungeon_themes", "affixes", "competences", "races", "classes",
-	"materials", "stations", "recipes", "components", "component_recipes", "meubles", "biomes", "vegetaux",
+	"materials", "stations", "recipes", "components", "component_recipes", "meubles", "biomes", "vegetaux", "weather_states",
 ]
 ## Tags dérivés des stats d'un matériau au seuil ≥ 50 (Schéma matériau).
 const TAGS_DERIVES := {"flammabilite": "inflammable", "conductivite_mana": "conducteur_mana", "flottabilite": "flottant",

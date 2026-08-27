@@ -1,0 +1,10 @@
+{
+  "name_key": "weather.pluie.name",
+  "temp_mod": -4,
+  "visibility_mult": 0.8,
+  "effects": [
+    "pluie",
+    "eteint_feux",
+    "arrose"
+  ]
+}

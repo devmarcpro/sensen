@@ -86,6 +86,9 @@ SAISONS : ACTIVÉES à l'étape 10, avec l'élevage et l'agriculture
 
 *Saisons : voir [[Ouvert — Saisons]].*
 
+> [!success] Codé le 2026-08-28 — étape 8.4, `data/weather_states/` (10 états), `Simulation.meteo()`
+> **Fonction pure** : `meteo(cellule, temps) = f(bruit spatial lent + bruit temporel, filtrés par température et humidité locales)` (`planete.meteo`) — évaluée à la demande, déterministe, jamais simulée ; un front couvre plusieurs cellules et se déplace. Les 10 états en données : clair, nuageux, brouillard, pluie, orage, neige, vent fort, tempête, blizzard, canicule, chacun avec `temp_mod`, `visibility_mult`, `effects` (tags). **Température ressentie** : `T = temp_biome (couche température → −15…+40 °C) + mod_météo + mod_nuit (−8) + mod_altitude (colline −3, montagne −6, haute montagne −10)`, zone de confort [5, 30] ; hors zone, l'**isolation** de l'équipement compense (Σ isolation / 10 °C), puis **régénération d'endurance ÷ 2** et, au-delà de 10 °C hors zone, **1 PV par 300 ticks** (décision : la note dit « malus progressifs puis dégâts par palier » sans chiffres). La visibilité multiplie la portée de vue. Les changements d'état sont annoncés au journal ; l'annonce **1 jour à l'avance** des extrêmes est codée (la météo de demain se lit au même point). Pluie (+1 niveau d'eau), neige et gel comme états de tuile, foudre, évaporation et arrachage attendent l'automate d'eau.
+
 ## Liens
 - **Dépend de** : [[Génération par couches de bruit]], [[Application des stats de matériau]], [[Simulation à ticks]]
 - **Alimente** : [[Eau et liquides]], [[Agriculture et élevage]], [[Véhicules]], [[Catalogue matériaux — Météorologiques]], [[Dialogue PNJ]]

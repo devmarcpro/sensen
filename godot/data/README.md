@@ -39,7 +39,7 @@
 | races/, classes/ | les 3 races et 8 classes visibles : bonus, kit, potentiels de base, talent (`tools/gen_progression_data.py`) | C.2, C.3, Talents de race, Talents de classe |
 | functions/ | fonctions (ex-postes de travail) | Fonctions |
 | rigs/ | les 4 rigs (`tools/gen_rigs.py`) : segments, ancrages, facings, slots peints | Squelette modulaire et points d'attache |
-| weather_states/ | états météo | Météo (E.28) |
+| weather_states/ | les 10 états météo (temp_mod, visibility_mult, effects) ; la météo est une fonction pure `Simulation.meteo` | Météo (E.28) |
 | species/ | espèces d'élevage (loci, moteur, conditions, coûts) | Élevage — intention et familles (Annexe H) |
 | prototype_arenas/ | arènes de l'étape 0 (3 arènes, posées par `tools/gen_arenas.py`) | Prototype de combat — spécification |
 | affixes/ | les 36 gabarits d'affixes (`tools/gen_affixes.py`) : fourchettes, effet, budget, slots | Loot — affixes, gemmes et rareté |

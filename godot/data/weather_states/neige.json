@@ -1,0 +1,8 @@
+{
+  "name_key": "weather.neige.name",
+  "temp_mod": -15,
+  "visibility_mult": 0.75,
+  "effects": [
+    "neige"
+  ]
+}

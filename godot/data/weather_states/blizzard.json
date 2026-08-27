@@ -1,0 +1,10 @@
+{
+  "name_key": "weather.blizzard.name",
+  "temp_mod": -25,
+  "visibility_mult": 0.3,
+  "effects": [
+    "neige",
+    "vent",
+    "blizzard"
+  ]
+}

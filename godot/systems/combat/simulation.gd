@@ -245,7 +245,10 @@ func _partir_en_expedition(e: Dictionary) -> bool:
 	var theme := "repaire" if ("marecage" in b.get("tags", []) or "corrompu" in b.get("tags", [])) else "ruine"
 	var cr: Dictionary = GameData.config("planete").corruption
 	var fourchette: Array = cr.etages_majeur if bool(f.get("majeur", false)) else cr.etages_mineur
-	donjon = {"etages_fixes": fourchette, "corruption": monde.corruption_de(cell), "cellule": cell}
+	var corruption := monde.corruption_de(cell)
+	if est_nuit():
+		corruption = minf(100.0, corruption * (1.0 + float(_cycle().get("corruption_nuit", 0.1))))   # la nuit : +10 %
+	donjon = {"etages_fixes": fourchette, "corruption": corruption, "cellule": cell}
 	EventBus.emettre(&"journal", [&"journal.expedition_depart", {}])
 	charger_donjon(theme, graine, id, 1, e)
 	return true
@@ -610,6 +613,12 @@ func _dormir(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 			return false
 	var cp: Dictionary = regles.r.camp
 	var duree := int(cp.dormir_ticks)
+	if lieu == "camp" and est_nuit():   # saut de nuit : dormir entre 21 h et 5 h avance au matin
+		var jour := int(_cycle().get("ticks_par_jour", 24000))
+		var reveil := int(float(_cycle().get("heure_reveil", 5)) / 24.0 * float(jour))
+		var dans_jour := posmod(horloge_monde.ticks, jour)
+		duree = (reveil - dans_jour) if dans_jour < reveil else (jour - dans_jour + reveil)
+		EventBus.emettre(&"journal", [&"journal.dort_nuit", {"nom": e.name_key}])
 	e.compteur = tick + duree
 	e["lit"] = vers
 	e["spawn"] = vers
@@ -667,6 +676,144 @@ func voyager(e: Dictionary, cell: Vector2i) -> bool:
 	maj_vision()
 	EventBus.emettre(&"journal", [&"journal.voyage", {"nom": e.name_key, "x": cell.x, "y": cell.y, "ticks": cout}])
 	return true
+
+
+# ---------------------------------------------------------------- cycle jour-nuit (E.21) et météo (E.28)
+
+func _cycle() -> Dictionary:
+	return GameData.config("planete").get("cycle", {})
+
+
+## L'heure du monde (0-24, décimale) et sa phase.
+func heure(tick: int = -1) -> float:
+	var t := horloge_monde.ticks if tick < 0 else tick
+	var jour := int(_cycle().get("ticks_par_jour", 24000))
+	return float(posmod(t, jour)) / float(jour) * 24.0
+
+
+func phase(tick: int = -1) -> String:
+	var h := heure(tick)
+	var c := _cycle()
+	if h >= float(c.aube[0]) and h < float(c.aube[1]):
+		return "aube"
+	if h >= float(c.jour[0]) and h < float(c.jour[1]):
+		return "jour"
+	if h >= float(c.crepuscule[0]) and h < float(c.crepuscule[1]):
+		return "crepuscule"
+	return "nuit"
+
+
+func est_nuit(tick: int = -1) -> bool:
+	return phase(tick) == "nuit"
+
+
+## La saison (Décision — Saisons activées à l'étape 10) : exposée, inerte.
+func saison() -> int:
+	return 0
+
+
+## La météo d'une cellule à un instant : une fonction pure du bruit spatial lent, du temps, de la
+## température et de l'humidité locales (Météo). Retourne l'id d'un état de data/weather_states/.
+func meteo(cell: Vector2i, tick: int = -1) -> String:
+	if monde == null:
+		return "clair"
+	var m: Dictionary = GameData.config("planete").get("meteo", {})
+	var t := horloge_monde.ticks if tick < 0 else tick
+	var n: FastNoiseLite = monde.surface.bruits.get("meteo")
+	if n == null:
+		n = FastNoiseLite.new()
+		n.seed = monde.surface.graine + int(m.get("seed_offset", 77))
+		n.frequency = float(m.get("frequence_spatiale", 0.0003))
+		n.fractal_octaves = 2
+		monde.surface.bruits["meteo"] = n
+	var taille: int = monde.taille
+	var cx := float(cell.x * taille)
+	var cy := float(cell.y * taille)
+	var front := float(t) / float(m.get("ticks_par_front", 24000)) * 900.0   # le front se déplace : le bruit défile
+	var p := clampf((n.get_noise_2d(cx + front, cy - front * 0.4) + 1.0) * 0.5, 0.0, 1.0)
+	var temp := monde.surface.valeur("temperature", int(cx) + taille / 2, int(cy) + taille / 2)
+	var hum := monde.surface.valeur("humidite", int(cx) + taille / 2, int(cy) + taille / 2)
+	var s: Dictionary = m.seuils
+	if p >= float(s.extreme):
+		return "blizzard" if temp < float(m.neige_temp) else "tempete"
+	if p >= float(s.violent):
+		return "neige" if temp < float(m.neige_temp) else "orage"
+	if p >= float(s.precipitation):
+		return "neige" if temp < float(m.neige_temp) else "pluie"
+	if p >= float(s.couvert):
+		return "brouillard" if hum >= float(m.brouillard_humidite) else "nuageux"
+	if temp >= float(m.canicule_temp) and p < 0.2:
+		return "canicule"
+	if p < 0.12:
+		return "vent_fort"
+	return "clair"
+
+
+## Température ressentie d'un être en surface (°C) et son écart à la zone de confort.
+func temperature_ressentie(e: Dictionary) -> Dictionary:
+	var m: Dictionary = GameData.config("planete").get("meteo", {})
+	if monde == null or lieu != "camp":
+		return {"temp": 18.0, "ecart": 0.0, "meteo": "clair"}
+	var cell := monde.cellule_de(e.pos)
+	var temp01 := monde.surface.valeur("temperature", e.pos.x, e.pos.y)
+	var temp := lerpf(float(m.temp_min), float(m.temp_max), temp01)
+	var etat_id := meteo(cell)
+	var etat: Dictionary = GameData.catalogues.weather_states.get(etat_id, {})
+	temp += float(etat.get("temp_mod", 0))
+	if est_nuit():
+		temp += float(_cycle().get("mod_nuit", -8))
+	var alt: float = float(monde.surface.tectonique_a(e.pos.x, e.pos.y).altitude)
+	var ma: Dictionary = m.mod_altitude
+	if alt >= 0.85:
+		temp += float(ma.haute_montagne)
+	elif alt >= 0.70:
+		temp += float(ma.montagne)
+	elif alt >= 0.55:
+		temp += float(ma.colline)
+	var confort: Array = m.confort
+	var ecart := 0.0
+	if temp < float(confort[0]):
+		# L'isolation de l'équipement compense le froid (Application des stats de matériau).
+		var iso := 0.0
+		for slot in e.equipement.keys():
+			var it: Dictionary = items.get(e.equipement[slot], {})
+			iso += float(it.get("stats", {}).get("isolation", 0.0))
+		temp += iso / float(m.isolation_div)
+		if temp < float(confort[0]):
+			ecart = temp - float(confort[0])
+	elif temp > float(confort[1]):
+		ecart = temp - float(confort[1])
+	return {"temp": temp, "ecart": ecart, "meteo": etat_id}
+
+
+## Les effets de la météo et du froid/chaud sur le joueur (phase 2, avec la faim).
+var _meteo_annoncee: String = ""
+var _meteo_courante: String = ""
+func _tiquer_meteo(tick: int) -> void:
+	if monde == null or lieu != "camp":
+		return
+	var m: Dictionary = GameData.config("planete").get("meteo", {})
+	for e in vivants():
+		if e.controle != "joueur":
+			continue
+		var cell := monde.cellule_de(e.pos)
+		var etat := meteo(cell, tick)
+		if etat != _meteo_courante:
+			_meteo_courante = etat
+			EventBus.emettre(&"journal", [&"journal.meteo", {"meteo": GameData.catalogues.weather_states[etat].name_key}])
+		var demain := meteo(cell, tick + int(_cycle().get("ticks_par_jour", 24000)))
+		if demain != _meteo_annoncee and demain in ["tempete", "blizzard", "canicule"]:
+			_meteo_annoncee = demain
+			EventBus.emettre(&"journal", [&"journal.meteo_annonce", {"meteo": GameData.catalogues.weather_states[demain].name_key}])
+		var tr_ := temperature_ressentie(e)
+		e["temp_ressentie"] = tr_.temp
+		e["ecart_confort"] = tr_.ecart
+		if absf(float(tr_.ecart)) >= float(m.degats_hors_confort_ecart):
+			var per := int(m.degats_periode)
+			if tick / per != int(e.get("meteo_tick", 0)) / per:
+				e.sante = maxi(1, int(e.sante) - 1)
+				EventBus.emettre(&"journal", [&"journal.froid" if float(tr_.ecart) < 0.0 else &"journal.chaud", {"nom": e.name_key}])
+		e["meteo_tick"] = tick
 
 
 # ---------------------------------------------------------------- sauvegarde (Sauvegarde, E.10)
@@ -1519,6 +1666,7 @@ func _sur_avancee_monde(_de: int, _a: int) -> void:
 		garde_fou -= 1
 	_tiquer_faim(horloge_monde.ticks)
 	_tiquer_monde(horloge_monde.ticks)
+	_tiquer_meteo(horloge_monde.ticks)
 
 
 ## La dérive de la corruption sur l'horloge du monde : le passage hebdomadaire, les grâces échues.
@@ -1640,6 +1788,13 @@ func maj_vision() -> void:
 		if e.controle != "joueur":
 			continue
 		var portee := int(float(e.stats_eff.perception) * float(regles.r.engagement.detection_par_perception))
+		if lieu == "camp" and monde != null:
+			var facteur := 1.0
+			if est_nuit() and not ("vision_nocturne" in e.get("tags_acquis", [])):
+				facteur *= float(_cycle().get("vision_nuit", 0.6))   # la nuit : malus de vision pour tous
+			var etat: Dictionary = GameData.catalogues.weather_states.get(str(e.get("meteo_locale", meteo(monde.cellule_de(e.pos)))), {})
+			facteur *= float(etat.get("visibility_mult", 1.0))
+			portee = maxi(1, roundi(float(portee) * facteur))
 		var vue := {}
 		for dy in range(-portee, portee + 1):
 			for dx in range(-portee, portee + 1):
@@ -1737,7 +1892,10 @@ func _declencher_glyphe(entrant: Dictionary, pos: Vector2i) -> void:
 func _regenerer(e: Dictionary, tick: int) -> void:
 	var ecoules := tick - int(e.tick_endurance)
 	if ecoules > 0:
-		e.endurance = mini(e.endurance_max, e.endurance + ecoules * int(regles.r.endurance.regen_par_tick))
+		var regen := ecoules * int(regles.r.endurance.regen_par_tick)
+		if float(e.get("ecart_confort", 0.0)) != 0.0:
+			regen = int(float(regen) * float(GameData.config("planete").get("meteo", {}).get("endurance_regen_hors_confort", 0.5)))
+		e.endurance = mini(e.endurance_max, e.endurance + regen)
 		# Mana (A.5) : à chaque tranche de 10 ticks franchie, 1 chance sur 8 de rendre 1 + N_meditation × 0.2.
 		var periode := int(regles.r.mana.periode_ticks)
 		var tranches := tick / periode - int(e.tick_endurance) / periode

@@ -1,0 +1,10 @@
+{
+  "name_key": "weather.canicule.name",
+  "temp_mod": 18,
+  "visibility_mult": 0.9,
+  "effects": [
+    "canicule",
+    "evapore",
+    "ignition"
+  ]
+}
