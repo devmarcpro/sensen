@@ -56,6 +56,9 @@ Les donjons sont une des sources principales de contenu du jeu, et le premier es
 > [!success] Décidé le 2026-08-27 — un étage = une cellule
 > Chaque étage tient dans **une cellule de 128×128** (la taille de cellule du monde, [[Grille continue]]) ; l'entrée en surface, à l'étape 8, occupera donc exactement une cellule de la carte. Deux escaliers par étage, un montant et un descendant ; le premier étage remonte vers la surface ([[Génération de donjon]]).
 
+> [!success] Précisé le 2026-08-27 (soir)
+> La cellule fait désormais 64×64 ([[Grille continue]]) : un étage = 64×64 tuiles, 4 à 8 salles procédurales.
+
 ## Liens
 - **Dépend de** : [[Grille continue]], [[Hauteur de terrain ±10]], [[Décisions fondatrices]]
 - **Alimente** : [[Génération de donjon]], [[Salles et connecteurs]], [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Grimoires et manuels]]

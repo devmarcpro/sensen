@@ -86,7 +86,7 @@
   },
   "contenants": {
     "_doc": "coffres par salle : tuiles de sol par coffre ; objets par coffre",
-    "tuiles_par_coffre": 120,
+    "tuiles_par_coffre": 40,
     "objets_par_coffre": [
       1,
       2

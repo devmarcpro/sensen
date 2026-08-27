@@ -10,7 +10,7 @@ const TH := 20            # hauteur du losange
 const HSTEP := 8          # pixels par niveau de hauteur
 const DELAI_PAS := 0.12   # secondes réelles entre deux pas d'une horloge de combat (lisibilité)
 const BUDGET_ATTEIGNABLE := 12   # ticks : rayon des coûts affichés
-const RAYON_VUE := 24            # tuiles dessinées autour du joueur (une cellule fait 128×128)
+const RAYON_VUE := 24            # tuiles dessinées autour du joueur (une cellule fait 64×64)
 var centre_terrain := Vector2i(-99, -99)   # centre de la dernière passe statique du terrain
 
 var sim: Simulation
@@ -532,20 +532,7 @@ func _dessiner_terrain(ci: CanvasItem) -> void:
 	for s in range(x0 + y0, x1 + y1 + 1):     # tri de profondeur : diagonales x+y, dans la fenêtre
 		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
 			var y := s - x
-			if not _plein_invisible(g, Vector2i(x, y)):
-				_dessine_tuile(ci, Vector2i(x, y))
-
-
-## Le plein d'un donjon (roche) n'est dessiné que s'il borde une tuile franchissable : le reste
-## est du fond — 9 000 blocs de roche par image, c'est 80 ms ; une centaine, c'est rien.
-func _plein_invisible(g: Grille, t: Vector2i) -> bool:
-	if not g.bloque_passage(t):
-		return false
-	for d in Grille.DIRS:
-		var v: Vector2i = t + d
-		if g.dans(v) and not g.bloque_passage(v):
-			return false
-	return true
+			_dessine_tuile(ci, Vector2i(x, y))   # tous les murs de la fenêtre, en blocs pleins
 
 
 func _zones_telegraphes() -> Dictionary:
@@ -608,6 +595,10 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 		ci.draw_colored_polygon(PackedVector2Array([
 			c + Vector2(-TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm),
 			c + Vector2(TW * 0.5, -hm), c + Vector2(0, TH * 0.5 - hm)]), Color(0.5, 0.47, 0.44))
+		# L'arête du dessus : les blocs contigus se lisent comme des blocs, pas comme une nappe.
+		ci.draw_polyline(PackedVector2Array([
+			c + Vector2(-TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm), c + Vector2(TW * 0.5, -hm),
+			c + Vector2(0, TH * 0.5 - hm), c + Vector2(-TW * 0.5, -hm)]), Color(0.28, 0.25, 0.23), 1.0)
 
 
 ## La couche d'interface : barres, garde, télégraphe et jauge de chaîne de chaque être.

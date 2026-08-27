@@ -7,14 +7,18 @@
     }
   ],
   "boss": "chef_de_bande",
-  "tuiles_par_creature": 200,
+  "tuiles_par_creature": 30,
   "croissance_par_etage": 0.25,
   "etages": [
     2,
     3
   ],
   "salles_par_etage": [
-    8,
-    14
+    4,
+    8
+  ],
+  "taille_salles": [
+    4,
+    9
   ]
 }

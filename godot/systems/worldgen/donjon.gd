@@ -1,24 +1,25 @@
 class_name Donjon
 extends RefCounted
-## Génération d'un étage de donjon : **un labyrinthe avec des salles, contenu dans une cellule**
-## (128×128 tuiles — Grille continue), à étages, deux escaliers par étage (un vers le haut, un vers
-## le bas), murs destructibles (décision du designer, 2026-08-27 — Génération de donjon).
-##   1. les salles de la bibliothèque (Salles et connecteurs) sont posées sans chevauchement ;
+## Génération d'un étage : **un labyrinthe avec des salles, contenu dans une cellule** (64×64 tuiles —
+## Grille continue), à étages, deux escaliers par étage (un vers le haut, un vers le bas), murs
+## destructibles, **salles procédurales façon Elin** (décisions du designer, 2026-08-27 — Génération de donjon).
+##   1. des salles rectangulaires tirées au hasard (`taille_salles` du thème) sont posées sans
+##      chevauchement, avec 1 à 3 portes ;
 ##   2. le labyrinthe (backtracker sur une trame de 4 tuiles) remplit tout le reste ;
-##   3. chaque porte de salle s'ouvre sur le couloir voisin ; connexité vérifiée par BFS et
-##      réparée par une tranchée droite si besoin ;
+##   3. chaque porte s'ouvre sur le couloir voisin ; connexité vérifiée par BFS et réparée par une
+##      tranchée droite si besoin ;
 ##   4. l'escalier montant (l'arrivée) dans une salle, l'escalier descendant dans la salle la plus
 ##      lointaine ; le boss au dernier étage y remplace l'escalier ;
 ##   5. peuplement par le thème, contenants de loot.
 ## Déterministe par seed(monde, id_donjon, étage). Le plein est du mur (destructible) ; le bord
-## de la cellule est de la roche (indestructible).
+## de la cellule est de la roche (indestructible). La bibliothèque de prefabs reste en données.
 
 const H_BASE := 10                 # hauteur de référence d'un étage (Hauteur de terrain ±10)
 const PAS := 4                     # trame du labyrinthe : 3 tuiles de couloir + 1 de mur
 const ESSAIS_SALLE := 12
 
-var salles: Dictionary
-var connecteurs: Dictionary        # conservés pour la bibliothèque ; le labyrinthe remplace les corridors
+var salles: Dictionary             # bibliothèque de prefabs, conservée mais non posée
+var connecteurs: Dictionary
 var theme: Dictionary
 var rng := RandomNumberGenerator.new()
 
@@ -31,7 +32,7 @@ func _init(p_salles: Dictionary, p_connecteurs: Dictionary, p_theme: Dictionary)
 
 ## Génère un étage : {largeur, hauteur, hauteurs, murs, sol, bord, pieces: [{id, kind, rect, attaches}],
 ##  entree (escalier montant), escalier (descendant, null au dernier), boss, spawns, coffres, graphe}.
-func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dernier: bool, taille: int = 128) -> Dictionary:
+func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dernier: bool, taille: int = 64) -> Dictionary:
 	rng.seed = hash([graine, id_donjon, etage])
 	var e := {"largeur": taille, "hauteur": taille, "hauteurs": PackedByteArray(), "murs": {}, "sol": {}, "bord": {},
 		"pieces": [], "entree": Vector2i.ZERO, "escalier": null, "boss": null, "spawns": [], "coffres": [], "graphe": {}, "etage": etage}
@@ -40,20 +41,19 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 	for i in taille:
 		for b in [Vector2i(i, 0), Vector2i(i, taille - 1), Vector2i(0, i), Vector2i(taille - 1, i)]:
 			e.bord[b.y * taille + b.x] = true
-	# 1. Les salles, posées au hasard sans chevauchement (marge : un mur et un couloir).
-	var candidates := _salles_du_theme()
+	# 1. Les salles : des rectangles au hasard (façon Elin), alignés sur la trame, sans chevauchement.
+	var tailles: Array = theme.get("taille_salles", [4, 9])
 	var essais := 0
 	while _nb_salles(e) < nb_salles and essais < nb_salles * ESSAIS_SALLE:
 		essais += 1
-		var s: Dictionary = candidates[rng.randi_range(0, candidates.size() - 1)]
-		var w: int = s.plan[0].length()
-		var h: int = s.plan.size()
+		var w := rng.randi_range(int(tailles[0]), int(tailles[1]))
+		var h := rng.randi_range(int(tailles[0]), int(tailles[1]))
 		var origine := Vector2i(rng.randi_range(2, taille - w - 3), rng.randi_range(2, taille - h - 3))
 		origine = Vector2i(origine.x - origine.x % PAS + 1, origine.y - origine.y % PAS + 1)   # aligné sur la trame
 		var r := Rect2i(origine, Vector2i(w, h))
 		if not _libre(e, r):
 			continue
-		_placer(e, s, origine, "salle")
+		_placer_rectangle(e, r)
 	# 2. Le labyrinthe dans tout ce qui reste.
 	_labyrinthe(e)
 	# 3. Les portes des salles s'ouvrent sur le couloir voisin ; connexité réparée si besoin.
@@ -115,6 +115,31 @@ func _placer(e: Dictionary, prefab: Dictionary, origine: Vector2i, kind: String)
 			if c in "NSEW":
 				attaches.append({"type": "porte", "pos": p, "direction": {"N": Vector2i(0, -1), "S": Vector2i(0, 1), "E": Vector2i(1, 0), "W": Vector2i(-1, 0)}[c], "libre": true})
 	var piece := {"id": prefab.id, "kind": kind, "rect": Rect2i(origine, Vector2i(plan[0].length(), plan.size())), "attaches": attaches}
+	e.pieces.append(piece)
+	return piece
+
+
+## Une salle procédurale : un rectangle de sol, 1 à 3 portes sur des côtés distincts.
+func _placer_rectangle(e: Dictionary, r: Rect2i) -> Dictionary:
+	for y in range(r.position.y, r.end.y):
+		for x in range(r.position.x, r.end.x):
+			e.sol[y * e.largeur + x] = true
+	var attaches: Array = []
+	var nb := rng.randi_range(1, 3)
+	var pris := {}
+	for k in nb:
+		var i := rng.randi_range(0, 3)
+		while pris.has(i):
+			i = (i + 1) % 4
+		pris[i] = true
+		var d: Vector2i = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(1, 0), Vector2i(-1, 0)][i]
+		var pos: Vector2i
+		if d.y != 0:
+			pos = Vector2i(rng.randi_range(r.position.x, r.end.x - 1), r.position.y if d.y < 0 else r.end.y - 1)
+		else:
+			pos = Vector2i(r.position.x if d.x < 0 else r.end.x - 1, rng.randi_range(r.position.y, r.end.y - 1))
+		attaches.append({"type": "porte", "pos": pos, "direction": d, "libre": true})
+	var piece := {"id": "salle_%dx%d" % [r.size.x, r.size.y], "kind": "salle", "rect": r, "attaches": attaches}
 	e.pieces.append(piece)
 	return piece
 
@@ -309,7 +334,7 @@ func _peupler(e: Dictionary, etage: int) -> void:
 		if i == 0:
 			continue
 		var r: Rect2i = p.rect
-		var n := int(floorf(float(r.size.x * r.size.y) / float(theme.get("tuiles_par_creature", 64)) * facteur))
+		var n := maxi(1, int(floorf(float(r.size.x * r.size.y) / float(theme.get("tuiles_par_creature", 64)) * facteur)))   # au moins un occupant par salle
 		if p.get("boss_room", false):
 			var boss: String = str(theme.get("boss", ""))
 			if not boss.is_empty():

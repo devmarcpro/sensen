@@ -45,6 +45,9 @@ L'algorithme par graphe intégral (attache → connecteur → salle → collisio
 > [!success] Précisé le 2026-08-27
 > Les prefabs de salles sont réutilisés tels quels dans le labyrinthe ([[Génération de donjon]]) ; les prefabs de connecteurs sont conservés en données mais ne sont plus posés — le labyrinthe relie les salles.
 
+> [!success] Précisé le 2026-08-27 (soir)
+> Les salles courantes sont procédurales (rectangles, façon Elin) ; les prefabs restent en données pour de futures salles spéciales.
+
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Génération de donjon]], [[Salles et connecteurs]], [[Grille continue]]
 - **Alimente** : [[Donjons — structure et intégration]], [[Ouvert — Taille des salles de donjon]]

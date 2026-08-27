@@ -23,6 +23,9 @@ Chaque tuile porte : une **hauteur entière** (0-20, voir [[Hauteur de terrain �
 
 *Note d'architecture : les chunks sont indexés en 3D `(x, y, z)` dès le premier jour — voir [[Décisions d'architecture]] et [[Décision — Structure de données de la grille]].*
 
+> [!success] Décidé le 2026-08-27 — la cellule fait 64×64 (instruction du designer)
+> « Je veux que les cellules soient de 64×64. » La cellule passe de 128×128 à **64×64 tuiles** ; un chunk de 32×32 = un quart de cellule. Le monde (16×16 secteurs de 64×64 cellules) fait donc 65 536 tuiles de côté. Les mentions de 128 dans [[Décision — Monde fini, continents et océan]] et [[Unification macro-micro]] sont remplacées par ce callout. Un étage de donjon = une cellule ([[Génération de donjon]]).
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Unification macro-micro]]
 - **Alimente** : [[Décision — Monde fini, continents et océan]], [[Hauteur de terrain ±10]], [[Carte du monde]], [[Claims et persistance]], [[Donjons — structure et intégration]], [[Combat tactique sur grille]]
