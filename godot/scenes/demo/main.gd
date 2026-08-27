@@ -645,6 +645,8 @@ func _options_tuile(t: Vector2i) -> Array:
 			res.append({"id": "parler", "cible": occ})
 		if "bete" in x.get("tags", []) and not x.has("maitre") and d <= 1:
 			res.append({"id": "apprivoiser", "cible": occ})
+		if sim.a_talent(j, "saisie") and d == 1 and str(j.get("porte", "")).is_empty():
+			res.append({"id": "saisir", "cible": occ})
 		res.append({"id": "attaquer", "cible": occ})
 		res.append({"id": "lourde", "cible": occ})
 		return res
@@ -656,6 +658,8 @@ func _options_tuile(t: Vector2i) -> Array:
 		if sim.lieu == "camp" and sim.monde != null and sim.monde.cellule(sim._cell_de(t)).get("a_donjon", false) and sim.monde.pos_monde(sim._cell_de(t), sim.monde.cellule(sim._cell_de(t)).entree_donjon) == t:
 			res.append({"id": "descendre", "vers": t})
 		return res
+	if not str(j.get("porte", "")).is_empty() and d >= 1 and d <= 3:
+		res.append({"id": "lancer_etre", "vers": t})
 	if d != 1:
 		return res
 	var tags: Array = g.contenu_de(t).get("tags", [])
@@ -708,6 +712,10 @@ func _executer_option(opt: Dictionary) -> void:
 				_log(tr("journal.inaccessible"))
 		"apprivoiser":
 			sim.intention(joueur_id, {"type": "apprivoiser", "cible": str(opt.cible)})
+		"saisir":
+			sim.intention(joueur_id, {"type": "saisir", "cible": str(opt.cible)})
+		"lancer_etre":
+			sim.intention(joueur_id, {"type": "lancer_etre", "vers": opt.vers})
 		"descendre", "remonter":
 			if sim.intention(joueur_id, {"type": str(opt.id)}):
 				_apres_changement_de_grille()
@@ -1189,6 +1197,7 @@ func _maj_ui() -> void:
 			+ (" · " + tr(sim.items[e.equipement.main_principale].name_key) if e.equipement.has("main_principale") else "")
 			+ (" + " + tr(sim.items[e.equipement.main_secondaire].name_key) if e.equipement.has("main_secondaire") else "")
 			+ (" · " + _texte_chaine(e) if e.has("chaine") else "")
+			+ (tr("ui.sang").format({"n": int(e.get("sang", 0))}) if sim.a_talent(e, "jauge_de_sang") else "")
 			+ (" · " + _texte_statuts(e) if not e.statuts.is_empty() else ""))
 	if survol.x >= 0 and not j.is_empty():
 		lignes.append("  " + tr("ui.case").format({"x": survol.x, "y": survol.y, "h": g.h(survol), "dh": g.h(survol) - g.h(j.pos)}))

@@ -67,6 +67,7 @@ func _ready() -> void:
 	test_palier_industriel()
 	test_betail()
 	test_ombre_et_rieur()
+	test_ecarlate_et_porteur()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2448,6 +2449,39 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- L'Écarlate et Le Porteur
+
+func test_ecarlate_et_porteur() -> void:
+	var s := Simulation.new(131)
+	s.charger_donjon("ruine", 131, 15, 1)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	j.classe = "l_ecarlate"
+	verifier(s.a_talent(j, "jauge_de_sang"), "L'Écarlate porte la jauge de sang")
+	j.sante = 40
+	s._appliquer_degats(j, 30, "", {"type": "test"})
+	verifier(int(j.get("sang", 0)) == 30, "30 de dégâts subis : sang 30")
+	var fiole := s.generer_objet("fiole_de_soin", 1, {}, "commun", 0)
+	j.sac.append(fiole.uid)
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "manger", "objet": fiole.uid})
+	verifier(int(j.get("sang", 0)) == 0, "boire une fiole de soin vide la jauge")
+	# Le Porteur : saisir un loup adjacent, ne plus pouvoir attaquer, le lancer.
+	j.classe = "le_porteur"
+	var loup := s.ajouter("loup", j.pos + Vector2i(1, 0), "ia")
+	for d in range(1, 5):
+		var q: Vector2i = j.pos + Vector2i(d, 0)
+		if d > 1:
+			s.grille.contenu[s.grille.idx(q)] = 0
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "saisir", "cible": loup.id}) and str(j.porte) == loup.id and Etres.a_statut_tag(loup, "saisi", s.statuts_defs), "le loup est saisi")
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false}), "en portant : pas d'attaque")
+	var sante0 := int(loup.sante)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "lancer_etre", "vers": j.pos + Vector2i(3, 0)}) and not j.has("porte"), "lancé")
+	verifier(Grille.distance(j.pos, loup.pos) >= 2 and int(loup.sante) < sante0, "le loup atterrit à %d tuiles, blessé (%d → %d)" % [Grille.distance(j.pos, loup.pos), sante0, int(loup.sante)])
 
 
 # ---------------------------------------------------------------- L'Ombre, Le Rieur, le jet de coup

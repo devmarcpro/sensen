@@ -701,6 +701,7 @@ func _dormir(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	if not e.vivant:
 		return true
 	e.sante = e.sante_max
+	e["sang"] = 0
 	e.mana = e.mana_max
 	e.endurance = e.endurance_max
 	e.tick_endurance = horloge_monde.ticks
@@ -1077,6 +1078,64 @@ func pieces_de_cellule(cell: Vector2i) -> Array:
 				continue
 			res.append({"tuiles": region.keys(), "meubles": types.keys(), "porte": porte})
 	return res
+
+
+## Le Porteur (Talents de classe) : saisir un être adjacent — il est immobilisé, le Porteur ne frappe ni ne se garde.
+func _saisir(e: Dictionary, cible_id: String, tick: int) -> bool:
+	var c: Dictionary = entites.get(cible_id, {})
+	if not a_talent(e, "saisie") or c.is_empty() or not c.vivant or Grille.distance(e.pos, c.pos) != 1 or not str(e.get("porte", "")).is_empty():
+		return false
+	e["porte"] = cible_id
+	c["saisi_par"] = e.id
+	appliquer_statut(c, "saisi", int(statuts_defs.saisi.duree_ticks), e.id)
+	_quitter_garde(e)
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.saisi", {"nom": e.name_key, "cible": c.name_key}])
+	return true
+
+
+## Lancer l'être saisi vers une tuile : projection de distance_lancer dans cette direction, dégâts à l'arrivée.
+func _lancer_etre(e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	var c: Dictionary = entites.get(str(e.get("porte", "")), {})
+	if c.is_empty():
+		return false
+	var d := Vector2i(signi(vers.x - e.pos.x), signi(vers.y - e.pos.y))
+	if d == Vector2i.ZERO:
+		return false
+	var sa: Dictionary = regles.r.talents.saisie
+	# On place la cible du côté du lancer, puis on la projette.
+	var depart: Vector2i = e.pos + d
+	if grille.dans(depart) and not grille.bloque_passage(depart) and (grille.occupant(depart).is_empty() or grille.occupant(depart) == c.id):
+		grille.liberer(c.pos)
+		c.pos = depart
+		grille.placer(c.id, depart)
+	var cibles: Array[Dictionary] = [c]
+	_effet_deplacement(e, {"mode": "projection", "distance": str(int(sa.distance_lancer) - 1)}, cibles, {})
+	_liberer_saisie(e, c)
+	var deg := des.jet(str(sa.degats_lancer))
+	_appliquer_degats(c, deg, e.id, {"type": "contondant", "element": {}, "lancer": true})
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.lance", {"nom": e.name_key, "cible": c.name_key, "degats": deg}])
+	return true
+
+
+func _liberer_saisie(e: Dictionary, c: Dictionary) -> void:
+	e.erase("porte")
+	c.erase("saisi_par")
+	c.statuts = c.statuts.filter(func(s0: Dictionary) -> bool: return str(s0.id) != "saisi")
+
+
+## La cible saisie se débat à son tour : jet de Force opposé, elle se libère si elle gagne.
+func _ia_se_debattre(c: Dictionary, tick: int) -> bool:
+	var p: Dictionary = entites.get(str(c.get("saisi_par", "")), {})
+	if p.is_empty() or not p.vivant or str(p.get("porte", "")) != c.id:
+		c.erase("saisi_par")
+		return false
+	if des.jet("1d20") + int(c.stats_eff.force) / 2 > des.jet("1d20") + int(p.stats_eff.force) / 2:
+		_liberer_saisie(p, c)
+		EventBus.emettre(&"journal", [&"journal.debat", {"nom": c.name_key}])
+	c.compteur = tick + int(regles.r.actions.objet)
+	return true
 
 
 ## Un abri pour le bétail (Habitat des PNJ) : un enclos à portée.
@@ -4578,6 +4637,9 @@ func pas(nom: String) -> bool:
 	if e.controle == "joueur":
 		attente[e.id] = true
 		return false
+	if e.has("saisi_par") and _ia_se_debattre(e, h.ticks):
+		_fin_de_pas(nom)
+		return true
 	_decider_ia(e, h.ticks)
 	_fin_de_pas(nom)
 	return true
@@ -4857,6 +4919,7 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 		Etres.recalculer(e, items, affixes_defs, regles)
 	if not str(it.get("soin_des", "")).is_empty():
 		var soin := des.jet(str(it.soin_des))
+		e["sang"] = 0
 		e.sante = mini(e.sante_max, int(e.sante) + soin)
 		extra.append("+%d PV" % soin)
 	if int(it.get("mana", 0)) > 0:
@@ -5124,6 +5187,10 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _lancer(e, str(i.get("objet", "")), i.get("cible", e.pos), h.ticks)
 		"statut_habitat":
 			ok = _statut_habitat(e, str(i.get("pnj", "")), str(i.get("statut", "normal")), h.ticks)
+		"saisir":
+			ok = _saisir(e, str(i.get("cible", "")), h.ticks)
+		"lancer_etre":
+			ok = _lancer_etre(e, i.get("vers", e.pos), h.ticks)
 		"livrer":
 			ok = _livrer_commande(e, str(i.get("pnj", "")), h.ticks)
 		"planter":
@@ -5242,6 +5309,9 @@ func _attaquer_arme(e: Dictionary, cible: Dictionary, lourde: bool, tick: int) -
 	var arme := Etres.arme(e, items)
 	if arme.is_empty() or not cible.vivant:
 		return false
+	if not str(e.get("porte", "")).is_empty():   # Le Porteur : il porte quelqu'un
+		EventBus.emettre(&"journal", [&"journal.porte", {}])
+		return false
 	var fonct: Dictionary = fonctionnalites.get(arme.functionality, {})
 	if not _cible_atteignable(e, cible, _portee_effective(e, arme, fonct), true):
 		return false
@@ -5328,6 +5398,8 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 		mult_coup = float(regles.r.degats.get("crit_mult", 1.5))
 		e["coups_critiques"] = int(e.get("coups_critiques", 0)) + 1
 		EventBus.emettre(&"journal", [&"journal.critique", {"att": e.name_key, "mult": "%.1f" % mult_coup}])
+	if a_talent(e, "jauge_de_sang"):   # L'Écarlate : jusqu'à ×1,8 la jauge pleine
+		mult_coup *= 1.0 + (float(regles.r.talents.jauge_de_sang.mult_max) - 1.0) * float(e.get("sang", 0)) / float(regles.r.talents.jauge_de_sang.max)
 	if a_talent(e, "dissimulation"):   # L'Ombre : −25 % de face ; attaquer lève la dissimulation
 		if Regles.direction_relative(cible.orientation, e.pos - cible.pos) == "front":
 			mult_coup *= float(regles.r.talents.dissimulation.face_mult)
@@ -5573,6 +5645,8 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 	_verser_xp(cible, degats, source, detail)
 	var avant_pct := float(cible.sante) / float(cible.sante_max)
 	cible.sante = maxi(0, cible.sante - degats)
+	if a_talent(cible, "jauge_de_sang"):   # L'Écarlate : les dégâts subis remplissent la jauge
+		cible["sang"] = mini(int(regles.r.talents.jauge_de_sang.max), int(cible.get("sang", 0)) + degats)
 	EventBus.emettre(&"damage_dealt", [source, cible.id, degats, detail])
 	var att: Dictionary = entites.get(source, {})
 	if not att.is_empty() and att.controle == "joueur" and cible.camp == "civil" and "civil" in cible.get("tags", []):
@@ -6286,6 +6360,8 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 						soin = roundi(float(soin) * float(prev.multiplicateur) * float(wuxing.w.chaine.resolveur_non_offensif))
 					var avant: int = c.sante
 					c.sante = mini(c.sante_max, c.sante + soin)
+					if c.sante > avant:
+						c["sang"] = 0   # L'Écarlate : soigner vide la jauge
 					a_touche = true
 					if a_talent(e, "souffle_rendu") and c.sante > avant:   # Souffle rendu : un segment de l'élément de la cible
 						var el_c: Dictionary = c.get("elements", {}) if c.get("elements") is Dictionary else {}

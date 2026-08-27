@@ -828,6 +828,14 @@
     "dissimulation": {
       "face_mult": 0.75,
       "vu_a": 1
+    },
+    "jauge_de_sang": {
+      "max": 100,
+      "mult_max": 1.8
+    },
+    "saisie": {
+      "distance_lancer": 3,
+      "degats_lancer": "1d6"
     }
   },
   "bombes": {

@@ -10,7 +10,8 @@
   "classes_possibles": [
     "la_trace",
     "le_vent",
-    "la_braise"
+    "la_braise",
+    "le_porteur"
   ],
   "leadership": false,
   "portefeuille": 30,

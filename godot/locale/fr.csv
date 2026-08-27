@@ -400,6 +400,20 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+classe.l_ecarlate.name,L'Écarlate
+classe.le_porteur.name,Le Porteur
+talent.jauge_de_sang.name,Jauge de sang
+talent.jauge_de_sang.desc,"Les dégâts subis remplissent la jauge (jusqu'à ×1,8) ; tout soin la vide."
+talent.saisie.name,Saisie
+talent.saisie.desc,"Saisir un être adjacent et le lancer ; ni attaque ni garde tant qu'il est porté."
+status.saisi.name,Saisi
+ui.sang," · sang {n} %"
+option.saisir,Saisir
+option.lancer_etre,Lancer l'être saisi ici
+journal.saisi,"{nom} saisit {cible}"
+journal.lance,"{nom} lance {cible} ({degats})"
+journal.debat,"{nom} se débat et se libère"
+journal.porte,tu portes quelqu'un : ni attaque ni garde
 classe.l_ombre.name,L'Ombre
 classe.le_rieur.name,Le Rieur
 talent.dissimulation.name,Dissimulation

@@ -1,0 +1,21 @@
+{
+  "name_key": "classe.l_ecarlate.name",
+  "bonus_stats": {
+    "force": 2,
+    "endurance": 1
+  },
+  "equipement": [],
+  "ratelier": [],
+  "competences": {
+    "epee": 4,
+    "encaissement": 4
+  },
+  "base_potentials": {
+    "_defaut": 100
+  },
+  "talent": "jauge_de_sang",
+  "points_creation_bonus": 15,
+  "tags": [
+    "cache"
+  ]
+}

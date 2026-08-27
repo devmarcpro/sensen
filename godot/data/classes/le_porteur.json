@@ -1,0 +1,20 @@
+{
+  "name_key": "classe.le_porteur.name",
+  "bonus_stats": {
+    "force": 3
+  },
+  "equipement": [],
+  "ratelier": [],
+  "competences": {
+    "mains_nues": 4,
+    "athletisme": 4
+  },
+  "base_potentials": {
+    "_defaut": 100
+  },
+  "talent": "saisie",
+  "points_creation_bonus": 15,
+  "tags": [
+    "cache"
+  ]
+}

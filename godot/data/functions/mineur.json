@@ -11,7 +11,8 @@
     "la_trace",
     "le_vent",
     "la_braise",
-    "la_meche"
+    "la_meche",
+    "le_porteur"
   ],
   "leadership": false,
   "portefeuille": 30,
