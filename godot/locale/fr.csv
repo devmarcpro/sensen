@@ -98,7 +98,7 @@ journal.condition_fausse,{capacite} ne part pas : {condition} n'est pas remplie 
 capacite.etincelle.name,Étincelle
 capacite.gel_en_ligne.name,Gel en ligne
 capacite.baume.name,Baume
-ui.aide.capacites,I : inventaire · F : atelier · C : feuille (Échap ferme) · M : carte du monde · V : apprivoiser · N : zoom minimap (⇧N : masquer) · F6 sauvegarder · F7 charger · F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
+ui.aide.capacites,I : inventaire · F : atelier · C : feuille (Échap ferme) · M : carte du monde (clic sur une cellule voisine : revendiquer) · K : territoire · V : apprivoiser · N : zoom minimap (⇧N : masquer) · F6 sauvegarder · F7 charger · F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
 ui.capacite,{touche} {nom} [{modules}] : {forme} portée {pmin}-{pmax} taille {taille} · {ticks} ticks · {ressource} {monnaie} · {des}{bonus}
 ui.capacite.visee,VISÉE : {nom} — cliquer une tuile (Échap annule)
 ui.capacite.preview,{nom} sur {def} : {des}{bonus} ×{dom} → zone {zone} ×{mult} − armure {armure} ⇒ {min}–{max}
@@ -401,6 +401,46 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+function.mineur.name,Mineur
+function.bucheron.name,Bûcheron
+function.herboriste.name,Herboriste
+ui.ecran.gestion,"TERRITOIRE — {n} cellules · {pnj} résidents · trésor {tresor} or · dette {dette} · prévisionnel {prev} or/semaine"
+ui.gestion.cellule,"cellule ({x},{y}) — {role}{camp}"
+ui.gestion.camp," · camp"
+ui.gestion.resident,"{nom} — {fonction} · humeur {humeur} · rendement ×{facteur}"
+ui.gestion.stock,"stock : {nom} ×{n}"
+ui.gestion.rapport,{texte}
+ui.gestion.role_aide,"Entrée : changer de rôle (base → habitation → champs → ressources naturelles ; ressources naturelles efface les constructions au passage de la semaine)"
+ui.gestion.resident_aide,Entrée : retirer son affectation (il redevient compagnon)
+ui.gestion.stock_aide,Entrée : retirer le stock dans ton sac
+ui.ecran.deposer,Déposer 50 or (D)
+ui.ecran.retirer,Retirer 50 or (W)
+ui.ecran.assigner,Assigner ici (X)
+ui.assigner.titre,"ASSIGNER {nom} — choisis sa fonction"
+ui.assigner.fonction,"{fonction} · produit : {produit} · rendement de base {rendement}"
+ui.assigner.rien,rien
+role.base,base
+role.habitation,habitation
+role.champs,champs
+role.ressources,ressources naturelles
+journal.claim,"cellule ({x},{y}) revendiquée pour {or} or ({n} cellules)"
+journal.claim_refuse,impossible de revendiquer : non contiguë, inexplorée, en mer, occupée par un donjon ou un village
+journal.claim_or,pas assez d'or pour revendiquer ({or} or)
+journal.role,"cellule ({x},{y}) : rôle {role}"
+journal.assigne,"{nom} est assigné : {fonction}"
+journal.station_refusee,pas de station lourde sur un champ
+journal.desassigne,"{nom} n'est plus assigné"
+journal.rapport_semaine,"rapport de la semaine : production {prod} · entretien {entretien} or · trésor {tresor} or · dette {dette} or"
+journal.dette_palier,"dette d'entretien : {texte}"
+dette.humeur,humeur −5
+dette.productivite,productivité −25 %
+dette.depart,{nom} a quitté le territoire
+journal.depot,"{n} or déposés (trésor {tresor})"
+journal.retrait,"{n} or retirés (trésor {tresor})"
+journal.tresor_vide,le trésor est vide
+journal.stock_retire,"{nom} ×{n} retirés du stock"
+journal.taxe_guilde,"taxe de guilde : {n} or"
+journal.royaume,"8 cellules et 5 résidents : ton campement est désormais un royaume aux yeux du monde"
 item.ame.name,Âme d'un compagnon
 status.affaibli.name,Affaibli
 ui.ecran.recruter,Recruter (R)

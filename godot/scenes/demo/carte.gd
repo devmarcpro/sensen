@@ -92,8 +92,10 @@ func _dessiner() -> void:
 				dessin.draw_rect(Rect2(r.position + Vector2(5, 5), Vector2(CASE - 11, CASE - 11)), Color(0.9, 0.8, 0.3), false, 1.0)
 			if info.poi.get("filon_majeur", false):
 				dessin.draw_circle(r.position + Vector2(CASE * 0.5, CASE * 0.5), 3.0, Color(0.8, 0.85, 0.9))
-			if cell == sim.monde.cellule_camp:
-				dessin.draw_rect(r, Color(0.3, 1.0, 0.4), false, 2.0)
+			if sim.monde.claims.has(cell):
+				dessin.draw_rect(r.grow(-1), Color(0.3, 1.0, 0.4, 0.9), false, 2.0)
+			elif sim.monde.revendicable(cell, sim.horloge_monde.ticks):
+				dessin.draw_rect(r.grow(-2), Color(0.3, 1.0, 0.4, 0.35), false, 1.0)
 			if cell == cj:
 				dessin.draw_rect(r.grow(-3), Color(0.3, 0.8, 1.0), false, 2.0)
 	dessin.draw_string(ThemeDB.fallback_font, o + Vector2(0, N * CASE + 20), tr("ui.carte.legende"), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.85, 0.85, 0.8))

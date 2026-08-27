@@ -1,7 +1,7 @@
 {
   "name_key": "function.dirigeant.name",
   "skill": "leadership",
-  "rendement_base": 1.0,
+  "rendement_base": 0.02,
   "horaires": {
     "6-20": "poste",
     "20-22": "social",
@@ -15,5 +15,6 @@
   ],
   "leadership": true,
   "portefeuille": 2000,
-  "tags": []
+  "tags": [],
+  "produit": null
 }

@@ -19,6 +19,8 @@ signal item_sold(uid: String, acheteur: String, prix: int)   # un objet a chang�
 signal dungeon_cleared(cellule: Vector2i, joueur: String)     # un donjon vidé (boss vaincu) à la sortie — les quêtes écoutent
 signal quest_completed(quete: Dictionary)
 signal creature_recruited(id: String, maitre: String)      # un PNJ ou une bête rejoint le joueur (Apprivoisement et recrutement)
+signal cell_claimed(cellule: Vector2i)                    # une cellule revendiquée (Expansion territoriale)
+signal cell_role_changed(cellule: Vector2i, role: String)  # rôle de case changé (Rôles de cases)
 signal action_engaged(id: String, action: Dictionary)      # télégraphe : intention visible
 signal action_resolved(id: String, action: Dictionary)
 signal journal(cle: String, params: Dictionary)             # une ligne de journal, localisée côté client

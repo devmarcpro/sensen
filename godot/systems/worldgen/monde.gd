@@ -27,6 +27,7 @@ var foyers: Dictionary = {}            # Vector2i (cellule) → {actif, majeur, 
 var semaine_courante: int = 0          # dernière semaine passée (ticks / ticks_par_semaine)
 var grille_active: Grille = null       # la fenêtre courante, pour effacer une entrée après la grâce
 var peuplees: Dictionary = {}          # Vector2i (cellule) → true : ses PNJ ont été instanciés (première visite)
+var claims: Dictionary = {}            # Vector2i (cellule) → {role} : le territoire du joueur (Expansion territoriale)
 var mutex := Mutex.new()
 var tache: int = -1                    # tâche WorkerThreadPool de pré-génération en cours (−1 : aucune)
 
@@ -127,6 +128,8 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 		g.poser_contenu(base + e.entree_donjon, "entree_donjon")
 		foyer(cell)   # le donjon devient un foyer connu de la dérive
 	if cell == cellule_camp:
+		if not claims.has(cell):
+			claims[cell] = {"role": "base"}
 		if not decouvert.has(cell):   # sa cellule, on la connaît (Claims et persistance) — tuiles et chunks
 			var tout := {}
 			for i in taille * taille:
@@ -416,6 +419,23 @@ func _reposer_entree(cell: Vector2i) -> void:
 				else:
 					grille_active.materiaux[gi] = "pierre"
 					grille_active.poser_contenu(base + l, "mur")
+
+
+## Une cellule est-elle revendicable : contiguë au territoire, explorée, de terre, sans donjon actif ni village.
+func revendicable(cell: Vector2i, tick: int) -> bool:
+	if claims.has(cell) or not surface.terre_a(cell) or not cellule_exploree(cell):
+		return false
+	var contigue := false
+	for c in claims.keys():
+		if absi(c.x - cell.x) <= 1 and absi(c.y - cell.y) <= 1 and c != cell:
+			contigue = true
+	if not contigue:
+		return false
+	if donjon_ouvert(cell, tick):
+		return false
+	if bool(surface.poi_de(cell).get("village", false)):
+		return false
+	return true
 
 
 ## Une cellule est explorée si l'un de ses chunks l'est (carte du monde, voyage rapide).

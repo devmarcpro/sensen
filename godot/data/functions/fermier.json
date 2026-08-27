@@ -1,7 +1,7 @@
 {
   "name_key": "function.fermier.name",
   "skill": "agriculture",
-  "rendement_base": 1.0,
+  "rendement_base": 0.05,
   "horaires": {
     "6-20": "poste",
     "20-22": "social",
@@ -14,5 +14,9 @@
   ],
   "leadership": false,
   "portefeuille": 30,
-  "tags": []
+  "tags": [],
+  "produit": {
+    "item": "baies",
+    "par_unite": 1.0
+  }
 }

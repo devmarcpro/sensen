@@ -1,6 +1,6 @@
 {
-  "name_key": "function.commercant.name",
-  "skill": "negociation",
+  "name_key": "function.mineur.name",
+  "skill": "minage",
   "rendement_base": 0.02,
   "horaires": {
     "6-20": "poste",
@@ -8,14 +8,16 @@
     "22-6": "lit"
   },
   "classes_possibles": [
-    "la_balance",
+    "la_trace",
     "le_vent",
-    "le_creuset"
+    "la_braise"
   ],
   "leadership": false,
-  "portefeuille": 300,
+  "portefeuille": 30,
   "tags": [],
   "produit": {
-    "or": 2.0
+    "materiau": "fer",
+    "forme": "brut",
+    "par_unite": 0.5
   }
 }

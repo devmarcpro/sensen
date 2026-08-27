@@ -39,6 +39,7 @@ func _ready() -> void:
 	test_village_vivant()
 	test_reputation_et_quetes()
 	test_compagnons()
+	test_territoire()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1385,6 +1386,51 @@ func test_village() -> void:
 	var lingot2: String = s._pile(j, "fer", "lingot").uid
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "vendre", "pnj": marchand.id, "objet": lingot2}), "le marchand à sec refuse d'acheter")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Étape 10.1 : territoire, résidents, semaine
+
+func test_territoire() -> void:
+	var s := Simulation.new(71)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var camp: Vector2i = s.monde.cellule_camp
+	verifier(s.monde.claims.has(camp) and s.monde.claims[camp].role == "base", "le camp est revendiqué, rôle base")
+	var voisine := camp + Vector2i(1, 0)
+	var loin := camp + Vector2i(3, 0)
+	s.monde.explores[Vector2i(voisine.x * 4, voisine.y * 4)] = true
+	s.monde.explores[Vector2i(loin.x * 4, loin.y * 4)] = true
+	if s.monde.surface.terre_a(voisine) and not s.monde.surface.poi_de(voisine).get("village", false):
+		j.or = 10
+		verifier(not s.revendiquer(j, voisine), "10 or : pas assez pour revendiquer (50)")
+		j.or = 100
+		verifier(s.revendiquer(j, voisine) and int(j.or) == 50 and s.monde.claims.size() == 2, "revendiquer la voisine pour 50 or")
+		verifier(not s.revendiquer(j, loin), "une cellule non contiguë est refusée")
+		verifier(s.changer_role(voisine, "champs") and s.monde.claims[voisine].role == "champs", "changer le rôle en champs")
+	# Un compagnon assigné devient résident ; sans lit, humeur −15 ; puis un lit.
+	var v := s.ajouter("villageois", j.pos + Vector2i(1, 1), "ia")
+	s._habiller_pnj(v, GameData.entree("creatures", "villageois"))
+	v.social.relations[j.id] = 80
+	j.corps.stats.charisme = 25
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "recruter", "pnj": v.id})
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "assigner", "pnj": v.id, "fonction": "bucheron"}), "assigner le compagnon comme bûcheron")
+	verifier(v.has("assignation") and not v.has("maitre") and s.residents().size() == 1 and int(v.humeur) == 60 - 15, "résident sans logement : humeur 45")
+	var pr := s.production_de(v)
+	verifier(pr.has("base") and pr.base == "chene" and int(pr.n) > 0, "production prévue : des planches de chêne (%d)" % int(pr.get("n", 0)))
+	# La semaine : production en stock, entretien 10 or ; sans trésor → dette et palier humeur.
+	s._semaine_territoire(j)
+	verifier(int(s.territoire.stocks.get("chene|planche", 0)) > 0 and int(s.territoire.dette) == 10 and int(s.territoire.semaines_dette) == 1, "semaine 1 : planches en stock, dette 10 or")
+	verifier(int(v.humeur) == 45 - 5, "palier 1 : humeur −5")
+	s.deposer(j, 40)
+	s._semaine_territoire(j)
+	verifier(int(s.territoire.dette) == 0 and int(s.territoire.tresor) == 40 - 20, "trésor : la dette et l'entretien sont réglés (reste %d)" % int(s.territoire.tresor))
+	verifier(s.retirer_stock(j, "chene|planche") and not s._pile(j, "chene", "planche").is_empty(), "retirer les planches du stock dans le sac")
+	var or0: int = int(j.or)
+	verifier(s.retirer(j, 20) and int(j.or) == or0 + 20 and int(s.territoire.tresor) == 0, "retirer 20 or du trésor")
 	s.monde.fermer()
 
 

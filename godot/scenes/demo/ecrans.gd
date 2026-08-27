@@ -171,6 +171,20 @@ func touche(ev: InputEventKey) -> bool:
 			if courant == "dialogue":
 				_option("attendre")
 				return true
+		KEY_X:
+			if courant == "dialogue":
+				_option("assigner")
+				return true
+		KEY_D:
+			if courant == "gestion":
+				main.sim.deposer(main.joueur(), 50)
+				rafraichir()
+				return true
+		KEY_W:
+			if courant == "gestion":
+				main.sim.retirer(main.joueur(), 50)
+				rafraichir()
+				return true
 	return false
 
 
@@ -196,6 +210,10 @@ func rafraichir() -> void:
 			_construire_dialogue(j)
 		"quetes":
 			_construire_quetes(j)
+		"gestion":
+			_construire_gestion(j)
+		"assigner":
+			_construire_assigner(j)
 		"commerce":
 			_construire_commerce(j)
 	selection = clampi(sel, 0, maxi(0, entrees.size() - 1))
@@ -230,7 +248,7 @@ func _montrer_detail() -> void:
 			detail.text = texte_recette(en.plan)
 		"texte":
 			detail.text = str(en.texte)
-		"option", "quete":
+		"option", "quete", "cellule", "resident", "stock", "fonction":
 			detail.text = str(en.get("texte", ""))
 		"achat", "vente":
 			var p: Dictionary = en.prix
@@ -266,6 +284,19 @@ func _action_principale() -> void:
 				main.sim.intention(j.id, {"type": "accepter_quete", "pnj": pnj_id, "quete": str(q.uid)})
 			elif q.etat == "terminee":
 				main.sim.intention(j.id, {"type": "rendre_quete", "pnj": pnj_id, "quete": str(q.uid)})
+		"cellule":
+			var roles: Array = main.sim.regles.r.royaume.roles
+			var cell: Vector2i = en.cellule
+			var actuel := str(main.sim.monde.claims[cell].role)
+			main.sim.changer_role(cell, str(roles[(roles.find(actuel) + 1) % roles.size()]))
+		"resident":
+			main.sim.desassigner(j, str(en.id))
+		"stock":
+			main.sim.retirer_stock(j, str(en.cle))
+		"fonction":
+			main.sim.intention(j.id, {"type": "assigner", "pnj": pnj_id, "fonction": str(en.fonction)})
+			fermer()
+			return
 	rafraichir()
 
 
@@ -298,6 +329,9 @@ func _construire_dialogue(j: Dictionary) -> void:
 		entrees.append({"kind": "option", "option": "suivre"})
 		liste.add_item(tr("ui.ecran.attendre"))
 		entrees.append({"kind": "option", "option": "attendre"})
+		if main.sim.monde != null and main.sim.monde.claims.has(main.sim.monde.cellule_de(pnj.pos)):
+			liste.add_item(tr("ui.ecran.assigner"))
+			entrees.append({"kind": "option", "option": "assigner"})
 	else:
 		var def: Dictionary = GameData.catalogues.creatures.get(str(pnj.def), {})
 		var rc: Dictionary = def.get("recruitable", {"method": "jamais"})
@@ -332,6 +366,8 @@ func _option(opt: String) -> void:
 		"suivre", "attendre":
 			main.sim.ordonner(j, pnj_id, opt)
 			rafraichir()
+		"assigner":
+			ouvrir("assigner")
 		"partir":
 			fermer()
 
@@ -410,6 +446,52 @@ func _construire_commerce(j: Dictionary) -> void:
 		entrees.append({"kind": "vente", "uid": uid, "prix": p2})
 	_bouton(tr("ui.ecran.acheter"), _action_principale)
 	_bouton(tr("ui.ecran.vendre"), _action_principale)
+
+
+# ---------------------------------------------------------------- territoire (Population et exploitation, Entretien et taxes)
+
+func _construire_gestion(j: Dictionary) -> void:
+	var sim = main.sim
+	if sim.monde == null:
+		fermer()
+		return
+	var t: Dictionary = sim.territoire
+	titre.text = tr("ui.ecran.gestion").format({"n": sim.monde.claims.size(), "pnj": sim.residents().size(), "tresor": int(t.tresor), "dette": int(t.dette), "prev": sim.previsionnel()})
+	var cells: Array = sim.monde.claims.keys()
+	cells.sort()
+	for cell in cells:
+		liste.add_item(tr("ui.gestion.cellule").format({"x": cell.x, "y": cell.y, "role": tr("role." + str(sim.monde.claims[cell].role)), "camp": tr("ui.gestion.camp") if cell == sim.monde.cellule_camp else ""}))
+		entrees.append({"kind": "cellule", "cellule": cell, "texte": tr("ui.gestion.role_aide")})
+	for x in sim.residents():
+		liste.add_item(tr("ui.gestion.resident").format({"nom": tr(x.name_key), "fonction": tr(GameData.entree("functions", str(x.assignation.fonction)).name_key), "humeur": int(x.get("humeur", 60)), "facteur": "%.2f" % sim.facteur_humeur(x)}))
+		var pr: Dictionary = sim.production_de(x)
+		entrees.append({"kind": "resident", "id": x.id, "texte": tr("ui.gestion.resident_aide") + "\n" + str(pr)})
+	for cle in t.stocks.keys():
+		liste.add_item(tr("ui.gestion.stock").format({"nom": str(cle).split("|")[0], "n": int(t.stocks[cle])}))
+		entrees.append({"kind": "stock", "cle": cle, "texte": tr("ui.gestion.stock_aide")})
+	for r in t.rapports:
+		liste.add_item(tr("ui.gestion.rapport").format({"texte": tr("journal.rapport_semaine").format(r)}), null, false)
+		entrees.append({"kind": "texte", "texte": tr("journal.rapport_semaine").format(r)})
+	_bouton(tr("ui.ecran.deposer"), func() -> void: main.sim.deposer(main.joueur(), 50); rafraichir())
+	_bouton(tr("ui.ecran.retirer"), func() -> void: main.sim.retirer(main.joueur(), 50); rafraichir())
+
+
+func _construire_assigner(j: Dictionary) -> void:
+	var pnj: Dictionary = main.sim.entites.get(pnj_id, {})
+	if pnj.is_empty():
+		fermer()
+		return
+	titre.text = tr("ui.assigner.titre").format({"nom": tr(pnj.name_key)})
+	var ids: Array = GameData.catalogues.functions.keys()
+	ids.sort()
+	for fid in ids:
+		var f: Dictionary = GameData.catalogues.functions[fid]
+		if fid in ["aventurier", "dirigeant", "oisif"]:
+			continue
+		var prod = f.get("produit")
+		var ptxt: String = tr("ui.assigner.rien") if prod == null else (("%s or/unité" % str(prod.or)) if prod.has("or") else str(prod.get("item", prod.get("materiau", ""))))
+		liste.add_item(tr(f.name_key))
+		entrees.append({"kind": "fonction", "fonction": fid, "texte": tr("ui.assigner.fonction").format({"fonction": tr(f.name_key), "produit": ptxt, "rendement": str(f.get("rendement_base", 0))})})
 
 
 # ---------------------------------------------------------------- inventaire

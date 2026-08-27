@@ -202,8 +202,12 @@ func _choisir_depart(cell: Vector2i) -> void:
 	_log(tr("journal.depart_choisi").format({"x": cell.x, "y": cell.y, "biome": tr(GameData.entree("biomes", str(sim.camp_sauve.biome)).name_key)}))
 
 
-## Voyage rapide depuis la carte.
+## Voyage rapide depuis la carte — ou revendication d'une cellule contiguë au territoire (Expansion territoriale).
 func _voyager(cell: Vector2i) -> void:
+	if sim.monde != null and sim.monde.revendicable(cell, sim.horloge_monde.ticks):
+		sim.revendiquer(joueur(), cell)
+		carte.dessin.queue_redraw()
+		return
 	if sim.voyager(joueur(), cell):
 		carte.fermer()
 		_apres_changement_de_grille()
@@ -573,6 +577,9 @@ func _unhandled_input(ev: InputEvent) -> void:
 				ecrans.basculer("atelier")
 			KEY_I:
 				ecrans.basculer("inventaire")
+			KEY_K:
+				if sim.lieu == "camp":
+					ecrans.basculer("gestion")
 			KEY_N:
 				if ev.shift_pressed:
 					minimap.visible = not minimap.visible

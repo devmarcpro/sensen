@@ -415,5 +415,50 @@
     "malus_par_tranche": 0.1,
     "tranche": 10,
     "chance_mort_par_an": 0.05
+  },
+  "royaume": {
+    "_doc": "Territoire du joueur (Expansion territoriale, Population et exploitation, Entretien et taxes) : coût du claim, rôles, humeur, production hebdomadaire, entretien, dette, seuil de royaume.",
+    "claim_cout_par_cellule": 50,
+    "roles": [
+      "base",
+      "habitation",
+      "champs",
+      "ressources"
+    ],
+    "humeur_base": 60,
+    "sans_logement": -15,
+    "facteur_humeur_mult": 1.5,
+    "facteur_humeur_bornes": [
+      0.4,
+      1.2
+    ],
+    "heures_semaine": 98,
+    "entretien_pnj": 10,
+    "entretien_structure": 25,
+    "dette_paliers": {
+      "humeur": [
+        1,
+        -5
+      ],
+      "productivite": [
+        2,
+        0.75
+      ],
+      "depart": [
+        4,
+        1
+      ]
+    },
+    "taxe_guilde": 0.05,
+    "taxe_rang": 0.1,
+    "seuil_royaume": {
+      "cellules": 8,
+      "pnj": 5
+    },
+    "stations_lourdes": [
+      "forge",
+      "scierie",
+      "enclume"
+    ]
   }
 }

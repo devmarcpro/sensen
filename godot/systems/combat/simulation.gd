@@ -32,6 +32,7 @@ var camp_sauve: Dictionary = {}      # le camp mis de côté pendant une expédi
 var lieu: String = "arene"           # "arene" | "camp" | "donjon"
 var prochain_donjon: int = 1         # id du prochain donjon lancé depuis le camp
 var monde: Monde = null              # la surface comme fenêtre glissante (étape 8.2a)
+var territoire: Dictionary = {"tresor": 0, "dette": 0, "semaines_dette": 0, "stocks": {}, "rapports": [], "gains_quetes": 0, "royaume": false}   # le royaume du joueur (étape 10)
 var objets: Dictionary = {}          # uid → instance générée (le catalogue reste dans `items`, fusionné)
 var contenants: Dictionary = {}      # index de tuile → [uids] (coffres, butin au sol)
 var dernier_combat: Dictionary = {}   # récapitulatif du dernier combat terminé (écran de fin)
@@ -489,6 +490,9 @@ func _poser(e: Dictionary, uid: String, vers: Vector2i, tick: int) -> bool:
 		if int(m.capacite_slots) > 0:
 			contenants[idx] = []
 	else:
+		if monde != null and str(monde.claims.get(monde.cellule_de(vers), {}).get("role", "base")) == "champs" and str(it.station) in _ry().stations_lourdes:
+			EventBus.emettre(&"journal", [&"journal.station_refusee", {}])
+			return false
 		grille.poser_contenu(vers, "station_fixe")
 		grille.stations_fixes[idx] = str(it.station)
 	e.sac.erase(uid)
@@ -810,6 +814,253 @@ func _vendre(e: Dictionary, pnj_id: String, uid: String, tick: int) -> bool:
 	return true
 
 
+# ---------------------------------------------------------------- territoire : claims, rôles, résidents, semaine (étape 10)
+
+func _ry() -> Dictionary:
+	return regles.r.royaume
+
+
+## Revendiquer une cellule contiguë explorée (Expansion territoriale) : 50 or × cellules possédées.
+func revendiquer(e: Dictionary, cell: Vector2i) -> bool:
+	if monde == null or e.controle != "joueur":
+		return false
+	if not monde.revendicable(cell, horloge_monde.ticks):
+		EventBus.emettre(&"journal", [&"journal.claim_refuse", {}])
+		return false
+	var cout := int(_ry().claim_cout_par_cellule) * monde.claims.size()
+	if int(e.or) < cout:
+		EventBus.emettre(&"journal", [&"journal.claim_or", {"or": cout}])
+		return false
+	e.or = int(e.or) - cout
+	monde.claims[cell] = {"role": "base"}
+	if not monde.decouvert.has(cell):
+		monde.decouvert[cell] = {}
+	EventBus.emettre(&"cell_claimed", [cell])
+	EventBus.emettre(&"journal", [&"journal.claim", {"x": cell.x, "y": cell.y, "or": cout, "n": monde.claims.size()}])
+	_verifier_royaume(e)
+	return true
+
+
+func changer_role(cell: Vector2i, role: String) -> bool:
+	if monde == null or not monde.claims.has(cell) or not (role in _ry().roles):
+		return false
+	monde.claims[cell].role = role
+	EventBus.emettre(&"cell_role_changed", [cell, role])
+	EventBus.emettre(&"journal", [&"journal.role", {"x": cell.x, "y": cell.y, "role": "role." + role}])
+	return true
+
+
+func residents() -> Array:
+	var res: Array = []
+	for x in entites.values():
+		if x.vivant and x.has("assignation"):
+			res.append(x)
+	return res
+
+
+## Le facteur d'humeur d'un résident (Population et exploitation) : humeur/100 × 1,5, borné [0,4 ; 1,2].
+func facteur_humeur(x: Dictionary) -> float:
+	var b: Array = _ry().facteur_humeur_bornes
+	return clampf(float(x.get("humeur", _ry().humeur_base)) / 100.0 * float(_ry().facteur_humeur_mult), float(b[0]), float(b[1]))
+
+
+## Assigner un compagnon ou un PNJ ami à une fonction, sur la cellule où il se trouve.
+func _assigner(e: Dictionary, pnj_id: String, fonction: String, tick: int) -> bool:
+	var x: Dictionary = entites.get(pnj_id, {})
+	if x.is_empty() or monde == null or not GameData.catalogues.functions.has(fonction):
+		return false
+	var cell := monde.cellule_de(x.pos)
+	if not monde.claims.has(cell) or (str(x.get("maitre", "")) != e.id and x.camp != "joueur"):
+		return false
+	x.erase("maitre")
+	x.camp = "joueur"
+	x.ai_profile = "civil" if fonction != "garde" else "garde"
+	x["fonction"] = fonction
+	x["role"] = "resident"
+	x["assignation"] = {"fonction": fonction, "cellule": cell}
+	x["poste"] = x.pos
+	x.ancre = x.pos
+	x["place"] = x.pos
+	x["humeur"] = int(_ry().humeur_base)
+	# Logement : un lit libre de la cellule.
+	x.erase("lit")
+	for gi in grille.meubles.keys():
+		var p := grille.pos_de(int(gi))
+		if monde.cellule_de(p) == cell and bool(GameData.entree("meubles", str(grille.meubles[gi])).dormir):
+			var pris := false
+			for autre in residents():
+				if autre.get("lit", Vector2i(-1, -1)) == p:
+					pris = true
+			if not pris:
+				x["lit"] = p
+				break
+	if not x.has("lit"):
+		x.humeur = int(x.humeur) + int(_ry().sans_logement)
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.assigne", {"nom": x.name_key, "fonction": GameData.entree("functions", fonction).name_key}])
+	_verifier_royaume(e)
+	return true
+
+
+func desassigner(e: Dictionary, pnj_id: String) -> bool:
+	var x: Dictionary = entites.get(pnj_id, {})
+	if x.is_empty() or not x.has("assignation"):
+		return false
+	x.erase("assignation")
+	_devenir_compagnon(e, x)
+	EventBus.emettre(&"journal", [&"journal.desassigne", {"nom": x.name_key}])
+	return true
+
+
+func _verifier_royaume(e: Dictionary) -> void:
+	var seuil: Dictionary = _ry().seuil_royaume
+	if not bool(territoire.royaume) and monde != null and monde.claims.size() >= int(seuil.cellules) and residents().size() >= int(seuil.pnj):
+		territoire.royaume = true
+		EventBus.emettre(&"journal", [&"journal.royaume", {}])
+
+
+## La production hebdomadaire d'un résident (Abstraction hors-site) : rendement × heures × humeur.
+func production_de(x: Dictionary) -> Dictionary:
+	var f: Dictionary = GameData.catalogues.functions.get(str(x.assignation.fonction), {})
+	var prod = f.get("produit")
+	if prod == null:
+		return {}
+	var niveau := regles.niveau(x.competences_eff, str(f.get("skill", ""))) if not str(f.get("skill", "")).is_empty() else 0
+	var rendement := float(f.get("rendement_base", 0.02)) * (1.0 + float(niveau) / 10.0)
+	var mult := float(territoire.get("productivite", 1.0))
+	var q := rendement * float(_ry().heures_semaine) * facteur_humeur(x) * mult
+	if prod.has("or"):
+		return {"or": int(round(q * float(prod.or)))}
+	return {"base": str(prod.get("item", prod.get("materiau", ""))), "forme": str(prod.get("forme", "")), "n": int(floor(q * float(prod.get("par_unite", 1.0))))}
+
+
+## Le passage hebdomadaire du territoire : production, entretien, dette et ses paliers, taxe de guilde, rapport.
+func _semaine_territoire(e: Dictionary) -> void:
+	if monde == null or monde.claims.is_empty():
+		return
+	var ry := _ry()
+	var prod_txt: Array[String] = []
+	var or_prod := 0
+	for x in residents():
+		var pr := production_de(x)
+		if pr.is_empty():
+			continue
+		if pr.has("or"):
+			or_prod += int(pr.or)
+			prod_txt.append("%d or" % int(pr.or))
+		elif int(pr.n) > 0:
+			var cle: String = pr.base + ("|" + pr.forme if not str(pr.forme).is_empty() else "")
+			territoire.stocks[cle] = int(territoire.stocks.get(cle, 0)) + int(pr.n)
+			prod_txt.append("%s ×%d" % [pr.base, int(pr.n)])
+	territoire.tresor = int(territoire.tresor) + or_prod
+	# Ressources naturelles : la régénération efface le bâti de la cellule.
+	for cell in monde.claims.keys():
+		if str(monde.claims[cell].role) == "ressources":
+			monde.modifications.erase(cell)
+	var entretien := int(ry.entretien_pnj) * residents().size() + int(ry.entretien_structure) * _structures_speciales()
+	var du := entretien + int(territoire.dette)
+	if int(territoire.tresor) >= du:
+		territoire.tresor = int(territoire.tresor) - du
+		territoire.dette = 0
+		territoire.semaines_dette = 0
+		territoire["productivite"] = 1.0
+	else:
+		territoire.dette = du - int(territoire.tresor)
+		territoire.tresor = 0
+		territoire.semaines_dette = int(territoire.semaines_dette) + 1
+	var pal: Dictionary = ry.dette_paliers
+	if int(territoire.semaines_dette) >= int(pal.humeur[0]):
+		for x in residents():
+			x.humeur = int(x.get("humeur", ry.humeur_base)) + int(pal.humeur[1])
+		EventBus.emettre(&"journal", [&"journal.dette_palier", {"texte": "dette.humeur"}])
+	if int(territoire.semaines_dette) >= int(pal.productivite[0]):
+		territoire["productivite"] = float(pal.productivite[1])
+		EventBus.emettre(&"journal", [&"journal.dette_palier", {"texte": "dette.productivite"}])
+	if int(territoire.semaines_dette) >= int(pal.depart[0]) and not residents().is_empty():
+		var moins_fidele: Dictionary = residents()[0]
+		for x in residents():
+			if relation_de(x, e) < relation_de(moins_fidele, e):
+				moins_fidele = x
+		moins_fidele.erase("assignation")
+		moins_fidele.camp = "civil"
+		EventBus.emettre(&"journal", [&"journal.dette_palier", {"texte": "dette.depart"}])
+	if int(territoire.semaines_dette) == 0:
+		for x in residents():
+			x.humeur = int(ry.humeur_base) + (int(ry.sans_logement) if not x.has("lit") else 0)
+	# Taxe de guilde sur les gains de quêtes de la semaine (Entretien et taxes).
+	var gains := int(territoire.get("gains_quetes", 0))
+	if gains > 0:
+		var rang := int(e.get("guildes", {}).get("guerriers", {}).get("rang", 0))
+		var taxe := int(round(float(gains) * float(ry.taxe_guilde) * (1.0 + float(ry.taxe_rang) * rang)))
+		e.or = maxi(0, int(e.or) - taxe)
+		territoire.gains_quetes = 0
+		if taxe > 0:
+			EventBus.emettre(&"journal", [&"journal.taxe_guilde", {"n": taxe}])
+	var rapport := {"prod": " · ".join(prod_txt) if not prod_txt.is_empty() else "—", "entretien": entretien, "tresor": int(territoire.tresor), "dette": int(territoire.dette)}
+	territoire.rapports.append(rapport)
+	while territoire.rapports.size() > 8:
+		territoire.rapports.pop_front()
+	EventBus.emettre(&"journal", [&"journal.rapport_semaine", rapport])
+
+
+func _structures_speciales() -> int:
+	var n := 0
+	if monde == null:
+		return 0
+	for gi in grille.stations_fixes.keys():
+		if monde.claims.has(monde.cellule_de(grille.pos_de(int(gi)))):
+			n += 1
+	return n
+
+
+## Le prévisionnel hebdomadaire (revenus en or − entretien).
+func previsionnel() -> int:
+	var revenus := 0
+	for x in residents():
+		var pr := production_de(x)
+		if pr.has("or"):
+			revenus += int(pr.or)
+	return revenus - (int(_ry().entretien_pnj) * residents().size() + int(_ry().entretien_structure) * _structures_speciales())
+
+
+func deposer(e: Dictionary, n: int) -> bool:
+	if int(e.or) < n:
+		return false
+	e.or = int(e.or) - n
+	territoire.tresor = int(territoire.tresor) + n
+	EventBus.emettre(&"journal", [&"journal.depot", {"n": n, "tresor": int(territoire.tresor)}])
+	return true
+
+
+func retirer(e: Dictionary, n: int) -> bool:
+	n = mini(n, int(territoire.tresor))
+	if n <= 0:
+		EventBus.emettre(&"journal", [&"journal.tresor_vide", {}])
+		return false
+	territoire.tresor = int(territoire.tresor) - n
+	e.or = int(e.or) + n
+	EventBus.emettre(&"journal", [&"journal.retrait", {"n": n, "tresor": int(territoire.tresor)}])
+	return true
+
+
+## Retirer un stock du territoire dans le sac (matériaux et consommables).
+func retirer_stock(e: Dictionary, cle: String) -> bool:
+	var n := int(territoire.stocks.get(cle, 0))
+	if n <= 0:
+		return false
+	var parts: PackedStringArray = cle.split("|")
+	if parts.size() > 1:
+		_donner_materiau(e, parts[0], n, parts[1])
+	else:
+		for k in n:
+			var o := generer_objet(parts[0], 1, {}, "commun", 0)
+			if not o.is_empty():
+				donner(e, o.uid)
+	territoire.stocks.erase(cle)
+	EventBus.emettre(&"journal", [&"journal.stock_retire", {"nom": parts[0], "n": n}])
+	return true
+
+
 # ---------------------------------------------------------------- compagnons, apprivoisement, âge
 
 ## Places d'escorte (Compagnons) : 1 + Charisme/5 + Leadership/10.
@@ -1088,6 +1339,7 @@ func _rendre_quete(e: Dictionary, pnj_id: String, uid: String, tick: int) -> boo
 		if q.uid == uid and q.etat == "terminee" and q.donneur == pnj_id:
 			q.etat = "rendue"
 			e.or = int(e.or) + int(q.or)
+			territoire.gains_quetes = int(territoire.get("gains_quetes", 0)) + int(q.or)
 			if not e.has("guildes"):
 				e["guildes"] = {}
 			var g: Dictionary = e.guildes.get(q.guild, {"xp": 0, "rang": 0})
@@ -1284,7 +1536,7 @@ func sauvegarder(nom: String = "monde") -> bool:
 		contenants_monde[grille.pos_de(int(gi))] = contenants[gi]
 	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "graine": graine, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
 		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores,
-		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees})
+		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire})
 	ok = Sauvegarde.ecrire(nom, "surface.json", surface) and ok
 	ok = Sauvegarde.ecrire(nom, "entities.json", {"entites": autres, "ordre": ordre_autres, "contenants": contenants_monde}) and ok
 	ok = Sauvegarde.ecrire(nom, "items.json", instances) and ok
@@ -1320,6 +1572,8 @@ func charger_sauvegarde(nom: String = "monde") -> bool:
 	monde.foyers = w.get("foyers", {})
 	monde.semaine_courante = int(w.get("semaine", 0))
 	monde.peuplees = w.get("peuplees", {})
+	monde.claims = w.get("claims", {})
+	territoire = w.get("territoire", territoire)
 	for cell in surface.keys():
 		var sc: Dictionary = surface[cell]
 		if not sc.modifications.is_empty():
@@ -2339,6 +2593,9 @@ func _tiquer_monde(tick: int) -> void:
 		var touchees := monde.semaine(tick)
 		var derive := int(regles.r.reputation.derive_hebdo)
 		_vieillir_semaine(tick)
+		for x in entites.values():
+			if x.controle == "joueur":
+				_semaine_territoire(x)
 		for x in entites.values():   # les bourses des PNJ se rechargent (+15 % par semaine, Barèmes économiques)
 			if x.has("or_max"):
 				x.or = mini(int(x.or_max), int(x.or) + int(ceil(float(x.or_max) * float(regles.r.commerce.recharge_hebdo))))
@@ -2653,6 +2910,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _accepter_quete(e, str(i.get("pnj", "")), str(i.get("quete", "")), h.ticks)
 		"recruter":
 			ok = _recruter(e, str(i.get("pnj", "")), h.ticks)
+		"assigner":
+			ok = _assigner(e, str(i.get("pnj", "")), str(i.get("fonction", "")), h.ticks)
 		"apprivoiser":
 			ok = _apprivoiser(e, str(i.get("cible", "")), h.ticks)
 		"ressusciter":

@@ -1,7 +1,7 @@
 {
   "name_key": "function.oisif.name",
   "skill": "",
-  "rendement_base": 1.0,
+  "rendement_base": 0.02,
   "horaires": {
     "6-20": "poste",
     "20-22": "social",
@@ -14,5 +14,6 @@
   ],
   "leadership": false,
   "portefeuille": 30,
-  "tags": []
+  "tags": [],
+  "produit": null
 }

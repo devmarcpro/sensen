@@ -19,6 +19,9 @@ Les puits d'or qui contrebalancent la richesse territoriale — avec des malus p
 
 **Écran dédié ([[Écrans d'interface]]) :** gestion de claim — solde, prévisionnel hebdomadaire (revenus boutiques vs entretien), dépôts/retraits.
 
+> [!success] Codé le 2026-08-28 — étape 10.1
+> `entretien = Σ 10 or par PNJ assigné + Σ 25 or par structure spéciale (station fixe)` prélevé chaque semaine sur le **trésor** ; sinon `dette += manquant` avec les paliers de la note : 1 semaine → humeur −5 ; 2 → productivité −25 % ; 4+ → les gardes cessent, un PNJ (le moins fidèle) peut partir par semaine ; tout se rétablit dès régularisation. Taxe de guilde `0,05 × gains de quêtes de la semaine × (1 + 0,1 × rang)` prélevée sur l'or du joueur. **Rapport hebdomadaire** au journal (production, entretien, dette). Trésor : dépôts et retraits libres dans l'écran de gestion.
+
 ## Liens
 - **Dépend de** : [[Économie — sources et puits]], [[Barèmes économiques]], [[Boutique passive]], [[Population et exploitation]]
 - **Alimente** : [[Défense et raids]], [[Habitat des PNJ]]
