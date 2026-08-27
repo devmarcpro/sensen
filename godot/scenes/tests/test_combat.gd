@@ -70,6 +70,7 @@ func _ready() -> void:
 	test_ecarlate_et_porteur()
 	test_passeur_et_sablier()
 	test_masque_et_sceau()
+	test_fossoyeur_et_engrenage()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2451,6 +2452,51 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Le Fossoyeur et L'Engrenage
+
+func test_fossoyeur_et_engrenage() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	j.classe = "le_fossoyeur"
+	j["reputations"] = {"bourg": 20}
+	var loup: Dictionary = s.entites["loup_2"]
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(0, -2)
+	s.grille.placer(loup.id, loup.pos)
+	s._appliquer_degats(loup, 999, j.id, {"type": "test"})
+	verifier(not loup.vivant, "le loup est mort")
+	var n0 := s.vivants().size()
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "relever", "cible": loup.id}) and s.vivants().size() == n0 + 1 and int(j.reputations.bourg) == 10, "relevé : un loup de plus au camp du joueur, réputation 20 → 10")
+	var releve: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.has("fin_invocation"))[0]
+	verifier(releve.camp == j.camp and str(releve.maitre) == j.id and releve.pos == loup.pos, "il se lève sur la tuile du cadavre, au camp du joueur")
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "relever", "cible": loup.id}), "un cadavre ne se relève qu'une fois")
+	var h := s.horloge_de(j)
+	h.avancer(61)
+	s._tiquer_differes(j.horloge, h.ticks)
+	verifier(not releve.vivant, "après 60 ticks, le relevé retourne à la terre")
+	# L'Engrenage : un affût qui mange le carquois
+	j.classe = "l_engrenage"
+	var loup3: Dictionary = s.entites["loup_3"]
+	s.grille.liberer(loup3.pos)
+	loup3.pos = j.pos + Vector2i(3, 0)
+	s.grille.placer(loup3.id, loup3.pos)
+	for d in range(1, 4):
+		s.grille.contenu[s.grille.idx(j.pos + Vector2i(d, 0))] = 0
+	var mun0 := int(j.munitions)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "affut", "cible": j.pos + Vector2i(1, 0)}) and s.affuts.size() == 1, "affût déployé")
+	var pv0 := int(loup3.sante)
+	s._tirs_d_affuts(j.horloge, h.ticks + 100)
+	verifier(int(loup3.sante) < pv0 and int(j.munitions) == mun0 - 1, "il tire sur le loup (%d → %d) et consomme une flèche (%d → %d)" % [pv0, int(loup3.sante), mun0, int(j.munitions)])
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "affut", "cible": j.pos + Vector2i(0, 1)}) and s.affuts.size() == 1 and s.affuts[0].pos == j.pos + Vector2i(0, 1), "redéployer déplace l'affût")
+	j.munitions = 0
+	s._tirs_d_affuts(j.horloge, h.ticks + 200)
+	verifier(s.affuts.is_empty(), "sans munition, l'affût se replie")
 
 
 # ---------------------------------------------------------------- Le Masque et Le Sceau

@@ -33,6 +33,7 @@ var lieu: String = "arene"           # "arene" | "camp" | "donjon"
 var prochain_donjon: int = 1         # id du prochain donjon lancé depuis le camp
 var monde: Monde = null              # la surface comme fenêtre glissante (étape 8.2a)
 var bombes: Array = []               # les bombes posées, en attente d'explosion (Explosions)
+var affuts: Array[Dictionary] = []   # tourelles portatives de L'Engrenage : {pos, source, prochain}
 var portails: Dictionary = {}   # idx de tuile → id du Passeur qui l'a ouvert (Talents de classe)
 var territoire: Dictionary = {"tresor": 0, "dette": 0, "semaines_dette": 0, "stocks": {}, "rapports": [], "gains_quetes": 0, "royaume": false,
 	"cultures": {}, "fertilite": {}, "etals": {}, "caisse": 0, "marge": 1.0, "clients": 0.0, "heure_resolue": -1, "absence": {"ventes": 0, "or": 0, "mures": 0},
@@ -1079,6 +1080,87 @@ func pieces_de_cellule(cell: Vector2i) -> Array:
 				continue
 			res.append({"tuiles": region.keys(), "meubles": types.keys(), "porte": porte})
 	return res
+
+
+## Le Fossoyeur (Talents de classe) : relever un cadavre en invocation temporaire, contre de la réputation.
+func _relever(e: Dictionary, cible_id: String, tick: int) -> bool:
+	var c: Dictionary = entites.get(cible_id, {})
+	var rl: Dictionary = regles.r.talents.releveur
+	if not a_talent(e, "releveur") or c.is_empty() or c.vivant or bool(c.get("releve", false)) or Grille.distance(e.pos, c.pos) > int(rl.portee) or not grille.occupant(c.pos).is_empty():
+		return false
+	c["releve"] = true
+	var x := ajouter(str(c.def), c.pos, "ia")
+	x.camp = e.camp
+	x["maitre"] = e.id
+	x["fin_invocation"] = tick + int(rl.duree_ticks)
+	x.horloge = e.horloge
+	x.compteur = tick + 1
+	if not ("releve" in x.get("tags", [])):
+		x.tags.append("releve")
+	if not e.has("reputations"):
+		e["reputations"] = {}
+	for v in e.reputations.keys():
+		e.reputations[v] = clampi(int(e.reputations[v]) + int(rl.reputation), -100, 100)
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.releve", {"nom": e.name_key, "cible": c.name_key, "n": -int(rl.reputation)}])
+	return true
+
+
+## L'Engrenage : déployer l'affût sur une tuile libre adjacente — une seule, redéployer la déplace.
+func _deployer_affut(e: Dictionary, t: Vector2i, tick: int) -> bool:
+	if not a_talent(e, "affut") or Grille.distance(e.pos, t) != 1 or not grille.dans(t) or grille.bloque_passage(t) or not grille.occupant(t).is_empty():
+		return false
+	_replier_affut(e)
+	grille.poser_contenu(t, "barriere")
+	affuts.append({"pos": t, "source": e.id, "prochain": tick + int(regles.r.talents.affut.cadence_ticks)})   # le temps de l'armer
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.affut_pose", {"nom": e.name_key}])
+	EventBus.emettre(&"tile_changed", [t])
+	return true
+
+
+func _replier_affut(e: Dictionary) -> void:
+	for a in affuts.duplicate():
+		if str(a.source) == e.id:
+			grille.contenu[grille.idx(a.pos)] = 0
+			EventBus.emettre(&"tile_changed", [a.pos])
+			affuts.erase(a)
+
+
+## Les affûts tirent à leur cadence sur l'ennemi le plus proche, avec les éléments de l'arme du propriétaire ;
+## chaque tir consomme une munition du carquois, sans munition l'affût se replie.
+func _tirs_d_affuts(nom: String, tick: int) -> void:
+	var af: Dictionary = regles.r.talents.get("affut", {})
+	for a in affuts.duplicate():
+		var src: Dictionary = entites.get(str(a.source), {})
+		if src.is_empty() or src.horloge != nom or int(a.prochain) > tick:
+			continue
+		if not src.vivant:
+			_replier_affut(src)
+			continue
+		if int(src.munitions) <= 0:   # le compteur de munitions de l'être (Projectiles)
+			EventBus.emettre(&"journal", [&"journal.affut_replie", {}])
+			_replier_affut(src)
+			continue
+		a.prochain = tick + int(af.cadence_ticks)
+		var cible: Dictionary = {}
+		var dmin := int(af.portee) + 1
+		for x in vivants():
+			if x.camp == src.camp or x.camp == "civil":
+				continue
+			var dist := Grille.distance(a.pos, x.pos)
+			if dist < dmin and grille.ligne_de_vue(a.pos, x.pos):
+				dmin = dist
+				cible = x
+		if cible.is_empty():
+			continue
+		src.munitions = int(src.munitions) - 1
+		src.munitions_tirees = int(src.get("munitions_tirees", 0)) + 1
+		var arme := Etres.arme(src, items)
+		var elems: Dictionary = arme.get("elements", {}) if arme.get("elements") != null else {}
+		var deg := des.jet(str(af.degats))
+		_appliquer_degats(cible, deg, src.id, {"type": str(af.get("type", "perforant")), "element": elems, "affut": true})
+		EventBus.emettre(&"journal", [&"journal.affut_tire", {"nom": cible.name_key, "degats": deg}])
 
 
 ## Le Masque (Talents de classe) : porter ou retirer un masque — un statut, à 0 tick, deux au plus.
@@ -5154,6 +5236,12 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 		if src.is_empty() or src.horloge != nom or int(gl.fin) > tick:
 			g_restants.append(gl)
 	glyphes = g_restants
+	for x in vivants():   # les relevés du Fossoyeur retournent à la terre
+		if x.has("fin_invocation") and x.horloge == nom and int(x.fin_invocation) <= tick:
+			x.vivant = false
+			grille.liberer(x.pos)
+			EventBus.emettre(&"journal", [&"journal.releve_fin", {"nom": x.name_key}])
+	_tirs_d_affuts(nom, tick)
 	var o_restants: Array[Dictionary] = []
 	for o in obstacles:
 		var src: Dictionary = entites.get(o.source, {})
@@ -5301,6 +5389,10 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _traverser(e, h.ticks)
 		"masque":
 			ok = _porter_masque(e, str(i.get("masque", "")), h.ticks)
+		"relever":
+			ok = _relever(e, str(i.get("cible", "")), h.ticks)
+		"affut":
+			ok = _deployer_affut(e, i.get("cible", e.pos), h.ticks)
 		"declencher_glyphe":
 			ok = _declencher_glyphe_distance(e, i.get("cible", e.pos), h.ticks)
 		"tempo":

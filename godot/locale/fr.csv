@@ -400,6 +400,19 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+classe.le_fossoyeur.name,Le Fossoyeur
+classe.l_engrenage.name,L'Engrenage
+talent.releveur.name,Releveur
+talent.releveur.desc,"Relève les cadavres en invocations de 60 ticks ; chaque relève coûte de la réputation partout."
+talent.affut.name,Affût
+talent.affut.desc,"Une tourelle portative qui tire avec l'élément de ton arme et mange ton carquois."
+option.relever,"Relever : {nom}"
+option.affut,Déployer l'affût
+journal.releve,"{nom} relève {cible} (réputation −{n})"
+journal.releve_fin,"{nom} retourne à la terre"
+journal.affut_pose,"{nom} déploie son affût"
+journal.affut_tire,"l'affût touche {nom} ({degats})"
+journal.affut_replie,l'affût se replie : plus de munitions
 classe.le_masque.name,Le Masque
 classe.le_sceau.name,Le Sceau
 talent.masques.name,Masques

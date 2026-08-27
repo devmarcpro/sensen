@@ -853,6 +853,17 @@
       "mana_mult": 2,
       "gravure_ticks": 6,
       "portee_declenchement": 8
+    },
+    "releveur": {
+      "duree_ticks": 60,
+      "portee": 2,
+      "reputation": -10
+    },
+    "affut": {
+      "portee": 6,
+      "cadence_ticks": 4,
+      "degats": "1d6",
+      "type": "perforant"
     }
   },
   "bombes": {

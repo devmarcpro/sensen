@@ -12,7 +12,9 @@
     "le_passeur",
     "le_sablier",
     "le_masque",
-    "le_sceau"
+    "le_sceau",
+    "le_fossoyeur",
+    "l_engrenage"
   ],
   "leadership": false,
   "portefeuille": 30,

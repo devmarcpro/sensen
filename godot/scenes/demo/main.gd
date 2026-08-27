@@ -664,6 +664,13 @@ func _options_tuile(t: Vector2i) -> Array:
 		res.append({"id": "lancer_etre", "vers": t})
 	if d == 0 and sim.portails.has(g.idx(t)):
 		res.append({"id": "traverser"})
+	if sim.a_talent(j, "releveur") and d <= int(sim.regles.r.talents.releveur.portee) and g.occupant(t).is_empty():
+		for x in sim.entites.values():
+			if not x.vivant and x.pos == t and not bool(x.get("releve", false)):
+				res.append({"id": "relever", "cible": str(x.id), "nom": tr(x.name_key)})
+				break
+	if sim.a_talent(j, "affut") and d == 1 and g.dans(t) and not g.bloque_passage(t) and g.occupant(t).is_empty():
+		res.append({"id": "affut", "cible": t})
 	if d == 0 and sim.a_talent(j, "masques"):
 		for sid in sim.statuts_defs.keys():
 			if "masque" in sim.statuts_defs[sid].get("tags", []):
@@ -735,6 +742,10 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "traverser"})
 		"masque":
 			sim.intention(joueur_id, {"type": "masque", "masque": str(opt.masque)})
+		"relever":
+			sim.intention(joueur_id, {"type": "relever", "cible": str(opt.cible)})
+		"affut":
+			sim.intention(joueur_id, {"type": "affut", "cible": opt.cible})
 		"declencher_glyphe":
 			sim.intention(joueur_id, {"type": "declencher_glyphe", "cible": opt.cible})
 		"poser_portail":
@@ -923,6 +934,8 @@ func _draw() -> void:
 		_losange(survol, Color(1, 1, 1, 0.22))
 	for b in sim.bombes:
 		_losange(b.pos, Color(1.0, 0.4, 0.1, 0.7))
+	for a in sim.affuts:   # les affûts de L'Engrenage
+		_losange(a.pos, Color(0.6, 0.6, 0.65, 0.8))
 	for pi in sim.portails.keys():   # les brèches du Passeur
 		_losange(sim.grille.pos_de(int(pi)), Color(0.6, 0.3, 0.9, 0.7))
 	if not sim.donjon.is_empty() and sim.donjon.escalier != null:

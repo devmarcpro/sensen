@@ -1,0 +1,21 @@
+{
+  "name_key": "classe.l_engrenage.name",
+  "bonus_stats": {
+    "dexterite": 2,
+    "perception": 1
+  },
+  "equipement": [],
+  "ratelier": [],
+  "competences": {
+    "tir": 4,
+    "artisanat": 4
+  },
+  "base_potentials": {
+    "_defaut": 100
+  },
+  "talent": "affut",
+  "points_creation_bonus": 15,
+  "tags": [
+    "cache"
+  ]
+}

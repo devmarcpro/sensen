@@ -1,0 +1,21 @@
+{
+  "name_key": "classe.le_fossoyeur.name",
+  "bonus_stats": {
+    "volonte": 2,
+    "esprit": 1
+  },
+  "equipement": [],
+  "ratelier": [],
+  "competences": {
+    "arcanes": 4,
+    "encaissement": 4
+  },
+  "base_potentials": {
+    "_defaut": 100
+  },
+  "talent": "releveur",
+  "points_creation_bonus": 15,
+  "tags": [
+    "cache"
+  ]
+}
