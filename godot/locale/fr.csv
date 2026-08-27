@@ -400,6 +400,13 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+race.spectre.name,Spectre
+talent.sans_chair.name,Sans chair
+talent.sans_chair.desc,"Dégâts physiques ×0,3, traverse un mur ; ni armure, ni soins de bouche ; les civils fuient."
+option.traverser_mur,Traverser le mur
+journal.spectre,"{nom} se relève… spectre"
+journal.armure_refusee,un spectre ne porte pas d'armure
+journal.traverse_mur,"{nom} passe à travers le mur"
 race.vampire.name,Vampire
 talent.soif_de_sang.name,Soif de sang
 talent.soif_de_sang.desc,"+3 à toutes les stats la nuit, brûle au jour ; une morsure remplit la jauge ; plus de plats."

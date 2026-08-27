@@ -1,0 +1,16 @@
+{
+  "name_key": "race.spectre.name",
+  "bonus_stats": {
+    "volonte": 2
+  },
+  "xp_mult": 1.1,
+  "base_potentials": {
+    "_defaut": 90
+  },
+  "talent": "sans_chair",
+  "lifespan": 80,
+  "tags": [
+    "cache",
+    "humanoide"
+  ]
+}

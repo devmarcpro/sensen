@@ -687,6 +687,10 @@ func _options_tuile(t: Vector2i) -> Array:
 			if not x.vivant and x.pos == t and not bool(x.get("releve", false)):
 				res.append({"id": "relever", "cible": str(x.id), "nom": tr(x.name_key)})
 				break
+	if sim.a_talent(j, "sans_chair") and d == 2 and g.dans(t) and not g.bloque_passage(t) and g.occupant(t).is_empty():
+		var dm: Vector2i = t - j.pos
+		if (dm.x == 0 or dm.y == 0 or absi(dm.x) == absi(dm.y)) and g.bloque_passage(j.pos + Vector2i(signi(dm.x), signi(dm.y))):
+			res.append({"id": "traverser_mur", "cible": t})
 	if sim.a_talent(j, "affut") and d == 1 and g.dans(t) and not g.bloque_passage(t) and g.occupant(t).is_empty():
 		res.append({"id": "affut", "cible": t})
 	if d == 0 and sim.a_talent(j, "masques"):
@@ -764,6 +768,8 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "relever", "cible": str(opt.cible)})
 		"mordre":
 			sim.intention(joueur_id, {"type": "mordre", "cible": str(opt.cible)})
+		"traverser_mur":
+			sim.intention(joueur_id, {"type": "traverser_mur", "cible": opt.cible})
 		"affut":
 			sim.intention(joueur_id, {"type": "affut", "cible": opt.cible})
 		"declencher_glyphe":

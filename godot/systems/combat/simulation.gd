@@ -1082,6 +1082,41 @@ func pieces_de_cellule(cell: Vector2i) -> Array:
 	return res
 
 
+## Le Spectre (Talents de race) : se relever spectre, traverser un mur d'une tuile.
+func _devenir_spectre(e: Dictionary) -> void:
+	e["race_origine"] = str(e.get("race", ""))
+	e.race = "spectre"
+	e["tags_acquis_race"] = GameData.catalogues.races.spectre.get("tags_acquis", []).duplicate()
+	for slot in regles.r.talents.sans_chair.slots_refuses:
+		if e.equipement.has(str(slot)):
+			e.equipement.erase(str(slot))
+	_contreparties(e)
+	EventBus.emettre(&"journal", [&"journal.spectre", {"nom": e.name_key}])
+
+
+func _traverser_mur(e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	if not a_talent(e, "sans_chair") or Grille.distance(e.pos, vers) != 2 or not grille.dans(vers):
+		return false
+	var d: Vector2i = vers - e.pos
+	if not (d.x == 0 or d.y == 0 or absi(d.x) == absi(d.y)):
+		return false
+	var milieu: Vector2i = e.pos + Vector2i(signi(d.x), signi(d.y))
+	if not grille.bloque_passage(milieu) or grille.bloque_passage(vers) or not grille.occupant(vers).is_empty():
+		return false
+	if Etres.bloque_statuts(e, "deplacement", statuts_defs):
+		return false
+	_quitter_garde(e)
+	grille.liberer(e.pos)
+	e.orientation = Vector2i(signi(d.x), signi(d.y))
+	e.pos = vers
+	grille.placer(e.id, vers)
+	e["vue_sale"] = true
+	e.compteur = tick + 2 * regles.ticks_deplacement(int(regles.r.deplacement.cout_base), e.competences_eff, en_combat(e))
+	_declencher_glyphe(e, vers)
+	EventBus.emettre(&"journal", [&"journal.traverse_mur", {"nom": e.name_key}])
+	return true
+
+
 ## Le Vampire (Talents de race) : la nuit le porte, le jour le brûle ; les mordus s'éveillent à l'aube.
 func _tiquer_vampires(nom: String, tick: int) -> void:
 	var nuit := est_nuit()
@@ -4533,6 +4568,9 @@ func _equiper(e: Dictionary, uid: String, tick: int) -> bool:
 	var slot := str(it.get("equip_slot", ""))
 	if slot.is_empty():
 		return false
+	if a_talent(e, "sans_chair") and slot in regles.r.talents.sans_chair.slots_refuses:   # le Spectre ne porte aucune armure
+		EventBus.emettre(&"journal", [&"journal.armure_refusee", {}])
+		return false
 	if slot == "anneau":
 		slot = "anneau_1" if not e.equipement.has("anneau_1") else ("anneau_2" if not e.equipement.has("anneau_2") else "anneau_1")
 	if slot == "main_secondaire":
@@ -4641,6 +4679,8 @@ func _respawn(e: Dictionary) -> bool:
 	e.endurance = e.endurance_max
 	e.statuts = []
 	e.action_en_cours = {}
+	if monde != null and lieu != "arene" and not a_talent(e, "sans_chair") and monde.corruption_de(_cell_de(e.pos)) >= float(regles.r.talents.sans_chair.corruption_seuil):
+		_devenir_spectre(e)   # mort en forte corruption sans Renaissance (Talents de race)
 	if lieu == "donjon" and not camp_sauve.is_empty() and e.has("lit"):
 		# Mort en expédition : on se relève au dernier lit, au camp (Mort et pénalité) ; l'expédition est finie.
 		grille.liberer(e.pos)
@@ -5140,6 +5180,8 @@ func poids_de(e: Dictionary) -> Dictionary:
 	for slot in e.equipement.keys():
 		total += regles.poids_objet(items.get(e.equipement[slot], {}), fonctionnalites)
 	var cap := regles.capacite_poids(e.stats_eff)
+	if a_talent(e, "sans_chair"):   # le Spectre : capacité fixe
+		cap = float(regles.r.talents.sans_chair.capacite_poids)
 	return {"poids": total, "capacite": cap, "facteur": regles.facteur_surcharge(total, cap)}
 
 
@@ -5164,7 +5206,7 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 	e.faim = mini(100, int(e.faim) + roundi(nutrition))
 	if avant < int(regles.r.faim.seuil_stats) and int(e.faim) >= int(regles.r.faim.seuil_stats):
 		Etres.recalculer(e, items, affixes_defs, regles)
-	if not str(it.get("soin_des", "")).is_empty():
+	if not str(it.get("soin_des", "")).is_empty() and not a_talent(e, "sans_chair"):   # le Spectre ne se soigne que par mana
 		var soin := des.jet(str(it.soin_des))
 		e["sang"] = 0
 		e.sante = mini(e.sante_max, int(e.sante) + soin)
@@ -5453,6 +5495,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _relever(e, str(i.get("cible", "")), h.ticks)
 		"mordre":
 			ok = _mordre(e, str(i.get("cible", "")), h.ticks)
+		"traverser_mur":
+			ok = _traverser_mur(e, i.get("cible", e.pos), h.ticks)
 		"affut":
 			ok = _deployer_affut(e, i.get("cible", e.pos), h.ticks)
 		"declencher_glyphe":
@@ -5915,6 +5959,8 @@ func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degat
 
 
 func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: Dictionary) -> void:
+	if a_talent(cible, "sans_chair") and str(detail.get("type", "")) in ["contondant", "tranchant", "perforant"]:   # le Spectre
+		degats = roundi(float(degats) * float(regles.r.talents.sans_chair.physique_mult))
 	_verser_xp(cible, degats, source, detail)
 	var avant_pct := float(cible.sante) / float(cible.sante_max)
 	cible.sante = maxi(0, cible.sante - degats)
@@ -6853,6 +6899,11 @@ func _verifier_desengagements() -> void:
 
 func _decider_ia(e: Dictionary, tick: int) -> void:
 	var profil: Dictionary = profils_ia.get(e.ai_profile, {})
+	if e.camp == "civil":   # les civils fuient un spectre à vue (Talents de race)
+		for x in vivants():
+			if a_talent(x, "sans_chair") and voit_ia(e, x):
+				appliquer_statut(e, "terreur", int(regles.r.talents.sans_chair.terreur_ticks), x.id)
+				break
 	var cible := _chercher_cible(e, tick)
 	var candidates := _actions_candidates(e, cible, profil, tick)
 	var meilleure := ""

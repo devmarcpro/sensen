@@ -868,6 +868,17 @@
     "soif_de_sang": {
       "degats_morsure": "1d6",
       "refresh_ticks": 200
+    },
+    "sans_chair": {
+      "corruption_seuil": 70,
+      "physique_mult": 0.3,
+      "capacite_poids": 5,
+      "terreur_ticks": 20,
+      "slots_refuses": [
+        "casque",
+        "cuirasse",
+        "jambieres"
+      ]
     }
   },
   "bombes": {

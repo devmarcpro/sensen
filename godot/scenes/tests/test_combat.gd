@@ -74,6 +74,7 @@ func _ready() -> void:
 	test_propagation_lumiere()
 	test_aciers_allies()
 	test_vampire()
+	test_spectre()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2455,6 +2456,42 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Le Spectre
+
+func test_spectre() -> void:
+	var s := Simulation.new(136)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	s.monde.delta[s._cell_de(j.pos)] = 100   # une cellule mortellement corrompue
+	verifier(s.monde.corruption_de(s._cell_de(j.pos)) >= 70.0, "la cellule est corrompue à %.0f" % s.monde.corruption_de(s._cell_de(j.pos)))
+	s._appliquer_degats(j, 9999, "", {"type": "test"})
+	verifier(not j.vivant, "le joueur meurt")
+	s._respawn(j)
+	verifier(j.vivant and j.race == "spectre" and s.a_talent(j, "sans_chair"), "il se relève spectre")
+	var pv := int(j.sante)
+	s._appliquer_degats(j, 10, "", {"type": "tranchant", "element": {}})
+	verifier(pv - int(j.sante) == 3, "10 tranchant → 3 subis (×0,3)")
+	verifier(s.poids_de(j).capacite == 5.0, "capacité de poids 5")
+	var casque := s.generer_objet("proto_casque_cuir", 1, {}, "commun", 0)
+	j.sac.append(casque.uid)
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "equiper", "objet": casque.uid}), "le casque est refusé")
+	# Traverser un mur d'une tuile
+	var mur: Vector2i = j.pos + Vector2i(1, 0)
+	var derriere: Vector2i = j.pos + Vector2i(2, 0)
+	s.grille.contenu[s.grille.idx(derriere)] = 0
+	s.grille.poser_contenu(mur, "mur")
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "traverser_mur", "cible": derriere}) and j.pos == derriere, "il passe à travers le mur")
+	# Un civil qui le voit prend peur
+	var v := s.ajouter("villageois", j.pos + Vector2i(0, 1), "ia")
+	s._habiller_pnj(v, GameData.entree("creatures", "villageois"))
+	v.camp = "civil"
+	s._decider_ia(v, s.horloge_monde.ticks)
+	verifier(Etres.a_statut_tag(v, "controle", s.statuts_defs), "le villageois est terrorisé")
+	s.monde.fermer()
 
 
 # ---------------------------------------------------------------- Le Vampire
