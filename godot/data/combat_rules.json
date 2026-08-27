@@ -139,5 +139,13 @@
   "projectiles": {
     "_doc": "Décision — Projectiles : trajectoire réelle, tir refusé si un allié masque, 50 % des munitions récupérées en fin de combat",
     "recuperation": 0.5
+  },
+  "progression": {
+    "_doc": "Progression par l'usage : skill_factor(N) = 1 + N × 0.02 · Structure compétences-modules-slots (ticks / skill_factor, plancher 50 %) · Boucle de tick (déplacement / skill_factor(Athlétisme), minimum 2)",
+    "skill_factor_par_niveau": 0.02,
+    "ticks_plancher_module": 0.5,
+    "deplacement_min": 2,
+    "esquive_par_niveau": 0.005,
+    "esquive_max": 0.33
   }
 }

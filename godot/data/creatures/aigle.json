@@ -35,5 +35,8 @@
   "tags": [
     "bete",
     "volant"
-  ]
+  ],
+  "competences": {
+    "athletisme": 40
+  }
 }

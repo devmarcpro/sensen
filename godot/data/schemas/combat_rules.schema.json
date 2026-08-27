@@ -45,6 +45,9 @@
     },
     "projectiles": {
       "type": "object"
+    },
+    "progression": {
+      "type": "object"
     }
   },
   "required": [

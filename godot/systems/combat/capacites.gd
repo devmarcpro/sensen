@@ -6,6 +6,8 @@ extends RefCounted
 ## {noyau, forme, dés, coûts, monnaie, conditions, drapeaux}. La géométrie des formes aussi.
 
 var modules: Dictionary   # le catalogue data/modules
+var par_niveau := 0.02    # skill_factor : + par niveau (combat_rules.progression)
+var plancher := 0.5       # ticks d'un module : jamais sous 50 % de sa base
 
 
 func _init(catalogue: Dictionary) -> void:
@@ -27,7 +29,15 @@ static func lire_surcout(s: Variant) -> Dictionary:
 
 ## Assemble une séquence d'ids de modules. `ticks_arme` / `des_arme` : pour les noyaux « arme ».
 ## Retourne le plan ; `plan.erreurs` liste ce que la séquence a d'invalide.
-func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme: Dictionary) -> Dictionary:
+## Ticks d'un module selon son niveau : base / skill_factor, plancher 50 % (décision du 2026-08-27).
+func ticks_module(base: int, id: String, niveaux: Dictionary) -> int:
+	if base <= 0:
+		return base
+	var sf := 1.0 + float(niveaux.get(id, 0)) * par_niveau
+	return maxi(int(ceilf(float(base) * plancher)), roundi(float(base) / sf))
+
+
+func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme: Dictionary, niveaux: Dictionary = {}) -> Dictionary:
 	var plan := {
 		"modules": sequence, "noyau": {}, "forme": {}, "erreurs": [], "avertissements": [],
 		"geometrie": "point", "portee": Vector2i(1, 1), "taille": 1, "ligne_de_vue": true,
@@ -50,7 +60,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				plan.avertissements.append("déclencheur non résolu dans le prototype : " + id)
 				plan.ticks += int(m.get("surcout_ticks", 0))
 				break
-			var suite := assembler(sequence.slice(k + 1), ticks_arme, des_arme, element_arme)
+			var suite := assembler(sequence.slice(k + 1), ticks_arme, des_arme, element_arme, niveaux)
 			suite["declencheur"] = str(ef.declencheur)
 			suite["duree_declencheur"] = int(ef.get("duree_ticks", 100))
 			suite["ticks_declencheur"] = int(ef.get("ticks", 20))
@@ -58,7 +68,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 			suite["n_declencheur"] = int(ef.get("n", 3))
 			suite["name_key"] = m.name_key
 			plan.charge_suivante = suite
-			plan.ticks += int(m.get("surcout_ticks", 0)) + int(suite.ticks)
+			plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux) + int(suite.ticks)
 			plan.erreurs.append_array(suite.erreurs)
 			break
 		match str(m.module_type):
@@ -68,16 +78,18 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 					continue
 				plan.noyau = m
 				var arme: bool = m.get("power_base") == "arme"
-				plan.ticks += ticks_arme if arme else int(m.cout_ticks)
+				plan.ticks += ticks_arme if arme else ticks_module(int(m.cout_ticks), id, niveaux)
 				plan.des = des_arme if arme else m.get("power_base")
 				plan.elements = element_arme.duplicate() if (arme or m.get("element_special") == "arme") else m.get("elements", {}).duplicate()
 				plan.effets = m.get("effets", []).duplicate()
+				# Ressource : coût de base / skill_factor(N_module) (Mana, Structure compétences-modules-slots).
+				var sf_noyau := 1.0 + float(niveaux.get(id, 0)) * par_niveau
 				if int(m.get("cout_mana", 0)) > 0:
 					plan.monnaie = "mana"
-					plan.ressource = int(m.cout_mana)
+					plan.ressource = roundi(float(m.cout_mana) / sf_noyau)
 				elif int(m.get("cout_endurance", 0)) > 0:
 					plan.monnaie = "endurance"
-					plan.ressource = int(m.cout_endurance)
+					plan.ressource = roundi(float(m.cout_endurance) / sf_noyau)
 				plan.parametres = m.get("effet", {}).duplicate()
 			"forme":
 				if not plan.forme.is_empty():
@@ -88,9 +100,9 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				plan.portee = Vector2i(int(m.portee_base[0]), int(m.portee_base[1]))
 				plan.taille = int(m.taille_base)
 				plan.ligne_de_vue = bool(m.get("ligne_de_vue", true))
-				plan.ticks += int(m.get("surcout_ticks", 0))
+				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 			"modificateur":
-				plan.ticks += int(m.get("surcout_ticks", 0))
+				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 				var s := lire_surcout(m.get("surcout_ressource"))
 				plus += s.plus
 				mult *= s.mult
@@ -116,9 +128,9 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 					continue
 				plan.conditions.append({"id": id, "name_key": m.name_key, "predicat": ef.predicat_structure,
 					"bonus": ef.bonus_structure, "ticks_rendus": float(ef.get("echec_ticks_rendus", 0.5))})
-				plan.ticks += int(m.get("surcout_ticks", 0))
+				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 			"liaison":
-				plan.ticks += int(m.get("surcout_ticks", 0))
+				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 				var ef: Dictionary = m.get("effet", {})
 				if ef.is_empty():
 					plan.avertissements.append("liaison non résolue dans le prototype : " + id)

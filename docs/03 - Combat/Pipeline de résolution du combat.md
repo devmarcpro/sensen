@@ -51,6 +51,11 @@ la reproductibilité en debug.
 
 **Jet de compétence universel (hors combat) :** voir [[Jet de compétence universel]].
 
+> [!success] Décidé le 2026-08-27 — les niveaux de compétence entrent dans les dégâts d'arme
+> Tranché par le designer. L'étape 3 devient :
+> `bruts = jet(dés) × (dureté_base/20) × qualité × skill_factor(N_arme) × skill_factor(N_type_dégâts) × Σ_e [proportion_e × (1 + niveau_élément_e / 100)] + For/4 (mêlée) ou Dex/4 (distance)`
+> avec `skill_factor(N) = 1 + N × 0,02` ([[Progression par l'usage]]). Trois compétences pèsent donc sur chaque coup — **l'arme** (Épée, Arc…), **le type de dégâts** (tranchant / perforant / contondant) et **l'élément dominant employé, pondéré par sa part dans le vecteur** (une arme mixte gagne moins qu'une pure — terme déjà présent dans [[Domination et multiplicateurs]]). Les niveaux sont à 0 jusqu'à l'étape 4 : le code porte les crochets (`competences` sur chaque être), le facteur vaut 1.
+
 ## Liens
 - **Dépend de** : [[Boucle de tick]], [[Mana]], [[Stats d'armes]], [[Fonctionnalité]]
 - **Alimente** : [[XP de combat]], [[Statuts]], [[Armure par zone et constructions]], [[Domination et multiplicateurs]]

@@ -11,6 +11,38 @@ func _init(regles: Dictionary) -> void:
 	r = regles
 
 
+# ---------------------------------------------------------------- progression
+
+## skill_factor(N) = 1 + N × 0,02 (Progression par l'usage).
+func skill_factor(niveau: int) -> float:
+	return 1.0 + float(niveau) * float(r.progression.skill_factor_par_niveau)
+
+
+func niveau(competences: Dictionary, cle: String) -> int:
+	return int(competences.get(cle, 0))
+
+
+## Facteur de compétences d'un coup d'arme : arme × type de dégâts × élément dominant pondéré
+## (Pipeline de résolution du combat, décision du 2026-08-27).
+func facteur_competences(competences: Dictionary, fonct: Dictionary, vecteur: Dictionary) -> float:
+	var f := skill_factor(niveau(competences, str(fonct.get("combat_skill", "")))) \
+		* skill_factor(niveau(competences, str(fonct.get("type_degats", ""))))
+	if not vecteur.is_empty():
+		var somme := 0.0
+		for e: String in vecteur.keys():
+			somme += float(vecteur[e]) * (1.0 + float(niveau(competences, "element_" + e)) / 100.0)
+		f *= somme
+	return f
+
+
+## Ticks de déplacement d'un être : coût de pente / skill_factor(Athlétisme) × esquive en combat, min 2.
+func ticks_deplacement(cout_pente: int, competences: Dictionary, en_combat: bool) -> int:
+	var k := 1.0 / skill_factor(niveau(competences, "athletisme"))
+	if en_combat:
+		k *= 1.0 - minf(float(r.progression.esquive_max), float(niveau(competences, "esquive")) * float(r.progression.esquive_par_niveau))
+	return maxi(int(r.progression.deplacement_min), roundi(float(cout_pente) * k))
+
+
 # ---------------------------------------------------------------- stats dérivées
 
 func sante_max(stats: Dictionary) -> int:
@@ -76,9 +108,9 @@ func degats_finaux(bruts: float, zone_mult: float, armure: float, garde_tient: b
 
 ## bruts = jet(dés) × (dureté_base/20) × qualité + For/4 (mêlée) ou Dex/4 (distance),
 ## ×2.2 en lourde, ×0.6 à zéro d'endurance.
-func degats_arme(stats: Dictionary, arme: Dictionary, fonct: Dictionary, des: Des, lourde: bool, endurance_a_zero: bool, des_bonus: int = 0) -> Dictionary:
+func degats_arme(stats: Dictionary, arme: Dictionary, fonct: Dictionary, des: Des, lourde: bool, endurance_a_zero: bool, des_bonus: int = 0, competences: Dictionary = {}, vecteur: Dictionary = {}) -> Dictionary:
 	var jet := des.jet(fonct.degats_des, des_bonus)
-	var mult := float(arme.durete_base) / float(r.degats.durete_reference) * float(arme.qualite)
+	var mult := float(arme.durete_base) / float(r.degats.durete_reference) * float(arme.qualite) * facteur_competences(competences, fonct, vecteur)
 	var distance := portee_de(fonct).y > 1 and int(fonct.get("portee_min", 1)) > 1
 	var stat := int(stats.dexterite if distance else stats.force) / int(r.degats.stat_div)
 	var bruts := float(jet) * mult + float(stat)
@@ -101,9 +133,9 @@ func degats_action(stats: Dictionary, action: Dictionary, des: Des, endurance_a_
 
 ## Fourchette [min, max] des dégâts finaux d'une arme (prévisualisation UI, détail du calcul).
 ## `k_ext` : facteur externe (Wu Xing : domination × gain × chaîne).
-func fourchette_arme(stats: Dictionary, arme: Dictionary, fonct: Dictionary, lourde: bool, zone_mult: float, armure: float, endurance_a_zero: bool, k_ext: float = 1.0) -> Vector2i:
+func fourchette_arme(stats: Dictionary, arme: Dictionary, fonct: Dictionary, lourde: bool, zone_mult: float, armure: float, endurance_a_zero: bool, k_ext: float = 1.0, competences: Dictionary = {}, vecteur: Dictionary = {}) -> Vector2i:
 	var f := Des.fourchette(fonct.degats_des)
-	var mult := float(arme.durete_base) / float(r.degats.durete_reference) * float(arme.qualite)
+	var mult := float(arme.durete_base) / float(r.degats.durete_reference) * float(arme.qualite) * facteur_competences(competences, fonct, vecteur)
 	var distance := int(fonct.get("portee_min", 1)) > 1
 	var stat := int(stats.dexterite if distance else stats.force) / int(r.degats.stat_div)
 	var k := (float(r.actions.lourde_mult_degats) if lourde else 1.0) * (float(r.endurance.a_zero_degats_mult) if endurance_a_zero else 1.0) * k_ext

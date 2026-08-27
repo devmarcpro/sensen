@@ -23,6 +23,7 @@ func _ready() -> void:
 	test_liaisons()
 	test_glyphes_terrain()
 	test_evenements()
+	test_niveaux()
 	test_arenes_autonomes()
 	if echecs == 0:
 		print("TESTS : tout passe")
@@ -825,3 +826,32 @@ func test_evenements() -> void:
 	s.pas(j.horloge)
 	s.intention(j.id, {"type": "attaquer", "cible": loups[0].id, "lourde": false})
 	verifier(not loups[0].vivant and j.sante < pvj, "le loup tombe : son Testament en anneau frappe le joueur")
+
+
+# ---------------------------------------------------------------- Niveaux de compétence (décisions du 2026-08-27)
+
+func test_niveaux() -> void:
+	var r := Regles.new(GameData.config("combat_rules"))
+	verifier(is_equal_approx(r.skill_factor(50), 2.0), "skill_factor(50) = 2.0")
+	var epee: Dictionary = GameData.entree("functionalities", "epee")
+	verifier(is_equal_approx(r.facteur_competences({}, epee, {"metal": 1.0}), 1.0), "sans niveau : facteur 1")
+	verifier(is_equal_approx(r.facteur_competences({"epee": 50}, epee, {"metal": 1.0}), 2.0), "Épée 50 : ×2")
+	verifier(is_equal_approx(r.facteur_competences({"tranchant": 50, "element_metal": 100}, epee, {"metal": 1.0}), 2.0 * 2.0), "tranchant 50 × Métal 100 : ×4")
+	verifier(is_equal_approx(r.facteur_competences({"element_metal": 100}, epee, {"metal": 0.5, "bois": 0.5}), 1.5), "arme mixte : le niveau d'élément pèse à hauteur de sa part")
+	# Déplacement : Athlétisme, minimum 2
+	verifier(r.ticks_deplacement(3, {}, false) == 3 and r.ticks_deplacement(3, {"athletisme": 25}, false) == 2, "3 ticks ; Athlétisme 25 → 2")
+	verifier(r.ticks_deplacement(3, {"athletisme": 200}, false) == 2, "jamais sous 2 ticks")
+	verifier(r.ticks_deplacement(8, {"athletisme": 50}, false) == 4, "montée +2 (8) / 2 = 4")
+	verifier(r.ticks_deplacement(3, {"esquive": 50}, true) == 2 and r.ticks_deplacement(3, {"esquive": 50}, false) == 3, "Esquive : −25 % en combat seulement")
+	var s := nouvelle_sim("plaine_au_talus")
+	var loup: Dictionary = s.entites["loup_2"]
+	verifier(int(loup.competences.get("athletisme", 0)) == 25, "le loup part avec Athlétisme 25 (modificateur de race)")
+	var t: int = s.horloge_monde.ticks
+	s._deplacer(loup, loup.pos + Vector2i(0, 1), t)
+	verifier(loup.compteur == t + 2, "le loup se déplace en 2 ticks")
+	# Modules : ticks / skill_factor, plancher 50 % ; ressource / skill_factor
+	var cap := Capacites.new(GameData.catalogues["modules"])
+	var p := cap.assembler(["ligne", "flamme", "concentration"], 5, "2d6", {}, {"flamme": 50, "ligne": 50, "concentration": 50})
+	verifier(p.ticks == 4 + 1 + 1 and p.ressource == 4 + 4, "niveau 50 partout : (8+2+2)/2 = 6 ticks · 8/2 + 4 = 8 mana")
+	p = cap.assembler(["ligne", "flamme"], 5, "2d6", {}, {"flamme": 1000})
+	verifier(p.ticks == 4 + 2, "plancher : Flamme ne descend jamais sous 4 ticks")

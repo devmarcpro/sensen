@@ -36,6 +36,9 @@ Monter un module en niveau le rend plus puissant ET moins coûteux (puissance : 
 
 **Écran dédié ([[Écrans d'interface]]) :** *Assemblage de compétences (slots armes/modules, coûts mana)*.
 
+> [!success] Décidé le 2026-08-27 — le niveau d'un module réduit aussi ses ticks
+> Tranché par le designer : « plus une attaque est complexe, plus elle coûte de ressources et de ticks ; moins si les modules employés sont haut niveau ». En plus de `cout_module_effectif = cout_base / skill_factor(N_module)` (ressource, sans plancher), chaque module de la séquence contribue `ticks_effectifs = max(ticks_base × 0,5, ticks_base / skill_factor(N_module))` — **plancher à 50 %** : la complexité coûte toujours du temps, un module de niveau 100 ne devient jamais gratuit. Les surcoûts en ticks des formes, modificateurs, conditions, déclencheurs et liaisons suivent la même règle, chacun avec son propre niveau.
+
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Progression par l'usage]]
 - **Alimente** : [[Six types de modules et assemblage]], [[Mana]], [[Vocabulaire des modules — six axes]]

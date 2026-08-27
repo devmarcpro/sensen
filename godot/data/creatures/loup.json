@@ -35,5 +35,8 @@
   "tags": [
     "bete",
     "meute"
-  ]
+  ],
+  "competences": {
+    "athletisme": 25
+  }
 }

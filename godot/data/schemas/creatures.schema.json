@@ -144,6 +144,9 @@
         }
       },
       "maxItems": 3
+    },
+    "competences": {
+      "type": "object"
     }
   },
   "required": [

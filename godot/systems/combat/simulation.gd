@@ -37,6 +37,8 @@ func _init(p_graine: int) -> void:
 	regles = Regles.new(GameData.config("combat_rules"))
 	wuxing = WuXing.new(GameData.config("wuxing"))
 	capacites = Capacites.new(GameData.catalogues.get("modules", {}))
+	capacites.par_niveau = float(regles.r.progression.skill_factor_par_niveau)
+	capacites.plancher = float(regles.r.progression.ticks_plancher_module)
 	items = GameData.catalogues.get("items", {})
 	fonctionnalites = GameData.catalogues.get("functionalities", {})
 	actions_creatures = GameData.catalogues.get("creature_actions", {})
@@ -271,9 +273,9 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	e.orientation = vers - e.pos
 	e.pos = vers
 	grille.placer(e.id, vers)
-	e.compteur = tick + _ticks_avec_statuts(e, cout)
+	e.compteur = tick + _ticks_avec_statuts(e, regles.ticks_deplacement(cout, e.competences, en_combat(e)))
 	_declencher_glyphe(e, vers)
-	EventBus.emettre(&"journal", [&"journal.deplacement", {"nom": e.name_key, "cout": cout}])
+	EventBus.emettre(&"journal", [&"journal.deplacement", {"nom": e.name_key, "cout": e.compteur - tick}])
 	if chute > 0:
 		var d := grille.degats_chute(chute)
 		EventBus.emettre(&"journal", [&"journal.chute", {"nom": e.name_key, "niveaux": chute, "degats": d}])
@@ -398,8 +400,8 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 	if est_distance(fonct):
 		e.munitions -= 1
 		e.munitions_tirees += 1
-	var d := regles.degats_arme(e.corps.stats, arme, fonct, des, lourde, a_zero)
 	var vecteur := vecteur_arme(arme)
+	var d := regles.degats_arme(e.corps.stats, arme, fonct, des, lourde, a_zero, 0, e.competences, vecteur)
 	var wx := _facteur_wuxing(e, cible, vecteur, tick_de(e))
 	var res := _resoudre_coup(e, cible, d.bruts * wx.total * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur)
 	res.merge(wx)
@@ -801,7 +803,7 @@ func plan_capacite(e: Dictionary, index: int) -> Dictionary:
 	var arme := Etres.arme(e, items)
 	var fonct: Dictionary = fonctionnalites.get(arme.get("functionality", ""), {})
 	var ticks_arme := regles.ticks_attaque(fonct, false) if not fonct.is_empty() else int(regles.r.actions.attaque_base)
-	var plan := capacites.assembler(caps[index].modules, ticks_arme, fonct.get("degats_des", "1d4"), vecteur_arme(arme))
+	var plan := capacites.assembler(caps[index].modules, ticks_arme, fonct.get("degats_des", "1d4"), vecteur_arme(arme), e.competences)
 	plan["id"] = caps[index].id
 	plan["name_key"] = caps[index].get("name_key", "")
 	plan["arme"] = arme
@@ -1199,7 +1201,7 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 	var d: Dictionary
 	var type_degats := "magique"
 	if arme_noyau and not plan.arme.is_empty():
-		d = regles.degats_arme(e.corps.stats, plan.arme, plan.fonct, des, false, a_zero, int(plan.des_bonus))
+		d = regles.degats_arme(e.corps.stats, plan.arme, plan.fonct, des, false, a_zero, int(plan.des_bonus), e.competences, plan.elements)
 		type_degats = str(plan.fonct.type_degats)
 	else:
 		var jet := des.jet(plan.des, int(plan.des_bonus))

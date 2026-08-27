@@ -18,6 +18,7 @@ var joueur_id := ""
 var chemin_en_cours: Array[Vector2i] = []
 var minuterie_pas := 0.0
 var minuterie_ui := 0.0
+var minuterie_clavier := 0.0        # cadence des pas au clavier (ZQSD maintenu)
 var survol := Vector2i(-1, -1)
 var journal: Array[String] = []
 var telegraphes: Dictionary = {}   # id → action engagée
@@ -86,10 +87,13 @@ func _charger() -> void:
 
 
 func _recentrer() -> void:
-	var taille := get_viewport_rect().size
-	camera_offset = Vector2(taille.x * 0.5, 140)
-	position = camera_offset
 	scale = Vector2.ONE * zoom
+	var j := joueur()
+	if j.is_empty():
+		return
+	var taille := get_viewport_rect().size
+	# Le joueur est centré à l'écran, la vue le suit (Écrans d'interface, décision du 2026-08-27).
+	position = taille * 0.5 - _ecran(j.pos, sim.grille.h(j.pos)) * zoom
 
 
 func joueur() -> Dictionary:
@@ -116,6 +120,25 @@ func _process(delta: float) -> void:
 	var j := joueur()
 	if j.is_empty():
 		return
+	_recentrer()
+	# ZQSD (8 directions d'écran) : Z = haut, S = bas, Q = gauche, D = droite ; deux touches = diagonale.
+	minuterie_clavier -= delta
+	if sim.attente.has(joueur_id) and visee < 0 and minuterie_clavier <= 0.0:
+		var dir := Vector2i.ZERO
+		if Input.is_key_pressed(KEY_Z):
+			dir += Vector2i(-1, -1)
+		if Input.is_key_pressed(KEY_S):
+			dir += Vector2i(1, 1)
+		if Input.is_key_pressed(KEY_D):
+			dir += Vector2i(1, -1)
+		if Input.is_key_pressed(KEY_Q):
+			dir += Vector2i(-1, 1)
+		dir = Vector2i(signi(dir.x), signi(dir.y))
+		if dir != Vector2i.ZERO:
+			chemin_en_cours.clear()
+			minuterie_clavier = 0.15
+			if not sim.intention(joueur_id, {"type": "deplacer", "vers": j.pos + dir}):
+				_log(tr("journal.inaccessible"))
 	# En attente d'intention : on consomme la file d'ordres du joueur (un pas par décision).
 	if sim.attente.has(joueur_id) and not chemin_en_cours.is_empty():
 		var cible: Vector2i = chemin_en_cours[0]
@@ -157,9 +180,6 @@ func _unhandled_input(ev: InputEvent) -> void:
 		return
 	if ev is InputEventMouseMotion:
 		survol = _tuile_sous(get_local_mouse_position())
-		if ev.button_mask & MOUSE_BUTTON_MASK_MIDDLE:
-			camera_offset += ev.relative
-			position = camera_offset
 	elif ev is InputEventMouseButton and ev.pressed:
 		if ev.button_index == MOUSE_BUTTON_WHEEL_UP:
 			zoom = minf(2.0, zoom * 1.1)
@@ -475,13 +495,13 @@ func _preview(j: Dictionary, cible: Dictionary) -> Array[String]:
 	var a_zero: bool = j.endurance <= 0
 	var vecteur := sim.vecteur_arme(arme)
 	var wx: Dictionary = sim._facteur_wuxing(j, cible, vecteur, sim.horloge_de(j).ticks)
-	var f := sim.regles.fourchette_arme(j.corps.stats, arme, fonct, false, zone.mult, armure, a_zero, wx.total)
+	var f := sim.regles.fourchette_arme(j.corps.stats, arme, fonct, false, zone.mult, armure, a_zero, wx.total, j.competences, vecteur)
 	var stat := int(j.corps.stats.force) / int(sim.regles.r.degats.stat_div)
 	res.append("  " + tr("ui.preview").format({"nom": tr(arme.name_key), "des": fonct.degats_des,
 		"dur": "%.2f" % (float(arme.durete_base) / float(sim.regles.r.degats.durete_reference) * float(arme.qualite)),
 		"stat": stat, "zone": zone.zone, "mult": zone.mult, "armure": "%.1f" % armure,
 		"min": f.x, "max": f.y, "ticks": sim.regles.ticks_attaque(fonct, false)}))
-	var fl := sim.regles.fourchette_arme(j.corps.stats, arme, fonct, true, zone.mult, armure, a_zero, wx.total)
+	var fl := sim.regles.fourchette_arme(j.corps.stats, arme, fonct, true, zone.mult, armure, a_zero, wx.total, j.competences, vecteur)
 	res.append("  " + tr("ui.preview.lourde").format({"lourde": "%d–%d" % [fl.x, fl.y], "ticks": sim.regles.ticks_attaque(fonct, true)}))
 	if not vecteur.is_empty():
 		var contre: Array[String] = []

@@ -35,5 +35,8 @@
   "tags": [
     "bete",
     "poison"
-  ]
+  ],
+  "competences": {
+    "athletisme": 5
+  }
 }

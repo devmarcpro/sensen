@@ -36,6 +36,11 @@ Le temps calendaire (jour/nuit, semaine in-game) est un compteur de ticks :
 
 **Budget de performance ([[Budgets de performance]]) :** tick complet < 8 ms (marge sur les 100 ms du tick).
 
+> [!success] Décidé le 2026-08-27 — la vitesse de déplacement n'est pas une stat, c'est une compétence
+> Tranché par le designer : « améliorable ou altérable comme tout, pas de vitesse fixe ». Le déplacement d'une tuile coûte
+> `ticks = 3 × modificateur_de_dénivelé / skill_factor(N_athlétisme) × facteur_esquive (en combat, [[Décision — Esquive active]]) × facteur_poids ([[Armures et poids porté]]) × facteur_friction ([[Application des stats de matériau]])`, arrondi, **minimum 2**.
+> **Athlétisme** ([[Compétences — liste]] : course/saut/nage) est la compétence de la course. La différence entre un loup et un humain est un **modificateur de race** : la fiche déclare des niveaux de départ (`competences` — un loup part avec un Athlétisme élevé), rien n'est figé. Hâte, Ralentissement, équipement +Athlétisme passent par les mécanismes existants. Poids porté et friction n'existent pas encore dans le prototype (facteur 1). La règle « 3 ticks × modificateur de dénivelé, modulé par vitesse/poids porté » ci-dessus est ainsi chiffrée.
+
 ## Liens
 - **Dépend de** : [[Action-time à ticks]], [[Simulation à ticks]]
 - **Alimente** : [[Pipeline de résolution du combat]], [[Endurance]], [[Mana]], [[Faim]], [[Cycle jour-nuit et sommeil]], [[Dérive de la corruption]]

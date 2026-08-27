@@ -24,6 +24,9 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 
 **Rafraîchissement à chaud ([[Localisation]]) :** signal `locale_changed` → toute l'UI se rafraîchit.
 
+> [!success] Décidé le 2026-08-27 — contrôles et caméra du prototype
+> Tranché par le designer : **pas de rotation de caméra** (une seule vue isométrique). Le joueur est **centré à l'écran**, la vue le suit. Déplacement au clavier **ZQSD en 8 directions** (Z = haut de l'écran, D = droite, etc. ; deux touches ensemble = diagonale d'écran, soit un axe de la grille). La souris garde la visée : clic sur un être pour frapper, sur une tuile pour s'y rendre, capacités par F1-F3 puis clic. Le clavier n'entre jamais dans la logique : le client convertit une touche en intention de déplacement d'une tuile ([[Contraintes permanentes]]).
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]
