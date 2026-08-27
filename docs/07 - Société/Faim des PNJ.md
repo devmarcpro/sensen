@@ -18,6 +18,9 @@ Les PNJ résidents ont la même jauge de faim que le joueur (même système, [[S
 
 **Timers ([[Simulation du monde — performance]]) :** la faim des PNJ ne tourne pas par tick — timer wheel globale.
 
+> [!success] Codé le 2026-08-28
+> Chaque semaine, chaque résident mange **une unité** prise dans les **garde-manger** du territoire (fenêtre chargée ; tout consommable à nutrition > 0, une unité par pile) ; garde-manger vide → **humeur −10** (`combat_rules.royaume.faim_pnj`) et journal. Pas de jauge par tick pour les PNJ : une seule échéance hebdomadaire.
+
 ## Liens
 - **Dépend de** : [[Faim]], [[Schéma unifié créature-PNJ]], [[Agriculture et élevage]]
 - **Alimente** : [[Habitat des PNJ]], [[Population et exploitation]], [[Abstraction hors-site]]

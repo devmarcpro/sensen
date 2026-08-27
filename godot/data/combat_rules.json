@@ -725,7 +725,17 @@
       "creature_boutique": "marchand",
       "creature_hall": "maitre_de_guilde",
       "hall_rang_min": 3
-    }
+    },
+    "pieces": {
+      "surface_min": 6,
+      "surface_bonus": 12,
+      "bonus_taille": 5,
+      "bonus_par_meuble": 1,
+      "bonus_meubles_max": 10,
+      "co_occupant": -5,
+      "fill_max": 1024
+    },
+    "faim_pnj": -10
   },
   "alchimie": {
     "_doc": "Alchimie (Cuisine et alchimie) : parties droppées par les bêtes (une par mort), stat orientée ; qualité ≥ seuil_forte → statut fort ; durée des potions × qualité.",

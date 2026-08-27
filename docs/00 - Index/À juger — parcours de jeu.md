@@ -49,6 +49,7 @@ etape: 10
 ## 5. Le territoire — claims, production, raids, royaume (15 min)
 
 - **Claim** (clic sur une cellule voisine depuis M) : le coût `50 or × cellules` est-il lisible ? — [[Expansion territoriale]]
+- **Logement et faim** : bâtir une chambre (murs, porte, lit, un meuble, ≥ 6 tuiles) et garnir un garde-manger — les −15 / −10 d'humeur se voient-ils sur la production ? — [[Habitat des PNJ]], [[Faim des PNJ]]
 - **Semaine** (= 21 nuits) : la production d'un résident se voit-elle ? L'écran de gestion (K) en liste suffit-il ? — [[Population et exploitation]]
 - **Parcelles** : un jour de pousse à 24 000 ticks est-il long ? La récolte au clic ? — [[Agriculture et élevage]]
 - **Boutique passive** : caisse séparée du trésor (à relever sur l'étal) — bon ou agaçant ? **Troc d'office** des marchands à sec sans écran d'acceptation ? — [[Boutique passive]], [[Économie — sources et puits]]

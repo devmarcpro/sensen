@@ -38,6 +38,9 @@ Les PNJ résidant sur la base/claim du joueur (compagnons recrutés, animaux —
 
 **Rôle de case dédié ([[Rôles de cases]]) :** « Habitation » — seules les pièces de ce rôle comptent pour la capacité de logement.
 
+> [!success] Codé le 2026-08-28
+> Au passage de semaine, l'humeur d'un résident est **recalculée** : `60 − 15 sans pièce valide autour de son lit` ; pièce valide : **+1 par type de meuble distinct** (max +10), **+5 à 12 tuiles**, **−5 par co-occupant** au-delà du premier (autres résidents dont le lit est dans la même pièce) ; puis la faim (−10 sans nourriture au garde-manger) et la dette. Le statut bétail et la rétrogradation attendent (pas de bétail-résident pour l'instant).
+
 ## Liens
 - **Dépend de** : [[Détection de pièces]], [[Construction cadrée]], [[Rôles de cases]], [[Schéma créature]]
 - **Alimente** : [[Population et exploitation]], [[Abstraction hors-site]], [[Villages PNJ — repeuplement et décimation]], [[Entretien et taxes]]

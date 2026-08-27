@@ -1023,6 +1023,111 @@ func _verifier_royaume(e: Dictionary) -> void:
 		EventBus.emettre(&"journal", [&"journal.royaume_fonde", {"gouv": GameData.entree("governments", territoire.gouvernance).name_key}])
 
 
+## Les pièces valides d'une cellule (Détection de pièces, Décision — Pièces en 2D) : flood fill depuis chaque porte.
+func pieces_de_cellule(cell: Vector2i) -> Array:
+	var res: Array = []
+	if monde == null or lieu != "camp":
+		return res
+	var pc: Dictionary = _ry().pieces
+	var vues: Dictionary = {}
+	for i in grille.contenu.size():
+		if grille.contenu[i] <= 0 or grille.contenu_ids[grille.contenu[i]] != "porte":
+			continue
+		var porte := grille.pos_de(i)
+		if _cell_de(porte) != cell:
+			continue
+		for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var depart: Vector2i = porte + d
+			if not grille.dans(depart) or vues.has(depart) or grille.bloque_passage(depart):
+				continue
+			var region: Dictionary = {}
+			var pile: Array = [depart]
+			var ouvert := false
+			while not pile.is_empty() and region.size() <= int(pc.fill_max):
+				var q: Vector2i = pile.pop_back()
+				if region.has(q):
+					continue
+				if not grille.dans(q) or _cell_de(q) != cell:
+					ouvert = true
+					break
+				var tags: Array = grille.contenu_de(q).get("tags", [])
+				if "mur" in tags or "porte" in tags:
+					continue
+				if grille.bloque_passage(q) and not grille.meubles.has(grille.idx(q)):
+					continue
+				region[q] = true
+				for d2 in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+					pile.append(q + d2)
+			for q in region.keys():
+				vues[q] = true
+			if ouvert or region.size() > int(pc.fill_max) or region.size() < int(pc.surface_min):
+				continue
+			var types: Dictionary = {}
+			for q in region.keys():
+				if grille.meubles.has(grille.idx(q)):
+					types[str(grille.meubles[grille.idx(q)])] = true
+			if types.is_empty():
+				continue
+			res.append({"tuiles": region.keys(), "meubles": types.keys(), "porte": porte})
+	return res
+
+
+## La pièce d'un lit (ou vide).
+func _piece_du_lit(lit: Vector2i, pieces: Array) -> Dictionary:
+	for pi in pieces:
+		if lit in pi.tuiles:
+			return pi
+	return {}
+
+
+## Les humeurs recalculées au passage de semaine (Habitat des PNJ, Faim des PNJ) : logement, chambre, co-occupants, faim.
+func _recalculer_humeurs() -> void:
+	var ry := _ry()
+	var pc: Dictionary = ry.pieces
+	var pieces_par_cell: Dictionary = {}
+	var res := residents()
+	var garde_manger: Array = []
+	for gi in grille.meubles.keys():
+		if str(GameData.entree("meubles", str(grille.meubles[gi])).type_meuble) == "garde_manger" and monde.claims.has(_cell_de(grille.pos_de(int(gi)))):
+			garde_manger.append(int(gi))
+	for x in res:
+		var h := int(ry.humeur_base)
+		var lit: Vector2i = x.get("lit", Vector2i(-1, -1))
+		var cell := _cell_de(lit) if lit != Vector2i(-1, -1) else Vector2i(-9999, -9999)
+		if not pieces_par_cell.has(cell):
+			pieces_par_cell[cell] = pieces_de_cellule(cell) if cell != Vector2i(-9999, -9999) else []
+		var piece := _piece_du_lit(lit, pieces_par_cell[cell]) if lit != Vector2i(-1, -1) else {}
+		if piece.is_empty():
+			h += int(ry.sans_logement)
+		else:
+			h += mini(int(pc.bonus_meubles_max), int(pc.bonus_par_meuble) * piece.meubles.size())
+			if piece.tuiles.size() >= int(pc.surface_bonus):
+				h += int(pc.bonus_taille)
+			var co := 0
+			for autre in res:
+				if autre.id != x.id and autre.get("lit", Vector2i(-2, -2)) in piece.tuiles:
+					co += 1
+			h += int(pc.co_occupant) * co
+		# La faim : une unité au garde-manger, sinon le malus.
+		var mange := false
+		for gi in garde_manger:
+			for uid in contenants.get(gi, []):
+				var it: Dictionary = items.get(uid, {})
+				if it.get("type", "") == "consommable" and float(it.get("nutrition", 0)) > 0.0:
+					it.quantite = int(it.get("quantite", 1)) - 1
+					if int(it.quantite) <= 0:
+						contenants[gi].erase(uid)
+						items.erase(uid)
+					mange = true
+					break
+			if mange:
+				break
+		if not mange:
+			h += int(ry.get("faim_pnj", -10))
+			EventBus.emettre(&"journal", [&"journal.pnj_affame", {"nom": x.name_key}])
+		x.humeur = h
+
+
 ## La production hebdomadaire d'un résident (Abstraction hors-site) : rendement × heures × humeur.
 func production_de(x: Dictionary) -> Dictionary:
 	var f: Dictionary = GameData.catalogues.functions.get(str(x.assignation.fonction), {})
@@ -1092,8 +1197,7 @@ func _semaine_territoire(e: Dictionary) -> void:
 		moins_fidele.camp = "civil"
 		EventBus.emettre(&"journal", [&"journal.dette_palier", {"texte": "dette.depart"}])
 	if int(territoire.semaines_dette) == 0:
-		for x in residents():
-			x.humeur = int(ry.humeur_base) + (int(ry.sans_logement) if not x.has("lit") else 0)
+		_recalculer_humeurs()
 	# Taxe de guilde sur les gains de quêtes de la semaine (Entretien et taxes).
 	var gains := int(territoire.get("gains_quetes", 0))
 	if gains > 0:

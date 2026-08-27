@@ -58,6 +58,7 @@ func _ready() -> void:
 	test_regle_anneau_mesure()
 	test_chatoyant()
 	test_routes()
+	test_habitat_pnj()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -2288,6 +2289,54 @@ func test_pretre_et_tourelle() -> void:
 	verifier(s.intention(j.id, {"type": "ressusciter", "ame": ame, "pnj": pretre.id}) and v.vivant and int(j.or) == 0, "le prêtre rappelle le compagnon")
 	verifier(int(pretre.or) == int(pretre.or_max), "sa bourse est finie : le surplus sort du jeu")
 	verifier(float(v.get("affaibli_mult", 1.0)) < 1.0, "le ressuscité revient Affaibli")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Habitat et faim des PNJ
+
+func test_habitat_pnj() -> void:
+	var s := Simulation.new(109)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	# Une chambre 3×3 murée avec une porte, un lit et une table, dégagée près du joueur.
+	var o: Vector2i = j.pos + Vector2i(3, 3)
+	for y in range(-1, 4):
+		for x in range(-1, 4):
+			var q: Vector2i = o + Vector2i(x, y)
+			s.grille.contenu[s.grille.idx(q)] = 0
+			s.grille.meubles.erase(s.grille.idx(q))
+			s.contenants.erase(s.grille.idx(q))
+			if x == -1 or y == -1 or x == 3 or y == 3:
+				s.grille.poser_contenu(q, "mur_construit")
+	s.grille.poser_contenu(o + Vector2i(1, -1), "porte")
+	s.grille.poser_contenu(o, "meuble")
+	s.grille.meubles[s.grille.idx(o)] = "lit_de_paille"
+	s.grille.poser_contenu(o + Vector2i(2, 2), "meuble")
+	s.grille.meubles[s.grille.idx(o + Vector2i(2, 2))] = "table"
+	var cell: Vector2i = s._cell_de(o)
+	var pieces: Array = s.pieces_de_cellule(cell)
+	verifier(pieces.size() == 1 and pieces[0].tuiles.size() == 9 and pieces[0].meubles.size() == 2, "une pièce close de 9 tuiles avec deux types de meubles (%d pièce(s))" % pieces.size())
+	# Un résident logé dans cette pièce, un autre sans pièce ; un garde-manger vide puis plein.
+	var a := s.ajouter("villageois", o + Vector2i(1, 1), "ia")
+	s._habiller_pnj(a, GameData.entree("creatures", "villageois"))
+	a["assignation"] = {"fonction": "fermier", "cellule": cell}
+	a["lit"] = o
+	a.camp = "joueur"
+	var b := s.ajouter("villageois", j.pos + Vector2i(-2, 0), "ia")
+	s._habiller_pnj(b, GameData.entree("creatures", "villageois"))
+	b["assignation"] = {"fonction": "fermier", "cellule": cell}
+	b.camp = "joueur"
+	s._recalculer_humeurs()
+	verifier(int(a.humeur) == 60 + 2 - 10 and int(b.humeur) == 60 - 15 - 10, "logé : 60 +2 meubles −10 faim = %d ; sans pièce : 60 −15 −10 = %d" % [int(a.humeur), int(b.humeur)])
+	var gm: Vector2i = j.pos + Vector2i(0, -2)
+	s.grille.contenu[s.grille.idx(gm)] = 0
+	s.grille.poser_contenu(gm, "meuble")
+	s.grille.meubles[s.grille.idx(gm)] = "garde_manger"
+	var pain := s.generer_objet("pain", 1, {}, "commun", 0)
+	pain.quantite = 5
+	s.contenants[s.grille.idx(gm)] = [pain.uid]
+	s._recalculer_humeurs()
+	verifier(int(a.humeur) == 62 and int(b.humeur) == 45 and int(pain.quantite) == 3, "garde-manger garni : plus de malus de faim, deux pains mangés")
 	s.monde.fermer()
 
 

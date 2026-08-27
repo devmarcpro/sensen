@@ -576,6 +576,16 @@ func _construire_gestion(j: Dictionary) -> void:
 		var accord: String = str(t.accords.get(str(roy.id), ""))
 		liste.add_item(tr("ui.gestion.voisin").format({"nom": roy.nom, "gouv": tr(GameData.entree("governments", str(roy.government_type)).name_key), "n": roy.territory_cells.size(), "rep": int(j.get("reputations", {}).get(str(roy.id), 0)), "rel": tr("relation." + sim.relation_royaume(j, roy)), "accord": tr("accord." + accord) if not accord.is_empty() else tr("accord.aucun")}))
 		entrees.append({"kind": "voisin", "id": str(roy.id), "texte": tr("ui.gestion.voisin_aide") + "\n" + _lois_txt(roy)})
+	var npieces := 0
+	var loges := 0
+	for cell0 in sim.monde.claims.keys():
+		var ps: Array = sim.pieces_de_cellule(cell0)
+		npieces += ps.size()
+		for x in sim.residents():
+			if not sim._piece_du_lit(x.get("lit", Vector2i(-1, -1)), ps).is_empty():
+				loges += 1
+	liste.add_item(tr("ui.gestion.pieces").format({"n": npieces, "logees": loges}), null, false)
+	entrees.append({"kind": "texte", "texte": ""})
 	var mures := 0
 	for c in t.cultures.values():
 		if bool(c.mure):

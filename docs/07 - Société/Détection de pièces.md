@@ -34,6 +34,9 @@ Bétail : toute tuile sous une empreinte avec toit.
 
 **Nœuds du graphe de POI ([[LOD de simulation]]) :** les lits des pièces détectées sont des nœuds du graphe de niveau 2.
 
+> [!success] Codé le 2026-08-28 — `Simulation.pieces_de_cellule(cell)`
+> Flood fill 2D depuis chaque **porte** d'une cellule revendiquée (dans la fenêtre chargée) : la région est close si elle ne s'échappe pas (bornée à 1 024 tuiles, murs = tag `mur`, portes = tag `porte`, l'eau et les solides bloquent) ; **surface ≥ 6**, **≥ 1 meuble**. **Toit** : décision — les empreintes de bâtiment n'existent pas encore en code, une région close par des murs est réputée couverte. Résultat `{tuiles, meubles (types), portes}` par cellule, recalculé au passage de semaine (pas de throttling par événement : le passage hebdomadaire suffit tant que le logement n'est lu qu'à la semaine). La capacité de village reste « un lit par PNJ initial ».
+
 ## Liens
 - **Dépend de** : [[Construction cadrée]], [[EventBus]], [[Claims et persistance]]
 - **Alimente** : [[Habitat des PNJ]], [[Villages PNJ — repeuplement et décimation]], [[Quêtes et guildes]], [[LOD de simulation]]
