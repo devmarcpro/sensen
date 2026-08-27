@@ -8,5 +8,9 @@
   "tags": [
     "declencheur"
   ],
-  "surcout_ticks": 3
+  "surcout_ticks": 3,
+  "effet": {
+    "declencheur": "entree",
+    "duree_ticks": 100
+  }
 }

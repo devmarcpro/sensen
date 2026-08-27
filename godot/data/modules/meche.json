@@ -8,5 +8,9 @@
   "tags": [
     "declencheur"
   ],
-  "surcout_ticks": 0
+  "surcout_ticks": 0,
+  "effet": {
+    "declencheur": "apres_ticks",
+    "ticks": 20
+  }
 }

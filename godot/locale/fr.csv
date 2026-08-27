@@ -132,6 +132,12 @@ ui.fin.victoire,victoire
 ui.fin.defaite,défaite
 ui.fin.piste,  {piste} : {detail}
 ui.fin.suite,(clic ou touche pour continuer)
+tile_content.barriere.name,Barrière
+journal.glyphe_pose,"{nom} pose un glyphe ({capacite}) sur ({x},{y})"
+journal.glyphe_declenche,{nom} déclenche le glyphe de {source} !
+journal.differe,{nom} : {capacite} partira dans {ticks} ticks
+journal.terrain,"la tuile ({x},{y}) passe de h={avant} à h={apres}"
+journal.invocation,"{nom} dresse {contenu} sur ({x},{y}) pour {ticks} ticks"
 journal.victoire,plus aucun hostile. Victoire.
 journal.defaite,tu es tombé. Tab : recommencer.
 module.a_l_impact.name,À l'impact

@@ -53,6 +53,7 @@ func _ready() -> void:
 	EventBus.action_engaged.connect(func(id: String, a: Dictionary) -> void: telegraphes[id] = a)
 	EventBus.action_resolved.connect(func(id: String, _a: Dictionary) -> void: telegraphes.erase(id))
 	EventBus.combat_ended.connect(_sur_fin_de_combat)
+	EventBus.tile_changed.connect(func(_p: Vector2i) -> void: terrain.queue_redraw())
 	GameData.donnees_rechargees.connect(_charger)
 	_charger()
 
@@ -262,6 +263,10 @@ func _draw() -> void:
 		_losange(t, Color(1.0, 0.2, 0.1, 0.5))
 	if survol.x >= 0:
 		_losange(survol, Color(1, 1, 1, 0.22))
+	for gl in sim.glyphes:   # les glyphes : un losange cerclé à la teinte de leur élément
+		var cg := _ecran(gl.pos, g.h(gl.pos))
+		var teinte := sim.wuxing.teinte(sim.wuxing.dominante(gl.elements)) if not gl.elements.is_empty() else Color(0.8, 0.8, 0.9)
+		draw_arc(cg, 7.0, 0.0, TAU, 12, teinte, 2.0)
 	if visee < 0 and survol.x >= 0 and not j.is_empty() and not g.occupant(survol).is_empty() and g.occupant(survol) != joueur_id:
 		var tir := sim.verifier_tir(j, sim.entites[g.occupant(survol)])
 		if tir.has("bloqueur"):

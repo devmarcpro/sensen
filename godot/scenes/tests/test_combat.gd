@@ -21,6 +21,7 @@ func _ready() -> void:
 	test_projectiles()
 	test_statuts()
 	test_liaisons()
+	test_glyphes_terrain()
 	test_arenes_autonomes()
 	if echecs == 0:
 		print("TESTS : tout passe")
@@ -670,3 +671,83 @@ func test_liaisons() -> void:
 	s.pas(j.horloge)
 	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": allie.pos}), "Baume + Partage")
 	verifier(allie.sante > 10 and j.sante > 10, "l'allié et le lanceur sont soignés")
+
+
+# ---------------------------------------------------------------- Glyphes, charges différées, terrain, invocations
+
+func test_glyphes_terrain() -> void:
+	var cap := Capacites.new(GameData.catalogues["modules"])
+	var p := cap.assembler(["sceau", "tuile", "racine"], 5, "1d4", {})
+	verifier(p.erreurs.is_empty() and p.noyau.is_empty() and p.charge_suivante.declencheur == "entree" and p.geometrie == "tuile", "[Sceau]+[Tuile]+[Racine] : un glyphe, visé avec la géométrie Tuile")
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var loup: Dictionary = s.entites["loup_2"]
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(0, -4)
+	s.grille.placer(loup.id, loup.pos)
+	for id in ["loup_2", "loup_3", "loup_4"]:
+		s.entites[id].compteur = 500
+	s._engager_combat(j, loup)
+	var h := s.horloge_de(j)
+	j.mana = 300
+	j.capacites.append({"id": "g", "name_key": "capacite.etincelle.name", "modules": ["sceau", "tuile", "racine"]})
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	var glyphe_pos: Vector2i = j.pos + Vector2i(0, -2)
+	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": glyphe_pos}), "poser le glyphe")
+	s.pas(j.horloge)   # 3 + 1 + 11 = 15 ticks : télégraphé, résolu à l'échéance
+	verifier(s.glyphes.size() == 1 and s.glyphes[0].pos == glyphe_pos, "un glyphe attend au sol")
+	# Le loup entre sur la tuile : le glyphe se déclenche, la Racine l'enracine, un segment Bois est posé
+	s.grille.liberer(loup.pos)
+	loup.pos = glyphe_pos + Vector2i(0, -1)
+	s.grille.placer(loup.id, loup.pos)
+	loup.compteur = h.ticks
+	j.compteur = h.ticks + 500
+	var seg_avant: int = j.chaine.segments.size()
+	s._deplacer(loup, glyphe_pos, h.ticks)
+	verifier(s.glyphes.is_empty() and Etres.bloque_statuts(loup, "deplacement", s.statuts_defs), "à l'entrée : le glyphe part, le loup est enraciné")
+	verifier(j.chaine.segments.size() == seg_avant + 1 and j.chaine.segments.back().element == "bois", "le glyphe élémentaire pose un segment Bois au lanceur")
+	# Mèche : la charge part après 20 ticks
+	j.capacites[3] = {"id": "m", "name_key": "capacite.etincelle.name", "modules": ["meche", "point", "etincelle"]}
+	j.compteur = h.ticks
+	loup.compteur = h.ticks + 500
+	s.pas(j.horloge)
+	var pv: int = loup.sante
+	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loup.pos}), "Mèche + Étincelle")
+	verifier(s.differes.size() == 1 and loup.sante == pv, "la charge est différée, rien ne part encore")
+	loup.compteur = h.ticks + 25
+	j.compteur = h.ticks + 600
+	s.pas(j.horloge)   # le loup agit à t+25 : la mèche (t+20) est tiquée en fin de pas
+	verifier(s.differes.is_empty() and loup.sante < pv, "20 ticks plus tard, l'Étincelle part")
+	# Barrière : occupe la tuile, bloque le passage, disparaît après 50 ticks
+	j.capacites[3] = {"id": "b", "name_key": "capacite.etincelle.name", "modules": ["tuile", "barriere"]}
+	j.compteur = h.ticks
+	loup.compteur = h.ticks + 500
+	s.pas(j.horloge)
+	var mur_pos: Vector2i = j.pos + Vector2i(1, -1)
+	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": mur_pos}), "Barrière")
+	s.pas(j.horloge)   # 15 ticks : télégraphée
+	verifier(s.grille.bloque_passage(mur_pos) and s.obstacles.size() == 1, "la barrière bloque la tuile")
+	loup.compteur = h.ticks + 60
+	j.compteur = h.ticks + 600
+	s.pas(j.horloge)
+	verifier(not s.grille.bloque_passage(mur_pos) and s.obstacles.is_empty(), "après 50 ticks, la barrière disparaît")
+	# Exhaussement : +1 niveau ; Fosse : −3 niveaux et ce qui est dessus chute
+	j.capacites[3] = {"id": "e", "name_key": "capacite.etincelle.name", "modules": ["tuile", "exhaussement"]}
+	j.compteur = h.ticks
+	loup.compteur = h.ticks + 500
+	s.pas(j.horloge)
+	var t_pos: Vector2i = j.pos + Vector2i(-1, -1)
+	var h_avant: int = s.grille.h(t_pos)
+	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": t_pos}), "Exhaussement")
+	s.pas(j.horloge)
+	verifier(s.grille.h(t_pos) == h_avant + 1, "la tuile monte d'un niveau")
+	j.capacites[3] = {"id": "f", "name_key": "capacite.etincelle.name", "modules": ["tuile", "fosse"]}
+	j.compteur = h.ticks
+	loup.compteur = h.ticks + 500
+	s.pas(j.horloge)
+	h_avant = s.grille.h(loup.pos)
+	pv = loup.sante
+	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loup.pos}), "Fosse sous le loup")
+	s.pas(j.horloge)
+	verifier(s.grille.h(loup.pos) == h_avant - 3 and loup.sante == pv - 5, "la tuile s'effondre de 3 : le loup chute (5 dégâts)")

@@ -22,5 +22,11 @@
     "statut"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "enracinement",
+      "duree_ticks": 10
+    }
+  }
 }

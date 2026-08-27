@@ -5,6 +5,20 @@
     "bloque_passage": true,
     "bloque_vue": true,
     "hauteur_vue": 3,
-    "tags": ["mur", "solide"]
+    "tags": [
+      "mur",
+      "solide"
+    ]
+  },
+  "barriere": {
+    "name_key": "tile_content.barriere.name",
+    "bloque_passage": true,
+    "bloque_vue": true,
+    "hauteur_vue": 2,
+    "tags": [
+      "barriere",
+      "invocation",
+      "solide"
+    ]
   }
 }

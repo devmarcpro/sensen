@@ -66,6 +66,10 @@ NOYAUX = {
     "transfert": {"soin": {"source": "pv_porteur"}},
     "second_souffle": {"ressource": {"endurance": 30}},
     "trait_nu": {"sans_segment": True},
+    "barriere": {"invocation": {"contenu": "barriere", "duree_ticks": 50}},
+    "exhaussement": {"terrain": {"delta": 1}},
+    "fosse": {"terrain": {"delta": -3, "chute": True}},
+    "racine": {"statut": {"id": "enracinement", "duree_ticks": 10}},
 }
 
 # Liaisons et déclencheurs résolus par le prototype (décision du 2026-08-27).
@@ -75,10 +79,13 @@ LIAISONS = {
     "dispersion": {"dispersion": True},
     "miroir": {"miroir": True},
     "partage": {"partage": True},
+    "echo": {"echo": 0.5, "apres_ticks": 20},
 }
 DECLENCHEURS = {
     "a_l_impact": {"declencheur": "impact"},
     "curee": {"declencheur": "mise_a_mort"},
+    "sceau": {"declencheur": "entree", "duree_ticks": 100},
+    "meche": {"declencheur": "apres_ticks", "ticks": 20},
 }
 
 n = 0

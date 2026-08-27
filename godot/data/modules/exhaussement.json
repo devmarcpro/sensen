@@ -21,5 +21,10 @@
     "terrain"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "terrain": {
+      "delta": 1
+    }
+  }
 }

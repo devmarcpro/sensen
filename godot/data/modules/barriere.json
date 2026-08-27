@@ -19,5 +19,11 @@
     "invocation"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "invocation": {
+      "contenu": "barriere",
+      "duree_ticks": 50
+    }
+  }
 }

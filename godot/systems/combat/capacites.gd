@@ -52,6 +52,8 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				break
 			var suite := assembler(sequence.slice(k + 1), ticks_arme, des_arme, element_arme)
 			suite["declencheur"] = str(ef.declencheur)
+			suite["duree_declencheur"] = int(ef.get("duree_ticks", 100))
+			suite["ticks_declencheur"] = int(ef.get("ticks", 20))
 			suite["name_key"] = m.name_key
 			plan.charge_suivante = suite
 			plan.ticks += int(m.get("surcout_ticks", 0)) + int(suite.ticks)
@@ -124,7 +126,16 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				plan.ticks += int(m.get("surcout_ticks", 0))
 				plan.avertissements.append("type non résolu dans le prototype : " + id)
 	if plan.noyau.is_empty():
-		plan.erreurs.append("aucun noyau")
+		var suite: Dictionary = plan.charge_suivante
+		if suite.is_empty() or suite.noyau.is_empty():
+			plan.erreurs.append("aucun noyau")
+		else:
+			# Séquence ouverte par un déclencheur (Sceau, Mèche) : on vise avec la géométrie de la charge différée.
+			plan.geometrie = suite.geometrie
+			plan.portee = suite.portee
+			plan.taille = suite.taille
+			plan.ligne_de_vue = suite.ligne_de_vue
+			plan.forme = suite.forme
 	if plan.forme.is_empty():
 		# Sans forme, un noyau vise l'adjacent (Modules).
 		plan.geometrie = "point"

@@ -21,6 +21,9 @@ var actions_creatures: Dictionary
 var profils_ia: Dictionary
 var statuts_defs: Dictionary
 var dernier_combat: Dictionary = {}   # récapitulatif du dernier combat terminé (écran de fin)
+var glyphes: Array[Dictionary] = []   # couche d'overlay runtime : {pos, plan, source, fin} — jamais sauvegardée
+var differes: Array[Dictionary] = []  # charges différées : {tick, source, plan, pos}
+var obstacles: Array[Dictionary] = [] # invocations temporaires : {pos, fin}
 var horloge_monde: Horloge
 var combats: Dictionary = {}          # nom → {"horloge": Horloge, "participants": Array[String]}
 var attente: Dictionary = {}          # id → true : une entité contrôlée attend une intention
@@ -53,6 +56,8 @@ func charger_arene(id: String) -> void:
 	ordre.clear()
 	combats.clear()
 	attente.clear()
+	glyphes.clear()
+	differe_clear()
 	for nom in TickManager.horloges.keys():
 		TickManager.retirer(nom)
 	horloge_monde = TickManager.creer("monde", Horloge.Mode.TEMPS_REEL, float(regles.r.ticks_par_seconde_exploration))
@@ -142,8 +147,59 @@ func _fin_de_pas(nom: String) -> void:
 	for e in vivants():
 		if e.horloge == nom:
 			_tiquer_statuts(e, h.ticks)
+	_tiquer_differes(nom, h.ticks)
 	_verifier_desengagements()
 	EventBus.dispatcher()
+
+
+func differe_clear() -> void:
+	differes.clear()
+	obstacles.clear()
+
+
+## Charges différées (Mèche, Écho) et expirations (glyphes, barrières) de l'horloge `nom`.
+func _tiquer_differes(nom: String, tick: int) -> void:
+	var restants: Array[Dictionary] = []
+	for d in differes:
+		var src: Dictionary = entites.get(d.source, {})
+		if src.is_empty() or src.horloge != nom:
+			restants.append(d)
+		elif int(d.tick) <= tick:
+			if src.vivant:
+				_executer_capacite(src, d.plan, d.pos, false)
+		else:
+			restants.append(d)
+	differes = restants
+	var g_restants: Array[Dictionary] = []
+	for gl in glyphes:
+		var src: Dictionary = entites.get(gl.source, {})
+		if src.is_empty() or src.horloge != nom or int(gl.fin) > tick:
+			g_restants.append(gl)
+	glyphes = g_restants
+	var o_restants: Array[Dictionary] = []
+	for o in obstacles:
+		var src: Dictionary = entites.get(o.source, {})
+		if not src.is_empty() and src.horloge == nom and int(o.fin) <= tick:
+			grille.contenu[grille.idx(o.pos)] = 0
+			EventBus.emettre(&"tile_changed", [o.pos])
+		else:
+			o_restants.append(o)
+	obstacles = o_restants
+
+
+## Un glyphe posé sur cette tuile ? Il se déclenche à l'entrée (Familles de capacités de la grille).
+func _declencher_glyphe(entrant: Dictionary, pos: Vector2i) -> void:
+	for gl in glyphes.duplicate():
+		if gl.pos != pos:
+			continue
+		var src: Dictionary = entites.get(gl.source, {})
+		glyphes.erase(gl)
+		if src.is_empty():
+			continue
+		EventBus.emettre(&"journal", [&"journal.glyphe_declenche", {"nom": entrant.name_key, "source": src.name_key}])
+		var charge: Dictionary = gl.plan.duplicate()
+		charge.geometrie = "point"   # la charge au sol frappe celui qui entre
+		_executer_capacite(src, charge, pos, true)
 
 
 ## Régénération d'endurance : +2 par tick écoulé depuis la dernière application (Endurance).
@@ -216,6 +272,7 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	e.pos = vers
 	grille.placer(e.id, vers)
 	e.compteur = tick + _ticks_avec_statuts(e, cout)
+	_declencher_glyphe(e, vers)
 	EventBus.emettre(&"journal", [&"journal.deplacement", {"nom": e.name_key, "cout": cout}])
 	if chute > 0:
 		var d := grille.degats_chute(chute)
@@ -847,8 +904,17 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 		if l.get("dispersion", false) and touchees.size() > 1:
 			charge = plan.duplicate()
 			charge.mult = float(plan.mult) / float(touchees.size())   # la charge répartie, divisée par leur nombre
-	var res := _appliquer_charge(e, charge, touchees, cible_pos, prev)
+	var res := {"a_touche": false, "premiere": {}, "tuee": {}}
+	if not plan.noyau.is_empty():
+		res = _appliquer_charge(e, charge, touchees, tuiles, cible_pos, prev)
 	var a_touche: bool = res.a_touche
+	for l: Dictionary in plan.liaisons:
+		if l.has("echo"):   # Écho : rejoue la charge à 50 % après 20 ticks
+			var rejeu := plan.duplicate()
+			rejeu.mult = float(plan.mult) * float(l.echo)
+			rejeu.liaisons = []
+			rejeu.charge_suivante = {}
+			differes.append({"tick": tick + int(l.get("apres_ticks", 20)), "source": e.id, "plan": rejeu, "pos": cible_pos})
 	# Liaisons qui rejouent : Répétition (2 fois, −1 dé), Ricochet (1d3 cibles proches, −1 dé par saut).
 	for l: Dictionary in plan.liaisons:
 		if l.has("rejoue"):
@@ -856,7 +922,7 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 				var rejeu := plan.duplicate()
 				rejeu.des_bonus = int(plan.des_bonus) + int(l.get("des", -1))
 				rejeu.liaisons = []
-				a_touche = _appliquer_charge(e, rejeu, touchees, cible_pos, {}).a_touche or a_touche
+				a_touche = _appliquer_charge(e, rejeu, touchees, tuiles, cible_pos, {}).a_touche or a_touche
 		if l.has("sauts") and not touchees.is_empty():
 			var deja: Array[Dictionary] = touchees.duplicate()
 			var depuis: Dictionary = touchees.back()
@@ -867,7 +933,7 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 				var saut := plan.duplicate()
 				saut.des_bonus = int(plan.des_bonus) + int(l.get("des", -1)) * (k + 1)
 				saut.liaisons = []
-				a_touche = _appliquer_charge(e, saut, [suivante], suivante.pos, {}).a_touche or a_touche
+				a_touche = _appliquer_charge(e, saut, [suivante], [suivante.pos], suivante.pos, {}).a_touche or a_touche
 				deja.append(suivante)
 				depuis = suivante
 	if plan.drapeaux.has("projection"):
@@ -888,6 +954,18 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 			"mise_a_mort":
 				if not res.tuee.is_empty():
 					_executer_capacite(e, suite, res.tuee.pos, false)
+			"entree":
+				# Sceau : la charge attend au sol, jusqu'à 100 ticks — overlay runtime, jamais sauvegardé.
+				var duree := int(suite.get("duree_declencheur", 100))
+				glyphes.append({"pos": cible_pos, "plan": suite, "source": e.id, "fin": tick + duree, "elements": suite.elements})
+				EventBus.emettre(&"journal", [&"journal.glyphe_pose", {"nom": e.name_key, "capacite": suite.noyau.name_key, "x": cible_pos.x, "y": cible_pos.y}])
+				var occ := grille.occupant(cible_pos)
+				if not occ.is_empty():
+					_declencher_glyphe(entites[occ], cible_pos)
+			"apres_ticks":
+				var n := int(suite.get("ticks_declencheur", 20))
+				differes.append({"tick": tick + n, "source": e.id, "plan": suite, "pos": ou})
+				EventBus.emettre(&"journal", [&"journal.differe", {"nom": e.name_key, "capacite": suite.noyau.name_key, "ticks": n}])
 	EventBus.emettre(&"action_resolved", [e.id, {"type": "capacite", "plan": plan}])
 
 
@@ -895,6 +973,8 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 ## les zones touchent tout ce qu'elles couvrent, alliés compris).
 func _entites_dans(e: Dictionary, plan: Dictionary, tuiles: Array[Vector2i]) -> Array[Dictionary]:
 	var res: Array[Dictionary] = []
+	if plan.geometrie == "tuile":
+		return res   # Tuile : au sol, sans cible vivante (la forme des glyphes et des zones)
 	for t in tuiles:
 		var occ := grille.occupant(t)
 		if occ.is_empty():
@@ -925,7 +1005,7 @@ func _voisine_non_touchee(e: Dictionary, depuis: Dictionary, deja: Array[Diction
 
 
 ## Applique les effets du noyau à des cibles. Retourne {a_touche, premiere, tuee}.
-func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictionary], cible_pos: Vector2i, prev: Dictionary) -> Dictionary:
+func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictionary], tuiles: Array[Vector2i], cible_pos: Vector2i, prev: Dictionary) -> Dictionary:
 	var tick := tick_de(e)
 	var a_touche := false
 	var premiere := {}
@@ -987,8 +1067,37 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 					a_touche = a_touche or applique != 0
 					if plan.parametres.get("vol", false) and applique > 0:
 						e.compteur = maxi(tick, e.compteur - applique)
+			"terrain":
+				var tp: Dictionary = plan.parametres.get("terrain", {})
+				if not tp.is_empty():
+					for t in tuiles:
+						var avant := grille.h(t)
+						var apres := clampi(avant + int(tp.delta), 0, 20)
+						if apres == avant:
+							continue
+						grille.hauteurs[grille.idx(t)] = apres
+						a_touche = true
+						EventBus.emettre(&"journal", [&"journal.terrain", {"x": t.x, "y": t.y, "avant": avant, "apres": apres}])
+						EventBus.emettre(&"tile_changed", [t])
+						var occ := grille.occupant(t)
+						if tp.get("chute", false) and not occ.is_empty() and avant - apres >= int(regles.r.deplacement.chute_delta):
+							var c: Dictionary = entites[occ]
+							var deg := grille.degats_chute(avant - apres)
+							EventBus.emettre(&"journal", [&"journal.chute", {"nom": c.name_key, "niveaux": avant - apres, "degats": deg}])
+							_appliquer_degats(c, deg, e.id, {"chute": true})
+			"invocation":
+				var iv: Dictionary = plan.parametres.get("invocation", {})
+				if not iv.is_empty():
+					for t in tuiles:
+						if not grille.occupant(t).is_empty() or grille.bloque_passage(t):
+							continue
+						grille.poser_contenu(t, str(iv.contenu))
+						obstacles.append({"pos": t, "fin": tick + int(iv.duree_ticks), "source": e.id})
+						a_touche = true
+						EventBus.emettre(&"journal", [&"journal.invocation", {"nom": e.name_key, "contenu": "tile_content." + str(iv.contenu) + ".name", "x": t.x, "y": t.y, "ticks": iv.duree_ticks}])
+						EventBus.emettre(&"tile_changed", [t])
 			_:
-				pass   # terrain, invocation, saisie : étapes suivantes
+				pass   # saisie : étape suivante
 	return {"a_touche": a_touche, "premiere": premiere, "tuee": tuee}
 
 
