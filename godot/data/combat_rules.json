@@ -771,6 +771,14 @@
       "par_pas": 45,
       "pas_max": 2,
       "palier_double": 3000
+    },
+    "chatoyant": {
+      "chance": 0.015,
+      "mult_parent": 6.0,
+      "palier_varietes": 500,
+      "mult_palier": 3.0,
+      "commande_chance": 0.1,
+      "commande_mult": 3.0
     }
   }
 }

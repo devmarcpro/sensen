@@ -56,6 +56,7 @@ func _ready() -> void:
 	test_gabarits_guildes()
 	test_pretre_et_tourelle()
 	test_regle_anneau_mesure()
+	test_chatoyant()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -2176,7 +2177,7 @@ func test_entraineur_et_commandes() -> void:
 	verifier(not cmd.is_empty() and cmd.espece == "carpe" and int(cmd.couleur) != 4 and absi(int(cmd.couleur) - 4) <= 2 and int(cmd.or) >= 195, "commande : une carpe à un ou deux pas (couleur %s, %d or)" % [str(cmd.get("couleur", "?")), int(cmd.get("or", 0))])
 	m.tags.append("commerce_possible")
 	m.or = 0
-	var sp := s._nouveau_specimen("carpe", {"couleur": int(cmd.couleur), "motif": 2, "taille": 2.0}, "f")
+	var sp := s._nouveau_specimen("carpe", {"couleur": int(cmd.couleur), "motif": 2, "taille": 2.0}, "f", bool(cmd.get("chatoyant", false)))
 	j.sac.append(sp.uid)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "livrer", "pnj": m.id}), "marchand sans or : refus")
@@ -2264,6 +2265,41 @@ func test_pretre_et_tourelle() -> void:
 	verifier(s.intention(j.id, {"type": "ressusciter", "ame": ame, "pnj": pretre.id}) and v.vivant and int(j.or) == 0, "le prêtre rappelle le compagnon")
 	verifier(int(pretre.or) == int(pretre.or_max), "sa bourse est finie : le surplus sort du jeu")
 	verifier(float(v.get("affaibli_mult", 1.0)) < 1.0, "le ressuscité revient Affaibli")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Le chatoyant
+
+func test_chatoyant() -> void:
+	var s := Simulation.new(105)
+	s.charger_camp()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 105
+	var n0 := 0
+	var n1 := 0
+	for k in 4000:
+		if s._tirer_chatoyant(rng, false):
+			n0 += 1
+		if s._tirer_chatoyant(rng, true):
+			n1 += 1
+	verifier(n0 >= 20 and n0 <= 120 and n1 >= 250 and n1 <= 480, "sur 4 000 tirages : %d chatoyants sans parent (≈60), %d avec (≈360)" % [n0, n1])
+	var c := s._nouveau_specimen("carpe", {"couleur": 2, "motif": 3, "taille": 2.0}, "f", true)
+	verifier(bool(c.chatoyant) and int(s.territoire.chatoyants.carpe) == 1 and str(c.nom.params.chatoyant) == "ui.specimen.chatoyant", "un spécimen chatoyant est compté et nommé")
+	# Une commande chatoyante n'accepte qu'un chatoyant.
+	s.territoire["commande"] = {"espece": "carpe", "couleur": 5, "motif": "3", "or": 600, "semaine": 0, "chatoyant": true}
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var m := s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
+	s._habiller_pnj(m, GameData.entree("creatures", "villageois"))
+	m.tags.append("commerce_possible")
+	m.or = 1000
+	var ordinaire := s._nouveau_specimen("carpe", {"couleur": 5, "motif": 3, "taille": 2.0}, "f", false)
+	j.sac.append(ordinaire.uid)
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "livrer", "pnj": m.id}), "un spécimen ordinaire ne satisfait pas une commande chatoyante")
+	var brillant := s._nouveau_specimen("carpe", {"couleur": 5, "motif": 3, "taille": 2.0}, "f", true)
+	j.sac.append(brillant.uid)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "livrer", "pnj": m.id}), "le chatoyant est livré")
 	s.monde.fermer()
 
 

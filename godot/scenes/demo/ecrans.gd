@@ -592,7 +592,7 @@ func _construire_gestion(j: Dictionary) -> void:
 	liste.add_item(tr("ui.gestion.elevage").format({"n": nv, "especes": ", ".join(especes) if not especes.is_empty() else "—"}), null, false)
 	entrees.append({"kind": "texte", "texte": ""})
 	var cmd: Dictionary = t.get("commande", {})
-	liste.add_item(tr("ui.gestion.commande").format({"espece": tr(GameData.entree("species", str(cmd.espece)).name_key), "couleur": cmd.couleur, "motif": cmd.motif, "or": int(cmd.or)}) if not cmd.is_empty() else tr("ui.gestion.commande_aucune"), null, false)
+	liste.add_item(tr("ui.gestion.commande").format({"espece": tr(GameData.entree("species", str(cmd.espece)).name_key), "couleur": cmd.couleur, "motif": cmd.motif, "or": int(cmd.or), "chatoyant": tr("ui.gestion.commande_chatoyant") if bool(cmd.get("chatoyant", false)) else ""}) if not cmd.is_empty() else tr("ui.gestion.commande_aucune"), null, false)
 	entrees.append({"kind": "texte", "texte": ""})
 	_bouton(tr("ui.ecran.deposer"), func() -> void: main.sim.deposer(main.joueur(), 50); rafraichir())
 	_bouton(tr("ui.ecran.retirer"), func() -> void: main.sim.retirer(main.joueur(), 50); rafraichir())
@@ -661,7 +661,8 @@ func _construire_registre(_j: Dictionary) -> void:
 				var als: Array = recs[nom].keys()
 				als.sort()
 				lignes.append("%s : allèles vus %s" % [str(nom), ", ".join(als)])
-		liste.add_item(tr("ui.registre.espece").format({"nom": tr(e.name_key), "mode": str(e.get("registre", "grille")), "n": reg[esp].size(), "possibles": sim.varietes_possibles(str(esp)), "records": rtxt}))
+		var nch: int = int(t.get("chatoyants", {}).get(esp, 0))
+		liste.add_item(tr("ui.registre.espece").format({"nom": tr(e.name_key), "mode": str(e.get("registre", "grille")), "n": reg[esp].size(), "possibles": sim.varietes_possibles(str(esp)), "records": rtxt + (tr("ui.registre.chatoyants").format({"n": nch}) if nch > 0 else "")}))
 		# Le détail : par couleur, les motifs obtenus.
 		var par_couleur: Dictionary = {}
 		for cle in reg[esp].keys():

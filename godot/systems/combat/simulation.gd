@@ -1255,9 +1255,13 @@ func _tirer_commande() -> void:
 	var pas := rng.randi_range(1, int(cm.pas_max))
 	var couleur := posmod(int(parts[0]) + pas * (1 if rng.randf() < 0.5 else -1), int(esp.loci.couleur.n))
 	var mult := 2.0 if _total_varietes() >= int(cm.palier_double) else 1.0
+	var ch: Dictionary = _elv().get("chatoyant", {})
+	var chatoyant := not ch.is_empty() and rng.randf() < float(ch.commande_chance)
+	if chatoyant:
+		mult *= float(ch.commande_mult)
 	var or_ := int(round((float(cm.base) + float(cm.par_rarete) * float(esp.capture.get("rarete", 1)) + float(cm.par_pas) * float(pas)) * mult))
-	territoire["commande"] = {"espece": esp_id, "couleur": couleur, "motif": parts[1] if parts.size() > 1 else "", "or": or_, "semaine": monde.semaine_courante}
-	EventBus.emettre(&"journal", [&"journal.commande", {"espece": esp.name_key, "couleur": couleur, "motif": territoire.commande.motif, "or": or_}])
+	territoire["commande"] = {"espece": esp_id, "couleur": couleur, "motif": parts[1] if parts.size() > 1 else "", "or": or_, "semaine": monde.semaine_courante, "chatoyant": chatoyant}
+	EventBus.emettre(&"journal", [&"journal.commande", {"espece": esp.name_key, "couleur": couleur, "motif": territoire.commande.motif, "or": or_, "chatoyant": "ui.gestion.commande_chatoyant" if chatoyant else ""}])
 
 
 func _total_varietes() -> int:
@@ -1275,7 +1279,7 @@ func _livrer_commande(e: Dictionary, pnj_id: String, tick: int) -> bool:
 	var uid := ""
 	for u in e.sac:
 		var it: Dictionary = items.get(u, {})
-		if str(it.get("espece", "")) == str(cmd.espece) and str(it.get("genome", {}).get("couleur", "")) == str(cmd.couleur) and str(it.get("genome", {}).get("motif", "")) == str(cmd.motif):
+		if str(it.get("espece", "")) == str(cmd.espece) and str(it.get("genome", {}).get("couleur", "")) == str(cmd.couleur) and str(it.get("genome", {}).get("motif", "")) == str(cmd.motif) and (not bool(cmd.get("chatoyant", false)) or bool(it.get("chatoyant", false))):
 			uid = u
 			break
 	if uid.is_empty():
@@ -1487,7 +1491,7 @@ func _capturer(e: Dictionary, tick: int) -> bool:
 		return true
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([graine, "capture", tick, e.id])
-	var sp := _nouveau_specimen(esp_id, _genome_aleatoire(esp, rng), "m" if rng.randf() < 0.5 else "f")
+	var sp := _nouveau_specimen(esp_id, _genome_aleatoire(esp, rng), "m" if rng.randf() < 0.5 else "f", _tirer_chatoyant(rng, false))
 	_exprimer_loci(sp, _cell_de(e.pos), true)
 	_enregistrer_variete(sp)
 	donner(e, sp.uid)
@@ -1495,13 +1499,32 @@ func _capturer(e: Dictionary, tick: int) -> bool:
 	return true
 
 
-func _nouveau_specimen(esp_id: String, genome: Dictionary, sexe: String) -> Dictionary:
+## Le tirage du chatoyant (Vivarium — loci et variétés) : 1,5 %, ×6 si un parent l'est, ×3 au palier 500.
+func _tirer_chatoyant(rng: RandomNumberGenerator, parent_chatoyant: bool) -> bool:
+	var ch: Dictionary = _elv().get("chatoyant", {})
+	if ch.is_empty():
+		return false
+	var chance := float(ch.chance)
+	if parent_chatoyant:
+		chance *= float(ch.mult_parent)
+	if _total_varietes() >= int(ch.palier_varietes):
+		chance *= float(ch.mult_palier)
+	return rng.randf() < chance
+
+
+func _nouveau_specimen(esp_id: String, genome: Dictionary, sexe: String, chatoyant: bool = false) -> Dictionary:
 	var sp := generer_objet("specimen", 1, {"espece": esp_id}, "commun", 0)
 	sp["espece"] = esp_id
 	sp["genome"] = genome
 	sp["sexe"] = sexe
 	sp["age_semaines"] = 0
-	sp["nom"] = {"params": {"espece": GameData.catalogues.species[esp_id].name_key, "couleur": str(genome.get("couleur", "")), "motif": str(genome.get("motif", ""))}}
+	sp["chatoyant"] = chatoyant
+	if chatoyant:
+		if not territoire.has("chatoyants"):
+			territoire["chatoyants"] = {}
+		territoire.chatoyants[esp_id] = int(territoire.chatoyants.get(esp_id, 0)) + 1
+		EventBus.emettre(&"journal", [&"journal.chatoyant", {"espece": GameData.catalogues.species[esp_id].name_key}])
+	sp["nom"] = {"params": {"espece": GameData.catalogues.species[esp_id].name_key, "couleur": str(genome.get("couleur", "")), "motif": str(genome.get("motif", "")), "chatoyant": "ui.specimen.chatoyant" if chatoyant else ""}}
 	sp.tags = sp.tags.duplicate()
 	sp.tags.erase("empilable")
 	_enregistrer_variete(sp)
@@ -1619,7 +1642,7 @@ func _semaine_elevage() -> void:
 					var g := {}
 					for nom in esp.loci.keys():
 						g[nom] = _heriter(specimens[i].genome.get(nom), specimens[j].genome.get(nom), esp.loci[nom], rng)
-					var enfant := _nouveau_specimen(str(specimens[i].espece), g, "m" if rng.randf() < 0.5 else "f")
+					var enfant := _nouveau_specimen(str(specimens[i].espece), g, "m" if rng.randf() < 0.5 else "f", _tirer_chatoyant(rng, bool(specimens[i].get("chatoyant", false)) or bool(specimens[j].get("chatoyant", false))))
 					_exprimer_loci(enfant, _cell_de(pos), true)
 					_enregistrer_variete(enfant)
 					contenants[gi].append(enfant.uid)

@@ -51,6 +51,9 @@ Le motif étant une fonction de `(x, y)` :
 
 **Couverture mesurée**, du plus discret au plus voyant : Moucheté et Pointillé 13 %, Larmes 17 %, Constellé 15 %, Ocellé 26 %, Rayé 29 %, Croisillon 33 %, Oblique 42 %, Chevron 50 %, Damier 52 %.
 
+> [!success] Codé le 2026-08-28 — le chatoyant
+> Drapeau `chatoyant` sur le spécimen : **1,5 %** à la naissance et à la capture, **×6** si un parent l'est, **×3** au palier 500 variétés (`combat_rules.elevage.chatoyant`). Il ne crée pas de variété au registre (le registre compte les couleurs × motifs), mais le registre note le **nombre de chatoyants vus** par espèce. Les commandes des collectionneurs demandent un chatoyant **une fois sur dix** (`or × 3`) ; un spécimen ordinaire ne satisfait pas une commande chatoyante. Le nom affiché porte « chatoyant ».
+
 ## Liens
 - **Dépend de** : [[Règle d'anneau]], [[Loci — les dix types]], [[Apparence — données et équipement]]
 - **Alimente** : [[Vivarium — capture et élevage]], [[Vivarium — registre et paliers]]

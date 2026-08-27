@@ -401,6 +401,10 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+ui.specimen.chatoyant," chatoyant"
+journal.chatoyant,"un spécimen chatoyant : {espece} !"
+ui.registre.chatoyants," · chatoyants vus {n}"
+ui.gestion.commande_chatoyant," CHATOYANT"
 ui.royaume.fiche,"peuple : {race} · culture : {culture} · capitale {capitale} · taxes {base_rate} %\ndirigeant : {dirigeant}\nvillages connus : {villages}\ndiplomatie : {diplomatie}"
 ui.royaume.dirigeant_inconnu,inconnu (capitale non visitée)
 creature.pretre.name,Prêtre
@@ -426,10 +430,10 @@ ui.entrainer.aucune,rien à entraîner ici
 journal.entraine,"{nom} entraîne {competence} : potentiel {potentiel} (−{cout} or)"
 journal.entraine_refuse,pas assez d'or pour cet entraînement
 journal.entraine_plafond,le potentiel est déjà au plafond
-ui.gestion.commande,"commande : {espece} couleur {couleur} motif {motif} — {or} or (livrer à un marchand)"
+ui.gestion.commande,"commande : {espece} couleur {couleur} motif {motif}{chatoyant} — {or} or (livrer à un marchand)"
 ui.gestion.commande_aucune,commande : aucune (le registre est vide)
 ui.ecran.livrer,Livrer la commande (Z)
-journal.commande,"un collectionneur demande : {espece} couleur {couleur} motif {motif} — {or} or"
+journal.commande,"un collectionneur demande : {espece} couleur {couleur} motif {motif}{chatoyant} — {or} or"
 journal.commande_livree,"commande livrée : {or} or"
 journal.commande_manque,tu n'as pas le spécimen demandé
 journal.commande_bourse,le marchand n'a pas l'or de la commande
