@@ -176,6 +176,8 @@ func _creer_personnage() -> void:
 	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
 	var fiche := Etres.creer_personnage("creature.aventurier.name", races[creation.race % races.size()], classes[creation.classe % classes.size()], creation.points, int(creation.annee), prog)
 	fiche.capacites = GameData.entree("creatures", "aventurier").get("capacites", []).duplicate(true)
+	if not fiche.has("modules_connus"):
+		fiche["modules_connus"] = []
 	for cap in fiche.capacites:   # les modules des capacités de départ sont connus : on peut les recombiner (Structure compétences-modules-slots)
 		for m in cap.get("modules", []):
 			if not (str(m) in fiche.modules_connus):
