@@ -23,6 +23,9 @@ var profils_ia: Dictionary
 var statuts_defs: Dictionary
 var affixes_defs: Dictionary
 var loot: Loot
+var progression: Progression
+var niveaux_gagnes: Array = []       # [{id, competence, niveau}] depuis le dernier écran de fin
+var fiche_joueur: Dictionary = {}    # la fiche créée (Création de personnage), sinon l'aventurier du catalogue
 var objets: Dictionary = {}          # uid → instance générée (le catalogue reste dans `items`, fusionné)
 var contenants: Dictionary = {}      # index de tuile → [uids] (coffres, butin au sol)
 var dernier_combat: Dictionary = {}   # récapitulatif du dernier combat terminé (écran de fin)
@@ -52,6 +55,7 @@ func _init(p_graine: int) -> void:
 	statuts_defs = GameData.catalogues.get("status_effects", {})
 	loot = Loot.new(GameData.config("loot_rules"), affixes_defs, GameData.catalogues.get("items", {}), GameData.config("wuxing").elements)
 	loot.modules = GameData.catalogues.get("modules", {})
+	progression = Progression.new(regles.r.progression, GameData.catalogues.get("competences", {}), GameData.config("astrologie"))
 
 
 # ---------------------------------------------------------------- mise en place
@@ -152,7 +156,7 @@ func _descendre(e: Dictionary) -> bool:
 func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 	_n_entites += 1
 	var id := "%s_%d" % [def_id, _n_entites]
-	var def := GameData.entree("creatures", def_id)
+	var def := fiche_joueur if (controle == "joueur" and not fiche_joueur.is_empty()) else GameData.entree("creatures", def_id)
 	var e := Etres.instancier(id, def, pos, controle, regles, items)
 	# Variante rare (Monstres rares) : tirage à la résolution du spawn, stats ×2.5, teinte or, épithète, drop garanti.
 	if controle == "ia":
@@ -163,6 +167,7 @@ func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 			_rendre_rare(e, rng)
 	if e.chain_gauge:
 		e.chaine = wuxing.jauge_neuve()
+	e.spawn = pos
 	Etres.recalculer(e, items, affixes_defs, regles)
 	entites[id] = e
 	ordre.append(id)
@@ -266,6 +271,34 @@ func _ramasser(e: Dictionary, tick: int) -> bool:
 	return true
 
 
+## Mort et pénalité : respawn au point d'entrée, 10 % de chance par objet du sac de tomber sur le
+## lieu de mort, équipement conservé, aucune perte d'XP. Le respawn est une intention du client.
+func _respawn(e: Dictionary) -> bool:
+	if e.vivant or e.controle != "joueur":
+		return false
+	var perdus: Array = []
+	for uid in e.sac.duplicate():
+		if des.reel() < float(regles.r.mort.chance_perte_objet):
+			e.sac.erase(uid)
+			perdus.append(uid)
+	_poser_contenant(e.pos, perdus, "butin")
+	var spawn: Vector2i = e.get("spawn", e.pos)
+	if not grille.occupant(spawn).is_empty() or grille.bloque_passage(spawn):
+		spawn = e.pos
+	if en_combat(e):
+		_quitter_combat(e)
+	e.vivant = true
+	e.sante = e.sante_max
+	e.endurance = e.endurance_max
+	e.statuts = []
+	e.action_en_cours = {}
+	e.pos = spawn
+	grille.placer(e.id, spawn)
+	e.compteur = horloge_monde.ticks
+	EventBus.emettre(&"journal", [&"journal.respawn", {"nom": e.name_key, "perdus": perdus.size()}])
+	return true
+
+
 ## Sertir une gemme du sac dans un emplacement libre d'un objet porté ou du sac (5 ticks).
 func _sertir(e: Dictionary, objet: String, gemme: String, tick: int) -> bool:
 	if not (gemme in e.sac) or not items.has(objet) or items.get(gemme, {}).get("type", "") != "gemme":
@@ -306,9 +339,11 @@ func _lire(e: Dictionary, objet: String, tick: int) -> bool:
 				e.modules_connus.append(m)
 			appris.append(m)
 		e.xp.competence["lecture"] = int(e.xp.competence.get("lecture", 0)) + int(livre.difficulte) * int(lv.xp_succes)
+		gagner_xp(e, "lecture", int(livre.difficulte) * int(lv.xp_succes))
 		EventBus.emettre(&"journal", [&"journal.lecture_reussie", {"nom": e.name_key, "n": appris.size(), "livre": nom_objet(objet)}])
 	else:
 		e.xp.competence["lecture"] = int(e.xp.competence.get("lecture", 0)) + int(livre.difficulte) * int(lv.xp_echec)
+		gagner_xp(e, "lecture", int(livre.difficulte) * int(lv.xp_echec))
 		var grave := marge <= -10 or jet == 1
 		_effet_echec_lecture(e, grave, tick)
 		EventBus.emettre(&"journal", [&"journal.lecture_echouee", {"nom": e.name_key, "livre": nom_objet(objet), "grave": grave}])
@@ -500,7 +535,8 @@ func _regenerer(e: Dictionary, tick: int) -> void:
 		var tranches := tick / periode - int(e.tick_endurance) / periode
 		for i in tranches:
 			if des.reel() < float(regles.r.mana.chance):
-				e.mana = mini(e.mana_max, e.mana + roundi(float(regles.r.mana.regen_base)))
+				e.mana = mini(e.mana_max, e.mana + roundi(float(regles.r.mana.regen_base) + float(e.competences_eff.get("meditation", 0)) * float(regles.r.mana.regen_par_meditation)))
+				gagner_xp(e, "meditation", 1)
 	e.tick_endurance = tick
 
 
@@ -509,6 +545,8 @@ func _regenerer(e: Dictionary, tick: int) -> void:
 ## Une intention pour l'entité `id`, qui doit être en attente. Valide, exécute, retourne
 ## vrai si elle a été consommée. Types : deplacer{vers} · attaquer{cible, lourde} · garde · attendre.
 func intention(id: String, i: Dictionary) -> bool:
+	if str(i.get("type", "")) == "respawn" and entites.has(id):
+		return _respawn(entites[id])   # un mort n'attend rien : le respawn passe hors de la file
 	if not attente.has(id) or not entites.has(id):
 		return false
 	var e: Dictionary = entites[id]
@@ -538,6 +576,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _equiper(e, str(i.get("objet", "")), h.ticks)
 		"ramasser":
 			ok = _ramasser(e, h.ticks)
+		"respawn":
+			ok = _respawn(e)
 		"sertir":
 			ok = _sertir(e, str(i.get("objet", "")), str(i.get("gemme", "")), h.ticks)
 		"lire":
@@ -572,6 +612,12 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	grille.placer(e.id, vers)
 	e.compteur = tick + _ticks_avec_statuts(e, regles.ticks_deplacement(cout, e.competences_eff, en_combat(e)))
 	_declencher_glyphe(e, vers)
+	if en_combat(e):
+		for autre in vivants():
+			if autre.camp != e.camp and Grille.distance(autre.pos, e.pos) == 1:
+				gagner_xp(e, "esquive", 1)   # la mobilité s'apprend sous le feu (Décision — Esquive active)
+				break
+	gagner_xp(e, "athletisme", 1)
 	EventBus.emettre(&"journal", [&"journal.deplacement", {"nom": e.name_key, "cout": e.compteur - tick}])
 	if chute > 0:
 		var d := grille.degats_chute(chute)
@@ -880,6 +926,8 @@ func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degat
 	if cible.garde:
 		if tient:
 			var cout := regles.cout_garde_impact(sans_garde, bouclier)
+			if bouclier:
+				gagner_xp(cible, "bouclier", sans_garde)   # la compétence Bouclier progresse à chaque impact bloqué
 			for ax in Etres.affixes_equipes(cible, items, affixes_defs, "meca_garde_endurance"):
 				cout = roundi(float(cout) * (1.0 - float(ax.params.pct) / 100.0))   # garde −N % d'endurance
 			cible.endurance = maxi(0, cible.endurance - cout)
@@ -953,16 +1001,62 @@ func _verser_xp(cible: Dictionary, degats: int, source: String, detail: Dictiona
 		var el := wuxing.dominante(detail.get("element"))
 		if not el.is_empty():
 			att.xp.element[el] = int(att.xp.element.get(el, 0)) + xp
+			gagner_xp(att, "element_" + el, xp)
 		var comp := str(detail.get("competence", ""))
 		if not comp.is_empty():
 			att.xp.competence[comp] = int(att.xp.competence.get(comp, 0)) + xp
+			gagner_xp(att, comp, xp)
 		var type := str(detail.get("type", ""))
-		if not type.is_empty():
+		if not type.is_empty() and type != "statut" and type != "magique":
 			att.xp.type[type] = int(att.xp.type.get(type, 0)) + xp
+			gagner_xp(att, type, xp)
+		for m in detail.get("modules", []):
+			gagner_xp(att, str(m), xp)   # les modules montent par l'usage, sous leur id
 		EventBus.emettre(&"skill_xp_gained", [att.id, comp, xp])
 	var cons := str(detail.get("construction", ""))
 	if cible.has("xp") and not cons.is_empty() and int(detail.get("evites", 0)) > 0:
 		cible.xp.construction[cons] = int(cible.xp.construction.get(cons, 0)) + int(detail.evites)
+		gagner_xp(cible, cons, int(detail.evites))
+	if cible.has("xp") and xp > 0 and not att.is_empty():
+		gagner_xp(cible, "encaissement", xp)   # le défenseur gagne en Encaissement (E.3, étape 6)
+
+
+## Verse de l'XP à une compétence par le moteur de progression ; la stat associée en reçoit la
+## moitié ; chaque niveau gagné est journalisé et signalé (skill_level_up), l'équipement recalculé.
+func gagner_xp(e: Dictionary, cle: String, xp: int) -> void:
+	if xp <= 0 or not e.has("xp_competences"):
+		return
+	var gagnes := progression.verser(e, cle, xp)
+	var stat := progression.stat_associee(cle)
+	if not stat.is_empty() and e.corps.stats.has(stat):
+		_verser_stat(e, stat, roundi(float(xp) * float(regles.r.progression.part_stat)))
+	if gagnes > 0:
+		niveaux_gagnes.append({"id": e.id, "competence": cle, "niveau": int(e.competences[cle])})
+		EventBus.emettre(&"skill_level_up", [e.id, cle, int(e.competences[cle])])
+		EventBus.emettre(&"journal", [&"journal.niveau", {"nom": e.name_key, "competence": _nom_competence(cle), "niveau": int(e.competences[cle]), "potentiel": int(e.potentiels.get(cle, 80))}])
+		Etres.recalculer(e, items, affixes_defs, regles)
+
+
+## Une stat progresse comme une compétence (même courbe, même potentiel) ; un niveau = +1 à la stat.
+func _verser_stat(e: Dictionary, stat: String, xp: int) -> void:
+	if xp <= 0:
+		return
+	var cle := "stat:" + stat
+	e.competences[cle] = int(e.corps.stats[stat])
+	var gagnes := progression.verser(e, cle, xp)
+	if gagnes > 0:
+		e.corps.stats[stat] = int(e.corps.stats[stat]) + gagnes
+		EventBus.emettre(&"journal", [&"journal.niveau", {"nom": e.name_key, "competence": "stat." + stat, "niveau": int(e.corps.stats[stat]), "potentiel": int(e.potentiels.get(cle, 80))}])
+		Etres.recalculer(e, items, affixes_defs, regles)
+	e.competences.erase(cle)
+
+
+func _nom_competence(cle: String) -> String:
+	if GameData.existe("competences", cle):
+		return str(GameData.entree("competences", cle).name_key)
+	if GameData.existe("modules", cle):
+		return str(GameData.entree("modules", cle).name_key)
+	return cle
 
 
 # ---------------------------------------------------------------- statuts (Statuts · anti-stunlock)
@@ -1648,7 +1742,7 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 	return {"zone": zone.zone, "mult": zone.mult, "armure": armure, "direction": direction, "garde": tient,
 		"degats": degats, "bruts": bruts, "type": type_degats, "element": plan.elements, "dom": dom.mult,
 		"contre": dom.contre, "gain": gain, "chaine": chaine, "jet": d.jet,
-		"competence": str(plan.fonct.get("combat_skill", "")) if arme_noyau else "magie_" + wuxing.dominante(plan.elements),
+		"competence": str(plan.fonct.get("combat_skill", "")) if arme_noyau else "magie_" + wuxing.dominante(plan.elements), "modules": plan.modules,
 		"construction": str(piece.get("construction", "")), "evites": maxi(0, roundi(bruts * zone.mult) - degats)}
 
 
@@ -1718,7 +1812,8 @@ func _verifier_desengagements() -> void:
 				if proche and (vue or recemment_vu):
 					menace = true
 		if not menace:
-			dernier_combat = {"nom": nom, "ticks": h.ticks, "participants": c.participants.duplicate(), "victoire": true}
+			dernier_combat = {"nom": nom, "ticks": h.ticks, "participants": c.participants.duplicate(), "victoire": true, "niveaux": niveaux_gagnes.duplicate()}
+			niveaux_gagnes.clear()
 			for id in c.participants.duplicate():
 				var p: Dictionary = entites[id]
 				if p.camp == "joueur" and not p.vivant:

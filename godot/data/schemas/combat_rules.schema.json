@@ -48,6 +48,9 @@
     },
     "progression": {
       "type": "object"
+    },
+    "mort": {
+      "type": "object"
     }
   },
   "required": [

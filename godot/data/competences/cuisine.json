@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.cuisine.name",
+  "category": "general",
+  "stat": "perception",
+  "famille": "artisanat",
+  "tags": [
+    "general",
+    "artisanat"
+  ]
+}

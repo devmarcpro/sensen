@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.dague.name",
+  "category": "combat",
+  "stat": "dexterite",
+  "famille": "armes",
+  "tags": [
+    "combat",
+    "armes"
+  ]
+}

@@ -256,8 +256,108 @@ journal.pas_de_sertissure,pas d'emplacement libre (ou pas de gemme)
 journal.lecture_reussie,{nom} lit {livre} : {n} module(s) appris
 journal.lecture_echouee,"{nom} échoue à lire {livre} — le livre est perdu ({grave})"
 ui.modules_connus,modules connus {n} (L : lire · T : sertir)
+competence.epee.name,Épée
+competence.hache_d_armes.name,Hache d'armes
+competence.masse.name,Masse
+competence.lance.name,Lance
+competence.dague.name,Dague
+competence.arc.name,Arc
+competence.arbalete.name,Arbalète
+competence.baton_magique.name,Bâton magique
+competence.mains_nues.name,Mains nues
+competence.bouclier.name,Bouclier
+competence.dual_wielding.name,Dual wielding
+competence.deux_mains.name,Deux mains
+competence.meditation.name,Méditation
+competence.controle_mana.name,Contrôle du mana
+competence.magie_feu.name,Feu
+competence.magie_eau.name,Eau/Glace
+competence.magie_terre.name,Terre
+competence.magie_metal.name,Métal
+competence.magie_bois.name,Foudre/Vie
+competence.magie_arcane.name,Arcane
+competence.magie_espace.name,Espace
+competence.magie_corruption.name,Corruption
+competence.minage.name,Minage
+competence.bucheronnage.name,Bûcheronnage
+competence.terrassement.name,Terrassement
+competence.herboristerie.name,Herboristerie
+competence.collecte.name,Collecte
+competence.forge.name,Forge
+competence.menuiserie.name,Menuiserie
+competence.taille_de_pierre.name,Taille de pierre
+competence.tissage.name,Tissage
+competence.alchimie.name,Alchimie
+competence.cuisine.name,Cuisine
+competence.enchantement.name,Enchantement
+competence.lecture.name,Lecture
+competence.negociation.name,Négociation
+competence.dressage.name,Dressage
+competence.leadership.name,Leadership
+competence.agriculture.name,Agriculture
+competence.elevage.name,Élevage
+competence.navigation.name,Navigation
+competence.discretion.name,Discrétion
+competence.athletisme.name,Athlétisme
+competence.esquive.name,Esquive
+competence.encaissement.name,Encaissement
+competence.matelasse.name,Matelassé
+competence.cuir.name,Cuir
+competence.mailles.name,Mailles
+competence.ecailles.name,Écailles
+competence.plaque.name,Plaque
+competence.tranchant.name,Tranchant
+competence.perforant.name,Perforant
+competence.contondant.name,Contondant
+competence.element_bois.name,Bois (élément)
+competence.element_feu.name,Feu (élément)
+competence.element_terre.name,Terre (élément)
+competence.element_metal.name,Métal (élément)
+competence.element_eau.name,Eau (élément)
+race.humain.name,Humain
+race.elfe.name,Elfe
+race.nain.name,Nain
+classe.le_sabre.name,Le Sabre
+classe.le_souffle.name,Le Souffle
+classe.la_braise.name,La Braise
+classe.la_trace.name,La Trace
+classe.la_balance.name,La Balance
+classe.la_paume.name,La Paume
+classe.le_creuset.name,Le Creuset
+classe.le_vent.name,Le Vent
+journal.niveau,{nom} : {competence} passe au niveau {niveau} (potentiel {potentiel})
+ui.niveaux,niveau de combat {combat} · général {general}
+ui.fin.niveaux,  niveaux gagnés : {liste}
+ui.feuille,=== FEUILLE (C pour fermer) ===
+ui.feuille.ligne,  {competence} {niveau} (XP {xp}/{suivant} · potentiel {potentiel})
+ui.feuille.stat,  {stat} {valeur} (potentiel {potentiel})
+animal.rat,Rat
+animal.boeuf,Bœuf
+animal.tigre,Tigre
+animal.lapin,Lapin
+animal.dragon,Dragon
+animal.serpent,Serpent
+animal.cheval,Cheval
+animal.chevre,Chèvre
+animal.singe,Singe
+animal.coq,Coq
+animal.chien,Chien
+animal.cochon,Cochon
+stat.force,Force
+stat.dexterite,Dextérité
+stat.endurance,Endurance
+stat.volonte,Volonté
+stat.perception,Perception
+stat.charisme,Charisme
+ui.creation.titre,=== CRÉATION DU PERSONNAGE ===
+ui.creation.race,Race : {race} (R)
+ui.creation.classe,Classe : {classe} — talent {talent} (C)
+ui.creation.points,Points à répartir : {restants} / {total}
+ui.creation.signe,"Année de naissance {annee} : signe {element}-{animal} (← →)"
+ui.creation.aide,"↑↓ choisir une stat · + / − répartir (max +10) · Entrée : commencer"
+journal.respawn,{nom} se relève au point d'entrée ({perdus} objet(s) perdu(s))
 journal.victoire,plus aucun hostile. Victoire.
-journal.defaite,tu es tombé. Tab : recommencer.
+journal.defaite,tu es tombé. Une touche : te relever au point d'entrée (Mort et pénalité).
 module.a_l_impact.name,À l'impact
 module.absorption.name,Absorption
 module.accord.name,Accord

@@ -28,6 +28,9 @@ var profil_sans_ui := false        # mesure de perf : saute la mise à jour du t
 var profil_sans_terrain := false   # mesure de perf : saute le dessin des tuiles
 var visee := -1                    # capacité en cours de visée (index), -1 sinon
 var ecran_fin: Array[String] = []  # récapitulatif du dernier combat (écran de fin), vide sinon
+var feuille := false               # la feuille de personnage est affichée
+var creation: Dictionary = {}      # l'écran de création, tant que le personnage n'existe pas
+const STATS := ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]
 var zoom := 1.0
 
 var terrain: Terrain              # couche statique : les tuiles, dessinées une fois (perf É0)
@@ -73,14 +76,59 @@ func _ready() -> void:
 	EventBus.combat_ended.connect(_sur_fin_de_combat)
 	EventBus.tile_changed.connect(func(_p: Vector2i) -> void: terrain.queue_redraw())
 	GameData.donnees_rechargees.connect(_charger)
+	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": 1000}
 	var tutoriels := Tutoriels.new()
 	tutoriels.afficher = func(texte: String) -> void: _log("💡 " + texte)
 	add_child(tutoriels)
+	if OS.get_cmdline_user_args().has("--sans-creation") or DisplayServer.get_name() == "headless":
+		creation = {}
 	_charger()
 
 
-func _charger() -> void:
+## L'écran de création : R race, C classe, ↑↓ stat, +/− points, ← → année de naissance, Entrée.
+func _texte_creation() -> String:
+	var races: Array = GameData.catalogues.races.keys()
+	var classes: Array = GameData.catalogues.classes.keys()
+	races.sort()
+	classes.sort()
+	var race: String = races[creation.race % races.size()]
+	var classe: String = classes[creation.classe % classes.size()]
+	var cl: Dictionary = GameData.entree("classes", classe)
+	var total := 30 + int(cl.get("points_creation_bonus", 0))
+	var utilises := 0
+	for st in STATS:
+		utilises += int(creation.points.get(st, 0))
+	var prog: Progression = Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
+	var signe := prog.signe(int(creation.annee))
+	var l: Array[String] = [tr("ui.creation.titre"), tr("ui.creation.race").format({"race": tr(GameData.entree("races", race).name_key)}),
+		tr("ui.creation.classe").format({"classe": tr(cl.name_key), "talent": str(cl.get("talent", "—"))}),
+		tr("ui.creation.points").format({"restants": total - utilises, "total": total})]
+	for i in STATS.size():
+		var st: String = STATS[i]
+		var base := 5 + int(creation.points.get(st, 0)) + int(GameData.entree("races", race).bonus_stats.get(st, 0)) + int(cl.bonus_stats.get(st, 0))
+		l.append(("▶ " if i == creation.stat else "   ") + "%s : %d" % [tr("stat." + st), base])
+	l.append(tr("ui.creation.signe").format({"annee": creation.annee, "element": tr("element." + signe.element), "animal": tr("animal." + signe.animal)}))
+	l.append(tr("ui.creation.aide"))
+	return "\n".join(l)
+
+
+func _creer_personnage() -> void:
+	var races: Array = GameData.catalogues.races.keys()
+	var classes: Array = GameData.catalogues.classes.keys()
+	races.sort()
+	classes.sort()
+	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
+	var fiche := Etres.creer_personnage("creature.aventurier.name", races[creation.race % races.size()], classes[creation.classe % classes.size()], creation.points, int(creation.annee), prog)
+	fiche.capacites = GameData.entree("creatures", "aventurier").get("capacites", []).duplicate(true)
+	creation = {}
+	_charger(fiche)
+
+
+func _charger(fiche: Dictionary = {}) -> void:
+	if fiche.is_empty() and sim != null and not sim.fiche_joueur.is_empty():
+		fiche = sim.fiche_joueur
 	sim = Simulation.new(0x68EE)
+	sim.fiche_joueur = fiche
 	if arene_courante >= arenes.size():
 		sim.charger_donjon("ruine", 0x68EE, 1, 1)   # Tab après les arènes : le donjon
 	else:
@@ -156,6 +204,11 @@ func _log(t: String) -> void:
 # ---------------------------------------------------------------- rythme (client)
 
 func _process(delta: float) -> void:
+	if not creation.is_empty():
+		ui.text = _texte_creation()
+		ui_bas.text = ""
+		ui_droite.text = ""
+		return
 	var j := joueur()
 	if j.is_empty():
 		return
@@ -250,7 +303,36 @@ func _maj_atteignables() -> void:
 # ---------------------------------------------------------------- entrées → intentions
 
 func _unhandled_input(ev: InputEvent) -> void:
+	if not creation.is_empty():
+		if ev is InputEventKey and ev.pressed and not ev.echo:
+			match ev.keycode:
+				KEY_R: creation.race += 1
+				KEY_C: creation.classe += 1
+				KEY_UP: creation.stat = posmod(creation.stat - 1, STATS.size())
+				KEY_DOWN: creation.stat = posmod(creation.stat + 1, STATS.size())
+				KEY_LEFT: creation.annee -= 1
+				KEY_RIGHT: creation.annee += 1
+				KEY_KP_ADD, KEY_EQUAL, KEY_PLUS:
+					var st: String = STATS[creation.stat]
+					var cl: Dictionary = GameData.entree("classes", GameData.catalogues.classes.keys()[creation.classe % GameData.catalogues.classes.size()])
+					var total := 30 + int(cl.get("points_creation_bonus", 0))
+					var utilises := 0
+					for s2 in STATS:
+						utilises += int(creation.points.get(s2, 0))
+					if utilises < total and int(creation.points.get(st, 0)) < 10:
+						creation.points[st] = int(creation.points.get(st, 0)) + 1
+				KEY_KP_SUBTRACT, KEY_MINUS:
+					var st: String = STATS[creation.stat]
+					creation.points[st] = maxi(0, int(creation.points.get(st, 0)) - 1)
+				KEY_ENTER, KEY_KP_ENTER:
+					_creer_personnage()
+			ui.text = _texte_creation() if not creation.is_empty() else ui.text
+		return
 	var j := joueur()
+	if not j.is_empty() and not j.vivant and ev is InputEventKey and ev.pressed and not ev.echo:
+		sim.intention(joueur_id, {"type": "respawn"})
+		_apres_changement_de_grille()
+		return
 	if not ecran_fin.is_empty() and ((ev is InputEventMouseButton and ev.pressed) or (ev is InputEventKey and ev.pressed)):
 		ecran_fin.clear()
 		if ev is InputEventKey and ev.keycode == KEY_TAB:
@@ -279,6 +361,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 			KEY_TAB:
 				arene_courante = (arene_courante + 1) % (arenes.size() + 1)
 				_charger()
+			KEY_C:
+				feuille = not feuille
 			KEY_L:
 				if sim.attente.has(joueur_id) and not j.is_empty():
 					for uid in j.sac:
@@ -568,6 +652,19 @@ func _maj_ui() -> void:
 			lignes.append_array(_preview(j, sim.entites[occ]))
 	if not j.is_empty():
 		lignes.append("  " + tr("ui.entite.mana").format({"mana": j.mana, "mana_max": j.mana_max}) + " · " + tr("ui.munitions").format({"n": j.munitions}) + " · " + tr("ui.modules_connus").format({"n": j.modules_connus.size()}))
+		var nd := sim.progression.niveaux_derives(j)
+		lignes.append("  " + tr("ui.niveaux").format({"combat": "%.1f" % nd.combat, "general": "%.1f" % nd.general}))
+		if feuille:
+			lignes.append(tr("ui.feuille"))
+			for st in STATS:
+				lignes.append(tr("ui.feuille.stat").format({"stat": tr("stat." + st), "valeur": j.corps.stats[st], "potentiel": int(j.potentiels.get(st, 80))}))
+			var cles: Array = j.competences.keys()
+			cles.sort()
+			for cle in cles:
+				if int(j.competences[cle]) <= 0 and float(j.xp_competences.get(cle, 0.0)) <= 0.0:
+					continue
+				lignes.append(tr("ui.feuille.ligne").format({"competence": tr(sim._nom_competence(cle)), "niveau": int(j.competences[cle]),
+					"xp": int(j.xp_competences.get(cle, 0.0)), "suivant": sim.progression.xp_next(int(j.competences[cle])), "potentiel": int(j.potentiels.get(cle, 80))}))
 		for k in j.get("capacites", []).size():
 			lignes.append("  " + _texte_capacite(j, k))
 		if visee >= 0:
@@ -699,6 +796,12 @@ func _sur_fin_de_combat(_nom: String) -> void:
 			var nom: String = tr("element." + k) if piste == "element" else str(k)
 			parts.append("%s %d" % [nom, j.xp[piste][k]])
 		ecran_fin.append(tr("ui.fin.piste").format({"piste": piste, "detail": ", ".join(parts) if not parts.is_empty() else "—"}))
+	var gagnes: Array[String] = []
+	for g in dc.get("niveaux", []):
+		if g.id == j.id:
+			gagnes.append("%s %d" % [tr(sim._nom_competence(g.competence)), g.niveau])
+	if not gagnes.is_empty():
+		ecran_fin.append(tr("ui.fin.niveaux").format({"liste": ", ".join(gagnes)}))
 	ecran_fin.append(tr("ui.fin.suite"))
 	for piste in j.xp.keys():
 		j.xp[piste] = {}   # non persistée : l'écran la montre, la partie ne la garde pas (prototype)

@@ -141,11 +141,26 @@
     "recuperation": 0.5
   },
   "progression": {
-    "_doc": "Progression par l'usage : skill_factor(N) = 1 + N × 0.02 · Structure compétences-modules-slots (ticks / skill_factor, plancher 50 %) · Boucle de tick (déplacement / skill_factor(Athlétisme), minimum 2)",
+    "_doc": "Progression par l'usage : skill_factor(N) = 1 + N × 0.02 · Structure compétences-modules-slots (ticks / skill_factor, plancher 50 %) · Boucle de tick (déplacement / skill_factor(Athlétisme), minimum 2) · Progression par l'usage (xp_next = 100 × (N+1)^1.6) · Potentiel (×potentiel/100, −(10 + N/10) par niveau, plancher race+classe) · Double niveau (moyenne des 5 meilleures) · la stat associée reçoit part_stat de l'XP",
     "skill_factor_par_niveau": 0.02,
     "ticks_plancher_module": 0.5,
     "deplacement_min": 2,
     "esquive_par_niveau": 0.005,
-    "esquive_max": 0.33
+    "esquive_max": 0.33,
+    "xp_base": 100,
+    "xp_exposant": 1.6,
+    "potentiel_defaut": 80,
+    "potentiel_min": 50,
+    "potentiel_max_base": 130,
+    "potentiel_max": 200,
+    "potentiel_cout_base": 10,
+    "potentiel_cout_div": 10,
+    "top_n": 5,
+    "part_stat": 0.5
+  },
+  "mort": {
+    "_doc": "Mort et pénalité : respawn, −10 % d'or (pas d'or encore), 10 % de chance par objet du sac de tomber, équipement et XP conservés",
+    "chance_perte_objet": 0.1,
+    "perte_or": 0.1
   }
 }

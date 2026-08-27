@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.forge.name",
+  "category": "general",
+  "stat": "force",
+  "famille": "artisanat",
+  "tags": [
+    "general",
+    "artisanat"
+  ]
+}

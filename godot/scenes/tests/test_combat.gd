@@ -29,6 +29,7 @@ func _ready() -> void:
 	test_loot()
 	test_coffres_et_rares()
 	test_gemmes_et_livres()
+	test_progression()
 	test_arenes_autonomes()
 	if echecs == 0:
 		print("TESTS : tout passe")
@@ -1168,3 +1169,70 @@ func test_gemmes_et_livres() -> void:
 	verifier(s.intention(j.id, {"type": "lire", "objet": dur.uid}), "tenter un livre impossible")
 	verifier(not (dur.uid in j.sac) and j.modules_connus.size() == connus_avant, "échec : livre perdu, rien d'appris")
 	verifier(int(j.xp.competence.get("lecture", 0)) == 30 * 5 + 200 * 2, "XP de Lecture : difficulté × 5 (succès) + × 2 (échec)")
+
+
+# ---------------------------------------------------------------- Étape 4 : progression par l'usage, potentiel, création, mort
+
+func test_progression() -> void:
+	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
+	verifier(prog.xp_next(1) == 303 and prog.xp_next(10) == roundi(100.0 * pow(11.0, 1.6)) and prog.xp_next(50) == roundi(100.0 * pow(51.0, 1.6)), "xp_next : 303 · ~4 600 · ~54 000 (100 × (N+1)^1.6)")
+	verifier(GameData.catalogues.competences.size() == 58, "58 compétences en données (catégorie, stat, famille)")
+	var humain := GameData.entree("races", "humain")
+	var nain := GameData.entree("races", "nain")
+	var sabre := GameData.entree("classes", "le_sabre")
+	var souffle := GameData.entree("classes", "le_souffle")
+	verifier(prog.potentiel_base("forge", nain, souffle, {}) == 100, "Nain Souffle : Forge 100 (moyenne de 120 et du défaut 80)")
+	verifier(prog.potentiel_base("epee", humain, sabre, {}) == 105, "Humain Sabre : Épée 105 (moyenne de 90 et 120)")
+	verifier(prog.potentiel_base("magie_feu", nain, sabre, {}) == 60, "Nain Sabre : magie 60 (accord des deux)")
+	var signe := prog.signe(1004)
+	verifier(signe.element == "eau" and signe.animal == "singe", "année 1004 : Eau-Singe (cycles de 5 et de 12)")
+	verifier(prog.potentiel_base("lecture", humain, sabre, signe) == 95, "le Singe donne +10 en Lecture (moyenne 85 → 95)")
+	# Un être qui gagne de l'XP : niveau, potentiel qui baisse, stat associée
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	j.potentiels["epee"] = 100
+	j.potentiels_base["epee"] = 80
+	var force: int = j.corps.stats.force
+	s.gagner_xp(j, "epee", 310)
+	verifier(int(j.competences.get("epee", 0)) == 1 and int(j.potentiels.epee) == 100 - 10 and is_equal_approx(float(j.xp_competences.epee), 210.0), "310 XP à potentiel 100 : Épée 1 (100 XP), potentiel 90, reste 210")
+	j.potentiels["epee"] = 50
+	s.gagner_xp(j, "epee", 200)
+	verifier(int(j.competences.epee) == 2 and is_equal_approx(float(j.xp_competences.epee), 7.0) and int(j.potentiels.epee) == 80, "potentiel 50 : 200 XP n'en valent que 100 → Épée 2, reste 7, potentiel au plancher 80")
+	verifier(float(j.xp_competences.get("stat:force", 0.0)) > 0.0 or int(j.corps.stats.force) > force, "la Force reçoit la moitié de l'XP d'Épée")
+	# Les niveaux dérivés
+	j.competences["epee"] = 20
+	j.competences["bouclier"] = 10
+	j.competences["forge"] = 30
+	var nd := prog.niveaux_derives(j)
+	verifier(is_equal_approx(nd.combat, 15.0) and is_equal_approx(nd.general, 30.0), "niveau de combat 15 (20, 10), général 30")
+	# Le combat verse pour de vrai : après un coup, Épée, tranchant et Métal ont de l'XP
+	var loup: Dictionary = s.entites["loup_2"]
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(1, 0)
+	s.grille.placer(loup.id, loup.pos)
+	s._engager_combat(j, loup)
+	loup.compteur = 900
+	j.compteur = s.horloge_de(j).ticks
+	s.pas(j.horloge)
+	s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false})
+	verifier(float(j.xp_competences.get("tranchant", 0.0)) > 0.0 and float(j.xp_competences.get("element_metal", 0.0)) > 0.0 and float(loup.xp_competences.get("encaissement", 0.0)) > 0.0, "XP versée à l'arme, au type, à l'élément ; Encaissement au défenseur")
+	# Création de personnage : 30 points, bonus de race et de classe, kit, potentiels
+	var fiche := Etres.creer_personnage("creature.aventurier.name", "nain", "le_sabre", {"force": 10, "endurance": 10, "volonte": 10}, 1000, prog)
+	verifier(fiche.corps.stats.force == 5 + 10 + 1 + 2 and fiche.corps.stats.endurance == 5 + 10 + 2 + 1 and fiche.corps.stats.charisme == 5, "stats : base 5 + points + race + classe")
+	verifier("proto_epee" in fiche.equipement and fiche.competences.get("epee", 0) == 5 and fiche.potentiels_base.forge == 100, "kit du Sabre, Épée 5, potentiel de Forge nain+sabre = 100")
+	var p := Simulation.new(5)
+	p.fiche_joueur = fiche
+	p.charger_arene("plaine_au_talus")
+	var jp := joueur_de(p)
+	verifier(jp.race == "nain" and jp.sante_max == 20 + 18 * 4 and "detection_filons" in jp.tags_acquis, "le personnage créé entre en jeu : PV 92, Œil de la pierre")
+	# Mort et pénalité : respawn au point d'entrée, PV pleins, sac écrémé à 10 %, équipement gardé
+	var o := p.generer_objet("proto_dague", 1)
+	p.donner(jp, o.uid)
+	var spawn: Vector2i = jp.spawn
+	p.grille.liberer(jp.pos)
+	jp.pos = spawn + Vector2i(3, 0)
+	p.grille.placer(jp.id, jp.pos)
+	p._appliquer_degats(jp, 999, "", {})
+	verifier(not jp.vivant, "mort")
+	verifier(p.intention(jp.id, {"type": "respawn"}), "respawn")
+	verifier(jp.vivant and jp.sante == jp.sante_max and jp.pos == spawn and jp.equipement.has("main_principale"), "relevé au point d'entrée, PV pleins, équipement conservé")

@@ -1,0 +1,22 @@
+{
+  "name_key": "classe.le_vent.name",
+  "bonus_stats": {
+    "force": 1,
+    "dexterite": 1,
+    "endurance": 1,
+    "volonte": 1,
+    "perception": 1,
+    "charisme": 1
+  },
+  "equipement": [],
+  "ratelier": [],
+  "competences": {},
+  "base_potentials": {
+    "_defaut": 100
+  },
+  "talent": null,
+  "points_creation_bonus": 15,
+  "tags": [
+    "visible"
+  ]
+}

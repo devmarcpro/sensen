@@ -1,0 +1,28 @@
+{
+  "name_key": "race.nain.name",
+  "bonus_stats": {
+    "endurance": 2,
+    "force": 1
+  },
+  "recolte_mult": {
+    "minage": 1.15,
+    "forge": 1.15
+  },
+  "base_potentials": {
+    "_defaut": 80,
+    "forge": 120,
+    "minage": 120,
+    "taille_de_pierre": 120,
+    "encaissement": 120,
+    "magie": 60,
+    "discretion": 60
+  },
+  "talent": "oeil_de_la_pierre",
+  "tags_acquis": [
+    "detection_filons"
+  ],
+  "lifespan": 250,
+  "tags": [
+    "humanoide"
+  ]
+}

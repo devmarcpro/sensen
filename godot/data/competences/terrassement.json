@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.terrassement.name",
+  "category": "general",
+  "stat": "endurance",
+  "famille": "recolte",
+  "tags": [
+    "general",
+    "recolte"
+  ]
+}

@@ -1,20 +1,16 @@
 {
-  "_doc": "Classe — ce que l'être sait (docs: Classes, Talents de classe). Deuxième axe avec race et fonction. 6 visibles + 9 cachées.",
-  "name_key": "class.<id>.name",
-  "stat_bonuses": {},
-  "starting_equipment": [],
-  "starting_skills": {},
-  "base_potentials": {},
-  "talent": {
-    "id": "<id du talent>",
-    "hors_slot": true,
-    "module": "<id module ou null>",
-    "jauge": null,
-    "_doc": "Talent ACTIF hors slots. `jauge` : id d'une jauge de classe (même objet que la jauge de chaîne), ou null."
+  "_doc": "Classe (docs: Classes, Talents de classe). Kit : bonus_stats, equipement, ratelier, competences de départ ; base_potentials par compétence ou famille ; talent : id (mécanisme d'étape ultérieure) ; points_creation_bonus.",
+  "name_key": "classe.<id>.name",
+  "bonus_stats": {},
+  "equipement": [],
+  "ratelier": [],
+  "competences": {},
+  "base_potentials": {
+    "_defaut": 80
   },
-  "cachee": false,
-  "apprise_de": {
-    "relation_min": 75,
-    "_doc": "Classes cachées : apprises d'un PNJ porteur (docs: L'information comme récompense)."
-  }
+  "talent": null,
+  "points_creation_bonus": 0,
+  "tags": [
+    "visible"
+  ]
 }

@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.dual_wielding.name",
+  "category": "combat",
+  "stat": "dexterite",
+  "famille": "armes",
+  "tags": [
+    "combat",
+    "armes"
+  ]
+}

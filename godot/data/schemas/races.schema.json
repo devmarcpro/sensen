@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "bonus_stats",
+    "base_potentials",
+    "lifespan",
+    "tags"
+  ],
+  "properties": {
+    "name_key": {
+      "type": "string"
+    },
+    "bonus_stats": {
+      "type": "object"
+    },
+    "base_potentials": {
+      "type": "object"
+    },
+    "talent": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "lifespan": {
+      "type": "integer"
+    },
+    "xp_mult": {
+      "type": "number"
+    },
+    "tags": {
+      "type": "array"
+    }
+  }
+}

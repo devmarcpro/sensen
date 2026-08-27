@@ -39,6 +39,9 @@ Le cycle sexagésimal chinois — un élément et un animal — donne une pente 
 
 **Information visible ([[L'information comme récompense]]) :** le signe d'un PNJ se révèle au palier de relation 20-49.
 
+> [!success] Codé le 2026-08-27
+> `data/astrologie.json` : `signe(année) = {élément: année mod 5, animal: année mod 12}` ; +10 de potentiel de base sur les compétences listées par élément et par animal (le mapping de la note, `magie_<élément>` pour les domaines). Trines et oppositions sont en données ; leur multiplicateur de relation attend l'étape 9.
+
 ## Liens
 - **Dépend de** : [[Création de personnage]], [[Identité visuelle chinoise]], [[Wu Xing — cycles et vecteurs]]
 - **Alimente** : [[Potentiel]], [[Réputation et relations]], [[Âge des PNJ]], [[Familles et succession]]

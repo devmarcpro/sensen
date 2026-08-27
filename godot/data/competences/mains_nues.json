@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.mains_nues.name",
+  "category": "combat",
+  "stat": "force",
+  "famille": "armes",
+  "tags": [
+    "combat",
+    "armes"
+  ]
+}

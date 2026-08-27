@@ -32,6 +32,9 @@ Le tag combat/general est un champ de la définition de chaque compétence (data
 
 **Succession ([[Conquête de village]]) :** `succession_rule = "next_in_rank"` sélectionne le PNJ de plus haut **niveau général** de la faction.
 
+> [!success] Codé le 2026-08-27
+> `Progression.niveaux_derives()` : moyenne des 5 meilleures compétences de chaque catégorie (`category` de `data/competences/` ; un module sans fiche compte en combat). Affiché sous le mana ; la feuille de personnage (**C**) liste stats, potentiels, compétences avec XP et prochain seuil.
+
 ## Liens
 - **Dépend de** : [[Progression par l'usage]], [[Compétences — liste]]
 - **Alimente** : [[Gabarit de quête]], [[Défense et raids]], [[Population et exploitation]], [[Conquête de village]]

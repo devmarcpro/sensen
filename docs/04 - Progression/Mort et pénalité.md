@@ -26,6 +26,9 @@ usage-based rend la perte d'XP très punitive, on pénalise l'économie à la pl
 
 **Mort d'un PNJ unique :** définitive pour l'individu, voir [[Familles et succession]].
 
+> [!success] Codé le 2026-08-27
+> Le joueur mort attend une touche : intention `respawn` → relevé au **point d'entrée** (arène ou étage — pas encore de lit ni de claim), PV et endurance pleins, statuts effacés, sorti de l'horloge de combat ; **10 % de chance par objet du sac** de tomber en butin sur le lieu de mort (`combat_rules.mort`) ; équipement et XP conservés ; l'or n'existe pas encore (−10 % en données, en attente).
+
 ## Liens
 - **Dépend de** : [[Progression par l'usage]]
 - **Alimente** : [[Économie — sources et puits]]

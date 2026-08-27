@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.matelasse.name",
+  "category": "combat",
+  "stat": "endurance",
+  "famille": "construction",
+  "tags": [
+    "combat",
+    "construction"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.element_bois.name",
+  "category": "combat",
+  "stat": "volonte",
+  "famille": "element",
+  "tags": [
+    "combat",
+    "element"
+  ]
+}

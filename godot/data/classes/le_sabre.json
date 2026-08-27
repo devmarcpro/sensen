@@ -1,0 +1,33 @@
+{
+  "name_key": "classe.le_sabre.name",
+  "bonus_stats": {
+    "force": 2,
+    "endurance": 1
+  },
+  "equipement": [
+    "proto_epee",
+    "proto_bouclier"
+  ],
+  "ratelier": [
+    "proto_epee",
+    "proto_bouclier"
+  ],
+  "competences": {
+    "epee": 5,
+    "bouclier": 5
+  },
+  "base_potentials": {
+    "_defaut": 80,
+    "epee": 120,
+    "bouclier": 120,
+    "deux_mains": 120,
+    "encaissement": 120,
+    "magie": 60,
+    "alchimie": 60
+  },
+  "talent": "ratelier_vivant",
+  "points_creation_bonus": 0,
+  "tags": [
+    "visible"
+  ]
+}

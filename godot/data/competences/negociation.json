@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.negociation.name",
+  "category": "general",
+  "stat": "charisme",
+  "famille": "vie",
+  "tags": [
+    "general",
+    "vie"
+  ]
+}

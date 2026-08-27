@@ -1,0 +1,31 @@
+{
+  "name_key": "classe.la_paume.name",
+  "bonus_stats": {
+    "volonte": 2,
+    "charisme": 1
+  },
+  "equipement": [
+    "proto_baton_magique"
+  ],
+  "ratelier": [
+    "proto_baton_magique"
+  ],
+  "competences": {
+    "magie_bois": 5,
+    "alchimie": 5
+  },
+  "base_potentials": {
+    "_defaut": 80,
+    "magie_bois": 120,
+    "meditation": 120,
+    "alchimie": 100,
+    "masse": 60,
+    "hache_d_armes": 60,
+    "deux_mains": 60
+  },
+  "talent": "souffle_rendu",
+  "points_creation_bonus": 0,
+  "tags": [
+    "visible"
+  ]
+}

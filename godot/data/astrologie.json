@@ -1,0 +1,125 @@
+{
+  "_doc": "Cycle sexagésimal (docs: Astrologie — cycle sexagésimal) : +10 de potentiel de base dans les compétences liées. Une année = un élément (cycle de 5) et un animal (cycle de 12) ; 60 combinaisons.",
+  "elements": [
+    "bois",
+    "feu",
+    "terre",
+    "metal",
+    "eau"
+  ],
+  "animaux": [
+    "rat",
+    "boeuf",
+    "tigre",
+    "lapin",
+    "dragon",
+    "serpent",
+    "cheval",
+    "chevre",
+    "singe",
+    "coq",
+    "chien",
+    "cochon"
+  ],
+  "bonus_potentiel": 10,
+  "element_competences": {
+    "bois": [
+      "magie_bois",
+      "agriculture"
+    ],
+    "feu": [
+      "magie_feu",
+      "cuisine",
+      "forge"
+    ],
+    "terre": [
+      "magie_terre",
+      "minage",
+      "terrassement"
+    ],
+    "metal": [
+      "magie_metal",
+      "forge",
+      "taille_de_pierre"
+    ],
+    "eau": [
+      "magie_eau",
+      "alchimie",
+      "navigation"
+    ]
+  },
+  "animal_competences": {
+    "rat": [
+      "discretion",
+      "negociation"
+    ],
+    "boeuf": [
+      "encaissement",
+      "agriculture"
+    ],
+    "tigre": [
+      "deux_mains",
+      "athletisme"
+    ],
+    "lapin": [
+      "esquive",
+      "herboristerie"
+    ],
+    "dragon": [
+      "controle_mana",
+      "leadership"
+    ],
+    "serpent": [
+      "alchimie",
+      "herboristerie"
+    ],
+    "cheval": [
+      "athletisme",
+      "dressage"
+    ],
+    "chevre": [
+      "tissage",
+      "taille_de_pierre"
+    ],
+    "singe": [
+      "lecture",
+      "menuiserie"
+    ],
+    "coq": [
+      "arc",
+      "arbalete"
+    ],
+    "chien": [
+      "dressage",
+      "encaissement"
+    ],
+    "cochon": [
+      "cuisine",
+      "negociation"
+    ]
+  },
+  "trines": [
+    [
+      "rat",
+      "dragon",
+      "singe"
+    ],
+    [
+      "boeuf",
+      "serpent",
+      "coq"
+    ],
+    [
+      "tigre",
+      "cheval",
+      "chien"
+    ],
+    [
+      "lapin",
+      "chevre",
+      "cochon"
+    ]
+  ],
+  "relation_trine": 1.25,
+  "relation_opposition": 0.8
+}

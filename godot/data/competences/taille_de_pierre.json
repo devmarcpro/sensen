@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.taille_de_pierre.name",
+  "category": "general",
+  "stat": "force",
+  "famille": "artisanat",
+  "tags": [
+    "general",
+    "artisanat"
+  ]
+}

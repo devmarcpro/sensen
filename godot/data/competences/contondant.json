@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.contondant.name",
+  "category": "combat",
+  "stat": "force",
+  "famille": "type_degats",
+  "tags": [
+    "combat",
+    "type_degats"
+  ]
+}

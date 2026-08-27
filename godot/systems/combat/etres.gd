@@ -42,9 +42,16 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 		"capacites": def.get("capacites", []).duplicate(true),   # séquences de modules assemblées
 		"competences": def.get("competences", {}).duplicate(),     # niveaux (Progression par l'usage) — modificateur de race au départ
 		"stats_eff": stats.duplicate(),                            # (base + Σ add) × Π mult — Résolveur de modificateurs
+		"xp_competences": {},                                       # XP accumulée par compétence et par stat (Progression par l'usage)
+		"potentiels": def.get("potentiels", {}).duplicate(),       # potentiel courant par clé (Potentiel), défaut 80
+		"potentiels_base": def.get("potentiels_base", {}).duplicate(),
+		"xp_mult": float(def.get("xp_mult", 1.0)),
+		"signe": def.get("signe", {}),
+		"classe": def.get("classe", ""),
 		"competences_eff": def.get("competences", {}).duplicate(),
 		"sac": [],                                                  # uids des objets portés non équipés
 		"tags_acquis": [],                                          # grant_tag des effets passifs
+		"tags_acquis_race": def.get("tags_acquis_race", []).duplicate(),   # ceux du talent de race
 		"rare": false,                                              # variante rare (Monstres rares)
 		"degats_element": {},                                       # bonus plats des gemmes
 		"affinites": {},                                            # tailles en affinité de l'arme tenue
@@ -75,13 +82,39 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 	}
 
 
+## Crée la fiche d'un personnage (Création de personnage) : 6 stats à base 5 + 30 points répartis
+## (+ bonus de classe), bonus de race et de classe, kit, compétences de départ, potentiels de base
+## par race + classe + signe. Le résultat est une fiche comme celles de data/creatures/.
+static func creer_personnage(nom_key: String, race_id: String, classe_id: String, repartition: Dictionary, annee: int, prog: Progression) -> Dictionary:
+	var race: Dictionary = GameData.entree("races", race_id)
+	var classe: Dictionary = GameData.entree("classes", classe_id)
+	var stats := {}
+	for st in ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]:
+		stats[st] = 5 + int(repartition.get(st, 0)) + int(race.get("bonus_stats", {}).get(st, 0)) + int(classe.get("bonus_stats", {}).get(st, 0))
+	var signe := prog.signe(annee)
+	var pot_base := {}
+	for cle: String in prog.competences.keys():
+		pot_base[cle] = prog.potentiel_base(cle, race, classe, signe)
+	for st in stats.keys():
+		pot_base[st] = prog.potentiel_base(st, race, classe, signe)
+	return {
+		"id": "joueur", "name_key": nom_key, "race": race_id, "classe": classe_id, "fonction": "aventurier", "skeleton_template": "humanoide",
+		"corps": {"stats": stats, "silhouette": "humanoide"}, "esprit": null, "ai_profile": "compagnon",
+		"actions": [], "equipement": classe.get("equipement", []).duplicate(), "ratelier": classe.get("ratelier", []).duplicate(),
+		"competences": classe.get("competences", {}).duplicate(), "capacites": [], "chain_gauge": true, "elements": null,
+		"rare_chance": 0.0, "teinte": [0.28, 0.62, 0.92], "tags": ["humanoide", "joueur"] + race.get("tags", []),
+		"potentiels": pot_base.duplicate(), "potentiels_base": pot_base, "xp_mult": float(race.get("xp_mult", 1.0)), "signe": signe,
+		"tags_acquis_race": race.get("tags_acquis", []).duplicate(),
+	}
+
+
 ## Recalcule ce que l'équipement change (Résolveur de modificateurs : (base + Σ add) × Π mult) :
 ## stats et compétences effectives (les affixes passifs des bijoux et armures), endurance max,
 ## capacité de jauge, tags acquis. À appeler à l'instanciation et à chaque changement d'équipement.
 static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionary, regles: Regles) -> void:
 	var stats: Dictionary = e.corps.stats.duplicate()
 	var comp: Dictionary = e.competences.duplicate()
-	var tags: Array = []
+	var tags: Array = e.get("tags_acquis_race", []).duplicate()
 	var segments_bonus := 0
 	var endurance_bonus := 0
 	var sante_bonus := 0

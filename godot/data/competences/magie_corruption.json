@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.magie_corruption.name",
+  "category": "combat",
+  "stat": "volonte",
+  "famille": "magie",
+  "tags": [
+    "combat",
+    "magie"
+  ]
+}

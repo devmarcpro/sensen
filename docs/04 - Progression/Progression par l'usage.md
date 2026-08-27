@@ -28,6 +28,10 @@ avec base_xp = 100
 
 **Signal :** `skill_level_up` sur l'EventBus, écouté par l'UI, les niveaux dérivés et les guildes ([[EventBus]]).
 
+> [!success] Codé le 2026-08-27 — `systems/skills/progression.gd`, `data/competences/`
+> La courbe telle quelle (`xp_next = 100 × (N+1)^1.6`, `combat_rules.progression`) ; **58 compétences en données** (`data/competences/`, `tools/gen_progression_data.py`) avec `category` combat/général, `stat` associée et `famille` ; les **modules** progressent sous leur propre id (catégorie combat, stat Volonté) sans fiche. Ce qui verse de l'XP aujourd'hui : chaque dégât appliqué (arme, type de dégâts, élément dominant, modules employés — [[XP de combat]]), l'armure qui épargne (construction), le défenseur (Encaissement = dégâts subis), Bouclier (dégâts bloqués), Esquive (1 par tuile adjacente à un hostile en combat), Athlétisme (1 par tuile), Méditation (chaque régénération), Lecture. Signal `skill_level_up`, journal, écran de fin.
+> **Décision** : la **stat associée** à une compétence reçoit **la moitié** de l'XP versée (`part_stat: 0.5`), sur la même courbe et son propre potentiel — un niveau de stat = +1 ; c'est ainsi que les six stats progressent par l'usage, façon Elin, sans note dédiée jusqu'ici.
+
 ## Liens
 - **Dépend de** : [[Le vocabulaire des modules et l'absence d'arbre de talents]]
 - **Alimente** : [[Potentiel]], [[Double niveau combat et général]], [[XP de combat]], [[Récolte]], [[Qualité d'artisanat]], [[Structure compétences-modules-slots]]

@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "bonus_stats",
+    "equipement",
+    "ratelier",
+    "competences",
+    "base_potentials",
+    "points_creation_bonus",
+    "tags"
+  ],
+  "properties": {
+    "name_key": {
+      "type": "string"
+    },
+    "bonus_stats": {
+      "type": "object"
+    },
+    "equipement": {
+      "type": "array"
+    },
+    "ratelier": {
+      "type": "array"
+    },
+    "competences": {
+      "type": "object"
+    },
+    "base_potentials": {
+      "type": "object"
+    },
+    "talent": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "points_creation_bonus": {
+      "type": "integer"
+    },
+    "tags": {
+      "type": "array"
+    }
+  }
+}

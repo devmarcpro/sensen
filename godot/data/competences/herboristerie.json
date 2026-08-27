@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.herboristerie.name",
+  "category": "general",
+  "stat": "perception",
+  "famille": "recolte",
+  "tags": [
+    "general",
+    "recolte"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.navigation.name",
+  "category": "general",
+  "stat": "perception",
+  "famille": "vie",
+  "tags": [
+    "general",
+    "vie"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.epee.name",
+  "category": "combat",
+  "stat": "force",
+  "famille": "armes",
+  "tags": [
+    "combat",
+    "armes"
+  ]
+}

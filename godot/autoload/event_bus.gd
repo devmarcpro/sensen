@@ -8,6 +8,7 @@ extends Node
 signal damage_dealt(source_id: String, cible_id: String, degats: int, detail: Dictionary)
 signal creature_killed(id: String, tueur_id: String)
 signal skill_xp_gained(id: String, competence: String, xp: int)
+signal skill_level_up(id: String, competence: String, niveau: int)
 signal combat_started(horloge: String, participants: Array)
 signal combat_ended(horloge: String)
 signal action_engaged(id: String, action: Dictionary)      # télégraphe : intention visible

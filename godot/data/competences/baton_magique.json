@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.baton_magique.name",
+  "category": "combat",
+  "stat": "volonte",
+  "famille": "armes",
+  "tags": [
+    "combat",
+    "armes"
+  ]
+}

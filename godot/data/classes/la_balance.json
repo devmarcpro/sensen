@@ -1,0 +1,32 @@
+{
+  "name_key": "classe.la_balance.name",
+  "bonus_stats": {
+    "charisme": 2,
+    "perception": 1
+  },
+  "equipement": [
+    "proto_dague"
+  ],
+  "ratelier": [
+    "proto_dague"
+  ],
+  "competences": {
+    "negociation": 5,
+    "lecture": 5
+  },
+  "base_potentials": {
+    "_defaut": 80,
+    "negociation": 120,
+    "leadership": 120,
+    "lecture": 120,
+    "minage": 60,
+    "masse": 60,
+    "hache_d_armes": 60,
+    "deux_mains": 60
+  },
+  "talent": "oeil_du_prix",
+  "points_creation_bonus": 0,
+  "tags": [
+    "visible"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.tissage.name",
+  "category": "general",
+  "stat": "dexterite",
+  "famille": "artisanat",
+  "tags": [
+    "general",
+    "artisanat"
+  ]
+}

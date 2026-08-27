@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "category",
+    "stat",
+    "famille",
+    "tags"
+  ],
+  "properties": {
+    "name_key": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "combat",
+        "general"
+      ]
+    },
+    "stat": {
+      "type": "string"
+    },
+    "famille": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array"
+    }
+  }
+}

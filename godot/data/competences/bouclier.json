@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.bouclier.name",
+  "category": "combat",
+  "stat": "endurance",
+  "famille": "armes",
+  "tags": [
+    "combat",
+    "armes"
+  ]
+}

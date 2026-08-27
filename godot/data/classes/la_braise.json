@@ -1,0 +1,34 @@
+{
+  "name_key": "classe.la_braise.name",
+  "bonus_stats": {
+    "dexterite": 2,
+    "force": 1
+  },
+  "equipement": [
+    "proto_masse"
+  ],
+  "ratelier": [
+    "proto_masse"
+  ],
+  "competences": {
+    "forge": 5,
+    "menuiserie": 5
+  },
+  "base_potentials": {
+    "_defaut": 80,
+    "forge": 120,
+    "menuiserie": 120,
+    "tissage": 120,
+    "taille_de_pierre": 120,
+    "cuisine": 120,
+    "magie": 60,
+    "masse": 60,
+    "hache_d_armes": 60,
+    "deux_mains": 60
+  },
+  "talent": "main_du_metal",
+  "points_creation_bonus": 0,
+  "tags": [
+    "visible"
+  ]
+}

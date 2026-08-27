@@ -34,6 +34,9 @@ Cap : 200. Le potentiel est par-personnage (joueur, PNJ, compagnons).
 
 **Astrologie ([[Astrologie — cycle sexagésimal]]) :** *tout passe par le potentiel, jamais par un bonus dur — la naissance donne une pente, pas un plafond.*
 
+> [!success] Codé le 2026-08-27
+> `xp_effective = xp × potentiel/100 × bonus de race` ; au niveau : `potentiel = max(base, potentiel − (10 + N/10))` ; **potentiel de base** = moyenne race/classe quand elles diffèrent (défaut 80 ; par compétence, sinon par famille — `armes`, `magie`, `artisanat`… — sinon `_defaut` ; Humain 90 partout, Le Vent 100 partout), + 10 par l'astrologie, borné 50-130. Les sources de restauration (plats, sommeil, entraîneur) attendent les étapes 7-9 ; le cap 200 est en données.
+
 ## Liens
 - **Dépend de** : [[Progression par l'usage]], [[Races]], [[Classes]]
 - **Alimente** : [[XP de combat]], [[Cuisine et alchimie]], [[Astrologie — cycle sexagésimal]], [[Nourriture, potentiel et potions]]

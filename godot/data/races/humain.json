@@ -1,0 +1,13 @@
+{
+  "name_key": "race.humain.name",
+  "bonus_stats": {},
+  "xp_mult": 1.1,
+  "base_potentials": {
+    "_defaut": 90
+  },
+  "talent": "polyvalent",
+  "lifespan": 80,
+  "tags": [
+    "humanoide"
+  ]
+}

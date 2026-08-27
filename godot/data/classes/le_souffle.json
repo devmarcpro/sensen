@@ -1,0 +1,31 @@
+{
+  "name_key": "classe.le_souffle.name",
+  "bonus_stats": {
+    "volonte": 2,
+    "perception": 1
+  },
+  "equipement": [
+    "proto_baton_magique"
+  ],
+  "ratelier": [
+    "proto_baton_magique"
+  ],
+  "competences": {
+    "magie_feu": 5,
+    "meditation": 5
+  },
+  "base_potentials": {
+    "_defaut": 80,
+    "magie": 120,
+    "meditation": 120,
+    "controle_mana": 120,
+    "masse": 60,
+    "hache_d_armes": 60,
+    "deux_mains": 60
+  },
+  "talent": "communion_des_cinq",
+  "points_creation_bonus": 0,
+  "tags": [
+    "visible"
+  ]
+}

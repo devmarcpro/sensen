@@ -32,16 +32,17 @@
 | recipes/ | transformations de matériaux | Stations de transformation (C.8) |
 | tutorials/ | tooltips contextuels (signal EventBus + conditions → text_key) | Tooltips contextuels (E.19) |
 | dialogue/ | répliques d'ambiance | Dialogue PNJ (E.23) |
-| races/, classes/ | races et classes, **avec leur talent** | C.2, C.3, Talents de race, Talents de classe |
+| races/, classes/ | les 3 races et 8 classes visibles : bonus, kit, potentiels de base, talent (`tools/gen_progression_data.py`) | C.2, C.3, Talents de race, Talents de classe |
 | functions/ | fonctions (ex-postes de travail) | Fonctions |
 | rigs/ | les 4 rigs (`tools/gen_rigs.py`) : segments, ancrages, facings, slots peints | Squelette modulaire et points d'attache |
 | weather_states/ | états météo | Météo (E.28) |
 | species/ | espèces d'élevage (loci, moteur, conditions, coûts) | Élevage — intention et familles (Annexe H) |
 | prototype_arenas/ | arènes de l'étape 0 (3 arènes, posées par `tools/gen_arenas.py`) | Prototype de combat — spécification |
 | affixes/ | les 36 gabarits d'affixes (`tools/gen_affixes.py`) : fourchettes, effet, budget, slots | Loot — affixes, gemmes et rareté |
+| competences/ | les 58 compétences : catégorie combat/général, stat associée, famille | Compétences — liste, Double niveau |
 | schemas/ | JSON Schema (sous-ensemble : type, required, properties, items, enum, min/max) de chaque catalogue | Décision — Pipeline de contenu |
 
-**Configurations (fichier unique, à la racine de data/) :** `combat_rules.json` (toutes les constantes chiffrées du combat, chacune citant sa note — Boucle de tick, Endurance, Zones de coup, Armure par zone…) · `tile_contents.json` (contenus de tuile par tags) · `wuxing.json` (cycles, multiplicateurs, jauge de chaîne, teintes) · `palette_materiaux.json` (155 teintes, `tools/gen_palette.py`) · `loot_rules.json` (grille de rareté par étage, budgets, contenants, monstres rares, gemmes, livres) · `rare_epithets.json` · `reading_failures.json` · `noise_layers.json` (B.8) · `material_categories.json` (B.2) · `reserved_colors.json` (12.1) · `strata.json` + `ore_bands.json` (Décision — Minerais et strates) · `reading_failures.json` (A.7) · `rare_epithets.json` (12.4) · `absurd_laws_pool.json` (E.26).
+**Configurations (fichier unique, à la racine de data/) :** `combat_rules.json` (toutes les constantes chiffrées du combat, chacune citant sa note — Boucle de tick, Endurance, Zones de coup, Armure par zone…) · `tile_contents.json` (contenus de tuile par tags) · `wuxing.json` (cycles, multiplicateurs, jauge de chaîne, teintes) · `palette_materiaux.json` (155 teintes, `tools/gen_palette.py`) · `loot_rules.json` (grille de rareté par étage, budgets, contenants, monstres rares, gemmes, livres) · `rare_epithets.json` · `reading_failures.json` · `astrologie.json` · `noise_layers.json` (B.8) · `material_categories.json` (B.2) · `reserved_colors.json` (12.1) · `strata.json` + `ore_bands.json` (Décision — Minerais et strates) · `reading_failures.json` (A.7) · `rare_epithets.json` (12.4) · `absurd_laws_pool.json` (E.26).
 
 **Élevage (Annexe H) :** `species/` déclare tout — les **types de loci** (10), les **conditions** (15) et les **coûts** (6) sont du code générique, jamais du code par espèce. Ajouter une espèce = **un fichier**, et les tests de conformité vérifient qu'elle est jouable (atteignabilité, faisabilité).
 

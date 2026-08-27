@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.discretion.name",
+  "category": "combat",
+  "stat": "dexterite",
+  "famille": "survie",
+  "tags": [
+    "combat",
+    "survie"
+  ]
+}

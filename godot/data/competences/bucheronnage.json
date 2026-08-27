@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.bucheronnage.name",
+  "category": "general",
+  "stat": "force",
+  "famille": "recolte",
+  "tags": [
+    "general",
+    "recolte"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.menuiserie.name",
+  "category": "general",
+  "stat": "dexterite",
+  "famille": "artisanat",
+  "tags": [
+    "general",
+    "artisanat"
+  ]
+}

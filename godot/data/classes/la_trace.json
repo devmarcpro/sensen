@@ -1,0 +1,34 @@
+{
+  "name_key": "classe.la_trace.name",
+  "bonus_stats": {
+    "dexterite": 2,
+    "perception": 1
+  },
+  "equipement": [
+    "proto_arc",
+    "proto_fleches"
+  ],
+  "ratelier": [
+    "proto_arc",
+    "proto_dague"
+  ],
+  "competences": {
+    "arc": 5,
+    "dressage": 5
+  },
+  "base_potentials": {
+    "_defaut": 80,
+    "arc": 120,
+    "arbalete": 120,
+    "dressage": 120,
+    "discretion": 120,
+    "herboristerie": 120,
+    "forge": 60,
+    "encaissement": 60
+  },
+  "talent": "meute",
+  "points_creation_bonus": 0,
+  "tags": [
+    "visible"
+  ]
+}

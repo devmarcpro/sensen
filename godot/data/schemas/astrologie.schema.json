@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": [
+    "elements",
+    "animaux",
+    "bonus_potentiel",
+    "element_competences",
+    "animal_competences",
+    "trines"
+  ]
+}

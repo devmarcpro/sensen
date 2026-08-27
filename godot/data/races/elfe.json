@@ -1,0 +1,22 @@
+{
+  "name_key": "race.elfe.name",
+  "bonus_stats": {
+    "volonte": 2,
+    "perception": 1
+  },
+  "regen_mana_mult": 1.2,
+  "endurance_max_add": -20,
+  "base_potentials": {
+    "_defaut": 80,
+    "magie": 120,
+    "meditation": 120,
+    "controle_mana": 120,
+    "forge": 60,
+    "encaissement": 60
+  },
+  "talent": "chair_de_mana",
+  "lifespan": 350,
+  "tags": [
+    "humanoide"
+  ]
+}

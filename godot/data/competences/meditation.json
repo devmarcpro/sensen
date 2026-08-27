@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.meditation.name",
+  "category": "combat",
+  "stat": "volonte",
+  "famille": "magie",
+  "tags": [
+    "combat",
+    "magie"
+  ]
+}

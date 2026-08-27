@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.magie_metal.name",
+  "category": "combat",
+  "stat": "volonte",
+  "famille": "magie",
+  "tags": [
+    "combat",
+    "magie"
+  ]
+}
