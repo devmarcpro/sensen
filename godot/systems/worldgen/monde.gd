@@ -22,6 +22,10 @@ var contenants_hors: Dictionary = {}   # Vector2i → {idx local: [uids]}
 var dormants: Dictionary = {}          # Vector2i → [êtres] hors fenêtre
 var explores: Dictionary = {}          # Vector2i (chunk de 32) → true : bit d'exploration (minimap, sauvegardé)
 var teintes: Dictionary = {}           # Vector2i (chunk) → Color : teinte dominante, calculée une fois
+var delta: Dictionary = {}             # Vector2i (cellule) → int : dérive de la corruption, borné (sauvegardé)
+var foyers: Dictionary = {}            # Vector2i (cellule) → {actif, majeur, generation, repit, nettoye_tick} (donjons connus)
+var semaine_courante: int = 0          # dernière semaine passée (ticks / ticks_par_semaine)
+var grille_active: Grille = null       # la fenêtre courante, pour effacer une entrée après la grâce
 var mutex := Mutex.new()
 var tache: int = -1                    # tâche WorkerThreadPool de pré-génération en cours (−1 : aucune)
 
@@ -75,6 +79,7 @@ func fenetre(c: Vector2i, contenus: Dictionary, regles_dep: Dictionary, oeil: in
 		for dx in range(-rayon, rayon + 1):
 			var cell := c + Vector2i(dx, dy)
 			_poser_cellule(g, cell, cellule(cell))
+	grille_active = g
 	return g
 
 
@@ -108,6 +113,7 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 		g.poser_contenu(base + Vector2i(int(i) % taille, int(i) / taille), "eau")
 	if bool(e.get("a_donjon", false)):
 		g.poser_contenu(base + e.entree_donjon, "entree_donjon")
+		foyer(cell)   # le donjon devient un foyer connu de la dérive
 	if cell == cellule_camp:
 		if not decouvert.has(cell):   # sa cellule, on la connaît (Claims et persistance) — tuiles et chunks
 			var tout := {}
@@ -209,6 +215,195 @@ func couleur_chunk(ch: Vector2i) -> Color:
 	col = col.darkened(clampf((10.0 - h_moy) * 0.06, -0.3, 0.4)) if h_moy < 10.0 else col.lightened(clampf((h_moy - 10.0) * 0.05, 0.0, 0.3))
 	teintes[ch] = col
 	return col
+
+
+# ---------------------------------------------------------------- dérive de la corruption (E.20)
+
+func _cr() -> Dictionary:
+	return planete.get("corruption", {})
+
+
+## Le foyer d'une cellule à donjon (créé à la première demande) ; {} si la cellule n'en a pas.
+func foyer(cell: Vector2i) -> Dictionary:
+	if foyers.has(cell):
+		return foyers[cell]
+	if not surface.poi_de(cell, cell == cellule_camp).donjon:
+		return {}
+	foyers[cell] = {"actif": true, "majeur": surface.danger_de(cell) >= 2, "generation": 0, "repit": 0, "nettoye_tick": -1}
+	return foyers[cell]
+
+
+## Corruption effective d'une cellule (0-100) : le bruit de danger plus le delta.
+func corruption_de(cell: Vector2i) -> float:
+	var taille_c: int = taille
+	var d := surface.valeur("danger", cell.x * taille_c + taille_c / 2, cell.y * taille_c + taille_c / 2) * 100.0
+	return clampf(d + float(delta.get(cell, 0)), 0.0, 100.0)
+
+
+## Le niveau de danger affiché (0 paisible, 1 dangereuse, 2 mortelle) à partir de la corruption effective.
+func danger_de(cell: Vector2i) -> int:
+	var seuils: Array = planete.get("danger", {}).get("seuils", [0.45, 0.75])
+	var c := corruption_de(cell) / 100.0
+	return 2 if c >= float(seuils[1]) else (1 if c >= float(seuils[0]) else 0)
+
+
+func _ajouter_delta(cell: Vector2i, n: int) -> void:
+	var cr := _cr()
+	delta[cell] = clampi(int(delta.get(cell, 0)) + n, int(cr.get("delta_min", -40)), int(cr.get("delta_max", 40)))
+	if delta[cell] == 0:
+		delta.erase(cell)
+
+
+## Les cellules que la dérive simule (LOD) : les explorées et leurs voisines.
+func _cellules_simulees() -> Dictionary:
+	var res := {}
+	var n := taille / 32
+	var cellules_explorees := {}
+	for ch in explores.keys():
+		cellules_explorees[Vector2i(floori(float(ch.x) / n), floori(float(ch.y) / n))] = true
+	for cell in cellules_explorees.keys():
+		for dy in range(-1, 2):
+			for dx in range(-1, 2):
+				res[cell + Vector2i(dx, dy)] = true
+	return res
+
+
+## Le passage hebdomadaire : infection des foyers actifs, répit et repeuplement des foyers nettoyés,
+## décroissance loin des foyers, effet civilisateur du camp. Retourne les cellules touchées.
+func semaine(tick: int) -> Array[Vector2i]:
+	var cr := _cr()
+	var touchees: Array[Vector2i] = []
+	var cellules := _cellules_simulees()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([surface.graine, "semaine", tick])
+	var actifs := {}
+	for cell in cellules.keys():
+		var f := foyer(cell)
+		if f.is_empty():
+			continue
+		if bool(f.actif):
+			actifs[cell] = true
+			var plafond := int(cr.get("plafond_majeur", 25)) if bool(f.majeur) else int(cr.get("plafond_mineur", 10))
+			if int(delta.get(cell, 0)) < plafond:
+				_ajouter_delta(cell, int(cr.get("infection_cellule", 2)))
+				touchees.append(cell)
+			for dy in range(-1, 2):
+				for dx in range(-1, 2):
+					var v: Vector2i = cell + Vector2i(dx, dy)
+					if v != cell and int(delta.get(v, 0)) < plafond:
+						_ajouter_delta(v, int(cr.get("infection_voisines", 1)))
+		else:
+			if int(f.repit) > 0:
+				f.repit = int(f.repit) - 1
+			elif rng.randf() < corruption_de(cell) / 100.0:   # repeuplement ∝ corruption locale restante
+				f.actif = true
+				f.generation = int(f.generation) + 1
+				f.majeur = danger_de(cell) >= 2
+				f.nettoye_tick = -1
+				touchees.append(cell)
+				_reposer_entree(cell)
+	for cell in cellules.keys():
+		if not delta.has(cell):
+			continue
+		var proche := false
+		for a in actifs.keys():
+			if absi(a.x - cell.x) <= 2 and absi(a.y - cell.y) <= 2:
+				proche = true
+				break
+		if not proche:
+			_ajouter_delta(cell, -signi(int(delta.get(cell, 0))) * int(cr.get("decroissance", 1)))
+	for dy in range(-1, 2):   # le camp, zone civilisée
+		for dx in range(-1, 2):
+			var v := cellule_camp + Vector2i(dx, dy)
+			if v != cellule_camp and delta.has(v) and int(delta[v]) > 0:
+				_ajouter_delta(v, -int(cr.get("civilisation", 1)))
+	return touchees
+
+
+## Le boss d'un donjon est vaincu : le foyer s'endort (répit), la corruption recule, la grâce commence.
+func nettoyer(cell: Vector2i, tick: int) -> void:
+	var f := foyer(cell)
+	if f.is_empty() or not bool(f.actif):
+		return
+	var cr := _cr()
+	f.actif = false
+	f.repit = int(cr.get("repit_majeur", 12)) if bool(f.majeur) else int(cr.get("repit_mineur", 4))
+	f.nettoye_tick = tick
+	_ajouter_delta(cell, int(cr.get("nettoyage_cellule", -8)))
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			if dx != 0 or dy != 0:
+				_ajouter_delta(cell + Vector2i(dx, dy), int(cr.get("nettoyage_voisines", -3)))
+
+
+## Le donjon d'une cellule est-il ouvert (actif, ou nettoyé depuis moins que la grâce) ?
+func donjon_ouvert(cell: Vector2i, tick: int) -> bool:
+	var f := foyer(cell)
+	if f.is_empty():
+		return false
+	if bool(f.actif):
+		return true
+	return int(f.nettoye_tick) >= 0 and tick - int(f.nettoye_tick) < int(_cr().get("grace_ticks", 36000))
+
+
+## Le tick du monde : les grâces échues effacent l'entrée de la fenêtre (et de la cellule mémorisée).
+func tick(t: int) -> Array[Vector2i]:
+	var disparues: Array[Vector2i] = []
+	for cell in foyers.keys():
+		var f: Dictionary = foyers[cell]
+		if bool(f.actif) or int(f.nettoye_tick) < 0 or bool(f.get("effacee", false)):
+			continue
+		if t - int(f.nettoye_tick) >= int(_cr().get("grace_ticks", 36000)):
+			f["effacee"] = true
+			_effacer_entree(cell)
+			disparues.append(cell)
+	return disparues
+
+
+func _effacer_entree(cell: Vector2i) -> void:
+	var e := cellule(cell)
+	var pe: Vector2i = e.entree_donjon
+	var base := pos_monde(cell, Vector2i.ZERO)
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var l := pe + Vector2i(dx, dy)
+			var i := l.y * taille + l.x
+			e.rochers.erase(i)
+			e.sol[i] = true
+			if not modifications.has(cell):
+				modifications[cell] = {}
+			modifications[cell][i] = {"h": int(e.hauteurs[i]), "contenu": "", "materiau": "", "meuble": "", "station": "", "sol": str(e.sols.get(i, ""))}
+			if grille_active != null and grille_active.dans(base + l):
+				var gi := grille_active.idx(base + l)
+				grille_active.contenu[gi] = 0
+				grille_active.materiaux.erase(gi)
+	e["a_donjon"] = false
+
+
+func _reposer_entree(cell: Vector2i) -> void:
+	var e := cellule(cell)
+	var f := foyer(cell)
+	f.erase("effacee")
+	var pe: Vector2i = e.entree_donjon
+	var base := pos_monde(cell, Vector2i.ZERO)
+	e["a_donjon"] = true
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var l: Vector2i = pe + Vector2i(dx, dy)
+			var i := l.y * taille + l.x
+			var centre_ou_sud := (dx == 0 and dy == 0) or (dx == 0 and dy == 1)
+			if not centre_ou_sud:
+				e.rochers[i] = "pierre"
+				e.sol.erase(i)
+			modifications.get(cell, {}).erase(i)
+			if grille_active != null and grille_active.dans(base + l):
+				var gi := grille_active.idx(base + l)
+				if centre_ou_sud:
+					if dx == 0 and dy == 0:
+						grille_active.poser_contenu(base + l, "entree_donjon")
+				else:
+					grille_active.materiaux[gi] = "pierre"
+					grille_active.poser_contenu(base + l, "mur")
 
 
 ## Une cellule est explorée si l'un de ses chunks l'est (carte du monde, voyage rapide).

@@ -401,6 +401,10 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+journal.semaine,"une semaine passe : la corruption dérive ({n} cellules)"
+journal.donjon_nettoye,"le donjon est nettoyé : il restera ouvert un jour et demi"
+journal.donjon_disparu,"l'entrée du donjon s'est effondrée en ({x},{y})"
+journal.donjon_reapparu,"un donjon est réapparu en ({x},{y})"
 ui.carte.titre,=== CARTE DU MONDE — clic : voyage rapide vers une cellule explorée · flèches : défiler · M/Échap : fermer ===
 ui.carte.depart,=== CHOISIS TA CASE DE DÉPART — clic sur une cellule de terre (couleur : biome · orange/rouge : danger · carré doré : donjon) ===
 ui.carte.legende,"vert cerclé : ton camp · bleu cerclé : ici · carré doré : donjon · point clair : filon majeur · sombre : jamais explorée"

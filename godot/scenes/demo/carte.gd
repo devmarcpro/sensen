@@ -84,7 +84,7 @@ func _dessiner() -> void:
 				col = col.darkened(0.55)
 			dessin.draw_rect(r, col)
 			# Heat-map de danger : trois niveaux lisibles (Niveau de danger : vague par défaut).
-			match int(info.danger):
+			match int(sim.monde.danger_de(cell)):
 				1: dessin.draw_rect(r, Color(1.0, 0.5, 0.1, 0.25))
 				2: dessin.draw_rect(r, Color(1.0, 0.1, 0.1, 0.4))
 			if info.poi.get("donjon", false):

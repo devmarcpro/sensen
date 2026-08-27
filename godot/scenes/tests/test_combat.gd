@@ -33,6 +33,7 @@ func _ready() -> void:
 	test_surface()
 	test_sauvegarde()
 	test_carte_et_voyage()
+	test_corruption()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1225,12 +1226,73 @@ func test_carte_et_voyage() -> void:
 	s.grille.placer(j.id, entree)
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "descendre"}), "entrer dans le donjon de la cellule")
-	verifier(s.lieu == "donjon" and int(s.donjon.id) == int(hash([s.graine, camp.x, camp.y, "donjon"]) & 0x7fffffff), "le donjon a l'id de sa cellule")
+	verifier(s.lieu == "donjon" and int(s.donjon.id) == int(hash([s.graine, camp.x, camp.y, "donjon", 0]) & 0x7fffffff), "le donjon a l'id de sa cellule (génération 0)")
 	j.pos = s.donjon.entree
 	s.grille.placer(j.id, j.pos)
 	s.attente[j.id] = true
 	s.intention(j.id, {"type": "remonter"})
 	verifier(s.lieu == "camp" and j.pos == entree, "ressortir ramène devant l'entrée")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Étape 8.3b : la dérive de la corruption
+
+func test_corruption() -> void:
+	var s := Simulation.new(43)
+	s.charger_camp()
+	var m = s.monde
+	var camp: Vector2i = m.cellule_camp
+	var cr: Dictionary = GameData.config("planete").corruption
+	var f := m.foyer(camp)
+	verifier(not f.is_empty() and bool(f.actif) and int(f.generation) == 0, "le donjon du camp est un foyer actif")
+	var c0 := m.corruption_de(camp)
+	var touchees := m.semaine(1)
+	verifier(touchees.has(camp) and int(m.delta.get(camp, 0)) == int(cr.infection_cellule) and int(m.delta.get(camp + Vector2i(1, 0), 0)) == int(cr.infection_voisines) - int(cr.civilisation), "une semaine : +2 sur la cellule du foyer, +1 sur ses voisines (−1 : le camp civilise ses voisines)")
+	verifier(m.corruption_de(camp) > c0, "la corruption effective a monté")
+	for k in 30:
+		m.semaine(k + 2)
+	var plafond := int(cr.plafond_majeur) if bool(f.majeur) else int(cr.plafond_mineur)
+	verifier(int(m.delta.get(camp, 0)) <= plafond, "plafond d'influence respecté (%d ≤ %d)" % [int(m.delta.get(camp, 0)), plafond])
+	# Nettoyage : le boss vaincu à la sortie → foyer inactif, corruption en recul, grâce puis disparition.
+	var d0 := int(m.delta.get(camp, 0))
+	m.nettoyer(camp, 1000)
+	verifier(not bool(f.actif) and int(f.repit) > 0 and int(m.delta.get(camp, 0)) == d0 + int(cr.nettoyage_cellule), "nettoyé : inactif, répit, −8")
+	verifier(m.donjon_ouvert(camp, 1000 + 100) and not m.donjon_ouvert(camp, 1000 + int(cr.grace_ticks) + 1), "ouvert pendant la grâce, fermé après")
+	var entree: Vector2i = m.pos_monde(camp, m.cellule(camp).entree_donjon)
+	var disparues := m.tick(1000 + int(cr.grace_ticks) + 1)
+	verifier(disparues.has(camp) and s.grille.contenu_de(entree).is_empty() and not s.grille.bloque_passage(entree + Vector2i(0, -1)), "après la grâce, l'entrée et son anneau de roche ont disparu")
+	# Répit puis repeuplement : le répit décompte, la réapparition rend l'entrée avec une nouvelle génération.
+	var repit0 := int(f.repit)
+	m.semaine(2000)
+	verifier(int(f.repit) == repit0 - 1, "le répit décompte chaque semaine")
+	f.repit = 0
+	m.delta[camp] = 40
+	var reapparu := false
+	for k in 40:
+		m.semaine(3000 + k)
+		if bool(f.actif):
+			reapparu = true
+			break
+	verifier(reapparu and int(f.generation) == 1 and s.grille.contenu_de(entree).get("tags", []).has("entree_donjon"), "réapparition ∝ corruption : nouvelle génération, entrée de retour")
+	# Décroissance loin des foyers : une cellule sans foyer actif à moins de 2 revient vers 0.
+	var loin := camp + Vector2i(5, 5)
+	m.explores[Vector2i(loin.x * 4, loin.y * 4)] = true
+	m.delta[loin] = 3
+	f.actif = false
+	m.semaine(5000)
+	verifier(int(m.delta.get(loin, 0)) == 2, "décroissance −1/semaine sans foyer proche")
+	# Le danger de la carte lit la corruption effective ; l'expédition prend la corruption de la cellule.
+	f.actif = true
+	m.delta[camp] = 40
+	verifier(m.danger_de(camp) >= s.monde.surface.danger_de(camp), "le danger affiché intègre le delta")
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	s.grille.liberer(j.pos)
+	j.pos = entree
+	s.grille.placer(j.id, entree)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "descendre"}), "entrer dans le donjon réapparu")
+	var gen: int = int(m.foyer(camp).generation)
+	verifier(gen >= 1 and int(s.donjon.id) == int(hash([s.graine, camp.x, camp.y, "donjon", gen]) & 0x7fffffff) and float(s.donjon.corruption) > 0.0 and int(s.donjon.profondeur) >= 1, "id de la génération %d, corruption %.0f et profondeur %d portées par le donjon" % [gen, float(s.donjon.corruption), int(s.donjon.profondeur)])
 	s.monde.fermer()
 
 

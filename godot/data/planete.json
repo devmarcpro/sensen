@@ -114,5 +114,32 @@
   },
   "voyage": {
     "ticks_par_cellule": 384
+  },
+  "corruption": {
+    "_doc": "Dérive de la corruption (E.20) : delta borné, infection par foyer actif, plafonds mineur/majeur, nettoyage, répit, décroissance, civilisation, grâce après nettoyage.",
+    "ticks_par_semaine": 168000,
+    "delta_min": -40,
+    "delta_max": 40,
+    "infection_cellule": 2,
+    "infection_voisines": 1,
+    "plafond_mineur": 10,
+    "plafond_majeur": 25,
+    "nettoyage_cellule": -8,
+    "nettoyage_voisines": -3,
+    "repit_mineur": 4,
+    "repit_majeur": 12,
+    "decroissance": 1,
+    "civilisation": 1,
+    "grace_ticks": 36000,
+    "etages_mineur": [
+      2,
+      3
+    ],
+    "etages_majeur": [
+      5,
+      8
+    ],
+    "corruption_par_etage": 8,
+    "profondeur_par_corruption": 25
   }
 }

@@ -237,9 +237,15 @@ func _partir_en_expedition(e: Dictionary) -> bool:
 	expedition = {}
 	etages_visites.clear()
 	# Le donjon de cette cellule : id déterministe, thème selon le biome (repaire en marécage/zone corrompue).
-	var id := int(hash([graine, cell.x, cell.y, "donjon"]) & 0x7fffffff)
+	if not monde.donjon_ouvert(cell, horloge_monde.ticks):
+		return false
+	var f := monde.foyer(cell)
+	var id := int(hash([graine, cell.x, cell.y, "donjon", int(f.get("generation", 0))]) & 0x7fffffff)
 	var b: Dictionary = GameData.catalogues.biomes.get(str(monde.surface.resume_cellule(cell).biome), {})
 	var theme := "repaire" if ("marecage" in b.get("tags", []) or "corrompu" in b.get("tags", [])) else "ruine"
+	var cr: Dictionary = GameData.config("planete").corruption
+	var fourchette: Array = cr.etages_majeur if bool(f.get("majeur", false)) else cr.etages_mineur
+	donjon = {"etages_fixes": fourchette, "corruption": monde.corruption_de(cell), "cellule": cell}
 	EventBus.emettre(&"journal", [&"journal.expedition_depart", {}])
 	charger_donjon(theme, graine, id, 1, e)
 	return true
@@ -250,10 +256,13 @@ func _partir_en_expedition(e: Dictionary) -> bool:
 func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, joueur: Dictionary = {}) -> void:
 	var theme := GameData.entree("dungeon_themes", theme_id)
 	var etages: int = donjon.get("etages", 0)
+	var corruption_locale: float = float(donjon.get("corruption", 0.0))
+	var cellule_donjon: Vector2i = donjon.get("cellule", Vector2i(-9999, -9999))
 	if etages == 0:
 		var r := RandomNumberGenerator.new()
 		r.seed = hash([graine, id_donjon])
-		etages = r.randi_range(int(theme.etages[0]), int(theme.etages[1]))
+		var fourchette: Array = donjon.get("etages_fixes", theme.etages)   # majeur / mineur (Dérive de la corruption)
+		etages = r.randi_range(int(fourchette[0]), int(fourchette[1]))
 	var gen := Donjon.new(GameData.catalogues.get("dungeon_rooms", {}), GameData.catalogues.get("dungeon_connectors", {}), theme)
 	var r2 := RandomNumberGenerator.new()
 	r2.seed = hash([graine, id_donjon, etage, "salles"])
@@ -281,8 +290,12 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 		_reprendre(joueur, ou)
 		return
 	var e := gen.generer_etage(graine, id_donjon, etage, nb, etage == etages)
+	var cr: Dictionary = GameData.config("planete").get("corruption", {})
+	var corruption_etage := minf(100.0, corruption_locale + float(etage) * float(cr.get("corruption_par_etage", 8)))
 	donjon = {"theme": theme_id, "graine": graine, "id": id_donjon, "etage": etage, "etages": etages,
-		"salles": gen._nb_salles(e), "escalier": e.escalier, "boss": e.boss, "entree": e.entree}
+		"salles": gen._nb_salles(e), "escalier": e.escalier, "boss": e.boss, "entree": e.entree,
+		"corruption": corruption_locale, "corruption_etage": corruption_etage, "cellule": cellule_donjon,
+		"profondeur": etage + int(corruption_etage / float(cr.get("profondeur_par_corruption", 25)))}
 	grille = Grille.depuis_etage(e, GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
 	grille.materiau_defaut = str(theme.get("materiau_mur", ""))
 	for idx in e.filons.keys():
@@ -293,13 +306,26 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 		ajouter(theme.get("joueur", "aventurier"), e.entree, "joueur")
 	else:
 		_reprendre(joueur, e.entree)
+	var n_spawns := int(ceil(float(e.spawns.size()) * (1.0 + corruption_etage / 100.0)))   # la corruption densifie
+	var k_spawn := 0
 	for s: Dictionary in e.spawns:
 		if grille.occupant(s.pos).is_empty():
 			ajouter(s.creature, s.pos, "ia")
+			k_spawn += 1
+	var i_extra := 0
+	while k_spawn < n_spawns and not e.spawns.is_empty() and i_extra < e.spawns.size():
+		var s2: Dictionary = e.spawns[i_extra]
+		i_extra += 1
+		for d in Grille.DIRS:
+			var q: Vector2i = s2.pos + d
+			if grille.dans(q) and not grille.bloque_passage(q) and grille.occupant(q).is_empty():
+				ajouter(s2.creature, q, "ia")
+				k_spawn += 1
+				break
 	for c: Dictionary in e.coffres:
 		var uids: Array = []
 		for base in c.bases:
-			var o := generer_objet(str(base), etage, {"donjon": theme_id, "etage": etage})
+			var o := generer_objet(str(base), int(donjon.profondeur), {"donjon": theme_id, "etage": etage})
 			if not o.is_empty():
 				uids.append(o.uid)
 		_poser_contenant(c.pos, uids, "coffre")
@@ -679,7 +705,8 @@ func sauvegarder(nom: String = "monde") -> bool:
 	for gi in contenants.keys():
 		contenants_monde[grille.pos_de(int(gi))] = contenants[gi]
 	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "graine": graine, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
-		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores})
+		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores,
+		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante})
 	ok = Sauvegarde.ecrire(nom, "surface.json", surface) and ok
 	ok = Sauvegarde.ecrire(nom, "entities.json", {"entites": autres, "ordre": ordre_autres, "contenants": contenants_monde}) and ok
 	ok = Sauvegarde.ecrire(nom, "items.json", instances) and ok
@@ -711,6 +738,9 @@ func charger_sauvegarde(nom: String = "monde") -> bool:
 		items[uid] = instances[uid]
 	monde.cellule_camp = w.cellule_camp
 	monde.explores = w.get("explores", {})
+	monde.delta = w.get("delta", {})
+	monde.foyers = w.get("foyers", {})
+	monde.semaine_courante = int(w.get("semaine", 0))
 	for cell in surface.keys():
 		var sc: Dictionary = surface[cell]
 		if not sc.modifications.is_empty():
@@ -726,6 +756,7 @@ func charger_sauvegarde(nom: String = "monde") -> bool:
 	_reinitialiser()
 	monde.centre = Vector2i(-1, -1)
 	grille = monde.fenetre(monde.cellule_de(joueur_sauve.pos), GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
+	monde.tick(int(w.ticks))   # les grâces échues avant la sauvegarde
 	entites[joueur_sauve.id] = joueur_sauve
 	ordre.append(joueur_sauve.id)
 	for id in ent.ordre:
@@ -1094,7 +1125,11 @@ func _sortir(e: Dictionary) -> bool:
 	expedition = {}
 	if not camp_sauve.is_empty():   # le camp est le point d'ancrage entre deux expéditions (étape 7)
 		EventBus.emettre(&"journal", [&"journal.retour_camp", {}])
+		var cell_donjon: Vector2i = donjon.get("cellule", Vector2i(-9999, -9999))
 		charger_camp(e)
+		if recap.boss_vaincu and monde != null and cell_donjon != Vector2i(-9999, -9999):
+			monde.nettoyer(cell_donjon, horloge_monde.ticks)   # Dérive de la corruption : foyer nettoyé
+			EventBus.emettre(&"journal", [&"journal.donjon_nettoye", {}])
 		sauvegarder()   # autosave au retour (Sauvegarde : sur événements clés)
 		return true
 	var suivant: int = int(donjon.id) + 1
@@ -1397,7 +1432,7 @@ func _drop(cible: Dictionary, source: String) -> void:
 	var lr: Dictionary = GameData.config("loot_rules")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([graine, "drop", cible.id])
-	var profondeur: int = int(donjon.get("etage", 0))
+	var profondeur: int = int(donjon.get("profondeur", donjon.get("etage", 0)))
 	var uids: Array = []
 	if cible.get("rare", false):
 		var base := str(loot._base_pour(rng))
@@ -1483,6 +1518,26 @@ func _sur_avancee_monde(_de: int, _a: int) -> void:
 	while garde_fou > 0 and pas("monde"):
 		garde_fou -= 1
 	_tiquer_faim(horloge_monde.ticks)
+	_tiquer_monde(horloge_monde.ticks)
+
+
+## La dérive de la corruption sur l'horloge du monde : le passage hebdomadaire, les grâces échues.
+func _tiquer_monde(tick: int) -> void:
+	if monde == null:
+		return
+	var cr: Dictionary = GameData.config("planete").corruption
+	var semaine := tick / int(cr.ticks_par_semaine)
+	while monde.semaine_courante < semaine:
+		monde.semaine_courante += 1
+		var touchees := monde.semaine(tick)
+		EventBus.emettre(&"journal", [&"journal.semaine", {"n": touchees.size()}])
+		for cell in touchees:
+			if monde.foyer(cell).get("generation", 0) > 0 and bool(monde.foyer(cell).actif):
+				EventBus.emettre(&"journal", [&"journal.donjon_reapparu", {"x": cell.x, "y": cell.y}])
+	for cell in monde.tick(tick):
+		EventBus.emettre(&"journal", [&"journal.donjon_disparu", {"x": cell.x, "y": cell.y}])
+		if lieu == "camp":
+			EventBus.emettre(&"tile_changed", [monde.pos_monde(cell, monde.cellule(cell).entree_donjon)])
 
 
 ## La faim (Faim) : −1 par `ticks_par_point` sur l'horloge du monde, pour les êtres qui ont une jauge

@@ -68,6 +68,9 @@ Les donjons sont une des sources principales de contenu du jeu, et le premier es
 > [!success] Codé le 2026-08-28 — les donjons de surface (8.3a)
 > Une cellule à POI donjon porte une **entrée scellée** : la tuile `entree_donjon` entourée d'un anneau de roche ouvert au sud, posée hors de l'eau. Entrer (E) lance l'expédition dans le donjon **de cette cellule** (`id = hash(seed, cellule)`, thème selon le biome : `repaire` en marécage ou zone corrompue, `ruine` ailleurs) ; ressortir **ramène devant l'entrée** (`e.retour`), pas au camp. Le voyage rapide vers une cellule à donjon dépose au point d'entrée. La cellule reste claimable dans ce prototype (pas encore de claim au-delà du camp) ; le nettoyage, le délai de grâce et la réapparition viennent avec la corruption hebdomadaire (8.3b).
 
+> [!success] Précisé le 2026-08-28 — nettoyage, grâce, réapparition (8.3b)
+> Ressortir d'un donjon dont le boss est vaincu le marque **nettoyé** ([[Dérive de la corruption]]) ; il reste explorable **1,5 jour** (36 000 ticks) puis son **entrée disparaît** de la cellule (la roche de l'entrée scellée aussi) — la cellule redevient une cellule normale ; une réapparition tirée par la dérive la remet. Les étages nettoyés ne sont plus mis de côté après la grâce.
+
 ## Liens
 - **Dépend de** : [[Grille continue]], [[Hauteur de terrain ±10]], [[Décisions fondatrices]]
 - **Alimente** : [[Génération de donjon]], [[Salles et connecteurs]], [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Grimoires et manuels]]

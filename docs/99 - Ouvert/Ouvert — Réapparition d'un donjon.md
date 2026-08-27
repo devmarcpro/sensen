@@ -25,6 +25,9 @@ etape: 2
 
 **Pourquoi :** zéro système nouveau, et ça préserve la promesse de [[Loot — affixes, gemmes et rareté]] (*le donjon est la SEULE source*) sans jamais permettre de farmer le même donjon.
 
+> [!success] Codé le 2026-08-28
+> Tel quel : après nettoyage, le foyer dort son répit puis tire chaque semaine ∝ corruption locale ; réussite → nouveau donjon (nouvelle génération) dans la même cellule. En région pacifiée, la probabilité tend vers zéro.
+
 ## Liens
 - **Dépend de** : [[Donjons — structure et intégration]], [[Dérive de la corruption]]
 - **Alimente** : [[Loot — affixes, gemmes et rareté]], [[Boucle de jeu]]
