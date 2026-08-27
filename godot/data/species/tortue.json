@@ -1,0 +1,56 @@
+{
+  "name_key": "species.tortue.name",
+  "famille": "individu_qui_evolue",
+  "groupe": "tortues",
+  "habitat": "enclos",
+  "capture": {
+    "verbe": "ramassage",
+    "milieu": "plante",
+    "dd": 7,
+    "rarete": 1
+  },
+  "loci": {
+    "couleur": {
+      "type": "anneau",
+      "n": 8
+    },
+    "dossiere": {
+      "type": "age",
+      "par_semaine": 1,
+      "max": 12
+    },
+    "taille": {
+      "type": "nombre",
+      "min": 1,
+      "max": null,
+      "var": 0.04
+    }
+  },
+  "silhouette": "",
+  "repro": {
+    "moteur": "anneau",
+    "conditions": [
+      {
+        "c": "habitat",
+        "v": "enclos"
+      },
+      {
+        "c": "place"
+      },
+      {
+        "c": "sexe"
+      },
+      {
+        "c": "age",
+        "min": 4
+      }
+    ],
+    "portee": [
+      1,
+      2
+    ],
+    "couts": []
+  },
+  "registre": "patrimoine",
+  "tags": []
+}

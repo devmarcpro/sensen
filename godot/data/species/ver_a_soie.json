@@ -1,0 +1,55 @@
+{
+  "name_key": "species.ver_a_soie.name",
+  "famille": "cout_par_croisement",
+  "groupe": "vers_a_soie",
+  "habitat": "clayette",
+  "capture": {
+    "verbe": "ramassage",
+    "milieu": "arbre",
+    "dd": 6,
+    "rarete": 1
+  },
+  "loci": {
+    "finesse": {
+      "type": "nombre",
+      "min": 1,
+      "max": null,
+      "var": 0.08
+    },
+    "couleur": {
+      "type": "anneau",
+      "n": 6
+    }
+  },
+  "silhouette": "",
+  "repro": {
+    "moteur": "anneau",
+    "conditions": [
+      {
+        "c": "habitat",
+        "v": "clayette"
+      },
+      {
+        "c": "place"
+      },
+      {
+        "c": "ressource",
+        "k": "chou",
+        "n": 4
+      }
+    ],
+    "portee": [
+      2,
+      2
+    ],
+    "couts": [
+      {
+        "c": "ressource",
+        "k": "chou",
+        "n": 4
+      }
+    ]
+  },
+  "registre": "records",
+  "tags": []
+}

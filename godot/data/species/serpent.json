@@ -1,0 +1,60 @@
+{
+  "name_key": "species.serpent.name",
+  "famille": "trait_cache",
+  "groupe": "serpents",
+  "habitat": "terrarium",
+  "capture": {
+    "verbe": "appat",
+    "milieu": "sol",
+    "appat": "viande_crue",
+    "dd": 10,
+    "rarete": 1
+  },
+  "loci": {
+    "couleur": {
+      "type": "anneau",
+      "n": 12
+    },
+    "ecailles": {
+      "type": "recessif"
+    },
+    "taille": {
+      "type": "nombre",
+      "min": 1,
+      "max": null,
+      "var": 0.05
+    }
+  },
+  "silhouette": "",
+  "repro": {
+    "moteur": "anneau",
+    "conditions": [
+      {
+        "c": "habitat",
+        "v": "terrarium"
+      },
+      {
+        "c": "place"
+      },
+      {
+        "c": "sexe"
+      },
+      {
+        "c": "age",
+        "min": 1
+      },
+      {
+        "c": "temperature",
+        "min": 10,
+        "max": 40
+      }
+    ],
+    "portee": [
+      1,
+      3
+    ],
+    "couts": []
+  },
+  "registre": "phenotypes",
+  "tags": []
+}

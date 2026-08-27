@@ -1,0 +1,65 @@
+{
+  "name_key": "species.ruche.name",
+  "famille": "population_autonome",
+  "groupe": "ruches",
+  "habitat": "rucher",
+  "capture": {
+    "verbe": "ramassage",
+    "milieu": "plante",
+    "dd": 9,
+    "rarete": 1
+  },
+  "loci": {
+    "miel": {
+      "type": "anneau",
+      "n": 8
+    },
+    "colonie": {
+      "type": "colonie",
+      "max": 10,
+      "par_semaine": 1
+    }
+  },
+  "silhouette": "",
+  "repro": {
+    "moteur": "anneau",
+    "conditions": [
+      {
+        "c": "habitat",
+        "v": "rucher"
+      },
+      {
+        "c": "place"
+      },
+      {
+        "c": "saison",
+        "v": [
+          "printemps",
+          "ete",
+          "fin_ete"
+        ]
+      },
+      {
+        "c": "stat",
+        "k": "colonie",
+        "min": 8
+      }
+    ],
+    "portee": [
+      1,
+      1
+    ],
+    "couts": []
+  },
+  "production": {
+    "item": "miel",
+    "par_colonie": 0.25,
+    "saisons": [
+      "printemps",
+      "ete",
+      "fin_ete"
+    ]
+  },
+  "registre": "records",
+  "tags": []
+}

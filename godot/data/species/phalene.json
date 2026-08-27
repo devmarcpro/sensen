@@ -1,0 +1,51 @@
+{
+  "name_key": "species.phalene.name",
+  "famille": "le_monde_decide",
+  "groupe": "phalenes",
+  "habitat": "vivarium",
+  "capture": {
+    "verbe": "piege_lumineux",
+    "milieu": "plante",
+    "nuit": true,
+    "dd": 8,
+    "rarete": 1
+  },
+  "loci": {
+    "couleur": {
+      "type": "anneau",
+      "n": 16
+    },
+    "motif": {
+      "type": "anneau",
+      "n": 8
+    },
+    "melanisme": {
+      "type": "acquis",
+      "source": "corruption",
+      "seuil": 0.5
+    }
+  },
+  "silhouette": "",
+  "repro": {
+    "moteur": "anneau",
+    "conditions": [
+      {
+        "c": "habitat",
+        "v": "vivarium"
+      },
+      {
+        "c": "place"
+      },
+      {
+        "c": "sexe"
+      }
+    ],
+    "portee": [
+      2,
+      3
+    ],
+    "couts": []
+  },
+  "registre": "grille",
+  "tags": []
+}

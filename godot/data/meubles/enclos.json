@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.enclos.name",
+  "type_meuble": "enclos",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 4,
+  "luminosite": 0,
+  "bonus_humeur": 1,
+  "couleur": "#8a6a3a"
+}

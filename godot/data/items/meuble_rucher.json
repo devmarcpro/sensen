@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.rucher.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "rucher",
+  "tags": [
+    "meuble",
+    "posable"
+  ]
+}

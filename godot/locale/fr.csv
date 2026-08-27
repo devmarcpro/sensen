@@ -401,6 +401,23 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+species.serpent.name,Serpent des dunes
+species.ver_a_soie.name,Ver à soie
+species.ruche.name,Ruche
+species.tortue.name,Tortue des marais
+species.phalene.name,Phalène du bouleau
+meuble.terrarium.name,Terrarium
+recipe.meuble_terrarium.name,Assembler : terrarium
+meuble.clayette.name,Clayette à vers
+recipe.meuble_clayette.name,Assembler : clayette à vers
+meuble.rucher.name,Rucher
+recipe.meuble_rucher.name,Assembler : rucher
+meuble.enclos.name,Enclos
+recipe.meuble_enclos.name,Assembler : enclos
+item.miel.name,Miel
+journal.production_colonie,"{espece} : {n} {item} au stock"
+journal.capture_appat,il faut un appât dans le sac ({appat})
+journal.capture_nuit,ce piège ne prend que la nuit
 species.carpe.name,Carpe de bassin
 meuble.vivarium.name,Vivarium
 recipe.meuble_vivarium.name,Assembler un vivarium

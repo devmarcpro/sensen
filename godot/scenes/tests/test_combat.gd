@@ -47,6 +47,7 @@ func _ready() -> void:
 	test_alchimie()
 	test_villes_et_halls()
 	test_saisons_et_elevage()
+	test_elevage_familles()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -1028,7 +1029,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 44, "9 stations, 44 recettes plates (9 transformations, 18 meubles, 9 stations, 3 plats, 5 potions)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 48, "9 stations, 48 recettes plates (9 transformations, 22 meubles, 9 stations, 3 plats, 5 potions)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -1881,6 +1882,77 @@ func test_saisons_et_elevage() -> void:
 		var m_ok: bool = int(g.motif) in [1, 2, 3, 5, 6, 7]
 		verifier(c_ok and m_ok and float(g.taille) > 2.0 and float(g.taille) < 4.5, "l'enfant : couleur %d, motif %d, taille %.2f — un parent ou une voisine, moyenne dérivée" % [int(g.couleur), int(g.motif), float(g.taille)])
 	verifier(int(s.territoire.registre.carpe.size()) >= 3, "le registre compte les variétés (%d)" % int(s.territoire.registre.carpe.size()))
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Élevage : les six familles
+
+func test_elevage_familles() -> void:
+	var s := Simulation.new(87)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	verifier(GameData.catalogues.species.size() >= 6, "six espèces en données (%d)" % GameData.catalogues.species.size())
+	var jour := int(s._cycle().ticks_par_jour)
+	s.horloge_monde.ticks = 35 * jour + jour / 2   # un midi d'été : les conditions de température passent
+	# Un habitat de test posé à côté du joueur.
+	var hab: Vector2i = j.pos + Vector2i(0, 1)
+	for d in [Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1), Vector2i(1, 0)]:
+		var c: Vector2i = j.pos + d
+		if s.grille.dans(c) and s.grille.occupant(c).is_empty():
+			hab = c
+			break
+	var idx := s.grille.idx(hab)
+	s.grille.contenu[idx] = 0
+	s.grille.poser_contenu(hab, "meuble")
+	# Serpent : le trait caché — deux porteurs [0,1] peuvent donner un [1,1].
+	s.grille.meubles[idx] = "terrarium"
+	var a := s._nouveau_specimen("serpent", {"couleur": 2, "ecailles": [0, 1], "taille": 2.0}, "m")
+	var b := s._nouveau_specimen("serpent", {"couleur": 2, "ecailles": [1, 0], "taille": 2.0}, "f")
+	a.age_semaines = 1
+	b.age_semaines = 1
+	s.contenants[idx] = [a.uid, b.uid]
+	s._semaine_elevage()
+	var petits: Array = s.contenants[idx].filter(func(u: String) -> bool: return u != a.uid and u != b.uid)
+	verifier(petits.size() >= 1 and s.items[petits[0]].genome.ecailles.size() == 2, "serpents : une couvée, écailles à deux allèles (%s)" % str(s.items[petits[0]].genome.ecailles if not petits.is_empty() else "-"))
+	# Ver à soie : le coût par croisement consomme 4 choux du stock ; sans stock, refus motivé.
+	s.grille.meubles[idx] = "clayette"
+	var v1 := s._nouveau_specimen("ver_a_soie", {"finesse": 3.0, "couleur": 1}, "m")
+	var v2 := s._nouveau_specimen("ver_a_soie", {"finesse": 5.0, "couleur": 2}, "f")
+	s.contenants[idx] = [v1.uid, v2.uid]
+	var sans := s.conditions_repro(v1, v2, {"habitat": "clayette", "libre": 4, "temp": 18.0, "saison": "ete"})
+	verifier(not sans.ok and str(sans.raisons[0].cle) == "raison.ressource", "vers à soie sans choux : refus motivé")
+	s.territoire.stocks["chou"] = 5
+	s._semaine_elevage()
+	verifier(int(s.territoire.stocks.get("chou", 0)) == 1 and s.contenants[idx].size() == 4, "avec 5 choux : une couvée de 2, il reste 1 chou")
+	# Ruche : la colonie croît chaque semaine et produit du miel en été.
+	s.grille.meubles[idx] = "rucher"
+	var r := s._nouveau_specimen("ruche", {"miel": 0, "colonie": 7}, "f")
+	s.contenants[idx] = [r.uid]
+	s._semaine_elevage()
+	verifier(int(r.genome.colonie) == 8 and int(s.territoire.stocks.get("miel", 0)) == 2, "ruche : colonie 7 → 8, 2 miels au stock (%d)" % int(s.territoire.stocks.get("miel", 0)))
+	# Tortue : la dossière suit l'âge.
+	var t := s._nouveau_specimen("tortue", {"couleur": 1, "dossiere": 0, "taille": 1.0}, "m")
+	s.grille.meubles[idx] = "enclos"
+	s.contenants[idx] = [t.uid]
+	s._semaine_elevage()
+	s._semaine_elevage()
+	verifier(int(t.genome.dossiere) == 2 and int(t.age_semaines) == 2, "tortue : dossière 2 à 2 semaines")
+	# Phalène : le mélanisme est acquis de la corruption du lieu.
+	var ph := s._nouveau_specimen("phalene", {"couleur": 3, "motif": 1, "melanisme": null}, "f")
+	s._exprimer_loci(ph, s.monde.cellule_camp, true)
+	verifier(ph.genome.melanisme != null, "phalène : mélanisme fixé à la naissance (%s)" % str(ph.genome.melanisme))
+	# Capture : sans appât ni milieu, refus ; une plante voisine → une tortue ou une ruche.
+	s.attente[j.id] = true
+	var viande := s.generer_objet("viande_crue", 1, {}, "commun", 0)
+	j.sac.append(viande.uid)
+	j.competences["collecte"] = 60
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	var ok := s.intention(j.id, {"type": "capturer"})
+	var pris := 0
+	for uid in j.sac:
+		if s.items[uid].has("genome"):
+			pris += 1
+	verifier(ok and pris >= 1, "capturer : le milieu voisin (ou l'appât) décide de l'espèce, un spécimen pris")
 	s.monde.fermer()
 
 

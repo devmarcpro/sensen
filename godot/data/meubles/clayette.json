@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.clayette.name",
+  "type_meuble": "clayette",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 6,
+  "luminosite": 0,
+  "bonus_humeur": 1,
+  "couleur": "#c8b070"
+}

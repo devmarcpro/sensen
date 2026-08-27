@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.clayette.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "clayette",
+  "tags": [
+    "meuble",
+    "posable"
+  ]
+}

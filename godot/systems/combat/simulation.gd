@@ -1192,9 +1192,29 @@ func _genome_aleatoire(esp: Dictionary, rng: RandomNumberGenerator) -> Dictionar
 				for k in int(L.get("n", 4)):
 					seq.append(rng.randi() % int(L.get("valeurs", 2)))
 				g[nom] = seq
+			"age":
+				g[nom] = 0
+			"colonie":
+				g[nom] = 1
 			_:
 				g[nom] = null
 	return g
+
+
+## Les loci qui s'expriment après la conception (Loci — les dix types) : acquis du lieu, âge, colonie.
+func _exprimer_loci(sp: Dictionary, cell: Vector2i, naissance: bool) -> void:
+	var esp: Dictionary = GameData.catalogues.species.get(str(sp.espece), {})
+	for nom in esp.get("loci", {}).keys():
+		var L: Dictionary = esp.loci[nom]
+		match str(L.type):
+			"acquis":
+				if naissance and str(L.get("source", "")) == "corruption" and monde != null:
+					sp.genome[nom] = 1 if monde.corruption_de(cell) / 100.0 >= float(L.get("seuil", 0.5)) else 0
+			"age":
+				sp.genome[nom] = mini(int(L.get("max", 999)), int(sp.get("age_semaines", 0)) * int(L.get("par_semaine", 1)))
+			"colonie":
+				if not naissance:
+					sp.genome[nom] = mini(int(L.get("max", 10)), int(sp.genome.get(nom, 1)) + int(L.get("par_semaine", 1)))
 
 
 ## L'hérédité, locus par locus (Loci — les dix types) : une fonction par type, aucune ne connaît d'espèce.
@@ -1266,25 +1286,44 @@ func conditions_repro(a: Dictionary, b: Dictionary, ctx: Dictionary) -> Dictiona
 func _capturer(e: Dictionary, tick: int) -> bool:
 	if monde == null or lieu != "camp":
 		return false
-	var eau := false
+	var milieux: Dictionary = {"sol": true}
 	for d in Grille.DIRS:
 		var q: Vector2i = e.pos + d
-		if grille.dans(q) and "eau" in grille.contenu_de(q).get("tags", []):
-			eau = true
-	if not eau:
-		EventBus.emettre(&"journal", [&"journal.capture_rien", {}])
-		return false
+		if not grille.dans(q):
+			continue
+		var tags: Array = grille.contenu_de(q).get("tags", [])
+		for t in ["eau", "plante", "arbre"]:
+			if t in tags:
+				milieux[t] = true
 	var ids: Array = GameData.catalogues.species.keys()
 	ids.sort()
-	var esp: Dictionary = {}
-	var esp_id := ""
+	var candidats: Array = []
+	var refus := ""
 	for sid in ids:
-		if str(GameData.catalogues.species[sid].capture.get("milieu", "")) == "eau":
-			esp = GameData.catalogues.species[sid]
-			esp_id = str(sid)
-			break
-	if esp.is_empty():
+		var c: Dictionary = GameData.catalogues.species[sid].capture
+		if not milieux.has(str(c.get("milieu", ""))):
+			continue
+		if bool(c.get("nuit", false)) and not est_nuit():
+			refus = "journal.capture_nuit"
+			continue
+		if c.has("appat") and _pile_objet(e, str(c.appat)).is_empty():
+			refus = "journal.capture_appat"
+			continue
+		candidats.append(str(sid))
+	if candidats.is_empty():
+		if refus == "journal.capture_appat":
+			EventBus.emettre(&"journal", [&"journal.capture_appat", {"appat": "item.viande_crue.name"}])
+		elif not refus.is_empty():
+			EventBus.emettre(&"journal", [StringName(refus), {}])
+		else:
+			EventBus.emettre(&"journal", [&"journal.capture_rien", {}])
 		return false
+	var rng0 := RandomNumberGenerator.new()
+	rng0.seed = hash([graine, "milieu", tick, e.id])
+	var esp_id: String = candidats[rng0.randi() % candidats.size()]
+	var esp: Dictionary = GameData.catalogues.species[esp_id]
+	if esp.capture.has("appat"):
+		_consommer_pile(e, _pile_objet(e, str(esp.capture.appat)))
 	e.compteur = tick + int(regles.r.actions.objet) * 2
 	var jet := des.jet("1d20") + regles.niveau(e.competences_eff, str(_elv().competence_capture))
 	var dd := int(esp.capture.get("dd", 10))
@@ -1295,6 +1334,7 @@ func _capturer(e: Dictionary, tick: int) -> bool:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([graine, "capture", tick, e.id])
 	var sp := _nouveau_specimen(esp_id, _genome_aleatoire(esp, rng), "m" if rng.randf() < 0.5 else "f")
+	_exprimer_loci(sp, _cell_de(e.pos), true)
 	donner(e, sp.uid)
 	EventBus.emettre(&"journal", [&"journal.capture_reussie", {"nom": e.name_key, "espece": esp.name_key, "couleur": str(sp.genome.get("couleur", "-")), "motif": str(sp.genome.get("motif", "-"))}])
 	return true
@@ -1330,14 +1370,25 @@ func _semaine_elevage() -> void:
 	for gi in grille.meubles.keys():
 		var m: Dictionary = GameData.entree("meubles", str(grille.meubles[gi]))
 		var specimens: Array = []
+		var pos := grille.pos_de(int(gi))
 		for uid in contenants.get(gi, []):
 			var it: Dictionary = items.get(uid, {})
 			if it.has("genome"):
 				it.age_semaines = int(it.get("age_semaines", 0)) + 1
+				_exprimer_loci(it, _cell_de(pos), false)
 				specimens.append(it)
+				var prod: Dictionary = GameData.catalogues.species[str(it.espece)].get("production", {})
+				if not prod.is_empty() and (not prod.has("saisons") or saison() in prod.saisons):
+					var col := 1
+					for nom in it.genome.keys():
+						if str(GameData.catalogues.species[str(it.espece)].loci[nom].type) == "colonie":
+							col = int(it.genome[nom])
+					var n := int(floor(float(prod.par_colonie) * float(col)))
+					if n > 0:
+						territoire.stocks[str(prod.item)] = int(territoire.stocks.get(str(prod.item), 0)) + n
+						EventBus.emettre(&"journal", [&"journal.production_colonie", {"espece": GameData.catalogues.species[str(it.espece)].name_key, "n": n, "item": "item.%s.name" % str(prod.item)}])
 		if specimens.size() < 2:
 			continue
-		var pos := grille.pos_de(int(gi))
 		var ctx := {"habitat": str(m.type_meuble), "libre": int(m.capacite_slots) - contenants[gi].size(), "temp": float(temperature_ressentie({"pos": pos}).temp), "saison": saison()}
 		var fait := false
 		var derniere: Array = []
@@ -1353,11 +1404,17 @@ func _semaine_elevage() -> void:
 				var rng := RandomNumberGenerator.new()
 				rng.seed = hash([graine, "couvee", gi, monde.semaine_courante])
 				var n := mini(rng.randi_range(int(esp.repro.portee[0]), int(esp.repro.portee[1])), int(ctx.libre))
+				for cout in esp.repro.get("couts", []):   # coût par croisement (vers à soie : des feuilles du stock)
+					if str(cout.c) == "ressource":
+						territoire.stocks[str(cout.k)] = int(territoire.stocks.get(str(cout.k), 0)) - int(cout.n)
+						if int(territoire.stocks[str(cout.k)]) <= 0:
+							territoire.stocks.erase(str(cout.k))
 				for k in n:
 					var g := {}
 					for nom in esp.loci.keys():
 						g[nom] = _heriter(specimens[i].genome.get(nom), specimens[j].genome.get(nom), esp.loci[nom], rng)
 					var enfant := _nouveau_specimen(str(specimens[i].espece), g, "m" if rng.randf() < 0.5 else "f")
+					_exprimer_loci(enfant, _cell_de(pos), true)
 					contenants[gi].append(enfant.uid)
 					EventBus.emettre(&"journal", [&"journal.couvee", {"espece": esp.name_key, "n": n, "couleur": str(g.get("couleur", "-")), "motif": str(g.get("motif", "-"))}])
 				fait = true
