@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] Coordonnées : la simulation parle en monde, l'écran et le joueur en local (2026-08-28)
+> Le designer a vu « case (65879, …) » : la fenêtre glissante place les tuiles en coordonnées monde (cellule × 128 + tuile). C'est voulu côté simulation (une seule grille continue, aucune conversion dans la logique), mais **jamais côté rendu ni côté affichage** : `_ecran` soustrait désormais l'origine de la fenêtre (les pixels restent petits — c'était la vraie cause des polygones dégénérés et du risque de jitter), et le HUD comme le journal parlent en **tuiles locales à la cellule (0-127)**.
 > [!important] « Invalid polygon data » : plus aucun draw_colored_polygon en coordonnées monde (2026-08-28)
 > Le designer a vu l'erreur revenir dans le brouillard (`_dessiner_brouillard`). Tous les polygones du client (sol, blocs, brouillard, mer, glyphes) passent désormais par `_poly` : un éventail de triangles `draw_primitive`, que la triangulation float32 ne peut plus juger dégénéré.
 > [!important] Le raid se lit (2026-08-28)

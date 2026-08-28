@@ -313,7 +313,13 @@ func joueur() -> Dictionary:
 
 func _sur_journal(cle: String, params: Dictionary) -> void:
 	var p := {}
+	if params.has("x") and params.has("y") and (params.x is int) and (params.y is int):   # le journal parle en tuiles locales à la cellule
+		var cl := _coord_locale(Vector2i(int(params.x), int(params.y)))
+		p["x"] = cl.x
+		p["y"] = cl.y
 	for k in params.keys():
+		if p.has(k):
+			continue
 		var v: Variant = params[k]
 		if v is Dictionary and v.has("base"):
 			p[k] = nom_objet(v)
@@ -1003,8 +1009,19 @@ func _tuile_sous(p: Vector2) -> Vector2i:
 
 # ---------------------------------------------------------------- rendu
 
+## Tuile → écran, en coordonnées LOCALES à la fenêtre chargée : la simulation parle en coordonnées monde
+## (cellule × 128 + tuile, jusqu'à ~65 000), mais le rendu ne doit jamais manipuler des pixels à 1e6 —
+## précision float32, polygones dégénérés, jitter. L'origine de la fenêtre glissante est soustraite ici, une fois.
 func _ecran(t: Vector2i, h: int) -> Vector2:
-	return Vector2((t.x - t.y) * TW * 0.5, (t.x + t.y) * TH * 0.5 - h * HSTEP)
+	var l: Vector2i = t - (sim.grille.origine if sim != null else Vector2i.ZERO)
+	return Vector2((l.x - l.y) * TW * 0.5, (l.x + l.y) * TH * 0.5 - h * HSTEP)
+
+
+## Une position affichée au joueur : locale à sa cellule (0-127), jamais la coordonnée monde.
+func _coord_locale(t: Vector2i) -> Vector2i:
+	if sim != null and sim.monde != null and sim.lieu == "camp":
+		return t - sim.monde.pos_monde(sim.monde.cellule_de(t), Vector2i.ZERO)
+	return t
 
 
 func _draw() -> void:
@@ -1361,7 +1378,8 @@ func _maj_ui() -> void:
 			+ (tr("ui.sang").format({"n": int(e.get("sang", 0))}) if sim.a_talent(e, "jauge_de_sang") else "")
 			+ (" · " + _texte_statuts(e) if not e.statuts.is_empty() else ""))
 	if survol.x >= 0 and not j.is_empty():
-		lignes.append("  " + tr("ui.case").format({"x": survol.x, "y": survol.y, "h": g.h(survol), "dh": g.h(survol) - g.h(j.pos)}))
+		var cl := _coord_locale(survol)
+		lignes.append("  " + tr("ui.case").format({"x": cl.x, "y": cl.y, "h": g.h(survol), "dh": g.h(survol) - g.h(j.pos)}))
 		var occ := g.occupant(survol)
 		if not occ.is_empty() and occ != joueur_id and j.vivant:
 			lignes.append_array(_preview(j, sim.entites[occ]))
