@@ -83,6 +83,10 @@ $godot = "C:\Users\ciryl\Documents\Godot_v4.6.3-stable_win64.exe"
 python tools/check_vault.py                                                          # le coffre est intègre
 & $godot --headless --path godot res://scenes/tests/test_criteres.tscn --quit-after 3 # rapport des critères mesurables (§ 5 de la spec)
 & $godot --path godot res://scenes/tests/capture.tscn -- --sortie C:/tmp/c.png --arene 0 # capture d'écran (fenêtré)
+& $godot --path godot res://scenes/tests/capture.tscn -- --arene 3 --heure 12 --raid --sortie user://r.png   # camp de jour, raid en cours (aussi : --donjon, --torche, --talents, --ecran inventaire|menu|gestion, --carte)
+& $godot --headless --path godot res://scenes/tests/fuzz.tscn -- --pas 3000 --graine 7   # chasse aux bugs : intentions au hasard (aussi : --bete, --ia) ; lire les SCRIPT ERROR
 ```
+
+La suite de tests dure environ cinq minutes ; le fuzz environ quatre (un seul Godot à la fois).
 
 L'arborescence (autoload, data, systems, scenes, locale) suit la note *Arborescence du projet*. `autoload/game_data.gd` charge et valide tout `data/` au boot (bloquant en debug) ; `systems/combat/simulation.gd` est l'autorité (le client `scenes/demo/main.gd` n'envoie que des intentions) ; `scenes/entities/creature.tscn` est la scène unique de tout être (rig en données, équipement visible, sans asset). État et prochaines étapes : `docs/00 - Index/Vers la production.md`.
