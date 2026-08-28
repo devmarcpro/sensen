@@ -96,6 +96,7 @@ func _ready() -> void:
 	test_automate_eau()
 	test_foudre()
 	test_retrait_eau()
+	test_compagnons_postures()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2513,6 +2514,47 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_compagnons_postures() -> void:
+	var s := Simulation.new(148)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var comp := s.ajouter("villageois", j.pos + Vector2i(0, 1), "ia")
+	s._habiller_pnj(comp, GameData.entree("creatures", "villageois"))
+	s._devenir_compagnon(j, comp)
+	var loup := s.ajouter("loup", j.pos + Vector2i(4, 1), "ia")
+	var profil: Dictionary = GameData.entree("ai_profiles", "compagnon")
+	var tick := s.tick_de(comp)
+	# Défensive par défaut : une cible proche du maître se poursuit
+	var c := s._actions_candidates(comp, loup, profil, tick)
+	verifier(c.has("poursuivre") and not c.get("attaquer", {}).has("posture_agressive"), "défensive : il poursuit une cible proche du maître, sans zèle")
+	loup.pos = j.pos + Vector2i(9, 0)
+	c = s._actions_candidates(comp, loup, profil, tick)
+	verifier(not c.has("poursuivre"), "défensive : il ne poursuit pas une cible à 9 tuiles du maître")
+	# Agressive
+	verifier(s.ordonner(j, comp.id, "agressive") and str(comp.posture) == "agressive", "ordre : posture agressive, sans tick")
+	c = s._actions_candidates(comp, loup, profil, tick)
+	verifier(c.has("poursuivre") and float(c.poursuivre.get("posture_agressive", 0.0)) == 1.0, "agressive : il poursuit, considération posture_agressive")
+	# Évite
+	loup.pos = j.pos + Vector2i(3, 0)
+	s.ordonner(j, comp.id, "eviter")
+	c = s._actions_candidates(comp, loup, profil, tick)
+	verifier(not c.has("attaquer") and not c.has("poursuivre") and float(c.get("fuir", {}).get("eviter", 0.0)) == 1.0, "évite : ni attaque ni poursuite, il fuit la menace à 3 tuiles")
+	verifier(not s.ordonner(j, comp.id, "charger"), "un ordre inconnu est refusé")
+	# Retour à la base : l'ancre au centre de la cellule du camp
+	verifier(s.ordonner(j, comp.id, "retour") and str(comp.ordre) == "attendre" and comp.ancre == s.grille.pos_de(s.grille.largeur * s.grille.hauteur_grille / 2), "retour à la base : attends ici, l'ancre au centre du camp")
+	# Échange d'équipement : il s'équipe de ce qu'on lui donne, et le rend déséquipé
+	var o := s.generer_objet("proto_epee", 1, {}, "commun", 0)
+	if not s.items.has(str(o.get("uid", ""))):
+		s.items[o.uid] = o
+	if not (str(o.uid) in j.sac):
+		j.sac.append(str(o.uid))
+	var uid := str(o.uid)
+	verifier(s.echanger(j, comp.id, uid, "donner") and not (uid in j.sac) and str(comp.equipement.get("main_principale", "")) == uid, "donner une épée : le compagnon s'en équipe")
+	verifier(s.echanger(j, comp.id, uid, "reprendre") and (uid in j.sac) and not (uid in comp.sac) and str(comp.equipement.get("main_principale", "")) != uid, "reprendre : elle revient dans mon sac, déséquipée")
+	verifier(not s.echanger(j, loup.id, uid, "donner"), "on n'échange qu'avec ses compagnons")
+	s.monde.fermer()
+
 
 func test_retrait_eau() -> void:
 	var s := Simulation.new(147)

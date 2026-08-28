@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] Postures et échange des compagnons (2026-08-28)
+> Trois postures (défensive, agressive, évite), retour à la base, écran d'échange où le compagnon s'équipe de ce qu'on lui donne. **À juger** : un compagnon en posture défensive qui refuse de poursuivre au-delà de 6 tuiles — protecteur ou passif ?
 > [!important] Le retrait de l'eau (2026-08-28)
 > Une nappe qui n'est plus alimentée se rétracte, la canicule assèche les flaques, une source élevée disparaît. **À juger** : combler la source d'un ennemi pour assécher sa tranchée — manœuvre lisible, ou exploit ?
 > [!important] La foudre de l'orage (2026-08-28)

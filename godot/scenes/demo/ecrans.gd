@@ -188,6 +188,18 @@ func touche(ev: InputEventKey) -> bool:
 			if courant == "dialogue":
 				_option("attendre")
 				return true
+		KEY_F:
+			if courant == "dialogue":
+				_option("posture")
+				return true
+		KEY_B:
+			if courant == "dialogue":
+				_option("retour")
+				return true
+		KEY_K:
+			if courant == "dialogue":
+				_option("echanger")
+				return true
 		KEY_X:
 			if courant == "dialogue":
 				_option("assigner")
@@ -309,6 +321,8 @@ func rafraichir() -> void:
 			_construire_registre(j)
 		"assigner":
 			_construire_assigner(j)
+		"echange":
+			_construire_echange(j)
 		"entrainer":
 			_construire_entrainer(j)
 		"commerce":
@@ -345,6 +359,8 @@ func _montrer_detail() -> void:
 			detail.text = texte_recette(en.plan)
 		"texte":
 			detail.text = str(en.texte)
+		"donner", "reprendre":
+			detail.text = texte_objet(str(en.uid))
 		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer", "menu", "contexte", "capacite", "nouvelle_capacite", "module_composer":
 			detail.text = str(en.get("texte", ""))
 		"achat", "vente":
@@ -392,6 +408,8 @@ func _action_principale() -> void:
 			main.sim.desassigner(j, str(en.id))
 		"stock":
 			main.sim.retirer_stock(j, str(en.cle))
+		"donner", "reprendre":
+			main.sim.echanger(j, pnj_id, str(en.uid), str(en.kind))
 		"fonction":
 			main.sim.intention(j.id, {"type": "assigner", "pnj": pnj_id, "fonction": str(en.fonction)})
 			fermer()
@@ -468,6 +486,12 @@ func _construire_dialogue(j: Dictionary) -> void:
 		entrees.append({"kind": "option", "option": "suivre"})
 		liste.add_item(tr("ui.ecran.attendre"))
 		entrees.append({"kind": "option", "option": "attendre"})
+		liste.add_item(tr("ui.ecran.posture").format({"posture": tr("posture." + str(pnj.get("posture", "defensive")))}))
+		entrees.append({"kind": "option", "option": "posture"})
+		liste.add_item(tr("ui.ecran.retour"))
+		entrees.append({"kind": "option", "option": "retour"})
+		liste.add_item(tr("ui.ecran.echanger"))
+		entrees.append({"kind": "option", "option": "echanger"})
 		if main.sim.monde != null and main.sim.monde.claims.has(main.sim._cell_de(pnj.pos)):
 			liste.add_item(tr("ui.ecran.assigner"))
 			entrees.append({"kind": "option", "option": "assigner"})
@@ -520,9 +544,16 @@ func _option(opt: String) -> void:
 		"recruter":
 			main.sim.intention(j.id, {"type": "recruter", "pnj": pnj_id})
 			rafraichir()
-		"suivre", "attendre":
+		"suivre", "attendre", "retour":
 			main.sim.ordonner(j, pnj_id, opt)
 			rafraichir()
+		"posture":
+			var cycle := ["defensive", "agressive", "eviter"]
+			var pnj: Dictionary = main.sim.entites.get(pnj_id, {})
+			main.sim.ordonner(j, pnj_id, cycle[(cycle.find(str(pnj.get("posture", "defensive"))) + 1) % cycle.size()])
+			rafraichir()
+		"echanger":
+			ouvrir("echange")
 		"incarner":
 			if main.sim.intention(j.id, {"type": "incarner", "pnj": pnj_id}):
 				fermer()
@@ -913,6 +944,32 @@ func _construire_assigner(j: Dictionary) -> void:
 		var ptxt: String = tr("ui.assigner.rien") if prod == null else (("%s or/unité" % str(prod.or)) if prod.has("or") else str(prod.get("item", prod.get("materiau", ""))))
 		liste.add_item(tr(f.name_key))
 		entrees.append({"kind": "fonction", "fonction": fid, "texte": tr("ui.assigner.fonction").format({"fonction": tr(f.name_key), "produit": ptxt, "rendement": str(f.get("rendement_base", 0))})})
+
+
+## L'échange d'équipement avec un compagnon (Compagnons) : ton sac à donner, son équipement et son sac à reprendre.
+func _construire_echange(j: Dictionary) -> void:
+	var pnj: Dictionary = main.sim.entites.get(pnj_id, {})
+	if pnj.is_empty():
+		fermer()
+		return
+	titre.text = tr("ui.echange.titre").format({"nom": tr(pnj.name_key)})
+	liste.add_item(tr("ui.echange.donner"), null, false)
+	entrees.append({"kind": "texte", "texte": ""})
+	for uid in j.sac:
+		liste.add_item(_nom_court(uid))
+		entrees.append({"kind": "donner", "uid": uid})
+	liste.add_item(tr("ui.echange.reprendre").format({"nom": tr(pnj.name_key)}), null, false)
+	entrees.append({"kind": "texte", "texte": ""})
+	for slot in ["main_principale", "main_secondaire", "casque", "cuirasse", "jambieres", "anneau_1", "anneau_2", "amulette", "carquois"]:
+		var uid: String = str(pnj.equipement.get(slot, ""))
+		if uid.is_empty():
+			continue
+		liste.add_item("%s : %s" % [tr("slot." + slot), main.nom_objet(main.sim.nom_objet(uid))])
+		liste.set_item_custom_fg_color(liste.item_count - 1, Color(0.85, 0.8, 0.55))
+		entrees.append({"kind": "reprendre", "uid": uid})
+	for uid in pnj.sac:
+		liste.add_item(_nom_court(uid))
+		entrees.append({"kind": "reprendre", "uid": uid})
 
 
 # ---------------------------------------------------------------- inventaire

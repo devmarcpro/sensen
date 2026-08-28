@@ -1070,6 +1070,22 @@ ui.ecran.attendre,Attends ici (A)
 ui.dialogue.compagnon,"compagnon · ordre : {ordre}"
 ordre.suivre,suis-moi
 ordre.attendre,attends ici
+ui.ecran.posture,Posture : {posture} (F)
+ui.ecran.retour,Retourne à la base (B)
+ui.ecran.echanger,Échanger l'équipement (K)
+ui.echange.titre,"Échange avec {nom}"
+ui.echange.donner,"— ton sac (Entrée : donner) —"
+ui.echange.reprendre,"— {nom} (Entrée : reprendre) —"
+journal.echange_donne,"{nom} reçoit {objet}"
+journal.echange_reprend,"{nom} rend {objet}"
+journal.retour_impossible,il faut être dans la cellule du camp pour renvoyer quelqu'un à la base
+ordre.agressive,posture agressive
+ordre.defensive,posture défensive
+ordre.eviter,évite les combats
+ordre.retour,retourne à la base
+posture.agressive,agressive
+posture.defensive,défensive
+posture.eviter,évite
 journal.recrute,"{nom} rejoint l'équipe ({places} places d'escorte)"
 journal.pas_de_place,plus de place dans l'escorte
 journal.pas_recrutable,{nom} ne te suivra pas (relation insuffisante)

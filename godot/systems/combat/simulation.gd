@@ -3864,12 +3864,52 @@ func _recruter(e: Dictionary, pnj_id: String, tick: int) -> bool:
 	return true
 
 
+## Échange d'équipement avec un compagnon (Compagnons) : donner (il s'équipe s'il peut) ou reprendre (il se déséquipe).
+func echanger(e: Dictionary, id: String, uid: String, sens: String) -> bool:
+	var x: Dictionary = entites.get(id, {})
+	if x.is_empty() or str(x.get("maitre", "")) != e.id or not x.vivant or not items.has(uid):
+		return false
+	if sens == "donner":
+		if not (uid in e.sac):
+			return false
+		e.sac.erase(uid)
+		x.sac.append(uid)
+		EventBus.emettre(&"journal", [&"journal.echange_donne", {"nom": x.name_key, "objet": nom_objet(uid)}])
+		if not str(items[uid].get("equip_slot", "")).is_empty():
+			_equiper(x, uid, tick_de(x))
+		return true
+	if uid in x.sac:
+		x.sac.erase(uid)
+	else:
+		var slot := ""
+		for s in x.equipement.keys():
+			if str(x.equipement[s]) == uid:
+				slot = str(s)
+		if slot.is_empty() or not _desequiper(x, slot, tick_de(x)):
+			return false
+		x.sac.erase(uid)
+	if uid in x.ratelier:
+		x.ratelier.erase(uid)
+	e.sac.append(uid)
+	EventBus.emettre(&"journal", [&"journal.echange_reprend", {"nom": x.name_key, "objet": nom_objet(uid)}])
+	return true
+
+
 ## Un ordre à un compagnon : sans coût de ticks (Compagnons).
 func ordonner(e: Dictionary, id: String, ordre: String) -> bool:
 	var x: Dictionary = entites.get(id, {})
-	if x.is_empty() or str(x.get("maitre", "")) != e.id or not (ordre in ["suivre", "attendre"]):
+	if x.is_empty() or str(x.get("maitre", "")) != e.id or not (ordre in ["suivre", "attendre", "agressive", "defensive", "eviter", "retour"]):
 		return false
-	x.ordre = ordre
+	if ordre in ["agressive", "defensive", "eviter"]:   # une posture, pas un déplacement
+		x["posture"] = ordre
+	elif ordre == "retour":   # à la base : l'ancre au centre de la cellule du camp, si c'est elle qui est chargée
+		if lieu != "camp" or monde == null or monde.cellule_de(x.pos) != monde.cellule_camp:
+			EventBus.emettre(&"journal", [&"journal.retour_impossible", {}])
+			return false
+		x.ordre = "attendre"
+		x.ancre = grille.pos_de(grille.largeur * grille.hauteur_grille / 2)
+	else:
+		x.ordre = ordre
 	if ordre == "attendre":
 		x.ancre = x.pos
 	EventBus.emettre(&"journal", [&"journal.ordre", {"nom": x.name_key, "ordre": "ordre." + ordre}])
@@ -7827,6 +7867,20 @@ func _actions_candidates(e: Dictionary, cible: Dictionary, profil: Dictionary, t
 		var m: Dictionary = entites[str(e.maitre)]
 		var loin := Grille.distance(e.pos, m.pos) > int(regles.r.compagnons.distance_suivi)
 		c["suivre"] = {"loin_du_maitre": 1.0 if (loin and str(e.get("ordre", "suivre")) == "suivre") else 0.0}
+		match str(e.get("posture", "defensive")):   # Compagnons : la posture colore les considérations
+			"agressive":
+				if c.has("attaquer"):
+					c.attaquer["posture_agressive"] = 1.0
+				if c.has("poursuivre"):
+					c.poursuivre["posture_agressive"] = 1.0
+			"eviter":
+				c.erase("attaquer")
+				c.erase("poursuivre")
+				if a_cible:
+					c.fuir["eviter"] = 1.0 if Grille.distance(e.pos, cible.pos) <= 6 else 0.0
+			_:
+				if a_cible and c.has("poursuivre") and Grille.distance(cible.pos, m.pos) > 3 * int(regles.r.compagnons.distance_suivi):
+					c.erase("poursuivre")   # défensive : il ne s'éloigne pas du maître pour poursuivre
 	if e.ai_profile == "assaillant" and not a_cible:
 		c["assaut"] = {"vers_le_coeur": 1.0}
 	if not a_cible and not e.has("maitre"):

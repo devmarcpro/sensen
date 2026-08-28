@@ -2,17 +2,22 @@
   "name_key": "ai_profile.compagnon.name",
   "considerations": {
     "attaquer": {
-      "cible_a_portee": 1.0
+      "cible_a_portee": 1.0,
+      "posture_agressive": 0.6
     },
     "poursuivre": {
       "cible_visible": 0.5,
-      "distance_cible": 0.3
+      "distance_cible": 0.3,
+      "posture_agressive": 0.6
     },
     "attendre": {
       "calme": 1.0
     },
     "suivre": {
       "loin_du_maitre": 1.2
+    },
+    "fuir": {
+      "eviter": 1.5
     }
   },
   "seuil_fuite_sante": 0.0,
