@@ -99,6 +99,7 @@ func _ready() -> void:
 	test_compagnons_postures()
 	test_cueillette()
 	test_affixes_reveilles()
+	test_feu()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2517,6 +2518,55 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_feu() -> void:
+	var s := Simulation.new(151)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var base: Vector2i = j.pos + Vector2i(3, 0)
+	var h0 := s.grille.h(j.pos)
+	for dx in range(0, 8):
+		for dy in range(-2, 3):
+			var t: Vector2i = base + Vector2i(dx, dy)
+			s.grille.contenu[s.grille.idx(t)] = 0
+			s.grille.hauteurs[s.grille.idx(t)] = h0
+			s.grille.sols.erase(s.grille.idx(t))
+	for dx in range(0, 6):   # une rangée de pins (flammabilité 70)
+		s.grille.poser_contenu(base + Vector2i(dx, 0), "arbre")
+		s.grille.materiaux[s.grille.idx(base + Vector2i(dx, 0))] = "pin"
+	var pierre: Vector2i = base + Vector2i(0, 2)
+	s.grille.poser_contenu(pierre, "mur")
+	s.grille.materiaux[s.grille.idx(pierre)] = "granit"
+	s.meteo_force = "clair"
+	verifier(s.flammabilite_de(base) == 70 and s.flammabilite_de(pierre) == 0 and s.flammabilite_de(base + Vector2i(0, 1)) == 0, "un pin brûle (70), le granit et le sol nu non")
+	verifier(s._enflammer(base) and not s._enflammer(base) and not s._enflammer(pierre), "le premier pin prend feu, une seule fois ; le granit jamais")
+	var tick := 2000
+	s.regles.r.feu["propagation"] = 1.5   # déterministe pour le test : un pin voisin prend à coup sûr
+	var propage := false
+	for k in 30:
+		s._tiquer_feux(tick + k * 10)
+		if s.feux.size() > 1:
+			propage = true
+	verifier(propage, "le feu gagne les pins voisins")
+	verifier(s.grille.contenu_de(base).is_empty() and s.modifs_terrain.has(s.grille.idx(base)), "le premier pin est consumé, terrain mémorisé")
+	# Brûler : un loup posé sur une tuile en feu
+	for idx in s.feux.keys().duplicate():
+		s.feux.erase(idx)
+	var herbe: Vector2i = base + Vector2i(2, -2)
+	s.grille.poser_contenu(herbe, "plante_sauvage")
+	s.grille.materiaux[s.grille.idx(herbe)] = "ortie"
+	var loup := s.ajouter("loup", herbe, "ia")
+	s._enflammer(herbe)
+	var pv := int(loup.sante)
+	s._tiquer_feux(tick + 1000)
+	verifier(int(loup.sante) < pv and Etres.a_statut_id(loup, "brulure"), "le loup sur la tuile en feu brûle (%d → %d) et prend Brûlure" % [pv, int(loup.sante)])
+	# La pluie éteint tout
+	s.meteo_force = "pluie"
+	s._tiquer_feux(tick + 1010)
+	verifier(s.feux.is_empty(), "la pluie éteint les feux")
+	s.meteo_force = ""
+	s.monde.fermer()
+
 
 func test_affixes_reveilles() -> void:
 	var s := Simulation.new(150)

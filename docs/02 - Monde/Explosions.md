@@ -24,6 +24,9 @@ Les tuiles détruites droppent leur matériau avec 50 % de perte.
 > [!success] Codé le 2026-08-28
 > Objet **bombe** (établi : 2 houille brute + 1 lingot de métal ; `items/bombe.json` porte `bombe {puissance 40, rayon 2, retard_ticks 20, degats 3d6}`). Intention `lancer` (hotbar : une bombe du sac se sélectionne, le rayon se prévisualise, le clic lance) : portée 6 en ligne de vue, la bombe attend sur **son horloge** (`Simulation.bombes`, résolue dans `pas()` avant l'entité suivante — en mode action l'horloge saute à l'échéance). Explosion : pour chaque tuile à distance `d ≤ R` (Chebyshev), **détruite si `durete < P × (1 − d/R)`** (contenu `destructible`, dureté du matériau de la tuile, 10 par défaut), **50 % de chance de laisser une unité brute** ; chaque être dans le rayon subit `dégâts × (1 − d/R)` de type explosion (élément Feu), **friendly fire intégral** (le lanceur compris). Signal `explosion`. La Mèche (chaîne d'amorces) est codée depuis (Talents de classe) : une explosion déclenche les bombes en attente dans son rayon.
 
+> [!success] Codé le 2026-08-28 — une explosion enflamme
+> Chaque tuile du rayon d'une bombe tente de prendre feu (chance = flammabilité du matériau, `Simulation._enflammer`) — voir *Météo*, le feu de tuile.
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Destruction du terrain]]
 - **Alimente** : [[Véhicules]], [[Sorts cataclysmiques]]

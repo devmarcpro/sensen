@@ -370,6 +370,16 @@ func _dessiner_lumieres() -> void:
 	var j := joueur()
 	if j.is_empty():
 		return
+	for fi in sim.feux.keys():   # Météo : les flammes (couche additive, visibles de jour comme de nuit)
+		var ft := g.pos_de(int(fi))
+		if Grille.distance(ft, j.pos) > RAYON_VUE or not g.decouvert.has(int(fi)):
+			continue
+		var fc := _ecran(ft, g.h(ft))
+		var ph := float((Time.get_ticks_msec() / 90 + int(fi)) % 6) / 6.0
+		lumieres.draw_colored_polygon(PackedVector2Array([fc + Vector2(-9, 2), fc + Vector2(0, -22 - 8.0 * ph), fc + Vector2(9, 2)]), Color(1.0, 0.45, 0.1, 0.85))
+		lumieres.draw_colored_polygon(PackedVector2Array([fc + Vector2(-5, 2), fc + Vector2(0, -12 - 6.0 * ph), fc + Vector2(5, 2)]), Color(1.0, 0.85, 0.3, 0.9))
+		if sim.lieu == "camp" and ambiance.color.r <= 0.9:
+			_halo(fc, (1.0 - ambiance.color.r) * 0.8)
 	if sim.lieu == "donjon":
 		return   # le voile du donjon est dessiné par la couche `voiles` (mélange normal)
 	if sim.lieu != "camp" or ambiance.color.r > 0.9:

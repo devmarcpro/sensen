@@ -38,6 +38,9 @@ var pluie_heure := -1   # la dernière heure de monde où la pluie a rempli les 
 var foudre_heure := -1   # la dernière heure d'orage où la foudre a frappé (Météo)
 var evapo_heure := -1   # la dernière heure de canicule où les flaques ont baissé
 var eau_active: Dictionary = {}   # idx → true : tuiles de liquide à propager (Eau et liquides)
+var feux: Dictionary = {}   # idx → {reste} : tuiles en feu (Météo : le feu de tuile)
+var feu_prochain_pas := 0
+var canicule_heure := -1
 var eau_prochain_pas := 0
 var modifs_terrain: Dictionary = {}   # idx → {h, contenu} d'origine : ce que le monde rendra hors claim (Destruction du terrain)
 var vecteur_lieu_force: Dictionary = {}   # tests et arènes : imposer le vecteur du lieu (Wu Xing hors combat)
@@ -547,6 +550,111 @@ func _pluie_sur(t: Vector2i) -> bool:
 	return true
 
 
+## La flammabilité d'une tuile (Météo : le feu) : celle du matériau de son contenu, d'une culture, ou de son sol nu.
+func flammabilite_de(t: Vector2i) -> int:
+	if not grille.dans(t) or grille.niveau_liquide(t) > 0 or grille.gel:
+		return 0
+	var fe: Dictionary = regles.r.get("feu", {})
+	var tags: Array = grille.contenu_de(t).get("tags", [])
+	if "culture" in tags:
+		return int(fe.get("flamm_culture", 60))
+	if "plante_sauvage" in tags:
+		return int(fe.get("flamm_plante_sauvage", 50))
+	if "vegetation" in tags or "construit" in tags or "mur" in tags:
+		return int(GameData.catalogues.materials.get(grille.materiau_de(t), {}).get("stats", {}).get("flammabilite", 0))
+	if tags.is_empty() and grille.meubles.has(grille.idx(t)):
+		return 40
+	if tags.is_empty():
+		return int(GameData.catalogues.materials.get(grille.materiau_sol(t), {}).get("stats", {}).get("flammabilite", 0))
+	return 0
+
+
+## Une tuile prend feu si elle brûle ; retourne vrai si un feu vient de naître.
+func _enflammer(t: Vector2i) -> bool:
+	if flammabilite_de(t) <= 0 or feux.has(grille.idx(t)):
+		return false
+	feux[grille.idx(t)] = {"reste": int(regles.r.get("feu", {}).get("duree_ticks", 80))}
+	lumiere_sale = true
+	EventBus.emettre(&"journal", [&"journal.feu_prend", {"x": t.x, "y": t.y}])
+	EventBus.emettre(&"tile_changed", [t])
+	return true
+
+
+## Le pas du feu : brûle qui s'y tient, gagne ses voisines, s'éteint sous la pluie, consume la tuile au bout de sa durée.
+func _tiquer_feux(tick: int) -> void:
+	if feux.is_empty() or tick < feu_prochain_pas:
+		return
+	var fe: Dictionary = regles.r.get("feu", {})
+	var periode := int(fe.get("periode_ticks", 10))
+	feu_prochain_pas = tick + periode
+	var effets: Array = []
+	if lieu == "camp" and monde != null:
+		effets = GameData.catalogues.weather_states.get(meteo(monde.cellule_de(grille.pos_de(grille.largeur * grille.hauteur_grille / 2))), {}).get("effects", [])
+	if "eteint_feux" in effets or "neige" in effets or grille.neige:
+		var n := feux.size()
+		for idx in feux.keys():
+			EventBus.emettre(&"tile_changed", [grille.pos_de(int(idx))])
+		feux.clear()
+		lumiere_sale = true
+		EventBus.emettre(&"journal", [&"journal.feux_eteints", {"n": n}])
+		return
+	var vent := float(fe.get("vent_mult", 2.0)) if ("vent" in effets or "tempete" in effets) else 1.0
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "feu", tick])
+	for idx in feux.keys():
+		var t := grille.pos_de(int(idx))
+		var occ := grille.occupant(t)
+		if not occ.is_empty() and entites.has(occ) and entites[occ].vivant:
+			var x: Dictionary = entites[occ]
+			var deg := des.jet(str(fe.get("degats", "1d6")))
+			_appliquer_degats(x, deg, "", {"type": "feu", "element": {"feu": 1.0}})
+			appliquer_statut(x, "brulure", int(fe.get("brulure_ticks", 30)), "")
+			EventBus.emettre(&"journal", [&"journal.brule", {"nom": x.name_key, "degats": deg}])
+		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var q: Vector2i = t + dd
+			var fl := flammabilite_de(q)
+			if fl > 0 and not feux.has(grille.idx(q)) and rng.randf() < float(fl) / 100.0 * float(fe.get("propagation", 0.35)) * vent:
+				_enflammer(q)
+		feux[idx].reste = int(feux[idx].reste) - periode
+		if int(feux[idx].reste) <= 0:
+			_consumer(t)
+
+
+## La tuile consumée : son contenu s'en va, le terrain est mémorisé (il repousse hors claim).
+func _consumer(t: Vector2i) -> void:
+	var idx := grille.idx(t)
+	feux.erase(idx)
+	if grille.contenu[idx] != 0 and not ("contenant" in grille.contenu_de(t).get("tags", [])):
+		_memoriser_terrain(t)
+		grille.contenu[idx] = 0
+		grille.marquer(t)
+	if grille.meubles.has(idx):
+		grille.meubles.erase(idx)
+		grille.marquer(t)
+	lumiere_sale = true
+	EventBus.emettre(&"journal", [&"journal.feu_consume", {"x": t.x, "y": t.y}])
+	EventBus.emettre(&"tile_changed", [t])
+
+
+## La canicule (effet météo ignition) : chaque heure, une chance qu'une tuile inflammable prenne autour du joueur.
+func _ignition_canicule(tick: int) -> void:
+	var fe: Dictionary = regles.r.get("feu", {})
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "canicule", tick])
+	if rng.randf() >= float(fe.get("canicule_chance", 0.15)):
+		return
+	var centre := grille.pos_de(grille.largeur * grille.hauteur_grille / 2)
+	for x in vivants():
+		if x.controle == "joueur":
+			centre = x.pos
+			break
+	var portee := int(fe.get("canicule_portee", 20))
+	for essai in 40:
+		var t := centre + Vector2i(rng.randi_range(-portee, portee), rng.randi_range(-portee, portee))
+		if _enflammer(t):
+			return
+
+
 ## La foudre de l'orage (Météo) : un impact par heure, ciblé par hauteur et conductivité autour du joueur.
 func _foudre(tick: int) -> void:
 	var rng := RandomNumberGenerator.new()
@@ -585,6 +693,7 @@ func _frapper_foudre(t: Vector2i) -> void:
 	var ea: Dictionary = regles.r.get("eau", {})
 	EventBus.emettre(&"journal", [&"journal.foudre", {"x": t.x, "y": t.y}])
 	lumiere_sale = true
+	_enflammer(t)   # ignition
 	var touches: Dictionary = {}
 	for x in vivants():
 		if Grille.distance(x.pos, t) <= 1:
@@ -5732,6 +5841,13 @@ func _exploser(b: Dictionary) -> void:
 	var pos: Vector2i = b.pos
 	var R: int = int(b.rayon)
 	var P: float = float(b.puissance)
+	var rng_feu := RandomNumberGenerator.new()   # Explosions : les tuiles du rayon prennent feu selon leur flammabilité
+	rng_feu.seed = hash([graine, "explosion_feu", pos])
+	for fy in range(-R, R + 1):
+		for fx in range(-R, R + 1):
+			var ft := pos + Vector2i(fx, fy)
+			if Grille.distance(pos, ft) <= R and grille.dans(ft) and rng_feu.randf() < float(flammabilite_de(ft)) / 100.0:
+				_enflammer(ft)
 	var tuiles := 0
 	var etres := 0
 	for dy in range(-R, R + 1):
@@ -6121,6 +6237,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 	_maj_etats_meteo()
 	if nom == "monde":
 		_tiquer_eau(tick)
+		_tiquer_feux(tick)
 		var h_ticks := int(_cycle().get("ticks_par_jour", 24000)) / 24
 		if lieu == "camp" and monde != null:
 			var met := meteo(monde.cellule_de(grille.pos_de(grille.largeur * grille.hauteur_grille / 2)))
@@ -6133,6 +6250,9 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 			if tick / h_ticks != evapo_heure and "evapore" in GameData.catalogues.weather_states.get(met, {}).get("effects", []):
 				evapo_heure = tick / h_ticks
 				_evaporation()
+			if tick / h_ticks != canicule_heure and "ignition" in GameData.catalogues.weather_states.get(met, {}).get("effects", []):
+				canicule_heure = tick / h_ticks
+				_ignition_canicule(tick)
 	_tiquer_vampires(nom, tick)
 	_tiquer_armes_fantomes(nom, tick)
 	_tiquer_souffle(nom, tick)
