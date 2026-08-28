@@ -383,7 +383,7 @@ func _dessiner_voiles() -> void:
 		return
 	for gi in j.get("vue", {}).keys():
 		var t := g.pos_de(int(gi))
-		if Grille.distance(t, j.pos) > RAYON_VUE or t == j.pos:   # le personnage reste net dans le noir (À juger — tranché : lisibilité)
+		if Grille.distance(t, j.pos) > RAYON_VUE or Grille.distance(t, j.pos) <= 1:   # le personnage et sa tuile restent nets dans le noir (lisibilité)
 			continue
 		var a := 0.8 * (1.0 - float(sim.niveau_lumiere(t)) / 15.0)
 		if a > 0.02:
