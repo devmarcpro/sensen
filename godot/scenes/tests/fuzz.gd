@@ -63,7 +63,28 @@ func _intention(s: Simulation, j: Dictionary, rng: RandomNumberGenerator) -> Dic
 			if dd < dmin:
 				dmin = dd
 				ennemi = x.id
-	match rng.randi_range(0, 13):
+	var pnj := ""
+	for x in s.vivants():
+		if x.camp == "civil" and Grille.distance(j.pos, x.pos) <= 2:
+			pnj = x.id
+			break
+	match rng.randi_range(0, 21):
+		14:
+			return {"type": "parler", "pnj": pnj} if not pnj.is_empty() else {"type": "attendre"}
+		15:
+			return {"type": "descendre"} if rng.randf() < 0.5 else {"type": "remonter"}
+		16:
+			return {"type": "fabriquer", "recette": ["fondre_lingot", "plat_ragout", "meuble_chaise", "distiller_dent"][rng.randi_range(0, 3)]}
+		17:
+			return {"type": "poser", "objet": str(j.sac[rng.randi_range(0, j.sac.size() - 1)]) if not j.sac.is_empty() else "", "vers": t}
+		18:
+			return {"type": "equiper", "objet": str(j.sac[rng.randi_range(0, j.sac.size() - 1)]) if not j.sac.is_empty() else ""}
+		19:
+			return {"type": "recruter", "pnj": pnj} if not pnj.is_empty() else {"type": "attendre"}
+		20:
+			return {"type": "acheter", "pnj": pnj, "objet": ""} if not pnj.is_empty() else {"type": "attendre"}
+		21:
+			return {"type": "lire", "objet": str(j.sac[rng.randi_range(0, j.sac.size() - 1)]) if not j.sac.is_empty() else ""}
 		0, 1, 2:
 			return {"type": "deplacer", "vers": t}
 		3:
