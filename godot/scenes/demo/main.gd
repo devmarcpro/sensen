@@ -39,6 +39,7 @@ var ecrans: Ecrans                 # inventaire, atelier, feuille (scenes/demo/e
 var minimap: Minimap               # coin haut-droit (Décision — Minimap en 2D)
 var ambiance: CanvasModulate       # la lumière du cycle jour-nuit (un « uniform global »)
 var lumieres: Node2D               # halos additifs des sources locales la nuit
+var voiles: Node2D                 # le voile par tuile du donjon (mélange normal : l'additif ne peut pas assombrir)
 var carte: Carte                   # la carte du monde (M), aussi le choix de la case de départ
 var fiche_en_attente: Dictionary = {}   # la fiche créée, en attendant le choix de la case de départ
 var minuterie_autosave := 300.0    # autosave toutes les 5 minutes réelles (Sauvegarde)
@@ -114,6 +115,7 @@ func _ready() -> void:
 		if sim != null:
 			sim.lumiere_sale = true
 		lumieres.queue_redraw()
+		voiles.queue_redraw()
 		var i := sim.grille.idx(p) if sim != null else -1
 		if noeuds_vegetaux.has(i):
 			noeuds_vegetaux[i].queue_free()
@@ -125,6 +127,11 @@ func _ready() -> void:
 	add_child(ecrans)
 	ambiance = CanvasModulate.new()
 	add_child(ambiance)
+	voiles = Node2D.new()
+	voiles.z_as_relative = false
+	voiles.z_index = 139
+	voiles.draw.connect(_dessiner_voiles)
+	add_child(voiles)
 	lumieres = Node2D.new()
 	lumieres.z_as_relative = false
 	lumieres.z_index = 140
@@ -317,6 +324,7 @@ func _maj_ambiance() -> void:
 	if sim == null or sim.lieu != "camp" or sim.monde == null:
 		ambiance.color = Color.WHITE
 		lumieres.queue_redraw()
+		voiles.queue_redraw()
 		return
 	var c: Dictionary = GameData.config("planete").cycle
 	var h := sim.heure()
@@ -334,6 +342,7 @@ func _maj_ambiance() -> void:
 		col = jour.lerp(crep, (h - float(c.crepuscule[0])) / (float(c.crepuscule[1]) - float(c.crepuscule[0])) * 0.5).lerp(nuit, maxf(0.0, (h - float(c.crepuscule[0])) / (float(c.crepuscule[1]) - float(c.crepuscule[0])) - 0.5) * 2.0)
 	ambiance.color = col
 	lumieres.queue_redraw()
+	voiles.queue_redraw()
 
 
 ## Les halos des sources locales (meubles lumineux, torche en main), visibles quand l'ambiance baisse.
@@ -344,17 +353,8 @@ func _dessiner_lumieres() -> void:
 	var j := joueur()
 	if j.is_empty():
 		return
-	if sim.lieu == "donjon":   # l'ambiante n'entre pas : un voile par tuile, creusé par la carte de lumière (Éclairage)
-		for gi in j.get("vue", {}).keys():
-			var t := g.pos_de(int(gi))
-			if Grille.distance(t, j.pos) > RAYON_VUE:
-				continue
-			var a := 0.8 * (1.0 - float(sim.niveau_lumiere(t)) / 15.0)
-			if a > 0.02:
-				var c := _ecran(t, g.h(t))
-				var col := Color(0.02, 0.02, 0.05, a)
-				lumieres.draw_primitive(PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)]), PackedColorArray([col, col, col, col]), PackedVector2Array())
-		return
+	if sim.lieu == "donjon":
+		return   # le voile du donjon est dessiné par la couche `voiles` (mélange normal)
 	if sim.lieu != "camp" or ambiance.color.r > 0.9:
 		return
 	var force := 1.0 - ambiance.color.r
@@ -371,6 +371,25 @@ func _dessiner_lumieres() -> void:
 		var it: Dictionary = sim.items.get(j.equipement.get(slot, ""), {})
 		if int(it.get("luminosite", 0)) > 0:
 			_halo(_ecran(j.pos, g.h(j.pos)), float(it.luminosite) / 100.0 * force)
+
+
+## Le voile du donjon (Éclairage) : l'ambiante n'entre pas, chaque tuile vue est voilée selon la carte de lumière.
+func _dessiner_voiles() -> void:
+	if sim == null or sim.lieu != "donjon":
+		return
+	var g := sim.grille
+	var j := joueur()
+	if j.is_empty():
+		return
+	for gi in j.get("vue", {}).keys():
+		var t := g.pos_de(int(gi))
+		if Grille.distance(t, j.pos) > RAYON_VUE:
+			continue
+		var a := 0.8 * (1.0 - float(sim.niveau_lumiere(t)) / 15.0)
+		if a > 0.02:
+			var c := _ecran(t, g.h(t))
+			var col := Color(0.02, 0.02, 0.05, a)
+			voiles.draw_primitive(PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)]), PackedColorArray([col, col, col, col]), PackedVector2Array())
 
 
 func _halo(c: Vector2, intensite: float) -> void:

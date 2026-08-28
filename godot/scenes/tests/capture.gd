@@ -28,10 +28,6 @@ func _ready() -> void:
 		scene._creer_personnage()   # la capture saute l'écran de création
 		scene.fiche_en_attente = {}
 		scene.carte.fermer()
-	for i3 in args.size():   # --heure H : l'heure du monde (cycle jour-nuit)
-		if args[i3] == "--heure" and i3 + 1 < args.size() and scene.sim != null:
-			scene.sim.horloge_monde.ticks = int(float(args[i3 + 1]) / 24.0 * 24000.0)
-			scene.sim.maj_vision()
 	if "--carte" in args:
 		scene.carte.ouvrir("voyage")
 	for i2 in args.size():   # --ecran inventaire|atelier|feuille : l'écran ouvert
@@ -40,6 +36,15 @@ func _ready() -> void:
 	if arene > 0:
 		scene.arene_courante = arene
 		scene._charger()
+	if "--donjon" in args and scene.sim != null:   # --donjon : descendre dans une ruine depuis le camp (voile, brèches…)
+		var jd: Dictionary = scene.joueur()
+		scene.sim.charger_donjon("ruine", 7, 7, 1, jd)
+		scene._apres_changement_de_grille()
+	for i3 in args.size():   # --heure H : l'heure du monde (cycle jour-nuit) — après le chargement, qui remet l'horloge
+		if args[i3] == "--heure" and i3 + 1 < args.size() and scene.sim != null:
+			scene.sim.horloge_monde.ticks = int(float(args[i3 + 1]) / 24.0 * 24000.0)
+			scene.sim.maj_vision()
+			scene._maj_ambiance()
 	# Un survol simulé sur une créature, pour voir la prévisualisation.
 	var j: Dictionary = scene.joueur()
 	for e in scene.sim.vivants():

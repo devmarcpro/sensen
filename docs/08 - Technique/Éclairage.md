@@ -37,6 +37,9 @@ global), pas en re-propagation — changer l'heure ne coûte rien.
 > [!success] Codé le 2026-08-28 — la propagation 0-15 sur la grille
 > `Simulation.carte_lumiere` (un octet par tuile, 0-15) : **flood fill 2D** depuis les sources — meubles lumineux (`niveau = luminosite / 100 × 15`) et objets lumineux en main des êtres vivants — avec **−1 par tuile** (distance de Tchebychev) ; les contenus `bloque_vue` **reçoivent la lumière mais ne la propagent pas**, sauf `transparence ≥ 50`. Décision : **pas d'incrémental ni de thread pour l'instant** — la carte est recalculée **paresseusement**, au plus une fois par tick de monde et seulement quand on la lit (`niveau_lumiere(pos)` / `lumiere_a(pos)`), sur 128 × 128 tuiles c'est négligeable ; le delta local viendra si le profil le réclame. `lumiere_a` (0-100, lu par la détection et la vision) devient `niveau × 100 / 15`, max avec la lumière portée par l'occupant. **Client** : en donjon, où l'ambiante n'entre pas, chaque tuile vue reçoit un **voile** d'opacité `0,8 × (1 − niveau / 15)` — le halo d'une torche est un vrai trou dans le noir ; au camp, le cycle reste porté par `CanvasModulate` (l'« uniform global » de la note) et les halos.
 
+> [!success] Corrigé le 2026-08-28
+> Le voile du donjon est dessiné sur une couche à mélange normal (`voiles`, z 139), pas sur la couche additive des halos (`lumieres`, z 140) où un noir n'assombrit rien. Vérifié par `capture.tscn -- --arene 3 --donjon`.
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Application des stats de matériau]], [[Risques majeurs]]
 - **Alimente** : [[Cycle jour-nuit et sommeil]], [[IA des créatures]], [[Minimap et brouillard de guerre]]
