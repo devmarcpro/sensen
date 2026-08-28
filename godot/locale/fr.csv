@@ -418,6 +418,9 @@ ui.atelier,=== ATELIER (F pour fermer) — chiffre : fabriquer ===
 ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
+tile_content.plante_sauvage.name,Plante sauvage
+option.cueillir,Cueillir
+journal.cueillette,"{nom} cueille {plante} ×{n}"
 tile_content.eau.name,Eau
 tile_content.eau_ecoulement.name,Eau (écoulement)
 journal.inondation,"l'eau envahit ({x},{y})"

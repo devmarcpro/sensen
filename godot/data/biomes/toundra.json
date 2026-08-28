@@ -85,5 +85,11 @@
       "id": "loup_blanc",
       "density": 0.3
     }
+  ],
+  "cueillette": [
+    {
+      "id": "myrtillier",
+      "density": 0.003
+    }
   ]
 }

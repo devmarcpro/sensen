@@ -122,7 +122,9 @@ func _intention(s: Simulation, j: Dictionary, rng: RandomNumberGenerator) -> Dic
 		if str(x.get("maitre", "")) == j.id and Grille.distance(j.pos, x.pos) <= 2:
 			compagnon = x.id
 			break
-	match rng.randi_range(0, 27):
+	match rng.randi_range(0, 28):
+		28:
+			return {"type": "cueillir", "vers": t}
 		22:
 			return {"type": "assigner", "pnj": pnj, "fonction": ["fermier", "garde", "mineur", "bucheron"][rng.randi_range(0, 3)]} if not pnj.is_empty() else {"type": "attendre"}
 		23:

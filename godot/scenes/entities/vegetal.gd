@@ -14,10 +14,10 @@ var graine: int = 0                 # petites variations déterministes par tuil
 func configurer(id_vegetal: String, p_fiche: Dictionary, materiau: Dictionary, p_graine: int) -> void:
 	fiche = p_fiche
 	graine = p_graine
+	couleur = Color.html(str(fiche.get("couleur_feuillage", "#3f6f2a")))
 	if not materiau.is_empty():
 		var c := Color.html(str(materiau.color))
 		tronc = c.darkened(0.2)
-		couleur = Color.html(str(fiche.get("couleur_feuillage", "#3f6f2a")))
 	queue_redraw()
 
 

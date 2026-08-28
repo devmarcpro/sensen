@@ -31,6 +31,9 @@
     },
     "farming_yield": {
       "type": "number"
+    },
+    "cueillette": {
+      "type": "array"
     }
   }
 }

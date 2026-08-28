@@ -74,5 +74,27 @@
       "id": "loup",
       "density": 0.5
     }
+  ],
+  "cueillette": [
+    {
+      "id": "sauge",
+      "density": 0.006
+    },
+    {
+      "id": "belladone",
+      "density": 0.003
+    },
+    {
+      "id": "amanite",
+      "density": 0.003
+    },
+    {
+      "id": "myrtillier",
+      "density": 0.005
+    },
+    {
+      "id": "menthe",
+      "density": 0.003
+    }
   ]
 }

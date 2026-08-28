@@ -85,5 +85,15 @@
       "id": "lynx",
       "density": 0.2
     }
+  ],
+  "cueillette": [
+    {
+      "id": "achillee",
+      "density": 0.003
+    },
+    {
+      "id": "sauge",
+      "density": 0.002
+    }
   ]
 }

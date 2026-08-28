@@ -18,6 +18,7 @@ etape: 10
 - **Le camp a-t-il l'air d'un lieu ?** Les accidents de relief sont-ils assez nombreux, la couleur de sol par biome suffit-elle ? Le camp vide au départ est-il lisible (récolter à la hache, scier, poser) ? — [[Génération par couches de bruit]], [[Claims et persistance]]
 - **Végétaux en billboards** : silhouettes assez lisibles et variées, taille des arbres vs personnages, occultation d'un être derrière un arbre (les sprites définitifs sont pour plus tard, décision du designer) — [[Direction artistique]]
 - **Faim et poids** : vitesse de la faim (2 h 30 de jeu actif), −10 % de stats sous 25, capacité de charge — [[Faim]], [[Armures et poids porté]]
+- **La cueillette sauvage** : moitié d'une récolte cultivée par plante sauvage, qui repousse — vaut-elle le détour, ou rend-elle le champ inutile ? — [[Plantes]]
 - **Les postures des compagnons** : défensive (ne poursuit pas loin du maître), agressive, évite — protecteur ou passif ? l'échange d'équipement (K dans le dialogue) où il s'équipe tout seul suffit-il ? — [[Compagnons]]
 - **Le retrait de l'eau** : combler la source pour assécher la tranchée d'en face — manœuvre lisible, ou exploit ? — [[Eau et liquides]]
 - **La foudre** : un impact par heure d'orage, pondéré par hauteur et métal, qui court dans l'eau — assez pour s'abriter, pas une loterie ? — [[Météo]]

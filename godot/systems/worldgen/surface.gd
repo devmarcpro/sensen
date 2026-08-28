@@ -482,7 +482,7 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 	var rng := RandomNumberGenerator.new()   # local : la génération peut tourner en thread (Monde)
 	rng.seed = hash([graine, cx, cy, "cellule"])
 	var e := {"largeur": taille, "hauteur": taille, "hauteurs": PackedByteArray(), "sol": {}, "bord": {}, "sols": {}, "filons": {},
-		"arbres": {}, "rochers": {}, "plantes": {}, "eau": {}, "cellule": Vector2i(cx, cy), "biome": "", "biomes_vus": {}, "accidents": [],
+		"arbres": {}, "rochers": {}, "plantes": {}, "cueillette": {}, "eau": {}, "cellule": Vector2i(cx, cy), "biome": "", "biomes_vus": {}, "accidents": [],
 		"entree": Vector2i(taille / 2, taille / 2), "entree_donjon": Vector2i(taille / 2 + 10, taille / 2), "coffre_depart": Vector2i(taille / 2 - 2, taille / 2),
 		"pieces": [], "spawns": [], "coffres": [], "escalier": null, "boss": null, "etage": 0}
 	e.hauteurs.resize(taille * taille)
@@ -543,6 +543,13 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 				break
 		if pose:
 			continue
+		for cu in b.get("cueillette", []):   # Plantes : la cueillette sauvage par biome
+			if tire < float(cu.density) * veg * 2.0:
+				e.cueillette[i] = str(cu.id)
+				pose = true
+				break
+		if pose:
+			continue
 		for r in b.get("rochers", []):
 			if tire < float(r.density) * (1.0 - res):
 				e.rochers[i] = str(r.id)
@@ -580,6 +587,7 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 				e.rochers[qi] = "pierre"
 				e.arbres.erase(qi)
 				e.plantes.erase(qi)
+				e.cueillette.erase(qi)
 				e.filons.erase(qi)
 	if bool(poi.filon_majeur):
 		var fm: Array = planete.get("poi", {}).get("filon_majeur_taille", [20, 40])
@@ -598,6 +606,7 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 				e.filons[fi] = mat
 				e.arbres.erase(fi)
 				e.plantes.erase(fi)
+				e.cueillette.erase(fi)
 				reste -= 1
 				if reste <= 0:
 					break

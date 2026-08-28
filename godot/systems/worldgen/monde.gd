@@ -115,6 +115,10 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 		var p := base + Vector2i(int(i) % taille, int(i) / taille)
 		g.materiaux[g.idx(p)] = e.plantes[i]
 		g.poser_contenu(p, "plante")
+	for i in e.get("cueillette", {}).keys():   # Plantes : les plantes sauvages, l'id de la plante en « matériau »
+		var p := base + Vector2i(int(i) % taille, int(i) / taille)
+		g.materiaux[g.idx(p)] = e.cueillette[i]
+		g.poser_contenu(p, "plante_sauvage")
 	for i in e.get("eau", {}).keys():
 		g.poser_contenu(base + Vector2i(int(i) % taille, int(i) / taille), "eau")
 	for i in e.get("murs", {}).keys():   # les bâtiments du hameau

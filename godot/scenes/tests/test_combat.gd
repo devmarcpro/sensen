@@ -97,6 +97,7 @@ func _ready() -> void:
 	test_foudre()
 	test_retrait_eau()
 	test_compagnons_postures()
+	test_cueillette()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2514,6 +2515,32 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_cueillette() -> void:
+	# Les données : chaque plante de cueillette existe, et sa silhouette aussi
+	var manque := 0
+	for bid in GameData.catalogues.biomes.keys():
+		for cu in GameData.catalogues.biomes[bid].get("cueillette", []):
+			if not GameData.catalogues.plants.has(str(cu.id)) or not GameData.catalogues.vegetaux.has(str(cu.id)) or not GameData.catalogues.items.has(str(cu.id)):
+				manque += 1
+	verifier(manque == 0, "chaque plante de cueillette a sa fiche, sa silhouette et son consommable")
+	var s := Simulation.new(149)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var t: Vector2i = j.pos + Vector2i(1, 0)
+	s.grille.contenu[s.grille.idx(t)] = 0
+	s.grille.hauteurs[s.grille.idx(t)] = s.grille.h(j.pos)
+	verifier(not s.intention(j.id, {"type": "cueillir", "vers": t}), "rien à cueillir sur du sol nu")
+	s.grille.poser_contenu(t, "plante_sauvage")
+	s.grille.materiaux[s.grille.idx(t)] = "framboisier"
+	var avant: int = j.sac.size()
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "cueillir", "vers": t}), "cueillir un framboisier adjacent")
+	var n: int = j.sac.size() - avant
+	verifier(n == maxi(1, int(GameData.catalogues.plants.framboisier.recolte_base) / 2), "la moitié d'une récolte cultivée (%d)" % n)
+	verifier(s.grille.contenu_de(t).is_empty() and s.modifs_terrain.has(s.grille.idx(t)), "la tuile redevient du sol, mémorisée pour repousser")
+	s.monde.fermer()
+
 
 func test_compagnons_postures() -> void:
 	var s := Simulation.new(148)

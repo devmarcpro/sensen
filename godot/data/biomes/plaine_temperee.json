@@ -98,5 +98,31 @@
       "id": "sanglier",
       "density": 0.2
     }
+  ],
+  "cueillette": [
+    {
+      "id": "fleurs_sauvages",
+      "density": 0.01
+    },
+    {
+      "id": "camomille",
+      "density": 0.006
+    },
+    {
+      "id": "achillee",
+      "density": 0.005
+    },
+    {
+      "id": "ortie",
+      "density": 0.004
+    },
+    {
+      "id": "champignon_des_pres",
+      "density": 0.004
+    },
+    {
+      "id": "sauge",
+      "density": 0.002
+    }
   ]
 }

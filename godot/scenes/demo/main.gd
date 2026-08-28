@@ -778,6 +778,8 @@ func _options_tuile(t: Vector2i) -> Array:
 			res.append({"id": "conquerir", "vers": t})
 		if "eau" in tags:
 			res.append({"id": "capturer", "vers": t})
+	if "plante_sauvage" in tags:
+		res.append({"id": "cueillir", "vers": t})
 	if "plante" in tags or "arbre" in tags:
 		res.append({"id": "creuser", "vers": t})
 	if "construit" in tags:
@@ -861,6 +863,8 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "conquerir", "vers": opt.vers})
 		"capturer":
 			sim.intention(joueur_id, {"type": "capturer"})
+		"cueillir":
+			sim.intention(joueur_id, {"type": "cueillir", "vers": opt.vers})
 		"creuser":
 			if not sim.intention(joueur_id, {"type": "creuser", "vers": opt.vers}):
 				_log(tr("journal.increusable"))

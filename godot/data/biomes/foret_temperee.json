@@ -102,5 +102,43 @@
       "id": "loup",
       "density": 0.8
     }
+  ],
+  "cueillette": [
+    {
+      "id": "framboisier",
+      "density": 0.01
+    },
+    {
+      "id": "myrtillier",
+      "density": 0.008
+    },
+    {
+      "id": "champignon_des_pres",
+      "density": 0.006
+    },
+    {
+      "id": "amanite",
+      "density": 0.002
+    },
+    {
+      "id": "ortie",
+      "density": 0.006
+    },
+    {
+      "id": "menthe",
+      "density": 0.004
+    },
+    {
+      "id": "achillee",
+      "density": 0.004
+    },
+    {
+      "id": "camomille",
+      "density": 0.003
+    },
+    {
+      "id": "fleurs_sauvages",
+      "density": 0.006
+    }
   ]
 }

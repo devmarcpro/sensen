@@ -62,5 +62,15 @@
       "id": "loup",
       "density": 0.3
     }
+  ],
+  "cueillette": [
+    {
+      "id": "roseau",
+      "density": 0.008
+    },
+    {
+      "id": "fleurs_sauvages",
+      "density": 0.003
+    }
   ]
 }

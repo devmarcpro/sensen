@@ -85,5 +85,23 @@
       "id": "crocodile",
       "density": 0.2
     }
+  ],
+  "cueillette": [
+    {
+      "id": "roseau",
+      "density": 0.015
+    },
+    {
+      "id": "amanite",
+      "density": 0.003
+    },
+    {
+      "id": "belladone",
+      "density": 0.002
+    },
+    {
+      "id": "menthe",
+      "density": 0.003
+    }
   ]
 }

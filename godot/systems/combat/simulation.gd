@@ -680,6 +680,33 @@ func _regenerer_terrain_sauvage() -> void:
 		EventBus.emettre(&"journal", [&"journal.regeneration", {"n": n}])
 
 
+## Cueillir une plante sauvage adjacente (Plantes) : la moitié d'une récolte cultivée, la tuile repoussera hors claim.
+func _cueillir(e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	if not grille.dans(vers) or Grille.distance(e.pos, vers) != 1:
+		return false
+	if not ("plante_sauvage" in grille.contenu_de(vers).get("tags", [])):
+		return false
+	var pid := grille.materiau_de(vers)
+	var pl: Dictionary = GameData.catalogues.plants.get(pid, {})
+	if pl.is_empty():
+		return false
+	var n := maxi(1, int(pl.get("recolte_base", 2)) / 2)
+	for k in n:
+		var o := generer_objet(pid, 1, {}, "commun", 0)
+		if not o.is_empty():
+			donner(e, o.uid)
+	_memoriser_terrain(vers)
+	grille.contenu[grille.idx(vers)] = 0
+	grille.marquer(vers)
+	e.compteur = tick + int(regles.r.actions.objet)
+	e["vue_sale"] = true
+	gagner_xp(e, "herboristerie", 3)
+	lumiere_sale = true
+	EventBus.emettre(&"tile_changed", [vers])
+	EventBus.emettre(&"journal", [&"journal.cueillette", {"nom": e.name_key, "plante": pl.name_key, "n": n}])
+	return true
+
+
 func _creuser(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	e["vue_sale"] = true
 	if not grille.dans(vers) or Grille.distance(e.pos, vers) != 1:
@@ -6184,6 +6211,8 @@ func intention(id: String, i: Dictionary) -> bool:
 				return true
 		"creuser":
 			ok = _creuser(e, i.get("vers", Vector2i(-1, -1)), h.ticks)
+		"cueillir":
+			ok = _cueillir(e, i.get("vers", Vector2i(-1, -1)), h.ticks)
 		"terrasser":
 			ok = _terrasser(e, i.get("vers", Vector2i(-1, -1)), int(i.get("sens", -1)), h.ticks)
 		"equiper":

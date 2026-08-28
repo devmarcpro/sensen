@@ -199,5 +199,16 @@
       "nage"
     ],
     "couleur": "#3f78b8"
+  },
+  "plante_sauvage": {
+    "name_key": "tile_content.plante_sauvage.name",
+    "bloque_passage": false,
+    "bloque_vue": false,
+    "hauteur_vue": 0,
+    "tags": [
+      "plante_sauvage",
+      "vegetation",
+      "cueillette"
+    ]
   }
 }

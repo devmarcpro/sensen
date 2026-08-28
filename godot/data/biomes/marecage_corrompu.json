@@ -82,5 +82,19 @@
       "id": "nuee_moustiques",
       "density": 0.5
     }
+  ],
+  "cueillette": [
+    {
+      "id": "roseau",
+      "density": 0.012
+    },
+    {
+      "id": "amanite",
+      "density": 0.004
+    },
+    {
+      "id": "belladone",
+      "density": 0.004
+    }
   ]
 }
