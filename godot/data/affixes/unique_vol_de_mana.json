@@ -1,0 +1,25 @@
+{
+  "name_key": "affixe.unique_vol_de_mana.nom",
+  "famille": "unique",
+  "slots_valides": [
+    "main_principale"
+  ],
+  "parametres": {
+    "pct": [
+      15,
+      25
+    ]
+  },
+  "effet": {
+    "type": "unique",
+    "mecanique": "vol_de_mana"
+  },
+  "meilleur": {
+    "pct": "haut"
+  },
+  "inerte": false,
+  "tags": [
+    "artefact_seulement",
+    "tres_rare"
+  ]
+}

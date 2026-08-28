@@ -973,5 +973,9 @@
     "periode_ticks": 10,
     "des_malus": 2,
     "refus_surcharge": true
+  },
+  "uniques": {
+    "_doc": "Trésors et artefacts : effets uniques hors pools. second_souffle : sous seuil_pct, soin pct des PV max, une fois par combat.",
+    "second_souffle_seuil_pct": 20
   }
 }

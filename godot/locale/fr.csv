@@ -185,6 +185,10 @@ epithete.feu,de braise
 epithete.terre,de roc
 epithete.metal,d'acier
 epithete.eau,de givre
+affixe.unique_second_souffle.nom,"{base} du second souffle"
+affixe.unique_vol_de_mana.nom,"{base} buveur de mana ({pct} %)"
+affixe.unique_chaine_eternelle.nom,"{base} de la chaîne éternelle"
+journal.second_souffle,"{nom} trouve un second souffle (+{soin} PV)"
 affixe.cadence_element.nom,{base} {epithete} (une attaque sur {n} porte {element})
 affixe.cadence_des.nom,{base} fervent (une sur {n} : +{des} dé)
 affixe.cadence_percant.nom,{base} perçant (tous les {n} coups : ignore {pct} % d'armure)

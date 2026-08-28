@@ -1193,6 +1193,18 @@ func _doublon_recette(e: Dictionary, rid: String) -> void:
 		EventBus.emettre(&"journal", [&"journal.recette_doublon", {"k": n - d, "n": n + 1}])
 
 
+## Un effet unique d'artefact porté ? (Trésors et artefacts)
+func a_unique(e: Dictionary, mecanique: String) -> bool:
+	return not a_unique_ax(e, mecanique).is_empty()
+
+
+func a_unique_ax(e: Dictionary, mecanique: String) -> Dictionary:
+	for ax in Etres.affixes_equipes(e, items, affixes_defs, "unique"):
+		if str(affixes_defs.get(ax.id, {}).get("effet", {}).get("mecanique", "")) == mecanique:
+			return ax
+	return {}
+
+
 ## Une tuile d'eau à nager (Eau et liquides) — gelée, elle se marche.
 func dans_l_eau(pos: Vector2i) -> bool:
 	return grille.dans(pos) and not grille.gel and "nage" in grille.contenu_de(pos).get("tags", [])
@@ -6252,6 +6264,9 @@ func _affixes_apres_coup(e: Dictionary, arme: Dictionary, cible: Dictionary, res
 		match str(d.effet.type):
 			"meca_vol_de_vie":
 				e.sante = mini(e.sante_max, e.sante + roundi(float(res.degats) * float(p.pct) / 100.0))
+			"unique":   # Trésors et artefacts : effets uniques hors pools
+				if str(d.effet.mecanique) == "vol_de_mana":
+					e.mana = mini(e.mana_max, int(e.mana) + roundi(float(res.degats) * float(p.pct) / 100.0))
 			"decl_zone_statut":
 				if res.zone == str(p.zone) and cible.vivant:
 					appliquer_statut(cible, str(d.effet.statut), int(p.duree_ticks), e.id)
@@ -6339,7 +6354,8 @@ func _facteur_wuxing(e: Dictionary, cible: Dictionary, v_att: Dictionary, tick: 
 	var chaine := 1.0
 	var prev := {}
 	if e.has("chaine") and not v_att.is_empty():
-		wuxing.decroitre(e.chaine, tick)
+		if not a_unique(e, "chaine_eternelle"):   # Chaîne éternelle : la jauge ne décroît plus
+			wuxing.decroitre(e.chaine, tick)
 		prev = wuxing.prevoir(e.chaine, wuxing.dominante(v_att))
 		gain = prev.gain
 		chaine = prev.multiplicateur
@@ -6420,6 +6436,13 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 	_verser_xp(cible, degats, source, detail)
 	var avant_pct := float(cible.sante) / float(cible.sante_max)
 	cible.sante = maxi(0, cible.sante - degats)
+	if cible.sante > 0 and not bool(cible.get("second_souffle_pris", false)) and float(cible.sante) / float(cible.sante_max) * 100.0 < float(regles.r.uniques.second_souffle_seuil_pct):
+		var ax_ss := a_unique_ax(cible, "second_souffle")   # Second souffle : une fois par combat
+		if not ax_ss.is_empty():
+			var soin := roundi(float(cible.sante_max) * float(ax_ss.params.get("pct", 30)) / 100.0)
+			cible.sante = mini(cible.sante_max, int(cible.sante) + soin)
+			cible["second_souffle_pris"] = true
+			EventBus.emettre(&"journal", [&"journal.second_souffle", {"nom": cible.name_key, "soin": soin}])
 	if a_talent(cible, "jauge_de_sang"):   # L'Écarlate : les dégâts subis remplissent la jauge
 		cible["sang"] = mini(int(regles.r.talents.jauge_de_sang.max), int(cible.get("sang", 0)) + degats)
 	EventBus.emettre(&"damage_dealt", [source, cible.id, degats, detail])
@@ -7309,6 +7332,8 @@ func _engager_combat(a: Dictionary, b: Dictionary) -> void:
 	b.erase("relance_utilisee")
 	a.erase("cataclysmes_combat")   # Sorts cataclysmiques : un par combat
 	b.erase("cataclysmes_combat")
+	a.erase("second_souffle_pris")   # Trésors et artefacts : un second souffle par combat
+	b.erase("second_souffle_pris")
 	if a.get("huile_feu", false) and not en_combat(a):
 		a.erase("huile_feu")
 		a["degats_element_bonus"] = {"feu": "1d4"}   # consommé par le premier combat (Nourriture : huile d'arme)

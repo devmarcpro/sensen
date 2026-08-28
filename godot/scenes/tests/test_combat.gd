@@ -93,6 +93,7 @@ func _ready() -> void:
 	test_poison_illegal()
 	test_nage()
 	test_neige_et_gel()
+	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2476,6 +2477,38 @@ func test_bombes() -> void:
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
 
 
+# ---------------------------------------------------------------- Effets uniques d'artefacts
+
+func test_uniques_artefacts() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	# Jamais sur un objet commun, même en forçant 3 affixes
+	var uniques_communs := 0
+	for k in 20:
+		var o := s.generer_objet("proto_epee", 5, {}, "exceptionnel", 3)
+		for ax in o.get("affixes", []):
+			if str(ax.id).begins_with("unique_"):
+				uniques_communs += 1
+	verifier(uniques_communs == 0, "aucun effet unique hors de la rareté artefact")
+	var art := s.generer_objet("proto_epee", 5, {}, "artefact", 3)
+	verifier(not art.is_empty() and bool(art.get("fini", false)), "un artefact se génère, fini")
+	# Second souffle
+	var anneau := {"uid": "anneau_ss", "name_key": "x", "type": "bijou", "equip_slot": "anneau", "affixes": [{"id": "unique_second_souffle", "params": {"pct": 30}, "compteur": 0, "etat": {}}], "sertissures": {"nombre": 0, "contenu": []}, "tags": []}
+	s.items["anneau_ss"] = anneau
+	j.equipement["anneau_1"] = "anneau_ss"
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	j.sante = j.sante_max
+	s._appliquer_degats(j, int(j.sante_max) - 2, "", {"type": "test"})
+	verifier(int(j.sante) > 2 and bool(j.second_souffle_pris), "sous 20 %% : second souffle (+30 %% → %d PV)" % int(j.sante))
+	var pv := int(j.sante)
+	s._appliquer_degats(j, pv - 1, "", {"type": "test"})
+	verifier(int(j.sante) == 1, "une seule fois par combat")
+	# Chaîne éternelle : la jauge ne décroît plus
+	s.items["amu_ce"] = {"uid": "amu_ce", "name_key": "x", "type": "bijou", "equip_slot": "amulette", "affixes": [{"id": "unique_chaine_eternelle", "params": {}, "compteur": 0, "etat": {}}], "sertissures": {"nombre": 0, "contenu": []}, "tags": []}
+	j.equipement["amulette"] = "amu_ce"
+	verifier(s.a_unique(j, "chaine_eternelle") and s.a_unique(j, "second_souffle") and not s.a_unique(j, "vol_de_mana"), "les uniques portés sont reconnus")
+
+
 # ---------------------------------------------------------------- Neige et gel
 
 func test_neige_et_gel() -> void:
@@ -4394,7 +4427,7 @@ func test_donjon() -> void:
 # ---------------------------------------------------------------- Étape 3 (a) : affixes générateurs, rareté, effets passifs
 
 func test_loot() -> void:
-	verifier(GameData.catalogues["affixes"].size() == 38, "38 gabarits d'affixes (6 familles × 6, + portage et sobriété)")
+	verifier(GameData.catalogues["affixes"].size() == 41, "41 gabarits d'affixes (6 familles × 6, + portage et sobriété, + 3 uniques)")
 	var s := nouvelle_sim("plaine_au_talus")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1

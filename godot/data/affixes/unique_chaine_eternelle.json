@@ -1,0 +1,19 @@
+{
+  "name_key": "affixe.unique_chaine_eternelle.nom",
+  "famille": "unique",
+  "slots_valides": [
+    "anneau",
+    "amulette"
+  ],
+  "parametres": {},
+  "effet": {
+    "type": "unique",
+    "mecanique": "chaine_eternelle"
+  },
+  "meilleur": {},
+  "inerte": false,
+  "tags": [
+    "artefact_seulement",
+    "tres_rare"
+  ]
+}

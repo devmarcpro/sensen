@@ -62,7 +62,7 @@ func generer(base_id: String, profondeur: int, rng: RandomNumberGenerator, prove
 	var valides := _affixes_pour(str(base.get("equip_slot", "")))
 	var pris := {}
 	for k in n:
-		var candidats := valides.filter(func(a: Dictionary) -> bool: return not pris.has(a.id) and not ("tres_rare" in a.tags and not (rarete in ["exceptionnel", "artefact"])) and not ("rare" in a.tags and rarete in ["commun", "inhabituel"]))
+		var candidats := valides.filter(func(a: Dictionary) -> bool: return not pris.has(a.id) and not ("tres_rare" in a.tags and not (rarete in ["exceptionnel", "artefact"])) and not ("rare" in a.tags and rarete in ["commun", "inhabituel"]) and not ("artefact_seulement" in a.tags and rarete != "artefact"))
 		if candidats.is_empty():
 			break
 		var a: Dictionary = candidats[rng.randi_range(0, candidats.size() - 1)]

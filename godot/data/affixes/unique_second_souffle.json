@@ -1,0 +1,31 @@
+{
+  "name_key": "affixe.unique_second_souffle.nom",
+  "famille": "unique",
+  "slots_valides": [
+    "main_principale",
+    "main_secondaire",
+    "casque",
+    "cuirasse",
+    "jambieres",
+    "anneau",
+    "amulette"
+  ],
+  "parametres": {
+    "pct": [
+      30,
+      30
+    ]
+  },
+  "effet": {
+    "type": "unique",
+    "mecanique": "second_souffle"
+  },
+  "meilleur": {
+    "pct": "haut"
+  },
+  "inerte": false,
+  "tags": [
+    "artefact_seulement",
+    "tres_rare"
+  ]
+}
