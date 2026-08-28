@@ -31,7 +31,7 @@ etape: 10
 
 ## 2. Le monde — carte, biomes, voyage (10 min)
 
-- **Carte du monde (M)** : une couleur par biome suffit-elle ? La règle « voyage seulement vers l'exploré » ? Le coût en temps du voyage ? Les **territoires teintés** des royaumes, le nom sur la capitale et la ligne de survol se lisent-ils ? — [[Carte du monde]], [[Génération des royaumes PNJ]]
+- **Carte du monde (Tab → Carte du monde)** : une couleur par biome suffit-elle ? La règle « voyage seulement vers l'exploré » ? Le coût en temps du voyage ? Les **territoires teintés** des royaumes, le nom sur la capitale et la ligne de survol se lisent-ils ? — [[Carte du monde]], [[Génération des royaumes PNJ]]
 - **Routes** : le chemin de sol tracé dans les cellules se lit-il comme une route ? Les traits ocre sur la carte ? — [[Unification macro-micro]]
 - **Côtes et mer** : forme des côtes, part de mer visible depuis le camp, lisibilité des 12 biomes par le sol et les arbres — [[Biomes — schéma]]
 - **Minimap** : teintes par matériau, place à l'écran ; on ne sauvegarde qu'en surface — [[Sauvegarde]]
@@ -63,9 +63,9 @@ etape: 10
 
 ## 5. Le territoire — claims, production, raids, royaume (15 min)
 
-- **Claim** (clic sur une cellule voisine depuis M) : le coût `50 or × cellules` est-il lisible ? — [[Expansion territoriale]]
+- **Claim** (clic sur une cellule voisine depuis la carte du monde) : le coût `50 or × cellules` est-il lisible ? — [[Expansion territoriale]]
 - **Logement et faim** : bâtir une chambre (murs, porte, lit, un meuble, ≥ 6 tuiles) et garnir un garde-manger — les −15 / −10 d'humeur se voient-ils sur la production ? — [[Habitat des PNJ]], [[Faim des PNJ]]
-- **Semaine** (= 21 nuits) : la production d'un résident se voit-elle ? L'écran de gestion (K) en liste suffit-il ? — [[Population et exploitation]]
+- **Semaine** (= 21 nuits) : la production d'un résident se voit-elle ? L'écran Territoire (Tab → Territoire) en liste suffit-il ? — [[Population et exploitation]]
 - **Parcelles** : un jour de pousse à 24 000 ticks est-il long ? La récolte au clic ? — [[Agriculture et élevage]]
 - **Boutique passive** : caisse séparée du trésor (à relever sur l'étal) — bon ou agaçant ? **Troc d'office** des marchands à sec sans écran d'acceptation ? — [[Boutique passive]], [[Économie — sources et puits]]
 - **Raids** : probabilité de base 0,05 et échelle `valeur/20` ; un raid qui tombe pendant la nuit sautée se lit-il ? La tourelle (4 planches + 2 lingots) : 1d6 toutes les 20 ticks à 6 tuiles — assez ? trop ? La punition d'une dette de 4 semaines quand un raid tombe — [[Défense et raids]], [[Raids et menaces]]
