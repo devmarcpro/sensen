@@ -1,22 +1,22 @@
 {
-  "name_key": "affixe.passif_regen.nom",
+  "name_key": "affixe.passif_faim.nom",
   "famille": "passif",
   "slots_valides": [
     "anneau",
     "amulette"
   ],
   "parametres": {
-    "pct": [
-      50,
-      100
+    "mult": [
+      70,
+      90
     ]
   },
   "effet": {
     "type": "passif_mecanique",
-    "mecanique": "regen_sante"
+    "mecanique": "faim_vitesse"
   },
   "meilleur": {
-    "pct": "haut"
+    "mult": "bas"
   },
   "inerte": false,
   "tags": []

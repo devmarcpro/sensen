@@ -400,6 +400,9 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+affixe.passif_poids.nom,"de portage (+{n} de capacité)"
+affixe.passif_faim.nom,"de sobriété (faim ×{mult} %)"
+journal.immunite_poison,le poison glisse sur toi
 item.arme_fantome.name,Lame fantôme
 option.arme_fantome,"Invoquer une lame de {element}"
 journal.arme_fantome,"{nom} invoque une lame de {element}"

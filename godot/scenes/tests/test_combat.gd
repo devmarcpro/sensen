@@ -82,6 +82,7 @@ func _ready() -> void:
 	test_armes_fantomes()
 	test_cataclysme()
 	test_vecteur_lieu()
+	test_effets_equipement()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2465,6 +2466,51 @@ func test_bombes() -> void:
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
 
 
+# ---------------------------------------------------------------- Effets d'équipement types
+
+func test_effets_equipement() -> void:
+	var s := Simulation.new(139)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var anneau := {"uid": "anneau_test", "name_key": "x", "type": "bijou", "equip_slot": "anneau", "affixes": [{"id": "passif_vitesse", "params": {"pct": 50}}, {"id": "passif_regen", "params": {"pct": 100}}, {"id": "passif_poids", "params": {"n": 40}}, {"id": "passif_tag", "params": {"tag": "immunite_poison"}}], "sertissures": {"nombre": 0, "contenu": []}, "tags": []}
+	s.items["anneau_test"] = anneau
+	var cap0: float = s.poids_de(j).capacite
+	j.equipement["anneau_1"] = "anneau_test"
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	verifier(j.mecaniques.has("vitesse_deplacement") and j.mecaniques.has("regen_sante") and "immunite_poison" in j.tags_acquis, "les mécaniques et le tag sont collectés (%s)" % str(j.mecaniques.keys()))
+	verifier(s.poids_de(j).capacite == cap0 + 40.0, "capacité de poids +40 (%.0f → %.0f)" % [cap0, s.poids_de(j).capacite])
+	verifier(not s.appliquer_statut(j, "poison", 100, ""), "immunisé au poison")
+	j.sante = 10
+	j.tick_endurance = 0
+	s._regenerer(j, 1000)
+	verifier(int(j.sante) == 15, "régénération : +5 PV en 1000 ticks à +100 %% (%d)" % int(j.sante))
+	var t: Vector2i = j.pos + Vector2i(1, 0)
+	s.grille.contenu[s.grille.idx(t)] = 0
+	s.grille.contenu[s.grille.idx(t + Vector2i(1, 0))] = 0
+	s.grille.hauteurs[s.grille.idx(t)] = s.grille.h(j.pos)
+	s.grille.hauteurs[s.grille.idx(t + Vector2i(1, 0))] = s.grille.h(j.pos)
+	s.attente[j.id] = true
+	var c0 := int(j.compteur)
+	s.intention(j.id, {"type": "deplacer", "vers": t})
+	var ticks_avec: int = int(j.compteur) - c0
+	var ticks_sans: int = ceili(float(s.regles.ticks_deplacement(int(s.regles.r.deplacement.cout_base), j.competences_eff, false)) * s.poids_de(j).facteur)
+	j.equipement.erase("anneau_1")
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	verifier(ticks_avec > 0 and ticks_avec < ticks_sans, "vitesse +50 %% : %d ticks avec, %d sans" % [ticks_avec, ticks_sans])
+	# Pas silencieux : détecté de moins loin
+	var g := s.ajouter("villageois", j.pos + Vector2i(0, 8), "ia")
+	s._habiller_pnj(g, GameData.entree("creatures", "villageois"))
+	g.corps.stats.perception = 10
+	for d in range(1, 9):
+		s.grille.contenu[s.grille.idx(j.pos + Vector2i(0, d))] = 0
+	s.horloge_monde.ticks = int(s._cycle().ticks_par_jour) / 2
+	verifier(s.voit_ia(g, j), "à 8 tuiles, de jour : vu")
+	j["tags_acquis_race"] = ["pas_silencieux"]
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	verifier(not s.voit_ia(g, j), "pas silencieux : portée 10 × 0,7 = 7 → invisible à 8 tuiles")
+	s.monde.fermer()
+
+
 # ---------------------------------------------------------------- Wu Xing hors combat : le lieu
 
 func test_vecteur_lieu() -> void:
@@ -4048,7 +4094,7 @@ func test_donjon() -> void:
 # ---------------------------------------------------------------- Étape 3 (a) : affixes générateurs, rareté, effets passifs
 
 func test_loot() -> void:
-	verifier(GameData.catalogues["affixes"].size() == 36, "36 gabarits d'affixes (6 familles × 6)")
+	verifier(GameData.catalogues["affixes"].size() == 38, "38 gabarits d'affixes (6 familles × 6, + portage et sobriété)")
 	var s := nouvelle_sim("plaine_au_talus")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1

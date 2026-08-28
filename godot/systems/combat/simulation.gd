@@ -1140,6 +1140,21 @@ func pieces_de_cellule(cell: Vector2i) -> Array:
 	return res
 
 
+## Les trésors détectés (Effets d'équipement : detection_tresors) : les contenants à portée, vus ou non.
+func tresors_detectes(e: Dictionary) -> Array[Vector2i]:
+	var res: Array[Vector2i] = []
+	if not ("detection_tresors" in e.get("tags_acquis", [])):
+		return res
+	var r := int(regles.r.effets_equipement.tresors_rayon)
+	for gi in contenants.keys():
+		if contenants[gi].is_empty():
+			continue
+		var t := grille.pos_de(int(gi))
+		if Grille.distance(e.pos, t) <= r:
+			res.append(t)
+	return res
+
+
 ## Le vecteur élémentaire d'une tuile (Wu Xing hors combat) : dérivé des couches de bruit, jamais du biome.
 func vecteur_lieu(pos: Vector2i) -> Dictionary:
 	if not vecteur_lieu_force.is_empty():
@@ -5400,7 +5415,7 @@ func _tiquer_faim(tick: int) -> void:
 		if not e.has("faim"):
 			e["faim"] = 100
 			e["faim_tick"] = tick
-		var periode := int(float(f.ticks_par_point) / float(e.get("faim_vitesse", 1.0)))
+		var periode := int(float(f.ticks_par_point) / (float(e.get("faim_vitesse", 1.0)) * float(e.get("mecaniques", {}).get("faim_vitesse", {}).get("mult", 100)) / 100.0))
 		var points := tick / periode - int(e.faim_tick) / periode
 		if points > 0:
 			var avant := int(e.faim)
@@ -5425,7 +5440,7 @@ func poids_de(e: Dictionary) -> Dictionary:
 		total += regles.poids_objet(items.get(uid, {}), fonctionnalites)
 	for slot in e.equipement.keys():
 		total += regles.poids_objet(items.get(e.equipement[slot], {}), fonctionnalites)
-	var cap := regles.capacite_poids(e.stats_eff)
+	var cap := regles.capacite_poids(e.stats_eff) + float(e.get("mecaniques", {}).get("capacite_poids", {}).get("n", 0))
 	if a_talent(e, "sans_chair"):   # le Spectre : capacité fixe
 		cap = float(regles.r.talents.sans_chair.capacite_poids)
 	return {"poids": total, "capacite": cap, "facteur": regles.facteur_surcharge(total, cap)}
@@ -5632,6 +5647,11 @@ func _regenerer(e: Dictionary, tick: int) -> void:
 			if des.reel() < float(regles.r.mana.chance):
 				e.mana = mini(e.mana_max, e.mana + roundi((float(regles.r.mana.regen_base) + float(e.competences_eff.get("meditation", 0)) * float(regles.r.mana.regen_par_meditation)) * (float(regles.r.talents.chair_de_mana.mana_regen_mult) if a_talent(e, "chair_de_mana") else 1.0)))
 				gagner_xp(e, "meditation", 1)
+		if e.get("mecaniques", {}).has("regen_sante") and not en_combat(e):   # Effets d'équipement : 1 PV toutes les 200 × 100 / pct ticks
+			var per := maxi(1, roundi(float(regles.r.effets_equipement.regen_base_ticks) * 100.0 / float(e.mecaniques.regen_sante.get("pct", 50))))
+			var pv := tick / per - int(e.tick_endurance) / per
+			if pv > 0:
+				e.sante = mini(e.sante_max, int(e.sante) + pv)
 	e.tick_endurance = tick
 
 
@@ -5813,6 +5833,8 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	var ticks_dep := regles.ticks_deplacement(cout, e.competences_eff, en_combat(e))
 	if e.controle == "joueur":   # surcharge (Armures et poids porté) : sur les ticks d'Athlétisme, jamais sur une stat
 		ticks_dep = ceili(float(ticks_dep) * poids_de(e).facteur)
+	if e.get("mecaniques", {}).has("vitesse_deplacement"):   # Effets d'équipement : +pct % de vitesse
+		ticks_dep = maxi(1, roundi(float(ticks_dep) / (1.0 + float(e.mecaniques.vitesse_deplacement.get("pct", 0)) / 100.0)))
 	e.compteur = tick + _ticks_avec_statuts(e, ticks_dep)
 	_declencher_glyphe(e, vers)
 	if en_combat(e):
@@ -6369,6 +6391,9 @@ func appliquer_statut(cible: Dictionary, id: String, duree: int, source: String,
 	var d: Dictionary = statuts_defs.get(id, {})
 	if d.is_empty() or not cible.vivant:
 		return false
+	if "poison" in d.get("tags", []) and "immunite_poison" in cible.get("tags_acquis", []):   # Effets d'équipement
+		EventBus.emettre(&"journal", [&"journal.immunite_poison", {}])
+		return false
 	var tick := tick_de(cible)
 	if d.get("controle", false):
 		if tick < int(cible.anti_stunlock_jusqua):
@@ -6732,7 +6757,7 @@ func _payer(e: Dictionary, plan: Dictionary) -> void:
 			var deficit: int = maxi(0, cout - int(e.mana))
 			e.mana = maxi(0, int(e.mana) - cout)
 			if deficit > 0:
-				var degats := deficit * int(regles.r.mana.surchauffe_mult)
+				var degats := roundi(float(deficit * int(regles.r.mana.surchauffe_mult)) * float(e.get("mecaniques", {}).get("surchauffe_mult", {}).get("mult", 100)) / 100.0)
 				EventBus.emettre(&"journal", [&"journal.surchauffe", {"nom": e.name_key, "deficit": deficit, "degats": degats}])
 				if a_talent(e, "chair_de_mana"):   # Chair de mana (Talents de race) : le corps paie en endurance
 					e.endurance = maxi(0, int(e.endurance) - degats)
@@ -7389,6 +7414,8 @@ func voit_ia(e: Dictionary, autre: Dictionary) -> bool:
 			portee *= float(_cycle().get("vision_nuit", 0.6))
 		else:
 			portee *= 1.0 + float(lum) / 100.0 * float(regles.r.engagement.get("lumiere_detection", 0.5))
+	if "pas_silencieux" in autre.get("tags_acquis", []):   # Effets d'équipement : détecté de moins loin
+		portee *= float(regles.r.effets_equipement.silence_mult)
 	return Grille.distance(e.pos, autre.pos) <= int(portee) and grille.ligne_de_vue(e.pos, autre.pos)
 
 

@@ -132,6 +132,7 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 	var plafond := int(GameData.config("loot_rules").gemmes.plafond_par_competence)
 	e.degats_element = {}
 	e.affinites = {}
+	e.mecaniques = {}   # affixes passif_mecanique : mécanique → paramètres (Effets d'équipement types)
 	for slot: String in e.equipement.keys():
 		var it: Dictionary = items.get(e.equipement[slot], {})
 		var q := float(it.get("qualite", 1.0))
@@ -146,6 +147,8 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 					comp[ax.params.competence] = int(comp.get(ax.params.competence, 0)) + roundi(float(ax.params.n) * q)
 				"passif_tag":
 					tags.append(str(ax.params.tag))
+				"passif_mecanique":
+					e.mecaniques[str(d.effet.mecanique)] = ax.params
 				"wuxing_segment":
 					segments_bonus += 1
 				"meca_endurance_max":

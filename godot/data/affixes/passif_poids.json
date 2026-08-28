@@ -1,22 +1,23 @@
 {
-  "name_key": "affixe.passif_regen.nom",
+  "name_key": "affixe.passif_poids.nom",
   "famille": "passif",
   "slots_valides": [
     "anneau",
-    "amulette"
+    "amulette",
+    "cuirasse"
   ],
   "parametres": {
-    "pct": [
-      50,
-      100
+    "n": [
+      10,
+      40
     ]
   },
   "effet": {
     "type": "passif_mecanique",
-    "mecanique": "regen_sante"
+    "mecanique": "capacite_poids"
   },
   "meilleur": {
-    "pct": "haut"
+    "n": "haut"
   },
   "inerte": false,
   "tags": []

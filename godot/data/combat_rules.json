@@ -947,5 +947,11 @@
       "metal",
       "terre"
     ]
+  },
+  "effets_equipement": {
+    "_doc": "Effets d'équipement types : regen_sante = 1 PV toutes les regen_base_ticks × 100 / pct ticks hors combat ; pas_silencieux = portée de détection × silence_mult ; detection_tresors = contenants à tresors_rayon tuiles.",
+    "regen_base_ticks": 200,
+    "silence_mult": 0.7,
+    "tresors_rayon": 10
   }
 }

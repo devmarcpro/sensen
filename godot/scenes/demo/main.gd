@@ -981,6 +981,9 @@ func _draw() -> void:
 		_losange(survol, Color(1, 1, 1, 0.22))
 	for b in sim.bombes:
 		_losange(b.pos, Color(1.0, 0.4, 0.1, 0.7))
+	if not j.is_empty():
+		for t in sim.tresors_detectes(j):   # detection_tresors : les contenants à portée, même hors de vue
+			_losange(t, Color(1.0, 0.85, 0.2, 0.55))
 	for a in sim.affuts:   # les affûts de L'Engrenage
 		_losange(a.pos, Color(0.6, 0.6, 0.65, 0.8))
 	for pi in sim.portails.keys():   # les brèches du Passeur
