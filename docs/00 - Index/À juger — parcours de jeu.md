@@ -35,12 +35,12 @@ etape: 10
 - **Routes** : le chemin de sol tracé dans les cellules se lit-il comme une route ? Les traits ocre sur la carte ? — [[Unification macro-micro]]
 - **Côtes et mer** : forme des côtes, part de mer visible depuis le camp, lisibilité des 12 biomes par le sol et les arbres — [[Biomes — schéma]]
 - **Minimap** : teintes par matériau, place à l'écran ; on ne sauvegarde qu'en surface — [[Sauvegarde]]
-- **Dérive de la corruption** : on ne la voit qu'en dormant beaucoup (une semaine = 21 nuits) — faut-il afficher le delta ? — [[Dérive de la corruption]]
+- **Dérive de la corruption** : on ne la voit qu'en dormant beaucoup (une semaine = 21 nuits) — la carte affiche désormais « dérive +n » sur la cellule survolée ; suffit-il ? — [[Dérive de la corruption]]
 
 ## 3. Le donjon — combat, loot, étages (10 min)
 
 - **Rythme** : `DELAI_PAS = 0.12 s` entre deux pas — trop lent, trop rapide pour suivre les loups ? Durée d'une rencontre (cible 60-200 ticks, affichée à l'écran de fin)
-- **Télégraphe** (« ! » + tuiles rouges) vu à temps ? **Coûts sur les tuiles** (jaune) utiles ou bruit ? **Capacités** (F1 + clic) : la prévisualisation suffit-elle ?
+- **Télégraphe** (« ! » + tuiles rouges) vu à temps ? **Coûts sur les tuiles** (jaune) utiles ou bruit ? **Capacités** (hotbar 2-4 + clic) : la prévisualisation suffit-elle ?
 - **Capacités** : composer une capacité (Tab → Capacités → Nouvelle) en enchaînant forme + noyau + modificateurs — la liste ordonnée suffit-elle ? — [[Structure compétences-modules-slots]]
 - **Jet de coup** : 5 % de critiques ×1,5, 5 % de coups ratés — se sent-il, frustre-t-il ? — [[Pipeline de résolution du combat]]
 - **Talents** : Le Sabre (un swap gratuit par chaîne), La Paume (soins qui tissent), La Trace (la meute pose sur ta jauge), l'Elfe (surchauffe en endurance), le Nain (tout se récolte, lentement) — chacun se sent-il ? — [[Talents de classe]], [[Talents de race]]

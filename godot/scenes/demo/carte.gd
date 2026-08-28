@@ -127,6 +127,9 @@ func _dessiner() -> void:
 	if survol != Vector2i(-1, -1):
 		var info_s: Dictionary = surf.resume_cellule(survol)
 		var texte := tr("ui.carte.survol").format({"x": survol.x, "y": survol.y, "biome": tr(GameData.entree("biomes", str(info_s.biome)).name_key) if info_s.terre else tr("ui.carte.mer"), "danger": int(sim.monde.danger_de(survol))})
+		var derive := int(sim.monde.delta.get(survol, 0))   # Dérive de la corruption : le delta accumulé se lit
+		if derive != 0:
+			texte += tr("ui.carte.survol_derive").format({"d": ("+%d" % derive) if derive > 0 else str(derive)})
 		if info_s.terre:   # le vecteur du lieu (Wu Xing hors combat) : ce que le mana y coûtera
 			var vl: Dictionary = sim.vecteur_lieu(sim.monde.pos_monde(survol, Vector2i(sim.monde.taille / 2, sim.monde.taille / 2)))
 			if not vl.is_empty():
