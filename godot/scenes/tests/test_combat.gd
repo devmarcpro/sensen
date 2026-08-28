@@ -93,6 +93,7 @@ func _ready() -> void:
 	test_poison_illegal()
 	test_nage()
 	test_neige_et_gel()
+	test_automate_eau()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2507,6 +2508,52 @@ func test_uniques_artefacts() -> void:
 	s.items["amu_ce"] = {"uid": "amu_ce", "name_key": "x", "type": "bijou", "equip_slot": "amulette", "affixes": [{"id": "unique_chaine_eternelle", "params": {}, "compteur": 0, "etat": {}}], "sertissures": {"nombre": 0, "contenu": []}, "tags": []}
 	j.equipement["amulette"] = "amu_ce"
 	verifier(s.a_unique(j, "chaine_eternelle") and s.a_unique(j, "second_souffle") and not s.a_unique(j, "vol_de_mana"), "les uniques portés sont reconnus")
+
+
+# ---------------------------------------------------------------- L'automate d'eau
+
+func test_automate_eau() -> void:
+	var s := Simulation.new(145)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	# Un lac (source) à 3 tuiles, une plaine plate entre les deux ; creuser une tranchée au bord : elle s'inonde.
+	var base: Vector2i = j.pos + Vector2i(4, 0)
+	var h0 := s.grille.h(j.pos)
+	for dx in range(0, 8):
+		for dy in range(-2, 3):
+			var t: Vector2i = base + Vector2i(dx, dy)
+			s.grille.contenu[s.grille.idx(t)] = 0
+			s.grille.hauteurs[s.grille.idx(t)] = h0
+	var lac: Vector2i = base + Vector2i(5, 0)
+	var talus: Vector2i = lac + Vector2i(0, 1)
+	s.grille.hauteurs[s.grille.idx(talus)] = h0 + 1   # un talus au bord du lac, posé avant que l'eau ne bouge
+	s.grille.poser_contenu(lac, "eau")
+	verifier(s.grille.niveau_liquide(lac) == 8 and s.eau_active.is_empty(), "une source au niveau 8, rien ne bouge tant qu'on n'y touche pas")
+	var tranchee: Vector2i = lac + Vector2i(-1, 0)
+	s._memoriser_terrain(tranchee)
+	s.grille.hauteurs[s.grille.idx(tranchee)] = h0 - 1
+	verifier(not s.eau_active.is_empty(), "creuser au bord réveille le lac")
+	var tick := s.horloge_monde.ticks
+	for k in 10:
+		s._tiquer_eau(tick + k * 5)
+	verifier(s.grille.niveau_liquide(tranchee) == 7, "la tranchée (plus basse) s'inonde : niveau 7")
+	var plat: Vector2i = lac + Vector2i(-2, 0)
+	var loin: Vector2i = lac + Vector2i(-4, 0)
+	verifier(s.grille.niveau_liquide(plat) > s.grille.niveau_liquide(loin) and s.grille.niveau_liquide(loin) > 0, "l'eau s'étale à plat en perdant un niveau par tuile (%d puis %d)" % [s.grille.niveau_liquide(plat), s.grille.niveau_liquide(loin)])
+	verifier(s.grille.niveau_liquide(lac + Vector2i(-8, 0)) == 0, "et s'arrête au bout de sa portée")
+	verifier(s.grille.niveau_liquide(talus) == 0, "le talus (plus haut) endigue")
+	# La pluie remplit un creux d'un niveau
+	var creux: Vector2i = j.pos + Vector2i(-3, 0)
+	for dd in [Vector2i(0, 0), Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		s.grille.contenu[s.grille.idx(creux + dd)] = 0
+		s.grille.hauteurs[s.grille.idx(creux + dd)] = h0
+	s.grille.hauteurs[s.grille.idx(creux)] = h0 - 2
+	var avant := s.grille.niveau_liquide(creux)
+	var g1 := s._pluie_sur(creux)
+	var g2 := s._pluie_sur(creux)
+	verifier(avant == 0 and g1 and not g2 and s.grille.niveau_liquide(creux) == 1, "la pluie remplit le creux d'un niveau, jamais plus (%d)" % s.grille.niveau_liquide(creux))
+	verifier(not s._pluie_sur(creux + Vector2i(1, 0)), "une tuile qui n'est pas un creux ne prend pas la pluie")
+	s.monde.fermer()
 
 
 # ---------------------------------------------------------------- Neige et gel

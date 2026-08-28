@@ -977,5 +977,12 @@
   "uniques": {
     "_doc": "Trésors et artefacts : effets uniques hors pools. second_souffle : sous seuil_pct, soin pct des PV max, une fois par combat.",
     "second_souffle_seuil_pct": 20
+  },
+  "eau": {
+    "_doc": "Eau et liquides : automate — periode_ticks entre deux pas, tuiles_par_pas traitées par pas, portee = niveau de départ d'un écoulement à plat (7), pluie_tuiles = creux remplis par heure de pluie.",
+    "periode_ticks": 5,
+    "tuiles_par_pas": 64,
+    "portee": 7,
+    "pluie_tuiles": 20
   }
 }

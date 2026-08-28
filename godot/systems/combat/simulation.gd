@@ -34,6 +34,9 @@ var prochain_donjon: int = 1         # id du prochain donjon lancé depuis le ca
 var monde: Monde = null              # la surface comme fenêtre glissante (étape 8.2a)
 var bombes: Array = []               # les bombes posées, en attente d'explosion (Explosions)
 var affuts: Array[Dictionary] = []   # tourelles portatives de L'Engrenage : {pos, source, prochain}
+var pluie_heure := -1   # la dernière heure de monde où la pluie a rempli les creux
+var eau_active: Dictionary = {}   # idx → true : tuiles de liquide à propager (Eau et liquides)
+var eau_prochain_pas := 0
 var modifs_terrain: Dictionary = {}   # idx → {h, contenu} d'origine : ce que le monde rendra hors claim (Destruction du terrain)
 var vecteur_lieu_force: Dictionary = {}   # tests et arènes : imposer le vecteur du lieu (Wu Xing hors combat)
 var portails: Dictionary = {}   # idx de tuile → id du Passeur qui l'a ouvert (Talents de classe)
@@ -392,6 +395,91 @@ func _memoriser_terrain(t: Vector2i) -> void:
 	var idx := grille.idx(t)
 	if not modifs_terrain.has(idx):
 		modifs_terrain[idx] = {"h": grille.h(t), "contenu": int(grille.contenu[idx])}
+	_reveiller_eau_autour(t)
+
+
+## Une tuile modifiée réveille les liquides voisins (Eau et liquides) : la tranchée s'inonde, le talus endigue.
+func _reveiller_eau_autour(t: Vector2i) -> void:
+	for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var q: Vector2i = t + dd
+		if grille.dans(q) and grille.niveau_liquide(q) > 0:
+			eau_active[grille.idx(q)] = true
+
+
+## L'automate d'eau (Eau et liquides) : chaque tuile active verse vers ses quatre voisines.
+func _tiquer_eau(tick: int) -> void:
+	if eau_active.is_empty() or tick < eau_prochain_pas:
+		return
+	var ea: Dictionary = regles.r.get("eau", {})
+	eau_prochain_pas = tick + int(ea.get("periode_ticks", 5))
+	var budget := int(ea.get("tuiles_par_pas", 64))
+	var portee := int(ea.get("portee", 7))
+	for idx in eau_active.keys():
+		if budget <= 0:
+			break
+		budget -= 1
+		eau_active.erase(idx)
+		var t := grille.pos_de(int(idx))
+		var niveau := grille.niveau_liquide(t)
+		if niveau <= 1:
+			continue
+		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var q: Vector2i = t + dd
+			if not grille.dans(q) or grille.bloque_passage(q) or grille.meubles.has(grille.idx(q)):
+				continue
+			var cible := 0
+			if grille.h(q) < grille.h(t):
+				cible = portee   # elle descend le relief et remplit le creux
+			elif grille.h(q) == grille.h(t):
+				cible = niveau - 1   # elle s'étale en perdant un niveau par tuile
+			if cible <= 0 or grille.niveau_liquide(q) >= cible:
+				continue
+			_poser_eau(q, cible)
+
+
+## Poser un écoulement de niveau donné (jamais sur une source) et le rendre actif.
+func _poser_eau(q: Vector2i, niveau: int) -> void:
+	var qi := grille.idx(q)
+	if grille.niveau_liquide(q) >= 8:
+		return
+	var nouveau := grille.niveau_liquide(q) == 0
+	grille.poser_contenu(q, "eau_ecoulement")
+	grille.niveau_eau[qi] = clampi(niveau, 1, 7)
+	grille.marquer(q)
+	eau_active[qi] = true
+	lumiere_sale = true
+	if nouveau:
+		EventBus.emettre(&"journal", [&"journal.inondation", {"x": q.x, "y": q.y}])
+	EventBus.emettre(&"tile_changed", [q])
+
+
+## Une goutte sur une tuile : elle ne prend qu'un creux ouvert (plus bas que ses quatre voisines), un niveau, jamais plus.
+func _pluie_sur(t: Vector2i) -> bool:
+	if not grille.dans(t) or grille.bloque_passage(t) or grille.niveau_liquide(t) > 0 or grille.meubles.has(grille.idx(t)) or not grille.occupant(t).is_empty():
+		return false
+	for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var q: Vector2i = t + dd
+		if not grille.dans(q) or grille.h(q) <= grille.h(t):
+			return false
+	_poser_eau(t, 1)
+	eau_active.erase(grille.idx(t))   # une flaque de pluie ne se propage pas
+	return true
+
+
+## La pluie (Météo) remplit les creux ouverts d'un niveau : des tuiles plus basses que leurs quatre voisines.
+func _pluie(tick: int) -> void:
+	var ea: Dictionary = regles.r.get("eau", {})
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "pluie", tick])
+	var n := 0
+	for essai in int(ea.get("pluie_tuiles", 20)) * 8:
+		if n >= int(ea.get("pluie_tuiles", 20)):
+			break
+		var t := grille.pos_de(rng.randi_range(0, grille.largeur * grille.hauteur_grille - 1))
+		if _pluie_sur(t):
+			n += 1
+	if n > 0:
+		EventBus.emettre(&"journal", [&"journal.pluie_creux", {}])
 
 
 ## Terrasser (Destruction du terrain) : ±1 de hauteur sur une tuile de sol adjacente ; élever demande une pioche.
@@ -5776,6 +5864,12 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 			EventBus.emettre(&"journal", [&"journal.releve_fin", {"nom": x.name_key}])
 	_tirs_d_affuts(nom, tick)
 	_maj_etats_meteo()
+	if nom == "monde":
+		_tiquer_eau(tick)
+		var h_ticks := int(_cycle().get("ticks_par_jour", 24000)) / 24
+		if lieu == "camp" and monde != null and tick / h_ticks != pluie_heure and meteo(monde.cellule_de(grille.pos_de(grille.largeur * grille.hauteur_grille / 2))) == "pluie":
+			pluie_heure = tick / h_ticks
+			_pluie(tick)
 	_tiquer_vampires(nom, tick)
 	_tiquer_armes_fantomes(nom, tick)
 	_tiquer_souffle(nom, tick)

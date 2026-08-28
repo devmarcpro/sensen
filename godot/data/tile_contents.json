@@ -186,5 +186,18 @@
       "parcelle",
       "mure"
     ]
+  },
+  "eau_ecoulement": {
+    "name_key": "tile_content.eau_ecoulement.name",
+    "bloque_passage": false,
+    "bloque_vue": false,
+    "hauteur_vue": 0,
+    "tags": [
+      "eau",
+      "liquide",
+      "ecoulement",
+      "nage"
+    ],
+    "couleur": "#3f78b8"
   }
 }

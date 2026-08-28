@@ -27,11 +27,22 @@ var materiaux: Dictionary = {}            # index de tuile → id de matériau (
 var materiau_defaut: String = ""          # le matériau des murs ordinaires (materiau_mur du thème)
 var meubles: Dictionary = {}              # index de tuile → id de meuble (data/meubles/)
 var stations_fixes: Dictionary = {}       # index de tuile → id de station posée
+var niveau_eau: Dictionary = {}           # index de tuile → niveau 1-7 d'un écoulement (Eau et liquides) ; une source vaut 8
 var neige := false                        # état météo de la grille (Météo) : chaque pas coûte neige_surcout de plus
 var gel := false                          # sous 0 °C : l'eau est de la glace, elle se marche
 var sols: Dictionary = {}                 # index de tuile → id de matériau de sol (surface) ; vide = sol par défaut
 var origine := Vector2i.ZERO              # coordonnée monde de la tuile locale (0, 0) — fenêtre glissante (Monde)
 var modifies: Dictionary = {}             # index de tuile → true : tuiles modifiées depuis la construction (capture par cellule)
+
+
+## Le niveau d'eau d'une tuile (Eau et liquides) : 8 pour une source, 1-7 pour un écoulement, 0 sinon.
+func niveau_liquide(p: Vector2i) -> int:
+	var tags: Array = contenu_de(p).get("tags", [])
+	if "source" in tags and "liquide" in tags:
+		return 8
+	if "ecoulement" in tags:
+		return int(niveau_eau.get(idx(p), 1))
+	return 0
 
 
 func materiau_sol(p: Vector2i) -> String:

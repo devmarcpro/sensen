@@ -1200,6 +1200,8 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 	var tags_c: Array = g.contenu_de(t).get("tags", [])
 	if "liquide" in tags_c:   # la mer : un losange d'eau à sa hauteur, les flancs de la rive sont ceux des tuiles voisines
 		var col_eau := Color.html(str(g.contenu_de(t).get("couleur", "#2f5f9a")))
+		if "ecoulement" in tags_c:   # un écoulement : plus le niveau est bas, plus l'eau est claire (Eau et liquides)
+			col_eau = col_eau.lerp(Color(0.6, 0.8, 0.95), 1.0 - float(g.niveau_liquide(t)) / 8.0)
 		if g.gel:   # Météo : la glace
 			col_eau = col_eau.lerp(Color(0.85, 0.92, 1.0), 0.7)
 		_poly(ci, PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)]),
