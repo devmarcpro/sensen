@@ -710,6 +710,8 @@ func _options_tuile(t: Vector2i) -> Array:
 			res.append({"id": "tempo", "cible": occ})
 		res.append({"id": "attaquer", "cible": occ})
 		res.append({"id": "lourde", "cible": occ})
+		if sim.ennemis(j, x) and not sim.compagnons_de(j).is_empty():   # Compagnons : cibler en priorité
+			res.append({"id": "designer", "cible": occ})
 		return res
 	if t == j.pos:
 		if not sim.donjon.is_empty() and sim.donjon.get("escalier") != null and sim.donjon.escalier == t:
@@ -865,6 +867,8 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "capturer"})
 		"cueillir":
 			sim.intention(joueur_id, {"type": "cueillir", "vers": opt.vers})
+		"designer":
+			sim.designer_cible(j, str(opt.cible))
 		"creuser":
 			if not sim.intention(joueur_id, {"type": "creuser", "vers": opt.vers}):
 				_log(tr("journal.increusable"))

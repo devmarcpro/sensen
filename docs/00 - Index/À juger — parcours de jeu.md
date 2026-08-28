@@ -20,6 +20,7 @@ etape: 10
 - **Faim et poids** : vitesse de la faim (2 h 30 de jeu actif), −10 % de stats sous 25, capacité de charge — [[Faim]], [[Armures et poids porté]]
 - **Les affixes conditionnels au monde** : nocturne, du danger (corruption ≥ seuil), des sources (densité de mana) — des raisons d'aller quelque part, ou des objets qu'on oublie ? — [[Loot — affixes, gemmes et rareté]]
 - **La cueillette sauvage** : moitié d'une récolte cultivée par plante sauvage, qui repousse — vaut-elle le détour, ou rend-elle le champ inutile ? — [[Plantes]]
+- **Désigner une cible / Repli** : clic droit sur l'ennemi pour l'assigner à tous les compagnons, Y dans le dialogue pour le repli — deux gestes suffisent-ils en mêlée ? — [[Compagnons]]
 - **Les postures des compagnons** : défensive (ne poursuit pas loin du maître), agressive, évite — protecteur ou passif ? l'échange d'équipement (K dans le dialogue) où il s'équipe tout seul suffit-il ? — [[Compagnons]]
 - **Le retrait de l'eau** : combler la source pour assécher la tranchée d'en face — manœuvre lisible, ou exploit ? — [[Eau et liquides]]
 - **La foudre** : un impact par heure d'orage, pondéré par hauteur et métal, qui court dans l'eau — assez pour s'abriter, pas une loterie ? — [[Météo]]

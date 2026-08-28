@@ -111,6 +111,7 @@ func _ready() -> void:
 	test_progression()
 	test_expedition()
 	test_arenes_autonomes()
+	Monde.fermer_tous()   # aucun thread de pré-génération ne doit survivre aux autoloads
 	if echecs == 0:
 		print("TESTS : tout passe")
 		get_tree().quit(0)
@@ -2610,6 +2611,14 @@ func test_compagnons_postures() -> void:
 	c = s._actions_candidates(comp, loup, profil, tick)
 	verifier(not c.has("attaquer") and not c.has("poursuivre") and float(c.get("fuir", {}).get("eviter", 0.0)) == 1.0, "évite : ni attaque ni poursuite, il fuit la menace à 3 tuiles")
 	verifier(not s.ordonner(j, comp.id, "charger"), "un ordre inconnu est refusé")
+	# Consignes de combat : désigner une cible, repli
+	var loup2 := s.ajouter("loup", j.pos + Vector2i(-3, 0), "ia")
+	s.ordonner(j, comp.id, "defensive")
+	verifier(s.designer_cible(j, loup2.id) and str(comp.cible) == loup2.id and str(comp.cible_prioritaire) == loup2.id, "désigner un loup : le compagnon le prend pour cible")
+	comp.cible = loup.id
+	verifier(str(s._chercher_cible(comp, tick).get("id", "")) == loup2.id, "la cible désignée passe devant une autre")
+	verifier(not s.designer_cible(j, comp.id), "on ne désigne pas un allié")
+	verifier(s.ordonner(j, comp.id, "repli") and str(comp.ordre) == "suivre" and str(comp.posture) == "eviter" and comp.cible.is_empty() and not comp.has("cible_prioritaire"), "repli : suis-moi, évite, cible oubliée")
 	# Retour à la base : l'ancre au centre de la cellule du camp
 	verifier(s.ordonner(j, comp.id, "retour") and str(comp.ordre) == "attendre" and comp.ancre == s.grille.pos_de(s.grille.largeur * s.grille.hauteur_grille / 2), "retour à la base : attends ici, l'ancre au centre du camp")
 	# Échange d'équipement : il s'équipe de ce qu'on lui donne, et le rend déséquipé

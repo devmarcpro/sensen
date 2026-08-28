@@ -34,6 +34,7 @@ var vacances_guildes: Dictionary = {}  # "guilde|village" → semaine de résolu
 var villages: Dictionary = {}          # nom de village → {cellule, royaume, conquis_par, defense_jusqua, abandonne} (Conquête de village)
 var mutex := Mutex.new()
 var tache: int = -1                    # tâche WorkerThreadPool de pré-génération en cours (−1 : aucune)
+static var ouverts: Array = []          # tous les mondes créés, pour attendre leurs threads avant de quitter (Monde.fermer_tous)
 
 
 func _init(p_surface: Surface, p_planete: Dictionary, p_camp: Dictionary) -> void:
@@ -495,12 +496,23 @@ func pregenerer_voisins() -> void:
 				manquantes.append(cell)
 	if manquantes.is_empty():
 		return
+	if not (self in ouverts):
+		ouverts.append(self)
 	tache = WorkerThreadPool.add_task(_generer_en_thread.bind(manquantes), false, "Sensen : pré-génération de cellules")
 
 
 func _generer_en_thread(liste: Array[Vector2i]) -> void:
 	for cell in liste:
 		cellule(cell)
+
+
+## Attend les threads de tous les mondes (à appeler avant de quitter : un thread qui génère encore pendant la
+## libération des autoloads fait des « previously freed »).
+static func fermer_tous() -> void:
+	for m in ouverts:
+		if m is Monde:
+			m.fermer()
+	ouverts.clear()
 
 
 ## Attend la fin de la pré-génération (tests, fermeture).

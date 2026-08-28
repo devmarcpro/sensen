@@ -222,7 +222,7 @@ affixe.meca_armure.nom,{base} renforcé (+{n} armure)
 affixe.passif_stat.nom,{base} de {stat} (+{n})
 affixe.passif_competence.nom,{base} de {competence} (+{n})
 affixe.passif_surchauffe.nom,{base} du mage (surchauffe ×{mult} %)
-affixe.passif_regen.nom,{base} vivace (régénération +{pct} % — en attente)
+affixe.passif_regen.nom,{base} vivace (régénération +{pct} %)
 affixe.passif_vitesse.nom,{base} du coureur (+{pct} % vitesse)
 affixe.passif_tag.nom,{base} de {tag}
 journal.loot,{nom} trouve : {objet}
@@ -686,9 +686,9 @@ journal.fiole_vive,"{nom} partage la potion avec {n} allié(s)"
 talent.ratelier_vivant.name,Râtelier vivant
 talent.ratelier_vivant.desc,"Une fois par chaîne, changer d'arme coûte 0 tick."
 talent.communion_des_cinq.name,Communion des cinq
-talent.communion_des_cinq.desc,"L'élément de son arme tourne seul dans le cycle. (en attente)"
+talent.communion_des_cinq.desc,"L'élément de son arme tourne seul dans le cycle à chaque coup, contre un peu de mana."
 talent.main_du_metal.name,Main du métal
-talent.main_du_metal.desc,"Reforger un objet looté sans perdre ses affixes. (en attente)"
+talent.main_du_metal.desc,"Reforger un objet looté sans perdre ses affixes."
 talent.meute.name,Meute
 talent.meute.desc,"Les coups de ses compagnons posent des segments sur sa jauge de chaîne."
 talent.oeil_du_prix.name,Œil du prix
@@ -696,7 +696,7 @@ talent.oeil_du_prix.desc,"Voit la bourse réelle des marchands ; +1 place d'esco
 talent.souffle_rendu.name,Souffle rendu
 talent.souffle_rendu.desc,"Ses soins posent un segment de l'élément de la cible ; ses coups d'arme n'en posent aucun."
 talent.fiole_vive.name,Fiole vive
-talent.fiole_vive.desc,"Potions projetables en zone, deux actives par famille. (en attente)"
+talent.fiole_vive.desc,"Ses potions se partagent avec les alliés adjacents, et l'alambic en tire deux."
 talent.sans_maitre.name,Sans maître
 talent.sans_maitre.desc,"Commence sans talent ; apprend celui d'un PNJ (relation ≥ 75) et peut en changer."
 talent.polyvalent.name,Polyvalent
@@ -1086,6 +1086,10 @@ ordre.agressive,posture agressive
 ordre.defensive,posture défensive
 ordre.eviter,évite les combats
 ordre.retour,retourne à la base
+ordre.repli,repli !
+ui.ecran.repli,Repli ! (Y)
+option.designer,Désigner aux compagnons
+journal.cible_designee,"{nom} désigne {cible} à ses compagnons"
 posture.agressive,agressive
 posture.defensive,défensive
 posture.eviter,évite

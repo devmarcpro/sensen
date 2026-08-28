@@ -3932,12 +3932,40 @@ func echanger(e: Dictionary, id: String, uid: String, sens: String) -> bool:
 	return true
 
 
+## Désigner une cible à tous ses compagnons (Compagnons : consignes de combat), sans coût de ticks.
+func designer_cible(e: Dictionary, cible_id: String) -> bool:
+	var c: Dictionary = entites.get(cible_id, {})
+	if c.is_empty() or not c.vivant or not ennemis(e, c):
+		return false
+	var n := 0
+	for x in compagnons_de(e):
+		if not x.vivant:
+			continue
+		x["cible_prioritaire"] = cible_id
+		x.cible = cible_id
+		x.tick_derniere_vue = tick_de(x)
+		x.pos_connue = c.pos
+		if str(x.get("posture", "defensive")) == "eviter":
+			x["posture"] = "defensive"
+		_engager_combat(x, c)
+		n += 1
+	if n == 0:
+		return false
+	EventBus.emettre(&"journal", [&"journal.cible_designee", {"nom": e.name_key, "cible": c.name_key}])
+	return true
+
+
 ## Un ordre à un compagnon : sans coût de ticks (Compagnons).
 func ordonner(e: Dictionary, id: String, ordre: String) -> bool:
 	var x: Dictionary = entites.get(id, {})
-	if x.is_empty() or str(x.get("maitre", "")) != e.id or not (ordre in ["suivre", "attendre", "agressive", "defensive", "eviter", "retour"]):
+	if x.is_empty() or str(x.get("maitre", "")) != e.id or not (ordre in ["suivre", "attendre", "agressive", "defensive", "eviter", "retour", "repli"]):
 		return false
-	if ordre in ["agressive", "defensive", "eviter"]:   # une posture, pas un déplacement
+	if ordre == "repli":   # consigne de combat : ils lâchent tout et reviennent en évitant
+		x.ordre = "suivre"
+		x["posture"] = "eviter"
+		x.cible = ""
+		x.erase("cible_prioritaire")
+	elif ordre in ["agressive", "defensive", "eviter"]:   # une posture, pas un déplacement
 		x["posture"] = ordre
 	elif ordre == "retour":   # à la base : l'ancre au centre de la cellule du camp, si c'est elle qui est chargée
 		if lieu != "camp" or monde == null or monde.cellule_de(x.pos) != monde.cellule_camp:
@@ -7886,6 +7914,12 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 ## la perte d'intérêt suit les seuils de Décision — Fuite et désengagement.
 func _chercher_cible(e: Dictionary, tick: int) -> Dictionary:
 	var portee := int(float(e.corps.stats.perception) * float(regles.r.engagement.detection_par_perception))
+	if e.has("cible_prioritaire"):   # Compagnons : la cible désignée passe devant, tant qu'elle vit et se voit
+		var cp: Dictionary = entites.get(str(e.cible_prioritaire), {})
+		if cp.is_empty() or not cp.vivant:
+			e.erase("cible_prioritaire")
+		elif e.cible != cp.id and grille.ligne_de_vue(e.pos, cp.pos):
+			e.cible = cp.id
 	if not e.cible.is_empty():
 		var c: Dictionary = entites.get(e.cible, {})
 		if c.is_empty() or not c.vivant:

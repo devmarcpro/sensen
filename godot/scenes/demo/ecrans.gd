@@ -200,6 +200,10 @@ func touche(ev: InputEventKey) -> bool:
 			if courant == "dialogue":
 				_option("echanger")
 				return true
+		KEY_Y:
+			if courant == "dialogue":
+				_option("repli")
+				return true
 		KEY_X:
 			if courant == "dialogue":
 				_option("assigner")
@@ -490,6 +494,8 @@ func _construire_dialogue(j: Dictionary) -> void:
 		entrees.append({"kind": "option", "option": "posture"})
 		liste.add_item(tr("ui.ecran.retour"))
 		entrees.append({"kind": "option", "option": "retour"})
+		liste.add_item(tr("ui.ecran.repli"))
+		entrees.append({"kind": "option", "option": "repli"})
 		liste.add_item(tr("ui.ecran.echanger"))
 		entrees.append({"kind": "option", "option": "echanger"})
 		if main.sim.monde != null and main.sim.monde.claims.has(main.sim._cell_de(pnj.pos)):
@@ -544,7 +550,7 @@ func _option(opt: String) -> void:
 		"recruter":
 			main.sim.intention(j.id, {"type": "recruter", "pnj": pnj_id})
 			rafraichir()
-		"suivre", "attendre", "retour":
+		"suivre", "attendre", "retour", "repli":
 			main.sim.ordonner(j, pnj_id, opt)
 			rafraichir()
 		"posture":
