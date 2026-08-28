@@ -36,6 +36,15 @@ func _ready() -> void:
 	for k in pas_total:
 		if k == pas_total / 4 and s.lieu == "camp":   # un raid réel au quart
 			s._lancer_raid_reel(12.0, s.horloge_monde.ticks)
+		if k % 500 == 400 and s.lieu == "camp":   # un voyage vers une cellule voisine explorée d'office (Carte du monde), puis retour
+			var ici: Vector2i = s.monde.cellule_de(s.entites[jid].pos)
+			var vers: Vector2i = ici + Vector2i(rng.randi_range(-2, 2), rng.randi_range(-2, 2))
+			if vers != ici and s.monde.surface.terre_a(vers):
+				var nch: int = s.monde.taille / 32
+				for cy in nch:
+					for cx in nch:
+						s.monde.explores[Vector2i(vers.x * nch + cx, vers.y * nch + cy)] = true
+				s.voyager(s.entites[jid], vers)
 		if k % 300 == 150 and s.lieu == "camp":   # la semaine du territoire
 			s._semaine_territoire(s.entites[jid])
 			s._recalculer_humeurs()

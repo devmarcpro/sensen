@@ -796,6 +796,8 @@ func voyager(e: Dictionary, cell: Vector2i) -> bool:
 		cout = int(round(float(cout) * float(GameData.config("planete").voyage.get("route_mult", 1.0))))
 	var ec := monde.cellule(cell)
 	var ou: Vector2i = monde.pos_monde(cell, ec.entree_donjon + Vector2i(0, 1)) if bool(ec.get("a_donjon", false)) else monde.point_marchable(cell)
+	if en_combat(e):
+		_quitter_combat(e)   # on ne voyage pas en gardant un combat derrière soi
 	grille.liberer(e.pos)
 	e.pos = ou
 	_verifier_fenetre(e)
@@ -7408,6 +7410,7 @@ func _verifier_desengagements() -> void:
 		var c: Dictionary = combats[nom]
 		var h: Horloge = c.horloge
 		var menace := false
+		c.participants = c.participants.filter(func(pid: String) -> bool: return entites.has(pid))   # la fenêtre glissante a pu décharger un participant
 		for id in c.participants:
 			var e: Dictionary = entites[id]
 			if not e.vivant or e.camp == "joueur":
