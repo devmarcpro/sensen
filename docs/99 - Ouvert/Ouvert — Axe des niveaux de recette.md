@@ -33,6 +33,9 @@ N1 : 0.85–1.15  ·  N3 : 0.91–1.09  ·  N5 : 0.97–1.03
 
 **Pourquoi celui-là :** c'est le seul des trois axes qui **ne multiplie jamais la qualité** (la contrainte non négociable) — la moyenne reste identique, seule la variance baisse. Un artisan qui maîtrise sa recette rate moins, il ne fait pas mieux. Les deux autres axes (efficacité matière, vitesse/lots) restent disponibles comme bonus secondaires si le playtest les réclame.
 
+> [!success] Codé le 2026-08-28 — la stabilité du jet, telle quelle
+> `e.niveaux_recettes` (recette → N, 1 par défaut) et `e.doublons_recettes` : **relire un plan déjà connu** compte un doublon ; quand les doublons atteignent **N**, la recette passe au niveau **N + 1** (max 5 — soit 1 + 2 + 3 + 4 = 10 doublons pour le niveau 5, la note dit 10 au total) et le compteur repart. Le journal dit le niveau atteint, ou « encore k doublons ». **Effet** : `Regles.qualite_craft(niveau, rng, resserrement)` — l'aléa `[0,85 ; 1,15]` devient `[0,85 + 0,03 × (N−1) ; 1,15 − 0,03 × (N−1)]` (`combat_rules.craft.qualite.resserrement_par_niveau`), appliqué aux composants, à l'assemblage des objets et aux plats. **La qualité n'est jamais multipliée** : seule la variance se resserre — un artisan de haut niveau de recette produit du régulier, pas du meilleur.
+
 ## Liens
 - **Dépend de** : [[Craft compositionnel]], [[Composant et recette d'obtention]]
 - **Alimente** : [[Qualité d'artisanat]]

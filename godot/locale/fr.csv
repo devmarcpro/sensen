@@ -538,6 +538,8 @@ recipe.couler_beton.name,Couler du béton
 item.plan_industriel.name,Plan industriel
 journal.plan_appris,"{nom} déchiffre le plan : {recette}"
 journal.plan_deja,"ce plan ne t'apprend rien de neuf"
+journal.recette_niveau,"{recette} passe au niveau {n} : le jet de qualité se resserre"
+journal.recette_doublon,"ce plan est connu — encore {k} doublon(s) pour le niveau {n}"
 ui.objet.plan,"plan : {recette} (difficulté {difficulte})"
 journal.communion,"{nom} : l'élément tourne vers {element} (Communion des cinq)"
 module.renaissance.name,Renaissance

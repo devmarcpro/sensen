@@ -85,6 +85,7 @@ func _ready() -> void:
 	test_effets_equipement()
 	test_palette_etage()
 	test_arme_mixte()
+	test_niveaux_recette()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2466,6 +2467,44 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Axe des niveaux de recette
+
+func test_niveaux_recette() -> void:
+	var s := Simulation.new(141)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	j["recettes_connues"] = ["tremper_verre"]
+	verifier(s.niveau_recette(j, "tremper_verre") == 1, "niveau 1 par défaut")
+	s._doublon_recette(j, "tremper_verre")
+	verifier(s.niveau_recette(j, "tremper_verre") == 2, "1 doublon : niveau 2")
+	s._doublon_recette(j, "tremper_verre")
+	verifier(s.niveau_recette(j, "tremper_verre") == 2 and int(j.doublons_recettes.tremper_verre) == 1, "il en faut 2 pour le niveau 3 : encore 1")
+	s._doublon_recette(j, "tremper_verre")
+	verifier(s.niveau_recette(j, "tremper_verre") == 3, "2 doublons : niveau 3")
+	for k in 7:
+		s._doublon_recette(j, "tremper_verre")
+	verifier(s.niveau_recette(j, "tremper_verre") == 5, "10 doublons en tout : niveau 5 (plafond)")
+	s._doublon_recette(j, "tremper_verre")
+	verifier(s.niveau_recette(j, "tremper_verre") == 5, "au plafond, un doublon ne fait plus rien")
+	# Le jet : même moyenne, variance resserrée, jamais multipliée
+	var rng := RandomNumberGenerator.new()
+	var lo1 := 9.0
+	var hi1 := 0.0
+	var lo5 := 9.0
+	var hi5 := 0.0
+	for k in 300:
+		rng.seed = k
+		var q1 := s.regles.qualite_craft(25, rng, s.regles.resserrement_recette(1))
+		rng.seed = k
+		var q5 := s.regles.qualite_craft(25, rng, s.regles.resserrement_recette(5))
+		lo1 = minf(lo1, q1)
+		hi1 = maxf(hi1, q1)
+		lo5 = minf(lo5, q5)
+		hi5 = maxf(hi5, q5)
+	verifier(hi5 - lo5 < hi1 - lo1 and hi5 <= hi1 + 0.001 and lo5 >= lo1 - 0.001, "niveau 5 : fourchette [%.2f ; %.2f] dans [%.2f ; %.2f]" % [lo5, hi5, lo1, hi1])
+	s.monde.fermer()
 
 
 # ---------------------------------------------------------------- Compensation de l'arme mixte

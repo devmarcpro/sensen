@@ -94,10 +94,18 @@ func facteur_surcharge(poids: float, capacite: float) -> float:
 
 
 ## Qualité d'artisanat (A.3) : max(min, N/(N+pivot) × max × aléa[a, b]) — composants, plats, potions.
-func qualite_craft(niveau: int, rng: RandomNumberGenerator) -> float:
+## `resserrement` (Axe des niveaux de recette) : réduit l'aléa des deux côtés — jamais la qualité elle-même.
+func qualite_craft(niveau: int, rng: RandomNumberGenerator, resserrement: float = 0.0) -> float:
 	var q: Dictionary = r.craft.qualite
-	var brut := float(niveau) / float(niveau + int(q.pivot)) * float(q.max) * rng.randf_range(float(q.alea[0]), float(q.alea[1]))
+	var a0 := float(q.alea[0]) + resserrement
+	var a1 := maxf(a0, float(q.alea[1]) - resserrement)
+	var brut := float(niveau) / float(niveau + int(q.pivot)) * float(q.max) * rng.randf_range(a0, a1)
 	return maxf(float(q.min), brut)
+
+
+## Le resserrement d'un niveau de recette N : (N − 1) × resserrement_par_niveau.
+func resserrement_recette(niveau_recette: int) -> float:
+	return float(maxi(0, niveau_recette - 1)) * float(r.craft.qualite.get("resserrement_par_niveau", 0.03))
 
 
 ## Le palier de nom d'une qualité (Qualité d'artisanat : 8 paliers).

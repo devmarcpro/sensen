@@ -1166,6 +1166,33 @@ func tresors_detectes(e: Dictionary) -> Array[Vector2i]:
 	return res
 
 
+## Le niveau d'une recette pour un être (Axe des niveaux de recette) : 1 par défaut, jusqu'à 5.
+func niveau_recette(e: Dictionary, rid: String) -> int:
+	return int(e.get("niveaux_recettes", {}).get(rid, 1))
+
+
+## Un doublon de plan : il compte, et quand les doublons atteignent le niveau, la recette monte.
+func _doublon_recette(e: Dictionary, rid: String) -> void:
+	if not e.has("niveaux_recettes"):
+		e["niveaux_recettes"] = {}
+	if not e.has("doublons_recettes"):
+		e["doublons_recettes"] = {}
+	var n := niveau_recette(e, rid)
+	var maxi_n := int(regles.r.craft.qualite.get("niveau_recette_max", 5))
+	var nom: String = GameData.catalogues.recipes.get(rid, GameData.catalogues.component_recipes.get(rid, {})).get("name_key", rid)
+	if n >= maxi_n:
+		EventBus.emettre(&"journal", [&"journal.plan_deja", {}])
+		return
+	var d := int(e.doublons_recettes.get(rid, 0)) + 1
+	if d >= n:
+		e.niveaux_recettes[rid] = n + 1
+		e.doublons_recettes[rid] = 0
+		EventBus.emettre(&"journal", [&"journal.recette_niveau", {"recette": nom, "n": n + 1}])
+	else:
+		e.doublons_recettes[rid] = d
+		EventBus.emettre(&"journal", [&"journal.recette_doublon", {"k": n - d, "n": n + 1}])
+
+
 ## Le vecteur élémentaire d'une tuile (Wu Xing hors combat) : dérivé des couches de bruit, jamais du biome.
 func vecteur_lieu(pos: Vector2i) -> Dictionary:
 	if not vecteur_lieu_force.is_empty():
@@ -4113,7 +4140,7 @@ func _faconner(e: Dictionary, r: Dictionary, tick: int) -> bool:
 	inst.name_key = comp.name_key
 	inst.stats = mat.stats.duplicate()
 	inst.elements = mat.wuxing.duplicate()
-	inst.qualite = regles.qualite_craft(regles.niveau(e.competences_eff, skill), rng)
+	inst.qualite = regles.qualite_craft(regles.niveau(e.competences_eff, skill), rng, regles.resserrement_recette(niveau_recette(e, str(r.id))))
 	e.sac.append(inst.uid)
 	var n := regles.niveau(e.competences_eff, skill)
 	e.compteur = tick + _ticks_avec_statuts(e, maxi(1, ceili(float(regles.r.craft.ticks_base) / regles.skill_factor(n))))
@@ -4161,7 +4188,7 @@ func _assembler(e: Dictionary, def: Dictionary, tick: int) -> bool:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([graine, "assemblage", objets.size(), def.id])
 	var borne: Array = regles.r.craft.qualite.jet_assemblage
-	var jet := clampf(regles.qualite_craft(n, rng), float(borne[0]), float(borne[1]))
+	var jet := clampf(regles.qualite_craft(n, rng, regles.resserrement_recette(niveau_recette(e, str(def.id)))), float(borne[0]), float(borne[1]))
 	var inst := generer_objet(def.id, 1, {}, "commun", 0)
 	if inst.is_empty():
 		return false
@@ -4434,7 +4461,7 @@ func _fabriquer(e: Dictionary, rid: String, tick: int) -> bool:
 			var inst := generer_objet(str(r.output.item), 1, {}, "commun", 0)
 			if not inst.is_empty():
 				if inst.get("type", "") == "consommable":   # un plat : qualité A.3 sur Cuisine, empilé
-					inst.qualite = snappedf(regles.qualite_craft(regles.niveau(e.competences_eff, str(r.craft_skill)), rng), 0.01)
+					inst.qualite = snappedf(regles.qualite_craft(regles.niveau(e.competences_eff, str(r.craft_skill)), rng, regles.resserrement_recette(niveau_recette(e, str(r.id)))), 0.01)
 					if "potion" in inst.get("tags", []) and float(inst.qualite) >= float(regles.r.alchimie.seuil_forte) and statuts_defs.has(str(inst.get("statut", "")) + "_forte"):
 						inst.statut = str(inst.statut) + "_forte"   # une potion forte (Cuisine et alchimie)
 					var wx := {}   # le vecteur du plat : Σ ingrédients + la cuisson (Décision — Affinités de cuisine)
@@ -5008,7 +5035,7 @@ func _lire(e: Dictionary, objet: String, tick: int) -> bool:
 		if not e.has("recettes_connues"):
 			e["recettes_connues"] = []
 		if str(livre.recette) in e.recettes_connues:
-			EventBus.emettre(&"journal", [&"journal.plan_deja", {}])
+			_doublon_recette(e, str(livre.recette))   # Axe des niveaux de recette : le doublon fait monter le niveau
 		else:
 			e.recettes_connues.append(str(livre.recette))
 			EventBus.emettre(&"journal", [&"journal.plan_appris", {"nom": e.name_key, "recette": GameData.catalogues.recipes[str(livre.recette)].name_key}])
