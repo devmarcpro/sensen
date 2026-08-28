@@ -28,7 +28,7 @@ etape: 0
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
 > [!important] Le raid se lit (2026-08-28)
-> Capture `--raid` : un raid réel en cours n'apparaissait nulle part à l'écran (assaillants à 60 tuiles, journal seul). Le HUD affiche désormais « RAID : n assaillant(s) · le plus proche à d tuiles · t ticks avant leur retrait ». **À juger** : faut-il aussi une flèche vers eux ?
+> Capture `--raid` : un raid réel en cours n'apparaissait nulle part à l'écran (assaillants à 60 tuiles, journal seul). Le HUD affiche désormais « RAID : n assaillant(s) · le plus proche à d tuiles · t ticks avant leur retrait », et une **flèche rouge** près du personnage pointe vers l'assaillant le plus proche tant qu'il est à plus de 6 tuiles. L'atelier affiche le niveau de recette (≥ 2).
 > [!important] Fuzz : deux bugs de grille trouvés et corrigés (2026-08-28)
 > `scenes/tests/fuzz.tscn -- --pas N --graine G` : 1 500 intentions au hasard (camp puis donjon, bêtes ajoutées, horloges avancées) ; a trouvé un respawn sur le spawn du camp depuis le donjon (index hors grille) et une ligne de vue vers une position d'une autre grille — corrigés (`Grille.ligne_de_vue` refuse une position hors grille, `_respawn` ignore un spawn hors grille).
 > [!important] Création : les talents se lisent ; nuit : Discrétion +4 (2026-08-28)

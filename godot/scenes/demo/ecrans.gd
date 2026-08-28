@@ -1132,7 +1132,8 @@ func _construire_atelier(j: Dictionary) -> void:
 		noms.append(tr(GameData.entree("stations", st).name_key))
 	titre.text = tr("ui.ecran.atelier").format({"stations": " · ".join(noms) if not noms.is_empty() else "—"})
 	for pl in plans:
-		liste.add_item(("✓ " if pl.faisable else "✗ ") + _titre_plan(pl) + "   [" + tr(GameData.entree("stations", pl.station).name_key) + "]")
+		var niv_r: int = main.sim.niveau_recette(main.joueur(), str(pl.get("id", "")))   # Axe des niveaux de recette : le niveau se lit
+		liste.add_item(("✓ " if pl.faisable else "✗ ") + _titre_plan(pl) + ((" " + tr("ui.atelier.niveau_recette").format({"n": niv_r})) if niv_r > 1 else "") + "   [" + tr(GameData.entree("stations", pl.station).name_key) + "]")
 		if not pl.faisable:
 			liste.set_item_custom_fg_color(liste.item_count - 1, Color(0.6, 0.6, 0.6))
 		entrees.append({"kind": "recette", "plan": pl})

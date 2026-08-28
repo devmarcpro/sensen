@@ -1024,6 +1024,21 @@ func _draw() -> void:
 	if not j.is_empty():
 		for t in sim.tresors_detectes(j):   # detection_tresors : les contenants à portée, même hors de vue
 			_losange(t, Color(1.0, 0.85, 0.2, 0.55))
+	if not j.is_empty() and not sim.territoire.get("raid", {}).is_empty():   # Défense et raids : une flèche vers l'assaillant le plus proche
+		var plus_proche := Vector2i(-1, -1)
+		var dmin := 9999
+		for x in sim.vivants():
+			if x.camp == "raid":
+				var dd := Grille.distance(j.pos, x.pos)
+				if dd < dmin:
+					dmin = dd
+					plus_proche = x.pos
+		if dmin > 6 and plus_proche != Vector2i(-1, -1):
+			var c0 := _ecran(j.pos, sim.grille.h(j.pos))
+			var dir := (_ecran(plus_proche, sim.grille.h(j.pos)) - c0).normalized()
+			var pointe := c0 + dir * 70.0
+			var perp := Vector2(-dir.y, dir.x)
+			draw_primitive(PackedVector2Array([pointe, pointe - dir * 14.0 + perp * 7.0, pointe - dir * 14.0 - perp * 7.0]), PackedColorArray([Color(0.95, 0.2, 0.2, 0.9), Color(0.95, 0.2, 0.2, 0.9), Color(0.95, 0.2, 0.2, 0.9)]), PackedVector2Array())
 	for a in sim.affuts:   # les affûts de L'Engrenage
 		_losange(a.pos, Color(0.25, 0.25, 0.3, 0.85))
 	for pi in sim.portails.keys():   # les brèches du Passeur
