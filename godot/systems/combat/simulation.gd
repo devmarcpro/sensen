@@ -3941,7 +3941,7 @@ func temperature_ressentie(e: Dictionary) -> Dictionary:
 	var ecart := 0.0
 	if temp < float(confort[0]):
 		# L'isolation de l'équipement compense le froid (Application des stats de matériau).
-		var iso := 0.0
+		var iso := Etres.add_statuts(e, "isolation", statuts_defs)   # potion de résistance au froid
 		for slot in e.equipement.keys():
 			var it: Dictionary = items.get(e.equipement[slot], {})
 			iso += float(it.get("stats", {}).get("isolation", 0.0))
@@ -3949,7 +3949,9 @@ func temperature_ressentie(e: Dictionary) -> Dictionary:
 		if temp < float(confort[0]):
 			ecart = temp - float(confort[0])
 	elif temp > float(confort[1]):
-		ecart = temp - float(confort[1])
+		temp -= Etres.add_statuts(e, "isolation_chaud", statuts_defs) / float(m.isolation_div)   # potion de résistance au feu
+		if temp > float(confort[1]):
+			ecart = temp - float(confort[1])
 	return {"temp": temp, "ecart": ecart, "meteo": etat_id}
 
 
@@ -6069,6 +6071,11 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 		mult_coup *= float(regles.r.armes_fantomes.degats_mult)
 	if a_talent(e, "jauge_de_sang"):   # L'Écarlate : jusqu'à ×1,8 la jauge pleine
 		mult_coup *= 1.0 + (float(regles.r.talents.jauge_de_sang.mult_max) - 1.0) * float(e.get("sang", 0)) / float(regles.r.talents.jauge_de_sang.max)
+	for s0 in e.statuts:   # Poison de lame : chaque coup d'arme applique un statut à la cible
+		for mod in statuts_defs.get(str(s0.id), {}).get("modifiers", []):
+			if str(mod.cible) == "attaque_statut" and cible.vivant:
+				appliquer_statut(cible, str(mod.statut), int(mod.get("duree", 30)), e.id)
+				EventBus.emettre(&"journal", [&"journal.lame_empoisonnee", {"nom": e.name_key, "cible": cible.name_key}])
 	if a_talent(e, "dissimulation"):   # L'Ombre : −25 % de face ; attaquer lève la dissimulation
 		if Regles.direction_relative(cible.orientation, e.pos - cible.pos) == "front":
 			mult_coup *= float(regles.r.talents.dissimulation.face_mult)

@@ -117,13 +117,15 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 	var stats: Dictionary = e.corps.stats.duplicate()
 	# Les statuts qui touchent une stat (potions : modifiers cible "stat:<nom>", add).
 	var defs_statuts: Dictionary = GameData.catalogues.get("status_effects", {})
+	var tags: Array = e.get("tags_acquis_race", []).duplicate()
 	for s: Dictionary in e.get("statuts", []):
 		for mod: Dictionary in defs_statuts.get(s.id, {}).get("modifiers", []):
 			if str(mod.cible).begins_with("stat:") and mod.has("add"):
 				var nom_stat := str(mod.cible).trim_prefix("stat:")
 				stats[nom_stat] = int(stats.get(nom_stat, 0)) + roundi(float(mod.add) * float(s.get("puissance", 1.0)))
+			elif str(mod.cible) == "tag" and mod.has("grant"):   # un statut accorde un tag (Potions : vision nocturne, antipoison)
+				tags.append(str(mod.grant))
 	var comp: Dictionary = e.competences.duplicate()
-	var tags: Array = e.get("tags_acquis_race", []).duplicate()
 	var segments_bonus := 0
 	var endurance_bonus := 0
 	var sante_bonus := 0
@@ -235,7 +237,7 @@ static func _munitions(equip: Dictionary, items: Dictionary) -> int:
 ## Un statut actif portant ce tag ?
 static func statut_touche_stats(id: String, defs: Dictionary) -> bool:
 	for mod: Dictionary in defs.get(id, {}).get("modifiers", []):
-		if str(mod.cible).begins_with("stat:"):
+		if str(mod.cible).begins_with("stat:") or str(mod.cible) == "tag":
 			return true
 	return false
 

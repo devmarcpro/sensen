@@ -89,6 +89,7 @@ func _ready() -> void:
 	test_plantes()
 	test_bestiaire()
 	test_statuts_complets()
+	test_potions_completes()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -1072,7 +1073,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 60, "9 stations, 60 recettes plates (17 transformations, 23 meubles, 9 stations, 3 plats, 8 potions)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 65, "9 stations, 65 recettes plates (17 transformations, 23 meubles, 9 stations, 3 plats, 13 potions)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -2470,6 +2471,35 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Treize potions
+
+func test_potions_completes() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	s.appliquer_statut(j, "vision_nocturne_potion", 3000, "")
+	verifier("vision_nocturne" in j.tags_acquis, "la potion de vision nocturne accorde le tag")
+	s.appliquer_statut(j, "antipoison", 1500, "")
+	verifier(not s.appliquer_statut(j, "poison", 100, ""), "antipoison : immunisé")
+	j.statuts = []
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	s.appliquer_statut(j, "resistance_froid", 3000, "")
+	verifier(int(Etres.add_statuts(j, "isolation", s.statuts_defs)) == 40, "résistance au froid : isolation +40")
+	j.statuts = []
+	var loup: Dictionary = s.entites["loup_2"]
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(1, 0)
+	s.grille.placer(loup.id, loup.pos)
+	s.appliquer_statut(j, "lame_empoisonnee", 1500, "")
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false})
+	var h := s.horloge_de(j)
+	for k in 3:
+		j.compteur = h.ticks
+		s.pas(j.horloge)
+	verifier(Etres.a_statut_tag(loup, "poison", s.statuts_defs), "poison de lame : le loup est empoisonné par le coup")
+	verifier(GameData.catalogues.recipes.has("distiller_amanite") and GameData.catalogues.items.has("poison_de_lame"), "l'amanite se distille en poison de lame")
 
 
 # ---------------------------------------------------------------- Les 17 statuts

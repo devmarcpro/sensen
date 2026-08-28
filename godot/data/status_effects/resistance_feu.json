@@ -1,0 +1,19 @@
+{
+  "name_key": "status.resistance_feu.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 3000,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "isolation_chaud",
+      "add": 40
+    }
+  ],
+  "tags": [
+    "positif",
+    "potion"
+  ]
+}

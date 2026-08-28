@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.distiller_camomille.name",
+  "station": "alambic",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "item": "camomille",
+      "forme": "",
+      "amount": 2
+    },
+    {
+      "tag": "culture",
+      "forme": "",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "potion_antipoison",
+    "amount": 1
+  },
+  "fuel": null
+}

@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.distiller_belladone.name",
+  "station": "alambic",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "item": "belladone",
+      "forme": "",
+      "amount": 2
+    },
+    {
+      "tag": "culture",
+      "forme": "",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "potion_vision_nocturne",
+    "amount": 1
+  },
+  "fuel": null
+}

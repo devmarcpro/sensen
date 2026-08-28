@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.distiller_ortie.name",
+  "station": "alambic",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "item": "ortie",
+      "forme": "",
+      "amount": 2
+    },
+    {
+      "tag": "culture",
+      "forme": "",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "potion_resistance_froid",
+    "amount": 1
+  },
+  "fuel": null
+}

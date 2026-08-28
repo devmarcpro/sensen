@@ -1,0 +1,19 @@
+{
+  "name_key": "status.vision_nocturne_potion.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 3000,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "tag",
+      "grant": "vision_nocturne"
+    }
+  ],
+  "tags": [
+    "positif",
+    "potion"
+  ]
+}

@@ -413,6 +413,22 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+status.resistance_feu.name,Résistance au feu
+status.resistance_froid.name,Résistance au froid
+status.vision_nocturne_potion.name,Vision nocturne
+status.antipoison.name,Antipoison
+status.lame_empoisonnee.name,Lame empoisonnée
+item.potion_resistance_feu.name,Potion de résistance au feu
+item.potion_resistance_froid.name,Potion de résistance au froid
+item.potion_vision_nocturne.name,Potion de vision nocturne
+item.potion_antipoison.name,Antipoison
+item.poison_de_lame.name,Poison de lame
+recipe.distiller_menthe.name,Distiller menthe (résistance au feu)
+recipe.distiller_ortie.name,Distiller ortie (résistance au froid)
+recipe.distiller_belladone.name,Distiller belladone (vision nocturne)
+recipe.distiller_camomille.name,Distiller camomille (antipoison)
+recipe.distiller_amanite.name,Distiller amanite (poison de lame)
+journal.lame_empoisonnee,"{nom} : la lame empoisonne {cible}"
 status.gel.name,Gel
 status.confusion.name,Confusion
 status.regeneration.name,Régénération

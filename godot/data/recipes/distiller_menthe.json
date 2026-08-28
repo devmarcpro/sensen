@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.distiller_menthe.name",
+  "station": "alambic",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "item": "menthe",
+      "forme": "",
+      "amount": 2
+    },
+    {
+      "tag": "culture",
+      "forme": "",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "potion_resistance_feu",
+    "amount": 1
+  },
+  "fuel": null
+}

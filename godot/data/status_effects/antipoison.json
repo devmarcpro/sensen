@@ -1,0 +1,19 @@
+{
+  "name_key": "status.antipoison.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 1500,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "tag",
+      "grant": "immunite_poison"
+    }
+  ],
+  "tags": [
+    "positif",
+    "potion"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name_key": "status.resistance_froid.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 3000,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "isolation",
+      "add": 40
+    }
+  ],
+  "tags": [
+    "positif",
+    "potion"
+  ]
+}

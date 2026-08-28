@@ -74,6 +74,9 @@ Les actions du bestiaire — **24 actions** partagées par famille, deux règles
 - **Loup / Loup blanc** : morsure, harcelement_meute, hurlement · **Sanglier** : coup_de_defenses, charge · **Cerf / Renard / Renne / Chameau** : morsure (renard), ruade · **Essaim d'abeilles** : dard_essaim · **Scorpion** : pique_venimeuse, pinces · **Vautour** : becquetage, pique_plongeant · **Ours brun / polaire** : griffure, morsure_puissante, coup_de_patte · **Morse** : masse_ecrasante, coup_de_defenses · **Crocodile** : morsure, machoire_verrouillee, embuscade · **Nuée de moustiques** : nuee · **Serpent venimeux** : morsure_venimeuse, embuscade · **Aigle** : serres, pique_plongeant · **Bouquetin** : coup_de_tete, ruade · **Lynx** : bond, griffure, embuscade
 - **Humains** (villageois → roi, bandits, pillards…) : système standard (arme + garde + lourde + tir) · **Chef de bande** (élite) : + cri_de_ralliement, enchainement · **Ermite** : modules de grimoire ([[Modules]]) · **Garde / Pillard** : standard, profil IA dédié.
 
+> [!success] Codé (vérifié le 2026-08-28)
+> Les 24 actions du tableau sont dans `data/creature_actions/` et portées par les 19 races du bestiaire ; rien à ajouter.
+
 ## Liens
 - **Dépend de** : [[Décision — Vocabulaire d'attaque des créatures]], [[Créatures]], [[Vocabulaire des modules — six axes]]
 - **Alimente** : [[IA des créatures]], [[Prototype de combat — spécification]], [[Combat tactique sur grille]]
