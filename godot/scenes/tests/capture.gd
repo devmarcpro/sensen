@@ -45,6 +45,15 @@ func _ready() -> void:
 			scene.sim.horloge_monde.ticks = int(float(args[i3 + 1]) / 24.0 * 24000.0)
 			scene.sim.maj_vision()
 			scene._maj_ambiance()
+	if "--torche" in args and scene.sim != null:   # --torche : une torche en main (Éclairage, la nuit)
+		var jt0: Dictionary = scene.joueur()
+		var torche: Dictionary = scene.sim.generer_objet("torche", 1, {}, "commun", 0)
+		if not torche.is_empty():
+			jt0.sac.append(torche.uid)
+			jt0.equipement["main_secondaire"] = torche.uid
+			jt0["vue_sale"] = true
+			scene.sim.maj_vision()
+			scene._maj_ambiance()
 	if "--talents" in args and scene.sim != null:   # --talents : brèches, affût, lame fantôme, trésor détecté, masque — pour voir les couches récentes
 		var sim = scene.sim
 		var jt: Dictionary = scene.joueur()
