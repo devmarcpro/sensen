@@ -64,6 +64,7 @@ func _ready() -> void:
 			s.horloge_monde.avancer(rng.randi_range(10, 400))
 		if k % 200 == 0:
 			s._tiquer_differes("monde", s.horloge_monde.ticks)
+			print("FUZZ pas %d tick %d lieu %s vivants %d" % [k, s.horloge_monde.ticks, s.lieu, s.vivants().size()])
 	print("FUZZ : %d intentions, %d acceptées, tick %d, vivants %d" % [intentions, ok, s.horloge_monde.ticks, s.vivants().size()])
 	if s.monde != null:
 		s.monde.fermer()
