@@ -14,6 +14,7 @@ func _ready() -> void:
 			pas_total = int(args[i + 1])
 		elif args[i] == "--graine" and i + 1 < args.size():
 			graine = int(args[i + 1])
+	var ia := "--ia" in args   # --ia : vingt bêtes de tous biomes autour du joueur, qui attend — les IA se débrouillent entre elles
 	var bete := "--bete" in args   # --bete : le joueur incarne un cerf dès le départ (Changer de personnage : un corps sans mains)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = graine
@@ -41,6 +42,14 @@ func _ready() -> void:
 	var res := s.ajouter("villageois", j.pos + Vector2i(0, -1), "ia")
 	s._habiller_pnj(res, GameData.entree("creatures", "villageois"))
 	res.social.relations[jid] = 80
+	if ia:
+		var especes := ["loup", "sanglier", "lynx", "serpent_venimeux", "ours_brun", "bouquetin", "vautour", "crocodile", "nuee_moustiques", "essaim_abeilles", "cerf", "renne", "chameau", "morse", "loup_blanc", "ours_polaire", "scorpion", "aigle", "renard", "villageois"]
+		for k2 in 20:
+			var q: Vector2i = j.pos + Vector2i(rng.randi_range(-8, 8), rng.randi_range(-8, 8))
+			if s.grille.dans(q) and not s.grille.bloque_passage(q) and s.grille.occupant(q).is_empty():
+				var b := s.ajouter(especes[k2 % especes.size()], q, "ia")
+				if especes[k2 % especes.size()] == "villageois":
+					s._habiller_pnj(b, GameData.entree("creatures", "villageois"))
 	for k in pas_total:
 		if k == pas_total / 4 and s.lieu == "camp":   # un raid réel au quart
 			s._lancer_raid_reel(12.0, s.horloge_monde.ticks)
@@ -75,7 +84,7 @@ func _ready() -> void:
 			if s.grille.dans(q) and not s.grille.bloque_passage(q) and s.grille.occupant(q).is_empty():
 				s.ajouter(["loup", "sanglier", "lynx", "serpent_venimeux"][rng.randi_range(0, 3)], q, "ia")
 		s.attente[jid] = true
-		var i := _intention(s, j, rng)
+		var i := _intention(s, j, rng) if not ia else {"type": "attendre"}
 		intentions += 1
 		if s.intention(jid, i):
 			ok += 1
