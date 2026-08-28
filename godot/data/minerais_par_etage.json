@@ -167,6 +167,13 @@
         ],
         "materiau": "granit_noir"
       }
-    ]
+    ],
+    "poches": {
+      "_doc": "Poches locales ±1 strate : bruit dédié par étage ; au-dessus de seuil_dur la strate suivante (etage + saut), sous seuil_tendre la précédente.",
+      "frequence": 0.08,
+      "seuil_dur": 0.7,
+      "seuil_tendre": 0.3,
+      "saut": 2
+    }
   }
 }

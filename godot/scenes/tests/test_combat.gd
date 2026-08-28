@@ -2794,6 +2794,14 @@ func test_palette_etage() -> void:
 	verifier(s.materiau_mur_etage(theme, 3) == "ardoise" and s.materiau_mur_etage(theme, 5) == "basalte" and s.materiau_mur_etage(theme, 8) == "granit" and s.materiau_mur_etage(theme, 12) == "granit_noir", "3 ardoise · 5 basalte · 8 granit · 12 granit noir")
 	s.charger_donjon("ruine", 140, 17, 6)
 	verifier(s.grille.materiau_defaut == "basalte", "étage 6 chargé : les murs sont de basalte")
+	var comptes := {}
+	for y in s.grille.hauteur_grille:
+		for x in s.grille.largeur:
+			var t := Vector2i(x, y)
+			if "destructible" in s.grille.contenu_de(t).get("tags", []):
+				var m := s.grille.materiau_de(t)
+				comptes[m] = int(comptes.get(m, 0)) + 1
+	verifier(int(comptes.get("basalte", 0)) > int(comptes.get("granit", 0)) and int(comptes.get("granit", 0)) > 0 and int(comptes.get("ardoise", 0)) > 0, "poches de strates : basalte majoritaire, taches de granit et d'ardoise (%s)" % str(comptes))
 	var d_bas := int(GameData.entree("materials", "basalte").stats.durete)
 	var d_cal := int(GameData.entree("materials", "calcaire").stats.durete)
 	verifier(d_bas > d_cal, "le basalte (%d) est plus dur que le calcaire (%d) : creuser ralentit avec l'étage" % [d_bas, d_cal])

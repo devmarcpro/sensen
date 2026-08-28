@@ -311,6 +311,7 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 		"profondeur": etage + int(corruption_etage / float(cr.get("profondeur_par_corruption", 25)))}
 	grille = Grille.depuis_etage(e, GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
 	grille.materiau_defaut = materiau_mur_etage(theme, etage)
+	_poches_de_strates(theme, etage, graine, id_donjon)
 	for idx in e.filons.keys():
 		grille.materiaux[idx] = e.filons[idx]
 		grille.poser_contenu(Vector2i(int(idx) % grille.largeur, int(idx) / grille.largeur), "filon")
@@ -1138,6 +1139,30 @@ func pieces_de_cellule(cell: Vector2i) -> Array:
 				continue
 			res.append({"tuiles": region.keys(), "meubles": types.keys(), "porte": porte})
 	return res
+
+
+## Les poches locales (Stratification verticale) : un bruit dédié déplace le mur d'une strate, ±1, par taches.
+func _poches_de_strates(theme: Dictionary, etage: int, graine: int, id_donjon: int) -> void:
+	var pal: Dictionary = GameData.config("minerais_par_etage").get("palette_mur", {})
+	var pc: Dictionary = pal.get("poches", {})
+	if pc.is_empty() or etage < int(pal.get("etage_min", 3)):
+		return
+	var bruit := FastNoiseLite.new()
+	bruit.seed = hash([graine, "poches", id_donjon, etage])
+	bruit.frequency = float(pc.get("frequence", 0.08))
+	var dur := materiau_mur_etage(theme, etage + int(pc.get("saut", 2)))
+	var tendre := materiau_mur_etage(theme, maxi(int(pal.get("etage_min", 3)), etage - int(pc.get("saut", 2))))
+	var defaut := grille.materiau_defaut
+	for y in grille.hauteur_grille:
+		for x in grille.largeur:
+			var t := Vector2i(x, y)
+			if not ("destructible" in grille.contenu_de(t).get("tags", [])):
+				continue
+			var v := (bruit.get_noise_2d(float(x), float(y)) + 1.0) * 0.5
+			if v > float(pc.get("seuil_dur", 0.7)) and dur != defaut:
+				grille.materiaux[grille.idx(t)] = dur
+			elif v < float(pc.get("seuil_tendre", 0.3)) and tendre != defaut:
+				grille.materiaux[grille.idx(t)] = tendre
 
 
 ## Le matériau des murs d'un étage (Stratification verticale) : le thème en surface, la palette en profondeur.
