@@ -26,6 +26,9 @@ Une création détaillée, pas un menu déroulant : stats à répartir, race, cl
 > [!success] Codé le 2026-08-27 — écran de création du prototype
 > Au lancement : race (R), classe (C), 30 points à répartir (+15 pour Le Vent, max +10 par stat, base 5), année de naissance (← →, signe affiché), Entrée. `Etres.creer_personnage()` produit une **fiche identique à celles de `data/creatures/`** (le joueur reste un être comme les autres) : stats = base + points + bonus de race + bonus de classe, kit de la classe (`data/classes/`), compétences de départ, potentiels de base pour toutes les compétences et les six stats, tags du talent de race (Œil de la pierre → `detection_filons`). L'apparence (parties du corps) et les **talents actifs** attendent leurs systèmes. `data/races/` et `data/classes/` sont les catalogues promis par [[Races]] et [[Classes]].
 
+> [!success] Complété le 2026-08-28
+> Les talents existent : l'écran de création affiche le **talent de classe** (nom et description) et le **talent de race** ; Le Vent affiche « aucun (à apprendre d'un maître) ». L'apparence attend toujours les sprites (décision du designer).
+
 ## Liens
 - **Dépend de** : [[Progression par l'usage]]
 - **Alimente** : [[Races]], [[Classes]], [[Astrologie — cycle sexagésimal]], [[Stats de personnage]], [[Début de partie]]

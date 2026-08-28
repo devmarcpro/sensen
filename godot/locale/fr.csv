@@ -367,7 +367,9 @@ stat.perception,Perception
 stat.charisme,Charisme
 ui.creation.titre,=== CRÉATION DU PERSONNAGE ===
 ui.creation.race,Race : {race} (R)
-ui.creation.classe,Classe : {classe} — talent {talent} (C)
+ui.creation.classe,Classe : {classe} (C) — talent : {talent}
+ui.creation.talent_race,Talent de race : {talent}
+ui.creation.sans_talent,aucun (à apprendre d'un maître)
 ui.creation.points,Points à répartir : {restants} / {total}
 ui.creation.signe,"Année de naissance {annee} : signe {element}-{animal} (← →)"
 ui.creation.aide,"↑↓ choisir une stat · + / − répartir (max +10) · Entrée : commencer"

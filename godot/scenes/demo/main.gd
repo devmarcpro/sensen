@@ -157,6 +157,16 @@ func _ready() -> void:
 
 
 ## L'écran de création : R race, C classe, ↑↓ stat, +/− points, ← → année de naissance, Entrée.
+## Le nom et la description d'un talent (Talents de classe / de race) pour l'écran de création.
+func _texte_talent(id: String) -> String:
+	if id.is_empty():
+		return tr("ui.creation.sans_talent")
+	var t: Dictionary = GameData.catalogues.get("talents", {}).get(id, {})
+	if t.is_empty():
+		return id
+	return "%s — %s" % [tr(t.name_key), tr(t.desc_key)]
+
+
 func _texte_creation() -> String:
 	var races: Array = GameData.catalogues.races.keys()
 	var classes: Array = _classes_visibles()
@@ -172,7 +182,8 @@ func _texte_creation() -> String:
 	var prog: Progression = Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
 	var signe := prog.signe(int(creation.annee))
 	var l: Array[String] = [tr("ui.creation.titre"), tr("ui.creation.race").format({"race": tr(GameData.entree("races", race).name_key)}),
-		tr("ui.creation.classe").format({"classe": tr(cl.name_key), "talent": str(cl.get("talent", "—"))}),
+		tr("ui.creation.classe").format({"classe": tr(cl.name_key), "talent": _texte_talent(str(cl.get("talent", "")))}),
+		tr("ui.creation.talent_race").format({"talent": _texte_talent(str(GameData.entree("races", race).get("talent", "")))}),
 		tr("ui.creation.points").format({"restants": total - utilises, "total": total})]
 	for i in STATS.size():
 		var st: String = STATS[i]

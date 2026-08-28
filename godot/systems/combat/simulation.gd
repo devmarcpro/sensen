@@ -2985,7 +2985,7 @@ func _infraction(e: Dictionary, type: String, cible: String, pos: Vector2i, uid:
 	if temoin.is_empty():
 		return false
 	var jet_temoin := des.jet("1d20") + int(temoin.corps.stats.perception) / 2
-	var jet_joueur := des.jet("1d20") + regles.niveau(e.competences_eff, "discretion")
+	var jet_joueur := des.jet("1d20") + regles.niveau(e.competences_eff, "discretion") + (int(_cycle().get("discretion_nuit", 4)) if est_nuit() else 0)   # Cycle jour-nuit : Discrétion +4 la nuit
 	if jet_joueur >= jet_temoin:
 		EventBus.emettre(&"journal", [&"journal.infraction_ignoree", {}])
 		return false

@@ -56,6 +56,9 @@ ou hors combat ; le temps saute pour tout le monde.
 > [!success] Codé le 2026-08-28 — étape 8.4, le cycle (`planete.cycle`, `Simulation.heure()`)
 > **1 jour = 24 000 ticks** sur l'horloge du monde : aube 5-7 h, jour 7-19 h, crépuscule 19-21 h, nuit 21-5 h ; l'heure est dans l'en-tête. **Lumière ambiante** : un `CanvasModulate` interpolé (le « shader, uniform global » de la note : changer l'heure ne coûte rien) ; la nuit, les **sources locales** (meubles lumineux, torche en main — stat `luminosite`) dessinent un halo additif. **La nuit est dangereuse** : corruption effective **+10 %** (expéditions lancées de nuit), **malus de vision pour tous** (portée × 0,6, annulé par le tag `vision_nocturne`) ; les spawns nocturnes ×2 et Discrétion +4 attendent la faune de surface et la discrétion (étape 9). **Saut de nuit** : dormir entre 21 h et 5 h avance le monde jusqu'à 5 h (sinon 8 h de sommeil) — le monde avance réellement (pas d'abstraction hors-site encore, pas de vote en solo). Champ `saison` exposé par `saison()` mais inerte (étape 10).
 
+> [!success] Complété le 2026-08-28
+> Les spawns nocturnes ×2 sont codés depuis la faune de surface (`planete.faune.nuit_mult`) ; la **Discrétion +4 la nuit** s'applique désormais au jet opposé des infractions (`planete.cycle.discretion_nuit`, défaut 4) — la vision réduite des IA la nuit couvrait déjà la détection.
+
 ## Liens
 - **Dépend de** : [[Boucle de tick]], [[Simulation à ticks]], [[Application des stats de matériau]]
 - **Alimente** : [[IA des créatures]], [[Potentiel]], [[Abstraction hors-site]], [[Créatures]]
