@@ -268,6 +268,8 @@ func _partir_en_expedition(e: Dictionary) -> bool:
 ## joueur au premier étage, ou son état courant pour le faire descendre avec ses PV et son sac.
 func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, joueur: Dictionary = {}) -> void:
 	var theme := GameData.entree("dungeon_themes", theme_id)
+	if lieu == "camp" and not joueur.is_empty() and monde != null and not camp_sauve.has("grille"):
+		_sauver_camp(joueur)   # descendre depuis le camp sans passer par l'expédition : le camp est quand même mis de côté
 	var etages: int = donjon.get("etages", 0)
 	var corruption_locale: float = float(donjon.get("corruption", 0.0))
 	var cellule_donjon: Vector2i = donjon.get("cellule", Vector2i(-9999, -9999))
@@ -5304,7 +5306,13 @@ func horloge_de(e: Dictionary) -> Horloge:
 
 
 func en_combat(e: Dictionary) -> bool:
-	return e.horloge != "monde"
+	if e.horloge == "monde":
+		return false
+	if not combats.has(e.horloge):   # un combat disparu (rechargement, grille changée) : l'être est de fait sur le monde
+		e.horloge = "monde"
+		e.action_en_cours = {}
+		return false
+	return true
 
 
 # ---------------------------------------------------------------- avancement
