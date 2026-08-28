@@ -1599,6 +1599,16 @@ func mult_mana_lieu(e: Dictionary, plan: Dictionary) -> float:
 	return 1.0
 
 
+## « Des sources » (Loot) : dans une forte densité de mana, le coût baisse de pct % par pièce.
+func mult_mana_sources(e: Dictionary) -> float:
+	if densite_mana(e.pos) < float(regles.r.effets_equipement.get("densite_mana_seuil", 0.6)):
+		return 1.0
+	var m := 1.0
+	for ax in Etres.affixes_equipes(e, items, affixes_defs, "cond_densite_mana_cout"):
+		m *= 1.0 - float(ax.params.get("pct", 0)) / 100.0
+	return m
+
+
 ## Armes fantomatiques : une lame d'élément pur invoquée en main principale, entretenue en mana.
 func _invoquer_arme_fantome(e: Dictionary, element: String, tick: int) -> bool:
 	var af: Dictionary = regles.r.armes_fantomes
@@ -6320,6 +6330,32 @@ func intention(id: String, i: Dictionary) -> bool:
 
 # ---------------------------------------------------------------- actions
 
+## Les affixes qui allègent un pas (Loot) : « nocturne », la nuit, −pct % par pièce, jamais sous 1 tick.
+func cout_pas_affixes(e: Dictionary, cout: int) -> int:
+	if not est_nuit():
+		return cout
+	var c := float(cout)
+	for ax in Etres.affixes_equipes(e, items, affixes_defs, "cond_nuit_vitesse"):
+		c *= 1.0 - float(ax.params.get("pct", 0)) / 100.0
+	return maxi(1, roundi(c))
+
+
+## La densité de mana au point d'un être (Loot : « des sources ») : la couche `mana` de la surface, rien en donjon.
+func densite_mana(pos: Vector2i) -> float:
+	if monde == null or lieu != "camp":
+		return 0.0
+	return float(monde.surface.valeur("mana", pos.x, pos.y))
+
+
+## La corruption effective là où se tient un être : la cellule (dérive comprise) au camp, celle du donjon en bas.
+func corruption_ici(pos: Vector2i) -> float:
+	if lieu != "camp":
+		return float(donjon.get("corruption", 0))
+	if monde == null:
+		return 0.0
+	return monde.corruption_de(_cell_de(pos))
+
+
 ## Déplacement d'une tuile (8 directions). Une chute volontaire (Δ ≤ −3) est autorisée : dégâts.
 func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	if Grille.distance(e.pos, vers) != 1 or not grille.occupant(vers).is_empty():
@@ -6333,6 +6369,7 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 			cout = int(regles.r.deplacement.descente)
 		else:
 			return false
+	cout = cout_pas_affixes(e, cout)
 	if Etres.bloque_statuts(e, "deplacement", statuts_defs):
 		return false
 	if dans_l_eau(vers) and not dans_l_eau(e.pos) and bool(regles.r.nage.get("refus_surcharge", true)) and poids_de(e).facteur > 1.0 and not volant:
@@ -6591,6 +6628,9 @@ func _affixes_offensifs(e: Dictionary, arme: Dictionary, cible: Dictionary) -> D
 			"cond_profondeur":
 				if not donjon.is_empty() and int(donjon.etage) >= int(p.etage):
 					r.des += int(p.des)
+			"cond_corruption":   # du danger : la corruption du lieu atteint le seuil
+				if corruption_ici(e.pos) >= float(p.seuil):
+					r.mult *= 1.0 + float(p.pct) / 100.0
 			"wuxing_avance":
 				# L'élément avance dans le cycle d'engendrement à chaque coup touché (état sur l'objet).
 				var courant: String = str(ax.etat.get("element", wuxing.dominante(r.vecteur)))
@@ -7324,7 +7364,7 @@ func _payer(e: Dictionary, plan: Dictionary) -> void:
 		_payer(e, plan.charge_suivante)   # la charge différée paie aussi, dans sa propre monnaie
 	match str(plan.monnaie):
 		"mana":
-			var cout := roundi(float(plan.ressource) * mult_mana_lieu(e, plan))   # le lieu module le mana (Wu Xing hors combat)
+			var cout := roundi(float(plan.ressource) * mult_mana_lieu(e, plan) * mult_mana_sources(e))   # le lieu module le mana (Wu Xing hors combat)
 			var deficit: int = maxi(0, cout - int(e.mana))
 			e.mana = maxi(0, int(e.mana) - cout)
 			if deficit > 0:

@@ -21,6 +21,6 @@
     "seuil": "bas",
     "pct": "haut"
   },
-  "inerte": true,
+  "inerte": false,
   "tags": []
 }

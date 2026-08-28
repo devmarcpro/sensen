@@ -22,6 +22,6 @@
   "meilleur": {
     "kg": "haut"
   },
-  "inerte": true,
+  "inerte": false,
   "tags": []
 }

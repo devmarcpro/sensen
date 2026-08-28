@@ -18,6 +18,6 @@
   "meilleur": {
     "pct": "haut"
   },
-  "inerte": true,
+  "inerte": false,
   "tags": []
 }

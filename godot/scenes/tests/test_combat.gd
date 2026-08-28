@@ -98,6 +98,7 @@ func _ready() -> void:
 	test_retrait_eau()
 	test_compagnons_postures()
 	test_cueillette()
+	test_affixes_reveilles()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2515,6 +2516,47 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_affixes_reveilles() -> void:
+	var s := Simulation.new(150)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	verifier(not s.affixes_defs.cond_nuit.inerte and not s.affixes_defs.cond_corruption.inerte and not s.affixes_defs.cond_mana.inerte and not s.affixes_defs.meca_capacite.inerte, "quatre affixes ne sont plus inertes")
+	# Du porteur : +kg de capacité
+	var cap0 := float(s.poids_de(j).capacite)
+	s.items["anneau_p"] = {"uid": "anneau_p", "name_key": "x", "type": "bijou", "equip_slot": "anneau", "affixes": [{"id": "meca_capacite", "params": {"kg": 20}, "compteur": 0, "etat": {}}], "sertissures": {"nombre": 0, "contenu": []}, "tags": []}
+	j.equipement["anneau_1"] = "anneau_p"
+	s.items["amu_p"] = {"uid": "amu_p", "name_key": "x", "type": "bijou", "equip_slot": "amulette", "affixes": [{"id": "meca_capacite", "params": {"kg": 10}, "compteur": 0, "etat": {}}, {"id": "cond_mana", "params": {"pct": 20}, "compteur": 0, "etat": {}}], "sertissures": {"nombre": 0, "contenu": []}, "tags": []}
+	j.equipement["amulette"] = "amu_p"
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	verifier(float(s.poids_de(j).capacite) == cap0 + 30.0, "du porteur : +20 et +10 de capacité cumulés (%.0f → %.0f)" % [cap0, float(s.poids_de(j).capacite)])
+	# Nocturne : la nuit, un pas coûte moins
+	s.items["casque_n"] = {"uid": "casque_n", "name_key": "x", "type": "armure", "equip_slot": "casque", "affixes": [{"id": "cond_nuit", "params": {"pct": 20}, "compteur": 0, "etat": {}}], "sertissures": {"nombre": 0, "contenu": []}, "tags": []}
+	j.equipement["casque"] = "casque_n"
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	s.horloge_monde.ticks = int(s._cycle().ticks_par_jour) / 2
+	verifier(not s.est_nuit() and s.cout_pas_affixes(j, 10) == 10, "le jour : un pas de 10 reste 10")
+	s.horloge_monde.ticks = 0
+	verifier(s.est_nuit() and s.cout_pas_affixes(j, 10) == 8, "la nuit : 10 → 8 (−20 %)")
+	# Des sources : la densité de mana du lieu
+	var dm := s.densite_mana(j.pos)
+	var m := s.mult_mana_sources(j)
+	verifier((dm >= 0.6 and is_equal_approx(m, 0.8)) or (dm < 0.6 and m == 1.0), "des sources : densité %.2f → coût ×%.2f" % [dm, m])
+	# Du danger : la corruption du lieu
+	var arme := {"uid": "epee_d", "name_key": "x", "type": "arme", "equip_slot": "main_principale", "functionality": "epee", "affixes": [{"id": "cond_corruption", "params": {"seuil": 40, "pct": 30}, "compteur": 0, "etat": {}}], "sertissures": {"nombre": 0, "contenu": []}, "tags": []}
+	s.items["epee_d"] = arme
+	var loup := s.ajouter("loup", j.pos + Vector2i(1, 0), "ia")
+	var corr := s.corruption_ici(j.pos)
+	var r := s._affixes_offensifs(j, arme, loup)
+	verifier((corr >= 40.0 and is_equal_approx(float(r.mult), 1.3)) or (corr < 40.0 and is_equal_approx(float(r.mult), 1.0)), "du danger : corruption %.0f → ×%.2f" % [corr, float(r.mult)])
+	s.donjon = {"corruption": 90, "etage": 1}
+	s.lieu = "donjon"
+	r = s._affixes_offensifs(j, arme, loup)
+	verifier(is_equal_approx(float(r.mult), 1.3), "en donjon corrompu (90) : ×1,30")
+	s.lieu = "camp"
+	s.donjon = {}
+	s.monde.fermer()
+
 
 func test_cueillette() -> void:
 	# Les données : chaque plante de cueillette existe, et sa silhouette aussi

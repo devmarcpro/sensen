@@ -155,6 +155,8 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 					segments_bonus += 1
 				"meca_endurance_max":
 					endurance_bonus += int(ax.params.n)
+				"meca_capacite":   # du porteur : capacité de poids cumulée (lue par poids_de)
+					e.mecaniques["capacite_poids"] = {"n": int(e.mecaniques.get("capacite_poids", {}).get("n", 0)) + int(ax.params.kg)}
 		# Gemmes serties : tous les bonus plats (Loot — GEMMES = TOUS LES BONUS PLATS, jamais une règle).
 		for uid in it.get("sertissures", {}).get("contenu", []):
 			var gemme: Dictionary = items.get(uid, {})

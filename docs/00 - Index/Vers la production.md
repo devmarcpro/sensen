@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] Affixes réveillés (2026-08-28)
+> Nocturne, du danger, des sources, du porteur : quatre affixes qui attendaient leurs systèmes sont actifs. **À juger** : une arme « du danger » qui ne mord que dans les cellules corrompues — une raison d'y aller, ou un objet qu'on oublie ?
 > [!important] La cueillette sauvage (2026-08-28)
 > Des plantes sauvages par biome, cueillies d'un E, qui repoussent hors des claims. **À juger** : la moitié d'une récolte cultivée par plante sauvage — la cueillette vaut-elle le détour, ou rend-elle le champ inutile ?
 > [!important] Postures et échange des compagnons (2026-08-28)
