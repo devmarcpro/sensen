@@ -28,6 +28,7 @@ var materiau_defaut: String = ""          # le matériau des murs ordinaires (ma
 var meubles: Dictionary = {}              # index de tuile → id de meuble (data/meubles/)
 var stations_fixes: Dictionary = {}       # index de tuile → id de station posée
 var niveau_eau: Dictionary = {}           # index de tuile → niveau 1-7 d'un écoulement (Eau et liquides) ; une source vaut 8
+var dangers: Dictionary = {}              # index de tuile → true : à éviter en chemin (le feu, Météo) — la simulation le tient à jour
 var neige := false                        # état météo de la grille (Météo) : chaque pas coûte neige_surcout de plus
 var gel := false                          # sous 0 °C : l'eau est de la glace, elle se marche
 var sols: Dictionary = {}                 # index de tuile → id de matériau de sol (surface) ; vide = sol par défaut
@@ -224,6 +225,8 @@ func chemin(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignorer: 
 				continue
 			var occ := occupant(voisin)
 			if not occ.is_empty() and occ != ignorer and voisin != arrivee:
+				continue
+			if dangers.has(idx(voisin)) and voisin != arrivee:   # on contourne le feu
 				continue
 			var ng: int = g[courant] + cout
 			if ng < int(g.get(voisin, 1 << 30)):

@@ -574,6 +574,7 @@ func _enflammer(t: Vector2i) -> bool:
 	if flammabilite_de(t) <= 0 or feux.has(grille.idx(t)):
 		return false
 	feux[grille.idx(t)] = {"reste": int(regles.r.get("feu", {}).get("duree_ticks", 80))}
+	grille.dangers[grille.idx(t)] = true
 	lumiere_sale = true
 	EventBus.emettre(&"journal", [&"journal.feu_prend", {"x": t.x, "y": t.y}])
 	EventBus.emettre(&"tile_changed", [t])
@@ -593,6 +594,7 @@ func _tiquer_feux(tick: int) -> void:
 	if "eteint_feux" in effets or "neige" in effets or grille.neige:
 		var n := feux.size()
 		for idx in feux.keys():
+			grille.dangers.erase(idx)
 			EventBus.emettre(&"tile_changed", [grille.pos_de(int(idx))])
 		feux.clear()
 		lumiere_sale = true
@@ -624,6 +626,7 @@ func _tiquer_feux(tick: int) -> void:
 func _consumer(t: Vector2i) -> void:
 	var idx := grille.idx(t)
 	feux.erase(idx)
+	grille.dangers.erase(idx)
 	if grille.contenu[idx] != 0 and not ("contenant" in grille.contenu_de(t).get("tags", [])):
 		_memoriser_terrain(t)
 		grille.contenu[idx] = 0
@@ -7988,6 +7991,14 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 			EventBus.emettre(&"journal", [&"journal.confusion", {"nom": e.name_key}])
 			_deplacer(e, libres[des.entier(0, libres.size() - 1)], tick)
 			return
+	if grille.dangers.has(grille.idx(e.pos)):   # Météo : on ne reste pas dans le feu — un pas hors des flammes
+		var sorties: Array[Vector2i] = []
+		for d in Grille.DIRS:
+			var q: Vector2i = e.pos + d
+			if grille.dans(q) and not grille.dangers.has(grille.idx(q)) and grille.cout_pas(e.pos, q, Etres.est_volant(e)) >= 0 and grille.occupant(q).is_empty():
+				sorties.append(q)
+		if not sorties.is_empty() and _deplacer(e, sorties[des.entier(0, sorties.size() - 1)], tick):
+			return
 	if e.camp == "civil":   # les civils fuient un spectre à vue (Talents de race)
 		for x in vivants():
 			if a_talent(x, "sans_chair") and voit_ia(e, x):
@@ -8257,7 +8268,7 @@ func _ia_pas_routine(e: Dictionary, cible: Vector2i, tick: int) -> void:
 	var dmin := Grille.distance(e.pos, cible)
 	for d in Grille.DIRS:
 		var q: Vector2i = e.pos + d
-		if grille.dans(q) and not grille.bloque_passage(q) and grille.occupant(q).is_empty() and Grille.distance(q, cible) < dmin:
+		if grille.dans(q) and not grille.bloque_passage(q) and grille.occupant(q).is_empty() and not grille.dangers.has(grille.idx(q)) and Grille.distance(q, cible) < dmin:
 			dmin = Grille.distance(q, cible)
 			meilleur = q
 	if meilleur == e.pos or not _deplacer(e, meilleur, tick):

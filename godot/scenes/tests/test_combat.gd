@@ -2560,10 +2560,15 @@ func test_feu() -> void:
 	var pv := int(loup.sante)
 	s._tiquer_feux(tick + 1000)
 	verifier(int(loup.sante) < pv and Etres.a_statut_id(loup, "brulure"), "le loup sur la tuile en feu brûle (%d → %d) et prend Brûlure" % [pv, int(loup.sante)])
+	# On contourne le feu : un chemin ne traverse pas une tuile en flammes, et l'IA en sort
+	var sortie := s.grille.chemin(loup.pos + Vector2i(-2, 0), loup.pos + Vector2i(2, 0))
+	verifier(not sortie.is_empty() and not (herbe in sortie), "le chemin contourne la tuile en feu")
+	s._decider_ia(loup, tick + 1005)
+	verifier(loup.pos != herbe, "le loup sort des flammes d'un pas")
 	# La pluie éteint tout
 	s.meteo_force = "pluie"
 	s._tiquer_feux(tick + 1010)
-	verifier(s.feux.is_empty(), "la pluie éteint les feux")
+	verifier(s.feux.is_empty() and s.grille.dangers.is_empty(), "la pluie éteint les feux, plus rien à éviter")
 	s.meteo_force = ""
 	s.monde.fermer()
 
