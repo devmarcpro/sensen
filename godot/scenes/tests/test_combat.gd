@@ -102,6 +102,7 @@ func _ready() -> void:
 	test_feu()
 	test_lave()
 	test_courant()
+	test_ia_portails()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2520,6 +2521,31 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_ia_portails() -> void:
+	var s := Simulation.new(154)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var loup := s.ajouter("loup", j.pos + Vector2i(-2, 0), "ia")
+	var but: Vector2i = j.pos + Vector2i(20, 0)
+	verifier(s.portail_utile(loup, but) == Vector2i(-1, -1), "sans portail, aucun détour")
+	# Deux portails du Passeur : l'entrée près du loup, la sortie près du but
+	var entree: Vector2i = loup.pos + Vector2i(-1, 0)
+	var sortie: Vector2i = but + Vector2i(-1, 0)
+	for t in [entree, sortie]:
+		s.grille.contenu[s.grille.idx(t)] = 0
+		s.grille.hauteurs[s.grille.idx(t)] = s.grille.h(loup.pos)
+	j["portails"] = [s.grille.idx(entree), s.grille.idx(sortie)]
+	s.portails[s.grille.idx(entree)] = j.id
+	s.portails[s.grille.idx(sortie)] = j.id
+	verifier(s.portail_utile(loup, but) == entree, "le loup voit la brèche qui le rapproche")
+	verifier(s.portail_utile(loup, loup.pos + Vector2i(1, 0)) == Vector2i(-1, -1), "pour deux tuiles, le détour n'en vaut pas la peine")
+	var tick := s.tick_de(loup)
+	verifier(s._ia_par_portail(loup, but, tick) and loup.pos == entree, "un pas vers la brèche")
+	verifier(s._ia_par_portail(loup, but, tick) and loup.pos == sortie, "puis elle traverse")
+	verifier(Grille.distance(loup.pos, but) <= 1, "le loup ressort à côté de son but")
+	s.monde.fermer()
+
 
 func test_courant() -> void:
 	var s := Simulation.new(153)

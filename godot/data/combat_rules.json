@@ -849,7 +849,9 @@
     },
     "breche": {
       "portails_max": 2,
-      "mana_max_mult": 0.7
+      "mana_max_mult": 0.7,
+      "ia_portee": 8,
+      "ia_gain_min": 6
     },
     "maitre_du_tempo": {
       "tempo_vole": 8,

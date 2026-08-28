@@ -2232,6 +2232,45 @@ func _traverser(e: Dictionary, tick: int) -> bool:
 	return false
 
 
+## Le portail qui rapproche le plus du but (Talents de classe) : Vector2i(-1, -1) si aucun ne vaut le détour.
+## Retourne la tuile du portail à rejoindre — si c'est celle où l'on est déjà, il n'y a qu'à traverser.
+func portail_utile(e: Dictionary, but: Vector2i) -> Vector2i:
+	if portails.is_empty():
+		return Vector2i(-1, -1)
+	var br: Dictionary = regles.r.talents.get("breche", {})
+	var portee := int(br.get("ia_portee", 8))
+	var meilleur := Vector2i(-1, -1)
+	var meilleur_gain := int(br.get("ia_gain_min", 6)) - 1
+	for idx in portails.keys():
+		var entree := grille.pos_de(int(idx))
+		var d_entree := Grille.distance(e.pos, entree)
+		if d_entree > portee or (d_entree > 0 and not grille.occupant(entree).is_empty()):
+			continue
+		var p: Dictionary = entites.get(str(portails[idx]), {})
+		for j in p.get("portails", []):
+			if int(j) == int(idx) or not portails.has(int(j)):
+				continue
+			var sortie := grille.pos_de(int(j))
+			if not grille.occupant(sortie).is_empty():
+				continue
+			var gain := Grille.distance(e.pos, but) - (d_entree + Grille.distance(sortie, but))
+			if gain > meilleur_gain:
+				meilleur_gain = gain
+				meilleur = entree
+	return meilleur
+
+
+## Le pas d'une IA qui passe par un portail : vrai si elle a traversé ou avancé vers la brèche.
+func _ia_par_portail(e: Dictionary, but: Vector2i, tick: int) -> bool:
+	var entree := portail_utile(e, but)
+	if entree == Vector2i(-1, -1):
+		return false
+	if entree == e.pos:
+		return _traverser(e, tick)
+	var pas := grille.chemin(e.pos, entree, Etres.est_volant(e))
+	return not pas.is_empty() and _deplacer(e, pas[0], tick)
+
+
 ## Le Sablier : voler du tempo — l'ennemi recule, le Sablier avance d'autant, et paie en santé.
 func _voler_tempo(e: Dictionary, cible_id: String, tick: int) -> bool:
 	var c: Dictionary = entites.get(cible_id, {})
@@ -8369,6 +8408,8 @@ func _ia_pas_routine(e: Dictionary, cible: Vector2i, tick: int) -> void:
 	if cible == e.pos:
 		_attendre(e, tick)
 		return
+	if _ia_par_portail(e, cible, tick):
+		return
 	if Grille.distance(e.pos, cible) <= int(GameData.config("planete").routine.astar_sous):
 		var chemin := grille.chemin(e.pos, cible, Etres.est_volant(e))
 		if chemin.size() > 0:
@@ -8443,6 +8484,8 @@ func _ia_attaquer(e: Dictionary, cible: Dictionary, tick: int) -> void:
 
 
 func _ia_pas_vers(e: Dictionary, but: Vector2i, tick: int, ignorer: String) -> void:
+	if _ia_par_portail(e, but, tick):   # Talents de classe : une brèche ouverte sert à tout le monde
+		return
 	var pas := grille.chemin(e.pos, but, Etres.est_volant(e), ignorer)
 	if pas.is_empty() or pas[0] == but and not grille.occupant(but).is_empty():
 		_attendre(e, tick)
