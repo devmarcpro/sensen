@@ -1348,6 +1348,15 @@ func _maj_ui() -> void:
 			lignes.append("  " + tr("ui.heure").format({"heure": "%02d:%02d" % [int(sim.heure()), int(fmod(sim.heure(), 1.0) * 60.0)], "phase": tr("phase." + sim.phase()), "saison": tr("saison." + sim.saison()),
 				"meteo": tr(GameData.entree("weather_states", str(tr_.meteo)).name_key), "temp": "%.0f" % float(tr_.temp),
 				"confort": tr("ui.confort.froid") if float(tr_.ecart) < 0.0 else (tr("ui.confort.chaud") if float(tr_.ecart) > 0.0 else "")}))
+			if not sim.territoire.get("raid", {}).is_empty():   # Défense et raids : le raid en cours se lit
+				var raid: Dictionary = sim.territoire.raid
+				var vivants_raid := 0
+				var dmin := 9999
+				for x in sim.vivants():
+					if x.camp == "raid":
+						vivants_raid += 1
+						dmin = mini(dmin, Grille.distance(j.pos, x.pos))
+				lignes.append("  " + tr("ui.raid").format({"n": vivants_raid, "dist": dmin if dmin < 9999 else 0, "ticks": maxi(0, int(raid.get("fin", 0)) - sim.horloge_monde.ticks)}))
 			var vl := sim.vecteur_lieu(j.pos)   # le lieu (Wu Xing hors combat) : ses deux éléments dominants
 			if not vl.is_empty():
 				var cles: Array = vl.keys()

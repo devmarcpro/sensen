@@ -1188,6 +1188,7 @@ weather.blizzard.name,Blizzard
 weather.canicule.name,Canicule
 ui.heure,"{heure} h · {phase} · {saison} · {meteo} · {temp} °C{confort}"
 ui.lieu,"lieu : {a} {pa} % · {b} {pb} %"
+ui.raid,"RAID : {n} assaillant(s) · le plus proche à {dist} tuiles · {ticks} ticks avant leur retrait"
 phase.aube,aube
 phase.jour,jour
 phase.crepuscule,crépuscule

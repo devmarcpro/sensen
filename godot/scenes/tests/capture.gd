@@ -54,6 +54,11 @@ func _ready() -> void:
 			jt0["vue_sale"] = true
 			scene.sim.maj_vision()
 			scene._maj_ambiance()
+	if "--raid" in args and scene.sim != null:   # --raid : un raid réel en cours (Défense et raids)
+		scene.sim._lancer_raid_reel(12.0, scene.sim.horloge_monde.ticks)
+		for k in 6:
+			scene.sim.pas("monde")
+		scene._apres_changement_de_grille()
 	if "--talents" in args and scene.sim != null:   # --talents : brèches, affût, lame fantôme, trésor détecté, masque — pour voir les couches récentes
 		var sim = scene.sim
 		var jt: Dictionary = scene.joueur()
