@@ -413,6 +413,15 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+status.gel.name,Gel
+status.confusion.name,Confusion
+status.regeneration.name,Régénération
+status.peau_de_pierre.name,Peau de pierre
+status.beni.name,Béni
+journal.statut_soin,"{nom} : {statut} rend {soin} PV"
+journal.liberation,"{nom} se libère : {statut}"
+journal.confusion,"{nom}, confus, part au hasard"
+journal.brulure_eteinte,l'eau éteint la brûlure
 option.segment_prefere,"Poser le segment : {element}"
 option.segment_dominant,Segment : le dominant
 ui.segment_prefere," · segment {element}"

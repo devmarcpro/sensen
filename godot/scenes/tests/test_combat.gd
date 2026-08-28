@@ -88,6 +88,7 @@ func _ready() -> void:
 	test_niveaux_recette()
 	test_plantes()
 	test_bestiaire()
+	test_statuts_complets()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2469,6 +2470,45 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Les 17 statuts
+
+func test_statuts_complets() -> void:
+	for sid in ["brulure", "ralentissement", "gel", "poison", "saignement", "etourdi", "confusion", "terreur", "infection", "affaibli", "regeneration", "peau_de_pierre", "hate", "beni", "dissimule", "saisi", "retarde"]:
+		verifier(GameData.catalogues.status_effects.has(sid), "statut %s en données" % sid)
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var h := s.horloge_de(j)
+	# Régénération
+	j.sante = 10
+	s.appliquer_statut(j, "regeneration", 50, "")
+	s._tiquer_statuts(j, h.ticks + 30)
+	verifier(int(j.sante) >= 13, "Régénération : +1d4 par période (%d PV après 3 périodes)" % int(j.sante))
+	j.statuts = []
+	# Gel : immobilisé, jet de Force pour se libérer
+	j.stats_eff.force = 40
+	s.appliquer_statut(j, "gel", 20, "")
+	verifier(Etres.bloque_statuts(j, "deplacement", s.statuts_defs), "gelé : ne bouge plus")
+	s._tiquer_statuts(j, h.ticks + 10)
+	verifier(not Etres.a_statut_id(j, "gel"), "Force 40 : libéré au premier jet")
+	# Béni : +1 dé
+	s.appliquer_statut(j, "beni", 3000, "")
+	verifier(int(Etres.add_statuts(j, "des", s.statuts_defs)) == 1, "Béni : +1 dé aux jets")
+	# Peau de pierre : +5 d'armure dans la résolution
+	s.appliquer_statut(j, "peau_de_pierre", 100, "")
+	verifier(int(Etres.add_statuts(j, "armure", s.statuts_defs)) == 5, "Peau de pierre : +5 d'armure")
+	j.statuts = []
+	# L'eau éteint la brûlure
+	s.appliquer_statut(j, "brulure", 30, "")
+	var bord: Vector2i = j.pos + Vector2i(1, 0)
+	var eau: Vector2i = j.pos + Vector2i(2, 0)
+	s.grille.contenu[s.grille.idx(bord)] = 0
+	s.grille.hauteurs[s.grille.idx(bord)] = s.grille.h(j.pos)
+	s.grille.poser_contenu(eau, "eau")
+	s.attente[j.id] = true
+	var ok_dep := s.intention(j.id, {"type": "deplacer", "vers": bord})
+	verifier(ok_dep and not Etres.a_statut_id(j, "brulure"), "arriver au bord de l'eau éteint la brûlure")
 
 
 # ---------------------------------------------------------------- Le bestiaire : 19 races animales

@@ -1,0 +1,14 @@
+{
+  "name_key": "status.confusion.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 30,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [],
+  "tags": [
+    "negatif",
+    "confusion"
+  ]
+}

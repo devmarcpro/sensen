@@ -1,0 +1,14 @@
+{
+  "name_key": "status.regeneration.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 50,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [],
+  "tags": [
+    "positif"
+  ],
+  "soin_des": "1d4"
+}

@@ -240,6 +240,13 @@ static func statut_touche_stats(id: String, defs: Dictionary) -> bool:
 	return false
 
 
+static func a_statut_id(e: Dictionary, id: String) -> bool:
+	for s: Dictionary in e.statuts:
+		if str(s.id) == id:
+			return true
+	return false
+
+
 static func a_statut_tag(e: Dictionary, tag: String, defs: Dictionary) -> bool:
 	for s: Dictionary in e.statuts:
 		if tag in defs.get(s.id, {}).get("tags", []):

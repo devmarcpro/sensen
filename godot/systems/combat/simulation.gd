@@ -5708,6 +5708,15 @@ func intention(id: String, i: Dictionary) -> bool:
 		return false
 	var h := horloge_de(e)
 	_regenerer(e, h.ticks)
+	if Etres.a_statut_tag(e, "confusion", statuts_defs) and str(i.get("type", "")) in ["deplacer", "attaquer", "capacite"] and des.reel() < float(regles.r.get("statuts", {}).get("confusion_chance", 0.3)):
+		var libres: Array[Vector2i] = []   # Confusion : un pas au hasard remplace l'intention
+		for dd in Grille.DIRS:
+			var q: Vector2i = e.pos + dd
+			if grille.dans(q) and not grille.bloque_passage(q) and grille.occupant(q).is_empty() and grille.cout_pas(e.pos, q) >= 0:
+				libres.append(q)
+		if not libres.is_empty():
+			EventBus.emettre(&"journal", [&"journal.confusion", {"nom": e.name_key}])
+			i = {"type": "deplacer", "vers": libres[des.entier(0, libres.size() - 1)]}
 	var ok := false
 	match str(i.get("type", "")):
 		"deplacer":
@@ -5882,6 +5891,13 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	if e.get("mecaniques", {}).has("vitesse_deplacement"):   # Effets d'équipement : +pct % de vitesse
 		ticks_dep = maxi(1, roundi(float(ticks_dep) / (1.0 + float(e.mecaniques.vitesse_deplacement.get("pct", 0)) / 100.0)))
 	e.compteur = tick + _ticks_avec_statuts(e, ticks_dep)
+	if Etres.a_statut_id(e, "brulure"):   # l'eau éteint la Brûlure (Statuts) : l'eau ne se traverse pas, s'y plonger = y arriver au bord
+		for dd in Grille.DIRS:
+			var q: Vector2i = vers + dd
+			if grille.dans(q) and "liquide" in grille.contenu_de(q).get("tags", []):
+				_retirer_statut(e, "brulure")
+				EventBus.emettre(&"journal", [&"journal.brulure_eteinte", {}])
+				break
 	_declencher_glyphe(e, vers)
 	if en_combat(e):
 		for autre in vivants():
@@ -6057,7 +6073,7 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 		if Regles.direction_relative(cible.orientation, e.pos - cible.pos) == "front":
 			mult_coup *= float(regles.r.talents.dissimulation.face_mult)
 		e.statuts = e.statuts.filter(func(s0: Dictionary) -> bool: return str(s0.id) != "dissimule")
-	var d := regles.degats_arme(e.stats_eff, arme, fonct, des, lourde, a_zero, int(ax.des), e.competences_eff, vecteur)
+	var d := regles.degats_arme(e.stats_eff, arme, fonct, des, lourde, a_zero, int(ax.des) + int(Etres.add_statuts(e, "des", statuts_defs)), e.competences_eff, vecteur)   # Béni : +dés
 	var wx := _facteur_wuxing(e, cible, vecteur, tick_de(e))
 	var plat := int(e.get("degats_element", {}).get(wuxing.dominante(vecteur), 0))
 	var res := _resoudre_coup(e, cible, (d.bruts + float(plat)) * wx.total * float(ax.mult) * mult_coup * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur, float(ax.ignore_armure))
@@ -6516,7 +6532,19 @@ func _tiquer_statuts(e: Dictionary, tick: int) -> void:
 			EventBus.emettre(&"journal", [&"journal.statut_degats", {"nom": e.name_key, "statut": d.name_key, "degats": deg}])
 			_appliquer_degats(e, deg, s.source, {"statut": s.id, "element": {d.element: 1.0} if d.get("element") else {}, "type": "statut"})
 			s.prochain = int(s.prochain) + int(d.periode_ticks)
-		if int(s.fin) > tick:
+		while e.vivant and d.get("soin_des") != null and int(s.prochain) <= tick and int(s.prochain) <= int(s.fin):   # Régénération
+			var soin := des.jet(str(d.soin_des))
+			e.sante = mini(e.sante_max, int(e.sante) + soin)
+			EventBus.emettre(&"journal", [&"journal.statut_soin", {"nom": e.name_key, "statut": d.name_key, "soin": soin}])
+			s.prochain = int(s.prochain) + int(d.periode_ticks)
+		var libere := false
+		if d.has("liberation") and int(s.prochain) <= tick:   # Gel : un jet de Force par période pour se libérer
+			var lb: Dictionary = d.liberation
+			s.prochain = int(s.prochain) + int(d.periode_ticks)
+			if des.jet("1d20") + int(e.stats_eff.get(str(lb.stat), 0)) / 2 >= int(lb.seuil):
+				libere = true
+				EventBus.emettre(&"journal", [&"journal.liberation", {"nom": e.name_key, "statut": d.name_key}])
+		if int(s.fin) > tick and not libere:
 			restants.append(s)
 		elif Etres.statut_touche_stats(str(s.id), statuts_defs):
 			e.statuts = restants
@@ -6585,7 +6613,7 @@ func _executer_action_creature(e: Dictionary, action: Dictionary, cible: Diction
 				for c in cibles:
 					if not c.vivant:
 						continue
-					var bonus := _bonus_des_conditions(e, c, action)
+					var bonus := _bonus_des_conditions(e, c, action) + int(Etres.add_statuts(e, "des", statuts_defs))   # Béni
 					var d := regles.degats_action(e.stats_eff, action, des, a_zero, bonus)
 					var wx := _facteur_wuxing(e, c, action.elements, tick_de(e))
 					var res := _resoudre_coup(e, c, d.bruts * wx.total * Etres.mult_statuts(e, "degats", statuts_defs), str(action.get("type_degats", "contondant")), false, action.elements)
@@ -7282,6 +7310,16 @@ func _verifier_desengagements() -> void:
 
 func _decider_ia(e: Dictionary, tick: int) -> void:
 	var profil: Dictionary = profils_ia.get(e.ai_profile, {})
+	if Etres.a_statut_tag(e, "confusion", statuts_defs) and des.reel() < float(regles.r.get("statuts", {}).get("confusion_chance", 0.3)):   # Confusion : l'IA aussi s'égare
+		var libres: Array[Vector2i] = []
+		for dd in Grille.DIRS:
+			var q: Vector2i = e.pos + dd
+			if grille.dans(q) and not grille.bloque_passage(q) and grille.occupant(q).is_empty() and grille.cout_pas(e.pos, q) >= 0:
+				libres.append(q)
+		if not libres.is_empty():
+			EventBus.emettre(&"journal", [&"journal.confusion", {"nom": e.name_key}])
+			_deplacer(e, libres[des.entier(0, libres.size() - 1)], tick)
+			return
 	if e.camp == "civil":   # les civils fuient un spectre à vue (Talents de race)
 		for x in vivants():
 			if a_talent(x, "sans_chair") and voit_ia(e, x):

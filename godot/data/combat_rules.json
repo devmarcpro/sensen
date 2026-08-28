@@ -958,5 +958,8 @@
   },
   "chaine": {
     "seuil_mixte": 0.25
+  },
+  "statuts": {
+    "confusion_chance": 0.3
   }
 }
