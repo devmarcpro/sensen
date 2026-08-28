@@ -1083,6 +1083,14 @@ func _draw() -> void:
 		draw_string(ThemeDB.fallback_font, c, str(atteignables[t]), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1, 1, 0.8, 0.8))
 
 
+## Un polygone convexe dessiné en éventail de triangles par draw_primitive : draw_colored_polygon triangule en float32
+## et juge dégénérés les polygones aux coordonnées monde (~1e6 px) — « Invalid polygon data » (brouillard, sol, blocs).
+static func _poly(ci: CanvasItem, pts: PackedVector2Array, col: Color) -> void:
+	var cols := PackedColorArray([col, col, col])
+	for i in range(1, pts.size() - 1):
+		ci.draw_primitive(PackedVector2Array([pts[0], pts[i], pts[i + 1]]), cols, PackedVector2Array())
+
+
 func _losange(t: Vector2i, col: Color) -> void:
 	# draw_primitive (deux triangles, sans triangulation) : les coordonnées monde sont grandes (~1e6 px) et la
 	# triangulation en float32 de draw_colored_polygon jugeait le losange dégénéré (« Invalid polygon data »).
@@ -1177,7 +1185,7 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 		var col_eau := Color.html(str(g.contenu_de(t).get("couleur", "#2f5f9a")))
 		if g.gel:   # Météo : la glace
 			col_eau = col_eau.lerp(Color(0.85, 0.92, 1.0), 0.7)
-		ci.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)]),
+		_poly(ci, PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)]),
 			col_eau * teinte)
 		return
 	if g.neige:   # Météo : le sol blanchit sous la neige
@@ -1196,25 +1204,25 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 		if not ms.is_empty():
 			col = Color.html(str(ms.color)).lerp(Color(0.35, 0.5, 0.25), 0.35 if sol_id.begins_with("terre") else 0.0).darkened(0.25 - k * 0.3)
 	col *= teinte
-	ci.draw_colored_polygon(haut, col)
+	_poly(ci, haut, col)
 	var flanc := col.darkened(0.35)
 	var hs := g.h(t + Vector2i(0, 1)) if g.dans(t + Vector2i(0, 1)) else 0
 	if hs < h:
 		var d := (h - hs) * HSTEP
-		ci.draw_colored_polygon(PackedVector2Array([
+		_poly(ci, PackedVector2Array([
 			c + Vector2(-TW * 0.5, 0), c + Vector2(0, TH * 0.5),
 			c + Vector2(0, TH * 0.5 + d), c + Vector2(-TW * 0.5, d)]), flanc)
 	var he := g.h(t + Vector2i(1, 0)) if g.dans(t + Vector2i(1, 0)) else 0
 	if he < h:
 		var d2 := (h - he) * HSTEP
-		ci.draw_colored_polygon(PackedVector2Array([
+		_poly(ci, PackedVector2Array([
 			c + Vector2(0, TH * 0.5), c + Vector2(TW * 0.5, 0),
 			c + Vector2(TW * 0.5, d2), c + Vector2(0, TH * 0.5 + d2)]), flanc.darkened(0.15))
 	var contenu := g.contenu_de(t)
 	if not contenu.is_empty() and not g.bloque_passage(t) and (contenu.has("couleur") or "meuble" in contenu.get("tags", [])):
 		# contenu franchissable (porte, entrée du donjon, tapis) : un losange plat coloré
 		var cf := Color.html(str(GameData.entree("meubles", str(g.meubles.get(g.idx(t), "tapis"))).couleur)) if "meuble" in contenu.get("tags", []) else Color.html(str(contenu.couleur))
-		ci.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -TH * 0.35), c + Vector2(TW * 0.35, 0), c + Vector2(0, TH * 0.35), c + Vector2(-TW * 0.35, 0)]), cf * teinte)
+		_poly(ci, PackedVector2Array([c + Vector2(0, -TH * 0.35), c + Vector2(TW * 0.35, 0), c + Vector2(0, TH * 0.35), c + Vector2(-TW * 0.35, 0)]), cf * teinte)
 	if "contenant" in contenu.get("tags", []):   # coffre ou butin : une caisse
 		var cc := (Color(0.55, 0.38, 0.18) if "coffre" in contenu.tags else Color(0.75, 0.65, 0.3)) * teinte
 		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc)
@@ -1254,7 +1262,7 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 				hm = 0   # un billboard : on le voile lui-même (modulate), pas un pavé par-dessus
 				if noeuds_vegetaux.has(idx):
 					noeuds_vegetaux[idx].modulate = Color(0.45, 0.45, 0.5) if vu else Color(0, 0, 0, 0)
-			ci.draw_colored_polygon(PackedVector2Array([
+			_poly(ci, PackedVector2Array([
 				c + Vector2(-TW * 0.5, 0), c + Vector2(-TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm),
 				c + Vector2(TW * 0.5, -hm), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5)]), voile if vu else fond)
 
@@ -1278,15 +1286,15 @@ func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: C
 	haut_bloc *= teinte
 	var sud := t + Vector2i(0, 1)
 	if not g.dans(sud) or not g.bloque_passage(sud):
-		ci.draw_colored_polygon(PackedVector2Array([   # face sud-ouest (gauche)
+		_poly(ci, PackedVector2Array([   # face sud-ouest (gauche)
 			c + Vector2(-TW * 0.5, 0), c + Vector2(0, TH * 0.5),
 			c + Vector2(0, TH * 0.5 - hm), c + Vector2(-TW * 0.5, -hm)]), haut_bloc.darkened(0.35))
 	var est := t + Vector2i(1, 0)
 	if not g.dans(est) or not g.bloque_passage(est):
-		ci.draw_colored_polygon(PackedVector2Array([   # face sud-est (droite)
+		_poly(ci, PackedVector2Array([   # face sud-est (droite)
 			c + Vector2(0, TH * 0.5), c + Vector2(TW * 0.5, 0),
 			c + Vector2(TW * 0.5, -hm), c + Vector2(0, TH * 0.5 - hm)]), haut_bloc.darkened(0.5))
-	ci.draw_colored_polygon(PackedVector2Array([   # dessus
+	_poly(ci, PackedVector2Array([   # dessus
 		c + Vector2(-TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm),
 		c + Vector2(TW * 0.5, -hm), c + Vector2(0, TH * 0.5 - hm)]), haut_bloc)
 
