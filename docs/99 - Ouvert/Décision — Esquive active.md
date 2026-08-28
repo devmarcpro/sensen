@@ -26,6 +26,9 @@ XP d'Esquive : se déplacer en combat en étant adjacent à un hostile
 - Toutes les références existantes restent valides : Lapin → Esquive ([[Astrologie — cycle sexagésimal]]), skill +2..+6 Esquive ([[Effets d'équipement types]]), classification combat/survie ([[Double niveau combat et général]]). Les niveaux effectifs d'équipement accélèrent le déplacement — un anneau d'Esquive se sent.
 - Le `malus_poids_armure` de l'ancien jet de défense ([[Pipeline de résolution du combat]], étape supprimée) ne s'applique plus qu'au **déplacement** via la capacité de poids ([[Armures et poids porté]]).
 
+> [!success] Codé (vérifié le 2026-08-28)
+> `Regles.ticks_deplacement` : en combat, `× (1 − min(esquive_max, N_esquive × esquive_par_niveau))`, plancher `deplacement_min` ; l'XP d'Esquive tombe à chaque pas en combat adjacent à un hostile (`_deplacer`). Rien d'autre à coder.
+
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Compétences — liste]], [[Trous connus du combat]]
 - **Alimente** : [[Boucle de tick]], [[XP de combat]], [[Double niveau combat et général]]

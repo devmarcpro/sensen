@@ -225,7 +225,7 @@ func garde_tient(direction: String, bouclier: bool, lourde: bool) -> bool:
 
 
 ## Endurance perdue à l'impact : 12 + dégâts/4 (6 + dégâts/8 avec bouclier).
-func cout_garde_impact(degats: int, bouclier: bool) -> int:
-	if bouclier:
-		return int(r.garde.bouclier_impact_base) + degats / int(r.garde.bouclier_impact_div)
+func cout_garde_impact(degats: int, bouclier: bool, competences: Dictionary = {}) -> int:
+	if bouclier:   # Décision — Boucliers : la compétence Bouclier réduit le coût à l'impact
+		return maxi(1, roundi(float(int(r.garde.bouclier_impact_base) + degats / int(r.garde.bouclier_impact_div)) / skill_factor(niveau(competences, "bouclier"))))
 	return int(r.endurance.garde_impact_base) + degats / int(r.endurance.garde_impact_div)

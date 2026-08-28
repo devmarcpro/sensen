@@ -22,6 +22,9 @@ etape: 0
 
 **Prix ([[Pipeline de résolution du combat]]) :** rien ne change au pipeline — la garde-bouclier est la même posture avec d'autres paramètres, lus sur le slot secondaire.
 
+> [!success] Codé (vérifié et complété le 2026-08-28)
+> La garde-bouclier couvrait déjà front et flancs, tenait la lourde et coûtait `6 + dégâts/8` (`Regles.garde_tient`, `cout_garde_impact`) ; l'XP de Bouclier tombait à chaque impact bloqué. Manquait le **`/ skill_factor(N_bouclier)`** sur le coût d'endurance : ajouté (`cout_garde_impact(degats, bouclier, competences)`), plancher 1.
+
 ## Liens
 - **Dépend de** : [[Garde en posture]], [[Équipement — 14 slots]], [[Endurance]], [[Trous connus du combat]]
 - **Alimente** : [[Cinq accès au cycle]], [[Compétences — liste]], [[Attaque lourde et télégraphe]]

@@ -6285,7 +6285,7 @@ func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degat
 	var degats := regles.degats_finaux(bruts, zone.mult, armure, tient)
 	if cible.garde:
 		if tient:
-			var cout := regles.cout_garde_impact(sans_garde, bouclier)
+			var cout := regles.cout_garde_impact(sans_garde, bouclier, cible.competences_eff)
 			if bouclier:
 				gagner_xp(cible, "bouclier", sans_garde)   # la compétence Bouclier progresse à chaque impact bloqué
 			for ax in Etres.affixes_equipes(cible, items, affixes_defs, "meca_garde_endurance"):
