@@ -383,7 +383,7 @@ func _dessiner_voiles() -> void:
 		return
 	for gi in j.get("vue", {}).keys():
 		var t := g.pos_de(int(gi))
-		if Grille.distance(t, j.pos) > RAYON_VUE:
+		if Grille.distance(t, j.pos) > RAYON_VUE or t == j.pos:   # le personnage reste net dans le noir (À juger — tranché : lisibilité)
 			continue
 		var a := 0.8 * (1.0 - float(sim.niveau_lumiere(t)) / 15.0)
 		if a > 0.02:
@@ -1330,6 +1330,11 @@ func _maj_ui() -> void:
 			lignes.append("  " + tr("ui.heure").format({"heure": "%02d:%02d" % [int(sim.heure()), int(fmod(sim.heure(), 1.0) * 60.0)], "phase": tr("phase." + sim.phase()), "saison": tr("saison." + sim.saison()),
 				"meteo": tr(GameData.entree("weather_states", str(tr_.meteo)).name_key), "temp": "%.0f" % float(tr_.temp),
 				"confort": tr("ui.confort.froid") if float(tr_.ecart) < 0.0 else (tr("ui.confort.chaud") if float(tr_.ecart) > 0.0 else "")}))
+			var vl := sim.vecteur_lieu(j.pos)   # le lieu (Wu Xing hors combat) : ses deux éléments dominants
+			if not vl.is_empty():
+				var cles: Array = vl.keys()
+				cles.sort_custom(func(p: String, q: String) -> bool: return float(vl[p]) > float(vl[q]))
+				lignes.append("  " + tr("ui.lieu").format({"a": tr("element." + str(cles[0])), "pa": roundi(float(vl[cles[0]]) * 100.0), "b": tr("element." + str(cles[1])), "pb": roundi(float(vl[cles[1]]) * 100.0)}))
 		var pd: Dictionary = sim.poids_de(j)
 		lignes.append("  " + tr("ui.entite.mana").format({"mana": j.mana, "mana_max": j.mana_max}) + " · " + tr("ui.munitions").format({"n": j.munitions}) + " · " + tr("ui.modules_connus").format({"n": j.modules_connus.size()})
 			+ " · " + tr("ui.or").format({"n": int(j.get("or", 0))}) + " · " + tr("ui.faim").format({"faim": int(j.get("faim", 100))}) + " · " + tr("ui.poids").format({"poids": "%.0f" % pd.poids, "capacite": "%.0f" % pd.capacite, "surcharge": tr("ui.poids.surcharge").format({"facteur": "%.1f" % pd.facteur}) if pd.facteur > 1.0 else ""}))
