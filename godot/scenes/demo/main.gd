@@ -1004,7 +1004,7 @@ func _draw() -> void:
 		for t in sim.tresors_detectes(j):   # detection_tresors : les contenants à portée, même hors de vue
 			_losange(t, Color(1.0, 0.85, 0.2, 0.55))
 	for a in sim.affuts:   # les affûts de L'Engrenage
-		_losange(a.pos, Color(0.6, 0.6, 0.65, 0.8))
+		_losange(a.pos, Color(0.25, 0.25, 0.3, 0.85))
 	for pi in sim.portails.keys():   # les brèches du Passeur
 		_losange(sim.grille.pos_de(int(pi)), Color(0.6, 0.3, 0.9, 0.7))
 	if not sim.donjon.is_empty() and sim.donjon.escalier != null:

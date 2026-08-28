@@ -45,6 +45,29 @@ func _ready() -> void:
 			scene.sim.horloge_monde.ticks = int(float(args[i3 + 1]) / 24.0 * 24000.0)
 			scene.sim.maj_vision()
 			scene._maj_ambiance()
+	if "--talents" in args and scene.sim != null:   # --talents : brèches, affût, lame fantôme, trésor détecté, masque — pour voir les couches récentes
+		var sim = scene.sim
+		var jt: Dictionary = scene.joueur()
+		var t0: int = sim.horloge_monde.ticks
+		for d in [Vector2i(1, 0), Vector2i(2, 0), Vector2i(0, 1), Vector2i(0, 2), Vector2i(-1, 0), Vector2i(-2, 0), Vector2i(0, -1), Vector2i(3, 0), Vector2i(-3, 0)]:
+			var q: Vector2i = jt.pos + d
+			if sim.grille.dans(q) and sim.grille.occupant(q).is_empty():
+				sim.grille.contenu[sim.grille.idx(q)] = 0
+				sim.grille.hauteurs[sim.grille.idx(q)] = sim.grille.h(jt.pos)
+		jt["talents_appris"] = ["breche", "affut", "masques"]
+		jt["tags_acquis_race"] = ["detection_tresors"]
+		sim._contreparties(jt)
+		sim._poser_portail(jt, jt.pos + Vector2i(1, 0), t0)
+		sim._poser_portail(jt, jt.pos + Vector2i(0, 2), t0)
+		sim._deployer_affut(jt, jt.pos + Vector2i(-1, 0), t0)
+		sim._porter_masque(jt, "masque_du_taureau", t0)
+		jt.mana = 60
+		sim._invoquer_arme_fantome(jt, "feu", t0)
+		sim.contenants[sim.grille.idx(jt.pos + Vector2i(3, 0))] = ["capture_tresor"]
+		sim.grille.poser_contenu(jt.pos + Vector2i(3, 0), "coffre")
+		jt["vue_sale"] = true
+		sim.maj_vision()
+		scene._apres_changement_de_grille()
 	# Un survol simulé sur une créature, pour voir la prévisualisation.
 	var j: Dictionary = scene.joueur()
 	for e in scene.sim.vivants():
