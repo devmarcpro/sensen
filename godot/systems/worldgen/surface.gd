@@ -529,22 +529,26 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 		var res: float = float(bloc.couches.ressources)
 		var tire := rng.randf()
 		var pose := false
+		var seuil := 0.0   # seuils cumulés : chaque entrée garde sa densité propre (sinon une densité plus faible qu'une précédente ne sort jamais)
 		for v in b.get("vegetation", []):
-			if tire < float(v.density) * veg * 2.0:
+			seuil += float(v.density) * veg * 2.0
+			if tire < seuil:
 				e.arbres[i] = str(v.id)
 				pose = true
 				break
 		if pose:
 			continue
 		for pl in b.get("plantes", []):
-			if tire < float(pl.density) * veg * 2.0:
+			seuil += float(pl.density) * veg * 2.0
+			if tire < seuil:
 				e.plantes[i] = str(pl.id)
 				pose = true
 				break
 		if pose:
 			continue
 		for cu in b.get("cueillette", []):   # Plantes : la cueillette sauvage par biome
-			if tire < float(cu.density) * veg * 2.0:
+			seuil += float(cu.density) * veg * 2.0
+			if tire < seuil:
 				e.cueillette[i] = str(cu.id)
 				pose = true
 				break
