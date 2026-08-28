@@ -30,9 +30,6 @@ func _ready() -> void:
 		scene.carte.fermer()
 	if "--carte" in args:
 		scene.carte.ouvrir("voyage")
-	for i2 in args.size():   # --ecran inventaire|atelier|feuille : l'écran ouvert
-		if args[i2] == "--ecran" and i2 + 1 < args.size():
-			scene.ecrans.ouvrir(args[i2 + 1])
 	if arene > 0:
 		scene.arene_courante = arene
 		scene._charger()
@@ -82,6 +79,9 @@ func _ready() -> void:
 		jt["vue_sale"] = true
 		sim.maj_vision()
 		scene._apres_changement_de_grille()
+	for i2 in args.size():   # --ecran inventaire|atelier|feuille|menu : l'écran ouvert — après le chargement
+		if args[i2] == "--ecran" and i2 + 1 < args.size():
+			scene.ecrans.ouvrir(args[i2 + 1])
 	# Un survol simulé sur une créature, pour voir la prévisualisation.
 	var j: Dictionary = scene.joueur()
 	for e in scene.sim.vivants():

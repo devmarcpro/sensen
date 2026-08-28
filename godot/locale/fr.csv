@@ -1424,14 +1424,14 @@ slotc.plaque,plaque
 slotc.sangles,sangles
 slotc.divers,divers
 ui.ecran.fermer,Fermer (Échap)
-ui.ecran.inventaire,"INVENTAIRE — {n} objets dans le sac (E : équiper/retirer · J : jeter · L : lire · T : sertir · B : reforger · au camp : P poser, M mur, O porte, R ranger, H planter · G : manger)"
+ui.ecran.inventaire,"INVENTAIRE — {n} objet(s) dans le sac"
 ui.ecran.sac,sac
 ui.ecran.slot_vide,(emplacement vide)
 ui.ecran.equiper,Équiper / retirer (E)
 ui.ecran.jeter,Jeter (J)
 ui.ecran.lire,Lire (L)
 ui.ecran.sertir,Sertir (T)
-ui.ecran.atelier,"ATELIER — stations du sac : {stations} (Entrée : fabriquer)"
+ui.ecran.atelier,"ATELIER — stations à portée : {stations}"
 ui.ecran.fabriquer,Fabriquer (Entrée)
 ui.ecran.feuille,FEUILLE — {nom}
 ui.objet.type,"{type} · {slot} · {rarete}"
