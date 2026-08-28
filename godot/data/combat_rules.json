@@ -10,7 +10,8 @@
     "descente": 2,
     "chute_delta": 3,
     "chute_degats_par_niveau": 5,
-    "chute_franchise": 2
+    "chute_franchise": 2,
+    "nage": 6
   },
   "actions": {
     "_doc": "Boucle de tick · Attaque lourde et télégraphe · Décision — Vocabulaire d'attaque des créatures",
@@ -961,5 +962,14 @@
   },
   "statuts": {
     "confusion_chance": 0.3
+  },
+  "nage": {
+    "_doc": "Eau et liquides : souffle_max = souffle_base + endurance × souffle_par_endurance ; à 0, degats_des par periode_ticks ; mêlée des_malus dans l'eau ; le Feu ne part pas.",
+    "souffle_base": 300,
+    "souffle_par_endurance": 2,
+    "degats_des": "1d6",
+    "periode_ticks": 10,
+    "des_malus": 2,
+    "refus_surcharge": true
   }
 }

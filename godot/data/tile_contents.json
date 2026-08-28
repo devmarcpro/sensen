@@ -153,13 +153,14 @@
   },
   "eau": {
     "name_key": "tile_content.eau.name",
-    "bloque_passage": true,
+    "bloque_passage": false,
     "bloque_vue": false,
     "hauteur_vue": 0,
     "tags": [
       "eau",
       "liquide",
-      "source"
+      "source",
+      "nage"
     ],
     "couleur": "#2f5f9a"
   },

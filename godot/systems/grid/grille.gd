@@ -155,6 +155,8 @@ func cout_pas(de: Vector2i, vers: Vector2i, volant: bool = false) -> int:
 	var base: int = dep["cout_base"]
 	if volant:
 		return base
+	if "nage" in contenu_de(vers).get("tags", []):   # Eau et liquides : nager coûte le double d'un pas
+		return int(dep.get("nage", base * 2))
 	var dh := h(vers) - h(de)
 	if dh >= int(dep["falaise_delta"]) or dh <= -int(dep["chute_delta"]):
 		return -1

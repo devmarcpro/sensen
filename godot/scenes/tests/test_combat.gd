@@ -91,6 +91,7 @@ func _ready() -> void:
 	test_statuts_complets()
 	test_potions_completes()
 	test_poison_illegal()
+	test_nage()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -1074,7 +1075,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 65, "9 stations, 65 recettes plates (17 transformations, 23 meubles, 9 stations, 3 plats, 13 potions)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 66, "9 stations, 66 recettes plates (17 transformations, 23 meubles, 9 stations, 3 plats, 14 potions)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -2472,6 +2473,50 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- La nage et le souffle
+
+func test_nage() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var h := s.horloge_de(j)
+	var eau: Vector2i = j.pos + Vector2i(1, 0)
+	var eau2: Vector2i = j.pos + Vector2i(2, 0)
+	for t in [eau, eau2]:
+		s.grille.poser_contenu(t, "eau")
+		s.grille.hauteurs[s.grille.idx(t)] = s.grille.h(j.pos)
+	verifier(not s.grille.bloque_passage(eau) and s.grille.cout_pas(j.pos, eau) == 6, "l'eau se traverse : coût de pas 6")
+	s.attente[j.id] = true
+	var c0 := int(j.compteur)
+	verifier(s.intention(j.id, {"type": "deplacer", "vers": eau}) and j.pos == eau and int(j.compteur) - c0 >= 4, "nager : %d ticks" % (int(j.compteur) - c0))
+	var smax := s.souffle_max(j)
+	s._tiquer_souffle(j.horloge, h.ticks)
+	var pv0 := int(j.sante)
+	s._tiquer_souffle(j.horloge, h.ticks + smax + 20)
+	verifier(int(j.souffle) == 0 and int(j.sante) < pv0, "souffle épuisé après %d ticks : noyade (%d → %d)" % [smax, pv0, int(j.sante)])
+	j["tags_acquis_race"] = ["respiration_aquatique"]
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	var pv1 := int(j.sante)
+	s._tiquer_souffle(j.horloge, h.ticks + smax + 60)
+	verifier(int(j.sante) == pv1, "respiration aquatique : plus de noyade")
+	# Le Feu ne part pas sous l'eau
+	var cap := Capacites.new(GameData.catalogues["modules"])
+	verifier(s.wuxing.dominante(cap.assembler(["point", "etincelle"], 5, "1d4", {}).elements) == "feu", "Étincelle est du Feu")
+	j.mana = 50
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "capacite", "index": 1, "cible": eau2}), "pas de Feu sous l'eau (Étincelle refusée)")
+	# Surcharge : on ne peut pas entrer dans l'eau
+	s.grille.liberer(j.pos)
+	j.pos = eau - Vector2i(1, 0)
+	s.grille.placer(j.id, j.pos)
+	for k in 40:
+		var o := s.generer_objet("proto_epee", 1, {}, "commun", 0)
+		if not o.is_empty():
+			j.sac.append(o.uid)
+	verifier(s.poids_de(j).facteur > 1.0, "40 épées : surcharge (×%.2f)" % s.poids_de(j).facteur)
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "deplacer", "vers": eau}), "trop chargé : refus d'entrer dans l'eau")
 
 
 # ---------------------------------------------------------------- Le poison de lame est illégal

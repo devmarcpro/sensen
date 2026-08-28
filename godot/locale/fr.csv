@@ -413,6 +413,13 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+status.respiration_aquatique_potion.name,Respiration aquatique
+item.potion_respiration_aquatique.name,Potion de respiration aquatique
+recipe.distiller_roseau.name,Distiller roseau (respiration aquatique)
+journal.coule,trop chargé pour nager : tu coulerais
+journal.noyade,"{nom} manque d'air ({degats})"
+journal.feu_dans_eau,pas de Feu sous l'eau
+ui.souffle," · souffle {n}/{max}"
 status.resistance_feu.name,Résistance au feu
 status.resistance_froid.name,Résistance au froid
 status.vision_nocturne_potion.name,Vision nocturne

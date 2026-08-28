@@ -1193,6 +1193,41 @@ func _doublon_recette(e: Dictionary, rid: String) -> void:
 		EventBus.emettre(&"journal", [&"journal.recette_doublon", {"k": n - d, "n": n + 1}])
 
 
+## Une tuile d'eau à nager (Eau et liquides).
+func dans_l_eau(pos: Vector2i) -> bool:
+	return grille.dans(pos) and "nage" in grille.contenu_de(pos).get("tags", [])
+
+
+func souffle_max(e: Dictionary) -> int:
+	return int(regles.r.nage.souffle_base) + int(e.stats_eff.get("endurance", 0)) * int(regles.r.nage.souffle_par_endurance)
+
+
+## Le souffle (Eau et liquides) : décroît dans l'eau, se remplit dehors ; à zéro, 1d6 par période.
+func _tiquer_souffle(nom: String, tick: int) -> void:
+	var ng: Dictionary = regles.r.nage
+	for e in vivants():
+		if e.horloge != nom or Etres.est_volant(e):
+			continue
+		var maxi_s := souffle_max(e)
+		if not e.has("souffle"):
+			e["souffle"] = maxi_s
+			e["souffle_tick"] = tick
+		var ecoules := tick - int(e.souffle_tick)
+		if ecoules <= 0:
+			continue
+		e.souffle_tick = tick
+		if dans_l_eau(e.pos) and not ("respiration_aquatique" in e.get("tags_acquis", [])):
+			e.souffle = maxi(0, int(e.souffle) - ecoules)
+			if int(e.souffle) <= 0:
+				var periodes := tick / int(ng.periode_ticks) - (tick - ecoules) / int(ng.periode_ticks)
+				for k in periodes:
+					var deg := des.jet(str(ng.degats_des))
+					EventBus.emettre(&"journal", [&"journal.noyade", {"nom": e.name_key, "degats": deg}])
+					_appliquer_degats(e, deg, "", {"type": "noyade", "element": {}})
+		else:
+			e.souffle = mini(maxi_s, int(e.souffle) + ecoules)
+
+
 ## Le vecteur élémentaire d'une tuile (Wu Xing hors combat) : dérivé des couches de bruit, jamais du biome.
 func vecteur_lieu(pos: Vector2i) -> Dictionary:
 	if not vecteur_lieu_force.is_empty():
@@ -5649,6 +5684,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 	_tirs_d_affuts(nom, tick)
 	_tiquer_vampires(nom, tick)
 	_tiquer_armes_fantomes(nom, tick)
+	_tiquer_souffle(nom, tick)
 	var o_restants: Array[Dictionary] = []
 	for o in obstacles:
 		var src: Dictionary = entites.get(o.source, {})
@@ -5884,6 +5920,9 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 			return false
 	if Etres.bloque_statuts(e, "deplacement", statuts_defs):
 		return false
+	if dans_l_eau(vers) and not dans_l_eau(e.pos) and bool(regles.r.nage.get("refus_surcharge", true)) and poids_de(e).facteur > 1.0 and not volant:
+		EventBus.emettre(&"journal", [&"journal.coule", {}])   # le poids tire vers le fond : on refuse d'entrer
+		return false
 	_quitter_garde(e)
 	grille.liberer(e.pos)
 	e.orientation = vers - e.pos
@@ -6082,7 +6121,7 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 		if Regles.direction_relative(cible.orientation, e.pos - cible.pos) == "front":
 			mult_coup *= float(regles.r.talents.dissimulation.face_mult)
 		e.statuts = e.statuts.filter(func(s0: Dictionary) -> bool: return str(s0.id) != "dissimule")
-	var d := regles.degats_arme(e.stats_eff, arme, fonct, des, lourde, a_zero, int(ax.des) + int(Etres.add_statuts(e, "des", statuts_defs)), e.competences_eff, vecteur)   # Béni : +dés
+	var d := regles.degats_arme(e.stats_eff, arme, fonct, des, lourde, a_zero, int(ax.des) + int(Etres.add_statuts(e, "des", statuts_defs)) - (int(regles.r.nage.des_malus) if dans_l_eau(e.pos) else 0), e.competences_eff, vecteur)   # Béni : +dés ; dans l'eau : −dés
 	var wx := _facteur_wuxing(e, cible, vecteur, tick_de(e))
 	var plat := int(e.get("degats_element", {}).get(wuxing.dominante(vecteur), 0))
 	var res := _resoudre_coup(e, cible, (d.bruts + float(plat)) * wx.total * float(ax.mult) * mult_coup * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur, float(ax.ignore_armure))
@@ -6825,6 +6864,9 @@ func _lancer_capacite(e: Dictionary, index: int, cible: Variant, tick: int) -> b
 	if not (cible is Vector2i) and plan.geometrie != "soi":
 		return false
 	if not capacite_visable(e, plan, cible_pos):
+		return false
+	if dans_l_eau(e.pos) and wuxing.dominante(plan.get("elements", {})) == "feu":   # pas de Feu sous l'eau (Eau et liquides)
+		EventBus.emettre(&"journal", [&"journal.feu_dans_eau", {}])
 		return false
 	if bool(plan.noyau.get("unique_par_combat", false)) and en_combat(e) and str(plan.noyau.id) in e.get("cataclysmes_combat", []):   # Sorts cataclysmiques : une fois par combat
 		EventBus.emettre(&"journal", [&"journal.cataclysme_unique", {}])

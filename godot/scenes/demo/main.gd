@@ -1317,6 +1317,7 @@ func _maj_ui() -> void:
 			+ (" + " + tr(sim.items[e.equipement.main_secondaire].name_key) if e.equipement.has("main_secondaire") else "")
 			+ (" · " + _texte_chaine(e) if e.has("chaine") else "")
 			+ (tr("ui.segment_prefere").format({"element": tr("element." + str(e.segment_prefere))}) if e.has("segment_prefere") else "")
+			+ (tr("ui.souffle").format({"n": int(e.get("souffle", 0)), "max": sim.souffle_max(e)}) if sim.dans_l_eau(e.pos) else "")
 			+ (tr("ui.sang").format({"n": int(e.get("sang", 0))}) if sim.a_talent(e, "jauge_de_sang") else "")
 			+ (" · " + _texte_statuts(e) if not e.statuts.is_empty() else ""))
 	if survol.x >= 0 and not j.is_empty():

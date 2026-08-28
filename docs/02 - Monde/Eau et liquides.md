@@ -65,6 +65,9 @@ standard (E.11) — rien de nouveau à synchroniser.
 > [!success] Codé le 2026-08-28 — la mer, statique
 > Les tuiles de mer (altitude < `planete.mer.altitude` = 0,30) sont un contenu `eau` (source, niveau 8/8), **hauteur 8** (décision : la note ne chiffre pas le niveau de la mer ; la référence du sol étant 10, la mer est deux niveaux sous la plaine, un talus la borde). L'eau bloque le passage tant que la nage attend ; elle ne bloque pas la vue. L'automate (écoulement, lacs, rivières, pluie) et les interactions (lave, foudre, évaporation) attendent.
 
+> [!success] Codé le 2026-08-28 — la nage et le souffle
+> Le contenu `eau` **ne bloque plus le passage** : il porte le tag `nage`, et `Grille.cout_pas` lui donne `deplacement.nage` (6, deux fois un pas de plaine) — les ticks passent ensuite par Athlétisme comme tout déplacement (« nager = Athlétisme »). **Le poids tire vers le fond** : un être en surcharge (`poids_de(e).facteur > 1`) **ne peut pas entrer dans l'eau** (journal) — décision : plutôt que couler, on refuse ; larguer des objets reste le geste. **Souffle** : `e.souffle`, max `= souffle_base (300 ticks = 30 s) + Endurance × 2`, décroît d'un par tick dans l'eau et se remplit hors de l'eau ; à 0, **1d6 par période de 10 ticks** (`_tiquer_souffle`, sur l'horloge de l'être) ; le tag `respiration_aquatique` immunise — la **potion de respiration aquatique** (roseau, statut qui accorde le tag, 5 min) ferme la liste des potions. **Dans l'eau** : mêlée à **−2 dés**, et une capacité dont l'élément dominant est le **Feu** ne part pas (journal). Le HUD affiche le souffle quand on nage. L'IA nage comme tout le monde (même coût de pas). Vision réduite, arbalète et foudre attendent.
+
 ## Liens
 - **Dépend de** : [[Hauteur de terrain ±10]], [[Application des stats de matériau]], [[Simulation à ticks]]
 - **Alimente** : [[Véhicules]], [[Catalogue matériaux — Liquides]], [[Météo]]
