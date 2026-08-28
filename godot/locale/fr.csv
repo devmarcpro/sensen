@@ -413,6 +413,8 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+ui.etat_grille_neige," · neige"
+ui.etat_grille_gel," · gel"
 status.respiration_aquatique_potion.name,Respiration aquatique
 item.potion_respiration_aquatique.name,Potion de respiration aquatique
 recipe.distiller_roseau.name,Distiller roseau (respiration aquatique)

@@ -1193,9 +1193,39 @@ func _doublon_recette(e: Dictionary, rid: String) -> void:
 		EventBus.emettre(&"journal", [&"journal.recette_doublon", {"k": n - d, "n": n + 1}])
 
 
-## Une tuile d'eau à nager (Eau et liquides).
+## Une tuile d'eau à nager (Eau et liquides) — gelée, elle se marche.
 func dans_l_eau(pos: Vector2i) -> bool:
-	return grille.dans(pos) and "nage" in grille.contenu_de(pos).get("tags", [])
+	return grille.dans(pos) and not grille.gel and "nage" in grille.contenu_de(pos).get("tags", [])
+
+
+## La température au centre de la cellule chargée (biome, saison, météo, nuit) — pour le gel (Météo).
+func temperature_cellule() -> float:
+	if monde == null or lieu != "camp":
+		return 18.0
+	var m: Dictionary = GameData.config("planete").get("meteo", {})
+	var cell := monde.cellule_de(grille.pos_de(grille.largeur * grille.hauteur_grille / 2))
+	var centre := grille.pos_de(grille.largeur * grille.hauteur_grille / 2)
+	var temp: float = lerpf(float(m.temp_min), float(m.temp_max), monde.surface.valeur("temperature", centre.x, centre.y)) + float(_saison_info().temp)
+	temp += float(GameData.catalogues.weather_states.get(meteo(cell), {}).get("temp_mod", 0))
+	if est_nuit():
+		temp += float(m.get("mod_nuit", -8))
+	return temp
+
+
+## Les états météo de la grille (Météo) : neige et gel, recalculés à chaque pas au camp.
+func _maj_etats_meteo() -> void:
+	if monde == null or lieu != "camp":
+		grille.neige = false
+		grille.gel = false
+		return
+	var cell := monde.cellule_de(grille.pos_de(grille.largeur * grille.hauteur_grille / 2))
+	var etat: Dictionary = GameData.catalogues.weather_states.get(meteo(cell), {})
+	var neige_avant := grille.neige
+	var gel_avant := grille.gel
+	grille.neige = "neige" in etat.get("effects", [])
+	grille.gel = temperature_cellule() < float(regles.r.deplacement.get("gel_seuil", 0.0))
+	if neige_avant != grille.neige or gel_avant != grille.gel:
+		EventBus.emettre(&"tile_changed", [grille.pos_de(0)])   # le client redessine (neige, glace)
 
 
 func souffle_max(e: Dictionary) -> int:
@@ -3914,7 +3944,12 @@ func _saison_info(tick: int = -1) -> Dictionary:
 
 ## La météo d'une cellule à un instant : une fonction pure du bruit spatial lent, du temps, de la
 ## température et de l'humidité locales (Météo). Retourne l'id d'un état de data/weather_states/.
+var meteo_force := ""   # tests et arènes : imposer un état météo
+
+
 func meteo(cell: Vector2i, tick: int = -1) -> String:
+	if not meteo_force.is_empty():
+		return meteo_force
 	if monde == null:
 		return "clair"
 	var m: Dictionary = GameData.config("planete").get("meteo", {})
@@ -5682,6 +5717,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 			grille.liberer(x.pos)
 			EventBus.emettre(&"journal", [&"journal.releve_fin", {"nom": x.name_key}])
 	_tirs_d_affuts(nom, tick)
+	_maj_etats_meteo()
 	_tiquer_vampires(nom, tick)
 	_tiquer_armes_fantomes(nom, tick)
 	_tiquer_souffle(nom, tick)

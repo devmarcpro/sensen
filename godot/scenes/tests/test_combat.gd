@@ -92,6 +92,7 @@ func _ready() -> void:
 	test_potions_completes()
 	test_poison_illegal()
 	test_nage()
+	test_neige_et_gel()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2473,6 +2474,33 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Neige et gel
+
+func test_neige_et_gel() -> void:
+	var s := Simulation.new(144)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var eau: Vector2i = j.pos + Vector2i(1, 0)
+	s.grille.poser_contenu(eau, "eau")
+	s.grille.hauteurs[s.grille.idx(eau)] = s.grille.h(j.pos)
+	var plat: Vector2i = j.pos + Vector2i(0, 1)
+	s.grille.contenu[s.grille.idx(plat)] = 0
+	s.grille.hauteurs[s.grille.idx(plat)] = s.grille.h(j.pos)
+	s.meteo_force = "clair"
+	s.horloge_monde.ticks = int(s._cycle().ticks_par_jour) / 2
+	s._maj_etats_meteo()
+	var c_plat := s.grille.cout_pas(j.pos, plat)
+	verifier(not s.grille.neige and s.grille.cout_pas(j.pos, eau) == 6, "ciel clair : pas de neige, l'eau se nage (6)")
+	s.meteo_force = "blizzard"
+	s._maj_etats_meteo()
+	verifier(s.grille.neige and s.grille.cout_pas(j.pos, plat) == c_plat + 1, "blizzard : la neige ralentit (%d → %d)" % [c_plat, s.grille.cout_pas(j.pos, plat)])
+	verifier(s.temperature_cellule() < 0.0 and s.grille.gel and not s.dans_l_eau(eau) and s.grille.cout_pas(j.pos, eau) == c_plat + 1, "−25 °C : la mer gèle, elle se marche (%.0f °C, coût %d)" % [s.temperature_cellule(), s.grille.cout_pas(j.pos, eau)])
+	s.meteo_force = "canicule"
+	s._maj_etats_meteo()
+	verifier(not s.grille.gel and not s.grille.neige, "canicule : la glace fond")
+	s.monde.fermer()
 
 
 # ---------------------------------------------------------------- La nage et le souffle

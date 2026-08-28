@@ -27,6 +27,8 @@ var materiaux: Dictionary = {}            # index de tuile → id de matériau (
 var materiau_defaut: String = ""          # le matériau des murs ordinaires (materiau_mur du thème)
 var meubles: Dictionary = {}              # index de tuile → id de meuble (data/meubles/)
 var stations_fixes: Dictionary = {}       # index de tuile → id de station posée
+var neige := false                        # état météo de la grille (Météo) : chaque pas coûte neige_surcout de plus
+var gel := false                          # sous 0 °C : l'eau est de la glace, elle se marche
 var sols: Dictionary = {}                 # index de tuile → id de matériau de sol (surface) ; vide = sol par défaut
 var origine := Vector2i.ZERO              # coordonnée monde de la tuile locale (0, 0) — fenêtre glissante (Monde)
 var modifies: Dictionary = {}             # index de tuile → true : tuiles modifiées depuis la construction (capture par cellule)
@@ -155,18 +157,19 @@ func cout_pas(de: Vector2i, vers: Vector2i, volant: bool = false) -> int:
 	var base: int = dep["cout_base"]
 	if volant:
 		return base
-	if "nage" in contenu_de(vers).get("tags", []):   # Eau et liquides : nager coûte le double d'un pas
-		return int(dep.get("nage", base * 2))
+	if "nage" in contenu_de(vers).get("tags", []) and not gel:   # Eau et liquides : nager coûte le double d'un pas (sauf glace)
+		return int(dep.get("nage", base * 2)) + (int(dep.get("neige_surcout", 1)) if neige else 0)
 	var dh := h(vers) - h(de)
 	if dh >= int(dep["falaise_delta"]) or dh <= -int(dep["chute_delta"]):
 		return -1
+	var sur := int(dep.get("neige_surcout", 1)) if neige else 0   # Météo : la neige ralentit
 	if dh == 2:
-		return dep["montee_2"]
+		return int(dep["montee_2"]) + sur
 	if dh == 1:
-		return dep["montee_1"]
+		return int(dep["montee_1"]) + sur
 	if dh < 0:
-		return dep["descente"]
-	return base
+		return int(dep["descente"]) + sur
+	return base + sur
 
 
 ## Une chute (descente ≥ chute_delta) est autorisée en un pas volontaire : dégâts = (niveaux − franchise) × 5.

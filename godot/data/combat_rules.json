@@ -11,7 +11,9 @@
     "chute_delta": 3,
     "chute_degats_par_niveau": 5,
     "chute_franchise": 2,
-    "nage": 6
+    "nage": 6,
+    "neige_surcout": 1,
+    "gel_seuil": 0.0
   },
   "actions": {
     "_doc": "Boucle de tick · Attaque lourde et télégraphe · Décision — Vocabulaire d'attaque des créatures",

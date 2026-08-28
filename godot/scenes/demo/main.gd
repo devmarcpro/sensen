@@ -1148,9 +1148,14 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 	var teinte := Color.WHITE   # le brouillard est une couche à part (_dessiner_brouillard)
 	var tags_c: Array = g.contenu_de(t).get("tags", [])
 	if "liquide" in tags_c:   # la mer : un losange d'eau à sa hauteur, les flancs de la rive sont ceux des tuiles voisines
+		var col_eau := Color.html(str(g.contenu_de(t).get("couleur", "#2f5f9a")))
+		if g.gel:   # Météo : la glace
+			col_eau = col_eau.lerp(Color(0.85, 0.92, 1.0), 0.7)
 		ci.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)]),
-			Color.html(str(g.contenu_de(t).get("couleur", "#2f5f9a"))) * teinte)
+			col_eau * teinte)
 		return
+	if g.neige:   # Météo : le sol blanchit sous la neige
+		teinte = teinte.lerp(Color(1.4, 1.4, 1.5), 0.5)
 	if g.bloque_passage(t) and not ("vegetation" in tags_c):   # un mur : un bloc plein — le sol dessous est caché
 		_dessine_bloc(ci, g, t, c, teinte)
 		return
@@ -1318,6 +1323,7 @@ func _maj_ui() -> void:
 			+ (" · " + _texte_chaine(e) if e.has("chaine") else "")
 			+ (tr("ui.segment_prefere").format({"element": tr("element." + str(e.segment_prefere))}) if e.has("segment_prefere") else "")
 			+ (tr("ui.souffle").format({"n": int(e.get("souffle", 0)), "max": sim.souffle_max(e)}) if sim.dans_l_eau(e.pos) else "")
+			+ (tr("ui.etat_grille_neige") if sim.grille.neige else "") + (tr("ui.etat_grille_gel") if sim.grille.gel else "")
 			+ (tr("ui.sang").format({"n": int(e.get("sang", 0))}) if sim.a_talent(e, "jauge_de_sang") else "")
 			+ (" · " + _texte_statuts(e) if not e.statuts.is_empty() else ""))
 	if survol.x >= 0 and not j.is_empty():
