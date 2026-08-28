@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] La foudre de l'orage (2026-08-28)
+> Une heure d'orage, un impact pondéré par hauteur et conductivité, 3d8 en zone et dans l'eau connexe. **À juger** : un impact par heure est-il assez pour qu'on pense à s'abriter, sans que l'orage devienne une loterie ?
 > [!important] L'automate d'eau (2026-08-28)
 > Creuser au bord d'un lac inonde la tranchée, un talus endigue, la pluie remplit les creux d'un niveau ; l'eau ne se retire pas encore. **À juger** : l'inondation d'une tranchée de siège — arme tactique lisible, ou piège agaçant ?
 > [!important] Coordonnées : la simulation parle en monde, l'écran et le joueur en local (2026-08-28)

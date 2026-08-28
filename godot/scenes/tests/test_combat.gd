@@ -94,6 +94,7 @@ func _ready() -> void:
 	test_nage()
 	test_neige_et_gel()
 	test_automate_eau()
+	test_foudre()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2511,6 +2512,53 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_foudre() -> void:
+	var s := Simulation.new(146)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var base: Vector2i = j.pos + Vector2i(6, 0)
+	var h0 := s.grille.h(j.pos)
+	for dx in range(-3, 12):
+		for dy in range(-3, 4):
+			var t: Vector2i = base + Vector2i(dx, dy)
+			s.grille.contenu[s.grille.idx(t)] = 0
+			s.grille.hauteurs[s.grille.idx(t)] = h0
+	# Une mare d'eau douce : une ligne d'écoulement de 7 tuiles
+	for dx in range(0, 7):
+		s.grille.poser_contenu(base + Vector2i(dx, 0), "eau_ecoulement")
+		s.grille.niveau_eau[s.grille.idx(base + Vector2i(dx, 0))] = 7 - dx
+	var dans_eau := s.ajouter("loup", base + Vector2i(4, 0), "ia")
+	var loin_eau := s.ajouter("loup", base + Vector2i(6, 0), "ia")   # à 6 : au-delà du rayon 5 de l'eau douce
+	var terre := s.ajouter("loup", base + Vector2i(3, 2), "ia")   # sur la terre, à 2 : hors zone
+	var voisin := s.ajouter("loup", base + Vector2i(-1, 1), "ia")   # voisin diagonal de l'impact : zone
+	var pv := [int(dans_eau.sante), int(loin_eau.sante), int(terre.sante), int(voisin.sante)]
+	s._frapper_foudre(base)
+	verifier(int(dans_eau.sante) < pv[0], "la foudre court dans l'eau : le loup à 4 tuiles dans la mare est touché (%d → %d)" % [pv[0], int(dans_eau.sante)])
+	verifier(int(loin_eau.sante) == pv[1], "à 6 tuiles, au-delà du rayon 5 de l'eau douce : rien")
+	verifier(int(terre.sante) == pv[2], "sur la terre à 2 tuiles : rien")
+	verifier(int(voisin.sante) < pv[3], "le voisin de l'impact prend la zone")
+	# La glace ne conduit pas
+	dans_eau.sante = dans_eau.sante_max
+	s.grille.gel = true
+	s._frapper_foudre(base)
+	verifier(int(dans_eau.sante) == int(dans_eau.sante_max), "sur la glace, la foudre ne court pas")
+	s.grille.gel = false
+	# Une source (la mer) conduit à 8
+	s.grille.poser_contenu(base, "eau")
+	loin_eau.sante = loin_eau.sante_max
+	s._frapper_foudre(base)
+	verifier(int(loin_eau.sante) < int(loin_eau.sante_max), "depuis une source (eau salée) : rayon 8, le loup à 6 est touché")
+	# Le paratonnerre émergent : la foudre vise le point haut
+	var mat: Vector2i = base + Vector2i(2, -2)
+	s.grille.hauteurs[s.grille.idx(mat)] = h0 + 3
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 3
+	s.regles.r.eau["foudre_portee_joueur"] = 1   # candidates dans le carré 3×3 autour du point haut
+	var cible := s._cible_foudre(rng, mat)
+	verifier(cible == mat, "la foudre vise le point haut (%s, h %d)" % [str(cible - mat), s.grille.h(cible)])
+	s.monde.fermer()
+
 
 func test_automate_eau() -> void:
 	var s := Simulation.new(145)

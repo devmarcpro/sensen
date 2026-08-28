@@ -979,10 +979,15 @@
     "second_souffle_seuil_pct": 20
   },
   "eau": {
-    "_doc": "Eau et liquides : automate — periode_ticks entre deux pas, tuiles_par_pas traitées par pas, portee = niveau de départ d'un écoulement à plat (7), pluie_tuiles = creux remplis par heure de pluie.",
+    "_doc": "Eau et liquides : automate — periode_ticks entre deux pas, tuiles_par_pas traitées par pas, portee = niveau de départ d'un écoulement à plat (7), pluie_tuiles = creux remplis par heure de pluie. Foudre (Météo, orage) : foudre_des en zone 1 et dans l'eau connexe (rayon foudre_rayon_eau, foudre_rayon_mer sur une source), cible choisie parmi foudre_candidats tuiles dans foudre_portee_joueur, pondérées par hauteur et conductivité électrique.",
     "periode_ticks": 5,
     "tuiles_par_pas": 64,
     "portee": 7,
-    "pluie_tuiles": 20
+    "pluie_tuiles": 20,
+    "foudre_des": "3d8",
+    "foudre_rayon_eau": 5,
+    "foudre_rayon_mer": 8,
+    "foudre_candidats": 40,
+    "foudre_portee_joueur": 24
   }
 }

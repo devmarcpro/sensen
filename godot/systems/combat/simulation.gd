@@ -35,6 +35,7 @@ var monde: Monde = null              # la surface comme fenêtre glissante (éta
 var bombes: Array = []               # les bombes posées, en attente d'explosion (Explosions)
 var affuts: Array[Dictionary] = []   # tourelles portatives de L'Engrenage : {pos, source, prochain}
 var pluie_heure := -1   # la dernière heure de monde où la pluie a rempli les creux
+var foudre_heure := -1   # la dernière heure d'orage où la foudre a frappé (Météo)
 var eau_active: Dictionary = {}   # idx → true : tuiles de liquide à propager (Eau et liquides)
 var eau_prochain_pas := 0
 var modifs_terrain: Dictionary = {}   # idx → {h, contenu} d'origine : ce que le monde rendra hors claim (Destruction du terrain)
@@ -464,6 +465,70 @@ func _pluie_sur(t: Vector2i) -> bool:
 	_poser_eau(t, 1)
 	eau_active.erase(grille.idx(t))   # une flaque de pluie ne se propage pas
 	return true
+
+
+## La foudre de l'orage (Météo) : un impact par heure, ciblé par hauteur et conductivité autour du joueur.
+func _foudre(tick: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "foudre", tick])
+	var centre := grille.pos_de(grille.largeur * grille.hauteur_grille / 2)
+	for x in vivants():
+		if x.controle == "joueur":
+			centre = x.pos
+			break
+	var t := _cible_foudre(rng, centre)
+	if grille.dans(t):
+		_frapper_foudre(t)
+
+
+## La tuile que la foudre choisit : la plus haute et la plus conductrice parmi des candidates au hasard (paratonnerre émergent).
+func _cible_foudre(rng: RandomNumberGenerator, centre: Vector2i) -> Vector2i:
+	var ea: Dictionary = regles.r.get("eau", {})
+	var portee := int(ea.get("foudre_portee_joueur", 24))
+	var meilleure := Vector2i(-1, -1)
+	var score_max := -1.0
+	for essai in int(ea.get("foudre_candidats", 40)):
+		var t := centre + Vector2i(rng.randi_range(-portee, portee), rng.randi_range(-portee, portee))
+		if not grille.dans(t):
+			continue
+		var score := float(grille.h(t)) * 10.0 + rng.randf()
+		if grille.bloque_passage(t):   # un relief ou un mur : son matériau compte
+			score += float(GameData.entree("materials", grille.materiau_de(t)).get("stats", {}).get("conductivite_electrique", 5))
+		if score > score_max:
+			score_max = score
+			meilleure = t
+	return meilleure
+
+
+## L'impact : 3d8 en zone 1, puis la nappe d'eau connexe (Eau et liquides : conductivité).
+func _frapper_foudre(t: Vector2i) -> void:
+	var ea: Dictionary = regles.r.get("eau", {})
+	EventBus.emettre(&"journal", [&"journal.foudre", {"x": t.x, "y": t.y}])
+	lumiere_sale = true
+	var touches: Dictionary = {}
+	for x in vivants():
+		if Grille.distance(x.pos, t) <= 1:
+			touches[x.id] = true
+			_appliquer_degats(x, des.jet(str(ea.get("foudre_des", "3d8"))), "", {"type": "foudre"})
+	if grille.niveau_liquide(t) <= 0 or grille.gel:
+		return
+	var rayon := int(ea.get("foudre_rayon_mer", 8)) if grille.niveau_liquide(t) >= 8 else int(ea.get("foudre_rayon_eau", 5))
+	var nappe: Dictionary = {grille.idx(t): true}
+	var file: Array[Vector2i] = [t]
+	while not file.is_empty():
+		var c: Vector2i = file.pop_front()
+		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var q: Vector2i = c + dd
+			if grille.dans(q) and not nappe.has(grille.idx(q)) and Grille.distance(q, t) <= rayon and grille.niveau_liquide(q) > 0:
+				nappe[grille.idx(q)] = true
+				file.append(q)
+	var n := 0
+	for x in vivants():
+		if not touches.has(x.id) and nappe.has(grille.idx(x.pos)):
+			n += 1
+			_appliquer_degats(x, des.jet(str(ea.get("foudre_des", "3d8"))), "", {"type": "foudre"})
+	if n > 0:
+		EventBus.emettre(&"journal", [&"journal.foudre_eau", {"n": n}])
 
 
 ## La pluie (Météo) remplit les creux ouverts d'un niveau : des tuiles plus basses que leurs quatre voisines.
@@ -5867,9 +5932,14 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 	if nom == "monde":
 		_tiquer_eau(tick)
 		var h_ticks := int(_cycle().get("ticks_par_jour", 24000)) / 24
-		if lieu == "camp" and monde != null and tick / h_ticks != pluie_heure and meteo(monde.cellule_de(grille.pos_de(grille.largeur * grille.hauteur_grille / 2))) == "pluie":
-			pluie_heure = tick / h_ticks
-			_pluie(tick)
+		if lieu == "camp" and monde != null:
+			var met := meteo(monde.cellule_de(grille.pos_de(grille.largeur * grille.hauteur_grille / 2)))
+			if tick / h_ticks != pluie_heure and met in ["pluie", "orage"]:   # l'orage arrose aussi
+				pluie_heure = tick / h_ticks
+				_pluie(tick)
+			if tick / h_ticks != foudre_heure and met == "orage":   # Météo : la foudre réelle
+				foudre_heure = tick / h_ticks
+				_foudre(tick)
 	_tiquer_vampires(nom, tick)
 	_tiquer_armes_fantomes(nom, tick)
 	_tiquer_souffle(nom, tick)

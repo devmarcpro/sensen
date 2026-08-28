@@ -422,6 +422,8 @@ tile_content.eau.name,Eau
 tile_content.eau_ecoulement.name,Eau (écoulement)
 journal.inondation,"l'eau envahit ({x},{y})"
 journal.pluie_creux,la pluie remplit les creux
+journal.foudre,"la foudre frappe ({x},{y})"
+journal.foudre_eau,"la foudre court dans l'eau : {n} touché(s)"
 ui.etat_grille_neige," · neige"
 ui.etat_grille_gel," · gel"
 status.respiration_aquatique_potion.name,Respiration aquatique
