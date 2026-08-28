@@ -5095,7 +5095,7 @@ func _respawn(e: Dictionary) -> bool:
 		EventBus.emettre(&"journal", [&"journal.respawn", {"nom": e.name_key, "perdus": perdus.size()}])
 		return true
 	var spawn: Vector2i = e.get("spawn", e.pos)
-	if not grille.occupant(spawn).is_empty() or grille.bloque_passage(spawn):
+	if not grille.dans(spawn) or not grille.occupant(spawn).is_empty() or grille.bloque_passage(spawn):   # le spawn d'une autre grille (camp → donjon) ne vaut rien ici
 		spawn = e.pos
 	e.pos = spawn
 	grille.placer(e.id, spawn)

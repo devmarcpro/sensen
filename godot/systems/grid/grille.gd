@@ -251,6 +251,8 @@ func atteignables(depart: Vector2i, budget: int, volant: bool = false) -> Dictio
 func ligne_de_vue(a: Vector2i, b: Vector2i) -> bool:
 	if a == b:
 		return true
+	if not dans(a) or not dans(b):   # une position d'une autre grille : hors de vue
+		return false
 	var ha := float(h(a) + hauteur_oeil)
 	var hb := float(h(b) + hauteur_oeil)
 	var n := maxi(absi(b.x - a.x), absi(b.y - a.y))
