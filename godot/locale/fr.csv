@@ -419,6 +419,10 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.plante_sauvage.name,Plante sauvage
+tile_content.lave.name,Lave
+tile_content.obsidienne_figee.name,Roche figée
+journal.lave_brule,"{nom} touche la lave ({degats})"
+journal.lave_figee,"la lave se fige au contact de l'eau ({x},{y})"
 option.cueillir,Cueillir
 journal.cueillette,"{nom} cueille {plante} ×{n}"
 tile_content.eau.name,Eau

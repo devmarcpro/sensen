@@ -550,6 +550,55 @@ func _pluie_sur(t: Vector2i) -> bool:
 	return true
 
 
+## La lave (Eau et liquides) : elle brûle qui s'y tient, enflamme ses voisines, et se fige au contact de l'eau.
+func _tiquer_lave(tick: int) -> void:
+	if tick < eau_prochain_pas:
+		return
+	var lv: Dictionary = regles.r.get("lave", {})
+	for idx in grille.dangers.keys():
+		var t := grille.pos_de(int(idx))
+		if not ("lave" in grille.contenu_de(t).get("tags", [])):
+			continue
+		var occ := grille.occupant(t)
+		if not occ.is_empty() and entites.has(occ) and entites[occ].vivant:
+			var x: Dictionary = entites[occ]
+			var deg := des.jet(str(lv.get("degats", "3d6")))
+			_appliquer_degats(x, deg, "", {"type": "lave", "element": {"feu": 1.0}})
+			appliquer_statut(x, "brulure", int(lv.get("brulure_ticks", 40)), "")
+			EventBus.emettre(&"journal", [&"journal.lave_brule", {"nom": x.name_key, "degats": deg}])
+		var fige := ""
+		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var q: Vector2i = t + dd
+			if not grille.dans(q):
+				continue
+			var niv := grille.niveau_liquide(q)
+			if niv >= 8:
+				fige = str(lv.get("obsidienne_source", "obsidienne"))
+			elif niv > 0:
+				if fige.is_empty():
+					fige = str(lv.get("pierre_ecoulement", "basalte"))
+				grille.contenu[grille.idx(q)] = 0   # l'écoulement s'évapore au contact
+				grille.niveau_eau.erase(grille.idx(q))
+				grille.marquer(q)
+				EventBus.emettre(&"tile_changed", [q])
+			else:
+				_enflammer(q)
+		if not fige.is_empty():
+			_figer_lave(t, fige)
+
+
+## La lave figée par l'eau : obsidienne au contact d'une source, basalte au contact d'un écoulement.
+func _figer_lave(t: Vector2i, materiau: String) -> void:
+	var idx := grille.idx(t)
+	grille.poser_contenu(t, "obsidienne_figee")
+	grille.materiaux[idx] = materiau
+	grille.dangers.erase(idx)
+	grille.marquer(t)
+	lumiere_sale = true
+	EventBus.emettre(&"journal", [&"journal.lave_figee", {"x": t.x, "y": t.y}])
+	EventBus.emettre(&"tile_changed", [t])
+
+
 ## La flammabilité d'une tuile (Météo : le feu) : celle du matériau de son contenu, d'une culture, ou de son sol nu.
 func flammabilite_de(t: Vector2i) -> int:
 	if not grille.dans(t) or grille.niveau_liquide(t) > 0 or grille.gel:
@@ -6240,6 +6289,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 	_maj_etats_meteo()
 	if nom == "monde":
 		_tiquer_eau(tick)
+		_tiquer_lave(tick)
 		_tiquer_feux(tick)
 		var h_ticks := int(_cycle().get("ticks_par_jour", 24000)) / 24
 		if lieu == "camp" and monde != null:

@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] La lave (2026-08-28)
+> Des mares de lave dès l'étage 5 : 3d6 au contact, elles enflamment autour et se figent en obsidienne au contact de l'eau. **À juger** : une mare de lave dans un couloir de donjon — obstacle lisible, ou mort injuste quand on recule en combat ?
 > [!important] Le feu de tuile (2026-08-28)
 > Foudre, canicule et bombes enflamment ; le feu court d'arbre en arbre (×2 sous le vent), brûle qui s'y tient, la pluie l'éteint. **À juger** : une forêt qui part en fumée à cause d'une bombe — spectaculaire, ou punitif (la cueillette et le bois s'en vont) ?
 > [!important] Affixes réveillés (2026-08-28)

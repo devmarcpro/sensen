@@ -91,6 +91,9 @@ static func depuis_etage(etage: Dictionary, contenus: Dictionary, regles_dep: Di
 	for i in g.largeur * g.hauteur_grille:
 		if not etage.sol.has(i):
 			g.poser_contenu(Vector2i(i % g.largeur, i / g.largeur), "roche" if etage.get("bord", {}).has(i) else "mur")
+	for i in etage.get("lave", {}).keys():   # Eau et liquides : les mares de lave
+		g.poser_contenu(Vector2i(int(i) % g.largeur, int(i) / g.largeur), "lave")
+		g.dangers[int(i)] = true
 	return g
 
 

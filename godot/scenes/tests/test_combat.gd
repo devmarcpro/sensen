@@ -100,6 +100,7 @@ func _ready() -> void:
 	test_cueillette()
 	test_affixes_reveilles()
 	test_feu()
+	test_lave()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2518,6 +2519,40 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_lave() -> void:
+	# Le générateur : pas de lave avant l'étage minimum, des mares après
+	var s := Simulation.new(152)
+	s.charger_donjon("ruine", 152, 3, 2)
+	var lave_2 := 0
+	for i in s.grille.contenu.size():
+		if "lave" in s.grille.contenu_de(s.grille.pos_de(i)).get("tags", []):
+			lave_2 += 1
+	s.charger_donjon("ruine", 152, 3, 6)
+	var laves: Array[Vector2i] = []
+	for i in s.grille.contenu.size():
+		var t := s.grille.pos_de(i)
+		if "lave" in s.grille.contenu_de(t).get("tags", []):
+			laves.append(t)
+	verifier(lave_2 == 0 and laves.size() >= 6, "pas de lave à l'étage 2, des mares à l'étage 6 (%d tuiles)" % laves.size())
+	verifier(s.grille.dangers.has(s.grille.idx(laves[0])), "la lave est un danger : l'IA la contourne")
+	# Contact : un loup posé dans la lave brûle
+	var t0: Vector2i = laves[0]
+	var loup := s.ajouter("loup", t0, "ia")
+	var pv := int(loup.sante)
+	s.eau_prochain_pas = 0
+	s._tiquer_lave(1000)
+	verifier(int(loup.sante) < pv and Etres.a_statut_id(loup, "brulure"), "la lave brûle qui s'y tient (%d → %d)" % [pv, int(loup.sante)])
+	# L'eau la fige : une source à côté → obsidienne
+	var voisine: Vector2i = t0 + Vector2i(1, 0)
+	if not s.grille.dans(voisine) or s.grille.bloque_passage(voisine):
+		voisine = t0 + Vector2i(-1, 0)
+	s.grille.poser_contenu(voisine, "eau")
+	s.eau_prochain_pas = 0
+	s._tiquer_lave(1010)
+	verifier(not ("lave" in s.grille.contenu_de(t0).get("tags", [])) and str(s.grille.materiau_de(t0)) == "obsidienne", "au contact d'une source, la lave se fige en obsidienne")
+	verifier(not s.grille.dangers.has(s.grille.idx(t0)), "figée, elle n'est plus un danger")
+
 
 func test_feu() -> void:
 	var s := Simulation.new(151)

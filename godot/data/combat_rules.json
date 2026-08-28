@@ -1003,5 +1003,21 @@
     "canicule_portee": 20,
     "flamm_culture": 60,
     "flamm_plante_sauvage": 50
+  },
+  "lave": {
+    "_doc": "Eau et liquides : la lave. etage_min = premier étage de donjon qui en porte, mares et taille = nombre et étendue, degats au contact par pas d'automate (+ Brûlure brulure_ticks), obsidienne_source / pierre_ecoulement = matériaux de la lave figée par l'eau.",
+    "etage_min": 5,
+    "mares": [
+      1,
+      3
+    ],
+    "taille": [
+      6,
+      20
+    ],
+    "degats": "3d6",
+    "brulure_ticks": 40,
+    "obsidienne_source": "obsidienne",
+    "pierre_ecoulement": "basalte"
   }
 }

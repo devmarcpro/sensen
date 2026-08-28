@@ -99,7 +99,48 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 	_peupler(e, etage)
 	_poser_coffres(e)
 	_poser_filons(e, etage)
+	_poser_lave(e, etage)
 	return e
+
+
+## Des mares de lave dans les étages profonds (Eau et liquides) : des tuiles de sol, loin des points fixes.
+func _poser_lave(e: Dictionary, etage: int) -> void:
+	var lv: Dictionary = GameData.config("combat_rules").get("lave", {})
+	if etage < int(lv.get("etage_min", 5)):
+		return
+	var interdits := {}
+	for pt in [e.entree, e.escalier, e.boss]:
+		if pt != null:
+			for dy in range(-2, 3):
+				for dx in range(-2, 3):
+					interdits[(pt.y + dy) * e.largeur + pt.x + dx] = true
+	for c in e.coffres:
+		interdits[c.pos.y * e.largeur + c.pos.x] = true
+	var mares: Array = lv.get("mares", [1, 3])
+	var tailles: Array = lv.get("taille", [6, 20])
+	e["lave"] = {}
+	var sols: Array = e.sol.keys()   # la marche part d'une tuile de sol : au hasard dans la grille, elle tomberait dans la roche
+	if sols.is_empty():
+		return
+	for k in rng.randi_range(int(mares[0]), int(mares[1])):
+		var depart: int = int(sols[rng.randi_range(0, sols.size() - 1)])
+		var p := Vector2i(depart % e.largeur, depart / e.largeur)
+		var reste := rng.randi_range(int(tailles[0]), int(tailles[1]))
+		for pas in reste * 20:
+			var idx: int = p.y * e.largeur + p.x
+			if e.sol.has(idx) and not interdits.has(idx) and not e.lave.has(idx):
+				e.lave[idx] = true
+				reste -= 1
+				if reste <= 0:
+					break
+			var libres: Array[Vector2i] = []   # la marche reste sur le sol : sinon elle se perd dans la roche
+			for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var q: Vector2i = p + d
+				if q.x >= 2 and q.y >= 2 and q.x < e.largeur - 2 and q.y < e.hauteur - 2 and e.sol.has(q.y * e.largeur + q.x):
+					libres.append(q)
+			if libres.is_empty():
+				break
+			p = libres[rng.randi_range(0, libres.size() - 1)]
 
 
 # ---------------------------------------------------------------- salles

@@ -210,5 +210,28 @@
       "vegetation",
       "cueillette"
     ]
+  },
+  "lave": {
+    "name_key": "tile_content.lave.name",
+    "bloque_passage": false,
+    "bloque_vue": false,
+    "hauteur_vue": 0,
+    "tags": [
+      "liquide",
+      "source",
+      "lave",
+      "danger"
+    ],
+    "couleur": "#e2531f"
+  },
+  "obsidienne_figee": {
+    "name_key": "tile_content.obsidienne_figee.name",
+    "bloque_passage": false,
+    "bloque_vue": false,
+    "hauteur_vue": 0,
+    "tags": [
+      "fige"
+    ],
+    "couleur": "#2a2230"
   }
 }
