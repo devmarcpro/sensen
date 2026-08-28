@@ -14,6 +14,7 @@ func _ready() -> void:
 			pas_total = int(args[i + 1])
 		elif args[i] == "--graine" and i + 1 < args.size():
 			graine = int(args[i + 1])
+	var bete := "--bete" in args   # --bete : le joueur incarne un cerf dès le départ (Changer de personnage : un corps sans mains)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = graine
 	var s := Simulation.new(graine)
@@ -30,6 +31,13 @@ func _ready() -> void:
 	s._habiller_pnj(comp, GameData.entree("creatures", "villageois"))
 	comp["maitre"] = jid
 	comp.camp = j.camp
+	if bete:
+		var cerf := s.ajouter("cerf", j.pos + Vector2i(1, 1), "ia")
+		cerf["maitre"] = jid
+		cerf.camp = j.camp
+		s.attente[jid] = true
+		var incarne := s.intention(jid, {"type": "incarner", "pnj": cerf.id})
+		print("FUZZ bete : incarnation %s" % str(incarne))
 	var res := s.ajouter("villageois", j.pos + Vector2i(0, -1), "ia")
 	s._habiller_pnj(res, GameData.entree("creatures", "villageois"))
 	res.social.relations[jid] = 80
