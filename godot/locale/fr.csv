@@ -1865,8 +1865,6 @@ material.chanvre.name,Chanvre
 material.laine.name,Laine
 material.soie.name,Soie
 material.cuir.name,Cuir
-material.os.name,Os
-material.os_massif.name,Os massif
 material.fourrure.name,Fourrure
 material.eau.name,Eau
 material.eau_salee.name,Eau salée
@@ -1887,6 +1885,8 @@ material.verre.name,Verre
 material.brique.name,Brique
 material.chaume_tresse.name,Chaume tressé
 material.papier.name,Papier
+material.os.name,Os
+material.os_massif.name,Os massif
 # --- fin matériaux ---
 # --- cultures de nommage (tools/gen_name_cultures.py) ---
 titre.latine.monarchie_hereditaire.m,Roi

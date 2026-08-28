@@ -100,7 +100,7 @@ DECLENCHEURS = {
 }
 
 n = 0
-for p in sorted(glob.glob(os.path.join(ROOT, "*.json"))):
+for p in sorted(glob.glob(os.path.join(ROOT, "**", "*.json"), recursive=True)):
     d = json.load(open(p, encoding="utf-8"))
     id_ = d["id"]
     effet = None

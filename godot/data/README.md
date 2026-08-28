@@ -4,7 +4,7 @@
 
 ## Les cinq règles
 
-1. **Un fichier par entrée** — l'id est le nom du fichier (`materials/chene.json` → id `chene`). Ajouter du contenu = ajouter un fichier, zéro code.
+1. **Un fichier par entrée** — l'id est le nom du fichier (`materials/bois/chene.json` → id `chene`). Ajouter du contenu = ajouter un fichier, zéro code. Depuis le 2026-08-29 un catalogue peut être **rangé en sous-dossiers** (chargement récursif) : le dossier n'est qu'un classement pour l'humain, **l'id reste le nom du fichier** et doit rester unique dans le catalogue (le loader le vérifie). Rangements en place : `modules/<module_type>/`, `items/<type>/`, `affixes/<famille>/`, `materials/<category>/`, `plants/<catégorie>/`, `status_effects/<potion|controle|negatif|positif>/`.
 2. **Copier le `_template.json`** du dossier, le renommer, le remplir. Le champ `_doc` est ignoré par le loader.
 3. **Validation au boot** (schémas dans `schemas/`, erreurs `fichier → champ` en console, bloquantes en debug) ; **F5 recharge tout** sans relancer. Les fichiers `_*` sont ignorés.
 4. **Les systèmes lisent des tags et des champs, jamais des ids** — `GameData.entree(catalogue, id)` / `GameData.par_tag(catalogue, tag)` (`get` est réservé par `Object` en GDScript) ; configurations : `GameData.config(nom)` / `GameData.regle("combat_rules/endurance/max")`.

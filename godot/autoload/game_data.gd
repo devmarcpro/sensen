@@ -152,16 +152,32 @@ func _charger_dossier(nom: String) -> Dictionary:
 		avertissements.append("%s : dossier absent" % nom)
 		return res
 	var schema := _charger_schema(nom)
+	_charger_recursif(nom, "", schema, res)
+	return res
+
+
+## Un catalogue peut être **rangé en sous-dossiers** (data/modules/noyau/…) : l'id reste le nom du fichier,
+## le sous-dossier n'est qu'un classement pour l'humain (décision du designer, 2026-08-29).
+func _charger_recursif(nom: String, sous: String, schema: Dictionary, res: Dictionary) -> void:
+	var chemin := RACINE + nom + sous
+	var dir := DirAccess.open(chemin)
+	if dir == null:
+		return
+	for d2 in dir.get_directories():
+		if not d2.begins_with("_"):
+			_charger_recursif(nom, sous + "/" + d2, schema, res)
 	for f in dir.get_files():
 		if not f.ends_with(".json") or f.begins_with("_"):
 			continue
-		var fichier := "%s/%s" % [nom, f]
+		var fichier := "%s%s/%s" % [nom, sous, f]
 		var d: Variant = _lire_json(chemin + "/" + f, fichier)
 		if not (d is Dictionary):
 			continue
 		var id := f.trim_suffix(".json")
 		if d.has("id") and d["id"] != id:
 			erreurs.append("%s → id → « %s » ne correspond pas au nom du fichier" % [fichier, d["id"]])
+		if res.has(id):
+			erreurs.append("%s → deux fichiers portent l'id « %s » dans le catalogue" % [fichier, id])
 		d["id"] = id
 		d.erase("_doc")
 		if not schema.is_empty():
@@ -171,7 +187,6 @@ func _charger_dossier(nom: String) -> Dictionary:
 		if d.has("text_key"):
 			_verifier_cle(d["text_key"], fichier)
 		res[id] = d
-	return res
 
 
 func _charger_config(nom: String) -> Dictionary:

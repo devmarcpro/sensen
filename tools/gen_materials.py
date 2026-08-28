@@ -103,11 +103,14 @@ for fichier, cat in CATALOGUES.items():
         materiaux[ident] = (nom, m)
 
 # ---------------------------------------------------------------- écriture
-for f in glob.glob(os.path.join(SORTIE, "*.json")):
+for f in glob.glob(os.path.join(SORTIE, "**", "*.json"), recursive=True):
     if not os.path.basename(f).startswith("_"):
         os.remove(f)
 for ident, (nom, m) in materiaux.items():
-    with io.open(os.path.join(SORTIE, ident + ".json"), "w", encoding="utf-8", newline="\n") as f:
+    dossier = os.path.join(SORTIE, str(m.get("category", "divers")))   # range par categorie (2026-08-29)
+    if not os.path.isdir(dossier):
+        os.makedirs(dossier)
+    with io.open(os.path.join(dossier, ident + ".json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(m, f, ensure_ascii=False, indent=2)
         f.write("\n")
 
