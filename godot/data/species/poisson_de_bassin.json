@@ -1,0 +1,60 @@
+{
+  "name_key": "species.poisson_de_bassin.name",
+  "famille": "grille",
+  "groupe": "poissons",
+  "habitat": "bassin",
+  "capture": {
+    "verbe": "ligne",
+    "milieu": "eau",
+    "dd": 8,
+    "rarete": 1
+  },
+  "loci": {
+    "couleur": {
+      "type": "anneau",
+      "n": 10
+    },
+    "motif": {
+      "type": "anneau",
+      "n": 6
+    },
+    "taille": {
+      "type": "nombre",
+      "min": 2,
+      "max": null,
+      "var": 0.12
+    }
+  },
+  "silhouette": "",
+  "registre": "records",
+  "tags": [],
+  "repro": {
+    "moteur": "anneau",
+    "conditions": [
+      {
+        "c": "habitat",
+        "v": "bassin"
+      },
+      {
+        "c": "place"
+      },
+      {
+        "c": "sexe"
+      },
+      {
+        "c": "age",
+        "min": 2
+      },
+      {
+        "c": "temperature",
+        "min": 18,
+        "max": 26
+      }
+    ],
+    "portee": [
+      2,
+      3
+    ],
+    "couts": []
+  }
+}

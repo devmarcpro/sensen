@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.meuble_bassin.name",
+  "station": "etabli",
+  "craft_skill": "menuiserie",
+  "inputs": [
+    {
+      "category": "bois",
+      "forme": "planche",
+      "amount": 2
+    },
+    {
+      "category": "roche",
+      "forme": "bloc",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "meuble_bassin",
+    "amount": 1
+  },
+  "fuel": null
+}

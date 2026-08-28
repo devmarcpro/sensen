@@ -2995,6 +2995,9 @@ func conditions_repro(a: Dictionary, b: Dictionary, ctx: Dictionary) -> Dictiona
 			"stat":
 				if minf(float(a.genome.get(str(c.k), 0)), float(b.genome.get(str(c.k), 0))) < float(c.min):
 					raisons.append({"cle": "raison.stat", "k": str(c.k)})
+			"colonie":   # Lucioles : elles ne s'accordent qu'en nombre (Catalogue des groupes d'élevage)
+				if int(ctx.get("occupants", 0)) < int(c.min):
+					raisons.append({"cle": "raison.colonie", "n": int(c.min)})
 			"ressource":
 				if int(territoire.stocks.get(str(c.k), 0)) < int(c.n):
 					raisons.append({"cle": "raison.ressource", "k": str(c.k), "n": int(c.n)})
@@ -3211,7 +3214,7 @@ func _semaine_elevage() -> void:
 						EventBus.emettre(&"journal", [&"journal.production_colonie", {"espece": GameData.catalogues.species[str(it.espece)].name_key, "n": n, "item": "item.%s.name" % str(prod.item)}])
 		if specimens.size() < 2:
 			continue
-		var ctx := {"habitat": str(m.type_meuble), "libre": int(m.capacite_slots) - contenants[gi].size(), "temp": float(temperature_ressentie({"pos": pos}).temp), "saison": saison()}
+		var ctx := {"habitat": str(m.type_meuble), "occupants": contenants[gi].size(), "libre": int(m.capacite_slots) - contenants[gi].size(), "temp": float(temperature_ressentie({"pos": pos}).temp), "saison": saison()}
 		var fait := false
 		var couvees := 0
 		var couvees_max: int = int(_elv().couvees_par_semaine) + int(paliers_elevage().couvees)

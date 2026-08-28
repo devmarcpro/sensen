@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.bassin.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "bassin",
+  "tags": [
+    "meuble",
+    "posable"
+  ]
+}

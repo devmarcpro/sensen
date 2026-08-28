@@ -1,0 +1,54 @@
+{
+  "name_key": "species.luciole.name",
+  "famille": "monde_decide",
+  "groupe": "lucioles",
+  "habitat": "vivarium",
+  "capture": {
+    "verbe": "filet",
+    "milieu": "plante",
+    "dd": 9,
+    "rarete": 1,
+    "nuit": true
+  },
+  "loci": {
+    "couleur": {
+      "type": "anneau",
+      "n": 6
+    },
+    "rythme": {
+      "type": "sequence",
+      "n": 4
+    }
+  },
+  "silhouette": "",
+  "registre": "sequences",
+  "tags": [],
+  "repro": {
+    "moteur": "anneau",
+    "conditions": [
+      {
+        "c": "habitat",
+        "v": "vivarium"
+      },
+      {
+        "c": "place"
+      },
+      {
+        "c": "sexe"
+      },
+      {
+        "c": "age",
+        "min": 1
+      },
+      {
+        "c": "colonie",
+        "min": 6
+      }
+    ],
+    "portee": [
+      2,
+      4
+    ],
+    "couts": []
+  }
+}

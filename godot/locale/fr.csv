@@ -805,6 +805,11 @@ species.coquillage.name,Coquillage nacré
 recipe.filer_soie.name,Filer la soie (tue la chrysalide)
 species.serpent.name,Serpent des dunes
 species.ver_a_soie.name,Ver à soie
+species.luciole.name,Luciole des haies
+species.poisson_de_bassin.name,Poisson de bassin
+meuble.bassin.name,Bassin
+recipe.meuble_bassin.name,Bassin
+raison.colonie,"il faut {n} spécimens dans l'habitat"
 species.ruche.name,Ruche
 species.tortue.name,Tortue des marais
 species.phalene.name,Phalène du bouleau

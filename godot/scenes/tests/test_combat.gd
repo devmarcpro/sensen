@@ -104,6 +104,7 @@ func _ready() -> void:
 	test_courant()
 	test_ia_portails()
 	test_paliers_elevage()
+	test_especes_ajoutees()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -1089,7 +1090,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 66, "9 stations, 66 recettes plates (17 transformations, 23 meubles, 9 stations, 3 plats, 14 potions)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 67, "9 stations, 67 recettes plates (17 transformations, 24 meubles, 9 stations, 3 plats, 14 potions)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -2524,6 +2525,34 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_especes_ajoutees() -> void:
+	verifier(GameData.catalogues.species.size() >= 10, "dix espèces d'élevage au catalogue (%d)" % GameData.catalogues.species.size())
+	var lu: Dictionary = GameData.entree("species", "luciole")
+	var po: Dictionary = GameData.entree("species", "poisson_de_bassin")
+	verifier(str(lu.loci.rythme.type) == "sequence" and str(po.loci.taille.type) == "nombre", "les deux derniers types de loci ont un porteur")
+	verifier(bool(lu.capture.get("nuit", false)) and str(po.capture.verbe) == "ligne", "luciole de nuit, poisson à la ligne")
+	verifier(GameData.catalogues.meubles.has("bassin") and GameData.catalogues.items.has("meuble_bassin") and GameData.catalogues.recipes.has("meuble_bassin"), "le bassin : meuble, objet et recette")
+	# La condition colonie : six lucioles avant toute couvée
+	var s := Simulation.new(156)
+	s.charger_camp()
+	var a := s._nouveau_specimen("luciole", {"couleur": [0, 0], "rythme": [[0, 1, 2, 3], [0, 1, 2, 3]]}, "m", false)
+	var b := s._nouveau_specimen("luciole", {"couleur": [1, 1], "rythme": [[1, 2, 3, 0], [1, 2, 3, 0]]}, "f", false)
+	a["age_semaines"] = 3
+	b["age_semaines"] = 3
+	var ctx_peu := {"habitat": "vivarium", "occupants": 2, "libre": 2, "temp": 20.0, "saison": s.saison()}
+	var ctx_colonie := {"habitat": "vivarium", "occupants": 6, "libre": 2, "temp": 20.0, "saison": s.saison()}
+	verifier(not s.conditions_repro(a, b, ctx_peu).ok, "à deux, les lucioles ne s'accordent pas")
+	verifier(s.conditions_repro(a, b, ctx_colonie).ok, "à six, la colonie s'accorde")
+	# Le poisson : la température du bassin
+	var p1 := s._nouveau_specimen("poisson_de_bassin", {"couleur": [0, 0], "motif": [0, 0], "taille": 4.0}, "m", false)
+	var p2 := s._nouveau_specimen("poisson_de_bassin", {"couleur": [1, 1], "motif": [1, 1], "taille": 6.0}, "f", false)
+	p1["age_semaines"] = 3
+	p2["age_semaines"] = 3
+	verifier(s.conditions_repro(p1, p2, {"habitat": "bassin", "occupants": 2, "libre": 2, "temp": 22.0, "saison": s.saison()}).ok, "bassin à 22 °C : les poissons frayent")
+	verifier(not s.conditions_repro(p1, p2, {"habitat": "bassin", "occupants": 2, "libre": 2, "temp": 5.0, "saison": s.saison()}).ok, "bassin à 5 °C : trop froid")
+	s.monde.fermer()
+
 
 func test_paliers_elevage() -> void:
 	var s := Simulation.new(155)
