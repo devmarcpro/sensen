@@ -169,6 +169,8 @@ static func appliquer_bonus(plan: Dictionary, bonus: Dictionary) -> void:
 	plan.portee.y += int(bonus.get("portee", 0))
 	plan.taille += int(bonus.get("taille", 0))
 	plan.mult *= float(bonus.get("mult", 1.0))
+	if bonus.has("ressource_mult"):   # Terroir : −25 % de ressource
+		plan.ressource = maxi(0, roundi(float(plan.ressource) * float(bonus.ressource_mult)))
 
 
 # ---------------------------------------------------------------- géométrie des formes

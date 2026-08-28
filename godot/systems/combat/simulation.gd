@@ -35,6 +35,7 @@ var monde: Monde = null              # la surface comme fenêtre glissante (éta
 var bombes: Array = []               # les bombes posées, en attente d'explosion (Explosions)
 var affuts: Array[Dictionary] = []   # tourelles portatives de L'Engrenage : {pos, source, prochain}
 var modifs_terrain: Dictionary = {}   # idx → {h, contenu} d'origine : ce que le monde rendra hors claim (Destruction du terrain)
+var vecteur_lieu_force: Dictionary = {}   # tests et arènes : imposer le vecteur du lieu (Wu Xing hors combat)
 var portails: Dictionary = {}   # idx de tuile → id du Passeur qui l'a ouvert (Talents de classe)
 var territoire: Dictionary = {"tresor": 0, "dette": 0, "semaines_dette": 0, "stocks": {}, "rapports": [], "gains_quetes": 0, "royaume": false,
 	"cultures": {}, "fertilite": {}, "etals": {}, "caisse": 0, "marge": 1.0, "clients": 0.0, "heure_resolue": -1, "absence": {"ventes": 0, "or": 0, "mures": 0},
@@ -1137,6 +1138,41 @@ func pieces_de_cellule(cell: Vector2i) -> Array:
 				continue
 			res.append({"tuiles": region.keys(), "meubles": types.keys(), "porte": porte})
 	return res
+
+
+## Le vecteur élémentaire d'une tuile (Wu Xing hors combat) : dérivé des couches de bruit, jamais du biome.
+func vecteur_lieu(pos: Vector2i) -> Dictionary:
+	if not vecteur_lieu_force.is_empty():
+		return vecteur_lieu_force
+	if monde == null or monde.surface == null:
+		return {}
+	var sf = monde.surface
+	var veg := sf.valeur("vegetation", pos.x, pos.y)
+	var hum := sf.valeur("humidite", pos.x, pos.y)
+	var temp := sf.valeur("temperature", pos.x, pos.y)
+	var v := {"bois": veg * hum, "eau": hum, "metal": sf.valeur("ressources", pos.x, pos.y), "feu": maxf(absf(temp - 0.5) * 2.0, sf.valeur("sismique", pos.x, pos.y)), "terre": 0.3 + sf.valeur("altitude", pos.x, pos.y) * 0.4}
+	var total := 0.0
+	for k in v.keys():
+		total += float(v[k])
+	if total <= 0.0:
+		return {}
+	for k in v.keys():
+		v[k] = float(v[k]) / total
+	return v
+
+
+## Le multiplicateur de mana du lieu pour un plan : même élément dominant ×0,85, dominé par le lieu ×1,15.
+func mult_mana_lieu(e: Dictionary, plan: Dictionary) -> float:
+	var el := wuxing.dominante(plan.get("elements", {}))
+	var lieu_el := wuxing.dominante(vecteur_lieu(e.pos))
+	if el.is_empty() or lieu_el.is_empty():
+		return 1.0
+	var ml: Dictionary = regles.r.mana.get("lieu", {})
+	if el == lieu_el:
+		return float(ml.get("meme", 0.85))
+	if wuxing.relation(lieu_el, el) == "domine":
+		return float(ml.get("domine_par", 1.15))
+	return 1.0
 
 
 ## Armes fantomatiques : une lame d'élément pur invoquée en main principale, entretenue en mana.
@@ -6635,6 +6671,9 @@ func _evaluer_conditions(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -
 				vrai = not cible.is_empty() and float(cible.sante) / float(cible.sante_max) * 100.0 < float(p.pct)
 			"pv_porteur_sous":
 				vrai = float(e.sante) / float(e.sante_max) * 100.0 < float(p.pct)
+			"vecteur_de_lieu":   # Terroir : le lieu porte l'élément du noyau
+				var el_lieu := wuxing.dominante(vecteur_lieu(e.pos))
+				vrai = not el_lieu.is_empty() and el_lieu == wuxing.dominante(plan.get("elements", {}))
 			"porteur_en_posture":
 				vrai = e.garde
 			"jauge_chaine_pleine":
@@ -6689,8 +6728,9 @@ func _payer(e: Dictionary, plan: Dictionary) -> void:
 		_payer(e, plan.charge_suivante)   # la charge différée paie aussi, dans sa propre monnaie
 	match str(plan.monnaie):
 		"mana":
-			var deficit: int = maxi(0, int(plan.ressource) - int(e.mana))
-			e.mana = maxi(0, int(e.mana) - int(plan.ressource))
+			var cout := roundi(float(plan.ressource) * mult_mana_lieu(e, plan))   # le lieu module le mana (Wu Xing hors combat)
+			var deficit: int = maxi(0, cout - int(e.mana))
+			e.mana = maxi(0, int(e.mana) - cout)
 			if deficit > 0:
 				var degats := deficit * int(regles.r.mana.surchauffe_mult)
 				EventBus.emettre(&"journal", [&"journal.surchauffe", {"nom": e.name_key, "deficit": deficit, "degats": degats}])

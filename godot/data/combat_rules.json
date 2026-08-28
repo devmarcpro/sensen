@@ -115,7 +115,12 @@
     "chance": 0.125,
     "regen_base": 1,
     "regen_par_meditation": 0.2,
-    "surchauffe_mult": 2
+    "surchauffe_mult": 2,
+    "lieu": {
+      "_doc": "Wu Xing hors combat : élément du module == dominant du lieu → même ; dominé par l'élément du lieu → domine_par.",
+      "meme": 0.85,
+      "domine_par": 1.15
+    }
   },
   "vision": {
     "_doc": "Hauteur de terrain ±10 : un relief plus haut que la ligne tireur→cible coupe la vue",

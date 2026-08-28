@@ -18,6 +18,7 @@ etape: 10
 - **Le camp a-t-il l'air d'un lieu ?** Les accidents de relief sont-ils assez nombreux, la couleur de sol par biome suffit-elle ? Le camp vide au départ est-il lisible (récolter à la hache, scier, poser) ? — [[Génération par couches de bruit]], [[Claims et persistance]]
 - **Végétaux en billboards** : silhouettes assez lisibles et variées, taille des arbres vs personnages, occultation d'un être derrière un arbre (les sprites définitifs sont pour plus tard, décision du designer) — [[Direction artistique]]
 - **Faim et poids** : vitesse de la faim (2 h 30 de jeu actif), −10 % de stats sous 25, capacité de charge — [[Faim]], [[Armures et poids porté]]
+- **Le lieu et le mana** : lancer du Feu dans une terre volcanique coûte moins, dans un marais plus — se sent-il, se lit-il ? — [[Wu Xing hors combat]]
 - **Cataclysme** : 60 ticks de canalisation visible pour un cratère 7 × 7 qui coupe les lignes de vue — un pari lisible ou une pause gênante ? — [[Sorts cataclysmiques]]
 - **Armes fantomatiques** : la lame invoquée (pure, ×0,7, entretien en mana) ferme-t-elle le cycle des cinq éléments pour un mage sans râtelier, ou reste-t-elle un gadget ? — [[Armes fantomatiques]]
 - **Incarner une bête** : jouer ton loup apprivoisé — sans mains, sans lecture, sans parole — est-ce un défi ou une impasse ? — [[Ouvert — Changer de personnage]]

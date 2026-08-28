@@ -81,6 +81,7 @@ func _ready() -> void:
 	test_empoigne()
 	test_armes_fantomes()
 	test_cataclysme()
+	test_vecteur_lieu()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2462,6 +2463,44 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Wu Xing hors combat : le lieu
+
+func test_vecteur_lieu() -> void:
+	var s := Simulation.new(138)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var v := s.vecteur_lieu(j.pos)
+	var total := 0.0
+	for k in v.keys():
+		total += float(v[k])
+	verifier(v.size() == 5 and absf(total - 1.0) < 0.001, "le lieu porte un vecteur à cinq éléments normalisé (%s)" % str(v))
+	var cap := Capacites.new(GameData.catalogues["modules"])
+	var plan := cap.assembler(["point", "etincelle"], 5, "1d4", {})
+	s.vecteur_lieu_force = {"feu": 1.0}
+	verifier(is_equal_approx(s.mult_mana_lieu(j, plan), 0.85), "Étincelle (Feu) sur une terre de Feu : mana × 0,85")
+	s.vecteur_lieu_force = {"eau": 1.0}
+	verifier(is_equal_approx(s.mult_mana_lieu(j, plan), 1.15), "sur une terre d'Eau (qui domine le Feu) : × 1,15")
+	s.vecteur_lieu_force = {"bois": 1.0}
+	verifier(is_equal_approx(s.mult_mana_lieu(j, plan), 1.0), "sur une terre de Bois : × 1")
+	var plan_c := cap.assembler(["point", "brasier"], 5, "1d4", {})
+	j.mana = 100
+	s.vecteur_lieu_force = {"feu": 1.0}
+	s._payer(j, plan_c)
+	var paye_feu := 100 - int(j.mana)
+	j.mana = 100
+	s.vecteur_lieu_force = {"eau": 1.0}
+	s._payer(j, plan_c)
+	var paye_eau := 100 - int(j.mana)
+	verifier(paye_feu < paye_eau, "payé %d en terre de Feu, %d en terre d'Eau" % [paye_feu, paye_eau])
+	# Terroir : la condition lit le lieu
+	var plan_t := cap.assembler(["point", "etincelle", "terroir"], 5, "1d4", {})
+	verifier(plan_t.erreurs.is_empty() and plan_t.conditions.size() == 1 and str(plan_t.conditions[0].predicat.type) == "vecteur_de_lieu", "Terroir : un prédicat structuré")
+	s.vecteur_lieu_force = {"feu": 1.0}
+	var ev := s._evaluer_conditions(j, plan_t, j.pos + Vector2i(1, 0))
+	verifier(ev.is_empty() or not bool(ev.get("fausse", false)), "Terroir vrai sur une terre de Feu")
+	s.monde.fermer()
 
 
 # ---------------------------------------------------------------- Sorts cataclysmiques

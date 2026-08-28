@@ -30,6 +30,9 @@ CUISINE (7.7) : un plat couvrant les 5 éléments : nutrition et
 
 **Contenu à produire :** [[Décision — Surcharges Wu Xing des matériaux]], [[Décision — Affinités de cuisine]].
 
+> [!success] Codé le 2026-08-28 — le vecteur du lieu, le coût de mana par lieu, Terroir
+> `Simulation.vecteur_lieu(pos)` : fonction pure sur les couches de bruit de la surface à la tuile — **Bois** = végétation × humidité, **Eau** = humidité, **Métal** = ressources, **Feu** = max(écart de température à 0,5 × 2, sismique), **Terre** = 0,3 + altitude × 0,4 — normalisé à 1, jamais l'étiquette de biome ; vide en arène (neutre), valable en donjon (les couches restent celles de la cellule). **Coût de mana par lieu** (`combat_rules.mana.lieu`) : dans `_payer`, élément dominant du plan == dominant du lieu → **× 0,85** ; dominé par celui du lieu → **× 1,15**. **Terroir** (condition `vecteur_de_lieu`) reçoit enfin son prédicat structuré : vrai si le lieu porte l'élément du noyau, bonus **ressource × 0,75** (`appliquer_bonus` sait maintenant `ressource_mult`), échec = la capacité ne part pas et rend 50 % des ticks. `vecteur_lieu_force` (dictionnaire, vide par défaut) permet aux tests et aux arènes d'imposer un lieu.
+
 ## Liens
 - **Dépend de** : [[Wu Xing — cycles et vecteurs]], [[Génération par couches de bruit]], [[Matériaux — 13 stats]]
 - **Alimente** : [[Cuisine et alchimie]], [[Mana]], [[Craft compositionnel]], [[Palier industriel]]
