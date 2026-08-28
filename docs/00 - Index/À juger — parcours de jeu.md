@@ -20,6 +20,7 @@ etape: 10
 - **Faim et poids** : vitesse de la faim (2 h 30 de jeu actif), −10 % de stats sous 25, capacité de charge — [[Faim]], [[Armures et poids porté]]
 - **Les affixes conditionnels au monde** : nocturne, du danger (corruption ≥ seuil), des sources (densité de mana) — des raisons d'aller quelque part, ou des objets qu'on oublie ? — [[Loot — affixes, gemmes et rareté]]
 - **La cueillette sauvage** : moitié d'une récolte cultivée par plante sauvage, qui repousse — vaut-elle le détour, ou rend-elle le champ inutile ? — [[Plantes]]
+- **Les paliers d'élevage** : 25 variétés pour +10 de potentiel, 75 pour la capture — assez tôt pour accrocher, ou trop loin ? — [[Vivarium — registre et paliers]]
 - **Les portails ouverts à tous** : un poursuivant, une bête ou un raid peuvent traverser la brèche du Passeur — piège intéressant ou punition invisible ? — [[Talents de classe]]
 - **Le courant** : un objet tombé dans une rivière part au fil de l'eau, un personnage léger dérive — péripétie ou frustration ? — [[Eau et liquides]]
 - **La lave** : mares statiques dès l'étage 5, 3d6 au contact, figées en obsidienne par un seau d'eau — obstacle lisible ou mort injuste ? — [[Eau et liquides]]

@@ -785,10 +785,31 @@
     "couvees_par_semaine": 1,
     "age_adulte_semaines": 1,
     "paliers": {
+      "_doc": "Vivarium — registre et paliers : [seuil, effet, valeur]. Effets : potentiel (+n sur Élevage), capture (+n au jet), eclosion (mult sur l'âge de maturité), chatoyant (mult, lu par elevage.chatoyant), potentiel_vie (+n sur la branche Vie), commande_mult (×n), couvees (+n par habitat), commande_pct (+n % sur les commandes).",
       "varietes": [
+        [
+          25,
+          "potentiel",
+          10
+        ],
         [
           75,
           "capture",
+          2
+        ],
+        [
+          200,
+          "eclosion",
+          0.75
+        ],
+        [
+          1200,
+          "potentiel_vie",
+          10
+        ],
+        [
+          3000,
+          "commande_mult",
           2
         ]
       ],
@@ -797,6 +818,11 @@
           10,
           "couvees",
           2
+        ],
+        [
+          20,
+          "commande_pct",
+          50
         ]
       ],
       "bestiaire_complet_capture": 4

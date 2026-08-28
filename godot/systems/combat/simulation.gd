@@ -2813,7 +2813,8 @@ func _tirer_commande() -> void:
 	var parts: PackedStringArray = str(cles[rng.randi() % cles.size()]).split("|")
 	var pas := rng.randi_range(1, int(cm.pas_max))
 	var couleur := posmod(int(parts[0]) + pas * (1 if rng.randf() < 0.5 else -1), int(esp.loci.couleur.n))
-	var mult := 2.0 if _total_varietes() >= int(cm.palier_double) else 1.0
+	var pal_e := paliers_elevage()
+	var mult := float(pal_e.commande_mult) * (1.0 + float(pal_e.commande_pct) / 100.0)
 	var ch: Dictionary = _elv().get("chatoyant", {})
 	var chatoyant := not ch.is_empty() and rng.randf() < float(ch.commande_chance)
 	if chatoyant:
@@ -2988,7 +2989,8 @@ func conditions_repro(a: Dictionary, b: Dictionary, ctx: Dictionary) -> Dictiona
 				if str(a.sexe) == str(b.sexe):
 					raisons.append({"cle": "raison.sexe"})
 			"age":
-				if mini(int(a.get("age_semaines", 0)), int(b.get("age_semaines", 0))) < int(c.min):
+				var min_age := maxi(1, roundi(float(c.min) * float(paliers_elevage().eclosion)))   # palier 200 : éclosions plus rapides
+				if mini(int(a.get("age_semaines", 0)), int(b.get("age_semaines", 0))) < min_age:
 					raisons.append({"cle": "raison.age"})
 			"stat":
 				if minf(float(a.genome.get(str(c.k), 0)), float(b.genome.get(str(c.k), 0))) < float(c.min):
@@ -3093,6 +3095,7 @@ func _nouveau_specimen(esp_id: String, genome: Dictionary, sexe: String, chatoya
 func _enregistrer_variete(sp: Dictionary) -> void:
 	if not territoire.has("registre"):
 		territoire["registre"] = {}
+	_appliquer_paliers_potentiel()
 	var esp := str(sp.espece)
 	if not territoire.registre.has(esp):
 		territoire.registre[esp] = {}
@@ -3116,22 +3119,55 @@ func _enregistrer_variete(sp: Dictionary) -> void:
 			territoire.records[esp][nom] = vus
 
 
+## Applique les planchers de potentiel au joueur et à ses compagnons (après une nouvelle variété, un chargement).
+func _appliquer_paliers_potentiel() -> void:
+	for x in entites.values():
+		if x.controle == "joueur" or (x.has("maitre") and str(x.maitre) != ""):
+			_paliers_potentiel(x)
+
+
+## Le plancher de potentiel donné par les paliers du registre (Vivarium — registre et paliers) : sur le joueur
+## et ses compagnons seulement — le registre est celui du camp.
+func _paliers_potentiel(e: Dictionary) -> void:
+	if not e.has("potentiels") or territoire.get("registre", {}).is_empty():
+		return
+	var pal := paliers_elevage()
+	var n_elevage := int(pal.potentiel)
+	var n_vie := int(pal.potentiel_vie)
+	if n_elevage <= 0 and n_vie <= 0:
+		return
+	var defaut := int(regles.r.progression.potentiel_defaut)
+	var cap := int(regles.r.progression.get("potentiel_max", 200))
+	for cle in GameData.catalogues.competences.keys():
+		var bonus := 0
+		if str(cle) == "elevage":
+			bonus = maxi(bonus, n_elevage)
+		if str(GameData.catalogues.competences[cle].get("famille", "")) == "vie":
+			bonus = maxi(bonus, n_vie)
+		if bonus <= 0:
+			continue
+		var base := int(e.get("potentiels_base", {}).get(cle, defaut))   # un plancher sur le potentiel de base, pas un cumul
+		e.potentiels[cle] = mini(cap, maxi(int(e.potentiels.get(cle, defaut)), base + bonus))
+
+
 ## Les paliers du registre (Vivarium — registre et paliers) : bonus de capture, couvées supplémentaires.
 func paliers_elevage() -> Dictionary:
-	var res := {"capture": 0, "couvees": 0, "atteints": []}
+	var res := {"capture": 0, "couvees": 0, "potentiel": 0, "potentiel_vie": 0, "eclosion": 1.0, "commande_mult": 1, "commande_pct": 0, "atteints": []}
 	var pal: Dictionary = _elv().get("paliers", {})
 	var nv := 0
 	for esp in territoire.get("registre", {}).keys():
 		nv += territoire.registre[esp].size()
 	var ne: int = territoire.get("registre", {}).size()
-	for s in pal.get("varietes", []):
-		if nv >= int(s[0]):
-			res[str(s[1])] = int(res.get(str(s[1]), 0)) + int(s[2])
-			res.atteints.append("palier." + str(s[1]))
-	for s in pal.get("especes", []):
-		if ne >= int(s[0]):
-			res[str(s[1])] = int(res.get(str(s[1]), 0)) + int(s[2])
-			res.atteints.append("palier." + str(s[1]))
+	for s in pal.get("varietes", []) + pal.get("especes", []):
+		var seuil := nv if (s in pal.get("varietes", [])) else ne
+		if seuil < int(s[0]):
+			continue
+		var effet := str(s[1])
+		if effet in ["eclosion", "commande_mult"]:   # des multiplicateurs, pas des sommes
+			res[effet] = float(s[2]) if effet == "eclosion" else int(s[2])
+		else:
+			res[effet] = int(res.get(effet, 0)) + int(s[2])
+		res.atteints.append("palier." + effet)
 	if ne >= GameData.catalogues.species.size() and ne > 0:
 		res.capture = int(res.capture) + int(pal.get("bestiaire_complet_capture", 0))
 		res.atteints.append("palier.bestiaire")

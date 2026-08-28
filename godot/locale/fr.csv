@@ -789,6 +789,11 @@ ui.registre.aucun,aucune espèce au registre — capture (Y) ou couvée
 ui.registre.grille_ligne,"couleur {c} : motifs {motifs}"
 ui.registre.record," · record {locus} {v}"
 ui.registre.paliers_aucun,aucun
+palier.potentiel,+10 de potentiel en Élevage
+palier.eclosion,éclosions plus rapides
+palier.potentiel_vie,+10 de potentiel sur la branche Vie
+palier.commande_mult,les collectionneurs paient double
+palier.commande_pct,commandes mieux payées
 palier.capture,captures +{n}
 palier.couvees,couvées +{n}
 palier.bestiaire,bestiaire complet
