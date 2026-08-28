@@ -36,6 +36,7 @@ var bombes: Array = []               # les bombes posées, en attente d'explosio
 var affuts: Array[Dictionary] = []   # tourelles portatives de L'Engrenage : {pos, source, prochain}
 var pluie_heure := -1   # la dernière heure de monde où la pluie a rempli les creux
 var foudre_heure := -1   # la dernière heure d'orage où la foudre a frappé (Météo)
+var evapo_heure := -1   # la dernière heure de canicule où les flaques ont baissé
 var eau_active: Dictionary = {}   # idx → true : tuiles de liquide à propager (Eau et liquides)
 var eau_prochain_pas := 0
 var modifs_terrain: Dictionary = {}   # idx → {h, contenu} d'origine : ce que le monde rendra hors claim (Destruction du terrain)
@@ -422,6 +423,10 @@ func _tiquer_eau(tick: int) -> void:
 		eau_active.erase(idx)
 		var t := grille.pos_de(int(idx))
 		var niveau := grille.niveau_liquide(t)
+		if niveau < 8 and niveau > 0 and not _alimentee(t):   # plus rien ne l'alimente : elle ne verse plus, et se retire si elle n'est pas dans un creux
+			if not _en_creux(t):
+				_retirer_eau(t)
+			continue
 		if niveau <= 1:
 			continue
 		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
@@ -436,6 +441,81 @@ func _tiquer_eau(tick: int) -> void:
 			if cible <= 0 or grille.niveau_liquide(q) >= cible:
 				continue
 			_poser_eau(q, cible)
+
+
+## Une tuile d'écoulement est alimentée si, en remontant le courant (voisine plus haute portant un liquide, ou de même hauteur d'un niveau
+## supérieur), on atteint une source. Un simple regard aux voisines ne suffit pas : un bord qui s'assèche « nourrirait » l'intérieur.
+func _alimentee(t: Vector2i) -> bool:
+	var vus: Dictionary = {grille.idx(t): true}
+	var file: Array[Vector2i] = [t]
+	while not file.is_empty() and vus.size() < 128:
+		var c: Vector2i = file.pop_front()
+		var nc := grille.niveau_liquide(c)
+		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var q: Vector2i = c + dd
+			if not grille.dans(q) or vus.has(grille.idx(q)):
+				continue
+			var nq := grille.niveau_liquide(q)
+			if nq <= 0:
+				continue
+			if grille.h(q) > grille.h(c) or (grille.h(q) == grille.h(c) and nq > nc):
+				if nq >= 8:
+					return true
+				vus[grille.idx(q)] = true
+				file.append(q)
+	return false
+
+
+## Un creux : l'eau n'a nulle part où aller (chaque voisine est plus haute, bloquante, ou déjà liquide).
+func _en_creux(t: Vector2i) -> bool:
+	for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var q: Vector2i = t + dd
+		if grille.dans(q) and grille.h(q) <= grille.h(t) and grille.niveau_liquide(q) == 0 and not grille.bloque_passage(q):
+			return false
+	return true
+
+
+## L'eau se retire d'un niveau ; à sec, la tuile redevient du sol et ses voisines sont réévaluées.
+func _retirer_eau(t: Vector2i, tout: bool = false) -> void:
+	var ti := grille.idx(t)
+	var niveau := grille.niveau_liquide(t)
+	if niveau <= 0 or niveau >= 8:
+		return
+	if niveau > 1 and not tout:
+		grille.niveau_eau[ti] = niveau - 1
+		eau_active[ti] = true
+	else:
+		grille.contenu[ti] = 0
+		grille.niveau_eau.erase(ti)
+		EventBus.emettre(&"journal", [&"journal.retrait", {"x": t.x, "y": t.y}])
+	grille.marquer(t)
+	lumiere_sale = true
+	_reveiller_eau_autour(t)
+	EventBus.emettre(&"tile_changed", [t])
+
+
+## Une source détruite disparaît (Eau et liquides) : la tuile redevient du sol, la nappe qu'elle nourrissait se retire.
+func _retirer_source(t: Vector2i) -> void:
+	if grille.niveau_liquide(t) < 8:
+		return
+	grille.contenu[grille.idx(t)] = 0
+	grille.marquer(t)
+	lumiere_sale = true
+	EventBus.emettre(&"journal", [&"journal.source_comblee", {"x": t.x, "y": t.y}])
+	_reveiller_eau_autour(t)
+	EventBus.emettre(&"tile_changed", [t])
+
+
+## La canicule (Météo, effet evapore) : chaque flaque non alimentée perd un niveau.
+func _evaporation() -> void:
+	var n := 0
+	for ti in grille.niveau_eau.keys():
+		var t := grille.pos_de(int(ti))
+		if grille.niveau_liquide(t) in range(1, 8) and not _alimentee(t):
+			_retirer_eau(t)
+			n += 1
+	if n > 0:
+		EventBus.emettre(&"journal", [&"journal.evaporation", {}])
 
 
 ## Poser un écoulement de niveau donné (jamais sur une source) et le rendre actif.
@@ -566,6 +646,11 @@ func _terrasser(e: Dictionary, vers: Vector2i, sens: int, tick: int) -> bool:
 		return false
 	_memoriser_terrain(vers)
 	grille.hauteurs[grille.idx(vers)] = h
+	if sens > 0 and grille.niveau_liquide(vers) > 0:   # Eau et liquides : élever une tuile d'eau la comble (une source détruite disparaît)
+		if grille.niveau_liquide(vers) >= 8:
+			_retirer_source(vers)
+		else:
+			_retirer_eau(vers, true)
 	e.endurance -= int(tr.endurance)
 	e.compteur = tick + int(tr.ticks)
 	e["vue_sale"] = true
@@ -5940,6 +6025,9 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 			if tick / h_ticks != foudre_heure and met == "orage":   # Météo : la foudre réelle
 				foudre_heure = tick / h_ticks
 				_foudre(tick)
+			if tick / h_ticks != evapo_heure and "evapore" in GameData.catalogues.weather_states.get(met, {}).get("effects", []):
+				evapo_heure = tick / h_ticks
+				_evaporation()
 	_tiquer_vampires(nom, tick)
 	_tiquer_armes_fantomes(nom, tick)
 	_tiquer_souffle(nom, tick)

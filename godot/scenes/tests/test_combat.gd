@@ -95,6 +95,7 @@ func _ready() -> void:
 	test_neige_et_gel()
 	test_automate_eau()
 	test_foudre()
+	test_retrait_eau()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2512,6 +2513,53 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_retrait_eau() -> void:
+	var s := Simulation.new(147)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var base: Vector2i = j.pos + Vector2i(4, 0)
+	var h0 := s.grille.h(j.pos)
+	for dx in range(0, 8):
+		for dy in range(-2, 3):
+			var t: Vector2i = base + Vector2i(dx, dy)
+			s.grille.contenu[s.grille.idx(t)] = 0
+			s.grille.hauteurs[s.grille.idx(t)] = h0
+	var lac: Vector2i = base + Vector2i(5, 0)
+	s.grille.poser_contenu(lac, "eau")
+	var tranchee: Vector2i = lac + Vector2i(-1, 0)
+	s.grille.hauteurs[s.grille.idx(tranchee)] = h0 - 1
+	s.eau_active[s.grille.idx(lac)] = true
+	var tick := 1000
+	for k in 12:
+		s._tiquer_eau(tick + k * 5)
+	var plat: Vector2i = lac + Vector2i(1, 0)
+	verifier(s.grille.niveau_liquide(tranchee) == 7 and s.grille.niveau_liquide(plat) == 7, "la nappe est en place (tranchée 7, plat 7)")
+	# Persistance du niveau avec la cellule
+	s.monde.capturer(s.grille)
+	var m: Dictionary = s.monde.modifications.get(s.monde.cellule_de(plat), {}).get(s.monde.idx_local(plat), {})
+	verifier(int(m.get("eau", 0)) == 7, "le niveau d'un écoulement est mémorisé avec la cellule (%d)" % int(m.get("eau", 0)))
+	# La source comblée : la nappe à plat se retire, la tranchée (un creux) garde son eau
+	s._retirer_source(lac)
+	for k in 400:   # la nappe se rétracte de proche en proche : lentement
+		s._tiquer_eau(tick + 100 + k * 5)
+	verifier(s.grille.niveau_liquide(lac) == 0, "la source comblée a disparu")
+	verifier(s.grille.niveau_liquide(plat) == 0 and s.grille.niveau_liquide(lac + Vector2i(3, 0)) == 0, "la nappe à plat s'est retirée (%d, %d)" % [s.grille.niveau_liquide(plat), s.grille.niveau_liquide(lac + Vector2i(3, 0))])
+	verifier(s.grille.niveau_liquide(tranchee) == 7, "la tranchée, un creux, garde son eau (%d)" % s.grille.niveau_liquide(tranchee))
+	# La canicule évapore la flaque du creux, un niveau par heure
+	s._evaporation()
+	verifier(s.grille.niveau_liquide(tranchee) == 6, "la canicule évapore d'un niveau (%d)" % s.grille.niveau_liquide(tranchee))
+	for k in 8:
+		s._evaporation()
+	verifier(s.grille.niveau_liquide(tranchee) == 0, "sept heures de canicule plus tard, la tranchée est sèche")
+	# Élever une tuile d'écoulement la comble
+	s.grille.poser_contenu(plat, "eau_ecoulement")
+	s.grille.niveau_eau[s.grille.idx(plat)] = 3
+	s.grille.hauteurs[s.grille.idx(plat)] = h0 + 1
+	s._retirer_eau(plat, true)
+	verifier(s.grille.niveau_liquide(plat) == 0 and not s.grille.niveau_eau.has(s.grille.idx(plat)), "une tuile d'écoulement élevée est comblée")
+	s.monde.fermer()
+
 
 func test_foudre() -> void:
 	var s := Simulation.new(146)

@@ -422,6 +422,9 @@ tile_content.eau.name,Eau
 tile_content.eau_ecoulement.name,Eau (écoulement)
 journal.inondation,"l'eau envahit ({x},{y})"
 journal.pluie_creux,la pluie remplit les creux
+journal.retrait,"l'eau se retire de ({x},{y})"
+journal.evaporation,la canicule assèche les flaques
+journal.source_comblee,"la source ({x},{y}) est comblée"
 journal.foudre,"la foudre frappe ({x},{y})"
 journal.foudre_eau,"la foudre court dans l'eau : {n} touché(s)"
 ui.etat_grille_neige," · neige"

@@ -152,6 +152,9 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 		g.materiaux.erase(gi)
 		g.meubles.erase(gi)
 		g.stations_fixes.erase(gi)
+		g.niveau_eau.erase(gi)
+		if int(m.get("eau", 0)) > 0:   # le niveau d'un écoulement (Eau et liquides)
+			g.niveau_eau[gi] = int(m.eau)
 		if not str(m.contenu).is_empty():
 			g.poser_contenu(p, str(m.contenu))
 		if not str(m.materiau).is_empty():
@@ -174,7 +177,7 @@ func capturer(g: Grille) -> void:
 			modifications[cell] = {}
 		var c := g.contenu_de(p)
 		modifications[cell][idx_local(p)] = {"h": g.h(p), "contenu": str(g.contenu_ids[g.contenu[gi]]) if g.contenu[gi] > 0 else "",
-			"materiau": str(g.materiaux.get(gi, "")), "meuble": str(g.meubles.get(gi, "")), "station": str(g.stations_fixes.get(gi, "")), "sol": str(g.sols.get(gi, ""))}
+			"materiau": str(g.materiaux.get(gi, "")), "meuble": str(g.meubles.get(gi, "")), "station": str(g.stations_fixes.get(gi, "")), "sol": str(g.sols.get(gi, "")), "eau": int(g.niveau_eau.get(gi, 0))}
 	for gi in g.decouvert.keys():
 		var p := g.pos_de(int(gi))
 		var cell := cellule_de(p)
