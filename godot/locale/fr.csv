@@ -743,6 +743,7 @@ journal.commande_livree,"commande livrée : {or} or"
 journal.commande_manque,tu n'as pas le spécimen demandé
 journal.commande_bourse,le marchand n'a pas l'or de la commande
 ui.carte.survol,"({x},{y}) · {biome} · danger {danger}"
+ui.carte.survol_lieu," · lieu : {a} {pa} % · {b} {pb} %"
 ui.carte.survol_royaume," · {nom}{capitale} — {gouv}, {taille}, {n} cellules · {etat}"
 ui.carte.capitale," (capitale)"
 ui.carte.vacance,trône vacant
