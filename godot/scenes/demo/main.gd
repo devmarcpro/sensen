@@ -717,6 +717,12 @@ func _options_tuile(t: Vector2i) -> Array:
 			res.append({"id": "traverser_mur", "cible": t})
 	if sim.a_talent(j, "affut") and d == 1 and g.dans(t) and not g.bloque_passage(t) and g.occupant(t).is_empty():
 		res.append({"id": "affut", "cible": t})
+	if d == 0:
+		for el in sim.segments_possibles(Etres.arme(j, sim.items)):   # l'arme mixte choisit son segment
+			if str(el) != str(j.get("segment_prefere", "")):
+				res.append({"id": "segment_prefere", "element": str(el), "nom": tr("element." + str(el))})
+		if j.has("segment_prefere"):
+			res.append({"id": "segment_dominant"})
 	if d == 0 and str(j.corps.get("silhouette", "humanoide")) == "humanoide":
 		for el in sim.regles.r.armes_fantomes.elements:
 			res.append({"id": "arme_fantome", "element": str(el), "nom": tr("element." + str(el))})
@@ -810,6 +816,10 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "transformer"})
 		"arme_fantome":
 			sim.intention(joueur_id, {"type": "arme_fantome", "element": str(opt.element)})
+		"segment_prefere":
+			sim.intention(joueur_id, {"type": "segment_prefere", "element": str(opt.element)})
+		"segment_dominant":
+			sim.intention(joueur_id, {"type": "segment_prefere", "element": ""})
 		"affut":
 			sim.intention(joueur_id, {"type": "affut", "cible": opt.cible})
 		"declencher_glyphe":
@@ -1306,6 +1316,7 @@ func _maj_ui() -> void:
 			+ (" · " + tr(sim.items[e.equipement.main_principale].name_key) if e.equipement.has("main_principale") else "")
 			+ (" + " + tr(sim.items[e.equipement.main_secondaire].name_key) if e.equipement.has("main_secondaire") else "")
 			+ (" · " + _texte_chaine(e) if e.has("chaine") else "")
+			+ (tr("ui.segment_prefere").format({"element": tr("element." + str(e.segment_prefere))}) if e.has("segment_prefere") else "")
 			+ (tr("ui.sang").format({"n": int(e.get("sang", 0))}) if sim.a_talent(e, "jauge_de_sang") else "")
 			+ (" · " + _texte_statuts(e) if not e.statuts.is_empty() else ""))
 	if survol.x >= 0 and not j.is_empty():

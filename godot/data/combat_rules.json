@@ -953,5 +953,8 @@
     "regen_base_ticks": 200,
     "silence_mult": 0.7,
     "tresors_rayon": 10
+  },
+  "chaine": {
+    "seuil_mixte": 0.25
   }
 }

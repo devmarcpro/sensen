@@ -29,6 +29,9 @@ etape: 0
 
 **Le test au playtest** ([[Prototype de combat — spécification]]) : une arme mixte bien jouée doit rester **à ±15 %** d'une arme pure sur une rotation complète. Si le mixte gagne, retirer le choix du segment ; s'il perd, autoriser le mixte à compter pour **deux transitions** dans une rotation.
 
+> [!success] Codé le 2026-08-28 — le défaut, tel quel
+> **Constat** : `vecteur_arme` ne lisait que `arme.element` (le dominant) — le vecteur mixte d'une arme assemblée (`arme.elements`, moyenne pondérée des composants) n'entrait ni dans la domination ni dans la chaîne. Corrigé : **le vecteur complet est lu** quand il existe (l'amortissement des matchups devient réel), le dominant reste le repli des prototypes. **Le choix du segment** : clic droit sur sa tuile → *Poser le segment : Feu / Métal…* pour chaque élément porté à **≥ 25 %** (`combat_rules.chaine.seuil_mixte`) quand l'arme en porte au moins deux ; `e.segment_prefere` (0 tick, *Segment : dominant* pour revenir) est lu par `_poser_segment` : si l'élément préféré est dans le vecteur à ≥ 25 %, c'est lui qui est posé, sinon le dominant. Les coups d'arme comme les capacités passent par là. Le HUD affiche le segment choisi.
+
 ## Liens
 - **Dépend de** : [[Domination et multiplicateurs]], [[Craft compositionnel]], [[Stats et qualité de l'assemblage]]
 - **Alimente** : [[Jauge de chaîne Wu Xing]], [[Modificateurs d'affinité]]

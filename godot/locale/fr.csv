@@ -400,6 +400,9 @@ ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
 ui.atelier.vide,  (aucune station dans le sac)
 tile_content.plante.name,Plante
 tile_content.eau.name,Eau
+option.segment_prefere,"Poser le segment : {element}"
+option.segment_dominant,Segment : le dominant
+ui.segment_prefere," · segment {element}"
 affixe.passif_poids.nom,"de portage (+{n} de capacité)"
 affixe.passif_faim.nom,"de sobriété (faim ×{mult} %)"
 journal.immunite_poison,le poison glisse sur toi

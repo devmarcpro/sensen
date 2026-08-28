@@ -5693,6 +5693,13 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _incarner(e, str(i.get("pnj", "")), h.ticks)
 		"arme_fantome":
 			ok = _invoquer_arme_fantome(e, str(i.get("element", "")), h.ticks)
+		"segment_prefere":   # 0 tick : un réglage, pas un acte
+			var el := str(i.get("element", ""))
+			if el.is_empty():
+				e.erase("segment_prefere")
+			else:
+				e["segment_prefere"] = el
+			ok = true
 		"garde":
 			ok = _prendre_garde(e, h.ticks)
 		"attendre":
@@ -6158,8 +6165,25 @@ func _communion_tourner(e: Dictionary, arme: Dictionary) -> void:
 
 
 func vecteur_arme(arme: Dictionary) -> Dictionary:
+	var elems: Variant = arme.get("elements")
+	if elems is Dictionary and not elems.is_empty():   # une arme assemblée : son vecteur complet (Compensation de l'arme mixte)
+		return elems
 	var el: Variant = arme.get("element")
 	return {el: 1.0} if el is String and not el.is_empty() else {}
+
+
+## Les éléments qu'une arme mixte peut poser en segment : ceux portés à ≥ seuil_mixte (au moins deux, sinon vide).
+func segments_possibles(arme: Dictionary) -> Array[String]:
+	var res: Array[String] = []
+	var v := vecteur_arme(arme)
+	var seuil := float(regles.r.get("chaine", {}).get("seuil_mixte", 0.25))
+	for k in v.keys():
+		if float(v[k]) >= seuil:
+			res.append(str(k))
+	if res.size() < 2:
+		return []
+	res.sort()
+	return res
 
 
 ## L'alignement contre lequel un coup se résout : le vecteur de la pièce touchée (multiplicateurs
@@ -6206,6 +6230,9 @@ func _poser_segment(e: Dictionary, v_att: Dictionary, tick: int, origine: String
 	if not e.has("chaine"):
 		return
 	var element := wuxing.dominante(v_att)
+	var pref := str(e.get("segment_prefere", ""))   # l'arme mixte choisit son segment (Compensation de l'arme mixte)
+	if not pref.is_empty() and float(v_att.get(pref, 0.0)) >= float(regles.r.get("chaine", {}).get("seuil_mixte", 0.25)):
+		element = pref
 	_declencher(e, "accord", e.derniere_cible_pos)
 	var p := wuxing.poser(e.chaine, element, tick)
 	if p.resout:

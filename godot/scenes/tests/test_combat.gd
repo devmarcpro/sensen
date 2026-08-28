@@ -84,6 +84,7 @@ func _ready() -> void:
 	test_vecteur_lieu()
 	test_effets_equipement()
 	test_palette_etage()
+	test_arme_mixte()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2465,6 +2466,34 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Compensation de l'arme mixte
+
+func test_arme_mixte() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var mixte := {"uid": "mixte_test", "name_key": "item.proto_epee.name", "type": "arme", "equip_slot": "main_principale", "hands": 1, "functionality": "epee", "durete_base": 20, "qualite": 1.0, "element": "feu", "elements": {"feu": 0.6, "metal": 0.4}, "tags": ["arme"], "materiau": "fer", "affixes": [], "sertissures": {"nombre": 0, "contenu": []}}
+	s.items["mixte_test"] = mixte
+	j.sac.append("mixte_test")
+	j.equipement["main_principale"] = "mixte_test"
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	verifier(s.vecteur_arme(mixte) == {"feu": 0.6, "metal": 0.4}, "le vecteur complet de l'arme assemblée est lu")
+	verifier(s.segments_possibles(mixte) == ["feu", "metal"], "deux segments possibles : feu, metal")
+	var pure := {"element": "feu"}
+	verifier(s.segments_possibles(pure).is_empty(), "une arme pure n'a pas le choix")
+	var h := s.horloge_de(j)
+	j.chaine.segments.clear()
+	s._poser_segment(j, s.vecteur_arme(mixte), h.ticks)
+	verifier(j.chaine.segments.size() == 1 and str(j.chaine.segments[0].element) == "feu", "sans préférence : le dominant (feu)")
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "segment_prefere", "element": "metal"}) and str(j.segment_prefere) == "metal", "préférer le métal (0 tick)")
+	s._poser_segment(j, s.vecteur_arme(mixte), h.ticks + 1)
+	verifier(str(j.chaine.segments[j.chaine.segments.size() - 1].element) == "metal", "avec préférence : le segment posé est métal")
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "segment_prefere", "element": "eau"})
+	s._poser_segment(j, s.vecteur_arme(mixte), h.ticks + 2)
+	verifier(str(j.chaine.segments[j.chaine.segments.size() - 1].element) == "feu", "une préférence hors du vecteur est ignorée : dominant")
 
 
 # ---------------------------------------------------------------- Stratification verticale : la palette de sol
