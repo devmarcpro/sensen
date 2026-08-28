@@ -4321,6 +4321,12 @@ func _assembler(e: Dictionary, def: Dictionary, tick: int) -> bool:
 	gagner_xp(e, skill, inst.durete_base)
 	EventBus.emettre(&"journal", [&"journal.assemble", {"nom": e.name_key, "objet": nom_objet(inst.uid), "qualite": "qualite." + regles.palier_qualite(inst.qualite)}])
 	_progresser_quetes(e, "fabriquer", ["objet"])
+	for x in entites.values():   # Sauvegarde : aucun combat ne survit au rechargement — tout le monde sur l'horloge du monde
+		if x.horloge != "monde":
+			x.horloge = "monde"
+			x.compteur = horloge_monde.ticks
+			x.action_en_cours = {}
+	combats.clear()
 	return true
 
 
@@ -5289,7 +5295,12 @@ func vivants() -> Array[Dictionary]:
 
 
 func horloge_de(e: Dictionary) -> Horloge:
-	return horloge_monde if e.horloge == "monde" else combats[e.horloge].horloge
+	if e.horloge == "monde" or not combats.has(e.horloge):   # un combat disparu (sauvegarde, changement de grille) : l'horloge du monde
+		if e.horloge != "monde":
+			e.horloge = "monde"
+			e.action_en_cours = {}
+		return horloge_monde
+	return combats[e.horloge].horloge
 
 
 func en_combat(e: Dictionary) -> bool:

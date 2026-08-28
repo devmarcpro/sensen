@@ -36,6 +36,9 @@ func _ready() -> void:
 	for k in pas_total:
 		if k == pas_total / 4 and s.lieu == "camp":   # un raid réel au quart
 			s._lancer_raid_reel(12.0, s.horloge_monde.ticks)
+		if k % 700 == 650 and s.lieu == "camp":   # sauvegarder puis recharger (Sauvegarde) : le cycle le plus sensible aux états orphelins
+			if s.sauvegarder():
+				s.charger_sauvegarde()
 		if k % 500 == 400 and s.lieu == "camp":   # un voyage vers une cellule voisine explorée d'office (Carte du monde), puis retour
 			var ici: Vector2i = s.monde.cellule_de(s.entites[jid].pos)
 			var vers: Vector2i = ici + Vector2i(rng.randi_range(-2, 2), rng.randi_range(-2, 2))
