@@ -17,7 +17,7 @@ Deux voies d'expansion : coloniser le vide, ou annexer le peuplé.
 **Territoire des royaumes PNJ ([[Schéma royaume]]) :** `territory_cells` est dérivé dynamiquement des claims/conquêtes, pas saisi à la main.
 
 > [!success] Décidé et codé le 2026-08-28 — étape 10.1, revendiquer une cellule (`Monde.claims`, `Simulation.revendiquer`)
-> **Geste** : depuis la carte du monde (M), clic sur une cellule **contiguë** au territoire, **explorée**, de terre, **sans donjon actif ni village PNJ** — la note ne chiffrait ni coût ni geste. **Coût (décision)** : `50 or × nombre de cellules déjà possédées` (le camp est gratuit) — un puits d'or qui croît avec le territoire ; la somme est nulle : la cellule cesse d'être sauvage. Le territoire ne franchit pas l'eau (contiguïté sur la terre). Signal `cell_claimed` émis. `territory_cells` est dérivé de `Monde.claims`.
+> **Geste** : depuis la carte du monde (Tab → Carte du monde ; anciennement M), clic sur une cellule **contiguë** au territoire, **explorée**, de terre, **sans donjon actif ni village PNJ** — la note ne chiffrait ni coût ni geste. **Coût (décision)** : `50 or × nombre de cellules déjà possédées` (le camp est gratuit) — un puits d'or qui croît avec le territoire ; la somme est nulle : la cellule cesse d'être sauvage. Le territoire ne franchit pas l'eau (contiguïté sur la terre). Signal `cell_claimed` émis. `territory_cells` est dérivé de `Monde.claims`.
 
 ## Liens
 - **Dépend de** : [[Claims et persistance]], [[Rôles de cases]], [[Conquête de village]], [[Construction cadrée]]

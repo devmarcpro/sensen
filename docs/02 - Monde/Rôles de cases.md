@@ -25,7 +25,7 @@ Le joueur peut assigner un **rôle** à chaque case revendiquée ([[Claims et pe
 **Signal :** `cell_role_changed` sur l'EventBus, écouté par la régénération et les restrictions ([[EventBus]]).
 
 > [!success] Codé le 2026-08-28 — étape 10.1
-> Les quatre rôles en données (`combat_rules.royaume.roles`), assignés dans l'écran de gestion (K) et changeables à tout moment ; **Ressources naturelles** rend la cellule à la régénération hebdomadaire (ses modifications sont effacées — la confirmation explicite est affichée dans l'écran avant le changement) ; **Champs** refuse les stations lourdes (poser une station y est refusé) ; Habitation compte les lits pour le logement. Signal `cell_role_changed`.
+> Les quatre rôles en données (`combat_rules.royaume.roles`), assignés dans l'écran Territoire (Tab → Territoire ; anciennement K) et changeables à tout moment ; **Ressources naturelles** rend la cellule à la régénération hebdomadaire (ses modifications sont effacées — la confirmation explicite est affichée dans l'écran avant le changement) ; **Champs** refuse les stations lourdes (poser une station y est refusé) ; Habitation compte les lits pour le logement. Signal `cell_role_changed`.
 
 ## Liens
 - **Dépend de** : [[Claims et persistance]]
