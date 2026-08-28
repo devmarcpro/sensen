@@ -83,6 +83,7 @@ func _ready() -> void:
 	test_cataclysme()
 	test_vecteur_lieu()
 	test_effets_equipement()
+	test_palette_etage()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2464,6 +2465,20 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Stratification verticale : la palette de sol
+
+func test_palette_etage() -> void:
+	var s := Simulation.new(140)
+	var theme := GameData.entree("dungeon_themes", "ruine")
+	verifier(s.materiau_mur_etage(theme, 1) == "pierre" and s.materiau_mur_etage(theme, 2) == "pierre", "étages 1-2 : le thème (pierre)")
+	verifier(s.materiau_mur_etage(theme, 3) == "ardoise" and s.materiau_mur_etage(theme, 5) == "basalte" and s.materiau_mur_etage(theme, 8) == "granit" and s.materiau_mur_etage(theme, 12) == "granit_noir", "3 ardoise · 5 basalte · 8 granit · 12 granit noir")
+	s.charger_donjon("ruine", 140, 17, 6)
+	verifier(s.grille.materiau_defaut == "basalte", "étage 6 chargé : les murs sont de basalte")
+	var d_bas := int(GameData.entree("materials", "basalte").stats.durete)
+	var d_cal := int(GameData.entree("materials", "calcaire").stats.durete)
+	verifier(d_bas > d_cal, "le basalte (%d) est plus dur que le calcaire (%d) : creuser ralentit avec l'étage" % [d_bas, d_cal])
 
 
 # ---------------------------------------------------------------- Effets d'équipement types

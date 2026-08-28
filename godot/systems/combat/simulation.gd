@@ -310,7 +310,7 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 		"corruption": corruption_locale, "corruption_etage": corruption_etage, "cellule": cellule_donjon,
 		"profondeur": etage + int(corruption_etage / float(cr.get("profondeur_par_corruption", 25)))}
 	grille = Grille.depuis_etage(e, GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
-	grille.materiau_defaut = str(theme.get("materiau_mur", ""))
+	grille.materiau_defaut = materiau_mur_etage(theme, etage)
 	for idx in e.filons.keys():
 		grille.materiaux[idx] = e.filons[idx]
 		grille.poser_contenu(Vector2i(int(idx) % grille.largeur, int(idx) / grille.largeur), "filon")
@@ -1138,6 +1138,17 @@ func pieces_de_cellule(cell: Vector2i) -> Array:
 				continue
 			res.append({"tuiles": region.keys(), "meubles": types.keys(), "porte": porte})
 	return res
+
+
+## Le matériau des murs d'un étage (Stratification verticale) : le thème en surface, la palette en profondeur.
+func materiau_mur_etage(theme: Dictionary, etage: int) -> String:
+	var pal: Dictionary = GameData.config("minerais_par_etage").get("palette_mur", {})
+	if pal.is_empty() or etage < int(pal.get("etage_min", 3)):
+		return str(theme.get("materiau_mur", ""))
+	for b in pal.get("bandes", []):
+		if etage >= int(b.etages[0]) and etage <= int(b.etages[1]):
+			return str(b.materiau)
+	return str(theme.get("materiau_mur", ""))
 
 
 ## Les trésors détectés (Effets d'équipement : detection_tresors) : les contenants à portée, vus ou non.

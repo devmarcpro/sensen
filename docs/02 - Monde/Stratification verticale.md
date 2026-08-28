@@ -36,6 +36,9 @@ Les **variantes latérales** restent applicables telles quelles aux étages de d
 
 **Paliers serrés voulus ([[Application des stats de matériau]]) :** les paliers de dureté des roches ([[Catalogue matériaux — Roches]]) sont VOULUS — ne pas les écarter.
 
+> [!success] Codé le 2026-08-28 — la palette de sol par étage
+> `minerais_par_etage.palette_mur` : bandes d'étages → matériau des murs du labyrinthe (`calcaire` 1-2, `ardoise` 3-4, `basalte` 5-6, `granit` 7-9, `granit_noir` 10+). Décision : **le thème garde son `materiau_mur` aux étages 1-2** (ruine = pierre, repaire = calcaire : l'identité du lieu se voit en surface), la palette prend le relais à partir de l'étage 3 — le sol se lit alors par sa dureté, et creuser (Destruction du terrain) devient plus lent avec la profondeur puisque `_creuser` lit `grille.materiau_de`. Les poches locales (±1 strate par bruit dédié) attendent.
+
 ## Liens
 - **Dépend de** : [[Décision — Minerais et strates après le pivot]], [[Catalogue matériaux — Roches]]
 - **Alimente** : [[Génération de donjon]], [[Destruction du terrain]]
