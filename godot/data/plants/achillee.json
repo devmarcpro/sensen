@@ -1,0 +1,17 @@
+{
+  "name_key": "plant.achillee.name",
+  "categorie": "herbe",
+  "nutrition": 1,
+  "bonus_potentiel": {
+    "endurance": 1
+  },
+  "wuxing": {
+    "bois": 0.7,
+    "terre": 0.3
+  },
+  "duree_jours": 3,
+  "recolte_base": 3,
+  "tags": [
+    "herbe"
+  ]
+}

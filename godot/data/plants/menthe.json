@@ -1,0 +1,15 @@
+{
+  "name_key": "plant.menthe.name",
+  "categorie": "herbe",
+  "nutrition": 1,
+  "bonus_potentiel": {},
+  "wuxing": {
+    "bois": 0.5,
+    "eau": 0.5
+  },
+  "duree_jours": 3,
+  "recolte_base": 3,
+  "tags": [
+    "herbe"
+  ]
+}

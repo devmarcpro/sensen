@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.distiller_sauge.name",
+  "station": "alambic",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "item": "sauge",
+      "forme": "",
+      "amount": 2
+    },
+    {
+      "tag": "culture",
+      "forme": "",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "potion_mana",
+    "amount": 1
+  },
+  "fuel": null
+}

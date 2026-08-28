@@ -86,6 +86,7 @@ func _ready() -> void:
 	test_palette_etage()
 	test_arme_mixte()
 	test_niveaux_recette()
+	test_plantes()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -1069,7 +1070,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 57, "9 stations, 57 recettes plates (17 transformations, 23 meubles, 9 stations, 3 plats, 5 potions)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 60, "9 stations, 60 recettes plates (17 transformations, 23 meubles, 9 stations, 3 plats, 8 potions)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -2467,6 +2468,32 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Les 22 plantes
+
+func test_plantes() -> void:
+	verifier(GameData.catalogues.plants.size() == 22, "22 plantes au catalogue (%d)" % GameData.catalogues.plants.size())
+	var cats := {}
+	for pid in GameData.catalogues.plants.keys():
+		var c := str(GameData.catalogues.plants[pid].categorie)
+		cats[c] = int(cats.get(c, 0)) + 1
+	verifier(int(cats.get("culture", 0)) == 8 and int(cats.get("buisson", 0)) == 4 and int(cats.get("herbe", 0)) == 6 and int(cats.get("champignon", 0)) == 2 and int(cats.get("decorative", 0)) == 2, "8 cultures, 4 buissons, 6 herbes, 2 champignons, 2 décoratives")
+	var s := Simulation.new(142)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var am := s.generer_objet("amanite", 1, {}, "commun", 0)
+	j.sac.append(am.uid)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "manger", "objet": am.uid}) and Etres.a_statut_tag(j, "poison", s.statuts_defs), "manger une amanite empoisonne")
+	j.statuts = []
+	j.sante = 10
+	var ps := s.generer_objet("potion_soin", 1, {}, "commun", 0)
+	j.sac.append(ps.uid)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "manger", "objet": ps.uid}) and int(j.sante) >= 12, "la potion de soin rend 2d6 (%d)" % int(j.sante))
+	verifier(GameData.catalogues.recipes.has("distiller_achillee") and GameData.catalogues.recipes.distiller_achillee.output.item == "potion_soin", "l'achillée se distille en potion de soin")
+	s.monde.fermer()
 
 
 # ---------------------------------------------------------------- Axe des niveaux de recette

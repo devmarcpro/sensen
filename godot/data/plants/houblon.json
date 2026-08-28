@@ -1,0 +1,15 @@
+{
+  "name_key": "plant.houblon.name",
+  "categorie": "buisson",
+  "nutrition": 2,
+  "bonus_potentiel": {},
+  "wuxing": {
+    "bois": 0.8,
+    "terre": 0.2
+  },
+  "duree_jours": 12,
+  "recolte_base": 4,
+  "tags": [
+    "buisson"
+  ]
+}

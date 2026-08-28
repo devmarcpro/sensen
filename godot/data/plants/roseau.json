@@ -1,0 +1,15 @@
+{
+  "name_key": "plant.roseau.name",
+  "categorie": "decorative",
+  "nutrition": 0,
+  "bonus_potentiel": {},
+  "wuxing": {
+    "bois": 0.5,
+    "eau": 0.5
+  },
+  "duree_jours": 4,
+  "recolte_base": 5,
+  "tags": [
+    "decorative"
+  ]
+}

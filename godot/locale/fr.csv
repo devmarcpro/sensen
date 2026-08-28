@@ -893,6 +893,42 @@ journal.raid_pertes,"pertes : {perte} % des stocks et de la caisse, {structures}
 journal.raid_mineur,dégâts mineurs : quelques stocks piétinés
 journal.raid_reveil,des cris te réveillent : le camp est attaqué
 plant.ble.name,Blé
+plant.framboisier.name,Framboisier
+item.framboisier.name,Framboisier
+plant.myrtillier.name,Myrtillier
+item.myrtillier.name,Myrtillier
+plant.vigne.name,Vigne
+item.vigne.name,Vigne
+plant.houblon.name,Houblon
+item.houblon.name,Houblon
+plant.camomille.name,Camomille
+item.camomille.name,Camomille
+plant.menthe.name,Menthe
+item.menthe.name,Menthe
+plant.sauge.name,Sauge
+item.sauge.name,Sauge
+plant.achillee.name,Achillée
+item.achillee.name,Achillée
+plant.ortie.name,Ortie
+item.ortie.name,Ortie
+plant.belladone.name,Belladone
+item.belladone.name,Belladone
+plant.champignon_des_pres.name,Champignon des prés
+item.champignon_des_pres.name,Champignon des prés
+plant.amanite.name,Amanite
+item.amanite.name,Amanite
+plant.fleurs_sauvages.name,Fleurs sauvages
+item.fleurs_sauvages.name,Fleurs sauvages
+plant.roseau.name,Roseau
+item.roseau.name,Roseau
+item.potion_soin.name,Potion de soin
+item.potion_mana.name,Potion de mana
+item.potion_charisme.name,Potion de charisme
+status.potion_charisme.name,Potion de charisme
+status.potion_charisme_forte.name,Potion de charisme (forte)
+recipe.distiller_achillee.name,Distiller achillée (soin)
+recipe.distiller_sauge.name,Distiller sauge (mana)
+recipe.distiller_fleurs.name,Distiller fleurs sauvages (charisme)
 item.ble.name,Blé
 plant.orge.name,Orge
 item.orge.name,Orge

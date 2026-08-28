@@ -1,0 +1,17 @@
+{
+  "name_key": "plant.framboisier.name",
+  "categorie": "buisson",
+  "nutrition": 6,
+  "bonus_potentiel": {
+    "dexterite": 1
+  },
+  "wuxing": {
+    "bois": 0.8,
+    "eau": 0.2
+  },
+  "duree_jours": 12,
+  "recolte_base": 3,
+  "tags": [
+    "buisson"
+  ]
+}

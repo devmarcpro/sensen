@@ -1,0 +1,16 @@
+{
+  "name_key": "plant.belladone.name",
+  "categorie": "herbe",
+  "nutrition": 0,
+  "bonus_potentiel": {},
+  "wuxing": {
+    "bois": 0.5,
+    "eau": 0.3,
+    "terre": 0.2
+  },
+  "duree_jours": 4,
+  "recolte_base": 2,
+  "tags": [
+    "herbe"
+  ]
+}

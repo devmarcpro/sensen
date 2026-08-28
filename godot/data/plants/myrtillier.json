@@ -1,0 +1,17 @@
+{
+  "name_key": "plant.myrtillier.name",
+  "categorie": "buisson",
+  "nutrition": 6,
+  "bonus_potentiel": {
+    "perception": 1
+  },
+  "wuxing": {
+    "bois": 0.7,
+    "eau": 0.3
+  },
+  "duree_jours": 12,
+  "recolte_base": 3,
+  "tags": [
+    "buisson"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "name_key": "item.fleurs_sauvages.name",
+  "type": "consommable",
+  "equip_slot": "",
+  "nutrition": 0,
+  "soin_des": "",
+  "mana": 0,
+  "statut": "",
+  "statut_ticks": 0,
+  "risque": {},
+  "potentiel": {
+    "charisme": 1
+  },
+  "cru": true,
+  "poids": 0,
+  "quantite": 1,
+  "tags": [
+    "consommable",
+    "empilable",
+    "decorative",
+    "ingredient"
+  ],
+  "wuxing": {
+    "bois": 0.6,
+    "feu": 0.4
+  }
+}

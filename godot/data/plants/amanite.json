@@ -1,0 +1,16 @@
+{
+  "name_key": "plant.amanite.name",
+  "categorie": "champignon",
+  "nutrition": 0,
+  "bonus_potentiel": {},
+  "wuxing": {
+    "terre": 0.5,
+    "feu": 0.3,
+    "eau": 0.2
+  },
+  "duree_jours": 2,
+  "recolte_base": 2,
+  "tags": [
+    "champignon"
+  ]
+}

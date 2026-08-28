@@ -28,6 +28,9 @@ Les 22 plantes non-arbres — réelles, récolte Herboristerie/Agriculture.
 
 **Météo ([[Météo]]) :** pluie → +15 % vitesse de pousse ; canicule → flétrissement sans arrosage manuel.
 
+> [!success] Codé le 2026-08-28 — les 22 plantes
+> Les 14 non-cultures rejoignent `data/plants/` (catégories `buisson`, `herbe`, `champignon`, `decorative`) et `data/items/` (consommables crus, tags `ingredient` + catégorie ; **Amanite** et **Belladone** empoisonnent qui les mange : statut `poison`). Décision : **toutes se plantent dans un champ** comme les cultures (`_planter` ne distingue pas) — les buissons poussent en 12 jours, les herbes en 3, les champignons en 2, les décoratives en 4 ; la **cueillette sauvage par biome** (champ `vegetation`) attend. Trois potions de plantes à l'alambic : **Achillée** → *potion de soin* (2d6 PV), **Sauge** → *potion de mana* (+20), **Fleurs sauvages** → *potion de charisme* (+3, forte à haute qualité) ; les neuf autres potions de [[Potions]] attendent leurs statuts (résistances, vision nocturne, sommeil).
+
 ## Liens
 - **Dépend de** : [[Agriculture et élevage]], [[Catégories de matériaux]], [[Biomes — schéma]]
 - **Alimente** : [[Cuisine et alchimie]], [[Potions]], [[Nourriture]], [[Catalogue matériaux — Végétaux et fibres]]

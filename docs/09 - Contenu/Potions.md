@@ -27,6 +27,9 @@ POTION : intensité = effet_base * qualite_potion (A.3, Alchimie)
 
 **Puissance court terme ([[Cuisine et alchimie]]) :** distiller donne la puissance court terme via buffs ; cuisiner donne la croissance long terme via potentiel.
 
+> [!success] Codé le 2026-08-28 — huit potions sur douze
+> Cinq potions de stat par parties de créatures (existantes) + **soin** (achillée, `soin_des` 2d6), **mana** (sauge, +20), **charisme** (fleurs sauvages, +3 / forte). Restent : résistance au feu / au froid (l'isolation des statuts n'existe pas encore), vision nocturne (un statut ne pose pas de tag), sommeil / calme.
+
 ## Liens
 - **Dépend de** : [[Cuisine et alchimie]], [[Nourriture, potentiel et potions]], [[Qualité d'artisanat]]
 - **Alimente** : [[Statuts]], [[Résolveur de modificateurs]]

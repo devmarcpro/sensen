@@ -1,0 +1,18 @@
+{
+  "name_key": "plant.vigne.name",
+  "categorie": "buisson",
+  "nutrition": 5,
+  "bonus_potentiel": {
+    "charisme": 1
+  },
+  "wuxing": {
+    "bois": 0.6,
+    "feu": 0.2,
+    "terre": 0.2
+  },
+  "duree_jours": 12,
+  "recolte_base": 4,
+  "tags": [
+    "buisson"
+  ]
+}

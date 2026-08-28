@@ -1,0 +1,15 @@
+{
+  "name_key": "plant.champignon_des_pres.name",
+  "categorie": "champignon",
+  "nutrition": 6,
+  "bonus_potentiel": {},
+  "wuxing": {
+    "terre": 0.6,
+    "eau": 0.4
+  },
+  "duree_jours": 2,
+  "recolte_base": 4,
+  "tags": [
+    "champignon"
+  ]
+}

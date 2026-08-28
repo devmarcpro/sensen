@@ -1,0 +1,17 @@
+{
+  "name_key": "plant.ortie.name",
+  "categorie": "herbe",
+  "nutrition": 2,
+  "bonus_potentiel": {
+    "endurance": 1
+  },
+  "wuxing": {
+    "bois": 0.8,
+    "feu": 0.2
+  },
+  "duree_jours": 3,
+  "recolte_base": 4,
+  "tags": [
+    "herbe"
+  ]
+}
