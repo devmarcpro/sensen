@@ -1829,7 +1829,7 @@ func _statut_habitat(e: Dictionary, pnj_id: String, statut: String, tick: int) -
 	e.compteur = tick + int(regles.r.actions.objet)
 	if statut == "betail":
 		EventBus.emettre(&"journal", [&"journal.statut_betail", {"nom": x.name_key}])
-		if not ("bete" in x.get("tags", [])):
+		if not ("bete" in x.get("tags", [])) and x.has("social"):   # un ancien corps de joueur n'a pas de bloc social
 			x.social.relations[e.id] = int(x.social.relations.get(e.id, 0)) + int(_ry().betail.retrogradation_relation)
 			EventBus.emettre(&"journal", [&"journal.retrogradation", {"nom": x.name_key}])
 	else:

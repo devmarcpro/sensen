@@ -22,9 +22,28 @@ func _ready() -> void:
 	var jid: String = j.id
 	var intentions := 0
 	var ok := 0
+	# Territoire et compagnons (Défense et raids, Compagnons) : un claim rôle champs, un compagnon, un résident assigné.
+	j["or"] = 500
+	var cell_camp: Vector2i = s.monde.cellule_camp
+	s.changer_role(cell_camp, "champs")
+	var comp := s.ajouter("villageois", j.pos + Vector2i(0, 1), "ia")
+	s._habiller_pnj(comp, GameData.entree("creatures", "villageois"))
+	comp["maitre"] = jid
+	comp.camp = j.camp
+	var res := s.ajouter("villageois", j.pos + Vector2i(0, -1), "ia")
+	s._habiller_pnj(res, GameData.entree("creatures", "villageois"))
+	res.social.relations[jid] = 80
 	for k in pas_total:
+		if k == pas_total / 4 and s.lieu == "camp":   # un raid réel au quart
+			s._lancer_raid_reel(12.0, s.horloge_monde.ticks)
+		if k % 300 == 150 and s.lieu == "camp":   # la semaine du territoire
+			s._semaine_territoire(s.entites[jid])
+			s._recalculer_humeurs()
 		if k == pas_total / 2:   # à mi-course : le donjon
 			s.charger_donjon("ruine", graine, 3, 1 + rng.randi_range(0, 4), s.entites[jid])
+		for x in s.entites.values():   # après une incarnation, le joueur est un autre corps
+			if x.controle == "joueur" and x.vivant:
+				jid = x.id
 		if not s.entites.has(jid):
 			break
 		j = s.entites[jid]
@@ -68,7 +87,24 @@ func _intention(s: Simulation, j: Dictionary, rng: RandomNumberGenerator) -> Dic
 		if x.camp == "civil" and Grille.distance(j.pos, x.pos) <= 2:
 			pnj = x.id
 			break
-	match rng.randi_range(0, 21):
+	var compagnon := ""
+	for x in s.vivants():
+		if str(x.get("maitre", "")) == j.id and Grille.distance(j.pos, x.pos) <= 2:
+			compagnon = x.id
+			break
+	match rng.randi_range(0, 27):
+		22:
+			return {"type": "assigner", "pnj": pnj, "fonction": ["fermier", "garde", "mineur", "bucheron"][rng.randi_range(0, 3)]} if not pnj.is_empty() else {"type": "attendre"}
+		23:
+			return {"type": "incarner", "pnj": compagnon} if not compagnon.is_empty() else {"type": "attendre"}
+		24:
+			return {"type": "planter", "base": ["ble", "carotte", "sauge"][rng.randi_range(0, 2)]}
+		25:
+			return {"type": "entrainer", "pnj": pnj, "competence": "epee"} if not pnj.is_empty() else {"type": "attendre"}
+		26:
+			return {"type": "statut_habitat", "pnj": compagnon, "statut": "betail"} if not compagnon.is_empty() else {"type": "attendre"}
+		27:
+			return {"type": "conquerir", "vers": t}
 		14:
 			return {"type": "parler", "pnj": pnj} if not pnj.is_empty() else {"type": "attendre"}
 		15:
