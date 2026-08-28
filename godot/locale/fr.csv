@@ -434,6 +434,7 @@ journal.feu_consume,"({x},{y}) est consumé par les flammes"
 journal.feux_eteints,"la pluie éteint les feux ({n})"
 journal.brule,"{nom} brûle ({degats})"
 journal.retrait,"l'eau se retire de ({x},{y})"
+journal.emporte,"{nom} est emporté par le courant"
 journal.evaporation,la canicule assèche les flaques
 journal.source_comblee,"la source ({x},{y}) est comblée"
 journal.foudre,"la foudre frappe ({x},{y})"

@@ -101,6 +101,7 @@ func _ready() -> void:
 	test_affixes_reveilles()
 	test_feu()
 	test_lave()
+	test_courant()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2519,6 +2520,64 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_courant() -> void:
+	var s := Simulation.new(153)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var base: Vector2i = j.pos + Vector2i(4, 0)
+	var h0 := s.grille.h(j.pos)
+	for dx in range(0, 8):
+		for dy in range(-2, 3):
+			var t: Vector2i = base + Vector2i(dx, dy)
+			s.grille.contenu[s.grille.idx(t)] = 0
+			s.grille.hauteurs[s.grille.idx(t)] = h0
+	# Une pente : une rivière qui descend vers l'est
+	for dx in range(0, 6):
+		var t: Vector2i = base + Vector2i(dx, 0)
+		s.grille.hauteurs[s.grille.idx(t)] = h0 - dx
+		s.grille.poser_contenu(t, "eau_ecoulement")
+		s.grille.niveau_eau[s.grille.idx(t)] = 5
+	verifier(s.courant_de(base) == Vector2i(1, 0), "le courant descend la pente (%s)" % str(s.courant_de(base)))
+	s.grille.poser_contenu(base + Vector2i(2, 0), "eau")
+	verifier(s.courant_de(base + Vector2i(2, 0)) == Vector2i.ZERO, "une source n'a pas de courant")
+	s.grille.poser_contenu(base + Vector2i(2, 0), "eau_ecoulement")
+	s.grille.niveau_eau[s.grille.idx(base + Vector2i(2, 0))] = 5
+	# Un objet au sol part au fil de l'eau
+	var o := s.generer_objet("proto_epee", 1, {}, "commun", 0)
+	s._poser_contenant(base, [str(o.uid)], "butin")
+	var parti := false
+	for k in 40:
+		s._tiquer_courant(2000 + k)
+		if not s.contenants.has(s.grille.idx(base)):
+			parti = true
+			break
+	verifier(parti and s.contenants.size() > 0, "le butin tombé dans la rivière part au fil de l'eau")
+	# Un être léger dérive, un être surchargé tient
+	var loup := s.ajouter("loup", base, "ia")
+	var derive := false
+	for k in 60:
+		s._tiquer_courant(3000 + k)
+		if loup.pos != base:
+			derive = true
+			break
+	verifier(derive, "un loup dans le courant est emporté (%s)" % str(loup.pos - base))
+	s.grille.liberer(loup.pos)
+	loup.pos = base
+	s.grille.placer(loup.id, base)
+	for k in 60:   # alourdi au-delà du seuil : il tient debout
+		s.items["encl_%d" % k] = {"uid": "encl_%d" % k, "name_key": "x", "type": "materiau", "poids": 30.0, "affixes": [], "sertissures": {"nombre": 0, "contenu": []}, "tags": []}
+		loup.sac.append("encl_%d" % k)
+	verifier(float(s.poids_de(loup).poids) / float(s.poids_de(loup).capacite) > 0.5, "le loup est chargé (%.2f de sa capacité)" % (float(s.poids_de(loup).poids) / float(s.poids_de(loup).capacite)))
+	var bouge := false
+	for k in 60:
+		s._tiquer_courant(4000 + k)
+		if loup.pos != base:
+			bouge = true
+			break
+	verifier(not bouge, "trop lourd pour dériver : il tient debout")
+	s.monde.fermer()
+
 
 func test_lave() -> void:
 	# Le générateur : pas de lave avant l'étage minimum, des mares après

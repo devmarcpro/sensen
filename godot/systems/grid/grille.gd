@@ -43,7 +43,7 @@ func niveau_liquide(p: Vector2i) -> int:
 		return 8
 	if "ecoulement" in tags:
 		return int(niveau_eau.get(idx(p), 1))
-	return 0
+	return int(niveau_eau.get(idx(p), 0))   # une tuile dont le contenu a été remplacé (du butin posé) reste mouillée
 
 
 func materiau_sol(p: Vector2i) -> String:

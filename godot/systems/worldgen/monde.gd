@@ -33,8 +33,8 @@ var heritiers: Dictionary = {}         # id de royaume → id de l'héritier dé
 var vacances_guildes: Dictionary = {}  # "guilde|village" → semaine de résolution : hall sans maître
 var villages: Dictionary = {}          # nom de village → {cellule, royaume, conquis_par, defense_jusqua, abandonne} (Conquête de village)
 var mutex := Mutex.new()
-var tache: int = -1                    # tâche WorkerThreadPool de pré-génération en cours (−1 : aucune)
-static var ouverts: Array = []          # tous les mondes créés, pour attendre leurs threads avant de quitter (Monde.fermer_tous)
+var tache: int = -1                    # plus utilisé (pré-génération synchrone) — gardé pour compatibilité des sauvegardes en mémoire
+static var ouverts: Array = []          # plus utilisé depuis que la pré-génération est synchrone (gardé : `fermer_tous` reste appelé)
 
 
 func _init(p_surface: Surface, p_planete: Dictionary, p_camp: Dictionary) -> void:
@@ -481,42 +481,28 @@ func dans_fenetre(p: Vector2i) -> bool:
 	return absi(c.x - centre.x) <= rayon and absi(c.y - centre.y) <= rayon
 
 
-## Pré-génère en thread (WorkerThreadPool) les cellules voisines manquantes autour du centre.
+## Pré-génère les cellules voisines manquantes autour du centre, **sur le fil principal** et par petites doses
+## (`pregen_par_appel`). Décision du 2026-08-29 : le WorkerThreadPool écrivait dans les mêmes caches que le fil
+## principal (GameData, `cellules`, `Surface`) — d'où des crashs aléatoires en fin de test (« Unreferenced static
+## string », threads détruits sans wait). Une cellule par appel coûte quelques ms et rend la génération déterministe.
 func pregenerer_voisins() -> void:
-	if tache >= 0:
-		if not WorkerThreadPool.is_task_completed(tache):
-			return
-		WorkerThreadPool.wait_for_task_completion(tache)
-		tache = -1
-	var manquantes: Array[Vector2i] = []
+	var budget := int(GameData.config("planete").get("monde", {}).get("pregen_par_appel", 1))
 	for dy in range(-rayon - 1, rayon + 2):
 		for dx in range(-rayon - 1, rayon + 2):
+			if budget <= 0:
+				return
 			var cell := centre + Vector2i(dx, dy)
 			if not cellules.has(cell):
-				manquantes.append(cell)
-	if manquantes.is_empty():
-		return
-	if not (self in ouverts):
-		ouverts.append(self)
-	tache = WorkerThreadPool.add_task(_generer_en_thread.bind(manquantes), false, "Sensen : pré-génération de cellules")
+				cellule(cell)
+				budget -= 1
 
 
-func _generer_en_thread(liste: Array[Vector2i]) -> void:
-	for cell in liste:
-		cellule(cell)
-
-
-## Attend les threads de tous les mondes (à appeler avant de quitter : un thread qui génère encore pendant la
-## libération des autoloads fait des « previously freed »).
+## Ne fait plus rien (la pré-génération est synchrone) : gardé pour les scènes qui l'appellent avant de quitter.
 static func fermer_tous() -> void:
-	for m in ouverts:
-		if m is Monde:
-			m.fermer()
 	ouverts.clear()
 
 
 ## Attend la fin de la pré-génération (tests, fermeture).
 func fermer() -> void:
-	if tache >= 0:
-		WorkerThreadPool.wait_for_task_completion(tache)
-		tache = -1
+	tache = -1
+	ouverts.erase(self)

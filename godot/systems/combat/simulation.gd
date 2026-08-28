@@ -446,6 +446,64 @@ func _tiquer_eau(tick: int) -> void:
 			_poser_eau(q, cible)
 
 
+## La direction du courant sur une tuile d'écoulement (Eau et liquides) : là où l'eau s'en va — la voisine
+## la plus basse, sinon celle du niveau le plus faible. Zéro sur une source, sur la glace, ou dans un creux.
+func courant_de(t: Vector2i) -> Vector2i:
+	var niveau := grille.niveau_liquide(t)
+	if niveau <= 0 or niveau >= 8 or grille.gel:
+		return Vector2i.ZERO
+	var meilleure := Vector2i.ZERO
+	var meilleur_h := grille.h(t)
+	var meilleur_niv := niveau
+	for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var q: Vector2i = t + dd
+		if not grille.dans(q) or grille.bloque_passage(q):
+			continue
+		if grille.h(q) < meilleur_h:
+			meilleur_h = grille.h(q)
+			meilleur_niv = grille.niveau_liquide(q)
+			meilleure = dd
+		elif grille.h(q) == meilleur_h and meilleure == Vector2i.ZERO and grille.niveau_liquide(q) < meilleur_niv:
+			meilleur_niv = grille.niveau_liquide(q)
+			meilleure = dd
+	return meilleure
+
+
+## Le courant emporte ce qui flotte (Eau et liquides) : les êtres légers, puis les objets au sol.
+func _tiquer_courant(tick: int) -> void:
+	var ea: Dictionary = regles.r.get("eau", {})
+	var chance := float(ea.get("courant_chance", 0.25))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "courant", tick])
+	for x in vivants():
+		if grille.niveau_liquide(x.pos) <= 0 or rng.randf() >= chance:
+			continue
+		var pd := poids_de(x)   # la charge relative, pas le facteur de surcharge : à moitié chargé, on tient déjà
+		if float(pd.capacite) > 0.0 and float(pd.poids) / float(pd.capacite) > float(ea.get("courant_poids", 0.5)):
+			continue   # trop lourd pour dériver : on tient debout
+		var d := courant_de(x.pos)
+		if d == Vector2i.ZERO or not grille.dans(x.pos + d) or not grille.occupant(x.pos + d).is_empty():
+			continue
+		var avant: Vector2i = x.pos
+		var compteur: int = int(x.compteur)
+		if _deplacer(x, x.pos + d, tick_de(x)):
+			x.compteur = compteur   # la dérive ne coûte aucun tick à qui la subit
+			if x.pos != avant:
+				EventBus.emettre(&"journal", [&"journal.emporte", {"nom": x.name_key}])
+	for idx in contenants.keys().duplicate():
+		var t := grille.pos_de(int(idx))
+		if not ("butin" in grille.contenu_de(t).get("tags", [])) or grille.niveau_liquide(t) <= 0 or rng.randf() >= chance:
+			continue
+		var d2 := courant_de(t)
+		if d2 == Vector2i.ZERO or not grille.dans(t + d2) or grille.bloque_passage(t + d2):
+			continue
+		var uids: Array = contenants[idx]
+		contenants.erase(idx)
+		grille.contenu[int(idx)] = 0
+		EventBus.emettre(&"tile_changed", [t])
+		_poser_contenant(t + d2, uids, "butin")
+
+
 ## Une tuile d'écoulement est alimentée si, en remontant le courant (voisine plus haute portant un liquide, ou de même hauteur d'un niveau
 ## supérieur), on atteint une source. Un simple regard aux voisines ne suffit pas : un bord qui s'assèche « nourrirait » l'intérieur.
 func _alimentee(t: Vector2i) -> bool:
@@ -6288,6 +6346,8 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 	_tirs_d_affuts(nom, tick)
 	_maj_etats_meteo()
 	if nom == "monde":
+		if tick >= eau_prochain_pas:
+			_tiquer_courant(tick)
 		_tiquer_eau(tick)
 		_tiquer_lave(tick)
 		_tiquer_feux(tick)

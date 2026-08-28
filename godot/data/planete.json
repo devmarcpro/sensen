@@ -289,5 +289,8 @@
     "_doc": "Routines des PNJ (IA des créatures) : rayon de patrouille des gardes, distance à laquelle l'A* remplace le pas glouton.",
     "rayon_patrouille": 8,
     "astar_sous": 20
+  },
+  "monde": {
+    "pregen_par_appel": 1
   }
 }
