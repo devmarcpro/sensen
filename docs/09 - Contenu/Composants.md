@@ -32,6 +32,9 @@ Les 14 composants standard du craft compositionnel — peu de types, beaucoup de
 
 **Contenu à produire :** [[Ouvert — Recettes de composants par famille]].
 
+> [!success] Codé (vérifié le 2026-08-28)
+> Les 14 composants sont dans `data/components/`.
+
 ## Liens
 - **Dépend de** : [[Craft compositionnel]], [[Composant et recette d'obtention]], [[Stats et qualité de l'assemblage]]
 - **Alimente** : [[Armure par zone et constructions]], [[Équipement — 14 slots]], [[Stations de transformation]], [[Véhicules]]

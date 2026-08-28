@@ -90,6 +90,7 @@ func _ready() -> void:
 	test_bestiaire()
 	test_statuts_complets()
 	test_potions_completes()
+	test_poison_illegal()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2471,6 +2472,29 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Le poison de lame est illégal
+
+func test_poison_illegal() -> void:
+	var s := Simulation.new(143)
+	s.charger_camp()
+	var n_lois := 0
+	var n_roy := 0
+	for k in 40:
+		var sect: Vector2i = s.monde.surface.secteur_de(s.monde.cellule_camp) + Vector2i(k % 7 - 3, k / 7 - 3)
+		var roys: Dictionary = s.monde.surface.royaumes_secteur(sect)
+		if true:
+			for rid in roys.keys():
+				var r: Dictionary = roys[rid]
+				if str(r.government_type) == "anarchie":
+					continue
+				n_roy += 1
+				for l in r.laws:
+					if str(l.target) == "poison_de_lame" and str(l.status) == "illegal":
+						n_lois += 1
+	verifier(n_roy > 0 and n_lois > 0 and float(n_lois) / float(n_roy) >= 0.5, "le poison de lame est illégal dans %d royaumes sur %d" % [n_lois, n_roy])
+	s.monde.fermer()
 
 
 # ---------------------------------------------------------------- Treize potions

@@ -5517,6 +5517,8 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 		e.mana = mini(e.mana_max, int(e.mana) + int(it.mana))
 		extra.append("+%d mana" % int(it.mana))
 	var statut := str(it.get("statut", ""))
+	if "illegal" in statuts_defs.get(statut, {}).get("tags", []) and lieu == "camp":   # poison de lame : l'usage est une infraction là où c'est illégal
+		_infraction(e, "objet", str(it.get("base", "")), e.pos, uid)
 	if statut.begins_with("purge:"):
 		var cible := statut.trim_prefix("purge:")
 		e.statuts = e.statuts.filter(func(s: Dictionary) -> bool: return str(s.id) != cible)

@@ -40,6 +40,9 @@ Quelles familles de matériaux fabriquent quel composant, où, et comment on app
 > [!success] Transcrit le 2026-08-28 — `data/component_recipes/` (56 recettes)
 > La matrice ligne par ligne ; bases connues d'office, exotiques avec leurs `unlock_sources`. « Or » seul (contrepoids) est la famille `or` ; « rivets/ligatures/colle » sont trois recettes de `fixations_std`.
 
+> [!success] Codé (vérifié le 2026-08-28)
+> La matrice est transcrite : 56 recettes d'obtention dans `data/component_recipes/`.
+
 ## Liens
 - **Dépend de** : [[Composants]], [[Composant et recette d'obtention]], [[Stations de transformation]]
 - **Alimente** : [[Craft compositionnel]], [[Armure par zone et constructions]], [[Stats et qualité de l'assemblage]]

@@ -141,6 +141,10 @@ func _royaumes_secteur_calc(sect: Vector2i) -> Dictionary:
 		if not bool(g.get("meurtre_legal", false)):
 			lois.append({"id": "loi_meurtre", "type": "comportement", "target": "meurtre", "status": "illegal", "consequence": "gardes_hostiles"})
 			lois.append({"id": "loi_vol", "type": "comportement", "target": "vol", "status": "illegal", "consequence": "amende:50"})
+		if not bool(g.get("meurtre_legal", false)):   # Lois et infractions : les substances illégales le sont partout où l'on juge (Potions)
+			for sub in pool.get("substances_illegales", []):
+				if rng.randf() < float(pool.get("substances_chance", 0.8)):
+					lois.append({"id": "loi_" + str(sub), "type": "objet", "target": str(sub), "status": "illegal", "consequence": "confiscation"})
 		if rng.randf() < float(pool.chance):
 			for a in rng.randi_range(1, int(pool.max)):
 				var obj: String = str(pool.objets[rng.randi() % pool.objets.size()])
