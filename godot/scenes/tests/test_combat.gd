@@ -87,6 +87,7 @@ func _ready() -> void:
 	test_arme_mixte()
 	test_niveaux_recette()
 	test_plantes()
+	test_bestiaire()
 	test_bombes()
 	test_composer_capacites()
 	test_camp()
@@ -2468,6 +2469,28 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
+
+
+# ---------------------------------------------------------------- Le bestiaire : 19 races animales
+
+func test_bestiaire() -> void:
+	var betes: Array = []
+	for cid in GameData.catalogues.creatures.keys():
+		if "bete" in GameData.catalogues.creatures[cid].get("tags", []):
+			betes.append(str(cid))
+	verifier(betes.size() == 19, "19 races animales au bestiaire (%d)" % betes.size())
+	for cid in betes:
+		for a in GameData.catalogues.creatures[cid].actions:
+			verifier(GameData.catalogues.creature_actions.has(str(a)), "%s : action %s connue" % [cid, a])
+	for b in ["toundra", "marecage", "montagne", "desert_aride"]:
+		for f in GameData.entree("biomes", b).faune:
+			verifier(GameData.catalogues.creatures.has(str(f.id)), "%s : faune %s existe" % [b, f.id])
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var ours := s.ajouter("ours_brun", j.pos + Vector2i(1, 0), "ia")
+	verifier(ours.corps.stats.force == 18 and ours.corps.silhouette == "quadrupede" and not ours.actions.is_empty(), "un ours brun se pose : Force 18, quadrupède, %d actions" % ours.actions.size())
+	var moustiques := s.ajouter("nuee_moustiques", j.pos + Vector2i(-1, 0), "ia")
+	verifier(moustiques.corps.silhouette == "amorphe" and "nuee" in moustiques.tags, "une nuée de moustiques : amorphe, tag nuée")
 
 
 # ---------------------------------------------------------------- Les 22 plantes

@@ -1,0 +1,46 @@
+{
+  "name_key": "creature.chameau.name",
+  "race": "chameau",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 9,
+      "dexterite": 8,
+      "endurance": 12,
+      "volonte": 4,
+      "perception": 9,
+      "charisme": 3
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "ruade",
+    "coup_de_tete"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 0.7,
+    "feu": 0.3
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.75,
+    0.6,
+    0.4
+  ],
+  "tags": [
+    "bete",
+    "proie"
+  ],
+  "competences": {
+    "athletisme": 30
+  },
+  "depouille": [
+    "viande_crue",
+    "peau"
+  ]
+}

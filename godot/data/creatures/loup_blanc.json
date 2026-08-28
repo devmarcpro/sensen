@@ -1,0 +1,48 @@
+{
+  "name_key": "creature.loup_blanc.name",
+  "race": "loup_blanc",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 9,
+      "dexterite": 13,
+      "endurance": 7,
+      "volonte": 4,
+      "perception": 13,
+      "charisme": 2
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "morsure",
+    "harcelement_meute",
+    "hurlement"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "eau": 0.6,
+    "bois": 0.4
+  },
+  "rare_chance": 0.02,
+  "teinte": [
+    0.9,
+    0.9,
+    0.92
+  ],
+  "tags": [
+    "bete",
+    "meute"
+  ],
+  "competences": {
+    "athletisme": 28
+  },
+  "depouille": [
+    "viande_crue",
+    "peau"
+  ],
+  "meute": "1d4+1"
+}

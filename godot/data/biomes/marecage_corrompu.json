@@ -59,6 +59,14 @@
     {
       "id": "loup",
       "density": 0.2
+    },
+    {
+      "id": "crocodile",
+      "density": 0.3
+    },
+    {
+      "id": "serpent_venimeux",
+      "density": 0.3
     }
   ],
   "faune_nuit": [
@@ -69,6 +77,10 @@
     {
       "id": "scorpion",
       "density": 0.3
+    },
+    {
+      "id": "nuee_moustiques",
+      "density": 0.5
     }
   ]
 }

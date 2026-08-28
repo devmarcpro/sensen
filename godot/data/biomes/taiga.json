@@ -75,12 +75,28 @@
     {
       "id": "sanglier",
       "density": 0.2
+    },
+    {
+      "id": "renne",
+      "density": 0.4
+    },
+    {
+      "id": "loup_blanc",
+      "density": 0.3
+    },
+    {
+      "id": "lynx",
+      "density": 0.15
     }
   ],
   "faune_nuit": [
     {
       "id": "loup",
       "density": 0.9
+    },
+    {
+      "id": "loup_blanc",
+      "density": 0.3
     }
   ]
 }

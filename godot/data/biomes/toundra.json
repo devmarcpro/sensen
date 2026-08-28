@@ -58,12 +58,32 @@
     {
       "id": "loup",
       "density": 0.2
+    },
+    {
+      "id": "renne",
+      "density": 0.5
+    },
+    {
+      "id": "loup_blanc",
+      "density": 0.3
+    },
+    {
+      "id": "ours_polaire",
+      "density": 0.1
+    },
+    {
+      "id": "morse",
+      "density": 0.1
     }
   ],
   "faune_nuit": [
     {
       "id": "loup",
       "density": 0.8
+    },
+    {
+      "id": "loup_blanc",
+      "density": 0.3
     }
   ]
 }

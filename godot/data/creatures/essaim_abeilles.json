@@ -1,0 +1,46 @@
+{
+  "name_key": "creature.essaim_abeilles.name",
+  "race": "essaim_abeilles",
+  "skeleton_template": "amorphe",
+  "corps": {
+    "stats": {
+      "force": 2,
+      "dexterite": 14,
+      "endurance": 3,
+      "volonte": 2,
+      "perception": 10,
+      "charisme": 1
+    },
+    "silhouette": "amorphe"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "dard_essaim",
+    "nuee"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "bois": 0.6,
+    "feu": 0.4
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.85,
+    0.7,
+    0.2
+  ],
+  "tags": [
+    "bete",
+    "nuee",
+    "volant"
+  ],
+  "competences": {
+    "athletisme": 20
+  },
+  "depouille": [
+    "miel"
+  ]
+}

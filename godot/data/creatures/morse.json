@@ -1,0 +1,46 @@
+{
+  "name_key": "creature.morse.name",
+  "race": "morse",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 16,
+      "dexterite": 5,
+      "endurance": 15,
+      "volonte": 5,
+      "perception": 8,
+      "charisme": 2
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "bete_sauvage",
+  "actions": [
+    "coup_de_defenses",
+    "masse_ecrasante"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "eau": 0.8,
+    "terre": 0.2
+  },
+  "rare_chance": 0.02,
+  "teinte": [
+    0.5,
+    0.42,
+    0.38
+  ],
+  "tags": [
+    "bete"
+  ],
+  "competences": {
+    "athletisme": 15
+  },
+  "depouille": [
+    "viande_crue",
+    "peau",
+    "dent"
+  ]
+}

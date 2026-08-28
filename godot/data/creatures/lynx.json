@@ -1,0 +1,48 @@
+{
+  "name_key": "creature.lynx.name",
+  "race": "lynx",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 9,
+      "dexterite": 15,
+      "endurance": 7,
+      "volonte": 4,
+      "perception": 14,
+      "charisme": 2
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "griffure",
+    "bond",
+    "embuscade"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "bois": 0.5,
+    "metal": 0.5
+  },
+  "rare_chance": 0.02,
+  "teinte": [
+    0.65,
+    0.55,
+    0.4
+  ],
+  "tags": [
+    "bete",
+    "embuscade"
+  ],
+  "competences": {
+    "athletisme": 32
+  },
+  "depouille": [
+    "viande_crue",
+    "peau",
+    "griffe"
+  ]
+}

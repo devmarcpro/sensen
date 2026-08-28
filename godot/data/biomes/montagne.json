@@ -58,6 +58,18 @@
     {
       "id": "cerf",
       "density": 0.2
+    },
+    {
+      "id": "bouquetin",
+      "density": 0.5
+    },
+    {
+      "id": "ours_brun",
+      "density": 0.15
+    },
+    {
+      "id": "lynx",
+      "density": 0.2
     }
   ],
   "faune_nuit": [
@@ -67,6 +79,10 @@
     },
     {
       "id": "aigle",
+      "density": 0.2
+    },
+    {
+      "id": "lynx",
       "density": 0.2
     }
   ]

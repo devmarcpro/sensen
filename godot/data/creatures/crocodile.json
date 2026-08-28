@@ -1,0 +1,48 @@
+{
+  "name_key": "creature.crocodile.name",
+  "race": "crocodile",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 15,
+      "dexterite": 9,
+      "endurance": 13,
+      "volonte": 4,
+      "perception": 10,
+      "charisme": 1
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "machoire_verrouillee",
+    "embuscade",
+    "morsure_puissante"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "eau": 0.7,
+    "terre": 0.3
+  },
+  "rare_chance": 0.02,
+  "teinte": [
+    0.3,
+    0.42,
+    0.25
+  ],
+  "tags": [
+    "bete",
+    "embuscade"
+  ],
+  "competences": {
+    "athletisme": 20
+  },
+  "depouille": [
+    "viande_crue",
+    "peau",
+    "dent"
+  ]
+}

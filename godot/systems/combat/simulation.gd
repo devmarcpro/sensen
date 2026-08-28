@@ -5398,6 +5398,7 @@ func _tiquer_faune(tick: int) -> void:
 		var n := 1
 		if def.has("meute") and (nuit or def.get("ai_profile", "") == "hostile"):
 			n = des.jet(str(def.meute))
+		n = mini(n, int(fa.budget) - betes.size())   # la meute ne dépasse jamais le budget de faune
 		for k in n:
 			var pos: Vector2i = q + Vector2i(rng.randi_range(-2, 2), rng.randi_range(-2, 2)) if k > 0 else q
 			if grille.dans(pos) and not grille.bloque_passage(pos) and grille.occupant(pos).is_empty():

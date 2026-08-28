@@ -1,0 +1,47 @@
+{
+  "name_key": "creature.bouquetin.name",
+  "race": "bouquetin",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 7,
+      "dexterite": 13,
+      "endurance": 8,
+      "volonte": 3,
+      "perception": 12,
+      "charisme": 2
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "coup_de_tete",
+    "bond"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 0.6,
+    "metal": 0.4
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.5,
+    0.42,
+    0.3
+  ],
+  "tags": [
+    "bete",
+    "proie"
+  ],
+  "competences": {
+    "athletisme": 35
+  },
+  "depouille": [
+    "viande_crue",
+    "peau",
+    "os"
+  ]
+}

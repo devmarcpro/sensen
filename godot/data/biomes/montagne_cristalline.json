@@ -54,12 +54,24 @@
     {
       "id": "aigle",
       "density": 0.4
+    },
+    {
+      "id": "bouquetin",
+      "density": 0.4
+    },
+    {
+      "id": "lynx",
+      "density": 0.2
     }
   ],
   "faune_nuit": [
     {
       "id": "loup",
       "density": 0.4
+    },
+    {
+      "id": "lynx",
+      "density": 0.2
     }
   ]
 }

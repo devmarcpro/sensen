@@ -67,12 +67,24 @@
     {
       "id": "aigle",
       "density": 0.2
+    },
+    {
+      "id": "vautour",
+      "density": 0.3
+    },
+    {
+      "id": "chameau",
+      "density": 0.3
     }
   ],
   "faune_nuit": [
     {
       "id": "scorpion",
       "density": 0.6
+    },
+    {
+      "id": "serpent_venimeux",
+      "density": 0.2
     }
   ]
 }

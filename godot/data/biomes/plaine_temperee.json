@@ -83,6 +83,10 @@
     {
       "id": "sanglier",
       "density": 0.2
+    },
+    {
+      "id": "essaim_abeilles",
+      "density": 0.15
     }
   ],
   "faune_nuit": [
