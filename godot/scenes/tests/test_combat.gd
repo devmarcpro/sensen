@@ -118,6 +118,7 @@ func _ready() -> void:
 	test_arrachage()
 	test_glyphes_visibles()
 	test_etats_tuiles_par_grille()
+	test_index_monde()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2539,6 +2540,32 @@ func test_uniques_artefacts() -> void:
 
 # ---------------------------------------------------------------- L'automate d'eau
 
+func test_index_monde() -> void:
+	# La fenêtre glisse : ce qui est mémorisé par tuile doit suivre le MONDE, pas la grille
+	var s := Simulation.new(164)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var t: Vector2i = j.pos + Vector2i(2, 0)
+	var h0 := s.grille.h(t)
+	s.grille.hauteurs[s.grille.idx(t)] = h0 - 2
+	s._memoriser_terrain(t)
+	s.portails[t] = j.id
+	var origine_avant: Vector2i = s.grille.origine
+	# Faire glisser la fenêtre : le joueur change de cellule
+	var cible: Vector2i = s.monde.cellule_camp + Vector2i(1, 0)
+	s.grille.liberer(j.pos)
+	j.pos = s.monde.pos_monde(cible, Vector2i(64, 64))   # un pas dans la cellule voisine
+	s.grille.placer(j.id, j.pos)
+	s._verifier_fenetre(j)   # c'est lui qui fait glisser la fenêtre
+	verifier(s.grille.origine != origine_avant, "la fenêtre a glissé (%s → %s)" % [str(origine_avant), str(s.grille.origine)])
+	verifier(s.modifs_terrain.has(t), "la mémoire du terrain garde sa position monde")
+	verifier(s.portails.has(t), "le portail garde sa position monde")
+	# Changer de lieu, en revanche, vide tout
+	s.charger_donjon("ruine", 164, 11, 1, j)
+	verifier(s.modifs_terrain.is_empty() and s.portails.is_empty(), "en donjon : mémoire de terrain et portails remis à zéro")
+	s.monde.fermer()
+
+
 func test_etats_tuiles_par_grille() -> void:
 	var s := Simulation.new(163)
 	s.charger_camp()
@@ -2605,7 +2632,7 @@ func test_arrachage() -> void:
 	verifier(s._arracher(pierre, 3) == false, "le granit ne s'arrache pas")
 	verifier(s._arracher(abrite, 3) == false, "un chaume abrité par plus haut tient")
 	verifier(s._arracher(chaume, 3) and s.grille.contenu_de(chaume).is_empty(), "un chaume exposé s'envole")
-	verifier(s.modifs_terrain.has(s.grille.idx(chaume)), "le terrain est mémorisé : il repoussera hors claim")
+	verifier(s.modifs_terrain.has(chaume), "le terrain est mémorisé : il repoussera hors claim")
 	s.monde.fermer()
 
 
@@ -2973,9 +3000,9 @@ func test_ia_portails() -> void:
 	for t in [entree, sortie]:
 		s.grille.contenu[s.grille.idx(t)] = 0
 		s.grille.hauteurs[s.grille.idx(t)] = s.grille.h(loup.pos)
-	j["portails"] = [s.grille.idx(entree), s.grille.idx(sortie)]
-	s.portails[s.grille.idx(entree)] = j.id
-	s.portails[s.grille.idx(sortie)] = j.id
+	j["portails"] = [entree, sortie]   # clés en position monde (la fenêtre glisse)
+	s.portails[entree] = j.id
+	s.portails[sortie] = j.id
 	verifier(s.portail_utile(loup, but) == entree, "le loup voit la brèche qui le rapproche")
 	verifier(s.portail_utile(loup, loup.pos + Vector2i(1, 0)) == Vector2i(-1, -1), "pour deux tuiles, le détour n'en vaut pas la peine")
 	var tick := s.tick_de(loup)
@@ -3106,7 +3133,7 @@ func test_feu() -> void:
 		if s.feux.size() > 1:
 			propage = true
 	verifier(propage, "le feu gagne les pins voisins")
-	verifier(s.grille.contenu_de(base).is_empty() and s.modifs_terrain.has(s.grille.idx(base)), "le premier pin est consumé, terrain mémorisé")
+	verifier(s.grille.contenu_de(base).is_empty() and s.modifs_terrain.has(base), "le premier pin est consumé, terrain mémorisé")
 	# Brûler : un loup posé sur une tuile en feu
 	for idx in s.feux.keys().duplicate():
 		s.feux.erase(idx)
@@ -3194,7 +3221,7 @@ func test_cueillette() -> void:
 	verifier(s.intention(j.id, {"type": "cueillir", "vers": t}), "cueillir un framboisier adjacent")
 	var n: int = j.sac.size() - avant
 	verifier(n == maxi(1, int(GameData.catalogues.plants.framboisier.recolte_base) / 2), "la moitié d'une récolte cultivée (%d)" % n)
-	verifier(s.grille.contenu_de(t).is_empty() and s.modifs_terrain.has(s.grille.idx(t)), "la tuile redevient du sol, mémorisée pour repousser")
+	verifier(s.grille.contenu_de(t).is_empty() and s.modifs_terrain.has(t), "la tuile redevient du sol, mémorisée pour repousser")
 	s.monde.fermer()
 
 
@@ -3792,7 +3819,7 @@ func test_cataclysme() -> void:
 	verifier(s.intention(j.id, {"type": "capacite", "index": j.capacites.size() - 1, "cible": centre}), "le cataclysme est canalisé (télégraphié)")
 	verifier(not j.action_en_cours.is_empty(), "la canalisation est visible : une action en cours")
 	s.pas(j.horloge)
-	verifier(s.grille.h(centre) == maxi(0, h0 - 4) and int(j.endurance) == 0 and s.modifs_terrain.has(s.grille.idx(centre)), "cratère : %d → %d, endurance vidée, terrain mémorisé" % [h0, s.grille.h(centre)])
+	verifier(s.grille.h(centre) == maxi(0, h0 - 4) and int(j.endurance) == 0 and s.modifs_terrain.has(centre), "cratère : %d → %d, endurance vidée, terrain mémorisé" % [h0, s.grille.h(centre)])
 	j.mana = 300
 	j.compteur = h.ticks
 	verifier(not s.intention(j.id, {"type": "capacite", "index": j.capacites.size() - 1, "cible": centre}), "un seul cataclysme par combat")
@@ -3873,12 +3900,12 @@ func test_terrasser() -> void:
 		verifier(s.intention(j.id, {"type": "terrasser", "vers": t, "sens": 1}) and s.grille.h(t) == h0, "élever avec la pioche : %d" % s.grille.h(t))
 		s.attente[j.id] = true
 		s.intention(j.id, {"type": "terrasser", "vers": t, "sens": 1})
-	verifier(s.modifs_terrain.has(s.grille.idx(t)) and int(s.modifs_terrain[s.grille.idx(t)].h) == h0, "l'état d'origine est mémorisé (h %d)" % h0)
+	verifier(s.modifs_terrain.has(t) and int(s.modifs_terrain[t].h) == h0, "l'état d'origine est mémorisé (h %d)" % h0)
 	# Hors claim, la semaine rend la tuile ; sur un claim, elle persiste
 	var cell := s._cell_de(t)
 	s.monde.claims.erase(cell)
 	s._regenerer_terrain_sauvage()
-	verifier(s.grille.h(t) == h0 and not s.modifs_terrain.has(s.grille.idx(t)), "hors claim : le monde rend la hauteur %d" % h0)
+	verifier(s.grille.h(t) == h0 and not s.modifs_terrain.has(t), "hors claim : le monde rend la hauteur %d" % h0)
 	s.attente[j.id] = true
 	s.intention(j.id, {"type": "terrasser", "vers": t, "sens": -1})
 	s.monde.claims[cell] = {"proprietaire": j.id}

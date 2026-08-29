@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] La mémoire du terrain se décalait (bug, 2026-08-29)
+> `modifs_terrain` et `portails` étaient indexés par la grille glissante : après une traversée de cellule, la régénération réécrivait le terrain **au mauvais endroit**. Indexés par position monde depuis.
 > [!important] Les feux traversaient les cellules (bug, 2026-08-29)
 > `feux` et `eau_active` indexent des tuiles ; rien ne les vidait au changement de grille — un incendie continuait dans la cellule d'arrivée, sur des index sans rapport. Corrigé et testé.
 > [!important] Les glyphes se voient — sauf ceux de L'Ombre (2026-08-29)

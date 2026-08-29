@@ -733,7 +733,7 @@ func _options_tuile(t: Vector2i) -> Array:
 		return res
 	if not str(j.get("porte", "")).is_empty() and d >= 1 and d <= 3:
 		res.append({"id": "lancer_etre", "vers": t})
-	if d == 0 and sim.portails.has(g.idx(t)):
+	if d == 0 and sim.portails.has(t):
 		res.append({"id": "traverser"})
 	if sim.a_talent(j, "releveur") and d <= int(sim.regles.r.talents.releveur.portee) and g.occupant(t).is_empty():
 		for x in sim.entites.values():
@@ -1085,8 +1085,9 @@ func _draw() -> void:
 			draw_primitive(PackedVector2Array([pointe, pointe - dir * 14.0 + perp * 7.0, pointe - dir * 14.0 - perp * 7.0]), PackedColorArray([Color(0.95, 0.2, 0.2, 0.9), Color(0.95, 0.2, 0.2, 0.9), Color(0.95, 0.2, 0.2, 0.9)]), PackedVector2Array())
 	for a in sim.affuts:   # les affûts de L'Engrenage
 		_losange(a.pos, Color(0.25, 0.25, 0.3, 0.85))
-	for pi in sim.portails.keys():   # les brèches du Passeur
-		_losange(sim.grille.pos_de(int(pi)), Color(0.6, 0.3, 0.9, 0.7))
+	for pi in sim.portails.keys():   # les brèches du Passeur (clés en position monde)
+		if sim.grille.dans(pi):
+			_losange(pi, Color(0.6, 0.3, 0.9, 0.7))
 	if not sim.donjon.is_empty() and sim.donjon.escalier != null:
 		_losange(sim.donjon.escalier, Color(0.9, 0.7, 0.2, 0.6))
 	if not sim.donjon.is_empty() and sim.donjon.has("entree"):

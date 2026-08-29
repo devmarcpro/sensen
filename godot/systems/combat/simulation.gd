@@ -43,9 +43,10 @@ var feu_prochain_pas := 0
 var canicule_heure := -1
 var arrachage_heure := -1   # la dernière heure de tempête où le vent a arraché (Météo)
 var eau_prochain_pas := 0
-var modifs_terrain: Dictionary = {}   # idx → {h, contenu} d'origine : ce que le monde rendra hors claim (Destruction du terrain)
+var modifs_terrain: Dictionary = {}   # **position monde** → {h, contenu} d'origine : ce que le monde rendra hors claim
+                                     # (Destruction du terrain). Jamais un index de grille : la fenêtre glisse.
 var vecteur_lieu_force: Dictionary = {}   # tests et arènes : imposer le vecteur du lieu (Wu Xing hors combat)
-var portails: Dictionary = {}   # idx de tuile → id du Passeur qui l'a ouvert (Talents de classe)
+var portails: Dictionary = {}   # **position monde** → id du Passeur qui l'a ouverte (Talents de classe)
 var territoire: Dictionary = {"tresor": 0, "dette": 0, "semaines_dette": 0, "stocks": {}, "rapports": [], "gains_quetes": 0, "royaume": false,
 	"cultures": {}, "fertilite": {}, "etals": {}, "caisse": 0, "marge": 1.0, "clients": 0.0, "heure_resolue": -1, "absence": {"ventes": 0, "or": 0, "mures": 0},
 	"gouvernance": "", "gouvernance_cible": "", "transition": 0, "raid": {}, "dernier_raid": {}, "accords": {}}   # le royaume du joueur (étape 10)
@@ -360,7 +361,10 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 
 ## Les états indexés par tuile ne valent que pour la grille courante : tout changement de grille les vide
 ## (voyage, donjon, retour au camp, chargement). Sans ça, un feu continue de brûler les mêmes index ailleurs.
-func _vider_etats_tuiles() -> void:
+func _vider_etats_tuiles(change_de_lieu: bool = false) -> void:
+	if change_de_lieu:   # camp ↔ donjon : deux espaces de coordonnées, rien ne se transporte
+		modifs_terrain.clear()
+		portails.clear()
 	feux.clear()
 	eau_active.clear()
 	glyphes.clear()
@@ -370,7 +374,7 @@ func _vider_etats_tuiles() -> void:
 
 
 func _reinitialiser() -> void:
-	_vider_etats_tuiles()
+	_vider_etats_tuiles(true)
 	entites.clear()
 	ordre.clear()
 	combats.clear()
@@ -410,9 +414,8 @@ func _reprendre(e: Dictionary, pos: Vector2i) -> void:
 ## Le bord de la cellule (roche) ne se creuse pas. Coût en ticks et en endurance, XP de Terrassement.
 ## Mémoriser l'état d'origine d'une tuile avant de la modifier (régénération des cases sauvages).
 func _memoriser_terrain(t: Vector2i) -> void:
-	var idx := grille.idx(t)
-	if not modifs_terrain.has(idx):
-		modifs_terrain[idx] = {"h": grille.h(t), "contenu": int(grille.contenu[idx])}
+	if not modifs_terrain.has(t):
+		modifs_terrain[t] = {"h": grille.h(t), "contenu": int(grille.contenu[grille.idx(t)])}
 	_reveiller_eau_autour(t)
 
 
@@ -936,16 +939,17 @@ func _terrasser(e: Dictionary, vers: Vector2i, sens: int, tick: int) -> bool:
 ## Chaque semaine, le monde efface les modifications de terrain hors des claims (Claims et persistance).
 func _regenerer_terrain_sauvage() -> void:
 	var n := 0
-	for idx in modifs_terrain.keys():
-		var t := grille.pos_de(int(idx))
+	for t in modifs_terrain.keys():
+		if not grille.dans(t):
+			continue   # hors de la fenêtre : la mémoire reste, la tuile redeviendra atteignable
 		if monde != null and monde.claims.has(_cell_de(t)):
 			continue
-		if not grille.occupant(t).is_empty() or grille.meubles.has(int(idx)) or grille.stations_fixes.has(int(idx)):
+		if not grille.occupant(t).is_empty() or grille.meubles.has(grille.idx(t)) or grille.stations_fixes.has(grille.idx(t)):
 			continue
-		var o: Dictionary = modifs_terrain[idx]
-		grille.hauteurs[int(idx)] = int(o.h)
-		grille.contenu[int(idx)] = int(o.contenu)
-		modifs_terrain.erase(idx)
+		var o: Dictionary = modifs_terrain[t]
+		grille.hauteurs[grille.idx(t)] = int(o.h)
+		grille.contenu[grille.idx(t)] = int(o.contenu)
+		modifs_terrain.erase(t)
 		lumiere_sale = true
 		EventBus.emettre(&"tile_changed", [t])
 		n += 1
@@ -2284,15 +2288,14 @@ func _contreparties(e: Dictionary) -> void:
 func _poser_portail(e: Dictionary, t: Vector2i, tick: int) -> bool:
 	if not a_talent(e, "breche") or Grille.distance(e.pos, t) != 1 or not grille.dans(t) or grille.bloque_passage(t) or not grille.occupant(t).is_empty():
 		return false
-	var idx := grille.idx(t)
-	if portails.has(idx):
+	if portails.has(t):
 		return false
 	if not e.has("portails"):
 		e["portails"] = []
 	while e.portails.size() >= int(regles.r.talents.breche.portails_max):
-		portails.erase(int(e.portails.pop_front()))
-	e.portails.append(idx)
-	portails[idx] = e.id
+		portails.erase(e.portails.pop_front())
+	e.portails.append(t)
+	portails[t] = e.id
 	e.compteur = tick + int(regles.r.actions.objet)
 	EventBus.emettre(&"journal", [&"journal.portail_pose", {"nom": e.name_key}])
 	return true
@@ -2300,15 +2303,14 @@ func _poser_portail(e: Dictionary, t: Vector2i, tick: int) -> bool:
 
 ## Traverser : debout sur un portail, vers son jumeau s'il est libre (ouvert à tous).
 func _traverser(e: Dictionary, tick: int) -> bool:
-	var idx := grille.idx(e.pos)
-	if not portails.has(idx):
+	if not portails.has(e.pos):
 		return false
-	var p: Dictionary = entites.get(str(portails[idx]), {})
+	var p: Dictionary = entites.get(str(portails[e.pos]), {})
 	if p.is_empty():
 		return false
 	for j in p.get("portails", []):
-		if int(j) != idx and portails.has(int(j)):
-			var vers := grille.pos_de(int(j))
+		if j != e.pos and portails.has(j):
+			var vers: Vector2i = j
 			if not grille.occupant(vers).is_empty():
 				return false
 			grille.liberer(e.pos)
@@ -2330,16 +2332,17 @@ func portail_utile(e: Dictionary, but: Vector2i) -> Vector2i:
 	var portee := int(br.get("ia_portee", 8))
 	var meilleur := Vector2i(-1, -1)
 	var meilleur_gain := int(br.get("ia_gain_min", 6)) - 1
-	for idx in portails.keys():
-		var entree := grille.pos_de(int(idx))
+	for entree in portails.keys():
+		if not grille.dans(entree):
+			continue
 		var d_entree := Grille.distance(e.pos, entree)
 		if d_entree > portee or (d_entree > 0 and not grille.occupant(entree).is_empty()):
 			continue
-		var p: Dictionary = entites.get(str(portails[idx]), {})
+		var p: Dictionary = entites.get(str(portails[entree]), {})
 		for j in p.get("portails", []):
-			if int(j) == int(idx) or not portails.has(int(j)):
+			if j == entree or not portails.has(j):
 				continue
-			var sortie := grille.pos_de(int(j))
+			var sortie: Vector2i = j
 			if not grille.occupant(sortie).is_empty():
 				continue
 			var gain := Grille.distance(e.pos, but) - (d_entree + Grille.distance(sortie, but))
