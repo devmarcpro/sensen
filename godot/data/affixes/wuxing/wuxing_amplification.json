@@ -1,0 +1,25 @@
+{
+  "name_key": "affixe.wuxing_amplification.nom",
+  "famille": "wuxing",
+  "slots_valides": [
+    "anneau",
+    "amulette"
+  ],
+  "parametres": {
+    "element": "element",
+    "pct": [
+      20,
+      60
+    ]
+  },
+  "effet": {
+    "type": "wuxing_amplification"
+  },
+  "meilleur": {
+    "pct": "haut"
+  },
+  "inerte": false,
+  "tags": [
+    "rare"
+  ]
+}

@@ -44,6 +44,9 @@ Quatre opérations sur le vecteur élémentaire, résolues dans un ordre strict 
 
 **Affixes Wu Xing associés ([[Loot — affixes, gemmes et rareté]]) :** « les coups touchés avancent l'élément dans le cycle » · « +[20-40] % [élément] au vecteur » · « +1 segment de chaîne » (rare) · « les combos donnent +2 dés au lieu de +1 » (très rare).
 
+> [!success] Codé le 2026-08-29 — les quatre opérations, dans l'ordre de la note
+> Deux des quatre existaient (**ajout**, **purification**, portées par des affixes d'arme) ; **amplification** et **transmutation** manquaient — donc les *anneaux de transmutation*, l'un des [[Cinq accès au cycle]], n'existaient pas. Deux gabarits d'affixes de plus (`wuxing_amplification` : *part de X × N*, `wuxing_transmutation` : *remplace X par Y*), **sur les anneaux et les amulettes** — c'est là que la note les place. Ils s'appliquent au vecteur du coup dans **l'ordre prescrit** (`Simulation._vecteur_modifie` : base → **amplifications** → ajouts → **transmutations** → purifications → normalisation à 1), après les affixes d'arme et les gemmes. Décisions : une transmutation dont l'élément source est **absent du vecteur** ne fait rien (elle ne crée pas d'élément à partir de rien) ; une amplification d'un élément absent non plus, comme le dit la note (« sans effet si absent ») ; fermer un élément avec deux anneaux qui transmutent vers le même Y **concentre** naturellement — c'est l'effet voulu (« fermer un élément interdit la rotation mais rend la concentration naturelle »).
+
 ## Liens
 - **Dépend de** : [[Wu Xing — cycles et vecteurs]], [[Domination et multiplicateurs]]
 - **Alimente** : [[Cinq accès au cycle]], [[Jauge de chaîne Wu Xing]], [[Loot — affixes, gemmes et rareté]]

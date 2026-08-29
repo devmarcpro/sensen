@@ -1,0 +1,20 @@
+{
+  "name_key": "affixe.wuxing_transmutation.nom",
+  "famille": "wuxing",
+  "slots_valides": [
+    "anneau",
+    "amulette"
+  ],
+  "parametres": {
+    "element": "element",
+    "vers": "element"
+  },
+  "effet": {
+    "type": "wuxing_transmutation"
+  },
+  "meilleur": {},
+  "inerte": false,
+  "tags": [
+    "tres_rare"
+  ]
+}

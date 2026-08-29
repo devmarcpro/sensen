@@ -2007,3 +2007,5 @@ ui.ecran.suiveur,Follow me on my land (W)
 ui.ecran.suiveur_stop,Go back to your post (W)
 journal.suiveur_local,"{nom} will follow you on your land"
 journal.suiveur_fin,"{nom} will not leave the territory and returns to their post"
+affixe.wuxing_amplification.nom,{base} amplified ({element} ×{pct} %)
+affixe.wuxing_transmutation.nom,{base} of transmutation ({element} → {vers})

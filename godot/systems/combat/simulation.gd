@@ -7067,7 +7067,34 @@ func _affixes_offensifs(e: Dictionary, arme: Dictionary, cible: Dictionary) -> D
 				var dom := wuxing.dominante(r.vecteur)
 				if not dom.is_empty():
 					r.vecteur = _ajouter_element(r.vecteur, dom, float(p.pct) / 100.0)
+	r.vecteur = _vecteur_modifie(e, r.vecteur)   # anneaux et amulettes : amplification puis transmutation
 	return r
+
+
+## Les modificateurs d'affinité portés par l'équipement (anneaux, amulettes) appliqués au vecteur d'un coup,
+## dans l'ordre de la note : base → amplifications → ajouts → transmutations → purifications → normalisation.
+func _vecteur_modifie(e: Dictionary, v: Dictionary) -> Dictionary:
+	if v.is_empty():
+		return v
+	var res := v.duplicate()
+	for ax in Etres.affixes_equipes(e, items, affixes_defs, "wuxing_amplification"):   # amplification : sans effet si absent
+		var el := str(ax.params.get("element", ""))
+		if res.has(el):
+			res[el] = float(res[el]) * (1.0 + float(ax.params.get("pct", 0)) / 100.0)
+	for ax in Etres.affixes_equipes(e, items, affixes_defs, "wuxing_transmutation"):   # remplace X par Y
+		var de := str(ax.params.get("element", ""))
+		var vers := str(ax.params.get("vers", ""))
+		if de != vers and res.has(de) and not vers.is_empty():
+			res[vers] = float(res.get(vers, 0.0)) + float(res[de])
+			res.erase(de)
+	var total := 0.0
+	for k in res.keys():
+		total += float(res[k])
+	if total <= 0.0:
+		return v
+	for k in res.keys():
+		res[k] = float(res[k]) / total
+	return res
 
 
 ## Modificateur d'affinité AJOUT puis normalisation à somme 1 (Modificateurs d'affinité).

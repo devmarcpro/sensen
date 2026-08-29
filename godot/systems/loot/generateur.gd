@@ -189,6 +189,8 @@ func _tirer_parametres(a: Dictionary, budget: float, rng: RandomNumberGenerator,
 		var spec: Variant = a.parametres[nom]
 		if spec is String and spec == "element":
 			res[nom] = elements[rng.randi_range(0, elements.size() - 1)]
+			if nom == "vers" and str(res[nom]) == str(res.get("element", "")):   # transmutation : deux éléments distincts
+				res[nom] = elements[(elements.find(res[nom]) + 1) % elements.size()]
 		elif spec is Array and spec.size() == 2 and (spec[0] is float or spec[0] is int) and not (spec[0] is String):
 			var lo := int(spec[0])
 			var hi := int(spec[1])

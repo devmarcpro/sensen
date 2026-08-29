@@ -114,6 +114,7 @@ func _ready() -> void:
 	test_registre_loci()
 	test_meubles_rituels()
 	test_suiveur_territorial()
+	test_transmutation()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2534,6 +2535,40 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_transmutation() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	# Une arme mixte : bois 0,6 / feu 0,4
+	var arme := {"uid": "epee_mix", "name_key": "x", "type": "arme", "equip_slot": "main_principale", "functionality": "epee",
+		"elements": {"bois": 0.6, "feu": 0.4}, "affixes": [], "sertissures": {"nombre": 0, "contenu": []}, "tags": []}
+	s.items["epee_mix"] = arme
+	var v0 := s.vecteur_arme(arme)
+	verifier(is_equal_approx(float(v0.bois), 0.6), "l'arme mixte porte son vecteur")
+	# Amplification : la part de feu monte, la normalisation dilue le bois
+	s.items["anneau_amp"] = {"uid": "anneau_amp", "name_key": "x", "type": "bijou", "equip_slot": "anneau",
+		"affixes": [{"id": "wuxing_amplification", "params": {"element": "feu", "pct": 50}, "compteur": 0, "etat": {}}],
+		"sertissures": {"nombre": 0, "contenu": []}, "tags": []}
+	j.equipement["anneau_1"] = "anneau_amp"
+	var v1 := s._vecteur_modifie(j, v0)
+	verifier(float(v1.feu) > 0.4 and float(v1.bois) < 0.6 and is_equal_approx(float(v1.feu) + float(v1.bois), 1.0), "amplification : feu %.2f, bois %.2f, somme 1" % [float(v1.feu), float(v1.bois)])
+	# Amplification d'un élément absent : sans effet
+	s.items.anneau_amp.affixes[0].params.element = "eau"
+	var v2 := s._vecteur_modifie(j, v0)
+	verifier(is_equal_approx(float(v2.bois), 0.6), "amplifier un élément absent ne fait rien")
+	# Transmutation : le bois devient métal, l'arme se concentre
+	s.items["anneau_tr"] = {"uid": "anneau_tr", "name_key": "x", "type": "bijou", "equip_slot": "anneau",
+		"affixes": [{"id": "wuxing_transmutation", "params": {"element": "bois", "vers": "metal"}, "compteur": 0, "etat": {}}],
+		"sertissures": {"nombre": 0, "contenu": []}, "tags": []}
+	j.equipement["anneau_2"] = "anneau_tr"
+	var v3 := s._vecteur_modifie(j, v0)
+	verifier(not v3.has("bois") and is_equal_approx(float(v3.metal), 0.6), "transmutation : le bois devient métal (%.2f)" % float(v3.get("metal", 0.0)))
+	# Deux anneaux vers le même élément ferment la rotation : mono-élément
+	s.items.anneau_amp.affixes[0] = {"id": "wuxing_transmutation", "params": {"element": "feu", "vers": "metal"}, "compteur": 0, "etat": {}}
+	var v4 := s._vecteur_modifie(j, v0)
+	verifier(v4.size() == 1 and is_equal_approx(float(v4.metal), 1.0), "deux transmutations vers Métal : le vecteur se ferme (%s)" % str(v4))
+	s.monde.fermer() if s.monde != null else null
+
 
 func test_suiveur_territorial() -> void:
 	var s := Simulation.new(161)
@@ -5203,7 +5238,7 @@ func test_donjon() -> void:
 # ---------------------------------------------------------------- Étape 3 (a) : affixes générateurs, rareté, effets passifs
 
 func test_loot() -> void:
-	verifier(GameData.catalogues["affixes"].size() == 41, "41 gabarits d'affixes (6 familles × 6, + portage et sobriété, + 3 uniques)")
+	verifier(GameData.catalogues["affixes"].size() == 43, "43 gabarits d'affixes (6 familles × 6, + portage et sobriété, + 3 uniques, + amplification et transmutation)")
 	var s := nouvelle_sim("plaine_au_talus")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1
