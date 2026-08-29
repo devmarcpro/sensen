@@ -118,6 +118,7 @@ func _ready() -> void:
 	test_arrachage()
 	test_glyphes_visibles()
 	test_derobade()
+	test_alternance()
 	test_etats_tuiles_par_grille()
 	test_index_monde()
 	test_sauvegarde_terrain()
@@ -2604,6 +2605,21 @@ func test_etats_tuiles_par_grille() -> void:
 	verifier(s.feux.is_empty() and s.eau_active.is_empty(), "descendre en donjon éteint les états de tuile (%d feux, %d eaux)" % [s.feux.size(), s.eau_active.size()])
 	verifier(s.grille.dangers.size() == s.grille.dangers.size(), "la grille du donjon a ses propres dangers")
 	s.monde.fermer()
+
+
+func test_alternance() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	# Deux noyaux sans Alternance : erreur d'assemblage
+	var sans := s.capacites.assembler(["point", "etincelle", "gel"], 5, "1d6", {"metal": 1.0}, {})
+	verifier(not sans.erreurs.is_empty(), "deux noyaux sans Alternance : refusé (%s)" % str(sans.erreurs))
+	# Avec Alternance : deux plans, un par noyau
+	var plan := s.capacites.assembler(["point", "alternance", "etincelle", "gel"], 5, "1d6", {"metal": 1.0}, {})
+	verifier(plan.erreurs.is_empty(), "avec Alternance : la séquence s'assemble (%s)" % str(plan.erreurs))
+	verifier(plan.has("alt") and not plan.noyau.is_empty() and not plan.alt.noyau.is_empty(), "deux plans, deux noyaux")
+	verifier(str(plan.noyau.id) != str(plan.alt.noyau.id), "les deux noyaux diffèrent (%s / %s)" % [str(plan.noyau.id), str(plan.alt.noyau.id)])
+	verifier(int(plan.ticks) > 0 and int(plan.alt.ticks) > 0, "chaque plan garde ses propres ticks (%d / %d)" % [int(plan.ticks), int(plan.alt.ticks)])
+	s.monde.fermer() if s.monde != null else null
 
 
 func test_derobade() -> void:

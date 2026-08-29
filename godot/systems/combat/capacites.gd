@@ -37,6 +37,21 @@ func ticks_module(base: int, id: String, niveaux: Dictionary) -> int:
 	return maxi(int(ceilf(float(base) * plancher)), roundi(float(base) / sf))
 
 
+## Alternance (Modules) : une séquence à deux noyaux devient deux plans, joués à tour de rôle.
+## `sans` retire le n-ième noyau de la séquence (0 = le premier).
+static func _sans_noyau(sequence: Array, modules: Dictionary, n: int) -> Array:
+	var res: Array = []
+	var vus := 0
+	for id in sequence:
+		if str(modules.get(str(id), {}).get("module_type", "")) == "noyau":
+			if vus == n:
+				vus += 1
+				continue
+			vus += 1
+		res.append(id)
+	return res
+
+
 func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme: Dictionary, niveaux: Dictionary = {}) -> Dictionary:
 	var plan := {
 		"modules": sequence, "noyau": {}, "forme": {}, "erreurs": [], "avertissements": [],
@@ -45,6 +60,19 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 		"elements": {}, "effets": [], "conditions": [], "drapeaux": {}, "parametres": {},
 		"liaisons": [], "charge_suivante": {},
 	}
+	var alternance := false   # Alternance (Modules) : la séquence a droit à deux noyaux
+	var noyaux := 0
+	for id0 in sequence:
+		var m0: Dictionary = modules.get(str(id0), {})
+		if bool(m0.get("effet", {}).get("alternance", false)):
+			alternance = true
+		if str(m0.get("module_type", "")) == "noyau":
+			noyaux += 1
+	if alternance and noyaux >= 2 and not sequence.has("__alt__"):
+		var plan_a := assembler(_sans_noyau(sequence, modules, 1), ticks_arme, des_arme, element_arme, niveaux)
+		plan_a["alt"] = assembler(_sans_noyau(sequence, modules, 0), ticks_arme, des_arme, element_arme, niveaux)
+		plan_a["modules"] = sequence
+		return plan_a
 	var plus := 0
 	var mult := 1.0
 	for k in sequence.size():
@@ -74,6 +102,8 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 		match str(m.module_type):
 			"noyau":
 				if not plan.noyau.is_empty():
+					if alternance:
+						continue   # Alternance : le second noyau est assemblé dans le plan `alt`
 					plan.erreurs.append("deux noyaux dans la même séquence (" + id + ")")
 					continue
 				plan.noyau = m

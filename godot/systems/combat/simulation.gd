@@ -7855,6 +7855,13 @@ func _lancer_capacite(e: Dictionary, index: int, cible: Variant, tick: int) -> b
 	var plan := plan_capacite(e, index)
 	if plan.is_empty() or not plan.erreurs.is_empty():
 		return false
+	if plan.has("alt"):   # Alternance (Modules) : un emploi sur deux part avec l'autre noyau
+		var cle_alt := "alt:%d" % index
+		if int(e.get("emplois", {}).get(cle_alt, 0)) % 2 == 1:
+			plan = plan.alt
+		if not e.has("emplois"):
+			e["emplois"] = {}
+		e.emplois[cle_alt] = int(e.emplois.get(cle_alt, 0)) + 1
 	var cible_pos: Vector2i = e.pos if plan.geometrie == "soi" else cible
 	if not (cible is Vector2i) and plan.geometrie != "soi":
 		return false
