@@ -109,6 +109,7 @@ func _ready() -> void:
 	test_huile_d_arme()
 	test_liens_donnees()
 	test_discretion()
+	test_routes_entre_royaumes()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2529,6 +2530,32 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_routes_entre_royaumes() -> void:
+	var planete: Dictionary = GameData.config("planete")
+	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
+	var trouves := 0
+	var hostiles_relies := 0
+	var capitales_reliees := 0
+	for sx in 3:
+		for sy in 3:
+			var roys: Dictionary = surf.royaumes_secteur(Vector2i(sx, sy))
+			for id in roys.keys():
+				var r: Dictionary = roys[id]
+				var cap: Vector2i = r.capital_poi
+				for id2 in roys.keys():
+					if id2 == id:
+						continue
+					var r2: Dictionary = roys[id2]
+					if str(r.diplomacy.get(id2, "")) == "hostile" and (r2.capital_poi in surf.route_de(cap)):
+						hostiles_relies += 1
+				if not surf.route_de(cap).is_empty():
+					capitales_reliees += 1
+				trouves += 1
+	verifier(trouves > 0, "des royaumes sont générés (%d)" % trouves)
+	verifier(capitales_reliees > 0, "des capitales voisines sont reliées (%d capitales sur %d en portent)" % [capitales_reliees, trouves])
+	verifier(hostiles_relies == 0, "aucune route directe entre deux capitales hostiles")
+
 
 func test_discretion() -> void:
 	var s := Simulation.new(158)

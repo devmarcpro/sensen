@@ -227,6 +227,26 @@ func _royaumes_secteur_calc(sect: Vector2i) -> Dictionary:
 				q = p0
 			if not (cap in r.routes):
 				r.routes.append(cap)
+	# Les routes commerciales entre royaumes voisins non hostiles (Unification macro-micro) : capitale à capitale,
+	# par les deux territoires seulement — une route est un lien de confiance, elle ne traverse pas un tiers.
+	for i in ordre.size():
+		for j in range(i + 1, ordre.size()):
+			var ra: Dictionary = res[ordre[i]]
+			var rb: Dictionary = res[ordre[j]]
+			if str(ra.diplomacy.get(rb.id, "")) == "hostile" or str(rb.diplomacy.get(ra.id, "")) == "hostile":
+				continue
+			var voisins := false
+			var passables: Dictionary = {}
+			for c in ra.territory_cells:
+				passables[c] = true
+			for c in rb.territory_cells:
+				passables[c] = true
+				for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+					if (c + d) in ra.territory_cells:
+						voisins = true
+			if not voisins:
+				continue
+			_route_entre(ra.capital_poi, rb.capital_poi, passables, cfg)
 	# Diplomatie initiale entre royaumes du secteur : compatibilité de gouvernance et de race.
 	for i in ordre.size():
 		for j in ordre.size():
@@ -244,6 +264,38 @@ func _royaumes_secteur_calc(sect: Vector2i) -> Dictionary:
 			score += rng.randf_range(-0.3, 0.3)
 			a.diplomacy[b2.id] = "hostile" if score < -0.3 else ("tension" if score < 0.0 else ("cordial" if score < 0.4 else "allie"))
 	return res
+
+
+## Une route entre deux points, par le plus court chemin à coût dans un ensemble de cellules autorisées.
+func _route_entre(depart: Vector2i, arrivee: Vector2i, passables: Dictionary, cfg: Dictionary) -> void:
+	var taille: int = int(planete.taille_cellule)
+	var couts: Dictionary = {depart: 0.0}
+	var pred: Dictionary = {}
+	var ouverts: Array = [depart]
+	while not ouverts.is_empty():
+		var mi := 0
+		for i in ouverts.size():
+			if float(couts[ouverts[i]]) < float(couts[ouverts[mi]]):
+				mi = i
+		var c: Vector2i = ouverts[mi]
+		ouverts.remove_at(mi)
+		if c == arrivee:
+			break
+		for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var v: Vector2i = c + d
+			if not passables.has(v) or not terre_a(v):
+				continue
+			var cout := 1.0 + float(cfg.cout_danger) * valeur("danger", v.x * taille + taille / 2, v.y * taille + taille / 2) + float(cfg.cout_altitude) * maxf(0.0, valeur("altitude", v.x * taille + taille / 2, v.y * taille + taille / 2) - 0.5)
+			if not couts.has(v) or float(couts[c]) + cout < float(couts[v]):
+				couts[v] = float(couts[c]) + cout
+				pred[v] = c
+				ouverts.append(v)
+	if not pred.has(arrivee):
+		return   # aucun chemin par les deux territoires : pas de route
+	var q: Vector2i = arrivee
+	while pred.has(q):
+		_relier(q, pred[q])
+		q = pred[q]
 
 
 func _relier(a: Vector2i, b: Vector2i) -> void:
