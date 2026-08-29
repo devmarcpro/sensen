@@ -94,9 +94,22 @@ func _ready() -> void:
 		if k % 200 == 0:
 			s._tiquer_differes("monde", s.horloge_monde.ticks)
 			print("FUZZ pas %d tick %d lieu %s vivants %d" % [k, s.horloge_monde.ticks, s.lieu, s.vivants().size()])
-	print("FUZZ : %d intentions, %d acceptées, tick %d, vivants %d" % [intentions, ok, s.horloge_monde.ticks, s.vivants().size()])
+	var joueur_vivant := s.entites.has(jid) and bool(s.entites[jid].vivant)
+	print("FUZZ : %d intentions, %d acceptées, tick %d, vivants %d, joueur %s, lieu %s" % [intentions, ok, s.horloge_monde.ticks, s.vivants().size(), "vivant" if joueur_vivant else "MORT", s.lieu])
 	Monde.fermer_tous()
 	get_tree().quit(0)
+
+
+## Les ordres de compagnon ne passent pas par `intention` : on les appelle directement (Compagnons).
+func s_ordres(s: Simulation, j: Dictionary, cid: String, rng: RandomNumberGenerator) -> void:
+	var ordres := ["suivre", "attendre", "agressive", "defensive", "eviter", "retour", "repli"]
+	s.ordonner(j, cid, ordres[rng.randi_range(0, ordres.size() - 1)])
+	if rng.randf() < 0.3:
+		s.designer_cible(j, cid)
+	if rng.randf() < 0.3:
+		s.suiveur_local(j, cid, rng.randf() < 0.5)
+	if rng.randf() < 0.3 and not j.sac.is_empty():
+		s.echanger(j, cid, str(j.sac[rng.randi_range(0, j.sac.size() - 1)]), "donner" if rng.randf() < 0.5 else "reprendre")
 
 
 func _intention(s: Simulation, j: Dictionary, rng: RandomNumberGenerator) -> Dictionary:
@@ -121,9 +134,22 @@ func _intention(s: Simulation, j: Dictionary, rng: RandomNumberGenerator) -> Dic
 		if str(x.get("maitre", "")) == j.id and Grille.distance(j.pos, x.pos) <= 2:
 			compagnon = x.id
 			break
-	match rng.randi_range(0, 28):
+	match rng.randi_range(0, 33):
 		28:
 			return {"type": "cueillir", "vers": t}
+		29:   # les systèmes de 2026-08-29 : rituels de donjon, portails, ordres de compagnon
+			return {"type": "boire_source", "vers": t}
+		30:
+			return {"type": "rituel", "vers": t}
+		31:
+			return {"type": "poser_portail", "vers": t} if rng.randf() < 0.5 else {"type": "traverser"}
+		32:   # les ordres et consignes de compagnon (gratuits, mais ils touchent l'état)
+			if compagnon.is_empty():
+				return {"type": "attendre"}
+			s_ordres(s, j, compagnon, rng)
+			return {"type": "attendre"}
+		33:
+			return {"type": "capacite", "index": rng.randi_range(0, maxi(0, j.get("capacites", []).size() - 1)), "cible": t}
 		22:
 			return {"type": "assigner", "pnj": pnj, "fonction": ["fermier", "garde", "mineur", "bucheron"][rng.randi_range(0, 3)]} if not pnj.is_empty() else {"type": "attendre"}
 		23:

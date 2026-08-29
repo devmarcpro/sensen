@@ -124,6 +124,8 @@ Aucune sortie ne doit contenir `SCRIPT ERROR`, et la suite doit finir par `TESTS
 
 ```powershell
 # Chasse aux bugs : des intentions au hasard pendant N pas (aussi : --bete, --ia). Lire les SCRIPT ERROR.
+# Le bilan final dit si le joueur a survécu et où il est ; « vivants 1 » juste après un voyage est normal (la faune
+# de la cellule d'arrivée n'a pas encore éclos), pas un bug.
 & $godot --headless --path godot res://scenes/tests/fuzz.tscn -- --pas 3000 --graine 7
 
 # Rapport des critères mesurables de la spécification du prototype
