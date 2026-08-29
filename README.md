@@ -114,6 +114,7 @@ $godot = "C:\Users\ciryl\Documents\Godot_v4.6.3-stable_win64.exe"
 & $godot --headless --path godot res://scenes/tests/test_combat.tscn                  # la suite de tests (~5 min)
 & $godot --headless --path godot res://scenes/demo/main.tscn --quit-after 60          # la scène tourne sans erreur
 python tools/check_vault.py                                                           # le coffre est intègre
+python tools/audit_donnees.py                                                         # les liens entre catalogues tiennent
 ```
 
 Aucune sortie ne doit contenir `SCRIPT ERROR`, et la suite doit finir par `TESTS : tout passe`.
@@ -137,7 +138,7 @@ Un seul Godot à la fois (le fuzz dure ~4 min, la suite ~5). Une capture statiqu
 
 ### Générateurs de données
 
-`tools/gen_*.py` transcrivent des tableaux des notes en JSON (`gen_materials.py`, `gen_affixes.py`, `gen_status_effects.py`, `gen_creature_actions.py`, `gen_dungeon_prefabs.py`, `gen_name_cultures.py`, `gen_palette.py`, `gen_progression_data.py`, `gen_rigs.py`, `gen_arenas.py`), et `structure_modules.py` ajoute la forme structurée des effets de modules. Ils écrivent dans les sous-dossiers de rangement et **effacent ce qu'ils régénèrent** : ne pas éditer à la main un fichier qu'un générateur possède.
+`audit_donnees.py` vérifie les liens **entre** catalogues, que ni les schémas ni `check_vault.py` ne voient : une famille de matériaux qu'aucune recette ne produit, une dépouille sans objet, un habitat d'élevage sans meuble. `tools/gen_*.py` transcrivent des tableaux des notes en JSON (`gen_materials.py`, `gen_affixes.py`, `gen_status_effects.py`, `gen_creature_actions.py`, `gen_dungeon_prefabs.py`, `gen_name_cultures.py`, `gen_palette.py`, `gen_progression_data.py`, `gen_rigs.py`, `gen_arenas.py`), et `structure_modules.py` ajoute la forme structurée des effets de modules. Ils écrivent dans les sous-dossiers de rangement et **effacent ce qu'ils régénèrent** : ne pas éditer à la main un fichier qu'un générateur possède.
 
 ---
 

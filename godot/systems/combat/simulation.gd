@@ -6914,7 +6914,11 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 		e.statuts = e.statuts.filter(func(s0: Dictionary) -> bool: return str(s0.id) != "dissimule")
 	var d := regles.degats_arme(e.stats_eff, arme, fonct, des, lourde, a_zero, int(ax.des) + int(Etres.add_statuts(e, "des", statuts_defs)) - (int(regles.r.nage.des_malus) if dans_l_eau(e.pos) else 0), e.competences_eff, vecteur)   # Béni : +dés ; dans l'eau : −dés
 	var wx := _facteur_wuxing(e, cible, vecteur, tick_de(e))
-	var plat := int(e.get("degats_element", {}).get(wuxing.dominante(vecteur), 0))
+	var dom := wuxing.dominante(vecteur)
+	var plat := int(e.get("degats_element", {}).get(dom, 0))
+	var huile := str(e.get("degats_element_bonus", {}).get(dom, ""))   # Nourriture : l'huile d'arme, le temps d'un combat
+	if not huile.is_empty():
+		plat += des.jet(huile)
 	var res := _resoudre_coup(e, cible, (d.bruts + float(plat)) * wx.total * float(ax.mult) * mult_coup * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur, float(ax.ignore_armure))
 	res.merge(wx)
 	res["competence"] = str(fonct.get("combat_skill", ""))
@@ -8158,6 +8162,7 @@ func _verifier_desengagements() -> void:
 				p.munitions_tirees = 0
 				p.declencheurs_armes.clear()
 				p.contact = false
+				p.erase("degats_element_bonus")   # Nourriture : l'huile d'arme ne vaut que pour ce combat
 				_quitter_combat(p)
 			TickManager.retirer(nom)
 			combats.erase(nom)

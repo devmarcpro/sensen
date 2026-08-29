@@ -106,6 +106,7 @@ func _ready() -> void:
 	test_paliers_elevage()
 	test_especes_ajoutees()
 	test_tannage()
+	test_huile_d_arme()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2526,6 +2527,42 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_huile_d_arme() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var loup := {}
+	for e in s.vivants():
+		if e.id != j.id:
+			loup = e
+	# L'huile pose le drapeau, l'engagement le transforme en bonus de feu
+	var uid := "huile_test"
+	s.items[uid] = {"uid": uid, "name_key": "x", "base": "huile_d_arme", "type": "consommable", "statut": "huile_feu", "statut_ticks": 0, "quantite": 1, "tags": ["consommable"], "affixes": [], "sertissures": {"nombre": 0, "contenu": []}}
+	j.sac.append(uid)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "manger", "objet": uid}) and bool(j.get("huile_feu", false)), "l'huile enduit l'arme")
+	s._engager_combat(j, loup)
+	verifier(not j.get("huile_feu", false) and str(j.get("degats_element_bonus", {}).get("feu", "")) == "1d4", "au premier combat : +1d4 feu par coup")
+	# Le coup lit vraiment le bonus : les dégâts moyens montent d'environ 1d4
+	var sans := 0
+	var avec := 0
+	loup.pos = j.pos + Vector2i(1, 0)   # à portée de mêlée
+	s.grille.liberer(loup.pos)
+	s.grille.placer(loup.id, loup.pos)
+	s.grille.hauteurs[s.grille.idx(loup.pos)] = s.grille.h(j.pos)
+	for k in 40:
+		loup.sante = loup.sante_max
+		j.compteur = 0
+		j.erase("degats_element_bonus")
+		s._attaquer_arme(j, loup, false, s.tick_de(j))
+		sans += int(loup.sante_max) - int(loup.sante)
+		loup.sante = loup.sante_max
+		j.compteur = 0
+		j["degats_element_bonus"] = {"feu": "1d4"}
+		s._attaquer_arme(j, loup, false, s.tick_de(j))
+		avec += int(loup.sante_max) - int(loup.sante)
+	verifier(avec > sans, "les coups enduits frappent plus fort (%d contre %d sur 40 coups)" % [avec, sans])
+
 
 func test_tannage() -> void:
 	# La famille cuir a désormais une source : plus aucune famille de composant n'est orpheline
