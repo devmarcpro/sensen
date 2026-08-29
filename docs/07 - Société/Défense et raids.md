@@ -39,6 +39,9 @@ Défendre son territoire avec des gardes, des tourelles et des murs — et le se
 > [!success] Codé le 2026-08-28 — la tourelle tire
 > Pendant un **raid réel**, chaque tourelle du territoire (fenêtre chargée, hors service à 2 semaines de dette) tire toutes les `cadence_ticks` (20) sur l'assaillant le plus proche à portée (6 tuiles, ligne de vue) : `1d6` de dégâts perforants (`combat_rules.royaume.defense.tourelle_tir`), source « tourelle » — le journal le dit. Décision : pas de munitions, pas d'usure ; la tourelle ne tire que sur le camp `raid`. Véhicules : la note demande la sculpture (pixels-marqueurs) — hors de portée d'un incrément, en attente.
 
+> [!success] Corrigé le 2026-08-29 — le « niveau mêlée » des gardes valait toujours 0
+> `defense_totale` lisait `regles.niveau(competences, "melee")` — et **`melee` n'est pas une compétence du jeu** (les compétences d'armes sont épée, masse, dague… et les techniques tranchant/contondant/perforant). Le facteur `(1 + niveau/5)` de la formule était donc toujours 1 : un garde vétéran défendait comme une recrue. Le niveau lu est désormais celui de la **compétence de l'arme que le garde tient** (`functionality.combat_skill`, *mains nues* sans arme). Trouvé par le contrôle inverse des précédents : les noms que le **code** cite, comparés à ce que les **données** portent. Le même contrôle a montré que le tag `plat` (le Vampire « ne mange plus de plats ») n'était porté par **aucun objet** : ragoût, viande grillée, ration, pain et poisson grillé le portent maintenant.
+
 ## Liens
 - **Dépend de** : [[Population et exploitation]], [[Expansion territoriale]], [[Abstraction hors-site]], [[Construction cadrée]]
 - **Alimente** : [[Raids et menaces]], [[Gouvernance, lois et diplomatie]], [[Schéma royaume]], [[Entretien et taxes]]

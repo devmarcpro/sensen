@@ -14,7 +14,8 @@
   "quantite": 1,
   "tags": [
     "consommable",
-    "empilable"
+    "empilable",
+    "plat"
   ],
   "wuxing": {
     "bois": 0.5,

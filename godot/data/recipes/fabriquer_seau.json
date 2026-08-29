@@ -4,9 +4,9 @@
   "craft_skill": "menuiserie",
   "inputs": [
     {
-      "material": "chene",
       "forme": "planche",
-      "amount": 2
+      "amount": 2,
+      "category": "bois"
     }
   ],
   "output": {

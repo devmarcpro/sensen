@@ -280,6 +280,30 @@ for iid, it in items.items():
         if e.get("material") and str(e["material"]) not in materials:
             probs["objet.recipe -> materiau inconnu"].append("%s -> %s" % (iid, e["material"]))
 
+# 20. tags cites par le code (`"x" in e.tags`) : chacun doit exister quelque part en donnees
+import re as _re
+_src = ""
+for _f in glob.glob("C:/Sensen/godot/**/*.gd", recursive=True):
+    if "tests" in _f: continue
+    _src += io.open(_f, encoding="utf-8").read() + "\n"
+_tags_data = set()
+for _f in glob.glob(R + "**/*.json", recursive=True):
+    try: _d = json.load(io.open(_f, encoding="utf-8"))
+    except Exception: continue
+    _pile = [_d]
+    while _pile:
+        _x = _pile.pop()
+        if isinstance(_x, dict):
+            for _t in _x.get("tags", []) if isinstance(_x.get("tags"), list) else []:
+                _tags_data.add(str(_t))
+            _pile.extend(_x.values())
+        elif isinstance(_x, list):
+            _pile.extend(_x)
+_cites = set(_re.findall(r'"([a-z_]+)" in \w+(?:\.\w+)?\.get\("tags"', _src)) | set(_re.findall(r'"([a-z_]+)" in \w+\.tags', _src))
+_poses = set(_re.findall(r'tags\.append\("([a-z_]+)"\)', _src))   # poses a l'execution (releve, quetes…)
+for _t in sorted(_cites - _tags_data - _poses):
+    probs["tag cite par le code, porte par aucune donnee"].append(_t)
+
 for k in sorted(probs):
     print("\n== %s (%d)" % (k, len(probs[k])))
     for v in probs[k][:12]:

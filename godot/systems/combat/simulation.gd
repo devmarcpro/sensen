@@ -3820,7 +3820,10 @@ func defense_totale() -> float:
 		for x in residents():
 			if str(x.assignation.fonction) != "garde":
 				continue
-			var niv := regles.niveau(x.competences_eff, "melee")
+			# « niveau mêlée » de la note = la compétence de l'arme que le garde tient (mains nues sans arme) ;
+			# « melee » n'est pas une compétence du jeu — le niveau valait toujours 0.
+			var fonct_g: Dictionary = fonctionnalites.get(str(Etres.arme(x, items).get("functionality", "")), {})
+			var niv := regles.niveau(x.competences_eff, str(fonct_g.get("combat_skill", "mains_nues")))
 			total += float(d.garde_base) * (1.0 + float(niv) / float(d.niveau_div)) * (1.0 + float(d.equipement_par_piece) * float(x.equipement.size()))
 	var murs := 0
 	var tourelles := 0

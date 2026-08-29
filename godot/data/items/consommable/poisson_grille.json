@@ -16,7 +16,8 @@
   "quantite": 1,
   "tags": [
     "consommable",
-    "empilable"
+    "empilable",
+    "plat"
   ],
   "wuxing": {
     "eau": 0.8,
