@@ -926,15 +926,54 @@ func _texte_capacite_plan(j: Dictionary, k: int) -> String:
 	return _apercu_plan(plan)
 
 
+## L'aperçu exhaustif d'un plan (Vocabulaire des modules — six axes : « chaque module affiche ses valeurs
+## calculées pour le personnage courant »). Une ligne par axe, et rien d'implicite.
 func _apercu_plan(plan: Dictionary) -> String:
 	var effets: Array[String] = []
 	for ef in plan.get("effets", []):
-		effets.append(str(ef))
+		effets.append(tr("effet." + str(ef)))
 	var err: Array[String] = []
 	for er in plan.get("erreurs", []):
 		err.append(str(er))
-	return tr("ui.composer.apercu").format({"geometrie": str(plan.get("geometrie", "")), "portee": str(plan.get("portee", "")), "taille": int(plan.get("taille", 1)), "ticks": int(plan.get("ticks", 0)), "ressource": int(plan.get("ressource", 0)), "monnaie": str(plan.get("monnaie", "")),
-		"des": str(plan.get("des", "—")), "effets": ", ".join(effets) if not effets.is_empty() else "—", "erreurs": tr("ui.composer.erreurs").format({"liste": " ; ".join(err)}) if not err.is_empty() else ""})
+	var txt := tr("ui.composer.apercu").format({"geometrie": tr("geometrie." + str(plan.get("geometrie", ""))), "portee": "%d–%d" % [int(plan.portee.x), int(plan.portee.y)],
+		"taille": int(plan.get("taille", 1)), "ticks": int(plan.get("ticks", 0)), "ressource": int(plan.get("ressource", 0)),
+		"monnaie": tr("monnaie." + str(plan.monnaie)) if not str(plan.get("monnaie", "")).is_empty() else "—",
+		"des": str(plan.get("des", "—")), "effets": ", ".join(effets) if not effets.is_empty() else "—",
+		"erreurs": tr("ui.composer.erreurs").format({"liste": " ; ".join(err)}) if not err.is_empty() else ""})
+	# Les dégâts attendus, avec le détail : fourchette du dé, dés de bonus, multiplicateur.
+	if plan.get("des") != null and not str(plan.get("des", "")).is_empty():
+		var f := Des.fourchette(plan.des, int(plan.get("des_bonus", 0)))
+		var mult := float(plan.get("mult", 1.0))
+		txt += "\n" + tr("ui.composer.degats").format({"min": roundi(float(f.x) * mult), "max": roundi(float(f.y) * mult),
+			"des": str(plan.des), "bonus": int(plan.get("des_bonus", 0)), "mult": "%.2f" % mult})
+	if not str(plan.get("element_dominant", "")).is_empty() or not plan.get("elements", {}).is_empty():
+		var els: Array[String] = []
+		for el in plan.get("elements", {}).keys():
+			els.append("%s %d %%" % [tr("element." + str(el)), roundi(float(plan.elements[el]) * 100.0)])
+		if not els.is_empty():
+			txt += "\n" + tr("ui.composer.elements").format({"liste": ", ".join(els)})
+	# Les conditions : ce qu'elles exigent, ce qu'elles rendent.
+	for c: Dictionary in plan.get("conditions", []):
+		var bonus: Array[String] = []
+		for cle in c.get("bonus", {}).keys():
+			bonus.append("%s %s" % [tr("bonus." + str(cle)), str(c.bonus[cle])])
+		txt += "\n" + tr("ui.composer.condition").format({"nom": tr(str(c.get("name_key", c.id))),
+			"predicat": tr("predicat." + str(c.get("predicat", {}).get("type", ""))), "bonus": ", ".join(bonus) if not bonus.is_empty() else "—"})
+	# Les modificateurs actifs (drapeaux) et les liaisons.
+	var drap: Array[String] = []
+	for cle in plan.get("drapeaux", {}).keys():
+		drap.append(tr("drapeau." + str(cle)))
+	if not drap.is_empty():
+		txt += "\n" + tr("ui.composer.modificateurs").format({"liste": ", ".join(drap)})
+	if not plan.get("liaisons", []).is_empty():
+		var li: Array[String] = []
+		for l: Dictionary in plan.liaisons:
+			for cle in l.keys():
+				li.append(tr("drapeau." + str(cle)))
+		txt += "\n" + tr("ui.composer.liaisons").format({"liste": ", ".join(li)})
+	if not plan.get("avertissements", []).is_empty():
+		txt += "\n" + tr("ui.composer.avertissements").format({"liste": " ; ".join(PackedStringArray(plan.avertissements))})
+	return txt
 
 
 ## Composer : les modules connus, groupés par type ; Entrée les ajoute à la séquence (ou les en retire) ; V valide.

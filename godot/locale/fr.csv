@@ -2056,3 +2056,90 @@ journal.desarmement_rate,"{nom} garde son arme"
 journal.estimation,"{nom} — {pv} PV · {stats} · {element}"
 journal.rappel_a_la_vie,"{nom} rappelle {def} à la vie"
 journal.portail_traverse,"{nom} traverse le portail"
+ui.composer.degats,"Dégâts attendus : {min}–{max}  ({des} + {bonus} dés · ×{mult})"
+ui.composer.elements,"Éléments : {liste}"
+ui.composer.condition,"Condition {nom} : {predicat} → {bonus}"
+ui.composer.modificateurs,"Modificateurs : {liste}"
+ui.composer.liaisons,"Liaisons : {liste}"
+ui.composer.avertissements,"Non résolu : {liste}"
+geometrie.point,point
+geometrie.soi,soi
+geometrie.ligne,ligne
+geometrie.cone,cône
+geometrie.carre,carré
+geometrie.anneau,anneau
+geometrie.croix,croix
+geometrie.diagonale,diagonale
+geometrie.colonne,colonne
+geometrie.mur,mur
+geometrie.nuee,nuée
+geometrie.sillage,sillage
+geometrie.chemin,chemin
+geometrie.horizon,horizon
+geometrie.tuile,tuile
+geometrie.vague,vague
+effet.degats,dégâts
+effet.soin,soin
+effet.statut,statut
+effet.terrain,terrain
+effet.deplacement,déplacement
+effet.invocation,invocation
+effet.tempo,tempo
+effet.saisie,saisie
+effet.resurrection,résurrection
+effet.ressource,ressource
+drapeau.ignore_armure,ignore l'armure
+drapeau.vampirique,vampirique
+drapeau.durees_mult,durées ×
+drapeau.projection,projection
+drapeau.attraction,attraction
+drapeau.segments,segments
+drapeau.purification,purification
+drapeau.silencieux,silencieux
+drapeau.sans_trace,sans trace
+drapeau.detonation,détonation
+drapeau.emprise,emprise
+drapeau.tracant,traçant
+drapeau.prisme,prisme
+drapeau.element_vers,transmutation
+drapeau.geometrie_map,évasement
+drapeau.canalisation,canalisation
+drapeau.enchainement,enchaînement
+drapeau.fragmentation,fragmentation
+drapeau.ligature,ligature
+drapeau.remanence,rémanence
+drapeau.ricochet,ricochet
+drapeau.miroir,miroir
+drapeau.partage,partage
+drapeau.salve,salve
+drapeau.meute,meute
+drapeau.alternance,alternance
+drapeau.dispersion,dispersion
+drapeau.propagation,propagation
+drapeau.boucle,boucle
+drapeau.contagion,contagion
+drapeau.echo,écho
+predicat.hauteur_relative,en surplomb
+predicat.dos_ou_flanc,de dos ou de flanc
+predicat.ligne_de_vue_degagee,ligne de vue dégagée
+predicat.cible_isolee,cible isolée
+predicat.cible_adjacente_a_allie,cible au contact d'un allié
+predicat.pv_cible_sous,PV de la cible bas
+predicat.pv_porteur_sous,PV du porteur bas
+predicat.vecteur_de_lieu,le lieu porte l'élément
+predicat.porteur_en_posture,porteur en garde
+predicat.jauge_chaine_pleine,jauge de chaîne pleine
+predicat.segment_chaine_present,un segment en jauge
+predicat.element_cible,élément de la cible
+predicat.porteur_immobile_depuis,porteur immobile
+predicat.corruption_au_dessus,cellule corrompue
+predicat.phase_du_jour,la nuit
+predicat.meteo_parmi,intempérie
+predicat.porteur_dissimule,porteur dissimulé
+predicat.cible_immobilisee,cible immobilisée
+bonus.des,dés
+bonus.ticks,ticks
+bonus.portee,portée
+bonus.taille,taille
+bonus.mult,×
+bonus.ressource_mult,ressource ×
