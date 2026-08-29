@@ -223,6 +223,7 @@ func _verifier_fenetre(e: Dictionary) -> void:
 				ordre.append(x.id)
 			monde.dormants.erase(cell)
 	grille = nouvelle
+	_vider_etats_tuiles()   # la fenêtre a glissé : les index de l'ancienne grille ne veulent plus rien dire
 	nouvelle.modifies.clear()
 	for id in ordre:
 		if entites[id].vivant:
@@ -303,7 +304,7 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 		var sauve: Dictionary = etages_visites[etage]
 		donjon = sauve.donjon
 		grille = sauve.grille
-		_reinitialiser()
+		_reinitialiser()   # vide aussi les feux et l'eau en cours de l'étage quitté
 		for id in sauve.ordre:
 			entites[id] = sauve.entites[id]
 			ordre.append(id)
@@ -357,12 +358,23 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 	maj_vision()
 
 
+## Les états indexés par tuile ne valent que pour la grille courante : tout changement de grille les vide
+## (voyage, donjon, retour au camp, chargement). Sans ça, un feu continue de brûler les mêmes index ailleurs.
+func _vider_etats_tuiles() -> void:
+	feux.clear()
+	eau_active.clear()
+	glyphes.clear()
+	obstacles.clear()
+	feu_prochain_pas = 0
+	eau_prochain_pas = 0
+
+
 func _reinitialiser() -> void:
+	_vider_etats_tuiles()
 	entites.clear()
 	ordre.clear()
 	combats.clear()
 	attente.clear()
-	glyphes.clear()
 	contenants = {}   # jamais clear() : un lieu mis de côté garde la référence à ses contenants
 	differe_clear()
 	for nom in TickManager.horloges.keys():

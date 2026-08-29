@@ -117,6 +117,7 @@ func _ready() -> void:
 	test_transmutation()
 	test_arrachage()
 	test_glyphes_visibles()
+	test_etats_tuiles_par_grille()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2538,12 +2539,32 @@ func test_uniques_artefacts() -> void:
 
 # ---------------------------------------------------------------- L'automate d'eau
 
+func test_etats_tuiles_par_grille() -> void:
+	var s := Simulation.new(163)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	# Un feu et une eau active au camp
+	var t: Vector2i = j.pos + Vector2i(2, 0)
+	s.grille.contenu[s.grille.idx(t)] = 0
+	s.grille.poser_contenu(t, "arbre")
+	s.grille.materiaux[s.grille.idx(t)] = "pin"
+	verifier(s._enflammer(t), "un feu brûle au camp")
+	s.eau_active[s.grille.idx(t)] = true
+	# Descendre en donjon change la grille : les index n'ont plus de sens
+	s.charger_donjon("ruine", 163, 9, 1, j)
+	verifier(s.feux.is_empty() and s.eau_active.is_empty(), "descendre en donjon éteint les états de tuile (%d feux, %d eaux)" % [s.feux.size(), s.eau_active.size()])
+	verifier(s.grille.dangers.size() == s.grille.dangers.size(), "la grille du donjon a ses propres dangers")
+	s.monde.fermer()
+
+
 func test_glyphes_visibles() -> void:
 	var s := nouvelle_sim("plaine_au_talus")
 	var j := joueur_de(s)
 	var pos: Vector2i = j.pos + Vector2i(2, 0)
 	# Un glyphe ordinaire : une marque que l'IA évite
-	s.glyphes.append({"pos": pos, "plan": {"elements": {"feu": 1.0}, "noyau": {"name_key": "x"}}, "source": j.id, "fin": 999999, "elements": {"feu": 1.0}, "cache": false})
+	var plan_vide := {"elements": {"feu": 1.0}, "noyau": {}, "geometrie": "point", "taille": 1, "portee": Vector2i(0, 1),
+		"liaisons": [], "mult": 1.0, "des_bonus": 0, "parametres": {}, "monnaie": "mana", "ressource": 0, "charge_suivante": {}, "drapeaux": {}, "statuts": [], "modificateurs": []}
+	s.glyphes.append({"pos": pos, "plan": plan_vide, "source": j.id, "fin": 999999, "elements": {"feu": 1.0}, "cache": false})
 	s.grille.dangers[s.grille.idx(pos)] = true
 	verifier(s.grille.dangers.has(s.grille.idx(pos)), "un glyphe ordinaire est une marque au sol")
 	var chemin := s.grille.chemin(j.pos + Vector2i(1, 0), j.pos + Vector2i(3, 0))
