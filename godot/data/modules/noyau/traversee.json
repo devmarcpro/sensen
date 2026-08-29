@@ -19,5 +19,12 @@
     "deplacement"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "deplacement": {
+      "mode": "traversee",
+      "cible": "soi",
+      "distance": "4"
+    }
+  }
 }

@@ -7988,7 +7988,10 @@ func _bonus_des_conditions(e: Dictionary, c: Dictionary, action: Dictionary) -> 
 
 
 ## Effets de déplacement : projection (la cible recule), au_contact (le lanceur avance).
-func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictionary], cible: Dictionary) -> void:
+## Les modes de déplacement des noyaux (Modules) : projection, attraction, recul, saut, permutation,
+## convocation, lancer d'un être porté, traversée, retour à l'Ancre, lévitation, fauchage.
+## `cible_hors_entite` sert aux modes qui visent une **tuile** et non un être (Traversée).
+func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictionary], cible: Dictionary, cible_hors_entite: Vector2i = Vector2i(-1, -1)) -> void:
 	match str(effet.get("mode", "")):
 		"projection":
 			for c in cibles:
@@ -8023,6 +8026,126 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 				grille.liberer(e.pos)
 				e.pos = p
 				grille.placer(e.id, p)
+		"attraction":   # la cible est tirée vers le lanceur (Modules — Attraction, Convocation)
+			for c in cibles:
+				if not c.vivant or Etres.bloque_statuts(c, "projection", statuts_defs):
+					continue
+				var d := Vector2i(signi(e.pos.x - c.pos.x), signi(e.pos.y - c.pos.y))
+				for i in des.jet(effet.get("distance", "1")):
+					var vers: Vector2i = c.pos + d
+					if vers == e.pos or not grille.dans(vers) or grille.bloque_passage(vers) or not grille.occupant(vers).is_empty():
+						break
+					grille.liberer(c.pos)
+					c.pos = vers
+					grille.placer(c.id, vers)
+		"recul":   # le lanceur se dégage, dos à sa cible (Botte)
+			var dr: Vector2i = Vector2i(signi(e.pos.x - cible.pos.x), signi(e.pos.y - cible.pos.y)) if not cible.is_empty() else -Vector2i(e.orientation)
+			for i in des.jet(effet.get("distance", "1")):
+				var vers: Vector2i = e.pos + dr
+				if not grille.dans(vers) or grille.bloque_passage(vers) or not grille.occupant(vers).is_empty():
+					break
+				grille.liberer(e.pos)
+				e.pos = vers
+				grille.placer(e.id, vers)
+		"saut":   # Élan : le lanceur bondit vers la tuile visée, par-dessus ce qui gêne
+			if cible.is_empty():
+				return
+			var ds := Vector2i(signi(cible.pos.x - e.pos.x), signi(cible.pos.y - e.pos.y))
+			var arrivee: Vector2i = e.pos
+			for i in des.jet(effet.get("distance", "1")):
+				var vers: Vector2i = arrivee + ds
+				if not grille.dans(vers) or Grille.distance(e.pos, vers) > Grille.distance(e.pos, cible.pos):
+					break
+				if grille.bloque_passage(vers) or not grille.occupant(vers).is_empty():
+					continue   # on saute par-dessus
+				arrivee = vers
+			if arrivee != e.pos:
+				grille.liberer(e.pos)
+				e.pos = arrivee
+				grille.placer(e.id, arrivee)
+		"permutation":   # les deux échangent leurs places
+			if cible.is_empty() or not cible.vivant or Etres.bloque_statuts(cible, "projection", statuts_defs):
+				return
+			var pe: Vector2i = e.pos
+			var pc: Vector2i = cible.pos
+			grille.liberer(pe)
+			grille.liberer(pc)
+			e.pos = pc
+			cible.pos = pe
+			grille.placer(e.id, pc)
+			grille.placer(cible.id, pe)
+		"convocation":   # un allié consentant rejoint le lanceur, depuis n'importe où en vue
+			for c in cibles:
+				if not c.vivant or ennemis(e, c) or c.id == e.id:
+					continue
+				var libre := _tuile_libre_autour(e.pos)
+				if libre == Vector2i(-1, -1):
+					continue
+				grille.liberer(c.pos)
+				c.pos = libre
+				grille.placer(c.id, libre)
+				EventBus.emettre(&"journal", [&"journal.convocation", {"nom": e.name_key, "allie": c.name_key}])
+		"lancer_porte":   # Projection : ce qui est saisi ou lévité part sur N tuiles, dégâts de chute à l'arrivée
+			var vole: Dictionary = entites.get(str(e.get("porte", "")), {})
+			if vole.is_empty():
+				for c in cibles:
+					if c.vivant and Etres.a_statut_id(c, "levite"):
+						vole = c
+						break
+			if vole.is_empty():
+				EventBus.emettre(&"journal", [&"journal.rien_a_lancer", {"nom": e.name_key}])
+				return
+			_effet_deplacement(e, {"mode": "projection", "distance": str(effet.get("distance", "5"))}, [vole] as Array[Dictionary], {})
+			if not str(e.get("porte", "")).is_empty():
+				_liberer_saisie(e, vole)
+			var dch := des.jet(str(regles.r.talents.saisie.degats_lancer))
+			_appliquer_degats(vole, dch, e.id, {"type": "contondant", "element": {}, "lancer": true})
+		"traversee":   # le lanceur traverse murs et entités : il réapparaît sur la première tuile libre au-delà
+			if cible.is_empty() and cible_hors_entite == Vector2i(-1, -1):
+				return
+			var vise: Vector2i = cible.pos if not cible.is_empty() else cible_hors_entite
+			var dt := Vector2i(signi(vise.x - e.pos.x), signi(vise.y - e.pos.y))
+			if dt == Vector2i.ZERO:
+				return
+			var but: Vector2i = e.pos
+			for i in int(des.jet(effet.get("distance", "1"))):
+				var q: Vector2i = e.pos + dt * (i + 1)
+				if not grille.dans(q):
+					break
+				if grille.occupant(q).is_empty() and not grille.bloque_passage(q):
+					but = q
+			if but != e.pos:
+				grille.liberer(e.pos)
+				e.pos = but
+				grille.placer(e.id, but)
+		"retour_ancre":   # Retour : l'Ancre posée plus tôt rappelle son auteur
+			var ancres: Array[Dictionary] = []
+			for z in zones:
+				if str(z.type) == "ancre" and str(z.source) == e.id:
+					ancres.append(z)
+			if ancres.is_empty():
+				EventBus.emettre(&"journal", [&"journal.pas_d_ancre", {"nom": e.name_key}])
+				return
+			var but_a: Vector2i = ancres.back().pos
+			if grille.dans(but_a) and grille.occupant(but_a).is_empty() and not grille.bloque_passage(but_a):
+				grille.liberer(e.pos)
+				e.pos = but_a
+				grille.placer(e.id, but_a)
+				EventBus.emettre(&"journal", [&"journal.retour_ancre", {"nom": e.name_key}])
+		"levitation":   # la cible flotte : plus rien ne la porte, et elle devient projetable
+			for c in cibles:
+				if c.vivant and not Etres.bloque_statuts(c, "projection", statuts_defs):
+					EventBus.emettre(&"journal", [&"journal.levite", {"nom": c.name_key}])
+		"fauchage":   # jet opposé de Force : la cible tombe
+			for c in cibles:
+				if not c.vivant or c.id == e.id:
+					continue
+				if des.jet("1d20") + int(e.stats_eff.force) < des.jet("1d20") + int(c.stats_eff.force):
+					EventBus.emettre(&"journal", [&"journal.fauchage_rate", {"nom": e.name_key, "def": c.name_key}])
+					continue
+				_retirer_statut(c, "au_sol")
+				appliquer_statut(c, "au_sol", int(statuts_defs.au_sol.duree_ticks), e.id)
+				EventBus.emettre(&"journal", [&"journal.fauche", {"nom": c.name_key}])
 
 
 # ---------------------------------------------------------------- capacités (modules assemblés)
@@ -8428,8 +8551,8 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 				var dp: Dictionary = plan.parametres.get("deplacement", {})
 				if not dp.is_empty():
 					var occ := grille.occupant(cible_pos)
-					_effet_deplacement(e, dp, touchees, entites.get(occ, {}))
-					a_touche = a_touche or not touchees.is_empty()
+					_effet_deplacement(e, dp, touchees, entites.get(occ, {}), cible_pos)
+					a_touche = true   # un déplacement agit même sans cible vivante (Traversée, Retour, Élan)
 			"statut":
 				var st: Dictionary = plan.parametres.get("statut", {})
 				if not st.is_empty():

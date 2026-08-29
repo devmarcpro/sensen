@@ -20,5 +20,14 @@
     "statut"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "deplacement": {
+      "mode": "levitation"
+    },
+    "statut": {
+      "id": "levite",
+      "duree_ticks": 25
+    }
+  }
 }

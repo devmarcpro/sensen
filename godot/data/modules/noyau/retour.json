@@ -19,5 +19,11 @@
     "deplacement"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "deplacement": {
+      "mode": "retour_ancre",
+      "cible": "soi"
+    }
+  }
 }

@@ -1,0 +1,24 @@
+{
+  "name_key": "status.levite.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 25,
+  "controle": true,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "deplacement",
+      "bloque": true
+    },
+    {
+      "cible": "garde",
+      "bloque": true
+    }
+  ],
+  "tags": [
+    "negatif",
+    "controle",
+    "levite"
+  ]
+}

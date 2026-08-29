@@ -20,5 +20,11 @@
     "degats"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "deplacement": {
+      "mode": "lancer_porte",
+      "distance": "5"
+    }
+  }
 }

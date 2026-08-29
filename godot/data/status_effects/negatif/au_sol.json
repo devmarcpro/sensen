@@ -1,0 +1,19 @@
+{
+  "name_key": "status.au_sol.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 40,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "garde",
+      "bloque": true
+    }
+  ],
+  "tags": [
+    "negatif",
+    "au_sol"
+  ]
+}
