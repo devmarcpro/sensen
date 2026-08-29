@@ -1692,3 +1692,293 @@ zone.mains,hands
 zone.pieds,feet
 zone.tete,head
 zone.torse,torso
+journal.accord,"{nom} accepts: {accord}"
+journal.accord_refuse,"{nom} refuses: {accord} (reputation too low or incompatible regime)"
+journal.achete,"{nom} buys {objet} for {n} gold"
+journal.action_creature,{att}: {action} on {def} ({zone}): {degats} damage
+journal.affame,{nom} is starving: hunger gnaws at their health
+journal.affut_pose,"{nom} deploys their turret"
+journal.affut_replie,the turret folds up: out of ammunition
+journal.affut_tire,"the turret hits {nom} ({degats})"
+journal.amorce,"the explosion primes another bomb"
+journal.apprivoise,"{nom} is tamed! (roll {jet} ≥ {dd})"
+journal.apprivoisement_rate,"{nom} resists (roll {jet} < {dd})"
+journal.arme,{nom} arms {capacite} ({evenement})
+journal.arme_fantome,"{nom} summons a blade of {element}"
+journal.arme_fantome_dissipee,the phantom blade fades
+journal.arme_fantome_mana,not enough mana to summon a blade
+journal.armure_refusee,a wraith wears no armour
+journal.artefact,"an artefact lies on {nom}'s remains"
+journal.assemble,"{nom} assembles {objet} ({qualite})"
+journal.assigne,"{nom} is assigned: {fonction}"
+journal.bete_refus,in beast form: no ability, no speech
+journal.bombe_lancee,"{nom} throws a bomb ({retard} ticks)"
+journal.bombe_refusee,throwing: six tiles at most, in line of sight
+journal.brule,"{nom} burns ({degats})"
+journal.brulure_eteinte,the water puts out the burn
+journal.caisse,"{nom} collects the takings: {n} gold"
+journal.capacite,{att} casts {capacite} on {def} ({zone}): {degats} damage
+journal.capacite_creee,"new ability: {nom}"
+journal.capacite_refusee,ability refused: invalid sequence or no slot left
+journal.capacite_supprimee,"ability removed: {nom}"
+journal.capture_appat,you need bait in your bag ({appat})
+journal.capture_nuit,this trap only catches at night
+journal.capture_ratee,"the net comes back empty ({jet} against {dd})"
+journal.capture_reussie,"{nom} catches {espece} (colour {couleur}, pattern {motif})"
+journal.capture_rien,no water within reach of the net
+journal.cataclysme,"{nom} unleashes a cataclysm: their stamina is spent"
+journal.cataclysme_unique,one cataclysm per fight — the body cannot take more
+journal.chaine_interrompue,{nom}'s chain is BROKEN: a segment falls
+journal.changer_arme,{nom} draws {objet} ({ticks} ticks)
+journal.chargement,game loaded
+journal.chatoyant,"an iridescent specimen: {espece}!"
+journal.chaud,{nom} suffers from the heat
+journal.cible_designee,"{nom} marks {cible} for their companions"
+journal.claim,"cell ({x},{y}) claimed for {or} gold ({n} cells)"
+journal.claim_or,not enough gold to claim ({or} gold)
+journal.claim_refuse,"cannot claim: not adjacent, unexplored, at sea, or held by a dungeon or a village"
+journal.coffre_plein,the chest is full
+journal.commande,"a collector asks for: {espece} colour {couleur} pattern {motif}{chatoyant} — {or} gold"
+journal.commande_bourse,the merchant does not have the gold for the order
+journal.commande_livree,"order delivered: {or} gold"
+journal.commande_manque,you do not have the requested specimen
+journal.communion,"{nom}: the element turns to {element} (Communion of the Five)"
+journal.compagnon_mort,"{nom} has died — their soul is in your bag; a household altar can call them back"
+journal.condition_fausse,{capacite} does not go off: {condition} is not met (50 % of the ticks returned)
+journal.confusion,"{nom}, confused, wanders off"
+journal.conquete_agression,"{royaume}: aggression ({n})"
+journal.conquete_echec,"{village} drives you back ({jet} against DC {dd}): its defences harden"
+journal.conquete_gardes,"the guards still hold ({gardes} against {seuil}) — weaken them first"
+journal.conquete_liberation,"{royaume}: the liberation is welcomed (+{n})"
+journal.conquete_reussie,"{village} comes under your banner ({jet} against DC {dd})"
+journal.coule,too heavily laden to swim: you would sink
+journal.couvee,"{espece}: a brood of {n} (colour {couleur}, pattern {motif})"
+journal.couvee_refusee,"{espece}: no brood — {raison}"
+journal.creuse,"{nom} breaks the wall at ({x},{y})"
+journal.critique,"{att}: critical hit (×{mult})!"
+journal.cueillette,"{nom} gathers {plante} ×{n}"
+journal.culture_mure,"a plot of {plante} is ripe"
+journal.culture_pas_mure,the plot is not ripe
+journal.debat,"{nom} struggles free"
+journal.declencheur,{nom}: {evenement} — {capacite} goes off!
+journal.deja_tente,{nom}: already attempted today
+journal.demonte,"{nom} dismantles {objet}"
+journal.depart_choisi,"the camp is set at ({x},{y}) — {biome}"
+journal.depot,"{n} gold deposited (treasury {tresor})"
+journal.desassigne,"{nom} is no longer assigned"
+journal.descente,you go down to floor {etage}
+journal.desequipe,"{nom} removes {objet}"
+journal.dette_palier,"upkeep debt: {texte}"
+journal.differe,{nom}: {capacite} will go off in {ticks} ticks
+journal.dissimule,"{nom} melts into the shadows"
+journal.donjon_disparu,"the dungeon entrance has collapsed at ({x},{y})"
+journal.donjon_nettoye,"the dungeon is cleared: it will stay open for a day and a half"
+journal.donjon_reapparu,"a dungeon has reappeared at ({x},{y})"
+journal.dort,"{nom} sleeps {heures} h: rested (+{potentiel} potential in: {liste})"
+journal.dort_nuit,"{nom} sleeps until dawn"
+journal.douane,"customs: {pct} % on {objet}"
+journal.douane_interdit,"{objet} is forbidden here"
+journal.echange_donne,"{nom} receives {objet}"
+journal.echange_reprend,"{nom} hands back {objet}"
+journal.effrite,"{nom} breaks the wall; without a tool, the {materiau} crumbles away"
+journal.emporte,"{nom} is carried off by the current"
+journal.endurance_zero,{nom} is out of breath: damage at 60 %
+journal.entraine,"{nom} trains {competence}: potential {potentiel} (−{cout} gold)"
+journal.entraine_plafond,the potential is already at its ceiling
+journal.entraine_refuse,not enough gold for this training
+journal.equipe,{nom} equips {objet}
+journal.evaporation,the heatwave dries up the puddles
+journal.expedition_depart,a new expedition begins
+journal.explosion,"BOOM — {tuiles} tile(s) blown apart, {etres} being(s) hit"
+journal.explosion_degats,"the explosion deals {degats} to {nom}"
+journal.fabrique,"{nom} crafts {quantite} × {objet} ({recette})"
+journal.faconne,"{nom} shapes {objet} ({qualite})"
+journal.faim_stats,{nom} is hungry: −10 % to every stat
+journal.fertilise,"plot fertilised ({fertilite})"
+journal.feu_consume,"({x},{y}) is consumed by the flames"
+journal.feu_dans_eau,no Fire under water
+journal.feu_prend,"fire catches at ({x},{y})"
+journal.feux_eteints,"the rain puts out the fires ({n})"
+journal.fiole_vive,"{nom} shares the potion with {n} ally/allies"
+journal.forme_forcee,the moon forces the beast tonight
+journal.forme_humaine,"{nom} returns to human form"
+journal.foudre,"lightning strikes ({x},{y})"
+journal.foudre_eau,"the lightning runs through the water: {n} hit"
+journal.froid,{nom} suffers from the cold
+journal.garde_masque,the mask occupies the hand: no guard
+journal.garde_porte,you are carrying someone: no guard
+journal.garde_tient,{nom}'s guard absorbs the blow: {avant} → {apres}
+journal.glyphe_declenche,{nom} sets off {source}'s glyph!
+journal.glyphe_distance,"{nom} triggers a glyph at range"
+journal.glyphe_pose,"{nom} lays a glyph ({capacite}) at ({x},{y})"
+journal.gouvernance,"transition to {gouv}: four weeks, the people grumble (−10)"
+journal.gouvernance_faite,"the regime is now: {gouv}"
+journal.gouvernance_refuse,"a kingdom is needed (8 cells, 5 residents) to change regime"
+journal.hall_demonte,"the master of the {guilde} leaves"
+journal.hall_pose,"a hall of the {guilde}: its master moves in"
+journal.hall_refuse,you need Adept rank in a guild to build a hall
+journal.harmonie,"a harmonious plate: all five elements (×1.2)"
+journal.hostile_a_vue,{nom} treats you as an enemy
+journal.hostile_en_vue,cannot sleep: a hostile is in sight
+journal.huile,{nom} oils their weapon: +1d4 fire in the next fight
+journal.immunite_poison,the poison slides off you
+journal.inaccessible,unreachable — a cliff (Δ ≥ 3) or a wall blocks the way
+journal.incarne,"you take control of {nom}; {ancien} follows you"
+journal.incarner_refuse,a relationship of 75 is needed for a being to give up their place
+journal.increusable,this wall cannot be dug (the cell's bedrock)
+journal.infraction,"{royaume}: {loi} — {consequence} {detail}"
+journal.infraction_ignoree,nobody saw a thing
+journal.inondation,"the water floods ({x},{y})"
+journal.invocation,"{nom} raises {contenu} at ({x},{y}) for {ticks} ticks"
+journal.jette,"{nom} drops {objet}"
+journal.lame_empoisonnee,"{nom}: the blade poisons {cible}"
+journal.lance,"{nom} throws {cible} ({degats})"
+journal.lave_brule,"{nom} touches the lava ({degats})"
+journal.lave_figee,"the lava cools where it meets the water ({x},{y})"
+journal.lecture_echouee,"{nom} fails to read {livre} — the book is lost ({grave})"
+journal.lecture_reussie,{nom} reads {livre}: {n} module(s) learnt
+journal.liberation,"{nom} breaks free: {statut}"
+journal.livraison,"{nom} hands over {objet}: the delivery is done"
+journal.loot,{nom} finds: {objet}
+journal.lycanthrope,"{nom} wakes a lycanthrope at dawn"
+journal.mange,"{nom} eats {objet}: hunger {faim}/100{extra}"
+journal.manque,some materials are missing for {recette}
+journal.marchand_a_sec,{nom} has no gold left to buy with
+journal.marge,"shop margin: ×{marge}"
+journal.masque,"{nom} changes mask: {masque}"
+journal.meteo,"the weather turns: {meteo}"
+journal.meteo_annonce,"the sky promises for tomorrow: {meteo}"
+journal.monde_muet,the world does not speak to a beast
+journal.morsure,"{nom} bites {cible} ({degats}) — the gauge fills"
+journal.mort_vieillesse,{nom} has died of old age
+journal.naissance,"{village}: {nom} gives birth to a child"
+journal.niveau,{nom}: {competence} reaches level {niveau} (potential {potentiel})
+journal.noyade,"{nom} is running out of air ({degats})"
+journal.objet_fini,"this item is finished by nature: no socket, no infusion"
+journal.ordre,"{nom}: {ordre}"
+journal.parle,"{nom}: “{texte}”"
+journal.pas_assez_or,not enough gold
+journal.pas_comestible,that is not edible
+journal.pas_d_autel,you need an adjacent household altar and the soul in your bag
+journal.pas_de_bete,you need an adjacent beast to tame
+journal.pas_de_lecture,this form does not read
+journal.pas_de_lit,you need an adjacent bed to sleep
+journal.pas_de_mains,"no hands: only barding and jewellery can be worn"
+journal.pas_de_materiau_mur,you need cut stone / a plank / a brick for a wall
+journal.pas_de_place,no room left in the escort
+journal.pas_de_sauvegarde,no save file
+journal.pas_de_sertissure,no free socket (or no gem)
+journal.pas_de_station,no station in the bag for {recette}
+journal.pas_escalier,no stairwell here
+journal.pas_recrutable,{nom} will not follow you (relationship too low)
+journal.plan_appris,"{nom} deciphers the blueprint: {recette}"
+journal.plan_deja,"this blueprint teaches you nothing new"
+journal.plante,"{nom} plants {plante}"
+journal.planter_refuse,planting: you need a free neighbouring tile in a Fields cell
+journal.plat_refuse,a vampire no longer eats cooked food
+journal.pluie_creux,the rain fills the hollows
+journal.pnj_affame,"{nom} found nothing in the pantry (mood −10)"
+journal.portail_pose,"{nom} opens a breach"
+journal.porte,you are carrying someone: no attack and no guard
+journal.pose,"{nom} places {objet}"
+journal.potentiel_plat,"{nom}: +{n} potential in {stat} (the meal)"
+journal.prend,{nom} empties the chest ({n} items)
+journal.production_colonie,"{espece}: {n} {item} in the stock"
+journal.purge,{nom} is cured of: {statut}
+journal.quete_acceptee,"quest accepted: {texte}"
+journal.quete_progres,"quest: {fait}/{count}"
+journal.quete_rendue,"quest handed in: +{or} gold, +{xp} XP ({guilde})"
+journal.raid_abstrait,"a raid struck the territory while you were away: strength {force} against defence {defense} — {issue}"
+journal.raid_commence,"RAID! {n} attackers approach the camp (strength {force})"
+journal.raid_fin,"the raid is over: {issue} ({morts}/{n} attackers fallen)"
+journal.raid_mineur,minor damage: a few stores trampled
+journal.raid_pertes,"losses: {perte} % of the stores and the till, {structures} structure(s) destroyed"
+journal.raid_reveil,shouting wakes you: the camp is under attack
+journal.raid_royaume,"{nom}'s troops are behind this raid"
+journal.rang_guilde,"{guilde}: you are now {rang}"
+journal.range,"{nom} stores {objet} in the chest"
+journal.rapport_absence,"while you were away: {ventes} sales for {or} gold · {mures} plots ripened"
+journal.rapport_semaine,"weekly report: production {prod} · upkeep {entretien} gold · treasury {tresor} gold · debt {dette} gold"
+journal.rare,a RARE {nom} appears — {epithete}!
+journal.rate,"{att} misses"
+journal.rebondit,"the tool bounces off: {materiau} is too hard for it"
+journal.recette_doublon,"this blueprint is known — {k} more duplicate(s) for level {n}"
+journal.recette_niveau,"{recette} reaches level {n}: the quality roll tightens"
+journal.recolte,"{nom} harvests {quantite} × {materiau}"
+journal.recolte_culture,"{nom} harvests {plante} ×{n}"
+journal.recrute,"{nom} joins the party ({places} escort slots)"
+journal.reforge,"{nom} reforges {objet}: {composant} — the affixes hold"
+journal.reforge_refuse,"reforging: you need Hand of Metal, the item's station, and a component for the right slot"
+journal.regeneration,"the world heals itself: {n} tile(s) restored"
+journal.relance,"{att} rerolls the die (The Laugher)"
+journal.relation,"{nom} likes you a little better (relationship {n})"
+journal.releve,"{nom} raises {cible} (reputation −{n})"
+journal.releve_fin,"{nom} returns to the earth"
+journal.remontee,you go back up to floor {etage}
+journal.renaissance,"{nom} calls {compagnon} back through Rebirth"
+journal.renaissance_rien,no soul to call back
+journal.repeuplement,"{village}: a new inhabitant settles in"
+journal.reputation,"{nom}: relationship {pnj} · {village}: {rep}"
+journal.respawn,{nom} rises again at the entrance ({perdus} item(s) lost)
+journal.ressuscite,"{nom} returns to life, weakened ({or} gold)"
+journal.resurrection_pretre,"{pretre} calls {nom} back from the dead ({cout} gold)"
+journal.retour_camp,back at the camp
+journal.retour_impossible,you must be in the camp's cell to send someone back to base
+journal.retrait,"{n} gold withdrawn (treasury {tresor})"
+journal.retrogradation,"{nom} takes it badly (relationship −30, mood −20)"
+journal.rien_a_interagir,nothing to interact with around you
+journal.rien_a_poser,nothing to place here (tile occupied or outside the camp)
+journal.rien_a_ramasser,nothing to pick up here
+journal.role,"cell ({x},{y}): role {role}"
+journal.royaume,"8 cells and 5 residents: your encampment is now a kingdom in the eyes of the world"
+journal.royaume_fonde,"your territory is recognised as a kingdom — government: {gouv}"
+journal.rumeur,"{nom} shares a rumour: something at ({x},{y})"
+journal.saisi,"{nom} grabs {cible}"
+journal.sauvegarde,game saved ({nom})
+journal.sauvegarde_impossible,you can only save above ground (at the camp or on foot)
+journal.second_souffle,"{nom} finds a second wind (+{soin} HP)"
+journal.semaine,"a week passes: the corruption drifts ({n} cells)"
+journal.serti,{nom} sockets {gemme} into {objet}
+journal.soin,{att}: {capacite} heals {def} for {soin}
+journal.sortie,"{nom} leaves the dungeon: {tues} enemies, {objets} items, floor {etage_max}"
+journal.source_comblee,"the spring at ({x},{y}) is filled in"
+journal.spectre,"{nom} rises again… a wraith"
+journal.station_refusee,no heavy station on a field
+journal.statut,{nom} suffers {statut} ({duree} ticks)
+journal.statut_betail,"{nom} is now treated as livestock"
+journal.statut_degats,{nom} suffers from {statut}: {degats} damage
+journal.statut_resident,"{nom} is now treated as a resident"
+journal.statut_soin,"{nom}: {statut} restores {soin} HP"
+journal.stock_retire,"{nom} ×{n} taken from the stock"
+journal.succession,"{royaume}: {nom} takes the head of the kingdom"
+journal.succession_guilde,"{nom} becomes master of the {guilde}"
+journal.succession_heritier,"{royaume}: {nom}, the heir, takes the throne"
+journal.surchauffe,{nom} OVERHEATS: {deficit} mana short → {degats} HP
+journal.swap_gratuit,"{nom} switches weapons without losing a tick (Living Rack)"
+journal.talent_appris,"{nom} teaches you: {talent}"
+journal.talent_refuse,"you need a relationship of at least 75, and room for a talent"
+journal.taxe_guilde,"guild tax: {n} gold"
+journal.tempo_refuse,time resists (anti-stunlock)
+journal.tempo_vole,"{nom} steals {n} ticks from {cible} (−{sante} HP)"
+journal.terrain,"the tile ({x},{y}) goes from h={avant} to h={apres}"
+journal.terrasse,"{nom} reshapes ({x},{y}): height {h}"
+journal.terrasser_outil,you need a pickaxe in hand to raise the ground
+journal.tir_refuse,"cannot shoot: {raison}"
+journal.tourelle_tire,"a turret hits {nom}: {degats}"
+journal.transformation,"{nom} shapeshifts"
+journal.traverse,"{nom} steps through the breach"
+journal.traverse_mur,"{nom} passes through the wall"
+journal.tresor_vide,the treasury is empty
+journal.tribut,"tribute: {n} gold ({sens})"
+journal.troc,"{nom} is out of coin: barter for {objet}"
+journal.vacance,"{royaume}: the throne is vacant"
+journal.vacance_guilde,"the hall of the {guilde} has no master"
+journal.vacance_prolongee,"{royaume}: nobody to take the throne"
+journal.vampire,"{nom} wakes a vampire at dawn"
+journal.vend,"{nom} sells {objet} for {n} gold"
+journal.vente_boutique,"the shop sells {objet} for {n} gold"
+journal.village,"a hamlet: {nom}"
+journal.village_abandonne,"{village} is abandoned"
+journal.village_rendu,"{village} returns to {royaume}"
+journal.voyage,"{nom} travels to ({x},{y}): {ticks} ticks"
+journal.voyage_impossible,"travel impossible: cell unexplored or at sea"

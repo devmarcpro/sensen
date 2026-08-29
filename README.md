@@ -100,7 +100,7 @@ Quatre contraintes permanentes, dès la première ligne de code :
 
 1. **Une partie solo EST une partie multijoueur hébergée** dont la porte est fermée — serveur autoritaire même en solo, intentions côté client, déterminisme par ticks.
 2. **Une brique à la fois**, avec un critère de sortie formulé avant de commencer.
-3. **`tr()` dès le premier écran** — aucune string affichable en dur, jamais (fr/en/ja/zh au lancement).
+3. **`tr()` dès le premier écran** — aucune string affichable en dur, jamais. **Français et anglais sont complets** (1 983 clés chacun) ; japonais et chinois visés au lancement.
 4. **Tout le contenu est de la donnée** — JSON validé au boot, hot-reload, zéro valeur de gameplay en dur.
 
 ### La boucle de validation
@@ -115,7 +115,7 @@ $godot = "C:\Users\ciryl\Documents\Godot_v4.6.3-stable_win64.exe"
 & $godot --headless --path godot res://scenes/demo/main.tscn --quit-after 60          # la scène tourne sans erreur
 python tools/check_vault.py                                                           # le coffre est intègre
 python tools/audit_donnees.py                                                         # les liens entre catalogues tiennent
-python tools/i18n_couverture.py                                                       # couverture de traduction (informatif)
+python tools/i18n_couverture.py                                                       # couverture de traduction (fr et en : 100 %)
 ```
 
 Aucune sortie ne doit contenir `SCRIPT ERROR`, et la suite doit finir par `TESTS : tout passe`.
