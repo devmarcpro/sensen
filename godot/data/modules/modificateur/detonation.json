@@ -10,5 +10,8 @@
   ],
   "famille": "Effet",
   "surcout_ticks": 1,
-  "surcout_ressource": "+4"
+  "surcout_ressource": "+4",
+  "effet": {
+    "detonation": 2.0
+  }
 }

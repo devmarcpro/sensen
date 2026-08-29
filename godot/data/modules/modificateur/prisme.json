@@ -10,5 +10,8 @@
   ],
   "famille": "Élément",
   "surcout_ticks": 3,
-  "surcout_ressource": "+8"
+  "surcout_ressource": "+8",
+  "effet": {
+    "prisme": true
+  }
 }

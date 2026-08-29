@@ -10,5 +10,8 @@
   ],
   "famille": "Discrétion",
   "surcout_ticks": 3,
-  "surcout_ressource": "+7"
+  "surcout_ressource": "+7",
+  "effet": {
+    "sans_trace": true
+  }
 }

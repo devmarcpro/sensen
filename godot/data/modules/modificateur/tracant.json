@@ -10,5 +10,8 @@
   ],
   "famille": "Forme",
   "surcout_ticks": 2,
-  "surcout_ressource": "+6"
+  "surcout_ressource": "+6",
+  "effet": {
+    "tracant": true
+  }
 }

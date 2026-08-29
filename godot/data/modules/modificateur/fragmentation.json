@@ -10,5 +10,11 @@
   ],
   "famille": "Taille",
   "surcout_ticks": 2,
-  "surcout_ressource": "+5"
+  "surcout_ressource": "+5",
+  "effet": {
+    "fragmentation": {
+      "n": 3,
+      "mult": 0.4
+    }
+  }
 }

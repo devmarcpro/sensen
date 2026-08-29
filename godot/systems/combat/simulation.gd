@@ -396,6 +396,10 @@ func _zones_a_l_entree(e: Dictionary, pos: Vector2i, tick: int) -> void:
 						e.pos = sortie
 						grille.placer(e.id, sortie)
 						EventBus.emettre(&"journal", [&"journal.portail_traverse", {"nom": e.name_key}])
+			"remanence":   # Rémanence : la charge se rejoue sur qui entre dans la zone
+				var src_r: Dictionary = entites.get(str(z.source), {})
+				if not src_r.is_empty() and src_r.get("vivant", false) and src_r.id != e.id:
+					_appliquer_charge(src_r, z.params.plan, [e] as Array[Dictionary], [pos] as Array[Vector2i], pos, {})
 			"vapeur":   # Vapeur : le nuage applique son statut à ce qui entre
 				appliquer_statut(e, str(z.params.get("statut", "confusion")), int(z.params.get("statut_ticks", 20)), str(z.source))
 			"glissante":   # Nappe : on glisse d'une tuile de plus, dans son élan
@@ -7057,6 +7061,7 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 				gagner_xp(e, "esquive", 1)   # la mobilité s'apprend sous le feu (Décision — Esquive active)
 				_declencher(e, "derobade", e.pos)   # Dérobade : « quand le porteur esquive » = un pas sous la menace
 				break
+	e["immobile_depuis"] = e.compteur   # Canalisation : l'immobilité repart de zéro à chaque pas
 	gagner_xp(e, "athletisme", 1)
 	EventBus.emettre(&"journal", [&"journal.deplacement", {"nom": e.name_key, "cout": e.compteur - tick}])
 	if chute > 0:
@@ -7230,7 +7235,8 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 	if a_talent(e, "dissimulation"):   # L'Ombre : −25 % de face ; attaquer lève la dissimulation
 		if Regles.direction_relative(cible.orientation, e.pos - cible.pos) == "front":
 			mult_coup *= float(regles.r.talents.dissimulation.face_mult)
-		e.statuts = e.statuts.filter(func(s0: Dictionary) -> bool: return str(s0.id) != "dissimule")
+		if not bool(e.get("sans_trace", false)):   # Sans trace / Silencieux : ce coup-là ne trahit pas son auteur
+			e.statuts = e.statuts.filter(func(s0: Dictionary) -> bool: return str(s0.id) != "dissimule")
 	var d := regles.degats_arme(e.stats_eff, arme, fonct, des, lourde, a_zero, int(ax.des) + int(Etres.add_statuts(e, "des", statuts_defs)) - (int(regles.r.nage.des_malus) if dans_l_eau(e.pos) else 0), e.competences_eff, vecteur)   # Béni : +dés ; dans l'eau : −dés
 	var wx := _facteur_wuxing(e, cible, vecteur, tick_de(e))
 	var dom := wuxing.dominante(vecteur)
@@ -8239,6 +8245,8 @@ func plan_capacite(e: Dictionary, index: int) -> Dictionary:
 func capacite_visable(e: Dictionary, plan: Dictionary, cible: Vector2i) -> bool:
 	if not grille.dans(cible):
 		return false
+	if bool(plan.get("drapeaux", {}).get("tracant", false)):   # Traçant : la charge suit, le couvert ne compte plus
+		return Grille.distance(e.pos, cible) >= int(plan.portee.x) and Grille.distance(e.pos, cible) <= int(plan.portee.y)
 	var occ_t := grille.occupant(cible)   # Traque : la proie marquée se vise sans ligne de vue
 	if not occ_t.is_empty() and entites.has(occ_t):
 		for st: Dictionary in entites[occ_t].get("statuts", []):
@@ -8290,6 +8298,17 @@ func _evaluer_conditions(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -
 				vrai = e.has("chaine") and e.chaine.segments.size() >= int(e.chaine.capacite) - 1
 			"segment_chaine_present":
 				vrai = e.has("chaine") and not e.chaine.segments.is_empty()
+			"corruption_au_dessus":   # Corruption : l'arme qui aime le danger (Niveau de danger)
+				vrai = monde != null and monde.corruption_de(_cell_de(e.pos)) >= float(p.get("seuil", 50))
+			"phase_du_jour":   # Heure : selon le cycle jour-nuit
+				vrai = (str(p.get("phase", "nuit")) == "nuit") == est_nuit()
+			"meteo_parmi":   # Intempérie : l'orage nourrit la Foudre
+				vrai = monde != null and str(meteo(_cell_de(e.pos))) in p.get("etats", [])
+			"porteur_dissimule":   # Ombre : le lanceur est Dissimulé
+				vrai = Etres.a_statut_tag(e, "dissimule", statuts_defs)
+			"cible_immobilisee":   # Prise : la cible est saisie ou en lévitation
+				vrai = not cible.is_empty() and (Etres.a_statut_id(cible, "saisi") or Etres.a_statut_id(cible, "levite") \
+					or str(cible.get("saisi_par", "")) != "")
 			_:
 				vrai = false
 		if not vrai:
@@ -8336,6 +8355,8 @@ func _lancer_capacite(e: Dictionary, index: int, cible: Variant, tick: int) -> b
 		return true
 	_payer(e, plan)
 	e.compteur = tick + int(plan.ticks)
+	if bool(plan.drapeaux.get("enchainement", false)) and bool(e.get("dernier_coup_touche", false)):
+		plan.ticks = 1   # Enchaînement : la suite d'un coup qui a porté ne coûte (presque) rien
 	if regles.est_telegraphee(int(plan.ticks)):
 		e.action_en_cours = {"type": "capacite", "plan": plan, "cible_pos": cible_pos, "cible": grille.occupant(cible_pos), "ticks": plan.ticks, "name_key": plan.name_key}
 		EventBus.emettre(&"journal", [&"journal.telegraphe", {"nom": e.name_key, "action": plan.name_key, "ticks": plan.ticks}])
@@ -8375,8 +8396,27 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 		if not (str(plan.noyau.id) in e.cataclysmes_combat):
 			e.cataclysmes_combat.append(str(plan.noyau.id))
 		EventBus.emettre(&"journal", [&"journal.cataclysme", {"nom": e.name_key}])
+	e["sans_trace"] = bool(plan.drapeaux.get("sans_trace", false)) or bool(plan.drapeaux.get("silencieux", false))
+	if plan.drapeaux.has("canalisation"):   # Canalisation : les dés de l'immobilité, comptés au lancement
+		var cn: Dictionary = plan.drapeaux.canalisation
+		var immobile := tick - int(e.get("immobile_depuis", tick))
+		plan.des_bonus = int(plan.des_bonus) + int(cn.get("des_par", 1)) * int(immobile / maxi(1, int(cn.get("ticks", 5))))
+	if bool(plan.drapeaux.get("prisme", false)):   # Prisme : le noyau prend l'élément qui domine la cible
+		var occ_p := grille.occupant(cible_pos)
+		if not occ_p.is_empty() and entites.has(occ_p):
+			var dom_c := wuxing.dominante(entites[occ_p].get("elements", {}) if entites[occ_p].get("elements") is Dictionary else {})
+			for el in wuxing.w.domine.keys():   # celui qui DOMINE l'élément de la cible (table domine : x → ce que x domine)
+				if str(wuxing.w.domine[el]) == dom_c:
+					plan.elements = {str(el): 1.0}
+					break
+	if plan.drapeaux.has("element_vers"):   # Transmutation : l'élément du noyau devient celui choisi
+		plan.elements = {str(plan.drapeaux.element_vers): 1.0}
 	var tuiles := Capacites.tuiles_de_forme(grille, plan.geometrie, e.pos, cible_pos, int(plan.taille))
 	var touchees := _entites_dans(e, plan, tuiles)
+	if int(plan.drapeaux.get("emprise", 0)) > 0:   # Emprise : ce qui est touché ne se déplace plus
+		for c in touchees:
+			if c.vivant and c.id != e.id:
+				appliquer_statut(c, "enracinement", int(plan.drapeaux.emprise), e.id)
 	# Liaisons qui étendent les cibles : Miroir (position symétrique), Partage (le lanceur aussi).
 	for l: Dictionary in plan.liaisons:
 		if l.get("meute", false):   # Meute (La Trace) : la forme s'applique aussi depuis la tuile de chaque compagnon
@@ -8408,6 +8448,9 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 	for l: Dictionary in plan.liaisons:
 		if l.has("salve"):
 			salve = l
+	if plan.drapeaux.has("fragmentation") and salve.is_empty():   # Fragmentation : la charge se divise en éclats
+		var fr: Dictionary = plan.drapeaux.fragmentation
+		salve = {"salve": int(fr.get("n", 3)), "mult": float(fr.get("mult", 0.4))}
 	if not plan.noyau.is_empty() and not salve.is_empty() and not touchees.is_empty():
 		# Salve : 3 charges simultanées à 60 %, réparties dans la forme (une cible chacune, à tour de rôle).
 		for k in int(salve.salve):
@@ -8420,6 +8463,17 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 				res.premiere = r.premiere
 	elif not plan.noyau.is_empty():
 		res = _appliquer_charge(e, charge, touchees, tuiles, cible_pos, prev)
+	e["sans_trace"] = false   # le drapeau ne vaut que pour la capacité qui vient de partir
+	e["dernier_coup_touche"] = res.a_touche   # Enchaînement : la prochaine capacité saura si celle-ci a porté
+	if bool(plan.drapeaux.get("ligature", false)):   # Ligature : affûts et tourelles de la forme tirent tout de suite
+		for a in affuts:
+			if str(a.source) == e.id and a.pos in tuiles:
+				a.prochain = tick
+	if int(plan.drapeaux.get("remanence", 0)) > 0:   # Rémanence : la zone touchée réapplique la charge à l'entrée
+		for t in tuiles:
+			if grille.dans(t):
+				zones.append({"pos": t, "type": "remanence", "fin": tick + int(plan.drapeaux.remanence),
+					"source": e.id, "params": {"plan": plan.duplicate()}, "elements": plan.elements.duplicate()})
 	var a_touche: bool = res.a_touche
 	for l: Dictionary in plan.liaisons:
 		if l.get("propagation", false) and a_touche:
@@ -8866,6 +8920,8 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 			EventBus.emettre(&"journal", [&"journal.pari", {"nom": e.name_key, "jet": jet}])
 		d = {"jet": jet, "bruts": float(jet)}
 	var bruts: float = d.bruts * float(plan.mult)
+	if plan.drapeaux.has("detonation") and (c.has("fin_invocation") or bool(c.get("releve", false))):
+		bruts *= float(plan.drapeaux.detonation)   # Détonation : le double contre les invocations
 	var zone: Dictionary = regles.zone_de_coup(grille.h(e.pos), grille.h(c.pos))
 	var dom := multiplicateur_domination(plan.elements, c, zone.zone)
 	var gain: float = float(prev.get("gain", 1.0)) if not prev.is_empty() else 1.0

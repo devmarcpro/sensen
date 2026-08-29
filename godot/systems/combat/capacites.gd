@@ -148,9 +148,16 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				if ef.has("portee_min"):
 					plan.portee.x = int(ef.portee_min)
 				plan.taille = maxi(1, plan.taille + int(ef.get("taille", 0)))
-				for cle in ["ignore_armure", "vampirique", "durees_mult", "projection", "attraction", "segments", "purification"]:
+				for cle in ["ignore_armure", "vampirique", "durees_mult", "projection", "attraction", "segments", "purification",
+						"silencieux", "sans_trace", "detonation", "emprise", "tracant", "prisme", "element_vers",
+						"canalisation", "enchainement", "fragmentation", "ligature", "remanence", "ricochet"]:
 					if ef.has(cle):
 						plan.drapeaux[cle] = ef[cle]
+				if ef.has("geometrie_map"):   # Évasement : la forme s'ouvre (Ligne → Cône, Anneau → Carré)
+					var mapg: Dictionary = ef.geometrie_map
+					if mapg.has(plan.geometrie):
+						plan.geometrie = str(mapg[plan.geometrie])
+						plan.taille = maxi(1, int(plan.taille) + 1)
 			"condition":
 				var ef: Dictionary = m.get("effet", {})
 				if ef.is_empty():

@@ -10,5 +10,12 @@
   ],
   "famille": "Forme",
   "surcout_ticks": 1,
-  "surcout_ressource": "+3"
+  "surcout_ressource": "+3",
+  "effet": {
+    "geometrie_map": {
+      "ligne": "cone",
+      "anneau": "carre",
+      "point": "tuile"
+    }
+  }
 }

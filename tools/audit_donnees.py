@@ -338,6 +338,25 @@ for mid, m in modules_cat.items():
             inertes.append("%s -> %s (pas de power_base)" % (mid, e))
 # Chantier connu (voir Structure competences-modules-slots, callout du 2026-08-29) : 50 slots inertes
 # au moment du constat. L'audit ne bloque pas sur l'existant, mais refuse que le chiffre AUGMENTE.
+# 23. les autres types de modules : une condition sans predicat, une liaison ou un declencheur sans
+# effet, un modificateur dont l'effet n'est lu par personne — meme controle que pour les noyaux.
+CLES_MOD = ("des", "portee", "portee_mult", "portee_fixe", "portee_min", "taille", "ignore_armure", "vampirique",
+            "durees_mult", "projection", "attraction", "segments", "purification", "silencieux", "sans_trace",
+            "detonation", "emprise", "tracant", "prisme", "element_vers", "geometrie_map",
+            "canalisation", "enchainement", "fragmentation", "ligature", "remanence", "ricochet")
+for mid, m in modules_cat.items():
+    t, ef = str(m.get("module_type", "")), (m.get("effet") or {})
+    if t == "condition" and "predicat_structure" not in ef:
+        probs["condition sans predicat"].append(mid)
+    elif t == "liaison" and not ef:
+        probs["liaison sans effet"].append(mid)
+    elif t == "declencheur" and "declencheur" not in ef:
+        probs["declencheur sans effet"].append(mid)
+    elif t == "modificateur" and ef and not (set(ef) & set(CLES_MOD)):
+        probs["modificateur dont aucune cle n'est lue par l'assembleur"].append("%s -> %s" % (mid, list(ef)))
+    elif t == "forme" and (m.get("geometrie") is None or m.get("portee_base") is None):
+        probs["forme incomplete"].append(mid)
+
 BUDGET_INERTES = 0   # chantier clos le 2026-08-29 : plus aucun noyau inerte, et l'audit le tient   # 50 au constat du 2026-08-29, descendu lot par lot   # 50 au constat du 2026-08-29, descendu lot par lot   # 50 au constat du 2026-08-29, descendu lot par lot   # 50 au constat du 2026-08-29, descendu lot par lot   # 50 au constat du 2026-08-29, descendu lot par lot
 print("noyaux inertes (chantier en cours) : %d / %d slots — budget %d" % (len(inertes), sum(len(m.get("effets", [])) for m in modules_cat.values() if str(m.get("module_type", "")) == "noyau"), BUDGET_INERTES))
 if len(inertes) > BUDGET_INERTES:

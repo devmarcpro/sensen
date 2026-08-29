@@ -12,5 +12,15 @@
   "predicat": "cycle = nuit | jour",
   "bonus": "+15 % dégâts",
   "surcout_ticks": 0,
-  "echec": "la capacité ne part pas et rend 50 % de ses ticks"
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks",
+  "effet": {
+    "predicat_structure": {
+      "type": "phase_du_jour",
+      "phase": "nuit"
+    },
+    "bonus_structure": {
+      "des": 2
+    },
+    "echec_ticks_rendus": 0.5
+  }
 }
