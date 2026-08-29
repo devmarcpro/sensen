@@ -7,6 +7,11 @@
       "category": "vegetal",
       "forme": "tissu",
       "amount": 2
+    },
+    {
+      "item": "peau",
+      "forme": "",
+      "amount": 1
     }
   ],
   "output": {

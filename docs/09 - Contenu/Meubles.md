@@ -35,6 +35,9 @@ Lit (dormir, assignation PNJ) · Lit de paille (idem, malus humeur −3) · Tabl
 > [!success] Codé (vérifié le 2026-08-28)
 > Les 16 meubles de la note sont dans `data/meubles/` (24 avec l'enclos, le rucher, le terrarium, le vivarium, la clayette, le bassin, le hall de guilde, l'autel domestique et la tourelle ajoutés aux étapes 9-10).
 
+> [!success] Codé le 2026-08-29 — le trophée demande enfin une dépouille
+> `recipes/meuble_trophee` : **2 planches + 1 peau** (entrée par objet, la peau vient de la dépouille d'une bête) au lieu de deux planches sèches — un trophée de chasse se gagne à la chasse. Le **tapis** demande de même **1 peau** en plus de son tissu.
+
 ## Liens
 - **Dépend de** : [[Construction cadrée]], [[Tables de sculpture]], [[Fabrication d'outils]]
 - **Alimente** : [[Habitat des PNJ]], [[Détection de pièces]], [[LOD de simulation]], [[Commerce et boutiques]], [[Boutique passive]]

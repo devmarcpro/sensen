@@ -7,6 +7,11 @@
       "category": "bois",
       "forme": "planche",
       "amount": 2
+    },
+    {
+      "item": "peau",
+      "forme": "",
+      "amount": 1
     }
   ],
   "output": {

@@ -105,6 +105,7 @@ func _ready() -> void:
 	test_ia_portails()
 	test_paliers_elevage()
 	test_especes_ajoutees()
+	test_tannage()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -1090,7 +1091,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 67, "9 stations, 67 recettes plates (17 transformations, 24 meubles, 9 stations, 3 plats, 14 potions)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 68, "9 stations, 68 recettes plates (18 transformations, 24 meubles, 9 stations, 3 plats, 14 potions)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -2525,6 +2526,35 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_tannage() -> void:
+	# La famille cuir a désormais une source : plus aucune famille de composant n'est orpheline
+	var produits := {}
+	for rid in GameData.catalogues.recipes.keys():
+		var r: Dictionary = GameData.catalogues.recipes[rid]
+		if str(r.output.get("material", "")) != "":
+			produits[str(r.output.material)] = true
+	verifier(produits.has("cuir"), "une recette produit du cuir")
+	var s := Simulation.new(157)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var peau := s.generer_objet("peau", 1, {}, "commun", 0)
+	s.items[str(peau.uid)].quantite = 2
+	if not (str(peau.uid) in j.sac):
+		j.sac.append(str(peau.uid))
+	var plan := s._plan_recette(j, GameData.entree("recipes", "tanner_cuir"))
+	verifier(plan.faisable and str(plan.sortie.materiau) == "cuir" and str(plan.sortie.forme) == "brut", "deux peaux au sac : le tannage est faisable")
+	s.items[str(peau.uid)].quantite = 1
+	verifier(not s._plan_recette(j, GameData.entree("recipes", "tanner_cuir")).faisable, "une seule peau ne suffit pas")
+	# Le trophée demande une dépouille
+	var tro: Dictionary = GameData.entree("recipes", "meuble_trophee")
+	var demande_peau := false
+	for entree in tro.inputs:
+		if str(entree.get("item", "")) == "peau":
+			demande_peau = true
+	verifier(demande_peau, "le trophée demande une peau")
+	s.monde.fermer()
+
 
 func test_especes_ajoutees() -> void:
 	verifier(GameData.catalogues.species.size() >= 10, "dix espèces d'élevage au catalogue (%d)" % GameData.catalogues.species.size())
