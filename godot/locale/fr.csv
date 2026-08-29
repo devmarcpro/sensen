@@ -2029,3 +2029,6 @@ zone.balise,Balise
 journal.zone_posee,"{nom} pose : {zone}"
 journal.zone_blesse,"{nom} traverse le sol vif : {degats}"
 journal.glisse,"{nom} glisse sur la nappe"
+journal.tourelle_posee,"{nom} déploie une tourelle"
+journal.pas_de_cadavre,"{nom} ne trouve aucun cadavre à relever"
+journal.echo_de_chair,"{nom} appelle un écho de chair : {creature}"

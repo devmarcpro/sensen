@@ -1063,5 +1063,24 @@
     "brulure_ticks": 40,
     "obsidienne_source": "obsidienne",
     "pierre_ecoulement": "basalte"
+  },
+  "invocations": {
+    "_doc": "Noyaux d'invocation (Modules) : la charge posée par Bombe, la tourelle de Tourelle, la créature d'Écho de chair.",
+    "bombe": {
+      "retard_ticks": 20,
+      "puissance": 40.0,
+      "rayon": 2,
+      "degats": "3d6"
+    },
+    "tourelle": {
+      "duree_ticks": 120,
+      "cadence_ticks": 6,
+      "degats": "1d6",
+      "portee": 6
+    },
+    "echo_de_chair": {
+      "duree_ticks": 80,
+      "creature": "loup"
+    }
   }
 }

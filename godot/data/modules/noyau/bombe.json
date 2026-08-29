@@ -19,5 +19,10 @@
     "invocation"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "invocation": {
+      "mode": "bombe"
+    }
+  }
 }

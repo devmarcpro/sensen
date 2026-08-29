@@ -2019,3 +2019,6 @@ zone.balise,Beacon
 journal.zone_posee,"{nom} lays: {zone}"
 journal.zone_blesse,"{nom} crosses the razor ground: {degats}"
 journal.glisse,"{nom} slips on the slick"
+journal.tourelle_posee,"{nom} deploys a turret"
+journal.pas_de_cadavre,"{nom} finds no corpse to raise"
+journal.echo_de_chair,"{nom} calls an echo of flesh: {creature}"

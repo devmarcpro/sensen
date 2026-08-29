@@ -2219,7 +2219,15 @@ func _mordre(e: Dictionary, cible_id: String, tick: int) -> bool:
 func _relever(e: Dictionary, cible_id: String, tick: int) -> bool:
 	var c: Dictionary = entites.get(cible_id, {})
 	var rl: Dictionary = regles.r.talents.releveur
-	if not a_talent(e, "releveur") or c.is_empty() or c.vivant or bool(c.get("releve", false)) or Grille.distance(e.pos, c.pos) > int(rl.portee) or not grille.occupant(c.pos).is_empty():
+	if not a_talent(e, "releveur") or c.is_empty() or Grille.distance(e.pos, c.pos) > int(rl.portee):
+		return false
+	return _relever_brut(e, c, tick)
+
+
+## Le relevé lui-même, sans le talent : le noyau *Relevé* y accède en payant son mana (Modules).
+func _relever_brut(e: Dictionary, c: Dictionary, tick: int) -> bool:
+	var rl: Dictionary = regles.r.talents.releveur
+	if c.is_empty() or c.vivant or bool(c.get("releve", false)) or not grille.occupant(c.pos).is_empty():
 		return false
 	c["releve"] = true
 	var x := ajouter(str(c.def), c.pos, "ia")
@@ -2271,13 +2279,19 @@ func _tirs_d_affuts(nom: String, tick: int) -> void:
 		if not src.vivant:
 			_replier_affut(src)
 			continue
-		if int(src.munitions) <= 0:   # le compteur de munitions de l'être (Projectiles)
+		var autonome: bool = a.has("fin")   # une Tourelle invoquée : ses ticks, ses dés, pas de carquois
+		if autonome and int(a.fin) <= tick:
+			grille.contenu[grille.idx(a.pos)] = 0
+			EventBus.emettre(&"tile_changed", [a.pos])
+			affuts.erase(a)
+			continue
+		if not autonome and int(src.munitions) <= 0:   # le compteur de munitions de l'être (Projectiles)
 			EventBus.emettre(&"journal", [&"journal.affut_replie", {}])
 			_replier_affut(src)
 			continue
-		a.prochain = tick + int(af.cadence_ticks)
+		a.prochain = tick + int(a.get("cadence", af.cadence_ticks))
 		var cible: Dictionary = {}
-		var dmin := int(af.portee) + 1
+		var dmin: int = int(a.get("portee", af.portee)) + 1
 		for x in vivants():
 			if x.camp == src.camp or x.camp == "civil":
 				continue
@@ -2287,11 +2301,12 @@ func _tirs_d_affuts(nom: String, tick: int) -> void:
 				cible = x
 		if cible.is_empty():
 			continue
-		src.munitions = int(src.munitions) - 1
-		src.munitions_tirees = int(src.get("munitions_tirees", 0)) + 1
+		if not autonome:
+			src.munitions = int(src.munitions) - 1
+			src.munitions_tirees = int(src.get("munitions_tirees", 0)) + 1
 		var arme := Etres.arme(src, items)
-		var elems: Dictionary = arme.get("elements", {}) if arme.get("elements") != null else {}
-		var deg := des.jet(str(af.degats))
+		var elems: Dictionary = a.get("elements", {}) if autonome and not a.get("elements", {}).is_empty() else (arme.get("elements", {}) if arme.get("elements") != null else {})
+		var deg := des.jet(str(a.get("degats", af.degats)))
 		_appliquer_degats(cible, deg, src.id, {"type": str(af.get("type", "perforant")), "element": elems, "affut": true})
 		EventBus.emettre(&"journal", [&"journal.affut_tire", {"nom": cible.name_key, "degats": deg}])
 
@@ -8605,7 +8620,9 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 							_appliquer_degats(c, deg, e.id, {"chute": true})
 			"invocation":
 				var iv: Dictionary = plan.parametres.get("invocation", {})
-				if not iv.is_empty():
+				if iv.has("mode"):   # une invocation vivante ou mécanique (Modules), pas un contenu de tuile
+					a_touche = _invoquer(e, str(iv.mode), tuiles, cible_pos, plan, tick) or a_touche
+				elif not iv.is_empty():
 					for t in tuiles:
 						if not grille.occupant(t).is_empty() or grille.bloque_passage(t):
 							continue
@@ -8626,6 +8643,57 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 
 ## Dégâts d'un noyau sur une cible : noyau « arme » = formule de l'arme ; noyau magique = jet × niveau.
 ## La réduction d'armure ne s'applique qu'à 50 % aux dégâts magiques (Armure par zone).
+## Les invocations des noyaux (Modules) : la charge de Bombe, la Tourelle, le Relevé, l'Écho de chair.
+## Chacune réutilise la mécanique que le jeu a déjà — bombes, affûts, relevé du Fossoyeur, compagnon temporaire.
+func _invoquer(e: Dictionary, mode: String, tuiles: Array[Vector2i], cible_pos: Vector2i, plan: Dictionary, tick: int) -> bool:
+	var iv: Dictionary = regles.r.get("invocations", {})
+	match mode:
+		"bombe":   # une charge posée sur la tuile visée, qui amorce les bombes adjacentes en explosant
+			var b: Dictionary = iv.get("bombe", {})
+			bombes.append({"pos": cible_pos, "fin": tick + int(b.get("retard_ticks", 20)), "horloge": str(e.horloge),
+				"puissance": float(b.get("puissance", 40.0)), "rayon": int(b.get("rayon", 2)),
+				"degats": str(b.get("degats", "3d6")), "source": e.id})
+			EventBus.emettre(&"journal", [&"journal.bombe_lancee", {"nom": e.name_key, "retard": int(b.get("retard_ticks", 20))}])
+			return true
+		"tourelle":   # un affût autonome : il tire tout seul, avec l'élément de l'arme du lanceur
+			var t: Dictionary = iv.get("tourelle", {})
+			for q in tuiles:
+				if not grille.dans(q) or not grille.occupant(q).is_empty() or grille.bloque_passage(q):
+					continue
+				grille.poser_contenu(q, "barriere")
+				affuts.append({"pos": q, "source": e.id, "prochain": tick + int(t.get("cadence_ticks", 6)),
+					"fin": tick + int(t.get("duree_ticks", 120)), "degats": str(t.get("degats", "1d6")),
+					"portee": int(t.get("portee", 6)), "elements": plan.elements.duplicate()})
+				EventBus.emettre(&"journal", [&"journal.tourelle_posee", {"nom": e.name_key}])
+				EventBus.emettre(&"tile_changed", [q])
+				return true
+			return false
+		"releve":   # un cadavre présent se relève au service du lanceur (la réputation en pâtit)
+			for q in tuiles:
+				for x in entites.values():
+					if not x.vivant and x.pos == q and not bool(x.get("releve", false)):
+						if _relever_brut(e, x, tick):
+							return true
+			EventBus.emettre(&"journal", [&"journal.pas_de_cadavre", {"nom": e.name_key}])
+			return false
+		"creature":   # Écho de chair : une créature alliée temporaire, sur une tuile libre
+			var c: Dictionary = iv.get("echo_de_chair", {})
+			var libre := _tuile_libre_autour(cible_pos)
+			if libre == Vector2i(-1, -1):
+				return false
+			var x := ajouter(str(c.get("creature", "loup")), libre, "ia")
+			if x.is_empty():
+				return false
+			x.camp = e.camp
+			x["maitre"] = e.id
+			x["fin_invocation"] = tick + int(c.get("duree_ticks", 80))
+			x.horloge = e.horloge
+			x.compteur = tick + 1
+			EventBus.emettre(&"journal", [&"journal.echo_de_chair", {"nom": e.name_key, "creature": x.name_key}])
+			return true
+	return false
+
+
 ## Balise (Modules) : les dés de plus que la tuile visée accorde au porteur qui l'a marquée.
 func _bonus_balise(e: Dictionary, pos: Vector2i) -> int:
 	var bonus := 0
