@@ -36,7 +36,7 @@ etape: 0
 > [!important] Le tannage, et le trophée qui se mérite (2026-08-29)
 > La famille de matériaux `cuir` n'avait aucune source : deux peaux tannées la produisent désormais. Le trophée et le tapis demandent une peau. **À juger** : deux peaux pour un cuir — est-ce le bon prix pour une armure légère ?
 > [!important] Dix espèces d'élevage (2026-08-29)
-> Luciole (séquence de rythme, colonie de 6) et poisson de bassin (records de taille, eau tempérée) portent les deux derniers types de loci. **À juger** : dix espèces suffisent-elles à faire sentir la collection, ou faut-il pousser vers les trente-cinq groupes ?
+> Luciole (séquence de rythme, colonie de 6) et truite d'étang (records de taille, eau tempérée) portent les deux derniers types de loci. **À juger** : dix espèces suffisent-elles à faire sentir la collection, ou faut-il pousser vers les trente-cinq groupes ?
 > [!important] Les paliers d'élevage (2026-08-29)
 > Les neuf paliers du registre rendent leur effet : potentiel, capture, éclosion, chatoyants, prix des collectionneurs. **À juger** : les deux premiers paliers (25 et 75 variétés) arrivent-ils assez tôt pour donner envie de continuer ?
 > [!important] Les IA empruntent les portails (2026-08-29)

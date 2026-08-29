@@ -253,3 +253,174 @@ race.lycanthrope.name,Lycanthrope
 race.nain.name,Dwarf
 race.spectre.name,Wraith
 race.vampire.name,Vampire
+item.achillee.name,Yarrow
+item.amanite.name,Fly agaric
+item.ame.name,Companion's soul
+item.antidote.name,Antidote
+item.arme_fantome.name,Phantom blade
+item.baies.name,Berries
+item.bandage.name,Bandage
+item.belladone.name,Belladonna
+item.ble.name,Wheat
+item.bombe.name,Bomb
+item.camomille.name,Chamomile
+item.carotte.name,Carrot
+item.champignon_bleu.name,Blue mushroom
+item.champignon_des_pres.name,Field mushroom
+item.chou.name,Cabbage
+item.citrouille.name,Pumpkin
+item.composant.name,Component
+item.craft_casque.name,Helmet
+item.craft_cuirasse.name,Cuirass
+item.craft_dague.name,Dagger
+item.craft_epee.name,Sword
+item.craft_jambieres.name,Greaves
+item.craft_lance.name,Spear
+item.craft_masse.name,Mace
+item.craft_pioche.name,Pickaxe
+item.dent.name,Tooth
+item.elixir_de_hate.name,Elixir of haste
+item.essence_de_mana.name,Mana essence
+item.fiole_de_soin.name,Healing vial
+item.fleurs_sauvages.name,Wildflowers
+item.framboisier.name,Raspberry bush
+item.fruit_de_mana.name,Mana fruit
+item.gemme_ambre.name,Amber
+item.gemme_amethyste.name,Amethyst
+item.gemme_diamant.name,Diamond
+item.gemme_emeraude.name,Emerald
+item.gemme_grenat.name,Garnet
+item.gemme_onyx.name,Onyx
+item.gemme_opale.name,Opal
+item.gemme_rubis.name,Ruby
+item.gemme_saphir.name,Sapphire
+item.gemme_topaze.name,Topaz
+item.grande_fiole_de_soin.name,Large healing vial
+item.griffe.name,Claw
+item.grimoire.name,Grimoire
+item.houblon.name,Hops
+item.huile_d_arme.name,Weapon oil
+item.manuel.name,Manual
+item.materiau_brut.name,Raw material
+item.menthe.name,Mint
+item.miel.name,Honey
+item.myrtillier.name,Bilberry bush
+item.oeil.name,Eye
+item.oignon.name,Onion
+item.orge.name,Barley
+item.ortie.name,Nettle
+item.os.name,Bone
+item.pain.name,Bread
+item.peau.name,Hide
+item.plan_industriel.name,Industrial blueprint
+item.poison_de_lame.name,Blade poison
+item.poisson_grille.name,Grilled fish
+item.pomme_de_terre.name,Potato
+item.potion_antipoison.name,Antidote potion
+item.potion_charisme.name,Charisma potion
+item.potion_dexterite.name,Dexterity potion
+item.potion_endurance.name,Endurance potion
+item.potion_force.name,Strength potion
+item.potion_mana.name,Mana potion
+item.potion_perception.name,Perception potion
+item.potion_resistance_feu.name,Fire resistance potion
+item.potion_resistance_froid.name,Cold resistance potion
+item.potion_respiration_aquatique.name,Water breathing potion
+item.potion_soin.name,Healing potion
+item.potion_vision_nocturne.name,Night vision potion
+item.potion_volonte.name,Will potion
+item.proto_amulette.name,Amulet
+item.proto_anneau.name,Ring
+item.proto_faucille.name,Iron sickle
+item.proto_hache.name,Iron axe
+item.proto_pioche.name,Iron pickaxe
+item.ragout.name,Stew
+item.ration_de_voyage.name,Travel ration
+item.ration_moisie.name,Mouldy ration
+item.roseau.name,Reed
+item.sauge.name,Sage
+item.specimen.name,Specimen
+item.tomate.name,Tomato
+item.torche.name,Torch
+item.viande_crue.name,Raw meat
+item.viande_grillee.name,Grilled meat
+item.vigne.name,Vine
+meuble.autel_domestique.name,Household altar
+meuble.bassin.name,Pond
+meuble.bibliotheque.name,Bookcase
+meuble.chaise.name,Chair
+meuble.cheminee.name,Fireplace
+meuble.clayette.name,Silkworm tray
+meuble.coffre.name,Chest
+meuble.enclos.name,Pen
+meuble.etal_de_vente.name,Market stall
+meuble.garde_manger.name,Pantry
+meuble.grand_coffre.name,Large chest
+meuble.hall_de_guilde.name,Guild hall
+meuble.lanterne_de_cristal.name,Crystal lantern
+meuble.lit.name,Bed
+meuble.lit_de_paille.name,Straw bed
+meuble.ratelier_d_armes.name,Weapon rack
+meuble.rucher.name,Apiary
+meuble.statue.name,Statue
+meuble.table.name,Table
+meuble.tapis.name,Rug
+meuble.terrarium.name,Terrarium
+meuble.torchere.name,Torch sconce
+meuble.tourelle.name,Turret
+meuble.trophee.name,Trophy
+meuble.vivarium.name,Vivarium
+plant.achillee.name,Yarrow
+plant.amanite.name,Fly agaric
+plant.belladone.name,Belladonna
+plant.ble.name,Wheat
+plant.camomille.name,Chamomile
+plant.carotte.name,Carrot
+plant.champignon_des_pres.name,Field mushroom
+plant.chou.name,Cabbage
+plant.citrouille.name,Pumpkin
+plant.fleurs_sauvages.name,Wildflowers
+plant.framboisier.name,Raspberry bush
+plant.houblon.name,Hops
+plant.menthe.name,Mint
+plant.myrtillier.name,Bilberry bush
+plant.oignon.name,Onion
+plant.orge.name,Barley
+plant.ortie.name,Nettle
+plant.pomme_de_terre.name,Potato
+plant.roseau.name,Reed
+plant.sauge.name,Sage
+plant.tomate.name,Tomato
+plant.vigne.name,Vine
+creature.bouquetin.name,Ibex
+creature.cerf.name,Deer
+creature.chameau.name,Wild camel
+creature.crocodile.name,Crocodile
+creature.essaim_abeilles.name,Bee swarm
+creature.fermier.name,Farmer
+creature.forgeron.name,Blacksmith
+creature.garde_village.name,Village guard
+creature.loup_blanc.name,White wolf
+creature.lynx.name,Lynx
+creature.maitre_de_guilde.name,Guild master
+creature.marchand.name,Merchant
+creature.morse.name,Walrus
+creature.nuee_moustiques.name,Mosquito swarm
+creature.ours_brun.name,Brown bear
+creature.ours_polaire.name,Polar bear
+creature.pretre.name,Priest
+creature.renard.name,Fox
+creature.renne.name,Reindeer
+creature.serpent_venimeux.name,Venomous snake
+creature.vautour.name,Vulture
+creature.villageois.name,Villager
+species.carpe.name,Pond carp
+species.chat.name,Alley cat
+species.coquillage.name,Nacre shell
+species.luciole.name,Hedgerow firefly
+species.phalene.name,Peppered moth
+species.poisson_de_bassin.name,Pond trout
+species.ruche.name,Beehive
+species.serpent.name,Dune snake
+species.tortue.name,Marsh turtle
+species.ver_a_soie.name,Silkworm
