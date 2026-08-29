@@ -365,6 +365,8 @@ func _vider_etats_tuiles(change_de_lieu: bool = false) -> void:
 	if change_de_lieu:   # camp ↔ donjon : deux espaces de coordonnées, rien ne se transporte
 		modifs_terrain.clear()
 		portails.clear()
+		bombes.clear()   # une bombe lancée au camp n'explose pas au fond du donjon
+		affuts.clear()
 	feux.clear()
 	eau_active.clear()
 	glyphes.clear()

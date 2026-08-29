@@ -2583,6 +2583,7 @@ func test_index_monde() -> void:
 	# Changer de lieu, en revanche, vide tout
 	s.charger_donjon("ruine", 164, 11, 1, j)
 	verifier(s.modifs_terrain.is_empty() and s.portails.is_empty(), "en donjon : mémoire de terrain et portails remis à zéro")
+	verifier(s.bombes.is_empty() and s.affuts.is_empty(), "en donjon : ni bombe ni affût du camp")
 	s.monde.fermer()
 
 
