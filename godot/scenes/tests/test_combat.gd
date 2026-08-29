@@ -116,6 +116,7 @@ func _ready() -> void:
 	test_suiveur_territorial()
 	test_transmutation()
 	test_arrachage()
+	test_glyphes_visibles()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2536,6 +2537,28 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_glyphes_visibles() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var pos: Vector2i = j.pos + Vector2i(2, 0)
+	# Un glyphe ordinaire : une marque que l'IA évite
+	s.glyphes.append({"pos": pos, "plan": {"elements": {"feu": 1.0}, "noyau": {"name_key": "x"}}, "source": j.id, "fin": 999999, "elements": {"feu": 1.0}, "cache": false})
+	s.grille.dangers[s.grille.idx(pos)] = true
+	verifier(s.grille.dangers.has(s.grille.idx(pos)), "un glyphe ordinaire est une marque au sol")
+	var chemin := s.grille.chemin(j.pos + Vector2i(1, 0), j.pos + Vector2i(3, 0))
+	verifier(not chemin.is_empty() and not (pos in chemin), "l'IA contourne le glyphe")
+	# Il s'efface quand il se déclenche
+	var loup := {}
+	for e in s.vivants():
+		if e.id != j.id:
+			loup = e
+	s._declencher_glyphe(loup, pos)
+	verifier(s.glyphes.is_empty() and not s.grille.dangers.has(s.grille.idx(pos)), "déclenché : le glyphe et sa marque disparaissent")
+	# Le talent Dissimulation ne pose pas de marque
+	verifier(s.regles.r.talents.has("dissimulation"), "le talent Dissimulation est en données")
+	s.monde.fermer() if s.monde != null else null
+
 
 func test_arrachage() -> void:
 	var s := Simulation.new(162)

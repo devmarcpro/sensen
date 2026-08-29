@@ -2233,6 +2233,14 @@ func _porter_masque(e: Dictionary, id: String, _tick: int) -> bool:
 	return true
 
 
+## La marque au sol d'un glyphe s'efface — sauf si un feu ou de la lave occupe encore la tuile.
+func _oublier_glyphe(pos: Vector2i) -> void:
+	var idx := grille.idx(pos)
+	if feux.has(idx) or "lave" in grille.contenu_de(pos).get("tags", []):
+		return
+	grille.dangers.erase(idx)
+
+
 ## Le Sceau : déclencher à distance l'un de ses glyphes — la charge part sur la tuile, occupée ou non.
 func _declencher_glyphe_distance(e: Dictionary, pos: Vector2i, tick: int) -> bool:
 	if not a_talent(e, "graveur") or Grille.distance(e.pos, pos) > int(regles.r.talents.graveur.portee_declenchement):
@@ -2241,6 +2249,7 @@ func _declencher_glyphe_distance(e: Dictionary, pos: Vector2i, tick: int) -> boo
 		if gl.pos != pos or str(gl.source) != e.id:
 			continue
 		glyphes.erase(gl)
+		_oublier_glyphe(pos)
 		var charge: Dictionary = gl.plan.duplicate()
 		charge.geometrie = "point"
 		e.compteur = tick + int(regles.r.actions.objet)
@@ -6534,6 +6543,8 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 		var src: Dictionary = entites.get(gl.source, {})
 		if src.is_empty() or src.horloge != nom or int(gl.fin) > tick:
 			g_restants.append(gl)
+		else:
+			_oublier_glyphe(gl.pos)   # expiré : la marque au sol s'efface
 	glyphes = g_restants
 	for x in vivants():   # les relevés du Fossoyeur retournent à la terre
 		if x.has("fin_invocation") and x.horloge == nom and int(x.fin_invocation) <= tick:
@@ -6587,6 +6598,7 @@ func _declencher_glyphe(entrant: Dictionary, pos: Vector2i) -> void:
 			continue
 		var src: Dictionary = entites.get(gl.source, {})
 		glyphes.erase(gl)
+		_oublier_glyphe(pos)
 		if src.is_empty():
 			continue
 		EventBus.emettre(&"journal", [&"journal.glyphe_declenche", {"nom": entrant.name_key, "source": src.name_key}])
@@ -8011,7 +8023,10 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 					duree = 1 << 30
 					e.mana = maxi(0, int(e.mana) - int(plan.ressource) * (int(regles.r.talents.graveur.mana_mult) - 1))
 					appliquer_statut(e, "gravure", int(regles.r.talents.graveur.gravure_ticks), e.id)
-				glyphes.append({"pos": cible_pos, "plan": suite, "source": e.id, "fin": tick + duree, "elements": suite.elements})
+				glyphes.append({"pos": cible_pos, "plan": suite, "source": e.id, "fin": tick + duree, "elements": suite.elements,
+					"cache": a_talent(e, "dissimulation")})
+				if not a_talent(e, "dissimulation"):   # L'Ombre : ses pièges ne se voient pas (Talents de classe)
+					grille.dangers[grille.idx(cible_pos)] = true
 				EventBus.emettre(&"journal", [&"journal.glyphe_pose", {"nom": e.name_key, "capacite": suite.noyau.name_key, "x": cible_pos.x, "y": cible_pos.y}])
 				var occ := grille.occupant(cible_pos)
 				if not occ.is_empty():
