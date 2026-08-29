@@ -1094,6 +1094,11 @@ func _draw() -> void:
 		_losange(sim.donjon.escalier, Color(0.9, 0.7, 0.2, 0.6))
 	if not sim.donjon.is_empty() and sim.donjon.has("entree"):
 		_losange(sim.donjon.entree, Color(0.3, 0.9, 0.5, 0.5))   # la sortie / l'escalier montant
+	for z in sim.zones:   # les zones au sol (Racine, Sol vif, Nappe, Brume, Balise) : un liseré à leur teinte
+		if not g.dans(z.pos):
+			continue
+		var cz := _ecran(z.pos, g.h(z.pos))
+		_losange(z.pos, COULEUR_ZONE.get(str(z.type), Color(0.7, 0.7, 0.7, 0.35)))
 	for gl in sim.glyphes:   # les glyphes : un losange cerclé à la teinte de leur élément
 		var cg := _ecran(gl.pos, g.h(gl.pos))
 		var teinte := sim.wuxing.teinte(sim.wuxing.dominante(gl.elements)) if not gl.elements.is_empty() else Color(0.8, 0.8, 0.9)
@@ -1624,6 +1629,10 @@ func nom_objet(n: Dictionary) -> String:
 			p[k] = tr("element." + str(p[k]))
 	p["base"] = base
 	return tr("affixe." + str(n.affixe) + ".nom").format(p) + " [" + tr("rarete." + str(n.get("rarete", "commun"))) + "]"
+
+
+const COULEUR_ZONE := {"entrave": Color(0.35, 0.6, 0.25, 0.4), "blessure": Color(0.8, 0.2, 0.2, 0.4),
+	"glissante": Color(0.4, 0.75, 0.95, 0.35), "brume": Color(0.75, 0.78, 0.85, 0.5), "balise": Color(0.95, 0.85, 0.3, 0.4)}
 
 
 func _texte_chaine(e: Dictionary) -> String:

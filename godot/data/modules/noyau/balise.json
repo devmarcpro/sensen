@@ -19,5 +19,12 @@
     "terrain"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "terrain": {
+      "zone": "balise",
+      "duree_ticks": 80,
+      "des": 1
+    }
+  }
 }

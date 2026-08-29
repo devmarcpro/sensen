@@ -131,6 +131,7 @@ func _ready() -> void:
 	test_bombes()
 	test_composer_capacites()
 	test_creation_de_sorts()
+	test_zones_au_sol()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -2440,6 +2441,72 @@ func test_talents() -> void:
 ## Création de sorts (Structure compétences-modules-slots) : tout le catalogue de modules passé au banc.
 ## Chaque noyau seul, chaque forme avec un noyau, puis 300 séquences tirées au hasard : l'assembleur
 ## doit toujours rendre un plan cohérent — jamais de plan à moitié construit, jamais d'erreur muette.
+## Les zones au sol (Modules — lot 2) : Racine, Sol vif, Nappe, Voile de brume, Balise.
+func test_zones_au_sol() -> void:
+	var s := Simulation.new(515)
+	s.charger_donjon("ruine", 515, 9, 1)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	# une allée dégagée devant le joueur
+	for dx in range(1, 6):
+		var t: Vector2i = j.pos + Vector2i(dx, 0)
+		s.grille.contenu[s.grille.idx(t)] = 0
+		s.grille.hauteurs[s.grille.idx(t)] = s.grille.h(j.pos)
+	var loup := s.ajouter("loup", j.pos + Vector2i(4, 0), "ia")
+	var cible: Vector2i = j.pos + Vector2i(1, 0)
+	var plan_z := func(nid: String) -> Dictionary:
+		var pl := s.capacites.assembler([nid], 10, "1d4", {}, j.competences_eff)
+		pl["name_key"] = ""
+		pl["arme"] = {}
+		pl["fonct"] = {}
+		return pl
+	# Sol vif : la tuile blesse ce qui la traverse
+	s._executer_capacite(j, plan_z.call("sol_vif"), cible)
+	verifier(s.zones_sur(cible, "blessure").size() == 1, "Sol vif : une zone de blessure sur la tuile")
+	s.grille.liberer(loup.pos)
+	loup.pos = cible + Vector2i(1, 0)
+	s.grille.placer(loup.id, loup.pos)
+	loup.orientation = Vector2i(-1, 0)
+	var pv0: int = int(loup.sante)
+	s._deplacer(loup, cible, s.tick_de(loup))
+	verifier(int(loup.sante) < pv0, "le loup traverse le sol vif et saigne (%d → %d)" % [pv0, int(loup.sante)])
+	# Racine : la zone enracine ce qui s'y arrête
+	var t_racine: Vector2i = j.pos + Vector2i(0, 1)
+	s.grille.contenu[s.grille.idx(t_racine)] = 0
+	s.grille.hauteurs[s.grille.idx(t_racine)] = s.grille.h(j.pos)
+	s.zones.clear()
+	s._executer_capacite(j, plan_z.call("racine"), t_racine)
+	s.grille.liberer(loup.pos)
+	loup.pos = t_racine + Vector2i(0, 1)
+	s.grille.placer(loup.id, loup.pos)
+	if s.grille.dans(loup.pos):
+		s.grille.contenu[s.grille.idx(loup.pos)] = 0
+		s.grille.hauteurs[s.grille.idx(loup.pos)] = s.grille.h(j.pos)
+	s._deplacer(loup, t_racine, s.tick_de(loup))
+	verifier(Etres.a_statut_id(loup, "enracinement"), "Racine : ce qui entre dans la zone est enraciné")
+	# Voile de brume : ni vu, ni voyant
+	s.zones.clear()
+	s._executer_capacite(j, plan_z.call("voile_de_brume"), loup.pos)
+	verifier(not s.zones_sur(loup.pos, "brume").is_empty() and not s.voit_ia(loup, j), "Voile de brume : le loup ne voit plus")
+	# Balise : la tuile marquée donne un dé de plus au porteur
+	s.zones.clear()
+	s._executer_capacite(j, plan_z.call("balise"), loup.pos)
+	verifier(s._bonus_balise(j, loup.pos) == 1 and s._bonus_balise(loup, loup.pos) == 0, "Balise : +1 dé pour celui qui l'a posée, pour personne d'autre")
+	# Nappe : on glisse d'une tuile de plus
+	s.zones.clear()
+	var t_nappe: Vector2i = j.pos + Vector2i(2, 0)
+	s._executer_capacite(j, plan_z.call("nappe"), t_nappe)
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(1, 0)
+	s.grille.placer(loup.id, loup.pos)
+	loup.orientation = Vector2i(1, 0)
+	loup.statuts.clear()   # il sort de la Racine du test précédent : rien ne doit le retenir
+	s._deplacer(loup, t_nappe, s.tick_de(loup))
+	verifier(loup.pos == t_nappe + Vector2i(1, 0), "Nappe : le loup glisse d'une tuile de plus (%s)" % str(loup.pos - t_nappe))
+	# expiration
+	s._tiquer_zones(999999)
+	verifier(s.zones.is_empty(), "les zones expirent")
+
+
 func test_creation_de_sorts() -> void:
 	var s := Simulation.new(4242)
 	s.charger_donjon("ruine", 4242, 12, 1)
@@ -2557,6 +2624,7 @@ func test_creation_de_sorts() -> void:
 		var pv_avant: int = int(mannequin.sante)
 		var statuts_avant: int = mannequin.statuts.size() + j.statuts.size()
 		var vivants_avant: int = s.vivants().size()
+		var zones_avant: int = s.zones.size()
 		j.mana = 9999
 		j.endurance = 9999
 		j.sante = int(j.sante_max)   # certains noyaux coûtent des PV (Cataclysme, Offrande, Saignée)
@@ -2566,14 +2634,14 @@ func test_creation_de_sorts() -> void:
 		executes += 1
 		# Un noyau qui touche doit faire QUELQUE CHOSE : des PV, un statut, une invocation, ou du terrain.
 		var agi: bool = int(mannequin.sante) != pv_avant or (mannequin.statuts.size() + j.statuts.size()) != statuts_avant \
-			or s.vivants().size() != vivants_avant or not s.grille.modifies.is_empty()
+			or s.vivants().size() != vivants_avant or not s.grille.modifies.is_empty() or s.zones.size() != zones_avant
 		if not agi:
 			sans_effet.append(nid)
 		s.grille.modifies.clear()
 	verifier(executes >= 80, "%d noyaux exécutés sur une cible réelle" % executes)
 	# Chantier connu (Structure compétences-modules-slots, constat du 2026-08-29) : 47 noyaux ont un `effet`
 	# vide et ne produisent rien. Le test tient le compte et refuse qu'il AUGMENTE, comme l'audit.
-	verifier(sans_effet.size() <= 45, "noyaux sans effet visible : %d (budget 45, chantier en cours) — %s" % [sans_effet.size(), str(sans_effet.slice(0, 6))])
+	verifier(sans_effet.size() <= 40, "noyaux sans effet visible : %d (budget 40, chantier en cours) — %s" % [sans_effet.size(), str(sans_effet.slice(0, 6))])
 	verifier(j.vivant and mannequin.vivant, "le lanceur et le mannequin survivent aux 86 sorts")
 
 

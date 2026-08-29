@@ -21,5 +21,11 @@
     "terrain"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "terrain": {
+      "zone": "glissante",
+      "duree_ticks": 50
+    }
+  }
 }

@@ -338,7 +338,7 @@ for mid, m in modules_cat.items():
             inertes.append("%s -> %s (pas de power_base)" % (mid, e))
 # Chantier connu (voir Structure competences-modules-slots, callout du 2026-08-29) : 50 slots inertes
 # au moment du constat. L'audit ne bloque pas sur l'existant, mais refuse que le chiffre AUGMENTE.
-BUDGET_INERTES = 43   # 50 au constat du 2026-08-29, descendu lot par lot
+BUDGET_INERTES = 39   # 50 au constat du 2026-08-29, descendu lot par lot   # 50 au constat du 2026-08-29, descendu lot par lot
 print("noyaux inertes (chantier en cours) : %d / %d slots — budget %d" % (len(inertes), sum(len(m.get("effets", [])) for m in modules_cat.values() if str(m.get("module_type", "")) == "noyau"), BUDGET_INERTES))
 if len(inertes) > BUDGET_INERTES:
     probs["noyaux inertes : le chantier RECULE (budget %d)" % BUDGET_INERTES] = inertes

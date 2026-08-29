@@ -19,5 +19,11 @@
     "terrain"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "terrain": {
+      "zone": "brume",
+      "duree_ticks": 60
+    }
+  }
 }

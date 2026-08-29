@@ -19,5 +19,12 @@
     "terrain"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "terrain": {
+      "zone": "blessure",
+      "duree_ticks": 50,
+      "degats": "1d6"
+    }
+  }
 }

@@ -24,6 +24,12 @@
   "forme": null,
   "portee": null,
   "effet": {
+    "terrain": {
+      "zone": "entrave",
+      "duree_ticks": 50,
+      "statut": "enracinement",
+      "statut_ticks": 20
+    },
     "statut": {
       "id": "enracinement",
       "duree_ticks": 10

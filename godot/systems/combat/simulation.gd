@@ -54,6 +54,10 @@ var objets: Dictionary = {}          # uid → instance générée (le catalogue
 var contenants: Dictionary = {}      # index de tuile → [uids] (coffres, butin au sol)
 var dernier_combat: Dictionary = {}   # récapitulatif du dernier combat terminé (écran de fin)
 var glyphes: Array[Dictionary] = []   # couche d'overlay runtime : {pos, plan, source, fin} — jamais sauvegardée
+## Les zones au sol (Modules — Racine, Sol vif, Nappe, Voile de brume, Balise) : une tuile marquée qui agit
+## sur ce qui y passe, ou sur la vue. Clés en **position monde** (la fenêtre glisse), vidées au changement de
+## grille comme les feux. {pos, type, fin, source, params}
+var zones: Array[Dictionary] = []
 var differes: Array[Dictionary] = []  # charges différées : {tick, source, plan, pos}
 var obstacles: Array[Dictionary] = [] # invocations temporaires : {pos, fin}
 var horloge_monde: Horloge
@@ -361,7 +365,48 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 
 ## Les états indexés par tuile ne valent que pour la grille courante : tout changement de grille les vide
 ## (voyage, donjon, retour au camp, chargement). Sans ça, un feu continue de brûler les mêmes index ailleurs.
+## Les zones au sol posées sur une tuile (Modules) — une tuile peut en porter plusieurs.
+func zones_sur(pos: Vector2i, type: String = "") -> Array[Dictionary]:
+	var res: Array[Dictionary] = []
+	for z: Dictionary in zones:
+		if z.pos == pos and (type.is_empty() or str(z.type) == type):
+			res.append(z)
+	return res
+
+
+## Ce qu'une zone fait à celui qui entre sur sa tuile (appelé après chaque pas).
+func _zones_a_l_entree(e: Dictionary, pos: Vector2i, tick: int) -> void:
+	for z in zones_sur(pos):
+		match str(z.type):
+			"entrave":   # Racine : ce qui s'arrête là s'enracine
+				appliquer_statut(e, str(z.params.get("statut", "enracinement")), int(z.params.get("statut_ticks", 20)), str(z.source))
+			"blessure":   # Sol vif : la tuile blesse ce qui la traverse
+				var deg := des.jet(str(z.params.get("degats", "1d6")))
+				EventBus.emettre(&"journal", [&"journal.zone_blesse", {"nom": e.name_key, "degats": deg}])
+				_appliquer_degats(e, deg, str(z.source), {"type": "zone", "element": z.get("elements", {})})
+			"glissante":   # Nappe : on glisse d'une tuile de plus, dans son élan
+				var suite: Vector2i = pos + e.orientation
+				if grille.dans(suite) and grille.occupant(suite).is_empty() and not grille.bloque_passage(suite) and grille.cout_pas(pos, suite, Etres.est_volant(e)) >= 0:
+					grille.liberer(pos)
+					e.pos = suite
+					grille.placer(e.id, suite)
+					EventBus.emettre(&"journal", [&"journal.glisse", {"nom": e.name_key}])
+					_zones_a_l_entree(e, suite, tick)
+
+
+## Les zones expirées s'effacent (appelé avec les glyphes).
+func _tiquer_zones(tick: int) -> void:
+	var restantes: Array[Dictionary] = []
+	for z in zones:
+		if int(z.fin) > tick:
+			restantes.append(z)
+		else:
+			EventBus.emettre(&"tile_changed", [z.pos])
+	zones = restantes
+
+
 func _vider_etats_tuiles(change_de_lieu: bool = false) -> void:
+	zones.clear()
 	if change_de_lieu:   # camp ↔ donjon : deux espaces de coordonnées, rien ne se transporte
 		modifs_terrain.clear()
 		portails.clear()
@@ -6650,6 +6695,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 		else:
 			_oublier_glyphe(gl.pos)   # expiré : la marque au sol s'efface
 	glyphes = g_restants
+	_tiquer_zones(tick)
 	for x in vivants():   # les relevés du Fossoyeur retournent à la terre
 		if x.has("fin_invocation") and x.horloge == nom and int(x.fin_invocation) <= tick:
 			x.vivant = false
@@ -6975,6 +7021,7 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 				EventBus.emettre(&"journal", [&"journal.brulure_eteinte", {}])
 				break
 	_declencher_glyphe(e, vers)
+	_zones_a_l_entree(e, vers, tick)   # Racine, Sol vif, Nappe
 	if en_combat(e):
 		for autre in vivants():
 			if autre.camp != e.camp and Grille.distance(autre.pos, e.pos) == 1:
@@ -8407,7 +8454,16 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 						e.compteur = maxi(tick, e.compteur - applique)
 			"terrain":
 				var tp: Dictionary = plan.parametres.get("terrain", {})
-				if not tp.is_empty():
+				if tp.has("zone"):   # une zone au sol plutôt qu'un remodelage (Modules)
+					for t in tuiles:
+						if not grille.dans(t):
+							continue
+						zones.append({"pos": t, "type": str(tp.zone), "fin": tick + int(tp.get("duree_ticks", 50)),
+							"source": e.id, "params": tp, "elements": plan.elements.duplicate()})
+						a_touche = true
+						EventBus.emettre(&"tile_changed", [t])
+					EventBus.emettre(&"journal", [&"journal.zone_posee", {"nom": e.name_key, "zone": "zone." + str(tp.zone)}])
+				if not tp.is_empty() and tp.has("delta"):
 					for t in tuiles:
 						var avant := grille.h(t)
 						var apres := clampi(avant + int(tp.delta), 0, 20)
@@ -8447,16 +8503,26 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 
 ## Dégâts d'un noyau sur une cible : noyau « arme » = formule de l'arme ; noyau magique = jet × niveau.
 ## La réduction d'armure ne s'applique qu'à 50 % aux dégâts magiques (Armure par zone).
+## Balise (Modules) : les dés de plus que la tuile visée accorde au porteur qui l'a marquée.
+func _bonus_balise(e: Dictionary, pos: Vector2i) -> int:
+	var bonus := 0
+	for z in zones_sur(pos, "balise"):
+		if str(z.source) == e.id:
+			bonus += int(z.params.get("des", 1))
+	return bonus
+
+
 func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dictionary) -> Dictionary:
 	var a_zero: bool = e.endurance <= 0 and plan.monnaie == "endurance"
 	var arme_noyau: bool = plan.noyau.get("power_base") == "arme"
 	var d: Dictionary
 	var type_degats := "magique"
+	var des_bonus := int(plan.des_bonus) + _bonus_balise(e, c.pos)   # Balise : la tuile marquée donne ses dés
 	if arme_noyau and not plan.arme.is_empty():
-		d = regles.degats_arme(e.stats_eff, plan.arme, plan.fonct, des, false, a_zero, int(plan.des_bonus), e.competences_eff, plan.elements)
+		d = regles.degats_arme(e.stats_eff, plan.arme, plan.fonct, des, false, a_zero, des_bonus, e.competences_eff, plan.elements)
 		type_degats = str(plan.fonct.type_degats)
 	else:
-		var jet := des.jet(plan.des, int(plan.des_bonus))
+		var jet := des.jet(plan.des, des_bonus)
 		d = {"jet": jet, "bruts": float(jet)}
 	var bruts: float = d.bruts * float(plan.mult)
 	var zone: Dictionary = regles.zone_de_coup(grille.h(e.pos), grille.h(c.pos))
@@ -8833,6 +8899,8 @@ func voit_ia(e: Dictionary, autre: Dictionary) -> bool:
 		portee *= float(regles.r.effets_equipement.silence_mult)
 	portee *= 1.0 - discretion_reduction(autre)   # IA des créatures : la Discrétion de la cible raccourcit le cône
 	portee *= float(Etres.mult_statuts(e, "detection", statuts_defs))   # Aveuglement : l'observateur ne voit plus
+	if not zones_sur(autre.pos, "brume").is_empty() or not zones_sur(e.pos, "brume").is_empty():
+		return false   # Voile de brume : ni vu, ni voyant
 	return Grille.distance(e.pos, autre.pos) <= maxi(int(regles.r.engagement.get("portee_min", 1)), int(portee)) and grille.ligne_de_vue(e.pos, autre.pos)
 
 

@@ -2021,3 +2021,11 @@ monnaie.or,or
 journal.monnaie_bloquee,"{nom} ne peut plus puiser dans son {monnaie}"
 journal.voile_esquive,"Le voile de {nom} absorbe le coup et se dissipe"
 journal.reflet,"Le reflet de {nom} renvoie {degats} à {att}"
+zone.entrave,Racines
+zone.blessure,Sol vif
+zone.glissante,Nappe glissante
+zone.brume,Voile de brume
+zone.balise,Balise
+journal.zone_posee,"{nom} pose : {zone}"
+journal.zone_blesse,"{nom} traverse le sol vif : {degats}"
+journal.glisse,"{nom} glisse sur la nappe"

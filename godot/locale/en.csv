@@ -2011,3 +2011,11 @@ monnaie.or,gold
 journal.monnaie_bloquee,"{nom} can no longer draw on their {monnaie}"
 journal.voile_esquive,"{nom}'s veil absorbs the blow and fades"
 journal.reflet,"{nom}'s reflection sends {degats} back to {att}"
+zone.entrave,Roots
+zone.blessure,Razor ground
+zone.glissante,Slick
+zone.brume,Mist veil
+zone.balise,Beacon
+journal.zone_posee,"{nom} lays: {zone}"
+journal.zone_blesse,"{nom} crosses the razor ground: {degats}"
+journal.glisse,"{nom} slips on the slick"
