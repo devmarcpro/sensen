@@ -35,6 +35,9 @@ L'intégralité du jeu est pilotée par des données, pas par du code en dur. Le
 
 **Risque ([[Risques majeurs]]) :** architecture data-driven à grande échelle — bien conçue dès le départ, sinon coûteuse à retrofit plus tard.
 
+> [!success] Codé le 2026-08-29 — `GameData.filtrer` : le filtre de catégorie, outil commun
+> La règle « les systèmes lisent des tags et des champs, **jamais des ids** » était écrite ici depuis le début et violée partout où il fallait *un ensemble d'objets* : boutiques, loot, stock des marchands. `GameData.filtrer(catalogue, filtre) -> Array[String]` et `GameData.tirer(catalogue, filtre, rng)` donnent cet ensemble : `types_any`, `tags_any`, `tags_all`, `tags_none`, `categories_materiau` (résolue via `materials.*.category`), `exclut`. Résultat **trié** (donc déterministe à graine égale) et **mis en cache**, cache vidé au rechargement à chaud. `tools/audit_donnees.py` signale tout filtre qui ne matche **aucun** objet — une catégorie morte est un bug de données, pas un choix.
+
 ## Liens
 - **Dépend de** : [[Contraintes permanentes]]
 - **Alimente** : [[Arborescence du projet]], [[Décisions d'architecture]], [[EventBus]], [[Localisation]], tous les schémas de l'Annexe B

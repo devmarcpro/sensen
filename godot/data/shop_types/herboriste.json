@@ -1,12 +1,22 @@
 {
   "name_key": "boutique.herboriste.name",
-  "inventaire": [
-    "baies",
-    "baies",
-    "champignon_bleu",
-    "tomate",
-    "chou",
-    "antidote"
-  ],
-  "tags": []
+  "tags": [],
+  "selection": [
+    {
+      "filtre": {
+        "types_any": [
+          "consommable"
+        ],
+        "tags_any": [
+          "herbe",
+          "champignon",
+          "buisson"
+        ]
+      },
+      "nombre": [
+        4,
+        7
+      ]
+    }
+  ]
 }

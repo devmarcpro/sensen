@@ -1,12 +1,34 @@
 {
   "name_key": "boutique.alchimiste.name",
-  "inventaire": [
-    "fiole_de_soin",
-    "fiole_de_soin",
-    "grande_fiole_de_soin",
-    "antidote",
-    "elixir_de_hate",
-    "station_alambic"
-  ],
-  "tags": []
+  "tags": [],
+  "selection": [
+    {
+      "filtre": {
+        "types_any": [
+          "consommable"
+        ],
+        "tags_any": [
+          "potion"
+        ]
+      },
+      "nombre": [
+        3,
+        6
+      ]
+    },
+    {
+      "filtre": {
+        "types_any": [
+          "consommable"
+        ],
+        "tags_any": [
+          "partie"
+        ]
+      },
+      "nombre": [
+        1,
+        3
+      ]
+    }
+  ]
 }

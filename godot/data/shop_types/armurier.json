@@ -1,10 +1,38 @@
 {
   "name_key": "boutique.armurier.name",
-  "inventaire": [
-    "proto_cuirasse_cuir",
-    "proto_cuirasse_cuir",
-    "bandage",
-    "bandage"
-  ],
-  "tags": []
+  "tags": [],
+  "selection": [
+    {
+      "filtre": {
+        "types_any": [
+          "armure",
+          "bouclier"
+        ],
+        "tags_any": [
+          "prototype"
+        ],
+        "categories_materiau": [
+          "metal"
+        ]
+      },
+      "nombre": [
+        2,
+        4
+      ]
+    },
+    {
+      "filtre": {
+        "types_any": [
+          "consommable"
+        ],
+        "tags_any": [
+          "soin"
+        ]
+      },
+      "nombre": [
+        1,
+        2
+      ]
+    }
+  ]
 }

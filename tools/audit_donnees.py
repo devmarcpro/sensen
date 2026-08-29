@@ -218,6 +218,37 @@ for mid, m in materials.items():
     if tc and str(tc) not in outils:
         probs["materiau -> outil qu'aucune fonctionnalite ne porte"].append("%s -> %s" % (mid, tc))
 
+# 17. filtres de categorie (loot, boutiques, marchands) : un filtre qui ne matche RIEN est une categorie morte
+shop_types = cat("shop_types")
+def _matche(it, f):
+    if f.get("types_any") and str(it.get("type", "")) not in f["types_any"]:
+        return False
+    tags = it.get("tags", [])
+    if f.get("tags_any") and not any(t in tags for t in f["tags_any"]):
+        return False
+    if any(t not in tags for t in f.get("tags_all", [])):
+        return False
+    if any(t in tags for t in f.get("tags_none", [])):
+        return False
+    if str(it.get("id", "")) in f.get("exclut", []):
+        return False
+    if f.get("categories_materiau"):
+        m = materials.get(str(it.get("materiau", "")), {})
+        if str(m.get("category", "")) not in f["categories_materiau"]:
+            return False
+    return True
+def _verifier_filtre(ou, f):
+    if not any(_matche(it, f) for it in items.values()):
+        probs["filtre de categorie qui ne matche aucun objet"].append("%s -> %s" % (ou, json.dumps(f, ensure_ascii=False)))
+for nom, c in conf("loot_rules")["contenants"]["categories"].items():
+    _verifier_filtre("loot/" + nom, c["filtre"])
+for sid, sh in shop_types.items():
+    for k, bloc in enumerate(sh.get("selection", [])):
+        _verifier_filtre("boutique %s [%d]" % (sid, k), bloc["filtre"])
+for cid, c in creatures.items():
+    for k, bloc in enumerate(c.get("stock_marchand", [])):
+        _verifier_filtre("marchand %s [%d]" % (cid, k), bloc["filtre"])
+
 for k in sorted(probs):
     print("\n== %s (%d)" % (k, len(probs[k])))
     for v in probs[k][:12]:

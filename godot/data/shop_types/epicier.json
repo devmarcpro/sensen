@@ -1,14 +1,26 @@
 {
   "name_key": "boutique.epicier.name",
-  "inventaire": [
-    "pain",
-    "pain",
-    "ration_de_voyage",
-    "ration_de_voyage",
-    "ble",
-    "carotte",
-    "oignon",
-    "pomme_de_terre"
-  ],
-  "tags": []
+  "tags": [],
+  "selection": [
+    {
+      "filtre": {
+        "types_any": [
+          "consommable"
+        ],
+        "tags_any": [
+          "culture",
+          "ingredient"
+        ],
+        "tags_none": [
+          "potion",
+          "partie",
+          "herbe"
+        ]
+      },
+      "nombre": [
+        5,
+        8
+      ]
+    }
+  ]
 }

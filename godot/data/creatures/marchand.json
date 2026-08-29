@@ -56,18 +56,37 @@
   "competences": {
     "negociation": 20
   },
-  "inventaire_marchand": [
-    "pain",
-    "pain",
-    "ration_de_voyage",
-    "fiole_de_soin",
-    "fiole_de_soin",
-    "bandage",
-    "torche",
-    "proto_faucille",
-    "essence_de_mana",
-    "baies",
-    "baies",
-    "antidote"
+  "stock_marchand": [
+    {
+      "filtre": {
+        "types_any": [
+          "consommable"
+        ],
+        "tags_none": [
+          "partie",
+          "ame",
+          "specimen"
+        ]
+      },
+      "nombre": [
+        5,
+        8
+      ]
+    },
+    {
+      "filtre": {
+        "types_any": [
+          "outil"
+        ],
+        "tags_any": [
+          "prototype",
+          "lumiere"
+        ]
+      },
+      "nombre": [
+        1,
+        2
+      ]
+    }
   ]
 }

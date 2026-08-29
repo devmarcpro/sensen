@@ -1,10 +1,25 @@
 {
   "name_key": "boutique.tailleur.name",
-  "inventaire": [
-    "meuble_tapis",
-    "meuble_lit",
-    "bandage",
-    "torche"
-  ],
-  "tags": []
+  "tags": [],
+  "selection": [
+    {
+      "filtre": {
+        "types_any": [
+          "armure",
+          "bouclier"
+        ],
+        "tags_any": [
+          "prototype"
+        ],
+        "categories_materiau": [
+          "vegetal",
+          "bois"
+        ]
+      },
+      "nombre": [
+        3,
+        5
+      ]
+    }
+  ]
 }

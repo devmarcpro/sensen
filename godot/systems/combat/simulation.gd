@@ -5548,6 +5548,28 @@ func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 
 
 ## Génère un objet de loot et l'enregistre (son uid devient une clé de `items`).
+## Le stock d'un marchand, décrit par des CATÉGORIES (`{filtre, nombre}`) et jamais par une liste d'objets :
+## une boutique d'armurier vend « les armures de prototype en métal », donc toute armure qui le sera un jour.
+## Complété chaque semaine quand il est vide (Commerce et boutiques).
+func _garnir_stock(e: Dictionary, selection: Array) -> void:
+	if not e.has("stock"):
+		e["stock"] = []
+	var rng := RandomNumberGenerator.new()
+	var sem := 0
+	if horloge_monde != null:
+		sem = horloge_monde.ticks / maxi(1, int(GameData.config("planete").corruption.ticks_par_semaine))
+	rng.seed = hash([graine, "stock", e.id, sem])
+	for bloc: Dictionary in selection:
+		var n := rng.randi_range(int(bloc.nombre[0]), int(bloc.nombre[1]))
+		for k in n:
+			var base := GameData.tirer("items", bloc.filtre, rng)
+			if base.is_empty():
+				continue   # une catégorie vide n'est pas une erreur de jeu : l'audit des données la signale
+			var o := generer_objet(base, 1, {}, "commun", 0)
+			if not o.is_empty():
+				e.stock.append(o.uid)
+
+
 func generer_objet(base_id: String, profondeur: int, provenance: Dictionary = {}, rarete: String = "", nb_affixes: int = -1) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([graine, "loot", objets.size(), base_id, profondeur])
@@ -5585,10 +5607,7 @@ func _habiller_pnj(e: Dictionary, def: Dictionary, culture_id: String = "") -> v
 	e["or_max"] = int(float(f.get("portefeuille", 30)) * (1.0 + float(e.get("rang", 0)) * 0.5))
 	e.or = e.or_max
 	e["stock"] = []
-	for base in def.get("inventaire_marchand", []):
-		var o := generer_objet(str(base), 1, {}, "commun", 0)
-		if not o.is_empty():
-			e.stock.append(o.uid)
+	_garnir_stock(e, def.get("stock_marchand", []))
 	e["dernieres_repliques"] = []
 	e["dernier_parler_jour"] = -1
 	e["family"] = {"parent_of": [], "child_of": [], "spouse": ""}
@@ -5710,13 +5729,10 @@ func _peupler_fenetre() -> void:
 					if pj.has("fonction"):
 						x.fonction = str(pj.fonction)
 					_habiller_pnj(x, GameData.entree("creatures", str(pj.creature)), str(v.culture))
-					if not str(pj.get("boutique", "")).is_empty():   # une boutique typée : le stock du type
+					if not str(pj.get("boutique", "")).is_empty():   # une boutique typée : les catégories du type
 						x["boutique"] = str(pj.boutique)
 						x.stock = []
-						for base in GameData.entree("shop_types", str(pj.boutique)).inventaire:
-							var ob := generer_objet(str(base), 1, {}, "commun", 0)
-							if not ob.is_empty():
-								x.stock.append(ob.uid)
+						_garnir_stock(x, GameData.entree("shop_types", str(pj.boutique)).selection)
 					if not str(pj.get("guilde", "")).is_empty():
 						x["guilde"] = str(pj.guilde)
 					x["lit"] = monde.pos_monde(cell, pj.lit)
@@ -6360,6 +6376,9 @@ func _tiquer_monde(tick: int) -> void:
 		for x in entites.values():   # les bourses des PNJ se rechargent (+15 % par semaine, Barèmes économiques)
 			if x.has("or_max"):
 				x.or = mini(int(x.or_max), int(x.or) + int(ceil(float(x.or_max) * float(regles.r.commerce.recharge_hebdo))))
+			# … et le marchand se réapprovisionne : un stock vidé par le joueur revient la semaine suivante.
+			if not str(x.get("boutique", "")).is_empty() and x.get("stock", []).is_empty():
+				_garnir_stock(x, GameData.entree("shop_types", str(x.boutique)).selection)
 			for rels in [x.get("social", {}).get("relations", {}), x.get("reputations", {})]:   # Voie de rédemption : +1/semaine vers 0
 				for cle in rels.keys():
 					if int(rels[cle]) < 0:

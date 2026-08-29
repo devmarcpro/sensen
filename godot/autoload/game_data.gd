@@ -34,6 +34,7 @@ var configs: Dictionary = {}      # nom → Dictionary
 var erreurs: Array[String] = []
 var avertissements: Array[String] = []
 var _cles_locale: Dictionary = {} # clés de traduction connues (validation des name_key)
+var _cache_filtres: Dictionary = {} # filtre de catégorie → ids (vidé au rechargement)
 
 
 func _ready() -> void:
@@ -49,6 +50,7 @@ func charger() -> void:
 	avertissements.clear()
 	catalogues.clear()
 	configs.clear()
+	_cache_filtres.clear()
 	_charger_locales()
 	for nom in CATALOGUES:
 		catalogues[nom] = _charger_dossier(nom)
@@ -124,6 +126,62 @@ func par_tag(catalogue: String, tag: String) -> Array[Dictionary]:
 		if tag in e.get("tags", []):
 			res.append(e)
 	return res
+
+
+## Les **ids** qui répondent à un filtre de catégorie — le seul moyen correct de désigner « toutes les armes
+## de prototype » ou « tous les consommables sauf les parties de bête » (Data-driven design : les systèmes
+## lisent des tags et des champs, jamais des listes d'ids écrites à la main).
+## Filtre : `types_any`, `tags_any`, `tags_all`, `tags_none`, `exclut`. Résultat trié (déterministe) et mis en cache.
+func filtrer(catalogue: String, filtre: Dictionary) -> Array[String]:
+	var cle := catalogue + ":" + JSON.stringify(filtre)
+	if _cache_filtres.has(cle):
+		return _cache_filtres[cle]
+	var types: Array = filtre.get("types_any", [])
+	var t_any: Array = filtre.get("tags_any", [])
+	var t_all: Array = filtre.get("tags_all", [])
+	var t_non: Array = filtre.get("tags_none", [])
+	var exclut: Array = filtre.get("exclut", [])
+	var cats_mat: Array = filtre.get("categories_materiau", [])   # metal, bois, vegetal… (Catégories de matériaux)
+	var res: Array[String] = []
+	for id in catalogues.get(catalogue, {}).keys():
+		var e: Dictionary = catalogues[catalogue][id]
+		if id in exclut:
+			continue
+		if not types.is_empty() and not (str(e.get("type", "")) in types):
+			continue
+		var tags: Array = e.get("tags", [])
+		if not t_any.is_empty():
+			var trouve := false
+			for t in t_any:
+				if t in tags:
+					trouve = true
+			if not trouve:
+				continue
+		var manque := false
+		for t in t_all:
+			if not (t in tags):
+				manque = true
+		for t in t_non:
+			if t in tags:
+				manque = true
+		if manque:
+			continue
+		if not cats_mat.is_empty():
+			var m: Dictionary = catalogues.get("materials", {}).get(str(e.get("materiau", "")), {})
+			if not (str(m.get("category", "")) in cats_mat):
+				continue
+		res.append(str(id))
+	res.sort()
+	_cache_filtres[cle] = res
+	return res
+
+
+## Un id tiré au hasard parmi ceux qui répondent au filtre ("" si le filtre ne matche rien).
+func tirer(catalogue: String, filtre: Dictionary, rng: RandomNumberGenerator) -> String:
+	var ids := filtrer(catalogue, filtre)
+	if ids.is_empty():
+		return ""
+	return ids[rng.randi_range(0, ids.size() - 1)]
 
 
 ## Une règle chiffrée, par chemin : `regle("combat_rules/endurance/max")`.

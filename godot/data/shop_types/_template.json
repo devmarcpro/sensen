@@ -1,8 +1,21 @@
 {
-  "_doc": "Type de boutique PNJ (docs: Génération des royaumes PNJ, Commerce et boutiques) : l'inventaire de départ du marchand qui la tient.",
+  "_doc": "Type de boutique PNJ (docs: Commerce et boutiques) : ce que le marchand tient, decrit par des CATEGORIES (filtre + nombre), jamais par une liste d'objets.",
   "name_key": "boutique.<id>.name",
-  "inventaire": [
-    "pain"
-  ],
-  "tags": []
+  "tags": [],
+  "selection": [
+    {
+      "filtre": {
+        "types_any": [
+          "consommable"
+        ],
+        "tags_any": [
+          "culture"
+        ]
+      },
+      "nombre": [
+        3,
+        5
+      ]
+    }
+  ]
 }

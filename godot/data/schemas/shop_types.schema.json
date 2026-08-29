@@ -2,6 +2,6 @@
   "type": "object",
   "required": [
     "name_key",
-    "inventaire"
+    "selection"
   ]
 }

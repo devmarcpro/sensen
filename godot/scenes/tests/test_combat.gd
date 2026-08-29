@@ -1469,17 +1469,16 @@ func test_village() -> void:
 	s.intention(j.id, {"type": "parler", "pnj": marchand.id})
 	verifier(rel1 >= 1 and int(marchand.social.relations.get(j.id, 0)) == rel1, "+1 (ou +2) de relation, une seule fois par jour")
 	# Commerce : acheter du pain, vendre un lingot, le marchand à sec refuse.
-	var pain := ""
-	for uid in marchand.stock:
-		if s.items[uid].get("base", "") == "pain":
-			pain = uid
+	# Le stock du marchand vient de ses CATÉGORIES (Commerce et boutiques) : le test prend ce qu'il y trouve.
+	verifier(marchand.stock.size() >= 5, "le marchand tient un stock tiré de ses catégories (%d objets)" % marchand.stock.size())
+	var pain: String = str(marchand.stock[0])
 	var p := s.prix_suggere(pain, marchand, j)
-	verifier(int(p.prix) >= 1 and p.has("base") and p.has("rarete"), "prix suggéré du pain : %d or (détail présent)" % int(p.prix))
+	verifier(int(p.prix) >= 1 and p.has("base") and p.has("rarete"), "prix suggéré du premier objet du stock : %d or (détail présent)" % int(p.prix))
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "acheter", "pnj": marchand.id, "objet": pain}), "sans or, pas d'achat")
 	j.or = 100
 	s.attente[j.id] = true
-	verifier(s.intention(j.id, {"type": "acheter", "pnj": marchand.id, "objet": pain}) and pain in j.sac and int(j.or) == 100 - int(p.prix) and int(marchand.or) == 300 + int(p.prix), "acheter le pain")
+	verifier(s.intention(j.id, {"type": "acheter", "pnj": marchand.id, "objet": pain}) and pain in j.sac and int(j.or) == 100 - int(p.prix) and int(marchand.or) == 300 + int(p.prix), "acheter au marchand")
 	s._donner_materiau(j, "fer", 1, "lingot")
 	var lingot: String = s._pile(j, "fer", "lingot").uid
 	var pl := s.prix_suggere(lingot, marchand, j)
@@ -2894,7 +2893,7 @@ func test_discretion() -> void:
 	j.competences_eff["discretion"] = 0
 	verifier(is_equal_approx(s.discretion_reduction(j), 0.0), "sans Discrétion : rien de gagné")
 	j.competences_eff["discretion"] = 20
-	verifier(is_equal_approx(s.discretion_reduction(j), 0.4), "niveau 20 le jour : −40 % de portée (%.2f)" % s.discretion_reduction(j))
+	verifier(is_equal_approx(s.discretion_reduction(j), 0.4), "niveau 20 le jour : −40 %% de portée (%.2f)" % s.discretion_reduction(j))
 	s.horloge_monde.ticks = 0   # nuit
 	verifier(is_equal_approx(s.discretion_reduction(j), 0.48), "la nuit vaut quatre niveaux de plus (−48 %)")
 	j.competences_eff["discretion"] = 60

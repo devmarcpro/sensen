@@ -99,90 +99,96 @@
     ]
   },
   "contenants": {
-    "_doc": "coffres par salle : tuiles de sol par coffre ; objets par coffre",
+    "_doc": "coffres par salle : tuiles de sol par coffre ; objets par coffre. `categories` : un poids et un FILTRE de categorie (jamais une liste d'ids ecrite a la main - Data-driven design).",
     "tuiles_par_coffre": 40,
     "objets_par_coffre": [
       1,
       2
     ],
-    "bases_armes": [
-      "proto_dague",
-      "proto_epee",
-      "proto_masse",
-      "proto_lance",
-      "proto_arc",
-      "proto_baton_magique"
-    ],
-    "bases_armures": [
-      "proto_casque_cuir",
-      "proto_cuirasse_cuir",
-      "proto_cuirasse_mailles",
-      "proto_casque_fer",
-      "proto_jambieres_cuir"
-    ],
-    "bases_bijoux": [
-      "proto_anneau",
-      "proto_amulette"
-    ],
-    "poids_categories": {
-      "armes": 4,
-      "armures": 4,
-      "bijoux": 2,
-      "gemmes": 2,
-      "grimoires": 2,
-      "outils": 2,
-      "stations": 1,
-      "consommables": 4
-    },
-    "bases_gemmes": [
-      "gemme_rubis",
-      "gemme_saphir",
-      "gemme_emeraude",
-      "gemme_topaze",
-      "gemme_onyx",
-      "gemme_diamant",
-      "gemme_amethyste",
-      "gemme_grenat",
-      "gemme_opale",
-      "gemme_ambre"
-    ],
-    "bases_grimoires": [
-      "grimoire",
-      "grimoire",
-      "manuel"
-    ],
-    "bases_outils": [
-      "proto_pioche",
-      "proto_hache",
-      "proto_faucille"
-    ],
-    "bases_stations": [
-      "station_forge",
-      "station_enclume",
-      "station_scierie",
-      "station_tailleur_de_pierre",
-      "station_atelier_tissage",
-      "station_alambic",
-      "station_cuisine",
-      "station_table_enchantement"
-    ],
-    "bases_consommables": [
-      "pain",
-      "baies",
-      "champignon_bleu",
-      "fruit_de_mana",
-      "ration_de_voyage",
-      "ration_moisie",
-      "fiole_de_soin",
-      "fiole_de_soin",
-      "grande_fiole_de_soin",
-      "essence_de_mana",
-      "antidote",
-      "bandage",
-      "elixir_de_hate",
-      "huile_d_arme",
-      "torche"
-    ]
+    "categories": {
+      "armes": {
+        "poids": 4,
+        "filtre": {
+          "types_any": [
+            "arme"
+          ],
+          "tags_any": [
+            "prototype"
+          ]
+        }
+      },
+      "armures": {
+        "poids": 4,
+        "filtre": {
+          "types_any": [
+            "armure",
+            "bouclier"
+          ],
+          "tags_any": [
+            "prototype"
+          ]
+        }
+      },
+      "bijoux": {
+        "poids": 2,
+        "filtre": {
+          "types_any": [
+            "bijou"
+          ]
+        }
+      },
+      "gemmes": {
+        "poids": 2,
+        "filtre": {
+          "types_any": [
+            "gemme"
+          ]
+        }
+      },
+      "grimoires": {
+        "poids": 2,
+        "filtre": {
+          "types_any": [
+            "grimoire",
+            "manuel"
+          ]
+        }
+      },
+      "outils": {
+        "poids": 2,
+        "filtre": {
+          "types_any": [
+            "outil"
+          ],
+          "tags_any": [
+            "prototype",
+            "lumiere"
+          ]
+        }
+      },
+      "stations": {
+        "poids": 1,
+        "filtre": {
+          "types_any": [
+            "station"
+          ]
+        }
+      },
+      "consommables": {
+        "poids": 4,
+        "filtre": {
+          "types_any": [
+            "consommable",
+            "munition"
+          ],
+          "tags_none": [
+            "partie",
+            "ame",
+            "specimen"
+          ]
+        }
+      }
+    }
   },
   "drops": {
     "_doc": "Monstres rares : drop garanti au budget renforcé ; tout-venant : chance de drop",

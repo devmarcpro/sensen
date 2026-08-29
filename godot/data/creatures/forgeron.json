@@ -57,10 +57,24 @@
     "forge": 25,
     "menuiserie": 8
   },
-  "inventaire_marchand": [
-    "proto_pioche",
-    "proto_hache",
-    "proto_dague",
-    "proto_masse"
+  "stock_marchand": [
+    {
+      "filtre": {
+        "types_any": [
+          "arme",
+          "outil"
+        ],
+        "tags_any": [
+          "prototype"
+        ],
+        "categories_materiau": [
+          "metal"
+        ]
+      },
+      "nombre": [
+        3,
+        5
+      ]
+    }
   ]
 }

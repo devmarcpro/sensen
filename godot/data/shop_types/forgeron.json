@@ -1,12 +1,48 @@
 {
   "name_key": "boutique.forgeron.name",
-  "inventaire": [
-    "proto_epee",
-    "proto_hache",
-    "proto_pioche",
-    "proto_faucille",
-    "huile_d_arme",
-    "plan_industriel"
-  ],
-  "tags": []
+  "tags": [],
+  "selection": [
+    {
+      "filtre": {
+        "types_any": [
+          "arme"
+        ],
+        "tags_any": [
+          "prototype"
+        ],
+        "categories_materiau": [
+          "metal"
+        ]
+      },
+      "nombre": [
+        2,
+        4
+      ]
+    },
+    {
+      "filtre": {
+        "types_any": [
+          "outil"
+        ],
+        "tags_any": [
+          "prototype"
+        ]
+      },
+      "nombre": [
+        2,
+        3
+      ]
+    },
+    {
+      "filtre": {
+        "types_any": [
+          "station"
+        ]
+      },
+      "nombre": [
+        0,
+        1
+      ]
+    }
+  ]
 }

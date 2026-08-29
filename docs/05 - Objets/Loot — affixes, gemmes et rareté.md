@@ -108,6 +108,9 @@ L'atelier consomme ce que le donjon fournit — jamais l'inverse.
 > [!success] Codé le 2026-08-29 — 43 gabarits : amplification et transmutation
 > Deux gabarits de plus dans la famille Wu Xing, sur les **anneaux et amulettes** : `wuxing_amplification` (*part de X × N*) et `wuxing_transmutation` (*remplace X par Y*, deux éléments distincts garantis au tirage). Ils complètent les quatre opérations de [[Modificateurs d'affinité]] et ouvrent les *anneaux de transmutation* des [[Cinq accès au cycle]]. Le compte passe de 41 à **43**.
 
+> [!success] Corrigé le 2026-08-29 — le loot tirait dans huit listes d'ids
+> Même défaut que les boutiques : `loot_rules.contenants` portait `bases_armes`, `bases_armures`, `bases_gemmes`… — huit listes à tenir à la main, et deux implémentations copiées (`Loot._base_pour`, `Donjon._base_aleatoire`). Devenu `categories: {armes: {poids, filtre}, …}` : le poids de la catégorie et le **filtre** qui la définit. Toute arme de prototype ajoutée au jeu entre dans les coffres **le jour où elle existe**. **Décisions** : les doublons de pondération des anciennes listes (grimoire deux fois, fiole de soin deux fois) disparaissent — un filtre est un ensemble, la pondération se fait au niveau de la catégorie ; les boucliers rejoignent les armures ; la torche rejoint les outils (`tags_any: [prototype, lumiere]`) ; parties de bête, âmes et spécimens sont exclus des consommables lootables (`tags_none`).
+
 ## Liens
 - **Dépend de** : [[Effets d'équipement passifs]], [[Qualité d'artisanat]], [[Génération de donjon]], [[Modificateurs d'affinité]]
 - **Alimente** : [[Trésors et artefacts]], [[Monstres rares]], [[Équipement — 14 slots]], [[Jauge de chaîne Wu Xing]], [[Cinq accès au cycle]]

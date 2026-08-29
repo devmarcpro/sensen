@@ -163,7 +163,7 @@
     "recruitable": {
       "type": "object"
     },
-    "inventaire_marchand": {
+    "stock_marchand": {
       "type": "array"
     },
     "genre": {

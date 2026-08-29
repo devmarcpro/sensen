@@ -217,21 +217,22 @@ func _tirer_parametres(a: Dictionary, budget: float, rng: RandomNumberGenerator,
 ## Une base d'objet tirée selon les poids de catégorie de `contenants` (armes, armures, bijoux…).
 func _base_pour(rng: RandomNumberGenerator) -> String:
 	var lr: Dictionary = regles.contenants
-	var cats: Dictionary = lr.poids_categories
+	var cats: Dictionary = lr.categories
 	var total := 0.0
 	for c in cats.keys():
-		total += float(cats[c])
+		total += float(cats[c].poids)
 	var t := rng.randf() * total
-	var cat := "armes"
+	var cat := str(cats.keys()[0])
 	for c in cats.keys():
-		t -= float(cats[c])
+		t -= float(cats[c].poids)
 		if t < 0.0:
-			cat = c
+			cat = str(c)
 			break
-	var bases: Array = lr.get("bases_" + cat, [])
-	if bases.is_empty():
-		bases = lr.bases_armes
-	return str(bases[rng.randi_range(0, bases.size() - 1)])
+	# Une CATÉGORIE, pas une liste d'ids : tout objet qui répond au filtre entre dans le loot du jour où il existe.
+	var choisi := GameData.tirer("items", cats[cat].filtre, rng)
+	if choisi.is_empty():
+		choisi = GameData.tirer("items", cats[cats.keys()[0]].filtre, rng)
+	return choisi
 
 
 ## Les affixes d'une instance dont l'effet est d'un type donné (avec leurs paramètres).
