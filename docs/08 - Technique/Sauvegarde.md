@@ -42,6 +42,7 @@ connexion, exporté à la déconnexion).
 
 > [!success] Complété le 2026-08-29 — ce qui est persisté, et ce qui ne l'est délibérément pas
 > Ajoutés à `world.json` : **`modifs_terrain`** (ce que le monde doit rendre hors claim) et **`portails`** (les brèches du Passeur), tous deux indexés par **position monde** — un index de grille n'aurait aucun sens d'une session à l'autre, la fenêtre glisse. Ils sont relus **après** la réinitialisation, qui les vide (l'ordre a coûté un test rouge).
+> Le test de sauvegarde fait désormais **un tour complet de l'état du camp** : trésor, stocks, registre d'élevage, claims, dérive de corruption, nombre d'êtres et compagnons attachés — tout est comparé après rechargement dans une simulation neuve.
 > **Ce qui n'est volontairement pas sauvegardé**, et pourquoi : les **feux** et l'**automate d'eau en cours** (ils s'éteignent en quittant la cellule — les persister demanderait de les stocker par cellule dans `Monde`, or le hors-champ se résout par formules, [[Abstraction hors-site]]) ; les **glyphes**, **bombes en vol**, **affûts déployés** et **invocations temporaires** (couches d'overlay de combat, et on ne sauvegarde pas en combat) ; l'**état d'un donjon en cours** (on ne sauvegarde qu'en surface). Si l'un de ces choix se révèle gênant au playtest, c'est une décision de design, pas un oubli.
 
 ## Liens

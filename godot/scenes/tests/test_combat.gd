@@ -5045,6 +5045,26 @@ func test_sauvegarde() -> void:
 	verifier(s2.horloge_monde.ticks == s.horloge_monde.ticks and s2.graine == 37, "le temps et la graine")
 	verifier(s2.monde.explores.size() == s.monde.explores.size(), "les chunks explorés (%d)" % s2.monde.explores.size())
 	verifier(s2.grille.decouvert.size() > 10000, "la cellule du camp reste découverte")
+	# Un tour complet sur l'état du camp : ce qu'on a construit, élevé, revendiqué, stocké
+	s.territoire["tresor"] = 321
+	s.territoire["stocks"] = {"chene": 7}
+	s.territoire["registre"] = {"carpe": {"1|2": true, "3|4": true}}
+	s.monde.claims[s.monde.cellule_camp] = {"role": "champs", "depuis": 0}
+	s.monde.delta[s.monde.cellule_camp] = 12
+	var comp := s.ajouter("villageois", j.pos + Vector2i(0, 2), "ia")
+	s._habiller_pnj(comp, GameData.entree("creatures", "villageois"))
+	s._devenir_compagnon(j, comp)
+	var n_vivants := s.vivants().size()
+	verifier(s.sauvegarder("test_sensen2"), "sauvegarder l'état complet du camp")
+	var s4 := Simulation.new(3)
+	verifier(s4.charger_sauvegarde("test_sensen2"), "recharger l'état complet")
+	verifier(int(s4.territoire.tresor) == 321 and int(s4.territoire.stocks.get("chene", 0)) == 7, "trésor et stocks revenus")
+	verifier(int(s4.territoire.get("registre", {}).get("carpe", {}).size()) == 2, "le registre d'élevage est revenu")
+	verifier(s4.monde.claims.has(s.monde.cellule_camp) and int(s4.monde.delta.get(s.monde.cellule_camp, 0)) == 12, "claim et dérive de corruption revenus")
+	verifier(s4.vivants().size() == n_vivants, "autant d'êtres qu'avant (%d contre %d)" % [s4.vivants().size(), n_vivants])
+	var comp4 := s4.compagnons_de(s4.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0])
+	verifier(comp4.size() == 1, "le compagnon est toujours au service du joueur")
+	s4.monde.fermer()
 	# Impossible en donjon.
 	var s3 := Simulation.new(2)
 	s3.charger_donjon("ruine", 2, 9, 1)
