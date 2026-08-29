@@ -1,0 +1,18 @@
+{
+  "name_key": "status.epuisement.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 25,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "endurance",
+      "bloque": true
+    }
+  ],
+  "tags": [
+    "negatif"
+  ]
+}

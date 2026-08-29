@@ -1997,3 +1997,17 @@ ui.triche.race,Become a race
 journal.triche,"Cheat: {action}"
 nom.de_creature,{base} of {creature}
 journal.statue,A statue of {nom} drops — rare trophy
+status.seve.name,Sap
+status.aveugle.name,Blinded
+status.silence.name,Silence
+status.epuisement.name,Exhaustion
+status.ancrage.name,Anchoring
+status.reflet.name,Reflection
+status.voile.name,Veil
+monnaie.mana,mana
+monnaie.endurance,stamina
+monnaie.sante,HP
+monnaie.or,gold
+journal.monnaie_bloquee,"{nom} can no longer draw on their {monnaie}"
+journal.voile_esquive,"{nom}'s veil absorbs the blow and fades"
+journal.reflet,"{nom}'s reflection sends {degats} back to {att}"

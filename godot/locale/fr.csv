@@ -2007,3 +2007,17 @@ ui.triche.race,Devenir une race
 journal.triche,"Triche : {action}"
 nom.de_creature,{base} de {creature}
 journal.statue,Une statue de {nom} tombe — trophée rare
+status.seve.name,Sève
+status.aveugle.name,Aveuglé
+status.silence.name,Silence
+status.epuisement.name,Épuisement
+status.ancrage.name,Ancrage
+status.reflet.name,Reflet
+status.voile.name,Voile
+monnaie.mana,mana
+monnaie.endurance,endurance
+monnaie.sante,PV
+monnaie.or,or
+journal.monnaie_bloquee,"{nom} ne peut plus puiser dans son {monnaie}"
+journal.voile_esquive,"Le voile de {nom} absorbe le coup et se dissipe"
+journal.reflet,"Le reflet de {nom} renvoie {degats} à {att}"

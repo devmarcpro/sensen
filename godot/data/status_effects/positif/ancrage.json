@@ -1,0 +1,19 @@
+{
+  "name_key": "status.ancrage.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 40,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "projection",
+      "bloque": true
+    }
+  ],
+  "tags": [
+    "positif",
+    "defense"
+  ]
+}

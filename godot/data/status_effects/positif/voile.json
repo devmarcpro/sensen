@@ -1,0 +1,19 @@
+{
+  "name_key": "status.voile.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 60,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "esquive_prochaine",
+      "bloque": true
+    }
+  ],
+  "tags": [
+    "positif",
+    "defense"
+  ]
+}

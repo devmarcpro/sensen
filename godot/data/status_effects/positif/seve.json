@@ -1,0 +1,15 @@
+{
+  "name_key": "status.seve.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 50,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [],
+  "tags": [
+    "positif",
+    "soin"
+  ],
+  "soin_des": "1d4"
+}

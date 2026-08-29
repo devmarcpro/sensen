@@ -2406,6 +2406,8 @@ func _saisir(e: Dictionary, cible_id: String, tick: int, par_talent: bool = true
 	var c: Dictionary = entites.get(cible_id, {})
 	if (par_talent and not a_talent(e, "saisie")) or c.is_empty() or not c.vivant or c.id == e.id or Grille.distance(e.pos, c.pos) != 1 or not str(e.get("porte", "")).is_empty():
 		return false
+	if Etres.bloque_statuts(c, "projection", statuts_defs):
+		return false   # Ancrage : on ne l'empoigne pas non plus
 	e["porte"] = cible_id
 	c["saisi_par"] = e.id
 	appliquer_statut(c, "saisi", int(statuts_defs.saisi.duree_ticks), e.id)
@@ -7558,6 +7560,17 @@ func _tuile_libre_autour(pos: Vector2i) -> Vector2i:
 func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: Dictionary) -> void:
 	if invincible and cible.controle == "joueur":
 		return   # menu de triche
+	if degats > 0 and Etres.bloque_statuts(cible, "esquive_prochaine", statuts_defs):
+		_retirer_statut(cible, "voile")   # Voile : le prochain coup subi est esquivé, et le voile tombe
+		EventBus.emettre(&"journal", [&"journal.voile_esquive", {"nom": cible.name_key}])
+		return
+	var pct_reflet := 1.0 - float(Etres.mult_statuts(cible, "reflet", statuts_defs))   # Reflet : une part revient
+	if degats > 0 and pct_reflet > 0.0 and not source.is_empty() and entites.has(source) and str(detail.get("type", "")) != "reflet":
+		var att: Dictionary = entites[source]
+		if att.vivant and att.id != cible.id:
+			var renvoi := maxi(1, roundi(float(degats) * pct_reflet))
+			EventBus.emettre(&"journal", [&"journal.reflet", {"nom": cible.name_key, "att": att.name_key, "degats": renvoi}])
+			_appliquer_degats(att, renvoi, cible.id, {"type": "reflet", "element": {}})
 	if a_talent(cible, "sans_chair") and str(detail.get("type", "")) in ["contondant", "tranchant", "perforant"]:   # le Spectre
 		degats = roundi(float(degats) * float(regles.r.talents.sans_chair.physique_mult))
 	_verser_xp(cible, degats, source, detail)
@@ -7932,8 +7945,8 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 	match str(effet.get("mode", "")):
 		"projection":
 			for c in cibles:
-				if not c.vivant:
-					continue
+				if not c.vivant or Etres.bloque_statuts(c, "projection", statuts_defs):
+					continue   # Ancrage : rien ne le déplace
 				var d := Vector2i(signi(c.pos.x - e.pos.x), signi(c.pos.y - e.pos.y))
 				if d == Vector2i.ZERO:
 					continue
@@ -8056,6 +8069,9 @@ func _lancer_capacite(e: Dictionary, index: int, cible: Variant, tick: int) -> b
 		if not e.has("emplois"):
 			e["emplois"] = {}
 		e.emplois[cle_alt] = int(e.emplois.get(cle_alt, 0)) + 1
+	if not str(plan.monnaie).is_empty() and Etres.bloque_statuts(e, str(plan.monnaie), statuts_defs):
+		EventBus.emettre(&"journal", [&"journal.monnaie_bloquee", {"nom": e.name_key, "monnaie": "monnaie." + str(plan.monnaie)}])
+		return false   # Silence (mana) et Épuisement (endurance) : la ressource du noyau est coupée
 	var cible_pos: Vector2i = e.pos if plan.geometrie == "soi" else cible
 	if not (cible is Vector2i) and plan.geometrie != "soi":
 		return false
@@ -8816,6 +8832,7 @@ func voit_ia(e: Dictionary, autre: Dictionary) -> bool:
 	if "pas_silencieux" in autre.get("tags_acquis", []):   # Effets d'équipement : détecté de moins loin
 		portee *= float(regles.r.effets_equipement.silence_mult)
 	portee *= 1.0 - discretion_reduction(autre)   # IA des créatures : la Discrétion de la cible raccourcit le cône
+	portee *= float(Etres.mult_statuts(e, "detection", statuts_defs))   # Aveuglement : l'observateur ne voit plus
 	return Grille.distance(e.pos, autre.pos) <= maxi(int(regles.r.engagement.get("portee_min", 1)), int(portee)) and grille.ligne_de_vue(e.pos, autre.pos)
 
 

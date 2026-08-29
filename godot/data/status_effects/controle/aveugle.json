@@ -1,0 +1,19 @@
+{
+  "name_key": "status.aveugle.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 20,
+  "controle": true,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "detection",
+      "mult": 0.1
+    }
+  ],
+  "tags": [
+    "negatif",
+    "controle"
+  ]
+}
