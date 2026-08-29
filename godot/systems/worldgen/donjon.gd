@@ -100,7 +100,34 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 	_poser_coffres(e)
 	_poser_filons(e, etage)
 	_poser_lave(e, etage)
+	_poser_meubles_rituels(e, etage)
 	return e
+
+
+## Les meubles de race cachée dans les étages profonds (Talents de race) : un au plus, loin des points fixes.
+func _poser_meubles_rituels(e: Dictionary, etage: int) -> void:
+	var mr: Dictionary = GameData.config("combat_rules").get("talents", {}).get("meubles_rituels", {})
+	if etage < int(mr.get("etage_min", 4)) or rng.randf() >= float(mr.get("chance", 0.35)):
+		return
+	var sols: Array = e.sol.keys()
+	if sols.is_empty():
+		return
+	e["meubles"] = e.get("meubles", {})
+	var id: String = "source_maudite" if rng.randf() < 0.5 else "autel_rituel"
+	for essai in 60:
+		var idx: int = int(sols[rng.randi_range(0, sols.size() - 1)])
+		var p := Vector2i(idx % e.largeur, idx / e.largeur)
+		if Grille.distance(p, e.entree) < 6:
+			continue
+		if e.escalier != null and Grille.distance(p, e.escalier) < 6:
+			continue
+		var libre := true
+		for c in e.coffres:
+			if c.pos == p:
+				libre = false
+		if libre and not e.meubles.has(idx):
+			e.meubles[idx] = id
+			return
 
 
 ## Des mares de lave dans les étages profonds (Eau et liquides) : des tuiles de sol, loin des points fixes.

@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.source_maudite.name",
+  "type_meuble": "source_maudite",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 0,
+  "luminosite": 25,
+  "bonus_humeur": -2,
+  "couleur": "#6f3f8f"
+}

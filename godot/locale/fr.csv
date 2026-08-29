@@ -1336,6 +1336,13 @@ meuble.lit.name,Lit
 recipe.meuble_lit.name,Fabriquer : Lit
 meuble.lit_de_paille.name,Lit de paille
 recipe.meuble_lit_de_paille.name,Fabriquer : Lit de paille
+meuble.source_maudite.name,Source maudite
+meuble.autel_rituel.name,Autel du rituel
+option.boire_source,Boire à la source
+option.rituel,Accomplir le rituel
+journal.source_bue,"{nom} boit à la source maudite — l'eau a un goût de fer"
+journal.rituel_accompli,"{nom} accomplit le rituel ; l'autel se brise"
+journal.deja_maudit,ce corps porte déjà sa malédiction
 meuble.table.name,Table
 recipe.meuble_table.name,Fabriquer : Table
 meuble.chaise.name,Chaise

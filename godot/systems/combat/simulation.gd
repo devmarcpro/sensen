@@ -1963,6 +1963,32 @@ func _devenir_lycanthrope(e: Dictionary) -> void:
 	EventBus.emettre(&"journal", [&"journal.lycanthrope", {"nom": e.name_key}])
 
 
+## La source maudite et l'autel du rituel (Talents de race) : deux meubles de donjon, à usage unique,
+## qui ouvrent une race cachée à qui n'en porte pas déjà une.
+func _rituel_race(e: Dictionary, vers: Vector2i, type_meuble: String, tick: int) -> bool:
+	if not grille.dans(vers) or Grille.distance(e.pos, vers) > 1:
+		return false
+	var gi := grille.idx(vers)
+	if str(GameData.entree("meubles", str(grille.meubles.get(gi, ""))).get("type_meuble", "")) != type_meuble:
+		return false
+	if str(e.get("race", "")) in ["vampire", "spectre", "lycanthrope"]:
+		EventBus.emettre(&"journal", [&"journal.deja_maudit", {}])
+		return false
+	grille.meubles.erase(gi)   # à usage unique : la source se tarit, l'autel se brise
+	grille.contenu[gi] = 0
+	grille.marquer(vers)
+	lumiere_sale = true
+	EventBus.emettre(&"tile_changed", [vers])
+	e.compteur = tick + int(regles.r.actions.objet)
+	if type_meuble == "source_maudite":
+		EventBus.emettre(&"journal", [&"journal.source_bue", {"nom": e.name_key}])
+		_devenir_vampire(e)
+	else:
+		EventBus.emettre(&"journal", [&"journal.rituel_accompli", {"nom": e.name_key}])
+		_devenir_lycanthrope(e)
+	return true
+
+
 ## Le Spectre (Talents de race) : se relever spectre, traverser un mur d'une tuile.
 func _devenir_spectre(e: Dictionary) -> void:
 	e["race_origine"] = str(e.get("race", ""))
@@ -6649,6 +6675,10 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _saisir(e, str(i.get("cible", "")), h.ticks)
 		"poser_portail":
 			ok = _poser_portail(e, i.get("cible", e.pos), h.ticks)
+		"boire_source":
+			ok = _rituel_race(e, i.get("vers", Vector2i(-1, -1)), "source_maudite", h.ticks)
+		"rituel":
+			ok = _rituel_race(e, i.get("vers", Vector2i(-1, -1)), "autel_rituel", h.ticks)
 		"traverser":
 			ok = _traverser(e, h.ticks)
 		"masque":

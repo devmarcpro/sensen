@@ -1996,3 +1996,10 @@ tutorial.premiere_nage.text,"You cannot swim laden: drop some weight, or go arou
 tutorial.premiere_recolte.text,"Walls and veins are harvested with a pickaxe, trees with an axe: the tool in hand decides what you get."
 ui.registre.variete,"  variety: {v}"
 ui.registre.sequence,"  rhythm: {s}"
+meuble.source_maudite.name,Cursed spring
+meuble.autel_rituel.name,Ritual altar
+option.boire_source,Drink from the spring
+option.rituel,Perform the ritual
+journal.source_bue,"{nom} drinks from the cursed spring — the water tastes of iron"
+journal.rituel_accompli,"{nom} performs the ritual; the altar shatters"
+journal.deja_maudit,this body already carries its curse

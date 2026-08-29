@@ -1,0 +1,10 @@
+{
+  "name_key": "meuble.autel_rituel.name",
+  "type_meuble": "autel_rituel",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 0,
+  "luminosite": 6,
+  "bonus_humeur": -2,
+  "couleur": "#7a6a4a"
+}

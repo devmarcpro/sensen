@@ -939,6 +939,11 @@
         "anneau_2",
         "cuirasse"
       ]
+    },
+    "meubles_rituels": {
+      "_doc": "Talents de race : les meubles de donjon qui ouvrent une race cachée. etage_min = premier étage qui peut en porter, chance = probabilité par étage, un seul au plus.",
+      "etage_min": 4,
+      "chance": 0.35
     }
   },
   "bombes": {

@@ -112,6 +112,7 @@ func _ready() -> void:
 	test_routes_entre_royaumes()
 	test_tooltips()
 	test_registre_loci()
+	test_meubles_rituels()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2532,6 +2533,35 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_meubles_rituels() -> void:
+	# Le générateur en pose dans les étages profonds, jamais avant l'étage minimum
+	var gen := Donjon.new(GameData.catalogues.get("dungeon_rooms", {}), GameData.catalogues.get("dungeon_connectors", {}), GameData.entree("dungeon_themes", "ruine"))
+	var avant := 0
+	var apres := 0
+	for k in 12:
+		avant += gen.generer_etage(300 + k, 7, 2, 12, false).get("meubles", {}).size()
+		apres += gen.generer_etage(300 + k, 7, 6, 12, false).get("meubles", {}).size()
+	verifier(avant == 0, "aucun meuble de rituel avant l'étage 4 (%d)" % avant)
+	verifier(apres > 0 and apres <= 12, "des sources et des autels dans les étages profonds (%d sur 12 étages)" % apres)
+	# Boire transforme, et la source se tarit
+	var s := Simulation.new(160)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var t: Vector2i = j.pos + Vector2i(1, 0)
+	s.grille.meubles[s.grille.idx(t)] = "source_maudite"
+	s.grille.poser_contenu(t, "meuble")
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "boire_source", "vers": t}) and str(j.race) == "vampire", "boire à la source : vampire")
+	verifier(not s.grille.meubles.has(s.grille.idx(t)), "la source se tarit")
+	# On ne cumule pas les malédictions
+	var t2: Vector2i = j.pos + Vector2i(0, 1)
+	s.grille.meubles[s.grille.idx(t2)] = "autel_rituel"
+	s.grille.poser_contenu(t2, "meuble")
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "rituel", "vers": t2}) and s.grille.meubles.has(s.grille.idx(t2)), "un vampire ne devient pas lycanthrope : l'autel tient")
+	s.monde.fermer()
+
 
 func test_registre_loci() -> void:
 	var s := Simulation.new(159)

@@ -790,6 +790,11 @@ func _options_tuile(t: Vector2i) -> Array:
 			res.append({"id": "conquerir", "vers": t})
 		if "eau" in tags:
 			res.append({"id": "capturer", "vers": t})
+	var meuble_id := str(g.meubles.get(g.idx(t), ""))   # Talents de race : les deux meubles de donjon
+	if d <= 1 and meuble_id == "source_maudite":
+		res.append({"id": "boire_source", "vers": t})
+	if d <= 1 and meuble_id == "autel_rituel":
+		res.append({"id": "rituel", "vers": t})
 	if "plante_sauvage" in tags:
 		res.append({"id": "cueillir", "vers": t})
 	if "plante" in tags or "arbre" in tags:
@@ -877,6 +882,10 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "capturer"})
 		"cueillir":
 			sim.intention(joueur_id, {"type": "cueillir", "vers": opt.vers})
+		"boire_source":
+			sim.intention(joueur_id, {"type": "boire_source", "vers": opt.vers})
+		"rituel":
+			sim.intention(joueur_id, {"type": "rituel", "vers": opt.vers})
 		"designer":
 			sim.designer_cible(j, str(opt.cible))
 		"creuser":
