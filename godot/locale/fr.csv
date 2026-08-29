@@ -1102,6 +1102,10 @@ journal.royaume,"8 cellules et 5 résidents : ton campement est désormais un ro
 item.ame.name,Âme d'un compagnon
 status.affaibli.name,Affaibli
 ui.ecran.recruter,Recruter (R)
+ui.ecran.suiveur,Suis-moi sur le territoire (W)
+ui.ecran.suiveur_stop,Reste à ton poste (W)
+journal.suiveur_local,"{nom} te suivra sur le territoire"
+journal.suiveur_fin,"{nom} ne quitte pas le territoire et rentre à son poste"
 ui.ecran.suivre,Suis-moi (S)
 ui.ecran.attendre,Attends ici (A)
 ui.dialogue.compagnon,"compagnon · ordre : {ordre}"

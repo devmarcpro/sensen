@@ -204,6 +204,10 @@ func touche(ev: InputEventKey) -> bool:
 			if courant == "dialogue":
 				_option("repli")
 				return true
+		KEY_W:
+			if courant == "dialogue":
+				_option("suiveur")
+				return true
 		KEY_X:
 			if courant == "dialogue":
 				_option("assigner")
@@ -483,6 +487,12 @@ func _construire_dialogue(j: Dictionary) -> void:
 	if "quetes" in pnj.get("tags", []):
 		liste.add_item(tr("ui.ecran.quetes"))
 		entrees.append({"kind": "option", "option": "quetes"})
+	if pnj.has("assignation") and not pnj.has("maitre"):   # Compagnons : le suiveur territorial
+		liste.add_item(tr("ui.ecran.suiveur"))
+		entrees.append({"kind": "option", "option": "suiveur"})
+	if bool(pnj.get("suiveur_local", false)):
+		liste.add_item(tr("ui.ecran.suiveur_stop"))
+		entrees.append({"kind": "option", "option": "suiveur_stop"})
 	if pnj.has("maitre"):
 		liste.add_item(tr("ui.ecran.incarner"))
 		entrees.append({"kind": "option", "option": "incarner"})
@@ -549,6 +559,12 @@ func _option(opt: String) -> void:
 			ouvrir("quetes")
 		"recruter":
 			main.sim.intention(j.id, {"type": "recruter", "pnj": pnj_id})
+			rafraichir()
+		"suiveur":
+			main.sim.suiveur_local(j, pnj_id, true)
+			rafraichir()
+		"suiveur_stop":
+			main.sim.suiveur_local(j, pnj_id, false)
 			rafraichir()
 		"suivre", "attendre", "retour", "repli":
 			main.sim.ordonner(j, pnj_id, opt)

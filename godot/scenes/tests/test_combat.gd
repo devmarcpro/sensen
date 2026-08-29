@@ -113,6 +113,7 @@ func _ready() -> void:
 	test_tooltips()
 	test_registre_loci()
 	test_meubles_rituels()
+	test_suiveur_territorial()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2533,6 +2534,26 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_suiveur_territorial() -> void:
+	var s := Simulation.new(161)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var pnj := s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
+	s._habiller_pnj(pnj, GameData.entree("creatures", "villageois"))
+	verifier(not s.suiveur_local(j, pnj.id, true), "un villageois sans assignation ne suit pas")
+	s.changer_role(s.monde.cellule_camp, "champs")
+	pnj["assignation"] = {"fonction": "fermier", "cellule": s.monde.cellule_camp}
+	pnj["poste"] = pnj.pos
+	verifier(s.suiveur_local(j, pnj.id, true) and str(pnj.maitre) == j.id and bool(pnj.suiveur_local), "un résident assigné accepte de suivre sur le territoire")
+	# Il ne compte pas dans les places d'escorte
+	verifier(s.compagnons_de(j).size() == 1 and s.compagnons_de(j, false).is_empty(), "il n'occupe pas de place d'escorte")
+	# Hors du territoire, il rentre à son poste
+	s.monde.claims.erase(s.monde.cellule_camp)   # le camp n'est plus revendiqué : équivaut à sortir du territoire
+	s._decider_ia(pnj, s.tick_de(pnj))
+	verifier(not pnj.has("maitre") and not pnj.has("suiveur_local") and str(pnj.ai_profile) == "civil", "hors territoire : il redevient résident et rentre")
+	s.monde.fermer()
+
 
 func test_meubles_rituels() -> void:
 	# Le générateur en pose dans les étages profonds, jamais avant l'étage minimum

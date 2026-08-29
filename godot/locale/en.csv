@@ -2003,3 +2003,7 @@ option.rituel,Perform the ritual
 journal.source_bue,"{nom} drinks from the cursed spring — the water tastes of iron"
 journal.rituel_accompli,"{nom} performs the ritual; the altar shatters"
 journal.deja_maudit,this body already carries its curse
+ui.ecran.suiveur,Follow me on my land (W)
+ui.ecran.suiveur_stop,Go back to your post (W)
+journal.suiveur_local,"{nom} will follow you on your land"
+journal.suiveur_fin,"{nom} will not leave the territory and returns to their post"

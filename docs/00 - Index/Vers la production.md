@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] Le suiveur territorial (2026-08-29)
+> Un résident peut suivre chez toi sans occuper une place d'escorte, et rentre à son poste dès que tu sors du territoire. **À juger** : est-ce que ça sert vraiment (escorter un chantier, un raid), ou est-ce un ordre de plus dans un menu déjà long ?
 > [!important] Les deux voies manquantes des races cachées (2026-08-29)
 > Source maudite (vampire) et autel du rituel (lycanthrope) dans les étages profonds — jusqu'ici seules la morsure et la mort en corruption ouvraient ces races. **À juger** : une transformation irréversible sans avertissement, au clic droit — audacieux ou cruel ?
 > [!important] Le registre d'élevage suivait mal ses espèces (2026-08-29)

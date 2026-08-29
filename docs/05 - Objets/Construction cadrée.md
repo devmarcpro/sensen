@@ -24,6 +24,9 @@ La construction libre à la Minecraft est **écartée** : elle n'a pas de sens s
 > [!success] Codé le 2026-08-28 — poser à la tuile sur le camp
 > Intentions `poser` (un meuble ou une station portative du sac devient un contenu de tuile adjacente : `meuble`, `station_fixe`), `poser_mur` (**1 unité de pierre taillée, de planche ou de brique** → un mur construit, destructible, portant son matériau — décision : la note dit « coût en ressources et en temps » sans chiffre), `poser_porte` (1 planche → une porte, franchissable, qui coupe la vue), `demonter` (un meuble ou une station revient au sac ; un mur construit se démonte sans rendre son matériau, comme creuser). **Pas d'orientation** : tout se pose à la tuile, un mur est un bloc plein (décision). Les tuiles construites portent le tag `construit`. Coût en temps : `camp.poser_ticks` (10). Le modelage du terrain (élever/abaisser) attend la surface.
 
+> [!success] Complété le 2026-08-29 — le modelage du terrain, et le signal réel
+> Le callout ci-dessus disait « le modelage du terrain (élever/abaisser) attend la surface » : il est codé depuis (intention `terrasser`, ±1 de hauteur, pioche en main pour élever, bornes `terrasser.h_min`/`h_max`, terrain mémorisé et régénéré hors claim — voir *Destruction du terrain*). **Le signal** : la note prévoyait `block_placed` / `block_destroyed` ; l'implémentation n'en a qu'un, **`tile_changed(pos)`**, émis par toute mutation de tuile (contenu, hauteur, meuble, eau, feu) — le client redessine, et les quêtes de construction progressent par appel direct (`_progresser_quetes`) plutôt que par abonnement. Décision : un seul signal de mutation plutôt que deux signaux typés, tant qu'aucun système n'a besoin de distinguer *poser* de *détruire*.
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Claims et persistance]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[Détection de pièces]], [[Habitat des PNJ]], [[Expansion territoriale]], [[Destruction du terrain]]

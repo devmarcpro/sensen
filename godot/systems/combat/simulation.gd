@@ -4198,12 +4198,43 @@ func places_escorte(e: Dictionary) -> int:
 	return int(c.places_base) + int(e.stats_eff.charisme) / int(c.par_charisme) + regles.niveau(e.competences_eff, "leadership") / int(c.par_leadership) + (1 if a_talent(e, "oeil_du_prix") else 0)
 
 
-func compagnons_de(e: Dictionary) -> Array:
+func compagnons_de(e: Dictionary, avec_suiveurs: bool = true) -> Array:
 	var res: Array = []
 	for x in vivants():
-		if str(x.get("maitre", "")) == e.id:
+		if str(x.get("maitre", "")) == e.id and (avec_suiveurs or not bool(x.get("suiveur_local", false))):
 			res.append(x)
 	return res
+
+
+## Le suiveur territorial (Compagnons) : un résident assigné suit sur le territoire, sans place d'escorte.
+func suiveur_local(e: Dictionary, id: String, actif: bool) -> bool:
+	var x: Dictionary = entites.get(id, {})
+	if x.is_empty() or not x.vivant or Grille.distance(e.pos, x.pos) > 2:
+		return false
+	if actif:
+		if not x.has("assignation") or x.has("maitre"):
+			return false
+		x["maitre"] = e.id
+		x["suiveur_local"] = true
+		x["ordre"] = "suivre"
+		x["posture"] = "defensive"
+		x.ai_profile = "compagnon"
+		EventBus.emettre(&"journal", [&"journal.suiveur_local", {"nom": x.name_key}])
+		return true
+	if not bool(x.get("suiveur_local", false)):
+		return false
+	_fin_suiveur(x)
+	return true
+
+
+## Il redevient un résident ordinaire : plus de maître, retour au profil civil et à son poste.
+func _fin_suiveur(x: Dictionary) -> void:
+	x.erase("maitre")
+	x.erase("suiveur_local")
+	x.erase("ordre")
+	x.ai_profile = "civil"
+	x.cible = ""
+	x.ancre = x.get("poste", x.pos)
 
 
 ## Faire d'un être un compagnon du joueur.
@@ -4236,7 +4267,7 @@ func _recruter(e: Dictionary, pnj_id: String, tick: int) -> bool:
 	if not ok:
 		EventBus.emettre(&"journal", [&"journal.pas_recrutable", {"nom": pnj.name_key}])
 		return false
-	if compagnons_de(e).size() >= places_escorte(e):
+	if compagnons_de(e, false).size() >= places_escorte(e):
 		EventBus.emettre(&"journal", [&"journal.pas_de_place", {}])
 		return false
 	_devenir_compagnon(e, pnj)
@@ -8234,6 +8265,11 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 			EventBus.emettre(&"journal", [&"journal.confusion", {"nom": e.name_key}])
 			_deplacer(e, libres[des.entier(0, libres.size() - 1)], tick)
 			return
+	if bool(e.get("suiveur_local", false)):   # Compagnons : un suiveur territorial ne sort pas de chez lui
+		var m0: Dictionary = entites.get(str(e.get("maitre", "")), {})
+		if m0.is_empty() or monde == null or lieu != "camp" or not monde.claims.has(_cell_de(m0.pos)):
+			EventBus.emettre(&"journal", [&"journal.suiveur_fin", {"nom": e.name_key}])
+			_fin_suiveur(e)
 	if grille.dangers.has(grille.idx(e.pos)):   # Météo : on ne reste pas dans le feu — un pas hors des flammes
 		var sorties: Array[Vector2i] = []
 		for d in Grille.DIRS:
