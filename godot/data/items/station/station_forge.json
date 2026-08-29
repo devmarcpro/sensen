@@ -6,5 +6,21 @@
   "tags": [
     "station",
     "portative"
-  ]
+  ],
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie",
+    "inputs": [
+      {
+        "category": "roche",
+        "forme": "pierre_taillee",
+        "amount": 6
+      },
+      {
+        "category": "metal",
+        "forme": "lingot",
+        "amount": 2
+      }
+    ]
+  }
 }

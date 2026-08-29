@@ -263,6 +263,22 @@ for rid, r in recipes.items():
     if not porteurs:
         probs["recette derivee sans ingredient qui porte le champ"].append("%s -> %s/%s" % (rid, tag, champ))
 
+# 19. objets qui portent leur cout (meubles, stations) : station et competence reelles, entrees connues
+competences_all = cat("competences")
+for iid, it in items.items():
+    rc = it.get("recipe", {})
+    if not rc.get("inputs"):
+        continue
+    if str(rc.get("station", "")) not in stations:
+        probs["objet.recipe -> station inconnue"].append("%s -> %s" % (iid, rc.get("station")))
+    if str(rc.get("craft_skill", "")) not in competences_all:
+        probs["objet.recipe -> competence inconnue"].append("%s -> %s" % (iid, rc.get("craft_skill")))
+    for e in rc["inputs"]:
+        if e.get("item") and str(e["item"]) not in items:
+            probs["objet.recipe -> ingredient inconnu"].append("%s -> %s" % (iid, e["item"]))
+        if e.get("material") and str(e["material"]) not in materials:
+            probs["objet.recipe -> materiau inconnu"].append("%s -> %s" % (iid, e["material"]))
+
 for k in sorted(probs):
     print("\n== %s (%d)" % (k, len(probs[k])))
     for v in probs[k][:12]:

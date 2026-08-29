@@ -6,5 +6,21 @@
   "tags": [
     "meuble",
     "posable"
-  ]
+  ],
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie",
+    "inputs": [
+      {
+        "category": "vegetal",
+        "forme": "tissu",
+        "amount": 2
+      },
+      {
+        "item": "peau",
+        "forme": "",
+        "amount": 1
+      }
+    ]
+  }
 }

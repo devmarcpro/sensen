@@ -57,8 +57,26 @@ func charger() -> void:
 	for nom in CONFIGS:
 		configs[nom] = _charger_config(nom)
 	_finir_materiaux()
+	_deriver_recettes_objets()
 	_verifier_craft()
 	_rapport()
+
+
+## Un objet fini qui porte `recipe.inputs` (meuble, station) DIT lui-même ce qu'il coûte : sa recette est
+## dérivée ici, sous son propre id, au lieu d'exister comme un 33e fichier « meuble_x → meuble_x » à tenir à la
+## main (Craft compositionnel — le coût est une propriété de la chose, pas une recette nommée à part).
+func _deriver_recettes_objets() -> void:
+	for id in catalogues.get("items", {}).keys():
+		var it: Dictionary = catalogues.items[id]
+		var rc: Dictionary = it.get("recipe", {})
+		if it.has("slots") or not rc.has("inputs"):
+			continue   # les objets à slots passent par l'assemblage de composants
+		if catalogues.recipes.has(id):
+			erreurs.append("items/%s.json → recipe → une recette plate du même nom existe déjà dans recipes/" % id)
+			continue
+		catalogues.recipes[id] = {"id": id, "name_key": str(it.name_key), "station": str(rc.station),
+			"craft_skill": str(rc.craft_skill), "inputs": rc.inputs, "output": {"item": id, "amount": int(rc.get("amount", 1))},
+			"fuel": null, "derivee": true}
 
 
 ## Craft compositionnel : chaque recette de composant vise un composant, une famille et une station

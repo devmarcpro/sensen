@@ -1124,7 +1124,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 57, "9 stations, 57 recettes plates (19 transformations, 24 meubles, 9 stations, 3 plats, 2 distillations par catégorie)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 57, "57 recettes : 19 transformations, 3 plats, 2 distillations, et 33 dérivées des objets qui portent leur coût (24 meubles, 9 stations)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")

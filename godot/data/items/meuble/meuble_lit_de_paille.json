@@ -6,5 +6,21 @@
   "tags": [
     "meuble",
     "posable"
-  ]
+  ],
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie",
+    "inputs": [
+      {
+        "material": "paille",
+        "forme": "brut",
+        "amount": 2
+      },
+      {
+        "category": "bois",
+        "forme": "planche",
+        "amount": 1
+      }
+    ]
+  }
 }

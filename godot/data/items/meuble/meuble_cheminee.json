@@ -6,5 +6,16 @@
   "tags": [
     "meuble",
     "posable"
-  ]
+  ],
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie",
+    "inputs": [
+      {
+        "category": "roche",
+        "forme": "pierre_taillee",
+        "amount": 4
+      }
+    ]
+  }
 }

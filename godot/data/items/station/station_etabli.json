@@ -6,5 +6,16 @@
   "tags": [
     "station",
     "portative"
-  ]
+  ],
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie",
+    "inputs": [
+      {
+        "category": "bois",
+        "forme": "planche",
+        "amount": 4
+      }
+    ]
+  }
 }

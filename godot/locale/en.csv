@@ -1126,43 +1126,10 @@ recipe.faire_papier.name,Make paper
 recipe.filer_soie.name,Spin silk (kills the chrysalis)
 recipe.fondre_lingot.name,Smelt an ingot
 recipe.fondre_verre.name,Melt glass
-recipe.meuble_autel_domestique.name,"Craft: Household altar"
-recipe.meuble_bassin.name,Pond
-recipe.meuble_bibliotheque.name,"Craft: Bookcase"
-recipe.meuble_chaise.name,"Craft: Chair"
-recipe.meuble_cheminee.name,"Craft: Fireplace"
-recipe.meuble_clayette.name,"Assemble: silkworm tray"
-recipe.meuble_coffre.name,"Craft: Chest"
-recipe.meuble_enclos.name,"Assemble: pen"
-recipe.meuble_etal_de_vente.name,"Craft: Market stall"
-recipe.meuble_garde_manger.name,"Craft: Pantry"
-recipe.meuble_grand_coffre.name,"Craft: Large chest"
-recipe.meuble_hall_de_guilde.name,Build a guild hall
-recipe.meuble_lanterne_de_cristal.name,"Craft: Crystal lantern"
-recipe.meuble_lit.name,"Craft: Bed"
-recipe.meuble_lit_de_paille.name,"Craft: Straw bed"
-recipe.meuble_ratelier_d_armes.name,"Craft: Weapon rack"
-recipe.meuble_rucher.name,"Assemble: apiary"
-recipe.meuble_table.name,"Craft: Table"
-recipe.meuble_tapis.name,"Craft: Rug"
-recipe.meuble_terrarium.name,"Assemble: terrarium"
-recipe.meuble_torchere.name,"Craft: Torch sconce"
-recipe.meuble_tourelle.name,Build a turret
-recipe.meuble_trophee.name,"Craft: Trophy"
-recipe.meuble_vivarium.name,Assemble a vivarium
 recipe.plat_ragout.name,Simmer a stew
 recipe.plat_ration_de_voyage.name,Prepare rations
 recipe.plat_viande_grillee.name,Grill the meat
 recipe.scier_planche.name,Saw planks
-recipe.station_alambic.name,"Craft: Alembic"
-recipe.station_atelier_tissage.name,"Craft: Weaving bench"
-recipe.station_cuisine.name,"Craft: Kitchen"
-recipe.station_enclume.name,"Craft: Anvil"
-recipe.station_etabli.name,"Craft: Workbench"
-recipe.station_forge.name,"Craft: Forge"
-recipe.station_scierie.name,"Craft: Sawmill"
-recipe.station_table_enchantement.name,"Craft: Enchanting table"
-recipe.station_tailleur_de_pierre.name,"Craft: Stonecutter"
 recipe.tailler_gemme.name,Cut a gem
 recipe.tailler_pierre.name,Cut stone
 recipe.tanner_cuir.name,Tan a hide

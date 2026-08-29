@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] Le coût d'un meuble est sur le meuble (2026-08-29)
+> 33 recettes « meuble_x → meuble_x » supprimées : la fiche de l'objet porte `recipe.inputs`, la recette en est dérivée au boot. Un meuble neuf est constructible sans fichier de plus.
 > [!important] La distillation : deux recettes au lieu de quatorze (2026-08-29)
 > La sortie d'une recette peut se lire sur l'ingrédient (`depuis_entree`/`champ`) : une plante neuve devient distillable en portant un `distillat`, sans écrire de recette.
 > [!important] Boutiques et loot : des catégories, plus des listes d'objets (2026-08-29)

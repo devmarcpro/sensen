@@ -750,7 +750,6 @@ ui.royaume.fiche,"peuple : {race} · culture : {culture} · capitale {capitale} 
 ui.royaume.dirigeant_inconnu,inconnu (capitale non visitée)
 creature.pretre.name,Prêtre
 function.pretre.name,Prêtre
-recipe.meuble_tourelle.name,Bâtir une tourelle
 ui.ecran.ressusciter,"Ressusciter un compagnon (N) — {cout} or"
 ui.ecran.ressusciter_rien,(pas d'âme dans le sac)
 journal.resurrection_pretre,"{pretre} rappelle {nom} d'entre les morts ({cout} or)"
@@ -826,26 +825,20 @@ species.ver_a_soie.name,Ver à soie
 species.luciole.name,Luciole des haies
 species.poisson_de_bassin.name,Truite d'étang
 meuble.bassin.name,Bassin
-recipe.meuble_bassin.name,Bassin
 raison.colonie,"il faut {n} spécimens dans l'habitat"
 species.ruche.name,Ruche
 species.tortue.name,Tortue des marais
 species.phalene.name,Phalène du bouleau
 meuble.terrarium.name,Terrarium
-recipe.meuble_terrarium.name,Assembler : terrarium
 meuble.clayette.name,Clayette à vers
-recipe.meuble_clayette.name,Assembler : clayette à vers
 meuble.rucher.name,Rucher
-recipe.meuble_rucher.name,Assembler : rucher
 meuble.enclos.name,Enclos
-recipe.meuble_enclos.name,Assembler : enclos
 item.miel.name,Miel
 journal.production_colonie,"{espece} : {n} {item} au stock"
 journal.capture_appat,il faut un appât dans le sac ({appat})
 journal.capture_nuit,ce piège ne prend que la nuit
 species.carpe.name,Carpe de bassin
 meuble.vivarium.name,Vivarium
-recipe.meuble_vivarium.name,Assembler un vivarium
 item.specimen.name,Spécimen
 saison.printemps,printemps
 saison.ete,été
@@ -888,7 +881,6 @@ boutique.herboriste.name,Herboriste
 function.maitre_de_guilde.name,Maître de guilde
 creature.maitre_de_guilde.name,Maître de guilde
 meuble.hall_de_guilde.name,Hall de guilde
-recipe.meuble_hall_de_guilde.name,Bâtir un hall de guilde
 quest.traque.text,Traquer {count} bêtes pour la Guilde des Chasseurs
 quest.purge.text,Purger le donjon voisin pour les Prospecteurs
 journal.hall_pose,"un hall de la {guilde} : son maître s'installe"
@@ -1332,9 +1324,7 @@ ui.objet.poids,poids {poids}
 journal.huile,{nom} huile son arme : +1d4 feu au prochain combat
 journal.purge,{nom} est soigné de : {statut}
 meuble.lit.name,Lit
-recipe.meuble_lit.name,Fabriquer : Lit
 meuble.lit_de_paille.name,Lit de paille
-recipe.meuble_lit_de_paille.name,Fabriquer : Lit de paille
 meuble.source_maudite.name,Source maudite
 meuble.autel_rituel.name,Autel du rituel
 option.boire_source,Boire à la source
@@ -1343,43 +1333,20 @@ journal.source_bue,"{nom} boit à la source maudite — l'eau a un goût de fer"
 journal.rituel_accompli,"{nom} accomplit le rituel ; l'autel se brise"
 journal.deja_maudit,ce corps porte déjà sa malédiction
 meuble.table.name,Table
-recipe.meuble_table.name,Fabriquer : Table
 meuble.chaise.name,Chaise
-recipe.meuble_chaise.name,Fabriquer : Chaise
 meuble.coffre.name,Coffre
-recipe.meuble_coffre.name,Fabriquer : Coffre
 meuble.grand_coffre.name,Grand coffre
-recipe.meuble_grand_coffre.name,Fabriquer : Grand coffre
 meuble.garde_manger.name,Garde-manger
-recipe.meuble_garde_manger.name,Fabriquer : Garde-manger
 meuble.etal_de_vente.name,Étal de vente
-recipe.meuble_etal_de_vente.name,Fabriquer : Étal de vente
 meuble.torchere.name,Torchère
-recipe.meuble_torchere.name,Fabriquer : Torchère
 meuble.lanterne_de_cristal.name,Lanterne de cristal
-recipe.meuble_lanterne_de_cristal.name,Fabriquer : Lanterne de cristal
 meuble.cheminee.name,Cheminée
-recipe.meuble_cheminee.name,Fabriquer : Cheminée
 meuble.bibliotheque.name,Bibliothèque
-recipe.meuble_bibliotheque.name,Fabriquer : Bibliothèque
 meuble.ratelier_d_armes.name,Râtelier d'armes
-recipe.meuble_ratelier_d_armes.name,Fabriquer : Râtelier d'armes
 meuble.tapis.name,Tapis
-recipe.meuble_tapis.name,Fabriquer : Tapis
 meuble.trophee.name,Trophée
-recipe.meuble_trophee.name,Fabriquer : Trophée
 meuble.autel_domestique.name,Autel domestique
-recipe.meuble_autel_domestique.name,Fabriquer : Autel domestique
 meuble.statue.name,Statue
-recipe.station_etabli.name,Fabriquer : Établi
-recipe.station_forge.name,Fabriquer : Forge
-recipe.station_enclume.name,Fabriquer : Enclume
-recipe.station_scierie.name,Fabriquer : Scierie
-recipe.station_tailleur_de_pierre.name,Fabriquer : Tailleur de pierre
-recipe.station_atelier_tissage.name,Fabriquer : Atelier de tissage
-recipe.station_alambic.name,Fabriquer : Alambic
-recipe.station_cuisine.name,Fabriquer : Cuisine
-recipe.station_table_enchantement.name,Fabriquer : Table d'enchantement
 item.proto_hache.name,Hache de fer
 functionality.hache.name,Hache
 tile_content.arbre.name,Arbre
