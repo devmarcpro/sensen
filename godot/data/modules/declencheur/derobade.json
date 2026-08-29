@@ -8,5 +8,9 @@
   "tags": [
     "declencheur"
   ],
-  "surcout_ticks": 2
+  "surcout_ticks": 2,
+  "effet": {
+    "declencheur": "derobade",
+    "duree_ticks": 100
+  }
 }

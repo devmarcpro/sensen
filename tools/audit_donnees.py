@@ -150,6 +150,11 @@ for aid, a in cat("affixes").items():
     sid = str(st.get("id", "")) if isinstance(st, dict) else (str(st) if st else "")
     if sid and sid not in statuses: probs["affixe -> statut inconnu"].append("%s -> %s" % (aid, sid))
 
+# 13. modules : une liaison ou un declencheur sans `effet` est ignore en silence par l'assembleur
+for mid, m in modules.items():
+    if str(m.get("module_type", "")) in ("liaison", "declencheur") and not m.get("effet"):
+        probs["module -> liaison/declencheur sans effet"].append(mid)
+
 for k in sorted(probs):
     print("\n== %s (%d)" % (k, len(probs[k])))
     for v in probs[k][:12]:

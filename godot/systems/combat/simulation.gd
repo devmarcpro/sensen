@@ -7928,6 +7928,13 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 	var touchees := _entites_dans(e, plan, tuiles)
 	# Liaisons qui étendent les cibles : Miroir (position symétrique), Partage (le lanceur aussi).
 	for l: Dictionary in plan.liaisons:
+		if l.get("meute", false):   # Meute (La Trace) : la forme s'applique aussi depuis la tuile de chaque compagnon
+			for comp in compagnons_de(e):
+				if not comp.vivant or Grille.distance(comp.pos, cible_pos) > int(plan.portee.y) + int(plan.taille):
+					continue
+				for c in _entites_dans(e, plan, Capacites.tuiles_de_forme(grille, plan.geometrie, comp.pos, cible_pos, int(plan.taille))):
+					if not touchees.has(c):
+						touchees.append(c)
 		if l.get("miroir", false):
 			var sym: Vector2i = e.pos - (cible_pos - e.pos)
 			for c in _entites_dans(e, plan, Capacites.tuiles_de_forme(grille, plan.geometrie, e.pos, sym, int(plan.taille))):

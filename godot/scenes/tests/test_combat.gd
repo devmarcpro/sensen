@@ -119,6 +119,7 @@ func _ready() -> void:
 	test_glyphes_visibles()
 	test_derobade()
 	test_alternance()
+	test_meute_liaison()
 	test_etats_tuiles_par_grille()
 	test_index_monde()
 	test_sauvegarde_terrain()
@@ -2607,6 +2608,19 @@ func test_etats_tuiles_par_grille() -> void:
 	s.monde.fermer()
 
 
+func test_meute_liaison() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var plan := s.capacites.assembler(["meute", "point", "etincelle"], 5, "1d6", {"metal": 1.0}, {})
+	verifier(plan.erreurs.is_empty() and plan.avertissements.is_empty(), "Meute s'assemble sans avertissement (%s)" % str(plan.avertissements))
+	var meute_ok := false
+	for l in plan.liaisons:
+		if bool(l.get("meute", false)):
+			meute_ok = true
+	verifier(meute_ok, "la liaison Meute est portée par le plan")
+	s.monde.fermer() if s.monde != null else null
+
+
 func test_alternance() -> void:
 	var s := nouvelle_sim("plaine_au_talus")
 	var j := joueur_de(s)
@@ -2630,10 +2644,11 @@ func test_derobade() -> void:
 		if e.id != j.id:
 			loup = e
 	# Une charge armée sur Dérobade part au premier pas sous la menace, une seule fois
-	var plan := {"elements": {}, "geometrie": "point", "taille": 1, "portee": Vector2i(0, 1), "liaisons": [],
-		"mult": 1.0, "des_bonus": 0, "parametres": {}, "monnaie": "mana", "ressource": 0, "charge_suivante": {},
-		"drapeaux": {}, "statuts": [], "modificateurs": [], "declencheur": "derobade", "effets": [], "noyau": {"name_key": "module.ombre.name", "id": "ombre", "effets": []}}
-	j.declencheurs_armes.append({"evenement": "derobade", "plan": plan})
+	# La séquence est assemblée pour de vrai : [Dérobade] + [Point] + [Étincelle]
+	var assemble := s.capacites.assembler(["derobade", "point", "etincelle"], 5, "1d6", {"metal": 1.0}, {})
+	verifier(assemble.erreurs.is_empty() and assemble.avertissements.is_empty(), "Dérobade s'assemble sans avertissement (%s)" % str(assemble.avertissements))
+	verifier(str(assemble.charge_suivante.get("declencheur", "")) == "derobade", "la charge attend l'esquive")
+	j.declencheurs_armes.append({"evenement": "derobade", "plan": assemble.charge_suivante})
 	s._engager_combat(j, loup)
 	loup.pos = j.pos + Vector2i(1, 0)
 	s.grille.liberer(loup.pos)
