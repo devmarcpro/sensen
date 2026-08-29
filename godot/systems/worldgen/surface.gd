@@ -544,8 +544,9 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 	e.biome = biome_a(ox + taille / 2, oy + taille / 2)
 	# 1. Sol, biome et matériau par tuile. Les couches sont échantillonnées par bloc de PAS_BRUIT tuiles
 	#    (fréquences ≤ 0,003 : rien ne varie à l'échelle de la tuile) — 16 fois moins d'appels au bruit.
-	var par_tuile: Dictionary = {}
-	var par_bloc: Dictionary = {}
+	var par_bloc: Dictionary = {}   # la clé de bloc se recalcule (x / PAS_BRUIT) : pas de table de 16 384 entrées
+	var mer_alt := float(planete.get("mer", {}).get("altitude", 0.30))   # hors boucle : 16 384 tuiles
+	var mer_h := int(planete.get("mer", {}).get("hauteur", 8))
 	for y in taille:
 		for x in taille:
 			var i := y * taille + x
@@ -556,14 +557,15 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 			var cle := Vector2i(x / PAS_BRUIT, y / PAS_BRUIT)
 			if not par_bloc.has(cle):
 				var v := couches_a(ox + cle.x * PAS_BRUIT + PAS_BRUIT / 2, oy + cle.y * PAS_BRUIT + PAS_BRUIT / 2)
-				par_bloc[cle] = {"couches": v, "biome": _biome_de(v)}
-			var b: String = par_bloc[cle].biome
-			par_tuile[i] = cle
-			e.biomes_vus[b] = true
-			e.sols[i] = str(biomes.get(b, {}).get("surface_material", "terre"))
-			if float(par_bloc[cle].couches.altitude) < float(planete.get("mer", {}).get("altitude", 0.30)):
-				e.eau[i] = true   # la mer (Eau et liquides : une source, niveau 8/8 — statique tant que l'automate attend)
-				e.hauteurs[i] = int(planete.get("mer", {}).get("hauteur", 8))
+				var b0 := _biome_de(v)
+				par_bloc[cle] = {"couches": v, "biome": b0, "sol": str(biomes.get(b0, {}).get("surface_material", "terre")),
+					"mer": float(v.get("altitude", 1.0)) < mer_alt}
+				e.biomes_vus[b0] = true
+			var bl: Dictionary = par_bloc[cle]
+			e.sols[i] = bl.sol
+			if bool(bl.mer):
+				e.eau[i] = true   # la mer (Eau et liquides : une source, niveau 8/8)
+				e.hauteurs[i] = mer_h
 	# 2. Le relief : des accidents posés, hors de la zone d'arrivée si un camp s'y greffe.
 	var reserve := Rect2i(e.entree - Vector2i(8, 8), Vector2i(24, 16)) if not camp.is_empty() else Rect2i(-1, -1, 0, 0)
 	_poser_accidents(e, reserve, rng)
@@ -575,7 +577,7 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 		var y: int = i / taille
 		if reserve.has_point(Vector2i(x, y)) or e.eau.has(i):
 			continue
-		var bloc: Dictionary = par_bloc[par_tuile[i]]
+		var bloc: Dictionary = par_bloc[Vector2i(x / PAS_BRUIT, y / PAS_BRUIT)]
 		var b: Dictionary = biomes.get(str(bloc.biome), {})
 		var veg: float = float(bloc.couches.vegetation)
 		var res: float = float(bloc.couches.ressources)

@@ -24,6 +24,9 @@ Cinq façons de faire tourner les éléments dans une chaîne, chacune payée da
 
 **Arbitrage central du combat ([[Jauge de chaîne Wu Xing]]) :** enchaîner avec la même arme (0 tick de swap, +0.10) ou payer 4 ticks pour changer d'élément (+0.35). *Le swap doit être rentable DANS CERTAINS CAS SEULEMENT — si la réponse est toujours la même, les chiffres sont à revoir.*
 
+> [!success] Codé le 2026-08-29 — les cinq accès existent
+> Le dernier manquait. Récapitulatif de ce qui les porte : **1. râtelier** (`changer_arme`, 4 ticks, hotbar) · **2. Communion des cinq** (talent de classe : l'élément de l'arme avance seul à chaque coup contre du mana) · **3. enchantement déclencheur** (affixe `wuxing_cycle` : les coups touchés avancent l'élément dans le cycle) · **4. anneaux de transmutation** (affixes `wuxing_transmutation` et `wuxing_amplification` sur anneaux et amulettes, 2026-08-29) · **5. armes fantomatiques** (`arme_fantome`, une lame d'élément pur entretenue en mana). **À juger** : cinq voies existent, mais rien ne dit qu'elles sont *également* attirantes — c'est le genre d'équilibre qui se mesure en jouant, pas en lisant.
+
 ## Liens
 - **Dépend de** : [[Wu Xing — cycles et vecteurs]], [[Jauge de chaîne Wu Xing]], [[Modificateurs d'affinité]]
 - **Alimente** : [[Armes fantomatiques]], [[Équipement — 14 slots]]
