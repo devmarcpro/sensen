@@ -130,6 +130,7 @@ func _ready() -> void:
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
+	test_creation_de_sorts()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -2435,6 +2436,106 @@ func test_talents() -> void:
 
 
 # ---------------------------------------------------------------- Assemblage de capacités, Renaissance
+
+## Création de sorts (Structure compétences-modules-slots) : tout le catalogue de modules passé au banc.
+## Chaque noyau seul, chaque forme avec un noyau, puis 300 séquences tirées au hasard : l'assembleur
+## doit toujours rendre un plan cohérent — jamais de plan à moitié construit, jamais d'erreur muette.
+func test_creation_de_sorts() -> void:
+	var s := Simulation.new(4242)
+	s.charger_donjon("ruine", 4242, 12, 1)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var par_type := {}
+	for mid in GameData.catalogues.modules.keys():
+		var t := str(GameData.catalogues.modules[mid].module_type)
+		if not par_type.has(t):
+			par_type[t] = []
+		par_type[t].append(str(mid))
+	for t in par_type.keys():
+		par_type[t].sort()
+	verifier(par_type.get("noyau", []).size() == 86 and par_type.get("forme", []).size() == 16, "le catalogue : %d noyaux, %d formes" % [par_type.get("noyau", []).size(), par_type.get("forme", []).size()])
+
+	# 1. chaque noyau, seul : un plan complet et cohérent
+	var noyaux_ko: Array[String] = []
+	var incoherents: Array[String] = []
+	for nid in par_type.noyau:
+		var plan := s.capacites.assembler([nid], 10, "1d4", {}, j.competences_eff)
+		if not plan.erreurs.is_empty():
+			noyaux_ko.append("%s (%s)" % [nid, str(plan.erreurs[0])])
+			continue
+		if plan.noyau.is_empty() or int(plan.ticks) <= 0 or int(plan.portee.x) > int(plan.portee.y) or int(plan.taille) < 0:
+			incoherents.append(nid)
+		elif int(plan.ressource) < 0 or (not str(plan.monnaie).is_empty() and not (str(plan.monnaie) in ["mana", "endurance", "sante", "or"])):
+			incoherents.append(nid + " (monnaie " + str(plan.monnaie) + ")")
+	verifier(noyaux_ko.is_empty(), "les 86 noyaux s'assemblent seuls (%s)" % str(noyaux_ko.slice(0, 4)))
+	verifier(incoherents.is_empty(), "chacun rend un plan cohérent — ticks, portée, taille, monnaie (%s)" % str(incoherents.slice(0, 4)))
+
+	# 2. chaque forme, avec un noyau : la géométrie du plan est celle de la forme
+	var formes_ko: Array[String] = []
+	for fid in par_type.forme:
+		var plan := s.capacites.assembler([fid, "etincelle"], 10, "1d4", {}, j.competences_eff)
+		if not plan.erreurs.is_empty() or plan.forme.is_empty() or str(plan.geometrie).is_empty():
+			formes_ko.append(fid)
+	verifier(formes_ko.is_empty(), "les 16 formes portent leur géométrie (%s)" % str(formes_ko))
+
+	# 3. les refus attendus
+	verifier(not s.capacites.assembler(["point"], 10, "1d4", {}, {}).erreurs.is_empty(), "sans noyau : erreur")
+	verifier(not s.capacites.assembler(["module_qui_n_existe_pas"], 10, "1d4", {}, {}).erreurs.is_empty(), "module inconnu : erreur")
+	verifier(not s.capacites.assembler(["etincelle", "gel"], 10, "1d4", {}, {}).erreurs.is_empty(), "deux noyaux sans Alternance : erreur")
+
+	# 4. 300 séquences tirées au hasard dans TOUT le catalogue : jamais de plan à moitié construit
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20260829
+	var tous: Array = GameData.catalogues.modules.keys()
+	tous.sort()
+	var casses: Array[String] = []
+	var assemblees := 0
+	for essai in 300:
+		var seq: Array = []
+		for k in rng.randi_range(1, 5):
+			seq.append(str(tous[rng.randi_range(0, tous.size() - 1)]))
+		var plan := s.capacites.assembler(seq, 10, "1d4", {}, j.competences_eff)
+		if not plan.erreurs.is_empty():
+			continue   # un refus est une réponse valable (deux noyaux, pas de noyau…)
+		assemblees += 1
+		# Invariants d'un plan accepté. Un plan ouvert par un déclencheur porte son noyau dans la charge
+		# différée (`charge_suivante`), pas à la racine — c'est le modèle des Six types de modules.
+		var noyau_effectif: Dictionary = plan.noyau if not plan.noyau.is_empty() else plan.charge_suivante.get("noyau", {})
+		if noyau_effectif.is_empty() or int(plan.ticks) <= 0 or int(plan.portee.x) > int(plan.portee.y) or int(plan.ressource) < 0:
+			casses.append(str(seq))
+		elif plan.has("alt") and (plan.alt.noyau.is_empty() or not plan.alt.erreurs.is_empty()):
+			casses.append("alternance " + str(seq))
+	verifier(assemblees > 60, "%d séquences sur 300 s'assemblent" % assemblees)
+	verifier(casses.is_empty(), "aucun plan accepté n'est incohérent (%s)" % str(casses.slice(0, 3)))
+
+	# 5. de bout en bout : composer puis LANCER un sort de chaque géométrie, en jeu
+	j.modules_connus = []
+	for mid in GameData.catalogues.modules.keys():
+		j.modules_connus.append(str(mid))
+	j.capacites = []
+	j.mana = 9999
+	j.mana_max = 9999
+	j.endurance = 9999
+	var lances := 0
+	var refus: Array[String] = []
+	for fid in ["point", "ligne", "cone", "carre", "soi"]:
+		if not (fid in par_type.get("forme", [])):
+			continue
+		j.capacites = []   # un slot de capacité à la fois : c'est la géométrie qu'on teste, pas les slots
+		if not s.composer_capacite(j, [fid, "etincelle"]):
+			refus.append("composer " + fid)
+			continue
+		var idx: int = j.capacites.size() - 1
+		var cible: Vector2i = j.pos if fid == "soi" else j.pos + Vector2i(1, 0)
+		s.attente[j.id] = true
+		j.mana = 9999
+		j.endurance = 9999
+		if s.intention(j.id, {"type": "capacite", "index": idx, "cible": cible}):
+			lances += 1
+		else:
+			refus.append("lancer " + fid)
+	verifier(refus.is_empty(), "composer et lancer un sort de chaque géométrie (%s)" % str(refus))
+	verifier(lances >= 4, "%d sorts lancés en jeu" % lances)
+
 
 func test_composer_capacites() -> void:
 	var s := Simulation.new(119)

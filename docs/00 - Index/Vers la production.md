@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] La création de sorts, passée au banc (2026-08-29)
+> 86 noyaux, 16 formes, 300 séquences aléatoires, cinq sorts composés puis lancés en jeu : aucun plan incohérent, aucun refus muet. **À juger** : 115 séquences sur 300 s'assemblent — la composition est-elle assez permissive pour inviter à essayer, ou trop pour guider ?
 > [!important] La statue 1:1 tombe enfin (2026-08-29)
 > 0,5 % par créature abattue : un meuble-trophée nommé d'après elle, valeur ∝ ses stats. C'était le seul objet du catalogue qu'aucune source ne donnait.
 > [!important] Menu de triche (2026-08-29)
