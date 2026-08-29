@@ -130,14 +130,17 @@
     "hauteur_oeil": 1
   },
   "engagement": {
-    "_doc": "Décision — Fuite et désengagement · IA des créatures (détection = Perception en tuiles) · Éclairage : la nuit, cible non éclairée vue à portée × vision_nuit, cible éclairée à portée × (1 + lumière/100 × lumiere_detection) ; lumiere_rayon = portée des meubles lumineux.",
+    "_doc": "Décision — Fuite et désengagement · IA des créatures (détection = Perception en tuiles) · Éclairage : la nuit, cible non éclairée vue à portée × vision_nuit, cible éclairée à portée × (1 + lumière/100 × lumiere_detection) ; lumiere_rayon = portée des meubles lumineux. Discretion de la cible : portee × (1 − min(discretion_max_pct, niveau × discretion_par_niveau)), jamais sous portee_min.",
     "sortie_distance": 12,
     "sortie_ticks_sans_vue": 30,
     "ia_distance_ancre": 20,
     "ia_ticks_sans_vue": 100,
     "detection_par_perception": 1.0,
     "lumiere_detection": 0.5,
-    "lumiere_rayon": 3
+    "lumiere_rayon": 3,
+    "discretion_par_niveau": 0.02,
+    "discretion_max_pct": 0.6,
+    "portee_min": 1
   },
   "ia": {
     "_doc": "IA des créatures : une décision tous les 10 ticks",

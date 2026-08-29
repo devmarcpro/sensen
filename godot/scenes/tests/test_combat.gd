@@ -108,6 +108,7 @@ func _ready() -> void:
 	test_tannage()
 	test_huile_d_arme()
 	test_liens_donnees()
+	test_discretion()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2528,6 +2529,38 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_discretion() -> void:
+	var s := Simulation.new(158)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	s.horloge_monde.ticks = int(s._cycle().ticks_par_jour) / 2   # plein jour
+	j.competences_eff["discretion"] = 0
+	verifier(is_equal_approx(s.discretion_reduction(j), 0.0), "sans Discrétion : rien de gagné")
+	j.competences_eff["discretion"] = 20
+	verifier(is_equal_approx(s.discretion_reduction(j), 0.4), "niveau 20 le jour : −40 % de portée (%.2f)" % s.discretion_reduction(j))
+	s.horloge_monde.ticks = 0   # nuit
+	verifier(is_equal_approx(s.discretion_reduction(j), 0.48), "la nuit vaut quatre niveaux de plus (−48 %)")
+	j.competences_eff["discretion"] = 60
+	verifier(is_equal_approx(s.discretion_reduction(j), 0.6), "le plafond tient à 60 %")
+	j["garde"] = true
+	verifier(is_equal_approx(s.discretion_reduction(j), 0.0), "en garde, on ne se cache pas")
+	j.erase("garde")
+	# Un loup qui voit à 10 tuiles ne voit plus qu'à 4 quand la cible est discrète
+	s.horloge_monde.ticks = int(s._cycle().ticks_par_jour) / 2
+	var loup := s.ajouter("loup", j.pos + Vector2i(6, 0), "ia")
+	loup.corps.stats.perception = 10
+	for dx in range(0, 8):
+		var t: Vector2i = j.pos + Vector2i(dx, 0)
+		s.grille.contenu[s.grille.idx(t)] = 0
+		s.grille.hauteurs[s.grille.idx(t)] = s.grille.h(j.pos)
+	j.competences_eff["discretion"] = 0
+	var vu_sans := s.voit_ia(loup, j)
+	j.competences_eff["discretion"] = 30
+	var vu_avec := s.voit_ia(loup, j)
+	verifier(vu_sans and not vu_avec, "à six tuiles : vu sans Discrétion, invisible avec")
+	s.monde.fermer()
+
 
 ## Les liens entre catalogues (tools/audit_donnees.py fait le tour complet ; ici les plus coûteux à casser).
 func test_liens_donnees() -> void:

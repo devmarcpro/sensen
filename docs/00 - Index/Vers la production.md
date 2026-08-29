@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] La Discrétion sert enfin (2026-08-29)
+> La compétence réduit la portée à laquelle on est repéré (2 %/niveau, plafond 60 %, +4 niveaux la nuit). **À juger** : un rôdeur peut-il traverser un camp de bandits sans être vu, et est-ce que ça doit être possible ?
 > [!important] La traduction anglaise avait 4 % de couverture (2026-08-29)
 > Le pipeline `tr()` était en place, mais `en.csv` n'avait pas suivi le contenu depuis l'étape 1 : 80 clés sur 1 983. Outil de mesure + première passe (options, tuiles, statuts, compétences, classes, races). **À juger** : les noms de classes en anglais (The Ferryman, The Hourglass…) sonnent-ils juste ?
 > [!important] Compétences fantômes des classes cachées (2026-08-29)

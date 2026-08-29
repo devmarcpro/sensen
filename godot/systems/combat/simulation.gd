@@ -8412,7 +8412,20 @@ func voit_ia(e: Dictionary, autre: Dictionary) -> bool:
 			portee *= 1.0 + float(lum) / 100.0 * float(regles.r.engagement.get("lumiere_detection", 0.5))
 	if "pas_silencieux" in autre.get("tags_acquis", []):   # Effets d'équipement : détecté de moins loin
 		portee *= float(regles.r.effets_equipement.silence_mult)
-	return Grille.distance(e.pos, autre.pos) <= int(portee) and grille.ligne_de_vue(e.pos, autre.pos)
+	portee *= 1.0 - discretion_reduction(autre)   # IA des créatures : la Discrétion de la cible raccourcit le cône
+	return Grille.distance(e.pos, autre.pos) <= maxi(int(regles.r.engagement.get("portee_min", 1)), int(portee)) and grille.ligne_de_vue(e.pos, autre.pos)
+
+
+## Ce que la Discrétion d'un être retire à la portée à laquelle on le repère (IA des créatures) : 0 à
+## `discretion_max_pct`. La nuit vaut `cycle.discretion_nuit` niveaux de plus ; en garde, on ne se cache pas.
+func discretion_reduction(e: Dictionary) -> float:
+	var en: Dictionary = regles.r.engagement
+	if bool(e.get("garde", false)):
+		return 0.0
+	var niveau := float(regles.niveau(e.get("competences_eff", {}), "discretion"))
+	if est_nuit():
+		niveau += float(_cycle().get("discretion_nuit", 4))
+	return minf(float(en.get("discretion_max_pct", 0.6)), niveau * float(en.get("discretion_par_niveau", 0.02)))
 
 
 ## La cible de la routine horaire d'un PNJ (IA des créatures) : poste, place ou lit selon l'heure.
