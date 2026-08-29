@@ -74,6 +74,9 @@ Le schéma de données d'un module et les six axes du vocabulaire commun — la 
 - **Aucun arbre de talents, aucun point à dépenser** : les modules s'obtiennent par le **loot et l'apprentissage** ([[Grimoires et manuels]]), montent de niveau **par l'usage** ([[Potentiel]]), et le build **émerge** de ce qu'on possède et de ce qu'on utilise.
 - **Infobulle exhaustive obligatoire** : chaque module affiche ses valeurs **calculées pour le personnage courant** — forme, portée, coûts, conditions, dégâts attendus avec le détail. Aucune information cachée, aucun « environ ».
 
+> [!success] Corrigé le 2026-08-29 — deux prédicats de condition que le code ne connaissait pas
+> Dernier reste de la même famille : **Affinité** (`element_cible`) et **Pied ferme** (`porteur_immobile_depuis`) portaient un prédicat bien écrit… que `_evaluer_conditions` ne gérait pas. Or une condition inconnue tombe dans le défaut « faux », et une condition fausse **empêche la capacité de partir** : ces deux modules rendaient un sort **injouable**, pas simplement plus faible. *Affinité* compare l'élément dominant de la cible à celui désigné (`"X"` = celui du noyau) ; *Pied ferme* lit l'immobilité du lanceur (`immobile_depuis`, remis à zéro à chaque pas, posé pour Canalisation). `tools/audit_donnees.py` tient désormais la **liste des prédicats gérés** en miroir du code et refuse tout prédicat qu'il ne connaît pas — c'est le même contrôle que pour les effets de noyau, appliqué aux conditions.
+
 ## Liens
 - **Dépend de** : [[Le vocabulaire des modules et l'absence d'arbre de talents]], [[Data-driven design]], [[Wu Xing — cycles et vecteurs]]
 - **Alimente** : [[Six types de modules et assemblage]], [[Modules]], [[Familles de capacités de la grille]]

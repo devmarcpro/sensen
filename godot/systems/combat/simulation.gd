@@ -8298,6 +8298,13 @@ func _evaluer_conditions(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -
 				vrai = e.has("chaine") and e.chaine.segments.size() >= int(e.chaine.capacite) - 1
 			"segment_chaine_present":
 				vrai = e.has("chaine") and not e.chaine.segments.is_empty()
+			"element_cible":   # Affinité : la cible porte l'élément désigné ("X" = celui du noyau)
+				var el_vise := str(p.get("element", "X"))
+				if el_vise == "X":
+					el_vise = wuxing.dominante(plan.get("elements", {}))
+				vrai = not cible.is_empty() and not el_vise.is_empty() 					and wuxing.dominante(cible.get("elements", {}) if cible.get("elements") is Dictionary else {}) == el_vise
+			"porteur_immobile_depuis":   # Pied ferme : le lanceur n'a pas bougé depuis N ticks
+				vrai = tick_de(e) - int(e.get("immobile_depuis", -99999)) >= int(p.get("ticks", 20))
 			"corruption_au_dessus":   # Corruption : l'arme qui aime le danger (Niveau de danger)
 				vrai = monde != null and monde.corruption_de(_cell_de(e.pos)) >= float(p.get("seuil", 50))
 			"phase_du_jour":   # Heure : selon le cycle jour-nuit

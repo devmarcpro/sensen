@@ -340,12 +340,22 @@ for mid, m in modules_cat.items():
 # au moment du constat. L'audit ne bloque pas sur l'existant, mais refuse que le chiffre AUGMENTE.
 # 23. les autres types de modules : une condition sans predicat, une liaison ou un declencheur sans
 # effet, un modificateur dont l'effet n'est lu par personne — meme controle que pour les noyaux.
+# La liste est tenue a la main en miroir de Simulation._evaluer_conditions : un predicat absent d'ici
+# est un module qui ne se declenche JAMAIS (la capacite ne part pas du tout).
+PREDICATS_GERES = ("hauteur_relative", "dos_ou_flanc", "ligne_de_vue_degagee", "cible_isolee",
+    "cible_adjacente_a_allie", "pv_cible_sous", "pv_porteur_sous", "vecteur_de_lieu", "porteur_en_posture",
+    "jauge_chaine_pleine", "segment_chaine_present", "element_cible", "porteur_immobile_depuis",
+    "corruption_au_dessus", "phase_du_jour", "meteo_parmi", "porteur_dissimule", "cible_immobilisee")
 CLES_MOD = ("des", "portee", "portee_mult", "portee_fixe", "portee_min", "taille", "ignore_armure", "vampirique",
             "durees_mult", "projection", "attraction", "segments", "purification", "silencieux", "sans_trace",
             "detonation", "emprise", "tracant", "prisme", "element_vers", "geometrie_map",
             "canalisation", "enchainement", "fragmentation", "ligature", "remanence", "ricochet")
 for mid, m in modules_cat.items():
     t, ef = str(m.get("module_type", "")), (m.get("effet") or {})
+    if t == "condition" and "predicat_structure" in ef:
+        _t = str((ef.get("predicat_structure") or {}).get("type", ""))
+        if _t and _t not in PREDICATS_GERES:
+            probs["condition -> predicat que le code ne gere pas"].append("%s -> %s" % (mid, _t))
     if t == "condition" and "predicat_structure" not in ef:
         probs["condition sans predicat"].append(mid)
     elif t == "liaison" and not ef:

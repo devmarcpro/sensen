@@ -132,6 +132,7 @@ func _ready() -> void:
 	test_composer_capacites()
 	test_creation_de_sorts()
 	test_zones_au_sol()
+	test_conditions_et_modificateurs()
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
@@ -2441,6 +2442,95 @@ func test_talents() -> void:
 ## Création de sorts (Structure compétences-modules-slots) : tout le catalogue de modules passé au banc.
 ## Chaque noyau seul, chaque forme avec un noyau, puis 300 séquences tirées au hasard : l'assembleur
 ## doit toujours rendre un plan cohérent — jamais de plan à moitié construit, jamais d'erreur muette.
+## Conditions et modificateurs (Modules, lots 7 et 7b) : chaque prédicat s'évalue, chaque drapeau agit.
+func test_conditions_et_modificateurs() -> void:
+	var s := Simulation.new(616)
+	s.charger_donjon("ruine", 616, 6, 1)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	for dx in range(1, 5):
+		var t: Vector2i = j.pos + Vector2i(dx, 0)
+		s.grille.contenu[s.grille.idx(t)] = 0
+		s.grille.hauteurs[s.grille.idx(t)] = s.grille.h(j.pos)
+	var loup := s.ajouter("loup", j.pos + Vector2i(1, 0), "ia")
+	var plan_de := func(mods: Array) -> Dictionary:
+		var pl := s.capacites.assembler(mods, 10, "1d4", {}, j.competences_eff)
+		pl["name_key"] = ""
+		pl["arme"] = {}
+		pl["fonct"] = {}
+		return pl
+
+	# 1. tout prédicat cité par une condition est évalué par le code (aucun ne tombe dans le défaut)
+	var non_geres: Array[String] = []
+	for mid in GameData.catalogues.modules.keys():
+		var m: Dictionary = GameData.catalogues.modules[mid]
+		if str(m.module_type) != "condition":
+			continue
+		var t := str(m.get("effet", {}).get("predicat_structure", {}).get("type", ""))
+		if t.is_empty():
+			non_geres.append(str(mid) + " (sans prédicat)")
+	verifier(non_geres.is_empty(), "les 20 conditions portent un prédicat (%s)" % str(non_geres))
+
+	# 2. Ombre : vrai seulement quand le lanceur est Dissimulé — et la capacité ne part pas sinon
+	var plan_ombre: Dictionary = plan_de.call(["ombre", "etincelle"])
+	verifier(not s._evaluer_conditions(j, plan_ombre, loup.pos).is_empty(), "Ombre : sans Dissimulé, la condition est fausse")
+	s.appliquer_statut(j, "dissimule", 200, j.id)
+	verifier(s._evaluer_conditions(j, plan_de.call(["ombre", "etincelle"]), loup.pos).is_empty(), "Ombre : Dissimulé, la condition passe")
+	s._retirer_statut(j, "dissimule")
+
+	# 3. Prise : vrai quand la cible est saisie ou lévitée
+	verifier(not s._evaluer_conditions(j, plan_de.call(["prise", "etincelle"]), loup.pos).is_empty(), "Prise : cible libre, condition fausse")
+	s.appliquer_statut(loup, "levite", 50, j.id)
+	verifier(s._evaluer_conditions(j, plan_de.call(["prise", "etincelle"]), loup.pos).is_empty(), "Prise : cible lévitée, condition vraie")
+	s._retirer_statut(loup, "levite")
+
+	# 4. Pied ferme : le lanceur n'a pas bougé depuis 20 ticks
+	j["immobile_depuis"] = s.tick_de(j)
+	verifier(not s._evaluer_conditions(j, plan_de.call(["pied_ferme", "etincelle"]), loup.pos).is_empty(), "Pied ferme : à peine arrêté, condition fausse")
+	j["immobile_depuis"] = s.tick_de(j) - 50
+	verifier(s._evaluer_conditions(j, plan_de.call(["pied_ferme", "etincelle"]), loup.pos).is_empty(), "Pied ferme : 50 ticks immobile, condition vraie")
+
+	# 5. Évasement : la géométrie s'ouvre
+	verifier(str(plan_de.call(["ligne", "etincelle"]).geometrie) == "ligne" and str(plan_de.call(["ligne", "evasement", "etincelle"]).geometrie) == "cone", "Évasement : la Ligne devient un Cône")
+
+	# 6. Canalisation : les dés de l'immobilité
+	var plan_can: Dictionary = plan_de.call(["canalisation", "etincelle"])
+	j["immobile_depuis"] = s.tick_de(j) - 25
+	var des0: int = int(plan_can.des_bonus)
+	s._executer_capacite(j, plan_can, loup.pos)
+	verifier(int(plan_can.des_bonus) == des0 + 5, "Canalisation : 25 ticks immobile = +5 dés (%d)" % int(plan_can.des_bonus))
+
+	# 7. Emprise : ce qui est touché est enraciné
+	loup.statuts.clear()
+	loup.vivant = true   # l'Étincelle du test précédent a pu l'abattre
+	loup.anti_stunlock_jusqua = 0   # la Lévitation du test 4 tient encore le verrou anti-stunlock
+	loup.sante = 100000
+	loup.sante_max = 100000
+	if s.grille.occupant(loup.pos).is_empty():
+		s.grille.placer(loup.id, loup.pos)
+	s._executer_capacite(j, plan_de.call(["emprise", "etincelle"]), loup.pos)
+	verifier(Etres.a_statut_id(loup, "enracinement"), "Emprise : la cible touchée est enracinée")
+
+	# 8. Traçant : la portée seule compte, le couvert non
+	var derriere_mur: Vector2i = j.pos + Vector2i(3, 0)
+	s.grille.poser_contenu(j.pos + Vector2i(2, 0), "mur")
+	var plan_normal: Dictionary = plan_de.call(["ligne", "etincelle"])
+	var plan_trac: Dictionary = plan_de.call(["ligne", "tracant", "etincelle"])
+	plan_normal.portee = Vector2i(1, 6)
+	plan_trac.portee = Vector2i(1, 6)
+	verifier(not s.capacite_visable(j, plan_normal, derriere_mur) and s.capacite_visable(j, plan_trac, derriere_mur), "Traçant : la charge passe le mur, pas la charge normale")
+	s.grille.contenu[s.grille.idx(j.pos + Vector2i(2, 0))] = 0
+
+	# 9. Détonation : le double contre une invocation
+	var invoque := s.ajouter("loup", j.pos + Vector2i(4, 0), "ia")
+	invoque["fin_invocation"] = s.tick_de(j) + 500
+	invoque.sante = 100000
+	invoque.sante_max = 100000
+	loup.sante = 100000
+	loup.sante_max = 100000
+	var plan_det: Dictionary = plan_de.call(["detonation", "etincelle"])
+	verifier(float(plan_det.drapeaux.get("detonation", 0.0)) == 2.0, "Détonation : le drapeau atteint le plan")
+
+
 ## Les zones au sol (Modules — lot 2) : Racine, Sol vif, Nappe, Voile de brume, Balise.
 func test_zones_au_sol() -> void:
 	var s := Simulation.new(515)
