@@ -424,3 +424,250 @@ species.ruche.name,Beehive
 species.serpent.name,Dune snake
 species.tortue.name,Marsh turtle
 species.ver_a_soie.name,Silkworm
+material.acacia.name,Acacia
+material.acajou.name,Mahogany
+material.acier.name,Steel
+material.acier_inox.name,Stainless steel
+material.acier_trempe.name,Tempered steel
+material.acier_tungstene.name,Tungsten steel
+material.aluminium.name,Aluminium (bauxite)
+material.ambre.name,Amber
+material.amethyste.name,Amethyst
+material.amiante.name,Asbestos
+material.ammonite.name,Ammonite
+material.andesite.name,Andesite
+material.anthracite.name,Anthracite
+material.antimoine.name,Antimony
+material.ardoise.name,Slate
+material.argent.name,Silver
+material.argile.name,Clay
+material.argile_refractaire.name,Fireclay
+material.aulne.name,Alder
+material.balsa.name,Balsa
+material.bambou.name,Bamboo
+material.basalte.name,Basalt
+material.beton.name,Concrete
+material.bismuth.name,Bismuth
+material.bitume.name,Bitumen
+material.bois_calcine.name,Charred wood
+material.bois_flotte.name,Driftwood
+material.bois_petrifie.name,Petrified wood
+material.boue.name,Mud
+material.bouleau.name,Birch
+material.breche_volcanique.name,Volcanic breccia
+material.brique.name,Brick
+material.brique_refractaire.name,Firebrick
+material.bronze.name,Bronze
+material.buis.name,Boxwood
+material.calcaire.name,Limestone
+material.calcite.name,Calcite (spar)
+material.caoutchouc.name,Rubber
+material.cedre.name,Cedar
+material.cerisier.name,Cherry wood
+material.chanvre.name,Hemp
+material.charme.name,Hornbeam
+material.chataignier.name,Chestnut
+material.chaume_tresse.name,Woven thatch
+material.chene.name,Oak
+material.chrome.name,Chromium (chromite)
+material.cinabre.name,Cinnabar
+material.cobalt.name,Cobalt
+material.conglomerat.name,Conglomerate
+material.coquillage_fossile.name,Fossil shell
+material.coton.name,Cotton
+material.craie.name,Chalk
+material.cuir.name,Leather
+material.cuivre.name,Copper
+material.cypres.name,Cypress
+material.diamant.name,Diamond
+material.diorite.name,Diorite
+material.dolomie.name,Dolomite
+material.eau.name,Water
+material.eau_salee.name,Salt water
+material.ebene.name,Ebony
+material.emeraude.name,Emerald
+material.epicea.name,Spruce
+material.erable.name,Maple
+material.etain.name,Tin
+material.eucalyptus.name,Eucalyptus
+material.fer.name,Iron
+material.fluorine.name,Fluorite
+material.fourrure.name,Fur
+material.frene.name,Ash wood
+material.gaiac.name,Lignum vitae
+material.geode.name,Geode
+material.glace.name,Ice
+material.gneiss.name,Gneiss
+material.goudron.name,Tar
+material.granit.name,Granite
+material.granit_noir.name,Black granite (gabbro)
+material.graphite.name,Graphite
+material.gravier.name,Gravel
+material.grenat.name,Garnet
+material.gres.name,Sandstone
+material.guano.name,Guano/cave saltpetre
+material.gypse.name,Gypsum
+material.hetre.name,Beech
+material.houille.name,Coal
+material.huile.name,Oil
+material.if.name,Yew
+material.jade.name,Jade
+material.kimberlite.name,Kimberlite
+material.laine.name,Wool
+material.laiton.name,Brass
+material.lapis_lazuli.name,Lapis lazuli
+material.lave.name,Lava
+material.liege.name,Cork (cork oak)
+material.lignite.name,Lignite
+material.lin.name,Flax
+material.malachite.name,Malachite
+material.manganese.name,Manganese
+material.marbre.name,Marble
+material.meleze.name,Larch
+material.meteorite_ferreuse.name,Iron meteorite
+material.mica.name,Mica
+material.neige.name,Snow
+material.nickel.name,Nickel
+material.noisetier.name,Hazel
+material.noyer.name,Walnut
+material.obsidienne.name,Obsidian
+material.ocre.name,Ochre
+material.olivier.name,Olive wood
+material.onyx.name,Onyx
+material.opale.name,Opal
+material.or.name,Gold
+material.orme.name,Elm
+material.os.name,Bone
+material.os_fossile.name,Fossil bone
+material.os_massif.name,Dense bone
+material.paille.name,Straw
+material.palmier.name,Palm (stipe)
+material.papier.name,Paper
+material.peridotite.name,Peridotite
+material.peuplier.name,Poplar
+material.phosphorite.name,Phosphorite
+material.pierre.name,Stone
+material.pierre_ponce.name,Pumice
+material.pin.name,Pine
+material.platane.name,Plane wood
+material.platine.name,Platinum
+material.plomb.name,Lead
+material.pommier.name,Apple wood
+material.pyrite.name,Pyrite
+material.quartz.name,Quartz
+material.quartzite.name,Quartzite
+material.rhyolite.name,Rhyolite
+material.robinier.name,Black locust
+material.rubis.name,Ruby
+material.sable.name,Sand
+material.salpetre.name,Saltpetre
+material.saphir.name,Sapphire
+material.sapin.name,Fir
+material.saule.name,Willow
+material.schiste.name,Shale
+material.sel_gemme.name,Rock salt
+material.sequoia.name,Sequoia
+material.serpentinite.name,Serpentinite
+material.seve.name,Sap
+material.silex.name,Flint
+material.soie.name,Silk
+material.soufre.name,Sulphur
+material.teck.name,Teak
+material.terre.name,Soil
+material.terre_fertile.name,Fertile soil
+material.tilleul.name,Linden
+material.titane.name,Titanium
+material.topaze.name,Topaz
+material.tourbe.name,Peat
+material.tourbe_compactee.name,Compressed peat
+material.travertin.name,Travertine
+material.tuf_volcanique.name,Volcanic tuff
+material.tungstene.name,Tungsten
+material.turquoise.name,Turquoise
+material.verre.name,Glass
+material.verre_trempe.name,Tempered glass
+material.zinc.name,Zinc
+titre.arabo_berbere.dictature.m,War Emir
+titre.arabo_berbere.dictature.f,War Emira
+titre.arabo_berbere.guilde_maitre.m,Grand Master
+titre.arabo_berbere.guilde_maitre.f,Grand Mistress
+titre.arabo_berbere.monarchie_hereditaire.m,Sultan
+titre.arabo_berbere.monarchie_hereditaire.f,Sultana
+titre.arabo_berbere.ploutocratie.m,Grand Vizier of the Markets
+titre.arabo_berbere.ploutocratie.f,Grand Vizier of the Markets
+titre.arabo_berbere.republique.m,Sheikh of the Council
+titre.arabo_berbere.republique.f,Sheikha of the Council
+titre.arabo_berbere.theocratie.m,Caliph
+titre.arabo_berbere.theocratie.f,Calipha
+titre.celte.dictature.m,Champion-Regent
+titre.celte.dictature.f,Champion-Regent
+titre.celte.guilde_maitre.m,Grand Master
+titre.celte.guilde_maitre.f,Grand Mistress
+titre.celte.monarchie_hereditaire.m,High King
+titre.celte.monarchie_hereditaire.f,High Queen
+titre.celte.ploutocratie.m,Prince of the Fairs
+titre.celte.ploutocratie.f,Princess of the Fairs
+titre.celte.republique.m,Brehon
+titre.celte.republique.f,Brehon
+titre.celte.theocratie.m,Archdruid
+titre.celte.theocratie.f,Archdruidess
+titre.latine.dictature.m,Imperator
+titre.latine.dictature.f,Imperatrix
+titre.latine.guilde_maitre.m,Grand Master
+titre.latine.guilde_maitre.f,Grand Mistress
+titre.latine.monarchie_hereditaire.m,King
+titre.latine.monarchie_hereditaire.f,Queen
+titre.latine.ploutocratie.m,Magnate
+titre.latine.ploutocratie.f,Magnate
+titre.latine.republique.m,Consul
+titre.latine.republique.f,Consul
+titre.latine.theocratie.m,Pontifex Maximus
+titre.latine.theocratie.f,Pontifex Maxima
+titre.nipponne.dictature.m,Shogun
+titre.nipponne.dictature.f,Shogun
+titre.nipponne.guilde_maitre.m,Grand Master
+titre.nipponne.guilde_maitre.f,Grand Mistress
+titre.nipponne.monarchie_hereditaire.m,Emperor
+titre.nipponne.monarchie_hereditaire.f,Empress
+titre.nipponne.ploutocratie.m,Supreme Merchant
+titre.nipponne.ploutocratie.f,Supreme Merchant
+titre.nipponne.republique.m,Chancellor
+titre.nipponne.republique.f,Chancellor
+titre.nipponne.theocratie.m,High Kannushi
+titre.nipponne.theocratie.f,High Miko
+titre.nordique.dictature.m,Warlord
+titre.nordique.dictature.f,Warlady
+titre.nordique.guilde_maitre.m,Grand Master
+titre.nordique.guilde_maitre.f,Grand Mistress
+titre.nordique.monarchie_hereditaire.m,High King
+titre.nordique.monarchie_hereditaire.f,High Queen
+titre.nordique.ploutocratie.m,Master of the Guilds
+titre.nordique.ploutocratie.f,Mistress of the Guilds
+titre.nordique.republique.m,First Jarl
+titre.nordique.republique.f,First Jarl
+titre.nordique.theocratie.m,Godi
+titre.nordique.theocratie.f,Gydja
+titre.sino.dictature.m,Generalissimo
+titre.sino.dictature.f,Generalissima
+titre.sino.guilde_maitre.m,Grand Master
+titre.sino.guilde_maitre.f,Grand Mistress
+titre.sino.monarchie_hereditaire.m,Emperor
+titre.sino.monarchie_hereditaire.f,Empress
+titre.sino.ploutocratie.m,Grand Merchant
+titre.sino.ploutocratie.f,Grand Merchant
+titre.sino.republique.m,Chancellor
+titre.sino.republique.f,Chancellor
+titre.sino.theocratie.m,High Priest
+titre.sino.theocratie.f,High Priestess
+titre.slave.dictature.m,Voivode
+titre.slave.dictature.f,Voivode
+titre.slave.guilde_maitre.m,Grand Master
+titre.slave.guilde_maitre.f,Grand Mistress
+titre.slave.monarchie_hereditaire.m,Tsar
+titre.slave.monarchie_hereditaire.f,Tsarina
+titre.slave.ploutocratie.m,Boyar of the Markets
+titre.slave.ploutocratie.f,Boyarina of the Markets
+titre.slave.republique.m,Starosta
+titre.slave.republique.f,Starosta
+titre.slave.theocratie.m,Patriarch
+titre.slave.theocratie.f,Matriarch
