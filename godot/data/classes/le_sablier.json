@@ -6,8 +6,8 @@
   "equipement": [],
   "ratelier": [],
   "competences": {
-    "arcanes": 4,
-    "perception": 4
+    "magie_arcane": 4,
+    "esquive": 4
   },
   "base_potentials": {
     "_defaut": 100

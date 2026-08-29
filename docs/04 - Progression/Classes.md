@@ -50,6 +50,9 @@ Race et classe **s'additionnent** : le plancher final est la moyenne des deux va
 
 **Équipement initial ([[Début de partie]]) :** kit de la classe, rien d'autre.
 
+> [!success] Corrigé le 2026-08-29 — cinq classes cachées distribuaient des compétences qui n'existent pas
+> Trouvé par `tools/audit_donnees.py` : les fiches des classes cachées, écrites à la main, donnaient des niveaux de départ dans **`arcanes`**, **`tir`**, **`artisanat`** et **`perception`** — quatre ids absents de `data/competences/` (les vrais sont `magie_arcane`, `arbalete`, `forge`…, et *perception* est une **stat**, pas une compétence). Les points partaient dans le vide : ni fiche, ni famille de potentiel, ni progression par l'usage. Corrigé au plus près du thème de chaque classe : **Le Passeur** magie de l'Espace + Athlétisme, **Le Sablier** magie Arcane + Esquive, **Le Sceau** Enchantement + Encaissement, **Le Fossoyeur** magie de la Corruption + Encaissement, **L'Engrenage** Arbalète + Forge. L'audit vérifie désormais que toute compétence citée par une classe existe.
+
 ## Liens
 - **Dépend de** : [[Création de personnage]], [[Les trois axes — race, classe, fonction]]
 - **Alimente** : [[Talents de classe]], [[Potentiel]], [[Début de partie]], [[Fonctions]]

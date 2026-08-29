@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] Compétences fantômes des classes cachées (2026-08-29)
+> Cinq classes cachées donnaient des points dans des compétences inexistantes (`arcanes`, `tir`, `artisanat`, `perception`) : corrigé, et l'audit des données le vérifie.
 > [!important] L'huile d'arme (2026-08-29)
 > Elle ne faisait rien : le bonus de feu était écrit mais jamais lu. Corrigé, et consommé à la fin du combat.
 > [!important] Le tannage, et le trophée qui se mérite (2026-08-29)

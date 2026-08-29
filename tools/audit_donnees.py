@@ -105,6 +105,51 @@ for sid, sp in species.items():
     if str(sp.get("habitat", "")) not in types_meubles:
         probs["espèce → habitat sans meuble"].append("%s → %s" % (sid, sp.get("habitat")))
 
+
+# 8. classes et races : competences, talents, objets, modules
+classes, races, talents, competences = cat("classes"), cat("races"), cat("talents"), cat("competences")
+modules, creature_actions, ai_profiles = cat("modules"), cat("creature_actions"), cat("ai_profiles")
+biomes, rigs, functionalities = cat("biomes"), cat("rigs"), cat("functionalities")
+for cid, c in classes.items():
+    for k in c.get("competences", {}):
+        if str(k) not in competences: probs["classe -> competence inconnue"].append("%s -> %s" % (cid, k))
+    if c.get("talent") and str(c["talent"]) not in talents: probs["classe -> talent inconnu"].append("%s -> %s" % (cid, c["talent"]))
+    for it in c.get("equipement", []) + c.get("ratelier", []):
+        if str(it) not in items: probs["classe -> objet inconnu"].append("%s -> %s" % (cid, it))
+for rid, r in races.items():
+    if r.get("talent") and str(r["talent"]) not in talents: probs["race -> talent inconnu"].append("%s -> %s" % (rid, r["talent"]))
+
+# 9. creatures : actions, profil d'IA, rig, objets
+for cid, c in creatures.items():
+    for a in c.get("actions", []):
+        if str(a) not in creature_actions: probs["creature -> action inconnue"].append("%s -> %s" % (cid, a))
+    if c.get("ai_profile") and str(c["ai_profile"]) not in ai_profiles: probs["creature -> profil d'IA inconnu"].append("%s -> %s" % (cid, c["ai_profile"]))
+    if c.get("skeleton_template") and str(c["skeleton_template"]) not in rigs: probs["creature -> rig inconnu"].append("%s -> %s" % (cid, c["skeleton_template"]))
+    for it in c.get("equipement", []) + c.get("ratelier", []):
+        if str(it) not in items: probs["creature -> objet inconnu"].append("%s -> %s" % (cid, it))
+
+# 10. biomes : la faune existe au bestiaire
+for bid, b in biomes.items():
+    for f in b.get("faune", []) + b.get("faune_nuit", []):
+        i = str(f.get("id", f) if isinstance(f, dict) else f)
+        if i not in creatures: probs["biome -> creature inconnue"].append("%s -> %s" % (bid, i))
+
+# 11. objets : fonctionnalite, module, competence
+for iid, it in items.items():
+    if it.get("functionality") and str(it["functionality"]) not in functionalities: probs["objet -> fonctionnalite inconnue"].append("%s -> %s" % (iid, it["functionality"]))
+    if it.get("module") and str(it["module"]) not in modules: probs["objet -> module inconnu"].append("%s -> %s" % (iid, it["module"]))
+    if it.get("competence") and str(it["competence"]) not in competences: probs["objet -> competence inconnue"].append("%s -> %s" % (iid, it["competence"]))
+
+# 12. statuts poses par les modules et les affixes (le champ est un dict {id, duree_ticks})
+for mid, m in modules.items():
+    st = (m.get("effet") or {}).get("statut")
+    sid = str(st.get("id", "")) if isinstance(st, dict) else (str(st) if st else "")
+    if sid and sid not in statuses: probs["module -> statut inconnu"].append("%s -> %s" % (mid, sid))
+for aid, a in cat("affixes").items():
+    st = (a.get("effet") or {}).get("statut")
+    sid = str(st.get("id", "")) if isinstance(st, dict) else (str(st) if st else "")
+    if sid and sid not in statuses: probs["affixe -> statut inconnu"].append("%s -> %s" % (aid, sid))
+
 for k in sorted(probs):
     print("\n== %s (%d)" % (k, len(probs[k])))
     for v in probs[k][:12]:

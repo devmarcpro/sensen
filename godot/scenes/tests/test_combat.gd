@@ -107,6 +107,7 @@ func _ready() -> void:
 	test_especes_ajoutees()
 	test_tannage()
 	test_huile_d_arme()
+	test_liens_donnees()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2527,6 +2528,39 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+## Les liens entre catalogues (tools/audit_donnees.py fait le tour complet ; ici les plus coûteux à casser).
+func test_liens_donnees() -> void:
+	var manquantes: Array[String] = []
+	for cid in GameData.catalogues.classes.keys():
+		var c: Dictionary = GameData.catalogues.classes[cid]
+		for cle in c.get("competences", {}).keys():
+			if not GameData.catalogues.competences.has(str(cle)):
+				manquantes.append("%s → %s" % [cid, cle])
+		if str(c.get("talent", "")) != "" and not GameData.catalogues.talents.has(str(c.talent)):
+			manquantes.append("%s → talent %s" % [cid, c.talent])
+		for uid in c.get("equipement", []) + c.get("ratelier", []):
+			if not GameData.catalogues.items.has(str(uid)):
+				manquantes.append("%s → objet %s" % [cid, uid])
+	verifier(manquantes.is_empty(), "chaque classe cite des compétences, un talent et des objets qui existent (%s)" % str(manquantes))
+	var cr_manquantes: Array[String] = []
+	for cid in GameData.catalogues.creatures.keys():
+		var c: Dictionary = GameData.catalogues.creatures[cid]
+		for a in c.get("actions", []):
+			if not GameData.catalogues.creature_actions.has(str(a)):
+				cr_manquantes.append("%s → %s" % [cid, a])
+		if str(c.get("ai_profile", "")) != "" and not GameData.catalogues.ai_profiles.has(str(c.ai_profile)):
+			cr_manquantes.append("%s → profil %s" % [cid, c.ai_profile])
+	verifier(cr_manquantes.is_empty(), "chaque créature cite des actions et un profil d'IA qui existent (%s)" % str(cr_manquantes))
+	var biomes_ko: Array[String] = []
+	for bid in GameData.catalogues.biomes.keys():
+		var b: Dictionary = GameData.catalogues.biomes[bid]
+		for f in b.get("faune", []) + b.get("faune_nuit", []):
+			var i := str(f.id) if f is Dictionary else str(f)
+			if not GameData.catalogues.creatures.has(i):
+				biomes_ko.append("%s → %s" % [bid, i])
+	verifier(biomes_ko.is_empty(), "chaque faune de biome existe au bestiaire (%s)" % str(biomes_ko))
+
 
 func test_huile_d_arme() -> void:
 	var s := nouvelle_sim("plaine_au_talus")

@@ -7,7 +7,7 @@
   "equipement": [],
   "ratelier": [],
   "competences": {
-    "arcanes": 4,
+    "magie_corruption": 4,
     "encaissement": 4
   },
   "base_potentials": {

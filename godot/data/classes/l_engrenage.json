@@ -7,8 +7,8 @@
   "equipement": [],
   "ratelier": [],
   "competences": {
-    "tir": 4,
-    "artisanat": 4
+    "arbalete": 4,
+    "forge": 4
   },
   "base_potentials": {
     "_defaut": 100
