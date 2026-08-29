@@ -1234,3 +1234,461 @@ talent.soif_de_sang.name,Bloodthirst
 talent.soif_de_sang.desc,"+3 to every stat at night, burns by day; a bite fills the gauge; no more cooked food."
 talent.souffle_rendu.name,Breath Returned
 talent.souffle_rendu.desc,"Their healing lays a segment of the target's element; their weapon blows lay none."
+accord.alliance,defensive alliance
+accord.aucun,none
+accord.commercial,trade agreement
+accord.non_agression,non-aggression
+accord.tribut_paie,tribute paid
+accord.tribut_recoit,tribute received
+affixe.cadence_des.nom,{base} of fervour (one in {n}: +{des} dice)
+affixe.cadence_element.nom,{base} {epithete} (one attack in {n} carries {element})
+affixe.cadence_parade.nom,{base} of the gambler (one parry in {n} returns {endurance} stamina)
+affixe.cadence_percant.nom,{base} piercing (every {n} blows: ignores {pct} % armour)
+affixe.cadence_riposte.nom,{base} avenging (one blow taken in {n}: riposte +{des} dice)
+affixe.cadence_saignee.nom,{base} bloody (one blow in {n} draws blood)
+affixe.cond_corruption.nom,{base} of danger (corruption ≥ {seuil}: +{pct} %)
+affixe.cond_element_cible.nom,{base} of the hunter (against {element}: +{pct} %)
+affixe.cond_mana.nom,{base} of the springs (mana density: −{pct} % cost)
+affixe.cond_nuit.nom,{base} nocturnal (at night: +{pct} % speed)
+affixe.cond_profondeur.nom,{base} of the depths (floor ≥ {etage}: +{des} dice)
+affixe.cond_pv_bas.nom,{base} of the last breath (below {pct_pv} % HP: +{des} dice)
+affixe.decl_mise_a_mort.nom,{base} of the predator (on a kill: +{pct} % speed for {ticks} ticks)
+affixe.decl_parade.nom,{base} of the rampart (on a parry: returns {endurance} stamina)
+affixe.decl_touche_etourdit.nom,{base} bristling (when hit: {chance} % to stun for {duree_ticks} ticks)
+affixe.decl_touche_saigne.nom,{base} thorned (when hit: {chance} % to draw blood)
+affixe.decl_zone_etourdit.nom,{base} stunning (on a blow to the {zone}: stuns for {duree_ticks} ticks)
+affixe.decl_zone_saigne.nom,{base} cruel (on a blow to the {zone}: bleeds for {duree_ticks} ticks)
+affixe.meca_allonge.nom,{base} long (+{n} reach)
+affixe.meca_armure.nom,{base} reinforced (+{n} armour)
+affixe.meca_capacite.nom,{base} of the bearer (+{kg} capacity)
+affixe.meca_endurance_max.nom,{base} of breath (+{n} max stamina)
+affixe.meca_garde.nom,{base} of the guard (guarding costs −{pct} % stamina)
+affixe.meca_vol_de_vie.nom,{base} vampiric (life steal {pct} %)
+affixe.passif_competence.nom,{base} of {competence} (+{n})
+affixe.passif_faim.nom,"of temperance (hunger ×{mult} %)"
+affixe.passif_poids.nom,"of carrying (+{n} capacity)"
+affixe.passif_regen.nom,{base} hardy (regeneration +{pct} %)
+affixe.passif_stat.nom,{base} of {stat} (+{n})
+affixe.passif_surchauffe.nom,{base} of the mage (overheat ×{mult} %)
+affixe.passif_tag.nom,{base} of {tag}
+affixe.passif_vitesse.nom,{base} of the runner (+{pct} % speed)
+affixe.unique_chaine_eternelle.nom,"{base} of the eternal chain"
+affixe.unique_second_souffle.nom,"{base} of the second wind"
+affixe.unique_vol_de_mana.nom,"{base} mana-drinker ({pct} %)"
+affixe.wuxing_ajout.nom,{base} {epithete} (+{pct} % {element} to the vector)
+affixe.wuxing_combo.nom,{base} of the combo (combos give +2 dice)
+affixe.wuxing_cycle.nom,{base} turning (landed blows advance the element through the cycle)
+affixe.wuxing_domination.nom,{base} attuned (defensive matchups +{pct} %)
+affixe.wuxing_purete.nom,{base} pure (+{pct} % to the dominant element)
+affixe.wuxing_segment.nom,{base} of the chain (+1 chain segment)
+age.adulte,adult
+age.age,elderly
+age.jeune,young
+ai_profile.assaillant.name,Attacker
+ai_profile.bete_sauvage.name,Wild beast
+ai_profile.civil.name,Civilian
+ai_profile.compagnon.name,Companion
+ai_profile.elite.name,Elite
+ai_profile.garde.name,Guard
+ai_profile.hostile.name,Hostile
+ai_profile.proie.name,Prey
+animal.boeuf,Ox
+animal.cheval,Horse
+animal.chevre,Goat
+animal.chien,Dog
+animal.cochon,Pig
+animal.coq,Rooster
+animal.dragon,Dragon
+animal.lapin,Rabbit
+animal.rat,Rat
+animal.serpent,Snake
+animal.singe,Monkey
+animal.tigre,Tiger
+biome.cote_plage.name,Coast
+biome.desert_aride.name,Arid desert
+biome.desert_de_cendres.name,Ash desert
+biome.foret_de_mana.name,Mana forest
+biome.foret_temperee.name,Temperate forest
+biome.marecage.name,Marsh
+biome.marecage_corrompu.name,Corrupted marsh
+biome.montagne.name,Mountain
+biome.montagne_cristalline.name,Crystal mountain
+biome.plaine_temperee.name,Temperate plain
+biome.taiga.name,Taiga
+biome.toundra.name,Tundra
+boutique.alchimiste.name,Alchemist
+boutique.armurier.name,Armourer
+boutique.epicier.name,Grocer
+boutique.forgeron.name,Blacksmith
+boutique.herboriste.name,Herbalist
+boutique.tailleur.name,Tailor
+capacite.baume.name,Balm
+capacite.etincelle.name,Spark
+capacite.gel_en_ligne.name,Freeze in a line
+categorie.bois,wood
+categorie.fossile,fossil
+categorie.gemme,gem
+categorie.liquide,liquid
+categorie.metal,metal
+categorie.meteorologique,weather
+categorie.mineral,mineral
+categorie.roche,rock
+categorie.synthetique,synthetic
+categorie.terre,soil
+categorie.vegetal,plant and fibre
+component.contrepoids.name,Counterweight
+component.fixations_std.name,Standard fittings
+component.garde.name,Crossguard
+component.lame_courte.name,Short blade
+component.lame_longue.name,Long blade
+component.manche_court.name,Short haft
+component.manche_long.name,Long haft
+component.plaque.name,Plate
+component.poignee.name,Grip
+component.pointe.name,Point
+component.rembourrage.name,Padding
+component.sangles.name,Straps
+component.tete_arme_lourde.name,Heavy weapon head
+component.tete_outil.name,Tool head
+consequence.amende,fine
+consequence.confiscation,confiscation
+consequence.gardes_hostiles,the guards hunt you
+construction.plaque.nom,plate
+creature_action.becquetage.name,Pecking
+creature_action.bond.name,Pounce
+creature_action.charge.name,Charge
+creature_action.coup_de_defenses.name,Tusk strike
+creature_action.coup_de_patte.name,Paw swipe
+creature_action.coup_de_tete.name,Headbutt
+creature_action.cri_de_ralliement.name,Rallying cry
+creature_action.dard_essaim.name,Swarm sting
+creature_action.embuscade.name,Ambush
+creature_action.enchainement.name,Combination
+creature_action.griffure.name,Claw
+creature_action.harcelement_meute.name,Pack harrying
+creature_action.hurlement.name,Howl
+creature_action.machoire_verrouillee.name,Locked jaw
+creature_action.masse_ecrasante.name,Crushing bulk
+creature_action.morsure.name,Bite
+creature_action.morsure_puissante.name,Powerful bite
+creature_action.morsure_venimeuse.name,Venomous bite
+creature_action.nuee.name,Swarm
+creature_action.pinces.name,Pincers
+creature_action.pique_plongeant.name,Diving swoop
+creature_action.pique_venimeuse.name,Venomous sting
+creature_action.ruade.name,Kick
+creature_action.serres.name,Talons
+culture.arabo_berbere.name,Arab-Berber
+culture.celte.name,Celtic
+culture.latine.name,Latin/Romance
+culture.nipponne.name,Japanese
+culture.nordique.name,Norse/Germanic
+culture.sino.name,Chinese
+culture.slave.name,Slavic
+declencheur.accord,accord
+declencheur.ouverture,opening
+declencheur.parade,parry
+declencheur.riposte,riposte
+declencheur.testament,testament
+declencheur.veille,vigil
+degats.contondant,blunt
+degats.perforant,piercing
+degats.tranchant,slashing
+dette.depart,{nom} has left the territory
+dette.humeur,mood −5
+dette.productivite,productivity −25 %
+dialogue.ami.text,"My friend! Sit down, tell me about your travels."
+dialogue.aube.text,"The day is barely breaking. Up early, like me."
+dialogue.connaissance.text,"Ah, it's you. What can I do for you?"
+dialogue.corruption.text,"The nights are getting worse around here."
+dialogue.donjon.text,"They say that ruin over there has never been cleared."
+dialogue.faim.text,"You look hungry. The merchant sells bread."
+dialogue.fermier_1.text,"The soil is good this year."
+dialogue.fermier_2.text,"A boar has turned over my field again."
+dialogue.fermier_3.text,"We could do with some rain."
+dialogue.forgeron_1.text,"The forge has been hot since dawn."
+dialogue.forgeron_2.text,"Good iron, that's all I ask for."
+dialogue.forgeron_3.text,"An ash haft — nothing beats it."
+dialogue.garde_1.text,"Move along. No trouble here."
+dialogue.garde_2.text,"Bandits prowl beyond the fields. I keep watch."
+dialogue.garde_3.text,"At night, stay near the fires."
+dialogue.inconnu.text,"I don't know you. Keep your distance."
+dialogue.marchand_1.text,"Look at my wares, everything is good quality."
+dialogue.marchand_2.text,"I buy as well, if you have something to sell."
+dialogue.marchand_3.text,"Prices rise with the danger — I don't set them."
+dialogue.meteo_neige.text,"The snow is settling. Wrap up warm."
+dialogue.meteo_orage.text,"A storm like that, we close the shutters."
+dialogue.meteo_pluie.text,"This rain never ends… stay dry."
+dialogue.nuit.text,"Walking at night? So are the wolves."
+dialogue.rumeur.text,"A pedlar spoke of a vein further north… rumours, mind you."
+dialogue.salut.text,"Good day, traveller. Things are quiet around here."
+dialogue.soir.text,"It has been a long day. My supper is waiting."
+dialogue.travail.text,"There's no shortage of work. There's a shortage of hands."
+dialogue.village.text,"A small hamlet, but we live well here."
+domaine.arcane,of the Arcane
+domaine.bois,of Lightning and Life
+domaine.eau,of Water and Ice
+domaine.feu,of Fire
+domaine.frappes,of Strikes
+domaine.maitrise,of Mastery
+domaine.metal,of Metal
+domaine.postures,of Stances
+domaine.techniques,of Techniques
+domaine.terre,of Earth
+domaine.vie,of Life
+dungeon_theme.repaire.name,Lair
+dungeon_theme.ruine.name,Ruin
+epithete.bois,of sap
+epithete.eau,of frost
+epithete.feu,of embers
+epithete.metal,of steel
+epithete.terre,of rock
+epithete_rare.affame,Starving
+epithete_rare.ancestral,Ancestral
+epithete_rare.dore,Gilded
+epithete_rare.sans_ombre,Shadowless
+famille.bois,wood (plank)
+famille.conjoint,spouse of {nom}
+famille.cuir,leather
+famille.dent_croc,tooth or fang
+famille.ecaille,scale
+famille.enfant,child of {nom}
+famille.fibre,"fibre (flax, hemp, cotton)"
+famille.fourrure,fur
+famille.granit_noir,cut black granite
+famille.ivoire,ivory
+famille.laine,wool
+famille.lingot_metal,metal ingot
+famille.meteorite,meteorite (ingot)
+famille.obsidienne,cut obsidian
+famille.or,gold (ingot)
+famille.or_argent,gold or silver (ingot)
+famille.os,bone
+famille.os_massif,dense bone
+famille.parent,parent of {n} child(ren)
+famille.plomb,lead (ingot)
+famille.roche_taillee,cut rock
+famille.seve,sap
+famille.silex,knapped flint
+famille.soie,silk
+famille.tissu,cloth
+famille.tungstene,tungsten (ingot)
+famille.verre,glass
+forme.brut,{materiau}
+forme.lingot,{materiau} (ingot)
+forme.pierre_taillee,{materiau} (cut stone)
+forme.planche,{materiau} (plank)
+forme.taillee,{materiau} (cut)
+forme.tissu,{materiau} (cloth)
+function.artisan.name,Artisan
+function.aventurier.name,Adventurer
+function.bucheron.name,Woodcutter
+function.commercant.name,Trader
+function.dirigeant.name,Ruler
+function.fermier.name,Farmer
+function.garde.name,Guard
+function.herboriste.name,Herbalist
+function.maitre_de_guilde.name,Guild master
+function.mineur.name,Miner
+function.oisif.name,Villager
+function.pretre.name,Priest
+functionality.faucille.name,Sickle
+functionality.hache.name,Axe
+functionality.pioche.name,Pickaxe
+genre.f,woman
+genre.m,man
+government.anarchie.name,Anarchy
+government.dictature_militaire.name,Military dictatorship
+government.monarchie_hereditaire.name,Hereditary monarchy
+government.ploutocratie.name,Plutocracy
+government.republique_elue.name,Elected republic
+government.theocratie.name,Theocracy
+guilde.alchimistes.name,Alchemists' Guild
+guilde.artisans.name,Artisans' Guild
+guilde.batisseurs.name,Builders' Guild
+guilde.chasseurs.name,Hunters' Guild
+guilde.cuisiniers.name,Cooks' Fellowship
+guilde.eclaireurs.name,Scouts' Guild
+guilde.enchanteurs.name,Enchanters' Guild
+guilde.guerriers.name,Warriors' Guild
+guilde.mages.name,Circle of Mages
+guilde.marchands.name,Merchants' Guild
+guilde.prospecteurs.name,Prospectors' Guild
+guilde.transporteurs.name,Carriers' Guild
+kingdom.taille.cite,city-state
+kingdom.taille.grand,great kingdom
+kingdom.taille.hameau,hamlet-state
+kingdom.taille.petit,small kingdom
+loi.meurtre,murder
+loi.objet,"forbidden item ({objet})"
+loi.vol,theft
+mstat.conductivite_electrique,elec. conductivity
+mstat.conductivite_mana,mana conductivity
+mstat.densite,density
+mstat.durete,hardness
+mstat.elasticite,elasticity
+mstat.fertilite,fertility
+mstat.flammabilite,flammability
+mstat.flottabilite,buoyancy
+mstat.friction,friction
+mstat.isolation,insulation
+mstat.luminosite,brightness
+mstat.transparence,transparency
+mstat.valeur_base,value
+nom.arme_en,{materiau} {base}
+nom.armure_en,{materiau} {construction} {base}
+nom.composant,{materiau} {base}
+ordre.agressive,aggressive stance
+ordre.attendre,wait here
+ordre.defensive,defensive stance
+ordre.eviter,avoid fights
+ordre.repli,fall back!
+ordre.retour,return to base
+ordre.suivre,follow me
+palier.bestiaire,complete bestiary
+palier.capture,captures +{n}
+palier.commande_mult,collectors pay double
+palier.commande_pct,orders better paid
+palier.couvees,broods +{n}
+palier.eclosion,faster hatching
+palier.potentiel,+10 potential in Breeding
+palier.potentiel_vie,+10 potential across the Life branch
+phase.aube,dawn
+phase.crepuscule,dusk
+phase.jour,day
+phase.nuit,night
+posture.agressive,aggressive
+posture.defensive,defensive
+posture.eviter,avoiding
+qualite.bon,good
+qualite.chef_d_oeuvre,masterwork
+qualite.correct,fair
+qualite.excellent,excellent
+qualite.legendaire,legendary
+qualite.miserable,wretched
+qualite.mythique,mythical
+qualite.pauvre,poor
+quest.arcanes.text,"The Circle wants {count} fewer hostiles between the world and its towers."
+quest.banquet.text,"Cook {count} dishes for the Fellowship's banquet."
+quest.chantier.text,"Build {count} structures (furniture, stations or walls) on your territory."
+quest.chasse_bete.text,"Kill {count} beasts prowling around the village."
+quest.chasse_prime.text,"Eliminate {count} brigands or hostile beasts nearby."
+quest.commande_artisan.text,"Craft {count} components or items at the workshop."
+quest.donjon.text,"Clear the neighbouring dungeon: defeat what rules there."
+quest.elixirs.text,"Distil {count} potions at the Alembic."
+quest.enchantement.text,"Craft {count} components for the Enchanters."
+quest.livraison.text,"Deliver {objet} to someone in {destination}."
+quest.negoce.text,"Sell {count} items to merchants across the land."
+quest.purge.text,Clear the neighbouring dungeon for the Prospectors
+quest.reconnaissance.text,"Scout {count} new stretches of land."
+quest.traque.text,Track {count} beasts for the Hunters' Guild
+raison.age,too young
+raison.allie,an ally blocks the target
+raison.colonie,"{n} specimens are needed in the habitat"
+raison.espece,different species
+raison.habitat,a {v} is needed
+raison.munitions,out of ammunition
+raison.place,no room left
+raison.ressource,"{n} {k} needed"
+raison.saison,wrong season
+raison.sexe,a male and a female are needed
+raison.stat,{k} too low
+raison.temperature,"{temp} °C, it must be between {min} and {max}"
+rang.adepte,Adept
+rang.compagnon,Journeyman
+rang.expert,Expert
+rang.maitre,Master
+rang.novice,Novice
+rarete.artefact,artefact
+rarete.commun,common
+rarete.exceptionnel,exceptional
+rarete.inhabituel,uncommon
+rarete.rare,rare
+relation.allie,allied
+relation.cordial,cordial
+relation.hostile,hostile
+relation.neutre,neutral
+relation.tension,strained
+role.base,base
+role.champs,fields
+role.habitation,housing
+role.ressources,wild resources
+saison.automne,autumn
+saison.ete,summer
+saison.fin_ete,late summer
+saison.hiver,winter
+saison.printemps,spring
+slot.amulette,Amulet
+slot.anneau,Ring
+slot.anneau_1,Ring (1)
+slot.anneau_2,Ring (2)
+slot.arme,Weapon
+slot.carquois,Quiver
+slot.casque,Helmet
+slot.cuirasse,Cuirass
+slot.jambieres,Greaves
+slot.main_principale,Main hand
+slot.main_secondaire,Off hand
+slot.sertissure,Socket
+slotc.divers,misc
+slotc.fixations,fittings
+slotc.manche,haft
+slotc.plaque,plate
+slotc.sangles,straps
+slotc.tete,head
+stat.charisme,Charisma
+stat.dexterite,Dexterity
+stat.endurance,Endurance
+stat.force,Strength
+stat.perception,Perception
+stat.volonte,Will
+station.alambic.name,Alembic
+station.atelier_tissage.name,Weaving bench
+station.cuisine.name,Kitchen
+station.enclume.name,Anvil
+station.etabli.name,Workbench
+station.forge.name,Forge
+station.scierie.name,Sawmill
+station.table_enchantement.name,Enchanting table
+station.tailleur_de_pierre.name,Stonecutter
+statut.repose,Rested
+taille.affinite,affinity +
+taille.competence,skill +
+taille.degats_element,elemental damage +
+taille.duree_statuts,status duration +
+taille.endurance_max,max stamina +
+taille.mana_max,max mana +
+taille.qualite,quality +
+taille.sante_max,max HP +
+taille.stat,stat +
+tribut.recu,received
+tribut.verse,paid
+type.arme,weapon
+type.armure,armour
+type.bijou,jewellery
+type.bouclier,shield
+type.composant,component
+type.consommable,consumable
+type.gemme,gem
+type.grimoire,grimoire
+type.manuel,manual
+type.materiau,material
+type.munition,ammunition
+type.outil,tool
+type.station,portable station
+weather.blizzard.name,Blizzard
+weather.brouillard.name,Fog
+weather.canicule.name,Heatwave
+weather.clair.name,Clear sky
+weather.neige.name,Snow
+weather.nuageux.name,Cloudy
+weather.orage.name,Thunderstorm
+weather.pluie.name,Rain
+weather.tempete.name,Storm
+weather.vent_fort.name,Strong wind
+zone.bras,arms
+zone.jambes,legs
+zone.mains,hands
+zone.pieds,feet
+zone.tete,head
+zone.torse,torso
