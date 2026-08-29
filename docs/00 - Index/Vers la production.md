@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] Les modules deviennent des charges (2026-08-29)
+> Précision du designer : lire un livre donne des **charges**, et **chaque lancer consomme 1 charge de chaque module** du sort. Les grimoires deviennent la ressource de fond du mage. **À juger** : 5 charges par module et par livre, 10 au départ — le rythme d'obtention est-il tenable, ou faut-il des livres plus généreux ?
 > [!important] Les 178 modules font tous quelque chose (2026-08-29)
 > Chantier clos en sept lots : 86 noyaux, 5 conditions et 14 modificateurs qui partaient dans le vide agissent. L'audit vérifie les cinq types de modules et refuse toute régression. **À juger** : la puissance relative de tout ça — 25 PV d'Absorption, +3 dés d'Ombre, ×2 de Détonation sont des premiers chiffres, pas un équilibrage.
 > [!important] 47 noyaux sur 86 ne font rien (constat, 2026-08-29)

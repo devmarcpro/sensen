@@ -5629,14 +5629,14 @@ func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 	var id := "%s_%d" % [def_id, _n_entites]
 	var def := fiche_joueur if (controle == "joueur" and not fiche_joueur.is_empty()) else GameData.entree("creatures", def_id)
 	var e := Etres.instancier(id, def, pos, controle, regles, items)
-	if controle == "joueur":   # les modules des capacités de départ sont connus (Structure compétences-modules-slots)
+	if controle == "joueur":   # les modules des capacités de départ sont connus, avec leurs charges de départ
+		var c0 := int(regles.r.get("modules", {}).get("charges_depart", 10))
 		for m in def.get("modules_connus", []):
-			if not (str(m) in e.modules_connus):
-				e.modules_connus.append(str(m))
+			crediter_module(e, str(m), c0)
 		for cap in e.get("capacites", []):
 			for m in cap.get("modules", []):
-				if not (str(m) in e.modules_connus):
-					e.modules_connus.append(str(m))
+				if int(e.get("modules_charges", {}).get(str(m), 0)) < c0:
+					crediter_module(e, str(m), c0)
 	_contreparties(e)
 	e["or"] = 0
 	if controle != "joueur" and "civil" in def.get("tags", []):
@@ -6099,8 +6099,7 @@ func _lire(e: Dictionary, objet: String, tick: int) -> bool:
 			n = maxi(1, int(floorf(float(livre.modules.size()) * minf(1.0, float(n_lecture) / float(livre.difficulte)))))
 		for k in n:
 			var m: String = str(livre.modules[k])
-			if not (m in e.modules_connus):
-				e.modules_connus.append(m)
+			crediter_module(e, m, int(regles.r.get("modules", {}).get("charges_par_lecture", 5)))
 			appris.append(m)
 		e.xp.competence["lecture"] = int(e.xp.competence.get("lecture", 0)) + int(livre.difficulte) * int(lv.xp_succes)
 		gagner_xp(e, "lecture", int(livre.difficulte) * int(lv.xp_succes))
@@ -7560,8 +7559,7 @@ func triche(e: Dictionary, action: String, arg: String = "") -> bool:
 					e.talents_appris.append(str(tid))
 		"modules":
 			for mid in GameData.catalogues.modules.keys():
-				if not (str(mid) in e.modules_connus):
-					e.modules_connus.append(str(mid))
+				crediter_module(e, str(mid), 99)   # menu de triche : de quoi tout essayer
 		"recettes":
 			if not e.has("recettes_connues"):
 				e["recettes_connues"] = []
@@ -8325,6 +8323,32 @@ func _evaluer_conditions(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -
 
 
 ## Lance la capacité n° `index` sur la tuile `cible` : coûts, conditions, télégraphe ou exécution.
+## Créditer des charges de module (Grimoires et manuels) : la lecture, la création, la triche.
+## Apprendre un module, c'est le connaître pour toujours ET recevoir des munitions.
+func crediter_module(e: Dictionary, mid: String, charges: int) -> void:
+	if not e.has("modules_connus"):
+		e["modules_connus"] = []
+	if not e.has("modules_charges"):
+		e["modules_charges"] = {}
+	if not (mid in e.modules_connus):
+		e.modules_connus.append(mid)
+	e.modules_charges[mid] = int(e.modules_charges.get(mid, 0)) + charges
+
+
+## Les charges qui manquent pour lancer ce plan (Grimoires et manuels) : une par module de la séquence.
+func modules_sans_charge(e: Dictionary, plan: Dictionary) -> Array[String]:
+	var manquants: Array[String] = []
+	if e.controle != "joueur":
+		return manquants   # les créatures n'ont pas de livres : leurs capacités ne se consomment pas
+	var compte := {}
+	for m in plan.get("modules", []):
+		compte[str(m)] = int(compte.get(str(m), 0)) + 1
+	for mid in compte.keys():
+		if int(e.get("modules_charges", {}).get(mid, 0)) < int(compte[mid]):
+			manquants.append(str(mid))
+	return manquants
+
+
 func _lancer_capacite(e: Dictionary, index: int, cible: Variant, tick: int) -> bool:
 	var plan := plan_capacite(e, index)
 	if plan.is_empty() or not plan.erreurs.is_empty():
@@ -8336,6 +8360,11 @@ func _lancer_capacite(e: Dictionary, index: int, cible: Variant, tick: int) -> b
 		if not e.has("emplois"):
 			e["emplois"] = {}
 		e.emplois[cle_alt] = int(e.emplois.get(cle_alt, 0)) + 1
+	var sans_charge := modules_sans_charge(e, plan)
+	if not sans_charge.is_empty():   # Grimoires et manuels : un sort sans munition ne part pas
+		EventBus.emettre(&"journal", [&"journal.sans_charge", {"nom": e.name_key,
+			"module": GameData.catalogues.modules.get(sans_charge[0], {}).get("name_key", sans_charge[0])}])
+		return false
 	if not str(plan.monnaie).is_empty() and Etres.bloque_statuts(e, str(plan.monnaie), statuts_defs):
 		EventBus.emettre(&"journal", [&"journal.monnaie_bloquee", {"nom": e.name_key, "monnaie": "monnaie." + str(plan.monnaie)}])
 		return false   # Silence (mana) et Épuisement (endurance) : la ressource du noyau est coupée
@@ -8361,6 +8390,7 @@ func _lancer_capacite(e: Dictionary, index: int, cible: Variant, tick: int) -> b
 		EventBus.emettre(&"journal", [&"journal.condition_fausse", {"nom": e.name_key, "capacite": plan.name_key, "condition": fausse.name_key}])
 		return true
 	_payer(e, plan)
+	_consommer_charges(e, plan)   # Grimoires et manuels : une charge par module de la séquence
 	e.compteur = tick + int(plan.ticks)
 	if bool(plan.drapeaux.get("enchainement", false)) and bool(e.get("dernier_coup_touche", false)):
 		plan.ticks = 1   # Enchaînement : la suite d'un coup qui a porté ne coûte (presque) rien
@@ -8371,6 +8401,20 @@ func _lancer_capacite(e: Dictionary, index: int, cible: Variant, tick: int) -> b
 		return true
 	_executer_capacite(e, plan, cible_pos)
 	return true
+
+
+## Dépense une charge de chaque module de la séquence (Grimoires et manuels) — le joueur seul :
+## les créatures n'ont pas de livres, leurs capacités ne s'épuisent pas.
+func _consommer_charges(e: Dictionary, plan: Dictionary) -> void:
+	if e.controle != "joueur":
+		return
+	for m in plan.get("modules", []):
+		var mid := str(m)
+		var reste := int(e.get("modules_charges", {}).get(mid, 0)) - 1
+		if reste <= 0:
+			e.modules_charges.erase(mid)
+		else:
+			e.modules_charges[mid] = reste
 
 
 ## Paie la monnaie du noyau. Mana insuffisant = surchauffe : le déficit est infligé en PV × 2 (Mana).
