@@ -5804,10 +5804,17 @@ func donner(e: Dictionary, uid: String) -> void:
 
 
 ## Le nom affichable d'un objet : {"base": name_key, "affixe": id ou "", "params": {}} — le client formate.
+## La fiche de créature d'une entité (drops pondérés par race — Créatures).
+func def_stats_c(cible: Dictionary) -> Dictionary:
+	return GameData.catalogues.creatures.get(str(cible.def), {})
+
+
 func nom_objet(uid: String) -> Dictionary:
 	var it: Dictionary = items.get(uid, {})
 	var nom: Dictionary = it.get("nom", {})
 	var res := {"base": it.get("name_key", uid), "affixe": nom.get("affixe", ""), "params": nom.get("params", {}), "rarete": it.get("rarete", "commun")}
+	if nom.has("de_creature"):   # « Statue de loup » : le nom porte la créature dont l'objet est tiré
+		res["de_creature"] = str(nom.de_creature)
 	if it.get("type", "") == "composant" or it.has("composants"):   # craft : l'objet se décrit par son matériau
 		res["materiau"] = GameData.catalogues.materials.get(str(it.get("materiau", "")), {}).get("name_key", "")
 		res["construction"] = str(it.get("construction", ""))
@@ -6070,6 +6077,22 @@ func _drop(cible: Dictionary, source: String) -> void:
 		var o := generer_objet(str(loot._base_pour(rng)), profondeur, {"creature": cible.name_key})
 		if not o.is_empty():
 			uids.append(o.uid)
+	# Le drop rare universel (Créatures) : la statue 1:1 de la bête abattue, meuble décoratif et trophée.
+	if cible.controle == "ia" and lr.drops.has("statue"):
+		var st: Dictionary = lr.drops.statue
+		var mult := float(def_stats_c(cible).get("statue_mult", 1.0))
+		if rng.randf() < float(st.chance) * mult:
+			var stat_moy := 0.0
+			var stats_s: Dictionary = GameData.catalogues.creatures.get(str(cible.def), {}).get("corps", {}).get("stats", {})
+			for v in stats_s.values():
+				stat_moy += float(v)
+			stat_moy = stat_moy / maxf(1.0, float(stats_s.size()))
+			var statue := generer_objet(str(st.item), profondeur, {"creature": cible.name_key}, "commun", 0)
+			if not statue.is_empty():
+				statue["valeur"] = maxf(1.0, stat_moy * float(st.valeur_par_stat))   # Prix suggéré : ∝ niveau de la créature
+				statue["nom"] = {"affixe": "", "params": {}, "de_creature": str(cible.name_key)}
+				uids.append(statue.uid)
+				EventBus.emettre(&"journal", [&"journal.statue", {"nom": cible.name_key}])
 	# Un plan industriel dans les ruines profondes (Palier industriel).
 	if cible.controle == "ia" and lr.drops.has("plan") and profondeur >= int(lr.drops.plan.profondeur_min) and rng.randf() < float(lr.drops.plan.chance):
 		var plan_i := generer_objet("plan_industriel", profondeur, {"creature": cible.name_key}, "commun", 0)

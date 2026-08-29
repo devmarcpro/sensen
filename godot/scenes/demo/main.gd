@@ -1608,6 +1608,8 @@ func nom_objet(n: Dictionary) -> String:
 		if not str(n.construction).is_empty():
 			return tr("nom.armure_en").format({"base": base, "construction": tr("construction.%s.nom" % n.construction), "materiau": mat}) + q
 		return tr("nom.arme_en").format({"base": base, "materiau": mat}) + q
+	if n.has("de_creature"):   # la statue 1:1 (Créatures)
+		return tr("nom.de_creature").format({"base": base, "creature": tr(str(n.de_creature))})
 	if n.has("taille"):
 		var t: Dictionary = n.taille
 		return "%s (%s %s)" % [base, tr("taille." + str(t.type)), ("%.2f" % float(t.valeur)) if t.type in ["affinite", "qualite"] else str(int(t.valeur))]

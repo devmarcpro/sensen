@@ -202,6 +202,12 @@
     "plan": {
       "profondeur_min": 3,
       "chance": 0.08
+    },
+    "statue": {
+      "_doc": "Drop rare universel (Créatures) : la statue 1:1 de la créature tuée ; valeur ∝ à ses stats.",
+      "chance": 0.005,
+      "item": "meuble_statue",
+      "valeur_par_stat": 12
     }
   },
   "monstres_rares": {

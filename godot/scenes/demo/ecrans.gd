@@ -377,7 +377,7 @@ func _montrer_detail() -> void:
 			detail.text = str(en.texte)
 		"donner", "reprendre":
 			detail.text = texte_objet(str(en.uid))
-		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer", "menu", "contexte", "capacite", "nouvelle_capacite", "module_composer":
+		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer", "menu", "contexte", "capacite", "nouvelle_capacite", "module_composer", "triche", "triche_catalogue", "triche_item":
 			detail.text = str(en.get("texte", ""))
 		"achat", "vente":
 			var p: Dictionary = en.prix

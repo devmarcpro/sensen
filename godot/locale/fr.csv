@@ -2005,3 +2005,5 @@ ui.triche.meteo,Imposer une météo
 ui.triche.statut,S'appliquer un statut
 ui.triche.race,Devenir une race
 journal.triche,"Triche : {action}"
+nom.de_creature,{base} de {creature}
+journal.statue,Une statue de {nom} tombe — trophée rare

@@ -1995,3 +1995,5 @@ ui.triche.meteo,Force weather
 ui.triche.statut,Apply a status to myself
 ui.triche.race,Become a race
 journal.triche,"Cheat: {action}"
+nom.de_creature,{base} of {creature}
+journal.statue,A statue of {nom} drops — rare trophy

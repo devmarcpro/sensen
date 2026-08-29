@@ -112,6 +112,7 @@ func _ready() -> void:
 	test_discretion()
 	test_embuscade()
 	test_triche()
+	test_statue()
 	test_routes_entre_royaumes()
 	test_tooltips()
 	test_registre_loci()
@@ -2885,6 +2886,29 @@ func test_routes_entre_royaumes() -> void:
 	verifier(trouves > 0, "des royaumes sont générés (%d)" % trouves)
 	verifier(capitales_reliees > 0, "des capitales voisines sont reliées (%d capitales sur %d en portent)" % [capitales_reliees, trouves])
 	verifier(hostiles_relies == 0, "aucune route directe entre deux capitales hostiles")
+
+
+## Le drop rare universel (Créatures) : la statue 1:1, à 0,5 % — forcée ici à 100 % pour la vérifier.
+func test_statue() -> void:
+	var s := Simulation.new(909)
+	s.charger_donjon("ruine", 909, 3, 1)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var lr: Dictionary = GameData.config("loot_rules")
+	var chance0: float = float(lr.drops.statue.chance)
+	lr.drops.statue.chance = 1.0
+	var loup := s.ajouter("loup", j.pos + Vector2i(2, 0), "ia")
+	loup.sante = 1
+	s._appliquer_degats(loup, 5, j.id, {"type": "test"})
+	var trouvee := {}
+	for uid in s.items.keys():
+		if str(s.items[uid].get("base", "")) == "meuble_statue":
+			trouvee = s.items[uid]
+	lr.drops.statue.chance = chance0
+	verifier(not trouvee.is_empty(), "une statue tombe de la créature abattue")
+	if trouvee.is_empty():
+		return
+	verifier(str(trouvee.nom.get("de_creature", "")) == "creature.loup.name", "la statue porte le nom de la créature")
+	verifier(float(trouvee.get("valeur", 0.0)) > float(GameData.config("combat_rules").commerce.valeur_par_defaut), "sa valeur suit les stats de la bête (%.0f)" % float(trouvee.valeur))
 
 
 ## Le menu de triche (Écrans d'interface) : chaque action agit, et les catalogues sont parcourus tels quels.
