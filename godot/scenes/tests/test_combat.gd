@@ -110,6 +110,7 @@ func _ready() -> void:
 	test_huile_d_arme()
 	test_liens_donnees()
 	test_discretion()
+	test_embuscade()
 	test_routes_entre_royaumes()
 	test_tooltips()
 	test_registre_loci()
@@ -2883,6 +2884,26 @@ func test_routes_entre_royaumes() -> void:
 	verifier(trouves > 0, "des royaumes sont générés (%d)" % trouves)
 	verifier(capitales_reliees > 0, "des capitales voisines sont reliées (%d capitales sur %d en portent)" % [capitales_reliees, trouves])
 	verifier(hostiles_relies == 0, "aucune route directe entre deux capitales hostiles")
+
+
+## Embuscade (Prototype de combat, axe 5) : la frappe qui ouvre le combat contre une proie surprise gagne les dés.
+func test_embuscade() -> void:
+	var s := Simulation.new(313)
+	s.charger_donjon("ruine", 313, 4, 1)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var lynx := s.ajouter("lynx", j.pos + Vector2i(1, 0), "ia")
+	verifier(not s.en_combat(j), "avant la frappe : la proie n'est pas en combat")
+	var griffure: Dictionary = s.actions_creatures.griffure
+	lynx["surprise_sur"] = str(j.id) if not s.en_combat(j) else ""
+	s._engager_combat(lynx, j)
+	verifier(s._bonus_embuscade(lynx, j) == 2, "première frappe sur une proie surprise : +2 dés (embuscade du lynx)")
+	verifier(s._bonus_embuscade(lynx, j) == 0, "la seconde frappe n'a plus de bonus : la proie est prévenue")
+	lynx["surprise_sur"] = str(j.id) if not s.en_combat(j) else ""
+	verifier(lynx.surprise_sur == "", "une proie déjà en combat ne se laisse pas surprendre")
+	var cerf := s.ajouter("cerf", j.pos + Vector2i(-1, 0), "ia")
+	cerf["surprise_sur"] = str(j.id)
+	verifier(s._bonus_embuscade(cerf, j) == 0, "un cerf n'a pas d'action d'embuscade : rien")
+	verifier(griffure.effets.size() >= 1, "la griffure existe (%d effet)" % griffure.effets.size())
 
 
 func test_discretion() -> void:

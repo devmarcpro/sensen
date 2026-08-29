@@ -1981,3 +1981,4 @@ culture.sino.name,Sino
 # --- fin cultures ---
 recipe.distiller_herbe.name,Distiller une herbe
 recipe.distiller_partie.name,Distiller une partie de bête
+journal.embuscade,{att} surprend {def} : +{des} dés

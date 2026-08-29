@@ -67,6 +67,7 @@ etape: 10
 - **Les glyphes se voient** : l'IA les contourne comme le feu, sauf ceux posés sous Dissimulation (L'Ombre) — un piège qu'il faut faire traverser, meilleur jeu qu'un piège gratuit ? — [[Talents de classe]]
 - **La source maudite et l'autel du rituel** (étage 4+) : une transformation irréversible au clic droit, sans avertissement — audacieux ou cruel ? — [[Talents de race]]
 - **Les anneaux de transmutation** : fermer un élément de son arme pour concentrer sa chaîne — un vrai choix face au râtelier ? — [[Modificateurs d'affinité]]
+- **L'embuscade** : +2 dés sur la frappe qui ouvre un combat contre une proie surprise (lynx, crocodile, serpent) — se sent-elle, ou se perd-elle dans le bruit des dés ? — [[Prototype de combat — spécification]]
 
 ## 4. Le village — PNJ, commerce, quêtes, compagnons (10 min)
 

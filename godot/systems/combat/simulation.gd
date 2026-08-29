@@ -2007,11 +2007,30 @@ func _attaquer_bete(e: Dictionary, cible: Dictionary, tick: int) -> bool:
 	for aid in jeu:
 		var action: Dictionary = actions_creatures.get(str(aid), {})
 		if not action.is_empty() and _action_creature_possible(e, action, cible):
+			# Embuscade : la frappe qui OUVRE le combat contre une cible qui ne se bat pas encore est une surprise
+			e["surprise_sur"] = str(cible.id) if not en_combat(cible) else ""
 			if not en_combat(e):
 				_engager_combat(e, cible)
 			_lancer_action_creature(e, action, cible, tick)
 			return true
 	return false
+
+
+## Embuscade (Prototype de combat — six axes, axe 5) : une action passive `bonus_premiere_attaque` de
+## l'attaquant ajoute ses dés à la **première** frappe portée sur une cible surprise — celle contre qui
+## cette frappe ouvre le combat. Une seule fois par proie : après, elle est prévenue.
+func _bonus_embuscade(e: Dictionary, c: Dictionary) -> int:
+	if str(e.get("surprise_sur", "")) != str(c.id):
+		return 0
+	e.surprise_sur = ""
+	var bonus := 0
+	for aid in e.get("actions", []):
+		for effet: Dictionary in actions_creatures.get(str(aid), {}).get("effets", []):
+			if str(effet.get("type", "")) == "bonus_premiere_attaque":
+				bonus += int(effet.get("des", 0))
+	if bonus > 0:
+		EventBus.emettre(&"journal", [&"journal.embuscade", {"att": e.name_key, "def": c.name_key, "des": bonus}])
+	return bonus
 
 
 func _devenir_lycanthrope(e: Dictionary) -> void:
@@ -7694,7 +7713,7 @@ func _executer_action_creature(e: Dictionary, action: Dictionary, cible: Diction
 				for c in cibles:
 					if not c.vivant:
 						continue
-					var bonus := _bonus_des_conditions(e, c, action) + int(Etres.add_statuts(e, "des", statuts_defs))   # Béni
+					var bonus := _bonus_des_conditions(e, c, action) + _bonus_embuscade(e, c) + int(Etres.add_statuts(e, "des", statuts_defs))   # Béni
 					var d := regles.degats_action(e.stats_eff, action, des, a_zero, bonus)
 					var wx := _facteur_wuxing(e, c, action.elements, tick_de(e))
 					var res := _resoudre_coup(e, c, d.bruts * wx.total * Etres.mult_statuts(e, "degats", statuts_defs), str(action.get("type_degats", "contondant")), false, action.elements)
@@ -7722,7 +7741,7 @@ func _executer_action_creature(e: Dictionary, action: Dictionary, cible: Diction
 						continue
 					appliquer_statut(c, str(effet.id), int(effet.get("duree_ticks", statuts_defs.get(effet.id, {}).get("duree_ticks", 10))), e.id)
 			_:
-				pass   # bonus_premiere_attaque (embuscade) : la détection du joueur n'existe pas encore
+				pass   # bonus_premiere_attaque : passif, lu par _bonus_embuscade au moment de la frappe
 
 
 func _cibles_de_forme(e: Dictionary, action: Dictionary, cible: Dictionary) -> Array[Dictionary]:

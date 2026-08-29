@@ -1971,3 +1971,4 @@ item.craft_pelle.name,Shovel
 recipe.fabriquer_seau.name,Make a bucket
 recipe.distiller_herbe.name,Distil a herb
 recipe.distiller_partie.name,Distil a beast part
+journal.embuscade,{att} ambushes {def}: +{des} dice
