@@ -671,3 +671,270 @@ titre.slave.republique.m,Starosta
 titre.slave.republique.f,Starosta
 titre.slave.theocratie.m,Patriarch
 titre.slave.theocratie.f,Matriarch
+ui.aide.armes,1-7: switch weapon ({ticks} ticks) — {liste}
+ui.aide.capacites,I: inventory · F: workshop · C: character sheet (Esc closes) · M: world map (click a neighbouring cell: claim it) · K: territory · B: breeding register · V: tame · N: minimap zoom (Shift+N: hide) · F6 save · F7 load · F1-F3: aim an ability then click (Esc: cancel) — {liste}
+ui.assigner.fonction,"{fonction} · produces: {produit} · base yield {rendement}"
+ui.assigner.rien,nothing
+ui.assigner.titre,"ASSIGN {nom} — choose their role"
+ui.atelier,=== WORKSHOP (F to close) — number: craft ===
+ui.atelier.ingredient,"      {coche} {nom} — optional ingredient (Enter: toggle)"
+ui.atelier.kind.composant,component
+ui.atelier.kind.objet,assembly
+ui.atelier.kind.plate,transformation
+ui.atelier.ligne,"  {n} {recette} [{station}] : {entrees} → {sortie}{ok}"
+ui.atelier.niveau_recette,(level {n})
+ui.atelier.vide,  (no workstation in the bag)
+ui.camp,"BASE CAMP · {biome}"
+ui.capacite,{touche} {nom} [{modules}]: {forme} range {pmin}-{pmax} size {taille} · {ticks} ticks · {ressource} {monnaie} · {des}{bonus}
+ui.capacite.preview,{nom} on {def}: {des}{bonus} ×{dom} → zone {zone} ×{mult} − armour {armure} ⇒ {min}–{max}
+ui.capacite.visee,AIMING: {nom} — click a tile
+ui.capacites.ligne,"{nom} — {modules}"
+ui.capacites.nouvelle,+ New ability
+ui.carte.capitale," (capital)"
+ui.carte.depart,=== CHOOSE YOUR STARTING TILE — click a land cell (colour: biome · orange/red: danger · gold square: dungeon) ===
+ui.carte.legende,"ochre line: road · circled green: your camp · circled blue: you are here · gold square: dungeon · light dot: major vein · dark: never explored"
+ui.carte.mer,sea
+ui.carte.royaume,"{nom} — {gouv}, {n} cells"
+ui.carte.survol,"({x},{y}) · {biome} · danger {danger}"
+ui.carte.survol_derive," · drift {d}"
+ui.carte.survol_lieu," · place: {a} {pa} % · {b} {pb} %"
+ui.carte.survol_royaume," · {nom}{capitale} — {gouv}, {taille}, {n} cells · {etat}"
+ui.carte.titre,=== WORLD MAP — click: fast travel to an explored cell, or claim a neighbouring one · arrows: scroll · Esc: close ===
+ui.carte.vacance,vacant throne
+ui.case,"tile ({x},{y}) h={h} · Δh vs you: {dh}"
+ui.chaine,chain: {segments}
+ui.commerce.bourse_cachee,?
+ui.commerce.sac,— YOUR BAG (they buy at {pct} %) —
+ui.commerce.stock,— FOR SALE —
+ui.composer.apercu,"Preview: {geometrie} · range {portee} · size {taille} · {ticks} ticks · {ressource} {monnaie} · dice {des} · effects {effets}{erreurs}"
+ui.composer.erreurs," · ERRORS: {liste}"
+ui.composer.module,"{nom} — {desc}"
+ui.composer.type,[{type}]
+ui.composer.valider,Confirm (V)
+ui.composer.vide,(no module learnt: read grimoires and manuals)
+ui.confort.chaud," · HEAT"
+ui.confort.froid," · COLD"
+ui.contexte.aucune,nothing to do here
+ui.creation.aide,"↑↓ pick a stat · + / − spend (max +10) · Enter: begin"
+ui.creation.classe,Class: {classe} (C) — talent: {talent}
+ui.creation.points,Points to spend: {restants} / {total}
+ui.creation.race,Race: {race} (R)
+ui.creation.sans_talent,none (to be learnt from a master)
+ui.creation.signe,"Birth year {annee}: sign {element}-{animal} (← →)"
+ui.creation.talent_race,Racial talent: {talent}
+ui.creation.titre,=== CHARACTER CREATION ===
+ui.dialogue.boutique," — {boutique}"
+ui.dialogue.compagnon,"companion · order: {ordre}"
+ui.dialogue.famille,"family: {texte}"
+ui.dialogue.guilde," — {guilde}"
+ui.dialogue.relation,relationship {n}
+ui.dialogue.titre," — {titre}"
+ui.donjon,DUNGEON {theme} · floor {etage}/{etages} · rooms {salles} · E: go down (gold stairs) / go up and leave (green stairs)
+ui.echange.donner,"— your bag (Enter: give) —"
+ui.echange.reprendre,"— {nom} (Enter: take back) —"
+ui.echange.titre,"Trading gear with {nom}"
+ui.ecran.accepter,Accept (Enter)
+ui.ecran.acheter,Buy (Enter)
+ui.ecran.apprendre,Learn their talent (Q)
+ui.ecran.assigner,Assign here (X)
+ui.ecran.atelier,"WORKSHOP — stations in reach: {stations}"
+ui.ecran.attendre,Wait here (A)
+ui.ecran.betail,Treat as livestock
+ui.ecran.capacites,"ABILITIES — {n}/{max} (Enter: delete · modules per ability: {modules})"
+ui.ecran.capturer,Net (Y) — capture on a neighbouring water tile
+ui.ecran.commerce,"TRADE — {nom} · their purse: {or} gold · yours: {joueur} gold"
+ui.ecran.commercer,Trade (C)
+ui.ecran.composer,"COMPOSE — sequence: {sequence} ({n}/{max}) · Enter: add / remove · V: confirm"
+ui.ecran.conquerir,Conquer this village
+ui.ecran.contexte,"OPTIONS — ({x},{y}) (Enter: choose · Esc: close)"
+ui.ecran.deposer,Deposit 50 gold (D)
+ui.ecran.dialogue,"{nom} — {fonction}"
+ui.ecran.echanger,Trade gear (K)
+ui.ecran.entrainer,Train (U)
+ui.ecran.equiper,Equip / remove (E)
+ui.ecran.fabriquer,Craft (Enter)
+ui.ecran.fermer,Close (Esc)
+ui.ecran.feuille,SHEET — {nom}
+ui.ecran.gestion,"TERRITORY — {n} cells · {pnj} residents · treasury {tresor} gold · debt {dette} · forecast {prev} gold/week"
+ui.ecran.incarner,Take control
+ui.ecran.inventaire,"INVENTORY — {n} item(s) in the bag"
+ui.ecran.jeter,Drop (J)
+ui.ecran.lire,Read (L)
+ui.ecran.livrer,Deliver the order (Z)
+ui.ecran.manger,Eat (G)
+ui.ecran.menu,MENU (Tab / Esc closes)
+ui.ecran.mur,Wall (M)
+ui.ecran.parler,Talk (P)
+ui.ecran.partir,Leave (Esc)
+ui.ecran.planter,Plant (H) — on a free tile next to a Fields cell
+ui.ecran.porte,Door (O)
+ui.ecran.poser,Place (P)
+ui.ecran.posture,Stance: {posture} (F)
+ui.ecran.quetes,Quests (Q)
+ui.ecran.ranger,Store (R)
+ui.ecran.recruter,Recruit (R)
+ui.ecran.reforger,"Reforge (B) — the item first, then the component"
+ui.ecran.registre,"REGISTER — {n} varieties · {especes}/{total} species · milestones: {paliers}"
+ui.ecran.rendre,Hand in (Enter)
+ui.ecran.repli,Fall back! (Y)
+ui.ecran.resident,Treat as a resident
+ui.ecran.ressusciter,"Resurrect a companion (N) — {cout} gold"
+ui.ecran.ressusciter_rien,(no soul in the bag)
+ui.ecran.retirer,Withdraw 50 gold (W)
+ui.ecran.retour,Return to base (B)
+ui.ecran.sac,bag
+ui.ecran.sertir,Socket (T)
+ui.ecran.slot_vide,(empty slot)
+ui.ecran.suivre,Follow me (S)
+ui.ecran.vendre,Sell (Enter)
+ui.entite.ligne,{nom} hp {pv}/{pv_max} · sta {end} · acts at t={compteur} · h={h}
+ui.entite.mana,mana {mana}/{mana_max}
+ui.entrainer.aucune,nothing to train here
+ui.entrainer.competence,"{nom} — level {niveau} · potential {potentiel} · {cout} gold"
+ui.entrainer.titre,"TRAINING with {nom} — 20 gold × level, +10 potential (you have {or} gold)"
+ui.etat_grille_gel," · frost"
+ui.etat_grille_neige," · snow"
+ui.expedition.ligne,"  deepest floor {etage_max} · {tues} enemies defeated · {objets} items picked up ({sac} in the bag) · boss: {boss} · combat level {combat}, general {general} — a new expedition begins"
+ui.expedition.titre,=== EXPEDITION OVER — {theme} ===
+ui.faim,hunger {faim}/100
+ui.feuille,=== CHARACTER SHEET ===
+ui.feuille.aucune,(none)
+ui.feuille.cat.combat,Combat skills
+ui.feuille.cat.general,General skills
+ui.feuille.equipement,Equipment
+ui.feuille.ligne,  {competence} {niveau} (XP {xp}/{suivant} · potential {potentiel})
+ui.feuille.stat,  {stat} {valeur} (potential {potentiel})
+ui.feuille.stats,Stats
+ui.feuille.talent,"{nom} — {desc}"
+ui.feuille.talents,Talents
+ui.feuille.vitaux,"HP {pv}/{pv_max} · stamina {end} · mana {mana}/{mana_max}"
+ui.fiche.age,"{genre} · {age} years old ({categorie}) · sign {signe} · level ≈ {niveau}"
+ui.fiche.apparence,A stranger. Nothing is known about them.
+ui.fiche.base,"{nom} · {fonction} · {village}"
+ui.fiche.competences,skills: {liste} · equipment: {equip}
+ui.fiche.gouts,likes: {tags}
+ui.fiche.tout,full history · can be recruited
+ui.fin.niveaux,  levels gained: {liste}
+ui.fin.piste,  {piste}: {detail}
+ui.fin.suite,(click or press a key to continue)
+ui.gestion.aucun_raid,none
+ui.gestion.betail, · livestock
+ui.gestion.boutique,"shop: till {caisse} gold · margin ×{marge} (+/−) · {etals} stall(s) · waiting customers {clients}"
+ui.gestion.camp," · camp"
+ui.gestion.campement,encampment
+ui.gestion.cellule,"cell ({x},{y}) — {role}{camp}"
+ui.gestion.commande,"order: {espece} colour {couleur} pattern {motif}{chatoyant} — {or} gold (deliver to a merchant)"
+ui.gestion.commande_aucune,order: none (the register is empty)
+ui.gestion.commande_chatoyant," IRIDESCENT"
+ui.gestion.defaite,lost
+ui.gestion.elevage,"breeding: {n} varieties in the register ({especes})"
+ui.gestion.gouv_aide,G: change government (4 weeks of transition, −10 mood)
+ui.gestion.parcelles,"plots: {n} ({mures} ripe)"
+ui.gestion.pieces,"valid rooms: {n} ({logees} residents housed)"
+ui.gestion.raid,"strength {force} vs defence {defense} — {issue} (losses {perte} %)"
+ui.gestion.rapport,{texte}
+ui.gestion.resident,"{nom} — {fonction}{betail} · mood {humeur} · yield ×{facteur}"
+ui.gestion.resident_aide,Enter: remove their assignment (they become a companion again)
+ui.gestion.role_aide,"Enter: change the role (base → housing → fields → wild resources ; wild resources wipes buildings when the week turns)"
+ui.gestion.royaume,"{statut} · government: {gouv}{transition} · defence {defense} · value {valeur} · last raid: {raid}"
+ui.gestion.royaume_statut,kingdom
+ui.gestion.stock,"stock: {nom} ×{n}"
+ui.gestion.stock_aide,Enter: take the stock into your bag
+ui.gestion.transition," (→ {cible} in {n} wk)"
+ui.gestion.victoire,repelled
+ui.gestion.voisin,"{nom} ({gouv}, {n} cells) — reputation {rep} · relationship {rel} · treaty: {accord}"
+ui.gestion.voisin_aide,T: offer the next treaty (trade ≥ 20 · non-aggression ≥ 40 · alliance ≥ 60 · tribute)
+ui.heure,"{heure} h · {phase} · {saison} · {meteo} · {temp} °C{confort}"
+ui.hotbar,"{liste}"
+ui.hotbar.attendre,Wait
+ui.hotbar.garde,Guard
+ui.hotbar.lourde,Heavy attack
+ui.hotbar.objet,"{nom} ×{n}"
+ui.hotbar.selection,"[{k} {nom}]"
+ui.lieu,"place: {a} {pa} % · {b} {pb} %"
+ui.menu.arene,Debug: next arena then the camp
+ui.menu.atelier,Workshop
+ui.menu.capacites,Abilities
+ui.menu.carte,World map
+ui.menu.charger,Load
+ui.menu.fermer,Close
+ui.menu.feuille,Character sheet
+ui.menu.gestion,Territory
+ui.menu.inventaire,Inventory
+ui.menu.minimap_masquer,Minimap: show / hide
+ui.menu.minimap_zoom,Minimap: zoom
+ui.menu.recharger,Debug: reload the data
+ui.menu.registre,Breeding register
+ui.menu.sauvegarder,Save
+ui.modules_connus,modules known {n}
+ui.munitions,arrows {n}
+ui.niveaux,combat level {combat} · general {general}
+ui.objet.arme,"weapon: {des} {type} · {ticks} ticks · range {portee}"
+ui.objet.armure,"armour: {zone} · {construction} · composite hardness {durete} · construction level {niveau}"
+ui.objet.composant,component in {materiau}
+ui.objet.composants,components:
+ui.objet.consommable,"consumable: nutrition {nutrition} · healing {soin} · mana {mana} · {statut} · potential {potentiel}{cru}"
+ui.objet.consommable.cru," · raw (50 %, no potential, risky)"
+ui.objet.durete,"base hardness {durete} / reference {ref} × quality ⇒ damage ×{facteur}"
+ui.objet.elements,Wu Xing: {liste}
+ui.objet.harmonie," · harmony ×{n}"
+ui.objet.livre,"book: {domaine} · difficulty {difficulte} · {n} modules"
+ui.objet.materiau,"{categorie} · {forme} · ×{quantite}"
+ui.objet.meuble,"furniture: {type} · {details}"
+ui.objet.meuble.lit,you can sleep here
+ui.objet.meuble.lumiere,brightness {n}
+ui.objet.meuble.slots,{n} slots
+ui.objet.plan,"blueprint: {recette} (difficulty {difficulte})"
+ui.objet.poids,weight {poids}
+ui.objet.qualite,"quality: {palier} ({valeur})"
+ui.objet.sertissures,"sockets: {contenu}/{n}"
+ui.objet.station,"portable station: weight {poids} · skill {competence}"
+ui.objet.stats,stats: {liste}
+ui.objet.type,"{type} · {slot} · {rarete}"
+ui.objet.visee,"AIMING: {nom} — click a tile"
+ui.objet.vitesse,haft: attack ticks ×{facteur}
+ui.or,gold {n}
+ui.poids,"weight {poids}/{capacite}{surcharge}"
+ui.poids.surcharge," · OVERLOADED ×{facteur}"
+ui.preview,{nom}: {des}×{dur} +{stat} → zone {zone} ×{mult} − armour {armure} ⇒ {min}–{max} ({ticks} ticks)
+ui.preview.lourde,heavy: ×{lourde} damage · {ticks} ticks · breaks the guard
+ui.prix.achat,they offer you {n} gold
+ui.prix.detail,"suggested price {prix} gold = materials {base} × margin {marge} × quality {qualite} × rarity {rarete} × reputation {rep}"
+ui.prix.vente,they sell it for {n} gold
+ui.quetes.aucune,  (nothing to offer this week)
+ui.quetes.en_cours,"[{fait}/{count}] {texte}"
+ui.quetes.offerte,[offered] {texte}
+ui.quetes.recompense,"reward: {or} gold · {xp} guild XP"
+ui.quetes.refus,  (they entrust you with nothing: reputation too low)
+ui.quetes.terminee,[to hand in] {texte}
+ui.quetes.titre,"QUESTS — {nom} · {guilde}: {rang} ({xp} XP)"
+ui.raid,"RAID: {n} attacker(s) · nearest {dist} tiles away · {ticks} ticks before they withdraw"
+ui.recette.assemblage,(quality = Σ components × weight × assembly roll)
+ui.recette.entrees,inputs:
+ui.recette.harmonie,"Expected vector: {vecteur} — harmony {harmonie}"
+ui.recette.harmonie_non,"none ({n}/5 elements)"
+ui.recette.harmonie_oui,"×1.2: all five elements"
+ui.recette.inconnue,unknown recipe
+ui.recette.manque,missing
+ui.recette.optionnel," (optional)"
+ui.recette.qualite_composant,(A.3 quality on the station's skill)
+ui.recette.recolte,← harvest (pickaxe on a wall or a vein)
+ui.recette.sans_source,(no source yet: creature parts)
+ui.recette.sortie,output:
+ui.recette.station,"at: {station} · skill: {competence}"
+ui.registre.aucun,no species in the register — capture (Y) or breed
+ui.registre.chatoyants," · iridescent seen {n}"
+ui.registre.espece,"{nom} — {mode} · {n}/{possibles} varieties{records}"
+ui.registre.grille_ligne,"colour {c}: patterns {motifs}"
+ui.registre.paliers_aucun,none
+ui.registre.record," · record {locus} {v}"
+ui.royaume.dirigeant_inconnu,unknown (capital not visited)
+ui.royaume.fiche,"people: {race} · culture: {culture} · capital {capitale} · taxes {base_rate} %\nruler: {dirigeant}\nknown villages: {villages}\ndiplomacy: {diplomatie}"
+ui.sac,"bag: {liste}"
+ui.sang," · blood {n} %"
+ui.segment_prefere," · segment {element}"
+ui.souffle," · breath {n}/{max}"
+ui.specimen.chatoyant," iridescent"
+ui.statuts,statuses: {liste}
+ui.village,{nom}
+ui.wuxing,{element} against {contre}: ×{dom} · gauge {segments}/{capacite} (gain ×{gain}) · this blow: segment {position} {transition} → ×{chaine}
