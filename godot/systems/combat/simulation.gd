@@ -4916,7 +4916,8 @@ func sauvegarder(nom: String = "monde") -> bool:
 		contenants_monde[grille.pos_de(int(gi))] = contenants[gi]
 	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "graine": graine, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
 		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores,
-		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire, "vacances": monde.vacances, "villages": monde.villages, "heritiers": monde.heritiers, "vacances_guildes": monde.vacances_guildes})
+		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire, "vacances": monde.vacances, "villages": monde.villages, "heritiers": monde.heritiers, "vacances_guildes": monde.vacances_guildes,
+		"modifs_terrain": modifs_terrain, "portails": portails})   # indexés par position monde, donc valables au rechargement
 	ok = Sauvegarde.ecrire(nom, "surface.json", surface) and ok
 	ok = Sauvegarde.ecrire(nom, "entities.json", {"entites": autres, "ordre": ordre_autres, "contenants": contenants_monde}) and ok
 	ok = Sauvegarde.ecrire(nom, "items.json", instances) and ok
@@ -4972,6 +4973,8 @@ func charger_sauvegarde(nom: String = "monde") -> bool:
 	var joueur_sauve: Dictionary = pj.etre
 	_reinitialiser()
 	monde.centre = Vector2i(-1, -1)
+	modifs_terrain = w.get("modifs_terrain", {})   # après _reinitialiser, qui les vide : ce que le monde doit rendre
+	portails = w.get("portails", {})               # et les brèches du Passeur, indexées par position monde
 	grille = monde.fenetre(monde.cellule_de(joueur_sauve.pos), GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
 	monde.tick(int(w.ticks))   # les grâces échues avant la sauvegarde
 	entites[joueur_sauve.id] = joueur_sauve

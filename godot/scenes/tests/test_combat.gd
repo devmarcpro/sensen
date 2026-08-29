@@ -119,6 +119,7 @@ func _ready() -> void:
 	test_glyphes_visibles()
 	test_etats_tuiles_par_grille()
 	test_index_monde()
+	test_sauvegarde_terrain()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2539,6 +2540,25 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_sauvegarde_terrain() -> void:
+	# Ce que le monde doit rendre, et les brèches, survivent à une sauvegarde
+	var s := Simulation.new(165)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var t: Vector2i = j.pos + Vector2i(3, 0)
+	s.grille.hauteurs[s.grille.idx(t)] = s.grille.h(t) - 1
+	s._memoriser_terrain(t)
+	s.portails[t] = j.id
+	verifier(s.sauvegarder("test_terrain"), "sauvegarde écrite")
+	var s2 := Simulation.new(1)
+	s2.charger_camp()
+	verifier(s2.charger_sauvegarde("test_terrain"), "sauvegarde relue")
+	verifier(s2.modifs_terrain.has(t), "la mémoire du terrain a survécu")
+	verifier(s2.portails.has(t) and str(s2.portails[t]) == j.id, "la brèche a survécu")
+	s.monde.fermer()
+	s2.monde.fermer()
+
 
 func test_index_monde() -> void:
 	# La fenêtre glisse : ce qui est mémorisé par tuile doit suivre le MONDE, pas la grille
