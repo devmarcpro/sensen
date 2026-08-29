@@ -6895,6 +6895,7 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 		for autre in vivants():
 			if autre.camp != e.camp and Grille.distance(autre.pos, e.pos) == 1:
 				gagner_xp(e, "esquive", 1)   # la mobilité s'apprend sous le feu (Décision — Esquive active)
+				_declencher(e, "derobade", e.pos)   # Dérobade : « quand le porteur esquive » = un pas sous la menace
 				break
 	gagner_xp(e, "athletisme", 1)
 	EventBus.emettre(&"journal", [&"journal.deplacement", {"nom": e.name_key, "cout": e.compteur - tick}])
@@ -8061,7 +8062,7 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 				e.emplois[cle] = int(e.emplois.get(cle, 0)) + 1
 				if int(e.emplois[cle]) % int(suite.get("n_declencheur", 3)) == 0:
 					_executer_capacite(e, suite, ou, false)
-			"riposte", "parade", "ouverture", "veille", "testament", "accord":
+			"riposte", "parade", "ouverture", "veille", "testament", "accord", "derobade":
 				# La charge attend l'événement sur le porteur — armée une fois.
 				e.declencheurs_armes.append({"evenement": str(suite.declencheur), "plan": suite})
 				EventBus.emettre(&"journal", [&"journal.arme", {"nom": e.name_key, "capacite": suite.noyau.name_key, "evenement": "declencheur." + str(suite.declencheur)}])

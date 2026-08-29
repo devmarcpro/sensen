@@ -117,6 +117,7 @@ func _ready() -> void:
 	test_transmutation()
 	test_arrachage()
 	test_glyphes_visibles()
+	test_derobade()
 	test_etats_tuiles_par_grille()
 	test_index_monde()
 	test_sauvegarde_terrain()
@@ -2603,6 +2604,30 @@ func test_etats_tuiles_par_grille() -> void:
 	verifier(s.feux.is_empty() and s.eau_active.is_empty(), "descendre en donjon éteint les états de tuile (%d feux, %d eaux)" % [s.feux.size(), s.eau_active.size()])
 	verifier(s.grille.dangers.size() == s.grille.dangers.size(), "la grille du donjon a ses propres dangers")
 	s.monde.fermer()
+
+
+func test_derobade() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var loup := {}
+	for e in s.vivants():
+		if e.id != j.id:
+			loup = e
+	# Une charge armée sur Dérobade part au premier pas sous la menace, une seule fois
+	var plan := {"elements": {}, "geometrie": "point", "taille": 1, "portee": Vector2i(0, 1), "liaisons": [],
+		"mult": 1.0, "des_bonus": 0, "parametres": {}, "monnaie": "mana", "ressource": 0, "charge_suivante": {},
+		"drapeaux": {}, "statuts": [], "modificateurs": [], "declencheur": "derobade", "effets": [], "noyau": {"name_key": "module.ombre.name", "id": "ombre", "effets": []}}
+	j.declencheurs_armes.append({"evenement": "derobade", "plan": plan})
+	s._engager_combat(j, loup)
+	loup.pos = j.pos + Vector2i(1, 0)
+	s.grille.liberer(loup.pos)
+	s.grille.placer(loup.id, loup.pos)
+	var libre: Vector2i = j.pos + Vector2i(0, 1)   # un pas de côté : le loup reste adjacent (on se dérobe, on ne fuit pas)
+	s.grille.hauteurs[s.grille.idx(libre)] = s.grille.h(j.pos)
+	s.grille.contenu[s.grille.idx(libre)] = 0
+	verifier(s._deplacer(j, libre, s.tick_de(j)), "le joueur se dérobe d'un pas")
+	verifier(j.declencheurs_armes.is_empty(), "la charge de Dérobade est partie")
+	s.monde.fermer() if s.monde != null else null
 
 
 func test_glyphes_visibles() -> void:
