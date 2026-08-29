@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] Le registre d'élevage suivait mal ses espèces (2026-08-29)
+> La clé de variété était figée à couleur|motif : luciole, coquillage et truite confondaient leurs variétés. Elle suit les loci de l'espèce, et l'écran rend les six modes de la note. **À juger** : 96 variétés de lucioles — la profondeur est-elle lisible, ou faut-il moins de combinatoire ?
 > [!important] Les tooltips manquants (2026-08-29)
 > Douze tooltips contextuels au lieu de quatre : récolte, cueillette, lecture, capacités, faim, claim, recrutement, construction, nage, feu, couvée, raid. **À juger** : arrivent-ils au bon moment, et le journal est-il le bon endroit pour les montrer ?
 > [!important] Les routes entre royaumes (2026-08-29)

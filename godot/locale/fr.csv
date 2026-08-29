@@ -800,6 +800,8 @@ ui.ecran.registre,"REGISTRE — {n} variétés · {especes}/{total} espèces · 
 ui.registre.espece,"{nom} — {mode} · {n}/{possibles} variétés{records}"
 ui.registre.aucun,aucune espèce au registre — capture (Y) ou couvée
 ui.registre.grille_ligne,"couleur {c} : motifs {motifs}"
+ui.registre.variete,"  variété : {v}"
+ui.registre.sequence,"  rythme : {s}"
 ui.registre.record," · record {locus} {v}"
 ui.registre.paliers_aucun,aucun
 palier.potentiel,+10 de potentiel en Élevage

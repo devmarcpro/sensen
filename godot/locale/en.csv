@@ -1994,3 +1994,5 @@ tutorial.premiere_cueillette.text,"Wild plants grow back outside claimed cells â
 tutorial.premiere_faim.text,"Hunger eats at your stats before your health: a cooked dish feeds you better than raw meat, and without the risk."
 tutorial.premiere_nage.text,"You cannot swim laden: drop some weight, or go around. Under water your breath drains and Fire will not fire."
 tutorial.premiere_recolte.text,"Walls and veins are harvested with a pickaxe, trees with an axe: the tool in hand decides what you get."
+ui.registre.variete,"  variety: {v}"
+ui.registre.sequence,"  rhythm: {s}"

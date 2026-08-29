@@ -3102,8 +3102,7 @@ func _enregistrer_variete(sp: Dictionary) -> void:
 	var esp := str(sp.espece)
 	if not territoire.registre.has(esp):
 		territoire.registre[esp] = {}
-	var cle := "%s|%s" % [str(sp.genome.get("couleur", "")), str(sp.genome.get("motif", ""))]
-	territoire.registre[esp][cle] = true
+	territoire.registre[esp][cle_variete(sp)] = true
 	# Records des loci nombre et allèles vus (Vivarium — registre et paliers).
 	if not territoire.has("records"):
 		territoire["records"] = {}
@@ -3181,10 +3180,31 @@ func paliers_elevage() -> Dictionary:
 func varietes_possibles(esp_id: String) -> int:
 	var loci: Dictionary = GameData.catalogues.species.get(esp_id, {}).get("loci", {})
 	var n := 1
-	for nom in ["couleur", "motif"]:
-		if loci.has(nom) and str(loci[nom].type) == "anneau":
-			n *= int(loci[nom].n)
+	for nom in loci.keys():
+		var L: Dictionary = loci[nom]
+		match str(L.type):
+			"anneau":
+				n *= int(L.n)
+			"sequence":
+				n *= int(pow(float(L.get("valeurs", 2)), float(L.get("n", 4))))
+			"automate", "acquis":
+				n *= maxi(2, int(L.get("n", 2)))
 	return n
+
+
+## La clé d'une variété au registre (Vivarium) : les loci **qualitatifs** de l'espèce, dans l'ordre du
+## catalogue — pas seulement couleur|motif, sinon une luciole (rythme) ou un coquillage (automate) ne
+## collectionnerait rien. Les loci `nombre`, `age` et `colonie` en sont exclus : ils vont aux records.
+func cle_variete(sp: Dictionary) -> String:
+	var loci: Dictionary = GameData.catalogues.species.get(str(sp.espece), {}).get("loci", {})
+	var parts: Array[String] = []
+	for nom in loci.keys():
+		if str(loci[nom].type) in ["anneau", "sequence", "automate", "carte", "acquis"]:
+			var v = sp.get("genome", {}).get(nom)
+			parts.append(",".join(v.map(func(x: Variant) -> String: return str(x))) if v is Array else str(v))
+	if parts.is_empty():
+		parts.append(str(sp.get("genome", {}).get("couleur", "")))
+	return "|".join(parts)
 
 
 ## Le passage hebdomadaire de l'élevage : dans chaque vivarium de la fenêtre, le premier couple valide donne une couvée.

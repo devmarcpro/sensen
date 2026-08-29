@@ -111,6 +111,7 @@ func _ready() -> void:
 	test_discretion()
 	test_routes_entre_royaumes()
 	test_tooltips()
+	test_registre_loci()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2531,6 +2532,27 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_registre_loci() -> void:
+	var s := Simulation.new(159)
+	s.charger_camp()
+	# La clé suit les loci qualitatifs de l'espèce, pas couleur|motif
+	var lu := s._nouveau_specimen("luciole", {"couleur": 2, "rythme": [0, 1, 2, 3]}, "m", false)
+	var lu2 := s._nouveau_specimen("luciole", {"couleur": 2, "rythme": [3, 2, 1, 0]}, "f", false)
+	verifier(s.cle_variete(lu) != s.cle_variete(lu2), "deux rythmes de luciole font deux variétés (%s / %s)" % [s.cle_variete(lu), s.cle_variete(lu2)])
+	s._enregistrer_variete(lu)
+	s._enregistrer_variete(lu2)
+	verifier(int(s.territoire.registre.luciole.size()) == 2, "le registre en compte deux")
+	# Le nombre de variétés possibles suit aussi les loci
+	verifier(s.varietes_possibles("luciole") == 6 * 16, "luciole : 6 couleurs × 2⁴ rythmes = %d" % s.varietes_possibles("luciole"))
+	verifier(s.varietes_possibles("carpe") > 0 and s.varietes_possibles("coquillage") > 10, "carpe et coquillage comptent leurs loci (%d, %d)" % [s.varietes_possibles("carpe"), s.varietes_possibles("coquillage")])
+	# Les records restent aux loci nombre
+	var po := s._nouveau_specimen("poisson_de_bassin", {"couleur": 1, "motif": 2, "taille": 7.5}, "m", false)
+	s._enregistrer_variete(po)
+	verifier(is_equal_approx(float(s.territoire.records.poisson_de_bassin.taille), 7.5), "la taille va aux records, pas à la clé")
+	verifier(not ("7.5" in s.cle_variete(po)), "la clé de variété ignore les loci nombre (%s)" % s.cle_variete(po))
+	s.monde.fermer()
+
 
 func test_tooltips() -> void:
 	# Chaque tooltip cite un signal qui existe et une clé de texte traduite

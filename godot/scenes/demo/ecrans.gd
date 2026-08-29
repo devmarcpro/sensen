@@ -795,20 +795,56 @@ func _construire_registre(_j: Dictionary) -> void:
 				lignes.append("%s : allèles vus %s" % [str(nom), ", ".join(als)])
 		var nch: int = int(t.get("chatoyants", {}).get(esp, 0))
 		liste.add_item(tr("ui.registre.espece").format({"nom": tr(e.name_key), "mode": str(e.get("registre", "grille")), "n": reg[esp].size(), "possibles": sim.varietes_possibles(str(esp)), "records": rtxt + (tr("ui.registre.chatoyants").format({"n": nch}) if nch > 0 else "")}))
-		# Le détail : par couleur, les motifs obtenus.
-		var par_couleur: Dictionary = {}
-		for cle in reg[esp].keys():
-			var parts: PackedStringArray = str(cle).split("|")
-			if not par_couleur.has(parts[0]):
-				par_couleur[parts[0]] = []
-			par_couleur[parts[0]].append(parts[1] if parts.size() > 1 else "")
-		var couleurs: Array = par_couleur.keys()
-		couleurs.sort_custom(func(a: String, b: String) -> bool: return int(a) < int(b))
-		for c in couleurs:
-			var ms: Array = par_couleur[c]
-			ms.sort()
-			lignes.append(tr("ui.registre.grille_ligne").format({"c": c, "motifs": ", ".join(ms)}))
+		lignes.append_array(_detail_registre(str(e.get("registre", "grille")), reg[esp].keys()))
 		entrees.append({"kind": "texte", "texte": "\n".join(lignes)})
+
+
+## Le détail d'une espèce selon son mode de registre (Vivarium — registre et paliers : six modes).
+func _detail_registre(mode: String, cles: Array) -> Array[String]:
+	var lignes: Array[String] = []
+	match mode:
+		"records", "studbook":   # les variétés vues, une par ligne (les records sont déjà en en-tête)
+			var vues: Array = cles.duplicate()
+			vues.sort()
+			for cle in vues:
+				lignes.append(tr("ui.registre.variete").format({"v": str(cle).replace("|", " · ")}))
+		"sequences":   # les rythmes observés
+			var seqs: Array = []
+			for cle in cles:
+				var parts: PackedStringArray = str(cle).split("|")
+				if parts.size() > 1 and not (parts[1] in seqs):
+					seqs.append(parts[1])
+			seqs.sort()
+			for s2 in seqs:
+				lignes.append(tr("ui.registre.sequence").format({"s": str(s2).replace(",", " ")}))
+		"galerie", "familles":   # une entrée par combinaison, groupée par première composante
+			var par: Dictionary = {}
+			for cle in cles:
+				var parts: PackedStringArray = str(cle).split("|")
+				var tete := parts[0]
+				if not par.has(tete):
+					par[tete] = []
+				par[tete].append(" · ".join(Array(parts).slice(1)))
+			var tetes: Array = par.keys()
+			tetes.sort()
+			for t2 in tetes:
+				var v2: Array = par[t2]
+				v2.sort()
+				lignes.append(tr("ui.registre.grille_ligne").format({"c": t2, "motifs": ", ".join(v2)}))
+		_:   # grille, phenotypes, patrimoine : par couleur, les motifs obtenus
+			var par_couleur: Dictionary = {}
+			for cle in cles:
+				var parts: PackedStringArray = str(cle).split("|")
+				if not par_couleur.has(parts[0]):
+					par_couleur[parts[0]] = []
+				par_couleur[parts[0]].append(" · ".join(Array(parts).slice(1)))
+			var couleurs: Array = par_couleur.keys()
+			couleurs.sort_custom(func(a: String, b: String) -> bool: return int(a) < int(b))
+			for c in couleurs:
+				var ms: Array = par_couleur[c]
+				ms.sort()
+				lignes.append(tr("ui.registre.grille_ligne").format({"c": c, "motifs": ", ".join(ms)}))
+	return lignes
 
 
 func _construire_entrainer(j: Dictionary) -> void:
