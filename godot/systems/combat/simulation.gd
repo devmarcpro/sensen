@@ -8502,7 +8502,8 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 ## Détection : un ennemi à portée de Perception et en ligne de vue devient la cible ;
 ## la perte d'intérêt suit les seuils de Décision — Fuite et désengagement.
 func _chercher_cible(e: Dictionary, tick: int) -> Dictionary:
-	var portee := int(float(e.corps.stats.perception) * float(regles.r.engagement.detection_par_perception))
+	# Toute la détection passe par voit_ia : Perception, ligne de vue, nuit et lumière, Dissimulation de
+	# L'Ombre, pas silencieux, Discrétion de la cible. Lire la Perception brute ici court-circuitait tout ça.
 	if e.has("cible_prioritaire"):   # Compagnons : la cible désignée passe devant, tant qu'elle vit et se voit
 		var cp: Dictionary = entites.get(str(e.cible_prioritaire), {})
 		if cp.is_empty() or not cp.vivant:
@@ -8514,11 +8515,11 @@ func _chercher_cible(e: Dictionary, tick: int) -> Dictionary:
 		if c.is_empty() or not c.vivant:
 			e.cible = ""
 		else:
-			if grille.ligne_de_vue(e.pos, c.pos):
+			if voit_ia(e, c):
 				e.tick_derniere_vue = tick
 				e.pos_connue = c.pos
 			elif tick - int(e.tick_derniere_vue) > int(regles.r.engagement.ia_ticks_sans_vue):
-				e.cible = ""
+				e.cible = ""   # semée : la cible s'est dérobée assez longtemps (Discrétion, nuit, obstacle)
 			if Grille.distance(e.pos, e.ancre) > int(regles.r.engagement.ia_distance_ancre):
 				e.cible = ""
 	if e.cible.is_empty():
@@ -8528,7 +8529,7 @@ func _chercher_cible(e: Dictionary, tick: int) -> Dictionary:
 			if not ennemis(e, autre):
 				continue
 			var d := Grille.distance(e.pos, autre.pos)
-			if d <= portee and d < dmin and grille.ligne_de_vue(e.pos, autre.pos):
+			if d < dmin and voit_ia(e, autre):
 				dmin = d
 				meilleure = autre
 		if not meilleure.is_empty():

@@ -2935,6 +2935,19 @@ func test_discretion() -> void:
 	j.competences_eff["discretion"] = 30
 	var vu_avec := s.voit_ia(loup, j)
 	verifier(vu_sans and not vu_avec, "à six tuiles : vu sans Discrétion, invisible avec")
+	# L'acquisition de cible passe par la même détection : discret, on n'est pas pris pour cible ; et on sème.
+	loup.cible = ""
+	j.competences_eff["discretion"] = 0
+	var c0 := s._chercher_cible(loup, 10)
+	verifier(not c0.is_empty() and c0.id == j.id, "sans Discrétion : le loup prend le joueur pour cible")
+	loup.cible = ""
+	s.combats.clear()
+	j.competences_eff["discretion"] = 30
+	verifier(s._chercher_cible(loup, 20).is_empty(), "discret : le loup ne le voit pas, pas de cible")
+	loup.cible = j.id
+	loup.tick_derniere_vue = 20
+	s._chercher_cible(loup, 20 + int(s.regles.r.engagement.ia_ticks_sans_vue) + 1)
+	verifier(loup.cible == "", "semé en Discrétion : après ia_ticks_sans_vue sans le voir, le loup lâche")
 	s.monde.fermer()
 
 
