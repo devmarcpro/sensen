@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] L'arrachage de la tempête (2026-08-29)
+> Une tempête emporte jusqu'à trois tuiles très fragiles et exposées par heure (chaume, paille) ; la pierre et le bois ne bougent pas. **À juger** : est-ce qu'on le remarque, ou est-ce trop discret pour valoir la peur d'une tempête ?
 > [!important] Les anneaux de transmutation (2026-08-29)
 > Le quatrième des cinq accès au cycle existe : amplification et transmutation du vecteur, sur les anneaux et les amulettes, dans l'ordre de résolution de la note. **À juger** : fermer un élément pour concentrer sa chaîne — est-ce un vrai choix face au râtelier ?
 > [!important] Le suiveur territorial (2026-08-29)

@@ -115,6 +115,7 @@ func _ready() -> void:
 	test_meubles_rituels()
 	test_suiveur_territorial()
 	test_transmutation()
+	test_arrachage()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2535,6 +2536,34 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_arrachage() -> void:
+	var s := Simulation.new(162)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var base: Vector2i = j.pos + Vector2i(3, 0)
+	var h0 := s.grille.h(j.pos)
+	for dx in range(0, 6):
+		for dy in range(-2, 3):
+			var t: Vector2i = base + Vector2i(dx, dy)
+			s.grille.contenu[s.grille.idx(t)] = 0
+			s.grille.hauteurs[s.grille.idx(t)] = h0
+	# Un mur de chaume (dureté 1) exposé, un mur de pierre, et un chaume abrité par plus haut
+	var chaume: Vector2i = base
+	var pierre: Vector2i = base + Vector2i(2, 0)
+	var abrite: Vector2i = base + Vector2i(4, 0)
+	for t in [chaume, pierre, abrite]:
+		s.grille.poser_contenu(t, "mur_construit")
+	s.grille.materiaux[s.grille.idx(chaume)] = "chaume_tresse"
+	s.grille.materiaux[s.grille.idx(pierre)] = "granit"
+	s.grille.materiaux[s.grille.idx(abrite)] = "chaume_tresse"
+	s.grille.hauteurs[s.grille.idx(abrite + Vector2i(1, 0))] = h0 + 2   # un voisin plus haut l'abrite
+	verifier(s._arracher(pierre, 3) == false, "le granit ne s'arrache pas")
+	verifier(s._arracher(abrite, 3) == false, "un chaume abrité par plus haut tient")
+	verifier(s._arracher(chaume, 3) and s.grille.contenu_de(chaume).is_empty(), "un chaume exposé s'envole")
+	verifier(s.modifs_terrain.has(s.grille.idx(chaume)), "le terrain est mémorisé : il repoussera hors claim")
+	s.monde.fermer()
+
 
 func test_transmutation() -> void:
 	var s := nouvelle_sim("plaine_au_talus")

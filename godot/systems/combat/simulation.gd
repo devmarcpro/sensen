@@ -41,6 +41,7 @@ var eau_active: Dictionary = {}   # idx → true : tuiles de liquide à propager
 var feux: Dictionary = {}   # idx → {reste} : tuiles en feu (Météo : le feu de tuile)
 var feu_prochain_pas := 0
 var canicule_heure := -1
+var arrachage_heure := -1   # la dernière heure de tempête où le vent a arraché (Météo)
 var eau_prochain_pas := 0
 var modifs_terrain: Dictionary = {}   # idx → {h, contenu} d'origine : ce que le monde rendra hors claim (Destruction du terrain)
 var vecteur_lieu_force: Dictionary = {}   # tests et arènes : imposer le vecteur du lieu (Wu Xing hors combat)
@@ -744,6 +745,47 @@ func _consumer(t: Vector2i) -> void:
 	lumiere_sale = true
 	EventBus.emettre(&"journal", [&"journal.feu_consume", {"x": t.x, "y": t.y}])
 	EventBus.emettre(&"tile_changed", [t])
+
+
+## La tempête (effet météo arrache_fragiles) : quelques tuiles très fragiles et exposées s'envolent.
+func _arrachage(tick: int) -> void:
+	var fe: Dictionary = regles.r.get("feu", {})
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "arrachage", tick])
+	var centre := grille.pos_de(grille.largeur * grille.hauteur_grille / 2)
+	for x in vivants():
+		if x.controle == "joueur":
+			centre = x.pos
+			break
+	var portee := int(fe.get("arrachage_portee", 20))
+	var reste := int(fe.get("arrachage_tuiles", 3))
+	for essai in 60:
+		if reste <= 0:
+			return
+		var t := centre + Vector2i(rng.randi_range(-portee, portee), rng.randi_range(-portee, portee))
+		if _arracher(t, int(fe.get("arrachage_durete", 3))):
+			reste -= 1
+
+
+## Une tuile s'arrache si son matériau est très tendre et qu'aucune voisine plus haute ne l'abrite.
+func _arracher(t: Vector2i, durete_max: int) -> bool:
+	if not grille.dans(t) or grille.contenu[grille.idx(t)] == 0 or grille.meubles.has(grille.idx(t)):
+		return false
+	if "contenant" in grille.contenu_de(t).get("tags", []) or grille.niveau_liquide(t) > 0:
+		return false
+	var mat: Dictionary = GameData.catalogues.materials.get(grille.materiau_de(t), {})
+	if mat.is_empty() or int(mat.get("stats", {}).get("durete", 99)) > durete_max:
+		return false
+	for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		if grille.dans(t + dd) and grille.h(t + dd) > grille.h(t):
+			return false   # abritée par plus haut qu'elle
+	_memoriser_terrain(t)
+	grille.contenu[grille.idx(t)] = 0
+	grille.marquer(t)
+	lumiere_sale = true
+	EventBus.emettre(&"journal", [&"journal.arrachage", {"x": t.x, "y": t.y}])
+	EventBus.emettre(&"tile_changed", [t])
+	return true
 
 
 ## La canicule (effet météo ignition) : chaque heure, une chance qu'une tuile inflammable prenne autour du joueur.
@@ -6521,6 +6563,9 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 			if tick / h_ticks != canicule_heure and "ignition" in GameData.catalogues.weather_states.get(met, {}).get("effects", []):
 				canicule_heure = tick / h_ticks
 				_ignition_canicule(tick)
+			if tick / h_ticks != arrachage_heure and "arrache_fragiles" in GameData.catalogues.weather_states.get(met, {}).get("effects", []):
+				arrachage_heure = tick / h_ticks
+				_arrachage(tick)
 	_tiquer_vampires(nom, tick)
 	_tiquer_armes_fantomes(nom, tick)
 	_tiquer_souffle(nom, tick)

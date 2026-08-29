@@ -2009,3 +2009,4 @@ journal.suiveur_local,"{nom} will follow you on your land"
 journal.suiveur_fin,"{nom} will not leave the territory and returns to their post"
 affixe.wuxing_amplification.nom,{base} amplified ({element} ×{pct} %)
 affixe.wuxing_transmutation.nom,{base} of transmutation ({element} → {vers})
+journal.arrachage,"the storm tears away ({x},{y})"

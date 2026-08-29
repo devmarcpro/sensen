@@ -446,6 +446,7 @@ journal.inondation,"l'eau envahit ({x},{y})"
 journal.pluie_creux,la pluie remplit les creux
 journal.feu_prend,"le feu prend en ({x},{y})"
 journal.feu_consume,"({x},{y}) est consumé par les flammes"
+journal.arrachage,"la tempête arrache ({x},{y})"
 journal.feux_eteints,"la pluie éteint les feux ({n})"
 journal.brule,"{nom} brûle ({degats})"
 journal.retrait,"l'eau se retire de ({x},{y})"
