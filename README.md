@@ -115,6 +115,7 @@ $godot = "C:\Users\ciryl\Documents\Godot_v4.6.3-stable_win64.exe"
 & $godot --headless --path godot res://scenes/demo/main.tscn --quit-after 60          # la scène tourne sans erreur
 python tools/check_vault.py                                                           # le coffre est intègre
 python tools/audit_donnees.py                                                         # les liens entre catalogues tiennent
+python tools/i18n_couverture.py                                                       # couverture de traduction (informatif)
 ```
 
 Aucune sortie ne doit contenir `SCRIPT ERROR`, et la suite doit finir par `TESTS : tout passe`.

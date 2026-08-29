@@ -27,6 +27,9 @@ Le jeu doit permettre de **changer de langue d'affichage** dans les réglages, �
 
 **Textes localisés ailleurs :** épithètes de monstres rares ([[Monstres rares]]), gabarits de dialogue ([[Dialogue PNJ]]), noms de royaumes ([[Génération des royaumes PNJ]]), tooltips ([[Tooltips contextuels]]).
 
+> [!success] Codé le 2026-08-29 — la couverture de traduction est mesurée, l'anglais commence
+> `tools/i18n_couverture.py` compare chaque `locale/*.csv` au **français, qui fait foi** (c'est la langue des notes) : nombre de clés traduites, manquantes par préfixe, et les clés **orphelines** (traduites mais disparues du français). État au 2026-08-29 : l'anglais couvrait **80 clés sur 1 983** (4 %) — le pipeline était en place depuis l'étape 1 mais le fichier n'avait jamais suivi le contenu. Première passe : **toutes les options du clic droit, les contenus de tuile, les statuts, les 58 compétences, les 19 classes et les 6 races** sont en anglais (+180 clés). Restent surtout les textes longs : journal (290), UI (267), modules (178), matériaux (163) — un chantier de contenu, à faire par blocs. Le japonais et le chinois attendent qu'un anglais complet serve de source. L'outil ne fait **pas** échouer la validation (seuil à 100 %) : une traduction incomplète n'est pas une régression, mais elle se voit.
+
 ## Liens
 - **Dépend de** : [[Data-driven design]], [[Contraintes permanentes]]
 - **Alimente** : [[Arborescence du projet]], [[EventBus]], [[Écrans d'interface]], [[Gabarit de quête]], [[Dialogue PNJ]]

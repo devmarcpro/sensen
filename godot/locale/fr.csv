@@ -886,8 +886,8 @@ status.potion_perception_forte.name,Potion de perception forte
 recipe.distiller_oeil.name,Distiller un œil (perception)
 item.peau.name,Peau
 item.potion_endurance.name,Potion de endurance
-status.potion_endurance.name,Potion de endurance
-status.potion_endurance_forte.name,Potion de endurance forte
+status.potion_endurance.name,Potion d'endurance
+status.potion_endurance_forte.name,Potion d'endurance forte
 recipe.distiller_peau.name,Distiller peau (endurance)
 item.griffe.name,Griffe
 item.potion_force.name,Potion de force

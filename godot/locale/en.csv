@@ -79,3 +79,177 @@ tutorial.premier_segment.text,A hit sets a chain segment (the dots below you). C
 tutorial.fin_de_combat.text,"Combat releases: the end screen shows the duration in ticks and the XP of each track (element, weapon, damage type, armour)."
 journal.victoire,no hostile left. Victory.
 journal.defaite,you fell. Tab: restart.
+option.abaisser,Dig down (trench)
+option.affut,Deploy the turret
+option.apprivoiser,Tame
+option.arme_fantome,"Summon a {element} blade"
+option.attaquer,Attack
+option.caisse,Collect the takings
+option.capturer,Throw the net
+option.conquerir,Conquer this village
+option.creuser,Dig / harvest
+option.cueillir,Gather
+option.declencher_glyphe,Trigger the glyph
+option.demonter,Dismantle
+option.deplacer,Move here
+option.descendre,Go down the stairs
+option.designer,Mark for the companions
+option.dormir,Sleep
+option.elever,Raise (bank)
+option.fertiliser,Fertilise the plot
+option.forme_humaine,Return to human form
+option.lancer_etre,Throw the held being here
+option.lourde,Heavy attack
+option.masque,"Wear / remove: {nom}"
+option.mordre,Bite
+option.parler,Talk
+option.poser_portail,Place a portal
+option.prendre,Take the contents
+option.recolter,Harvest the plot
+option.recruter,Recruit
+option.relever,"Raise: {nom}"
+option.remonter,Go up the stairs
+option.saisir,Grab
+option.segment_dominant,Segment: the dominant one
+option.segment_prefere,"Lay the segment: {element}"
+option.tempo,Steal tempo
+option.transformer,Shapeshift
+option.traverser,Step through the portal
+option.traverser_mur,Pass through the wall
+tile_content.arbre.name,Tree
+tile_content.barriere.name,Barrier
+tile_content.butin.name,Loot
+tile_content.coffre.name,Chest
+tile_content.culture.name,Plot
+tile_content.culture_mure.name,Ripe plot
+tile_content.eau.name,Water
+tile_content.eau_ecoulement.name,Water (flow)
+tile_content.entree_donjon.name,Dungeon entrance
+tile_content.filon.name,Vein
+tile_content.lave.name,Lava
+tile_content.meuble.name,Furniture
+tile_content.mur.name,Wall
+tile_content.mur_construit.name,Built wall
+tile_content.obsidienne_figee.name,Cooled rock
+tile_content.plante.name,Plant
+tile_content.plante_sauvage.name,Wild plant
+tile_content.porte.name,Door
+tile_content.roche.name,Rock
+tile_content.station_fixe.name,Workstation
+status.affaibli.name,Weakened
+status.antipoison.name,Antidote
+status.beni.name,Blessed
+status.confusion.name,Confusion
+status.dissimule.name,Hidden
+status.gel.name,Frozen
+status.gravure.name,Engraving
+status.lame_empoisonnee.name,Poisoned blade
+status.masque_du_hibou.name,Owl Mask
+status.masque_du_renard.name,Fox Mask
+status.masque_du_taureau.name,Bull Mask
+status.morsure.name,Bite
+status.morsure_lunaire.name,Moon bite
+status.peau_de_pierre.name,Stoneskin
+status.potion_charisme.name,Charisma potion
+status.potion_charisme_forte.name,Strong charisma potion
+status.potion_dexterite.name,Dexterity potion
+status.potion_dexterite_forte.name,Strong dexterity potion
+status.potion_endurance.name,Endurance potion
+status.potion_endurance_forte.name,Strong endurance potion
+status.potion_force.name,Strength potion
+status.potion_force_forte.name,Strong strength potion
+status.potion_perception.name,Perception potion
+status.potion_perception_forte.name,Strong perception potion
+status.potion_volonte.name,Will potion
+status.potion_volonte_forte.name,Strong will potion
+status.regeneration.name,Regeneration
+status.resistance_feu.name,Fire resistance
+status.resistance_froid.name,Cold resistance
+status.respiration_aquatique_potion.name,Water breathing
+status.saisi.name,Grabbed
+status.sang_de_la_nuit.name,Blood of the night
+status.soleil.name,Sunlight
+status.vision_nocturne_potion.name,Night vision
+competence.agriculture.name,Farming
+competence.alchimie.name,Alchemy
+competence.arbalete.name,Crossbow
+competence.arc.name,Bow
+competence.athletisme.name,Athletics
+competence.baton_magique.name,Magic staff
+competence.bouclier.name,Shield
+competence.bucheronnage.name,Woodcutting
+competence.collecte.name,Gathering
+competence.contondant.name,Blunt
+competence.controle_mana.name,Mana control
+competence.cuir.name,Leather
+competence.cuisine.name,Cooking
+competence.dague.name,Dagger
+competence.deux_mains.name,Two-handed
+competence.discretion.name,Stealth
+competence.dressage.name,Animal handling
+competence.dual_wielding.name,Dual wielding
+competence.ecailles.name,Scale armour
+competence.element_bois.name,Wood (element)
+competence.element_eau.name,Water (element)
+competence.element_feu.name,Fire (element)
+competence.element_metal.name,Metal (element)
+competence.element_terre.name,Earth (element)
+competence.elevage.name,Breeding
+competence.encaissement.name,Toughness
+competence.enchantement.name,Enchanting
+competence.epee.name,Sword
+competence.esquive.name,Dodge
+competence.forge.name,Smithing
+competence.hache_d_armes.name,Battleaxe
+competence.herboristerie.name,Herbalism
+competence.lance.name,Spear
+competence.leadership.name,Leadership
+competence.lecture.name,Reading
+competence.magie_arcane.name,Arcane
+competence.magie_bois.name,Lightning/Life
+competence.magie_corruption.name,Corruption
+competence.magie_eau.name,Water/Ice
+competence.magie_espace.name,Space
+competence.magie_feu.name,Fire
+competence.magie_metal.name,Metal
+competence.magie_terre.name,Earth
+competence.mailles.name,Mail
+competence.mains_nues.name,Unarmed
+competence.masse.name,Mace
+competence.matelasse.name,Padded armour
+competence.meditation.name,Meditation
+competence.menuiserie.name,Carpentry
+competence.minage.name,Mining
+competence.navigation.name,Navigation
+competence.negociation.name,Bargaining
+competence.perforant.name,Piercing
+competence.plaque.name,Plate
+competence.taille_de_pierre.name,Stonecutting
+competence.terrassement.name,Earthworks
+competence.tissage.name,Weaving
+competence.tranchant.name,Slashing
+classe.l_ecarlate.name,The Scarlet
+classe.l_engrenage.name,The Cog
+classe.l_ombre.name,The Shadow
+classe.la_balance.name,The Scales
+classe.la_braise.name,The Ember
+classe.la_meche.name,The Fuse
+classe.la_paume.name,The Palm
+classe.la_trace.name,The Trail
+classe.le_creuset.name,The Crucible
+classe.le_fossoyeur.name,The Gravedigger
+classe.le_masque.name,The Mask
+classe.le_passeur.name,The Ferryman
+classe.le_porteur.name,The Bearer
+classe.le_rieur.name,The Laugher
+classe.le_sablier.name,The Hourglass
+classe.le_sabre.name,The Sabre
+classe.le_sceau.name,The Seal
+classe.le_souffle.name,The Breath
+classe.le_vent.name,The Wind
+race.elfe.name,Elf
+race.humain.name,Human
+race.lycanthrope.name,Lycanthrope
+race.nain.name,Dwarf
+race.spectre.name,Wraith
+race.vampire.name,Vampire
