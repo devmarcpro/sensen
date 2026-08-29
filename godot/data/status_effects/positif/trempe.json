@@ -1,0 +1,19 @@
+{
+  "name_key": "status.trempe.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 60,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "des",
+      "add": 1
+    }
+  ],
+  "tags": [
+    "positif",
+    "arme"
+  ]
+}

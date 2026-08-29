@@ -2032,3 +2032,10 @@ journal.glisse,"{nom} glisse sur la nappe"
 journal.tourelle_posee,"{nom} déploie une tourelle"
 journal.pas_de_cadavre,"{nom} ne trouve aucun cadavre à relever"
 journal.echo_de_chair,"{nom} appelle un écho de chair : {creature}"
+status.envol.name,Envol
+status.trempe.name,Trempe
+status.rupture.name,Rupture
+status.traque.name,Traque
+journal.purge,"{nom} est délivré de : {statut}"
+journal.ponction,"{nom} ponctionne {mana} de mana à {def}"
+journal.transfert,"{nom} transfère {pv} PV à {def}"

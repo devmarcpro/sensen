@@ -2022,3 +2022,10 @@ journal.glisse,"{nom} slips on the slick"
 journal.tourelle_posee,"{nom} deploys a turret"
 journal.pas_de_cadavre,"{nom} finds no corpse to raise"
 journal.echo_de_chair,"{nom} calls an echo of flesh: {creature}"
+status.envol.name,Flight
+status.trempe.name,Tempering
+status.rupture.name,Rupture
+status.traque.name,Mark
+journal.purge,"{nom} is freed from: {statut}"
+journal.ponction,"{nom} siphons {mana} mana from {def}"
+journal.transfert,"{nom} transfers {pv} HP to {def}"

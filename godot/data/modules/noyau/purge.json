@@ -16,8 +16,14 @@
   "cout_mana": 10,
   "cout_endurance": 0,
   "effets": [
-    "statut"
+    "ressource"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "ressource": {
+      "purge": 1,
+      "cible": "allie"
+    }
+  }
 }

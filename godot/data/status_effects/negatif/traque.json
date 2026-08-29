@@ -1,0 +1,14 @@
+{
+  "name_key": "status.traque.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 100,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [],
+  "tags": [
+    "negatif",
+    "traque"
+  ]
+}

@@ -16,13 +16,14 @@
   "cout_mana": 0,
   "cout_endurance": 0,
   "effets": [
-    "statut"
+    "ressource"
   ],
   "forme": null,
   "portee": null,
   "effet": {
     "ressource": {
-      "endurance": 30
+      "endurance": 30,
+      "cible": "soi"
     }
   }
 }

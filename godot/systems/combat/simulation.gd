@@ -7473,7 +7473,8 @@ func _poser_segment(e: Dictionary, v_att: Dictionary, tick: int, origine: String
 func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degats: String, lourde: bool, element: Variant, ignore_armure: float = 0.0) -> Dictionary:
 	var zone: Dictionary = regles.zone_de_coup(grille.h(att.pos), grille.h(cible.pos))
 	var piece := Etres.piece_zone(cible, zone.zone, items)
-	var armure := regles.armure_piece(piece, type_degats) + Etres.add_statuts(cible, "armure", statuts_defs)
+	var armure := (regles.armure_piece(piece, type_degats) + Etres.add_statuts(cible, "armure", statuts_defs)) \
+		* float(Etres.mult_statuts(cible, "armure", statuts_defs))   # Rupture : −50 % de réduction de zone
 	for ax in Etres.affixes_equipes(cible, items, affixes_defs, "meca_armure"):
 		armure += float(ax.params.n)
 	armure *= 1.0 - ignore_armure
@@ -8188,6 +8189,11 @@ func plan_capacite(e: Dictionary, index: int) -> Dictionary:
 func capacite_visable(e: Dictionary, plan: Dictionary, cible: Vector2i) -> bool:
 	if not grille.dans(cible):
 		return false
+	var occ_t := grille.occupant(cible)   # Traque : la proie marquée se vise sans ligne de vue
+	if not occ_t.is_empty() and entites.has(occ_t):
+		for st: Dictionary in entites[occ_t].get("statuts", []):
+			if str(st.id) == "traque" and str(st.get("source", "")) == e.id:
+				return Grille.distance(e.pos, cible) >= int(plan.portee.x) and Grille.distance(e.pos, cible) <= int(plan.portee.y)
 	if plan.geometrie == "soi":
 		return true
 	var d := Grille.distance(e.pos, cible)
@@ -8631,6 +8637,52 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 						a_touche = true
 						EventBus.emettre(&"journal", [&"journal.invocation", {"nom": e.name_key, "contenu": "tile_content." + str(iv.contenu) + ".name", "x": t.x, "y": t.y, "ticks": iv.duree_ticks}])
 						EventBus.emettre(&"tile_changed", [t])
+			"ressource":   # Modules : les noyaux qui déplacent des points (mana, endurance, PV, jauge de sang)
+				var rs: Dictionary = plan.parametres.get("ressource", {})
+				if not rs.is_empty():
+					var sur_soi: bool = str(rs.get("cible", "")) == "soi"
+					var vises: Array[Dictionary] = ([e] as Array[Dictionary]) if sur_soi else touchees
+					for c in vises:
+						if not c.vivant:
+							continue
+						if rs.has("mana"):
+							c.mana = clampi(int(c.mana) + int(rs.mana), 0, int(c.mana_max))
+						if rs.has("endurance"):
+							c.endurance = clampi(int(c.endurance) + int(rs.endurance), 0, int(c.endurance_max))
+						if rs.has("sang"):   # L'Écarlate : la jauge monte d'un cran
+							c["sang"] = mini(int(regles.r.talents.jauge_de_sang.max), int(c.get("sang", 0)) + int(rs.sang) * int(regles.r.talents.jauge_de_sang.max) / 4)
+						if rs.has("purge"):   # retire un statut négatif, le premier trouvé
+							for st: Dictionary in c.statuts.duplicate():
+								if "negatif" in statuts_defs.get(st.id, {}).get("tags", []) or "controle" in statuts_defs.get(st.id, {}).get("tags", []):
+									_retirer_statut(c, str(st.id))
+									EventBus.emettre(&"journal", [&"journal.purge", {"nom": c.name_key, "statut": statuts_defs[st.id].name_key}])
+									break
+						if rs.has("sante") and int(rs.sante) != 0:
+							if int(rs.sante) < 0:
+								_appliquer_degats(c, -int(rs.sante), "", {"type": "ressource", "element": {}})
+							else:
+								c.sante = mini(int(c.sante_max), int(c.sante) + int(rs.sante))
+						a_touche = true
+						if premiere.is_empty():
+							premiere = c
+					if rs.has("vol_mana"):   # Ponction : le mana pris à la cible revient au lanceur
+						for c in touchees:
+							if c.id == e.id or not c.vivant:
+								continue
+							var vole := mini(int(c.mana), int(rs.vol_mana))
+							c.mana = int(c.mana) - vole
+							e.mana = mini(int(e.mana_max), int(e.mana) + vole)
+							EventBus.emettre(&"journal", [&"journal.ponction", {"nom": e.name_key, "def": c.name_key, "mana": vole}])
+							break
+					if rs.has("transfert_pv"):   # Transfert : le lanceur donne ses propres PV, 1:1
+						for c in touchees:
+							if c.id == e.id or not c.vivant or ennemis(e, c):
+								continue
+							var don := mini(int(rs.transfert_pv), maxi(0, int(e.sante) - 1))
+							e.sante = int(e.sante) - don
+							c.sante = mini(int(c.sante_max), int(c.sante) + don)
+							EventBus.emettre(&"journal", [&"journal.transfert", {"nom": e.name_key, "def": c.name_key, "pv": don}])
+							break
 			"saisie":   # Empoigne : la première cible vivante adjacente est saisie (Talents de classe — Le Porteur)
 				for c in touchees:
 					if c.vivant and c.id != e.id and _saisir(e, c.id, tick_de(e), false):

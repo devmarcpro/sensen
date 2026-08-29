@@ -16,8 +16,15 @@
   "cout_mana": 0,
   "cout_endurance": 0,
   "effets": [
-    "statut"
+    "ressource"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "ressource": {
+      "mana": 25,
+      "cible": "soi",
+      "rompt_si_touche": true
+    }
+  }
 }

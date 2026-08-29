@@ -16,13 +16,13 @@
   "cout_mana": 6,
   "cout_endurance": 0,
   "effets": [
-    "soin"
+    "ressource"
   ],
   "forme": null,
   "portee": null,
   "effet": {
-    "soin": {
-      "source": "pv_porteur"
+    "ressource": {
+      "transfert_pv": 15
     }
   }
 }
