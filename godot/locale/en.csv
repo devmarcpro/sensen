@@ -2010,3 +2010,9 @@ journal.suiveur_fin,"{nom} will not leave the territory and returns to their pos
 affixe.wuxing_amplification.nom,{base} amplified ({element} ×{pct} %)
 affixe.wuxing_transmutation.nom,{base} of transmutation ({element} → {vers})
 journal.arrachage,"the storm tears away ({x},{y})"
+functionality.pelle.name,Shovel
+functionality.seau.name,Bucket
+item.proto_pelle.name,Iron shovel
+item.proto_seau.name,Wooden bucket
+item.craft_pelle.name,Shovel
+recipe.fabriquer_seau.name,Make a bucket

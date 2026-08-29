@@ -181,6 +181,43 @@ for sid, st in statuses.items():
         if cible.startswith("stat:") and cible[5:] not in STATS:
             probs["statut -> stat inconnue"].append("%s -> %s" % (sid, cible))
 
+# 15. quetes : pattern connu du progresseur, tags du selecteur reellement passes par le code, guilde qui existe
+QUEST_PATTERNS = ("tuer", "donjon", "livrer", "construire", "fabriquer", "vendre", "explorer")
+TAGS_CONSTRUIRE = ("meuble", "station", "mur")
+KINDS_FABRIQUER = ("composant", "objet", "potion", "plat", "materiau")
+quests, guilds = cat("quest_templates"), cat("guilds")
+tags_creatures = set()
+for c in creatures.values():
+    tags_creatures.update(str(t) for t in c.get("tags", []))
+tags_creatures.add("hostile")   # pose par le camp, pas par la fiche
+for qid, q in quests.items():
+    pat = str(q.get("pattern", ""))
+    if pat not in QUEST_PATTERNS:
+        probs["quete -> pattern inconnu"].append("%s -> %s" % (qid, pat))
+    if q.get("guild") and str(q["guild"]) not in guilds:
+        probs["quete -> guilde inconnue"].append("%s -> %s" % (qid, q["guild"]))
+    sel = q.get("target_selector", {})
+    for t in sel.get("tags_any", []):
+        t = str(t)
+        if pat == "construire" and t not in TAGS_CONSTRUIRE:
+            probs["quete construire -> tag jamais passe"].append("%s -> %s" % (qid, t))
+        if pat == "tuer" and t not in tags_creatures:
+            probs["quete tuer -> tag qu'aucune creature ne porte"].append("%s -> %s" % (qid, t))
+    for t in sel.get("kinds_any", []):
+        if pat == "fabriquer" and str(t) not in KINDS_FABRIQUER:
+            probs["quete fabriquer -> kind jamais passe"].append("%s -> %s" % (qid, t))
+    for it in sel.get("items_any", []):
+        if str(it) not in items:
+            probs["quete livrer -> objet inconnu"].append("%s -> %s" % (qid, it))
+
+# 16. outils de recolte : toute categorie citee par un materiau doit etre portee par une fonctionnalite
+fonctionnalites = cat("functionalities")
+outils = set(str(f.get("outil", "")) for f in fonctionnalites.values() if f.get("outil"))
+for mid, m in materials.items():
+    tc = (m.get("harvest") or {}).get("tool_category") or ""
+    if tc and str(tc) not in outils:
+        probs["materiau -> outil qu'aucune fonctionnalite ne porte"].append("%s -> %s" % (mid, tc))
+
 for k in sorted(probs):
     print("\n== %s (%d)" % (k, len(probs[k])))
     for v in probs[k][:12]:

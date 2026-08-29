@@ -1,0 +1,16 @@
+{
+  "name_key": "functionality.seau.name",
+  "kind": "outil",
+  "hands": 1,
+  "combat_skill": "contondant",
+  "degats_des": "1d3",
+  "crit_range": 20,
+  "vitesse_base": 3.0,
+  "portee": 1.0,
+  "portee_min": 1,
+  "type_degats": "contondant",
+  "volume": 3.0,
+  "poids_reference": 1.5,
+  "outil": "seau",
+  "genre_grammatical": "ms"
+}

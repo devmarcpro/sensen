@@ -1,0 +1,16 @@
+{
+  "name_key": "functionality.pelle.name",
+  "kind": "outil",
+  "hands": 1,
+  "combat_skill": "contondant",
+  "degats_des": "1d4",
+  "crit_range": 20,
+  "vitesse_base": 3.5,
+  "portee": 1.0,
+  "portee_min": 1,
+  "type_degats": "contondant",
+  "volume": 2.0,
+  "poids_reference": 2.2,
+  "outil": "pelle",
+  "genre_grammatical": "fs"
+}

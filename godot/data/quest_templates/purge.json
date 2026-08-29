@@ -1,6 +1,6 @@
 {
   "guild": "prospecteurs",
-  "rank_min": 1,
+  "rank_min": 2,
   "pattern": "donjon",
   "target_selector": {
     "tags_any": [

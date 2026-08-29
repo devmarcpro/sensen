@@ -38,6 +38,7 @@ func _ready() -> void:
 	test_village()
 	test_village_vivant()
 	test_reputation_et_quetes()
+	test_rang_de_guilde()
 	test_compagnons()
 	test_territoire()
 	test_agriculture_et_boutique()
@@ -1100,6 +1101,21 @@ func test_recolte() -> void:
 		if s.items[uid].get("materiau", "") == "tungstene":
 			tung = true
 	verifier(tung, "le filon donne son matériau")
+	# La pelle : dix-sept matériaux (terre, sable, eau, os…) exigeaient un outil qui n'existait pas.
+	var pelle := s.generer_objet("proto_pelle", 1, {}, "commun", 0)
+	j.sac.append(pelle.uid)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "equiper", "objet": pelle.uid}), "équiper la pelle")
+	s.grille.poser_contenu(mur, "mur")
+	s.grille.materiaux[s.grille.idx(mur)] = "terre"
+	var xp_t: int = int(j.xp_competences.get("terrassement", 0))
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "creuser", "vers": mur}), "creuser la terre à la pelle")
+	var terre := false
+	for uid in j.sac:
+		if s.items[uid].get("materiau", "") == "terre":
+			terre = true
+	verifier(terre and int(j.xp_competences.get("terrassement", 0)) > xp_t, "la pelle récolte la terre et donne l'XP de Terrassement")
 
 
 # ---------------------------------------------------------------- Étape 6.3 : stations et transformations plates
@@ -1108,7 +1124,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 68, "9 stations, 68 recettes plates (18 transformations, 24 meubles, 9 stations, 3 plats, 14 potions)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 69, "9 stations, 69 recettes plates (18 transformations, 24 meubles, 9 stations, 3 plats, 14 potions, le seau)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -4851,6 +4867,45 @@ func test_compagnons() -> void:
 		s._vieillir_semaine(k * 1000 + 7)
 	verifier(not vieux.vivant, "un PNJ de 30 ans au-delà de son espérance meurt de vieillesse")
 	s.monde.fermer()
+
+
+## rank_min (Gabarit de quête) : les quêtes au-dessus du rang du joueur ne sont pas offertes.
+func test_rang_de_guilde() -> void:
+	var s := Simulation.new(4242)
+	s.charger_camp({}, Vector2i(512, 512))
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var garde := s.ajouter("garde_village", j.pos + Vector2i(2, 0), "ia")
+	if not ("quetes" in garde.tags):
+		garde.tags.append("quetes")
+	garde["village"] = "Bourg-Test"
+	garde.social.relations[j.id] = 50
+	var reserves := ["donjon", "purge"]   # les deux gabarits passés à rank_min 2
+	var vus_novice: Array = []
+	var vus_maitre: Array = []
+	var semaine := int(GameData.config("planete").corruption.ticks_par_semaine)
+	for k in 24:
+		s.horloge_monde.ticks = semaine * (k + 1) + 1
+		for q in s.quetes_offertes(garde, j):
+			if not vus_novice.has(str(q.gabarit)):
+				vus_novice.append(str(q.gabarit))
+	j["guildes"] = {}
+	for gid in GameData.catalogues.quest_templates.keys():
+		j.guildes[str(GameData.catalogues.quest_templates[gid].guild)] = {"xp": 9999, "rang": 4}
+	for k in 24:
+		s.horloge_monde.ticks = semaine * (k + 100) + 1
+		for q in s.quetes_offertes(garde, j):
+			if not vus_maitre.has(str(q.gabarit)):
+				vus_maitre.append(str(q.gabarit))
+	var fuite := false
+	for r in reserves:
+		if vus_novice.has(r):
+			fuite = true
+	verifier(not fuite and vus_novice.size() > 4, "novice : aucune quête de rang 2 offerte (%d gabarits vus)" % vus_novice.size())
+	var atteint := false
+	for r in reserves:
+		if vus_maitre.has(r):
+			atteint = true
+	verifier(atteint, "maître : les quêtes de donjon s'ouvrent")
 
 
 # ---------------------------------------------------------------- Étape 9.C : réputation, information, quêtes

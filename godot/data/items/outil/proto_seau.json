@@ -1,0 +1,16 @@
+{
+  "name_key": "item.proto_seau.name",
+  "type": "outil",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "functionality": "seau",
+  "durete_base": 8,
+  "qualite": 1.0,
+  "element": "bois",
+  "tags": [
+    "outil",
+    "prototype"
+  ],
+  "materiau": "chene",
+  "genre_grammatical": "ms"
+}

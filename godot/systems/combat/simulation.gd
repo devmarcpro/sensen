@@ -917,7 +917,7 @@ func _terrasser(e: Dictionary, vers: Vector2i, sens: int, tick: int) -> bool:
 		return false
 	if sens > 0:
 		var fonct: Dictionary = fonctionnalites.get(str(Etres.arme(e, items).get("functionality", "")), {})
-		if str(fonct.get("outil", "")) != str(tr.outil_elever):
+		if not (str(fonct.get("outil", "")) in tr.outils_elever):   # pioche ou pelle (Destruction du terrain)
 			EventBus.emettre(&"journal", [&"journal.terrasser_outil", {}])
 			return false
 	if e.endurance < int(tr.endurance):
@@ -4579,8 +4579,13 @@ func quetes_offertes(pnj: Dictionary, e: Dictionary) -> Array:
 		rng.seed = hash([graine, "quetes", pnj.id, semaine])
 		var ids: Array = []
 		for gid0 in GameData.catalogues.quest_templates.keys():
-			if not pnj.has("guilde") or str(GameData.catalogues.quest_templates[gid0].guild) == str(pnj.guilde):
-				ids.append(gid0)
+			var g0: Dictionary = GameData.catalogues.quest_templates[gid0]
+			if pnj.has("guilde") and str(g0.guild) != str(pnj.guilde):
+				continue
+			# rank_min (Gabarit de quête) : 1 = novice … 5 = maître ; les rangs internes sont indexés à 0.
+			if int(g0.get("rank_min", 1)) > int(e.get("guildes", {}).get(str(g0.guild), {}).get("rang", 0)) + 1:
+				continue
+			ids.append(gid0)
 		ids.sort()
 		if ids.is_empty():
 			return pnj.quetes

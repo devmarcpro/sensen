@@ -968,7 +968,10 @@
     "xp": 5,
     "h_min": 0,
     "h_max": 20,
-    "outil_elever": "pioche"
+    "outils_elever": [
+      "pioche",
+      "pelle"
+    ]
   },
   "armes_fantomes": {
     "_doc": "Armes fantomatiques : lame invoquée d'élément pur, ×degats_mult, cout_mana à l'invocation, entretien_mana toutes les entretien_ticks ; durete = durete_reference × (1 + volonte/volonte_div + niveau(competence)/niveau_div).",

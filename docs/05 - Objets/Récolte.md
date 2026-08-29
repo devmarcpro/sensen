@@ -41,6 +41,9 @@ XP gagnée par bloc récolté = durete_materiau
 > [!success] Précisé le 2026-08-28 — les plantes sauvages
 > Contenu de tuile `plante` (franchissable, destructible, tag `vegetation`) portant un matériau végétal (lin, chanvre, coton, paille) : se récolte à la **faucille** (`proto_faucille`, dans le coffre de départ et le loot) par un clic adjacent, selon la même formule (Herboristerie). Les biomes déclarent leurs `plantes` comme leur `vegetation`.
 
+> [!success] Corrigé le 2026-08-29 — trois outils de récolte que rien ne portait
+> Même contrôle que pour les stats fantômes, appliqué aux `harvest.tool_category` des matériaux : **dix-sept matériaux** exigeaient un outil qu'**aucune fonctionnalité** ne fournissait — `pelle` (glace, neige, argile, gravier, sable, terre, terre fertile, tourbe), `seau` (eau, eau salée, boue, sève, huile, goudron, lave) et `dague` (os, os massif). Creuser ces tuiles marchait, mais ne **récoltait rien** : ni matériau, ni XP, jamais. Deux fonctionnalités de plus (`pelle`, `seau`), leurs objets (`proto_pelle`, `proto_seau`, `craft_pelle` assemblé comme la pioche) et une recette de menuiserie pour le seau ; la **dague** reçoit `outil: "dague"` — on récolte les os à la lame, pas au pic. Le **talus** accepte désormais la pelle autant que la pioche, comme le disait déjà [[Destruction du terrain]] (`outil_elever` devient `outils_elever`, une liste). `tools/audit_donnees.py` vérifie que toute catégorie d'outil citée par un matériau est portée par au moins une fonctionnalité.
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Catégories de matériaux]], [[Progression par l'usage]], [[Qualité d'artisanat]]
 - **Alimente** : [[Stratification verticale]], [[Rôles de cases]], [[Population et exploitation]]

@@ -399,6 +399,12 @@ journal.rebondit,"l'outil rebondit : {materiau} est trop dur pour lui"
 journal.effrite,"{nom} abat le mur ; sans outil, {materiau} s'effrite"
 item.materiau_brut.name,Matériau brut
 item.proto_pioche.name,Pioche de fer
+functionality.pelle.name,Pelle
+functionality.seau.name,Seau
+item.proto_pelle.name,Pelle de fer
+item.proto_seau.name,Seau de bois
+item.craft_pelle.name,Pelle
+recipe.fabriquer_seau.name,Fabriquer un seau
 functionality.pioche.name,Pioche
 tile_content.filon.name,Filon
 station.etabli.name,Établi

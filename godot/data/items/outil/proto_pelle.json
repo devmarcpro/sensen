@@ -1,0 +1,16 @@
+{
+  "name_key": "item.proto_pelle.name",
+  "type": "outil",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "functionality": "pelle",
+  "durete_base": 22,
+  "qualite": 1.0,
+  "element": "metal",
+  "tags": [
+    "outil",
+    "prototype"
+  ],
+  "materiau": "fer",
+  "genre_grammatical": "fs"
+}

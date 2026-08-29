@@ -1,0 +1,17 @@
+{
+  "name_key": "recipe.fabriquer_seau.name",
+  "station": "etabli",
+  "craft_skill": "menuiserie",
+  "inputs": [
+    {
+      "material": "chene",
+      "forme": "planche",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "item": "proto_seau",
+    "amount": 1
+  },
+  "fuel": null
+}
