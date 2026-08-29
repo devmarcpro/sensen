@@ -8,7 +8,7 @@
   "cumule": false,
   "modifiers": [
     {
-      "cible": "stat:esprit",
+      "cible": "stat:volonte",
       "add": 3
     },
     {

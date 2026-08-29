@@ -155,6 +155,32 @@ for mid, m in modules.items():
     if str(m.get("module_type", "")) in ("liaison", "declencheur") and not m.get("effet"):
         probs["module -> liaison/declencheur sans effet"].append(mid)
 
+# 14. les six stats : tout nom cite ailleurs est un point donne dans le vide
+STATS = ("force", "dexterite", "endurance", "volonte", "perception", "charisme")
+def _stats_de(d):
+    for cle in ("bonus_stats", "potentiel", "stats"):
+        v = d.get(cle)
+        if isinstance(v, dict):
+            for k in v.keys():
+                yield cle, str(k)
+for cid, c in list(classes.items()) + list(races.items()):
+    for cle, nom in _stats_de(c):
+        if cle == "bonus_stats" and nom not in STATS:
+            probs["classe/race -> stat inconnue"].append("%s -> %s" % (cid, nom))
+for iid, it in items.items():
+    for cle, nom in _stats_de(it):
+        if cle == "potentiel" and nom not in STATS:
+            probs["objet -> stat inconnue"].append("%s -> %s" % (iid, nom))
+for pid, pl in plants.items():
+    for cle, nom in _stats_de(pl):
+        if cle == "potentiel" and nom not in STATS:
+            probs["plante -> stat inconnue"].append("%s -> %s" % (pid, nom))
+for sid, st in statuses.items():
+    for m in st.get("modifiers", []):
+        cible = str(m.get("cible", ""))
+        if cible.startswith("stat:") and cible[5:] not in STATS:
+            probs["statut -> stat inconnue"].append("%s -> %s" % (sid, cible))
+
 for k in sorted(probs):
     print("\n== %s (%d)" % (k, len(probs[k])))
     for v in probs[k][:12]:

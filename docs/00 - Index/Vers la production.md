@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] « Agilité » n'existe pas (bug, 2026-08-29)
+> Deux classes, une tomate et le Masque du Renard donnaient des points dans une stat inexistante — perdus. Reversés sur Dextérité, et l'audit vérifie désormais les noms de stats.
 > [!important] Deux modules qui ne partaient jamais (2026-08-29)
 > Dérobade et Meute n'avaient pas de champ `effet` : l'assembleur les ignorait en silence. Corrigé, et le test assemble désormais une vraie séquence au lieu d'un plan fabriqué à la main.
 > [!important] Alternance, le dernier module non résolu (2026-08-29)

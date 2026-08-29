@@ -1,8 +1,7 @@
 {
   "name_key": "classe.le_masque.name",
   "bonus_stats": {
-    "agilite": 2,
-    "dexterite": 1
+    "dexterite": 3
   },
   "equipement": [],
   "ratelier": [],

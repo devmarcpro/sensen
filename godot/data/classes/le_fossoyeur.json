@@ -1,8 +1,7 @@
 {
   "name_key": "classe.le_fossoyeur.name",
   "bonus_stats": {
-    "volonte": 2,
-    "esprit": 1
+    "volonte": 3
   },
   "equipement": [],
   "ratelier": [],

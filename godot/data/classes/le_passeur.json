@@ -1,8 +1,8 @@
 {
   "name_key": "classe.le_passeur.name",
   "bonus_stats": {
-    "esprit": 2,
-    "agilite": 1
+    "dexterite": 1,
+    "volonte": 2
   },
   "equipement": [],
   "ratelier": [],
