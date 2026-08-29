@@ -23,5 +23,6 @@
   "wuxing": {
     "bois": 0.6,
     "eau": 0.4
-  }
+  },
+  "distillat": "potion_antipoison"
 }

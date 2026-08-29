@@ -24,5 +24,6 @@
     "bois": 0.6,
     "metal": 0.2,
     "eau": 0.2
-  }
+  },
+  "distillat": "potion_mana"
 }

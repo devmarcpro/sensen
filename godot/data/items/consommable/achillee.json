@@ -23,5 +23,6 @@
   "wuxing": {
     "bois": 0.7,
     "terre": 0.3
-  }
+  },
+  "distillat": "potion_soin"
 }

@@ -22,5 +22,6 @@
     "bois": 0.5,
     "eau": 0.3,
     "terre": 0.2
-  }
+  },
+  "distillat": "potion_vision_nocturne"
 }

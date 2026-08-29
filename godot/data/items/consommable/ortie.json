@@ -23,5 +23,6 @@
   "wuxing": {
     "bois": 0.8,
     "feu": 0.2
-  }
+  },
+  "distillat": "potion_resistance_froid"
 }

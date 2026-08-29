@@ -5230,7 +5230,9 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 	var plan := {"id": r.id, "recette": r, "station": str(r.station), "faisable": true, "entrees": [], "sortie": {}}
 	var mat_sortie := str(r.output.get("material", ""))
 	var deja: Dictionary = {}   # les piles déjà retenues par une entrée optionnelle
-	var potion_double: bool = a_talent(e, "fiole_vive") and "potion" in GameData.catalogues.items.get(str(r.get("output", {}).get("item", "")), {}).get("tags", [])
+	# Fiole vive : le double d'ingrédients pour deux fioles — vrai pour toute recette d'alchimie,
+	# y compris celles dont la sortie n'est connue qu'une fois l'ingrédient choisi (`depuis_entree`).
+	var potion_double: bool = a_talent(e, "fiole_vive") and ("potion" in GameData.catalogues.items.get(str(r.get("output", {}).get("item", "")), {}).get("tags", []) or str(r.station) == "alambic")
 	for entree in r.inputs:
 		var besoin := int(entree.amount) * (2 if potion_double else 1)   # Fiole vive : le double d'ingrédients
 		var forme := str(entree.get("forme", "brut"))
@@ -5276,6 +5278,15 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 		elif mat_sortie.is_empty() and trouvee.has("materiau"):
 			mat_sortie = str(trouvee.materiau)   # la sortie garde le matériau de l'entrée (lingot de fer…)
 	plan.sortie = {"materiau": mat_sortie, "forme": str(r.output.get("forme", "brut")), "quantite": int(r.output.amount), "item": str(r.output.get("item", ""))}
+	if r.output.has("depuis_entree"):   # la sortie se lit sur l'INGRÉDIENT (Craft compositionnel) : une seule
+		plan.sortie.item = ""            # recette « distiller une herbe » plutôt qu'une par plante du jeu
+		for entree in plan.entrees:
+			if str(entree.filtre) != str(r.output.depuis_entree) or entree.pile.is_empty():
+				continue
+			var fiche: Dictionary = GameData.catalogues.items.get(str(entree.pile.get("base", "")), {})
+			plan.sortie.item = str(fiche.get(str(r.output.champ), ""))
+		if plan.sortie.item.is_empty():
+			plan.faisable = false
 	if r.output.has("par_locus") and plan.faisable:   # la quantité suit un locus du spécimen consommé (finesse du fil)
 		for entree in plan.entrees:
 			if entree.pile.has("genome"):
@@ -5365,12 +5376,12 @@ func _fabriquer(e: Dictionary, rid: String, tick: int) -> bool:
 	var sortie: Dictionary = plan.sortie
 	var n := regles.niveau(e.competences_eff, str(r.craft_skill))
 	e.compteur = tick + _ticks_avec_statuts(e, maxi(1, ceili(float(regles.r.craft.ticks_base) / regles.skill_factor(n))))
-	if r.output.has("item"):   # un objet fini (meuble, station, plat) : XP = dureté des entrées (10 par plat)
+	if not str(sortie.get("item", "")).is_empty():   # un objet fini (meuble, station, plat, potion) : XP = dureté des entrées
 		var nom_obj := ""
 		var rng := RandomNumberGenerator.new()
 		rng.seed = hash([graine, "plat", objets.size(), r.id])
 		for k in int(sortie.quantite):
-			var inst := generer_objet(str(r.output.item), 1, {}, "commun", 0)
+			var inst := generer_objet(str(sortie.item), 1, {}, "commun", 0)
 			if not inst.is_empty():
 				if inst.get("type", "") == "consommable":   # un plat : qualité A.3 sur Cuisine, empilé
 					inst.qualite = snappedf(regles.qualite_craft(regles.niveau(e.competences_eff, str(r.craft_skill)), rng, regles.resserrement_recette(niveau_recette(e, str(r.id)))), 0.01)
@@ -5404,7 +5415,7 @@ func _fabriquer(e: Dictionary, rid: String, tick: int) -> bool:
 						for st in entree.pile.get("potentiel", {}).keys():
 							pot[st] = int(pot.get(st, 0)) + int(entree.pile.potentiel[st])
 					inst.potentiel = pot
-					var pile := _pile_objet(e, str(r.output.item))
+					var pile := _pile_objet(e, str(sortie.item))
 					if not pile.is_empty():
 						pile.quantite = int(pile.quantite) + 1
 						items.erase(inst.uid)
@@ -5413,7 +5424,7 @@ func _fabriquer(e: Dictionary, rid: String, tick: int) -> bool:
 				e.sac.append(inst.uid)
 				nom_obj = inst.name_key
 		gagner_xp(e, str(r.craft_skill), maxi(10, durete_entrees))
-		var genre_obj: Dictionary = GameData.catalogues.items.get(str(r.output.item), {})
+		var genre_obj: Dictionary = GameData.catalogues.items.get(str(sortie.item), {})
 		var tags_q: Array = ["objet"]
 		if genre_obj.get("type", "") == "consommable":
 			tags_q = ["plat"] if not ("potion" in genre_obj.get("tags", [])) else ["potion"]

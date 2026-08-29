@@ -1,10 +1,10 @@
 {
-  "name_key": "recipe.distiller_belladone.name",
+  "name_key": "recipe.distiller_herbe.name",
   "station": "alambic",
   "craft_skill": "alchimie",
   "inputs": [
     {
-      "item": "belladone",
+      "tag": "herbe",
       "forme": "",
       "amount": 2
     },
@@ -15,7 +15,8 @@
     }
   ],
   "output": {
-    "item": "potion_vision_nocturne",
+    "depuis_entree": "herbe",
+    "champ": "distillat",
     "amount": 1
   },
   "fuel": null

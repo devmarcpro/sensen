@@ -465,7 +465,6 @@ ui.etat_grille_neige," · neige"
 ui.etat_grille_gel," · gel"
 status.respiration_aquatique_potion.name,Respiration aquatique
 item.potion_respiration_aquatique.name,Potion de respiration aquatique
-recipe.distiller_roseau.name,Distiller roseau (respiration aquatique)
 journal.coule,trop chargé pour nager : tu coulerais
 journal.noyade,"{nom} manque d'air ({degats})"
 journal.feu_dans_eau,pas de Feu sous l'eau
@@ -480,11 +479,6 @@ item.potion_resistance_froid.name,Potion de résistance au froid
 item.potion_vision_nocturne.name,Potion de vision nocturne
 item.potion_antipoison.name,Antipoison
 item.poison_de_lame.name,Poison de lame
-recipe.distiller_menthe.name,Distiller menthe (résistance au feu)
-recipe.distiller_ortie.name,Distiller ortie (résistance au froid)
-recipe.distiller_belladone.name,Distiller belladone (vision nocturne)
-recipe.distiller_camomille.name,Distiller camomille (antipoison)
-recipe.distiller_amanite.name,Distiller amanite (poison de lame)
 journal.lame_empoisonnee,"{nom} : la lame empoisonne {cible}"
 status.gel.name,Gel
 status.confusion.name,Confusion
@@ -906,27 +900,22 @@ item.oeil.name,Œil
 item.potion_perception.name,Potion de perception
 status.potion_perception.name,Potion de perception
 status.potion_perception_forte.name,Potion de perception forte
-recipe.distiller_oeil.name,Distiller un œil (perception)
 item.peau.name,Peau
 item.potion_endurance.name,Potion d'endurance
 status.potion_endurance.name,Potion d'endurance
 status.potion_endurance_forte.name,Potion d'endurance forte
-recipe.distiller_peau.name,Distiller peau (endurance)
 item.griffe.name,Griffe
 item.potion_force.name,Potion de force
 status.potion_force.name,Potion de force
 status.potion_force_forte.name,Potion de force forte
-recipe.distiller_griffe.name,Distiller griffe (force)
 item.dent.name,Dent
 item.potion_dexterite.name,Potion de dextérité
 status.potion_dexterite.name,Potion de dextérité
 status.potion_dexterite_forte.name,Potion de dextérité forte
-recipe.distiller_dent.name,Distiller dent (dextérité)
 item.os.name,Os
 item.potion_volonte.name,Potion de volonté
 status.potion_volonte.name,Potion de volonté
 status.potion_volonte_forte.name,Potion de volonté forte
-recipe.distiller_os.name,Distiller os (volonté)
 ui.ecran.conquerir,Conquérir ce village
 journal.conquete_gardes,"les gardes tiennent encore ({gardes} contre {seuil}) — affaiblis-les d'abord"
 journal.conquete_reussie,"{village} passe sous ta bannière ({jet} contre DD {dd})"
@@ -1035,9 +1024,6 @@ item.potion_mana.name,Potion de mana
 item.potion_charisme.name,Potion de charisme
 status.potion_charisme.name,Potion de charisme
 status.potion_charisme_forte.name,Potion de charisme (forte)
-recipe.distiller_achillee.name,Distiller achillée (soin)
-recipe.distiller_sauge.name,Distiller sauge (mana)
-recipe.distiller_fleurs.name,Distiller fleurs sauvages (charisme)
 item.ble.name,Blé
 plant.orge.name,Orge
 item.orge.name,Orge
@@ -2026,3 +2012,5 @@ titre.sino.guilde_maitre.m,Grand Maître
 titre.sino.guilde_maitre.f,Grande Maîtresse
 culture.sino.name,Sino
 # --- fin cultures ---
+recipe.distiller_herbe.name,Distiller une herbe
+recipe.distiller_partie.name,Distiller une partie de bête

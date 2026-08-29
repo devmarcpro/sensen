@@ -16,11 +16,13 @@
     "consommable",
     "empilable",
     "champignon",
-    "ingredient"
+    "ingredient",
+    "herbe"
   ],
   "wuxing": {
     "terre": 0.5,
     "feu": 0.3,
     "eau": 0.2
-  }
+  },
+  "distillat": "poison_de_lame"
 }

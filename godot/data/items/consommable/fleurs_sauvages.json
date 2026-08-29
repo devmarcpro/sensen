@@ -18,10 +18,12 @@
     "consommable",
     "empilable",
     "decorative",
-    "ingredient"
+    "ingredient",
+    "herbe"
   ],
   "wuxing": {
     "bois": 0.6,
     "feu": 0.4
-  }
+  },
+  "distillat": "potion_charisme"
 }

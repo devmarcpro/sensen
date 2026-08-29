@@ -16,10 +16,12 @@
     "consommable",
     "empilable",
     "decorative",
-    "ingredient"
+    "ingredient",
+    "herbe"
   ],
   "wuxing": {
     "bois": 0.5,
     "eau": 0.5
-  }
+  },
+  "distillat": "potion_respiration_aquatique"
 }

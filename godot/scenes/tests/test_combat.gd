@@ -1124,7 +1124,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 69, "9 stations, 69 recettes plates (18 transformations, 24 meubles, 9 stations, 3 plats, 14 potions, le seau)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 57, "9 stations, 57 recettes plates (19 transformations, 24 meubles, 9 stations, 3 plats, 2 distillations par catégorie)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -1865,7 +1865,7 @@ func test_alchimie() -> void:
 	for o in [griffe, ble, alambic]:
 		j.sac.append(o.uid)
 	s.attente[j.id] = true
-	verifier(s.intention(j.id, {"type": "fabriquer", "recette": "distiller_griffe"}) and not s._pile_objet(j, "potion_force").is_empty(), "distiller une griffe et du blé : une potion de force")
+	verifier(s.intention(j.id, {"type": "fabriquer", "recette": "distiller_partie"}) and not s._pile_objet(j, "potion_force").is_empty(), "distiller une griffe et du blé : une potion de force (la sortie vient de l'ingrédient)")
 	verifier(not (griffe.uid in j.sac) and not (ble.uid in j.sac), "les ingrédients sont consommés")
 	var potion := s._pile_objet(j, "potion_force")
 	potion.qualite = 1.5
@@ -3624,7 +3624,7 @@ func test_potions_completes() -> void:
 		j.compteur = h.ticks
 		s.pas(j.horloge)
 	verifier(Etres.a_statut_tag(loup, "poison", s.statuts_defs), "poison de lame : le loup est empoisonné par le coup")
-	verifier(GameData.catalogues.recipes.has("distiller_amanite") and GameData.catalogues.items.has("poison_de_lame"), "l'amanite se distille en poison de lame")
+	verifier(str(GameData.entree("items", "amanite").distillat) == "poison_de_lame" and GameData.catalogues.items.has("poison_de_lame"), "l'amanite se distille en poison de lame")
 
 
 # ---------------------------------------------------------------- Les 17 statuts
@@ -3710,7 +3710,7 @@ func test_plantes() -> void:
 	j.sac.append(ps.uid)
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "manger", "objet": ps.uid}) and int(j.sante) >= 12, "la potion de soin rend 2d6 (%d)" % int(j.sante))
-	verifier(GameData.catalogues.recipes.has("distiller_achillee") and GameData.catalogues.recipes.distiller_achillee.output.item == "potion_soin", "l'achillée se distille en potion de soin")
+	verifier(str(GameData.entree("items", "achillee").distillat) == "potion_soin" and GameData.catalogues.recipes.has("distiller_herbe"), "l'achillée se distille en potion de soin")
 	s.monde.fermer()
 
 
@@ -4603,7 +4603,7 @@ func test_reforge_et_fiole() -> void:
 	for st in ami.statuts:
 		touche = touche or str(st.id).begins_with("potion_force")
 	verifier(touche, "Fiole vive : l'allié adjacent reçoit la potion")
-	var plan := s._plan_recette(j, GameData.catalogues.recipes.distiller_griffe)
+	var plan := s._plan_recette(j, GameData.catalogues.recipes.distiller_partie)
 	verifier(int(plan.entrees[0].besoin) == 2, "Fiole vive : la distillation demande le double (%d)" % int(plan.entrees[0].besoin))
 
 

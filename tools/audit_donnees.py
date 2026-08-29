@@ -249,6 +249,20 @@ for cid, c in creatures.items():
     for k, bloc in enumerate(c.get("stock_marchand", [])):
         _verifier_filtre("marchand %s [%d]" % (cid, k), bloc["filtre"])
 
+# 18. sorties derivees (`depuis_entree`) : le champ cite doit exister sur au moins un objet, et pointer un objet reel
+for iid, it in items.items():
+    d = it.get("distillat")
+    if d and str(d) not in items:
+        probs["objet -> distillat inconnu"].append("%s -> %s" % (iid, d))
+for rid, r in recipes.items():
+    out = r.get("output", {})
+    if "depuis_entree" not in out:
+        continue
+    champ, tag = str(out.get("champ", "")), str(out["depuis_entree"])
+    porteurs = [i for i, it in items.items() if it.get(champ) and tag in it.get("tags", [])]
+    if not porteurs:
+        probs["recette derivee sans ingredient qui porte le champ"].append("%s -> %s/%s" % (rid, tag, champ))
+
 for k in sorted(probs):
     print("\n== %s (%d)" % (k, len(probs[k])))
     for v in probs[k][:12]:

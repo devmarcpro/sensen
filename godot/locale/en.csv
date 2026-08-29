@@ -1121,20 +1121,6 @@ recipe.allier_inox.name,Alloy stainless steel
 recipe.couler_beton.name,Pour concrete
 recipe.cuire_brique.name,Fire bricks
 recipe.cuire_brique_refractaire.name,Fire a firebrick
-recipe.distiller_achillee.name,Distil yarrow (healing)
-recipe.distiller_amanite.name,Distil fly agaric (blade poison)
-recipe.distiller_belladone.name,Distil belladonna (night vision)
-recipe.distiller_camomille.name,Distil chamomile (antidote)
-recipe.distiller_dent.name,Distil a tooth (dexterity)
-recipe.distiller_fleurs.name,Distil wildflowers (charisma)
-recipe.distiller_griffe.name,Distil a claw (strength)
-recipe.distiller_menthe.name,Distil mint (fire resistance)
-recipe.distiller_oeil.name,Distil an eye (perception)
-recipe.distiller_ortie.name,Distil nettle (cold resistance)
-recipe.distiller_os.name,Distil bone (will)
-recipe.distiller_peau.name,Distil hide (endurance)
-recipe.distiller_roseau.name,Distil reed (water breathing)
-recipe.distiller_sauge.name,Distil sage (mana)
 recipe.fabriquer_bombe.name,Make a bomb
 recipe.faire_papier.name,Make paper
 recipe.filer_soie.name,Spin silk (kills the chrysalis)
@@ -2016,3 +2002,5 @@ item.proto_pelle.name,Iron shovel
 item.proto_seau.name,Wooden bucket
 item.craft_pelle.name,Shovel
 recipe.fabriquer_seau.name,Make a bucket
+recipe.distiller_herbe.name,Distil a herb
+recipe.distiller_partie.name,Distil a beast part
