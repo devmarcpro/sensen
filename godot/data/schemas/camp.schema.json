@@ -2,9 +2,6 @@
   "type": "object",
   "required": [
     "taille",
-    "arbres",
-    "rochers",
-    "filons",
     "coffre_depart"
   ]
 }

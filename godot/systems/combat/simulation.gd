@@ -4598,8 +4598,8 @@ func quetes_offertes(pnj: Dictionary, e: Dictionary) -> Array:
 				"count": count, "fait": 0, "niveau": niveau, "or": int(g.reward.gold_per_target_level) * niveau * count, "xp": int(g.reward.guild_xp) * count,
 				"text_key": str(g.text_key), "donneur": pnj.id, "village": str(pnj.get("village", "")), "cellule": monde.cellule_de(pnj.pos) if monde != null else Vector2i.ZERO, "etat": "offerte"}
 			if str(g.pattern) == "livrer":   # une livraison : un objet du pool, vers un autre village connu (sinon le sien)
-				var pool: Array = g.target_selector.get("items_any", ["pain"])
-				q["objet"] = str(pool[rng.randi() % pool.size()])
+				# Le bien à livrer : une CATÉGORIE (denrées empilables), jamais une liste d'ids (Gabarit de quête)
+				q["objet"] = GameData.tirer("items", g.target_selector.get("filtre", {"types_any": ["consommable"]}), rng)
 				var autres: Array = []
 				for nom_v in monde.villages.keys():
 					if nom_v != str(pnj.get("village", "")):

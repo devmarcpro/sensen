@@ -1,38 +1,6 @@
 {
-  "_doc": "Le camp de base (docs: Claims et persistance, callout du 2026-08-28) : ce qui se greffe sur la cellule de départ générée par la surface — le coffre de départ. arbres/rochers/filons ne servent plus (le biome décide) et restent pour mémoire.",
+  "_doc": "Le camp de base (docs: Claims et persistance, callout du 2026-08-28) : ce qui se greffe sur la cellule de départ générée par la surface — le coffre de départ, un kit choisi (décision de design, pas une catégorie).",
   "taille": 128,
-  "arbres": {
-    "essences": [
-      "chene",
-      "pin",
-      "frene",
-      "bouleau",
-      "hetre"
-    ],
-    "nombre": 40,
-    "bosquet": 5
-  },
-  "rochers": {
-    "materiaux": [
-      "pierre",
-      "granit",
-      "calcaire",
-      "gres"
-    ],
-    "nombre": 14,
-    "amas": 4
-  },
-  "filons": {
-    "materiaux": [
-      "cuivre",
-      "etain",
-      "fer",
-      "argile",
-      "sable"
-    ],
-    "nombre": 10,
-    "amas": 3
-  },
   "coffre_depart": [
     "proto_hache",
     "proto_pioche",

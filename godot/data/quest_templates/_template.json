@@ -1,6 +1,5 @@
 {
-  "_doc": "Gabarit de quête (docs: Gabarit de quête / B.7).",
-  "_doc": "Gabarit de quête (Gabarit de quête). pattern : tuer | donjon | livrer (items_any) | construire (tags_any meuble/station/mur) | fabriquer (kinds_any composant/objet/potion/plat/materiau) | vendre | explorer.",
+  "_doc": "Gabarit de quête (Gabarit de quête). pattern : tuer | donjon | livrer (target_selector.filtre : un filtre de categorie, cf. GameData.filtrer) | construire (tags_any meuble/station/mur) | fabriquer (kinds_any composant/objet/potion/plat/materiau) | vendre | explorer.",
   "guild": "guerriers",
   "rank_min": 1,
   "pattern": "tuer",
