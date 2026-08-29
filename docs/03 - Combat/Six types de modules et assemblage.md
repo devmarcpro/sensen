@@ -32,6 +32,13 @@ La décision structurante : la FORME est séparée de l'EFFET. C'est ce qui fait
 
 Le même vocabulaire produit une attaque, un contrôle de zone, un piège et un soutien.
 
+> [!success] Décidé et codé le 2026-08-29 — **aucune limite d'assemblage** : le prix et le résultat sont les seules bornes
+> **Instruction du designer** : « tous les modules devraient pouvoir s'assembler entre eux, no limit ; la seule limite c'est le **résultat** (soigner les ennemis, se suicider) et les **stats** — certains sorts sont si ridicules qu'ils demandent une quantité de mana astronomique ». L'exemple donné fait loi : *une invocation portée par une forme large invoque **une créature par tuile**, et coûte donc plusieurs fois le prix — on peut remplir une salle de bombes d'un seul geste, à condition d'en avoir le mana.*
+> **Ce qui disparaît.** Les deux refus d'assemblage — « deux noyaux dans la même séquence » et « deux formes » — n'existent plus. **Plusieurs noyaux** : chacun applique sa charge, avec ses dés, ses effets et **son coût**, dans l'ordre de la séquence (*Alternance* garde son rôle : elle fait alterner les noyaux d'un emploi à l'autre au lieu de les cumuler). **Plusieurs formes** : les tuiles s'**additionnent** (union), et la portée retenue est la plus longue. Il ne reste que deux erreurs, structurelles : un module **inconnu**, et une séquence **sans aucun noyau** (il n'y aurait rien à exécuter).
+> **Le prix suit la surface.** Un effet qui s'instancie **par tuile** — invocation, zone au sol, remodelage du terrain — multiplie la ressource du sort par le **nombre de tuiles de la forme** (`Simulation._facteur_surface`). Poser une bombe sur une tuile coûte son prix ; en poser vingt en coûte vingt fois. Les effets qui frappent des **êtres** (dégâts, soin, statuts) gardent le prix de leur noyau : la forme les fait payer par son propre surcoût, et la cible n'est pas garantie.
+> **Le résultat est la seule morale.** Le soin ne vérifie plus le camp — un sort mal composé **soigne l'ennemi**, et c'est au joueur de le voir. Les dégâts n'épargnent plus le lanceur quand la forme le couvre : on peut **se tuer soi-même**. Décision assumée : ces deux garde-fous étaient un jugement de goût du code sur ce que le joueur a le droit de fabriquer, et la note dit l'inverse.
+> **Ce que ça ouvre** : une séquence *Carré + Bombe + Bombe* pose deux charges sur chaque tuile du carré ; *Nuée + Écho de chair* peuple une salle ; *Soi + Cataclysme + Baume* se soigne au centre de son propre cratère. Le mana décide, pas l'assembleur.
+
 ## Liens
 - **Dépend de** : [[Vocabulaire des modules — six axes]], [[Structure compétences-modules-slots]]
 - **Alimente** : [[Familles de capacités de la grille]], [[Modules]], [[Jauge de chaîne Wu Xing]]

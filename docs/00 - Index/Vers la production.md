@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] Assemblage sans limite (2026-08-29)
+> Plus aucun refus de composition : plusieurs noyaux, plusieurs formes, tout se cumule. Les effets **par tuile** (invocations, zones, terrain) coûtent leur prix **× le nombre de tuiles** — une salle de bombes en un geste, si le mana suit. Le soin ne vérifie plus le camp et les dégâts n'épargnent plus le lanceur : **le résultat est la seule limite**. **À juger** : est-ce grisant ou permissif au point d'être illisible ?
 > [!important] Analyse du catalogue de modules (2026-08-29)
 > Six noyaux qu'**aucun livre ne pouvait donner** (corrigé), et une **matrice 5 × 3** de noyaux de dégâts qui n'est qu'une seule idée répétée quinze fois. **À trancher** : garder la matrice (chaque case est une munition à collectionner), la réduire à trois noyaux paramétrés par l'élément, ou différencier les paliers autrement que par le dé. Détail dans [[Modules]].
 > [!important] Les modules deviennent des charges (2026-08-29)

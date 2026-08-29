@@ -2019,9 +2019,9 @@ zone.balise,Beacon
 journal.zone_posee,"{nom} lays: {zone}"
 journal.zone_blesse,"{nom} crosses the razor ground: {degats}"
 journal.glisse,"{nom} slips on the slick"
-journal.tourelle_posee,"{nom} deploys a turret"
+journal.tourelle_posee,"{nom} deploys {n} turret(s)"
 journal.pas_de_cadavre,"{nom} finds no corpse to raise"
-journal.echo_de_chair,"{nom} calls an echo of flesh: {creature}"
+journal.echo_de_chair,"{nom} calls {n} echo(es) of flesh"
 status.envol.name,Flight
 status.trempe.name,Tempering
 status.rupture.name,Rupture
@@ -2133,3 +2133,4 @@ bonus.portee,range
 bonus.taille,size
 bonus.mult,x
 bonus.ressource_mult,resource x
+journal.bombes_posees,"{nom} lays {n} charge(s), primed in {retard} ticks"

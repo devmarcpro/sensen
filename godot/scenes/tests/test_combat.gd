@@ -131,6 +131,7 @@ func _ready() -> void:
 	test_bombes()
 	test_composer_capacites()
 	test_charges_de_modules()
+	test_assemblage_sans_limite()
 	test_creation_de_sorts()
 	test_zones_au_sol()
 	test_conditions_et_modificateurs()
@@ -551,7 +552,8 @@ func test_capacites() -> void:
 	verifier(p.ticks == 1 and p.ressource == 4, "Étincelle + Vivacité : max(1, 3−3) tick · 3×1.3 ≈ 4 mana")
 	p = cap.assembler(["soi", "baume"], 5, "1d4", {})
 	verifier(p.ticks == 6 and p.ressource == 10 and p.geometrie == "soi", "[Soi]+[Baume] : 6 ticks · 10 mana")
-	verifier(not cap.assembler(["ligne", "flamme", "gel"], 5, "1d4", {}).erreurs.is_empty(), "deux noyaux = erreur")
+	var deux := cap.assembler(["ligne", "flamme", "gel"], 5, "1d4", {})
+	verifier(deux.erreurs.is_empty() and deux.charges_sup.size() == 1 and deux.ressource == 16, "deux noyaux : aucune limite, chacun paie (8 + 8 = %d mana)" % deux.ressource)
 	verifier(Capacites.lire_surcout("×1.3").mult == 1.3 and Capacites.lire_surcout("−2").plus == -2, "lecture des surcoûts")
 	# Formes : la ligne de 4, le cône qui s'élargit, le carré plein
 	var s := nouvelle_sim("plaine_au_talus")
@@ -2692,7 +2694,7 @@ func test_creation_de_sorts() -> void:
 	# 3. les refus attendus
 	verifier(not s.capacites.assembler(["point"], 10, "1d4", {}, {}).erreurs.is_empty(), "sans noyau : erreur")
 	verifier(not s.capacites.assembler(["module_qui_n_existe_pas"], 10, "1d4", {}, {}).erreurs.is_empty(), "module inconnu : erreur")
-	verifier(not s.capacites.assembler(["etincelle", "gel"], 10, "1d4", {}, {}).erreurs.is_empty(), "deux noyaux sans Alternance : erreur")
+	verifier(s.capacites.assembler(["etincelle", "gel"], 10, "1d4", {}, {}).erreurs.is_empty(), "deux noyaux sans Alternance : accepté, les deux charges partent")
 
 	# 4. 300 séquences tirées au hasard dans TOUT le catalogue : jamais de plan à moitié construit
 	var rng := RandomNumberGenerator.new()
@@ -2791,6 +2793,55 @@ func test_creation_de_sorts() -> void:
 
 
 ## Les charges de modules (Grimoires et manuels) : lire en donne, chaque lancer en consomme une par module.
+## Aucune limite d'assemblage (Six types de modules) : le prix et le résultat sont les seules bornes.
+func test_assemblage_sans_limite() -> void:
+	var s := Simulation.new(929)
+	s.charger_donjon("ruine", 929, 9, 1)
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	for dx in range(-3, 4):
+		for dy in range(-3, 4):
+			var t: Vector2i = j.pos + Vector2i(dx, dy)
+			if s.grille.dans(t) and t != j.pos:
+				s.grille.contenu[s.grille.idx(t)] = 0
+				s.grille.hauteurs[s.grille.idx(t)] = s.grille.h(j.pos)
+	var plan_de := func(mods: Array) -> Dictionary:
+		var pl := s.capacites.assembler(mods, 10, "1d4", {}, j.competences_eff)
+		pl["name_key"] = ""
+		pl["arme"] = {}
+		pl["fonct"] = {}
+		return pl
+	# 1. deux formes : les tuiles s'additionnent
+	var p_deux: Dictionary = plan_de.call(["ligne", "croix", "etincelle"])
+	verifier(p_deux.erreurs.is_empty() and p_deux.formes_sup.size() == 1, "deux formes : acceptées, la seconde s'ajoute")
+	var n_ligne: int = s.tuiles_du_plan(j, plan_de.call(["ligne", "etincelle"]), j.pos + Vector2i(2, 0)).size()
+	var n_union: int = s.tuiles_du_plan(j, p_deux, j.pos + Vector2i(2, 0)).size()
+	verifier(n_union > n_ligne, "l'union couvre plus que la ligne seule (%d > %d)" % [n_union, n_ligne])
+	# 2. une bombe par tuile, et le prix × le nombre de tuiles
+	var p_bombe: Dictionary = plan_de.call(["carre", "bombe"])
+	var n_tuiles: int = s.tuiles_du_plan(j, p_bombe, j.pos + Vector2i(2, 0)).size()
+	verifier(s._facteur_surface(j, p_bombe, j.pos + Vector2i(2, 0)) == n_tuiles and n_tuiles >= 9, "le facteur de surface = %d tuiles" % n_tuiles)
+	var n_bombes0: int = s.bombes.size()
+	s._executer_capacite(j, p_bombe, j.pos + Vector2i(2, 0))
+	verifier(s.bombes.size() - n_bombes0 == n_tuiles, "un carré de Bombe pose %d charges d'un geste" % (s.bombes.size() - n_bombes0))
+	s.bombes.clear()
+	var p_etin: Dictionary = plan_de.call(["carre", "etincelle"])
+	verifier(s._facteur_surface(j, p_etin, j.pos + Vector2i(2, 0)) == 1, "les dégâts ne paient pas par tuile : la forme suffit")
+	# 3. le résultat est la seule morale : le soin touche l'ennemi, les dégâts touchent le lanceur
+	var loup := s.ajouter("loup", j.pos + Vector2i(1, 0), "ia")
+	loup.sante = 5
+	loup.sante_max = 100
+	j.mana = 9999
+	s._executer_capacite(j, plan_de.call(["point", "baume"]), loup.pos)
+	verifier(int(loup.sante) > 5, "un Baume sur l'ennemi le soigne : le sort ne juge pas")
+	j.sante = int(j.sante_max)
+	var p_self: Dictionary = plan_de.call(["anneau", "soi", "flamme"])
+	s._executer_capacite(j, p_self, j.pos)
+	verifier(int(j.sante) < int(j.sante_max), "Anneau + Soi + Flamme : le lanceur se brûle lui-même")
+	# 4. il ne reste que deux erreurs structurelles
+	verifier(not s.capacites.assembler(["point", "carre"], 10, "1d4", {}, {}).erreurs.is_empty(), "sans noyau : toujours une erreur")
+	verifier(not s.capacites.assembler(["nexiste_pas", "etincelle"], 10, "1d4", {}, {}).erreurs.is_empty(), "module inconnu : toujours une erreur")
+
+
 func test_charges_de_modules() -> void:
 	var s := Simulation.new(818)
 	s.charger_donjon("ruine", 818, 8, 1)
@@ -3054,7 +3105,7 @@ func test_alternance() -> void:
 	var j := joueur_de(s)
 	# Deux noyaux sans Alternance : erreur d'assemblage
 	var sans := s.capacites.assembler(["point", "etincelle", "gel"], 5, "1d6", {"metal": 1.0}, {})
-	verifier(not sans.erreurs.is_empty(), "deux noyaux sans Alternance : refusé (%s)" % str(sans.erreurs))
+	verifier(sans.erreurs.is_empty() and sans.charges_sup.size() == 1, "deux noyaux sans Alternance : les deux se cumulent (Alternance les fait alterner)")
 	# Avec Alternance : deux plans, un par noyau
 	var plan := s.capacites.assembler(["point", "alternance", "etincelle", "gel"], 5, "1d6", {"metal": 1.0}, {})
 	verifier(plan.erreurs.is_empty(), "avec Alternance : la séquence s'assemble (%s)" % str(plan.erreurs))
@@ -4407,7 +4458,8 @@ func test_cataclysme() -> void:
 		s.entites[id].compteur = 500
 	s._engager_combat(j, loup)
 	var h := s.horloge_de(j)
-	j.mana = 300
+	j.mana = 99999   # un cataclysme 7 × 7 remodèle 49 tuiles : 49 × 40 = 1 960 mana — le prix suit la surface
+	j.mana_max = 99999
 	j.endurance = j.endurance_max
 	_capacite_test(s, j, "k", ["carre", "cataclysme", "ampleur", "ampleur"])
 	var centre: Vector2i = j.pos + Vector2i(0, -3)

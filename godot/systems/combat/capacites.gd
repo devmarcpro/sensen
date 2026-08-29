@@ -58,7 +58,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 		"geometrie": "point", "portee": Vector2i(1, 1), "taille": 1, "ligne_de_vue": true,
 		"ticks": 0, "monnaie": "", "ressource": 0, "des": null, "des_bonus": 0, "mult": 1.0,
 		"elements": {}, "effets": [], "conditions": [], "drapeaux": {}, "parametres": {},
-		"liaisons": [], "charge_suivante": {},
+		"liaisons": [], "charge_suivante": {}, "charges_sup": [], "formes_sup": [],
 	}
 	var alternance := false   # Alternance (Modules) : la séquence a droit à deux noyaux
 	var noyaux := 0
@@ -104,7 +104,23 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				if not plan.noyau.is_empty():
 					if alternance:
 						continue   # Alternance : le second noyau est assemblé dans le plan `alt`
-					plan.erreurs.append("deux noyaux dans la même séquence (" + id + ")")
+					# Aucune limite d'assemblage (Six types de modules) : le noyau de plus est une charge de
+					# plus, avec ses dés, ses effets et son coût. Le prix, pas l'assembleur, est la borne.
+					var sup := {"noyau": m, "effets": m.get("effets", []).duplicate(),
+						"des": des_arme if m.get("power_base") == "arme" else m.get("power_base"),
+						"elements": element_arme.duplicate() if (m.get("power_base") == "arme" or m.get("element_special") == "arme") else m.get("elements", {}).duplicate(),
+						"parametres": m.get("effet", {}).duplicate(), "des_bonus": 0, "mult": 1.0,
+						"drapeaux": plan.drapeaux, "liaisons": [], "modules": [id], "name_key": m.name_key}
+					plan.charges_sup.append(sup)
+					plan.ticks += ticks_arme if m.get("power_base") == "arme" else ticks_module(int(m.cout_ticks), id, niveaux)
+					var sf_sup := 1.0 + float(niveaux.get(id, 0)) * par_niveau
+					if int(m.get("cout_mana", 0)) > 0 and plan.monnaie in ["", "mana"]:
+						plan.monnaie = "mana"
+						plan.ressource += roundi(float(m.cout_mana) / sf_sup)
+					elif int(m.get("cout_endurance", 0)) > 0:
+						if plan.monnaie == "":
+							plan.monnaie = "endurance"
+						plan.ressource += roundi(float(m.cout_endurance) / sf_sup)
 					continue
 				plan.noyau = m
 				var arme: bool = m.get("power_base") == "arme"
@@ -123,7 +139,10 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				plan.parametres = m.get("effet", {}).duplicate()
 			"forme":
 				if not plan.forme.is_empty():
-					plan.erreurs.append("deux formes dans la même séquence (" + id + ")")
+					# Deux formes : les tuiles s'additionnent (union), la portée retenue est la plus longue.
+					plan.formes_sup.append({"geometrie": str(m.geometrie), "taille": int(m.taille_base)})
+					plan.portee.y = maxi(int(plan.portee.y), int(m.portee_base[1]))
+					plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 					continue
 				plan.forme = m
 				plan.geometrie = str(m.geometrie)

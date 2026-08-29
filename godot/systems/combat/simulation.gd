@@ -8389,6 +8389,7 @@ func _lancer_capacite(e: Dictionary, index: int, cible: Variant, tick: int) -> b
 		e.compteur = tick + maxi(1, roundi(float(plan.ticks) * (1.0 - float(fausse.ticks_rendus))))
 		EventBus.emettre(&"journal", [&"journal.condition_fausse", {"nom": e.name_key, "capacite": plan.name_key, "condition": fausse.name_key}])
 		return true
+	plan.ressource = int(plan.ressource) * _facteur_surface(e, plan, cible_pos)   # le prix suit la surface
 	_payer(e, plan)
 	_consommer_charges(e, plan)   # Grimoires et manuels : une charge par module de la séquence
 	e.compteur = tick + int(plan.ticks)
@@ -8462,7 +8463,7 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 					break
 	if plan.drapeaux.has("element_vers"):   # Transmutation : l'élément du noyau devient celui choisi
 		plan.elements = {str(plan.drapeaux.element_vers): 1.0}
-	var tuiles := Capacites.tuiles_de_forme(grille, plan.geometrie, e.pos, cible_pos, int(plan.taille))
+	var tuiles := tuiles_du_plan(e, plan, cible_pos)
 	var touchees := _entites_dans(e, plan, tuiles)
 	if int(plan.drapeaux.get("emprise", 0)) > 0:   # Emprise : ce qui est touché ne se déplace plus
 		for c in touchees:
@@ -8514,6 +8515,11 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 				res.premiere = r.premiere
 	elif not plan.noyau.is_empty():
 		res = _appliquer_charge(e, charge, touchees, tuiles, cible_pos, prev)
+	for sup: Dictionary in plan.get("charges_sup", []):   # les noyaux de plus, chacun sa charge
+		var r_sup := _appliquer_charge(e, sup, touchees, tuiles, cible_pos, {})
+		res.a_touche = bool(res.get("a_touche", false)) or bool(r_sup.get("a_touche", false))
+		if res.get("premiere", {}).is_empty():
+			res.premiere = r_sup.premiere
 	e["sans_trace"] = false   # le drapeau ne vaut que pour la capacité qui vient de partir
 	e["dernier_coup_touche"] = res.a_touche   # Enchaînement : la prochaine capacité saura si celle-ci a porté
 	if bool(plan.drapeaux.get("ligature", false)):   # Ligature : affûts et tourelles de la forme tirent tout de suite
@@ -8652,8 +8658,8 @@ func _entites_dans(e: Dictionary, plan: Dictionary, tuiles: Array[Vector2i]) -> 
 		var c: Dictionary = entites[occ]
 		if not c.vivant:
 			continue
-		if plan.geometrie == "point" and c.id == e.id:
-			continue
+		if plan.geometrie == "point" and c.id == e.id and plan.get("formes_sup", []).is_empty():
+			continue   # « point » vise autrui ; toute autre forme peut couvrir le lanceur — on peut se tuer
 		if plan.ligne_de_vue and plan.geometrie != "point" and plan.geometrie != "soi" and not grille.ligne_de_vue(e.pos, t):
 			continue
 		res.append(c)
@@ -8683,9 +8689,7 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 	for effet: String in plan.effets:
 		match effet:
 			"degats":
-				for c in touchees:
-					if c.id == e.id:
-						continue
+				for c in touchees:   # le lanceur n'est plus épargné : une forme qui le couvre le brûle (Six types de modules)
 					var d := _degats_capacite(e, c, plan, prev)
 					a_touche = true
 					if premiere.is_empty():
@@ -8697,8 +8701,8 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 					if plan.drapeaux.has("vampirique"):
 						e.sante = mini(e.sante_max, e.sante + roundi(float(d.degats) * float(plan.drapeaux.vampirique)))
 			"soin":
-				for c in touchees:
-					if c.camp != e.camp:
+				for c in touchees:   # le camp n'est plus vérifié : un sort mal composé soigne l'ennemi
+					if not c.vivant:
 						continue
 					var soin := des.jet(plan.des, int(plan.des_bonus))
 					if not prev.is_empty() and prev.resout:
@@ -8899,15 +8903,22 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 func _invoquer(e: Dictionary, mode: String, tuiles: Array[Vector2i], cible_pos: Vector2i, plan: Dictionary, tick: int) -> bool:
 	var iv: Dictionary = regles.r.get("invocations", {})
 	match mode:
-		"bombe":   # une charge posée sur la tuile visée, qui amorce les bombes adjacentes en explosant
+		"bombe":   # une charge PAR TUILE de la forme : on peut miner une salle entière, au prix fort
 			var b: Dictionary = iv.get("bombe", {})
-			bombes.append({"pos": cible_pos, "fin": tick + int(b.get("retard_ticks", 20)), "horloge": str(e.horloge),
-				"puissance": float(b.get("puissance", 40.0)), "rayon": int(b.get("rayon", 2)),
-				"degats": str(b.get("degats", "3d6")), "source": e.id})
-			EventBus.emettre(&"journal", [&"journal.bombe_lancee", {"nom": e.name_key, "retard": int(b.get("retard_ticks", 20))}])
-			return true
+			var posees := 0
+			for q in tuiles:
+				if not grille.dans(q):
+					continue
+				bombes.append({"pos": q, "fin": tick + int(b.get("retard_ticks", 20)), "horloge": str(e.horloge),
+					"puissance": float(b.get("puissance", 40.0)), "rayon": int(b.get("rayon", 2)),
+					"degats": str(b.get("degats", "3d6")), "source": e.id})
+				posees += 1
+			if posees > 0:
+				EventBus.emettre(&"journal", [&"journal.bombes_posees", {"nom": e.name_key, "n": posees, "retard": int(b.get("retard_ticks", 20))}])
+			return posees > 0
 		"tourelle":   # un affût autonome : il tire tout seul, avec l'élément de l'arme du lanceur
 			var t: Dictionary = iv.get("tourelle", {})
+			var n_tour := 0
 			for q in tuiles:
 				if not grille.dans(q) or not grille.occupant(q).is_empty() or grille.bloque_passage(q):
 					continue
@@ -8915,10 +8926,11 @@ func _invoquer(e: Dictionary, mode: String, tuiles: Array[Vector2i], cible_pos: 
 				affuts.append({"pos": q, "source": e.id, "prochain": tick + int(t.get("cadence_ticks", 6)),
 					"fin": tick + int(t.get("duree_ticks", 120)), "degats": str(t.get("degats", "1d6")),
 					"portee": int(t.get("portee", 6)), "elements": plan.elements.duplicate()})
-				EventBus.emettre(&"journal", [&"journal.tourelle_posee", {"nom": e.name_key}])
 				EventBus.emettre(&"tile_changed", [q])
-				return true
-			return false
+				n_tour += 1   # une tourelle par tuile libre de la forme
+			if n_tour > 0:
+				EventBus.emettre(&"journal", [&"journal.tourelle_posee", {"nom": e.name_key, "n": n_tour}])
+			return n_tour > 0
 		"releve":   # un cadavre présent se relève au service du lanceur (la réputation en pâtit)
 			for q in tuiles:
 				for x in entites.values():
@@ -8927,22 +8939,61 @@ func _invoquer(e: Dictionary, mode: String, tuiles: Array[Vector2i], cible_pos: 
 							return true
 			EventBus.emettre(&"journal", [&"journal.pas_de_cadavre", {"nom": e.name_key}])
 			return false
-		"creature":   # Écho de chair : une créature alliée temporaire, sur une tuile libre
+		"creature":   # Écho de chair : une créature alliée temporaire PAR TUILE libre de la forme
 			var c: Dictionary = iv.get("echo_de_chair", {})
-			var libre := _tuile_libre_autour(cible_pos)
-			if libre == Vector2i(-1, -1):
-				return false
-			var x := ajouter(str(c.get("creature", "loup")), libre, "ia")
-			if x.is_empty():
-				return false
-			x.camp = e.camp
-			x["maitre"] = e.id
-			x["fin_invocation"] = tick + int(c.get("duree_ticks", 80))
-			x.horloge = e.horloge
-			x.compteur = tick + 1
-			EventBus.emettre(&"journal", [&"journal.echo_de_chair", {"nom": e.name_key, "creature": x.name_key}])
+			var n_inv := 0
+			for q in tuiles:
+				if not grille.dans(q) or not grille.occupant(q).is_empty() or grille.bloque_passage(q):
+					continue
+				var x := ajouter(str(c.get("creature", "loup")), q, "ia")
+				if x.is_empty():
+					continue
+				x.camp = e.camp
+				x["maitre"] = e.id
+				x["fin_invocation"] = tick + int(c.get("duree_ticks", 80))
+				x.horloge = e.horloge
+				x.compteur = tick + 1
+				n_inv += 1
+			if n_inv == 0:   # aucune tuile de la forme n'est libre : la plus proche fait l'affaire
+				var libre := _tuile_libre_autour(cible_pos)
+				if libre == Vector2i(-1, -1):
+					return false
+				var x2 := ajouter(str(c.get("creature", "loup")), libre, "ia")
+				if x2.is_empty():
+					return false
+				x2.camp = e.camp
+				x2["maitre"] = e.id
+				x2["fin_invocation"] = tick + int(c.get("duree_ticks", 80))
+				x2.horloge = e.horloge
+				x2.compteur = tick + 1
+				n_inv = 1
+			EventBus.emettre(&"journal", [&"journal.echo_de_chair", {"nom": e.name_key, "n": n_inv}])
 			return true
 	return false
+
+
+## Les tuiles couvertes par un plan : la forme principale, **plus** celles ajoutées par les formes
+## suivantes (aucune limite d'assemblage — Six types de modules). Union, sans doublon.
+func tuiles_du_plan(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -> Array[Vector2i]:
+	var tuiles := Capacites.tuiles_de_forme(grille, plan.geometrie, e.pos, cible_pos, int(plan.taille))
+	for f: Dictionary in plan.get("formes_sup", []):
+		for t in Capacites.tuiles_de_forme(grille, str(f.geometrie), e.pos, cible_pos, int(f.taille)):
+			if not tuiles.has(t):
+				tuiles.append(t)
+	return tuiles
+
+
+## Le facteur de surface d'un plan (Six types de modules) : un effet qui s'instancie **par tuile**
+## (invocation, zone au sol, remodelage) coûte son prix autant de fois qu'il y a de tuiles.
+func _facteur_surface(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -> int:
+	var par_tuile := false
+	for lot in ([plan] as Array) + plan.get("charges_sup", []):
+		for ef in lot.get("effets", []):
+			if str(ef) in ["invocation", "terrain"]:
+				par_tuile = true
+	if not par_tuile:
+		return 1
+	return maxi(1, tuiles_du_plan(e, plan, cible_pos).size())
 
 
 ## Balise (Modules) : les dés de plus que la tuile visée accorde au porteur qui l'a marquée.
