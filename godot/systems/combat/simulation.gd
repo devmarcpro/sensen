@@ -384,6 +384,20 @@ func _zones_a_l_entree(e: Dictionary, pos: Vector2i, tick: int) -> void:
 				var deg := des.jet(str(z.params.get("degats", "1d6")))
 				EventBus.emettre(&"journal", [&"journal.zone_blesse", {"nom": e.name_key, "degats": deg}])
 				_appliquer_degats(e, deg, str(z.source), {"type": "zone", "element": z.get("elements", {})})
+			"portail":   # Portail : deux tuiles appairées, on entre par l'une et on sort par l'autre
+				var paire: Array[Dictionary] = []
+				for z2 in zones:
+					if str(z2.type) == "portail" and str(z2.source) == str(z.source) and z2.pos != pos:
+						paire.append(z2)
+				if not paire.is_empty():
+					var sortie: Vector2i = paire.back().pos
+					if grille.dans(sortie) and grille.occupant(sortie).is_empty() and not grille.bloque_passage(sortie):
+						grille.liberer(e.pos)
+						e.pos = sortie
+						grille.placer(e.id, sortie)
+						EventBus.emettre(&"journal", [&"journal.portail_traverse", {"nom": e.name_key}])
+			"vapeur":   # Vapeur : le nuage applique son statut à ce qui entre
+				appliquer_statut(e, str(z.params.get("statut", "confusion")), int(z.params.get("statut_ticks", 20)), str(z.source))
 			"glissante":   # Nappe : on glisse d'une tuile de plus, dans son élan
 				var suite: Vector2i = pos + e.orientation
 				if grille.dans(suite) and grille.occupant(suite).is_empty() and not grille.bloque_passage(suite) and grille.cout_pas(pos, suite, Etres.est_volant(e)) >= 0:
@@ -7636,8 +7650,37 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 			_appliquer_degats(att, renvoi, cible.id, {"type": "reflet", "element": {}})
 	if a_talent(cible, "sans_chair") and str(detail.get("type", "")) in ["contondant", "tranchant", "perforant"]:   # le Spectre
 		degats = roundi(float(degats) * float(regles.r.talents.sans_chair.physique_mult))
+	if degats > 0 and Etres.bloque_statuts(cible, "ecaille", statuts_defs):   # Écaille élémentaire : l'élément choisi ne passe pas
+		var el_dom := wuxing.dominante(detail.get("element", {}) if detail.get("element") is Dictionary else {})
+		if not el_dom.is_empty() and el_dom == str(cible.get("ecaille_element", "")):
+			EventBus.emettre(&"journal", [&"journal.ecaille", {"nom": cible.name_key, "element": "element." + el_dom}])
+			return
+	if degats > 0:   # Absorption : un matelas de PV encaisse d'abord, puis disparaît
+		var matelas := int(cible.get("absorption_pv", 0))
+		if matelas > 0:
+			var pris := mini(matelas, degats)
+			cible["absorption_pv"] = matelas - pris
+			degats -= pris
+			EventBus.emettre(&"journal", [&"journal.absorption", {"nom": cible.name_key, "degats": pris}])
+			if int(cible.absorption_pv) <= 0:
+				_retirer_statut(cible, "absorption")
+			if degats <= 0:
+				return
+	var part_communion := 1.0 - float(Etres.mult_statuts(cible, "communion", statuts_defs))   # Communion : le lanceur partage
+	if degats > 0 and part_communion > 0.0 and not str(cible.get("communion_avec", "")).is_empty():
+		var garant: Dictionary = entites.get(str(cible.communion_avec), {})
+		if garant.get("vivant", false) and garant.id != cible.id:
+			var pris_c := roundi(float(degats) * part_communion)
+			degats -= pris_c
+			EventBus.emettre(&"journal", [&"journal.communion", {"nom": garant.name_key, "def": cible.name_key, "degats": pris_c}])
+			_appliquer_degats(garant, pris_c, "", {"type": "communion", "element": {}})
 	_verser_xp(cible, degats, source, detail)
 	var avant_pct := float(cible.sante) / float(cible.sante_max)
+	var reserve := int(Etres.add_statuts(cible, "reserve", statuts_defs))   # Réserve : le soin dormant
+	if reserve > 0 and float(int(cible.sante) - degats) / float(cible.sante_max) < float(regles.r.get("soins", {}).get("reserve_seuil_pct", 30)) / 100.0:
+		cible.sante = mini(int(cible.sante_max), int(cible.sante) + reserve)
+		_retirer_statut(cible, "reserve")
+		EventBus.emettre(&"journal", [&"journal.reserve", {"nom": cible.name_key, "soin": reserve}])
 	cible.sante = maxi(0, cible.sante - degats)
 	if cible.sante > 0 and not bool(cible.get("second_souffle_pris", false)) and float(cible.sante) / float(cible.sante_max) * 100.0 < float(regles.r.uniques.second_souffle_seuil_pct):
 		var ax_ss := a_unique_ax(cible, "second_souffle")   # Second souffle : une fois par combat
@@ -7798,6 +7841,13 @@ func appliquer_statut(cible: Dictionary, id: String, duree: int, source: String,
 				s.fin = maxi(int(s.fin), tick + duree)   # rafraîchi, jamais cumulé
 				return true
 	cible.statuts.append({"id": id, "fin": tick + duree, "prochain": tick + int(d.periode_ticks), "source": source, "puissance": puissance})
+	match id:   # les statuts qui portent un compteur ou une cible (Modules)
+		"absorption":
+			cible["absorption_pv"] = int(Etres.add_statuts(cible, "absorption", statuts_defs))
+		"communion":
+			cible["communion_avec"] = source
+		"ecaille_elementaire":
+			cible["ecaille_element"] = str(cible.get("ecaille_choix", "feu"))
 	if Etres.statut_touche_stats(id, statuts_defs):
 		Etres.recalculer(cible, items, affixes_defs, regles)
 	for mod: Dictionary in d.get("modifiers", []):
@@ -8674,6 +8724,50 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 							e.mana = mini(int(e.mana_max), int(e.mana) + vole)
 							EventBus.emettre(&"journal", [&"journal.ponction", {"nom": e.name_key, "def": c.name_key, "mana": vole}])
 							break
+					if rs.has("desarme"):   # Désarmement : jet opposé, l'arme tombe sur la tuile de la cible
+						for c in touchees:
+							if c.id == e.id or not c.vivant:
+								continue
+							var arme_c := str(c.get("equipement", {}).get("main_principale", ""))
+							if arme_c.is_empty():
+								continue
+							if des.jet("1d20") + int(e.stats_eff.force) < des.jet("1d20") + int(c.stats_eff.force):
+								EventBus.emettre(&"journal", [&"journal.desarmement_rate", {"nom": c.name_key}])
+								continue
+							c.equipement.erase("main_principale")
+							c.sac.erase(arme_c)
+							_poser_contenant(c.pos, [arme_c], "butin")
+							Etres.recalculer(c, items, affixes_defs, regles)
+							EventBus.emettre(&"journal", [&"journal.desarmement", {"nom": c.name_key, "objet": nom_objet(arme_c)}])
+					if rs.has("estime"):   # Estimation : la fiche exacte de la cible, dans le journal
+						for c in touchees:
+							if c.id == e.id:
+								continue
+							EventBus.emettre(&"journal", [&"journal.estimation", {"nom": c.name_key,
+								"pv": "%d/%d" % [int(c.sante), int(c.sante_max)],
+								"element": "element." + wuxing.dominante(c.get("elements", {}) if c.get("elements") is Dictionary else {}),
+								"stats": "F%d D%d E%d V%d P%d C%d" % [int(c.stats_eff.force), int(c.stats_eff.dexterite),
+									int(c.stats_eff.endurance), int(c.stats_eff.volonte), int(c.stats_eff.perception), int(c.stats_eff.charisme)]}])
+							break
+					if rs.has("segment_de_la_cible"):   # Souffle rendu : un segment de l'élément de la cible soignée
+						for c in touchees:
+							if c.id == e.id or ennemis(e, c):
+								continue
+							var el_c: Dictionary = c.get("elements", {}) if c.get("elements") is Dictionary else {}
+							_poser_segment(e, el_c if not el_c.is_empty() else {"bois": 1.0}, tick, "soin")
+							break
+					if rs.has("releve_allie_pct"):   # Rappel à la vie : un allié tombé se relève à N % de ses PV
+						for c in touchees:
+							if c.vivant or ennemis(e, c):
+								continue
+							c.vivant = true
+							c.sante = maxi(1, int(float(c.sante_max) * float(rs.releve_allie_pct) / 100.0))
+							c.statuts.clear()
+							if grille.occupant(c.pos).is_empty():
+								grille.placer(c.id, c.pos)
+							appliquer_statut(c, "affaibli", int(statuts_defs.affaibli.duree_ticks), e.id)
+							EventBus.emettre(&"journal", [&"journal.rappel_a_la_vie", {"nom": e.name_key, "def": c.name_key}])
+							break
 					if rs.has("transfert_pv"):   # Transfert : le lanceur donne ses propres PV, 1:1
 						for c in touchees:
 							if c.id == e.id or not c.vivant or ennemis(e, c):
@@ -8766,6 +8860,10 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 		type_degats = str(plan.fonct.type_degats)
 	else:
 		var jet := des.jet(plan.des, des_bonus)
+		if Etres.bloque_statuts(e, "relance", statuts_defs):   # Pari : le second résultat s'applique, quel qu'il soit
+			jet = des.jet(plan.des, des_bonus)
+			_retirer_statut(e, "pari")
+			EventBus.emettre(&"journal", [&"journal.pari", {"nom": e.name_key, "jet": jet}])
 		d = {"jet": jet, "bruts": float(jet)}
 	var bruts: float = d.bruts * float(plan.mult)
 	var zone: Dictionary = regles.zone_de_coup(grille.h(e.pos), grille.h(c.pos))

@@ -20,5 +20,17 @@
     "statut"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "terrain": {
+      "zone": "vapeur",
+      "duree_ticks": 40,
+      "statut": "confusion",
+      "statut_ticks": 20
+    },
+    "statut": {
+      "id": "confusion",
+      "duree_ticks": 20
+    }
+  }
 }

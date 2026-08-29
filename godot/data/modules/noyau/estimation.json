@@ -16,8 +16,13 @@
   "cout_mana": 6,
   "cout_endurance": 0,
   "effets": [
-    "statut"
+    "ressource"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "ressource": {
+      "estime": true
+    }
+  }
 }

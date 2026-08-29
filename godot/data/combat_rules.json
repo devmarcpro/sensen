@@ -1082,5 +1082,9 @@
       "duree_ticks": 80,
       "creature": "loup"
     }
+  },
+  "soins": {
+    "reserve_seuil_pct": 30,
+    "_doc": "Soins dormants (Modules — Réserve) : le seuil de PV en pourcentage sous lequel la réserve se déclenche."
   }
 }

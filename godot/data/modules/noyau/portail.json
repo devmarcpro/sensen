@@ -19,5 +19,12 @@
     "terrain"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "terrain": {
+      "zone": "portail",
+      "duree_ticks": 600,
+      "paire": true
+    }
+  }
 }

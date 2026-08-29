@@ -20,5 +20,12 @@
     "statut"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "reserve",
+      "duree_ticks": 200
+    },
+    "cible": "allie"
+  }
 }

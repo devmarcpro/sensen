@@ -2641,7 +2641,7 @@ func test_creation_de_sorts() -> void:
 	verifier(executes >= 80, "%d noyaux exécutés sur une cible réelle" % executes)
 	# Chantier connu (Structure compétences-modules-slots, constat du 2026-08-29) : 47 noyaux ont un `effet`
 	# vide et ne produisent rien. Le test tient le compte et refuse qu'il AUGMENTE, comme l'audit.
-	verifier(sans_effet.size() <= 36, "noyaux sans effet visible : %d (budget 36, chantier en cours) — %s" % [sans_effet.size(), str(sans_effet.slice(0, 6))])
+	verifier(sans_effet.size() <= 34, "noyaux sans effet visible : %d (budget 34, mesure du banc) — %s" % [sans_effet.size(), str(sans_effet.slice(0, 6))])
 	verifier(j.vivant and mannequin.vivant, "le lanceur et le mannequin survivent aux 86 sorts")
 
 

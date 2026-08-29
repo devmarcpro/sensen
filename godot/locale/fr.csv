@@ -2039,3 +2039,20 @@ status.traque.name,Traque
 journal.purge,"{nom} est délivré de : {statut}"
 journal.ponction,"{nom} ponctionne {mana} de mana à {def}"
 journal.transfert,"{nom} transfère {pv} PV à {def}"
+status.absorption.name,Absorption
+status.communion.name,Communion
+status.ecaille_elementaire.name,Écaille élémentaire
+status.reserve.name,Réserve
+status.pari.name,Pari
+zone.portail,Portail
+zone.vapeur,Vapeur
+journal.absorption,"Le matelas de {nom} encaisse {degats}"
+journal.communion,"{nom} prend {degats} à la place de {def}"
+journal.ecaille,"L'écaille de {nom} annule l'élément {element}"
+journal.reserve,"La réserve de {nom} se libère : {soin}"
+journal.pari,"{nom} relance : {jet}"
+journal.desarmement,"{nom} lâche son arme : {objet}"
+journal.desarmement_rate,"{nom} garde son arme"
+journal.estimation,"{nom} — {pv} PV · {stats} · {element}"
+journal.rappel_a_la_vie,"{nom} rappelle {def} à la vie"
+journal.portail_traverse,"{nom} traverse le portail"

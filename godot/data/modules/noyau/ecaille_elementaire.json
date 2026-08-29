@@ -19,5 +19,12 @@
     "statut"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "ecaille_elementaire",
+      "duree_ticks": 30
+    },
+    "cible": "allie"
+  }
 }

@@ -16,8 +16,13 @@
   "cout_mana": 45,
   "cout_endurance": 0,
   "effets": [
-    "soin"
+    "ressource"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "ressource": {
+      "releve_allie_pct": 25
+    }
+  }
 }

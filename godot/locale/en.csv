@@ -2029,3 +2029,20 @@ status.traque.name,Mark
 journal.purge,"{nom} is freed from: {statut}"
 journal.ponction,"{nom} siphons {mana} mana from {def}"
 journal.transfert,"{nom} transfers {pv} HP to {def}"
+status.absorption.name,Absorption
+status.communion.name,Communion
+status.ecaille_elementaire.name,Elemental scale
+status.reserve.name,Reserve
+status.pari.name,Wager
+zone.portail,Portal
+zone.vapeur,Vapour
+journal.absorption,"{nom}'s buffer absorbs {degats}"
+journal.communion,"{nom} takes {degats} in place of {def}"
+journal.ecaille,"{nom}'s scale nullifies {element}"
+journal.reserve,"{nom}'s reserve releases: {soin}"
+journal.pari,"{nom} rerolls: {jet}"
+journal.desarmement,"{nom} drops their weapon: {objet}"
+journal.desarmement_rate,"{nom} keeps their weapon"
+journal.estimation,"{nom} — {pv} HP · {stats} · {element}"
+journal.rappel_a_la_vie,"{nom} calls {def} back to life"
+journal.portail_traverse,"{nom} steps through the portal"

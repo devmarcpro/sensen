@@ -16,8 +16,13 @@
   "cout_mana": 12,
   "cout_endurance": 0,
   "effets": [
-    "statut"
+    "ressource"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "ressource": {
+      "segment_de_la_cible": true
+    }
+  }
 }
