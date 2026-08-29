@@ -163,7 +163,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 				var ef: Dictionary = m.get("effet", {})
 				if ef.is_empty():
-					plan.avertissements.append("liaison non résolue dans le prototype : " + id)
+					plan.avertissements.append("liaison sans effet en données (ignorée) : " + id)
 				else:
 					plan.liaisons.append(ef.duplicate())
 			_:

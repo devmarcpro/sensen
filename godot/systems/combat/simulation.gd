@@ -8231,7 +8231,7 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 						a_touche = true
 						break
 			_:
-				pass
+				push_warning("Capacités : effet de noyau inconnu, ignoré — « %s » (%s)" % [effet, str(plan.noyau.get("id", ""))])
 	return {"a_touche": a_touche, "premiere": premiere, "tuee": tuee}
 
 
