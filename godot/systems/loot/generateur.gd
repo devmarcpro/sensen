@@ -132,8 +132,12 @@ func _composer_livre(inst: Dictionary, base: Dictionary, profondeur: int, rng: R
 		if grimoire:
 			var el := str(lv.domaines_grimoire[domaine])
 			if m.module_type == "noyau":
+				# Un noyau appartient au domaine de son élément ; **sans élément**, il est arcane. Le coût en
+				# mana ne peut pas servir de filtre : les noyaux de ressource (Méditation, Offrande…) n'en ont
+				# aucun, et aucun livre ne pouvait les donner — six noyaux étaient inatteignables.
 				var dom_m := _dominante(m.get("elements", {}))
-				if int(m.get("cout_mana", 0)) > 0 and (dom_m == el or (el == "neutre" and dom_m.is_empty())):
+				var arcane: bool = dom_m.is_empty() and int(m.get("cout_endurance", 0)) <= 0
+				if (dom_m == el and int(m.get("cout_mana", 0)) > 0) or (el == "neutre" and arcane):
 					candidats.append(id)
 			elif m.module_type in ["forme", "modificateur"] and el == "neutre":
 				candidats.append(id)

@@ -372,6 +372,39 @@ print("noyaux inertes (chantier en cours) : %d / %d slots — budget %d" % (len(
 if len(inertes) > BUDGET_INERTES:
     probs["noyaux inertes : le chantier RECULE (budget %d)" % BUDGET_INERTES] = inertes
 
+# 24. modules inatteignables : depuis que les modules sont des CHARGES (Grimoires et manuels), un module
+# qu'aucun livre, aucune classe et aucune creature ne donne est un sort que le joueur ne lancera jamais.
+livres = conf("loot_rules")["livres"]
+def _dominante(el):
+    return max(el.items(), key=lambda kv: kv[1])[0] if el else ""
+_atteignables = set()
+for _dom, _el in livres["domaines_grimoire"].items():
+    for _mid, _m in modules_cat.items():
+        _t = str(_m.get("module_type", ""))
+        if _t == "noyau":
+            _d = _dominante(_m.get("elements") or {})
+            _arcane = (not _d) and int(_m.get("cout_endurance", 0)) <= 0
+            if (_d == _el and int(_m.get("cout_mana", 0)) > 0) or (_el == "neutre" and _arcane):
+                _atteignables.add(_mid)
+        elif _t in ("forme", "modificateur") and _el == "neutre":
+            _atteignables.add(_mid)
+for _dom in livres["domaines_manuel"]:
+    for _mid, _m in modules_cat.items():
+        _t = str(_m.get("module_type", ""))
+        if _dom == "frappes" and _t == "noyau" and int(_m.get("cout_endurance", 0)) > 0: _atteignables.add(_mid)
+        if _dom == "postures" and _t == "condition": _atteignables.add(_mid)
+        if _dom == "techniques" and _t in ("declencheur", "liaison"): _atteignables.add(_mid)
+        if _dom == "maitrise" and _t in ("modificateur", "forme"): _atteignables.add(_mid)
+for _f in glob.glob(R + "classes/*.json") + glob.glob(R + "creatures/*.json"):
+    _d2 = json.load(io.open(_f, encoding="utf-8"))
+    for _m2 in _d2.get("modules_connus", []) or []:
+        _atteignables.add(str(_m2))
+    for _c2 in _d2.get("capacites", []) or []:
+        for _m3 in (_c2.get("modules", []) if isinstance(_c2, dict) else []):
+            _atteignables.add(str(_m3))
+for _mid in sorted(set(modules_cat) - _atteignables):
+    probs["module inatteignable (aucun livre, aucune classe)"].append(_mid)
+
 for k in sorted(probs):
     print("\n== %s (%d)" % (k, len(probs[k])))
     for v in probs[k][:12]:

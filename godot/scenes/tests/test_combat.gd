@@ -2824,6 +2824,24 @@ func test_charges_de_modules() -> void:
 	verifier(s.modules_sans_charge(j, {"modules": ["ampleur", "ampleur"]}).has("ampleur"), "deux fois le même module = deux charges")
 	# Une créature d'IA ne consomme rien : elle n'a pas de livres
 	verifier(s.modules_sans_charge(loup, {"modules": ["point", "etincelle"]}).is_empty(), "l'IA ne dépense pas de charges")
+	# Tout module doit avoir une source (Grimoires et manuels). Les six noyaux **sans coût** (Fiole,
+	# Méditation, Offrande, Ponction, Saignée, Second souffle) n'entraient dans aucun filtre de livre :
+	# ils sont arcanes par nature — sans élément et sans coût d'endurance. La garantie exhaustive est
+	# tenue par tools/audit_donnees.py (règle 24) ; ici on vérifie la règle qui les rend éligibles.
+	var hors_domaine: Array[String] = []
+	for mid in ["fiole", "meditation", "offrande", "ponction", "saignee", "second_souffle"]:
+		var md: Dictionary = GameData.entree("modules", mid)
+		if not md.get("elements", {}).is_empty() or int(md.get("cout_endurance", 0)) > 0:
+			hors_domaine.append(mid)
+	verifier(hors_domaine.is_empty(), "les noyaux sans coût sont arcanes, donc distribuables (%s)" % str(hors_domaine))
+	var vus := {}
+	for k in 300:   # et on le voit en tirant des grimoires : l'un d'eux au moins sort
+		for m in s.generer_objet("grimoire", 5, {}, "commun", 0).get("modules", []):
+			vus[str(m)] = true
+	var au_moins_un := false
+	for mid in ["fiole", "meditation", "offrande", "ponction", "saignee", "second_souffle"]:
+		au_moins_un = au_moins_un or vus.has(mid)
+	verifier(au_moins_un, "un grimoire arcane en contient effectivement")
 
 
 func test_composer_capacites() -> void:
