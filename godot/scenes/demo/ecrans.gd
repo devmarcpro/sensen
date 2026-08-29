@@ -68,6 +68,7 @@ var reforge_objet := ""   # Main du métal : l'objet choisi, en attente de son c
 
 
 var sequence_composee: Array = []   # la séquence en cours de composition (écran composer)
+var triche_categorie := ""   # menu de triche : le catalogue en cours de parcours
 var contexte_tuile := Vector2i(-1, -1)   # clic droit : la tuile et ses options
 var contexte_options: Array = []
 
@@ -117,6 +118,9 @@ func touche(ev: InputEventKey) -> bool:
 		return true
 	match ev.keycode:
 		KEY_ESCAPE:
+			if courant == "triche_liste":   # la sous-liste revient au menu de triche
+				ouvrir("triche")
+				return true
 			fermer()
 			return true
 		KEY_UP, KEY_DOWN:
@@ -335,6 +339,10 @@ func rafraichir() -> void:
 			_construire_entrainer(j)
 		"commerce":
 			_construire_commerce(j)
+		"triche":
+			_construire_triche(j)
+		"triche_liste":
+			_construire_triche_liste(j)
 	selection = clampi(sel, 0, maxi(0, entrees.size() - 1))
 	if entrees.size() > 0:
 		liste.select(selection)
@@ -442,6 +450,14 @@ func _action_principale() -> void:
 			fermer()
 			main._executer_option(en.opt)
 			return
+		"triche":
+			main.sim.triche(j, str(en.id))
+		"triche_catalogue":
+			triche_categorie = str(en.id)
+			ouvrir("triche_liste")
+			return
+		"triche_item":
+			main.sim.triche(j, triche_categorie, str(en.id))
 	rafraichir()
 
 
@@ -972,6 +988,52 @@ func _construire_menu(_j: Dictionary) -> void:
 			continue
 		liste.add_item(tr("ui.menu." + str(id)))
 		entrees.append({"kind": "menu", "id": str(id), "texte": ""})
+
+
+## Le menu de triche (V) — Écrans d'interface : tout obtenir, tout déclencher, sans farmer.
+## Les actions simples agissent tout de suite ; les autres ouvrent la liste d'un **catalogue**
+## (objets, matériaux, créatures, météo, statuts, races cachées) — rien n'est écrit en dur ici.
+const TRICHE_ACTIONS: Array[String] = ["or", "soin", "invincible", "competences", "talents", "modules",
+	"recettes", "heure", "semaine", "reveler", "claim", "tuer"]
+const TRICHE_CATALOGUES: Array[String] = ["objet", "materiau", "creature", "meteo", "statut", "race"]
+
+func _construire_triche(_j: Dictionary) -> void:
+	titre.text = tr("ui.ecran.triche").format({"invincible": tr("ui.triche.oui" if main.sim.invincible else "ui.triche.non")})
+	for id in TRICHE_ACTIONS:
+		liste.add_item(tr("ui.triche." + id))
+		entrees.append({"kind": "triche", "id": id, "texte": tr("ui.triche." + id)})
+	for id in TRICHE_CATALOGUES:
+		liste.add_item(tr("ui.triche." + id) + " …")
+		entrees.append({"kind": "triche_catalogue", "id": id, "texte": tr("ui.triche." + id)})
+
+
+## Les ids d'un catalogue, triés — la liste que le menu de triche parcourt.
+func _ids_triche(categorie: String) -> Array:
+	var ids: Array = []
+	match categorie:
+		"objet": ids = GameData.catalogues.items.keys()
+		"materiau": ids = GameData.catalogues.materials.keys()
+		"creature": ids = GameData.catalogues.creatures.keys()
+		"meteo": ids = GameData.catalogues.weather_states.keys()
+		"statut": ids = GameData.catalogues.status_effects.keys()
+		"race": ids = GameData.catalogues.races.keys()
+	ids.sort()
+	return ids
+
+
+func _construire_triche_liste(_j: Dictionary) -> void:
+	titre.text = tr("ui.ecran.triche_liste").format({"quoi": tr("ui.triche." + triche_categorie)})
+	for id in _ids_triche(triche_categorie):
+		var nom := str(id)
+		var fiche: Dictionary = GameData.catalogues[_CAT_TRICHE[triche_categorie]].get(id, {})
+		if fiche.has("name_key"):
+			nom = "%s  [color=#777]%s[/color]" % [tr(str(fiche.name_key)), id]
+		liste.add_item(nom.replace("[color=#777]", "(").replace("[/color]", ")"))
+		entrees.append({"kind": "triche_item", "id": str(id), "texte": nom})
+
+
+const _CAT_TRICHE := {"objet": "items", "materiau": "materials", "creature": "creatures",
+	"meteo": "weather_states", "statut": "status_effects", "race": "races"}
 
 
 ## Le clic droit : toutes les options de la tuile visée.

@@ -1982,3 +1982,26 @@ culture.sino.name,Sino
 recipe.distiller_herbe.name,Distiller une herbe
 recipe.distiller_partie.name,Distiller une partie de bête
 journal.embuscade,{att} surprend {def} : +{des} dés
+ui.ecran.triche,"TRICHE (V) — tout obtenir, tout déclencher · invincible : {invincible}"
+ui.ecran.triche_liste,"TRICHE — {quoi} (Entrée : donner / déclencher · Échap : retour)"
+ui.triche.oui,oui
+ui.triche.non,non
+ui.triche.or,+10 000 or
+ui.triche.soin,"Tout restaurer (PV, endurance, mana, faim, statuts)"
+ui.triche.invincible,Invincibilité (bascule)
+ui.triche.competences,Toutes les compétences au niveau 50
+ui.triche.talents,Tous les talents
+ui.triche.modules,Tous les modules de capacité
+ui.triche.recettes,Toutes les recettes
+ui.triche.heure,Basculer jour / nuit
+ui.triche.semaine,Avancer d'une semaine
+ui.triche.reveler,Révéler la carte autour (40 cellules)
+ui.triche.claim,Revendiquer cette cellule
+ui.triche.tuer,Tuer tous les hostiles autour
+ui.triche.objet,Un objet (exceptionnel)
+ui.triche.materiau,Un matériau (×20)
+ui.triche.creature,Faire apparaître une créature
+ui.triche.meteo,Imposer une météo
+ui.triche.statut,S'appliquer un statut
+ui.triche.race,Devenir une race
+journal.triche,"Triche : {action}"

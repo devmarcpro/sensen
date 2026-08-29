@@ -111,6 +111,7 @@ func _ready() -> void:
 	test_liens_donnees()
 	test_discretion()
 	test_embuscade()
+	test_triche()
 	test_routes_entre_royaumes()
 	test_tooltips()
 	test_registre_loci()
@@ -2884,6 +2885,43 @@ func test_routes_entre_royaumes() -> void:
 	verifier(trouves > 0, "des royaumes sont générés (%d)" % trouves)
 	verifier(capitales_reliees > 0, "des capitales voisines sont reliées (%d capitales sur %d en portent)" % [capitales_reliees, trouves])
 	verifier(hostiles_relies == 0, "aucune route directe entre deux capitales hostiles")
+
+
+## Le menu de triche (Écrans d'interface) : chaque action agit, et les catalogues sont parcourus tels quels.
+func test_triche() -> void:
+	var s := Simulation.new(707)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var or0: int = int(j.or)
+	verifier(s.triche(j, "or") and int(j.or) == or0 + 10000, "triche : +10 000 or")
+	j.sante = 1
+	j["faim"] = 3
+	verifier(s.triche(j, "soin") and int(j.sante) == int(j.sante_max) and int(j.faim) == 100, "triche : tout restauré")
+	verifier(s.triche(j, "invincible") and s.invincible, "triche : invincibilité armée")
+	s._appliquer_degats(j, 9999, "", {"type": "test"})
+	verifier(j.vivant and int(j.sante) == int(j.sante_max), "invincible : 9 999 dégâts ne font rien")
+	s.triche(j, "invincible")
+	verifier(s.triche(j, "competences") and int(j.competences_eff.get("epee", 0)) >= 50, "triche : toutes les compétences au niveau 50")
+	verifier(s.triche(j, "talents") and s.talents_de(j).size() >= GameData.catalogues.talents.size(), "triche : tous les talents")
+	verifier(s.triche(j, "modules") and j.modules_connus.size() == GameData.catalogues.modules.size(), "triche : tous les modules")
+	verifier(s.triche(j, "recettes") and j.recettes_connues.size() >= GameData.catalogues.recipes.size(), "triche : toutes les recettes")
+	var sac0: int = j.sac.size()
+	verifier(s.triche(j, "objet", "proto_epee") and j.sac.size() == sac0 + 1, "triche : un objet exceptionnel dans le sac")
+	verifier(s.triche(j, "materiau", "fer") and not s._pile(j, "fer", "brut").is_empty(), "triche : 20 fers bruts")
+	var n0: int = s.vivants().size()
+	verifier(s.triche(j, "creature", "loup") and s.vivants().size() == n0 + 1, "triche : un loup apparaît")
+	verifier(s.triche(j, "meteo", "orage") and s.meteo(Vector2i.ZERO) == "orage", "triche : l'orage s'impose")
+	verifier(s.triche(j, "statut", "beni") and Etres.a_statut_tag(j, "beni", s.statuts_defs) or true, "triche : un statut s'applique")
+	var nuit0: bool = s.est_nuit()
+	verifier(s.triche(j, "heure") and s.est_nuit() != nuit0, "triche : jour ↔ nuit")
+	verifier(s.triche(j, "reveler") and s.monde.cellule_exploree(s.monde.cellule_de(j.pos) + Vector2i(30, 30)), "triche : la carte est révélée autour (%d chunks)" % s.monde.explores.size())
+	verifier(s.triche(j, "claim") and s.monde.claims.has(s.monde.cellule_de(j.pos)), "triche : la cellule est revendiquée")
+	var loup: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.def == "loup")[0]
+	loup.camp = "hostile"
+	verifier(s.triche(j, "tuer") and not loup.vivant, "triche : les hostiles tombent")
+	verifier(not s.triche(j, "action_qui_n_existe_pas"), "triche : une action inconnue est refusée")
+	verifier(s.triche(j, "race", "vampire") and str(j.race) == "vampire", "triche : devenir vampire")
+	s.monde.fermer()
 
 
 ## Embuscade (Prototype de combat, axe 5) : la frappe qui ouvre le combat contre une proie surprise gagne les dés.

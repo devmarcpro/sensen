@@ -623,6 +623,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 		match ev.keycode:
 			KEY_TAB:
 				ecrans.basculer("menu")
+			KEY_V:
+				ecrans.basculer("triche")   # menu de triche : tout obtenir, tout déclencher
 			KEY_E:
 				_interagir()
 			KEY_R:

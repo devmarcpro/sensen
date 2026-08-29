@@ -1972,3 +1972,26 @@ recipe.fabriquer_seau.name,Make a bucket
 recipe.distiller_herbe.name,Distil a herb
 recipe.distiller_partie.name,Distil a beast part
 journal.embuscade,{att} ambushes {def}: +{des} dice
+ui.ecran.triche,"CHEATS (V) — get anything, trigger anything · invincible: {invincible}"
+ui.ecran.triche_liste,"CHEATS — {quoi} (Enter: give / trigger · Esc: back)"
+ui.triche.oui,yes
+ui.triche.non,no
+ui.triche.or,+10,000 gold
+ui.triche.soin,"Restore everything (HP, stamina, mana, hunger, statuses)"
+ui.triche.invincible,Invincibility (toggle)
+ui.triche.competences,All skills to level 50
+ui.triche.talents,All talents
+ui.triche.modules,All ability modules
+ui.triche.recettes,All recipes
+ui.triche.heure,Toggle day / night
+ui.triche.semaine,Skip one week
+ui.triche.reveler,Reveal the map around (40 cells)
+ui.triche.claim,Claim this cell
+ui.triche.tuer,Kill every hostile around
+ui.triche.objet,An item (exceptional)
+ui.triche.materiau,A material (x20)
+ui.triche.creature,Spawn a creature
+ui.triche.meteo,Force weather
+ui.triche.statut,Apply a status to myself
+ui.triche.race,Become a race
+journal.triche,"Cheat: {action}"

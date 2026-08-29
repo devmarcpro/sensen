@@ -4798,6 +4798,8 @@ func _saison_info(tick: int = -1) -> Dictionary:
 ## La météo d'une cellule à un instant : une fonction pure du bruit spatial lent, du temps, de la
 ## température et de l'humidité locales (Météo). Retourne l'id d'un état de data/weather_states/.
 var meteo_force := ""   # tests et arènes : imposer un état météo
+var invincible := false   # menu de triche : le joueur ne perd plus de PV (Écrans d'interface)
+const RAYON_REVELE := 40   # menu de triche : cellules révélées autour du joueur (l'écran de carte en montre 33)
 
 
 func meteo(cell: Vector2i, tick: int = -1) -> String:
@@ -7423,7 +7425,116 @@ func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degat
 		"construction": str(piece.get("construction", "")), "evites": maxi(0, roundi(bruts * zone.mult) - degats)}
 
 
+## Menu de triche (Écrans d'interface) : tout obtenir et tout déclencher, pour juger sans farmer.
+## Un seul point d'entrée côté simulation — le client n'écrit jamais l'état lui-même (Réseau).
+## `action` est une catégorie, `arg` l'id choisi dans un catalogue : rien n'est écrit en dur ici.
+func triche(e: Dictionary, action: String, arg: String = "") -> bool:
+	match action:
+		"or":
+			e.or = int(e.or) + 10000
+		"soin":
+			e.sante = int(e.sante_max)
+			e.endurance = int(e.endurance_max)
+			e.mana = int(e.mana_max)
+			e["faim"] = 100
+			e.statuts.clear()
+		"invincible":
+			invincible = not invincible
+		"competences":   # toutes les compétences du catalogue au niveau 50, potentiel au plafond
+			for cid in GameData.catalogues.competences.keys():
+				e.competences[str(cid)] = 50
+				e.potentiels[str(cid)] = int(regles.r.progression.potentiel_max)
+		"talents":
+			if not e.has("talents_appris"):
+				e["talents_appris"] = []
+			for tid in GameData.catalogues.talents.keys():
+				if not (str(tid) in e.talents_appris):
+					e.talents_appris.append(str(tid))
+		"modules":
+			for mid in GameData.catalogues.modules.keys():
+				if not (str(mid) in e.modules_connus):
+					e.modules_connus.append(str(mid))
+		"recettes":
+			if not e.has("recettes_connues"):
+				e["recettes_connues"] = []
+			for rid in GameData.catalogues.recipes.keys():
+				if not (str(rid) in e.recettes_connues):
+					e.recettes_connues.append(str(rid))
+			for rid in GameData.catalogues.component_recipes.keys():
+				if not (str(rid) in e.recettes_connues):
+					e.recettes_connues.append(str(rid))
+		"objet":
+			var inst := generer_objet(arg, 10, {}, "exceptionnel", -1)
+			if inst.is_empty():
+				return false
+			e.sac.append(inst.uid)
+		"materiau":
+			_donner_materiau(e, arg, 20, "brut")
+		"creature":
+			var libre := _tuile_libre_autour(e.pos)
+			if libre == Vector2i(-1, -1):
+				return false
+			var x := ajouter(arg, libre, "ia")
+			if x.is_empty():
+				return false
+			_habiller_pnj(x, GameData.entree("creatures", arg))
+		"meteo":
+			meteo_force = arg
+		"heure":   # bascule jour ↔ nuit : saute à midi quand il fait nuit, à minuit quand il fait jour
+			var jour := int(_cycle().ticks_par_jour)
+			var cible := jour / 2 if est_nuit() else 0
+			var avance := posmod(cible - posmod(horloge_monde.ticks, jour), jour)
+			horloge_monde.ticks += avance if avance > 0 else jour
+		"semaine":
+			_tiquer_monde(horloge_monde.ticks + int(GameData.config("planete").corruption.ticks_par_semaine))
+		"reveler":   # les cellules autour du joueur : de quoi voyager partout sans tout marquer (1024² cellules)
+			if monde == null:
+				return false
+			var n := monde.taille / 32
+			var centre := _cell_de(e.pos)
+			for dx in range(-RAYON_REVELE, RAYON_REVELE + 1):
+				for dy in range(-RAYON_REVELE, RAYON_REVELE + 1):
+					var c := centre + Vector2i(dx, dy)
+					if c.x >= 0 and c.y >= 0:
+						monde.explores[Vector2i(c.x * n, c.y * n)] = true
+		"claim":
+			if monde == null:
+				return false
+			monde.claims[_cell_de(e.pos)] = {"role": "base"}
+			EventBus.emettre(&"cell_claimed", [_cell_de(e.pos)])
+		"tuer":   # tout ce qui est hostile dans la fenêtre tombe
+			for x in vivants():
+				if ennemis(e, x):
+					_appliquer_degats(x, int(x.sante), e.id, {"type": "triche"})
+		"race":
+			match arg:
+				"vampire": _devenir_vampire(e)
+				"spectre": _devenir_spectre(e)
+				"lycanthrope": _devenir_lycanthrope(e)
+				_: return false
+		"statut":
+			appliquer_statut(e, arg, int(statuts_defs.get(arg, {}).get("duree_ticks", 300)), e.id)
+		_:
+			return false
+	Etres.recalculer(e, items, affixes_defs, regles)
+	EventBus.emettre(&"journal", [&"journal.triche", {"action": "ui.triche." + action}])
+	return true
+
+
+## La première tuile libre autour d'une position (menu de triche, invocations).
+func _tuile_libre_autour(pos: Vector2i) -> Vector2i:
+	for r in range(1, 4):
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				var t := pos + Vector2i(dx, dy)
+				if grille.dans(t) and not grille.bloque_passage(t) and grille.occupant(t).is_empty():
+					return t
+	return Vector2i(-1, -1)
+
+
 func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: Dictionary) -> void:
+	if invincible and cible.controle == "joueur":
+		return   # menu de triche
 	if a_talent(cible, "sans_chair") and str(detail.get("type", "")) in ["contondant", "tranchant", "perforant"]:   # le Spectre
 		degats = roundi(float(degats) * float(regles.r.talents.sans_chair.physique_mult))
 	_verser_xp(cible, degats, source, detail)
