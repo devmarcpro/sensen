@@ -7980,6 +7980,9 @@ func plan_capacite(e: Dictionary, index: int) -> Dictionary:
 	plan["name_key"] = caps[index].get("name_key", "")
 	plan["arme"] = arme
 	plan["fonct"] = fonct
+	if plan.has("alt"):   # Alternance : le plan du second noyau est lancé tel quel — il lui faut les mêmes attaches
+		for cle in ["id", "name_key", "arme", "fonct"]:
+			plan.alt[cle] = plan[cle]
 	return plan
 
 
@@ -8325,7 +8328,7 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 					a_touche = true
 					if premiere.is_empty():
 						premiere = c
-					EventBus.emettre(&"journal", [&"journal.capacite", {"att": e.name_key, "capacite": plan.name_key, "def": c.name_key, "zone": d.zone, "degats": d.degats}])
+					EventBus.emettre(&"journal", [&"journal.capacite", {"att": e.name_key, "capacite": plan.get("name_key", ""), "def": c.name_key, "zone": d.zone, "degats": d.degats}])
 					_appliquer_degats(c, d.degats, e.id, d)
 					if not c.vivant and tuee.is_empty():
 						tuee = c

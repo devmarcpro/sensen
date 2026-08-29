@@ -10,7 +10,7 @@
   ],
   "famille": "Dégâts · moyen",
   "elements": {
-    "métal": 1.0
+    "metal": 1.0
   },
   "element_special": null,
   "power_base": "2d6",

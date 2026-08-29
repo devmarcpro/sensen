@@ -304,6 +304,45 @@ _poses = set(_re.findall(r'tags\.append\("([a-z_]+)"\)', _src))   # poses a l'ex
 for _t in sorted(_cites - _tags_data - _poses):
     probs["tag cite par le code, porte par aucune donnee"].append(_t)
 
+# 21. les cinq elements : un nom d'element mal ecrit fait planter la table Wu Xing a l'execution
+ELEMENTS = tuple(conf("wuxing")["elements"])
+def _elements_de(d, chemin, ou):
+    if isinstance(d, dict):
+        for k, v in d.items():
+            if k in ("elements", "wuxing", "vecteur") and isinstance(v, dict):
+                for nom in v.keys():
+                    if str(nom) not in ELEMENTS:
+                        probs["element inconnu (les cinq du Wu Xing)"].append("%s -> %s" % (ou, nom))
+            else:
+                _elements_de(v, chemin + "/" + str(k), ou)
+    elif isinstance(d, list):
+        for x in d:
+            _elements_de(x, chemin, ou)
+for _nom_cat in ("modules", "creatures", "items", "materials", "affixes", "status_effects", "creature_actions", "biomes"):
+    for _id, _d in cat(_nom_cat).items():
+        _elements_de(_d, "", "%s/%s" % (_nom_cat, _id))
+
+# 22. noyaux inertes : un effet declare sans la donnee qui le sert ne fait RIEN quand le sort part
+BESOIN_EFFET = {"statut": "statut", "deplacement": "deplacement", "terrain": "terrain",
+                "invocation": "invocation", "tempo": "tempo"}
+modules_cat = cat("modules")
+inertes = []
+for mid, m in modules_cat.items():
+    if str(m.get("module_type", "")) != "noyau":
+        continue
+    ef = m.get("effet") or {}
+    for e in [str(x) for x in m.get("effets", [])]:
+        if e in BESOIN_EFFET and not ef.get(BESOIN_EFFET[e]):
+            inertes.append("%s -> %s" % (mid, e))
+        elif e in ("degats", "soin") and not m.get("power_base"):
+            inertes.append("%s -> %s (pas de power_base)" % (mid, e))
+# Chantier connu (voir Structure competences-modules-slots, callout du 2026-08-29) : 50 slots inertes
+# au moment du constat. L'audit ne bloque pas sur l'existant, mais refuse que le chiffre AUGMENTE.
+BUDGET_INERTES = 50
+print("noyaux inertes (chantier en cours) : %d / %d slots — budget %d" % (len(inertes), sum(len(m.get("effets", [])) for m in modules_cat.values() if str(m.get("module_type", "")) == "noyau"), BUDGET_INERTES))
+if len(inertes) > BUDGET_INERTES:
+    probs["noyaux inertes : le chantier RECULE (budget %d)" % BUDGET_INERTES] = inertes
+
 for k in sorted(probs):
     print("\n== %s (%d)" % (k, len(probs[k])))
     for v in probs[k][:12]:

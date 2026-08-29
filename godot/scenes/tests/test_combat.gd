@@ -2536,6 +2536,41 @@ func test_creation_de_sorts() -> void:
 	verifier(refus.is_empty(), "composer et lancer un sort de chaque géométrie (%s)" % str(refus))
 	verifier(lances >= 4, "%d sorts lancés en jeu" % lances)
 
+	# 6. les 86 noyaux EXÉCUTÉS sur une cible réelle : c'est là que vivent les neuf types d'effet
+	# (dégâts, statut, soin, terrain, déplacement, invocation, tempo, saisie, résurrection).
+	var mannequin := s.ajouter("sanglier", j.pos + Vector2i(1, 0), "ia")
+	mannequin.sante = 100000
+	mannequin.sante_max = 100000
+	var sans_effet: Array[String] = []
+	var executes := 0
+	for nid in par_type.noyau:
+		var plan := s.capacites.assembler([nid], 10, "1d4", {}, j.competences_eff)
+		if not plan.erreurs.is_empty():
+			continue
+		plan["name_key"] = str(plan.noyau.get("name_key", ""))   # comme plan_capacite le fait en jeu
+		plan["arme"] = {}
+		plan["fonct"] = {}
+		if s.grille.occupant(j.pos + Vector2i(1, 0)).is_empty():   # une invocation a pu prendre la tuile
+			s.grille.liberer(mannequin.pos)
+			mannequin.pos = j.pos + Vector2i(1, 0)
+			s.grille.placer(mannequin.id, mannequin.pos)
+		var pv_avant: int = int(mannequin.sante)
+		var statuts_avant: int = mannequin.statuts.size() + j.statuts.size()
+		var vivants_avant: int = s.vivants().size()
+		j.mana = 9999
+		j.endurance = 9999
+		s._executer_capacite(j, plan, mannequin.pos)
+		executes += 1
+		# Un noyau qui touche doit faire QUELQUE CHOSE : des PV, un statut, une invocation, ou du terrain.
+		var agi: bool = int(mannequin.sante) != pv_avant or (mannequin.statuts.size() + j.statuts.size()) != statuts_avant \
+			or s.vivants().size() != vivants_avant or not s.grille.modifies.is_empty()
+		if not agi:
+			sans_effet.append(nid)
+		s.grille.modifies.clear()
+	verifier(executes >= 80, "%d noyaux exécutés sur une cible réelle" % executes)
+	verifier(sans_effet.size() <= 12, "les noyaux agissent sur la cible (%d sans effet visible : %s)" % [sans_effet.size(), str(sans_effet.slice(0, 8))])
+	verifier(j.vivant and mannequin.vivant, "le lanceur et le mannequin survivent aux 86 sorts")
+
 
 func test_composer_capacites() -> void:
 	var s := Simulation.new(119)

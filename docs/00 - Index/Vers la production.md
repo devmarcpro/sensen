@@ -27,6 +27,10 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] 47 noyaux sur 86 ne font rien (constat, 2026-08-29)
+> Leur `effet` est vide : le sort part, coûte ses ticks, et ne produit rien. 50 slots à remplir (28 statuts, 8 terrains, 6 déplacements, 4 invocations, 4 puissances) — l'audit tient le compte et interdit qu'il monte. **Chantier ouvert, prochaine priorité.**
+> [!important] Trois bugs de sorts, trouvés en les lançant (2026-08-29)
+> `"métal"` accentué dans trois noyaux (la table Wu Xing plantait à chaque coup), le plan d'Alternance sans nom ni arme (un emploi sur deux cassait), un journal qui interrompait la charge. Le banc exécute désormais les 86 noyaux sur une cible réelle.
 > [!important] La création de sorts, passée au banc (2026-08-29)
 > 86 noyaux, 16 formes, 300 séquences aléatoires, cinq sorts composés puis lancés en jeu : aucun plan incohérent, aucun refus muet. **À juger** : 115 séquences sur 300 s'assemblent — la composition est-elle assez permissive pour inviter à essayer, ou trop pour guider ?
 > [!important] La statue 1:1 tombe enfin (2026-08-29)
