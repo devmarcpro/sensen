@@ -1,0 +1,9 @@
+{
+  "trigger": {
+    "signal": "cell_claimed"
+  },
+  "text_key": "tutorial.premier_claim.text",
+  "once": true,
+  "delay_ticks": 0,
+  "category": "territoire"
+}

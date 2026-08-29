@@ -1,0 +1,12 @@
+{
+  "trigger": {
+    "signal": "journal",
+    "conditions": {
+      "cle": "journal.coule"
+    }
+  },
+  "text_key": "tutorial.premiere_nage.text",
+  "once": true,
+  "delay_ticks": 0,
+  "category": "monde"
+}

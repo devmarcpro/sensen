@@ -1,0 +1,12 @@
+{
+  "trigger": {
+    "signal": "journal",
+    "conditions": {
+      "cle": "journal.capacite_creee"
+    }
+  },
+  "text_key": "tutorial.premier_module.text",
+  "once": true,
+  "delay_ticks": 0,
+  "category": "combat"
+}

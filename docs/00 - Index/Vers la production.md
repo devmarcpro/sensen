@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] Les tooltips manquants (2026-08-29)
+> Douze tooltips contextuels au lieu de quatre : récolte, cueillette, lecture, capacités, faim, claim, recrutement, construction, nage, feu, couvée, raid. **À juger** : arrivent-ils au bon moment, et le journal est-il le bon endroit pour les montrer ?
 > [!important] Les routes entre royaumes (2026-08-29)
 > Deux capitales voisines et non hostiles sont reliées par une route ; les royaumes en froid restent isolés. **À juger** : la carte se lit-elle mieux avec ces liens (qui est ami avec qui se voit d'un coup d'œil) ?
 > [!important] La Discrétion sert enfin (2026-08-29)
@@ -168,7 +170,7 @@ etape: 0
 > [!important] Fiche de royaume et mesure de la Règle d'anneau (2026-08-28)
 > Le détail d'un royaume voisin (écran K) donne peuple, culture, capitale, taxes, dirigeant ou vacance, villages connus, diplomatie, lois, douanes. La Règle d'anneau est **mesurée** : ×5,7 au lieu de ×15 (voir [[Règle d'anneau]]) — **à trancher** : 40/40/20 ou une autre définition du hasard.
 > [!important] Prêtres et tourelles (2026-08-28)
-> Chapelle et prêtre dans les villages (résurrection payante, Affaibli au retour), recette de la tourelle. **À juger** : une tourelle qui ne tire pas mais « compte » — acceptable tant que les raids réels restent rares ?
+> Chapelle et prêtre dans les villages (résurrection payante, Affaibli au retour), recette de la tourelle. **À juger** : la tourelle tire depuis (1d6 toutes les 20 ticks, portée 6) — assez pour changer un raid, ou décorative ?
 > [!important] Gabarits de quêtes pour les douze guildes (2026-08-28)
 > Livrer, construire, fabriquer, vendre, explorer : chaque hall a désormais quelque chose à offrir. **À juger** : les textes de quête et leur rythme (3-6 cibles).
 > [!important] Entraîneurs et commandes de collectionneurs (2026-08-28)

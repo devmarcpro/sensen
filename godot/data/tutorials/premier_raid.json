@@ -1,0 +1,12 @@
+{
+  "trigger": {
+    "signal": "journal",
+    "conditions": {
+      "cle": "journal.raid_commence"
+    }
+  },
+  "text_key": "tutorial.premier_raid.text",
+  "once": true,
+  "delay_ticks": 0,
+  "category": "territoire"
+}

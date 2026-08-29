@@ -1,0 +1,12 @@
+{
+  "trigger": {
+    "signal": "journal",
+    "conditions": {
+      "cle": "journal.recolte"
+    }
+  },
+  "text_key": "tutorial.premiere_recolte.text",
+  "once": true,
+  "delay_ticks": 0,
+  "category": "monde"
+}

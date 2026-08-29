@@ -1,0 +1,12 @@
+{
+  "trigger": {
+    "signal": "journal",
+    "conditions": {
+      "cle": "journal.faim_stats"
+    }
+  },
+  "text_key": "tutorial.premiere_faim.text",
+  "once": true,
+  "delay_ticks": 0,
+  "category": "survie"
+}

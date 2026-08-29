@@ -165,6 +165,18 @@ rig.volant.name,Volant
 rig.amorphe.name,Amorphe
 tutorial.bascule_tactique.text,"Un hostile vous a vu : le temps ne passe plus qu'à vos actions. Réfléchir est gratuit — lisez la timeline à droite avant d'agir."
 tutorial.telegraphe.text,"Un « ! » et des tuiles rouges : une attaque est engagée et se résoudra à l'échéance. Bougez, prenez la garde (G) ou frappez avant."
+tutorial.premier_claim.text,"Une cellule revendiquée porte un rôle (Tab → Territoire) : base, habitation, champs ou ressources naturelles."
+tutorial.premier_feu.text,"Le feu court d'une tuile inflammable à l'autre, deux fois plus vite sous le vent. La pluie l'éteint."
+tutorial.premier_livre.text,"Un livre peut aussi échouer : la Lecture et la Perception décident, et un échec grave détruit le livre."
+tutorial.premier_module.text,"Une capacité se compose : une forme, un noyau, des modificateurs. Tab → Capacités pour en assembler une autre."
+tutorial.premier_raid.text,"Un raid vise le cœur du claim : les gardes assignés, les murs et les tourelles font la défense."
+tutorial.premier_recrutement.text,"Un compagnon obéit à des ordres gratuits : suis-moi, attends ici, posture, repli — dans son dialogue."
+tutorial.premiere_construction.text,"Ce qui est posé se démonte (clic droit) : un meuble mal placé n'est jamais perdu."
+tutorial.premiere_couvee.text,"Chaque couvée enrichit le registre (Tab → Registre) : les paliers de variétés et d'espèces donnent de vrais bonus."
+tutorial.premiere_cueillette.text,"Les plantes sauvages repoussent hors des cellules revendiquées — inutile de tout ramasser d'un coup."
+tutorial.premiere_faim.text,"La faim ronge les stats avant la santé : un plat cuisiné nourrit mieux qu'une viande crue, et sans risque."
+tutorial.premiere_nage.text,"On ne nage pas chargé : lâche du poids, ou contourne. Sous l'eau, le souffle descend et le Feu ne part pas."
+tutorial.premiere_recolte.text,"Les murs et les filons se récoltent à la pioche, les arbres à la hache : l'outil en main décide de ce qui tombe."
 tutorial.premier_segment.text,"Un coup qui touche pose un segment de chaîne (les pastilles sous vous). Enchaînez cinq éléments dans l'ordre d'engendrement — ou quatre coups rapides puis une lourde — pour résoudre."
 tutorial.fin_de_combat.text,"Le combat se relâche : l'écran de fin montre la durée en ticks et l'XP des pistes (élément, arme, type de dégâts, armure)."
 tile_content.roche.name,Roche

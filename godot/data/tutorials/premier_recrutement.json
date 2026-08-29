@@ -1,0 +1,9 @@
+{
+  "trigger": {
+    "signal": "creature_recruited"
+  },
+  "text_key": "tutorial.premier_recrutement.text",
+  "once": true,
+  "delay_ticks": 0,
+  "category": "compagnons"
+}

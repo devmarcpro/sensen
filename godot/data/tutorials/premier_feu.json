@@ -1,0 +1,12 @@
+{
+  "trigger": {
+    "signal": "journal",
+    "conditions": {
+      "cle": "journal.feu_prend"
+    }
+  },
+  "text_key": "tutorial.premier_feu.text",
+  "once": true,
+  "delay_ticks": 0,
+  "category": "monde"
+}

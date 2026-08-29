@@ -1,0 +1,12 @@
+{
+  "trigger": {
+    "signal": "journal",
+    "conditions": {
+      "cle": "journal.couvee"
+    }
+  },
+  "text_key": "tutorial.premiere_couvee.text",
+  "once": true,
+  "delay_ticks": 0,
+  "category": "elevage"
+}

@@ -110,6 +110,7 @@ func _ready() -> void:
 	test_liens_donnees()
 	test_discretion()
 	test_routes_entre_royaumes()
+	test_tooltips()
 	test_uniques_artefacts()
 	test_bombes()
 	test_composer_capacites()
@@ -2530,6 +2531,33 @@ func test_uniques_artefacts() -> void:
 
 
 # ---------------------------------------------------------------- L'automate d'eau
+
+func test_tooltips() -> void:
+	# Chaque tooltip cite un signal qui existe et une clé de texte traduite
+	var ko: Array[String] = []
+	for tid in GameData.catalogues.get("tutorials", {}).keys():
+		var t: Dictionary = GameData.catalogues.tutorials[tid]
+		if not EventBus.has_signal(str(t.trigger.signal)):
+			ko.append("%s → signal %s" % [tid, t.trigger.signal])
+		if tr(str(t.text_key)) == str(t.text_key):
+			ko.append("%s → texte %s" % [tid, t.text_key])
+	verifier(ko.is_empty(), "chaque tooltip cite un signal réel et un texte traduit (%s)" % str(ko))
+	verifier(GameData.catalogues.get("tutorials", {}).size() >= 12, "douze tooltips ou plus (%d)" % GameData.catalogues.get("tutorials", {}).size())
+	# Ils se déclenchent vraiment : un tooltip par clé de journal, une seule fois
+	var tuto := Tutoriels.new()
+	add_child(tuto)
+	var vus: Array[String] = []
+	tuto.afficher = func(texte: String) -> void: vus.append(texte)
+	EventBus.emettre(&"journal", [&"journal.cueillette", {}])
+	EventBus.emettre(&"journal", [&"journal.cueillette", {}])
+	EventBus.dispatcher()   # les événements sont mis en file (Boucle de tick)
+	var n_cueillette := 0   # la file peut contenir d'autres événements des tests précédents
+	for texte in vus:
+		if texte == tr("tutorial.premiere_cueillette.text"):
+			n_cueillette += 1
+	verifier(n_cueillette == 1, "le tooltip de cueillette s'affiche une fois, pas deux (%d sur %d tooltips)" % [n_cueillette, vus.size()])
+	tuto.queue_free()
+
 
 func test_routes_entre_royaumes() -> void:
 	var planete: Dictionary = GameData.config("planete")

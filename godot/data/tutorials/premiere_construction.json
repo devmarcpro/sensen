@@ -1,0 +1,12 @@
+{
+  "trigger": {
+    "signal": "journal",
+    "conditions": {
+      "cle": "journal.pose"
+    }
+  },
+  "text_key": "tutorial.premiere_construction.text",
+  "once": true,
+  "delay_ticks": 0,
+  "category": "camp"
+}

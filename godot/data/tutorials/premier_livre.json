@@ -1,0 +1,12 @@
+{
+  "trigger": {
+    "signal": "journal",
+    "conditions": {
+      "cle": "journal.lecture_reussie"
+    }
+  },
+  "text_key": "tutorial.premier_livre.text",
+  "once": true,
+  "delay_ticks": 0,
+  "category": "progression"
+}

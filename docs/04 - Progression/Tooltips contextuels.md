@@ -34,6 +34,9 @@ pure, jamais de progression conditionnée.
 > [!success] Codé le 2026-08-27
 > `scenes/ui/tutoriels.gd` s'abonne aux signaux EventBus cités par `data/tutorials/*.json` (`trigger.signal` + `conditions`, `text_key`, `once`, `category`) et affiche le texte via un rappel du client (dans le journal, préfixé 💡). Quatre tooltips de combat : bascule tactique, télégraphe, premier segment, fin de combat. L'état « vu » tient la session en attendant le profil joueur ([[Sauvegarde]]).
 
+> [!success] Codé le 2026-08-29 — les huit déclencheurs de la note, et quatre de plus
+> La note listait huit exemples de déclencheurs ; seuls les **quatre du combat** existaient. Ajoutés : **première récolte** (l'outil décide), **première cueillette** (ça repousse hors claim), **premier livre lu** (la lecture peut échouer et détruire le livre), **première capacité composée** (forme + noyau + modificateurs), **première faim** (les stats avant la santé), **premier claim** (les rôles de cellule), **premier recrutement** (les ordres sont gratuits), **première construction** (ça se démonte). Quatre de plus pour les systèmes venus depuis : **nage** (on ne nage pas chargé), **feu** (il court, le vent le double, la pluie l'éteint), **première couvée** (le registre et ses paliers), **premier raid** (ce qui fait la défense). Douze au total, tous en données — un fichier, une clé française, une clé anglaise. Décision : aucun ne verrouille quoi que ce soit et aucun ne se répète (`once`), fidèle à « information pure, jamais de progression conditionnée ».
+
 ## Liens
 - **Dépend de** : [[Début de partie]], [[EventBus]], [[Data-driven design]]
 - **Alimente** : [[Craft compositionnel]], [[Écrans d'interface]]
