@@ -2,7 +2,7 @@
 aliases: ["Ouvert — Répartitions Arcane Espace Corruption", "Arcane Espace Corruption"]
 tags: [ouvert, combat, wuxing, décidé-par-défaut]
 domaine: combat
-statut: décidé-par-défaut
+statut: abandonné
 etape: 0
 ---
 
@@ -28,8 +28,8 @@ etape: 0
 
 **Ce que ça donne, vérifié :** Arcane est quasi neutre par construction (aucun matchup fort, aucun faible — le domaine du joueur qui refuse le système élémentaire, et qui le paie en multiplicateurs plats). Espace et Corruption sont des mixtes à deux composantes : ils bénéficient du choix de segment ([[Ouvert — Compensation de l'arme mixte]]) et amortissent les mauvais matchups, sans jamais atteindre le ×1.5 d'un domaine pur. **C'est cohérent** : ces trois domaines achètent de l'utilité (téléport, portée, drain) contre de la puissance élémentaire.
 
-> [!success] Codé le 2026-08-31 — le vecteur Espace est dans les fiches
-> Les douze noyaux de la famille Espace (`data/modules/noyau/espace/`) portaient `elements: {}` : ils ne posaient aucun segment de chaîne et ne subissaient aucune domination — la « viabilité des builds Espace » n'était pas testable. Ils portent désormais le défaut de cette note, `{eau: 0.6, metal: 0.4}` (dominante Eau). Arcane et Corruption n'ont encore aucun module au catalogue : leurs vecteurs s'appliqueront à la première fiche qui les déclare.
+> [!failure] Supprimé par le designer le 2026-08-31 — plus de domaines hors-cycle
+> **Instruction du designer** : « supprime arcane / espace / corruption ». Les trois domaines hors-cycle et leurs vecteurs par défaut sont retirés du design : un module sans élément est simplement **sans élément** — il ne pose pas de segment de chaîne et ne subit aucune domination (l'état du code avant le 2026-08-31 au soir ; le vecteur Espace posé quelques heures plus tôt est retiré des douze fiches). Les noms qui subsistent ailleurs (compétences `magie_arcane` / `magie_corruption`, domaine de grimoire « arcane » = livres neutres, dossier `noyau/espace/` comme rangement) sont de simples étiquettes, à renommer si le designer le souhaite.
 
 ## Liens
 - **Dépend de** : [[Domination et multiplicateurs]], [[Wu Xing — cycles et vecteurs]]

@@ -9,10 +9,7 @@
     "noyau"
   ],
   "famille": "Espace",
-  "elements": {
-    "eau": 0.6,
-    "metal": 0.4
-  },
+  "elements": {},
   "element_special": null,
   "power_base": null,
   "cout_ticks": 8,

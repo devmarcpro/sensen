@@ -141,6 +141,7 @@ func _ready() -> void:
 	test_donjon_temps_a_l_action()
 	test_types_ennemis()
 	test_loot_assemble()
+	test_budgets()
 	test_loot()
 	test_coffres_et_rares()
 	test_gemmes_et_livres()
@@ -6244,6 +6245,36 @@ func test_brouillard() -> void:
 
 
 # ---------------------------------------------------------------- Étape 2 : génération de donjon
+
+func test_budgets() -> void:
+	# Budgets de performance / Ordre de vérification (2026-08-31) : les critères mesurables sans écran ont un test.
+	var s := Simulation.new(51)
+	var t0 := Time.get_ticks_usec()
+	s.charger_donjon("ruine", 51, 4, 1)
+	var dt_etage := (Time.get_ticks_usec() - t0) / 1000.0
+	verifier(dt_etage < 100.0, "É2 : un étage de donjon généré en %.0f ms (< 100 ms)" % dt_etage)
+	t0 = Time.get_ticks_usec()
+	for k in 100:
+		s.generer_objet("proto_epee", 3)
+	var dt_objet := (Time.get_ticks_usec() - t0) / 1000.0 / 100.0
+	verifier(dt_objet < 1.0, "É3 : un objet à affixes généré en %.2f ms (< 1 ms)" % dt_objet)
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	t0 = Time.get_ticks_usec()
+	for k in 100:
+		Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	var dt_stats := (Time.get_ticks_usec() - t0) / 1000.0 / 100.0
+	verifier(dt_stats < 0.5, "É4 : recalcul complet des stats en %.3f ms (< 0.5 ms)" % dt_stats)
+	t0 = Time.get_ticks_usec()
+	var pas_faits := 0
+	for k in 200:   # l'horloge du donjon est à l'action : chaque pas fait agir une entité due
+		s.attente.clear()
+		if not s.pas("monde"):
+			break
+		pas_faits += 1
+	if pas_faits > 0:
+		var dt_tick := (Time.get_ticks_usec() - t0) / 1000.0 / float(pas_faits)
+		verifier(dt_tick < 8.0, "tick : %d pas de simulation à %.2f ms pièce (< 8 ms)" % [pas_faits, dt_tick])
+
 
 func test_loot_assemble() -> void:
 	# Loot (designer, 2026-08-30) : jamais « une simple épée » — composants, matériaux et qualité tirés.

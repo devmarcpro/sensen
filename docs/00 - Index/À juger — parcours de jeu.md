@@ -74,6 +74,7 @@ etape: 10
 - **Le journal en donjon** : huit « Bandit attend » par tick — filtrer les êtres hors de vue, ou tout garder pour la lecture ?
 - **La fourchette des gemmes** (balayage du 2026-08-31) : « misérable +0,04 → mythique +0,28 » est indexée sur la qualité de taille bornée [0,5 ; 2,0] — le haut de la fourchette (mythique = 5,0) est inatteignable ; élargir `loot_rules.gemmes.qualite_taille.max`, ou réindexer sur les paliers de qualité ? — [[Modificateurs d'affinité]]
 - **La pluie et la pousse** : le bonus d'arrosage ne joue qu'au semis (semer sous la pluie = −15 % de durée même s'il fait beau ensuite) — le passer en cumul pendant la pousse ? — [[Météo]]
+- **Limite d'ennemis au contact** (Trous connus du combat, jamais tranché) : huit voisins peuvent frapper au même tick — faut-il une limite (les autres attendent leur tour autour), ou est-ce le prix d'être encerclé ? — [[Décision — Multi-ennemis et jauge]]
 - **L'embuscade** : +2 dés sur la frappe qui ouvre un combat contre une proie surprise (lynx, crocodile, serpent) — se sent-elle, ou se perd-elle dans le bruit des dés ? — [[Prototype de combat — spécification]]
 
 ## 4. Le village — PNJ, commerce, quêtes, compagnons (10 min)

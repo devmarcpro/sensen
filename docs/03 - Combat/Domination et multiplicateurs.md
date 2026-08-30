@@ -56,6 +56,9 @@ DÉGÂTS PAR COMPOSANTES ET NIVEAUX :
 > - **Ordre des facteurs** : `bruts × Σ niveaux × domination × gain intermédiaire × (1 + Σ bonus) si résolveur`, puis zone de coup, garde, armure plate. Les **niveaux d'élément valent 0** dans le prototype (facteur 1) — ils arrivent avec la progression (étape 4).
 > - **Alignements du bestiaire du prototype**, dérivés des éléments de leurs actions : Loup `{bois: 1}` · Sanglier `{terre: 0.6, metal: 0.4}` · Aigle `{metal: 0.5, bois: 0.5}` · Scorpion `{eau: 0.6, metal: 0.4}` ; les humains n'ont pas d'alignement propre, c'est leur armure qui répond (cuir = Bois, fer = Métal — [[Décision — Surcharges Wu Xing des matériaux]]).
 
+> [!failure] Supprimé par le designer le 2026-08-31 — Arcane, Espace et Corruption ne sont plus des domaines
+> Les vecteurs hors-cycle de l'annexe ci-dessus (« Arcane {0.2 partout} · Espace {eau 0.6, metal 0.4} · Corruption {terre 0.5, feu 0.5} ») sont retirés : un module sans élément ne pose pas de segment et ne subit aucune domination. Voir [[Ouvert — Répartitions Arcane Espace Corruption]].
+
 ## Liens
 - **Dépend de** : [[Wu Xing — cycles et vecteurs]], [[Progression par l'usage]]
 - **Alimente** : [[Jauge de chaîne Wu Xing]], [[Pipeline de résolution du combat]], [[Armure par zone et constructions]], [[XP de combat]], [[Armes fantomatiques]]

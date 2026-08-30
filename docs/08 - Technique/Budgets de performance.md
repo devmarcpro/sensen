@@ -24,6 +24,9 @@ La stratégie d'optimisation complète, système par système, est consolidée e
 
 **Critères de validation par étape :** [[Ordre de vérification]].
 
+> [!success] Codé le 2026-08-31 — le tick sous les 8 ms, mesuré
+> `test_budgets` mesure le pas de simulation (< 8 ms), la génération d'étage, d'objet à affixes et le recalcul de stats. Les budgets de rendu se lisent avec `capture.tscn --disable-vsync` (moyenne et pire image imprimées).
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Boucle de tick]]
 - **Alimente** : [[Optimisation — principes]], [[Entités et pathfinding — performance]], [[Ordre de vérification]]
