@@ -378,8 +378,17 @@ func zones_sur(pos: Vector2i, type: String = "") -> Array[Dictionary]:
 
 
 ## Ce qu'une zone fait à celui qui entre sur sa tuile (appelé après chaque pas).
+## Un plan discret (Sans trace, Silencieux) pose des zones cachées : des pièges (Six types de modules, 2026-08-30).
+func _plan_discret(plan: Dictionary) -> bool:
+	var dr: Dictionary = plan.get("drapeaux", {})
+	return bool(dr.get("sans_trace", false)) or bool(dr.get("silencieux", false))
+
+
 func _zones_a_l_entree(e: Dictionary, pos: Vector2i, tick: int) -> void:
 	for z in zones_sur(pos):
+		if bool(z.get("cachee", false)) and str(z.get("source", "")) != e.id:
+			z.cachee = false   # le piège se révèle sur celui qui y met le pied
+			EventBus.emettre(&"journal", [&"journal.piege_revele", {"nom": e.name_key, "zone": "zone." + str(z.type)}])
 		match str(z.type):
 			"entrave":   # Racine : ce qui s'arrête là s'enracine
 				appliquer_statut(e, str(z.params.get("statut", "enracinement")), int(z.params.get("statut_ticks", 20)), str(z.source))
@@ -7230,11 +7239,13 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 	if jet_coup <= fumble:
 		e["coups_rates"] = int(e.get("coups_rates", 0)) + 1
 		EventBus.emettre(&"journal", [&"journal.rate", {"att": e.name_key}])
+		EventBus.emettre(&"coup_rate", [e.id])
 		return
 	if jet_coup >= crit_seuil:
 		mult_coup = float(regles.r.degats.get("crit_mult", 1.5))
 		e["coups_critiques"] = int(e.get("coups_critiques", 0)) + 1
 		EventBus.emettre(&"journal", [&"journal.critique", {"att": e.name_key, "mult": "%.1f" % mult_coup}])
+		EventBus.emettre(&"coup_critique", [e.id, cible.id, mult_coup])
 	if bool(arme.get("fantome", false)):   # Armes fantomatiques : pures, mais ×0,7
 		mult_coup *= float(regles.r.armes_fantomes.degats_mult)
 	if a_talent(e, "jauge_de_sang"):   # L'Écarlate : jusqu'à ×1,8 la jauge pleine
@@ -8082,6 +8093,24 @@ func _bonus_des_conditions(e: Dictionary, c: Dictionary, action: Dictionary) -> 
 ## Les modes de déplacement des noyaux (Modules) : projection, attraction, recul, saut, permutation,
 ## convocation, lancer d'un être porté, traversée, retour à l'Ancre, lévitation, fauchage.
 ## `cible_hors_entite` sert aux modes qui visent une **tuile** et non un être (Traversée).
+## Le choc d'une poussée (Six types de modules, 2026-08-30) : l'être poussé qui bute sur `vers` prend un dé par
+## tuile perdue ; si c'est un être qui bloque, il en encaisse une part.
+func _choc_de_poussee(c: Dictionary, vers: Vector2i, tuiles_perdues: int, source: String) -> void:
+	if tuiles_perdues <= 0 or not grille.dans(vers):
+		return
+	var dp: Dictionary = regles.r.deplacement
+	var deg := des.jet(Des.multiplier(str(dp.get("poussee_des_par_tuile", "1d4")), tuiles_perdues))
+	if deg <= 0:
+		return
+	EventBus.emettre(&"journal", [&"journal.poussee_choc", {"nom": c.name_key, "degats": deg, "tuiles": tuiles_perdues}])
+	_appliquer_degats(c, deg, source, {"type": "contondant", "element": {}, "poussee": true})
+	var occ := grille.occupant(vers)
+	if not occ.is_empty() and entites.has(occ) and entites[occ].vivant:
+		var part := roundi(float(deg) * float(dp.get("poussee_part_occupant", 0.5)))
+		if part > 0:
+			_appliquer_degats(entites[occ], part, source, {"type": "contondant", "element": {}, "poussee": true})
+
+
 ## Où finiraient les êtres si ce plan partait vers `cible_pos` (Écrans d'interface, 2026-08-30) : la règle du
 ## déplacement rejouée en lecture seule, à la distance maximale du dé. Retourne [{id, de, vers}] (vers ≠ de seulement).
 func prevoir_deplacement(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -> Array:
@@ -8180,6 +8209,7 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 				for i in n:
 					var vers: Vector2i = c.pos + d
 					if not grille.dans(vers) or grille.bloque_passage(vers) or not grille.occupant(vers).is_empty():
+						_choc_de_poussee(c, vers, n - i, e.id)   # ce qui bloque fait mal : un dé par tuile perdue
 						break
 					var dh := grille.h(vers) - grille.h(c.pos)
 					if dh >= int(regles.r.deplacement.falaise_delta):
@@ -8207,9 +8237,12 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 				if not c.vivant or Etres.bloque_statuts(c, "projection", statuts_defs):
 					continue
 				var d := Vector2i(signi(e.pos.x - c.pos.x), signi(e.pos.y - c.pos.y))
-				for i in des.jet(effet.get("distance", "1")):
+				var n_a := des.jet(effet.get("distance", "1"))
+				for i in n_a:
 					var vers: Vector2i = c.pos + d
 					if vers == e.pos or not grille.dans(vers) or grille.bloque_passage(vers) or not grille.occupant(vers).is_empty():
+						if vers != e.pos:
+							_choc_de_poussee(c, vers, n_a - i, e.id)   # tiré contre un mur ou un autre être
 						break
 					grille.liberer(c.pos)
 					c.pos = vers
@@ -8419,6 +8452,10 @@ func _evaluer_conditions(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -
 				vrai = dh > 0 if p.get("signe", ">") == ">" else dh < 0
 			"dos_ou_flanc":
 				vrai = not cible.is_empty() and Regles.direction_relative(cible.orientation, e.pos - cible.pos) != "front"
+			"cible_alignee":   # Alignement : même ligne, même colonne ou même diagonale que le lanceur
+				var dx_a: int = cible_pos.x - e.pos.x
+				var dy_a: int = cible_pos.y - e.pos.y
+				vrai = cible_pos != e.pos and (dx_a == 0 or dy_a == 0 or absi(dx_a) == absi(dy_a))
 			"ligne_de_vue_degagee":
 				vrai = grille.ligne_de_vue(e.pos, cible_pos)
 			"cible_isolee":
@@ -8698,7 +8735,7 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 		for t in tuiles:
 			if grille.dans(t):
 				zones.append({"pos": t, "type": "remanence", "fin": tick + int(plan.drapeaux.remanence),
-					"source": e.id, "params": {"plan": plan.duplicate()}, "elements": plan.elements.duplicate()})
+					"source": e.id, "params": {"plan": plan.duplicate()}, "elements": plan.elements.duplicate(), "cachee": _plan_discret(plan)})
 	var a_touche: bool = res.a_touche
 	for l: Dictionary in plan.liaisons:
 		if l.get("propagation", false) and a_touche and not touchees.is_empty():   # « a touché » sans être (terrain, zone) : rien d'où propager
@@ -8930,7 +8967,7 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 						if not grille.dans(t):
 							continue
 						zones.append({"pos": t, "type": str(tp.zone), "fin": tick + int(tp.get("duree_ticks", 50)),
-							"source": e.id, "params": tp, "elements": plan.elements.duplicate()})
+							"source": e.id, "params": tp, "elements": plan.elements.duplicate(), "cachee": _plan_discret(plan)})
 						a_touche = true
 						EventBus.emettre(&"tile_changed", [t])
 					EventBus.emettre(&"journal", [&"journal.zone_posee", {"nom": e.name_key, "zone": "zone." + str(tp.zone)}])

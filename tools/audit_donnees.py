@@ -349,7 +349,7 @@ GEOMETRIES_GEREES = ("point", "soi", "ligne", "cone", "croix", "diagonale", "car
 PREDICATS_GERES = ("hauteur_relative", "dos_ou_flanc", "ligne_de_vue_degagee", "cible_isolee",
     "cible_adjacente_a_allie", "pv_cible_sous", "pv_porteur_sous", "vecteur_de_lieu", "porteur_en_posture",
     "jauge_chaine_pleine", "segment_chaine_present", "element_cible", "porteur_immobile_depuis",
-    "corruption_au_dessus", "phase_du_jour", "meteo_parmi", "porteur_dissimule", "cible_immobilisee")
+    "corruption_au_dessus", "phase_du_jour", "meteo_parmi", "porteur_dissimule", "cible_immobilisee", "cible_alignee")
 CLES_MOD = ("des", "portee", "portee_mult", "portee_fixe", "portee_min", "taille", "ignore_armure", "vampirique",
             "durees_mult", "projection", "attraction", "segments", "purification", "silencieux", "sans_trace",
             "detonation", "emprise", "tracant", "prisme", "element_vers", "geometrie_map",

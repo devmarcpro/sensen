@@ -2231,3 +2231,8 @@ ui.bulle.pv,"{nom} · {pv}/{max} HP"
 ui.bulle.arme,"Weapon: {min}–{max} · heavy {lmin}–{lmax}"
 ui.bulle.wuxing,"{element} vs {cible} ×{dom}"
 ui.bulle.armure,"Zone {zone} ×{mult} · armor {armure}"
+ui.critique,"CRITICAL ×{mult}"
+ui.rate,MISS
+journal.poussee_choc,"{nom} slams: {degats} damage ({tuiles} tiles lost)"
+module.alignement.name,Alignment
+journal.piege_revele,"{nom} springs a hidden trap ({zone})"

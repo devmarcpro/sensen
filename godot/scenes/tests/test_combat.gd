@@ -2873,6 +2873,36 @@ func test_assemblage_sans_limite() -> void:
 	EventBus.dispatcher()
 	EventBus.xp_gagnee.disconnect(cb_xp)
 	verifier(xp_vus.size() == 1 and xp_vus[0][1] == "epee" and int(xp_vus[0][2]) == 7, "xp_gagnee est émis à chaque versement (%s)" % str(xp_vus))
+	# Dégâts de poussée (2026-08-30) : une projection qui bute sur un mur paie les tuiles perdues
+	for x in s.entites.values():
+		if x.id != j.id:
+			x.vivant = false
+			s.grille.liberer(x.pos)
+	var mur_p: Vector2i = j.pos + Vector2i(3, 0)
+	s.grille.poser_contenu(mur_p, "barriere")
+	var loup_p: Dictionary = s.ajouter("loup", j.pos + Vector2i(2, 0), "ia")
+	loup_p.sante = 60
+	loup_p.sante_max = 60
+	var p_pousse: Dictionary = plan_de.call(["point", "poussee"])
+	s._executer_capacite(j, p_pousse, loup_p.pos)
+	verifier(loup_p.pos == j.pos + Vector2i(2, 0) and int(loup_p.sante) < 60, "poussé contre une barrière : il ne bouge pas et prend le choc (%d PV)" % int(loup_p.sante))
+	loup_p.vivant = false
+	s.grille.liberer(loup_p.pos)
+	s.grille.contenu[s.grille.idx(mur_p)] = 0
+	var p_al: Dictionary = plan_de.call(["point", "alignement", "etincelle"])
+	var al_ok: Dictionary = s._evaluer_conditions(j, p_al, j.pos + Vector2i(3, 3))
+	var al_ko: Dictionary = s._evaluer_conditions(j, p_al, j.pos + Vector2i(3, 1))
+	verifier(al_ok.is_empty() and not al_ko.is_empty(), "Alignement : vrai en diagonale (rien ne bloque), faux de travers (%s)" % str(al_ko.get("name_key", "")))
+	s.zones.clear()   # pièges invisibles (2026-08-30) : une zone posée sans trace est cachée, et se révèle sur l'intrus
+	var p_piege: Dictionary = plan_de.call(["carre", "racine", "sans_trace"])
+	s._executer_capacite(j, p_piege, j.pos + Vector2i(3, 0))
+	verifier(not s.zones.is_empty() and s.zones.all(func(z: Dictionary) -> bool: return bool(z.get("cachee", false))), "un sort Sans trace pose des zones cachées (%d)" % s.zones.size())
+	var intrus: Dictionary = s.ajouter("loup", j.pos + Vector2i(6, 0), "ia")
+	s._zones_a_l_entree(intrus, j.pos + Vector2i(3, 0), s.tick_de(intrus))
+	verifier(s.zones_sur(j.pos + Vector2i(3, 0)).any(func(z: Dictionary) -> bool: return not bool(z.get("cachee", true))), "le piège se révèle sur celui qui y met le pied")
+	intrus.vivant = false
+	s.grille.liberer(intrus.pos)
+	s.zones.clear()
 	var p_cc: Dictionary = plan_de.call(["carre", "carre", "etincelle"])
 	var n_cc: int = s.tuiles_du_plan(j, p_cc, j.pos + Vector2i(2, 0)).size()
 	verifier(p_cc.formes_sup.is_empty() and int(p_cc.taille) == 2 * int(p_bombe.taille) and n_cc > n_tuiles, "Carré + Carré : une forme plus grande (%d tuiles > %d), pas une union" % [n_cc, n_tuiles])

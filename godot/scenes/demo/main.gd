@@ -48,6 +48,7 @@ var titre_ouvert := false          # l'écran principal (Écrans d'interface) : 
 var xp_cumul: Dictionary = {}      # XP du joueur reçue dans la fenêtre en cours : clé → total (XP de combat)
 var xp_fenetre := 0.0              # secondes restantes avant de « lâcher » le cumul en flottant + journal
 var xp_flottants: Array = []       # [{lignes, t}] : les textes qui montent au-dessus du joueur
+var gros_flottants: Array = []     # [{texte, pos, couleur, t}] : CRITIQUE / RATÉ en gros au-dessus d'un être
 var graine_monde := -1             # la graine choisie à l'écran Monde, portée à la simulation
 var fiche_monde: Dictionary = {}   # la fiche créée, en attente de l'écran Monde
 const STATS := ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]
@@ -111,6 +112,12 @@ func _ready() -> void:
 	arenes.assign(GameData.catalogues.get("prototype_arenas", {}).keys())
 	arenes.sort()
 	EventBus.journal.connect(_sur_journal)
+	EventBus.coup_critique.connect(func(_att: String, cible_id: String, mult: float) -> void:
+		if sim != null and sim.entites.has(cible_id):
+			gros_flottants.append({"texte": tr("ui.critique").format({"mult": "%.1f" % mult}), "pos": sim.entites[cible_id].pos, "couleur": Color(1.0, 0.85, 0.3), "t": 0.0}))
+	EventBus.coup_rate.connect(func(att_id: String) -> void:
+		if sim != null and sim.entites.has(att_id):
+			gros_flottants.append({"texte": tr("ui.rate"), "pos": sim.entites[att_id].pos, "couleur": Color(0.75, 0.75, 0.75), "t": 0.0}))
 	EventBus.xp_gagnee.connect(func(id: String, cle: String, xp: int) -> void:
 		if id == joueur_id and xp > 0:
 			xp_cumul[cle] = int(xp_cumul.get(cle, 0)) + xp
@@ -641,6 +648,11 @@ func _process(delta: float) -> void:
 	for f in xp_flottants:
 		f.t += delta
 	xp_flottants = xp_flottants.filter(func(f: Dictionary) -> bool: return f.t < 1.6)
+	for f in gros_flottants:
+		f.t += delta
+	gros_flottants = gros_flottants.filter(func(f: Dictionary) -> bool: return f.t < 1.2)
+	if not gros_flottants.is_empty():
+		hud.queue_redraw()
 	minuterie_autosave -= delta
 	if minuterie_autosave <= 0.0:
 		minuterie_autosave = 300.0
@@ -1277,6 +1289,10 @@ func _draw() -> void:
 	for z in sim.zones:   # les zones au sol (Racine, Sol vif, Nappe, Brume, Balise) : un liseré à leur teinte
 		if not g.dans(z.pos):
 			continue
+		if bool(z.get("cachee", false)):   # un piège : visible de son poseur et de ses alliés seulement
+			var src: Dictionary = sim.entites.get(str(z.get("source", "")), {})
+			if src.is_empty() or (src.id != joueur_id and sim.ennemis(j, src)):
+				continue
 		var cz := _ecran(z.pos, g.h(z.pos))
 		_losange(z.pos, COULEUR_ZONE.get(str(z.type), Color(0.7, 0.7, 0.7, 0.35)))
 	for gl in sim.glyphes:   # les glyphes : un losange cerclé à la teinte de leur élément
@@ -1562,6 +1578,13 @@ func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: C
 ## La couche d'interface : barres, garde, télégraphe et jauge de chaîne de chaque être.
 func _dessiner_hud(ci: CanvasItem) -> void:
 	_dessiner_bulle(ci)
+	if sim != null:
+		for f in gros_flottants:   # CRITIQUE / RATÉ en gros, qui montent et s'effacent (Écrans d'interface)
+			var pg := _ecran(f.pos, sim.grille.h(f.pos)) + Vector2(-36.0, -66.0 - f.t * 30.0)
+			var ag: float = clampf(1.2 - f.t, 0.0, 1.0)
+			var cg: Color = f.couleur
+			ci.draw_string(ThemeDB.fallback_font, pg + Vector2(1, 1), str(f.texte), HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(0, 0, 0, ag))
+			ci.draw_string(ThemeDB.fallback_font, pg, str(f.texte), HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(cg.r, cg.g, cg.b, ag))
 	if sim == null:
 		return
 	var j := joueur()

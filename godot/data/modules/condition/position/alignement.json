@@ -1,0 +1,26 @@
+{
+  "id": "alignement",
+  "nom": "Alignement",
+  "name_key": "module.alignement.name",
+  "module_type": "condition",
+  "description": "la cible est **alignée** avec le lanceur — même ligne, même colonne ou même diagonale : **+1 dé**",
+  "classe_signature": null,
+  "tags": [
+    "condition"
+  ],
+  "famille": "Position",
+  "predicat": "cible_alignee",
+  "bonus": "+1 dé",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks",
+  "effet": {
+    "predicat_structure": {
+      "type": "cible_alignee"
+    },
+    "bonus_structure": {
+      "des": 1
+    },
+    "echec_ticks_rendus": 0.5
+  },
+  "style": "ruse"
+}

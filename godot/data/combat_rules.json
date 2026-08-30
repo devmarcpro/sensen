@@ -2,7 +2,7 @@
   "_doc": "Règles chiffrées du combat (configuration unique). Chaque valeur cite sa note : aucune n'est inventée ici, aucune n'est en dur dans le code.",
   "ticks_par_seconde_exploration": 10,
   "deplacement": {
-    "_doc": "Hauteur de terrain ±10 · Boucle de tick",
+    "_doc": "Hauteur de terrain ±10 · Boucle de tick · poussee_des_par_tuile : degats (des) par tuile perdue quand une projection/attraction bute ; poussee_part_occupant : part encaissee par l'etre qui bloque",
     "cout_base": 3,
     "montee_1": 5,
     "montee_2": 8,
@@ -13,7 +13,9 @@
     "chute_franchise": 2,
     "nage": 6,
     "neige_surcout": 1,
-    "gel_seuil": 0.0
+    "gel_seuil": 0.0,
+    "poussee_des_par_tuile": "1d4",
+    "poussee_part_occupant": 0.5
   },
   "actions": {
     "_doc": "Boucle de tick · Attaque lourde et télégraphe · Décision — Vocabulaire d'attaque des créatures",
