@@ -2,7 +2,7 @@ extends Node
 ## Le parcours de donjon (Vers la production, point 13 — « essayer en profondeur le dungeon crawling ») : un robot
 ## joue VRAIMENT le client (main.tscn, fenêtré) — il descend étage après étage en marchant, frappe ce qu'il voit,
 ## ramasse ce qu'il croise, ouvre les portes, et prend des captures aux moments clés. À la fin, un rapport chiffré.
-##   Godot --path godot res://scenes/tests/parcours.tscn -- --etages 3 --frames 4000 --sortie C:/dossier
+##   Godot --path godot res://scenes/tests/parcours.tscn -- --etages 3 --frames 4000 --graine 7 --theme ruine --sortie C:/dossier
 var scene: Node
 var jid := ""
 var frames := 0
@@ -10,6 +10,7 @@ var frames_max := 4000
 var etages_voulus := 3
 var sortie := "C:/Users/ciryl/AppData/Local/Temp/parcours"
 var graine := 7
+var theme := "ruine"
 # le rapport
 var etage_depart := 0
 var etages_atteints := 0
@@ -44,6 +45,8 @@ func _ready() -> void:
 			sortie = args[i + 1]
 		elif args[i] == "--graine" and i + 1 < args.size():
 			graine = int(args[i + 1])
+		elif args[i] == "--theme" and i + 1 < args.size():
+			theme = args[i + 1]
 	DirAccess.make_dir_recursive_absolute(sortie)
 	scene = load("res://scenes/demo/main.tscn").instantiate()
 	add_child(scene)
@@ -57,7 +60,7 @@ func _ready() -> void:
 	var j: Dictionary = scene.joueur()
 	jid = j.id
 	scene.sim.donjon = {"etages": etages_voulus + 1}   # un donjon assez profond pour le parcours demandé
-	scene.sim.charger_donjon("ruine", graine, 7, 1, j)
+	scene.sim.charger_donjon(theme, graine, 7, 1, j)
 	scene.sim.maj_vision()
 	scene._apres_changement_de_grille()
 	etage_depart = int(scene.sim.donjon.etage)
