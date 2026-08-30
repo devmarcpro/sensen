@@ -1540,6 +1540,7 @@ func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: C
 
 ## La couche d'interface : barres, garde, télégraphe et jauge de chaîne de chaque être.
 func _dessiner_hud(ci: CanvasItem) -> void:
+	_dessiner_bulle(ci)
 	if sim == null:
 		return
 	var j := joueur()
@@ -1674,6 +1675,54 @@ func acteurs_timeline(j: Dictionary) -> Array:
 	var acteurs := sim.vivants().filter(func(e: Dictionary) -> bool: return e.horloge == j.horloge and (e.id == joueur_id or (Grille.distance(e.pos, j.pos) <= 12 and sim.voit(j, e.pos))))
 	acteurs.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.compteur < b.compteur)
 	return acteurs.slice(0, 10)
+
+
+## La bulle au survol, dessinée dans la couche HUD (au-dessus des blocs et des êtres) — rien ne la recouvre.
+func _dessiner_bulle(ci: CanvasItem) -> void:
+	var j := joueur()
+	if sim == null or j.is_empty() or survol.x < 0 or ecrans.est_ouvert() or titre_ouvert:
+		return
+	var g := sim.grille
+	var occ := g.occupant(survol)
+	if occ.is_empty() or occ == joueur_id or not sim.entites.has(occ) or not sim.entites[occ].vivant or not sim.voit(j, survol):
+		return
+	var cible: Dictionary = sim.entites[occ]
+	var lignes_b := _lignes_bulle(j, cible)
+	var larg := 0.0
+	for l in lignes_b:
+		larg = maxf(larg, ThemeDB.fallback_font.get_string_size(str(l), HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x)
+	var haut := 14.0 * lignes_b.size() + 8.0
+	var pb := _ecran(cible.pos, g.h(cible.pos)) + Vector2(-larg * 0.5 - 6.0, -70.0 - haut)
+	ci.draw_rect(Rect2(pb, Vector2(larg + 12.0, haut)), Color(0.05, 0.05, 0.08, 0.9))
+	ci.draw_rect(Rect2(pb, Vector2(larg + 12.0, haut)), Color(0.9, 0.3, 0.25) if sim.ennemis(j, cible) else Color(0.35, 0.8, 0.45), false, 1.0)
+	for k in lignes_b.size():
+		ci.draw_string(ThemeDB.fallback_font, pb + Vector2(6.0, 14.0 * (k + 1) - 2.0), str(lignes_b[k]), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.95, 0.95, 0.9) if k > 0 else Color(1.0, 0.9, 0.6))
+
+
+## La bulle au survol d'une cible (Écrans d'interface, 2026-08-30) : PV, fourchette de l'arme, résistance Wu Xing, armure.
+func _lignes_bulle(j: Dictionary, cible: Dictionary) -> Array[String]:
+	var res: Array[String] = [tr("ui.bulle.pv").format({"nom": tr(cible.name_key), "pv": int(cible.sante), "max": int(cible.sante_max)})]
+	var arme := Etres.arme(j, sim.items)
+	if not arme.is_empty():
+		var fonct: Dictionary = sim.fonctionnalites[arme.functionality]
+		var zone: Dictionary = sim.regles.zone_de_coup(g_h(j.pos), g_h(cible.pos))
+		var piece := Etres.piece_zone(cible, zone.zone, sim.items)
+		var armure := sim.regles.armure_piece(piece, fonct.type_degats)
+		var a_zero: bool = j.endurance <= 0
+		var vecteur := sim.vecteur_arme(arme)
+		var wx: Dictionary = sim._facteur_wuxing(j, cible, vecteur, sim.horloge_de(j).ticks)
+		var f := sim.regles.fourchette_arme(j.stats_eff, arme, fonct, false, zone.mult, armure, a_zero, wx.total, j.competences_eff, vecteur)
+		var fl := sim.regles.fourchette_arme(j.stats_eff, arme, fonct, true, zone.mult, armure, a_zero, wx.total, j.competences_eff, vecteur)
+		res.append(tr("ui.bulle.arme").format({"min": f.x, "max": f.y, "lmin": fl.x, "lmax": fl.y}))
+		if not vecteur.is_empty():
+			var el_c: Dictionary = cible.get("elements", {}) if cible.get("elements") is Dictionary else {}
+			res.append(tr("ui.bulle.wuxing").format({"element": tr("element." + sim.wuxing.dominante(vecteur)), "cible": tr("element." + sim.wuxing.dominante(el_c)) if not el_c.is_empty() else "—", "dom": "%.2f" % wx.dom}))
+		res.append(tr("ui.bulle.armure").format({"zone": tr("zone." + str(zone.zone)), "armure": "%.1f" % armure, "mult": "%.2f" % zone.mult}))
+	if visee >= 0:
+		var plan := sim.plan_capacite(j, visee)
+		if not plan.is_empty() and plan.erreurs.is_empty():
+			res.append(_preview_capacite(j, plan, cible))
+	return res
 
 
 ## Prévisualisation des dégâts avec le détail du calcul (la lisibilité est le but).

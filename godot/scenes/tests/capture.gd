@@ -87,6 +87,9 @@ func _ready() -> void:
 			for cid in args[i6 + 1].split(","):
 				scene.sim.triche(jc2, "creature", str(cid))
 			scene.sim.maj_vision()
+			var vivants_c: Array = scene.sim.vivants()
+			if not vivants_c.is_empty():
+				scene.survol = vivants_c.back().pos   # la dernière posée est sous la souris : bulle, prévisualisation
 	for i7 in args.size():   # --statut id[,id…] : des statuts sur le joueur (triche) — les puces de la timeline
 		if args[i7] == "--statut" and i7 + 1 < args.size():
 			for sid in args[i7 + 1].split(","):
@@ -111,10 +114,13 @@ func _ready() -> void:
 				scene.ecrans._montrer_detail()
 	# Un survol simulé sur une créature, pour voir la prévisualisation.
 	var j: Dictionary = scene.joueur()
-	for e in scene.sim.vivants():
-		if e.id != j.id:
+	var plus_proche := 999999
+	for e in scene.sim.vivants():   # la créature la plus proche du joueur est sous la souris (bulle, prévisualisation)
+		if e.id != j.id and Grille.distance(e.pos, j.pos) < plus_proche:
+			plus_proche = Grille.distance(e.pos, j.pos)
 			scene.survol = e.pos
-			break
+	if "--debug-survol" in args:
+		print("survol=", scene.survol, " occ=", scene.sim.grille.occupant(scene.survol), " voit=", scene.sim.voit(j, scene.survol), " ecran=", scene.ecrans.est_ouvert(), " j=", j.pos)
 
 
 func _process(delta: float) -> void:

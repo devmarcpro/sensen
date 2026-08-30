@@ -2237,3 +2237,7 @@ ui.composeur.style,"Style du sort : {liste}"
 ui.composeur.style_neutre,"Style du sort : —"
 journal.xp,"XP : {liste}"
 xp.encaissement,Encaissement
+ui.bulle.pv,"{nom} · {pv}/{max} PV"
+ui.bulle.arme,"Arme : {min}–{max} · lourde {lmin}–{lmax}"
+ui.bulle.wuxing,"{element} contre {cible} ×{dom}"
+ui.bulle.armure,"Zone {zone} ×{mult} · armure {armure}"
