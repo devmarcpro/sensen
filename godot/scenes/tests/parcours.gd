@@ -34,6 +34,7 @@ var attentes := 0
 var soins := 0
 var captures := 0
 var derniere_capture_frame := -999
+var derniere_capture_30s := 0   # une capture d'écran toutes les 30 s réelles dans <sortie>/toutes_les_30s/ (designer, 2026-08-31)
 var en_combat_avant := false
 var sante_avant := -1
 var journal_vu := 0
@@ -64,6 +65,7 @@ func _ready() -> void:
 		elif args[i] == "--sorts" and i + 1 < args.size():
 			sorts = int(args[i + 1])
 	DirAccess.make_dir_recursive_absolute(sortie)
+	DirAccess.make_dir_recursive_absolute(sortie + "/toutes_les_30s")
 	rng_bot.seed = graine
 	scene = load("res://scenes/demo/main.tscn").instantiate()
 	add_child(scene)
@@ -113,7 +115,7 @@ func _equiper_et_composer() -> void:
 	var bases: Array = ["craft_epee", "craft_dague", "craft_masse", "craft_lance", "craft_casque", "craft_cuirasse", "craft_jambieres", "proto_bouclier", "proto_anneau", "proto_amulette"]
 	for k in equiper:
 		var base: String = bases[rng_bot.randi() % bases.size()]
-		var o := sim.generer_objet(base, 3, {}, "rare" if rng_bot.randf() < 0.5 else "commun")
+		var o: Dictionary = sim.generer_objet(base, 3, {}, "rare" if rng_bot.randf() < 0.5 else "commun")
 		if o.is_empty():
 			continue
 		j.sac.append(o.uid)
@@ -158,6 +160,11 @@ func _capturer(nom: String) -> void:
 
 func _process(_delta: float) -> void:
 	frames += 1
+	if Time.get_ticks_msec() - derniere_capture_30s >= 30000 and frames > 5:   # le film du parcours : une image toutes les 30 s
+		derniere_capture_30s = Time.get_ticks_msec()
+		var img30 := get_viewport().get_texture().get_image()
+		if img30 != null:
+			img30.save_png("%s/toutes_les_30s/%03d.png" % [sortie, Time.get_ticks_msec() / 1000])
 	if frames < 5:
 		return
 	if frames == 5:
@@ -198,7 +205,7 @@ func _process(_delta: float) -> void:
 	if not cible.is_empty():
 		scene.chemin_en_cours.clear()
 		if sorts > 0 and rng_bot.randf() < 0.5 and j.capacites.size() > 0:   # un sort au hasard sur la cible (30)
-			var k_s := rng_bot.randi() % j.capacites.size()
+			var k_s: int = rng_bot.randi() % j.capacites.size()
 			if sim.intention(jid, {"type": "capacite", "index": k_s, "cible": cible.pos}):
 				sorts_lances += 1
 				return

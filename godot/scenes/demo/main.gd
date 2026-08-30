@@ -1380,6 +1380,8 @@ static func _poly(ci: CanvasItem, pts: PackedVector2Array, col: Color) -> void:
 
 
 func _losange(t: Vector2i, col: Color) -> void:
+	if not sim.grille.dans(t):   # une zone de télégraphe ou une visée peut déborder de la grille : hors de la grille, rien —
+		return                   # sinon h() imprimait une erreur d'index PAR IMAGE et PAR TUILE (le « lag de ouf » du 2026-08-31)
 	# draw_primitive (deux triangles, sans triangulation) : les coordonnées monde sont grandes (~1e6 px) et la
 	# triangulation en float32 de draw_colored_polygon jugeait le losange dégénéré (« Invalid polygon data »).
 	var c := _ecran(t, sim.grille.h(t))
