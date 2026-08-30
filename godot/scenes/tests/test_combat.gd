@@ -6283,6 +6283,17 @@ func test_sauvegarde_partout() -> void:
 	j.sante = 17
 	j.or = 33
 	s.expedition.tues = 4
+	var pas_loin: Vector2i = j.pos
+	for d in Grille.DIRS:   # un pas hors de l'entrée : la position doit survivre au rechargement
+		if s.grille.dans(j.pos + d) and not s.grille.bloque_passage(j.pos + d) and s.grille.occupant(j.pos + d).is_empty():
+			pas_loin = j.pos + d
+			break
+	s.grille.liberer(j.pos)
+	j.pos = pas_loin
+	s.grille.placer(j.id, pas_loin)
+	s.maj_vision()
+	verifier(s.appliquer_statut(j, "poison", 60, ""), "un poison avant la sauvegarde")
+	var n_decouvert: int = s.grille.decouvert.size()
 	var vivants_avant: int = s.vivants().size()
 	verifier(s.sauvegarder("test_partout"), "sauvegarder en plein donjon")
 	var s2 := Simulation.new(71)
@@ -6292,6 +6303,9 @@ func test_sauvegarde_partout() -> void:
 	verifier(s2.horloge_monde.mode == Horloge.Mode.ACTION, "l'horloge du donjon est à l'action")
 	verifier(s2.vivants().size() == vivants_avant, "les êtres de l'étage sont ceux de la sauvegarde (%d/%d)" % [s2.vivants().size(), vivants_avant])
 	verifier(int(j2.sante) == 17 and int(j2.or) == 33 and int(s2.expedition.tues) == 4, "PV, or et compteurs d'expédition conservés")
+	verifier(j2.pos == pas_loin, "le joueur reprend où il a sauvé, pas à l'entrée (%s)" % str(j2.pos))
+	verifier(not j2.statuts.is_empty() and str(j2.statuts[0].get("id", "")) == "poison", "les statuts du joueur survivent au rechargement")
+	verifier(s2.grille.decouvert.size() == n_decouvert and n_decouvert > 0, "le brouillard de l'étage est celui de la sauvegarde (%d tuiles vues)" % n_decouvert)
 	s2.attente[j2.id] = true
 	verifier(s2.intention(j2.id, {"type": "attendre"}), "et la partie continue")
 

@@ -5102,7 +5102,8 @@ func sauvegarder(nom: String = "monde") -> bool:
 			for gi in camp_sauve.contenants.keys():
 				camp_cont[camp_sauve.grille.pos_de(int(gi))] = camp_sauve.contenants[gi]
 		exp = {"lieu": "donjon", "donjon": {"theme": donjon.theme, "graine": int(donjon.graine), "id": int(donjon.id), "etage": int(donjon.etage), "etages": int(donjon.etages), "cellule": donjon.get("cellule", Vector2i(-9999, -9999)), "corruption": float(donjon.get("corruption", 0.0))},
-			"expedition": expedition, "camp": {"entites": camp_ent, "ordre": camp_sauve.get("ordre", []), "contenants": camp_cont}, "retour": j.get("retour", Vector2i.ZERO)}
+			"expedition": expedition, "camp": {"entites": camp_ent, "ordre": camp_sauve.get("ordre", []), "contenants": camp_cont}, "retour": j.get("retour", Vector2i.ZERO),
+			"decouvert": grille.decouvert.duplicate()}   # le brouillard de l'étage courant survit au rechargement (l'expédition reprend où elle était)
 	ok = Sauvegarde.ecrire(nom, "expedition.json", exp) and ok
 	if ok:
 		EventBus.emettre(&"sauvegarde_faite", [nom])
@@ -5167,6 +5168,8 @@ func charger_sauvegarde(nom: String = "monde") -> bool:
 		donjon = {"etages": int(d.etages), "cellule": d.get("cellule", Vector2i(-9999, -9999)), "corruption": float(d.get("corruption", 0.0)), "id": -1}
 		entites[joueur_sauve.id] = joueur_sauve   # charger_donjon reprendra cette fiche telle quelle
 		lieu = "donjon"
+		var pos_sauvee: Vector2i = joueur_sauve.pos   # _reprendre replace à l'entrée : on garde où le joueur a sauvé
+		var statuts_sauves: Array = joueur_sauve.get("statuts", []).duplicate(true)   # et ses statuts, que _reprendre efface
 		charger_donjon(str(d.theme), int(d.graine), int(d.id), int(d.etage), joueur_sauve)
 		for id in ordre.duplicate():   # les êtres frais de la régénération cèdent la place aux êtres sauvés
 			if id != joueur_sauve.id:
@@ -5178,6 +5181,13 @@ func charger_sauvegarde(nom: String = "monde") -> bool:
 			ordre.append(id)
 			if entites[id].vivant and grille.dans(entites[id].pos):
 				grille.placer(id, entites[id].pos)
+		if grille.dans(pos_sauvee) and not grille.bloque_passage(pos_sauvee) and grille.occupant(pos_sauvee).is_empty():
+			grille.liberer(joueur_sauve.pos)   # le joueur reprend où il a sauvé, pas à l'entrée (Sauvegarde)
+			joueur_sauve.pos = pos_sauvee
+			joueur_sauve.ancre = pos_sauvee
+			grille.placer(joueur_sauve.id, pos_sauvee)
+		joueur_sauve.statuts = statuts_sauves
+		grille.decouvert = exp.get("decouvert", grille.decouvert)   # le brouillard de l'étage tel qu'à la sauvegarde
 		contenants = {}
 		for pos in ent.contenants.keys():
 			if grille.dans(pos):
