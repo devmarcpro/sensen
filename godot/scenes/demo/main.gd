@@ -579,9 +579,9 @@ func _dessiner_voiles() -> void:
 			var col := Color(0.02, 0.02, 0.05, a)
 			var ct := g.contenu_de(t)
 			var hm := (int(ct.get("hauteur_vue", 0)) * HSTEP) if (g.bloque_passage(t) and not ("vegetation" in ct.get("tags", []))) else 0
-			if hm > 0:   # un mur : toute la silhouette du bloc s'assombrit, pas un losange posé sur ses pieds
-				voiles.draw_colored_polygon(PackedVector2Array([c + Vector2(-TW * 0.5, 0), c + Vector2(-TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm),
-					c + Vector2(TW * 0.5, -hm), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5)]), col)
+			if hm > 0:   # un mur : le bloc est redessiné OPAQUE, plus sombre — une silhouette translucide chevauchait les voisins (blocs « en verre », designer 2026-08-30)
+				var k := 1.0 - a
+				_dessine_bloc(voiles, g, t, c, Color(k, k, k + 0.02))
 			else:
 				voiles.draw_primitive(PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)]), PackedColorArray([col, col, col, col]), PackedVector2Array())
 
