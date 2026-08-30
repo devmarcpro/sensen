@@ -119,6 +119,20 @@ func _ready() -> void:
 			scene.sim.triche(scene.joueur(), "meteo", str(args[im + 1]))
 			scene.sim._maj_etats_meteo()   # les drapeaux neige / gel suivent tout de suite (sinon : au prochain pas d'horloge)
 			scene._apres_changement_de_grille()   # le terrain reteinte (sol blanchi, glace pâle)
+	if "--feu" in args and scene.sim != null:   # --feu : enflamme les tuiles inflammables autour du joueur (flammes, halo, dangers)
+		var jf: Dictionary = scene.joueur()
+		var n_feux := 0
+		for r_f in range(1, 7):
+			for dy_f in range(-r_f, r_f + 1):
+				for dx_f in range(-r_f, r_f + 1):
+					if absi(dx_f) != r_f and absi(dy_f) != r_f:
+						continue
+					var t_f: Vector2i = jf.pos + Vector2i(dx_f, dy_f)
+					if scene.sim.grille.dans(t_f) and n_feux < 5 and scene.sim._enflammer(t_f):
+						n_feux += 1
+			if n_feux >= 5:
+				break
+		print("feux allumés : ", n_feux)
 	if "--torche" in args and scene.sim != null:   # --torche : une torche en main (Éclairage, la nuit)
 		var jt0: Dictionary = scene.joueur()
 		var torche: Dictionary = scene.sim.generer_objet("torche", 1, {}, "commun", 0)
