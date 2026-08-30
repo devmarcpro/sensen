@@ -6027,6 +6027,10 @@ func nom_objet(uid: String) -> Dictionary:
 	var res := {"base": it.get("name_key", uid), "affixe": nom.get("affixe", ""), "params": nom.get("params", {}), "rarete": it.get("rarete", "commun")}
 	if nom.has("de_creature"):   # « Statue de loup » : le nom porte la créature dont l'objet est tiré
 		res["de_creature"] = str(nom.de_creature)
+	if it.get("type", "") in ["grimoire", "manuel"] and it.has("modules"):   # un livre dit son domaine et sa difficulté
+		res["livre"] = {"domaine": str(it.get("domaine", "")), "difficulte": int(it.get("difficulte", 0)), "n": it.modules.size()}
+		if nom.has("module"):   # un livre de module : le module au nom
+			res["module_livre"] = str(nom.module)
 	if it.get("type", "") == "composant" or it.has("composants"):   # craft : l'objet se décrit par son matériau
 		res["materiau"] = GameData.catalogues.materials.get(str(it.get("materiau", "")), {}).get("name_key", "")
 		res["construction"] = str(it.get("construction", ""))

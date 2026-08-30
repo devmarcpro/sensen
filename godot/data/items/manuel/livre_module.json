@@ -1,0 +1,12 @@
+{
+  "name_key": "item.livre_module.name",
+  "type": "manuel",
+  "equip_slot": "",
+  "hands": 0,
+  "materiau": "papier",
+  "tags": [
+    "livre",
+    "manuel",
+    "module_unique"
+  ]
+}

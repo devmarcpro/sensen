@@ -751,10 +751,8 @@ func _maj_atteignables() -> void:
 
 ## Les classes proposées à la création : sans les cachées (Talents de classe).
 func _classes_visibles() -> Array:
-	var res: Array = []
-	for id in GameData.catalogues.classes.keys():
-		if not ("cache" in GameData.catalogues.classes[id].get("tags", [])):
-			res.append(id)
+	# Plus de limites à la création (designer, 2026-08-31) : toutes les classes, les cachées comprises.
+	var res: Array = GameData.catalogues.classes.keys()
 	res.sort()
 	return res
 
@@ -1924,6 +1922,8 @@ func nom_objet(n: Dictionary) -> String:
 	if n.has("taille"):
 		var t: Dictionary = n.taille
 		return "%s (%s %s)" % [base, tr("taille." + str(t.type)), ("%.2f" % float(t.valeur)) if t.type in ["affinite", "qualite"] else str(int(t.valeur))]
+	if n.has("module_livre"):   # un livre de module : le module au nom (Grimoires et manuels, 2026-08-31)
+		return tr("nom.livre_module").format({"module": tr(str(n.module_livre)), "difficulte": int(n.livre.difficulte) if n.has("livre") else 0})
 	if n.has("livre"):
 		return "%s %s (difficulté %d, %d modules)" % [base, tr("domaine." + str(n.livre.domaine)), int(n.livre.difficulte), int(n.livre.n)]
 	if str(n.get("affixe", "")).is_empty():

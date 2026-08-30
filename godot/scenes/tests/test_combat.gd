@@ -6644,6 +6644,9 @@ func test_gemmes_et_livres() -> void:
 	# Livres : un grimoire tire domaine, difficulté et modules ; la lecture réussit avec Lecture haute
 	var livre := s.generer_objet("grimoire", 2)
 	verifier(livre.modules.size() >= 2 and livre.difficulte == 10 + 2 * 10 and not livre.domaine.is_empty(), "grimoire : %d modules, difficulté 30, domaine %s" % [livre.modules.size(), livre.domaine])
+	var lm := s.generer_objet("livre_module", 2)
+	verifier(lm.modules.size() == 1 and GameData.catalogues.modules.has(str(lm.modules[0])) and lm.nom.has("module"), "livre de module : UN module précis, à son nom (%s)" % str(lm.modules))
+	verifier(s.nom_objet(lm.uid).has("module_livre"), "le nom du livre porte le module")
 	var manuel := s.generer_objet("manuel", 1)
 	verifier(manuel.modules.size() >= 2 and manuel.domaine in ["frappes", "postures", "techniques", "maitrise"], "manuel : domaine %s" % manuel.domaine)
 	j.competences["lecture"] = 100

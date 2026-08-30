@@ -28,6 +28,9 @@ etape: 0
 
 **Ce que ça donne, vérifié :** Arcane est quasi neutre par construction (aucun matchup fort, aucun faible — le domaine du joueur qui refuse le système élémentaire, et qui le paie en multiplicateurs plats). Espace et Corruption sont des mixtes à deux composantes : ils bénéficient du choix de segment ([[Ouvert — Compensation de l'arme mixte]]) et amortissent les mauvais matchups, sans jamais atteindre le ×1.5 d'un domaine pur. **C'est cohérent** : ces trois domaines achètent de l'utilité (téléport, portée, drain) contre de la puissance élémentaire.
 
+> [!success] Codé le 2026-08-31 — le vecteur Espace est dans les fiches
+> Les douze noyaux de la famille Espace (`data/modules/noyau/espace/`) portaient `elements: {}` : ils ne posaient aucun segment de chaîne et ne subissaient aucune domination — la « viabilité des builds Espace » n'était pas testable. Ils portent désormais le défaut de cette note, `{eau: 0.6, metal: 0.4}` (dominante Eau). Arcane et Corruption n'ont encore aucun module au catalogue : leurs vecteurs s'appliqueront à la première fiche qui les déclare.
+
 ## Liens
 - **Dépend de** : [[Domination et multiplicateurs]], [[Wu Xing — cycles et vecteurs]]
 - **Alimente** : [[Domaines de grimoires et manuels]], [[Jauge de chaîne Wu Xing]], [[Modules]]

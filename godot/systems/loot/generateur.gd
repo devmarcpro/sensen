@@ -119,6 +119,15 @@ func _composer_livre(inst: Dictionary, base: Dictionary, profondeur: int, rng: R
 		inst["domaine"] = "industriel"
 		inst["nom"] = {"affixe": "", "params": {"recette": GameData.catalogues.recipes.get(inst.recette, {}).get("name_key", "")}}
 		return
+	if "module_unique" in base.get("tags", []):   # un livre de module (designer, 2026-08-31) : UN module précis, au nom du livre
+		var ids_m: Array = modules.keys()
+		ids_m.sort()
+		var choisi_m := str(ids_m[rng.randi_range(0, ids_m.size() - 1)])
+		inst["modules"] = [choisi_m]
+		inst["domaine"] = str(modules[choisi_m].get("module_type", "noyau"))
+		inst["difficulte"] = int(lv.difficulte_base) + maxi(0, profondeur - 1) * int(lv.difficulte_par_etage) / 2
+		inst["nom"] = {"affixe": "", "params": {}, "module": str(modules[choisi_m].get("name_key", choisi_m))}
+		return
 	var grimoire: bool = base.type == "grimoire"
 	var domaine := ""
 	if grimoire:

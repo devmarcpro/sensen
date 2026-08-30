@@ -2315,3 +2315,5 @@ ui.inventaire.col_poids,Weight
 ui.inventaire.col_quantite,Qty
 journal.mort_or,{nom} loses {or} gold in death
 journal.faim_conseil,{nom}'s stomach is rumbling — time to eat
+item.livre_module.name,Module book
+nom.livre_module,"Book: {module} (difficulty {difficulte})"
