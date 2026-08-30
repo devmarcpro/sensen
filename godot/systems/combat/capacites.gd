@@ -58,7 +58,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 		"geometrie": "point", "origine": "cible", "portee": Vector2i(1, 1), "taille": 1, "ligne_de_vue": true,
 		"ticks": 0, "monnaie": "", "ressource": 0, "des": null, "des_bonus": 0, "mult": 1.0,
 		"elements": {}, "effets": [], "conditions": [], "drapeaux": {}, "parametres": {},
-		"liaisons": [], "charge_suivante": {}, "charges_sup": [], "formes_sup": [],
+		"liaisons": [], "charge_suivante": {}, "charges_sup": [], "formes_sup": [], "fois": 1,
 	}
 	var alternance := false   # Alternance (Modules) : la séquence a droit à deux noyaux
 	var noyaux := 0
@@ -104,12 +104,28 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				if not plan.noyau.is_empty():
 					if alternance:
 						continue   # Alternance : le second noyau est assemblé dans le plan `alt`
+					# Un noyau répété est un noyau plus puissant (× n), pas une charge de plus : il paie une fois de plus.
+					var repete: Dictionary = {}
+					if str(plan.noyau.id) == id:
+						repete = plan
+					for sup_r: Dictionary in plan.charges_sup:
+						if str(sup_r.noyau.id) == id:
+							repete = sup_r
+					if not repete.is_empty():
+						repete.fois = int(repete.get("fois", 1)) + 1
+						plan.ticks += ticks_arme if m.get("power_base") == "arme" else ticks_module(int(m.cout_ticks), id, niveaux)
+						var sf_r := 1.0 + float(niveaux.get(id, 0)) * par_niveau
+						if int(m.get("cout_mana", 0)) > 0:
+							plan.ressource += roundi(float(m.cout_mana) / sf_r)
+						elif int(m.get("cout_endurance", 0)) > 0:
+							plan.ressource += roundi(float(m.cout_endurance) / sf_r)
+						continue
 					# Aucune limite d'assemblage (Six types de modules) : le noyau de plus est une charge de
 					# plus, avec ses dés, ses effets et son coût. Le prix, pas l'assembleur, est la borne.
 					var sup := {"noyau": m, "effets": m.get("effets", []).duplicate(),
 						"des": des_arme if m.get("power_base") == "arme" else m.get("power_base"),
 						"elements": element_arme.duplicate() if (m.get("power_base") == "arme" or m.get("element_special") == "arme") else m.get("elements", {}).duplicate(),
-						"parametres": m.get("effet", {}).duplicate(), "des_bonus": 0, "mult": 1.0,
+						"parametres": m.get("effet", {}).duplicate(), "des_bonus": 0, "mult": 1.0, "fois": 1,
 						"drapeaux": plan.drapeaux, "liaisons": [], "modules": [id], "name_key": m.name_key}
 					plan.charges_sup.append(sup)
 					plan.ticks += ticks_arme if m.get("power_base") == "arme" else ticks_module(int(m.cout_ticks), id, niveaux)
@@ -217,6 +233,9 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 		plan.portee = Vector2i(1, 1)
 	plan.ressource = maxi(0, roundi((float(plan.ressource) + float(plus)) * mult))
 	plan.ticks = maxi(1, plan.ticks)
+	appliquer_fois(plan)   # un noyau répété : dés et paramètres × n
+	for sup_f: Dictionary in plan.charges_sup:
+		appliquer_fois(sup_f)
 	return plan
 
 
@@ -329,3 +348,38 @@ static func tuiles_de_forme(g: Grille, geometrie: String, origine: Vector2i, cib
 			push_warning("Capacités : géométrie de forme inconnue « %s » — visée au point" % geometrie)
 			res.append(cible)
 	return res
+
+
+## Un noyau présent n fois dans la séquence (Six types de modules, 2026-08-30) : le lot (plan ou charge de plus)
+## devient n fois plus puissant — dés × n (« arme » et formules : mult × n), paramètres numériques × n. Les
+## identités (cible, mode, statut, zone, drapeaux) ne bougent pas. Le prix, lui, a déjà été compté n fois.
+const CLES_IDENTITE: Array[String] = ["mode", "cible", "id", "zone", "contenu", "statut", "paire", "chute",
+	"rompt_si_touche", "desarme", "estime", "segment_de_la_cible"]
+
+static func appliquer_fois(lot: Dictionary) -> void:
+	var n: int = int(lot.get("fois", 1))
+	if n <= 1:
+		return
+	var d: Variant = lot.get("des")
+	if d != null and not str(d).is_empty():
+		if Des.analyser(str(d)).faces > 0 or str(d).is_valid_int():
+			lot.des = Des.multiplier(str(d), n)
+		else:
+			lot.mult = float(lot.get("mult", 1.0)) * float(n)   # « arme », « (h−2)×5 » : la formule reste, le résultat × n
+	var p: Dictionary = lot.get("parametres", {}).duplicate(true)   # jamais le dictionnaire du catalogue
+	for k in ["tempo", "ignore_armure_points"]:
+		if p.has(k) and (typeof(p[k]) == TYPE_INT or typeof(p[k]) == TYPE_FLOAT):
+			p[k] = p[k] * n
+	for bloc in ["statut", "terrain", "invocation", "ressource", "deplacement"]:
+		if p.has(bloc) and p[bloc] is Dictionary:
+			var b: Dictionary = p[bloc]
+			for k in b.keys():
+				if str(k) in CLES_IDENTITE:
+					continue
+				var v: Variant = b[k]
+				if typeof(v) == TYPE_INT or typeof(v) == TYPE_FLOAT:
+					b[k] = v * n
+				elif typeof(v) == TYPE_STRING and Des.analyser(str(v)).faces > 0:
+					b[k] = Des.multiplier(str(v), n)
+	lot.parametres = p
+

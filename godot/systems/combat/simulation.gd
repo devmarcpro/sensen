@@ -8965,6 +8965,7 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 ## Chacune réutilise la mécanique que le jeu a déjà — bombes, affûts, relevé du Fossoyeur, compagnon temporaire.
 func _invoquer(e: Dictionary, mode: String, tuiles: Array[Vector2i], cible_pos: Vector2i, plan: Dictionary, tick: int) -> bool:
 	var iv: Dictionary = regles.r.get("invocations", {})
+	var fois: int = maxi(1, int(plan.get("fois", 1)))   # noyau répété : bombe et tourelle × n, n créatures
 	match mode:
 		"bombe":   # une charge PAR TUILE de la forme : on peut miner une salle entière, au prix fort
 			var b: Dictionary = iv.get("bombe", {})
@@ -8973,8 +8974,8 @@ func _invoquer(e: Dictionary, mode: String, tuiles: Array[Vector2i], cible_pos: 
 				if not grille.dans(q):
 					continue
 				bombes.append({"pos": q, "fin": tick + int(b.get("retard_ticks", 20)), "horloge": str(e.horloge),
-					"puissance": float(b.get("puissance", 40.0)), "rayon": int(b.get("rayon", 2)),
-					"degats": str(b.get("degats", "3d6")), "source": e.id})
+					"puissance": float(b.get("puissance", 40.0)) * float(fois), "rayon": int(b.get("rayon", 2)),
+					"degats": Des.multiplier(str(b.get("degats", "3d6")), fois), "source": e.id})
 				posees += 1
 			if posees > 0:
 				EventBus.emettre(&"journal", [&"journal.bombes_posees", {"nom": e.name_key, "n": posees, "retard": int(b.get("retard_ticks", 20))}])
@@ -8987,7 +8988,7 @@ func _invoquer(e: Dictionary, mode: String, tuiles: Array[Vector2i], cible_pos: 
 					continue
 				grille.poser_contenu(q, "barriere")
 				affuts.append({"pos": q, "source": e.id, "prochain": tick + int(t.get("cadence_ticks", 6)),
-					"fin": tick + int(t.get("duree_ticks", 120)), "degats": str(t.get("degats", "1d6")),
+					"fin": tick + int(t.get("duree_ticks", 120)), "degats": Des.multiplier(str(t.get("degats", "1d6")), fois),
 					"portee": int(t.get("portee", 6)), "elements": plan.elements.duplicate()})
 				EventBus.emettre(&"tile_changed", [q])
 				n_tour += 1   # une tourelle par tuile libre de la forme
@@ -9017,6 +9018,19 @@ func _invoquer(e: Dictionary, mode: String, tuiles: Array[Vector2i], cible_pos: 
 				x.horloge = e.horloge
 				x.compteur = tick + 1
 				n_inv += 1
+				for _k in range(fois - 1):   # noyau répété : n créatures par tuile, les suivantes autour
+					var q2 := _tuile_libre_autour(q)
+					if q2 == Vector2i(-1, -1):
+						break
+					var x3 := ajouter(str(c.get("creature", "loup")), q2, "ia")
+					if x3.is_empty():
+						break
+					x3.camp = e.camp
+					x3["maitre"] = e.id
+					x3["fin_invocation"] = tick + int(c.get("duree_ticks", 80))
+					x3.horloge = e.horloge
+					x3.compteur = tick + 1
+					n_inv += 1
 			if n_inv == 0:   # aucune tuile de la forme n'est libre : la plus proche fait l'affaire
 				var libre := _tuile_libre_autour(cible_pos)
 				if libre == Vector2i(-1, -1):

@@ -54,6 +54,14 @@ static func analyser(s: String) -> Dictionary:
 	return r
 
 
+## La notation multipliée : « 3d6 » × 2 → « 6d6 », « 1d4+1 » × 3 → « 3d4+3 », « 5 » × 2 → « 10 » (noyau répété).
+static func multiplier(notation: String, n: int) -> String:
+	var p := analyser(notation)
+	if p.faces == 0:
+		return str(p.bonus * n)
+	return "%dd%d" % [p.n * n, p.faces] + ("+%d" % (p.bonus * n) if p.bonus > 0 else "")
+
+
 ## Fourchette [min, max] d'une notation, avec dés en plus.
 static func fourchette(notation: Variant, des_bonus: int = 0) -> Vector2i:
 	if notation == null:
