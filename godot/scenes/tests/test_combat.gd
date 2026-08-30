@@ -2834,6 +2834,9 @@ func test_assemblage_sans_limite() -> void:
 		if not (m in j.modules_connus):
 			j.modules_connus.append(m)
 	verifier(s.composer_capacite(j, ["carre", "bombe", "etincelle", "concentration", "gel", "baume"]) and j.capacites.size() == 1, "six modules se composent au niveau 0 : la longueur n'est plus bornée par les slots (%d capacité)" % j.capacites.size())
+	for k in 12:   # pas de limite de sorts créés non plus (2026-08-30)
+		s.composer_capacite(j, ["point", "etincelle", "concentration"] if k % 2 == 0 else ["carre", "gel"])
+	verifier(j.capacites.size() == 13, "treize capacités composées sans refus (%d)" % j.capacites.size())
 	j.capacites = caps_sauve
 	var n_bombes0: int = s.bombes.size()
 	s._executer_capacite(j, p_bombe, j.pos + Vector2i(2, 0))
@@ -3056,7 +3059,7 @@ func test_composer_capacites() -> void:
 	verifier(s.composer_capacite(j, ["soi", "renaissance"]) and j.capacites.size() == 2, "soi + Renaissance : une capacité sur soi")
 	for k in 6:
 		s.composer_capacite(j, ["point", "etincelle"])
-	verifier(j.capacites.size() <= int(slots.capacites), "les capacités sont bornées par les slots (%d)" % j.capacites.size())
+	verifier(j.capacites.size() == 8 and int(slots.capacites) >= 2, "plus de plafond de capacités : huit composées (%d)" % j.capacites.size())
 	verifier(s.supprimer_capacite(j, 0) and j.capacites.size() >= 1, "supprimer une capacité")
 	# Renaissance : un compagnon mort, son âme dans le sac, le sort le rappelle contre du mana.
 	var v := s.ajouter("villageois", j.pos + Vector2i(1, 1), "ia")

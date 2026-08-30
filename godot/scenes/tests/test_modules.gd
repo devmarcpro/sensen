@@ -57,7 +57,68 @@ func _ready() -> void:
 	for c in par_type.get("noyau", []):   # le noyau répété et deux noyaux différents
 		executer.call(["carre", c, c])
 		executer.call(["point", c, "etincelle"])
-	print("ESSAIS : %d plans assemblés et exécutés, %d refusés" % [n, refus.size()])
+	# 2. « vérifie que tout fonctionne » : chaque noyau, lancé seul sur un mannequin hostile, doit changer QUELQUE CHOSE
+	# d'observable — les PV, le mana, l'endurance, la position, les statuts, le compteur du mannequin ou du lanceur,
+	# une bombe, un affût, une zone, une entité de plus, une tuile (hauteur, contenu), une saisie.
+	var muets: Array[String] = []
+	for c in par_type.get("noyau", []):
+		var md: Dictionary = GameData.catalogues.modules[c]
+		var ef_c: Dictionary = md.get("effet", {})
+		var effets_c: Array = md.get("effets", [])
+		# Le mannequin qui convient au noyau : un allié blessé et affaibli pour les soins, purges et statuts d'allié ;
+		# personne sur la tuile pour les invocations et convocations ; soi-même pour les déplacements « soi ».
+		var vise_allie: bool = str(ef_c.get("cible", "")) == "allie" or "soin" in effets_c or "resurrection" in effets_c 			or str(ef_c.get("ressource", {}).get("cible", "")) == "allie" or ef_c.get("ressource", {}).has("releve_allie_pct") or ef_c.get("ressource", {}).has("transfert_pv")
+		var sur_soi: bool = str(ef_c.get("deplacement", {}).get("cible", "")) == "soi" or str(ef_c.get("cible", "")) == "soi"
+		var sans_mannequin: bool = "invocation" in effets_c or str(ef_c.get("deplacement", {}).get("mode", "")) in ["convocation"]
+		var forme_c := "soi" if sur_soi else "point"
+		var pl := s.capacites.assembler([forme_c, c], 10, "1d4", {}, j.competences_eff)
+		pl["name_key"] = ""
+		pl["arme"] = {}
+		pl["fonct"] = {}
+		if not pl.erreurs.is_empty():
+			continue
+		for x in s.vivants():
+			if x.id != j.id:
+				x.vivant = false
+				s.grille.liberer(x.pos)
+		s.bombes.clear()
+		s.affuts.clear()
+		s.zones.clear()
+		var m: Dictionary = s.ajouter("loup", cible if not sans_mannequin else cible + Vector2i(3, 3), "ia")
+		m.sante_max = 60
+		m.sante = 30 if vise_allie else 60   # blessé : un soin se voit
+		if vise_allie:
+			m.camp = j.camp
+			s.appliquer_statut(m, "au_sol", 30, j.id)   # une purge a quelque chose à purger
+		j.sante = 30
+		j.sante_max = 40
+		j.mana = 40
+		j.endurance = 40
+		j.compteur = 0
+		m.compteur = 0
+		if "resurrection" in effets_c or ef_c.get("ressource", {}).has("releve_allie_pct") or str(ef_c.get("invocation", {}).get("mode", "")) == "releve":
+			m.vivant = false   # un mort à relever
+			s.grille.liberer(m.pos)
+		var avant := _photo(s, j, m, cible)
+		s._executer_capacite(j, pl, cible)
+		var apres := _photo(s, j, m, cible)
+		if avant == apres:
+			muets.append(c)
+	print("ESSAIS : %d plans assemblés et exécutés, %d refusés ; noyaux sans effet observable sur un mannequin : %d" % [n, refus.size(), muets.size()])
+	for c in muets:
+		print("  muet ", c, " ", str(GameData.catalogues.modules[c].get("effets", [])), " ", str(GameData.catalogues.modules[c].get("effet", {})))
 	for r in refus.slice(0, 40):
 		print("  refus ", r)
 	get_tree().quit()
+
+
+## Tout ce qui peut changer quand un noyau agit, en une photo comparable.
+func _photo(s: Simulation, j: Dictionary, m: Dictionary, cible: Vector2i) -> Array:
+	var entites := 0
+	for x in s.vivants():
+		entites += 1
+	var statuts_m: Array = m.get("statuts", []).map(func(st: Dictionary) -> String: return str(st.get("id", "")))
+	var statuts_j: Array = j.get("statuts", []).map(func(st: Dictionary) -> String: return str(st.get("id", "")))
+	return [int(m.sante), int(j.sante), int(j.mana), int(j.endurance), int(m.get("mana", 0)), int(m.get("endurance", 0)), m.pos, j.pos, statuts_m, statuts_j,
+		int(m.compteur), int(j.compteur), s.bombes.size(), s.affuts.size(), s.zones.size(), entites, s.grille.h(cible), s.grille.contenu[s.grille.idx(cible)],
+		str(j.get("saisie", "")), bool(m.vivant), int(j.get("sang", 0)), str(m.get("arme_principale", "")), int(j.get("or", 0)), s.grille.h(j.pos)]

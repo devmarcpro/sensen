@@ -2814,8 +2814,7 @@ func slots_capacites(e: Dictionary) -> Dictionary:
 ## Composer une capacité depuis des modules connus : l'assembleur juge la séquence, les slots bornent le **nombre**
 ## de capacités tenues prêtes — pas la longueur d'une séquence (assemblage sans limite, 2026-08-30).
 func composer_capacite(e: Dictionary, sequence: Array, nom: String = "") -> bool:
-	var slots := slots_capacites(e)
-	if sequence.is_empty() or e.get("capacites", []).size() >= int(slots.capacites):
+	if sequence.is_empty():   # plus de plafond de capacités non plus (décision du designer, 2026-08-30) : on en compose autant qu'on veut
 		EventBus.emettre(&"journal", [&"journal.capacite_refusee", {}])
 		return false
 	for m in sequence:

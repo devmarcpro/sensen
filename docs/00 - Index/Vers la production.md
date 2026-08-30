@@ -34,7 +34,7 @@ etape: 0
 > [!important] Police MingLiU-ExtB (2026-08-30)
 > Police système, sans asset, posée sur le thème par défaut et le repli de `ThemeDB`. **À juger** : le trait bitmap sans lissage est-il lisible aux petites tailles (10 px de la hotbar) ?
 > [!important] Plus de plafond de modules par capacité (2026-08-30)
-> Le composeur acceptait deux modules au niveau 0 malgré le « no limit » ; désormais seule la longueur des capacités tenues prêtes est bornée. **À juger** : faut-il un avertissement du composeur quand une séquence dépasse un seuil de ticks ?
+> Le composeur acceptait deux modules au niveau 0 malgré le « no limit » ; désormais plus aucun plafond — ni sur la longueur d'une séquence, ni sur le nombre de sorts composés (décision du designer, 15 h 45). **À juger** : faut-il un avertissement du composeur quand une séquence dépasse un seuil de ticks ?
 > [!important] Écran de chargement entre cellules (2026-08-30)
 > 0,6 s minimum, monde en pause, les huit voisines pré-générées pendant l'écran. **À juger** : la coupure rend-elle le monde plus lisible (« j'ai changé de lieu ») ou casse-t-elle l'exploration ?
 > [!important] Cellules 64 × 64 (2026-08-30)
