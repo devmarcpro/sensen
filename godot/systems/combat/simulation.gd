@@ -8082,6 +8082,91 @@ func _bonus_des_conditions(e: Dictionary, c: Dictionary, action: Dictionary) -> 
 ## Les modes de déplacement des noyaux (Modules) : projection, attraction, recul, saut, permutation,
 ## convocation, lancer d'un être porté, traversée, retour à l'Ancre, lévitation, fauchage.
 ## `cible_hors_entite` sert aux modes qui visent une **tuile** et non un être (Traversée).
+## Où finiraient les êtres si ce plan partait vers `cible_pos` (Écrans d'interface, 2026-08-30) : la règle du
+## déplacement rejouée en lecture seule, à la distance maximale du dé. Retourne [{id, de, vers}] (vers ≠ de seulement).
+func prevoir_deplacement(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -> Array:
+	var res: Array = []
+	var dp: Dictionary = plan.get("parametres", {}).get("deplacement", {})
+	if dp.is_empty() or not grille.dans(cible_pos):
+		return res
+	var tuiles := tuiles_du_plan(e, plan, cible_pos)
+	var cibles: Array[Dictionary] = []
+	for t in tuiles:
+		var occ := grille.occupant(t)
+		if not occ.is_empty() and entites.has(occ) and entites[occ].vivant and occ != e.id:
+			cibles.append(entites[occ])
+	var cible: Dictionary = entites.get(grille.occupant(cible_pos), {})
+	var portee_max: int = Des.fourchette(str(dp.get("distance", "1"))).y
+	var libre := func(v: Vector2i, hors: Array) -> bool:
+		return grille.dans(v) and not grille.bloque_passage(v) and (grille.occupant(v).is_empty() or grille.occupant(v) in hors)
+	match str(dp.get("mode", "")):
+		"projection":
+			for c in cibles:
+				if Etres.bloque_statuts(c, "projection", statuts_defs):
+					continue
+				var d := Vector2i(signi(c.pos.x - e.pos.x), signi(c.pos.y - e.pos.y))
+				if d == Vector2i.ZERO:
+					continue
+				var pos: Vector2i = c.pos
+				for i in portee_max:
+					var vers: Vector2i = pos + d
+					if not libre.call(vers, [c.id]) or grille.h(vers) - grille.h(pos) >= int(regles.r.deplacement.falaise_delta):
+						break
+					pos = vers
+					if grille.h(pos) - grille.h(vers) >= int(regles.r.deplacement.chute_delta):
+						break
+				if pos != c.pos:
+					res.append({"id": c.id, "de": c.pos, "vers": pos})
+		"attraction":
+			for c in cibles:
+				if Etres.bloque_statuts(c, "projection", statuts_defs):
+					continue
+				var d := Vector2i(signi(e.pos.x - c.pos.x), signi(e.pos.y - c.pos.y))
+				var pos: Vector2i = c.pos
+				for i in portee_max:
+					var vers: Vector2i = pos + d
+					if vers == e.pos or not libre.call(vers, [c.id]):
+						break
+					pos = vers
+				if pos != c.pos:
+					res.append({"id": c.id, "de": c.pos, "vers": pos})
+		"recul":
+			var dr: Vector2i = Vector2i(signi(e.pos.x - cible.pos.x), signi(e.pos.y - cible.pos.y)) if not cible.is_empty() else -Vector2i(e.orientation)
+			var pos: Vector2i = e.pos
+			for i in portee_max:
+				var vers: Vector2i = pos + dr
+				if not libre.call(vers, [e.id]):
+					break
+				pos = vers
+			if pos != e.pos:
+				res.append({"id": e.id, "de": e.pos, "vers": pos})
+		"saut":
+			var but: Vector2i = cible.pos if not cible.is_empty() else cible_pos
+			var ds := Vector2i(signi(but.x - e.pos.x), signi(but.y - e.pos.y))
+			var arrivee: Vector2i = e.pos
+			for i in portee_max:
+				var vers: Vector2i = arrivee + ds
+				if not grille.dans(vers) or Grille.distance(e.pos, vers) > Grille.distance(e.pos, but):
+					break
+				if grille.bloque_passage(vers) or not grille.occupant(vers).is_empty():
+					continue
+				arrivee = vers
+			if arrivee != e.pos:
+				res.append({"id": e.id, "de": e.pos, "vers": arrivee})
+		"permutation":
+			if not cible.is_empty() and cible.vivant and not Etres.bloque_statuts(cible, "projection", statuts_defs):
+				res.append({"id": e.id, "de": e.pos, "vers": cible.pos})
+				res.append({"id": cible.id, "de": cible.pos, "vers": e.pos})
+		"convocation":
+			for c in cibles:
+				if ennemis(e, c):
+					continue
+				var l := _tuile_libre_autour(e.pos)
+				if l != Vector2i(-1, -1):
+					res.append({"id": c.id, "de": c.pos, "vers": l})
+	return res
+
+
 func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictionary], cible: Dictionary, cible_hors_entite: Vector2i = Vector2i(-1, -1)) -> void:
 	match str(effet.get("mode", "")):
 		"projection":

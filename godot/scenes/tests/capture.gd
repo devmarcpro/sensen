@@ -90,6 +90,13 @@ func _ready() -> void:
 			var vivants_c: Array = scene.sim.vivants()
 			if not vivants_c.is_empty():
 				scene.survol = vivants_c.back().pos   # la dernière posée est sous la souris : bulle, prévisualisation
+	for i9 in args.size():   # --capacite a,b,c : compose cette capacité au joueur et la met en visée (poussées, formes)
+		if args[i9] == "--capacite" and i9 + 1 < args.size():
+			var jc3: Dictionary = scene.joueur()
+			for m in args[i9 + 1].split(","):
+				scene.sim.crediter_module(jc3, str(m), 9)
+			if scene.sim.composer_capacite(jc3, Array(args[i9 + 1].split(","))):
+				scene.visee = jc3.capacites.size() - 1
 	for i8 in args.size():   # --visee N : la capacité N du joueur en cours de visée (ligne de vue, forme, bulle)
 		if args[i8] == "--visee" and i8 + 1 < args.size():
 			scene.visee = int(args[i8 + 1])

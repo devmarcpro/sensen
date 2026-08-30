@@ -1303,6 +1303,15 @@ func _draw() -> void:
 		var ok := sim.capacite_visable(j, plan, survol)
 		for t in sim.tuiles_du_plan(j, plan, survol):   # toutes les formes du plan (no limit), pas seulement la première
 			_losange(t, Color(0.3, 0.6, 1.0, 0.45) if ok else Color(0.5, 0.5, 0.5, 0.35))
+		if ok:   # l'atterrissage des poussées : une flèche de la case de départ à la case d'arrivée, un losange fantôme
+			for mv in sim.prevoir_deplacement(j, plan, survol):
+				var a := _ecran(mv.de, g.h(mv.de))
+				var b := _ecran(mv.vers, g.h(mv.vers))
+				_losange(mv.vers, Color(1.0, 0.85, 0.4, 0.35))
+				draw_line(a, b, Color(1.0, 0.85, 0.4, 0.9), 2.0)
+				var dv := (b - a).normalized()
+				var nv := Vector2(-dv.y, dv.x)
+				draw_colored_polygon(PackedVector2Array([b, b - dv * 10.0 + nv * 5.0, b - dv * 10.0 - nv * 5.0]), Color(1.0, 0.85, 0.4, 0.9))
 		if bool(plan.get("ligne_de_vue", true)) and survol != j.pos:   # la ligne de vue, dessinée : verte jusqu'à l'obstacle, rouge après
 			var obstacle := g.premier_obstacle_vue(j.pos, survol)
 			var depart := _ecran(j.pos, g.h(j.pos))
