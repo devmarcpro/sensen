@@ -428,6 +428,14 @@ for _mid, _m in modules_cat.items():
     if not _m.get("famille"):
         probs["module sans famille"].append(_mid)
 
+# 27. Un module qui impose une icone (champ `icone`) doit nommer un pictogramme que scenes/demo/pictos.gd connait.
+_src_pictos = io.open(os.path.join(os.path.dirname(R.rstrip("/")), "scenes", "demo", "pictos.gd"), encoding="utf-8").read()
+_bloc = _src_pictos[_src_pictos.index("const NOMS"):_src_pictos.index("]", _src_pictos.index("const NOMS"))]
+PICTOS = set(re.findall(r'"([a-z_]+)"', _bloc))
+for mid, m in modules_cat.items():
+    if m.get("icone") and m["icone"] not in PICTOS:
+        probs.setdefault("27. icone de module inconnue de pictos.gd", []).append("%s : %s" % (mid, m["icone"]))
+
 for k in sorted(probs):
     print("\n== %s (%d)" % (k, len(probs[k])))
     for v in probs[k][:12]:
@@ -435,3 +443,4 @@ for k in sorted(probs):
 if not probs:
     print("audit des donnees : rien a signaler")
 sys.exit(1 if probs else 0)
+

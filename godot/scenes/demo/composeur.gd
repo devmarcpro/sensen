@@ -7,9 +7,9 @@ extends VBoxContainer
 ## reste possible : ← → ↑ ↓ parcourent le catalogue, Entrée ajoute, Suppr retire, V valide. Sous la rangée : le
 ## catalogue à gauche, section par type ; à droite le détail, le Wu Xing du sort et l'aperçu visuel.
 
-const CARTE := Vector2(64, 64)   # cartes et slots : des carrés, de la même taille (uniformité, 2026-08-30)
-const SLOT := Vector2(64, 64)
-const COLONNES := 6
+const CARTE := Vector2(48, 48)   # cartes et slots : des carrés, de la même taille (uniformité, 2026-08-30 ; 48 px à la demande du designer)
+const SLOT := Vector2(48, 48)
+const COLONNES := 8
 const GLYPHES := {"forme:cible": "◇", "forme:lanceur": "◈", "noyau": "●", "modificateur": "▲", "condition": "?", "declencheur": "⚡", "liaison": "∞"}
 const ORDRE_TYPES: Array[String] = ["forme:cible", "forme:lanceur", "noyau", "modificateur", "condition", "declencheur", "liaison"]
 ## Les groupes de la composition, dans l'ordre de la séquence : tout ce qui précède le déclencheur est la charge
@@ -23,6 +23,7 @@ var selection := 0                     # la carte sélectionnée au clavier / au
 var cartes: Array[Control] = []
 var ids: Array[String] = []            # les modules du catalogue, dans l'ordre des cartes
 
+var replie: Dictionary = {}            # type → section repliée (▸) ou déployée (▾)
 var nom: LineEdit
 var rangee_slots: HBoxContainer
 var catalogue: VBoxContainer
@@ -61,7 +62,7 @@ func _ready() -> void:
 	h2.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	add_child(h2)
 	var defil := ScrollContainer.new()
-	defil.custom_minimum_size = Vector2(COLONNES * (CARTE.x + 4) + 14, 0)
+	defil.custom_minimum_size = Vector2(COLONNES * (CARTE.x + 4) + 18, 0)
 	defil.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	defil.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	h2.add_child(defil)
@@ -156,11 +157,21 @@ func _reconstruire_catalogue(j: Dictionary) -> void:
 			var ca: int = int(j.get("modules_charges", {}).get(a, 0))
 			var cb: int = int(j.get("modules_charges", {}).get(b, 0))
 			return ca > cb if ca != cb else a < b)
-		var entete := Label.new()   # une section par type, bien séparée (demande du designer)
-		entete.text = "%s %s (%d)" % [GLYPHES.get(type, ""), tr("type_module." + type), du_type.size()]
+		var ferme: bool = bool(replie.get(type, false))
+		var entete := Button.new()   # une section par type, repliable d'un clic (demande du designer)
+		entete.text = "%s %s %s (%d)" % ["▸" if ferme else "▾", GLYPHES.get(type, ""), tr("type_module." + type), du_type.size()]
+		entete.flat = true
+		entete.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		entete.focus_mode = Control.FOCUS_NONE
 		entete.add_theme_font_size_override("font_size", 11)
 		entete.modulate = Color(0.85, 0.8, 0.6)
+		var type_c := type
+		entete.pressed.connect(func() -> void:
+			replie[type_c] = not bool(replie.get(type_c, false))
+			reconstruire(main.joueur()))
 		catalogue.add_child(entete)
+		if ferme:
+			continue
 		var grille := GridContainer.new()
 		grille.columns = COLONNES
 		catalogue.add_child(grille)
@@ -405,15 +416,16 @@ static func dessiner_carte(ci: CanvasItem, taille: Vector2, m: String, charges: 
 	var t := type_de(m)
 	var r := Rect2(Vector2(2, 2), taille - Vector2(4, 4))
 	ci.draw_rect(r, Color(c.r * 0.22, c.g * 0.22, c.b * 0.22, alpha))
-	ci.draw_rect(r, Color(c.r, c.g, c.b, alpha), false, 2.0)
-	var glyphe: String = GLYPHES.get(t, "·")
-	ci.draw_string(ThemeDB.fallback_font, Vector2(taille.x * 0.5 - 9.0, taille.y * 0.5 + 2.0), glyphe, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(c.r, c.g, c.b, alpha))
+	ci.draw_rect(r, Color(c.r, c.g, c.b, alpha), false, 1.5)
+	var md: Dictionary = GameData.catalogues.modules.get(m, {})
+	var marge := taille.x * 0.2   # le pictogramme de l'effet (Pictos), centré, au-dessus du nom
+	Pictos.dessiner(ci, Pictos.icone_de(md), Rect2(Vector2(marge, marge * 0.55), Vector2(taille.x - 2.0 * marge, taille.x - 2.0 * marge)), Color(c.r, c.g, c.b, alpha))
 	if fois > 0:
-		ci.draw_string(ThemeDB.fallback_font, Vector2(5, 14), "×%d" % fois, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1, 1, 1, alpha))
+		ci.draw_string(ThemeDB.fallback_font, Vector2(4, 12), "×%d" % fois, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(1, 1, 1, alpha))
 	if charges >= 0:
-		ci.draw_string(ThemeDB.fallback_font, Vector2(taille.x - 24, 14), str(charges), HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.9, 0.9, 0.8, 0.8 * alpha))
-	var nom_c := TranslationServer.translate(GameData.catalogues.modules.get(m, {}).get("name_key", m)).left(9)
-	ci.draw_string(ThemeDB.fallback_font, Vector2(5, taille.y - 7), nom_c, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.95, 0.95, 0.9, alpha))
+		ci.draw_string(ThemeDB.fallback_font, Vector2(taille.x - 20, 12), str(charges), HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0.9, 0.9, 0.8, 0.8 * alpha))
+	var nom_c := TranslationServer.translate(md.get("name_key", m)).left(8)
+	ci.draw_string(ThemeDB.fallback_font, Vector2(4, taille.y - 5), nom_c, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0.95, 0.95, 0.9, alpha))
 
 
 ## L'icône d'un module, dessinée par code : un cadre teinté, le glyphe de son type.
@@ -422,8 +434,8 @@ static func dessiner_icone(ci: CanvasItem, r: Rect2, m: String, alpha: float = 1
 	var t := type_de(m)
 	ci.draw_rect(r, Color(c.r * 0.25, c.g * 0.25, c.b * 0.25, alpha))
 	ci.draw_rect(r, Color(c.r, c.g, c.b, alpha), false, 2.0)
-	var glyphe: String = GLYPHES.get(t, "·")
-	ci.draw_string(ThemeDB.fallback_font, r.position + Vector2(r.size.x * 0.5 - 8.0, r.size.y * 0.5 + 6.0), glyphe, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(c.r, c.g, c.b, alpha))
+	var marge := r.size.x * 0.18
+	Pictos.dessiner(ci, Pictos.icone_de(GameData.catalogues.modules.get(m, {})), Rect2(r.position + Vector2(marge, marge), r.size - Vector2(2.0 * marge, 2.0 * marge)), Color(c.r, c.g, c.b, alpha))
 
 
 # ---------------------------------------------------------------- les Control internes
@@ -481,7 +493,7 @@ class SlotModule extends Control:
 			draw_rect(r, Color(0.1, 0.1, 0.12, 1.0))
 			draw_rect(r, Color(0.6, 0.55, 0.4, 0.9), false, 1.0)
 			var g_glyphe: String = Composeur.GLYPHES.get("forme:cible" if groupe == "forme" else groupe, "·")
-			draw_string(ThemeDB.fallback_font, Vector2(Composeur.SLOT.x * 0.5 - 8, Composeur.SLOT.y * 0.5 + 7), g_glyphe, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(0.35, 0.35, 0.35))
+			draw_string(ThemeDB.fallback_font, Vector2(Composeur.SLOT.x * 0.5 - 7, Composeur.SLOT.y * 0.5 + 6), g_glyphe, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.35, 0.35, 0.35))
 		else:
 			Composeur.dessiner_carte(self, Composeur.SLOT, module, -1, 0, 1.0)
 			draw_rect(Rect2(Vector2(1, 1), Composeur.SLOT - Vector2(2, 2)), Color(0.6, 0.55, 0.4, 0.9), false, 1.0)
@@ -545,15 +557,26 @@ class PentagrammeSort extends Control:
 		for k in elements.size():   # le cercle d'engendrement, le premier élément en haut
 			var a := -PI / 2.0 + TAU * float(k) / float(elements.size())
 			pts.append(centre + Vector2(cos(a), sin(a)) * RAYON)
-		for k in pts.size():
-			draw_line(pts[k], pts[(k + 1) % pts.size()], Color(1, 1, 1, 0.25), 1.0)          # engendre
-			draw_line(pts[k], pts[(k + 2) % pts.size()], Color(1, 1, 1, 0.12), 1.0)          # domine (l'étoile)
 		var parts: Dictionary = plan.get("elements", {}) if not plan.is_empty() else {}
 		var total := 0.0
 		for v in parts.values():
 			total += float(v)
 		var dominante := ""
 		var poids := 0.0
+		for el in parts.keys():
+			if float(parts[el]) > poids:
+				poids = float(parts[el])
+				dominante = str(el)
+		var i_dom: int = elements.find(dominante)
+		for k in pts.size():   # les flèches : engendre (plein, le cercle), domine (pointillé, l'étoile) — Wu Xing — cycles et vecteurs
+			var eng_dom: bool = k == i_dom
+			var dom_dom: bool = k == i_dom
+			var c_eng := _teinte(teintes, str(elements[k])) if eng_dom else Color(1, 1, 1, 0.3)
+			_fleche_courte(pts[k], pts[(k + 1) % pts.size()], c_eng, 1.6 if eng_dom else 1.0, 7.0)
+			var c_dom := _teinte(teintes, str(elements[k])) if dom_dom else Color(1, 1, 1, 0.14)
+			_pointille(pts[k], pts[(k + 2) % pts.size()], c_dom, 1.4 if dom_dom else 1.0)
+			_fleche_courte(pts[k].lerp(pts[(k + 2) % pts.size()], 0.82), pts[(k + 2) % pts.size()], c_dom, 1.4 if dom_dom else 1.0, 7.0)
+		poids = 0.0
 		for k in elements.size():
 			var el := str(elements[k])
 			var t: Array = teintes.get(el, [0.7, 0.7, 0.7])
@@ -566,9 +589,27 @@ class PentagrammeSort extends Control:
 			var etiquette := tr("element." + el) + (" %d %%" % roundi(part * 100.0) if part > 0.0 else "")
 			var dir := (pts[k] - centre).normalized()
 			draw_string(ThemeDB.fallback_font, pts[k] + dir * 14.0 + Vector2(-14.0, 4.0), etiquette, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.9, 0.9, 0.85))
+		draw_string(ThemeDB.fallback_font, Vector2(6.0, 12.0), tr("ui.composeur.wuxing_legende"), HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0.7, 0.7, 0.65))
 		var legende: String
 		if dominante.is_empty():
 			legende = tr("ui.composeur.wuxing_vide")
 		else:
 			legende = tr("ui.composeur.wuxing").format({"dominante": tr("element." + dominante), "engendre": tr("element." + str(wx.engendre.get(dominante, ""))), "domine": tr("element." + str(wx.domine.get(dominante, "")))})
 		draw_string(ThemeDB.fallback_font, Vector2(2.0, TAILLE + 13.0), legende, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.85, 0.85, 0.8))
+
+	static func _teinte(teintes: Dictionary, el: String) -> Color:
+		var t: Array = teintes.get(el, [0.7, 0.7, 0.7])
+		return Color(float(t[0]), float(t[1]), float(t[2]), 0.95)
+
+	func _fleche_courte(a: Vector2, b: Vector2, c: Color, largeur: float, tete: float) -> void:
+		draw_line(a, b, c, largeur)
+		var d := (b - a).normalized()
+		var n := Vector2(-d.y, d.x)
+		var m := a.lerp(b, 0.55)   # la tête au milieu du trait : elle ne se cache pas sous les sommets
+		draw_colored_polygon(PackedVector2Array([m + d * tete * 0.6, m - d * tete * 0.4 + n * tete * 0.5, m - d * tete * 0.4 - n * tete * 0.5]), c)
+
+	func _pointille(a: Vector2, b: Vector2, c: Color, largeur: float) -> void:
+		var n := 12
+		for k in n:
+			if k % 2 == 0:
+				draw_line(a.lerp(b, float(k) / n), a.lerp(b, float(k + 1) / n), c, largeur)

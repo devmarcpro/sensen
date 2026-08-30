@@ -2213,3 +2213,5 @@ ui.composeur.groupe.condition,Conditions
 ui.composeur.groupe.liaison,Links
 ui.composeur.groupe.declencheur,Trigger
 ui.composeur.groupe.suite,"Follow-up (after the trigger)"
+ui.composeur.wuxing_legende,"→ generates · ⇢ overcomes"
+ui.apercu.tuiles_souris,"{n} tiles · {origine} · range {portee} · aim: the mouse"

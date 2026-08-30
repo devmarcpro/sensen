@@ -10,11 +10,34 @@ const CASE := (TAILLE - 8.0) / float(COTE)   # pixels par tuile
 
 var plan: Dictionary = {}   # le plan assemblé (Capacites.assembler / Simulation.plan_sequence)
 var grille_virtuelle: Grille
+var visee_souris := Vector2i(-1, -1)   # la case survolée : elle devient la visée (décision du designer, 2026-08-30)
 
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(TAILLE, TAILLE + 18.0)
 	grille_virtuelle = Grille.new(COTE, COTE)
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	mouse_exited.connect(func() -> void:
+		visee_souris = Vector2i(-1, -1)
+		queue_redraw())
+
+
+func _gui_input(ev: InputEvent) -> void:
+	if ev is InputEventMouseMotion:
+		var t := Vector2i(int((ev.position.x - 4.0) / CASE), int((ev.position.y - 4.0) / CASE))
+		var nouvelle := t if (t.x >= 0 and t.y >= 0 and t.x < COTE and t.y < COTE) else Vector2i(-1, -1)
+		if nouvelle != visee_souris:
+			visee_souris = nouvelle
+			queue_redraw()
+
+
+## La visée : la case sous la souris si elle est sur la grille (et n'est pas le lanceur), sinon la nominale.
+func cible_courante() -> Vector2i:
+	var lanceur := Vector2i(COTE / 2, COTE / 2)
+	if visee_souris.x >= 0 and visee_souris != lanceur:
+		return visee_souris
+	var portee_max: int = clampi(int(plan.get("portee", Vector2i(0, 1)).y), 0, COTE / 2)
+	return lanceur + Vector2i(0, -maxi(1, portee_max)) if str(plan.get("origine", "cible")) == "lanceur" else lanceur + Vector2i(0, -portee_max)
 
 
 func montrer(p: Dictionary) -> void:
@@ -28,8 +51,7 @@ func couverture() -> Dictionary:
 	if plan.is_empty() or str(plan.get("geometrie", "")).is_empty():
 		return compte
 	var lanceur := Vector2i(COTE / 2, COTE / 2)
-	var portee_max: int = clampi(int(plan.get("portee", Vector2i(0, 1)).y), 0, COTE / 2)
-	var cible := lanceur + Vector2i(0, -maxi(1, portee_max)) if str(plan.get("origine", "cible")) == "lanceur" else lanceur + Vector2i(0, -portee_max)
+	var cible := cible_courante()
 	var lots: Array = [{"geometrie": str(plan.geometrie), "taille": int(plan.get("taille", 1))}]
 	for f in plan.get("formes_sup", []):
 		lots.append({"geometrie": str(f.geometrie), "taille": int(f.taille)})
@@ -66,9 +88,13 @@ func _draw() -> void:
 		if r > 0 and r <= COTE / 2:
 			draw_arc(centre, float(r) * CASE + CASE * 0.5, 0.0, TAU, 48, Color(1, 1, 1, 0.25), 1.0)
 	# La visée nominale (anneau blanc) et le lanceur (losange bleu).
-	var portee_max: int = clampi(int(portee.y), 0, COTE / 2)
-	var cible := lanceur + Vector2i(0, -portee_max) if str(plan.get("origine", "cible")) == "cible" else lanceur + Vector2i(0, -maxi(1, portee_max))
+	var cible := cible_courante()
 	var pc := o + Vector2((cible.x + 0.5) * CASE, (cible.y + 0.5) * CASE)
+	if visee_souris.x >= 0 and str(plan.get("origine", "cible")) == "cible":   # hors de portée : la visée le dit
+		var dist := Grille.distance(lanceur, cible)
+		if dist > int(portee.y) or dist < int(portee.x):
+			draw_line(pc + Vector2(-CASE * 0.4, -CASE * 0.4), pc + Vector2(CASE * 0.4, CASE * 0.4), Color(1, 0.3, 0.3, 0.9), 1.5)
+			draw_line(pc + Vector2(-CASE * 0.4, CASE * 0.4), pc + Vector2(CASE * 0.4, -CASE * 0.4), Color(1, 0.3, 0.3, 0.9), 1.5)
 	draw_arc(pc, CASE * 0.45, 0.0, TAU, 20, Color(1, 1, 1, 0.9), 1.5)
 	var pts := PackedVector2Array([centre + Vector2(0, -CASE * 0.45), centre + Vector2(CASE * 0.45, 0), centre + Vector2(0, CASE * 0.45), centre + Vector2(-CASE * 0.45, 0)])
 	draw_colored_polygon(pts, Color(0.35, 0.6, 1.0, 1.0))
@@ -76,7 +102,7 @@ func _draw() -> void:
 	if str(plan.get("geometrie", "")) == "horizon":
 		legende = tr("ui.apercu.horizon")
 	else:
-		legende = tr("ui.apercu.tuiles").format({"n": compte.size(), "origine": tr("origine." + str(plan.get("origine", "cible"))), "portee": "%d–%d" % [portee.x, portee.y]})
+		legende = tr("ui.apercu.tuiles" if visee_souris.x < 0 else "ui.apercu.tuiles_souris").format({"n": compte.size(), "origine": tr("origine." + str(plan.get("origine", "cible"))), "portee": "%d–%d" % [portee.x, portee.y]})
 	draw_string(ThemeDB.fallback_font, Vector2(2.0, TAILLE + 13.0), legende, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.85, 0.85, 0.8))
 
 

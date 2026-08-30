@@ -2223,3 +2223,5 @@ ui.composeur.groupe.condition,Conditions
 ui.composeur.groupe.liaison,Liaisons
 ui.composeur.groupe.declencheur,Déclencheur
 ui.composeur.groupe.suite,"Suite (après le déclencheur)"
+ui.composeur.wuxing_legende,"→ engendre · ⇢ domine"
+ui.apercu.tuiles_souris,"{n} tuiles · {origine} · portée {portee} · visée : la souris"
