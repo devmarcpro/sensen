@@ -451,6 +451,15 @@ func joueur() -> Dictionary:
 
 
 func _sur_journal(cle: String, params: Dictionary) -> void:
+	if cle == "journal.attendre":   # les attentes des êtres hors de vue n'encombrent pas le journal (parcours du 2026-08-30)
+		var j := joueur()
+		var vu := false
+		for e in sim.vivants():
+			if str(e.name_key) == str(params.get("nom", "")) and (e.id == joueur_id or (not j.is_empty() and sim.voit(j, e.pos))):
+				vu = true
+				break
+		if not vu:
+			return
 	var p := {}
 	if params.has("x") and params.has("y") and (params.x is int) and (params.y is int):   # le journal parle en tuiles locales à la cellule
 		var cl := _coord_locale(Vector2i(int(params.x), int(params.y)))
@@ -651,7 +660,7 @@ func _process(delta: float) -> void:
 			for cle in xp_cumul.keys():
 				lignes.append("+%d %s" % [int(xp_cumul[cle]), _nom_xp(str(cle))])
 				resume.append("%s +%d" % [_nom_xp(str(cle)), int(xp_cumul[cle])])
-			xp_flottants.append({"lignes": lignes, "t": 0.0})
+			xp_flottants.append({"lignes": lignes, "t": 0.0, "dec": 14.0 * xp_flottants.size()})   # les suivants montent au-dessus des précédents
 			_log(tr("journal.xp").format({"liste": " · ".join(resume)}))
 			xp_cumul = {}
 	for f in xp_flottants:
@@ -1364,7 +1373,7 @@ func _draw() -> void:
 		var c := _ecran(t, g.h(t)) + Vector2(-6, 4)
 		draw_string(ThemeDB.fallback_font, c, str(atteignables[t]), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1, 1, 0.8, 0.8))
 	for f in xp_flottants:   # l'XP de l'action, qui monte et s'efface au-dessus du joueur (XP de combat)
-		var base := _ecran(j.pos, g.h(j.pos)) + Vector2(-20.0, -52.0 - f.t * 22.0)
+		var base := _ecran(j.pos, g.h(j.pos)) + Vector2(-20.0, -52.0 - f.t * 22.0 - float(f.get("dec", 0.0)))
 		var a: float = clampf(1.6 - f.t, 0.0, 1.0)
 		for k in f.lignes.size():
 			draw_string(ThemeDB.fallback_font, base + Vector2(0.0, -12.0 * (f.lignes.size() - 1 - k)), str(f.lignes[k]), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.95, 0.9, 0.5, a))

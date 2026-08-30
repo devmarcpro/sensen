@@ -58,6 +58,9 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > [!success] Décidé et codé le 2026-08-30 — zoom au maximum par défaut
 > **Instruction du designer** : « par défaut la caméra devrait être zoomée au max ». `zoom = 2.0` à l'ouverture (la borne haute du Ctrl + molette) ; on peut toujours dézoomer jusqu'à 0,5. La fenêtre de dessin (`RAYON_VUE` = 20 tuiles) couvre largement l'écran à ce zoom.
 
+> [!success] Corrigé le 2026-08-30 — le journal en donjon, les flottants d'XP
+> Deux défauts relevés par le parcours robot ([[Vers la production]] 13) : le journal était noyé par les « X attend (5 ticks) » de tous les êtres de l'étage — il ne garde plus que les attentes du joueur et des êtres **en vue** ; les flottants d'XP d'une suite de pas s'empilaient au même point — chaque nouveau flottant part au-dessus de ceux qui montent encore.
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]
