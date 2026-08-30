@@ -143,6 +143,7 @@ func _ready() -> void:
 	test_loot_assemble()
 	test_budgets()
 	test_sauvegarde_partout()
+	test_boss_et_artefact()
 	test_loot()
 	test_coffres_et_rares()
 	test_gemmes_et_livres()
@@ -6246,6 +6247,30 @@ func test_brouillard() -> void:
 
 
 # ---------------------------------------------------------------- Étape 2 : génération de donjon
+
+func test_boss_et_artefact() -> void:
+	# Trésors et artefacts : le dernier étage porte le boss ; sa mort marque le donjon vaincu et lâche un artefact (majeur ≥ 4).
+	var s := Simulation.new(95)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	s.donjon = {"etages": 4}
+	s.charger_donjon("ruine", 95, 12, 4, j)
+	verifier(s.donjon.escalier == null and s.donjon.boss != null, "dernier étage : pas d'escalier plus bas, une position de boss")
+	var boss := {}
+	for x in s.vivants():
+		if x.id != j.id and "elite" in x.get("tags", []):
+			boss = x
+	verifier(not boss.is_empty(), "le boss est présent (%s)" % str(boss.get("name_key", "-")))
+	verifier(not s._boss_vaincu(), "vivant : le donjon n'est pas vaincu")
+	s._appliquer_degats(boss, 9999, j.id, {})
+	verifier(s._boss_vaincu(), "boss tué : le donjon est vaincu")
+	var art := false
+	for gi in s.contenants.keys():
+		for uid in s.contenants[gi]:
+			if str(s.items.get(uid, {}).get("rarete", "")) == "artefact":
+				art = true
+	verifier(art, "un artefact est lâché (donjon majeur, 4 étages)")
+
 
 func test_sauvegarde_partout() -> void:
 	# Sauvegarde (designer, 2026-08-31) : possible partout — en donjon, l'expédition reprend où elle était.
