@@ -24,5 +24,6 @@
     "ressource": {
       "desarme": true
     }
-  }
+  },
+  "style": "controle"
 }

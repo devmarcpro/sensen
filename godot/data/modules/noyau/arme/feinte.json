@@ -25,5 +25,6 @@
       "id": "garde_annulee",
       "duree_ticks": 15
     }
-  }
+  },
+  "style": "controle"
 }

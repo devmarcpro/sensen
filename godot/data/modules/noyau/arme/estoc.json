@@ -22,5 +22,6 @@
   "portee": null,
   "effet": {
     "ignore_armure_points": 4
-  }
+  },
+  "style": "assaut"
 }

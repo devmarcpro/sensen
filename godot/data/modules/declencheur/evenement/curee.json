@@ -12,5 +12,6 @@
   "effet": {
     "declencheur": "mise_a_mort"
   },
-  "famille": "Événement"
+  "famille": "Événement",
+  "style": "ruse"
 }

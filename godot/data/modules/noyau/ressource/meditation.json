@@ -26,5 +26,6 @@
       "cible": "soi",
       "rompt_si_touche": true
     }
-  }
+  },
+  "style": "soutien"
 }

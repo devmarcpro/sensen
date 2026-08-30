@@ -2215,3 +2215,13 @@ ui.composeur.groupe.declencheur,Trigger
 ui.composeur.groupe.suite,"Follow-up (after the trigger)"
 ui.composeur.wuxing_legende,"→ generates · ⇢ overcomes"
 ui.apercu.tuiles_souris,"{n} tiles · {origine} · range {portee} · aim: the mouse"
+style.assaut.name,Assault
+style.controle.name,Control
+style.soutien.name,Support
+style.mobilite.name,Mobility
+style.terrain.name,Terrain
+style.ruse.name,Guile
+style.neutre.name,Neutral
+ui.composeur.filtre_tous,All
+ui.composeur.style,"Spell style: {liste}"
+ui.composeur.style_neutre,"Spell style: —"

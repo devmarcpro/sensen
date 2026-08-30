@@ -13,5 +13,6 @@
     "declencheur": "derobade",
     "duree_ticks": 100
   },
-  "famille": "Événement"
+  "famille": "Événement",
+  "style": "ruse"
 }

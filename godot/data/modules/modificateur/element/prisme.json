@@ -13,5 +13,6 @@
   "surcout_ressource": "+8",
   "effet": {
     "prisme": true
-  }
+  },
+  "style": "neutre"
 }

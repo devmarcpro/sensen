@@ -12,5 +12,6 @@
   "effet": {
     "declencheur": "parade"
   },
-  "famille": "Événement"
+  "famille": "Événement",
+  "style": "ruse"
 }

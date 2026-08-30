@@ -29,5 +29,6 @@
       "id": "au_sol",
       "duree_ticks": 40
     }
-  }
+  },
+  "style": "controle"
 }

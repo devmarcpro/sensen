@@ -24,5 +24,6 @@
     "deplacement": {
       "mode": "permutation"
     }
-  }
+  },
+  "style": "mobilite"
 }

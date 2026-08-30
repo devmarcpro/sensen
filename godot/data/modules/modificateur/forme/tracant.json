@@ -13,5 +13,6 @@
   "surcout_ressource": "+6",
   "effet": {
     "tracant": true
-  }
+  },
+  "style": "neutre"
 }

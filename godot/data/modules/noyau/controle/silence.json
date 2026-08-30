@@ -25,5 +25,6 @@
       "id": "silence",
       "duree_ticks": 25
     }
-  }
+  },
+  "style": "controle"
 }

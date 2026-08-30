@@ -25,5 +25,6 @@
       "zone": "ancre",
       "duree_ticks": 200
     }
-  }
+  },
+  "style": "mobilite"
 }

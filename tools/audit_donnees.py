@@ -436,6 +436,13 @@ for mid, m in modules_cat.items():
     if m.get("icone") and m["icone"] not in PICTOS:
         probs.setdefault("27. icone de module inconnue de pictos.gd", []).append("%s : %s" % (mid, m["icone"]))
 
+# 28. Chaque module porte un style connu de data/styles.json (Six types de modules et assemblage, 2026-08-30).
+STYLES = set(conf("styles")["styles"].keys())
+for mid, m in modules_cat.items():
+    st = m.get("style")
+    if not st or st not in STYLES:
+        probs.setdefault("28. style de module absent ou inconnu (styles.json)", []).append("%s : %s" % (mid, st))
+
 for k in sorted(probs):
     print("\n== %s (%d)" % (k, len(probs[k])))
     for v in probs[k][:12]:

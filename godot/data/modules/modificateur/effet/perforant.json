@@ -13,5 +13,6 @@
   "surcout_ressource": "+5",
   "effet": {
     "ignore_armure": true
-  }
+  },
+  "style": "neutre"
 }

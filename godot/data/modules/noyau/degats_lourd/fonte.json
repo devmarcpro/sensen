@@ -28,5 +28,6 @@
       "id": "saignement",
       "duree_ticks": 20
     }
-  }
+  },
+  "style": "assaut"
 }

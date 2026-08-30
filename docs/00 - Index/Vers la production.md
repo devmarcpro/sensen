@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] Styles de jeu (2026-08-30)
+> Six styles + neutre, un par module, dérivés des familles en premier jet ; filtres, pastilles et style du sort au composeur. **À juger** : la répartition dérivée (86 noyaux : assaut / contrôle / soutien / mobilité / terrain / ruse) et le choix de laisser les formes et modificateurs génériques en neutre plutôt que multi-styles.
 > [!important] Empiler les modules (2026-08-30)
 > Décision du designer : un noyau répété est **un noyau n fois plus puissant** (dés × n, paramètres × n, bombe puissance × n), au prix × n — pas n charges séparées. **À juger** : une Bombe ×3 (`9d6`, puissance 120) fait-elle sentir son prix (42 mana la tuile, × la surface), ou l'échelle linéaire rend-elle le triplé toujours rentable ?
 > [!important] Écran principal (2026-08-30)

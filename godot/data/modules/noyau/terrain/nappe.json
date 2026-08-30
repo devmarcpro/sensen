@@ -27,5 +27,6 @@
       "zone": "glissante",
       "duree_ticks": 50
     }
-  }
+  },
+  "style": "terrain"
 }

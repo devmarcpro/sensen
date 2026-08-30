@@ -1543,7 +1543,7 @@ func _segments(e: Dictionary) -> Array:
 func _maj_ui() -> void:
 	var j := joueur()
 	var g := sim.grille
-	var titre: String = tr("ui.camp").format({"biome": tr(GameData.entree("biomes", str(sim.camp_sauve.get("biome", "plaine_temperee"))).name_key)}) if sim.lieu == "camp" else (tr(GameData.entree("prototype_arenas", arenes[arene_courante]).name_key) if sim.donjon.is_empty() else tr("ui.donjon").format({"theme": tr(GameData.entree("dungeon_themes", sim.donjon.theme).name_key), "etage": sim.donjon.etage, "etages": sim.donjon.etages, "salles": sim.donjon.salles}))
+	var titre: String = tr("ui.camp").format({"biome": tr(str(GameData.catalogues.biomes.get(str(sim.camp_sauve.get("biome", "plaine_temperee")), {}).get("name_key", "")))}) if sim.lieu == "camp" else (tr(GameData.entree("prototype_arenas", arenes[arene_courante]).name_key) if sim.donjon.is_empty() else tr("ui.donjon").format({"theme": tr(GameData.entree("dungeon_themes", sim.donjon.theme).name_key), "etage": sim.donjon.etage, "etages": sim.donjon.etages, "salles": sim.donjon.salles}))
 	var lignes: Array[String] = [tr("ui.titre") + " · " + titre]
 	var mode := tr("ui.mode.combat") if sim.en_combat(j) else tr("ui.mode.exploration").format({"tps": sim.regles.r.ticks_par_seconde_exploration})
 	lignes.append(tr("ui.horloge").format({"horloge": sim.horloge_de(j).ticks, "mode": mode}))

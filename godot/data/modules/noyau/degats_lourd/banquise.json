@@ -28,5 +28,6 @@
       "id": "ralentissement",
       "duree_ticks": 20
     }
-  }
+  },
+  "style": "assaut"
 }

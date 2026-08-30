@@ -23,5 +23,6 @@
   "effet": {
     "tempo": 8,
     "vol": true
-  }
+  },
+  "style": "controle"
 }

@@ -1,0 +1,70 @@
+{
+  "_doc": "Styles de jeu des modules (Six types de modules et assemblage, 2026-08-30) : un second axe, orthogonal au type. Un style principal par module (champ `style`), `neutre` pour ce qui sert tous les styles. teinte : la pastille du composeur.",
+  "ordre": [
+    "assaut",
+    "controle",
+    "soutien",
+    "mobilite",
+    "terrain",
+    "ruse",
+    "neutre"
+  ],
+  "styles": {
+    "assaut": {
+      "name_key": "style.assaut.name",
+      "teinte": [
+        0.9,
+        0.3,
+        0.25
+      ]
+    },
+    "controle": {
+      "name_key": "style.controle.name",
+      "teinte": [
+        0.7,
+        0.45,
+        0.9
+      ]
+    },
+    "soutien": {
+      "name_key": "style.soutien.name",
+      "teinte": [
+        0.35,
+        0.8,
+        0.45
+      ]
+    },
+    "mobilite": {
+      "name_key": "style.mobilite.name",
+      "teinte": [
+        0.35,
+        0.7,
+        0.95
+      ]
+    },
+    "terrain": {
+      "name_key": "style.terrain.name",
+      "teinte": [
+        0.8,
+        0.65,
+        0.3
+      ]
+    },
+    "ruse": {
+      "name_key": "style.ruse.name",
+      "teinte": [
+        0.6,
+        0.6,
+        0.65
+      ]
+    },
+    "neutre": {
+      "name_key": "style.neutre.name",
+      "teinte": [
+        0.45,
+        0.45,
+        0.5
+      ]
+    }
+  }
+}

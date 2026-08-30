@@ -17,5 +17,6 @@
       "anneau": "carre",
       "point": "tuile"
     }
-  }
+  },
+  "style": "neutre"
 }

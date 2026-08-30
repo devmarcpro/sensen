@@ -22,5 +22,6 @@
   "portee": null,
   "effet": {
     "tempo": 10
-  }
+  },
+  "style": "controle"
 }

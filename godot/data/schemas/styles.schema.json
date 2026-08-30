@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "required": ["ordre", "styles"],
+  "properties": {
+    "ordre": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "styles": { "type": "object" }
+  }
+}

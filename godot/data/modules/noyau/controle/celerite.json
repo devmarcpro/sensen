@@ -23,5 +23,6 @@
   "effet": {
     "tempo": -10,
     "cible": "allie"
-  }
+  },
+  "style": "controle"
 }

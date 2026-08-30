@@ -13,5 +13,6 @@
     "echo": 0.5,
     "apres_ticks": 20
   },
-  "famille": "Rejeu"
+  "famille": "Rejeu",
+  "style": "ruse"
 }

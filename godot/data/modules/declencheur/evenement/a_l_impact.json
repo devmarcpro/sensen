@@ -12,5 +12,6 @@
   "effet": {
     "declencheur": "impact"
   },
-  "famille": "Événement"
+  "famille": "Événement",
+  "style": "ruse"
 }

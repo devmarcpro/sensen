@@ -26,5 +26,6 @@
       "duree_ticks": 80,
       "des": 1
     }
-  }
+  },
+  "style": "terrain"
 }

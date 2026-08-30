@@ -25,5 +25,6 @@
       "zone": "brume",
       "duree_ticks": 60
     }
-  }
+  },
+  "style": "terrain"
 }

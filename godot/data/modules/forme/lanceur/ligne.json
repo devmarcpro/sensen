@@ -17,5 +17,6 @@
   "taille_base": 4,
   "ligne_de_vue": true,
   "origine": "lanceur",
-  "famille": "Depuis soi"
+  "famille": "Depuis soi",
+  "style": "neutre"
 }

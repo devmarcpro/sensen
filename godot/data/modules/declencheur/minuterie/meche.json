@@ -13,5 +13,6 @@
     "declencheur": "apres_ticks",
     "ticks": 20
   },
-  "famille": "Minuterie"
+  "famille": "Minuterie",
+  "style": "ruse"
 }

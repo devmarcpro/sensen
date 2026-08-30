@@ -26,5 +26,6 @@
       "duree_ticks": 600,
       "paire": true
     }
-  }
+  },
+  "style": "mobilite"
 }

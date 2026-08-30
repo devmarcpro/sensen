@@ -12,5 +12,6 @@
   "effet": {
     "declencheur": "accord"
   },
-  "famille": "Événement"
+  "famille": "Événement",
+  "style": "ruse"
 }

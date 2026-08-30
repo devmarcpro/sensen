@@ -34,5 +34,6 @@
       "id": "enracinement",
       "duree_ticks": 10
     }
-  }
+  },
+  "style": "terrain"
 }

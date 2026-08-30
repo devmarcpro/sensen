@@ -25,5 +25,6 @@
       "id": "enracinement",
       "duree_ticks": 20
     }
-  }
+  },
+  "style": "controle"
 }

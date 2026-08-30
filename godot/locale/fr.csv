@@ -2225,3 +2225,13 @@ ui.composeur.groupe.declencheur,Déclencheur
 ui.composeur.groupe.suite,"Suite (après le déclencheur)"
 ui.composeur.wuxing_legende,"→ engendre · ⇢ domine"
 ui.apercu.tuiles_souris,"{n} tuiles · {origine} · portée {portee} · visée : la souris"
+style.assaut.name,Assaut
+style.controle.name,Contrôle
+style.soutien.name,Soutien
+style.mobilite.name,Mobilité
+style.terrain.name,Terrain
+style.ruse.name,Ruse
+style.neutre.name,Neutre
+ui.composeur.filtre_tous,Tous
+ui.composeur.style,"Style du sort : {liste}"
+ui.composeur.style_neutre,"Style du sort : —"

@@ -22,5 +22,6 @@
   ],
   "forme": null,
   "portee": null,
-  "des_bonus": 1
+  "des_bonus": 1,
+  "style": "assaut"
 }

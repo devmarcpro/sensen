@@ -25,5 +25,6 @@
       "mode": "projection",
       "distance": "2"
     }
-  }
+  },
+  "style": "mobilite"
 }

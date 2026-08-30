@@ -13,5 +13,6 @@
     "declencheur": "veille",
     "pct": 40
   },
-  "famille": "Événement"
+  "famille": "Événement",
+  "style": "ruse"
 }

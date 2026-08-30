@@ -22,5 +22,6 @@
   "portee": null,
   "effet": {
     "sans_segment": true
-  }
+  },
+  "style": "assaut"
 }

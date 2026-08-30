@@ -19,5 +19,6 @@
     "saisie"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "style": "controle"
 }

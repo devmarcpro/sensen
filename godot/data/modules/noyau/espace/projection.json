@@ -26,5 +26,6 @@
       "mode": "lancer_porte",
       "distance": "5"
     }
-  }
+  },
+  "style": "mobilite"
 }

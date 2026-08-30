@@ -13,5 +13,6 @@
   "surcout_ressource": "+2",
   "effet": {
     "portee": 2
-  }
+  },
+  "style": "neutre"
 }

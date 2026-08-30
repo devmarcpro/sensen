@@ -11,5 +11,6 @@
   "famille": "Tempo",
   "surcout_ticks": 5,
   "surcout_ressource": "×0.6",
-  "effet": {}
+  "effet": {},
+  "style": "neutre"
 }

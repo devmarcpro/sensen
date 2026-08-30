@@ -25,5 +25,6 @@
       "id": "terreur",
       "duree_ticks": 20
     }
-  }
+  },
+  "style": "controle"
 }

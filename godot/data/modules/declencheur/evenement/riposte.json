@@ -12,5 +12,6 @@
   "effet": {
     "declencheur": "riposte"
   },
-  "famille": "Événement"
+  "famille": "Événement",
+  "style": "ruse"
 }

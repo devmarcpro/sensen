@@ -13,5 +13,6 @@
   "surcout_ressource": "+10",
   "effet": {
     "segments": 1
-  }
+  },
+  "style": "neutre"
 }

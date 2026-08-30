@@ -13,5 +13,6 @@
   "surcout_ressource": "+4",
   "effet": {
     "silencieux": true
-  }
+  },
+  "style": "ruse"
 }

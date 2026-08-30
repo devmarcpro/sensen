@@ -30,5 +30,6 @@
       "chute": true
     }
   },
-  "unique_par_combat": true
+  "unique_par_combat": true,
+  "style": "terrain"
 }

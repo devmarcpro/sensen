@@ -28,5 +28,6 @@
       "delta": -3,
       "chute": true
     }
-  }
+  },
+  "style": "terrain"
 }

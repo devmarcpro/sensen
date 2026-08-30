@@ -26,5 +26,6 @@
     "terrain": {
       "delta": 1
     }
-  }
+  },
+  "style": "terrain"
 }

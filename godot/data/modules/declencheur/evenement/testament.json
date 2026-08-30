@@ -12,5 +12,6 @@
   "effet": {
     "declencheur": "testament"
   },
-  "famille": "Événement"
+  "famille": "Événement",
+  "style": "ruse"
 }

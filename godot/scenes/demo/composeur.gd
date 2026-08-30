@@ -24,6 +24,9 @@ var cartes: Array[Control] = []
 var ids: Array[String] = []            # les modules du catalogue, dans l'ordre des cartes
 
 var replie: Dictionary = {}            # type → section repliée (▸) ou déployée (▾)
+var filtre_style := ""                 # "" = tous ; sinon un style de data/styles.json
+var rangee_filtres: HBoxContainer
+var etiquette_style: Label            # le style du sort en composition
 var nom: LineEdit
 var icone_sort: Control                # l'icône combinée du sort en cours, à côté du nom
 var rangee_slots: HBoxContainer
@@ -36,7 +39,7 @@ var pentagramme: Control
 func _ready() -> void:
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var h1 := HBoxContainer.new()   # rangée 1 : le nom du sort
+	var h1 := HBoxContainer.new()   # rangée 1 : le nom du sort, et son style
 	add_child(h1)
 	icone_sort = IconeSort.new()
 	icone_sort.composeur = self
@@ -49,6 +52,10 @@ func _ready() -> void:
 	nom.placeholder_text = tr("ui.composeur.nom_auto")
 	nom.max_length = 32
 	h1.add_child(nom)
+	etiquette_style = Label.new()
+	etiquette_style.add_theme_font_size_override("font_size", 11)
+	etiquette_style.modulate = Color(0.85, 0.85, 0.8)
+	h1.add_child(etiquette_style)
 	var aide := Label.new()
 	aide.text = tr("ui.composeur.aide")
 	aide.add_theme_font_size_override("font_size", 10)
@@ -65,11 +72,17 @@ func _ready() -> void:
 	var h2 := HBoxContainer.new()   # rangée 3 : le catalogue à gauche, le détail + Wu Xing + aperçu à droite
 	h2.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	add_child(h2)
+	var gauche := VBoxContainer.new()   # à gauche : les filtres de style, puis le catalogue
+	gauche.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	h2.add_child(gauche)
+	rangee_filtres = HBoxContainer.new()
+	gauche.add_child(rangee_filtres)
+	_construire_filtres()
 	var defil := ScrollContainer.new()
 	defil.custom_minimum_size = Vector2(COLONNES * (CARTE.x + 4) + 18, 0)
 	defil.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	defil.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	h2.add_child(defil)
+	gauche.add_child(defil)
 	var zone := ZoneCatalogue.new()   # accepte qu'on y ramène un module d'un slot : le slot se vide
 	zone.composeur = self
 	zone.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -92,6 +105,57 @@ func _ready() -> void:
 	bas.add_child(pentagramme)
 	apercu = ApercuSort.new()
 	bas.add_child(apercu)
+
+
+## Les filtres de style (Six types de modules, 2026-08-30) : Tous, puis un bouton par style de data/styles.json.
+func _construire_filtres() -> void:
+	for c in rangee_filtres.get_children():
+		c.queue_free()
+	var cfg: Dictionary = GameData.config("styles")
+	var ids: Array = [""] + Array(cfg.get("ordre", []))
+	for st in ids:
+		var b := Button.new()
+		b.text = tr("ui.composeur.filtre_tous") if str(st).is_empty() else tr(str(cfg.styles.get(st, {}).get("name_key", "style." + str(st) + ".name")))
+		b.flat = str(st) != filtre_style
+		b.focus_mode = Control.FOCUS_NONE
+		b.add_theme_font_size_override("font_size", 10)
+		if not str(st).is_empty():
+			b.modulate = teinte_style(str(st))
+		var st_c := str(st)
+		b.pressed.connect(func() -> void:
+			filtre_style = st_c
+			_construire_filtres()
+			reconstruire(main.joueur()))
+		rangee_filtres.add_child(b)
+
+
+static func style_de(m: String) -> String:
+	return str(GameData.catalogues.modules.get(m, {}).get("style", "neutre"))
+
+
+static func teinte_style(st: String) -> Color:
+	var t: Array = GameData.config("styles").get("styles", {}).get(st, {}).get("teinte", [0.5, 0.5, 0.5])
+	return Color(float(t[0]), float(t[1]), float(t[2]))
+
+
+## Le style du sort : le mélange des styles de ses modules, le neutre mis à part, en pourcentages.
+func texte_style_sort() -> String:
+	var compte := {}
+	var total := 0
+	for m in sequence():
+		var st := style_de(str(m))
+		if st == "neutre":
+			continue
+		compte[st] = int(compte.get(st, 0)) + 1
+		total += 1
+	if total == 0:
+		return tr("ui.composeur.style_neutre")
+	var cfg: Dictionary = GameData.config("styles")
+	var parts: Array[String] = []
+	for st in cfg.get("ordre", []):
+		if compte.has(st):
+			parts.append("%s %d %%" % [tr(str(cfg.styles[st].name_key)), roundi(100.0 * float(compte[st]) / float(total))])
+	return tr("ui.composeur.style").format({"liste": " · ".join(parts)})
 
 
 # ---------------------------------------------------------------- la séquence
@@ -152,7 +216,7 @@ func _reconstruire_catalogue(j: Dictionary) -> void:
 	for type in ORDRE_TYPES:
 		var du_type: Array = []
 		for m in connus:
-			if type_de(str(m)) == type:
+			if type_de(str(m)) == type and (filtre_style.is_empty() or style_de(str(m)) == filtre_style):
 				du_type.append(str(m))
 		if du_type.is_empty():
 			continue
@@ -260,6 +324,7 @@ func _rafraichir_detail(j: Dictionary) -> void:
 	else:
 		texte += tr("ui.composeur.glisser")
 	detail.text = texte
+	etiquette_style.text = texte_style_sort()
 	if nom.placeholder_text != _nom_auto(plan):
 		nom.placeholder_text = _nom_auto(plan)
 
@@ -412,11 +477,15 @@ static func dessiner_carte(ci: CanvasItem, taille: Vector2, m: String, charges: 
 	var marge := taille.x * 0.2   # le pictogramme de l'effet (Pictos), centré, au-dessus du nom
 	Pictos.dessiner(ci, Pictos.icone_de(md), Rect2(Vector2(marge, marge * 0.55), Vector2(taille.x - 2.0 * marge, taille.x - 2.0 * marge)), Color(c.r, c.g, c.b, alpha))
 	if fois > 0:
-		ci.draw_string(ThemeDB.fallback_font, Vector2(4, 12), "×%d" % fois, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(1, 1, 1, alpha))
+		ci.draw_string(ThemeDB.fallback_font, Vector2(12, 12), "×%d" % fois, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(1, 1, 1, alpha))
 	if charges >= 0:
 		ci.draw_string(ThemeDB.fallback_font, Vector2(taille.x - 20, 12), str(charges), HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0.9, 0.9, 0.8, 0.8 * alpha))
 	var nom_c := TranslationServer.translate(md.get("name_key", m)).left(8)
 	ci.draw_string(ThemeDB.fallback_font, Vector2(4, taille.y - 5), nom_c, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0.95, 0.95, 0.9, alpha))
+	var st := str(md.get("style", "neutre"))   # la pastille du style de jeu, en haut à gauche
+	if st != "neutre":
+		var cs := teinte_style(st)
+		ci.draw_circle(Vector2(7, taille.y * 0.5), 3.0, Color(cs.r, cs.g, cs.b, alpha))
 
 
 ## L'icône d'un module, dessinée par code : un cadre teinté, le glyphe de son type.
