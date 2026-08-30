@@ -121,6 +121,11 @@ func touche(ev: InputEventKey) -> bool:
 			if courant == "triche_liste":   # la sous-liste revient au menu de triche
 				ouvrir("triche")
 				return true
+			if courant == "titre":   # rien derrière l'écran principal : Échap n'y fait rien
+				return true
+			if courant in ["monde", "charger"] or (courant == "options" and main.titre_ouvert):
+				ouvrir("titre")
+				return true
 			fermer()
 			return true
 		KEY_UP, KEY_DOWN:
@@ -323,6 +328,14 @@ func rafraichir() -> void:
 			_construire_gestion(j)
 		"menu":
 			_construire_menu(j)
+		"titre":
+			_construire_titre()
+		"monde":
+			_construire_monde()
+		"options":
+			_construire_options()
+		"charger":
+			_construire_charger()
 		"capacites":
 			_construire_capacites(j)
 		"composer":
@@ -347,7 +360,12 @@ func rafraichir() -> void:
 	if entrees.size() > 0:
 		liste.select(selection)
 	_montrer_detail()
-	_bouton(tr("ui.ecran.fermer"), fermer)
+	if courant == "titre":   # rien derrière l'écran principal : pas de « Fermer »
+		pass
+	elif courant in ["monde", "charger"] or (courant == "options" and main.titre_ouvert):
+		_bouton(tr("ui.monde.retour"), func() -> void: ouvrir("titre"))
+	else:
+		_bouton(tr("ui.ecran.fermer"), fermer)
 
 
 func _bouton(texte: String, action: Callable) -> void:
@@ -377,7 +395,7 @@ func _montrer_detail() -> void:
 			detail.text = str(en.texte)
 		"donner", "reprendre":
 			detail.text = texte_objet(str(en.uid))
-		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer", "menu", "contexte", "capacite", "nouvelle_capacite", "module_composer", "triche", "triche_catalogue", "triche_item":
+		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer", "menu", "contexte", "capacite", "nouvelle_capacite", "module_composer", "triche", "triche_catalogue", "triche_item", "titre", "monde", "options", "charger_slot":
 			detail.text = str(en.get("texte", ""))
 		"achat", "vente":
 			var p: Dictionary = en.prix
@@ -434,6 +452,39 @@ func _action_principale() -> void:
 			main.sim.intention(j.id, {"type": "entrainer", "pnj": pnj_id, "competence": str(en.competence)})
 		"menu":
 			main._action_menu(str(en.id))
+			return
+		"titre":
+			match str(en.id):
+				"nouvelle": main._nouvelle_partie()
+				"continuer": main._charger_partie("monde")
+				"charger": ouvrir("charger")
+				"options": ouvrir("options")
+				"quitter": get_tree().quit()
+			return
+		"monde":
+			match str(en.id):
+				"graine": main.graine_monde = randi() % 1000000
+				"commencer":
+					main._commencer_monde()
+					return
+				"retour":
+					main.fiche_monde = {}
+					ouvrir("titre")
+					return
+		"options":
+			match str(en.id):
+				"langue": TranslationServer.set_locale("en" if TranslationServer.get_locale().begins_with("fr") else "fr")
+				"plein_ecran":
+					var plein: bool = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+					DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if plein else DisplayServer.WINDOW_MODE_FULLSCREEN)
+				"retour":
+					ouvrir("titre" if main.titre_ouvert else "menu")
+					return
+		"charger_slot":
+			if str(en.id).is_empty():
+				ouvrir("titre")
+			else:
+				main._charger_partie(str(en.id))
 			return
 		"capacite":
 			main.sim.supprimer_capacite(j, int(en.index))
@@ -1090,10 +1141,57 @@ func _valider_composition() -> void:
 		rafraichir()
 
 
+## L'écran principal (Écrans d'interface, 2026-08-30) : Nouvelle partie, Continuer, Charger, Options, Quitter.
+func _construire_titre() -> void:
+	titre.text = tr("ui.ecran.titre")
+	var ids: Array[String] = ["nouvelle"]
+	if Sauvegarde.existe("monde"):
+		ids.append("continuer")
+	ids.append_array(["charger", "options", "quitter"])
+	for id in ids:
+		liste.add_item(tr("ui.titre." + id))
+		entrees.append({"kind": "titre", "id": id, "texte": tr("ui.titre.d_" + id)})
+
+
+## L'écran Monde : la graine (aléatoire, re-tirable — aucun chiffre fixe), puis Commencer → la carte du départ.
+func _construire_monde() -> void:
+	titre.text = tr("ui.ecran.monde")
+	liste.add_item(tr("ui.monde.graine").format({"graine": int(main.graine_monde)}))
+	entrees.append({"kind": "monde", "id": "graine", "texte": tr("ui.monde.d_graine")})
+	liste.add_item(tr("ui.monde.commencer"))
+	entrees.append({"kind": "monde", "id": "commencer", "texte": tr("ui.monde.d_commencer")})
+	liste.add_item(tr("ui.monde.retour"))
+	entrees.append({"kind": "monde", "id": "retour", "texte": ""})
+
+
+## Les options : la langue (à chaud), le plein écran.
+func _construire_options() -> void:
+	titre.text = tr("ui.ecran.options")
+	liste.add_item(tr("ui.options.langue").format({"langue": TranslationServer.get_locale().substr(0, 2)}))
+	entrees.append({"kind": "options", "id": "langue", "texte": tr("ui.options.d_langue")})
+	var plein: bool = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+	liste.add_item(tr("ui.options.plein_ecran").format({"etat": tr("ui.triche.oui" if plein else "ui.triche.non")}))
+	entrees.append({"kind": "options", "id": "plein_ecran", "texte": ""})
+	liste.add_item(tr("ui.options.retour"))
+	entrees.append({"kind": "options", "id": "retour", "texte": ""})
+
+
+## Charger : les sauvegardes présentes dans user://sauvegardes/.
+func _construire_charger() -> void:
+	titre.text = tr("ui.ecran.charger")
+	var noms: Array[String] = main.sauvegardes_presentes()
+	if noms.is_empty():
+		liste.add_item(tr("ui.charger.aucune"))
+		entrees.append({"kind": "charger_slot", "id": "", "texte": ""})
+	for nom in noms:
+		liste.add_item(nom)
+		entrees.append({"kind": "charger_slot", "id": nom, "texte": tr("ui.charger.d_slot").format({"nom": nom})})
+
+
 ## Le menu (Tab) : les écrans et les actions générales (Écrans d'interface, contrôles).
 func _construire_menu(_j: Dictionary) -> void:
 	titre.text = tr("ui.ecran.menu")
-	var ids: Array = ["inventaire", "atelier", "feuille", "capacites", "carte", "gestion", "registre", "sauvegarder", "charger", "minimap_zoom", "minimap_masquer", "arene", "recharger", "fermer"]
+	var ids: Array = ["inventaire", "atelier", "feuille", "capacites", "carte", "gestion", "registre", "sauvegarder", "charger", "minimap_zoom", "minimap_masquer", "titre", "arene", "recharger", "fermer"]
 	for id in ids:
 		if id in ["carte", "gestion"] and main.sim.lieu != "camp":
 			continue

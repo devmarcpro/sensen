@@ -2176,3 +2176,29 @@ barre.faim,Faim
 ui.chargement,"Chargement — cellule ({x}, {y}) · {biome}"
 ui.composer.surface,"Par tuile : {n} tuiles à la visée nominale → {min}–{max} {monnaie} en tout"
 ui.capacite.surface,"{n} tuiles → {min}–{max} {monnaie}"
+ui.ecran.titre,"SENSEN"
+ui.titre.nouvelle,Nouvelle partie
+ui.titre.continuer,Continuer
+ui.titre.charger,Charger…
+ui.titre.options,Options…
+ui.titre.quitter,Quitter
+ui.titre.d_nouvelle,"Créer un personnage, puis un monde, puis choisir sa case de départ."
+ui.titre.d_continuer,"Reprendre la dernière sauvegarde."
+ui.titre.d_charger,"Choisir une sauvegarde."
+ui.titre.d_options,"Langue, plein écran."
+ui.titre.d_quitter,"Fermer le jeu."
+ui.ecran.monde,"CRÉATION DU MONDE — Entrée : valider · Échap : retour"
+ui.monde.graine,"Graine du monde : {graine} (Entrée : re-tirer)"
+ui.monde.d_graine,"La graine décide de tout le monde : continents, biomes, royaumes, donjons. Deux parties à graines différentes n'ont rien en commun."
+ui.monde.commencer,Commencer
+ui.monde.d_commencer,"Le monde est généré ; la carte s'ouvre pour choisir sa case de départ."
+ui.monde.retour,Retour
+ui.ecran.options,OPTIONS
+ui.options.langue,"Langue : {langue} (Entrée : changer)"
+ui.options.d_langue,"Français / English, à chaud."
+ui.options.plein_ecran,"Plein écran : {etat}"
+ui.options.retour,Retour
+ui.ecran.charger,"CHARGER — Entrée : charger · Échap : retour"
+ui.charger.aucune,"(aucune sauvegarde)"
+ui.charger.d_slot,"Charger la sauvegarde « {nom} »."
+ui.menu.titre,Retour à l'écran principal

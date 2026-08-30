@@ -25,7 +25,7 @@ func _process(_delta: float) -> void:
 
 
 func _draw() -> void:
-	if main == null or main.sim == null:
+	if main == null or main.sim == null or main.titre_ouvert:   # pas de HUD derrière l'écran principal
 		return
 	var j: Dictionary = main.joueur()
 	if j.is_empty():

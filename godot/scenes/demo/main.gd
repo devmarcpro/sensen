@@ -44,6 +44,9 @@ var carte: Carte                   # la carte du monde (M), aussi le choix de la
 var fiche_en_attente: Dictionary = {}   # la fiche créée, en attendant le choix de la case de départ
 var minuterie_autosave := 300.0    # autosave toutes les 5 minutes réelles (Sauvegarde)
 var creation: Dictionary = {}      # l'écran de création, tant que le personnage n'existe pas
+var titre_ouvert := false          # l'écran principal (Écrans d'interface) : le monde derrière est un décor, l'entrée est bloquée
+var graine_monde := -1             # la graine choisie à l'écran Monde, portée à la simulation
+var fiche_monde: Dictionary = {}   # la fiche créée, en attente de l'écran Monde
 const STATS := ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]
 var zoom := 1.0
 
@@ -128,7 +131,6 @@ func _ready() -> void:
 			noeuds_vegetaux[i].queue_free()
 			noeuds_vegetaux.erase(i))
 	GameData.donnees_rechargees.connect(_charger)
-	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": 1000}
 	ecrans = Ecrans.new()
 	ecrans.main = self
 	add_child(ecrans)
@@ -172,9 +174,72 @@ func _ready() -> void:
 	var tutoriels := Tutoriels.new()
 	tutoriels.afficher = func(texte: String) -> void: _log("💡 " + texte)
 	add_child(tutoriels)
-	if OS.get_cmdline_user_args().has("--sans-creation") or DisplayServer.get_name() == "headless":
-		creation = {}
 	_charger()
+	if not (OS.get_cmdline_user_args().has("--sans-creation") or DisplayServer.get_name() == "headless"):
+		_ouvrir_titre()   # le jeu s'ouvre sur l'écran principal (Écrans d'interface, 2026-08-30)
+
+
+## L'écran principal : par-dessus l'arène de décor, monde en pause, entrée bloquée hors du panneau.
+func _ouvrir_titre() -> void:
+	titre_ouvert = true
+	creation = {}
+	fiche_en_attente = {}
+	carte.fermer()
+	minimap.visible = false
+	hud_ecran.queue_redraw()
+	ecrans.ouvrir("titre")
+
+
+## Nouvelle partie : l'écran de création du personnage, puis l'écran Monde, puis la carte (case de départ).
+func _nouvelle_partie() -> void:
+	ecrans.fermer()
+	titre_ouvert = false
+	minimap.visible = true
+	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": 1000}
+	ui.text = _texte_creation()
+
+
+## Continuer / Charger : la sauvegarde `nom` ; sans elle, retour au titre.
+func _charger_partie(nom: String = "monde") -> void:
+	ecrans.fermer()
+	titre_ouvert = false
+	minimap.visible = true
+	arene_courante = arenes.size()
+	if sim.charger_sauvegarde(nom):
+		joueur_id = ""
+		for e in sim.vivants():
+			if e.controle == "joueur":
+				joueur_id = e.id
+		_apres_changement_de_grille()
+		_log(tr("journal.chargement"))
+	else:
+		_log(tr("journal.pas_de_sauvegarde"))
+		_ouvrir_titre()
+
+
+## Écran Monde validé : le monde est généré avec la graine choisie, puis la carte s'ouvre pour la case de départ.
+func _commencer_monde() -> void:
+	ecrans.fermer()
+	titre_ouvert = false
+	minimap.visible = true
+	arene_courante = arenes.size()   # une partie commence au camp, sur le monde (Début de partie)
+	_charger(fiche_monde)
+	fiche_en_attente = fiche_monde
+	fiche_monde = {}
+	carte.ouvrir("depart")
+
+
+## Les sauvegardes présentes (dossiers de user://sauvegardes/), pour l'écran Charger.
+static func sauvegardes_presentes() -> Array[String]:
+	var noms: Array[String] = []
+	var d := DirAccess.open(Sauvegarde.RACINE)
+	if d == null:
+		return noms
+	for nom in d.get_directories():
+		if Sauvegarde.existe(nom):
+			noms.append(nom)
+	noms.sort()
+	return noms
 
 
 ## L'écran de création : R race, C classe, ↑↓ stat, +/− points, ← → année de naissance, Entrée.
@@ -232,12 +297,13 @@ func _creer_personnage() -> void:
 	creation = {}
 	var interactif := DisplayServer.get_name() != "headless" and not OS.get_cmdline_user_args().has("--sans-creation")
 	if interactif:
-		arene_courante = arenes.size()   # une partie commence au camp, sur le monde (Début de partie)
+		# Début de partie : l'écran Monde (graine), puis la carte pour choisir sa case (Écrans d'interface).
+		fiche_monde = fiche
+		graine_monde = randi() % 1000000
+		titre_ouvert = true
+		ecrans.ouvrir("monde")
+		return
 	_charger(fiche)
-	if interactif:
-		# Début de partie : la carte s'ouvre pour choisir sa case ; la cellule proposée est déjà chargée.
-		fiche_en_attente = fiche
-		carte.ouvrir("depart")
 
 
 ## Le joueur a cliqué sa case de départ (Début de partie) : le camp y est établi.
@@ -246,6 +312,7 @@ func _choisir_depart(cell: Vector2i) -> void:
 		return
 	sim.monde.fermer()
 	sim = Simulation.new(0x68EE)
+	sim.graine_monde = graine_monde
 	sim.fiche_joueur = fiche_en_attente
 	sim.charger_camp({}, cell)
 	fiche_en_attente = {}
@@ -273,6 +340,7 @@ func _charger(fiche: Dictionary = {}) -> void:
 	if fiche.is_empty() and sim != null and not sim.fiche_joueur.is_empty():
 		fiche = sim.fiche_joueur
 	sim = Simulation.new(0x68EE)
+	sim.graine_monde = graine_monde
 	sim.fiche_joueur = fiche
 	if arene_courante >= arenes.size():
 		sim.charger_camp()   # Tab après les arènes : le camp de base (E sur l'entrée : le donjon)
@@ -485,6 +553,8 @@ func _process(delta: float) -> void:
 	var j := joueur()
 	if j.is_empty():
 		return
+	if titre_ouvert:   # écran principal : rien n'avance derrière
+		return
 	if chargement_restant > 0.0:   # écran de chargement : le monde est en pause, le temps sert à pré-générer
 		chargement_restant -= delta
 		if sim.monde != null:
@@ -614,6 +684,10 @@ func _classes_visibles() -> Array:
 
 
 func _unhandled_input(ev: InputEvent) -> void:
+	if titre_ouvert:   # écran principal : seules les touches du panneau passent
+		if ev is InputEventKey and ev.pressed and not ev.echo and ecrans.est_ouvert():
+			ecrans.touche(ev)
+		return
 	if not creation.is_empty():
 		if ev is InputEventKey and ev.pressed and not ev.echo:
 			match ev.keycode:
@@ -1023,6 +1097,8 @@ func _action_menu(id: String) -> void:
 			ecrans.fermer()
 			arene_courante = (arene_courante + 1) % (arenes.size() + 1)
 			_charger()
+		"titre":
+			_ouvrir_titre()
 		"recharger":
 			ecrans.fermer()
 			GameData.charger()

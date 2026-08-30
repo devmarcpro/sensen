@@ -67,6 +67,9 @@ var _n_combats := 0
 var _n_entites := 0
 
 
+var graine_monde := -1   # la graine du monde choisie à l'écran Monde (Écrans d'interface) ; -1 = celle de planete.json
+
+
 func _init(p_graine: int) -> void:
 	graine = p_graine
 	des = Des.new(p_graine)
@@ -132,7 +135,7 @@ func charger_camp(joueur: Dictionary = {}, cellule_choisie: Vector2i = Vector2i(
 	# Première venue : le monde (fenêtre glissante) centré sur la cellule de départ.
 	var cfg: Dictionary = GameData.config("camp")
 	var planete: Dictionary = GameData.config("planete")
-	var surface := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, int(planete.graine))
+	var surface := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, graine_monde if graine_monde >= 0 else int(planete.graine))
 	monde = Monde.new(surface, planete, cfg)
 	var depart := monde.cellule_camp if cellule_choisie == Vector2i(-1, -1) else cellule_choisie
 	# Garde-fou (Début de partie) : si la cellule de départ est en mer, la première cellule de terre en spirale.
@@ -5034,7 +5037,7 @@ func sauvegarder(nom: String = "monde") -> bool:
 	var contenants_monde := {}
 	for gi in contenants.keys():
 		contenants_monde[grille.pos_de(int(gi))] = contenants[gi]
-	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "graine": graine, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
+	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "graine": graine, "graine_monde": graine_monde, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
 		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores,
 		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire, "vacances": monde.vacances, "villages": monde.villages, "heritiers": monde.heritiers, "vacances_guildes": monde.vacances_guildes,
 		"modifs_terrain": modifs_terrain, "portails": portails})   # indexés par position monde, donc valables au rechargement
@@ -5057,6 +5060,7 @@ func charger_sauvegarde(nom: String = "monde") -> bool:
 	var instances: Dictionary = Sauvegarde.lire(nom, "items.json")
 	var pj: Dictionary = Sauvegarde.lire(nom, "players/joueur.json")
 	graine = int(w.graine)
+	graine_monde = int(w.get("graine_monde", -1))   # le monde de cette partie, pas celui de planete.json
 	des = Des.new(graine)
 	fiche_joueur = pj.get("fiche", {})
 	camp_sauve = {}

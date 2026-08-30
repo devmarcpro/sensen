@@ -2166,3 +2166,29 @@ barre.faim,Hunger
 ui.chargement,"Loading — cell ({x}, {y}) · {biome}"
 ui.composer.surface,"Per tile: {n} tiles at nominal aim → {min}–{max} {monnaie} in total"
 ui.capacite.surface,"{n} tiles → {min}–{max} {monnaie}"
+ui.ecran.titre,"SENSEN"
+ui.titre.nouvelle,New game
+ui.titre.continuer,Continue
+ui.titre.charger,Load…
+ui.titre.options,Options…
+ui.titre.quitter,Quit
+ui.titre.d_nouvelle,"Create a character, then a world, then pick a starting cell."
+ui.titre.d_continuer,"Resume the last save."
+ui.titre.d_charger,"Pick a save."
+ui.titre.d_options,"Language, fullscreen."
+ui.titre.d_quitter,"Close the game."
+ui.ecran.monde,"WORLD CREATION — Enter: confirm · Esc: back"
+ui.monde.graine,"World seed: {graine} (Enter: reroll)"
+ui.monde.d_graine,"The seed decides the whole world: continents, biomes, kingdoms, dungeons. Two games with different seeds share nothing."
+ui.monde.commencer,Begin
+ui.monde.d_commencer,"The world is generated; the map opens to pick a starting cell."
+ui.monde.retour,Back
+ui.ecran.options,OPTIONS
+ui.options.langue,"Language: {langue} (Enter: switch)"
+ui.options.d_langue,"Français / English, live."
+ui.options.plein_ecran,"Fullscreen: {etat}"
+ui.options.retour,Back
+ui.ecran.charger,"LOAD — Enter: load · Esc: back"
+ui.charger.aucune,"(no save)"
+ui.charger.d_slot,"Load save “{nom}”."
+ui.menu.titre,Back to the main screen

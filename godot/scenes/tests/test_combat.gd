@@ -5841,6 +5841,16 @@ func test_sauvegarde() -> void:
 	verifier(j2.pos == pos0 and j2.sac.size() == sac0 and dague.uid in j2.sac and s2.items.has(dague.uid), "le joueur, son sac et ses objets sont revenus")
 	verifier(s2.grille.contenu_de(mur).get("tags", []).has("construit") and s2.grille.materiau_de(mur) == "chene", "le mur posé est là (seed + modifications)")
 	verifier(s2.horloge_monde.ticks == s.horloge_monde.ticks and s2.graine == 37, "le temps et la graine")
+	# La graine du monde choisie à l'écran Monde (Écrans d'interface) : portée par la simulation, écrite, relue.
+	var s5 := Simulation.new(5)
+	s5.graine_monde = 4242
+	s5.charger_camp()
+	verifier(int(s5.monde.surface.graine) == 4242, "la surface est générée avec la graine choisie (%d)" % int(s5.monde.surface.graine))
+	verifier(s5.sauvegarder("test_graine"), "sauvegarder la partie à graine choisie")
+	var s6 := Simulation.new(6)
+	verifier(s6.charger_sauvegarde("test_graine") and s6.graine_monde == 4242 and int(s6.monde.surface.graine) == 4242, "la graine du monde est relue avec la sauvegarde (%d)" % s6.graine_monde)
+	s5.monde.fermer()
+	s6.monde.fermer()
 	verifier(s2.monde.explores.size() == s.monde.explores.size(), "les chunks explorés (%d)" % s2.monde.explores.size())
 	verifier(s2.grille.decouvert.size() > s2.monde.taille * s2.monde.taille / 2, "la cellule du camp reste découverte (%d tuiles)" % s2.grille.decouvert.size())
 	# Un tour complet sur l'état du camp : ce qu'on a construit, élevé, revendiqué, stocké
