@@ -13,6 +13,7 @@ var panneau: PanelContainer
 var titre: Label
 var liste: ItemList
 var detail: RichTextLabel
+var apercu_sort: ApercuSort   # l'aperçu visuel du sort (écran Composer, Écrans d'interface)
 var boutons: HBoxContainer
 var entrees: Array = []                 # ce que chaque ligne de la liste représente
 var selection := 0
@@ -56,12 +57,19 @@ func _ready() -> void:
 	liste.item_selected.connect(_sur_selection)
 	liste.item_activated.connect(func(i: int) -> void: _sur_selection(i); _action_principale())
 	h.add_child(liste)
+	var droite := VBoxContainer.new()   # à droite : le détail, et sous lui l'aperçu visuel du sort (composeur)
+	droite.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	droite.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	h.add_child(droite)
+	apercu_sort = ApercuSort.new()
+	apercu_sort.visible = false
 	detail = RichTextLabel.new()
 	detail.bbcode_enabled = true
 	detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	detail.add_theme_font_size_override("normal_font_size", 13)
-	h.add_child(detail)
+	droite.add_child(detail)
+	droite.add_child(apercu_sort)
 	boutons = HBoxContainer.new()
 	v.add_child(boutons)
 
@@ -96,12 +104,14 @@ func ouvrir(nom: String) -> void:
 	courant = nom
 	selection = 0
 	panneau.visible = true
+	apercu_sort.visible = nom == "composer"
 	rafraichir()
 
 
 func fermer() -> void:
 	courant = ""
 	panneau.visible = false
+	apercu_sort.visible = false
 
 
 func _process(delta: float) -> void:
@@ -1108,6 +1118,8 @@ func _construire_composer(j: Dictionary) -> void:
 	for m in sequence_composee:
 		noms.append(tr(GameData.catalogues.modules.get(str(m), {}).get("name_key", str(m))))
 	titre.text = tr("ui.ecran.composer").format({"sequence": " → ".join(noms) if not noms.is_empty() else "—", "n": sequence_composee.size(), "max": int(slots.modules)})
+	apercu_sort.visible = true   # l'aperçu visuel du sort en cours (décision du designer, 2026-08-30)
+	apercu_sort.montrer(main.sim.plan_sequence(j, sequence_composee.duplicate()) if not sequence_composee.is_empty() else {})
 	var connus: Array = j.get("modules_connus", []).duplicate()
 	if connus.is_empty():
 		liste.add_item(tr("ui.composer.vide"), null, false)

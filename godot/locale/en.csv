@@ -2196,3 +2196,6 @@ ui.composer.taille_courte,size
 ui.composer.charges,"Charges: {n} (one per cast, per occurrence)"
 journal.epuisement,"{nom} is exhausted: {deficit} stamina short, {degats} HP"
 ui.composer.telegraphe,"⚠ {ticks} ticks: beyond {seuil}, the spell is telegraphed — visible to all, interruptible"
+ui.apercu.vide,"Preview: add a form and a core"
+ui.apercu.tuiles,"{n} tiles · {origine} · range {portee} · nominal aim northwards"
+ui.apercu.horizon,"Horizon: every entity in sight"

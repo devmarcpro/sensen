@@ -2206,3 +2206,6 @@ ui.composer.taille_courte,taille
 ui.composer.charges,"Charges : {n} (une par lancer, par occurrence)"
 journal.epuisement,"{nom} s’épuise : {deficit} d’endurance manquants, {degats} PV"
 ui.composer.telegraphe,"⚠ {ticks} ticks : au-delà de {seuil}, le sort est télégraphié — visible de tous, interruptible"
+ui.apercu.vide,"Aperçu : ajoutez une forme et un noyau"
+ui.apercu.tuiles,"{n} tuiles · {origine} · portée {portee} · visée nominale vers le nord"
+ui.apercu.horizon,"Horizon : toutes les entités en vue"

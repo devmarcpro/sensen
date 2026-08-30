@@ -322,7 +322,7 @@ func _choisir_depart(cell: Vector2i) -> void:
 			joueur_id = e.id
 	_apres_changement_de_grille()
 	carte.fermer()
-	_log(tr("journal.depart_choisi").format({"x": cell.x, "y": cell.y, "biome": tr(GameData.entree("biomes", str(sim.camp_sauve.biome)).name_key)}))
+	_log(tr("journal.depart_choisi").format({"x": cell.x, "y": cell.y, "biome": tr(GameData.catalogues.biomes.get(str(sim.camp_sauve.get("biome", "")), {}).get("name_key", ""))}))
 
 
 ## Voyage rapide depuis la carte — ou revendication d'une cellule contiguë au territoire (Expansion territoriale).
