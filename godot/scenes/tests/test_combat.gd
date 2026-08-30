@@ -6308,6 +6308,21 @@ func test_sauvegarde_partout() -> void:
 	verifier(s2.grille.decouvert.size() == n_decouvert and n_decouvert > 0, "le brouillard de l'étage est celui de la sauvegarde (%d tuiles vues)" % n_decouvert)
 	s2.attente[j2.id] = true
 	verifier(s2.intention(j2.id, {"type": "attendre"}), "et la partie continue")
+	# Le flux classique : sauver au camp, partir en expédition, recharger — on ressort du donjon proprement.
+	var s3 := Simulation.new(72)
+	s3.graine_monde = 72
+	s3.charger_camp()
+	var j3: Dictionary = s3.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var pos_camp: Vector2i = j3.pos
+	verifier(s3.sauvegarder("test_partout2"), "sauvegarder au camp avant l'expédition")
+	s3.charger_donjon("ruine", 72, 8, 1, j3)
+	verifier(s3.lieu == "donjon", "puis descendre en donjon")
+	verifier(s3.charger_sauvegarde("test_partout2"), "recharger la sauvegarde du camp depuis le donjon")
+	var j3b: Dictionary = s3.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	verifier(s3.lieu == "camp" and s3.donjon.is_empty() and s3.expedition.is_empty(), "retour au camp : plus de donjon ni d'expédition en cours")
+	verifier(j3b.pos == pos_camp, "le joueur est à la case où il a sauvé (%s)" % str(j3b.pos))
+	s3.attente[j3b.id] = true
+	verifier(s3.intention(j3b.id, {"type": "attendre"}), "et cette partie-là continue aussi")
 
 
 func test_budgets() -> void:
