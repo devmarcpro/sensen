@@ -576,7 +576,7 @@ func test_capacites() -> void:
 	var mana: int = j.mana
 	var pv: int = loup.sante
 	verifier(s.intention(j.id, {"type": "capacite", "index": 0, "cible": loup.pos}), "lancer Étincelle sur le loup à 3 tuiles")
-	verifier(j.mana == mana - 3 and j.compteur == h.ticks + 3, "Étincelle : 3 mana, 3 ticks")
+	verifier(j.mana < mana and j.mana >= mana - 6 and j.compteur == h.ticks + 3, "Étincelle : 3 mana ± le jet de coût (%d payés), 3 ticks" % (mana - j.mana))
 	verifier(loup.sante < pv and j.chaine.segments.size() == 1 and j.chaine.segments[0].element == "feu", "le loup est touché, un segment Feu est posé")
 	# Hors de portée (Point : 1-6) : refusé
 	j.compteur = h.ticks
@@ -586,7 +586,7 @@ func test_capacites() -> void:
 	j.mana = 4
 	var pvj: int = j.sante
 	verifier(s.intention(j.id, {"type": "capacite", "index": 1, "cible": j.pos + Vector2i(0, -1)}), "Gel en ligne sans assez de mana")
-	verifier(j.mana == 0 and j.sante == pvj - 16, "surchauffe : déficit 8 × 2 = 16 PV")
+	verifier(j.mana == 0 and j.sante < pvj and (pvj - j.sante) % 2 == 0, "surchauffe : le déficit × 2 en PV (%d)" % (pvj - j.sante))
 	verifier(not j.action_en_cours.is_empty(), "12 ticks : la capacité est télégraphée (engagée)")
 	# Baume sur soi : soigne
 	j.compteur = h.ticks
@@ -993,7 +993,7 @@ func test_evenements() -> void:
 	j.compteur = h.ticks
 	s.pas(j.horloge)
 	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loups[0].pos}), "Étincelle + Boucle")
-	verifier(coups[0] == 3 and j.mana == 1, "la boucle rejoue jusqu'à épuisement du mana (%d coups, mana %d)" % [coups[0], j.mana])
+	verifier(coups[0] >= 2 and j.mana <= 3, "la boucle rejoue jusqu'à épuisement du mana (%d coups, mana %d)" % [coups[0], j.mana])
 	# Testament : la charge part quand le porteur tombe
 	loups[0].capacites = [{"id": "t", "name_key": "capacite.etincelle.name", "modules": ["testament", "anneau", "etincelle"]}]
 	loups[0].mana = 50
@@ -2898,7 +2898,25 @@ func test_assemblage_sans_limite() -> void:
 	var v1: Dictionary = s._vecteur_arme_de(j, arme_j)
 	verifier(v1 == {"feu": 1.0} and v0 != v1, "Trempe : l'arme passe au Feu (%s → %s)" % [str(v0), str(v1)])
 	s._retirer_statut(j, "trempe")
-	# 7. il ne reste que deux erreurs structurelles
+	# 7. l'arme équipée entre dans le sort : un sceptre porte le mana, une épée l'endurance
+	var sceptre := s.generer_objet("proto_baton_magique", 1, {}, "commun", 0)
+	var epee := s.generer_objet("proto_epee", 1, {}, "commun", 0)
+	j.sac.append(sceptre.uid)
+	j.sac.append(epee.uid)
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "equiper", "objet": sceptre.uid})
+	var p_mana_sc: Dictionary = s.plan_sequence(j, ["point", "etincelle"])
+	var p_end_sc: Dictionary = s.plan_sequence(j, ["point", "frappe"])
+	s.attente[j.id] = true
+	s.intention(j.id, {"type": "equiper", "objet": epee.uid})
+	var p_mana_ep: Dictionary = s.plan_sequence(j, ["point", "etincelle"])
+	var p_end_ep: Dictionary = s.plan_sequence(j, ["point", "frappe"])
+	verifier(float(p_mana_sc.affinite_arme) > float(p_mana_ep.affinite_arme), "un sort de mana porte mieux au sceptre (×%.2f) qu'à l'épée (×%.2f)" % [p_mana_sc.affinite_arme, p_mana_ep.affinite_arme])
+	verifier(float(p_end_ep.affinite_arme) > float(p_end_sc.affinite_arme), "un sort d'endurance porte mieux à l'épée (×%.2f) qu'au sceptre (×%.2f)" % [p_end_ep.affinite_arme, p_end_sc.affinite_arme])
+	verifier(float(p_mana_sc.mult) > float(p_mana_ep.mult), "l'affinité multiplie la puissance du plan")
+	var fc: Vector2i = s.fourchette_cout(p_mana_ep)
+	verifier(fc.x < int(p_mana_ep.ressource) and fc.y > int(p_mana_ep.ressource), "le coût réel est une fourchette autour de la base (%d–%d pour %d)" % [fc.x, fc.y, int(p_mana_ep.ressource)])
+	# 8. il ne reste que deux erreurs structurelles
 	verifier(not s.capacites.assembler(["point", "carre"], 10, "1d4", {}, {}).erreurs.is_empty(), "sans noyau : toujours une erreur")
 	verifier(not s.capacites.assembler(["nexiste_pas", "etincelle"], 10, "1d4", {}, {}).erreurs.is_empty(), "module inconnu : toujours une erreur")
 

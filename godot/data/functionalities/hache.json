@@ -12,5 +12,9 @@
   "volume": 1.8,
   "poids_reference": 2.2,
   "outil": "hache",
-  "genre_grammatical": "fs"
+  "genre_grammatical": "fs",
+  "affinite_sorts": {
+    "mana": 0.8,
+    "endurance": 1.2
+  }
 }

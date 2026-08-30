@@ -12,5 +12,9 @@
   "volume": 2.0,
   "poids_reference": 2.2,
   "outil": "pelle",
-  "genre_grammatical": "fs"
+  "genre_grammatical": "fs",
+  "affinite_sorts": {
+    "mana": 0.9,
+    "endurance": 0.9
+  }
 }

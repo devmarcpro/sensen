@@ -1091,7 +1091,13 @@
     "_doc": "Charges de modules (Grimoires et manuels) : des DES, multiplies par skill_factor(Lecture) — aucun chiffre fixe.",
     "charges_des": "1d4",
     "charges_depart_des": "2d4",
-    "competence": "lecture"
+    "competence": "lecture",
+    "cout_variance_des": "2d6",
+    "cout_variance_moyenne": 7.0,
+    "affinite_mains_nues": {
+      "mana": 1.0,
+      "endurance": 1.0
+    }
   },
   "cueillette": {
     "des": "1d2",

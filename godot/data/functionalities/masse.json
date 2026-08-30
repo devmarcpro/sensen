@@ -11,5 +11,9 @@
   "type_degats": "contondant",
   "volume": 5.5,
   "poids_reference": 6.6,
-  "genre_grammatical": "fs"
+  "genre_grammatical": "fs",
+  "affinite_sorts": {
+    "mana": 0.8,
+    "endurance": 1.2
+  }
 }

@@ -12,5 +12,9 @@
   "volume": 3.0,
   "poids_reference": 1.5,
   "outil": "seau",
-  "genre_grammatical": "ms"
+  "genre_grammatical": "ms",
+  "affinite_sorts": {
+    "mana": 0.9,
+    "endurance": 0.9
+  }
 }

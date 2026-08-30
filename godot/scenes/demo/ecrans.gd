@@ -926,6 +926,60 @@ func _texte_capacite_plan(j: Dictionary, k: int) -> String:
 	return _apercu_plan(plan)
 
 
+## Ce qu'un module AJOUTE à la séquence en cours : la différence entre le plan avec lui et le plan sans lui
+## (Structure compétences-modules-slots). Calculé par l'assembleur, avec l'arme tenue — jamais écrit à la main.
+func _contribution_module(j: Dictionary, m: String, deja_dedans: bool) -> String:
+	var avec: Array = sequence_composee.duplicate()
+	var sans: Array = sequence_composee.duplicate()
+	if deja_dedans:
+		sans.erase(m)
+	else:
+		avec.append(m)
+	var pa: Dictionary = main.sim.plan_sequence(j, avec)
+	var ps: Dictionary = main.sim.plan_sequence(j, sans) if not sans.is_empty() else {}
+	var parts: Array[String] = []
+	var d_ticks := int(pa.get("ticks", 0)) - int(ps.get("ticks", 0))
+	var d_res := int(pa.get("ressource", 0)) - int(ps.get("ressource", 0))
+	var d_des := int(pa.get("des_bonus", 0)) - int(ps.get("des_bonus", 0))
+	if d_ticks != 0:
+		parts.append("%+d ticks" % d_ticks)
+	if d_res != 0 or str(pa.get("monnaie", "")) != str(ps.get("monnaie", "")):
+		parts.append("%+d %s" % [d_res, tr("monnaie." + str(pa.get("monnaie", ""))) if not str(pa.get("monnaie", "")).is_empty() else ""])
+	if d_des != 0:
+		parts.append("%+d %s" % [d_des, tr("bonus.des")])
+	if pa.get("des") != null and ps.get("des") == null:
+		parts.append(tr("bonus.des") + " " + str(pa.des))
+	if str(pa.get("geometrie", "")) != str(ps.get("geometrie", "")):
+		parts.append(tr("geometrie." + str(pa.get("geometrie", ""))) + " %d–%d" % [int(pa.portee.x), int(pa.portee.y)])
+	elif pa.has("portee") and ps.has("portee") and pa.portee != ps.portee:
+		parts.append(tr("bonus.portee") + " %d–%d" % [int(pa.portee.x), int(pa.portee.y)])
+	if int(pa.get("taille", 1)) != int(ps.get("taille", 1)):
+		parts.append("%s %+d" % [tr("bonus.taille"), int(pa.get("taille", 1)) - int(ps.get("taille", 1))])
+	if float(pa.get("mult", 1.0)) != float(ps.get("mult", 1.0)):
+		parts.append("×%.2f" % (float(pa.get("mult", 1.0)) / maxf(0.01, float(ps.get("mult", 1.0)))))
+	var els_a: Dictionary = pa.get("elements", {})
+	if els_a != ps.get("elements", {}) and not els_a.is_empty():
+		var noms_el: Array[String] = []
+		for el in els_a.keys():
+			noms_el.append(tr("element." + str(el)))
+		parts.append(", ".join(noms_el))
+	for ef in pa.get("effets", []):
+		if not (ef in ps.get("effets", [])):
+			parts.append(tr("effet." + str(ef)))
+	for cle in pa.get("drapeaux", {}).keys():
+		if not ps.get("drapeaux", {}).has(cle):
+			parts.append(tr("drapeau." + str(cle)))
+	for c: Dictionary in pa.get("conditions", []):
+		var deja := false
+		for c2: Dictionary in ps.get("conditions", []):
+			deja = deja or str(c2.id) == str(c.id)
+		if not deja:
+			parts.append(tr("predicat." + str(c.get("predicat", {}).get("type", ""))))
+	if parts.is_empty():
+		return tr("ui.composer.contribution_nulle")
+	return tr("ui.composer.contribution").format({"liste": " · ".join(parts)})
+
+
 ## L'aperçu exhaustif d'un plan (Vocabulaire des modules — six axes : « chaque module affiche ses valeurs
 ## calculées pour le personnage courant »). Une ligne par axe, et rien d'implicite.
 func _apercu_plan(plan: Dictionary) -> String:
@@ -940,6 +994,9 @@ func _apercu_plan(plan: Dictionary) -> String:
 		"monnaie": tr("monnaie." + str(plan.monnaie)) if not str(plan.get("monnaie", "")).is_empty() else "—",
 		"des": str(plan.get("des", "—")), "effets": ", ".join(effets) if not effets.is_empty() else "—",
 		"erreurs": tr("ui.composer.erreurs").format({"liste": " ; ".join(err)}) if not err.is_empty() else ""})
+	var fc: Vector2i = main.sim.fourchette_cout(plan)   # « aucun chiffre fixe » : le coût est une fourchette
+	txt += "\n" + tr("ui.composer.cout").format({"min": fc.x, "max": fc.y, "monnaie": tr("monnaie." + str(plan.get("monnaie", ""))) if not str(plan.get("monnaie", "")).is_empty() else "—",
+		"affinite": "%.2f" % float(plan.get("affinite_arme", 1.0)), "arme": tr(str(plan.get("fonct", {}).get("name_key", "functionality.mains_nues.name")))})
 	# Les dégâts attendus, avec le détail : fourchette du dé, dés de bonus, multiplicateur.
 	if plan.get("des") != null and not str(plan.get("des", "")).is_empty():
 		var f := Des.fourchette(plan.des, int(plan.get("des_bonus", 0)))
@@ -989,8 +1046,8 @@ func _construire_composer(j: Dictionary) -> void:
 		entrees.append({"kind": "texte", "texte": ""})
 		return
 	var apercu := ""
-	if not sequence_composee.is_empty():
-		apercu = _apercu_plan(main.sim.capacites.assembler(sequence_composee.duplicate(), 10, "1d4", {}, j.competences_eff))
+	if not sequence_composee.is_empty():   # le plan réel : avec l'arme tenue et les niveaux du personnage
+		apercu = _apercu_plan(main.sim.plan_sequence(j, sequence_composee.duplicate()))
 	for type in ["forme:cible", "forme:lanceur", "noyau", "modificateur", "condition", "declencheur", "liaison"]:
 		var du_type: Array = []
 		for m in connus:
@@ -1003,14 +1060,21 @@ func _construire_composer(j: Dictionary) -> void:
 		if du_type.is_empty():
 			continue
 		du_type.sort()
+		du_type.sort_custom(func(a: String, b: String) -> bool:   # le stock en tête, les modules vides à la fin
+			var ca: int = int(j.get("modules_charges", {}).get(a, 0))
+			var cb: int = int(j.get("modules_charges", {}).get(b, 0))
+			return ca > cb if ca != cb else a < b)
 		liste.add_item(tr("ui.composer.type").format({"type": tr("type_module." + type)}), null, false)
 		entrees.append({"kind": "texte", "texte": apercu})
 		for m in du_type:
 			var md: Dictionary = GameData.catalogues.modules[m]
 			var dans: bool = m in sequence_composee
 			var fam := str(md.get("famille", ""))   # « quoi fait quoi » : la famille se lit dans la liste
-			liste.add_item(("☑ " if dans else "☐ ") + tr(md.name_key) + ("  · " + fam if not fam.is_empty() else ""))
-			entrees.append({"kind": "module_composer", "module": m, "texte": tr("ui.composer.module").format({"nom": tr(md.name_key), "desc": str(md.get("description", ""))}) + "\n\n" + apercu})
+			var ch: int = int(j.get("modules_charges", {}).get(str(m), 0))   # Grimoires : les charges restantes
+			liste.add_item(("☑ " if dans else "☐ ") + tr(md.name_key) + (" ×%d" % ch) + ("  · " + fam if not fam.is_empty() else ""))
+			var contrib := _contribution_module(j, m, dans)   # ce que CE module ajoute au sort (plan avec / sans)
+			entrees.append({"kind": "module_composer", "module": m, "texte": tr("ui.composer.module").format({"nom": tr(md.name_key), "desc": str(md.get("description", ""))})
+				+ "\n" + tr("ui.composer.charges").format({"n": ch}) + "\n" + contrib + "\n\n" + apercu})
 	_bouton(tr("ui.composer.valider"), _valider_composition)
 
 

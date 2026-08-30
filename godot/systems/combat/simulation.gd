@@ -8231,21 +8231,52 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 
 # ---------------------------------------------------------------- capacités (modules assemblés)
 
+## Le plan d'une SÉQUENCE pour `e`, avec l'arme tenue : ticks, dés et élément de l'arme pour les noyaux
+## « arme », et l'**affinité** de la fonctionnalité pour tous les sorts (Structure compétences-modules-slots :
+## un sceptre porte les sorts de mana, une épée ceux d'endurance). C'est aussi ce que l'écran Composer lit.
+func plan_sequence(e: Dictionary, sequence: Array) -> Dictionary:
+	var arme := Etres.arme(e, items)
+	var fonct: Dictionary = fonctionnalites.get(arme.get("functionality", ""), {})
+	var ticks_arme := regles.ticks_attaque(fonct, false, arme) if not fonct.is_empty() else int(regles.r.actions.attaque_base)
+	var plan := capacites.assembler(sequence, ticks_arme, fonct.get("degats_des", "1d4"), _vecteur_arme_de(e, arme), e.competences_eff)
+	plan["arme"] = arme
+	plan["fonct"] = fonct
+	_appliquer_affinite_arme(plan, fonct)
+	if plan.has("alt"):
+		plan.alt["arme"] = arme
+		plan.alt["fonct"] = fonct
+		_appliquer_affinite_arme(plan.alt, fonct)
+	return plan
+
+
+## L'affinité d'arme d'un plan : ×mana ou ×endurance selon la monnaie, sur la puissance (dés et soins).
+func _appliquer_affinite_arme(plan: Dictionary, fonct: Dictionary) -> void:
+	var aff: Dictionary = fonct.get("affinite_sorts", regles.r.get("modules", {}).get("affinite_mains_nues", {"mana": 1.0, "endurance": 1.0}))
+	var monnaie := str(plan.get("monnaie", ""))
+	var f := float(aff.get(monnaie, 1.0)) if not monnaie.is_empty() else 1.0
+	plan["affinite_arme"] = f
+	plan.mult = float(plan.mult) * f
+
+
+## La fourchette du coût réel d'un plan (« aucun chiffre fixe » : la ressource payée est un jet autour de sa base).
+func fourchette_cout(plan: Dictionary) -> Vector2i:
+	var rm: Dictionary = regles.r.get("modules", {})
+	var f := Des.fourchette(str(rm.get("cout_variance_des", "2d6")))
+	var moy := float(rm.get("cout_variance_moyenne", 7.0))
+	var base := float(plan.get("ressource", 0))
+	return Vector2i(roundi(base * float(f.x) / moy), roundi(base * float(f.y) / moy))
+
+
 ## Le plan d'une capacité de `e` : assemblage avec l'arme tenue (pour les noyaux « arme »).
 func plan_capacite(e: Dictionary, index: int) -> Dictionary:
 	var caps: Array = e.get("capacites", [])
 	if index < 0 or index >= caps.size():
 		return {}
-	var arme := Etres.arme(e, items)
-	var fonct: Dictionary = fonctionnalites.get(arme.get("functionality", ""), {})
-	var ticks_arme := regles.ticks_attaque(fonct, false, arme) if not fonct.is_empty() else int(regles.r.actions.attaque_base)
-	var plan := capacites.assembler(caps[index].modules, ticks_arme, fonct.get("degats_des", "1d4"), _vecteur_arme_de(e, arme), e.competences_eff)
+	var plan := plan_sequence(e, caps[index].modules)
 	plan["id"] = caps[index].id
 	plan["name_key"] = caps[index].get("name_key", "")
-	plan["arme"] = arme
-	plan["fonct"] = fonct
 	if plan.has("alt"):   # Alternance : le plan du second noyau est lancé tel quel — il lui faut les mêmes attaches
-		for cle in ["id", "name_key", "arme", "fonct"]:
+		for cle in ["id", "name_key"]:
 			plan.alt[cle] = plan[cle]
 	return plan
 
@@ -8412,6 +8443,8 @@ func _lancer_capacite(e: Dictionary, index: int, cible: Variant, tick: int) -> b
 		EventBus.emettre(&"journal", [&"journal.condition_fausse", {"nom": e.name_key, "capacite": plan.name_key, "condition": fausse.name_key}])
 		return true
 	plan.ressource = int(plan.ressource) * _facteur_surface(e, plan, cible_pos)   # le prix suit la surface
+	var rm_c: Dictionary = regles.r.get("modules", {})   # « aucun chiffre fixe » : le coût réel est un jet autour de sa base
+	plan.ressource = maxi(0, roundi(float(plan.ressource) * float(des.jet(str(rm_c.get("cout_variance_des", "2d6")))) / float(rm_c.get("cout_variance_moyenne", 7.0))))
 	_payer(e, plan)
 	_consommer_charges(e, plan)   # Grimoires et manuels : une charge par module de la séquence
 	e.compteur = tick + int(plan.ticks)

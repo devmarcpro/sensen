@@ -12,5 +12,9 @@
   "volume": 1.6,
   "poids_reference": 1.92,
   "genre_grammatical": "fs",
-  "outil": "dague"
+  "outil": "dague",
+  "affinite_sorts": {
+    "mana": 0.9,
+    "endurance": 1.1
+  }
 }

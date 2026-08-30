@@ -12,5 +12,9 @@
   "volume": 1.2,
   "poids_reference": 1.2,
   "outil": "faucille",
-  "genre_grammatical": "fs"
+  "genre_grammatical": "fs",
+  "affinite_sorts": {
+    "mana": 0.9,
+    "endurance": 0.9
+  }
 }

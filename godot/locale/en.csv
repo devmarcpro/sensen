@@ -2155,3 +2155,7 @@ journal.fauche,"{nom} is knocked down"
 journal.fauchage_rate,"{def} resists {nom}'s sweep"
 journal.se_releve,"{nom} gets back up"
 journal.ecaille_revers,"{nom}'s scale gives way to {element}"
+ui.composer.contribution,"This module adds: {liste}"
+ui.composer.contribution_nulle,"This module adds nothing to this sequence"
+ui.composer.cout,"Actual cost: {min}–{max} {monnaie} · weapon affinity ({arme}) x{affinite}"
+functionality.mains_nues.name,Bare hands

@@ -27,6 +27,10 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] File d'attente du designer (2026-08-30) — à prendre dans l'ordre, après le chantier des modules
+> 1. **HUD** : un **compas** avec l'**horloge** dedans, la **température**, un **pentagramme Wu Xing** (la jauge de chaîne), les barres **vie / endurance / mana / faim**, et la **hotbar**. 2. **Molette** = changer de slot de hotbar ; **Ctrl + molette** = zoom / dézoom. 3. Retour à des cellules de **64 × 64**. 4. Un **temps de chargement** entre les cellules en mode exploration (au lieu du recentrage à la volée). 5. « Peut-être réécrire des systèmes en C++ pour optimiser » — **à discuter** : les contraintes permanentes interdisent GDExtension ; si le designer le veut, c'est une décision fondatrice à écrire avant une ligne de code.
+> [!important] L'arme entre dans les sorts, chaque module montre sa contribution (2026-08-30)
+> Sceptre ×1,3 sur les sorts de mana, épée ×1,2 sur ceux d'endurance ; l'écran Composer affiche ce que chaque module ajoute (plan avec / sans lui) ; le coût est une fourchette (2d6/7). **À juger** : l'affinité fait-elle choisir son arme pour son sort, ou l'écart 0,7–1,3 est-il trop timide pour se sentir ?
 > [!important] « Aucun chiffre fixe », partout où le joueur gagne (2026-08-30)
 > Récolte, cueillette, parcelles, or et XP de quête : des dés × la compétence. **À juger** : la variance rend-elle les récoltes vivantes, ou frustrantes quand il manque une unité pour une recette ?
 > [!important] Aucun chiffre fixe : livres en kit, charges au dé (2026-08-30)
