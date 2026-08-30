@@ -881,9 +881,7 @@ func _options_tuile(t: Vector2i) -> Array:
 	var res: Array = []
 	var j := joueur()
 	if j.is_empty() or t.x < 0 or not sim.grille.dans(t):
-		if "porte" in sim.grille.contenu_de(t).get("tags", []) and Grille.distance(j.pos, t) == 1:   # ouvrir / fermer une porte adjacente
-		res.append({"id": "porte", "vers": t})
-	return res
+		return res
 	var g := sim.grille
 	var d := Grille.distance(j.pos, t)
 	var occ := g.occupant(t)
@@ -987,6 +985,8 @@ func _options_tuile(t: Vector2i) -> Array:
 		res.append({"id": "elever", "vers": t})
 	if g.bloque_passage(t) and not ("meuble" in tags) and not ("plante" in tags) and not ("arbre" in tags) and not ("eau" in tags):
 		res.append({"id": "creuser", "vers": t})
+	if "porte" in sim.grille.contenu_de(t).get("tags", []) and Grille.distance(j.pos, t) == 1:   # ouvrir / fermer une porte adjacente
+		res.append({"id": "porte", "vers": t})
 	return res
 
 
