@@ -394,7 +394,9 @@ func terre_a(c: Vector2i) -> bool:
 	var seuil := float(planete.get("mer", {}).get("altitude", 0.30))
 	var q := taille / 4   # cinq sondes DANS la cellule (centre + quatre quarts) — des offsets figés sur 128 tombaient dans la cellule voisine depuis les cellules de 64 (2026-08-30)
 	for off in [Vector2i(2 * q, 2 * q), Vector2i(q, q), Vector2i(3 * q, q), Vector2i(q, 3 * q), Vector2i(3 * q, 3 * q)]:
-		if float(tectonique_a(c.x * taille + off.x, c.y * taille + off.y).altitude) < seuil:
+		# Le MÊME critère que la pose des tuiles de mer (generer_cellule : couches_a().altitude < mer.altitude) — l'altitude
+		# tectonique seule disait « terre » sur des cellules dont chaque tuile devenait mer (départ dans l'eau, 2026-08-30).
+		if float(couches_a(c.x * taille + off.x, c.y * taille + off.y).get("altitude", 1.0)) < seuil:
 			return false
 	return true
 

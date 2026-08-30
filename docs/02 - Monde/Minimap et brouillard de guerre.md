@@ -47,6 +47,9 @@ RENDU — échantillonnage des chunks explorés dans un rayon autour du
 > [!success] Corrigé le 2026-08-30 — les murs mémorisés sont des blocs pleins
 > **Retour du designer** : « les blocs du donjon sont transparents et incomplets ». Le brouillard peignait un hexagone **translucide** sur chaque mur mémorisé (on voyait le bloc au travers), et effaçait un mur **jamais vu** en couleur de fond alors que son voisin visible avait sauté la face qu'il « cachait » : des blocs creux. Désormais la passe du terrain ne dessine que les tuiles **découvertes** et se redessine à chaque découverte (coût mesuré : 4,3 ms par image en donjon, 6 ms au camp) ; un mur mémorisé hors de vue est **redessiné en bloc sombre et opaque** ; une face n'est sautée que si le mur devant est découvert. Le sol mémorisé garde son voile translucide.
 
+> [!success] Décidé et codé le 2026-08-30 — la minimap est la cellule
+> **Instruction du designer** : « la minimap représente uniquement la cellule dans laquelle le joueur est ; deux fois plus petite ; en haut à droite ; compas et Wu Xing en dessous ». Plus de chunks ni de zooms : `Minimap` dessine la **cellule courante** (64 × 64 tuiles) en 128 × 128 px, 2 px par tuile — tuiles **découvertes** seulement (eau, mur/roche, végétation, porte, sol du matériau éclairci par la hauteur), le reste noir ; le joueur et les êtres en vue en points. Elle marche aussi **en donjon** (un étage = une cellule) et en arène. Le bit d'exploration par chunk (`Monde.explores`) reste pour la carte du monde. Le HUD descend : compas puis pentagramme sous la minimap.
+
 ## Liens
 - **Dépend de** : [[Grille continue]], [[IA des créatures]], [[Sauvegarde]]
 - **Alimente** : [[Écrans d'interface]], [[Donjons — structure et intégration]]

@@ -32,8 +32,10 @@ func _draw() -> void:
 		return
 	var sim = main.sim
 	var taille := get_viewport_rect().size
-	_dessiner_compas(sim, j, Vector2(taille.x - MARGE - RAYON_COMPAS, MARGE + RAYON_COMPAS + 40.0))
-	_dessiner_pentagramme(sim, j, Vector2(taille.x - MARGE - RAYON_COMPAS, MARGE + RAYON_COMPAS * 2 + RAYON_PENTA + 70.0))
+	# Sous la minimap (128 px en haut à droite — designer, 2026-08-30) : le compas, puis le pentagramme.
+	var sous_minimap := MARGE + float(Minimap.TAILLE) + 12.0
+	_dessiner_compas(sim, j, Vector2(taille.x - MARGE - float(Minimap.TAILLE) * 0.5, sous_minimap + RAYON_COMPAS))
+	_dessiner_pentagramme(sim, j, Vector2(taille.x - MARGE - float(Minimap.TAILLE) * 0.5, sous_minimap + RAYON_COMPAS * 2 + 30.0 + RAYON_PENTA))
 	_dessiner_barres(j, Vector2(MARGE, taille.y - MARGE - CASE - 4.0 * (BARRE_H + 6.0) - 12.0))
 
 	_dessiner_hotbar(sim, j, Vector2(MARGE, taille.y - MARGE - CASE))

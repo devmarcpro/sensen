@@ -1657,16 +1657,7 @@ func _dessine_hud_entite(ci: CanvasItem, e: Dictionary) -> void:
 		ci.draw_arc(c + Vector2(0, -10), 16.0, o.angle() - 0.9, o.angle() + 0.9, 8, Color(0.6, 0.85, 1.0), 2.0)
 	if telegraphes.has(e.id):   # intention visible : le télégraphe est une information d'interface
 		ci.draw_string(ThemeDB.fallback_font, c + Vector2(-4, -40), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(1, 0.3, 0.2))
-	var w := 22.0   # plus de barres de vie ni d'endurance au-dessus des personnages (designer, 2026-08-30) : la bulle au survol les dit
-	if e.has("chaine"):   # la jauge de chaîne, toujours visible (pastilles colorées)
-		var segs := _segments(e)
-		var cap: int = e.chaine.capacite
-		for k in cap:
-			var p := c + Vector2(-w * 0.5 + 2 + k * (w - 2) / cap, 5)
-			if k < segs.size():
-				ci.draw_circle(p, 2.6, sim.wuxing.teinte(segs[k].element))
-			else:
-				ci.draw_circle(p, 2.2, Color(0, 0, 0, 0.5))
+	# Plus de barres ni de jauge de chaîne sous les personnages (designer, 2026-08-30) : la bulle au survol et le pentagramme du HUD les disent.
 
 
 ## Les segments effectifs d'une jauge à l'instant présent (décroissance calculée, sans la modifier).

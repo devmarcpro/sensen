@@ -146,7 +146,7 @@ func charger_camp(joueur: Dictionary = {}, cellule_choisie: Vector2i = Vector2i(
 		essais += 1
 		var r := 1
 		var trouve := false
-		while r < 20 and not trouve:
+		while r < 96 and not trouve:   # une graine peut poser (512, 512) en plein océan : on cherche loin (2026-08-30 : 4 graines sur 16 démarraient en mer)
 			for dy in range(-r, r + 1):
 				for dx in range(-r, r + 1):
 					if absi(dx) != r and absi(dy) != r:
@@ -165,11 +165,19 @@ func charger_camp(joueur: Dictionary = {}, cellule_choisie: Vector2i = Vector2i(
 	var e := monde.cellule(depart)
 	var entree := monde.point_marchable(depart)   # le point marchable le plus proche du centre (Début de partie)
 	_reinitialiser()
+	# Une partie commence à heure_depart (Cycle jour-nuit, designer 2026-08-30 : 8 h) ; une sauvegarde garde son heure.
+	var cy: Dictionary = planete.get("cycle", {})
+	horloge_monde.ticks = int(float(cy.get("heure_depart", 0)) / 24.0 * float(cy.get("ticks_par_jour", 24000)))
 	if joueur.is_empty():
 		var j := ajouter("aventurier", entree, "joueur")
 		j.spawn = entree
 	else:
 		_reprendre(joueur, entree)
+	for x in entites.values():   # les compteurs des premiers êtres partent de l'heure de départ, pas de minuit
+		x.compteur = horloge_monde.ticks
+		x.tick_endurance = horloge_monde.ticks
+		if x.has("faim_tick"):
+			x.faim_tick = horloge_monde.ticks
 		joueur.spawn = entree
 	var uids: Array = []
 	for base in cfg.coffre_depart:

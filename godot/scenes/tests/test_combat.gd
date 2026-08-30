@@ -1289,7 +1289,7 @@ func test_desequiper_jeter() -> void:
 
 func test_surface() -> void:
 	# Début de partie (2026-08-30) : le camp n'est jamais dans la mer — terre_a sonde DANS la cellule (bug des offsets 128)
-	for g in [763439, 31, 92]:
+	for g in [763439, 31, 92, 4, 555, 8080, 1234, 99]:
 		var sd := Simulation.new(g)
 		sd.charger_camp()
 		var jd: Dictionary = sd.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]

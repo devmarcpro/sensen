@@ -61,6 +61,9 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > [!success] Corrigé le 2026-08-30 — le journal en donjon, les flottants d'XP
 > Deux défauts relevés par le parcours robot ([[Vers la production]] 13) : le journal était noyé par les « X attend (5 ticks) » de tous les êtres de l'étage — il ne garde plus que les attentes du joueur et des êtres **en vue** ; les flottants d'XP d'une suite de pas s'empilaient au même point — chaque nouveau flottant part au-dessus de ceux qui montent encore.
 
+> [!success] Décidé et codé le 2026-08-30 — plus de jauge Wu Xing sous le personnage ; le HUD droit sous la minimap
+> **Instruction du designer** : « retirer la jauge de Wu Xing en dessous du personnage » — le pentagramme du HUD la porte déjà. Sous les êtres il ne reste que l'arc de garde et le « ! » du télégraphe. La minimap (128 px) prend le coin haut-droit, le compas et le pentagramme viennent dessous ([[Minimap et brouillard de guerre]]).
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

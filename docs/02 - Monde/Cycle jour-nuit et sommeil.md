@@ -59,6 +59,9 @@ ou hors combat ; le temps saute pour tout le monde.
 > [!success] Complété le 2026-08-28
 > Les spawns nocturnes ×2 sont codés depuis la faune de surface (`planete.faune.nuit_mult`) ; la **Discrétion +4 la nuit** s'applique désormais au jet opposé des infractions (`planete.cycle.discretion_nuit`, défaut 4) — la vision réduite des IA la nuit couvrait déjà la détection. **Complété le 2026-08-29** : la Discrétion entre aussi dans `voit_ia` (elle raccourcit le cône de détection, +4 niveaux équivalents la nuit — voir *IA des créatures*), donc le bonus nocturne joue partout, plus seulement sur les infractions.
 
+> [!success] Décidé et codé le 2026-08-30 — une partie commence à 8 h
+> **Instruction du designer** : « commencer chaque nouvelle partie à 8 h du matin ». `planete.cycle.heure_depart` (8) : à la création du monde, l'horloge est posée à `heure_depart / 24 × ticks_par_jour` — la première matinée est un jour plein, la première nuit vient après. Une sauvegarde chargée garde son heure.
+
 ## Liens
 - **Dépend de** : [[Boucle de tick]], [[Simulation à ticks]], [[Application des stats de matériau]]
 - **Alimente** : [[IA des créatures]], [[Potentiel]], [[Abstraction hors-site]], [[Créatures]]

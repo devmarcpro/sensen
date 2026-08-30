@@ -145,8 +145,9 @@
     "profondeur_par_corruption": 25
   },
   "cycle": {
-    "_doc": "Cycle jour-nuit (E.21) : 1 jour = ticks_par_jour ; phases en heures ; nuit : corruption +10 %, vision × vision_nuit ; saut de nuit jusqu'à heure_reveil.",
+    "_doc": "Cycle jour-nuit (E.21) : 1 jour = ticks_par_jour ; phases en heures ; nuit : corruption +10 %, vision × vision_nuit ; saut de nuit jusqu'à heure_reveil ; heure_depart = l'heure du monde à la nouvelle partie (designer, 2026-08-30 : 8 h).",
     "ticks_par_jour": 24000,
+    "heure_depart": 8,
     "aube": [
       5,
       7
