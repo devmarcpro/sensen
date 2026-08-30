@@ -81,6 +81,12 @@ func _ready() -> void:
 		jt["vue_sale"] = true
 		sim.maj_vision()
 		scene._apres_changement_de_grille()
+	for i6 in args.size():   # --creature id[,id…] : des créatures posées autour du joueur (triche) — timeline, états, bulles
+		if args[i6] == "--creature" and i6 + 1 < args.size():
+			var jc2: Dictionary = scene.joueur()
+			for cid in args[i6 + 1].split(","):
+				scene.sim.triche(jc2, "creature", str(cid))
+			scene.sim.maj_vision()
 	for i4 in args.size():   # --sequence a,b,c : une séquence pré-remplie dans le composeur (et ses charges)
 		if args[i4] == "--sequence" and i4 + 1 < args.size():
 			var seq: Array = Array(args[i4 + 1].split(","))
