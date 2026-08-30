@@ -120,6 +120,8 @@ func _process(delta: float) -> void:
 	minuterie -= delta
 	if minuterie <= 0.0:
 		minuterie = 0.25
+		if courant == "composer":   # rien n'y change sans une touche, et 178 modules × 2 plans coûtent 40 ms
+			return
 		rafraichir()
 
 
