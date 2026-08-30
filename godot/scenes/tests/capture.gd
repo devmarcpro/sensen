@@ -72,6 +72,13 @@ func _ready() -> void:
 		var jd: Dictionary = scene.joueur()
 		scene.sim.charger_donjon("ruine", 7, 7, 1, jd)
 		scene._apres_changement_de_grille()
+	for i10 in args.size():   # --objet a,b,c : des objets générés (profondeur 3, donc assemblés et composés) dans le sac du joueur
+		if args[i10] == "--objet" and i10 + 1 < args.size() and scene.sim != null:
+			var jo: Dictionary = scene.joueur()
+			for id_o in str(args[i10 + 1]).split(","):
+				var o: Dictionary = scene.sim.generer_objet(id_o.strip_edges(), 3)
+				if not o.is_empty():
+					jo.sac.append(o.uid)
 	for i9 in args.size():   # --explorer N : le joueur marche N pas vers l'escalier avant la capture (un étage exploré, designer 2026-08-30)
 		if args[i9] == "--explorer" and i9 + 1 < args.size() and scene.sim != null:
 			var se = scene.sim
