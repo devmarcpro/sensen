@@ -4,8 +4,8 @@ extends CanvasLayer
 ## personnage — des Control Godot construits par code, sans asset. Un écran à la fois ; Échap ferme.
 ## L'écran ne décide rien : il lit la simulation et lui envoie des intentions.
 
-const LARGEUR := 900.0
-const HAUTEUR := 560.0
+const LARGEUR := 1000.0
+const HAUTEUR := 660.0
 
 var main: Node                          # la scène principale (sim, joueur(), nom_objet())
 var courant := ""                       # "inventaire" | "atelier" | "feuille" | ""

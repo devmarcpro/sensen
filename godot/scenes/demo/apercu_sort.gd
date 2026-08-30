@@ -5,14 +5,15 @@ extends Control
 ## du plan. Dessiné par code, sans asset ; la grille est virtuelle — l'aperçu montre la forme, pas le terrain.
 
 const COTE := 17            # tuiles par côté de la grille virtuelle (impair : le lanceur au centre)
-const CASE := 9.0           # pixels par tuile (assez petit pour laisser le détail lisible au composeur)
+const TAILLE := 204.0       # le panneau carré, même taille que le Wu Xing du sort (uniformité, 2026-08-30)
+const CASE := (TAILLE - 8.0) / float(COTE)   # pixels par tuile
 
 var plan: Dictionary = {}   # le plan assemblé (Capacites.assembler / Simulation.plan_sequence)
 var grille_virtuelle: Grille
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(COTE * CASE + 8.0, COTE * CASE + 24.0)
+	custom_minimum_size = Vector2(TAILLE, TAILLE + 18.0)
 	grille_virtuelle = Grille.new(COTE, COTE)
 
 
@@ -41,13 +42,13 @@ func couverture() -> Dictionary:
 
 func _draw() -> void:
 	var o := Vector2(4.0, 4.0)
-	var fond := Color(0.06, 0.06, 0.08, 1.0)
-	draw_rect(Rect2(o, Vector2(COTE * CASE, COTE * CASE)), fond)
+	draw_rect(Rect2(Vector2.ZERO, Vector2(TAILLE, TAILLE)), Color(0.06, 0.06, 0.08, 1.0))
+	draw_rect(Rect2(Vector2.ZERO, Vector2(TAILLE, TAILLE)), Color(0.6, 0.55, 0.4, 0.6), false, 1.0)
 	for k in COTE + 1:   # le quadrillage
 		draw_line(o + Vector2(k * CASE, 0.0), o + Vector2(k * CASE, COTE * CASE), Color(1, 1, 1, 0.06))
 		draw_line(o + Vector2(0.0, k * CASE), o + Vector2(COTE * CASE, k * CASE), Color(1, 1, 1, 0.06))
 	if plan.is_empty() or str(plan.get("geometrie", "")).is_empty():
-		draw_string(ThemeDB.fallback_font, o + Vector2(4.0, COTE * CASE + 14.0), tr("ui.apercu.vide"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.7, 0.7, 0.7))
+		draw_string(ThemeDB.fallback_font, Vector2(2.0, TAILLE + 13.0), tr("ui.apercu.vide"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.7, 0.7, 0.7))
 		return
 	var lanceur := Vector2i(COTE / 2, COTE / 2)
 	var portee: Vector2i = plan.get("portee", Vector2i(0, 1))
@@ -76,7 +77,7 @@ func _draw() -> void:
 		legende = tr("ui.apercu.horizon")
 	else:
 		legende = tr("ui.apercu.tuiles").format({"n": compte.size(), "origine": tr("origine." + str(plan.get("origine", "cible"))), "portee": "%d–%d" % [portee.x, portee.y]})
-	draw_string(ThemeDB.fallback_font, o + Vector2(4.0, COTE * CASE + 14.0), legende, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.85, 0.85, 0.8))
+	draw_string(ThemeDB.fallback_font, Vector2(2.0, TAILLE + 13.0), legende, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.85, 0.85, 0.8))
 
 
 ## La couleur de l'élément dominant du plan (wuxing.teintes), ou un ocre neutre.

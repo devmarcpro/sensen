@@ -7,8 +7,8 @@ extends VBoxContainer
 ## reste possible : ← → ↑ ↓ parcourent le catalogue, Entrée ajoute, Suppr retire, V valide. Sous la rangée : le
 ## catalogue à gauche, section par type ; à droite le détail, le Wu Xing du sort et l'aperçu visuel.
 
-const CARTE := Vector2(60, 66)
-const SLOT := Vector2(52, 54)
+const CARTE := Vector2(64, 64)   # cartes et slots : des carrés, de la même taille (uniformité, 2026-08-30)
+const SLOT := Vector2(64, 64)
 const COLONNES := 6
 const GLYPHES := {"forme:cible": "◇", "forme:lanceur": "◈", "noyau": "●", "modificateur": "▲", "condition": "?", "declencheur": "⚡", "liaison": "∞"}
 const ORDRE_TYPES: Array[String] = ["forme:cible", "forme:lanceur", "noyau", "modificateur", "condition", "declencheur", "liaison"]
@@ -52,7 +52,7 @@ func _ready() -> void:
 	aide.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h1.add_child(aide)
 	var defil_slots := ScrollContainer.new()   # rangée 2 : les groupes de slots, défilables si la composition s'allonge
-	defil_slots.custom_minimum_size = Vector2(0, SLOT.y + 40)
+	defil_slots.custom_minimum_size = Vector2(0, SLOT.y + 34)
 	defil_slots.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	add_child(defil_slots)
 	rangee_slots = HBoxContainer.new()
@@ -158,7 +158,7 @@ func _reconstruire_catalogue(j: Dictionary) -> void:
 			return ca > cb if ca != cb else a < b)
 		var entete := Label.new()   # une section par type, bien séparée (demande du designer)
 		entete.text = "%s %s (%d)" % [GLYPHES.get(type, ""), tr("type_module." + type), du_type.size()]
-		entete.add_theme_font_size_override("font_size", 12)
+		entete.add_theme_font_size_override("font_size", 11)
 		entete.modulate = Color(0.85, 0.8, 0.6)
 		catalogue.add_child(entete)
 		var grille := GridContainer.new()
@@ -190,7 +190,7 @@ func _reconstruire_slots() -> void:
 		bloc.add_child(entete)
 		var l := Label.new()
 		l.text = tr("ui.composeur.groupe." + g)
-		l.add_theme_font_size_override("font_size", 10)
+		l.add_theme_font_size_override("font_size", 11)
 		l.modulate = Color(0.85, 0.8, 0.6)
 		entete.add_child(l)
 		var moins := Button.new()
@@ -399,6 +399,23 @@ static func couleur_de(m: String) -> Color:
 	return Color(0.7, 0.7, 0.8)      # arcane / neutre : gris bleuté
 
 
+## Une carte carrée complète : le cadre teinté, le glyphe, le nom en bas, les charges en coin, « ×n » si déjà posé.
+static func dessiner_carte(ci: CanvasItem, taille: Vector2, m: String, charges: int, fois: int, alpha: float = 1.0) -> void:
+	var c := couleur_de(m)
+	var t := type_de(m)
+	var r := Rect2(Vector2(2, 2), taille - Vector2(4, 4))
+	ci.draw_rect(r, Color(c.r * 0.22, c.g * 0.22, c.b * 0.22, alpha))
+	ci.draw_rect(r, Color(c.r, c.g, c.b, alpha), false, 2.0)
+	var glyphe: String = GLYPHES.get(t, "·")
+	ci.draw_string(ThemeDB.fallback_font, Vector2(taille.x * 0.5 - 9.0, taille.y * 0.5 + 2.0), glyphe, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(c.r, c.g, c.b, alpha))
+	if fois > 0:
+		ci.draw_string(ThemeDB.fallback_font, Vector2(5, 14), "×%d" % fois, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1, 1, 1, alpha))
+	if charges >= 0:
+		ci.draw_string(ThemeDB.fallback_font, Vector2(taille.x - 24, 14), str(charges), HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.9, 0.9, 0.8, 0.8 * alpha))
+	var nom_c := TranslationServer.translate(GameData.catalogues.modules.get(m, {}).get("name_key", m)).left(9)
+	ci.draw_string(ThemeDB.fallback_font, Vector2(5, taille.y - 7), nom_c, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.95, 0.95, 0.9, alpha))
+
+
 ## L'icône d'un module, dessinée par code : un cadre teinté, le glyphe de son type.
 static func dessiner_icone(ci: CanvasItem, r: Rect2, m: String, alpha: float = 1.0) -> void:
 	var c := couleur_de(m)
@@ -426,15 +443,9 @@ class CarteModule extends Control:
 		tooltip_text = tr(GameData.catalogues.modules.get(module, {}).get("name_key", module))
 
 	func _draw() -> void:
-		var r := Rect2(Vector2(4, 2), Vector2(Composeur.CARTE.x - 8, 40))
-		Composeur.dessiner_icone(self, r, module, 1.0 if charges > 0 else 0.45)
+		Composeur.dessiner_carte(self, Composeur.CARTE, module, charges, fois, 1.0 if charges > 0 else 0.45)
 		if selectionnee:
-			draw_rect(Rect2(Vector2.ZERO, Composeur.CARTE), Color(1, 1, 1, 0.9), false, 1.5)
-		if fois > 0:
-			draw_string(ThemeDB.fallback_font, Vector2(6, 14), "×%d" % fois, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1, 1, 1))
-		draw_string(ThemeDB.fallback_font, Vector2(Composeur.CARTE.x - 26, 14), str(charges), HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.9, 0.9, 0.8, 0.8))
-		var nom_c := tr(GameData.catalogues.modules.get(module, {}).get("name_key", module)).left(9)
-		draw_string(ThemeDB.fallback_font, Vector2(4, Composeur.CARTE.y - 6), nom_c, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.95, 0.95, 0.9))
+			draw_rect(Rect2(Vector2(1, 1), Composeur.CARTE - Vector2(2, 2)), Color(1, 1, 1, 0.95), false, 2.0)
 
 	func _gui_input(ev: InputEvent) -> void:
 		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
@@ -465,16 +476,15 @@ class SlotModule extends Control:
 		mouse_filter = Control.MOUSE_FILTER_STOP
 
 	func _draw() -> void:
-		var r := Rect2(Vector2(2, 2), Composeur.SLOT - Vector2(4, 4))
-		draw_rect(r, Color(0.12, 0.12, 0.15, 1.0))
-		draw_rect(r, Color(0.6, 0.55, 0.4, 0.9), false, 1.0)
 		if module.is_empty():
+			var r := Rect2(Vector2(2, 2), Composeur.SLOT - Vector2(4, 4))
+			draw_rect(r, Color(0.1, 0.1, 0.12, 1.0))
+			draw_rect(r, Color(0.6, 0.55, 0.4, 0.9), false, 1.0)
 			var g_glyphe: String = Composeur.GLYPHES.get("forme:cible" if groupe == "forme" else groupe, "·")
-			draw_string(ThemeDB.fallback_font, Vector2(Composeur.SLOT.x * 0.5 - 6, Composeur.SLOT.y * 0.5 + 6), g_glyphe, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.35, 0.35, 0.35))
+			draw_string(ThemeDB.fallback_font, Vector2(Composeur.SLOT.x * 0.5 - 8, Composeur.SLOT.y * 0.5 + 7), g_glyphe, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(0.35, 0.35, 0.35))
 		else:
-			Composeur.dessiner_icone(self, Rect2(Vector2(8, 4), Vector2(36, 34)), module)
-			var nom_s := tr(GameData.catalogues.modules.get(module, {}).get("name_key", module)).left(7)
-			draw_string(ThemeDB.fallback_font, Vector2(3, Composeur.SLOT.y - 4), nom_s, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.95, 0.95, 0.9))
+			Composeur.dessiner_carte(self, Composeur.SLOT, module, -1, 0, 1.0)
+			draw_rect(Rect2(Vector2(1, 1), Composeur.SLOT - Vector2(2, 2)), Color(0.6, 0.55, 0.4, 0.9), false, 1.0)
 
 	func _can_drop_data(_at: Vector2, data: Variant) -> bool:
 		return data is Dictionary and data.has("module") and composeur.accepte(groupe, str(data.module))
@@ -514,10 +524,11 @@ class ZoneCatalogue extends MarginContainer:
 class PentagrammeSort extends Control:
 	var composeur: Composeur
 	var plan: Dictionary = {}
-	const RAYON := 38.0
+	const TAILLE := ApercuSort.TAILLE   # le même carré que l'aperçu visuel (uniformité, 2026-08-30)
+	const RAYON := 66.0
 
 	func _ready() -> void:
-		custom_minimum_size = Vector2(RAYON * 2 + 100, RAYON * 2 + 44)   # assez large pour la légende « X domine · engendre Y · domine Z »
+		custom_minimum_size = Vector2(TAILLE, TAILLE + 18.0)
 
 	func montrer(p: Dictionary) -> void:
 		plan = p
@@ -527,7 +538,9 @@ class PentagrammeSort extends Control:
 		var wx: Dictionary = GameData.config("wuxing")
 		var elements: Array = wx.get("elements", ["bois", "feu", "terre", "metal", "eau"])
 		var teintes: Dictionary = wx.get("teintes", {})
-		var centre := Vector2(RAYON + 50, RAYON + 16)
+		draw_rect(Rect2(Vector2.ZERO, Vector2(TAILLE, TAILLE)), Color(0.06, 0.06, 0.08, 1.0))
+		draw_rect(Rect2(Vector2.ZERO, Vector2(TAILLE, TAILLE)), Color(0.6, 0.55, 0.4, 0.6), false, 1.0)
+		var centre := Vector2(TAILLE * 0.5, TAILLE * 0.5 + 6.0)
 		var pts: Array[Vector2] = []
 		for k in elements.size():   # le cercle d'engendrement, le premier élément en haut
 			var a := -PI / 2.0 + TAU * float(k) / float(elements.size())
@@ -558,4 +571,4 @@ class PentagrammeSort extends Control:
 			legende = tr("ui.composeur.wuxing_vide")
 		else:
 			legende = tr("ui.composeur.wuxing").format({"dominante": tr("element." + dominante), "engendre": tr("element." + str(wx.engendre.get(dominante, ""))), "domine": tr("element." + str(wx.domine.get(dominante, "")))})
-		draw_string(ThemeDB.fallback_font, Vector2(2.0, RAYON * 2 + 40), legende, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.85, 0.85, 0.8))
+		draw_string(ThemeDB.fallback_font, Vector2(2.0, TAILLE + 13.0), legende, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.85, 0.85, 0.8))

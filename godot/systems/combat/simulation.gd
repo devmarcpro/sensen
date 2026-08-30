@@ -8606,7 +8606,7 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 					"source": e.id, "params": {"plan": plan.duplicate()}, "elements": plan.elements.duplicate()})
 	var a_touche: bool = res.a_touche
 	for l: Dictionary in plan.liaisons:
-		if l.get("propagation", false) and a_touche:
+		if l.get("propagation", false) and a_touche and not touchees.is_empty():   # « a touché » sans être (terrain, zone) : rien d'où propager
 			# De proche en proche tant que ça touche, −1 dé par pas.
 			var deja: Array[Dictionary] = touchees.duplicate()
 			var depuis: Dictionary = touchees.back()
