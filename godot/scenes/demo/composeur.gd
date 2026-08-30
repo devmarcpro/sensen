@@ -450,16 +450,21 @@ class CarteModule extends Control:
 	var fois := 0
 	var index := 0
 	var selectionnee := false
+	var survolee := false
 
 	func _ready() -> void:
 		custom_minimum_size = Composeur.CARTE
 		mouse_filter = Control.MOUSE_FILTER_STOP
 		tooltip_text = tr(GameData.catalogues.modules.get(module, {}).get("name_key", module))
+		mouse_entered.connect(func() -> void: survolee = true; queue_redraw())
+		mouse_exited.connect(func() -> void: survolee = false; queue_redraw())
 
 	func _draw() -> void:
 		Composeur.dessiner_carte(self, Composeur.CARTE, module, charges, fois, 1.0 if charges > 0 else 0.45)
 		if selectionnee:
 			draw_rect(Rect2(Vector2(1, 1), Composeur.CARTE - Vector2(2, 2)), Color(1, 1, 1, 0.95), false, 2.0)
+		elif survolee:   # la souris passe : la carte s'éclaire
+			draw_rect(Rect2(Vector2(1, 1), Composeur.CARTE - Vector2(2, 2)), Color(1, 1, 1, 0.5), false, 1.0)
 
 	func _gui_input(ev: InputEvent) -> void:
 		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
@@ -484,12 +489,16 @@ class SlotModule extends Control:
 	var groupe := ""
 	var index := 0
 	var module := ""
+	var depot_possible := false   # un module compatible est en train d'être glissé au-dessus
 
 	func _ready() -> void:
 		custom_minimum_size = Composeur.SLOT
 		mouse_filter = Control.MOUSE_FILTER_STOP
+		mouse_exited.connect(func() -> void: depot_possible = false; queue_redraw())
 
 	func _draw() -> void:
+		if depot_possible:
+			draw_rect(Rect2(Vector2.ZERO, Composeur.SLOT), Color(1, 1, 0.6, 0.25))
 		if module.is_empty():
 			var r := Rect2(Vector2(2, 2), Composeur.SLOT - Vector2(4, 4))
 			draw_rect(r, Color(0.1, 0.1, 0.12, 1.0))
@@ -501,9 +510,14 @@ class SlotModule extends Control:
 			draw_rect(Rect2(Vector2(1, 1), Composeur.SLOT - Vector2(2, 2)), Color(0.6, 0.55, 0.4, 0.9), false, 1.0)
 
 	func _can_drop_data(_at: Vector2, data: Variant) -> bool:
-		return data is Dictionary and data.has("module") and composeur.accepte(groupe, str(data.module))
+		var ok: bool = data is Dictionary and data.has("module") and composeur.accepte(groupe, str(data.module))
+		if ok != depot_possible:
+			depot_possible = ok
+			queue_redraw()
+		return ok
 
 	func _drop_data(_at: Vector2, data: Variant) -> void:
+		depot_possible = false
 		composeur.poser(groupe, index, str(data.module), str(data.get("groupe", "")), int(data.get("index", -1)))
 
 	func _get_drag_data(_at: Vector2) -> Variant:
