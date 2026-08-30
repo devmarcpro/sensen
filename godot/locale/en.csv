@@ -2164,3 +2164,5 @@ barre.endurance,Stamina
 barre.mana,Mana
 barre.faim,Hunger
 ui.chargement,"Loading — cell ({x}, {y}) · {biome}"
+ui.composer.surface,"Per tile: {n} tiles at nominal aim → {min}–{max} {monnaie} in total"
+ui.capacite.surface,"{n} tiles → {min}–{max} {monnaie}"

@@ -2174,3 +2174,5 @@ barre.endurance,Endurance
 barre.mana,Mana
 barre.faim,Faim
 ui.chargement,"Chargement — cellule ({x}, {y}) · {biome}"
+ui.composer.surface,"Par tuile : {n} tuiles à la visée nominale → {min}–{max} {monnaie} en tout"
+ui.capacite.surface,"{n} tuiles → {min}–{max} {monnaie}"

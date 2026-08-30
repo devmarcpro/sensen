@@ -2826,6 +2826,7 @@ func test_assemblage_sans_limite() -> void:
 	var p_bombe: Dictionary = plan_de.call(["carre", "bombe"])
 	var n_tuiles: int = s.tuiles_du_plan(j, p_bombe, j.pos + Vector2i(2, 0)).size()
 	verifier(s._facteur_surface(j, p_bombe, j.pos + Vector2i(2, 0)) == n_tuiles and n_tuiles >= 9, "le facteur de surface = %d tuiles" % n_tuiles)
+	verifier(s.plan_par_tuile(p_bombe) and not s.plan_par_tuile(plan_de.call(["carre", "etincelle"])) and s.surface_nominale(j, p_bombe) >= 9, "le composeur sait qu'un plan est par tuile et estime sa surface avant la visée (%d)" % s.surface_nominale(j, p_bombe))
 	var n_bombes0: int = s.bombes.size()
 	s._executer_capacite(j, p_bombe, j.pos + Vector2i(2, 0))
 	verifier(s.bombes.size() - n_bombes0 == n_tuiles, "un carré de Bombe pose %d charges d'un geste" % (s.bombes.size() - n_bombes0))

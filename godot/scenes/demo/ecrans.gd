@@ -997,6 +997,9 @@ func _apercu_plan(plan: Dictionary) -> String:
 	var fc: Vector2i = main.sim.fourchette_cout(plan)   # « aucun chiffre fixe » : le coût est une fourchette
 	txt += "\n" + tr("ui.composer.cout").format({"min": fc.x, "max": fc.y, "monnaie": tr("monnaie." + str(plan.get("monnaie", ""))) if not str(plan.get("monnaie", "")).is_empty() else "—",
 		"affinite": "%.2f" % float(plan.get("affinite_arme", 1.0)), "arme": tr(str(plan.get("fonct", {}).get("name_key", "functionality.mains_nues.name")))})
+	if main.sim.plan_par_tuile(plan):   # le prix suit la surface (Six types de modules) : le composeur le dit avant la visée
+		var n: int = main.sim.surface_nominale(main.joueur(), plan)
+		txt += "\n" + tr("ui.composer.surface").format({"n": n, "min": fc.x * n, "max": fc.y * n, "monnaie": tr("monnaie." + str(plan.get("monnaie", ""))) if not str(plan.get("monnaie", "")).is_empty() else "—"})
 	# Les dégâts attendus, avec le détail : fourchette du dé, dés de bonus, multiplicateur.
 	if plan.get("des") != null and not str(plan.get("des", "")).is_empty():
 		var f := Des.fourchette(plan.des, int(plan.get("des_bonus", 0)))

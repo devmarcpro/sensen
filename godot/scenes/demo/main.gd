@@ -1177,7 +1177,7 @@ func _draw() -> void:
 	if visee >= 0 and survol.x >= 0 and not j.is_empty():
 		var plan := sim.plan_capacite(j, visee)
 		var ok := sim.capacite_visable(j, plan, survol)
-		for t in Capacites.tuiles_de_forme(g, plan.geometrie, j.pos, survol, int(plan.taille)):
+		for t in sim.tuiles_du_plan(j, plan, survol):   # toutes les formes du plan (no limit), pas seulement la première
 			_losange(t, Color(0.3, 0.6, 1.0, 0.45) if ok else Color(0.5, 0.5, 0.5, 0.35))
 	if not chemin_en_cours.is_empty() and not j.is_empty():
 		var pts := PackedVector2Array([_ecran(j.pos, g.h(j.pos))])
@@ -1510,6 +1510,10 @@ func _maj_ui() -> void:
 		if visee >= 0:
 			var plan := sim.plan_capacite(j, visee)
 			lignes.append("  " + tr("ui.capacite.visee").format({"nom": tr(plan.name_key)}))
+			if survol.x >= 0 and sim.plan_par_tuile(plan) and sim.capacite_visable(j, plan, survol):   # le prix de cette visée-là
+				var n_t: int = sim.tuiles_du_plan(j, plan, survol).size()
+				var fc_v: Vector2i = sim.fourchette_cout(plan)
+				lignes.append("  " + tr("ui.capacite.surface").format({"n": n_t, "min": fc_v.x * n_t, "max": fc_v.y * n_t, "monnaie": tr("monnaie." + str(plan.get("monnaie", "")))}))
 			if survol.x >= 0 and not g.occupant(survol).is_empty():
 				lignes.append("  " + _preview_capacite(j, plan, sim.entites[g.occupant(survol)]))
 	ui.text = "\n".join(lignes)

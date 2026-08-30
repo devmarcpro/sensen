@@ -9044,14 +9044,31 @@ func tuiles_du_plan(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -> Arr
 ## Le facteur de surface d'un plan (Six types de modules) : un effet qui s'instancie **par tuile**
 ## (invocation, zone au sol, remodelage) coûte son prix autant de fois qu'il y a de tuiles.
 func _facteur_surface(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -> int:
-	var par_tuile := false
+	if not plan_par_tuile(plan):
+		return 1
+	return maxi(1, tuiles_du_plan(e, plan, cible_pos).size())
+
+
+## Un plan dont un effet s'instancie par tuile (invocation, zone, terrain) : son prix suit la surface.
+func plan_par_tuile(plan: Dictionary) -> bool:
 	for lot in ([plan] as Array) + plan.get("charges_sup", []):
 		for ef in lot.get("effets", []):
 			if str(ef) in ["invocation", "terrain"]:
-				par_tuile = true
-	if not par_tuile:
+				return true
+	return false
+
+
+## La surface d'un plan par tuile **avant de viser** (écran Composer) : une visée nominale à portée maximale,
+## vers le centre de la grille pour que la forme tienne dedans. 1 pour un plan qui n'est pas par tuile.
+func surface_nominale(e: Dictionary, plan: Dictionary) -> int:
+	if not plan_par_tuile(plan) or not plan.has("portee"):
 		return 1
-	return maxi(1, tuiles_du_plan(e, plan, cible_pos).size())
+	var centre := grille.origine + Vector2i(grille.largeur / 2, grille.hauteur_grille / 2)
+	var dir := Vector2i(signi(centre.x - e.pos.x), signi(centre.y - e.pos.y))
+	if dir == Vector2i.ZERO:
+		dir = Vector2i.RIGHT
+	var cible: Vector2i = e.pos + dir * maxi(1, int(plan.portee.y))
+	return _facteur_surface(e, plan, cible)
 
 
 ## Balise (Modules) : les dés de plus que la tuile visée accorde au porteur qui l'a marquée.
