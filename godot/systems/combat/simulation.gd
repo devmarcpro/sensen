@@ -115,7 +115,7 @@ func charger_camp(joueur: Dictionary = {}, cellule_choisie: Vector2i = Vector2i(
 	arene_id = "camp"
 	lieu = "camp"
 	donjon = {}
-	if not camp_sauve.is_empty():
+	if camp_sauve.has("grille"):   # un camp mis de côté (pas seulement ses métadonnées : biome…)
 		var sauve: Dictionary = camp_sauve
 		grille = sauve.grille
 		_reinitialiser()

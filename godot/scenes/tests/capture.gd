@@ -30,6 +30,37 @@ func _ready() -> void:
 		scene._commencer_monde()
 		scene.fiche_en_attente = {}
 		scene.carte.fermer()
+	if "--village" in args and scene.sim != null:   # --village : le village le plus proche du camp, le joueur sur sa place
+		var sv = scene.sim
+		var c0: Vector2i = sv.monde.cellule_camp
+		var cible := Vector2i(-9999, -9999)
+		for r in range(1, 30):
+			for dy in range(-r, r + 1):
+				for dx in range(-r, r + 1):
+					if absi(dx) != r and absi(dy) != r:
+						continue
+					var cv := c0 + Vector2i(dx, dy)
+					if sv.monde.surface.terre_a(cv) and bool(sv.monde.surface.poi_de(cv).get("village", false)):
+						cible = cv
+						break
+				if cible.x != -9999:
+					break
+			if cible.x != -9999:
+				break
+		if cible.x != -9999:
+			sv.charger_camp({}, cible + Vector2i(1, 0))   # la cellule-camp elle-même n'a jamais de village : le camp à côté
+			var ev: Dictionary = sv.monde.cellule(cible)
+			var jv: Dictionary = sv.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+			scene.joueur_id = jv.id
+			var centre_v: Vector2i = cible * int(GameData.config("planete").taille_cellule) + Vector2i(ev.village.centre)
+			if not sv.grille.occupant(centre_v).is_empty():
+				centre_v = sv._tuile_libre_autour(centre_v)   # la place peut être occupée par un PNJ
+			sv.grille.liberer(jv.pos)
+			jv.pos = centre_v
+			sv.grille.placer(jv.id, centre_v)
+			sv.maj_vision()
+			scene._apres_changement_de_grille()
+			print("village : ", str(ev.village.get("nom", "?")), " en ", cible)
 	if "--carte" in args:
 		scene.carte.ouvrir("voyage")
 	if arene > 0:
