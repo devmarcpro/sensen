@@ -12,8 +12,8 @@
     8
   ],
   "reward": {
-    "gold_per_target_level": 8,
-    "guild_xp": 8
+    "gold_per_target_level": "2d4+3",
+    "guild_xp": "2d4+3"
   },
   "text_key": "quest.traque.text"
 }

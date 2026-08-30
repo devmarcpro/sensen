@@ -12,8 +12,8 @@
     2
   ],
   "reward": {
-    "gold_per_target_level": 40,
-    "guild_xp": 12
+    "gold_per_target_level": "2d20+19",
+    "guild_xp": "2d6+5"
   },
   "text_key": "quest.elixirs.text"
 }

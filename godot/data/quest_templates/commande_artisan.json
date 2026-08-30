@@ -13,8 +13,8 @@
     4
   ],
   "reward": {
-    "gold_per_target_level": 20,
-    "guild_xp": 10
+    "gold_per_target_level": "2d10+9",
+    "guild_xp": "2d5+4"
   },
   "text_key": "quest.commande_artisan.text"
 }

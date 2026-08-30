@@ -193,8 +193,8 @@
     "_doc": "Récolte : ticks = ceil(durete_mat / (durete_outil × qualite × skill_factor(N)) × ticks_par_seconde) ; irrécoltable si durete_outil × qualite < durete_mat × seuil_irrecoltable ; quantite = 1 + N / niveaux_par_unite ; XP = durete_mat.",
     "ticks_par_seconde": 10,
     "seuil_irrecoltable": 0.5,
-    "niveaux_par_unite": 10,
-    "mains_nues_durete": 1
+    "mains_nues_durete": 1,
+    "des": "1d2"
   },
   "craft": {
     "_doc": "Fabrication : ticks = ceil(ticks_base / skill_factor(N)). qualite (A.3) = max(min, N/(N+pivot) × max × aléa) sur la compétence de la station ; jet_assemblage = même formule bornée. poids : poids de slots. vitesse : ticks d'attaque × (1 + (densite_manche − densite_reference) × par_point).",
@@ -1092,5 +1092,15 @@
     "charges_des": "1d4",
     "charges_depart_des": "2d4",
     "competence": "lecture"
+  },
+  "cueillette": {
+    "des": "1d2",
+    "competence": "collecte"
+  },
+  "agriculture_recolte": {
+    "_doc": "Parcelle mure (Agriculture et elevage) : base x rendement x fertilite x jet/moyenne x skill_factor(Agriculture).",
+    "des": "2d6",
+    "moyenne": 7.0,
+    "competence": "agriculture"
   }
 }

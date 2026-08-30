@@ -12,8 +12,8 @@
     1
   ],
   "reward": {
-    "gold_per_target_level": 60,
-    "guild_xp": 25
+    "gold_per_target_level": "2d30+29",
+    "guild_xp": "2d12+12"
   },
   "text_key": "quest.purge.text"
 }

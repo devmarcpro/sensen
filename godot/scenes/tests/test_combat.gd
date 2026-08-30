@@ -1144,12 +1144,13 @@ func test_recolte() -> void:
 		var it: Dictionary = s.items[uid]
 		if it.get("type", "") == "materiau":
 			brut = it
-	verifier(not brut.is_empty() and brut.materiau == "pierre" and int(brut.quantite) == 1, "1 × pierre dans le sac")
+	verifier(not brut.is_empty() and brut.materiau == "pierre" and int(brut.quantite) >= 1 and int(brut.quantite) <= 2, "1d2 pierre dans le sac (%d)" % int(brut.quantite))
+	var q1: int = int(brut.quantite)
 	verifier(int(j.xp_competences.get("minage", 0)) - xp0 > 0, "XP de Minage = dureté")
 	s.grille.poser_contenu(mur, "mur")
 	s.attente[j.id] = true
 	s.intention(j.id, {"type": "creuser", "vers": mur})
-	verifier(int(brut.quantite) == 2, "la pierre s'empile (×2)")
+	verifier(int(brut.quantite) > q1, "la pierre s'empile (%d → %d)" % [q1, int(brut.quantite)])
 	# Un filon de tungstène (dureté 42) : 25 × 1.0 ≥ 21, récoltable ; le diamant (40) aussi ; une pioche de cuivre (16) rebondit sur le tungstène.
 	s.grille.poser_contenu(mur, "filon")
 	s.grille.materiaux[s.grille.idx(mur)] = "tungstene"
@@ -3926,7 +3927,7 @@ func test_cueillette() -> void:
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "cueillir", "vers": t}), "cueillir un framboisier adjacent")
 	var n: int = j.sac.size() - avant
-	verifier(n == maxi(1, int(GameData.catalogues.plants.framboisier.recolte_base) / 2), "la moitié d'une récolte cultivée (%d)" % n)
+	verifier(n >= 1 and n <= 2, "cueillette sauvage : 1d2 au niveau 0 de Collecte (%d)" % n)
 	verifier(s.grille.contenu_de(t).is_empty() and s.modifs_terrain.has(t), "la tuile redevient du sol, mémorisée pour repousser")
 	s.monde.fermer()
 

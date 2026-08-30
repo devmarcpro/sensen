@@ -1032,7 +1032,8 @@ func _cueillir(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	var pl: Dictionary = GameData.catalogues.plants.get(pid, {})
 	if pl.is_empty():
 		return false
-	var n := maxi(1, int(pl.get("recolte_base", 2)) / 2)
+	var cu: Dictionary = regles.r.get("cueillette", {})
+	var n := maxi(1, roundi(float(des.jet(str(cu.get("des", "1d2")))) * regles.skill_factor(regles.niveau(e.competences_eff, str(cu.get("competence", "collecte"))))))
 	for k in n:
 		var o := generer_objet(pid, 1, {}, "commun", 0)
 		if not o.is_empty():
@@ -1091,7 +1092,8 @@ func _creuser(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	if recolte:
 		var rr2: Dictionary = regles.r.recolte
 		var n2 := regles.niveau(e.competences_eff, str(mat.harvest.skill))
-		var quantite := 1 + n2 / int(rr2.niveaux_par_unite)
+		# « aucun chiffre fixe » (Récolte) : un jet, multiplié par la compétence — plancher 1
+		var quantite := maxi(1, roundi(float(des.jet(str(rr2.get("des", "1d2")))) * regles.skill_factor(n2)))
 		_donner_materiau(e, mat_id, quantite)
 		gagner_xp(e, str(mat.harvest.skill), int(mat.stats.durete))
 		EventBus.emettre(&"journal", [&"journal.recolte", {"nom": e.name_key, "quantite": quantite, "materiau": mat.name_key}])
@@ -4246,7 +4248,10 @@ func _recolter_culture(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	var biome := str(monde.cellule(cell).get("biome", ""))
 	var fy := float(GameData.catalogues.biomes.get(biome, {}).get("farming_yield", 1.0))
 	var pl: Dictionary = GameData.catalogues.plants[str(c.plante)]
-	var q := float(pl.recolte_base) * fy * (0.5 + float(fertilite_a(pm, vers)) / 100.0)
+	var ag: Dictionary = regles.r.get("agriculture_recolte", {})
+	var alea := float(des.jet(str(ag.get("des", "2d6")))) / float(ag.get("moyenne", 7.0))   # jamais deux récoltes identiques
+	var q := float(pl.recolte_base) * fy * (0.5 + float(fertilite_a(pm, vers)) / 100.0) * alea \
+		* regles.skill_factor(regles.niveau(e.competences_eff, str(ag.get("competence", "agriculture"))))
 	if meteo(cell) == "canicule":
 		q *= float(_ry().agriculture.canicule_facteur)
 	var n := maxi(1, roundi(q))
@@ -4697,7 +4702,7 @@ func quetes_offertes(pnj: Dictionary, e: Dictionary) -> Array:
 			var count := rng.randi_range(int(g.count_range[0]), int(g.count_range[1]))
 			var niveau := maxi(1, int(round(monde.corruption_de(monde.cellule_de(pnj.pos)) / 20.0))) if monde != null else 1
 			var q := {"uid": "q_%s_%d_%d" % [pnj.id, semaine, k], "gabarit": gid, "guild": str(g.guild), "pattern": str(g.pattern), "selector": g.target_selector,
-				"count": count, "fait": 0, "niveau": niveau, "or": int(g.reward.gold_per_target_level) * niveau * count, "xp": int(g.reward.guild_xp) * count,
+				"count": count, "fait": 0, "niveau": niveau, "or": Des.jet_rng(str(g.reward.gold_per_target_level), rng) * niveau * count, "xp": Des.jet_rng(str(g.reward.guild_xp), rng) * count,
 				"text_key": str(g.text_key), "donneur": pnj.id, "village": str(pnj.get("village", "")), "cellule": monde.cellule_de(pnj.pos) if monde != null else Vector2i.ZERO, "etat": "offerte"}
 			if str(g.pattern) == "livrer":   # une livraison : un objet du pool, vers un autre village connu (sinon le sien)
 				# Le bien à livrer : une CATÉGORIE (denrées empilables), jamais une liste d'ids (Gabarit de quête)

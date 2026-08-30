@@ -12,8 +12,8 @@
     4
   ],
   "reward": {
-    "gold_per_target_level": 15,
-    "guild_xp": 8
+    "gold_per_target_level": "2d7+7",
+    "guild_xp": "2d4+3"
   },
   "text_key": "quest.banquet.text"
 }

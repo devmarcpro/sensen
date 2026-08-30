@@ -14,8 +14,8 @@
     6
   ],
   "reward": {
-    "gold_per_target_level": 12,
-    "guild_xp": 10
+    "gold_per_target_level": "2d6+5",
+    "guild_xp": "2d5+4"
   },
   "text_key": "quest.chantier.text"
 }

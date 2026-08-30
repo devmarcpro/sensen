@@ -8,8 +8,8 @@
     8
   ],
   "reward": {
-    "gold_per_target_level": 10,
-    "guild_xp": 8
+    "gold_per_target_level": "2d5+4",
+    "guild_xp": "2d4+3"
   },
   "text_key": "quest.reconnaissance.text"
 }

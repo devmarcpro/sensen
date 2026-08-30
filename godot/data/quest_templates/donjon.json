@@ -10,8 +10,8 @@
     1
   ],
   "reward": {
-    "gold_per_target_level": 60,
-    "guild_xp": 40
+    "gold_per_target_level": "2d30+29",
+    "guild_xp": "2d20+19"
   },
   "text_key": "quest.donjon.text"
 }
