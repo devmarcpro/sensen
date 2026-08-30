@@ -117,6 +117,8 @@ func _ready() -> void:
 	for im in args.size():   # --meteo id : force la météo (triche) — pluie, orage, neige, brouillard…
 		if args[im] == "--meteo" and im + 1 < args.size() and scene.sim != null:
 			scene.sim.triche(scene.joueur(), "meteo", str(args[im + 1]))
+			scene.sim._maj_etats_meteo()   # les drapeaux neige / gel suivent tout de suite (sinon : au prochain pas d'horloge)
+			scene._apres_changement_de_grille()   # le terrain reteinte (sol blanchi, glace pâle)
 	if "--torche" in args and scene.sim != null:   # --torche : une torche en main (Éclairage, la nuit)
 		var jt0: Dictionary = scene.joueur()
 		var torche: Dictionary = scene.sim.generer_objet("torche", 1, {}, "commun", 0)
