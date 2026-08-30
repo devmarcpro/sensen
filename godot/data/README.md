@@ -54,3 +54,37 @@
 **Textes :** aucun texte affichable ici — uniquement des `name_key`/`text_key`, résolues dans `godot/locale/*.csv` (fr, en, ja, zh).
 
 **Catalogues chargés par GameData (étape 0) :** `modules`, `creatures`, `creature_actions`, `ai_profiles`, `functionalities`, `items`, `status_effects`, `prototype_arenas`, plus les configurations `combat_rules`, `tile_contents` et `wuxing`. Ajouter un catalogue = son schéma dans `schemas/` + une ligne dans `autoload/game_data.gd`. Les dossiers `exemples_*` sont des exemples générés, pas des catalogues.
+
+## `modules/` — rangés par type, puis par famille
+
+Le sous-dossier n'est qu'un classement pour l'humain (l'id reste le nom du fichier) ; la **famille** est aussi le champ `famille` de la fiche, et l'**origine** d'une forme (`cible` : projetée sur la tuile visée · `lanceur` : émise depuis soi) est son champ `origine`.
+
+- `condition/`
+  - `cible/` — achevement, affinite, entravee, escorte, isolement, prise
+  - `monde/` — corruption, heure, intemperie, terroir
+  - `porteur/` — chaine_pleine, dernier_souffle, ombre, pleine_garde, resonance
+  - `position/` — angle_mort, champ_libre, contrebas, pied_ferme, surplomb
+- `forme/`
+  - `cible/` — anneau, carre, colonne, croix, diagonale, mur, nuee, point, sillage, tuile
+  - `lanceur/` — chemin, cone, horizon, ligne, soi, vague
+- `modificateur/`
+  - `discretion/` — sans_trace, silencieux
+  - `effet/` — detonation, emprise, gravite, ligature, perforant, persistance, remanence, repulsion, vampirique
+  - `element/` — amorce, prisme, purete, transmutation
+  - `forme/` — evasement, ricochet_mural, tracant
+  - `portee/` — allonge, corps_a_corps, longue_vue, sans_angle_mort
+  - `puissance/` — canalisation, concentration, surcharge
+  - `taille/` — ampleur, focale, fragmentation
+  - `tempo/` — enchainement, patience, precipitation, vivacite
+- `noyau/`
+  - `arme/` — botte, charge_d_epaule, estoc, etourdissement, fauchage, feinte, frappe, saignement
+  - `controle/` — aveuglement, celerite, desarmement, effroi, empoigne, entrave, epuisement, rapt_de_tempo, rupture, silence, torpeur
+  - `defense/` — absorption, ancrage, ecaille_elementaire, egide, reflet, voile
+  - `degats_leger/` — aiguille, bruine, epine, etincelle, gravier
+  - `degats_lourd/` — banquise, brasier, eboulement, fonte, foudroiement
+  - `degats_moyen/` — eclat, flamme, gel, roche, ronce, trait_nu
+  - `espace/` — ancre, attraction, convocation, elan, envol, levitation, permutation, portail, poussee, projection, retour, traversee
+  - `ressource/` — estimation, fiole, meditation, offrande, pari, ponction, saignee, second_souffle, souffle_rendu, traque, trempe, vapeur
+  - `soin/` — baume, communion, purge, rappel_a_la_vie, renaissance, reserve, seve, transfert
+  - `terrain/` — balise, barriere, bombe, cataclysme, echo_de_chair, exhaussement, fosse, nappe, racine, releve, sol_vif, tourelle, voile_de_brume
+- `declencheur/`, `liaison/` — sans famille : douze fiches chacun, à plat.

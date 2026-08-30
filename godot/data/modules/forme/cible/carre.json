@@ -15,5 +15,6 @@
     5
   ],
   "taille_base": 1,
-  "ligne_de_vue": false
+  "ligne_de_vue": false,
+  "origine": "cible"
 }

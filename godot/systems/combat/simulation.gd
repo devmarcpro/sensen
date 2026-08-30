@@ -8252,6 +8252,8 @@ func capacite_visable(e: Dictionary, plan: Dictionary, cible: Vector2i) -> bool:
 				return Grille.distance(e.pos, cible) >= int(plan.portee.x) and Grille.distance(e.pos, cible) <= int(plan.portee.y)
 	if plan.geometrie == "soi":
 		return true
+	if str(plan.get("origine", "cible")) == "lanceur":
+		return cible != e.pos   # la forme part du lanceur : la tuile cliquée n'est qu'une direction
 	var d := Grille.distance(e.pos, cible)
 	if d < plan.portee.x or d > plan.portee.y:
 		return false

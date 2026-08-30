@@ -2570,8 +2570,8 @@ func test_conditions_et_modificateurs() -> void:
 	# 8. Traçant : la portée seule compte, le couvert non
 	var derriere_mur: Vector2i = j.pos + Vector2i(3, 0)
 	s.grille.poser_contenu(j.pos + Vector2i(2, 0), "mur")
-	var plan_normal: Dictionary = plan_de.call(["ligne", "etincelle"])
-	var plan_trac: Dictionary = plan_de.call(["ligne", "tracant", "etincelle"])
+	var plan_normal: Dictionary = plan_de.call(["point", "etincelle"])   # une forme projetée : la ligne de vue compte
+	var plan_trac: Dictionary = plan_de.call(["point", "tracant", "etincelle"])
 	plan_normal.portee = Vector2i(1, 6)
 	plan_trac.portee = Vector2i(1, 6)
 	verifier(not s.capacite_visable(j, plan_normal, derriere_mur) and s.capacite_visable(j, plan_trac, derriere_mur), "Traçant : la charge passe le mur, pas la charge normale")
@@ -2864,7 +2864,15 @@ func test_assemblage_sans_limite() -> void:
 	verifier(s.bombes.size() == 2 * t_folie, "deux charges par tuile de l'union : %d bombes" % s.bombes.size())
 	verifier(s._facteur_surface(j, p_folie, j.pos + Vector2i(2, 0)) == t_folie, "et le prix × %d tuiles" % t_folie)
 	s.bombes.clear()
-	# 5. il ne reste que deux erreurs structurelles
+	# 5. deux familles de formes : un Cône accepte un clic lointain (direction), un Point non (portée)
+	var p_cone: Dictionary = plan_de.call(["cone", "etincelle"])
+	var p_point: Dictionary = plan_de.call(["point", "etincelle"])
+	var loin: Vector2i = j.pos + Vector2i(5, 0)
+	verifier(str(p_cone.origine) == "lanceur" and str(p_point.origine) == "cible", "Cône part du lanceur, Point est projeté")
+	verifier(s.capacite_visable(j, p_cone, loin), "un cône de portée %d accepte un clic à 5 tuiles : c'est une direction" % int(p_cone.portee.y))
+	verifier(not s.capacite_visable(j, p_point, loin) or int(p_point.portee.y) >= 5, "un point de portée %d refuse un clic à 5 tuiles" % int(p_point.portee.y))
+	verifier(not s.capacite_visable(j, p_cone, j.pos), "sa propre tuile n'est pas une direction")
+	# 6. il ne reste que deux erreurs structurelles
 	verifier(not s.capacites.assembler(["point", "carre"], 10, "1d4", {}, {}).erreurs.is_empty(), "sans noyau : toujours une erreur")
 	verifier(not s.capacites.assembler(["nexiste_pas", "etincelle"], 10, "1d4", {}, {}).erreurs.is_empty(), "module inconnu : toujours une erreur")
 

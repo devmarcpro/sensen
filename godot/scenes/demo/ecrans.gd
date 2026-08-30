@@ -935,7 +935,7 @@ func _apercu_plan(plan: Dictionary) -> String:
 	var err: Array[String] = []
 	for er in plan.get("erreurs", []):
 		err.append(str(er))
-	var txt := tr("ui.composer.apercu").format({"geometrie": tr("geometrie." + str(plan.get("geometrie", ""))), "portee": "%d–%d" % [int(plan.portee.x), int(plan.portee.y)],
+	var txt := tr("ui.composer.apercu").format({"geometrie": tr("geometrie." + str(plan.get("geometrie", ""))) + " (" + tr("origine." + str(plan.get("origine", "cible"))) + ")", "portee": "%d–%d" % [int(plan.portee.x), int(plan.portee.y)],
 		"taille": int(plan.get("taille", 1)), "ticks": int(plan.get("ticks", 0)), "ressource": int(plan.get("ressource", 0)),
 		"monnaie": tr("monnaie." + str(plan.monnaie)) if not str(plan.get("monnaie", "")).is_empty() else "—",
 		"des": str(plan.get("des", "—")), "effets": ", ".join(effets) if not effets.is_empty() else "—",
@@ -991,20 +991,25 @@ func _construire_composer(j: Dictionary) -> void:
 	var apercu := ""
 	if not sequence_composee.is_empty():
 		apercu = _apercu_plan(main.sim.capacites.assembler(sequence_composee.duplicate(), 10, "1d4", {}, j.competences_eff))
-	for type in ["forme", "noyau", "modificateur", "condition", "declencheur", "liaison"]:
+	for type in ["forme:cible", "forme:lanceur", "noyau", "modificateur", "condition", "declencheur", "liaison"]:
 		var du_type: Array = []
 		for m in connus:
-			if str(GameData.catalogues.modules.get(str(m), {}).get("module_type", "")) == type:
+			var md0: Dictionary = GameData.catalogues.modules.get(str(m), {})
+			var t0 := str(md0.get("module_type", ""))
+			if t0 == "forme":   # deux familles : projetée à distance, ou émise depuis soi (Six types de modules)
+				t0 = "forme:" + str(md0.get("origine", "cible"))
+			if t0 == type:
 				du_type.append(str(m))
 		if du_type.is_empty():
 			continue
 		du_type.sort()
-		liste.add_item(tr("ui.composer.type").format({"type": type}), null, false)
+		liste.add_item(tr("ui.composer.type").format({"type": tr("type_module." + type)}), null, false)
 		entrees.append({"kind": "texte", "texte": apercu})
 		for m in du_type:
 			var md: Dictionary = GameData.catalogues.modules[m]
 			var dans: bool = m in sequence_composee
-			liste.add_item(("☑ " if dans else "☐ ") + tr(md.name_key))
+			var fam := str(md.get("famille", ""))   # « quoi fait quoi » : la famille se lit dans la liste
+			liste.add_item(("☑ " if dans else "☐ ") + tr(md.name_key) + ("  · " + fam if not fam.is_empty() else ""))
 			entrees.append({"kind": "module_composer", "module": m, "texte": tr("ui.composer.module").format({"nom": tr(md.name_key), "desc": str(md.get("description", ""))}) + "\n\n" + apercu})
 	_bouton(tr("ui.composer.valider"), _valider_composition)
 

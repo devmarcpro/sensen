@@ -2134,3 +2134,23 @@ bonus.taille,size
 bonus.mult,x
 bonus.ressource_mult,resource x
 journal.bombes_posees,"{nom} lays {n} charge(s), primed in {retard} ticks"
+type_module.forme:cible,Shapes — at range
+type_module.forme:lanceur,Shapes — from self
+type_module.noyau,Cores
+type_module.modificateur,Modifiers
+type_module.condition,Conditions
+type_module.declencheur,Triggers
+type_module.liaison,Links
+origine.cible,at range
+origine.lanceur,from self
+status.levite.name,Levitation
+status.au_sol.name,Prone
+zone.ancre,Anchor
+journal.convocation,"{nom} pulls {allie} to their side"
+journal.rien_a_lancer,"{nom} has no one to throw"
+journal.pas_d_ancre,"{nom} has laid no anchor"
+journal.retour_ancre,"{nom} returns to their anchor"
+journal.levite,"{nom} lifts off the ground"
+journal.fauche,"{nom} is knocked down"
+journal.fauchage_rate,"{def} resists {nom}'s sweep"
+journal.se_releve,"{nom} gets back up"

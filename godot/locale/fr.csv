@@ -2144,3 +2144,23 @@ bonus.taille,taille
 bonus.mult,×
 bonus.ressource_mult,ressource ×
 journal.bombes_posees,"{nom} pose {n} charge(s), amorcées dans {retard} ticks"
+type_module.forme:cible,Formes — à distance
+type_module.forme:lanceur,Formes — depuis soi
+type_module.noyau,Noyaux
+type_module.modificateur,Modificateurs
+type_module.condition,Conditions
+type_module.declencheur,Déclencheurs
+type_module.liaison,Liaisons
+origine.cible,à distance
+origine.lanceur,depuis soi
+status.levite.name,Lévitation
+status.au_sol.name,À terre
+zone.ancre,Ancre
+journal.convocation,"{nom} attire {allie} à ses côtés"
+journal.rien_a_lancer,"{nom} n'a personne à lancer"
+journal.pas_d_ancre,"{nom} n'a pas posé d'ancre"
+journal.retour_ancre,"{nom} revient à son ancre"
+journal.levite,"{nom} décolle du sol"
+journal.fauche,"{nom} tombe à terre"
+journal.fauchage_rate,"{def} résiste au fauchage de {nom}"
+journal.se_releve,"{nom} se relève"

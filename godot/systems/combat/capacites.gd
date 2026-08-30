@@ -55,7 +55,7 @@ static func _sans_noyau(sequence: Array, modules: Dictionary, n: int) -> Array:
 func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme: Dictionary, niveaux: Dictionary = {}) -> Dictionary:
 	var plan := {
 		"modules": sequence, "noyau": {}, "forme": {}, "erreurs": [], "avertissements": [],
-		"geometrie": "point", "portee": Vector2i(1, 1), "taille": 1, "ligne_de_vue": true,
+		"geometrie": "point", "origine": "cible", "portee": Vector2i(1, 1), "taille": 1, "ligne_de_vue": true,
 		"ticks": 0, "monnaie": "", "ressource": 0, "des": null, "des_bonus": 0, "mult": 1.0,
 		"elements": {}, "effets": [], "conditions": [], "drapeaux": {}, "parametres": {},
 		"liaisons": [], "charge_suivante": {}, "charges_sup": [], "formes_sup": [],
@@ -146,6 +146,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 					continue
 				plan.forme = m
 				plan.geometrie = str(m.geometrie)
+				plan.origine = str(m.get("origine", "cible"))   # d'où part la forme (Six types de modules)
 				plan.portee = Vector2i(int(m.portee_base[0]), int(m.portee_base[1]))
 				plan.taille = int(m.taille_base)
 				plan.ligne_de_vue = bool(m.get("ligne_de_vue", true))
