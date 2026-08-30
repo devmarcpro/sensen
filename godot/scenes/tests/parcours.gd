@@ -44,6 +44,7 @@ var derniere_pos := Vector2i(-1, -1)
 
 
 func _ready() -> void:
+	Simulation.slot_autosave = "essai_parcours"   # l'autosave du retour d'expédition ne doit jamais écraser « monde » pendant un parcours robot
 	var args := OS.get_cmdline_user_args()
 	for i in args.size():
 		if args[i] == "--etages" and i + 1 < args.size():

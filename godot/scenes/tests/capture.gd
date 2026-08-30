@@ -27,7 +27,7 @@ func _ready() -> void:
 	if scene.titre_ouvert and "--creation" in args:   # --creation : l'écran de création du personnage
 		scene._nouvelle_partie()
 	elif scene.titre_ouvert and "--charger" in args:   # --charger : le chemin Continuer de l'écran principal, à froid (Sauvegarde)
-		scene._charger_partie("monde")
+		scene._charger_partie("essai_capture")   # l'emplacement de la sonde — jamais « monde », qui peut être une vraie partie
 		if scene.sim != null:
 			print("charge : lieu=", scene.sim.lieu, " expedition=", str(scene.sim.expedition))
 	elif scene.titre_ouvert and not ("--titre" in args):   # la capture saute l'écran principal, la création et l'écran Monde
@@ -108,7 +108,7 @@ func _ready() -> void:
 			scene.xp_flottants = []
 			scene.xp_fenetre = 0.0
 	if "--sauvegarder" in args and scene.sim != null:   # --sauvegarder : écrit la partie après la mise en place — pour tester Continuer à froid
-		print("sauvegarde : ", scene.sim.sauvegarder("monde"))
+		print("sauvegarde : ", scene.sim.sauvegarder("essai_capture"))   # jamais « monde », qui peut être une vraie partie
 	for i3 in args.size():   # --heure H : l'heure du monde (cycle jour-nuit) — après le chargement, qui remet l'horloge
 		if args[i3] == "--heure" and i3 + 1 < args.size() and scene.sim != null:
 			scene.sim.horloge_monde.ticks = int(float(args[i3 + 1]) / 24.0 * 24000.0)

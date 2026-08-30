@@ -122,3 +122,19 @@ static func lire(nom: String, fichier: String) -> Variant:
 
 static func existe(nom: String) -> bool:
 	return FileAccess.file_exists(RACINE + nom + "/world.json")
+
+
+## Efface un emplacement (récursif) — les tests et sondes nettoient derrière eux : l'écran Charger ne doit lister que de vraies parties.
+static func effacer(nom: String) -> void:
+	_effacer_dossier(RACINE + nom)
+
+
+static func _effacer_dossier(chemin: String) -> void:
+	var d := DirAccess.open(chemin)
+	if d == null:
+		return
+	for f in d.get_files():
+		d.remove(f)
+	for sous in d.get_directories():
+		_effacer_dossier(chemin + "/" + sous)
+	DirAccess.remove_absolute(chemin)

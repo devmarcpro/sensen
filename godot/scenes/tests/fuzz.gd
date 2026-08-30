@@ -8,6 +8,7 @@ var graine := 7
 
 
 func _ready() -> void:
+	Simulation.slot_autosave = "essai_fuzz"   # jamais « monde » : une vraie partie ne doit pas être écrasée par un outil
 	var args := OS.get_cmdline_user_args()
 	for i in args.size():
 		if args[i] == "--pas" and i + 1 < args.size():
@@ -54,8 +55,8 @@ func _ready() -> void:
 		if k == pas_total / 4 and s.lieu == "camp":   # un raid réel au quart
 			s._lancer_raid_reel(12.0, s.horloge_monde.ticks)
 		if k % 700 == 650 and s.lieu == "camp":   # sauvegarder puis recharger (Sauvegarde) : le cycle le plus sensible aux états orphelins
-			if s.sauvegarder():
-				s.charger_sauvegarde()
+			if s.sauvegarder(Simulation.slot_autosave):
+				s.charger_sauvegarde(Simulation.slot_autosave)
 		if k % 500 == 400 and s.lieu == "camp":   # un voyage vers une cellule voisine explorée d'office (Carte du monde), puis retour
 			var ici: Vector2i = s.monde.cellule_de(s.entites[jid].pos)
 			var vers: Vector2i = ici + Vector2i(rng.randi_range(-2, 2), rng.randi_range(-2, 2))
@@ -96,6 +97,7 @@ func _ready() -> void:
 			print("FUZZ pas %d tick %d lieu %s vivants %d" % [k, s.horloge_monde.ticks, s.lieu, s.vivants().size()])
 	var joueur_vivant := s.entites.has(jid) and bool(s.entites[jid].vivant)
 	print("FUZZ : %d intentions, %d acceptées, tick %d, vivants %d, joueur %s, lieu %s" % [intentions, ok, s.horloge_monde.ticks, s.vivants().size(), "vivant" if joueur_vivant else "MORT", s.lieu])
+	Sauvegarde.effacer(Simulation.slot_autosave)   # le fuzz nettoie son emplacement : l'écran Charger ne liste que de vraies parties
 	Monde.fermer_tous()
 	get_tree().quit(0)
 

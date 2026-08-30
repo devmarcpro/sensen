@@ -8,6 +8,7 @@ var echecs := 0
 
 func _ready() -> void:
 	# GameData a déjà chargé (autoload) : aucune erreur de schéma tolérée.
+	Simulation.slot_autosave = "test_auto"   # l'autosave du retour d'expédition ne doit jamais écraser « monde » pendant la suite
 	verifier(GameData.erreurs.is_empty(), "données valides (Décision — Pipeline de contenu)")
 	test_grille()
 	test_des()
@@ -151,6 +152,8 @@ func _ready() -> void:
 	test_expedition()
 	test_arenes_autonomes()
 	Monde.fermer_tous()   # aucun thread de pré-génération ne doit survivre aux autoloads
+	for nom_s in ["test_terrain", "test_sensen", "test_sensen2", "test_graine", "test_partout", "test_partout2", "test_auto"]:
+		Sauvegarde.effacer(nom_s)   # la suite nettoie derrière elle : l'écran Charger ne liste que de vraies parties
 	if echecs == 0:
 		print("TESTS : tout passe")
 		get_tree().quit(0)
@@ -6015,10 +6018,10 @@ func test_sauvegarde() -> void:
 	var comp4 := s4.compagnons_de(s4.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0])
 	verifier(comp4.size() == 1, "le compagnon est toujours au service du joueur")
 	s4.monde.fermer()
-	# Impossible en donjon.
+	# Sans monde (arène ou donjon chargé à cru), rien à sérialiser — le donjon lui-même se sauve, voir test_sauvegarde_partout.
 	var s3 := Simulation.new(2)
 	s3.charger_donjon("ruine", 2, 9, 1)
-	verifier(not s3.sauvegarder("test_sensen"), "pas de sauvegarde en donjon")
+	verifier(not s3.sauvegarder("test_sensen"), "pas de sauvegarde sans monde")
 	s.monde.fermer()
 	s2.monde.fermer()
 

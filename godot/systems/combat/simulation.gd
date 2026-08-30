@@ -30,6 +30,7 @@ var etages_visites: Dictionary = {}  # étage → état sauvé (grille, êtres, 
 var expedition: Dictionary = {}      # compteurs de l'expédition en cours : tués, objets, étage max
 var camp_sauve: Dictionary = {}      # le camp mis de côté pendant une expédition (Claims et persistance)
 var lieu: String = "arene"           # "arene" | "camp" | "donjon"
+static var slot_autosave := "monde"  # l'emplacement des sauvegardes automatiques — les tests et le fuzz le détournent pour ne jamais écraser une vraie partie
 var prochain_donjon: int = 1         # id du prochain donjon lancé depuis le camp
 var monde: Monde = null              # la surface comme fenêtre glissante (étape 8.2a)
 var bombes: Array = []               # les bombes posées, en attente d'explosion (Explosions)
@@ -5704,7 +5705,7 @@ func _sortir(e: Dictionary) -> bool:
 			EventBus.emettre(&"journal", [&"journal.donjon_nettoye", {}])
 			_quetes_sur_donjon(cell_donjon, e.id)
 			EventBus.emettre(&"dungeon_cleared", [cell_donjon, e.id])
-		sauvegarder()   # autosave au retour (Sauvegarde : sur événements clés)
+		sauvegarder(slot_autosave)   # autosave au retour (Sauvegarde : sur événements clés)
 		return true
 	var suivant: int = int(donjon.id) + 1
 	charger_donjon(donjon.theme, int(donjon.graine), suivant, 1, e)
