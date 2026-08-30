@@ -63,3 +63,14 @@ static func fourchette(notation: Variant, des_bonus: int = 0) -> Vector2i:
 	if p.faces == 0:
 		return Vector2i(p.bonus, p.bonus)
 	return Vector2i(n + p.bonus, n * p.faces + p.bonus)
+
+
+## Un jet sur un générateur donné (le loot est semé) : « 1d2 », « 3 », « 2d4+1 ».
+static func jet_rng(notation: String, rng: RandomNumberGenerator) -> int:
+	var p := analyser(notation)
+	if p.faces == 0:
+		return int(p.bonus)
+	var total: int = int(p.bonus)
+	for i in int(p.n):
+		total += rng.randi_range(1, int(p.faces))
+	return total

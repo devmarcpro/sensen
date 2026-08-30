@@ -11,5 +11,6 @@
   "surcout_ticks": 4,
   "effet": {
     "contagion": true
-  }
+  },
+  "famille": "Cibles"
 }

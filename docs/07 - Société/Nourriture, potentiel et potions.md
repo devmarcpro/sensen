@@ -32,6 +32,9 @@ POTION : intensité = effet_base * qualite_potion (A.3, Alchimie)
 > [!success] Précisé le 2026-08-28
 > La formule du plat est codée à l'étape 7 avec des bonus **fixes** en données (`potentiel` du consommable) : `potentiel_gagné = Σ bonus × nutrition/100 × qualité(A.3 Cuisine)`, cap 200. Les viandes paramétriques, le ×1,2 des cinq éléments et les potions attendent l'étape 10.
 
+> [!success] Corrigé le 2026-08-30 — l'huile d'arme ne brûlait qu'avec une arme de Feu
+> Le bonus de l'huile (`degats_element_bonus`) était lu **par l'élément dominant de l'arme** : une huile de Feu sur une dague de fer (Métal) n'ajoutait jamais son `1d4`. Le test qui devait le garantir comparait quarante coups « avec » à quarante coups « sans » — deux distributions identiques, donc un tirage à pile ou face qu'il avait gagné jusqu'ici ; un décalage du générateur l'a fait perdre, et le bug est apparu. Les dés de l'huile s'ajoutent désormais **quel que soit l'élément de l'arme** — c'est une couche sur la lame, pas une affinité. Le bonus des plats (`degats_element`) reste lié à l'élément de l'arme : un plat aligne, une huile enduit.
+
 ## Liens
 - **Dépend de** : [[Cuisine et alchimie]], [[Qualité d'artisanat]], [[Potentiel]], [[Faim]]
 - **Alimente** : [[Potions]], [[Nourriture]], [[Statuts]]

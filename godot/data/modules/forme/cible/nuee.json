@@ -16,5 +16,6 @@
   ],
   "taille_base": 4,
   "ligne_de_vue": false,
-  "origine": "cible"
+  "origine": "cible",
+  "famille": "À distance"
 }

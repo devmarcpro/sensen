@@ -12,5 +12,6 @@
   "effet": {
     "declencheur": "derobade",
     "duree_ticks": 100
-  }
+  },
+  "famille": "Événement"
 }

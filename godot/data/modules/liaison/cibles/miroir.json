@@ -11,5 +11,6 @@
   "surcout_ticks": 3,
   "effet": {
     "miroir": true
-  }
+  },
+  "famille": "Cibles"
 }

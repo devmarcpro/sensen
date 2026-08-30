@@ -5629,14 +5629,13 @@ func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 	var id := "%s_%d" % [def_id, _n_entites]
 	var def := fiche_joueur if (controle == "joueur" and not fiche_joueur.is_empty()) else GameData.entree("creatures", def_id)
 	var e := Etres.instancier(id, def, pos, controle, regles, items)
-	if controle == "joueur":   # les modules des capacités de départ sont connus, avec leurs charges de départ
-		var c0 := int(regles.r.get("modules", {}).get("charges_depart", 10))
+	if controle == "joueur":   # les modules des capacités de départ sont connus, avec un kit de charges au dé
 		for m in def.get("modules_connus", []):
-			crediter_module(e, str(m), c0)
+			crediter_module(e, str(m), charges_lues(e, true))
 		for cap in e.get("capacites", []):
 			for m in cap.get("modules", []):
-				if int(e.get("modules_charges", {}).get(str(m), 0)) < c0:
-					crediter_module(e, str(m), c0)
+				if int(e.get("modules_charges", {}).get(str(m), 0)) <= 0:
+					crediter_module(e, str(m), charges_lues(e, true))
 	_contreparties(e)
 	e["or"] = 0
 	if controle != "joueur" and "civil" in def.get("tags", []):
@@ -6099,7 +6098,7 @@ func _lire(e: Dictionary, objet: String, tick: int) -> bool:
 			n = maxi(1, int(floorf(float(livre.modules.size()) * minf(1.0, float(n_lecture) / float(livre.difficulte)))))
 		for k in n:
 			var m: String = str(livre.modules[k])
-			crediter_module(e, m, int(regles.r.get("modules", {}).get("charges_par_lecture", 5)))
+			crediter_module(e, m, charges_lues(e))   # un jet par module, porté par la Lecture
 			appris.append(m)
 		e.xp.competence["lecture"] = int(e.xp.competence.get("lecture", 0)) + int(livre.difficulte) * int(lv.xp_succes)
 		gagner_xp(e, "lecture", int(livre.difficulte) * int(lv.xp_succes))
@@ -7240,9 +7239,8 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 	var wx := _facteur_wuxing(e, cible, vecteur, tick_de(e))
 	var dom := wuxing.dominante(vecteur)
 	var plat := int(e.get("degats_element", {}).get(dom, 0))
-	var huile := str(e.get("degats_element_bonus", {}).get(dom, ""))   # Nourriture : l'huile d'arme, le temps d'un combat
-	if not huile.is_empty():
-		plat += des.jet(huile)
+	for el_h in e.get("degats_element_bonus", {}).keys():   # Nourriture : l'huile d'arme, le temps d'un combat —
+		plat += des.jet(str(e.degats_element_bonus[el_h]))   # ses dés s'ajoutent quel que soit l'élément de l'arme
 	var res := _resoudre_coup(e, cible, (d.bruts + float(plat)) * wx.total * float(ax.mult) * mult_coup * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur, float(ax.ignore_armure))
 	res.merge(wx)
 	res["competence"] = str(fonct.get("combat_skill", ""))
@@ -8325,6 +8323,15 @@ func _evaluer_conditions(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -
 
 
 ## Lance la capacité n° `index` sur la tuile `cible` : coûts, conditions, télégraphe ou exécution.
+## Les charges qu'une lecture rapporte pour UN module (Grimoires et manuels) : un jet de dés, multiplié par
+## le facteur de la compétence de lecture — aucun chiffre fixe. `depart` : le kit de création du personnage.
+func charges_lues(e: Dictionary, depart: bool = false) -> int:
+	var rm: Dictionary = regles.r.get("modules", {})
+	var notation := str(rm.get("charges_depart_des" if depart else "charges_des", "1d4"))
+	var niv := regles.niveau(e.get("competences_eff", e.get("competences", {})), str(rm.get("competence", "lecture")))
+	return maxi(1, roundi(float(des.jet(notation)) * regles.skill_factor(niv)))
+
+
 ## Créditer des charges de module (Grimoires et manuels) : la lecture, la création, la triche.
 ## Apprendre un module, c'est le connaître pour toujours ET recevoir des munitions.
 func crediter_module(e: Dictionary, mid: String, charges: int) -> void:

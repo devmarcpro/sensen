@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] Aucun chiffre fixe : livres en kit, charges au dé (2026-08-30)
+> Un livre = une forme + un noyau + 1d2 modules d'appoint du domaine ; les charges = 1d4 × Lecture par module. La matrice 5 × 3 se différencie (lourd = signature élémentaire, moyen = +1 dé). **À juger** : 1d4 × Lecture est-il assez généreux pour qu'un mage vive de ses livres, ou faut-il des livres plus gros ?
 > [!important] Formes à distance / formes depuis soi (2026-08-30)
 > Chaque forme dit d'où elle part : projetée sur la tuile visée, ou émise depuis le lanceur (le clic n'est alors qu'une direction — un cône ne refuse plus un clic lointain). L'écran de composition les sépare. **À juger** : deux blocs suffisent-ils, ou faut-il un pictogramme sur chaque forme ?
 > [!important] Assemblage sans limite (2026-08-29)

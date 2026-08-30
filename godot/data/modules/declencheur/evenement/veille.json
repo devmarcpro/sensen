@@ -12,5 +12,6 @@
   "effet": {
     "declencheur": "veille",
     "pct": 40
-  }
+  },
+  "famille": "Événement"
 }

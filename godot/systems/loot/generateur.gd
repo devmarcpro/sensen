@@ -155,12 +155,43 @@ func _composer_livre(inst: Dictionary, base: Dictionary, profondeur: int, rng: R
 				"maitrise":
 					if m.module_type in ["modificateur", "forme"]:
 						candidats.append(id)
-	var n := rng.randi_range(int(lv.modules_par_livre[0]), int(lv.modules_par_livre[1]))
+	# Un livre est un sort en kit (Grimoires et manuels) : toujours une forme, toujours un noyau du domaine,
+	# plus des modules d'appoint — chaque quantité est un jet de dés, jamais un entier.
+	var comp: Dictionary = lv.get("composition", {"formes": "1", "noyaux": "1", "appoint": "1d2"})
 	var choisis: Array = []
-	while choisis.size() < n and not candidats.is_empty():
-		var k := rng.randi_range(0, candidats.size() - 1)
-		choisis.append(candidats[k])
-		candidats.remove_at(k)
+	var formes: Array[String] = []
+	var noyaux: Array[String] = []
+	var appoint: Array[String] = []
+	for id in candidats:
+		match str(modules[id].module_type):
+			"forme": formes.append(id)
+			"noyau": noyaux.append(id)
+			_: appoint.append(id)
+	if noyaux.is_empty():   # un manuel de postures ou de techniques : le noyau d'arme et la forme viennent d'ailleurs
+		for id: String in modules.keys():
+			if modules[id].module_type == "noyau" and int(modules[id].get("cout_endurance", 0)) > 0 and (grimoire == false):
+				noyaux.append(id)
+			elif grimoire and modules[id].module_type == "noyau" and int(modules[id].get("cout_mana", 0)) > 0:
+				noyaux.append(id)
+	if formes.is_empty():
+		for id: String in modules.keys():
+			if modules[id].module_type == "forme":
+				formes.append(id)
+	if appoint.is_empty():   # un grimoire élémentaire n'a que ses noyaux : l'appoint vient du tronc commun
+		for id: String in modules.keys():
+			var t_a := str(modules[id].module_type)
+			if (grimoire and t_a in ["modificateur", "condition"]) or (not grimoire and t_a in ["modificateur", "condition", "declencheur", "liaison"]):
+				appoint.append(id)
+	var tirer := func(pool: Array, n: int) -> void:
+		for i in n:
+			if pool.is_empty():
+				return
+			var k := rng.randi_range(0, pool.size() - 1)
+			choisis.append(pool[k])
+			pool.remove_at(k)
+	tirer.call(formes, Des.jet_rng(str(comp.formes), rng))
+	tirer.call(noyaux, Des.jet_rng(str(comp.noyaux), rng))
+	tirer.call(appoint, Des.jet_rng(str(comp.appoint), rng))
 	inst["domaine"] = domaine
 	inst["difficulte"] = int(lv.difficulte_base) + profondeur * int(lv.difficulte_par_etage)
 	inst["modules"] = choisis

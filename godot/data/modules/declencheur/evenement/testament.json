@@ -11,5 +11,6 @@
   "surcout_ticks": 0,
   "effet": {
     "declencheur": "testament"
-  }
+  },
+  "famille": "Événement"
 }

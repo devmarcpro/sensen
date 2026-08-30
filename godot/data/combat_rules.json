@@ -1088,8 +1088,9 @@
     "_doc": "Soins dormants (Modules — Réserve) : le seuil de PV en pourcentage sous lequel la réserve se déclenche."
   },
   "modules": {
-    "_doc": "Charges de modules (Grimoires et manuels) : ce qu'une lecture donne, ce dont on part.",
-    "charges_par_lecture": 5,
-    "charges_depart": 10
+    "_doc": "Charges de modules (Grimoires et manuels) : des DES, multiplies par skill_factor(Lecture) — aucun chiffre fixe.",
+    "charges_des": "1d4",
+    "charges_depart_des": "2d4",
+    "competence": "lecture"
   }
 }

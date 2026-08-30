@@ -6,6 +6,7 @@ verifie les liens ENTRE catalogues, que GameData ne connait pas — une famille 
 recette qui la produit, une depouille qui ne correspond a aucun objet, un habitat sans meuble.
 Sortie non nulle si un probleme est trouve."""
 import sys
+import re
 import io, json, glob, os, collections
 
 R = "C:/Sensen/godot/data/"
@@ -411,6 +412,21 @@ for _f in glob.glob(R + "classes/*.json") + glob.glob(R + "creatures/*.json"):
             _atteignables.add(str(_m3))
 for _mid in sorted(set(modules_cat) - _atteignables):
     probs["module inatteignable (aucun livre, aucune classe)"].append(_mid)
+
+# 25. « aucun chiffre fixe » (Grimoires et manuels) : les quantites de livres et de charges sont des DES
+_DES = re.compile(r"^\d*d\d+([+-]\d+)?$|^\d+$")
+for _cle, _v in conf("loot_rules")["livres"].get("composition", {}).items():
+    if _cle.startswith("_"): continue
+    if not isinstance(_v, str) or not _DES.match(_v):
+        probs["livres.composition : pas une notation de des"].append("%s = %r" % (_cle, _v))
+for _cle in ("charges_des", "charges_depart_des"):
+    _v = conf("combat_rules").get("modules", {}).get(_cle)
+    if not isinstance(_v, str) or "d" not in str(_v):
+        probs["modules.%s : doit etre un de, pas un entier" % _cle].append(repr(_v))
+# 26. toute fiche de module porte une famille (le rangement en dossiers en depend)
+for _mid, _m in modules_cat.items():
+    if not _m.get("famille"):
+        probs["module sans famille"].append(_mid)
 
 for k in sorted(probs):
     print("\n== %s (%d)" % (k, len(probs[k])))

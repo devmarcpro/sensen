@@ -128,6 +128,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				plan.des = des_arme if arme else m.get("power_base")
 				plan.elements = element_arme.duplicate() if (arme or m.get("element_special") == "arme") else m.get("elements", {}).duplicate()
 				plan.effets = m.get("effets", []).duplicate()
+				plan.des_bonus += int(m.get("des_bonus", 0))   # le palier moyen de la matrice : +1 dé
 				# Ressource : coût de base / skill_factor(N_module) (Mana, Structure compétences-modules-slots).
 				var sf_noyau := 1.0 + float(niveaux.get(id, 0)) * par_niveau
 				if int(m.get("cout_mana", 0)) > 0:

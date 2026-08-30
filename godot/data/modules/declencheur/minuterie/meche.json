@@ -12,5 +12,6 @@
   "effet": {
     "declencheur": "apres_ticks",
     "ticks": 20
-  }
+  },
+  "famille": "Minuterie"
 }

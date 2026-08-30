@@ -12,5 +12,6 @@
   "effet": {
     "declencheur": "entree",
     "duree_ticks": 100
-  }
+  },
+  "famille": "Minuterie"
 }

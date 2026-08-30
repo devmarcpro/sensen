@@ -543,7 +543,7 @@ func test_capacites() -> void:
 	# L'exemple chiffré de la note Modules : [Ligne] + [Flamme] + [Concentration] = 12 ticks, 12 mana, 3d6
 	var p := cap.assembler(["ligne", "flamme", "concentration"], 5, "2d6", {"metal": 1.0})
 	verifier(p.erreurs.is_empty() and p.ticks == 12 and p.monnaie == "mana" and p.ressource == 12, "[Ligne]+[Flamme]+[Concentration] : 12 ticks · 12 mana")
-	verifier(p.des == "2d6" and p.des_bonus == 1 and p.geometrie == "ligne" and p.taille == 4 and p.elements == {"feu": 1.0}, "3d6 de Feu sur 4 tuiles en ligne")
+	verifier(p.des == "2d6" and p.des_bonus == 2 and p.geometrie == "ligne" and p.taille == 4 and p.elements == {"feu": 1.0}, "4d6 de Feu sur 4 tuiles en ligne (Flamme, palier moyen : +1 dé ; Concentration : +1)")
 	# [Ligne] + [Frappe] + [Concentration] avec une épée : 9 ticks · 10 endurance, à l'élément de l'arme
 	p = cap.assembler(["ligne", "frappe", "concentration"], 5, "2d6", {"metal": 1.0})
 	verifier(p.ticks == 9 and p.monnaie == "endurance" and p.ressource == 10 and p.elements == {"metal": 1.0}, "[Ligne]+[Frappe]+[Concentration] : 9 ticks · 10 endurance · Métal")
@@ -2905,6 +2905,28 @@ func test_charges_de_modules() -> void:
 	verifier(not s.intention(j.id, {"type": "capacite", "index": 0, "cible": loup.pos}), "à sec : le sort ne part plus")
 	verifier("point" in j.modules_connus, "le module reste connu : c'est la munition qui manque, pas le savoir")
 	verifier(s.modules_sans_charge(j, {"modules": ["point", "etincelle"]}).size() == 2, "les deux modules sont signalés sans charge")
+	# Un livre est un sort en kit : toujours une forme et un noyau ; les charges suivent la Lecture
+	var kit_ok := true
+	for k in 60:
+		var livre := s.generer_objet("grimoire" if k % 2 == 0 else "manuel", 3, {}, "commun", 0)
+		var a_forme := false
+		var a_noyau := false
+		for m in livre.get("modules", []):
+			var t := str(GameData.catalogues.modules.get(str(m), {}).get("module_type", ""))
+			a_forme = a_forme or t == "forme"
+			a_noyau = a_noyau or t == "noyau"
+		kit_ok = kit_ok and a_forme and a_noyau and livre.modules.size() >= 3
+	verifier(kit_ok, "60 livres : chacun porte une forme, un noyau et au moins un module d'appoint")
+	j.competences_eff["lecture"] = 0
+	var novice := 0
+	var lettre := 0
+	for k in 200:
+		novice += s.charges_lues(j)
+	j.competences_eff["lecture"] = 50
+	for k in 200:
+		lettre += s.charges_lues(j)
+	verifier(lettre > novice * 1.3, "les charges lues suivent la Lecture (niveau 50 : %d contre %d au niveau 0, sur 200 jets)" % [lettre, novice])
+	verifier(novice >= 200 and novice <= 800, "au niveau 0 : 1d4 par module (%d sur 200 jets)" % novice)
 	# Un module employé deux fois dans la même séquence coûte deux charges
 	s.crediter_module(j, "ampleur", 1)
 	verifier(s.modules_sans_charge(j, {"modules": ["ampleur", "ampleur"]}).has("ampleur"), "deux fois le même module = deux charges")

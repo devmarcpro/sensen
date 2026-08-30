@@ -11,5 +11,6 @@
   "surcout_ticks": 1,
   "effet": {
     "declencheur": "impact"
-  }
+  },
+  "famille": "Événement"
 }

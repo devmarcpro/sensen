@@ -236,10 +236,6 @@
     "_doc": "Grimoires et manuels · Lecture des livres : difficulté = base + étage × par_etage ; modules par livre ; domaines (Domaines de grimoires et manuels)",
     "difficulte_base": 10,
     "difficulte_par_etage": 10,
-    "modules_par_livre": [
-      2,
-      4
-    ],
     "dd_base": 10,
     "xp_succes": 5,
     "xp_echec": 2,
@@ -257,6 +253,12 @@
       "postures",
       "techniques",
       "maitrise"
-    ]
+    ],
+    "composition": {
+      "_doc": "Un livre = de quoi composer un sort : des notations de des, jamais des entiers.",
+      "formes": "1",
+      "noyaux": "1",
+      "appoint": "1d2"
+    }
   }
 }

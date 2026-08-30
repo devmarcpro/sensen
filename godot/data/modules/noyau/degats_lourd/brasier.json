@@ -18,8 +18,15 @@
   "cout_mana": 20,
   "cout_endurance": 0,
   "effets": [
-    "degats"
+    "degats",
+    "statut"
   ],
   "forme": null,
-  "portee": null
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "brulure",
+      "duree_ticks": 20
+    }
+  }
 }

@@ -59,32 +59,5 @@
 
 Le sous-dossier n'est qu'un classement pour l'humain (l'id reste le nom du fichier) ; la **famille** est aussi le champ `famille` de la fiche, et l'**origine** d'une forme (`cible` : projetée sur la tuile visée · `lanceur` : émise depuis soi) est son champ `origine`.
 
-- `condition/`
-  - `cible/` — achevement, affinite, entravee, escorte, isolement, prise
-  - `monde/` — corruption, heure, intemperie, terroir
-  - `porteur/` — chaine_pleine, dernier_souffle, ombre, pleine_garde, resonance
-  - `position/` — angle_mort, champ_libre, contrebas, pied_ferme, surplomb
-- `forme/`
-  - `cible/` — anneau, carre, colonne, croix, diagonale, mur, nuee, point, sillage, tuile
-  - `lanceur/` — chemin, cone, horizon, ligne, soi, vague
-- `modificateur/`
-  - `discretion/` — sans_trace, silencieux
-  - `effet/` — detonation, emprise, gravite, ligature, perforant, persistance, remanence, repulsion, vampirique
-  - `element/` — amorce, prisme, purete, transmutation
-  - `forme/` — evasement, ricochet_mural, tracant
-  - `portee/` — allonge, corps_a_corps, longue_vue, sans_angle_mort
-  - `puissance/` — canalisation, concentration, surcharge
-  - `taille/` — ampleur, focale, fragmentation
-  - `tempo/` — enchainement, patience, precipitation, vivacite
-- `noyau/`
-  - `arme/` — botte, charge_d_epaule, estoc, etourdissement, fauchage, feinte, frappe, saignement
-  - `controle/` — aveuglement, celerite, desarmement, effroi, empoigne, entrave, epuisement, rapt_de_tempo, rupture, silence, torpeur
-  - `defense/` — absorption, ancrage, ecaille_elementaire, egide, reflet, voile
-  - `degats_leger/` — aiguille, bruine, epine, etincelle, gravier
-  - `degats_lourd/` — banquise, brasier, eboulement, fonte, foudroiement
-  - `degats_moyen/` — eclat, flamme, gel, roche, ronce, trait_nu
-  - `espace/` — ancre, attraction, convocation, elan, envol, levitation, permutation, portail, poussee, projection, retour, traversee
-  - `ressource/` — estimation, fiole, meditation, offrande, pari, ponction, saignee, second_souffle, souffle_rendu, traque, trempe, vapeur
-  - `soin/` — baume, communion, purge, rappel_a_la_vie, renaissance, reserve, seve, transfert
-  - `terrain/` — balise, barriere, bombe, cataclysme, echo_de_chair, exhaussement, fosse, nappe, racine, releve, sol_vif, tourelle, voile_de_brume
-- `declencheur/`, `liaison/` — sans famille : douze fiches chacun, à plat.
+- `godot/`
+  - `data/` — a_l_impact, absorption, accord, achevement, affinite, aiguille, allonge, alternance, amorce, ampleur, ancrage, ancre, angle_mort, anneau, attraction, aveuglement, balise, banquise, barriere, baume, bombe, botte, boucle, brasier, bruine, cadence, canalisation, carre, cataclysme, celerite, chaine_pleine, champ_libre, charge_d_epaule, chemin, colonne, communion, concentration, cone, contagion, contrebas, convocation, corps_a_corps, corruption, croix, curee, dernier_souffle, derobade, desarmement, detonation, diagonale, dispersion, eboulement, ecaille_elementaire, echo, echo_de_chair, eclat, effroi, egide, elan, empoigne, emprise, enchainement, entrave, entravee, envol, epine, epuisement, escorte, estimation, estoc, etincelle, etourdissement, evasement, exhaussement, fauchage, feinte, fiole, flamme, focale, fonte, fosse, foudroiement, fragmentation, frappe, gel, gravier, gravite, heure, horizon, intemperie, isolement, levitation, ligature, ligne, longue_vue, meche, meditation, meute, miroir, mur, nappe, nuee, offrande, ombre, ouverture, parade, pari, partage, patience, perforant, permutation, persistance, pied_ferme, pleine_garde, point, ponction, portail, poussee, precipitation, prise, prisme, projection, propagation, purete, purge, racine, rappel_a_la_vie, rapt_de_tempo, reflet, releve, remanence, renaissance, repetition, repulsion, reserve, resonance, retour, ricochet, ricochet_mural, riposte, roche, ronce, rupture, saignee, saignement, salve, sans_angle_mort, sans_trace, sceau, second_souffle, seve, silence, silencieux, sillage, soi, sol_vif, souffle_rendu, surcharge, surplomb, terroir, testament, torpeur, tourelle, tracant, trait_nu, transfert, transmutation, traque, traversee, trempe, tuile, vague, vampirique, vapeur, veille, vivacite, voile, voile_de_brume

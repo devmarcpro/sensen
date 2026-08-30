@@ -12,5 +12,6 @@
   "effet": {
     "declencheur": "cadence",
     "n": 3
-  }
+  },
+  "famille": "Minuterie"
 }
