@@ -342,6 +342,9 @@ for mid, m in modules_cat.items():
 # effet, un modificateur dont l'effet n'est lu par personne — meme controle que pour les noyaux.
 # La liste est tenue a la main en miroir de Simulation._evaluer_conditions : un predicat absent d'ici
 # est un module qui ne se declenche JAMAIS (la capacite ne part pas du tout).
+# Miroir de Capacites.tuiles_de_forme : une geometrie absente d'ici tombe dans le defaut « visee au point ».
+GEOMETRIES_GEREES = ("point", "soi", "ligne", "cone", "croix", "diagonale", "carre", "anneau", "tuile", "vague",
+    "mur", "sillage", "chemin", "colonne", "horizon", "nuee")
 PREDICATS_GERES = ("hauteur_relative", "dos_ou_flanc", "ligne_de_vue_degagee", "cible_isolee",
     "cible_adjacente_a_allie", "pv_cible_sous", "pv_porteur_sous", "vecteur_de_lieu", "porteur_en_posture",
     "jauge_chaine_pleine", "segment_chaine_present", "element_cible", "porteur_immobile_depuis",
@@ -364,6 +367,8 @@ for mid, m in modules_cat.items():
         probs["declencheur sans effet"].append(mid)
     elif t == "modificateur" and ef and not (set(ef) & set(CLES_MOD)):
         probs["modificateur dont aucune cle n'est lue par l'assembleur"].append("%s -> %s" % (mid, list(ef)))
+    elif t == "forme" and str(m.get("geometrie", "")) not in GEOMETRIES_GEREES:
+        probs["forme -> geometrie que le code ne gere pas"].append("%s -> %s" % (mid, m.get("geometrie")))
     elif t == "forme" and (m.get("geometrie") is None or m.get("portee_base") is None):
         probs["forme incomplete"].append(mid)
 

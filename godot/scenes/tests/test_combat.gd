@@ -2798,8 +2798,8 @@ func test_assemblage_sans_limite() -> void:
 	var s := Simulation.new(929)
 	s.charger_donjon("ruine", 929, 9, 1)
 	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
-	for dx in range(-3, 4):
-		for dy in range(-3, 4):
+	for dx in range(-5, 6):   # une esplanade : la Nuée tire à 2 tuiles autour d'une cible à 2 tuiles
+		for dy in range(-5, 6):
 			var t: Vector2i = j.pos + Vector2i(dx, dy)
 			if s.grille.dans(t) and t != j.pos:
 				s.grille.contenu[s.grille.idx(t)] = 0
@@ -2837,7 +2837,34 @@ func test_assemblage_sans_limite() -> void:
 	var p_self: Dictionary = plan_de.call(["anneau", "soi", "flamme"])
 	s._executer_capacite(j, p_self, j.pos)
 	verifier(int(j.sante) < int(j.sante_max), "Anneau + Soi + Flamme : le lanceur se brûle lui-même")
-	# 4. il ne reste que deux erreurs structurelles
+	# 4. les séquences absurdes tiennent : rien ne casse, tout se paie
+	j.mana = 99999
+	j.mana_max = 99999
+	var n_vivants0: int = s.vivants().size()
+	var p_nuee: Dictionary = plan_de.call(["nuee", "echo_de_chair"])
+	var tuiles_nuee: int = s.tuiles_du_plan(j, p_nuee, j.pos + Vector2i(2, 0)).size()
+	s._executer_capacite(j, p_nuee, j.pos + Vector2i(2, 0))
+	var invoques: int = s.vivants().size() - n_vivants0
+	verifier(tuiles_nuee == 4 and invoques >= 2 and invoques <= tuiles_nuee, "Nuée + Écho de chair : %d créatures sur %d tuiles" % [invoques, tuiles_nuee])
+	# les seize formes rendent chacune des tuiles — aucune ne tombe dans le défaut « point »
+	var muettes: Array[String] = []
+	for fid in GameData.catalogues.modules.keys():
+		var fm: Dictionary = GameData.catalogues.modules[fid]
+		if str(fm.module_type) != "forme" or str(fm.geometrie) in ["point", "soi", "tuile", "colonne"]:
+			continue
+		var n_t: int = Capacites.tuiles_de_forme(s.grille, str(fm.geometrie), j.pos, j.pos + Vector2i(2, 0), int(fm.taille_base)).size()
+		if n_t <= 1:
+			muettes.append("%s(%d)" % [fid, n_t])
+	verifier(muettes.is_empty(), "chaque forme couvre plus d'une tuile (%s)" % str(muettes))
+	s.bombes.clear()
+	var p_folie: Dictionary = plan_de.call(["ligne", "croix", "bombe", "bombe"])
+	var t_folie: int = s.tuiles_du_plan(j, p_folie, j.pos + Vector2i(2, 0)).size()
+	verifier(p_folie.erreurs.is_empty() and p_folie.charges_sup.size() == 1 and p_folie.formes_sup.size() == 1, "Ligne + Croix + Bombe + Bombe : assemblé sans un mot")
+	s._executer_capacite(j, p_folie, j.pos + Vector2i(2, 0))
+	verifier(s.bombes.size() == 2 * t_folie, "deux charges par tuile de l'union : %d bombes" % s.bombes.size())
+	verifier(s._facteur_surface(j, p_folie, j.pos + Vector2i(2, 0)) == t_folie, "et le prix × %d tuiles" % t_folie)
+	s.bombes.clear()
+	# 5. il ne reste que deux erreurs structurelles
 	verifier(not s.capacites.assembler(["point", "carre"], 10, "1d4", {}, {}).erreurs.is_empty(), "sans noyau : toujours une erreur")
 	verifier(not s.capacites.assembler(["nexiste_pas", "etincelle"], 10, "1d4", {}, {}).erreurs.is_empty(), "module inconnu : toujours une erreur")
 

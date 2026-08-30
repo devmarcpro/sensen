@@ -292,6 +292,38 @@ static func tuiles_de_forme(g: Grille, geometrie: String, origine: Vector2i, cib
 				var p := cible + perp * w
 				if g.dans(p):
 					res.append(p)
+		"sillage":   # les N tuiles DERRIÈRE la cible, dans l'axe du lanceur — pour ce qui traverse
+			if d == Vector2i.ZERO:
+				return res
+			for k in range(1, taille + 1):
+				var p: Vector2i = cible + d * k
+				if g.dans(p):
+					res.append(p)
+		"chemin":   # le trajet du lanceur vers la cible : tout ce qu'il longe est touché
+			for p in g.ligne(origine, cible, taille):
+				if p != origine and g.dans(p):
+					res.append(p)
+		"colonne":   # toute la hauteur d'une tuile : la tuile elle-même (volants et contrebas y sont)
+			res.append(cible)
+		"horizon":   # toutes les tuiles en vue dans la portée — le prix des ticks est le garde-fou
+			var r := mini(taille, 12)
+			for y in range(-r, r + 1):
+				for x in range(-r, r + 1):
+					var p := origine + Vector2i(x, y)
+					if p != origine and g.dans(p) and Grille.distance(origine, p) <= r and g.ligne_de_vue(origine, p):
+						res.append(p)
+		"nuee":   # N tuiles aléatoires autour de la cible, reproductibles pour une même visée
+			var rng := RandomNumberGenerator.new()
+			rng.seed = hash([origine, cible, taille])
+			var cand: Array[Vector2i] = []
+			for y in range(-2, 3):
+				for x in range(-2, 3):
+					var p := cible + Vector2i(x, y)
+					if g.dans(p):
+						cand.append(p)
+			while res.size() < taille and not cand.is_empty():
+				res.append(cand.pop_at(rng.randi_range(0, cand.size() - 1)))
 		_:
+			push_warning("Capacités : géométrie de forme inconnue « %s » — visée au point" % geometrie)
 			res.append(cible)
 	return res
