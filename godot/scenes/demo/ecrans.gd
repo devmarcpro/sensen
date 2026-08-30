@@ -14,6 +14,8 @@ var titre: Label
 var liste: ItemList
 var detail: RichTextLabel
 var apercu_sort: ApercuSort   # l'aperçu visuel du sort (écran Composer, Écrans d'interface)
+var composeur: Composeur      # le composeur en glisser-déposer (écran Composer)
+var corps: HBoxContainer      # liste + détail : caché quand le composeur est ouvert
 var boutons: HBoxContainer
 var entrees: Array = []                 # ce que chaque ligne de la liste représente
 var selection := 0
@@ -50,6 +52,13 @@ func _ready() -> void:
 	var h := HBoxContainer.new()
 	h.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	v.add_child(h)
+	corps = h
+	composeur = Composeur.new()
+	composeur.ecrans = self
+	composeur.main = main
+	composeur.visible = false
+	v.add_child(composeur)
+	v.move_child(composeur, 1)
 	liste = ItemList.new()
 	liste.custom_minimum_size = Vector2(340, 0)
 	liste.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -104,7 +113,9 @@ func ouvrir(nom: String) -> void:
 	courant = nom
 	selection = 0
 	panneau.visible = true
-	apercu_sort.visible = nom == "composer"
+	apercu_sort.visible = false
+	corps.visible = nom != "composer"
+	composeur.visible = nom == "composer"
 	rafraichir()
 
 
@@ -112,6 +123,8 @@ func fermer() -> void:
 	courant = ""
 	panneau.visible = false
 	apercu_sort.visible = false
+	composeur.visible = false
+	corps.visible = true
 
 
 func _process(delta: float) -> void:
@@ -129,6 +142,8 @@ func _process(delta: float) -> void:
 func touche(ev: InputEventKey) -> bool:
 	if ev.keycode == KEY_TAB:
 		fermer()
+		return true
+	if courant == "composer" and ev.keycode != KEY_ESCAPE and ev.keycode != KEY_V and composeur.touche(ev):
 		return true
 	match ev.keycode:
 		KEY_ESCAPE:
@@ -1120,50 +1135,20 @@ func _construire_composer(j: Dictionary) -> void:
 	for m in sequence_composee:
 		noms.append(tr(GameData.catalogues.modules.get(str(m), {}).get("name_key", str(m))))
 	titre.text = tr("ui.ecran.composer").format({"sequence": " → ".join(noms) if not noms.is_empty() else "—", "n": sequence_composee.size(), "max": int(slots.modules)})
-	apercu_sort.visible = true   # l'aperçu visuel du sort en cours (décision du designer, 2026-08-30)
-	apercu_sort.montrer(main.sim.plan_sequence(j, sequence_composee.duplicate()) if not sequence_composee.is_empty() else {})
-	var connus: Array = j.get("modules_connus", []).duplicate()
-	if connus.is_empty():
-		liste.add_item(tr("ui.composer.vide"), null, false)
-		entrees.append({"kind": "texte", "texte": ""})
-		return
-	var apercu := ""
-	if not sequence_composee.is_empty():   # le plan réel : avec l'arme tenue et les niveaux du personnage
-		apercu = _apercu_plan(main.sim.plan_sequence(j, sequence_composee.duplicate()))
-	for type in ["forme:cible", "forme:lanceur", "noyau", "modificateur", "condition", "declencheur", "liaison"]:
-		var du_type: Array = []
-		for m in connus:
-			var md0: Dictionary = GameData.catalogues.modules.get(str(m), {})
-			var t0 := str(md0.get("module_type", ""))
-			if t0 == "forme":   # deux familles : projetée à distance, ou émise depuis soi (Six types de modules)
-				t0 = "forme:" + str(md0.get("origine", "cible"))
-			if t0 == type:
-				du_type.append(str(m))
-		if du_type.is_empty():
-			continue
-		du_type.sort()
-		du_type.sort_custom(func(a: String, b: String) -> bool:   # le stock en tête, les modules vides à la fin
-			var ca: int = int(j.get("modules_charges", {}).get(a, 0))
-			var cb: int = int(j.get("modules_charges", {}).get(b, 0))
-			return ca > cb if ca != cb else a < b)
-		liste.add_item(tr("ui.composer.type").format({"type": tr("type_module." + type)}), null, false)
-		entrees.append({"kind": "texte", "texte": apercu})
-		for m in du_type:
-			var md: Dictionary = GameData.catalogues.modules[m]
-			var fois: int = sequence_composee.count(m)   # un module peut entrer plusieurs fois (no limit : deux Bombes, deux Concentrations)
-			var fam := str(md.get("famille", ""))   # « quoi fait quoi » : la famille se lit dans la liste
-			var ch: int = int(j.get("modules_charges", {}).get(str(m), 0))   # Grimoires : les charges restantes
-			liste.add_item(("[%d] " % fois if fois > 0 else "[ ] ") + tr(md.name_key) + (" ×%d" % ch) + ("  · " + fam if not fam.is_empty() else ""))
-			var contrib := _contribution_module(j, m, fois > 0)   # ce que CE module ajoute au sort (plan avec / sans)
-			entrees.append({"kind": "module_composer", "module": m, "texte": tr("ui.composer.module").format({"nom": tr(md.name_key), "desc": str(md.get("description", ""))})
-				+ "\n" + tr("ui.composer.charges").format({"n": ch}) + "\n" + contrib + "\n\n" + apercu})
+	# Le composeur en glisser-déposer (décision du designer, 2026-08-30) remplace la liste : slots, cartes, nom, Wu Xing.
+	corps.visible = false
+	composeur.visible = true
+	composeur.reconstruire(j, sequence_composee.duplicate())
 	_bouton(tr("ui.composer.valider"), _valider_composition)
 
 
 func _valider_composition() -> void:
 	var j: Dictionary = main.joueur()
-	if main.sim.composer_capacite(j, sequence_composee):
+	var seq: Array = composeur.sequence()
+	if main.sim.composer_capacite(j, seq, composeur.nom_choisi()):
 		sequence_composee = []
+		composeur.slots = []
+		composeur.nom.text = ""
 		ouvrir("capacites")
 	else:
 		rafraichir()

@@ -93,9 +93,12 @@ func _ready() -> void:
 			scene.ecrans.ouvrir(args[i2 + 1])
 	for i5 in args.size():   # --selection N : la ligne sélectionnée dans l'écran ouvert (son détail s'affiche)
 		if args[i5] == "--selection" and i5 + 1 < args.size() and scene.ecrans.est_ouvert():
-			scene.ecrans.selection = int(args[i5 + 1])
-			scene.ecrans.liste.select(scene.ecrans.selection)
-			scene.ecrans._montrer_detail()
+			if scene.ecrans.courant == "composer":
+				scene.ecrans.composeur.selectionner(int(args[i5 + 1]))
+			else:
+				scene.ecrans.selection = int(args[i5 + 1])
+				scene.ecrans.liste.select(scene.ecrans.selection)
+				scene.ecrans._montrer_detail()
 	# Un survol simulé sur une créature, pour voir la prévisualisation.
 	var j: Dictionary = scene.joueur()
 	for e in scene.sim.vivants():

@@ -752,6 +752,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 		elif ev.button_index == MOUSE_BUTTON_RIGHT and not j.is_empty() and j.vivant:
 			_contexte(_tuile_sous(get_local_mouse_position()))
 	elif ev is InputEventKey and ev.pressed and not ev.echo:
+		if ecrans.est_ouvert() and ecrans.courant == "composer" and ecrans.composeur.nom.has_focus():
+			return   # on tape le nom du sort : les lettres vont au champ, pas au jeu
 		if ecrans.est_ouvert() and ecrans.touche(ev):
 			return
 		if carte.ouverte:

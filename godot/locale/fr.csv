@@ -636,7 +636,7 @@ ui.menu.capacites,Capacités
 ui.ecran.capacites,"CAPACITÉS — {n}/{max} (Entrée : supprimer · modules par capacité : {modules})"
 ui.capacites.nouvelle,+ Nouvelle capacité
 ui.capacites.ligne,"{nom} — {modules}"
-ui.ecran.composer,"COMPOSER — séquence : {sequence} ({n} modules, sans plafond) · Entrée : ajouter (même deux fois) · Suppr : retirer · V : valider"
+ui.ecran.composer,"COMPOSER — {sequence} ({n} modules, sans plafond) · V : valider"
 ui.composer.type,[{type}]
 ui.composer.module,"{nom} — {desc}"
 ui.composer.valider,Valider (V)
@@ -2209,3 +2209,10 @@ ui.composer.telegraphe,"⚠ {ticks} ticks : au-delà de {seuil}, le sort est té
 ui.apercu.vide,"Aperçu : ajoutez une forme et un noyau"
 ui.apercu.tuiles,"{n} tuiles · {origine} · portée {portee} · visée nominale vers le nord"
 ui.apercu.horizon,"Horizon : toutes les entités en vue"
+ui.composeur.nom,"Nom du sort :"
+ui.composeur.nom_auto,"(le nom du noyau)"
+ui.composeur.slot_vide,"glisser ici"
+ui.composeur.aide,"glisser une carte dans un slot · double-clic : premier slot libre · clic droit : vider · ← → Entrée Suppr"
+ui.composeur.glisser,"Glissez une forme et un noyau dans les slots — ou Entrée sur une carte."
+ui.composeur.wuxing,"{dominante} domine · engendre {engendre} · domine {domine}"
+ui.composeur.wuxing_vide,"Wu Xing du sort : —"

@@ -2813,7 +2813,7 @@ func slots_capacites(e: Dictionary) -> Dictionary:
 
 ## Composer une capacité depuis des modules connus : l'assembleur juge la séquence, les slots bornent le **nombre**
 ## de capacités tenues prêtes — pas la longueur d'une séquence (assemblage sans limite, 2026-08-30).
-func composer_capacite(e: Dictionary, sequence: Array) -> bool:
+func composer_capacite(e: Dictionary, sequence: Array, nom: String = "") -> bool:
 	var slots := slots_capacites(e)
 	if sequence.is_empty() or e.get("capacites", []).size() >= int(slots.capacites):
 		EventBus.emettre(&"journal", [&"journal.capacite_refusee", {}])
@@ -2828,6 +2828,8 @@ func composer_capacite(e: Dictionary, sequence: Array) -> bool:
 		return false
 	var noyau: Dictionary = plan.noyau
 	var nom_key := str(noyau.get("name_key", "capacite.etincelle.name"))
+	if not nom.strip_edges().is_empty():   # le nom choisi par le joueur (Écrans d'interface) : tr() le rend tel quel
+		nom_key = nom.strip_edges()
 	var cap := {"id": "cap_%d_%d" % [e.get("capacites", []).size(), sequence.hash()], "name_key": nom_key, "modules": sequence.duplicate()}
 	if not e.has("capacites"):
 		e["capacites"] = []
