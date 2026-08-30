@@ -650,11 +650,14 @@ func _process(delta: float) -> void:
 		minuterie_pas = DELAI_PAS
 		for nom in sim.combats.keys():
 			sim.pas(nom)
-	if sim.horloge_monde.mode == Horloge.Mode.ACTION:
+	if sim.horloge_monde.mode == Horloge.Mode.ACTION and j.get("horloge", "monde") == "monde":
 		# En donjon, le monde n'avance qu'à l'action — mais SANS la cadence de lisibilité des combats : un pas
 		# toutes les 0,12 s faisait payer au joueur 0,12 s réelle par « attend » de chaque PNJ de l'étage
 		# (30 PNJ ≈ 4 s de gel après chaque action — le « lag » constaté le 2026-08-31). L'horloge du monde
-		# se vide donc chaque image, jusqu'au joueur ou au garde-fou.
+		# se vide donc chaque image, jusqu'au joueur ou au garde-fou. QUAND LE JOUEUR EST EN COMBAT (sur une
+		# horloge de combat), le monde ne se vide pas : sans lui pour la bloquer, l'horloge tournait sans fin
+		# (128 pas × 60 images/s = le « dès qu'on rentre en combat ça lag énormément », 2026-08-31) —
+		# temporalités parallèles : pendant un combat, le reste de l'étage attend.
 		var garde_pas := 128
 		while garde_pas > 0 and sim.pas("monde"):
 			garde_pas -= 1
@@ -746,10 +749,18 @@ func _dessiner_occulteurs(n: Paperdoll) -> void:
 			n.draw_set_transform(Vector2.ZERO)
 
 
+var _attein_cle := ""   # le flood des tuiles atteignables ne se recalcule que quand la situation change (lag en combat, 2026-08-31)
+
+
 func _maj_atteignables() -> void:
 	var j := joueur()
+	var en_combat: bool = not j.is_empty() and j.vivant and sim.attente.has(joueur_id) and sim.en_combat(j)
+	var cle := "%s|%s|%d" % [str(j.get("pos", Vector2i.ZERO)), str(en_combat), sim.grille.decouvert.size()]
+	if cle == _attein_cle:
+		return
+	_attein_cle = cle
 	atteignables = {}
-	if j.vivant and sim.attente.has(joueur_id) and sim.en_combat(j):
+	if en_combat:
 		atteignables = sim.grille.atteignables(j.pos, BUDGET_ATTEIGNABLE, Etres.est_volant(j))
 
 
