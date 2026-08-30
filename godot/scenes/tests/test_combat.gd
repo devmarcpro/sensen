@@ -142,6 +142,7 @@ func _ready() -> void:
 	test_types_ennemis()
 	test_loot_assemble()
 	test_budgets()
+	test_sauvegarde_partout()
 	test_loot()
 	test_coffres_et_rares()
 	test_gemmes_et_livres()
@@ -6245,6 +6246,30 @@ func test_brouillard() -> void:
 
 
 # ---------------------------------------------------------------- Étape 2 : génération de donjon
+
+func test_sauvegarde_partout() -> void:
+	# Sauvegarde (designer, 2026-08-31) : possible partout — en donjon, l'expédition reprend où elle était.
+	var s := Simulation.new(71)
+	s.graine_monde = 71
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	s.charger_donjon("ruine", 71, 6, 1, j)
+	s.donjon.etages = 3
+	j.sante = 17
+	j.or = 33
+	s.expedition.tues = 4
+	var vivants_avant: int = s.vivants().size()
+	verifier(s.sauvegarder("test_partout"), "sauvegarder en plein donjon")
+	var s2 := Simulation.new(71)
+	verifier(s2.charger_sauvegarde("test_partout"), "recharger la partie")
+	var j2: Dictionary = s2.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	verifier(s2.lieu == "donjon" and int(s2.donjon.etage) == 1 and int(s2.donjon.etages) == 3, "on reprend dans le donjon, au même étage (%s %s/%s)" % [s2.lieu, s2.donjon.get("etage"), s2.donjon.get("etages")])
+	verifier(s2.horloge_monde.mode == Horloge.Mode.ACTION, "l'horloge du donjon est à l'action")
+	verifier(s2.vivants().size() == vivants_avant, "les êtres de l'étage sont ceux de la sauvegarde (%d/%d)" % [s2.vivants().size(), vivants_avant])
+	verifier(int(j2.sante) == 17 and int(j2.or) == 33 and int(s2.expedition.tues) == 4, "PV, or et compteurs d'expédition conservés")
+	s2.attente[j2.id] = true
+	verifier(s2.intention(j2.id, {"type": "attendre"}), "et la partie continue")
+
 
 func test_budgets() -> void:
 	# Budgets de performance / Ordre de vérification (2026-08-31) : les critères mesurables sans écran ont un test.

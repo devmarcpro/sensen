@@ -185,8 +185,23 @@ func charger_camp(joueur: Dictionary = {}, cellule_choisie: Vector2i = Vector2i(
 		if not o.is_empty():
 			uids.append(o.uid)
 	_poser_contenant(monde.pos_monde(depart, e.coffre_depart), uids, "coffre")
+	var pnj_sauves: Dictionary = camp_sauve.get("entites", {})   # une sauvegarde en expédition : les PNJ du camp reviennent
+	var ordre_sauves: Array = camp_sauve.get("ordre", [])
+	var cont_sauves: Dictionary = camp_sauve.get("contenants_pos", {})
 	camp_sauve = {"entree": entree, "biome": e.biome, "cellule": depart}
 	_peupler_fenetre()
+	for id in ordre_sauves:
+		if not entites.has(id) and pnj_sauves.has(id):
+			var x2: Dictionary = pnj_sauves[id]
+			entites[id] = x2
+			ordre.append(id)
+			if x2.vivant and grille.dans(x2.pos) and grille.occupant(x2.pos).is_empty():
+				grille.placer(id, x2.pos)
+	for pos in cont_sauves.keys():
+		if grille.dans(pos):
+			contenants[grille.idx(pos)] = cont_sauves[pos]
+			if grille.contenu_de(pos).is_empty():
+				grille.poser_contenu(pos, "butin")
 	maj_vision()
 	monde.pregenerer_voisins()
 
@@ -5032,9 +5047,17 @@ func _tiquer_meteo(tick: int) -> void:
 
 ## Sauvegarde la partie (surface seulement : au camp ou à pied). Retourne vrai si tout est écrit.
 func sauvegarder(nom: String = "monde") -> bool:
-	if lieu != "camp" or monde == null:
+	# Sauvegarde possible partout (designer, 2026-08-31) : au camp comme en donjon. Seule l'arène de test reste hors jeu.
+	if not (lieu in ["camp", "donjon"]) or monde == null:
 		return false
-	monde.capturer(grille)
+	if lieu == "camp":
+		monde.capturer(grille)
+	for x in entites.values():   # aucun combat ne survit au rechargement (précédent : l'atelier) — on normalise à l'écriture
+		if x.horloge != "monde":
+			x.horloge = "monde"
+			x.compteur = horloge_monde.ticks
+			x.action_en_cours = {}
+	combats.clear()
 	var j := {}
 	for e in entites.values():
 		if e.controle == "joueur":
@@ -5071,6 +5094,16 @@ func sauvegarder(nom: String = "monde") -> bool:
 	ok = Sauvegarde.ecrire(nom, "entities.json", {"entites": autres, "ordre": ordre_autres, "contenants": contenants_monde}) and ok
 	ok = Sauvegarde.ecrire(nom, "items.json", instances) and ok
 	ok = Sauvegarde.ecrire(nom, "players/joueur.json", {"fiche": fiche_joueur, "etre": j}) and ok
+	var exp := {"lieu": lieu}
+	if lieu == "donjon":   # l'expédition en cours : l'étage se régénère de sa graine, ses êtres sont dans entities.json
+		var camp_ent: Dictionary = camp_sauve.get("entites", {})
+		var camp_cont := {}
+		if camp_sauve.has("grille") and camp_sauve.has("contenants"):
+			for gi in camp_sauve.contenants.keys():
+				camp_cont[camp_sauve.grille.pos_de(int(gi))] = camp_sauve.contenants[gi]
+		exp = {"lieu": "donjon", "donjon": {"theme": donjon.theme, "graine": int(donjon.graine), "id": int(donjon.id), "etage": int(donjon.etage), "etages": int(donjon.etages), "cellule": donjon.get("cellule", Vector2i(-9999, -9999)), "corruption": float(donjon.get("corruption", 0.0))},
+			"expedition": expedition, "camp": {"entites": camp_ent, "ordre": camp_sauve.get("ordre", []), "contenants": camp_cont}, "retour": j.get("retour", Vector2i.ZERO)}
+	ok = Sauvegarde.ecrire(nom, "expedition.json", exp) and ok
 	if ok:
 		EventBus.emettre(&"sauvegarde_faite", [nom])
 	return ok
@@ -5121,6 +5154,50 @@ func charger_sauvegarde(nom: String = "monde") -> bool:
 			monde.dormants[cell] = sc.dormants
 	# Le joueur, puis la fenêtre autour de lui (les cellules mémorisées y sont rejouées).
 	var joueur_sauve: Dictionary = pj.etre
+	var exp: Variant = Sauvegarde.lire(nom, "expedition.json")
+	if exp != null and str(exp.get("lieu", "camp")) == "donjon":
+		# Sauvegarde en expédition (designer, 2026-08-31) : l'étage se régénère de sa graine, puis les êtres
+		# sauvés remplacent les êtres frais ; le camp mis de côté garde ses PNJ (réinjectés à la sortie).
+		var d: Dictionary = exp.donjon
+		horloge_monde = TickManager.creer("monde", Horloge.Mode.TEMPS_REEL, float(regles.r.ticks_par_seconde_exploration))
+		monde.tick(int(w.ticks))
+		modifs_terrain = w.get("modifs_terrain", {})
+		portails = w.get("portails", {})
+		joueur_sauve["retour"] = exp.get("retour", Vector2i.ZERO)
+		donjon = {"etages": int(d.etages), "cellule": d.get("cellule", Vector2i(-9999, -9999)), "corruption": float(d.get("corruption", 0.0)), "id": -1}
+		entites[joueur_sauve.id] = joueur_sauve   # charger_donjon reprendra cette fiche telle quelle
+		lieu = "donjon"
+		charger_donjon(str(d.theme), int(d.graine), int(d.id), int(d.etage), joueur_sauve)
+		for id in ordre.duplicate():   # les êtres frais de la régénération cèdent la place aux êtres sauvés
+			if id != joueur_sauve.id:
+				grille.liberer(entites[id].pos)
+				entites.erase(id)
+				ordre.erase(id)
+		for id in ent.ordre:
+			entites[id] = ent.entites[id]
+			ordre.append(id)
+			if entites[id].vivant and grille.dans(entites[id].pos):
+				grille.placer(id, entites[id].pos)
+		contenants = {}
+		for pos in ent.contenants.keys():
+			if grille.dans(pos):
+				contenants[grille.idx(pos)] = ent.contenants[pos]
+				if grille.contenu_de(pos).is_empty():
+					grille.poser_contenu(pos, "butin")
+		expedition = exp.get("expedition", {})
+		etages_visites.clear()
+		camp_sauve = {"entree": w.camp.entree, "biome": str(w.camp.biome), "cellule": w.camp.cellule,
+			"entites": exp.camp.get("entites", {}), "ordre": exp.camp.get("ordre", []), "contenants_pos": exp.camp.get("contenants", {})}
+		horloge_monde.ticks = int(w.ticks)
+		if temps_a_l_action():
+			horloge_monde.mode = Horloge.Mode.ACTION
+		for x in entites.values():
+			x.compteur = mini(int(x.get("compteur", 0)), horloge_monde.ticks)
+		prochain_donjon = int(w.prochain_donjon)
+		_n_entites = int(w.n_entites)
+		maj_vision()
+		EventBus.emettre(&"journal", [&"journal.chargement", {}])
+		return true
 	_reinitialiser()
 	monde.centre = Vector2i(-1, -1)
 	modifs_terrain = w.get("modifs_terrain", {})   # après _reinitialiser, qui les vide : ce que le monde doit rendre
