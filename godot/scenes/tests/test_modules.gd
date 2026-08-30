@@ -138,12 +138,36 @@ func _ready() -> void:
 			for q in [j.pos + Vector2i(-1, 0), cible + Vector2i(1, 0), cible + Vector2i(2, 0)]:
 				voisines += " %s:occ=%s bloque=%s h=%d contenu=%d" % [str(q), str(s.grille.occupant(q)), str(s.grille.bloque_passage(q)), s.grille.h(q), s.grille.contenu[s.grille.idx(q)]]
 			print("  détail ", c, " forme=", forme_c, " m=", m.pos, " vivant=", m.vivant, " camp=", m.camp, "/", j.camp, " j=", j.pos, " h_j=", s.grille.h(j.pos), " statuts_m=", m.get("statuts", []).size(), voisines)
-	print("ESSAIS : %d plans assemblés et exécutés, %d refusés ; noyaux sans effet observable sur un mannequin : %d" % [n, refus.size(), muets.size()])
+	# 3. Les autres types : ajouté à un sort de base, chaque module doit changer le PLAN (ticks, prix, dés, portée, taille,
+	# éléments, drapeaux, paramètres, conditions, liaisons, charge différée…). Un module qui n'y change rien est inerte.
+	var inertes: Array[String] = []
+	var base_plan := _empreinte(s.plan_sequence(j, ["carre", "etincelle"]))
+	var base_forme := _empreinte(s.plan_sequence(j, ["point", "etincelle"]))
+	for t in ["modificateur", "condition", "liaison", "declencheur", "forme"]:
+		for m in par_type.get(t, []):
+			var seq: Array = ["carre", "etincelle", m] if t != "forme" else [m, "etincelle"]
+			if t == "declencheur":
+				seq = ["point", "etincelle", m, "carre", "gel"]
+			var e_m := _empreinte(s.plan_sequence(j, seq))
+			if e_m == (base_plan if t != "forme" else base_forme) and not (t == "forme" and m == "point"):
+				inertes.append(m)
+	print("ESSAIS : %d plans assemblés et exécutés, %d refusés ; noyaux sans effet observable sur un mannequin : %d ; autres modules inertes dans le plan : %d" % [n, refus.size(), muets.size(), inertes.size()])
+	for m in inertes:
+		print("  inerte ", m)
 	for c in muets:
 		print("  muet ", c, " ", str(GameData.catalogues.modules[c].get("effets", [])), " ", str(GameData.catalogues.modules[c].get("effet", {})))
 	for r in refus.slice(0, 40):
 		print("  refus ", r)
 	get_tree().quit()
+
+
+## L'empreinte d'un plan : tout ce qu'un module peut y changer.
+func _empreinte(pl: Dictionary) -> String:
+	var cles := ["ticks", "ressource", "monnaie", "des", "des_bonus", "mult", "portee", "taille", "geometrie", "origine", "elements", "effets", "drapeaux", "parametres", "conditions", "liaisons", "charge_suivante", "charges_sup", "formes_sup", "fois", "ligne_de_vue", "avertissements"]
+	var parts: Array[String] = []
+	for k in cles:
+		parts.append("%s=%s" % [k, str(pl.get(k, null))])
+	return " ".join(parts)
 
 
 ## Tout ce qui peut changer quand un noyau agit, en une photo comparable.
