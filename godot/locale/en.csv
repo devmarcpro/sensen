@@ -2308,3 +2308,8 @@ ui.teinte.cendre,ash
 ui.teinte.rubis,ruby
 ui.teinte.ivoire,ivory
 ui.teinte.nuit,night
+ui.inventaire.col_nom,Name
+ui.inventaire.col_type,Type
+ui.inventaire.col_qualite,Quality
+ui.inventaire.col_poids,Weight
+ui.inventaire.col_quantite,Qty

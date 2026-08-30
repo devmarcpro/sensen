@@ -24,6 +24,7 @@ var ramassages := 0
 var portes_ouvertes := 0
 var pas := 0
 var attentes := 0
+var soins := 0
 var captures := 0
 var derniere_capture_frame := -999
 var en_combat_avant := false
@@ -148,6 +149,13 @@ func _process(_delta: float) -> void:
 		if sim.intention(jid, {"type": "attendre"}):
 			attentes += 1
 		return
+	if int(j.sante) * 10 < int(j.sante_max) * 6:   # blessé et tranquille : le Baume (soin sur soi), sinon on souffle
+		soins += 1
+		for k in j.capacites.size():
+			if "baume" in j.capacites[k].get("modules", []) and sim.intention(jid, {"type": "capacite", "index": k, "cible": j.pos}):
+				return
+		if int(j.sante) * 10 < int(j.sante_max) * 4 and sim.intention(jid, {"type": "attendre"}):
+			return
 	for d in Grille.DIRS:   # un contenant à côté : on prend
 		var t: Vector2i = j.pos + d
 		if sim.grille.dans(t) and "contenant" in sim.grille.contenu_de(t).get("tags", []):
@@ -210,8 +218,8 @@ func _fin(raison: String) -> void:
 	set_process(false)
 	var j: Dictionary = scene.sim.entites.get(jid, {})
 	_capturer("fin")
-	print("PARCOURS : %s — étages descendus %d (arrivé à l'étage %d) · combats %d · coups portés %d · coups reçus %d (%d dégâts) · kills %d · morts %d · ramassages %d · portes ouvertes %d · pas %d · attentes %d · images %d · captures %d · PV finaux %d/%d" % [
-		raison, etages_atteints, int(scene.sim.donjon.get("etage", 0)), combats, coups_portes, coups_recus, degats_recus, kills, morts, ramassages, portes_ouvertes, pas, attentes, frames, captures, int(j.get("sante", 0)), int(j.get("sante_max", 0))])
+	print("PARCOURS : %s — étages descendus %d (arrivé à l'étage %d) · combats %d · coups portés %d · coups reçus %d (%d dégâts) · kills %d · morts %d · ramassages %d · portes ouvertes %d · pas %d · soins %d · attentes %d · images %d · captures %d · PV finaux %d/%d" % [
+		raison, etages_atteints, int(scene.sim.donjon.get("etage", 0)), combats, coups_portes, coups_recus, degats_recus, kills, morts, ramassages, portes_ouvertes, pas, soins, attentes, frames, captures, int(j.get("sante", 0)), int(j.get("sante_max", 0))])
 	for ev in evenements:
 		print("  ", ev)
 	for l in scene.journal:

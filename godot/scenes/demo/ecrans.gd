@@ -452,6 +452,7 @@ func rafraichir() -> void:
 		droite.custom_minimum_size = Vector2(360, 0)
 		droite.size_flags_stretch_ratio = 0.9
 		detail.size_flags_vertical = Control.SIZE_FILL   # le Wu Xing de l'objet juste sous le détail, pas au fond du panneau
+		detail.custom_minimum_size = Vector2(0, 340)
 		inventaire_visuel.reconstruire()
 	elif courant == "atelier":
 		droite.custom_minimum_size = Vector2(380, 0)
@@ -462,6 +463,7 @@ func rafraichir() -> void:
 		droite.custom_minimum_size = Vector2(0, 0)
 		droite.size_flags_stretch_ratio = 1.0
 		detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		detail.custom_minimum_size = Vector2(0, 0)
 	if courant == "titre":   # rien derrière l'écran principal : pas de « Fermer »
 		pass
 	elif courant == "creation":

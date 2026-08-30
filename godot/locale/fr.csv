@@ -2318,3 +2318,8 @@ ui.teinte.cendre,cendre
 ui.teinte.rubis,rubis
 ui.teinte.ivoire,ivoire
 ui.teinte.nuit,nuit
+ui.inventaire.col_nom,Nom
+ui.inventaire.col_type,Type
+ui.inventaire.col_qualite,Qualité
+ui.inventaire.col_poids,Poids
+ui.inventaire.col_quantite,Qté
