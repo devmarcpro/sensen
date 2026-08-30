@@ -2169,3 +2169,7 @@ ui.composer.contribution,"Ce module ajoute : {liste}"
 ui.composer.contribution_nulle,"Ce module n’ajoute rien à cette séquence"
 ui.composer.cout,"Coût réel : {min}–{max} {monnaie} · affinité de l’arme ({arme}) ×{affinite}"
 functionality.mains_nues.name,Mains nues
+barre.sante,Vie
+barre.endurance,Endurance
+barre.mana,Mana
+barre.faim,Faim

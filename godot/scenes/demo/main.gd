@@ -49,6 +49,7 @@ var zoom := 1.0
 
 var terrain: Terrain              # couche statique : les tuiles, dessinées une fois (perf É0)
 var hud: Hud                      # couche au-dessus des êtres : barres, garde, télégraphes, jauges
+var hud_ecran: HudEcran           # le HUD fixe à l'écran : compas-horloge, pentagramme, barres, hotbar (Écrans d'interface)
 var brouillard: Brouillard        # couche du brouillard de guerre, au-dessus du terrain et des êtres
 var noeuds_vegetaux: Dictionary = {}   # index de tuile → Vegetal (billboards des arbres et plantes de la fenêtre)
 var noeuds: Dictionary = {}       # id d'être → nœud creature.tscn (le paperdoll)
@@ -125,6 +126,9 @@ func _ready() -> void:
 	ecrans = Ecrans.new()
 	ecrans.main = self
 	add_child(ecrans)
+	hud_ecran = HudEcran.new()
+	hud_ecran.main = self
+	$CanvasLayer.add_child(hud_ecran)
 	ambiance = CanvasModulate.new()
 	add_child(ambiance)
 	voiles = Node2D.new()
@@ -599,12 +603,17 @@ func _unhandled_input(ev: InputEvent) -> void:
 	if ev is InputEventMouseMotion:
 		survol = _tuile_sous(get_local_mouse_position())
 	elif ev is InputEventMouseButton and ev.pressed:
-		if ev.button_index == MOUSE_BUTTON_WHEEL_UP:
-			zoom = minf(2.0, zoom * 1.1)
-			scale = Vector2.ONE * zoom
-		elif ev.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			zoom = maxf(0.5, zoom / 1.1)
-			scale = Vector2.ONE * zoom
+		if ev.button_index == MOUSE_BUTTON_WHEEL_UP or ev.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			var haut: bool = ev.button_index == MOUSE_BUTTON_WHEEL_UP
+			if ev.ctrl_pressed:   # Ctrl + molette : le zoom (contrôles, décision du 2026-08-30)
+				zoom = minf(2.0, zoom * 1.1) if haut else maxf(0.5, zoom / 1.1)
+				scale = Vector2.ONE * zoom
+			elif not ecrans.est_ouvert():   # molette seule : la hotbar tourne, en boucle
+				var j_m := joueur()
+				var n := hotbar_entrees(j_m).size() if not j_m.is_empty() else 0
+				if n > 0:
+					_hotbar(posmod(hotbar_sel + (-1 if haut else 1), n))
+			return
 		elif ev.button_index == MOUSE_BUTTON_LEFT and not j.is_empty() and j.vivant:
 			_clic(_tuile_sous(get_local_mouse_position()), lourde_armee)
 		elif ev.button_index == MOUSE_BUTTON_RIGHT and not j.is_empty() and j.vivant:
