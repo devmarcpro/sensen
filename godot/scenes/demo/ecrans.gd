@@ -43,6 +43,8 @@ func _ready() -> void:
 	panneau.add_child(v)
 	titre = Label.new()
 	titre.add_theme_font_size_override("font_size", 16)
+	titre.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART   # un long titre (séquence composée) se replie, le panneau ne déborde pas de l'écran
+	titre.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.add_child(titre)
 	var h := HBoxContainer.new()
 	h.size_flags_vertical = Control.SIZE_EXPAND_FILL

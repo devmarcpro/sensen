@@ -81,6 +81,13 @@ func _ready() -> void:
 		jt["vue_sale"] = true
 		sim.maj_vision()
 		scene._apres_changement_de_grille()
+	for i4 in args.size():   # --sequence a,b,c : une séquence pré-remplie dans le composeur (et ses charges)
+		if args[i4] == "--sequence" and i4 + 1 < args.size():
+			var seq: Array = Array(args[i4 + 1].split(","))
+			var jc: Dictionary = scene.joueur()
+			for m in seq:
+				scene.sim.crediter_module(jc, str(m), 9)
+			scene.ecrans.sequence_composee = seq
 	for i2 in args.size():   # --ecran inventaire|atelier|feuille|menu : l'écran ouvert — après le chargement
 		if args[i2] == "--ecran" and i2 + 1 < args.size():
 			scene.ecrans.ouvrir(args[i2 + 1])

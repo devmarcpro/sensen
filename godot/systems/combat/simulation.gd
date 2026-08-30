@@ -8961,6 +8961,15 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 
 ## Dégâts d'un noyau sur une cible : noyau « arme » = formule de l'arme ; noyau magique = jet × niveau.
 ## La réduction d'armure ne s'applique qu'à 50 % aux dégâts magiques (Armure par zone).
+## Les dés d'une bombe : la notation × le noyau répété, plus les dés de bonus des modificateurs (Concentration…) —
+## ce que l'écran Composer annonce est ce qui explose.
+static func _des_bombe(notation: String, fois: int, des_bonus: int) -> String:
+	var p := Des.analyser(Des.multiplier(notation, fois))
+	if p.faces == 0:
+		return str(p.bonus)
+	return "%dd%d" % [maxi(1, p.n + des_bonus), p.faces] + ("+%d" % p.bonus if p.bonus > 0 else "")
+
+
 ## Les invocations des noyaux (Modules) : la charge de Bombe, la Tourelle, le Relevé, l'Écho de chair.
 ## Chacune réutilise la mécanique que le jeu a déjà — bombes, affûts, relevé du Fossoyeur, compagnon temporaire.
 func _invoquer(e: Dictionary, mode: String, tuiles: Array[Vector2i], cible_pos: Vector2i, plan: Dictionary, tick: int) -> bool:
@@ -8975,7 +8984,7 @@ func _invoquer(e: Dictionary, mode: String, tuiles: Array[Vector2i], cible_pos: 
 					continue
 				bombes.append({"pos": q, "fin": tick + int(b.get("retard_ticks", 20)), "horloge": str(e.horloge),
 					"puissance": float(b.get("puissance", 40.0)) * float(fois), "rayon": int(b.get("rayon", 2)),
-					"degats": Des.multiplier(str(b.get("degats", "3d6")), fois), "source": e.id})
+					"degats": _des_bombe(str(b.get("degats", "3d6")), fois, int(plan.get("des_bonus", 0))), "source": e.id})
 				posees += 1
 			if posees > 0:
 				EventBus.emettre(&"journal", [&"journal.bombes_posees", {"nom": e.name_key, "n": posees, "retard": int(b.get("retard_ticks", 20))}])
