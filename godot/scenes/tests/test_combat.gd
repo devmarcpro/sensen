@@ -6644,6 +6644,28 @@ func test_loot() -> void:
 	s.pas(j.horloge)
 	s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false})
 	verifier(j.chaine.segments.back().element == "feu" and epee.affixes[0].compteur == 2, "2e coup : Feu (une attaque sur 2)")
+	# Riposte à cadence (armure) : tous les n coups reçus, la prochaine attaque gagne +des dés
+	var cuirasse := s.generer_objet("proto_cuirasse_cuir", 2, {}, "rare", 1)
+	cuirasse.affixes = [{"id": "cadence_riposte", "params": {"n": 2, "des": 2}, "compteur": 0, "etat": {}}]
+	s.donner(j, cuirasse.uid)
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(s.intention(j.id, {"type": "equiper", "objet": cuirasse.uid}), "équiper la cuirasse à riposte")
+	s._appliquer_degats(j, 2, loup.id, {})
+	s._appliquer_degats(j, 2, loup.id, {})
+	verifier(int(j.get("riposte_des", 0)) == 2, "2 coups reçus : +2 dés armés (%d)" % int(j.get("riposte_des", 0)))
+	verifier(int(s._affixes_offensifs(j, s.items[j.equipement.main_principale], loup).des) >= 2, "les dés armés entrent dans la prévisualisation du prochain coup")
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false})
+	verifier(int(j.get("riposte_des", 0)) == 0, "le coup suivant dépense le bonus de riposte")
+	# Combo Wu Xing (arme, très rare) : poser un segment en engendrement arme +2 dés
+	epee.affixes = [{"id": "wuxing_combo", "params": {"des": 2}, "compteur": 0, "etat": {}}]
+	j.chaine.segments = [{"element": "terre", "tick": 0}]   # terre engendre métal : le prochain coup Métal est un combo
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false})
+	verifier(int(j.get("combo_des", 0)) == 2, "le combo (terre → métal) arme +2 dés pour le coup suivant (%d)" % int(j.get("combo_des", 0)))
 	# Vol de vie
 	epee.affixes = [{"id": "meca_vol_de_vie", "params": {"pct": 8}, "compteur": 0, "etat": {}}]
 	j.sante = 30

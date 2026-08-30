@@ -4,11 +4,18 @@
   "slots_valides": [
     "main_principale"
   ],
-  "parametres": {},
+  "parametres": {
+    "des": [
+      2,
+      2
+    ]
+  },
   "effet": {
     "type": "wuxing_combo_des"
   },
-  "meilleur": {},
+  "meilleur": {
+    "des": "haut"
+  },
   "inerte": false,
   "tags": [
     "tres_rare"

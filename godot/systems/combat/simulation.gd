@@ -7466,6 +7466,8 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 		e.munitions_tirees += 1
 	# Affixes de l'arme (Loot — affixes) : vecteur, dés, armure ignorée, multiplicateurs — avant le jet.
 	var ax := _affixes_offensifs(e, arme, cible)
+	e["riposte_des"] = 0   # les bonus armés (riposte à cadence, combo) sont dépensés par ce coup — raté compris, la fenêtre passe
+	e["combo_des"] = 0
 	var vecteur: Dictionary = ax.vecteur
 	# Le jet de coup (Pipeline de résolution du combat) : critique ≥ crit_range, raté ≤ fumble_max ; Le Rieur élargit les deux queues.
 	var jet_coup := des.jet("1d20")
@@ -7529,6 +7531,9 @@ func _portee_effective(e: Dictionary, arme: Dictionary, fonct: Dictionary) -> Ve
 ## Les compteurs rythmiques avancent ici (une attaque = un cran, jamais par cible).
 func _affixes_offensifs(e: Dictionary, arme: Dictionary, cible: Dictionary) -> Dictionary:
 	var r := {"vecteur": _vecteur_arme_de(e, arme), "des": 0, "mult": 1.0, "ignore_armure": 0.0, "plat": 0}
+	# Bonus armés par les coups précédents (riposte à cadence, combo Wu Xing) — lus sans être consommés
+	# (la prévisualisation passe ici aussi) ; _frapper_arme les vide après le coup qui les dépense.
+	r.des += int(e.get("riposte_des", 0)) + int(e.get("combo_des", 0))
 	# Gemmes de l'arme : la taille en affinité déplace le vecteur (AJOUT normalisé), les dégâts
 	# élémentaires plats s'ajoutent si le coup porte cet élément.
 	if not _vecteur_pur(r.vecteur):   # Modificateurs d'affinité : « sur une arme PURE, jamais » — la pureté reste une propriété du craft
@@ -7756,6 +7761,10 @@ func _poser_segment(e: Dictionary, v_att: Dictionary, tick: int, origine: String
 	if not pref.is_empty() and float(v_att.get(pref, 0.0)) >= float(regles.r.get("chaine", {}).get("seuil_mixte", 0.25)):
 		element = pref
 	_declencher(e, "accord", e.derniere_cible_pos)
+	var precedent := str(e.chaine.segments.back().element) if not e.chaine.segments.is_empty() else ""
+	if wuxing.relation(precedent, element) == "engendre":   # un combo : la transition d'engendrement du cycle
+		for ax in Etres.affixes_equipes(e, items, affixes_defs, "wuxing_combo_des"):   # très rare : le combo arme +des dés sur le coup suivant
+			e["combo_des"] = int(e.get("combo_des", 0)) + int(ax.params.des)
 	var p := wuxing.poser(e.chaine, element, tick)
 	if p.resout:
 		e.erase("swap_gratuit_pris")
@@ -8020,6 +8029,11 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 				_declencher(e, "ouverture", cible.pos if e.id == att.id else att.pos)
 		if cible.vivant:
 			_declencher(cible, "riposte", att.pos)
+			# Riposte à cadence (Loot — affixes, armure) : tous les n coups reçus, la prochaine attaque du porteur gagne +des dés.
+			for ax in Etres.affixes_equipes(cible, items, affixes_defs, "cadence_riposte_des"):
+				ax.instance.compteur = int(ax.instance.compteur) + 1
+				if int(ax.instance.compteur) % int(ax.params.n) == 0:
+					cible["riposte_des"] = int(cible.get("riposte_des", 0)) + int(ax.params.des)
 	for p in vivants():
 		if p.id != cible.id and p.camp == cible.camp:
 			for d in p.declencheurs_armes.duplicate():
