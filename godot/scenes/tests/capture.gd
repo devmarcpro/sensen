@@ -87,6 +87,10 @@ func _ready() -> void:
 			for cid in args[i6 + 1].split(","):
 				scene.sim.triche(jc2, "creature", str(cid))
 			scene.sim.maj_vision()
+	for i7 in args.size():   # --statut id[,id…] : des statuts sur le joueur (triche) — les puces de la timeline
+		if args[i7] == "--statut" and i7 + 1 < args.size():
+			for sid in args[i7 + 1].split(","):
+				scene.sim.triche(scene.joueur(), "statut", str(sid))
 	for i4 in args.size():   # --sequence a,b,c : une séquence pré-remplie dans le composeur (et ses charges)
 		if args[i4] == "--sequence" and i4 + 1 < args.size():
 			var seq: Array = Array(args[i4 + 1].split(","))

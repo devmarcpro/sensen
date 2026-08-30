@@ -135,6 +135,22 @@ func _dessiner_timeline(sim, j: Dictionary, centre_haut: Vector2) -> void:
 		draw_string(ThemeDB.fallback_font, r.position + Vector2(2.0, -3.0), "+%d" % maxi(0, delta), HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.8, 0.8, 0.7))
 		if not e.action_en_cours.is_empty():   # l'action engagée, sous le nom
 			draw_string(ThemeDB.fallback_font, r.position + Vector2(-4.0, PORTRAIT + 21.0), "← " + tr(str(e.action_en_cours.get("name_key", ""))).left(8), HORIZONTAL_ALIGNMENT_LEFT, PORTRAIT + 10.0, 8, Color(1.0, 0.85, 0.5))
+		var tick_e: int = sim.tick_de(e)   # les états : une puce par statut, teintée par sa nature, les ticks restants dessous
+		var n_s := 0
+		for st in e.get("statuts", []):
+			if n_s >= 4:
+				break
+			var d_s: Dictionary = sim.statuts_defs.get(str(st.id), {})
+			var tags: Array = d_s.get("tags", [])
+			var c_s := Color(0.75, 0.45, 0.95) if ("controle" in tags or bool(d_s.get("controle", false))) else (Color(0.9, 0.3, 0.3) if "negatif" in tags else Color(0.35, 0.8, 0.45))
+			var p_s := r.position + Vector2(n_s * 15.0 - 8.0, PORTRAIT + 25.0 + (10.0 if not e.action_en_cours.is_empty() else 0.0))
+			draw_rect(Rect2(p_s, Vector2(11, 11)), Color(c_s.r * 0.3, c_s.g * 0.3, c_s.b * 0.3, 0.95))
+			draw_rect(Rect2(p_s, Vector2(11, 11)), c_s, false, 1.0)
+			draw_string(ThemeDB.fallback_font, p_s + Vector2(2.0, 9.0), tr(str(d_s.get("name_key", st.id))).left(1).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 8, c_s)
+			var reste: int = maxi(0, int(st.get("fin", 0)) - tick_e)
+			var texte_r := ("%dk" % (reste / 1000)) if reste >= 1000 else str(reste)   # un statut d'un jour se lit « 24k »
+			draw_string(ThemeDB.fallback_font, p_s + Vector2(-1.0, 20.0), texte_r, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.8, 0.8, 0.75))
+			n_s += 1
 		if k < acteurs.size() - 1:   # le trait vers le suivant
 			draw_line(r.position + Vector2(PORTRAIT + 2.0, PORTRAIT * 0.5), r.position + Vector2(pas - 2.0, PORTRAIT * 0.5), Color(1, 1, 1, 0.3), 1.0)
 
