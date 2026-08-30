@@ -107,6 +107,9 @@ SAISONS : ACTIVÉES à l'étape 10, avec l'élevage et l'agriculture
 > [!success] Corrigé le 2026-08-31 — l'orage arrose aussi
 > Le semis testait l'id `pluie` en dur ; il lit le tag `arrose` des états de météo (`weather_states`), que la pluie et l'orage portent. Le bonus (`agriculture.pluie_bonus`) reste appliqué au semis seulement ; « accumulé pendant la pousse » est une question pour [[À juger — parcours de jeu]].
 
+> [!success] Décidé et codé le 2026-08-31 — la pluie se voit
+> Les états à effet `arrose` (pluie, orage) n'existaient à l'écran que comme texte du HUD. Décision (visuel, aucun asset) : le client dessine des **traits de pluie** obliques au-dessus du terrain et des êtres (sous le HUD), animés, densité double sous l'orage ; rien en donjon (pas de météo). La neige gardait déjà son sol blanchi, la glace son eau pâle, le feu ses flammes — la pluie rejoint le rang des météos lisibles. `capture.tscn -- --meteo <id>` force un état pour vérifier à l'écran.
+
 ## Liens
 - **Dépend de** : [[Génération par couches de bruit]], [[Application des stats de matériau]], [[Simulation à ticks]]
 - **Alimente** : [[Eau et liquides]], [[Agriculture et élevage]], [[Véhicules]], [[Catalogue matériaux — Météorologiques]], [[Dialogue PNJ]]

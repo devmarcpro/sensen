@@ -114,6 +114,9 @@ func _ready() -> void:
 			scene.sim.horloge_monde.ticks = int(float(args[i3 + 1]) / 24.0 * 24000.0)
 			scene.sim.maj_vision()
 			scene._maj_ambiance()
+	for im in args.size():   # --meteo id : force la météo (triche) — pluie, orage, neige, brouillard…
+		if args[im] == "--meteo" and im + 1 < args.size() and scene.sim != null:
+			scene.sim.triche(scene.joueur(), "meteo", str(args[im + 1]))
 	if "--torche" in args and scene.sim != null:   # --torche : une torche en main (Éclairage, la nuit)
 		var jt0: Dictionary = scene.joueur()
 		var torche: Dictionary = scene.sim.generer_objet("torche", 1, {}, "commun", 0)

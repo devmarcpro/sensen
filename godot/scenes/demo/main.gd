@@ -41,6 +41,7 @@ var minimap: Minimap               # coin haut-droit (Décision — Minimap en 2
 var ambiance: CanvasModulate       # la lumière du cycle jour-nuit (un « uniform global »)
 var lumieres: Node2D               # halos additifs des sources locales la nuit
 var voiles: Node2D                 # le voile par tuile du donjon (mélange normal : l'additif ne peut pas assombrir)
+var pluie: PluieVisuelle           # traits de pluie des états « arrose » (Météo, 2026-08-31)
 var carte: Carte                   # la carte du monde (M), aussi le choix de la case de départ
 var fiche_en_attente: Dictionary = {}   # la fiche créée, en attendant le choix de la case de départ
 var minuterie_autosave := 300.0    # autosave toutes les 5 minutes réelles (Sauvegarde)
@@ -109,6 +110,12 @@ func _ready() -> void:
 	hud.z_as_relative = false
 	hud.z_index = 4090   # au-dessus des êtres (états, flottants, barres)
 	add_child(hud)
+	pluie = PluieVisuelle.new()
+	pluie.proprio = self
+	pluie.top_level = true   # effet d'écran : la pluie ignore le déplacement caméra de la scène (main bouge, elle non)
+	pluie.z_as_relative = false
+	pluie.z_index = 4050   # la pluie tombe devant le monde et les êtres, sous le HUD (Météo, 2026-08-31)
+	add_child(pluie)
 	EventBus.damage_dealt.connect(func(src: String, _c: String, _d: int, _det: Dictionary) -> void: if noeuds.has(src): noeuds[src].frapper())
 	arenes.assign(GameData.catalogues.get("prototype_arenas", {}).keys())
 	arenes.sort()
