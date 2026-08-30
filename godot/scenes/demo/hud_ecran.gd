@@ -11,7 +11,7 @@ const RAYON_COMPAS := 34.0
 const RAYON_PENTA := 30.0
 const BARRE_L := 160.0
 const BARRE_H := 10.0
-const CASE := 40.0
+const CASE := 56.0   # assez large pour lire « Étincelle » ou « Attaque » sans les tronquer
 const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "endurance": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95), "faim": Color(0.55, 0.35, 0.15)}
 
 
@@ -119,4 +119,4 @@ func _dessiner_hotbar(sim, j: Dictionary, o: Vector2) -> void:
 		draw_string(ThemeDB.fallback_font, r.position + Vector2(3.0, 11.0), str((k + 1) % 10), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.7, 0.65, 0.5))
 		if k < entrees.size():
 			var nom := str(entrees[k].nom)
-			draw_string(ThemeDB.fallback_font, r.position + Vector2(3.0, CASE - 6.0), nom.left(6), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.95, 0.95, 0.9))
+			draw_string(ThemeDB.fallback_font, r.position + Vector2(3.0, CASE - 6.0), nom.left(9), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.95, 0.95, 0.9))
