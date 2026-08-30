@@ -45,6 +45,9 @@ var fiche_en_attente: Dictionary = {}   # la fiche créée, en attendant le choi
 var minuterie_autosave := 300.0    # autosave toutes les 5 minutes réelles (Sauvegarde)
 var creation: Dictionary = {}      # l'écran de création, tant que le personnage n'existe pas
 var titre_ouvert := false          # l'écran principal (Écrans d'interface) : le monde derrière est un décor, l'entrée est bloquée
+var xp_cumul: Dictionary = {}      # XP du joueur reçue dans la fenêtre en cours : clé → total (XP de combat)
+var xp_fenetre := 0.0              # secondes restantes avant de « lâcher » le cumul en flottant + journal
+var xp_flottants: Array = []       # [{lignes, t}] : les textes qui montent au-dessus du joueur
 var graine_monde := -1             # la graine choisie à l'écran Monde, portée à la simulation
 var fiche_monde: Dictionary = {}   # la fiche créée, en attente de l'écran Monde
 const STATS := ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]
@@ -108,6 +111,10 @@ func _ready() -> void:
 	arenes.assign(GameData.catalogues.get("prototype_arenas", {}).keys())
 	arenes.sort()
 	EventBus.journal.connect(_sur_journal)
+	EventBus.xp_gagnee.connect(func(id: String, cle: String, xp: int) -> void:
+		if id == joueur_id and xp > 0:
+			xp_cumul[cle] = int(xp_cumul.get(cle, 0)) + xp
+			xp_fenetre = 0.4)
 	EventBus.fenetre_recentree.connect(func(_o: Vector2i) -> void:
 		_apres_changement_de_grille()
 		_ouvrir_chargement())
@@ -620,6 +627,20 @@ func _process(delta: float) -> void:
 		_maj_ui()
 		minimap.rafraichir()
 		_maj_ambiance()
+	if xp_fenetre > 0.0:   # l'XP de l'action : cumulée, puis affichée d'un bloc
+		xp_fenetre -= delta
+		if xp_fenetre <= 0.0 and not xp_cumul.is_empty():
+			var lignes: Array[String] = []
+			var resume: Array[String] = []
+			for cle in xp_cumul.keys():
+				lignes.append("+%d %s" % [int(xp_cumul[cle]), _nom_xp(str(cle))])
+				resume.append("%s +%d" % [_nom_xp(str(cle)), int(xp_cumul[cle])])
+			xp_flottants.append({"lignes": lignes, "t": 0.0})
+			_log(tr("journal.xp").format({"liste": " · ".join(resume)}))
+			xp_cumul = {}
+	for f in xp_flottants:
+		f.t += delta
+	xp_flottants = xp_flottants.filter(func(f: Dictionary) -> bool: return f.t < 1.6)
 	minuterie_autosave -= delta
 	if minuterie_autosave <= 0.0:
 		minuterie_autosave = 300.0
@@ -1192,6 +1213,19 @@ func _ecran(t: Vector2i, h: int) -> Vector2:
 	return Vector2((l.x - l.y) * TW * 0.5, (l.x + l.y) * TH * 0.5 - h * HSTEP)
 
 
+## Le nom d'une piste d'XP (XP de combat) : l'élément, la compétence, le module, sinon la clé.
+func _nom_xp(cle: String) -> String:
+	if cle.begins_with("element_"):
+		return tr("element." + cle.substr(8))
+	if GameData.catalogues.competences.has(cle):
+		return tr(str(GameData.catalogues.competences[cle].get("name_key", cle)))
+	if GameData.catalogues.modules.has(cle):
+		return tr(str(GameData.catalogues.modules[cle].get("name_key", cle)))
+	var cle_tr := "xp." + cle
+	var t := tr(cle_tr)
+	return t if t != cle_tr else cle
+
+
 ## Une position affichée au joueur : locale à sa cellule (0-127), jamais la coordonnée monde.
 func _coord_locale(t: Vector2i) -> Vector2i:
 	if sim != null and sim.monde != null and sim.lieu == "camp":
@@ -1279,6 +1313,11 @@ func _draw() -> void:
 			continue
 		var c := _ecran(t, g.h(t)) + Vector2(-6, 4)
 		draw_string(ThemeDB.fallback_font, c, str(atteignables[t]), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1, 1, 0.8, 0.8))
+	for f in xp_flottants:   # l'XP de l'action, qui monte et s'efface au-dessus du joueur (XP de combat)
+		var base := _ecran(j.pos, g.h(j.pos)) + Vector2(-20.0, -52.0 - f.t * 22.0)
+		var a: float = clampf(1.6 - f.t, 0.0, 1.0)
+		for k in f.lignes.size():
+			draw_string(ThemeDB.fallback_font, base + Vector2(0.0, -12.0 * (f.lignes.size() - 1 - k)), str(f.lignes[k]), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.95, 0.9, 0.5, a))
 
 
 ## Un polygone convexe dessiné en éventail de triangles par draw_primitive : draw_colored_polygon triangule en float32
@@ -1624,16 +1663,17 @@ func _maj_ui() -> void:
 	if not j.vivant:
 		bas.append(tr("journal.defaite"))
 	ui_bas.text = "\n".join(bas)
-	# Timeline : les prochaines actions de l'horloge du joueur, par compteur croissant.
-	var timeline: Array[String] = [tr("ui.timeline")]
+	ui_droite.text = ""   # la timeline est graphique (HudEcran._dessiner_timeline, Écrans d'interface)
+
+
+## La timeline (Écrans d'interface) : les êtres de l'horloge du joueur, lui compris et ceux en vue à ≤ 12 tuiles,
+## dans l'ordre de leur compteur — c'est la lecture de la simulation, sans règle nouvelle.
+func acteurs_timeline(j: Dictionary) -> Array:
+	if sim == null or j.is_empty():
+		return []
 	var acteurs := sim.vivants().filter(func(e: Dictionary) -> bool: return e.horloge == j.horloge and (e.id == joueur_id or (Grille.distance(e.pos, j.pos) <= 12 and sim.voit(j, e.pos))))
 	acteurs.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.compteur < b.compteur)
-	for e in acteurs.slice(0, 12):
-		var suffixe := ""
-		if not e.action_en_cours.is_empty():
-			suffixe = " ← " + tr(e.action_en_cours.name_key)
-		timeline.append("  t=%d  %s%s" % [e.compteur, tr(e.name_key), suffixe])
-	ui_droite.text = "\n".join(timeline)
+	return acteurs.slice(0, 10)
 
 
 ## Prévisualisation des dégâts avec le détail du calcul (la lisibilité est le but).

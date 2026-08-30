@@ -2866,6 +2866,13 @@ func test_assemblage_sans_limite() -> void:
 	verifier(int(j.endurance) == 0 and int(j.sante) == 40 - 15 * int(s.regles.r.endurance.epuisement_mult), "l'épuisement : 15 d'endurance manquants → PV (%d)" % int(j.sante))
 	j.sante = 40
 	j.endurance = 80
+	var xp_vus: Array = []   # l'XP s'annonce à chaque versement (XP de combat, 2026-08-30)
+	var cb_xp := func(id: String, cle: String, xp: int) -> void: xp_vus.append([id, cle, xp])
+	EventBus.xp_gagnee.connect(cb_xp)
+	s.gagner_xp(j, "epee", 7)
+	EventBus.dispatcher()
+	EventBus.xp_gagnee.disconnect(cb_xp)
+	verifier(xp_vus.size() == 1 and xp_vus[0][1] == "epee" and int(xp_vus[0][2]) == 7, "xp_gagnee est émis à chaque versement (%s)" % str(xp_vus))
 	var p_cc: Dictionary = plan_de.call(["carre", "carre", "etincelle"])
 	var n_cc: int = s.tuiles_du_plan(j, p_cc, j.pos + Vector2i(2, 0)).size()
 	verifier(p_cc.formes_sup.is_empty() and int(p_cc.taille) == 2 * int(p_bombe.taille) and n_cc > n_tuiles, "Carré + Carré : une forme plus grande (%d tuiles > %d), pas une union" % [n_cc, n_tuiles])

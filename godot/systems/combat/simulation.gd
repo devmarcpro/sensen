@@ -7808,6 +7808,7 @@ func gagner_xp(e: Dictionary, cle: String, xp: int) -> void:
 	if not e.has("xp_depuis_repos"):
 		e["xp_depuis_repos"] = {}
 	e.xp_depuis_repos[cle] = int(e.xp_depuis_repos.get(cle, 0)) + xp   # « consommées récemment » (sommeil)
+	EventBus.emettre(&"xp_gagnee", [e.id, cle, xp])   # l'XP s'affiche à chaque action (XP de combat, 2026-08-30)
 	var gagnes := progression.verser(e, cle, xp)
 	var stat := progression.stat_associee(cle)
 	if not stat.is_empty() and e.corps.stats.has(stat):

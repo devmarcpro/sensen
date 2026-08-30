@@ -2225,3 +2225,5 @@ style.neutre.name,Neutral
 ui.composeur.filtre_tous,All
 ui.composeur.style,"Spell style: {liste}"
 ui.composeur.style_neutre,"Spell style: —"
+journal.xp,"XP: {liste}"
+xp.encaissement,Toughness

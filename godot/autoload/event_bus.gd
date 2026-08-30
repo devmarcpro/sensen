@@ -8,6 +8,7 @@ extends Node
 signal damage_dealt(source_id: String, cible_id: String, degats: int, detail: Dictionary)
 signal creature_killed(id: String, tueur_id: String)
 signal skill_xp_gained(id: String, competence: String, xp: int)
+signal xp_gagnee(id: String, cle: String, xp: int)               # tout versement d'XP (gagner_xp) : le client l'affiche pour le joueur
 signal skill_level_up(id: String, competence: String, niveau: int)
 signal combat_started(horloge: String, participants: Array)
 signal combat_ended(horloge: String)

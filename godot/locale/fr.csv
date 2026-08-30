@@ -2235,3 +2235,5 @@ style.neutre.name,Neutre
 ui.composeur.filtre_tous,Tous
 ui.composeur.style,"Style du sort : {liste}"
 ui.composeur.style_neutre,"Style du sort : —"
+journal.xp,"XP : {liste}"
+xp.encaissement,Encaissement
