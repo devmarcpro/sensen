@@ -29,6 +29,9 @@ Avec récolte infinie et progression sans plafond, l'inflation est structurellem
 > [!success] Codé le 2026-08-28 — étape 10.2
 > Puits en place : entretien du territoire, taxe de guilde `0,05 × gains de quêtes × (1 + 0,1 × (rang − 1))`, résurrection, mort. **Troc automatique** : un marchand à sec propose en échange un objet de son stock dont le prix est à ±15 % de la valeur de vente ; l'échange est fait d'office avec une ligne de journal (pas d'écran d'acceptation — à juger). Entraîneurs PNJ non codés.
 
+> [!success] Mis à jour le 2026-08-30 — les entraîneurs PNJ sont codés (le « non codés » ci-dessus est périmé)
+> Le puits existe depuis le 2026-08-28 ([[Potentiel]], callout « l'entraîneur ») : PNJ tagués `entraineur` (maîtres de guilde, gardes de village), *Entraîner* au dialogue, `coût = 20 or × niveau actuel`, +10 de potentiel plafonné ; l'or va à la bourse finie du PNJ. Testé (`test_entraineur_et_commandes`). Balayage du coffre : la phrase du callout précédent était restée en retard d'une note.
+
 ## Liens
 - **Dépend de** : [[Récolte]], [[Commerce et boutiques]], [[Prix suggéré]]
 - **Alimente** : [[Barèmes économiques]], [[Entretien et taxes]], [[Boutique passive]], [[Quêtes et guildes]]

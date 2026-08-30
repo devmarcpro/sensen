@@ -58,6 +58,9 @@ or = (80 + rareté×70 + distance_en_pas×45) × (chatoyant ? 3 : 1) × multipli
 > [!success] Codé le 2026-08-28 — les commandes
 > Chaque semaine (`_semaine_elevage`), si le registre n'est pas vide, une **commande** est tirée : une variété possédée, décalée d'**un ou deux pas** de couleur sur l'anneau (le motif conservé) — `or = (80 + rareté × 70 + pas × 45) × multiplicateur` (rareté = `capture.rarete` de l'espèce ; multiplicateur = 2 au palier 3 000 variétés ; chatoyant non codé). La commande s'affiche dans l'écran K ; on la **livre à un marchand** (option *Livrer la commande* du dialogue, bourse finie : il refuse s'il n'a pas l'or) avec un spécimen exact du sac. Une commande non livrée est remplacée la semaine suivante.
 
+> [!success] Mis à jour le 2026-08-30 — le chatoyant des commandes est codé (le « non codé » ci-dessus est périmé)
+> `combat_rules.elevage.chatoyant` : 10 % des commandes (`commande_chance`) exigent un **spécimen chatoyant** et paient **× 3** (`commande_mult`), conformément à la formule de la note ; la livraison vérifie le drapeau du spécimen, le journal l'annonce (`ui.gestion.commande_chatoyant`). Testé (`test_chatoyant`, `test_entraineur_et_commandes`). Balayage du coffre : le callout précédent n'avait pas suivi le code.
+
 ## Liens
 - **Dépend de** : [[Vivarium — loci et variétés]], [[Règle d'anneau]], [[Conditions de reproduction]]
 - **Alimente** : [[Vivarium — registre et paliers]], [[Commerce et boutiques]]
