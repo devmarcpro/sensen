@@ -285,6 +285,21 @@ func ligne_de_vue(a: Vector2i, b: Vector2i) -> bool:
 	return true
 
 
+## La première tuile qui coupe la vue de a vers b (même parcours que ligne_de_vue), ou (-1, -1) si la vue est dégagée.
+func premier_obstacle_vue(a: Vector2i, b: Vector2i) -> Vector2i:
+	if a == b or not dans(a) or not dans(b):
+		return Vector2i(-1, -1)
+	var ha := float(h(a) + hauteur_oeil)
+	var hb := float(h(b) + hauteur_oeil)
+	var n := maxi(absi(b.x - a.x), absi(b.y - a.y))
+	for i in range(1, n):
+		var t := float(i) / float(n)
+		var p := Vector2i(roundi(lerpf(a.x, b.x, t)), roundi(lerpf(a.y, b.y, t)))
+		if float(hauteur_vue(p)) > lerpf(ha, hb, t):
+			return p
+	return Vector2i(-1, -1)
+
+
 ## Les tuiles intermédiaires de la trajectoire a → b (sans les extrémités), dans l'ordre.
 func trajectoire(a: Vector2i, b: Vector2i) -> Array[Vector2i]:
 	var res: Array[Vector2i] = []

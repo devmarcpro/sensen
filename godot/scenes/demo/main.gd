@@ -1303,6 +1303,18 @@ func _draw() -> void:
 		var ok := sim.capacite_visable(j, plan, survol)
 		for t in sim.tuiles_du_plan(j, plan, survol):   # toutes les formes du plan (no limit), pas seulement la première
 			_losange(t, Color(0.3, 0.6, 1.0, 0.45) if ok else Color(0.5, 0.5, 0.5, 0.35))
+		if bool(plan.get("ligne_de_vue", true)) and survol != j.pos:   # la ligne de vue, dessinée : verte jusqu'à l'obstacle, rouge après
+			var obstacle := g.premier_obstacle_vue(j.pos, survol)
+			var depart := _ecran(j.pos, g.h(j.pos))
+			var arrivee := _ecran(survol, g.h(survol))
+			if obstacle == Vector2i(-1, -1):
+				draw_line(depart, arrivee, Color(0.4, 1.0, 0.5, 0.8), 2.0)
+			else:
+				var casse := _ecran(obstacle, g.h(obstacle))
+				draw_line(depart, casse, Color(0.4, 1.0, 0.5, 0.8), 2.0)
+				draw_line(casse, arrivee, Color(1.0, 0.3, 0.3, 0.7), 2.0)
+				draw_line(casse + Vector2(-7, -7), casse + Vector2(7, 7), Color(1.0, 0.3, 0.3, 0.95), 2.0)
+				draw_line(casse + Vector2(-7, 7), casse + Vector2(7, -7), Color(1.0, 0.3, 0.3, 0.95), 2.0)
 	if not chemin_en_cours.is_empty() and not j.is_empty():
 		var pts := PackedVector2Array([_ecran(j.pos, g.h(j.pos))])
 		for c in chemin_en_cours:
@@ -1690,13 +1702,13 @@ func _dessiner_bulle(ci: CanvasItem) -> void:
 	var lignes_b := _lignes_bulle(j, cible)
 	var larg := 0.0
 	for l in lignes_b:
-		larg = maxf(larg, ThemeDB.fallback_font.get_string_size(str(l), HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x)
+		larg = minf(420.0, maxf(larg, ThemeDB.fallback_font.get_string_size(str(l), HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x + 8.0))   # 420 px au plus
 	var haut := 14.0 * lignes_b.size() + 8.0
 	var pb := _ecran(cible.pos, g.h(cible.pos)) + Vector2(-larg * 0.5 - 6.0, -70.0 - haut)
 	ci.draw_rect(Rect2(pb, Vector2(larg + 12.0, haut)), Color(0.05, 0.05, 0.08, 0.9))
 	ci.draw_rect(Rect2(pb, Vector2(larg + 12.0, haut)), Color(0.9, 0.3, 0.25) if sim.ennemis(j, cible) else Color(0.35, 0.8, 0.45), false, 1.0)
 	for k in lignes_b.size():
-		ci.draw_string(ThemeDB.fallback_font, pb + Vector2(6.0, 14.0 * (k + 1) - 2.0), str(lignes_b[k]), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.95, 0.95, 0.9) if k > 0 else Color(1.0, 0.9, 0.6))
+		ci.draw_string(ThemeDB.fallback_font, pb + Vector2(6.0, 14.0 * (k + 1) - 2.0), str(lignes_b[k]), HORIZONTAL_ALIGNMENT_LEFT, larg + 2.0, 11, Color(0.95, 0.95, 0.9) if k > 0 else Color(1.0, 0.9, 0.6))   # bornée au cadre
 
 
 ## La bulle au survol d'une cible (Écrans d'interface, 2026-08-30) : PV, fourchette de l'arme, résistance Wu Xing, armure.

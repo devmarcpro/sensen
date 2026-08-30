@@ -90,6 +90,9 @@ func _ready() -> void:
 			var vivants_c: Array = scene.sim.vivants()
 			if not vivants_c.is_empty():
 				scene.survol = vivants_c.back().pos   # la dernière posée est sous la souris : bulle, prévisualisation
+	for i8 in args.size():   # --visee N : la capacité N du joueur en cours de visée (ligne de vue, forme, bulle)
+		if args[i8] == "--visee" and i8 + 1 < args.size():
+			scene.visee = int(args[i8 + 1])
 	for i7 in args.size():   # --statut id[,id…] : des statuts sur le joueur (triche) — les puces de la timeline
 		if args[i7] == "--statut" and i7 + 1 < args.size():
 			for sid in args[i7 + 1].split(","):
