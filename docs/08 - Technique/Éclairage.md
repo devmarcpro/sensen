@@ -40,6 +40,9 @@ global), pas en re-propagation — changer l'heure ne coûte rien.
 > [!success] Corrigé le 2026-08-28
 > Le voile du donjon est dessiné sur une couche à mélange normal (`voiles`, z 139), pas sur la couche additive des halos (`lumieres`, z 140) où un noir n'assombrit rien. Vérifié par `capture.tscn -- --arene 3 --donjon`.
 
+> [!success] Décidé et codé le 2026-08-30 — une lueur ambiante dans les étages ; le voile sous les êtres et sur toute la silhouette des blocs
+> **Instruction du designer** (parcours de donjon) : « la ligne de vue est trop petite ; les sprites et les blocs devraient passer devant le fog ». Ce qui bornait la vue n'était pas la Perception (10 tuiles) mais le **voile du noir** : sans torche, la carte de lumière est à 0 partout et tout est voilé à 80 % dès la deuxième tuile. Désormais chaque tuile d'un étage part d'une **lueur ambiante** `combat_rules.eclairage.donjon_ambiante` (6 sur 15 → voile à 48 %), qu'un thème peut remplacer (`lumiere_ambiante` dans sa fiche : une crypte à 2, une ruine à ciel ouvert à 10) ; les sources s'y ajoutent comme avant, la torche reste un vrai trou de lumière, et la détection lit la même carte (une salle ambiante rend visible, cible et joueur). **Couches** : le voile, le brouillard de guerre et les halos passent **sous les êtres et les végétaux** (z −4/−2/−3 contre 1..4000 pour les êtres — jusqu'ici un être à faible profondeur d'écran passait sous le brouillard, z 150), et le voile d'un mur couvre **toute la silhouette du bloc** (dessus et faces) plutôt qu'un losange posé à ses pieds. Le HUD du monde passe au-dessus de tout (z 4090).
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Application des stats de matériau]], [[Risques majeurs]]
 - **Alimente** : [[Cycle jour-nuit et sommeil]], [[IA des créatures]], [[Minimap et brouillard de guerre]]

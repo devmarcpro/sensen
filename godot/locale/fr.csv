@@ -73,6 +73,7 @@ ui.titre,SENSEN — prototype de combat
 ui.horloge,horloge {horloge} · {mode}
 ui.mode.exploration,exploration ({tps} ticks/s)
 ui.mode.combat,COMBAT — le temps n'avance qu'à l'action
+ui.mode.donjon,DONJON — le temps n'avance qu'à l'action
 ui.aide,ZQSD : se déplacer (8 directions) · R : ramasser · clic : se déplacer / frapper / creuser un mur adjacent (la pioche en main récolte) · maj+clic : attaque lourde · G : garde · espace : attendre · tab : arène suivante puis le camp · F5 : recharger les données
 ui.entite.ligne,{nom} pv {pv}/{pv_max} · end {end} · agit à t={compteur} · h={h}
 ui.case,"case ({x},{y}) h={h} · Δh vs toi : {dh}"

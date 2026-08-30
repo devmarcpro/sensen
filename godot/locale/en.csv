@@ -32,6 +32,7 @@ ui.titre,SENSEN — combat prototype
 ui.horloge,clock {horloge} · {mode}
 ui.mode.exploration,exploration ({tps} ticks/s)
 ui.mode.combat,COMBAT — time only moves when you act
+ui.mode.donjon,DUNGEON — time only moves when you act
 ui.aide,ZQSD: move (8 directions) · click: move / strike · shift+click: heavy attack · G: guard · space: wait · tab: next arena · F5: reload data
 ui.timeline,next actions:
 journal.deplacement,{nom} moves ({cout} ticks)

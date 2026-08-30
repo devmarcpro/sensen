@@ -462,7 +462,14 @@ func _reinitialiser() -> void:
 	for nom in TickManager.horloges.keys():
 		TickManager.retirer(nom)
 	horloge_monde = TickManager.creer("monde", Horloge.Mode.TEMPS_REEL, float(regles.r.ticks_par_seconde_exploration))
+	if temps_a_l_action():
+		horloge_monde.mode = Horloge.Mode.ACTION   # en donjon, le temps n'avance qu'à l'action (Boucle de tick, 2026-08-30)
 	horloge_monde.avancee.connect(_sur_avancee_monde)
+
+
+## En donjon, l'horloge du monde est une horloge d'action : elle s'arrête sur le joueur tant qu'il réfléchit.
+func temps_a_l_action() -> bool:
+	return lieu == "donjon" and bool(regles.r.get("donjon", {}).get("temps_a_l_action", false))
 
 
 ## Un être qui change d'étage garde son état (PV, mana, sac, XP, compétences) — instance ≠ définition.
@@ -6430,6 +6437,15 @@ func _exploser(b: Dictionary) -> void:
 
 
 ## L'entité vivante de cette horloge au plus petit compteur (ordre d'ajout en cas d'égalité).
+## Mode action : quelque chose est-il dû à l'instant présent de l'horloge du monde (être ou bombe) ?
+func _du_sur_monde() -> bool:
+	var e := _prochaine("monde")
+	if not e.is_empty() and int(e.compteur) <= horloge_monde.ticks:
+		return true
+	var b := _prochaine_bombe("monde")
+	return not b.is_empty() and int(b.fin) <= horloge_monde.ticks
+
+
 func _prochaine(nom: String) -> Dictionary:
 	var meilleure := {}
 	for id in ordre:
@@ -6439,11 +6455,16 @@ func _prochaine(nom: String) -> Dictionary:
 	return meilleure
 
 
+var _dans_avancee_monde := false
 func _sur_avancee_monde(_de: int, _a: int) -> void:
-	# Temps réel : tout ce qui est dû agit, dans l'ordre des compteurs.
-	var garde_fou := 64
-	while garde_fou > 0 and pas("monde"):
-		garde_fou -= 1
+	# Tout ce qui est dû agit, dans l'ordre des compteurs. En mode action (donjon), l'horloge saute d'elle-même
+	# dans pas() — ici on ne résout que ce qui est déjà dû (un avancer() externe : tests, voyage), sans réentrer.
+	if not _dans_avancee_monde:
+		_dans_avancee_monde = true
+		var garde_fou := 64
+		while garde_fou > 0 and (horloge_monde.mode == Horloge.Mode.TEMPS_REEL or _du_sur_monde()) and pas("monde"):
+			garde_fou -= 1
+		_dans_avancee_monde = false
 	_tiquer_faim(horloge_monde.ticks)
 	_tiquer_monde(horloge_monde.ticks)
 	_tiquer_territoire(horloge_monde.ticks)
@@ -9629,7 +9650,10 @@ var lumiere_sale := true
 func _recalculer_lumiere() -> void:
 	var n := grille.largeur * grille.hauteur_grille
 	carte_lumiere.resize(n)
-	carte_lumiere.fill(0)
+	var ambiante := 0
+	if lieu == "donjon" and not donjon.is_empty():   # Éclairage (2026-08-30) : une lueur ambiante de l'étage, le thème peut la fixer
+		ambiante = clampi(int(GameData.entree("dungeon_themes", str(donjon.theme)).get("lumiere_ambiante", regles.r.get("eclairage", {}).get("donjon_ambiante", 0))), 0, 15)
+	carte_lumiere.fill(ambiante)
 	var file: Array[int] = []
 	for gi in grille.meubles.keys():
 		var l := int(GameData.entree("meubles", str(grille.meubles[gi])).get("luminosite", 0))

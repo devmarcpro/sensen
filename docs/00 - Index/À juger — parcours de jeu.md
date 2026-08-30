@@ -67,6 +67,11 @@ etape: 10
 - **Les glyphes se voient** : l'IA les contourne comme le feu, sauf ceux posés sous Dissimulation (L'Ombre) — un piège qu'il faut faire traverser, meilleur jeu qu'un piège gratuit ? — [[Talents de classe]]
 - **La source maudite et l'autel du rituel** (étage 4+) : une transformation irréversible au clic droit, sans avertissement — audacieux ou cruel ? — [[Talents de race]]
 - **Les anneaux de transmutation** : fermer un élément de son arme pour concentrer sa chaîne — un vrai choix face au râtelier ? — [[Modificateurs d'affinité]]
+- **Le premier combat (parcours robot du 2026-08-30)** : à l'étage 1 la dague fait **1 dégât** au bandit (cuir + Perforant), lui met 11 par coup et 17 en critique sur 40 PV — mur ou leçon (reculer, composer un sort, prendre l'Attaque lourde) ? Faut-il baisser l'armure du bandit d'étage 1, ou donner un sort d'attaque au départ ? — [[Prototype de combat — spécification]]
+- **Respawn dans l'étage** : mourir te remet à l'entrée du même étage avec tout ton sac — doux ; voulu (prototype) ou faut-il la perte de l'expédition ? — [[Mort et pénalité]]
+- **Le donjon à l'action** : plus de temps réel dans les étages — le rythme des salles vides te paraît-il « tour par tour » ou juste calme ? Faut-il aussi fusionner les horloges de combat dans celle de l'étage ? — [[Boucle de tick]]
+- **La lueur ambiante** (6/15) : les étages sont-ils encore assez sombres pour que la torche compte ? Un thème plus noir (crypte à 2) ? — [[Éclairage]]
+- **Le journal en donjon** : huit « Bandit attend » par tick — filtrer les êtres hors de vue, ou tout garder pour la lecture ?
 - **L'embuscade** : +2 dés sur la frappe qui ouvre un combat contre une proie surprise (lynx, crocodile, serpent) — se sent-elle, ou se perd-elle dans le bruit des dés ? — [[Prototype de combat — spécification]]
 
 ## 4. Le village — PNJ, commerce, quêtes, compagnons (10 min)

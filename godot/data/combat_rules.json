@@ -1,6 +1,10 @@
 {
   "_doc": "Règles chiffrées du combat (configuration unique). Chaque valeur cite sa note : aucune n'est inventée ici, aucune n'est en dur dans le code.",
   "ticks_par_seconde_exploration": 10,
+  "donjon": {
+    "_doc": "Boucle de tick (2026-08-30) : en donjon, l'horloge du monde passe en mode action — le temps n'avance que quand le joueur agit",
+    "temps_a_l_action": true
+  },
   "deplacement": {
     "_doc": "Hauteur de terrain ±10 · Boucle de tick · poussee_des_par_tuile : degats (des) par tuile perdue quand une projection/attraction bute ; poussee_part_occupant : part encaissee par l'etre qui bloque",
     "cout_base": 3,
@@ -136,6 +140,10 @@
   "vision": {
     "_doc": "Hauteur de terrain ±10 : un relief plus haut que la ligne tireur→cible coupe la vue",
     "hauteur_oeil": 1
+  },
+  "eclairage": {
+    "_doc": "Éclairage (2026-08-30) : niveau de lumière ambiante (0-15) de chaque tuile d'un étage de donjon, sous les sources ; un thème peut le remplacer par lumiere_ambiante",
+    "donjon_ambiante": 6
   },
   "engagement": {
     "_doc": "Décision — Fuite et désengagement · IA des créatures (détection = Perception en tuiles) · Éclairage : la nuit, cible non éclairée vue à portée × vision_nuit, cible éclairée à portée × (1 + lumière/100 × lumiere_detection) ; lumiere_rayon = portée des meubles lumineux. Discretion de la cible : portee × (1 − min(discretion_max_pct, niveau × discretion_par_niveau)), jamais sous portee_min.",

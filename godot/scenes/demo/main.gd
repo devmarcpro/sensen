@@ -14,6 +14,7 @@ const RAYON_VUE := 20            # tuiles dessinées autour du joueur (une cellu
 var centre_terrain := Vector2i(-99, -99)   # centre de la dernière passe statique du terrain
 var vue_version := -1                      # version du champ de vue dessiné (brouillard de guerre)
 var centre_brouillard := Vector2i(-99, -99) # centre de la dernière passe du brouillard
+var decouvert_dessine := -1                 # nombre de tuiles découvertes à la dernière passe du terrain (une découverte = redessin)
 
 var sim: Simulation
 var arenes: Array[String] = []
@@ -52,7 +53,7 @@ var gros_flottants: Array = []     # [{texte, pos, couleur, t}] : CRITIQUE / RAT
 var graine_monde := -1             # la graine choisie à l'écran Monde, portée à la simulation
 var fiche_monde: Dictionary = {}   # la fiche créée, en attente de l'écran Monde
 const STATS := ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]
-var zoom := 1.0
+var zoom := 2.0   # au maximum par défaut (décision du designer, 2026-08-30)
 
 var terrain: Terrain              # couche statique : les tuiles, dessinées une fois (perf É0)
 var hud: Hud                      # couche au-dessus des êtres : barres, garde, télégraphes, jauges
@@ -96,17 +97,17 @@ class Hud extends Node2D:
 func _ready() -> void:
 	terrain = Terrain.new()
 	terrain.proprio = self
-	terrain.z_index = -1
+	terrain.z_index = -10   # couches du monde SOUS les êtres et les végétaux (z 1..4000) : brouillard, voile, halos (2026-08-30)
 	add_child(terrain)
 	brouillard = Brouillard.new()
 	brouillard.proprio = self
 	brouillard.z_as_relative = false
-	brouillard.z_index = 150
+	brouillard.z_index = -2
 	add_child(brouillard)
 	hud = Hud.new()
 	hud.proprio = self
 	hud.z_as_relative = false
-	hud.z_index = 200
+	hud.z_index = 4090   # au-dessus des êtres (états, flottants, barres)
 	add_child(hud)
 	EventBus.damage_dealt.connect(func(src: String, _c: String, _d: int, _det: Dictionary) -> void: if noeuds.has(src): noeuds[src].frapper())
 	arenes.assign(GameData.catalogues.get("prototype_arenas", {}).keys())
@@ -166,12 +167,12 @@ func _ready() -> void:
 	add_child(ambiance)
 	voiles = Node2D.new()
 	voiles.z_as_relative = false
-	voiles.z_index = 139
+	voiles.z_index = -4
 	voiles.draw.connect(_dessiner_voiles)
 	add_child(voiles)
 	lumieres = Node2D.new()
 	lumieres.z_as_relative = false
-	lumieres.z_index = 140
+	lumieres.z_index = -3
 	var mat_add := CanvasItemMaterial.new()
 	mat_add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
 	lumieres.material = mat_add
@@ -554,7 +555,13 @@ func _dessiner_voiles() -> void:
 		if a > 0.02:
 			var c := _ecran(t, g.h(t))
 			var col := Color(0.02, 0.02, 0.05, a)
-			voiles.draw_primitive(PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)]), PackedColorArray([col, col, col, col]), PackedVector2Array())
+			var ct := g.contenu_de(t)
+			var hm := (int(ct.get("hauteur_vue", 0)) * HSTEP) if (g.bloque_passage(t) and not ("vegetation" in ct.get("tags", []))) else 0
+			if hm > 0:   # un mur : toute la silhouette du bloc s'assombrit, pas un losange posé sur ses pieds
+				voiles.draw_colored_polygon(PackedVector2Array([c + Vector2(-TW * 0.5, 0), c + Vector2(-TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm),
+					c + Vector2(TW * 0.5, -hm), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5)]), col)
+			else:
+				voiles.draw_primitive(PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)]), PackedColorArray([col, col, col, col]), PackedVector2Array())
 
 
 func _halo(c: Vector2, intensite: float) -> void:
@@ -621,9 +628,11 @@ func _process(delta: float) -> void:
 		minuterie_pas = DELAI_PAS
 		for nom in sim.combats.keys():
 			sim.pas(nom)
+		if sim.horloge_monde.mode == Horloge.Mode.ACTION:   # en donjon, le monde aussi n'avance qu'à l'action
+			sim.pas("monde")
 	_maj_noeuds(delta)
-	if Grille.distance(j.pos, centre_terrain) > RAYON_VUE / 3:
-		terrain.queue_redraw()   # le joueur s'éloigne du centre de la passe statique
+	if Grille.distance(j.pos, centre_terrain) > RAYON_VUE / 3 or sim.grille.decouvert.size() != decouvert_dessine:
+		terrain.queue_redraw()   # le joueur s'éloigne du centre de la passe statique, ou il a découvert des tuiles
 	if int(j.get("vue_version", 0)) != vue_version or Grille.distance(j.pos, centre_brouillard) > RAYON_VUE / 3:
 		brouillard.queue_redraw()   # son champ de vue a changé : seul le brouillard se redessine
 	hud.queue_redraw()
@@ -1385,6 +1394,7 @@ func _dessiner_terrain(ci: CanvasItem) -> void:
 	var j := joueur()
 	var c: Vector2i = j.pos if not j.is_empty() else g.origine + Vector2i(g.largeur / 2, g.hauteur_grille / 2)
 	centre_terrain = c
+	decouvert_dessine = g.decouvert.size()
 	var x0 := maxi(g.origine.x, c.x - RAYON_VUE)
 	var x1 := mini(g.origine.x + g.largeur - 1, c.x + RAYON_VUE)
 	var y0 := maxi(g.origine.y, c.y - RAYON_VUE)
@@ -1394,7 +1404,9 @@ func _dessiner_terrain(ci: CanvasItem) -> void:
 		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
 			var y := s - x
 			var t := Vector2i(x, y)
-			_dessine_tuile(ci, t)   # tous les murs de la fenêtre, en blocs pleins
+			if not g.decouvert.has(g.idx(t)):
+				continue   # jamais vue : rien (le fond de la scène est le brouillard) — le terrain se redessine à chaque découverte
+			_dessine_tuile(ci, t)   # tous les murs découverts de la fenêtre, en blocs pleins
 			if "vegetation" in g.contenu_de(t).get("tags", []):
 				garder[g.idx(t)] = true
 				_assurer_vegetal(t)
@@ -1520,8 +1532,7 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 		return
 	centre_brouillard = j.pos
 	vue_version = int(j.get("vue_version", 0))
-	var fond := Color(0.3, 0.3, 0.3)   # la couleur de fond de la scène (clear color)
-	var voile := Color(0.05, 0.05, 0.08, 0.55)
+	var voile := Color(0.05, 0.05, 0.08, 0.55)   # le sol mémorisé, hors de vue
 	var x0 := maxi(g.origine.x, j.pos.x - RAYON_VUE)
 	var x1 := mini(g.origine.x + g.largeur - 1, j.pos.x + RAYON_VUE)
 	var y0 := maxi(g.origine.y, j.pos.y - RAYON_VUE)
@@ -1531,24 +1542,26 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 			var t := Vector2i(x, s - x)
 			var idx := g.idx(t)
 			var vu := g.decouvert.has(idx)
-			if vu and sim.voit(j, t):
+			if not vu:
+				continue   # jamais vue : la passe du terrain n'a rien dessiné, le fond de la scène suffit
+			if sim.voit(j, t):
 				if noeuds_vegetaux.has(idx):
 					noeuds_vegetaux[idx].modulate = Color.WHITE
 				continue
 			var c := _ecran(t, g.h(t))
 			var ct := g.contenu_de(t)
-			var hm := (int(ct.get("hauteur_vue", 0)) * HSTEP) if g.bloque_passage(t) else 0
 			if "vegetation" in ct.get("tags", []):
-				hm = 0   # un billboard : on le voile lui-même (modulate), pas un pavé par-dessus
 				if noeuds_vegetaux.has(idx):
-					noeuds_vegetaux[idx].modulate = Color(0.45, 0.45, 0.5) if vu else Color(0, 0, 0, 0)
-			_poly(ci, PackedVector2Array([
-				c + Vector2(-TW * 0.5, 0), c + Vector2(-TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm),
-				c + Vector2(TW * 0.5, -hm), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5)]), voile if vu else fond)
+					noeuds_vegetaux[idx].modulate = Color(0.45, 0.45, 0.5)   # un billboard : on le voile lui-même (modulate)
+			elif g.bloque_passage(t):
+				_dessine_bloc(ci, g, t, c, Color(0.38, 0.38, 0.44))   # un mur mémorisé : le même bloc, sombre et opaque — pas un voile qu'on voit au travers
+				continue
+			_poly(ci, PackedVector2Array([c + Vector2(-TW * 0.5, 0), c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5)]), voile)
 
 
 ## Un bloc de mur : le dessus et les deux faces avant (sud-ouest, sud-est) ; une face n'est
-## dessinée que si la tuile devant n'est pas elle-même un mur (elle la cacherait entièrement).
+## dessinée que si la tuile devant n'est pas elle-même un mur découvert (elle la cacherait entièrement ;
+## un mur jamais vu n'est pas dessiné, donc ne cache rien — sinon le bloc paraît creux).
 func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: Color = Color.WHITE) -> void:
 	var hm := int(g.contenu_de(t).get("hauteur_vue", 3)) * HSTEP
 	var haut_bloc := Color(0.5, 0.47, 0.44)
@@ -1565,12 +1578,12 @@ func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: C
 		haut_bloc = haut_bloc.lerp(Color.html(mat.color), 0.55 if g.materiaux.has(g.idx(t)) else 0.35)
 	haut_bloc *= teinte
 	var sud := t + Vector2i(0, 1)
-	if not g.dans(sud) or not g.bloque_passage(sud):
+	if not g.dans(sud) or not g.bloque_passage(sud) or not g.decouvert.has(g.idx(sud)):
 		_poly(ci, PackedVector2Array([   # face sud-ouest (gauche)
 			c + Vector2(-TW * 0.5, 0), c + Vector2(0, TH * 0.5),
 			c + Vector2(0, TH * 0.5 - hm), c + Vector2(-TW * 0.5, -hm)]), haut_bloc.darkened(0.35))
 	var est := t + Vector2i(1, 0)
-	if not g.dans(est) or not g.bloque_passage(est):
+	if not g.dans(est) or not g.bloque_passage(est) or not g.decouvert.has(g.idx(est)):
 		_poly(ci, PackedVector2Array([   # face sud-est (droite)
 			c + Vector2(0, TH * 0.5), c + Vector2(TW * 0.5, 0),
 			c + Vector2(TW * 0.5, -hm), c + Vector2(0, TH * 0.5 - hm)]), haut_bloc.darkened(0.5))
@@ -1661,7 +1674,7 @@ func _maj_ui() -> void:
 	var g := sim.grille
 	var titre: String = tr("ui.camp").format({"biome": tr(str(GameData.catalogues.biomes.get(str(sim.camp_sauve.get("biome", "plaine_temperee")), {}).get("name_key", "")))}) if sim.lieu == "camp" else (tr(GameData.entree("prototype_arenas", arenes[arene_courante]).name_key) if sim.donjon.is_empty() else tr("ui.donjon").format({"theme": tr(GameData.entree("dungeon_themes", sim.donjon.theme).name_key), "etage": sim.donjon.etage, "etages": sim.donjon.etages, "salles": sim.donjon.salles}))
 	var lignes: Array[String] = [tr("ui.titre") + " · " + titre]
-	var mode := tr("ui.mode.combat") if sim.en_combat(j) else tr("ui.mode.exploration").format({"tps": sim.regles.r.ticks_par_seconde_exploration})
+	var mode := tr("ui.mode.combat") if sim.en_combat(j) else (tr("ui.mode.donjon") if sim.horloge_monde.mode == Horloge.Mode.ACTION else tr("ui.mode.exploration").format({"tps": sim.regles.r.ticks_par_seconde_exploration}))
 	lignes.append(tr("ui.horloge").format({"horloge": sim.horloge_de(j).ticks, "mode": mode}))
 	var proches := sim.vivants().filter(func(e: Dictionary) -> bool: return e.id == joueur_id or (Grille.distance(e.pos, j.pos) <= 12 and sim.voit(j, e.pos)))
 	proches = proches.slice(0, 10)   # les êtres en vue seulement : l'écran n'est pas un registre

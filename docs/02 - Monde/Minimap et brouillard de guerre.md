@@ -44,6 +44,9 @@ RENDU — échantillonnage des chunks explorés dans un rayon autour du
 > [!success] Précisé le 2026-08-28
 > La minimap est codée ([[Décision — Minimap en 2D]]) ; l'exploration à **résolution chunk** (`explored[cx, cy]`, sauvegardée) coexiste avec la mémoire par tuile du rendu grisé : le chunk devient exploré dès qu'une de ses tuiles est vue.
 
+> [!success] Corrigé le 2026-08-30 — les murs mémorisés sont des blocs pleins
+> **Retour du designer** : « les blocs du donjon sont transparents et incomplets ». Le brouillard peignait un hexagone **translucide** sur chaque mur mémorisé (on voyait le bloc au travers), et effaçait un mur **jamais vu** en couleur de fond alors que son voisin visible avait sauté la face qu'il « cachait » : des blocs creux. Désormais la passe du terrain ne dessine que les tuiles **découvertes** et se redessine à chaque découverte (coût mesuré : 4,3 ms par image en donjon, 6 ms au camp) ; un mur mémorisé hors de vue est **redessiné en bloc sombre et opaque** ; une face n'est sautée que si le mur devant est découvert. Le sol mémorisé garde son voile translucide.
+
 ## Liens
 - **Dépend de** : [[Grille continue]], [[IA des créatures]], [[Sauvegarde]]
 - **Alimente** : [[Écrans d'interface]], [[Donjons — structure et intégration]]

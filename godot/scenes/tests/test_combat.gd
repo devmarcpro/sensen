@@ -138,6 +138,7 @@ func _ready() -> void:
 	test_camp()
 	test_faim_et_poids()
 	test_donjon()
+	test_donjon_temps_a_l_action()
 	test_loot()
 	test_coffres_et_rares()
 	test_gemmes_et_livres()
@@ -6235,6 +6236,29 @@ func test_brouillard() -> void:
 
 
 # ---------------------------------------------------------------- Étape 2 : génération de donjon
+
+func test_donjon_temps_a_l_action() -> void:
+	# Boucle de tick (2026-08-30) : en donjon, l'horloge du monde est une horloge d'action.
+	var s := Simulation.new(21)
+	s.charger_donjon("ruine", 21, 9, 1)
+	verifier(s.horloge_monde.mode == Horloge.Mode.ACTION, "donjon : l'horloge du monde est en mode action")
+	var t0: int = s.horloge_monde.ticks
+	TickManager._process(2.0)
+	verifier(s.horloge_monde.ticks == t0, "deux secondes réelles : le temps n'a pas bougé (%d → %d)" % [t0, s.horloge_monde.ticks])
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var garde := 64
+	while garde > 0 and s.pas("monde"):
+		garde -= 1
+	verifier(s.attente.has(j.id), "l'horloge s'arrête sur le joueur qui réfléchit")
+	verifier(s.intention(j.id, {"type": "attendre"}), "le joueur attend")
+	garde = 64
+	while garde > 0 and s.pas("monde"):
+		garde -= 1
+	verifier(s.horloge_monde.ticks > t0, "après l'action du joueur, le temps a avancé (%d → %d)" % [t0, s.horloge_monde.ticks])
+	var s2 := Simulation.new(22)
+	s2.charger_camp()
+	verifier(s2.horloge_monde.mode == Horloge.Mode.TEMPS_REEL, "au camp, le temps réel demeure")
+
 
 func test_donjon() -> void:
 	var gen := Donjon.new(GameData.catalogues["dungeon_rooms"], GameData.catalogues["dungeon_connectors"], GameData.entree("dungeon_themes", "ruine"))
