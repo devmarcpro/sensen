@@ -100,6 +100,15 @@ etape: 10
 - **Les paliers d'élevage** : 25 variétés pour +10 de potentiel, 75 pour la capture — assez tôt pour accrocher, ou trop loin ? — [[Vivarium — registre et paliers]]
 - **Le registre par mode** : grille, records, séquences, galerie, familles — chaque espèce a le sien, et une luciole a 96 variétés possibles — lisible, ou trop de combinatoire ? — [[Vivarium — registre et paliers]]
 
+## 7. Modules, composition et interface (ajouts du 2026-08-30, 10 min)
+
+- **Composer sans plafond** : Bombe × 3 sur un carré (`9d6`, puissance 120, 42 de mana la tuile × 9 tuiles) — le prix se sent-il, ou l'échelle linéaire rend-elle le triplé toujours rentable ? Faut-il un avertissement au-delà d'un seuil de ticks ? — [[Six types de modules et assemblage]], [[Structure compétences-modules-slots]]
+- **Le prix par tuile annoncé** : « 9 tuiles à la visée nominale → 72–432 » au composeur, puis les tuiles réelles à la visée — lisible, ou faut-il la fourchette en gros sur la hotbar ? — [[Six types de modules et assemblage]]
+- **La forme répétée** : Carré + Carré = un carré de 25 tuiles pour 4 ticks de plus — trop bon marché par rapport au noyau répété (prix × 2) ? — [[Six types de modules et assemblage]]
+- **L'écran principal** : titre → personnage → monde (graine re-tirable) → case de départ — manque-t-il un aperçu du monde avant Commencer, des emplacements de sauvegarde nommés ? — [[Écrans d'interface]]
+- **La police MingLiU-ExtB** : trait bitmap sans lissage, 10 px sur la hotbar — lisible partout, ou trop fin sur les barres ? — [[Écrans d'interface]]
+- **HUD et 64 × 64** : compas-horloge et pentagramme en haut à droite, barres et hotbar en bas à gauche, écran de chargement 0,6 s entre cellules — la coupure rend-elle le monde plus lisible ou casse-t-elle l'exploration ? Un étage de 64 × 64 se lit-il encore comme un labyrinthe ? — [[Grille continue]], [[Claims et persistance]]
+
 ## Comment répondre
 
 Un callout daté dans la note liée (`> [!success] Tranché le <date>`) — la boucle autonome le lit avant de coder. Une réponse « ça va » suffit pour fermer un point ; une valeur chiffrée suffit pour un réglage.
