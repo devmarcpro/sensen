@@ -39,4 +39,19 @@ for f in autres:
             print("      %s,%s" % (k, fr[k]))
     if part > SEUIL:
         echec = True
+# Les clés littérales tr("...") du code GDScript doivent exister dans fr.csv (une clé absente s'affiche brute à l'écran).
+import re, glob
+GODOT = os.path.normpath(os.path.join(RACINE, ".."))
+motif = re.compile(r'tr\("([a-z0-9_.]+)"\)')
+cles_code = {}
+for f in glob.glob(os.path.join(GODOT, "scenes", "**", "*.gd"), recursive=True) + glob.glob(os.path.join(GODOT, "systems", "**", "*.gd"), recursive=True):
+    for k in motif.findall(io.open(f, encoding="utf-8").read()):
+        cles_code.setdefault(k, os.path.relpath(f, GODOT))
+absentes = sorted((k, f) for k, f in cles_code.items() if k not in fr)
+for k, f in absentes:
+    print("cle de code absente de fr.csv : %s (%s)" % (k, f))
+print("cles litterales du code : %d, absentes de fr.csv : %d" % (len(cles_code), len(absentes)))
+if absentes:
+    echec = True
 sys.exit(1 if echec else 0)
+

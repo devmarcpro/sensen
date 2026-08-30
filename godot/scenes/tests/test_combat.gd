@@ -2855,6 +2855,8 @@ func test_assemblage_sans_limite() -> void:
 	s._executer_capacite(j, p_bc, j.pos + Vector2i(2, 0))
 	verifier(s.bombes.size() == n_tuiles and str(s.bombes[0].degats) == "4d6", "Concentration ajoute son dé à la bombe (%s)" % str(s.bombes[0].degats))
 	s.bombes.clear()
+	var p_bb: Dictionary = plan_de.call(["carre", "bombe", "baume"])
+	verifier(str(p_bb.monnaie) == "endurance" and int(p_bb.ressource) == int(p_bombe.ressource) + int(GameData.entree("modules", "baume").cout_mana), "un noyau de mana dans un sort d'endurance paie en endurance, 1 pour 1 (%d)" % int(p_bb.ressource))
 	var p_cc: Dictionary = plan_de.call(["carre", "carre", "etincelle"])
 	var n_cc: int = s.tuiles_du_plan(j, p_cc, j.pos + Vector2i(2, 0)).size()
 	verifier(p_cc.formes_sup.is_empty() and int(p_cc.taille) == 2 * int(p_bombe.taille) and n_cc > n_tuiles, "Carré + Carré : une forme plus grande (%d tuiles > %d), pas une union" % [n_cc, n_tuiles])

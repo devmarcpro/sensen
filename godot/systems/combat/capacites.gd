@@ -130,13 +130,12 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 					plan.charges_sup.append(sup)
 					plan.ticks += ticks_arme if m.get("power_base") == "arme" else ticks_module(int(m.cout_ticks), id, niveaux)
 					var sf_sup := 1.0 + float(niveaux.get(id, 0)) * par_niveau
-					if int(m.get("cout_mana", 0)) > 0 and plan.monnaie in ["", "mana"]:
-						plan.monnaie = "mana"
-						plan.ressource += roundi(float(m.cout_mana) / sf_sup)
-					elif int(m.get("cout_endurance", 0)) > 0:
-						if plan.monnaie == "":
-							plan.monnaie = "endurance"
-						plan.ressource += roundi(float(m.cout_endurance) / sf_sup)
+					# Un sort a une monnaie (celle de son premier noyau) ; un noyau de l'autre monnaie paie dans
+					# celle du sort, 1 pour 1 — rien n'est gratuit (Six types de modules).
+					var cout_sup: int = int(m.get("cout_mana", 0)) if int(m.get("cout_mana", 0)) > 0 else int(m.get("cout_endurance", 0))
+					if plan.monnaie == "":
+						plan.monnaie = "mana" if int(m.get("cout_mana", 0)) > 0 else ("endurance" if cout_sup > 0 else "")
+					plan.ressource += roundi(float(cout_sup) / sf_sup)
 					continue
 				plan.noyau = m
 				var arme: bool = m.get("power_base") == "arme"

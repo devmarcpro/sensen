@@ -2202,3 +2202,5 @@ ui.ecran.charger,"CHARGER — Entrée : charger · Échap : retour"
 ui.charger.aucune,"(aucune sauvegarde)"
 ui.charger.d_slot,"Charger la sauvegarde « {nom} »."
 ui.menu.titre,Retour à l'écran principal
+ui.composer.taille_courte,taille
+ui.composer.charges,"Charges : {n} (une par lancer, par occurrence)"

@@ -987,13 +987,12 @@ func _texte_capacite_plan(j: Dictionary, k: int) -> String:
 
 ## Ce qu'un module AJOUTE à la séquence en cours : la différence entre le plan avec lui et le plan sans lui
 ## (Structure compétences-modules-slots). Calculé par l'assembleur, avec l'arme tenue — jamais écrit à la main.
-func _contribution_module(j: Dictionary, m: String, deja_dedans: bool) -> String:
+func _contribution_module(j: Dictionary, m: String, _deja_dedans: bool) -> String:
+	# Entrée ajoute toujours une occurrence : la contribution est celle d'une occurrence DE PLUS (un noyau
+	# répété double ses dés, une forme répétée grandit — Six types de modules).
 	var avec: Array = sequence_composee.duplicate()
 	var sans: Array = sequence_composee.duplicate()
-	if deja_dedans:
-		sans.erase(m)
-	else:
-		avec.append(m)
+	avec.append(m)
 	var pa: Dictionary = main.sim.plan_sequence(j, avec)
 	var ps: Dictionary = main.sim.plan_sequence(j, sans) if not sans.is_empty() else {}
 	var parts: Array[String] = []
@@ -1008,6 +1007,10 @@ func _contribution_module(j: Dictionary, m: String, deja_dedans: bool) -> String
 		parts.append("%+d %s" % [d_des, tr("bonus.des")])
 	if pa.get("des") != null and ps.get("des") == null:
 		parts.append(tr("bonus.des") + " " + str(pa.des))
+	elif pa.get("des") != null and ps.get("des") != null and str(pa.des) != str(ps.des):
+		parts.append("%s → %s" % [str(ps.des), str(pa.des)])   # le noyau répété : 3d6 → 6d6
+	if int(pa.get("taille", 0)) != int(ps.get("taille", 0)) and not ps.is_empty():
+		parts.append("%s %d → %d" % [tr("ui.composer.taille_courte"), int(ps.get("taille", 0)), int(pa.get("taille", 0))])
 	if str(pa.get("geometrie", "")) != str(ps.get("geometrie", "")):
 		parts.append(tr("geometrie." + str(pa.get("geometrie", ""))) + " %d–%d" % [int(pa.portee.x), int(pa.portee.y)])
 	elif pa.has("portee") and ps.has("portee") and pa.portee != ps.portee:

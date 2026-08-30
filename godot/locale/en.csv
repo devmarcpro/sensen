@@ -2192,3 +2192,5 @@ ui.ecran.charger,"LOAD — Enter: load · Esc: back"
 ui.charger.aucune,"(no save)"
 ui.charger.d_slot,"Load save “{nom}”."
 ui.menu.titre,Back to the main screen
+ui.composer.taille_courte,size
+ui.composer.charges,"Charges: {n} (one per cast, per occurrence)"
