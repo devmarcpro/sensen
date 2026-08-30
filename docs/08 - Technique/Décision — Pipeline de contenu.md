@@ -48,6 +48,9 @@ Le registre complet vit dans `godot/data/README.md` (versionné avec les donnée
 > [!success] Précisé le 2026-08-26 — noms d'API et configurations
 > En GDScript `get()` est réservé par `Object` : les deux portes d'entrée s'appellent **`GameData.entree(catalogue, id)`** et **`GameData.par_tag(catalogue, tag)`** ; les configurations se lisent par **`GameData.config(nom)`** / **`GameData.regle("combat_rules/endurance/max")`**. Deux configurations ajoutées : **`combat_rules.json`** (toutes les constantes chiffrées du combat, chacune citant sa note) et **`tile_contents.json`** (contenus de tuile par tags). Un fichier dont le champ `id` diffère du nom est une erreur. Après un clone, `Godot --headless --path godot --import` construit le cache des classes (`.godot/`, ignoré par git).
 
+> [!success] Rangé le 2026-08-30 — créatures et recettes en sous-dossiers
+> Dans la continuité de la demande du designer sur les modules (« vraiment trier tout ça ») : `creatures/` se lit désormais en **`bete/`**, **`humanoide/`** (hostiles, aventuriers) et **`civil/`** (villageois, gardes, marchands…) — le tag de la fiche décide ; `recipes/` en **`transformation/`** (matière → matière), **`alchimie/`**, **`cuisine/`**, **`fabrication/`**. Rien ne change pour le code : le chargement est récursif et l'id reste le nom du fichier. Le rangement suit toujours **un champ de la fiche** (tag, famille, origine, type), jamais un choix arbitraire — c'est ce qui permet de le régénérer.
+
 ## Liens
 - **Dépend de** : [[Data-driven design]], [[Décisions d'architecture]], [[Contraintes permanentes]]
 - **Alimente** : [[Arborescence du projet]], [[Prototype de combat — spécification]], tous les schémas de l'Annexe B

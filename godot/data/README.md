@@ -55,6 +55,12 @@
 
 **Catalogues chargés par GameData (étape 0) :** `modules`, `creatures`, `creature_actions`, `ai_profiles`, `functionalities`, `items`, `status_effects`, `prototype_arenas`, plus les configurations `combat_rules`, `tile_contents` et `wuxing`. Ajouter un catalogue = son schéma dans `schemas/` + une ligne dans `autoload/game_data.gd`. Les dossiers `exemples_*` sont des exemples générés, pas des catalogues.
 
+## `creatures/` et `recipes/` — rangés par nature
+
+- `creatures/bete/` — les bêtes (tag `bete`) · `creatures/humanoide/` — hostiles et aventuriers · `creatures/civil/` — les PNJ de village (tag `civil`).
+- `recipes/transformation/` — matière → matière (fondre, scier, tanner, allier…) · `recipes/alchimie/` — les deux distillations · `recipes/cuisine/` — les plats · `recipes/fabrication/` — les objets plats (bombe, seau).
+- Comme pour `modules/`, le dossier n'est qu'un classement : l'id reste le nom du fichier.
+
 ## `modules/` — rangés par type, puis par famille
 
 Le sous-dossier n'est qu'un classement pour l'humain (l'id reste le nom du fichier) ; la **famille** est aussi le champ `famille` de la fiche, et l'**origine** d'une forme (`cible` : projetée sur la tuile visée · `lanceur` : émise depuis soi) est son champ `origine`.
