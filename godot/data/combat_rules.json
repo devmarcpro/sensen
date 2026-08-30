@@ -145,6 +145,12 @@
     "_doc": "Éclairage (2026-08-30) : niveau de lumière ambiante (0-15) de chaque tuile d'un étage de donjon, sous les sources ; un thème peut le remplacer par lumiere_ambiante",
     "donjon_ambiante": 6
   },
+  "ia": {
+    "_doc": "IA des créatures (2026-08-30) : soin_seuil = fraction de PV sous laquelle un soigneur soigne un allié ; reculer_distance = un tireur recule si la cible est à cette distance ou moins ; guet_distance = un embusqueur attend tant que la cible est plus loin",
+    "soin_seuil": 0.7,
+    "reculer_distance": 1,
+    "guet_distance": 3
+  },
   "engagement": {
     "_doc": "Décision — Fuite et désengagement · IA des créatures (détection = Perception en tuiles) · Éclairage : la nuit, cible non éclairée vue à portée × vision_nuit, cible éclairée à portée × (1 + lumière/100 × lumiere_detection) ; lumiere_rayon = portée des meubles lumineux. Discretion de la cible : portee × (1 − min(discretion_max_pct, niveau × discretion_par_niveau)), jamais sous portee_min.",
     "sortie_distance": 12,

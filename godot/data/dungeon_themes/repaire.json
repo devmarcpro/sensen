@@ -12,6 +12,15 @@
     },
     {
       "id": "aigle"
+    },
+    {
+      "id": "chauve_souris"
+    },
+    {
+      "id": "rat_geant"
+    },
+    {
+      "id": "rodeur"
     }
   ],
   "boss": "chef_de_bande",

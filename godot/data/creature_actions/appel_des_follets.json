@@ -1,0 +1,32 @@
+{
+  "name_key": "creature_action.appel_des_follets.name",
+  "elements": {
+    "feu": 1.0
+  },
+  "forme": "soi",
+  "portee": [
+    0,
+    0
+  ],
+  "taille": 0,
+  "cible": "soi",
+  "ligne_de_vue": false,
+  "cout_ticks": 14,
+  "cout_endurance": 8,
+  "degats_des": null,
+  "type_degats": null,
+  "conditions": [],
+  "effets": [
+    {
+      "type": "invoquer",
+      "creature": "feu_follet",
+      "n": 1,
+      "max": 2,
+      "duree_ticks": 120
+    }
+  ],
+  "tags": [
+    "invocation",
+    "telegraphe"
+  ]
+}

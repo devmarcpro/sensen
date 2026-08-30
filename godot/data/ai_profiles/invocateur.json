@@ -1,0 +1,33 @@
+{
+  "name_key": "ai_profile.invocateur.name",
+  "considerations": {
+    "retour": {
+      "loin_de_l_ancre": 1.0,
+      "cible_perdue": 1.0
+    },
+    "soutenir": {
+      "allie_a_soutenir": 1.7
+    },
+    "attaquer": {
+      "cible_a_portee": 1.0,
+      "agressivite": 0.6
+    },
+    "reculer": {
+      "cible_au_contact": 1.8
+    },
+    "poursuivre": {
+      "cible_visible": 0.4,
+      "distance_cible": 0.3
+    },
+    "fuir": {
+      "sante_basse": 1.5
+    },
+    "attendre": {
+      "endurance_basse": 0.7
+    }
+  },
+  "seuil_fuite_sante": 0.35,
+  "chute_max_degats": 10,
+  "horaires": null,
+  "chain_bonus": 0.0
+}

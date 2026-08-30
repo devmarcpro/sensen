@@ -1,0 +1,44 @@
+{
+  "name_key": "creature.bandit_archer.name",
+  "race": "humain",
+  "skeleton_template": "humanoide",
+  "corps": {
+    "stats": {
+      "force": 9,
+      "dexterite": 13,
+      "endurance": 8,
+      "volonte": 7,
+      "perception": 12,
+      "charisme": 7
+    },
+    "silhouette": "humanoide"
+  },
+  "esprit": null,
+  "ai_profile": "tireur",
+  "actions": [
+    "tir_a_l_arc"
+  ],
+  "equipement": [
+    "proto_dague",
+    "proto_cuirasse_cuir"
+  ],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": null,
+  "rare_chance": 0.0,
+  "teinte": [
+    0.75,
+    0.55,
+    0.25
+  ],
+  "tags": [
+    "humanoide",
+    "hostile",
+    "tireur"
+  ],
+  "classe": "Le Sabre",
+  "fonction": "aventurier",
+  "competences": {
+    "athletisme": 15
+  }
+}

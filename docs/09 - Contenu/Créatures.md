@@ -78,6 +78,21 @@ Toute créature a une faible chance (défaut **0.5 %**, pondérable par race) de
 > [!success] Codé le 2026-08-29 — la statue 1:1, décidée depuis longtemps et jamais droppée
 > Trouvé par un contrôle neuf : chercher les objets du catalogue qu'**aucune source ne donne** (ni recette, ni loot, ni boutique, ni dépouille, ni coffre de départ). Un seul survivait — `meuble_statue`, le « drop rare universel » de cette note, qui existait comme meuble et comme objet mais que rien au monde ne faisait tomber. Toute créature d'IA abattue a désormais **0,5 %** (`loot_rules.drops.statue.chance`, pondérable par fiche via `statue_mult`) de laisser sa **statue**, meuble décoratif (+3 d'humeur) nommé d'après elle (« Statue de loup »). **Décisions** : la valeur de vente « ∝ niveau de la créature » se lit sur la **moyenne de ses six stats × 12** (`valeur_par_stat`), le jeu n'ayant pas de niveau de créature explicite ; le modèle recolorisé en pierre attend les sprites (décision du designer : l'apparence plus tard) — la statue est pour l'instant le meuble générique, avec son nom et sa valeur propres.
 
+> [!success] Décidé et codé le 2026-08-30 — sept types d'ennemis, vraiment différents
+> **Instruction du designer** : « rajouter des types d'ennemis (tireurs, invocateurs, soigneurs, fuyards, tanks, essaims, embusqueurs), en données, intégrés aux thèmes de donjon et aux faunes ». Sept fiches (`data/creatures/`), six actions (`data/creature_actions/`) et six profils d'IA (`data/ai_profiles/`) :
+>
+> | Fiche | Rôle | Action / arme | IA | Où |
+> |---|---|---|---|---|
+> | Bandit archer | tireur | Tir à l'arc 1d6 perforant, portée 2-6 ; dague au contact | `tireur` : **recule** au contact | ruine |
+> | Chaman bandit | invocateur | Appel des follets (1 feu follet, **2 au plus**, 120 ticks, télégraphié) + Flammèche | `invocateur` : soutient, recule | ruine |
+> | Guérisseur bandit | soigneur | Onguent 2d4 sur l'allié le plus blessé (< 70 %, portée 3) | `soigneur` : soutient d'abord | ruine |
+> | Brute | tank | Coup de masse 2d6 contondant, 30 % Au sol, télégraphié ; mailles, casque, bouclier, jauge de chaîne | `tank` : **ne fuit jamais** | ruine |
+> | Rôdeur | embusqueur | Embuscade (+2 dés sur la première frappe), Discrétion 30 | `embusqueur` : **guette** tant que la cible est à plus de 3 tuiles | ruine, repaire |
+> | Rat géant | fuyard | Morsure 1d4, 15 % Infection ; meute 1d3 | `fuyard` : fuit sous 50 % | ruine, repaire, plaines la nuit |
+> | Chauve-souris | essaim | Morsure 1d3, 5 ticks ; meute 1d4+2, volante, 3 PV de fond | `hostile` | repaire, forêts la nuit |
+>
+> Deux effets d'action nouveaux dans le moteur : `soin` (dés) et `invoquer` (créature, n, max, durée) ; les stats suivent le barème de la table du 26 (PV = 20 + End × 4). Les tirages des salles piochent dans la liste du thème à parts égales : la ruine a désormais dix entrées, dont trois bandits sur dix.
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Les trois axes — race, classe, fonction]], [[Squelette modulaire et points d'attache]]
 - **Alimente** : [[Profils de PNJ]], [[Catalogue matériaux — Paramétriques]], [[Monstres rares]], [[Actions des créatures]], [[Génération de donjon]]

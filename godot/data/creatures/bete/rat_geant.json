@@ -1,0 +1,46 @@
+{
+  "name_key": "creature.rat_geant.name",
+  "race": "rat",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 6,
+      "dexterite": 12,
+      "endurance": 6,
+      "volonte": 3,
+      "perception": 10,
+      "charisme": 2
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "fuyard",
+  "actions": [
+    "morsure_de_rat"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "eau": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.45,
+    0.4,
+    0.35
+  ],
+  "tags": [
+    "bete",
+    "hostile",
+    "meute",
+    "fuyard"
+  ],
+  "meute": "1d3",
+  "depouille": [
+    "viande_crue"
+  ],
+  "competences": {
+    "athletisme": 30
+  }
+}

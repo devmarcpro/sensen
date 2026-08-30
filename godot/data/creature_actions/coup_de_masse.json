@@ -1,0 +1,34 @@
+{
+  "name_key": "creature_action.coup_de_masse.name",
+  "elements": {
+    "terre": 1.0
+  },
+  "forme": "cible_unique",
+  "portee": [
+    1,
+    1
+  ],
+  "taille": 1,
+  "cible": "ennemi",
+  "ligne_de_vue": true,
+  "cout_ticks": 12,
+  "cout_endurance": 10,
+  "degats_des": "2d6",
+  "type_degats": "contondant",
+  "conditions": [],
+  "effets": [
+    {
+      "type": "degats"
+    },
+    {
+      "type": "statut",
+      "id": "au_sol",
+      "chance": 0.3,
+      "duree_ticks": 8
+    }
+  ],
+  "tags": [
+    "coup",
+    "telegraphe"
+  ]
+}

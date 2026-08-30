@@ -1,0 +1,27 @@
+{
+  "name_key": "ai_profile.fuyard.name",
+  "considerations": {
+    "retour": {
+      "loin_de_l_ancre": 1.0,
+      "cible_perdue": 1.0
+    },
+    "attaquer": {
+      "cible_a_portee": 1.0,
+      "agressivite": 0.8
+    },
+    "poursuivre": {
+      "cible_visible": 0.6,
+      "distance_cible": 0.3
+    },
+    "fuir": {
+      "sante_basse": 2.0
+    },
+    "attendre": {
+      "endurance_basse": 0.7
+    }
+  },
+  "seuil_fuite_sante": 0.5,
+  "chute_max_degats": 10,
+  "horaires": null,
+  "chain_bonus": 0.0
+}

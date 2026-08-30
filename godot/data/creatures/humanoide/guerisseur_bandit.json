@@ -1,0 +1,43 @@
+{
+  "name_key": "creature.guerisseur_bandit.name",
+  "race": "humain",
+  "skeleton_template": "humanoide",
+  "corps": {
+    "stats": {
+      "force": 8,
+      "dexterite": 10,
+      "endurance": 9,
+      "volonte": 12,
+      "perception": 10,
+      "charisme": 11
+    },
+    "silhouette": "humanoide"
+  },
+  "esprit": null,
+  "ai_profile": "soigneur",
+  "actions": [
+    "onguent"
+  ],
+  "equipement": [
+    "proto_dague",
+    "proto_cuirasse_cuir"
+  ],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "bois": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.45,
+    0.75,
+    0.4
+  ],
+  "tags": [
+    "humanoide",
+    "hostile",
+    "soigneur"
+  ],
+  "classe": "Le Sabre",
+  "fonction": "aventurier"
+}

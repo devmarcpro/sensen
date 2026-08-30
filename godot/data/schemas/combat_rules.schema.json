@@ -31,6 +31,11 @@
     "engagement": {
       "type": "object"
     },
+    "ia": {
+      "type": "object",
+      "properties": {"soin_seuil": {"type": "number"}, "reculer_distance": {"type": "integer"}, "guet_distance": {"type": "integer"}},
+      "required": ["soin_seuil", "reculer_distance", "guet_distance"]
+    },
     "eclairage": {
       "type": "object",
       "properties": {"donjon_ambiante": {"type": "integer", "minimum": 0, "maximum": 15}},

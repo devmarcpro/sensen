@@ -2250,3 +2250,23 @@ tile_content.porte_fermee.name,Closed door
 option.porte,Open / close the door
 journal.porte_ouverte,"{nom} opens a door"
 journal.porte_fermee,"{nom} closes a door"
+creature.bandit_archer.name,Bandit archer
+creature.chaman_bandit.name,Bandit shaman
+creature.guerisseur_bandit.name,Bandit healer
+creature.brute.name,Brute
+creature.rodeur.name,Prowler
+creature.rat_geant.name,Giant rat
+creature.chauve_souris.name,Bat
+creature_action.tir_a_l_arc.name,Bow shot
+creature_action.onguent.name,Salve
+creature_action.appel_des_follets.name,Call of the wisps
+creature_action.coup_de_masse.name,Mace blow
+creature_action.morsure_de_rat.name,Rat bite
+creature_action.morsure_de_chauve_souris.name,Bat bite
+ai_profile.tireur.name,Shooter
+ai_profile.invocateur.name,Summoner
+ai_profile.soigneur.name,Healer
+ai_profile.tank.name,Tank
+ai_profile.embusqueur.name,Ambusher
+ai_profile.fuyard.name,Skittish
+journal.invocation_creature,{nom}: {action} — {n} creature(s) called

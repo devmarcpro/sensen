@@ -1,0 +1,45 @@
+{
+  "name_key": "creature.chauve_souris.name",
+  "race": "chauve_souris",
+  "skeleton_template": "volant",
+  "corps": {
+    "stats": {
+      "force": 3,
+      "dexterite": 15,
+      "endurance": 3,
+      "volonte": 2,
+      "perception": 12,
+      "charisme": 1
+    },
+    "silhouette": "volant"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "morsure_de_chauve_souris"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "bois": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.3,
+    0.25,
+    0.3
+  ],
+  "tags": [
+    "bete",
+    "hostile",
+    "meute",
+    "volant",
+    "essaim"
+  ],
+  "meute": "1d4+2",
+  "depouille": [],
+  "competences": {
+    "athletisme": 40
+  }
+}

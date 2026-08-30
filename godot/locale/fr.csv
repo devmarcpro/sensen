@@ -2260,3 +2260,23 @@ tile_content.porte_fermee.name,Porte fermée
 option.porte,Ouvrir / fermer la porte
 journal.porte_ouverte,"{nom} ouvre une porte"
 journal.porte_fermee,"{nom} ferme une porte"
+creature.bandit_archer.name,Bandit archer
+creature.chaman_bandit.name,Chaman bandit
+creature.guerisseur_bandit.name,Guérisseur bandit
+creature.brute.name,Brute
+creature.rodeur.name,Rôdeur
+creature.rat_geant.name,Rat géant
+creature.chauve_souris.name,Chauve-souris
+creature_action.tir_a_l_arc.name,Tir à l'arc
+creature_action.onguent.name,Onguent
+creature_action.appel_des_follets.name,Appel des follets
+creature_action.coup_de_masse.name,Coup de masse
+creature_action.morsure_de_rat.name,Morsure de rat
+creature_action.morsure_de_chauve_souris.name,Morsure de chauve-souris
+ai_profile.tireur.name,Tireur
+ai_profile.invocateur.name,Invocateur
+ai_profile.soigneur.name,Soigneur
+ai_profile.tank.name,Tank
+ai_profile.embusqueur.name,Embusqueur
+ai_profile.fuyard.name,Fuyard
+journal.invocation_creature,{nom} : {action} — {n} créature(s) appelée(s)

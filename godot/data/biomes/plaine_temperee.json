@@ -97,6 +97,10 @@
     {
       "id": "sanglier",
       "density": 0.2
+    },
+    {
+      "id": "rat_geant",
+      "density": 0.3
     }
   ],
   "cueillette": [

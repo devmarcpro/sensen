@@ -1,0 +1,44 @@
+{
+  "name_key": "creature.chaman_bandit.name",
+  "race": "humain",
+  "skeleton_template": "humanoide",
+  "corps": {
+    "stats": {
+      "force": 7,
+      "dexterite": 10,
+      "endurance": 8,
+      "volonte": 13,
+      "perception": 11,
+      "charisme": 10
+    },
+    "silhouette": "humanoide"
+  },
+  "esprit": null,
+  "ai_profile": "invocateur",
+  "actions": [
+    "flammeche",
+    "appel_des_follets"
+  ],
+  "equipement": [
+    "proto_baton_magique",
+    "proto_cuirasse_cuir"
+  ],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "feu": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.8,
+    0.4,
+    0.7
+  ],
+  "tags": [
+    "humanoide",
+    "hostile",
+    "invocateur"
+  ],
+  "classe": "Le Sabre",
+  "fonction": "aventurier"
+}

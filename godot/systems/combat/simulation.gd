@@ -8100,8 +8100,98 @@ func _executer_action_creature(e: Dictionary, action: Dictionary, cible: Diction
 					if effet.has("chance") and des.reel() >= float(effet.chance):
 						continue
 					appliquer_statut(c, str(effet.id), int(effet.get("duree_ticks", statuts_defs.get(effet.id, {}).get("duree_ticks", 10))), e.id)
+			"soin":   # Créatures (2026-08-30) : un soigneur — la cible est l'allié choisi par _meilleur_soutien
+				for c in cibles:
+					if not c.vivant:
+						continue
+					var avant: int = int(c.sante)
+					c.sante = mini(int(c.sante_max), int(c.sante) + des.jet(str(effet.get("des", "1d4"))))
+					EventBus.emettre(&"journal", [&"journal.soin", {"att": e.name_key, "capacite": action.name_key, "def": c.name_key, "soin": int(c.sante) - avant}])
+				if not cibles.is_empty():
+					_poser_segment(e, action.elements, tick_de(e), "soin")
+			"invoquer":   # un invocateur : n créatures alliées autour de lui, plafonnées par `max`
+				_invoquer_creature_ia(e, effet, action)
 			_:
 				pass   # bonus_premiere_attaque : passif, lu par _bonus_embuscade au moment de la frappe
+
+
+## L'invocation d'une créature par une action de créature (Créatures, 2026-08-30) : comme l'Écho de chair du
+## joueur — même camp, `maitre`, durée — mais plafonnée : un chaman n'a jamais plus de `max` invocations vivantes.
+func _invoquer_creature_ia(e: Dictionary, effet: Dictionary, action: Dictionary) -> void:
+	var tick := tick_de(e)
+	var n := 0
+	for _k in range(int(effet.get("n", 1))):
+		if _invocations_de(e) >= int(effet.get("max", 2)):
+			break
+		var q := _tuile_libre_autour(e.pos)
+		if q == Vector2i(-1, -1):
+			break
+		var x := ajouter(str(effet.get("creature", "feu_follet")), q, "ia")
+		if x.is_empty():
+			break
+		x.camp = e.camp
+		x["maitre"] = e.id
+		x["fin_invocation"] = tick + int(effet.get("duree_ticks", 120))
+		x.horloge = e.horloge
+		x.compteur = tick + 1
+		n += 1
+	if n > 0:
+		EventBus.emettre(&"journal", [&"journal.invocation_creature", {"nom": e.name_key, "action": action.name_key, "n": n}])
+
+
+func _invocations_de(e: Dictionary) -> int:
+	var n := 0
+	for x in vivants():
+		if str(x.get("maitre", "")) == e.id and x.has("fin_invocation"):
+			n += 1
+	return n
+
+
+## Une action de créature est un soutien (soin, invocation) : elle ne se choisit pas comme une attaque.
+func _est_soutien(a: Dictionary) -> bool:
+	if str(a.get("cible", "")) == "allie":
+		return true
+	for effet: Dictionary in a.get("effets", []):
+		if str(effet.get("type", "")) in ["soin", "invoquer"]:
+			return true
+	return false
+
+
+## Le meilleur soutien possible maintenant : l'allié le plus blessé à portée d'un soin (sous `ia.soin_seuil`),
+## ou une invocation s'il reste de la place et qu'un ennemi est pris pour cible. Vide sinon.
+func _meilleur_soutien(e: Dictionary) -> Dictionary:
+	var ia_r: Dictionary = regles.r.get("ia", {})
+	for aid: String in e.actions:
+		var a: Dictionary = actions_creatures.get(aid, {})
+		if a.is_empty() or "passive" in a.tags or not _est_soutien(a):
+			continue
+		for effet: Dictionary in a.effets:
+			match str(effet.type):
+				"soin":
+					var pire := {}
+					var ratio_min := float(ia_r.get("soin_seuil", 0.7))
+					for x in vivants():
+						if x.id == e.id or ennemis(e, x) or Grille.distance(e.pos, x.pos) > int(a.portee[1]):
+							continue
+						var ratio := float(x.sante) / maxf(1.0, float(x.sante_max))
+						if ratio < ratio_min:
+							ratio_min = ratio
+							pire = x
+					if not pire.is_empty():
+						return {"action": a, "cible": pire}
+				"invoquer":
+					if not str(e.get("cible", "")).is_empty() and _invocations_de(e) < int(effet.get("max", 2)):
+						return {"action": a, "cible": e}
+	return {}
+
+
+## L'être a une attaque à distance (portée minimale ≥ 2) : au contact, un tireur préfère reculer.
+func _a_action_a_distance(e: Dictionary) -> bool:
+	for aid: String in e.actions:
+		var a: Dictionary = actions_creatures.get(aid, {})
+		if not a.is_empty() and not ("passive" in a.tags) and int(a.portee[0]) >= 2:
+			return true
+	return false
 
 
 func _cibles_de_forme(e: Dictionary, action: Dictionary, cible: Dictionary) -> Array[Dictionary]:
@@ -9530,6 +9620,16 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 			_ia_errer(e, tick)
 		"assaut":
 			_ia_assaut(e, tick)
+		"reculer":   # un pas qui éloigne de la cible (même pas que la fuite), pour retrouver sa portée
+			_ia_fuir(e, cible, tick)
+		"soutenir":
+			var s := _meilleur_soutien(e)
+			if s.is_empty():
+				_attendre(e, tick)
+			else:
+				if not cible.is_empty():
+					_engager_combat(e, cible)
+				_lancer_action_creature(e, s.action, s.cible, tick)
 		"retour":
 			e.cible = ""
 			e.fuite = false
@@ -9598,6 +9698,14 @@ func _actions_candidates(e: Dictionary, cible: Dictionary, profil: Dictionary, t
 		c["retour"] = {"loin_de_l_ancre": 1.0 if Grille.distance(e.pos, e.ancre) > int(regles.r.engagement.ia_distance_ancre) else 0.0,
 			"cible_perdue": 0.0 if a_cible else 1.0}
 	c["attendre"] = {"endurance_basse": 1.0 if e.endurance < 20 else 0.0, "calme": 0.0 if a_cible else 1.0}
+	# Types d'ennemis (Créatures, 2026-08-30) : le tireur recule au contact, le soigneur / l'invocateur soutient,
+	# l'embusqueur guette tant que la cible est loin. Seuls les profils qui pondèrent ces considérations les voient.
+	var ia_r: Dictionary = regles.r.get("ia", {})
+	if a_cible and Grille.distance(e.pos, cible.pos) <= int(ia_r.get("reculer_distance", 1)) and _a_action_a_distance(e):
+		c["reculer"] = {"cible_au_contact": 1.0}
+	if not _meilleur_soutien(e).is_empty():
+		c["soutenir"] = {"allie_a_soutenir": 1.0}
+	c.attendre["guet"] = 1.0 if (a_cible and Grille.distance(e.pos, cible.pos) > int(ia_r.get("guet_distance", 3))) else 0.0
 	if e.has("maitre") and entites.has(str(e.maitre)):
 		var m: Dictionary = entites[str(e.maitre)]
 		var loin := Grille.distance(e.pos, m.pos) > int(regles.r.compagnons.distance_suivi)
@@ -9814,7 +9922,7 @@ func _meilleure_attaque(e: Dictionary, cible: Dictionary) -> Dictionary:
 	var moy := -1.0
 	for aid: String in e.actions:
 		var a: Dictionary = actions_creatures.get(aid, {})
-		if a.is_empty() or not _action_creature_possible(e, a, cible):
+		if a.is_empty() or _est_soutien(a) or not _action_creature_possible(e, a, cible):
 			continue
 		var f := Des.fourchette(a.get("degats_des"))
 		var m := float(f.x + f.y) * 0.5 + _bonus_chaine_ia(e, a.get("elements", {}))

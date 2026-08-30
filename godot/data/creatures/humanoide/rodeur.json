@@ -1,0 +1,45 @@
+{
+  "name_key": "creature.rodeur.name",
+  "race": "humain",
+  "skeleton_template": "humanoide",
+  "corps": {
+    "stats": {
+      "force": 10,
+      "dexterite": 13,
+      "endurance": 9,
+      "volonte": 8,
+      "perception": 13,
+      "charisme": 7
+    },
+    "silhouette": "humanoide"
+  },
+  "esprit": null,
+  "ai_profile": "embusqueur",
+  "actions": [
+    "embuscade"
+  ],
+  "equipement": [
+    "proto_dague",
+    "proto_cuirasse_cuir"
+  ],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": null,
+  "rare_chance": 0.0,
+  "teinte": [
+    0.35,
+    0.35,
+    0.4
+  ],
+  "tags": [
+    "humanoide",
+    "hostile",
+    "embusqueur"
+  ],
+  "classe": "Le Sabre",
+  "fonction": "aventurier",
+  "competences": {
+    "discretion": 30,
+    "athletisme": 20
+  }
+}

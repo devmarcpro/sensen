@@ -101,6 +101,10 @@
     {
       "id": "loup",
       "density": 0.8
+    },
+    {
+      "id": "chauve_souris",
+      "density": 0.35
     }
   ],
   "cueillette": [

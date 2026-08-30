@@ -139,6 +139,7 @@ func _ready() -> void:
 	test_faim_et_poids()
 	test_donjon()
 	test_donjon_temps_a_l_action()
+	test_types_ennemis()
 	test_loot()
 	test_coffres_et_rares()
 	test_gemmes_et_livres()
@@ -4491,7 +4492,7 @@ func test_bestiaire() -> void:
 	for cid in GameData.catalogues.creatures.keys():
 		if "bete" in GameData.catalogues.creatures[cid].get("tags", []):
 			betes.append(str(cid))
-	verifier(betes.size() == 19, "19 races animales au bestiaire (%d)" % betes.size())
+	verifier(betes.size() >= 19, "au moins 19 races animales au bestiaire (%d)" % betes.size())
 	for cid in betes:
 		for a in GameData.catalogues.creatures[cid].actions:
 			verifier(GameData.catalogues.creature_actions.has(str(a)), "%s : action %s connue" % [cid, a])
@@ -6236,6 +6237,68 @@ func test_brouillard() -> void:
 
 
 # ---------------------------------------------------------------- Étape 2 : génération de donjon
+
+func test_types_ennemis() -> void:
+	# Créatures (2026-08-30) : tireur, invocateur, soigneur, tank, embusqueur, fuyard, essaim — données + IA.
+	var s := Simulation.new(31)
+	s.charger_arene("plaine_au_talus")
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	for x in s.vivants():   # l'arène vidée : seuls les cobayes comptent
+		if x.id != j.id:
+			x.vivant = false
+			s.grille.liberer(x.pos)
+	var manquantes := []
+	for id in ["bandit_archer", "chaman_bandit", "guerisseur_bandit", "brute", "rodeur", "rat_geant", "chauve_souris"]:
+		if not GameData.catalogues.creatures.has(id):
+			manquantes.append(id)
+	verifier(manquantes.is_empty(), "sept fiches d'ennemis au bestiaire (%s)" % str(manquantes))
+	# Le soigneur soigne l'allié le plus blessé à portée.
+	var g := s.ajouter("guerisseur_bandit", s._tuile_libre_autour(j.pos), "ia")
+	var b := s.ajouter("bandit", s._tuile_libre_autour(g.pos), "ia")
+	b.sante = 10
+	var sout := s._meilleur_soutien(g)
+	verifier(not sout.is_empty() and sout.cible.id == b.id, "soigneur : l'allié blessé est le soutien choisi")
+	s._executer_action_creature(g, sout.action, sout.cible)
+	verifier(int(b.sante) > 10, "onguent : le bandit est soigné (%d)" % int(b.sante))
+	b.sante = b.sante_max
+	verifier(s._meilleur_soutien(g).is_empty(), "personne de blessé : pas de soutien")
+	verifier(s._meilleure_attaque(g, j).is_empty() or s._meilleure_attaque(g, j).type == "arme", "l'onguent ne se choisit jamais comme attaque")
+	# L'invocateur appelle des follets, plafonnés à max.
+	var c := s.ajouter("chaman_bandit", s._tuile_libre_autour(g.pos), "ia")
+	c.cible = j.id
+	var appel: Dictionary = s.actions_creatures.appel_des_follets
+	s._executer_action_creature(c, appel, c)
+	s._executer_action_creature(c, appel, c)
+	s._executer_action_creature(c, appel, c)
+	verifier(s._invocations_de(c) == 2, "chaman : 2 follets au plus (%d)" % s._invocations_de(c))
+	verifier(s._meilleur_soutien(c).is_empty(), "au plafond : plus d'appel")
+	var follets := s.vivants().filter(func(x: Dictionary) -> bool: return str(x.get("maitre", "")) == c.id)
+	verifier(follets.size() == 2 and follets[0].camp == c.camp and s.ennemis(follets[0], j), "les follets sont du camp du chaman, hostiles au joueur")
+	# Le tireur recule au contact ; l'embusqueur guette ; le tank ne fuit jamais ; le fuyard fuit tôt.
+	var a := s.ajouter("bandit_archer", s._tuile_libre_autour(j.pos), "ia")
+	var ca := s._actions_candidates(a, j, s.profils_ia.tireur, 0)
+	verifier(ca.has("reculer") and s._a_action_a_distance(a), "archer au contact : reculer est candidat")
+	var meilleure := ""
+	var score_max := -1.0
+	for nom in ca.keys():
+		var sc := 0.0
+		for k in s.profils_ia.tireur.considerations.get(nom, {}).keys():
+			sc += float(ca[nom].get(k, 0.0)) * float(s.profils_ia.tireur.considerations[nom][k])
+		if sc > score_max:
+			score_max = sc
+			meilleure = nom
+	verifier(meilleure == "reculer", "et le profil tireur le préfère (%s)" % meilleure)
+	var r := s.ajouter("rodeur", s._tuile_libre_autour(j.pos + Vector2i(6, 0)), "ia")
+	var cr := s._actions_candidates(r, j, s.profils_ia.embusqueur, 0)
+	verifier(Grille.distance(r.pos, j.pos) > 3 and float(cr.attendre.guet) == 1.0, "rôdeur à %d tuiles : il guette" % Grille.distance(r.pos, j.pos))
+	var t := s.ajouter("brute", s._tuile_libre_autour(j.pos), "ia")
+	t.sante = 1
+	verifier(float(s._actions_candidates(t, j, s.profils_ia.tank, 0).fuir.sante_basse) == 0.0 and float(s.profils_ia.tank.seuil_fuite_sante) == 0.0, "brute à 1 PV : ne fuit pas")
+	var rat := s.ajouter("rat_geant", s._tuile_libre_autour(j.pos), "ia")
+	rat.sante = int(rat.sante_max * 0.4)
+	verifier(float(s._actions_candidates(rat, j, s.profils_ia.fuyard, 0).fuir.sante_basse) == 1.0, "rat à 40 % : fuit déjà")
+	verifier(str(GameData.catalogues.creatures.chauve_souris.meute) == "1d4+2" and Etres.est_volant(s.ajouter("chauve_souris", s._tuile_libre_autour(rat.pos), "ia")), "chauve-souris : en essaim, volante")
+
 
 func test_donjon_temps_a_l_action() -> void:
 	# Boucle de tick (2026-08-30) : en donjon, l'horloge du monde est une horloge d'action.

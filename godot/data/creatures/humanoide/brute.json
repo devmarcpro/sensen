@@ -1,0 +1,45 @@
+{
+  "name_key": "creature.brute.name",
+  "race": "humain",
+  "skeleton_template": "humanoide",
+  "corps": {
+    "stats": {
+      "force": 15,
+      "dexterite": 7,
+      "endurance": 14,
+      "volonte": 6,
+      "perception": 7,
+      "charisme": 6
+    },
+    "silhouette": "humanoide"
+  },
+  "esprit": null,
+  "ai_profile": "tank",
+  "actions": [
+    "coup_de_masse"
+  ],
+  "equipement": [
+    "proto_masse",
+    "proto_casque_fer",
+    "proto_cuirasse_mailles",
+    "proto_bouclier"
+  ],
+  "ratelier": [],
+  "chain_gauge": true,
+  "elements": {
+    "terre": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.5,
+    0.3,
+    0.2
+  ],
+  "tags": [
+    "humanoide",
+    "hostile",
+    "tank"
+  ],
+  "classe": "Le Sabre",
+  "fonction": "aventurier"
+}
