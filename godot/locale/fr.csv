@@ -2216,3 +2216,10 @@ ui.composeur.aide,"glisser une carte dans un slot · double-clic : premier slot 
 ui.composeur.glisser,"Glissez une forme et un noyau dans les slots — ou Entrée sur une carte."
 ui.composeur.wuxing,"{dominante} domine · engendre {engendre} · domine {domine}"
 ui.composeur.wuxing_vide,"Wu Xing du sort : —"
+ui.composeur.groupe.forme,Formes
+ui.composeur.groupe.noyau,Noyaux
+ui.composeur.groupe.modificateur,Modificateurs
+ui.composeur.groupe.condition,Conditions
+ui.composeur.groupe.liaison,Liaisons
+ui.composeur.groupe.declencheur,Déclencheur
+ui.composeur.groupe.suite,"Suite (après le déclencheur)"

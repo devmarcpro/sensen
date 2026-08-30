@@ -2206,3 +2206,10 @@ ui.composeur.aide,"drag a card into a slot · double-click: first free slot · r
 ui.composeur.glisser,"Drag a form and a core into the slots — or Enter on a card."
 ui.composeur.wuxing,"{dominante} leads · generates {engendre} · overcomes {domine}"
 ui.composeur.wuxing_vide,"Spell Wu Xing: —"
+ui.composeur.groupe.forme,Forms
+ui.composeur.groupe.noyau,Cores
+ui.composeur.groupe.modificateur,Modifiers
+ui.composeur.groupe.condition,Conditions
+ui.composeur.groupe.liaison,Links
+ui.composeur.groupe.declencheur,Trigger
+ui.composeur.groupe.suite,"Follow-up (after the trigger)"
