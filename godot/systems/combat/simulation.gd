@@ -8451,6 +8451,8 @@ func _lancer_capacite(e: Dictionary, index: int, cible: Variant, tick: int) -> b
 		EventBus.emettre(&"journal", [&"journal.condition_fausse", {"nom": e.name_key, "capacite": plan.name_key, "condition": fausse.name_key}])
 		return true
 	plan.ressource = int(plan.ressource) * _facteur_surface(e, plan, cible_pos)   # le prix suit la surface
+	if not plan.charge_suivante.is_empty() and plan.charge_suivante.has("geometrie"):   # la charge différée d'un déclencheur aussi
+		plan.charge_suivante.ressource = int(plan.charge_suivante.get("ressource", 0)) * _facteur_surface(e, plan.charge_suivante, cible_pos)
 	var rm_c: Dictionary = regles.r.get("modules", {})   # « aucun chiffre fixe » : le coût réel est un jet autour de sa base
 	plan.ressource = maxi(0, roundi(float(plan.ressource) * float(des.jet(str(rm_c.get("cout_variance_des", "2d6")))) / float(rm_c.get("cout_variance_moyenne", 7.0))))
 	_payer(e, plan)
