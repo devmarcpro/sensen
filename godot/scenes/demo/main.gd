@@ -210,8 +210,12 @@ func _nouvelle_partie() -> void:
 	ecrans.fermer()
 	titre_ouvert = false
 	minimap.visible = true
-	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": 1000}
-	ui.text = _texte_creation()
+	var cfg_c: Dictionary = GameData.config("creation")
+	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": int(cfg_c.get("annee_defaut", 1000)), "nom": "", "teinte": 0}
+	titre_ouvert = true   # l'écran de création est un vrai écran (Écrans d'interface, 2026-08-30) : rien ne tourne derrière
+	minimap.visible = false
+	ui.text = ""
+	ecrans.ouvrir("creation")
 
 
 ## Continuer / Charger : la sauvegarde `nom` ; sans elle, retour au titre.
@@ -304,6 +308,15 @@ func _creer_personnage() -> void:
 	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
 	var fiche := Etres.creer_personnage("creature.aventurier.name", races[creation.race % races.size()], classes[creation.classe % classes.size()], creation.points, int(creation.annee), prog)
 	fiche.capacites = GameData.entree("creatures", "aventurier").get("capacites", []).duplicate(true)
+	# Personnalisation (Écrans d'interface, 2026-08-30) : le nom choisi et la teinte du personnage.
+	var nom_choisi := str(creation.get("nom", "")).strip_edges()
+	if not nom_choisi.is_empty():
+		GameData.enregistrer_nom("joueur.nom", nom_choisi)
+		fiche.name_key = "joueur.nom"
+	var teintes: Array = GameData.config("creation").get("teintes", [])
+	if not teintes.is_empty():
+		var tn: Dictionary = teintes[int(creation.get("teinte", 0)) % teintes.size()]
+		fiche.teinte = [float(tn.rgb[0]), float(tn.rgb[1]), float(tn.rgb[2])]
 	if not fiche.has("modules_connus"):
 		fiche["modules_connus"] = []
 	for cap in fiche.capacites:   # les modules des capacités de départ sont connus : on peut les recombiner (Structure compétences-modules-slots)
@@ -587,8 +600,8 @@ func _exit_tree() -> void:
 
 
 func _process(delta: float) -> void:
-	if not creation.is_empty():
-		ui.text = _texte_creation()
+	if not creation.is_empty():   # l'écran de création : rien derrière
+		ui.text = ""
 		ui_bas.text = ""
 		ui_droite.text = ""
 		return
@@ -750,31 +763,6 @@ func _unhandled_input(ev: InputEvent) -> void:
 	if titre_ouvert:   # écran principal : seules les touches du panneau passent
 		if ev is InputEventKey and ev.pressed and not ev.echo and ecrans.est_ouvert():
 			ecrans.touche(ev)
-		return
-	if not creation.is_empty():
-		if ev is InputEventKey and ev.pressed and not ev.echo:
-			match ev.keycode:
-				KEY_R: creation.race += 1
-				KEY_C: creation.classe += 1
-				KEY_UP: creation.stat = posmod(creation.stat - 1, STATS.size())
-				KEY_DOWN: creation.stat = posmod(creation.stat + 1, STATS.size())
-				KEY_LEFT: creation.annee -= 1
-				KEY_RIGHT: creation.annee += 1
-				KEY_KP_ADD, KEY_EQUAL, KEY_PLUS:
-					var st: String = STATS[creation.stat]
-					var cl: Dictionary = GameData.entree("classes", _classes_visibles()[creation.classe % GameData.catalogues.classes.size()])
-					var total := 30 + int(cl.get("points_creation_bonus", 0))
-					var utilises := 0
-					for s2 in STATS:
-						utilises += int(creation.points.get(s2, 0))
-					if utilises < total and int(creation.points.get(st, 0)) < 10:
-						creation.points[st] = int(creation.points.get(st, 0)) + 1
-				KEY_KP_SUBTRACT, KEY_MINUS:
-					var st: String = STATS[creation.stat]
-					creation.points[st] = maxi(0, int(creation.points.get(st, 0)) - 1)
-				KEY_ENTER, KEY_KP_ENTER:
-					_creer_personnage()
-			ui.text = _texte_creation() if not creation.is_empty() else ui.text
 		return
 	var j := joueur()
 	if not j.is_empty() and not j.vivant and ev is InputEventKey and ev.pressed and not ev.echo:

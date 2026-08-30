@@ -14,6 +14,8 @@ var titre: Label
 var liste: ItemList
 var detail: RichTextLabel
 var apercu_sort: ApercuSort   # l'aperçu visuel du sort (écran Composer, Écrans d'interface)
+var cadre_perso: Control      # l'aperçu du personnage (écran Création) : un paperdoll dans un cadre
+var apercu_perso: Paperdoll
 var composeur: Composeur      # le composeur en glisser-déposer (écran Composer)
 var corps: HBoxContainer      # liste + détail : caché quand le composeur est ouvert
 var boutons: HBoxContainer
@@ -72,6 +74,15 @@ func _ready() -> void:
 	h.add_child(droite)
 	apercu_sort = ApercuSort.new()
 	apercu_sort.visible = false
+	cadre_perso = Control.new()   # Création : le personnage en grand, au-dessus du détail
+	cadre_perso.custom_minimum_size = Vector2(0, 230)
+	cadre_perso.visible = false
+	cadre_perso.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	droite.add_child(cadre_perso)
+	apercu_perso = Paperdoll.new()
+	apercu_perso.scale = Vector2(3.2, 3.2)
+	apercu_perso.position = Vector2(300, 205)
+	cadre_perso.add_child(apercu_perso)
 	detail = RichTextLabel.new()
 	detail.bbcode_enabled = true
 	detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -140,7 +151,11 @@ func _process(delta: float) -> void:
 
 ## Touches quand un écran est ouvert ; true si consommée.
 func touche(ev: InputEventKey) -> bool:
+	if courant == "creation" and _touche_creation(ev):
+		return true
 	if ev.keycode == KEY_TAB:
+		if courant == "creation":
+			return true
 		fermer()
 		return true
 	if courant == "composer" and ev.keycode != KEY_ESCAPE and ev.keycode != KEY_V and composeur.touche(ev):
@@ -151,6 +166,10 @@ func touche(ev: InputEventKey) -> bool:
 				ouvrir("triche")
 				return true
 			if courant == "titre":   # rien derrière l'écran principal : Échap n'y fait rien
+				return true
+			if courant == "creation":
+				main.creation = {}
+				ouvrir("titre")
 				return true
 			if courant in ["monde", "charger"] or (courant == "options" and main.titre_ouvert):
 				ouvrir("titre")
@@ -368,6 +387,8 @@ func rafraichir() -> void:
 			_construire_menu(j)
 		"titre":
 			_construire_titre()
+		"creation":
+			_construire_creation()
 		"monde":
 			_construire_monde()
 		"options":
@@ -398,8 +419,12 @@ func rafraichir() -> void:
 	if entrees.size() > 0:
 		liste.select(selection)
 	_montrer_detail()
+	cadre_perso.visible = courant == "creation"
 	if courant == "titre":   # rien derrière l'écran principal : pas de « Fermer »
 		pass
+	elif courant == "creation":
+		_bouton(tr("ui.creation.commencer"), func() -> void: main._creer_personnage())
+		_bouton(tr("ui.monde.retour"), func() -> void: main.creation = {}; ouvrir("titre"))
 	elif courant in ["monde", "charger"] or (courant == "options" and main.titre_ouvert):
 		_bouton(tr("ui.monde.retour"), func() -> void: ouvrir("titre"))
 	else:
@@ -435,6 +460,8 @@ func _montrer_detail() -> void:
 			detail.text = texte_objet(str(en.uid))
 		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer", "menu", "contexte", "capacite", "nouvelle_capacite", "module_composer", "triche", "triche_catalogue", "triche_item", "titre", "monde", "options", "charger_slot":
 			detail.text = str(en.get("texte", ""))
+		"creation":
+			detail.text = _detail_creation(str(en.id))
 		"achat", "vente":
 			var p: Dictionary = en.prix
 			detail.text = texte_objet(str(en.uid)) + "\n\n" + tr("ui.prix.detail").format({"prix": int(p.prix), "base": p.base, "marge": p.marge, "qualite": p.qualite, "rarete": p.rarete, "rep": p.rep}) \
@@ -490,6 +517,9 @@ func _action_principale() -> void:
 			main.sim.intention(j.id, {"type": "entrainer", "pnj": pnj_id, "competence": str(en.competence)})
 		"menu":
 			main._action_menu(str(en.id))
+			return
+		"creation":
+			_action_creation(str(en.id), 1)
 			return
 		"titre":
 			match str(en.id):
@@ -1164,6 +1194,210 @@ func _construire_titre() -> void:
 	for id in ids:
 		liste.add_item(tr("ui.titre." + id))
 		entrees.append({"kind": "titre", "id": id, "texte": tr("ui.titre.d_" + id)})
+
+
+# ---------------------------------------------------------------- l'écran de création (Écrans d'interface, 2026-08-30)
+
+## La fiche telle qu'elle serait créée maintenant (aperçu : stats, potentiels, kit) — sans la valider.
+func _fiche_apercu() -> Dictionary:
+	var c: Dictionary = main.creation
+	var races: Array = GameData.catalogues.races.keys()
+	races.sort()
+	var classes: Array = main._classes_visibles()
+	var prog: Progression = Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
+	return Etres.creer_personnage("creature.aventurier.name", races[int(c.race) % races.size()], classes[int(c.classe) % classes.size()], c.points, int(c.annee), prog)
+
+
+func _points_creation() -> Dictionary:
+	var c: Dictionary = main.creation
+	var classes: Array = main._classes_visibles()
+	var cl: Dictionary = GameData.entree("classes", classes[int(c.classe) % classes.size()])
+	var cfg: Dictionary = GameData.config("creation")
+	var total := int(cfg.get("points_base", 30)) + int(cl.get("points_creation_bonus", 0))
+	var utilises := 0
+	for st in main.STATS:
+		utilises += int(c.points.get(st, 0))
+	return {"total": total, "utilises": utilises, "restants": total - utilises, "max": int(cfg.get("max_par_stat", 10))}
+
+
+func _construire_creation() -> void:
+	titre.text = tr("ui.ecran.creation")
+	var c: Dictionary = main.creation
+	var fiche := _fiche_apercu()
+	var cfg: Dictionary = GameData.config("creation")
+	var teintes: Array = cfg.get("teintes", [])
+	var pts := _points_creation()
+	var nom: String = str(c.get("nom", ""))
+	liste.add_item(tr("ui.creation.nom_l").format({"nom": nom if not nom.is_empty() else tr("ui.creation.nom_vide")}))
+	entrees.append({"kind": "creation", "id": "nom"})
+	liste.add_item(tr("ui.creation.race_l").format({"race": tr(GameData.entree("races", fiche.race).name_key)}))
+	entrees.append({"kind": "creation", "id": "race"})
+	liste.add_item(tr("ui.creation.classe_l").format({"classe": tr(GameData.entree("classes", fiche.classe).name_key)}))
+	entrees.append({"kind": "creation", "id": "classe"})
+	liste.add_item(tr("ui.creation.annee_l").format({"annee": int(c.annee), "element": tr("element." + str(fiche.signe.element)), "animal": tr("animal." + str(fiche.signe.animal))}))
+	entrees.append({"kind": "creation", "id": "annee"})
+	liste.add_item(tr("ui.creation.points_l").format({"restants": pts.restants, "total": pts.total}))
+	entrees.append({"kind": "creation", "id": "points"})
+	for st in main.STATS:
+		liste.add_item(tr("ui.creation.stat_l").format({"stat": tr("stat." + st), "valeur": int(fiche.corps.stats[st]), "points": int(c.points.get(st, 0))}))
+		entrees.append({"kind": "creation", "id": "stat:" + st})
+	var tn: Dictionary = teintes[int(c.get("teinte", 0)) % teintes.size()] if not teintes.is_empty() else {"id": "azur"}
+	liste.add_item(tr("ui.creation.teinte_l").format({"teinte": tr("ui.teinte." + str(tn.id))}))
+	entrees.append({"kind": "creation", "id": "teinte"})
+	liste.add_item(tr("ui.creation.commencer"))
+	entrees.append({"kind": "creation", "id": "commencer"})
+	_apercu_personnage(fiche, tn)
+
+
+## Le personnage en grand : le paperdoll du jeu, avec la teinte choisie et l'équipement de départ de la classe.
+func _apercu_personnage(fiche: Dictionary, tn: Dictionary) -> void:
+	var e: Dictionary = fiche.duplicate(true)
+	if tn.has("rgb"):
+		e.teinte = [float(tn.rgb[0]), float(tn.rgb[1]), float(tn.rgb[2])]
+	var items := {}
+	var equip := {}
+	for id in fiche.get("equipement", []):
+		var d: Dictionary = GameData.entree("items", str(id))
+		if d.is_empty():
+			continue
+		var it: Dictionary = d.duplicate(true)
+		it["uid"] = str(id)
+		items[str(id)] = it
+		equip[str(d.get("equip_slot", "main_principale"))] = str(id)
+	e.equipement = equip
+	e["orientation"] = Vector2i(1, 1)
+	apercu_perso.configurer(e, GameData.entree("rigs", str(e.skeleton_template)), items, GameData.catalogues.functionalities, GameData.config("palette_materiaux"))
+	apercu_perso.queue_redraw()
+
+
+## Le détail de la ligne choisie : ce que change la race, la classe (talent, bonus, compétences, kit), la stat…
+func _detail_creation(id: String) -> String:
+	var fiche := _fiche_apercu()
+	var race: Dictionary = GameData.entree("races", fiche.race)
+	var cl: Dictionary = GameData.entree("classes", fiche.classe)
+	var pts := _points_creation()
+	var l: Array[String] = []
+	match id:
+		"nom":
+			l.append(tr("ui.creation.d_nom").format({"max": int(GameData.config("creation").get("nom_max", 16))}))
+		"race":
+			l.append("[b]%s[/b]" % tr(race.name_key))
+			l.append(tr("ui.creation.talent_race").format({"talent": main._texte_talent(str(race.get("talent", "")))}))
+			l.append(tr("ui.creation.bonus").format({"bonus": _texte_bonus(race.get("bonus_stats", {}))}))
+			l.append(tr("ui.creation.xp_mult").format({"mult": "%.2f" % float(race.get("xp_mult", 1.0)), "vie": int(race.get("lifespan", 80))}))
+			l.append(tr("ui.creation.d_race"))
+		"classe":
+			l.append("[b]%s[/b]" % tr(cl.name_key))
+			l.append(tr("ui.creation.talent_classe").format({"talent": main._texte_talent(str(cl.get("talent", "")))}))
+			l.append(tr("ui.creation.bonus").format({"bonus": _texte_bonus(cl.get("bonus_stats", {}))}))
+			var comps: Array[String] = []
+			for k in cl.get("competences", {}).keys():
+				comps.append("%s %d" % [tr(GameData.catalogues.competences.get(k, {}).get("name_key", "competence.%s.name" % k)), int(cl.competences[k])])
+			l.append(tr("ui.creation.competences_l").format({"liste": ", ".join(comps) if not comps.is_empty() else "—"}))
+			var pots: Array[String] = []
+			for k in cl.get("base_potentials", {}).keys():
+				if str(k) != "_defaut":
+					pots.append("%s %d" % [tr(GameData.catalogues.competences.get(k, {}).get("name_key", "competence.%s.name" % k)), int(cl.base_potentials[k])])
+			l.append(tr("ui.creation.potentiels_l").format({"defaut": int(cl.get("base_potentials", {}).get("_defaut", 80)), "liste": ", ".join(pots) if not pots.is_empty() else "—"}))
+			l.append(tr("ui.creation.kit_l").format({"liste": _texte_kit(cl)}))
+			l.append(tr("ui.creation.d_classe"))
+		"annee":
+			l.append(tr("ui.creation.signe").format({"annee": int(main.creation.annee), "element": tr("element." + str(fiche.signe.element)), "animal": tr("animal." + str(fiche.signe.animal))}))
+			l.append(tr("ui.creation.d_annee"))
+		"points":
+			l.append(tr("ui.creation.points").format({"restants": pts.restants, "total": pts.total}))
+			l.append(tr("ui.creation.d_points").format({"max": pts.max}))
+		"teinte":
+			l.append(tr("ui.creation.d_teinte"))
+		"commencer":
+			l.append(tr("ui.creation.d_commencer"))
+		_:
+			if id.begins_with("stat:"):
+				var st := id.trim_prefix("stat:")
+				l.append("[b]%s[/b] : %d" % [tr("stat." + st), int(fiche.corps.stats[st])])
+				l.append(tr("ui.creation.points").format({"restants": pts.restants, "total": pts.total}))
+				l.append(tr("stat." + st + ".desc"))
+	l.append("")
+	l.append(tr("ui.creation.aide2"))
+	return "\n".join(l)
+
+
+func _texte_bonus(bonus: Dictionary) -> String:
+	var parts: Array[String] = []
+	for k in bonus.keys():
+		parts.append("%s %+d" % [tr("stat." + str(k)), int(bonus[k])])
+	return ", ".join(parts) if not parts.is_empty() else "—"
+
+
+## Le kit de départ : l'équipement et le râtelier de la classe, l'établi portatif, le coffre du camp.
+func _texte_kit(cl: Dictionary) -> String:
+	var noms: Array[String] = []
+	var vus := {}
+	for id in cl.get("equipement", []) + cl.get("ratelier", []) + ["station_etabli"] + GameData.config("camp").get("coffre_depart", []):
+		if vus.has(str(id)):
+			continue
+		vus[str(id)] = true
+		var d: Dictionary = GameData.entree("items", str(id))
+		noms.append(tr(str(d.get("name_key", "item.%s.name" % id))))
+	return ", ".join(noms)
+
+
+## Une ligne de création réagit à ← → / + − / Entrée : cycler, ajuster, ou commencer.
+func _action_creation(id: String, sens: int) -> void:
+	var c: Dictionary = main.creation
+	var pts := _points_creation()
+	match id:
+		"race":
+			c.race = posmod(int(c.race) + sens, GameData.catalogues.races.size())
+		"classe":
+			c.classe = posmod(int(c.classe) + sens, main._classes_visibles().size())
+		"annee":
+			c.annee = int(c.annee) + sens
+		"teinte":
+			c.teinte = posmod(int(c.get("teinte", 0)) + sens, maxi(1, GameData.config("creation").get("teintes", []).size()))
+		"commencer":
+			main._creer_personnage()
+			return
+		"nom", "points":
+			if sens > 0:   # Entrée sur le nom ou les points : la ligne suivante
+				selection = mini(selection + 1, entrees.size() - 1)
+		_:
+			if id.begins_with("stat:"):
+				var st := id.trim_prefix("stat:")
+				var actuel := int(c.points.get(st, 0))
+				if sens > 0 and pts.restants > 0 and actuel < pts.max:
+					c.points[st] = actuel + 1
+				elif sens < 0 and actuel > 0:
+					c.points[st] = actuel - 1
+	rafraichir()
+
+
+func _touche_creation(ev: InputEventKey) -> bool:
+	if entrees.is_empty() or selection >= entrees.size():
+		return false
+	var en: Dictionary = entrees[selection]
+	var id := str(en.get("id", ""))
+	match ev.keycode:
+		KEY_LEFT, KEY_MINUS, KEY_KP_SUBTRACT:
+			_action_creation(id, -1)
+			return true
+		KEY_RIGHT, KEY_PLUS, KEY_KP_ADD, KEY_EQUAL:
+			_action_creation(id, 1)
+			return true
+		KEY_BACKSPACE:
+			if id == "nom":
+				main.creation.nom = str(main.creation.nom).left(maxi(0, str(main.creation.nom).length() - 1))
+				rafraichir()
+				return true
+		KEY_ESCAPE, KEY_UP, KEY_DOWN, KEY_ENTER, KEY_KP_ENTER, KEY_TAB:
+			return false
+	if id == "nom" and ev.unicode >= 32 and ev.unicode != 127:
+		var nom := str(main.creation.nom)
+		if nom.length() < int(GameData.config("creation").get("nom_max", 16)):
+			main.creation.nom = nom + char(ev.unicode)
+			rafraichir()
+		return true
+	return false
 
 
 ## L'écran Monde : la graine (aléatoire, re-tirable — aucun chiffre fixe), puis Commencer → la carte du départ.

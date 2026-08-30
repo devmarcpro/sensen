@@ -27,7 +27,7 @@ const WUXING_CATEGORIE := {"metal": {"metal": 1.0}, "bois": {"bois": 1.0}, "vege
 	"terre": {"terre": 1.0}, "mineral": {"terre": 1.0}, "fossile": {"terre": 1.0}, "gemme": {"terre": 1.0},
 	"liquide": {"eau": 1.0}, "meteorologique": {"eau": 1.0}, "synthetique": {"terre": 1.0}}
 ## Configurations (fichier unique à la racine de data/).
-const CONFIGS: Array[String] = ["combat_rules", "tile_contents", "wuxing", "palette_materiaux", "loot_rules", "rare_epithets", "reading_failures", "astrologie", "material_categories", "minerais_par_etage", "material_families", "camp", "noise_layers", "planete", "absurd_laws_pool", "styles"]
+const CONFIGS: Array[String] = ["combat_rules", "tile_contents", "wuxing", "palette_materiaux", "loot_rules", "rare_epithets", "reading_failures", "astrologie", "material_categories", "minerais_par_etage", "material_families", "camp", "noise_layers", "planete", "absurd_laws_pool", "styles", "creation"]
 
 var catalogues: Dictionary = {}   # nom → { id → Dictionary }
 var configs: Dictionary = {}      # nom → Dictionary
@@ -401,13 +401,18 @@ func _charger_locales() -> void:
 
 
 ## Un nom propre généré devient une clé de traduction : tout ce qui affiche `name_key` affiche le nom.
+var _traduction_dynamique_en: Translation
 var _traduction_dynamique: Translation = null
 func enregistrer_nom(cle: String, texte: String) -> void:
 	if _traduction_dynamique == null:
 		_traduction_dynamique = Translation.new()
 		_traduction_dynamique.locale = "fr"
 		TranslationServer.add_translation(_traduction_dynamique)
+		_traduction_dynamique_en = Translation.new()   # un nom propre est le même dans toutes les langues
+		_traduction_dynamique_en.locale = "en"
+		TranslationServer.add_translation(_traduction_dynamique_en)
 	_traduction_dynamique.add_message(cle, texte)
+	_traduction_dynamique_en.add_message(cle, texte)
 
 
 # ---------------------------------------------------------------- rapport

@@ -24,7 +24,9 @@ func _ready() -> void:
 	add_child(scene)
 	scene.profil_sans_ui = "--sans-ui" in args
 	scene.profil_sans_terrain = "--sans-terrain" in args
-	if scene.titre_ouvert and not ("--titre" in args):   # la capture saute l'écran principal, la création et l'écran Monde
+	if scene.titre_ouvert and "--creation" in args:   # --creation : l'écran de création du personnage
+		scene._nouvelle_partie()
+	elif scene.titre_ouvert and not ("--titre" in args):   # la capture saute l'écran principal, la création et l'écran Monde
 		scene._nouvelle_partie()
 		scene._creer_personnage()
 		scene._commencer_monde()

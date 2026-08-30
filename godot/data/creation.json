@@ -1,0 +1,73 @@
+{
+  "_doc": "L'écran de création du personnage (Écrans d'interface, designer 2026-08-30) : points à répartir, plafond par stat, année par défaut, et les teintes proposées (personnalisation — la couleur du personnage, avant les sprites du designer).",
+  "points_base": 30,
+  "max_par_stat": 10,
+  "annee_defaut": 1000,
+  "nom_max": 16,
+  "teintes": [
+    {
+      "id": "azur",
+      "rgb": [
+        0.28,
+        0.62,
+        0.92
+      ]
+    },
+    {
+      "id": "ocre",
+      "rgb": [
+        0.82,
+        0.6,
+        0.32
+      ]
+    },
+    {
+      "id": "sauge",
+      "rgb": [
+        0.45,
+        0.68,
+        0.42
+      ]
+    },
+    {
+      "id": "pourpre",
+      "rgb": [
+        0.66,
+        0.36,
+        0.7
+      ]
+    },
+    {
+      "id": "cendre",
+      "rgb": [
+        0.55,
+        0.55,
+        0.6
+      ]
+    },
+    {
+      "id": "rubis",
+      "rgb": [
+        0.8,
+        0.3,
+        0.3
+      ]
+    },
+    {
+      "id": "ivoire",
+      "rgb": [
+        0.9,
+        0.86,
+        0.75
+      ]
+    },
+    {
+      "id": "nuit",
+      "rgb": [
+        0.2,
+        0.22,
+        0.35
+      ]
+    }
+  ]
+}

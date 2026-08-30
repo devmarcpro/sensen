@@ -2270,3 +2270,41 @@ ai_profile.tank.name,Tank
 ai_profile.embusqueur.name,Ambusher
 ai_profile.fuyard.name,Skittish
 journal.invocation_creature,{nom}: {action} — {n} creature(s) called
+ui.ecran.creation,CHARACTER CREATION
+ui.creation.nom_l,Name: {nom}
+ui.creation.nom_vide,(type a name)
+ui.creation.race_l,Race: {race}
+ui.creation.classe_l,Class: {classe}
+ui.creation.annee_l,Born in {annee} — sign {element}-{animal}
+ui.creation.points_l,Points to spend: {restants} / {total}
+ui.creation.stat_l,{stat}: {valeur} (+{points})
+ui.creation.teinte_l,Tint: {teinte}
+ui.creation.commencer,Begin
+ui.creation.d_nom,"The character's name — type letters, Backspace erases ({max} letters at most). Without a name, they are the Adventurer."
+ui.creation.talent_classe,Class talent: {talent}
+ui.creation.bonus,Stat bonuses: {bonus}
+ui.creation.xp_mult,XP × {mult} · lifespan {vie} years
+ui.creation.d_race,"The race gives its talent, its bonuses and its learning pace."
+ui.creation.competences_l,Starting skills: {liste}
+ui.creation.potentiels_l,Potentials: {defaut} by default · {liste}
+ui.creation.kit_l,Starting kit: {liste}
+ui.creation.d_classe,"The class gives its talent, its skills, its gear and its potentials — everything else is learned by use."
+ui.creation.d_annee,"The birth year sets the astrological sign, which colours the potentials (← →)."
+ui.creation.d_points,"Every stat starts at 5; up to {max} points per stat, plus race and class bonuses."
+ui.creation.d_teinte,"The character's colour — sprites will come later, the tint stays."
+ui.creation.d_commencer,"Confirm the character, then pick the world (seed) and the starting cell."
+ui.creation.aide2,← → or + / −: change · ↑ ↓: line · Enter: next / confirm · Esc: back
+stat.force.desc,"Strength: heavy weapon damage, carried weight, digging."
+stat.dexterite.desc,"Dexterity: accuracy, dodging, light weapons and shooting."
+stat.endurance.desc,"Endurance: hit points (20 + End × 4), action stamina, walking."
+stat.volonte.desc,"Will: mana, resistance to control, magic."
+stat.perception.desc,"Perception: sight and detection range, gathering, shooting."
+stat.charisme.desc,"Charisma: trade, companions, reputations."
+ui.teinte.azur,azure
+ui.teinte.ocre,ochre
+ui.teinte.sauge,sage
+ui.teinte.pourpre,purple
+ui.teinte.cendre,ash
+ui.teinte.rubis,ruby
+ui.teinte.ivoire,ivory
+ui.teinte.nuit,night

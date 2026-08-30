@@ -2280,3 +2280,41 @@ ai_profile.tank.name,Tank
 ai_profile.embusqueur.name,Embusqueur
 ai_profile.fuyard.name,Fuyard
 journal.invocation_creature,{nom} : {action} — {n} créature(s) appelée(s)
+ui.ecran.creation,CRÉATION DU PERSONNAGE
+ui.creation.nom_l,Nom : {nom}
+ui.creation.nom_vide,(tapez un nom)
+ui.creation.race_l,Race : {race}
+ui.creation.classe_l,Classe : {classe}
+ui.creation.annee_l,Née en {annee} — signe {element}-{animal}
+ui.creation.points_l,Points à répartir : {restants} / {total}
+ui.creation.stat_l,{stat} : {valeur} (+{points})
+ui.creation.teinte_l,Teinte : {teinte}
+ui.creation.commencer,Commencer
+ui.creation.d_nom,"Le nom du personnage — tapez les lettres, Retour arrière efface ({max} lettres au plus). Sans nom, il s'appellera Aventurier."
+ui.creation.talent_classe,Talent de classe : {talent}
+ui.creation.bonus,Bonus de stats : {bonus}
+ui.creation.xp_mult,XP × {mult} · espérance de vie {vie} ans
+ui.creation.d_race,"La race donne son talent, ses bonus et son rythme d'apprentissage."
+ui.creation.competences_l,Compétences de départ : {liste}
+ui.creation.potentiels_l,Potentiels : {defaut} par défaut · {liste}
+ui.creation.kit_l,Kit de départ : {liste}
+ui.creation.d_classe,"La classe donne son talent, ses compétences, son équipement et ses potentiels — tout le reste s'apprend par l'usage."
+ui.creation.d_annee,"L'année de naissance fixe le signe astrologique, qui colore les potentiels (← →)."
+ui.creation.d_points,"Chaque stat part de 5 ; jusqu'à {max} points par stat, plus les bonus de race et de classe."
+ui.creation.d_teinte,"La couleur du personnage — ses sprites viendront plus tard, la teinte reste."
+ui.creation.d_commencer,"Valider le personnage, puis choisir le monde (graine) et la case de départ."
+ui.creation.aide2,← → ou + / − : modifier · ↑ ↓ : ligne · Entrée : suivant / valider · Échap : retour
+stat.force.desc,"Force : les dégâts des armes lourdes, le poids porté, creuser."
+stat.dexterite.desc,"Dextérité : la précision, l'esquive, les armes légères et le tir."
+stat.endurance.desc,"Endurance : les points de vie (20 + End × 4), l'endurance d'action, la marche."
+stat.volonte.desc,"Volonté : le mana, la résistance aux contrôles, la magie."
+stat.perception.desc,"Perception : la portée de vue et de détection, la récolte, le tir."
+stat.charisme.desc,"Charisme : le commerce, les compagnons, les réputations."
+ui.teinte.azur,azur
+ui.teinte.ocre,ocre
+ui.teinte.sauge,sauge
+ui.teinte.pourpre,pourpre
+ui.teinte.cendre,cendre
+ui.teinte.rubis,rubis
+ui.teinte.ivoire,ivoire
+ui.teinte.nuit,nuit
