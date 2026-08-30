@@ -99,7 +99,7 @@
     ]
   },
   "contenants": {
-    "_doc": "coffres par salle : tuiles de sol par coffre ; objets par coffre. `categories` : un poids et un FILTRE de categorie (jamais une liste d'ids ecrite a la main - Data-driven design).",
+    "_doc": "coffres par salle : tuiles de sol par coffre ; objets par coffre. `categories` : un poids et un FILTRE de categorie (jamais une liste d'ids ecrite a la main - Data-driven design). Designer (2026-08-30) : les armes, armures et outils du loot sont des objets ASSEMBLES (tags assemble), composes a la generation - jamais « une simple epee ».",
     "tuiles_par_coffre": 40,
     "objets_par_coffre": [
       1,
@@ -113,7 +113,7 @@
             "arme"
           ],
           "tags_any": [
-            "prototype"
+            "assemble"
           ]
         }
       },
@@ -121,11 +121,10 @@
         "poids": 4,
         "filtre": {
           "types_any": [
-            "armure",
-            "bouclier"
+            "armure"
           ],
           "tags_any": [
-            "prototype"
+            "assemble"
           ]
         }
       },
@@ -161,7 +160,7 @@
             "outil"
           ],
           "tags_any": [
-            "prototype",
+            "assemble",
             "lumiere"
           ]
         }
@@ -185,6 +184,14 @@
             "partie",
             "ame",
             "specimen"
+          ]
+        }
+      },
+      "boucliers": {
+        "poids": 1,
+        "filtre": {
+          "types_any": [
+            "bouclier"
           ]
         }
       }
@@ -260,5 +267,11 @@
       "noyaux": "1",
       "appoint": "1d2"
     }
+  },
+  "assemblage": {
+    "_doc": "Loot assemblé (designer, 2026-08-30) : chaque composant d'un objet assemblé tiré dans un coffre ou un drop reçoit une recette (donc une famille de matériau), un matériau de la famille (les minerais d'étage ≤ profondeur sont favorisés : poids_etage) et une qualité tirée comme un artisan de niveau niveau_base + niveau_par_profondeur × profondeur ; le jet d'assemblage suit combat_rules.craft.qualite.jet_assemblage.",
+    "niveau_base": 8,
+    "niveau_par_profondeur": 6,
+    "poids_etage": 3
   }
 }

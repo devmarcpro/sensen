@@ -5210,26 +5210,10 @@ func _assembler(e: Dictionary, def: Dictionary, tick: int) -> bool:
 	if not plan.faisable:
 		EventBus.emettre(&"journal", [&"journal.manque", {"recette": def.name_key}])
 		return false
-	var poids: Dictionary = regles.r.craft.poids.armure if def.type == "armure" else regles.r.craft.poids.arme
-	var stats := {}
-	var elements := {}
-	var q_somme := 0.0
-	var composants := {}
-	var tete: Dictionary = {}
-	var manche: Dictionary = {}
+	var pieces: Array[Dictionary] = []
 	for en in plan.entrees:
 		var c: Dictionary = en.pile
-		var w := float(poids.get(en.slot, 0.0))
-		for s in c.stats.keys():
-			stats[s] = float(stats.get(s, 0.0)) + float(c.stats[s]) * w
-		for el in c.elements.keys():
-			elements[el] = float(elements.get(el, 0.0)) + float(c.elements[el]) * w
-		q_somme += float(c.qualite) * w
-		composants[en.slot] = {"composant": c.composant, "materiau": c.materiau, "qualite": c.qualite}
-		if en.slot in ["tete", "plaque"]:
-			tete = c
-		elif en.slot == "manche":
-			manche = c
+		pieces.append({"slot": en.slot, "composant": c.composant, "materiau": c.materiau, "qualite": c.qualite, "stats": c.stats, "elements": c.elements})
 		e.sac.erase(c.uid)
 		items.erase(c.uid)
 	var skill := str(def.recipe.craft_skill)
@@ -5238,22 +5222,10 @@ func _assembler(e: Dictionary, def: Dictionary, tick: int) -> bool:
 	rng.seed = hash([graine, "assemblage", objets.size(), def.id])
 	var borne: Array = regles.r.craft.qualite.jet_assemblage
 	var jet := clampf(regles.qualite_craft(n, rng, regles.resserrement_recette(niveau_recette(e, str(def.id)))), float(borne[0]), float(borne[1]))
-	var inst := generer_objet(def.id, 1, {}, "commun", 0)
+	var inst := generer_objet(def.id, 1, {"assemblage": true}, "commun", 0)
 	if inst.is_empty():
 		return false
-	inst.stats = stats
-	inst.durete_base = roundi(float(stats.get("durete", 0.0)))   # la moyenne pondérée AVANT qualité
-	inst.qualite = snappedf(q_somme * jet, 0.01)
-	inst.elements = elements
-	inst.element = wuxing.dominante(elements)
-	inst.materiau = str(tete.get("materiau", ""))
-	inst.composants = composants
-	if not manche.is_empty():
-		var v: Dictionary = regles.r.craft.vitesse
-		inst.vitesse_facteur = snappedf(1.0 + (float(manche.stats.densite) - float(v.densite_reference)) * float(v.par_point), 0.01)
-	if def.type == "armure":
-		inst.durete_composite = inst.durete_base
-		inst.niveau_construction = 0
+	_appliquer_composition(inst, def, pieces, jet)
 	e.sac.append(inst.uid)
 	e.compteur = tick + _ticks_avec_statuts(e, maxi(1, ceili(float(regles.r.craft.ticks_base) / regles.skill_factor(n))))
 	gagner_xp(e, skill, inst.durete_base)
@@ -5732,7 +5704,119 @@ func generer_objet(base_id: String, profondeur: int, provenance: Dictionary = {}
 		return {}
 	objets[inst.uid] = inst
 	items[inst.uid] = inst
+	if "assemble" in inst.get("tags", []) and not bool(provenance.get("assemblage", false)):
+		_composer_loot(inst, profondeur, rng)   # un objet assemblé trouvé est composé : manche, tête, fixations tirés (designer, 2026-08-30)
 	return inst
+
+
+## Le loot assemblé (Loot — affixes, gemmes et rareté, 2026-08-30) : jamais « une simple épée » — chaque composant
+## reçoit une recette, un matériau de sa famille (les minerais de l'étage favorisés) et une qualité d'artisan.
+func _composer_loot(inst: Dictionary, profondeur: int, rng: RandomNumberGenerator) -> void:
+	var def: Dictionary = GameData.entree("items", str(inst.base))
+	if def.get("slots", {}).is_empty():
+		return
+	var la: Dictionary = GameData.config("loot_rules").get("assemblage", {})
+	var niveau := int(la.get("niveau_base", 8)) + int(la.get("niveau_par_profondeur", 6)) * maxi(0, profondeur)
+	var pieces: Array[Dictionary] = []
+	for slot in def.slots.keys():
+		var comp_id := str(def.slots[slot])
+		var recettes: Array = []
+		for rid in GameData.catalogues.component_recipes.keys():
+			if str(GameData.catalogues.component_recipes[rid].component) == comp_id:
+				recettes.append(GameData.catalogues.component_recipes[rid])
+		if recettes.is_empty():
+			continue
+		recettes.shuffle()   # une famille sans matériau au catalogue (os, écailles… paramétriques) : la recette suivante
+		var mat_id := ""
+		for r in recettes:
+			var fam: Dictionary = GameData.config("material_families").get(str(r.material_family), {})
+			mat_id = _materiau_loot(fam, profondeur, rng)
+			if not mat_id.is_empty():
+				break
+		if mat_id.is_empty():
+			continue
+		var mat: Dictionary = GameData.entree("materials", mat_id)
+		pieces.append({"slot": slot, "composant": comp_id, "materiau": mat_id, "qualite": regles.qualite_craft(niveau, rng),
+			"stats": mat.get("stats", {}), "elements": mat.get("wuxing", {}) if mat.get("wuxing") != null else {}})
+	if pieces.is_empty():
+		return
+	var borne: Array = regles.r.craft.qualite.jet_assemblage
+	var jet := clampf(regles.qualite_craft(niveau, rng), float(borne[0]), float(borne[1]))
+	_appliquer_composition(inst, def, pieces, jet)
+
+
+## Un matériau d'une famille (Recettes de composants) pour le loot : les minerais des étages ≤ profondeur pèsent plus.
+func _materiau_loot(fam: Dictionary, profondeur: int, rng: RandomNumberGenerator) -> String:
+	var candidats: Array[String] = []
+	if fam.has("material"):
+		candidats.append(str(fam.material))
+	elif fam.has("materials"):
+		for m in fam.materials:
+			candidats.append(str(m))
+	else:
+		for m in GameData.catalogues.materials.keys():
+			var d: Dictionary = GameData.catalogues.materials[m]
+			if fam.has("category") and str(d.get("category", "")) == str(fam.category):
+				candidats.append(str(m))
+			elif fam.has("tag") and str(fam.tag) in d.get("tags", []):
+				candidats.append(str(m))
+	candidats = candidats.filter(func(m: String) -> bool: return GameData.catalogues.materials.has(m))
+	if candidats.is_empty():
+		return ""
+	var tiers: Dictionary = GameData.config("minerais_par_etage").get("tiers", {})
+	var favoris := {}
+	for k in tiers.keys():
+		if int(k) <= maxi(1, profondeur):
+			for m in tiers[k]:
+				favoris[str(m)] = true
+	var poids_fav := float(GameData.config("loot_rules").get("assemblage", {}).get("poids_etage", 3))
+	var total := 0.0
+	for m in candidats:
+		total += poids_fav if favoris.has(m) else 1.0
+	var t := rng.randf() * total
+	for m in candidats:
+		t -= poids_fav if favoris.has(m) else 1.0
+		if t < 0.0:
+			return m
+	return candidats[candidats.size() - 1]
+
+
+## Ce que les composants font à l'objet (Stats et qualité de l'assemblage) : stats = Σ stat × poids, durete_base avant
+## qualité, qualité = Σ q × poids × jet, Wu Xing composite, matériau de la tête, vitesse du manche. Partagé par
+## l'atelier (_assembler) et le loot (_composer_loot).
+func _appliquer_composition(inst: Dictionary, def: Dictionary, pieces: Array[Dictionary], jet: float) -> void:
+	var poids: Dictionary = regles.r.craft.poids.armure if def.type == "armure" else regles.r.craft.poids.arme
+	var stats := {}
+	var elements := {}
+	var q_somme := 0.0
+	var composants := {}
+	var tete: Dictionary = {}
+	var manche: Dictionary = {}
+	for c in pieces:
+		var w := float(poids.get(c.slot, 0.0))
+		for s in c.stats.keys():
+			stats[s] = float(stats.get(s, 0.0)) + float(c.stats[s]) * w
+		for el in c.elements.keys():
+			elements[el] = float(elements.get(el, 0.0)) + float(c.elements[el]) * w
+		q_somme += float(c.qualite) * w
+		composants[c.slot] = {"composant": c.composant, "materiau": c.materiau, "qualite": c.qualite}
+		if c.slot in ["tete", "plaque"]:
+			tete = c
+		elif c.slot == "manche":
+			manche = c
+	inst.stats = stats
+	inst.durete_base = roundi(float(stats.get("durete", 0.0)))   # la moyenne pondérée AVANT qualité
+	inst.qualite = snappedf(q_somme * jet, 0.01)
+	inst.elements = elements
+	inst.element = wuxing.dominante(elements)
+	inst.materiau = str(tete.get("materiau", ""))
+	inst.composants = composants
+	if not manche.is_empty():
+		var v: Dictionary = regles.r.craft.vitesse
+		inst.vitesse_facteur = snappedf(1.0 + (float(manche.stats.get("densite", v.densite_reference)) - float(v.densite_reference)) * float(v.par_point), 0.01)
+	if def.type == "armure":
+		inst.durete_composite = inst.durete_base
+		inst.niveau_construction = 0
 
 
 ## Un PNJ civil : son camp, son nom (culture du village ou de sa race), sa bourse (fonction), son stock.

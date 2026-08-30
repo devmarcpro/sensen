@@ -6,6 +6,28 @@
     "contenants",
     "drops",
     "monstres_rares",
-    "gemmes"
-  ]
+    "gemmes",
+    "assemblage"
+  ],
+  "properties": {
+    "assemblage": {
+      "type": "object",
+      "properties": {
+        "niveau_base": {
+          "type": "integer"
+        },
+        "niveau_par_profondeur": {
+          "type": "integer"
+        },
+        "poids_etage": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "niveau_base",
+        "niveau_par_profondeur",
+        "poids_etage"
+      ]
+    }
+  }
 }

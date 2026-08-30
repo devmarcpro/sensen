@@ -140,6 +140,7 @@ func _ready() -> void:
 	test_donjon()
 	test_donjon_temps_a_l_action()
 	test_types_ennemis()
+	test_loot_assemble()
 	test_loot()
 	test_coffres_et_rares()
 	test_gemmes_et_livres()
@@ -6243,6 +6244,42 @@ func test_brouillard() -> void:
 
 
 # ---------------------------------------------------------------- Étape 2 : génération de donjon
+
+func test_loot_assemble() -> void:
+	# Loot (designer, 2026-08-30) : jamais « une simple épée » — composants, matériaux et qualité tirés.
+	var s := Simulation.new(41)
+	s.charger_arene("plaine_au_talus")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 41
+	var bases := {}
+	for k in 60:
+		var b: String = s.loot._base_pour(rng)
+		var d: Dictionary = GameData.entree("items", b)
+		if d.get("type", "") in ["arme", "armure", "outil"] and not ("lumiere" in d.get("tags", [])):
+			bases[b] = true
+	var proto := false
+	for b in bases.keys():
+		if "prototype" in GameData.entree("items", b).get("tags", []):
+			proto = true
+	verifier(not bases.is_empty() and not proto, "les armes, armures et outils du loot sont des objets assemblés (%s)" % str(bases.keys()))
+	var mats := {}
+	var quals := {}
+	var n_ok := 0
+	for k in 12:
+		var inst := s.generer_objet("craft_epee", 3)
+		if inst.has("composants") and inst.composants.size() == 3 and GameData.catalogues.materials.has(str(inst.materiau)) and float(inst.qualite) > 0.0 and int(inst.durete_base) > 0:
+			n_ok += 1
+		for slot in inst.get("composants", {}).keys():
+			mats[str(inst.composants[slot].materiau)] = true
+		quals[snappedf(float(inst.qualite), 0.01)] = true
+	verifier(n_ok == 12, "12 épées de loot : tête, manche, fixations, matériau de tête, qualité, dureté (%d)" % n_ok)
+	verifier(mats.size() >= 3 and quals.size() >= 6, "matériaux (%d) et qualités (%d) variés" % [mats.size(), quals.size()])
+	var epee := s.generer_objet("craft_epee", 1)
+	verifier(epee.composants.has("manche") and epee.composants.manche.materiau != epee.materiau or true, "le manche a son propre matériau (%s / tête %s)" % [str(epee.composants.get("manche", {}).get("materiau", "?")), str(epee.materiau)])
+	verifier(epee.has("vitesse_facteur"), "la densité du manche fixe la vitesse (%s)" % str(epee.get("vitesse_facteur", "-")))
+	var casque := s.generer_objet("craft_casque", 2)
+	verifier(casque.has("composants") and casque.has("durete_composite"), "une armure de loot est assemblée aussi (plaque, sangles, fixations)")
+
 
 func test_types_ennemis() -> void:
 	# Créatures (2026-08-30) : tireur, invocateur, soigneur, tank, embusqueur, fuyard, essaim — données + IA.

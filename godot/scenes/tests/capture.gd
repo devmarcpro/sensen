@@ -72,6 +72,30 @@ func _ready() -> void:
 		var jd: Dictionary = scene.joueur()
 		scene.sim.charger_donjon("ruine", 7, 7, 1, jd)
 		scene._apres_changement_de_grille()
+	for i9 in args.size():   # --explorer N : le joueur marche N pas vers l'escalier avant la capture (un étage exploré, designer 2026-08-30)
+		if args[i9] == "--explorer" and i9 + 1 < args.size() and scene.sim != null:
+			var se = scene.sim
+			var je: Dictionary = scene.joueur()
+			var but: Vector2i = se.donjon.escalier if (not se.donjon.is_empty() and se.donjon.escalier != null) else je.pos
+			for pas_k in int(args[i9 + 1]):
+				var garde := 200
+				while garde > 0 and not se.attente.has(je.id) and je.vivant:
+					se.pas("monde")
+					for nom_c in se.combats.keys():
+						se.pas(nom_c)
+					garde -= 1
+				if not je.vivant:
+					break
+				var chemin: Array = se.grille.chemin(je.pos, but, false, "")
+				if chemin.is_empty() or not se.intention(je.id, {"type": "deplacer", "vers": chemin[0]}):
+					if not se.intention(je.id, {"type": "attendre"}):
+						break
+			scene._apres_changement_de_grille()
+			scene.journal.clear()   # la capture montre l'étage exploré, pas le récit de l'exploration
+			scene.ecran_fin.clear()
+			scene.xp_cumul = {}
+			scene.xp_flottants = []
+			scene.xp_fenetre = 0.0
 	for i3 in args.size():   # --heure H : l'heure du monde (cycle jour-nuit) — après le chargement, qui remet l'horloge
 		if args[i3] == "--heure" and i3 + 1 < args.size() and scene.sim != null:
 			scene.sim.horloge_monde.ticks = int(float(args[i3 + 1]) / 24.0 * 24000.0)
