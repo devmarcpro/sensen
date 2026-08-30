@@ -2808,10 +2808,11 @@ func slots_capacites(e: Dictionary) -> Dictionary:
 	return {"capacites": mini(int(c.capacites_max), int(c.capacites_base) + n / int(c.par_niveau_capacites)), "modules": mini(int(c.modules_max), int(c.modules_base) + n / int(c.par_niveau_modules))}
 
 
-## Composer une capacité depuis des modules connus : l'assembleur juge la séquence, les slots la bornent.
+## Composer une capacité depuis des modules connus : l'assembleur juge la séquence, les slots bornent le **nombre**
+## de capacités tenues prêtes — pas la longueur d'une séquence (assemblage sans limite, 2026-08-30).
 func composer_capacite(e: Dictionary, sequence: Array) -> bool:
 	var slots := slots_capacites(e)
-	if sequence.is_empty() or sequence.size() > int(slots.modules) or e.get("capacites", []).size() >= int(slots.capacites):
+	if sequence.is_empty() or e.get("capacites", []).size() >= int(slots.capacites):
 		EventBus.emettre(&"journal", [&"journal.capacite_refusee", {}])
 		return false
 	for m in sequence:

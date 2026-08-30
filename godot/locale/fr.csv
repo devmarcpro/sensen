@@ -636,7 +636,7 @@ ui.menu.capacites,Capacités
 ui.ecran.capacites,"CAPACITÉS — {n}/{max} (Entrée : supprimer · modules par capacité : {modules})"
 ui.capacites.nouvelle,+ Nouvelle capacité
 ui.capacites.ligne,"{nom} — {modules}"
-ui.ecran.composer,"COMPOSER — séquence : {sequence} ({n}/{max}) · Entrée : ajouter / retirer · V : valider"
+ui.ecran.composer,"COMPOSER — séquence : {sequence} ({n} modules, sans plafond) · Entrée : ajouter / retirer · V : valider"
 ui.composer.type,[{type}]
 ui.composer.module,"{nom} — {desc}"
 ui.composer.valider,Valider (V)
