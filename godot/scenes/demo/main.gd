@@ -224,6 +224,7 @@ func _commencer_monde() -> void:
 	minimap.visible = true
 	arene_courante = arenes.size()   # une partie commence au camp, sur le monde (Début de partie)
 	_charger(fiche_monde)
+	_kit_de_test()
 	fiche_en_attente = fiche_monde
 	fiche_monde = {}
 	carte.ouvrir("depart")
@@ -304,6 +305,16 @@ func _creer_personnage() -> void:
 		ecrans.ouvrir("monde")
 		return
 	_charger(fiche)
+	_kit_de_test()
+
+
+## Mode test (Grimoires et manuels, décision du 2026-08-30) : tous les modules du catalogue au joueur à la nouvelle partie.
+func _kit_de_test() -> void:
+	if not bool(GameData.config("combat_rules").get("modules", {}).get("tout_au_depart", false)):
+		return
+	var j := joueur()
+	if not j.is_empty():
+		sim.triche(j, "modules")
 
 
 ## Le joueur a cliqué sa case de départ (Début de partie) : le camp y est établi.
@@ -315,6 +326,7 @@ func _choisir_depart(cell: Vector2i) -> void:
 	sim.graine_monde = graine_monde
 	sim.fiche_joueur = fiche_en_attente
 	sim.charger_camp({}, cell)
+	_kit_de_test()   # le joueur est recréé sur la case choisie : le kit de test aussi
 	fiche_en_attente = {}
 	joueur_id = ""
 	for e in sim.vivants():
