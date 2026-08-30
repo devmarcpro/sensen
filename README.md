@@ -11,6 +11,7 @@ Un **roguelike tactique** en monde infini, généré procéduralement et totalem
 ## Sommaire
 
 1. [Jouer](#jouer) — lancer le jeu, les contrôles
+2. [En images](#en-images) — captures d'écran
 2. [Ce qui tourne aujourd'hui](#ce-qui-tourne-aujourdhui) — les systèmes jouables, par thème
 3. [Juger le jeu](#juger-le-jeu) — ce qui attend un œil humain
 4. [Structure du dépôt](#structure-du-dépôt)
@@ -40,6 +41,18 @@ La partie démarre par la **création de personnage** (R race, C classe, ↑↓ 
 | molette, clic milieu | zoomer, déplacer la vue |
 
 Dans les écrans : flèches et Entrée, plus les raccourcis lettres **affichés dans l'en-tête** de chaque écran (aucun raccourci global caché).
+
+---
+
+## En images
+
+Captures prises par `scenes/tests/capture.tscn` (tout est dessiné par code — aucun asset) ; elles sont dans [`captures/`](captures/) et se rafraîchissent avec `capture.tscn -- --sortie captures/<nom>.png` quand un écran change.
+
+| | |
+|---|---|
+| ![Écran principal](captures/titre.png) **Écran principal** — nouvelle partie, continuer, charger | ![Camp de base](captures/camp.png) **Le camp de base** — une cellule du monde, HUD (compas, horloge, Wu Xing, barres, hotbar) |
+| ![Carte du monde](captures/carte.png) **La carte du monde** — biomes, danger, donjons, filons, voyage rapide | ![Donjon](captures/donjon.png) **Un étage de donjon** — blocs pleins, brouillard de guerre, lueur ambiante |
+| ![Combat](captures/combat.png) **Le combat** — action-time à ticks, résolution simultanée, ennemis typés | ![Composeur](captures/composeur.png) **Le composeur de sorts** — formes, noyaux, modificateurs en glisser-déposer, Wu Xing du sort et aperçu |
 
 ---
 

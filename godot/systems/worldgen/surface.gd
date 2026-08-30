@@ -392,7 +392,8 @@ func resume_cellule(c: Vector2i, camp: bool = false) -> Dictionary:
 func terre_a(c: Vector2i) -> bool:
 	var taille: int = int(planete.taille_cellule)
 	var seuil := float(planete.get("mer", {}).get("altitude", 0.30))
-	for off in [Vector2i(64, 64), Vector2i(32, 32), Vector2i(96, 32), Vector2i(32, 96), Vector2i(96, 96)]:
+	var q := taille / 4   # cinq sondes DANS la cellule (centre + quatre quarts) — des offsets figés sur 128 tombaient dans la cellule voisine depuis les cellules de 64 (2026-08-30)
+	for off in [Vector2i(2 * q, 2 * q), Vector2i(q, q), Vector2i(3 * q, q), Vector2i(q, 3 * q), Vector2i(3 * q, 3 * q)]:
 		if float(tectonique_a(c.x * taille + off.x, c.y * taille + off.y).altitude) < seuil:
 			return false
 	return true

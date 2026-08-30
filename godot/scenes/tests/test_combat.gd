@@ -1288,6 +1288,12 @@ func test_desequiper_jeter() -> void:
 # ---------------------------------------------------------------- Étape 8.1 : une cellule de surface
 
 func test_surface() -> void:
+	# Début de partie (2026-08-30) : le camp n'est jamais dans la mer — terre_a sonde DANS la cellule (bug des offsets 128)
+	for g in [763439, 31, 92]:
+		var sd := Simulation.new(g)
+		sd.charger_camp()
+		var jd: Dictionary = sd.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+		verifier(sd.grille.niveau_liquide(jd.pos) == 0 and not ("liquide" in sd.grille.contenu_de(jd.pos).get("tags", [])), "graine %d : le camp est sur la terre ferme" % g)
 	var planete: Dictionary = GameData.config("planete")
 	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
 	verifier(GameData.config("noise_layers").size() == 8 and GameData.catalogues.biomes.size() == 12, "8 couches de bruit, 12 biomes")
