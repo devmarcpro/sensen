@@ -184,7 +184,7 @@ tile_content.roche.name,Roche
 dungeon_theme.ruine.name,Ruine
 dungeon_theme.repaire.name,Repaire
 ui.donjon,DONJON {theme} · étage {etage}/{etages} · salles {salles} · E : descendre (escalier doré) / remonter et sortir (escalier vert)
-journal.descente,vous descendez à l'étage {etage}
+journal.descente,"vous descendez à l'étage {etage}/{etages} — {salles} salles, corruption {corruption} %"
 journal.pas_escalier,pas de cage d'escalier ici
 item.proto_anneau.name,Anneau
 item.proto_amulette.name,Amulette

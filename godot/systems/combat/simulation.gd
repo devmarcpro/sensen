@@ -5595,8 +5595,9 @@ func _descendre(e: Dictionary) -> bool:
 		return false
 	var prochain: int = int(donjon.etage) + 1
 	e.etage_depuis = int(donjon.etage)
-	EventBus.emettre(&"journal", [&"journal.descente", {"etage": prochain}])
 	charger_donjon(donjon.theme, int(donjon.graine), int(donjon.id), prochain, e)
+	# Le message d'arrivée dit l'étage, la profondeur du donjon, la corruption et le nombre de salles (parcours du 2026-08-30)
+	EventBus.emettre(&"journal", [&"journal.descente", {"etage": prochain, "etages": int(donjon.etages), "corruption": int(donjon.get("corruption_etage", 0)), "salles": int(donjon.salles)}])
 	return true
 
 

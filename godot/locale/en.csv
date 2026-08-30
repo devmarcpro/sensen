@@ -1720,7 +1720,7 @@ journal.demonte,"{nom} dismantles {objet}"
 journal.depart_choisi,"the camp is set at ({x},{y}) — {biome}"
 journal.depot,"{n} gold deposited (treasury {tresor})"
 journal.desassigne,"{nom} is no longer assigned"
-journal.descente,you go down to floor {etage}
+journal.descente,"you go down to floor {etage}/{etages} — {salles} rooms, corruption {corruption} %"
 journal.desequipe,"{nom} removes {objet}"
 journal.dette_palier,"upkeep debt: {texte}"
 journal.differe,{nom}: {capacite} will go off in {ticks} ticks
