@@ -2935,6 +2935,29 @@ func test_assemblage_sans_limite() -> void:
 	for x in follets:
 		x.vivant = false
 		s.grille.liberer(x.pos)
+	# Résolution simultanée (Boucle de tick, 2026-08-30) : deux actions dues au même tick partent ensemble,
+	# même si la première tue l'auteur de la seconde.
+	var duel_a: Dictionary = s.ajouter("loup", j.pos + Vector2i(4, 4), "ia")
+	var duel_b: Dictionary = s.ajouter("loup", j.pos + Vector2i(5, 4), "ia")
+	duel_a.horloge = "monde"
+	duel_b.horloge = "monde"
+	duel_a.sante = 1
+	duel_b.sante = 1
+	var t_duel: int = s.horloge_monde.ticks
+	duel_a.compteur = t_duel
+	duel_b.compteur = t_duel
+	duel_a.action_en_cours = {"type": "creature", "action": "morsure", "cible": duel_b.id, "ticks": 6, "name_key": "creature_action.morsure.name"}
+	duel_b.action_en_cours = {"type": "creature", "action": "morsure", "cible": duel_a.id, "ticks": 6, "name_key": "creature_action.morsure.name"}
+	var j_horloge_avant: String = j.horloge
+	var j_compteur_avant: int = int(j.compteur)
+	j.compteur = t_duel + 999   # le joueur n'est pas dû : le pas résout le duel
+	s.pas("monde")
+	j.compteur = j_compteur_avant
+	j.horloge = j_horloge_avant
+	verifier(not duel_a.vivant and not duel_b.vivant, "deux morsures au même tick : les deux loups meurent ensemble (%s / %s)" % [str(duel_a.vivant), str(duel_b.vivant)])
+	for x in [duel_a, duel_b]:
+		x.vivant = false
+		s.grille.liberer(x.pos)
 	var p_cc: Dictionary = plan_de.call(["carre", "carre", "etincelle"])
 	var n_cc: int = s.tuiles_du_plan(j, p_cc, j.pos + Vector2i(2, 0)).size()
 	verifier(p_cc.formes_sup.is_empty() and int(p_cc.taille) == 2 * int(p_bombe.taille) and n_cc > n_tuiles, "Carré + Carré : une forme plus grande (%d tuiles > %d), pas une union" % [n_cc, n_tuiles])

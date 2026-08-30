@@ -44,6 +44,9 @@ Le temps calendaire (jour/nuit, semaine in-game) est un compteur de ticks :
 > [!warning] Réglage du 2026-08-27
 > **Changer d'arme : 3 ticks** (au lieu de 4), pour que le swap paie dans certains cas seulement — mesure et raisons dans [[Jauge de chaîne Wu Xing]]. Valeur de playtest, `combat_rules.json`.
 
+> [!success] Décidé et codé le 2026-08-30 — **résolution simultanée** : plus de tours, plus d'ordre de passage
+> **Instruction du designer** : « supprimer complètement les tours et l'ordre de passage ; plusieurs PNJ peuvent effectuer des actions en même temps, le joueur et un ennemi peuvent attaquer exactement au même tick ». Jusqu'ici, à un même tick, `pas()` résolvait **une** action engagée par appel, dans l'ordre d'itération des êtres — si la première tuait l'auteur de la seconde, la seconde ne partait jamais : un ordre de passage caché. Désormais `pas()` prend **toutes les actions engagées dues à ce tick** (mêmes compteurs, même horloge) comme **un seul lot** : elles sont détachées d'un coup, puis résolues l'une après l'autre **comme si elles partaient au même instant** — un auteur tué dans le lot frappe quand même, une cible tuée dans le lot est quand même frappée (`Simulation.lot_simultane`). Les **décisions** (choisir sa prochaine action) restent une par appel : elles ne sont pas des coups, l'ordre n'y change rien de visible. Conséquence voulue : deux adversaires qui frappent au même tick peuvent **mourir ensemble**. La timeline graphique est **retirée** (elle affichait un ordre qui n'existe plus) ; les états se lisent au-dessus des êtres ([[Écrans d'interface]]).
+
 ## Liens
 - **Dépend de** : [[Action-time à ticks]], [[Simulation à ticks]]
 - **Alimente** : [[Pipeline de résolution du combat]], [[Endurance]], [[Mana]], [[Faim]], [[Cycle jour-nuit et sommeil]], [[Dérive de la corruption]]

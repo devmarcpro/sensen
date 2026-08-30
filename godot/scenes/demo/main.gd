@@ -1576,8 +1576,39 @@ func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: C
 
 
 ## La couche d'interface : barres, garde, télégraphe et jauge de chaîne de chaque être.
+## Les états au-dessus des êtres en vue (Écrans d'interface, 2026-08-30) : une puce par statut, teintée, l'initiale
+## dedans, les ticks restants dessous.
+func _dessiner_etats(ci: CanvasItem) -> void:
+	var j := joueur()
+	if sim == null or j.is_empty() or titre_ouvert:
+		return
+	for e in sim.vivants():
+		if e.id != j.id and not sim.voit(j, e.pos):
+			continue
+		var statuts: Array = e.get("statuts", [])
+		if statuts.is_empty():
+			continue
+		var tick_e: int = sim.tick_de(e)
+		var base := _ecran(e.pos, sim.grille.h(e.pos)) + Vector2(-7.0 * mini(4, statuts.size()), -78.0)   # au-dessus des barres de vie
+		var n_s := 0
+		for st in statuts:
+			if n_s >= 4:
+				break
+			var d_s: Dictionary = sim.statuts_defs.get(str(st.id), {})
+			var tags: Array = d_s.get("tags", [])
+			var c_s := Color(0.75, 0.45, 0.95) if ("controle" in tags or bool(d_s.get("controle", false))) else (Color(0.9, 0.3, 0.3) if "negatif" in tags else Color(0.35, 0.8, 0.45))
+			var p_s := base + Vector2(n_s * 14.0, 0.0)
+			ci.draw_rect(Rect2(p_s, Vector2(11, 11)), Color(c_s.r * 0.3, c_s.g * 0.3, c_s.b * 0.3, 0.95))
+			ci.draw_rect(Rect2(p_s, Vector2(11, 11)), c_s, false, 1.0)
+			ci.draw_string(ThemeDB.fallback_font, p_s + Vector2(2.0, 9.0), tr(str(d_s.get("name_key", st.id))).left(1).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 8, c_s)
+			var reste: int = maxi(0, int(st.get("fin", 0)) - tick_e)
+			ci.draw_string(ThemeDB.fallback_font, p_s + Vector2(-1.0, 20.0), ("%dk" % (reste / 1000)) if reste >= 1000 else str(reste), HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.8, 0.8, 0.75))
+			n_s += 1
+
+
 func _dessiner_hud(ci: CanvasItem) -> void:
 	_dessiner_bulle(ci)
+	_dessiner_etats(ci)
 	if sim != null:
 		for f in gros_flottants:   # CRITIQUE / RATÉ en gros, qui montent et s'effacent (Écrans d'interface)
 			var pg := _ecran(f.pos, sim.grille.h(f.pos)) + Vector2(-36.0, -66.0 - f.t * 30.0)
@@ -1709,16 +1740,6 @@ func _maj_ui() -> void:
 		bas.append(tr("journal.defaite"))
 	ui_bas.text = "\n".join(bas)
 	ui_droite.text = ""   # la timeline est graphique (HudEcran._dessiner_timeline, Écrans d'interface)
-
-
-## La timeline (Écrans d'interface) : les êtres de l'horloge du joueur, lui compris et ceux en vue à ≤ 12 tuiles,
-## dans l'ordre de leur compteur — c'est la lecture de la simulation, sans règle nouvelle.
-func acteurs_timeline(j: Dictionary) -> Array:
-	if sim == null or j.is_empty():
-		return []
-	var acteurs := sim.vivants().filter(func(e: Dictionary) -> bool: return e.horloge == j.horloge and (e.id == joueur_id or (Grille.distance(e.pos, j.pos) <= 12 and sim.voit(j, e.pos))))
-	acteurs.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.compteur < b.compteur)
-	return acteurs.slice(0, 10)
 
 
 ## La bulle au survol, dessinée dans la couche HUD (au-dessus des blocs et des êtres) — rien ne la recouvre.

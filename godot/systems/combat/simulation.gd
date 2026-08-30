@@ -67,6 +67,7 @@ var _n_combats := 0
 var _n_entites := 0
 
 
+var lot_simultane: Array[String] = []   # les êtres dont l'action part à ce tick (Boucle de tick) : un mort du lot frappe et est frappé quand même
 var graine_monde := -1   # la graine du monde choisie à l'écran Monde (Écrans d'interface) ; -1 = celle de planete.json
 
 
@@ -6309,9 +6310,18 @@ func pas(nom: String) -> bool:
 		return false
 	_regenerer(e, h.ticks)
 	if not e.action_en_cours.is_empty():
-		var a: Dictionary = e.action_en_cours
-		e.action_en_cours = {}
-		_resoudre_action_engagee(e, a)
+		# Résolution simultanée (Boucle de tick, 2026-08-30) : toutes les actions engagées dues à ce tick partent
+		# ensemble — détachées d'un coup, puis résolues comme si elles frappaient au même instant.
+		var lot: Array[Dictionary] = []
+		for id in ordre:
+			var x: Dictionary = entites[id]
+			if x.vivant and x.horloge == nom and int(x.compteur) == int(e.compteur) and not x.action_en_cours.is_empty():
+				lot.append({"e": x, "a": x.action_en_cours})
+				x.action_en_cours = {}
+				lot_simultane.append(x.id)
+		for entree in lot:
+			_resoudre_action_engagee(entree.e, entree.a)
+		lot_simultane.clear()
 		_fin_de_pas(nom)
 		return true
 	if e.controle == "joueur":
@@ -7961,7 +7971,8 @@ func _resoudre_action_engagee(e: Dictionary, a: Dictionary) -> void:
 		"arme":
 			var arme := Etres.arme(e, items)
 			var fonct: Dictionary = fonctionnalites.get(arme.get("functionality", ""), {})
-			if cible.is_empty() or not cible.vivant or not _cible_atteignable(e, cible, _portee_effective(e, arme, fonct), true):
+			var cible_du_lot: bool = not cible.is_empty() and cible.id in lot_simultane   # tuée dans le même lot : elle était vivante à l'instant du coup
+			if cible.is_empty() or (not cible.vivant and not cible_du_lot) or not _cible_atteignable(e, cible, _portee_effective(e, arme, fonct), true):
 				return   # la cible s'est dérobée : le coup passe dans le vide
 			_frapper_arme(e, cible, arme, fonct, a.lourde, a.ticks)
 		"creature":
@@ -8012,7 +8023,7 @@ func _executer_action_creature(e: Dictionary, action: Dictionary, cible: Diction
 		match str(effet.type):
 			"degats":
 				for c in cibles:
-					if not c.vivant:
+					if not c.vivant and not (c.id in lot_simultane):   # tuée dans le même lot : frappée quand même (Boucle de tick)
 						continue
 					var bonus := _bonus_des_conditions(e, c, action) + _bonus_embuscade(e, c) + int(Etres.add_statuts(e, "des", statuts_defs))   # Béni
 					var d := regles.degats_action(e.stats_eff, action, des, a_zero, bonus)

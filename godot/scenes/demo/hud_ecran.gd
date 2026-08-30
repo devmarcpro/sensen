@@ -35,7 +35,7 @@ func _draw() -> void:
 	_dessiner_compas(sim, j, Vector2(taille.x - MARGE - RAYON_COMPAS, MARGE + RAYON_COMPAS + 40.0))
 	_dessiner_pentagramme(sim, j, Vector2(taille.x - MARGE - RAYON_COMPAS, MARGE + RAYON_COMPAS * 2 + RAYON_PENTA + 70.0))
 	_dessiner_barres(j, Vector2(MARGE, taille.y - MARGE - CASE - 4.0 * (BARRE_H + 6.0) - 12.0))
-	_dessiner_timeline(sim, j, Vector2(taille.x * 0.5, MARGE + 4.0))
+
 	_dessiner_hotbar(sim, j, Vector2(MARGE, taille.y - MARGE - CASE))
 
 
@@ -107,52 +107,6 @@ func _dessiner_barres(j: Dictionary, o: Vector2) -> void:
 		draw_rect(Rect2(o.x, y, BARRE_L * part, BARRE_H), COULEURS[str(l[0])])
 		draw_rect(Rect2(o.x, y, BARRE_L, BARRE_H), Color(0.6, 0.55, 0.4, 0.8), false, 1.0)
 		draw_string(ThemeDB.fallback_font, Vector2(o.x + BARRE_L + 6.0, y + BARRE_H), "%s %d/%d" % [tr("barre." + str(l[0])), l[1], l[2]], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.9, 0.9, 0.85))
-
-
-## La timeline (Écrans d'interface, 2026-08-30) : un portrait par être à agir, dans l'ordre des compteurs, centré en haut.
-const PORTRAIT := 34.0
-
-func _dessiner_timeline(sim, j: Dictionary, centre_haut: Vector2) -> void:
-	var acteurs: Array = main.acteurs_timeline(j)
-	if acteurs.size() <= 1 and not sim.en_combat(j):
-		return   # seul en exploration : rien à lire
-	var pas := PORTRAIT + 14.0
-	var largeur := acteurs.size() * pas - 14.0
-	var o := Vector2(centre_haut.x - largeur * 0.5, centre_haut.y)
-	var t0: int = int(j.compteur)
-	for k in acteurs.size():
-		var e: Dictionary = acteurs[k]
-		var r := Rect2(o + Vector2(k * pas, 0.0), Vector2(PORTRAIT, PORTRAIT))
-		var couleur := Color(0.35, 0.6, 1.0) if e.id == j.id else (Color(0.9, 0.3, 0.25) if sim.ennemis(j, e) else Color(0.35, 0.8, 0.45))
-		draw_rect(r, Color(couleur.r * 0.25, couleur.g * 0.25, couleur.b * 0.25, 0.9))
-		draw_rect(r, couleur, false, 1.5)
-		if k == 0:   # le prochain à agir, cerclé d'or
-			draw_rect(Rect2(r.position - Vector2(2, 2), r.size + Vector2(4, 4)), Color(1.0, 0.85, 0.4), false, 1.5)
-		var nom := tr(str(e.name_key))
-		draw_string(ThemeDB.fallback_font, r.position + Vector2(PORTRAIT * 0.5 - 5.0, PORTRAIT * 0.5 + 6.0), nom.left(1).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 16, couleur)
-		draw_string(ThemeDB.fallback_font, r.position + Vector2(-4.0, PORTRAIT + 11.0), nom.left(8), HORIZONTAL_ALIGNMENT_LEFT, PORTRAIT + 10.0, 9, Color(0.9, 0.9, 0.85))
-		var delta: int = int(e.compteur) - t0
-		draw_string(ThemeDB.fallback_font, r.position + Vector2(2.0, -3.0), "+%d" % maxi(0, delta), HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.8, 0.8, 0.7))
-		if not e.action_en_cours.is_empty():   # l'action engagée, sous le nom
-			draw_string(ThemeDB.fallback_font, r.position + Vector2(-4.0, PORTRAIT + 21.0), "← " + tr(str(e.action_en_cours.get("name_key", ""))).left(8), HORIZONTAL_ALIGNMENT_LEFT, PORTRAIT + 10.0, 8, Color(1.0, 0.85, 0.5))
-		var tick_e: int = sim.tick_de(e)   # les états : une puce par statut, teintée par sa nature, les ticks restants dessous
-		var n_s := 0
-		for st in e.get("statuts", []):
-			if n_s >= 4:
-				break
-			var d_s: Dictionary = sim.statuts_defs.get(str(st.id), {})
-			var tags: Array = d_s.get("tags", [])
-			var c_s := Color(0.75, 0.45, 0.95) if ("controle" in tags or bool(d_s.get("controle", false))) else (Color(0.9, 0.3, 0.3) if "negatif" in tags else Color(0.35, 0.8, 0.45))
-			var p_s := r.position + Vector2(n_s * 15.0 - 8.0, PORTRAIT + 25.0 + (10.0 if not e.action_en_cours.is_empty() else 0.0))
-			draw_rect(Rect2(p_s, Vector2(11, 11)), Color(c_s.r * 0.3, c_s.g * 0.3, c_s.b * 0.3, 0.95))
-			draw_rect(Rect2(p_s, Vector2(11, 11)), c_s, false, 1.0)
-			draw_string(ThemeDB.fallback_font, p_s + Vector2(2.0, 9.0), tr(str(d_s.get("name_key", st.id))).left(1).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 8, c_s)
-			var reste: int = maxi(0, int(st.get("fin", 0)) - tick_e)
-			var texte_r := ("%dk" % (reste / 1000)) if reste >= 1000 else str(reste)   # un statut d'un jour se lit « 24k »
-			draw_string(ThemeDB.fallback_font, p_s + Vector2(-1.0, 20.0), texte_r, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.8, 0.8, 0.75))
-			n_s += 1
-		if k < acteurs.size() - 1:   # le trait vers le suivant
-			draw_line(r.position + Vector2(PORTRAIT + 2.0, PORTRAIT * 0.5), r.position + Vector2(pas - 2.0, PORTRAIT * 0.5), Color(1, 1, 1, 0.3), 1.0)
 
 
 ## La hotbar : dix cases (1 → 0), la sélection encadrée, la molette la fait tourner (main.gd).
