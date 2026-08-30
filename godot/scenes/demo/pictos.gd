@@ -400,3 +400,198 @@ static func _forme(ci: CanvasItem, nom: String, r: Rect2, c: Color) -> void:
 		ci.draw_rect(Rect2(r.position + Vector2(t.x * cell + 1.0, t.y * cell + 1.0), Vector2(cell - 2.0, cell - 2.0)), c)
 	if nom != "soi":
 		ci.draw_rect(Rect2(r.position + Vector2(lanceur.x * cell + 2.0, lanceur.y * cell + 2.0), Vector2(cell - 4.0, cell - 4.0)), Color(0.35, 0.6, 1.0, c.a))
+
+
+# ---------------------------------------------------------------- les objets (Écrans d'interface, 2026-08-30)
+
+## La couleur d'un objet : celle de son matériau (palette), sinon celle de son type.
+static func couleur_objet(it: Dictionary) -> Color:
+	var mat := str(it.get("materiau", ""))
+	var pal: Dictionary = GameData.config("palette_materiaux")
+	if not mat.is_empty() and pal.has(mat):
+		return Color.html(str(pal[mat].hex))
+	if not mat.is_empty() and GameData.catalogues.materials.has(mat):
+		return Color.html(str(GameData.catalogues.materials[mat].get("color", "#999999")))
+	match str(it.get("type", "")):
+		"arme": return Color(0.75, 0.75, 0.8)
+		"armure", "bouclier": return Color(0.6, 0.5, 0.35)
+		"bijou": return Color(0.95, 0.8, 0.3)
+		"gemme": return Color(0.9, 0.35, 0.5)
+		"grimoire", "manuel": return Color(0.55, 0.4, 0.75)
+		"consommable": return Color(0.5, 0.75, 0.4)
+		"munition": return Color(0.7, 0.6, 0.4)
+		"materiau", "composant": return Color(0.65, 0.6, 0.5)
+		"meuble", "station": return Color(0.7, 0.5, 0.3)
+	return Color(0.7, 0.7, 0.7)
+
+
+## Le cadre d'une carte : le palier de qualité (misérable → parfait) ou la rareté.
+static func couleur_qualite(it: Dictionary) -> Color:
+	var rarete := str(it.get("rarete", "commun"))
+	if rarete in ["rare", "exceptionnel", "artefact"]:
+		return {"rare": Color(0.4, 0.6, 1.0), "exceptionnel": Color(0.8, 0.4, 1.0), "artefact": Color(1.0, 0.7, 0.2)}[rarete]
+	if it.has("qualite") and it.get("type", "") != "materiau":
+		var q := float(it.qualite)
+		return Color(0.55, 0.55, 0.55).lerp(Color(0.95, 0.85, 0.4), clampf((q - 0.5) / 1.5, 0.0, 1.0))
+	return Color(0.6, 0.55, 0.4)
+
+
+## Le pictogramme d'un objet : sa fonctionnalité (épée, pioche…) ou son type (casque, gemme, livre, fiole…).
+static func dessiner_objet(ci: CanvasItem, it: Dictionary, r: Rect2) -> void:
+	if it.is_empty():
+		return
+	var c := couleur_objet(it)
+	var o := r.position
+	var u := r.size.x / 10.0
+	var p := func(x: float, y: float) -> Vector2: return o + Vector2(x * u, y * u)
+	var sombre := c.darkened(0.45)
+	var f := str(it.get("functionality", ""))
+	var t := str(it.get("type", ""))
+	var slot := str(it.get("equip_slot", ""))
+	var nom := f if not f.is_empty() else (slot if t in ["armure", "bijou"] else t)
+	if t == "meuble":
+		nom = "meuble"
+	match nom:
+		"epee":
+			ci.draw_line(p.call(2, 8), p.call(8, 2), c, 2.4)
+			ci.draw_line(p.call(2.5, 5.5), p.call(4.5, 7.5), sombre, 2.0)
+			ci.draw_line(p.call(1.5, 8.5), p.call(2.6, 7.4), Color(0.45, 0.3, 0.15), 2.6)
+		"dague":
+			ci.draw_line(p.call(3, 7), p.call(7.5, 2.5), c, 2.2)
+			ci.draw_line(p.call(3.2, 5.8), p.call(4.2, 6.8), sombre, 2.0)
+			ci.draw_line(p.call(2.2, 7.8), p.call(3.1, 6.9), Color(0.45, 0.3, 0.15), 2.4)
+		"lance":
+			ci.draw_line(p.call(1.5, 8.5), p.call(7.5, 2.5), Color(0.55, 0.4, 0.2), 1.8)
+			ci.draw_colored_polygon(PackedVector2Array([p.call(6.4, 3.6), p.call(9, 1), p.call(7.6, 3.4), p.call(8.8, 1.2)]), c)
+			ci.draw_colored_polygon(PackedVector2Array([p.call(6.2, 3.8), p.call(9, 1), p.call(7.4, 4.2)]), c)
+		"masse":
+			ci.draw_line(p.call(2, 8), p.call(6, 4), Color(0.5, 0.35, 0.2), 1.8)
+			ci.draw_rect(Rect2(p.call(5, 1.5), Vector2(u * 3.5, u * 3.5)), c)
+			ci.draw_rect(Rect2(p.call(5, 1.5), Vector2(u * 3.5, u * 3.5)), sombre, false, 1.0)
+		"hache":
+			ci.draw_line(p.call(2, 8.5), p.call(6.5, 3), Color(0.5, 0.35, 0.2), 1.8)
+			ci.draw_colored_polygon(PackedVector2Array([p.call(5.2, 2.2), p.call(8.6, 1.6), p.call(9, 5), p.call(6.6, 4.4)]), c)
+		"pioche":
+			ci.draw_line(p.call(2, 8.5), p.call(6.5, 3.5), Color(0.5, 0.35, 0.2), 1.8)
+			ci.draw_arc(p.call(6.5, 5.2), u * 3.2, PI * 1.1, PI * 1.9, 10, c, 2.2)
+		"pelle":
+			ci.draw_line(p.call(2, 8.5), p.call(6, 4.5), Color(0.5, 0.35, 0.2), 1.8)
+			ci.draw_colored_polygon(PackedVector2Array([p.call(5.5, 4), p.call(8.5, 1.5), p.call(9, 4), p.call(6.5, 5.5)]), c)
+		"faucille":
+			ci.draw_arc(p.call(5.5, 4.5), u * 3.0, PI * 0.9, PI * 2.1, 12, c, 2.0)
+			ci.draw_line(p.call(3, 9), p.call(4.5, 6.5), Color(0.5, 0.35, 0.2), 1.8)
+		"seau":
+			ci.draw_colored_polygon(PackedVector2Array([p.call(2.5, 4), p.call(7.5, 4), p.call(7, 9), p.call(3, 9)]), c)
+			ci.draw_arc(p.call(5, 4), u * 2.5, PI, TAU, 10, sombre, 1.2)
+		"arc":
+			ci.draw_arc(p.call(3.5, 5), u * 4.0, -PI * 0.45, PI * 0.45, 12, Color(0.55, 0.4, 0.2), 2.0)
+			ci.draw_line(p.call(4.7, 1.3), p.call(4.7, 8.7), c, 1.0)
+			ci.draw_line(p.call(1.5, 5), p.call(8.5, 5), sombre, 1.2)
+		"baton_magique":
+			ci.draw_line(p.call(2.5, 8.5), p.call(6.5, 2.5), Color(0.5, 0.35, 0.2), 1.8)
+			ci.draw_circle(p.call(7, 2), u * 1.4, c)
+			ci.draw_circle(p.call(7, 2), u * 0.6, Color(1, 1, 0.9))
+		"bouclier", "main_secondaire":
+			ci.draw_colored_polygon(PackedVector2Array([p.call(2, 2), p.call(8, 2), p.call(8, 5.5), p.call(5, 9), p.call(2, 5.5)]), c)
+			ci.draw_line(p.call(5, 2.5), p.call(5, 8.2), sombre, 1.2)
+		"casque":
+			ci.draw_arc(p.call(5, 5.5), u * 3.5, PI, TAU, 12, c, 2.6)
+			ci.draw_rect(Rect2(p.call(1.6, 5.4), Vector2(u * 6.8, u * 1.6)), c)
+			ci.draw_rect(Rect2(p.call(3.6, 5.6), Vector2(u * 2.8, u * 1.2)), sombre)
+		"cuirasse":
+			ci.draw_colored_polygon(PackedVector2Array([p.call(2, 2), p.call(4, 1.5), p.call(6, 1.5), p.call(8, 2), p.call(8.5, 5), p.call(7.5, 9), p.call(2.5, 9), p.call(1.5, 5)]), c)
+			ci.draw_line(p.call(5, 2.2), p.call(5, 8.5), sombre, 1.0)
+		"jambieres":
+			ci.draw_colored_polygon(PackedVector2Array([p.call(2, 1.5), p.call(8, 1.5), p.call(8, 9), p.call(5.8, 9), p.call(5, 4.5), p.call(4.2, 9), p.call(2, 9)]), c)
+		"anneau":
+			ci.draw_arc(p.call(5, 5.5), u * 3.0, 0.0, TAU, 16, c, 2.2)
+			ci.draw_circle(p.call(5, 2.2), u * 1.1, Color(0.9, 0.35, 0.45))
+		"amulette":
+			ci.draw_arc(p.call(5, 3.5), u * 3.0, PI * 0.15, PI * 0.85, 10, c, 1.4)
+			ci.draw_colored_polygon(PackedVector2Array([p.call(5, 5), p.call(7, 7), p.call(5, 9), p.call(3, 7)]), c)
+		"gemme":
+			ci.draw_colored_polygon(PackedVector2Array([p.call(3, 2), p.call(7, 2), p.call(9, 4.5), p.call(5, 9), p.call(1, 4.5)]), c)
+			ci.draw_line(p.call(1, 4.5), p.call(9, 4.5), Color(1, 1, 1, 0.6), 1.0)
+			ci.draw_line(p.call(3, 2), p.call(5, 9), Color(1, 1, 1, 0.35), 1.0)
+		"grimoire", "manuel":
+			ci.draw_rect(Rect2(p.call(2, 1.5), Vector2(u * 6, u * 7)), c)
+			ci.draw_rect(Rect2(p.call(2, 1.5), Vector2(u * 6, u * 7)), sombre, false, 1.0)
+			ci.draw_line(p.call(3.2, 1.5), p.call(3.2, 8.5), sombre, 1.2)
+		"consommable":
+			if bool(it.get("cru", false)) or int(it.get("nutrition", 0)) > 0:   # à manger : une miche
+				ci.draw_colored_polygon(PackedVector2Array([p.call(1.5, 6), p.call(3, 3.5), p.call(7, 3.5), p.call(8.5, 6), p.call(8, 8), p.call(2, 8)]), c)
+				ci.draw_line(p.call(3.5, 4.5), p.call(4.5, 6.5), sombre, 1.0)
+				ci.draw_line(p.call(5.5, 4.5), p.call(6.5, 6.5), sombre, 1.0)
+			else:   # une fiole
+				ci.draw_rect(Rect2(p.call(4, 1), Vector2(u * 2, u * 2)), Color(0.8, 0.8, 0.85))
+				ci.draw_colored_polygon(PackedVector2Array([p.call(4, 3), p.call(6, 3), p.call(8, 6), p.call(7.5, 9), p.call(2.5, 9), p.call(2, 6)]), c)
+		"munition":
+			for k in 3:
+				ci.draw_line(p.call(2 + k * 2, 9), p.call(4 + k * 2, 2), c, 1.3)
+				ci.draw_colored_polygon(PackedVector2Array([p.call(4 + k * 2, 1.2), p.call(3.4 + k * 2, 2.8), p.call(4.6 + k * 2, 2.8)]), sombre)
+		"materiau":
+			var forme := str(it.get("forme", "brut"))
+			if forme == "lingot":
+				ci.draw_colored_polygon(PackedVector2Array([p.call(2, 4), p.call(8, 4), p.call(9, 8), p.call(1, 8)]), c)
+				ci.draw_line(p.call(2, 4), p.call(8, 4), Color(1, 1, 1, 0.4), 1.0)
+			elif forme == "planche":
+				ci.draw_rect(Rect2(p.call(1.5, 3), Vector2(u * 7, u * 4)), c)
+				ci.draw_line(p.call(2.5, 4), p.call(7.5, 6), sombre, 1.0)
+			else:
+				ci.draw_colored_polygon(PackedVector2Array([p.call(2, 8), p.call(1.5, 4.5), p.call(4, 2), p.call(7, 2.5), p.call(8.5, 5), p.call(7.5, 8.5)]), c)
+		"composant":
+			ci.draw_circle(p.call(5, 5), u * 3.2, c)
+			ci.draw_circle(p.call(5, 5), u * 1.3, Color(0.1, 0.1, 0.12))
+		"station":
+			ci.draw_rect(Rect2(p.call(1.5, 4), Vector2(u * 7, u * 1.6)), c)
+			ci.draw_line(p.call(2.5, 5.6), p.call(2.5, 9), c, 1.6)
+			ci.draw_line(p.call(7.5, 5.6), p.call(7.5, 9), c, 1.6)
+			ci.draw_rect(Rect2(p.call(3.5, 2), Vector2(u * 3, u * 2)), sombre)
+		"meuble":
+			ci.draw_rect(Rect2(p.call(1.5, 2), Vector2(u * 7, u * 5)), c)
+			ci.draw_line(p.call(2.5, 7), p.call(2.5, 9), c, 1.6)
+			ci.draw_line(p.call(7.5, 7), p.call(7.5, 9), c, 1.6)
+		"carquois":
+			ci.draw_colored_polygon(PackedVector2Array([p.call(3, 3), p.call(7, 3), p.call(6.5, 9), p.call(3.5, 9)]), c)
+			ci.draw_line(p.call(4, 3), p.call(4.5, 0.8), sombre, 1.2)
+			ci.draw_line(p.call(6, 3), p.call(6.2, 0.8), sombre, 1.2)
+		_:
+			ci.draw_rect(Rect2(p.call(2, 2), Vector2(u * 6, u * 6)), c)
+			ci.draw_rect(Rect2(p.call(2, 2), Vector2(u * 6, u * 6)), sombre, false, 1.0)
+
+
+## Le glyphe d'un slot vide : la silhouette de ce qu'on y met, en fantôme.
+static func dessiner_slot_vide(ci: CanvasItem, slot: String, r: Rect2) -> void:
+	var faux := {"type": "armure", "equip_slot": slot}
+	match slot:
+		"main_principale": faux = {"type": "arme", "functionality": "epee"}
+		"main_secondaire": faux = {"type": "bouclier", "equip_slot": "main_secondaire"}
+		"anneau_1", "anneau_2": faux = {"type": "bijou", "equip_slot": "anneau"}
+		"amulette": faux = {"type": "bijou", "equip_slot": "amulette"}
+		"carquois": faux = {"type": "munition", "equip_slot": "carquois"}
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	ci.modulate = ci.modulate   # (pas de changement : le fantôme se dessine en alpha via la couleur ci-dessous)
+	var pal_alpha := Color(1, 1, 1, 0.22)
+	# On dessine deux fois : la forme en gris fantôme (couleur forcée par un objet sans matériau).
+	var copie := faux.duplicate()
+	copie.erase("materiau")
+	_dessiner_fantome(ci, copie, r, pal_alpha)
+
+
+static func _dessiner_fantome(ci: CanvasItem, it: Dictionary, r: Rect2, _c: Color) -> void:
+	var o := r.position
+	var u := r.size.x / 10.0
+	var p := func(x: float, y: float) -> Vector2: return o + Vector2(x * u, y * u)
+	var g := Color(1, 1, 1, 0.2)
+	var slot := str(it.get("equip_slot", ""))
+	var f := str(it.get("functionality", ""))
+	match f if not f.is_empty() else (slot if slot != "" else str(it.get("type", ""))):
+		"epee": ci.draw_line(p.call(2, 8), p.call(8, 2), g, 2.2)
+		"main_secondaire": ci.draw_colored_polygon(PackedVector2Array([p.call(2, 2), p.call(8, 2), p.call(8, 5.5), p.call(5, 9), p.call(2, 5.5)]), g)
+		"casque": ci.draw_arc(p.call(5, 5.5), u * 3.5, PI, TAU, 12, g, 2.4)
+		"cuirasse": ci.draw_colored_polygon(PackedVector2Array([p.call(2, 2), p.call(8, 2), p.call(8.5, 5), p.call(7.5, 9), p.call(2.5, 9), p.call(1.5, 5)]), g)
+		"jambieres": ci.draw_colored_polygon(PackedVector2Array([p.call(2, 1.5), p.call(8, 1.5), p.call(8, 9), p.call(5.8, 9), p.call(5, 4.5), p.call(4.2, 9), p.call(2, 9)]), g)
+		"anneau": ci.draw_arc(p.call(5, 5.5), u * 3.0, 0.0, TAU, 16, g, 2.0)
+		"amulette": ci.draw_colored_polygon(PackedVector2Array([p.call(5, 4), p.call(7.5, 6.5), p.call(5, 9), p.call(2.5, 6.5)]), g)
+		"carquois": ci.draw_colored_polygon(PackedVector2Array([p.call(3, 3), p.call(7, 3), p.call(6.5, 9), p.call(3.5, 9)]), g)
+		_: ci.draw_rect(Rect2(p.call(2, 2), Vector2(u * 6, u * 6)), g, false, 1.0)

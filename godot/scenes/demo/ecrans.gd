@@ -4,8 +4,9 @@ extends CanvasLayer
 ## personnage — des Control Godot construits par code, sans asset. Un écran à la fois ; Échap ferme.
 ## L'écran ne décide rien : il lit la simulation et lui envoie des intentions.
 
-const LARGEUR := 1000.0
+const LARGEUR := 1000.0   # taille minimale ; à l'écran, le panneau prend PART de la fenêtre (designer, 2026-08-30 : plus de place)
 const HAUTEUR := 660.0
+const PART := Vector2(0.94, 0.92)
 
 var main: Node                          # la scène principale (sim, joueur(), nom_objet())
 var courant := ""                       # "inventaire" | "atelier" | "feuille" | ""
@@ -30,12 +31,8 @@ func _ready() -> void:
 	layer = 10
 	panneau = PanelContainer.new()
 	panneau.set_anchors_preset(Control.PRESET_CENTER)
-	panneau.custom_minimum_size = Vector2(LARGEUR, HAUTEUR)
-	panneau.position = Vector2(-LARGEUR / 2.0, -HAUTEUR / 2.0)
-	panneau.set_anchor_and_offset(SIDE_LEFT, 0.5, -LARGEUR / 2.0)
-	panneau.set_anchor_and_offset(SIDE_TOP, 0.5, -HAUTEUR / 2.0)
-	panneau.set_anchor_and_offset(SIDE_RIGHT, 0.5, LARGEUR / 2.0)
-	panneau.set_anchor_and_offset(SIDE_BOTTOM, 0.5, HAUTEUR / 2.0)
+	_dimensionner()
+	get_viewport().size_changed.connect(_dimensionner)
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.08, 0.08, 0.1, 0.94)
 	style.border_color = Color(0.6, 0.55, 0.4)
@@ -61,6 +58,10 @@ func _ready() -> void:
 	composeur.visible = false
 	v.add_child(composeur)
 	v.move_child(composeur, 1)
+	inventaire_visuel = InventaireVisuel.new()
+	inventaire_visuel.ecrans = self
+	inventaire_visuel.visible = false
+	h.add_child(inventaire_visuel)
 	liste = ItemList.new()
 	liste.custom_minimum_size = Vector2(340, 0)
 	liste.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -68,7 +69,7 @@ func _ready() -> void:
 	liste.item_selected.connect(_sur_selection)
 	liste.item_activated.connect(func(i: int) -> void: _sur_selection(i); _action_principale())
 	h.add_child(liste)
-	var droite := VBoxContainer.new()   # à droite : le détail, et sous lui l'aperçu visuel du sort (composeur)
+	droite = VBoxContainer.new()   # à droite : le détail, et sous lui l'aperçu visuel du sort (composeur)
 	droite.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	droite.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	h.add_child(droite)
@@ -89,12 +90,30 @@ func _ready() -> void:
 	detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	detail.add_theme_font_size_override("normal_font_size", 13)
 	droite.add_child(detail)
+	penta_objet = Composeur.PentagrammeSort.new()
+	penta_objet.visible = false
+	droite.add_child(penta_objet)
 	droite.add_child(apercu_sort)
 	boutons = HBoxContainer.new()
 	v.add_child(boutons)
 
 
 var reforge_objet := ""   # Main du métal : l'objet choisi, en attente de son composant
+var droite: VBoxContainer          # la colonne de droite : le détail, sous lui le Wu Xing de l'objet ou l'aperçu du sort
+var inventaire_visuel: InventaireVisuel   # l'inventaire en icônes (Écrans d'interface, 2026-08-30)
+var penta_objet: Composeur.PentagrammeSort   # le Wu Xing de l'objet choisi
+
+
+## Le panneau prend PART de la fenêtre, jamais moins que LARGEUR × HAUTEUR.
+func _dimensionner() -> void:
+	var v := get_viewport().get_visible_rect().size
+	var l := maxf(LARGEUR, v.x * PART.x)
+	var h := maxf(HAUTEUR, v.y * PART.y)
+	panneau.custom_minimum_size = Vector2(l, h)
+	panneau.set_anchor_and_offset(SIDE_LEFT, 0.5, -l / 2.0)
+	panneau.set_anchor_and_offset(SIDE_TOP, 0.5, -h / 2.0)
+	panneau.set_anchor_and_offset(SIDE_RIGHT, 0.5, l / 2.0)
+	panneau.set_anchor_and_offset(SIDE_BOTTOM, 0.5, h / 2.0)
 
 
 var sequence_composee: Array = []   # la séquence en cours de composition (écran composer)
@@ -420,6 +439,18 @@ func rafraichir() -> void:
 		liste.select(selection)
 	_montrer_detail()
 	cadre_perso.visible = courant == "creation"
+	inventaire_visuel.visible = courant == "inventaire"
+	liste.visible = courant != "inventaire"
+	penta_objet.visible = courant == "inventaire"
+	if courant == "inventaire":
+		droite.custom_minimum_size = Vector2(360, 0)
+		droite.size_flags_stretch_ratio = 0.9
+		detail.size_flags_vertical = Control.SIZE_FILL   # le Wu Xing de l'objet juste sous le détail, pas au fond du panneau
+		inventaire_visuel.reconstruire()
+	else:
+		droite.custom_minimum_size = Vector2(0, 0)
+		droite.size_flags_stretch_ratio = 1.0
+		detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	if courant == "titre":   # rien derrière l'écran principal : pas de « Fermer »
 		pass
 	elif courant == "creation":
@@ -452,6 +483,10 @@ func _montrer_detail() -> void:
 	match str(en.get("kind", "")):
 		"objet":
 			detail.text = texte_objet(str(en.uid))
+			if courant == "inventaire":
+				var it_p: Dictionary = main.sim.items.get(str(en.uid), {})
+				penta_objet.montrer({"elements": it_p.get("elements", {}) if it_p.get("elements") is Dictionary else {}})
+				inventaire_visuel.rafraichir_selection()
 		"recette", "ingredient":
 			detail.text = texte_recette(en.plan)
 		"texte":
