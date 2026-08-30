@@ -6788,6 +6788,18 @@ func test_gemmes_et_livres() -> void:
 	verifier(s.intention(j.id, {"type": "lire", "objet": dur.uid}), "tenter un livre impossible")
 	verifier(not (dur.uid in j.sac) and j.modules_connus.size() == connus_avant, "échec : livre perdu, rien d'appris")
 	verifier(int(j.xp.competence.get("lecture", 0)) == 30 * 5 + 200 * 2, "XP de Lecture : difficulté × 5 (succès) + × 2 (échec)")
+	# Le livre de module (designer, 2026-08-31), lu de bout en bout : le module précis est appris, avec des charges.
+	j.statuts.clear()   # l'échec de lecture précédent peut avoir posé un statut bloquant (effet d'échec)
+	j.competences["lecture"] = 100
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	s.donner(j, lm.uid)
+	j.compteur = s.horloge_monde.ticks
+	s.horloge_monde.avancer(1)
+	var mod_lm := str(lm.modules[0])
+	var charges_avant := int(j.get("modules_charges", {}).get(mod_lm, 0))
+	s.attente[j.id] = true   # l'effet d'échec précédent (invocation, téléportation) peut avoir sorti le joueur de la file
+	verifier(s.intention(j.id, {"type": "lire", "objet": lm.uid}), "lire le livre de module")
+	verifier(mod_lm in j.modules_connus and int(j.modules_charges.get(mod_lm, 0)) > charges_avant, "le module précis est appris, avec des charges (%s)" % mod_lm)
 
 
 # ---------------------------------------------------------------- Étape 4 : progression par l'usage, potentiel, création, mort
