@@ -53,7 +53,8 @@ Captures prises par `scenes/tests/capture.tscn` (tout est dessiné par code — 
 | ![Écran principal](captures/titre.png) **Écran principal** — nouvelle partie, continuer, charger | ![Camp de base](captures/camp.png) **Le camp de base** — une cellule du monde, HUD (compas, horloge, Wu Xing, barres, hotbar) |
 | ![Carte du monde](captures/carte.png) **La carte du monde** — biomes, danger, donjons, filons, voyage rapide | ![Donjon](captures/donjon.png) **Un étage de donjon** — blocs pleins, brouillard de guerre, lueur ambiante |
 | ![Combat](captures/combat.png) **Le combat** — action-time à ticks, résolution simultanée, ennemis typés | ![Composeur](captures/composeur.png) **Le composeur de sorts** — formes, noyaux, modificateurs en glisser-déposer, Wu Xing du sort et aperçu |
-| ![Création du personnage](captures/creation.png) **La création du personnage** — nom, race, classe, année, stats, teinte ; talent, compétences et kit de départ | |
+| ![Création du personnage](captures/creation.png) **La création du personnage** — nom, race, classe, année, stats, teinte ; talent, compétences et kit de départ | ![Inventaire](captures/inventaire.png) **L'inventaire** — l'avatar et ses cases d'équipement, le sac en icônes, le Wu Xing de l'objet |
+| ![Atelier](captures/atelier.png) **L'atelier** — les recettes en cartes, l'obtention de chaque composant dépliée | |
 
 ---
 

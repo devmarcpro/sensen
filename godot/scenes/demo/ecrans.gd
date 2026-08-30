@@ -62,6 +62,10 @@ func _ready() -> void:
 	inventaire_visuel.ecrans = self
 	inventaire_visuel.visible = false
 	h.add_child(inventaire_visuel)
+	atelier_visuel = AtelierVisuel.new()
+	atelier_visuel.ecrans = self
+	atelier_visuel.visible = false
+	h.add_child(atelier_visuel)
 	liste = ItemList.new()
 	liste.custom_minimum_size = Vector2(340, 0)
 	liste.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -101,6 +105,7 @@ func _ready() -> void:
 var reforge_objet := ""   # Main du métal : l'objet choisi, en attente de son composant
 var droite: VBoxContainer          # la colonne de droite : le détail, sous lui le Wu Xing de l'objet ou l'aperçu du sort
 var inventaire_visuel: InventaireVisuel   # l'inventaire en icônes (Écrans d'interface, 2026-08-30)
+var atelier_visuel: AtelierVisuel         # l'atelier en cartes de recettes
 var penta_objet: Composeur.PentagrammeSort   # le Wu Xing de l'objet choisi
 
 
@@ -440,13 +445,19 @@ func rafraichir() -> void:
 	_montrer_detail()
 	cadre_perso.visible = courant == "creation"
 	inventaire_visuel.visible = courant == "inventaire"
-	liste.visible = courant != "inventaire"
+	atelier_visuel.visible = courant == "atelier"
+	liste.visible = not (courant in ["inventaire", "atelier"])
 	penta_objet.visible = courant == "inventaire"
 	if courant == "inventaire":
 		droite.custom_minimum_size = Vector2(360, 0)
 		droite.size_flags_stretch_ratio = 0.9
 		detail.size_flags_vertical = Control.SIZE_FILL   # le Wu Xing de l'objet juste sous le détail, pas au fond du panneau
 		inventaire_visuel.reconstruire()
+	elif courant == "atelier":
+		droite.custom_minimum_size = Vector2(380, 0)
+		droite.size_flags_stretch_ratio = 0.8
+		detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		atelier_visuel.reconstruire()
 	else:
 		droite.custom_minimum_size = Vector2(0, 0)
 		droite.size_flags_stretch_ratio = 1.0
@@ -489,6 +500,8 @@ func _montrer_detail() -> void:
 				inventaire_visuel.rafraichir_selection()
 		"recette", "ingredient":
 			detail.text = texte_recette(en.plan)
+			if courant == "atelier":
+				atelier_visuel.rafraichir_selection()
 		"texte":
 			detail.text = str(en.texte)
 		"donner", "reprendre":
