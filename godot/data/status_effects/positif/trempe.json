@@ -10,6 +10,10 @@
     {
       "cible": "des",
       "add": 1
+    },
+    {
+      "cible": "element_arme",
+      "grant": "feu"
     }
   ],
   "tags": [

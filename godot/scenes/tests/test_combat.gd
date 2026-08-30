@@ -2873,7 +2873,32 @@ func test_assemblage_sans_limite() -> void:
 	verifier(s.capacite_visable(j, p_cone, loin), "un cône de portée %d accepte un clic à 5 tuiles : c'est une direction" % int(p_cone.portee.y))
 	verifier(not s.capacite_visable(j, p_point, loin) or int(p_point.portee.y) >= 5, "un point de portée %d refuse un clic à 5 tuiles" % int(p_point.portee.y))
 	verifier(not s.capacite_visable(j, p_cone, j.pos), "sa propre tuile n'est pas une direction")
-	# 6. il ne reste que deux erreurs structurelles
+	# 6. Écaille : immunité à l'élément choisi, vulnérabilité à celui qu'il domine ; Trempe : l'arme passe au Feu
+	loup.statuts.clear()
+	loup.anti_stunlock_jusqua = 0
+	loup.vivant = true   # la section 3 l'a tué : un mort ne porte pas d'écaille
+	if s.grille.occupant(loup.pos).is_empty():
+		s.grille.placer(loup.id, loup.pos)
+	loup["ecaille_choix"] = "feu"
+	s.appliquer_statut(loup, "ecaille_elementaire", 100, j.id)
+	# Des PV réels, pas gonflés à la main : un coup qui fait monter Encaissement recalcule sante_max
+	loup.corps.stats.endurance = 250
+	Etres.recalculer(loup, s.items, s.affixes_defs, s.regles)
+	loup.sante = int(loup.sante_max)
+	var pv0: int = int(loup.sante)
+	s._appliquer_degats(loup, 100, j.id, {"type": "magique", "element": {"feu": 1.0}})
+	verifier(int(loup.sante) == pv0, "Écaille (Feu) : le Feu ne passe pas")
+	s._appliquer_degats(loup, 100, j.id, {"type": "magique", "element": {"metal": 1.0}})
+	verifier(int(loup.sante) == pv0 - 150, "le Métal, que le Feu domine, passe à +50 %% (%d)" % (pv0 - int(loup.sante)))
+	s._appliquer_degats(loup, 100, j.id, {"type": "magique", "element": {"eau": 1.0}})
+	verifier(int(loup.sante) == pv0 - 250, "l'Eau passe telle quelle")
+	var arme_j := Etres.arme(j, s.items)
+	var v0: Dictionary = s._vecteur_arme_de(j, arme_j)
+	s.appliquer_statut(j, "trempe", 60, j.id)
+	var v1: Dictionary = s._vecteur_arme_de(j, arme_j)
+	verifier(v1 == {"feu": 1.0} and v0 != v1, "Trempe : l'arme passe au Feu (%s → %s)" % [str(v0), str(v1)])
+	s._retirer_statut(j, "trempe")
+	# 7. il ne reste que deux erreurs structurelles
 	verifier(not s.capacites.assembler(["point", "carre"], 10, "1d4", {}, {}).erreurs.is_empty(), "sans noyau : toujours une erreur")
 	verifier(not s.capacites.assembler(["nexiste_pas", "etincelle"], 10, "1d4", {}, {}).erreurs.is_empty(), "module inconnu : toujours une erreur")
 

@@ -7393,6 +7393,10 @@ func tick_de(e: Dictionary) -> int:
 func _vecteur_arme_de(e: Dictionary, arme: Dictionary) -> Dictionary:
 	if a_talent(e, "communion_des_cinq") and e.has("element_communion"):
 		return {str(e.element_communion): 1.0}
+	for s: Dictionary in e.get("statuts", []):   # Trempe (Modules) : l'arme chauffée passe à l'élément accordé
+		for mod: Dictionary in statuts_defs.get(s.id, {}).get("modifiers", []):
+			if str(mod.get("cible", "")) == "element_arme" and mod.has("grant"):
+				return {str(mod.grant): 1.0}
 	return vecteur_arme(arme)
 
 
@@ -7662,6 +7666,10 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		if not el_dom.is_empty() and el_dom == str(cible.get("ecaille_element", "")):
 			EventBus.emettre(&"journal", [&"journal.ecaille", {"nom": cible.name_key, "element": "element." + el_dom}])
 			return
+		# … et le revers : l'élément que l'écaille DOMINE passe amplifié (vulnérabilité, un modificateur du statut)
+		if not el_dom.is_empty() and str(wuxing.w.domine.get(str(cible.get("ecaille_element", "")), "")) == el_dom:
+			degats = roundi(float(degats) * float(Etres.mult_statuts(cible, "vulnerabilite", statuts_defs)))
+			EventBus.emettre(&"journal", [&"journal.ecaille_revers", {"nom": cible.name_key, "element": "element." + el_dom}])
 	if degats > 0:   # Absorption : un matelas de PV encaisse d'abord, puis disparaît
 		var matelas := int(cible.get("absorption_pv", 0))
 		if matelas > 0:
@@ -8231,7 +8239,7 @@ func plan_capacite(e: Dictionary, index: int) -> Dictionary:
 	var arme := Etres.arme(e, items)
 	var fonct: Dictionary = fonctionnalites.get(arme.get("functionality", ""), {})
 	var ticks_arme := regles.ticks_attaque(fonct, false, arme) if not fonct.is_empty() else int(regles.r.actions.attaque_base)
-	var plan := capacites.assembler(caps[index].modules, ticks_arme, fonct.get("degats_des", "1d4"), vecteur_arme(arme), e.competences_eff)
+	var plan := capacites.assembler(caps[index].modules, ticks_arme, fonct.get("degats_des", "1d4"), _vecteur_arme_de(e, arme), e.competences_eff)
 	plan["id"] = caps[index].id
 	plan["name_key"] = caps[index].get("name_key", "")
 	plan["arme"] = arme
