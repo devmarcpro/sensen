@@ -11,6 +11,13 @@ var etages_voulus := 3
 var sortie := "C:/Users/ciryl/AppData/Local/Temp/parcours"
 var graine := 7
 var theme := "ruine"
+var classe := ""            # --classe id : la classe du personnage (30 : tester des classes variées)
+var race := ""              # --race id
+var equiper := 0            # --equiper N : N objets assemblés générés, les équipables portés
+var sorts := 0              # --sorts N : N sorts composés au hasard (forme + noyau [+ modificateur]), lancés en combat
+var rng_bot := RandomNumberGenerator.new()
+var sorts_lances := 0
+var sorts_refuses := 0
 # le rapport
 var etage_depart := 0
 var etages_atteints := 0
@@ -48,11 +55,27 @@ func _ready() -> void:
 			graine = int(args[i + 1])
 		elif args[i] == "--theme" and i + 1 < args.size():
 			theme = args[i + 1]
+		elif args[i] == "--classe" and i + 1 < args.size():
+			classe = args[i + 1]
+		elif args[i] == "--race" and i + 1 < args.size():
+			race = args[i + 1]
+		elif args[i] == "--equiper" and i + 1 < args.size():
+			equiper = int(args[i + 1])
+		elif args[i] == "--sorts" and i + 1 < args.size():
+			sorts = int(args[i + 1])
 	DirAccess.make_dir_recursive_absolute(sortie)
+	rng_bot.seed = graine
 	scene = load("res://scenes/demo/main.tscn").instantiate()
 	add_child(scene)
 	if scene.titre_ouvert:
 		scene._nouvelle_partie()
+		if not classe.is_empty():   # la classe et la race demandées (30 : plein de classes)
+			var classes: Array = scene._classes_visibles()
+			scene.creation.classe = maxi(0, classes.find(classe))
+		if not race.is_empty():
+			var races: Array = GameData.catalogues.races.keys()
+			races.sort()
+			scene.creation.race = maxi(0, races.find(race))
 		scene._creer_personnage()
 		scene._commencer_monde()
 		scene.fiche_en_attente = {}
@@ -66,6 +89,7 @@ func _ready() -> void:
 	scene._apres_changement_de_grille()
 	etage_depart = int(scene.sim.donjon.etage)
 	sante_avant = int(scene.joueur().sante)
+	_equiper_et_composer()
 	EventBus.damage_dealt.connect(func(src: String, cible: String, degats: int, _d: Dictionary) -> void:
 		if cible == jid:
 			coups_recus += 1
@@ -80,6 +104,42 @@ func _ready() -> void:
 		if str(cle) == "journal.porte_ouverte":
 			portes_ouvertes += 1)
 	_note("étage %d : arrivée (%d salles, %s)" % [etage_depart, int(scene.sim.donjon.salles), str(scene.sim.donjon.theme)])
+
+
+## L'équipement et les sorts du parcours (30) : des objets assemblés générés et portés, des sorts composés au hasard.
+func _equiper_et_composer() -> void:
+	var sim = scene.sim
+	var j: Dictionary = sim.entites[jid]
+	var bases: Array = ["craft_epee", "craft_dague", "craft_masse", "craft_lance", "craft_casque", "craft_cuirasse", "craft_jambieres", "proto_bouclier", "proto_anneau", "proto_amulette"]
+	for k in equiper:
+		var base: String = bases[rng_bot.randi() % bases.size()]
+		var o := sim.generer_objet(base, 3, {}, "rare" if rng_bot.randf() < 0.5 else "commun")
+		if o.is_empty():
+			continue
+		j.sac.append(o.uid)
+		sim.attente[jid] = true
+		if sim.intention(jid, {"type": "equiper", "objet": o.uid}):
+			_note("équipé : %s" % scene.nom_objet(sim.nom_objet(o.uid)))
+	if sorts > 0:
+		var formes: Array[String] = []
+		var noyaux: Array[String] = []
+		var modifs: Array[String] = []
+		for id in j.get("modules_connus", []):
+			match str(GameData.catalogues.modules.get(str(id), {}).get("module_type", "")):
+				"forme": formes.append(str(id))
+				"noyau": noyaux.append(str(id))
+				"modificateur": modifs.append(str(id))
+		for k in sorts:
+			if formes.is_empty() or noyaux.is_empty():
+				break
+			var seq: Array = [formes[rng_bot.randi() % formes.size()], noyaux[rng_bot.randi() % noyaux.size()]]
+			if not modifs.is_empty() and rng_bot.randf() < 0.5:
+				seq.append(modifs[rng_bot.randi() % modifs.size()])
+			if not sim.composer_capacite(j, seq, "bot_%d" % k):
+				_note("composition refusée : %s" % str(seq))
+	if equiper > 0 or sorts > 0:
+		Etres.recalculer(j, sim.items, sim.affixes_defs, sim.regles)
+		_note("kit : %d objets équipables générés · %d sorts composés · %d capacités" % [equiper, sorts, j.capacites.size()])
 
 
 func _note(t: String) -> void:
@@ -137,6 +197,12 @@ func _process(_delta: float) -> void:
 	var cible := _hostile_en_vue(j)
 	if not cible.is_empty():
 		scene.chemin_en_cours.clear()
+		if sorts > 0 and rng_bot.randf() < 0.5 and j.capacites.size() > 0:   # un sort au hasard sur la cible (30)
+			var k_s := rng_bot.randi() % j.capacites.size()
+			if sim.intention(jid, {"type": "capacite", "index": k_s, "cible": cible.pos}):
+				sorts_lances += 1
+				return
+			sorts_refuses += 1
 		if Grille.distance(j.pos, cible.pos) <= 1:
 			if sim.intention(jid, {"type": "attaquer", "cible": cible.id, "lourde": false}):
 				return
@@ -218,8 +284,8 @@ func _fin(raison: String) -> void:
 	set_process(false)
 	var j: Dictionary = scene.sim.entites.get(jid, {})
 	_capturer("fin")
-	print("PARCOURS : %s — étages descendus %d (arrivé à l'étage %d) · combats %d · coups portés %d · coups reçus %d (%d dégâts) · kills %d · morts %d · ramassages %d · portes ouvertes %d · pas %d · soins %d · attentes %d · images %d · captures %d · PV finaux %d/%d" % [
-		raison, etages_atteints, int(scene.sim.donjon.get("etage", 0)), combats, coups_portes, coups_recus, degats_recus, kills, morts, ramassages, portes_ouvertes, pas, soins, attentes, frames, captures, int(j.get("sante", 0)), int(j.get("sante_max", 0))])
+	print("PARCOURS : %s — étages descendus %d (arrivé à l'étage %d) · combats %d · coups portés %d · coups reçus %d (%d dégâts) · kills %d · morts %d · ramassages %d · portes ouvertes %d · pas %d · soins %d · sorts %d (refusés %d) · attentes %d · images %d · captures %d · PV finaux %d/%d" % [
+		raison, etages_atteints, int(scene.sim.donjon.get("etage", 0)), combats, coups_portes, coups_recus, degats_recus, kills, morts, ramassages, portes_ouvertes, pas, soins, sorts_lances, sorts_refuses, attentes, frames, captures, int(j.get("sante", 0)), int(j.get("sante_max", 0))])
 	for ev in evenements:
 		print("  ", ev)
 	for l in scene.journal:

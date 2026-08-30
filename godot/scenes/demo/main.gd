@@ -650,8 +650,14 @@ func _process(delta: float) -> void:
 		minuterie_pas = DELAI_PAS
 		for nom in sim.combats.keys():
 			sim.pas(nom)
-		if sim.horloge_monde.mode == Horloge.Mode.ACTION:   # en donjon, le monde aussi n'avance qu'à l'action
-			sim.pas("monde")
+	if sim.horloge_monde.mode == Horloge.Mode.ACTION:
+		# En donjon, le monde n'avance qu'à l'action — mais SANS la cadence de lisibilité des combats : un pas
+		# toutes les 0,12 s faisait payer au joueur 0,12 s réelle par « attend » de chaque PNJ de l'étage
+		# (30 PNJ ≈ 4 s de gel après chaque action — le « lag » constaté le 2026-08-31). L'horloge du monde
+		# se vide donc chaque image, jusqu'au joueur ou au garde-fou.
+		var garde_pas := 128
+		while garde_pas > 0 and sim.pas("monde"):
+			garde_pas -= 1
 	_maj_noeuds(delta)
 	if Grille.distance(j.pos, centre_terrain) > RAYON_VUE / 3 or sim.grille.decouvert.size() != decouvert_dessine:
 		terrain.queue_redraw()   # le joueur s'éloigne du centre de la passe statique, ou il a découvert des tuiles
