@@ -744,7 +744,7 @@ ui.ecran.capacites,"ABILITIES — {n}/{max} (Enter: delete · modules per abilit
 ui.ecran.capturer,Net (Y) — capture on a neighbouring water tile
 ui.ecran.commerce,"TRADE — {nom} · their purse: {or} gold · yours: {joueur} gold"
 ui.ecran.commercer,Trade (C)
-ui.ecran.composer,"COMPOSE — sequence: {sequence} ({n} modules, no cap) · Enter: add / remove · V: confirm"
+ui.ecran.composer,"COMPOSE — sequence: {sequence} ({n} modules, no cap) · Enter: add (even twice) · Del: remove · V: confirm"
 ui.ecran.conquerir,Conquer this village
 ui.ecran.contexte,"OPTIONS — ({x},{y}) (Enter: choose · Esc: close)"
 ui.ecran.deposer,Deposit 50 gold (D)

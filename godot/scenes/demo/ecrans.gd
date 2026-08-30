@@ -137,6 +137,15 @@ func touche(ev: InputEventKey) -> bool:
 		KEY_ENTER, KEY_KP_ENTER:
 			_action_principale()
 			return true
+		KEY_DELETE, KEY_BACKSPACE:
+			if courant == "composer":   # retirer la dernière occurrence du module sélectionné
+				var en_c: Dictionary = entrees[selection] if selection < entrees.size() else {}
+				if en_c.get("kind", "") == "module_composer":
+					var i_c: int = sequence_composee.rfind(str(en_c.module))
+					if i_c >= 0:
+						sequence_composee.remove_at(i_c)
+						rafraichir()
+				return true
 		KEY_E:
 			if courant == "inventaire":
 				_action_principale()
@@ -492,11 +501,8 @@ func _action_principale() -> void:
 			sequence_composee = []
 			ouvrir("composer")
 			return
-		"module_composer":
-			if str(en.module) in sequence_composee:
-				sequence_composee.erase(str(en.module))
-			else:
-				sequence_composee.append(str(en.module))
+		"module_composer":   # Entrée ajoute (même déjà présent : la séquence se cumule) ; Suppr / Retour arrière retire
+			sequence_composee.append(str(en.module))
 		"contexte":
 			fermer()
 			main._executer_option(en.opt)
@@ -1122,11 +1128,11 @@ func _construire_composer(j: Dictionary) -> void:
 		entrees.append({"kind": "texte", "texte": apercu})
 		for m in du_type:
 			var md: Dictionary = GameData.catalogues.modules[m]
-			var dans: bool = m in sequence_composee
+			var fois: int = sequence_composee.count(m)   # un module peut entrer plusieurs fois (no limit : deux Bombes, deux Concentrations)
 			var fam := str(md.get("famille", ""))   # « quoi fait quoi » : la famille se lit dans la liste
 			var ch: int = int(j.get("modules_charges", {}).get(str(m), 0))   # Grimoires : les charges restantes
-			liste.add_item(("☑ " if dans else "☐ ") + tr(md.name_key) + (" ×%d" % ch) + ("  · " + fam if not fam.is_empty() else ""))
-			var contrib := _contribution_module(j, m, dans)   # ce que CE module ajoute au sort (plan avec / sans)
+			liste.add_item(("[%d] " % fois if fois > 0 else "[ ] ") + tr(md.name_key) + (" ×%d" % ch) + ("  · " + fam if not fam.is_empty() else ""))
+			var contrib := _contribution_module(j, m, fois > 0)   # ce que CE module ajoute au sort (plan avec / sans)
 			entrees.append({"kind": "module_composer", "module": m, "texte": tr("ui.composer.module").format({"nom": tr(md.name_key), "desc": str(md.get("description", ""))})
 				+ "\n" + tr("ui.composer.charges").format({"n": ch}) + "\n" + contrib + "\n\n" + apercu})
 	_bouton(tr("ui.composer.valider"), _valider_composition)

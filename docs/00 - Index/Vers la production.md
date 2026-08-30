@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] Empiler les modules (2026-08-30)
+> Un module peut entrer plusieurs fois dans une séquence : deux Bombes sur un carré = deux bombes **par tuile** (18 entrées, prix doublé), chacune explosant pour son compte au même tick — linéaire, sans addition de puissance ni chaîne. **À juger (question du designer)** : faut-il une règle d'empilement — puissance additionnée (un mur qui résiste à une bombe tombe sous deux), ou chaîne (la première fait sauter les voisines) ? Le moteur le permet : chaque bombe porte sa tuile.
 > [!important] Écran principal (2026-08-30)
 > Titre → Nouvelle partie → personnage → monde (graine aléatoire, re-tirable) → case de départ ; Continuer / Charger / Options (langue, plein écran) / Quitter ; retour au titre depuis Tab. **À juger** : faut-il des emplacements de sauvegarde nommés dès maintenant, et l'écran Monde doit-il montrer un aperçu (carte, biome de départ) avant de commencer ?
 > [!important] Police MingLiU-ExtB (2026-08-30)
