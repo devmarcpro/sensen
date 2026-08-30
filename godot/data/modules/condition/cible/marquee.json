@@ -1,0 +1,27 @@
+{
+  "id": "marquee",
+  "nom": "Marquée",
+  "name_key": "module.marquee.name",
+  "module_type": "condition",
+  "description": "la cible porte une **Marque** : **+2 dés**, et la marque est **consommée**",
+  "classe_signature": null,
+  "tags": [
+    "condition"
+  ],
+  "famille": "Cible",
+  "predicat": "cible_marquee",
+  "bonus": "+2 dés",
+  "surcout_ticks": 0,
+  "echec": "la capacité ne part pas et rend 50 % de ses ticks",
+  "effet": {
+    "predicat_structure": {
+      "type": "cible_marquee",
+      "consomme": "marque"
+    },
+    "bonus_structure": {
+      "des": 2
+    },
+    "echec_ticks_rendus": 0.5
+  },
+  "style": "ruse"
+}

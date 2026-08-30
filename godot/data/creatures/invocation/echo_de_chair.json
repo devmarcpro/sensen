@@ -1,0 +1,42 @@
+{
+  "name_key": "creature.echo_de_chair.name",
+  "race": "echo",
+  "skeleton_template": "humanoide",
+  "corps": {
+    "stats": {
+      "force": 8,
+      "dexterite": 9,
+      "endurance": 6,
+      "volonte": 4,
+      "perception": 8,
+      "charisme": 1
+    },
+    "silhouette": "humanoide"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "griffure",
+    "bond"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.45,
+    0.35,
+    0.4
+  ],
+  "tags": [
+    "invocation",
+    "echo"
+  ],
+  "competences": {
+    "athletisme": 20
+  },
+  "depouille": []
+}

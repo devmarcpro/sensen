@@ -2246,3 +2246,12 @@ ui.rate,RATÉ
 journal.poussee_choc,"{nom} bute : {degats} dégâts ({tuiles} tuiles perdues)"
 module.alignement.name,Alignement
 journal.piege_revele,"{nom} déclenche un piège caché ({zone})"
+status.marque.name,Marque
+module.marque.name,Marque
+module.marquee.name,Marquée
+module.erosif.name,Érosif
+journal.erosion,"{nom} est érodé : −{pv} PV max ({max})"
+creature.echo_de_chair.name,Écho de chair
+creature.feu_follet.name,Feu follet
+creature_action.flammeche.name,Flammèche
+module.feu_follet.name,Feu follet

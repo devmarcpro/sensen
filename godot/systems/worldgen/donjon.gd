@@ -87,6 +87,8 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 		_impasse(e, couloirs)
 	# 3. Connexité.
 	_reparer_connexite(e)
+	# 3 bis. Les décors de salles (Génération de donjon, 2026-08-30) : piliers cassables, estrades, fosses.
+	_poser_decors(e)
 	# 4. Les escaliers : l'arrivée dans la première salle, la descente dans la plus lointaine.
 	var p0: Dictionary = e.pieces[0]
 	e.entree = _centre_libre(e, p0)
@@ -211,6 +213,76 @@ func _placer_rectangle(e: Dictionary, r: Rect2i) -> Dictionary:
 	var piece := {"id": "salle_%s_%dx%d" % [cat, r.size.x, r.size.y], "kind": "salle", "rect": r, "attaches": []}
 	e.pieces.append(piece)
 	return piece
+
+
+## Les décors des salles moyennes et grandes, au dé selon `theme.decors` : des piliers (murs du thème, destructibles),
+## une estrade (hauteur +1/+2) ou une fosse (hauteur −chute_delta). Le centre reste libre, les bords aussi.
+func _poser_decors(e: Dictionary) -> void:
+	var regles: Array = theme.get("decors", [])
+	if regles.is_empty():
+		return
+	var reliefs := 0
+	var plus_grande: Dictionary = {}
+	for piece in e.pieces:
+		if piece.kind != "salle":
+			continue
+		var r: Rect2i = piece.rect
+		if mini(r.size.x, r.size.y) < 5:
+			continue   # une petite salle reste nue
+		var centre := _centre_libre(e, piece)
+		var interieur := Rect2i(r.position + Vector2i(1, 1), r.size - Vector2i(2, 2))
+		if plus_grande.is_empty() or r.get_area() > (plus_grande.rect as Rect2i).get_area():
+			plus_grande = piece
+		for d in regles:
+			if rng.randf() >= float(d.get("chance", 0.0)):
+				continue
+			match str(d.get("type", "")):
+				"piliers":
+					var f_n: Array = d.get("n", [1, 3])
+					for k in rng.randi_range(int(f_n[0]), int(f_n[1])):
+						var p := Vector2i(rng.randi_range(interieur.position.x, interieur.end.x - 1), rng.randi_range(interieur.position.y, interieur.end.y - 1))
+						if Grille.distance(p, centre) <= 1 or _pilier_voisin(e, p):
+							continue
+						e.sol.erase(p.y * e.largeur + p.x)
+						e.murs[p.y * e.largeur + p.x] = true
+				"estrade", "fosse":
+					var f_t: Array = d.get("taille", [2, 3])
+					var dim := Vector2i(rng.randi_range(int(f_t[0]), int(f_t[1])), rng.randi_range(int(f_t[0]), int(f_t[1])))
+					if dim.x > interieur.size.x - 1 or dim.y > interieur.size.y - 1:
+						continue
+					var o := Vector2i(rng.randi_range(interieur.position.x, interieur.end.x - dim.x), rng.randi_range(interieur.position.y, interieur.end.y - dim.y))
+					var zone := Rect2i(o, dim)
+					if zone.has_point(centre):
+						continue   # le centre reste plat : escaliers, boss, spawns
+					var delta: int = int(d.get("delta", 1))
+					for y in range(zone.position.y, zone.end.y):
+						for x in range(zone.position.x, zone.end.x):
+							if e.sol.has(y * e.largeur + x):
+								e.hauteurs[y * e.largeur + x] = clampi(H_BASE + delta, 0, 20)
+								reliefs += 1
+	if reliefs == 0 and not plus_grande.is_empty():   # un étage a toujours au moins un relief : une estrade dans la plus grande salle
+		var rg: Rect2i = plus_grande.rect
+		var cg := _centre_libre(e, plus_grande)
+		var zone_g := Rect2i(rg.position + Vector2i(1, 1), Vector2i(2, 2))
+		if zone_g.has_point(cg):
+			zone_g.position = rg.end - Vector2i(3, 3)
+		for y in range(zone_g.position.y, zone_g.end.y):
+			for x in range(zone_g.position.x, zone_g.end.x):
+				if e.sol.has(y * e.largeur + x) and Vector2i(x, y) != cg:
+					e.hauteurs[y * e.largeur + x] = H_BASE + 1
+
+
+## Un pilier ne touche pas un autre pilier ni un mur : on peut toujours le contourner.
+func _pilier_voisin(e: Dictionary, p: Vector2i) -> bool:
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var q := p + Vector2i(dx, dy)
+			if q == p:
+				continue
+			var i: int = q.y * int(e.largeur) + q.x
+			if not e.sol.has(i) or e.murs.has(i):
+				return true
+	return false
 
 
 func _nb_salles(e: Dictionary) -> int:

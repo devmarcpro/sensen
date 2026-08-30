@@ -2236,3 +2236,12 @@ ui.rate,MISS
 journal.poussee_choc,"{nom} slams: {degats} damage ({tuiles} tiles lost)"
 module.alignement.name,Alignment
 journal.piege_revele,"{nom} springs a hidden trap ({zone})"
+status.marque.name,Mark
+module.marque.name,Mark
+module.marquee.name,Marked
+module.erosif.name,Erosive
+journal.erosion,"{nom} is eroded: −{pv} max HP ({max})"
+creature.echo_de_chair.name,Flesh Echo
+creature.feu_follet.name,Will-o’-wisp
+creature_action.flammeche.name,Flamelet
+module.feu_follet.name,Will-o’-wisp

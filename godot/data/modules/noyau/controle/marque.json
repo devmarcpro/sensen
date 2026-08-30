@@ -1,0 +1,30 @@
+{
+  "id": "marque",
+  "nom": "Marque",
+  "name_key": "module.marque.name",
+  "module_type": "noyau",
+  "description": "**marque** la cible 60 ticks — une condition *Marquée* la consomme pour frapper plus fort",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 4,
+  "cout_mana": 5,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "marque",
+      "duree_ticks": 60
+    }
+  },
+  "style": "controle"
+}

@@ -1,0 +1,33 @@
+{
+  "id": "feu_follet",
+  "nom": "Feu follet",
+  "name_key": "module.feu_follet.name",
+  "module_type": "noyau",
+  "description": "invoque un **feu follet** par tuile libre de la forme : il crache des flammèches à 4 tuiles, 60 ticks",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Terrain",
+  "elements": {
+    "feu": 1.0
+  },
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 14,
+  "cout_mana": 18,
+  "cout_endurance": 0,
+  "effets": [
+    "invocation"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "invocation": {
+      "mode": "creature",
+      "creature": "feu_follet",
+      "duree_ticks": 60
+    }
+  },
+  "style": "terrain"
+}

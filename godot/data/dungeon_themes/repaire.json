@@ -64,5 +64,33 @@
       12
     ]
   },
-  "materiau_mur": "calcaire"
+  "materiau_mur": "calcaire",
+  "decors": [
+    {
+      "type": "piliers",
+      "chance": 0.35,
+      "n": [
+        1,
+        3
+      ]
+    },
+    {
+      "type": "fosse",
+      "chance": 0.35,
+      "delta": -3,
+      "taille": [
+        2,
+        3
+      ]
+    },
+    {
+      "type": "estrade",
+      "chance": 0.2,
+      "delta": 1,
+      "taille": [
+        3,
+        4
+      ]
+    }
+  ]
 }

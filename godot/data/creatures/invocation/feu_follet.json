@@ -1,0 +1,41 @@
+{
+  "name_key": "creature.feu_follet.name",
+  "race": "follet",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 3,
+      "dexterite": 14,
+      "endurance": 3,
+      "volonte": 8,
+      "perception": 14,
+      "charisme": 3
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "flammeche"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "feu": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    1.0,
+    0.55,
+    0.2
+  ],
+  "tags": [
+    "invocation",
+    "volant"
+  ],
+  "competences": {
+    "athletisme": 30
+  },
+  "depouille": []
+}

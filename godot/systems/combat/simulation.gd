@@ -7717,6 +7717,11 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		_retirer_statut(cible, "reserve")
 		EventBus.emettre(&"journal", [&"journal.reserve", {"nom": cible.name_key, "soin": reserve}])
 	cible.sante = maxi(0, cible.sante - degats)
+	if float(detail.get("erosion", 0.0)) > 0.0 and degats > 0:   # Érosif : une part des dégâts rogne les PV max, pour le combat
+		var rogne := maxi(1, roundi(float(degats) * float(detail.erosion)))
+		cible["erosion"] = int(cible.get("erosion", 0)) + rogne
+		Etres.recalculer(cible, items, affixes_defs, regles)
+		EventBus.emettre(&"journal", [&"journal.erosion", {"nom": cible.name_key, "pv": rogne, "max": int(cible.sante_max)}])
 	if cible.sante > 0 and not bool(cible.get("second_souffle_pris", false)) and float(cible.sante) / float(cible.sante_max) * 100.0 < float(regles.r.uniques.second_souffle_seuil_pct):
 		var ax_ss := a_unique_ax(cible, "second_souffle")   # Second souffle : une fois par combat
 		if not ax_ss.is_empty():
@@ -8452,6 +8457,8 @@ func _evaluer_conditions(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -
 				vrai = dh > 0 if p.get("signe", ">") == ">" else dh < 0
 			"dos_ou_flanc":
 				vrai = not cible.is_empty() and Regles.direction_relative(cible.orientation, e.pos - cible.pos) != "front"
+			"cible_marquee":   # Marquée : la cible porte une Marque (et la condition la consommera)
+				vrai = not cible.is_empty() and Etres.a_statut_id(cible, str(p.get("consomme", "marque")))
 			"cible_alignee":   # Alignement : même ligne, même colonne ou même diagonale que le lanceur
 				var dx_a: int = cible_pos.x - e.pos.x
 				var dy_a: int = cible_pos.y - e.pos.y
@@ -8503,6 +8510,8 @@ func _evaluer_conditions(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -
 		if not vrai:
 			return c
 		Capacites.appliquer_bonus(plan, c.bonus)
+		if p.has("consomme") and not cible.is_empty():   # la marque se consomme : un deuxième sort ne l'exploitera pas
+			_retirer_statut(cible, str(p.consomme))
 	return {}
 
 
@@ -9158,8 +9167,13 @@ func _invoquer(e: Dictionary, mode: String, tuiles: Array[Vector2i], cible_pos: 
 							return true
 			EventBus.emettre(&"journal", [&"journal.pas_de_cadavre", {"nom": e.name_key}])
 			return false
-		"creature":   # Écho de chair : une créature alliée temporaire PAR TUILE libre de la forme
-			var c: Dictionary = iv.get("echo_de_chair", {})
+		"creature":   # Écho de chair, Feu follet… : une créature alliée temporaire PAR TUILE libre de la forme
+			var c: Dictionary = iv.get("echo_de_chair", {}).duplicate()
+			var inv_p: Dictionary = plan.get("parametres", {}).get("invocation", {})
+			if inv_p.has("creature"):   # la fiche d'invocation est dans le noyau (Six types de modules, 2026-08-30)
+				c["creature"] = str(inv_p.creature)
+			if inv_p.has("duree_ticks"):
+				c["duree_ticks"] = int(inv_p.duree_ticks)
 			var n_inv := 0
 			for q in tuiles:
 				if not grille.dans(q) or not grille.occupant(q).is_empty() or grille.bloque_passage(q):
@@ -9298,7 +9312,8 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 		"degats": degats, "bruts": bruts, "type": type_degats, "element": plan.elements, "dom": dom.mult,
 		"contre": dom.contre, "gain": gain, "chaine": chaine, "jet": d.jet,
 		"competence": str(plan.fonct.get("combat_skill", "")) if arme_noyau else "magie_" + wuxing.dominante(plan.elements), "modules": plan.modules,
-		"construction": str(piece.get("construction", "")), "evites": maxi(0, roundi(bruts * zone.mult) - degats)}
+		"construction": str(piece.get("construction", "")), "evites": maxi(0, roundi(bruts * zone.mult) - degats),
+		"erosion": float(plan.get("drapeaux", {}).get("erosion", 0.0))}
 
 
 # ---------------------------------------------------------------- engagement (Temporalités parallèles)
@@ -9390,6 +9405,9 @@ func _verifier_desengagements() -> void:
 				p.declencheurs_armes.clear()
 				p.contact = false
 				p.erase("degats_element_bonus")   # Nourriture : l'huile d'arme ne vaut que pour ce combat
+				if p.has("erosion"):   # Érosion : les PV max rognés reviennent à la fin du combat
+					p.erase("erosion")
+					Etres.recalculer(p, items, affixes_defs, regles)
 				_quitter_combat(p)
 			TickManager.retirer(nom)
 			combats.erase(nom)

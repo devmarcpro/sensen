@@ -64,5 +64,33 @@
       12
     ]
   },
-  "materiau_mur": "pierre"
+  "materiau_mur": "pierre",
+  "decors": [
+    {
+      "type": "piliers",
+      "chance": 0.5,
+      "n": [
+        2,
+        5
+      ]
+    },
+    {
+      "type": "estrade",
+      "chance": 0.4,
+      "delta": 2,
+      "taille": [
+        3,
+        5
+      ]
+    },
+    {
+      "type": "fosse",
+      "chance": 0.2,
+      "delta": -3,
+      "taille": [
+        2,
+        3
+      ]
+    }
+  ]
 }

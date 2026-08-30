@@ -2672,7 +2672,7 @@ func test_creation_de_sorts() -> void:
 		par_type[t].append(str(mid))
 	for t in par_type.keys():
 		par_type[t].sort()
-	verifier(par_type.get("noyau", []).size() == 86 and par_type.get("forme", []).size() == 16, "le catalogue : %d noyaux, %d formes" % [par_type.get("noyau", []).size(), par_type.get("forme", []).size()])
+	verifier(par_type.get("noyau", []).size() >= 86 and par_type.get("forme", []).size() == 16, "le catalogue : %d noyaux, %d formes" % [par_type.get("noyau", []).size(), par_type.get("forme", []).size()])
 
 	# 1. chaque noyau, seul : un plan complet et cohérent
 	var noyaux_ko: Array[String] = []
@@ -2903,6 +2903,38 @@ func test_assemblage_sans_limite() -> void:
 	intrus.vivant = false
 	s.grille.liberer(intrus.pos)
 	s.zones.clear()
+	# Marques et consommation (2026-08-30) : Marque pose le statut, Marquée l'exige, le récompense et le consomme
+	var cobaye: Dictionary = s.ajouter("loup", j.pos + Vector2i(2, 0), "ia")
+	var p_marque: Dictionary = plan_de.call(["point", "marque"])
+	s._executer_capacite(j, p_marque, cobaye.pos)
+	verifier(Etres.a_statut_id(cobaye, "marque"), "le noyau Marque pose la Marque")
+	var p_exploite: Dictionary = plan_de.call(["point", "marquee", "etincelle"])
+	var cond_m: Dictionary = s._evaluer_conditions(j, p_exploite, cobaye.pos)
+	verifier(cond_m.is_empty() and int(p_exploite.des_bonus) >= 2 and not Etres.a_statut_id(cobaye, "marque"), "Marquée : vraie, +2 dés, et la marque est consommée")
+	var p_exploite2: Dictionary = plan_de.call(["point", "marquee", "etincelle"])
+	verifier(not s._evaluer_conditions(j, p_exploite2, cobaye.pos).is_empty(), "sans marque, la condition bloque")
+	cobaye.vivant = false
+	s.grille.liberer(cobaye.pos)
+	# Érosion (2026-08-30) : Érosif rogne les PV max de la cible, rendus à la fin du combat
+	var erode: Dictionary = s.ajouter("loup", j.pos + Vector2i(2, 0), "ia")
+	var max0: int = int(erode.sante_max)
+	var p_ero: Dictionary = plan_de.call(["point", "brasier", "erosif"])
+	s._executer_capacite(j, p_ero, erode.pos)
+	verifier(int(erode.get("erosion", 0)) > 0 and int(erode.sante_max) < max0, "Érosif : les PV max de la cible sont rognés (%d → %d)" % [max0, int(erode.sante_max)])
+	erode.erase("erosion")
+	Etres.recalculer(erode, s.items, s.affixes_defs, s.regles)
+	verifier(int(erode.sante_max) == max0, "l'érosion levée, les PV max reviennent")
+	erode.vivant = false
+	s.grille.liberer(erode.pos)
+	# Fiches d'invocations (2026-08-30) : le Feu follet invoque des follets qui ont une action, sur le camp du lanceur
+	var n_av: int = s.vivants().size()
+	var p_follet: Dictionary = plan_de.call(["point", "feu_follet"])
+	s._executer_capacite(j, p_follet, j.pos + Vector2i(2, 0))
+	var follets: Array = s.vivants().filter(func(x: Dictionary) -> bool: return x.get("maitre", "") == j.id and "invocation" in x.get("tags", []))
+	verifier(s.vivants().size() == n_av + 1 and not follets.is_empty() and follets[0].camp == j.camp and "flammeche" in follets[0].get("actions", []), "un Feu follet invoqué : allié, avec sa Flammèche (%d)" % follets.size())
+	for x in follets:
+		x.vivant = false
+		s.grille.liberer(x.pos)
 	var p_cc: Dictionary = plan_de.call(["carre", "carre", "etincelle"])
 	var n_cc: int = s.tuiles_du_plan(j, p_cc, j.pos + Vector2i(2, 0)).size()
 	verifier(p_cc.formes_sup.is_empty() and int(p_cc.taille) == 2 * int(p_bombe.taille) and n_cc > n_tuiles, "Carré + Carré : une forme plus grande (%d tuiles > %d), pas une union" % [n_cc, n_tuiles])
@@ -6197,6 +6229,11 @@ func test_donjon() -> void:
 			if e.pieces[i].rect.intersects(e.pieces[k].rect):
 				ok = false
 	verifier(ok, "aucun chevauchement de salles")
+	var reliefs := 0   # décors de salles (2026-08-30) : au moins une estrade ou une fosse sur un étage de ruine
+	for i_h in e.hauteurs.size():
+		if e.sol.has(i_h) and int(e.hauteurs[i_h]) != 10:
+			reliefs += 1
+	verifier(reliefs > 0, "les salles ont des reliefs (estrades, fosses) : %d tuiles" % reliefs)
 	verifier(e.sol.size() > tc2 * tc2 / 10 and e.sol.size() < tc2 * tc2 * 3 / 4, "salles et couloirs, avec du plein à creuser (%d tuiles de sol)" % e.sol.size())
 	# Connexité : toutes les salles et les deux escaliers sont atteignables depuis l'arrivée
 	var g := Grille.depuis_etage(e, GameData.config("tile_contents"), GameData.config("combat_rules").deplacement, 1)

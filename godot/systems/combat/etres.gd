@@ -210,7 +210,7 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 	e.endurance = mini(int(e.endurance), end_max) if int(e.endurance_max) != end_max else int(e.endurance)
 	e.endurance_max = end_max
 	# Les maxima dérivés des stats effectives ; la valeur courante est clampée, plancher 1 pour la santé.
-	e.sante_max = regles.sante_max(stats) + sante_bonus
+	e.sante_max = maxi(1, regles.sante_max(stats) + sante_bonus - int(e.get("erosion", 0)))   # Érosion : PV max rognés pour le combat
 	e.sante = clampi(int(e.sante), 1, int(e.sante_max)) if int(e.sante) > 0 else int(e.sante)
 	e.mana_max = regles.mana_max(stats) + mana_bonus
 	if e.has("mana_max_mult"):   # contrepartie d'un talent (Le Passeur)

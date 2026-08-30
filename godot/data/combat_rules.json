@@ -1083,7 +1083,7 @@
     },
     "echo_de_chair": {
       "duree_ticks": 80,
-      "creature": "loup"
+      "creature": "echo_de_chair"
     }
   },
   "soins": {

@@ -202,7 +202,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				plan.taille = maxi(1, plan.taille + int(ef.get("taille", 0)))
 				for cle in ["ignore_armure", "vampirique", "durees_mult", "projection", "attraction", "segments", "purification",
 						"silencieux", "sans_trace", "detonation", "emprise", "tracant", "prisme", "element_vers",
-						"canalisation", "enchainement", "fragmentation", "ligature", "remanence", "ricochet"]:
+						"canalisation", "enchainement", "fragmentation", "ligature", "remanence", "ricochet", "erosion"]:
 					if ef.has(cle):
 						plan.drapeaux[cle] = ef[cle]
 				if ef.has("geometrie_map"):   # Évasement : la forme s'ouvre (Ligne → Cône, Anneau → Carré)

@@ -1,0 +1,14 @@
+{
+  "name_key": "status.marque.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 0,
+  "duree_ticks": 60,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [],
+  "tags": [
+    "negatif",
+    "marque"
+  ]
+}
