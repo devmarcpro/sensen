@@ -21,6 +21,9 @@ C'est la position honnête : la mesure objective existe déjà (le **facteur qui
 
 **Défaut en attendant :** **34/34/16/16**, la valeur de l'annexe — implémentable telle quelle, le code n'attend rien.
 
+> [!success] Codé le 2026-08-28, constaté le 2026-08-31 — 34/34/16/16 est en données
+> La règle d'anneau est `combat_rules.elevage.anneau = [0.34, 0.34, 0.16, 0.16]`, lue par la simulation ; seul le playtest reste.
+
 ## Liens
 - **Dépend de** : [[Élevage — intention et familles]], [[Catalogue des groupes d'élevage]]
 - **Voir aussi** : [[Loci — les dix types]], [[Règle d'anneau]], [[Vivarium — loci et variétés]], [[Carte — Ouvert]]

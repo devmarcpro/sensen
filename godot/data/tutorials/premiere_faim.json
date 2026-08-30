@@ -2,7 +2,7 @@
   "trigger": {
     "signal": "journal",
     "conditions": {
-      "cle": "journal.faim_stats"
+      "cle": "journal.faim_conseil"
     }
   },
   "text_key": "tutorial.premiere_faim.text",

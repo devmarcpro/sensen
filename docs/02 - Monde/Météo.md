@@ -104,6 +104,9 @@ SAISONS : ACTIVÉES à l'étape 10, avec l'élevage et l'agriculture
 > [!success] Corrigé le 2026-08-29 — les feux ne survivent plus à un changement de grille
 > Bug trouvé en relisant les états indexés par tuile : `feux` et `eau_active` sont des **index de tuile** dans la grille courante, et rien ne les vidait quand la grille change — voyage vers une autre cellule, descente en donjon, retour au camp, chargement d'une sauvegarde. Un incendie allumé dans une forêt continuait donc de brûler **les mêmes index** dans la cellule d'arrivée, consumant des tuiles au hasard ; l'automate d'eau propageait depuis des tuiles qui n'existaient plus. `Simulation._vider_etats_tuiles()` les efface (avec les compteurs de pas) à chaque bascule de grille, comme `glyphes` l'était déjà. Décision : un feu **ne se sauvegarde pas** — il s'éteint quand on quitte la cellule ; le persister demanderait de le stocker par cellule dans `Monde`, ce qui n'a d'intérêt que si le monde vit en notre absence (il ne le fait pas encore : *Abstraction hors-site* résout par formules).
 
+> [!success] Corrigé le 2026-08-31 — l'orage arrose aussi
+> Le semis testait l'id `pluie` en dur ; il lit le tag `arrose` des états de météo (`weather_states`), que la pluie et l'orage portent. Le bonus (`agriculture.pluie_bonus`) reste appliqué au semis seulement ; « accumulé pendant la pousse » est une question pour [[À juger — parcours de jeu]].
+
 ## Liens
 - **Dépend de** : [[Génération par couches de bruit]], [[Application des stats de matériau]], [[Simulation à ticks]]
 - **Alimente** : [[Eau et liquides]], [[Agriculture et élevage]], [[Véhicules]], [[Catalogue matériaux — Météorologiques]], [[Dialogue PNJ]]

@@ -27,6 +27,9 @@ etape: 6
 
 **Usage :** ces noms apparaissent partout où la qualité est affichée — objets craftés, loot ([[Loot — affixes, gemmes et rareté]]), plats et potions ([[Cuisine et alchimie]]), taille de gemmes en affinité (*misérable +0.04 → mythique +0.28*).
 
+> [!success] Codé le 2026-08-28, constaté le 2026-08-31 — les huit paliers sont en données
+> `combat_rules.craft.paliers_qualite` (misérable → mythique), lus par `Regles.palier_qualite` et affichés jusque dans les noms d'objets ; la formulation « à établir » du GDD est caduque.
+
 ## Liens
 - **Dépend de** : [[Qualité d'artisanat]]
 - **Alimente** : [[Loot — affixes, gemmes et rareté]], [[Localisation]]

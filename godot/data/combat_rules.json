@@ -145,12 +145,6 @@
     "_doc": "Éclairage (2026-08-30) : niveau de lumière ambiante (0-15) de chaque tuile d'un étage de donjon, sous les sources ; un thème peut le remplacer par lumiere_ambiante",
     "donjon_ambiante": 6
   },
-  "ia": {
-    "_doc": "IA des créatures (2026-08-30) : soin_seuil = fraction de PV sous laquelle un soigneur soigne un allié ; reculer_distance = un tireur recule si la cible est à cette distance ou moins ; guet_distance = un embusqueur attend tant que la cible est plus loin",
-    "soin_seuil": 0.7,
-    "reculer_distance": 1,
-    "guet_distance": 3
-  },
   "engagement": {
     "_doc": "Décision — Fuite et désengagement · IA des créatures (détection = Perception en tuiles) · Éclairage : la nuit, cible non éclairée vue à portée × vision_nuit, cible éclairée à portée × (1 + lumière/100 × lumiere_detection) ; lumiere_rayon = portée des meubles lumineux. Discretion de la cible : portee × (1 − min(discretion_max_pct, niveau × discretion_par_niveau)), jamais sous portee_min.",
     "sortie_distance": 12,
@@ -165,8 +159,11 @@
     "portee_min": 1
   },
   "ia": {
-    "_doc": "IA des créatures : une décision tous les 10 ticks",
-    "ticks_entre_decisions": 10
+    "_doc": "IA des créatures : ticks_entre_decisions (une décision tous les 10 ticks) ; types d'ennemis (2026-08-30) : soin_seuil = fraction de PV sous laquelle un soigneur soigne un allié ; reculer_distance = un tireur recule si la cible est à cette distance ou moins ; guet_distance = un embusqueur attend tant que la cible est plus loin. (Une clé « ia » dupliquée écrasait ces trois réglages jusqu'au 2026-08-31.)",
+    "ticks_entre_decisions": 10,
+    "soin_seuil": 0.7,
+    "reculer_distance": 1,
+    "guet_distance": 3
   },
   "anti_stunlock": {
     "_doc": "Statuts de contrôle et anti-stunlock : aucun contrôle dur > 20 ticks, pas de réapplication dans les 50 ticks suivant la fin",
@@ -201,7 +198,7 @@
     }
   },
   "mort": {
-    "_doc": "Mort et pénalité : respawn, −10 % d'or (pas d'or encore), 10 % de chance par objet du sac de tomber, équipement et XP conservés",
+    "_doc": "Mort et pénalité : respawn, −perte_or de l'or porté (prélevé depuis le 2026-08-31), 10 % de chance par objet du sac de tomber, équipement et XP conservés",
     "chance_perte_objet": 0.1,
     "perte_or": 0.1
   },
@@ -318,9 +315,10 @@
     "porte_famille": "bois"
   },
   "faim": {
-    "_doc": "Faim (docs: Faim) : jauge 0-100, −1 par ticks_par_point ; seuils : sous_50 → régén santé ×0.9 (sans prise encore), sous_25 → stats ×0.9, zero → −pct_sante_max % de santé max par periode_zero ticks.",
+    "_doc": "Faim (docs: Faim) : jauge 0-100, −1 par ticks_par_point ; seuils : sous seuil_regen → régén de santé (équipement) × malus_regen, sous seuil_stats → stats × malus_stats et plus de régén de santé, zero → −pct_sante_max % de santé max par periode_zero ticks ; tooltip_seuil : le conseil « manger » (journal.faim_conseil) la première fois sous ce seuil.",
     "ticks_par_point": 900,
     "seuil_regen": 50,
+    "malus_regen": 0.9,
     "seuil_stats": 25,
     "malus_stats": 0.9,
     "periode_zero": 300,

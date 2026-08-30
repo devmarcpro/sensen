@@ -4224,7 +4224,7 @@ func _planter(e: Dictionary, base: String, tick: int) -> bool:
 		_consommer_pile(e, pile)
 		var pl: Dictionary = GameData.catalogues.plants[base]
 		var duree := float(pl.duree_jours) * float(_cycle().get("ticks_par_jour", 24000))
-		if meteo(_cell_de(vers)) == "pluie":
+		if "arrose" in GameData.catalogues.weather_states.get(str(meteo(_cell_de(vers))), {}).get("effects", []):   # Météo : pluie ET orage arrosent (tag arrose)
 			duree *= 1.0 - float(_ry().agriculture.pluie_bonus)
 		territoire.cultures[_pm(vers)] = {"plante": base, "semis": tick, "echeance": tick + int(duree), "mure": false}
 		grille.poser_contenu(vers, "culture")
@@ -6149,6 +6149,10 @@ func _respawn(e: Dictionary) -> bool:
 			e.sac.erase(uid)
 			perdus.append(uid)
 	_poser_contenant(e.pos, perdus, "butin")
+	var or_perdu := int(floor(float(e.get("or", 0)) * float(regles.r.mort.get("perte_or", 0.0))))   # Mort et pénalité : −10 % de l'or porté
+	if or_perdu > 0:
+		e.or = int(e.or) - or_perdu
+		EventBus.emettre(&"journal", [&"journal.mort_or", {"nom": e.name_key, "or": or_perdu}])
 	if en_combat(e):
 		_quitter_combat(e)
 	e.vivant = true
@@ -6700,6 +6704,8 @@ func _tiquer_faim(tick: int) -> void:
 		if points > 0:
 			var avant := int(e.faim)
 			e.faim = maxi(0, int(e.faim) - points)
+			if avant >= int(f.get("tooltip_seuil", 60)) and int(e.faim) < int(f.get("tooltip_seuil", 60)):
+				EventBus.emettre(&"journal", [&"journal.faim_conseil", {"nom": e.name_key}])   # Faim : le conseil arrive avant le malus
 			if avant >= int(f.seuil_stats) and int(e.faim) < int(f.seuil_stats):
 				Etres.recalculer(e, items, affixes_defs, regles)
 				EventBus.emettre(&"journal", [&"journal.faim_stats", {"nom": e.name_key}])
@@ -6959,8 +6965,13 @@ func _regenerer(e: Dictionary, tick: int) -> void:
 			if des.reel() < float(regles.r.mana.chance):
 				e.mana = mini(e.mana_max, e.mana + roundi((float(regles.r.mana.regen_base) + float(e.competences_eff.get("meditation", 0)) * float(regles.r.mana.regen_par_meditation)) * (float(regles.r.talents.chair_de_mana.mana_regen_mult) if a_talent(e, "chair_de_mana") else 1.0)))
 				gagner_xp(e, "meditation", 1)
-		if e.get("mecaniques", {}).has("regen_sante") and not en_combat(e):   # Effets d'équipement : 1 PV toutes les 200 × 100 / pct ticks
-			var per := maxi(1, roundi(float(regles.r.effets_equipement.regen_base_ticks) * 100.0 / float(e.mecaniques.regen_sante.get("pct", 50))))
+		var f_faim: Dictionary = regles.r.faim
+		var faim_e := int(e.get("faim", 100))
+		if e.get("mecaniques", {}).has("regen_sante") and not en_combat(e) and faim_e >= int(f_faim.seuil_stats):   # Effets d'équipement : 1 PV toutes les 200 × 100 / pct ticks ; Faim : plus de régén sous seuil_stats
+			var pct_regen := float(e.mecaniques.regen_sante.get("pct", 50))
+			if faim_e < int(f_faim.seuil_regen):
+				pct_regen *= float(f_faim.get("malus_regen", 0.9))   # Faim < 50 : −10 % de régénération
+			var per := maxi(1, roundi(float(regles.r.effets_equipement.regen_base_ticks) * 100.0 / pct_regen))
 			var pv := tick / per - int(e.tick_endurance) / per
 			if pv > 0:
 				e.sante = mini(e.sante_max, int(e.sante) + pv)
@@ -7428,8 +7439,9 @@ func _affixes_offensifs(e: Dictionary, arme: Dictionary, cible: Dictionary) -> D
 	var r := {"vecteur": _vecteur_arme_de(e, arme), "des": 0, "mult": 1.0, "ignore_armure": 0.0, "plat": 0}
 	# Gemmes de l'arme : la taille en affinité déplace le vecteur (AJOUT normalisé), les dégâts
 	# élémentaires plats s'ajoutent si le coup porte cet élément.
-	for el in e.get("affinites", {}).keys():
-		r.vecteur = _ajouter_element(r.vecteur, str(el), float(e.affinites[el]))
+	if not _vecteur_pur(r.vecteur):   # Modificateurs d'affinité : « sur une arme PURE, jamais » — la pureté reste une propriété du craft
+		for el in e.get("affinites", {}).keys():
+			r.vecteur = _ajouter_element(r.vecteur, str(el), float(e.affinites[el]))
 	if arme.get("affixes", []).is_empty():
 		return r
 	for ax: Dictionary in arme.affixes:
@@ -7501,6 +7513,15 @@ func _vecteur_modifie(e: Dictionary, v: Dictionary) -> Dictionary:
 
 
 ## Modificateur d'affinité AJOUT puis normalisation à somme 1 (Modificateurs d'affinité).
+## Un vecteur pur : un seul élément qui porte tout (à l'arrondi près).
+func _vecteur_pur(v: Dictionary) -> bool:
+	var n := 0
+	for k in v.keys():
+		if float(v[k]) > 0.001:
+			n += 1
+	return n == 1
+
+
 func _ajouter_element(v: Dictionary, element: String, part: float) -> Dictionary:
 	var res := v.duplicate()
 	res[element] = float(res.get(element, 0.0)) + part

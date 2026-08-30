@@ -6635,7 +6635,12 @@ func test_gemmes_et_livres() -> void:
 	epee.affixes = []   # les affixes de l'épée exceptionnelle pourraient aussi toucher le vecteur
 	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
 	var ax := s._affixes_offensifs(j, epee, s.entites["loup_2"])
-	verifier(is_equal_approx(float(ax.vecteur.feu), 0.28 / 1.28) and is_equal_approx(float(ax.vecteur.metal), 1.0 / 1.28), "affinité Feu +0.28 : vecteur {métal 0.78, feu 0.22}")
+	verifier(float(ax.vecteur.get("feu", 0.0)) == 0.0 and is_equal_approx(float(ax.vecteur.metal), 1.0), "affinité Feu +0.28 sur une épée PURE : jamais (Modificateurs d'affinité, 2026-08-31) — vecteur {métal 1.0}")
+	var vec_avant: Dictionary = epee.elements if epee.has("elements") else {}
+	epee.elements = {"metal": 0.7, "bois": 0.3}   # la même épée, mixte : la taille déplace le vecteur (ajout normalisé)
+	var ax2 := s._affixes_offensifs(j, epee, s.entites["loup_2"])
+	verifier(is_equal_approx(float(ax2.vecteur.feu), 0.28 / 1.28) and is_equal_approx(float(ax2.vecteur.metal), 0.7 / 1.28), "affinité Feu +0.28 sur une épée mixte : vecteur {métal 0.55, bois 0.23, feu 0.22}")
+	epee.elements = vec_avant
 	# Livres : un grimoire tire domaine, difficulté et modules ; la lecture réussit avec Lecture haute
 	var livre := s.generer_objet("grimoire", 2)
 	verifier(livre.modules.size() >= 2 and livre.difficulte == 10 + 2 * 10 and not livre.domaine.is_empty(), "grimoire : %d modules, difficulté 30, domaine %s" % [livre.modules.size(), livre.domaine])
@@ -6732,8 +6737,35 @@ func test_progression() -> void:
 	p.grille.placer(jp.id, jp.pos)
 	p._appliquer_degats(jp, 999, "", {})
 	verifier(not jp.vivant, "mort")
+	jp.or = 50
 	verifier(p.intention(jp.id, {"type": "respawn"}), "respawn")
 	verifier(jp.vivant and jp.sante == jp.sante_max and jp.pos == spawn and jp.equipement.has("main_principale"), "relevé au point d'entrée, PV pleins, équipement conservé")
+	verifier(int(jp.or) == 45, "Mort et pénalité : −10 %% de l'or porté (%d)" % int(jp.or))
+	# Faim : la régénération de santé d'équipement suit les paliers (< 50 : −10 %, < 25 : plus rien)
+	jp["mecaniques"] = {"regen_sante": {"pct": 100}}
+	jp.faim = 100
+	jp.sante = 1
+	jp.tick_endurance = 0
+	p._regenerer(jp, 2000)
+	var regen_plein: int = int(jp.sante) - 1
+	jp.faim = 40
+	jp.sante = 1
+	jp.tick_endurance = 0
+	p._regenerer(jp, 2000)
+	var regen_faim: int = int(jp.sante) - 1
+	jp.faim = 10
+	jp.sante = 1
+	jp.tick_endurance = 0
+	p._regenerer(jp, 2000)
+	verifier(regen_plein > 0 and regen_faim < regen_plein and int(jp.sante) == 1, "faim : régén %d à 100, %d sous 50, rien sous 25" % [regen_plein, regen_faim])
+	jp.faim = 100
+	jp.erase("mecaniques")
+	# Modificateurs d'affinité : une arme pure ne se dilue pas par sertissage, une mixte oui
+	jp["affinites"] = {"feu": 0.5}
+	var pur := p._affixes_offensifs(jp, {"materiau": "fer", "elements": {"metal": 1.0}, "affixes": []}, {})
+	var mixte := p._affixes_offensifs(jp, {"materiau": "fer", "elements": {"metal": 0.6, "bois": 0.4}, "affixes": []}, {})
+	verifier(float(pur.vecteur.get("feu", 0.0)) == 0.0 and float(mixte.vecteur.get("feu", 0.0)) > 0.0, "l'arme pure ignore la taille en affinité, l'arme mixte la reçoit")
+	jp.erase("affinites")
 
 
 # ---------------------------------------------------------------- Étape 5 : entrer, combattre, looter, progresser, ressortir

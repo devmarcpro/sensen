@@ -2323,3 +2323,5 @@ ui.inventaire.col_type,Type
 ui.inventaire.col_qualite,Qualité
 ui.inventaire.col_poids,Poids
 ui.inventaire.col_quantite,Qté
+journal.mort_or,{nom} laisse {or} pièces d'or dans la mort
+journal.faim_conseil,{nom} a l'estomac qui gronde — il faudrait manger

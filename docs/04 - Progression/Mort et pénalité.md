@@ -32,6 +32,9 @@ usage-based rend la perte d'XP très punitive, on pénalise l'économie à la pl
 > [!success] Précisé le 2026-08-28
 > Le respawn se fait désormais **au dernier lit où l'on a dormi** (le camp) : mourir en donjon termine l'expédition et ramène au camp, les pertes du sac tombant sur le lieu de mort. Sans lit activé, l'ancien comportement (point d'entrée) reste.
 
+> [!success] Codé le 2026-08-31 — les −10 % d'or sont prélevés
+> `combat_rules.mort.perte_or` existait mais n'était lu nulle part (« pas d'or encore » disait la note de règles — l'or existe depuis les boutiques). `_respawn` retire désormais `floor(or × perte_or)` et le journal le dit (`journal.mort_or`). Test dans `test_progression`.
+
 ## Liens
 - **Dépend de** : [[Progression par l'usage]]
 - **Alimente** : [[Économie — sources et puits]]
