@@ -103,7 +103,7 @@ func _draw() -> void:
 		legende = tr("ui.apercu.horizon")
 	else:
 		legende = tr("ui.apercu.tuiles" if visee_souris.x < 0 else "ui.apercu.tuiles_souris").format({"n": compte.size(), "origine": tr("origine." + str(plan.get("origine", "cible"))), "portee": "%d–%d" % [portee.x, portee.y]})
-	draw_string(ThemeDB.fallback_font, Vector2(2.0, TAILLE + 13.0), legende, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.85, 0.85, 0.8))
+	draw_string(ThemeDB.fallback_font, Vector2(2.0, TAILLE + 13.0), legende, HORIZONTAL_ALIGNMENT_LEFT, TAILLE - 4.0, 9, Color(0.85, 0.85, 0.8))
 
 
 ## La couleur de l'élément dominant du plan (wuxing.teintes), ou un ocre neutre.

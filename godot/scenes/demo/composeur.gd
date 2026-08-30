@@ -25,6 +25,7 @@ var ids: Array[String] = []            # les modules du catalogue, dans l'ordre 
 
 var replie: Dictionary = {}            # type → section repliée (▸) ou déployée (▾)
 var nom: LineEdit
+var icone_sort: Control                # l'icône combinée du sort en cours, à côté du nom
 var rangee_slots: HBoxContainer
 var catalogue: VBoxContainer
 var detail: RichTextLabel
@@ -37,6 +38,9 @@ func _ready() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var h1 := HBoxContainer.new()   # rangée 1 : le nom du sort
 	add_child(h1)
+	icone_sort = IconeSort.new()
+	icone_sort.composeur = self
+	h1.add_child(icone_sort)
 	var l_nom := Label.new()
 	l_nom.text = tr("ui.composeur.nom")
 	h1.add_child(l_nom)
@@ -243,6 +247,7 @@ func _rafraichir_detail(j: Dictionary) -> void:
 	var plan: Dictionary = main.sim.plan_sequence(j, seq.duplicate()) if not seq.is_empty() else {}
 	apercu.montrer(plan)
 	pentagramme.montrer(plan)
+	icone_sort.queue_redraw()
 	var texte := ""
 	if selection < ids.size():
 		var m := ids[selection]
@@ -393,21 +398,7 @@ static func type_de(m: String) -> String:
 
 
 static func couleur_de(m: String) -> Color:
-	var md: Dictionary = GameData.catalogues.modules.get(m, {})
-	var els: Dictionary = md.get("elements", {})
-	var meilleur := ""
-	var poids := 0.0
-	for el in els.keys():
-		if float(els[el]) > poids:
-			poids = float(els[el])
-			meilleur = str(el)
-	var teintes: Dictionary = GameData.config("wuxing").get("teintes", {})
-	if not meilleur.is_empty() and teintes.has(meilleur):
-		var t: Array = teintes[meilleur]
-		return Color(float(t[0]), float(t[1]), float(t[2]))
-	if int(md.get("cout_endurance", 0)) > 0:
-		return Color(0.85, 0.6, 0.3)   # endurance : ocre
-	return Color(0.7, 0.7, 0.8)      # arcane / neutre : gris bleuté
+	return Pictos.couleur_module(GameData.catalogues.modules.get(m, {}))
 
 
 ## Une carte carrée complète : le cadre teinté, le glyphe, le nom en bas, les charges en coin, « ×n » si déjà posé.
@@ -439,6 +430,17 @@ static func dessiner_icone(ci: CanvasItem, r: Rect2, m: String, alpha: float = 1
 
 
 # ---------------------------------------------------------------- les Control internes
+
+## L'icône combinée du sort en cours de composition (Pictos.dessiner_sort), à côté du nom.
+class IconeSort extends Control:
+	var composeur: Composeur
+
+	func _ready() -> void:
+		custom_minimum_size = Composeur.SLOT
+
+	func _draw() -> void:
+		Pictos.dessiner_sort(self, composeur.sequence(), Rect2(Vector2(2, 2), Composeur.SLOT - Vector2(4, 4)))
+
 
 ## Une carte du catalogue : icône + nom court + charges ; source de glisser-déposer.
 class CarteModule extends Control:
@@ -595,7 +597,7 @@ class PentagrammeSort extends Control:
 			legende = tr("ui.composeur.wuxing_vide")
 		else:
 			legende = tr("ui.composeur.wuxing").format({"dominante": tr("element." + dominante), "engendre": tr("element." + str(wx.engendre.get(dominante, ""))), "domine": tr("element." + str(wx.domine.get(dominante, "")))})
-		draw_string(ThemeDB.fallback_font, Vector2(2.0, TAILLE + 13.0), legende, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.85, 0.85, 0.8))
+		draw_string(ThemeDB.fallback_font, Vector2(2.0, TAILLE + 13.0), legende, HORIZONTAL_ALIGNMENT_LEFT, TAILLE - 4.0, 9, Color(0.85, 0.85, 0.8))   # bornée à son carré : pas de chevauchement avec l'aperçu
 
 	static func _teinte(teintes: Dictionary, el: String) -> Color:
 		var t: Array = teintes.get(el, [0.7, 0.7, 0.7])

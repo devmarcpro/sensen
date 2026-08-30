@@ -113,6 +113,59 @@ static func _degats_element(md: Dictionary) -> String:
 	return "eclat" if md.get("power_base") == "arme" else "etoile"
 
 
+## La couleur d'un module : son élément dominant (wuxing.teintes), ocre pour l'endurance, gris bleuté pour l'arcane.
+static func couleur_module(md: Dictionary) -> Color:
+	var els: Dictionary = md.get("elements", {})
+	var meilleur := ""
+	var poids := 0.0
+	for el in els.keys():
+		if float(els[el]) > poids:
+			poids = float(els[el])
+			meilleur = str(el)
+	var teintes: Dictionary = GameData.config("wuxing").get("teintes", {})
+	if not meilleur.is_empty() and teintes.has(meilleur):
+		var t: Array = teintes[meilleur]
+		return Color(float(t[0]), float(t[1]), float(t[2]))
+	if int(md.get("cout_endurance", 0)) > 0:
+		return Color(0.85, 0.6, 0.3)
+	return Color(0.7, 0.7, 0.8)
+
+
+## L'icône d'un sort : la combinaison des icônes de ses modules (Écrans d'interface, 2026-08-30). La forme en fond,
+## le noyau au centre, les modificateurs en haut, conditions / déclencheur / liaisons à gauche, le cadre à la dominante.
+static func dessiner_sort(ci: CanvasItem, modules: Array, r: Rect2, alpha: float = 1.0) -> void:
+	var formes: Array = []
+	var noyaux: Array = []
+	var modifs: Array = []
+	var autres: Array = []
+	for m in modules:
+		var md: Dictionary = GameData.catalogues.modules.get(str(m), {})
+		match str(md.get("module_type", "")):
+			"forme": formes.append(md)
+			"noyau": noyaux.append(md)
+			"modificateur": modifs.append(md)
+			_: autres.append(md)
+	var cadre := couleur_module(noyaux[0]) if not noyaux.is_empty() else Color(0.6, 0.55, 0.4)
+	ci.draw_rect(r, Color(cadre.r * 0.18, cadre.g * 0.18, cadre.b * 0.18, alpha))
+	if not formes.is_empty():   # la forme : ses tuiles, estompées, plein cadre
+		var cf := couleur_module(formes[0])
+		dessiner(ci, icone_de(formes[0]), Rect2(r.position + r.size * 0.08, r.size * 0.84), Color(cf.r, cf.g, cf.b, alpha * 0.28))
+	if not noyaux.is_empty():   # le noyau principal au centre, le second plus petit en bas à droite
+		var c0 := couleur_module(noyaux[0])
+		dessiner(ci, icone_de(noyaux[0]), Rect2(r.position + r.size * 0.25, r.size * 0.5), Color(c0.r, c0.g, c0.b, alpha))
+		if noyaux.size() > 1:
+			var c1 := couleur_module(noyaux[1])
+			dessiner(ci, icone_de(noyaux[1]), Rect2(r.position + r.size * Vector2(0.62, 0.62), r.size * 0.3), Color(c1.r, c1.g, c1.b, alpha))
+	var v := r.size.x * 0.2   # les vignettes
+	for k in mini(4, modifs.size()):
+		var cm := couleur_module(modifs[k])
+		dessiner(ci, icone_de(modifs[k]), Rect2(r.position + Vector2(r.size.x * 0.06 + k * v * 1.15, r.size.y * 0.04), Vector2(v, v)), Color(cm.r, cm.g, cm.b, alpha * 0.95))
+	for k in mini(4, autres.size()):
+		var ca := couleur_module(autres[k])
+		dessiner(ci, icone_de(autres[k]), Rect2(r.position + Vector2(r.size.x * 0.04, r.size.y * 0.28 + k * v * 1.15), Vector2(v, v)), Color(ca.r, ca.g, ca.b, alpha * 0.95))
+	ci.draw_rect(r, Color(cadre.r, cadre.g, cadre.b, alpha), false, 1.5)
+
+
 # ---------------------------------------------------------------- le tracé
 
 ## Dessine le pictogramme `nom` dans `r`, couleur `c`. Tout est tracé en primitives : lignes, polygones, arcs.

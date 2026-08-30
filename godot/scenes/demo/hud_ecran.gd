@@ -119,4 +119,7 @@ func _dessiner_hotbar(sim, j: Dictionary, o: Vector2) -> void:
 		draw_string(ThemeDB.fallback_font, r.position + Vector2(3.0, 11.0), str((k + 1) % 10), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.7, 0.65, 0.5))
 		if k < entrees.size():
 			var nom := str(entrees[k].nom)
+			if str(entrees[k].type) == "capacite":   # l'icône combinée du sort (Pictos), au-dessus de son nom
+				var cap: Dictionary = j.capacites[int(entrees[k].ref)]
+				Pictos.dessiner_sort(self, cap.get("modules", []), Rect2(r.position + Vector2(CASE * 0.22, 12.0), Vector2(CASE * 0.56, CASE * 0.56)))
 			draw_string(ThemeDB.fallback_font, r.position + Vector2(3.0, CASE - 6.0), nom.left(9), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.95, 0.95, 0.9))
