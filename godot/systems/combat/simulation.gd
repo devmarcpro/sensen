@@ -8255,6 +8255,14 @@ func plan_sequence(e: Dictionary, sequence: Array) -> Dictionary:
 		plan.alt["arme"] = arme
 		plan.alt["fonct"] = fonct
 		_appliquer_affinite_arme(plan.alt, fonct)
+	var suite: Dictionary = plan.get("charge_suivante", {})   # la charge différée d'un déclencheur part plus tard : elle porte l'arme aussi
+	while not suite.is_empty():
+		suite["arme"] = arme
+		suite["fonct"] = fonct
+		if not suite.has("name_key"):
+			suite["name_key"] = str(suite.get("noyau", {}).get("name_key", ""))
+		_appliquer_affinite_arme(suite, fonct)
+		suite = suite.get("charge_suivante", {})
 	return plan
 
 
@@ -8593,6 +8601,8 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 		if res.get("premiere", {}).is_empty():
 			res.premiere = r_sup.premiere
 	e["sans_trace"] = false   # le drapeau ne vaut que pour la capacité qui vient de partir
+	if not res.has("a_touche"):   # un plan sans noyau (une suite de déclencheur réduite à sa forme) : rien n'a porté
+		res = {"a_touche": false, "premiere": {}, "tuee": {}}
 	e["dernier_coup_touche"] = res.a_touche   # Enchaînement : la prochaine capacité saura si celle-ci a porté
 	if bool(plan.drapeaux.get("ligature", false)):   # Ligature : affûts et tourelles de la forme tirent tout de suite
 		for a in affuts:
@@ -8938,7 +8948,11 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 							_poser_segment(e, el_c if not el_c.is_empty() else {"bois": 1.0}, tick, "soin")
 							break
 					if rs.has("releve_allie_pct"):   # Rappel à la vie : un allié tombé se relève à N % de ses PV
-						for c in touchees:
+						var tombes: Array[Dictionary] = []   # les touchés ne comptent que les vivants : les morts se cherchent sur les tuiles
+						for x in entites.values():
+							if not x.vivant and x.pos in tuiles and not ennemis(e, x) and x.id != e.id:
+								tombes.append(x)
+						for c in tombes:
 							if c.vivant or ennemis(e, c):
 								continue
 							c.vivant = true
