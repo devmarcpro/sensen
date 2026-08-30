@@ -5,7 +5,7 @@ extends Control
 ## du plan. Dessiné par code, sans asset ; la grille est virtuelle — l'aperçu montre la forme, pas le terrain.
 
 const COTE := 17            # tuiles par côté de la grille virtuelle (impair : le lanceur au centre)
-const CASE := 11.0          # pixels par tuile
+const CASE := 9.0           # pixels par tuile (assez petit pour laisser le détail lisible au composeur)
 
 var plan: Dictionary = {}   # le plan assemblé (Capacites.assembler / Simulation.plan_sequence)
 var grille_virtuelle: Grille

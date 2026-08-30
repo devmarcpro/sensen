@@ -514,7 +514,7 @@ class ZoneCatalogue extends MarginContainer:
 class PentagrammeSort extends Control:
 	var composeur: Composeur
 	var plan: Dictionary = {}
-	const RAYON := 46.0
+	const RAYON := 38.0
 
 	func _ready() -> void:
 		custom_minimum_size = Vector2(RAYON * 2 + 100, RAYON * 2 + 44)   # assez large pour la légende « X domine · engendre Y · domine Z »
