@@ -8997,7 +8997,7 @@ func _invoquer(e: Dictionary, mode: String, tuiles: Array[Vector2i], cible_pos: 
 					continue
 				grille.poser_contenu(q, "barriere")
 				affuts.append({"pos": q, "source": e.id, "prochain": tick + int(t.get("cadence_ticks", 6)),
-					"fin": tick + int(t.get("duree_ticks", 120)), "degats": Des.multiplier(str(t.get("degats", "1d6")), fois),
+					"fin": tick + int(t.get("duree_ticks", 120)), "degats": _des_bombe(str(t.get("degats", "1d6")), fois, int(plan.get("des_bonus", 0))),   # comme la bombe : × n, + dés de bonus
 					"portee": int(t.get("portee", 6)), "elements": plan.elements.duplicate()})
 				EventBus.emettre(&"tile_changed", [q])
 				n_tour += 1   # une tourelle par tuile libre de la forme
