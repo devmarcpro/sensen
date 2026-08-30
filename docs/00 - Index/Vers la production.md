@@ -27,6 +27,8 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] Police MingLiU-ExtB (2026-08-30)
+> Police système, sans asset, posée sur le thème par défaut et le repli de `ThemeDB`. **À juger** : le trait bitmap sans lissage est-il lisible aux petites tailles (10 px de la hotbar) ?
 > [!important] Plus de plafond de modules par capacité (2026-08-30)
 > Le composeur acceptait deux modules au niveau 0 malgré le « no limit » ; désormais seule la longueur des capacités tenues prêtes est bornée. **À juger** : faut-il un avertissement du composeur quand une séquence dépasse un seuil de ticks ?
 > [!important] Écran de chargement entre cellules (2026-08-30)

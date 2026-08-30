@@ -38,6 +38,7 @@ var _cache_filtres: Dictionary = {} # filtre de catégorie → ids (vidé au rec
 
 
 func _ready() -> void:
+	_installer_police()
 	charger()
 
 
@@ -427,3 +428,22 @@ func _rapport() -> void:
 		# Bloquant en debug (Décision — Pipeline de contenu, règle 3).
 		printerr("GameData : %d erreur(s) de données — arrêt (bloquant en debug)" % erreurs.size())
 		get_tree().quit(1)
+
+
+## La police du jeu (Écrans d'interface, décision du 2026-08-30) : MingLiU-ExtB, police **système** — aucun asset dans
+## le dépôt. Posée en police de repli du thème (tous les draw_string du client) et sur le thème de la fenêtre racine
+## (tous les Control). Si la famille manque sur la machine, Godot garde sa police par défaut.
+func _installer_police() -> void:
+	var police := SystemFont.new()
+	police.font_names = PackedStringArray(["MingLiU-ExtB", "MingLiU_HKSCS-ExtB", "PMingLiU-ExtB"])
+	police.allow_system_fallback = true
+	police.antialiasing = TextServer.FONT_ANTIALIASING_NONE   # le tracé bitmap de MingLiU, net
+	police.hinting = TextServer.HINTING_NORMAL
+	police.subpixel_positioning = TextServer.SUBPIXEL_POSITIONING_DISABLED
+	ThemeDB.fallback_font = police
+	# Le thème par défaut porte sa propre police : les Control sous un Node2D ou un CanvasLayer n'ont pas de
+	# propriétaire de thème (seuls Control et Window propagent), le thème de la fenêtre racine ne les atteint pas.
+	var defaut := ThemeDB.get_default_theme()
+	if defaut != null:
+		defaut.default_font = police
+
