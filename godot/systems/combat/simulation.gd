@@ -5691,7 +5691,7 @@ func _garnir_stock(e: Dictionary, selection: Array) -> void:
 			var base := GameData.tirer("items", bloc.filtre, rng)
 			if base.is_empty():
 				continue   # une catégorie vide n'est pas une erreur de jeu : l'audit des données la signale
-			var o := generer_objet(base, 1, {}, "commun", 0)
+			var o := generer_objet(base, 1, {"categories_materiau": bloc.get("materiaux", [])}, "commun", 0)   # un forgeron assemble dans le métal
 			if not o.is_empty():
 				e.stock.append(o.uid)
 
@@ -5705,13 +5705,13 @@ func generer_objet(base_id: String, profondeur: int, provenance: Dictionary = {}
 	objets[inst.uid] = inst
 	items[inst.uid] = inst
 	if "assemble" in inst.get("tags", []) and not bool(provenance.get("assemblage", false)):
-		_composer_loot(inst, profondeur, rng)   # un objet assemblé trouvé est composé : manche, tête, fixations tirés (designer, 2026-08-30)
+		_composer_loot(inst, profondeur, rng, provenance.get("categories_materiau", []))   # un objet assemblé trouvé est composé : manche, tête, fixations tirés (designer, 2026-08-30)
 	return inst
 
 
 ## Le loot assemblé (Loot — affixes, gemmes et rareté, 2026-08-30) : jamais « une simple épée » — chaque composant
 ## reçoit une recette, un matériau de sa famille (les minerais de l'étage favorisés) et une qualité d'artisan.
-func _composer_loot(inst: Dictionary, profondeur: int, rng: RandomNumberGenerator) -> void:
+func _composer_loot(inst: Dictionary, profondeur: int, rng: RandomNumberGenerator, cats_mat: Array = []) -> void:
 	var def: Dictionary = GameData.entree("items", str(inst.base))
 	if def.get("slots", {}).is_empty():
 		return
@@ -5730,7 +5730,7 @@ func _composer_loot(inst: Dictionary, profondeur: int, rng: RandomNumberGenerato
 		var mat_id := ""
 		for r in recettes:
 			var fam: Dictionary = GameData.config("material_families").get(str(r.material_family), {})
-			mat_id = _materiau_loot(fam, profondeur, rng)
+			mat_id = _materiau_loot(fam, profondeur, rng, cats_mat if slot in ["tete", "plaque"] else [])   # la catégorie demandée vaut pour la pièce maîtresse
 			if not mat_id.is_empty():
 				break
 		if mat_id.is_empty():
@@ -5746,7 +5746,7 @@ func _composer_loot(inst: Dictionary, profondeur: int, rng: RandomNumberGenerato
 
 
 ## Un matériau d'une famille (Recettes de composants) pour le loot : les minerais des étages ≤ profondeur pèsent plus.
-func _materiau_loot(fam: Dictionary, profondeur: int, rng: RandomNumberGenerator) -> String:
+func _materiau_loot(fam: Dictionary, profondeur: int, rng: RandomNumberGenerator, cats_mat: Array = []) -> String:
 	var candidats: Array[String] = []
 	if fam.has("material"):
 		candidats.append(str(fam.material))
@@ -5761,6 +5761,8 @@ func _materiau_loot(fam: Dictionary, profondeur: int, rng: RandomNumberGenerator
 			elif fam.has("tag") and str(fam.tag) in d.get("tags", []):
 				candidats.append(str(m))
 	candidats = candidats.filter(func(m: String) -> bool: return GameData.catalogues.materials.has(m))
+	if not cats_mat.is_empty():   # une boutique demande une catégorie (métal chez le forgeron) : cette famille doit la fournir
+		candidats = candidats.filter(func(m: String) -> bool: return str(GameData.catalogues.materials[m].get("category", "")) in cats_mat)
 	if candidats.is_empty():
 		return ""
 	var tiers: Dictionary = GameData.config("minerais_par_etage").get("tiers", {})

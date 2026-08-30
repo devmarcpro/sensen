@@ -5,19 +5,29 @@
     {
       "filtre": {
         "types_any": [
-          "armure",
-          "bouclier"
+          "armure"
         ],
         "tags_any": [
-          "prototype"
-        ],
-        "categories_materiau": [
-          "metal"
+          "assemble"
         ]
       },
       "nombre": [
         2,
         4
+      ],
+      "materiaux": [
+        "metal"
+      ]
+    },
+    {
+      "filtre": {
+        "types_any": [
+          "bouclier"
+        ]
+      },
+      "nombre": [
+        0,
+        1
       ]
     },
     {

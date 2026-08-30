@@ -8,15 +8,15 @@
           "arme"
         ],
         "tags_any": [
-          "prototype"
-        ],
-        "categories_materiau": [
-          "metal"
+          "assemble"
         ]
       },
       "nombre": [
         2,
         4
+      ],
+      "materiaux": [
+        "metal"
       ]
     },
     {
@@ -25,7 +25,7 @@
           "outil"
         ],
         "tags_any": [
-          "prototype"
+          "assemble"
         ]
       },
       "nombre": [

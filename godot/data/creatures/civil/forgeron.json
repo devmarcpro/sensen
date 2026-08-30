@@ -65,15 +65,15 @@
           "outil"
         ],
         "tags_any": [
-          "prototype"
-        ],
-        "categories_materiau": [
-          "metal"
+          "assemble"
         ]
       },
       "nombre": [
         3,
         5
+      ],
+      "materiaux": [
+        "metal"
       ]
     }
   ]
