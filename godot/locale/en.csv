@@ -2195,3 +2195,4 @@ ui.menu.titre,Back to the main screen
 ui.composer.taille_courte,size
 ui.composer.charges,"Charges: {n} (one per cast, per occurrence)"
 journal.epuisement,"{nom} is exhausted: {deficit} stamina short, {degats} HP"
+ui.composer.telegraphe,"⚠ {ticks} ticks: beyond {seuil}, the spell is telegraphed — visible to all, interruptible"
