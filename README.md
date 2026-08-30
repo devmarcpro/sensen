@@ -160,6 +160,17 @@ Un seul Godot à la fois (le fuzz dure ~4 min, la suite ~5). Une capture statiqu
 
 ---
 
+## Exécutable (alpha)
+
+Les versions jouables sont dans les [Releases](https://github.com/devmarcpro/sensen/releases) du dépôt (Windows x86_64, `.pck` embarqué — décompresser et lancer `Sensen.exe`). Pour reconstruire :
+
+```
+# une fois : les gabarits d'export 4.6.3 dans %APPDATA%\Godot\export_templates\4.6.3.stable\
+& $godot --headless --path godot --export-release "Windows Desktop" ../build/Sensen.exe
+```
+
+Le préréglage est `godot/export_presets.cfg` (tests exclus, données JSON et locales incluses).
+
 ## Lire le design
 
 Ouvrir [`docs/`](docs/) comme coffre dans **Obsidian**. Point d'entrée : `00 - Index/Sensen — Index général.md`.

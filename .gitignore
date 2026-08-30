@@ -8,3 +8,6 @@ desktop.ini
 # Godot
 godot/.godot/
 *.translation
+
+# Exports
+build/
