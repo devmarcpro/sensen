@@ -44,7 +44,7 @@ journal.garde,{nom} takes guard (2 ticks)
 journal.attendre,"{nom} waits (5 ticks, +20 stamina)"
 journal.mort,{nom} falls.
 journal.engagement,{nom} saw you — COMBAT: time only moves when you act
-journal.desengagement,no hostile in sight — back to real time
+journal.desengagement,no hostile in sight — the fight is over
 journal.chaine_segment,"{nom} sets a {element} segment ({position}/{capacite}, +{transition})"
 journal.chaine_resout,{nom} RESOLVES the chain: damage ×{mult}
 element.bois,Wood

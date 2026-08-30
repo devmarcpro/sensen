@@ -90,7 +90,7 @@ journal.garde_tient,la garde de {nom} absorbe le coup : {avant} → {apres}
 journal.attendre,"{nom} attend (5 ticks, +20 endurance)"
 journal.mort,{nom} tombe.
 journal.engagement,{nom} t'a vu — COMBAT : le temps n'avance plus qu'à l'action
-journal.desengagement,plus d'hostile en vue — retour au temps réel
+journal.desengagement,plus d'hostile en vue — le combat est fini
 journal.inaccessible,inaccessible — une falaise (Δ ≥ 3) ou un mur barre la route
 journal.endurance_zero,{nom} est à bout de souffle : dégâts à 60 %
 journal.action_creature,{att} : {action} sur {def} ({zone}) : {degats} dégâts

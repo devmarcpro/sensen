@@ -21,6 +21,9 @@
         },
         "poids_etage": {
           "type": "number"
+        },
+        "tiers_au_dela": {
+          "type": "integer"
         }
       },
       "required": [

@@ -5764,12 +5764,19 @@ func _materiau_loot(fam: Dictionary, profondeur: int, rng: RandomNumberGenerator
 	if candidats.is_empty():
 		return ""
 	var tiers: Dictionary = GameData.config("minerais_par_etage").get("tiers", {})
+	var la: Dictionary = GameData.config("loot_rules").get("assemblage", {})
 	var favoris := {}
+	var trop_profonds := {}   # un minerai d'un tier trop profond pour l'étage n'apparaît pas (pas de titane à l'étage 2)
 	for k in tiers.keys():
-		if int(k) <= maxi(1, profondeur):
-			for m in tiers[k]:
+		for m in tiers[k]:
+			if int(k) <= maxi(1, profondeur):
 				favoris[str(m)] = true
-	var poids_fav := float(GameData.config("loot_rules").get("assemblage", {}).get("poids_etage", 3))
+			elif int(k) > maxi(1, profondeur) + int(la.get("tiers_au_dela", 1)):
+				trop_profonds[str(m)] = true
+	var sans := candidats.filter(func(m: String) -> bool: return not trop_profonds.has(m))
+	if not sans.is_empty():
+		candidats = sans
+	var poids_fav := float(la.get("poids_etage", 3))
 	var total := 0.0
 	for m in candidats:
 		total += poids_fav if favoris.has(m) else 1.0
