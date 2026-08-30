@@ -27,6 +27,10 @@ etape: 0
 > Sauvegarder en plein combat puis recharger laissait les êtres sur une horloge de combat disparue (`horloge_de` → null, des centaines d'erreurs). Corrigé : au rechargement tout le monde revient sur l'horloge du monde et les combats sont vidés ; `horloge_de` se rabat sur le monde si le combat n'existe plus.
 > [!important] Fuzz du voyage : un combat qui suivait le joueur d'une cellule à l'autre (2026-08-28)
 > Voyager en plein combat laissait le combat vivant avec des participants déchargés par la fenêtre glissante → 959 erreurs par run. Corrigé : `voyager` quitte le combat, `_verifier_desengagements` ignore les participants déchargés.
+> [!important] Écran de chargement entre cellules (2026-08-30)
+> 0,6 s minimum, monde en pause, les huit voisines pré-générées pendant l'écran. **À juger** : la coupure rend-elle le monde plus lisible (« j'ai changé de lieu ») ou casse-t-elle l'exploration ?
+> [!important] Cellules 64 × 64 (2026-08-30)
+> Retour à 64 : fenêtre 192 × 192, donjons remis à l'échelle (6–10 salles), relief 1–3 accidents par cellule. **À juger** : un étage de 64 × 64 se lit-il encore comme un labyrinthe, ou comme une pièce ?
 > [!important] HUD graphique et molette (2026-08-30)
 > Compas-horloge, température, pentagramme de chaîne, barres, hotbar en cases ; la molette tourne la hotbar, Ctrl + molette zoome. **À juger** : les tailles (compas 34 px, barres 160 px) et l'emplacement — le coin bas-gauche pour les barres et la hotbar, le haut-droit pour le compas et le pentagramme.
 > [!important] File d'attente du designer (2026-08-30) — à prendre dans l'ordre, après le chantier des modules

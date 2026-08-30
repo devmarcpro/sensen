@@ -32,7 +32,9 @@ func _init(p_salles: Dictionary, p_connecteurs: Dictionary, p_theme: Dictionary)
 
 ## Génère un étage : {largeur, hauteur, hauteurs, murs, sol, bord, pieces: [{id, kind, rect, attaches}],
 ##  entree (escalier montant), escalier (descendant, null au dernier), boss, spawns, coffres, graphe}.
-func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dernier: bool, taille: int = 128) -> Dictionary:
+func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dernier: bool, taille: int = -1) -> Dictionary:
+	if taille < 0:
+		taille = int(GameData.config("planete").taille_cellule)   # un étage = une cellule (Grille continue)
 	rng.seed = hash([graine, id_donjon, etage])
 	var e := {"largeur": taille, "hauteur": taille, "hauteurs": PackedByteArray(), "murs": {}, "sol": {}, "bord": {},
 		"pieces": [], "entree": Vector2i.ZERO, "escalier": null, "boss": null, "spawns": [], "coffres": [], "filons": {}, "graphe": {}, "etage": etage}

@@ -1293,7 +1293,7 @@ func test_surface() -> void:
 	verifier(surf.plaques.size() == 24 and surf.points_chauds.size() >= 8 and surf.points_chauds.size() <= 14, "24 plaques, 8 à 14 points chauds")
 	var terres := 0
 	var n_ech := 40
-	var monde_t := 1024 * 128
+	var monde_t := 1024 * int(planete.taille_cellule)
 	for j2 in n_ech:
 		for i2 in n_ech:
 			if float(surf.tectonique_a(int((i2 + 0.5) / n_ech * monde_t), int((j2 + 0.5) / n_ech * monde_t)).altitude) >= 0.30:
@@ -1317,7 +1317,7 @@ func test_surface() -> void:
 			bornes = false
 	verifier(v.size() == 8 and bornes, "les couches sont normalisées 0..1")
 	verifier(surf.valeur("temperature", 0, 0) != surf.valeur("temperature", 50000, 50000) or surf.valeur("humidite", 0, 0) != surf.valeur("humidite", 50000, 50000), "le bruit varie à travers le monde")
-	var b := surf.biome_a(512 * 128, 512 * 128)
+	var b := surf.biome_a(512 * int(planete.taille_cellule), 512 * int(planete.taille_cellule))
 	verifier(GameData.catalogues.biomes.has(b), "un biome résolu au centre du monde (%s)" % b)
 	var e := surf.generer_cellule(512, 512, GameData.config("camp"))
 	var e2 := surf.generer_cellule(512, 512, GameData.config("camp"))
@@ -1327,7 +1327,7 @@ func test_surface() -> void:
 		if int(e.hauteurs[i]) == 10:
 			plats += 1
 	verifier(plats > e.hauteurs.size() * 0.8 and plats < e.hauteurs.size(), "plat à 10 avec des accidents (%d %% plat, %d accidents)" % [plats * 100 / e.hauteurs.size(), e.accidents.size()])
-	verifier(e.accidents.size() >= 2 and e.accidents.size() <= 13, "2 à 5 accidents posés (× accidents_mult du biome : %d)" % e.accidents.size())
+	verifier(e.accidents.size() >= 1 and e.accidents.size() <= 8, "1 à 3 accidents posés par cellule de 64 (× accidents_mult du biome : %d)" % e.accidents.size())
 	verifier(e.sols.size() > 100 and e.sols.values()[0] == GameData.entree("biomes", e.biome).surface_material or true, "le sol porte le matériau du biome")
 	var mat_ok := true
 	for i in e.arbres.keys():
@@ -1347,7 +1347,7 @@ func test_surface() -> void:
 		var t0 := Time.get_ticks_usec()
 		surf.generer_cellule(513 + k, 512)
 		dt = minf(dt, (Time.get_ticks_usec() - t0) / 1000.0)
-	verifier(dt < 250.0, "une cellule de 128×128 générée en %.0f ms (< 250 ms ; le budget de 32 ms attend une refonte des structures)" % dt)
+	verifier(dt < 250.0, "une cellule de %d×%d générée en %.0f ms (< 250 ms ; le budget de 32 ms attend une refonte des structures)" % [int(planete.taille_cellule), int(planete.taille_cellule), dt])
 	# Le camp est cette cellule.
 	var s := Simulation.new(31)
 	s.charger_camp()
@@ -1390,7 +1390,7 @@ func test_carte_et_voyage() -> void:
 	var voisine := camp + Vector2i(1, 0)
 	var t0: int = s.horloge_monde.ticks
 	verifier(not s.voyager(j, voisine) or not s.monde.surface.terre_a(voisine) or s.monde.cellule_exploree(voisine), "pas de voyage vers une cellule jamais explorée")
-	s.monde.explores[Vector2i(voisine.x * 4, voisine.y * 4)] = true
+	s.monde.explores[Vector2i(voisine.x * (s.monde.taille / 32), voisine.y * (s.monde.taille / 32))] = true
 	if s.monde.surface.terre_a(voisine):
 		verifier(s.voyager(j, voisine), "voyage rapide vers la cellule voisine explorée")
 		verifier(s.monde.cellule_de(j.pos) == voisine and s.horloge_monde.ticks - t0 == int(planete.voyage.ticks_par_cellule), "arrivé dans la cellule, %d ticks de voyage" % (s.horloge_monde.ticks - t0))
@@ -1451,7 +1451,7 @@ func test_corruption() -> void:
 	verifier(reapparu and int(f.generation) == 1 and s.grille.contenu_de(entree).get("tags", []).has("entree_donjon"), "réapparition ∝ corruption : nouvelle génération, entrée de retour")
 	# Décroissance loin des foyers : une cellule sans foyer actif à moins de 2 revient vers 0.
 	var loin := camp + Vector2i(5, 5)
-	m.explores[Vector2i(loin.x * 4, loin.y * 4)] = true
+	m.explores[Vector2i(loin.x * (m.taille / 32), loin.y * (m.taille / 32))] = true
 	m.delta[loin] = 3
 	f.actif = false
 	m.semaine(5000)
@@ -1570,8 +1570,8 @@ func test_territoire() -> void:
 	verifier(s.monde.claims.has(camp) and s.monde.claims[camp].role == "base", "le camp est revendiqué, rôle base")
 	var voisine := camp + Vector2i(1, 0)
 	var loin := camp + Vector2i(3, 0)
-	s.monde.explores[Vector2i(voisine.x * 4, voisine.y * 4)] = true
-	s.monde.explores[Vector2i(loin.x * 4, loin.y * 4)] = true
+	s.monde.explores[Vector2i(voisine.x * (s.monde.taille / 32), voisine.y * (s.monde.taille / 32))] = true
+	s.monde.explores[Vector2i(loin.x * (s.monde.taille / 32), loin.y * (s.monde.taille / 32))] = true
 	if s.monde.surface.terre_a(voisine) and not s.monde.surface.poi_de(voisine).get("village", false):
 		j.or = 10
 		verifier(not s.revendiquer(j, voisine), "10 or : pas assez pour revendiquer (50)")
@@ -1839,7 +1839,7 @@ func test_conquete_et_succession() -> void:
 	var camp: Vector2i = s.monde.cellule_camp
 	var cell: Vector2i = camp + Vector2i(1, 0)
 	var e: Dictionary = s.monde.cellule(cell)
-	var centre_l := Vector2i(6, 64)
+	var centre_l := Vector2i(6, s.monde.taille / 2)   # au bord gauche de la cellule, à mi-hauteur
 	var centre: Vector2i = s.monde.pos_monde(cell, centre_l)
 	for dy in range(-3, 4):
 		for dx in range(-3, 6):
@@ -2065,7 +2065,10 @@ func test_saisons_et_elevage() -> void:
 	s.contenants[s.grille.idx(viv)] = [a.uid, b.uid]
 	var meme_sexe := s.conditions_repro(a, s._nouveau_specimen("carpe", {"couleur": 0, "motif": 0, "taille": 1.0}, "m"), {"habitat": "vivarium", "libre": 2, "temp": 18.0, "saison": "ete"})
 	verifier(not meme_sexe.ok and str(meme_sexe.raisons[0].cle) == "raison.sexe", "deux mâles : l'évaluateur dit pourquoi")
+	s.horloge_monde.ticks = 35 * jour + jour / 2   # un midi d'été : la couvée dépend de la température réelle du lieu
+	s.meteo_force = "canicule"
 	s._semaine_elevage()
+	s.meteo_force = ""
 	var enfants: Array = s.contenants[s.grille.idx(viv)].filter(func(u: String) -> bool: return u != a.uid and u != b.uid)
 	verifier(enfants.size() >= 1, "une couvée dans le vivarium (%d)" % enfants.size())
 	if not enfants.is_empty():
@@ -2103,7 +2106,9 @@ func test_elevage_familles() -> void:
 	a.age_semaines = 1
 	b.age_semaines = 1
 	s.contenants[idx] = [a.uid, b.uid]
+	s.meteo_force = "canicule"   # la cellule de départ est froide à 64 × 64 : on force l'été réel
 	s._semaine_elevage()
+	s.meteo_force = ""
 	var petits: Array = s.contenants[idx].filter(func(u: String) -> bool: return u != a.uid and u != b.uid)
 	verifier(petits.size() >= 1 and s.items[petits[0]].genome.ecailles.size() == 2, "serpents : une couvée, écailles à deux allèles (%s)" % str(s.items[petits[0]].genome.ecailles if not petits.is_empty() else "-"))
 	# Ver à soie : le coût par croisement consomme 4 choux du stock ; sans stock, refus motivé.
@@ -3031,6 +3036,12 @@ func test_composer_capacites() -> void:
 	for k in j.capacites.size():
 		if j.capacites[k].modules == ["soi", "renaissance"]:
 			idx = k
+	for x in s.vivants():   # hors combat : un étage de 64 met les bêtes plus près, et une capacité engagée en combat
+		if x.id != j.id:   # se résout sur l'horloge du combat, pas sur celle du monde que ce test fait avancer
+			x.vivant = false
+			s.grille.liberer(x.pos)
+	s.combats.clear()
+	j.horloge = "monde"
 	j.mana = 100
 	j.or = 0
 	s.attente[j.id] = true
@@ -3040,7 +3051,7 @@ func test_composer_capacites() -> void:
 		s.horloge_monde.avancer(5)
 		if j.action_en_cours.is_empty():
 			break
-	verifier(v.vivant and int(j.mana) < 100 and int(j.or) == 0, "le compagnon revient, payé en mana (%d), pas en or" % int(j.mana))
+	verifier(v.vivant and int(j.mana) < 100 and int(j.or) == 0, "le compagnon revient, payé en mana (%d), pas en or [action en cours : %s]" % [int(j.mana), str(j.action_en_cours.get("name_key", "-"))])
 	verifier(n0 >= 0, "")
 
 
@@ -3056,8 +3067,9 @@ func test_bombes() -> void:
 	# Une cible : un mur destructible à 3 tuiles (on le pose), un loup à 2 tuiles.
 	var cible: Vector2i = j.pos + Vector2i(3, 0)
 	var mur: Vector2i = cible + Vector2i(1, 0)
-	for q in [cible, mur, cible + Vector2i(0, 1)]:
+	for q in [j.pos + Vector2i(1, 0), j.pos + Vector2i(2, 0), cible, mur, cible + Vector2i(0, 1)]:   # la ligne de vue du lancer aussi
 		s.grille.contenu[s.grille.idx(q)] = 0
+		s.grille.hauteurs[s.grille.idx(q)] = s.grille.h(j.pos)
 	s.grille.poser_contenu(mur, "mur_construit")
 	s.grille.materiaux[s.grille.idx(mur)] = "chene"
 	var loup := s.ajouter("loup", cible + Vector2i(0, 1), "ia")
@@ -3070,7 +3082,7 @@ func test_bombes() -> void:
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la bombe a explosé")
-	verifier(s.grille.contenu_de(mur).is_empty(), "le mur de chêne (dureté < 40 × 1/2) est soufflé")
+	verifier(not ("mur" in s.grille.contenu_de(mur).get("tags", [])), "le mur de chêne (dureté < 40 × 1/2) est soufflé (il reste : %s)" % str(s.grille.contenu_de(mur).get("name_key", "rien")))   # le matériau brut peut tomber sur la tuile
 	verifier(int(loup.sante) < sante0 or not loup.vivant, "le loup dans le rayon est blessé (%d → %d)" % [sante0, int(loup.sante)])
 	# La Mèche : deux bombes posées à une tuile l'une de l'autre ; la première amorce la seconde.
 	j.classe = "la_meche"
@@ -3430,8 +3442,9 @@ func test_routes_entre_royaumes() -> void:
 	var trouves := 0
 	var hostiles_relies := 0
 	var capitales_reliees := 0
-	for sx in 3:
-		for sy in 3:
+	var paires_voisines := 0   # une route n'existe qu'entre royaumes dont les territoires se touchent
+	for sx in 6:
+		for sy in 6:
 			var roys: Dictionary = surf.royaumes_secteur(Vector2i(sx, sy))
 			for id in roys.keys():
 				var r: Dictionary = roys[id]
@@ -3440,13 +3453,20 @@ func test_routes_entre_royaumes() -> void:
 					if id2 == id:
 						continue
 					var r2: Dictionary = roys[id2]
+					var touche := false
+					for c in r2.get("territory_cells", []):
+						for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+							if (Vector2i(c) + d) in r.get("territory_cells", []):
+								touche = true
+					if touche and str(r.diplomacy.get(id2, "")) != "hostile":
+						paires_voisines += 1
 					if str(r.diplomacy.get(id2, "")) == "hostile" and (r2.capital_poi in surf.route_de(cap)):
 						hostiles_relies += 1
 				if not surf.route_de(cap).is_empty():
 					capitales_reliees += 1
 				trouves += 1
 	verifier(trouves > 0, "des royaumes sont générés (%d)" % trouves)
-	verifier(capitales_reliees > 0, "des capitales voisines sont reliées (%d capitales sur %d en portent)" % [capitales_reliees, trouves])
+	verifier(capitales_reliees > 0 or paires_voisines == 0, "des capitales voisines non hostiles sont reliées (%d capitales sur %d en portent, %d paires voisines)" % [capitales_reliees, trouves, paires_voisines])
 	verifier(hostiles_relies == 0, "aucune route directe entre deux capitales hostiles")
 
 
@@ -5813,7 +5833,7 @@ func test_sauvegarde() -> void:
 	verifier(s2.grille.contenu_de(mur).get("tags", []).has("construit") and s2.grille.materiau_de(mur) == "chene", "le mur posé est là (seed + modifications)")
 	verifier(s2.horloge_monde.ticks == s.horloge_monde.ticks and s2.graine == 37, "le temps et la graine")
 	verifier(s2.monde.explores.size() == s.monde.explores.size(), "les chunks explorés (%d)" % s2.monde.explores.size())
-	verifier(s2.grille.decouvert.size() > 10000, "la cellule du camp reste découverte")
+	verifier(s2.grille.decouvert.size() > s2.monde.taille * s2.monde.taille / 2, "la cellule du camp reste découverte (%d tuiles)" % s2.grille.decouvert.size())
 	# Un tour complet sur l'état du camp : ce qu'on a construit, élevé, revendiqué, stocké
 	s.territoire["tresor"] = 321
 	s.territoire["stocks"] = {"chene": 7}
@@ -5848,7 +5868,8 @@ func test_camp() -> void:
 	var s := Simulation.new(23)
 	s.charger_camp()
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(s.lieu == "camp" and s.grille.largeur == 384 and s.grille.origine == Vector2i(511 * 128, 511 * 128), "le camp : la fenêtre de 3×3 cellules du monde, en coordonnées monde")
+	var tc: int = int(GameData.config("planete").taille_cellule)
+	verifier(s.lieu == "camp" and s.grille.largeur == 3 * tc and s.grille.origine == Vector2i(511 * tc, 511 * tc), "le camp : la fenêtre de 3×3 cellules du monde, en coordonnées monde")
 	var arbres := 0
 	var entree := Vector2i(-1, -1)
 	for i in s.grille.largeur * s.grille.hauteur_grille:
@@ -5859,8 +5880,8 @@ func test_camp() -> void:
 		if "entree_donjon" in tags:
 			entree = t
 	verifier(arbres >= 5 and entree != Vector2i(-1, -1), "des arbres (%d) et l'entrée du donjon" % arbres)
-	var base := Vector2i(512 * 128, 512 * 128)
-	var coffre := base + Vector2i(64 - 2, 64)
+	var base := Vector2i(512 * tc, 512 * tc)
+	var coffre := base + Vector2i(tc / 2 - 2, tc / 2)   # le centre de la cellule du camp
 	verifier(s.contenants.get(s.grille.idx(coffre), []).size() >= 4, "le coffre de départ : hache, pioche, faucille, lit de paille, graines, étal")
 	# Une plante se récolte à la faucille par un clic adjacent (Récolte).
 	var plante := base + Vector2i(64 + 3, 64 + 3)
@@ -5951,20 +5972,20 @@ func test_camp() -> void:
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "poser_mur", "vers": mur2}), "un mur posé au camp avant de partir")
 	var origine0: Vector2i = s.grille.origine
-	var loin: Vector2i = base + Vector2i(128 + 20, 64)   # dans la cellule (513, 512)
+	var loin: Vector2i = base + Vector2i(tc + 20, tc / 2)   # dans la cellule (513, 512)
 	s.grille.liberer(j.pos)
 	j.pos = loin
 	s._fin_de_pas("monde")
-	verifier(s.grille.origine == origine0 + Vector2i(128, 0) and s.grille.dans(loin) and j.pos == loin, "la fenêtre s'est recentrée d'une cellule, le joueur n'a pas bougé")
+	verifier(s.grille.origine == origine0 + Vector2i(tc, 0) and s.grille.dans(loin) and j.pos == loin, "la fenêtre s'est recentrée d'une cellule, le joueur n'a pas bougé")
 	verifier(s.grille.contenu_de(mur2).get("tags", []).has("construit"), "le mur est encore dans la fenêtre (cellule de départ toujours chargée)")
-	var tres_loin: Vector2i = base + Vector2i(128 * 2 + 20, 64)   # cellule (514, 512) : le camp sort de la fenêtre
+	var tres_loin: Vector2i = base + Vector2i(tc * 2 + 20, tc / 2)   # cellule (514, 512) : le camp sort de la fenêtre
 	s.grille.liberer(j.pos)
 	j.pos = tres_loin
 	s._fin_de_pas("monde")
-	verifier(s.grille.origine == origine0 + Vector2i(256, 0) and not s.grille.dans(mur2), "deux cellules plus loin : le camp est hors fenêtre")
+	verifier(s.grille.origine == origine0 + Vector2i(2 * tc, 0) and not s.grille.dans(mur2), "deux cellules plus loin : le camp est hors fenêtre")
 	verifier(s.monde.modifications.has(Vector2i(512, 512)) and not s.monde.modifications[Vector2i(512, 512)].is_empty(), "ses modifications sont capturées par cellule")
 	s.grille.liberer(j.pos)
-	j.pos = base + Vector2i(64, 70)
+	j.pos = base + Vector2i(tc / 2, tc / 2 + 6)
 	s._fin_de_pas("monde")
 	verifier(s.grille.origine == origine0 and s.grille.contenu_de(mur2).get("tags", []).has("construit") and s.grille.meubles.get(s.grille.idx(devant), "") == "lit_de_paille" and s.contenants.get(s.grille.idx(ou), []) == [pioche], "de retour au camp : mur, lit et coffre sont là (seed + modifications)")
 	verifier(s.grille.decouvert.has(s.grille.idx(base + Vector2i(3, 3))), "la cellule du camp reste entièrement découverte")
@@ -6074,7 +6095,8 @@ func test_donjon() -> void:
 	var dt := (Time.get_ticks_usec() - t0) / 1000.0
 	var e2 := gen.generer_etage(42, 1, 1, 18, false)
 	verifier(e.pieces.size() == e2.pieces.size() and e.spawns.size() == e2.spawns.size() and e.sol.size() == e2.sol.size(), "déterministe à seed égale")
-	verifier(e.largeur == 128 and e.hauteur == 128, "un étage = une cellule de 128×128")
+	var tc2: int = int(GameData.config("planete").taille_cellule)
+	verifier(e.largeur == tc2 and e.hauteur == tc2, "un étage = une cellule de %d×%d" % [tc2, tc2])
 	verifier(gen._nb_salles(e) >= 12, "au moins 12 salles procédurales posées (%d)" % gen._nb_salles(e))
 	var tailles := {}
 	for pc in e.pieces:
@@ -6089,7 +6111,7 @@ func test_donjon() -> void:
 			if e.pieces[i].rect.intersects(e.pieces[k].rect):
 				ok = false
 	verifier(ok, "aucun chevauchement de salles")
-	verifier(e.sol.size() > 128 * 128 / 10 and e.sol.size() < 128 * 128 * 3 / 4, "salles et couloirs, avec du plein à creuser (%d tuiles de sol)" % e.sol.size())
+	verifier(e.sol.size() > tc2 * tc2 / 10 and e.sol.size() < tc2 * tc2 * 3 / 4, "salles et couloirs, avec du plein à creuser (%d tuiles de sol)" % e.sol.size())
 	# Connexité : toutes les salles et les deux escaliers sont atteignables depuis l'arrivée
 	var g := Grille.depuis_etage(e, GameData.config("tile_contents"), GameData.config("combat_rules").deplacement, 1)
 	var atteint := g.atteignables(e.entree, 100000)

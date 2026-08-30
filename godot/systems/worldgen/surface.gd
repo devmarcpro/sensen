@@ -691,10 +691,14 @@ func _poser_village(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator) -
 	var bats: Dictionary = GameData.catalogues.village_buildings
 	var b: Dictionary = biomes.get(e.biome, {})
 	var palette: Dictionary = b.get("village_palette", {"mur": "chene", "toit": "chaume_tresse", "sol": "calcaire"})
-	var centre := Vector2i(taille / 2 + rng.randi_range(-25, 25), taille / 2 + rng.randi_range(-25, 25))
+	# Le centre du village : au milieu de la cellule, à ± un cinquième — en unités de la cellule, pas en tuiles
+	# fixes (les ± 25 tuiles d'avant sortaient une capitale d'une cellule de 64 : bâtiments perdus).
+	var jeu: int = maxi(4, taille / 5)
+	var centre := Vector2i(taille / 2 + rng.randi_range(-jeu, jeu), taille / 2 + rng.randi_range(-jeu, jeu))
 	var rayon: int = int(vc.get("rayon_place", 6))
-	if e.has("a_donjon") and bool(e.a_donjon) and Vector2i(e.entree_donjon).distance_to(centre) < 20:
-		centre = Vector2i(e.entree_donjon) + Vector2i(30, 0)
+	if e.has("a_donjon") and bool(e.a_donjon) and Vector2i(e.entree_donjon).distance_to(centre) < taille / 6:
+		centre = Vector2i(e.entree_donjon) + Vector2i(taille / 4, 0)
+	centre = Vector2i(clampi(centre.x, taille / 4, taille * 3 / 4), clampi(centre.y, taille / 4, taille * 3 / 4))
 	# La culture et le nom du village : la race dominante (humain) tire parmi ses cultures.
 	var cultures: Dictionary = GameData.catalogues.name_cultures
 	var culture_id := Noms.culture_pour("humain", cultures, rng)

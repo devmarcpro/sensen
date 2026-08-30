@@ -32,6 +32,9 @@ La couche stratégique : une vue abstraite de la même grille, servant de voyage
 > [!success] Codé le 2026-08-28 — les routes sur la carte et le voyage
 > Traits ocre entre cellules reliées ; **voyage rapide ×0,6** quand départ et arrivée sont sur une route (sans véhicule — le facteur des véhicules attend).
 
+> [!success] Ajusté le 2026-08-30 — 192 ticks par cellule
+> Avec le retour aux cellules de 64 × 64 ([[Claims et persistance]]), `voyage.ticks_par_cellule` passe de 384 à **192** : toujours 3 ticks par tuile, la règle n'a pas changé, la cellule si.
+
 ## Liens
 - **Dépend de** : [[Décision — Monde fini, continents et océan]], [[Grille continue]], [[Unification macro-micro]], [[Génération par couches de bruit]]
 - **Alimente** : [[Début de partie]], [[Boucle de jeu]], [[Donjons — structure et intégration]], [[Minimap et brouillard de guerre]]

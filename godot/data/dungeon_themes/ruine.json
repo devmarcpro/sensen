@@ -22,21 +22,21 @@
     3
   ],
   "salles_par_etage": [
-    14,
-    24
+    6,
+    10
   ],
   "tailles_salles": {
     "petite": [
       3,
-      5
+      4
     ],
     "moyenne": [
-      6,
-      9
+      5,
+      7
     ],
     "grande": [
-      10,
-      16
+      8,
+      12
     ]
   },
   "poids_salles": {
@@ -52,16 +52,16 @@
     "virage": 0.35,
     "voisins_relies": 3,
     "boucles": [
-      6,
-      12
+      3,
+      6
     ],
     "impasses": [
-      10,
-      20
+      4,
+      8
     ],
     "impasse_longueur": [
-      6,
-      24
+      4,
+      12
     ]
   },
   "materiau_mur": "pierre"

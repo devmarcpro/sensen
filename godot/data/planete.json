@@ -1,6 +1,6 @@
 {
   "_doc": "La planète (docs: Décision — Monde fini, continents et océan ; Génération par couches de bruit). taille_cellule : tuiles ; monde : cellules de côté (1024) ; cellule_depart : la cellule du camp tant que la carte n'existe pas ; relief : les accidents posés par cellule (décision du 2026-08-27, plat + exceptions) ; filons : densité de filons de surface ; tiers_corruption : seuils (en %) des tiers de minerai (Décision — Minerais et strates). tectonique : Décision — Monde fini (plaques Voronoï, seuil calibré) ; mer : altitude sous laquelle une tuile est de l'eau, et sa hauteur.",
-  "taille_cellule": 128,
+  "taille_cellule": 64,
   "monde_cellules": 1024,
   "cellule_depart": [
     512,
@@ -9,8 +9,8 @@
   "graine": 68333,
   "relief": {
     "par_cellule": [
-      2,
-      5
+      1,
+      3
     ],
     "types": {
       "talus": {
@@ -113,7 +113,7 @@
     ]
   },
   "voyage": {
-    "ticks_par_cellule": 384,
+    "ticks_par_cellule": 192,
     "route_mult": 0.6,
     "_doc": "Voyage rapide (Carte du monde) : ticks par cellule ; route_mult quand départ et arrivée sont sur une route."
   },
@@ -291,6 +291,8 @@
     "astar_sous": 20
   },
   "monde": {
-    "pregen_par_appel": 1
+    "pregen_par_appel": 1,
+    "chargement_s": 0.6,
+    "_doc": "pregen_par_appel : cellules voisines generees par appel (fil principal) ; chargement_s : duree minimale de l'ecran de chargement entre cellules (Grille continue)."
   }
 }
