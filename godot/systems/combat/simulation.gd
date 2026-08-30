@@ -8497,8 +8497,14 @@ func _payer(e: Dictionary, plan: Dictionary) -> void:
 					e.endurance = maxi(0, int(e.endurance) - degats)
 				else:
 					_appliquer_degats(e, degats, "", {"surchauffe": true})
-		"endurance":
+		"endurance":   # Épuisement (Mana) : au-delà du pool, le déficit se paie en PV — rien n'est gratuit
+			var deficit_e: int = maxi(0, int(plan.ressource) - int(e.endurance))
 			e.endurance = maxi(0, int(e.endurance) - int(plan.ressource))
+			if deficit_e > 0:
+				var degats_e := roundi(float(deficit_e) * float(regles.r.endurance.get("epuisement_mult", 1)))
+				if degats_e > 0:
+					EventBus.emettre(&"journal", [&"journal.epuisement", {"nom": e.name_key, "deficit": deficit_e, "degats": degats_e}])
+					_appliquer_degats(e, degats_e, "", {"surchauffe": true})
 
 
 ## Exécute une capacité : forme → cibles (friendly fire des zones), puis les effets du noyau.

@@ -2204,3 +2204,4 @@ ui.charger.d_slot,"Charger la sauvegarde « {nom} »."
 ui.menu.titre,Retour à l'écran principal
 ui.composer.taille_courte,taille
 ui.composer.charges,"Charges : {n} (une par lancer, par occurrence)"
+journal.epuisement,"{nom} s’épuise : {deficit} d’endurance manquants, {degats} PV"

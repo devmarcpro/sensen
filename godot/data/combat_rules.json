@@ -28,14 +28,15 @@
     "telegraphe_seuil_ticks": 10
   },
   "endurance": {
-    "_doc": "Endurance (A.6.1)",
+    "_doc": "Endurance (A.6.1) ; epuisement_mult : deficit d'endurance d'un sort inflige en PV x mult (le pendant de la surchauffe du mana)",
     "max": 100,
     "attaque": 8,
     "lourde": 18,
     "garde_impact_base": 12,
     "garde_impact_div": 4,
     "regen_par_tick": 2,
-    "a_zero_degats_mult": 0.6
+    "a_zero_degats_mult": 0.6,
+    "epuisement_mult": 1
   },
   "garde": {
     "_doc": "Garde en posture · Décision — Boucliers",

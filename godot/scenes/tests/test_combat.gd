@@ -2857,6 +2857,12 @@ func test_assemblage_sans_limite() -> void:
 	s.bombes.clear()
 	var p_bb: Dictionary = plan_de.call(["carre", "bombe", "baume"])
 	verifier(str(p_bb.monnaie) == "endurance" and int(p_bb.ressource) == int(p_bombe.ressource) + int(GameData.entree("modules", "baume").cout_mana), "un noyau de mana dans un sort d'endurance paie en endurance, 1 pour 1 (%d)" % int(p_bb.ressource))
+	j.endurance = 10   # Épuisement (Mana) : un sort d'endurance au-delà du pool se paie en PV (sans tuer le mannequin)
+	j.sante = 40
+	s._payer(j, {"monnaie": "endurance", "ressource": 25, "charge_suivante": {}})
+	verifier(int(j.endurance) == 0 and int(j.sante) == 40 - 15 * int(s.regles.r.endurance.epuisement_mult), "l'épuisement : 15 d'endurance manquants → PV (%d)" % int(j.sante))
+	j.sante = 40
+	j.endurance = 80
 	var p_cc: Dictionary = plan_de.call(["carre", "carre", "etincelle"])
 	var n_cc: int = s.tuiles_du_plan(j, p_cc, j.pos + Vector2i(2, 0)).size()
 	verifier(p_cc.formes_sup.is_empty() and int(p_cc.taille) == 2 * int(p_bombe.taille) and n_cc > n_tuiles, "Carré + Carré : une forme plus grande (%d tuiles > %d), pas une union" % [n_cc, n_tuiles])

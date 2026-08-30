@@ -41,6 +41,9 @@ Monter un module en niveau le rend plus puissant ET moins coûteux (puissance : 
 > [!success] Décidé le 2026-08-26 — dans le prototype
 > La régénération est tirée par le RNG seedé de la simulation : à chaque tranche de 10 ticks franchie par une entité, 1 chance sur 8 de rendre `1 + N_meditation × 0.2` (N = 0 pour l'instant). La surchauffe est en place : le déficit est infligé en PV × 2 (`combat_rules.json`, bloc `mana`). Le `skill_factor` des modules vaut 1 jusqu'à la progression (étape 4).
 
+> [!success] Décidé et codé le 2026-08-30 — l'**épuisement** : le pendant de la surchauffe pour l'endurance
+> Le « no limit » de l'assemblage rendait les sorts d'**endurance** presque gratuits au-delà du pool : `endurance = max(0, endurance − coût)` — une salle entière de Bombes (noyau d'endurance) pour « toute mon endurance », quel que soit le coût réel. Désormais l'endurance a le même garde-fou que le mana : **le déficit est infligé en PV × `endurance.epuisement_mult`** (1, `combat_rules.json` — la moitié de la surchauffe : le corps encaisse mieux l'effort que le feu du mana), journal `journal.epuisement`. Lancer reste permis ; se tuer d'épuisement aussi — « la seule limite, c'est le résultat et les stats ». Chair de mana ne s'applique pas (elle convertit déjà le mana en endurance).
+
 ## Liens
 - **Dépend de** : [[Stats de personnage]], [[Progression par l'usage]], [[Boucle de tick]]
 - **Alimente** : [[Structure compétences-modules-slots]], [[Pipeline de résolution du combat]], [[Armes fantomatiques]], [[Modules]]
