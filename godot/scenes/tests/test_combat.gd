@@ -2851,6 +2851,9 @@ func test_assemblage_sans_limite() -> void:
 	var p_mix: Dictionary = plan_de.call(["point", "etincelle", "gel"])
 	verifier(p_mix.charges_sup.size() == 1 and int(p_mix.fois) == 1, "deux noyaux différents restent deux charges")
 	verifier(str(GameData.entree("modules", "etincelle").get("power_base", "")) == "1d4", "le catalogue n'a pas été modifié par la répétition")
+	var p_cc: Dictionary = plan_de.call(["carre", "carre", "etincelle"])
+	var n_cc: int = s.tuiles_du_plan(j, p_cc, j.pos + Vector2i(2, 0)).size()
+	verifier(p_cc.formes_sup.is_empty() and int(p_cc.taille) == 2 * int(p_bombe.taille) and n_cc > n_tuiles, "Carré + Carré : une forme plus grande (%d tuiles > %d), pas une union" % [n_cc, n_tuiles])
 	var p_etin: Dictionary = plan_de.call(["carre", "etincelle"])
 	verifier(s._facteur_surface(j, p_etin, j.pos + Vector2i(2, 0)) == 1, "les dégâts ne paient pas par tuile : la forme suffit")
 	# 3. le résultat est la seule morale : le soin touche l'ennemi, les dégâts touchent le lanceur

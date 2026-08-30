@@ -156,8 +156,24 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				plan.parametres = m.get("effet", {}).duplicate()
 			"forme":
 				if not plan.forme.is_empty():
+					# La même forme répétée est une forme plus grande (même règle que le noyau répété) : taille et
+					# portée additionnées, le surcoût de ticks payé une fois de plus.
+					if str(plan.forme.id) == id:
+						plan.taille += int(m.taille_base)
+						plan.portee.y += int(m.portee_base[1])
+						plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
+						continue
+					var forme_r: Dictionary = {}
+					for f_r: Dictionary in plan.formes_sup:
+						if str(f_r.get("id", "")) == id:
+							forme_r = f_r
+					if not forme_r.is_empty():
+						forme_r.taille += int(m.taille_base)
+						plan.portee.y = maxi(int(plan.portee.y), int(m.portee_base[1]) * 2)
+						plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
+						continue
 					# Deux formes : les tuiles s'additionnent (union), la portée retenue est la plus longue.
-					plan.formes_sup.append({"geometrie": str(m.geometrie), "taille": int(m.taille_base)})
+					plan.formes_sup.append({"id": id, "geometrie": str(m.geometrie), "taille": int(m.taille_base)})
 					plan.portee.y = maxi(int(plan.portee.y), int(m.portee_base[1]))
 					plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 					continue
