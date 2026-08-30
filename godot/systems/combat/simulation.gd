@@ -2113,7 +2113,10 @@ func _rituel_race(e: Dictionary, vers: Vector2i, type_meuble: String, tick: int)
 	if not grille.dans(vers) or Grille.distance(e.pos, vers) > 1:
 		return false
 	var gi := grille.idx(vers)
-	if str(GameData.entree("meubles", str(grille.meubles.get(gi, ""))).get("type_meuble", "")) != type_meuble:
+	var id_meuble := str(grille.meubles.get(gi, ""))
+	if id_meuble.is_empty():   # pas de meuble sur la tuile : rien à interroger (le fuzz pousse cette intention partout)
+		return false
+	if str(GameData.entree("meubles", id_meuble).get("type_meuble", "")) != type_meuble:
 		return false
 	if str(e.get("race", "")) in ["vampire", "spectre", "lycanthrope"]:
 		EventBus.emettre(&"journal", [&"journal.deja_maudit", {}])
