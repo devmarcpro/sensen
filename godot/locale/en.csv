@@ -2163,3 +2163,4 @@ barre.sante,Health
 barre.endurance,Stamina
 barre.mana,Mana
 barre.faim,Hunger
+ui.chargement,"Loading — cell ({x}, {y}) · {biome}"

@@ -2173,3 +2173,4 @@ barre.sante,Vie
 barre.endurance,Endurance
 barre.mana,Mana
 barre.faim,Faim
+ui.chargement,"Chargement — cellule ({x}, {y}) · {biome}"

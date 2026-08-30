@@ -10,7 +10,7 @@ const TH := 20            # hauteur du losange
 const HSTEP := 8          # pixels par niveau de hauteur
 const DELAI_PAS := 0.12   # secondes réelles entre deux pas d'une horloge de combat (lisibilité)
 const BUDGET_ATTEIGNABLE := 12   # ticks : rayon des coûts affichés
-const RAYON_VUE := 20            # tuiles dessinées autour du joueur (une cellule fait 128×128)
+const RAYON_VUE := 20            # tuiles dessinées autour du joueur (une cellule fait taille_cellule², 64 depuis le 2026-08-30)
 var centre_terrain := Vector2i(-99, -99)   # centre de la dernière passe statique du terrain
 var vue_version := -1                      # version du champ de vue dessiné (brouillard de guerre)
 var centre_brouillard := Vector2i(-99, -99) # centre de la dernière passe du brouillard
@@ -50,6 +50,10 @@ var zoom := 1.0
 var terrain: Terrain              # couche statique : les tuiles, dessinées une fois (perf É0)
 var hud: Hud                      # couche au-dessus des êtres : barres, garde, télégraphes, jauges
 var hud_ecran: HudEcran           # le HUD fixe à l'écran : compas-horloge, pentagramme, barres, hotbar (Écrans d'interface)
+var chargement_restant := 0.0     # écran de chargement entre cellules (Grille continue) : secondes restantes, 0 = fermé
+var chargement_cellule := Vector2i.ZERO
+var chargement: ColorRect         # le voile noir de l'écran de chargement, sur le CanvasLayer
+var chargement_texte: Label
 var brouillard: Brouillard        # couche du brouillard de guerre, au-dessus du terrain et des êtres
 var noeuds_vegetaux: Dictionary = {}   # index de tuile → Vegetal (billboards des arbres et plantes de la fenêtre)
 var noeuds: Dictionary = {}       # id d'être → nœud creature.tscn (le paperdoll)
@@ -101,7 +105,9 @@ func _ready() -> void:
 	arenes.assign(GameData.catalogues.get("prototype_arenas", {}).keys())
 	arenes.sort()
 	EventBus.journal.connect(_sur_journal)
-	EventBus.fenetre_recentree.connect(func(_o: Vector2i) -> void: _apres_changement_de_grille())
+	EventBus.fenetre_recentree.connect(func(_o: Vector2i) -> void:
+		_apres_changement_de_grille()
+		_ouvrir_chargement())
 	EventBus.action_engaged.connect(func(id: String, a: Dictionary) -> void: telegraphes[id] = a)
 	EventBus.action_resolved.connect(func(id: String, _a: Dictionary) -> void: telegraphes.erase(id))
 	EventBus.combat_ended.connect(_sur_fin_de_combat)
@@ -129,6 +135,17 @@ func _ready() -> void:
 	hud_ecran = HudEcran.new()
 	hud_ecran.main = self
 	$CanvasLayer.add_child(hud_ecran)
+	chargement = ColorRect.new()   # l'écran de chargement : par-dessus tout, fermé par défaut
+	chargement.color = Color(0.02, 0.02, 0.03, 1.0)
+	chargement.set_anchors_preset(Control.PRESET_FULL_RECT)
+	chargement.mouse_filter = Control.MOUSE_FILTER_STOP
+	chargement.visible = false
+	$CanvasLayer.add_child(chargement)
+	chargement_texte = Label.new()
+	chargement_texte.set_anchors_preset(Control.PRESET_CENTER)
+	chargement_texte.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	chargement_texte.add_theme_font_size_override("font_size", 18)
+	chargement.add_child(chargement_texte)
 	ambiance = CanvasModulate.new()
 	add_child(ambiance)
 	voiles = Node2D.new()
@@ -284,6 +301,29 @@ func _charger(fiche: Dictionary = {}) -> void:
 
 
 ## La simulation a changé de grille (descente) : la vue statique et les nœuds repartent de zéro.
+## L'écran de chargement (Grille continue) : ouvert quand la fenêtre se recentre au camp, jamais en donjon.
+func _ouvrir_chargement() -> void:
+	if sim == null or sim.lieu != "camp" or sim.monde == null or profil_sans_ui:
+		return
+	var j := joueur()
+	if j.is_empty():
+		return
+	chargement_restant = float(GameData.config("planete").get("monde", {}).get("chargement_s", 0.6))
+	chargement_cellule = sim.monde.cellule_de(j.pos)
+	var biome: Dictionary = GameData.catalogues.biomes.get(str(sim.monde.surface.biome_a(j.pos.x, j.pos.y)), {})
+	chargement_texte.text = tr("ui.chargement").format({"x": chargement_cellule.x, "y": chargement_cellule.y, "biome": tr(str(biome.get("name_key", "")))})
+	chargement.visible = true
+	sim.horloge_monde.active = false   # le monde n'avance pas pendant le chargement (c'est un temps mort, pas une ellipse)
+	chemin_en_cours.clear()
+
+
+func _fermer_chargement() -> void:
+	chargement_restant = 0.0
+	chargement.visible = false
+	if sim != null and sim.horloge_monde != null:
+		sim.horloge_monde.active = true
+
+
 func _apres_changement_de_grille() -> void:
 	terrain.queue_redraw()
 	for v in noeuds_vegetaux.values():
@@ -444,6 +484,13 @@ func _process(delta: float) -> void:
 		return
 	var j := joueur()
 	if j.is_empty():
+		return
+	if chargement_restant > 0.0:   # écran de chargement : le monde est en pause, le temps sert à pré-générer
+		chargement_restant -= delta
+		if sim.monde != null:
+			sim.monde.pregenerer_voisins()
+		if chargement_restant <= 0.0:
+			_fermer_chargement()
 		return
 	_recentrer()
 	# ZQSD (8 directions d'écran) : Z = haut, S = bas, Q = gauche, D = droite ; deux touches = diagonale.
