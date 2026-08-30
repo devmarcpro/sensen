@@ -2255,3 +2255,7 @@ creature.echo_de_chair.name,Écho de chair
 creature.feu_follet.name,Feu follet
 creature_action.flammeche.name,Flammèche
 module.feu_follet.name,Feu follet
+tile_content.porte_fermee.name,Porte fermée
+option.porte,Ouvrir / fermer la porte
+journal.porte_ouverte,"{nom} ouvre une porte"
+journal.porte_fermee,"{nom} ferme une porte"

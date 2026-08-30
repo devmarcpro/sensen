@@ -2245,3 +2245,7 @@ creature.echo_de_chair.name,Flesh Echo
 creature.feu_follet.name,Will-o’-wisp
 creature_action.flammeche.name,Flamelet
 module.feu_follet.name,Will-o’-wisp
+tile_content.porte_fermee.name,Closed door
+option.porte,Open / close the door
+journal.porte_ouverte,"{nom} opens a door"
+journal.porte_fermee,"{nom} closes a door"

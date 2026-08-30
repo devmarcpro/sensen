@@ -2958,6 +2958,14 @@ func test_assemblage_sans_limite() -> void:
 	for x in [duel_a, duel_b]:
 		x.vivant = false
 		s.grille.liberer(x.pos)
+	# Portes (2026-08-30) : fermée, elle bloque passage et vue ; un pas vers elle l'ouvre ; E la referme
+	var porte_p: Vector2i = j.pos + Vector2i(1, 0)
+	s.grille.poser_contenu(porte_p, "porte_fermee")
+	verifier(s.grille.bloque_passage(porte_p) and not s.grille.ligne_de_vue(j.pos, j.pos + Vector2i(2, 0)), "une porte fermée bloque le passage et la vue")
+	var t_p: int = s.tick_de(j)
+	verifier(s._deplacer(j, porte_p, t_p) and j.pos != porte_p and not s.grille.bloque_passage(porte_p), "un pas vers la porte l'ouvre sans la franchir")
+	verifier(s._basculer_porte(j, porte_p, t_p) and s.grille.bloque_passage(porte_p), "on la referme")
+	s.grille.contenu[s.grille.idx(porte_p)] = 0
 	var p_cc: Dictionary = plan_de.call(["carre", "carre", "etincelle"])
 	var n_cc: int = s.tuiles_du_plan(j, p_cc, j.pos + Vector2i(2, 0)).size()
 	verifier(p_cc.formes_sup.is_empty() and int(p_cc.taille) == 2 * int(p_bombe.taille) and n_cc > n_tuiles, "Carré + Carré : une forme plus grande (%d tuiles > %d), pas une union" % [n_cc, n_tuiles])
@@ -6257,6 +6265,7 @@ func test_donjon() -> void:
 		if e.sol.has(i_h) and int(e.hauteurs[i_h]) != 10:
 			reliefs += 1
 	verifier(reliefs > 0, "les salles ont des reliefs (estrades, fosses) : %d tuiles" % reliefs)
+	verifier(e.get("portes", {}).size() > 0, "certaines salles ont leurs seuils fermés : %d portes" % e.get("portes", {}).size())
 	verifier(e.sol.size() > tc2 * tc2 / 10 and e.sol.size() < tc2 * tc2 * 3 / 4, "salles et couloirs, avec du plein à creuser (%d tuiles de sol)" % e.sol.size())
 	# Connexité : toutes les salles et les deux escaliers sont atteignables depuis l'arrivée
 	var g := Grille.depuis_etage(e, GameData.config("tile_contents"), GameData.config("combat_rules").deplacement, 1)

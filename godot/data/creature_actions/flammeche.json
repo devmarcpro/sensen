@@ -14,7 +14,7 @@
   "cout_ticks": 6,
   "cout_endurance": 3,
   "degats_des": "1d4",
-  "type_degats": null,
+  "type_degats": "magique",
   "conditions": [],
   "effets": [
     {

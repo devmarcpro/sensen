@@ -56,6 +56,9 @@ la reproductibilité en debug.
 > `bruts = jet(dés) × (dureté_base/20) × qualité × skill_factor(N_arme) × skill_factor(N_type_dégâts) × Σ_e [proportion_e × (1 + niveau_élément_e / 100)] + For/4 (mêlée) ou Dex/4 (distance)`
 > avec `skill_factor(N) = 1 + N × 0,02` ([[Progression par l'usage]]). Trois compétences pèsent donc sur chaque coup — **l'arme** (Épée, Arc…), **le type de dégâts** (tranchant / perforant / contondant) et **l'élément dominant employé, pondéré par sa part dans le vecteur** (une arme mixte gagne moins qu'une pure — terme déjà présent dans [[Domination et multiplicateurs]]). Les niveaux sont à 0 jusqu'à l'étape 4 : le code porte les crochets (`competences` sur chaque être), le facteur vaut 1.
 
+> [!success] Décidé et codé le 2026-08-30 — **« magique » est un type de dégâts à part entière**
+> **Instruction du designer** : « on devrait rajouter les dégâts magiques plutôt que null ». Jusqu'ici les actions de créature ne connaissaient que tranchant / perforant / contondant (ou rien), et les sorts appliquaient un cas particulier (armure de contondant × `magie_facteur`). Désormais `magique` est dans l'énumération du schéma des actions de créature (la *Flammèche* du Feu follet le porte), la **matrice d'armure** a une colonne `magique` par construction (0,5 partout en premier jet — le même 0,5 qu'avant, mais réglable par construction : des mailles pourraient mieux tenir la magie que du cuir), et `Regles.armure_piece` la lit comme n'importe quel type (repli : contondant × `magie_facteur` si une construction n'a pas la colonne). Le cas particulier des sorts est retiré ; l'XP par type ignore toujours `magique` (elle passe par l'élément).
+
 ## Liens
 - **Dépend de** : [[Boucle de tick]], [[Mana]], [[Stats d'armes]], [[Fonctionnalité]]
 - **Alimente** : [[XP de combat]], [[Statuts]], [[Armure par zone et constructions]], [[Domination et multiplicateurs]]

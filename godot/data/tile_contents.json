@@ -91,11 +91,12 @@
   "porte": {
     "name_key": "tile_content.porte.name",
     "bloque_passage": false,
-    "bloque_vue": true,
+    "bloque_vue": false,
     "hauteur_vue": 2,
     "tags": [
       "porte",
-      "construit"
+      "construit",
+      "ouverte"
     ],
     "couleur": "#8a6a3a"
   },
@@ -233,5 +234,18 @@
       "fige"
     ],
     "couleur": "#2a2230"
+  },
+  "porte_fermee": {
+    "name_key": "tile_content.porte_fermee.name",
+    "bloque_passage": true,
+    "bloque_vue": true,
+    "hauteur_vue": 2,
+    "tags": [
+      "porte",
+      "construit",
+      "fermee",
+      "destructible"
+    ],
+    "couleur": "#6a4a22"
   }
 }

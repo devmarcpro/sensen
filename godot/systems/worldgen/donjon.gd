@@ -89,6 +89,8 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 	_reparer_connexite(e)
 	# 3 bis. Les décors de salles (Génération de donjon, 2026-08-30) : piliers cassables, estrades, fosses.
 	_poser_decors(e)
+	# 3 ter. Les portes : certaines salles ont leurs seuils fermés (theme.portes).
+	_poser_portes(e)
 	# 4. Les escaliers : l'arrivée dans la première salle, la descente dans la plus lointaine.
 	var p0: Dictionary = e.pieces[0]
 	e.entree = _centre_libre(e, p0)
@@ -270,6 +272,31 @@ func _poser_decors(e: Dictionary) -> void:
 			for x in range(zone_g.position.x, zone_g.end.x):
 				if e.sol.has(y * e.largeur + x) and Vector2i(x, y) != cg:
 					e.hauteurs[y * e.largeur + x] = H_BASE + 1
+
+
+## Les seuils d'une salle : ses tuiles de sol du bord qui touchent un couloir (du sol hors de la salle). Une salle
+## tirée au sort (theme.portes) les reçoit fermés — e.portes, posés par Grille.depuis_etage.
+func _poser_portes(e: Dictionary) -> void:
+	var chance: float = float(theme.get("portes", 0.0))
+	if chance <= 0.0:
+		return
+	e["portes"] = {}
+	for piece in e.pieces:
+		if piece.kind != "salle" or rng.randf() >= chance:
+			continue
+		var r: Rect2i = piece.rect
+		for y in range(r.position.y, r.end.y):
+			for x in range(r.position.x, r.end.x):
+				if x != r.position.x and x != r.end.x - 1 and y != r.position.y and y != r.end.y - 1:
+					continue   # seulement le bord
+				var p := Vector2i(x, y)
+				if not e.sol.has(p.y * e.largeur + p.x):
+					continue
+				for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+					var q: Vector2i = p + dv
+					if not r.has_point(q) and e.sol.has(q.y * e.largeur + q.x):
+						e.portes[p.y * e.largeur + p.x] = true
+						break
 
 
 ## Un pilier ne touche pas un autre pilier ni un mur : on peut toujours le contourner.

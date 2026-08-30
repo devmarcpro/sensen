@@ -6932,6 +6932,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _poser_mur(e, i.get("vers", Vector2i(-1, -1)), false, h.ticks)
 		"poser_porte":
 			ok = _poser_mur(e, i.get("vers", Vector2i(-1, -1)), true, h.ticks)
+		"porte":   # ouvrir / fermer une porte adjacente
+			ok = _basculer_porte(e, i.get("vers", Vector2i(-1, -1)), h.ticks)
 		"demonter":
 			ok = _demonter(e, i.get("vers", Vector2i(-1, -1)), h.ticks)
 		"ranger":
@@ -7051,6 +7053,8 @@ func corruption_ici(pos: Vector2i) -> float:
 func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	if Grille.distance(e.pos, vers) != 1 or not grille.occupant(vers).is_empty():
 		return false
+	if "fermee" in grille.contenu_de(vers).get("tags", []):   # une porte fermée : ce pas l'ouvre, le suivant passe
+		return _basculer_porte(e, vers, tick)
 	var volant := Etres.est_volant(e)
 	var cout := grille.cout_pas(e.pos, vers, volant)
 	var chute := 0
@@ -7786,6 +7790,29 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 				if d.evenement == "veille" and avant_pct * 100.0 >= float(d.plan.pct_declencheur) and float(cible.sante) / float(cible.sante_max) * 100.0 < float(d.plan.pct_declencheur):
 					p.declencheurs_armes.erase(d)
 					_executer_capacite(p, d.plan, cible.pos, false)
+
+
+## Ouvre une porte fermée, ou ferme une porte ouverte (jamais sur un être) — Génération de donjon, 2026-08-30.
+func _basculer_porte(e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	if not grille.dans(vers) or Grille.distance(e.pos, vers) > 1:
+		return false
+	var tags: Array = grille.contenu_de(vers).get("tags", [])
+	if not ("porte" in tags):
+		return false
+	if "fermee" in tags:
+		grille.poser_contenu(vers, "porte")
+		EventBus.emettre(&"journal", [&"journal.porte_ouverte", {"nom": e.name_key}])
+	else:
+		if not grille.occupant(vers).is_empty():
+			return false
+		grille.poser_contenu(vers, "porte_fermee")
+		EventBus.emettre(&"journal", [&"journal.porte_fermee", {"nom": e.name_key}])
+	grille.marquer(vers)
+	lumiere_sale = true
+	EventBus.emettre(&"tile_changed", [vers])
+	_quitter_garde(e)
+	e.compteur = tick + int(regles.r.actions.objet)
+	return true
 
 
 ## Fait partir les charges armées sur `e` pour cet événement (chacune une seule fois).
@@ -9306,9 +9333,7 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 	var piece := Etres.piece_zone(c, zone.zone, items)
 	var armure := 0.0
 	if not plan.drapeaux.get("ignore_armure", false):
-		armure = regles.armure_piece(piece, type_degats if type_degats != "magique" else "contondant") + Etres.add_statuts(c, "armure", statuts_defs)
-		if type_degats == "magique":
-			armure *= float(regles.r.armure.magie_facteur)
+		armure = regles.armure_piece(piece, type_degats) + Etres.add_statuts(c, "armure", statuts_defs)   # « magique » : la matrice le connaît
 		armure = maxf(0.0, armure - float(plan.parametres.get("ignore_armure_points", 0)))
 	var direction := Regles.direction_relative(c.orientation, e.pos - c.pos)
 	var bouclier := Etres.a_bouclier(c, items)

@@ -95,6 +95,8 @@ static func depuis_etage(etage: Dictionary, contenus: Dictionary, regles_dep: Di
 		var pm := Vector2i(int(i) % g.largeur, int(i) / g.largeur)
 		g.meubles[int(i)] = str(etage.meubles[i])
 		g.poser_contenu(pm, "meuble")
+	for i in etage.get("portes", {}).keys():   # les seuils fermés des salles (Génération de donjon, 2026-08-30)
+		g.poser_contenu(Vector2i(int(i) % g.largeur, int(i) / g.largeur), "porte_fermee")
 	for i in etage.get("lave", {}).keys():   # Eau et liquides : les mares de lave
 		g.poser_contenu(Vector2i(int(i) % g.largeur, int(i) / g.largeur), "lave")
 		g.dangers[int(i)] = true
@@ -171,7 +173,11 @@ static func distance(a: Vector2i, b: Vector2i) -> int:
 ## Coût en ticks pour passer d'une tuile à sa voisine ; -1 = infranchissable (falaise, mur,
 ## chute). Les volants ignorent le dénivelé (IA des créatures : morphologies).
 func cout_pas(de: Vector2i, vers: Vector2i, volant: bool = false) -> int:
-	if not dans(vers) or bloque_passage(vers):
+	if not dans(vers):
+		return -1
+	if bloque_passage(vers):
+		if "fermee" in contenu_de(vers).get("tags", []):   # une porte fermée s'ouvre au passage : un pas de plus, pas un mur
+			return int(dep["cout_base"]) * 2
 		return -1
 	var base: int = dep["cout_base"]
 	if volant:

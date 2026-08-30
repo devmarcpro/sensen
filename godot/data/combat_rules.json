@@ -69,7 +69,7 @@
     }
   },
   "armure": {
-    "_doc": "Armure par zone et constructions : armure_zone = dureté/4 × qualité × (1 + niv/100) × matrice",
+    "_doc": "Armure par zone et constructions : armure_zone = dureté/4 × qualité × (1 + niv/100) × matrice ; colonne magique = facteur d'armure contre les degats magiques (type a part entiere)",
     "durete_div": 4,
     "degats_min": 1,
     "magie_facteur": 0.5,
@@ -77,27 +77,32 @@
       "matelasse": {
         "tranchant": 0.95,
         "perforant": 0.8,
-        "contondant": 1.25
+        "contondant": 1.25,
+        "magique": 0.5
       },
       "cuir": {
         "tranchant": 1.1,
         "perforant": 0.85,
-        "contondant": 1.0
+        "contondant": 1.0,
+        "magique": 0.5
       },
       "mailles": {
         "tranchant": 1.25,
         "perforant": 0.8,
-        "contondant": 0.85
+        "contondant": 0.85,
+        "magique": 0.5
       },
       "ecailles": {
         "tranchant": 1.2,
         "perforant": 1.1,
-        "contondant": 0.85
+        "contondant": 0.85,
+        "magique": 0.5
       },
       "plaque": {
         "tranchant": 1.3,
         "perforant": 1.2,
-        "contondant": 0.95
+        "contondant": 0.95,
+        "magique": 0.5
       }
     }
   },

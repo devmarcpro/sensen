@@ -126,8 +126,8 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 		var p := base + Vector2i(int(i) % taille, int(i) / taille)
 		g.materiaux[g.idx(p)] = e.murs[i]
 		g.poser_contenu(p, "mur_construit")
-	for i in e.get("portes", {}).keys():
-		g.poser_contenu(base + Vector2i(int(i) % taille, int(i) / taille), "porte")
+	for i in e.get("portes", {}).keys():   # fermées : les PNJ les ouvrent en rentrant (Génération de donjon, 2026-08-30)
+		g.poser_contenu(base + Vector2i(int(i) % taille, int(i) / taille), "porte_fermee")
 	for i in e.get("meubles", {}).keys():
 		var p := base + Vector2i(int(i) % taille, int(i) / taille)
 		var m: Dictionary = GameData.catalogues.meubles.get(str(e.meubles[i]), {})

@@ -881,7 +881,9 @@ func _options_tuile(t: Vector2i) -> Array:
 	var res: Array = []
 	var j := joueur()
 	if j.is_empty() or t.x < 0 or not sim.grille.dans(t):
-		return res
+		if "porte" in sim.grille.contenu_de(t).get("tags", []) and Grille.distance(j.pos, t) == 1:   # ouvrir / fermer une porte adjacente
+		res.append({"id": "porte", "vers": t})
+	return res
 	var g := sim.grille
 	var d := Grille.distance(j.pos, t)
 	var occ := g.occupant(t)
@@ -1015,6 +1017,8 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "tempo", "cible": str(opt.cible)})
 		"traverser":
 			sim.intention(joueur_id, {"type": "traverser"})
+		"porte":
+			sim.intention(joueur_id, {"type": "porte", "vers": opt.vers})
 		"masque":
 			sim.intention(joueur_id, {"type": "masque", "masque": str(opt.masque)})
 		"relever":
@@ -1589,7 +1593,7 @@ func _dessiner_etats(ci: CanvasItem) -> void:
 		if statuts.is_empty():
 			continue
 		var tick_e: int = sim.tick_de(e)
-		var base := _ecran(e.pos, sim.grille.h(e.pos)) + Vector2(-7.0 * mini(4, statuts.size()), -78.0)   # au-dessus des barres de vie
+		var base := _ecran(e.pos, sim.grille.h(e.pos)) + Vector2(-7.0 * mini(4, statuts.size()), -62.0)   # au-dessus de la tête
 		var n_s := 0
 		for st in statuts:
 			if n_s >= 4:
@@ -1631,10 +1635,7 @@ func _dessine_hud_entite(ci: CanvasItem, e: Dictionary) -> void:
 		ci.draw_arc(c + Vector2(0, -10), 16.0, o.angle() - 0.9, o.angle() + 0.9, 8, Color(0.6, 0.85, 1.0), 2.0)
 	if telegraphes.has(e.id):   # intention visible : le télégraphe est une information d'interface
 		ci.draw_string(ThemeDB.fallback_font, c + Vector2(-4, -40), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(1, 0.3, 0.2))
-	var w := 22.0
-	ci.draw_rect(Rect2(c + Vector2(-w * 0.5, -42), Vector2(w, 3)), Color(0, 0, 0, 0.6))
-	ci.draw_rect(Rect2(c + Vector2(-w * 0.5, -42), Vector2(w * e.sante / e.sante_max, 3)), Color(0.3, 0.9, 0.3))
-	ci.draw_rect(Rect2(c + Vector2(-w * 0.5, -38), Vector2(w * e.endurance / e.endurance_max, 2)), Color(0.9, 0.8, 0.3))
+	var w := 22.0   # plus de barres de vie ni d'endurance au-dessus des personnages (designer, 2026-08-30) : la bulle au survol les dit
 	if e.has("chaine"):   # la jauge de chaîne, toujours visible (pastilles colorées)
 		var segs := _segments(e)
 		var cap: int = e.chaine.capacite

@@ -114,6 +114,8 @@ func _ready() -> void:
 			m.sac.append(dague.uid)
 			m.equipement["main_principale"] = dague.uid
 			Etres.recalculer(m, s.items, s.affixes_defs, s.regles)
+			m.stats_eff.force = 0   # le jet opposé (1d20 + Force) doit passer : le banc ne juge pas la chance
+			j.stats_eff.force = 40
 		m.sante_max = 60
 		m.sante = 30 if vise_allie else 60   # blessé : un soin se voit
 		if vise_allie:

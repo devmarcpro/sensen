@@ -148,6 +148,8 @@ func armure_piece(piece: Dictionary, type_degats: String) -> float:
 		return 0.0
 	var mat: Dictionary = r.armure.matrice.get(piece.get("construction", ""), {})
 	var facteur: float = float(mat.get(type_degats, 1.0))
+	if type_degats == "magique" and not mat.has("magique"):   # « magique » : un type à part entière (2026-08-30) ; à défaut d'une colonne, contondant × magie_facteur
+		facteur = float(mat.get("contondant", 1.0)) * float(r.armure.get("magie_facteur", 0.5))
 	return float(piece.durete_composite) / float(r.armure.durete_div) * float(piece.qualite) \
 		* (1.0 + float(piece.get("niveau_construction", 0)) / 100.0) * facteur
 
