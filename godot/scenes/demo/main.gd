@@ -777,7 +777,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 		ecran_fin.clear()
 		return
 	if ev is InputEventMouseMotion:
-		survol = _tuile_sous(get_local_mouse_position())
+		var t_survol := _tuile_sous(get_local_mouse_position())
+		survol = t_survol if sim.grille.dans(t_survol) else Vector2i(-1, -1)   # hors de la grille : pas de survol (les h(survol) ne débordent jamais)
 	elif ev is InputEventMouseButton and ev.pressed:
 		if ev.button_index == MOUSE_BUTTON_WHEEL_UP or ev.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			var haut: bool = ev.button_index == MOUSE_BUTTON_WHEEL_UP
@@ -1359,11 +1360,8 @@ func _draw() -> void:
 		for c in chemin_en_cours:
 			pts.append(_ecran(c, g.h(c)))
 		draw_polyline(pts, Color(1, 1, 1, 0.55), 2.0)
-	for t in atteignables.keys():
-		if t == j.pos:
-			continue
-		var c := _ecran(t, g.h(t)) + Vector2(-6, 4)
-		draw_string(ThemeDB.fallback_font, c, str(atteignables[t]), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1, 1, 0.8, 0.8))
+	# Plus de chiffre de ticks sur les tuiles atteignables en combat (designer, 2026-08-31) : le voile jaune suffit,
+	# le coût exact reste lisible dans l'en-tête au survol.
 	for f in xp_flottants:   # l'XP de l'action, qui monte et s'efface au-dessus du joueur (XP de combat)
 		var base := _ecran(j.pos, g.h(j.pos)) + Vector2(-20.0, -52.0 - f.t * 22.0 - float(f.get("dec", 0.0)))
 		var a: float = clampf(1.6 - f.t, 0.0, 1.0)

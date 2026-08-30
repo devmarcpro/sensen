@@ -73,6 +73,9 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > [!success] Décidé le 2026-08-31 — plus de limites à la création
 > **Instruction du designer** : « enlève les limites pour la création du personnage : toutes classes et toutes races possibles ». `_classes_visibles` ne filtre plus le tag `cache` — les onze classes cachées (l'Ombre, le Passeur, le Sablier…) se choisissent à la création comme les autres ; les races cachées (vampire, lycanthrope, spectre) l'étaient déjà (la liste des races n'a jamais filtré). Le tag `cache` reste sur les fiches pour ce que le monde en fait par ailleurs.
 
+> [!success] Décidé le 2026-08-31 — plus de chiffres de ticks sur les tuiles en combat
+> **Instruction du designer** : « enlève en combat la prévisualisation du nombre de ticks utilisés pour se déplacer ». Les tuiles atteignables gardent leur voile jaune, le chiffre par tuile disparaît ; le coût exact reste dans l'en-tête au survol (« case (x, y) »). Au passage, deux sources du « lag de ouf » : le survol hors de la grille est désormais nul (les `h(survol)` ne débordent plus), et `_losange` ignore une tuile hors grille (une zone de télégraphe au bord imprimait une erreur d'index par image et par tuile).
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]
