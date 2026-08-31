@@ -42,6 +42,7 @@ etape: 10
 
 ## 3. Le donjon — combat, loot, étages (10 min)
 
+- **Difficulté et équipement** (mesuré le 2026-08-31, graine 73) : le robot **équipé** (3 objets assemblés + 3 sorts composés) descend **4 étages sans mourir** — 18 combats, 41 kills, 210 coups portés / 58 reçus, 10 soins, PV 37/44 à l'étage 5 — quand les profils nus ou fragiles meurent en boucle à l'étage 1. L'écart nu/équipé est-il la courbe voulue (l'équipement comme réponse au mur), ou le premier étage doit-il pardonner davantage ?
 - **Rythme** : `DELAI_PAS = 0.12 s` entre deux pas — trop lent, trop rapide pour suivre les loups ? Durée d'une rencontre (cible 60-200 ticks, affichée à l'écran de fin)
 - **Écran de fin de combat** (observé le 2026-08-31, sonde du sommeil) : dormir peut afficher « FIN DU COMBAT — victoire en 0 ticks » aux pistes vides — une bête de la faune engage le dormeur puis se désengage pendant la nuit, le combat naît et meurt sans un coup. S'ajoute au « reste en surimpression jusqu'au clic » du rapport 13 : faut-il taire l'écran quand le joueur n'a rien fait (0 tick, pistes vides), ou le garder comme trace de la nuit mouvementée ?
 - **Télégraphe** (« ! » + tuiles rouges) vu à temps ? **Coûts sur les tuiles** (jaune) utiles ou bruit ? **Capacités** (hotbar 2-4 + clic) : la prévisualisation suffit-elle ?
