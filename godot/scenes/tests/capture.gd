@@ -86,6 +86,8 @@ func _ready() -> void:
 		if not proche_id.is_empty():
 			scene.ecrans.ouvrir_dialogue(proche_id)
 			print("dialogue : ", scene.sim.entites[proche_id].name_key)
+			if "--commerce" in args:   # --commerce : enchaîne sur l'écran de commerce du PNJ (stock, prix, or)
+				scene.ecrans.ouvrir("commerce")
 	if "--carte" in args:
 		scene.carte.ouvrir("voyage")
 	if arene > 0:
