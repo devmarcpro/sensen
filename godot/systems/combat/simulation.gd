@@ -6266,7 +6266,8 @@ func _respawn(e: Dictionary) -> bool:
 	_poser_contenant(e.pos, perdus, "butin")
 	if horloge_monde != null:   # Mort et pénalité : récupérable pendant 1 jour in-game, puis poussière
 		for uid_p in perdus:
-			objets[str(uid_p)]["peremption_tick"] = horloge_monde.ticks + int(regles.r.mort.get("peremption_jours", 1)) * int(_cycle().get("ticks_par_jour", 24000))
+			if objets.has(str(uid_p)):   # le sac peut porter des ids de catalogue (râtelier du prototype) sans instance : eux ne périment pas
+				objets[str(uid_p)]["peremption_tick"] = horloge_monde.ticks + int(regles.r.mort.get("peremption_jours", 1)) * int(_cycle().get("ticks_par_jour", 24000))
 	var or_perdu := int(floor(float(e.get("or", 0)) * float(regles.r.mort.get("perte_or", 0.0))))   # Mort et pénalité : −10 % de l'or porté
 	if or_perdu > 0:
 		e.or = int(e.or) - or_perdu
