@@ -27,5 +27,49 @@
   "points_creation_bonus": 0,
   "tags": [
     "visible"
+  ],
+  "capacites": [
+    {
+      "id": "le_souffle_meditation",
+      "name_key": "module.meditation.name",
+      "modules": [
+        "soi",
+        "meditation"
+      ]
+    },
+    {
+      "id": "le_souffle_etincelle",
+      "name_key": "module.etincelle.name",
+      "modules": [
+        "ligne",
+        "etincelle"
+      ]
+    },
+    {
+      "id": "le_souffle_gel",
+      "name_key": "module.gel.name",
+      "modules": [
+        "ligne",
+        "gel"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "arme",
+      "ref": "proto_baton_magique"
+    },
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
   ]
 }

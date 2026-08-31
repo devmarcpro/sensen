@@ -61,7 +61,7 @@
           "type": "number"
         },
         "barbe": {
-          "type": "number"
+          "type": "string"
         }
       }
     }

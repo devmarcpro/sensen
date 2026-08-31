@@ -240,7 +240,7 @@
     }
   },
   "livres": {
-    "_doc": "Grimoires et manuels · Lecture des livres : difficulté = base + étage × par_etage ; modules par livre ; domaines (Domaines de grimoires et manuels)",
+    "_doc": "Un livre n'enseigne qu'un module (designer 2026-08-31) : plus de composition forme/noyau/appoint.",
     "difficulte_base": 10,
     "difficulte_par_etage": 10,
     "dd_base": 10,
@@ -260,13 +260,7 @@
       "postures",
       "techniques",
       "maitrise"
-    ],
-    "composition": {
-      "_doc": "Un livre = de quoi composer un sort : des notations de des, jamais des entiers.",
-      "formes": "1",
-      "noyaux": "1",
-      "appoint": "1d2"
-    }
+    ]
   },
   "assemblage": {
     "_doc": "Loot assemblé (designer, 2026-08-30) : chaque composant d'un objet assemblé tiré dans un coffre ou un drop reçoit une recette (donc une famille de matériau), un matériau de la famille (les minerais d'étage ≤ profondeur sont favorisés : poids_etage) et une qualité tirée comme un artisan de niveau niveau_base + niveau_par_profondeur × profondeur ; le jet d'assemblage suit combat_rules.craft.qualite.jet_assemblage. tiers_au_dela : un minerai d'un tier > profondeur + tiers_au_dela n'apparaît pas (pas de titane à l'étage 2).",

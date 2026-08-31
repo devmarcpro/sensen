@@ -27,5 +27,49 @@
   "points_creation_bonus": 0,
   "tags": [
     "visible"
+  ],
+  "capacites": [
+    {
+      "id": "la_paume_baume",
+      "name_key": "module.baume.name",
+      "modules": [
+        "ligne",
+        "baume"
+      ]
+    },
+    {
+      "id": "la_paume_communion",
+      "name_key": "module.communion.name",
+      "modules": [
+        "ligne",
+        "communion"
+      ]
+    },
+    {
+      "id": "la_paume_purge",
+      "name_key": "module.purge.name",
+      "modules": [
+        "ligne",
+        "purge"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "arme",
+      "ref": "proto_baton_magique"
+    },
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
   ]
 }

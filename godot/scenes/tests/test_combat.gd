@@ -3111,52 +3111,26 @@ func test_charges_de_modules() -> void:
 	loup.sante_max = 100000
 	j.capacites = []
 	j.modules_connus = []
-	j.modules_charges = {}
-	# Deux charges de chaque module : deux lancers, pas trois.
+	# Charges infinies (designer 2026-08-31) : apprendre un module est définitif, lancer n'épuise rien.
 	for m in ["point", "etincelle"]:
-		s.crediter_module(j, m, 2)
-	verifier(s.composer_capacite(j, ["point", "etincelle"]), "composer avec des charges en stock")
-	verifier(int(j.modules_charges.point) == 2, "composer ne consomme rien : la charge se dépense au lancer")
+		s.crediter_module(j, m)
+	verifier(s.composer_capacite(j, ["point", "etincelle"]), "composer avec des modules connus")
 	j.mana = 999
-	s.attente[j.id] = true
-	verifier(s.intention(j.id, {"type": "capacite", "index": 0, "cible": loup.pos}), "premier lancer")
-	verifier(int(j.modules_charges.point) == 1 and int(j.modules_charges.etincelle) == 1, "une charge de chaque module dépensée")
-	j.compteur = s.tick_de(j)
-	s.attente[j.id] = true
-	verifier(s.intention(j.id, {"type": "capacite", "index": 0, "cible": loup.pos}), "second lancer")
-	verifier(not j.modules_charges.has("point") and not j.modules_charges.has("etincelle"), "stock vidé")
-	j.compteur = s.tick_de(j)
-	s.attente[j.id] = true
-	verifier(not s.intention(j.id, {"type": "capacite", "index": 0, "cible": loup.pos}), "à sec : le sort ne part plus")
-	verifier("point" in j.modules_connus, "le module reste connu : c'est la munition qui manque, pas le savoir")
-	verifier(s.modules_sans_charge(j, {"modules": ["point", "etincelle"]}).size() == 2, "les deux modules sont signalés sans charge")
-	# Un livre est un sort en kit : toujours une forme et un noyau ; les charges suivent la Lecture
-	var kit_ok := true
+	for k in 3:
+		j.compteur = s.tick_de(j)
+		s.attente[j.id] = true
+		verifier(s.intention(j.id, {"type": "capacite", "index": 0, "cible": loup.pos}), "lancer n° %d : rien ne s'épuise" % (k + 1))
+	verifier("point" in j.modules_connus and "etincelle" in j.modules_connus, "les modules restent connus après trois lancers")
+	verifier(s.modules_sans_charge(j, {"modules": ["point", "etincelle"]}).is_empty(), "aucun module ne manque : ils sont connus")
+	verifier(s.modules_sans_charge(j, {"modules": ["ampleur"]}).has("ampleur"), "un module jamais appris, lui, manque toujours")
+	# Un livre n'enseigne qu'UN module (designer 2026-08-31), grimoire comme manuel
+	var un_seul := true
 	for k in 60:
 		var livre := s.generer_objet("grimoire" if k % 2 == 0 else "manuel", 3, {}, "commun", 0)
-		var a_forme := false
-		var a_noyau := false
-		for m in livre.get("modules", []):
-			var t := str(GameData.catalogues.modules.get(str(m), {}).get("module_type", ""))
-			a_forme = a_forme or t == "forme"
-			a_noyau = a_noyau or t == "noyau"
-		kit_ok = kit_ok and a_forme and a_noyau and livre.modules.size() >= 3
-	verifier(kit_ok, "60 livres : chacun porte une forme, un noyau et au moins un module d'appoint")
-	j.competences_eff["lecture"] = 0
-	var novice := 0
-	var lettre := 0
-	for k in 200:
-		novice += s.charges_lues(j)
-	j.competences_eff["lecture"] = 50
-	for k in 200:
-		lettre += s.charges_lues(j)
-	verifier(lettre > novice * 1.3, "les charges lues suivent la Lecture (niveau 50 : %d contre %d au niveau 0, sur 200 jets)" % [lettre, novice])
-	verifier(novice >= 200 and novice <= 800, "au niveau 0 : 1d4 par module (%d sur 200 jets)" % novice)
-	# Un module employé deux fois dans la même séquence coûte deux charges
-	s.crediter_module(j, "ampleur", 1)
-	verifier(s.modules_sans_charge(j, {"modules": ["ampleur", "ampleur"]}).has("ampleur"), "deux fois le même module = deux charges")
-	# Une créature d'IA ne consomme rien : elle n'a pas de livres
-	verifier(s.modules_sans_charge(loup, {"modules": ["point", "etincelle"]}).is_empty(), "l'IA ne dépense pas de charges")
+		un_seul = un_seul and livre.get("modules", []).size() == 1
+	verifier(un_seul, "60 livres tirés : chacun porte exactement un module")
+	# Une créature d'IA n'apprend pas dans des livres
+	verifier(s.modules_sans_charge(loup, {"modules": ["point", "etincelle"]}).is_empty(), "l'IA ne connaît pas de manque")
 	# Tout module doit avoir une source (Grimoires et manuels). Les six noyaux **sans coût** (Fiole,
 	# Méditation, Offrande, Ponction, Saignée, Second souffle) n'entraient dans aucun filtre de livre :
 	# ils sont arcanes par nature — sans élément et sans coût d'endurance. La garantie exhaustive est
@@ -3168,13 +3142,13 @@ func test_charges_de_modules() -> void:
 			hors_domaine.append(mid)
 	verifier(hors_domaine.is_empty(), "les noyaux sans coût sont arcanes, donc distribuables (%s)" % str(hors_domaine))
 	var vus := {}
-	for k in 300:   # et on le voit en tirant des grimoires : l'un d'eux au moins sort
-		for m in s.generer_objet("grimoire", 5, {}, "commun", 0).get("modules", []):
+	for k in 300:   # un livre = un module : sur 300 tirages des deux types, les arcanes sortent
+		for m in s.generer_objet("grimoire" if k % 2 == 0 else "manuel", 5, {}, "commun", 0).get("modules", []):
 			vus[str(m)] = true
 	var au_moins_un := false
 	for mid in ["fiole", "meditation", "offrande", "ponction", "saignee", "second_souffle"]:
 		au_moins_un = au_moins_un or vus.has(mid)
-	verifier(au_moins_un, "un grimoire arcane en contient effectivement")
+	verifier(au_moins_un, "les noyaux arcanes sortent bien dans des livres")
 
 
 func test_composer_capacites() -> void:
@@ -6905,12 +6879,12 @@ func test_gemmes_et_livres() -> void:
 	epee.elements = vec_avant
 	# Livres : un grimoire tire domaine, difficulté et modules ; la lecture réussit avec Lecture haute
 	var livre := s.generer_objet("grimoire", 2)
-	verifier(livre.modules.size() >= 2 and livre.difficulte == 10 + 2 * 10 and not livre.domaine.is_empty(), "grimoire : %d modules, difficulté 30, domaine %s" % [livre.modules.size(), livre.domaine])
+	verifier(livre.modules.size() == 1 and livre.difficulte == 10 + 1 * 10 / 2 and not livre.domaine.is_empty(), "grimoire : un seul module, difficulté 15, domaine %s" % livre.domaine)
 	var lm := s.generer_objet("livre_module", 2)
 	verifier(lm.modules.size() == 1 and GameData.catalogues.modules.has(str(lm.modules[0])) and lm.nom.has("module"), "livre de module : UN module précis, à son nom (%s)" % str(lm.modules))
 	verifier(s.nom_objet(lm.uid).has("module_livre"), "le nom du livre porte le module")
 	var manuel := s.generer_objet("manuel", 1)
-	verifier(manuel.modules.size() >= 2 and manuel.domaine in ["frappes", "postures", "techniques", "maitrise"], "manuel : domaine %s" % manuel.domaine)
+	verifier(manuel.modules.size() == 1 and not manuel.domaine.is_empty(), "manuel : un seul module, domaine %s" % manuel.domaine)
 	j.competences["lecture"] = 100
 	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
 	s.donner(j, livre.uid)
@@ -6936,8 +6910,8 @@ func test_gemmes_et_livres() -> void:
 	var connus_avant: int = j.modules_connus.size()
 	verifier(s.intention(j.id, {"type": "lire", "objet": dur.uid}), "tenter un livre impossible")
 	verifier(not (dur.uid in j.sac) and j.modules_connus.size() == connus_avant, "échec : livre perdu, rien d'appris")
-	verifier(int(j.xp.competence.get("lecture", 0)) == 30 * 5 + 200 * 2, "XP de Lecture : difficulté × 5 (succès) + × 2 (échec)")
-	# Le livre de module (designer, 2026-08-31), lu de bout en bout : le module précis est appris, avec des charges.
+	verifier(int(j.xp.competence.get("lecture", 0)) == 15 * 5 + 200 * 2, "XP de Lecture : difficulté × 5 (succès) + × 2 (échec)")
+	# Le livre de module (designer, 2026-08-31), lu de bout en bout : le module précis est appris.
 	j.statuts.clear()   # l'échec de lecture précédent peut avoir posé un statut bloquant (effet d'échec)
 	j.competences["lecture"] = 100
 	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
@@ -6945,10 +6919,9 @@ func test_gemmes_et_livres() -> void:
 	j.compteur = s.horloge_monde.ticks
 	s.horloge_monde.avancer(1)
 	var mod_lm := str(lm.modules[0])
-	var charges_avant := int(j.get("modules_charges", {}).get(mod_lm, 0))
 	s.attente[j.id] = true   # l'effet d'échec précédent (invocation, téléportation) peut avoir sorti le joueur de la file
 	verifier(s.intention(j.id, {"type": "lire", "objet": lm.uid}), "lire le livre de module")
-	verifier(mod_lm in j.modules_connus and int(j.modules_charges.get(mod_lm, 0)) > charges_avant, "le module précis est appris, avec des charges (%s)" % mod_lm)
+	verifier(mod_lm in j.modules_connus, "le module précis est appris, pour toujours (%s)" % mod_lm)
 
 
 # ---------------------------------------------------------------- Étape 4 : progression par l'usage, potentiel, création, mort

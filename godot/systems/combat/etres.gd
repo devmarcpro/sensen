@@ -58,7 +58,6 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 		"degats_element": {},                                       # bonus plats des gemmes
 		"affinites": {},                                            # tailles en affinité de l'arme tenue
 		"modules_connus": [],                                       # appris par la lecture (Grimoires et manuels)
-		"modules_charges": {},                                      # id → charges restantes : un lancer en consomme une par module
 		"epithete": "",
 		"ai_profile": def.ai_profile,
 		"chain_gauge": def.get("chain_gauge", false),   # porteurs de jauge : joueur, élites, boss

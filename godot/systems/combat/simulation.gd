@@ -5755,11 +5755,10 @@ func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 	var e := Etres.instancier(id, def, pos, controle, regles, items)
 	if controle == "joueur":   # les modules des capacités de départ sont connus, avec un kit de charges au dé
 		for m in def.get("modules_connus", []):
-			crediter_module(e, str(m), charges_lues(e, true))
+			crediter_module(e, str(m))
 		for cap in e.get("capacites", []):
 			for m in cap.get("modules", []):
-				if int(e.get("modules_charges", {}).get(str(m), 0)) <= 0:
-					crediter_module(e, str(m), charges_lues(e, true))
+				crediter_module(e, str(m))
 	if str(e.corps.get("silhouette", "")) == "humanoide" and e.get("apparence", {}).is_empty():
 		var rng_ap := RandomNumberGenerator.new()   # un visage à tout humanoïde, tiré une fois pour toutes
 		rng_ap.seed = hash([graine, "apparence", id])
@@ -6400,7 +6399,7 @@ func _lire(e: Dictionary, objet: String, tick: int) -> bool:
 			n = maxi(1, int(floorf(float(livre.modules.size()) * minf(1.0, float(n_lecture) / float(livre.difficulte)))))
 		for k in n:
 			var m: String = str(livre.modules[k])
-			crediter_module(e, m, charges_lues(e))   # un jet par module, porté par la Lecture
+			crediter_module(e, m)   # apprendre un module est définitif (designer 2026-08-31)
 			appris.append(m)
 		e.xp.competence["lecture"] = int(e.xp.competence.get("lecture", 0)) + int(livre.difficulte) * int(lv.xp_succes)
 		gagner_xp(e, "lecture", int(livre.difficulte) * int(lv.xp_succes))
@@ -8991,38 +8990,24 @@ func _evaluer_conditions(e: Dictionary, plan: Dictionary, cible_pos: Vector2i) -
 
 
 ## Lance la capacité n° `index` sur la tuile `cible` : coûts, conditions, télégraphe ou exécution.
-## Les charges qu'une lecture rapporte pour UN module (Grimoires et manuels) : un jet de dés, multiplié par
-## le facteur de la compétence de lecture — aucun chiffre fixe. `depart` : le kit de création du personnage.
-func charges_lues(e: Dictionary, depart: bool = false) -> int:
-	var rm: Dictionary = regles.r.get("modules", {})
-	var notation := str(rm.get("charges_depart_des" if depart else "charges_des", "1d4"))
-	var niv := regles.niveau(e.get("competences_eff", e.get("competences", {})), str(rm.get("competence", "lecture")))
-	return maxi(1, roundi(float(des.jet(notation)) * regles.skill_factor(niv)))
-
-
-## Créditer des charges de module (Grimoires et manuels) : la lecture, la création, la triche.
-## Apprendre un module, c'est le connaître pour toujours ET recevoir des munitions.
-func crediter_module(e: Dictionary, mid: String, charges: int) -> void:
+## Apprendre un module (Grimoires et manuels, designer 2026-08-31) : c'est définitif et sans munitions —
+## les charges n'existent plus. Le paramètre `charges` n'est gardé que pour les appels historiques.
+func crediter_module(e: Dictionary, mid: String, _charges: int = 0) -> void:
 	if not e.has("modules_connus"):
 		e["modules_connus"] = []
-	if not e.has("modules_charges"):
-		e["modules_charges"] = {}
 	if not (mid in e.modules_connus):
 		e.modules_connus.append(mid)
-	e.modules_charges[mid] = int(e.modules_charges.get(mid, 0)) + charges
 
 
-## Les charges qui manquent pour lancer ce plan (Grimoires et manuels) : une par module de la séquence.
+## Les modules du plan que l'être ne connaît pas (Grimoires et manuels) : un module connu l'est pour toujours.
 func modules_sans_charge(e: Dictionary, plan: Dictionary) -> Array[String]:
 	var manquants: Array[String] = []
 	if e.controle != "joueur":
-		return manquants   # les créatures n'ont pas de livres : leurs capacités ne se consomment pas
-	var compte := {}
+		return manquants   # les créatures n'apprennent pas dans des livres
+	var connus: Array = e.get("modules_connus", [])
 	for m in plan.get("modules", []):
-		compte[str(m)] = int(compte.get(str(m), 0)) + 1
-	for mid in compte.keys():
-		if int(e.get("modules_charges", {}).get(mid, 0)) < int(compte[mid]):
-			manquants.append(str(mid))
+		if not (str(m) in connus) and not (str(m) in manquants):
+			manquants.append(str(m))
 	return manquants
 
 
@@ -9085,18 +9070,9 @@ func _lancer_capacite(e: Dictionary, index: int, cible: Variant, tick: int) -> b
 	return true
 
 
-## Dépense une charge de chaque module de la séquence (Grimoires et manuels) — le joueur seul :
-## les créatures n'ont pas de livres, leurs capacités ne s'épuisent pas.
-func _consommer_charges(e: Dictionary, plan: Dictionary) -> void:
-	if e.controle != "joueur":
-		return
-	for m in plan.get("modules", []):
-		var mid := str(m)
-		var reste := int(e.get("modules_charges", {}).get(mid, 0)) - 1
-		if reste <= 0:
-			e.modules_charges.erase(mid)
-		else:
-			e.modules_charges[mid] = reste
+## Les modules ne s'épuisent plus (designer 2026-08-31) : lancer un sort ne coûte que mana, endurance et ticks.
+func _consommer_charges(_e: Dictionary, _plan: Dictionary) -> void:
+	pass
 
 
 ## Paie la monnaie du noyau. Mana insuffisant = surchauffe : le déficit est infligé en PV × 2 (Mana).

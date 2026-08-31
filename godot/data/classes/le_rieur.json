@@ -17,5 +17,45 @@
   "points_creation_bonus": 15,
   "tags": [
     "cache"
+  ],
+  "capacites": [
+    {
+      "id": "le_rieur_pari",
+      "name_key": "module.pari.name",
+      "modules": [
+        "ligne",
+        "pari"
+      ]
+    },
+    {
+      "id": "le_rieur_etincelle",
+      "name_key": "module.etincelle.name",
+      "modules": [
+        "ligne",
+        "etincelle"
+      ]
+    },
+    {
+      "id": "le_rieur_gel",
+      "name_key": "module.gel.name",
+      "modules": [
+        "ligne",
+        "gel"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
   ]
 }

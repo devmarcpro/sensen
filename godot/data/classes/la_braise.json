@@ -30,5 +30,49 @@
   "points_creation_bonus": 0,
   "tags": [
     "visible"
+  ],
+  "capacites": [
+    {
+      "id": "la_braise_trempe",
+      "name_key": "module.trempe.name",
+      "modules": [
+        "point",
+        "trempe"
+      ]
+    },
+    {
+      "id": "la_braise_etincelle",
+      "name_key": "module.etincelle.name",
+      "modules": [
+        "ligne",
+        "etincelle"
+      ]
+    },
+    {
+      "id": "la_braise_gel",
+      "name_key": "module.gel.name",
+      "modules": [
+        "ligne",
+        "gel"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "arme",
+      "ref": "proto_masse"
+    },
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
   ]
 }

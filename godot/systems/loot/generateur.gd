@@ -119,92 +119,25 @@ func _composer_livre(inst: Dictionary, base: Dictionary, profondeur: int, rng: R
 		inst["domaine"] = "industriel"
 		inst["nom"] = {"affixe": "", "params": {"recette": GameData.catalogues.recipes.get(inst.recette, {}).get("name_key", "")}}
 		return
-	if "module_unique" in base.get("tags", []):   # un livre de module (designer, 2026-08-31) : UN module précis, au nom du livre
-		var ids_m: Array = modules.keys()
-		ids_m.sort()
-		var choisi_m := str(ids_m[rng.randi_range(0, ids_m.size() - 1)])
-		inst["modules"] = [choisi_m]
-		inst["domaine"] = str(modules[choisi_m].get("module_type", "noyau"))
-		inst["difficulte"] = int(lv.difficulte_base) + maxi(0, profondeur - 1) * int(lv.difficulte_par_etage) / 2
-		inst["nom"] = {"affixe": "", "params": {}, "module": str(modules[choisi_m].get("name_key", choisi_m))}
-		return
+	# Tout livre n'enseigne qu'UN module (designer 2026-08-31) : le grimoire comme le manuel.
+	# Le domaine reste ce qui les distingue — un grimoire tire dans les modules de magie,
+	# un manuel dans ceux du corps — et la difficulté suit la profondeur.
+	var ids_m: Array = modules.keys()
+	ids_m.sort()
 	var grimoire: bool = base.type == "grimoire"
-	var domaine := ""
-	if grimoire:
-		var doms: Array = lv.domaines_grimoire.keys()
-		domaine = str(doms[rng.randi_range(0, doms.size() - 1)])
-	else:
-		domaine = str(lv.domaines_manuel[rng.randi_range(0, lv.domaines_manuel.size() - 1)])
-	var candidats: Array[String] = []
-	for id: String in modules.keys():
-		var m: Dictionary = modules[id]
-		if grimoire:
-			var el := str(lv.domaines_grimoire[domaine])
-			if m.module_type == "noyau":
-				# Un noyau appartient au domaine de son élément ; **sans élément**, il est arcane. Le coût en
-				# mana ne peut pas servir de filtre : les noyaux de ressource (Méditation, Offrande…) n'en ont
-				# aucun, et aucun livre ne pouvait les donner — six noyaux étaient inatteignables.
-				var dom_m := _dominante(m.get("elements", {}))
-				var arcane: bool = dom_m.is_empty() and int(m.get("cout_endurance", 0)) <= 0
-				if (dom_m == el and int(m.get("cout_mana", 0)) > 0) or (el == "neutre" and arcane):
-					candidats.append(id)
-			elif m.module_type in ["forme", "modificateur"] and el == "neutre":
-				candidats.append(id)
-		else:
-			match domaine:
-				"frappes":
-					if m.module_type == "noyau" and int(m.get("cout_endurance", 0)) > 0:
-						candidats.append(id)
-				"postures":
-					if m.module_type == "condition":
-						candidats.append(id)
-				"techniques":
-					if m.module_type in ["declencheur", "liaison"]:
-						candidats.append(id)
-				"maitrise":
-					if m.module_type in ["modificateur", "forme"]:
-						candidats.append(id)
-	# Un livre est un sort en kit (Grimoires et manuels) : toujours une forme, toujours un noyau du domaine,
-	# plus des modules d'appoint — chaque quantité est un jet de dés, jamais un entier.
-	var comp: Dictionary = lv.get("composition", {"formes": "1", "noyaux": "1", "appoint": "1d2"})
-	var choisis: Array = []
-	var formes: Array[String] = []
-	var noyaux: Array[String] = []
-	var appoint: Array[String] = []
-	for id in candidats:
-		match str(modules[id].module_type):
-			"forme": formes.append(id)
-			"noyau": noyaux.append(id)
-			_: appoint.append(id)
-	if noyaux.is_empty():   # un manuel de postures ou de techniques : le noyau d'arme et la forme viennent d'ailleurs
-		for id: String in modules.keys():
-			if modules[id].module_type == "noyau" and int(modules[id].get("cout_endurance", 0)) > 0 and (grimoire == false):
-				noyaux.append(id)
-			elif grimoire and modules[id].module_type == "noyau" and int(modules[id].get("cout_mana", 0)) > 0:
-				noyaux.append(id)
-	if formes.is_empty():
-		for id: String in modules.keys():
-			if modules[id].module_type == "forme":
-				formes.append(id)
-	if appoint.is_empty():   # un grimoire élémentaire n'a que ses noyaux : l'appoint vient du tronc commun
-		for id: String in modules.keys():
-			var t_a := str(modules[id].module_type)
-			if (grimoire and t_a in ["modificateur", "condition"]) or (not grimoire and t_a in ["modificateur", "condition", "declencheur", "liaison"]):
-				appoint.append(id)
-	var tirer := func(pool: Array, n: int) -> void:
-		for i in n:
-			if pool.is_empty():
-				return
-			var k := rng.randi_range(0, pool.size() - 1)
-			choisis.append(pool[k])
-			pool.remove_at(k)
-	tirer.call(formes, Des.jet_rng(str(comp.formes), rng))
-	tirer.call(noyaux, Des.jet_rng(str(comp.noyaux), rng))
-	tirer.call(appoint, Des.jet_rng(str(comp.appoint), rng))
-	inst["domaine"] = domaine
-	inst["difficulte"] = int(lv.difficulte_base) + profondeur * int(lv.difficulte_par_etage)
-	inst["modules"] = choisis
-	inst["nom"] = {"affixe": "", "params": {}, "livre": {"domaine": domaine, "difficulte": inst.difficulte, "n": choisis.size()}}
+	var pool: Array = []
+	for id: String in ids_m:
+		var md: Dictionary = modules[id]
+		var magique: bool = not Dictionary(md.get("elements", {})).is_empty() or int(md.get("cout_mana", 0)) > 0
+		if "module_unique" in base.get("tags", []) or (grimoire == magique):
+			pool.append(id)
+	if pool.is_empty():
+		pool = ids_m
+	var choisi_m := str(pool[rng.randi_range(0, pool.size() - 1)])
+	inst["modules"] = [choisi_m]
+	inst["domaine"] = str(modules[choisi_m].get("module_type", "noyau"))
+	inst["difficulte"] = int(lv.difficulte_base) + maxi(0, profondeur - 1) * int(lv.difficulte_par_etage) / 2
+	inst["nom"] = {"affixe": "", "params": {}, "module": str(modules[choisi_m].get("name_key", choisi_m))}
 
 
 static func _dominante(v: Dictionary) -> String:

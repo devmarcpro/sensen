@@ -415,14 +415,7 @@ for _mid in sorted(set(modules_cat) - _atteignables):
 
 # 25. « aucun chiffre fixe » (Grimoires et manuels) : les quantites de livres et de charges sont des DES
 _DES = re.compile(r"^\d*d\d+([+-]\d+)?$|^\d+$")
-for _cle, _v in conf("loot_rules")["livres"].get("composition", {}).items():
-    if _cle.startswith("_"): continue
-    if not isinstance(_v, str) or not _DES.match(_v):
-        probs["livres.composition : pas une notation de des"].append("%s = %r" % (_cle, _v))
-for _cle in ("charges_des", "charges_depart_des"):
-    _v = conf("combat_rules").get("modules", {}).get(_cle)
-    if not isinstance(_v, str) or "d" not in str(_v):
-        probs["modules.%s : doit etre un de, pas un entier" % _cle].append(repr(_v))
+# (les charges de module n'existent plus : apprendre est definitif, designer 2026-08-31)
 # 26. toute fiche de module porte une famille (le rangement en dossiers en depend)
 for _mid, _m in modules_cat.items():
     if not _m.get("famille"):

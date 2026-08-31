@@ -17,5 +17,45 @@
   "points_creation_bonus": 15,
   "tags": [
     "cache"
+  ],
+  "capacites": [
+    {
+      "id": "l_ombre_voile",
+      "name_key": "module.voile.name",
+      "modules": [
+        "ligne",
+        "voile"
+      ]
+    },
+    {
+      "id": "l_ombre_voile_de_brume",
+      "name_key": "module.voile_de_brume.name",
+      "modules": [
+        "ligne",
+        "voile_de_brume"
+      ]
+    },
+    {
+      "id": "l_ombre_etincelle",
+      "name_key": "module.etincelle.name",
+      "modules": [
+        "ligne",
+        "etincelle"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
   ]
 }

@@ -17,5 +17,45 @@
   "points_creation_bonus": 15,
   "tags": [
     "cache"
+  ],
+  "capacites": [
+    {
+      "id": "l_ecarlate_offrande",
+      "name_key": "module.offrande.name",
+      "modules": [
+        "soi",
+        "offrande"
+      ]
+    },
+    {
+      "id": "l_ecarlate_saignee",
+      "name_key": "module.saignee.name",
+      "modules": [
+        "soi",
+        "saignee"
+      ]
+    },
+    {
+      "id": "l_ecarlate_saignement",
+      "name_key": "module.saignement.name",
+      "modules": [
+        "point",
+        "saignement"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
   ]
 }

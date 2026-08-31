@@ -16,5 +16,45 @@
   "points_creation_bonus": 15,
   "tags": [
     "cache"
+  ],
+  "capacites": [
+    {
+      "id": "le_porteur_ancrage",
+      "name_key": "module.ancrage.name",
+      "modules": [
+        "point",
+        "ancrage"
+      ]
+    },
+    {
+      "id": "le_porteur_empoigne",
+      "name_key": "module.empoigne.name",
+      "modules": [
+        "point",
+        "empoigne"
+      ]
+    },
+    {
+      "id": "le_porteur_levitation",
+      "name_key": "module.levitation.name",
+      "modules": [
+        "ligne",
+        "levitation"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
   ]
 }

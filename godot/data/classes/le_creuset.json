@@ -27,5 +27,49 @@
   "points_creation_bonus": 0,
   "tags": [
     "visible"
+  ],
+  "capacites": [
+    {
+      "id": "le_creuset_fiole",
+      "name_key": "module.fiole.name",
+      "modules": [
+        "soi",
+        "fiole"
+      ]
+    },
+    {
+      "id": "le_creuset_vapeur",
+      "name_key": "module.vapeur.name",
+      "modules": [
+        "ligne",
+        "vapeur"
+      ]
+    },
+    {
+      "id": "le_creuset_etincelle",
+      "name_key": "module.etincelle.name",
+      "modules": [
+        "ligne",
+        "etincelle"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "arme",
+      "ref": "proto_dague"
+    },
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
   ]
 }

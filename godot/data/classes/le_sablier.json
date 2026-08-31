@@ -16,5 +16,45 @@
   "points_creation_bonus": 15,
   "tags": [
     "cache"
+  ],
+  "capacites": [
+    {
+      "id": "le_sablier_celerite",
+      "name_key": "module.celerite.name",
+      "modules": [
+        "ligne",
+        "celerite"
+      ]
+    },
+    {
+      "id": "le_sablier_rapt_de_tempo",
+      "name_key": "module.rapt_de_tempo.name",
+      "modules": [
+        "ligne",
+        "rapt_de_tempo"
+      ]
+    },
+    {
+      "id": "le_sablier_torpeur",
+      "name_key": "module.torpeur.name",
+      "modules": [
+        "ligne",
+        "torpeur"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
   ]
 }

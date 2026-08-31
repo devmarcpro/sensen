@@ -17,5 +17,45 @@
   "points_creation_bonus": 15,
   "tags": [
     "cache"
+  ],
+  "capacites": [
+    {
+      "id": "le_passeur_convocation",
+      "name_key": "module.convocation.name",
+      "modules": [
+        "ligne",
+        "convocation"
+      ]
+    },
+    {
+      "id": "le_passeur_portail",
+      "name_key": "module.portail.name",
+      "modules": [
+        "ligne",
+        "portail"
+      ]
+    },
+    {
+      "id": "le_passeur_traversee",
+      "name_key": "module.traversee.name",
+      "modules": [
+        "ligne",
+        "traversee"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
   ]
 }

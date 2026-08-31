@@ -101,6 +101,11 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 >
 > Conséquence assumée : les **loci du visage ne s'affichent que si l'espèce a un visage** — une araignée n'a ni nez ni coiffure ; ses réglages se limitent à la teinte et à la taille. Quatre loci nouveaux pour tous : **taille** (petite, moyenne, grande — elle multiplie l'échelle du rig), **sourcils**, **barbe** (aucune, courte, longue — elle prend le pas sur le défaut de la race) et **marque** (aucune, cicatrice, tatouage).
 
+> [!success] Décidé le 2026-08-31 — la classe donne les sorts et la hotbar (designer, point 45)
+> L'écran de création **ne propose plus de sorts** : les sorts de départ sont **ceux de la classe**, comme ses armes et ses compétences. Chaque classe déclare en données son **loadout de hotbar** — ses armes du râtelier et ses capacités assemblées, dans l'ordre où elles apparaissent sous les touches 1-0. Le joueur reste libre de tout recomposer (le no-limit d'assemblage ne bouge pas) et de réaffecter ses cases par glisser-déposer ; la classe donne le **point de départ**, pas une limite.
+>
+> Autre règle du même jour : **plus de capacité spéciale au clic droit**. Le menu contextuel garde les gestes du monde — parler, apprivoiser, attaquer, descendre, traverser un portail — et perd tout ce qui était une capacité déguisée (saisir, mordre, rapt de tempo, affût, traversée de mur, relève, armes fantômes, attaque lourde). **Tout ce qui ressemble à un sort se fait avec des modules**, par la hotbar ou le composeur.
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

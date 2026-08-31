@@ -24,5 +24,49 @@
   "points_creation_bonus": 0,
   "tags": [
     "cache"
+  ],
+  "capacites": [
+    {
+      "id": "la_meche_bombe",
+      "name_key": "module.bombe.name",
+      "modules": [
+        "point",
+        "bombe"
+      ]
+    },
+    {
+      "id": "la_meche_etincelle",
+      "name_key": "module.etincelle.name",
+      "modules": [
+        "ligne",
+        "etincelle"
+      ]
+    },
+    {
+      "id": "la_meche_gel",
+      "name_key": "module.gel.name",
+      "modules": [
+        "ligne",
+        "gel"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "arme",
+      "ref": "proto_masse"
+    },
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
   ]
 }

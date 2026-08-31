@@ -1110,8 +1110,6 @@
   },
   "modules": {
     "_doc": "Charges de modules (Grimoires et manuels) : des DES, multiplies par skill_factor(Lecture) — aucun chiffre fixe. ; tout_au_depart : mode test, le client credite tous les modules (99 charges) a chaque nouvelle partie",
-    "charges_des": "1d4",
-    "charges_depart_des": "2d4",
     "competence": "lecture",
     "cout_variance_des": "2d6",
     "cout_variance_moyenne": 7.0,

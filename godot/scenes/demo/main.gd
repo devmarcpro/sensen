@@ -219,7 +219,7 @@ func _nouvelle_partie() -> void:
 	titre_ouvert = false
 	minimap.visible = true
 	var cfg_c: Dictionary = GameData.config("creation")
-	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": int(cfg_c.get("annee_defaut", 1000)), "nom": "", "espece": "", "sorts": [], "apparence": {}}
+	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": int(cfg_c.get("annee_defaut", 1000)), "nom": "", "espece": "", "apparence": {}}
 	titre_ouvert = true   # l'écran de création est un vrai écran (Écrans d'interface, 2026-08-30) : rien ne tourne derrière
 	minimap.visible = false
 	ui.text = ""
@@ -315,14 +315,9 @@ func _creer_personnage() -> void:
 	classes.sort()
 	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
 	var fiche := Etres.creer_personnage("creature.aventurier.name", races[creation.race % races.size()], classes[creation.classe % classes.size()], creation.points, int(creation.annee), prog)
-	fiche.capacites = GameData.entree("creatures", "aventurier").get("capacites", []).duplicate(true)
-	# Sorts recommandés cochés à la création (designer, point 38) : ils rejoignent les capacités de départ.
-	var recos: Array = GameData.config("creation").get("sorts_recommandes", [])
-	var coches: Array = creation.get("sorts", [])
-	for r in recos:
-		if not (str(r.id) in coches):
-			continue
-		fiche.capacites.append({"id": str(r.id), "name_key": str(r.name_key), "modules": Array(r.modules).duplicate()})
+	var cl_dep: Dictionary = GameData.entree("classes", str(fiche.classe))   # les sorts sont ceux de la classe (point 45)
+	fiche.capacites = cl_dep.get("capacites", GameData.entree("creatures", "aventurier").get("capacites", [])).duplicate(true)
+	fiche["hotbar"] = cl_dep.get("hotbar", []).duplicate(true)   # et son loadout de hotbar
 	# Personnalisation (Écrans d'interface, 2026-08-30) : le nom choisi et la teinte du personnage.
 	var nom_choisi := str(creation.get("nom", "")).strip_edges()
 	if not nom_choisi.is_empty():
@@ -956,14 +951,7 @@ func _options_tuile(t: Vector2i) -> Array:
 			res.append({"id": "parler", "cible": occ})
 		if "bete" in x.get("tags", []) and not x.has("maitre") and d <= 1:
 			res.append({"id": "apprivoiser", "cible": occ})
-		if sim.a_talent(j, "saisie") and d == 1 and str(j.get("porte", "")).is_empty():
-			res.append({"id": "saisir", "cible": occ})
-		if sim.a_talent(j, "soif_de_sang") and d == 1:
-			res.append({"id": "mordre", "cible": occ})
-		if sim.a_talent(j, "maitre_du_tempo") and x.camp != j.camp and d <= int(sim.regles.r.talents.maitre_du_tempo.portee):
-			res.append({"id": "tempo", "cible": occ})
 		res.append({"id": "attaquer", "cible": occ})
-		res.append({"id": "lourde", "cible": occ})
 		if sim.ennemis(j, x) and not sim.compagnons_de(j).is_empty():   # Compagnons : cibler en priorité
 			res.append({"id": "designer", "cible": occ})
 		return res
@@ -979,26 +967,12 @@ func _options_tuile(t: Vector2i) -> Array:
 		res.append({"id": "lancer_etre", "vers": t})
 	if d == 0 and sim.portails.has(t):
 		res.append({"id": "traverser"})
-	if sim.a_talent(j, "releveur") and d <= int(sim.regles.r.talents.releveur.portee) and g.occupant(t).is_empty():
-		for x in sim.entites.values():
-			if not x.vivant and x.pos == t and not bool(x.get("releve", false)):
-				res.append({"id": "relever", "cible": str(x.id), "nom": tr(x.name_key)})
-				break
-	if sim.a_talent(j, "sans_chair") and d == 2 and g.dans(t) and not g.bloque_passage(t) and g.occupant(t).is_empty():
-		var dm: Vector2i = t - j.pos
-		if (dm.x == 0 or dm.y == 0 or absi(dm.x) == absi(dm.y)) and g.bloque_passage(j.pos + Vector2i(signi(dm.x), signi(dm.y))):
-			res.append({"id": "traverser_mur", "cible": t})
-	if sim.a_talent(j, "affut") and d == 1 and g.dans(t) and not g.bloque_passage(t) and g.occupant(t).is_empty():
-		res.append({"id": "affut", "cible": t})
 	if d == 0:
 		for el in sim.segments_possibles(Etres.arme(j, sim.items)):   # l'arme mixte choisit son segment
 			if str(el) != str(j.get("segment_prefere", "")):
 				res.append({"id": "segment_prefere", "element": str(el), "nom": tr("element." + str(el))})
 		if j.has("segment_prefere"):
 			res.append({"id": "segment_dominant"})
-	if d == 0 and str(j.corps.get("silhouette", "humanoide")) == "humanoide":
-		for el in sim.regles.r.armes_fantomes.elements:
-			res.append({"id": "arme_fantome", "element": str(el), "nom": tr("element." + str(el))})
 	if d == 0 and sim.a_talent(j, "lune"):
 		res.append({"id": "transformer", "forme_humaine": bool(j.get("forme_bestiale", false))})
 	if d == 0 and sim.a_talent(j, "masques"):
@@ -1010,8 +984,6 @@ func _options_tuile(t: Vector2i) -> Array:
 			if gl.pos == t and str(gl.source) == j.id:
 				res.append({"id": "declencher_glyphe", "cible": t})
 				break
-	if sim.a_talent(j, "breche") and d == 1 and g.dans(t) and not g.bloque_passage(t) and g.occupant(t).is_empty() and not sim.portails.has(g.idx(t)):
-		res.append({"id": "poser_portail", "cible": t})
 	if d != 1:
 		return res
 	var tags: Array = g.contenu_de(t).get("tags", [])

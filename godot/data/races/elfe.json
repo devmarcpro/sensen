@@ -26,6 +26,6 @@
     "teinte_peau": "ivoire",
     "teinte_cheveux": "blond",
     "oreilles": 3.2,
-    "barbe": 0.0
+    "barbe": "aucune"
   }
 }

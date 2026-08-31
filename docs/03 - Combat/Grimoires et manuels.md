@@ -49,6 +49,11 @@ Les modules ne se craftent pas : ils s'obtiennent en lisant des livres à usage 
 > [!success] Décidé et codé le 2026-08-31 — les livres de modules
 > **Instruction du designer** : « crée les livres de modules et rajoute-les au loot ». Un troisième livre à côté du grimoire (sort en kit) et du manuel : `items/manuel/livre_module.json` (tag `module_unique`) — il enseigne **UN module précis**, tiré uniformément dans tout le catalogue à la génération, et le porte à son nom : « Livre : Poussée (difficulté 15) ». Difficulté plus douce qu'un grimoire (base + ½ par étage) ; la lecture passe par la voie normale (jet de Lecture, charges par `charges_lues`, échec avec ses effets). Il entre dans le loot par la catégorie `grimoires` des coffres (le filtre `types_any: [grimoire, manuel]` le prend dès qu'il existe) et chez les marchands qui vendent des livres. Au passage : le nom des grimoires et manuels ne disait ni domaine ni difficulté (la branche d'affichage existait côté client, la simulation ne la remplissait jamais) — corrigé.
 
+> [!success] Décidé le 2026-08-31 — charges infinies, un livre = un module (designer, point 45)
+> Deux règles de ce chapitre tombent, sur décision du designer, et le callout le plus récent l'emporte : **les charges de module n'existent plus**. Apprendre un module, c'est le connaître **pour toujours** — plus de munitions, plus de `charges_des`, plus de compte à rebours dans le composeur. Ce qui limite un sort reste le **mana**, l'**endurance**, les **ticks** et la **surchauffe** — les coûts qui se paient à chaque lancer, pas un stock qui s'épuise.
+>
+> Et **tout livre n'enseigne qu'un seul module** : le grimoire « sort en kit » à 2-4 modules disparaît au profit du livre à module unique, déjà en place (`module_unique`), désormais la règle pour le grimoire comme pour le manuel — le domaine et la difficulté continuent de les distinguer. Un livre lu est un module gagné, définitivement, ou un jet raté et un livre perdu.
+
 ## Liens
 - **Dépend de** : [[Vocabulaire des modules — six axes]], [[Donjons — structure et intégration]]
 - **Alimente** : [[Lecture des livres]], [[Modules]], [[Structure compétences-modules-slots]]

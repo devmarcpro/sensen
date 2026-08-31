@@ -29,5 +29,53 @@
   "points_creation_bonus": 0,
   "tags": [
     "visible"
+  ],
+  "capacites": [
+    {
+      "id": "le_sabre_frappe",
+      "name_key": "module.frappe.name",
+      "modules": [
+        "point",
+        "frappe"
+      ]
+    },
+    {
+      "id": "le_sabre_etincelle",
+      "name_key": "module.etincelle.name",
+      "modules": [
+        "ligne",
+        "etincelle"
+      ]
+    },
+    {
+      "id": "le_sabre_gel",
+      "name_key": "module.gel.name",
+      "modules": [
+        "ligne",
+        "gel"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "arme",
+      "ref": "proto_epee"
+    },
+    {
+      "type": "arme",
+      "ref": "proto_bouclier"
+    },
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
   ]
 }

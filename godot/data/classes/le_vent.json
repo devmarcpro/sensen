@@ -18,5 +18,45 @@
   "points_creation_bonus": 15,
   "tags": [
     "visible"
+  ],
+  "capacites": [
+    {
+      "id": "le_vent_etincelle",
+      "name_key": "module.etincelle.name",
+      "modules": [
+        "ligne",
+        "etincelle"
+      ]
+    },
+    {
+      "id": "le_vent_gel",
+      "name_key": "module.gel.name",
+      "modules": [
+        "ligne",
+        "gel"
+      ]
+    },
+    {
+      "id": "le_vent_baume",
+      "name_key": "module.baume.name",
+      "modules": [
+        "ligne",
+        "baume"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
   ]
 }

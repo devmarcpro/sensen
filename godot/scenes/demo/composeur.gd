@@ -221,10 +221,7 @@ func _reconstruire_catalogue(j: Dictionary) -> void:
 		if du_type.is_empty():
 			continue
 		du_type.sort()
-		du_type.sort_custom(func(a: String, b: String) -> bool:
-			var ca: int = int(j.get("modules_charges", {}).get(a, 0))
-			var cb: int = int(j.get("modules_charges", {}).get(b, 0))
-			return ca > cb if ca != cb else a < b)
+		du_type.sort()   # plus de charges (designer 2026-08-31) : l'ordre alphabétique suffit
 		var ferme: bool = bool(replie.get(type, false))
 		var entete := Button.new()   # une section par type, repliable d'un clic (demande du designer)
 		entete.text = "%s %s %s (%d)" % ["▸" if ferme else "▾", GLYPHES.get(type, ""), tr("type_module." + type), du_type.size()]
@@ -247,7 +244,7 @@ func _reconstruire_catalogue(j: Dictionary) -> void:
 			var carte := CarteModule.new()
 			carte.composeur = self
 			carte.module = m
-			carte.charges = int(j.get("modules_charges", {}).get(m, 0))
+			carte.charges = -1   # un module connu l'est pour toujours : rien à afficher en coin
 			carte.fois = sequence().count(m)
 			carte.index = ids.size()
 			grille.add_child(carte)
@@ -316,9 +313,11 @@ func _rafraichir_detail(j: Dictionary) -> void:
 	if selection < ids.size():
 		var m := ids[selection]
 		var md: Dictionary = GameData.catalogues.modules.get(m, {})
-		var ch: int = int(j.get("modules_charges", {}).get(m, 0))
 		texte = tr("ui.composer.module").format({"nom": tr(md.get("name_key", m)), "desc": str(md.get("description", ""))}) \
-			+ "\n" + tr("ui.composer.charges").format({"n": ch}) + "\n" + ecrans._contribution_module(j, m, false) + "\n\n"
+			+ "
+" + ecrans._contribution_module(j, m, false) + "
+
+"
 	if not plan.is_empty():
 		texte += ecrans._apercu_plan(plan)
 	else:
@@ -529,7 +528,7 @@ class CarteModule extends Control:
 		mouse_exited.connect(func() -> void: survolee = false; queue_redraw())
 
 	func _draw() -> void:
-		Composeur.dessiner_carte(self, Composeur.CARTE, module, charges, fois, 1.0 if charges > 0 else 0.45)
+		Composeur.dessiner_carte(self, Composeur.CARTE, module, charges, fois, 1.0)
 		if selectionnee:
 			draw_rect(Rect2(Vector2(1, 1), Composeur.CARTE - Vector2(2, 2)), Color(1, 1, 1, 0.95), false, 2.0)
 		elif survolee:   # la souris passe : la carte s'éclaire
