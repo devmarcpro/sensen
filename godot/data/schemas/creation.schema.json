@@ -16,30 +16,6 @@
       "type": "integer",
       "minimum": 1
     },
-    "teintes": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "required": [
-          "id",
-          "rgb"
-        ],
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "rgb": {
-            "type": "array",
-            "minItems": 3,
-            "maxItems": 3,
-            "items": {
-              "type": "number"
-            }
-          }
-        }
-      }
-    },
     "max_sorts": {
       "type": "integer",
       "minimum": 0
@@ -78,7 +54,6 @@
     "points_base",
     "max_par_stat",
     "annee_defaut",
-    "nom_max",
-    "teintes"
+    "nom_max"
   ]
 }

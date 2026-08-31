@@ -2287,7 +2287,6 @@ ui.creation.classe_l,Classe : {classe}
 ui.creation.annee_l,Née en {annee} — signe {element}-{animal}
 ui.creation.points_l,Points à répartir : {restants} / {total}
 ui.creation.stat_l,{stat} : {valeur} (+{points})
-ui.creation.teinte_l,Teinte : {teinte}
 ui.creation.commencer,Commencer
 ui.creation.d_nom,"Le nom du personnage — tapez les lettres, Retour arrière efface ({max} lettres au plus). Sans nom, il s'appellera Aventurier."
 ui.creation.talent_classe,Talent de classe : {talent}
@@ -2300,7 +2299,6 @@ ui.creation.kit_l,Kit de départ : {liste}
 ui.creation.d_classe,"La classe donne son talent, ses compétences, son équipement et ses potentiels — tout le reste s'apprend par l'usage."
 ui.creation.d_annee,"L'année de naissance fixe le signe astrologique, qui colore les potentiels (← →)."
 ui.creation.d_points,"Chaque stat part de 5 ; jusqu'à {max} points par stat, plus les bonus de race et de classe."
-ui.creation.d_teinte,"La couleur du personnage — ses sprites viendront plus tard, la teinte reste."
 ui.creation.d_commencer,"Valider le personnage, puis choisir le monde (graine) et la case de départ."
 ui.creation.aide2,← → ou + / − : modifier · ↑ ↓ : ligne · Entrée : suivant / valider · Échap : retour
 stat.force.desc,"Force : les dégâts des armes lourdes, le poids porté, creuser."
@@ -2309,14 +2307,6 @@ stat.endurance.desc,"Endurance : les points de vie (20 + End × 4), l'endurance 
 stat.volonte.desc,"Volonté : le mana, la résistance aux contrôles, la magie."
 stat.perception.desc,"Perception : la portée de vue et de détection, la récolte, le tir."
 stat.charisme.desc,"Charisme : le commerce, les compagnons, les réputations."
-ui.teinte.azur,azur
-ui.teinte.ocre,ocre
-ui.teinte.sauge,sauge
-ui.teinte.pourpre,pourpre
-ui.teinte.cendre,cendre
-ui.teinte.rubis,rubis
-ui.teinte.ivoire,ivoire
-ui.teinte.nuit,nuit
 ui.inventaire.col_nom,Nom
 ui.inventaire.col_type,Type
 ui.inventaire.col_qualite,Qualité

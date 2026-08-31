@@ -17,6 +17,8 @@ var detail: RichTextLabel
 var apercu_sort: ApercuSort   # l'aperçu visuel du sort (écran Composer, Écrans d'interface)
 var cadre_perso: Control      # l'aperçu du personnage (écran Création) : un paperdoll dans un cadre
 var apercu_perso: Paperdoll
+var cadre_visage: Control          # le cadre du portrait : il rogne tout ce qui n'est pas la tête
+var portrait_perso: Paperdoll      # le même paperdoll, zoomé sur le visage (designer, point 43)
 var barres_perso: BarresCreation   # vie, endurance, mana sous l'aperçu (designer, point 42)
 var composeur: Composeur      # le composeur en glisser-déposer (écran Composer)
 var corps: HBoxContainer      # liste + détail : caché quand le composeur est ouvert
@@ -89,16 +91,27 @@ func _ready() -> void:
 	apercu_sort = ApercuSort.new()
 	apercu_sort.visible = false
 	cadre_perso = Control.new()   # Création : le personnage en grand, au-dessus du détail
-	cadre_perso.custom_minimum_size = Vector2(0, 300)
+	cadre_perso.custom_minimum_size = Vector2(0, 380)
 	cadre_perso.visible = false
 	cadre_perso.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	droite.add_child(cadre_perso)
 	apercu_perso = Paperdoll.new()
-	apercu_perso.scale = Vector2(3.2, 3.2)
-	apercu_perso.position = Vector2(300, 205)
+	apercu_perso.scale = Vector2(5.4, 5.4)   # le personnage en grand (designer, point 43)
+	apercu_perso.position = Vector2(210, 300)
 	cadre_perso.add_child(apercu_perso)
+	cadre_visage = Control.new()   # à sa droite, le seul visage, cadré sur la tête
+	cadre_visage.position = Vector2(340, 60)
+	cadre_visage.size = Vector2(170, 170)
+	cadre_visage.custom_minimum_size = Vector2(170, 170)
+	cadre_visage.clip_contents = true
+	cadre_visage.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cadre_perso.add_child(cadre_visage)
+	portrait_perso = Paperdoll.new()
+	portrait_perso.scale = Vector2(11.0, 11.0)
+	portrait_perso.position = Vector2(85, 415)
+	cadre_visage.add_child(portrait_perso)
 	barres_perso = BarresCreation.new()
-	barres_perso.position = Vector2(0, 236)
+	barres_perso.position = Vector2(0, 316)
 	barres_perso.custom_minimum_size = Vector2(0, 60)
 	barres_perso.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	cadre_perso.add_child(barres_perso)
@@ -1339,7 +1352,6 @@ func _construire_creation() -> void:
 	var c: Dictionary = main.creation
 	var fiche := _fiche_apercu()
 	var cfg: Dictionary = GameData.config("creation")
-	var teintes: Array = cfg.get("teintes", [])
 	var pts := _points_creation()
 	var nom: String = str(c.get("nom", ""))
 	liste.add_item(tr("ui.creation.nom_l").format({"nom": nom if not nom.is_empty() else tr("ui.creation.nom_vide")}))
@@ -1355,9 +1367,6 @@ func _construire_creation() -> void:
 	for st in main.STATS:
 		liste.add_item(tr("ui.creation.stat_l").format({"stat": tr("stat." + st), "valeur": int(fiche.corps.stats[st]), "points": int(c.points.get(st, 0))}))
 		entrees.append({"kind": "creation", "id": "stat:" + st})
-	var tn: Dictionary = teintes[int(c.get("teinte", 0)) % teintes.size()] if not teintes.is_empty() else {"id": "azur"}
-	liste.add_item(tr("ui.creation.teinte_l").format({"teinte": tr("ui.teinte." + str(tn.id))}))
-	entrees.append({"kind": "creation", "id": "teinte"})
 	var app: Dictionary = _apparence_apercu(fiche)   # apparence : les loci visuels (designer, points 39 et 41)
 	for ligne in _lignes_apparence():
 		liste.add_item(tr("ui.creation.app_l").format({
@@ -1384,15 +1393,13 @@ func _construire_creation() -> void:
 			entrees.append({"kind": "creation", "id": "sort:" + str(r.id)})
 	liste.add_item(tr("ui.creation.commencer"))
 	entrees.append({"kind": "creation", "id": "commencer"})
-	_apercu_personnage(fiche, tn)
+	_apercu_personnage(fiche)
 
 
 ## Le personnage en grand : le paperdoll du jeu, avec la teinte choisie et l'équipement de départ de la classe.
-func _apercu_personnage(fiche: Dictionary, tn: Dictionary) -> void:
+func _apercu_personnage(fiche: Dictionary) -> void:
 	var e: Dictionary = fiche.duplicate(true)
 	e["apparence"] = _apparence_apercu(fiche)
-	if tn.has("rgb"):
-		e.teinte = [float(tn.rgb[0]), float(tn.rgb[1]), float(tn.rgb[2])]
 	var items := {}
 	var equip := {}
 	for id in fiche.get("equipement", []):
@@ -1407,6 +1414,8 @@ func _apercu_personnage(fiche: Dictionary, tn: Dictionary) -> void:
 	e["orientation"] = Vector2i(1, 1)
 	apercu_perso.configurer(e, GameData.entree("rigs", str(e.skeleton_template)), items, GameData.catalogues.functionalities, GameData.config("palette_materiaux"))
 	apercu_perso.queue_redraw()
+	portrait_perso.configurer(e, GameData.entree("rigs", str(e.skeleton_template)), items, GameData.catalogues.functionalities, GameData.config("palette_materiaux"))
+	portrait_perso.queue_redraw()
 	var regles := Regles.new(GameData.config("combat_rules"))   # les trois jauges du personnage à naître (point 42)
 	var stats: Dictionary = fiche.corps.stats
 	barres_perso.valeurs = [
@@ -1454,8 +1463,6 @@ func _detail_creation(id: String) -> String:
 		"points":
 			l.append(tr("ui.creation.points").format({"restants": pts.restants, "total": pts.total}))
 			l.append(tr("ui.creation.d_points").format({"max": pts.max}))
-		"teinte":
-			l.append(tr("ui.creation.d_teinte"))
 		"commencer":
 			l.append(tr("ui.creation.d_commencer"))
 		_:
@@ -1504,8 +1511,6 @@ func _action_creation(id: String, sens: int) -> void:
 			c.classe = posmod(int(c.classe) + sens, main._classes_visibles().size())
 		"annee":
 			c.annee = int(c.annee) + sens
-		"teinte":
-			c.teinte = posmod(int(c.get("teinte", 0)) + sens, maxi(1, GameData.config("creation").get("teintes", []).size()))
 		"depart":   # Départ : Camp / Donjon (designer, point 34)
 			c.depart = posmod(int(c.get("depart", 0)) + sens, 2)
 		"sorts":   # la ligne d'en-tête ne coche rien : elle mène aux sorts

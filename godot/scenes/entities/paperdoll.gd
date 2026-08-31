@@ -75,6 +75,8 @@ func _draw() -> void:
 	var monde := _poser_segments(f, miroir)
 	var peint := _segments_peints()
 	var teinte := Color(e.teinte[0], e.teinte[1], e.teinte[2])
+	if not _ap.is_empty():   # nu : la peau peint le corps entier, l'équipement seul le recouvre (point 43)
+		teinte = _teinte_de("teintes_peau", str(_ap.get("teinte_peau", "")), teinte)
 	for nom: String in f.ordre:
 		if not monde.has(nom):
 			continue

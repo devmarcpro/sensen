@@ -219,7 +219,7 @@ func _nouvelle_partie() -> void:
 	titre_ouvert = false
 	minimap.visible = true
 	var cfg_c: Dictionary = GameData.config("creation")
-	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": int(cfg_c.get("annee_defaut", 1000)), "nom": "", "teinte": 0, "sorts": [], "apparence": {}}
+	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": int(cfg_c.get("annee_defaut", 1000)), "nom": "", "sorts": [], "apparence": {}}
 	titre_ouvert = true   # l'écran de création est un vrai écran (Écrans d'interface, 2026-08-30) : rien ne tourne derrière
 	minimap.visible = false
 	ui.text = ""
@@ -328,10 +328,9 @@ func _creer_personnage() -> void:
 	if not nom_choisi.is_empty():
 		GameData.enregistrer_nom("joueur.nom", nom_choisi)
 		fiche.name_key = "joueur.nom"
-	var teintes: Array = GameData.config("creation").get("teintes", [])
-	if not teintes.is_empty():
-		var tn: Dictionary = teintes[int(creation.get("teinte", 0)) % teintes.size()]
-		fiche.teinte = [float(tn.rgb[0]), float(tn.rgb[1]), float(tn.rgb[2])]
+	for t_peau in GameData.config("apparence").get("teintes_peau", []):   # le teint peint tout le corps (point 43)
+		if str(t_peau.id) == str(creation.get("apparence", {}).get("teinte_peau", fiche.get("apparence", {}).get("teinte_peau", ""))):
+			fiche.teinte = [float(t_peau.rgb[0]), float(t_peau.rgb[1]), float(t_peau.rgb[2])]
 	if not fiche.has("modules_connus"):
 		fiche["modules_connus"] = []
 	for cap in fiche.capacites:   # les modules des capacités de départ sont connus : on peut les recombiner (Structure compétences-modules-slots)
