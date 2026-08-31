@@ -20,6 +20,9 @@ func _ready() -> void:
 			cible = int(args[i + 1])
 		elif args[i] == "--arene" and i + 1 < args.size():
 			arene = int(args[i + 1])
+	for il in args.size():   # --langue fr|en : force la locale AVANT la scène — vérifier le rendu anglais à l'écran
+		if args[il] == "--langue" and il + 1 < args.size():
+			TranslationServer.set_locale(str(args[il + 1]))
 	if "--plein-ecran" in args:   # --plein-ecran : la fenêtre passe en plein écran AVANT la capture (README, designer 2026-08-31)
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	var scene: Node = load("res://scenes/demo/main.tscn").instantiate()

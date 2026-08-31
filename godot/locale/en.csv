@@ -700,7 +700,7 @@ ui.carte.survol,"({x},{y}) · {biome} · danger {danger}"
 ui.carte.survol_derive," · drift {d}"
 ui.carte.survol_lieu," · place: {a} {pa} % · {b} {pb} %"
 ui.carte.survol_royaume," · {nom}{capitale} — {gouv}, {taille}, {n} cells · {etat}"
-ui.carte.titre,=== WORLD MAP — click: fast travel to an explored cell, or claim a neighbouring one · arrows: scroll · Esc: close ===
+ui.carte.titre,"=== WORLD MAP — click: fast travel to an explored cell, or claim a neighbouring one · arrows: scroll · Esc: close ==="
 ui.carte.vacance,vacant throne
 ui.case,"tile ({x},{y}) h={h} · Δh vs you: {dh}"
 ui.chaine,chain: {segments}
@@ -829,7 +829,7 @@ ui.gestion.commande_aucune,order: none (the register is empty)
 ui.gestion.commande_chatoyant," IRIDESCENT"
 ui.gestion.defaite,lost
 ui.gestion.elevage,"breeding: {n} varieties in the register ({especes})"
-ui.gestion.gouv_aide,G: change government (4 weeks of transition, −10 mood)
+ui.gestion.gouv_aide,"G: change government (4 weeks of transition, −10 mood)"
 ui.gestion.parcelles,"plots: {n} ({mures} ripe)"
 ui.gestion.pieces,"valid rooms: {n} ({logees} residents housed)"
 ui.gestion.raid,"strength {force} vs defence {defense} — {issue} (losses {perte} %)"
@@ -1665,9 +1665,9 @@ journal.armure_refusee,a wraith wears no armour
 journal.artefact,"an artefact lies on {nom}'s remains"
 journal.assemble,"{nom} assembles {objet} ({qualite})"
 journal.assigne,"{nom} is assigned: {fonction}"
-journal.bete_refus,in beast form: no ability, no speech
+journal.bete_refus,"in beast form: no ability, no speech"
 journal.bombe_lancee,"{nom} throws a bomb ({retard} ticks)"
-journal.bombe_refusee,throwing: six tiles at most, in line of sight
+journal.bombe_refusee,"throwing: six tiles at most, in line of sight"
 journal.brule,"{nom} burns ({degats})"
 journal.brulure_eteinte,the water puts out the burn
 journal.caisse,"{nom} collects the takings: {n} gold"
@@ -1977,7 +1977,7 @@ ui.ecran.triche,"CHEATS (V) — get anything, trigger anything · invincible: {i
 ui.ecran.triche_liste,"CHEATS — {quoi} (Enter: give / trigger · Esc: back)"
 ui.triche.oui,yes
 ui.triche.non,no
-ui.triche.or,+10,000 gold
+ui.triche.or,+10 000 gold
 ui.triche.soin,"Restore everything (HP, stamina, mana, hunger, statuses)"
 ui.triche.invincible,Invincibility (toggle)
 ui.triche.competences,All skills to level 50

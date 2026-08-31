@@ -522,7 +522,7 @@ option.forme_humaine,Reprendre forme humaine
 journal.transformation,"{nom} se transforme"
 journal.forme_humaine,"{nom} reprend forme humaine"
 journal.forme_forcee,la lune impose la bête cette nuit
-journal.bete_refus,sous forme bestiale : ni capacité, ni parole
+journal.bete_refus,"sous forme bestiale : ni capacité, ni parole"
 journal.lycanthrope,"{nom} s'éveille lycanthrope à l'aube"
 race.spectre.name,Spectre
 talent.sans_chair.name,Sans chair
@@ -656,14 +656,14 @@ journal.amorce,"l'explosion amorce une autre bombe"
 item.bombe.name,Bombe
 recipe.fabriquer_bombe.name,Fabriquer une bombe
 journal.bombe_lancee,"{nom} lance une bombe ({retard} ticks)"
-journal.bombe_refusee,lancer : à 6 tuiles au plus, en ligne de vue
+journal.bombe_refusee,"lancer : à 6 tuiles au plus, en ligne de vue"
 journal.explosion,"BOUM — {tuiles} tuile(s) soufflée(s), {etres} être(s) touché(s)"
 journal.explosion_degats,"l'explosion inflige {degats} à {nom}"
 ui.hotbar.objet,"{nom} ×{n}"
 ui.objet.visee,"VISÉE : {nom} — cliquer une tuile"
 ui.ecran.reforger,"Reforger (B) — d'abord l'objet, puis le composant"
 journal.reforge,"{nom} reforge {objet} : {composant} — les affixes tiennent"
-journal.reforge_refuse,reforger : il faut Main du métal, la station de l'objet, et un composant du bon slot
+journal.reforge_refuse,"reforger : il faut Main du métal, la station de l'objet, et un composant du bon slot"
 journal.fiole_vive,"{nom} partage la potion avec {n} allié(s)"
 ui.sac,"sac : {liste}"
 ui.hotbar,"{liste}"
@@ -707,7 +707,6 @@ option.recruter,Recruter
 journal.rien_a_interagir,rien avec quoi interagir autour de toi
 ui.ecran.reforger,"Reforger (B) — d'abord l'objet, puis le composant"
 journal.reforge,"{nom} reforge {objet} : {composant} — les affixes tiennent"
-journal.reforge_refuse,reforger : il faut Main du métal, la station de l'objet, et un composant du bon slot
 journal.fiole_vive,"{nom} partage la potion avec {n} allié(s)"
 talent.ratelier_vivant.name,Râtelier vivant
 talent.ratelier_vivant.desc,"Une fois par chaîne, changer d'arme coûte 0 tick."
@@ -735,7 +734,7 @@ ui.feuille.talents,Talents
 ui.feuille.talent,"{nom} — {desc}"
 ui.ecran.apprendre,Apprendre son talent (Q)
 journal.talent_appris,"{nom} t'enseigne : {talent}"
-journal.talent_refuse,il faut une relation d'au moins 75, et une place pour un talent
+journal.talent_refuse,"il faut une relation d'au moins 75, et une place pour un talent"
 ui.commerce.bourse_cachee,?
 journal.swap_gratuit,"{nom} change d'arme sans perdre un tick (Râtelier vivant)"
 journal.artefact,"un artefact repose sur la dépouille de {nom}"
@@ -972,11 +971,11 @@ ui.gestion.aucun_raid,aucun
 ui.gestion.raid,"force {force} vs défense {defense} — {issue} (pertes {perte} %)"
 ui.gestion.victoire,repoussé
 ui.gestion.defaite,subi
-ui.gestion.gouv_aide,G : changer de gouvernance (4 semaines de transition, −10 d'humeur)
+ui.gestion.gouv_aide,"G : changer de gouvernance (4 semaines de transition, −10 d'humeur)"
 journal.royaume_fonde,"ton territoire est reconnu comme un royaume — gouvernance : {gouv}"
 journal.gouvernance,"transition vers {gouv} : 4 semaines, la population grogne (−10)"
 journal.gouvernance_faite,"le régime est désormais : {gouv}"
-journal.gouvernance_refuse,il faut un royaume (8 cellules, 5 résidents) pour changer de régime
+journal.gouvernance_refuse,"il faut un royaume (8 cellules, 5 résidents) pour changer de régime"
 journal.raid_commence,"RAID ! {n} assaillants approchent du camp (force {force})"
 journal.raid_abstrait,"un raid a frappé le territoire en ton absence : force {force} contre défense {defense} — {issue}"
 journal.raid_fin,"le raid est terminé : {issue} ({morts}/{n} assaillants tombés)"
@@ -1070,7 +1069,7 @@ role.habitation,habitation
 role.champs,champs
 role.ressources,ressources naturelles
 journal.claim,"cellule ({x},{y}) revendiquée pour {or} or ({n} cellules)"
-journal.claim_refuse,impossible de revendiquer : non contiguë, inexplorée, en mer, occupée par un donjon ou un village
+journal.claim_refuse,"impossible de revendiquer : non contiguë, inexplorée, en mer, occupée par un donjon ou un village"
 journal.claim_or,pas assez d'or pour revendiquer ({or} or)
 journal.role,"cellule ({x},{y}) : rôle {role}"
 journal.assigne,"{nom} est assigné : {fonction}"
@@ -1264,7 +1263,7 @@ journal.semaine,"une semaine passe : la corruption dérive ({n} cellules)"
 journal.donjon_nettoye,"le donjon est nettoyé : il restera ouvert un jour et demi"
 journal.donjon_disparu,"l'entrée du donjon s'est effondrée en ({x},{y})"
 journal.donjon_reapparu,"un donjon est réapparu en ({x},{y})"
-ui.carte.titre,=== CARTE DU MONDE — clic : voyage rapide vers une cellule explorée, ou revendiquer une voisine · flèches : défiler · Échap : fermer ===
+ui.carte.titre,"=== CARTE DU MONDE — clic : voyage rapide vers une cellule explorée, ou revendiquer une voisine · flèches : défiler · Échap : fermer ==="
 ui.carte.depart,=== CHOISIS TA CASE DE DÉPART — clic sur une cellule de terre (couleur : biome · orange/rouge : danger · carré doré : donjon) ===
 ui.carte.legende,"trait ocre : route · vert cerclé : ton camp · bleu cerclé : ici · carré doré : donjon · point clair : filon majeur · sombre : jamais explorée"
 journal.voyage,"{nom} voyage jusqu'en ({x},{y}) : {ticks} ticks"
@@ -1440,7 +1439,7 @@ famille.or,or (lingot)
 famille.plomb,plomb (lingot)
 famille.tungstene,tungstène (lingot)
 famille.cuir,cuir
-famille.fibre,fibre (lin, chanvre, coton)
+famille.fibre,"fibre (lin, chanvre, coton)"
 famille.tissu,tissu
 famille.laine,laine
 famille.fourrure,fourrure
