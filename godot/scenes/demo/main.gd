@@ -219,7 +219,7 @@ func _nouvelle_partie() -> void:
 	titre_ouvert = false
 	minimap.visible = true
 	var cfg_c: Dictionary = GameData.config("creation")
-	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": int(cfg_c.get("annee_defaut", 1000)), "nom": "", "teinte": 0}
+	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": int(cfg_c.get("annee_defaut", 1000)), "nom": "", "teinte": 0, "sorts": []}
 	titre_ouvert = true   # l'écran de création est un vrai écran (Écrans d'interface, 2026-08-30) : rien ne tourne derrière
 	minimap.visible = false
 	ui.text = ""
@@ -316,6 +316,13 @@ func _creer_personnage() -> void:
 	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
 	var fiche := Etres.creer_personnage("creature.aventurier.name", races[creation.race % races.size()], classes[creation.classe % classes.size()], creation.points, int(creation.annee), prog)
 	fiche.capacites = GameData.entree("creatures", "aventurier").get("capacites", []).duplicate(true)
+	# Sorts recommandés cochés à la création (designer, point 38) : ils rejoignent les capacités de départ.
+	var recos: Array = GameData.config("creation").get("sorts_recommandes", [])
+	var coches: Array = creation.get("sorts", [])
+	for r in recos:
+		if not (str(r.id) in coches):
+			continue
+		fiche.capacites.append({"id": str(r.id), "name_key": str(r.name_key), "modules": Array(r.modules).duplicate()})
 	# Personnalisation (Écrans d'interface, 2026-08-30) : le nom choisi et la teinte du personnage.
 	var nom_choisi := str(creation.get("nom", "")).strip_edges()
 	if not nom_choisi.is_empty():

@@ -1,5 +1,5 @@
 {
-  "_doc": "L'écran de création du personnage (Écrans d'interface, designer 2026-08-30) : points à répartir, plafond par stat, année par défaut, et les teintes proposées (personnalisation — la couleur du personnage, avant les sprites du designer).",
+  "_doc": "L'écran de création du personnage (Écrans d'interface, designer 2026-08-30) : points à répartir, plafond par stat, année par défaut, et les teintes proposées (personnalisation — la couleur du personnage, avant les sprites du designer). Les sorts recommandés viennent du banc d'essai (scenes/tests/banc_sorts.tscn, designer 2026-08-31) : score = dégâts par tick ; le joueur en coche au plus max_sorts.",
   "points_base": 30,
   "max_par_stat": 10,
   "annee_defaut": 1000,
@@ -68,6 +68,72 @@
         0.22,
         0.35
       ]
+    }
+  ],
+  "max_sorts": 3,
+  "sorts_recommandes": [
+    {
+      "id": "rejet",
+      "name_key": "sort.rejet.name",
+      "modules": [
+        "point",
+        "projection"
+      ],
+      "score": 15.0
+    },
+    {
+      "id": "frappe_precise",
+      "name_key": "sort.frappe_precise.name",
+      "modules": [
+        "point",
+        "frappe"
+      ],
+      "score": 14.2
+    },
+    {
+      "id": "frappe_en_croix",
+      "name_key": "sort.frappe_en_croix.name",
+      "modules": [
+        "croix",
+        "frappe"
+      ],
+      "score": 13.0
+    },
+    {
+      "id": "botte",
+      "name_key": "sort.botte.name",
+      "modules": [
+        "point",
+        "botte"
+      ],
+      "score": 12.4
+    },
+    {
+      "id": "frappe_oblique",
+      "name_key": "sort.frappe_oblique.name",
+      "modules": [
+        "diagonale",
+        "frappe"
+      ],
+      "score": 12.3
+    },
+    {
+      "id": "botte_en_croix",
+      "name_key": "sort.botte_en_croix.name",
+      "modules": [
+        "croix",
+        "botte"
+      ],
+      "score": 11.8
+    },
+    {
+      "id": "transfert_vital",
+      "name_key": "sort.transfert_vital.name",
+      "modules": [
+        "point",
+        "transfert"
+      ],
+      "score": 2.5
     }
   ]
 }

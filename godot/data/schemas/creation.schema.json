@@ -39,6 +39,39 @@
           }
         }
       }
+    },
+    "max_sorts": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "sorts_recommandes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name_key",
+          "modules"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name_key": {
+            "type": "string"
+          },
+          "modules": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "score": {
+            "type": "number"
+          }
+        }
+      }
     }
   },
   "required": [

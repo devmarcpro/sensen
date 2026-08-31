@@ -2334,3 +2334,15 @@ creature.tsuchigumo.name,Tsuchigumo
 creature.basilic.name,Basilisk
 creature.griffon.name,Griffin
 creature.golem_d_argile.name,Clay golem
+sort.rejet.name,"Repulse"
+sort.frappe_precise.name,"Precise strike"
+sort.frappe_en_croix.name,"Cross strike"
+sort.botte.name,"Thrust"
+sort.frappe_oblique.name,"Oblique strike"
+sort.botte_en_croix.name,"Cross thrust"
+sort.transfert_vital.name,"Life transfer"
+ui.creation.sorts_l,"Recommended spells: {choisis}/{max} checked (Enter: check)"
+ui.creation.sort_l,"  {coche} {sort} — {modules}"
+ui.creation.sort_coche,"[x]"
+ui.creation.sort_vide,"[ ]"
+ui.creation.d_sort,"A spell recommended by the test bench: Enter to check or uncheck. Three at most; they are assembled at the start and stay recombinable."

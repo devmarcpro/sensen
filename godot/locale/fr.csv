@@ -2343,3 +2343,15 @@ creature.tsuchigumo.name,Tsuchigumo
 creature.basilic.name,Basilic
 creature.griffon.name,Griffon
 creature.golem_d_argile.name,Golem d'argile
+sort.rejet.name,"Rejet"
+sort.frappe_precise.name,"Frappe précise"
+sort.frappe_en_croix.name,"Frappe en croix"
+sort.botte.name,"Botte"
+sort.frappe_oblique.name,"Frappe oblique"
+sort.botte_en_croix.name,"Botte en croix"
+sort.transfert_vital.name,"Transfert vital"
+ui.creation.sorts_l,"Sorts recommandés : {choisis}/{max} cochés (Entrée : cocher)"
+ui.creation.sort_l,"  {coche} {sort} — {modules}"
+ui.creation.sort_coche,"[x]"
+ui.creation.sort_vide,"[ ]"
+ui.creation.d_sort,"Un sort recommandé par le banc d'essai : Entrée pour le cocher ou le décocher. Trois au maximum ; ils sont assemblés au départ et restent recombinables."

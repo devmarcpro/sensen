@@ -1329,6 +1329,21 @@ func _construire_creation() -> void:
 	entrees.append({"kind": "creation", "id": "teinte"})
 	liste.add_item(tr("ui.creation.depart_l").format({"lieu": tr("ui.creation.depart_donjon" if int(c.get("depart", 0)) == 1 else "ui.creation.depart_camp")}))
 	entrees.append({"kind": "creation", "id": "depart"})
+	var recos: Array = cfg.get("sorts_recommandes", [])   # sorts recommandés du banc d'essai (designer, point 38)
+	if not recos.is_empty():
+		var coches: Array = c.get("sorts", [])
+		liste.add_item(tr("ui.creation.sorts_l").format({"choisis": coches.size(), "max": int(cfg.get("max_sorts", 3))}))
+		entrees.append({"kind": "creation", "id": "sorts"})
+		for r in recos:
+			var mods: Array = []
+			for m in r.get("modules", []):
+				mods.append(tr(GameData.entree("modules", str(m)).name_key))
+			liste.add_item(tr("ui.creation.sort_l").format({
+				"coche": tr("ui.creation.sort_coche" if str(r.id) in coches else "ui.creation.sort_vide"),
+				"sort": tr(str(r.name_key)),
+				"modules": " + ".join(PackedStringArray(mods)),
+			}))
+			entrees.append({"kind": "creation", "id": "sort:" + str(r.id)})
 	liste.add_item(tr("ui.creation.commencer"))
 	entrees.append({"kind": "creation", "id": "commencer"})
 	_apercu_personnage(fiche, tn)
@@ -1397,7 +1412,9 @@ func _detail_creation(id: String) -> String:
 		"commencer":
 			l.append(tr("ui.creation.d_commencer"))
 		_:
-			if id.begins_with("stat:"):
+			if id.begins_with("sort:"):   # le détail d'un sort recommandé (designer, point 38)
+				l.append(tr("ui.creation.d_sort"))
+			elif id.begins_with("stat:"):
 				var st := id.trim_prefix("stat:")
 				l.append("[b]%s[/b] : %d" % [tr("stat." + st), int(fiche.corps.stats[st])])
 				l.append(tr("ui.creation.points").format({"restants": pts.restants, "total": pts.total}))
@@ -1442,6 +1459,9 @@ func _action_creation(id: String, sens: int) -> void:
 			c.teinte = posmod(int(c.get("teinte", 0)) + sens, maxi(1, GameData.config("creation").get("teintes", []).size()))
 		"depart":   # Départ : Camp / Donjon (designer, point 34)
 			c.depart = posmod(int(c.get("depart", 0)) + sens, 2)
+		"sorts":   # la ligne d'en-tête ne coche rien : elle mène aux sorts
+			if sens > 0:
+				selection = mini(selection + 1, entrees.size() - 1)
 		"commencer":
 			main._creer_personnage()
 			return
@@ -1449,7 +1469,15 @@ func _action_creation(id: String, sens: int) -> void:
 			if sens > 0:   # Entrée sur le nom ou les points : la ligne suivante
 				selection = mini(selection + 1, entrees.size() - 1)
 		_:
-			if id.begins_with("stat:"):
+			if id.begins_with("sort:"):   # cocher / décocher un sort recommandé, trois au plus (designer, point 38)
+				var sid := id.trim_prefix("sort:")
+				var coches2: Array = c.get("sorts", [])
+				if sid in coches2:
+					coches2.erase(sid)
+				elif coches2.size() < int(GameData.config("creation").get("max_sorts", 3)):
+					coches2.append(sid)
+				c["sorts"] = coches2
+			elif id.begins_with("stat:"):
 				var st := id.trim_prefix("stat:")
 				var actuel := int(c.points.get(st, 0))
 				if sens > 0 and pts.restants > 0 and actuel < pts.max:

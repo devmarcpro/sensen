@@ -80,6 +80,14 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > **34.** L'écran de création gagne une ligne **Départ : Camp / Donjon** (← →) : après le choix de la case sur la carte, le camp est posé puis, si l'option est sur Donjon, l'expédition part **immédiatement** dans le donjon de la cellule du camp (`Simulation.commencer_en_donjon` — id déterministe, thème du biome, ouvert d'office pour une nouvelle partie ; le retour au camp garde tous ses invariants).
 > **35.** La **hotbar apparaît en bas de l'inventaire et de l'écran de capacités** : dix cases identiques au HUD, cibles de **glisser-déposer** — une ligne du sac ou une capacité s'y dépose « tout simplement » ; clic droit sur une case pour la vider. Les affectations vivent dans `joueur.hotbar` (sauvegardées avec l'être) et **recouvrent case par case** la hotbar dérivée (râtelier + capacités + bombes) ; une case non affectée garde son entrée dérivée.
 
+> [!success] Décidé et codé le 2026-08-31 — sorts recommandés à la création (designer, point 38)
+> Un banc d'essai (`scenes/tests/banc_sorts.tscn`) a joué **5632 assemblages** forme × noyau et forme × noyau × noyau contre un mannequin, et noté chacun en **dégâts par tick** : les gagnants nets sont `point+projection` (15,0), `point+frappe` (14,2), `croix+frappe` (13,0), `point+botte` (12,4), `diagonale+frappe` (12,3), `croix+botte` (11,8), et côté soin `point+transfert` (2,5). Les scores saturés par le plafond de mort ont été écartés à la main : la liste proposée est **variée** (mêlée, portée, zone, soin), pas seulement la tête du classement.
+>
+> L'écran de création gagne donc **sept lignes cochables** — `data/creation.json → sorts_recommandes`, aucun chiffre en dur — et le joueur en **coche trois au maximum** (`max_sorts`). Au démarrage, chaque sort coché crédite ses modules puis compose la capacité : le personnage part avec ses trois sorts déjà assemblés, et le no-limit d'assemblage reste entier — ce sont des **raccourcis**, pas des classes déguisées.
+
+> [!success] Décidé et codé le 2026-08-31 — le visage à la création (designer, points 39 et 41)
+> L'écran de création gagne un bloc **Apparence** : forme de la tête, yeux, nez, bouche, cheveux, carrure, teint et couleur de cheveux, chacun sur une ligne qui défile à ← →, l'aperçu du personnage se redessinant à chaque changement. Les valeurs par défaut viennent de la **race choisie** — changer de race change la silhouette avant tout réglage manuel — et tout est en données (`data/apparence.json`), aucun chiffre en dur, aucun asset : le visage est dessiné par code sur le disque de la tête.
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

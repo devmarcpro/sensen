@@ -6535,6 +6535,23 @@ func test_donjon_temps_a_l_action() -> void:
 	verifier(s34.commencer_en_donjon(j34) and s34.lieu == "donjon" and int(s34.donjon.etage) == 1, "commencer_en_donjon : étage 1 d'office")
 	verifier(not s34.camp_sauve.is_empty() and j34.has("retour"), "le camp est mis de côté, le retour connu")
 	s34.monde.fermer()
+	# Sorts recommandés à la création (2026-08-31, point 38) : les modules existent et s'assemblent
+	var cfg38: Dictionary = GameData.config("creation")
+	var recos38: Array = cfg38.get("sorts_recommandes", [])
+	verifier(recos38.size() >= 3 and int(cfg38.get("max_sorts", 0)) == 3, "sept sorts recommandés, trois cochables au plus")
+	var s38 := Simulation.new(38)
+	s38.charger_camp()
+	var j38: Dictionary = s38.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var tous38 := true
+	for r38 in recos38:
+		for m38 in r38.modules:
+			if GameData.entree("modules", str(m38)).is_empty():
+				tous38 = false
+			s38.crediter_module(j38, str(m38), 9)
+		if not s38.composer_capacite(j38, Array(r38.modules).duplicate()):
+			tous38 = false
+	verifier(tous38, "chaque sort recommandé s'assemble avec des modules du catalogue")
+	s38.monde.fermer()
 	var s2 := Simulation.new(22)
 	s2.charger_camp()
 	verifier(s2.horloge_monde.mode == Horloge.Mode.TEMPS_REEL, "au camp, le temps réel demeure")
