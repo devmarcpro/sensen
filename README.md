@@ -172,6 +172,8 @@ Les versions jouables sont dans les [Releases](https://github.com/devmarcpro/sen
 
 Le préréglage est `godot/export_presets.cfg` (tests exclus, données JSON et locales incluses).
 
+Pour publier une pré-version : GitHub CLI est installé (`gh` 2.98). Le jeton du gestionnaire d'identifiants Windows n'a pas le scope `read:org` qu'exige `gh auth login`, mais il suffit pour les commandes : passer par la variable `GH_TOKEN` (lue via `git credential fill`), puis `gh release create <tag> <archive> --prerelease --notes-file <notes>`.
+
 ## Lire le design
 
 Ouvrir [`docs/`](docs/) comme coffre dans **Obsidian**. Point d'entrée : `00 - Index/Sensen — Index général.md`.
