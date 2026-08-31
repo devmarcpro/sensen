@@ -1307,7 +1307,19 @@ func _fiche_apercu() -> Dictionary:
 	races.sort()
 	var classes: Array = main._classes_visibles()
 	var prog: Progression = Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
-	return Etres.creer_personnage("creature.aventurier.name", races[int(c.race) % races.size()], classes[int(c.classe) % classes.size()], c.points, int(c.annee), prog)
+	var f := Etres.creer_personnage("creature.aventurier.name", races[int(c.race) % races.size()], classes[int(c.classe) % classes.size()], c.points, int(c.annee), prog)
+	Etres.appliquer_espece(f, str(c.get("espece", "")))
+	return f
+
+
+## Les espèces jouables (designer, point 44) : « humanoïde » d'abord, puis toutes les créatures du catalogue.
+func _especes() -> Array:
+	var l: Array = [""]
+	var ids: Array = GameData.catalogues.creatures.keys()
+	ids.sort()
+	for cid in ids:
+		l.append(str(cid))
+	return l
 
 
 ## L'apparence de l'aperçu : le bloc de la race, recouvert des loci réglés à la main (points 39 et 41).
@@ -1319,15 +1331,17 @@ func _apparence_apercu(fiche: Dictionary) -> Dictionary:
 
 
 ## Les lignes réglables de l'apparence : les loci du catalogue, puis les deux palettes.
-func _lignes_apparence() -> Array:
+func _lignes_apparence(avec_visage: bool = true) -> Array:
 	var cfg: Dictionary = GameData.config("apparence")
 	var l: Array = []
 	for locus in cfg.get("loci", []):
+		if not avec_visage and not bool(locus.get("universel", false)):
+			continue
 		var vals: Array = []
 		for v in locus.get("valeurs", []):
 			vals.append(str(v))
 		l.append({"id": str(locus.id), "valeurs": vals})
-	for pal in ["teinte_peau", "teinte_cheveux"]:
+	for pal in (["teinte_peau", "teinte_cheveux"] if avec_visage else ["teinte_peau"]):   # sans visage : pas de couleur de cheveux
 		var ids: Array = []
 		for t in cfg.get("teintes_peau" if pal == "teinte_peau" else "teintes_cheveux", []):
 			ids.append(str(t.id))
@@ -1358,6 +1372,11 @@ func _construire_creation() -> void:
 	entrees.append({"kind": "creation", "id": "nom"})
 	liste.add_item(tr("ui.creation.race_l").format({"race": tr(GameData.entree("races", fiche.race).name_key)}))
 	entrees.append({"kind": "creation", "id": "race"})
+	var esp := str(c.get("espece", ""))   # toute créature du catalogue est jouable (designer, point 44)
+	liste.add_item(tr("ui.creation.espece_l").format({
+		"espece": tr("ui.creation.espece_humanoide") if esp.is_empty() else tr(GameData.entree("creatures", esp).name_key),
+	}))
+	entrees.append({"kind": "creation", "id": "espece"})
 	liste.add_item(tr("ui.creation.classe_l").format({"classe": tr(GameData.entree("classes", fiche.classe).name_key)}))
 	entrees.append({"kind": "creation", "id": "classe"})
 	liste.add_item(tr("ui.creation.annee_l").format({"annee": int(c.annee), "element": tr("element." + str(fiche.signe.element)), "animal": tr("animal." + str(fiche.signe.animal))}))
@@ -1368,7 +1387,7 @@ func _construire_creation() -> void:
 		liste.add_item(tr("ui.creation.stat_l").format({"stat": tr("stat." + st), "valeur": int(fiche.corps.stats[st]), "points": int(c.points.get(st, 0))}))
 		entrees.append({"kind": "creation", "id": "stat:" + st})
 	var app: Dictionary = _apparence_apercu(fiche)   # apparence : les loci visuels (designer, points 39 et 41)
-	for ligne in _lignes_apparence():
+	for ligne in _lignes_apparence(not app.is_empty()):
 		liste.add_item(tr("ui.creation.app_l").format({
 			"locus": tr("ui.apparence." + str(ligne.id)),
 			"valeur": tr("ui.apparence.val." + str(app.get(str(ligne.id), ligne.valeurs[0] if not ligne.valeurs.is_empty() else ""))),
@@ -1414,6 +1433,7 @@ func _apercu_personnage(fiche: Dictionary) -> void:
 	e["orientation"] = Vector2i(1, 1)
 	apercu_perso.configurer(e, GameData.entree("rigs", str(e.skeleton_template)), items, GameData.catalogues.functionalities, GameData.config("palette_materiaux"))
 	apercu_perso.queue_redraw()
+	cadre_visage.visible = not e.get("apparence", {}).is_empty()   # pas de portrait pour qui n'a pas de visage
 	portrait_perso.configurer(e, GameData.entree("rigs", str(e.skeleton_template)), items, GameData.catalogues.functionalities, GameData.config("palette_materiaux"))
 	portrait_perso.queue_redraw()
 	var regles := Regles.new(GameData.config("combat_rules"))   # les trois jauges du personnage à naître (point 42)
@@ -1463,6 +1483,13 @@ func _detail_creation(id: String) -> String:
 		"points":
 			l.append(tr("ui.creation.points").format({"restants": pts.restants, "total": pts.total}))
 			l.append(tr("ui.creation.d_points").format({"max": pts.max}))
+		"espece":
+			var esp_d := str(main.creation.get("espece", ""))
+			if not esp_d.is_empty():
+				var def_d: Dictionary = GameData.entree("creatures", esp_d)
+				l.append("[b]%s[/b]" % tr(def_d.name_key))
+				l.append(tr("ui.creation.silhouette").format({"silhouette": str(def_d.corps.silhouette)}))
+			l.append(tr("ui.creation.d_espece"))
 		"commencer":
 			l.append(tr("ui.creation.d_commencer"))
 		_:
@@ -1509,6 +1536,11 @@ func _action_creation(id: String, sens: int) -> void:
 			c.race = posmod(int(c.race) + sens, GameData.catalogues.races.size())
 		"classe":
 			c.classe = posmod(int(c.classe) + sens, main._classes_visibles().size())
+		"espece":
+			var esps := _especes()
+			var i_esp := esps.find(str(c.get("espece", "")))
+			c["espece"] = str(esps[posmod(maxi(i_esp, 0) + sens, esps.size())])
+			c["apparence"] = {}   # les loci d'une espèce ne valent pas pour la suivante
 		"annee":
 			c.annee = int(c.annee) + sens
 		"depart":   # Départ : Camp / Donjon (designer, point 34)
@@ -1527,7 +1559,7 @@ func _action_creation(id: String, sens: int) -> void:
 				var lid := id.trim_prefix("app:")
 				var courante := ""
 				var valeurs: Array = []
-				for ligne2 in _lignes_apparence():
+				for ligne2 in _lignes_apparence(true):
 					if str(ligne2.id) == lid:
 						valeurs = ligne2.valeurs
 				if valeurs.is_empty():

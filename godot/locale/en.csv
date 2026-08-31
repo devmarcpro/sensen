@@ -2408,3 +2408,22 @@ creature.jorogumo.name,Jorogumo
 creature.lindworm.name,Lindworm
 creature.ours_des_cavernes.name,Cave bear
 creature.essaim_de_chauves_souris.name,Bat swarm
+ui.apparence.taille,"Height"
+ui.apparence.sourcils,"Eyebrows"
+ui.apparence.barbe,"Beard"
+ui.apparence.marque,"Mark"
+ui.apparence.val.petite,"short"
+ui.apparence.val.moyenne_t,"average"
+ui.apparence.val.grande,"tall"
+ui.apparence.val.fins,"thin"
+ui.apparence.val.epais,"thick"
+ui.apparence.val.aucun,"none"
+ui.apparence.val.aucune,"none"
+ui.apparence.val.courte,"short"
+ui.apparence.val.longue,"long"
+ui.apparence.val.cicatrice,"scar"
+ui.apparence.val.tatouage,"tattoo"
+ui.creation.espece_l,"Species: {espece} (← →)"
+ui.creation.espece_humanoide,"humanoid (see race)"
+ui.creation.d_espece,"The character's species: every creature in the catalogue is playable. It sets the skeleton, silhouette, tint and natural actions; class, points and spells stay yours."
+ui.creation.silhouette,"Silhouette: {silhouette}"

@@ -9,7 +9,8 @@
         "carree",
         "allongee",
         "en_coeur"
-      ]
+      ],
+      "universel": false
     },
     {
       "id": "yeux",
@@ -19,7 +20,8 @@
         "grands",
         "en_amande",
         "tombants"
-      ]
+      ],
+      "universel": false
     },
     {
       "id": "nez",
@@ -29,7 +31,8 @@
         "plat",
         "fin",
         "busque"
-      ]
+      ],
+      "universel": false
     },
     {
       "id": "bouche",
@@ -38,7 +41,8 @@
         "large",
         "sourire",
         "boudeuse"
-      ]
+      ],
+      "universel": false
     },
     {
       "id": "cheveux",
@@ -50,7 +54,8 @@
         "crete",
         "chignon",
         "tresses"
-      ]
+      ],
+      "universel": false
     },
     {
       "id": "carrure",
@@ -60,7 +65,44 @@
         "large",
         "trapue",
         "athletique"
-      ]
+      ],
+      "universel": true
+    },
+    {
+      "id": "taille",
+      "valeurs": [
+        "petite",
+        "moyenne",
+        "grande"
+      ],
+      "universel": true
+    },
+    {
+      "id": "sourcils",
+      "valeurs": [
+        "fins",
+        "epais",
+        "aucun"
+      ],
+      "universel": false
+    },
+    {
+      "id": "barbe",
+      "valeurs": [
+        "aucune",
+        "courte",
+        "longue"
+      ],
+      "universel": false
+    },
+    {
+      "id": "marque",
+      "valeurs": [
+        "aucune",
+        "cicatrice",
+        "tatouage"
+      ],
+      "universel": false
     }
   ],
   "facteurs": {
@@ -77,6 +119,16 @@
       "large": 1.22,
       "trapue": 1.35,
       "athletique": 1.1
+    },
+    "taille": {
+      "petite": 0.88,
+      "moyenne": 1.0,
+      "grande": 1.14
+    },
+    "barbe": {
+      "aucune": 0.0,
+      "courte": 2.0,
+      "longue": 4.0
     }
   },
   "teintes_peau": [

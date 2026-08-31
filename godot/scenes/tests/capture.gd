@@ -37,6 +37,9 @@ func _ready() -> void:
 				races_c.sort()
 				scene.creation.race = maxi(0, races_c.find(str(args[ir + 1])))
 				scene.ecrans.ouvrir("creation")
+			if args[ir] == "--espece" and ir + 1 < args.size():   # --espece id : une créature jouée (point 44)
+				scene.creation.espece = str(args[ir + 1])
+				scene.ecrans.ouvrir("creation")
 	elif scene.titre_ouvert and "--charger" in args:   # --charger : le chemin Continuer de l'écran principal, à froid (Sauvegarde)
 		scene._charger_partie("essai_capture")   # l'emplacement de la sonde — jamais « monde », qui peut être une vraie partie
 		if scene.sim != null:

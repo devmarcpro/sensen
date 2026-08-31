@@ -6557,6 +6557,22 @@ func test_donjon_temps_a_l_action() -> void:
 	var nain41 := Etres.creer_personnage("creature.aventurier.name", "nain", "le_sabre", {}, 1000, prog41)
 	verifier(float(nain41.get("apparence", {}).get("echelle", 1.0)) < 1.0 and float(nain41.apparence.get("barbe", 0.0)) > 0.0, "le nain naît court et barbu, sans une ligne de code par race")
 
+	# Toute espèce est jouable (2026-08-31, point 44) : elle remplace le squelette, pas la classe
+	var prog44 := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
+	var loup44 := Etres.creer_personnage("creature.aventurier.name", "elfe", "le_sabre", {}, 1000, prog44)
+	var classe44 := str(loup44.classe)
+	Etres.appliquer_espece(loup44, "loup")
+	verifier(str(loup44.skeleton_template) == "quadrupede" and str(loup44.corps.silhouette) == "quadrupede", "jouer un loup change le squelette et la silhouette")
+	verifier(str(loup44.classe) == classe44 and not loup44.actions.is_empty(), "la classe reste, les actions naturelles du loup arrivent")
+	verifier(loup44.get("apparence", {}).is_empty(), "sans visage humanoïde, pas de loci de visage")
+	var especes44 := 0
+	for cid44: String in GameData.catalogues.creatures.keys():
+		var f44 := Etres.creer_personnage("creature.aventurier.name", "humain", "le_sabre", {}, 1000, prog44)
+		Etres.appliquer_espece(f44, cid44)
+		if not GameData.entree("rigs", str(f44.skeleton_template)).is_empty():
+			especes44 += 1
+	verifier(especes44 == GameData.catalogues.creatures.size(), "chaque espèce jouable a un rig au catalogue (%d / %d)" % [especes44, GameData.catalogues.creatures.size()])
+
 	# Sorts recommandés à la création (2026-08-31, point 38) : les modules existent et s'assemblent
 	var cfg38: Dictionary = GameData.config("creation")
 	var recos38: Array = cfg38.get("sorts_recommandes", [])

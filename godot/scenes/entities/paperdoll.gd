@@ -69,7 +69,7 @@ func _draw() -> void:
 	_vue_tete = str(f.get("vue_tete", "face"))
 	var fac: Dictionary = GameData.config("apparence").get("facteurs", {})
 	_carrure = float(fac.get("carrure", {}).get(str(_ap.get("carrure", "moyenne")), 1.0))
-	var ech := float(_ap.get("echelle", 1.0))
+	var ech := float(_ap.get("echelle", 1.0)) * float(fac.get("taille", {}).get(str(_ap.get("taille", "moyenne")), 1.0))
 	if not is_equal_approx(ech, 1.0):
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(ech, ech))
 	var monde := _poser_segments(f, miroir)
@@ -285,9 +285,20 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 		draw_arc(y_bouche + d * r * 0.2, r * 0.32, PI * 1.15, PI * 1.85, 10, encre, maxf(0.7, r * 0.09))
 	else:
 		draw_line(y_bouche - p * demi, y_bouche + p * demi, encre, maxf(0.7, r * 0.09))
-	var barbe := float(_ap.get("barbe", 0.0))
+	var b_brut: Variant = _ap.get("barbe", 0.0)
+	var barbe := float(GameData.config("apparence").get("facteurs", {}).get("barbe", {}).get(str(b_brut), 0.0)) if b_brut is String else float(b_brut)
 	if barbe > 0.0:
 		draw_colored_polygon(PackedVector2Array([
 			c - p * r * 0.8 - d * r * 0.1, c + p * r * 0.8 - d * r * 0.1,
 			c + p * r * 0.35 - d * (r + barbe), c - p * r * 0.35 - d * (r + barbe),
 		]), cheveux)
+	var sourcils := str(_ap.get("sourcils", "fins"))
+	if sourcils != "aucun":
+		for cote9 in [-1.0, 1.0]:
+			var o9: Vector2 = c + p * (r * ecart * cote9) + d * r * 0.42
+			draw_line(o9 - p * r * 0.16, o9 + p * r * 0.16, cheveux, maxf(0.8, r * (0.16 if sourcils == "epais" else 0.08)))
+	match str(_ap.get("marque", "aucune")):
+		"cicatrice":
+			draw_line(c + p * r * 0.5 + d * r * 0.5, c + p * r * 0.25 - d * r * 0.45, encre.lightened(0.25), maxf(0.6, r * 0.08))
+		"tatouage":
+			draw_arc(c - p * r * 0.45 + d * r * 0.05, r * 0.24, 0.0, TAU, 10, cheveux.lightened(0.1), maxf(0.6, r * 0.08))

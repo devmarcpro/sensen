@@ -113,6 +113,25 @@ static func creer_personnage(nom_key: String, race_id: String, classe_id: String
 	}
 
 
+## L'espèce choisie à la création (designer, point 44) : elle donne le squelette, la silhouette,
+## la teinte et les actions naturelles ; la classe, les points et les sorts restent ceux du joueur.
+## Le bloc `apparence` ne survit que si la nouvelle espèce a un visage (rig humanoïde).
+static func appliquer_espece(fiche: Dictionary, espece: String) -> void:
+	if espece.is_empty():
+		return
+	var def: Dictionary = GameData.entree("creatures", espece)
+	if def.is_empty():
+		return
+	fiche["espece"] = espece
+	fiche.skeleton_template = str(def.get("skeleton_template", fiche.skeleton_template))
+	fiche.corps.silhouette = str(def.corps.silhouette)
+	fiche.teinte = Array(def.get("teinte", fiche.teinte)).duplicate()
+	fiche.actions = def.get("actions", []).duplicate()
+	fiche["tags"] = Array(fiche.get("tags", [])) + Array(def.get("tags", []))
+	if str(def.corps.silhouette) != "humanoide":
+		fiche["apparence"] = {}
+
+
 ## Recalcule ce que l'équipement change (Résolveur de modificateurs : (base + Σ add) × Π mult) :
 ## stats et compétences effectives (les affixes passifs des bijoux et armures), endurance max,
 ## capacité de jauge, tags acquis. À appeler à l'instanciation et à chaque changement d'équipement.

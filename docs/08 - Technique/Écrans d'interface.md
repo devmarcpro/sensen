@@ -96,6 +96,11 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > [!success] Décidé et codé le 2026-08-31 — le corps prend la couleur de la peau (designer, point 43)
 > Jusqu'ici le personnage était peint d'une **teinte d'atelier** (azur, ocre…) choisie à la création, indépendante du teint du visage. Le designer tranche : **la couleur de la peau du visage est celle du corps entier**, parce que le personnage est **nu** tant qu'il n'a rien d'équipé — nu au sens des silhouettes de ce jeu, sans aucun détail anatomique. La ligne « Teinte » disparaît donc de l'écran de création : c'est le **Teint** des loci visuels qui peint tout ce que l'équipement ne recouvre pas ; une pièce d'armure continue de peindre ses segments de la couleur de son matériau. Le portrait, lui, gagne sa place : l'avatar est **agrandi** et une **vue du seul visage** s'affiche à sa droite, cadrée sur la tête, pour juger les traits sans plisser les yeux.
 
+> [!success] Décidé et codé le 2026-08-31 — toute espèce est jouable (designer, point 44)
+> Dans la continuité du **no-limit de la création** (point 26 : toutes les classes, toutes les races), l'écran gagne une ligne **Espèce** qui liste **toutes les créatures du catalogue** — loup, ours, tengu, jōrōgumo, lindworm, golem… Choisir une espèce non humaine remplace le **squelette**, la **silhouette**, la **teinte** de base et les **actions naturelles** du personnage ; la classe, les points de stats et les sorts choisis restent les siens, parce que ce sont des blocs de l'être indépendants ([[Blocs de l'être]]) et non des types. Le défaut reste `humanoïde`, où la **race** garde son rôle habituel.
+>
+> Conséquence assumée : les **loci du visage ne s'affichent que si l'espèce a un visage** — une araignée n'a ni nez ni coiffure ; ses réglages se limitent à la teinte et à la taille. Quatre loci nouveaux pour tous : **taille** (petite, moyenne, grande — elle multiplie l'échelle du rig), **sourcils**, **barbe** (aucune, courte, longue — elle prend le pas sur le défaut de la race) et **marque** (aucune, cicatrice, tatouage).
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]
