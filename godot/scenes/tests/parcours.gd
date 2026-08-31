@@ -324,6 +324,18 @@ func _process(_delta: float) -> void:
 				bloque_depuis = 0
 			derniere_pos = j.pos
 			return
+	# Surchargé devant l'eau (Eau et liquides : « larguer des objets reste le geste ») : un chemin mouillé
+	# existe mais la surcharge interdit la nage — on jette du lest jusqu'à pouvoir nager.
+	if sim.refuse_nage(j) and not sim.grille.chemin(j.pos, but, false, "", false).is_empty():
+		if not j.sac.is_empty():
+			var uid_j: String = str(j.sac.back())
+			if sim.intention(jid, {"type": "jeter", "objet": uid_j}):
+				_note("délesté (surcharge devant l'eau) : un objet du sac jeté · facteur %.2f" % sim.poids_de(j).facteur)
+				return
+		for slot in j.equipement.keys():
+			if sim.intention(jid, {"type": "desequiper", "slot": str(slot)}):
+				_note("délesté : %s retiré (il sera jeté au tour suivant)" % str(slot))
+				return
 	# Pas de chemin (porte fermée, mur, éboulis) : on creuse vers l'escalier, ou on attend.
 	var dir := Vector2i(signi(but.x - j.pos.x), signi(but.y - j.pos.y))
 	if dir != Vector2i.ZERO and sim.intention(jid, {"type": "creuser", "vers": j.pos + dir}):
