@@ -38,6 +38,9 @@ Les bonus s'ajoutent au facteur avant multiplication. Une arme exceptionnelle à
 
 **Valeur des trophées ([[Créatures]]) :** la statue 1:1 a une valeur de vente ∝ niveau de la créature.
 
+> [!success] Constaté codé le 2026-08-31 — la note vivait sans callout
+> `Simulation.prix_suggere()` implémente la formule telle quelle (Σ valeur_base des matériaux × 1,5 de marge × qualité × facteur de rareté × réputation bornée [0,5 ; 2,0] avec les paliers +25 % / −10 %), et **toute la table** vit dans `combat_rules.commerce` : facteurs 1,0 / 1,4 / 2,2 / 4,0 / 10,0, +0,35 par affixe, +0,50 par sertissure, rachat marchand à 50 % (`achat_ratio`), tolérance de troc ±15 %. Les douanes s'appliquent à l'achat (`tarif_de`, refus à ≥ 1,0). L'écran de commerce montre le détail du calcul.
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Qualité d'artisanat]], [[Réputation et relations]]
 - **Alimente** : [[Commerce et boutiques]], [[Boutique passive]], [[Barèmes économiques]], [[Lois et infractions]]
