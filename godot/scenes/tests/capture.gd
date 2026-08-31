@@ -70,6 +70,17 @@ func _ready() -> void:
 			sv.maj_vision()
 			scene._apres_changement_de_grille()
 			print("village : ", str(ev.village.get("nom", "?")), " en ", cible)
+	if "--dialogue" in args and scene.sim != null:   # --dialogue : ouvre le dialogue avec le PNJ civil le plus proche (options, commerce, quêtes)
+		var jq: Dictionary = scene.joueur()
+		var proche_id := ""
+		var proche_d := 999999
+		for xq in scene.sim.vivants():
+			if xq.id != jq.id and str(xq.get("camp", "")) == "civil" and Grille.distance(xq.pos, jq.pos) < proche_d:
+				proche_d = Grille.distance(xq.pos, jq.pos)
+				proche_id = str(xq.id)
+		if not proche_id.is_empty():
+			scene.ecrans.ouvrir_dialogue(proche_id)
+			print("dialogue : ", scene.sim.entites[proche_id].name_key)
 	if "--carte" in args:
 		scene.carte.ouvrir("voyage")
 	if arene > 0:
