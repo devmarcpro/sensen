@@ -39,6 +39,21 @@
     },
     {
       "id": "tsuchigumo"
+    },
+    {
+      "id": "tengu"
+    },
+    {
+      "id": "jorogumo"
+    },
+    {
+      "id": "nue"
+    },
+    {
+      "id": "ours_des_cavernes"
+    },
+    {
+      "id": "essaim_de_chauves_souris"
     }
   ],
   "boss": "chef_de_bande",

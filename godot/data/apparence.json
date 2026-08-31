@@ -6,7 +6,9 @@
       "valeurs": [
         "ronde",
         "ovale",
-        "carree"
+        "carree",
+        "allongee",
+        "en_coeur"
       ]
     },
     {
@@ -14,7 +16,9 @@
       "valeurs": [
         "points",
         "fentes",
-        "grands"
+        "grands",
+        "en_amande",
+        "tombants"
       ]
     },
     {
@@ -22,7 +26,9 @@
       "valeurs": [
         "droit",
         "crochu",
-        "plat"
+        "plat",
+        "fin",
+        "busque"
       ]
     },
     {
@@ -30,7 +36,8 @@
       "valeurs": [
         "fine",
         "large",
-        "sourire"
+        "sourire",
+        "boudeuse"
       ]
     },
     {
@@ -39,7 +46,10 @@
         "courts",
         "longs",
         "queue",
-        "chauve"
+        "chauve",
+        "crete",
+        "chignon",
+        "tresses"
       ]
     },
     {
@@ -47,7 +57,9 @@
       "valeurs": [
         "mince",
         "moyenne",
-        "large"
+        "large",
+        "trapue",
+        "athletique"
       ]
     }
   ],
@@ -55,12 +67,16 @@
     "tete": {
       "ronde": 1.0,
       "ovale": 1.12,
-      "carree": 0.94
+      "carree": 0.94,
+      "allongee": 1.2,
+      "en_coeur": 1.04
     },
     "carrure": {
       "mince": 0.86,
       "moyenne": 1.0,
-      "large": 1.22
+      "large": 1.22,
+      "trapue": 1.35,
+      "athletique": 1.1
     }
   },
   "teintes_peau": [
@@ -111,6 +127,30 @@
         0.68,
         0.72
       ]
+    },
+    {
+      "id": "olive",
+      "rgb": [
+        0.74,
+        0.66,
+        0.45
+      ]
+    },
+    {
+      "id": "cuivre",
+      "rgb": [
+        0.78,
+        0.52,
+        0.32
+      ]
+    },
+    {
+      "id": "porcelaine",
+      "rgb": [
+        0.97,
+        0.89,
+        0.83
+      ]
     }
   ],
   "teintes_cheveux": [
@@ -152,6 +192,38 @@
         0.78,
         0.78,
         0.8
+      ]
+    },
+    {
+      "id": "neige",
+      "rgb": [
+        0.94,
+        0.94,
+        0.95
+      ]
+    },
+    {
+      "id": "acajou",
+      "rgb": [
+        0.45,
+        0.16,
+        0.13
+      ]
+    },
+    {
+      "id": "lin",
+      "rgb": [
+        0.9,
+        0.85,
+        0.68
+      ]
+    },
+    {
+      "id": "encre_bleue",
+      "rgb": [
+        0.2,
+        0.24,
+        0.4
       ]
     }
   ]

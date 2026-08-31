@@ -17,6 +17,7 @@ var detail: RichTextLabel
 var apercu_sort: ApercuSort   # l'aperçu visuel du sort (écran Composer, Écrans d'interface)
 var cadre_perso: Control      # l'aperçu du personnage (écran Création) : un paperdoll dans un cadre
 var apercu_perso: Paperdoll
+var barres_perso: BarresCreation   # vie, endurance, mana sous l'aperçu (designer, point 42)
 var composeur: Composeur      # le composeur en glisser-déposer (écran Composer)
 var corps: HBoxContainer      # liste + détail : caché quand le composeur est ouvert
 var boutons: HBoxContainer
@@ -88,7 +89,7 @@ func _ready() -> void:
 	apercu_sort = ApercuSort.new()
 	apercu_sort.visible = false
 	cadre_perso = Control.new()   # Création : le personnage en grand, au-dessus du détail
-	cadre_perso.custom_minimum_size = Vector2(0, 230)
+	cadre_perso.custom_minimum_size = Vector2(0, 300)
 	cadre_perso.visible = false
 	cadre_perso.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	droite.add_child(cadre_perso)
@@ -96,6 +97,11 @@ func _ready() -> void:
 	apercu_perso.scale = Vector2(3.2, 3.2)
 	apercu_perso.position = Vector2(300, 205)
 	cadre_perso.add_child(apercu_perso)
+	barres_perso = BarresCreation.new()
+	barres_perso.position = Vector2(0, 236)
+	barres_perso.custom_minimum_size = Vector2(0, 60)
+	barres_perso.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cadre_perso.add_child(barres_perso)
 	detail = RichTextLabel.new()
 	detail.bbcode_enabled = true
 	detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1401,6 +1407,14 @@ func _apercu_personnage(fiche: Dictionary, tn: Dictionary) -> void:
 	e["orientation"] = Vector2i(1, 1)
 	apercu_perso.configurer(e, GameData.entree("rigs", str(e.skeleton_template)), items, GameData.catalogues.functionalities, GameData.config("palette_materiaux"))
 	apercu_perso.queue_redraw()
+	var regles := Regles.new(GameData.config("combat_rules"))   # les trois jauges du personnage à naître (point 42)
+	var stats: Dictionary = fiche.corps.stats
+	barres_perso.valeurs = [
+		["sante", regles.sante_max(stats)],
+		["endurance", int(GameData.config("combat_rules").endurance.max)],
+		["mana", regles.mana_max(stats)],
+	]
+	barres_perso.queue_redraw()
 
 
 ## Le détail de la ligne choisie : ce que change la race, la classe (talent, bonus, compétences, kit), la stat…
@@ -2150,3 +2164,21 @@ class HotbarEcran extends Control:
 				j.hotbar[k] = {}
 				queue_redraw()
 				ecrans.main.hud_ecran.queue_redraw()
+
+
+## Les trois jauges de l'écran de création : vie, endurance, mana, pleines, avec leur valeur écrite.
+## Les mêmes couleurs que le HUD, la même lecture « valeur / max » — jamais un pourcentage seul.
+class BarresCreation extends Control:
+	const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "endurance": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95)}
+	const BARRE_L := 190.0
+	const BARRE_H := 12.0
+	var valeurs: Array = []
+
+	func _draw() -> void:
+		for k in valeurs.size():
+			var l: Array = valeurs[k]
+			var y := k * (BARRE_H + 6.0)
+			draw_rect(Rect2(0.0, y, BARRE_L, BARRE_H), Color(0.05, 0.05, 0.08, 0.85))
+			draw_rect(Rect2(0.0, y, BARRE_L, BARRE_H), COULEURS.get(str(l[0]), Color.WHITE))
+			draw_rect(Rect2(0.0, y, BARRE_L, BARRE_H), Color(0.6, 0.55, 0.4, 0.8), false, 1.0)
+			draw_string(ThemeDB.fallback_font, Vector2(BARRE_L + 8.0, y + BARRE_H), "%s %d/%d" % [tr("barre." + str(l[0])), int(l[1]), int(l[1])], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.9, 0.9, 0.85))

@@ -2385,3 +2385,36 @@ ui.apparence.val.roux,"red"
 ui.apparence.val.blond,"blond"
 ui.apparence.val.argent,"silver"
 ui.creation.d_apparence,"A facial or body trait: ← → to change it. The race sets the default — dwarves are short, broad and bearded, elves slender with pointed ears."
+sort.eclats_en_ligne.name,"Shards in line"
+sort.fonte_en_croix.name,"Cross smelting"
+sort.aiguille_du_chemin.name,"Path needle"
+sort.double_transfert.name,"Double transfer"
+sort.fioles_en_ligne.name,"Flasks in line"
+sort.fosse_du_chemin.name,"Path pit"
+ui.apparence.val.allongee,"long"
+ui.apparence.val.en_coeur,"heart-shaped"
+ui.apparence.val.en_amande,"almond"
+ui.apparence.val.tombants,"drooping"
+ui.apparence.val.fin,"thin"
+ui.apparence.val.busque,"aquiline"
+ui.apparence.val.boudeuse,"pouting"
+ui.apparence.val.crete,"mohawk"
+ui.apparence.val.chignon,"bun"
+ui.apparence.val.tresses,"braids"
+ui.apparence.val.trapue,"stocky"
+ui.apparence.val.athletique,"athletic"
+ui.apparence.val.olive,"olive"
+ui.apparence.val.cuivre,"copper"
+ui.apparence.val.porcelaine,"porcelain"
+ui.apparence.val.neige,"snow"
+ui.apparence.val.acajou,"mahogany"
+ui.apparence.val.lin,"flaxen"
+ui.apparence.val.encre_bleue,"blue-black"
+creature.tengu.name,Tengu
+creature.banshee.name,Banshee
+creature.troll.name,Troll
+creature.nue.name,Nue
+creature.jorogumo.name,Jorogumo
+creature.lindworm.name,Lindworm
+creature.ours_des_cavernes.name,Cave bear
+creature.essaim_de_chauves_souris.name,Bat swarm

@@ -1,0 +1,42 @@
+{
+  "name_key": "creature.banshee.name",
+  "race": "banshee",
+  "skeleton_template": "humanoide",
+  "corps": {
+    "stats": {
+      "force": 5,
+      "dexterite": 11,
+      "endurance": 7,
+      "volonte": 16,
+      "perception": 12,
+      "charisme": 3
+    },
+    "silhouette": "humanoide"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "hurlement",
+    "cri_de_ralliement"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "eau": 0.6,
+    "metal": 0.4
+  },
+  "rare_chance": 0.03,
+  "teinte": [
+    0.75,
+    0.78,
+    0.85
+  ],
+  "tags": [
+    "folklore"
+  ],
+  "competences": {
+    "athletisme": 18
+  },
+  "depouille": []
+}

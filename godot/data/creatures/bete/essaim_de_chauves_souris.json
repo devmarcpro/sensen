@@ -1,0 +1,44 @@
+{
+  "name_key": "creature.essaim_de_chauves_souris.name",
+  "race": "essaim_de_chauves_souris",
+  "skeleton_template": "volant",
+  "corps": {
+    "stats": {
+      "force": 4,
+      "dexterite": 16,
+      "endurance": 4,
+      "volonte": 3,
+      "perception": 14,
+      "charisme": 1
+    },
+    "silhouette": "volant"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "morsure_de_chauve_souris",
+    "nuee"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "bois": 0.5,
+    "eau": 0.5
+  },
+  "rare_chance": 0.03,
+  "teinte": [
+    0.22,
+    0.2,
+    0.24
+  ],
+  "tags": [
+    "bete",
+    "meute"
+  ],
+  "competences": {
+    "athletisme": 20
+  },
+  "depouille": [],
+  "meute": "1d3+2"
+}

@@ -5949,7 +5949,7 @@ func _appliquer_composition(inst: Dictionary, def: Dictionary, pieces: Array[Dic
 ## au tirage (Apparence — données et équipement). Aucune branche par race : tout vient des données.
 func _apparence_pour(race_id: String, rng: RandomNumberGenerator) -> Dictionary:
 	var cfg: Dictionary = GameData.config("apparence")
-	var ap: Dictionary = GameData.entree("races", race_id).get("apparence", {}).duplicate()
+	var ap: Dictionary = GameData.catalogues.races.get(race_id, {}).get("apparence", {}).duplicate()   # une race inconnue (invoqués, échos) : pas d'erreur, pas de visage imposé
 	for locus in cfg.get("loci", []):
 		var vals: Array = locus.get("valeurs", [])
 		if vals.is_empty():

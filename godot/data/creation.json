@@ -134,6 +134,64 @@
         "transfert"
       ],
       "score": 2.5
+    },
+    {
+      "id": "eclats_en_ligne",
+      "name_key": "sort.eclats_en_ligne.name",
+      "modules": [
+        "ligne",
+        "eclat",
+        "eclat"
+      ],
+      "score": 6.31
+    },
+    {
+      "id": "fonte_en_croix",
+      "name_key": "sort.fonte_en_croix.name",
+      "modules": [
+        "croix",
+        "fonte",
+        "fonte"
+      ],
+      "score": 6.06
+    },
+    {
+      "id": "aiguille_du_chemin",
+      "name_key": "sort.aiguille_du_chemin.name",
+      "modules": [
+        "chemin",
+        "aiguille"
+      ],
+      "score": 4.4
+    },
+    {
+      "id": "double_transfert",
+      "name_key": "sort.double_transfert.name",
+      "modules": [
+        "point",
+        "transfert",
+        "transfert"
+      ],
+      "score": 2.5
+    },
+    {
+      "id": "fioles_en_ligne",
+      "name_key": "sort.fioles_en_ligne.name",
+      "modules": [
+        "ligne",
+        "fiole",
+        "fiole"
+      ],
+      "score": 2.31
+    },
+    {
+      "id": "fosse_du_chemin",
+      "name_key": "sort.fosse_du_chemin.name",
+      "modules": [
+        "chemin",
+        "fosse"
+      ],
+      "score": 1.63
     }
   ]
 }

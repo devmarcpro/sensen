@@ -223,7 +223,9 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 				base + p * (oreille * cote) + d * (oreille * 0.6),
 			]), peau)
 	var coif := str(_ap.get("cheveux", "courts"))
-	if coif != "chauve":   # la calotte, vue de face comme de dos
+	if coif == "crete":   # une crête dressée : pas de calotte, une bande sur le sommet
+		draw_line(c + d * r * 0.9, c + d * r * 1.5, cheveux, maxf(1.5, r * 0.4))
+	elif coif != "chauve":   # la calotte, vue de face comme de dos
 		var ang := d.angle()   # la calotte suit le haut du crâne, quelle que soit l'inclinaison de la tête
 		draw_arc(c, r * 0.94, ang - PI * 0.44, ang + PI * 0.44, 18, cheveux, maxf(1.5, r * 0.34))
 		if coif == "longs":
@@ -231,6 +233,12 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 				draw_line(c + p * (r * 0.85 * cote2), c + p * (r * 0.85 * cote2) - d * r * 1.5, cheveux, maxf(1.2, r * 0.3))
 		elif coif == "queue":
 			draw_line(c - d * r * 0.6, c - d * r * 1.8, cheveux, maxf(1.2, r * 0.25))
+		elif coif == "chignon":
+			draw_circle(c - d * r * 1.05, maxf(1.5, r * 0.42), cheveux)
+		elif coif == "tresses":
+			for cote6 in [-1.0, 1.0]:
+				var haut6: Vector2 = c + p * (r * 0.8 * cote6) + d * r * 0.2
+				draw_line(haut6, haut6 - d * r * 1.6 + p * (r * 0.3 * cote6), cheveux, maxf(1.2, r * 0.22))
 	if _vue_tete == "dos":
 		return
 	var ecart := 0.42 if _vue_tete == "face" else 0.18
@@ -238,6 +246,14 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 		"grands":
 			for cote3 in [-1.0, 1.0]:
 				draw_circle(c + p * (r * ecart * cote3) + d * r * 0.15, maxf(0.8, r * 0.2), encre)
+		"en_amande":
+			for cote7 in [-1.0, 1.0]:
+				var o7: Vector2 = c + p * (r * ecart * cote7) + d * r * 0.15
+				draw_arc(o7, r * 0.2, 0.0, TAU, 10, encre, maxf(0.7, r * 0.09))
+		"tombants":
+			for cote8 in [-1.0, 1.0]:
+				var o8: Vector2 = c + p * (r * ecart * cote8) + d * r * 0.18
+				draw_line(o8 - p * r * 0.14, o8 + p * r * 0.14 - d * r * 0.12, encre, maxf(0.8, r * 0.1))
 		"fentes":
 			for cote4 in [-1.0, 1.0]:
 				var o4: Vector2 = c + p * (r * ecart * cote4) + d * r * 0.15
@@ -247,7 +263,12 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 				draw_circle(c + p * (r * ecart * cote5) + d * r * 0.15, maxf(0.6, r * 0.12), encre)
 	var nez := str(_ap.get("nez", "droit"))
 	var haut_nez: Vector2 = c + d * r * 0.05
-	if nez == "crochu":
+	if nez == "fin":
+		draw_line(haut_nez, haut_nez - d * r * 0.3, encre, maxf(0.5, r * 0.05))
+	elif nez == "busque":
+		draw_line(haut_nez + d * r * 0.1, haut_nez - d * r * 0.15 + p * r * 0.08, encre, maxf(0.7, r * 0.1))
+		draw_line(haut_nez - d * r * 0.15 + p * r * 0.08, haut_nez - d * r * 0.4, encre, maxf(0.7, r * 0.1))
+	elif nez == "crochu":
 		draw_line(haut_nez, haut_nez - d * r * 0.35 + p * r * 0.12, encre, maxf(0.7, r * 0.09))
 	elif nez == "plat":
 		draw_line(haut_nez - p * r * 0.1, haut_nez + p * r * 0.1, encre, maxf(0.7, r * 0.09))
@@ -256,7 +277,9 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 	var bouche := str(_ap.get("bouche", "fine"))
 	var y_bouche: Vector2 = c - d * r * 0.5
 	var demi := r * (0.3 if bouche == "large" else 0.18)
-	if bouche == "sourire":
+	if bouche == "boudeuse":
+		draw_arc(y_bouche - d * r * 0.24, r * 0.3, PI * 0.2, PI * 0.8, 10, encre, maxf(0.7, r * 0.09))
+	elif bouche == "sourire":
 		draw_arc(y_bouche + d * r * 0.2, r * 0.32, PI * 1.15, PI * 1.85, 10, encre, maxf(0.7, r * 0.09))
 	else:
 		draw_line(y_bouche - p * demi, y_bouche + p * demi, encre, maxf(0.7, r * 0.09))

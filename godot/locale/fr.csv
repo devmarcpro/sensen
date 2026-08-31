@@ -2394,3 +2394,36 @@ ui.apparence.val.roux,"roux"
 ui.apparence.val.blond,"blond"
 ui.apparence.val.argent,"argent"
 ui.creation.d_apparence,"Un trait du visage ou de la silhouette : ← → pour en changer. La race donne le défaut — le nain est court et large et barbu, l'elfe élancé aux oreilles pointues."
+sort.eclats_en_ligne.name,"Éclats en ligne"
+sort.fonte_en_croix.name,"Fonte en croix"
+sort.aiguille_du_chemin.name,"Aiguille du chemin"
+sort.double_transfert.name,"Double transfert"
+sort.fioles_en_ligne.name,"Fioles en ligne"
+sort.fosse_du_chemin.name,"Fosse du chemin"
+ui.apparence.val.allongee,"allongée"
+ui.apparence.val.en_coeur,"en cœur"
+ui.apparence.val.en_amande,"en amande"
+ui.apparence.val.tombants,"tombants"
+ui.apparence.val.fin,"fin"
+ui.apparence.val.busque,"busqué"
+ui.apparence.val.boudeuse,"boudeuse"
+ui.apparence.val.crete,"en crête"
+ui.apparence.val.chignon,"en chignon"
+ui.apparence.val.tresses,"en tresses"
+ui.apparence.val.trapue,"trapue"
+ui.apparence.val.athletique,"athlétique"
+ui.apparence.val.olive,"olive"
+ui.apparence.val.cuivre,"cuivre"
+ui.apparence.val.porcelaine,"porcelaine"
+ui.apparence.val.neige,"neige"
+ui.apparence.val.acajou,"acajou"
+ui.apparence.val.lin,"lin"
+ui.apparence.val.encre_bleue,"encre bleue"
+creature.tengu.name,Tengu
+creature.banshee.name,Banshee
+creature.troll.name,Troll
+creature.nue.name,Nue
+creature.jorogumo.name,Jorogumo
+creature.lindworm.name,Lindworm
+creature.ours_des_cavernes.name,Ours des cavernes
+creature.essaim_de_chauves_souris.name,Essaim de chauves-souris

@@ -1,0 +1,45 @@
+{
+  "name_key": "creature.tengu.name",
+  "race": "tengu",
+  "skeleton_template": "volant",
+  "corps": {
+    "stats": {
+      "force": 11,
+      "dexterite": 14,
+      "endurance": 9,
+      "volonte": 11,
+      "perception": 13,
+      "charisme": 6
+    },
+    "silhouette": "volant"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "serres",
+    "pique_plongeant"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "bois": 0.5,
+    "metal": 0.5
+  },
+  "rare_chance": 0.03,
+  "teinte": [
+    0.5,
+    0.2,
+    0.18
+  ],
+  "tags": [
+    "folklore"
+  ],
+  "competences": {
+    "athletisme": 26
+  },
+  "depouille": [
+    "peau",
+    "dent"
+  ]
+}

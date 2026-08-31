@@ -45,6 +45,15 @@
     },
     {
       "id": "golem_d_argile"
+    },
+    {
+      "id": "banshee"
+    },
+    {
+      "id": "troll"
+    },
+    {
+      "id": "lindworm"
     }
   ],
   "boss": "chef_de_bande",

@@ -56,6 +56,14 @@ func _ready() -> void:
 	var soins := resultats.filter(func(r: Dictionary) -> bool: return str(r.type) == "soin")
 	for k in mini(4, soins.size()):
 		print("RECO_SOIN ", JSON.stringify(soins[k]))
+	var familles := {}   # le meilleur plan par famille de noyau : de la variété, pas seulement la tête du classement
+	for r in resultats:
+		var noyau := str(r.sequence[1])
+		var fam := str(GameData.catalogues.modules[noyau].get("famille", GameData.catalogues.modules[noyau].get("module_type", "")))
+		if not familles.has(fam) or float(familles[fam].score) < float(r.score):
+			familles[fam] = r
+	for fam in familles.keys():
+		print("RECO_FAMILLE ", fam, " ", JSON.stringify(familles[fam]))
 	print("BANC : %d essais, %d plans qui changent quelque chose" % [essais, resultats.size()])
 	get_tree().quit()
 

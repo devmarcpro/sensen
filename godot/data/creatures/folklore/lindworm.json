@@ -1,0 +1,45 @@
+{
+  "name_key": "creature.lindworm.name",
+  "race": "lindworm",
+  "skeleton_template": "serpentin",
+  "corps": {
+    "stats": {
+      "force": 15,
+      "dexterite": 10,
+      "endurance": 14,
+      "volonte": 6,
+      "perception": 10,
+      "charisme": 2
+    },
+    "silhouette": "serpentin"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "morsure_puissante",
+    "machoire_verrouillee"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 0.5,
+    "eau": 0.5
+  },
+  "rare_chance": 0.03,
+  "teinte": [
+    0.25,
+    0.3,
+    0.35
+  ],
+  "tags": [
+    "folklore"
+  ],
+  "competences": {
+    "athletisme": 22
+  },
+  "depouille": [
+    "peau",
+    "dent"
+  ]
+}

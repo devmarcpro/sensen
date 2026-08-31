@@ -88,6 +88,11 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > [!success] Décidé et codé le 2026-08-31 — le visage à la création (designer, points 39 et 41)
 > L'écran de création gagne un bloc **Apparence** : forme de la tête, yeux, nez, bouche, cheveux, carrure, teint et couleur de cheveux, chacun sur une ligne qui défile à ← →, l'aperçu du personnage se redessinant à chaque changement. Les valeurs par défaut viennent de la **race choisie** — changer de race change la silhouette avant tout réglage manuel — et tout est en données (`data/apparence.json`), aucun chiffre en dur, aucun asset : le visage est dessiné par code sur le disque de la tête.
 
+> [!success] Élargi le 2026-08-31 — plus de sorts, plus de visages, plus de bêtes (designer, point 42)
+> Trois catalogues s'étoffent d'un coup, tous en données. **Sorts recommandés** : le banc rend désormais aussi le **meilleur plan par famille de noyau** — six lignes de plus, mesurées et variées (éclats en ligne 6,31 ; fonte en croix 6,06 ; aiguille du chemin 4,4 ; double transfert 2,5 ; fioles en ligne 2,31 ; fosse du chemin 1,63), soit **treize** propositions dont trois cochables. **Apparence** : tête allongée ou en cœur, yeux en amande ou tombants, nez fin ou busqué, bouche boudeuse, crête, chignon et tresses, carrure trapue ou athlétique, trois teints et quatre couleurs de cheveux de plus — chaque valeur est dessinée, aucune n'est un libellé mort. **Bestiaire** : huit entrées de plus — tengu, banshee, troll, nue, jōrōgumo, lindworm côté folklore attesté, ours des cavernes et essaim de chauves-souris côté bêtes.
+>
+> L'écran de création montre enfin les **trois jauges** du personnage à naître — vie, endurance, mana — sous son portrait, aux couleurs du HUD et avec leur valeur écrite : on voit ce que coûte un point d'endurance avant de le dépenser.
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]
