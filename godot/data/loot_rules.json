@@ -100,10 +100,10 @@
   },
   "contenants": {
     "_doc": "coffres par salle : tuiles de sol par coffre ; objets par coffre. `categories` : un poids et un FILTRE de categorie (jamais une liste d'ids ecrite a la main - Data-driven design). Designer (2026-08-30) : les armes, armures et outils du loot sont des objets ASSEMBLES (tags assemble), composes a la generation - jamais « une simple epee ».",
-    "tuiles_par_coffre": 40,
+    "tuiles_par_coffre": 18,
     "objets_par_coffre": [
       1,
-      2
+      3
     ],
     "categories": {
       "armes": {
@@ -198,8 +198,8 @@
     }
   },
   "drops": {
-    "_doc": "Monstres rares : drop garanti au budget renforcé ; tout-venant : chance de drop",
-    "chance_tout_venant": 0.25,
+    "_doc": "Monstres rares : drop garanti au budget renforce ; tout-venant : chaque ennemi laisse un objet (designer 2026-08-31, point 46).",
+    "chance_tout_venant": 1.0,
     "rare_affixes": 3,
     "rare_rarete": "exceptionnel",
     "artefact": {

@@ -256,3 +256,7 @@ class LigneObjet extends Control:
 			if ev.double_click:
 				inventaire.ecrans._action_principale()
 			accept_event()
+		elif ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_RIGHT:
+			inventaire.selectionner(index)   # clic droit : les actions de l'objet (designer, point 46)
+			inventaire.ecrans.menu_objet(uid, get_global_mouse_position())
+			accept_event()

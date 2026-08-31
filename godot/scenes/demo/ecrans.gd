@@ -19,6 +19,7 @@ var cadre_perso: Control      # l'aperçu du personnage (écran Création) : un 
 var apercu_perso: Paperdoll
 var cadre_visage: Control          # le cadre du portrait : il rogne tout ce qui n'est pas la tête
 var portrait_perso: Paperdoll      # le même paperdoll, zoomé sur le visage (designer, point 43)
+var menu_contextuel_objet: PopupMenu   # clic droit sur un objet du sac (designer, point 46)
 var barres_perso: BarresCreation   # vie, endurance, mana sous l'aperçu (designer, point 42)
 var composeur: Composeur      # le composeur en glisser-déposer (écran Composer)
 var corps: HBoxContainer      # liste + détail : caché quand le composeur est ouvert
@@ -1762,6 +1763,45 @@ func _construire_inventaire(j: Dictionary) -> void:
 		_bouton(tr("ui.ecran.mur"), func() -> void: _mur(false))
 		_bouton(tr("ui.ecran.porte"), func() -> void: _mur(true))
 		_bouton(tr("ui.ecran.ranger"), _ranger)
+
+
+## Le clic droit sur un objet du sac (designer 2026-08-31, point 46) : ses actions possibles,
+## là où pointe la souris. Les entrées sont celles des boutons du bas, filtrées par le type d'objet.
+func menu_objet(uid: String, ou: Vector2) -> void:
+	if uid.is_empty() or main.sim == null:
+		return
+	for k in entrees.size():   # la ligne cliquée devient la sélection : les actions portent sur elle
+		if entrees[k].get("kind", "") == "objet" and str(entrees[k].get("uid", "")) == uid:
+			selection = k
+			break
+	var it: Dictionary = main.sim.items.get(uid, {})
+	if it.is_empty():
+		return
+	var tags: Array = it.get("tags", [])
+	var type_it := str(it.get("type", ""))
+	var actions: Array = []
+	if not str(it.get("equip_slot", "")).is_empty():
+		actions.append(["ui.ecran.equiper", _action_principale])
+	if type_it in ["grimoire", "manuel"] or "ame" in tags:
+		actions.append(["ui.ecran.lire", _lire])
+	if type_it == "consommable" or "nourriture" in tags:
+		actions.append(["ui.ecran.manger", _manger])
+	if type_it == "gemme":
+		actions.append(["ui.ecran.sertir", _sertir])
+	if main.sim.lieu == "camp":
+		actions.append(["ui.ecran.poser", _poser])
+	actions.append(["ui.ecran.jeter", _jeter])
+	if menu_contextuel_objet != null:
+		menu_contextuel_objet.queue_free()
+	menu_contextuel_objet = PopupMenu.new()
+	add_child(menu_contextuel_objet)
+	for k in actions.size():
+		menu_contextuel_objet.add_item(tr(str(actions[k][0])), k)
+	menu_contextuel_objet.id_pressed.connect(func(id: int) -> void:
+		if id >= 0 and id < actions.size():
+			(actions[id][1] as Callable).call())
+	menu_contextuel_objet.position = Vector2i(ou)
+	menu_contextuel_objet.popup()
 
 
 func _nom_court(uid: String) -> String:

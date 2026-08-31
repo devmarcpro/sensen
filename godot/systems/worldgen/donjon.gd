@@ -193,6 +193,9 @@ func _dimension_salle() -> Vector2i:
 			cat = k
 			break
 	var f: Array = tailles[cat]
+	if bool(theme.get("salles_carrees", false)):   # des salles carrées, pas des rectangles biscornus (designer, point 46)
+		var cote := rng.randi_range(int(f[0]), int(f[1]))
+		return Vector2i(cote, cote)
 	return Vector2i(rng.randi_range(int(f[0]), int(f[1])), rng.randi_range(int(f[0]), int(f[1])))
 
 
@@ -330,10 +333,11 @@ func _tunnel(e: Dictionary, de: Vector2i, vers: Vector2i, couloirs: Dictionary) 
 	var largeur := rng.randi_range(int(largeurs[0]), int(largeurs[1]))
 	var p := de
 	var axe_x := absi(vers.x - p.x) >= absi(vers.y - p.y)
+	var droit: bool = bool(couloirs.get("droits", false))   # un L franc : tout droit, un seul angle (designer, point 46)
 	var garde := 0
 	while p != vers and garde < e.largeur * e.hauteur:
 		garde += 1
-		if rng.randf() < virage:
+		if not droit and rng.randf() < virage:
 			axe_x = not axe_x
 		if axe_x and p.x == vers.x:
 			axe_x = false
@@ -341,26 +345,47 @@ func _tunnel(e: Dictionary, de: Vector2i, vers: Vector2i, couloirs: Dictionary) 
 			axe_x = true
 		p += Vector2i(signi(vers.x - p.x), 0) if axe_x else Vector2i(0, signi(vers.y - p.y))
 		_creuser(e, p)
-		if largeur > 1:
-			_creuser(e, p + (Vector2i(0, 1) if axe_x else Vector2i(1, 0)))
+		for l in range(1, largeur):   # un couloir large reste rectiligne sur toute sa largeur
+			_creuser(e, p + (Vector2i(0, l) if axe_x else Vector2i(l, 0)))
 
 
 ## Une impasse : une marche au hasard depuis une tuile de sol.
 func _impasse(e: Dictionary, couloirs: Dictionary) -> void:
 	if e.sol.is_empty():
 		return
-	var cles: Array = e.sol.keys()
-	var idx: int = cles[rng.randi_range(0, cles.size() - 1)]
-	var p := Vector2i(idx % e.largeur, idx / e.largeur)
+	var p := _sol_au_hasard(e)
+	if p.x < 0:
+		return
 	var longueurs: Array = couloirs.get("impasse_longueur", [4, 12])
 	var d: Vector2i = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)][rng.randi_range(0, 3)]
+	var droit: bool = bool(couloirs.get("droits", false))
+	var larg_b: Array = couloirs.get("largeur", [1, 2])
+	var lb := rng.randi_range(int(larg_b[0]), int(larg_b[1]))
 	for k in rng.randi_range(int(longueurs[0]), int(longueurs[1])):
-		if rng.randf() < float(couloirs.get("virage", 0.25)):
+		if not droit and rng.randf() < float(couloirs.get("virage", 0.25)):
 			d = Vector2i(d.y, d.x) * (1 if rng.randf() < 0.5 else -1)
 		p += d
 		if p.x <= 1 or p.y <= 1 or p.x >= e.largeur - 2 or p.y >= e.hauteur - 2:
 			return
 		_creuser(e, p)
+		for l in range(1, lb):   # un branchement a la largeur d'un couloir
+			_creuser(e, p + (Vector2i(0, l) if d.x != 0 else Vector2i(l, 0)))
+
+
+## Une tuile de sol au hasard, tirée dans une pièce plutôt qu'en recopiant tout le dictionnaire :
+## avec les salles immenses (designer 2026-08-31), `e.sol.keys()` faisait des milliers d'entrées par appel.
+func _sol_au_hasard(e: Dictionary) -> Vector2i:
+	if not e.pieces.is_empty():
+		for essai in 24:
+			var r: Rect2i = e.pieces[rng.randi_range(0, e.pieces.size() - 1)].rect
+			var p := Vector2i(rng.randi_range(r.position.x, r.end.x - 1), rng.randi_range(r.position.y, r.end.y - 1))
+			if e.sol.has(p.y * e.largeur + p.x):
+				return p
+	var cles: Array = e.sol.keys()
+	if cles.is_empty():
+		return Vector2i(-1, -1)
+	var idx: int = cles[rng.randi_range(0, cles.size() - 1)]
+	return Vector2i(idx % e.largeur, idx / e.largeur)
 
 
 func _creuser(e: Dictionary, p: Vector2i) -> void:

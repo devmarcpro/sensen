@@ -75,6 +75,9 @@
       },
       "minItems": 2,
       "maxItems": 2
+    },
+    "salles_carrees": {
+      "type": "boolean"
     }
   }
 }

@@ -6529,7 +6529,7 @@ func test_donjon_temps_a_l_action() -> void:
 	verifier(silhouettes41.size() >= 4, "les races ne se ressemblent pas : %d silhouettes distinctes" % silhouettes41.size())
 	var prog41 := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
 	var nain41 := Etres.creer_personnage("creature.aventurier.name", "nain", "le_sabre", {}, 1000, prog41)
-	verifier(float(nain41.get("apparence", {}).get("echelle", 1.0)) < 1.0 and float(nain41.apparence.get("barbe", 0.0)) > 0.0, "le nain naît court et barbu, sans une ligne de code par race")
+	verifier(float(nain41.get("apparence", {}).get("echelle", 1.0)) < 1.0 and str(nain41.apparence.get("barbe", "aucune")) != "aucune", "le nain naît court et barbu, sans une ligne de code par race")
 
 	# Toute espèce est jouable (2026-08-31, point 44) : elle remplace le squelette, pas la classe
 	var prog44 := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))

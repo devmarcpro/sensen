@@ -108,6 +108,11 @@ NETTOYAGE ET DISPARITION (3.5) : à la mort du boss (`creature_killed`
 > [!success] Décidé et codé le 2026-08-31 — de vrais escaliers, pris en marchant (designer, point 36)
 > Les losanges doré et vert deviennent de **vraies marches dessinées par code** (quatre degrés qui rétrécissent, doré = descente, vert = montée), et **marcher sur l'escalier change d'étage automatiquement** : le pas du joueur qui arrive sur la cage déclenche la descente (ou la remontée — sur l'étage 1, elle fait ressortir au camp). Les intentions `descendre`/`remonter`, la touche E et les options contextuelles restent valables (les tests et la triche s'en servent), mais ne sont plus nécessaires. Le spawn sur l'escalier d'arrivée ne re-déclenche rien : seul un **pas** sur la tuile compte. Les PNJ ne changent jamais d'étage. Le robot de parcours détecte le changement d'étage au lieu de l'ordonner.
 
+> [!success] Décidé et codé le 2026-08-31 — des donjons carrés (designer, point 46)
+> Le designer tranche contre l'organique : **salles carrées de toutes tailles** (4-6, 8-11, 13-17 et des **salles immenses** de 20 à 26 côtés), **couloirs droits** — un L franc, plus de marche au hasard — de deux à trois tuiles de large, et des **branchements** rectilignes plus nombreux (6 à 12 par étage). Deux drapeaux en données le pilotent, `salles_carrees` et `couloirs.droits` : un thème peut redevenir sinueux sans toucher au code. Les grands espaces ouverts viennent des salles immenses et des couloirs larges, pas d'un bruit de terrain.
+>
+> Au passage, deux règles du même jour : **tous les ennemis lâchent du loot** (`chance_tout_venant` passe de 0,25 à 1) et les **coffres doublent** (une tuile sur 18 au lieu de 40, un à trois objets). Un **meuble n'occupe plus toute sa case** : chaque fiche porte une `emprise` (0,58 pour un coffre, 0,78 pour un lit ou une station) et le bloc est dessiné d'autant plus petit et plus bas. Enfin, **E ne casse plus les blocs ni le sol** : creuser un mur, abaisser ou élever une tuile disparaissent du menu.
+
 ## Liens
 - **Dépend de** : [[Donjons — structure et intégration]], [[Salles et connecteurs]], [[Unification macro-micro]], [[Dérive de la corruption]]
 - **Alimente** : [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Créatures]], [[Gabarit de quête]]

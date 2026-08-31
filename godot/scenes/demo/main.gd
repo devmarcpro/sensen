@@ -9,7 +9,6 @@ const TW := 40            # largeur d'une tuile à l'écran
 const TH := 20            # hauteur du losange
 const HSTEP := 8          # pixels par niveau de hauteur
 const DELAI_PAS := 0.12   # secondes réelles entre deux pas d'une horloge de combat (lisibilité)
-const BUDGET_ATTEIGNABLE := 12   # ticks : rayon des coûts affichés
 const RAYON_VUE := 20            # tuiles dessinées autour du joueur (une cellule fait taille_cellule², 64 depuis le 2026-08-30)
 var centre_terrain := Vector2i(-99, -99)   # centre de la dernière passe statique du terrain
 var vue_version := -1                      # version du champ de vue dessiné (brouillard de guerre)
@@ -651,7 +650,12 @@ func _process(delta: float) -> void:
 		if dir != Vector2i.ZERO:
 			chemin_en_cours.clear()
 			minuterie_clavier = 0.05
-			if not sim.intention(joueur_id, {"type": "deplacer", "vers": j.pos + dir}):
+			var vise: Vector2i = j.pos + dir
+			var occ_v := sim.grille.occupant(vise)   # se diriger vers un ennemi adjacent l'attaque (designer, point 46)
+			if not occ_v.is_empty() and occ_v != joueur_id and sim.ennemis(j, sim.entites[occ_v]):
+				if not sim.intention(joueur_id, {"type": "attaquer", "cible": occ_v}):
+					_log(tr("journal.inaccessible"))
+			elif not sim.intention(joueur_id, {"type": "deplacer", "vers": vise}):
 				_log(tr("journal.inaccessible"))
 	# En attente d'intention : on consomme la file d'ordres du joueur (un pas par décision).
 	if sim.attente.has(joueur_id) and not chemin_en_cours.is_empty():
@@ -675,9 +679,14 @@ func _process(delta: float) -> void:
 		# horloge de combat), le monde ne se vide pas : sans lui pour la bloquer, l'horloge tournait sans fin
 		# (128 pas × 60 images/s = le « dès qu'on rentre en combat ça lag énormément », 2026-08-31) —
 		# temporalités parallèles : pendant un combat, le reste de l'étage attend.
-		var garde_pas := 128
+		var tempo: Dictionary = sim.regles.r.get("tempo", {})
+		var garde_pas := int(tempo.get("ticks_max_par_image", 5))   # au plus 5 ticks par image (designer, point 46)
+		var t_debut := Time.get_ticks_msec()
+		var budget_ms := int(tempo.get("ms_max_par_image", 12))     # et jamais plus de 12 ms : plus de gel
 		while garde_pas > 0 and sim.pas("monde"):
 			garde_pas -= 1
+			if Time.get_ticks_msec() - t_debut >= budget_ms:
+				break
 	_maj_noeuds(delta)
 	if Grille.distance(j.pos, centre_terrain) > RAYON_VUE / 3 or sim.grille.decouvert.size() != decouvert_dessine:
 		terrain.queue_redraw()   # le joueur s'éloigne du centre de la passe statique, ou il a découvert des tuiles
@@ -766,19 +775,12 @@ func _dessiner_occulteurs(n: Paperdoll) -> void:
 			n.draw_set_transform(Vector2.ZERO)
 
 
-var _attein_cle := ""   # le flood des tuiles atteignables ne se recalcule que quand la situation change (lag en combat, 2026-08-31)
 
 
+## Le voile jaune des tuiles atteignables est retiré (designer 2026-08-31, point 46) : plus de flood
+## par image en combat non plus — le coût d'un pas reste lisible dans l'en-tête au survol.
 func _maj_atteignables() -> void:
-	var j := joueur()
-	var en_combat: bool = not j.is_empty() and j.vivant and sim.attente.has(joueur_id) and sim.en_combat(j)
-	var cle := "%s|%s|%d|%.2f" % [str(j.get("pos", Vector2i.ZERO)), str(en_combat), sim.grille.decouvert.size(), float(sim.poids_de(j).facteur)]
-	if cle == _attein_cle:
-		return
-	_attein_cle = cle
 	atteignables = {}
-	if en_combat:
-		atteignables = sim.grille.atteignables(j.pos, BUDGET_ATTEIGNABLE, Etres.est_volant(j), sim.refuse_nage(j))
 
 
 # ---------------------------------------------------------------- entrées → intentions
@@ -1017,11 +1019,6 @@ func _options_tuile(t: Vector2i) -> Array:
 		res.append({"id": "creuser", "vers": t})
 	if "construit" in tags:
 		res.append({"id": "demonter", "vers": t})
-	if not g.bloque_passage(t) and g.occupant(t).is_empty() and not g.meubles.has(g.idx(t)) and not g.stations_fixes.has(g.idx(t)):
-		res.append({"id": "abaisser", "vers": t})
-		res.append({"id": "elever", "vers": t})
-	if g.bloque_passage(t) and not ("meuble" in tags) and not ("plante" in tags) and not ("arbre" in tags) and not ("eau" in tags):
-		res.append({"id": "creuser", "vers": t})
 	if "porte" in sim.grille.contenu_de(t).get("tags", []) and Grille.distance(j.pos, t) == 1:   # ouvrir / fermer une porte adjacente
 		res.append({"id": "porte", "vers": t})
 	return res
@@ -1064,10 +1061,6 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "mordre", "cible": str(opt.cible)})
 		"traverser_mur":
 			sim.intention(joueur_id, {"type": "traverser_mur", "cible": opt.cible})
-		"abaisser":
-			sim.intention(joueur_id, {"type": "terrasser", "vers": opt.vers, "sens": -1})
-		"elever":
-			sim.intention(joueur_id, {"type": "terrasser", "vers": opt.vers, "sens": 1})
 		"transformer":
 			sim.intention(joueur_id, {"type": "transformer"})
 		"arme_fantome":
@@ -1292,8 +1285,6 @@ func _draw() -> void:
 	var g := sim.grille
 	var j := joueur()
 	# Superpositions translucides sur les tuiles (atteignables, télégraphes, survol, forme visée).
-	for t in atteignables.keys():
-		_losange(t, Color(0.9, 0.9, 0.5, 0.28))
 	for t in _zones_telegraphes().keys():
 		_losange(t, Color(1.0, 0.2, 0.1, 0.5))
 	if survol.x >= 0:
@@ -1609,8 +1600,12 @@ func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: C
 	var contenu_t := g.contenu_de(t)
 	var tags_t: Array = contenu_t.get("tags", [])
 	var mat: Dictionary = GameData.catalogues.materials.get(g.materiau_de(t), {})
+	var emprise := 1.0   # un meuble est un bloc plus petit que sa case (designer, point 46)
 	if "meuble" in tags_t and g.meubles.has(g.idx(t)):
-		haut_bloc = Color.html(str(GameData.entree("meubles", str(g.meubles[g.idx(t)])).couleur))
+		var mb: Dictionary = GameData.entree("meubles", str(g.meubles[g.idx(t)]))
+		haut_bloc = Color.html(str(mb.couleur))
+		emprise = float(mb.get("emprise", 0.6))
+		hm = int(roundf(float(hm) * emprise))
 	elif contenu_t.has("couleur"):
 		haut_bloc = Color.html(str(contenu_t.couleur))
 	elif "arbre" in tags_t:
@@ -1618,19 +1613,21 @@ func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: C
 	elif not mat.is_empty():   # la couleur de la palette du matériau (filon ou mur du thème)
 		haut_bloc = haut_bloc.lerp(Color.html(mat.color), 0.55 if g.materiaux.has(g.idx(t)) else 0.35)
 	haut_bloc *= teinte
+	var tw := TW * 0.5 * emprise
+	var th := TH * 0.5 * emprise
 	var sud := t + Vector2i(0, 1)
 	if not g.dans(sud) or not g.bloque_passage(sud) or not g.decouvert.has(g.idx(sud)):
 		_poly(ci, PackedVector2Array([   # face sud-ouest (gauche)
-			c + Vector2(-TW * 0.5, 0), c + Vector2(0, TH * 0.5),
-			c + Vector2(0, TH * 0.5 - hm), c + Vector2(-TW * 0.5, -hm)]), haut_bloc.darkened(0.35))
+			c + Vector2(-tw, 0), c + Vector2(0, th),
+			c + Vector2(0, th - hm), c + Vector2(-tw, -hm)]), haut_bloc.darkened(0.35))
 	var est := t + Vector2i(1, 0)
 	if not g.dans(est) or not g.bloque_passage(est) or not g.decouvert.has(g.idx(est)):
 		_poly(ci, PackedVector2Array([   # face sud-est (droite)
-			c + Vector2(0, TH * 0.5), c + Vector2(TW * 0.5, 0),
-			c + Vector2(TW * 0.5, -hm), c + Vector2(0, TH * 0.5 - hm)]), haut_bloc.darkened(0.5))
+			c + Vector2(0, th), c + Vector2(tw, 0),
+			c + Vector2(tw, -hm), c + Vector2(0, th - hm)]), haut_bloc.darkened(0.5))
 	_poly(ci, PackedVector2Array([   # dessus
-		c + Vector2(-TW * 0.5, -hm), c + Vector2(0, -TH * 0.5 - hm),
-		c + Vector2(TW * 0.5, -hm), c + Vector2(0, TH * 0.5 - hm)]), haut_bloc)
+		c + Vector2(-tw, -hm), c + Vector2(0, -th - hm),
+		c + Vector2(tw, -hm), c + Vector2(0, th - hm)]), haut_bloc)
 
 
 ## La couche d'interface : barres, garde, télégraphe et jauge de chaîne de chaque être.

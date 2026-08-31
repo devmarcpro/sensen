@@ -69,42 +69,48 @@
   ],
   "tailles_salles": {
     "petite": [
-      3,
-      4
+      4,
+      6
     ],
     "moyenne": [
-      5,
-      7
+      8,
+      11
     ],
     "grande": [
-      8,
-      12
+      13,
+      17
+    ],
+    "immense": [
+      20,
+      26
     ]
   },
   "poids_salles": {
-    "petite": 4,
-    "moyenne": 3,
-    "grande": 1
+    "petite": 3,
+    "moyenne": 4,
+    "grande": 2,
+    "immense": 1
   },
   "couloirs": {
     "largeur": [
-      1,
+      2,
       3
     ],
-    "virage": 0.35,
+    "virage": 0.0,
     "voisins_relies": 3,
     "boucles": [
       3,
       6
     ],
     "impasses": [
-      4,
-      8
+      6,
+      12
     ],
     "impasse_longueur": [
-      4,
-      12
-    ]
+      5,
+      14
+    ],
+    "droits": true
   },
   "materiau_mur": "pierre",
   "decors": [
@@ -135,5 +141,6 @@
       ]
     }
   ],
-  "portes": 0.5
+  "portes": 0.5,
+  "salles_carrees": true
 }

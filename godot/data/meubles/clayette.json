@@ -6,5 +6,6 @@
   "capacite_slots": 6,
   "luminosite": 0,
   "bonus_humeur": 1,
-  "couleur": "#c8b070"
+  "couleur": "#c8b070",
+  "emprise": 0.78
 }

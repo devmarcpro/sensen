@@ -1128,5 +1128,10 @@
     "des": "2d6",
     "moyenne": 7.0,
     "competence": "agriculture"
+  },
+  "tempo": {
+    "ticks_max_par_image": 5,
+    "ms_max_par_image": 12,
+    "_doc": "Plafond de travail par image en donjon (designer 2026-08-31, point 46) : au plus 5 ticks du monde et 12 ms, pour qu'aucune action ne gèle l'affichage."
   }
 }
