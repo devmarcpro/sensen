@@ -139,9 +139,14 @@ func _ready() -> void:
 		var jd: Dictionary = scene.joueur()
 		var lit_d: Dictionary = scene.sim.generer_objet("meuble_lit_de_paille", 1)
 		scene.sim.donner(jd, lit_d.uid)
-		var devant_d: Vector2i = jd.pos + Vector2i(0, 1)
+		var devant_d: Vector2i = jd.pos   # une tuile libre adjacente pour le lit — la case fixe peut être bloquée
+		for d_l in Grille.DIRS:
+			var c_l: Vector2i = jd.pos + d_l
+			if scene.sim.grille.dans(c_l) and not scene.sim.grille.bloque_passage(c_l) and scene.sim.grille.occupant(c_l).is_empty():
+				devant_d = c_l
+				break
 		scene.sim.attente[jd.id] = true
-		scene.sim.intention(jd.id, {"type": "poser", "objet": lit_d.uid, "vers": devant_d})
+		print("poser lit : ", scene.sim.intention(jd.id, {"type": "poser", "objet": lit_d.uid, "vers": devant_d}))
 		scene.sim.attente[jd.id] = true
 		print("dormir : ", scene.sim.intention(jd.id, {"type": "dormir", "vers": devant_d}), " · heure ", "%.1f" % scene.sim.heure())
 		scene._apres_changement_de_grille()
@@ -244,6 +249,10 @@ func _process(delta: float) -> void:
 		temps_total += delta
 	if frames == cible:
 		var img := get_viewport().get_texture().get_image()
+		if img == null or img.is_empty():   # headless : pas d'image — on quitte quand même (sinon le processus reste)
+			print("capture impossible (headless ?) — sortie")
+			get_tree().quit()
+			return
 		img.save_png(sortie)
 		print("capture : ", sortie)
 		print("image : moyenne %.1f ms, pire %.1f ms sur %d images" % [temps_total / float(frames - 5) * 1000.0, temps_max * 1000.0, frames - 5])
