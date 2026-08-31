@@ -35,6 +35,9 @@ usage-based rend la perte d'XP très punitive, on pénalise l'économie à la pl
 > [!success] Codé le 2026-08-31 — les −10 % d'or sont prélevés
 > `combat_rules.mort.perte_or` existait mais n'était lu nulle part (« pas d'or encore » disait la note de règles — l'or existe depuis les boutiques). `_respawn` retire désormais `floor(or × perte_or)` et le journal le dit (`journal.mort_or`). Test dans `test_progression`.
 
+> [!success] Codé le 2026-08-31 — le butin de mort retourne à la poussière
+> La note promettait des objets « récupérables pendant 1 jour in-game » ; le code posait le contenant sans péremption — le tas restait pour toujours. Chaque objet tombé à la mort porte désormais `peremption_tick` (1 jour, `combat_rules.mort.peremption_jours`) ; un passage horaire de l'horloge du monde (`_perimer_butin`, camp comme donjon) retire les objets périmés et rend la tuile quand le tas est vide. Les coffres, étals et butins de combat ordinaires ne périment pas — seule la dépouille de la mort est concernée, comme la note le dit.
+
 ## Liens
 - **Dépend de** : [[Progression par l'usage]]
 - **Alimente** : [[Économie — sources et puits]]

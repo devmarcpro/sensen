@@ -4400,6 +4400,13 @@ func test_nage() -> void:
 	s.attente[j.id] = true
 	var c0 := int(j.compteur)
 	verifier(s.intention(j.id, {"type": "deplacer", "vers": eau}) and j.pos == eau and int(j.compteur) - c0 >= 4, "nager : %d ticks" % (int(j.compteur) - c0))
+	# Le butin de mort périme après un jour (Mort et pénalité, 2026-08-31)
+	var t_per: Vector2i = j.pos + Vector2i(-2, 0)
+	var o_per: Dictionary = s.generer_objet("proto_epee", 1, {}, "commun", 0)
+	s._poser_contenant(t_per, [o_per.uid], "butin")
+	s.objets[o_per.uid]["peremption_tick"] = 100
+	s._perimer_butin(101)
+	verifier(not s.contenants.has(s.grille.idx(t_per)) and s.grille.contenu_de(t_per).is_empty(), "le butin périmé rend sa tuile")
 	var smax := s.souffle_max(j)
 	s._tiquer_souffle(j.horloge, h.ticks)
 	var pv0 := int(j.sante)

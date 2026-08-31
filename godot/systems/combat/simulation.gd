@@ -38,6 +38,7 @@ var affuts: Array[Dictionary] = []   # tourelles portatives de L'Engrenage : {po
 var pluie_heure := -1   # la dernière heure de monde où la pluie a rempli les creux
 var foudre_heure := -1   # la dernière heure d'orage où la foudre a frappé (Météo)
 var evapo_heure := -1   # la dernière heure de canicule où les flaques ont baissé
+var peremption_heure := -1   # la dernière heure où le butin de mort périmé a été balayé (Mort et pénalité)
 var eau_active: Dictionary = {}   # idx → true : tuiles de liquide à propager (Eau et liquides)
 var feux: Dictionary = {}   # idx → {reste} : tuiles en feu (Météo : le feu de tuile)
 var feu_prochain_pas := 0
@@ -6202,6 +6203,28 @@ func _rendre_rare(e: Dictionary, rng: RandomNumberGenerator) -> void:
 
 
 ## Pose un contenant (coffre, butin) sur une tuile ; s'il y en a déjà un, le contenu s'ajoute.
+## Le butin de mort périme (Mort et pénalité : « récupérable pendant 1 jour ») : les objets marqués
+## d'un peremption_tick dépassé quittent leur tas ; un tas vidé rend sa tuile. Les coffres ne périment pas.
+func _perimer_butin(tick: int) -> void:
+	for gi in contenants.keys().duplicate():
+		var restants: Array = []
+		var retire := false
+		for uid in contenants[gi]:
+			var o: Dictionary = objets.get(str(uid), {})
+			if o.has("peremption_tick") and int(o.peremption_tick) <= tick:
+				retire = true
+			else:
+				restants.append(uid)
+		if not retire:
+			continue
+		if restants.is_empty():
+			contenants.erase(gi)
+			grille.contenu[int(gi)] = 0
+			EventBus.emettre(&"tile_changed", [grille.pos_de(int(gi))])
+		else:
+			contenants[gi] = restants
+
+
 func _poser_contenant(pos: Vector2i, uids: Array, type: String) -> void:
 	if uids.is_empty():
 		return
@@ -6241,6 +6264,9 @@ func _respawn(e: Dictionary) -> bool:
 			e.sac.erase(uid)
 			perdus.append(uid)
 	_poser_contenant(e.pos, perdus, "butin")
+	if horloge_monde != null:   # Mort et pénalité : récupérable pendant 1 jour in-game, puis poussière
+		for uid_p in perdus:
+			objets[str(uid_p)]["peremption_tick"] = horloge_monde.ticks + int(regles.r.mort.get("peremption_jours", 1)) * int(_cycle().get("ticks_par_jour", 24000))
 	var or_perdu := int(floor(float(e.get("or", 0)) * float(regles.r.mort.get("perte_or", 0.0))))   # Mort et pénalité : −10 % de l'or porté
 	if or_perdu > 0:
 		e.or = int(e.or) - or_perdu
@@ -7000,6 +7026,10 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 		_tiquer_eau(tick)
 		_tiquer_lave(tick)
 		_tiquer_feux(tick)
+		var h_per := int(_cycle().get("ticks_par_jour", 24000)) / 24
+		if tick / h_per != peremption_heure:
+			peremption_heure = tick / h_per
+			_perimer_butin(tick)
 		var h_ticks := int(_cycle().get("ticks_par_jour", 24000)) / 24
 		if lieu == "camp" and monde != null:
 			var met := meteo(monde.cellule_de(grille.pos_de(grille.largeur * grille.hauteur_grille / 2)))

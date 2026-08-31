@@ -198,9 +198,10 @@
     }
   },
   "mort": {
-    "_doc": "Mort et pénalité : respawn, −perte_or de l'or porté (prélevé depuis le 2026-08-31), 10 % de chance par objet du sac de tomber, équipement et XP conservés",
+    "_doc": "Mort et pénalité : respawn, −perte_or de l'or porté (prélevé depuis le 2026-08-31), 10 % de chance par objet du sac de tomber, équipement et XP conservés ; les objets tombes periment apres peremption_jours (recuperables 1 jour)",
     "chance_perte_objet": 0.1,
-    "perte_or": 0.1
+    "perte_or": 0.1,
+    "peremption_jours": 1
   },
   "creuser": {
     "_doc": "Destruction du terrain : détruire un mur (la tuile redevient sol). Coût en ticks d'une tuile de mur ; XP versée à Terrassement. Décision du 2026-08-27.",
