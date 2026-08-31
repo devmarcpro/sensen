@@ -42,7 +42,8 @@ var poursuite_d := 999         # si la distance ne baisse jamais (kiting mutuel)
 var poursuite_sterile := 0
 var progres_marqueur := []     # garde-fou d'étage : si AUCUN compteur ne bouge longtemps, on purge les cibles puis on rend le rapport
 var progres_frame := 0
-var purge_faite := false   # une capture d'écran toutes les 30 s réelles dans <sortie>/toutes_les_30s/ (designer, 2026-08-31)
+var purge_faite := false
+var capacites_a_sec := {}      # index → image de re-essai : un sort refusé (charges, portée) se met en retrait   # une capture d'écran toutes les 30 s réelles dans <sortie>/toutes_les_30s/ (designer, 2026-08-31)
 var en_combat_avant := false
 var sante_avant := -1
 var journal_vu := 0
@@ -229,10 +230,12 @@ func _process(_delta: float) -> void:
 		scene.chemin_en_cours.clear()
 		if sorts > 0 and rng_bot.randf() < 0.5 and j.capacites.size() > 0:   # un sort au hasard sur la cible (30)
 			var k_s: int = rng_bot.randi() % j.capacites.size()
-			if sim.intention(jid, {"type": "capacite", "index": k_s, "cible": cible.pos}):
-				sorts_lances += 1
-				return
-			sorts_refuses += 1
+			if int(capacites_a_sec.get(k_s, -1)) <= frames:
+				if sim.intention(jid, {"type": "capacite", "index": k_s, "cible": cible.pos}):
+					sorts_lances += 1
+					return
+				sorts_refuses += 1
+				capacites_a_sec[k_s] = frames + 2000   # à sec ou hors géométrie : on n'insiste pas à chaque tour
 		var arme_b: Dictionary = Etres.arme(j, sim.items)
 		var fonct_b: Dictionary = sim.fonctionnalites.get(arme_b.get("functionality", ""), {})
 		var pa: Vector2i = sim.regles.portee_de(fonct_b) if not fonct_b.is_empty() else Vector2i(1, 1)
