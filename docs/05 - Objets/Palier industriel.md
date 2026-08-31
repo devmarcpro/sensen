@@ -26,6 +26,9 @@ Le joueur **trouve et achète des recettes industrielles** (ruines profondes, ma
 > [!success] Codé le 2026-08-28 — aciers alliés et caoutchouc
 > Trois matériaux de plus, recettes `industrielle: true` à la **forge** (apprises par plan industriel comme les autres) : **acier inoxydable** (`allier_inox` : 2 acier + 1 chrome + 1 nickel + 1 anthracite ; catégorie `metal`, donc utilisable dans les lames et plaques ; dureté 42, valeur 45 ; vecteur plat Métal 0,6 / Feu 0,25 / Eau 0,15 comme dans la note), **acier au tungstène** (`allier_acier_tungstene` : 2 acier + 1 tungstène + 1 anthracite ; dureté 50, densité 16, valeur 55 ; Métal 0,7 / Feu 0,2 / Terre 0,1), **caoutchouc** (`vulcaniser_caoutchouc` : 3 sève + 1 soufre + 1 houille ; catégorie `synthetique`, élasticité 90, friction 80, isolation 60, conductivité électrique 0 ; Bois 0,5 / Eau 0,3 / Feu 0,2). Décision : l'anthracite est le combustible des alliages (meilleur carburant de la note), la houille suffit à la vulcanisation ; pas de haut fourneau ni de laminoir en station propre — la forge porte tout tant que les stations industrielles n'ont pas de meuble.
 
+> [!success] Corrigé le 2026-08-31 — le forgeron vend enfin les plans
+> La note promettait les plans industriels « achetés chez les forgerons de ville (inventaire du type de boutique) », mais `shop_types/forgeron.json` ne sélectionnait que armes, outils et stations — la seule source réelle était le drop des ruines profondes. Un bloc de sélection `manuel` + tag `plan` (0 à 1 par réassort hebdomadaire) rejoint l'étal du forgeron : le générateur d'objets lui donne sa recette industrielle comme pour un plan trouvé en donjon.
+
 ## Liens
 - **Dépend de** : [[Craft compositionnel]], [[Composant et recette d'obtention]], [[Stations de transformation]]
 - **Alimente** : [[Wu Xing hors combat]], [[Jauge de chaîne Wu Xing]]

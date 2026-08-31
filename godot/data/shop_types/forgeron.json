@@ -43,6 +43,20 @@
         0,
         1
       ]
+    },
+    {
+      "filtre": {
+        "types_any": [
+          "manuel"
+        ],
+        "tags_any": [
+          "plan"
+        ]
+      },
+      "nombre": [
+        0,
+        1
+      ]
     }
   ]
 }
