@@ -20,6 +20,8 @@ func _ready() -> void:
 			cible = int(args[i + 1])
 		elif args[i] == "--arene" and i + 1 < args.size():
 			arene = int(args[i + 1])
+	if "--plein-ecran" in args:   # --plein-ecran : la fenêtre passe en plein écran AVANT la capture (README, designer 2026-08-31)
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	var scene: Node = load("res://scenes/demo/main.tscn").instantiate()
 	add_child(scene)
 	scene.profil_sans_ui = "--sans-ui" in args
@@ -122,7 +124,7 @@ func _ready() -> void:
 	if "--feu" in args and scene.sim != null:   # --feu : enflamme les tuiles inflammables autour du joueur (flammes, halo, dangers)
 		var jf: Dictionary = scene.joueur()
 		var n_feux := 0
-		for r_f in range(1, 7):
+		for r_f in range(1, 16):
 			for dy_f in range(-r_f, r_f + 1):
 				for dx_f in range(-r_f, r_f + 1):
 					if absi(dx_f) != r_f and absi(dy_f) != r_f:
@@ -133,6 +135,16 @@ func _ready() -> void:
 			if n_feux >= 5:
 				break
 		print("feux allumés : ", n_feux)
+	if "--dormir" in args and scene.sim != null:   # --dormir : pose un lit devant le joueur et y dort (saut de sommeil, Reposé)
+		var jd: Dictionary = scene.joueur()
+		var lit_d: Dictionary = scene.sim.generer_objet("meuble_lit_de_paille", 1)
+		scene.sim.donner(jd, lit_d.uid)
+		var devant_d: Vector2i = jd.pos + Vector2i(0, 1)
+		scene.sim.attente[jd.id] = true
+		scene.sim.intention(jd.id, {"type": "poser", "objet": lit_d.uid, "vers": devant_d})
+		scene.sim.attente[jd.id] = true
+		print("dormir : ", scene.sim.intention(jd.id, {"type": "dormir", "vers": devant_d}), " · heure ", "%.1f" % scene.sim.heure())
+		scene._apres_changement_de_grille()
 	if "--torche" in args and scene.sim != null:   # --torche : une torche en main (Éclairage, la nuit)
 		var jt0: Dictionary = scene.joueur()
 		var torche: Dictionary = scene.sim.generer_objet("torche", 1, {}, "commun", 0)
