@@ -1889,7 +1889,7 @@ func a_unique_ax(e: Dictionary, mecanique: String) -> Dictionary:
 
 ## Une tuile d'eau à nager (Eau et liquides) — gelée, elle se marche.
 func dans_l_eau(pos: Vector2i) -> bool:
-	return grille.dans(pos) and not grille.gel and "nage" in grille.contenu_de(pos).get("tags", [])
+	return grille.dans(pos) and grille.nageable(pos)
 
 
 ## La température au centre de la cellule chargée (biome, saison, météo, nuit) — pour le gel (Météo).
@@ -2507,7 +2507,7 @@ func _ia_par_portail(e: Dictionary, but: Vector2i, tick: int) -> bool:
 		return false
 	if entree == e.pos:
 		return _traverser(e, tick)
-	var pas := grille.chemin(e.pos, entree, Etres.est_volant(e))
+	var pas := grille.chemin(e.pos, entree, Etres.est_volant(e), "", refuse_nage(e))
 	return not pas.is_empty() and _deplacer(e, pas[0], tick)
 
 
@@ -6824,6 +6824,12 @@ func poids_de(e: Dictionary) -> Dictionary:
 	return {"poids": total, "capacite": cap, "facteur": regles.facteur_surcharge(total, cap)}
 
 
+## L'eau refuse un être en surcharge (Eau et liquides) : le pathfinding doit le savoir,
+## sinon l'A* propose des pas que _deplacer refusera — l'être piétine au bord de l'eau.
+func refuse_nage(e: Dictionary) -> bool:
+	return bool(regles.r.nage.get("refus_surcharge", true)) and not Etres.est_volant(e) and poids_de(e).facteur > 1.0
+
+
 ## Manger un consommable du sac (Nourriture) : nutrition, soin, mana, statut, risque, potentiel du plat.
 func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 	var it: Dictionary = items.get(uid, {})
@@ -7401,7 +7407,7 @@ func _attaquer_arme(e: Dictionary, cible: Dictionary, lourde: bool, tick: int) -
 	var fonct: Dictionary = fonctionnalites.get(arme.functionality, {})
 	if not _cible_atteignable(e, cible, _portee_effective(e, arme, fonct), true):
 		return false
-	if est_distance(fonct):
+	if est_projectile(fonct):
 		# Projectile (Décision — Projectiles) : munitions, trajectoire réelle, tir refusé si un allié masque.
 		if e.munitions <= 0:
 			return false
@@ -7430,6 +7436,12 @@ func est_distance(fonct: Dictionary) -> bool:
 	return int(fonct.get("portee_min", 1)) > 1
 
 
+## Projectile (Décision — Projectiles) : munitions et trajectoire — l'arc, pas la lance.
+## La zone morte au contact (portee_min > 1) est commune ; le carquois ne l'est pas.
+func est_projectile(fonct: Dictionary) -> bool:
+	return bool(fonct.get("projectile", false))
+
+
 ## Coût en ticks modulé par les statuts (Ralentissement, Hâte) — Statuts.
 func _ticks_avec_statuts(e: Dictionary, ticks: int) -> int:
 	return maxi(1, roundi(float(ticks) * Etres.mult_statuts(e, "cout_ticks", statuts_defs)))
@@ -7448,7 +7460,7 @@ func _premier_sur_trajectoire(e: Dictionary, cible: Dictionary) -> Dictionary:
 func verifier_tir(e: Dictionary, cible: Dictionary) -> Dictionary:
 	var arme := Etres.arme(e, items)
 	var fonct: Dictionary = fonctionnalites.get(arme.get("functionality", ""), {})
-	if fonct.is_empty() or not est_distance(fonct):
+	if fonct.is_empty() or not est_projectile(fonct):
 		return {"ok": true}
 	if e.munitions <= 0:
 		return {"ok": false, "raison": "munitions"}
@@ -7461,7 +7473,7 @@ func verifier_tir(e: Dictionary, cible: Dictionary) -> Dictionary:
 func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Dictionary, lourde: bool, ticks: int) -> void:
 	var a_zero: bool = e.endurance <= 0
 	e.endurance = maxi(0, e.endurance - int(regles.r.endurance.lourde if lourde else regles.r.endurance.attaque))
-	if est_distance(fonct):
+	if est_projectile(fonct):
 		e.munitions -= 1
 		e.munitions_tirees += 1
 	# Affixes de l'arme (Loot — affixes) : vecteur, dés, armure ignorée, multiplicateurs — avant le jet.
@@ -10119,15 +10131,16 @@ func _ia_pas_routine(e: Dictionary, cible: Vector2i, tick: int) -> void:
 	if _ia_par_portail(e, cible, tick):
 		return
 	if Grille.distance(e.pos, cible) <= int(GameData.config("planete").routine.astar_sous):
-		var chemin := grille.chemin(e.pos, cible, Etres.est_volant(e))
+		var chemin := grille.chemin(e.pos, cible, Etres.est_volant(e), "", refuse_nage(e))
 		if chemin.size() > 0:
 			if _deplacer(e, chemin[0], tick):
 				return
 	var meilleur: Vector2i = e.pos
 	var dmin := Grille.distance(e.pos, cible)
+	var rn := refuse_nage(e)   # l'eau refuse la surcharge : le pas glouton ne la propose pas
 	for d in Grille.DIRS:
 		var q: Vector2i = e.pos + d
-		if grille.dans(q) and not grille.bloque_passage(q) and grille.occupant(q).is_empty() and not grille.dangers.has(grille.idx(q)) and Grille.distance(q, cible) < dmin:
+		if grille.dans(q) and not grille.bloque_passage(q) and grille.occupant(q).is_empty() and not grille.dangers.has(grille.idx(q)) and not (rn and dans_l_eau(q) and not dans_l_eau(e.pos)) and Grille.distance(q, cible) < dmin:
 			dmin = Grille.distance(q, cible)
 			meilleur = q
 	if meilleur == e.pos or not _deplacer(e, meilleur, tick):
@@ -10194,7 +10207,7 @@ func _ia_attaquer(e: Dictionary, cible: Dictionary, tick: int) -> void:
 func _ia_pas_vers(e: Dictionary, but: Vector2i, tick: int, ignorer: String) -> void:
 	if _ia_par_portail(e, but, tick):   # Talents de classe : une brèche ouverte sert à tout le monde
 		return
-	var pas := grille.chemin(e.pos, but, Etres.est_volant(e), ignorer)
+	var pas := grille.chemin(e.pos, but, Etres.est_volant(e), ignorer, refuse_nage(e))
 	if pas.is_empty() or pas[0] == but and not grille.occupant(but).is_empty():
 		_attendre(e, tick)
 		return
@@ -10207,7 +10220,7 @@ func _ia_fuir(e: Dictionary, cible: Dictionary, tick: int) -> void:
 	var dmax := Grille.distance(e.pos, cible.pos)
 	for d in Grille.DIRS:
 		var v: Vector2i = e.pos + d
-		if grille.cout_pas(e.pos, v, Etres.est_volant(e)) < 0 or not grille.occupant(v).is_empty():
+		if grille.cout_pas(e.pos, v, Etres.est_volant(e), refuse_nage(e)) < 0 or not grille.occupant(v).is_empty():
 			continue
 		var dist := Grille.distance(v, cible.pos)
 		if dist > dmax:

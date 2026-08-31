@@ -27,6 +27,9 @@ etape: 0
 > - **Un ennemi sur la trajectoire prend la flèche** (la note ne tranchait que le cas de l'allié) : la trajectoire est réelle dans les deux sens. L'UI grise la cible masquée par un allié et peint la tuile bloquante en rouge.
 > - **Munitions** : le carquois est un objet équipé (`items/proto_fleches.json`, `quantite`) ; l'être porte `munitions` et `munitions_tirees` ; la récupération de 50 % (arrondi bas) se fait à la sortie du combat, quand l'horloge de combat se dissout. La météo n'existe pas encore dans le prototype.
 
+> [!success] Corrigé le 2026-08-31 — la lance n'est pas un projectile
+> La sonde de parcours (profil 6 objets, graine 73) a tiré une lance au sort et n'a **jamais porté un coup** : le code prenait `portee_min > 1` pour « arme à distance » et exigeait des **munitions** (et une trajectoire à la Bresenham) pour la lance — une arme d'hast n'a pas de carquois. Le champ de données **`projectile`** (booléen, `functionalities/`) porte désormais la règle : munitions, trajectoire, allié qui masque et récupération de 50 % ne concernent que les fonctionnalités `projectile: true` (l'arc seul aujourd'hui, l'arbalète demain). La **zone morte au contact** (`portee_min` 2) reste commune à l'arc **et** à la lance — c'est l'arbitrage voulu de la note. Le robot de parcours apprend au passage à respecter la portée de son arme (reculer d'un pas dans la zone morte) et à ne plus « se reposer » d'une blessure : la santé ne revient jamais toute seule.
+
 ## Liens
 - **Dépend de** : [[Hauteur de terrain ±10]], [[Stats d'armes]], [[Vocabulaire des modules — six axes]], [[Trous connus du combat]]
 - **Alimente** : [[Combat tactique sur grille]], [[Multijoueur]], [[Équipement — 14 slots]]

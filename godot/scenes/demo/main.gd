@@ -762,13 +762,13 @@ var _attein_cle := ""   # le flood des tuiles atteignables ne se recalcule que q
 func _maj_atteignables() -> void:
 	var j := joueur()
 	var en_combat: bool = not j.is_empty() and j.vivant and sim.attente.has(joueur_id) and sim.en_combat(j)
-	var cle := "%s|%s|%d" % [str(j.get("pos", Vector2i.ZERO)), str(en_combat), sim.grille.decouvert.size()]
+	var cle := "%s|%s|%d|%.2f" % [str(j.get("pos", Vector2i.ZERO)), str(en_combat), sim.grille.decouvert.size(), float(sim.poids_de(j).facteur)]
 	if cle == _attein_cle:
 		return
 	_attein_cle = cle
 	atteignables = {}
 	if en_combat:
-		atteignables = sim.grille.atteignables(j.pos, BUDGET_ATTEIGNABLE, Etres.est_volant(j))
+		atteignables = sim.grille.atteignables(j.pos, BUDGET_ATTEIGNABLE, Etres.est_volant(j), sim.refuse_nage(j))
 
 
 # ---------------------------------------------------------------- entrées → intentions
@@ -1227,7 +1227,7 @@ func _clic(t: Vector2i, lourde: bool) -> void:
 			return
 		chemin_en_cours = [t]   # un pas direct : autorise la chute volontaire
 		return
-	chemin_en_cours = sim.grille.chemin(j.pos, t, Etres.est_volant(j))
+	chemin_en_cours = sim.grille.chemin(j.pos, t, Etres.est_volant(j), "", sim.refuse_nage(j))
 	if chemin_en_cours.is_empty() and t != j.pos:
 		_log(tr("journal.inaccessible"))
 

@@ -1,5 +1,5 @@
 {
-  "_doc": "Fonctionnalité (docs: Fonctionnalité / B.3.1, Stats d'armes / A.4.1). kind: arme|armure|mobilier|vehicule|bouclier. portee en tuiles de Chebyshev (arrondie à l'entier), portee_min > 1 = zone morte au contact. volume → poids_reference = 12 × volume / 10.",
+  "_doc": "Fonctionnalité (docs: Fonctionnalité / B.3.1, Stats d'armes / A.4.1). kind: arme|armure|mobilier|vehicule|bouclier. portee en tuiles de Chebyshev (arrondie à l'entier), portee_min > 1 = zone morte au contact ; projectile: true = munitions + trajectoire (arc, arbalète) — une arme d'hast (lance) a la zone morte SANS être un projectile. volume → poids_reference = 12 × volume / 10.",
   "name_key": "functionality.<id>.name",
   "kind": "arme",
   "hands": 1,
@@ -9,6 +9,7 @@
   "vitesse_base": 2.0,
   "portee": 1.5,
   "portee_min": 1,
+  "projectile": false,
   "type_degats": "tranchant",
   "volume": 3.2,
   "poids_reference": 3.84

@@ -128,12 +128,22 @@ func h(p: Vector2i) -> int:
 
 
 func poser_contenu(p: Vector2i, id: String) -> void:
+	var avant: Array = contenu_de(p).get("tags", [])
+	if "liquide" in avant:   # le contenu remplacé (du butin posé sur l'eau) : la tuile reste mouillée (Eau et liquides)
+		niveau_eau[idx(p)] = 8 if "source" in avant else int(niveau_eau.get(idx(p), 1))
 	var i := contenu_ids.find(id)
 	if i < 0:
 		contenu_ids.append(id)
 		i = contenu_ids.size() - 1
 	contenu[idx(p)] = i
 	modifies[idx(p)] = true
+
+
+## La tuile se nage (Eau et liquides) : tag `nage`, ou niveau d'eau mémorisé sous un contenu posé — hors gel.
+func nageable(p: Vector2i) -> bool:
+	if gel:
+		return false
+	return "nage" in contenu_de(p).get("tags", []) or niveau_liquide(p) > 0
 
 
 func contenu_de(p: Vector2i) -> Dictionary:
@@ -172,7 +182,7 @@ static func distance(a: Vector2i, b: Vector2i) -> int:
 
 ## Coût en ticks pour passer d'une tuile à sa voisine ; -1 = infranchissable (falaise, mur,
 ## chute). Les volants ignorent le dénivelé (IA des créatures : morphologies).
-func cout_pas(de: Vector2i, vers: Vector2i, volant: bool = false) -> int:
+func cout_pas(de: Vector2i, vers: Vector2i, volant: bool = false, eviter_nage: bool = false) -> int:
 	if not dans(vers):
 		return -1
 	if bloque_passage(vers):
@@ -182,7 +192,9 @@ func cout_pas(de: Vector2i, vers: Vector2i, volant: bool = false) -> int:
 	var base: int = dep["cout_base"]
 	if volant:
 		return base
-	if "nage" in contenu_de(vers).get("tags", []) and not gel:   # Eau et liquides : nager coûte le double d'un pas (sauf glace)
+	if eviter_nage and nageable(vers) and not nageable(de):
+		return -1   # Eau et liquides : la surcharge refuse d'entrer — le chemin ne le propose pas
+	if nageable(vers):   # Eau et liquides : nager coûte le double d'un pas (sauf glace) — butin sur l'eau compris
 		return int(dep.get("nage", base * 2)) + (int(dep.get("neige_surcout", 1)) if neige else 0)
 	var dh := h(vers) - h(de)
 	if dh >= int(dep["falaise_delta"]) or dh <= -int(dep["chute_delta"]):
@@ -208,7 +220,7 @@ func degats_chute(niveaux: int) -> int:
 
 ## A* 8-directions sur les coûts de pente. Retourne les étapes SANS la case de départ.
 ## `ignorer` : id d'entité dont on ignore l'occupation (la cible, pour s'approcher d'elle).
-func chemin(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignorer: String = "") -> Array[Vector2i]:
+func chemin(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignorer: String = "", eviter_nage: bool = false) -> Array[Vector2i]:
 	var vide: Array[Vector2i] = []
 	if depart == arrivee or not dans(arrivee):
 		return vide
@@ -233,7 +245,7 @@ func chemin(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignorer: 
 			return pas
 		for d in DIRS:
 			var voisin := courant + d
-			var cout := cout_pas(courant, voisin, volant)
+			var cout := cout_pas(courant, voisin, volant, eviter_nage)
 			if cout < 0:
 				continue
 			var occ := occupant(voisin)
@@ -250,7 +262,7 @@ func chemin(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignorer: 
 
 
 ## Dijkstra borné : tuile → coût en ticks pour l'atteindre (UI : coûts sur les tuiles atteignables).
-func atteignables(depart: Vector2i, budget: int, volant: bool = false) -> Dictionary:
+func atteignables(depart: Vector2i, budget: int, volant: bool = false, eviter_nage: bool = false) -> Dictionary:
 	var couts := {depart: 0}
 	var file: Array[Vector2i] = [depart]
 	while not file.is_empty():
@@ -262,7 +274,7 @@ func atteignables(depart: Vector2i, budget: int, volant: bool = false) -> Dictio
 		file.remove_at(k)
 		for d in DIRS:
 			var v := c + d
-			var cout := cout_pas(c, v, volant)
+			var cout := cout_pas(c, v, volant, eviter_nage)
 			if cout < 0 or not occupant(v).is_empty():
 				continue
 			var nc: int = couts[c] + cout

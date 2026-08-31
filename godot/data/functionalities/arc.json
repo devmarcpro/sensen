@@ -8,6 +8,7 @@
   "vitesse_base": 1.5,
   "portee": 25.0,
   "portee_min": 2,
+  "projectile": true,
   "type_degats": "perforant",
   "volume": 1.4,
   "poids_reference": 1.68,

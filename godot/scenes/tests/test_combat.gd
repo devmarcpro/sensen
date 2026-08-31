@@ -689,6 +689,28 @@ func test_projectiles() -> void:
 	s._verifier_desengagements()
 	verifier(j.munitions == 1 and not s.en_combat(j), "fin de combat : floor(3 × 0.5) = 1 flèche récupérée")
 	verifier(s.dernier_combat.victoire and s.dernier_combat.ticks == h.ticks, "récapitulatif du combat : victoire, durée en ticks")
+	# La lance n'est pas un projectile (Décision — Projectiles, 2026-08-31) : zone morte, mais ni munition ni trajectoire
+	var lance_o: Dictionary = s.generer_objet("craft_lance", 1, {}, "commun", 0)
+	verifier(not lance_o.is_empty(), "une lance générée")
+	j.sac.append(lance_o.uid)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "equiper", "objet": lance_o.uid}), "la lance en main")
+	var loup2b: Dictionary = s.entites["loup_2"]
+	loup2b.vivant = true
+	loup2b.sante = 10
+	s.grille.liberer(loup2b.pos)
+	loup2b.pos = j.pos + Vector2i(0, -2)
+	s.grille.placer(loup2b.id, loup2b.pos)
+	j.munitions = 0
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(s.intention(j.id, {"type": "attaquer", "cible": loup2b.id, "lourde": false}), "lance à 2 tuiles, 0 munition : le coup part")
+	s.grille.liberer(loup2b.pos)
+	loup2b.pos = j.pos + Vector2i(0, -1)
+	s.grille.placer(loup2b.id, loup2b.pos)
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(not s.intention(j.id, {"type": "attaquer", "cible": loup2b.id, "lourde": false}), "lance au contact : zone morte (portee_min 2)")
 
 
 # ---------------------------------------------------------------- Statuts, anti-stunlock, interruption, XP
@@ -4405,6 +4427,21 @@ func test_nage() -> void:
 	verifier(s.poids_de(j).facteur > 1.0, "40 épées : surcharge (×%.2f)" % s.poids_de(j).facteur)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "deplacer", "vers": eau}), "trop chargé : refus d'entrer dans l'eau")
+	# Le pathfinding sait ce que _deplacer refusera (Eau et liquides, 2026-08-31)
+	verifier(s.refuse_nage(j), "refuse_nage : surchargé et non volant")
+	verifier(s.grille.cout_pas(j.pos, eau, false, true) == -1, "eviter_nage : l'entrée terre → eau vaut −1")
+	verifier(s.grille.cout_pas(eau, eau2, false, true) > 0, "eviter_nage : eau → eau reste libre")
+	var ch_sec := s.grille.chemin(j.pos, eau2 + Vector2i(1, 0), false, "", true)
+	var prev_n: Vector2i = j.pos
+	var entre_dans_eau := false
+	for pas_n in ch_sec:
+		if s.dans_l_eau(pas_n) and not s.dans_l_eau(prev_n):
+			entre_dans_eau = true
+		prev_n = pas_n
+	verifier(not ch_sec.is_empty() and not entre_dans_eau, "l'A* contourne l'eau au lieu de proposer un pas refusé")
+	j.sac.clear()
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	verifier(not s.refuse_nage(j), "sac vidé : la nage redevient permise au chemin")
 
 
 # ---------------------------------------------------------------- Le poison de lame est illégal

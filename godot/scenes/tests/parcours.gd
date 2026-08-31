@@ -34,7 +34,9 @@ var attentes := 0
 var soins := 0
 var captures := 0
 var derniere_capture_frame := -999
-var derniere_capture_30s := 0   # une capture d'écran toutes les 30 s réelles dans <sortie>/toutes_les_30s/ (designer, 2026-08-31)
+var derniere_capture_30s := 0
+var cibles_ignorees := {}      # id → image d'expiration : un duel figé (cible inatteignable) se contourne
+var echecs_cible := 0   # une capture d'écran toutes les 30 s réelles dans <sortie>/toutes_les_30s/ (designer, 2026-08-31)
 var en_combat_avant := false
 var sante_avant := -1
 var journal_vu := 0
@@ -211,25 +213,48 @@ func _process(_delta: float) -> void:
 				sorts_lances += 1
 				return
 			sorts_refuses += 1
-		if Grille.distance(j.pos, cible.pos) <= 1:
+		var arme_b: Dictionary = Etres.arme(j, sim.items)
+		var fonct_b: Dictionary = sim.fonctionnalites.get(arme_b.get("functionality", ""), {})
+		var pa: Vector2i = sim.regles.portee_de(fonct_b) if not fonct_b.is_empty() else Vector2i(1, 1)
+		var d_c := Grille.distance(j.pos, cible.pos)
+		if d_c >= pa.x and d_c <= pa.y:
 			if sim.intention(jid, {"type": "attaquer", "cible": cible.id, "lourde": false}):
+				echecs_cible = 0
 				return
+			var ch_r: Array = sim.grille.chemin(j.pos, cible.pos, false, cible.id, sim.refuse_nage(j))
+			if ch_r.size() >= 1 and sim.intention(jid, {"type": "deplacer", "vers": ch_r[0]}):
+				pas += 1   # coup refusé (ligne de vue, relief) : on bouge au lieu de camper — l'attente figeait les duels
+				echecs_cible = 0
+				return
+		elif d_c < pa.x:   # zone morte (lance, arc) : reculer d'un pas pour retrouver la portée
+			for dd in Grille.DIRS:
+				var q2: Vector2i = j.pos + dd
+				if sim.grille.dans(q2) and sim.grille.cout_pas(j.pos, q2, false, sim.refuse_nage(j)) >= 0 and sim.grille.occupant(q2).is_empty() and Grille.distance(q2, cible.pos) > d_c:
+					if sim.intention(jid, {"type": "deplacer", "vers": q2}):
+						pas += 1
+						echecs_cible = 0
+						return
 		else:
-			var ch: Array = sim.grille.chemin(j.pos, cible.pos, false, cible.id)   # sans la case de départ : [0] est le premier pas
+			var ch: Array = sim.grille.chemin(j.pos, cible.pos, false, cible.id, sim.refuse_nage(j))   # sans la case de départ : [0] est le premier pas
 			if ch.size() >= 1:
 				if sim.intention(jid, {"type": "deplacer", "vers": ch[0]}):
 					pas += 1
+					echecs_cible = 0
 					return
+		echecs_cible += 1
+		if echecs_cible > 20:   # rien ne marche contre cette cible (relief, falaise, chemin vide) : on l'abandonne et on reprend la route
+			cibles_ignorees[cible.id] = frames + 900
+			_note("cible abandonnée : %s (d=%d, portée %s, ldv=%s)" % [str(cible.id), d_c, str(pa), str(sim.grille.ligne_de_vue(j.pos, cible.pos))])
+			echecs_cible = 0
+			return
 		if sim.intention(jid, {"type": "attendre"}):
 			attentes += 1
 		return
-	if int(j.sante) * 10 < int(j.sante_max) * 6:   # blessé et tranquille : le Baume (soin sur soi), sinon on souffle
-		soins += 1
+	if int(j.sante) * 10 < int(j.sante_max) * 6:   # blessé : le Baume si on l'a — la santé ne revient jamais toute seule, attendre ne guérit rien
 		for k in j.capacites.size():
 			if "baume" in j.capacites[k].get("modules", []) and sim.intention(jid, {"type": "capacite", "index": k, "cible": j.pos}):
+				soins += 1
 				return
-		if int(j.sante) * 10 < int(j.sante_max) * 4 and sim.intention(jid, {"type": "attendre"}):
-			return
 	for d in Grille.DIRS:   # un contenant à côté : on prend
 		var t: Vector2i = j.pos + d
 		if sim.grille.dans(t) and "contenant" in sim.grille.contenu_de(t).get("tags", []):
@@ -252,7 +277,7 @@ func _process(_delta: float) -> void:
 	if sim.donjon.escalier == null:
 		_fin("dernier étage atteint (boss) : pas d'escalier plus bas")
 		return
-	var chemin: Array = sim.grille.chemin(j.pos, but, false, "")   # sans la case de départ
+	var chemin: Array = sim.grille.chemin(j.pos, but, false, "", sim.refuse_nage(j))   # sans la case de départ
 	if chemin.size() >= 1:
 		if sim.intention(jid, {"type": "deplacer", "vers": chemin[0]}):
 			pas += 1
@@ -280,6 +305,8 @@ func _hostile_en_vue(j: Dictionary) -> Dictionary:
 	var dmin := 99
 	for x in sim.vivants():
 		if x.id == j.id or not sim.ennemis(j, x):
+			continue
+		if int(cibles_ignorees.get(x.id, -1)) > frames:
 			continue
 		var d := Grille.distance(j.pos, x.pos)
 		if d <= 8 and sim.voit(j, x.pos) and d < dmin:
