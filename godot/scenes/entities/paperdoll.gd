@@ -8,9 +8,6 @@ extends Node2D
 ## son ancrage — le rig, l'ordre de calque, les décalages et le miroir sont déjà les vrais.
 
 ## Orientation de grille → facing d'écran (géométrie de la vue, pas du gameplay).
-const FACINGS := {
-	Vector2i(1, 1): "S", Vector2i(1, 0): "SE", Vector2i(1, -1): "E", Vector2i(0, -1): "NE",
-	Vector2i(-1, -1): "N", Vector2i(-1, 0): "NW", Vector2i(-1, 1): "W", Vector2i(0, 1): "SW"}
 ## Épaisseur de contour par construction — « la construction est la forme, le matériau la teinte ».
 const CONTOURS := {"matelasse": 0.6, "cuir": 1.0, "mailles": 1.4, "ecailles": 1.6, "plaque": 2.2}
 
@@ -59,8 +56,9 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	if e.is_empty() or rig.is_empty():
 		return
-	var facing: String = FACINGS.get(e.get("orientation", Vector2i(1, 1)), "S")
-	var f: Dictionary = rig.facings.get(facing, {})
+	# Une seule vue : de face (designer 2026-09-01, point 54). L'orientation de l'être continue de
+	# décider la garde, les zones de coup et le champ de vision — elle ne décide plus le dessin.
+	var f: Dictionary = rig.facings.get("S", {})
 	var miroir := false
 	if f.has("miroir"):
 		miroir = true

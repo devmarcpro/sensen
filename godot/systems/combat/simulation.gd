@@ -70,6 +70,8 @@ var _n_entites := 0
 
 
 var lot_simultane: Array[String] = []   # les êtres dont l'action part à ce tick (Boucle de tick) : un mort du lot frappe et est frappé quand même
+var identifies: Dictionary = {}      # bases d'objets révélées dans cette partie (identification, point 52)
+var planete_options: Dictionary = {}   # config planete surchargée par l'écran Monde (designer, point 49)
 var graine_monde := -1   # la graine du monde choisie à l'écran Monde (Écrans d'interface) ; -1 = celle de planete.json
 
 
@@ -137,7 +139,7 @@ func charger_camp(joueur: Dictionary = {}, cellule_choisie: Vector2i = Vector2i(
 		return
 	# Première venue : le monde (fenêtre glissante) centré sur la cellule de départ.
 	var cfg: Dictionary = GameData.config("camp")
-	var planete: Dictionary = GameData.config("planete")
+	var planete: Dictionary = planete_options if not planete_options.is_empty() else GameData.config("planete")
 	var surface := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, graine_monde if graine_monde >= 0 else int(planete.graine))
 	monde = Monde.new(surface, planete, cfg)
 	var depart := monde.cellule_camp if cellule_choisie == Vector2i(-1, -1) else cellule_choisie
@@ -5111,7 +5113,7 @@ func sauvegarder(nom: String = "monde") -> bool:
 	var contenants_monde := {}
 	for gi in contenants.keys():
 		contenants_monde[grille.pos_de(int(gi))] = contenants[gi]
-	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "graine": graine, "graine_monde": graine_monde, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
+	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "graine": graine, "graine_monde": graine_monde, "planete_options": planete_options, "identifies": identifies, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
 		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores,
 		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire, "vacances": monde.vacances, "villages": monde.villages, "heritiers": monde.heritiers, "vacances_guildes": monde.vacances_guildes,
 		"modifs_terrain": modifs_terrain, "portails": portails})   # indexés par position monde, donc valables au rechargement
@@ -5146,6 +5148,8 @@ func charger_sauvegarde(nom: String = "monde") -> bool:
 	var pj: Dictionary = Sauvegarde.lire(nom, "players/joueur.json")
 	graine = int(w.graine)
 	graine_monde = int(w.get("graine_monde", -1))   # le monde de cette partie, pas celui de planete.json
+	planete_options = w.get("planete_options", {})   # les réglages de génération de cette partie (designer, point 49)
+	identifies = w.get("identifies", {})             # ce que le joueur a déjà identifié (point 52)
 	des = Des.new(graine)
 	fiche_joueur = pj.get("fiche", {})
 	camp_sauve = {}
@@ -6158,6 +6162,8 @@ func def_stats_c(cible: Dictionary) -> Dictionary:
 func nom_objet(uid: String) -> Dictionary:
 	var it: Dictionary = items.get(uid, {})
 	var nom: Dictionary = it.get("nom", {})
+	if inconnu(it):   # non identifié (designer 2026-09-01, point 52) : une apparence, pas un nom
+		return {"base": "objet.inconnu.%s" % str(it.get("type", "objet")), "affixe": "", "params": {"apparence": apparence_inconnue(it)}, "rarete": "commun", "inconnu": true}
 	var res := {"base": it.get("name_key", uid), "affixe": nom.get("affixe", ""), "params": nom.get("params", {}), "rarete": it.get("rarete", "commun")}
 	if nom.has("de_creature"):   # « Statue de loup » : le nom porte la créature dont l'objet est tiré
 		res["de_creature"] = str(nom.de_creature)
@@ -6170,6 +6176,33 @@ func nom_objet(uid: String) -> Dictionary:
 		res["construction"] = str(it.get("construction", ""))
 		res["qualite"] = float(it.get("qualite", 1.0))
 	return res
+
+
+## Un objet est-il encore inconnu ? (Loot — identification, designer 2026-09-01, point 52)
+## Les consommables et les gemmes sortent anonymes ; essayer l'un d'eux révèle sa base pour toute la partie.
+func inconnu(it: Dictionary) -> bool:
+	var ident: Dictionary = GameData.config("loot_rules").get("identification", {})
+	if not (str(it.get("type", "")) in ident.get("types", [])):
+		return false
+	return not identifies.has(str(it.get("base", it.get("id", ""))))
+
+
+## L'apparence d'un objet inconnu : une couleur, un aspect — stable pour toute la partie et par base,
+## de sorte que deux fioles de la même potion se ressemblent avant d'être bues.
+func apparence_inconnue(it: Dictionary) -> String:
+	var apparences: Array = GameData.config("loot_rules").get("identification", {}).get("apparences", [])
+	if apparences.is_empty():
+		return ""
+	return str(apparences[absi(hash([graine, str(it.get("base", it.get("id", "")))])) % apparences.size()])
+
+
+## Révèle la base d'un objet : toutes ses copies prennent leur vrai nom (Rogue : une potion bue les nomme toutes).
+func identifier(it: Dictionary) -> void:
+	var base := str(it.get("base", it.get("id", "")))
+	if base.is_empty() or identifies.has(base):
+		return
+	identifies[base] = true
+	EventBus.emettre(&"journal", [&"journal.identifie", {"objet": str(it.get("name_key", base))}])
 
 
 ## Équiper un objet du sac : le slot de l'objet (anneau : premier libre des deux) ; l'ancien va au sac.
@@ -6356,6 +6389,7 @@ func _sertir(e: Dictionary, objet: String, gemme: String, tick: int) -> bool:
 		return false
 	if not porte or not it.has("sertissures") or it.sertissures.contenu.size() >= int(it.sertissures.nombre):
 		return false
+	identifier(items[gemme])   # sertir une gemme révèle son espèce (point 52)
 	e.sac.erase(gemme)
 	it.sertissures.contenu.append(gemme)
 	Etres.recalculer(e, items, affixes_defs, regles)
@@ -6876,10 +6910,20 @@ func _tiquer_faim(tick: int) -> void:
 			if avant > 0 and int(e.faim) == 0:
 				EventBus.emettre(&"journal", [&"journal.affame", {"nom": e.name_key}])
 		if int(e.faim) == 0:
+			# La faim tue (designer 2026-09-01, point 52) : plus de plancher à 1 PV — la famine va
+			# jusqu'au bout, et le compte à rebours de la nourriture redevient une vraie horloge.
 			var pz := int(f.periode_zero)
 			var coups := tick / pz - int(e.faim_tick) / pz
 			if coups > 0:
-				e.sante = maxi(1, int(e.sante) - coups * maxi(1, int(e.sante_max) * int(f.pct_sante_max) / 100))
+				var degats := coups * maxi(int(f.get("degats_par_palier", 2)), int(e.sante_max) * int(f.pct_sante_max) / 100)
+				e.sante = int(e.sante) - degats
+				EventBus.emettre(&"journal", [&"journal.famine", {"nom": e.name_key, "n": degats}])
+				if int(e.sante) <= 0 and e.vivant:   # mort de faim : la même sortie que la mort au combat
+					e.sante = 0
+					e.vivant = false
+					grille.liberer(e.pos)
+					EventBus.emettre(&"journal", [&"journal.mort", {"nom": e.name_key}])
+					EventBus.emettre(&"creature_killed", [e.id, e.id])
 		e.faim_tick = tick
 
 
@@ -6911,6 +6955,7 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 	if not e.has("faim"):
 		e["faim"] = 100
 		e["faim_tick"] = tick
+	identifier(it)   # goûter, c'est identifier (designer 2026-09-01, point 52)
 	if a_talent(e, "soif_de_sang") and "plat" in it.get("tags", []):   # le Vampire ne mange plus de plats
 		EventBus.emettre(&"journal", [&"journal.plat_refuse", {}])
 		return false

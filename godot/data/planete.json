@@ -1,10 +1,10 @@
 {
-  "_doc": "La planète (docs: Décision — Monde fini, continents et océan ; Génération par couches de bruit). taille_cellule : tuiles ; monde : cellules de côté (1024) ; cellule_depart : la cellule du camp tant que la carte n'existe pas ; relief : les accidents posés par cellule (décision du 2026-08-27, plat + exceptions) ; filons : densité de filons de surface ; tiers_corruption : seuils (en %) des tiers de minerai (Décision — Minerais et strates). tectonique : Décision — Monde fini (plaques Voronoï, seuil calibré) ; mer : altitude sous laquelle une tuile est de l'eau, et sa hauteur.",
+  "_doc": "La planète (docs: Décision — Monde fini, continents et océan ; Génération par couches de bruit). taille_cellule : tuiles ; monde : cellules de côté (1024) ; cellule_depart : la cellule du camp tant que la carte n'existe pas ; relief : les accidents posés par cellule (décision du 2026-08-27, plat + exceptions) ; filons : densité de filons de surface ; tiers_corruption : seuils (en %) des tiers de minerai (Décision — Minerais et strates). tectonique : Décision — Monde fini (plaques Voronoï, seuil calibré) ; mer : altitude sous laquelle une tuile est de l'eau, et sa hauteur. generation_options : les réglages offerts à l'écran de création du monde (designer 2026-08-31, point 49) — chemin dans cette config, bornes et pas. monde_ratio : le monde n'est pas carré mais rectangulaire (designer 2026-08-31) — hauteur = monde_cellules × monde_ratio.",
   "taille_cellule": 64,
   "monde_cellules": 1024,
   "cellule_depart": [
     512,
-    512
+    256
   ],
   "graine": 68333,
   "relief": {
@@ -88,7 +88,8 @@
     "ridged_frequence": 0.0015,
     "bordure_tuiles": 20000.0,
     "suture_tuiles": 6000.0,
-    "calibrage_echantillons": 48
+    "calibrage_echantillons": 48,
+    "ocean_bord": 0.1
   },
   "mer": {
     "altitude": 0.3,
@@ -295,5 +296,58 @@
     "pregen_par_appel": 1,
     "chargement_s": 0.6,
     "_doc": "pregen_par_appel : cellules voisines generees par appel (fil principal) ; chargement_s : duree minimale de l'ecran de chargement entre cellules (Grille continue)."
-  }
+  },
+  "generation_options": [
+    {
+      "id": "monde_cellules",
+      "chemin": "monde_cellules",
+      "min": 256,
+      "max": 2048,
+      "pas": 256
+    },
+    {
+      "id": "monde_ratio",
+      "chemin": "monde_ratio",
+      "min": 0.35,
+      "max": 1.0,
+      "pas": 0.05
+    },
+    {
+      "id": "plaques",
+      "chemin": "tectonique.plaques",
+      "min": 6,
+      "max": 64,
+      "pas": 2
+    },
+    {
+      "id": "continentales",
+      "chemin": "tectonique.continentales",
+      "min": 0.15,
+      "max": 0.75,
+      "pas": 0.05
+    },
+    {
+      "id": "terres",
+      "chemin": "tectonique.terres",
+      "min": 0.15,
+      "max": 0.7,
+      "pas": 0.05
+    },
+    {
+      "id": "points_chauds",
+      "chemin": "tectonique.points_chauds",
+      "min": 0,
+      "max": 30,
+      "pas": 2,
+      "paire": true
+    },
+    {
+      "id": "suture",
+      "chemin": "tectonique.suture_tuiles",
+      "min": 2000.0,
+      "max": 12000.0,
+      "pas": 1000.0
+    }
+  ],
+  "monde_ratio": 0.5
 }

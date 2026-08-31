@@ -51,6 +51,43 @@ var xp_fenetre := 0.0              # secondes restantes avant de « lâcher » l
 var xp_flottants: Array = []       # [{lignes, t}] : les textes qui montent au-dessus du joueur
 var gros_flottants: Array = []     # [{texte, pos, couleur, t}] : CRITIQUE / RATÉ en gros au-dessus d'un être
 var graine_monde := -1             # la graine choisie à l'écran Monde, portée à la simulation
+var monde_options: Dictionary = {}   # les réglages de génération choisis à l'écran Monde (designer, point 49)
+
+
+## La config `planete` surchargée des réglages du joueur (designer 2026-08-31, point 49) :
+## chaque option porte son chemin dans la config, aucune valeur n'est écrite en dur ici.
+func planete_effective() -> Dictionary:
+	var base: Dictionary = GameData.config("planete").duplicate(true)
+	for opt in base.get("generation_options", []):
+		var id_o := str(opt.id)
+		if not monde_options.has(id_o):
+			continue
+		var valeur: Variant = monde_options[id_o]
+		var parts: PackedStringArray = str(opt.chemin).split(".")
+		var cible: Dictionary = base
+		for k in parts.size() - 1:
+			cible = cible[parts[k]]
+		var cle := str(parts[parts.size() - 1])
+		if bool(opt.get("paire", false)):   # un intervalle [min, max] : la valeur règle le haut, le bas suit
+			cible[cle] = [maxi(0, int(valeur) - 6), int(valeur)]
+		elif cible[cle] is float:
+			cible[cle] = float(valeur)
+		else:
+			cible[cle] = int(valeur)
+	return base
+
+
+## La valeur courante d'une option, ou celle de la config si le joueur n'y a pas touché.
+func option_monde(opt: Dictionary) -> float:
+	if monde_options.has(str(opt.id)):
+		return float(monde_options[str(opt.id)])
+	var v: Variant = GameData.config("planete")
+	for part in str(opt.chemin).split("."):
+		v = (v as Dictionary)[part]
+	if v is Array:
+		var arr: Array = v
+		return float(arr[arr.size() - 1])
+	return float(v)
 var fiche_monde: Dictionary = {}   # la fiche créée, en attente de l'écran Monde
 var depart_donjon := false         # l'option de création « Départ : Donjon » (designer, point 34)
 const STATS := ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]
@@ -341,6 +378,7 @@ func _creer_personnage() -> void:
 		# Début de partie : l'écran Monde (graine), puis la carte pour choisir sa case (Écrans d'interface).
 		fiche_monde = fiche
 		graine_monde = randi() % 1000000
+		monde_options = {}
 		titre_ouvert = true
 		ecrans.ouvrir("monde")
 		return
@@ -364,6 +402,7 @@ func _choisir_depart(cell: Vector2i) -> void:
 	sim.monde.fermer()
 	sim = Simulation.new(0x68EE)
 	sim.graine_monde = graine_monde
+	sim.planete_options = planete_effective()
 	sim.fiche_joueur = fiche_en_attente
 	sim.charger_camp({}, cell)
 	_kit_de_test()   # le joueur est recréé sur la case choisie : le kit de test aussi
@@ -938,6 +977,20 @@ func _hotbar(k: int) -> void:
 			sim.intention(joueur_id, {"type": "attendre"})
 
 
+## Le verbe demande son outil en main (designer 2026-09-01, point 52) : creuser une pioche,
+## terrasser une pelle, abattre une hache, cueillir une faucille, inonder un seau, brûler une torche.
+## La table vit dans combat_rules.outils_verbes — aucun verbe n'est écrit en dur ici.
+func _outil_en_main(j: Dictionary, verbe: String) -> bool:
+	var attendu := str(sim.regles.r.get("outils_verbes", {}).get(verbe, ""))
+	if attendu.is_empty():
+		return true
+	for slot in ["main_principale", "main_secondaire"]:
+		var it: Dictionary = sim.items.get(str(j.get("equipement", {}).get(slot, "")), {})
+		if str(it.get("functionality", "")) == attendu:
+			return true
+	return false
+
+
 ## Les options possibles sur une tuile (E et clic droit) : dans l'ordre de priorité de E.
 func _options_tuile(t: Vector2i) -> Array:
 	var res: Array = []
@@ -1013,10 +1066,15 @@ func _options_tuile(t: Vector2i) -> Array:
 		res.append({"id": "boire_source", "vers": t})
 	if d <= 1 and meuble_id == "autel_rituel":
 		res.append({"id": "rituel", "vers": t})
-	if "plante_sauvage" in tags:
+	if "plante_sauvage" in tags and _outil_en_main(j, "cueillir"):
 		res.append({"id": "cueillir", "vers": t})
-	if "plante" in tags or "arbre" in tags:
-		res.append({"id": "creuser", "vers": t})
+	if ("plante" in tags or "arbre" in tags) and _outil_en_main(j, "abattre"):
+		res.append({"id": "creuser", "vers": t})   # abattre : la hache met l'arbre à terre
+	if g.bloque_passage(t) and not ("meuble" in tags) and not ("plante" in tags) and not ("arbre" in tags) and not ("eau" in tags) and _outil_en_main(j, "creuser"):
+		res.append({"id": "creuser", "vers": t})   # percer la roche : pioche en main (designer, point 52)
+	if not g.bloque_passage(t) and g.occupant(t).is_empty() and not g.meubles.has(g.idx(t)) and not g.stations_fixes.has(g.idx(t)) and _outil_en_main(j, "terrasser"):
+		res.append({"id": "abaisser", "vers": t})
+		res.append({"id": "elever", "vers": t})
 	if "construit" in tags:
 		res.append({"id": "demonter", "vers": t})
 	if "porte" in sim.grille.contenu_de(t).get("tags", []) and Grille.distance(j.pos, t) == 1:   # ouvrir / fermer une porte adjacente
@@ -1093,6 +1151,10 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "conquerir", "vers": opt.vers})
 		"capturer":
 			sim.intention(joueur_id, {"type": "capturer"})
+		"abaisser":
+			sim.intention(joueur_id, {"type": "terrasser", "vers": opt.vers, "sens": -1})
+		"elever":
+			sim.intention(joueur_id, {"type": "terrasser", "vers": opt.vers, "sens": 1})
 		"cueillir":
 			sim.intention(joueur_id, {"type": "cueillir", "vers": opt.vers})
 		"boire_source":

@@ -316,7 +316,7 @@
     "porte_famille": "bois"
   },
   "faim": {
-    "_doc": "Faim (docs: Faim) : jauge 0-100, −1 par ticks_par_point ; seuils : sous seuil_regen → régén de santé (équipement) × malus_regen, sous seuil_stats → stats × malus_stats et plus de régén de santé, zero → −pct_sante_max % de santé max par periode_zero ticks ; tooltip_seuil : le conseil « manger » (journal.faim_conseil) la première fois sous ce seuil.",
+    "_doc": "La faim peut tuer (designer 2026-09-01, point 52) : à zéro, la famine ronge les PV par paliers jusqu'à la mort.",
     "ticks_par_point": 900,
     "seuil_regen": 50,
     "malus_regen": 0.9,
@@ -324,7 +324,9 @@
     "malus_stats": 0.9,
     "periode_zero": 300,
     "pct_sante_max": 1,
-    "tooltip_seuil": 60
+    "tooltip_seuil": 60,
+    "degats_par_palier": 2,
+    "ticks_par_palier": 40
   },
   "poids": {
     "_doc": "Poids porté (docs: Armures et poids porté) : capacite = base + force × par_force ; poids d'un matériau = densité / densite_div par unité ; surcharge : ticks × (1 + (ratio − 1) × pente), plafond.",
@@ -1133,5 +1135,14 @@
     "ticks_max_par_image": 5,
     "ms_max_par_image": 12,
     "_doc": "Plafond de travail par image en donjon (designer 2026-08-31, point 46) : au plus 5 ticks du monde et 12 ms, pour qu'aucune action ne gèle l'affichage."
+  },
+  "outils_verbes": {
+    "_doc": "Les verbes du monde et l'outil qu'ils exigent en main (designer 2026-09-01, point 52) : sans l'outil, l'option n'apparaît pas.",
+    "creuser": "pioche",
+    "terrasser": "pelle",
+    "abattre": "hache",
+    "cueillir": "faucille",
+    "inonder": "seau",
+    "bruler": "torche"
   }
 }

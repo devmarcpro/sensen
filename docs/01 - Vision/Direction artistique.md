@@ -23,6 +23,9 @@ Comment le jeu se donne à voir : isométrique, tuiles teintées, billboards pap
 > [!success] Décidé le 2026-08-28 — les ressources récoltables sont des billboards (instruction du designer)
 > « Je veux que les ressources récoltables soient des sprites billboard (arbres, plantes). » Les arbres et les plantes sauvages ne sont plus des blocs de terrain : ce sont des **billboards dessinés par code** (`scenes/entities/vegetal.gd`, pas d'asset), comme les paperdolls — une silhouette de `data/vegetaux/` (feuillu, conifère, palme, buisson, herbe) teintée par le matériau de l'essence (palette), triée en profondeur avec les êtres. Les rochers et filons restent des blocs (ce sont des reliefs). Côté simulation rien ne change : un arbre est un contenu de tuile qui bloque le passage et la vue, une plante un contenu franchissable ; les deux se récoltent (hache, faucille).
 
+> [!info] Précisé le 2026-09-01 — le full code est un choix d'étape, pas un dogme (designer)
+> Le « tout est dessiné par code, aucun asset » qui traverse ces notes est **l'état actuel du projet, pas une interdiction définitive** : le designer compte **ajouter des assets plus tard**. Ce qui suit reste donc vrai pour le prototype — chaque forme est un polygone, chaque texture viendra d'un shader — mais aucune décision ne doit être écrite comme si les images étaient bannies pour toujours. En pratique : ce qui est dessiné par code doit rester **remplaçable** par une image (une silhouette, un portrait, une tuile), et les catalogues de données doivent continuer à décrire *quoi* dessiner plutôt que *comment*.
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Piliers d'inspiration]]
 - **Alimente** : [[Squelette modulaire et points d'attache]], [[Écrans d'interface]], [[Palette de couleurs des matériaux]]

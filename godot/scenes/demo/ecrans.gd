@@ -15,6 +15,7 @@ var titre: Label
 var liste: ItemList
 var detail: RichTextLabel
 var apercu_sort: ApercuSort   # l'aperçu visuel du sort (écran Composer, Écrans d'interface)
+var apercu_monde: ApercuMonde   # l'aperçu du monde entier (écran Monde, designer point 49)
 var cadre_perso: Control      # l'aperçu du personnage (écran Création) : un paperdoll dans un cadre
 var apercu_perso: Paperdoll
 var cadre_visage: Control          # le cadre du portrait : il rogne tout ce qui n'est pas la tête
@@ -91,6 +92,13 @@ func _ready() -> void:
 	h.add_child(droite)
 	apercu_sort = ApercuSort.new()
 	apercu_sort.visible = false
+	apercu_monde = ApercuMonde.new()   # Monde : la carte entière, presque plein écran (designer, point 49)
+	apercu_monde.ecrans = self
+	apercu_monde.custom_minimum_size = Vector2(0, 620)
+	apercu_monde.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	apercu_monde.visible = false
+	apercu_monde.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	droite.add_child(apercu_monde)
 	cadre_perso = Control.new()   # Création : le personnage en grand, au-dessus du détail
 	cadre_perso.custom_minimum_size = Vector2(0, 380)
 	cadre_perso.visible = false
@@ -228,6 +236,13 @@ func touche(ev: InputEventKey) -> bool:
 				return true
 			fermer()
 			return true
+		KEY_LEFT, KEY_RIGHT:
+			if courant == "monde" and selection < entrees.size():   # les réglages du monde (designer, point 49)
+				var en_m: Dictionary = entrees[selection]
+				if str(en_m.get("id", "")).begins_with("opt:"):
+					_regler_monde(str(en_m.id).trim_prefix("opt:"), -1 if ev.keycode == KEY_LEFT else 1)
+					rafraichir()
+					return true
 		KEY_UP, KEY_DOWN:
 			if entrees.size() > 0:
 				selection = posmod(selection + (1 if ev.keycode == KEY_DOWN else -1), entrees.size())
@@ -472,12 +487,19 @@ func rafraichir() -> void:
 		liste.select(selection)
 	_montrer_detail()
 	cadre_perso.visible = courant == "creation"
+	apercu_monde.visible = courant == "monde"
 	inventaire_visuel.visible = courant == "inventaire"
 	hotbar_ecran.visible = courant == "inventaire" or courant == "capacites"
 	atelier_visuel.visible = courant == "atelier"
 	liste.visible = not (courant in ["inventaire", "atelier"])
 	penta_objet.visible = courant == "inventaire"
-	if courant == "inventaire":
+	if courant == "monde":   # la carte du monde prend presque toute la fenêtre (designer, point 49)
+		droite.custom_minimum_size = Vector2(900, 0)
+		droite.size_flags_stretch_ratio = 3.0
+		detail.size_flags_vertical = Control.SIZE_SHRINK_END   # le texte se tasse : la carte prend le reste
+		detail.custom_minimum_size = Vector2(0, 44)
+		apercu_monde.custom_minimum_size = Vector2(0, 880)
+	elif courant == "inventaire":
 		droite.custom_minimum_size = Vector2(360, 0)
 		droite.size_flags_stretch_ratio = 0.9
 		detail.size_flags_vertical = Control.SIZE_FILL   # le Wu Xing de l'objet juste sous le détail, pas au fond du panneau
@@ -633,6 +655,10 @@ func _action_principale() -> void:
 				"quitter": get_tree().quit()
 			return
 		"monde":
+			if str(en.id).begins_with("opt:"):   # un réglage de génération (designer, point 49)
+				_regler_monde(str(en.id).trim_prefix("opt:"), 1)   # Entrée : un pas vers le haut
+				rafraichir()
+				return
 			match str(en.id):
 				"graine": main.graine_monde = randi() % 1000000
 				"commencer":
@@ -1563,10 +1589,26 @@ func _touche_creation(ev: InputEventKey) -> bool:
 
 
 ## L'écran Monde : la graine (aléatoire, re-tirable — aucun chiffre fixe), puis Commencer → la carte du départ.
+## Change un réglage de génération d'un pas, dans ses bornes (designer 2026-08-31, point 49).
+func _regler_monde(id: String, sens: int) -> void:
+	for opt in GameData.config("planete").get("generation_options", []):
+		if str(opt.id) != id:
+			continue
+		var v: float = main.option_monde(opt) + float(opt.pas) * float(sens if sens != 0 else 1)
+		main.monde_options[id] = clampf(v, float(opt.min), float(opt.max))
+		return
+
+
 func _construire_monde() -> void:
 	titre.text = tr("ui.ecran.monde")
 	liste.add_item(tr("ui.monde.graine").format({"graine": int(main.graine_monde)}))
 	entrees.append({"kind": "monde", "id": "graine", "texte": tr("ui.monde.d_graine")})
+	for opt in GameData.config("planete").get("generation_options", []):   # les réglages du monde (designer, point 49)
+		var v: float = main.option_monde(opt)
+		var texte := ("%.2f" % v) if float(opt.pas) < 1.0 else str(int(v))
+		liste.add_item(tr("ui.monde.option").format({"nom": tr("ui.monde.opt." + str(opt.id)), "valeur": texte}))
+		entrees.append({"kind": "monde", "id": "opt:" + str(opt.id), "texte": tr("ui.monde.d_opt." + str(opt.id))})
+	apercu_monde.rafraichir()   # l'aperçu suit les réglages (designer, point 49)
 	liste.add_item(tr("ui.monde.commencer"))
 	entrees.append({"kind": "monde", "id": "commencer", "texte": tr("ui.monde.d_commencer")})
 	liste.add_item(tr("ui.monde.retour"))
@@ -2204,3 +2246,67 @@ class BarresCreation extends Control:
 			draw_rect(Rect2(0.0, y, BARRE_L, BARRE_H), COULEURS.get(str(l[0]), Color.WHITE))
 			draw_rect(Rect2(0.0, y, BARRE_L, BARRE_H), Color(0.6, 0.55, 0.4, 0.8), false, 1.0)
 			draw_string(ThemeDB.fallback_font, Vector2(BARRE_L + 8.0, y + BARRE_H), "%s %d/%d" % [tr("barre." + str(l[0])), int(l[1]), int(l[1])], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.9, 0.9, 0.85))
+
+
+## L'aperçu du monde entier à l'écran Monde (designer 2026-08-31, point 49) : la carte est
+## échantillonnée une fois par régénération — mers, côtes, reliefs — puis dessinée comme une image.
+## Rien n'est deviné : c'est la même Surface que la partie, avec les réglages du joueur.
+class ApercuMonde extends Control:
+	const N := 256   # côté de l'échantillonnage : 65 536 sondes, une par lot de cellules
+	var ecrans: Ecrans
+	var image: Image
+	var texture: ImageTexture
+	var _cle := ""
+
+	func rafraichir() -> void:
+		var planete: Dictionary = ecrans.main.planete_effective()
+		var graine: int = int(ecrans.main.graine_monde)
+		var cle := "%d|%s" % [graine, JSON.stringify(planete.get("tectonique", {})) + str(planete.get("monde_cellules", 0)) + str(planete.get("monde_ratio", 1.0))]
+		if cle == _cle:
+			return
+		_cle = cle
+		var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, graine)
+		var cellules: int = int(planete.get("monde_cellules", 1024))
+		var ratio: float = float(planete.get("monde_ratio", 1.0))   # le monde est rectangulaire (designer, point 49)
+		var nh := maxi(8, int(round(N * ratio)))
+		image = Image.create(N, nh, false, Image.FORMAT_RGB8)
+		for y in nh:
+			for x in N:
+				var cell := Vector2i(int(float(x) / N * cellules), int(float(y) / nh * cellules * ratio))
+				image.set_pixel(x, y, _couleur(surf, cell, int(planete.get("taille_cellule", 64))))
+		texture = ImageTexture.create_from_image(image)
+		queue_redraw()
+
+	## La couleur d'une cellule : la mer par profondeur, la terre par la teinte de son biome,
+	## nuancée par l'altitude — on doit lire les côtes, les plaines et les montagnes d'un coup d'œil.
+	func _couleur(surf: Surface, cell: Vector2i, taille: int) -> Color:
+		var t := surf.tectonique_a(cell.x * taille + taille / 2, cell.y * taille + taille / 2)
+		var alt := float(t.get("altitude", 0.0))
+		if not surf.terre_a(cell):
+			return Color(0.05, 0.10, 0.22).lerp(Color(0.16, 0.31, 0.52), clampf(alt / 0.30, 0.0, 1.0))
+		var b: Dictionary = GameData.entree("biomes", str(surf.resume_cellule(cell).biome))
+		var col := Color.html(str(b.couleur)) if b.has("couleur") else Color(0.35, 0.45, 0.28)
+		if alt > 0.72:    # les hautes terres blanchissent, les basses s'assombrissent : le relief se lit
+			col = col.lerp(Color(0.92, 0.92, 0.95), clampf((alt - 0.72) / 0.28, 0.0, 1.0) * 0.75)
+		elif alt < 0.38:
+			col = col.lerp(Color(0.85, 0.80, 0.60), 0.35)   # la frange littorale, sableuse
+		return col
+
+	func _draw() -> void:
+		if texture == null:
+			return
+		var planete: Dictionary = ecrans.main.planete_effective()
+		var ratio: float = float(planete.get("monde_ratio", 1.0))
+		var larg := minf(size.x, (size.y - 24.0) / maxf(0.2, ratio))
+		var haut := larg * ratio
+		var o := Vector2((size.x - larg) * 0.5, maxf(0.0, (size.y - 24.0 - haut) * 0.5))
+		draw_texture_rect(texture, Rect2(o, Vector2(larg, haut)), false)
+		draw_rect(Rect2(o, Vector2(larg, haut)), Color(0.6, 0.55, 0.4, 0.9), false, 1.0)
+		var cellules: float = float(planete.get("monde_cellules", 1024))
+		var depart: Array = planete.get("cellule_depart", [cellules / 2.0, cellules * ratio / 2.0])
+		var c := o + Vector2(float(depart[0]) / cellules * larg, float(depart[1]) / maxf(1.0, cellules * ratio) * haut)
+		draw_arc(c, 9.0, 0.0, TAU, 16, Color(0.1, 0.08, 0.05, 0.9), 3.0)
+		draw_arc(c, 9.0, 0.0, TAU, 16, Color(1, 0.9, 0.3), 1.5)
+		draw_line(c - Vector2(12, 0), c + Vector2(12, 0), Color(1, 0.9, 0.3), 2.0)
+		draw_line(c - Vector2(0, 12), c + Vector2(0, 12), Color(1, 0.9, 0.3), 2.0)
+		draw_string(ThemeDB.fallback_font, Vector2(o.x, o.y + haut + 16.0), tr("ui.monde.apercu"), HORIZONTAL_ALIGNMENT_LEFT, larg, 11, Color(0.85, 0.85, 0.8))

@@ -29,7 +29,10 @@ func _ready() -> void:
 	add_child(scene)
 	scene.profil_sans_ui = "--sans-ui" in args
 	scene.profil_sans_terrain = "--sans-terrain" in args
-	if scene.titre_ouvert and "--creation" in args:   # --creation : l'écran de création du personnage
+	if scene.titre_ouvert and "--monde" in args:   # --monde : l'écran de création du monde (designer, point 49)
+		scene._nouvelle_partie()
+		scene._creer_personnage()
+	elif scene.titre_ouvert and "--creation" in args:   # --creation : l'écran de création du personnage
 		scene._nouvelle_partie()
 		for ir in args.size():   # --race id : la race sélectionnée à la création (apparence par race, point 41)
 			if args[ir] == "--race" and ir + 1 < args.size():

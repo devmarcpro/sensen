@@ -268,5 +268,23 @@
     "niveau_par_profondeur": 10,
     "poids_etage": 6,
     "tiers_au_dela": 1
+  },
+  "identification": {
+    "_doc": "Objets non identifiés (designer 2026-09-01, point 52) : ces types sortent inconnus du loot ; les essayer révèle la base pour toute la partie.",
+    "types": [
+      "consommable",
+      "gemme"
+    ],
+    "revele_par_usage": true,
+    "apparences": [
+      "trouble",
+      "irisee",
+      "fumeuse",
+      "laiteuse",
+      "sombre",
+      "petillante",
+      "terne",
+      "ambree"
+    ]
   }
 }

@@ -35,6 +35,9 @@ Manger restaure selon l'aliment (valeur nutritive en données).
 > [!success] Codé le 2026-08-31 — les trois paliers ont une prise, le conseil arrive à 60
 > La régénération de santé hors sommeil existe désormais (effets d'équipement `regen_sante`) : sous `seuil_regen` (50) elle est × `malus_regen` (0,9), sous `seuil_stats` (25) elle s'arrête ; le malus de stats reste. Le conseil « manger » (`journal.faim_conseil`, tutoriel `premiere_faim`) part la première fois sous `tooltip_seuil` (60), avant le malus — il attendait le seuil 25.
 
+> [!success] Décidé le 2026-09-01 — la faim tue (designer, point 52)
+> « Une jauge qui ne tue jamais » n'était plus tenable : dans l'esprit de *Rogue*, la nourriture est **l'horloge qui pousse à avancer**. À jauge vide, la famine ronge les PV par paliers — `faim.degats_par_palier` PV tous les `faim.ticks_par_palier` ticks — jusqu'à la mort. Rien ne change pour les PNJ, qui gardent leur pénalité d'humeur : c'est le joueur qui reprend un compte à rebours.
+
 ## Liens
 - **Dépend de** : [[Agriculture et élevage]], [[Boucle de tick]]
 - **Alimente** : [[Cuisine et alchimie]], [[Nourriture, potentiel et potions]], [[Faim des PNJ]]

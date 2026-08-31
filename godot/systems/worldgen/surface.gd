@@ -410,17 +410,18 @@ func _tectonique() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([graine, "tectonique"])
 	var monde_tuiles := float(int(planete.monde_cellules) * int(planete.taille_cellule))
+	var monde_haut := monde_tuiles * float(planete.get("monde_ratio", 1.0))   # le monde est rectangulaire
 	var bord := float(int(tc.get("bord_secteurs", 2)) * 64 * int(planete.taille_cellule))
 	plaques.clear()
 	for k in int(tc.get("plaques", 24)):
-		var c := Vector2(rng.randf() * monde_tuiles, rng.randf() * monde_tuiles)
-		var pres_du_bord := c.x < bord or c.y < bord or c.x > monde_tuiles - bord or c.y > monde_tuiles - bord
+		var c := Vector2(rng.randf() * monde_tuiles, rng.randf() * monde_haut)
+		var pres_du_bord := c.x < bord or c.y < bord or c.x > monde_tuiles - bord or c.y > monde_haut - bord
 		plaques.append({"centre": c, "continentale": (rng.randf() < float(tc.get("continentales", 0.4))) and not pres_du_bord,
 			"derive": Vector2.from_angle(rng.randf() * TAU) * rng.randf_range(0.3, 1.0)})
 	points_chauds.clear()
 	var pc: Array = tc.get("points_chauds", [8, 14])
 	for k in rng.randi_range(int(pc[0]), int(pc[1])):
-		points_chauds.append(Vector2(rng.randf() * monde_tuiles, rng.randf() * monde_tuiles))
+		points_chauds.append(Vector2(rng.randf() * monde_tuiles, rng.randf() * monde_haut))
 	warp = FastNoiseLite.new()
 	warp.seed = graine + 101
 	warp.frequency = float(tc.get("warp_frequence", 0.00025))
@@ -439,7 +440,7 @@ func _tectonique() -> void:
 	var valeurs: Array[float] = []
 	for j in n:
 		for i in n:
-			valeurs.append(_continentalite(Vector2((i + 0.5) / n * monde_tuiles, (j + 0.5) / n * monde_tuiles)))
+			valeurs.append(_continentalite(Vector2((i + 0.5) / n * monde_tuiles, (j + 0.5) / n * monde_haut)))
 	valeurs.sort()
 	var part_terres: float = float(tc.get("terres", 0.35))
 	seuil_mer = valeurs[clampi(int(float(valeurs.size()) * (1.0 - part_terres)), 0, valeurs.size() - 1)]
@@ -481,6 +482,15 @@ func _continentalite(p: Vector2) -> float:
 		var dp: float = q.distance_to(pc)
 		if dp < r:
 			c += (1.0 - dp / r) * 1.4
+	# Le monde est entouré d'eau (designer 2026-08-31) : la continentalité s'effondre sur la marge du
+	# bord, quelles que soient les plaques — aucune terre ne touche la limite de la carte.
+	var larg := float(int(planete.monde_cellules) * int(planete.taille_cellule))
+	var haut := larg * float(planete.get("monde_ratio", 1.0))
+	var marge := minf(larg, haut) * float(planete.get("tectonique", {}).get("ocean_bord", 0.10))
+	if marge > 0.0:
+		var d_bord: float = minf(minf(p.x, larg - p.x), minf(p.y, haut - p.y))
+		if d_bord < marge:
+			c -= (1.0 - clampf(d_bord / marge, 0.0, 1.0)) * 6.0
 	return c
 
 

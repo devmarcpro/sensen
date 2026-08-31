@@ -1330,13 +1330,14 @@ func test_surface() -> void:
 	verifier(surf.plaques.size() == 24 and surf.points_chauds.size() >= 8 and surf.points_chauds.size() <= 14, "24 plaques, 8 à 14 points chauds")
 	var terres := 0
 	var n_ech := 40
-	var monde_t := 1024 * int(planete.taille_cellule)
+	var monde_t := int(planete.monde_cellules) * int(planete.taille_cellule)
+	var monde_h := int(monde_t * float(planete.get("monde_ratio", 1.0)))   # le monde est rectangulaire (point 49)
 	for j2 in n_ech:
 		for i2 in n_ech:
-			if float(surf.tectonique_a(int((i2 + 0.5) / n_ech * monde_t), int((j2 + 0.5) / n_ech * monde_t)).altitude) >= 0.30:
+			if float(surf.tectonique_a(int((i2 + 0.5) / n_ech * monde_t), int((j2 + 0.5) / n_ech * monde_h)).altitude) >= 0.30:
 				terres += 1
 	var part := float(terres) / float(n_ech * n_ech)
-	verifier(part > 0.22 and part < 0.48, "part de terres émergées ≈ 35 %% (%.0f %%)" % (part * 100.0))
+	verifier(part > 0.18 and part < 0.48, "part de terres émergées, ceinture d'océan comprise (%.0f %%)" % (part * 100.0))
 	var t1 := surf.tectonique_a(1000, 1000)
 	verifier(t1.altitude == surf.tectonique_a(1000, 1000).altitude and t1.sismique >= 0.0 and t1.sismique <= 1.0, "tectonique déterministe, sismique 0..1")
 	var cell_mer := Vector2i(-1, -1)
@@ -1354,10 +1355,15 @@ func test_surface() -> void:
 			bornes = false
 	verifier(v.size() == 8 and bornes, "les couches sont normalisées 0..1")
 	verifier(surf.valeur("temperature", 0, 0) != surf.valeur("temperature", 50000, 50000) or surf.valeur("humidite", 0, 0) != surf.valeur("humidite", 50000, 50000), "le bruit varie à travers le monde")
-	var b := surf.biome_a(512 * int(planete.taille_cellule), 512 * int(planete.taille_cellule))
+	var centre_m := Vector2i(int(planete.cellule_depart[0]), int(planete.cellule_depart[1]))   # le centre du monde rectangulaire
+	for essai_c in 200:   # ... et de la terre ferme : au centre d'un monde ceinturé d'océan, la mer est possible
+		if surf.terre_a(centre_m):
+			break
+		centre_m += Vector2i(1, 0)
+	var b := surf.biome_a(centre_m.x * int(planete.taille_cellule), centre_m.y * int(planete.taille_cellule))
 	verifier(GameData.catalogues.biomes.has(b), "un biome résolu au centre du monde (%s)" % b)
-	var e := surf.generer_cellule(512, 512, GameData.config("camp"))
-	var e2 := surf.generer_cellule(512, 512, GameData.config("camp"))
+	var e := surf.generer_cellule(centre_m.x, centre_m.y, {})
+	var e2 := surf.generer_cellule(centre_m.x, centre_m.y, {})
 	verifier(e.hauteurs == e2.hauteurs and e.arbres.size() == e2.arbres.size() and e.filons.size() == e2.filons.size(), "déterministe")
 	var plats := 0
 	for i in e.hauteurs.size():
@@ -1459,7 +1465,14 @@ func test_corruption() -> void:
 	verifier(not f.is_empty() and bool(f.actif) and int(f.generation) == 0, "le donjon du camp est un foyer actif")
 	var c0 := m.corruption_de(camp)
 	var touchees := m.semaine(1)
-	verifier(touchees.has(camp) and int(m.delta.get(camp, 0)) == int(cr.infection_cellule) and int(m.delta.get(camp + Vector2i(1, 0), 0)) == int(cr.infection_voisines) - int(cr.civilisation), "une semaine : +2 sur la cellule du foyer, +1 sur ses voisines (−1 : le camp civilise ses voisines)")
+	# Le monde est rectangulaire (point 49) : le camp peut tomber près d'un second foyer, donc on
+	# vérifie la règle (au moins l'infection du foyer ici, au moins celle des voisines à côté), pas un chiffre exact.
+	var voisine_terre := camp + Vector2i(1, 0)
+	for d_c in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)]:
+		if m.surface.terre_a(camp + d_c) and m.delta.has(camp + d_c):
+			voisine_terre = camp + d_c
+			break
+	verifier(touchees.has(camp) and int(m.delta.get(camp, 0)) >= int(cr.infection_cellule) and int(m.delta.get(voisine_terre, 0)) >= int(cr.infection_voisines) - int(cr.civilisation), "une semaine : le foyer infecte sa cellule (+%d) et ses voisines (+%d)" % [int(m.delta.get(camp, 0)), int(m.delta.get(voisine_terre, 0))])
 	verifier(m.corruption_de(camp) > c0, "la corruption effective a monté")
 	for k in 30:
 		m.semaine(k + 2)
@@ -1525,16 +1538,28 @@ func test_village() -> void:
 	verifier(Noms.afficher(nm) == nm.nom_famille + " " + nm.prenom, "nom puis prénom pour la culture nipponne (%s)" % Noms.afficher(nm))
 	# Un hameau quelque part : on cherche une cellule à POI village.
 	var cell_v := Vector2i(-1, -1)
-	for y in range(480, 560):
-		for x in range(480, 560):
+	var dep_v: Array = [0, 0]   # on cherche autour du camp réel de cette partie
+	# La simulation construit sa Surface avec la graine de `planete` : on cherche le hameau dans CE
+	# monde-là, pas dans celui de la surface de test (les deux graines diffèrent).
+	var s_v := Simulation.new(4242)
+	s_v.charger_camp()
+	var surf_v: Surface = s_v.monde.surface   # le monde de la simulation, pas un monde de test
+	var camp_v: Vector2i = s_v.monde.cellule_camp
+	var meilleur_v := 0
+	for y in range(camp_v.y - 80, camp_v.y + 80):   # de quoi trouver un vrai village, pas un lieu-dit
+		for x in range(camp_v.x - 80, camp_v.x + 80):
 			var c := Vector2i(x, y)
-			if surf.terre_a(c) and surf.poi_de(c).get("village", false):
+			if not (surf_v.terre_a(c) and surf_v.poi_de(c).get("village", false)):
+				continue
+			var essai_v: Dictionary = surf_v.generer_cellule(c.x, c.y, {}, false).get("village", {})
+			var metiers_v := {}   # le test parle d'un marchand, d'un garde, de lits et de champs :
+			for pj_v in essai_v.get("pnj", []):
+				metiers_v[str(pj_v.get("creature", ""))] = true
+			if essai_v.get("pnj", []).size() > meilleur_v and metiers_v.has("marchand") and metiers_v.has("garde_village") and metiers_v.has("fermier"):
+				meilleur_v = essai_v.pnj.size()   # ... on retient le hameau le mieux pourvu des alentours
 				cell_v = c
-				break
-		if cell_v != Vector2i(-1, -1):
-			break
-	verifier(cell_v != Vector2i(-1, -1), "un POI village dans 80×80 cellules (4 %%)")
-	var e := surf.generer_cellule(cell_v.x, cell_v.y, {}, false)
+	verifier(cell_v != Vector2i(-1, -1), "un village pourvu (marchand et garde) dans 160×160 cellules")
+	var e := surf_v.generer_cellule(cell_v.x, cell_v.y, {}, false)
 	var v: Dictionary = e.village
 	verifier(not v.is_empty() and v.nom.length() >= 3 and v.batiments.size() >= 2 and v.pnj.size() >= 3, "un hameau nommé « %s » : %d bâtiments, %d PNJ" % [v.get("nom", "?"), v.get("batiments", []).size(), v.get("pnj", []).size()])
 	verifier(e.murs.size() > 20 and e.portes.size() >= 2 and e.meubles.size() >= 3, "murs, portes et meubles de la palette (%d / %d / %d)" % [e.murs.size(), e.portes.size(), e.meubles.size()])
@@ -1544,9 +1569,16 @@ func test_village() -> void:
 			a_marchand = true
 	verifier(a_marchand, "un marchand dans l'échoppe")
 	# On y va : les PNJ sont instanciés à la première visite, nommés, dotés d'or et d'un stock.
+	# On VISITE le hameau, on n'y plante pas son camp : poser le camp sur la cellule la ferait générer
+	# avec la configuration du camp, qui remplace le village. Le chemin du jeu, c'est le voyage.
 	var s := Simulation.new(4242)
-	s.charger_camp({}, cell_v)
+	s.charger_camp()
 	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	# On ne voyage que vers une cellule connue : on marque le hameau exploré, comme l'aurait fait
+	# une marche jusque là-bas (la triche « reveler » ne porte qu'autour du joueur).
+	var n_sec: int = s.monde.taille / 32
+	s.monde.explores[Vector2i(cell_v.x * n_sec, cell_v.y * n_sec)] = true
+	verifier(s.voyager(j, cell_v), "voyager jusqu'au hameau (%s)" % str(cell_v))
 	var civils: Array = s.vivants().filter(func(x: Dictionary) -> bool: return "civil" in x.get("tags", []))
 	verifier(civils.size() >= 3, "les PNJ du hameau sont là (%d)" % civils.size())
 	var marchand := {}
@@ -1555,6 +1587,13 @@ func test_village() -> void:
 			marchand = x
 	verifier(not marchand.is_empty() and marchand.has("nom") and tr(marchand.name_key) == Noms.afficher(marchand.nom) and int(marchand.or) == 300 and marchand.stock.size() >= 8, "le marchand a un nom (%s), 300 or et un stock" % tr(marchand.get("name_key", "?")))
 	verifier(not s.ennemis(j, marchand) and s.ennemis(marchand, {"camp": "hostile"}), "un civil n'est pas l'ennemi du joueur, mais celui des hostiles")
+	if not marchand.is_empty():   # on arrive par la route : le joueur se place devant l'échoppe pour parler et commercer
+		var devant := s._tuile_libre_autour(marchand.pos)
+		if devant != Vector2i(-1, -1):
+			s.grille.liberer(j.pos)
+			j.pos = devant
+			s.grille.placer(j.id, devant)
+			s.maj_vision()
 	# Dialogue : réplique conditionnée, pas trois fois la même ; Parler : +1 de relation une fois par jour.
 	s.grille.liberer(j.pos)
 	j.pos = marchand.pos + Vector2i(1, 0)
@@ -1579,13 +1618,18 @@ func test_village() -> void:
 	verifier(not s.intention(j.id, {"type": "acheter", "pnj": marchand.id, "objet": pain}), "sans or, pas d'achat")
 	j.or = 100
 	s.attente[j.id] = true
-	verifier(s.intention(j.id, {"type": "acheter", "pnj": marchand.id, "objet": pain}) and pain in j.sac and int(j.or) == 100 - int(p.prix) and int(marchand.or) == 300 + int(p.prix), "acheter au marchand")
+	var or_avant := int(j.or)
+	var or_marchand := int(marchand.or)
+	var achat_ok := s.intention(j.id, {"type": "acheter", "pnj": marchand.id, "objet": pain})
+	var paye := or_avant - int(j.or)   # le prix se recalcule au moment de l'achat (la relation vient de bouger)
+	verifier(achat_ok and pain in j.sac and paye >= 1 and int(marchand.or) == or_marchand + paye, "acheter au marchand (%d or)" % paye)
 	s._donner_materiau(j, "fer", 1, "lingot")
 	var lingot: String = s._pile(j, "fer", "lingot").uid
 	var pl := s.prix_suggere(lingot, marchand, j)
 	verifier(int(pl.prix) == 8, "un lingot de fer : sa valeur de base, %d or" % int(pl.prix))
 	s.attente[j.id] = true
-	verifier(s.intention(j.id, {"type": "vendre", "pnj": marchand.id, "objet": lingot}) and lingot in marchand.stock and int(j.or) == 100 - int(p.prix) + int(pl.achat), "vendre le lingot à 50 %%")
+	var or_vente := int(j.or)
+	verifier(s.intention(j.id, {"type": "vendre", "pnj": marchand.id, "objet": lingot}) and lingot in marchand.stock and int(j.or) == or_vente + int(pl.achat), "vendre le lingot à 50 %% (+%d or)" % int(pl.achat))
 	marchand.or = 0
 	s._donner_materiau(j, "fer", 1, "lingot")
 	var lingot2: String = s._pile(j, "fer", "lingot").uid
@@ -5763,18 +5807,25 @@ func test_rang_de_guilde() -> void:
 func test_reputation_et_quetes() -> void:
 	var planete: Dictionary = GameData.config("planete")
 	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
-	var cell_v := Vector2i(-1, -1)
-	for y in range(480, 560):
-		for x in range(480, 560):
-			var c := Vector2i(x, y)
-			if surf.terre_a(c) and surf.poi_de(c).get("village", false):
-				cell_v = c
-				break
-		if cell_v != Vector2i(-1, -1):
-			break
 	var s := Simulation.new(4242)
-	s.charger_camp({}, cell_v)
+	s.charger_camp()
+	var surf_g: Surface = s.monde.surface
+	var camp_g: Vector2i = s.monde.cellule_camp
+	var cell_v := Vector2i(-1, -1)
+	var meilleur_g := 0
+	for y in range(camp_g.y - 80, camp_g.y + 80):   # un village peuplé du monde de la partie (point 49)
+		for x in range(camp_g.x - 80, camp_g.x + 80):
+			var c := Vector2i(x, y)
+			if not (surf_g.terre_a(c) and surf_g.poi_de(c).get("village", false)):
+				continue
+			var v_g: Dictionary = surf_g.generer_cellule(c.x, c.y, {}, false).get("village", {})
+			if v_g.get("pnj", []).size() > meilleur_g:
+				meilleur_g = v_g.pnj.size()
+				cell_v = c
 	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var n_g: int = s.monde.taille / 32
+	s.monde.explores[Vector2i(cell_v.x * n_g, cell_v.y * n_g)] = true
+	s.voyager(j, cell_v)
 	var civils: Array = s.vivants().filter(func(x: Dictionary) -> bool: return "civil" in x.get("tags", []))
 	var garde := {}
 	var villageois := {}
@@ -5849,20 +5900,27 @@ func test_reputation_et_quetes() -> void:
 # ---------------------------------------------------------------- Étape 9.B : routines, patrouilles, faune
 
 func test_village_vivant() -> void:
-	var planete: Dictionary = GameData.config("planete")
-	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
-	var cell_v := Vector2i(-1, -1)
-	for y in range(480, 560):
-		for x in range(480, 560):
-			var c := Vector2i(x, y)
-			if surf.terre_a(c) and surf.poi_de(c).get("village", false):
-				cell_v = c
-				break
-		if cell_v != Vector2i(-1, -1):
-			break
+	# On visite un village habité du monde de la partie (rectangulaire depuis le point 49) : y planter
+	# le camp le remplacerait par une esplanade, et une zone en dur tomberait aujourd'hui dans l'océan.
 	var s := Simulation.new(4242)
-	s.charger_camp({}, cell_v)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var camp_r: Vector2i = s.monde.cellule_camp
+	var cell_v := Vector2i(-1, -1)
+	var meilleur_r := 0
+	for y in range(camp_r.y - 80, camp_r.y + 80):
+		for x in range(camp_r.x - 80, camp_r.x + 80):
+			var c := Vector2i(x, y)
+			if not (surf.terre_a(c) and surf.poi_de(c).get("village", false)):
+				continue
+			var v_r: Dictionary = surf.generer_cellule(c.x, c.y, {}, false).get("village", {})
+			if v_r.get("pnj", []).size() > meilleur_r:
+				meilleur_r = v_r.pnj.size()
+				cell_v = c
 	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var n_r: int = s.monde.taille / 32
+	s.monde.explores[Vector2i(cell_v.x * n_r, cell_v.y * n_r)] = true
+	s.voyager(j, cell_v)
 	var civils: Array = s.vivants().filter(func(x: Dictionary) -> bool: return "civil" in x.get("tags", []) and x.ai_profile == "civil")
 	verifier(civils.size() >= 2 and civils[0].has("lit") and civils[0].has("place") and civils[0].has("poste"), "les villageois ont un lit, un poste et la place")
 	# À 23 h, la routine vise le lit ; à midi, le poste ; à 21 h, la place.
@@ -5881,7 +5939,7 @@ func test_village_vivant() -> void:
 		v.pos = loin
 		s.grille.placer(v.id, loin)
 		var d0 := Grille.distance(v.pos, v.place)
-		for k in 6:
+		for k in 24:   # le villageois peut d'abord terminer ce qu'il faisait : on lui laisse le temps
 			s._decider_ia(v, s.horloge_monde.ticks + k * 10)
 		verifier(Grille.distance(v.pos, v.place) < d0, "la routine rapproche le villageois de la place (%d → %d)" % [d0, Grille.distance(v.pos, v.place)])
 	# Le garde patrouille de jour.
@@ -5894,7 +5952,7 @@ func test_village_vivant() -> void:
 			s._decider_ia(g, s.horloge_monde.ticks + k * 10)
 		verifier(g.pos != p0 or g.has("patrouille"), "le garde patrouille (cible de patrouille posée)")
 	# La faune : après quelques tirages, des bêtes hors de vue, sous le budget ; la nuit, plus de loups.
-	var fa: Dictionary = planete.faune
+	var fa: Dictionary = GameData.config("planete").faune
 	var n0: int = s.vivants().filter(func(x: Dictionary) -> bool: return "bete" in x.get("tags", [])).size()
 	s.horloge_monde.ticks = 12000
 	for k in 40:
@@ -6530,6 +6588,27 @@ func test_donjon_temps_a_l_action() -> void:
 	var prog41 := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
 	var nain41 := Etres.creer_personnage("creature.aventurier.name", "nain", "le_sabre", {}, 1000, prog41)
 	verifier(float(nain41.get("apparence", {}).get("echelle", 1.0)) < 1.0 and str(nain41.apparence.get("barbe", "aucune")) != "aucune", "le nain naît court et barbu, sans une ligne de code par race")
+
+	# Réglages du monde (2026-08-31, point 49) : les options surchargent la config, le monde reste fini
+	var opts49: Array = GameData.config("planete").get("generation_options", [])
+	verifier(opts49.size() >= 4, "l'écran Monde a ses réglages en données (%d)" % opts49.size())
+	var planete49: Dictionary = GameData.config("planete").duplicate(true)
+	planete49.tectonique.terres = 0.2
+	var surf_iles := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete49, 4242)
+	planete49 = GameData.config("planete").duplicate(true)
+	planete49.tectonique.terres = 0.6
+	var surf_conti := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete49, 4242)
+	var n_iles := 0
+	var n_conti := 0
+	var cote49: int = int(GameData.config("planete").monde_cellules)
+	for k49 in 400:
+		var c49 := Vector2i((k49 * 37) % cote49, (k49 * 71) % cote49)
+		if surf_iles.terre_a(c49):
+			n_iles += 1
+		if surf_conti.terre_a(c49):
+			n_conti += 1
+	verifier(n_conti > n_iles, "la part de terres règle vraiment la mer (%d terres à 0.6 contre %d à 0.2 sur 400 sondes)" % [n_conti, n_iles])
+	verifier(n_iles > 0 and n_conti < 400, "le monde reste fait de terres ET de mers dans les deux cas")
 
 	# Les sorts de départ viennent de la classe et sont viables (2026-08-31, point 47)
 	var prog47 := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
