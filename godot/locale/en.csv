@@ -2321,3 +2321,16 @@ ui.creation.depart_l,"Start: {lieu} (← →)"
 ui.creation.depart_camp,at camp
 ui.creation.depart_donjon,in a dungeon
 ui.hotbar.glisser,HOTBAR — drag an item or an ability into a slot · right click: clear
+creature.serpent_geant.name,Giant snake
+creature.araignee_geante.name,Giant spider
+creature.sangsue_geante.name,Giant leech
+creature.aigle_royal.name,Golden eagle
+creature.scarabee_cuirasse.name,Armored beetle
+rig.serpentin.name,Serpentine
+rig.arachnide.name,Arachnid
+creature.kappa.name,Kappa
+creature.kitsune.name,Kitsune
+creature.tsuchigumo.name,Tsuchigumo
+creature.basilic.name,Basilisk
+creature.griffon.name,Griffin
+creature.golem_d_argile.name,Clay golem

@@ -1,0 +1,233 @@
+{
+  "name_key": "rig.arachnide.name",
+  "racine": "torse",
+  "hauteur_pieds": 6,
+  "segments": {
+    "torse": {
+      "parent": null,
+      "ancrage": null,
+      "longueur": 12,
+      "largeur": 9,
+      "angle": 0,
+      "ancrages": {
+        "cou": [
+          12,
+          -1
+        ],
+        "p1G": [
+          3,
+          3
+        ],
+        "p2G": [
+          6,
+          3
+        ],
+        "p3G": [
+          9,
+          3
+        ],
+        "p4G": [
+          11,
+          3
+        ],
+        "p1D": [
+          3,
+          -3
+        ],
+        "p2D": [
+          6,
+          -3
+        ],
+        "p3D": [
+          9,
+          -3
+        ],
+        "p4D": [
+          11,
+          -3
+        ]
+      },
+      "zone": "torse"
+    },
+    "tete": {
+      "parent": "torse",
+      "ancrage": "cou",
+      "longueur": 5,
+      "largeur": 4,
+      "angle": -15,
+      "ancrages": {},
+      "zone": "tete"
+    },
+    "patte_1G": {
+      "parent": "torse",
+      "ancrage": "p1G",
+      "longueur": 7,
+      "largeur": 1.8,
+      "angle": 60,
+      "ancrages": {},
+      "zone": "jambes"
+    },
+    "patte_2G": {
+      "parent": "torse",
+      "ancrage": "p2G",
+      "longueur": 7,
+      "largeur": 1.8,
+      "angle": 82,
+      "ancrages": {},
+      "zone": "jambes"
+    },
+    "patte_3G": {
+      "parent": "torse",
+      "ancrage": "p3G",
+      "longueur": 7,
+      "largeur": 1.8,
+      "angle": 104,
+      "ancrages": {},
+      "zone": "jambes"
+    },
+    "patte_4G": {
+      "parent": "torse",
+      "ancrage": "p4G",
+      "longueur": 7,
+      "largeur": 1.8,
+      "angle": 126,
+      "ancrages": {},
+      "zone": "jambes"
+    },
+    "patte_1D": {
+      "parent": "torse",
+      "ancrage": "p1D",
+      "longueur": 7,
+      "largeur": 1.8,
+      "angle": -60,
+      "ancrages": {},
+      "zone": "jambes"
+    },
+    "patte_2D": {
+      "parent": "torse",
+      "ancrage": "p2D",
+      "longueur": 7,
+      "largeur": 1.8,
+      "angle": -82,
+      "ancrages": {},
+      "zone": "jambes"
+    },
+    "patte_3D": {
+      "parent": "torse",
+      "ancrage": "p3D",
+      "longueur": 7,
+      "largeur": 1.8,
+      "angle": -104,
+      "ancrages": {},
+      "zone": "jambes"
+    },
+    "patte_4D": {
+      "parent": "torse",
+      "ancrage": "p4D",
+      "longueur": 7,
+      "largeur": 1.8,
+      "angle": -126,
+      "ancrages": {},
+      "zone": "jambes"
+    }
+  },
+  "facings": {
+    "S": {
+      "ordre": [
+        "patte_1D",
+        "patte_2D",
+        "patte_3D",
+        "patte_4D",
+        "torse",
+        "patte_1G",
+        "patte_2G",
+        "patte_3G",
+        "patte_4G",
+        "tete"
+      ],
+      "offsets": {},
+      "vue_tete": "face"
+    },
+    "SE": {
+      "ordre": [
+        "patte_1D",
+        "patte_2D",
+        "patte_3D",
+        "patte_4D",
+        "torse",
+        "patte_1G",
+        "patte_2G",
+        "patte_3G",
+        "patte_4G",
+        "tete"
+      ],
+      "offsets": {},
+      "vue_tete": "face"
+    },
+    "E": {
+      "ordre": [
+        "patte_1D",
+        "patte_2D",
+        "patte_3D",
+        "patte_4D",
+        "torse",
+        "tete",
+        "patte_1G",
+        "patte_2G",
+        "patte_3G",
+        "patte_4G"
+      ],
+      "offsets": {},
+      "vue_tete": "profil"
+    },
+    "NE": {
+      "ordre": [
+        "tete",
+        "patte_1D",
+        "patte_2D",
+        "patte_3D",
+        "patte_4D",
+        "torse",
+        "patte_1G",
+        "patte_2G",
+        "patte_3G",
+        "patte_4G"
+      ],
+      "offsets": {},
+      "vue_tete": "dos"
+    },
+    "N": {
+      "ordre": [
+        "tete",
+        "patte_1D",
+        "patte_2D",
+        "patte_3D",
+        "patte_4D",
+        "torse",
+        "patte_1G",
+        "patte_2G",
+        "patte_3G",
+        "patte_4G"
+      ],
+      "offsets": {},
+      "vue_tete": "dos"
+    },
+    "SW": {
+      "miroir": "SE"
+    },
+    "W": {
+      "miroir": "E"
+    },
+    "NW": {
+      "miroir": "NE"
+    }
+  },
+  "slots_segments": {
+    "casque": [
+      "tete"
+    ],
+    "cuirasse": [
+      "torse"
+    ]
+  }
+}

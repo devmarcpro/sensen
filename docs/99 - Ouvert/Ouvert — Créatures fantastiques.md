@@ -1,10 +1,13 @@
 ---
 aliases: ["Ouvert — Créatures fantastiques", "Créatures fantastiques", "Abandonné — créatures fantastiques"]
-tags: [ouvert, êtres, abandonné]
+tags: [ouvert, êtres, décidé]
 domaine: êtres
-statut: abandonné
+statut: décidé
 etape: 9
 ---
+
+> [!success] Rouvert et tranché le 2026-08-31 — le folklore, rien que le folklore (designer, point 40)
+> Le designer lève l'abandon du 26 : **les créatures fantastiques rejoignent le bestiaire**, sous une règle unique et stricte — **uniquement du folklore attesté, rien d'inventé**. Un nom, un peuple, une tradition : kappa, kitsune, basilic, tsuchigumo, griffon, golem d'argile. Aucune créature de notre cru, aucune variation « inspirée de » : si la bête n'a pas déjà un nom dans un folklore réel, elle n'entre pas. Le reste du cadre ne bouge pas — mêmes blocs de l'être, mêmes rigs en données, mêmes actions du catalogue, et la haute corruption continue de monter par les **chiffres et la densité** ([[Monstres rares]], [[Niveau de danger]]) plutôt que par le bestiaire seul. Le callout ci-dessous est conservé comme trace : c'est l'état antérieur, pas la règle en vigueur.
 
 > [!failure] Abandonné le 2026-08-26
 > Sur décision du designer : **plus de fantaisie dans le bestiaire**. La piste de réintroduction est fermée, pas seulement reportée.

@@ -1,0 +1,145 @@
+{
+  "name_key": "rig.serpentin.name",
+  "racine": "torse",
+  "hauteur_pieds": 2,
+  "segments": {
+    "torse": {
+      "parent": null,
+      "ancrage": null,
+      "longueur": 10,
+      "largeur": 6,
+      "angle": 0,
+      "ancrages": {
+        "cou": [
+          10,
+          -1
+        ],
+        "q1": [
+          0,
+          0
+        ]
+      },
+      "zone": "torse"
+    },
+    "tete": {
+      "parent": "torse",
+      "ancrage": "cou",
+      "longueur": 6,
+      "largeur": 5,
+      "angle": -10,
+      "ancrages": {},
+      "zone": "tete"
+    },
+    "c1": {
+      "parent": "torse",
+      "ancrage": "q1",
+      "longueur": 8,
+      "largeur": 5,
+      "angle": 150,
+      "ancrages": {
+        "q2": [
+          8,
+          0
+        ]
+      },
+      "zone": "torse"
+    },
+    "c2": {
+      "parent": "c1",
+      "ancrage": "q2",
+      "longueur": 7,
+      "largeur": 4,
+      "angle": -52,
+      "ancrages": {
+        "q3": [
+          7,
+          0
+        ]
+      },
+      "zone": "torse"
+    },
+    "c3": {
+      "parent": "c2",
+      "ancrage": "q3",
+      "longueur": 6,
+      "largeur": 3,
+      "angle": 52,
+      "ancrages": {},
+      "zone": "torse"
+    }
+  },
+  "facings": {
+    "S": {
+      "ordre": [
+        "c3",
+        "c2",
+        "c1",
+        "torse",
+        "tete"
+      ],
+      "offsets": {},
+      "vue_tete": "face"
+    },
+    "SE": {
+      "ordre": [
+        "c3",
+        "c2",
+        "c1",
+        "torse",
+        "tete"
+      ],
+      "offsets": {},
+      "vue_tete": "face"
+    },
+    "E": {
+      "ordre": [
+        "c3",
+        "c2",
+        "c1",
+        "torse",
+        "tete"
+      ],
+      "offsets": {},
+      "vue_tete": "profil"
+    },
+    "NE": {
+      "ordre": [
+        "tete",
+        "torse",
+        "c1",
+        "c2",
+        "c3"
+      ],
+      "offsets": {},
+      "vue_tete": "dos"
+    },
+    "N": {
+      "ordre": [
+        "tete",
+        "torse",
+        "c1",
+        "c2",
+        "c3"
+      ],
+      "offsets": {},
+      "vue_tete": "dos"
+    },
+    "SW": {
+      "miroir": "SE"
+    },
+    "W": {
+      "miroir": "E"
+    },
+    "NW": {
+      "miroir": "NE"
+    }
+  },
+  "slots_segments": {
+    "casque": [
+      "tete"
+    ],
+    "cuirasse": [
+      "torse"
+    ]
+  }
+}

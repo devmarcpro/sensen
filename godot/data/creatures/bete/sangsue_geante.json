@@ -1,0 +1,42 @@
+{
+  "name_key": "creature.sangsue_geante.name",
+  "race": "sangsue_geante",
+  "skeleton_template": "amorphe",
+  "corps": {
+    "stats": {
+      "force": 6,
+      "dexterite": 5,
+      "endurance": 12,
+      "volonte": 2,
+      "perception": 6,
+      "charisme": 1
+    },
+    "silhouette": "amorphe"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "morsure",
+    "machoire_verrouillee"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "eau": 0.7,
+    "terre": 0.3
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.3,
+    0.6,
+    0.5
+  ],
+  "tags": [
+    "bete"
+  ],
+  "competences": {
+    "athletisme": 12
+  },
+  "depouille": []
+}

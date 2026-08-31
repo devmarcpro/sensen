@@ -1,0 +1,45 @@
+{
+  "name_key": "creature.griffon.name",
+  "race": "griffon",
+  "skeleton_template": "volant",
+  "corps": {
+    "stats": {
+      "force": 14,
+      "dexterite": 13,
+      "endurance": 11,
+      "volonte": 8,
+      "perception": 14,
+      "charisme": 7
+    },
+    "silhouette": "volant"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "serres",
+    "pique_plongeant"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "metal": 0.5,
+    "feu": 0.5
+  },
+  "rare_chance": 0.04,
+  "teinte": [
+    0.7,
+    0.6,
+    0.25
+  ],
+  "tags": [
+    "folklore"
+  ],
+  "competences": {
+    "athletisme": 28
+  },
+  "depouille": [
+    "peau",
+    "dent"
+  ]
+}

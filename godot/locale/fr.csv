@@ -2330,3 +2330,16 @@ ui.creation.depart_l,"Départ : {lieu} (← →)"
 ui.creation.depart_camp,au camp
 ui.creation.depart_donjon,dans un donjon
 ui.hotbar.glisser,HOTBAR — glissez un objet ou une capacité dans une case · clic droit : vider
+creature.serpent_geant.name,Serpent géant
+creature.araignee_geante.name,Araignée géante
+creature.sangsue_geante.name,Sangsue géante
+creature.aigle_royal.name,Aigle royal
+creature.scarabee_cuirasse.name,Scarabée cuirassé
+rig.serpentin.name,Serpentin
+rig.arachnide.name,Arachnide
+creature.kappa.name,Kappa
+creature.kitsune.name,Kitsune
+creature.tsuchigumo.name,Tsuchigumo
+creature.basilic.name,Basilic
+creature.griffon.name,Griffon
+creature.golem_d_argile.name,Golem d'argile

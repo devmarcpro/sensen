@@ -21,6 +21,24 @@
     },
     {
       "id": "rodeur"
+    },
+    {
+      "id": "araignee_geante"
+    },
+    {
+      "id": "sangsue_geante"
+    },
+    {
+      "id": "scarabee_cuirasse"
+    },
+    {
+      "id": "kappa"
+    },
+    {
+      "id": "kitsune"
+    },
+    {
+      "id": "tsuchigumo"
     }
   ],
   "boss": "chef_de_bande",

@@ -1,0 +1,45 @@
+{
+  "name_key": "creature.kappa.name",
+  "race": "kappa",
+  "skeleton_template": "humanoide",
+  "corps": {
+    "stats": {
+      "force": 9,
+      "dexterite": 12,
+      "endurance": 9,
+      "volonte": 8,
+      "perception": 10,
+      "charisme": 4
+    },
+    "silhouette": "humanoide"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "griffure",
+    "machoire_verrouillee"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "eau": 0.7,
+    "bois": 0.3
+  },
+  "rare_chance": 0.04,
+  "teinte": [
+    0.25,
+    0.5,
+    0.4
+  ],
+  "tags": [
+    "folklore",
+    "embuscade"
+  ],
+  "competences": {
+    "athletisme": 20
+  },
+  "depouille": [
+    "peau"
+  ]
+}

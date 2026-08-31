@@ -1,0 +1,41 @@
+{
+  "name_key": "creature.golem_d_argile.name",
+  "race": "golem_d_argile",
+  "skeleton_template": "humanoide",
+  "corps": {
+    "stats": {
+      "force": 16,
+      "dexterite": 4,
+      "endurance": 16,
+      "volonte": 1,
+      "perception": 5,
+      "charisme": 1
+    },
+    "silhouette": "humanoide"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "masse_ecrasante",
+    "coup_de_masse"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 1.0
+  },
+  "rare_chance": 0.04,
+  "teinte": [
+    0.55,
+    0.35,
+    0.25
+  ],
+  "tags": [
+    "folklore"
+  ],
+  "competences": {
+    "athletisme": 14
+  },
+  "depouille": []
+}

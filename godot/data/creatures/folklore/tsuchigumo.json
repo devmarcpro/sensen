@@ -1,0 +1,46 @@
+{
+  "name_key": "creature.tsuchigumo.name",
+  "race": "tsuchigumo",
+  "skeleton_template": "arachnide",
+  "corps": {
+    "stats": {
+      "force": 12,
+      "dexterite": 12,
+      "endurance": 11,
+      "volonte": 7,
+      "perception": 11,
+      "charisme": 1
+    },
+    "silhouette": "arachnide"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "morsure_venimeuse",
+    "embuscade"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 0.6,
+    "bois": 0.4
+  },
+  "rare_chance": 0.04,
+  "teinte": [
+    0.2,
+    0.18,
+    0.22
+  ],
+  "tags": [
+    "folklore",
+    "embuscade"
+  ],
+  "competences": {
+    "athletisme": 22
+  },
+  "depouille": [
+    "peau",
+    "dent"
+  ]
+}

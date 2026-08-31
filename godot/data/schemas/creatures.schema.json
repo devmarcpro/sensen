@@ -50,7 +50,9 @@
             "humanoide",
             "quadrupede",
             "volant",
-            "amorphe"
+            "amorphe",
+            "serpentin",
+            "arachnide"
           ]
         }
       },

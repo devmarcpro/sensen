@@ -1,0 +1,44 @@
+{
+  "name_key": "creature.aigle_royal.name",
+  "race": "aigle_royal",
+  "skeleton_template": "volant",
+  "corps": {
+    "stats": {
+      "force": 7,
+      "dexterite": 13,
+      "endurance": 5,
+      "volonte": 6,
+      "perception": 12,
+      "charisme": 4
+    },
+    "silhouette": "volant"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "serres",
+    "pique_plongeant"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "bois": 0.5,
+    "feu": 0.5
+  },
+  "rare_chance": 0.02,
+  "teinte": [
+    0.6,
+    0.4,
+    0.3
+  ],
+  "tags": [
+    "bete",
+    "meute"
+  ],
+  "competences": {
+    "athletisme": 22
+  },
+  "depouille": [],
+  "meute": "1d2+1"
+}

@@ -30,6 +30,21 @@
     },
     {
       "id": "scorpion"
+    },
+    {
+      "id": "serpent_geant"
+    },
+    {
+      "id": "aigle_royal"
+    },
+    {
+      "id": "basilic"
+    },
+    {
+      "id": "griffon"
+    },
+    {
+      "id": "golem_d_argile"
     }
   ],
   "boss": "chef_de_bande",

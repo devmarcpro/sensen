@@ -1,0 +1,45 @@
+{
+  "name_key": "creature.kitsune.name",
+  "race": "kitsune",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 7,
+      "dexterite": 15,
+      "endurance": 7,
+      "volonte": 13,
+      "perception": 13,
+      "charisme": 10
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": [
+    "morsure",
+    "flammeche"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "feu": 0.6,
+    "bois": 0.4
+  },
+  "rare_chance": 0.04,
+  "teinte": [
+    0.75,
+    0.4,
+    0.15
+  ],
+  "tags": [
+    "folklore"
+  ],
+  "competences": {
+    "athletisme": 26
+  },
+  "depouille": [
+    "peau",
+    "dent"
+  ]
+}

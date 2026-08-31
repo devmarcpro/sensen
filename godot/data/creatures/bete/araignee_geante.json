@@ -1,0 +1,21 @@
+{
+  "name_key": "creature.araignee_geante.name",
+  "race": "araignee_geante",
+  "skeleton_template": "arachnide",
+  "corps": {
+    "stats": {"force": 7, "dexterite": 14, "endurance": 5, "volonte": 3, "perception": 13, "charisme": 1},
+    "silhouette": "arachnide"
+  },
+  "esprit": null,
+  "ai_profile": "hostile",
+  "actions": ["morsure_venimeuse", "bond", "embuscade"],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {"bois": 0.6, "terre": 0.4},
+  "rare_chance": 0.02,
+  "teinte": [0.25, 0.22, 0.28],
+  "tags": ["bete", "embuscade"],
+  "competences": {"athletisme": 26},
+  "depouille": ["dent"]
+}
