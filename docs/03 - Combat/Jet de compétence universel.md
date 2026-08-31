@@ -27,6 +27,9 @@ vol/discrétion, désamorçage, etc. UNE grammaire pour tout le jeu.
 
 **Les jets de dés survivent hors combat ([[Combat tactique sur grille]]) :** le jet de compétence universel reste la résolution de la lecture, du dressage, de la négociation, de la discrétion, de la capture — alors même que le **jet de toucher** a disparu du combat.
 
+> [!success] Constaté codé le 2026-08-31 — la grammaire vit, la note n'avait pas de callout
+> Le jet universel est bien la résolution hors combat, vérifié site par site : **conquête** (`1d20 + Leadership/2 + Charisme/4`), **dressage** (`1d20 + Dressage/2 + Charisme/4`), **détection d'infraction** (jet opposé Perception/2 du témoin contre Discrétion du joueur — le +4 de nuit vient du cycle), **négociation** (`1d20 + Charisme/4` contre `commerce.parler_charisme_dd`), bras de fer du courant (`Force/2` opposé). La **capture d'élevage** emploie sa compétence à taux plein + palier — c'est le callout de sa propre note qui l'emporte, comme la règle du coffre le veut. Les degrés (succès supérieur à +10, échec grave à −10) restent à brancher là où une table d'effets aggravés existera.
+
 ## Liens
 - **Dépend de** : [[Pipeline de résolution du combat]], [[Progression par l'usage]], [[Stats de personnage]]
 - **Alimente** : [[Lecture des livres]], [[Apprivoisement et recrutement]], [[Conquête de village]], [[Lois et infractions]], [[IA des créatures]]
