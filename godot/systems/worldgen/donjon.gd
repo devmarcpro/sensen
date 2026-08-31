@@ -484,6 +484,8 @@ func _peupler(e: Dictionary, etage: int) -> void:
 			var pos := Vector2i(r.position.x + rng.randi_range(1, r.size.x - 2), r.position.y + rng.randi_range(1, r.size.y - 2))
 			if not e.sol.has(pos.y * e.largeur + pos.x) or poses.has(pos) or pos == e.boss or pos == e.escalier:
 				continue
+			if int(e.hauteurs[pos.y * e.largeur + pos.x]) != H_BASE:
+				continue   # jamais dans une fosse (prison sans chemin) ni sur une estrade — le décor se conquiert, il ne se naît pas
 			poses[pos] = true
 			e.spawns.append({"creature": c.id, "pos": pos})
 

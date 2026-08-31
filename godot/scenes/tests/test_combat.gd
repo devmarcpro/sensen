@@ -6545,6 +6545,17 @@ func test_donjon() -> void:
 		if e.sol.has(i_h) and int(e.hauteurs[i_h]) != 10:
 			reliefs += 1
 	verifier(reliefs > 0, "les salles ont des reliefs (estrades, fosses) : %d tuiles" % reliefs)
+	# Les spawns restent au sol plat (2026-08-31) : jamais dans une fosse (prison sans chemin) ni sur une estrade
+	var hors_sol := 0
+	var spawns_vus := 0
+	for g_s in [7, 42, 73, 300, 924]:
+		var e_s: Dictionary = gen.generer_etage(g_s, 1, 3, 12, false)
+		for sp in e_s.spawns:
+			spawns_vus += 1
+			var i_s: int = sp.pos.y * e_s.largeur + sp.pos.x
+			if int(e_s.hauteurs[i_s]) != 10:
+				hors_sol += 1
+	verifier(spawns_vus > 0 and hors_sol == 0, "spawns au sol plat sur 5 graines : %d / %d hors hauteur de base" % [hors_sol, spawns_vus])
 	verifier(e.get("portes", {}).size() > 0, "certaines salles ont leurs seuils fermés : %d portes" % e.get("portes", {}).size())
 	verifier(e.sol.size() > tc2 * tc2 / 10 and e.sol.size() < tc2 * tc2 * 3 / 4, "salles et couloirs, avec du plein à creuser (%d tuiles de sol)" % e.sol.size())
 	# Connexité : toutes les salles et les deux escaliers sont atteignables depuis l'arrivée
