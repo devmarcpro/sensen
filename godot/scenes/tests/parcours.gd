@@ -36,7 +36,13 @@ var captures := 0
 var derniere_capture_frame := -999
 var derniere_capture_30s := 0
 var cibles_ignorees := {}      # id → image d'expiration : un duel figé (cible inatteignable) se contourne
-var echecs_cible := 0   # une capture d'écran toutes les 30 s réelles dans <sortie>/toutes_les_30s/ (designer, 2026-08-31)
+var echecs_cible := 0
+var poursuite_cible := ""      # la cible poursuivie et la distance au tour d'avant :
+var poursuite_d := 999         # si la distance ne baisse jamais (kiting mutuel), la poursuite est stérile
+var poursuite_sterile := 0
+var progres_marqueur := []     # garde-fou d'étage : si AUCUN compteur ne bouge longtemps, on purge les cibles puis on rend le rapport
+var progres_frame := 0
+var purge_faite := false   # une capture d'écran toutes les 30 s réelles dans <sortie>/toutes_les_30s/ (designer, 2026-08-31)
 var en_combat_avant := false
 var sante_avant := -1
 var journal_vu := 0
@@ -203,6 +209,20 @@ func _process(_delta: float) -> void:
 		return
 	if not sim.attente.has(jid):
 		return
+	var marqueur := [etages_atteints, kills, coups_portes, ramassages, portes_ouvertes, morts]
+	if marqueur != progres_marqueur:
+		progres_marqueur = marqueur
+		progres_frame = frames
+		purge_faite = false
+	elif frames - progres_frame > 9000:
+		_fin("étage %d sans progrès (aucun compteur ne bouge depuis %d images)" % [int(sim.donjon.etage), frames - progres_frame])
+		return
+	elif frames - progres_frame > 4000 and not purge_faite:
+		purge_faite = true
+		for x in sim.vivants():   # rien ne bouge depuis longtemps : on purge les cibles en vue et on file à l'escalier
+			if x.id != jid and sim.ennemis(sim.entites[jid], x):
+				cibles_ignorees[x.id] = frames + 4000
+		_note("étage %d enlisé (%d images sans progrès) : cibles purgées, cap sur l'escalier" % [int(sim.donjon.etage), frames - progres_frame])
 	# Le robot décide : frapper ce qui est en vue, ramasser, descendre, sinon marcher vers l'escalier.
 	var cible := _hostile_en_vue(j)
 	if not cible.is_empty():
@@ -217,9 +237,23 @@ func _process(_delta: float) -> void:
 		var fonct_b: Dictionary = sim.fonctionnalites.get(arme_b.get("functionality", ""), {})
 		var pa: Vector2i = sim.regles.portee_de(fonct_b) if not fonct_b.is_empty() else Vector2i(1, 1)
 		var d_c := Grille.distance(j.pos, cible.pos)
+		if str(cible.id) == poursuite_cible and d_c >= poursuite_d:
+			poursuite_sterile += 1
+			if poursuite_sterile > 60:   # le Rôdeur kite à notre vitesse : la distance ne baisse jamais, on le laisse filer
+				cibles_ignorees[cible.id] = frames + 3000
+				_note("poursuite stérile abandonnée : %s (d=%d depuis 60 tours)" % [str(cible.id), d_c])
+				poursuite_sterile = 0
+				poursuite_cible = ""
+				return
+		elif str(cible.id) != poursuite_cible:
+			poursuite_sterile = 0
+			poursuite_d = 999   # nouvelle cible : la mesure repart
+		poursuite_cible = str(cible.id)
+		poursuite_d = mini(poursuite_d, d_c)
 		if d_c >= pa.x and d_c <= pa.y:
 			if sim.intention(jid, {"type": "attaquer", "cible": cible.id, "lourde": false}):
 				echecs_cible = 0
+				poursuite_sterile = 0
 				return
 			var ch_r: Array = sim.grille.chemin(j.pos, cible.pos, false, cible.id, sim.refuse_nage(j))
 			if ch_r.size() >= 1 and sim.intention(jid, {"type": "deplacer", "vers": ch_r[0]}):
@@ -243,7 +277,7 @@ func _process(_delta: float) -> void:
 					return
 		echecs_cible += 1
 		if echecs_cible > 20:   # rien ne marche contre cette cible (relief, falaise, chemin vide) : on l'abandonne et on reprend la route
-			cibles_ignorees[cible.id] = frames + 900
+			cibles_ignorees[cible.id] = frames + 3000
 			_note("cible abandonnée : %s (d=%d, portée %s, ldv=%s)" % [str(cible.id), d_c, str(pa), str(sim.grille.ligne_de_vue(j.pos, cible.pos))])
 			echecs_cible = 0
 			return
