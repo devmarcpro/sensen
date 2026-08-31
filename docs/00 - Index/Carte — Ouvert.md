@@ -6,7 +6,7 @@ statut: décidé
 etape: 0
 ---
 
-**Il ne reste aucune question bloquante.** Tout ce qui était ouvert a reçu soit une décision, soit un **défaut chiffré implémentable** — le code n'a rien à inventer. Cette carte liste ce qui reste révisable, et à quel titre. 41 notes.
+**Il ne reste aucune question bloquante.** Tout ce qui était ouvert a reçu soit une décision, soit un **défaut chiffré implémentable** — le code n'a rien à inventer. Cette carte liste ce qui reste révisable, et à quel titre. 42 notes.
 
 ## Décisions prises (le code s'appuie dessus)
 
@@ -34,6 +34,10 @@ Chacun porte une valeur chiffrée que le code applique telle quelle ; les révis
 - [[Ouvert — Taille des salles de donjon]] — 24 prefabs, PNG à deux couches
 - [[Ouvert — Saisons]] — non incluses ; la question ne peut se trancher qu'après la boucle agricole (étape 10)
 - [[Ouvert — Interprétation dureté et qualité]] — **clos** (ambiguïté levée dans [[Qualité d'artisanat]])
+
+## Extension culturelle — ouvert, non bloquant
+
+- [[Ouvert — Feng shui, orientation du bâti et axe Yin-Yang]] — le Wu Xing mord sur six domaines et pas sur le bâti. Feng shui (décision spatiale) et Yin-Yang comme axe orthogonal (décision temporelle) ; bagua, qi et cultivation écartés. Aucune donnée nouvelle requise.
 
 ## Feature future — contrainte d'architecture immédiate
 

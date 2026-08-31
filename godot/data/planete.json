@@ -3,8 +3,8 @@
   "taille_cellule": 64,
   "monde_cellules": 1024,
   "cellule_depart": [
-    512,
-    256
+    513,
+    257
   ],
   "graine": 68333,
   "relief": {

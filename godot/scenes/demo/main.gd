@@ -132,13 +132,46 @@ class Hud extends Node2D:
 		proprio._dessiner_hud(self)
 
 
+## Le grain procédural du décor (designer 2026-09-01, point 50) : un ShaderMaterial posé sur les
+## calques du monde. Les chiffres viennent des données (styles.grain) — rien en dur, aucun asset.
+func _materiau_grain() -> ShaderMaterial:
+	var cfg: Dictionary = GameData.config("styles").get("grain", {})
+	if not bool(cfg.get("actif", true)):
+		return null
+	var sh: Shader = load("res://shaders/grain.gdshader")
+	if sh == null:
+		return null
+	var mat := ShaderMaterial.new()
+	mat.shader = sh
+	for cle in ["grains_par_tuile", "force_grain", "force_douce", "echelle_douce"]:
+		if cfg.has(cle):
+			mat.set_shader_parameter(cle, float(cfg[cle]))
+	return mat
+
+
+## Le style de texture d'un matériau (designer 2026-09-01, point 58) : sa famille décide du motif
+## (roche veinée, terre grumeleuse, bois fibré…), un matériau nommé peut le surcharger. Le style est
+## encodé dans la partie haute de UV.x — la 2D n'offre pas d'autre canal par sommet.
+func _style_grain(materiau: String) -> float:
+	var cfg: Dictionary = GameData.config("styles").get("grain", {})
+	if materiau.is_empty():
+		return 0.0
+	var nom := str(cfg.get("styles_par_materiau", {}).get(materiau, ""))
+	if nom.is_empty():
+		var m: Dictionary = GameData.catalogues.materials.get(materiau, {})
+		nom = str(cfg.get("styles_par_categorie", {}).get(str(m.get("category", m.get("categorie", ""))), "uni"))
+	return float(int(cfg.get("styles", {}).get(nom, 0))) * float(cfg.get("pas_style", 512.0))
+
+
 func _ready() -> void:
 	terrain = Terrain.new()
 	terrain.proprio = self
+	terrain.material = _materiau_grain()   # le décor prend son grain (point 50)
 	terrain.z_index = -10   # couches du monde SOUS les êtres et les végétaux (z 1..4000) : brouillard, voile, halos (2026-08-30)
 	add_child(terrain)
 	brouillard = Brouillard.new()
 	brouillard.proprio = self
+	brouillard.material = _materiau_grain()   # les murs mémorisés sont dessinés ici : ils prennent le grain aussi (point 58)
 	brouillard.z_as_relative = false
 	brouillard.z_index = -2
 	add_child(brouillard)
@@ -1448,10 +1481,15 @@ func _draw() -> void:
 
 ## Un polygone convexe dessiné en éventail de triangles par draw_primitive : draw_colored_polygon triangule en float32
 ## et juge dégénérés les polygones aux coordonnées monde (~1e6 px) — « Invalid polygon data » (brouillard, sol, blocs).
-static func _poly(ci: CanvasItem, pts: PackedVector2Array, col: Color) -> void:
+static func _poly(ci: CanvasItem, pts: PackedVector2Array, col: Color, uvs: PackedVector2Array = PackedVector2Array()) -> void:
+	# Les UV portent la position DANS LE PLAN de la face (designer 2026-09-01, point 50) : le grain du
+	# shader suit alors l'inclinaison du sol et des parois au lieu d'être plaqué à plat sur l'écran.
 	var cols := PackedColorArray([col, col, col])
+	var avec_uv := uvs.size() == pts.size()
 	for i in range(1, pts.size() - 1):
-		ci.draw_primitive(PackedVector2Array([pts[0], pts[i], pts[i + 1]]), cols, PackedVector2Array())
+		var tri := PackedVector2Array([pts[0], pts[i], pts[i + 1]])
+		var uv := PackedVector2Array([uvs[0], uvs[i], uvs[i + 1]]) if avec_uv else PackedVector2Array()
+		ci.draw_primitive(tri, cols, uv)
 
 
 ## De vraies marches (designer 2026-08-31, point 36) : quatre degrés qui rétrécissent vers le fond,
@@ -1588,20 +1626,26 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 		if not ms.is_empty():
 			col = Color.html(str(ms.color)).lerp(Color(0.35, 0.5, 0.25), 0.35 if sol_id.begins_with("terre") else 0.0).darkened(0.25 - k * 0.3)
 	col *= teinte
-	_poly(ci, haut, col)
+	var st_sol := _style_grain(sol_id)   # le motif de la matière (point 58)
+	var uv_sol := PackedVector2Array([   # le grain suit le plan du sol : les UV sont les coins de la tuile
+		Vector2(st_sol + t.x, t.y), Vector2(st_sol + t.x + 1, t.y),
+		Vector2(st_sol + t.x + 1, t.y + 1), Vector2(st_sol + t.x, t.y + 1)])
+	_poly(ci, haut, col, uv_sol)
 	var flanc := col.darkened(0.35)
 	var hs := g.h(t + Vector2i(0, 1)) if g.dans(t + Vector2i(0, 1)) else 0
 	if hs < h:
 		var d := (h - hs) * HSTEP
 		_poly(ci, PackedVector2Array([
 			c + Vector2(-TW * 0.5, 0), c + Vector2(0, TH * 0.5),
-			c + Vector2(0, TH * 0.5 + d), c + Vector2(-TW * 0.5, d)]), flanc)
+			c + Vector2(0, TH * 0.5 + d), c + Vector2(-TW * 0.5, d)]), flanc,
+			PackedVector2Array([Vector2(st_sol + t.x, -h), Vector2(st_sol + t.x + 1, -h), Vector2(st_sol + t.x + 1, -hs), Vector2(st_sol + t.x, -hs)]))
 	var he := g.h(t + Vector2i(1, 0)) if g.dans(t + Vector2i(1, 0)) else 0
 	if he < h:
 		var d2 := (h - he) * HSTEP
 		_poly(ci, PackedVector2Array([
 			c + Vector2(0, TH * 0.5), c + Vector2(TW * 0.5, 0),
-			c + Vector2(TW * 0.5, d2), c + Vector2(0, TH * 0.5 + d2)]), flanc.darkened(0.15))
+			c + Vector2(TW * 0.5, d2), c + Vector2(0, TH * 0.5 + d2)]), flanc.darkened(0.15),
+			PackedVector2Array([Vector2(st_sol + t.y, -h), Vector2(st_sol + t.y + 1, -h), Vector2(st_sol + t.y + 1, -he), Vector2(st_sol + t.y, -he)]))
 	var contenu := g.contenu_de(t)
 	if not contenu.is_empty() and not g.bloque_passage(t) and (contenu.has("couleur") or "meuble" in contenu.get("tags", [])):
 		# contenu franchissable (porte, entrée du donjon, tapis) : un losange plat coloré
@@ -1673,21 +1717,28 @@ func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: C
 	elif not mat.is_empty():   # la couleur de la palette du matériau (filon ou mur du thème)
 		haut_bloc = haut_bloc.lerp(Color.html(mat.color), 0.55 if g.materiaux.has(g.idx(t)) else 0.35)
 	haut_bloc *= teinte
+	var mat_bloc := g.materiau_de(t)   # murs et blocs texturés comme le sol (point 58)
+	if mat_bloc.is_empty():
+		mat_bloc = str(GameData.config("styles").get("grain", {}).get("materiau_mur_defaut", "granit"))   # un mur nu reste de la roche
+	var st_bloc := _style_grain(mat_bloc)
 	var tw := TW * 0.5 * emprise
 	var th := TH * 0.5 * emprise
 	var sud := t + Vector2i(0, 1)
 	if not g.dans(sud) or not g.bloque_passage(sud) or not g.decouvert.has(g.idx(sud)):
 		_poly(ci, PackedVector2Array([   # face sud-ouest (gauche)
 			c + Vector2(-tw, 0), c + Vector2(0, th),
-			c + Vector2(0, th - hm), c + Vector2(-tw, -hm)]), haut_bloc.darkened(0.35))
+			c + Vector2(0, th - hm), c + Vector2(-tw, -hm)]), haut_bloc.darkened(0.35),
+			PackedVector2Array([Vector2(st_bloc + t.x, 0), Vector2(st_bloc + t.x + 1, 0), Vector2(st_bloc + t.x + 1, -3), Vector2(st_bloc + t.x, -3)]))
 	var est := t + Vector2i(1, 0)
 	if not g.dans(est) or not g.bloque_passage(est) or not g.decouvert.has(g.idx(est)):
 		_poly(ci, PackedVector2Array([   # face sud-est (droite)
 			c + Vector2(0, th), c + Vector2(tw, 0),
-			c + Vector2(tw, -hm), c + Vector2(0, th - hm)]), haut_bloc.darkened(0.5))
+			c + Vector2(tw, -hm), c + Vector2(0, th - hm)]), haut_bloc.darkened(0.5),
+			PackedVector2Array([Vector2(st_bloc + t.y, 0), Vector2(st_bloc + t.y + 1, 0), Vector2(st_bloc + t.y + 1, -3), Vector2(st_bloc + t.y, -3)]))
 	_poly(ci, PackedVector2Array([   # dessus
 		c + Vector2(-tw, -hm), c + Vector2(0, -th - hm),
-		c + Vector2(tw, -hm), c + Vector2(0, th - hm)]), haut_bloc)
+		c + Vector2(tw, -hm), c + Vector2(0, th - hm)]), haut_bloc,
+		PackedVector2Array([Vector2(st_bloc + t.x, t.y + 1), Vector2(st_bloc + t.x, t.y), Vector2(st_bloc + t.x + 1, t.y), Vector2(st_bloc + t.x + 1, t.y + 1)]))
 
 
 ## La couche d'interface : barres, garde, télégraphe et jauge de chaîne de chaque être.

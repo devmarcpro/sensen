@@ -127,6 +127,9 @@ Le bateau passe de **bonus de vitesse** à **porte**.
 >
 > Et il se règle : **graine**, **taille du monde**, **nombre de plaques**, **part de plaques continentales**, **part de terres émergées** (le niveau des mers) et **points chauds** — les six chiffres qui décident de la forme des continents, chacun sur une ligne qui change à ← → et redessine l'aperçu. Les valeurs choisies **surchargent la config `planete`** pour toute la partie et sont **sauvegardées avec elle** : recharger une partie retrouve exactement le même monde. Aucune valeur en dur : les bornes de chaque réglage vivent dans `planete.json → generation_options`.
 
+> [!info] Ajusté le 2026-09-01 — le camp de départ retrouve une forêt tempérée
+> Le passage au monde rectangulaire (point 49) a déplacé la cellule de départ : elle tombait dans un **désert de cendres**, biome extrême où même une carpe ne se reproduit pas. `cellule_depart` pointe désormais la première **forêt tempérée** au centre du monde (513, 257). Le début de partie doit être hospitalier : c'est un choix de contenu, pas un réglage technique.
+
 ## Liens
 - **Dépend de** : [[Grille continue]], [[Unification macro-micro]], [[Génération par couches de bruit]]
 - **Alimente** : [[Carte du monde]], [[Génération des royaumes PNJ]], [[Véhicules]], [[Ouvert — Dark Continent]], [[Royaume du joueur]], [[Risques majeurs]]

@@ -66,5 +66,45 @@
         0.5
       ]
     }
+  },
+  "grain": {
+    "_doc": "Textures procédurales du décor (designer 2026-09-01, points 50 et 58) : calculées par shader, jamais une image. Les UV portent le plan de la face (le grain suit le relief) et leur partie haute encode le style de la matière. styles_par_categorie : la famille de matériau → le motif du shader.",
+    "actif": true,
+    "grains_par_tuile": 8.0,
+    "force_grain": 0.12,
+    "force_douce": 0.07,
+    "echelle_douce": 0.35,
+    "pas_style": 512.0,
+    "styles": {
+      "uni": 0,
+      "roche": 1,
+      "terre": 2,
+      "vegetal": 3,
+      "bois": 4,
+      "metal": 5,
+      "gemme": 6,
+      "liquide": 7,
+      "sable": 8
+    },
+    "styles_par_categorie": {
+      "roche": "roche",
+      "mineral": "roche",
+      "fossile": "roche",
+      "terre": "terre",
+      "vegetal": "vegetal",
+      "bois": "bois",
+      "metal": "metal",
+      "gemme": "gemme",
+      "liquide": "liquide",
+      "synthetique": "uni",
+      "meteorologique": "uni"
+    },
+    "styles_par_materiau": {
+      "sable": "sable",
+      "gres": "sable",
+      "eau": "liquide",
+      "herbe": "vegetal"
+    },
+    "materiau_mur_defaut": "granit"
   }
 }

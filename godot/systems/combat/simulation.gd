@@ -9953,7 +9953,7 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 			meilleur_score = score
 			meilleure = nom
 	# Aggro (designer 2026-08-31, point 48) : une bête qui a une cible hostile en vue ne flâne pas.
-	if not cible.is_empty() and cible.vivant and ennemis(e, cible) and meilleure in ["errer", "routine", "attendre", ""]:
+	if e.camp == "hostile" and not cible.is_empty() and cible.vivant and ennemis(e, cible) and meilleure in ["errer", "routine", "attendre", ""]:
 		meilleure = "poursuivre"
 	match meilleure:
 		"attaquer":

@@ -6,151 +6,167 @@ extends Node
 var echecs := 0
 
 
+## Un filtre pour n'exécuter qu'une partie de la suite (2026-09-01) : la suite entière dure ~7 min,
+## ce qui rend impossible d'itérer sur un seul test. `--seul <fragment>` ne lance que les tests dont
+## le nom contient le fragment ; sans argument, tout tourne comme avant.
+var _filtre := ""
+
+
+func _lancer(nom: String) -> void:
+	if not _filtre.is_empty() and not nom.contains(_filtre):
+		return
+	call(nom)
+
+
 func _ready() -> void:
 	# GameData a déjà chargé (autoload) : aucune erreur de schéma tolérée.
 	Simulation.slot_autosave = "test_auto"   # l'autosave du retour d'expédition ne doit jamais écraser « monde » pendant la suite
+	var args := OS.get_cmdline_user_args()
+	for i in args.size():
+		if args[i] == "--seul" and i + 1 < args.size():
+			_filtre = str(args[i + 1])
 	verifier(GameData.erreurs.is_empty(), "données valides (Décision — Pipeline de contenu)")
-	test_grille()
-	test_des()
-	test_regles()
-	test_simulation()
-	test_garde_et_lourde()
-	test_horloges()
-	test_wuxing()
-	test_ratelier()
-	test_capacites()
-	test_projectiles()
-	test_statuts()
-	test_liaisons()
-	test_glyphes_terrain()
-	test_evenements()
-	test_niveaux()
-	test_paperdoll_et_tutoriels()
-	test_materiaux()
-	test_recolte()
-	test_fabrication()
-	test_assemblage()
-	test_desequiper_jeter()
-	test_surface()
-	test_sauvegarde()
-	test_carte_et_voyage()
-	test_corruption()
-	test_cycle_et_meteo()
-	test_village()
-	test_village_vivant()
-	test_reputation_et_quetes()
-	test_rang_de_guilde()
-	test_compagnons()
-	test_territoire()
-	test_agriculture_et_boutique()
-	test_defense_et_raids()
-	test_royaumes_pnj()
-	test_conquete_et_succession()
-	test_alchimie()
-	test_villes_et_halls()
-	test_saisons_et_elevage()
-	test_elevage_familles()
-	test_loci_et_soie()
-	test_harmonie()
-	test_registre_elevage()
-	test_familles()
-	test_entraineur_et_commandes()
-	test_gabarits_guildes()
-	test_pretre_et_tourelle()
-	test_regle_anneau_mesure()
-	test_chatoyant()
-	test_routes()
-	test_habitat_pnj()
-	test_artefacts()
-	test_talents()
-	test_reforge_et_fiole()
-	test_communion()
-	test_lumiere()
-	test_palier_industriel()
-	test_betail()
-	test_ombre_et_rieur()
-	test_ecarlate_et_porteur()
-	test_passeur_et_sablier()
-	test_masque_et_sceau()
-	test_fossoyeur_et_engrenage()
-	test_propagation_lumiere()
-	test_aciers_allies()
-	test_vampire()
-	test_spectre()
-	test_lycanthrope()
-	test_incarnation()
-	test_terrasser()
-	test_empoigne()
-	test_armes_fantomes()
-	test_cataclysme()
-	test_vecteur_lieu()
-	test_effets_equipement()
-	test_palette_etage()
-	test_arme_mixte()
-	test_niveaux_recette()
-	test_plantes()
-	test_bestiaire()
-	test_statuts_complets()
-	test_potions_completes()
-	test_poison_illegal()
-	test_nage()
-	test_neige_et_gel()
-	test_automate_eau()
-	test_foudre()
-	test_retrait_eau()
-	test_compagnons_postures()
-	test_cueillette()
-	test_affixes_reveilles()
-	test_feu()
-	test_lave()
-	test_courant()
-	test_ia_portails()
-	test_paliers_elevage()
-	test_especes_ajoutees()
-	test_tannage()
-	test_huile_d_arme()
-	test_liens_donnees()
-	test_discretion()
-	test_embuscade()
-	test_triche()
-	test_statue()
-	test_routes_entre_royaumes()
-	test_tooltips()
-	test_registre_loci()
-	test_meubles_rituels()
-	test_suiveur_territorial()
-	test_transmutation()
-	test_arrachage()
-	test_glyphes_visibles()
-	test_derobade()
-	test_alternance()
-	test_meute_liaison()
-	test_etats_tuiles_par_grille()
-	test_index_monde()
-	test_sauvegarde_terrain()
-	test_uniques_artefacts()
-	test_bombes()
-	test_composer_capacites()
-	test_charges_de_modules()
-	test_assemblage_sans_limite()
-	test_creation_de_sorts()
-	test_zones_au_sol()
-	test_conditions_et_modificateurs()
-	test_camp()
-	test_faim_et_poids()
-	test_donjon()
-	test_donjon_temps_a_l_action()
-	test_types_ennemis()
-	test_loot_assemble()
-	test_budgets()
-	test_sauvegarde_partout()
-	test_boss_et_artefact()
-	test_loot()
-	test_coffres_et_rares()
-	test_gemmes_et_livres()
-	test_progression()
-	test_expedition()
-	test_arenes_autonomes()
+	_lancer("test_grille")
+	_lancer("test_des")
+	_lancer("test_regles")
+	_lancer("test_simulation")
+	_lancer("test_garde_et_lourde")
+	_lancer("test_horloges")
+	_lancer("test_wuxing")
+	_lancer("test_ratelier")
+	_lancer("test_capacites")
+	_lancer("test_projectiles")
+	_lancer("test_statuts")
+	_lancer("test_liaisons")
+	_lancer("test_glyphes_terrain")
+	_lancer("test_evenements")
+	_lancer("test_niveaux")
+	_lancer("test_paperdoll_et_tutoriels")
+	_lancer("test_materiaux")
+	_lancer("test_recolte")
+	_lancer("test_fabrication")
+	_lancer("test_assemblage")
+	_lancer("test_desequiper_jeter")
+	_lancer("test_surface")
+	_lancer("test_sauvegarde")
+	_lancer("test_carte_et_voyage")
+	_lancer("test_corruption")
+	_lancer("test_cycle_et_meteo")
+	_lancer("test_village")
+	_lancer("test_village_vivant")
+	_lancer("test_reputation_et_quetes")
+	_lancer("test_rang_de_guilde")
+	_lancer("test_compagnons")
+	_lancer("test_territoire")
+	_lancer("test_agriculture_et_boutique")
+	_lancer("test_defense_et_raids")
+	_lancer("test_royaumes_pnj")
+	_lancer("test_conquete_et_succession")
+	_lancer("test_alchimie")
+	_lancer("test_villes_et_halls")
+	_lancer("test_saisons_et_elevage")
+	_lancer("test_elevage_familles")
+	_lancer("test_loci_et_soie")
+	_lancer("test_harmonie")
+	_lancer("test_registre_elevage")
+	_lancer("test_familles")
+	_lancer("test_entraineur_et_commandes")
+	_lancer("test_gabarits_guildes")
+	_lancer("test_pretre_et_tourelle")
+	_lancer("test_regle_anneau_mesure")
+	_lancer("test_chatoyant")
+	_lancer("test_routes")
+	_lancer("test_habitat_pnj")
+	_lancer("test_artefacts")
+	_lancer("test_talents")
+	_lancer("test_reforge_et_fiole")
+	_lancer("test_communion")
+	_lancer("test_lumiere")
+	_lancer("test_palier_industriel")
+	_lancer("test_betail")
+	_lancer("test_ombre_et_rieur")
+	_lancer("test_ecarlate_et_porteur")
+	_lancer("test_passeur_et_sablier")
+	_lancer("test_masque_et_sceau")
+	_lancer("test_fossoyeur_et_engrenage")
+	_lancer("test_propagation_lumiere")
+	_lancer("test_aciers_allies")
+	_lancer("test_vampire")
+	_lancer("test_spectre")
+	_lancer("test_lycanthrope")
+	_lancer("test_incarnation")
+	_lancer("test_terrasser")
+	_lancer("test_empoigne")
+	_lancer("test_armes_fantomes")
+	_lancer("test_cataclysme")
+	_lancer("test_vecteur_lieu")
+	_lancer("test_effets_equipement")
+	_lancer("test_palette_etage")
+	_lancer("test_arme_mixte")
+	_lancer("test_niveaux_recette")
+	_lancer("test_plantes")
+	_lancer("test_bestiaire")
+	_lancer("test_statuts_complets")
+	_lancer("test_potions_completes")
+	_lancer("test_poison_illegal")
+	_lancer("test_nage")
+	_lancer("test_neige_et_gel")
+	_lancer("test_automate_eau")
+	_lancer("test_foudre")
+	_lancer("test_retrait_eau")
+	_lancer("test_compagnons_postures")
+	_lancer("test_cueillette")
+	_lancer("test_affixes_reveilles")
+	_lancer("test_feu")
+	_lancer("test_lave")
+	_lancer("test_courant")
+	_lancer("test_ia_portails")
+	_lancer("test_paliers_elevage")
+	_lancer("test_especes_ajoutees")
+	_lancer("test_tannage")
+	_lancer("test_huile_d_arme")
+	_lancer("test_liens_donnees")
+	_lancer("test_discretion")
+	_lancer("test_embuscade")
+	_lancer("test_triche")
+	_lancer("test_statue")
+	_lancer("test_routes_entre_royaumes")
+	_lancer("test_tooltips")
+	_lancer("test_registre_loci")
+	_lancer("test_meubles_rituels")
+	_lancer("test_suiveur_territorial")
+	_lancer("test_transmutation")
+	_lancer("test_arrachage")
+	_lancer("test_glyphes_visibles")
+	_lancer("test_derobade")
+	_lancer("test_alternance")
+	_lancer("test_meute_liaison")
+	_lancer("test_etats_tuiles_par_grille")
+	_lancer("test_index_monde")
+	_lancer("test_sauvegarde_terrain")
+	_lancer("test_uniques_artefacts")
+	_lancer("test_bombes")
+	_lancer("test_composer_capacites")
+	_lancer("test_charges_de_modules")
+	_lancer("test_assemblage_sans_limite")
+	_lancer("test_creation_de_sorts")
+	_lancer("test_zones_au_sol")
+	_lancer("test_conditions_et_modificateurs")
+	_lancer("test_camp")
+	_lancer("test_faim_et_poids")
+	_lancer("test_donjon")
+	_lancer("test_donjon_temps_a_l_action")
+	_lancer("test_types_ennemis")
+	_lancer("test_loot_assemble")
+	_lancer("test_budgets")
+	_lancer("test_sauvegarde_partout")
+	_lancer("test_boss_et_artefact")
+	_lancer("test_loot")
+	_lancer("test_coffres_et_rares")
+	_lancer("test_gemmes_et_livres")
+	_lancer("test_progression")
+	_lancer("test_expedition")
+	_lancer("test_arenes_autonomes")
 	Monde.fermer_tous()   # aucun thread de pré-génération ne doit survivre aux autoloads
 	for nom_s in ["test_terrain", "test_sensen", "test_sensen2", "test_graine", "test_partout", "test_partout2", "test_auto"]:
 		Sauvegarde.effacer(nom_s)   # la suite nettoie derrière elle : l'écran Charger ne liste que de vraies parties
@@ -1523,6 +1539,17 @@ func test_corruption() -> void:
 
 # ---------------------------------------------------------------- Étape 9.A : hameau, PNJ nommés, dialogue, commerce
 
+## Un monde de test stable (2026-09-01) : carré et centré, quelle que soit la forme du monde livré.
+## Les tests de contenu vérifient des règles — villages, cultures, élevage — pas la géographie du jour.
+static func _planete_test() -> Dictionary:
+	var p := GameData.config("planete").duplicate(true)
+	p["monde_ratio"] = 1.0            # carré, comme avant le point 49
+	p["cellule_depart"] = [512, 512]  # et centré sur la cellule historique du camp
+	p["tectonique"] = (p["tectonique"] as Dictionary).duplicate(true)
+	p["tectonique"]["ocean_bord"] = 0.0   # sans la ceinture d'océan : la géographie du centre ne bouge plus
+	return p
+
+
 func test_village() -> void:
 	var planete: Dictionary = GameData.config("planete")
 	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
@@ -1542,6 +1569,7 @@ func test_village() -> void:
 	# La simulation construit sa Surface avec la graine de `planete` : on cherche le hameau dans CE
 	# monde-là, pas dans celui de la surface de test (les deux graines diffèrent).
 	var s_v := Simulation.new(4242)
+	s_v.planete_options = _planete_test()
 	s_v.charger_camp()
 	var surf_v: Surface = s_v.monde.surface   # le monde de la simulation, pas un monde de test
 	var camp_v: Vector2i = s_v.monde.cellule_camp
@@ -1572,6 +1600,7 @@ func test_village() -> void:
 	# On VISITE le hameau, on n'y plante pas son camp : poser le camp sur la cellule la ferait générer
 	# avec la configuration du camp, qui remplace le village. Le chemin du jeu, c'est le voyage.
 	var s := Simulation.new(4242)
+	s.planete_options = _planete_test()
 	s.charger_camp()
 	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
 	# On ne voyage que vers une cellule connue : on marque le hameau exploré, comme l'aurait fait
@@ -1690,6 +1719,7 @@ func test_territoire() -> void:
 
 func test_agriculture_et_boutique() -> void:
 	var s := Simulation.new(73)
+	s.planete_options = _planete_test()   # un camp tempéré et stable : le blé pousse, l'étal se pose
 	s.charger_camp()
 	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
 	var camp: Vector2i = s.monde.cellule_camp
@@ -1718,6 +1748,11 @@ func test_agriculture_et_boutique() -> void:
 			var n := mini(reste, 4000)
 			s.horloge_monde.avancer(n)
 			reste -= n
+		# La faim tue depuis le point 52 : quelques jours de pousse affameraient le fermier. Il mange.
+		j.faim = 100
+		j.faim_tick = s.horloge_monde.ticks
+		j.sante = j.sante_max
+		j.vivant = true
 		verifier(bool(s.territoire.cultures[pm].mure) and "mure" in s.grille.contenu_de(loc).get("tags", []), "à l'échéance la parcelle est mûre")
 		s.attente[j.id] = true
 		j.pos = loc + Vector2i(-1, 0)
@@ -2132,32 +2167,34 @@ func test_saisons_et_elevage() -> void:
 			specimens.append(s.items[uid])
 	verifier(specimens.size() == 1 and specimens[0].genome.has("couleur"), "un spécimen d'eau capturé (%s), avec son génome" % str(specimens[0].espece if not specimens.is_empty() else "-"))
 	# Un couple dans un vivarium : la couvée hebdomadaire hérite locus par locus.
-	var a := s._nouveau_specimen("carpe", {"couleur": 3, "motif": 2, "taille": 2.0}, "m")
-	var b := s._nouveau_specimen("carpe", {"couleur": 5, "motif": 6, "taille": 4.0}, "f")
-	var viv: Vector2i = j.pos + Vector2i(0, 1)
-	for d in [Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)]:
-		var c: Vector2i = j.pos + d
-		if s.grille.dans(c) and s.grille.occupant(c).is_empty():
-			viv = c
-			break
-	s.grille.contenu[s.grille.idx(viv)] = 0
-	s.grille.poser_contenu(viv, "meuble")
-	s.grille.meubles[s.grille.idx(viv)] = "vivarium"
-	s.contenants[s.grille.idx(viv)] = [a.uid, b.uid]
-	var meme_sexe := s.conditions_repro(a, s._nouveau_specimen("carpe", {"couleur": 0, "motif": 0, "taille": 1.0}, "m"), {"habitat": "vivarium", "libre": 2, "temp": 18.0, "saison": "ete"})
+	# Sur SA propre simulation (2026-09-01) : le camp de ce test a reçu un hall de guilde, des PNJ et
+	# des meubles, et l'élevage ne doit pas dépendre de ce décor — seulement de ses règles.
+	var s_vv := Simulation.new(87)
+	s_vv.planete_options = _planete_test()
+	s_vv.charger_camp()
+	var j_vv: Dictionary = s_vv.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	s_vv.horloge_monde.ticks = 35 * jour + jour / 2   # un midi d'été : la couvée dépend de la température réelle
+	s_vv.meteo_force = "canicule"
+	var a := s_vv._nouveau_specimen("carpe", {"couleur": 3, "motif": 2, "taille": 2.0}, "m")
+	var b := s_vv._nouveau_specimen("carpe", {"couleur": 5, "motif": 6, "taille": 4.0}, "f")
+	var viv: Vector2i = j_vv.pos + Vector2i(0, 1)
+	s_vv.grille.contenu[s_vv.grille.idx(viv)] = 0
+	s_vv.grille.poser_contenu(viv, "meuble")
+	s_vv.grille.meubles[s_vv.grille.idx(viv)] = "vivarium"
+	s_vv.contenants[s_vv.grille.idx(viv)] = [a.uid, b.uid]
+	var meme_sexe := s_vv.conditions_repro(a, s_vv._nouveau_specimen("carpe", {"couleur": 0, "motif": 0, "taille": 1.0}, "m"), {"habitat": "vivarium", "libre": 2, "temp": 18.0, "saison": "ete"})
 	verifier(not meme_sexe.ok and str(meme_sexe.raisons[0].cle) == "raison.sexe", "deux mâles : l'évaluateur dit pourquoi")
-	s.horloge_monde.ticks = 35 * jour + jour / 2   # un midi d'été : la couvée dépend de la température réelle du lieu
-	s.meteo_force = "canicule"
-	s._semaine_elevage()
-	s.meteo_force = ""
-	var enfants: Array = s.contenants[s.grille.idx(viv)].filter(func(u: String) -> bool: return u != a.uid and u != b.uid)
+	s_vv._semaine_elevage()
+	s_vv.meteo_force = ""
+	var enfants: Array = s_vv.contenants[s_vv.grille.idx(viv)].filter(func(u: String) -> bool: return u != a.uid and u != b.uid)
 	verifier(enfants.size() >= 1, "une couvée dans le vivarium (%d)" % enfants.size())
 	if not enfants.is_empty():
-		var g: Dictionary = s.items[enfants[0]].genome
+		var g: Dictionary = s_vv.items[enfants[0]].genome
 		var c_ok: bool = int(g.couleur) in [2, 3, 4, 5, 6]
 		var m_ok: bool = int(g.motif) in [1, 2, 3, 5, 6, 7]
 		verifier(c_ok and m_ok and float(g.taille) > 2.0 and float(g.taille) < 4.5, "l'enfant : couleur %d, motif %d, taille %.2f — un parent ou une voisine, moyenne dérivée" % [int(g.couleur), int(g.motif), float(g.taille)])
-	verifier(int(s.territoire.registre.carpe.size()) >= 3, "le registre compte les variétés (%d)" % int(s.territoire.registre.carpe.size()))
+	verifier(int(s_vv.territoire.registre.carpe.size()) >= 3, "le registre compte les variétés (%d)" % int(s_vv.territoire.registre.carpe.size()))
+	s_vv.monde.fermer()
 	s.monde.fermer()
 
 
@@ -2165,6 +2202,7 @@ func test_saisons_et_elevage() -> void:
 
 func test_elevage_familles() -> void:
 	var s := Simulation.new(87)
+	s.planete_options = _planete_test()   # un lieu tempéré et stable : l'élevage dépend de la température
 	s.charger_camp()
 	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
 	verifier(GameData.catalogues.species.size() >= 6, "six espèces en données (%d)" % GameData.catalogues.species.size())
@@ -5903,6 +5941,7 @@ func test_village_vivant() -> void:
 	# On visite un village habité du monde de la partie (rectangulaire depuis le point 49) : y planter
 	# le camp le remplacerait par une esplanade, et une zone en dur tomberait aujourd'hui dans l'océan.
 	var s := Simulation.new(4242)
+	s.planete_options = _planete_test()
 	s.charger_camp()
 	var surf: Surface = s.monde.surface
 	var camp_r: Vector2i = s.monde.cellule_camp
@@ -5938,10 +5977,20 @@ func test_village_vivant() -> void:
 		s.grille.liberer(v.pos)
 		v.pos = loin
 		s.grille.placer(v.id, loin)
-		var d0 := Grille.distance(v.pos, v.place)
-		for k in 24:   # le villageois peut d'abord terminer ce qu'il faisait : on lui laisse le temps
-			s._decider_ia(v, s.horloge_monde.ticks + k * 10)
-		verifier(Grille.distance(v.pos, v.place) < d0, "la routine rapproche le villageois de la place (%d → %d)" % [d0, Grille.distance(v.pos, v.place)])
+		# On mesure le CHEMIN restant, pas la distance à vol d'oiseau : contourner un mur éloigne
+		# d'abord le villageois de sa place, ce qui ne veut pas dire qu'il n'y va pas.
+		var d0 := s.grille.chemin(v.pos, v.place, false, "", false).size()
+		if s.en_combat(v):
+			s._quitter_combat(v)   # un villageois pris dans une échauffourée ne rentre évidemment pas
+		v["horloge"] = "monde"
+		# On vérifie LA ROUTINE elle-même (le pas vers la cible horaire) : dans un village visité, le
+		# sélecteur d'utilité peut légitimement préférer autre chose (fuir une bête, discuter) — ce
+		# choix-là est couvert par les tests d'IA, celui-ci parle du trajet.
+		for k in 24:
+			v.compteur = 0
+			s._ia_pas_routine(v, s._cible_routine(v, profil), s.horloge_monde.ticks + k * 10)
+		var d1 := s.grille.chemin(v.pos, v.place, false, "", false).size()
+		verifier(v.pos == v.place or d1 < d0, "la routine rapproche le villageois de la place (%d → %d pas)" % [d0, d1])
 	# Le garde patrouille de jour.
 	var gardes: Array = s.vivants().filter(func(x: Dictionary) -> bool: return x.ai_profile == "garde")
 	if not gardes.is_empty():
@@ -6106,10 +6155,12 @@ func test_sauvegarde() -> void:
 
 func test_camp() -> void:
 	var s := Simulation.new(23)
+	s.planete_options = _planete_test()   # monde de test : la fenêtre est vérifiée autour d'un départ connu
 	s.charger_camp()
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
 	var tc: int = int(GameData.config("planete").taille_cellule)
-	verifier(s.lieu == "camp" and s.grille.largeur == 3 * tc and s.grille.origine == Vector2i(511 * tc, 511 * tc), "le camp : la fenêtre de 3×3 cellules du monde, en coordonnées monde")
+	var cc: Vector2i = s.monde.cellule_camp   # la fenêtre suit le camp, où qu'il soit tombé
+	verifier(s.lieu == "camp" and s.grille.largeur == 3 * tc and s.grille.origine == Vector2i((cc.x - 1) * tc, (cc.y - 1) * tc), "le camp : la fenêtre de 3×3 cellules du monde, en coordonnées monde")
 	var arbres := 0
 	var entree := Vector2i(-1, -1)
 	for i in s.grille.largeur * s.grille.hauteur_grille:
@@ -6120,7 +6171,7 @@ func test_camp() -> void:
 		if "entree_donjon" in tags:
 			entree = t
 	verifier(arbres >= 5 and entree != Vector2i(-1, -1), "des arbres (%d) et l'entrée du donjon" % arbres)
-	var base := Vector2i(512 * tc, 512 * tc)
+	var base := Vector2i(s.monde.cellule_camp.x * tc, s.monde.cellule_camp.y * tc)   # la cellule du camp, où qu'elle soit
 	var coffre := base + Vector2i(tc / 2 - 2, tc / 2)   # le centre de la cellule du camp
 	verifier(s.contenants.get(s.grille.idx(coffre), []).size() >= 4, "le coffre de départ : hache, pioche, faucille, lit de paille, graines, étal")
 	# Une plante se récolte à la faucille par un clic adjacent (Récolte).

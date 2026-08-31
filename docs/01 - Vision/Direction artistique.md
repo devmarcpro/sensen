@@ -26,6 +26,13 @@ Comment le jeu se donne à voir : isométrique, tuiles teintées, billboards pap
 > [!info] Précisé le 2026-09-01 — le full code est un choix d'étape, pas un dogme (designer)
 > Le « tout est dessiné par code, aucun asset » qui traverse ces notes est **l'état actuel du projet, pas une interdiction définitive** : le designer compte **ajouter des assets plus tard**. Ce qui suit reste donc vrai pour le prototype — chaque forme est un polygone, chaque texture viendra d'un shader — mais aucune décision ne doit être écrite comme si les images étaient bannies pour toujours. En pratique : ce qui est dessiné par code doit rester **remplaçable** par une image (une silhouette, un portrait, une tuile), et les catalogues de données doivent continuer à décrire *quoi* dessiner plutôt que *comment*.
 
+> [!success] Codé le 2026-09-01 — le décor a un grain (designer, point 50)
+> Les surfaces n'étaient que des aplats de la couleur du matériau. Elles reçoivent maintenant une **texture calculée**, dans l'esprit de Voxen : un `ShaderMaterial` posé sur le calque du monde (`shaders/grain.gdshader`) module la couleur d'origine par un **grain fin** — une case de `taille_grain` unités du monde = une teinte, tirée d'un hachage déterministe — et par une **variation douce** basse fréquence, pour que la roche ne soit ni un aplat ni du bruit. La couleur du matériau n'est jamais remplacée : elle est **modulée**, donc la palette des données reste la source.
+>
+> **Précision du designer (4 h 05) : le grain doit suivre le relief, pas rester plat.** C'est corrigé — chaque face porte désormais des **UV dans son propre plan** (le sol : les coordonnées de la tuile ; une paroi : sa longueur et sa hauteur), et le shader lit ces UV. Le grain épouse donc l'inclinaison isométrique : sur le sol, les grains sont des losanges ; sur un mur, ils descendent avec la paroi.
+>
+> Le grain est calculé à partir de ces UV : il est fixé au monde, ne « nage » pas quand la caméra bouge, et ne coûte rien (une passe de fragment, pas de texture en mémoire). Ses quatre chiffres vivent dans `styles.json → grain` — un `actif: false` rend les aplats d'avant.
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Piliers d'inspiration]]
 - **Alimente** : [[Squelette modulaire et points d'attache]], [[Écrans d'interface]], [[Palette de couleurs des matériaux]]
