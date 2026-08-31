@@ -74,10 +74,15 @@ func _ready() -> void:
 		var jq: Dictionary = scene.joueur()
 		var proche_id := ""
 		var proche_d := 999999
-		for xq in scene.sim.vivants():
-			if xq.id != jq.id and str(xq.get("camp", "")) == "civil" and Grille.distance(xq.pos, jq.pos) < proche_d:
-				proche_d = Grille.distance(xq.pos, jq.pos)
-				proche_id = str(xq.id)
+		for passe_m in [true, false]:   # un marchand d'abord (commerce visible), sinon le civil le plus proche
+			for xq in scene.sim.vivants():
+				if passe_m and str(xq.get("fonction", "")) != "commercant":   # l'id de fonction du marchand
+					continue
+				if xq.id != jq.id and str(xq.get("camp", "")) == "civil" and Grille.distance(xq.pos, jq.pos) < proche_d:
+					proche_d = Grille.distance(xq.pos, jq.pos)
+					proche_id = str(xq.id)
+			if not proche_id.is_empty():
+				break
 		if not proche_id.is_empty():
 			scene.ecrans.ouvrir_dialogue(proche_id)
 			print("dialogue : ", scene.sim.entites[proche_id].name_key)
