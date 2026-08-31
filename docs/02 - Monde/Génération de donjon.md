@@ -105,6 +105,9 @@ NETTOYAGE ET DISPARITION (3.5) : à la mort du boss (`creature_killed`
 > [!success] Corrigé le 2026-08-31 — les spawns restent au sol plat
 > La sonde de parcours a trouvé un Rôdeur **visible mais sans chemin** (consigné dans [[À juger — parcours de jeu]]) : `_peupler` tirait ses tuiles sans lire les hauteurs des décors — une créature pouvait naître **dans une fosse** (−`chute_delta` : impossible d'en sortir, l'A* n'y entre jamais — une prison à ennemi) ou **sur une estrade**. La note voulait déjà l'inverse (« le centre reste libre : escaliers, boss, spawns le lisent ») : les spawns ne se posent désormais que sur des tuiles à la hauteur de base de l'étage. Pousser un ennemi dans une fosse reste bien sûr permis — c'est le décor qui joue, pas la naissance.
 
+> [!success] Décidé et codé le 2026-08-31 — de vrais escaliers, pris en marchant (designer, point 36)
+> Les losanges doré et vert deviennent de **vraies marches dessinées par code** (quatre degrés qui rétrécissent, doré = descente, vert = montée), et **marcher sur l'escalier change d'étage automatiquement** : le pas du joueur qui arrive sur la cage déclenche la descente (ou la remontée — sur l'étage 1, elle fait ressortir au camp). Les intentions `descendre`/`remonter`, la touche E et les options contextuelles restent valables (les tests et la triche s'en servent), mais ne sont plus nécessaires. Le spawn sur l'escalier d'arrivée ne re-déclenche rien : seul un **pas** sur la tuile compte. Les PNJ ne changent jamais d'étage. Le robot de parcours détecte le changement d'étage au lieu de l'ordonner.
+
 ## Liens
 - **Dépend de** : [[Donjons — structure et intégration]], [[Salles et connecteurs]], [[Unification macro-micro]], [[Dérive de la corruption]]
 - **Alimente** : [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Créatures]], [[Gabarit de quête]]

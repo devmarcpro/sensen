@@ -244,6 +244,12 @@ class LigneObjet extends Control:
 			draw_string(f, Vector2(x_fin + 4.0, y), texte, HORIZONTAL_ALIGNMENT_LEFT, float(InventaireVisuel.LARGEURS[col]) - 6.0, 11, cadre if col == "qualite" else Color(0.85, 0.83, 0.75))
 		draw_string(f, Vector2(30, y), nom, HORIZONTAL_ALIGNMENT_LEFT, x_fin - 34.0, 12, Color(0.95, 0.93, 0.85))
 
+	func _get_drag_data(_pos: Vector2) -> Variant:   # vers la hotbar (designer, point 35)
+		var ap := Label.new()
+		ap.text = nom
+		set_drag_preview(ap)
+		return {"hotbar_type": "objet", "ref": uid}
+
 	func _gui_input(ev: InputEvent) -> void:
 		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
 			inventaire.selectionner(index)

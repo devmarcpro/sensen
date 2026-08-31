@@ -43,6 +43,7 @@ var poursuite_sterile := 0
 var progres_marqueur := []     # garde-fou d'étage : si AUCUN compteur ne bouge longtemps, on purge les cibles puis on rend le rapport
 var progres_frame := 0
 var purge_faite := false
+var etage_vu := -1             # l'étage courant vu par le robot : la descente est automatique (escaliers réels, point 36)
 var capacites_a_sec := {}      # index → image de re-essai : un sort refusé (charges, portée) se met en retrait   # une capture d'écran toutes les 30 s réelles dans <sortie>/toutes_les_30s/ (designer, 2026-08-31)
 var en_combat_avant := false
 var sante_avant := -1
@@ -210,6 +211,16 @@ func _process(_delta: float) -> void:
 		return
 	if not sim.attente.has(jid):
 		return
+	if int(sim.donjon.get("etage", -1)) != etage_vu:   # les escaliers se prennent en marchant : on constate la descente
+		if etage_vu != -1 and int(sim.donjon.get("etage", 0)) > etage_vu:
+			etages_atteints += 1
+			scene._apres_changement_de_grille()
+			_note("descente : étage %d → %d (%d salles) · PV %d/%d" % [etage_vu, int(sim.donjon.etage), int(sim.donjon.salles), int(j.sante), int(j.sante_max)])
+			_capturer("etage_%d_arrivee" % int(sim.donjon.etage))
+			if etages_atteints >= etages_voulus - 1:
+				_fin("%d étages descendus" % etages_atteints)
+				return
+		etage_vu = int(sim.donjon.get("etage", -1))
 	var marqueur := [etages_atteints, kills, coups_portes, ramassages, portes_ouvertes, morts]
 	if marqueur != progres_marqueur:
 		progres_marqueur = marqueur
@@ -299,17 +310,6 @@ func _process(_delta: float) -> void:
 				ramassages += 1
 				_note("ramassage à l'étage %d" % int(sim.donjon.etage))
 				return
-	if sim.donjon.escalier != null and j.pos == sim.donjon.escalier:
-		var etage_ici: int = int(sim.donjon.etage)
-		if etages_atteints + 1 >= etages_voulus:
-			_fin("%d étages descendus" % etages_atteints)
-			return
-		if sim.intention(jid, {"type": "descendre"}):
-			scene._apres_changement_de_grille()
-			etages_atteints += 1
-			_note("descente : étage %d → %d (%d salles) · PV %d/%d" % [etage_ici, int(sim.donjon.etage), int(sim.donjon.salles), int(j.sante), int(j.sante_max)])
-			_capturer("etage_%d_arrivee" % int(sim.donjon.etage))
-			return
 	var but: Vector2i = sim.donjon.escalier if sim.donjon.escalier != null else sim.donjon.entree
 	if sim.donjon.escalier == null:
 		_fin("dernier étage atteint (boss) : pas d'escalier plus bas")

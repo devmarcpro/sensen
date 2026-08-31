@@ -282,6 +282,29 @@ func _sauver_camp(joueur: Dictionary) -> void:
 
 
 ## Partir en expédition depuis l'entrée du donjon du camp.
+## Nouvelle partie directement en donjon (designer 2026-08-31, point 34) : l'expédition part de la cellule
+## du camp, donjon ouvert d'office — mêmes invariants de retour que _partir_en_expedition.
+func commencer_en_donjon(e: Dictionary) -> bool:
+	if lieu != "camp" or monde == null or e.is_empty():
+		return false
+	var cell := monde.cellule_de(e.pos)
+	e["retour"] = e.pos
+	_sauver_camp(e)
+	expedition = {}
+	etages_visites.clear()
+	var f := monde.foyer(cell)
+	var id := int(hash([graine, cell.x, cell.y, "donjon", int(f.get("generation", 0))]) & 0x7fffffff)
+	var b: Dictionary = GameData.catalogues.biomes.get(str(monde.surface.resume_cellule(cell).biome), {})
+	var theme := "repaire" if ("marecage" in b.get("tags", []) or "corrompu" in b.get("tags", [])) else "ruine"
+	var cr: Dictionary = GameData.config("planete").corruption
+	var fourchette: Array = cr.etages_majeur if bool(f.get("majeur", false)) else cr.etages_mineur
+	var corruption := monde.corruption_de(cell)
+	donjon = {"etages_fixes": fourchette, "corruption": corruption, "cellule": cell}
+	EventBus.emettre(&"journal", [&"journal.expedition_depart", {}])
+	charger_donjon(theme, graine, id, 1, e)
+	return true
+
+
 func _partir_en_expedition(e: Dictionary) -> bool:
 	if lieu != "camp" or not ("entree_donjon" in grille.contenu_de(e.pos).get("tags", [])):
 		return false
@@ -7366,6 +7389,14 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 		var d := grille.degats_chute(chute)
 		EventBus.emettre(&"journal", [&"journal.chute", {"nom": e.name_key, "niveaux": chute, "degats": d}])
 		_appliquer_degats(e, d, "", {"chute": true})
+	# De vrais escaliers (Génération de donjon, designer 2026-08-31) : marcher dessus change d'étage.
+	if e.controle == "joueur" and lieu == "donjon" and not donjon.is_empty():
+		if donjon.get("escalier") != null and vers == donjon.escalier and _descendre(e):
+			EventBus.dispatcher()
+			return true
+		if donjon.has("entree") and vers == donjon.entree and _remonter(e):
+			EventBus.dispatcher()
+			return true
 	return true
 
 

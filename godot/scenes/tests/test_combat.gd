@@ -6518,6 +6518,23 @@ func test_donjon_temps_a_l_action() -> void:
 	while garde > 0 and s.pas("monde"):
 		garde -= 1
 	verifier(s.horloge_monde.ticks > t0, "après l'action du joueur, le temps a avancé (%d → %d)" % [t0, s.horloge_monde.ticks])
+	# De vrais escaliers (2026-08-31, point 36) : marcher dessus descend tout seul
+	var esc: Vector2i = s.donjon.escalier
+	if not s.grille.occupant(esc).is_empty():
+		s.grille.liberer(esc)
+	var voisin: Vector2i = s._tuile_libre_autour(esc)
+	s.grille.liberer(j.pos)
+	j.pos = voisin
+	s.grille.placer(j.id, voisin)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "deplacer", "vers": esc}) and int(s.donjon.etage) == 2, "un pas sur l'escalier doré : étage 2 sans touche E")
+	# Nouvelle partie en donjon (2026-08-31, point 34) : l'expédition part de la cellule du camp
+	var s34 := Simulation.new(77)
+	s34.charger_camp()
+	var j34: Dictionary = s34.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	verifier(s34.commencer_en_donjon(j34) and s34.lieu == "donjon" and int(s34.donjon.etage) == 1, "commencer_en_donjon : étage 1 d'office")
+	verifier(not s34.camp_sauve.is_empty() and j34.has("retour"), "le camp est mis de côté, le retour connu")
+	s34.monde.fermer()
 	var s2 := Simulation.new(22)
 	s2.charger_camp()
 	verifier(s2.horloge_monde.mode == Horloge.Mode.TEMPS_REEL, "au camp, le temps réel demeure")

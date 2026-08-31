@@ -53,6 +53,7 @@ var xp_flottants: Array = []       # [{lignes, t}] : les textes qui montent au-d
 var gros_flottants: Array = []     # [{texte, pos, couleur, t}] : CRITIQUE / RATÉ en gros au-dessus d'un être
 var graine_monde := -1             # la graine choisie à l'écran Monde, portée à la simulation
 var fiche_monde: Dictionary = {}   # la fiche créée, en attente de l'écran Monde
+var depart_donjon := false         # l'option de création « Départ : Donjon » (designer, point 34)
 const STATS := ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]
 var zoom := 2.0   # au maximum par défaut (décision du designer, 2026-08-30)
 
@@ -330,6 +331,7 @@ func _creer_personnage() -> void:
 		for m in cap.get("modules", []):
 			if not (str(m) in fiche.modules_connus):
 				fiche.modules_connus.append(str(m))
+	depart_donjon = int(creation.get("depart", 0)) == 1   # point 34 : capturée avant l'effacement
 	creation = {}
 	var interactif := DisplayServer.get_name() != "headless" and not OS.get_cmdline_user_args().has("--sans-creation")
 	if interactif:
@@ -369,6 +371,10 @@ func _choisir_depart(cell: Vector2i) -> void:
 			joueur_id = e.id
 	_apres_changement_de_grille()
 	carte.fermer()
+	if depart_donjon:   # point 34 : le camp est posé, l'expédition part sur-le-champ
+		depart_donjon = false
+		if sim.commencer_en_donjon(joueur()):
+			_apres_changement_de_grille()
 	_log(tr("journal.depart_choisi").format({"x": cell.x, "y": cell.y, "biome": tr(GameData.catalogues.biomes.get(str(sim.camp_sauve.get("biome", "")), {}).get("name_key", ""))}))
 
 
@@ -860,7 +866,28 @@ func hotbar_entrees(j: Dictionary) -> Array:
 	res.append({"type": "lourde", "ref": "", "nom": tr("ui.hotbar.lourde")})
 	res.append({"type": "garde", "ref": "", "nom": tr("ui.hotbar.garde")})
 	res.append({"type": "attendre", "ref": "", "nom": tr("ui.hotbar.attendre")})
-	return res.slice(0, 10)
+	res = res.slice(0, 10)
+	# Les affectations du joueur (designer 2026-08-31, point 35) recouvrent case par case la hotbar dérivée.
+	if j.has("hotbar"):
+		while res.size() < 10:
+			res.append({"type": "", "ref": "", "nom": ""})
+		for k in mini(10, j.hotbar.size()):
+			var a: Variant = j.hotbar[k]
+			if not (a is Dictionary) or a.is_empty():
+				continue
+			match str(a.get("type", "")):
+				"capacite":
+					if int(a.ref) < j.get("capacites", []).size():
+						res[k] = {"type": "capacite", "ref": int(a.ref), "nom": tr(j.capacites[int(a.ref)].get("name_key", j.capacites[int(a.ref)].id))}
+				"objet":
+					if str(a.ref) in j.sac and sim.items.has(str(a.ref)):
+						res[k] = {"type": "objet", "ref": str(a.ref), "nom": tr(sim.items[str(a.ref)].get("name_key", "?"))}
+				"arme":
+					if sim.items.has(str(a.ref)):
+						res[k] = {"type": "arme", "ref": str(a.ref), "nom": tr(sim.items[str(a.ref)].name_key)}
+				"lourde", "garde", "attendre":
+					res[k] = {"type": str(a.type), "ref": "", "nom": tr("ui.hotbar." + str(a.type))}
+	return res
 
 
 ## La touche 1 → 0 sélectionne une action : une arme s'équipe et arme le clic, une capacité se vise, la lourde s'arme.
@@ -1316,9 +1343,9 @@ func _draw() -> void:
 		if sim.grille.dans(pi):
 			_losange(pi, Color(0.6, 0.3, 0.9, 0.7))
 	if not sim.donjon.is_empty() and sim.donjon.escalier != null:
-		_losange(sim.donjon.escalier, Color(0.9, 0.7, 0.2, 0.6))
+		_dessiner_escalier(sim.donjon.escalier, Color(0.9, 0.7, 0.2, 0.9), true)
 	if not sim.donjon.is_empty() and sim.donjon.has("entree"):
-		_losange(sim.donjon.entree, Color(0.3, 0.9, 0.5, 0.5))   # la sortie / l'escalier montant
+		_dessiner_escalier(sim.donjon.entree, Color(0.3, 0.9, 0.5, 0.9), false)   # la sortie / l'escalier montant
 	for z in sim.zones:   # les zones au sol (Racine, Sol vif, Nappe, Brume, Balise) : un liseré à leur teinte
 		if not g.dans(z.pos):
 			continue
@@ -1393,6 +1420,20 @@ static func _poly(ci: CanvasItem, pts: PackedVector2Array, col: Color) -> void:
 	var cols := PackedColorArray([col, col, col])
 	for i in range(1, pts.size() - 1):
 		ci.draw_primitive(PackedVector2Array([pts[0], pts[i], pts[i + 1]]), cols, PackedVector2Array())
+
+
+## De vraies marches (designer 2026-08-31, point 36) : quatre degrés qui rétrécissent vers le fond,
+## dorés pour la descente, verts pour la montée — on les prend en marchant dessus.
+func _dessiner_escalier(t: Vector2i, col: Color, descend: bool) -> void:
+	if not sim.grille.dans(t):
+		return
+	var c := _ecran(t, sim.grille.h(t))
+	for k in 4:
+		var l := 26.0 - k * 5.0
+		var y := (k - 1.5) * 5.0 * (1.0 if descend else -1.0)
+		var teinte := col.darkened(k * 0.12) if descend else col.darkened((3 - k) * 0.12)
+		draw_rect(Rect2(c + Vector2(-l * 0.5, y - 2.0), Vector2(l, 4.0)), teinte)
+	draw_rect(Rect2(c + Vector2(-14.0, -10.0), Vector2(28.0, 20.0)), col, false, 1.0)
 
 
 func _losange(t: Vector2i, col: Color) -> void:

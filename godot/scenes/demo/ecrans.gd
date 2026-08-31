@@ -27,6 +27,9 @@ var pnj_id := ""                     # le PNJ du dialogue / du commerce en cours
 var replique_key := ""
 
 
+var hotbar_ecran: Control   # la hotbar en bas de l'inventaire et des capacités (designer, point 35)
+
+
 func _ready() -> void:
 	layer = 10
 	panneau = PanelContainer.new()
@@ -73,6 +76,11 @@ func _ready() -> void:
 	liste.item_selected.connect(_sur_selection)
 	liste.item_activated.connect(func(i: int) -> void: _sur_selection(i); _action_principale())
 	h.add_child(liste)
+	liste.set_drag_forwarding(_glisser_liste, _depot_refuse, _depot_rien)
+	hotbar_ecran = HotbarEcran.new()
+	hotbar_ecran.ecrans = self
+	hotbar_ecran.visible = false
+	v.add_child(hotbar_ecran)
 	droite = VBoxContainer.new()   # à droite : le détail, et sous lui l'aperçu visuel du sort (composeur)
 	droite.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	droite.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -445,6 +453,7 @@ func rafraichir() -> void:
 	_montrer_detail()
 	cadre_perso.visible = courant == "creation"
 	inventaire_visuel.visible = courant == "inventaire"
+	hotbar_ecran.visible = courant == "inventaire" or courant == "capacites"
 	atelier_visuel.visible = courant == "atelier"
 	liste.visible = not (courant in ["inventaire", "atelier"])
 	penta_objet.visible = courant == "inventaire"
@@ -481,6 +490,30 @@ func _bouton(texte: String, action: Callable) -> void:
 	b.focus_mode = Control.FOCUS_NONE
 	b.pressed.connect(action)
 	boutons.add_child(b)
+
+
+## Le glisser d'une capacité vers la hotbar (designer 2026-08-31, point 35).
+func _glisser_liste(at: Vector2) -> Variant:
+	if courant != "capacites":
+		return null
+	var idx := liste.get_item_at_position(at, true)
+	if idx < 0 or idx >= entrees.size():
+		return null
+	var en: Dictionary = entrees[idx]
+	if str(en.get("kind", "")) != "capacite":
+		return null
+	var ap := Label.new()
+	ap.text = liste.get_item_text(idx)
+	liste.set_drag_preview(ap)   # ecrans est un CanvasLayer : l'aperçu se pose sur le Control qui glisse
+	return {"hotbar_type": "capacite", "ref": int(en.index)}
+
+
+func _depot_refuse(_p: Vector2, _d: Variant) -> bool:
+	return false
+
+
+func _depot_rien(_p: Vector2, _d: Variant) -> void:
+	pass
 
 
 func _sur_selection(i: int) -> void:
@@ -1294,6 +1327,8 @@ func _construire_creation() -> void:
 	var tn: Dictionary = teintes[int(c.get("teinte", 0)) % teintes.size()] if not teintes.is_empty() else {"id": "azur"}
 	liste.add_item(tr("ui.creation.teinte_l").format({"teinte": tr("ui.teinte." + str(tn.id))}))
 	entrees.append({"kind": "creation", "id": "teinte"})
+	liste.add_item(tr("ui.creation.depart_l").format({"lieu": tr("ui.creation.depart_donjon" if int(c.get("depart", 0)) == 1 else "ui.creation.depart_camp")}))
+	entrees.append({"kind": "creation", "id": "depart"})
 	liste.add_item(tr("ui.creation.commencer"))
 	entrees.append({"kind": "creation", "id": "commencer"})
 	_apercu_personnage(fiche, tn)
@@ -1405,6 +1440,8 @@ func _action_creation(id: String, sens: int) -> void:
 			c.annee = int(c.annee) + sens
 		"teinte":
 			c.teinte = posmod(int(c.get("teinte", 0)) + sens, maxi(1, GameData.config("creation").get("teintes", []).size()))
+		"depart":   # Départ : Camp / Donjon (designer, point 34)
+			c.depart = posmod(int(c.get("depart", 0)) + sens, 2)
 		"commencer":
 			main._creer_personnage()
 			return
@@ -1972,3 +2009,66 @@ func _construire_feuille(j: Dictionary) -> void:
 		eq.append("%s : %s" % [tr("slot." + str(slot)), main.nom_objet(sim.nom_objet(j.equipement[slot]))])
 	liste.add_item(tr("ui.feuille.equipement"))
 	entrees.append({"kind": "texte", "texte": "\n".join(eq)})
+
+
+## La hotbar en bas de l'inventaire et de l'écran de capacités (designer 2026-08-31, point 35) :
+## dix cases identiques au HUD, cibles du glisser-déposer ; clic droit sur une case pour la vider.
+class HotbarEcran extends Control:
+	const CASE := 56.0
+	var ecrans: Node
+
+	func _ready() -> void:
+		custom_minimum_size = Vector2(10 * (CASE + 4.0), CASE + 22.0)
+		mouse_filter = Control.MOUSE_FILTER_STOP
+
+	func _draw() -> void:
+		var j: Dictionary = ecrans.main.joueur()
+		if j.is_empty():
+			return
+		var f := ThemeDB.fallback_font
+		draw_string(f, Vector2(0, 12), tr("ui.hotbar.glisser"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.7, 0.65, 0.5))
+		var entrees_h: Array = ecrans.main.hotbar_entrees(j)
+		for k in 10:
+			var r := Rect2(Vector2(k * (CASE + 4.0), 18.0), Vector2(CASE, CASE))
+			draw_rect(r, Color(0.05, 0.05, 0.08, 0.85))
+			draw_rect(r, Color(0.6, 0.55, 0.4, 0.8), false, 1.0)
+			draw_string(f, r.position + Vector2(3.0, 11.0), str((k + 1) % 10), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.7, 0.65, 0.5))
+			if k < entrees_h.size() and not str(entrees_h[k].get("type", "")).is_empty():
+				if str(entrees_h[k].type) == "capacite":
+					var cap: Dictionary = j.capacites[int(entrees_h[k].ref)]
+					Pictos.dessiner_sort(self, cap.get("modules", []), Rect2(r.position + Vector2(CASE * 0.22, 12.0), Vector2(CASE * 0.56, CASE * 0.56)))
+				draw_string(f, r.position + Vector2(3.0, CASE - 6.0), str(entrees_h[k].nom).left(9), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.95, 0.95, 0.9))
+
+	func _case_sous(pos: Vector2) -> int:
+		if pos.y < 18.0 or pos.y > 18.0 + CASE:
+			return -1
+		var k := int(pos.x / (CASE + 4.0))
+		if k < 0 or k >= 10 or fmod(pos.x, CASE + 4.0) > CASE:
+			return -1
+		return k
+
+	func _can_drop_data(pos: Vector2, data: Variant) -> bool:
+		return data is Dictionary and data.has("hotbar_type") and _case_sous(pos) >= 0
+
+	func _drop_data(pos: Vector2, data: Variant) -> void:
+		var k := _case_sous(pos)
+		var j: Dictionary = ecrans.main.joueur()
+		if k < 0 or j.is_empty():
+			return
+		if not j.has("hotbar"):
+			var vide: Array = []
+			for i in 10:
+				vide.append({})
+			j["hotbar"] = vide
+		j.hotbar[k] = {"type": str(data.hotbar_type), "ref": data.ref}
+		queue_redraw()
+		ecrans.main.hud_ecran.queue_redraw()
+
+	func _gui_input(ev: InputEvent) -> void:
+		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_RIGHT:
+			var k := _case_sous(ev.position)
+			var j: Dictionary = ecrans.main.joueur()
+			if k >= 0 and not j.is_empty() and j.has("hotbar") and k < j.hotbar.size():
+				j.hotbar[k] = {}
+				queue_redraw()
+				ecrans.main.hud_ecran.queue_redraw()
