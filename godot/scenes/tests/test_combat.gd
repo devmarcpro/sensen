@@ -6535,6 +6535,28 @@ func test_donjon_temps_a_l_action() -> void:
 	verifier(s34.commencer_en_donjon(j34) and s34.lieu == "donjon" and int(s34.donjon.etage) == 1, "commencer_en_donjon : étage 1 d'office")
 	verifier(not s34.camp_sauve.is_empty() and j34.has("retour"), "le camp est mis de côté, le retour connu")
 	s34.monde.fermer()
+	# Apparence par race (2026-08-31, points 39 et 41) : chaque race a ses loci, et le personnage les porte
+	var cfg41: Dictionary = GameData.config("apparence")
+	var valeurs41 := {}
+	for locus41 in cfg41.get("loci", []):
+		valeurs41[str(locus41.id)] = locus41.valeurs
+	var races41_ok := true
+	var silhouettes41 := {}
+	for rid41: String in GameData.catalogues.races.keys():
+		var ap41: Dictionary = GameData.entree("races", rid41).get("apparence", {})
+		if ap41.is_empty():
+			races41_ok = false
+			continue
+		for cle41: String in ["tete", "carrure"]:
+			if not (str(ap41.get(cle41, "")) in valeurs41.get(cle41, [])):
+				races41_ok = false
+		silhouettes41["%s|%s|%.2f" % [ap41.get("carrure", ""), ap41.get("teinte_peau", ""), float(ap41.get("echelle", 1.0))]] = true
+	verifier(races41_ok, "chaque race déclare une apparence dont les loci sont au catalogue")
+	verifier(silhouettes41.size() >= 4, "les races ne se ressemblent pas : %d silhouettes distinctes" % silhouettes41.size())
+	var prog41 := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
+	var nain41 := Etres.creer_personnage("creature.aventurier.name", "nain", "le_sabre", {}, 1000, prog41)
+	verifier(float(nain41.get("apparence", {}).get("echelle", 1.0)) < 1.0 and float(nain41.apparence.get("barbe", 0.0)) > 0.0, "le nain naît court et barbu, sans une ligne de code par race")
+
 	# Sorts recommandés à la création (2026-08-31, point 38) : les modules existent et s'assemblent
 	var cfg38: Dictionary = GameData.config("creation")
 	var recos38: Array = cfg38.get("sorts_recommandes", [])

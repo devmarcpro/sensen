@@ -18,5 +18,14 @@
   "lifespan": 350,
   "tags": [
     "humanoide"
-  ]
+  ],
+  "apparence": {
+    "echelle": 1.06,
+    "carrure": "mince",
+    "tete": "ovale",
+    "teinte_peau": "ivoire",
+    "teinte_cheveux": "blond",
+    "oreilles": 3.2,
+    "barbe": 0.0
+  }
 }

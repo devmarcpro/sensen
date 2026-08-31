@@ -12,5 +12,14 @@
   "tags": [
     "cache",
     "humanoide"
-  ]
+  ],
+  "apparence": {
+    "echelle": 0.98,
+    "carrure": "mince",
+    "tete": "ronde",
+    "teinte_peau": "cendre",
+    "teinte_cheveux": "argent",
+    "oreilles": 0.0,
+    "barbe": 0.0
+  }
 }

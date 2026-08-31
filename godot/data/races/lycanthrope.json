@@ -13,5 +13,14 @@
   "tags": [
     "cache",
     "humanoide"
-  ]
+  ],
+  "apparence": {
+    "echelle": 1.1,
+    "carrure": "large",
+    "tete": "carree",
+    "teinte_peau": "bronze",
+    "teinte_cheveux": "corbeau",
+    "oreilles": 2.0,
+    "barbe": 2.0
+  }
 }

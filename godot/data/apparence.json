@@ -1,0 +1,158 @@
+{
+  "_doc": "Loci visuels humanoïdes (Apparence — données et équipement ; designer 2026-08-31, points 39 et 41) : le Paperdoll ne branche jamais par race, il lit ces facteurs. echelle multiplie tout le rig, carrure la largeur, tete_facteur le diamètre du crâne ; oreilles et barbe sont des longueurs en pixels.",
+  "loci": [
+    {
+      "id": "tete",
+      "valeurs": [
+        "ronde",
+        "ovale",
+        "carree"
+      ]
+    },
+    {
+      "id": "yeux",
+      "valeurs": [
+        "points",
+        "fentes",
+        "grands"
+      ]
+    },
+    {
+      "id": "nez",
+      "valeurs": [
+        "droit",
+        "crochu",
+        "plat"
+      ]
+    },
+    {
+      "id": "bouche",
+      "valeurs": [
+        "fine",
+        "large",
+        "sourire"
+      ]
+    },
+    {
+      "id": "cheveux",
+      "valeurs": [
+        "courts",
+        "longs",
+        "queue",
+        "chauve"
+      ]
+    },
+    {
+      "id": "carrure",
+      "valeurs": [
+        "mince",
+        "moyenne",
+        "large"
+      ]
+    }
+  ],
+  "facteurs": {
+    "tete": {
+      "ronde": 1.0,
+      "ovale": 1.12,
+      "carree": 0.94
+    },
+    "carrure": {
+      "mince": 0.86,
+      "moyenne": 1.0,
+      "large": 1.22
+    }
+  },
+  "teintes_peau": [
+    {
+      "id": "ivoire",
+      "rgb": [
+        0.93,
+        0.82,
+        0.71
+      ]
+    },
+    {
+      "id": "sable",
+      "rgb": [
+        0.86,
+        0.71,
+        0.55
+      ]
+    },
+    {
+      "id": "ambre",
+      "rgb": [
+        0.72,
+        0.54,
+        0.37
+      ]
+    },
+    {
+      "id": "bronze",
+      "rgb": [
+        0.55,
+        0.39,
+        0.26
+      ]
+    },
+    {
+      "id": "ebene",
+      "rgb": [
+        0.36,
+        0.25,
+        0.18
+      ]
+    },
+    {
+      "id": "cendre",
+      "rgb": [
+        0.68,
+        0.68,
+        0.72
+      ]
+    }
+  ],
+  "teintes_cheveux": [
+    {
+      "id": "corbeau",
+      "rgb": [
+        0.12,
+        0.11,
+        0.12
+      ]
+    },
+    {
+      "id": "chataigne",
+      "rgb": [
+        0.36,
+        0.24,
+        0.14
+      ]
+    },
+    {
+      "id": "roux",
+      "rgb": [
+        0.66,
+        0.31,
+        0.12
+      ]
+    },
+    {
+      "id": "blond",
+      "rgb": [
+        0.85,
+        0.74,
+        0.42
+      ]
+    },
+    {
+      "id": "argent",
+      "rgb": [
+        0.78,
+        0.78,
+        0.8
+      ]
+    }
+  ]
+}

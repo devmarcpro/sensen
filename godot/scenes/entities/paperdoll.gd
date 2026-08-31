@@ -23,6 +23,9 @@ var dessine_apres: Callable     # le client peut dessiner par-dessus (tuiles occ
 var pose: Dictionary = {}       # segment → delta d'angle (animation par pivots)
 var _anim_restant := 0.0
 var _anim_duree := 0.25
+var _ap: Dictionary = {}       # loci visuels de l'être (Apparence — données et équipement)
+var _vue_tete := "face"
+var _carrure := 1.0
 
 
 func configurer(p_e: Dictionary, p_rig: Dictionary, p_items: Dictionary, p_fonct: Dictionary, p_palette: Dictionary) -> void:
@@ -62,6 +65,13 @@ func _draw() -> void:
 	if f.has("miroir"):
 		miroir = true
 		f = rig.facings[f.miroir]
+	_ap = e.get("apparence", {})
+	_vue_tete = str(f.get("vue_tete", "face"))
+	var fac: Dictionary = GameData.config("apparence").get("facteurs", {})
+	_carrure = float(fac.get("carrure", {}).get(str(_ap.get("carrure", "moyenne")), 1.0))
+	var ech := float(_ap.get("echelle", 1.0))
+	if not is_equal_approx(ech, 1.0):
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2(ech, ech))
 	var monde := _poser_segments(f, miroir)
 	var peint := _segments_peints()
 	var teinte := Color(e.teinte[0], e.teinte[1], e.teinte[2])
@@ -113,7 +123,10 @@ func _placer(nom: String, origine: Vector2, miroir: bool) -> Dictionary:
 		angle = 180.0 - angle
 	var d := Vector2.from_angle(deg_to_rad(angle))
 	var perp := Vector2(-d.y, d.x) * (-1.0 if miroir else 1.0)
-	return {"origine": origine, "direction": d, "perp": perp, "longueur": float(s.longueur), "largeur": float(s.largeur)}
+	var lg := float(s.largeur)
+	if not nom.begins_with("tete"):
+		lg *= _carrure
+	return {"origine": origine, "direction": d, "perp": perp, "longueur": float(s.longueur), "largeur": lg}
 
 
 ## Quels segments l'équipement peint, et de quelle couleur (slot → segments du rig).
@@ -142,9 +155,15 @@ func _dessine_segment(m: Dictionary, col: Color, contour: float, nom: String) ->
 	var l: float = m.longueur
 	var poly := PackedVector2Array([o - p * w, o + p * w, o + d * l + p * w, o + d * l - p * w])
 	if nom.begins_with("tete"):
-		draw_circle(o + d * l * 0.5, l * 0.5, col)
+		var fact: Dictionary = GameData.config("apparence").get("facteurs", {}).get("tete", {})
+		var r := l * 0.5 * float(fact.get(str(_ap.get("tete", "ronde")), 1.0))
+		var c := o + d * l * 0.5
+		var peau := col if _ap.is_empty() else _teinte_de("teintes_peau", str(_ap.get("teinte_peau", "")), col)
+		draw_circle(c, r, peau)
 		if contour > 0.0:
-			draw_arc(o + d * l * 0.5, l * 0.5, 0.0, TAU, 16, col.darkened(0.45), contour)
+			draw_arc(c, r, 0.0, TAU, 16, peau.darkened(0.45), contour)
+		if not _ap.is_empty():
+			_dessine_visage(c, r, d, p, peau)
 		return
 	draw_colored_polygon(poly, col)
 	draw_polyline(PackedVector2Array([poly[0], poly[1], poly[2], poly[3], poly[0]]), col.darkened(0.45), maxf(0.7, contour))
@@ -180,3 +199,70 @@ func _dessine_tenus(monde: Dictionary) -> void:
 		var pt: Vector2 = m.origine + m.direction * float(prise[0]) + m.perp * float(prise[1])
 		draw_circle(pt, 5.0, _couleur_materiau(it.get("materiau", "")))
 		draw_arc(pt, 5.0, 0.0, TAU, 12, Color(0.2, 0.15, 0.1), 1.2)
+
+
+## Une teinte nommée d'une palette de `apparence.json` (peau, cheveux) ; la couleur de repli si l'id est inconnu.
+func _teinte_de(palette_id: String, id: String, repli: Color) -> Color:
+	for t in GameData.config("apparence").get(palette_id, []):
+		if str(t.id) == id:
+			return Color(float(t.rgb[0]), float(t.rgb[1]), float(t.rgb[2]))
+	return repli
+
+
+## Le visage dessiné sur le disque du crâne : yeux, nez, bouche, cheveux, oreilles, barbe.
+## Tout vient des loci de l'être (Apparence — données et équipement) — jamais de sa race.
+func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) -> void:
+	var cheveux := _teinte_de("teintes_cheveux", str(_ap.get("teinte_cheveux", "")), peau.darkened(0.6))
+	var encre := peau.darkened(0.55)
+	var oreille := float(_ap.get("oreilles", 0.0))
+	if oreille > 0.0 and _vue_tete != "dos":   # les oreilles pointent vers le haut et vers l'extérieur
+		for cote in [-1.0, 1.0]:
+			var base: Vector2 = c + p * (r * 0.9 * cote)
+			draw_colored_polygon(PackedVector2Array([
+				base - d * r * 0.2, base + d * r * 0.2,
+				base + p * (oreille * cote) + d * (oreille * 0.6),
+			]), peau)
+	var coif := str(_ap.get("cheveux", "courts"))
+	if coif != "chauve":   # la calotte, vue de face comme de dos
+		var ang := d.angle()   # la calotte suit le haut du crâne, quelle que soit l'inclinaison de la tête
+		draw_arc(c, r * 0.94, ang - PI * 0.44, ang + PI * 0.44, 18, cheveux, maxf(1.5, r * 0.34))
+		if coif == "longs":
+			for cote2 in [-1.0, 1.0]:
+				draw_line(c + p * (r * 0.85 * cote2), c + p * (r * 0.85 * cote2) - d * r * 1.5, cheveux, maxf(1.2, r * 0.3))
+		elif coif == "queue":
+			draw_line(c - d * r * 0.6, c - d * r * 1.8, cheveux, maxf(1.2, r * 0.25))
+	if _vue_tete == "dos":
+		return
+	var ecart := 0.42 if _vue_tete == "face" else 0.18
+	match str(_ap.get("yeux", "points")):
+		"grands":
+			for cote3 in [-1.0, 1.0]:
+				draw_circle(c + p * (r * ecart * cote3) + d * r * 0.15, maxf(0.8, r * 0.2), encre)
+		"fentes":
+			for cote4 in [-1.0, 1.0]:
+				var o4: Vector2 = c + p * (r * ecart * cote4) + d * r * 0.15
+				draw_line(o4 - p * r * 0.16, o4 + p * r * 0.16, encre, maxf(0.8, r * 0.1))
+		_:
+			for cote5 in [-1.0, 1.0]:
+				draw_circle(c + p * (r * ecart * cote5) + d * r * 0.15, maxf(0.6, r * 0.12), encre)
+	var nez := str(_ap.get("nez", "droit"))
+	var haut_nez: Vector2 = c + d * r * 0.05
+	if nez == "crochu":
+		draw_line(haut_nez, haut_nez - d * r * 0.35 + p * r * 0.12, encre, maxf(0.7, r * 0.09))
+	elif nez == "plat":
+		draw_line(haut_nez - p * r * 0.1, haut_nez + p * r * 0.1, encre, maxf(0.7, r * 0.09))
+	else:
+		draw_line(haut_nez, haut_nez - d * r * 0.35, encre, maxf(0.7, r * 0.09))
+	var bouche := str(_ap.get("bouche", "fine"))
+	var y_bouche: Vector2 = c - d * r * 0.5
+	var demi := r * (0.3 if bouche == "large" else 0.18)
+	if bouche == "sourire":
+		draw_arc(y_bouche + d * r * 0.2, r * 0.32, PI * 1.15, PI * 1.85, 10, encre, maxf(0.7, r * 0.09))
+	else:
+		draw_line(y_bouche - p * demi, y_bouche + p * demi, encre, maxf(0.7, r * 0.09))
+	var barbe := float(_ap.get("barbe", 0.0))
+	if barbe > 0.0:
+		draw_colored_polygon(PackedVector2Array([
+			c - p * r * 0.8 - d * r * 0.1, c + p * r * 0.8 - d * r * 0.1,
+			c + p * r * 0.35 - d * (r + barbe), c - p * r * 0.35 - d * (r + barbe),
+		]), cheveux)

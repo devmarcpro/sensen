@@ -31,6 +31,39 @@
     },
     "tags": {
       "type": "array"
+    },
+    "apparence": {
+      "type": "object",
+      "required": [
+        "echelle",
+        "carrure",
+        "tete",
+        "teinte_peau",
+        "teinte_cheveux"
+      ],
+      "properties": {
+        "echelle": {
+          "type": "number"
+        },
+        "carrure": {
+          "type": "string"
+        },
+        "tete": {
+          "type": "string"
+        },
+        "teinte_peau": {
+          "type": "string"
+        },
+        "teinte_cheveux": {
+          "type": "string"
+        },
+        "oreilles": {
+          "type": "number"
+        },
+        "barbe": {
+          "type": "number"
+        }
+      }
     }
   }
 }

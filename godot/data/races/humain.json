@@ -9,5 +9,14 @@
   "lifespan": 80,
   "tags": [
     "humanoide"
-  ]
+  ],
+  "apparence": {
+    "echelle": 1.0,
+    "carrure": "moyenne",
+    "tete": "ovale",
+    "teinte_peau": "sable",
+    "teinte_cheveux": "chataigne",
+    "oreilles": 0.0,
+    "barbe": 0.0
+  }
 }

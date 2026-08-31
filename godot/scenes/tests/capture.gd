@@ -31,6 +31,12 @@ func _ready() -> void:
 	scene.profil_sans_terrain = "--sans-terrain" in args
 	if scene.titre_ouvert and "--creation" in args:   # --creation : l'écran de création du personnage
 		scene._nouvelle_partie()
+		for ir in args.size():   # --race id : la race sélectionnée à la création (apparence par race, point 41)
+			if args[ir] == "--race" and ir + 1 < args.size():
+				var races_c: Array = GameData.catalogues.races.keys()
+				races_c.sort()
+				scene.creation.race = maxi(0, races_c.find(str(args[ir + 1])))
+				scene.ecrans.ouvrir("creation")
 	elif scene.titre_ouvert and "--charger" in args:   # --charger : le chemin Continuer de l'écran principal, à froid (Sauvegarde)
 		scene._charger_partie("essai_capture")   # l'emplacement de la sonde — jamais « monde », qui peut être une vraie partie
 		if scene.sim != null:

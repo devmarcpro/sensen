@@ -219,7 +219,7 @@ func _nouvelle_partie() -> void:
 	titre_ouvert = false
 	minimap.visible = true
 	var cfg_c: Dictionary = GameData.config("creation")
-	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": int(cfg_c.get("annee_defaut", 1000)), "nom": "", "teinte": 0, "sorts": []}
+	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": int(cfg_c.get("annee_defaut", 1000)), "nom": "", "teinte": 0, "sorts": [], "apparence": {}}
 	titre_ouvert = true   # l'écran de création est un vrai écran (Écrans d'interface, 2026-08-30) : rien ne tourne derrière
 	minimap.visible = false
 	ui.text = ""
@@ -338,6 +338,8 @@ func _creer_personnage() -> void:
 		for m in cap.get("modules", []):
 			if not (str(m) in fiche.modules_connus):
 				fiche.modules_connus.append(str(m))
+	for cle: String in creation.get("apparence", {}).keys():   # les loci réglés à la création (points 39 et 41)
+		fiche.apparence[cle] = creation.apparence[cle]
 	depart_donjon = int(creation.get("depart", 0)) == 1   # point 34 : capturée avant l'effacement
 	creation = {}
 	var interactif := DisplayServer.get_name() != "headless" and not OS.get_cmdline_user_args().has("--sans-creation")

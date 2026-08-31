@@ -1291,6 +1291,31 @@ func _fiche_apercu() -> Dictionary:
 	return Etres.creer_personnage("creature.aventurier.name", races[int(c.race) % races.size()], classes[int(c.classe) % classes.size()], c.points, int(c.annee), prog)
 
 
+## L'apparence de l'aperçu : le bloc de la race, recouvert des loci réglés à la main (points 39 et 41).
+func _apparence_apercu(fiche: Dictionary) -> Dictionary:
+	var ap: Dictionary = fiche.get("apparence", {}).duplicate()
+	for cle: String in main.creation.get("apparence", {}).keys():
+		ap[cle] = main.creation.apparence[cle]
+	return ap
+
+
+## Les lignes réglables de l'apparence : les loci du catalogue, puis les deux palettes.
+func _lignes_apparence() -> Array:
+	var cfg: Dictionary = GameData.config("apparence")
+	var l: Array = []
+	for locus in cfg.get("loci", []):
+		var vals: Array = []
+		for v in locus.get("valeurs", []):
+			vals.append(str(v))
+		l.append({"id": str(locus.id), "valeurs": vals})
+	for pal in ["teinte_peau", "teinte_cheveux"]:
+		var ids: Array = []
+		for t in cfg.get("teintes_peau" if pal == "teinte_peau" else "teintes_cheveux", []):
+			ids.append(str(t.id))
+		l.append({"id": pal, "valeurs": ids})
+	return l
+
+
 func _points_creation() -> Dictionary:
 	var c: Dictionary = main.creation
 	var classes: Array = main._classes_visibles()
@@ -1327,6 +1352,13 @@ func _construire_creation() -> void:
 	var tn: Dictionary = teintes[int(c.get("teinte", 0)) % teintes.size()] if not teintes.is_empty() else {"id": "azur"}
 	liste.add_item(tr("ui.creation.teinte_l").format({"teinte": tr("ui.teinte." + str(tn.id))}))
 	entrees.append({"kind": "creation", "id": "teinte"})
+	var app: Dictionary = _apparence_apercu(fiche)   # apparence : les loci visuels (designer, points 39 et 41)
+	for ligne in _lignes_apparence():
+		liste.add_item(tr("ui.creation.app_l").format({
+			"locus": tr("ui.apparence." + str(ligne.id)),
+			"valeur": tr("ui.apparence.val." + str(app.get(str(ligne.id), ligne.valeurs[0] if not ligne.valeurs.is_empty() else ""))),
+		}))
+		entrees.append({"kind": "creation", "id": "app:" + str(ligne.id)})
 	liste.add_item(tr("ui.creation.depart_l").format({"lieu": tr("ui.creation.depart_donjon" if int(c.get("depart", 0)) == 1 else "ui.creation.depart_camp")}))
 	entrees.append({"kind": "creation", "id": "depart"})
 	var recos: Array = cfg.get("sorts_recommandes", [])   # sorts recommandés du banc d'essai (designer, point 38)
@@ -1352,6 +1384,7 @@ func _construire_creation() -> void:
 ## Le personnage en grand : le paperdoll du jeu, avec la teinte choisie et l'équipement de départ de la classe.
 func _apercu_personnage(fiche: Dictionary, tn: Dictionary) -> void:
 	var e: Dictionary = fiche.duplicate(true)
+	e["apparence"] = _apparence_apercu(fiche)
 	if tn.has("rgb"):
 		e.teinte = [float(tn.rgb[0]), float(tn.rgb[1]), float(tn.rgb[2])]
 	var items := {}
@@ -1412,7 +1445,9 @@ func _detail_creation(id: String) -> String:
 		"commencer":
 			l.append(tr("ui.creation.d_commencer"))
 		_:
-			if id.begins_with("sort:"):   # le détail d'un sort recommandé (designer, point 38)
+			if id.begins_with("app:"):   # le détail d'un locus visuel (designer, points 39 et 41)
+				l.append(tr("ui.creation.d_apparence"))
+			elif id.begins_with("sort:"):   # le détail d'un sort recommandé (designer, point 38)
 				l.append(tr("ui.creation.d_sort"))
 			elif id.begins_with("stat:"):
 				var st := id.trim_prefix("stat:")
@@ -1469,7 +1504,22 @@ func _action_creation(id: String, sens: int) -> void:
 			if sens > 0:   # Entrée sur le nom ou les points : la ligne suivante
 				selection = mini(selection + 1, entrees.size() - 1)
 		_:
-			if id.begins_with("sort:"):   # cocher / décocher un sort recommandé, trois au plus (designer, point 38)
+			if id.begins_with("app:"):   # apparence : le locus suivant / précédent (designer, points 39 et 41)
+				var lid := id.trim_prefix("app:")
+				var courante := ""
+				var valeurs: Array = []
+				for ligne2 in _lignes_apparence():
+					if str(ligne2.id) == lid:
+						valeurs = ligne2.valeurs
+				if valeurs.is_empty():
+					return
+				courante = str(_apparence_apercu(_fiche_apercu()).get(lid, valeurs[0]))
+				var i2 := valeurs.find(courante)
+				var suivant := str(valeurs[posmod(maxi(i2, 0) + sens, valeurs.size())])
+				var reglages: Dictionary = c.get("apparence", {})
+				reglages[lid] = suivant
+				c["apparence"] = reglages
+			elif id.begins_with("sort:"):   # cocher / décocher un sort recommandé, trois au plus (designer, point 38)
 				var sid := id.trim_prefix("sort:")
 				var coches2: Array = c.get("sorts", [])
 				if sid in coches2:

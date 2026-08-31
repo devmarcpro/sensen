@@ -5760,6 +5760,10 @@ func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 			for m in cap.get("modules", []):
 				if int(e.get("modules_charges", {}).get(str(m), 0)) <= 0:
 					crediter_module(e, str(m), charges_lues(e, true))
+	if str(e.corps.get("silhouette", "")) == "humanoide" and e.get("apparence", {}).is_empty():
+		var rng_ap := RandomNumberGenerator.new()   # un visage à tout humanoïde, tiré une fois pour toutes
+		rng_ap.seed = hash([graine, "apparence", id])
+		e["apparence"] = _apparence_pour(str(e.get("race", "humain")), rng_ap)
 	_contreparties(e)
 	e["or"] = 0
 	if controle != "joueur" and "civil" in def.get("tags", []):
@@ -5941,6 +5945,24 @@ func _appliquer_composition(inst: Dictionary, def: Dictionary, pieces: Array[Dic
 
 
 ## Un PNJ civil : son camp, son nom (culture du village ou de sa race), sa bourse (fonction), son stock.
+## Les loci visuels d'un être : le bloc `apparence` de sa race, dont les traits du visage varient
+## au tirage (Apparence — données et équipement). Aucune branche par race : tout vient des données.
+func _apparence_pour(race_id: String, rng: RandomNumberGenerator) -> Dictionary:
+	var cfg: Dictionary = GameData.config("apparence")
+	var ap: Dictionary = GameData.entree("races", race_id).get("apparence", {}).duplicate()
+	for locus in cfg.get("loci", []):
+		var vals: Array = locus.get("valeurs", [])
+		if vals.is_empty():
+			continue
+		if str(locus.id) in ["tete", "carrure"] and ap.has(str(locus.id)):
+			continue   # la forme du crâne et la carrure appartiennent à la race
+		ap[str(locus.id)] = str(vals[rng.randi() % vals.size()])
+	var cheveux: Array = cfg.get("teintes_cheveux", [])
+	if not cheveux.is_empty() and rng.randf() < 0.6:
+		ap["teinte_cheveux"] = str(cheveux[rng.randi() % cheveux.size()].id)
+	return ap
+
+
 func _habiller_pnj(e: Dictionary, def: Dictionary, culture_id: String = "") -> void:
 	e.camp = "civil"
 	var rng := RandomNumberGenerator.new()
@@ -5953,6 +5975,7 @@ func _habiller_pnj(e: Dictionary, def: Dictionary, culture_id: String = "") -> v
 	var genre := str(def.get("genre", "m" if rng.randf() < 0.5 else "f"))
 	e["nom"] = Noms.generer(culture_id, cultures.get(culture_id, {}), genre, rng)
 	e["genre"] = genre
+	e["apparence"] = _apparence_pour(str(e.get("race", def.get("race", "humain"))), rng)   # loci visuels : le défaut de la race, varié par tirage
 	e["name_key"] = "pnj.%s.name" % e.id
 	GameData.enregistrer_nom(e.name_key, Noms.afficher(e.nom))
 	e["fonction"] = str(def.get("fonction", "oisif"))

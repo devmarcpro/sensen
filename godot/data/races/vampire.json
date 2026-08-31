@@ -16,5 +16,14 @@
   ],
   "tags_acquis": [
     "vision_nocturne"
-  ]
+  ],
+  "apparence": {
+    "echelle": 1.02,
+    "carrure": "mince",
+    "tete": "ovale",
+    "teinte_peau": "cendre",
+    "teinte_cheveux": "corbeau",
+    "oreilles": 1.6,
+    "barbe": 0.0
+  }
 }
