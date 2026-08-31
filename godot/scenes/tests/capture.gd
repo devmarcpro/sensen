@@ -32,6 +32,7 @@ func _ready() -> void:
 		scene._charger_partie("essai_capture")   # l'emplacement de la sonde — jamais « monde », qui peut être une vraie partie
 		if scene.sim != null:
 			print("charge : lieu=", scene.sim.lieu, " expedition=", str(scene.sim.expedition))
+			Sauvegarde.effacer("essai_capture")   # la paire --sauvegarder / --charger est à usage unique : l'écran Charger reste net
 	elif scene.titre_ouvert and not ("--titre" in args):   # la capture saute l'écran principal, la création et l'écran Monde
 		scene._nouvelle_partie()
 		scene._creer_personnage()
