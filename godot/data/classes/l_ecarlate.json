@@ -20,27 +20,27 @@
   ],
   "capacites": [
     {
-      "id": "l_ecarlate_offrande",
-      "name_key": "module.offrande.name",
-      "modules": [
-        "soi",
-        "offrande"
-      ]
-    },
-    {
-      "id": "l_ecarlate_saignee",
-      "name_key": "module.saignee.name",
-      "modules": [
-        "soi",
-        "saignee"
-      ]
-    },
-    {
-      "id": "l_ecarlate_saignement",
-      "name_key": "module.saignement.name",
+      "id": "l_ecarlate_estoc",
+      "name_key": "module.estoc.name",
       "modules": [
         "point",
-        "saignement"
+        "estoc"
+      ]
+    },
+    {
+      "id": "l_ecarlate_frappe",
+      "name_key": "module.frappe.name",
+      "modules": [
+        "point",
+        "frappe"
+      ]
+    },
+    {
+      "id": "l_ecarlate_projection",
+      "name_key": "module.projection.name",
+      "modules": [
+        "point",
+        "projection"
       ]
     }
   ],

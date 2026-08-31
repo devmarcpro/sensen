@@ -30,14 +30,6 @@
   ],
   "capacites": [
     {
-      "id": "le_souffle_meditation",
-      "name_key": "module.meditation.name",
-      "modules": [
-        "soi",
-        "meditation"
-      ]
-    },
-    {
       "id": "le_souffle_etincelle",
       "name_key": "module.etincelle.name",
       "modules": [
@@ -46,11 +38,19 @@
       ]
     },
     {
-      "id": "le_souffle_gel",
-      "name_key": "module.gel.name",
+      "id": "le_souffle_eboulement",
+      "name_key": "module.eboulement.name",
       "modules": [
-        "ligne",
-        "gel"
+        "point",
+        "eboulement"
+      ]
+    },
+    {
+      "id": "le_souffle_ronce",
+      "name_key": "module.ronce.name",
+      "modules": [
+        "point",
+        "ronce"
       ]
     }
   ],

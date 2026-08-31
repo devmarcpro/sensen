@@ -20,11 +20,19 @@
   ],
   "capacites": [
     {
-      "id": "l_engrenage_tourelle",
-      "name_key": "module.tourelle.name",
+      "id": "l_engrenage_epine",
+      "name_key": "module.epine.name",
+      "modules": [
+        "chemin",
+        "epine"
+      ]
+    },
+    {
+      "id": "l_engrenage_aiguille",
+      "name_key": "module.aiguille.name",
       "modules": [
         "point",
-        "tourelle"
+        "aiguille"
       ]
     },
     {
@@ -33,14 +41,6 @@
       "modules": [
         "ligne",
         "etincelle"
-      ]
-    },
-    {
-      "id": "l_engrenage_gel",
-      "name_key": "module.gel.name",
-      "modules": [
-        "ligne",
-        "gel"
       ]
     }
   ],

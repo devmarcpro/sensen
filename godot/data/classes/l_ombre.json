@@ -20,27 +20,27 @@
   ],
   "capacites": [
     {
-      "id": "l_ombre_voile",
-      "name_key": "module.voile.name",
+      "id": "l_ombre_projection",
+      "name_key": "module.projection.name",
       "modules": [
-        "ligne",
-        "voile"
+        "point",
+        "projection"
       ]
     },
     {
-      "id": "l_ombre_voile_de_brume",
-      "name_key": "module.voile_de_brume.name",
+      "id": "l_ombre_botte",
+      "name_key": "module.botte.name",
       "modules": [
-        "ligne",
-        "voile_de_brume"
+        "chemin",
+        "botte"
       ]
     },
     {
-      "id": "l_ombre_etincelle",
-      "name_key": "module.etincelle.name",
+      "id": "l_ombre_charge_d_epaule",
+      "name_key": "module.charge_d_epaule.name",
       "modules": [
-        "ligne",
-        "etincelle"
+        "diagonale",
+        "charge_d_epaule"
       ]
     }
   ],

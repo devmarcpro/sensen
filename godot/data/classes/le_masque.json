@@ -19,27 +19,27 @@
   ],
   "capacites": [
     {
-      "id": "le_masque_etincelle",
-      "name_key": "module.etincelle.name",
+      "id": "le_masque_roche",
+      "name_key": "module.roche.name",
       "modules": [
-        "ligne",
-        "etincelle"
+        "chemin",
+        "roche"
       ]
     },
     {
-      "id": "le_masque_gel",
-      "name_key": "module.gel.name",
+      "id": "le_masque_brasier",
+      "name_key": "module.brasier.name",
       "modules": [
-        "ligne",
-        "gel"
+        "colonne",
+        "brasier"
       ]
     },
     {
-      "id": "le_masque_baume",
-      "name_key": "module.baume.name",
+      "id": "le_masque_flamme",
+      "name_key": "module.flamme.name",
       "modules": [
-        "ligne",
-        "baume"
+        "croix",
+        "flamme"
       ]
     }
   ],

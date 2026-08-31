@@ -21,27 +21,27 @@
   ],
   "capacites": [
     {
-      "id": "le_vent_etincelle",
-      "name_key": "module.etincelle.name",
+      "id": "le_vent_eboulement",
+      "name_key": "module.eboulement.name",
       "modules": [
-        "ligne",
-        "etincelle"
+        "point",
+        "eboulement"
       ]
     },
     {
-      "id": "le_vent_gel",
-      "name_key": "module.gel.name",
+      "id": "le_vent_ronce",
+      "name_key": "module.ronce.name",
       "modules": [
-        "ligne",
-        "gel"
+        "point",
+        "ronce"
       ]
     },
     {
-      "id": "le_vent_baume",
-      "name_key": "module.baume.name",
+      "id": "le_vent_fonte",
+      "name_key": "module.fonte.name",
       "modules": [
-        "ligne",
-        "baume"
+        "chemin",
+        "fonte"
       ]
     }
   ],

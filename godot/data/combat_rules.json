@@ -1109,7 +1109,7 @@
     "_doc": "Soins dormants (Modules — Réserve) : le seuil de PV en pourcentage sous lequel la réserve se déclenche."
   },
   "modules": {
-    "_doc": "Charges de modules (Grimoires et manuels) : des DES, multiplies par skill_factor(Lecture) — aucun chiffre fixe. ; tout_au_depart : mode test, le client credite tous les modules (99 charges) a chaque nouvelle partie",
+    "_doc": "Le joueur commence avec les seuls modules de sa classe (designer 2026-08-31, point 47) ; tout le reste s'apprend dans les livres. `tout_au_depart` reste un interrupteur de test.",
     "competence": "lecture",
     "cout_variance_des": "2d6",
     "cout_variance_moyenne": 7.0,
@@ -1117,7 +1117,7 @@
       "mana": 1.0,
       "endurance": 1.0
     },
-    "tout_au_depart": true
+    "tout_au_depart": false
   },
   "cueillette": {
     "des": "1d2",

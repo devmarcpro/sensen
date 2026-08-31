@@ -33,27 +33,27 @@
   ],
   "capacites": [
     {
-      "id": "la_trace_traque",
-      "name_key": "module.traque.name",
+      "id": "la_trace_projection",
+      "name_key": "module.projection.name",
       "modules": [
-        "ligne",
-        "traque"
+        "point",
+        "projection"
       ]
     },
     {
-      "id": "la_trace_etincelle",
-      "name_key": "module.etincelle.name",
+      "id": "la_trace_botte",
+      "name_key": "module.botte.name",
       "modules": [
-        "ligne",
-        "etincelle"
+        "chemin",
+        "botte"
       ]
     },
     {
-      "id": "la_trace_gel",
-      "name_key": "module.gel.name",
+      "id": "la_trace_charge_d_epaule",
+      "name_key": "module.charge_d_epaule.name",
       "modules": [
-        "ligne",
-        "gel"
+        "diagonale",
+        "charge_d_epaule"
       ]
     }
   ],

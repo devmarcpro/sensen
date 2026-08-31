@@ -218,7 +218,7 @@ func _nouvelle_partie() -> void:
 	titre_ouvert = false
 	minimap.visible = true
 	var cfg_c: Dictionary = GameData.config("creation")
-	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": int(cfg_c.get("annee_defaut", 1000)), "nom": "", "espece": "", "apparence": {}}
+	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": int(cfg_c.get("annee_defaut", 1000)), "nom": "", "apparence": {}}
 	titre_ouvert = true   # l'écran de création est un vrai écran (Écrans d'interface, 2026-08-30) : rien ne tourne derrière
 	minimap.visible = false
 	ui.text = ""
@@ -314,9 +314,6 @@ func _creer_personnage() -> void:
 	classes.sort()
 	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
 	var fiche := Etres.creer_personnage("creature.aventurier.name", races[creation.race % races.size()], classes[creation.classe % classes.size()], creation.points, int(creation.annee), prog)
-	var cl_dep: Dictionary = GameData.entree("classes", str(fiche.classe))   # les sorts sont ceux de la classe (point 45)
-	fiche.capacites = cl_dep.get("capacites", GameData.entree("creatures", "aventurier").get("capacites", [])).duplicate(true)
-	fiche["hotbar"] = cl_dep.get("hotbar", []).duplicate(true)   # et son loadout de hotbar
 	# Personnalisation (Écrans d'interface, 2026-08-30) : le nom choisi et la teinte du personnage.
 	var nom_choisi := str(creation.get("nom", "")).strip_edges()
 	if not nom_choisi.is_empty():
@@ -331,7 +328,6 @@ func _creer_personnage() -> void:
 		for m in cap.get("modules", []):
 			if not (str(m) in fiche.modules_connus):
 				fiche.modules_connus.append(str(m))
-	Etres.appliquer_espece(fiche, str(creation.get("espece", "")))
 	for cle: String in creation.get("apparence", {}).keys():   # les loci réglés à la création (points 39 et 41)
 		fiche.apparence[cle] = creation.apparence[cle]
 	depart_donjon = int(creation.get("depart", 0)) == 1   # point 34 : capturée avant l'effacement

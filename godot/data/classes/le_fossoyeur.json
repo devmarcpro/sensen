@@ -19,27 +19,27 @@
   ],
   "capacites": [
     {
-      "id": "le_fossoyeur_releve",
-      "name_key": "module.releve.name",
+      "id": "le_fossoyeur_banquise",
+      "name_key": "module.banquise.name",
       "modules": [
-        "ligne",
-        "releve"
+        "diagonale",
+        "banquise"
       ]
     },
     {
-      "id": "le_fossoyeur_etincelle",
-      "name_key": "module.etincelle.name",
+      "id": "le_fossoyeur_roche",
+      "name_key": "module.roche.name",
       "modules": [
-        "ligne",
-        "etincelle"
+        "chemin",
+        "roche"
       ]
     },
     {
-      "id": "le_fossoyeur_gel",
-      "name_key": "module.gel.name",
+      "id": "le_fossoyeur_brasier",
+      "name_key": "module.brasier.name",
       "modules": [
-        "ligne",
-        "gel"
+        "colonne",
+        "brasier"
       ]
     }
   ],

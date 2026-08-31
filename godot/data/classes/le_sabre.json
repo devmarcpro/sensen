@@ -40,19 +40,19 @@
       ]
     },
     {
-      "id": "le_sabre_etincelle",
-      "name_key": "module.etincelle.name",
+      "id": "le_sabre_estoc",
+      "name_key": "module.estoc.name",
       "modules": [
-        "ligne",
-        "etincelle"
+        "point",
+        "estoc"
       ]
     },
     {
-      "id": "le_sabre_gel",
-      "name_key": "module.gel.name",
+      "id": "le_sabre_projection",
+      "name_key": "module.projection.name",
       "modules": [
-        "ligne",
-        "gel"
+        "point",
+        "projection"
       ]
     }
   ],

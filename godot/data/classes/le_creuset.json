@@ -33,24 +33,24 @@
       "id": "le_creuset_fiole",
       "name_key": "module.fiole.name",
       "modules": [
-        "soi",
+        "chemin",
         "fiole"
       ]
     },
     {
-      "id": "le_creuset_vapeur",
-      "name_key": "module.vapeur.name",
+      "id": "le_creuset_eboulement",
+      "name_key": "module.eboulement.name",
       "modules": [
-        "ligne",
-        "vapeur"
+        "point",
+        "eboulement"
       ]
     },
     {
-      "id": "le_creuset_etincelle",
-      "name_key": "module.etincelle.name",
+      "id": "le_creuset_ronce",
+      "name_key": "module.ronce.name",
       "modules": [
-        "ligne",
-        "etincelle"
+        "point",
+        "ronce"
       ]
     }
   ],

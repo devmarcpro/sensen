@@ -20,27 +20,27 @@
   ],
   "capacites": [
     {
-      "id": "le_rieur_pari",
-      "name_key": "module.pari.name",
+      "id": "le_rieur_botte",
+      "name_key": "module.botte.name",
       "modules": [
-        "ligne",
-        "pari"
+        "chemin",
+        "botte"
       ]
     },
     {
-      "id": "le_rieur_etincelle",
-      "name_key": "module.etincelle.name",
+      "id": "le_rieur_charge_d_epaule",
+      "name_key": "module.charge_d_epaule.name",
       "modules": [
-        "ligne",
-        "etincelle"
+        "diagonale",
+        "charge_d_epaule"
       ]
     },
     {
-      "id": "le_rieur_gel",
-      "name_key": "module.gel.name",
+      "id": "le_rieur_estoc",
+      "name_key": "module.estoc.name",
       "modules": [
-        "ligne",
-        "gel"
+        "point",
+        "estoc"
       ]
     }
   ],

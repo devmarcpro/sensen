@@ -6531,21 +6531,29 @@ func test_donjon_temps_a_l_action() -> void:
 	var nain41 := Etres.creer_personnage("creature.aventurier.name", "nain", "le_sabre", {}, 1000, prog41)
 	verifier(float(nain41.get("apparence", {}).get("echelle", 1.0)) < 1.0 and str(nain41.apparence.get("barbe", "aucune")) != "aucune", "le nain naît court et barbu, sans une ligne de code par race")
 
-	# Toute espèce est jouable (2026-08-31, point 44) : elle remplace le squelette, pas la classe
-	var prog44 := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
-	var loup44 := Etres.creer_personnage("creature.aventurier.name", "elfe", "le_sabre", {}, 1000, prog44)
-	var classe44 := str(loup44.classe)
-	Etres.appliquer_espece(loup44, "loup")
-	verifier(str(loup44.skeleton_template) == "quadrupede" and str(loup44.corps.silhouette) == "quadrupede", "jouer un loup change le squelette et la silhouette")
-	verifier(str(loup44.classe) == classe44 and not loup44.actions.is_empty(), "la classe reste, les actions naturelles du loup arrivent")
-	verifier(loup44.get("apparence", {}).is_empty(), "sans visage humanoïde, pas de loci de visage")
-	var especes44 := 0
-	for cid44: String in GameData.catalogues.creatures.keys():
-		var f44 := Etres.creer_personnage("creature.aventurier.name", "humain", "le_sabre", {}, 1000, prog44)
-		Etres.appliquer_espece(f44, cid44)
-		if not GameData.entree("rigs", str(f44.skeleton_template)).is_empty():
-			especes44 += 1
-	verifier(especes44 == GameData.catalogues.creatures.size(), "chaque espèce jouable a un rig au catalogue (%d / %d)" % [especes44, GameData.catalogues.creatures.size()])
+	# Les sorts de départ viennent de la classe et sont viables (2026-08-31, point 47)
+	var prog47 := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
+	var classes_ok := true
+	var modules_ok := true
+	for cid47: String in GameData.catalogues.classes.keys():
+		var cl47: Dictionary = GameData.entree("classes", cid47)
+		if cl47.get("capacites", []).size() != 3 or cl47.get("hotbar", []).is_empty():
+			classes_ok = false
+		for cap47 in cl47.get("capacites", []):
+			for m47 in cap47.modules:
+				if GameData.entree("modules", str(m47)).is_empty():
+					classes_ok = false
+	verifier(classes_ok, "chaque classe déclare trois capacités assemblables et son loadout")
+	var perso47 := Etres.creer_personnage("creature.aventurier.name", "humain", "le_sabre", {}, 1000, prog47)
+	var attendus47 := {}
+	for cap47b in GameData.entree("classes", "le_sabre").capacites:
+		for m47b in cap47b.modules:
+			attendus47[str(m47b)] = true
+	for m47c in perso47.get("modules_connus", []):
+		if not attendus47.has(str(m47c)):
+			modules_ok = false
+	verifier(perso47.capacites.size() == 3, "le personnage naît avec les trois sorts de sa classe")
+	verifier(not bool(GameData.config("combat_rules").modules.get("tout_au_depart", false)), "plus de kit complet de modules au départ : les livres font le reste")
 
 	# Sorts recommandés à la création (2026-08-31, point 38) : les modules existent et s'assemblent
 	var cfg38: Dictionary = GameData.config("creation")

@@ -1309,18 +1309,7 @@ func _fiche_apercu() -> Dictionary:
 	var classes: Array = main._classes_visibles()
 	var prog: Progression = Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
 	var f := Etres.creer_personnage("creature.aventurier.name", races[int(c.race) % races.size()], classes[int(c.classe) % classes.size()], c.points, int(c.annee), prog)
-	Etres.appliquer_espece(f, str(c.get("espece", "")))
 	return f
-
-
-## Les espèces jouables (designer, point 44) : « humanoïde » d'abord, puis toutes les créatures du catalogue.
-func _especes() -> Array:
-	var l: Array = [""]
-	var ids: Array = GameData.catalogues.creatures.keys()
-	ids.sort()
-	for cid in ids:
-		l.append(str(cid))
-	return l
 
 
 ## L'apparence de l'aperçu : le bloc de la race, recouvert des loci réglés à la main (points 39 et 41).
@@ -1373,11 +1362,6 @@ func _construire_creation() -> void:
 	entrees.append({"kind": "creation", "id": "nom"})
 	liste.add_item(tr("ui.creation.race_l").format({"race": tr(GameData.entree("races", fiche.race).name_key)}))
 	entrees.append({"kind": "creation", "id": "race"})
-	var esp := str(c.get("espece", ""))   # toute créature du catalogue est jouable (designer, point 44)
-	liste.add_item(tr("ui.creation.espece_l").format({
-		"espece": tr("ui.creation.espece_humanoide") if esp.is_empty() else tr(GameData.entree("creatures", esp).name_key),
-	}))
-	entrees.append({"kind": "creation", "id": "espece"})
 	liste.add_item(tr("ui.creation.classe_l").format({"classe": tr(GameData.entree("classes", fiche.classe).name_key)}))
 	entrees.append({"kind": "creation", "id": "classe"})
 	liste.add_item(tr("ui.creation.annee_l").format({"annee": int(c.annee), "element": tr("element." + str(fiche.signe.element)), "animal": tr("animal." + str(fiche.signe.animal))}))
@@ -1469,13 +1453,6 @@ func _detail_creation(id: String) -> String:
 		"points":
 			l.append(tr("ui.creation.points").format({"restants": pts.restants, "total": pts.total}))
 			l.append(tr("ui.creation.d_points").format({"max": pts.max}))
-		"espece":
-			var esp_d := str(main.creation.get("espece", ""))
-			if not esp_d.is_empty():
-				var def_d: Dictionary = GameData.entree("creatures", esp_d)
-				l.append("[b]%s[/b]" % tr(def_d.name_key))
-				l.append(tr("ui.creation.silhouette").format({"silhouette": str(def_d.corps.silhouette)}))
-			l.append(tr("ui.creation.d_espece"))
 		"commencer":
 			l.append(tr("ui.creation.d_commencer"))
 		_:
@@ -1520,11 +1497,6 @@ func _action_creation(id: String, sens: int) -> void:
 			c.race = posmod(int(c.race) + sens, GameData.catalogues.races.size())
 		"classe":
 			c.classe = posmod(int(c.classe) + sens, main._classes_visibles().size())
-		"espece":
-			var esps := _especes()
-			var i_esp := esps.find(str(c.get("espece", "")))
-			c["espece"] = str(esps[posmod(maxi(i_esp, 0) + sens, esps.size())])
-			c["apparence"] = {}   # les loci d'une espèce ne valent pas pour la suivante
 		"annee":
 			c.annee = int(c.annee) + sens
 		"depart":   # Départ : Camp / Donjon (designer, point 34)

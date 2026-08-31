@@ -106,6 +106,9 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 >
 > Autre règle du même jour : **plus de capacité spéciale au clic droit**. Le menu contextuel garde les gestes du monde — parler, apprivoiser, attaquer, descendre, traverser un portail — et perd tout ce qui était une capacité déguisée (saisir, mordre, rapt de tempo, affût, traversée de mur, relève, armes fantômes, attaque lourde). **Tout ce qui ressemble à un sort se fait avec des modules**, par la hotbar ou le composeur.
 
+> [!success] Décidé le 2026-08-31 — le bestiaire n'est plus jouable, la classe fait le départ (designer, point 47)
+> Trois règles remplacent celles du jour même, et le callout le plus récent l'emporte. **La ligne « Espèce » disparaît** de la création : jouer un loup ou un tengu est retiré — le bestiaire redevient ce qu'on affronte, pas ce qu'on incarne (le point 44 est annulé, `Etres.appliquer_espece` supprimé plutôt que laissé mort). **Les sorts par défaut de chaque classe sont refaits au banc** : `banc_classes.tscn` mesure les 88 noyaux avec leur meilleure forme, n'en retient que **23 viables** (au moins 1,0 PV/tick, 0,6 pour un soin) et compose trois capacités par classe — signature de la classe d'abord, puis un socle propre à son profil (arme, sort, soin) tiré par rotation pour que deux classes ne se ressemblent pas. **Le joueur ne commence qu'avec les modules de sa classe** : `tout_au_depart` passe à faux, et tout le reste du catalogue s'apprend désormais **dans les livres** — un livre, un module, définitif.
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

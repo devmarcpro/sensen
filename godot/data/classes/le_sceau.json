@@ -20,11 +20,11 @@
   ],
   "capacites": [
     {
-      "id": "le_sceau_balise",
-      "name_key": "module.balise.name",
+      "id": "le_sceau_aiguille",
+      "name_key": "module.aiguille.name",
       "modules": [
-        "ligne",
-        "balise"
+        "point",
+        "aiguille"
       ]
     },
     {
@@ -36,11 +36,11 @@
       ]
     },
     {
-      "id": "le_sceau_gel",
-      "name_key": "module.gel.name",
+      "id": "le_sceau_eboulement",
+      "name_key": "module.eboulement.name",
       "modules": [
-        "ligne",
-        "gel"
+        "point",
+        "eboulement"
       ]
     }
   ],

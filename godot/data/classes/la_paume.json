@@ -33,24 +33,24 @@
       "id": "la_paume_baume",
       "name_key": "module.baume.name",
       "modules": [
-        "ligne",
+        "chemin",
         "baume"
       ]
     },
     {
-      "id": "la_paume_communion",
-      "name_key": "module.communion.name",
+      "id": "la_paume_aiguille",
+      "name_key": "module.aiguille.name",
       "modules": [
-        "ligne",
-        "communion"
+        "point",
+        "aiguille"
       ]
     },
     {
-      "id": "la_paume_purge",
-      "name_key": "module.purge.name",
+      "id": "la_paume_etincelle",
+      "name_key": "module.etincelle.name",
       "modules": [
         "ligne",
-        "purge"
+        "etincelle"
       ]
     }
   ],

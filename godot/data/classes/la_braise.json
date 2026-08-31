@@ -33,27 +33,27 @@
   ],
   "capacites": [
     {
-      "id": "la_braise_trempe",
-      "name_key": "module.trempe.name",
+      "id": "la_braise_eboulement",
+      "name_key": "module.eboulement.name",
       "modules": [
         "point",
-        "trempe"
+        "eboulement"
       ]
     },
     {
-      "id": "la_braise_etincelle",
-      "name_key": "module.etincelle.name",
+      "id": "la_braise_ronce",
+      "name_key": "module.ronce.name",
       "modules": [
-        "ligne",
-        "etincelle"
+        "point",
+        "ronce"
       ]
     },
     {
-      "id": "la_braise_gel",
-      "name_key": "module.gel.name",
+      "id": "la_braise_fonte",
+      "name_key": "module.fonte.name",
       "modules": [
-        "ligne",
-        "gel"
+        "chemin",
+        "fonte"
       ]
     }
   ],

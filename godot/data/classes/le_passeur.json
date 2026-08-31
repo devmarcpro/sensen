@@ -20,27 +20,27 @@
   ],
   "capacites": [
     {
-      "id": "le_passeur_convocation",
-      "name_key": "module.convocation.name",
+      "id": "le_passeur_brasier",
+      "name_key": "module.brasier.name",
       "modules": [
-        "ligne",
-        "convocation"
+        "colonne",
+        "brasier"
       ]
     },
     {
-      "id": "le_passeur_portail",
-      "name_key": "module.portail.name",
+      "id": "le_passeur_flamme",
+      "name_key": "module.flamme.name",
       "modules": [
-        "ligne",
-        "portail"
+        "croix",
+        "flamme"
       ]
     },
     {
-      "id": "le_passeur_traversee",
-      "name_key": "module.traversee.name",
+      "id": "le_passeur_fosse",
+      "name_key": "module.fosse.name",
       "modules": [
-        "ligne",
-        "traversee"
+        "cone",
+        "fosse"
       ]
     }
   ],

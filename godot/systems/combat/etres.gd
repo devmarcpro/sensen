@@ -104,31 +104,25 @@ static func creer_personnage(nom_key: String, race_id: String, classe_id: String
 		"corps": {"stats": stats, "silhouette": "humanoide"}, "esprit": null, "ai_profile": "compagnon",
 		"actions": [], "equipement": classe.get("equipement", []).duplicate(), "ratelier": classe.get("ratelier", []).duplicate(),
 		"sac": ["station_etabli"],   # chaque personnage part avec un établi portatif (Stations de transformation, décidé le 2026-08-28)
-		"competences": classe.get("competences", {}).duplicate(), "capacites": [], "chain_gauge": true, "elements": null,
+		"competences": classe.get("competences", {}).duplicate(), "chain_gauge": true, "elements": null,
 		"rare_chance": 0.0, "teinte": [0.28, 0.62, 0.92], "tags": ["humanoide", "joueur"] + race.get("tags", []),
 		"potentiels": pot_base.duplicate(), "potentiels_base": pot_base, "xp_mult": float(race.get("xp_mult", 1.0)), "signe": signe,
 		"tags_acquis_race": race.get("tags_acquis", []).duplicate(),
 		"apparence": race.get("apparence", {}).duplicate(),   # loci visuels : la race donne le défaut, la création les règle
+		"capacites": classe.get("capacites", []).duplicate(true),   # les sorts de départ sont ceux de la classe (designer, point 47)
+		"hotbar": classe.get("hotbar", []).duplicate(true),         # et son loadout de hotbar
+		"modules_connus": _modules_de_classe(classe),               # et ses seuls modules : le reste s'apprend dans les livres
 	}
 
 
-## L'espèce choisie à la création (designer, point 44) : elle donne le squelette, la silhouette,
-## la teinte et les actions naturelles ; la classe, les points et les sorts restent ceux du joueur.
-## Le bloc `apparence` ne survit que si la nouvelle espèce a un visage (rig humanoïde).
-static func appliquer_espece(fiche: Dictionary, espece: String) -> void:
-	if espece.is_empty():
-		return
-	var def: Dictionary = GameData.entree("creatures", espece)
-	if def.is_empty():
-		return
-	fiche["espece"] = espece
-	fiche.skeleton_template = str(def.get("skeleton_template", fiche.skeleton_template))
-	fiche.corps.silhouette = str(def.corps.silhouette)
-	fiche.teinte = Array(def.get("teinte", fiche.teinte)).duplicate()
-	fiche.actions = def.get("actions", []).duplicate()
-	fiche["tags"] = Array(fiche.get("tags", [])) + Array(def.get("tags", []))
-	if str(def.corps.silhouette) != "humanoide":
-		fiche["apparence"] = {}
+## Les modules que la classe apporte : ceux de ses capacités de départ, sans doublon.
+static func _modules_de_classe(classe: Dictionary) -> Array:
+	var res: Array = []
+	for cap in classe.get("capacites", []):
+		for m in cap.get("modules", []):
+			if not (str(m) in res):
+				res.append(str(m))
+	return res
 
 
 ## Recalcule ce que l'équipement change (Résolveur de modificateurs : (base + Σ add) × Π mult) :

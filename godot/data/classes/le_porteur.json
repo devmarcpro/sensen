@@ -19,27 +19,27 @@
   ],
   "capacites": [
     {
-      "id": "le_porteur_ancrage",
-      "name_key": "module.ancrage.name",
+      "id": "le_porteur_projection",
+      "name_key": "module.projection.name",
       "modules": [
         "point",
-        "ancrage"
+        "projection"
       ]
     },
     {
-      "id": "le_porteur_empoigne",
-      "name_key": "module.empoigne.name",
+      "id": "le_porteur_flamme",
+      "name_key": "module.flamme.name",
       "modules": [
-        "point",
-        "empoigne"
+        "croix",
+        "flamme"
       ]
     },
     {
-      "id": "le_porteur_levitation",
-      "name_key": "module.levitation.name",
+      "id": "le_porteur_fosse",
+      "name_key": "module.fosse.name",
       "modules": [
-        "ligne",
-        "levitation"
+        "cone",
+        "fosse"
       ]
     }
   ],

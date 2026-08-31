@@ -19,27 +19,27 @@
   ],
   "capacites": [
     {
-      "id": "le_sablier_celerite",
-      "name_key": "module.celerite.name",
+      "id": "le_sablier_eclat",
+      "name_key": "module.eclat.name",
       "modules": [
-        "ligne",
-        "celerite"
+        "diagonale",
+        "eclat"
       ]
     },
     {
-      "id": "le_sablier_rapt_de_tempo",
-      "name_key": "module.rapt_de_tempo.name",
+      "id": "le_sablier_epine",
+      "name_key": "module.epine.name",
       "modules": [
-        "ligne",
-        "rapt_de_tempo"
+        "chemin",
+        "epine"
       ]
     },
     {
-      "id": "le_sablier_torpeur",
-      "name_key": "module.torpeur.name",
+      "id": "le_sablier_aiguille",
+      "name_key": "module.aiguille.name",
       "modules": [
-        "ligne",
-        "torpeur"
+        "point",
+        "aiguille"
       ]
     }
   ],
