@@ -14,11 +14,19 @@
     "_defaut": 100
   },
   "talent": "dissimulation",
-  "points_creation_bonus": 15,
+  "points_creation_bonus": 4,
   "tags": [
     "cache"
   ],
   "capacites": [
+    {
+      "id": "l_ombre_voile",
+      "name_key": "module.voile.name",
+      "modules": [
+        "point",
+        "voile"
+      ]
+    },
     {
       "id": "l_ombre_projection",
       "name_key": "module.projection.name",
@@ -33,14 +41,6 @@
       "modules": [
         "chemin",
         "botte"
-      ]
-    },
-    {
-      "id": "l_ombre_charge_d_epaule",
-      "name_key": "module.charge_d_epaule.name",
-      "modules": [
-        "diagonale",
-        "charge_d_epaule"
       ]
     }
   ],
@@ -57,5 +57,6 @@
       "type": "capacite",
       "ref": 2
     }
-  ]
+  ],
+  "signature": "voile"
 }

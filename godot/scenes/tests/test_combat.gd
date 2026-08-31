@@ -6553,6 +6553,24 @@ func test_donjon_temps_a_l_action() -> void:
 		if not attendus47.has(str(m47c)):
 			modules_ok = false
 	verifier(perso47.capacites.size() == 3, "le personnage naît avec les trois sorts de sa classe")
+	var sig_ok := true   # la signature de chaque classe est toujours dans son loadout (designer, point 48)
+	for cid48: String in GameData.catalogues.classes.keys():
+		var cl48: Dictionary = GameData.entree("classes", cid48)
+		var sig48 := str(cl48.get("signature", ""))
+		if sig48.is_empty():
+			continue
+		var trouve48 := false
+		for cap48 in cl48.get("capacites", []):
+			if sig48 in Array(cap48.modules):
+				trouve48 = true
+		if not trouve48:
+			sig_ok = false
+	verifier(sig_ok, "chaque classe garde sa signature dans ses sorts de départ")
+	# Stats tirées aux dés (designer, point 48) : sans tirage, la base de repli ; avec, elle s'applique
+	var cfg48: Dictionary = GameData.config("creation")
+	verifier(str(cfg48.get("stats_des", "")).contains("d"), "les stats de base sont une notation de dés (%s)" % str(cfg48.get("stats_des", "")))
+	var tire48 := Etres.creer_personnage("creature.aventurier.name", "humain", "le_sabre", {}, 1000, prog47, {"force": 8, "dexterite": 3, "endurance": 3, "volonte": 3, "perception": 3, "charisme": 3})
+	verifier(int(tire48.corps.stats.force) == 8 + int(GameData.entree("classes", "le_sabre").bonus_stats.get("force", 0)), "le dé de Force devient la base, bonus de classe en plus")
 	verifier(not bool(GameData.config("combat_rules").modules.get("tout_au_depart", false)), "plus de kit complet de modules au départ : les livres font le reste")
 
 	# Sorts recommandés à la création (2026-08-31, point 38) : les modules existent et s'assemblent

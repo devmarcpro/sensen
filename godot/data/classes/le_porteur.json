@@ -13,7 +13,7 @@
     "_defaut": 100
   },
   "talent": "saisie",
-  "points_creation_bonus": 15,
+  "points_creation_bonus": 4,
   "tags": [
     "cache"
   ],
@@ -56,5 +56,6 @@
       "type": "capacite",
       "ref": 2
     }
-  ]
+  ],
+  "signature": "projection"
 }

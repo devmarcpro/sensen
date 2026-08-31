@@ -9907,6 +9907,9 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 		if score > meilleur_score:
 			meilleur_score = score
 			meilleure = nom
+	# Aggro (designer 2026-08-31, point 48) : une bête qui a une cible hostile en vue ne flâne pas.
+	if not cible.is_empty() and cible.vivant and ennemis(e, cible) and meilleure in ["errer", "routine", "attendre", ""]:
+		meilleure = "poursuivre"
 	match meilleure:
 		"attaquer":
 			_ia_attaquer(e, cible, tick)
@@ -10255,7 +10258,12 @@ func _bonus_chaine_ia(e: Dictionary, elements: Dictionary) -> float:
 func _ia_attaquer(e: Dictionary, cible: Dictionary, tick: int) -> void:
 	var att := _meilleure_attaque(e, cible)
 	if att.is_empty():
-		_attendre(e, tick)
+		# Aggro (designer 2026-08-31, point 48) : hors de portée, on s'approche — attendre laissait
+		# les bêtes tourner en rond à deux cases du joueur.
+		if not cible.is_empty() and cible.vivant:
+			_ia_pas_vers(e, cible.pos, tick, str(cible.id))
+		else:
+			_attendre(e, tick)
 		return
 	_engager_combat(e, cible)
 	if att.type == "creature":

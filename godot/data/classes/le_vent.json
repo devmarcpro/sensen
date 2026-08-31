@@ -15,7 +15,7 @@
     "_defaut": 100
   },
   "talent": "sans_maitre",
-  "points_creation_bonus": 15,
+  "points_creation_bonus": 4,
   "tags": [
     "visible"
   ],
@@ -58,5 +58,6 @@
       "type": "capacite",
       "ref": 2
     }
-  ]
+  ],
+  "signature": ""
 }

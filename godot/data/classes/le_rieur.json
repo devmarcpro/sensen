@@ -14,11 +14,19 @@
     "_defaut": 100
   },
   "talent": "deux_queues",
-  "points_creation_bonus": 15,
+  "points_creation_bonus": 4,
   "tags": [
     "cache"
   ],
   "capacites": [
+    {
+      "id": "le_rieur_pari",
+      "name_key": "module.pari.name",
+      "modules": [
+        "point",
+        "pari"
+      ]
+    },
     {
       "id": "le_rieur_botte",
       "name_key": "module.botte.name",
@@ -33,14 +41,6 @@
       "modules": [
         "diagonale",
         "charge_d_epaule"
-      ]
-    },
-    {
-      "id": "le_rieur_estoc",
-      "name_key": "module.estoc.name",
-      "modules": [
-        "point",
-        "estoc"
       ]
     }
   ],
@@ -57,5 +57,6 @@
       "type": "capacite",
       "ref": 2
     }
-  ]
+  ],
+  "signature": "pari"
 }

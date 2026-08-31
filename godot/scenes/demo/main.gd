@@ -218,7 +218,11 @@ func _nouvelle_partie() -> void:
 	titre_ouvert = false
 	minimap.visible = true
 	var cfg_c: Dictionary = GameData.config("creation")
-	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": int(cfg_c.get("annee_defaut", 1000)), "nom": "", "apparence": {}}
+	var des_c := Des.new(randi())   # les stats de base sont tirées aux dés (designer, point 48)
+	var tirage_c := {}
+	for st_c in STATS:
+		tirage_c[st_c] = des_c.jet(str(cfg_c.get("stats_des", "1d6+2")))
+	creation = {"race": 0, "classe": 0, "stat": 0, "points": {}, "annee": int(cfg_c.get("annee_defaut", 1000)), "nom": "", "apparence": {}, "tirage": tirage_c}
 	titre_ouvert = true   # l'écran de création est un vrai écran (Écrans d'interface, 2026-08-30) : rien ne tourne derrière
 	minimap.visible = false
 	ui.text = ""
@@ -313,7 +317,7 @@ func _creer_personnage() -> void:
 	races.sort()
 	classes.sort()
 	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
-	var fiche := Etres.creer_personnage("creature.aventurier.name", races[creation.race % races.size()], classes[creation.classe % classes.size()], creation.points, int(creation.annee), prog)
+	var fiche := Etres.creer_personnage("creature.aventurier.name", races[creation.race % races.size()], classes[creation.classe % classes.size()], creation.points, int(creation.annee), prog, creation.get("tirage", {}))
 	# Personnalisation (Écrans d'interface, 2026-08-30) : le nom choisi et la teinte du personnage.
 	var nom_choisi := str(creation.get("nom", "")).strip_edges()
 	if not nom_choisi.is_empty():
@@ -1281,8 +1285,6 @@ func _draw() -> void:
 	var g := sim.grille
 	var j := joueur()
 	# Superpositions translucides sur les tuiles (atteignables, télégraphes, survol, forme visée).
-	for t in _zones_telegraphes().keys():
-		_losange(t, Color(1.0, 0.2, 0.1, 0.5))
 	if survol.x >= 0:
 		_losange(survol, Color(1, 1, 1, 0.22))
 	for b in sim.bombes:

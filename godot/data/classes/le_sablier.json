@@ -13,11 +13,19 @@
     "_defaut": 100
   },
   "talent": "maitre_du_tempo",
-  "points_creation_bonus": 15,
+  "points_creation_bonus": 4,
   "tags": [
     "cache"
   ],
   "capacites": [
+    {
+      "id": "le_sablier_celerite",
+      "name_key": "module.celerite.name",
+      "modules": [
+        "point",
+        "celerite"
+      ]
+    },
     {
       "id": "le_sablier_eclat",
       "name_key": "module.eclat.name",
@@ -32,14 +40,6 @@
       "modules": [
         "chemin",
         "epine"
-      ]
-    },
-    {
-      "id": "le_sablier_aiguille",
-      "name_key": "module.aiguille.name",
-      "modules": [
-        "point",
-        "aiguille"
       ]
     }
   ],
@@ -56,5 +56,6 @@
       "type": "capacite",
       "ref": 2
     }
-  ]
+  ],
+  "signature": "celerite"
 }

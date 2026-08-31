@@ -14,11 +14,19 @@
     "_defaut": 100
   },
   "talent": "graveur",
-  "points_creation_bonus": 15,
+  "points_creation_bonus": 4,
   "tags": [
     "cache"
   ],
   "capacites": [
+    {
+      "id": "le_sceau_balise",
+      "name_key": "module.balise.name",
+      "modules": [
+        "point",
+        "balise"
+      ]
+    },
     {
       "id": "le_sceau_aiguille",
       "name_key": "module.aiguille.name",
@@ -33,14 +41,6 @@
       "modules": [
         "ligne",
         "etincelle"
-      ]
-    },
-    {
-      "id": "le_sceau_eboulement",
-      "name_key": "module.eboulement.name",
-      "modules": [
-        "point",
-        "eboulement"
       ]
     }
   ],
@@ -57,5 +57,6 @@
       "type": "capacite",
       "ref": 2
     }
-  ]
+  ],
+  "signature": "balise"
 }

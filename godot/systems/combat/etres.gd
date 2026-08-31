@@ -87,12 +87,15 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 ## Crée la fiche d'un personnage (Création de personnage) : 6 stats à base 5 + 30 points répartis
 ## (+ bonus de classe), bonus de race et de classe, kit, compétences de départ, potentiels de base
 ## par race + classe + signe. Le résultat est une fiche comme celles de data/creatures/.
-static func creer_personnage(nom_key: String, race_id: String, classe_id: String, repartition: Dictionary, annee: int, prog: Progression) -> Dictionary:
+static func creer_personnage(nom_key: String, race_id: String, classe_id: String, repartition: Dictionary, annee: int, prog: Progression, tirage: Dictionary = {}) -> Dictionary:
 	var race: Dictionary = GameData.entree("races", race_id)
 	var classe: Dictionary = GameData.entree("classes", classe_id)
 	var stats := {}
 	for st in ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]:
-		stats[st] = 5 + int(repartition.get(st, 0)) + int(race.get("bonus_stats", {}).get(st, 0)) + int(classe.get("bonus_stats", {}).get(st, 0))
+		# La base d'une stat est tirée aux dés à la création (designer 2026-08-31, point 48) ;
+		# sans tirage (PNJ, tests), la valeur de repli du catalogue s'applique.
+		var base_st := int(tirage.get(st, int(GameData.config("creation").get("stat_base_defaut", 5))))
+		stats[st] = base_st + int(repartition.get(st, 0)) + int(race.get("bonus_stats", {}).get(st, 0)) + int(classe.get("bonus_stats", {}).get(st, 0))
 	var signe := prog.signe(annee)
 	var pot_base := {}
 	for cle: String in prog.competences.keys():

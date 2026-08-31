@@ -14,11 +14,19 @@
     "_defaut": 100
   },
   "talent": "affut",
-  "points_creation_bonus": 15,
+  "points_creation_bonus": 4,
   "tags": [
     "cache"
   ],
   "capacites": [
+    {
+      "id": "l_engrenage_tourelle",
+      "name_key": "module.tourelle.name",
+      "modules": [
+        "point",
+        "tourelle"
+      ]
+    },
     {
       "id": "l_engrenage_epine",
       "name_key": "module.epine.name",
@@ -33,14 +41,6 @@
       "modules": [
         "point",
         "aiguille"
-      ]
-    },
-    {
-      "id": "l_engrenage_etincelle",
-      "name_key": "module.etincelle.name",
-      "modules": [
-        "ligne",
-        "etincelle"
       ]
     }
   ],
@@ -57,5 +57,6 @@
       "type": "capacite",
       "ref": 2
     }
-  ]
+  ],
+  "signature": "tourelle"
 }

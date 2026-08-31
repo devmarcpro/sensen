@@ -1308,7 +1308,7 @@ func _fiche_apercu() -> Dictionary:
 	races.sort()
 	var classes: Array = main._classes_visibles()
 	var prog: Progression = Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
-	var f := Etres.creer_personnage("creature.aventurier.name", races[int(c.race) % races.size()], classes[int(c.classe) % classes.size()], c.points, int(c.annee), prog)
+	var f := Etres.creer_personnage("creature.aventurier.name", races[int(c.race) % races.size()], classes[int(c.classe) % classes.size()], c.points, int(c.annee), prog, c.get("tirage", {}))
 	return f
 
 
@@ -1369,7 +1369,8 @@ func _construire_creation() -> void:
 	liste.add_item(tr("ui.creation.points_l").format({"restants": pts.restants, "total": pts.total}))
 	entrees.append({"kind": "creation", "id": "points"})
 	for st in main.STATS:
-		liste.add_item(tr("ui.creation.stat_l").format({"stat": tr("stat." + st), "valeur": int(fiche.corps.stats[st]), "points": int(c.points.get(st, 0))}))
+		liste.add_item(tr("ui.creation.stat_l").format({"stat": tr("stat." + st), "valeur": int(fiche.corps.stats[st]), "points": int(c.points.get(st, 0))})
+			+ tr("ui.creation.stat_de").format({"de": int(c.get("tirage", {}).get(st, 0))}))
 		entrees.append({"kind": "creation", "id": "stat:" + st})
 	var app: Dictionary = _apparence_apercu(fiche)   # apparence : les loci visuels (designer, points 39 et 41)
 	for ligne in _lignes_apparence(not app.is_empty()):

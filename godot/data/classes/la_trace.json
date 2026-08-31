@@ -33,6 +33,14 @@
   ],
   "capacites": [
     {
+      "id": "la_trace_traque",
+      "name_key": "module.traque.name",
+      "modules": [
+        "point",
+        "traque"
+      ]
+    },
+    {
       "id": "la_trace_projection",
       "name_key": "module.projection.name",
       "modules": [
@@ -46,14 +54,6 @@
       "modules": [
         "chemin",
         "botte"
-      ]
-    },
-    {
-      "id": "la_trace_charge_d_epaule",
-      "name_key": "module.charge_d_epaule.name",
-      "modules": [
-        "diagonale",
-        "charge_d_epaule"
       ]
     }
   ],
@@ -78,5 +78,6 @@
       "type": "capacite",
       "ref": 2
     }
-  ]
+  ],
+  "signature": "traque"
 }

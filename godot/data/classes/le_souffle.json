@@ -30,6 +30,14 @@
   ],
   "capacites": [
     {
+      "id": "le_souffle_meditation",
+      "name_key": "module.meditation.name",
+      "modules": [
+        "soi",
+        "meditation"
+      ]
+    },
+    {
       "id": "le_souffle_etincelle",
       "name_key": "module.etincelle.name",
       "modules": [
@@ -43,14 +51,6 @@
       "modules": [
         "point",
         "eboulement"
-      ]
-    },
-    {
-      "id": "le_souffle_ronce",
-      "name_key": "module.ronce.name",
-      "modules": [
-        "point",
-        "ronce"
       ]
     }
   ],
@@ -71,5 +71,6 @@
       "type": "capacite",
       "ref": 2
     }
-  ]
+  ],
+  "signature": "meditation"
 }

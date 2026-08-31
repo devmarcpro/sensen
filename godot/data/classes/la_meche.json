@@ -27,6 +27,14 @@
   ],
   "capacites": [
     {
+      "id": "la_meche_bombe",
+      "name_key": "module.bombe.name",
+      "modules": [
+        "point",
+        "bombe"
+      ]
+    },
+    {
       "id": "la_meche_ronce",
       "name_key": "module.ronce.name",
       "modules": [
@@ -40,14 +48,6 @@
       "modules": [
         "chemin",
         "fonte"
-      ]
-    },
-    {
-      "id": "la_meche_gel",
-      "name_key": "module.gel.name",
-      "modules": [
-        "colonne",
-        "gel"
       ]
     }
   ],
@@ -68,5 +68,6 @@
       "type": "capacite",
       "ref": 2
     }
-  ]
+  ],
+  "signature": "bombe"
 }

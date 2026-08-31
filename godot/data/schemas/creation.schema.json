@@ -48,6 +48,12 @@
           }
         }
       }
+    },
+    "stats_des": {
+      "type": "string"
+    },
+    "stat_base_defaut": {
+      "type": "integer"
     }
   },
   "required": [

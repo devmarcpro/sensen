@@ -1,7 +1,7 @@
 {
-  "_doc": "L'écran de création du personnage (Écrans d'interface, designer 2026-08-30) : points à répartir, plafond par stat, année par défaut, et les teintes proposées (personnalisation — la couleur du personnage, avant les sprites du designer). Les sorts recommandés viennent du banc d'essai (scenes/tests/banc_sorts.tscn, designer 2026-08-31) : score = dégâts par tick ; le joueur en coche au plus max_sorts. La couleur du corps n'est plus réglée ici : depuis le 2026-08-31 (point 43), c'est le teint des loci visuels (apparence.json) qui peint le personnage entier, nu sous son équipement.",
-  "points_base": 30,
-  "max_par_stat": 10,
+  "_doc": "L'écran de création du personnage (Écrans d'interface, designer 2026-08-30) : points à répartir, plafond par stat, année par défaut, et les teintes proposées (personnalisation — la couleur du personnage, avant les sprites du designer). Les sorts recommandés viennent du banc d'essai (scenes/tests/banc_sorts.tscn, designer 2026-08-31) : score = dégâts par tick ; le joueur en coche au plus max_sorts. La couleur du corps n'est plus réglée ici : depuis le 2026-08-31 (point 43), c'est le teint des loci visuels (apparence.json) qui peint le personnage entier, nu sous son équipement. Les stats de départ sont tirées aux dés (stats_des) puis complétées par points_base points à répartir (designer 2026-08-31, point 48).",
+  "points_base": 8,
+  "max_par_stat": 12,
   "annee_defaut": 1000,
   "nom_max": 16,
   "max_sorts": 3,
@@ -127,5 +127,7 @@
       ],
       "score": 1.63
     }
-  ]
+  ],
+  "stats_des": "1d6+2",
+  "stat_base_defaut": 5
 }

@@ -33,6 +33,14 @@
   ],
   "capacites": [
     {
+      "id": "la_braise_trempe",
+      "name_key": "module.trempe.name",
+      "modules": [
+        "point",
+        "trempe"
+      ]
+    },
+    {
       "id": "la_braise_eboulement",
       "name_key": "module.eboulement.name",
       "modules": [
@@ -46,14 +54,6 @@
       "modules": [
         "point",
         "ronce"
-      ]
-    },
-    {
-      "id": "la_braise_fonte",
-      "name_key": "module.fonte.name",
-      "modules": [
-        "chemin",
-        "fonte"
       ]
     }
   ],
@@ -74,5 +74,6 @@
       "type": "capacite",
       "ref": 2
     }
-  ]
+  ],
+  "signature": "trempe"
 }

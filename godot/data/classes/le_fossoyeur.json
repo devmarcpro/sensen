@@ -13,11 +13,19 @@
     "_defaut": 100
   },
   "talent": "releveur",
-  "points_creation_bonus": 15,
+  "points_creation_bonus": 4,
   "tags": [
     "cache"
   ],
   "capacites": [
+    {
+      "id": "le_fossoyeur_releve",
+      "name_key": "module.releve.name",
+      "modules": [
+        "point",
+        "releve"
+      ]
+    },
     {
       "id": "le_fossoyeur_banquise",
       "name_key": "module.banquise.name",
@@ -32,14 +40,6 @@
       "modules": [
         "chemin",
         "roche"
-      ]
-    },
-    {
-      "id": "le_fossoyeur_brasier",
-      "name_key": "module.brasier.name",
-      "modules": [
-        "colonne",
-        "brasier"
       ]
     }
   ],
@@ -56,5 +56,6 @@
       "type": "capacite",
       "ref": 2
     }
-  ]
+  ],
+  "signature": "releve"
 }

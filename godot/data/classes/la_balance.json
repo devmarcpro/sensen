@@ -31,6 +31,14 @@
   ],
   "capacites": [
     {
+      "id": "la_balance_estimation",
+      "name_key": "module.estimation.name",
+      "modules": [
+        "point",
+        "estimation"
+      ]
+    },
+    {
       "id": "la_balance_etincelle",
       "name_key": "module.etincelle.name",
       "modules": [
@@ -44,14 +52,6 @@
       "modules": [
         "point",
         "eboulement"
-      ]
-    },
-    {
-      "id": "la_balance_ronce",
-      "name_key": "module.ronce.name",
-      "modules": [
-        "point",
-        "ronce"
       ]
     }
   ],
@@ -72,5 +72,6 @@
       "type": "capacite",
       "ref": 2
     }
-  ]
+  ],
+  "signature": "estimation"
 }

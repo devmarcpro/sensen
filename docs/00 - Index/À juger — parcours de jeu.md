@@ -124,6 +124,9 @@ etape: 10
 
 Un callout daté dans la note liée (`> [!success] Tranché le <date>`) — la boucle autonome le lit avant de coder. Une réponse « ça va » suffit pour fermer un point ; une valeur chiffrée suffit pour un réglage.
 
+> [!question] À juger — l'échelle des stats après le passage aux dés (2026-08-31, point 48)
+> Les stats de base sont désormais tirées (`1d6+2`) et il ne reste que **8 points** à répartir (12 pour une classe cachée, l'ancien +15 divisé pour tenir l'échelle). Trois questions de game feel restent au designer : **le jet est-il assez large** (3-8 donne peu d'écart entre deux personnages) ; **8 points suffisent-ils** pour sentir un choix, ou faut-il monter ; et **faut-il pouvoir relancer** le tirage à la création — je ne l'ai pas ajouté, le refus des relances étant une décision de design, mais un tirage subi à la création n'est pas la même chose qu'une relance en combat.
+
 ## Liens
 - **Dépend de** : [[Vers la production]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]
