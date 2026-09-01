@@ -47,7 +47,9 @@ Méthode, non négociable :
   édites un script de test), tools/audit_donnees.py, tools/i18n_couverture.py,
   tools/check_vault.py, et une capture d'écran REGARDÉE. Si un écran change,
   refais sa capture du README.
-- Une pré-version tous les ~10 commits.
+- Une pré-version tous les ~10 commits, **avec son exécutable** : construire depuis le tag
+  (`git checkout <tag>`, export « Windows Desktop », retour sur main), zipper, joindre à la release.
+  Une release sans binaire n'est pas une release — vérifier avec `gh release view <tag> --json assets`.
 - Un test ciblé se lance avec --seul <fragment> : 20 secondes au lieu de 7
   minutes. Ne reste jamais bloqué à attendre la suite complète.
 

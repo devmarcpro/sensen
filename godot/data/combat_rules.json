@@ -1171,6 +1171,7 @@
       "_doc": "La distance affaiblit (designer 2026-09-01) : puissance x 1 / (1 + coef x (portee_max - 1)), bornee par un plancher. S'ajoute a la dilution par la surface.",
       "coef": 0.06,
       "plancher": 0.4
-    }
+    },
+    "increment_repetition": 1
   }
 }

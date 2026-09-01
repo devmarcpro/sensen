@@ -96,6 +96,10 @@ Le même vocabulaire produit une attaque, un contrôle de zone, un piège et un 
 > **La distance affaiblit** : une charge est multipliée par `1 / (1 + coef × (portée − 1))` (`combat_rules.surface.portee.attenuation`), en plus de la dilution par la surface. À portée 1 rien ne change, à 6 il reste 77 %, à 12 il reste 60 %. Frapper loin coûtait déjà des ticks ; ça coûte maintenant de la puissance. Les deux atténuations se composent : un carré de neuf tuiles lancé à douze cases frappe à un cinquième.
 
 
+> [!success] Décidé le 2026-09-01 — répéter un module l'incrémente d'un cran, il ne le double plus (designer)
+> « plutôt que doubler on va faire par incrément ». Une copie supplémentaire ajoutait la **valeur entière** du module : `Jet court` deux fois portait à 6, trois fois à 9 ; une `Diagonale` répétée gagnait 4 tuiles d'un coup. Le cadran sautait donc de palier en palier au lieu de se régler. Une copie ajoute désormais **un cran** — une tuile de portée, un point de taille (`combat_rules.surface.increment_repetition`) — en payant chaque fois le surcoût en ticks du module. `Jet court` répété donne 3, 4, 5, 6… au prix de deux ticks par cran, et l'on choisit sa distance exacte au lieu de la subir.
+
+
 ## Liens
 - **Dépend de** : [[Vocabulaire des modules — six axes]], [[Structure compétences-modules-slots]]
 - **Alimente** : [[Familles de capacités de la grille]], [[Modules]], [[Jauge de chaîne Wu Xing]]

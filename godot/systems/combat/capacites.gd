@@ -60,6 +60,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 		"elements": {}, "effets": [], "conditions": [], "drapeaux": {}, "parametres": {},
 		"liaisons": [], "charge_suivante": {}, "charges_sup": [], "formes_sup": [], "fois": 1, "portee_posee": false,
 	}
+	var pas_rep := int(GameData.config("combat_rules").get("surface", {}).get("increment_repetition", 1))   # répéter incrémente d'un cran (2026-09-01)
 	var alternance := false   # Alternance (Modules) : la séquence a droit à deux noyaux
 	var noyaux := 0
 	for id0 in sequence:
@@ -158,7 +159,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 					# La même forme répétée est une forme plus grande (même règle que le noyau répété) : taille et
 					# portée additionnées, le surcoût de ticks payé une fois de plus.
 					if str(plan.forme.id) == id:
-						plan.taille += int(m.taille_base)
+						plan.taille += pas_rep
 						plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 						continue
 					var forme_r: Dictionary = {}
@@ -166,7 +167,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 						if str(f_r.get("id", "")) == id:
 							forme_r = f_r
 					if not forme_r.is_empty():
-						forme_r.taille += int(m.taille_base)
+						forme_r.taille += pas_rep
 						plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 						continue
 					# Deux formes : les tuiles s'additionnent (union), la portée retenue est la plus longue.
@@ -188,7 +189,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				# distance est un cadran, pas un choix parmi six paliers.
 				var pb: Array = m.get("portee_base", [1, 1])
 				if bool(plan.get("portee_posee", false)):
-					plan.portee.y += int(pb[1]) - int(pb[0]) + 1
+					plan.portee.y += pas_rep
 					plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 					continue
 				plan.portee = Vector2i(int(pb[0]), int(pb[1]))
