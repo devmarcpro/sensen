@@ -157,6 +157,7 @@ func _ready() -> void:
 	_lancer("test_donjon")
 	_lancer("test_donjon_temps_a_l_action")
 	_lancer("test_portes_une_par_ouverture")
+	_lancer("test_chaine_a_trois_etapes")
 	_lancer("test_types_ennemis")
 	_lancer("test_loot_assemble")
 	_lancer("test_budgets")
@@ -7444,3 +7445,15 @@ func _cellule_eau(s, autour: Vector2i) -> Vector2i:
 				if not s.monde.surface.terre_a(c):
 					return c
 	return autour + Vector2i(1000, 1000)
+
+## Un sort à PLUSIEURS étapes (question du designer, 2026-09-01) : le moteur imbrique les déclencheurs —
+## chaque déclencheur encapsule tout ce qui le suit, donc une séquence peut enchaîner N charges.
+func test_chaine_a_trois_etapes() -> void:
+	var cap := Capacites.new(GameData.catalogues["modules"])
+	var p := cap.assembler(["jet_long", "point", "etincelle", "a_l_impact", "croix", "bruine", "a_l_impact", "ligne", "gel"], 5, "1d4", {})
+	verifier(p.erreurs.is_empty(), "une séquence à trois étapes s'assemble sans erreur")
+	var e1: Dictionary = p.get("charge_suivante", {})
+	var e2: Dictionary = e1.get("charge_suivante", {})
+	verifier(not e1.is_empty() and str(e1.geometrie) == "croix", "étape 2 : la croix part à l'impact de l'étincelle")
+	verifier(not e2.is_empty() and str(e2.geometrie) == "ligne", "étape 3 : la ligne part à l'impact de la croix")
+	verifier(int(p.ticks) > int(e1.ticks) and int(e1.ticks) > int(e2.ticks), "chaque étape ajoute ses ticks au total (%d > %d > %d)" % [int(p.ticks), int(e1.ticks), int(e2.ticks)])
