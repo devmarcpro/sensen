@@ -6285,6 +6285,22 @@ func test_camp() -> void:
 
 # ---------------------------------------------------------------- Étape 7.2 : faim, nourriture, poids porté
 
+	# Voyager coûte le temps d'une marche (2026-09-01, point 59) : la distance en tuiles × le coût d'un pas.
+	var s_v2 := Simulation.new(23)
+	s_v2.planete_options = _planete_test()
+	s_v2.charger_camp()
+	var j_v: Dictionary = s_v2.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var n_sec_v: int = s_v2.monde.taille / 32
+	var cible_v: Vector2i = s_v2.monde.cellule_camp + Vector2i(2, 0)
+	s_v2.monde.explores[Vector2i(cible_v.x * n_sec_v, cible_v.y * n_sec_v)] = true
+	var t_av := s_v2.horloge_monde.ticks
+	if s_v2.voyager(j_v, cible_v):
+		var paye := s_v2.horloge_monde.ticks - t_av
+		var attendu := 2 * int(GameData.config("planete").taille_cellule) * s_v2.regles.ticks_deplacement(int(s_v2.regles.r.deplacement.cout_base), j_v.get("competences_eff", {}), false)
+		verifier(paye >= attendu / 2 and paye <= attendu * 2, "voyager coûte une marche : %d ticks pour 2 cellules (marche ≈ %d)" % [paye, attendu])
+		verifier(paye > 0 and j_v.compteur > t_av, "le voyage occupe le personnage d'autant de ticks")
+	s_v2.monde.fermer()
+
 func test_faim_et_poids() -> void:
 	var s := Simulation.new(29)
 	s.charger_camp()

@@ -35,6 +35,11 @@ La couche stratégique : une vue abstraite de la même grille, servant de voyage
 > [!success] Ajusté le 2026-08-30 — 192 ticks par cellule
 > Avec le retour aux cellules de 64 × 64 ([[Claims et persistance]]), `voyage.ticks_par_cellule` passe de 384 à **192** : toujours 3 ticks par tuile, la règle n'a pas changé, la cellule si.
 
+> [!success] Décidé et codé le 2026-09-01 — la carte devient une vraie carte (designer, point 59)
+> Quatre changements demandés, tous en données ou en dessin, aucun asset. **Chaque cellule est peinte en 5 × 5 sous-points** (`carte.sous_points`) : la surface est échantillonnée cinq fois par côté au lieu d'une, si bien qu'une **côte, une lisière ou un flanc de montagne se lisent dans la case elle-même** au lieu d'un aplat de biome. **L'avatar du joueur** est dessiné sur sa cellule — le même paperdoll que dans le jeu, en miniature, pas un point. La carte se **zoome et se dézoome** (molette, de 4 à 40 pixels par cellule) et se **fait glisser** (bouton du milieu ou clic droit maintenu), les flèches faisant toujours défiler.
+>
+> Enfin, **voyager coûte le temps d'une vraie marche** : le forfait `ticks_par_cellule` disparaît au profit du produit *distance en tuiles × coût d'un pas*, où le coût d'un pas est celui du jeu — la vitesse du personnage, sa charge et le terrain compris. Traverser trois cellules de montagne chargé coûte donc bien plus que trois cellules de plaine à vide, et la route garde sa remise.
+
 ## Liens
 - **Dépend de** : [[Décision — Monde fini, continents et océan]], [[Grille continue]], [[Unification macro-micro]], [[Génération par couches de bruit]]
 - **Alimente** : [[Début de partie]], [[Boucle de jeu]], [[Donjons — structure et intégration]], [[Minimap et brouillard de guerre]]

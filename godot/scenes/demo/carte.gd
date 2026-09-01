@@ -6,8 +6,8 @@ extends CanvasLayer
 ## voyage rapide en cliquant une cellule déjà explorée (Carte du monde : le raccourci) ; en mode
 ## « départ », le clic choisit la case de départ (Début de partie). Dessinée par code, sans asset.
 
-const CASE := 18
-const N := 33                 # cellules par côté
+var case_px := 18.0           # taille d'une cellule à l'écran : la molette la change (designer, point 59)
+var decalage := Vector2.ZERO   # défilement fin, en pixels (le glisser à la souris)
 
 var main: Node
 var ouverte := false
@@ -16,6 +16,8 @@ var mode := "voyage"          # "voyage" | "depart"
 var centre := Vector2i.ZERO   # cellule au centre de la carte
 var dessin: Control
 var titre: Label
+var _glisse := false
+var avatar: Paperdoll   # le joueur, dessiné sur sa cellule (designer, point 59)
 
 
 func _ready() -> void:
@@ -48,19 +50,30 @@ func ouvrir(p_mode: String = "voyage") -> void:
 func fermer() -> void:
 	ouverte = false
 	visible = false
+	if avatar != null:
+		avatar.visible = false
+
+
+## Combien de cellules tiennent à l'écran, au zoom courant (impair : le centre est une case).
+func _n() -> int:
+	var taille := dessin.get_viewport_rect().size
+	var n := int(minf(taille.x, taille.y - 40.0) / case_px)
+	return maxi(5, n if n % 2 == 1 else n - 1)
 
 
 func _origine() -> Vector2:
 	var taille := dessin.get_viewport_rect().size
-	return Vector2((taille.x - N * CASE) * 0.5, (taille.y - N * CASE) * 0.5 + 10)
+	var n := _n()
+	return Vector2((taille.x - n * case_px) * 0.5, (taille.y - n * case_px) * 0.5 + 10) + decalage
 
 
 func _cellule_sous(p: Vector2) -> Vector2i:
 	var o := _origine()
-	var c := Vector2i(int(floor((p.x - o.x) / CASE)), int(floor((p.y - o.y) / CASE)))
-	if c.x < 0 or c.y < 0 or c.x >= N or c.y >= N:
+	var n := _n()
+	var c := Vector2i(int(floor((p.x - o.x) / case_px)), int(floor((p.y - o.y) / case_px)))
+	if c.x < 0 or c.y < 0 or c.x >= n or c.y >= n:
 		return Vector2i(-1, -1)
-	return centre + c - Vector2i(N / 2, N / 2)
+	return centre + c - Vector2i(n / 2, n / 2)
 
 
 func _dessiner() -> void:
@@ -69,13 +82,16 @@ func _dessiner() -> void:
 		return
 	var surf = sim.monde.surface
 	var o := _origine()
-	dessin.draw_rect(Rect2(o - Vector2(6, 6), Vector2(N * CASE + 12, N * CASE + 12)), Color(0.05, 0.05, 0.07, 0.96))
+	dessin.draw_rect(Rect2(o - Vector2(6, 6), Vector2(_n() * case_px + 12, _n() * case_px + 12)), Color(0.05, 0.05, 0.07, 0.96))
 	var j: Dictionary = main.joueur()
 	var cj: Vector2i = sim.monde.cellule_de(j.pos) if not j.is_empty() else centre
-	for y in N:
-		for x in N:
-			var cell := centre + Vector2i(x, y) - Vector2i(N / 2, N / 2)
-			var r := Rect2(o + Vector2(x * CASE, y * CASE), Vector2(CASE - 1, CASE - 1))
+	var tc: int = int(GameData.config('planete').taille_cellule)
+	var sp_min: int = int(GameData.config('styles').get('carte', {}).get('sous_points_min_px', 10))
+	var n := _n()
+	for y in n:
+		for x in n:
+			var cell := centre + Vector2i(x, y) - Vector2i(n / 2, n / 2)
+			var r := Rect2(o + Vector2(x * case_px, y * case_px), Vector2(case_px - 1.0, case_px - 1.0))
 			var info: Dictionary = surf.resume_cellule(cell)
 			var col: Color = Color.html(str(info.couleur))
 			if not info.terre:
@@ -83,7 +99,10 @@ func _dessiner() -> void:
 			var exploree: bool = sim.monde.cellule_exploree(cell)
 			if mode == "voyage" and not exploree:
 				col = col.darkened(0.55)
-			dessin.draw_rect(r, col)
+			if case_px >= float(sp_min):   # une cellule = 5 × 5 sondes : les côtes et les reliefs se lisent
+				_peindre_cellule(cell, r, col, surf, tc)
+			else:
+				dessin.draw_rect(r, col)
 			var roy: Dictionary = surf.royaume_de(cell) if info.terre else {}
 			if not roy.is_empty():
 				var teinte := Color.from_hsv(float(hash(str(roy.id)) % 360) / 360.0, 0.7, 0.9, 0.35)
@@ -95,34 +114,37 @@ func _dessiner() -> void:
 				1: dessin.draw_rect(r, Color(1.0, 0.5, 0.1, 0.25))
 				2: dessin.draw_rect(r, Color(1.0, 0.1, 0.1, 0.4))
 			if info.poi.get("donjon", false):
-				dessin.draw_rect(Rect2(r.position + Vector2(5, 5), Vector2(CASE - 11, CASE - 11)), Color(0.1, 0.05, 0.1))
-				dessin.draw_rect(Rect2(r.position + Vector2(5, 5), Vector2(CASE - 11, CASE - 11)), Color(0.9, 0.8, 0.3), false, 1.0)
+				dessin.draw_rect(Rect2(r.position + Vector2(5, 5), Vector2(case_px - 11.0, case_px - 11.0)), Color(0.1, 0.05, 0.1))
+				dessin.draw_rect(Rect2(r.position + Vector2(5, 5), Vector2(case_px - 11.0, case_px - 11.0)), Color(0.9, 0.8, 0.3), false, 1.0)
 			if info.poi.get("filon_majeur", false):
-				dessin.draw_circle(r.position + Vector2(CASE * 0.5, CASE * 0.5), 3.0, Color(0.8, 0.85, 0.9))
+				dessin.draw_circle(r.position + Vector2(case_px * 0.5, case_px * 0.5), 3.0, Color(0.8, 0.85, 0.9))
 			if sim.monde.claims.has(cell):
 				dessin.draw_rect(r.grow(-1), Color(0.3, 1.0, 0.4, 0.9), false, 2.0)
 			elif sim.monde.revendicable(cell, sim.horloge_monde.ticks):
 				dessin.draw_rect(r.grow(-2), Color(0.3, 1.0, 0.4, 0.35), false, 1.0)
 			if cell == cj:
 				dessin.draw_rect(r.grow(-3), Color(0.3, 0.8, 1.0), false, 2.0)
-	dessin.draw_string(ThemeDB.fallback_font, o + Vector2(0, N * CASE + 20), tr("ui.carte.legende"), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.85, 0.85, 0.8))
+				_placer_avatar(r)
+	dessin.draw_string(ThemeDB.fallback_font, o + Vector2(0, _n() * case_px + 20), tr("ui.carte.legende"), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.85, 0.85, 0.8))
 	# Les routes : un trait ocre entre cellules reliées (Unification macro-micro).
-	for y in N:
-		for x in N:
-			var cell := centre + Vector2i(x, y) - Vector2i(N / 2, N / 2)
+	n = _n()
+	for y in n:
+		for x in n:
+			var cell := centre + Vector2i(x, y) - Vector2i(n / 2, n / 2)
 			if not surf.terre_a(cell):
 				continue
-			var c0 := o + Vector2(x * CASE + CASE * 0.5, y * CASE + CASE * 0.5)
+			var c0 := o + Vector2(x * case_px + case_px * 0.5, y * case_px + case_px * 0.5)
 			for v in surf.route_de(cell):
 				var dv: Vector2i = v - cell
-				dessin.draw_line(c0, c0 + Vector2(dv.x, dv.y) * CASE * 0.5, Color(0.85, 0.7, 0.4, 0.9), 2.0)
+				dessin.draw_line(c0, c0 + Vector2(dv.x, dv.y) * case_px * 0.5, Color(0.85, 0.7, 0.4, 0.9), 2.0)
 	# Les noms des royaumes sur leur capitale (la carte politique se lit avant toute visite — Génération des royaumes PNJ).
-	for y in N:
-		for x in N:
-			var cell := centre + Vector2i(x, y) - Vector2i(N / 2, N / 2)
+	n = _n()
+	for y in n:
+		for x in n:
+			var cell := centre + Vector2i(x, y) - Vector2i(n / 2, n / 2)
 			var roy: Dictionary = surf.royaume_de(cell) if surf.terre_a(cell) else {}
 			if not roy.is_empty() and roy.capital_poi == cell:
-				dessin.draw_string(ThemeDB.fallback_font, o + Vector2(x * CASE - 10, y * CASE - 3), str(roy.nom), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1.0, 0.95, 0.7))
+				dessin.draw_string(ThemeDB.fallback_font, o + Vector2(x * case_px - 10.0, y * case_px - 3.0), str(roy.nom), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1.0, 0.95, 0.7))
 	# Le survol : biome, danger, royaume, dirigeant, relation.
 	if survol != Vector2i(-1, -1):
 		var info_s: Dictionary = surf.resume_cellule(survol)
@@ -141,7 +163,49 @@ func _dessiner() -> void:
 			var jr: Dictionary = main.joueur()
 			var etat := tr("ui.carte.vacance") if sim.monde.vacances.has(str(roy_s.id)) else tr("relation." + sim.relation_royaume(jr, roy_s))
 			texte += tr("ui.carte.survol_royaume").format({"nom": roy_s.nom, "gouv": tr(GameData.entree("governments", str(roy_s.government_type)).name_key), "taille": tr("kingdom.taille." + str(roy_s.taille)), "n": roy_s.territory_cells.size(), "etat": etat, "capitale": tr("ui.carte.capitale") if roy_s.capital_poi == survol else ""})
-		dessin.draw_string(ThemeDB.fallback_font, o + Vector2(0, N * CASE + 38), texte, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.95, 0.9, 0.7))
+		dessin.draw_string(ThemeDB.fallback_font, o + Vector2(0, _n() * case_px + 38.0), texte, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.95, 0.9, 0.7))
+
+
+## Une cellule peinte en 5 × 5 sous-points (designer 2026-09-01, point 59) : la surface est
+## échantillonnée cinq fois par côté, de sorte qu'une côte, une lisière ou un flanc se lisent
+## DANS la case. La couleur de base reste celle du biome : les sondes la nuancent, mer comprise.
+## L'avatar du joueur sur sa cellule (designer 2026-09-01, point 59) : le paperdoll du jeu, réduit,
+## pas une pastille — on doit se reconnaître sur la carte comme on se reconnaît sur le terrain.
+func _placer_avatar(r: Rect2) -> void:
+	var j: Dictionary = main.joueur()
+	if j.is_empty():
+		return
+	if avatar == null:
+		avatar = Paperdoll.new()
+		dessin.add_child(avatar)
+	avatar.configurer(j, GameData.entree("rigs", str(j.get("skeleton_template", "humanoide"))), main.sim.items, GameData.catalogues.functionalities, GameData.config("palette_materiaux"))
+	var ech := clampf(case_px / 26.0, 0.25, 1.4)   # il grandit avec le zoom, sans jamais déborder
+	avatar.scale = Vector2(ech, ech)
+	avatar.position = r.position + Vector2(r.size.x * 0.5, r.size.y * 0.92)
+	avatar.visible = true
+	avatar.queue_redraw()
+
+
+func _peindre_cellule(cell: Vector2i, r: Rect2, col: Color, surf, tc: int) -> void:
+	var sp: int = int(GameData.config("styles").get("carte", {}).get("sous_points", 5))
+	var pas := r.size.x / float(sp)
+	var mer := Color(0.10, 0.22, 0.42)
+	for sy in sp:
+		for sx in sp:
+			var px := cell.x * tc + int((sx + 0.5) / sp * tc)
+			var py := cell.y * tc + int((sy + 0.5) / sp * tc)
+			var t: Dictionary = surf.tectonique_a(px, py)
+			var alt := float(t.get("altitude", 0.0))
+			var c := col
+			if alt < 0.30:                       # sous le niveau de la mer : la profondeur se voit
+				c = mer.lerp(Color(0.20, 0.38, 0.62), clampf(alt / 0.30, 0.0, 1.0))
+			elif alt < 0.38:                     # la frange littorale
+				c = col.lerp(Color(0.85, 0.80, 0.60), 0.45)
+			elif alt > 0.72:                     # les hautes terres
+				c = col.lerp(Color(0.93, 0.93, 0.96), clampf((alt - 0.72) / 0.28, 0.0, 1.0) * 0.8)
+			else:
+				c = col.lerp(Color.BLACK, (0.55 - alt) * 0.25)
+			dessin.draw_rect(Rect2(r.position + Vector2(sx * pas, sy * pas), Vector2(pas + 0.5, pas + 0.5)), c)
 
 
 func _entree(ev: InputEvent) -> void:
@@ -150,6 +214,29 @@ func _entree(ev: InputEvent) -> void:
 		if c != survol:
 			survol = c
 			dessin.queue_redraw()
+		return
+	if ev is InputEventMouseButton and (ev.button_index == MOUSE_BUTTON_WHEEL_UP or ev.button_index == MOUSE_BUTTON_WHEEL_DOWN) and ev.pressed:
+		var vise := _cellule_sous(ev.position)   # on zoome vers la cellule sous la souris
+		case_px = clampf(case_px * (1.15 if ev.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / 1.15), 4.0, 40.0)
+		if vise != Vector2i(-1, -1):
+			centre = vise
+			decalage = Vector2.ZERO
+		dessin.queue_redraw()
+		return
+	if ev is InputEventMouseButton and ev.button_index in [MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT]:
+		_glisse = ev.pressed   # la carte se fait glisser
+		return
+	if ev is InputEventMouseMotion and _glisse:
+		decalage += ev.relative
+		var pas_c := int(decalage.x / case_px)   # au-delà d'une case, on décale la fenêtre elle-même
+		if pas_c != 0:
+			centre.x -= pas_c
+			decalage.x -= pas_c * case_px
+		var pas_l := int(decalage.y / case_px)
+		if pas_l != 0:
+			centre.y -= pas_l
+			decalage.y -= pas_l * case_px
+		dessin.queue_redraw()
 		return
 	if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
 		var cell := _cellule_sous(ev.position)

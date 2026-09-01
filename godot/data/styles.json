@@ -106,5 +106,10 @@
       "herbe": "vegetal"
     },
     "materiau_mur_defaut": "granit"
+  },
+  "carte": {
+    "_doc": "La carte du monde (designer 2026-09-01, point 59) : chaque cellule est peinte en sous_points × sous_points sondes, tant que la case dépasse sous_points_min_px pixels.",
+    "sous_points": 5,
+    "sous_points_min_px": 10
   }
 }

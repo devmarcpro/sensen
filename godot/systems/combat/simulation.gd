@@ -1472,7 +1472,11 @@ func voyager(e: Dictionary, cell: Vector2i) -> bool:
 		EventBus.emettre(&"journal", [&"journal.voyage_impossible", {}])
 		return false
 	var d := maxi(absi(cell.x - monde.cellule_de(e.pos).x), absi(cell.y - monde.cellule_de(e.pos).y))
-	var cout := d * int(GameData.config("planete").voyage.ticks_par_cellule)
+	# Le voyage coûte ce que coûterait la marche (designer 2026-09-01, point 59) : la distance en
+	# TUILES multipliée par le coût d'un pas de cet être — sa vitesse, sa charge, comprises.
+	var tuiles := d * int(GameData.config("planete").taille_cellule)
+	var pas := regles.ticks_deplacement(int(regles.r.deplacement.cout_base), e.get("competences_eff", e.get("competences", {})), false)
+	var cout := int(round(float(tuiles) * float(pas) * float(poids_de(e).facteur)))
 	if not monde.surface.route_de(cell).is_empty() and not monde.surface.route_de(monde.cellule_de(e.pos)).is_empty():   # par la route (Carte du monde)
 		cout = int(round(float(cout) * float(GameData.config("planete").voyage.get("route_mult", 1.0))))
 	var ec := monde.cellule(cell)
