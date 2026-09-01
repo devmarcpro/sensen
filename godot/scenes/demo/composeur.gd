@@ -10,8 +10,8 @@ extends VBoxContainer
 const CARTE := Vector2(48, 48)   # cartes et slots : des carrés, de la même taille (uniformité, 2026-08-30 ; 48 px à la demande du designer)
 const SLOT := Vector2(48, 48)
 const COLONNES := 8
-const GLYPHES := {"portee": "⟿", "forme:cible": "◇", "forme:lanceur": "◈", "noyau": "●", "modificateur": "▲", "condition": "?", "declencheur": "⚡", "liaison": "∞"}
-const ORDRE_TYPES: Array[String] = ["forme:cible", "forme:lanceur", "noyau", "modificateur", "condition", "declencheur", "liaison"]
+const GLYPHES := {"portee": "⟿", "forme": "◇", "noyau": "●", "modificateur": "▲", "condition": "?", "declencheur": "⚡", "liaison": "∞"}
+const ORDRE_TYPES: Array[String] = ["portee", "forme", "noyau", "modificateur", "condition", "declencheur", "liaison"]
 ## Les groupes de la composition, dans l'ordre de la séquence : tout ce qui précède le déclencheur est la charge
 ## principale, tout ce qui le suit (« suite », libre) est sa charge différée (Six types de modules).
 const GROUPES: Array[String] = ["portee", "forme", "noyau", "modificateur", "condition", "liaison", "declencheur", "suite"]
@@ -456,8 +456,6 @@ func touche(ev: InputEventKey) -> bool:
 static func type_de(m: String) -> String:
 	var md: Dictionary = GameData.catalogues.modules.get(m, {})
 	var t := str(md.get("module_type", ""))
-	if t == "forme":
-		return "forme:" + str(md.get("origine", "cible"))
 	return t
 
 
@@ -571,7 +569,7 @@ class SlotModule extends Control:
 			var r := Rect2(Vector2(2, 2), Composeur.SLOT - Vector2(4, 4))
 			draw_rect(r, Color(0.1, 0.1, 0.12, 1.0))
 			draw_rect(r, Color(0.6, 0.55, 0.4, 0.9), false, 1.0)
-			var g_glyphe: String = Composeur.GLYPHES.get("forme:cible" if groupe == "forme" else groupe, "·")
+			var g_glyphe: String = Composeur.GLYPHES.get(groupe, "·")
 			draw_string(ThemeDB.fallback_font, Vector2(Composeur.SLOT.x * 0.5 - 7, Composeur.SLOT.y * 0.5 + 6), g_glyphe, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.35, 0.35, 0.35))
 		else:
 			Composeur.dessiner_carte(self, Composeur.SLOT, module, -1, 0, 1.0)

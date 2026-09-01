@@ -1647,7 +1647,6 @@ module.gel.name,Gel
 module.gravier.name,Gravier
 module.gravite.name,Gravité
 module.heure.name,Heure
-module.horizon.name,Horizon
 module.intemperie.name,Intempérie
 module.isolement.name,Isolement
 module.levitation.name,Lévitation
@@ -2153,8 +2152,7 @@ bonus.taille,taille
 bonus.mult,×
 bonus.ressource_mult,ressource ×
 journal.bombes_posees,"{nom} pose {n} charge(s), amorcées dans {retard} ticks"
-type_module.forme:cible,Formes — à distance
-type_module.forme:lanceur,Formes — depuis soi
+type_module.forme,Formes
 type_module.portee,Portées
 type_module.noyau,Noyaux
 type_module.modificateur,Modificateurs

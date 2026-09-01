@@ -11,8 +11,7 @@
   "geometrie": "sillage",
   "surcout_ticks": 2,
   "taille_base": 3,
-  "origine": "cible",
-  "famille": "À distance",
+  "famille": "Formes",
   "style": "neutre",
   "portee_defaut": [
     1,

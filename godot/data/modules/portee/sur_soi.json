@@ -1,6 +1,6 @@
 {
   "id": "sur_soi",
-  "nom": "Soi",
+  "nom": "Sur soi",
   "name_key": "module.portee_sur_soi.name",
   "module_type": "portee",
   "description": "sur soi — aucune distance",
@@ -15,5 +15,6 @@
   "surcout_ticks": -2,
   "ligne_de_vue": true,
   "famille": "Portée",
-  "style": "neutre"
+  "style": "neutre",
+  "origine": "lanceur"
 }

@@ -11,8 +11,7 @@
   "geometrie": "vague",
   "surcout_ticks": 4,
   "taille_base": 5,
-  "origine": "lanceur",
-  "famille": "Depuis soi",
+  "famille": "Formes",
   "style": "neutre",
   "portee_defaut": [
     1,

@@ -368,8 +368,8 @@ for mid, m in modules_cat.items():
         probs["declencheur sans effet"].append(mid)
     elif t == "modificateur" and ef and not (set(ef) & set(CLES_MOD)):
         probs["modificateur dont aucune cle n'est lue par l'assembleur"].append("%s -> %s" % (mid, list(ef)))
-    elif t == "forme" and str(m.get("origine", "")) not in ("cible", "lanceur"):
-        probs["forme sans origine (cible | lanceur)"].append(mid)
+    elif t == "portee" and str(m.get("origine", "")) not in ("cible", "lanceur"):
+        probs["portee sans origine (cible | lanceur)"].append(mid)
     elif t == "forme" and str(m.get("geometrie", "")) not in GEOMETRIES_GEREES:
         probs["forme -> geometrie que le code ne gere pas"].append("%s -> %s" % (mid, m.get("geometrie")))
     elif t == "forme" and (m.get("geometrie") is None or m.get("portee_defaut") is None):

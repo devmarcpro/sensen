@@ -173,9 +173,15 @@ func liberer(p: Vector2i) -> void:
 	occupants.erase(idx(p))
 
 
-## Distance de Chebyshev — la mesure des portées sur la grille.
+## Distance de Tchebychev — la mesure du CONTACT et du déplacement : deux cases en diagonale sont voisines.
 static func distance(a: Vector2i, b: Vector2i) -> int:
 	return maxi(absi(a.x - b.x), absi(a.y - b.y))
+
+
+## La mesure d'une PORTÉE (designer 2026-09-01) : euclidienne, arrondie. Une boule de Tchebychev est un
+## carré — la zone de lancer en devenait carrée, contre l'anneau rond que dessine l'aperçu.
+static func portee_entre(a: Vector2i, b: Vector2i) -> int:
+	return int(round(sqrt(float((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)))))
 
 
 # ---------------------------------------------------------------- déplacement

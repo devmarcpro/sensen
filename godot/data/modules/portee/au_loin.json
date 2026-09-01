@@ -1,6 +1,6 @@
 {
   "id": "au_loin",
-  "nom": "Horizon",
+  "nom": "Au loin",
   "name_key": "module.portee_au_loin.name",
   "module_type": "portee",
   "description": "jusqu'à douze tuiles, à vue — très long à lancer",
@@ -15,5 +15,6 @@
   "surcout_ticks": 10,
   "ligne_de_vue": true,
   "famille": "Portée",
-  "style": "neutre"
+  "style": "neutre",
+  "origine": "cible"
 }

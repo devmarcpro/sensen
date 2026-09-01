@@ -71,6 +71,14 @@ Le même vocabulaire produit une attaque, un contrôle de zone, un piège et un 
 > **Compatibilité** : un sort sans module de portée retombe sur la `portee_defaut` de sa forme, désormais **courte** (le contact, ou la longueur propre aux formes qui partent du lanceur — cône, ligne, vague). Les sorts déjà composés restent donc valides, mais frappent de près : atteindre le fond de la salle demande d'y consacrer un module et des ticks. C'est exactement l'échange qui manquait.
 
 
+> [!success] Décidé le 2026-09-01 — l'origine passe de la forme à la portée (designer)
+> « il faut refaire les formes pour qu'il n'y ait pas de différence entre formes centrées sur la tuile visée et partant du lanceur, vu que c'est le module de portée qui s'occupe de ça ». Juste : depuis que la portée est un module, garder deux familles de formes revenait à décider deux fois de la même chose. Une forme n'est plus qu'une **géométrie et une taille** — un cône est un cône, où qu'on l'ancre. C'est la **portée** qui dit où la figure se pose : `sur_soi` l'ancre sur le lanceur, les cinq autres sur la tuile visée. Les deux dossiers `forme/cible` et `forme/lanceur` fusionnent en un seul, le composeur n'a plus qu'une section « Formes », et le champ `origine` quitte les seize formes pour rejoindre les six portées. **Conséquence de jeu** : un cône ou une vague se posent désormais **à distance** si on les paie — ce qui était impossible — et un carré ou une croix se posent **sur soi** avec `sur_soi`, ce qui ne l'était pas non plus.
+
+
+> [!success] Retiré le 2026-09-01 — la forme **Horizon** (designer)
+> « horizon est beaucoup trop puissant, on retire ». Les planches de combinaisons l'avaient montré : `horizon` touchait **toutes les entités en vue** quelle que soit la portée qu'on lui associait — la combinaison la moins chère (`contact`, +0 tick) donnait donc la portée maximale, et le module de portée ne servait plus à rien. Il devenait aussi la seule forme dont le prix ne dépendait pas de ce qu'elle couvrait. La forme disparaît du catalogue ; sa géométrie reste dans le code, inutilisée, le temps qu'on soit sûr de ne pas vouloir la réintroduire encadrée. Il reste quinze formes.
+
+
 ## Liens
 - **Dépend de** : [[Vocabulaire des modules — six axes]], [[Structure compétences-modules-slots]]
 - **Alimente** : [[Familles de capacités de la grille]], [[Modules]], [[Jauge de chaîne Wu Xing]]

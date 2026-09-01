@@ -355,6 +355,46 @@ func _ready() -> void:
 			for m in seq:
 				scene.sim.crediter_module(jc, str(m), 9)
 			scene.ecrans.sequence_composee = seq
+	if "--planche-combinaisons" in args and scene.sim != null:
+		# Toutes les combinaisons portée × forme, en une planche par portée (designer 2026-09-01) : on
+		# recompose la séquence, on laisse une image se dessiner, et on découpe l'aperçu dans la fenêtre.
+		cible = 1 << 30   # la capture ordinaire ne doit pas quitter pendant que la planche se construit
+		var jp2: Dictionary = scene.joueur()
+		var portees: Array = []
+		var formes: Array = []
+		for mid: String in GameData.catalogues.modules.keys():
+			var md: Dictionary = GameData.catalogues.modules[mid]
+			if str(md.get("module_type", "")) == "portee":
+				portees.append(mid)
+			elif str(md.get("module_type", "")) == "forme":
+				formes.append(mid)
+		portees.sort()
+		formes.sort()
+		for m2 in portees + formes + ["etincelle"]:
+			scene.sim.crediter_module(jp2, str(m2), 9)
+		scene.ecrans.ouvrir("composer")
+		var titre_r := Rect2i(40, 48, 470, 22)     # « COMPOSER — Portée → Forme → Noyau »
+		var ap_r := Rect2i(700, 745, 235, 262)     # la grille d'aperçu et sa légende
+		var tuile := Vector2i(maxi(titre_r.size.x, ap_r.size.x), titre_r.size.y + ap_r.size.y + 6)
+		for ip in portees.size():
+			var cols := 4
+			var lignes := int(ceil(float(formes.size()) / float(cols)))
+			var planche := Image.create(tuile.x * cols, tuile.y * lignes, false, Image.FORMAT_RGBA8)
+			planche.fill(Color(0.05, 0.05, 0.06))
+			for iff in formes.size():
+				scene.ecrans.sequence_composee = [portees[ip], formes[iff], "etincelle"]
+				scene.ecrans.rafraichir()
+				await scene.get_tree().process_frame
+				await scene.get_tree().process_frame
+				var vue := scene.get_viewport().get_texture().get_image()
+				vue.convert(Image.FORMAT_RGBA8)   # la fenetre rend en RGB8 : blit_rect exige le meme format
+				var ou := Vector2i((iff % cols) * tuile.x, (iff / cols) * tuile.y)
+				planche.blit_rect(vue, titre_r, ou)
+				planche.blit_rect(vue, ap_r, ou + Vector2i(0, titre_r.size.y + 6))
+			planche.save_png("%s/portee_%s.png" % [sortie.get_base_dir(), str(portees[ip])])
+			print("planche : ", portees[ip])
+		get_tree().quit()
+		return
 	for i2 in args.size():   # --ecran inventaire|atelier|feuille|menu : l'écran ouvert — après le chargement
 		if args[i2] == "--ecran" and i2 + 1 < args.size():
 			scene.ecrans.ouvrir(args[i2 + 1])

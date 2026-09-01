@@ -1035,7 +1035,6 @@ module.gel.name,Freeze
 module.gravier.name,Gravel
 module.gravite.name,Gravity
 module.heure.name,Hour
-module.horizon.name,Horizon
 module.intemperie.name,Foul Weather
 module.isolement.name,Isolation
 module.levitation.name,Levitation
@@ -2144,8 +2143,7 @@ bonus.taille,size
 bonus.mult,x
 bonus.ressource_mult,resource x
 journal.bombes_posees,"{nom} lays {n} charge(s), primed in {retard} ticks"
-type_module.forme:cible,Shapes — at range
-type_module.forme:lanceur,Shapes — from self
+type_module.forme,Shapes
 type_module.portee,Ranges
 type_module.noyau,Cores
 type_module.modificateur,Modifiers

@@ -36,6 +36,10 @@ Les règles générales du combat : pas de jet de toucher, la géométrie décid
 > « avant de lancer un sort la zone où le sort peut être placé devrait être en vert ». Jusqu'ici, une capacité visée ne montrait sa forme **que sous le curseur** : il fallait promener la souris pour découvrir jusqu'où on pouvait poser le sort, et une tuile refusée ne se distinguait qu'après coup. Dès qu'une capacité est visée, **toutes les tuiles où elle peut être placée** s'allument en vert pâle (`capacite_visable` par tuile, dans le carré de sa portée maximale) ; la forme visée continue de se dessiner par-dessus, en bleu, sous le curseur. Une portée nulle (`soi`) n'allume que la case du lanceur.
 
 
+> [!success] Décidé le 2026-09-01 — une portée est un disque, plus un carré (designer)
+> « on voit sur les captures que la portée n'est pas bonne, ça ne devrait pas être un carré ». C'était exact et visible : la zone verte formait un carré parfait alors que l'aperçu dessinait, juste à côté, un **anneau rond**. La cause : `Grille.distance` est une distance de Tchebychev (le maximum des deux écarts), et une boule de Tchebychev **est** un carré. Elle reste la mesure du **contact et du déplacement** — deux cases en diagonale sont bien voisines. Mais la **portée d'une capacité** se mesure désormais en **distance euclidienne arrondie** (`Grille.portee_entre`) : à portée 6, une cible en diagonale est à 8 cases de vol d'oiseau, donc hors de portée — ce que le carré autorisait. Le disque est ce que l'anneau de l'aperçu promettait depuis le début.
+
+
 ## Liens
 - **Dépend de** : [[Action-time à ticks]], [[Grille continue]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[Zones de coup par dénivelé]], [[Garde en posture]], [[Attaque lourde et télégraphe]], [[XP de combat]], [[Pipeline de résolution du combat]]

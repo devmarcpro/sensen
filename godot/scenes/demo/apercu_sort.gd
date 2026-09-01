@@ -97,7 +97,7 @@ func _draw() -> void:
 	var cible := cible_courante()
 	var pc := o + Vector2((cible.x + 0.5) * CASE, (cible.y + 0.5) * CASE)
 	if visee_souris.x >= 0 and str(plan.get("origine", "cible")) == "cible":   # hors de portée : la visée le dit
-		var dist := Grille.distance(lanceur, cible)
+		var dist := Grille.portee_entre(lanceur, cible)
 		if dist > int(portee.y) or dist < int(portee.x):
 			draw_line(pc + Vector2(-CASE * 0.4, -CASE * 0.4), pc + Vector2(CASE * 0.4, CASE * 0.4), Color(1, 0.3, 0.3, 0.9), 1.5)
 			draw_line(pc + Vector2(-CASE * 0.4, CASE * 0.4), pc + Vector2(CASE * 0.4, -CASE * 0.4), Color(1, 0.3, 0.3, 0.9), 1.5)
@@ -135,5 +135,5 @@ func _couleur_element() -> Color:
 func _dans_portee(t: Vector2i) -> bool:
 	var lanceur := Vector2i(COTE / 2, COTE / 2)
 	var portee: Vector2i = plan.get("portee", Vector2i(0, 1))
-	var d := Grille.distance(lanceur, t)
+	var d := Grille.portee_entre(lanceur, t)
 	return d >= int(portee.x) and d <= int(portee.y)

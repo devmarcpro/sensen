@@ -2845,7 +2845,7 @@ func test_creation_de_sorts() -> void:
 		par_type[t].append(str(mid))
 	for t in par_type.keys():
 		par_type[t].sort()
-	verifier(par_type.get("noyau", []).size() >= 86 and par_type.get("forme", []).size() == 16, "le catalogue : %d noyaux, %d formes" % [par_type.get("noyau", []).size(), par_type.get("forme", []).size()])
+	verifier(par_type.get("noyau", []).size() >= 86 and par_type.get("forme", []).size() == 15 and par_type.get("portee", []).size() == 6, "le catalogue : %d noyaux, %d formes, %d portees" % [par_type.get("noyau", []).size(), par_type.get("forme", []).size(), par_type.get("portee", []).size()])
 
 	# 1. chaque noyau, seul : un plan complet et cohérent
 	var noyaux_ko: Array[String] = []
@@ -3182,13 +3182,16 @@ func test_assemblage_sans_limite() -> void:
 	verifier(s.bombes.size() == t_folie and float(s.bombes[0].puissance) == 80.0, "une charge deux fois plus forte par tuile de l'union : %d bombes" % s.bombes.size())
 	verifier(s._facteur_surface(j, p_folie, j.pos + Vector2i(2, 0)) == t_folie, "et le prix × %d tuiles" % t_folie)
 	s.bombes.clear()
-	# 5. deux familles de formes : un Cône accepte un clic lointain (direction), un Point non (portée)
-	var p_cone: Dictionary = plan_de.call(["cone", "etincelle"])
-	var p_point: Dictionary = plan_de.call(["point", "etincelle"])
+	# 5. L'origine ne vient plus de la forme mais de la PORTÉE (designer 2026-09-01) : le même cône part
+	# du lanceur avec `sur_soi`, et se pose sur la tuile visée avec `jet_long`.
+	var p_cone: Dictionary = plan_de.call(["sur_soi", "cone", "etincelle"])
+	var p_cone_loin: Dictionary = plan_de.call(["jet_long", "cone", "etincelle"])
+	var p_point: Dictionary = plan_de.call(["contact", "point", "etincelle"])
 	var loin: Vector2i = j.pos + Vector2i(5, 0)
-	verifier(str(p_cone.origine) == "lanceur" and str(p_point.origine) == "cible", "Cône part du lanceur, Point est projeté")
-	verifier(s.capacite_visable(j, p_cone, loin), "un cône de portée %d accepte un clic à 5 tuiles : c'est une direction" % int(p_cone.portee.y))
-	verifier(not s.capacite_visable(j, p_point, loin) or int(p_point.portee.y) >= 5, "un point de portée %d refuse un clic à 5 tuiles" % int(p_point.portee.y))
+	verifier(str(p_cone.origine) == "lanceur" and str(p_cone_loin.origine) == "cible", "la portée décide de l'ancrage : le même cône part de soi ou se pose au loin")
+	verifier(str(p_point.origine) == "cible", "une portée à distance projette la figure")
+	verifier(s.capacite_visable(j, p_cone, loin), "ancré sur le lanceur, un clic lointain n'est qu'une direction")
+	verifier(not s.capacite_visable(j, p_point, loin), "un point au contact refuse un clic à 5 tuiles")
 	verifier(not s.capacite_visable(j, p_cone, j.pos), "sa propre tuile n'est pas une direction")
 	# 6. Écaille : immunité à l'élément choisi, vulnérabilité à celui qu'il domine ; Trempe : l'arme passe au Feu
 	loup.statuts.clear()

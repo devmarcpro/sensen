@@ -175,7 +175,6 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 					continue
 				plan.forme = m
 				plan.geometrie = str(m.geometrie)
-				plan.origine = str(m.get("origine", "cible"))   # d'où part la forme (Six types de modules)
 				plan.taille = int(m.taille_base)
 				# La portée est un module à part depuis le 2026-09-01 : sans lui, la forme retombe sur sa
 				# portée par défaut, courte. Un module de portée déjà lu ne se laisse pas écraser.
@@ -187,6 +186,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				# Le module de portée porte la distance ET la ligne de vue, et les paie en ticks.
 				var pb: Array = m.get("portee_base", [1, 1])
 				plan.portee = Vector2i(int(pb[0]), int(pb[1]))
+				plan.origine = str(m.get("origine", "cible"))   # la portée dit où la figure s'ancre (2026-09-01)
 				plan.ligne_de_vue = bool(m.get("ligne_de_vue", true))
 				plan["portee_posee"] = true
 				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)

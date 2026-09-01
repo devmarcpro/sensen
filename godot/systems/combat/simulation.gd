@@ -9057,17 +9057,17 @@ func capacite_visable(e: Dictionary, plan: Dictionary, cible: Vector2i) -> bool:
 	if not grille.dans(cible):
 		return false
 	if bool(plan.get("drapeaux", {}).get("tracant", false)):   # Traçant : la charge suit, le couvert ne compte plus
-		return Grille.distance(e.pos, cible) >= int(plan.portee.x) and Grille.distance(e.pos, cible) <= int(plan.portee.y)
+		return Grille.portee_entre(e.pos, cible) >= int(plan.portee.x) and Grille.portee_entre(e.pos, cible) <= int(plan.portee.y)
 	var occ_t := grille.occupant(cible)   # Traque : la proie marquée se vise sans ligne de vue
 	if not occ_t.is_empty() and entites.has(occ_t):
 		for st: Dictionary in entites[occ_t].get("statuts", []):
 			if str(st.id) == "traque" and str(st.get("source", "")) == e.id:
-				return Grille.distance(e.pos, cible) >= int(plan.portee.x) and Grille.distance(e.pos, cible) <= int(plan.portee.y)
+				return Grille.portee_entre(e.pos, cible) >= int(plan.portee.x) and Grille.portee_entre(e.pos, cible) <= int(plan.portee.y)
 	if plan.geometrie == "soi":
 		return true
 	if str(plan.get("origine", "cible")) == "lanceur":
 		return cible != e.pos   # la forme part du lanceur : la tuile cliquée n'est qu'une direction
-	var d := Grille.distance(e.pos, cible)
+	var d := Grille.portee_entre(e.pos, cible)   # une portée est un disque, pas un carré (designer 2026-09-01)
 	if d < plan.portee.x or d > plan.portee.y:
 		return false
 	return not plan.ligne_de_vue or grille.ligne_de_vue(e.pos, cible)

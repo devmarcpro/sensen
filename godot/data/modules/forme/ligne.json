@@ -11,8 +11,7 @@
   "geometrie": "ligne",
   "surcout_ticks": 2,
   "taille_base": 4,
-  "origine": "lanceur",
-  "famille": "Depuis soi",
+  "famille": "Formes",
   "style": "neutre",
   "portee_defaut": [
     1,

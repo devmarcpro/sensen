@@ -11,8 +11,7 @@
   "geometrie": "point",
   "surcout_ticks": 0,
   "taille_base": 1,
-  "origine": "cible",
-  "famille": "À distance",
+  "famille": "Formes",
   "style": "neutre",
   "portee_defaut": [
     1,
