@@ -1,0 +1,19 @@
+{
+  "id": "contact",
+  "nom": "Contact",
+  "name_key": "module.portee_contact.name",
+  "module_type": "portee",
+  "description": "la tuile adjacente : il faut être là",
+  "classe_signature": null,
+  "tags": [
+    "portee"
+  ],
+  "portee_base": [
+    1,
+    1
+  ],
+  "surcout_ticks": 0,
+  "ligne_de_vue": true,
+  "famille": "Portée",
+  "style": "neutre"
+}

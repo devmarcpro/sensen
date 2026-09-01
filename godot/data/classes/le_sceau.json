@@ -24,6 +24,7 @@
       "name_key": "module.balise.name",
       "modules": [
         "point",
+        "jet_long",
         "balise"
       ]
     },
@@ -32,6 +33,7 @@
       "name_key": "module.aiguille.name",
       "modules": [
         "point",
+        "jet_long",
         "aiguille"
       ]
     },
@@ -40,6 +42,7 @@
       "name_key": "module.etincelle.name",
       "modules": [
         "ligne",
+        "jet_long",
         "etincelle"
       ]
     }

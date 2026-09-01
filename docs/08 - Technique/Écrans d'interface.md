@@ -157,6 +157,10 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > Le panneau s'étire avec la fenêtre, mais **sa liste non** : `custom_minimum_size = (340, 0)`, sans expansion. Sur l'écran Territoire cela donnait « défense … », « Cernoslav (Anarchie, 10 cellules) — ré… », « boutique : caisse 0 or · marge ×1.00 (+… » — des lignes coupées **pendant que les deux tiers droits du panneau étaient vides**. La largeur de la liste est désormais une **proportion de celle du panneau** (`styles.ecrans.part_liste`, bornée), recalculée à chaque redimensionnement : en 1920 elle passe à 540 px et plus rien n'est tronqué ; en fenêtre étroite elle retombe sur son plancher de 340.
 
 
+> [!success] Codé le 2026-09-01 — l'aperçu du sort n'accepte plus une origine hors de portée (designer)
+> « dans l'aperçu de sorts, que l'origine du sort soit uniquement dans les cases qui sont définies par la portée ». L'aperçu laissait poser la visée **n'importe où** sur sa grille de 17 × 17 et se contentait d'une croix rouge quand c'était trop loin : on composait en regardant une figure impossible. Les cases atteignables sont maintenant **peintes en vert** (comme la zone de lancer en jeu, même journée) et une case hors de l'anneau de portée est **ignorée** — la visée retombe sur sa position nominale. Ce que montre l'aperçu est donc toujours un tir légal.
+
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

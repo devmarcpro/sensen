@@ -23,6 +23,7 @@
       "name_key": "module.projection.name",
       "modules": [
         "point",
+        "jet_long",
         "projection"
       ]
     },
@@ -31,6 +32,7 @@
       "name_key": "module.flamme.name",
       "modules": [
         "croix",
+        "jet_long",
         "flamme"
       ]
     },
@@ -39,6 +41,7 @@
       "name_key": "module.fosse.name",
       "modules": [
         "cone",
+        "jet_court",
         "fosse"
       ]
     }

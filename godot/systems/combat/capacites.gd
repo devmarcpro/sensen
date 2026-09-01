@@ -58,7 +58,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 		"geometrie": "point", "origine": "cible", "portee": Vector2i(1, 1), "taille": 1, "ligne_de_vue": true,
 		"ticks": 0, "monnaie": "", "ressource": 0, "des": null, "des_bonus": 0, "mult": 1.0,
 		"elements": {}, "effets": [], "conditions": [], "drapeaux": {}, "parametres": {},
-		"liaisons": [], "charge_suivante": {}, "charges_sup": [], "formes_sup": [], "fois": 1,
+		"liaisons": [], "charge_suivante": {}, "charges_sup": [], "formes_sup": [], "fois": 1, "portee_posee": false,
 	}
 	var alternance := false   # Alternance (Modules) : la séquence a droit à deux noyaux
 	var noyaux := 0
@@ -159,7 +159,6 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 					# portée additionnées, le surcoût de ticks payé une fois de plus.
 					if str(plan.forme.id) == id:
 						plan.taille += int(m.taille_base)
-						plan.portee.y += int(m.portee_base[1])
 						plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 						continue
 					var forme_r: Dictionary = {}
@@ -168,20 +167,28 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 							forme_r = f_r
 					if not forme_r.is_empty():
 						forme_r.taille += int(m.taille_base)
-						plan.portee.y = maxi(int(plan.portee.y), int(m.portee_base[1]) * 2)
 						plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 						continue
 					# Deux formes : les tuiles s'additionnent (union), la portée retenue est la plus longue.
 					plan.formes_sup.append({"id": id, "geometrie": str(m.geometrie), "taille": int(m.taille_base)})
-					plan.portee.y = maxi(int(plan.portee.y), int(m.portee_base[1]))
 					plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 					continue
 				plan.forme = m
 				plan.geometrie = str(m.geometrie)
 				plan.origine = str(m.get("origine", "cible"))   # d'où part la forme (Six types de modules)
-				plan.portee = Vector2i(int(m.portee_base[0]), int(m.portee_base[1]))
 				plan.taille = int(m.taille_base)
+				# La portée est un module à part depuis le 2026-09-01 : sans lui, la forme retombe sur sa
+				# portée par défaut, courte. Un module de portée déjà lu ne se laisse pas écraser.
+				if not plan.get("portee_posee", false):
+					var pd: Array = m.get("portee_defaut", [1, 1])
+					plan.portee = Vector2i(int(pd[0]), int(pd[1]))
+				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
+			"portee":
+				# Le module de portée porte la distance ET la ligne de vue, et les paie en ticks.
+				var pb: Array = m.get("portee_base", [1, 1])
+				plan.portee = Vector2i(int(pb[0]), int(pb[1]))
 				plan.ligne_de_vue = bool(m.get("ligne_de_vue", true))
+				plan["portee_posee"] = true
 				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 			"modificateur":
 				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)

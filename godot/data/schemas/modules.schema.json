@@ -15,7 +15,8 @@
         "modificateur",
         "condition",
         "declencheur",
-        "liaison"
+        "liaison",
+        "portee"
       ]
     },
     "tags": {

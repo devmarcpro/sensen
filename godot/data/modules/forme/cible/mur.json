@@ -10,13 +10,12 @@
   ],
   "geometrie": "mur",
   "surcout_ticks": 3,
-  "portee_base": [
-    1,
-    5
-  ],
   "taille_base": 3,
-  "ligne_de_vue": true,
   "origine": "cible",
   "famille": "À distance",
-  "style": "neutre"
+  "style": "neutre",
+  "portee_defaut": [
+    1,
+    1
+  ]
 }

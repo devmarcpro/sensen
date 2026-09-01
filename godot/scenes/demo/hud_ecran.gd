@@ -12,7 +12,7 @@ const RAYON_PENTA := 30.0
 const BARRE_L := 160.0
 const BARRE_H := 10.0
 const CASE := 56.0   # assez large pour lire « Étincelle » ou « Attaque » sans les tronquer
-const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "endurance": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95), "faim": Color(0.55, 0.35, 0.15)}
+const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "endurance": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95), "faim": Color(0.55, 0.35, 0.15), "charge": Color(0.55, 0.55, 0.6)}
 
 
 func _ready() -> void:
@@ -36,7 +36,7 @@ func _draw() -> void:
 	var sous_minimap := MARGE + float(Minimap.TAILLE) + 12.0
 	_dessiner_compas(sim, j, Vector2(taille.x - MARGE - float(Minimap.TAILLE) * 0.5, sous_minimap + RAYON_COMPAS))
 	_dessiner_pentagramme(sim, j, Vector2(taille.x - MARGE - float(Minimap.TAILLE) * 0.5, sous_minimap + RAYON_COMPAS * 2 + 30.0 + RAYON_PENTA))
-	_dessiner_barres(j, Vector2(MARGE, taille.y - MARGE - CASE - 4.0 * (BARRE_H + 6.0) - 12.0))
+	_dessiner_barres(j, Vector2(MARGE, taille.y - MARGE - CASE - 5.0 * (BARRE_H + 6.0) - 12.0))
 
 	_dessiner_hotbar(sim, j, Vector2(MARGE, taille.y - MARGE - CASE))
 
@@ -114,16 +114,24 @@ func _dessiner_pentagramme(sim, j: Dictionary, c: Vector2) -> void:
 
 ## Les quatre barres : vie, endurance, mana, faim — la valeur écrite dedans, jamais un pourcentage seul.
 func _dessiner_barres(j: Dictionary, o: Vector2) -> void:
+	# La charge est la cinquième barre : le rapport du parcours (2026-08-30) notait qu'on passait à
+	# 126/55 — surcharge ×3 — sans que rien à l'écran ne le dise.
+	var pds: Dictionary = main.sim.poids_de(j) if main.sim != null else {"poids": 0.0, "capacite": 1.0}
 	var lignes := [["sante", int(j.sante), int(j.sante_max)], ["endurance", int(j.endurance), int(j.endurance_max)],
-		["mana", int(j.mana), int(j.mana_max)], ["faim", int(j.get("faim", 100)), 100]]
+		["mana", int(j.mana), int(j.mana_max)], ["faim", int(j.get("faim", 100)), 100],
+		["charge", int(round(float(pds.poids))), maxi(1, int(round(float(pds.capacite))))]]
 	for k in lignes.size():
 		var l: Array = lignes[k]
 		var y := o.y + k * (BARRE_H + 6.0)
 		var part := clampf(float(l[1]) / maxf(1.0, float(l[2])), 0.0, 1.0)
+		var col: Color = COULEURS[str(l[0])]
+		var surcharge: bool = str(l[0]) == "charge" and int(l[1]) > int(l[2])
+		if surcharge:   # au-delà de la capacité : la barre reste pleine et bat, le chiffre dit le dépassement
+			col = Color(0.95, 0.35, 0.3).lerp(Color(0.6, 0.15, 0.15), 0.5 + 0.5 * sin(float(Time.get_ticks_msec()) / 180.0))
 		draw_rect(Rect2(o.x, y, BARRE_L, BARRE_H), Color(0.05, 0.05, 0.08, 0.85))
-		draw_rect(Rect2(o.x, y, BARRE_L * part, BARRE_H), COULEURS[str(l[0])])
+		draw_rect(Rect2(o.x, y, BARRE_L * part, BARRE_H), col)
 		draw_rect(Rect2(o.x, y, BARRE_L, BARRE_H), Color(0.6, 0.55, 0.4, 0.8), false, 1.0)
-		draw_string(ThemeDB.fallback_font, Vector2(o.x + BARRE_L + 6.0, y + BARRE_H), "%s %d/%d" % [tr("barre." + str(l[0])), l[1], l[2]], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.9, 0.9, 0.85))
+		draw_string(ThemeDB.fallback_font, Vector2(o.x + BARRE_L + 6.0, y + BARRE_H), "%s %d/%d" % [tr("barre." + str(l[0])), l[1], l[2]], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.95, 0.5, 0.45) if surcharge else Color(0.9, 0.9, 0.85))
 
 
 ## La hotbar : dix cases (1 → 0), la sélection encadrée, la molette la fait tourner (main.gd).

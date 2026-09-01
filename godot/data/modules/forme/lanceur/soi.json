@@ -10,13 +10,12 @@
   ],
   "geometrie": "soi",
   "surcout_ticks": -2,
-  "portee_base": [
-    0,
-    0
-  ],
   "taille_base": 0,
-  "ligne_de_vue": false,
   "origine": "lanceur",
   "famille": "Depuis soi",
-  "style": "neutre"
+  "style": "neutre",
+  "portee_defaut": [
+    0,
+    0
+  ]
 }

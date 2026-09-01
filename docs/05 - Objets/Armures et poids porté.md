@@ -36,6 +36,10 @@ malus_vitesse_deplacement = f(poids_total_porté / capacite)
 > [!success] Codé le 2026-08-28 — capacité et surcharge (`combat_rules.poids`)
 > `capacite = 30 + Force × 5`, sac et équipement compris. Poids d'un objet : son champ `poids` s'il existe, sinon `poids_reference` de sa fonctionnalité, le poids de sa station, et pour un matériau **densité / 4 par unité** (un lingot de fer 3, une planche de chêne 1,5) ; meuble 8, armure 6, autre 1 (décision — les notes ne pèsent pas les objets). **Décision sur `f`** (jamais définie) : sans malus jusqu'à la capacité, puis `ticks de déplacement × (1 + (ratio − 1) × 2)`, plafonné ×3 — appliqué sur les ticks issus d'Athlétisme, jamais sur une stat. Dépasser après un retrait n'éjecte rien. Affiché dans l'en-tête et l'inventaire ; les affixes `capacite_poids` viennent avec le loot.
 
+> [!success] Codé le 2026-09-01 — la charge se voit enfin dans le HUD
+> Le rapport du parcours du 2026-08-30 listait dans « ce qui manque » un **retour visuel du poids porté** : le robot est passé à **126 / 55 — surcharge ×3** sans que rien à l'écran ne le dise, la seule trace étant une ligne de texte. Le HUD gagne une **cinquième barre** sous la faim : la charge, remplie jusqu'à la capacité, **rouge et clignotante au-delà** (la barre reste pleine, le chiffre dit de combien on dépasse). Elle lit `poids_de`, donc la capacité tient déjà compte de la Force et des effets. C'est un affichage : aucune règle de surcharge ne change.
+
+
 ## Liens
 - **Dépend de** : [[Stats de personnage]], [[Qualité d'artisanat]], [[Matériaux — 13 stats]]
 - **Alimente** : [[Cinq accès au cycle]], [[Stations de transformation]], [[Équipement — 14 slots]], [[Eau et liquides]]

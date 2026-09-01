@@ -1447,6 +1447,16 @@ func _draw() -> void:
 				var tb := survol + Vector2i(dx, dy)
 				if g.dans(tb):
 					_losange(tb, Color(1.0, 0.5, 0.1, 0.4) if ok_b else Color(0.5, 0.5, 0.5, 0.3))
+	if visee >= 0 and not j.is_empty():
+		# La zone de lancer (designer 2026-09-01) : toutes les tuiles où le sort peut être POSÉ, en vert.
+		# Sans elle il fallait promener le curseur pour découvrir la portée réelle et la ligne de vue.
+		var plan_z := sim.plan_capacite(j, visee)
+		var pmax := int(Vector2i(plan_z.get("portee", Vector2i(0, 0))).y)
+		for dz in range(-pmax, pmax + 1):
+			for dx_z in range(-pmax, pmax + 1):
+				var tz: Vector2i = j.pos + Vector2i(dx_z, dz)
+				if g.dans(tz) and g.decouvert.has(g.idx(tz)) and sim.capacite_visable(j, plan_z, tz):
+					_losange(tz, Color(0.35, 0.95, 0.45, 0.16))
 	if visee >= 0 and survol.x >= 0 and not j.is_empty():
 		var plan := sim.plan_capacite(j, visee)
 		var ok := sim.capacite_visable(j, plan, survol)

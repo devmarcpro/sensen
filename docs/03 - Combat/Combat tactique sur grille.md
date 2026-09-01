@@ -32,6 +32,10 @@ Les règles générales du combat : pas de jet de toucher, la géométrie décid
 
 **Les sept trous du combat sont tranchés :** [[Décision — Multi-ennemis et jauge]] · [[Décision — Vocabulaire d'attaque des créatures]] · [[Décision — Fuite et désengagement]] · [[Décision — Chaîne côté ennemis]] · [[Décision — Boucliers]] · [[Décision — Projectiles]] · [[Décision — Esquive active]] (historique : [[Trous connus du combat]]).
 
+> [!success] Codé le 2026-09-01 — la zone de lancer s'allume en vert (designer)
+> « avant de lancer un sort la zone où le sort peut être placé devrait être en vert ». Jusqu'ici, une capacité visée ne montrait sa forme **que sous le curseur** : il fallait promener la souris pour découvrir jusqu'où on pouvait poser le sort, et une tuile refusée ne se distinguait qu'après coup. Dès qu'une capacité est visée, **toutes les tuiles où elle peut être placée** s'allument en vert pâle (`capacite_visable` par tuile, dans le carré de sa portée maximale) ; la forme visée continue de se dessiner par-dessus, en bleu, sous le curseur. Une portée nulle (`soi`) n'allume que la case du lanceur.
+
+
 ## Liens
 - **Dépend de** : [[Action-time à ticks]], [[Grille continue]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[Zones de coup par dénivelé]], [[Garde en posture]], [[Attaque lourde et télégraphe]], [[XP de combat]], [[Pipeline de résolution du combat]]

@@ -10,11 +10,11 @@ extends VBoxContainer
 const CARTE := Vector2(48, 48)   # cartes et slots : des carrés, de la même taille (uniformité, 2026-08-30 ; 48 px à la demande du designer)
 const SLOT := Vector2(48, 48)
 const COLONNES := 8
-const GLYPHES := {"forme:cible": "◇", "forme:lanceur": "◈", "noyau": "●", "modificateur": "▲", "condition": "?", "declencheur": "⚡", "liaison": "∞"}
+const GLYPHES := {"portee": "⟿", "forme:cible": "◇", "forme:lanceur": "◈", "noyau": "●", "modificateur": "▲", "condition": "?", "declencheur": "⚡", "liaison": "∞"}
 const ORDRE_TYPES: Array[String] = ["forme:cible", "forme:lanceur", "noyau", "modificateur", "condition", "declencheur", "liaison"]
 ## Les groupes de la composition, dans l'ordre de la séquence : tout ce qui précède le déclencheur est la charge
 ## principale, tout ce qui le suit (« suite », libre) est sa charge différée (Six types de modules).
-const GROUPES: Array[String] = ["forme", "noyau", "modificateur", "condition", "liaison", "declencheur", "suite"]
+const GROUPES: Array[String] = ["portee", "forme", "noyau", "modificateur", "condition", "liaison", "declencheur", "suite"]
 
 var ecrans: Node                       # l'écran parent (Ecrans) : _apercu_plan, _contribution_module, sequence_composee
 var main: Node

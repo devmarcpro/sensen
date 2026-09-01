@@ -36,6 +36,7 @@
       "name_key": "module.frappe.name",
       "modules": [
         "point",
+        "jet_long",
         "frappe"
       ]
     },
@@ -44,6 +45,7 @@
       "name_key": "module.estoc.name",
       "modules": [
         "point",
+        "jet_long",
         "estoc"
       ]
     },
@@ -52,6 +54,7 @@
       "name_key": "module.projection.name",
       "modules": [
         "point",
+        "jet_long",
         "projection"
       ]
     }

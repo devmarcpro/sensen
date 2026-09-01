@@ -23,6 +23,7 @@
       "name_key": "module.roche.name",
       "modules": [
         "chemin",
+        "jet_long",
         "roche"
       ]
     },
@@ -31,6 +32,7 @@
       "name_key": "module.brasier.name",
       "modules": [
         "colonne",
+        "aveugle",
         "brasier"
       ]
     },
@@ -39,6 +41,7 @@
       "name_key": "module.flamme.name",
       "modules": [
         "croix",
+        "jet_long",
         "flamme"
       ]
     }

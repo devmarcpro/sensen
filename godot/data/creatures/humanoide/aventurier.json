@@ -51,6 +51,7 @@
       "name_key": "capacite.etincelle.name",
       "modules": [
         "point",
+        "jet_long",
         "etincelle"
       ]
     },
@@ -59,6 +60,7 @@
       "name_key": "capacite.gel_en_ligne.name",
       "modules": [
         "ligne",
+        "jet_long",
         "gel",
         "concentration"
       ]

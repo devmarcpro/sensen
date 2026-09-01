@@ -34,6 +34,7 @@
       "name_key": "module.baume.name",
       "modules": [
         "chemin",
+        "jet_long",
         "baume"
       ]
     },
@@ -42,6 +43,7 @@
       "name_key": "module.aiguille.name",
       "modules": [
         "point",
+        "jet_long",
         "aiguille"
       ]
     },
@@ -50,6 +52,7 @@
       "name_key": "module.etincelle.name",
       "modules": [
         "ligne",
+        "jet_long",
         "etincelle"
       ]
     }

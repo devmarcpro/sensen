@@ -24,6 +24,7 @@
       "name_key": "module.tourelle.name",
       "modules": [
         "point",
+        "jet_long",
         "tourelle"
       ]
     },
@@ -32,6 +33,7 @@
       "name_key": "module.epine.name",
       "modules": [
         "chemin",
+        "jet_long",
         "epine"
       ]
     },
@@ -40,6 +42,7 @@
       "name_key": "module.aiguille.name",
       "modules": [
         "point",
+        "jet_long",
         "aiguille"
       ]
     }

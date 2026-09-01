@@ -34,7 +34,9 @@ func _gui_input(ev: InputEvent) -> void:
 ## La visée : la case sous la souris si elle est sur la grille (et n'est pas le lanceur), sinon la nominale.
 func cible_courante() -> Vector2i:
 	var lanceur := Vector2i(COTE / 2, COTE / 2)
-	if visee_souris.x >= 0 and visee_souris != lanceur:
+	# L'origine ne peut être QUE dans les cases de la portée (designer 2026-09-01) : une case hors de
+	# l'anneau est ignorée, l'aperçu retombe sur la visée nominale — il ne montre jamais un tir illégal.
+	if visee_souris.x >= 0 and visee_souris != lanceur and _dans_portee(visee_souris):
 		return visee_souris
 	var portee_max: int = clampi(int(plan.get("portee", Vector2i(0, 1)).y), 0, COTE / 2)
 	return lanceur + Vector2i(0, -maxi(1, portee_max)) if str(plan.get("origine", "cible")) == "lanceur" else lanceur + Vector2i(0, -portee_max)
@@ -75,6 +77,10 @@ func _draw() -> void:
 	var lanceur := Vector2i(COTE / 2, COTE / 2)
 	var portee: Vector2i = plan.get("portee", Vector2i(0, 1))
 	var teinte := _couleur_element()
+	for zy in COTE:   # les cases où l'origine peut être posée : le même vert que la zone de lancer en jeu
+		for zx in COTE:
+			if _dans_portee(Vector2i(zx, zy)):
+				draw_rect(Rect2(o + Vector2(zx * CASE + 1.0, zy * CASE + 1.0), Vector2(CASE - 2.0, CASE - 2.0)), Color(0.35, 0.95, 0.45, 0.10))
 	var compte := couverture()
 	var maxi_c := 1
 	for v in compte.values():
@@ -123,3 +129,11 @@ func _couleur_element() -> Color:
 		if t is Array and t.size() >= 3:
 			return Color(float(t[0]), float(t[1]), float(t[2]))
 	return Color(0.85, 0.65, 0.3)
+
+## Une case est-elle une origine légale ? (portée min–max autour du lanceur ; une forme partant du
+## lanceur vise une direction, donc toute case de l'anneau convient aussi.)
+func _dans_portee(t: Vector2i) -> bool:
+	var lanceur := Vector2i(COTE / 2, COTE / 2)
+	var portee: Vector2i = plan.get("portee", Vector2i(0, 1))
+	var d := Grille.distance(lanceur, t)
+	return d >= int(portee.x) and d <= int(portee.y)

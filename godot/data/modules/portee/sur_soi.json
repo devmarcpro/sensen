@@ -1,0 +1,19 @@
+{
+  "id": "sur_soi",
+  "nom": "Soi",
+  "name_key": "module.portee_sur_soi.name",
+  "module_type": "portee",
+  "description": "sur soi — aucune distance",
+  "classe_signature": null,
+  "tags": [
+    "portee"
+  ],
+  "portee_base": [
+    0,
+    0
+  ],
+  "surcout_ticks": -2,
+  "ligne_de_vue": true,
+  "famille": "Portée",
+  "style": "neutre"
+}

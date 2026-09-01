@@ -1,0 +1,19 @@
+{
+  "id": "jet_court",
+  "nom": "Jet court",
+  "name_key": "module.portee_jet_court.name",
+  "module_type": "portee",
+  "description": "jusqu'à trois tuiles, à vue",
+  "classe_signature": null,
+  "tags": [
+    "portee"
+  ],
+  "portee_base": [
+    1,
+    3
+  ],
+  "surcout_ticks": 2,
+  "ligne_de_vue": true,
+  "famille": "Portée",
+  "style": "neutre"
+}

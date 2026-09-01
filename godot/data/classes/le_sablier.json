@@ -23,6 +23,7 @@
       "name_key": "module.celerite.name",
       "modules": [
         "point",
+        "jet_long",
         "celerite"
       ]
     },
@@ -31,6 +32,7 @@
       "name_key": "module.eclat.name",
       "modules": [
         "diagonale",
+        "jet_long",
         "eclat"
       ]
     },
@@ -39,6 +41,7 @@
       "name_key": "module.epine.name",
       "modules": [
         "chemin",
+        "jet_long",
         "epine"
       ]
     }

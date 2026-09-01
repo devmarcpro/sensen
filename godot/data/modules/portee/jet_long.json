@@ -1,0 +1,19 @@
+{
+  "id": "jet_long",
+  "nom": "Jet long",
+  "name_key": "module.portee_jet_long.name",
+  "module_type": "portee",
+  "description": "jusqu'à six tuiles, à vue — le temps de viser",
+  "classe_signature": null,
+  "tags": [
+    "portee"
+  ],
+  "portee_base": [
+    1,
+    6
+  ],
+  "surcout_ticks": 5,
+  "ligne_de_vue": true,
+  "famille": "Portée",
+  "style": "neutre"
+}

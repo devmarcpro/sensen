@@ -10,13 +10,12 @@
   ],
   "geometrie": "nuee",
   "surcout_ticks": 3,
-  "portee_base": [
-    1,
-    6
-  ],
   "taille_base": 4,
-  "ligne_de_vue": false,
   "origine": "cible",
   "famille": "À distance",
-  "style": "neutre"
+  "style": "neutre",
+  "portee_defaut": [
+    1,
+    1
+  ]
 }

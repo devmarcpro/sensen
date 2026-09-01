@@ -372,7 +372,7 @@ for mid, m in modules_cat.items():
         probs["forme sans origine (cible | lanceur)"].append(mid)
     elif t == "forme" and str(m.get("geometrie", "")) not in GEOMETRIES_GEREES:
         probs["forme -> geometrie que le code ne gere pas"].append("%s -> %s" % (mid, m.get("geometrie")))
-    elif t == "forme" and (m.get("geometrie") is None or m.get("portee_base") is None):
+    elif t == "forme" and (m.get("geometrie") is None or m.get("portee_defaut") is None):
         probs["forme incomplete"].append(mid)
 
 BUDGET_INERTES = 0   # chantier clos le 2026-08-29 : plus aucun noyau inerte, et l'audit le tient   # 50 au constat du 2026-08-29, descendu lot par lot   # 50 au constat du 2026-08-29, descendu lot par lot   # 50 au constat du 2026-08-29, descendu lot par lot   # 50 au constat du 2026-08-29, descendu lot par lot   # 50 au constat du 2026-08-29, descendu lot par lot
@@ -402,7 +402,8 @@ for _dom in livres["domaines_manuel"]:
         if _dom == "frappes" and _t == "noyau" and int(_m.get("cout_endurance", 0)) > 0: _atteignables.add(_mid)
         if _dom == "postures" and _t == "condition": _atteignables.add(_mid)
         if _dom == "techniques" and _t in ("declencheur", "liaison"): _atteignables.add(_mid)
-        if _dom == "maitrise" and _t in ("modificateur", "forme"): _atteignables.add(_mid)
+        # La portee est un type de module depuis le 2026-09-01 : un manuel de maitrise l'enseigne aussi.
+        if _dom == "maitrise" and _t in ("modificateur", "forme", "portee"): _atteignables.add(_mid)
 for _f in glob.glob(R + "classes/*.json") + glob.glob(R + "creatures/*.json"):
     _d2 = json.load(io.open(_f, encoding="utf-8"))
     for _m2 in _d2.get("modules_connus", []) or []:

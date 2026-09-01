@@ -205,6 +205,15 @@ func joueur_de(s: Simulation) -> Dictionary:
 ## Une capacité de test : les modules sont connus ET chargés (Grimoires et manuels : un lancer consomme
 ## une charge par module). Sans ça, tout sort composé à la main serait refusé faute de munitions.
 func _capacite_test(s: Simulation, j: Dictionary, id: String, mods: Array) -> void:
+	# La portée est un module depuis le 2026-09-01 : sans lui un sort ne porte qu'au contact. Les tests
+	# d'effet ne parlent pas de distance — on leur donne un jet long, sauf s'ils choisissent leur portée.
+	var a_portee := false
+	for m0 in mods:
+		if str(GameData.catalogues.modules.get(str(m0), {}).get("module_type", "")) == "portee":
+			a_portee = true
+	if not a_portee:
+		mods = mods.duplicate()
+		mods.insert(mini(1, mods.size()), "jet_court")   # juste apres la forme : la charge differee d'un declencheur garde sa propre portee
 	for m in mods:
 		s.crediter_module(j, str(m), 99)
 	j.capacites.append({"id": id, "name_key": "capacite.etincelle.name", "modules": mods})
@@ -614,7 +623,9 @@ func test_capacites() -> void:
 	var mana: int = j.mana
 	var pv: int = loup.sante
 	verifier(s.intention(j.id, {"type": "capacite", "index": 0, "cible": loup.pos}), "lancer Étincelle sur le loup à 3 tuiles")
-	verifier(j.mana < mana and j.mana >= mana - 6 and j.compteur == h.ticks + 3, "Étincelle : 3 mana ± le jet de coût (%d payés), 3 ticks" % (mana - j.mana))
+	# Le sort de l'aventurier porte maintenant sa portée en module (point 70) : ses ticks sont ceux du plan.
+	var ticks_e: int = int(s.plan_capacite(j, 0).ticks)
+	verifier(j.mana < mana and j.mana >= mana - 6 and j.compteur == h.ticks + ticks_e, "Étincelle : 3 mana ± le jet de coût (%d payés), %d ticks avec sa portée" % [mana - j.mana, ticks_e])
 	verifier(loup.sante < pv and j.chaine.segments.size() == 1 and j.chaine.segments[0].element == "feu", "le loup est touché, un segment Feu est posé")
 	# Hors de portée (Point : 1-6) : refusé
 	j.compteur = h.ticks
@@ -641,13 +652,16 @@ func test_capacites() -> void:
 	mana = j.mana
 	var t: int = h.ticks
 	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loup.pos}), "Surplomb + Étincelle à hauteur égale")
-	verifier(j.mana == mana and j.compteur == t + 2, "condition fausse : ne part pas, 50 % des ticks (3 → 2), rien payé")
+	# Les ticks du plan dépendent de ses modules (la portée en est un depuis le 2026-09-01) : on compare
+	# à la moitié des ticks du plan, pas à un chiffre écrit à la main.
+	var ticks_t: int = int(s.plan_capacite(j, 3).ticks)
+	verifier(j.mana == mana and j.compteur == t + maxi(1, roundi(float(ticks_t) * 0.5)), "condition fausse : ne part pas, 50 %% des ticks (%d → %d), rien payé" % [ticks_t, j.compteur - t])
 	# Friendly fire : un carré touche un allié dans la zone
-	for m0 in ["carre", "flamme"]:
+	for m0 in ["carre", "flamme", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	for m0 in ["carre", "flamme"]:
+	for m0 in ["carre", "flamme", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	j.capacites[3] = {"id": "c", "name_key": "capacite.etincelle.name", "modules": ["carre", "flamme"]}
+	j.capacites[3] = {"id": "c", "name_key": "capacite.etincelle.name", "modules": ["carre", "jet_court", "flamme"]}
 	var allie := s.ajouter("bandit", j.pos + Vector2i(1, -2), "joueur")
 	allie.camp = "joueur"
 	var pva: int = allie.sante
@@ -845,34 +859,36 @@ func test_liaisons() -> void:
 	verifier(coups[0] == 3 and j.chaine.segments.size() == 1, "3 coups appliqués, un seul segment")
 	# À l'impact : Étincelle touche, puis la Bruine en croix part de la cible et touche le loup voisin
 	coups[0] = 0
-	for m0 in ["point", "etincelle", "a_l_impact", "croix", "bruine"]:
+	for m0 in ["point", "etincelle", "a_l_impact", "croix", "bruine", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	for m0 in ["point", "etincelle", "a_l_impact", "croix", "bruine"]:
+	for m0 in ["point", "etincelle", "a_l_impact", "croix", "bruine", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	j.capacites[3] = {"id": "i", "name_key": "capacite.etincelle.name", "modules": ["point", "etincelle", "a_l_impact", "croix", "bruine"]}
+	j.capacites[3] = {"id": "i", "name_key": "capacite.etincelle.name", "modules": ["point", "jet_court", "etincelle", "a_l_impact", "croix", "bruine"]}
 	j.compteur = h.ticks
 	j.action_en_cours = {}
 	s.pas(j.horloge)
 	var pv2: int = loups[2].sante
 	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loups[0].pos}), "Étincelle → À l'impact → Croix + Bruine")
+	s.pas(j.horloge)   # la portée en module ajoute des ticks : le sort est télégraphié, il part au pas suivant
 	verifier(coups[0] >= 2 and loups[2].sante < pv2, "la charge différée part de la cible touchée et frappe la croix (%d coups)" % coups[0])
 	verifier(j.chaine.segments.size() == 2, "une capacité = un segment, même avec deux noyaux")
 	# Ricochet : la charge saute vers les cibles proches
 	coups[0] = 0
-	for m0 in ["point", "etincelle", "ricochet"]:
+	for m0 in ["point", "etincelle", "ricochet", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	for m0 in ["point", "etincelle", "ricochet"]:
+	for m0 in ["point", "etincelle", "ricochet", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	j.capacites[3] = {"id": "c", "name_key": "capacite.etincelle.name", "modules": ["point", "etincelle", "ricochet"]}
+	j.capacites[3] = {"id": "c", "name_key": "capacite.etincelle.name", "modules": ["point", "jet_court", "etincelle", "ricochet"]}
 	j.compteur = h.ticks
 	s.pas(j.horloge)
 	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loups[0].pos}), "Étincelle + Ricochet")
+	s.pas(j.horloge)
 	verifier(coups[0] >= 2, "au moins un saut (%d coups)" % coups[0])
 	# Partage : le Baume sur un allié soigne aussi le lanceur
 	var allie := s.ajouter("bandit", j.pos + Vector2i(1, 0), "joueur")
 	allie.sante = 10
 	j.sante = 10
-	for m0 in ["point", "baume", "partage"]:
+	for m0 in ["point", "baume", "partage", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
 	j.capacites[3] = {"id": "p", "name_key": "capacite.baume.name", "modules": ["point", "baume", "partage"]}
 	j.compteur = h.ticks
@@ -916,11 +932,11 @@ func test_glyphes_terrain() -> void:
 	verifier(s.glyphes.is_empty() and Etres.bloque_statuts(loup, "deplacement", s.statuts_defs), "à l'entrée : le glyphe part, le loup est enraciné")
 	verifier(j.chaine.segments.size() == seg_avant + 1 and j.chaine.segments.back().element == "bois", "le glyphe élémentaire pose un segment Bois au lanceur")
 	# Mèche : la charge part après 20 ticks
-	for m0 in ["meche", "point", "etincelle"]:
+	for m0 in ["meche", "point", "etincelle", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	for m0 in ["meche", "point", "etincelle"]:
+	for m0 in ["meche", "point", "etincelle", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	j.capacites[3] = {"id": "m", "name_key": "capacite.etincelle.name", "modules": ["meche", "point", "etincelle"]}
+	j.capacites[3] = {"id": "m", "name_key": "capacite.etincelle.name", "modules": ["meche", "point", "jet_court", "etincelle"]}
 	j.compteur = h.ticks
 	loup.compteur = h.ticks + 500
 	s.pas(j.horloge)
@@ -932,11 +948,11 @@ func test_glyphes_terrain() -> void:
 	s.pas(j.horloge)   # le loup agit à t+25 : la mèche (t+20) est tiquée en fin de pas
 	verifier(s.differes.is_empty() and loup.sante < pv, "20 ticks plus tard, l'Étincelle part")
 	# Barrière : occupe la tuile, bloque le passage, disparaît après 50 ticks
-	for m0 in ["tuile", "barriere"]:
+	for m0 in ["tuile", "barriere", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	for m0 in ["tuile", "barriere"]:
+	for m0 in ["tuile", "barriere", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	j.capacites[3] = {"id": "b", "name_key": "capacite.etincelle.name", "modules": ["tuile", "barriere"]}
+	j.capacites[3] = {"id": "b", "name_key": "capacite.etincelle.name", "modules": ["tuile", "jet_court", "barriere"]}
 	j.compteur = h.ticks
 	loup.compteur = h.ticks + 500
 	s.pas(j.horloge)
@@ -949,11 +965,11 @@ func test_glyphes_terrain() -> void:
 	s.pas(j.horloge)
 	verifier(not s.grille.bloque_passage(mur_pos) and s.obstacles.is_empty(), "après 50 ticks, la barrière disparaît")
 	# Exhaussement : +1 niveau ; Fosse : −3 niveaux et ce qui est dessus chute
-	for m0 in ["tuile", "exhaussement"]:
+	for m0 in ["tuile", "exhaussement", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	for m0 in ["tuile", "exhaussement"]:
+	for m0 in ["tuile", "exhaussement", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	j.capacites[3] = {"id": "e", "name_key": "capacite.etincelle.name", "modules": ["tuile", "exhaussement"]}
+	j.capacites[3] = {"id": "e", "name_key": "capacite.etincelle.name", "modules": ["tuile", "jet_court", "exhaussement"]}
 	j.compteur = h.ticks
 	loup.compteur = h.ticks + 500
 	s.pas(j.horloge)
@@ -962,11 +978,11 @@ func test_glyphes_terrain() -> void:
 	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": t_pos}), "Exhaussement")
 	s.pas(j.horloge)
 	verifier(s.grille.h(t_pos) == h_avant + 1, "la tuile monte d'un niveau")
-	for m0 in ["tuile", "fosse"]:
+	for m0 in ["tuile", "jet_court", "fosse"]:
 		s.crediter_module(j, str(m0), 99)
-	for m0 in ["tuile", "fosse"]:
+	for m0 in ["tuile", "fosse", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	j.capacites[3] = {"id": "f", "name_key": "capacite.etincelle.name", "modules": ["tuile", "fosse"]}
+	j.capacites[3] = {"id": "f", "name_key": "capacite.etincelle.name", "modules": ["tuile", "jet_court", "fosse"]}
 	j.compteur = h.ticks
 	loup.compteur = h.ticks + 500
 	s.pas(j.horloge)
@@ -1006,11 +1022,11 @@ func test_evenements() -> void:
 	s.pas(j.horloge)   # le loup mord
 	verifier(j.declencheurs_armes.is_empty() and loups[0].sante < pv0, "touché : l'Étincelle part sur l'attaquant")
 	# Cadence : tous les 3 emplois, la charge qui suit part aussi
-	for m0 in ["point", "etincelle", "cadence", "point", "bruine"]:
+	for m0 in ["point", "etincelle", "cadence", "point", "bruine", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	for m0 in ["point", "etincelle", "cadence", "point", "bruine"]:
+	for m0 in ["point", "etincelle", "cadence", "point", "bruine", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	j.capacites[3] = {"id": "cad", "name_key": "capacite.etincelle.name", "modules": ["point", "etincelle", "cadence", "point", "bruine"]}
+	j.capacites[3] = {"id": "cad", "name_key": "capacite.etincelle.name", "modules": ["point", "jet_court", "etincelle", "cadence", "point", "bruine"]}
 	var coups := [0]
 	EventBus.damage_dealt.connect(func(src: String, _c: String, _d: int, _det: Dictionary) -> void: if src == j.id: coups[0] += 1)
 	for k in 3:
@@ -1021,41 +1037,45 @@ func test_evenements() -> void:
 	verifier(coups[0] == 4, "3 emplois → 3 Étincelles + 1 Bruine (%d coups)" % coups[0])
 	# Salve : 3 charges à 60 % réparties sur les cibles d'une ligne
 	coups[0] = 0
-	for m0 in ["ligne", "etincelle", "salve"]:
+	for m0 in ["ligne", "etincelle", "salve", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	for m0 in ["ligne", "etincelle", "salve"]:
+	for m0 in ["ligne", "etincelle", "salve", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	j.capacites[3] = {"id": "sv", "name_key": "capacite.etincelle.name", "modules": ["ligne", "etincelle", "salve"]}
+	j.capacites[3] = {"id": "sv", "name_key": "capacite.etincelle.name", "modules": ["ligne", "jet_court", "etincelle", "salve"]}
 	j.compteur = h.ticks
 	s.pas(j.horloge)
 	# la ligne part vers (0,-1) : seul loups[0] est dessus → les 3 charges tombent sur lui
 	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loups[0].pos}), "Salve en ligne")
+	s.pas(j.horloge)   # télégraphié depuis que la portée est un module : la salve part au pas suivant
 	verifier(coups[0] == 3, "3 charges (%d coups)" % coups[0])
 	# Propagation : de proche en proche (les trois loups sont contigus)
 	coups[0] = 0
-	for m0 in ["point", "etincelle", "propagation"]:
+	for m0 in ["point", "etincelle", "propagation", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	for m0 in ["point", "etincelle", "propagation"]:
+	for m0 in ["point", "etincelle", "propagation", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	j.capacites[3] = {"id": "pr", "name_key": "capacite.etincelle.name", "modules": ["point", "etincelle", "propagation"]}
+	j.capacites[3] = {"id": "pr", "name_key": "capacite.etincelle.name", "modules": ["point", "jet_court", "etincelle", "propagation"]}
 	j.compteur = h.ticks
 	s.pas(j.horloge)
 	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loups[0].pos}), "Étincelle + Propagation")
+	s.pas(j.horloge)
+	s.pas(j.horloge)
 	verifier(coups[0] == 3, "la charge se propage aux trois loups (%d coups)" % coups[0])
 	# Boucle : rejoue tant qu'il reste du mana
 	coups[0] = 0
 	j.mana = 10   # Étincelle = 3 mana : 1 + 3 rejeux (10 → 7 → 4 → 1)
-	for m0 in ["point", "etincelle", "boucle"]:
+	for m0 in ["point", "etincelle", "boucle", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	for m0 in ["point", "etincelle", "boucle"]:
+	for m0 in ["point", "etincelle", "boucle", "jet_court"]:
 		s.crediter_module(j, str(m0), 99)
-	j.capacites[3] = {"id": "bo", "name_key": "capacite.etincelle.name", "modules": ["point", "etincelle", "boucle"]}
+	j.capacites[3] = {"id": "bo", "name_key": "capacite.etincelle.name", "modules": ["point", "jet_court", "etincelle", "boucle"]}
 	j.compteur = h.ticks
 	s.pas(j.horloge)
 	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loups[0].pos}), "Étincelle + Boucle")
+	s.pas(j.horloge)
 	verifier(coups[0] >= 2 and j.mana <= 3, "la boucle rejoue jusqu'à épuisement du mana (%d coups, mana %d)" % [coups[0], j.mana])
 	# Testament : la charge part quand le porteur tombe
-	loups[0].capacites = [{"id": "t", "name_key": "capacite.etincelle.name", "modules": ["testament", "anneau", "etincelle"]}]
+	loups[0].capacites = [{"id": "t", "name_key": "capacite.etincelle.name", "modules": ["testament", "anneau", "jet_court", "etincelle"]}]
 	loups[0].mana = 50
 	loups[0].declencheurs_armes.append({"evenement": "testament", "plan": s.plan_capacite(loups[0], 0).charge_suivante})
 	var pvj: int = j.sante
@@ -3272,7 +3292,7 @@ func test_composer_capacites() -> void:
 	s.charger_donjon("ruine", 119, 11, 1)
 	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
 	j.modules_connus = []
-	for m0 in ["point", "etincelle", "ligne", "renaissance", "soi"]:
+	for m0 in ["point", "etincelle", "ligne", "renaissance", "soi", "jet_court"]:
 		s.crediter_module(j, m0, 99)
 	var slots := s.slots_capacites(j)
 	verifier(int(slots.capacites) >= 2 and int(slots.modules) >= 2, "slots : %d capacités, %d modules" % [int(slots.capacites), int(slots.modules)])

@@ -24,6 +24,7 @@
       "name_key": "module.portail.name",
       "modules": [
         "point",
+        "jet_long",
         "portail"
       ]
     },
@@ -32,6 +33,7 @@
       "name_key": "module.brasier.name",
       "modules": [
         "colonne",
+        "aveugle",
         "brasier"
       ]
     },
@@ -40,6 +42,7 @@
       "name_key": "module.flamme.name",
       "modules": [
         "croix",
+        "jet_long",
         "flamme"
       ]
     }

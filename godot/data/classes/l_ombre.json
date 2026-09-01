@@ -24,6 +24,7 @@
       "name_key": "module.voile.name",
       "modules": [
         "point",
+        "jet_long",
         "voile"
       ]
     },
@@ -32,6 +33,7 @@
       "name_key": "module.projection.name",
       "modules": [
         "point",
+        "jet_long",
         "projection"
       ]
     },
@@ -40,6 +42,7 @@
       "name_key": "module.botte.name",
       "modules": [
         "chemin",
+        "jet_long",
         "botte"
       ]
     }

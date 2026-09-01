@@ -138,7 +138,7 @@
               "type": "string"
             },
             "minItems": 1,
-            "maxItems": 3
+            "maxItems": 4
           },
           "name_key": {
             "type": "string"

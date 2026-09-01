@@ -1594,6 +1594,12 @@ module.convocation.name,Convocation
 module.corps_a_corps.name,Corps à corps
 module.corruption.name,Corruption
 module.croix.name,Croix
+module.portee_sur_soi.name,Sur soi
+module.portee_contact.name,Contact
+module.portee_jet_court.name,Jet court
+module.portee_jet_long.name,Jet long
+module.portee_au_loin.name,Au loin
+module.portee_aveugle.name,Aveugle
 module.curee.name,Curée
 module.dernier_souffle.name,Dernier souffle
 module.derobade.name,Dérobade
@@ -2149,6 +2155,7 @@ bonus.ressource_mult,ressource ×
 journal.bombes_posees,"{nom} pose {n} charge(s), amorcées dans {retard} ticks"
 type_module.forme:cible,Formes — à distance
 type_module.forme:lanceur,Formes — depuis soi
+type_module.portee,Portées
 type_module.noyau,Noyaux
 type_module.modificateur,Modificateurs
 type_module.condition,Conditions
@@ -2176,6 +2183,7 @@ barre.sante,Vie
 barre.endurance,Endurance
 barre.mana,Mana
 barre.faim,Faim
+barre.charge,Charge
 ui.chargement,"Chargement — cellule ({x}, {y}) · {biome}"
 ui.composer.surface,"Par tuile : {n} tuiles à la visée nominale → {min}–{max} {monnaie} en tout"
 ui.capacite.surface,"{n} tuiles → {min}–{max} {monnaie}"
@@ -2218,6 +2226,7 @@ ui.composeur.aide,"glisser une carte dans un slot · double-clic : premier slot 
 ui.composeur.glisser,"Glissez une forme et un noyau dans les slots — ou Entrée sur une carte."
 ui.composeur.wuxing,"{dominante} domine · engendre {engendre} · domine {domine}"
 ui.composeur.wuxing_vide,"Wu Xing du sort : —"
+ui.composeur.groupe.portee,Portée
 ui.composeur.groupe.forme,Formes
 ui.composeur.groupe.noyau,Noyaux
 ui.composeur.groupe.modificateur,Modificateurs

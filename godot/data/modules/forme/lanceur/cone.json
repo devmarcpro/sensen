@@ -10,13 +10,12 @@
   ],
   "geometrie": "cone",
   "surcout_ticks": 3,
-  "portee_base": [
-    1,
-    3
-  ],
   "taille_base": 3,
-  "ligne_de_vue": true,
   "origine": "lanceur",
   "famille": "Depuis soi",
-  "style": "neutre"
+  "style": "neutre",
+  "portee_defaut": [
+    1,
+    3
+  ]
 }

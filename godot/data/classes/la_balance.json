@@ -35,6 +35,7 @@
       "name_key": "module.estimation.name",
       "modules": [
         "point",
+        "jet_long",
         "estimation"
       ]
     },
@@ -43,6 +44,7 @@
       "name_key": "module.etincelle.name",
       "modules": [
         "ligne",
+        "jet_long",
         "etincelle"
       ]
     },
@@ -51,6 +53,7 @@
       "name_key": "module.eboulement.name",
       "modules": [
         "point",
+        "jet_long",
         "eboulement"
       ]
     }

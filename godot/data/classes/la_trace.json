@@ -37,6 +37,7 @@
       "name_key": "module.traque.name",
       "modules": [
         "point",
+        "jet_long",
         "traque"
       ]
     },
@@ -45,6 +46,7 @@
       "name_key": "module.projection.name",
       "modules": [
         "point",
+        "jet_long",
         "projection"
       ]
     },
@@ -53,6 +55,7 @@
       "name_key": "module.botte.name",
       "modules": [
         "chemin",
+        "jet_long",
         "botte"
       ]
     }

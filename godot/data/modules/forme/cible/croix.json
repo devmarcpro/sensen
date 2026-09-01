@@ -3,20 +3,19 @@
   "nom": "Croix",
   "name_key": "module.croix.name",
   "module_type": "forme",
-  "description": "les quatre axes depuis une tuile — **ignore la ligne de vue**",
+  "description": "les quatre axes depuis une tuile",
   "classe_signature": null,
   "tags": [
     "forme"
   ],
   "geometrie": "croix",
   "surcout_ticks": 3,
-  "portee_base": [
-    0,
-    5
-  ],
   "taille_base": 1,
-  "ligne_de_vue": false,
   "origine": "cible",
   "famille": "À distance",
-  "style": "neutre"
+  "style": "neutre",
+  "portee_defaut": [
+    0,
+    1
+  ]
 }

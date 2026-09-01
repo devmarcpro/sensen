@@ -10,13 +10,12 @@
   ],
   "geometrie": "chemin",
   "surcout_ticks": 2,
-  "portee_base": [
-    1,
-    5
-  ],
   "taille_base": 5,
-  "ligne_de_vue": false,
   "origine": "lanceur",
   "famille": "Depuis soi",
-  "style": "neutre"
+  "style": "neutre",
+  "portee_defaut": [
+    1,
+    5
+  ]
 }

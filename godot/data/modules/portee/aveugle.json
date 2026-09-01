@@ -1,0 +1,19 @@
+{
+  "id": "aveugle",
+  "nom": "Aveugle",
+  "name_key": "module.portee_aveugle.name",
+  "module_type": "portee",
+  "description": "quatre tuiles **à travers les murs** — cher",
+  "classe_signature": null,
+  "tags": [
+    "portee"
+  ],
+  "portee_base": [
+    1,
+    4
+  ],
+  "surcout_ticks": 6,
+  "ligne_de_vue": false,
+  "famille": "Portée",
+  "style": "neutre"
+}

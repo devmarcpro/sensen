@@ -10,13 +10,12 @@
   ],
   "geometrie": "tuile",
   "surcout_ticks": 1,
-  "portee_base": [
-    1,
-    5
-  ],
   "taille_base": 1,
-  "ligne_de_vue": false,
   "origine": "cible",
   "famille": "À distance",
-  "style": "neutre"
+  "style": "neutre",
+  "portee_defaut": [
+    1,
+    1
+  ]
 }

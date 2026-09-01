@@ -985,6 +985,12 @@ module.convocation.name,Summoning
 module.corps_a_corps.name,Close Quarters
 module.corruption.name,Corruption
 module.croix.name,Cross
+module.portee_sur_soi.name,On self
+module.portee_contact.name,Contact
+module.portee_jet_court.name,Short throw
+module.portee_jet_long.name,Long throw
+module.portee_au_loin.name,Far
+module.portee_aveugle.name,Blind
 module.curee.name,Quarry
 module.dernier_souffle.name,Last Breath
 module.derobade.name,Evasion
@@ -2140,6 +2146,7 @@ bonus.ressource_mult,resource x
 journal.bombes_posees,"{nom} lays {n} charge(s), primed in {retard} ticks"
 type_module.forme:cible,Shapes — at range
 type_module.forme:lanceur,Shapes — from self
+type_module.portee,Ranges
 type_module.noyau,Cores
 type_module.modificateur,Modifiers
 type_module.condition,Conditions
@@ -2167,6 +2174,7 @@ barre.sante,Health
 barre.endurance,Stamina
 barre.mana,Mana
 barre.faim,Hunger
+barre.charge,Load
 ui.chargement,"Loading — cell ({x}, {y}) · {biome}"
 ui.composer.surface,"Per tile: {n} tiles at nominal aim → {min}–{max} {monnaie} in total"
 ui.capacite.surface,"{n} tiles → {min}–{max} {monnaie}"
@@ -2209,6 +2217,7 @@ ui.composeur.aide,"drag a card into a slot · double-click: first free slot · r
 ui.composeur.glisser,"Drag a form and a core into the slots — or Enter on a card."
 ui.composeur.wuxing,"{dominante} leads · generates {engendre} · overcomes {domine}"
 ui.composeur.wuxing_vide,"Spell Wu Xing: —"
+ui.composeur.groupe.portee,Range
 ui.composeur.groupe.forme,Forms
 ui.composeur.groupe.noyau,Cores
 ui.composeur.groupe.modificateur,Modifiers
