@@ -2243,6 +2243,8 @@ ui.composeur.glisser,"Glissez une forme et un noyau dans les slots — ou Entré
 ui.composeur.wuxing,"{dominante} domine · engendre {engendre} · domine {domine}"
 ui.composeur.wuxing_vide,"Wu Xing du sort : —"
 ui.composeur.groupe.portee,Portée
+ui.composeur.etape,"Étape {n}"
+ui.composeur.etape_aide,"Une étape de plus part du déclencheur de la précédente — il en faut un"
 ui.composeur.groupe.forme,Formes
 ui.composeur.groupe.noyau,Noyaux
 ui.composeur.groupe.modificateur,Modificateurs

@@ -161,6 +161,10 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > « dans l'aperçu de sorts, que l'origine du sort soit uniquement dans les cases qui sont définies par la portée ». L'aperçu laissait poser la visée **n'importe où** sur sa grille de 17 × 17 et se contentait d'une croix rouge quand c'était trop loin : on composait en regardant une figure impossible. Les cases atteignables sont maintenant **peintes en vert** (comme la zone de lancer en jeu, même journée) et une case hors de l'anneau de portée est **ignorée** — la visée retombe sur sa position nominale. Ce que montre l'aperçu est donc toujours un tir légal.
 
 
+> [!success] Codé le 2026-09-01 — le composeur sait enfin composer plus de deux étapes
+> Le moteur enchaîne autant d'étapes qu'on veut — un déclencheur encapsule tout ce qui le suit, et l'assemblage se rappelle lui-même (`test_chaine_a_trois_etapes`). L'écran, lui, n'en exprimait que **deux** : ses créneaux étant groupés **par type**, tout ce qui suivait le premier déclencheur tombait dans une seule case « Suite », et un second déclencheur se rangeait avec le premier — la troisième étape était donc impossible à écrire à la souris. Le composeur tient maintenant une **liste d'étapes** : une ligne d'onglets « Étape 1 · 2 · 3 · + » ouvre celle qu'on modifie, chaque étape a ses propres créneaux (portée, forme, noyaux, modificateurs, conditions, liaisons) et son **déclencheur**, qui est précisément ce qui ouvre la suivante. Le groupe « Suite » disparaît : ce n'était que l'étape 2 sans le dire. Ajouter une étape exige un déclencheur dans la précédente — sans lui, rien ne partirait.
+
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

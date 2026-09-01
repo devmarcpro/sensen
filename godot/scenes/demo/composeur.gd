@@ -12,13 +12,15 @@ const SLOT := Vector2(48, 48)
 const COLONNES := 8
 const GLYPHES := {"portee": "⟿", "forme": "◇", "noyau": "●", "modificateur": "▲", "condition": "?", "declencheur": "⚡", "liaison": "∞"}
 const ORDRE_TYPES: Array[String] = ["portee", "forme", "noyau", "modificateur", "condition", "declencheur", "liaison"]
-## Les groupes de la composition, dans l'ordre de la séquence : tout ce qui précède le déclencheur est la charge
-## principale, tout ce qui le suit (« suite », libre) est sa charge différée (Six types de modules).
-const GROUPES: Array[String] = ["portee", "forme", "noyau", "modificateur", "condition", "liaison", "declencheur", "suite"]
+## Les groupes d'UNE étape, dans l'ordre de la séquence. Le déclencheur ferme l'étape : ce qui le suit est
+## l'étape suivante, et le moteur les imbrique sans limite (Six types de modules · designer 2026-09-01).
+const GROUPES: Array[String] = ["portee", "forme", "noyau", "modificateur", "condition", "liaison", "declencheur"]
 
 var ecrans: Node                       # l'écran parent (Ecrans) : _apercu_plan, _contribution_module, sequence_composee
 var main: Node
-var groupes: Dictionary = {}           # groupe → Array[String] (un module par slot, "" = vide)
+var groupes: Dictionary = {}           # groupe → Array[String] de l'étape courante (un module par slot)
+var etapes: Array[Dictionary] = []     # les étapes du sort : chacune ses groupes, son déclencheur ouvre la suivante
+var etape := 0                         # l'étape qu'on modifie
 var selection := 0                     # la carte sélectionnée au clavier / au clic
 var cartes: Array[Control] = []
 var ids: Array[String] = []            # les modules du catalogue, dans l'ordre des cartes
@@ -30,6 +32,7 @@ var etiquette_style: Label            # le style du sort en composition
 var nom: LineEdit
 var icone_sort: Control                # l'icône combinée du sort en cours, à côté du nom
 var rangee_slots: HBoxContainer
+var rangee_etapes: HBoxContainer
 var catalogue: VBoxContainer
 var detail: RichTextLabel
 var apercu: ApercuSort
@@ -63,6 +66,8 @@ func _ready() -> void:
 	aide.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	aide.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h1.add_child(aide)
+	rangee_etapes = HBoxContainer.new()   # rangée 1 bis : les étapes du sort (designer 2026-09-01)
+	add_child(rangee_etapes)
 	var defil_slots := ScrollContainer.new()   # rangée 2 : les groupes de slots, défilables si la composition s'allonge
 	defil_slots.custom_minimum_size = Vector2(0, SLOT.y + 34)
 	defil_slots.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -165,42 +170,57 @@ static func groupe_de(m: String) -> String:
 	var t := type_de(m)
 	if t.begins_with("forme"):
 		return "forme"
-	return t if t in GROUPES else "suite"
+	return t if t in GROUPES else "noyau"   # un type inconnu échoue sur le noyau plutôt que dans un fourre-tout
 
 
 func sequence() -> Array:
 	var seq: Array = []
-	for g in GROUPES:
-		for m in groupes.get(g, []):
-			if not str(m).is_empty():
-				seq.append(str(m))
+	for e in etapes:   # étape après étape ; le déclencheur de chacune ouvre la suivante
+		for g in GROUPES:
+			for m in e.get(g, []):
+				if not str(m).is_empty():
+					seq.append(str(m))
 	return seq
 
 
 ## Répartit une séquence dans les groupes : par type avant le déclencheur, tout ce qui le suit dans « suite ».
 func _repartir(depart: Array) -> void:
-	groupes = {}
-	for g in GROUPES:
-		groupes[g] = []
-	var apres := false
+	etapes = [_etape_vide()]
 	for m in depart:
 		var id := str(m)
-		if apres:
-			groupes.suite.append(id)
-			continue
 		var g := groupe_de(id)
-		groupes[g].append(id)
-		if g == "declencheur":
-			apres = true
+		etapes[etapes.size() - 1][g].append(id)
+		if g == "declencheur":   # le déclencheur ferme l'étape : la suite est une étape de plus
+			etapes.append(_etape_vide())
+	if etapes.size() > 1 and _etape_creuse(etapes[etapes.size() - 1]):
+		etapes.remove_at(etapes.size() - 1)   # un déclencheur sans suite : pas d'étape fantôme
+	etape = clampi(etape, 0, etapes.size() - 1)
+	groupes = etapes[etape]
 	if groupes.forme.is_empty():   # deux slots d'accueil : une forme, un noyau
 		groupes.forme.append("")
 	if groupes.noyau.is_empty():
 		groupes.noyau.append("")
 
 
+## Une étape neuve : un slot par groupe, tous vides.
+static func _etape_vide() -> Dictionary:
+	var e := {}
+	for g in GROUPES:
+		e[g] = []
+	return e
+
+
+static func _etape_creuse(e: Dictionary) -> bool:
+	for g in GROUPES:
+		for m in e.get(g, []):
+			if not str(m).is_empty():
+				return false
+	return true
+
+
 ## Reconstruit tout depuis l'état du joueur ; `depart` = une séquence à pré-remplir (hotbar, capture).
 func reconstruire(j: Dictionary, depart: Array = []) -> void:
-	if groupes.is_empty() or (not depart.is_empty() and sequence() != depart):
+	if etapes.is_empty() or (not depart.is_empty() and sequence() != depart):
 		_repartir(depart)
 	_reconstruire_catalogue(j)
 	_reconstruire_slots()
@@ -259,6 +279,7 @@ func _reconstruire_catalogue(j: Dictionary) -> void:
 func _reconstruire_slots() -> void:
 	for c in rangee_slots.get_children():
 		c.queue_free()
+	_reconstruire_etapes()
 	for g in GROUPES:
 		var bloc := VBoxContainer.new()
 		rangee_slots.add_child(bloc)
@@ -353,9 +374,9 @@ func _retirer_slot(g: String) -> void:
 	reconstruire(main.joueur())
 
 
-## Un module peut-il aller dans ce groupe ? « suite » accepte tout ; les autres, leur type.
+## Un module peut-il aller dans ce groupe ? Chaque groupe n'accepte que son type.
 func accepte(g: String, module: String) -> bool:
-	return g == "suite" or groupe_de(module) == g
+	return groupe_de(module) == g
 
 
 ## Pose `module` dans le slot (`g`, `index`) — depuis le catalogue, ou depuis le slot (`g_de`, `i_de`) : échange.
@@ -695,3 +716,41 @@ class PentagrammeSort extends Control:
 		for k in n:
 			if k % 2 == 0:
 				draw_line(a.lerp(b, float(k) / n), a.lerp(b, float(k + 1) / n), c, largeur)
+
+## La ligne des étapes : « Étape 1 · 2 · 3 · + ». Un déclencheur ferme une étape et ouvre la suivante ;
+## sans lui, une étape de plus ne partirait jamais — le bouton + l'exige (designer 2026-09-01).
+func _reconstruire_etapes() -> void:
+	if rangee_etapes == null:
+		return
+	for c in rangee_etapes.get_children():
+		c.queue_free()
+	for k in etapes.size():
+		var b := Button.new()
+		b.text = tr("ui.composeur.etape").format({"n": k + 1})
+		b.focus_mode = Control.FOCUS_NONE
+		b.add_theme_font_size_override("font_size", 11)
+		b.disabled = k == etape
+		var i := k
+		b.pressed.connect(func() -> void:
+			etape = i
+			groupes = etapes[etape]
+			reconstruire(main.joueur()))
+		rangee_etapes.add_child(b)
+	var derniere: Dictionary = etapes[etapes.size() - 1]
+	var a_declencheur := false
+	for m in derniere.get("declencheur", []):
+		if not str(m).is_empty():
+			a_declencheur = true
+	var plus := Button.new()
+	plus.text = "+"
+	plus.focus_mode = Control.FOCUS_NONE
+	plus.disabled = not a_declencheur
+	plus.tooltip_text = tr("ui.composeur.etape_aide")
+	plus.pressed.connect(func() -> void:
+		etapes.append(_etape_vide())
+		etape = etapes.size() - 1
+		groupes = etapes[etape]
+		groupes.forme.append("")
+		groupes.noyau.append("")
+		reconstruire(main.joueur()))
+	rangee_etapes.add_child(plus)

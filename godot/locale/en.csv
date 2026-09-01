@@ -2234,6 +2234,8 @@ ui.composeur.glisser,"Drag a form and a core into the slots — or Enter on a ca
 ui.composeur.wuxing,"{dominante} leads · generates {engendre} · overcomes {domine}"
 ui.composeur.wuxing_vide,"Spell Wu Xing: —"
 ui.composeur.groupe.portee,Range
+ui.composeur.etape,"Step {n}"
+ui.composeur.etape_aide,"A further step fires from the previous trigger — you need one"
 ui.composeur.groupe.forme,Forms
 ui.composeur.groupe.noyau,Cores
 ui.composeur.groupe.modificateur,Modifiers
