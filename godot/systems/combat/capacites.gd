@@ -183,8 +183,14 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 					plan.portee = Vector2i(int(pd[0]), int(pd[1]))
 				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 			"portee":
-				# Le module de portée porte la distance ET la ligne de vue, et les paie en ticks.
+				# Le module de portée porte la distance ET la ligne de vue, et les paie en ticks. Répété,
+				# il ALLONGE la distance comme une forme répétée s'agrandit (designer 2026-09-01) : la
+				# distance est un cadran, pas un choix parmi six paliers.
 				var pb: Array = m.get("portee_base", [1, 1])
+				if bool(plan.get("portee_posee", false)):
+					plan.portee.y += int(pb[1]) - int(pb[0]) + 1
+					plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
+					continue
 				plan.portee = Vector2i(int(pb[0]), int(pb[1]))
 				plan.origine = str(m.get("origine", "cible"))   # la portée dit où la figure s'ancre (2026-09-01)
 				plan.ligne_de_vue = bool(m.get("ligne_de_vue", true))

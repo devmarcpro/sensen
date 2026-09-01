@@ -9316,7 +9316,7 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 	for l: Dictionary in plan.liaisons:
 		if l.get("concentration", false):
 			concentre = true
-	var dil := facteur_dilution(tuiles.size())
+	var dil := facteur_dilution(tuiles.size()) * facteur_distance(int(plan.portee.y))
 	if not concentre and dil < 1.0:
 		charge = plan.duplicate()
 		charge.mult = float(plan.mult) * dil
@@ -10468,3 +10468,12 @@ func facteur_dilution(n_tuiles: int) -> float:
 		return 1.0
 	var f := 1.0 / pow(float(n_tuiles), float(cfg.get("exposant", 0.5)))
 	return maxf(f, float(cfg.get("plancher", 0.25)))
+
+## La distance affaiblit (designer 2026-09-01) : 1 / (1 + coef × (portée − 1)), borné par un plancher.
+## Frapper loin coûtait des ticks ; ça coûte aussi de la puissance. S'ajoute à la dilution par la surface.
+func facteur_distance(portee_max: int) -> float:
+	var cfg: Dictionary = regles.r.get("surface", {}).get("portee", {})
+	if portee_max <= 1:
+		return 1.0
+	var f := 1.0 / (1.0 + float(cfg.get("coef", 0.06)) * float(portee_max - 1))
+	return maxf(f, float(cfg.get("plancher", 0.4)))

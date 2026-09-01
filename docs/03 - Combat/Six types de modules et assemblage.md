@@ -90,6 +90,12 @@ Le même vocabulaire produit une attaque, un contrôle de zone, un piège et un 
 > **Conséquence sur `dispersion`** : « répartir la charge sur toutes les cibles, divisée par leur nombre » faisait double emploi avec la nouvelle règle. La liaison devient **`concentration`** : elle **annule la dilution** — la forme large frappe à pleine puissance — contre un fort surcoût. On ne paie plus pour diviser, on paie pour ne pas l'être.
 
 
+> [!success] Codé le 2026-09-01 — la distance affaiblit, et la portée se répète comme une forme (designer)
+> **Instruction** : « la portée pas seulement la forme devrait affecter » la puissance, et « plutôt que d'avoir une portée et une forme fixes, que ce soit modulable : on fait + ou − sur chaque module ».
+> **La modularité existait déjà pour deux types sur trois** : répéter un **noyau** en fait un noyau plus fort (× n, payé une fois de plus), répéter une **forme** l'agrandit (taille additionnée) — et les boutons `−` `+` du composeur ajoutent ou retirent exactement ces copies. Seule la **portée** manquait à l'appel : la répéter réglait deux fois la même valeur en la payant deux fois. Elle **allonge** désormais la distance comme une forme s'agrandit — `Jet court` deux fois porte à 6, trois fois à 9, chaque copie payant ses ticks. La distance est donc un cadran, pas un choix parmi six paliers.
+> **La distance affaiblit** : une charge est multipliée par `1 / (1 + coef × (portée − 1))` (`combat_rules.surface.portee.attenuation`), en plus de la dilution par la surface. À portée 1 rien ne change, à 6 il reste 77 %, à 12 il reste 60 %. Frapper loin coûtait déjà des ticks ; ça coûte maintenant de la puissance. Les deux atténuations se composent : un carré de neuf tuiles lancé à douze cases frappe à un cinquième.
+
+
 ## Liens
 - **Dépend de** : [[Vocabulaire des modules — six axes]], [[Structure compétences-modules-slots]]
 - **Alimente** : [[Familles de capacités de la grille]], [[Modules]], [[Jauge de chaîne Wu Xing]]

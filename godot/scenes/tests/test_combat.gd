@@ -7500,3 +7500,11 @@ func test_dilution_par_surface() -> void:
 			s.pas(j.horloge)
 	verifier(degats[0] > 0 and degats[1] > 0, "les deux formes touchent (%d en point, %d en carré)" % [degats[0], degats[1]])
 	verifier(degats[1] < degats[0], "le carré frappe moins fort que le point, à noyau égal (%d < %d)" % [degats[1], degats[0]])
+	# La distance affaiblit aussi (designer 2026-09-01), et la portée répétée allonge.
+	verifier(is_equal_approx(s.facteur_distance(1), 1.0), "au contact, la distance n'ôte rien")
+	verifier(s.facteur_distance(6) < 1.0 and s.facteur_distance(12) < s.facteur_distance(6), "plus c'est loin, plus c'est faible (%.2f à 6, %.2f à 12)" % [s.facteur_distance(6), s.facteur_distance(12)])
+	verifier(s.facteur_distance(99) >= float(s.regles.r.surface.portee.plancher), "un plancher borne l'atténuation")
+	var cap2 := Capacites.new(GameData.catalogues["modules"])
+	var p1: Dictionary = cap2.assembler(["jet_court", "point", "etincelle"], 5, "1d4", {})
+	var p2: Dictionary = cap2.assembler(["jet_court", "jet_court", "point", "etincelle"], 5, "1d4", {})
+	verifier(int(p2.portee.y) > int(p1.portee.y) and int(p2.ticks) > int(p1.ticks), "la portée répétée allonge et se paie (%d → %d tuiles, %d → %d ticks)" % [int(p1.portee.y), int(p2.portee.y), int(p1.ticks), int(p2.ticks)])
