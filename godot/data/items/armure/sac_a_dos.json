@@ -1,0 +1,23 @@
+{
+  "name_key": "item.sac_a_dos.name",
+  "type": "armure",
+  "equip_slot": "dos",
+  "hands": 0,
+  "genre_grammatical": "ms",
+  "poids": 3.0,
+  "tags": [
+    "armure",
+    "dos",
+    "sac"
+  ],
+  "zone": "torse",
+  "construction": "matelasse",
+  "affixes": [
+    {
+      "id": "passif_poids",
+      "params": {
+        "n": 25
+      }
+    }
+  ]
+}

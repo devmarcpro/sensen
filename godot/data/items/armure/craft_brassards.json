@@ -1,0 +1,22 @@
+{
+  "name_key": "item.craft_brassards.name",
+  "type": "armure",
+  "equip_slot": "brassards",
+  "hands": 0,
+  "slots": {
+    "plaque": "plaque",
+    "sangles": "sangles",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "mp",
+  "tags": [
+    "armure",
+    "assemble"
+  ],
+  "zone": "bras",
+  "construction": "plaque"
+}

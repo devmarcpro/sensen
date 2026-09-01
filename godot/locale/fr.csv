@@ -1529,6 +1529,15 @@ item.craft_masse.name,Masse
 item.craft_lance.name,Lance
 item.craft_pioche.name,Pioche
 item.craft_casque.name,Casque
+item.craft_brassards.name,Brassards
+item.craft_bottes.name,Bottes
+item.cape.name,Cape
+item.sac_a_dos.name,Sac à dos
+slot.brassards,Brassards
+slot.bottes,Bottes
+slot.dos,Dos
+slot.accessoire_1,Accessoire I
+slot.accessoire_2,Accessoire II
 item.craft_cuirasse.name,Cuirasse
 item.craft_jambieres.name,Jambières
 item.composant.name,Composant

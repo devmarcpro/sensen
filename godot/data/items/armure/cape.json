@@ -1,0 +1,18 @@
+{
+  "name_key": "item.cape.name",
+  "type": "armure",
+  "equip_slot": "dos",
+  "hands": 0,
+  "genre_grammatical": "fs",
+  "poids": 2.0,
+  "stats": {
+    "isolation": 40
+  },
+  "tags": [
+    "armure",
+    "dos",
+    "cape"
+  ],
+  "zone": "torse",
+  "construction": "matelasse"
+}

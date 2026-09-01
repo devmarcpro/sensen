@@ -28,6 +28,10 @@ La grille de 14 slots — et le principe directeur : l'armure est permanente, l'
 
 **Règles d'armure :** voir [[Armure par zone et constructions]].
 
+> [!bug] Corrigé le 2026-09-01 — le jeu n'avait que 9 des 14 slots (designer)
+> « il manque des slots d'équipement non ? on avait pas décidé qu'il y en aurait plus que ça ? ». Exact, et c'est un écart avec cette note même : l'écran d'inventaire n'affichait que **neuf** emplacements — deux mains, casque, cuirasse, jambières, deux anneaux, amulette, carquois. Manquaient les **brassards-gants**, les **bottes**, le **dos** (cape ou sac) et les **deux accessoires**. Le rig, lui, connaissait déjà `brassards` et `bottes` dans ses `slots_segments` : l'armure se serait peinte toute seule, il n'y avait simplement aucun objet à y mettre ni de case pour l'y poser. Les quatorze sont désormais là, avec deux armures assemblées de plus (brassards, bottes) et deux objets de dos qui portent la décision « cape **ou** sac, jamais les deux ».
+
+
 ## Liens
 - **Dépend de** : [[Zones de coup par dénivelé]], [[Craft compositionnel]]
 - **Alimente** : [[Armure par zone et constructions]], [[Effets d'équipement passifs]], [[Loot — affixes, gemmes et rareté]]

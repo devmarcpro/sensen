@@ -272,6 +272,15 @@ item.chou.name,Cabbage
 item.citrouille.name,Pumpkin
 item.composant.name,Component
 item.craft_casque.name,Helmet
+item.craft_brassards.name,Bracers
+item.craft_bottes.name,Boots
+item.cape.name,Cloak
+item.sac_a_dos.name,Backpack
+slot.brassards,Bracers
+slot.bottes,Boots
+slot.dos,Back
+slot.accessoire_1,Trinket I
+slot.accessoire_2,Trinket II
 item.craft_cuirasse.name,Cuirass
 item.craft_dague.name,Dagger
 item.craft_epee.name,Sword
