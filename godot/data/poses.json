@@ -1,0 +1,35 @@
+{
+  "_doc": "Les poses articulées par le joueur (designer 2026-09-01, point 63) : les actions que l'on peut mettre en scène, et l'amplitude de rotation permise par segment.",
+  "actions": [
+    {
+      "id": "repos",
+      "name_key": "pose.repos.name"
+    },
+    {
+      "id": "marche",
+      "name_key": "pose.marche.name"
+    },
+    {
+      "id": "attaque",
+      "name_key": "pose.attaque.name"
+    },
+    {
+      "id": "sort",
+      "name_key": "pose.sort.name"
+    },
+    {
+      "id": "garde",
+      "name_key": "pose.garde.name"
+    },
+    {
+      "id": "sommeil",
+      "name_key": "pose.sommeil.name"
+    },
+    {
+      "id": "mort",
+      "name_key": "pose.mort.name"
+    }
+  ],
+  "amplitude_max": 170.0,
+  "pas_degres": 6.0
+}

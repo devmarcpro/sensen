@@ -23,6 +23,7 @@ var _anim_duree := 0.25
 var _ap: Dictionary = {}       # loci visuels de l'être (Apparence — données et équipement)
 var _vue_tete := "face"
 var _carrure := 1.0
+var _pose_courante: Dictionary = {}   # la pose du joueur pour l'action en cours (point 63)
 
 
 func configurer(p_e: Dictionary, p_rig: Dictionary, p_items: Dictionary, p_fonct: Dictionary, p_palette: Dictionary) -> void:
@@ -64,6 +65,7 @@ func _draw() -> void:
 		miroir = true
 		f = rig.facings[f.miroir]
 	_ap = e.get("apparence", {})
+	_pose_courante = _pose_action()
 	_vue_tete = str(f.get("vue_tete", "face"))
 	var fac: Dictionary = GameData.config("apparence").get("facteurs", {})
 	_carrure = float(fac.get("carrure", {}).get(str(_ap.get("carrure", "moyenne")), 1.0))
@@ -116,9 +118,27 @@ func _poser_segments(f: Dictionary, miroir: bool) -> Dictionary:
 	return monde
 
 
+## La pose enregistrée par le joueur pour l'action en cours (designer 2026-09-01, point 63) :
+## un dictionnaire segment → angle, appliqué par-dessus le rig. Sans pose, le rig parle seul.
+func _pose_action() -> Dictionary:
+	var poses: Dictionary = e.get("poses", {})
+	if poses.is_empty():
+		return {}
+	var act := "repos"
+	if not bool(e.get("vivant", true)):
+		act = "mort"
+	elif bool(e.get("dort", false)):
+		act = "sommeil"
+	elif bool(e.get("garde", false)):
+		act = "garde"
+	elif not pose.is_empty():
+		act = "attaque"
+	return poses.get(act, poses.get("repos", {}))
+
+
 func _placer(nom: String, origine: Vector2, miroir: bool) -> Dictionary:
 	var s: Dictionary = rig.segments[nom]
-	var angle := float(s.angle) + float(pose.get(nom, 0.0))
+	var angle := float(s.angle) + float(pose.get(nom, 0.0)) + float(_pose_courante.get(nom, 0.0))
 	if miroir:
 		angle = 180.0 - angle
 	var d := Vector2.from_angle(deg_to_rad(angle))

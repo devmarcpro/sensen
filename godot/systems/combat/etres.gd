@@ -54,6 +54,7 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 		"tags_acquis": [],                                          # grant_tag des effets passifs
 		"tags_acquis_race": def.get("tags_acquis_race", []).duplicate(),   # ceux du talent de race
 		"apparence": def.get("apparence", {}).duplicate(),                 # loci visuels (Apparence — données et équipement)
+		"poses": def.get("poses", {}).duplicate(true),                     # poses articulées par le joueur (point 63)
 		"rare": false,                                              # variante rare (Monstres rares)
 		"degats_element": {},                                       # bonus plats des gemmes
 		"affinites": {},                                            # tailles en affinité de l'arme tenue
@@ -112,6 +113,7 @@ static func creer_personnage(nom_key: String, race_id: String, classe_id: String
 		"potentiels": pot_base.duplicate(), "potentiels_base": pot_base, "xp_mult": float(race.get("xp_mult", 1.0)), "signe": signe,
 		"tags_acquis_race": race.get("tags_acquis", []).duplicate(),
 		"apparence": race.get("apparence", {}).duplicate(),   # loci visuels : la race donne le défaut, la création les règle
+		"poses": {},                                          # poses articulées à la création (point 63)
 		"capacites": classe.get("capacites", []).duplicate(true),   # les sorts de départ sont ceux de la classe (designer, point 47)
 		"hotbar": classe.get("hotbar", []).duplicate(true),         # et son loadout de hotbar
 		"modules_connus": _modules_de_classe(classe),               # et ses seuls modules : le reste s'apprend dans les livres

@@ -6318,6 +6318,16 @@ func test_camp() -> void:
 			if m51.corruption_jour(c51b, jour51 + 30) != m51.corruption_jour(c51b, jour51 + 60):
 				bouge51 += 1
 	verifier(bouge51 > 0, "le bruit de corruption se déplace dans le temps (%d cellules changent)" % bouge51)
+	# Les poses articulées (2026-09-01, point 63) : un angle par segment, rejoué à l'action
+	var cfg63: Dictionary = GameData.config("poses")
+	verifier(cfg63.get("actions", []).size() >= 5, "les actions posables sont en données (%d)" % cfg63.get("actions", []).size())
+	var prog63 := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
+	var p63 := Etres.creer_personnage("creature.aventurier.name", "humain", "le_sabre", {}, 1000, prog63)
+	verifier(p63.has("poses"), "le personnage porte ses poses")
+	p63.poses = {"attaque": {"bras_haut_d": 40.0}, "repos": {"tete": 5.0}}
+	var inst63 := Etres.instancier("essai63", p63.duplicate(true), Vector2i.ZERO, "joueur", s.regles, s.items)
+	verifier(inst63.get("poses", {}).has("attaque"), "et les garde en s'instanciant dans le monde")
+
 	# Tout objet a son Wu Xing (2026-09-01, point 65), sauf tant qu'il n'est pas identifié
 	var j65: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
 	s._donner_materiau(j65, "fer", 1, "lingot")   # un lingot de fer : sa matière décide de son élément

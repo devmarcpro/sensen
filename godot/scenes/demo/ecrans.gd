@@ -20,6 +20,8 @@ var cadre_perso: Control      # l'aperçu du personnage (écran Création) : un 
 var apercu_perso: Paperdoll
 var cadre_visage: Control          # le cadre du portrait : il rogne tout ce qui n'est pas la tête
 var portrait_perso: Paperdoll      # le même paperdoll, zoomé sur le visage (designer, point 43)
+var pose_edition := ""      # l'action dont on articule la pose (designer, point 63)
+var pose_segment := ""      # le membre saisi
 var menu_contextuel_objet: PopupMenu   # clic droit sur un objet du sac (designer, point 46)
 var barres_perso: BarresCreation   # vie, endurance, mana sous l'aperçu (designer, point 42)
 var composeur: Composeur      # le composeur en glisser-déposer (écran Composer)
@@ -104,6 +106,8 @@ func _ready() -> void:
 	cadre_perso.visible = false
 	cadre_perso.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	droite.add_child(cadre_perso)
+	cadre_perso.mouse_filter = Control.MOUSE_FILTER_STOP   # le pantin se manipule à la souris (point 63)
+	cadre_perso.gui_input.connect(_pantin_entree)
 	apercu_perso = Paperdoll.new()
 	apercu_perso.scale = Vector2(5.4, 5.4)   # le personnage en grand (designer, point 43)
 	apercu_perso.position = Vector2(210, 300)
@@ -227,6 +231,11 @@ func touche(ev: InputEventKey) -> bool:
 				return true
 			if courant == "titre":   # rien derrière l'écran principal : Échap n'y fait rien
 				return true
+			if not pose_edition.is_empty():   # Échap : on sort du pantin sans quitter la création
+				pose_edition = ""
+				pose_segment = ""
+				rafraichir()
+				return true
 			if courant == "creation":
 				main.creation = {}
 				ouvrir("titre")
@@ -237,6 +246,9 @@ func touche(ev: InputEventKey) -> bool:
 			fermer()
 			return true
 		KEY_LEFT, KEY_RIGHT:
+			if not pose_edition.is_empty() and courant == "creation":   # le pantin (point 63)
+				_tourner_membre((-1.0 if ev.keycode == KEY_LEFT else 1.0) * float(GameData.config("poses").get("pas_degres", 6.0)))
+				return true
 			if courant == "monde" and selection < entrees.size():   # les réglages du monde (designer, point 49)
 				var en_m: Dictionary = entrees[selection]
 				if str(en_m.get("id", "")).begins_with("opt:"):
@@ -250,6 +262,11 @@ func touche(ev: InputEventKey) -> bool:
 				_montrer_detail()
 			return true
 		KEY_ENTER, KEY_KP_ENTER:
+			if not pose_edition.is_empty():   # garder la pose et sortir du pantin
+				pose_edition = ""
+				pose_segment = ""
+				rafraichir()
+				return true
 			_action_principale()
 			return true
 		KEY_DELETE, KEY_BACKSPACE:
@@ -647,7 +664,7 @@ func _action_principale() -> void:
 			main._action_menu(str(en.id))
 			return
 		"creation":
-			_action_creation(str(en.id), 1)
+			_action_creation(str(en.id), 0 if str(en.id) == "pose" else 1)
 			return
 		"titre":
 			match str(en.id):
@@ -1408,11 +1425,62 @@ func _construire_creation() -> void:
 			"valeur": tr("ui.apparence.val." + str(app.get(str(ligne.id), ligne.valeurs[0] if not ligne.valeurs.is_empty() else ""))),
 		}))
 		entrees.append({"kind": "creation", "id": "app:" + str(ligne.id)})
+	var actions_p: Array = GameData.config("poses").get("actions", [])   # articuler ses poses (designer, point 63)
+	if not actions_p.is_empty():
+		var i_p: int = int(c.get("pose_action", 0)) % actions_p.size()
+		liste.add_item(tr("ui.creation.pose_l").format({"action": tr(str(actions_p[i_p].name_key))}))
+		entrees.append({"kind": "creation", "id": "pose"})
 	liste.add_item(tr("ui.creation.depart_l").format({"lieu": tr("ui.creation.depart_donjon" if int(c.get("depart", 0)) == 1 else "ui.creation.depart_camp")}))
 	entrees.append({"kind": "creation", "id": "depart"})
 	liste.add_item(tr("ui.creation.commencer"))
 	entrees.append({"kind": "creation", "id": "commencer"})
+	if not pose_edition.is_empty():   # le bandeau du pantin (point 63)
+		var acts_t: Array = GameData.config("poses").get("actions", [])
+		var nom_a := pose_edition
+		for a_t in acts_t:
+			if str(a_t.id) == pose_edition:
+				nom_a = tr(str(a_t.name_key))
+		titre.text = tr("ui.pose.editer").format({"action": nom_a})
+		if not pose_segment.is_empty():
+			titre.text += "  ·  " + tr("ui.pose.segment").format({"nom": pose_segment})
 	_apercu_personnage(fiche)
+
+
+## Le pantin (designer 2026-09-01, point 63) : en mode pose, un clic saisit le membre le plus proche
+## et le glissement le fait pivoter. Rien n'est calculé ailleurs : on écrit un angle par segment.
+func _pantin_entree(ev: InputEvent) -> void:
+	if pose_edition.is_empty() or main.creation.is_empty():
+		return
+	var rig: Dictionary = GameData.entree("rigs", str(_fiche_apercu().get("skeleton_template", "humanoide")))
+	if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+		var local: Vector2 = (ev.position - apercu_perso.position) / apercu_perso.scale.x
+		var meilleur := ""
+		var d_min := 1e9
+		for nom: String in rig.get("segments", {}).keys():   # le membre dont l'ancrage est le plus proche du clic
+			var seg: Dictionary = rig.segments[nom]
+			var p := Vector2(0, -float(rig.get("hauteur_pieds", 0)) - float(seg.longueur) * 0.5)
+			var d := local.distance_to(p) + float(nom.length()) * 0.01
+			if d < d_min:
+				d_min = d
+				meilleur = nom
+		pose_segment = meilleur
+		rafraichir()
+	elif ev is InputEventMouseMotion and (ev.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0 and not pose_segment.is_empty():
+		_tourner_membre(ev.relative.x + ev.relative.y)
+
+
+## Fait pivoter le membre saisi, dans l'amplitude autorisée par les données.
+func _tourner_membre(delta: float) -> void:
+	if pose_segment.is_empty():
+		return
+	var cfg: Dictionary = GameData.config("poses")
+	var poses: Dictionary = main.creation.get("poses", {})
+	var pose: Dictionary = poses.get(pose_edition, {})
+	var a := float(pose.get(pose_segment, 0.0)) + delta
+	pose[pose_segment] = clampf(a, -float(cfg.get("amplitude_max", 170.0)), float(cfg.get("amplitude_max", 170.0)))
+	poses[pose_edition] = pose
+	main.creation["poses"] = poses
+	_apercu_personnage(_fiche_apercu())
 
 
 ## Le personnage en grand : le paperdoll du jeu, avec la teinte choisie et l'équipement de départ de la classe.
@@ -1431,6 +1499,9 @@ func _apercu_personnage(fiche: Dictionary) -> void:
 		equip[str(d.get("equip_slot", "main_principale"))] = str(id)
 	e.equipement = equip
 	e["orientation"] = Vector2i(1, 1)
+	e["poses"] = main.creation.get("poses", {}).duplicate(true)   # le pantin montre la pose qu'on articule
+	if not pose_edition.is_empty():
+		e["poses"] = {"repos": e.poses.get(pose_edition, {})}
 	apercu_perso.configurer(e, GameData.entree("rigs", str(e.skeleton_template)), items, GameData.catalogues.functionalities, GameData.config("palette_materiaux"))
 	apercu_perso.queue_redraw()
 	cadre_visage.visible = not e.get("apparence", {}).is_empty()   # pas de portrait pour qui n'a pas de visage
@@ -1529,6 +1600,16 @@ func _action_creation(id: String, sens: int) -> void:
 			c.classe = posmod(int(c.classe) + sens, main._classes_visibles().size())
 		"annee":
 			c.annee = int(c.annee) + sens
+		"pose":   # l'action à mettre en scène ; Entrée ouvre le pantin (designer, point 63)
+			var acts: Array = GameData.config("poses").get("actions", [])
+			if acts.is_empty():
+				return
+			if sens == 0:
+				pose_edition = str(acts[int(c.get("pose_action", 0)) % acts.size()].id)
+				pose_segment = ""
+				rafraichir()
+				return
+			c["pose_action"] = posmod(int(c.get("pose_action", 0)) + sens, acts.size())
 		"depart":   # Départ : Camp / Donjon (designer, point 34)
 			c.depart = posmod(int(c.get("depart", 0)) + sens, 2)
 		"commencer":

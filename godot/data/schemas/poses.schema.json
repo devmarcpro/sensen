@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "required": [
+    "actions",
+    "amplitude_max",
+    "pas_degres"
+  ],
+  "properties": {
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name_key"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name_key": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "amplitude_max": {
+      "type": "number"
+    },
+    "pas_degres": {
+      "type": "number"
+    }
+  }
+}

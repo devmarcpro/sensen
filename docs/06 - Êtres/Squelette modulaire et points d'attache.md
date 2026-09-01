@@ -150,6 +150,13 @@ Aucune ne figure dans la palette des matériaux ([[Palette de couleurs des maté
 >
 > Ce que ça achète : un visage lisible tout le temps, des traits qui n'ont plus à survivre à un profil ni à un dos, et — le jour où le projet acceptera des images ([[Direction artistique]]) — la possibilité de brancher un atlas 2D **de face** sans le redessiner sous huit angles. Les blocs `facings` restent dans les données des rigs : ils ne coûtent rien et gardent la porte ouverte si une seconde vue redevient utile.
 
+> [!success] Décidé et codé le 2026-09-01 — le joueur articule ses poses (designer, point 63)
+> Le rig est déjà une liste d'angles par segment, et le Paperdoll sait déjà appliquer un delta d'angle (l'animation de frappe s'en sert). Une **pose** n'est donc rien d'autre qu'un dictionnaire `segment → angle`, et le joueur peut le remplir lui-même.
+>
+> À la création, une ligne **Pose** choisit l'**action** à mettre en scène — repos, marche, attaque au corps à corps, sort, garde, sommeil, mort — puis l'aperçu devient un **pantin** : on clique un segment, on le fait pivoter à la souris ou aux flèches, et la pose est **enregistrée dans le personnage** (`poses`, sauvegardée avec la partie). En jeu, le Paperdoll rejoue la pose de l'action en cours ; sans pose enregistrée, il garde le rig par défaut, exactement comme avant.
+>
+> Les actions posables et l'amplitude autorisée vivent dans `data/poses.json` — aucune n'est écrite dans le code, et un rig non humanoïde s'articule aussi bien qu'un autre.
+
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Direction artistique]], [[Décisions d'architecture]]
 - **Alimente** : [[Schéma créature]], [[Apparence — données et équipement]], [[Équipement — 14 slots]], [[Armure par zone et constructions]], [[Monstres rares]]

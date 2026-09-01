@@ -262,6 +262,16 @@ func _ready() -> void:
 	for i8 in args.size():   # --visee N : la capacité N du joueur en cours de visée (ligne de vue, forme, bulle)
 		if args[i8] == "--visee" and i8 + 1 < args.size():
 			scene.visee = int(args[i8 + 1])
+	for ip in args.size():   # --pose seg:angle[,seg:angle…] : une pose de repos, pour juger l'articulation
+		if args[ip] == "--pose" and ip + 1 < args.size() and scene.sim != null:
+			var jp: Dictionary = scene.joueur()
+			var po := {}
+			for paire in args[ip + 1].split(","):
+				var kv: PackedStringArray = paire.split(":")
+				if kv.size() == 2:
+					po[str(kv[0])] = float(kv[1])
+			jp["poses"] = {"repos": po}
+			scene._apres_changement_de_grille()
 	for ich in args.size():   # --chaine el[,el…] : des segments posés dans la jauge (le clignotement, point 60)
 		if args[ich] == "--chaine" and ich + 1 < args.size() and scene.sim != null:
 			var jch: Dictionary = scene.joueur()
