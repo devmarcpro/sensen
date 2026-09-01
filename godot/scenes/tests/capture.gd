@@ -27,6 +27,9 @@ func _ready() -> void:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	var scene: Node = load("res://scenes/demo/main.tscn").instantiate()
 	add_child(scene)
+	for ig in args.size():   # --graine N : un monde CONNU pour les captures (sinon chaque prise tombe ailleurs)
+		if args[ig] == "--graine" and ig + 1 < args.size():
+			scene.graine_monde = int(args[ig + 1])
 	scene.profil_sans_ui = "--sans-ui" in args
 	scene.profil_sans_terrain = "--sans-terrain" in args
 	if scene.titre_ouvert and "--monde" in args:   # --monde : l'écran de création du monde (designer, point 49)
@@ -59,13 +62,16 @@ func _ready() -> void:
 		var sv = scene.sim
 		var c0: Vector2i = sv.monde.cellule_camp
 		var cible := Vector2i(-9999, -9999)
-		for r in range(1, 30):
+		for r in range(1, 70):   # le monde est rectangulaire : le premier village peut être loin (2026-09-01)
 			for dy in range(-r, r + 1):
 				for dx in range(-r, r + 1):
 					if absi(dx) != r and absi(dy) != r:
 						continue
 					var cv := c0 + Vector2i(dx, dy)
-					if sv.monde.surface.terre_a(cv) and bool(sv.monde.surface.poi_de(cv).get("village", false)):
+					if not (sv.monde.surface.terre_a(cv) and bool(sv.monde.surface.poi_de(cv).get("village", false))):
+						continue
+					var vv: Dictionary = sv.monde.surface.generer_cellule(cv.x, cv.y, {}, false).get("village", {})
+					if vv.get("pnj", []).size() >= 4:   # un village habité, pas un lieu-dit : la capture doit montrer du monde
 						cible = cv
 						break
 				if cible.x != -9999:
@@ -266,6 +272,16 @@ func _ready() -> void:
 	for i8 in args.size():   # --visee N : la capacité N du joueur en cours de visée (ligne de vue, forme, bulle)
 		if args[i8] == "--visee" and i8 + 1 < args.size():
 			scene.visee = int(args[i8 + 1])
+	if "--modules" in args and scene.sim != null:   # --modules : tout le catalogue appris, pour montrer le composeur plein
+		scene.sim.triche(scene.joueur(), "modules")
+	for isort in args.size():   # --sorts a,b|c,d : des capacités composées, pour garnir la hotbar et l'écran des capacités
+		if args[isort] == "--sorts" and isort + 1 < args.size() and scene.sim != null:
+			var js: Dictionary = scene.joueur()
+			for seq_s in args[isort + 1].split("|"):
+				var mods_s: Array = Array(seq_s.split(","))
+				for m_s in mods_s:
+					scene.sim.crediter_module(js, str(m_s))
+				scene.sim.composer_capacite(js, mods_s)
 	for ip in args.size():   # --pose seg:angle[,seg:angle…] : une pose de repos, pour juger l'articulation
 		if args[ip] == "--pose" and ip + 1 < args.size() and scene.sim != null:
 			var jp: Dictionary = scene.joueur()

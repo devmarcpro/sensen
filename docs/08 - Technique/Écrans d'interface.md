@@ -122,6 +122,10 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > [!success] Codé le 2026-09-01 — la création en trois volets (designer, point 66)
 > La liste avait grossi jusqu'à vingt-cinq lignes : nom, race, classe, stats, seize traits du visage, cinq curseurs, poses, départ. Elle se scinde en **trois volets** qu'une ligne d'onglets ouvre à ← → : **Personnage** (nom, race, classe, signe, points et stats, lieu de départ), **Apparence** (les seize traits, les deux palettes et les cinq réglages continus), **Pose** (l'action à mettre en scène et le pantin). L'aperçu, le portrait et les trois jauges restent visibles dans les trois — on voit toujours ce qu'on modifie. « Commencer » aussi : on valide depuis n'importe quel volet.
 
+> [!success] Codé le 2026-09-01 — les quatorze captures jouées avant d'être prises (designer)
+> **Instruction** : « refais toutes les captures d'écran, n'oublie pas remplir et équiper l'inventaire avant, pareil pour le composeur de sort, explorer avant la capture d'une cellule etc, qu'on voit le plus possible du jeu ». `capture.gd` gagne de quoi **jouer la scène** avant de la photographier : `--loot N` (assemble N objets et équipe ceux qui ont un slot), `--modules` (apprend tout le catalogue), `--sorts "forme,noyau|…"` (compose des capacités dans la barre), `--marcher N`, `--talents`, et surtout **`--graine N`** — les captures tombaient jusque-là dans un monde tiré au hasard à chaque lancement, ce qui explique le « village » qui n'en était pas un et la carte de cendres : `main.gd` respecte désormais une graine imposée au lieu de la réécrire. `--carte` est déplacé en toute fin de recette pour que la carte montre ce qui a été exploré, et `--village` cherche jusqu'à 70 cellules en exigeant **au moins quatre habitants**. Toutes les scènes de monde partagent la graine 4242 : même géographie d'une image à l'autre.
+
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

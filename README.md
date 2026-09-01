@@ -46,7 +46,7 @@ Dans les écrans : flèches et Entrée, plus les raccourcis lettres **affichés 
 
 ## En images
 
-Captures prises par `scenes/tests/capture.tscn` (tout est dessiné par code — aucun asset) ; elles sont dans [`captures/`](captures/), prises **en plein écran** (`--plein-ecran`, 1920×1080) et se rafraîchissent avec `capture.tscn -- --plein-ecran --sortie captures/<nom>.png` quand un écran change. Les scènes sont **jouées avant d'être photographiées** : `--explorer N` descend dans le donjon, `--marcher N` parcourt les alentours, `--loot N` remplit le sac d'objets assemblés et équipe le personnage — une capture montre un jeu vécu, pas un décor vide.
+Captures prises par `scenes/tests/capture.tscn` (tout est dessiné par code — aucun asset) ; elles sont dans [`captures/`](captures/), prises **en plein écran** (`--plein-ecran`, 1920×1080) et se rafraîchissent avec `capture.tscn -- --plein-ecran --sortie captures/<nom>.png` quand un écran change. Les scènes sont **jouées avant d'être photographiées** : `--graine N` fixe le monde, `--explorer N` descend dans le donjon, `--marcher N` parcourt les alentours, `--loot N` remplit le sac d'objets assemblés et équipe le personnage, `--modules` apprend tout le catalogue, `--sorts` compose des capacités, `--talents` pose brèches et affûts, `--creature`, `--chaine`, `--visee` mettent un combat en scène — une capture montre un jeu vécu, pas un décor vide.
 
 | | |
 |---|---|

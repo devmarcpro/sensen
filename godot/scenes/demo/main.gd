@@ -412,7 +412,8 @@ func _creer_personnage() -> void:
 	if interactif:
 		# Début de partie : l'écran Monde (graine), puis la carte pour choisir sa case (Écrans d'interface).
 		fiche_monde = fiche
-		graine_monde = randi() % 1000000
+		if graine_monde < 0:   # une graine imposée (outil de capture, tests) est respectée
+			graine_monde = randi() % 1000000
 		monde_options = {}
 		titre_ouvert = true
 		ecrans.ouvrir("monde")
