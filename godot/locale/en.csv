@@ -220,6 +220,20 @@ competence.masse.name,Mace
 competence.matelasse.name,Padded armour
 competence.meditation.name,Meditation
 competence.recuperation.name,Recovery
+serment.corps_nu.name,Bare body
+serment.corps_nu.desc,"No armour, ever — blows land 35 % harder"
+serment.mains_nues.name,Bare hands
+serment.mains_nues.desc,"No weapon in hand — blows land 25 % harder"
+serment.pauvrete.name,Poverty
+serment.pauvrete.desc,"Never more than a hundred gold — +3 Perception"
+serment.sobriete.name,Sobriety
+serment.sobriete.desc,"No potion drunk — +3 Endurance"
+serment.vegetarien.name,Vegetarian
+serment.vegetarien.desc,"No meat eaten — +3 Will"
+serment.silence.name,Silence
+serment.silence.desc,"No book read — +2 Strength and +2 Dexterity"
+ui.creation.serments,Oaths
+journal.serment_rompu,"{nom} broke the oath of {serment} — the gift is lost"
 competence.menuiserie.name,Carpentry
 competence.minage.name,Mining
 competence.navigation.name,Navigation
@@ -2528,4 +2542,6 @@ ui.creation.d_curseur,"A continuous facial setting: ← → nudge it. This is wh
 ui.creation.volet_personnage,"Character"
 ui.creation.volet_apparence,"Looks"
 ui.creation.volet_pose,"Pose"
+ui.creation.volet_serments,Oaths
+ui.creation.serment_l,"{jure} {nom} — {desc}"
 ui.creation.d_volet,"The three panels of character creation: the character (name, race, class, stats, start), the looks (features and facial settings), the poses. ← → switches panel."

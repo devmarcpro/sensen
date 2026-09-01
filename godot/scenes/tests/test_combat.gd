@@ -163,6 +163,7 @@ func _ready() -> void:
 	_lancer("test_loot_varie")
 	_lancer("test_chasse")
 	_lancer("test_recuperation")
+	_lancer("test_serments")
 	_lancer("test_types_ennemis")
 	_lancer("test_loot_assemble")
 	_lancer("test_budgets")
@@ -7637,3 +7638,36 @@ func test_recuperation() -> void:
 	var xp_plein: float = float(j.get("xp_competences", {}).get(str(cfg.competence), 0.0))
 	s._regenerer(j, h.ticks + 120)
 	verifier(is_equal_approx(float(j.get("xp_competences", {}).get(str(cfg.competence), 0.0)), xp_plein), "à endurance pleine, rien ne s'apprend")
+
+## Les serments (designer 2026-09-01) : une contrainte tenue toute la partie contre un don permanent,
+## perdu définitivement si on la rompt.
+func test_serments() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	verifier(GameData.catalogues.serments.size() >= 6, "%d serments au catalogue" % GameData.catalogues.serments.size())
+	# Corps nu : tenu tant qu'aucune armure n'est portée, rompu dès qu'on en équipe une.
+	j["serments"] = ["corps_nu"]
+	j["serments_rompus"] = []
+	for slot in j.equipement.keys().duplicate():
+		if str(s.items.get(str(j.equipement[slot]), {}).get("type", "")) == "armure":
+			j.equipement.erase(slot)
+	verifier(s.serment_tenu(j, "corps_nu"), "corps nu : tenu sans armure")
+	verifier(s.mult_serments(j) > 1.0, "un serment tenu multiplie les dégâts (×%.2f)" % s.mult_serments(j))
+	var casque := s.generer_objet("craft_casque", 1, {}, "commun", 0)
+	j.equipement["casque"] = casque.uid
+	verifier(not s.serment_tenu(j, "corps_nu"), "corps nu : rompu dès qu'une armure est portée")
+	verifier(is_equal_approx(s.mult_serments(j), 1.0), "le don tombe avec le serment")
+	# Un serment d'abstinence se rompt sur l'acte, et ne se répare pas.
+	j["serments"] = ["silence"]
+	j["serments_rompus"] = []
+	verifier(s.serment_tenu(j, "silence"), "silence : tenu tant qu'on n'a rien lu")
+	s.rompre_serment(j, "silence")
+	verifier(not s.serment_tenu(j, "silence") and ("silence" in j.serments_rompus), "silence : rompu, et inscrit pour la partie")
+	# Un serment de stat s'ajoute aux stats effectives.
+	var sans := int(j.stats_eff.get("volonte", 0))
+	j["serments"] = ["vegetarien"]
+	j["serments_rompus"] = []
+	Etres.recalculer(j, s.items, GameData.catalogues.affixes, s.regles)
+	verifier(int(j.stats_eff.get("volonte", 0)) > sans, "Végétarien donne sa Volonté (%d → %d)" % [sans, int(j.stats_eff.get("volonte", 0))])
+	s.rompre_serment(j, "vegetarien")
+	verifier(int(j.stats_eff.get("volonte", 0)) == sans, "rompu, la Volonté retombe (%d)" % int(j.stats_eff.get("volonte", 0)))

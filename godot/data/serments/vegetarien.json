@@ -1,0 +1,14 @@
+{
+  "id": "vegetarien",
+  "name_key": "serment.vegetarien.name",
+  "desc_key": "serment.vegetarien.desc",
+  "nom": "Vegetarien",
+  "description": "aucune viande mangee",
+  "predicat": "jamais_viande",
+  "bonus": {
+    "stat": {
+      "volonte": 3
+    }
+  },
+  "rupture": "le bonus est perdu pour la partie"
+}

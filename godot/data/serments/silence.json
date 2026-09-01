@@ -1,0 +1,15 @@
+{
+  "id": "silence",
+  "name_key": "serment.silence.name",
+  "desc_key": "serment.silence.desc",
+  "nom": "Silence",
+  "description": "aucun grimoire ni manuel lu",
+  "predicat": "jamais_livre",
+  "bonus": {
+    "stat": {
+      "force": 2,
+      "dexterite": 2
+    }
+  },
+  "rupture": "le bonus est perdu pour la partie"
+}

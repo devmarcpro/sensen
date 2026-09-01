@@ -301,6 +301,20 @@ competence.dual_wielding.name,Dual wielding
 competence.deux_mains.name,Deux mains
 competence.meditation.name,Méditation
 competence.recuperation.name,Récupération
+serment.corps_nu.name,Corps nu
+serment.corps_nu.desc,"Aucune armure, jamais — les coups portent à +35 %"
+serment.mains_nues.name,Mains nues
+serment.mains_nues.desc,"Aucune arme en main — les coups portent à +25 %"
+serment.pauvrete.name,Pauvreté
+serment.pauvrete.desc,"Jamais plus de cent pièces d’or — +3 Perception"
+serment.sobriete.name,Sobriété
+serment.sobriete.desc,"Aucune potion bue — +3 Endurance"
+serment.vegetarien.name,Végétarien
+serment.vegetarien.desc,"Aucune viande mangée — +3 Volonté"
+serment.silence.name,Silence
+serment.silence.desc,"Aucun livre lu — +2 Force et +2 Dextérité"
+ui.creation.serments,Serments
+journal.serment_rompu,"{nom} a rompu son serment : {serment} — le don est perdu"
 competence.controle_mana.name,Contrôle du mana
 competence.magie_feu.name,Feu
 competence.magie_eau.name,Eau/Glace
@@ -2537,4 +2551,6 @@ ui.creation.d_curseur,"Un réglage continu du visage : ← → l'ajustent par pe
 ui.creation.volet_personnage,"Personnage"
 ui.creation.volet_apparence,"Apparence"
 ui.creation.volet_pose,"Pose"
+ui.creation.volet_serments,Serments
+ui.creation.serment_l,"{jure} {nom} — {desc}"
 ui.creation.d_volet,"Les trois volets de la création : le personnage (nom, race, classe, stats, départ), son apparence (traits et réglages du visage), ses poses. ← → change de volet."

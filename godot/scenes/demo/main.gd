@@ -404,6 +404,7 @@ func _creer_personnage() -> void:
 			if not (str(m) in fiche.modules_connus):
 				fiche.modules_connus.append(str(m))
 	fiche["poses"] = creation.get("poses", {}).duplicate(true)   # les poses articulées à la création (point 63)
+	fiche["serments"] = (creation.get("serments", []) as Array).duplicate()   # les serments prononcés à la création
 	for cle: String in creation.get("apparence", {}).keys():   # les loci réglés à la création (points 39 et 41)
 		fiche.apparence[cle] = creation.apparence[cle]
 	depart_donjon = int(creation.get("depart", 0)) == 1   # point 34 : capturée avant l'effacement

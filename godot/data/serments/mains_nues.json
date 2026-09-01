@@ -1,0 +1,12 @@
+{
+  "id": "mains_nues",
+  "name_key": "serment.mains_nues.name",
+  "desc_key": "serment.mains_nues.desc",
+  "nom": "Mains nues",
+  "description": "aucune arme en main",
+  "predicat": "aucune_arme",
+  "bonus": {
+    "degats_mult": 1.25
+  },
+  "rupture": "le bonus est perdu pour la partie"
+}

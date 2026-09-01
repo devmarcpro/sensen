@@ -1,0 +1,14 @@
+{
+  "id": "sobriete",
+  "name_key": "serment.sobriete.name",
+  "desc_key": "serment.sobriete.desc",
+  "nom": "Sobriete",
+  "description": "aucune potion bue",
+  "predicat": "jamais_potion",
+  "bonus": {
+    "stat": {
+      "endurance": 3
+    }
+  },
+  "rupture": "le bonus est perdu pour la partie"
+}

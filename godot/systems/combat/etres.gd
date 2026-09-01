@@ -145,6 +145,13 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 				stats[nom_stat] = int(stats.get(nom_stat, 0)) + roundi(float(mod.add) * float(s.get("puissance", 1.0)))
 			elif str(mod.cible) == "tag" and mod.has("grant"):   # un statut accorde un tag (Potions : vision nocturne, antipoison)
 				tags.append(str(mod.grant))
+	# Serments tenus (point Nen, designer 2026-09-01) : leurs bonus de stat s'ajoutent tant qu'ils tiennent.
+	for sid in e.get("serments", []):
+		if str(sid) in e.get("serments_rompus", []):
+			continue
+		var sd: Dictionary = GameData.catalogues.get("serments", {}).get(str(sid), {})
+		for nom_st: String in (sd.get("bonus", {}).get("stat", {}) as Dictionary).keys():
+			stats[nom_st] = int(stats.get(nom_st, 0)) + int(sd.bonus.stat[nom_st])
 	var comp: Dictionary = e.competences.duplicate()
 	var segments_bonus := 0
 	var endurance_bonus := 0

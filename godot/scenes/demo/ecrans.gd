@@ -1421,7 +1421,7 @@ func _points_creation() -> Dictionary:
 
 ## Les trois volets de la création (designer 2026-09-01, point 66) : le personnage, son apparence,
 ## ses poses. Une liste de vingt-cinq lignes ne se lit pas ; trois volets de huit se lisent.
-const VOLETS := ["personnage", "apparence", "pose"]
+const VOLETS := ["personnage", "apparence", "pose", "serments"]
 
 
 func _construire_creation() -> void:
@@ -1465,6 +1465,14 @@ func _construire_creation() -> void:
 		var i_p: int = int(c.get("pose_action", 0)) % actions_p.size()
 		liste.add_item(tr("ui.creation.pose_l").format({"action": tr(str(actions_p[i_p].name_key))}))
 		entrees.append({"kind": "creation", "id": "pose"})
+	if volet == "serments":   # le pari du nen : une contrainte tenue toute la partie, un don en échange
+		var jures: Array = c.get("serments", [])
+		var ids_s: Array = GameData.catalogues.serments.keys()
+		ids_s.sort()
+		for sid in ids_s:
+			var sd: Dictionary = GameData.catalogues.serments[sid]
+			liste.add_item(tr("ui.creation.serment_l").format({"jure": "✓" if str(sid) in jures else "·", "nom": tr(str(sd.name_key)), "desc": tr(str(sd.desc_key))}))
+			entrees.append({"kind": "creation", "id": "serment:" + str(sid)})
 	if volet == "apparence" and not app.is_empty():   # les réglages continus du visage (designer, point 53)
 		for cur in GameData.config("apparence").get("curseurs", []):
 			var vc: float = float(app.get("curseurs", {}).get(str(cur.id), float(cur.defaut)))
@@ -1649,6 +1657,15 @@ func _action_creation(id: String, sens: int) -> void:
 			c.classe = posmod(int(c.classe) + sens, main._classes_visibles().size())
 		"annee":
 			c.annee = int(c.annee) + sens
+		_ when id.begins_with("serment:"):   # on jure ou on retire, tant qu'on n'a pas commencé
+			var sid_c := id.trim_prefix("serment:")
+			var jures_c: Array = c.get("serments", []).duplicate()
+			if sid_c in jures_c:
+				jures_c.erase(sid_c)
+			else:
+				jures_c.append(sid_c)
+			c["serments"] = jures_c
+			rafraichir()
 		"pose":   # l'action à mettre en scène ; Entrée ouvre le pantin (designer, point 63)
 			var acts: Array = GameData.config("poses").get("actions", [])
 			if acts.is_empty():

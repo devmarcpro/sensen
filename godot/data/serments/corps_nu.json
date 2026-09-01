@@ -1,0 +1,12 @@
+{
+  "id": "corps_nu",
+  "name_key": "serment.corps_nu.name",
+  "desc_key": "serment.corps_nu.desc",
+  "nom": "Corps nu",
+  "description": "aucune armure equipee, de la creation a la fin",
+  "predicat": "aucune_armure",
+  "bonus": {
+    "degats_mult": 1.35
+  },
+  "rupture": "le bonus est perdu pour la partie"
+}

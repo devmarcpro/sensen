@@ -29,6 +29,12 @@ Une création détaillée, pas un menu déroulant : stats à répartir, race, cl
 > [!success] Complété le 2026-08-28
 > Les talents existent : l'écran de création affiche le **talent de classe** (nom et description) et le **talent de race** ; Le Vent affiche « aucun (à apprendre d'un maître) ». L'apparence attend toujours les sprites (décision du designer).
 
+> [!success] Décidé et codé le 2026-09-01 — les **serments**, prononcés à la création (designer)
+> Le designer voulait le principe du *nen* de Hunter × Hunter : **la contrainte fait la force**. Les 22 modules `condition` en sont déjà une forme — frapper de dos donne +3 dés —, mais ils ne coûtent rien et se choisissent au lancer : c'est du bonus conditionnel, pas un pari. Le serment est l'autre moitié, et il se prononce **à la création**, là où il est irrévocable : un quatrième volet « Serments » à côté de Personnage, Apparence et Pose.
+> **Ce qu'est un serment** : une contrainte tenue **toute la partie**, vérifiée en continu, qui donne un bonus permanent tant qu'elle tient. La rompre **ne se pardonne pas** — le bonus est perdu pour la partie, définitivement, et le journal le dit. On peut en prononcer plusieurs : leurs bonus se cumulent, leurs risques aussi.
+> **Les six premiers** : *Corps nu* (aucune armure) · *Mains nues* (aucune arme) · *Pauvreté* (jamais plus de cent pièces d'or) · *Sobriété* (aucune potion) · *Végétarien* (aucune viande) · *Silence* (aucun grimoire ni manuel lu). Chacun donne un bonus proportionné à ce qu'il retire — le plus dur, *Corps nu*, donne le plus. Tout vit dans `data/serments/` : un fichier par serment, son prédicat, son bonus, sa rupture.
+
+
 ## Liens
 - **Dépend de** : [[Progression par l'usage]]
 - **Alimente** : [[Races]], [[Classes]], [[Astrologie — cycle sexagésimal]], [[Stats de personnage]], [[Début de partie]]

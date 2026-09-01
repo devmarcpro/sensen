@@ -1,0 +1,15 @@
+{
+  "id": "pauvrete",
+  "name_key": "serment.pauvrete.name",
+  "desc_key": "serment.pauvrete.desc",
+  "nom": "Pauvrete",
+  "description": "jamais plus de cent pieces d'or",
+  "predicat": "or_max",
+  "bonus": {
+    "stat": {
+      "perception": 3
+    },
+    "seuil": 100
+  },
+  "rupture": "le bonus est perdu pour la partie"
+}

@@ -6536,6 +6536,7 @@ func _lire(e: Dictionary, objet: String, tick: int) -> bool:
 	if str(e.corps.get("silhouette", "humanoide")) != "humanoide":   # une bête ne lit pas (Changer de personnage)
 		EventBus.emettre(&"journal", [&"journal.pas_de_lecture", {}])
 		return false
+	rompre_serment(e, "silence")   # lire rompt le Silence, définitivement
 	var livre: Dictionary = items[objet]
 	var lv: Dictionary = GameData.config("loot_rules").livres
 	var n_lecture := int(e.competences_eff.get("lecture", 0))
@@ -7115,6 +7116,10 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 		e["faim"] = 100
 		e["faim_tick"] = tick
 	identifier(it)   # goûter, c'est identifier (designer 2026-09-01, point 52)
+	if "potion" in it.get("tags", []):   # les serments d'abstinence se rompent sur l'ACTE, pas sur l'état
+		rompre_serment(e, "sobriete")
+	if "viande" in it.get("tags", []) or str(it.get("base", "")).begins_with("viande"):
+		rompre_serment(e, "vegetarien")
 	if a_talent(e, "soif_de_sang") and "plat" in it.get("tags", []):   # le Vampire ne mange plus de plats
 		EventBus.emettre(&"journal", [&"journal.plat_refuse", {}])
 		return false
@@ -9977,7 +9982,7 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 			d = regles.degats_sort(e.stats_eff, e.competences_eff, plan.elements, regles.focus_de(e.equipement, items), des, plan.des, des_bonus)
 			_retirer_statut(e, "pari")
 			EventBus.emettre(&"journal", [&"journal.pari", {"nom": e.name_key, "jet": int(d.jet)}])
-	var bruts: float = d.bruts * float(plan.mult)
+	var bruts: float = d.bruts * float(plan.mult) * mult_serments(e)   # les serments tenus paient (point Nen)
 	if plan.drapeaux.has("detonation") and (c.has("fin_invocation") or bool(c.get("releve", false))):
 		bruts *= float(plan.drapeaux.detonation)   # Détonation : le double contre les invocations
 	var zone: Dictionary = regles.zone_de_coup(grille.h(e.pos), grille.h(c.pos))
@@ -10577,3 +10582,45 @@ func stats_materiau(mat: Dictionary, espece: String) -> Dictionary:
 		var v := float(stats[nom_stat]) + ecart * float(c.get("par_point", 0.0))
 		stats[nom_stat] = clampf(v, float(c.get("min", 0.0)), float(c.get("max", 999.0)))
 	return stats
+
+# ---------------------------------------------------------------- serments (Création de personnage, point Nen)
+
+## Un serment tient-il encore ? Le prédicat est vérifié en continu ; il se rompt une fois, définitivement.
+func serment_tenu(e: Dictionary, sid: String) -> bool:
+	if str(sid) in e.get("serments_rompus", []):
+		return false
+	var d: Dictionary = GameData.catalogues.serments.get(sid, {})
+	if d.is_empty():
+		return true
+	match str(d.predicat):
+		"aucune_armure":
+			for slot: String in e.get("equipement", {}).keys():
+				if str(items.get(str(e.equipement[slot]), {}).get("type", "")) == "armure":
+					return false
+		"aucune_arme":
+			for slot in ["main_principale", "main_secondaire"]:
+				if str(items.get(str(e.get("equipement", {}).get(slot, "")), {}).get("type", "")) == "arme":
+					return false
+		"or_max":
+			return int(e.get("or", 0)) <= int(d.bonus.get("seuil", 100))
+	return true   # les serments d'abstinence (potion, viande, livre) se rompent sur l'acte, pas sur l'état
+
+
+## Rompt un serment : le don est perdu pour la partie, et le journal le dit.
+func rompre_serment(e: Dictionary, sid: String) -> void:
+	if not e.has("serments") or not (str(sid) in e.serments) or (str(sid) in e.get("serments_rompus", [])):
+		return
+	if not e.has("serments_rompus"):
+		e["serments_rompus"] = []
+	e.serments_rompus.append(str(sid))
+	Etres.recalculer(e, items, GameData.catalogues.affixes, regles)
+	EventBus.emettre(&"journal", [&"journal.serment_rompu", {"nom": e.name_key, "serment": GameData.catalogues.serments.get(sid, {}).get("name_key", sid)}])
+
+
+## Le multiplicateur de dégâts que les serments tenus accordent (Corps nu, Mains nues…).
+func mult_serments(e: Dictionary) -> float:
+	var m := 1.0
+	for sid in e.get("serments", []):
+		if serment_tenu(e, str(sid)):
+			m *= float(GameData.catalogues.serments.get(str(sid), {}).get("bonus", {}).get("degats_mult", 1.0))
+	return m
