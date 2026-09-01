@@ -573,7 +573,10 @@ func _montrer_detail() -> void:
 			detail.text = texte_objet(str(en.uid))
 			if courant == "inventaire":
 				var it_p: Dictionary = main.sim.items.get(str(en.uid), {})
-				penta_objet.montrer({"elements": it_p.get("elements", {}) if it_p.get("elements") is Dictionary else {}})
+				# Tout objet montre son Wu Xing (point 65) — sauf s'il n'est pas identifié : on ne lit
+				# pas l'élément d'une fiole dont on ignore encore ce qu'elle contient.
+				penta_objet.visible = not main.sim.inconnu(it_p)
+				penta_objet.montrer({"elements": main.sim.vecteur_objet(it_p)})
 				inventaire_visuel.rafraichir_selection()
 		"recette", "ingredient":
 			detail.text = texte_recette(en.plan)

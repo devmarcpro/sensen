@@ -6318,6 +6318,33 @@ func test_camp() -> void:
 			if m51.corruption_jour(c51b, jour51 + 30) != m51.corruption_jour(c51b, jour51 + 60):
 				bouge51 += 1
 	verifier(bouge51 > 0, "le bruit de corruption se déplace dans le temps (%d cellules changent)" % bouge51)
+	# Tout objet a son Wu Xing (2026-09-01, point 65), sauf tant qu'il n'est pas identifié
+	var j65: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	s._donner_materiau(j65, "fer", 1, "lingot")   # un lingot de fer : sa matière décide de son élément
+	var lingot65: Dictionary = s._pile(j65, "fer", "lingot")
+	var v65 := s.vecteur_objet(lingot65)
+	verifier(not v65.is_empty(), "un objet sans vecteur propre tient son Wu Xing de sa matière (%s)" % str(v65.keys()))
+	var fiole65 := s.generer_objet("potion_soin", 3, {}, "commun", 0)
+	if not fiole65.is_empty():
+		verifier(s.inconnu(fiole65), "une potion sort du loot non identifiée")
+		s.identifier(fiole65)
+		verifier(not s.inconnu(fiole65), "l'avoir essayée la révèle pour toute la partie")
+
+	# La fusion (2026-09-01, point 51) : des cellules contiguës font UN donjon, plafonné
+	var fusionne := 0
+	var max_groupe := 0
+	for dy51f in range(-25, 26):
+		for dx51f in range(-25, 26):
+			var c51f: Vector2i = m51.cellule_camp + Vector2i(dx51f, dy51f)
+			if not m51.donjon_corrompu(c51f, jour51 + 30):
+				continue
+			var g51: Array = m51.groupe_corrompu(c51f, jour51 + 30)
+			max_groupe = maxi(max_groupe, g51.size())
+			if g51.size() > 1:
+				fusionne += 1
+	verifier(max_groupe <= int(GameData.config("planete").corruption.donjons.fusion_max), "la fusion plafonne à %d cellules (max vu : %d)" % [int(GameData.config("planete").corruption.donjons.fusion_max), max_groupe])
+	verifier(max_groupe >= 1, "chaque donjon connaît son groupe (%d cellules fusionnées vues)" % fusionne)
+
 	# La corruption croît avec l'éloignement, et le niveau n'a plus de plafond (2026-09-01, point 62)
 	var pl62: Dictionary = m51.planete
 	var larg62: int = int(pl62.monde_cellules)

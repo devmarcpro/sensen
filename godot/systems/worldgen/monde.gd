@@ -310,6 +310,29 @@ func donjon_corrompu(cell: Vector2i, jour: int) -> bool:
 	return absi(hash([cell.x, cell.y, jour / per_t, "corruption"])) % 100 < densite
 
 
+## Les cellules corrompues contiguës forment UN donjon (designer 2026-09-01, point 51) : on remonte
+## le groupe depuis une cellule, en s'arrêtant au plafond (`fusion_max`). Un groupe de quatre est un
+## donjon énorme, pas quatre donjons voisins — et le plafond empêche la mer de donjons.
+func groupe_corrompu(cell: Vector2i, jour: int) -> Array:
+	var cfg: Dictionary = planete.corruption.get("donjons", {})
+	var plafond := maxi(1, int(cfg.get("fusion_max", 4)))
+	var vus := {cell: true}
+	var file: Array = [cell]
+	var groupe: Array = [cell]
+	while not file.is_empty() and groupe.size() < plafond:
+		var c: Vector2i = file.pop_front()
+		for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var v: Vector2i = c + d
+			if vus.has(v) or groupe.size() >= plafond:
+				continue
+			vus[v] = true
+			if donjon_corrompu(v, jour):
+				groupe.append(v)
+				file.append(v)
+	groupe.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.x < b.x or (a.x == b.x and a.y < b.y))
+	return groupe
+
+
 ## Le donjon d'une cellule corrompue : son thème (l'élément dominant du lieu) et son niveau,
 ## qui monte d'une période tant que personne ne l'a nettoyé (point 51).
 func donjon_de_corruption(cell: Vector2i, jour: int) -> Dictionary:
@@ -327,8 +350,13 @@ func donjon_de_corruption(cell: Vector2i, jour: int) -> Dictionary:
 	# Nettoyer un donjon lointain le ramène à son plancher, jamais à 1 : la marge reste la marge.
 	var plancher := int(round(float(cfg.get("niveau_par_cellule_distance", 0.0)) * eloignement(cell) * float(planete.monde_cellules) * 0.5))
 	var el := str(surface.element_dominant(cell)) if surface.has_method("element_dominant") else "terre"
+	# La fusion (point 51) : le groupe de cellules contiguës donne un seul donjon, plus grand et plus
+	# fort — sa tête est la cellule de tête du groupe, pour que toutes y mènent au même endroit.
+	var groupe := groupe_corrompu(cell, jour)
+	var niveau := maxi(1 + depuis * int(cfg.get("niveau_par_periode", 1)), plancher)
 	return {"theme": str(cfg.get("themes", {}).get(el, "terre")), "element": el,
-		"niveau": maxi(1 + depuis * int(cfg.get("niveau_par_periode", 1)), plancher), "plancher": plancher}
+		"niveau": niveau + (groupe.size() - 1) * int(cfg.get("niveau_par_fusion", 3)),
+		"plancher": plancher, "cellules": groupe.size(), "tete": groupe[0]}
 
 
 ## Le niveau de danger affiché (0 paisible, 1 dangereuse, 2 mortelle) à partir de la corruption effective.

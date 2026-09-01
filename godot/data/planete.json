@@ -163,7 +163,8 @@
       },
       "gradient_bord": 30.0,
       "niveau_par_cellule_distance": 0.09,
-      "recherche_max": 120
+      "recherche_max": 120,
+      "niveau_par_fusion": 3
     }
   },
   "cycle": {

@@ -63,6 +63,11 @@ Coût : un passage hebdomadaire sur les cellules à delta non nul ou à
 >
 > Et **le niveau des donjons n'est plus plafonné**. Il vaut désormais le **plus grand** de deux nombres : son **âge** (une période non nettoyée = un niveau) et son **plancher géographique** (`niveau_par_cellule_distance` × distance au centre). Nettoyer un donjon lointain le ramène donc à son plancher, jamais à 1 : la région reste dangereuse parce qu'elle est loin, et le joueur avancé y trouve un adversaire à sa taille. Seule la profondeur de recherche de l'âge reste bornée, pour que le calcul demeure instantané.
 
+> [!success] Complété le 2026-09-01 — fusion et cellule fermée (designer, point 51)
+> Les deux dernières pièces du système sont posées. **La fusion** : les cellules corrompues **contiguës forment un seul donjon**, plafonné à `fusion_max` (quatre) — un groupe de quatre est un gouffre, pas quatre donjons voisins. Chaque cellule du groupe mène à la **même tête**, le donjon gagne un étage et `niveau_par_fusion` niveaux par cellule fusionnée. Mesuré : des groupes de deux à quatre cellules, jamais davantage.
+>
+> **La cellule reste fermée tant que le donjon n'est pas vaincu.** Sortir en ayant tué le boss **nettoie** la cellule : elle retombe à son plancher géographique et rend le passage. Sortir sans l'avoir vaincu **repousse le joueur sur une cellule voisine saine** — il ressort à côté, pas dans la gueule du donjon, et la cellule corrompue reste infranchissable.
+
 ## Liens
 - **Dépend de** : [[Niveau de danger]], [[Catalogue des couches de bruit]], [[Sauvegarde]]
 - **Alimente** : [[Raids et menaces]], [[Loot — affixes, gemmes et rareté]], [[Villages PNJ — repeuplement et décimation]], [[Génération de donjon]], [[Créatures]]

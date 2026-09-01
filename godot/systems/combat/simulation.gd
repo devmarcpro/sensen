@@ -326,9 +326,9 @@ func entrer_donjon_corrompu(e: Dictionary) -> bool:
 	etages_visites.clear()
 	var cr: Dictionary = GameData.config("planete").corruption
 	var base: Array = cr.etages_mineur
-	var etages := int(base[0]) + int(dc.niveau) / 4   # le niveau creuse : quatre niveaux, un étage de plus
+	var etages := int(base[0]) + int(dc.niveau) / 4 + (int(dc.get("cellules", 1)) - 1)   # le niveau creuse, la fusion élargit
 	donjon = {"etages_fixes": [etages, etages], "corruption": monde.corruption_jour(cell, jour_courant()),
-		"cellule": cell, "corrompu": true, "niveau": int(dc.niveau)}
+		"cellule": Vector2i(dc.get("tete", cell)), "corrompu": true, "niveau": int(dc.niveau), "cellules": int(dc.get("cellules", 1))}
 	EventBus.emettre(&"journal", [&"journal.donjon_corrompu", {
 		"nom": GameData.entree("dungeon_themes", str(dc.theme)).name_key, "n": int(dc.niveau),
 		"element": "element." + str(dc.element), "etages": etages,
@@ -5771,7 +5771,24 @@ func _sortir(e: Dictionary) -> bool:
 		_rapport_absence()
 		if recap.boss_vaincu and monde != null and cell_donjon != Vector2i(-9999, -9999):
 			monde.nettoyer(cell_donjon, horloge_monde.ticks)   # Dérive de la corruption : foyer nettoyé
+			monde.nettoyages[cell_donjon] = jour_courant()   # un donjon de corruption vaincu retombe à son plancher (point 51)
 			EventBus.emettre(&"journal", [&"journal.donjon_nettoye", {}])
+		elif bool(donjon.get("corrompu", false)) and monde != null and cell_donjon != Vector2i(-9999, -9999):
+			# Sortir sans vaincre : la cellule reste corrompue, on ressort DEHORS (point 51) —
+			# le joueur est repoussé sur une cellule voisine saine plutôt que rejeté dans la gueule.
+			var sortie := cell_donjon
+			for d_s in Grille.DIRS:
+				var c_s: Vector2i = cell_donjon + d_s
+				if monde.surface.terre_a(c_s) and not monde.donjon_corrompu(c_s, jour_courant()):
+					sortie = c_s
+					break
+			if sortie != cell_donjon:
+				e.pos = monde.point_marchable(sortie)
+				e["cellule_vue"] = sortie
+				_verifier_fenetre(e)
+				grille.placer(e.id, e.pos)
+				maj_vision()
+				EventBus.emettre(&"journal", [&"journal.repousse_corruption", {}])
 			_quetes_sur_donjon(cell_donjon, e.id)
 			EventBus.emettre(&"dungeon_cleared", [cell_donjon, e.id])
 		sauvegarder(slot_autosave)   # autosave au retour (Sauvegarde : sur événements clés)
@@ -6217,6 +6234,37 @@ func nom_objet(uid: String) -> Dictionary:
 		res["construction"] = str(it.get("construction", ""))
 		res["qualite"] = float(it.get("qualite", 1.0))
 	return res
+
+
+## Le Wu Xing d'un objet (designer 2026-09-01, point 65) : son vecteur propre s'il en a un, sinon
+## celui de la MATIÈRE dont il est fait — un objet assemblé agrège les matériaux de ses composants.
+## Tout objet a donc un élément à montrer, et l'inventaire n'a plus de case vide.
+func vecteur_objet(it: Dictionary) -> Dictionary:
+	if it.get("elements") is Dictionary and not Dictionary(it.elements).is_empty():
+		return it.elements
+	var table: Dictionary = GameData.config("wuxing").get("materiaux_par_categorie", {})
+	var v := {}
+	var matieres: Array = []
+	if not str(it.get("materiau", "")).is_empty():
+		matieres.append(str(it.materiau))
+	for comp in it.get("composants", []):
+		var m := str(comp.get("materiau", "")) if comp is Dictionary else ""
+		if not m.is_empty():
+			matieres.append(m)
+	for m in matieres:
+		var cat := str(GameData.catalogues.materials.get(m, {}).get("category", ""))
+		var el := str(table.get(cat, ""))
+		if el.is_empty():
+			continue
+		v[el] = float(v.get(el, 0.0)) + 1.0
+	var total := 0.0
+	for k in v.keys():
+		total += float(v[k])
+	if total <= 0.0:
+		return {}
+	for k in v.keys():
+		v[k] = float(v[k]) / total
+	return v
 
 
 ## Un objet est-il encore inconnu ? (Loot — identification, designer 2026-09-01, point 52)

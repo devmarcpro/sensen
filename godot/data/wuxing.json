@@ -74,5 +74,18 @@
     "_doc": "L'élément à enchaîner clignote dans le pentagramme (designer 2026-09-01, point 60).",
     "periode_ms": 420,
     "amplitude": 0.85
+  },
+  "materiaux_par_categorie": {
+    "_doc": "Le Wu Xing d'un objet sans élément propre se lit dans la matière dont il est fait (designer 2026-09-01, point 65).",
+    "bois": "bois",
+    "vegetal": "bois",
+    "metal": "metal",
+    "gemme": "metal",
+    "roche": "terre",
+    "mineral": "terre",
+    "fossile": "terre",
+    "liquide": "eau",
+    "synthetique": "feu",
+    "meteorologique": "feu"
   }
 }
