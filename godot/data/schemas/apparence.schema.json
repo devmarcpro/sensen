@@ -77,6 +77,36 @@
           }
         }
       }
+    },
+    "curseurs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "min",
+          "max",
+          "pas",
+          "defaut"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "min": {
+            "type": "number"
+          },
+          "max": {
+            "type": "number"
+          },
+          "pas": {
+            "type": "number"
+          },
+          "defaut": {
+            "type": "number"
+          }
+        }
+      }
     }
   },
   "required": [

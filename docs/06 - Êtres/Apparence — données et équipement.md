@@ -51,6 +51,11 @@ Aucune étape ne demande *quel type d'être* on dessine. C'est la contrepartie v
 > [!success] Codé le 2026-08-31 — les loci visuels existent enfin à l'écran (designer, points 39 et 41)
 > Le pipeline décrit ici — *silhouette peinte par les loci*, sans jamais demander quel type d'être on dessine — devient du code. `data/apparence.json` déclare six **loci** (tête, yeux, nez, bouche, cheveux, carrure), leurs facteurs et deux palettes (six teints, cinq couleurs de cheveux) ; chaque race porte un bloc `apparence` (`data/races/*.json`) qui donne son **défaut** : le nain est court et large, barbu, ambre et roux ; l'elfe élancé, mince, ivoire, **oreilles pointues** ; le spectre cendré et argenté ; le vampire pâle aux oreilles courtes ; le lycanthrope grand et massif. Le Paperdoll lit ces chiffres — échelle du rig, largeur par carrure, diamètre du crâne, longueur d'oreille et de barbe, visage dessiné sur le disque de la tête — et **aucune branche par race** n'est écrite nulle part.
 
+> [!success] Codé le 2026-09-01 — le visage passe au portrait-robot (designer, point 53)
+> Dix loci ne suffisaient pas à distinguer deux visages. Le catalogue en compte **seize** : s'ajoutent la **mâchoire** (fine, carrée, lourde), le **menton** (rond, pointu, fendu), les **pommettes** (basses, hautes, saillantes), la **forme des oreilles** (rondes, pointues, longues, collées — désormais un locus comme la barbe, avec sa longueur en données), l'**implantation des cheveux** (droite, en pointe, dégarnie) et les **paupières** (ouvertes, lourdes, plissées). Chacune est **dessinée**, aucune n'est un libellé mort.
+>
+> Surtout, cinq **réglages continus** rejoignent les valeurs discrètes — largeur du visage, écartement et hauteur des yeux, longueur du nez, largeur de la bouche. C'est ce qui sépare un portrait-robot d'un simple catalogue : deux personnages aux mêmes traits ne se ressemblent plus. Les bornes et les pas vivent dans `apparence.json → curseurs`.
+
 ## Liens
 - **Dépend de** : [[Blocs de l'être]], [[Squelette modulaire et points d'attache]], [[Loci — les dix types]]
 - **Alimente** : [[Vivarium — loci et variétés]], [[Équipement — 14 slots]], [[Monstres rares]]

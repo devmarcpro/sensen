@@ -176,7 +176,7 @@ func _dessine_segment(m: Dictionary, col: Color, contour: float, nom: String) ->
 	var poly := PackedVector2Array([o - p * w, o + p * w, o + d * l + p * w, o + d * l - p * w])
 	if nom.begins_with("tete"):
 		var fact: Dictionary = GameData.config("apparence").get("facteurs", {}).get("tete", {})
-		var r := l * 0.5 * float(fact.get(str(_ap.get("tete", "ronde")), 1.0))
+		var r := l * 0.5 * float(fact.get(str(_ap.get("tete", "ronde")), 1.0)) * float(_ap.get("curseurs", {}).get("largeur_visage", 1.0))
 		var c := o + d * l * 0.5
 		var peau := col if _ap.is_empty() else _teinte_de("teintes_peau", str(_ap.get("teinte_peau", "")), col)
 		draw_circle(c, r, peau)
@@ -234,7 +234,8 @@ func _teinte_de(palette_id: String, id: String, repli: Color) -> Color:
 func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) -> void:
 	var cheveux := _teinte_de("teintes_cheveux", str(_ap.get("teinte_cheveux", "")), peau.darkened(0.6))
 	var encre := peau.darkened(0.55)
-	var oreille := float(_ap.get("oreilles", 0.0))
+	var o_brut: Variant = _ap.get("oreilles", 0.0)   # une valeur de locus, ou l'ancienne longueur chiffrée
+	var oreille := float(GameData.config("apparence").get("facteurs", {}).get("oreilles", {}).get(str(o_brut), 0.0)) if o_brut is String else float(o_brut)
 	if oreille > 0.0 and _vue_tete != "dos":   # les oreilles pointent vers le haut et vers l'extérieur
 		for cote in [-1.0, 1.0]:
 			var base: Vector2 = c + p * (r * 0.9 * cote)
@@ -261,42 +262,47 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 				draw_line(haut6, haut6 - d * r * 1.6 + p * (r * 0.3 * cote6), cheveux, maxf(1.2, r * 0.22))
 	if _vue_tete == "dos":
 		return
-	var ecart := 0.42 if _vue_tete == "face" else 0.18
+	var cur: Dictionary = _ap.get("curseurs", {})   # les réglages continus (point 53)
+	var f_ecart := float(cur.get("ecart_yeux", 1.0))
+	var f_haut := float(cur.get("hauteur_yeux", 0.0))
+	var f_nez := float(cur.get("longueur_nez", 1.0))
+	var f_bouche := float(cur.get("largeur_bouche", 1.0))
+	var ecart := (0.42 if _vue_tete == "face" else 0.18) * f_ecart
 	match str(_ap.get("yeux", "points")):
 		"grands":
 			for cote3 in [-1.0, 1.0]:
-				draw_circle(c + p * (r * ecart * cote3) + d * r * 0.15, maxf(0.8, r * 0.2), encre)
+				draw_circle(c + p * (r * ecart * cote3) + d * r * (0.15 + f_haut), maxf(0.8, r * 0.2), encre)
 		"en_amande":
 			for cote7 in [-1.0, 1.0]:
-				var o7: Vector2 = c + p * (r * ecart * cote7) + d * r * 0.15
+				var o7: Vector2 = c + p * (r * ecart * cote7) + d * r * (0.15 + f_haut)
 				draw_arc(o7, r * 0.2, 0.0, TAU, 10, encre, maxf(0.7, r * 0.09))
 		"tombants":
 			for cote8 in [-1.0, 1.0]:
-				var o8: Vector2 = c + p * (r * ecart * cote8) + d * r * 0.18
+				var o8: Vector2 = c + p * (r * ecart * cote8) + d * r * (0.18 + f_haut)
 				draw_line(o8 - p * r * 0.14, o8 + p * r * 0.14 - d * r * 0.12, encre, maxf(0.8, r * 0.1))
 		"fentes":
 			for cote4 in [-1.0, 1.0]:
-				var o4: Vector2 = c + p * (r * ecart * cote4) + d * r * 0.15
+				var o4: Vector2 = c + p * (r * ecart * cote4) + d * r * (0.15 + f_haut)
 				draw_line(o4 - p * r * 0.16, o4 + p * r * 0.16, encre, maxf(0.8, r * 0.1))
 		_:
 			for cote5 in [-1.0, 1.0]:
-				draw_circle(c + p * (r * ecart * cote5) + d * r * 0.15, maxf(0.6, r * 0.12), encre)
+				draw_circle(c + p * (r * ecart * cote5) + d * r * (0.15 + f_haut), maxf(0.6, r * 0.12), encre)
 	var nez := str(_ap.get("nez", "droit"))
 	var haut_nez: Vector2 = c + d * r * 0.05
 	if nez == "fin":
-		draw_line(haut_nez, haut_nez - d * r * 0.3, encre, maxf(0.5, r * 0.05))
+		draw_line(haut_nez, haut_nez - d * r * 0.3 * f_nez, encre, maxf(0.5, r * 0.05))
 	elif nez == "busque":
 		draw_line(haut_nez + d * r * 0.1, haut_nez - d * r * 0.15 + p * r * 0.08, encre, maxf(0.7, r * 0.1))
 		draw_line(haut_nez - d * r * 0.15 + p * r * 0.08, haut_nez - d * r * 0.4, encre, maxf(0.7, r * 0.1))
 	elif nez == "crochu":
-		draw_line(haut_nez, haut_nez - d * r * 0.35 + p * r * 0.12, encre, maxf(0.7, r * 0.09))
+		draw_line(haut_nez, haut_nez - d * r * 0.35 * f_nez + p * r * 0.12, encre, maxf(0.7, r * 0.09))
 	elif nez == "plat":
 		draw_line(haut_nez - p * r * 0.1, haut_nez + p * r * 0.1, encre, maxf(0.7, r * 0.09))
 	else:
-		draw_line(haut_nez, haut_nez - d * r * 0.35, encre, maxf(0.7, r * 0.09))
+		draw_line(haut_nez, haut_nez - d * r * 0.35 * f_nez, encre, maxf(0.7, r * 0.09))
 	var bouche := str(_ap.get("bouche", "fine"))
 	var y_bouche: Vector2 = c - d * r * 0.5
-	var demi := r * (0.3 if bouche == "large" else 0.18)
+	var demi := r * (0.3 if bouche == "large" else 0.18) * f_bouche
 	if bouche == "boudeuse":
 		draw_arc(y_bouche - d * r * 0.24, r * 0.3, PI * 0.2, PI * 0.8, 10, encre, maxf(0.7, r * 0.09))
 	elif bouche == "sourire":
@@ -315,6 +321,34 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 		for cote9 in [-1.0, 1.0]:
 			var o9: Vector2 = c + p * (r * ecart * cote9) + d * r * 0.42
 			draw_line(o9 - p * r * 0.16, o9 + p * r * 0.16, cheveux, maxf(0.8, r * (0.16 if sourcils == "epais" else 0.08)))
+	if str(_ap.get("machoire", "")) != "":   # la mâchoire : un trait sous les pommettes, plus ou moins large
+		var lg_m: float = float({"fine": 0.42, "carree": 0.66, "lourde": 0.80}.get(str(_ap.machoire), 0.55))
+		draw_line(c - p * r * lg_m - d * r * 0.55, c + p * r * lg_m - d * r * 0.55, encre.lightened(0.1), maxf(0.6, r * 0.07))
+	match str(_ap.get("menton", "")):
+		"pointu":
+			draw_colored_polygon(PackedVector2Array([c - p * r * 0.2 - d * r * 0.8, c + p * r * 0.2 - d * r * 0.8, c - d * r * 1.1]), peau.darkened(0.05))
+		"fendu":
+			draw_line(c - d * r * 0.78, c - d * r * 0.95, encre, maxf(0.6, r * 0.08))
+	match str(_ap.get("pommettes", "")):
+		"hautes", "saillantes":
+			for cote_p in [-1.0, 1.0]:
+				var o_p: Vector2 = c + p * (r * 0.62 * cote_p) + d * r * (0.05 if str(_ap.pommettes) == "hautes" else -0.02)
+				draw_line(o_p - d * r * 0.12, o_p + d * r * 0.12, encre.lightened(0.2), maxf(0.6, r * (0.10 if str(_ap.pommettes) == "saillantes" else 0.06)))
+	match str(_ap.get("implantation", "")):
+		"en_pointe":
+			draw_colored_polygon(PackedVector2Array([c - p * r * 0.22 + d * r * 0.72, c + p * r * 0.22 + d * r * 0.72, c + d * r * 0.42]), cheveux)
+		"degarnie":
+			for cote_i in [-1.0, 1.0]:
+				draw_circle(c + p * (r * 0.6 * cote_i) + d * r * 0.62, r * 0.2, peau)
+	match str(_ap.get("paupieres", "")):
+		"lourdes":
+			for cote_pa in [-1.0, 1.0]:
+				var o_pa: Vector2 = c + p * (r * ecart * cote_pa) + d * r * (0.30 + f_haut)
+				draw_line(o_pa - p * r * 0.2, o_pa + p * r * 0.2, encre, maxf(0.7, r * 0.11))
+		"plissees":
+			for cote_pl in [-1.0, 1.0]:
+				var o_pl: Vector2 = c + p * (r * ecart * cote_pl) + d * r * (0.33 + f_haut)
+				draw_arc(o_pl, r * 0.2, PI * 1.1, PI * 1.9, 8, encre, maxf(0.5, r * 0.06))
 	match str(_ap.get("marque", "aucune")):
 		"cicatrice":
 			draw_line(c + p * r * 0.5 + d * r * 0.5, c + p * r * 0.25 - d * r * 0.45, encre.lightened(0.25), maxf(0.6, r * 0.08))

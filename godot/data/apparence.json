@@ -1,5 +1,5 @@
 {
-  "_doc": "Loci visuels humanoïdes (Apparence — données et équipement ; designer 2026-08-31, points 39 et 41) : le Paperdoll ne branche jamais par race, il lit ces facteurs. echelle multiplie tout le rig, carrure la largeur, tete_facteur le diamètre du crâne ; oreilles et barbe sont des longueurs en pixels.",
+  "_doc": "Loci visuels humanoïdes (Apparence — données et équipement ; designer 2026-08-31, points 39 et 41) : le Paperdoll ne branche jamais par race, il lit ces facteurs. echelle multiplie tout le rig, carrure la largeur, tete_facteur le diamètre du crâne ; oreilles et barbe sont des longueurs en pixels. Les curseurs (designer 2026-09-01, point 53) sont des réglages CONTINUS du visage, en plus des valeurs discrètes : c'est ce qui distingue un portrait-robot d'un simple catalogue.",
   "loci": [
     {
       "id": "tete",
@@ -103,6 +103,61 @@
         "tatouage"
       ],
       "universel": false
+    },
+    {
+      "id": "machoire",
+      "valeurs": [
+        "fine",
+        "carree",
+        "lourde"
+      ],
+      "universel": false
+    },
+    {
+      "id": "menton",
+      "valeurs": [
+        "rond",
+        "pointu",
+        "fendu"
+      ],
+      "universel": false
+    },
+    {
+      "id": "pommettes",
+      "valeurs": [
+        "basses",
+        "hautes",
+        "saillantes"
+      ],
+      "universel": false
+    },
+    {
+      "id": "oreilles",
+      "valeurs": [
+        "rondes",
+        "pointues",
+        "longues",
+        "collees"
+      ],
+      "universel": false
+    },
+    {
+      "id": "implantation",
+      "valeurs": [
+        "droite",
+        "en_pointe",
+        "degarnie"
+      ],
+      "universel": false
+    },
+    {
+      "id": "paupieres",
+      "valeurs": [
+        "ouvertes",
+        "lourdes",
+        "plissees"
+      ],
+      "universel": false
     }
   ],
   "facteurs": {
@@ -129,6 +184,12 @@
       "aucune": 0.0,
       "courte": 2.0,
       "longue": 4.0
+    },
+    "oreilles": {
+      "rondes": 0.0,
+      "collees": 0.8,
+      "pointues": 3.2,
+      "longues": 5.5
     }
   },
   "teintes_peau": [
@@ -277,6 +338,43 @@
         0.24,
         0.4
       ]
+    }
+  ],
+  "curseurs": [
+    {
+      "id": "largeur_visage",
+      "min": 0.82,
+      "max": 1.2,
+      "pas": 0.02,
+      "defaut": 1.0
+    },
+    {
+      "id": "ecart_yeux",
+      "min": 0.62,
+      "max": 1.35,
+      "pas": 0.03,
+      "defaut": 1.0
+    },
+    {
+      "id": "hauteur_yeux",
+      "min": -0.18,
+      "max": 0.22,
+      "pas": 0.02,
+      "defaut": 0.0
+    },
+    {
+      "id": "longueur_nez",
+      "min": 0.6,
+      "max": 1.5,
+      "pas": 0.05,
+      "defaut": 1.0
+    },
+    {
+      "id": "largeur_bouche",
+      "min": 0.6,
+      "max": 1.5,
+      "pas": 0.05,
+      "defaut": 1.0
     }
   ]
 }

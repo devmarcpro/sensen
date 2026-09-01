@@ -58,7 +58,7 @@
           "type": "string"
         },
         "oreilles": {
-          "type": "number"
+          "type": "string"
         },
         "barbe": {
           "type": "string"

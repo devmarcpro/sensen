@@ -1430,6 +1430,11 @@ func _construire_creation() -> void:
 		var i_p: int = int(c.get("pose_action", 0)) % actions_p.size()
 		liste.add_item(tr("ui.creation.pose_l").format({"action": tr(str(actions_p[i_p].name_key))}))
 		entrees.append({"kind": "creation", "id": "pose"})
+	if not app.is_empty():   # les réglages continus du visage (designer, point 53)
+		for cur in GameData.config("apparence").get("curseurs", []):
+			var vc: float = float(app.get("curseurs", {}).get(str(cur.id), float(cur.defaut)))
+			liste.add_item(tr("ui.creation.curseur_l").format({"nom": tr("ui.apparence." + str(cur.id)), "valeur": "%.2f" % vc}))
+			entrees.append({"kind": "creation", "id": "cur:" + str(cur.id)})
 	liste.add_item(tr("ui.creation.depart_l").format({"lieu": tr("ui.creation.depart_donjon" if int(c.get("depart", 0)) == 1 else "ui.creation.depart_camp")}))
 	entrees.append({"kind": "creation", "id": "depart"})
 	liste.add_item(tr("ui.creation.commencer"))
@@ -1557,7 +1562,9 @@ func _detail_creation(id: String) -> String:
 		"commencer":
 			l.append(tr("ui.creation.d_commencer"))
 		_:
-			if id.begins_with("app:"):   # le détail d'un locus visuel (designer, points 39 et 41)
+			if id.begins_with("cur:"):
+				l.append(tr("ui.creation.d_curseur"))
+			elif id.begins_with("app:"):   # le détail d'un locus visuel (designer, points 39 et 41)
 				l.append(tr("ui.creation.d_apparence"))
 			elif id.begins_with("stat:"):
 				var st := id.trim_prefix("stat:")
@@ -1619,7 +1626,18 @@ func _action_creation(id: String, sens: int) -> void:
 			if sens > 0:   # Entrée sur le nom ou les points : la ligne suivante
 				selection = mini(selection + 1, entrees.size() - 1)
 		_:
-			if id.begins_with("app:"):   # apparence : le locus suivant / précédent (designer, points 39 et 41)
+			if id.begins_with("cur:"):   # un réglage continu du visage (designer, point 53)
+				var cid := id.trim_prefix("cur:")
+				for cur2 in GameData.config("apparence").get("curseurs", []):
+					if str(cur2.id) != cid:
+						continue
+					var regl: Dictionary = c.get("apparence", {})
+					var curs: Dictionary = regl.get("curseurs", {})
+					var v2: float = float(curs.get(cid, float(cur2.defaut))) + float(cur2.pas) * float(sens)
+					curs[cid] = clampf(v2, float(cur2.min), float(cur2.max))
+					regl["curseurs"] = curs
+					c["apparence"] = regl
+			elif id.begins_with("app:"):   # apparence : le locus suivant / précédent (designer, points 39 et 41)
 				var lid := id.trim_prefix("app:")
 				var courante := ""
 				var valeurs: Array = []
