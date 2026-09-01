@@ -100,8 +100,6 @@ func _ready() -> void:
 			print("dialogue : ", scene.sim.entites[proche_id].name_key)
 			if "--commerce" in args:   # --commerce : enchaîne sur l'écran de commerce du PNJ (stock, prix, or)
 				scene.ecrans.ouvrir("commerce")
-	if "--carte" in args:
-		scene.carte.ouvrir("voyage")
 	if arene > 0:
 		scene.arene_courante = arene
 		scene._charger()
@@ -218,6 +216,33 @@ func _ready() -> void:
 		jt["vue_sale"] = true
 		sim.maj_vision()
 		scene._apres_changement_de_grille()
+	for il2 in args.size():   # --loot N : N objets assemblés au hasard dans le sac, les meilleurs équipés
+		if args[il2] == "--loot" and il2 + 1 < args.size() and scene.sim != null:
+			var jl: Dictionary = scene.joueur()
+			var rngl := RandomNumberGenerator.new()
+			rngl.seed = 20260901
+			for k in int(args[il2 + 1]):
+				var base_l := str(scene.sim.loot._base_pour(rngl))
+				var ol: Dictionary = scene.sim.generer_objet(base_l, 6, {}, ["commun", "rare", "exceptionnel"][k % 3], k % 3)
+				if ol.is_empty():
+					continue
+				scene.sim.donner(jl, ol.uid)
+				if not str(ol.get("equip_slot", "")).is_empty():
+					scene.sim.intention(jl.id, {"type": "equiper", "objet": ol.uid})
+					scene.sim.attente[jl.id] = true
+			scene.sim.maj_vision()
+	for im2 in args.size():   # --marcher N : N pas au hasard, pour révéler les alentours avant la capture
+		if args[im2] == "--marcher" and im2 + 1 < args.size() and scene.sim != null:
+			var jm: Dictionary = scene.joueur()
+			for k in int(args[im2 + 1]):
+				var dirs: Array = Grille.DIRS.duplicate()
+				dirs.shuffle()
+				for d in dirs:
+					scene.sim.attente[jm.id] = true
+					if scene.sim.intention(jm.id, {"type": "deplacer", "vers": jm.pos + d}):
+						break
+			scene.sim.maj_vision()
+			scene._apres_changement_de_grille()
 	for i6 in args.size():   # --creature id[,id…] : des créatures posées autour du joueur (triche) — timeline, états, bulles
 		if args[i6] == "--creature" and i6 + 1 < args.size():
 			var jc2: Dictionary = scene.joueur()
@@ -274,6 +299,8 @@ func _ready() -> void:
 		if e.id != j.id and Grille.distance(e.pos, j.pos) < plus_proche:
 			plus_proche = Grille.distance(e.pos, j.pos)
 			scene.survol = e.pos
+	if "--carte" in args:   # la carte s'ouvre après l'exploration : elle montre ce que le joueur a vu
+		scene.carte.ouvrir("voyage")
 	if "--debug-survol" in args:
 		print("survol=", scene.survol, " occ=", scene.sim.grille.occupant(scene.survol), " voit=", scene.sim.voit(j, scene.survol), " ecran=", scene.ecrans.est_ouvert(), " j=", j.pos)
 

@@ -46,7 +46,7 @@ Dans les écrans : flèches et Entrée, plus les raccourcis lettres **affichés 
 
 ## En images
 
-Captures prises par `scenes/tests/capture.tscn` (tout est dessiné par code — aucun asset) ; elles sont dans [`captures/`](captures/), prises **en plein écran** (`--plein-ecran`, 1920×1080) et se rafraîchissent avec `capture.tscn -- --plein-ecran --sortie captures/<nom>.png` quand un écran change.
+Captures prises par `scenes/tests/capture.tscn` (tout est dessiné par code — aucun asset) ; elles sont dans [`captures/`](captures/), prises **en plein écran** (`--plein-ecran`, 1920×1080) et se rafraîchissent avec `capture.tscn -- --plein-ecran --sortie captures/<nom>.png` quand un écran change. Les scènes sont **jouées avant d'être photographiées** : `--explorer N` descend dans le donjon, `--marcher N` parcourt les alentours, `--loot N` remplit le sac d'objets assemblés et équipe le personnage — une capture montre un jeu vécu, pas un décor vide.
 
 | | |
 |---|---|
@@ -55,7 +55,8 @@ Captures prises par `scenes/tests/capture.tscn` (tout est dessiné par code — 
 | ![Donjon](captures/donjon.png) **Un étage de donjon** — blocs pleins, brouillard de guerre, lueur ambiante | ![Combat](captures/combat.png) **Le combat** — action-time à ticks, résolution simultanée, ennemis typés |
 | ![Composeur](captures/composeur.png) **Le composeur de sorts** — formes, noyaux, modificateurs en glisser-déposer, Wu Xing du sort et aperçu | ![Création du personnage](captures/creation.png) **La création du personnage** — nom, race, classe, stats, les trois jauges, dix loci d'apparence ; les sorts de départ viennent de la classe |
 | ![Inventaire](captures/inventaire.png) **L'inventaire** — l'avatar et ses cases d'équipement, le sac en liste triable, le Wu Xing de l'objet | ![Atelier](captures/atelier.png) **L'atelier** — les recettes en cartes, l'obtention de chaque composant dépliée |
-| ![Orage](captures/pluie.png) **Un orage sur le camp** — la pluie dessinée par code, la foudre au journal, la météo au HUD | |
+| ![Orage](captures/pluie.png) **Un orage sur le camp** — la pluie dessinée par code, la foudre au journal, la météo au HUD | ![Création du monde](captures/monde.png) **La création du monde** — l'aperçu de la mappemonde entière et les sept réglages de génération |
+| ![Capacités](captures/capacites.png) **Les capacités** — les sorts assemblés, leur coût, la hotbar en glisser-déposer | ![Commerce](captures/commerce.png) **Le commerce** — le stock d'un marchand, ses prix, et les objets encore non identifiés |
 
 ---
 
