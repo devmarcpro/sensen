@@ -141,6 +141,10 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > « fais en sorte que tous les menus et écrans se resize à la taille de la fenêtre pour que rien ne soit coupé ». Premier écran traité, le plus criant : la création. Le panneau prenait bien 94 % × 92 % de la fenêtre, mais **l'aperçu était posé en pixels fixes** — personnage à `(210, 300)` au facteur 5,4, portrait à `(340, 60)` sur 170 × 170, jauges à `y = 316` — dans un cadre haut de 380 px. Sur 1080 de haut, les deux tiers du bas restaient noirs ; sur une fenêtre courte, le personnage débordait. Le cadre **s'étire** désormais avec la colonne, et ses trois éléments se replacent à chaque redimensionnement selon des **proportions lues dans `styles.creation`** : le personnage est mis à l'échelle de la hauteur disponible (bornée), le portrait est un carré proportionnel, les jauges se calent sous le personnage. Rien n'est coupé, rien ne flotte.
 
 
+> [!bug] Corrigé le 2026-09-01 — la fiche du porteur débordait sur la liste du sac (point 67)
+> Deuxième écran du point 67, trouvé en ouvrant l'inventaire dans une fenêtre de 1280 × 800 : l'en-tête de la liste était **illisible**, « Type Combat 4.Qual(Général 0.Qids Qté ». La fiche du porteur (six stats, quatre jauges, charge, or, niveaux dérivés) dessine **246 pixels** de contenu dans un cadre déclaré à **210** : les trois dernières lignes tombaient par-dessus la ligne d'en-tête du sac. Sa hauteur minimale est désormais **calculée** à partir des lignes qu'elle dessine (`hauteur_requise()`, un seul endroit qui fait foi) et le cadre est `clip_contents` — un débordement ne peut plus mordre sur ce qui suit. Le fond du panneau passe aussi à l'opaque : à 0,94 le décor transparaissait sous les lignes du sac.
+
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

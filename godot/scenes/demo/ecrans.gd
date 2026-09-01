@@ -45,7 +45,7 @@ func _ready() -> void:
 	_dimensionner()
 	get_viewport().size_changed.connect(_dimensionner)
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.08, 0.1, 0.94)
+	style.bg_color = Color(0.08, 0.08, 0.1, 1.0)   # opaque : a 0,94 le journal du jeu transparaissait a travers la liste
 	style.border_color = Color(0.6, 0.55, 0.4)
 	style.set_border_width_all(2)
 	style.set_content_margin_all(10)

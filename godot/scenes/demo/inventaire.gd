@@ -9,7 +9,8 @@ extends VBoxContainer
 const CASE := Vector2(52, 52)
 const LIGNE := 26.0
 const COLONNES := ["nom", "type", "qualite", "poids", "quantite"]
-const LARGEURS := {"type": 90.0, "qualite": 70.0, "poids": 60.0, "quantite": 50.0}   # le nom prend le reste
+# « station portative » se lisait « station portati » : le type prend 125 px, le nom garde le reste.
+const LARGEURS := {"type": 125.0, "qualite": 70.0, "poids": 60.0, "quantite": 50.0}
 
 var ecrans: Node
 var cadre_avatar: Control
@@ -43,7 +44,7 @@ func _ready() -> void:
 		grille_slots.add_child(c)
 		cases[slot] = c
 	cadre_avatar = Control.new()
-	cadre_avatar.custom_minimum_size = Vector2(190, 210)   # le personnage en grand (designer, point 64)
+	cadre_avatar.custom_minimum_size = Vector2(190, FichePorteur.hauteur_requise())   # le personnage en grand (designer, point 64), aussi haut que la fiche
 	cadre_avatar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	haut.add_child(cadre_avatar)
 	avatar = Paperdoll.new()
@@ -52,7 +53,8 @@ func _ready() -> void:
 	cadre_avatar.add_child(avatar)
 	fiche = FichePorteur.new()   # à droite : stats, jauges, charge, or — ce que le HUD dit en jeu
 	fiche.inventaire = self
-	fiche.custom_minimum_size = Vector2(230, 210)
+	fiche.custom_minimum_size = Vector2(230, FichePorteur.hauteur_requise())
+	fiche.clip_contents = true   # rien ne mord sur la liste du sac, même si la fiche grandit (point 67)
 	fiche.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	haut.add_child(fiche)
 	entete = HBoxContainer.new()   # l'en-tête triable
@@ -274,7 +276,16 @@ class LigneObjet extends Control:
 ## Elle ne calcule rien : elle lit l'être et les règles, comme le HUD le fait en jeu.
 class FichePorteur extends Control:
 	const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "endurance": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95), "faim": Color(0.55, 0.35, 0.15)}
+	const TITRE_H := 14.0 + 18.0
+	const STAT_H := 15.0
+	const JAUGE_H := 16.0
+	const LIGNE_H := 16.0
 	var inventaire: InventaireVisuel
+
+	## La hauteur réellement dessinée : six stats, quatre jauges, charge, or, niveaux. Un seul endroit
+	## fait foi — la fiche débordait de 36 px sur l'en-tête du sac tant que le cadre l'ignorait (point 67).
+	static func hauteur_requise() -> float:
+		return TITRE_H + 6.0 * STAT_H + 6.0 + 4.0 * JAUGE_H + 6.0 + 3.0 * LIGNE_H + 8.0
 
 	func _draw() -> void:
 		var j: Dictionary = inventaire.ecrans.main.joueur()
