@@ -7118,7 +7118,7 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 	identifier(it)   # goûter, c'est identifier (designer 2026-09-01, point 52)
 	if "potion" in it.get("tags", []):   # les serments d'abstinence se rompent sur l'ACTE, pas sur l'état
 		rompre_serment(e, "sobriete")
-	if "viande" in it.get("tags", []) or str(it.get("base", "")).begins_with("viande"):
+	if "viande" in it.get("tags", []):   # le tag fait foi (l'audit refuse un tag que rien ne porte)
 		rompre_serment(e, "vegetarien")
 	if a_talent(e, "soif_de_sang") and "plat" in it.get("tags", []):   # le Vampire ne mange plus de plats
 		EventBus.emettre(&"journal", [&"journal.plat_refuse", {}])
