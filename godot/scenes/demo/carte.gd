@@ -236,26 +236,26 @@ func _peindre_cellule(cell: Vector2i, r: Rect2, col: Color, surf, tc: int) -> vo
 
 
 func _entree(ev: InputEvent) -> void:
+	if ev is InputEventMouseButton and ev.button_index in [MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT]:
+		_glisse = ev.pressed   # la carte se fait glisser au bouton du milieu ou au bouton droit
+		return
 	if ev is InputEventMouseMotion:
+		if _glisse:   # le glissement se traite ICI : une branche placée après le survol ne serait jamais atteinte
+			decalage += ev.relative
+			var pas_c := int(decalage.x / case_px)   # au-delà d'une case, on décale la fenêtre elle-même
+			if pas_c != 0:
+				centre.x -= pas_c
+				decalage.x -= pas_c * case_px
+			var pas_l := int(decalage.y / case_px)
+			if pas_l != 0:
+				centre.y -= pas_l
+				decalage.y -= pas_l * case_px
+			dessin.queue_redraw()
+			return
 		var c := _cellule_sous(ev.position)
 		if c != survol:
 			survol = c
 			dessin.queue_redraw()
-		return
-	if ev is InputEventMouseButton and ev.button_index in [MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT]:
-		_glisse = ev.pressed   # la carte se fait glisser
-		return
-	if ev is InputEventMouseMotion and _glisse:
-		decalage += ev.relative
-		var pas_c := int(decalage.x / case_px)   # au-delà d'une case, on décale la fenêtre elle-même
-		if pas_c != 0:
-			centre.x -= pas_c
-			decalage.x -= pas_c * case_px
-		var pas_l := int(decalage.y / case_px)
-		if pas_l != 0:
-			centre.y -= pas_l
-			decalage.y -= pas_l * case_px
-		dessin.queue_redraw()
 		return
 	if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
 		var cell := _cellule_sous(ev.position)

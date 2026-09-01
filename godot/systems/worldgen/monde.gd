@@ -12,6 +12,7 @@ var surface: Surface
 var planete: Dictionary
 var camp_cfg: Dictionary
 var cellule_camp: Vector2i
+var _amorce := Vector2i(-9999, -9999)   # la cellule du donjon garanti du début de partie (point 51)
 var nettoyages: Dictionary = {}   # cellule → jour du dernier nettoyage (donjons de corruption, point 51)
 var taille: int
 var rayon: int = 1
@@ -300,6 +301,8 @@ func donjon_corrompu(cell: Vector2i, jour: int) -> bool:
 		return false
 	if surface.poi_de(cell, cell == cellule_camp).get("donjon", false):
 		return false   # une cellule qui a déjà son donjon garde son entrée : la corruption ne la double pas
+	if cell == cellule_amorce() and not nettoyages.has(cell):
+		return true   # le donjon garanti du début de partie (designer 2026-09-01)
 	if corruption_jour(cell, jour) < float(cfg.get("seuil", 62.0)):
 		return false
 	# La densité se règle par un TIRAGE déterministe plutôt qu'en comptant les voisins : avec le
@@ -598,3 +601,29 @@ static func fermer_tous() -> void:
 func fermer() -> void:
 	tache = -1
 	ouverts.erase(self)
+
+## La cellule d'amorce (designer 2026-09-01) : une nouvelle partie a toujours un donjon à portée. Elle est
+## tirée sur la graine parmi les cellules de terre situées entre rayon_min et rayon_max cases du camp,
+## villages et claims écartés. Nettoyée, elle redevient une cellule ordinaire soumise au seul bruit.
+func cellule_amorce() -> Vector2i:
+	if _amorce != Vector2i(-9999, -9999):
+		return _amorce
+	var g: Dictionary = planete.corruption.get("donjons", {}).get("garantie_depart", {})
+	var rmin := int(g.get("rayon_min", 3))
+	var rmax := int(g.get("rayon_max", 6))
+	var candidates: Array[Vector2i] = []
+	for dy in range(-rmax, rmax + 1):
+		for dx in range(-rmax, rmax + 1):
+			var d := maxi(absi(dx), absi(dy))
+			if d < rmin or d > rmax:
+				continue
+			var c: Vector2i = cellule_camp + Vector2i(dx, dy)
+			if not surface.terre_a(c) or claims.has(c) or surface.poi_de(c).get("village", false):
+				continue
+			candidates.append(c)
+	if candidates.is_empty():
+		_amorce = Vector2i(-1, -1)   # une île minuscule : pas d'amorce, le bruit décidera seul
+		return _amorce
+	candidates.sort_custom(func(u: Vector2i, v: Vector2i) -> bool: return u.y * 100000 + u.x < v.y * 100000 + v.x)
+	_amorce = candidates[absi(hash([surface.graine, cellule_camp.x, cellule_camp.y, "amorce"])) % candidates.size()]
+	return _amorce

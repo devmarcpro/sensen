@@ -21,6 +21,20 @@
         5,
         8
       ]
+    },
+    {
+      "filtre": {
+        "types_any": [
+          "outil"
+        ],
+        "tags_any": [
+          "lumiere"
+        ]
+      },
+      "nombre": [
+        1,
+        3
+      ]
     }
   ]
 }

@@ -31,5 +31,6 @@
     }
   ],
   "amplitude_max": 170.0,
-  "pas_degres": 6.0
+  "pas_degres": 6.0,
+  "marge_saisie": 6.0
 }

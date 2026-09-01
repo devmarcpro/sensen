@@ -127,6 +127,9 @@ Un callout daté dans la note liée (`> [!success] Tranché le <date>`) — la b
 > [!question] À juger — l'échelle des stats après le passage aux dés (2026-08-31, point 48)
 > Les stats de base sont désormais tirées (`1d6+2`) et il ne reste que **8 points** à répartir (12 pour une classe cachée, l'ancien +15 divisé pour tenir l'échelle). Trois questions de game feel restent au designer : **le jet est-il assez large** (3-8 donne peu d'écart entre deux personnages) ; **8 points suffisent-ils** pour sentir un choix, ou faut-il monter ; et **faut-il pouvoir relancer** le tirage à la création — je ne l'ai pas ajouté, le refus des relances étant une décision de design, mais un tirage subi à la création n'est pas la même chose qu'une relance en combat.
 
+- **Le cycle de foyer est devenu inatteignable** (2026-09-01) : infection hebdomadaire, plafonds, nettoyage, répit, repeuplement par générations — toute cette machinerie ne s'amorçait que sur une cellule portant un donjon **posé**. Il n'y en a plus aucun. Elle reste en place et sous test (le test l'amorce à la main), mais aucune partie ne la déclenche : faut-il la fondre dans le bruit de corruption du point 51, ou la retirer ? — [[Dérive de la corruption]]
+- **Le premier donjon ne se trouve plus à côté du camp** (2026-09-01) : il dépend du hasard de la corruption alentour. Faut-il garantir une cellule corrompue à quelques cases du départ, ou est-ce au joueur de chercher ? — [[Donjons — structure et intégration]]
+
 ## Liens
 - **Dépend de** : [[Vers la production]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]

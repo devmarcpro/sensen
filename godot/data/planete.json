@@ -96,8 +96,8 @@
     "hauteur": 8
   },
   "poi": {
-    "_doc": "Densités par cellule terrestre (Unification macro-micro), pondérées par poi_weights du biome ; village, camp et sanctuaire attendent l'étape 9.",
-    "donjon": 0.06,
+    "_doc": "Densités par cellule terrestre (Unification macro-micro), pondérées par poi_weights du biome ; village, camp et sanctuaire attendent l'étape 9. Le donjon en POI vaut 0 depuis le 2026-09-01 (designer) : un donjon naît de la corruption ; seule la cellule du camp garde son entree d'apprentissage, forcee par poi_de.",
+    "donjon": 0.0,
     "filon_majeur": 0.06,
     "village": 0.04,
     "camp": 0.08,
@@ -164,7 +164,12 @@
       "gradient_bord": 30.0,
       "niveau_par_cellule_distance": 0.09,
       "recherche_max": 120,
-      "niveau_par_fusion": 3
+      "niveau_par_fusion": 3,
+      "garantie_depart": {
+        "_doc": "Une nouvelle partie commence toujours avec un donjon a portee : la cellule d'amorce est tiree entre rayon_min et rayon_max cases du camp (designer 2026-09-01). Nettoyee, elle redevient ordinaire.",
+        "rayon_min": 3,
+        "rayon_max": 6
+      }
     }
   },
   "cycle": {

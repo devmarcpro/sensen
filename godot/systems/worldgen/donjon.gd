@@ -284,6 +284,7 @@ func _poser_portes(e: Dictionary) -> void:
 	if chance <= 0.0:
 		return
 	e["portes"] = {}
+	var seuils: Array = []
 	for piece in e.pieces:
 		if piece.kind != "salle" or rng.randf() >= chance:
 			continue
@@ -298,8 +299,31 @@ func _poser_portes(e: Dictionary) -> void:
 				for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 					var q: Vector2i = p + dv
 					if not r.has_point(q) and e.sol.has(q.y * e.largeur + q.x):
-						e.portes[p.y * e.largeur + p.x] = true
+						seuils.append(p)
 						break
+	for p in _une_porte_par_ouverture(seuils):
+		e.portes[p.y * e.largeur + p.x] = true
+
+
+## Des seuils contigus forment UNE ouverture (un couloir large, un angle de salle) : elle ne reçoit qu'un
+## battant, celui du milieu — deux portes côte à côte n'ont pas de sens (designer, 2026-09-01).
+static func _une_porte_par_ouverture(seuils: Array) -> Array:
+	var reste := seuils.duplicate()
+	var portes := []
+	while not reste.is_empty():
+		var groupe: Array = [reste.pop_back()]
+		var k := 0
+		while k < groupe.size():   # propagation de proche en proche, en 4 voisins
+			var a: Vector2i = groupe[k]
+			for i in range(reste.size() - 1, -1, -1):
+				var b: Vector2i = reste[i]
+				if absi(a.x - b.x) + absi(a.y - b.y) == 1:
+					groupe.append(b)
+					reste.remove_at(i)
+			k += 1
+		groupe.sort_custom(func(u: Vector2i, v: Vector2i) -> bool: return u.y * 4096 + u.x < v.y * 4096 + v.x)
+		portes.append(groupe[groupe.size() / 2])
+	return portes
 
 
 ## Un pilier ne touche pas un autre pilier ni un mur : on peut toujours le contourner.

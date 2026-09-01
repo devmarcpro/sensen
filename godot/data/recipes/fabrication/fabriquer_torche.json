@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.fabriquer_torche.name",
+  "station": "etabli",
+  "craft_skill": "menuiserie",
+  "inputs": [
+    {
+      "category": "bois",
+      "forme": "planche",
+      "amount": 1
+    },
+    {
+      "category": "vegetal",
+      "forme": "tissu",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "torche",
+    "amount": 2
+  },
+  "fuel": null
+}

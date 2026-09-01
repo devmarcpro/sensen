@@ -356,7 +356,7 @@ func _tirer_pondere(poids: Dictionary, rng: RandomNumberGenerator) -> String:
 
 ## Les POI d'une cellule (Unification macro-micro) : hash(seed, cx, cy), densités de la planète × poids du biome.
 func poi_de(c: Vector2i, camp: bool = false) -> Dictionary:
-	var res := {"donjon": camp, "filon_majeur": false}
+	var res := {"donjon": false, "filon_majeur": false}   # plus aucun donjon posé : ils naissent de la corruption (designer 2026-09-01)
 	if not terre_a(c):
 		return res
 	var rng := RandomNumberGenerator.new()
@@ -365,8 +365,7 @@ func poi_de(c: Vector2i, camp: bool = false) -> Dictionary:
 	var b: Dictionary = biomes.get(biome_a(c.x * taille + taille / 2, c.y * taille + taille / 2), {})
 	var poids: Dictionary = b.get("poi_weights", {})
 	var dens: Dictionary = planete.get("poi", {})
-	if not camp:
-		res.donjon = rng.randf() < float(dens.get("donjon", 0.06)) * float(poids.get("donjon", 1))
+	rng.randf()   # le tirage du donjon est consommé sans effet : le retirer décalerait le flux et changerait tous les mondes
 	res.filon_majeur = rng.randf() < float(dens.get("filon_majeur", 0.06)) * float(poids.get("filon_majeur", 1))
 	res["village"] = (not camp) and rng.randf() < float(dens.get("village", 0.04)) * float(poids.get("village", 1))
 	return res

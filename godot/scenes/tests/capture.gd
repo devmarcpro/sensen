@@ -47,6 +47,30 @@ func _ready() -> void:
 			if args[iv] == "--volet" and iv + 1 < args.size():
 				scene.creation.volet = int(args[iv + 1])
 				scene.ecrans.ouvrir("creation")
+		for isa in args.size():   # --saisir <segment> : clique VRAIMENT sur ce membre du pantin et le tourne (point 68)
+			if args[isa] != "--saisir" or isa + 1 >= args.size():
+				continue
+			var ec = scene.ecrans
+			ec.pose_edition = "repos"
+			ec.rafraichir()
+			await scene.get_tree().process_frame
+			var vise := str(args[isa + 1])
+			var corps: PackedVector2Array = ec.apercu_perso.corps_de(vise)
+			if corps.size() < 2:
+				print("SAISIE : segment inconnu ", vise)
+				continue
+			var milieu: Vector2 = ec.apercu_perso.position + (corps[0] + corps[1]) * 0.5 * ec.apercu_perso.scale.x
+			var clic := InputEventMouseButton.new()
+			clic.button_index = MOUSE_BUTTON_LEFT
+			clic.pressed = true
+			clic.position = milieu
+			ec._pantin_entree(clic)
+			print("SAISIE : visé ", vise, " → saisi ", ec.pose_segment)
+			var glisse := InputEventMouseMotion.new()
+			glisse.button_mask = MOUSE_BUTTON_MASK_LEFT
+			glisse.position = milieu + Vector2(40, -40)
+			ec._pantin_entree(glisse)
+			ec.rafraichir()
 	elif scene.titre_ouvert and "--charger" in args:   # --charger : le chemin Continuer de l'écran principal, à froid (Sauvegarde)
 		scene._charger_partie("essai_capture")   # l'emplacement de la sonde — jamais « monde », qui peut être une vraie partie
 		if scene.sim != null:
@@ -148,6 +172,29 @@ func _ready() -> void:
 			scene.xp_cumul = {}
 			scene.xp_flottants = []
 			scene.xp_fenetre = 0.0
+	if "--porte" in args and scene.sim != null:   # --porte : le joueur devant la porte la plus proche (Génération de donjon)
+		var sp = scene.sim
+		var jp: Dictionary = scene.joueur()
+		var meilleure := Vector2i(-1, -1)
+		var dmin := 1 << 30
+		for dy in range(-25, 26):
+			for dx in range(-25, 26):
+				var pos: Vector2i = jp.pos + Vector2i(dx, dy)
+				if not sp.grille.dans(pos) or not ("porte" in sp.grille.contenu_de(pos).get("tags", [])):
+					continue
+				var dp: int = absi(dx) + absi(dy)
+				if dp < dmin:
+					dmin = dp
+					meilleure = pos
+		if meilleure != Vector2i(-1, -1):
+			for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var libre: Vector2i = meilleure + dv
+				if sp.grille.dans(libre) and not sp.grille.bloque_passage(libre) and sp.grille.occupant(libre).is_empty():
+					sp.grille.liberer(jp.pos)
+					jp["pos"] = libre
+					sp.grille.placer(jp.id, libre)
+					break
+			scene._apres_changement_de_grille()
 	if "--sauvegarder" in args and scene.sim != null:   # --sauvegarder : écrit la partie après la mise en place — pour tester Continuer à froid
 		print("sauvegarde : ", scene.sim.sauvegarder("essai_capture"))   # jamais « monde », qui peut être une vraie partie
 	for i3 in args.size():   # --heure H : l'heure du monde (cycle jour-nuit) — après le chargement, qui remet l'horloge

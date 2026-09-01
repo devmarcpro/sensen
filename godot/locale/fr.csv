@@ -406,6 +406,7 @@ item.proto_pelle.name,Pelle de fer
 item.proto_seau.name,Seau de bois
 item.craft_pelle.name,Pelle
 recipe.fabriquer_seau.name,Fabriquer un seau
+recipe.fabriquer_torche.name,Fabriquer des torches
 functionality.pioche.name,Pioche
 tile_content.filon.name,Filon
 station.etabli.name,Établi
@@ -1263,7 +1264,7 @@ journal.semaine,"une semaine passe : la corruption dérive ({n} cellules)"
 journal.donjon_nettoye,"le donjon est nettoyé : il restera ouvert un jour et demi"
 journal.donjon_disparu,"l'entrée du donjon s'est effondrée en ({x},{y})"
 journal.donjon_reapparu,"un donjon est réapparu en ({x},{y})"
-ui.carte.titre,"=== CARTE DU MONDE — clic : voyage rapide vers une cellule explorée, ou revendiquer une voisine · flèches : défiler · Échap : fermer ==="
+ui.carte.titre,"=== CARTE DU MONDE — clic : marcher jusqu'à cette cellule, ou revendiquer une voisine · clic droit : faire glisser · flèches : défiler · Échap : fermer ==="
 ui.carte.depart,=== CHOISIS TA CASE DE DÉPART — clic sur une cellule de terre (couleur : biome · orange/rouge : danger · carré doré : donjon) ===
 ui.carte.legende,"trait ocre : route · vert cerclé : ton camp · bleu cerclé : ici · carré doré : donjon · point clair : filon majeur · sombre : jamais explorée"
 journal.voyage,"{nom} voyage jusqu'en ({x},{y}) : {ticks} ticks"

@@ -29,6 +29,10 @@ La hauteur est **quantifiée sur 21 niveaux** (0 à 20, référence à 10) — f
 > - **Chute** : jamais choisie par le pathfinding ; un **pas volontaire** vers une tuile ≥ 3 en contrebas est autorisé, coûte le prix d'une descente (2 ticks) et applique `(hauteur − 2) × 5`. Les **volants** ignorent le dénivelé.
 > - **Murs** : un contenu de tuile (`data/tile_contents.json`, champ `content` de [[Décision — Structure de données de la grille]]) bloque le passage et la vue par ses tags — les systèmes lisent `bloque_passage` / `bloque_vue`, jamais l'id.
 
+> [!bug] Corrigé le 2026-09-01 — « escalade n'escalade pas » (designer)
+> La compétence était branchée, mais un plafond `hauteur_max = 6` — de mon invention, pas de la décision du designer — rendait infranchissable tout ce qui la dépassait. Or le seul relief vertical du monde est le **piton**, `delta 8` : la seule chose qui demandait vraiment de grimper était exactement celle qu'on ne pouvait pas grimper. Le plafond disparaît : **toute paroi de terrain se grimpe**, le coût restant `ticks_par_niveau × dh²` divisé par le facteur de compétence — plus c'est haut, plus c'est long, ce qui était la décision. Un mur (contenu qui bloque le passage) reste un mur. **À juger** : un piton de 8 niveaux coûte ~900 ticks au novice contre ~300 à l'expert — est-ce le bon ordre de grandeur pour un détour de quelques dizaines de tuiles ?
+
+
 ## Liens
 - **Dépend de** : [[Grille continue]], [[Terrain spectaculaire]], [[Décisions fondatrices]]
 - **Alimente** : [[Zones de coup par dénivelé]], [[Combat tactique sur grille]], [[Action-time à ticks]], [[Destruction du terrain]], [[Eau et liquides]], [[Sorts cataclysmiques]]

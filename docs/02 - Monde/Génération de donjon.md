@@ -113,6 +113,10 @@ NETTOYAGE ET DISPARITION (3.5) : à la mort du boss (`creature_killed`
 >
 > Au passage, deux règles du même jour : **tous les ennemis lâchent du loot** (`chance_tout_venant` passe de 0,25 à 1) et les **coffres doublent** (une tuile sur 18 au lieu de 40, un à trois objets). Un **meuble n'occupe plus toute sa case** : chaque fiche porte une `emprise` (0,58 pour un coffre, 0,78 pour un lit ou une station) et le bloc est dessiné d'autant plus petit et plus bas. Enfin, **E ne casse plus les blocs ni le sol** : creuser un mur, abaisser ou élever une tuile disparaissent du menu.
 
+> [!success] Codé le 2026-09-01 — une porte est une porte, et il n'y en a qu'une par seuil (designer)
+> **Instruction** : « fais en sorte que les portes ne soient pas des blocs complets mais vraiment des portes et qu'il y en ait qu'une de générée, pas deux côte à côte ». Deux défauts distincts. **Au dessin** : une porte fermée bloque le passage, et tout ce qui bloque le passage était rendu par `_dessine_bloc` — un cube plein, indiscernable d'un mur. Elle est désormais dessinée comme un **battant** : le sol de la tuile, deux montants, un panneau dressé en travers de l'ouverture (l'axe est déduit des murs voisins), une poignée ; ouverte, le battant se range contre son montant et laisse le seuil libre. **À la génération** : `_poser_portes` marquait *chaque* tuile de bord touchant un couloir — un couloir large de deux tuiles, ou un angle de salle, donnait deux portes côte à côte. Les seuils contigus sont maintenant **groupés en ouvertures** et une seule tuile par ouverture reçoit son battant (celle du milieu).
+
+
 ## Liens
 - **Dépend de** : [[Donjons — structure et intégration]], [[Salles et connecteurs]], [[Unification macro-micro]], [[Dérive de la corruption]]
 - **Alimente** : [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Créatures]], [[Gabarit de quête]]

@@ -156,6 +156,7 @@ func _ready() -> void:
 	_lancer("test_faim_et_poids")
 	_lancer("test_donjon")
 	_lancer("test_donjon_temps_a_l_action")
+	_lancer("test_portes_une_par_ouverture")
 	_lancer("test_types_ennemis")
 	_lancer("test_loot_assemble")
 	_lancer("test_budgets")
@@ -222,6 +223,16 @@ func test_grille() -> void:
 	# Δ+3 s'escalade depuis le point 56 : ce n'est plus un mur, c'est un temps à payer.
 	var esc_3 := g.cout_pas(Vector2i(13, 15), Vector2i(12, 15))
 	verifier(esc_3 > int(GameData.config("combat_rules").deplacement.montee_2), "Δ+3 : escaladé, et bien plus cher qu'une montée (%d ticks)" % esc_3)
+	# Un piton fait 8 niveaux : c'était la seule paroi qui demandait de grimper, et la seule qu'on ne
+	# pouvait pas grimper (plafond hauteur_max, retiré le 2026-09-01 à la demande du designer).
+	var piton := Grille.new(2, 1)
+	piton.dep = g.dep
+	piton.hauteurs[0] = 4
+	piton.hauteurs[1] = 12
+	var c_piton := piton.cout_pas(Vector2i(0, 0), Vector2i(1, 0))
+	var c_expert := piton.cout_pas(Vector2i(0, 0), Vector2i(1, 0), false, false, {"escalade": 3.0})
+	verifier(c_piton > 0, "un piton de 8 niveaux se grimpe (%d ticks)" % c_piton)
+	verifier(c_expert < c_piton, "l'escalade récompense la compétence (%d ticks pour l'expert)" % c_expert)
 	verifier(g.degats_chute(3) == 5 and g.degats_chute(6) == 20, "dégâts de chute = (h − 2) × 5")
 	var synth := Grille.new(3, 1)
 	synth.dep = g.dep
@@ -1237,7 +1248,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 57, "57 recettes : 19 transformations, 3 plats, 2 distillations, et 33 dérivées des objets qui portent leur coût (24 meubles, 9 stations)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 58, "58 recettes : 19 transformations, 3 plats, 2 distillations, la torche, et 33 dérivées des objets qui portent leur coût (24 meubles, 9 stations)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -1429,24 +1440,26 @@ func test_carte_et_voyage() -> void:
 	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
 	var donjons := 0
 	var terres := 0
-	for y in range(500, 520):
-		for x in range(500, 520):
+	var depart_c: Vector2i = Vector2i(int(planete.cellule_depart[0]), int(planete.cellule_depart[1]))
+	for y in range(depart_c.y - 15, depart_c.y + 16):   # autour du départ : de la terre pour de vrai
+		for x in range(depart_c.x - 15, depart_c.x + 16):
 			var c := Vector2i(x, y)
 			if surf.terre_a(c):
 				terres += 1
 				if surf.poi_de(c).donjon:
 					donjons += 1
-	verifier(terres == 0 or (float(donjons) / float(terres) < 0.2), "POI donjon à ~6 %% des cellules terrestres (%d / %d)" % [donjons, terres])
+	verifier(donjons == 0, "aucun donjon en POI : ils naissent de la corruption (%d sur %d terres)" % [donjons, terres])
+	verifier(not surf.poi_de(depart_c, true).donjon, "la cellule du camp non plus n'a de donjon")
 	verifier(surf.poi_de(Vector2i(512, 512)) == surf.poi_de(Vector2i(512, 512)), "POI déterministes")
 	var r := surf.resume_cellule(Vector2i(512, 512), true)
-	verifier(r.has("biome") and r.has("danger") and int(r.danger) >= 0 and int(r.danger) <= 2 and r.poi.donjon, "résumé de cellule : biome, danger 0-2, POI (le camp a son donjon)")
+	verifier(r.has("biome") and r.has("danger") and int(r.danger) >= 0 and int(r.danger) <= 2 and not r.poi.donjon, "résumé de cellule : biome, danger 0-2, aucun donjon en POI")
 	var s := Simulation.new(41)
 	s.charger_camp()
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
 	var camp := s.monde.cellule_camp
 	var e := s.monde.cellule(camp)
 	var entree: Vector2i = s.monde.pos_monde(camp, e.entree_donjon)
-	verifier(s.grille.contenu_de(entree).get("tags", []).has("entree_donjon") and s.grille.bloque_passage(entree + Vector2i(0, -1)) and not s.grille.bloque_passage(entree + Vector2i(0, 1)), "l'entrée scellée : anneau de roche ouvert au sud")
+	verifier(not s.grille.contenu_de(entree).get("tags", []).has("entree_donjon"), "le camp n'a plus d'entrée de donjon (designer 2026-09-01)")
 	# Voyage rapide : refusé vers l'inexploré, accepté vers une cellule explorée ; le temps avance.
 	var voisine := camp + Vector2i(1, 0)
 	for dv in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1), Vector2i(1, 1), Vector2i(2, 0)]:
@@ -1454,26 +1467,31 @@ func test_carte_et_voyage() -> void:
 			voisine = camp + dv   # une cellule saine : une cellule corrompue happerait le voyageur
 			break
 	var t0: int = s.horloge_monde.ticks
-	verifier(not s.voyager(j, voisine) or not s.monde.surface.terre_a(voisine) or s.monde.cellule_exploree(voisine), "pas de voyage vers une cellule jamais explorée")
+	verifier(not s.monde.surface.terre_a(voisine) or s.voyager(j, voisine), "on voyage vers l'inconnu : l'exploration n'est plus exigée (designer 2026-09-01)")
+	verifier(not s.voyager(j, _cellule_eau(s, camp)), "l'océan se refuse toujours")
 	s.monde.explores[Vector2i(voisine.x * (s.monde.taille / 32), voisine.y * (s.monde.taille / 32))] = true
 	if s.monde.surface.terre_a(voisine):
-		verifier(s.voyager(j, voisine), "voyage rapide vers la cellule voisine explorée")
+		verifier(s.monde.cellule_de(j.pos) == voisine or s.voyager(j, voisine), "voyage rapide vers la cellule voisine")
 		# Le voyage coûte une marche depuis le point 59 : une cellule = sa largeur en tuiles, au prix d'un pas.
 		var attendu_v := int(planete.taille_cellule) * s.regles.ticks_deplacement(int(s.regles.r.deplacement.cout_base), j.get("competences_eff", {}), false)
 		verifier(s.monde.cellule_de(j.pos) == voisine and absi(s.horloge_monde.ticks - t0 - attendu_v) <= attendu_v / 2, "arrivé dans la cellule, %d ticks de voyage (marche ≈ %d)" % [s.horloge_monde.ticks - t0, attendu_v])
-	# Partir d'un donjon de surface : id de la cellule, retour devant l'entrée.
-	s.grille.liberer(j.pos)
-	j.pos = entree
-	s._verifier_fenetre(j)
-	s.grille.placer(j.id, entree)
-	s.attente[j.id] = true
-	verifier(s.intention(j.id, {"type": "descendre"}), "entrer dans le donjon de la cellule")
-	verifier(s.lieu == "donjon" and int(s.donjon.id) == int(hash([s.graine, camp.x, camp.y, "donjon", 0]) & 0x7fffffff), "le donjon a l'id de sa cellule (génération 0)")
-	j.pos = s.donjon.entree
-	s.grille.placer(j.id, j.pos)
-	s.attente[j.id] = true
-	s.intention(j.id, {"type": "remonter"})
-	verifier(s.lieu == "camp" and j.pos == entree, "ressortir ramène devant l'entrée")
+	# Le donjon garanti du début de partie (designer 2026-09-01) : une cellule d'amorce à portée du camp,
+	# corrompue tant qu'elle n'est pas nettoyée. Y marcher, c'est y entrer ; ressortir ramène au monde.
+	var amorce: Vector2i = s.monde.cellule_amorce()
+	var dist_a := maxi(absi(amorce.x - camp.x), absi(amorce.y - camp.y))
+	var g_cfg: Dictionary = planete.corruption.donjons.garantie_depart
+	verifier(amorce != Vector2i(-1, -1) and dist_a >= int(g_cfg.rayon_min) and dist_a <= int(g_cfg.rayon_max), "une cellule d'amorce à %d cases du camp (%d-%d attendu)" % [dist_a, int(g_cfg.rayon_min), int(g_cfg.rayon_max)])
+	verifier(s.monde.cellule_amorce() == amorce, "l'amorce est déterministe")
+	verifier(s.monde.donjon_corrompu(amorce, s.jour_courant()), "l'amorce est corrompue dès le premier jour")
+	if s.lieu == "camp" and s.monde.cellule_de(j.pos) != amorce:
+		verifier(s.voyager(j, amorce) and s.lieu == "donjon" and not s.donjon.is_empty(), "marcher sur l'amorce, c'est entrer dans son donjon")
+		j.pos = s.donjon.entree
+		s.grille.placer(j.id, j.pos)
+		s.attente[j.id] = true
+		s.intention(j.id, {"type": "remonter"})
+		verifier(s.lieu == "camp", "ressortir ramène au monde")
+	s.monde.nettoyages[amorce] = s.jour_courant()
+	verifier(not s.monde.donjon_corrompu(amorce, s.jour_courant()), "nettoyée, l'amorce redevient une cellule ordinaire")
 	s.monde.fermer()
 
 
@@ -1485,8 +1503,16 @@ func test_corruption() -> void:
 	var m = s.monde
 	var camp: Vector2i = m.cellule_camp
 	var cr: Dictionary = GameData.config("planete").corruption
-	var f := m.foyer(camp)
-	verifier(not f.is_empty() and bool(f.actif) and int(f.generation) == 0, "le donjon du camp est un foyer actif")
+	# Depuis le retrait des donjons posés (designer 2026-09-01), aucun foyer ne naît en jeu : la machinerie
+	# de foyer reste sous test, mais il faut l'amorcer à la main — elle n'est plus atteignable en partie.
+	verifier(m.foyer(camp).is_empty(), "plus aucun foyer ne naît d'une cellule : les donjons viennent de la corruption")
+	m.cellule(camp)["a_donjon"] = true
+	m._reposer_entree(camp)
+	var f: Dictionary = m.foyers.get(camp, {})
+	if f.is_empty():
+		f = {"actif": true, "majeur": m.surface.danger_de(camp) >= 2, "generation": 0, "repit": 0, "nettoye_tick": -1}
+		m.foyers[camp] = f
+	verifier(bool(f.actif) and int(f.generation) == 0, "le foyer amorcé est actif")
 	var c0 := m.corruption_de(camp)
 	var touchees := m.semaine(1)
 	# Le monde est rectangulaire (point 49) : le camp peut tomber près d'un second foyer, donc on
@@ -6178,7 +6204,7 @@ func test_camp() -> void:
 			arbres += 1
 		if "entree_donjon" in tags:
 			entree = t
-	verifier(arbres >= 5 and entree != Vector2i(-1, -1), "des arbres (%d) et l'entrée du donjon" % arbres)
+	verifier(arbres >= 5 and entree == Vector2i(-1, -1), "des arbres (%d) et aucune entrée de donjon au camp" % arbres)
 	var base := Vector2i(s.monde.cellule_camp.x * tc, s.monde.cellule_camp.y * tc)   # la cellule du camp, où qu'elle soit
 	var coffre := base + Vector2i(tc / 2 - 2, tc / 2)   # le centre de la cellule du camp
 	verifier(s.contenants.get(s.grille.idx(coffre), []).size() >= 4, "le coffre de départ : hache, pioche, faucille, lit de paille, graines, étal")
@@ -6252,17 +6278,32 @@ func test_camp() -> void:
 	verifier(s.intention(j.id, {"type": "poser", "objet": coffre_it.uid, "vers": ou}), "poser un coffre")
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "ranger", "objet": pioche, "vers": ou}) and s.contenants[s.grille.idx(ou)] == [pioche] and not (pioche in j.sac), "ranger la pioche dans le coffre")
-	# Partir en expédition depuis l'entrée, ressortir : le camp revient tel quel.
-	j.pos = entree
-	s.grille.placer(j.id, entree)
-	s.attente[j.id] = true
-	verifier(s.intention(j.id, {"type": "descendre"}), "E sur l'entrée : expédition")
-	verifier(s.lieu == "donjon" and not s.donjon.is_empty() and s.camp_sauve.has("grille"), "on est au donjon, le camp est mis de côté")
+	# Partir en expédition, ressortir : le camp revient tel quel. Depuis le retrait des entrées posées
+	# (designer 2026-09-01), on part en marchant sur une cellule corrompue — il n'y a plus d'escalier au camp.
+	var cell_corr := Vector2i(-9999, -9999)
+	var camp_c: Vector2i = s.monde.cellule_camp
+	for r_c in range(1, 13):
+		for dy_c in range(-r_c, r_c + 1):
+			for dx_c in range(-r_c, r_c + 1):
+				var cel_c: Vector2i = camp_c + Vector2i(dx_c, dy_c)
+				if cell_corr.x == -9999 and s.monde.surface.terre_a(cel_c) and s.monde.donjon_corrompu(cel_c, s.jour_courant()):
+					cell_corr = cel_c
+		if cell_corr.x != -9999:
+			break
+	verifier(cell_corr.x != -9999, "une cellule corrompue existe à moins de 12 cases du camp (%s)" % str(cell_corr))
+	if cell_corr.x != -9999:
+		verifier(s.voyager(j, cell_corr), "on marche jusqu'à la cellule corrompue")
+		verifier(s.lieu == "donjon" and not s.donjon.is_empty() and s.camp_sauve.has("grille"), "y entrer, c'est entrer dans le donjon : le camp est mis de côté")
 	j.pos = s.donjon.entree
 	s.grille.placer(j.id, j.pos)
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "remonter"}), "ressortir par l'entrée de l'étage 1")
+	if s.lieu != "camp":
+		verifier(false, "le retour au camp a échoué")
 	verifier(s.lieu == "camp" and s.grille.meubles.get(s.grille.idx(devant), "") == "lit_de_paille" and s.contenants[s.grille.idx(ou)] == [pioche], "retour au camp : le lit et le coffre sont toujours là")
+	if s.monde.cellule_de(j.pos) != camp_c:   # on est ressorti sur la cellule corrompue : rentrer au camp
+		s.monde.nettoyages[cell_corr] = s.jour_courant()   # nettoyée, elle ne happe plus le voyageur
+		verifier(s.voyager(j, camp_c), "rentrer au camp après l'expédition")
 	# 8.2a : traverser à pied vers la cellule voisine — la fenêtre se recentre, rien ne bouge, tout revient.
 	var mur2: Vector2i = j.pos + Vector2i(0, 2)
 	s._donner_materiau(j, "chene", 1, "planche")
@@ -6390,8 +6431,11 @@ func test_camp() -> void:
 	var grimpeur := g56.cout_pas(bas, haut, false, false, {"escalade": 3.0})
 	verifier(novice > 0 and grimpeur > 0 and grimpeur < novice, "escalader : %d ticks au débutant, %d au grimpeur" % [novice, grimpeur])
 	var falaise: Vector2i = bas + Vector2i(0, 1)
-	g56.hauteurs[g56.idx(falaise)] = h0 + 12   # au-delà du plafond : la paroi reste infranchissable
-	verifier(g56.cout_pas(bas, falaise, false, false, {"escalade": 5.0}) < 0, "au-delà de hauteur_max, on ne grimpe pas")
+	g56.hauteurs[g56.idx(falaise)] = h0 + 12   # plus de plafond (designer 2026-09-01) : très haut = très long
+	var tres_haut := g56.cout_pas(bas, falaise, false, false, {"escalade": 5.0})
+	verifier(tres_haut > novice, "une paroi de 12 se grimpe, bien plus cher que 3 (%d ticks) " % tres_haut)
+	g56.poser_contenu(falaise, "mur")
+	verifier(g56.cout_pas(bas, falaise, false, false, {"escalade": 5.0}) < 0, "un mur, lui, reste un mur")
 	g56.hauteurs[g56.idx(haut)] = h0
 	g56.hauteurs[g56.idx(falaise)] = h0
 	# Voyager coûte le temps d'une marche (2026-09-01, point 59) : la distance en tuiles × le coût d'un pas.
@@ -7348,3 +7392,32 @@ func test_expedition() -> void:
 	verifier(s.intention(j.id, {"type": "remonter"}), "sortir par l'entrée de l'étage 1")
 	verifier(not recap[0].is_empty() and recap[0].tues == 1 and recap[0].sac == 1, "récapitulatif : 1 tué, 1 objet au sac")
 	verifier(s.donjon.id == 4 and s.donjon.etage == 1 and s.etages_visites.is_empty() and joueur_de(s).competences.epee == 7 and o.uid in joueur_de(s).sac, "nouvelle expédition (donjon 4), le même être avec son sac et ses niveaux")
+
+## Régression : deux portes ne se touchent jamais (designer 2026-09-01) — un couloir large ou un angle
+## de salle donnait autrefois deux battants côte à côte.
+func test_portes_une_par_ouverture() -> void:
+	var gen := Donjon.new(GameData.catalogues["dungeon_rooms"], GameData.catalogues["dungeon_connectors"], GameData.entree("dungeon_themes", "ruine"))
+	var total := 0
+	var colles := 0
+	for graine in [7, 42, 101, 202, 303]:
+		var e := gen.generer_etage(graine, 1, 1, 18, false)
+		var portes: Dictionary = e.get("portes", {})
+		total += portes.size()
+		for idx in portes.keys():
+			var p := Vector2i(int(idx) % int(e.largeur), int(idx) / int(e.largeur))
+			for dv in [Vector2i(1, 0), Vector2i(0, 1)]:
+				var q: Vector2i = p + dv
+				if portes.has(q.y * e.largeur + q.x):
+					colles += 1
+	verifier(total > 0, "des portes sont posées (%d sur cinq étages)" % total)
+	verifier(colles == 0, "aucune porte n'en touche une autre (%d collées)" % colles)
+
+## La première cellule d'eau autour d'un point — le voyage doit continuer à la refuser.
+func _cellule_eau(s, autour: Vector2i) -> Vector2i:
+	for r in range(1, 40):
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				var c: Vector2i = autour + Vector2i(dx, dy)
+				if not s.monde.surface.terre_a(c):
+					return c
+	return autour + Vector2i(1000, 1000)

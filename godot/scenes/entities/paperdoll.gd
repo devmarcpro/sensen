@@ -24,6 +24,9 @@ var _ap: Dictionary = {}       # loci visuels de l'être (Apparence — données
 var _vue_tete := "face"
 var _carrure := 1.0
 var _pose_courante: Dictionary = {}   # la pose du joueur pour l'action en cours (point 63)
+var _monde_dessine: Dictionary = {}   # dernier placement des segments — l'écran de pose y clique (point 68)
+var _echelle_dessin := 1.0
+var _peint: Dictionary = {}
 
 
 func configurer(p_e: Dictionary, p_rig: Dictionary, p_items: Dictionary, p_fonct: Dictionary, p_palette: Dictionary) -> void:
@@ -73,7 +76,10 @@ func _draw() -> void:
 	if not is_equal_approx(ech, 1.0):
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(ech, ech))
 	var monde := _poser_segments(f, miroir)
-	var peint := _segments_peints()
+	_monde_dessine = monde
+	_echelle_dessin = ech
+	_peint = _segments_peints()
+	var peint: Dictionary = _peint
 	var teinte := Color(e.teinte[0], e.teinte[1], e.teinte[2])
 	if not _ap.is_empty():   # nu : la peau peint le corps entier, l'équipement seul le recouvre (point 43)
 		teinte = _teinte_de("teintes_peau", str(_ap.get("teinte_peau", "")), teinte)
@@ -354,3 +360,39 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 			draw_line(c + p * r * 0.5 + d * r * 0.5, c + p * r * 0.25 - d * r * 0.45, encre.lightened(0.25), maxf(0.6, r * 0.08))
 		"tatouage":
 			draw_arc(c - p * r * 0.45 + d * r * 0.05, r * 0.24, 0.0, TAU, 10, cheveux.lightened(0.1), maxf(0.6, r * 0.08))
+
+## Le segment sous un point, en coordonnées locales du nœud (designer 2026-09-01, point 68) : l'écran de
+## pose y clique pour saisir un membre. On rend le segment dont le corps — pas l'ancrage — est le plus
+## proche ; au-delà de `marge` pixels, rien n'est saisi.
+func segment_sous(p: Vector2, marge: float = 10.0) -> String:
+	if _monde_dessine.is_empty():
+		return ""
+	var q: Vector2 = p / maxf(0.01, _echelle_dessin)
+	var meilleur := ""
+	var d_min := 1e9
+	for nom: String in _monde_dessine.keys():
+		var m: Dictionary = _monde_dessine[nom]
+		var a: Vector2 = m.origine
+		var b: Vector2 = m.origine + m.direction * float(m.longueur)
+		var ab: Vector2 = b - a
+		var t := 0.0 if ab.length_squared() < 0.001 else clampf((q - a).dot(ab) / ab.length_squared(), 0.0, 1.0)
+		var d: float = q.distance_to(a + ab * t) - float(m.largeur) * 0.5
+		if d < d_min:
+			d_min = d
+			meilleur = nom
+	return meilleur if d_min <= marge else ""
+
+
+## L'origine d'un segment (son joint) dans le repère du nœud — l'écran de pose y dessine la poignée.
+func joint_de(nom: String) -> Vector2:
+	if not _monde_dessine.has(nom):
+		return Vector2.ZERO
+	return (_monde_dessine[nom].origine as Vector2) * _echelle_dessin
+
+
+## Le corps d'un segment : [joint, extrémité], dans le repère de dessin du nœud (avant l'échelle d'apparence).
+func corps_de(nom: String) -> PackedVector2Array:
+	if not _monde_dessine.has(nom):
+		return PackedVector2Array()
+	var m: Dictionary = _monde_dessine[nom]
+	return PackedVector2Array([m.origine, (m.origine as Vector2) + (m.direction as Vector2) * float(m.longueur)])

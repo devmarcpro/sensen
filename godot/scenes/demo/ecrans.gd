@@ -18,6 +18,7 @@ var apercu_sort: ApercuSort   # l'aperçu visuel du sort (écran Composer, Écra
 var apercu_monde: ApercuMonde   # l'aperçu du monde entier (écran Monde, designer point 49)
 var cadre_perso: Control      # l'aperçu du personnage (écran Création) : un paperdoll dans un cadre
 var apercu_perso: Paperdoll
+var _angle_saisie := 0.0   # l'angle souris→joint au moment de la saisie (point 68)
 var cadre_visage: Control          # le cadre du portrait : il rogne tout ce qui n'est pas la tête
 var portrait_perso: Paperdoll      # le même paperdoll, zoomé sur le visage (designer, point 43)
 var pose_edition := ""      # l'action dont on articule la pose (designer, point 63)
@@ -110,6 +111,7 @@ func _ready() -> void:
 	cadre_perso.gui_input.connect(_pantin_entree)
 	apercu_perso = Paperdoll.new()
 	apercu_perso.scale = Vector2(5.4, 5.4)   # le personnage en grand (designer, point 43)
+	apercu_perso.dessine_apres = _surligner_membre   # le membre saisi est mis en évidence (point 68)
 	apercu_perso.position = Vector2(210, 300)
 	cadre_perso.add_child(apercu_perso)
 	cadre_visage = Control.new()   # à sa droite, le seul visage, cadré sur la tête
@@ -1470,22 +1472,26 @@ func _construire_creation() -> void:
 func _pantin_entree(ev: InputEvent) -> void:
 	if pose_edition.is_empty() or main.creation.is_empty():
 		return
-	var rig: Dictionary = GameData.entree("rigs", str(_fiche_apercu().get("skeleton_template", "humanoide")))
 	if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+		# le membre réellement sous le curseur : le paperdoll sait où il a posé chaque segment (point 68)
 		var local: Vector2 = (ev.position - apercu_perso.position) / apercu_perso.scale.x
-		var meilleur := ""
-		var d_min := 1e9
-		for nom: String in rig.get("segments", {}).keys():   # le membre dont l'ancrage est le plus proche du clic
-			var seg: Dictionary = rig.segments[nom]
-			var p := Vector2(0, -float(rig.get("hauteur_pieds", 0)) - float(seg.longueur) * 0.5)
-			var d := local.distance_to(p) + float(nom.length()) * 0.01
-			if d < d_min:
-				d_min = d
-				meilleur = nom
-		pose_segment = meilleur
-		rafraichir()
+		var touche: String = apercu_perso.segment_sous(local, float(GameData.config("poses").get("marge_saisie", 6.0)))
+		if not touche.is_empty():
+			pose_segment = touche
+			_angle_saisie = _angle_souris(ev.position, touche)
+			rafraichir()
 	elif ev is InputEventMouseMotion and (ev.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0 and not pose_segment.is_empty():
-		_tourner_membre(ev.relative.x + ev.relative.y)
+		# le membre suit la souris : on tourne de l'angle parcouru AUTOUR DE SON JOINT, pas d'un delta de pixels
+		var a := _angle_souris(ev.position, pose_segment)
+		var d := rad_to_deg(angle_difference(_angle_saisie, a))
+		_angle_saisie = a
+		_tourner_membre(d)
+
+
+## L'angle du curseur vu depuis le joint du segment saisi — le pantin se manipule comme une marionnette.
+func _angle_souris(pos: Vector2, segment: String) -> float:
+	var joint: Vector2 = apercu_perso.position + apercu_perso.joint_de(segment) * apercu_perso.scale.x
+	return (pos - joint).angle()
 
 
 ## Fait pivoter le membre saisi, dans l'amplitude autorisée par les données.
@@ -2431,3 +2437,13 @@ class ApercuMonde extends Control:
 		draw_line(c - Vector2(12, 0), c + Vector2(12, 0), Color(1, 0.9, 0.3), 2.0)
 		draw_line(c - Vector2(0, 12), c + Vector2(0, 12), Color(1, 0.9, 0.3), 2.0)
 		draw_string(ThemeDB.fallback_font, Vector2(o.x, o.y + haut + 16.0), tr("ui.monde.apercu"), HORIZONTAL_ALIGNMENT_LEFT, larg, 11, Color(0.85, 0.85, 0.8))
+
+## Le membre saisi dans le pantin : son joint cerclé et son corps souligné, pour qu'on voie ce qu'on tourne.
+func _surligner_membre(pd: Paperdoll) -> void:
+	if pose_edition.is_empty() or pose_segment.is_empty():
+		return
+	var corps: PackedVector2Array = pd.corps_de(pose_segment)
+	if corps.size() < 2:
+		return
+	pd.draw_line(corps[0], corps[1], Color(1.0, 0.85, 0.3, 0.9), 1.2)
+	pd.draw_arc(corps[0], 3.0, 0.0, TAU, 16, Color(1.0, 0.85, 0.3, 0.9), 1.0)

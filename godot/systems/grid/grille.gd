@@ -205,7 +205,7 @@ func cout_pas(de: Vector2i, vers: Vector2i, volant: bool = false, eviter_nage: b
 	# Escalade (point 56) : au-delà d'une marche, on grimpe — le coût monte avec le CARRÉ de la
 	# hauteur et descend avec la compétence ; au-delà de hauteur_max, la paroi reste infranchissable.
 	var esc: Dictionary = dep.get("escalade", {})
-	if dh >= int(dep["falaise_delta"]) and dh <= int(esc.get("hauteur_max", 0)):
+	if dh >= int(dep["falaise_delta"]):   # toute paroi de terrain se grimpe : c'est un temps à payer, pas un mur
 		var t_esc := float(esc.get("ticks_par_niveau", 14)) * float(dh * dh)
 		return maxi(1, int(round(t_esc / maxf(0.2, float(facteurs.get("escalade", 1.0))))))
 	if dh >= int(dep["falaise_delta"]) or dh <= -int(dep["chute_delta"]):

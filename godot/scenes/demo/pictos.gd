@@ -451,6 +451,8 @@ static func dessiner_objet(ci: CanvasItem, it: Dictionary, r: Rect2) -> void:
 	var nom := f if not f.is_empty() else (slot if t in ["armure", "bijou"] else t)
 	if t == "meuble":
 		nom = "meuble"
+	if f.is_empty() and (it.get("tags", []) as Array).has("lumiere"):   # une source de lumière se reconnaît à sa flamme
+		nom = "lumiere"
 	match nom:
 		"epee":
 			ci.draw_line(p.call(2, 8), p.call(8, 2), c, 2.4)
@@ -480,6 +482,10 @@ static func dessiner_objet(ci: CanvasItem, it: Dictionary, r: Rect2) -> void:
 		"faucille":
 			ci.draw_arc(p.call(5.5, 4.5), u * 3.0, PI * 0.9, PI * 2.1, 12, c, 2.0)
 			ci.draw_line(p.call(3, 9), p.call(4.5, 6.5), Color(0.5, 0.35, 0.2), 1.8)
+		"lumiere":   # la torche : un manche de bois et sa flamme
+			ci.draw_line(p.call(4.5, 9.5), p.call(5.5, 4.5), Color(0.45, 0.3, 0.15), 2.4)
+			ci.draw_colored_polygon(PackedVector2Array([p.call(5, 4.5), p.call(7, 3), p.call(5.5, 0.5), p.call(3.5, 3.2)]), Color(0.95, 0.6, 0.15))
+			ci.draw_colored_polygon(PackedVector2Array([p.call(5, 4.0), p.call(6.1, 2.9), p.call(5.3, 1.6), p.call(4.3, 3.0)]), Color(1.0, 0.9, 0.5))
 		"seau":
 			ci.draw_colored_polygon(PackedVector2Array([p.call(2.5, 4), p.call(7.5, 4), p.call(7, 9), p.call(3, 9)]), c)
 			ci.draw_arc(p.call(5, 4), u * 2.5, PI, TAU, 10, sombre, 1.2)

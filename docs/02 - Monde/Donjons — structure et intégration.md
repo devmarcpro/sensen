@@ -71,6 +71,14 @@ Les donjons sont une des sources principales de contenu du jeu, et le premier es
 > [!success] Précisé le 2026-08-28 — nettoyage, grâce, réapparition (8.3b)
 > Ressortir d'un donjon dont le boss est vaincu le marque **nettoyé** ([[Dérive de la corruption]]) ; il reste explorable **1,5 jour** (36 000 ticks) puis son **entrée disparaît** de la cellule (la roche de l'entrée scellée aussi) — la cellule redevient une cellule normale ; une réapparition tirée par la dérive la remet. Les étages nettoyés ne sont plus mis de côté après la grâce.
 
+> [!success] Codé le 2026-09-01 — les donjons ne naissent plus que de la corruption (designer)
+> « retire les entrées de donjons qui sont encore un peu partout ». Depuis le point 51, un donjon est un accident de corruption : un bruit qui dérive chaque jour, cristallise au-delà d'un seuil, prend l'élément de sa cellule et monte en niveau tant que personne ne le nettoie. Les **entrées scellées posées en POI** (6 % des cellules terrestres, héritées d'avant) doublaient ce système avec des donjons statiques que rien ne fait vivre. `planete.poi.donjon` passe à **0** : la cellule du camp garde la sienne (c'est le donjon d'apprentissage, `poi_de` la force), tout le reste vient de la corruption.
+
+
+> [!success] Codé le 2026-09-01 — le camp n'a plus d'entrée de donjon (designer)
+> « retire l'entrée de donjon du camp ». `poi_de` forçait encore `donjon = true` sur la cellule de départ : la dernière entrée scellée du monde. Elle disparaît — **plus aucun donjon n'est posé à la génération**, tous naissent de la corruption et s'atteignent en marchant sur leur cellule. Conséquence assumée : le cycle de *foyer* hérité des donjons de POI (repeuplement, générations, `_reposer_entree`) n'a plus de cellule à animer ; le code reste en place, inerte, plutôt que d'être arraché tant que la corruption n'a pas fait ses preuves à l'usage. **À juger** : le camp n'a plus de donjon à portée de pas — le premier donjon dépend maintenant du hasard de la corruption alentour ; faut-il garantir une cellule corrompue à quelques cases du départ ?
+
+
 ## Liens
 - **Dépend de** : [[Grille continue]], [[Hauteur de terrain ±10]], [[Décisions fondatrices]]
 - **Alimente** : [[Génération de donjon]], [[Salles et connecteurs]], [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Grimoires et manuels]]

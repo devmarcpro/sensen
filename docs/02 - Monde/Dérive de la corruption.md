@@ -68,6 +68,10 @@ Coût : un passage hebdomadaire sur les cellules à delta non nul ou à
 >
 > **La cellule reste fermée tant que le donjon n'est pas vaincu.** Sortir en ayant tué le boss **nettoie** la cellule : elle retombe à son plancher géographique et rend le passage. Sortir sans l'avoir vaincu **repousse le joueur sur une cellule voisine saine** — il ressort à côté, pas dans la gueule du donjon, et la cellule corrompue reste infranchissable.
 
+> [!success] Codé le 2026-09-01 — un donjon garanti près du camp (designer)
+> « fais en sorte qu'il y ait un donjon pas trop loin du camp au début d'une nouvelle partie ». Depuis le retrait des entrées posées, le premier donjon dépendait du hasard du bruit : une partie pouvait commencer sans rien de corrompu à vingt cellules. Une **cellule d'amorce** est désormais choisie de façon déterministe à la création du monde — un tirage sur la graine parmi les cellules de terre situées entre `garantie_depart.rayon` cases du camp, en écartant villages et claims — et `donjon_corrompu` la tient pour corrompue tant qu'elle n'a pas été nettoyée. Une fois nettoyée, elle redevient une cellule comme les autres, soumise au seul bruit. Elle ne change ni son niveau ni son thème : ce sont les règles ordinaires (âge, plancher d'éloignement, fusion) qui s'appliquent.
+
+
 ## Liens
 - **Dépend de** : [[Niveau de danger]], [[Catalogue des couches de bruit]], [[Sauvegarde]]
 - **Alimente** : [[Raids et menaces]], [[Loot — affixes, gemmes et rareté]], [[Villages PNJ — repeuplement et décimation]], [[Génération de donjon]], [[Créatures]]

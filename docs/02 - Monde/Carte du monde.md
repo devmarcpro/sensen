@@ -43,6 +43,10 @@ La couche stratégique : une vue abstraite de la même grille, servant de voyage
 > [!success] Codé le 2026-09-01 — le donjon dit sa difficulté (designer, point 61)
 > Un donjon né de la corruption ne se laissait juger qu'à la couleur de sa case. Il s'annonce désormais **deux fois**. **Au survol de la carte** : son nom de thème, son élément, son **niveau**, son nombre d'**étages** et le taux de **corruption** de la cellule. **À l'entrée** : la même ligne au journal, puis un rappel permanent dans l'en-tête tant qu'on y est — « corrompu, niveau 12 (74 %) ». Le joueur peut donc décider **avant** d'entrer, et sait **pendant** où il a mis les pieds.
 
+> [!bug] Corrigé le 2026-09-01 — la carte refusait tout voyage (designer)
+> « impossible de se déplacer avec la carte du monde contrairement à ce que je voulais ». Deux verrous. **Le premier** : `voyager` exigeait `cellule_exploree(cell)` — or on n'explore une cellule qu'en y allant, donc tout clic hors des cases déjà foulées répondait « voyage impossible ». Marcher vers l'inconnu est le geste normal d'une carte : la condition tombe, seule la terre ferme du monde reste exigée (l'océan se refuse toujours). **Le second** : le glissement était **du code mort** — la première branche de `_entree` traitait *tous* les `InputEventMouseMotion` et rendait la main, si bien que la branche `if ev is InputEventMouseMotion and _glisse` placée après n'était jamais atteinte. Le survol et le glissement sont désormais traités dans la même branche.
+
+
 ## Liens
 - **Dépend de** : [[Décision — Monde fini, continents et océan]], [[Grille continue]], [[Unification macro-micro]], [[Génération par couches de bruit]]
 - **Alimente** : [[Début de partie]], [[Boucle de jeu]], [[Donjons — structure et intégration]], [[Minimap et brouillard de guerre]]

@@ -1620,7 +1620,7 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 		return
 	if g.neige:   # Météo : le sol blanchit sous la neige
 		teinte = teinte.lerp(Color(1.4, 1.4, 1.5), 0.5)
-	if g.bloque_passage(t) and not ("vegetation" in tags_c):   # un mur : un bloc plein — le sol dessous est caché
+	if g.bloque_passage(t) and not ("vegetation" in tags_c) and not ("porte" in tags_c):   # un mur : un bloc plein — le sol dessous est caché
 		_dessine_bloc(ci, g, t, c, teinte)
 		return
 	var haut := PackedVector2Array([
@@ -1655,10 +1655,12 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 			c + Vector2(TW * 0.5, d2), c + Vector2(0, TH * 0.5 + d2)]), flanc.darkened(0.15),
 			PackedVector2Array([Vector2(st_sol + t.y, -h), Vector2(st_sol + t.y + 1, -h), Vector2(st_sol + t.y + 1, -he), Vector2(st_sol + t.y, -he)]))
 	var contenu := g.contenu_de(t)
-	if not contenu.is_empty() and not g.bloque_passage(t) and (contenu.has("couleur") or "meuble" in contenu.get("tags", [])):
+	if not contenu.is_empty() and not g.bloque_passage(t) and not ("porte" in contenu.get("tags", [])) and (contenu.has("couleur") or "meuble" in contenu.get("tags", [])):
 		# contenu franchissable (porte, entrée du donjon, tapis) : un losange plat coloré
 		var cf := Color.html(str(GameData.entree("meubles", str(g.meubles.get(g.idx(t), "tapis"))).couleur)) if "meuble" in contenu.get("tags", []) else Color.html(str(contenu.couleur))
 		_poly(ci, PackedVector2Array([c + Vector2(0, -TH * 0.35), c + Vector2(TW * 0.35, 0), c + Vector2(0, TH * 0.35), c + Vector2(-TW * 0.35, 0)]), cf * teinte)
+	if "porte" in contenu.get("tags", []):   # une porte n'est pas un mur : un battant dans son encadrement
+		_dessiner_porte(ci, g, t, c, contenu, teinte)
 	if "contenant" in contenu.get("tags", []):   # coffre ou butin : une caisse
 		var cc := (Color(0.55, 0.38, 0.18) if "coffre" in contenu.tags else Color(0.75, 0.65, 0.3)) * teinte
 		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc)
@@ -1697,7 +1699,7 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 			if "vegetation" in ct.get("tags", []):
 				if noeuds_vegetaux.has(idx):
 					noeuds_vegetaux[idx].modulate = Color(0.45, 0.45, 0.5)   # un billboard : on le voile lui-même (modulate)
-			elif g.bloque_passage(t):
+			elif g.bloque_passage(t) and not ("porte" in ct.get("tags", [])):
 				_dessine_bloc(ci, g, t, c, Color(0.38, 0.38, 0.44))   # un mur mémorisé : le même bloc, sombre et opaque — pas un voile qu'on voit au travers
 				continue
 			_poly(ci, PackedVector2Array([c + Vector2(-TW * 0.5, 0), c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5)]), voile)
@@ -2119,3 +2121,24 @@ func _texte_chaine(e: Dictionary) -> String:
 	for s in _segments(e):
 		noms.append(tr("element." + s.element))
 	return tr("ui.chaine").format({"segments": " → ".join(noms) if not noms.is_empty() else "∅"})
+
+## Une porte : deux montants plantés dans l'encadrement et un battant. L'axe de l'ouverture se lit sur les
+## voisins qui bloquent le passage ; fermé, le battant barre le seuil, ouvert il se range contre son montant.
+func _dessiner_porte(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, contenu: Dictionary, teinte: Color) -> void:
+	var bois := Color.html(str(contenu.get("couleur", "#6a4a22"))) * teinte
+	var mur_x: bool = (g.dans(t + Vector2i(1, 0)) and g.bloque_passage(t + Vector2i(1, 0))) or (g.dans(t - Vector2i(1, 0)) and g.bloque_passage(t - Vector2i(1, 0)))
+	# le battant relie les deux montants : selon l'axe, l'un ou l'autre demi-diagonale de la tuile
+	var demi := Vector2(TW * 0.25, TH * 0.25) if mur_x else Vector2(TW * 0.25, -TH * 0.25)
+	var a := c - demi
+	var b := c + demi
+	var haut := Vector2(0.0, -float(int(contenu.get("hauteur_vue", 2))) * HSTEP)
+	for m in [a, b]:   # les montants
+		_poly(ci, PackedVector2Array([m + Vector2(-1.5, 0), m + Vector2(1.5, 0), m + Vector2(1.5, 0) + haut, m + Vector2(-1.5, 0) + haut]), bois.darkened(0.45))
+	var ferme: bool = "fermee" in contenu.get("tags", [])
+	var p0 := a if ferme else a.lerp(b, 0.68)   # ouvert : le battant est rangé contre le montant
+	var p1 := b if ferme else b
+	_poly(ci, PackedVector2Array([p0, p1, p1 + haut, p0 + haut]), bois)
+	_poly(ci, PackedVector2Array([p0, p1, p1 + haut * 0.08, p0 + haut * 0.08]), bois.darkened(0.3))
+	var trav := (p0 + p1) * 0.5 + haut * 0.55
+	ci.draw_line(p0 + haut * 0.5, p1 + haut * 0.5, bois.darkened(0.25), 1.0)   # la traverse
+	ci.draw_circle(trav.lerp(p1 + haut * 0.55, 0.45), 1.6, Color(0.85, 0.75, 0.35) * teinte)   # la poignée

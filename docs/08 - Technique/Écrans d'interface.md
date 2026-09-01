@@ -133,6 +133,10 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > Depuis la scission en trois volets, chaque volet n'a plus que huit à vingt lignes dans une colonne de 200 px sur une fenêtre de 1920 : **les deux tiers inférieurs de l'écran sont noirs**, l'avatar et le portrait restent petits et logés dans le tiers supérieur. Deux issues, au choix du designer : élargir la colonne et agrandir le personnage jusqu'à occuper la hauteur, ou étaler chaque volet sur deux colonnes. Capture : `capture.tscn -- --creation --volet 0|1|2`.
 
 
+> [!success] Codé le 2026-09-01 — le pantin se manipule vraiment à la souris (designer, point 68)
+> Le clic existait déjà mais **ne visait rien** : il cherchait « le membre dont l'ancrage est le plus proche », or cet ancrage était recalculé à `(0, −hauteur_pieds − longueur/2)` pour *tous* les segments — l'abscisse du clic était ignorée et on saisissait un membre au hasard parmi ceux de même longueur. Le paperdoll expose maintenant `segment_sous(point)` — il connaît la position réelle de chaque segment puisqu'il vient de les dessiner (chaîne des parents, ancrages, angles de pose) — et rend le segment dont **le corps**, pas l'ancrage, passe le plus près du curseur (au-delà de `poses.marge_saisie`, rien n'est saisi). Le glissement ne convertit plus des pixels en degrés : le membre **suit le curseur**, tournant de l'angle parcouru autour de son joint. Le membre saisi est cerclé et souligné. Vérifié en synthétisant de vrais clics (`capture.tscn -- --creation --volet 2 --saisir <segment>`) : bras, jambe et tête visés, bras, jambe et tête saisis.
+
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

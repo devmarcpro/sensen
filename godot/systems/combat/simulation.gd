@@ -1499,7 +1499,7 @@ func _dormir(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 func voyager(e: Dictionary, cell: Vector2i) -> bool:
 	if lieu != "camp" or monde == null or e.controle != "joueur":
 		return false
-	if not monde.surface.terre_a(cell) or not monde.cellule_exploree(cell):
+	if not monde.surface.terre_a(cell):   # on marche vers l'inconnu : seule l'eau se refuse (designer 2026-09-01)
 		EventBus.emettre(&"journal", [&"journal.voyage_impossible", {}])
 		return false
 	var d := maxi(absi(cell.x - monde.cellule_de(e.pos).x), absi(cell.y - monde.cellule_de(e.pos).y))

@@ -700,7 +700,7 @@ ui.carte.survol,"({x},{y}) · {biome} · danger {danger}"
 ui.carte.survol_derive," · drift {d}"
 ui.carte.survol_lieu," · place: {a} {pa} % · {b} {pb} %"
 ui.carte.survol_royaume," · {nom}{capitale} — {gouv}, {taille}, {n} cells · {etat}"
-ui.carte.titre,"=== WORLD MAP — click: fast travel to an explored cell, or claim a neighbouring one · arrows: scroll · Esc: close ==="
+ui.carte.titre,"=== WORLD MAP — click: walk to that cell, or claim a neighbouring one · right-click: drag · arrows: scroll · Esc: close ==="
 ui.carte.vacance,vacant throne
 ui.case,"tile ({x},{y}) h={h} · Δh vs you: {dh}"
 ui.chaine,chain: {segments}
@@ -1970,6 +1970,7 @@ item.proto_pelle.name,Iron shovel
 item.proto_seau.name,Wooden bucket
 item.craft_pelle.name,Shovel
 recipe.fabriquer_seau.name,Make a bucket
+recipe.fabriquer_torche.name,Craft torches
 recipe.distiller_herbe.name,Distil a herb
 recipe.distiller_partie.name,Distil a beast part
 journal.embuscade,{att} ambushes {def}: +{des} dice
