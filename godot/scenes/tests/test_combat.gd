@@ -160,6 +160,7 @@ func _ready() -> void:
 	_lancer("test_chaine_a_trois_etapes")
 	_lancer("test_dilution_par_surface")
 	_lancer("test_cuir_par_espece")
+	_lancer("test_loot_varie")
 	_lancer("test_types_ennemis")
 	_lancer("test_loot_assemble")
 	_lancer("test_budgets")
@@ -7536,3 +7537,24 @@ func test_cuir_par_espece() -> void:
 	j.sac.clear()
 	j.sac.append(peau2.uid)
 	verifier(str(s._plan_recette(j, rec).sortie.get("espece", "")) == "", "une peau sans espèce ne transmet rien")
+
+## Le loot ne doit pas être monomatériau (designer 2026-09-01 : « je drop quasiment que des armures en
+## os massif »). On tire 200 armures et on regarde la matière de leur plaque.
+func test_loot_varie() -> void:
+	var s := nouvelle_sim("gorge")
+	var compte := {}
+	for k in 200:
+		var it := s.generer_objet("craft_casque", 2, {}, "commun", 2)
+		if it.is_empty() or not it.has("composants"):
+			continue
+		var m := str(it.composants.get("plaque", {}).get("materiau", ""))
+		compte[m] = int(compte.get(m, 0)) + 1
+	var total := 0
+	var pire := ""
+	for m: String in compte.keys():
+		total += int(compte[m])
+		if pire.is_empty() or int(compte[m]) > int(compte[pire]):
+			pire = m
+	var part := float(compte.get(pire, 0)) / maxf(1.0, float(total))
+	verifier(total > 150, "%d armures tirées, %d matières différentes" % [total, compte.size()])
+	verifier(part < 0.5, "aucune matière ne domine le loot : %s à %.0f %% (%s)" % [pire, part * 100.0, str(compte)])

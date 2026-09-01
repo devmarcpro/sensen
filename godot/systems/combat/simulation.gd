@@ -5914,13 +5914,16 @@ func _composer_loot(inst: Dictionary, profondeur: int, rng: RandomNumberGenerato
 				recettes.append(GameData.catalogues.component_recipes[rid])
 		if recettes.is_empty():
 			continue
-		recettes.shuffle()   # une famille sans matériau au catalogue (os, écailles… paramétriques) : la recette suivante
-		var mat_id := ""
+		# Les candidats de TOUTES les recettes du composant sont réunis avant le tirage (designer
+		# 2026-09-01) : une famille d'un seul matériau ne doit pas peser autant qu'une famille de vingt-
+		# trois — l'os massif sortait sur une armure sur deux.
+		var pool: Array[String] = []
 		for r in recettes:
 			var fam: Dictionary = GameData.config("material_families").get(str(r.material_family), {})
-			mat_id = _materiau_loot(fam, profondeur, rng, cats_mat if slot in ["tete", "plaque"] else [])   # la catégorie demandée vaut pour la pièce maîtresse
-			if not mat_id.is_empty():
-				break
+			for m in _candidats_famille(fam, cats_mat if slot in ["tete", "plaque"] else []):
+				if not pool.has(m):
+					pool.append(m)
+		var mat_id := _tirer_materiau(pool, profondeur, rng)
 		if mat_id.is_empty():
 			continue
 		var mat: Dictionary = GameData.entree("materials", mat_id)
@@ -5935,6 +5938,17 @@ func _composer_loot(inst: Dictionary, profondeur: int, rng: RandomNumberGenerato
 
 ## Un matériau d'une famille (Recettes de composants) pour le loot : les minerais des étages ≤ profondeur pèsent plus.
 func _materiau_loot(fam: Dictionary, profondeur: int, rng: RandomNumberGenerator, cats_mat: Array = []) -> String:
+	return _tirer_materiau(_candidats_famille(fam, cats_mat), profondeur, rng)
+
+
+var _cache_familles: Dictionary = {}   # (famille, catégories) → candidats : le pool se recalcule sinon à chaque objet
+
+
+## Les matériaux qu'une famille propose vraiment (par id, par liste, par catégorie ou par tag).
+func _candidats_famille(fam: Dictionary, cats_mat: Array = []) -> Array[String]:
+	var cle := str(fam.get("material", fam.get("materials", fam.get("category", fam.get("tag", ""))))) + "|" + ",".join(PackedStringArray(cats_mat))
+	if _cache_familles.has(cle):
+		return _cache_familles[cle]
 	var candidats: Array[String] = []
 	if fam.has("material"):
 		candidats.append(str(fam.material))
@@ -5951,6 +5965,13 @@ func _materiau_loot(fam: Dictionary, profondeur: int, rng: RandomNumberGenerator
 	candidats = candidats.filter(func(m: String) -> bool: return GameData.catalogues.materials.has(m))
 	if not cats_mat.is_empty():   # une boutique demande une catégorie (métal chez le forgeron) : cette famille doit la fournir
 		candidats = candidats.filter(func(m: String) -> bool: return str(GameData.catalogues.materials[m].get("category", "")) in cats_mat)
+	_cache_familles[cle] = candidats
+	return candidats
+
+
+## Le tirage dans un pool de matériaux : les minerais des étages ≤ profondeur pèsent plus, ceux d'un tier
+## trop profond ne sortent pas.
+func _tirer_materiau(candidats: Array[String], profondeur: int, rng: RandomNumberGenerator) -> String:
 	if candidats.is_empty():
 		return ""
 	var tiers: Dictionary = GameData.config("minerais_par_etage").get("tiers", {})
