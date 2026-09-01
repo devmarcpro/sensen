@@ -1153,6 +1153,10 @@ recipe.scier_planche.name,Saw planks
 recipe.tailler_gemme.name,Cut a gem
 recipe.tailler_pierre.name,Cut stone
 recipe.tanner_cuir.name,Tan a hide
+material.croc.name,fang
+recipe.travailler_os.name,Work bone
+recipe.tailler_croc.name,Carve a fang
+recipe.preparer_fourrure.name,Prepare a fur
 recipe.tisser_tissu.name,Weave
 recipe.tremper_verre.name,Temper glass
 recipe.tresser_chaume.name,Weave thatch

@@ -422,6 +422,10 @@ recipe.fondre_lingot.name,Fondre un lingot
 recipe.scier_planche.name,Scier des planches
 recipe.tailler_pierre.name,Tailler la pierre
 recipe.tanner_cuir.name,Tanner une peau
+material.croc.name,croc
+recipe.travailler_os.name,Travailler l’os
+recipe.tailler_croc.name,Tailler un croc
+recipe.preparer_fourrure.name,Préparer une fourrure
 recipe.tisser_tissu.name,Tisser
 recipe.tailler_gemme.name,Tailler une gemme
 recipe.fondre_verre.name,Fondre du verre

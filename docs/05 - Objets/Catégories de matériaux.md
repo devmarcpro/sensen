@@ -44,6 +44,11 @@ Les catégories de matériaux, chacune liée à un outil, une compétence de ré
 > **La bonne forme** : **un seul** matériau `cuir`, et l'**espèce voyage sur l'objet**. La peau porte son espèce depuis la dépouille, la pile de cuir tannée en hérite, le composant façonné aussi, et l'objet assemblé la porte jusqu'à son nom. Les stats du matériau sont **modulées à l'instanciation** par les stats de la bête, selon une formule qui vit dans `combat_rules.craft.materiau_espece` — quelles stats bougent, et de combien par point. Un ours polaire durcit et alourdit son cuir, un serpent venimeux l'assouplit et l'allège. Zéro fichier par espèce, zéro clé de traduction par espèce : le nom se compose (`material.avec_espece`), et **la mécanique vaudra pour l'os et la fourrure sans une ligne de plus**.
 
 
+> [!success] Codé le 2026-09-01 — toute matière tirée d'une bête dit de laquelle (designer, point 70)
+> « c'est pareil pour l'os, la fourrure etc, on doit toujours savoir de quelle créature ça vient car les stats ne sont pas les mêmes ». Le mécanisme du cuir étant générique — l'espèce voyage sur l'objet et module les stats du matériau — il ne restait qu'à le brancher. Trois transformations nouvelles, toutes marquées `herite_espece` : **travailler l'os** (deux os → un os massif), **tailler un croc** (deux dents → un croc) et **préparer une fourrure** (deux peaux → une fourrure). Chacune rend une matière qui porte sa bête, donc ses stats : un os d'ours des cavernes est plus dur qu'un os de lynx, et la fourrure d'un ours polaire isole plus.
+> **Deux familles mortes rouvertes** : `dent_croc` et `fourrure` n'avaient aucun matériau au catalogue — les recettes de composant qui les demandaient étaient donc **toujours sautées** au loot, ce qui appauvrissait le tirage exactement comme l'écaille. Le croc entre au catalogue ; la fourrure y était déjà mais rien ne la produisait.
+
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Schéma matériau]]
 - **Alimente** : [[Récolte]], [[Stations de transformation]], [[Composants]], [[Wu Xing hors combat]]

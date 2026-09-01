@@ -6658,10 +6658,37 @@ func _drop(cible: Dictionary, source: String) -> void:
 		if top_stat.is_empty() or int(stats_c[st]) > int(stats_c[top_stat]):
 			top_stat = str(st)
 	var al: Dictionary = regles.r.alchimie
-	for base in def_c.get("depouille", []):
-		var v := generer_objet(str(base), profondeur, {"creature": cible.name_key}, "commun", 0)
-		if not v.is_empty():
-			v["espece"] = str(cible.def)   # la peau sait de quelle bête elle vient (point 69)
+	# Chasseur (designer 2026-09-01, point 71) : chaque pièce passe un jet contre la taille de la bête ;
+	# une réussite large en donne plusieurs. Sans compétence, on repart souvent avec la viande seule.
+	var ch: Dictionary = regles.r.get("chasse", {})
+	var dd_chasse := int(ch.get("dd_base", 8)) + int(cible.get("sante_max", 10)) / maxi(1, int(ch.get("pv_par_point", 12)))
+	var tueur: Dictionary = entites.get(source, {})   # celui qui a porté le coup fatal fait le jet
+	if tueur.is_empty():
+		for x in vivants():   # personne d'identifiable : le joueur, sinon aucun jet ne se ferait
+			if x.controle == "joueur":
+				tueur = x
+				break
+	for base in def_c.get("depouille", []):   # ce qui tombe toujours : la viande, le miel
+		var v0 := generer_objet(str(base), profondeur, {"creature": cible.name_key}, "commun", 0)
+		if not v0.is_empty():
+			v0["espece"] = str(cible.def)
+			if not top_stat.is_empty():   # viande paramétrique (Cuisine et alchimie) : la stat dominante de la bête
+				v0["potentiel"] = {top_stat: 1}
+				v0["wuxing"] = def_c.elements.duplicate() if def_c.get("elements") is Dictionary else regles.r.craft.harmonie.viande_defaut.duplicate()
+				v0["puissance"] = _puissance_de(int(stats_c[top_stat]))
+				v0["nom"] = {"params": {"creature": cible.name_key}}
+			uids.append(v0.uid)
+	for base in def_c.get("drops_chasse", []):   # ce qui demande de savoir chasser (point 71)
+		var jet_ch := des.jet("1d20") + regles.niveau(tueur.get("competences_eff", tueur.get("competences", {})), str(ch.get("competence", "chasse")))
+		gagner_xp(tueur, str(ch.get("competence", "chasse")), int(ch.get("xp_par_jet", 1)))
+		if jet_ch < dd_chasse:
+			continue
+		var n_pieces := 1 + mini(int(ch.get("pieces_max", 3)) - 1, (jet_ch - dd_chasse) / maxi(1, int(ch.get("marge_par_piece", 6))))
+		for _p in n_pieces:
+			var v := generer_objet(str(base), profondeur, {"creature": cible.name_key}, "commun", 0)
+			if v.is_empty():
+				continue
+			v["espece"] = str(cible.def)   # la matière sait de quelle bête elle vient (point 69)
 			if not top_stat.is_empty():   # viande paramétrique (Cuisine et alchimie) : la stat dominante de la bête
 				v["potentiel"] = {top_stat: 1}
 				v["wuxing"] = def_c.elements.duplicate() if def_c.get("elements") is Dictionary else regles.r.craft.harmonie.viande_defaut.duplicate()

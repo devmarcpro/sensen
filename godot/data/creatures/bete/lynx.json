@@ -41,7 +41,9 @@
     "athletisme": 32
   },
   "depouille": [
-    "viande_crue",
+    "viande_crue"
+  ],
+  "drops_chasse": [
     "peau",
     "griffe"
   ]

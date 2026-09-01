@@ -1204,5 +1204,14 @@
       "plancher": 0.4
     },
     "increment_repetition": 1
+  },
+  "chasse": {
+    "_doc": "Competence Chasseur (designer 2026-09-01, point 71) : chaque piece de depouille passe un jet universel contre dd_base + pv_max / pv_par_point ; la marge donne des pieces en plus (une par tranche), plafonnees. L'usage entraine, reussi ou non.",
+    "competence": "chasse",
+    "dd_base": 8,
+    "pv_par_point": 12,
+    "marge_par_piece": 6,
+    "pieces_max": 3,
+    "xp_par_jet": 1
   }
 }

@@ -29,6 +29,10 @@ La liste de départ, ~30 compétences réparties en cinq familles.
 >
 > Les deux compétences entrent au catalogue (`competences/escalade.json`, `nage.json`, catégorie *général*, sur Force et Endurance) et **progressent par l'usage** : grimper d'un dénivelé rapporte autant d'XP que sa hauteur, nager une tuile en rapporte une. Aucun chiffre n'est écrit dans le code : tout vit dans `combat_rules.deplacement`.
 
+> [!success] Codé le 2026-09-01 — la compétence **Chasseur** décide ce qu'on tire d'une bête (designer, point 71)
+> « compétence chasseur qui détermine si on obtient du loot spécifique à l'ennemi (dents, peau, yeux, fourrure etc), plus le niveau de compétence est élevé plus on en obtient ». Jusqu'ici la dépouille tombait **toujours**, sans jet ni compétence : tuer un ours donnait sa peau qu'on soit boucher ou mage. Chaque pièce de dépouille passe désormais un **jet de compétence universel** sur Chasseur, contre une difficulté qui monte avec la taille de la bête (ses PV) ; la réussite donne la pièce, et **une réussite large en donne plusieurs** (une pièce de plus par tranche de marge, plafonnée). Un novice repart souvent avec de la viande et rien d'autre ; un chasseur confirmé rapporte la peau, les crocs et les yeux. L'usage entraîne : chaque jet donne son XP, réussi ou non. Les réglages vivent dans `combat_rules.chasse`.
+
+
 ## Liens
 - **Dépend de** : [[Progression par l'usage]]
 - **Alimente** : [[Double niveau combat et général]], [[Potentiel]], [[Récolte]], [[Qualité d'artisanat]]

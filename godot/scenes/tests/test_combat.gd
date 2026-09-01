@@ -161,6 +161,7 @@ func _ready() -> void:
 	_lancer("test_dilution_par_surface")
 	_lancer("test_cuir_par_espece")
 	_lancer("test_loot_varie")
+	_lancer("test_chasse")
 	_lancer("test_types_ennemis")
 	_lancer("test_loot_assemble")
 	_lancer("test_budgets")
@@ -1163,7 +1164,7 @@ func test_paperdoll_et_tutoriels() -> void:
 
 func test_materiaux() -> void:
 	var mats: Dictionary = GameData.catalogues.materials
-	verifier(mats.size() == 163, "les 163 matériaux des catalogues sont chargés (%d)" % mats.size())
+	verifier(mats.size() == 164, "les 164 matériaux des catalogues sont chargés — dont le croc (%d)" % mats.size())
 	var fer: Dictionary = mats.fer
 	verifier(int(fer.stats.durete) == 25 and int(fer.stats.conductivite_electrique) == 75, "le Fer suit sa table (Dur 25, CÉl 75)")
 	verifier("conducteur" in fer.tags and not ("inflammable" in fer.tags), "tags dérivés au seuil 50 (fer : conducteur)")
@@ -1272,7 +1273,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 58, "58 recettes : 19 transformations, 3 plats, 2 distillations, la torche, et 33 dérivées des objets qui portent leur coût (24 meubles, 9 stations)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 61, "61 recettes : 22 transformations (dont os, croc, fourrure), 3 plats, 2 distillations, la torche, et 33 dérivées des objets qui portent leur coût (24 meubles, 9 stations)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -7286,7 +7287,7 @@ func test_gemmes_et_livres() -> void:
 func test_progression() -> void:
 	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
 	verifier(prog.xp_next(1) == 303 and prog.xp_next(10) == roundi(100.0 * pow(11.0, 1.6)) and prog.xp_next(50) == roundi(100.0 * pow(51.0, 1.6)), "xp_next : 303 · ~4 600 · ~54 000 (100 × (N+1)^1.6)")
-	verifier(GameData.catalogues.competences.size() == 60, "60 compétences en données (catégorie, stat, famille)")
+	verifier(GameData.catalogues.competences.size() == 61, "61 compétences en données, dont Chasse (catégorie, stat, famille)")
 	var humain := GameData.entree("races", "humain")
 	var nain := GameData.entree("races", "nain")
 	var sabre := GameData.entree("classes", "le_sabre")
@@ -7558,3 +7559,30 @@ func test_loot_varie() -> void:
 	var part := float(compte.get(pire, 0)) / maxf(1.0, float(total))
 	verifier(total > 150, "%d armures tirées, %d matières différentes" % [total, compte.size()])
 	verifier(part < 0.5, "aucune matière ne domine le loot : %s à %.0f %% (%s)" % [pire, part * 100.0, str(compte)])
+
+## La compétence Chasseur décide ce qu'on tire d'une bête (designer 2026-09-01, point 71) : la viande
+## tombe toujours, les pièces (peau, os, dents…) demandent un jet, et le niveau en rend davantage.
+func test_chasse() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var avec_drops := 0
+	for cid: String in GameData.catalogues.creatures.keys():
+		if not (GameData.catalogues.creatures[cid].get("drops_chasse", []) as Array).is_empty():
+			avec_drops += 1
+	verifier(avec_drops >= 20, "%d fiches déclarent des drops de chasseur" % avec_drops)
+	var ch: Dictionary = s.regles.r.chasse
+	verifier(GameData.catalogues.competences.has(str(ch.competence)), "la compétence %s existe au catalogue" % str(ch.competence))
+	# Deux chasseurs, même bête : le novice repart moins chargé que l'expert.
+	var pieces := [0, 0]
+	for essai in 2:
+		j.competences[str(ch.competence)] = 0 if essai == 0 else 40
+		j.competences_eff = j.competences.duplicate()
+		for k in 30:
+			var proie: Dictionary = s.ajouter("ours_polaire", j.pos + Vector2i(3, 3), "ia")   # une bête qui a des pièces
+			if proie.is_empty():
+				break
+			s.contenants.clear()   # le butin tombe au sol, pas dans le sac
+			s._drop(proie, j.id)
+			for lot in s.contenants.values():
+				pieces[essai] += (lot as Array).size()
+	verifier(pieces[1] > pieces[0], "l'expert rapporte plus que le novice (%d contre %d pièces sur 30 bêtes)" % [pieces[1], pieces[0]])

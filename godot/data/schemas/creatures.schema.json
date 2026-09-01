@@ -173,6 +173,9 @@
     },
     "meute": {
       "type": "string"
+    },
+    "drops_chasse": {
+      "type": "array"
     }
   },
   "required": [

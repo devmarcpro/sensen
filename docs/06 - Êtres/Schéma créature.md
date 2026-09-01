@@ -70,6 +70,10 @@ Le format de données unique de tout être vivant du jeu — monstre comme march
 > [!success] Décidé et codé le 2026-08-28 — étape 9.A, la forme unique de la fiche
 > **La forme à blocs codée fait foi** (contradiction tranchée) ; les blocs sociaux du schéma B.5 s'y ajoutent, tous optionnels : `role` (résident, garde…), `fonction` (id de `data/functions/`), `social {culture, relations{}}`, `agenda {metier}`, `recruitable {method, threshold}`, `esprit {intelligence, temperament, dressabilite}`, `genre` (m/f, ou tiré), `inventaire_marchand` (bases d'objets en stock, tag `commerce_possible`). Le nom propre est **tiré à l'instanciation** ([[Génération de noms]]) et enregistré comme clé de traduction (`pnj.<id>.name`), si bien que tout ce qui affiche `name_key` affiche le nom. `parts_pool`, `jobs_compatible`, `housing_default`, `equip_slots`, `leadership_role` sont retirés du vocabulaire (absorbés par `fonction`, `agenda` et le rig).
 
+> [!success] Codé le 2026-09-01 — `drops_chasse` : ce qu'un chasseur peut tirer d'une bête (designer)
+> « du coup dans la fiche espèce il faut un champ pour les drops de chasseurs ». La fiche sépare désormais deux choses qui n'ont rien à voir : **`depouille`**, ce qui tombe toujours — la viande, le miel —, et **`drops_chasse`**, les pièces qui demandent un **jet de Chasseur** : peau, os, dents, griffes, yeux, fourrure. Chaque pièce est tirée séparément contre `dd_base + PV_max / pv_par_point` ; une réussite large en rend plusieurs (`marge_par_piece`, plafonné). Les vingt-deux bêtes à peau ont vu leurs pièces migrer de `depouille` vers `drops_chasse` : tuer un ours sans savoir chasser rend maintenant de la viande, et rien d'autre.
+
+
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Data-driven design]], [[Squelette modulaire et points d'attache]]
 - **Alimente** : [[IA des créatures]], [[Apprivoisement et recrutement]], [[Monstres rares]], [[Familles et succession]], [[Créatures]], [[Catalogue matériaux — Paramétriques]]

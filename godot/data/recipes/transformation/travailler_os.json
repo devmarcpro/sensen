@@ -1,0 +1,19 @@
+{
+  "name_key": "recipe.travailler_os.name",
+  "station": "etabli",
+  "craft_skill": "menuiserie",
+  "inputs": [
+    {
+      "item": "os",
+      "forme": "",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "material": "os_massif",
+    "forme": "brut",
+    "amount": 1,
+    "herite_espece": true
+  },
+  "fuel": null
+}

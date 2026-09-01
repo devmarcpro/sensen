@@ -41,8 +41,10 @@
     "athletisme": 28
   },
   "depouille": [
-    "viande_crue",
-    "peau"
+    "viande_crue"
   ],
-  "meute": "1d4+1"
+  "meute": "1d4+1",
+  "drops_chasse": [
+    "peau"
+  ]
 }

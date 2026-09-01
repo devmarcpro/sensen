@@ -39,7 +39,9 @@
     "athletisme": 15
   },
   "depouille": [
-    "viande_crue",
+    "viande_crue"
+  ],
+  "drops_chasse": [
     "peau",
     "dent"
   ]

@@ -542,7 +542,7 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 > « un casque en cuir ne devrait pas être juste ça, en cuir de quoi ? ». Aujourd'hui `cuir` est un matériau unique : un casque est « en cuir », point. Il faut que la dépouille d'une bête donne **son** cuir — cuir de sanglier, de loup, de basilic — et que l'objet assemblé le nomme, avec les stats de matériau qui vont avec. À traiter en données (matériaux dérivés de l'espèce, tannage qui conserve la provenance), sans casser les recettes existantes.
 
 
-> [!todo] Ajouts du designer (2026-09-01) : 70 et 71
+> [!done] Ajouts du designer (2026-09-01) : 70 et 71 — **faits le 2026-09-01** ([[Catégories de matériaux]], [[Compétences — liste]], [[Schéma créature]])
 > **70. L'os, la fourrure, tout ce qui vient d'une bête doit dire de laquelle** — « c'est pareil pour l'os, la fourrure etc, on doit toujours savoir de quelle créature ça vient car les stats ne sont pas les mêmes ». Le mécanisme est déjà en place pour le cuir (l'espèce voyage sur l'objet et module les stats du matériau) : il reste à le brancher sur les autres matières tirées d'une dépouille, et à leur donner leurs recettes de transformation.
 > **71. Compétence Chasseur** — « détermine si on obtient du loot spécifique à l'ennemi (dents, peau, yeux, fourrure etc), plus le niveau de compétence est élevé plus on en obtient ». Aujourd'hui la dépouille tombe toujours, sans jet ni compétence. Il faut un jet sur Chasseur à la mise à mort, dont la réussite et la quantité suivent le niveau.
 
