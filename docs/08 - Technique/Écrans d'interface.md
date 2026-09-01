@@ -114,6 +114,11 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 >
 > Deux réglages du même jour l'accompagnent. **La signature d'une classe passe toujours** : Le Passeur naît avec son Portail, Le Sceau avec sa Balise, La Mèche avec sa Bombe, même quand le banc ne leur mesure aucun dégât — un sort utilitaire n'est pas un sort mort, et chaque classe déclare désormais sa `signature` en données. **Plus d'overlay rouge au sol** pour les attaques annoncées : le « ! » au-dessus de l'être suffit à les dire. Enfin, une bête **aggro s'approche** au lieu d'attendre — hors de portée, l'IA fait un pas vers sa cible, et une cible hostile en vue interdit de flâner.
 
+> [!success] Décidé et codé le 2026-09-01 — l'inventaire rééquilibré (designer, point 64)
+> Le haut de l'inventaire était déséquilibré : neuf cases d'équipement à gauche, un personnage minuscule à droite, et rien d'autre. Il tient désormais en **trois colonnes** : les **slots d'équipement** à gauche, le **personnage en grand** au centre (deux fois plus grand qu'avant, dans un cadre qui lui laisse la place), et une **fiche du porteur** à droite — ses **six stats** avec le bonus que l'équipement leur ajoute, ses **quatre jauges** (vie, endurance, mana, faim) aux couleurs du HUD, sa **charge** sur sa capacité, son **or** et ses **niveaux**.
+>
+> Rien de neuf n'est calculé : la fiche lit `stats_eff`, `poids_de` et les jauges de l'être — ce que le HUD montrait déjà en jeu, mais qu'il fallait fermer l'inventaire pour consulter.
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

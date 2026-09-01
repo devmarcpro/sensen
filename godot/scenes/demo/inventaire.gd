@@ -13,6 +13,7 @@ const LARGEURS := {"type": 90.0, "qualite": 70.0, "poids": 60.0, "quantite": 50.
 
 var ecrans: Node
 var cadre_avatar: Control
+var fiche: FichePorteur   # la fiche du porteur : stats, jauges, charge (designer, point 64)
 var avatar: Paperdoll
 var cases: Dictionary = {}        # slot → CaseSlot
 var entete: HBoxContainer
@@ -42,13 +43,18 @@ func _ready() -> void:
 		grille_slots.add_child(c)
 		cases[slot] = c
 	cadre_avatar = Control.new()
-	cadre_avatar.custom_minimum_size = Vector2(140, 118)
+	cadre_avatar.custom_minimum_size = Vector2(190, 210)   # le personnage en grand (designer, point 64)
 	cadre_avatar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	haut.add_child(cadre_avatar)
 	avatar = Paperdoll.new()
-	avatar.scale = Vector2(2.0, 2.0)
-	avatar.position = Vector2(70, 108)
+	avatar.scale = Vector2(4.2, 4.2)
+	avatar.position = Vector2(95, 200)
 	cadre_avatar.add_child(avatar)
+	fiche = FichePorteur.new()   # à droite : stats, jauges, charge, or — ce que le HUD dit en jeu
+	fiche.inventaire = self
+	fiche.custom_minimum_size = Vector2(230, 210)
+	fiche.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	haut.add_child(fiche)
 	entete = HBoxContainer.new()   # l'en-tête triable
 	entete.add_theme_constant_override("separation", 0)
 	add_child(entete)
@@ -120,6 +126,7 @@ func reconstruire() -> void:
 		return
 	avatar.configurer(j, GameData.entree("rigs", str(j.get("skeleton_template", "humanoide"))), sim.items, sim.fonctionnalites, GameData.config("palette_materiaux"))
 	avatar.queue_redraw()
+	fiche.queue_redraw()
 	for ch in colonne.get_children():
 		colonne.remove_child(ch)
 		ch.queue_free()
@@ -260,3 +267,47 @@ class LigneObjet extends Control:
 			inventaire.selectionner(index)   # clic droit : les actions de l'objet (designer, point 46)
 			inventaire.ecrans.menu_objet(uid, get_global_mouse_position())
 			accept_event()
+
+
+## La fiche du porteur, à droite du personnage (designer 2026-09-01, point 64) : ses six stats avec
+## ce que l'équipement leur ajoute, ses quatre jauges, sa charge, son or et ses niveaux.
+## Elle ne calcule rien : elle lit l'être et les règles, comme le HUD le fait en jeu.
+class FichePorteur extends Control:
+	const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "endurance": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95), "faim": Color(0.55, 0.35, 0.15)}
+	var inventaire: InventaireVisuel
+
+	func _draw() -> void:
+		var j: Dictionary = inventaire.ecrans.main.joueur()
+		var sim = inventaire.ecrans.main.sim
+		if j.is_empty() or sim == null:
+			return
+		var f := ThemeDB.fallback_font
+		var y := 14.0
+		draw_string(f, Vector2(0, y), tr("ui.inventaire.fiche"), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.9, 0.88, 0.7))
+		y += 18.0
+		for st in ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]:
+			var base := int(j.corps.stats.get(st, 0))
+			var eff := int(j.get("stats_eff", j.corps.stats).get(st, base))
+			var texte := "%s %d" % [tr("stat." + st), eff]
+			if eff != base:
+				texte += "  (%+d)" % (eff - base)
+			draw_string(f, Vector2(6, y), texte, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.85, 0.85, 0.8) if eff == base else Color(0.6, 0.9, 0.7))
+			y += 15.0
+		y += 6.0
+		var jauges := [["sante", int(j.sante), int(j.sante_max)], ["endurance", int(j.endurance), int(j.endurance_max)],
+			["mana", int(j.mana), int(j.mana_max)], ["faim", int(j.get("faim", 100)), 100]]
+		for jg in jauges:
+			var part := clampf(float(jg[1]) / maxf(1.0, float(jg[2])), 0.0, 1.0)
+			draw_rect(Rect2(6, y, 150, 11), Color(0.05, 0.05, 0.08, 0.85))
+			draw_rect(Rect2(6, y, 150 * part, 11), COULEURS.get(str(jg[0]), Color.WHITE))
+			draw_rect(Rect2(6, y, 150, 11), Color(0.6, 0.55, 0.4, 0.8), false, 1.0)
+			draw_string(f, Vector2(162, y + 10), "%d/%d" % [int(jg[1]), int(jg[2])], HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.9, 0.9, 0.85))
+			y += 16.0
+		y += 6.0
+		var pds: Dictionary = sim.poids_de(j)
+		draw_string(f, Vector2(6, y), tr("ui.inventaire.charge").format({"poids": "%.1f" % float(pds.poids), "capacite": "%.0f" % float(pds.capacite)}), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.85, 0.8, 0.6) if float(pds.facteur) <= 1.0 else Color(0.95, 0.5, 0.4))
+		y += 16.0
+		draw_string(f, Vector2(6, y), tr("ui.inventaire.or").format({"or": int(j.get("or", 0))}), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.95, 0.85, 0.4))
+		y += 16.0
+		var nd: Dictionary = sim.progression.niveaux_derives(j)
+		draw_string(f, Vector2(6, y), tr("ui.inventaire.niveaux").format({"combat": "%.1f" % float(nd.combat), "general": "%.1f" % float(nd.general)}), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.8, 0.85, 0.9))
