@@ -35,6 +35,7 @@ var profil_sans_ui := false        # mesure de perf : saute la mise à jour du t
 var profil_sans_terrain := false   # mesure de perf : saute le dessin des tuiles
 var visee := -1                    # capacité en cours de visée (index), -1 sinon
 var ecran_fin: Array[String] = []  # récapitulatif du dernier combat (écran de fin), vide sinon
+var ecran_fin_reste := 0.0         # il s'efface seul au bout de quelques secondes (designer, point 13)
 var ecrans: Ecrans                 # inventaire, atelier, feuille (scenes/demo/ecrans.gd)
 var minimap: Minimap               # coin haut-droit (Décision — Minimap en 2D)
 var ambiance: CanvasModulate       # la lumière du cycle jour-nuit (un « uniform global »)
@@ -760,6 +761,10 @@ func _process(delta: float) -> void:
 			garde_pas -= 1
 			if Time.get_ticks_msec() - t_debut >= budget_ms:
 				break
+	if ecran_fin_reste > 0.0:   # l'écran de fin s'efface seul (point 13) : plus de surimpression jusqu'au clic
+		ecran_fin_reste -= delta
+		if ecran_fin_reste <= 0.0:
+			ecran_fin.clear()
 	_maj_noeuds(delta)
 	if Grille.distance(j.pos, centre_terrain) > RAYON_VUE / 3 or sim.grille.decouvert.size() != decouvert_dessine:
 		terrain.queue_redraw()   # le joueur s'éloigne du centre de la passe statique, ou il a découvert des tuiles
@@ -877,7 +882,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 		_apres_changement_de_grille()
 		return
 	if not ecran_fin.is_empty() and ((ev is InputEventMouseButton and ev.pressed) or (ev is InputEventKey and ev.pressed)):
-		ecran_fin.clear()
+		ecran_fin.clear()   # un clic l'efface tout de suite ; sinon il part de lui-même
+		ecran_fin_reste = 0.0
 		return
 	if ev is InputEventMouseMotion:
 		var t_survol := _tuile_sous(get_local_mouse_position())
@@ -2046,6 +2052,14 @@ func _sur_fin_de_combat(_nom: String) -> void:
 	var dc: Dictionary = sim.dernier_combat
 	if j.is_empty() or dc.is_empty():
 		return
+	# Un combat où le joueur n'a rien fait n'a pas de récapitulatif à montrer (designer, point 13) :
+	# une bête qui engage puis se désengage pendant le sommeil affichait « victoire en 0 ticks », pistes vides.
+	var vide := int(dc.get("ticks", 0)) <= int(GameData.config("combat_rules").get("fin_combat", {}).get("ticks_min", 1))
+	for piste_v in j.xp.keys():
+		if not j.xp[piste_v].is_empty():
+			vide = false
+	if vide and dc.get("niveaux", []).is_empty():
+		return
 	ecran_fin = [tr("ui.fin.titre").format({"issue": tr("ui.fin.victoire") if dc.victoire else tr("ui.fin.defaite"), "ticks": dc.ticks})]
 	for piste in ["element", "competence", "type", "construction"]:
 		var parts: Array[String] = []
@@ -2060,6 +2074,7 @@ func _sur_fin_de_combat(_nom: String) -> void:
 	if not gagnes.is_empty():
 		ecran_fin.append(tr("ui.fin.niveaux").format({"liste": ", ".join(gagnes)}))
 	ecran_fin.append(tr("ui.fin.suite"))
+	ecran_fin_reste = float(GameData.config("combat_rules").get("fin_combat", {}).get("secondes", 6.0))   # il s'efface seul
 	for piste in j.xp.keys():
 		j.xp[piste] = {}   # non persistée : l'écran la montre, la partie ne la garde pas (prototype)
 

@@ -119,6 +119,9 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 >
 > Rien de neuf n'est calculé : la fiche lit `stats_eff`, `poids_de` et les jauges de l'être — ce que le HUD montrait déjà en jeu, mais qu'il fallait fermer l'inventaire pour consulter.
 
+> [!success] Codé le 2026-09-01 — la création en trois volets (designer, point 66)
+> La liste avait grossi jusqu'à vingt-cinq lignes : nom, race, classe, stats, seize traits du visage, cinq curseurs, poses, départ. Elle se scinde en **trois volets** qu'une ligne d'onglets ouvre à ← → : **Personnage** (nom, race, classe, signe, points et stats, lieu de départ), **Apparence** (les seize traits, les deux palettes et les cinq réglages continus), **Pose** (l'action à mettre en scène et le pantin). L'aperçu, le portrait et les trois jauges restent visibles dans les trois — on voit toujours ce qu'on modifie. « Commencer » aussi : on valide depuis n'importe quel volet.
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

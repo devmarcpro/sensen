@@ -1397,46 +1397,60 @@ func _points_creation() -> Dictionary:
 	return {"total": total, "utilises": utilises, "restants": total - utilises, "max": int(cfg.get("max_par_stat", 10))}
 
 
+## Les trois volets de la création (designer 2026-09-01, point 66) : le personnage, son apparence,
+## ses poses. Une liste de vingt-cinq lignes ne se lit pas ; trois volets de huit se lisent.
+const VOLETS := ["personnage", "apparence", "pose"]
+
+
 func _construire_creation() -> void:
 	titre.text = tr("ui.ecran.creation")
 	var c: Dictionary = main.creation
+	var volet := str(VOLETS[int(c.get("volet", 0)) % VOLETS.size()])
+	var onglets: Array[String] = []
+	for v in VOLETS:
+		onglets.append(("[ %s ]" % tr("ui.creation.volet_" + v)) if v == volet else ("  %s  " % tr("ui.creation.volet_" + v)))
+	liste.add_item(" ".join(onglets))
+	entrees.append({"kind": "creation", "id": "volet"})
 	var fiche := _fiche_apercu()
 	var cfg: Dictionary = GameData.config("creation")
 	var pts := _points_creation()
 	var nom: String = str(c.get("nom", ""))
-	liste.add_item(tr("ui.creation.nom_l").format({"nom": nom if not nom.is_empty() else tr("ui.creation.nom_vide")}))
-	entrees.append({"kind": "creation", "id": "nom"})
-	liste.add_item(tr("ui.creation.race_l").format({"race": tr(GameData.entree("races", fiche.race).name_key)}))
-	entrees.append({"kind": "creation", "id": "race"})
-	liste.add_item(tr("ui.creation.classe_l").format({"classe": tr(GameData.entree("classes", fiche.classe).name_key)}))
-	entrees.append({"kind": "creation", "id": "classe"})
-	liste.add_item(tr("ui.creation.annee_l").format({"annee": int(c.annee), "element": tr("element." + str(fiche.signe.element)), "animal": tr("animal." + str(fiche.signe.animal))}))
-	entrees.append({"kind": "creation", "id": "annee"})
-	liste.add_item(tr("ui.creation.points_l").format({"restants": pts.restants, "total": pts.total}))
-	entrees.append({"kind": "creation", "id": "points"})
-	for st in main.STATS:
-		liste.add_item(tr("ui.creation.stat_l").format({"stat": tr("stat." + st), "valeur": int(fiche.corps.stats[st]), "points": int(c.points.get(st, 0))})
-			+ tr("ui.creation.stat_de").format({"de": int(c.get("tirage", {}).get(st, 0))}))
-		entrees.append({"kind": "creation", "id": "stat:" + st})
+	if volet == "personnage":
+		liste.add_item(tr("ui.creation.nom_l").format({"nom": nom if not nom.is_empty() else tr("ui.creation.nom_vide")}))
+		entrees.append({"kind": "creation", "id": "nom"})
+		liste.add_item(tr("ui.creation.race_l").format({"race": tr(GameData.entree("races", fiche.race).name_key)}))
+		entrees.append({"kind": "creation", "id": "race"})
+		liste.add_item(tr("ui.creation.classe_l").format({"classe": tr(GameData.entree("classes", fiche.classe).name_key)}))
+		entrees.append({"kind": "creation", "id": "classe"})
+		liste.add_item(tr("ui.creation.annee_l").format({"annee": int(c.annee), "element": tr("element." + str(fiche.signe.element)), "animal": tr("animal." + str(fiche.signe.animal))}))
+		entrees.append({"kind": "creation", "id": "annee"})
+		liste.add_item(tr("ui.creation.points_l").format({"restants": pts.restants, "total": pts.total}))
+		entrees.append({"kind": "creation", "id": "points"})
+		for st in main.STATS:
+			liste.add_item(tr("ui.creation.stat_l").format({"stat": tr("stat." + st), "valeur": int(fiche.corps.stats[st]), "points": int(c.points.get(st, 0))})
+				+ tr("ui.creation.stat_de").format({"de": int(c.get("tirage", {}).get(st, 0))}))
+			entrees.append({"kind": "creation", "id": "stat:" + st})
 	var app: Dictionary = _apparence_apercu(fiche)   # apparence : les loci visuels (designer, points 39 et 41)
-	for ligne in _lignes_apparence(not app.is_empty()):
-		liste.add_item(tr("ui.creation.app_l").format({
-			"locus": tr("ui.apparence." + str(ligne.id)),
-			"valeur": tr("ui.apparence.val." + str(app.get(str(ligne.id), ligne.valeurs[0] if not ligne.valeurs.is_empty() else ""))),
-		}))
-		entrees.append({"kind": "creation", "id": "app:" + str(ligne.id)})
+	if volet == "apparence":
+		for ligne in _lignes_apparence(not app.is_empty()):
+			liste.add_item(tr("ui.creation.app_l").format({
+				"locus": tr("ui.apparence." + str(ligne.id)),
+				"valeur": tr("ui.apparence.val." + str(app.get(str(ligne.id), ligne.valeurs[0] if not ligne.valeurs.is_empty() else ""))),
+			}))
+			entrees.append({"kind": "creation", "id": "app:" + str(ligne.id)})
 	var actions_p: Array = GameData.config("poses").get("actions", [])   # articuler ses poses (designer, point 63)
-	if not actions_p.is_empty():
+	if volet == "pose" and not actions_p.is_empty():
 		var i_p: int = int(c.get("pose_action", 0)) % actions_p.size()
 		liste.add_item(tr("ui.creation.pose_l").format({"action": tr(str(actions_p[i_p].name_key))}))
 		entrees.append({"kind": "creation", "id": "pose"})
-	if not app.is_empty():   # les réglages continus du visage (designer, point 53)
+	if volet == "apparence" and not app.is_empty():   # les réglages continus du visage (designer, point 53)
 		for cur in GameData.config("apparence").get("curseurs", []):
 			var vc: float = float(app.get("curseurs", {}).get(str(cur.id), float(cur.defaut)))
 			liste.add_item(tr("ui.creation.curseur_l").format({"nom": tr("ui.apparence." + str(cur.id)), "valeur": "%.2f" % vc}))
 			entrees.append({"kind": "creation", "id": "cur:" + str(cur.id)})
-	liste.add_item(tr("ui.creation.depart_l").format({"lieu": tr("ui.creation.depart_donjon" if int(c.get("depart", 0)) == 1 else "ui.creation.depart_camp")}))
-	entrees.append({"kind": "creation", "id": "depart"})
+	if volet == "personnage":
+		liste.add_item(tr("ui.creation.depart_l").format({"lieu": tr("ui.creation.depart_donjon" if int(c.get("depart", 0)) == 1 else "ui.creation.depart_camp")}))
+		entrees.append({"kind": "creation", "id": "depart"})
 	liste.add_item(tr("ui.creation.commencer"))
 	entrees.append({"kind": "creation", "id": "commencer"})
 	if not pose_edition.is_empty():   # le bandeau du pantin (point 63)
@@ -1562,7 +1576,9 @@ func _detail_creation(id: String) -> String:
 		"commencer":
 			l.append(tr("ui.creation.d_commencer"))
 		_:
-			if id.begins_with("cur:"):
+			if id == "volet":
+				l.append(tr("ui.creation.d_volet"))
+			elif id.begins_with("cur:"):
 				l.append(tr("ui.creation.d_curseur"))
 			elif id.begins_with("app:"):   # le détail d'un locus visuel (designer, points 39 et 41)
 				l.append(tr("ui.creation.d_apparence"))
@@ -1617,6 +1633,9 @@ func _action_creation(id: String, sens: int) -> void:
 				rafraichir()
 				return
 			c["pose_action"] = posmod(int(c.get("pose_action", 0)) + sens, acts.size())
+		"volet":   # les trois volets de la création (designer, point 66)
+			c["volet"] = posmod(int(c.get("volet", 0)) + (sens if sens != 0 else 1), VOLETS.size())
+			selection = 0
 		"depart":   # Départ : Camp / Donjon (designer, point 34)
 			c.depart = posmod(int(c.get("depart", 0)) + sens, 2)
 		"commencer":

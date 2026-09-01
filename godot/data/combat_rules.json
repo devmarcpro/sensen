@@ -1155,5 +1155,10 @@
     "cueillir": "faucille",
     "inonder": "seau",
     "bruler": "torche"
+  },
+  "fin_combat": {
+    "_doc": "L'écran de fin de combat (designer, point 13) : il s'efface seul au bout de `secondes`, et ne s'affiche pas pour un combat de moins de `ticks_min` ticks sans XP ni niveau gagné.",
+    "secondes": 6.0,
+    "ticks_min": 1
   }
 }
