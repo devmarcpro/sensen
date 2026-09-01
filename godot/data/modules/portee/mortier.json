@@ -1,0 +1,20 @@
+{
+  "id": "mortier",
+  "nom": "Mortier",
+  "name_key": "module.portee_mortier.name",
+  "module_type": "portee",
+  "description": "**trois tuiles au minimum**, jusqu'a huit, par-dessus les murs — inutilisable au corps a corps",
+  "classe_signature": null,
+  "tags": [
+    "portee"
+  ],
+  "portee_base": [
+    3,
+    8
+  ],
+  "surcout_ticks": 7,
+  "ligne_de_vue": false,
+  "origine": "cible",
+  "famille": "Portée",
+  "style": "neutre"
+}

@@ -79,6 +79,10 @@ Le même vocabulaire produit une attaque, un contrôle de zone, un piège et un 
 > « horizon est beaucoup trop puissant, on retire ». Les planches de combinaisons l'avaient montré : `horizon` touchait **toutes les entités en vue** quelle que soit la portée qu'on lui associait — la combinaison la moins chère (`contact`, +0 tick) donnait donc la portée maximale, et le module de portée ne servait plus à rien. Il devenait aussi la seule forme dont le prix ne dépendait pas de ce qu'elle couvrait. La forme disparaît du catalogue ; sa géométrie reste dans le code, inutilisée, le temps qu'on soit sûr de ne pas vouloir la réintroduire encadrée. Il reste quinze formes.
 
 
+> [!success] Codé le 2026-09-01 — trois modules pour combler trois manques (designer : « rajoute des modules »)
+> Les planches de combinaisons ont montré ce qui n'existait pas. **Deux portées** : `allonge` (1-2, +1 tick) — l'entre-deux du contact et du jet, la portée des armes d'hast, qui manquait complètement ; et `mortier` (**3-8**, à travers les murs, +7 ticks) — la première portée à **minimum**, inutilisable au corps à corps : un tir en cloche qui passe par-dessus l'obstacle mais laisse un angle mort autour du lanceur. C'est la seule contrainte tactique que le catalogue n'avait pas : jusqu'ici, tout ce qui portait loin portait aussi près. **Une forme** : `couronne` — les seules tuiles à distance exacte du centre, qui **épargne le centre et ses voisins**. Aucune forme ne faisait de trou ; `anneau` malgré son nom est un carré plein moins son centre. Elle sert à frapper autour d'un allié, ou à cercler sans toucher ce qu'on encercle.
+
+
 ## Liens
 - **Dépend de** : [[Vocabulaire des modules — six axes]], [[Structure compétences-modules-slots]]
 - **Alimente** : [[Familles de capacités de la grille]], [[Modules]], [[Jauge de chaîne Wu Xing]]

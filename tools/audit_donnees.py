@@ -344,7 +344,7 @@ for mid, m in modules_cat.items():
 # La liste est tenue a la main en miroir de Simulation._evaluer_conditions : un predicat absent d'ici
 # est un module qui ne se declenche JAMAIS (la capacite ne part pas du tout).
 # Miroir de Capacites.tuiles_de_forme : une geometrie absente d'ici tombe dans le defaut « visee au point ».
-GEOMETRIES_GEREES = ("point", "soi", "ligne", "cone", "croix", "diagonale", "carre", "anneau", "tuile", "vague",
+GEOMETRIES_GEREES = ("point", "soi", "ligne", "cone", "croix", "diagonale", "carre", "anneau", "couronne", "tuile", "vague",
     "mur", "sillage", "chemin", "colonne", "horizon", "nuee")
 PREDICATS_GERES = ("hauteur_relative", "dos_ou_flanc", "ligne_de_vue_degagee", "cible_isolee",
     "cible_adjacente_a_allie", "pv_cible_sous", "pv_porteur_sous", "vecteur_de_lieu", "porteur_en_posture",

@@ -1,0 +1,20 @@
+{
+  "id": "couronne",
+  "nom": "Couronne",
+  "name_key": "module.couronne.name",
+  "module_type": "forme",
+  "description": "les tuiles a distance exacte du centre — **epargne le centre et ses voisins**",
+  "classe_signature": null,
+  "tags": [
+    "forme"
+  ],
+  "geometrie": "couronne",
+  "surcout_ticks": 3,
+  "taille_base": 2,
+  "famille": "Formes",
+  "style": "neutre",
+  "portee_defaut": [
+    1,
+    1
+  ]
+}

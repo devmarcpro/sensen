@@ -1594,6 +1594,9 @@ module.convocation.name,Convocation
 module.corps_a_corps.name,Corps à corps
 module.corruption.name,Corruption
 module.croix.name,Croix
+module.portee_hast.name,Hast
+module.portee_mortier.name,Mortier
+module.couronne.name,Couronne
 module.portee_sur_soi.name,Sur soi
 module.portee_contact.name,Contact
 module.portee_jet_court.name,Jet court
@@ -2076,6 +2079,7 @@ geometrie.ligne,ligne
 geometrie.cone,cône
 geometrie.carre,carré
 geometrie.anneau,anneau
+geometrie.couronne,couronne
 geometrie.croix,croix
 geometrie.diagonale,diagonale
 geometrie.colonne,colonne

@@ -6,7 +6,7 @@ class_name Pictos
 ## `icone` que cette liste ne connaît pas.
 
 const NOMS: Array[String] = [
-	"point", "soi", "ligne", "cone", "croix", "diagonale", "carre", "anneau", "tuile", "vague", "mur", "sillage", "chemin", "colonne", "horizon", "nuee",
+	"point", "soi", "ligne", "cone", "croix", "diagonale", "carre", "anneau", "couronne", "tuile", "vague", "mur", "sillage", "chemin", "colonne", "horizon", "nuee",
 	"flamme", "goutte", "roche", "eclat", "epine", "etoile", "soin", "chaine", "sablier", "bouclier",
 	"fleche_droite", "fleche_gauche", "fleche_haut", "fleche_saut", "fleche_double", "fleche_retour", "tourbillon", "porte",
 	"monticule", "fosse", "bombe", "tourelle", "patte", "crane", "barriere",
@@ -180,7 +180,7 @@ static func dessiner(ci: CanvasItem, nom: String, r: Rect2, c: Color) -> void:
 	var fin := Color(c.r, c.g, c.b, c.a * 0.55)
 	match nom:
 		# --- les formes : des tuiles sur une grille 5 × 5 (le lanceur en bas, la cible au centre)
-		"point", "soi", "ligne", "cone", "croix", "diagonale", "carre", "anneau", "tuile", "vague", "mur", "sillage", "chemin", "colonne", "horizon", "nuee":
+		"point", "soi", "ligne", "cone", "croix", "diagonale", "carre", "anneau", "couronne", "tuile", "vague", "mur", "sillage", "chemin", "colonne", "horizon", "nuee":
 			_forme(ci, nom, r, c)
 		"flamme":
 			ci.draw_colored_polygon(PackedVector2Array([p.call(5, 1), p.call(7.5, 4.5), p.call(6.5, 5.5), p.call(8, 7.5), p.call(5, 9.5), p.call(2, 7.5), p.call(3.5, 5.5), p.call(2.5, 4.5)]), c)
@@ -392,6 +392,7 @@ static func _forme(ci: CanvasItem, nom: String, r: Rect2, c: Color) -> void:
 		"diagonale": tuiles = [cible, Vector2i(1, 1), Vector2i(3, 3), Vector2i(3, 1), Vector2i(1, 3)]
 		"carre": tuiles = [cible, Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1), Vector2i(1, 2), Vector2i(3, 2), Vector2i(1, 3), Vector2i(2, 3), Vector2i(3, 3)]
 		"anneau": tuiles = [Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1), Vector2i(1, 2), Vector2i(3, 2), Vector2i(1, 3), Vector2i(2, 3), Vector2i(3, 3)]
+		"couronne": tuiles = [Vector2i(2, 0), Vector2i(0, 2), Vector2i(4, 2), Vector2i(2, 4), Vector2i(1, 1), Vector2i(3, 1), Vector2i(1, 3), Vector2i(3, 3)]
 		"vague": tuiles = [Vector2i(0, 3), Vector2i(1, 3), Vector2i(2, 3), Vector2i(3, 3), Vector2i(4, 3), Vector2i(1, 2), Vector2i(2, 2), Vector2i(3, 2)]
 		"mur": tuiles = [Vector2i(0, 2), Vector2i(1, 2), Vector2i(2, 2), Vector2i(3, 2), Vector2i(4, 2)]
 		"sillage": tuiles = [Vector2i(2, 3), Vector2i(2, 2), Vector2i(1, 2), Vector2i(3, 2), Vector2i(2, 1)]

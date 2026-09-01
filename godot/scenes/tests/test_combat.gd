@@ -2845,7 +2845,7 @@ func test_creation_de_sorts() -> void:
 		par_type[t].append(str(mid))
 	for t in par_type.keys():
 		par_type[t].sort()
-	verifier(par_type.get("noyau", []).size() >= 86 and par_type.get("forme", []).size() == 15 and par_type.get("portee", []).size() == 6, "le catalogue : %d noyaux, %d formes, %d portees" % [par_type.get("noyau", []).size(), par_type.get("forme", []).size(), par_type.get("portee", []).size()])
+	verifier(par_type.get("noyau", []).size() >= 86 and par_type.get("forme", []).size() == 16 and par_type.get("portee", []).size() == 8, "le catalogue : %d noyaux, %d formes, %d portees" % [par_type.get("noyau", []).size(), par_type.get("forme", []).size(), par_type.get("portee", []).size()])
 
 	# 1. chaque noyau, seul : un plan complet et cohérent
 	var noyaux_ko: Array[String] = []

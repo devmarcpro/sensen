@@ -985,6 +985,9 @@ module.convocation.name,Summoning
 module.corps_a_corps.name,Close Quarters
 module.corruption.name,Corruption
 module.croix.name,Cross
+module.portee_hast.name,Polearm reach
+module.portee_mortier.name,Mortar
+module.couronne.name,Crown
 module.portee_sur_soi.name,On self
 module.portee_contact.name,Contact
 module.portee_jet_court.name,Short throw
@@ -2067,6 +2070,7 @@ geometrie.ligne,ligne
 geometrie.cone,cone
 geometrie.carre,carre
 geometrie.anneau,anneau
+geometrie.couronne,crown
 geometrie.croix,croix
 geometrie.diagonale,diagonale
 geometrie.colonne,colonne

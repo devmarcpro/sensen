@@ -318,6 +318,14 @@ static func tuiles_de_forme(g: Grille, geometrie: String, origine: Vector2i, cib
 						res.append(p)
 		"anneau":
 			res = g.anneau(cible, taille)
+		"couronne":
+			# Les seules tuiles à distance EXACTE du centre : elle épargne le centre et ses voisins,
+			# ce qu'aucune autre forme ne fait (designer 2026-09-01).
+			for y in range(-taille, taille + 1):
+				for x in range(-taille, taille + 1):
+					var pc := cible + Vector2i(x, y)
+					if g.dans(pc) and Grille.portee_entre(cible, pc) == taille:
+						res.append(pc)
 		"tuile":
 			res.append(cible)
 		"vague":

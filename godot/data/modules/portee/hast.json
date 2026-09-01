@@ -1,0 +1,20 @@
+{
+  "id": "hast",
+  "nom": "Hast",
+  "name_key": "module.portee_hast.name",
+  "module_type": "portee",
+  "description": "deux tuiles : l'allonge d'une arme d'hast",
+  "classe_signature": null,
+  "tags": [
+    "portee"
+  ],
+  "portee_base": [
+    1,
+    2
+  ],
+  "surcout_ticks": 1,
+  "ligne_de_vue": true,
+  "origine": "cible",
+  "famille": "Portée",
+  "style": "neutre"
+}
