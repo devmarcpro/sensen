@@ -9499,17 +9499,18 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 		var extra := int(plan.drapeaux.get("segments", 0))
 		for i in extra:
 			_poser_segment(e, elements, tick)
-	# Déclencheur : la charge qui suit part à l'impact, ou à la mise à mort — sans second segment.
+	# Déclencheur : la charge qui suit part à l'impact, ou à la mise à mort. Elle pose SON segment
+	# (designer 2026-09-01) : chaque étape est un acte, payé en ticks, donc elle vaut son segment.
 	var suite: Dictionary = plan.charge_suivante
 	if not suite.is_empty() and suite.erreurs.is_empty():
 		var ou: Vector2i = res.premiere.pos if not res.premiere.is_empty() else cible_pos
 		match str(suite.declencheur):
 			"impact":
 				if a_touche:
-					_executer_capacite(e, suite, ou, false)
+					_executer_capacite(e, suite, ou)
 			"mise_a_mort":
 				if not res.tuee.is_empty():
-					_executer_capacite(e, suite, res.tuee.pos, false)
+					_executer_capacite(e, suite, res.tuee.pos)
 			"entree":
 				# Sceau : la charge attend au sol, jusqu'à 100 ticks — overlay runtime, jamais sauvegardé.
 				var duree := int(suite.get("duree_declencheur", 100))
@@ -9534,7 +9535,7 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 				var cle := str(plan.get("id", ""))
 				e.emplois[cle] = int(e.emplois.get(cle, 0)) + 1
 				if int(e.emplois[cle]) % int(suite.get("n_declencheur", 3)) == 0:
-					_executer_capacite(e, suite, ou, false)
+					_executer_capacite(e, suite, ou)
 			"riposte", "parade", "ouverture", "veille", "testament", "accord", "derobade":
 				# La charge attend l'événement sur le porteur — armée une fois.
 				e.declencheurs_armes.append({"evenement": str(suite.declencheur), "plan": suite})
@@ -9961,12 +9962,12 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 		d = regles.degats_arme(e.stats_eff, plan.arme, plan.fonct, des, false, a_zero, des_bonus, e.competences_eff, plan.elements)
 		type_degats = str(plan.fonct.type_degats)
 	else:
-		var jet := des.jet(plan.des, des_bonus)
+		# Un sort roule comme un coup d'arme (designer 2026-09-01) : école, affinités, focus et Volonté.
+		d = regles.degats_sort(e.stats_eff, e.competences_eff, plan.elements, regles.focus_de(e.equipement, items), des, plan.des, des_bonus)
 		if Etres.bloque_statuts(e, "relance", statuts_defs):   # Pari : le second résultat s'applique, quel qu'il soit
-			jet = des.jet(plan.des, des_bonus)
+			d = regles.degats_sort(e.stats_eff, e.competences_eff, plan.elements, regles.focus_de(e.equipement, items), des, plan.des, des_bonus)
 			_retirer_statut(e, "pari")
-			EventBus.emettre(&"journal", [&"journal.pari", {"nom": e.name_key, "jet": jet}])
-		d = {"jet": jet, "bruts": float(jet)}
+			EventBus.emettre(&"journal", [&"journal.pari", {"nom": e.name_key, "jet": int(d.jet)}])
 	var bruts: float = d.bruts * float(plan.mult)
 	if plan.drapeaux.has("detonation") and (c.has("fin_invocation") or bool(c.get("releve", false))):
 		bruts *= float(plan.drapeaux.detonation)   # Détonation : le double contre les invocations

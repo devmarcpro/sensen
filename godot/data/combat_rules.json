@@ -126,7 +126,17 @@
     "durete_reference": 20,
     "stat_div": 4,
     "crit_mult": 1.5,
-    "fumble_max": 1
+    "fumble_max": 1,
+    "sort": {
+      "_doc": "Un sort roule comme un coup d'arme (designer 2026-09-01) : jet x (focus x ecole x affinites) + stat/stat_div. Le focus est l'objet en main dont le tag est dans focus_tags ; sans lui, le facteur vaut 1.",
+      "stat": "volonte",
+      "ecole_prefixe": "magie_",
+      "focus_tags": [
+        "baton_magique",
+        "grimoire",
+        "focus"
+      ]
+    }
   },
   "stats": {
     "_doc": "Stats de personnage · Exemples — dix PNJ générés (sante_max = 20 + End×4) · Mana",

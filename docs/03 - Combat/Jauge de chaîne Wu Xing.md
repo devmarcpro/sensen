@@ -78,6 +78,10 @@ JAUGE DE CHAÎNE — 5 SEGMENTS DE BASE, EXTENSIBLE JUSQU'À 10 :
 >
 > Deux chiffres en données (`wuxing.clignotement` : période et amplitude) ; aucune règle de combat ne change, c'est une aide de lecture.
 
+> [!success] Décidé le 2026-09-01 — une capacité pose **un segment par étape** (designer)
+> « une capacité peut poser plusieurs segments Wu Xing tant que c'est segmenté ». La règle précédente — *une capacité qui touche pose UN segment, quel que soit le nombre de cibles* — visait les groupes d'ennemis : elle empêchait qu'un carré sur cinq loups remplisse la jauge d'un coup. Elle reste vraie **par étape** : une étape qui touche pose un segment, cinq cibles ou une seule. Mais un sort à plusieurs étapes est plusieurs actes, séparés par leurs déclencheurs et payés chacun en ticks : **chaque étape qui touche pose le sien**, de son propre élément. Un sort à cinq étapes de cinq éléments peut donc parcourir la chaîne entière — au prix des ticks des cinq étapes, ce qui est exactement le pari. Les charges différées étaient jusqu'ici exécutées avec `segment = false`, exprès ; ce n'est plus le cas.
+
+
 ## Liens
 - **Dépend de** : [[Wu Xing — cycles et vecteurs]], [[Domination et multiplicateurs]], [[Action-time à ticks]]
 - **Alimente** : [[XP de combat]], [[Cinq accès au cycle]], [[Attaque lourde et télégraphe]]

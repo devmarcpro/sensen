@@ -231,3 +231,37 @@ func cout_garde_impact(degats: int, bouclier: bool, competences: Dictionary = {}
 	if bouclier:   # Décision — Boucliers : la compétence Bouclier réduit le coût à l'impact
 		return maxi(1, roundi(float(int(r.garde.bouclier_impact_base) + degats / int(r.garde.bouclier_impact_div)) / skill_factor(niveau(competences, "bouclier"))))
 	return int(r.endurance.garde_impact_base) + degats / int(r.endurance.garde_impact_div)
+
+## Les dégâts bruts d'un SORT (designer 2026-09-01) : le miroir de ceux d'une arme —
+## jet × (focus × école × affinités) + stat/stat_div. Sans focus en main, le facteur vaut 1.
+func degats_sort(stats: Dictionary, competences: Dictionary, vecteur: Dictionary, focus: Dictionary, des: Des, notation: Variant, des_bonus: int = 0) -> Dictionary:
+	var cfg: Dictionary = r.degats.get("sort", {})
+	var jet := des.jet(notation, des_bonus)
+	var f := 1.0
+	if not focus.is_empty():   # ce qu'on tient joue le rôle de l'arme : sa dureté et sa qualité
+		f *= float(focus.get("durete_base", r.degats.durete_reference)) / float(r.degats.durete_reference) * float(focus.get("qualite", 1.0))
+	var dom := ""
+	for el: String in vecteur.keys():
+		if dom.is_empty() or float(vecteur[el]) > float(vecteur[dom]):
+			dom = str(el)
+	if not dom.is_empty():
+		f *= skill_factor(niveau(competences, str(cfg.get("ecole_prefixe", "magie_")) + dom))
+		var somme := 0.0
+		for el: String in vecteur.keys():
+			somme += float(vecteur[el]) * (1.0 + float(niveau(competences, "element_" + el)) / 100.0)
+		f *= somme
+	var stat := int(stats.get(str(cfg.get("stat", "volonte")), 0)) / int(r.degats.stat_div)
+	return {"jet": jet, "mult": f, "stat": stat, "bruts": float(jet) * f + float(stat), "des": notation}
+
+
+## Le focus en main : le premier objet équipé dont un tag figure dans degats.sort.focus_tags.
+func focus_de(equipement: Dictionary, items: Dictionary) -> Dictionary:
+	var tags_focus: Array = r.degats.get("sort", {}).get("focus_tags", [])
+	for slot in ["main_principale", "main_secondaire"]:
+		var it: Dictionary = items.get(str(equipement.get(slot, "")), {})
+		for t in it.get("tags", []):
+			if str(t) in tags_focus:
+				return it
+		if tags_focus.has(str(it.get("functionality", ""))):
+			return it
+	return {}

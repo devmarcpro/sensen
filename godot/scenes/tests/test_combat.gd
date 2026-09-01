@@ -873,10 +873,11 @@ func test_liaisons() -> void:
 	j.action_en_cours = {}
 	s.pas(j.horloge)
 	var pv2: int = loups[2].sante
+	var seg_avant: int = j.chaine.segments.size()
 	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loups[0].pos}), "Étincelle → À l'impact → Croix + Bruine")
 	s.pas(j.horloge)   # la portée en module ajoute des ticks : le sort est télégraphié, il part au pas suivant
 	verifier(coups[0] >= 2 and loups[2].sante < pv2, "la charge différée part de la cible touchée et frappe la croix (%d coups)" % coups[0])
-	verifier(j.chaine.segments.size() == 2, "une capacité = un segment, même avec deux noyaux")
+	verifier(j.chaine.segments.size() - seg_avant == 2, "un segment par ÉTAPE (designer 2026-09-01) : deux étapes posent deux segments (%d de plus)" % (j.chaine.segments.size() - seg_avant))
 	# Ricochet : la charge saute vers les cibles proches
 	coups[0] = 0
 	for m0 in ["point", "etincelle", "ricochet", "jet_court"]:
