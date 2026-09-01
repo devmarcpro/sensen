@@ -55,25 +55,36 @@ func fermer() -> void:
 
 
 ## Combien de cellules tiennent à l'écran, au zoom courant (impair : le centre est une case).
-func _n() -> int:
+## La carte a LE FORMAT DU MONDE (designer 2026-09-01) : le monde est une mappemonde deux fois plus
+## large que haute, la carte l'est aussi. On tient le maximum de cellules à l'écran en gardant ce
+## rapport ; le nombre de colonnes et de lignes est impair, pour qu'une case soit au centre.
+func _fenetre() -> Vector2i:
 	var taille := dessin.get_viewport_rect().size
-	var n := int(minf(taille.x, taille.y - 40.0) / case_px)
-	return maxi(5, n if n % 2 == 1 else n - 1)
+	var ratio := float(GameData.config("planete").get("monde_ratio", 1.0))
+	var nx := int(minf(taille.x - 40.0, (taille.y - 60.0) / maxf(0.2, ratio)) / case_px)
+	var ny := int(round(nx * ratio))
+	nx = maxi(5, nx if nx % 2 == 1 else nx - 1)
+	ny = maxi(5, ny if ny % 2 == 1 else ny - 1)
+	return Vector2i(nx, ny)
+
+
+func _n() -> int:
+	return _fenetre().x
 
 
 func _origine() -> Vector2:
 	var taille := dessin.get_viewport_rect().size
-	var n := _n()
-	return Vector2((taille.x - n * case_px) * 0.5, (taille.y - n * case_px) * 0.5 + 10) + decalage
+	var f := _fenetre()
+	return Vector2((taille.x - f.x * case_px) * 0.5, (taille.y - f.y * case_px) * 0.5 + 10) + decalage
 
 
 func _cellule_sous(p: Vector2) -> Vector2i:
 	var o := _origine()
-	var n := _n()
+	var f := _fenetre()
 	var c := Vector2i(int(floor((p.x - o.x) / case_px)), int(floor((p.y - o.y) / case_px)))
-	if c.x < 0 or c.y < 0 or c.x >= n or c.y >= n:
+	if c.x < 0 or c.y < 0 or c.x >= f.x or c.y >= f.y:
 		return Vector2i(-1, -1)
-	return centre + c - Vector2i(n / 2, n / 2)
+	return centre + c - Vector2i(f.x / 2, f.y / 2)
 
 
 func _dessiner() -> void:
@@ -82,15 +93,15 @@ func _dessiner() -> void:
 		return
 	var surf = sim.monde.surface
 	var o := _origine()
-	dessin.draw_rect(Rect2(o - Vector2(6, 6), Vector2(_n() * case_px + 12, _n() * case_px + 12)), Color(0.05, 0.05, 0.07, 0.96))
+	dessin.draw_rect(Rect2(o - Vector2(6, 6), Vector2(_fenetre().x * case_px + 12, _fenetre().y * case_px + 12)), Color(0.05, 0.05, 0.07, 0.96))
 	var j: Dictionary = main.joueur()
 	var cj: Vector2i = sim.monde.cellule_de(j.pos) if not j.is_empty() else centre
 	var tc: int = int(GameData.config('planete').taille_cellule)
 	var sp_min: int = int(GameData.config('styles').get('carte', {}).get('sous_points_min_px', 10))
-	var n := _n()
-	for y in n:
-		for x in n:
-			var cell := centre + Vector2i(x, y) - Vector2i(n / 2, n / 2)
+	var f := _fenetre()
+	for y in f.y:
+		for x in f.x:
+			var cell := centre + Vector2i(x, y) - Vector2i(f.x / 2, f.y / 2)
 			var r := Rect2(o + Vector2(x * case_px, y * case_px), Vector2(case_px - 1.0, case_px - 1.0))
 			var info: Dictionary = surf.resume_cellule(cell)
 			var col: Color = Color.html(str(info.couleur))
@@ -113,6 +124,14 @@ func _dessiner() -> void:
 			match int(sim.monde.danger_de(cell)):
 				1: dessin.draw_rect(r, Color(1.0, 0.5, 0.1, 0.25))
 				2: dessin.draw_rect(r, Color(1.0, 0.1, 0.1, 0.4))
+			var dc: Dictionary = sim.monde.donjon_de_corruption(cell, sim.jour_courant()) if exploree else {}
+			if not dc.is_empty():   # un donjon né de la corruption (designer, point 51) : sa teinte d'élément
+				var tel: Dictionary = GameData.config("wuxing").get("teintes", {})
+				var ce := Color.html(str(tel.get(str(dc.element), "#aa3333")))
+				dessin.draw_rect(Rect2(r.position + Vector2(2, 2), r.size - Vector2(4, 4)), ce.darkened(0.35))
+				dessin.draw_rect(Rect2(r.position + Vector2(2, 2), r.size - Vector2(4, 4)), ce, false, 1.0)
+				if case_px >= 16.0:
+					dessin.draw_string(ThemeDB.fallback_font, r.position + Vector2(3, r.size.y - 3), str(int(dc.niveau)), HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(1, 1, 1, 0.9))
 			if info.poi.get("donjon", false):
 				dessin.draw_rect(Rect2(r.position + Vector2(5, 5), Vector2(case_px - 11.0, case_px - 11.0)), Color(0.1, 0.05, 0.1))
 				dessin.draw_rect(Rect2(r.position + Vector2(5, 5), Vector2(case_px - 11.0, case_px - 11.0)), Color(0.9, 0.8, 0.3), false, 1.0)
@@ -125,12 +144,11 @@ func _dessiner() -> void:
 			if cell == cj:
 				dessin.draw_rect(r.grow(-3), Color(0.3, 0.8, 1.0), false, 2.0)
 				_placer_avatar(r)
-	dessin.draw_string(ThemeDB.fallback_font, o + Vector2(0, _n() * case_px + 20), tr("ui.carte.legende"), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.85, 0.85, 0.8))
+	dessin.draw_string(ThemeDB.fallback_font, o + Vector2(0, _fenetre().y * case_px + 20), tr("ui.carte.legende"), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.85, 0.85, 0.8))
 	# Les routes : un trait ocre entre cellules reliées (Unification macro-micro).
-	n = _n()
-	for y in n:
-		for x in n:
-			var cell := centre + Vector2i(x, y) - Vector2i(n / 2, n / 2)
+	for y in f.y:
+		for x in f.x:
+			var cell := centre + Vector2i(x, y) - Vector2i(f.x / 2, f.y / 2)
 			if not surf.terre_a(cell):
 				continue
 			var c0 := o + Vector2(x * case_px + case_px * 0.5, y * case_px + case_px * 0.5)
@@ -138,10 +156,9 @@ func _dessiner() -> void:
 				var dv: Vector2i = v - cell
 				dessin.draw_line(c0, c0 + Vector2(dv.x, dv.y) * case_px * 0.5, Color(0.85, 0.7, 0.4, 0.9), 2.0)
 	# Les noms des royaumes sur leur capitale (la carte politique se lit avant toute visite — Génération des royaumes PNJ).
-	n = _n()
-	for y in n:
-		for x in n:
-			var cell := centre + Vector2i(x, y) - Vector2i(n / 2, n / 2)
+	for y in f.y:
+		for x in f.x:
+			var cell := centre + Vector2i(x, y) - Vector2i(f.x / 2, f.y / 2)
 			var roy: Dictionary = surf.royaume_de(cell) if surf.terre_a(cell) else {}
 			if not roy.is_empty() and roy.capital_poi == cell:
 				dessin.draw_string(ThemeDB.fallback_font, o + Vector2(x * case_px - 10.0, y * case_px - 3.0), str(roy.nom), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1.0, 0.95, 0.7))
@@ -149,6 +166,16 @@ func _dessiner() -> void:
 	if survol != Vector2i(-1, -1):
 		var info_s: Dictionary = surf.resume_cellule(survol)
 		var texte := tr("ui.carte.survol").format({"x": survol.x, "y": survol.y, "biome": tr(GameData.entree("biomes", str(info_s.biome)).name_key) if info_s.terre else tr("ui.carte.mer"), "danger": int(sim.monde.danger_de(survol))})
+		var dsurv: Dictionary = sim.monde.donjon_de_corruption(survol, sim.jour_courant())
+		if not dsurv.is_empty():   # le donjon dit sa difficulté au survol (designer, point 61)
+			var cr_s: Dictionary = GameData.config("planete").corruption
+			var etages_s := int(cr_s.etages_mineur[0]) + int(dsurv.niveau) / 4
+			texte += tr("ui.carte.survol_donjon").format({
+				"nom": tr(GameData.entree("dungeon_themes", str(dsurv.theme)).name_key),
+				"element": tr("element." + str(dsurv.element)),
+				"niveau": int(dsurv.niveau), "etages": etages_s,
+				"corruption": roundi(sim.monde.corruption_jour(survol, sim.jour_courant())),
+			})
 		var derive := int(sim.monde.delta.get(survol, 0))   # Dérive de la corruption : le delta accumulé se lit
 		if derive != 0:
 			texte += tr("ui.carte.survol_derive").format({"d": ("+%d" % derive) if derive > 0 else str(derive)})
@@ -163,7 +190,7 @@ func _dessiner() -> void:
 			var jr: Dictionary = main.joueur()
 			var etat := tr("ui.carte.vacance") if sim.monde.vacances.has(str(roy_s.id)) else tr("relation." + sim.relation_royaume(jr, roy_s))
 			texte += tr("ui.carte.survol_royaume").format({"nom": roy_s.nom, "gouv": tr(GameData.entree("governments", str(roy_s.government_type)).name_key), "taille": tr("kingdom.taille." + str(roy_s.taille)), "n": roy_s.territory_cells.size(), "etat": etat, "capitale": tr("ui.carte.capitale") if roy_s.capital_poi == survol else ""})
-		dessin.draw_string(ThemeDB.fallback_font, o + Vector2(0, _n() * case_px + 38.0), texte, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.95, 0.9, 0.7))
+		dessin.draw_string(ThemeDB.fallback_font, o + Vector2(0, _fenetre().y * case_px + 38.0), texte, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.95, 0.9, 0.7))
 
 
 ## Une cellule peinte en 5 × 5 sous-points (designer 2026-09-01, point 59) : la surface est

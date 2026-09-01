@@ -1,0 +1,107 @@
+{
+  "name_key": "dungeon_theme.eau.name",
+  "creatures": [
+    {
+      "id": "sangsue_geante"
+    },
+    {
+      "id": "kappa"
+    },
+    {
+      "id": "serpent_geant"
+    },
+    {
+      "id": "lindworm"
+    },
+    {
+      "id": "essaim_de_chauves_souris"
+    }
+  ],
+  "boss": "chef_de_bande",
+  "tuiles_par_creature": 30,
+  "croissance_par_etage": 0.25,
+  "etages": [
+    2,
+    3
+  ],
+  "salles_par_etage": [
+    6,
+    10
+  ],
+  "tailles_salles": {
+    "petite": [
+      4,
+      6
+    ],
+    "moyenne": [
+      8,
+      11
+    ],
+    "grande": [
+      13,
+      17
+    ],
+    "immense": [
+      20,
+      26
+    ]
+  },
+  "poids_salles": {
+    "petite": 3,
+    "moyenne": 4,
+    "grande": 2,
+    "immense": 1
+  },
+  "couloirs": {
+    "largeur": [
+      2,
+      3
+    ],
+    "virage": 0.0,
+    "voisins_relies": 3,
+    "boucles": [
+      3,
+      6
+    ],
+    "impasses": [
+      6,
+      12
+    ],
+    "impasse_longueur": [
+      5,
+      14
+    ],
+    "droits": true
+  },
+  "materiau_mur": "gres",
+  "decors": [
+    {
+      "type": "piliers",
+      "chance": 0.5,
+      "n": [
+        2,
+        5
+      ]
+    },
+    {
+      "type": "estrade",
+      "chance": 0.4,
+      "delta": 2,
+      "taille": [
+        3,
+        5
+      ]
+    },
+    {
+      "type": "fosse",
+      "chance": 0.2,
+      "delta": -3,
+      "taille": [
+        2,
+        3
+      ]
+    }
+  ],
+  "portes": 0.5,
+  "salles_carrees": true
+}

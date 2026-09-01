@@ -182,7 +182,10 @@ static func distance(a: Vector2i, b: Vector2i) -> int:
 
 ## Coût en ticks pour passer d'une tuile à sa voisine ; -1 = infranchissable (falaise, mur,
 ## chute). Les volants ignorent le dénivelé (IA des créatures : morphologies).
-func cout_pas(de: Vector2i, vers: Vector2i, volant: bool = false, eviter_nage: bool = false) -> int:
+## Le coût d'un pas, avec le franchissement progressif (designer 2026-09-01, points 56 et 57) :
+## `facteurs` porte le facteur de compétence de l'être — {"escalade": f, "nage": f} — pour que grimper
+## une paroi haute ou traverser un lac dépendent de qui le fait. Sans facteurs, on retombe sur 1.0.
+func cout_pas(de: Vector2i, vers: Vector2i, volant: bool = false, eviter_nage: bool = false, facteurs: Dictionary = {}) -> int:
 	if not dans(vers):
 		return -1
 	if bloque_passage(vers):
@@ -194,9 +197,17 @@ func cout_pas(de: Vector2i, vers: Vector2i, volant: bool = false, eviter_nage: b
 		return base
 	if eviter_nage and nageable(vers) and not nageable(de):
 		return -1   # Eau et liquides : la surcharge refuse d'entrer — le chemin ne le propose pas
-	if nageable(vers):   # Eau et liquides : nager coûte le double d'un pas (sauf glace) — butin sur l'eau compris
-		return int(dep.get("nage", base * 2)) + (int(dep.get("neige_surcout", 1)) if neige else 0)
+	if nageable(vers):   # Nage (point 57) : chaque tuile d'eau coûte selon la compétence du nageur
+		var np: Dictionary = dep.get("nage_progressive", {})
+		var t_nage := float(np.get("ticks_par_tuile", int(dep.get("nage", base * 2))))
+		return maxi(1, int(round(t_nage / maxf(0.2, float(facteurs.get("nage", 1.0)))))) + (int(dep.get("neige_surcout", 1)) if neige else 0)
 	var dh := h(vers) - h(de)
+	# Escalade (point 56) : au-delà d'une marche, on grimpe — le coût monte avec le CARRÉ de la
+	# hauteur et descend avec la compétence ; au-delà de hauteur_max, la paroi reste infranchissable.
+	var esc: Dictionary = dep.get("escalade", {})
+	if dh >= int(dep["falaise_delta"]) and dh <= int(esc.get("hauteur_max", 0)):
+		var t_esc := float(esc.get("ticks_par_niveau", 14)) * float(dh * dh)
+		return maxi(1, int(round(t_esc / maxf(0.2, float(facteurs.get("escalade", 1.0))))))
 	if dh >= int(dep["falaise_delta"]) or dh <= -int(dep["chute_delta"]):
 		return -1
 	var sur := int(dep.get("neige_surcout", 1)) if neige else 0   # Météo : la neige ralentit

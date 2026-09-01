@@ -19,7 +19,18 @@
     "neige_surcout": 1,
     "gel_seuil": 0.0,
     "poussee_des_par_tuile": "1d4",
-    "poussee_part_occupant": 0.5
+    "poussee_part_occupant": 0.5,
+    "escalade": {
+      "_doc": "Escalade (designer 2026-09-01, point 56) : franchir une paroi de dh niveaux coûte ticks_par_niveau × dh², divisé par le facteur de la compétence escalade ; au-delà de hauteur_max, la paroi reste infranchissable.",
+      "competence": "escalade",
+      "ticks_par_niveau": 14,
+      "hauteur_max": 6
+    },
+    "nage_progressive": {
+      "_doc": "Nage (designer 2026-09-01, point 57) : chaque tuile d'eau coûte ticks_par_tuile, divisé par le facteur de la compétence nage et multiplié par la charge portée.",
+      "competence": "nage",
+      "ticks_par_tuile": 6
+    }
   },
   "actions": {
     "_doc": "Boucle de tick · Attaque lourde et télégraphe · Décision — Vocabulaire d'attaque des créatures",

@@ -69,5 +69,10 @@
       0.3,
       0.75
     ]
+  },
+  "clignotement": {
+    "_doc": "L'élément à enchaîner clignote dans le pentagramme (designer 2026-09-01, point 60).",
+    "periode_ms": 420,
+    "amplitude": 0.85
   }
 }

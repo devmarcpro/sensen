@@ -307,6 +307,37 @@ func commencer_en_donjon(e: Dictionary) -> bool:
 	return true
 
 
+## Entrer sur la cellule d'un donjon de corruption y fait entrer d'office (designer 2026-09-01,
+## point 51) : la surface n'est plus un lieu qu'on traverse. Le niveau du donjon décide de sa
+## profondeur — un donjon que personne n'a nettoyé depuis longtemps est un gouffre.
+func entrer_donjon_corrompu(e: Dictionary) -> bool:
+	if lieu != "camp" or monde == null or e.controle != "joueur":
+		return false
+	var cell := monde.cellule_de(e.pos)
+	if cell == Vector2i(e.get("cellule_vue", Vector2i(-9999, -9999))):
+		return false   # on ne se fait happer qu'en ENTRANT dans la cellule, pas à chaque pas
+	e["cellule_vue"] = cell
+	var dc := monde.donjon_de_corruption(cell, jour_courant())
+	if dc.is_empty():
+		return false
+	e["retour"] = e.pos
+	_sauver_camp(e)
+	expedition = {}
+	etages_visites.clear()
+	var cr: Dictionary = GameData.config("planete").corruption
+	var base: Array = cr.etages_mineur
+	var etages := int(base[0]) + int(dc.niveau) / 4   # le niveau creuse : quatre niveaux, un étage de plus
+	donjon = {"etages_fixes": [etages, etages], "corruption": monde.corruption_jour(cell, jour_courant()),
+		"cellule": cell, "corrompu": true, "niveau": int(dc.niveau)}
+	EventBus.emettre(&"journal", [&"journal.donjon_corrompu", {
+		"nom": GameData.entree("dungeon_themes", str(dc.theme)).name_key, "n": int(dc.niveau),
+		"element": "element." + str(dc.element), "etages": etages,
+		"corruption": roundi(monde.corruption_jour(cell, jour_courant())),
+	}])
+	charger_donjon(str(dc.theme), graine, int(hash([graine, cell.x, cell.y, "corruption"]) & 0x7fffffff), 1, e)
+	return true
+
+
 func _partir_en_expedition(e: Dictionary) -> bool:
 	if lieu != "camp" or not ("entree_donjon" in grille.contenu_de(e.pos).get("tags", [])):
 		return false
@@ -1494,6 +1525,7 @@ func voyager(e: Dictionary, cell: Vector2i) -> bool:
 	horloge_monde.avancer(cout)
 	maj_vision()
 	EventBus.emettre(&"journal", [&"journal.voyage", {"nom": e.name_key, "x": cell.x, "y": cell.y, "ticks": cout}])
+	entrer_donjon_corrompu(e)   # arriver sur une cellule corrompue, c'est y entrer (point 51)
 	return true
 
 
@@ -1983,6 +2015,11 @@ func _tiquer_souffle(nom: String, tick: int) -> void:
 
 
 ## Le vecteur élémentaire d'une tuile (Wu Xing hors combat) : dérivé des couches de bruit, jamais du biome.
+## Le jour de jeu écoulé (les donjons de corruption s'y accrochent — designer, point 51).
+func jour_courant() -> int:
+	return int(horloge_monde.ticks / maxi(1, int(_cycle().ticks_par_jour)))
+
+
 func vecteur_lieu(pos: Vector2i) -> Dictionary:
 	if not vecteur_lieu_force.is_empty():
 		return vecteur_lieu_force
@@ -7407,13 +7444,25 @@ func corruption_ici(pos: Vector2i) -> float:
 
 
 ## Déplacement d'une tuile (8 directions). Une chute volontaire (Δ ≤ −3) est autorisée : dégâts.
+## Les facteurs de franchissement d'un être (designer 2026-09-01, points 56 et 57) : ce que valent
+## son Escalade et sa Nage, charge comprise — grimper chargé est plus lent, nager chargé aussi.
+func facteurs_franchissement(e: Dictionary) -> Dictionary:
+	var comp: Dictionary = e.get("competences_eff", e.get("competences", {}))
+	var charge := 1.0 / maxf(0.2, float(poids_de(e).facteur))
+	var dep: Dictionary = regles.r.deplacement
+	return {
+		"escalade": regles.skill_factor(regles.niveau(comp, str(dep.get("escalade", {}).get("competence", "escalade")))) * charge,
+		"nage": regles.skill_factor(regles.niveau(comp, str(dep.get("nage_progressive", {}).get("competence", "nage")))) * charge,
+	}
+
+
 func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	if Grille.distance(e.pos, vers) != 1 or not grille.occupant(vers).is_empty():
 		return false
 	if "fermee" in grille.contenu_de(vers).get("tags", []):   # une porte fermée : ce pas l'ouvre, le suivant passe
 		return _basculer_porte(e, vers, tick)
 	var volant := Etres.est_volant(e)
-	var cout := grille.cout_pas(e.pos, vers, volant)
+	var cout := grille.cout_pas(e.pos, vers, volant, false, facteurs_franchissement(e))
 	var chute := 0
 	if cout < 0:
 		if not volant and grille.est_chute(e.pos, vers):
@@ -7421,6 +7470,12 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 			cout = int(regles.r.deplacement.descente)
 		else:
 			return false
+	var dh_pas := grille.h(vers) - grille.h(e.pos)   # l'usage entraîne (points 56 et 57)
+	if dh_pas >= int(regles.r.deplacement.falaise_delta):
+		gagner_xp(e, str(regles.r.deplacement.get("escalade", {}).get("competence", "escalade")), dh_pas)
+		EventBus.emettre(&"journal", [&"journal.escalade", {"nom": e.name_key, "n": cout}])
+	elif grille.nageable(vers):
+		gagner_xp(e, str(regles.r.deplacement.get("nage_progressive", {}).get("competence", "nage")), 1)
 	cout = cout_pas_affixes(e, cout)
 	if Etres.bloque_statuts(e, "deplacement", statuts_defs):
 		return false
@@ -7468,6 +7523,10 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 		if donjon.has("entree") and vers == donjon.entree and _remonter(e):
 			EventBus.dispatcher()
 			return true
+	# Une cellule corrompue happe qui y met le pied (designer 2026-09-01, point 51).
+	if e.controle == "joueur" and lieu == "camp" and monde != null and entrer_donjon_corrompu(e):
+		EventBus.dispatcher()
+		return true
 	return true
 
 

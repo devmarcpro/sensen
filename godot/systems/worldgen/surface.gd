@@ -388,6 +388,28 @@ func resume_cellule(c: Vector2i, camp: bool = false) -> Dictionary:
 	return {"biome": b, "terre": terre, "danger": danger_de(c), "poi": poi_de(c, camp), "couleur": str(biomes.get(b, {}).get("couleur", "#7fa64a"))}
 
 
+## L'élément dominant d'une cellule (Wu Xing hors combat) : la même lecture que le vecteur du lieu,
+## agrégée au centre de la cellule. Sert au thème des donjons de corruption (designer, point 51).
+func element_dominant(c: Vector2i) -> String:
+	var t: int = int(planete.taille_cellule)
+	var x := c.x * t + t / 2
+	var y := c.y * t + t / 2
+	var v := {
+		"bois": valeur("vegetation", x, y) * valeur("humidite", x, y),
+		"eau": valeur("humidite", x, y),
+		"metal": valeur("ressources", x, y),
+		"feu": maxf(absf(valeur("temperature", x, y) - 0.5) * 2.0, valeur("sismique", x, y)),
+		"terre": 0.3 + valeur("altitude", x, y) * 0.4,
+	}
+	var meilleur := "terre"
+	var part := -1.0
+	for cle: String in v.keys():
+		if float(v[cle]) > part:
+			part = float(v[cle])
+			meilleur = cle
+	return meilleur
+
+
 ## La cellule est-elle de la terre ferme (son centre et ses quatre quarts au-dessus du niveau de la mer) ?
 func terre_a(c: Vector2i) -> bool:
 	var taille: int = int(planete.taille_cellule)

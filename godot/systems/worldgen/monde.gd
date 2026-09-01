@@ -12,6 +12,7 @@ var surface: Surface
 var planete: Dictionary
 var camp_cfg: Dictionary
 var cellule_camp: Vector2i
+var nettoyages: Dictionary = {}   # cellule → jour du dernier nettoyage (donjons de corruption, point 51)
 var taille: int
 var rayon: int = 1
 var centre: Vector2i = Vector2i(-1, -1)
@@ -265,6 +266,69 @@ func corruption_de(cell: Vector2i) -> float:
 	var taille_c: int = taille
 	var d := surface.valeur("danger", cell.x * taille_c + taille_c / 2, cell.y * taille_c + taille_c / 2) * 100.0
 	return clampf(d + float(delta.get(cell, 0)), 0.0, 100.0)
+
+
+## La corruption d'une cellule UN JOUR DONNÉ (designer 2026-09-01, point 51) : la corruption de fond
+## plus un bruit qui se déplace chaque période. Calculée à la demande — le monde entier « bouge »
+## sans qu'aucune boucle ne parcoure ses cellules.
+func corruption_jour(cell: Vector2i, jour: int) -> float:
+	var cfg: Dictionary = planete.corruption.get("donjons", {})
+	var per := maxi(1, int(cfg.get("periode_jours", 3)))
+	var vague := jour / per
+	var f := float(cfg.get("frequence", 0.045))
+	var n := sin((cell.x + vague * 3) * f) * cos((cell.y - vague * 2) * f * 1.3) 		+ 0.5 * sin((cell.x + cell.y + vague) * f * 2.1)
+	# Plus on s'éloigne du centre du monde, plus la corruption mord (designer 2026-09-01, point 62).
+	var loin := float(cfg.get("gradient_bord", 0.0)) * eloignement(cell)
+	return clampf(corruption_de(cell) + float(cfg.get("amplitude", 28.0)) * (n * 0.5 + 0.5) + loin, 0.0, 100.0)
+
+
+## L'éloignement d'une cellule, de 0 au centre du monde à 1 au bord (point 62).
+func eloignement(cell: Vector2i) -> float:
+	var larg := float(planete.monde_cellules)
+	var haut := larg * float(planete.get("monde_ratio", 1.0))
+	var d := Vector2(cell.x - larg * 0.5, (cell.y - haut * 0.5) / maxf(0.2, float(planete.get("monde_ratio", 1.0)))).length()
+	return clampf(d / maxf(1.0, larg * 0.5), 0.0, 1.0)
+
+
+## Cette cellule est-elle cristallisée en donjon ce jour-là ? (point 51)
+## Les lieux habités sont épargnés, et la densité de la région est plafonnée.
+func donjon_corrompu(cell: Vector2i, jour: int) -> bool:
+	var cfg: Dictionary = planete.corruption.get("donjons", {})
+	if not surface.terre_a(cell) or cell == cellule_camp:
+		return false
+	if claims.has(cell) or surface.poi_de(cell).get("village", false):
+		return false
+	if surface.poi_de(cell, cell == cellule_camp).get("donjon", false):
+		return false   # une cellule qui a déjà son donjon garde son entrée : la corruption ne la double pas
+	if corruption_jour(cell, jour) < float(cfg.get("seuil", 62.0)):
+		return false
+	# La densité se règle par un TIRAGE déterministe plutôt qu'en comptant les voisins : avec le
+	# gradient d'éloignement (point 62), presque toute une marge dépasse le seuil, et un comptage
+	# aurait tout retenu ou tout refusé. Ici, la part de cellules retenues est stable et dispersée.
+	var densite := int(cfg.get("densite_max_pct", 18))
+	var per_t := maxi(1, int(cfg.get("periode_jours", 3)))
+	return absi(hash([cell.x, cell.y, jour / per_t, "corruption"])) % 100 < densite
+
+
+## Le donjon d'une cellule corrompue : son thème (l'élément dominant du lieu) et son niveau,
+## qui monte d'une période tant que personne ne l'a nettoyé (point 51).
+func donjon_de_corruption(cell: Vector2i, jour: int) -> Dictionary:
+	if not donjon_corrompu(cell, jour):
+		return {}
+	var cfg: Dictionary = planete.corruption.get("donjons", {})
+	var per := maxi(1, int(cfg.get("periode_jours", 3)))
+	var depuis := 0   # depuis combien de périodes cette cellule est-elle corrompue sans discontinuer ?
+	while depuis < int(cfg.get("recherche_max", 120)) and donjon_corrompu(cell, jour - (depuis + 1) * per):
+		depuis += 1
+	var nettoye := int(nettoyages.get(cell, -1))
+	if nettoye >= 0:
+		depuis = mini(depuis, maxi(0, (jour - nettoye) / per))
+	# Le niveau n'a plus de plafond (point 62) : l'âge, ou le plancher géographique s'il est plus haut.
+	# Nettoyer un donjon lointain le ramène à son plancher, jamais à 1 : la marge reste la marge.
+	var plancher := int(round(float(cfg.get("niveau_par_cellule_distance", 0.0)) * eloignement(cell) * float(planete.monde_cellules) * 0.5))
+	var el := str(surface.element_dominant(cell)) if surface.has_method("element_dominant") else "terre"
+	return {"theme": str(cfg.get("themes", {}).get(el, "terre")), "element": el,
+		"niveau": maxi(1 + depuis * int(cfg.get("niveau_par_periode", 1)), plancher), "plancher": plancher}
 
 
 ## Le niveau de danger affiché (0 paisible, 1 dangereuse, 2 mortelle) à partir de la corruption effective.

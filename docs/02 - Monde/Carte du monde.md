@@ -40,6 +40,9 @@ La couche stratégique : une vue abstraite de la même grille, servant de voyage
 >
 > Enfin, **voyager coûte le temps d'une vraie marche** : le forfait `ticks_par_cellule` disparaît au profit du produit *distance en tuiles × coût d'un pas*, où le coût d'un pas est celui du jeu — la vitesse du personnage, sa charge et le terrain compris. Traverser trois cellules de montagne chargé coûte donc bien plus que trois cellules de plaine à vide, et la route garde sa remise.
 
+> [!success] Codé le 2026-09-01 — le donjon dit sa difficulté (designer, point 61)
+> Un donjon né de la corruption ne se laissait juger qu'à la couleur de sa case. Il s'annonce désormais **deux fois**. **Au survol de la carte** : son nom de thème, son élément, son **niveau**, son nombre d'**étages** et le taux de **corruption** de la cellule. **À l'entrée** : la même ligne au journal, puis un rappel permanent dans l'en-tête tant qu'on y est — « corrompu, niveau 12 (74 %) ». Le joueur peut donc décider **avant** d'entrer, et sait **pendant** où il a mis les pieds.
+
 ## Liens
 - **Dépend de** : [[Décision — Monde fini, continents et océan]], [[Grille continue]], [[Unification macro-micro]], [[Génération par couches de bruit]]
 - **Alimente** : [[Début de partie]], [[Boucle de jeu]], [[Donjons — structure et intégration]], [[Minimap et brouillard de guerre]]

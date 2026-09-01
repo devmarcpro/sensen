@@ -143,7 +143,28 @@
       8
     ],
     "corruption_par_etage": 8,
-    "profondeur_par_corruption": 25
+    "profondeur_par_corruption": 25,
+    "donjons": {
+      "_doc": "Les donjons naissent de la corruption (designer 2026-09-01, point 51) : bruit calculé à la demande pour (cellule, jour), cristallisation au-delà du seuil, thème par élément dominant, niveau qui monte tant que personne ne nettoie. Garde-fous : lieux habités épargnés, plafond de densité par région, fusion plafonnée. La corruption croît avec la distance au centre (gradient_bord) et le niveau n'est plus plafonné : il vaut le maximum de l'âge et du plancher géographique (designer 2026-09-01, point 62).",
+      "seuil": 62.0,
+      "periode_jours": 3,
+      "amplitude": 28.0,
+      "frequence": 0.045,
+      "densite_max_pct": 18,
+      "rayon_region": 6,
+      "fusion_max": 4,
+      "niveau_par_periode": 1,
+      "themes": {
+        "bois": "bois",
+        "feu": "feu",
+        "terre": "terre",
+        "metal": "metal",
+        "eau": "eau"
+      },
+      "gradient_bord": 30.0,
+      "niveau_par_cellule_distance": 0.09,
+      "recherche_max": 120
+    }
   },
   "cycle": {
     "_doc": "Cycle jour-nuit (E.21) : 1 jour = ticks_par_jour ; phases en heures ; nuit : corruption +10 %, vision × vision_nuit ; saut de nuit jusqu'à heure_reveil ; heure_depart = l'heure du monde à la nouvelle partie (designer, 2026-08-30 : 8 h).",

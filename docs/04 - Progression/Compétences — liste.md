@@ -24,6 +24,11 @@ La liste de départ, ~30 compétences réparties en cinq familles.
 
 **Mappage fonction → compétence :** voir [[Fonctions]] (troisième axe de [[Les trois axes — race, classe, fonction]], ex-postes de travail).
 
+> [!success] Décidé et codé le 2026-09-01 — Escalade et Nage, deux compétences de franchissement (designer, points 56 et 57)
+> Une paroi n'est plus un mur ni un pas ordinaire : au-delà d'une marche, on **grimpe**, et le coût monte avec le **carré de la hauteur** (`escalade.ticks_par_niveau` × dh²) puis se divise par le facteur de la compétence **Escalade** et par la charge portée. Au-delà de `hauteur_max` (6 niveaux), la paroi reste infranchissable : la compétence rend les falaises longues, jamais gratuites. Sur le même modèle, chaque tuile d'eau coûte `nage_progressive.ticks_par_tuile` divisé par la compétence **Nage** et la charge — un nageur chargé rampe, un nageur entraîné file.
+>
+> Les deux compétences entrent au catalogue (`competences/escalade.json`, `nage.json`, catégorie *général*, sur Force et Endurance) et **progressent par l'usage** : grimper d'un dénivelé rapporte autant d'XP que sa hauteur, nager une tuile en rapporte une. Aucun chiffre n'est écrit dans le code : tout vit dans `combat_rules.deplacement`.
+
 ## Liens
 - **Dépend de** : [[Progression par l'usage]]
 - **Alimente** : [[Double niveau combat et général]], [[Potentiel]], [[Récolte]], [[Qualité d'artisanat]]

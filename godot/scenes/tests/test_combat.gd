@@ -219,7 +219,9 @@ func test_grille() -> void:
 	# Rive (10) → fond (7) : Δ−3 = chute, Δ+3 = falaise
 	verifier(g.cout_pas(Vector2i(12, 15), Vector2i(13, 15)) == -1, "Δ−3 : pas un pas normal")
 	verifier(g.est_chute(Vector2i(12, 15), Vector2i(13, 15)), "Δ−3 : chute autorisée")
-	verifier(g.cout_pas(Vector2i(13, 15), Vector2i(12, 15)) == -1, "Δ+3 : falaise infranchissable")
+	# Δ+3 s'escalade depuis le point 56 : ce n'est plus un mur, c'est un temps à payer.
+	var esc_3 := g.cout_pas(Vector2i(13, 15), Vector2i(12, 15))
+	verifier(esc_3 > int(GameData.config("combat_rules").deplacement.montee_2), "Δ+3 : escaladé, et bien plus cher qu'une montée (%d ticks)" % esc_3)
 	verifier(g.degats_chute(3) == 5 and g.degats_chute(6) == 20, "dégâts de chute = (h − 2) × 5")
 	var synth := Grille.new(3, 1)
 	synth.dep = g.dep
@@ -1447,12 +1449,18 @@ func test_carte_et_voyage() -> void:
 	verifier(s.grille.contenu_de(entree).get("tags", []).has("entree_donjon") and s.grille.bloque_passage(entree + Vector2i(0, -1)) and not s.grille.bloque_passage(entree + Vector2i(0, 1)), "l'entrée scellée : anneau de roche ouvert au sud")
 	# Voyage rapide : refusé vers l'inexploré, accepté vers une cellule explorée ; le temps avance.
 	var voisine := camp + Vector2i(1, 0)
+	for dv in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1), Vector2i(1, 1), Vector2i(2, 0)]:
+		if s.monde.surface.terre_a(camp + dv) and not s.monde.donjon_corrompu(camp + dv, s.jour_courant()):
+			voisine = camp + dv   # une cellule saine : une cellule corrompue happerait le voyageur
+			break
 	var t0: int = s.horloge_monde.ticks
 	verifier(not s.voyager(j, voisine) or not s.monde.surface.terre_a(voisine) or s.monde.cellule_exploree(voisine), "pas de voyage vers une cellule jamais explorée")
 	s.monde.explores[Vector2i(voisine.x * (s.monde.taille / 32), voisine.y * (s.monde.taille / 32))] = true
 	if s.monde.surface.terre_a(voisine):
 		verifier(s.voyager(j, voisine), "voyage rapide vers la cellule voisine explorée")
-		verifier(s.monde.cellule_de(j.pos) == voisine and s.horloge_monde.ticks - t0 == int(planete.voyage.ticks_par_cellule), "arrivé dans la cellule, %d ticks de voyage" % (s.horloge_monde.ticks - t0))
+		# Le voyage coûte une marche depuis le point 59 : une cellule = sa largeur en tuiles, au prix d'un pas.
+		var attendu_v := int(planete.taille_cellule) * s.regles.ticks_deplacement(int(s.regles.r.deplacement.cout_base), j.get("competences_eff", {}), false)
+		verifier(s.monde.cellule_de(j.pos) == voisine and absi(s.horloge_monde.ticks - t0 - attendu_v) <= attendu_v / 2, "arrivé dans la cellule, %d ticks de voyage (marche ≈ %d)" % [s.horloge_monde.ticks - t0, attendu_v])
 	# Partir d'un donjon de surface : id de la cellule, retour devant l'entrée.
 	s.grille.liberer(j.pos)
 	j.pos = entree
@@ -6285,6 +6293,70 @@ func test_camp() -> void:
 
 # ---------------------------------------------------------------- Étape 7.2 : faim, nourriture, poids porté
 
+	# Donjons nés de la corruption (2026-09-01, point 51)
+	var m51 = s.monde
+	var jour51 := s.jour_courant()
+	verifier(not m51.donjon_corrompu(m51.cellule_camp, jour51 + 30), "le camp ne cristallise jamais en donjon")
+	var trouve51 := {}
+	var n51 := 0
+	for dy51 in range(-25, 26):
+		for dx51 in range(-25, 26):
+			var c51: Vector2i = m51.cellule_camp + Vector2i(dx51, dy51)
+			var d51: Dictionary = m51.donjon_de_corruption(c51, jour51 + 30)
+			if d51.is_empty():
+				continue
+			n51 += 1
+			trouve51[str(d51.element)] = true
+			if not GameData.catalogues.dungeon_themes.has(str(d51.theme)):
+				verifier(false, "le thème %s existe" % str(d51.theme))
+	verifier(n51 > 0, "la corruption fait naître des donjons (%d dans 51×51)" % n51)
+	verifier(trouve51.size() >= 2, "leur élément varie selon le lieu (%s)" % str(trouve51.keys()))
+	var bouge51 := 0   # le bruit se déplace : la carte des donjons n'est pas la même d'une période à l'autre
+	for dy51b in range(-12, 13):
+		for dx51b in range(-12, 13):
+			var c51b: Vector2i = m51.cellule_camp + Vector2i(dx51b, dy51b)
+			if m51.corruption_jour(c51b, jour51 + 30) != m51.corruption_jour(c51b, jour51 + 60):
+				bouge51 += 1
+	verifier(bouge51 > 0, "le bruit de corruption se déplace dans le temps (%d cellules changent)" % bouge51)
+	# La corruption croît avec l'éloignement, et le niveau n'a plus de plafond (2026-09-01, point 62)
+	var pl62: Dictionary = m51.planete
+	var larg62: int = int(pl62.monde_cellules)
+	var centre62 := Vector2i(larg62 / 2, int(larg62 * float(pl62.get("monde_ratio", 1.0)) / 2.0))
+	verifier(m51.eloignement(centre62) < 0.05 and m51.eloignement(Vector2i(larg62 - 1, centre62.y)) > 0.9, "l'éloignement va de 0 au centre à 1 au bord")
+	var niv_pres := 0
+	var niv_loin := 0
+	var n_pres := 0
+	var n_loin := 0
+	for dy62 in range(-10, 11):
+		for dx62 in range(-10, 11):
+			var cp: Vector2i = centre62 + Vector2i(dx62, dy62)
+			var cl: Vector2i = centre62 + Vector2i(220 + dx62, dy62)
+			var dp: Dictionary = m51.donjon_de_corruption(cp, jour51 + 30)
+			var dl: Dictionary = m51.donjon_de_corruption(cl, jour51 + 30)
+			if not dp.is_empty():
+				niv_pres += int(dp.niveau)
+				n_pres += 1
+			if not dl.is_empty():
+				niv_loin += int(dl.niveau)
+				n_loin += 1
+	var moy_pres := float(niv_pres) / float(maxi(1, n_pres))
+	var moy_loin := float(niv_loin) / float(maxi(1, n_loin))
+	verifier(n_loin == 0 or moy_loin > moy_pres * 2.0, "loin du centre, les donjons sont bien plus hauts (%.1f contre %.1f)" % [moy_loin, moy_pres])
+
+	# Escalade et Nage (2026-09-01, points 56 et 57) : le franchissement dépend de la compétence
+	var g56: Grille = s.grille
+	var bas: Vector2i = s.vivants()[0].pos   # une tuile quelconque du camp
+	var haut: Vector2i = bas + Vector2i(1, 0)
+	var h0 := g56.h(bas)
+	g56.hauteurs[g56.idx(haut)] = h0 + 3   # une paroi de trois niveaux : au-delà d'une marche
+	var novice := g56.cout_pas(bas, haut, false, false, {"escalade": 1.0})
+	var grimpeur := g56.cout_pas(bas, haut, false, false, {"escalade": 3.0})
+	verifier(novice > 0 and grimpeur > 0 and grimpeur < novice, "escalader : %d ticks au débutant, %d au grimpeur" % [novice, grimpeur])
+	var falaise: Vector2i = bas + Vector2i(0, 1)
+	g56.hauteurs[g56.idx(falaise)] = h0 + 12   # au-delà du plafond : la paroi reste infranchissable
+	verifier(g56.cout_pas(bas, falaise, false, false, {"escalade": 5.0}) < 0, "au-delà de hauteur_max, on ne grimpe pas")
+	g56.hauteurs[g56.idx(haut)] = h0
+	g56.hauteurs[g56.idx(falaise)] = h0
 	# Voyager coûte le temps d'une marche (2026-09-01, point 59) : la distance en tuiles × le coût d'un pas.
 	var s_v2 := Simulation.new(23)
 	s_v2.planete_options = _planete_test()
@@ -6292,6 +6364,11 @@ func test_camp() -> void:
 	var j_v: Dictionary = s_v2.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
 	var n_sec_v: int = s_v2.monde.taille / 32
 	var cible_v: Vector2i = s_v2.monde.cellule_camp + Vector2i(2, 0)
+	for dv2 in [Vector2i(2, 0), Vector2i(0, 2), Vector2i(-2, 0), Vector2i(0, -2), Vector2i(2, 2)]:
+		var cc2: Vector2i = s_v2.monde.cellule_camp + dv2
+		if s_v2.monde.surface.terre_a(cc2) and not s_v2.monde.donjon_corrompu(cc2, s_v2.jour_courant()):
+			cible_v = cc2   # une cellule saine : une cellule corrompue happerait le voyageur (point 51)
+			break
 	s_v2.monde.explores[Vector2i(cible_v.x * n_sec_v, cible_v.y * n_sec_v)] = true
 	var t_av := s_v2.horloge_monde.ticks
 	if s_v2.voyager(j_v, cible_v):
@@ -7101,7 +7178,7 @@ func test_gemmes_et_livres() -> void:
 func test_progression() -> void:
 	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
 	verifier(prog.xp_next(1) == 303 and prog.xp_next(10) == roundi(100.0 * pow(11.0, 1.6)) and prog.xp_next(50) == roundi(100.0 * pow(51.0, 1.6)), "xp_next : 303 · ~4 600 · ~54 000 (100 × (N+1)^1.6)")
-	verifier(GameData.catalogues.competences.size() == 58, "58 compétences en données (catégorie, stat, famille)")
+	verifier(GameData.catalogues.competences.size() == 60, "60 compétences en données (catégorie, stat, famille)")
 	var humain := GameData.entree("races", "humain")
 	var nain := GameData.entree("races", "nain")
 	var sabre := GameData.entree("classes", "le_sabre")

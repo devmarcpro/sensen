@@ -237,6 +237,11 @@ func _ready() -> void:
 	for i8 in args.size():   # --visee N : la capacité N du joueur en cours de visée (ligne de vue, forme, bulle)
 		if args[i8] == "--visee" and i8 + 1 < args.size():
 			scene.visee = int(args[i8 + 1])
+	for ich in args.size():   # --chaine el[,el…] : des segments posés dans la jauge (le clignotement, point 60)
+		if args[ich] == "--chaine" and ich + 1 < args.size() and scene.sim != null:
+			var jch: Dictionary = scene.joueur()
+			for el in args[ich + 1].split(","):
+				scene.sim.wuxing.poser(jch.chaine, str(el), scene.sim.horloge_de(jch).ticks)
 	for i7 in args.size():   # --statut id[,id…] : des statuts sur le joueur (triche) — les puces de la timeline
 		if args[i7] == "--statut" and i7 + 1 < args.size():
 			for sid in args[i7 + 1].split(","):

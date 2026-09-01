@@ -1815,6 +1815,8 @@ func _maj_ui() -> void:
 	var titre: String = tr("ui.camp").format({"biome": tr(str(GameData.catalogues.biomes.get(str(sim.camp_sauve.get("biome", "plaine_temperee")), {}).get("name_key", "")))}) if sim.lieu == "camp" else (tr(GameData.entree("prototype_arenas", arenes[arene_courante]).name_key) if sim.donjon.is_empty() else tr("ui.donjon").format({"theme": tr(GameData.entree("dungeon_themes", sim.donjon.theme).name_key), "etage": sim.donjon.etage, "etages": sim.donjon.etages, "salles": sim.donjon.salles}))
 	var lignes: Array[String] = [tr("ui.titre") + " · " + titre]
 	var mode := tr("ui.mode.combat") if sim.en_combat(j) else (tr("ui.mode.donjon") if sim.horloge_monde.mode == Horloge.Mode.ACTION else tr("ui.mode.exploration").format({"tps": sim.regles.r.ticks_par_seconde_exploration}))
+	if sim.lieu == "donjon" and bool(sim.donjon.get("corrompu", false)):   # le donjon corrompu dit sa difficulté (point 61)
+		mode += tr("ui.mode.donjon_corrompu").format({"n": int(sim.donjon.get("niveau", 1)), "corruption": roundi(float(sim.donjon.get("corruption", 0.0)))})
 	lignes.append(tr("ui.horloge").format({"horloge": sim.horloge_de(j).ticks, "mode": mode}))
 	var proches := sim.vivants().filter(func(e: Dictionary) -> bool: return e.id == joueur_id or (Grille.distance(e.pos, j.pos) <= 12 and sim.voit(j, e.pos)))
 	proches = proches.slice(0, 10)   # les êtres en vue seulement : l'écran n'est pas un registre

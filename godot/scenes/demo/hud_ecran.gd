@@ -85,6 +85,14 @@ func _dessiner_pentagramme(sim, j: Dictionary, c: Vector2) -> void:
 	var compte := {}
 	for s in segments:
 		compte[str(s.element)] = int(compte.get(str(s.element), 0)) + 1
+	# L'élément à enchaîner clignote (designer 2026-09-01, point 60) : celui qu'ENGENDRE le dernier
+	# segment posé. Le joueur n'a plus à connaître le cycle par cœur pour savoir où frapper ensuite.
+	var cap_c := int(j.get("chaine", {}).get("capacite", 0))
+	var suivant := ""
+	if not segments.is_empty() and segments.size() < cap_c:
+		suivant = str(sim.wuxing.w.engendre.get(str(segments.back().element), ""))
+	var cli: Dictionary = GameData.config("wuxing").get("clignotement", {})
+	var pulse := 0.5 + 0.5 * sin(float(Time.get_ticks_msec()) / maxf(80.0, float(cli.get("periode_ms", 420))) * TAU)
 	for k in elements.size():
 		var el := str(elements[k])
 		var teinte: Color = sim.wuxing.teinte(el)
@@ -92,6 +100,13 @@ func _dessiner_pentagramme(sim, j: Dictionary, c: Vector2) -> void:
 		draw_circle(pts[k], 5.0 + 2.0 * n, teinte if n > 0 else teinte.darkened(0.55))
 		if not segments.is_empty() and str(segments.back().element) == el:
 			draw_arc(pts[k], 9.0 + 2.0 * n, 0.0, TAU, 16, Color(1, 1, 1, 0.9), 1.5)
+		if el == suivant and not suivant.is_empty():
+			var a_cli: float = float(cli.get("amplitude", 0.85)) * pulse
+			draw_circle(pts[k], 5.0 + 2.0 * n + 4.0 * pulse, Color(teinte.r, teinte.g, teinte.b, a_cli * 0.45))
+			draw_arc(pts[k], 12.0 + 3.0 * pulse, 0.0, TAU, 18, Color(1.0, 1.0, 1.0, a_cli), 2.0)
+			var dep_fl := pts[elements.find(str(segments.back().element))]   # une flèche depuis l'élément courant
+			var dir_fl := (pts[k] - dep_fl).normalized()
+			draw_line(dep_fl + dir_fl * 10.0, pts[k] - dir_fl * 12.0, Color(1.0, 1.0, 1.0, a_cli * 0.7), 1.5)
 	var cap := int(j.get("chaine", {}).get("capacite", 0))
 	if cap > 0:
 		draw_string(ThemeDB.fallback_font, c + Vector2(-8.0, 5.0), "%d/%d" % [segments.size(), cap], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.9, 0.9, 0.85))

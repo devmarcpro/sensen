@@ -73,6 +73,11 @@ JAUGE DE CHAÎNE — 5 SEGMENTS DE BASE, EXTENSIBLE JUSQU'À 10 :
 > [!warning] Premier réglage le 2026-08-27 — « on ajustera plus tard »
 > Balayage de 48 jeux de valeurs avec `test_criteres` (dégâts moyens, vraies données) : **aucun** jeu de bonus de transition ne ramène les deux voies à ±15 %, parce que l'écart ne vient pas des transitions mais des **bases** — la lourde ×2.2 sur une masse (construction lourde : +30 % au-dessus de la rotation) et la dague à 1d6 (construction légère : −40 % en dessous). La rotation se place entre les deux. Valeurs retenues en attendant le playtest : **engendrement +0.45** (au lieu de +0.35 ; rotation ×2.80), même élément +0.10 et hors ordre +0.20 inchangés, **swap d'arme 3 ticks** (au lieu de 4 — [[Boucle de tick]]) : avec 3 ticks le swap devient rentable pour dague→épée lourde et reste perdant pour épée→masse→épée, ce qui est exactement « dans certains cas seulement ». Le critère « ±15 % » devra préciser ce qu'est la *construction* de référence (arme légère → lourde de l'élément engendré, avec quelle arme) avant d'être rejugé — [[Vers la production]].
 
+> [!success] Décidé et codé le 2026-09-01 — l'élément suivant clignote (designer, point 60)
+> La jauge disait ce qui était **posé**, jamais ce qu'il fallait poser **ensuite** : le joueur devait connaître le cycle par cœur pour enchaîner. Le pentagramme du HUD fait maintenant **clignoter le sommet de l'élément engendré** par le dernier segment — un halo qui pulse, à la teinte de l'élément, doublé d'une flèche depuis le segment courant. Il ne clignote que si la chaîne est ouverte et non pleine : quand il n'y a plus rien à enchaîner, l'indication s'éteint d'elle-même.
+>
+> Deux chiffres en données (`wuxing.clignotement` : période et amplitude) ; aucune règle de combat ne change, c'est une aide de lecture.
+
 ## Liens
 - **Dépend de** : [[Wu Xing — cycles et vecteurs]], [[Domination et multiplicateurs]], [[Action-time à ticks]]
 - **Alimente** : [[XP de combat]], [[Cinq accès au cycle]], [[Attaque lourde et télégraphe]]
