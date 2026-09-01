@@ -538,7 +538,7 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 > « fais en sorte que l'écran de pose permette de tout simplement sélectionner les membres et les joints avec la souris pour articuler le pantin ». Aujourd'hui le volet Pose se pilote au clavier, segment par segment, à ← →. Il faut pouvoir **cliquer un membre ou un joint** dans l'aperçu et le faire tourner à la souris, le segment saisi étant mis en évidence.
 
 
-> [!todo] Ajout du designer (2026-09-01) : 69. **Le cuir doit dire de quel animal il vient**
+> [!done] Ajout du designer (2026-09-01) : 69. **Fait le 2026-09-01** — vingt-deux cuirs, un par espèce à peau ([[Catégories de matériaux]]). **Le cuir doit dire de quel animal il vient**
 > « un casque en cuir ne devrait pas être juste ça, en cuir de quoi ? ». Aujourd'hui `cuir` est un matériau unique : un casque est « en cuir », point. Il faut que la dépouille d'une bête donne **son** cuir — cuir de sanglier, de loup, de basilic — et que l'objet assemblé le nomme, avec les stats de matériau qui vont avec. À traiter en données (matériaux dérivés de l'espèce, tannage qui conserve la provenance), sans casser les recettes existantes.
 
 

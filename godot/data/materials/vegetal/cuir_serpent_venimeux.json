@@ -1,0 +1,45 @@
+{
+  "name_key": "material.cuir_serpent_venimeux.name",
+  "category": "vegetal",
+  "stats": {
+    "durete": 8,
+    "densite": 4,
+    "valeur_base": 9,
+    "conductivite_mana": 5,
+    "flammabilite": 40,
+    "isolation": 48,
+    "conductivite_electrique": 15,
+    "flottabilite": 60,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 68,
+    "friction": 55
+  },
+  "tags": [
+    "organique",
+    "animal",
+    "cuir"
+  ],
+  "color": "#776335",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 295,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "faucille",
+    "skill": "herboristerie"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": {
+    "bois": 0.5,
+    "eau": 0.3,
+    "feu": 0.2
+  },
+  "composition": null
+}

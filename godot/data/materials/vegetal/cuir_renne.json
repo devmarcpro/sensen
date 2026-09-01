@@ -1,0 +1,44 @@
+{
+  "name_key": "material.cuir_renne.name",
+  "category": "vegetal",
+  "stats": {
+    "durete": 9,
+    "densite": 4,
+    "valeur_base": 10,
+    "conductivite_mana": 5,
+    "flammabilite": 40,
+    "isolation": 54,
+    "conductivite_electrique": 15,
+    "flottabilite": 60,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 65,
+    "friction": 55
+  },
+  "tags": [
+    "organique",
+    "animal",
+    "cuir"
+  ],
+  "color": "#8B6544",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 272,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "faucille",
+    "skill": "herboristerie"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": {
+    "bois": 0.6,
+    "eau": 0.4
+  },
+  "composition": null
+}

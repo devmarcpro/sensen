@@ -3,19 +3,46 @@
   "race": "serpent_geant",
   "skeleton_template": "serpentin",
   "corps": {
-    "stats": {"force": 8, "dexterite": 13, "endurance": 7, "volonte": 4, "perception": 11, "charisme": 1},
+    "stats": {
+      "force": 8,
+      "dexterite": 13,
+      "endurance": 7,
+      "volonte": 4,
+      "perception": 11,
+      "charisme": 1
+    },
     "silhouette": "serpentin"
   },
   "esprit": null,
   "ai_profile": "hostile",
-  "actions": ["morsure_venimeuse", "machoire_verrouillee"],
+  "actions": [
+    "morsure_venimeuse",
+    "machoire_verrouillee"
+  ],
   "equipement": [],
   "ratelier": [],
   "chain_gauge": false,
-  "elements": {"bois": 0.4, "eau": 0.4, "feu": 0.2},
+  "elements": {
+    "bois": 0.4,
+    "eau": 0.4,
+    "feu": 0.2
+  },
   "rare_chance": 0.02,
-  "teinte": [0.3, 0.55, 0.25],
-  "tags": ["bete", "embuscade"],
-  "competences": {"athletisme": 24},
-  "depouille": ["peau", "dent"]
+  "teinte": [
+    0.3,
+    0.55,
+    0.25
+  ],
+  "tags": [
+    "bete",
+    "embuscade"
+  ],
+  "competences": {
+    "athletisme": 24
+  },
+  "depouille": [
+    "peau",
+    "dent"
+  ],
+  "cuir": "cuir_serpent_geant"
 }

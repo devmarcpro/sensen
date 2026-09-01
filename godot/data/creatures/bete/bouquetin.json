@@ -43,5 +43,6 @@
     "viande_crue",
     "peau",
     "os"
-  ]
+  ],
+  "cuir": "cuir_bouquetin"
 }

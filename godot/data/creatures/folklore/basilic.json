@@ -42,5 +42,6 @@
   "depouille": [
     "peau",
     "dent"
-  ]
+  ],
+  "cuir": "cuir_basilic"
 }

@@ -1874,6 +1874,28 @@ material.chanvre.name,Chanvre
 material.laine.name,Laine
 material.soie.name,Soie
 material.cuir.name,Cuir
+material.cuir_basilic.name,"cuir de basilic"
+material.cuir_bouquetin.name,"cuir de bouquetin"
+material.cuir_chameau.name,"cuir de chameau sauvage"
+material.cuir_crocodile.name,"cuir de crocodile"
+material.cuir_griffon.name,"cuir de griffon"
+material.cuir_jorogumo.name,"cuir de jorogumo"
+material.cuir_kappa.name,"cuir de kappa"
+material.cuir_kitsune.name,"cuir de kitsune"
+material.cuir_lindworm.name,"cuir de lindworm"
+material.cuir_loup_blanc.name,"cuir de loup blanc"
+material.cuir_lynx.name,"cuir de lynx"
+material.cuir_morse.name,"cuir de morse"
+material.cuir_nue.name,"cuir de nue"
+material.cuir_ours_brun.name,"cuir de ours brun"
+material.cuir_ours_des_cavernes.name,"cuir de ours des cavernes"
+material.cuir_ours_polaire.name,"cuir de ours polaire"
+material.cuir_renne.name,"cuir de renne"
+material.cuir_serpent_geant.name,"cuir de serpent géant"
+material.cuir_serpent_venimeux.name,"cuir de serpent venimeux"
+material.cuir_tengu.name,"cuir de tengu"
+material.cuir_troll.name,"cuir de troll"
+material.cuir_tsuchigumo.name,"cuir de tsuchigumo"
 material.fourrure.name,Fourrure
 material.eau.name,Eau
 material.eau_salee.name,Eau salée

@@ -1,0 +1,44 @@
+{
+  "name_key": "material.cuir_crocodile.name",
+  "category": "vegetal",
+  "stats": {
+    "durete": 13,
+    "densite": 7,
+    "valeur_base": 15,
+    "conductivite_mana": 5,
+    "flammabilite": 40,
+    "isolation": 69,
+    "conductivite_electrique": 15,
+    "flottabilite": 60,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 52,
+    "friction": 55
+  },
+  "tags": [
+    "organique",
+    "animal",
+    "cuir"
+  ],
+  "color": "#6E6138",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 361,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "faucille",
+    "skill": "herboristerie"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": {
+    "eau": 0.7,
+    "terre": 0.3
+  },
+  "composition": null
+}

@@ -12,7 +12,8 @@
   "output": {
     "material": "cuir",
     "forme": "brut",
-    "amount": 1
+    "amount": 1,
+    "materiau_depuis_espece": "cuir"
   },
   "fuel": null
 }

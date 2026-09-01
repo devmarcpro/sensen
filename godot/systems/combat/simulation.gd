@@ -5559,6 +5559,16 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 			plan.sortie.item = str(fiche.get(str(r.output.champ), ""))
 		if plan.sortie.item.is_empty():
 			plan.faisable = false
+	if r.output.has("materiau_depuis_espece") and plan.faisable:
+		# Le cuir dit de quelle bête il vient (designer 2026-09-01, point 69) : une seule recette de
+		# tannage, autant de cuirs que d'espèces. Sans espèce identifiée, on garde le matériau générique.
+		for entree in plan.entrees:
+			var esp := str(entree.pile.get("espece", ""))
+			if esp.is_empty():
+				continue
+			var mat_esp := str(GameData.catalogues.creatures.get(esp, {}).get(str(r.output.materiau_depuis_espece), ""))
+			if not mat_esp.is_empty():
+				plan.sortie.materiau = mat_esp
 	if r.output.has("par_locus") and plan.faisable:   # la quantité suit un locus du spécimen consommé (finesse du fil)
 		for entree in plan.entrees:
 			if entree.pile.has("genome"):
@@ -6619,6 +6629,7 @@ func _drop(cible: Dictionary, source: String) -> void:
 	for base in def_c.get("depouille", []):
 		var v := generer_objet(str(base), profondeur, {"creature": cible.name_key}, "commun", 0)
 		if not v.is_empty():
+			v["espece"] = str(cible.def)   # la peau sait de quelle bête elle vient (point 69)
 			if not top_stat.is_empty():   # viande paramétrique (Cuisine et alchimie) : la stat dominante de la bête
 				v["potentiel"] = {top_stat: 1}
 				v["wuxing"] = def_c.elements.duplicate() if def_c.get("elements") is Dictionary else regles.r.craft.harmonie.viande_defaut.duplicate()

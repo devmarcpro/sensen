@@ -159,6 +159,7 @@ func _ready() -> void:
 	_lancer("test_portes_une_par_ouverture")
 	_lancer("test_chaine_a_trois_etapes")
 	_lancer("test_dilution_par_surface")
+	_lancer("test_cuir_par_espece")
 	_lancer("test_types_ennemis")
 	_lancer("test_loot_assemble")
 	_lancer("test_budgets")
@@ -1161,7 +1162,7 @@ func test_paperdoll_et_tutoriels() -> void:
 
 func test_materiaux() -> void:
 	var mats: Dictionary = GameData.catalogues.materials
-	verifier(mats.size() == 163, "les 163 matériaux des catalogues sont chargés (%d)" % mats.size())
+	verifier(mats.size() == 185, "les 185 matériaux des catalogues sont chargés — dont un cuir par espèce (%d)" % mats.size())
 	var fer: Dictionary = mats.fer
 	verifier(int(fer.stats.durete) == 25 and int(fer.stats.conductivite_electrique) == 75, "le Fer suit sa table (Dur 25, CÉl 75)")
 	verifier("conducteur" in fer.tags and not ("inflammable" in fer.tags), "tags dérivés au seuil 50 (fer : conducteur)")
@@ -7508,3 +7509,35 @@ func test_dilution_par_surface() -> void:
 	var p1: Dictionary = cap2.assembler(["jet_court", "point", "etincelle"], 5, "1d4", {})
 	var p2: Dictionary = cap2.assembler(["jet_court", "jet_court", "point", "etincelle"], 5, "1d4", {})
 	verifier(int(p2.portee.y) > int(p1.portee.y) and int(p2.ticks) > int(p1.ticks), "la portée répétée allonge et se paie (%d → %d tuiles, %d → %d ticks)" % [int(p1.portee.y), int(p2.portee.y), int(p1.ticks), int(p2.ticks)])
+
+## Le cuir dit de quelle bête il vient (designer 2026-09-01, point 69) : une seule recette de tannage,
+## un cuir par espèce, lu sur la peau consommée.
+func test_cuir_par_espece() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var especes := 0
+	var sans_cuir: Array = []
+	for cid: String in GameData.catalogues.creatures.keys():
+		var d: Dictionary = GameData.catalogues.creatures[cid]
+		if "peau" in d.get("depouille", []):
+			especes += 1
+			if str(d.get("cuir", "")).is_empty() or not GameData.catalogues.materials.has(str(d.cuir)):
+				sans_cuir.append(cid)
+	verifier(especes >= 20 and sans_cuir.is_empty(), "%d espèces laissent une peau, chacune avec son cuir (%s)" % [especes, str(sans_cuir)])
+	var ours: Dictionary = GameData.catalogues.materials.get("cuir_ours_polaire", {})
+	var serpent: Dictionary = GameData.catalogues.materials.get("cuir_serpent_venimeux", {})
+	verifier(not ours.is_empty() and not serpent.is_empty(), "les cuirs d'ours polaire et de serpent existent")
+	verifier(int(ours.stats.durete) > int(serpent.stats.durete) and int(ours.stats.densite) > int(serpent.stats.densite), "l'ours donne un cuir plus dur et plus lourd que le serpent (%d/%d contre %d/%d)" % [int(ours.stats.durete), int(ours.stats.densite), int(serpent.stats.durete), int(serpent.stats.densite)])
+	# Tanner une peau d'ours polaire donne du cuir d'ours polaire, pas du cuir générique.
+	var peau := s.generer_objet("peau", 1, {}, "commun", 0)
+	peau["espece"] = "ours_polaire"
+	peau["quantite"] = 4
+	j.sac.append(peau.uid)
+	var rec: Dictionary = GameData.catalogues.recipes.get("tanner_cuir", {})
+	var plan: Dictionary = s._plan_recette(j, rec)
+	verifier(bool(plan.faisable) and str(plan.sortie.materiau) == "cuir_ours_polaire", "tanner une peau d'ours polaire donne du cuir d'ours polaire (%s)" % str(plan.sortie.materiau))
+	var peau2 := s.generer_objet("peau", 1, {}, "commun", 0)
+	peau2["quantite"] = 4
+	j.sac.clear()
+	j.sac.append(peau2.uid)
+	verifier(str(s._plan_recette(j, rec).sortie.materiau) == "cuir", "une peau sans espèce retombe sur le cuir générique")
