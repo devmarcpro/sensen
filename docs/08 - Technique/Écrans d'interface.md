@@ -126,6 +126,13 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > **Instruction** : « refais toutes les captures d'écran, n'oublie pas remplir et équiper l'inventaire avant, pareil pour le composeur de sort, explorer avant la capture d'une cellule etc, qu'on voit le plus possible du jeu ». `capture.gd` gagne de quoi **jouer la scène** avant de la photographier : `--loot N` (assemble N objets et équipe ceux qui ont un slot), `--modules` (apprend tout le catalogue), `--sorts "forme,noyau|…"` (compose des capacités dans la barre), `--marcher N`, `--talents`, et surtout **`--graine N`** — les captures tombaient jusque-là dans un monde tiré au hasard à chaque lancement, ce qui explique le « village » qui n'en était pas un et la carte de cendres : `main.gd` respecte désormais une graine imposée au lieu de la réécrire. `--carte` est déplacé en toute fin de recette pour que la carte montre ce qui a été exploré, et `--village` cherche jusqu'à 70 cellules en exigeant **au moins quatre habitants**. Toutes les scènes de monde partagent la graine 4242 : même géographie d'une image à l'autre.
 
 
+> [!bug] Corrigé le 2026-09-01 — les noms de la hotbar étaient coupés à neuf caractères
+> La constante `CASE := 56.0` porte le commentaire « assez large pour lire *Étincelle* ou *Attaque* sans les tronquer », mais le dessin appelait `nom.left(9)` : on lisait « Saignemen » et « Attaque l ». La police s'ajuste maintenant à la largeur de la case (10 → 7, `_nom_ajuste`) au lieu de couper le mot. Vérifié à l'écran.
+
+> [!question] À juger — l'écran de création flotte dans le vide (2026-09-01)
+> Depuis la scission en trois volets, chaque volet n'a plus que huit à vingt lignes dans une colonne de 200 px sur une fenêtre de 1920 : **les deux tiers inférieurs de l'écran sont noirs**, l'avatar et le portrait restent petits et logés dans le tiers supérieur. Deux issues, au choix du designer : élargir la colonne et agrandir le personnage jusqu'à occuper la hauteur, ou étaler chaque volet sur deux colonnes. Capture : `capture.tscn -- --creation --volet 0|1|2`.
+
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

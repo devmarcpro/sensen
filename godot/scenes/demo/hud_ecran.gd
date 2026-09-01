@@ -140,4 +140,13 @@ func _dessiner_hotbar(sim, j: Dictionary, o: Vector2) -> void:
 			if str(entrees[k].type) == "capacite":   # l'icône combinée du sort (Pictos), au-dessus de son nom
 				var cap: Dictionary = j.capacites[int(entrees[k].ref)]
 				Pictos.dessiner_sort(self, cap.get("modules", []), Rect2(r.position + Vector2(CASE * 0.22, 12.0), Vector2(CASE * 0.56, CASE * 0.56)))
-			draw_string(ThemeDB.fallback_font, r.position + Vector2(3.0, CASE - 6.0), nom.left(9), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.95, 0.95, 0.9))
+			_nom_ajuste(nom, r)
+
+## Le nom d'une case tenu dans sa largeur : la police rétrécit (jusqu'à 7) au lieu de couper le mot.
+func _nom_ajuste(nom: String, r: Rect2) -> void:
+	var f := ThemeDB.fallback_font
+	var large := r.size.x - 6.0
+	var taille_police := 10
+	while taille_police > 7 and f.get_string_size(nom, HORIZONTAL_ALIGNMENT_LEFT, -1, taille_police).x > large:
+		taille_police -= 1
+	draw_string(f, r.position + Vector2(3.0, CASE - 6.0), nom, HORIZONTAL_ALIGNMENT_LEFT, large, taille_police, Color(0.95, 0.95, 0.9))
