@@ -162,6 +162,7 @@ func _ready() -> void:
 	_lancer("test_cuir_par_espece")
 	_lancer("test_loot_varie")
 	_lancer("test_chasse")
+	_lancer("test_recuperation")
 	_lancer("test_types_ennemis")
 	_lancer("test_loot_assemble")
 	_lancer("test_budgets")
@@ -7288,7 +7289,7 @@ func test_gemmes_et_livres() -> void:
 func test_progression() -> void:
 	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
 	verifier(prog.xp_next(1) == 303 and prog.xp_next(10) == roundi(100.0 * pow(11.0, 1.6)) and prog.xp_next(50) == roundi(100.0 * pow(51.0, 1.6)), "xp_next : 303 · ~4 600 · ~54 000 (100 × (N+1)^1.6)")
-	verifier(GameData.catalogues.competences.size() == 61, "61 compétences en données, dont Chasse (catégorie, stat, famille)")
+	verifier(GameData.catalogues.competences.size() == 62, "62 compétences en données, dont Chasse et Récupération (catégorie, stat, famille)")
 	var humain := GameData.entree("races", "humain")
 	var nain := GameData.entree("races", "nain")
 	var sabre := GameData.entree("classes", "le_sabre")
@@ -7587,3 +7588,52 @@ func test_chasse() -> void:
 			for lot in s.contenants.values():
 				pieces[essai] += (lot as Array).size()
 	verifier(pieces[1] > pieces[0], "l'expert rapporte plus que le novice (%d contre %d pièces sur 30 bêtes)" % [pieces[1], pieces[0]])
+
+## Récupération (designer 2026-09-01) : les attaques mangent l'endurance, le niveau décide de la vitesse
+## à laquelle elle revient, et récupérer entraîne.
+func test_recuperation() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var cfg: Dictionary = s.regles.r.endurance
+	verifier(GameData.catalogues.competences.has(str(cfg.competence)), "la compétence %s existe au catalogue" % str(cfg.competence))
+	# Une attaque coûte son endurance (hors capacité).
+	var loup: Dictionary = {}
+	for x in s.vivants():
+		if x.controle != "joueur" and x.get("camp", "") == "hostile":
+			loup = x
+			break
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(1, 0)
+	s.grille.placer(loup.id, loup.pos)
+	s._engager_combat(j, loup)
+	var h := s.horloge_de(j)
+	j.endurance = int(j.endurance_max)
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	var avant: int = j.endurance
+	s.intention(j.id, {"type": "attaquer", "cible": loup.id})
+	verifier(j.endurance <= avant - int(cfg.attaque) or j.endurance < avant, "frapper coûte de l'endurance (%d → %d)" % [avant, j.endurance])
+	# Deux niveaux de Récupération, même durée : le confirmé en reprend plus.
+	var repris := [0, 0]
+	for essai in 2:
+		j.competences[str(cfg.competence)] = 0 if essai == 0 else 40
+		j.competences_eff = j.competences.duplicate()
+		j.endurance = 10
+		j.tick_endurance = h.ticks
+		s._regenerer(j, h.ticks + 20)
+		repris[essai] = j.endurance - 10
+	verifier(repris[1] > repris[0], "le confirmé récupère plus vite (%d contre %d sur 20 ticks)" % [repris[1], repris[0]])
+	# Récupérer entraîne, mais pas à endurance pleine.
+	j.competences[str(cfg.competence)] = 0
+	j.competences_eff = j.competences.duplicate()
+	var xp_avant: float = float(j.get("xp_competences", {}).get(str(cfg.competence), 0.0))
+	j.endurance = 10
+	j.tick_endurance = h.ticks
+	s._regenerer(j, h.ticks + 60)
+	var xp_apres: float = float(j.get("xp_competences", {}).get(str(cfg.competence), 0.0))
+	verifier(xp_apres > xp_avant, "récupérer entraîne (%.1f → %.1f)" % [xp_avant, xp_apres])
+	j.endurance = int(j.endurance_max)
+	j.tick_endurance = h.ticks + 60
+	var xp_plein: float = float(j.get("xp_competences", {}).get(str(cfg.competence), 0.0))
+	s._regenerer(j, h.ticks + 120)
+	verifier(is_equal_approx(float(j.get("xp_competences", {}).get(str(cfg.competence), 0.0)), xp_plein), "à endurance pleine, rien ne s'apprend")

@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.recuperation.name",
+  "category": "general",
+  "stat": "endurance",
+  "famille": "corps",
+  "tags": [
+    "general",
+    "corps"
+  ]
+}

@@ -7332,10 +7332,19 @@ func _declencher_glyphe(entrant: Dictionary, pos: Vector2i) -> void:
 func _regenerer(e: Dictionary, tick: int) -> void:
 	var ecoules := tick - int(e.tick_endurance)
 	if ecoules > 0:
-		var regen := ecoules * int(regles.r.endurance.regen_par_tick)
+		# Récupération (designer 2026-09-01) : le pendant de Méditation pour l'endurance — le niveau
+		# augmente le gain par tick, et l'usage entraîne, mais seulement si le corps regagne vraiment.
+		var nv_rec := regles.niveau(e.get("competences_eff", e.get("competences", {})), str(regles.r.endurance.get("competence", "recuperation")))
+		var regen := int(round(float(ecoules) * float(regles.r.endurance.regen_par_tick) * (1.0 + float(nv_rec) * float(regles.r.endurance.get("regen_par_niveau", 0.0)))))
 		if float(e.get("ecart_confort", 0.0)) != 0.0:
 			regen = int(float(regen) * float(GameData.config("planete").get("meteo", {}).get("endurance_regen_hors_confort", 0.5)))
+		var avant_end: int = e.endurance
 		e.endurance = mini(e.endurance_max, e.endurance + regen)
+		if e.endurance > avant_end:   # on ne s'entraîne pas à récupérer quand on est déjà au maximum
+			var per_r := maxi(1, int(regles.r.endurance.get("xp_periode_ticks", 20)))
+			var tr_r := tick / per_r - int(e.tick_endurance) / per_r
+			if tr_r > 0:
+				gagner_xp(e, str(regles.r.endurance.get("competence", "recuperation")), tr_r)
 		# Mana (A.5) : à chaque tranche de 10 ticks franchie, 1 chance sur 8 de rendre 1 + N_meditation × 0.2.
 		var periode := int(regles.r.mana.periode_ticks)
 		var tranches := tick / periode - int(e.tick_endurance) / periode

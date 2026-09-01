@@ -53,7 +53,10 @@
     "garde_impact_div": 4,
     "regen_par_tick": 2,
     "a_zero_degats_mult": 0.6,
-    "epuisement_mult": 1
+    "epuisement_mult": 1,
+    "competence": "recuperation",
+    "regen_par_niveau": 0.05,
+    "xp_periode_ticks": 20
   },
   "garde": {
     "_doc": "Garde en posture · Décision — Boucliers",

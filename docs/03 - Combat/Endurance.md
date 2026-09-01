@@ -25,6 +25,10 @@ action, et elle est FRONTALE : flanc et dos l'ignorent.
 
 **Affixes liés ([[Loot — affixes, gemmes et rareté]]) :** « à la parade : rend [3-8] endurance » · « garde −[20-40] % d'endurance » · gemme **Ambre** : endurance ou compétence physique.
 
+> [!success] Codé le 2026-09-01 — la compétence **Récupération** (designer)
+> « les attaques hors capacités devraient consommer de l'endurance et faire en sorte que la récupération fonctionne bien ». **Vérifié avant de coder** : les attaques la consomment déjà — 8 points pour un coup, 18 pour une attaque lourde, prélevés dans `_frapper_arme`. Ce qui manquait, c'est l'autre moitié : la régénération valait **+2 par tick pour tout le monde**, sans compétence ni progression, alors que le mana avait la sienne (Méditation, qui améliore le jet et gagne de l'XP à chaque rendu). L'endurance a désormais son pendant : **Récupération** ajoute `regen_par_niveau` par niveau au gain par tick, et **s'entraîne en récupérant** — un point d'XP par tranche de ticks, seulement quand le corps a réellement regagné quelque chose, jamais à endurance pleine. Un débutant reprend 2 points par tick, un athlète confirmé le double.
+
+
 ## Liens
 - **Dépend de** : [[Boucle de tick]], [[Action-time à ticks]]
 - **Alimente** : [[Garde en posture]], [[Attaque lourde et télégraphe]], [[Combat tactique sur grille]]
