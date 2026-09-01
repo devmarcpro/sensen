@@ -100,6 +100,11 @@ Le même vocabulaire produit une attaque, un contrôle de zone, un piège et un 
 > « plutôt que doubler on va faire par incrément ». Une copie supplémentaire ajoutait la **valeur entière** du module : `Jet court` deux fois portait à 6, trois fois à 9 ; une `Diagonale` répétée gagnait 4 tuiles d'un coup. Le cadran sautait donc de palier en palier au lieu de se régler. Une copie ajoute désormais **un cran** — une tuile de portée, un point de taille (`combat_rules.surface.increment_repetition`) — en payant chaque fois le surcoût en ticks du module. `Jet court` répété donne 3, 4, 5, 6… au prix de deux ticks par cran, et l'on choisit sa distance exacte au lieu de la subir.
 
 
+> [!success] Décidé et codé le 2026-09-01 — une condition se paie, et son prix suit son don
+> Les 22 modules `condition` sont la forme la plus ancienne du principe « la contrainte fait la force » — frapper de dos donne **+3 dés**, viser une cible marquée **+2**. Mais **les 22 avaient un surcoût nul** : attacher une restriction ne coûtait rien. Ce n'était donc pas un pari, c'était un bonus gratuit dont la seule contrepartie était l'attente du bon moment — et la stratégie dominante consistait à prendre la condition la plus facile à satisfaire.
+> Une condition **paie désormais en ticks ce qu'elle promet**, et le prix se **déduit du don** au lieu d'être écrit fichier par fichier : `cout_par_de` ticks par dé accordé, `cout_par_dixieme_mult` par tranche de multiplicateur, plus les remises de ticks ou de portée qu'elle offre (`combat_rules.conditions`). Frapper de dos coûte donc trois fois plus cher à composer que la Marque, parce qu'il rapporte trois fois plus — et si la condition est fausse au lancer, le sort ne part pas et ne rend que la moitié de ces ticks. Le pari devient réel. Rien à maintenir à la main : une condition neuve est tarifée par sa propre générosité.
+
+
 ## Liens
 - **Dépend de** : [[Vocabulaire des modules — six axes]], [[Structure compétences-modules-slots]]
 - **Alimente** : [[Familles de capacités de la grille]], [[Modules]], [[Jauge de chaîne Wu Xing]]

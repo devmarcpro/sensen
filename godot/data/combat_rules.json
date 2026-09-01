@@ -1226,5 +1226,14 @@
     "marge_par_piece": 6,
     "pieces_max": 3,
     "xp_par_jet": 1
+  },
+  "conditions": {
+    "_doc": "Une condition paie en ticks ce qu'elle promet (designer 2026-09-01) : le surcout se DEDUIT du bonus, jamais ecrit par fichier. Si la condition est fausse au lancer, le sort ne part pas et rend echec_ticks_rendus de ces ticks.",
+    "cout_par_de": 3,
+    "cout_par_dixieme_mult": 2,
+    "cout_par_tick_rendu": 1,
+    "cout_par_portee": 2,
+    "cout_par_taille": 3,
+    "cout_min": 1
   }
 }

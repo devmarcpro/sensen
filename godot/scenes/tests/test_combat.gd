@@ -164,6 +164,7 @@ func _ready() -> void:
 	_lancer("test_chasse")
 	_lancer("test_recuperation")
 	_lancer("test_serments")
+	_lancer("test_conditions_payantes")
 	_lancer("test_types_ennemis")
 	_lancer("test_loot_assemble")
 	_lancer("test_budgets")
@@ -7671,3 +7672,25 @@ func test_serments() -> void:
 	verifier(int(j.stats_eff.get("volonte", 0)) > sans, "Végétarien donne sa Volonté (%d → %d)" % [sans, int(j.stats_eff.get("volonte", 0))])
 	s.rompre_serment(j, "vegetarien")
 	verifier(int(j.stats_eff.get("volonte", 0)) == sans, "rompu, la Volonté retombe (%d)" % int(j.stats_eff.get("volonte", 0)))
+
+## Une condition paie ce qu'elle promet (designer 2026-09-01) : le prix se déduit du bonus, donc une
+## condition généreuse coûte plus cher à composer qu'une petite.
+func test_conditions_payantes() -> void:
+	var cap := Capacites.new(GameData.catalogues["modules"])
+	var nu: Dictionary = cap.assembler(["jet_court", "point", "etincelle"], 5, "1d4", {})
+	var marque: Dictionary = cap.assembler(["jet_court", "point", "etincelle", "marquee"], 5, "1d4", {})
+	var dos: Dictionary = cap.assembler(["jet_court", "point", "etincelle", "angle_mort"], 5, "1d4", {})
+	verifier(int(marque.ticks) > int(nu.ticks), "attacher une condition coûte des ticks (%d → %d)" % [int(nu.ticks), int(marque.ticks)])
+	verifier(int(dos.ticks) > int(marque.ticks), "la plus généreuse coûte le plus (+3 dés à %d ticks, +2 dés à %d)" % [int(dos.ticks), int(marque.ticks)])
+	verifier(Capacites.cout_condition({}) == 0, "une condition sans don ne coûte rien")
+	verifier(Capacites.cout_condition({"des": 3}) > Capacites.cout_condition({"des": 1}), "le prix suit les dés promis")
+	# Aucune condition du catalogue ne doit être gratuite si elle donne quelque chose.
+	var gratuites: Array = []
+	for mid: String in GameData.catalogues.modules.keys():
+		var md: Dictionary = GameData.catalogues.modules[mid]
+		if str(md.get("module_type", "")) != "condition":
+			continue
+		var b: Dictionary = md.get("effet", {}).get("bonus_structure", {})
+		if not b.is_empty() and Capacites.cout_condition(b) <= 0:
+			gratuites.append(mid)
+	verifier(gratuites.is_empty(), "aucune condition ne donne sans rien coûter (%s)" % str(gratuites))

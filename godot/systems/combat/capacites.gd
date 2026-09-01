@@ -231,7 +231,8 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 					continue
 				plan.conditions.append({"id": id, "name_key": m.name_key, "predicat": ef.predicat_structure,
 					"bonus": ef.bonus_structure, "ticks_rendus": float(ef.get("echec_ticks_rendus", 0.5))})
-				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
+				# Une condition paie ce qu'elle promet (designer 2026-09-01) : le prix se déduit du don.
+				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)) + cout_condition(ef.get("bonus_structure", {})), id, niveaux)
 			"liaison":
 				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 				var ef: Dictionary = m.get("effet", {})
@@ -420,3 +421,17 @@ static func appliquer_fois(lot: Dictionary) -> void:
 					b[k] = Des.multiplier(str(v), n)
 	lot.parametres = p
 
+## Le prix en ticks d'une condition : déduit de son bonus, jamais écrit fichier par fichier — une
+## condition neuve est tarifée par sa propre générosité (designer 2026-09-01).
+static func cout_condition(bonus: Dictionary) -> int:
+	var c: Dictionary = GameData.config("combat_rules").get("conditions", {})
+	var prix := 0.0
+	prix += float(bonus.get("des", 0)) * float(c.get("cout_par_de", 3))
+	prix += maxf(0.0, (float(bonus.get("mult", 1.0)) - 1.0) * 10.0) * float(c.get("cout_par_dixieme_mult", 2))
+	prix += maxf(0.0, -float(bonus.get("ticks", 0))) * float(c.get("cout_par_tick_rendu", 1))
+	prix += float(bonus.get("portee", 0)) * float(c.get("cout_par_portee", 2))
+	prix += float(bonus.get("taille", 0)) * float(c.get("cout_par_taille", 3))
+	prix += maxf(0.0, (1.0 - float(bonus.get("ressource_mult", 1.0))) * 10.0) * float(c.get("cout_par_dixieme_mult", 2))
+	if prix <= 0.0:
+		return 0
+	return maxi(int(c.get("cout_min", 1)), int(round(prix)))
