@@ -23,6 +23,8 @@ static func icone_de(md: Dictionary) -> String:
 	var t := str(md.get("module_type", ""))
 	var fam := str(md.get("famille", "")).to_lower()
 	match t:
+		"portee":   # la portée a son propre type depuis le 2026-09-01 : une flèche, l'œil barré si elle traverse
+			return "oeil_barre" if not bool(md.get("ligne_de_vue", true)) else "portee"
 		"forme":
 			var g := str(md.get("geometrie", "point"))
 			return g if g in NOMS else "point"
@@ -142,6 +144,7 @@ static func dessiner_sort(ci: CanvasItem, modules: Array, r: Rect2, alpha: float
 		var md: Dictionary = GameData.catalogues.modules.get(str(m), {})
 		match str(md.get("module_type", "")):
 			"forme": formes.append(md)
+			"portee": autres.append(md)
 			"noyau": noyaux.append(md)
 			"modificateur": modifs.append(md)
 			_: autres.append(md)
