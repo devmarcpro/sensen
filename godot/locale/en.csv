@@ -478,28 +478,6 @@ material.coquillage_fossile.name,Fossil shell
 material.coton.name,Cotton
 material.craie.name,Chalk
 material.cuir.name,Leather
-material.cuir_basilic.name,"basilisk leather"
-material.cuir_bouquetin.name,"ibex leather"
-material.cuir_chameau.name,"wild camel leather"
-material.cuir_crocodile.name,"crocodile leather"
-material.cuir_griffon.name,"griffin leather"
-material.cuir_jorogumo.name,"jorogumo leather"
-material.cuir_kappa.name,"kappa leather"
-material.cuir_kitsune.name,"kitsune leather"
-material.cuir_lindworm.name,"lindworm leather"
-material.cuir_loup_blanc.name,"white wolf leather"
-material.cuir_lynx.name,"lynx leather"
-material.cuir_morse.name,"walrus leather"
-material.cuir_nue.name,"nue leather"
-material.cuir_ours_brun.name,"brown bear leather"
-material.cuir_ours_des_cavernes.name,"cave bear leather"
-material.cuir_ours_polaire.name,"polar bear leather"
-material.cuir_renne.name,"reindeer leather"
-material.cuir_serpent_geant.name,"giant snake leather"
-material.cuir_serpent_venimeux.name,"venomous snake leather"
-material.cuir_tengu.name,"tengu leather"
-material.cuir_troll.name,"troll leather"
-material.cuir_tsuchigumo.name,"tsuchigumo leather"
 material.cuivre.name,Copper
 material.cypres.name,Cypress
 material.diamant.name,Diamond
@@ -2030,6 +2008,7 @@ ui.triche.statut,Apply a status to myself
 ui.triche.race,Become a race
 journal.triche,"Cheat: {action}"
 nom.de_creature,{base} of {creature}
+nom.matiere_espece,"{creature} {materiau}"
 journal.statue,A statue of {nom} drops — rare trophy
 status.seve.name,Sap
 status.aveugle.name,Blinded

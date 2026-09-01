@@ -44,6 +44,5 @@
     "viande_crue",
     "peau"
   ],
-  "meute": "1d4+1",
-  "cuir": "cuir_loup_blanc"
+  "meute": "1d4+1"
 }

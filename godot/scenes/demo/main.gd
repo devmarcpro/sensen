@@ -2098,10 +2098,14 @@ func nom_objet(n: Dictionary) -> String:
 	var base := tr(str(n.base))
 	if n.has("materiau"):   # craft : « Dague en fer », « Casque de plaque en cuivre », « Lame courte en fer »
 		var mat := tr(str(n.materiau))
+		if n.has("espece"):   # la matière tirée d'une bête dit laquelle : « cuir d'ours des cavernes » (point 69)
+			mat = tr("nom.matiere_espece").format({"materiau": mat, "creature": tr(str(n.espece))})
 		var q := " (%s %.2f)" % [tr("qualite." + sim.regles.palier_qualite(float(n.qualite))), float(n.qualite)]
 		if not str(n.construction).is_empty():
 			return tr("nom.armure_en").format({"base": base, "construction": tr("construction.%s.nom" % n.construction), "materiau": mat}) + q
 		return tr("nom.arme_en").format({"base": base, "materiau": mat}) + q
+	if n.has("espece"):   # une pile de matière brute tirée d'une bête
+		return tr("nom.matiere_espece").format({"materiau": base, "creature": tr(str(n.espece))})
 	if n.has("de_creature"):   # la statue 1:1 (Créatures)
 		return tr("nom.de_creature").format({"base": base, "creature": tr(str(n.de_creature))})
 	if n.has("taille"):

@@ -1209,8 +1209,8 @@ func _creuser(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 
 
 ## Un matériau dans le sac : une pile par (matériau, forme) — `quantite` ; l'objet `materiau_brut` en base.
-func _donner_materiau(e: Dictionary, mat_id: String, quantite: int, forme: String = "brut") -> void:
-	var pile := _pile(e, mat_id, forme)
+func _donner_materiau(e: Dictionary, mat_id: String, quantite: int, forme: String = "brut", espece: String = "") -> void:
+	var pile := _pile(e, mat_id, forme, espece)   # deux cuirs d'espèces différentes ne s'empilent pas
 	if not pile.is_empty():
 		pile.quantite = int(pile.quantite) + quantite
 		return
@@ -1220,6 +1220,8 @@ func _donner_materiau(e: Dictionary, mat_id: String, quantite: int, forme: Strin
 	inst.materiau = mat_id
 	inst.forme = forme
 	inst.quantite = quantite
+	if not espece.is_empty():   # la matière garde la bête dont elle vient (point 69)
+		inst["espece"] = espece
 	inst.name_key = GameData.entree("materials", mat_id).name_key
 	e.sac.append(inst.uid)
 
@@ -1233,10 +1235,10 @@ func _pile_objet(e: Dictionary, base: String) -> Dictionary:
 	return {}
 
 
-func _pile(e: Dictionary, mat_id: String, forme: String) -> Dictionary:
+func _pile(e: Dictionary, mat_id: String, forme: String, espece: String = "") -> Dictionary:
 	for uid in e.sac:
 		var it: Dictionary = items.get(uid, {})
-		if it.get("type", "") == "materiau" and it.get("materiau", "") == mat_id and str(it.get("forme", "brut")) == forme:
+		if it.get("type", "") == "materiau" and it.get("materiau", "") == mat_id and str(it.get("forme", "brut")) == forme and str(it.get("espece", "")) == espece:
 			return it
 	return {}
 
@@ -5343,8 +5345,10 @@ func _faconner(e: Dictionary, r: Dictionary, tick: int) -> bool:
 	var mat: Dictionary = GameData.entree("materials", mat_id)
 	inst.composant = str(r.component)
 	inst.materiau = mat_id
+	if not str(pile.get("espece", "")).is_empty():   # l'espèce voyage de la peau au composant (point 69)
+		inst["espece"] = str(pile.espece)
 	inst.name_key = comp.name_key
-	inst.stats = mat.stats.duplicate()
+	inst.stats = stats_materiau(mat, str(inst.get("espece", "")))
 	inst.elements = mat.wuxing.duplicate()
 	inst.qualite = regles.qualite_craft(regles.niveau(e.competences_eff, skill), rng, regles.resserrement_recette(niveau_recette(e, str(r.id))))
 	e.sac.append(inst.uid)
@@ -5559,16 +5563,13 @@ func _plan_recette(e: Dictionary, r: Dictionary) -> Dictionary:
 			plan.sortie.item = str(fiche.get(str(r.output.champ), ""))
 		if plan.sortie.item.is_empty():
 			plan.faisable = false
-	if r.output.has("materiau_depuis_espece") and plan.faisable:
-		# Le cuir dit de quelle bête il vient (designer 2026-09-01, point 69) : une seule recette de
-		# tannage, autant de cuirs que d'espèces. Sans espèce identifiée, on garde le matériau générique.
+	if bool(r.output.get("herite_espece", false)) and plan.faisable:
+		# L'espèce est un MODIFICATEUR porté par l'objet, jamais un matériau de plus (designer 2026-09-01) :
+		# la peau transmet sa bête au cuir tanné, qui la transmettra au composant puis à l'objet assemblé.
 		for entree in plan.entrees:
 			var esp := str(entree.pile.get("espece", ""))
-			if esp.is_empty():
-				continue
-			var mat_esp := str(GameData.catalogues.creatures.get(esp, {}).get(str(r.output.materiau_depuis_espece), ""))
-			if not mat_esp.is_empty():
-				plan.sortie.materiau = mat_esp
+			if not esp.is_empty():
+				plan.sortie["espece"] = esp
 	if r.output.has("par_locus") and plan.faisable:   # la quantité suit un locus du spécimen consommé (finesse du fil)
 		for entree in plan.entrees:
 			if entree.pile.has("genome"):
@@ -5713,7 +5714,7 @@ func _fabriquer(e: Dictionary, rid: String, tick: int) -> bool:
 		_progresser_quetes(e, "fabriquer", tags_q)
 		EventBus.emettre(&"journal", [&"journal.fabrique", {"nom": e.name_key, "quantite": int(sortie.quantite), "objet": nom_obj, "recette": r.name_key}])
 		return true
-	_donner_materiau(e, sortie.materiau, int(sortie.quantite), sortie.forme)
+	_donner_materiau(e, sortie.materiau, int(sortie.quantite), sortie.forme, str(sortie.get("espece", "")))
 	var mat: Dictionary = GameData.catalogues.materials.get(str(sortie.materiau), {})
 	gagner_xp(e, str(r.craft_skill), int(mat.get("stats", {}).get("durete", 1)))
 	_progresser_quetes(e, "fabriquer", ["materiau"])
@@ -6239,8 +6240,18 @@ func nom_objet(uid: String) -> Dictionary:
 		res["livre"] = {"domaine": str(it.get("domaine", "")), "difficulte": int(it.get("difficulte", 0)), "n": it.modules.size()}
 		if nom.has("module"):   # un livre de module : le module au nom
 			res["module_livre"] = str(nom.module)
+	if it.get("type", "") == "materiau" and not str(it.get("espece", "")).is_empty():
+		res["espece"] = GameData.catalogues.creatures.get(str(it.espece), {}).get("name_key", "")
 	if it.get("type", "") == "composant" or it.has("composants"):   # craft : l'objet se décrit par son matériau
 		res["materiau"] = GameData.catalogues.materials.get(str(it.get("materiau", "")), {}).get("name_key", "")
+		var esp_o := str(it.get("espece", ""))
+		if esp_o.is_empty():   # un objet assemblé porte l'espèce du premier composant qui en a une (point 69)
+			for sc in it.get("composants", {}).keys():
+				if not str(it.composants[sc].get("espece", "")).is_empty():
+					esp_o = str(it.composants[sc].espece)
+					break
+		if not esp_o.is_empty():
+			res["espece"] = GameData.catalogues.creatures.get(esp_o, {}).get("name_key", "")
 		res["construction"] = str(it.get("construction", ""))
 		res["qualite"] = float(it.get("qualite", 1.0))
 	return res
@@ -10488,3 +10499,23 @@ func facteur_distance(portee_max: int) -> float:
 		return 1.0
 	var f := 1.0 / (1.0 + float(cfg.get("coef", 0.06)) * float(portee_max - 1))
 	return maxf(f, float(cfg.get("plancher", 0.4)))
+
+## Les stats d'un matériau tel qu'il sort d'une bête (designer 2026-09-01) : l'espèce est un modificateur
+## porté par l'objet — un seul `cuir` au catalogue, et l'ours le durcit là où le serpent l'assouplit.
+func stats_materiau(mat: Dictionary, espece: String) -> Dictionary:
+	var stats: Dictionary = (mat.get("stats", {}) as Dictionary).duplicate()
+	if espece.is_empty():
+		return stats
+	var def: Dictionary = GameData.catalogues.creatures.get(espece, {})
+	if def.is_empty():
+		return stats
+	var cfg: Dictionary = regles.r.craft.get("materiau_espece", {})
+	var st_bete: Dictionary = def.get("corps", {}).get("stats", {})
+	var ecart := float(int(st_bete.get("force", 8)) + int(st_bete.get("endurance", 8)) - int(cfg.get("reference", 16)))
+	for nom_stat: String in (cfg.get("stats", {}) as Dictionary).keys():
+		if not stats.has(nom_stat):
+			continue
+		var c: Dictionary = cfg.stats[nom_stat]
+		var v := float(stats[nom_stat]) + ecart * float(c.get("par_point", 0.0))
+		stats[nom_stat] = clampf(v, float(c.get("min", 0.0)), float(c.get("max", 999.0)))
+	return stats

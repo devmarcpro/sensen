@@ -309,6 +309,37 @@
         }
       },
       "_doc": "Harmonie des plats (Décision — Affinités de cuisine) : feu_cuisson ajouté avant normalisation ; mult à cinq éléments ; ingredients_materiaux = vecteur de cuisine d'un matériau (le sel gemme apporte le Métal en cuisine, sans toucher son vecteur de combat)."
+    },
+    "materiau_espece": {
+      "_doc": "L'espece d'une bete module les stats du materiau tire d'elle (designer 2026-09-01) : l'espece est un modificateur porte par l'OBJET, jamais un materiau de plus. base = la stat du materiau ; ecart = (force + endurance de la bete - reference) x par_point, borne par min/max.",
+      "reference": 16,
+      "stats": {
+        "durete": {
+          "par_point": 0.35,
+          "min": 4,
+          "max": 20
+        },
+        "densite": {
+          "par_point": 0.18,
+          "min": 2,
+          "max": 12
+        },
+        "valeur_base": {
+          "par_point": 0.5,
+          "min": 3,
+          "max": 40
+        },
+        "elasticite": {
+          "par_point": -0.9,
+          "min": 20,
+          "max": 80
+        },
+        "isolation": {
+          "par_point": 0.8,
+          "min": 30,
+          "max": 90
+        }
+      }
     }
   },
   "camp": {

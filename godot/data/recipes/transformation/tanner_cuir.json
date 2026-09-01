@@ -13,7 +13,7 @@
     "material": "cuir",
     "forme": "brut",
     "amount": 1,
-    "materiau_depuis_espece": "cuir"
+    "herite_espece": true
   },
   "fuel": null
 }
