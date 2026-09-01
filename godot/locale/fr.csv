@@ -1224,6 +1224,8 @@ ui.ecran.acheter,Acheter (Entrée)
 ui.ecran.vendre,Vendre (Entrée)
 ui.commerce.stock,— À VENDRE —
 ui.commerce.sac,— TON SAC (il achète à {pct} %) —
+ui.commerce.detail_achat,"Il en demande {prix} or — tu as {or} or"
+ui.commerce.detail_vente,"Il te donnerait {prix} or"
 ui.prix.detail,"prix suggéré {prix} or = matériaux {base} × marge {marge} × qualité {qualite} × rareté {rarete} × réputation {rep}"
 ui.prix.achat,il t'en donne {n} or
 ui.prix.vente,il le vend {n} or

@@ -145,6 +145,14 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > Deuxième écran du point 67, trouvé en ouvrant l'inventaire dans une fenêtre de 1280 × 800 : l'en-tête de la liste était **illisible**, « Type Combat 4.Qual(Général 0.Qids Qté ». La fiche du porteur (six stats, quatre jauges, charge, or, niveaux dérivés) dessine **246 pixels** de contenu dans un cadre déclaré à **210** : les trois dernières lignes tombaient par-dessus la ligne d'en-tête du sac. Sa hauteur minimale est désormais **calculée** à partir des lignes qu'elle dessine (`hauteur_requise()`, un seul endroit qui fait foi) et le cadre est `clip_contents` — un débordement ne peut plus mordre sur ce qui suit. Le fond du panneau passe aussi à l'opaque : à 0,94 le décor transparaissait sous les lignes du sac.
 
 
+> [!bug] Corrigé le 2026-09-01 — un nom d'écran inconnu ouvrait un panneau vide sous un titre faux
+> Trouvé en demandant `capture.tscn -- --ecran composeur` : l'écran s'appelle **`composer`**, pas `composeur`. Au lieu de ne rien faire, `ouvrir()` affichait le panneau, `rafraichir()` ne trouvait aucune branche dans son `match`, et l'écran restait **vide sous le titre du dernier écran construit** — « CRÉATION DU MONDE » suivi de rien. Une faute de frappe dans une recette de capture produisait donc une image plausible mais fausse, et rien ne le signalait. Le `match` a désormais une branche par défaut : l'écran se referme et le nom inconnu est signalé (`push_error`), ce qui le rend fatal en débogage comme les schémas de données.
+
+
+> [!bug] Corrigé le 2026-09-01 — on achetait à l'aveugle chez le marchand
+> L'écran de commerce n'affichait **aucun détail** : ses entrées `achat` et `vente` ne figuraient pas dans `_montrer_detail`, si bien que les deux tiers droits du panneau restaient noirs et qu'on dépensait 17 or pour un « Livre : Dérobade » sans rien savoir de lui — ni dégâts, ni poids, ni qualité. C'est aussi un écart avec le coffre : le point 65 dit que **tout objet montre son Wu Xing** sauf s'il n'est pas identifié, et la boutique était le seul écran d'objets à ne pas le faire. Le détail et le pentagramme s'affichent désormais à la sélection, à l'achat comme à la vente, avec la ligne de prix (ce qu'il demande, ou ce qu'il te donne).
+
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

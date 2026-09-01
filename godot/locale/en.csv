@@ -706,6 +706,8 @@ ui.case,"tile ({x},{y}) h={h} · Δh vs you: {dh}"
 ui.chaine,chain: {segments}
 ui.commerce.bourse_cachee,?
 ui.commerce.sac,— YOUR BAG (they buy at {pct} %) —
+ui.commerce.detail_achat,"He asks {prix} gold — you have {or} gold"
+ui.commerce.detail_vente,"He would give you {prix} gold"
 ui.commerce.stock,— FOR SALE —
 ui.composer.apercu,"Preview: {geometrie} · range {portee} · size {taille} · {ticks} ticks · {ressource} {monnaie} · dice {des} · effects {effets}{erreurs}"
 ui.composer.erreurs," · ERRORS: {liste}"

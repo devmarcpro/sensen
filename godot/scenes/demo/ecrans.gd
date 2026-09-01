@@ -505,6 +505,12 @@ func rafraichir() -> void:
 			_construire_triche(j)
 		"triche_liste":
 			_construire_triche_liste(j)
+		_:
+			# Un nom inconnu laissait le panneau ouvert, vide, sous le titre du dernier écran construit :
+			# une faute de frappe dans une recette de capture rendait une image fausse sans rien signaler.
+			push_error("Écran inconnu : « %s »" % courant)
+			fermer()
+			return
 	selection = clampi(sel, 0, maxi(0, entrees.size() - 1))
 	if entrees.size() > 0:
 		liste.select(selection)
@@ -609,6 +615,15 @@ func _montrer_detail() -> void:
 			detail.text = str(en.texte)
 		"donner", "reprendre":
 			detail.text = texte_objet(str(en.uid))
+		"achat", "vente":   # on n'achète plus à l'aveugle : la fiche et le Wu Xing de l'objet en vitrine (point 65)
+			var pr: Dictionary = en.get("prix", {})
+			var ligne := tr("ui.commerce.detail_achat").format({"prix": int(pr.get("prix", 0)), "or": int(main.joueur().get("or", 0))}) if str(en.kind) == "achat" else tr("ui.commerce.detail_vente").format({"prix": int(pr.get("achat", 0))})
+			detail.text = ligne + "
+
+" + texte_objet(str(en.uid))
+			var it_c: Dictionary = main.sim.items.get(str(en.uid), {})
+			penta_objet.visible = not main.sim.inconnu(it_c)
+			penta_objet.montrer({"elements": main.sim.vecteur_objet(it_c)})
 		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer", "menu", "contexte", "capacite", "nouvelle_capacite", "module_composer", "triche", "triche_catalogue", "triche_item", "titre", "monde", "options", "charger_slot":
 			detail.text = str(en.get("texte", ""))
 		"creation":
