@@ -153,6 +153,10 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > L'écran de commerce n'affichait **aucun détail** : ses entrées `achat` et `vente` ne figuraient pas dans `_montrer_detail`, si bien que les deux tiers droits du panneau restaient noirs et qu'on dépensait 17 or pour un « Livre : Dérobade » sans rien savoir de lui — ni dégâts, ni poids, ni qualité. C'est aussi un écart avec le coffre : le point 65 dit que **tout objet montre son Wu Xing** sauf s'il n'est pas identifié, et la boutique était le seul écran d'objets à ne pas le faire. Le détail et le pentagramme s'affichent désormais à la sélection, à l'achat comme à la vente, avec la ligne de prix (ce qu'il demande, ou ce qu'il te donne).
 
 
+> [!bug] Corrigé le 2026-09-01 — la colonne de gauche restait à 340 px quelle que soit la fenêtre (point 67)
+> Le panneau s'étire avec la fenêtre, mais **sa liste non** : `custom_minimum_size = (340, 0)`, sans expansion. Sur l'écran Territoire cela donnait « défense … », « Cernoslav (Anarchie, 10 cellules) — ré… », « boutique : caisse 0 or · marge ×1.00 (+… » — des lignes coupées **pendant que les deux tiers droits du panneau étaient vides**. La largeur de la liste est désormais une **proportion de celle du panneau** (`styles.ecrans.part_liste`, bornée), recalculée à chaque redimensionnement : en 1920 elle passe à 540 px et plus rien n'est tronqué ; en fenêtre étroite elle retombe sur son plancher de 340.
+
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

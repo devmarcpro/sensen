@@ -126,5 +126,11 @@
     "barres_y": 0.9,
     "part_apercu": 2.6,
     "part_detail": 1.0
+  },
+  "ecrans": {
+    "_doc": "Mise en page commune des ecrans (designer 2026-09-01, point 67) : la colonne de liste est une part de la largeur du panneau, bornee.",
+    "part_liste": 0.38,
+    "liste_min": 340.0,
+    "liste_max": 820.0
   }
 }

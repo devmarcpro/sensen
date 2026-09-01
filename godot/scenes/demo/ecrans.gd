@@ -50,6 +50,7 @@ func _ready() -> void:
 	style.set_border_width_all(2)
 	style.set_content_margin_all(10)
 	panneau.add_theme_stylebox_override("panel", style)
+	panneau.resized.connect(_replacer_liste)   # la colonne suit la largeur du panneau (point 67)
 	panneau.visible = false
 	add_child(panneau)
 	var v := VBoxContainer.new()
@@ -78,7 +79,7 @@ func _ready() -> void:
 	atelier_visuel.visible = false
 	h.add_child(atelier_visuel)
 	liste = ItemList.new()
-	liste.custom_minimum_size = Vector2(340, 0)
+	liste.custom_minimum_size = Vector2(float(GameData.config("styles").get("ecrans", {}).get("liste_min", 340.0)), 0)
 	liste.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	liste.focus_mode = Control.FOCUS_NONE          # les lettres restent au jeu (pas de recherche incrémentale)
 	liste.item_selected.connect(_sur_selection)
@@ -2488,3 +2489,12 @@ func _replacer_apercu() -> void:
 	portrait_perso.position = Vector2(cote * 0.5, cote * 2.45)   # la tête du rig, recadrée dans le carré
 	barres_perso.position = Vector2(0.0, cadre.y * float(st.get("barres_y", 0.88)))
 	barres_perso.size = Vector2(cadre.x, cadre.y * 0.12)
+
+## La colonne de liste prend une part de la largeur du panneau (designer 2026-09-01, point 67) : à 340 px
+## fixes, l'écran Territoire coupait ses lignes pendant que les deux tiers droits restaient vides.
+func _replacer_liste() -> void:
+	if liste == null or panneau == null:
+		return
+	var st: Dictionary = GameData.config("styles").get("ecrans", {})
+	var l := clampf(panneau.size.x * float(st.get("part_liste", 0.30)), float(st.get("liste_min", 340.0)), float(st.get("liste_max", 700.0)))
+	liste.custom_minimum_size = Vector2(l, 0)
