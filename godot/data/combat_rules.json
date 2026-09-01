@@ -1160,5 +1160,12 @@
     "_doc": "L'écran de fin de combat (designer, point 13) : il s'efface seul au bout de `secondes`, et ne s'affiche pas pour un combat de moins de `ticks_min` ticks sans XP ni niveau gagné.",
     "secondes": 6.0,
     "ticks_min": 1
+  },
+  "surface": {
+    "dilution": {
+      "_doc": "La surface dilue la puissance (designer 2026-09-01) : une charge est multipliee par 1 / n^exposant, n = nombre de TUILES de la forme (ce que l'apercu montre avant le lancer). La liaison concentration annule la dilution contre un surcout.",
+      "exposant": 0.5,
+      "plancher": 0.25
+    }
   }
 }

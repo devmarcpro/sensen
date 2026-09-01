@@ -1586,7 +1586,7 @@ module.charge_d_epaule.name,Charge d'épaule
 module.chemin.name,Chemin
 module.colonne.name,Colonne
 module.communion.name,Communion
-module.concentration.name,Concentration
+module.focalisation.name,Focalisation
 module.cone.name,Cône
 module.contagion.name,Contagion
 module.contrebas.name,Contrebas
@@ -1609,7 +1609,7 @@ module.derobade.name,Dérobade
 module.desarmement.name,Désarmement
 module.detonation.name,Détonation
 module.diagonale.name,Diagonale
-module.dispersion.name,Dispersion
+module.concentration.name,Concentration
 module.eboulement.name,Éboulement
 module.ecaille_elementaire.name,Écaille élémentaire
 module.echo.name,Écho

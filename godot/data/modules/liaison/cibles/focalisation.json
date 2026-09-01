@@ -1,0 +1,18 @@
+{
+  "id": "focalisation",
+  "nom": "Focalisation",
+  "name_key": "module.focalisation.name",
+  "module_type": "liaison",
+  "description": "annule la **dilution par la surface** : la forme large frappe à pleine puissance",
+  "classe_signature": null,
+  "tags": [
+    "liaison"
+  ],
+  "surcout_ticks": 8,
+  "effet": {
+    "concentration": true
+  },
+  "famille": "Cibles",
+  "style": "ruse",
+  "surcout_ressource": "×1.6"
+}

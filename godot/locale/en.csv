@@ -1000,7 +1000,7 @@ module.derobade.name,Evasion
 module.desarmement.name,Disarm
 module.detonation.name,Detonation
 module.diagonale.name,Diagonal
-module.dispersion.name,Dispersal
+module.focalisation.name,Focus
 module.eboulement.name,Landslide
 module.ecaille_elementaire.name,Elemental Scale
 module.echo.name,Echo

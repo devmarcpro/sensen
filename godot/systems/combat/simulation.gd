@@ -9310,10 +9310,16 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 		wuxing.decroitre(e.chaine, tick)
 		prev = wuxing.prevoir(e.chaine, wuxing.dominante(elements))
 	var charge := plan
+	# La surface dilue la puissance (designer 2026-09-01) : ×1/√n sur le nombre de TUILES de la forme —
+	# ce que l'aperçu montre avant le lancer. La liaison Concentration l'annule, contre son surcoût.
+	var concentre := false
 	for l: Dictionary in plan.liaisons:
-		if l.get("dispersion", false) and touchees.size() > 1:
-			charge = plan.duplicate()
-			charge.mult = float(plan.mult) / float(touchees.size())   # la charge répartie, divisée par leur nombre
+		if l.get("concentration", false):
+			concentre = true
+	var dil := facteur_dilution(tuiles.size())
+	if not concentre and dil < 1.0:
+		charge = plan.duplicate()
+		charge.mult = float(plan.mult) * dil
 	var res := {"a_touche": false, "premiere": {}, "tuee": {}}
 	var salve := {}
 	for l: Dictionary in plan.liaisons:
@@ -10453,3 +10459,12 @@ func _ia_fuir(e: Dictionary, cible: Dictionary, tick: int) -> void:
 			meilleur = v
 	if meilleur == e.pos or not _deplacer(e, meilleur, tick):
 		_attendre(e, tick)
+
+## Le facteur de dilution d'une forme : 1 / n^exposant, borné par un plancher (combat_rules.surface.dilution).
+## Une tuile ne dilue rien ; un carré de neuf frappe à un tiers, pas à un neuvième.
+func facteur_dilution(n_tuiles: int) -> float:
+	var cfg: Dictionary = regles.r.get("surface", {}).get("dilution", {})
+	if n_tuiles <= 1:
+		return 1.0
+	var f := 1.0 / pow(float(n_tuiles), float(cfg.get("exposant", 0.5)))
+	return maxf(f, float(cfg.get("plancher", 0.25)))

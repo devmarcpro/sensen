@@ -158,6 +158,7 @@ func _ready() -> void:
 	_lancer("test_donjon_temps_a_l_action")
 	_lancer("test_portes_une_par_ouverture")
 	_lancer("test_chaine_a_trois_etapes")
+	_lancer("test_dilution_par_surface")
 	_lancer("test_types_ennemis")
 	_lancer("test_loot_assemble")
 	_lancer("test_budgets")
@@ -7457,3 +7458,45 @@ func test_chaine_a_trois_etapes() -> void:
 	verifier(not e1.is_empty() and str(e1.geometrie) == "croix", "étape 2 : la croix part à l'impact de l'étincelle")
 	verifier(not e2.is_empty() and str(e2.geometrie) == "ligne", "étape 3 : la ligne part à l'impact de la croix")
 	verifier(int(p.ticks) > int(e1.ticks) and int(e1.ticks) > int(e2.ticks), "chaque étape ajoute ses ticks au total (%d > %d > %d)" % [int(p.ticks), int(e1.ticks), int(e2.ticks)])
+
+## La surface dilue la puissance (designer 2026-09-01) : ×1/√n sur les TUILES de la forme, la liaison
+## Concentration l'annule. Un carré de neuf frappait autrefois neuf fois pour quatre ticks de plus.
+func test_dilution_par_surface() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	verifier(is_equal_approx(s.facteur_dilution(1), 1.0), "une tuile ne dilue rien")
+	var f9 := s.facteur_dilution(9)
+	verifier(f9 > 0.32 and f9 < 0.34, "neuf tuiles : un tiers de la puissance (%.2f)" % f9)
+	verifier(s.facteur_dilution(400) >= float(s.regles.r.surface.dilution.plancher), "le plancher borne la dilution (%.2f)" % s.facteur_dilution(400))
+	verifier(s.facteur_dilution(4) > s.facteur_dilution(16), "plus la forme est large, plus elle dilue")
+	# En jeu : le même noyau, en point puis en carré, sur le même loup.
+	var loup: Dictionary = {}
+	for x in s.vivants():   # l'id des êtres dépend d'un compteur global : on prend le premier hostile
+		if x.controle != "joueur" and x.get("camp", "") == "hostile":
+			loup = x
+			break
+	verifier(not loup.is_empty(), "un hostile dans l'arène")
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(0, -2)
+	s.grille.placer(loup.id, loup.pos)
+	s._engager_combat(j, loup)
+	var h := s.horloge_de(j)
+	var degats := [0, 0]
+	var k := [0]
+	EventBus.damage_dealt.connect(func(src: String, _c: String, d: int, _det: Dictionary) -> void:
+		if src == j.id:
+			degats[k[0]] += d)
+	for essai in 2:
+		k[0] = essai
+		var forme := "point" if essai == 0 else "carre"
+		_capacite_test(s, j, "d%d" % essai, [forme, "etincelle"])
+		var idx: int = j.capacites.size() - 1
+		for _r in 12:   # plusieurs lancers : les dés varient, la tendance non
+			loup.sante = int(loup.sante_max)
+			j.mana = int(j.mana_max)
+			j.compteur = h.ticks
+			s.pas(j.horloge)
+			s.intention(j.id, {"type": "capacite", "index": idx, "cible": loup.pos})
+			s.pas(j.horloge)
+	verifier(degats[0] > 0 and degats[1] > 0, "les deux formes touchent (%d en point, %d en carré)" % [degats[0], degats[1]])
+	verifier(degats[1] < degats[0], "le carré frappe moins fort que le point, à noyau égal (%d < %d)" % [degats[1], degats[0]])
