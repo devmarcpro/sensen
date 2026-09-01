@@ -6,7 +6,7 @@ extends CanvasLayer
 ## voyage rapide en cliquant une cellule déjà explorée (Carte du monde : le raccourci) ; en mode
 ## « départ », le clic choisit la case de départ (Début de partie). Dessinée par code, sans asset.
 
-var case_px := 18.0           # taille d'une cellule à l'écran : la molette la change (designer, point 59)
+var case_px := 18.0           # taille d'une cellule à l'écran (le zoom est annulé — designer, 2026-09-01)
 var decalage := Vector2.ZERO   # défilement fin, en pixels (le glisser à la souris)
 
 var main: Node
@@ -214,14 +214,6 @@ func _entree(ev: InputEvent) -> void:
 		if c != survol:
 			survol = c
 			dessin.queue_redraw()
-		return
-	if ev is InputEventMouseButton and (ev.button_index == MOUSE_BUTTON_WHEEL_UP or ev.button_index == MOUSE_BUTTON_WHEEL_DOWN) and ev.pressed:
-		var vise := _cellule_sous(ev.position)   # on zoome vers la cellule sous la souris
-		case_px = clampf(case_px * (1.15 if ev.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / 1.15), 4.0, 40.0)
-		if vise != Vector2i(-1, -1):
-			centre = vise
-			decalage = Vector2.ZERO
-		dessin.queue_redraw()
 		return
 	if ev is InputEventMouseButton and ev.button_index in [MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT]:
 		_glisse = ev.pressed   # la carte se fait glisser

@@ -33,6 +33,9 @@ Comment le jeu se donne à voir : isométrique, tuiles teintées, billboards pap
 >
 > Le grain est calculé à partir de ces UV : il est fixé au monde, ne « nage » pas quand la caméra bouge, et ne coûte rien (une passe de fragment, pas de texture en mémoire). Ses quatre chiffres vivent dans `styles.json → grain` — un `actif: false` rend les aplats d'avant.
 
+> [!failure] Annulé le 2026-09-01 — pas de rendu pixelisé (designer)
+> Le rendu en basse résolution agrandie a été codé puis **retiré sur décision du designer**, avec le zoom de la carte. Ce que l'essai a montré, pour mémoire : à 640 × 360 le pixel est franc mais l'interface mange l'écran (une police de 13 px occupe le triple de sa place relative) ; à 960 × 540 l'équilibre est meilleur mais le pixel se voit à peine. Le jeu reste donc rendu **net**, à la résolution de la fenêtre. Le grain procédural des matières (points 50 et 58), lui, demeure : c'est lui qui donne la texture, pas la résolution.
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Piliers d'inspiration]]
 - **Alimente** : [[Squelette modulaire et points d'attache]], [[Écrans d'interface]], [[Palette de couleurs des matériaux]]
