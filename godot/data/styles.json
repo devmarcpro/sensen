@@ -111,5 +111,20 @@
     "_doc": "La carte du monde (designer 2026-09-01, point 59) : chaque cellule est peinte en sous_points × sous_points sondes, tant que la case dépasse sous_points_min_px pixels.",
     "sous_points": 5,
     "sous_points_min_px": 10
+  },
+  "creation": {
+    "_doc": "Proportions de l'apercu de creation (designer 2026-09-01, point 67) : tout se replace sur la taille du cadre, plus aucune position en pixels. hauteur_ref = la hauteur du rig en unites de dessin.",
+    "hauteur_ref": 52.0,
+    "echelle_min": 3.0,
+    "echelle_max": 14.0,
+    "personnage_x": 0.3,
+    "personnage_y": 0.84,
+    "visage_cote": 0.46,
+    "visage_x": 0.55,
+    "visage_y": 0.05,
+    "portrait_echelle": 0.065,
+    "barres_y": 0.9,
+    "part_apercu": 2.6,
+    "part_detail": 1.0
   }
 }

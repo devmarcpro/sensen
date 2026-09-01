@@ -104,11 +104,14 @@ func _ready() -> void:
 	droite.add_child(apercu_monde)
 	cadre_perso = Control.new()   # Création : le personnage en grand, au-dessus du détail
 	cadre_perso.custom_minimum_size = Vector2(0, 380)
+	cadre_perso.size_flags_vertical = Control.SIZE_EXPAND_FILL   # il prend la hauteur offerte (point 67)
+	cadre_perso.size_flags_stretch_ratio = float(GameData.config("styles").get("creation", {}).get("part_apercu", 2.6))
 	cadre_perso.visible = false
 	cadre_perso.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	droite.add_child(cadre_perso)
 	cadre_perso.mouse_filter = Control.MOUSE_FILTER_STOP   # le pantin se manipule à la souris (point 63)
 	cadre_perso.gui_input.connect(_pantin_entree)
+	cadre_perso.resized.connect(_replacer_apercu)   # tout se replace à la taille du cadre (point 67)
 	apercu_perso = Paperdoll.new()
 	apercu_perso.scale = Vector2(5.4, 5.4)   # le personnage en grand (designer, point 43)
 	apercu_perso.dessine_apres = _surligner_membre   # le membre saisi est mis en évidence (point 68)
@@ -134,6 +137,7 @@ func _ready() -> void:
 	detail.bbcode_enabled = true
 	detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	detail.size_flags_stretch_ratio = float(GameData.config("styles").get("creation", {}).get("part_detail", 1.0))
 	detail.add_theme_font_size_override("normal_font_size", 13)
 	droite.add_child(detail)
 	penta_objet = Composeur.PentagrammeSort.new()
@@ -2447,3 +2451,25 @@ func _surligner_membre(pd: Paperdoll) -> void:
 		return
 	pd.draw_line(corps[0], corps[1], Color(1.0, 0.85, 0.3, 0.9), 1.2)
 	pd.draw_arc(corps[0], 3.0, 0.0, TAU, 16, Color(1.0, 0.85, 0.3, 0.9), 1.0)
+
+## L'aperçu de la création se replace sur la taille de son cadre (designer 2026-09-01, point 67) : plus
+## une seule position en pixels, des proportions lues dans `styles.creation`. Rien ne flotte, rien n'est coupé.
+func _replacer_apercu() -> void:
+	if cadre_perso == null or apercu_perso == null:
+		return
+	var st: Dictionary = GameData.config("styles").get("creation", {})
+	var cadre: Vector2 = cadre_perso.size
+	if cadre.x <= 0.0 or cadre.y <= 0.0:
+		return
+	var ech := clampf(cadre.y / maxf(1.0, float(st.get("hauteur_ref", 52.0))), float(st.get("echelle_min", 3.0)), float(st.get("echelle_max", 9.0)))
+	apercu_perso.scale = Vector2(ech, ech)
+	apercu_perso.position = Vector2(cadre.x * float(st.get("personnage_x", 0.28)), cadre.y * float(st.get("personnage_y", 0.82)))
+	var cote := cadre.y * float(st.get("visage_cote", 0.46))
+	cadre_visage.size = Vector2(cote, cote)
+	cadre_visage.custom_minimum_size = Vector2(cote, cote)
+	cadre_visage.position = Vector2(cadre.x * float(st.get("visage_x", 0.55)), cadre.y * float(st.get("visage_y", 0.05)))
+	var ep := cote * float(st.get("portrait_echelle", 0.065))
+	portrait_perso.scale = Vector2(ep, ep)
+	portrait_perso.position = Vector2(cote * 0.5, cote * 2.45)   # la tête du rig, recadrée dans le carré
+	barres_perso.position = Vector2(0.0, cadre.y * float(st.get("barres_y", 0.88)))
+	barres_perso.size = Vector2(cadre.x, cadre.y * 0.12)
