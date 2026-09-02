@@ -1,0 +1,30 @@
+{
+  "id": "alourdir",
+  "nom": "Alourdir",
+  "name_key": "module.alourdir.name",
+  "module_type": "noyau",
+  "description": "l'équipement de la cible **pèse le double** : chaque pas coûte",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Équipement",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 5,
+  "cout_mana": 8,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "alourdi",
+      "duree_ticks": 150
+    }
+  },
+  "style": "controle"
+}

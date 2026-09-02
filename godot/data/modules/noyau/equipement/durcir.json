@@ -1,0 +1,30 @@
+{
+  "id": "durcir",
+  "nom": "Durcir",
+  "name_key": "module.durcir.name",
+  "module_type": "noyau",
+  "description": "l'armure que tu portes **encaisse davantage** : le métal se resserre, la maille se serre",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Équipement",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 6,
+  "cout_mana": 8,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "durci",
+      "duree_ticks": 240
+    }
+  },
+  "style": "soutien"
+}

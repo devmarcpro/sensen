@@ -225,14 +225,6 @@
           ]
         }
       },
-      "composants": {
-        "poids": 2,
-        "filtre": {
-          "types_any": [
-            "composant"
-          ]
-        }
-      },
       "munitions": {
         "poids": 1,
         "filtre": {
@@ -252,7 +244,8 @@
           ]
         }
       }
-    }
+    },
+    "_doc_composants": "La categorie « composants » est retiree (2026-09-02) : le seul objet de type `composant` du catalogue est la fiche GABARIT — composant vide, materiau vide, aucun slot — qui sert de modele aux vrais composants. On ramassait donc un « Composant » qui n'etait rien. Les composants s'obtiennent par les recettes, pas dans les coffres."
   },
   "drops": {
     "_doc": "Monstres rares : drop garanti au budget renforce ; tout-venant : chaque ennemi laisse un objet (designer 2026-08-31, point 46).",

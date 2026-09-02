@@ -1,0 +1,20 @@
+{
+  "id": "damier",
+  "nom": "Damier",
+  "name_key": "module.forme_damier.name",
+  "module_type": "forme",
+  "description": "un carré **une case sur deux** — couvre le terrain sans l'enfermer : on peut encore y marcher",
+  "classe_signature": null,
+  "tags": [
+    "forme"
+  ],
+  "geometrie": "damier",
+  "surcout_ticks": 4,
+  "taille_base": 2,
+  "famille": "Formes",
+  "style": "neutre",
+  "portee_defaut": [
+    1,
+    1
+  ]
+}

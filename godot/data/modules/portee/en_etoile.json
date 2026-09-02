@@ -1,0 +1,21 @@
+{
+  "id": "en_etoile",
+  "nom": "En étoile",
+  "name_key": "module.portee_en_etoile.name",
+  "module_type": "portee",
+  "description": "loin, mais seulement dans les **huit directions** — se placer sur un axe, ou renoncer",
+  "classe_signature": null,
+  "tags": [
+    "portee"
+  ],
+  "portee_base": [
+    1,
+    7
+  ],
+  "surcout_ticks": 4,
+  "ligne_de_vue": true,
+  "origine": "cible",
+  "motif": "etoile",
+  "famille": "Portée",
+  "style": "neutre"
+}

@@ -1,0 +1,38 @@
+{
+  "name_key": "material.givre.name",
+  "category": "meteorologique",
+  "palier": 2,
+  "stats": {
+    "durete": 2,
+    "densite": 3,
+    "valeur_base": 1,
+    "conductivite_mana": 30,
+    "flammabilite": 0,
+    "isolation": 55,
+    "conductivite_electrique": 8,
+    "flottabilite": 90,
+    "luminosite": 15,
+    "fertilite": 0,
+    "transparence": 60,
+    "elasticite": 4,
+    "friction": 10
+  },
+  "tags": [],
+  "color": "#DCEAF2",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 227,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}

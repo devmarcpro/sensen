@@ -1,0 +1,40 @@
+{
+  "name_key": "material.corne.name",
+  "category": "vegetal",
+  "palier": 5,
+  "stats": {
+    "durete": 18,
+    "densite": 6,
+    "valeur_base": 9,
+    "conductivite_mana": 25,
+    "flammabilite": 25,
+    "isolation": 45,
+    "conductivite_electrique": 2,
+    "flottabilite": 40,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 8,
+    "elasticite": 40,
+    "friction": 35
+  },
+  "tags": [
+    "animal"
+  ],
+  "color": "#D8C9A3",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 200,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "dague",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}

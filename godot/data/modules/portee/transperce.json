@@ -1,0 +1,21 @@
+{
+  "id": "transperce",
+  "nom": "Transperçant",
+  "name_key": "module.portee_transperce.name",
+  "module_type": "portee",
+  "description": "**à travers la pierre**, mais en ligne droite seulement — ce qui se cache derrière un mur n'est plus à l'abri",
+  "classe_signature": null,
+  "tags": [
+    "portee"
+  ],
+  "portee_base": [
+    1,
+    5
+  ],
+  "surcout_ticks": 5,
+  "ligne_de_vue": false,
+  "origine": "cible",
+  "motif": "ligne",
+  "famille": "Portée",
+  "style": "neutre"
+}

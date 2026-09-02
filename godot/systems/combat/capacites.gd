@@ -335,6 +335,25 @@ static func tuiles_de_forme(g: Grille, geometrie: String, origine: Vector2i, cib
 					var pc := cible + Vector2i(x, y)
 					if g.dans(pc) and Grille.portee_entre(cible, pc) == taille:
 						res.append(pc)
+		"arc":
+			# Le revers de la cible : les tuiles à distance exacte, mais seulement du côté OPPOSÉ au
+			# lanceur. La couronne encercle ; l'arc ne prend que la moitié qu'on ne voit pas d'ici, ce
+			# qui récompense d'avoir contourné (designer 2026-09-02).
+			for y in range(-taille, taille + 1):
+				for x in range(-taille, taille + 1):
+					var pa := cible + Vector2i(x, y)
+					if not g.dans(pa) or Grille.portee_entre(cible, pa) != taille:
+						continue
+					if d == Vector2i.ZERO or Vector2(pa - cible).normalized().dot(Vector2(d).normalized()) > 0.0:
+						res.append(pa)
+		"damier":
+			# Une case sur deux : la même emprise qu'un carré pour la moitié des tuiles, et surtout un
+			# terrain qu'on peut encore TRAVERSER — poser du feu en damier bloque sans emmurer.
+			for y in range(-taille, taille + 1):
+				for x in range(-taille, taille + 1):
+					var pd := cible + Vector2i(x, y)
+					if g.dans(pd) and (absi(x) + absi(y)) % 2 == 0:
+						res.append(pd)
 		"tuile":
 			res.append(cible)
 		"vague":

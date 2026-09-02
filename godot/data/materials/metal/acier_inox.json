@@ -4,7 +4,7 @@
   "palier": 5,
   "stats": {
     "durete": 42,
-    "densite": 13,
+    "densite": 8,
     "valeur_base": 45,
     "conductivite_mana": 8,
     "flammabilite": 0,
@@ -28,8 +28,8 @@
     "scale": 4
   },
   "harvest": {
-    "tool_category": null,
-    "skill": null
+    "tool_category": "pioche",
+    "skill": "minage"
   },
   "world_gen": {
     "mode": "biome",

@@ -1,0 +1,38 @@
+{
+  "name_key": "material.dent_fossile.name",
+  "category": "fossile",
+  "palier": 4,
+  "stats": {
+    "durete": 26,
+    "densite": 9,
+    "valeur_base": 26,
+    "conductivite_mana": 30,
+    "flammabilite": 0,
+    "isolation": 26,
+    "conductivite_electrique": 3,
+    "flottabilite": 14,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 6,
+    "friction": 34
+  },
+  "tags": [],
+  "color": "#C6B79A",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 226,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}

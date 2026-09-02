@@ -4,10 +4,10 @@
   "palier": 3,
   "stats": {
     "durete": 10,
-    "densite": 12,
+    "densite": 7,
     "valeur_base": 10,
     "conductivite_mana": 20,
-    "flammabilite": 5,
+    "flammabilite": 0,
     "isolation": 10,
     "conductivite_electrique": 35,
     "flottabilite": 3,

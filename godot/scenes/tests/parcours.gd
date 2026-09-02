@@ -129,7 +129,10 @@ func _ready() -> void:
 func _equiper_et_composer() -> void:
 	var sim = scene.sim
 	var j: Dictionary = sim.entites[jid]
-	var bases: Array = ["craft_epee", "craft_dague", "craft_masse", "craft_lance", "craft_casque", "craft_cuirasse", "craft_jambieres", "proto_bouclier", "proto_anneau", "proto_amulette"]
+	# Les trois derniers étaient des PROTOTYPES non assemblés — un « Anneau » sans matière ni qualité,
+	# restés là depuis l'époque où les bijoux et les boucliers n'avaient pas de version assemblée. Le
+	# robot mesurait donc un personnage moins bien équipé qu'un vrai joueur (2026-09-02).
+	var bases: Array = ["craft_epee", "craft_dague", "craft_masse", "craft_lance", "craft_casque", "craft_cuirasse", "craft_jambieres", "craft_bouclier", "craft_anneau", "craft_amulette"]
 	for k in equiper:
 		var base: String = bases[rng_bot.randi() % bases.size()]
 		var o: Dictionary = sim.generer_objet(base, 3, {}, "rare" if rng_bot.randf() < 0.5 else "commun")

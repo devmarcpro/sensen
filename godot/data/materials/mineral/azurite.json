@@ -1,0 +1,38 @@
+{
+  "name_key": "material.azurite.name",
+  "category": "mineral",
+  "palier": 4,
+  "stats": {
+    "durete": 8,
+    "densite": 7,
+    "valeur_base": 16,
+    "conductivite_mana": 38,
+    "flammabilite": 0,
+    "isolation": 22,
+    "conductivite_electrique": 12,
+    "flottabilite": 12,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 8,
+    "elasticite": 4,
+    "friction": 32
+  },
+  "tags": [],
+  "color": "#2E5FA3",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 219,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}

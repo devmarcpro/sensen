@@ -496,6 +496,37 @@ material.breche_volcanique.name,Volcanic breccia
 material.brique.name,Brick
 material.brique_refractaire.name,Firebrick
 material.bronze.name,Bronze
+material.cendre.name,"Ash"
+material.limon.name,"Silt"
+material.grele.name,"Hail"
+material.givre.name,"Frost"
+material.dent_fossile.name,"Fossil tooth"
+material.trilobite.name,"Trilobite"
+material.tourmaline.name,"Tourmaline"
+material.aigue_marine.name,"Aquamarine"
+material.agate.name,"Agate"
+material.perle.name,"Pearl"
+material.alun.name,"Alum"
+material.azurite.name,"Azurite"
+material.galene.name,"Galena"
+material.magnetite.name,"Magnetite"
+material.hematite.name,"Hematite"
+material.maillechort.name,"Nickel silver"
+material.acier_vanadium.name,"Vanadium steel"
+material.electrum.name,"Electrum"
+material.acier_damasse.name,"Damascus steel"
+material.fonte.name,"Cast iron"
+material.porcelaine.name,"Porcelain"
+material.cire.name,"Wax"
+material.poix.name,"Pitch"
+material.charbon_de_bois.name,"Charcoal"
+material.feutre.name,"Felt"
+material.cuir_bouilli.name,"Boiled leather"
+material.boyau.name,"Gut"
+material.crin.name,"Horsehair"
+material.plume.name,"Feather"
+material.tendon.name,"Sinew"
+material.corne.name,"Horn"
 material.buis.name,Boxwood
 material.calcaire.name,Limestone
 material.calcite.name,Calcite (spar)
@@ -1031,6 +1062,11 @@ module.portee_en_biais.name,Diagonal
 module.portee_zigzag.name,Zigzag
 module.portee_mortier.name,Mortar
 module.couronne.name,Crown
+module.forme_damier.name,"Chequer"
+module.forme_arc.name,"Arc"
+module.portee_en_etoile.name,"Star-wise"
+module.portee_transperce.name,"Piercing"
+module.portee_autour.name,"Around oneself"
 module.portee_sur_soi.name,On self
 module.portee_contact.name,Contact
 module.portee_jet_court.name,Short throw
@@ -1068,6 +1104,14 @@ module.etourdissement.name,Stun
 module.evasement.name,Flare
 module.exhaussement.name,High Ground
 module.fauchage.name,Sweep
+status.durci.name,"Hardened"
+module.durcir.name,"Harden"
+status.aimante.name,"Magnetised"
+status.alourdi.name,"Burdened"
+status.emousse.name,"Blunted"
+module.aimanter.name,"Magnetise"
+module.alourdir.name,"Burden"
+module.emousser.name,"Blunt"
 module.feinte.name,Feint
 module.fiole.name,Vial
 module.flamme.name,Flame

@@ -110,6 +110,18 @@ Le même vocabulaire produit une attaque, un contrôle de zone, un piège et un 
 > Rien à faire côté écran : la zone verte en jeu et l'aperçu du composeur passent tous deux par `capacite_visable`, donc ils dessinent le motif tout seuls.
 
 
+> [!success] Codé le 2026-09-02 — trois portées, deux formes, et les noyaux rangés par famille (designer)
+> « Rajoute des types de modules de portée, pourquoi pas de formes si t'as de bonnes idées, sépare dans le composeur les noyaux par types. »
+> **Trois portées**, chacune posant une décision plutôt qu'un chiffre :
+> - **Autour de soi** — les huit voisines. Il manquait la marche entre *sur soi* (zéro case) et *contact* (une cible choisie) : un sort qui part de toi mais frappe à côté.
+> - **Transperçant** — à travers la pierre, **mais en ligne droite seulement**. C'est la première portée qui ignore la ligne de vue sans être myope : *aveugle* plafonne à quatre cases dans toutes les directions, celle-ci va à cinq dans l'axe. Se cacher derrière un mur ne suffit plus si on reste aligné.
+> - **En étoile** — sept cases, mais **seulement dans les huit directions**. Le prix de la portée est de se placer sur un axe, ou de renoncer.
+> **Deux formes** :
+> - **Arc** — les tuiles à distance exacte, **du côté opposé au lanceur**. La couronne encercle ; l'arc ne prend que la moitié qu'on ne voit pas d'ici. C'est la première forme qui **récompense d'avoir contourné**.
+> - **Damier** — un carré une case sur deux. Même emprise pour la moitié des tuiles, et surtout un terrain qu'on peut encore **traverser** : poser du feu en damier bloque sans emmurer. La seule forme qui laisse volontairement des trous.
+> Vérifié à l'aperçu du composeur : le damier rend treize tuiles en quinconce, l'arc cinq tuiles sur le revers de la cible.
+> **Le composeur range les noyaux par famille.** Ils sont quatre-vingt-huit : en une seule grille on ne trouvait rien, et le joueur ne voyait même pas qu'il existait des familles. Les données les portaient déjà — Arme, Contrôle, Défense, Dégâts léger/moyen/lourd, Espace, Ressource, Soin, Terrain — le composeur ne s'en servait pas. Chaque famille a son en-tête repliable, comme les types.
+
 ## Liens
 - **Dépend de** : [[Vocabulaire des modules — six axes]], [[Structure compétences-modules-slots]]
 - **Alimente** : [[Familles de capacités de la grille]], [[Modules]], [[Jauge de chaîne Wu Xing]]

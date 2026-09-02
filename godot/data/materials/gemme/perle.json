@@ -1,0 +1,38 @@
+{
+  "name_key": "material.perle.name",
+  "category": "gemme",
+  "palier": 2,
+  "stats": {
+    "durete": 15,
+    "densite": 6,
+    "valeur_base": 42,
+    "conductivite_mana": 55,
+    "flammabilite": 0,
+    "isolation": 25,
+    "conductivite_electrique": 2,
+    "flottabilite": 20,
+    "luminosite": 20,
+    "fertilite": 0,
+    "transparence": 15,
+    "elasticite": 6,
+    "friction": 12
+  },
+  "tags": [],
+  "color": "#F3ECE0",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 221,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "dague",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}

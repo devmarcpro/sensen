@@ -1,0 +1,21 @@
+{
+  "id": "autour",
+  "nom": "Autour de soi",
+  "name_key": "module.portee_autour.name",
+  "module_type": "portee",
+  "description": "les **huit voisines** — le sort part de toi et frappe à côté, jamais loin",
+  "classe_signature": null,
+  "tags": [
+    "portee"
+  ],
+  "portee_base": [
+    1,
+    1
+  ],
+  "surcout_ticks": 0,
+  "ligne_de_vue": true,
+  "origine": "lanceur",
+  "motif": null,
+  "famille": "Portée",
+  "style": "neutre"
+}

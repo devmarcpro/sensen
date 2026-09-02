@@ -1195,7 +1195,16 @@ func test_paperdoll_et_tutoriels() -> void:
 
 func test_materiaux() -> void:
 	var mats: Dictionary = GameData.catalogues.materials
-	verifier(mats.size() == 166, "les 166 matériaux des catalogues sont chargés — dont croc, écaille et ivoire (%d)" % mats.size())
+	# Un SEUIL, pas un compte : le designer ajoute des matières (« il manque pas mal de matériaux »), et
+	# recopier un total ici obligeait à corriger le test à chaque enrichissement du catalogue. Ce qui
+	# doit tenir : le catalogue est plein, et chaque fiche porte de quoi être récoltée et assemblée.
+	verifier(mats.size() >= 166, "%d matériaux au catalogue (au moins 166)" % mats.size())
+	var sans_stats: Array[String] = []
+	for mid_v in mats.keys():
+		var mv: Dictionary = mats[mid_v]
+		if not mv.has("stats") or not mv.stats.has("durete") or not mv.has("palier"):
+			sans_stats.append(str(mid_v))
+	verifier(sans_stats.is_empty(), "chaque matériau a ses stats et son palier (manquants : %s)" % str(sans_stats.slice(0, 5)))
 	var fer: Dictionary = mats.fer
 	verifier(int(fer.stats.durete) == 25 and int(fer.stats.conductivite_electrique) == 75, "le Fer suit sa table (Dur 25, CÉl 75)")
 	verifier("conducteur" in fer.tags and not ("inflammable" in fer.tags), "tags dérivés au seuil 50 (fer : conducteur)")
@@ -2903,7 +2912,14 @@ func test_creation_de_sorts() -> void:
 		par_type[t].append(str(mid))
 	for t in par_type.keys():
 		par_type[t].sort()
-	verifier(par_type.get("noyau", []).size() >= 86 and par_type.get("forme", []).size() == 16 and par_type.get("portee", []).size() == 11, "le catalogue : %d noyaux, %d formes, %d portées (dont trois à motif)" % [par_type.get("noyau", []).size(), par_type.get("forme", []).size(), par_type.get("portee", []).size()])
+	# Des SEUILS, pas des comptes exacts : le designer ajoute des modules (« no limit »), et un test qui
+	# recopie un total le fait échouer à chaque ajout — il gêne au lieu de protéger. Ce qui doit tenir,
+	# c'est qu'aucun des trois types indispensables ne se vide, et que chaque forme sache se dessiner.
+	verifier(par_type.get("noyau", []).size() >= 86 and par_type.get("forme", []).size() >= 16 and par_type.get("portee", []).size() >= 11, "le catalogue : %d noyaux, %d formes, %d portées" % [par_type.get("noyau", []).size(), par_type.get("forme", []).size(), par_type.get("portee", []).size()])
+	for fid_v in par_type.get("forme", []):
+		var geo_v := str(GameData.catalogues.modules[fid_v].get("geometrie", ""))
+		if geo_v.is_empty():
+			verifier(false, "la forme %s déclare sa géométrie" % fid_v)
 
 	# 1. chaque noyau, seul : un plan complet et cohérent
 	var noyaux_ko: Array[String] = []

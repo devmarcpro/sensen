@@ -1,0 +1,38 @@
+{
+  "name_key": "material.galene.name",
+  "category": "mineral",
+  "palier": 4,
+  "stats": {
+    "durete": 10,
+    "densite": 13,
+    "valeur_base": 11,
+    "conductivite_mana": 22,
+    "flammabilite": 0,
+    "isolation": 15,
+    "conductivite_electrique": 40,
+    "flottabilite": 5,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 4,
+    "friction": 30
+  },
+  "tags": [],
+  "color": "#8E8F94",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 218,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}

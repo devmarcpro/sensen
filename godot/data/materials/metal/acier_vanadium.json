@@ -1,0 +1,38 @@
+{
+  "name_key": "material.acier_vanadium.name",
+  "category": "metal",
+  "palier": 5,
+  "stats": {
+    "durete": 46,
+    "densite": 8,
+    "valeur_base": 30,
+    "conductivite_mana": 28,
+    "flammabilite": 0,
+    "isolation": 7,
+    "conductivite_electrique": 58,
+    "flottabilite": 3,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 20,
+    "friction": 26
+  },
+  "tags": [],
+  "color": "#6E7681",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 214,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}

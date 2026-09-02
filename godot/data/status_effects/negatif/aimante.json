@@ -1,0 +1,23 @@
+{
+  "name_key": "status.aimante.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 0,
+  "duree_ticks": 180,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "garde",
+      "add": -2
+    },
+    {
+      "cible": "deplacement",
+      "mult": 1.3
+    }
+  ],
+  "tags": [
+    "negatif",
+    "mobilite"
+  ]
+}

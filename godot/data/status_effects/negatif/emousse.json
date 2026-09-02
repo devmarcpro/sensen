@@ -1,0 +1,19 @@
+{
+  "name_key": "status.emousse.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 0,
+  "duree_ticks": 180,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "des",
+      "add": -1
+    }
+  ],
+  "tags": [
+    "negatif",
+    "arme"
+  ]
+}

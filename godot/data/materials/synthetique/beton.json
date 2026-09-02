@@ -3,7 +3,7 @@
   "category": "synthetique",
   "palier": 5,
   "stats": {
-    "durete": 40,
+    "durete": 24,
     "densite": 12,
     "valeur_base": 20,
     "conductivite_mana": 5,
@@ -28,8 +28,8 @@
     "scale": 4
   },
   "harvest": {
-    "tool_category": null,
-    "skill": null
+    "tool_category": "pioche",
+    "skill": "minage"
   },
   "world_gen": {
     "mode": "biome",

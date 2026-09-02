@@ -1,0 +1,38 @@
+{
+  "name_key": "material.magnetite.name",
+  "category": "mineral",
+  "palier": 5,
+  "stats": {
+    "durete": 14,
+    "densite": 9,
+    "valeur_base": 14,
+    "conductivite_mana": 45,
+    "flammabilite": 0,
+    "isolation": 18,
+    "conductivite_electrique": 30,
+    "flottabilite": 8,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 5,
+    "friction": 42
+  },
+  "tags": [],
+  "color": "#312F33",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 217,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}

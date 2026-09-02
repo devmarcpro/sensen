@@ -1649,6 +1649,11 @@ module.portee_en_biais.name,En biais
 module.portee_zigzag.name,Zigzag
 module.portee_mortier.name,Mortier
 module.couronne.name,Couronne
+module.forme_damier.name,"Damier"
+module.forme_arc.name,"Arc"
+module.portee_en_etoile.name,"En étoile"
+module.portee_transperce.name,"Transperçant"
+module.portee_autour.name,"Autour de soi"
 module.portee_sur_soi.name,Sur soi
 module.portee_contact.name,Contact
 module.portee_jet_court.name,Jet court
@@ -1686,6 +1691,14 @@ module.etourdissement.name,Étourdissement
 module.evasement.name,Évasement
 module.exhaussement.name,Exhaussement
 module.fauchage.name,Fauchage
+status.durci.name,"Durci"
+module.durcir.name,"Durcir"
+status.aimante.name,"Aimanté"
+status.alourdi.name,"Alourdi"
+status.emousse.name,"Émoussé"
+module.aimanter.name,"Aimanter"
+module.alourdir.name,"Alourdir"
+module.emousser.name,"Émousser"
 module.feinte.name,Feinte
 module.fiole.name,Fiole
 module.flamme.name,Flamme
@@ -1835,6 +1848,37 @@ material.cuivre.name,Cuivre
 material.etain.name,Étain
 material.zinc.name,Zinc
 material.bronze.name,Bronze
+material.cendre.name,"Cendre"
+material.limon.name,"Limon"
+material.grele.name,"Grêle"
+material.givre.name,"Givre"
+material.dent_fossile.name,"Dent fossile"
+material.trilobite.name,"Trilobite"
+material.tourmaline.name,"Tourmaline"
+material.aigue_marine.name,"Aigue-marine"
+material.agate.name,"Agate"
+material.perle.name,"Perle"
+material.alun.name,"Alun"
+material.azurite.name,"Azurite"
+material.galene.name,"Galène"
+material.magnetite.name,"Magnétite"
+material.hematite.name,"Hématite"
+material.maillechort.name,"Maillechort"
+material.acier_vanadium.name,"Acier au vanadium"
+material.electrum.name,"Électrum"
+material.acier_damasse.name,"Acier damassé"
+material.fonte.name,"Fonte"
+material.porcelaine.name,"Porcelaine"
+material.cire.name,"Cire"
+material.poix.name,"Poix"
+material.charbon_de_bois.name,"Charbon de bois"
+material.feutre.name,"Feutre"
+material.cuir_bouilli.name,"Cuir bouilli"
+material.boyau.name,"Boyau"
+material.crin.name,"Crin"
+material.plume.name,"Plume"
+material.tendon.name,"Tendon"
+material.corne.name,"Corne"
 material.laiton.name,Laiton
 material.fer.name,Fer
 material.acier.name,Acier

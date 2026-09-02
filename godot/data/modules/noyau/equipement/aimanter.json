@@ -1,0 +1,30 @@
+{
+  "id": "aimanter",
+  "nom": "Aimanter",
+  "name_key": "module.aimanter.name",
+  "module_type": "noyau",
+  "description": "le métal qu'elle porte **la trahit** : sa garde s'ouvre et ses pas traînent",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Équipement",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 7,
+  "cout_mana": 9,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "aimante",
+      "duree_ticks": 120
+    }
+  },
+  "style": "controle"
+}

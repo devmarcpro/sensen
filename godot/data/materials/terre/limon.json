@@ -1,0 +1,38 @@
+{
+  "name_key": "material.limon.name",
+  "category": "terre",
+  "palier": 2,
+  "stats": {
+    "durete": 2,
+    "densite": 5,
+    "valeur_base": 2,
+    "conductivite_mana": 12,
+    "flammabilite": 5,
+    "isolation": 25,
+    "conductivite_electrique": 6,
+    "flottabilite": 25,
+    "luminosite": 0,
+    "fertilite": 85,
+    "transparence": 0,
+    "elasticite": 8,
+    "friction": 55
+  },
+  "tags": [],
+  "color": "#8A7A5C",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 229,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pelle",
+    "skill": "terrassement"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}

@@ -1,0 +1,38 @@
+{
+  "name_key": "material.cire.name",
+  "category": "synthetique",
+  "palier": 2,
+  "stats": {
+    "durete": 1,
+    "densite": 3,
+    "valeur_base": 7,
+    "conductivite_mana": 22,
+    "flammabilite": 75,
+    "isolation": 60,
+    "conductivite_electrique": 1,
+    "flottabilite": 80,
+    "luminosite": 5,
+    "fertilite": 0,
+    "transparence": 25,
+    "elasticite": 40,
+    "friction": 30
+  },
+  "tags": [],
+  "color": "#E8DFA8",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 209,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "seau",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}

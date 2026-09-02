@@ -1,0 +1,38 @@
+{
+  "name_key": "material.tourmaline.name",
+  "category": "gemme",
+  "palier": 2,
+  "stats": {
+    "durete": 38,
+    "densite": 7,
+    "valeur_base": 28,
+    "conductivite_mana": 58,
+    "flammabilite": 0,
+    "isolation": 21,
+    "conductivite_electrique": 2,
+    "flottabilite": 9,
+    "luminosite": 4,
+    "fertilite": 0,
+    "transparence": 45,
+    "elasticite": 5,
+    "friction": 17
+  },
+  "tags": [],
+  "color": "#3E6B4A",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 224,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}

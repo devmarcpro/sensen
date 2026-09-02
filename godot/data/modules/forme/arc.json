@@ -1,0 +1,20 @@
+{
+  "id": "arc",
+  "nom": "Arc",
+  "name_key": "module.forme_arc.name",
+  "module_type": "forme",
+  "description": "le **revers** de la cible : les tuiles à distance exacte, du côté opposé au lanceur",
+  "classe_signature": null,
+  "tags": [
+    "forme"
+  ],
+  "geometrie": "arc",
+  "surcout_ticks": 3,
+  "taille_base": 2,
+  "famille": "Formes",
+  "style": "neutre",
+  "portee_defaut": [
+    1,
+    1
+  ]
+}

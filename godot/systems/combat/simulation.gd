@@ -10957,4 +10957,6 @@ static func motif_atteint(motif: String, de: Vector2i, vers: Vector2i) -> bool:
 			return dx == dy and dx > 0
 		"zigzag":
 			return dx > 0 and dy > 0 and absi(dx - dy) <= 1
+		"etoile":   # les huit directions : les axes ET les diagonales, rien entre les deux
+			return dx == 0 or dy == 0 or dx == dy
 	return true

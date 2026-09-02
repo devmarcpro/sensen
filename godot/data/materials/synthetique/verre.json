@@ -26,8 +26,8 @@
     "scale": 4
   },
   "harvest": {
-    "tool_category": null,
-    "skill": null
+    "tool_category": "pioche",
+    "skill": "minage"
   },
   "world_gen": {
     "mode": "biome",

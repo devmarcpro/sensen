@@ -257,19 +257,55 @@ func _reconstruire_catalogue(j: Dictionary) -> void:
 		catalogue.add_child(entete)
 		if ferme:
 			continue
-		var grille := GridContainer.new()
-		grille.columns = COLONNES
-		catalogue.add_child(grille)
-		for m in du_type:
-			var carte := CarteModule.new()
-			carte.composeur = self
-			carte.module = m
-			carte.charges = -1   # un module connu l'est pour toujours : rien à afficher en coin
-			carte.fois = sequence().count(m)
-			carte.index = ids.size()
-			grille.add_child(carte)
-			cartes.append(carte)
-			ids.append(m)
+		# Les noyaux se rangent par FAMILLE (designer 2026-09-02 : « sépare dans le composeur les noyaux
+		# par types »). Ils sont quatre-vingt-huit : en une seule grille, on ne trouve rien, et le
+		# joueur ne voit même pas qu'il existe des familles. Les données les portaient déjà — Arme,
+		# Contrôle, Défense, Dégâts léger/moyen/lourd, Espace, Ressource, Soin, Terrain — le composeur
+		# ne s'en servait pas. Les autres types restent en une grille : ils sont assez peu nombreux.
+		var groupes: Array = []
+		if type == "noyau":
+			var par_famille := {}
+			for m in du_type:
+				var fam := str(GameData.catalogues.modules.get(str(m), {}).get("famille", ""))
+				if not par_famille.has(fam):
+					par_famille[fam] = []
+				(par_famille[fam] as Array).append(str(m))
+			var familles: Array = par_famille.keys()
+			familles.sort()
+			for fam in familles:
+				groupes.append({"titre": str(fam), "cle": type + "/" + str(fam), "modules": par_famille[fam]})
+		else:
+			groupes.append({"titre": "", "cle": type, "modules": du_type})
+		for gr in groupes:
+			if not str(gr.titre).is_empty():
+				var sous_ferme: bool = bool(replie.get(str(gr.cle), false))
+				var sous := Button.new()
+				sous.text = "   %s %s (%d)" % ["▸" if sous_ferme else "▾", str(gr.titre), (gr.modules as Array).size()]
+				sous.flat = true
+				sous.alignment = HORIZONTAL_ALIGNMENT_LEFT
+				sous.focus_mode = Control.FOCUS_NONE
+				sous.add_theme_font_size_override("font_size", 10)
+				sous.modulate = Color(0.7, 0.72, 0.66)
+				var cle_c := str(gr.cle)
+				sous.pressed.connect(func() -> void:
+					replie[cle_c] = not bool(replie.get(cle_c, false))
+					reconstruire(main.joueur()))
+				catalogue.add_child(sous)
+				if sous_ferme:
+					continue
+			var grille := GridContainer.new()
+			grille.columns = COLONNES
+			catalogue.add_child(grille)
+			for m in gr.modules:
+				var carte := CarteModule.new()
+				carte.composeur = self
+				carte.module = str(m)
+				carte.charges = -1   # un module connu l'est pour toujours : rien à afficher en coin
+				carte.fois = sequence().count(str(m))
+				carte.index = ids.size()
+				grille.add_child(carte)
+				cartes.append(carte)
+				ids.append(str(m))
 	selection = clampi(selection, 0, maxi(0, ids.size() - 1))
 	for k in cartes.size():
 		cartes[k].selectionnee = k == selection

@@ -1,0 +1,38 @@
+{
+  "name_key": "material.aigue_marine.name",
+  "category": "gemme",
+  "palier": 3,
+  "stats": {
+    "durete": 38,
+    "densite": 7,
+    "valeur_base": 34,
+    "conductivite_mana": 62,
+    "flammabilite": 0,
+    "isolation": 20,
+    "conductivite_electrique": 2,
+    "flottabilite": 9,
+    "luminosite": 8,
+    "fertilite": 0,
+    "transparence": 70,
+    "elasticite": 5,
+    "friction": 16
+  },
+  "tags": [],
+  "color": "#8FD4D8",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 223,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}

@@ -1,0 +1,30 @@
+{
+  "id": "emousser",
+  "nom": "Émousser",
+  "name_key": "module.emousser.name",
+  "module_type": "noyau",
+  "description": "l'arme de la cible perd **un dé** — elle frappe toujours, mais mal",
+  "classe_signature": null,
+  "tags": [
+    "noyau"
+  ],
+  "famille": "Équipement",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 5,
+  "cout_mana": 7,
+  "cout_endurance": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "emousse",
+      "duree_ticks": 180
+    }
+  },
+  "style": "controle"
+}

@@ -1,0 +1,19 @@
+{
+  "name_key": "status.durci.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 0,
+  "duree_ticks": 240,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "armure",
+      "add": 3
+    }
+  ],
+  "tags": [
+    "positif",
+    "defense"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "name_key": "material.porcelaine.name",
+  "category": "synthetique",
+  "palier": 4,
+  "stats": {
+    "durete": 16,
+    "densite": 6,
+    "valeur_base": 18,
+    "conductivite_mana": 40,
+    "flammabilite": 0,
+    "isolation": 65,
+    "conductivite_electrique": 1,
+    "flottabilite": 20,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 10,
+    "elasticite": 3,
+    "friction": 15
+  },
+  "tags": [],
+  "color": "#F4F1EA",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 210,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}
