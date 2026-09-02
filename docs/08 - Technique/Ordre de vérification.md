@@ -34,6 +34,10 @@ Un critère de performance à valider avant de passer à l'étape suivante. **Un
 > [!success] Codé le 2026-08-31 — les critères mesurables sans écran ont un test
 > `test_budgets` (suite) : É2 étage < 100 ms, É3 objet à affixes < 1 ms, É4 recalcul de stats < 0,5 ms, tick de simulation < 8 ms. Restent à l'œil ou au profil : les critères de rendu (fps, frames > 16 ms — `capture.tscn --disable-vsync` mesure déjà le coût moyen d'image) et le réseau (É11). La cellule de surface est mesurée dans `test_surface` (< 250 ms, budget de 32 ms différé).
 
+> [!success] Codé le 2026-09-02 — le robot sait collecter sans mourir, et rend son sac
+> Deux drapeaux de plus au parcours : **`--invincible`** (PV, endurance et mana rendus à chaque image) pour mesurer ce que le jeu **donne** plutôt que si l'on survit, et **`--inventaire <chemin>`** qui écrit le sac complet en JSON à la fin — une entrée par objet avec son nom rendu, son type, son matériau, son espèce, sa qualité, sa rareté, son poids, son vecteur Wu Xing, ses affixes et ses composants. Six étages, 97 objets : c'est ce qui a montré que 41 % du butin est une fiole non identifiée et que les boucliers ne sont pas assemblés.
+
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Budgets de performance]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]

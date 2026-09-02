@@ -1,0 +1,97 @@
+arme      | Épée en Fer (chef-d'œuvre 2.13)                            | q 2.13 | inhabituel   |   3.8 kg | bois 5% metal 95% | affixes: cadence_des | fixations: coton (1.56) · manche: cobalt (1.52) · tete: fer (1.69)
+arme      | Masse en Diorite (chef-d'œuvre 2.09)                       | q 2.09 | rare         |   6.6 kg | metal 30% terre 70% | affixes: cond_nuit,cadence_saignee | fixations: titane (1.39) · manche: zinc (1.69) · tete: diorite (1.59)
+arme      | Épée en Cobalt (excellent 1.97)                            | q 1.97 | inhabituel   |   3.8 kg | metal 100% | affixes: decl_zone_etourdit | fixations: bronze (1.64) · manche: tungstene (1.34) · tete: cobalt (1.57)
+arme      | Lance en Chrome (chromite) (excellent 1.95)                | q 1.95 | exceptionnel |   4.6 kg | metal 100% | affixes: wuxing_ajout,cond_profondeur | fixations: manganese (1.43) · manche: or (1.43) · tete: chrome (1.53)
+arme      | Épée en Verre (excellent 1.95)                             | q 1.95 | rare         |   3.8 kg | feu 35% metal 30% terre 35% | affixes: wuxing_cycle,decl_zone_etourdit | fixations: argent (1.61) · manche: titane (1.38) · tete: verre (1.54)
+arme      | Épée en Platine (excellent 1.89)                           | q 1.89 | rare         |   3.8 kg | metal 100% | affixes: cond_corruption,cond_profondeur | fixations: nickel (1.55) · manche: manganese (1.58) · tete: platine (1.40)
+arme      | Lance en Manganèse (excellent 1.88)                        | q 1.88 | rare         |   4.6 kg | bois 25% metal 75% | affixes: decl_zone_saigne | fixations: etain (1.54) · manche: palmier (1.68) · tete: manganese (1.38)
+arme      | Lance en Tungstène (excellent 1.88)                        | q 1.88 | rare         |   4.6 kg | metal 100% | affixes: wuxing_segment | fixations: titane (1.36) · manche: plomb (1.50) · tete: tungstene (1.43)
+arme      | Lance en Manganèse (excellent 1.85)                        | q 1.85 | inhabituel   |   4.6 kg | metal 100% | affixes: cond_corruption | fixations: cobalt (1.35) · manche: cuivre (1.54) · tete: manganese (1.39)
+arme      | Masse en Conglomérat (excellent 1.79)                      | q 1.79 | inhabituel   |   6.6 kg | metal 30% terre 70% | affixes: cond_pv_bas | fixations: fer (1.68) · manche: acier (1.36) · tete: conglomerat (1.36)
+arme      | Dague en Tungstène (excellent 1.77)                        | q 1.77 | rare         |   1.9 kg | bois 25% metal 75% | affixes: cond_element_cible | fixations: manganese (1.59) · manche: aulne (1.30) · tete: tungstene (1.37)
+arme      | Épée en Nickel (excellent 1.75)                            | q 1.75 | rare         |   3.8 kg | metal 100% | affixes: cadence_saignee | fixations: zinc (1.56) · manche: bronze (1.24) · tete: nickel (1.37)
+arme      | Épée en Étain (bon 1.38)                                   | q 1.38 | inhabituel   |   3.8 kg | metal 100% | affixes: wuxing_cycle | fixations: argent (1.28) · manche: argent (1.14) · tete: etain (1.10)
+arme      | Lance en Cobalt (bon 1.32)                                 | q 1.32 | inhabituel   |   4.6 kg | bois 25% metal 75% | affixes: decl_zone_saigne | fixations: manganese (1.17) · manche: robinier (1.29) · tete: cobalt (1.11)
+arme      | Épée en Acier trempé (correct 1.03)                        | q 1.03 | commun       |   3.8 kg | metal 100% | fixations: zinc (0.90) · manche: etain (0.97) · tete: acier_trempe (1.03)
+arme      | Dague en Bronze (correct 0.99)                             | q 0.99 | rare         |   1.9 kg | bois 25% metal 75% | affixes: cadence_element,wuxing_cycle | fixations: cuivre (1.07) · manche: eucalyptus (0.85) · tete: bronze (1.10)
+armure    | Cuirasse de plaque en Cuivre (excellent 1.98)              | q 1.98 | inhabituel   |   6.0 kg | bois 20% metal 80% | affixes: decl_touche_etourdit | fixations: argent (1.60) · plaque: cuivre (1.56) · sangles: cuir (1.37)
+armure    | Cuirasse de plaque en Cuivre (excellent 1.83)              | q 1.83 | rare         |   6.0 kg | bois 20% metal 80% | affixes: meca_armure,meca_garde | fixations: zinc (1.38) · plaque: cuivre (1.41) · sangles: soie (1.38)
+armure    | Casque de plaque en Tungstène (excellent 1.67)             | q 1.67 | rare         |   6.0 kg | bois 20% metal 80% | affixes: decl_parade | fixations: manganese (1.40) · plaque: tungstene (1.32) · sangles: lin (1.25)
+armure    | Casque de plaque en Zinc (bon 1.20)                        | q 1.20 | inhabituel   |   6.0 kg | bois 20% metal 80% | affixes: cond_profondeur | fixations: manganese (0.96) · plaque: zinc (1.11) · sangles: cuir (1.01)
+armure    | Brassards de plaque en Fer (correct 1.12)                  | q 1.12 | rare         |   6.0 kg | bois 20% metal 80% | affixes: cadence_parade,decl_touche_etourdit | fixations: argent (1.07) · plaque: fer (1.00) · sangles: coton (1.10)
+armure    | Jambières de plaque en Cuivre (correct 1.02)               | q 1.02 | commun       |   6.0 kg | bois 20% metal 80% | fixations: etain (1.13) · plaque: cuivre (0.89) · sangles: chanvre (1.02)
+armure    | Jambières de plaque en Zinc (correct 1.01)                 | q 1.01 | commun       |   6.0 kg | bois 20% metal 80% | fixations: bronze (0.99) · plaque: zinc (1.02) · sangles: chanvre (0.89)
+armure    | Cuirasse de plaque en Zinc (correct 0.93)                  | q 0.93 | rare         |   6.0 kg | bois 20% metal 80% | affixes: cadence_parade,passif_competence | fixations: etain (0.99) · plaque: zinc (0.96) · sangles: cuir (0.96)
+armure    | Jambières de plaque en Cuivre (correct 0.89)               | q 0.89 | inhabituel   |   6.0 kg | bois 20% metal 80% | affixes: cond_nuit | fixations: zinc (0.89) · plaque: cuivre (0.89) · sangles: lin (0.90)
+armure    | Casque de plaque en Cuivre (correct 0.86)                  | q 0.86 | commun       |   6.0 kg | bois 20% metal 80% | fixations: acier (1.14) · plaque: cuivre (0.99) · sangles: soie (1.03)
+armure    | Casque de plaque en Acier trempé (correct 0.83)            | q 0.83 | commun       |   6.0 kg | bois 20% metal 80% | fixations: etain (1.09) · plaque: acier_trempe (0.88) · sangles: cuir (0.90)
+bouclier  | Bouclier                                                   | q 1.00 | inhabituel   |   4.8 kg | bois 100% | 
+bouclier  | Bouclier                                                   | q 1.00 | inhabituel   |   4.8 kg | bois 100% | 
+bouclier  | Bouclier                                                   | q 1.00 | inhabituel   |   4.8 kg | bois 100% | 
+bouclier  | Bouclier                                                   | q 1.00 | commun       |   4.8 kg | bois 100% | 
+bouclier  | Bouclier                                                   | q 1.00 | rare         |   4.8 kg | bois 100% | 
+bouclier  | Bouclier                                                   | q 1.00 | inhabituel   |   4.8 kg | bois 100% | 
+bijou     | Amulette vivace (régénération +73 %) [rare]                | q 0.00 | rare         |   1.0 kg | metal 100% | affixes: passif_regen,passif_surchauffe | 
+bijou     | Anneau                                                     | q 0.00 | commun       |   1.0 kg | metal 100% | 
+bijou     | Anneau                                                     | q 0.00 | inhabituel   |   1.0 kg | metal 100% | affixes: passif_tag | 
+bijou     | de portage (+40 de capacité) [rare]                        | q 0.00 | rare         |   1.0 kg | metal 100% | affixes: passif_poids | 
+gemme     | Gemme {apparence}                                          | q 0.00 | commun       |   1.0 kg | metal 100% | 
+gemme     | Gemme {apparence}                                          | q 0.00 | inhabituel   |   1.0 kg | metal 100% | 
+gemme     | Gemme {apparence}                                          | q 0.00 | commun       |   1.0 kg | metal 100% | 
+gemme     | Gemme {apparence}                                          | q 0.00 | commun       |   1.0 kg | terre 100% | 
+outil     | Pelle en Quartzite (excellent 1.81)                        | q 1.81 | inhabituel   |   2.2 kg | metal 30% terre 70% | affixes: cond_element_cible | fixations: argent (1.37) · manche: acier_trempe (1.59) · tete: quartzite (1.32)
+outil     | Pelle en Zinc (bon 1.49)                                   | q 1.49 | inhabituel   |   2.2 kg | bois 25% metal 75% | affixes: meca_allonge | fixations: cobalt (1.45) · manche: noisetier (1.24) · tete: zinc (1.34)
+outil     | Pelle en Zinc (correct 1.14)                               | q 1.14 | commun       |   2.2 kg | bois 25% metal 75% | fixations: acier_trempe (0.94) · manche: epicea (0.86) · tete: zinc (1.05)
+outil     | Torche                                                     | q 0.00 | commun       |   1.0 kg | 
+outil     | Torche                                                     | q 0.00 | commun       |   1.0 kg | 
+grimoire  | Livre : Silence (difficulté 20)                            | q 0.00 | inhabituel   |   1.0 kg | feu 100% | 
+manuel    | Livre : Frappe (difficulté 10)                             | q 0.00 | inhabituel   |   1.0 kg | feu 100% | 
+manuel    | Livre : Gravité (difficulté 30)                            | q 0.00 | exceptionnel |   1.0 kg | feu 100% | 
+manuel    | Livre : Sur soi (difficulté 15)                            | q 0.00 | inhabituel   |   1.0 kg | feu 100% | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   1.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | rare         |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   1.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   1.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | rare         |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | inhabituel   |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   1.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | inhabituel   |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | rare         |   1.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   1.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | inhabituel   |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+consommable | Fiole {apparence}                                          | q 0.00 | commun       |   0.0 kg | 
+materiau  | Matériau brut                                              | q 0.00 | commun       |   1.5 kg | bois 100% | 
+materiau  | Matériau brut                                              | q 0.00 | commun       |   1.5 kg | bois 100% | 
+station   | Alambic                                                    | q 0.00 | commun       |  40.0 kg | 
+station   | Enclume                                                    | q 0.00 | inhabituel   |  60.0 kg | 
+station   | Forge                                                      | q 0.00 | commun       |  80.0 kg | 
+station   | Établi                                                     | q 0.00 | commun       |  35.0 kg | 
+meuble    | Statue de Bandit                                           | q 0.00 | commun       |   8.0 kg | 

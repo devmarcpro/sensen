@@ -14,6 +14,8 @@ var theme := "ruine"
 var classe := ""            # --classe id : la classe du personnage (30 : tester des classes variées)
 var race := ""              # --race id
 var equiper := 0            # --equiper N : N objets assemblés générés, les équipables portés
+var invincible := false     # --invincible : PV rendus à chaque image, pour une collecte longue
+var fichier_inventaire := ""  # --inventaire <chemin> : le sac complet écrit en JSON à la fin
 var sorts := 0              # --sorts N : N sorts composés au hasard (forme + noyau [+ modificateur]), lancés en combat
 var rng_bot := RandomNumberGenerator.new()
 var sorts_lances := 0
@@ -75,6 +77,10 @@ func _ready() -> void:
 			equiper = int(args[i + 1])
 		elif args[i] == "--sorts" and i + 1 < args.size():
 			sorts = int(args[i + 1])
+		elif args[i] == "--invincible":   # le robot ne meurt pas : on veut mesurer ce qu'il RAMASSE, pas s'il survit
+			invincible = true
+		elif args[i] == "--inventaire" and i + 1 < args.size():
+			fichier_inventaire = str(args[i + 1])
 	DirAccess.make_dir_recursive_absolute(sortie)
 	DirAccess.make_dir_recursive_absolute(sortie + "/toutes_les_30s")
 	rng_bot.seed = graine
@@ -189,6 +195,10 @@ func _process(_delta: float) -> void:
 		_fin("le joueur a disparu")
 		return
 	var j: Dictionary = sim.entites[jid]
+	if invincible and j.vivant:   # on rend les PV et l'endurance à chaque image : la collecte n'est pas un test de survie
+		j.sante = int(j.sante_max)
+		j.endurance = int(j.endurance_max)
+		j.mana = int(j.mana_max)
 	if not j.vivant:
 		morts += 1
 		_note("MORT à l'étage %d (%d coups reçus, %d dégâts)" % [int(sim.donjon.etage), coups_recus, degats_recus])
@@ -374,6 +384,30 @@ func _fin(raison: String) -> void:
 	_capturer("fin")
 	print("PARCOURS : %s — étages descendus %d (arrivé à l'étage %d) · combats %d · coups portés %d · coups reçus %d (%d dégâts) · kills %d · morts %d · ramassages %d · portes ouvertes %d · pas %d · soins %d · sorts %d (refusés %d) · attentes %d · images %d · captures %d · PV finaux %d/%d" % [
 		raison, etages_atteints, int(scene.sim.donjon.get("etage", 0)), combats, coups_portes, coups_recus, degats_recus, kills, morts, ramassages, portes_ouvertes, pas, soins, sorts_lances, sorts_refuses, attentes, frames, captures, int(j.get("sante", 0)), int(j.get("sante_max", 0))])
+	if not fichier_inventaire.is_empty():   # le sac complet, en JSON, pour être lu hors du jeu
+		var sim2 = scene.sim
+		var lignes: Array = []
+		for uid in j.get("sac", []):
+			var it: Dictionary = sim2.items.get(str(uid), {})
+			if it.is_empty():
+				continue
+			var d := {"nom": scene.nom_objet(sim2.nom_objet(str(uid))), "base": str(it.get("base", "")), "type": str(it.get("type", "")),
+				"materiau": str(it.get("materiau", "")), "espece": str(it.get("espece", "")), "qualite": float(it.get("qualite", 0.0)),
+				"quantite": int(it.get("quantite", 1)), "rarete": str(it.get("rarete", "")), "poids": sim2.regles.poids_objet(it, sim2.fonctionnalites),
+				"slot": str(it.get("equip_slot", "")), "tags": it.get("tags", []), "affixes": [], "composants": {}, "elements": sim2.vecteur_objet(it)}
+			for ax in it.get("affixes", []):
+				d.affixes.append(str(ax.get("id", "")))
+			for sc in it.get("composants", {}).keys():
+				d.composants[str(sc)] = {"materiau": str(it.composants[sc].get("materiau", "")), "qualite": float(it.composants[sc].get("qualite", 0.0))}
+			lignes.append(d)
+		var eq := {}
+		for slot in j.get("equipement", {}).keys():
+			eq[str(slot)] = scene.nom_objet(sim2.nom_objet(str(j.equipement[slot])))
+		var f := FileAccess.open(fichier_inventaire, FileAccess.WRITE)
+		if f != null:
+			f.store_string(JSON.stringify({"sac": lignes, "equipement": eq, "or": int(j.get("or", 0)), "ramassages": ramassages}, "  "))
+			f.close()
+		print("inventaire écrit : %s (%d objets)" % [fichier_inventaire, lignes.size()])
 	for ev in evenements:
 		print("  ", ev)
 	for l in scene.journal:
