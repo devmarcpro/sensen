@@ -40,5 +40,9 @@
     "athletisme": 22
   },
   "depouille": [],
-  "meute": "1d2+1"
+  "meute": "1d2+1",
+  "drops_chasse": [
+    "plume",
+    "griffe"
+  ]
 }

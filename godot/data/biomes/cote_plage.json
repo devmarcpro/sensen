@@ -55,12 +55,40 @@
     {
       "id": "aigle",
       "density": 0.2
+    },
+    {
+      "id": "canard_sauvage",
+      "density": 0.2
+    },
+    {
+      "id": "loutre",
+      "density": 0.175
+    },
+    {
+      "id": "corbeau",
+      "density": 0.15
+    },
+    {
+      "id": "heron",
+      "density": 0.15
+    },
+    {
+      "id": "escargot",
+      "density": 0.125
+    },
+    {
+      "id": "papillon",
+      "density": 0.125
     }
   ],
   "faune_nuit": [
     {
       "id": "loup",
       "density": 0.3
+    },
+    {
+      "id": "grillon",
+      "density": 0.15
     }
   ],
   "cueillette": [

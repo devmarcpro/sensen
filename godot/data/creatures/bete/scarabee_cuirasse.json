@@ -3,19 +3,43 @@
   "race": "scarabee_cuirasse",
   "skeleton_template": "quadrupede",
   "corps": {
-    "stats": {"force": 9, "dexterite": 5, "endurance": 12, "volonte": 3, "perception": 7, "charisme": 1},
+    "stats": {
+      "force": 9,
+      "dexterite": 5,
+      "endurance": 12,
+      "volonte": 3,
+      "perception": 7,
+      "charisme": 1
+    },
     "silhouette": "quadrupede"
   },
   "esprit": null,
   "ai_profile": "hostile",
-  "actions": ["charge", "pinces"],
+  "actions": [
+    "charge",
+    "pinces"
+  ],
   "equipement": [],
   "ratelier": [],
   "chain_gauge": false,
-  "elements": {"terre": 0.6, "metal": 0.4},
+  "elements": {
+    "terre": 0.6,
+    "metal": 0.4
+  },
   "rare_chance": 0.02,
-  "teinte": [0.35, 0.3, 0.2],
-  "tags": ["bete"],
-  "competences": {"athletisme": 14},
-  "depouille": []
+  "teinte": [
+    0.35,
+    0.3,
+    0.2
+  ],
+  "tags": [
+    "bete"
+  ],
+  "competences": {
+    "athletisme": 14
+  },
+  "depouille": [],
+  "drops_chasse": [
+    "carapace"
+  ]
 }

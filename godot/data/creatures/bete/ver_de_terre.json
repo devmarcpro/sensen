@@ -1,0 +1,42 @@
+{
+  "name_key": "creature.ver_de_terre.name",
+  "race": "ver_de_terre",
+  "skeleton_template": "amorphe",
+  "corps": {
+    "stats": {
+      "force": 1,
+      "dexterite": 3,
+      "endurance": 2,
+      "volonte": 1,
+      "perception": 2,
+      "charisme": 1
+    },
+    "silhouette": "amorphe"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "morsure"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.66,
+    0.44,
+    0.42
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "insecte"
+  ],
+  "competences": {
+    "athletisme": 2
+  },
+  "depouille": []
+}

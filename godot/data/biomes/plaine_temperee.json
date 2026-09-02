@@ -87,6 +87,54 @@
     {
       "id": "essaim_abeilles",
       "density": 0.15
+    },
+    {
+      "id": "lievre",
+      "density": 0.203
+    },
+    {
+      "id": "papillon",
+      "density": 0.27
+    },
+    {
+      "id": "sauterelle",
+      "density": 0.225
+    },
+    {
+      "id": "coccinelle",
+      "density": 0.18
+    },
+    {
+      "id": "corbeau",
+      "density": 0.158
+    },
+    {
+      "id": "pie",
+      "density": 0.135
+    },
+    {
+      "id": "perdrix",
+      "density": 0.135
+    },
+    {
+      "id": "taupe",
+      "density": 0.09
+    },
+    {
+      "id": "ver_de_terre",
+      "density": 0.135
+    },
+    {
+      "id": "cheval_sauvage",
+      "density": 0.068
+    },
+    {
+      "id": "bison",
+      "density": 0.045
+    },
+    {
+      "id": "herisson",
+      "density": 0.113
     }
   ],
   "faune_nuit": [
@@ -101,6 +149,18 @@
     {
       "id": "rat_geant",
       "density": 0.3
+    },
+    {
+      "id": "grillon",
+      "density": 0.225
+    },
+    {
+      "id": "herisson",
+      "density": 0.135
+    },
+    {
+      "id": "hibou",
+      "density": 0.113
     }
   ],
   "cueillette": [

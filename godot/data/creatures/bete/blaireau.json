@@ -1,50 +1,49 @@
 {
-  "name_key": "creature.sanglier.name",
-  "race": "sanglier",
+  "name_key": "creature.blaireau.name",
+  "race": "blaireau",
   "skeleton_template": "quadrupede",
   "corps": {
     "stats": {
-      "force": 12,
-      "dexterite": 6,
-      "endurance": 10,
+      "force": 7,
+      "dexterite": 8,
+      "endurance": 8,
       "volonte": 4,
-      "perception": 8,
-      "charisme": 2
+      "perception": 10,
+      "charisme": 3
     },
     "silhouette": "quadrupede"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "bete_sauvage",
   "actions": [
-    "coup_de_defenses",
-    "charge"
+    "griffure",
+    "morsure"
   ],
   "equipement": [],
   "ratelier": [],
   "chain_gauge": false,
   "elements": {
     "terre": 0.6,
-    "metal": 0.4
+    "bois": 0.4
   },
   "rare_chance": 0.0,
   "teinte": [
-    0.45,
-    0.3,
-    0.2
+    0.72,
+    0.7,
+    0.66
   ],
   "tags": [
-    "bete"
+    "bete",
+    "paisible"
   ],
   "competences": {
-    "athletisme": 15
+    "athletisme": 26
   },
   "depouille": [
-    "viande_crue",
     "viande_crue"
   ],
   "drops_chasse": [
     "peau",
-    "defense",
-    "os"
+    "griffe"
   ]
 }

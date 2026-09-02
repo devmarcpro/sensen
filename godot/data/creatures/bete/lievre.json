@@ -1,49 +1,46 @@
 {
-  "name_key": "creature.scorpion.name",
-  "race": "scorpion",
+  "name_key": "creature.lievre.name",
+  "race": "lievre",
   "skeleton_template": "quadrupede",
   "corps": {
     "stats": {
-      "force": 6,
-      "dexterite": 9,
-      "endurance": 6,
+      "force": 2,
+      "dexterite": 15,
+      "endurance": 3,
       "volonte": 2,
-      "perception": 8,
-      "charisme": 1
+      "perception": 13,
+      "charisme": 3
     },
     "silhouette": "quadrupede"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "fuyard",
   "actions": [
-    "pique_venimeuse",
-    "pinces"
+    "bond"
   ],
   "equipement": [],
   "ratelier": [],
   "chain_gauge": false,
   "elements": {
-    "eau": 0.6,
-    "metal": 0.4
+    "bois": 1.0
   },
   "rare_chance": 0.0,
   "teinte": [
-    0.3,
-    0.25,
-    0.2
+    0.62,
+    0.55,
+    0.42
   ],
   "tags": [
     "bete",
-    "poison"
+    "paisible"
   ],
   "competences": {
-    "athletisme": 5
+    "athletisme": 30
   },
   "depouille": [
     "viande_crue"
   ],
   "drops_chasse": [
-    "carapace",
-    "dent"
+    "peau"
   ]
 }

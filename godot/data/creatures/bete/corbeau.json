@@ -1,49 +1,47 @@
 {
-  "name_key": "creature.aigle.name",
-  "race": "aigle",
+  "name_key": "creature.corbeau.name",
+  "race": "corbeau",
   "skeleton_template": "volant",
   "corps": {
     "stats": {
-      "force": 5,
-      "dexterite": 15,
-      "endurance": 4,
-      "volonte": 3,
-      "perception": 16,
-      "charisme": 2
+      "force": 2,
+      "dexterite": 13,
+      "endurance": 3,
+      "volonte": 5,
+      "perception": 15,
+      "charisme": 5
     },
     "silhouette": "volant"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "fuyard",
   "actions": [
-    "serres",
-    "pique_plongeant"
+    "becquetage"
   ],
   "equipement": [],
   "ratelier": [],
   "chain_gauge": false,
   "elements": {
-    "metal": 0.5,
-    "bois": 0.5
+    "metal": 0.4,
+    "bois": 0.6
   },
   "rare_chance": 0.0,
   "teinte": [
-    0.6,
-    0.45,
-    0.25
+    0.14,
+    0.14,
+    0.16
   ],
   "tags": [
     "bete",
-    "volant"
+    "paisible"
   ],
   "competences": {
-    "athletisme": 40
+    "athletisme": 28
   },
   "depouille": [
     "viande_crue"
   ],
   "drops_chasse": [
-    "plume",
-    "griffe"
+    "plume"
   ]
 }

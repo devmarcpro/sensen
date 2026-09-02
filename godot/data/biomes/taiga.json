@@ -87,6 +87,26 @@
     {
       "id": "lynx",
       "density": 0.15
+    },
+    {
+      "id": "ecureuil",
+      "density": 0.28
+    },
+    {
+      "id": "lievre",
+      "density": 0.245
+    },
+    {
+      "id": "perdrix",
+      "density": 0.21
+    },
+    {
+      "id": "corbeau",
+      "density": 0.175
+    },
+    {
+      "id": "marmotte",
+      "density": 0.14
     }
   ],
   "faune_nuit": [
@@ -97,6 +117,10 @@
     {
       "id": "loup_blanc",
       "density": 0.3
+    },
+    {
+      "id": "hibou",
+      "density": 0.21
     }
   ],
   "cueillette": [

@@ -1,43 +1,43 @@
 {
-  "name_key": "creature.aigle.name",
-  "race": "aigle",
+  "name_key": "creature.hibou.name",
+  "race": "hibou",
   "skeleton_template": "volant",
   "corps": {
     "stats": {
-      "force": 5,
-      "dexterite": 15,
+      "force": 4,
+      "dexterite": 14,
       "endurance": 4,
-      "volonte": 3,
-      "perception": 16,
-      "charisme": 2
+      "volonte": 5,
+      "perception": 17,
+      "charisme": 4
     },
     "silhouette": "volant"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "bete_sauvage",
   "actions": [
     "serres",
-    "pique_plongeant"
+    "becquetage"
   ],
   "equipement": [],
   "ratelier": [],
   "chain_gauge": false,
   "elements": {
-    "metal": 0.5,
-    "bois": 0.5
+    "bois": 0.6,
+    "eau": 0.4
   },
   "rare_chance": 0.0,
   "teinte": [
     0.6,
-    0.45,
-    0.25
+    0.52,
+    0.42
   ],
   "tags": [
     "bete",
-    "volant"
+    "paisible"
   ],
   "competences": {
-    "athletisme": 40
+    "athletisme": 30
   },
   "depouille": [
     "viande_crue"

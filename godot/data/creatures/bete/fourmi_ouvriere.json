@@ -1,0 +1,45 @@
+{
+  "name_key": "creature.fourmi_ouvriere.name",
+  "race": "fourmi_ouvriere",
+  "skeleton_template": "arachnide",
+  "corps": {
+    "stats": {
+      "force": 2,
+      "dexterite": 8,
+      "endurance": 3,
+      "volonte": 1,
+      "perception": 7,
+      "charisme": 1
+    },
+    "silhouette": "arachnide"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "pinces"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.3,
+    0.2,
+    0.14
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "insecte"
+  ],
+  "competences": {
+    "athletisme": 6
+  },
+  "depouille": [],
+  "drops_chasse": [
+    "carapace"
+  ]
+}

@@ -39,5 +39,9 @@
   },
   "depouille": [
     "viande_crue"
+  ],
+  "drops_chasse": [
+    "peau",
+    "dent"
   ]
 }

@@ -70,6 +70,26 @@
     {
       "id": "lynx",
       "density": 0.2
+    },
+    {
+      "id": "marmotte",
+      "density": 0.315
+    },
+    {
+      "id": "mouflon",
+      "density": 0.28
+    },
+    {
+      "id": "corbeau",
+      "density": 0.21
+    },
+    {
+      "id": "pie",
+      "density": 0.14
+    },
+    {
+      "id": "papillon",
+      "density": 0.14
     }
   ],
   "faune_nuit": [
@@ -84,6 +104,14 @@
     {
       "id": "lynx",
       "density": 0.2
+    },
+    {
+      "id": "hibou",
+      "density": 0.175
+    },
+    {
+      "id": "marmotte",
+      "density": 0.105
     }
   ],
   "cueillette": [

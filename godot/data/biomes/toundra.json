@@ -74,6 +74,22 @@
     {
       "id": "morse",
       "density": 0.1
+    },
+    {
+      "id": "lievre",
+      "density": 0.28
+    },
+    {
+      "id": "phoque",
+      "density": 0.175
+    },
+    {
+      "id": "corbeau",
+      "density": 0.21
+    },
+    {
+      "id": "perdrix",
+      "density": 0.175
     }
   ],
   "faune_nuit": [
@@ -84,6 +100,10 @@
     {
       "id": "loup_blanc",
       "density": 0.3
+    },
+    {
+      "id": "hibou",
+      "density": 0.14
     }
   ],
   "cueillette": [

@@ -42,5 +42,9 @@
   ],
   "competences": {
     "athletisme": 30
-  }
+  },
+  "drops_chasse": [
+    "peau",
+    "dent"
+  ]
 }

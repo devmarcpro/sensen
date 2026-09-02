@@ -1,0 +1,43 @@
+{
+  "name_key": "creature.papillon.name",
+  "race": "papillon",
+  "skeleton_template": "volant",
+  "corps": {
+    "stats": {
+      "force": 1,
+      "dexterite": 9,
+      "endurance": 1,
+      "volonte": 1,
+      "perception": 6,
+      "charisme": 5
+    },
+    "silhouette": "volant"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "nuee"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "bois": 0.6,
+    "feu": 0.4
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.86,
+    0.72,
+    0.3
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "insecte"
+  ],
+  "competences": {
+    "athletisme": 6
+  },
+  "depouille": []
+}

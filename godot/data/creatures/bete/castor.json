@@ -1,50 +1,48 @@
 {
-  "name_key": "creature.sanglier.name",
-  "race": "sanglier",
+  "name_key": "creature.castor.name",
+  "race": "castor",
   "skeleton_template": "quadrupede",
   "corps": {
     "stats": {
-      "force": 12,
-      "dexterite": 6,
-      "endurance": 10,
+      "force": 6,
+      "dexterite": 8,
+      "endurance": 8,
       "volonte": 4,
-      "perception": 8,
-      "charisme": 2
+      "perception": 9,
+      "charisme": 3
     },
     "silhouette": "quadrupede"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "proie",
   "actions": [
-    "coup_de_defenses",
-    "charge"
+    "morsure"
   ],
   "equipement": [],
   "ratelier": [],
   "chain_gauge": false,
   "elements": {
-    "terre": 0.6,
-    "metal": 0.4
+    "eau": 0.5,
+    "bois": 0.5
   },
   "rare_chance": 0.0,
   "teinte": [
-    0.45,
-    0.3,
-    0.2
+    0.48,
+    0.36,
+    0.26
   ],
   "tags": [
-    "bete"
+    "bete",
+    "paisible"
   ],
   "competences": {
-    "athletisme": 15
+    "athletisme": 22
   },
   "depouille": [
-    "viande_crue",
     "viande_crue"
   ],
   "drops_chasse": [
     "peau",
-    "defense",
-    "os"
+    "dent"
   ]
 }

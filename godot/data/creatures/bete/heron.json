@@ -1,49 +1,48 @@
 {
-  "name_key": "creature.aigle.name",
-  "race": "aigle",
+  "name_key": "creature.heron.name",
+  "race": "heron",
   "skeleton_template": "volant",
   "corps": {
     "stats": {
-      "force": 5,
-      "dexterite": 15,
+      "force": 3,
+      "dexterite": 12,
       "endurance": 4,
       "volonte": 3,
-      "perception": 16,
-      "charisme": 2
+      "perception": 14,
+      "charisme": 4
     },
     "silhouette": "volant"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "proie",
   "actions": [
-    "serres",
-    "pique_plongeant"
+    "becquetage"
   ],
   "equipement": [],
   "ratelier": [],
   "chain_gauge": false,
   "elements": {
-    "metal": 0.5,
+    "eau": 0.5,
     "bois": 0.5
   },
   "rare_chance": 0.0,
   "teinte": [
-    0.6,
-    0.45,
-    0.25
+    0.74,
+    0.74,
+    0.72
   ],
   "tags": [
     "bete",
-    "volant"
+    "paisible"
   ],
   "competences": {
-    "athletisme": 40
+    "athletisme": 26
   },
   "depouille": [
     "viande_crue"
   ],
   "drops_chasse": [
     "plume",
-    "griffe"
+    "os"
   ]
 }

@@ -41,5 +41,9 @@
   "depouille": [],
   "competences": {
     "athletisme": 40
-  }
+  },
+  "drops_chasse": [
+    "peau",
+    "dent"
+  ]
 }

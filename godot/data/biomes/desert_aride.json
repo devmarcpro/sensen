@@ -75,6 +75,22 @@
     {
       "id": "chameau",
       "density": 0.3
+    },
+    {
+      "id": "sauterelle",
+      "density": 0.338
+    },
+    {
+      "id": "bousier",
+      "density": 0.3
+    },
+    {
+      "id": "fourmi_ouvriere",
+      "density": 0.262
+    },
+    {
+      "id": "corbeau",
+      "density": 0.15
     }
   ],
   "faune_nuit": [
@@ -85,6 +101,14 @@
     {
       "id": "serpent_venimeux",
       "density": 0.2
+    },
+    {
+      "id": "grillon",
+      "density": 0.3
+    },
+    {
+      "id": "bousier",
+      "density": 0.15
     }
   ],
   "cueillette": [

@@ -1,23 +1,22 @@
 {
-  "name_key": "creature.aigle.name",
-  "race": "aigle",
+  "name_key": "creature.pie.name",
+  "race": "pie",
   "skeleton_template": "volant",
   "corps": {
     "stats": {
-      "force": 5,
-      "dexterite": 15,
-      "endurance": 4,
-      "volonte": 3,
-      "perception": 16,
-      "charisme": 2
+      "force": 1,
+      "dexterite": 14,
+      "endurance": 2,
+      "volonte": 4,
+      "perception": 14,
+      "charisme": 5
     },
     "silhouette": "volant"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "fuyard",
   "actions": [
-    "serres",
-    "pique_plongeant"
+    "becquetage"
   ],
   "equipement": [],
   "ratelier": [],
@@ -28,22 +27,21 @@
   },
   "rare_chance": 0.0,
   "teinte": [
-    0.6,
-    0.45,
-    0.25
+    0.2,
+    0.2,
+    0.24
   ],
   "tags": [
     "bete",
-    "volant"
+    "paisible"
   ],
   "competences": {
-    "athletisme": 40
+    "athletisme": 26
   },
   "depouille": [
     "viande_crue"
   ],
   "drops_chasse": [
-    "plume",
-    "griffe"
+    "plume"
   ]
 }

@@ -1,50 +1,48 @@
 {
-  "name_key": "creature.sanglier.name",
-  "race": "sanglier",
+  "name_key": "creature.cheval_sauvage.name",
+  "race": "cheval_sauvage",
   "skeleton_template": "quadrupede",
   "corps": {
     "stats": {
-      "force": 12,
-      "dexterite": 6,
-      "endurance": 10,
-      "volonte": 4,
-      "perception": 8,
-      "charisme": 2
+      "force": 11,
+      "dexterite": 12,
+      "endurance": 12,
+      "volonte": 5,
+      "perception": 12,
+      "charisme": 6
     },
     "silhouette": "quadrupede"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "proie",
   "actions": [
-    "coup_de_defenses",
-    "charge"
+    "ruade"
   ],
   "equipement": [],
   "ratelier": [],
   "chain_gauge": false,
   "elements": {
-    "terre": 0.6,
-    "metal": 0.4
+    "bois": 0.5,
+    "terre": 0.5
   },
   "rare_chance": 0.0,
   "teinte": [
-    0.45,
-    0.3,
-    0.2
+    0.55,
+    0.42,
+    0.3
   ],
   "tags": [
-    "bete"
+    "bete",
+    "paisible"
   ],
   "competences": {
-    "athletisme": 15
+    "athletisme": 40
   },
   "depouille": [
-    "viande_crue",
     "viande_crue"
   ],
   "drops_chasse": [
     "peau",
-    "defense",
     "os"
   ]
 }

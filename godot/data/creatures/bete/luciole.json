@@ -1,0 +1,42 @@
+{
+  "name_key": "creature.luciole.name",
+  "race": "luciole",
+  "skeleton_template": "volant",
+  "corps": {
+    "stats": {
+      "force": 1,
+      "dexterite": 10,
+      "endurance": 1,
+      "volonte": 2,
+      "perception": 9,
+      "charisme": 5
+    },
+    "silhouette": "volant"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "nuee"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "feu": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.9,
+    0.88,
+    0.44
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "insecte"
+  ],
+  "competences": {
+    "athletisme": 6
+  },
+  "depouille": []
+}

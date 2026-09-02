@@ -1,50 +1,46 @@
 {
-  "name_key": "creature.sanglier.name",
-  "race": "sanglier",
+  "name_key": "creature.phoque.name",
+  "race": "phoque",
   "skeleton_template": "quadrupede",
   "corps": {
     "stats": {
-      "force": 12,
-      "dexterite": 6,
-      "endurance": 10,
+      "force": 8,
+      "dexterite": 7,
+      "endurance": 11,
       "volonte": 4,
-      "perception": 8,
-      "charisme": 2
+      "perception": 10,
+      "charisme": 4
     },
     "silhouette": "quadrupede"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "proie",
   "actions": [
-    "coup_de_defenses",
-    "charge"
+    "morsure"
   ],
   "equipement": [],
   "ratelier": [],
   "chain_gauge": false,
   "elements": {
-    "terre": 0.6,
-    "metal": 0.4
+    "eau": 1.0
   },
   "rare_chance": 0.0,
   "teinte": [
-    0.45,
-    0.3,
-    0.2
+    0.56,
+    0.56,
+    0.58
   ],
   "tags": [
-    "bete"
+    "bete",
+    "paisible"
   ],
   "competences": {
-    "athletisme": 15
+    "athletisme": 20
   },
   "depouille": [
-    "viande_crue",
     "viande_crue"
   ],
   "drops_chasse": [
-    "peau",
-    "defense",
-    "os"
+    "peau"
   ]
 }

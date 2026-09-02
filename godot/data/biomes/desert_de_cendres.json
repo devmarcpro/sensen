@@ -58,6 +58,14 @@
     {
       "id": "vautour",
       "density": 0.3
+    },
+    {
+      "id": "bousier",
+      "density": 0.3
+    },
+    {
+      "id": "corbeau",
+      "density": 0.2
     }
   ],
   "faune_nuit": [
@@ -68,6 +76,10 @@
     {
       "id": "serpent_venimeux",
       "density": 0.2
+    },
+    {
+      "id": "grillon",
+      "density": 0.25
     }
   ],
   "cueillette": []

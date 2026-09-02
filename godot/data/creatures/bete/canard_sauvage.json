@@ -1,49 +1,46 @@
 {
-  "name_key": "creature.aigle.name",
-  "race": "aigle",
+  "name_key": "creature.canard_sauvage.name",
+  "race": "canard_sauvage",
   "skeleton_template": "volant",
   "corps": {
     "stats": {
-      "force": 5,
-      "dexterite": 15,
+      "force": 2,
+      "dexterite": 11,
       "endurance": 4,
-      "volonte": 3,
-      "perception": 16,
-      "charisme": 2
+      "volonte": 2,
+      "perception": 11,
+      "charisme": 4
     },
     "silhouette": "volant"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "proie",
   "actions": [
-    "serres",
-    "pique_plongeant"
+    "becquetage"
   ],
   "equipement": [],
   "ratelier": [],
   "chain_gauge": false,
   "elements": {
-    "metal": 0.5,
-    "bois": 0.5
+    "eau": 1.0
   },
   "rare_chance": 0.0,
   "teinte": [
-    0.6,
-    0.45,
-    0.25
+    0.4,
+    0.48,
+    0.34
   ],
   "tags": [
     "bete",
-    "volant"
+    "paisible"
   ],
   "competences": {
-    "athletisme": 40
+    "athletisme": 22
   },
   "depouille": [
     "viande_crue"
   ],
   "drops_chasse": [
-    "plume",
-    "griffe"
+    "plume"
   ]
 }

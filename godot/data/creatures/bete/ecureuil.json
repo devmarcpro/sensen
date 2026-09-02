@@ -1,49 +1,46 @@
 {
-  "name_key": "creature.scorpion.name",
-  "race": "scorpion",
+  "name_key": "creature.ecureuil.name",
+  "race": "ecureuil",
   "skeleton_template": "quadrupede",
   "corps": {
     "stats": {
-      "force": 6,
-      "dexterite": 9,
-      "endurance": 6,
+      "force": 1,
+      "dexterite": 16,
+      "endurance": 2,
       "volonte": 2,
-      "perception": 8,
-      "charisme": 1
+      "perception": 12,
+      "charisme": 4
     },
     "silhouette": "quadrupede"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "fuyard",
   "actions": [
-    "pique_venimeuse",
-    "pinces"
+    "morsure"
   ],
   "equipement": [],
   "ratelier": [],
   "chain_gauge": false,
   "elements": {
-    "eau": 0.6,
-    "metal": 0.4
+    "bois": 1.0
   },
   "rare_chance": 0.0,
   "teinte": [
-    0.3,
-    0.25,
-    0.2
+    0.68,
+    0.42,
+    0.24
   ],
   "tags": [
     "bete",
-    "poison"
+    "paisible"
   ],
   "competences": {
-    "athletisme": 5
+    "athletisme": 34
   },
   "depouille": [
     "viande_crue"
   ],
   "drops_chasse": [
-    "carapace",
-    "dent"
+    "peau"
   ]
 }

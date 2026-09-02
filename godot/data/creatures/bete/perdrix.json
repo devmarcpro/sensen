@@ -1,49 +1,46 @@
 {
-  "name_key": "creature.aigle.name",
-  "race": "aigle",
+  "name_key": "creature.perdrix.name",
+  "race": "perdrix",
   "skeleton_template": "volant",
   "corps": {
     "stats": {
-      "force": 5,
-      "dexterite": 15,
-      "endurance": 4,
-      "volonte": 3,
-      "perception": 16,
-      "charisme": 2
+      "force": 2,
+      "dexterite": 10,
+      "endurance": 3,
+      "volonte": 2,
+      "perception": 10,
+      "charisme": 3
     },
     "silhouette": "volant"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "fuyard",
   "actions": [
-    "serres",
-    "pique_plongeant"
+    "becquetage"
   ],
   "equipement": [],
   "ratelier": [],
   "chain_gauge": false,
   "elements": {
-    "metal": 0.5,
-    "bois": 0.5
+    "bois": 1.0
   },
   "rare_chance": 0.0,
   "teinte": [
-    0.6,
-    0.45,
-    0.25
+    0.66,
+    0.58,
+    0.44
   ],
   "tags": [
     "bete",
-    "volant"
+    "paisible"
   ],
   "competences": {
-    "athletisme": 40
+    "athletisme": 18
   },
   "depouille": [
     "viande_crue"
   ],
   "drops_chasse": [
-    "plume",
-    "griffe"
+    "plume"
   ]
 }

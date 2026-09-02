@@ -1,0 +1,46 @@
+{
+  "name_key": "creature.coccinelle.name",
+  "race": "coccinelle",
+  "skeleton_template": "volant",
+  "corps": {
+    "stats": {
+      "force": 1,
+      "dexterite": 7,
+      "endurance": 2,
+      "volonte": 1,
+      "perception": 6,
+      "charisme": 4
+    },
+    "silhouette": "volant"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "nuee"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "feu": 0.6,
+    "bois": 0.4
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.8,
+    0.2,
+    0.18
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "insecte"
+  ],
+  "competences": {
+    "athletisme": 4
+  },
+  "depouille": [],
+  "drops_chasse": [
+    "carapace"
+  ]
+}

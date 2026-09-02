@@ -2693,3 +2693,34 @@ ui.creation.volet_pose,"Pose"
 ui.creation.volet_serments,Serments
 ui.creation.serment_l,"{jure} {nom} — {desc}"
 ui.creation.d_volet,"Les trois volets de la création : le personnage (nom, race, classe, stats, départ), son apparence (traits et réglages du visage), ses poses. ← → change de volet."
+creature.bison.name,Bison
+creature.blaireau.name,Blaireau
+creature.bousier.name,Bousier
+creature.canard_sauvage.name,Canard sauvage
+creature.castor.name,Castor
+creature.cheval_sauvage.name,Cheval sauvage
+creature.coccinelle.name,Coccinelle
+creature.corbeau.name,Corbeau
+creature.ecureuil.name,Écureuil
+creature.escargot.name,Escargot
+creature.fourmi_ouvriere.name,Fourmi ouvrière
+creature.grillon.name,Grillon
+creature.herisson.name,Hérisson
+creature.heron.name,Héron
+creature.hibou.name,Hibou
+creature.libellule.name,Libellule
+creature.lievre.name,Lièvre
+creature.loutre.name,Loutre
+creature.luciole.name,Luciole
+creature.marmotte.name,Marmotte
+creature.mouflon.name,Mouflon
+creature.papillon.name,Papillon
+creature.perdrix.name,Perdrix
+creature.phoque.name,Phoque
+creature.pie.name,Pie
+creature.sauterelle.name,Sauterelle
+creature.taupe.name,Taupe
+creature.ver_de_terre.name,Ver de terre
+item.carapace.name,Carapace
+item.corne.name,Corne
+item.plume.name,Plume

@@ -1,0 +1,45 @@
+{
+  "name_key": "creature.bousier.name",
+  "race": "bousier",
+  "skeleton_template": "arachnide",
+  "corps": {
+    "stats": {
+      "force": 3,
+      "dexterite": 6,
+      "endurance": 5,
+      "volonte": 1,
+      "perception": 6,
+      "charisme": 1
+    },
+    "silhouette": "arachnide"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "pinces"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.18,
+    0.16,
+    0.2
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "insecte"
+  ],
+  "competences": {
+    "athletisme": 8
+  },
+  "depouille": [],
+  "drops_chasse": [
+    "carapace"
+  ]
+}

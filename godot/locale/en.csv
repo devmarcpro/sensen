@@ -2684,3 +2684,34 @@ ui.creation.volet_pose,"Pose"
 ui.creation.volet_serments,Oaths
 ui.creation.serment_l,"{jure} {nom} — {desc}"
 ui.creation.d_volet,"The three panels of character creation: the character (name, race, class, stats, start), the looks (features and facial settings), the poses. ← → switches panel."
+creature.bison.name,Bison
+creature.blaireau.name,Badger
+creature.bousier.name,Dung beetle
+creature.canard_sauvage.name,Wild duck
+creature.castor.name,Beaver
+creature.cheval_sauvage.name,Wild horse
+creature.coccinelle.name,Ladybird
+creature.corbeau.name,Raven
+creature.ecureuil.name,Squirrel
+creature.escargot.name,Snail
+creature.fourmi_ouvriere.name,Worker ant
+creature.grillon.name,Cricket
+creature.herisson.name,Hedgehog
+creature.heron.name,Heron
+creature.hibou.name,Owl
+creature.libellule.name,Dragonfly
+creature.lievre.name,Hare
+creature.loutre.name,Otter
+creature.luciole.name,Firefly
+creature.marmotte.name,Marmot
+creature.mouflon.name,Mouflon
+creature.papillon.name,Butterfly
+creature.perdrix.name,Partridge
+creature.phoque.name,Seal
+creature.pie.name,Magpie
+creature.sauterelle.name,Grasshopper
+creature.taupe.name,Mole
+creature.ver_de_terre.name,Earthworm
+item.carapace.name,Carapace
+item.corne.name,Horn
+item.plume.name,Feather

@@ -1,22 +1,22 @@
 {
-  "name_key": "creature.sanglier.name",
-  "race": "sanglier",
+  "name_key": "creature.mouflon.name",
+  "race": "mouflon",
   "skeleton_template": "quadrupede",
   "corps": {
     "stats": {
-      "force": 12,
-      "dexterite": 6,
+      "force": 9,
+      "dexterite": 9,
       "endurance": 10,
-      "volonte": 4,
-      "perception": 8,
-      "charisme": 2
+      "volonte": 5,
+      "perception": 11,
+      "charisme": 4
     },
     "silhouette": "quadrupede"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "proie",
   "actions": [
-    "coup_de_defenses",
+    "coup_de_tete",
     "charge"
   ],
   "equipement": [],
@@ -28,23 +28,23 @@
   },
   "rare_chance": 0.0,
   "teinte": [
-    0.45,
-    0.3,
-    0.2
+    0.6,
+    0.5,
+    0.36
   ],
   "tags": [
-    "bete"
+    "bete",
+    "paisible"
   ],
   "competences": {
-    "athletisme": 15
+    "athletisme": 34
   },
   "depouille": [
-    "viande_crue",
     "viande_crue"
   ],
   "drops_chasse": [
     "peau",
-    "defense",
+    "corne",
     "os"
   ]
 }

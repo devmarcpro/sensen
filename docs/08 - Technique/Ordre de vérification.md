@@ -57,6 +57,9 @@ Un critère de performance à valider avant de passer à l'étape suivante. **Un
 > [!info] Ajout du 2026-09-03 — **la sonde des écrans**
 > `Godot --headless --path godot res://scenes/tests/sonde_ecrans.tscn` — huit écrans, quatre tailles de fenêtre, et l'échec nomme le fautif. À passer avec les autres avant de pousser dès qu'un écran change de mise en page : c'est la seule vérification qui rende durable la règle « rien n'est coupé », qu'une capture regardée une fois ne fait que constater.
 
+> [!info] Ajout du 2026-09-03 — **la sonde de la faune**
+> `Godot --headless --path godot res://scenes/tests/sonde_faune.tscn` — chaque bête s'instancie (action, squelette, dépouille) et chaque biome annonce sa part de paisible, jour et nuit. À passer dès qu'on touche au catalogue des créatures ou aux pools de biome : une action mal orthographiée dans une fiche ne se voit autrement qu'en jeu, au moment où la bête apparaît.
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Budgets de performance]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]

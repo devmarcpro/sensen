@@ -67,6 +67,14 @@
     {
       "id": "serpent_venimeux",
       "density": 0.3
+    },
+    {
+      "id": "libellule",
+      "density": 0.2
+    },
+    {
+      "id": "corbeau",
+      "density": 0.25
     }
   ],
   "faune_nuit": [
@@ -81,6 +89,10 @@
     {
       "id": "nuee_moustiques",
       "density": 0.5
+    },
+    {
+      "id": "luciole",
+      "density": 0.25
     }
   ],
   "cueillette": [

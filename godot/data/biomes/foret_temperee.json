@@ -95,6 +95,42 @@
     {
       "id": "ours_brun",
       "density": 0.05
+    },
+    {
+      "id": "ecureuil",
+      "density": 0.25
+    },
+    {
+      "id": "lievre",
+      "density": 0.175
+    },
+    {
+      "id": "blaireau",
+      "density": 0.1
+    },
+    {
+      "id": "papillon",
+      "density": 0.225
+    },
+    {
+      "id": "escargot",
+      "density": 0.175
+    },
+    {
+      "id": "fourmi_ouvriere",
+      "density": 0.2
+    },
+    {
+      "id": "corbeau",
+      "density": 0.15
+    },
+    {
+      "id": "herisson",
+      "density": 0.125
+    },
+    {
+      "id": "perdrix",
+      "density": 0.1
     }
   ],
   "faune_nuit": [
@@ -105,6 +141,22 @@
     {
       "id": "chauve_souris",
       "density": 0.35
+    },
+    {
+      "id": "hibou",
+      "density": 0.2
+    },
+    {
+      "id": "luciole",
+      "density": 0.225
+    },
+    {
+      "id": "grillon",
+      "density": 0.2
+    },
+    {
+      "id": "blaireau",
+      "density": 0.125
     }
   ],
   "cueillette": [

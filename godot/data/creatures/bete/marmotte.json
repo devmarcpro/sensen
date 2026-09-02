@@ -1,49 +1,46 @@
 {
-  "name_key": "creature.scorpion.name",
-  "race": "scorpion",
+  "name_key": "creature.marmotte.name",
+  "race": "marmotte",
   "skeleton_template": "quadrupede",
   "corps": {
     "stats": {
-      "force": 6,
+      "force": 3,
       "dexterite": 9,
-      "endurance": 6,
-      "volonte": 2,
-      "perception": 8,
-      "charisme": 1
+      "endurance": 5,
+      "volonte": 3,
+      "perception": 11,
+      "charisme": 3
     },
     "silhouette": "quadrupede"
   },
   "esprit": null,
-  "ai_profile": "hostile",
+  "ai_profile": "fuyard",
   "actions": [
-    "pique_venimeuse",
-    "pinces"
+    "morsure"
   ],
   "equipement": [],
   "ratelier": [],
   "chain_gauge": false,
   "elements": {
-    "eau": 0.6,
-    "metal": 0.4
+    "terre": 1.0
   },
   "rare_chance": 0.0,
   "teinte": [
-    0.3,
-    0.25,
-    0.2
+    0.66,
+    0.52,
+    0.34
   ],
   "tags": [
     "bete",
-    "poison"
+    "paisible"
   ],
   "competences": {
-    "athletisme": 5
+    "athletisme": 20
   },
   "depouille": [
     "viande_crue"
   ],
   "drops_chasse": [
-    "carapace",
-    "dent"
+    "peau"
   ]
 }
