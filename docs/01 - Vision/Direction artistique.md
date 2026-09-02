@@ -36,6 +36,13 @@ Comment le jeu se donne à voir : isométrique, tuiles teintées, billboards pap
 > [!failure] Annulé le 2026-09-01 — pas de rendu pixelisé (designer)
 > Le rendu en basse résolution agrandie a été codé puis **retiré sur décision du designer**, avec le zoom de la carte. Ce que l'essai a montré, pour mémoire : à 640 × 360 le pixel est franc mais l'interface mange l'écran (une police de 13 px occupe le triple de sa place relative) ; à 960 × 540 l'équilibre est meilleur mais le pixel se voit à peine. Le jeu reste donc rendu **net**, à la résolution de la fenêtre. Le grain procédural des matières (points 50 et 58), lui, demeure : c'est lui qui donne la texture, pas la résolution.
 
+> [!success] Codé le 2026-09-02 — le pantin se tenait mal : la pose n'était pas hiérarchique (point 68)
+> La saisie à la souris marchait déjà (clic sur un membre, glisser pour pivoter autour de son joint, membre surligné). En la **regardant** à l'écran, deux ruptures de chaîne :
+> **L'avant-bras ne suivait pas le bras.** L'origine d'un segment suivait bien son parent, mais pas sa **direction** : l'angle de chaque segment était absolu (`rig.angle + pose`), sans hériter de la rotation de ses parents. Tourner un bras laissait donc l'avant-bras et la main pointés dans leur ancienne direction, et la chaîne se cassait au coude. Chaque segment transmet désormais sa rotation de pose à ses enfants — seulement sa rotation de pose, l'angle de repos du rig étant déjà absolu et ne devant pas se propager deux fois.
+> **L'arme restait droite.** Elle était dessinée vers le haut **absolu de l'écran** (`Vector2(0, -1)`), si bien qu'articuler le bras la laissait verticale dans le vide, détachée du poing. Elle suit maintenant l'axe de la main.
+> Les deux corrections valent aussi pour les **poses d'action** en jeu, qui cassaient la chaîne de la même façon sans que personne l'ait remarqué à la taille où l'on voit les personnages.
+
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Piliers d'inspiration]]
 - **Alimente** : [[Squelette modulaire et points d'attache]], [[Écrans d'interface]], [[Palette de couleurs des matériaux]]

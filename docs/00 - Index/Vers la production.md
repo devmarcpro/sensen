@@ -534,7 +534,7 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 > « fais en sorte que tous les menus et écrans se resize à la taille de la fenêtre pour que rien ne soit coupé ». Le panneau des écrans prend déjà 94 % × 92 % de la fenêtre, mais son **contenu** ne suit pas : la création tient dans une colonne de 200 px sur 1920 et laisse les deux tiers du bas noirs, et rien ne garantit qu'une liste longue ou une fenêtre étroite ne coupe pas. À traiter écran par écran, avec une capture de chacun en petite et en grande fenêtre.
 
 
-> [!todo] Ajout du designer (2026-09-01) : 68. **Articuler le pantin à la souris**
+> [!done] Ajout du designer (2026-09-01) : 68. **Fait le 2026-09-02** — la saisie à la souris marchait déjà ; deux ruptures de chaîne corrigées en la regardant (l'avant-bras ne suivait pas le bras, l'arme restait verticale). **Articuler le pantin à la souris**
 > « fais en sorte que l'écran de pose permette de tout simplement sélectionner les membres et les joints avec la souris pour articuler le pantin ». Aujourd'hui le volet Pose se pilote au clavier, segment par segment, à ← →. Il faut pouvoir **cliquer un membre ou un joint** dans l'aperçu et le faire tourner à la souris, le segment saisi étant mis en évidence.
 
 

@@ -104,6 +104,7 @@ func _poser_segments(f: Dictionary, miroir: bool) -> Dictionary:
 	var racine: String = rig.racine
 	var offsets: Dictionary = f.get("offsets", {})
 	var restants: Array = rig.segments.keys()
+	var herite := {racine: _delta_pose(racine)}   # ce que chaque segment transmet à ses enfants
 	monde[racine] = _placer(racine, Vector2(0, -float(rig.hauteur_pieds)), miroir)
 	restants.erase(racine)
 	var garde_fou := 64
@@ -119,9 +120,17 @@ func _poser_segments(f: Dictionary, miroir: bool) -> Dictionary:
 			var along := float(a[0]) + float(off[0])
 			var across := float(a[1]) + float(off[1])
 			var pt: Vector2 = p.origine + p.direction * along + p.perp * across
-			monde[nom] = _placer(nom, pt, miroir)
+			var h: float = float(herite.get(str(s.parent), 0.0))
+			monde[nom] = _placer(nom, pt, miroir, h)
+			herite[nom] = h + _delta_pose(nom)
 			restants.erase(nom)
 	return monde
+
+
+## Ce qu'un segment ajoute à l'angle de ses enfants : sa propre rotation de pose, rien d'autre —
+## l'angle de repos du rig est déjà absolu et ne doit pas se propager deux fois.
+func _delta_pose(nom: String) -> float:
+	return float(pose.get(nom, 0.0)) + float(_pose_courante.get(nom, 0.0))
 
 
 ## La pose enregistrée par le joueur pour l'action en cours (designer 2026-09-01, point 63) :
@@ -142,9 +151,12 @@ func _pose_action() -> Dictionary:
 	return poses.get(act, poses.get("repos", {}))
 
 
-func _placer(nom: String, origine: Vector2, miroir: bool) -> Dictionary:
+func _placer(nom: String, origine: Vector2, miroir: bool, herite: float = 0.0) -> Dictionary:
 	var s: Dictionary = rig.segments[nom]
-	var angle := float(s.angle) + float(pose.get(nom, 0.0)) + float(_pose_courante.get(nom, 0.0))
+	# `herite` : la somme des rotations de pose des PARENTS. L'origine d'un segment suivait déjà son
+	# parent, mais pas sa direction : tourner un bras laissait l'avant-bras pointer dans son ancienne
+	# direction, et la chaîne se cassait au coude. Un pantin se manipule d'un bloc (point 68).
+	var angle := float(s.angle) + float(pose.get(nom, 0.0)) + float(_pose_courante.get(nom, 0.0)) + herite
 	if miroir:
 		angle = 180.0 - angle
 	var d := Vector2.from_angle(deg_to_rad(angle))
@@ -206,16 +218,19 @@ func _dessine_tenus(monde: Dictionary) -> void:
 		var prise: Array = rig.segments[main_arme].ancrages.get("prise", [0, 0])
 		var pt: Vector2 = m.origine + m.direction * float(prise[0]) + m.perp * float(prise[1])
 		var col := _couleur_materiau(it.get("materiau", ""))
-		var haut := Vector2(0, -1)
+		# L'arme suit la MAIN, pas la verticale de l'écran : elle était dessinée vers le haut absolu, si
+		# bien qu'articuler le bras la laissait droite dans le vide, détachée du poing (point 68).
+		var haut: Vector2 = -Vector2(m.direction)
+		var bas: Vector2 = Vector2(m.direction)
 		match str(fonct.get("combat_skill", "")):
 			"dague": draw_line(pt, pt + haut * 6, col, 1.5)
 			"epee": draw_line(pt, pt + haut * 12, col, 1.8)
 			"masse":
 				draw_line(pt, pt + haut * 8, col.darkened(0.3), 1.5)
 				draw_circle(pt + haut * 9, 2.5, col)
-			"lance": draw_line(pt + Vector2(0, 6), pt + haut * 16, col, 1.5)
-			"arc": draw_arc(pt + Vector2(2, -4), 7.0, -PI * 0.6, PI * 0.6, 10, col, 1.5)
-			"baton_magique": draw_line(pt + Vector2(0, 6), pt + haut * 14, col, 1.8)
+			"lance": draw_line(pt + bas * 6, pt + haut * 16, col, 1.5)
+			"arc": draw_arc(pt + Vector2(m.perp) * 2.0 + haut * 4.0, 7.0, -PI * 0.6, PI * 0.6, 10, col, 1.5)
+			"baton_magique": draw_line(pt + bas * 6, pt + haut * 14, col, 1.8)
 			_: draw_line(pt, pt + haut * 8, col, 1.5)
 	var main_bouclier: Variant = rig.get("prise_bouclier")
 	if main_bouclier is String and monde.has(main_bouclier) and equip.has("main_secondaire"):
