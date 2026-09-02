@@ -3,8 +3,15 @@
   "bonus_stats": {
     "volonte": 3
   },
-  "equipement": [],
-  "ratelier": [],
+  "equipement": [
+    "proto_masse",
+    "proto_cuirasse_cuir",
+    "torche"
+  ],
+  "ratelier": [
+    "proto_pelle",
+    "proto_dague"
+  ],
   "competences": {
     "magie_corruption": 4,
     "encaissement": 4

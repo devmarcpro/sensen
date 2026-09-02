@@ -4,8 +4,14 @@
     "dexterite": 1,
     "volonte": 2
   },
-  "equipement": [],
-  "ratelier": [],
+  "equipement": [
+    "proto_baton_magique",
+    "proto_jambieres_cuir",
+    "torche"
+  ],
+  "ratelier": [
+    "proto_dague"
+  ],
   "competences": {
     "magie_espace": 4,
     "athletisme": 4

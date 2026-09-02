@@ -4,8 +4,15 @@
     "dexterite": 2,
     "perception": 1
   },
-  "equipement": [],
-  "ratelier": [],
+  "equipement": [
+    "proto_dague",
+    "proto_jambieres_cuir",
+    "torche"
+  ],
+  "ratelier": [
+    "proto_arc",
+    "proto_epee"
+  ],
   "competences": {
     "discretion": 6,
     "dague": 4

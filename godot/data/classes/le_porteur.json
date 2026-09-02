@@ -3,8 +3,13 @@
   "bonus_stats": {
     "force": 3
   },
-  "equipement": [],
-  "ratelier": [],
+  "equipement": [
+    "proto_cuirasse_cuir",
+    "torche"
+  ],
+  "ratelier": [
+    "proto_masse"
+  ],
   "competences": {
     "mains_nues": 4,
     "athletisme": 4

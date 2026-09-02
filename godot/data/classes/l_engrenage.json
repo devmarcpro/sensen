@@ -4,8 +4,15 @@
     "dexterite": 2,
     "perception": 1
   },
-  "equipement": [],
-  "ratelier": [],
+  "equipement": [
+    "proto_arc",
+    "proto_casque_cuir",
+    "torche"
+  ],
+  "ratelier": [
+    "proto_dague",
+    "proto_masse"
+  ],
   "competences": {
     "arbalete": 4,
     "forge": 4

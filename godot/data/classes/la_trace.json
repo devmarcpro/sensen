@@ -6,11 +6,12 @@
   },
   "equipement": [
     "proto_arc",
-    "proto_fleches"
+    "proto_jambieres_cuir",
+    "torche"
   ],
   "ratelier": [
-    "proto_arc",
-    "proto_dague"
+    "proto_dague",
+    "proto_lance"
   ],
   "competences": {
     "arc": 5,

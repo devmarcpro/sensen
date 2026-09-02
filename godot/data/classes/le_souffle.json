@@ -5,10 +5,12 @@
     "perception": 1
   },
   "equipement": [
-    "proto_baton_magique"
+    "proto_baton_magique",
+    "proto_casque_cuir",
+    "torche"
   ],
   "ratelier": [
-    "proto_baton_magique"
+    "proto_dague"
   ],
   "competences": {
     "magie_feu": 5,

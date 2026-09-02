@@ -4,8 +4,15 @@
     "charisme": 2,
     "dexterite": 1
   },
-  "equipement": [],
-  "ratelier": [],
+  "equipement": [
+    "proto_dague",
+    "proto_casque_cuir",
+    "torche"
+  ],
+  "ratelier": [
+    "proto_epee",
+    "proto_arc"
+  ],
   "competences": {
     "negociation": 3,
     "dague": 3

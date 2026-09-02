@@ -47,6 +47,8 @@ creature_action.becquetage.name,Becquetage
 creature_action.cri_de_ralliement.name,Cri de ralliement
 creature_action.enchainement.name,Enchaînement
 functionality.dague.name,Dague
+functionality.mains_nues.name,mains nues
+item.mains_nues.name,Poings
 functionality.epee.name,Épée
 functionality.masse.name,Masse
 functionality.lance.name,Lance
@@ -301,6 +303,7 @@ competence.dual_wielding.name,Dual wielding
 competence.deux_mains.name,Deux mains
 competence.meditation.name,Méditation
 competence.recuperation.name,Récupération
+competence.chasse.name,Chasse
 serment.corps_nu.name,Corps nu
 serment.corps_nu.desc,"Aucune armure, jamais — les coups portent à +35 %"
 serment.mains_nues.name,Mains nues

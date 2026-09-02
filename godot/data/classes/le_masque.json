@@ -3,8 +3,13 @@
   "bonus_stats": {
     "dexterite": 3
   },
-  "equipement": [],
-  "ratelier": [],
+  "equipement": [
+    "proto_jambieres_cuir",
+    "torche"
+  ],
+  "ratelier": [
+    "proto_dague"
+  ],
   "competences": {
     "mains_nues": 4,
     "athletisme": 4

@@ -8,8 +8,15 @@
     "perception": 1,
     "charisme": 1
   },
-  "equipement": [],
-  "ratelier": [],
+  "equipement": [
+    "proto_lance",
+    "proto_jambieres_cuir",
+    "torche"
+  ],
+  "ratelier": [
+    "proto_arc",
+    "proto_dague"
+  ],
   "competences": {},
   "base_potentials": {
     "_defaut": 100

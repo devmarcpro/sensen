@@ -1,0 +1,19 @@
+{
+  "name_key": "functionality.mains_nues.name",
+  "kind": "arme",
+  "hands": 0,
+  "combat_skill": "mains_nues",
+  "degats_des": "1d3",
+  "crit_range": 20,
+  "vitesse_base": 2.0,
+  "portee": 1.0,
+  "portee_min": 1,
+  "type_degats": "contondant",
+  "volume": 0.1,
+  "poids_reference": 0.0,
+  "genre_grammatical": "fp",
+  "affinite_sorts": {
+    "mana": 1.0,
+    "endurance": 1.0
+  }
+}

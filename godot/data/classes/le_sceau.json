@@ -4,8 +4,14 @@
     "endurance": 1,
     "volonte": 2
   },
-  "equipement": [],
-  "ratelier": [],
+  "equipement": [
+    "proto_baton_magique",
+    "proto_cuirasse_cuir",
+    "torche"
+  ],
+  "ratelier": [
+    "proto_masse"
+  ],
   "competences": {
     "enchantement": 4,
     "encaissement": 4

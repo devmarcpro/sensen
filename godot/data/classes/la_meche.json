@@ -5,10 +5,13 @@
     "perception": 1
   },
   "equipement": [
-    "proto_masse"
+    "proto_dague",
+    "proto_casque_cuir",
+    "torche"
   ],
   "ratelier": [
-    "proto_masse"
+    "proto_arc",
+    "proto_pelle"
   ],
   "competences": {
     "forge": 3,

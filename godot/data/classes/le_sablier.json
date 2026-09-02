@@ -3,8 +3,14 @@
   "bonus_stats": {
     "volonte": 3
   },
-  "equipement": [],
-  "ratelier": [],
+  "equipement": [
+    "proto_baton_magique",
+    "proto_casque_cuir",
+    "torche"
+  ],
+  "ratelier": [
+    "proto_dague"
+  ],
   "competences": {
     "magie_arcane": 4,
     "esquive": 4

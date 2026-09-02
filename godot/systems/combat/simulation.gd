@@ -7723,7 +7723,9 @@ func _changer_arme(e: Dictionary, item_id: String, tick: int) -> bool:
 ## Attaque à l'arme équipée. Une lourde est télégraphée : engagée maintenant, résolue à l'échéance.
 func _attaquer_arme(e: Dictionary, cible: Dictionary, lourde: bool, tick: int) -> bool:
 	var arme := Etres.arme(e, items)
-	if arme.is_empty() or not cible.vivant:
+	if arme.is_empty():   # main vide : on frappe aux poings (Le Masque, Le Porteur — leur identité même)
+		arme = arme_mains_nues()
+	if not cible.vivant:
 		return false
 	if not str(e.get("porte", "")).is_empty():   # Le Porteur : il porte quelqu'un
 		EventBus.emettre(&"journal", [&"journal.porte", {}])
@@ -10624,3 +10626,10 @@ func mult_serments(e: Dictionary) -> float:
 		if serment_tenu(e, str(sid)):
 			m *= float(GameData.catalogues.serments.get(str(sid), {}).get("bonus", {}).get("degats_mult", 1.0))
 	return m
+
+## L'arme d'une main vide : les poings. Le catalogue avait la compétence, la dureté et l'affinité de sorts
+## des mains nues, mais aucune fonctionnalité — donc un personnage désarmé ne pouvait pas frapper.
+func arme_mains_nues() -> Dictionary:
+	return {"uid": "", "name_key": "item.mains_nues.name", "type": "arme", "functionality": "mains_nues",
+		"durete_base": int(regles.r.recolte.get("mains_nues_durete", 1)), "qualite": 1.0, "hands": 0,
+		"materiau": "", "affixes": [], "sertissures": {"nombre": 0, "contenu": []}, "tags": ["arme"]}

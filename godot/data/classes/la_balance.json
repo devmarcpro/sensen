@@ -5,7 +5,9 @@
     "perception": 1
   },
   "equipement": [
-    "proto_dague"
+    "proto_baton_magique",
+    "proto_cuirasse_cuir",
+    "torche"
   ],
   "ratelier": [
     "proto_dague"

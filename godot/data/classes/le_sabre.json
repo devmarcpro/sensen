@@ -6,11 +6,13 @@
   },
   "equipement": [
     "proto_epee",
-    "proto_bouclier"
+    "proto_bouclier",
+    "proto_cuirasse_cuir",
+    "torche"
   ],
   "ratelier": [
-    "proto_epee",
-    "proto_bouclier"
+    "proto_lance",
+    "proto_dague"
   ],
   "competences": {
     "epee": 5,

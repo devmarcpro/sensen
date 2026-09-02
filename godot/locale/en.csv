@@ -10,6 +10,8 @@ creature.chef_de_bande.name,Gang leader
 creature.aigle.name,Eagle
 creature.scorpion.name,Scorpion
 functionality.dague.name,Dagger
+functionality.mains_nues.name,bare hands
+item.mains_nues.name,Fists
 functionality.epee.name,Sword
 functionality.masse.name,Mace
 functionality.lance.name,Spear
@@ -220,6 +222,7 @@ competence.masse.name,Mace
 competence.matelasse.name,Padded armour
 competence.meditation.name,Meditation
 competence.recuperation.name,Recovery
+competence.chasse.name,Hunting
 serment.corps_nu.name,Bare body
 serment.corps_nu.desc,"No armour, ever — blows land 35 % harder"
 serment.mains_nues.name,Bare hands

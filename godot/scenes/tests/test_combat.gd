@@ -166,6 +166,7 @@ func _ready() -> void:
 	_lancer("test_serments")
 	_lancer("test_conditions_payantes")
 	_lancer("test_familles_non_vides")
+	_lancer("test_kit_de_depart")
 	_lancer("test_types_ennemis")
 	_lancer("test_loot_assemble")
 	_lancer("test_budgets")
@@ -7718,3 +7719,34 @@ func test_familles_non_vides() -> void:
 		if n == 0 and not vides.has(fid):
 			vides.append(fid)
 	verifier(vides.is_empty(), "aucune famille de composant n'est vide (%s)" % str(vides))
+
+## Le coffre promet un kit de départ par classe, et une main vide doit pouvoir frapper (2026-09-02) :
+## sans l'un ni l'autre, un personnage neuf ne portait aucun coup — le robot de parcours l'a montré.
+func test_kit_de_depart() -> void:
+	var sans_kit: Array = []
+	for cid: String in GameData.catalogues.classes.keys():
+		var d: Dictionary = GameData.catalogues.classes[cid]
+		if (d.get("equipement", []) as Array).is_empty():
+			sans_kit.append(cid)
+	verifier(sans_kit.is_empty(), "chaque classe a son kit de départ (%s)" % str(sans_kit))
+	verifier(GameData.catalogues.functionalities.has("mains_nues"), "la fonctionnalité mains nues existe")
+	# Un personnage désarmé frappe quand même, aux poings.
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var loup: Dictionary = {}
+	for x in s.vivants():
+		if x.controle != "joueur" and x.get("camp", "") == "hostile":
+			loup = x
+			break
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(1, 0)
+	s.grille.placer(loup.id, loup.pos)
+	s._engager_combat(j, loup)
+	j.equipement.erase("main_principale")
+	Etres.recalculer(j, s.items, GameData.catalogues.affixes, s.regles)
+	var h := s.horloge_de(j)
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	var pv: int = loup.sante
+	verifier(s.intention(j.id, {"type": "attaquer", "cible": loup.id}), "les mains vides, on frappe quand même")
+	verifier(loup.sante < pv, "et le coup porte (%d → %d)" % [pv, loup.sante])

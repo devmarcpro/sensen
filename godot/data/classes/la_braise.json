@@ -5,10 +5,13 @@
     "force": 1
   },
   "equipement": [
-    "proto_masse"
+    "proto_masse",
+    "proto_cuirasse_cuir",
+    "torche"
   ],
   "ratelier": [
-    "proto_masse"
+    "proto_hache",
+    "proto_pioche"
   ],
   "competences": {
     "forge": 5,

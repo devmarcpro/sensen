@@ -58,6 +58,12 @@ Race et classe **s'additionnent** : le plancher final est la moyenne des deux va
 > Chaque capacité porte maintenant la portée de **son style**, lue sur les compétences de départ de sa classe : `contact` pour celles qui vivent au corps à corps (L'Écarlate, L'Ombre, Le Sabre, Le Masque, Le Porteur, Le Rieur), `jet_court` pour les érudits et les alchimistes, `jet_long` pour les tireurs et les mages de feu, et `sur_soi` pour les formes qui **suivent le trajet du lanceur** (`chemin`) — elles n'avaient aucun sens ancrées sur une tuile lointaine. Une classe de mêlée gagne au passage les ticks qu'elle payait pour une portée dont elle n'avait pas l'usage.
 
 
+> [!bug] Corrigé le 2026-09-02 — un personnage neuf ne pouvait pas frapper du tout
+> Trouvé en relançant le robot de parcours après la journée de refonte du combat : **trois morts, quinze coups reçus, zéro coup porté**, et une ligne qui disait tout — « cible abandonnée : d=1, portée (1, 1) ». À distance 1, avec la ligne de vue, l'attaque était refusée vingt fois de suite.
+> **Deux causes, toutes deux des écarts avec ce que dit le coffre.** D'abord, les **19 classes avaient un `equipement` et un `ratelier` vides** alors que cette note et [[Création de personnage]] promettent un *kit de départ* : un personnage créé arrivait donc **les mains nues et sans armure**. Ensuite, `_attaquer_arme` refuse une main vide — or il n'existait **aucune fonctionnalité « mains nues »**, malgré une compétence `mains_nues`, une dureté `mains_nues_durete` et une affinité de sorts dédiée dans les règles. Le Masque et Le Porteur, dont l'identité **est** le combat à mains nues, ne pouvaient pas se battre.
+> **Corrigé des deux côtés** : chaque classe reçoit le kit de son style (arme, bouclier ou arc, armure de cuir, torche) et son râtelier ; et une main vide frappe désormais avec la fonctionnalité `mains_nues` — `1d3` contondant, portée 1, dureté 1 — qui existait partout sauf là où il fallait.
+
+
 ## Liens
 - **Dépend de** : [[Création de personnage]], [[Les trois axes — race, classe, fonction]]
 - **Alimente** : [[Talents de classe]], [[Potentiel]], [[Début de partie]], [[Fonctions]]
