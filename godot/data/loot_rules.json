@@ -99,7 +99,7 @@
     ]
   },
   "contenants": {
-    "_doc": "coffres par salle : tuiles de sol par coffre ; objets par coffre. `categories` : un poids et un FILTRE de categorie (jamais une liste d'ids ecrite a la main - Data-driven design). Designer (2026-08-30) : les armes, armures et outils du loot sont des objets ASSEMBLES (tags assemble), composes a la generation - jamais « une simple epee ».",
+    "_doc": "coffres par salle : tuiles de sol par coffre ; objets par coffre. `categories` : un poids et un FILTRE de categorie (jamais une liste d'ids ecrite a la main - Data-driven design). Designer (2026-08-30) : les armes, armures et outils du loot sont des objets ASSEMBLES (tags assemble), composes a la generation - jamais « une simple epee ». Chaque categorie peut porter une profondeur_min : elle ne sort qu'a partir de cet etage (designer 2026-09-02). `affixable` : seules ces categories peuvent porter des affixes — un drop garanti de monstre rare ou un artefact n'y tire que la-dedans (un lingot ne porte pas trois affixes).",
     "tuiles_par_coffre": 18,
     "objets_par_coffre": [
       1,
@@ -115,7 +115,8 @@
           "tags_any": [
             "assemble"
           ]
-        }
+        },
+        "affixable": true
       },
       "armures": {
         "poids": 4,
@@ -126,15 +127,21 @@
           "tags_any": [
             "assemble"
           ]
-        }
+        },
+        "affixable": true
       },
       "bijoux": {
         "poids": 2,
         "filtre": {
           "types_any": [
             "bijou"
+          ],
+          "tags_any": [
+            "assemble"
           ]
-        }
+        },
+        "profondeur_min": 2,
+        "affixable": true
       },
       "gemmes": {
         "poids": 2,
@@ -163,7 +170,8 @@
             "assemble",
             "lumiere"
           ]
-        }
+        },
+        "affixable": true
       },
       "stations": {
         "poids": 1,
@@ -171,10 +179,11 @@
           "types_any": [
             "station"
           ]
-        }
+        },
+        "profondeur_min": 2
       },
       "consommables": {
-        "poids": 4,
+        "poids": 1,
         "filtre": {
           "types_any": [
             "consommable",
@@ -192,6 +201,43 @@
         "filtre": {
           "types_any": [
             "bouclier"
+          ],
+          "tags_any": [
+            "assemble"
+          ]
+        },
+        "affixable": true
+      },
+      "meubles": {
+        "poids": 1,
+        "profondeur_min": 2,
+        "filtre": {
+          "types_any": [
+            "meuble"
+          ]
+        }
+      },
+      "materiaux": {
+        "poids": 2,
+        "filtre": {
+          "types_any": [
+            "materiau"
+          ]
+        }
+      },
+      "composants": {
+        "poids": 2,
+        "filtre": {
+          "types_any": [
+            "composant"
+          ]
+        }
+      },
+      "munitions": {
+        "poids": 1,
+        "filtre": {
+          "types_any": [
+            "munition"
           ]
         }
       }
@@ -215,6 +261,15 @@
       "chance": 0.005,
       "item": "meuble_statue",
       "valeur_par_stat": 12
+    },
+    "or": {
+      "_doc": "La bourse d'un hostile (designer 2026-09-02) : chance de laisser des pieces, quantite = base + pv_max x par_pv + profondeur x par_etage, +-variance.",
+      "chance": 0.45,
+      "base": 3,
+      "par_pv": 0.25,
+      "par_etage": 4,
+      "variance": 0.4,
+      "mult_boss": 6
     }
   },
   "monstres_rares": {

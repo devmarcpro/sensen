@@ -40,6 +40,10 @@ malus_vitesse_deplacement = f(poids_total_porté / capacite)
 > Le rapport du parcours du 2026-08-30 listait dans « ce qui manque » un **retour visuel du poids porté** : le robot est passé à **126 / 55 — surcharge ×3** sans que rien à l'écran ne le dise, la seule trace étant une ligne de texte. Le HUD gagne une **cinquième barre** sous la faim : la charge, remplie jusqu'à la capacité, **rouge et clignotante au-delà** (la barre reste pleine, le chiffre dit de combien on dépasse). Elle lit `poids_de`, donc la capacité tient déjà compte de la Force et des effets. C'est un affichage : aucune règle de surcharge ne change.
 
 
+> [!bug] Corrigé le 2026-09-02 — toutes les armures pesaient 6 kg, quelle que soit leur matière
+> Vu sur une collecte de 97 objets : casque, cuirasse, jambières et brassards affichaient **exactement 6,0 kg**, qu'ils soient en zinc, en cuivre ou en tungstène. Le poids d'une armure était une **constante** (`poids.armure`), alors qu'une armure assemblée connaît la densité de chacun de ses composants et que le sac, lui, fait déjà la somme. Une armure pèse désormais **la densité de ses composants**, pondérée par la part que chacun occupe (`craft.poids`) et par un facteur de volume propre au slot — un casque n'a pas le volume d'une cuirasse. La constante reste le repli pour les armures non assemblées.
+
+
 ## Liens
 - **Dépend de** : [[Stats de personnage]], [[Qualité d'artisanat]], [[Matériaux — 13 stats]]
 - **Alimente** : [[Cinq accès au cycle]], [[Stations de transformation]], [[Équipement — 14 slots]], [[Eau et liquides]]

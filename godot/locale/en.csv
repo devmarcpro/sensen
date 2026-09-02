@@ -290,6 +290,10 @@ item.chou.name,Cabbage
 item.citrouille.name,Pumpkin
 item.composant.name,Component
 item.craft_casque.name,Helmet
+item.craft_bouclier.name,Shield
+item.craft_anneau.name,Ring
+item.craft_amulette.name,Amulet
+component.monture.name,Setting
 item.craft_brassards.name,Bracers
 item.craft_bottes.name,Boots
 item.cape.name,Cloak
@@ -1268,8 +1272,8 @@ affixe.meca_endurance_max.nom,{base} of breath (+{n} max stamina)
 affixe.meca_garde.nom,{base} of the guard (guarding costs −{pct} % stamina)
 affixe.meca_vol_de_vie.nom,{base} vampiric (life steal {pct} %)
 affixe.passif_competence.nom,{base} of {competence} (+{n})
-affixe.passif_faim.nom,"of temperance (hunger ×{mult} %)"
-affixe.passif_poids.nom,"of carrying (+{n} capacity)"
+affixe.passif_faim.nom,"{base} of temperance (hunger ×{mult} %)"
+affixe.passif_poids.nom,"{base} of carrying (+{n} capacity)"
 affixe.passif_regen.nom,{base} hardy (regeneration +{pct} %)
 affixe.passif_stat.nom,{base} of {stat} (+{n})
 affixe.passif_surchauffe.nom,{base} of the mage (overheat ×{mult} %)
@@ -2049,6 +2053,7 @@ journal.triche,"Cheat: {action}"
 nom.de_creature,{base} of {creature}
 nom.matiere_espece,"{creature} {materiau}"
 journal.statue,A statue of {nom} drops — rare trophy
+journal.bourse,"{nom} picks up {or} coins"
 status.seve.name,Sap
 status.aveugle.name,Blinded
 status.silence.name,Silence

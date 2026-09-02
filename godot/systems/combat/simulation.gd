@@ -2999,7 +2999,7 @@ func _reforger(e: Dictionary, objet: String, composant: String, tick: int) -> bo
 		it["composants"] = {}
 	it.composants[slot] = {"composant": c.composant, "materiau": c.materiau, "qualite": c.qualite}
 	# Recalcul depuis les matériaux des composants présents, pondéré ; les affixes ne bougent pas.
-	var poids: Dictionary = regles.r.craft.poids.armure if def.get("type", "") == "armure" else regles.r.craft.poids.arme
+	var poids: Dictionary = regles.r.craft.poids.get(str(def.get("type", "arme")), regles.r.craft.poids.arme)   # une part par type (arme, armure, bouclier, bijou)
 	var stats := {}
 	var elements := {}
 	var q := 0.0
@@ -5920,7 +5920,7 @@ func _composer_loot(inst: Dictionary, profondeur: int, rng: RandomNumberGenerato
 		var pool: Array[String] = []
 		for r in recettes:
 			var fam: Dictionary = GameData.config("material_families").get(str(r.material_family), {})
-			for m in _candidats_famille(fam, cats_mat if slot in ["tete", "plaque"] else []):
+			for m in _candidats_famille(fam, cats_mat if slot in ["tete", "plaque", "monture"] else []):
 				if not pool.has(m):
 					pool.append(m)
 		var mat_id := _tirer_materiau(pool, profondeur, rng)
@@ -6003,7 +6003,7 @@ func _tirer_materiau(candidats: Array[String], profondeur: int, rng: RandomNumbe
 ## qualité, qualité = Σ q × poids × jet, Wu Xing composite, matériau de la tête, vitesse du manche. Partagé par
 ## l'atelier (_assembler) et le loot (_composer_loot).
 func _appliquer_composition(inst: Dictionary, def: Dictionary, pieces: Array[Dictionary], jet: float) -> void:
-	var poids: Dictionary = regles.r.craft.poids.armure if def.type == "armure" else regles.r.craft.poids.arme
+	var poids: Dictionary = regles.r.craft.poids.get(str(def.get("type", "arme")), regles.r.craft.poids.arme)   # une part par type
 	var stats := {}
 	var elements := {}
 	var q_somme := 0.0
@@ -6018,7 +6018,7 @@ func _appliquer_composition(inst: Dictionary, def: Dictionary, pieces: Array[Dic
 			elements[el] = float(elements.get(el, 0.0)) + float(c.elements[el]) * w
 		q_somme += float(c.qualite) * w
 		composants[c.slot] = {"composant": c.composant, "materiau": c.materiau, "qualite": c.qualite}
-		if c.slot in ["tete", "plaque"]:
+		if c.slot in ["tete", "plaque", "monture"]:   # la pièce maîtresse donne son matériau et son nom
 			tete = c
 		elif c.slot == "manche":
 			manche = c
@@ -6614,12 +6614,12 @@ func _drop(cible: Dictionary, source: String) -> void:
 	var profondeur: int = int(donjon.get("profondeur", donjon.get("etage", 0)))
 	var uids: Array = []
 	if cible.get("rare", false):
-		var base := str(loot._base_pour(rng))
+		var base := str(loot._base_pour(rng, profondeur, true))
 		var o := generer_objet(base, profondeur, {"monstre_rare": cible.name_key}, str(lr.drops.rare_rarete), int(lr.drops.rare_affixes))
 		if not o.is_empty():
 			uids.append(o.uid)
 	elif cible.controle == "ia" and rng.randf() < float(lr.drops.chance_tout_venant):
-		var o := generer_objet(str(loot._base_pour(rng)), profondeur, {"creature": cible.name_key})
+		var o := generer_objet(str(loot._base_pour(rng, profondeur)), profondeur, {"creature": cible.name_key})
 		if not o.is_empty():
 			uids.append(o.uid)
 	# Le drop rare universel (Créatures) : la statue 1:1 de la bête abattue, meuble décoratif et trophée.
@@ -6647,10 +6647,27 @@ func _drop(cible: Dictionary, source: String) -> void:
 	if bool(cible.get("chain_gauge", false)) and lieu != "camp" and lr.drops.has("artefact"):
 		var majeur := int(donjon.get("etages", 1)) >= int(lr.drops.artefact.etages_majeur)
 		if majeur or rng.randf() < float(lr.drops.artefact.chance_boss):
-			var art := generer_objet(str(loot._base_pour(rng)), profondeur, {"boss": cible.name_key}, "artefact")
+			var art := generer_objet(str(loot._base_pour(rng, profondeur, true)), profondeur, {"boss": cible.name_key}, "artefact")
 			if not art.is_empty():
 				uids.append(art.uid)
 				EventBus.emettre(&"journal", [&"journal.artefact", {"nom": cible.name_key}])
+	# La bourse (designer 2026-09-02) : 179 kills ne rapportaient pas une piece — rien ne donnait de monnaie.
+	var lo: Dictionary = lr.drops.get("or", {})
+	if cible.controle == "ia" and not lo.is_empty() and rng.randf() < float(lo.get("chance", 0.0)):
+		var pieces := float(lo.get("base", 3)) + float(cible.get("sante_max", 10)) * float(lo.get("par_pv", 0.25)) + float(profondeur) * float(lo.get("par_etage", 4))
+		if bool(cible.get("chain_gauge", false)):   # un boss porte une vraie bourse
+			pieces *= float(lo.get("mult_boss", 6))
+		pieces *= 1.0 + (rng.randf() * 2.0 - 1.0) * float(lo.get("variance", 0.4))
+		var n_or := maxi(1, roundi(pieces))
+		var bourse := generer_objet("or", profondeur, {"creature": cible.name_key}, "commun", 0)
+		if bourse.is_empty():   # pas d'objet « or » au catalogue : on crédite le tueur directement
+			var t_or: Dictionary = entites.get(source, {})
+			if not t_or.is_empty():
+				t_or["or"] = int(t_or.get("or", 0)) + n_or
+				EventBus.emettre(&"journal", [&"journal.bourse", {"nom": t_or.name_key, "or": n_or}])
+		else:
+			bourse["quantite"] = n_or
+			uids.append(bourse.uid)
 	# La dépouille (Nourriture : la viande crue des animaux, en attendant les viandes paramétriques).
 	var def_c: Dictionary = GameData.catalogues.creatures.get(str(cible.def), {})
 	var stats_c: Dictionary = def_c.get("corps", {}).get("stats", {})
@@ -6673,6 +6690,7 @@ func _drop(cible: Dictionary, source: String) -> void:
 		var v0 := generer_objet(str(base), profondeur, {"creature": cible.name_key}, "commun", 0)
 		if not v0.is_empty():
 			v0["espece"] = str(cible.def)
+			identifier(v0)   # ce qu'on dépèce soi-même n'est pas un mystère (2026-09-02)
 			if not top_stat.is_empty():   # viande paramétrique (Cuisine et alchimie) : la stat dominante de la bête
 				v0["potentiel"] = {top_stat: 1}
 				v0["wuxing"] = def_c.elements.duplicate() if def_c.get("elements") is Dictionary else regles.r.craft.harmonie.viande_defaut.duplicate()
@@ -6690,6 +6708,7 @@ func _drop(cible: Dictionary, source: String) -> void:
 			if v.is_empty():
 				continue
 			v["espece"] = str(cible.def)   # la matière sait de quelle bête elle vient (point 69)
+			identifier(v)   # dépecée de sa main : la peau, le croc et l'écaille sont reconnus
 			if not top_stat.is_empty():   # viande paramétrique (Cuisine et alchimie) : la stat dominante de la bête
 				v["potentiel"] = {top_stat: 1}
 				v["wuxing"] = def_c.elements.duplicate() if def_c.get("elements") is Dictionary else regles.r.craft.harmonie.viande_defaut.duplicate()

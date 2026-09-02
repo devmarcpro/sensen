@@ -4,8 +4,8 @@
     "main_principale": "Épée",
     "main_secondaire": "Torche"
   },
-  "or": 0,
-  "ramassages": 47,
+  "or": 3055,
+  "ramassages": 48,
   "sac": [
     {
       "affixes": [],
@@ -33,31 +33,192 @@
     },
     {
       "affixes": [],
-      "base": "craft_epee",
+      "base": "composant",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Composant en  (correct 1.00)",
+      "poids": 1.0,
+      "qualite": 1.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "composant",
+        "loot"
+      ],
+      "type": "composant"
+    },
+    {
+      "affixes": [],
+      "base": "craft_casque",
       "composants": {
         "fixations": {
-          "materiau": "zinc",
-          "qualite": 0.903609871864319
+          "materiau": "manganese",
+          "qualite": 1.13857543468475
         },
-        "manche": {
-          "materiau": "etain",
-          "qualite": 0.970767617225647
+        "plaque": {
+          "materiau": "manganese",
+          "qualite": 1.01119124889374
         },
-        "tete": {
-          "materiau": "acier_trempe",
-          "qualite": 1.02667677402496
+        "sangles": {
+          "materiau": "soie",
+          "qualite": 1.03004312515259
         }
       },
       "elements": {
-        "metal": 1.0
+        "bois": 0.2,
+        "metal": 0.8
       },
       "espece": "",
-      "materiau": "acier_trempe",
-      "nom": "Épée en Acier trempé (correct 1.03)",
-      "poids": 3.84,
-      "qualite": 1.03,
+      "materiau": "manganese",
+      "nom": "Casque de plaque en Manganèse (correct 1.16)",
+      "poids": 2.968,
+      "qualite": 1.16,
       "quantite": 1,
       "rarete": "commun",
+      "slot": "casque",
+      "tags": [
+        "armure",
+        "assemble",
+        "loot"
+      ],
+      "type": "armure"
+    },
+    {
+      "affixes": [],
+      "base": "craft_pelle",
+      "composants": {
+        "fixations": {
+          "materiau": "acier",
+          "qualite": 0.92508864402771
+        },
+        "manche": {
+          "materiau": "gaiac",
+          "qualite": 1.04959750175476
+        },
+        "tete": {
+          "materiau": "granit_noir",
+          "qualite": 0.925602197647095
+        }
+      },
+      "elements": {
+        "bois": 0.25,
+        "metal": 0.05,
+        "terre": 0.7
+      },
+      "espece": "",
+      "materiau": "granit_noir",
+      "nom": "Pelle en Granit noir (gabbro) (correct 0.91)",
+      "poids": 2.2,
+      "qualite": 0.91,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "main_principale",
+      "tags": [
+        "outil",
+        "assemble",
+        "loot"
+      ],
+      "type": "outil"
+    },
+    {
+      "affixes": [
+        "meca_armure"
+      ],
+      "base": "craft_brassards",
+      "composants": {
+        "fixations": {
+          "materiau": "zinc",
+          "qualite": 0.852030575275421
+        },
+        "plaque": {
+          "materiau": "etain",
+          "qualite": 0.859789669513702
+        },
+        "sangles": {
+          "materiau": "cuir",
+          "qualite": 0.947887301445007
+        }
+      },
+      "elements": {
+        "bois": 0.2,
+        "metal": 0.8
+      },
+      "espece": "",
+      "materiau": "etain",
+      "nom": "Brassards de plaque en Étain (correct 0.90)",
+      "poids": 2.52,
+      "qualite": 0.9,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "brassards",
+      "tags": [
+        "armure",
+        "assemble",
+        "loot"
+      ],
+      "type": "armure"
+    },
+    {
+      "affixes": [],
+      "base": "proto_fleches",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Flèches",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 20,
+      "rarete": "inhabituel",
+      "slot": "carquois",
+      "tags": [
+        "munition",
+        "prototype",
+        "loot"
+      ],
+      "type": "munition"
+    },
+    {
+      "affixes": [
+        "cond_corruption"
+      ],
+      "base": "craft_lance",
+      "composants": {
+        "fixations": {
+          "materiau": "plomb",
+          "qualite": 0.915708839893341
+        },
+        "manche": {
+          "materiau": "nickel",
+          "qualite": 1.10749673843384
+        },
+        "tete": {
+          "materiau": "os",
+          "qualite": 1.14765191078186
+        }
+      },
+      "elements": {
+        "bois": 0.7,
+        "metal": 0.3
+      },
+      "espece": "",
+      "materiau": "os",
+      "nom": "Lance en Os (correct 1.05)",
+      "poids": 4.56,
+      "qualite": 1.05,
+      "quantite": 1,
+      "rarete": "inhabituel",
       "slot": "main_principale",
       "tags": [
         "arme",
@@ -68,57 +229,118 @@
     },
     {
       "affixes": [],
-      "base": "craft_jambieres",
+      "base": "craft_bouclier",
       "composants": {
         "fixations": {
-          "materiau": "bronze",
-          "qualite": 0.986865222454071
+          "materiau": "aluminium",
+          "qualite": 0.988757431507111
         },
         "plaque": {
           "materiau": "zinc",
-          "qualite": 1.01930618286133
+          "qualite": 0.957964420318604
         },
         "sangles": {
-          "materiau": "chanvre",
-          "qualite": 0.889257669448853
+          "materiau": "soie",
+          "qualite": 1.09992814064026
         }
       },
       "elements": {
-        "bois": 0.2,
-        "metal": 0.8
+        "bois": 0.25,
+        "metal": 0.75
       },
       "espece": "",
       "materiau": "zinc",
-      "nom": "Jambières de plaque en Zinc (correct 1.01)",
-      "poids": 6.0,
-      "qualite": 1.01,
+      "nom": "Bouclier de plaque en Zinc (correct 0.86)",
+      "poids": 2.856,
+      "qualite": 0.86,
       "quantite": 1,
-      "rarete": "commun",
-      "slot": "jambieres",
+      "rarete": "rare",
+      "slot": "main_secondaire",
       "tags": [
-        "armure",
+        "bouclier",
         "assemble",
         "loot"
       ],
-      "type": "armure"
+      "type": "bouclier"
     },
     {
       "affixes": [
-        "cond_nuit"
+        "cadence_element"
       ],
-      "base": "craft_jambieres",
+      "base": "craft_pelle",
+      "composants": {
+        "fixations": {
+          "materiau": "cuivre",
+          "qualite": 1.0894809961319
+        },
+        "manche": {
+          "materiau": "etain",
+          "qualite": 0.983629286289215
+        },
+        "tete": {
+          "materiau": "obsidienne",
+          "qualite": 1.00725305080414
+        }
+      },
+      "elements": {
+        "feu": 0.28,
+        "metal": 0.3,
+        "terre": 0.42
+      },
+      "espece": "",
+      "materiau": "obsidienne",
+      "nom": "Pelle en Obsidienne (correct 0.86)",
+      "poids": 2.2,
+      "qualite": 0.86,
+      "quantite": 1,
+      "rarete": "rare",
+      "slot": "main_principale",
+      "tags": [
+        "outil",
+        "assemble",
+        "loot"
+      ],
+      "type": "outil"
+    },
+    {
+      "affixes": [],
+      "base": "proto_fleches",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Flèches",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 20,
+      "rarete": "commun",
+      "slot": "carquois",
+      "tags": [
+        "munition",
+        "prototype",
+        "loot"
+      ],
+      "type": "munition"
+    },
+    {
+      "affixes": [],
+      "base": "craft_cuirasse",
       "composants": {
         "fixations": {
           "materiau": "zinc",
-          "qualite": 0.887837648391724
+          "qualite": 0.978991627693176
         },
         "plaque": {
           "materiau": "cuivre",
-          "qualite": 0.894343435764313
+          "qualite": 0.896239995956421
         },
         "sangles": {
-          "materiau": "lin",
-          "qualite": 0.895622432231903
+          "materiau": "chanvre",
+          "qualite": 1.12592685222626
         }
       },
       "elements": {
@@ -127,152 +349,12 @@
       },
       "espece": "",
       "materiau": "cuivre",
-      "nom": "Jambières de plaque en Cuivre (correct 0.89)",
-      "poids": 6.0,
-      "qualite": 0.89,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "jambieres",
-      "tags": [
-        "armure",
-        "assemble",
-        "loot"
-      ],
-      "type": "armure"
-    },
-    {
-      "affixes": [],
-      "base": "proto_bouclier",
-      "composants": {
-
-      },
-      "elements": {
-        "bois": 1.0
-      },
-      "espece": "",
-      "materiau": "chene",
-      "nom": "Bouclier",
-      "poids": 4.8,
-      "qualite": 1.0,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "main_secondaire",
-      "tags": [
-        "bouclier",
-        "prototype",
-        "loot"
-      ],
-      "type": "bouclier"
-    },
-    {
-      "affixes": [],
-      "base": "peau",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "griffon",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
+      "nom": "Cuirasse de plaque en Cuivre (correct 0.88)",
+      "poids": 6.4295,
+      "qualite": 0.88,
       "quantite": 1,
       "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "peau",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "griffon",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "dent",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "griffon",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [
-        "cond_profondeur"
-      ],
-      "base": "craft_casque",
-      "composants": {
-        "fixations": {
-          "materiau": "manganese",
-          "qualite": 0.960730493068695
-        },
-        "plaque": {
-          "materiau": "zinc",
-          "qualite": 1.11253464221954
-        },
-        "sangles": {
-          "materiau": "cuir",
-          "qualite": 1.00907921791077
-        }
-      },
-      "elements": {
-        "bois": 0.2,
-        "metal": 0.8
-      },
-      "espece": "",
-      "materiau": "zinc",
-      "nom": "Casque de plaque en Zinc (bon 1.20)",
-      "poids": 6.0,
-      "qualite": 1.2,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "casque",
+      "slot": "cuirasse",
       "tags": [
         "armure",
         "assemble",
@@ -289,9 +371,9 @@
       "elements": {
 
       },
-      "espece": "rat_geant",
+      "espece": "scorpion",
       "materiau": "",
-      "nom": "Fiole {apparence}",
+      "nom": "Viande crue",
       "poids": 1.0,
       "qualite": 0.0,
       "quantite": 1,
@@ -307,7 +389,7 @@
     },
     {
       "affixes": [],
-      "base": "peau",
+      "base": "griffe",
       "composants": {
 
       },
@@ -333,7 +415,7 @@
     },
     {
       "affixes": [],
-      "base": "gemme_emeraude",
+      "base": "gemme_diamant",
       "composants": {
 
       },
@@ -341,7 +423,7 @@
         "metal": 1.0
       },
       "espece": "",
-      "materiau": "emeraude",
+      "materiau": "diamant",
       "nom": "Gemme {apparence}",
       "poids": 1.0,
       "qualite": 0.0,
@@ -354,823 +436,6 @@
         "loot"
       ],
       "type": "gemme"
-    },
-    {
-      "affixes": [],
-      "base": "proto_anneau",
-      "composants": {
-
-      },
-      "elements": {
-        "metal": 1.0
-      },
-      "espece": "",
-      "materiau": "argent",
-      "nom": "Anneau",
-      "poids": 1.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "anneau",
-      "tags": [
-        "bijou",
-        "prototype",
-        "loot"
-      ],
-      "type": "bijou"
-    },
-    {
-      "affixes": [],
-      "base": "craft_casque",
-      "composants": {
-        "fixations": {
-          "materiau": "etain",
-          "qualite": 1.09217464923859
-        },
-        "plaque": {
-          "materiau": "acier_trempe",
-          "qualite": 0.884756088256836
-        },
-        "sangles": {
-          "materiau": "cuir",
-          "qualite": 0.901203393936157
-        }
-      },
-      "elements": {
-        "bois": 0.2,
-        "metal": 0.8
-      },
-      "espece": "",
-      "materiau": "acier_trempe",
-      "nom": "Casque de plaque en Acier trempé (correct 0.83)",
-      "poids": 6.0,
-      "qualite": 0.83,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "casque",
-      "tags": [
-        "armure",
-        "assemble",
-        "loot"
-      ],
-      "type": "armure"
-    },
-    {
-      "affixes": [],
-      "base": "dent",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "troll",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "gemme_grenat",
-      "composants": {
-
-      },
-      "elements": {
-        "metal": 1.0
-      },
-      "espece": "",
-      "materiau": "grenat",
-      "nom": "Gemme {apparence}",
-      "poids": 1.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "sertissure",
-      "tags": [
-        "gemme",
-        "prototype",
-        "loot"
-      ],
-      "type": "gemme"
-    },
-    {
-      "affixes": [],
-      "base": "craft_casque",
-      "composants": {
-        "fixations": {
-          "materiau": "acier",
-          "qualite": 1.1425074338913
-        },
-        "plaque": {
-          "materiau": "cuivre",
-          "qualite": 0.989370346069336
-        },
-        "sangles": {
-          "materiau": "soie",
-          "qualite": 1.03420078754425
-        }
-      },
-      "elements": {
-        "bois": 0.2,
-        "metal": 0.8
-      },
-      "espece": "",
-      "materiau": "cuivre",
-      "nom": "Casque de plaque en Cuivre (correct 0.86)",
-      "poids": 6.0,
-      "qualite": 0.86,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "casque",
-      "tags": [
-        "armure",
-        "assemble",
-        "loot"
-      ],
-      "type": "armure"
-    },
-    {
-      "affixes": [
-        "cadence_element",
-        "wuxing_cycle"
-      ],
-      "base": "craft_dague",
-      "composants": {
-        "fixations": {
-          "materiau": "cuivre",
-          "qualite": 1.0730938911438
-        },
-        "manche": {
-          "materiau": "eucalyptus",
-          "qualite": 0.852050423622131
-        },
-        "tete": {
-          "materiau": "bronze",
-          "qualite": 1.10268306732178
-        }
-      },
-      "elements": {
-        "bois": 0.25,
-        "metal": 0.75
-      },
-      "espece": "",
-      "materiau": "bronze",
-      "nom": "Dague en Bronze (correct 0.99)",
-      "poids": 1.92,
-      "qualite": 0.99,
-      "quantite": 1,
-      "rarete": "rare",
-      "slot": "main_principale",
-      "tags": [
-        "arme",
-        "assemble",
-        "loot"
-      ],
-      "type": "arme"
-    },
-    {
-      "affixes": [],
-      "base": "craft_jambieres",
-      "composants": {
-        "fixations": {
-          "materiau": "etain",
-          "qualite": 1.13160192966461
-        },
-        "plaque": {
-          "materiau": "cuivre",
-          "qualite": 0.893736183643341
-        },
-        "sangles": {
-          "materiau": "chanvre",
-          "qualite": 1.0172131061554
-        }
-      },
-      "elements": {
-        "bois": 0.2,
-        "metal": 0.8
-      },
-      "espece": "",
-      "materiau": "cuivre",
-      "nom": "Jambières de plaque en Cuivre (correct 1.02)",
-      "poids": 6.0,
-      "qualite": 1.02,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "jambieres",
-      "tags": [
-        "armure",
-        "assemble",
-        "loot"
-      ],
-      "type": "armure"
-    },
-    {
-      "affixes": [],
-      "base": "craft_pelle",
-      "composants": {
-        "fixations": {
-          "materiau": "acier_trempe",
-          "qualite": 0.935357451438904
-        },
-        "manche": {
-          "materiau": "epicea",
-          "qualite": 0.864105403423309
-        },
-        "tete": {
-          "materiau": "zinc",
-          "qualite": 1.05436408519745
-        }
-      },
-      "elements": {
-        "bois": 0.25,
-        "metal": 0.75
-      },
-      "espece": "",
-      "materiau": "zinc",
-      "nom": "Pelle en Zinc (correct 1.14)",
-      "poids": 2.2,
-      "qualite": 1.14,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "main_principale",
-      "tags": [
-        "outil",
-        "assemble",
-        "loot"
-      ],
-      "type": "outil"
-    },
-    {
-      "affixes": [],
-      "base": "torche",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "",
-      "materiau": "",
-      "nom": "Torche",
-      "poids": 1.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "main_secondaire",
-      "tags": [
-        "outil",
-        "lumiere",
-        "loot"
-      ],
-      "type": "outil"
-    },
-    {
-      "affixes": [
-        "cadence_parade",
-        "passif_competence"
-      ],
-      "base": "craft_cuirasse",
-      "composants": {
-        "fixations": {
-          "materiau": "etain",
-          "qualite": 0.987027227878571
-        },
-        "plaque": {
-          "materiau": "zinc",
-          "qualite": 0.957129955291748
-        },
-        "sangles": {
-          "materiau": "cuir",
-          "qualite": 0.955555617809296
-        }
-      },
-      "elements": {
-        "bois": 0.2,
-        "metal": 0.8
-      },
-      "espece": "",
-      "materiau": "zinc",
-      "nom": "Cuirasse de plaque en Zinc (correct 0.93)",
-      "poids": 6.0,
-      "qualite": 0.93,
-      "quantite": 1,
-      "rarete": "rare",
-      "slot": "cuirasse",
-      "tags": [
-        "armure",
-        "assemble",
-        "loot"
-      ],
-      "type": "armure"
-    },
-    {
-      "affixes": [],
-      "base": "gemme_rubis",
-      "composants": {
-
-      },
-      "elements": {
-        "metal": 1.0
-      },
-      "espece": "",
-      "materiau": "rubis",
-      "nom": "Gemme {apparence}",
-      "poids": 1.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "sertissure",
-      "tags": [
-        "gemme",
-        "prototype",
-        "loot"
-      ],
-      "type": "gemme"
-    },
-    {
-      "affixes": [],
-      "base": "station_forge",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "",
-      "materiau": "",
-      "nom": "Forge",
-      "poids": 80.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "station",
-        "portative",
-        "loot"
-      ],
-      "type": "station"
-    },
-    {
-      "affixes": [],
-      "base": "peau",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "basilic",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "peau",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "basilic",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "dent",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "basilic",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "dent",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "basilic",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "ecaille",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "basilic",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "manuel",
-      "composants": {
-
-      },
-      "elements": {
-        "feu": 1.0
-      },
-      "espece": "",
-      "materiau": "papier",
-      "nom": "Livre : Frappe (difficulté 10)",
-      "poids": 1.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "",
-      "tags": [
-        "livre",
-        "manuel",
-        "loot"
-      ],
-      "type": "manuel"
-    },
-    {
-      "affixes": [],
-      "base": "torche",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "",
-      "materiau": "",
-      "nom": "Torche",
-      "poids": 1.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "main_secondaire",
-      "tags": [
-        "outil",
-        "lumiere",
-        "loot"
-      ],
-      "type": "outil"
-    },
-    {
-      "affixes": [
-        "cadence_parade",
-        "decl_touche_etourdit"
-      ],
-      "base": "craft_brassards",
-      "composants": {
-        "fixations": {
-          "materiau": "argent",
-          "qualite": 1.07470493515333
-        },
-        "plaque": {
-          "materiau": "fer",
-          "qualite": 0.9950110912323
-        },
-        "sangles": {
-          "materiau": "coton",
-          "qualite": 1.09620694319407
-        }
-      },
-      "elements": {
-        "bois": 0.2,
-        "metal": 0.8
-      },
-      "espece": "",
-      "materiau": "fer",
-      "nom": "Brassards de plaque en Fer (correct 1.12)",
-      "poids": 6.0,
-      "qualite": 1.12,
-      "quantite": 1,
-      "rarete": "rare",
-      "slot": "brassards",
-      "tags": [
-        "armure",
-        "assemble",
-        "loot"
-      ],
-      "type": "armure"
-    },
-    {
-      "affixes": [],
-      "base": "peau",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "serpent_geant",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "peau",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "serpent_geant",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "dent",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "serpent_geant",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "dent",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "serpent_geant",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "ecaille",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "serpent_geant",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "ecaille",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "serpent_geant",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "peau",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "potion_endurance",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "rare",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "potion",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "pain",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 1.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "plat",
-        "loot"
-      ],
-      "type": "consommable"
     },
     {
       "affixes": [],
@@ -1183,7 +448,7 @@
       },
       "espece": "scorpion",
       "materiau": "",
-      "nom": "Fiole {apparence}",
+      "nom": "Viande crue",
       "poids": 1.0,
       "qualite": 0.0,
       "quantite": 1,
@@ -1249,7 +514,7 @@
     },
     {
       "affixes": [],
-      "base": "antidote",
+      "base": "composant",
       "composants": {
 
       },
@@ -1258,45 +523,41 @@
       },
       "espece": "",
       "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
+      "nom": "Composant en  (correct 1.00)",
+      "poids": 1.0,
+      "qualite": 1.0,
       "quantite": 1,
-      "rarete": "rare",
+      "rarete": "commun",
       "slot": "",
       "tags": [
-        "consommable",
-        "empilable",
-        "soin",
+        "composant",
         "loot"
       ],
-      "type": "consommable"
+      "type": "composant"
     },
     {
       "affixes": [],
-      "base": "peau",
+      "base": "materiau_brut",
       "composants": {
 
       },
       "elements": {
 
       },
-      "espece": "troll",
+      "espece": "",
       "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
+      "nom": "Matériau brut",
+      "poids": 1.0,
       "qualite": 0.0,
       "quantite": 1,
       "rarete": "commun",
       "slot": "",
       "tags": [
-        "consommable",
+        "materiau",
         "empilable",
-        "ingredient",
-        "partie",
         "loot"
       ],
-      "type": "consommable"
+      "type": "materiau"
     },
     {
       "affixes": [],
@@ -1309,11 +570,11 @@
       },
       "espece": "",
       "materiau": "papier",
-      "nom": "Livre : Sur soi (difficulté 15)",
+      "nom": "Livre : Canalisation (difficulté 10)",
       "poids": 1.0,
       "qualite": 0.0,
       "quantite": 1,
-      "rarete": "inhabituel",
+      "rarete": "commun",
       "slot": "",
       "tags": [
         "livre",
@@ -1323,10 +584,8 @@
       "type": "manuel"
     },
     {
-      "affixes": [
-        "passif_tag"
-      ],
-      "base": "proto_anneau",
+      "affixes": [],
+      "base": "gemme_amethyste",
       "composants": {
 
       },
@@ -1334,404 +593,7 @@
         "metal": 1.0
       },
       "espece": "",
-      "materiau": "argent",
-      "nom": "Anneau",
-      "poids": 1.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "anneau",
-      "tags": [
-        "bijou",
-        "prototype",
-        "loot"
-      ],
-      "type": "bijou"
-    },
-    {
-      "affixes": [],
-      "base": "proto_bouclier",
-      "composants": {
-
-      },
-      "elements": {
-        "bois": 1.0
-      },
-      "espece": "",
-      "materiau": "chene",
-      "nom": "Bouclier",
-      "poids": 4.8,
-      "qualite": 1.0,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "main_secondaire",
-      "tags": [
-        "bouclier",
-        "prototype",
-        "loot"
-      ],
-      "type": "bouclier"
-    },
-    {
-      "affixes": [],
-      "base": "meuble_statue",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "",
-      "materiau": "",
-      "nom": "Statue de Bandit",
-      "poids": 8.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "meuble",
-        "posable",
-        "loot"
-      ],
-      "type": "meuble"
-    },
-    {
-      "affixes": [],
-      "base": "proto_bouclier",
-      "composants": {
-
-      },
-      "elements": {
-        "bois": 1.0
-      },
-      "espece": "",
-      "materiau": "chene",
-      "nom": "Bouclier",
-      "poids": 4.8,
-      "qualite": 1.0,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "main_secondaire",
-      "tags": [
-        "bouclier",
-        "prototype",
-        "loot"
-      ],
-      "type": "bouclier"
-    },
-    {
-      "affixes": [],
-      "base": "citrouille",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "culture",
-        "ingredient",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "station_alambic",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "",
-      "materiau": "",
-      "nom": "Alambic",
-      "poids": 40.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "station",
-        "portative",
-        "loot"
-      ],
-      "type": "station"
-    },
-    {
-      "affixes": [],
-      "base": "station_enclume",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "",
-      "materiau": "",
-      "nom": "Enclume",
-      "poids": 60.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "",
-      "tags": [
-        "station",
-        "portative",
-        "loot"
-      ],
-      "type": "station"
-    },
-    {
-      "affixes": [
-        "decl_zone_saigne"
-      ],
-      "base": "craft_lance",
-      "composants": {
-        "fixations": {
-          "materiau": "manganese",
-          "qualite": 1.17159446080526
-        },
-        "manche": {
-          "materiau": "robinier",
-          "qualite": 1.28875557581584
-        },
-        "tete": {
-          "materiau": "cobalt",
-          "qualite": 1.10695353150368
-        }
-      },
-      "elements": {
-        "bois": 0.25,
-        "metal": 0.75
-      },
-      "espece": "",
-      "materiau": "cobalt",
-      "nom": "Lance en Cobalt (bon 1.32)",
-      "poids": 4.56,
-      "qualite": 1.32,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "main_principale",
-      "tags": [
-        "arme",
-        "assemble",
-        "loot"
-      ],
-      "type": "arme"
-    },
-    {
-      "affixes": [],
-      "base": "potion_antipoison",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "potion",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [
-        "meca_armure",
-        "meca_garde"
-      ],
-      "base": "craft_cuirasse",
-      "composants": {
-        "fixations": {
-          "materiau": "zinc",
-          "qualite": 1.37813646452768
-        },
-        "plaque": {
-          "materiau": "cuivre",
-          "qualite": 1.41358239310128
-        },
-        "sangles": {
-          "materiau": "soie",
-          "qualite": 1.37503337860107
-        }
-      },
-      "elements": {
-        "bois": 0.2,
-        "metal": 0.8
-      },
-      "espece": "",
-      "materiau": "cuivre",
-      "nom": "Cuirasse de plaque en Cuivre (excellent 1.83)",
-      "poids": 6.0,
-      "qualite": 1.83,
-      "quantite": 1,
-      "rarete": "rare",
-      "slot": "cuirasse",
-      "tags": [
-        "armure",
-        "assemble",
-        "loot"
-      ],
-      "type": "armure"
-    },
-    {
-      "affixes": [],
-      "base": "grimoire",
-      "composants": {
-
-      },
-      "elements": {
-        "feu": 1.0
-      },
-      "espece": "",
-      "materiau": "papier",
-      "nom": "Livre : Silence (difficulté 20)",
-      "poids": 1.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "",
-      "tags": [
-        "livre",
-        "grimoire",
-        "loot"
-      ],
-      "type": "grimoire"
-    },
-    {
-      "affixes": [
-        "wuxing_cycle"
-      ],
-      "base": "craft_epee",
-      "composants": {
-        "fixations": {
-          "materiau": "argent",
-          "qualite": 1.2772228717804
-        },
-        "manche": {
-          "materiau": "argent",
-          "qualite": 1.14018398523331
-        },
-        "tete": {
-          "materiau": "etain",
-          "qualite": 1.10010419573103
-        }
-      },
-      "elements": {
-        "metal": 1.0
-      },
-      "espece": "",
-      "materiau": "etain",
-      "nom": "Épée en Étain (bon 1.38)",
-      "poids": 3.84,
-      "qualite": 1.38,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "main_principale",
-      "tags": [
-        "arme",
-        "assemble",
-        "loot"
-      ],
-      "type": "arme"
-    },
-    {
-      "affixes": [],
-      "base": "peau",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [
-        "meca_allonge"
-      ],
-      "base": "craft_pelle",
-      "composants": {
-        "fixations": {
-          "materiau": "cobalt",
-          "qualite": 1.44790547234671
-        },
-        "manche": {
-          "materiau": "noisetier",
-          "qualite": 1.24138786963054
-        },
-        "tete": {
-          "materiau": "zinc",
-          "qualite": 1.33745179857527
-        }
-      },
-      "elements": {
-        "bois": 0.25,
-        "metal": 0.75
-      },
-      "espece": "",
-      "materiau": "zinc",
-      "nom": "Pelle en Zinc (bon 1.49)",
-      "poids": 2.2,
-      "qualite": 1.49,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "main_principale",
-      "tags": [
-        "outil",
-        "assemble",
-        "loot"
-      ],
-      "type": "outil"
-    },
-    {
-      "affixes": [],
-      "base": "gemme_ambre",
-      "composants": {
-
-      },
-      "elements": {
-        "terre": 1.0
-      },
-      "espece": "",
-      "materiau": "ambre",
+      "materiau": "amethyste",
       "nom": "Gemme {apparence}",
       "poids": 1.0,
       "qualite": 0.0,
@@ -1746,46 +608,44 @@
       "type": "gemme"
     },
     {
-      "affixes": [
-        "cond_element_cible"
-      ],
-      "base": "craft_pelle",
+      "affixes": [],
+      "base": "craft_brassards",
       "composants": {
         "fixations": {
-          "materiau": "argent",
-          "qualite": 1.37409822808372
+          "materiau": "cuivre",
+          "qualite": 1.05251801013947
         },
-        "manche": {
-          "materiau": "acier_trempe",
-          "qualite": 1.58881436453925
+        "plaque": {
+          "materiau": "cuivre",
+          "qualite": 1.14958322048187
         },
-        "tete": {
-          "materiau": "quartzite",
-          "qualite": 1.32198086049822
+        "sangles": {
+          "materiau": "chanvre",
+          "qualite": 0.946908593177795
         }
       },
       "elements": {
-        "metal": 0.3,
-        "terre": 0.7
+        "bois": 0.2,
+        "metal": 0.8
       },
       "espece": "",
-      "materiau": "quartzite",
-      "nom": "Pelle en Quartzite (excellent 1.81)",
-      "poids": 2.2,
-      "qualite": 1.81,
+      "materiau": "cuivre",
+      "nom": "Brassards de plaque en Cuivre (correct 0.98)",
+      "poids": 2.646,
+      "qualite": 0.98,
       "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "main_principale",
+      "rarete": "commun",
+      "slot": "brassards",
       "tags": [
-        "outil",
+        "armure",
         "assemble",
         "loot"
       ],
-      "type": "outil"
+      "type": "armure"
     },
     {
       "affixes": [],
-      "base": "ecaille",
+      "base": "peau",
       "composants": {
 
       },
@@ -1794,7 +654,7 @@
       },
       "espece": "serpent_geant",
       "materiau": "",
-      "nom": "Fiole {apparence}",
+      "nom": "Peau",
       "poids": 0.0,
       "qualite": 0.0,
       "quantite": 1,
@@ -1836,95 +696,44 @@
       "type": "consommable"
     },
     {
-      "affixes": [
-        "cadence_saignee"
-      ],
-      "base": "craft_epee",
+      "affixes": [],
+      "base": "craft_pelle",
       "composants": {
         "fixations": {
-          "materiau": "zinc",
-          "qualite": 1.56313342518277
+          "materiau": "aluminium",
+          "qualite": 0.949135839939117
         },
         "manche": {
-          "materiau": "bronze",
-          "qualite": 1.23674441046185
+          "materiau": "chataignier",
+          "qualite": 0.87222957611084
         },
         "tete": {
-          "materiau": "nickel",
-          "qualite": 1.36683726973004
+          "materiau": "cuivre",
+          "qualite": 0.99389660358429
         }
       },
       "elements": {
-        "metal": 1.0
+        "bois": 0.25,
+        "metal": 0.75
       },
       "espece": "",
-      "materiau": "nickel",
-      "nom": "Épée en Nickel (excellent 1.75)",
-      "poids": 3.84,
-      "qualite": 1.75,
+      "materiau": "cuivre",
+      "nom": "Pelle en Cuivre (correct 1.03)",
+      "poids": 2.2,
+      "qualite": 1.03,
       "quantite": 1,
-      "rarete": "rare",
+      "rarete": "commun",
       "slot": "main_principale",
       "tags": [
-        "arme",
+        "outil",
         "assemble",
         "loot"
       ],
-      "type": "arme"
+      "type": "outil"
     },
     {
       "affixes": [],
-      "base": "livre_module",
-      "composants": {
-
-      },
-      "elements": {
-        "feu": 1.0
-      },
-      "espece": "",
-      "materiau": "papier",
-      "nom": "Livre : Gravité (difficulté 30)",
-      "poids": 1.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "exceptionnel",
-      "slot": "",
-      "tags": [
-        "livre",
-        "manuel",
-        "module_unique",
-        "loot"
-      ],
-      "type": "manuel"
-    },
-    {
-      "affixes": [],
-      "base": "viande_crue",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "rat_geant",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 1.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "viande",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "dent",
+      "base": "oeil",
       "composants": {
 
       },
@@ -1950,45 +759,165 @@
     },
     {
       "affixes": [],
-      "base": "proto_bouclier",
+      "base": "manuel",
       "composants": {
 
       },
       "elements": {
-        "bois": 1.0
+        "feu": 1.0
       },
       "espece": "",
-      "materiau": "chene",
-      "nom": "Bouclier",
-      "poids": 4.8,
-      "qualite": 1.0,
+      "materiau": "papier",
+      "nom": "Livre : Terroir (difficulté 10)",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "",
+      "tags": [
+        "livre",
+        "manuel",
+        "loot"
+      ],
+      "type": "manuel"
+    },
+    {
+      "affixes": [],
+      "base": "materiau_brut",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Matériau brut",
+      "poids": 1.0,
+      "qualite": 0.0,
       "quantite": 1,
       "rarete": "commun",
-      "slot": "main_secondaire",
+      "slot": "",
       "tags": [
-        "bouclier",
+        "materiau",
+        "empilable",
+        "loot"
+      ],
+      "type": "materiau"
+    },
+    {
+      "affixes": [],
+      "base": "materiau_brut",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Matériau brut",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "materiau",
+        "empilable",
+        "loot"
+      ],
+      "type": "materiau"
+    },
+    {
+      "affixes": [],
+      "base": "proto_fleches",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Flèches",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 20,
+      "rarete": "commun",
+      "slot": "carquois",
+      "tags": [
+        "munition",
         "prototype",
         "loot"
       ],
-      "type": "bouclier"
+      "type": "munition"
     },
     {
-      "affixes": [
-        "decl_parade"
+      "affixes": [],
+      "base": "defense",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "troll",
+      "materiau": "",
+      "nom": "Défense",
+      "poids": 0.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "consommable",
+        "empilable",
+        "ingredient",
+        "partie",
+        "loot"
       ],
-      "base": "craft_casque",
+      "type": "consommable"
+    },
+    {
+      "affixes": [],
+      "base": "manuel",
+      "composants": {
+
+      },
+      "elements": {
+        "feu": 1.0
+      },
+      "espece": "",
+      "materiau": "papier",
+      "nom": "Livre : Résonance (difficulté 10)",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "rare",
+      "slot": "",
+      "tags": [
+        "livre",
+        "manuel",
+        "loot"
+      ],
+      "type": "manuel"
+    },
+    {
+      "affixes": [],
+      "base": "craft_brassards",
       "composants": {
         "fixations": {
-          "materiau": "manganese",
-          "qualite": 1.39560714695189
+          "materiau": "etain",
+          "qualite": 0.873971223831177
         },
         "plaque": {
-          "materiau": "tungstene",
-          "qualite": 1.32041822539435
+          "materiau": "zinc",
+          "qualite": 1.05632781982422
         },
         "sangles": {
-          "materiau": "lin",
-          "qualite": 1.2463976211018
+          "materiau": "chanvre",
+          "qualite": 0.988222002983093
         }
       },
       "elements": {
@@ -1996,13 +925,13 @@
         "metal": 0.8
       },
       "espece": "",
-      "materiau": "tungstene",
-      "nom": "Casque de plaque en Tungstène (excellent 1.67)",
-      "poids": 6.0,
-      "qualite": 1.67,
+      "materiau": "zinc",
+      "nom": "Brassards de plaque en Zinc (correct 1.15)",
+      "poids": 2.394,
+      "qualite": 1.15,
       "quantite": 1,
-      "rarete": "rare",
-      "slot": "casque",
+      "rarete": "commun",
+      "slot": "brassards",
       "tags": [
         "armure",
         "assemble",
@@ -2011,152 +940,196 @@
       "type": "armure"
     },
     {
-      "affixes": [
-        "passif_poids"
-      ],
-      "base": "proto_anneau",
+      "affixes": [],
+      "base": "torche",
       "composants": {
 
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Torche",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "main_secondaire",
+      "tags": [
+        "outil",
+        "lumiere",
+        "loot"
+      ],
+      "type": "outil"
+    },
+    {
+      "affixes": [],
+      "base": "torche",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Torche",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "main_secondaire",
+      "tags": [
+        "outil",
+        "lumiere",
+        "loot"
+      ],
+      "type": "outil"
+    },
+    {
+      "affixes": [],
+      "base": "craft_masse",
+      "composants": {
+        "fixations": {
+          "materiau": "acier_tungstene",
+          "qualite": 0.94562292098999
+        },
+        "manche": {
+          "materiau": "aluminium",
+          "qualite": 1.14454054832459
+        },
+        "tete": {
+          "materiau": "obsidienne",
+          "qualite": 0.862787485122681
+        }
+      },
+      "elements": {
+        "feu": 0.29,
+        "metal": 0.285,
+        "terre": 0.425
+      },
+      "espece": "",
+      "materiau": "obsidienne",
+      "nom": "Masse en Obsidienne (correct 0.96)",
+      "poids": 6.6,
+      "qualite": 0.96,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "main_principale",
+      "tags": [
+        "arme",
+        "assemble",
+        "loot"
+      ],
+      "type": "arme"
+    },
+    {
+      "affixes": [],
+      "base": "craft_amulette",
+      "composants": {
+        "monture": {
+          "materiau": "acier_trempe",
+          "qualite": 1.11662316322327
+        }
       },
       "elements": {
         "metal": 1.0
       },
       "espece": "",
-      "materiau": "argent",
-      "nom": "de portage (+40 de capacité) [rare]",
+      "materiau": "acier_trempe",
+      "nom": "Amulette en Acier trempé (correct 1.10)",
       "poids": 1.0,
-      "qualite": 0.0,
+      "qualite": 1.1,
       "quantite": 1,
-      "rarete": "rare",
-      "slot": "anneau",
+      "rarete": "commun",
+      "slot": "amulette",
       "tags": [
         "bijou",
-        "prototype",
+        "assemble",
         "loot"
       ],
       "type": "bijou"
     },
     {
       "affixes": [],
-      "base": "camomille",
+      "base": "gemme_diamant",
       "composants": {
 
-      },
-      "elements": {
-
-      },
-      "espece": "",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "herbe",
-        "ingredient",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "viande_crue",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 1.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "rare",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "viande",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [
-        "wuxing_ajout",
-        "cond_profondeur"
-      ],
-      "base": "craft_lance",
-      "composants": {
-        "fixations": {
-          "materiau": "manganese",
-          "qualite": 1.43038076162338
-        },
-        "manche": {
-          "materiau": "or",
-          "qualite": 1.42832735180855
-        },
-        "tete": {
-          "materiau": "chrome",
-          "qualite": 1.52846306562424
-        }
       },
       "elements": {
         "metal": 1.0
       },
       "espece": "",
-      "materiau": "chrome",
-      "nom": "Lance en Chrome (chromite) (excellent 1.95)",
-      "poids": 4.56,
-      "qualite": 1.95,
+      "materiau": "diamant",
+      "nom": "Gemme {apparence}",
+      "poids": 1.0,
+      "qualite": 0.0,
       "quantite": 1,
       "rarete": "exceptionnel",
-      "slot": "main_principale",
+      "slot": "sertissure",
       "tags": [
-        "arme",
-        "assemble",
+        "gemme",
+        "prototype",
         "loot"
       ],
-      "type": "arme"
+      "type": "gemme"
+    },
+    {
+      "affixes": [],
+      "base": "gemme_amethyste",
+      "composants": {
+
+      },
+      "elements": {
+        "metal": 1.0
+      },
+      "espece": "",
+      "materiau": "amethyste",
+      "nom": "Gemme {apparence}",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "sertissure",
+      "tags": [
+        "gemme",
+        "prototype",
+        "loot"
+      ],
+      "type": "gemme"
     },
     {
       "affixes": [
-        "wuxing_cycle",
-        "decl_zone_etourdit"
+        "cadence_des",
+        "cadence_element"
       ],
       "base": "craft_epee",
       "composants": {
         "fixations": {
-          "materiau": "argent",
-          "qualite": 1.61042922735214
+          "materiau": "cuivre",
+          "qualite": 0.977958261966705
         },
         "manche": {
-          "materiau": "titane",
-          "qualite": 1.37886536121368
+          "materiau": "frene",
+          "qualite": 0.885437726974487
         },
         "tete": {
-          "materiau": "verre",
-          "qualite": 1.54085648059845
+          "materiau": "etain",
+          "qualite": 1.01113188266754
         }
       },
       "elements": {
-        "feu": 0.35,
-        "metal": 0.3,
-        "terre": 0.35
+        "bois": 0.25,
+        "metal": 0.75
       },
       "espece": "",
-      "materiau": "verre",
-      "nom": "Épée en Verre (excellent 1.95)",
+      "materiau": "etain",
+      "nom": "Épée en Étain (correct 1.03)",
       "poids": 3.84,
-      "qualite": 1.95,
+      "qualite": 1.03,
       "quantite": 1,
-      "rarete": "rare",
+      "rarete": "artefact",
       "slot": "main_principale",
       "tags": [
         "arme",
@@ -2167,17 +1140,42 @@
     },
     {
       "affixes": [],
-      "base": "viande_crue",
+      "base": "plan_industriel",
+      "composants": {
+
+      },
+      "elements": {
+        "feu": 1.0
+      },
+      "espece": "",
+      "materiau": "papier",
+      "nom": "Plan industriel domaine.industriel (difficulté 10, 0 modules)",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "livre",
+        "manuel",
+        "plan",
+        "loot"
+      ],
+      "type": "manuel"
+    },
+    {
+      "affixes": [],
+      "base": "dent",
       "composants": {
 
       },
       "elements": {
 
       },
-      "espece": "scorpion",
+      "espece": "serpent_geant",
       "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 1.0,
+      "nom": "Dent",
+      "poids": 0.0,
       "qualite": 0.0,
       "quantite": 1,
       "rarete": "commun",
@@ -2185,7 +1183,8 @@
       "tags": [
         "consommable",
         "empilable",
-        "viande",
+        "ingredient",
+        "partie",
         "loot"
       ],
       "type": "consommable"
@@ -2241,441 +1240,246 @@
       "type": "materiau"
     },
     {
-      "affixes": [
-        "passif_regen",
-        "passif_surchauffe"
-      ],
-      "base": "proto_amulette",
+      "affixes": [],
+      "base": "plan_industriel",
       "composants": {
 
+      },
+      "elements": {
+        "feu": 1.0
+      },
+      "espece": "",
+      "materiau": "papier",
+      "nom": "Plan industriel domaine.industriel (difficulté 10, 0 modules)",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "livre",
+        "manuel",
+        "plan",
+        "loot"
+      ],
+      "type": "manuel"
+    },
+    {
+      "affixes": [],
+      "base": "craft_anneau",
+      "composants": {
+        "monture": {
+          "materiau": "cuivre",
+          "qualite": 1.2165329058965
+        }
       },
       "elements": {
         "metal": 1.0
       },
       "espece": "",
-      "materiau": "or",
-      "nom": "Amulette vivace (régénération +73 %) [rare]",
+      "materiau": "cuivre",
+      "nom": "Anneau en Cuivre (bon 1.45)",
       "poids": 1.0,
-      "qualite": 0.0,
+      "qualite": 1.45,
       "quantite": 1,
-      "rarete": "rare",
-      "slot": "amulette",
+      "rarete": "commun",
+      "slot": "anneau",
       "tags": [
         "bijou",
-        "prototype",
+        "assemble",
         "loot"
       ],
       "type": "bijou"
     },
     {
-      "affixes": [
-        "cond_corruption"
-      ],
-      "base": "craft_lance",
+      "affixes": [],
+      "base": "viande_crue",
       "composants": {
-        "fixations": {
-          "materiau": "cobalt",
-          "qualite": 1.35154017806053
-        },
-        "manche": {
-          "materiau": "cuivre",
-          "qualite": 1.53834736347198
-        },
-        "tete": {
-          "materiau": "manganese",
-          "qualite": 1.39109855890274
+
+      },
+      "elements": {
+
+      },
+      "espece": "scorpion",
+      "materiau": "",
+      "nom": "Viande crue",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "consommable",
+        "empilable",
+        "viande",
+        "loot"
+      ],
+      "type": "consommable"
+    },
+    {
+      "affixes": [],
+      "base": "dent",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Dent",
+      "poids": 0.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "consommable",
+        "empilable",
+        "ingredient",
+        "partie",
+        "loot"
+      ],
+      "type": "consommable"
+    },
+    {
+      "affixes": [],
+      "base": "manuel",
+      "composants": {
+
+      },
+      "elements": {
+        "feu": 1.0
+      },
+      "espece": "",
+      "materiau": "papier",
+      "nom": "Livre : Méditation (difficulté 15)",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "",
+      "tags": [
+        "livre",
+        "manuel",
+        "loot"
+      ],
+      "type": "manuel"
+    },
+    {
+      "affixes": [],
+      "base": "craft_anneau",
+      "composants": {
+        "monture": {
+          "materiau": "etain",
+          "qualite": 1.25020064910253
         }
       },
       "elements": {
         "metal": 1.0
       },
       "espece": "",
-      "materiau": "manganese",
-      "nom": "Lance en Manganèse (excellent 1.85)",
-      "poids": 4.56,
-      "qualite": 1.85,
+      "materiau": "etain",
+      "nom": "Anneau en Étain (bon 1.59)",
+      "poids": 1.0,
+      "qualite": 1.59,
       "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "main_principale",
+      "rarete": "commun",
+      "slot": "anneau",
       "tags": [
-        "arme",
+        "bijou",
         "assemble",
         "loot"
       ],
-      "type": "arme"
+      "type": "bijou"
     },
     {
-      "affixes": [
-        "decl_zone_saigne"
+      "affixes": [],
+      "base": "manuel",
+      "composants": {
+
+      },
+      "elements": {
+        "feu": 1.0
+      },
+      "espece": "",
+      "materiau": "papier",
+      "nom": "Livre : Précipitation (difficulté 15)",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "",
+      "tags": [
+        "livre",
+        "manuel",
+        "loot"
       ],
-      "base": "craft_lance",
+      "type": "manuel"
+    },
+    {
+      "affixes": [],
+      "base": "materiau_brut",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Matériau brut",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "materiau",
+        "empilable",
+        "loot"
+      ],
+      "type": "materiau"
+    },
+    {
+      "affixes": [],
+      "base": "manuel",
+      "composants": {
+
+      },
+      "elements": {
+        "feu": 1.0
+      },
+      "espece": "",
+      "materiau": "papier",
+      "nom": "Livre : Anneau (difficulté 15)",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "",
+      "tags": [
+        "livre",
+        "manuel",
+        "loot"
+      ],
+      "type": "manuel"
+    },
+    {
+      "affixes": [],
+      "base": "craft_jambieres",
       "composants": {
         "fixations": {
           "materiau": "etain",
-          "qualite": 1.54263925552368
-        },
-        "manche": {
-          "materiau": "palmier",
-          "qualite": 1.6767053604126
-        },
-        "tete": {
-          "materiau": "manganese",
-          "qualite": 1.38380491733551
-        }
-      },
-      "elements": {
-        "bois": 0.25,
-        "metal": 0.75
-      },
-      "espece": "",
-      "materiau": "manganese",
-      "nom": "Lance en Manganèse (excellent 1.88)",
-      "poids": 4.56,
-      "qualite": 1.88,
-      "quantite": 1,
-      "rarete": "rare",
-      "slot": "main_principale",
-      "tags": [
-        "arme",
-        "assemble",
-        "loot"
-      ],
-      "type": "arme"
-    },
-    {
-      "affixes": [
-        "cond_pv_bas"
-      ],
-      "base": "craft_masse",
-      "composants": {
-        "fixations": {
-          "materiau": "fer",
-          "qualite": 1.6809321641922
-        },
-        "manche": {
-          "materiau": "acier",
-          "qualite": 1.35796049237251
-        },
-        "tete": {
-          "materiau": "conglomerat",
-          "qualite": 1.35744515061378
-        }
-      },
-      "elements": {
-        "metal": 0.3,
-        "terre": 0.7
-      },
-      "espece": "",
-      "materiau": "conglomerat",
-      "nom": "Masse en Conglomérat (excellent 1.79)",
-      "poids": 6.6,
-      "qualite": 1.79,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "main_principale",
-      "tags": [
-        "arme",
-        "assemble",
-        "loot"
-      ],
-      "type": "arme"
-    },
-    {
-      "affixes": [
-        "cadence_des"
-      ],
-      "base": "craft_epee",
-      "composants": {
-        "fixations": {
-          "materiau": "coton",
-          "qualite": 1.56226068735123
-        },
-        "manche": {
-          "materiau": "cobalt",
-          "qualite": 1.52007561922073
-        },
-        "tete": {
-          "materiau": "fer",
-          "qualite": 1.68782365322113
-        }
-      },
-      "elements": {
-        "bois": 0.05,
-        "metal": 0.95
-      },
-      "espece": "",
-      "materiau": "fer",
-      "nom": "Épée en Fer (chef-d'œuvre 2.13)",
-      "poids": 3.84,
-      "qualite": 2.13,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "main_principale",
-      "tags": [
-        "arme",
-        "assemble",
-        "loot"
-      ],
-      "type": "arme"
-    },
-    {
-      "affixes": [],
-      "base": "peau",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "troll",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "defense",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "troll",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "commun",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "ingredient",
-        "partie",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [],
-      "base": "proto_bouclier",
-      "composants": {
-
-      },
-      "elements": {
-        "bois": 1.0
-      },
-      "espece": "",
-      "materiau": "chene",
-      "nom": "Bouclier",
-      "poids": 4.8,
-      "qualite": 1.0,
-      "quantite": 1,
-      "rarete": "rare",
-      "slot": "main_secondaire",
-      "tags": [
-        "bouclier",
-        "prototype",
-        "loot"
-      ],
-      "type": "bouclier"
-    },
-    {
-      "affixes": [],
-      "base": "chou",
-      "composants": {
-
-      },
-      "elements": {
-
-      },
-      "espece": "",
-      "materiau": "",
-      "nom": "Fiole {apparence}",
-      "poids": 0.0,
-      "qualite": 0.0,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "",
-      "tags": [
-        "consommable",
-        "empilable",
-        "culture",
-        "ingredient",
-        "loot"
-      ],
-      "type": "consommable"
-    },
-    {
-      "affixes": [
-        "cond_nuit",
-        "cadence_saignee"
-      ],
-      "base": "craft_masse",
-      "composants": {
-        "fixations": {
-          "materiau": "titane",
-          "qualite": 1.38936942815781
-        },
-        "manche": {
-          "materiau": "zinc",
-          "qualite": 1.69483333826065
-        },
-        "tete": {
-          "materiau": "diorite",
-          "qualite": 1.59275633096695
-        }
-      },
-      "elements": {
-        "metal": 0.3,
-        "terre": 0.7
-      },
-      "espece": "",
-      "materiau": "diorite",
-      "nom": "Masse en Diorite (chef-d'œuvre 2.09)",
-      "poids": 6.6,
-      "qualite": 2.09,
-      "quantite": 1,
-      "rarete": "rare",
-      "slot": "main_principale",
-      "tags": [
-        "arme",
-        "assemble",
-        "loot"
-      ],
-      "type": "arme"
-    },
-    {
-      "affixes": [
-        "cond_corruption",
-        "cond_profondeur"
-      ],
-      "base": "craft_epee",
-      "composants": {
-        "fixations": {
-          "materiau": "nickel",
-          "qualite": 1.54720795154572
-        },
-        "manche": {
-          "materiau": "manganese",
-          "qualite": 1.5828360915184
-        },
-        "tete": {
-          "materiau": "platine",
-          "qualite": 1.3959901034832
-        }
-      },
-      "elements": {
-        "metal": 1.0
-      },
-      "espece": "",
-      "materiau": "platine",
-      "nom": "Épée en Platine (excellent 1.89)",
-      "poids": 3.84,
-      "qualite": 1.89,
-      "quantite": 1,
-      "rarete": "rare",
-      "slot": "main_principale",
-      "tags": [
-        "arme",
-        "assemble",
-        "loot"
-      ],
-      "type": "arme"
-    },
-    {
-      "affixes": [
-        "cond_element_cible"
-      ],
-      "base": "craft_dague",
-      "composants": {
-        "fixations": {
-          "materiau": "manganese",
-          "qualite": 1.58705341815948
-        },
-        "manche": {
-          "materiau": "aulne",
-          "qualite": 1.29557392001152
-        },
-        "tete": {
-          "materiau": "tungstene",
-          "qualite": 1.3651075065136
-        }
-      },
-      "elements": {
-        "bois": 0.25,
-        "metal": 0.75
-      },
-      "espece": "",
-      "materiau": "tungstene",
-      "nom": "Dague en Tungstène (excellent 1.77)",
-      "poids": 1.92,
-      "qualite": 1.77,
-      "quantite": 1,
-      "rarete": "rare",
-      "slot": "main_principale",
-      "tags": [
-        "arme",
-        "assemble",
-        "loot"
-      ],
-      "type": "arme"
-    },
-    {
-      "affixes": [],
-      "base": "proto_bouclier",
-      "composants": {
-
-      },
-      "elements": {
-        "bois": 1.0
-      },
-      "espece": "",
-      "materiau": "chene",
-      "nom": "Bouclier",
-      "poids": 4.8,
-      "qualite": 1.0,
-      "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "main_secondaire",
-      "tags": [
-        "bouclier",
-        "prototype",
-        "loot"
-      ],
-      "type": "bouclier"
-    },
-    {
-      "affixes": [
-        "decl_touche_etourdit"
-      ],
-      "base": "craft_cuirasse",
-      "composants": {
-        "fixations": {
-          "materiau": "argent",
-          "qualite": 1.60176694393158
+          "qualite": 1.13373255729675
         },
         "plaque": {
-          "materiau": "cuivre",
-          "qualite": 1.56086683273315
+          "materiau": "nickel",
+          "qualite": 1.08263172705968
         },
         "sangles": {
-          "materiau": "cuir",
-          "qualite": 1.37005081772804
+          "materiau": "coton",
+          "qualite": 1.14081042011579
         }
       },
       "elements": {
@@ -2683,13 +1487,13 @@
         "metal": 0.8
       },
       "espece": "",
-      "materiau": "cuivre",
-      "nom": "Cuirasse de plaque en Cuivre (excellent 1.98)",
-      "poids": 6.0,
-      "qualite": 1.98,
+      "materiau": "nickel",
+      "nom": "Jambières de plaque en Nickel (bon 1.27)",
+      "poids": 4.7285,
+      "qualite": 1.27,
       "quantite": 1,
-      "rarete": "inhabituel",
-      "slot": "cuirasse",
+      "rarete": "commun",
+      "slot": "jambieres",
       "tags": [
         "armure",
         "assemble",
@@ -2698,78 +1502,216 @@
       "type": "armure"
     },
     {
-      "affixes": [
-        "wuxing_segment"
-      ],
-      "base": "craft_lance",
+      "affixes": [],
+      "base": "station_atelier_tissage",
       "composants": {
-        "fixations": {
-          "materiau": "titane",
-          "qualite": 1.35613042116165
-        },
-        "manche": {
-          "materiau": "plomb",
-          "qualite": 1.49942278862
-        },
-        "tete": {
-          "materiau": "tungstene",
-          "qualite": 1.4295380115509
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Atelier de tissage",
+      "poids": 40.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "",
+      "tags": [
+        "station",
+        "portative",
+        "loot"
+      ],
+      "type": "station"
+    },
+    {
+      "affixes": [],
+      "base": "grimoire",
+      "composants": {
+
+      },
+      "elements": {
+        "feu": 1.0
+      },
+      "espece": "",
+      "materiau": "papier",
+      "nom": "Livre : Silence (difficulté 15)",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "livre",
+        "grimoire",
+        "loot"
+      ],
+      "type": "grimoire"
+    },
+    {
+      "affixes": [],
+      "base": "craft_amulette",
+      "composants": {
+        "monture": {
+          "materiau": "fer",
+          "qualite": 1.17954148848852
         }
       },
       "elements": {
         "metal": 1.0
       },
       "espece": "",
-      "materiau": "tungstene",
-      "nom": "Lance en Tungstène (excellent 1.88)",
-      "poids": 4.56,
-      "qualite": 1.88,
+      "materiau": "fer",
+      "nom": "Amulette en Fer (bon 1.21)",
+      "poids": 1.0,
+      "qualite": 1.21,
       "quantite": 1,
-      "rarete": "rare",
-      "slot": "main_principale",
+      "rarete": "commun",
+      "slot": "amulette",
       "tags": [
-        "arme",
+        "bijou",
         "assemble",
         "loot"
       ],
-      "type": "arme"
+      "type": "bijou"
+    },
+    {
+      "affixes": [],
+      "base": "materiau_brut",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Matériau brut",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "rare",
+      "slot": "",
+      "tags": [
+        "materiau",
+        "empilable",
+        "loot"
+      ],
+      "type": "materiau"
     },
     {
       "affixes": [
-        "decl_zone_etourdit"
+        "passif_faim"
       ],
-      "base": "craft_epee",
+      "base": "craft_amulette",
       "composants": {
-        "fixations": {
-          "materiau": "bronze",
-          "qualite": 1.63543260097504
-        },
-        "manche": {
-          "materiau": "tungstene",
-          "qualite": 1.33597058057785
-        },
-        "tete": {
-          "materiau": "cobalt",
-          "qualite": 1.57369422912598
+        "monture": {
+          "materiau": "nickel",
+          "qualite": 1.21881930317198
         }
       },
       "elements": {
         "metal": 1.0
       },
       "espece": "",
-      "materiau": "cobalt",
-      "nom": "Épée en Cobalt (excellent 1.97)",
-      "poids": 3.84,
-      "qualite": 1.97,
+      "materiau": "nickel",
+      "nom": "Amulette en Nickel (bon 1.58)",
+      "poids": 1.0,
+      "qualite": 1.58,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "amulette",
+      "tags": [
+        "bijou",
+        "assemble",
+        "loot"
+      ],
+      "type": "bijou"
+    },
+    {
+      "affixes": [
+        "cond_profondeur"
+      ],
+      "base": "craft_pioche",
+      "composants": {
+        "fixations": {
+          "materiau": "fer",
+          "qualite": 1.44825400624956
+        },
+        "manche": {
+          "materiau": "aluminium",
+          "qualite": 1.32480985777719
+        },
+        "tete": {
+          "materiau": "manganese",
+          "qualite": 1.21054936306817
+        }
+      },
+      "elements": {
+        "metal": 1.0
+      },
+      "espece": "",
+      "materiau": "manganese",
+      "nom": "Pioche en Manganèse (excellent 1.63)",
+      "poids": 2.5,
+      "qualite": 1.63,
       "quantite": 1,
       "rarete": "inhabituel",
       "slot": "main_principale",
       "tags": [
-        "arme",
+        "outil",
         "assemble",
         "loot"
       ],
-      "type": "arme"
+      "type": "outil"
+    },
+    {
+      "affixes": [],
+      "base": "station_cuisine",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Cuisine",
+      "poids": 50.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "station",
+        "portative",
+        "loot"
+      ],
+      "type": "station"
+    },
+    {
+      "affixes": [],
+      "base": "composant",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Composant en  (correct 1.00)",
+      "poids": 1.0,
+      "qualite": 1.0,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "",
+      "tags": [
+        "composant",
+        "loot"
+      ],
+      "type": "composant"
     },
     {
       "affixes": [],
@@ -2782,7 +1724,7 @@
       },
       "espece": "troll",
       "materiau": "",
-      "nom": "Fiole {apparence}",
+      "nom": "Peau",
       "poids": 0.0,
       "qualite": 0.0,
       "quantite": 1,
@@ -2808,6 +1750,55 @@
       },
       "espece": "troll",
       "materiau": "",
+      "nom": "Dent",
+      "poids": 0.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "consommable",
+        "empilable",
+        "ingredient",
+        "partie",
+        "loot"
+      ],
+      "type": "consommable"
+    },
+    {
+      "affixes": [],
+      "base": "composant",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Composant en  (correct 1.00)",
+      "poids": 1.0,
+      "qualite": 1.0,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "",
+      "tags": [
+        "composant",
+        "loot"
+      ],
+      "type": "composant"
+    },
+    {
+      "affixes": [],
+      "base": "os",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
       "nom": "Fiole {apparence}",
       "poids": 0.0,
       "qualite": 0.0,
@@ -2822,6 +1813,1041 @@
         "loot"
       ],
       "type": "consommable"
+    },
+    {
+      "affixes": [],
+      "base": "materiau_brut",
+      "composants": {
+
+      },
+      "elements": {
+        "bois": 1.0
+      },
+      "espece": "",
+      "materiau": "os",
+      "nom": "Matériau brut",
+      "poids": 1.5,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "materiau",
+        "empilable",
+        "loot"
+      ],
+      "type": "materiau"
+    },
+    {
+      "affixes": [
+        "cadence_riposte"
+      ],
+      "base": "craft_bottes",
+      "composants": {
+        "fixations": {
+          "materiau": "argent",
+          "qualite": 1.26829870258059
+        },
+        "plaque": {
+          "materiau": "cobalt",
+          "qualite": 1.11093978370939
+        },
+        "sangles": {
+          "materiau": "coton",
+          "qualite": 1.47796966348376
+        }
+      },
+      "elements": {
+        "bois": 0.2,
+        "metal": 0.8
+      },
+      "espece": "",
+      "materiau": "cobalt",
+      "nom": "Bottes de plaque en Cobalt (bon 1.55)",
+      "poids": 2.3765,
+      "qualite": 1.55,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "bottes",
+      "tags": [
+        "armure",
+        "assemble",
+        "loot"
+      ],
+      "type": "armure"
+    },
+    {
+      "affixes": [],
+      "base": "craft_brassards",
+      "composants": {
+        "fixations": {
+          "materiau": "acier",
+          "qualite": 1.45379345757621
+        },
+        "plaque": {
+          "materiau": "antimoine",
+          "qualite": 1.28071556772505
+        },
+        "sangles": {
+          "materiau": "lin",
+          "qualite": 1.36256953648158
+        }
+      },
+      "elements": {
+        "bois": 0.2,
+        "metal": 0.8
+      },
+      "espece": "",
+      "materiau": "antimoine",
+      "nom": "Brassards de plaque en Antimoine (bon 1.59)",
+      "poids": 3.10275,
+      "qualite": 1.59,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "brassards",
+      "tags": [
+        "armure",
+        "assemble",
+        "loot"
+      ],
+      "type": "armure"
+    },
+    {
+      "affixes": [],
+      "base": "craft_dague",
+      "composants": {
+        "fixations": {
+          "materiau": "cobalt",
+          "qualite": 1.37099596432277
+        },
+        "manche": {
+          "materiau": "etain",
+          "qualite": 1.16061621052878
+        },
+        "tete": {
+          "materiau": "cobalt",
+          "qualite": 1.31062158516475
+        }
+      },
+      "elements": {
+        "metal": 1.0
+      },
+      "espece": "",
+      "materiau": "cobalt",
+      "nom": "Dague en Cobalt (excellent 1.66)",
+      "poids": 1.92,
+      "qualite": 1.66,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "main_principale",
+      "tags": [
+        "arme",
+        "assemble",
+        "loot"
+      ],
+      "type": "arme"
+    },
+    {
+      "affixes": [],
+      "base": "composant",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Composant en  (correct 1.00)",
+      "poids": 1.0,
+      "qualite": 1.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "composant",
+        "loot"
+      ],
+      "type": "composant"
+    },
+    {
+      "affixes": [
+        "meca_capacite"
+      ],
+      "base": "craft_anneau",
+      "composants": {
+        "monture": {
+          "materiau": "bismuth",
+          "qualite": 1.42856597900391
+        }
+      },
+      "elements": {
+        "metal": 1.0
+      },
+      "espece": "",
+      "materiau": "bismuth",
+      "nom": "Anneau en Bismuth (excellent 1.86)",
+      "poids": 1.0,
+      "qualite": 1.86,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "anneau",
+      "tags": [
+        "bijou",
+        "assemble",
+        "loot"
+      ],
+      "type": "bijou"
+    },
+    {
+      "affixes": [],
+      "base": "composant",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Composant en  (correct 1.00)",
+      "poids": 1.0,
+      "qualite": 1.0,
+      "quantite": 1,
+      "rarete": "rare",
+      "slot": "",
+      "tags": [
+        "composant",
+        "loot"
+      ],
+      "type": "composant"
+    },
+    {
+      "affixes": [],
+      "base": "proto_fleches",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Flèches",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 20,
+      "rarete": "inhabituel",
+      "slot": "carquois",
+      "tags": [
+        "munition",
+        "prototype",
+        "loot"
+      ],
+      "type": "munition"
+    },
+    {
+      "affixes": [
+        "decl_touche_etourdit"
+      ],
+      "base": "craft_cuirasse",
+      "composants": {
+        "fixations": {
+          "materiau": "manganese",
+          "qualite": 1.61365535524156
+        },
+        "plaque": {
+          "materiau": "chrome",
+          "qualite": 1.64991451634301
+        },
+        "sangles": {
+          "materiau": "soie",
+          "qualite": 1.65857073995802
+        }
+      },
+      "elements": {
+        "bois": 0.2,
+        "metal": 0.8
+      },
+      "espece": "",
+      "materiau": "chrome",
+      "nom": "Cuirasse de plaque en Chrome (chromite) (chef-d'œuvre 2.14)",
+      "poids": 8.162,
+      "qualite": 2.14,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "cuirasse",
+      "tags": [
+        "armure",
+        "assemble",
+        "loot"
+      ],
+      "type": "armure"
+    },
+    {
+      "affixes": [
+        "meca_endurance_max",
+        "passif_vitesse",
+        "passif_poids"
+      ],
+      "base": "craft_amulette",
+      "composants": {
+        "monture": {
+          "materiau": "cuivre",
+          "qualite": 1.59451320436266
+        }
+      },
+      "elements": {
+        "metal": 1.0
+      },
+      "espece": "",
+      "materiau": "cuivre",
+      "nom": "Amulette en Cuivre (chef-d'œuvre 2.07)",
+      "poids": 1.0,
+      "qualite": 2.07,
+      "quantite": 1,
+      "rarete": "exceptionnel",
+      "slot": "amulette",
+      "tags": [
+        "bijou",
+        "assemble",
+        "loot"
+      ],
+      "type": "bijou"
+    },
+    {
+      "affixes": [],
+      "base": "dent",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Dent",
+      "poids": 0.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "consommable",
+        "empilable",
+        "ingredient",
+        "partie",
+        "loot"
+      ],
+      "type": "consommable"
+    },
+    {
+      "affixes": [
+        "cond_pv_bas"
+      ],
+      "base": "craft_epee",
+      "composants": {
+        "fixations": {
+          "materiau": "cuivre",
+          "qualite": 1.23007931974199
+        },
+        "manche": {
+          "materiau": "os",
+          "qualite": 1.66068249278598
+        },
+        "tete": {
+          "materiau": "plomb",
+          "qualite": 1.633509516716
+        }
+      },
+      "elements": {
+        "bois": 0.25,
+        "metal": 0.75
+      },
+      "espece": "",
+      "materiau": "plomb",
+      "nom": "Épée en Plomb (chef-d'œuvre 2.10)",
+      "poids": 3.84,
+      "qualite": 2.1,
+      "quantite": 1,
+      "rarete": "rare",
+      "slot": "main_principale",
+      "tags": [
+        "arme",
+        "assemble",
+        "loot"
+      ],
+      "type": "arme"
+    },
+    {
+      "affixes": [],
+      "base": "peau",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "serpent_geant",
+      "materiau": "",
+      "nom": "Peau",
+      "poids": 0.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "consommable",
+        "empilable",
+        "ingredient",
+        "partie",
+        "loot"
+      ],
+      "type": "consommable"
+    },
+    {
+      "affixes": [],
+      "base": "peau",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "serpent_geant",
+      "materiau": "",
+      "nom": "Peau",
+      "poids": 0.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "consommable",
+        "empilable",
+        "ingredient",
+        "partie",
+        "loot"
+      ],
+      "type": "consommable"
+    },
+    {
+      "affixes": [],
+      "base": "griffe",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Fiole {apparence}",
+      "poids": 0.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "consommable",
+        "empilable",
+        "ingredient",
+        "partie",
+        "loot"
+      ],
+      "type": "consommable"
+    },
+    {
+      "affixes": [],
+      "base": "manuel",
+      "composants": {
+
+      },
+      "elements": {
+        "feu": 1.0
+      },
+      "espece": "",
+      "materiau": "papier",
+      "nom": "Livre : Diagonale (difficulté 30)",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "",
+      "tags": [
+        "livre",
+        "manuel",
+        "loot"
+      ],
+      "type": "manuel"
+    },
+    {
+      "affixes": [],
+      "base": "ecaille",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "serpent_geant",
+      "materiau": "",
+      "nom": "Écaille",
+      "poids": 0.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "consommable",
+        "empilable",
+        "ingredient",
+        "partie",
+        "loot"
+      ],
+      "type": "consommable"
+    },
+    {
+      "affixes": [],
+      "base": "os",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Fiole {apparence}",
+      "poids": 0.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "consommable",
+        "empilable",
+        "ingredient",
+        "partie",
+        "loot"
+      ],
+      "type": "consommable"
+    },
+    {
+      "affixes": [],
+      "base": "materiau_brut",
+      "composants": {
+
+      },
+      "elements": {
+        "bois": 1.0
+      },
+      "espece": "",
+      "materiau": "os",
+      "nom": "Matériau brut",
+      "poids": 1.5,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "materiau",
+        "empilable",
+        "loot"
+      ],
+      "type": "materiau"
+    },
+    {
+      "affixes": [],
+      "base": "composant",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Composant en  (correct 1.00)",
+      "poids": 1.0,
+      "qualite": 1.0,
+      "quantite": 1,
+      "rarete": "exceptionnel",
+      "slot": "",
+      "tags": [
+        "composant",
+        "loot"
+      ],
+      "type": "composant"
+    },
+    {
+      "affixes": [],
+      "base": "torche",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Torche",
+      "poids": 1.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "exceptionnel",
+      "slot": "main_secondaire",
+      "tags": [
+        "outil",
+        "lumiere",
+        "loot"
+      ],
+      "type": "outil"
+    },
+    {
+      "affixes": [],
+      "base": "dent",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "lindworm",
+      "materiau": "",
+      "nom": "Dent",
+      "poids": 0.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "consommable",
+        "empilable",
+        "ingredient",
+        "partie",
+        "loot"
+      ],
+      "type": "consommable"
+    },
+    {
+      "affixes": [],
+      "base": "defense",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "lindworm",
+      "materiau": "",
+      "nom": "Défense",
+      "poids": 0.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "",
+      "tags": [
+        "consommable",
+        "empilable",
+        "ingredient",
+        "partie",
+        "loot"
+      ],
+      "type": "consommable"
+    },
+    {
+      "affixes": [
+        "passif_poids"
+      ],
+      "base": "craft_cuirasse",
+      "composants": {
+        "fixations": {
+          "materiau": "platine",
+          "qualite": 1.30630336867438
+        },
+        "plaque": {
+          "materiau": "fer",
+          "qualite": 1.51714821656545
+        },
+        "sangles": {
+          "materiau": "lin",
+          "qualite": 1.49232530593872
+        }
+      },
+      "elements": {
+        "bois": 0.2,
+        "metal": 0.8
+      },
+      "espece": "",
+      "materiau": "fer",
+      "nom": "Cuirasse de plaque en Fer (excellent 1.86)",
+      "poids": 7.8925,
+      "qualite": 1.86,
+      "quantite": 1,
+      "rarete": "rare",
+      "slot": "cuirasse",
+      "tags": [
+        "armure",
+        "assemble",
+        "loot"
+      ],
+      "type": "armure"
+    },
+    {
+      "affixes": [],
+      "base": "ble",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Fiole {apparence}",
+      "poids": 0.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "",
+      "tags": [
+        "consommable",
+        "empilable",
+        "culture",
+        "ingredient",
+        "loot"
+      ],
+      "type": "consommable"
+    },
+    {
+      "affixes": [
+        "meca_allonge",
+        "cadence_element"
+      ],
+      "base": "craft_epee",
+      "composants": {
+        "fixations": {
+          "materiau": "cuivre",
+          "qualite": 1.45942129029168
+        },
+        "manche": {
+          "materiau": "cuivre",
+          "qualite": 1.47492245833079
+        },
+        "tete": {
+          "materiau": "bismuth",
+          "qualite": 1.61849427223206
+        }
+      },
+      "elements": {
+        "metal": 1.0
+      },
+      "espece": "",
+      "materiau": "bismuth",
+      "nom": "Épée en Bismuth (chef-d'œuvre 2.00)",
+      "poids": 3.84,
+      "qualite": 2.0,
+      "quantite": 1,
+      "rarete": "rare",
+      "slot": "main_principale",
+      "tags": [
+        "arme",
+        "assemble",
+        "loot"
+      ],
+      "type": "arme"
+    },
+    {
+      "affixes": [
+        "passif_vitesse"
+      ],
+      "base": "craft_anneau",
+      "composants": {
+        "monture": {
+          "materiau": "cuivre",
+          "qualite": 1.51148088773092
+        }
+      },
+      "elements": {
+        "metal": 1.0
+      },
+      "espece": "",
+      "materiau": "cuivre",
+      "nom": "Anneau en Cuivre (excellent 1.96)",
+      "poids": 1.0,
+      "qualite": 1.96,
+      "quantite": 1,
+      "rarete": "rare",
+      "slot": "anneau",
+      "tags": [
+        "bijou",
+        "assemble",
+        "loot"
+      ],
+      "type": "bijou"
+    },
+    {
+      "affixes": [
+        "cond_nuit",
+        "wuxing_ajout"
+      ],
+      "base": "craft_jambieres",
+      "composants": {
+        "fixations": {
+          "materiau": "platine",
+          "qualite": 1.51395213603973
+        },
+        "plaque": {
+          "materiau": "cobalt",
+          "qualite": 1.34884375333786
+        },
+        "sangles": {
+          "materiau": "lin",
+          "qualite": 1.44539272785187
+        }
+      },
+      "elements": {
+        "bois": 0.2,
+        "metal": 0.8
+      },
+      "espece": "",
+      "materiau": "cobalt",
+      "nom": "Jambières de plaque en Cobalt (excellent 1.79)",
+      "poids": 5.0225,
+      "qualite": 1.79,
+      "quantite": 1,
+      "rarete": "rare",
+      "slot": "jambieres",
+      "tags": [
+        "armure",
+        "assemble",
+        "loot"
+      ],
+      "type": "armure"
+    },
+    {
+      "affixes": [
+        "passif_surchauffe"
+      ],
+      "base": "craft_amulette",
+      "composants": {
+        "monture": {
+          "materiau": "platine",
+          "qualite": 1.30841401219368
+        }
+      },
+      "elements": {
+        "metal": 1.0
+      },
+      "espece": "",
+      "materiau": "platine",
+      "nom": "Amulette en Platine (excellent 1.70)",
+      "poids": 1.0,
+      "qualite": 1.7,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "amulette",
+      "tags": [
+        "bijou",
+        "assemble",
+        "loot"
+      ],
+      "type": "bijou"
+    },
+    {
+      "affixes": [],
+      "base": "craft_lance",
+      "composants": {
+        "fixations": {
+          "materiau": "argent",
+          "qualite": 1.62663048505783
+        },
+        "manche": {
+          "materiau": "platine",
+          "qualite": 1.33275067806244
+        },
+        "tete": {
+          "materiau": "platine",
+          "qualite": 1.57962763309479
+        }
+      },
+      "elements": {
+        "metal": 1.0
+      },
+      "espece": "",
+      "materiau": "platine",
+      "nom": "Lance en Platine (excellent 1.98)",
+      "poids": 4.56,
+      "qualite": 1.98,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "main_principale",
+      "tags": [
+        "arme",
+        "assemble",
+        "loot"
+      ],
+      "type": "arme"
+    },
+    {
+      "affixes": [],
+      "base": "craft_bottes",
+      "composants": {
+        "fixations": {
+          "materiau": "bronze",
+          "qualite": 1.59539258480072
+        },
+        "plaque": {
+          "materiau": "nickel",
+          "qualite": 1.4389026761055
+        },
+        "sangles": {
+          "materiau": "lin",
+          "qualite": 1.51774728298187
+        }
+      },
+      "elements": {
+        "bois": 0.2,
+        "metal": 0.8
+      },
+      "espece": "",
+      "materiau": "nickel",
+      "nom": "Bottes de plaque en Nickel (excellent 1.89)",
+      "poids": 2.38875,
+      "qualite": 1.89,
+      "quantite": 1,
+      "rarete": "commun",
+      "slot": "bottes",
+      "tags": [
+        "armure",
+        "assemble",
+        "loot"
+      ],
+      "type": "armure"
+    },
+    {
+      "affixes": [
+        "wuxing_purete"
+      ],
+      "base": "craft_masse",
+      "composants": {
+        "fixations": {
+          "materiau": "aluminium",
+          "qualite": 1.3158263862133
+        },
+        "manche": {
+          "materiau": "bismuth",
+          "qualite": 1.44726741313934
+        },
+        "tete": {
+          "materiau": "andesite",
+          "qualite": 1.52584308385849
+        }
+      },
+      "elements": {
+        "metal": 0.3,
+        "terre": 0.7
+      },
+      "espece": "",
+      "materiau": "andesite",
+      "nom": "Masse en Andésite (excellent 1.94)",
+      "poids": 6.6,
+      "qualite": 1.94,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "main_principale",
+      "tags": [
+        "arme",
+        "assemble",
+        "loot"
+      ],
+      "type": "arme"
+    },
+    {
+      "affixes": [],
+      "base": "meuble_terrarium",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Terrarium",
+      "poids": 8.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "",
+      "tags": [
+        "meuble",
+        "posable",
+        "loot"
+      ],
+      "type": "meuble"
+    },
+    {
+      "affixes": [
+        "decl_mise_a_mort"
+      ],
+      "base": "craft_masse",
+      "composants": {
+        "fixations": {
+          "materiau": "bismuth",
+          "qualite": 1.38112324476242
+        },
+        "manche": {
+          "materiau": "bismuth",
+          "qualite": 1.63459324836731
+        },
+        "tete": {
+          "materiau": "bismuth",
+          "qualite": 1.42478004097939
+        }
+      },
+      "elements": {
+        "metal": 1.0
+      },
+      "espece": "",
+      "materiau": "bismuth",
+      "nom": "Masse en Bismuth (excellent 1.92)",
+      "poids": 6.6,
+      "qualite": 1.92,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "main_principale",
+      "tags": [
+        "arme",
+        "assemble",
+        "loot"
+      ],
+      "type": "arme"
+    },
+    {
+      "affixes": [],
+      "base": "station_tailleur_de_pierre",
+      "composants": {
+
+      },
+      "elements": {
+
+      },
+      "espece": "",
+      "materiau": "",
+      "nom": "Tailleur de pierre",
+      "poids": 50.0,
+      "qualite": 0.0,
+      "quantite": 1,
+      "rarete": "inhabituel",
+      "slot": "",
+      "tags": [
+        "station",
+        "portative",
+        "loot"
+      ],
+      "type": "station"
     }
   ]
 }

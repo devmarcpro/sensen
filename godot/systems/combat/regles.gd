@@ -79,8 +79,24 @@ func poids_objet(it: Dictionary, fonctionnalites: Dictionary) -> float:
 			return float(GameData.catalogues.stations.get(str(it.get("station", "")), {}).get("poids", r.poids.defaut))
 		"meuble":
 			return float(r.poids.meuble)
-		"armure":
-			return float(r.poids.armure)
+		"armure", "bouclier":
+			# Une armure assemblée pèse ses composants (designer 2026-09-02) : la densité de chacun,
+			# pondérée par sa part, multipliée par le volume du slot. La constante reste le repli.
+			var comps: Dictionary = it.get("composants", {})
+			if comps.is_empty():
+				return float(r.poids.armure)
+			var parts: Dictionary = r.craft.poids.get(str(it.get("type", "armure")), r.craft.poids.get("armure", {}))
+			var dens := 0.0
+			var somme := 0.0
+			for sc: String in comps.keys():
+				var w := float(parts.get(sc, 1.0))
+				var mat: Dictionary = GameData.catalogues.materials.get(str(comps[sc].get("materiau", "")), {})
+				dens += float(mat.get("stats", {}).get("densite", 4)) * w
+				somme += w
+			if somme <= 0.0:
+				return float(r.poids.armure)
+			var vol := float(r.poids.get("volume_slot", {}).get(str(it.get("equip_slot", "")), 1.0))
+			return maxf(0.2, dens / somme / float(r.poids.densite_div) * vol * float(r.poids.get("facteur_composants", 1.4)))
 		_:
 			var f: Dictionary = fonctionnalites.get(str(it.get("functionality", "")), {})
 			return float(f.get("poids_reference", r.poids.defaut))

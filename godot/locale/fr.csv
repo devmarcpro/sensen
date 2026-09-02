@@ -522,8 +522,8 @@ journal.brulure_eteinte,l'eau éteint la brûlure
 option.segment_prefere,"Poser le segment : {element}"
 option.segment_dominant,Segment : le dominant
 ui.segment_prefere," · segment {element}"
-affixe.passif_poids.nom,"de portage (+{n} de capacité)"
-affixe.passif_faim.nom,"de sobriété (faim ×{mult} %)"
+affixe.passif_poids.nom,"{base} de portage (+{n} de capacité)"
+affixe.passif_faim.nom,"{base} de sobriété (faim ×{mult} %)"
 journal.immunite_poison,le poison glisse sur toi
 item.arme_fantome.name,Lame fantôme
 option.arme_fantome,"Invoquer une lame de {element}"
@@ -1559,6 +1559,10 @@ item.craft_masse.name,Masse
 item.craft_lance.name,Lance
 item.craft_pioche.name,Pioche
 item.craft_casque.name,Casque
+item.craft_bouclier.name,Bouclier
+item.craft_anneau.name,Anneau
+item.craft_amulette.name,Amulette
+component.monture.name,Monture
 item.craft_brassards.name,Brassards
 item.craft_bottes.name,Bottes
 item.cape.name,Cape
@@ -2058,6 +2062,7 @@ journal.triche,"Triche : {action}"
 nom.de_creature,{base} de {creature}
 nom.matiere_espece,"{materiau} de {creature}"
 journal.statue,Une statue de {nom} tombe — trophée rare
+journal.bourse,"{nom} ramasse {or} pièces"
 status.seve.name,Sève
 status.aveugle.name,Aveuglé
 status.silence.name,Silence

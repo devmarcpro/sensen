@@ -192,15 +192,25 @@ func _tirer_parametres(a: Dictionary, budget: float, rng: RandomNumberGenerator,
 
 
 ## Une base d'objet tirée selon les poids de catégorie de `contenants` (armes, armures, bijoux…).
-func _base_pour(rng: RandomNumberGenerator) -> String:
+func _base_pour(rng: RandomNumberGenerator, profondeur: int = 99, affixable: bool = false) -> String:
+	# La profondeur décide de ce qui PEUT sortir (designer 2026-09-02) : chaque catégorie porte sa
+	# `profondeur_min`. Les stations, les meubles et les bijoux se méritent en descendant.
 	var lr: Dictionary = regles.contenants
 	var cats: Dictionary = lr.categories
-	var total := 0.0
+	var ouvertes: Array = []
 	for c in cats.keys():
+		if affixable and not bool(cats[c].get("affixable", false)):
+			continue   # un drop à affixes ne tire que dans ce qui peut en porter : pas un lingot, pas un lit
+		if profondeur >= int(cats[c].get("profondeur_min", 0)):
+			ouvertes.append(str(c))
+	if ouvertes.is_empty():
+		ouvertes = cats.keys()
+	var total := 0.0
+	for c in ouvertes:
 		total += float(cats[c].poids)
 	var t := rng.randf() * total
-	var cat := str(cats.keys()[0])
-	for c in cats.keys():
+	var cat := str(ouvertes[0])
+	for c in ouvertes:
 		t -= float(cats[c].poids)
 		if t < 0.0:
 			cat = str(c)

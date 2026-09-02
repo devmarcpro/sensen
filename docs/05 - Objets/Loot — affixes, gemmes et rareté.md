@@ -123,6 +123,11 @@ L'atelier consomme ce que le donjon fournit — jamais l'inverse.
 > **Corrigé** : les candidats de **toutes** les recettes du composant sont réunis d'abord, et le tirage se fait sur ce **pool de matériaux**. Une famille pèse ce qu'elle contient réellement, et la pondération par étage (les minerais du palier courant favorisés) s'applique ensuite comme avant. L'os massif redevient une trouvaille — mesuré à 4 % — au lieu d'être une armure sur deux. Régression : `test_loot_varie` refuse qu'une matière dépasse la moitié des tirages.
 
 
+> [!success] Codé le 2026-09-02 — tout ce qui existe se trouve, et la profondeur décide de la valeur (designer)
+> « on devrait pouvoir récupérer tout ce qu'il y a dans le jeu, la qualité/valeur/puissance dépend du niveau du donjon ». Le tirage ne connaissait que **neuf catégories** : armes, armures, bijoux, gemmes, grimoires, outils, stations, consommables, boucliers. Restaient donc **introuvables en donjon** : les 25 **meubles**, les **matériaux bruts**, les **composants**, les **munitions**. Quatre catégories de plus les ouvrent — un coffre peut désormais rendre un lit, un lingot, une lame nue ou un carquois de flèches. Rien n'est écrit en dur : ce sont des **filtres**, donc un objet neuf entre dans le butin le jour où il entre au catalogue.
+> **La profondeur décidait déjà de la qualité** (`niveau_base + niveau_par_profondeur × étage`, et les paliers de rareté par étage) ; elle décide maintenant aussi de ce qui **peut** sortir : chaque catégorie porte une `profondeur_min`. Les stations, les meubles et les artefacts n'apparaissent qu'en descendant, les consommables et les matériaux sont là dès le premier étage. Un coffre d'étage 1 rend de quoi survivre, un coffre d'étage 5 de quoi s'équiper.
+
+
 ## Liens
 - **Dépend de** : [[Effets d'équipement passifs]], [[Qualité d'artisanat]], [[Génération de donjon]], [[Modificateurs d'affinité]]
 - **Alimente** : [[Trésors et artefacts]], [[Monstres rares]], [[Équipement — 14 slots]], [[Jauge de chaîne Wu Xing]], [[Cinq accès au cycle]]

@@ -55,3 +55,15 @@ if absentes:
     echec = True
 sys.exit(1 if echec else 0)
 
+# Un gabarit d'affixe sans {base} efface le nom de l'objet : « de portage (+40) » au lieu de
+# « Anneau de portage (+40) ». Trouve le 2026-09-02 sur une collecte de 97 objets.
+_sans_base = []
+for _f in ("fr", "en"):
+    for _l in io.open(os.path.join(RACINE, "%s.csv" % _f), encoding="utf-8"):
+        if _l.startswith("affixe.") and ".nom," in _l and "{base}" not in _l:
+            _sans_base.append("%s : %s" % (_f, _l.split(",")[0]))
+if _sans_base:
+    print("GABARITS D'AFFIXE SANS {base} (le nom de l'objet disparait) : %d" % len(_sans_base))
+    for _x in _sans_base:
+        print("   ", _x)
+    sys.exit(1)

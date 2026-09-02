@@ -268,6 +268,14 @@
         "plaque": 0.75,
         "sangles": 0.2,
         "fixations": 0.05
+      },
+      "bouclier": {
+        "plaque": 0.7,
+        "sangles": 0.25,
+        "fixations": 0.05
+      },
+      "bijou": {
+        "monture": 1.0
       }
     },
     "vitesse": {
@@ -392,7 +400,18 @@
     "armure": 6,
     "defaut": 1,
     "pente": 2.0,
-    "plafond": 3.0
+    "plafond": 3.0,
+    "volume_slot": {
+      "_doc": "Le volume d'une piece d'armure par slot : multiplie la densite de ses composants pour donner son poids (designer 2026-09-02).",
+      "casque": 0.8,
+      "cuirasse": 2.2,
+      "brassards": 0.9,
+      "jambieres": 1.4,
+      "bottes": 0.7,
+      "dos": 0.6,
+      "main_secondaire": 1.2
+    },
+    "facteur_composants": 1.4
   },
   "cru_facteur": 0.5,
   "commerce": {

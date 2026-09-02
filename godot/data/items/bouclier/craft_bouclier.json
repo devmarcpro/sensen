@@ -1,0 +1,23 @@
+{
+  "name_key": "item.craft_bouclier.name",
+  "type": "bouclier",
+  "equip_slot": "main_secondaire",
+  "hands": 1,
+  "functionality": "bouclier",
+  "slots": {
+    "plaque": "plaque",
+    "sangles": "sangles",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "ms",
+  "tags": [
+    "bouclier",
+    "assemble"
+  ],
+  "zone": "bras",
+  "construction": "plaque"
+}

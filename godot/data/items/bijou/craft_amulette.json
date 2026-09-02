@@ -1,0 +1,18 @@
+{
+  "name_key": "item.craft_amulette.name",
+  "type": "bijou",
+  "equip_slot": "amulette",
+  "hands": 0,
+  "slots": {
+    "monture": "monture"
+  },
+  "recipe": {
+    "station": "enclume",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "fs",
+  "tags": [
+    "bijou",
+    "assemble"
+  ]
+}

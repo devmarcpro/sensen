@@ -1314,7 +1314,7 @@ func test_assemblage() -> void:
 	var s := Simulation.new(17)
 	s.charger_donjon("ruine", 17, 8, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.components.size() == 14 and GameData.catalogues.component_recipes.size() == 56, "14 composants, 56 recettes d'obtention")
+	verifier(GameData.catalogues.components.size() == 15 and GameData.catalogues.component_recipes.size() == 59, "15 composants (dont la monture), 59 recettes d'obtention")
 	for st in ["etabli", "enclume", "scierie"]:   # l'aventurier des donjons de test n'est pas un personnage créé
 		j.sac.append(s.generer_objet("station_" + st, 1, {}, "commun", 0).uid)
 	s._donner_materiau(j, "fer", 3, "lingot")
@@ -5988,6 +5988,7 @@ func test_reputation_et_quetes() -> void:
 		s._appliquer_degats(loup, 5, j.id, {"type": "test"})
 	verifier(int(j.quetes[0].fait) == 2 and j.quetes[0].etat == "terminee", "deux loups tués : la quête est terminée")
 	garde.social.relations[j.id] = 0
+	or0 = int(j.or)   # les hostiles laissent une bourse depuis le 2026-09-02 : on repart de l'or d'après les kills
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "rendre_quete", "pnj": garde.id, "quete": q_chasse.uid}), "rendre la quête")
 	verifier(int(j.or) == or0 + int(q_chasse.or) and int(j.guildes[str(q_chasse.guild)].xp) == int(q_chasse.xp) and int(garde.social.relations[j.id]) == 10, "or, XP de guilde, +10 de relation avec le donneur")
