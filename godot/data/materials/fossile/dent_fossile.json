@@ -1,12 +1,12 @@
 {
   "name_key": "material.dent_fossile.name",
   "category": "fossile",
-  "palier": 4,
+  "palier": 5,
   "stats": {
-    "durete": 26,
+    "durete": 73,
     "densite": 9,
-    "valeur_base": 26,
-    "conductivite_mana": 30,
+    "valeur_base": 73,
+    "conductivite_mana": 84,
     "flammabilite": 0,
     "isolation": 26,
     "conductivite_electrique": 3,
@@ -34,5 +34,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 26,
+    "valeur_base": 26,
+    "conductivite_mana": 30
+  }
 }

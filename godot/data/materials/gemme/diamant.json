@@ -3,10 +3,10 @@
   "category": "gemme",
   "palier": 5,
   "stats": {
-    "durete": 50,
+    "durete": 140,
     "densite": 9,
-    "valeur_base": 80,
-    "conductivite_mana": 55,
+    "valeur_base": 224,
+    "conductivite_mana": 154,
     "flammabilite": 0,
     "isolation": 15,
     "conductivite_electrique": 2,
@@ -37,5 +37,10 @@
     "terre": 0.8,
     "metal": 0.2
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 50,
+    "valeur_base": 80,
+    "conductivite_mana": 55
+  }
 }

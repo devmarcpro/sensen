@@ -1,0 +1,43 @@
+{
+  "name_key": "material.borax.name",
+  "category": "mineral",
+  "palier": 3,
+  "stats": {
+    "durete": 5,
+    "densite": 3,
+    "valeur_base": 16,
+    "conductivite_mana": 55,
+    "flammabilite": 0,
+    "isolation": 28,
+    "conductivite_electrique": 12,
+    "flottabilite": 45,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 45,
+    "elasticite": 3,
+    "friction": 22
+  },
+  "tags": [],
+  "color": "#F0F2EF",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 413,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null,
+  "stats_base": {
+    "durete": 4,
+    "valeur_base": 12,
+    "conductivite_mana": 42
+  }
+}

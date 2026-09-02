@@ -1,12 +1,12 @@
 {
   "name_key": "material.eau.name",
   "category": "liquide",
-  "palier": 3,
+  "palier": 2,
   "stats": {
     "durete": 0,
     "densite": 10,
     "valeur_base": 1,
-    "conductivite_mana": 15,
+    "conductivite_mana": 13,
     "flammabilite": 0,
     "isolation": 20,
     "conductivite_electrique": 80,
@@ -36,5 +36,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 0,
+    "valeur_base": 1,
+    "conductivite_mana": 15
+  }
 }

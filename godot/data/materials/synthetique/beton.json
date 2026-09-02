@@ -1,12 +1,12 @@
 {
   "name_key": "material.beton.name",
   "category": "synthetique",
-  "palier": 5,
+  "palier": 4,
   "stats": {
-    "durete": 24,
+    "durete": 46,
     "densite": 12,
-    "valeur_base": 20,
-    "conductivite_mana": 5,
+    "valeur_base": 38,
+    "conductivite_mana": 10,
     "flammabilite": 0,
     "isolation": 35,
     "conductivite_electrique": 10,
@@ -41,5 +41,10 @@
     "eau": 0.2,
     "feu": 0.1
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 24,
+    "valeur_base": 20,
+    "conductivite_mana": 5
+  }
 }

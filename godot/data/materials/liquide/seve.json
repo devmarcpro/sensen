@@ -1,12 +1,12 @@
 {
   "name_key": "material.seve.name",
   "category": "liquide",
-  "palier": 4,
+  "palier": 2,
   "stats": {
     "durete": 1,
     "densite": 9,
-    "valeur_base": 5,
-    "conductivite_mana": 20,
+    "valeur_base": 4,
+    "conductivite_mana": 17,
     "flammabilite": 65,
     "isolation": 30,
     "conductivite_electrique": 10,
@@ -39,5 +39,10 @@
     "bois": 0.7,
     "eau": 0.3
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 1,
+    "valeur_base": 5,
+    "conductivite_mana": 20
+  }
 }

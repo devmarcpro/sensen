@@ -63,6 +63,12 @@ Les catégories de matériaux, chacune liée à un outil, une compétence de ré
 > **Comment les paliers ont été posés.** Par dérivation, pas à la main : un minerai hérite du tier de `minerais_par_etage` ; les autres sont classés **dans leur catégorie** par un score de puissance (dureté, valeur de base, conductivité de mana) et répartis en cinq quintiles. Le classement se fait par catégorie parce qu'un bois de palier 5 reste un bois : on compare un chêne aux autres bois, pas au platine. Les valeurs sont **en données**, une par fiche : le designer peut en corriger une sans toucher au reste.
 
 
+> [!success] Codé le 2026-09-02 — la catégorie **animal** (designer : « si tu ressens le besoin tu peux rajouter des catégories »)
+> Seize matières d'origine animale étaient rangées en « végétal » : cuir, os, os massif, croc, écaille, ivoire, fourrure, laine, soie, corne, tendon, plume, crin, boyau, os de seiche, éponge. Ce n'était pas qu'une étiquette — la catégorie décide de **l'outil et de la compétence de récolte**, de la **station de transformation** et du **plafond de palier**. On écorche une bête au couteau, on ne la fauche pas ; on tanne une peau, on ne la tisse pas.
+> **L'élément reste le Bois**, comme pour le végétal : dans les cinq éléments, le Bois est celui du vivant qui pousse — la chair et l'os en sont autant que la tige. C'est le choix prudent, il tient en une ligne de `wuxing.materiaux_par_categorie` si le designer en veut un autre.
+> Le test qui comptait « 11 catégories » vérifie désormais la **règle** : toute catégorie utilisée par une fiche doit être décrite, sinon on ne sait ni la récolter ni la travailler.
+
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Schéma matériau]]
 - **Alimente** : [[Récolte]], [[Stations de transformation]], [[Composants]], [[Wu Xing hors combat]]

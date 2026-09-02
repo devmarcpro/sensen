@@ -76,7 +76,7 @@
     "amplitude": 0.85
   },
   "materiaux_par_categorie": {
-    "_doc": "Le Wu Xing d'un objet sans élément propre se lit dans la matière dont il est fait (designer 2026-09-01, point 65).",
+    "_doc": "Le Wu Xing d'un objet sans element propre se lit dans la matiere dont il est fait (designer 2026-09-01, point 65). Corrige le 2026-09-02 : la meteo etait rangee en FEU — la neige et la glace etaient du feu — et la categorie `terre` manquait, laissant huit matieres sans element. Une fiche peut toujours declarer son propre `wuxing`, qui l'emporte.",
     "bois": "bois",
     "vegetal": "bois",
     "metal": "metal",
@@ -86,6 +86,8 @@
     "fossile": "terre",
     "liquide": "eau",
     "synthetique": "feu",
-    "meteorologique": "feu"
+    "meteorologique": "eau",
+    "terre": "terre",
+    "animal": "bois"
   }
 }

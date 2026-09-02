@@ -1,12 +1,12 @@
 {
   "name_key": "material.glace.name",
   "category": "meteorologique",
-  "palier": 3,
+  "palier": 2,
   "stats": {
-    "durete": 6,
+    "durete": 5,
     "densite": 4,
     "valeur_base": 2,
-    "conductivite_mana": 20,
+    "conductivite_mana": 17,
     "flammabilite": 0,
     "isolation": 30,
     "conductivite_electrique": 25,
@@ -36,5 +36,10 @@
   "wuxing": {
     "eau": 1.0
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 6,
+    "valeur_base": 2,
+    "conductivite_mana": 20
+  }
 }

@@ -1,12 +1,12 @@
 {
   "name_key": "material.sequoia.name",
   "category": "bois",
-  "palier": 5,
+  "palier": 4,
   "stats": {
-    "durete": 9,
+    "durete": 17,
     "densite": 4,
-    "valeur_base": 14,
-    "conductivite_mana": 12,
+    "valeur_base": 27,
+    "conductivite_mana": 23,
     "flammabilite": 48,
     "isolation": 52,
     "conductivite_electrique": 5,
@@ -36,5 +36,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 9,
+    "valeur_base": 14,
+    "conductivite_mana": 12
+  }
 }

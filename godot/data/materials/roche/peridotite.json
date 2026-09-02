@@ -1,12 +1,12 @@
 {
   "name_key": "material.peridotite.name",
   "category": "roche",
-  "palier": 5,
+  "palier": 4,
   "stats": {
-    "durete": 33,
+    "durete": 63,
     "densite": 21,
-    "valeur_base": 8,
-    "conductivite_mana": 25,
+    "valeur_base": 15,
+    "conductivite_mana": 48,
     "flammabilite": 0,
     "isolation": 12,
     "conductivite_electrique": 18,
@@ -34,5 +34,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 33,
+    "valeur_base": 8,
+    "conductivite_mana": 25
+  }
 }

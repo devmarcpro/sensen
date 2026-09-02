@@ -1,12 +1,12 @@
 {
   "name_key": "material.ebene.name",
   "category": "bois",
-  "palier": 5,
+  "palier": 4,
   "stats": {
-    "durete": 18,
+    "durete": 34,
     "densite": 10,
-    "valeur_base": 22,
-    "conductivite_mana": 15,
+    "valeur_base": 42,
+    "conductivite_mana": 28,
     "flammabilite": 38,
     "isolation": 30,
     "conductivite_electrique": 8,
@@ -36,5 +36,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 18,
+    "valeur_base": 22,
+    "conductivite_mana": 15
+  }
 }

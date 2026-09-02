@@ -3,10 +3,10 @@
   "category": "mineral",
   "palier": 1,
   "stats": {
-    "durete": 14,
+    "durete": 8,
     "densite": 9,
-    "valeur_base": 26,
-    "conductivite_mana": 48,
+    "valeur_base": 14,
+    "conductivite_mana": 26,
     "flammabilite": 0,
     "isolation": 16,
     "conductivite_electrique": 16,
@@ -34,5 +34,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 14,
+    "valeur_base": 26,
+    "conductivite_mana": 48
+  }
 }

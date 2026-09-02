@@ -1,0 +1,43 @@
+{
+  "name_key": "material.alcool.name",
+  "category": "liquide",
+  "palier": 2,
+  "stats": {
+    "durete": 0,
+    "densite": 3,
+    "valeur_base": 10,
+    "conductivite_mana": 38,
+    "flammabilite": 90,
+    "isolation": 15,
+    "conductivite_electrique": 4,
+    "flottabilite": 90,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 80,
+    "elasticite": 2,
+    "friction": 10
+  },
+  "tags": [],
+  "color": "#E8E4D2",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 401,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "seau",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null,
+  "stats_base": {
+    "durete": 0,
+    "valeur_base": 12,
+    "conductivite_mana": 45
+  }
+}

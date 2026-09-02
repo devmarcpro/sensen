@@ -53,6 +53,10 @@ Recette exotique (à apprendre) :
 
 **Contenu à produire :** [[Ouvert — Recettes de composants par famille]] — recettes d'obtention par composant × famille et leurs sources exotiques.
 
+> [!important] Rappel de doctrine (2026-09-02) — une recette n'est pas une autorisation
+> Les fiches de `component_recipes` disent aujourd'hui « ce composant peut se tirer de cette famille de matières, à cette station ». Depuis la mise au point du designer ([[Craft compositionnel]]), il faut les lire autrement : elles décrivent **ce qui est attendu et facile**, pas **ce qui est permis**. Tout le reste se fabrique aussi, à condition d'avoir la station qui sait travailler cette classe de matière et la recette qui l'enseigne.
+> La conséquence pratique : **ne jamais ajouter une recette pour « rendre possible » une combinaison**. Si une matière n'entre nulle part, la question à poser est quelle station et quelle recette manquent — pas quelle paire ajouter à la main.
+
 ## Liens
 - **Dépend de** : [[Craft compositionnel]], [[Composants]], [[Data-driven design]]
 - **Alimente** : [[Schéma objet et recette]], [[Stats et qualité de l'assemblage]], [[Palier industriel]], [[Armure par zone et constructions]]

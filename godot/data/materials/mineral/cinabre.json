@@ -3,10 +3,10 @@
   "category": "mineral",
   "palier": 3,
   "stats": {
-    "durete": 9,
+    "durete": 12,
     "densite": 15,
-    "valeur_base": 20,
-    "conductivite_mana": 28,
+    "valeur_base": 26,
+    "conductivite_mana": 36,
     "flammabilite": 8,
     "isolation": 12,
     "conductivite_electrique": 22,
@@ -37,5 +37,10 @@
     "feu": 0.5,
     "terre": 0.5
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 9,
+    "valeur_base": 20,
+    "conductivite_mana": 28
+  }
 }

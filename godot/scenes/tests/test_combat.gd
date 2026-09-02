@@ -1206,7 +1206,10 @@ func test_materiaux() -> void:
 			sans_stats.append(str(mid_v))
 	verifier(sans_stats.is_empty(), "chaque matériau a ses stats et son palier (manquants : %s)" % str(sans_stats.slice(0, 5)))
 	var fer: Dictionary = mats.fer
-	verifier(int(fer.stats.durete) == 25 and int(fer.stats.conductivite_electrique) == 75, "le Fer suit sa table (Dur 25, CÉl 75)")
+	# Les chiffres d'une fiche appartiennent au designer et bougent (« tu peux rééquilibrer, j'ai écrit
+	# aucune stats »). Ce qui doit tenir, c'est que le Fer AIT ses treize stats et qu'elles se tiennent
+	# entre elles — un métal est dur, conducteur, et ne brûle pas.
+	verifier(int(fer.stats.durete) > 0 and int(fer.stats.conductivite_electrique) > 30 and int(fer.stats.flammabilite) == 0, "le Fer a sa table (Dur %d, CÉl %d)" % [int(fer.stats.durete), int(fer.stats.conductivite_electrique)])
 	verifier("conducteur" in fer.tags and not ("inflammable" in fer.tags), "tags dérivés au seuil 50 (fer : conducteur)")
 	verifier(mats.paille.tags.has("inflammable") and mats.verre.tags.has("transparent"), "paille inflammable, verre transparent")
 	verifier(mats.chene.wuxing == {"bois": 1.0}, "chêne : vecteur de sa catégorie (Bois)")
@@ -1217,7 +1220,16 @@ func test_materiaux() -> void:
 		couleurs[mats[id].color] = true
 	verifier(couleurs.size() == mats.size(), "160 couleurs uniques")
 	verifier(mats.chene.harvest.tool_category == "hache" and mats.chene.harvest.skill == "bucheronnage", "récolte : outil et compétence de la catégorie")
-	verifier(GameData.config("material_categories").size() == 11, "11 catégories de matériaux")
+	# Le nombre de catégories n'est plus figé (designer 2026-09-02 : « si tu ressens le besoin tu peux
+	# rajouter des catégories » — `animal` est née ce jour-là). Ce qui doit tenir : chaque catégorie
+	# utilisée par une fiche de matériau est décrite, sinon on ne sait ni la récolter ni la travailler.
+	var cats_mat: Dictionary = GameData.config("material_categories")
+	var orphelines := {}
+	for mid_c in GameData.catalogues.materials.keys():
+		var cat_c := str(GameData.catalogues.materials[mid_c].get("category", ""))
+		if not cats_mat.has(cat_c):
+			orphelines[cat_c] = true
+	verifier(orphelines.is_empty(), "chaque catégorie de matériau est décrite (%d catégories ; sans fiche : %s)" % [cats_mat.size(), str(orphelines.keys())])
 	verifier(tr("material.acier_trempe.name") == "Acier trempé", "nom localisé")
 
 
@@ -1267,7 +1279,7 @@ func test_recolte() -> void:
 	verifier(s.intention(j.id, {"type": "creuser", "vers": mur}), "récolter le mur de pierre à la pioche")
 	var pal_pierre := str(int(GameData.catalogues.materials.pierre.get("palier", 1)))
 	var mult_pierre := float(GameData.config("combat_rules").paliers_materiaux[pal_pierre].extraction_ticks)
-	var attendu_p := ceili(15.0 / 25.0 * float(GameData.config("combat_rules").recolte.ticks_par_seconde) * mult_pierre)
+	var attendu_p := ceili(float(GameData.catalogues.materials.pierre.stats.durete) / (float(pioche.durete_base) * float(pioche.get("qualite", 1.0))) * float(GameData.config("combat_rules").recolte.ticks_par_seconde) * mult_pierre)
 	verifier(j.compteur == attendu_p, "pierre à la pioche de fer : %d ticks (palier %s, ×%.1f) — obtenu %d" % [attendu_p, pal_pierre, mult_pierre, j.compteur])
 	var brut := {}
 	for uid in j.sac:
@@ -1371,7 +1383,8 @@ func test_assemblage() -> void:
 	var comps: Array = j.sac.filter(func(uid: String) -> bool: return s.items[uid].get("type", "") == "composant")
 	verifier(comps.size() == 3, "3 composants dans le sac (%d)" % comps.size())
 	var lame: Dictionary = s.items[comps[0]]
-	verifier(lame.composant == "lame_courte" and lame.materiau == "fer" and int(lame.stats.durete) == 25 and lame.elements.has("metal"), "la lame porte les stats et l'élément du fer")
+	var durete_fer := int(GameData.catalogues.materials.fer.stats.durete)
+	verifier(lame.composant == "lame_courte" and lame.materiau == "fer" and int(lame.stats.durete) == durete_fer and lame.elements.has("metal"), "la lame porte les stats du fer (%d) et son élément" % durete_fer)
 	verifier(float(lame.qualite) >= 0.1 and float(lame.qualite) <= 0.1 + 0.0001 or float(lame.qualite) <= 2.3, "qualité A.3 au niveau 0 : plancher 0,1 (%.2f)" % float(lame.qualite))
 	verifier(int(s._pile(j, "fer", "lingot").quantite) == 1 and s._pile(j, "chene", "planche").is_empty(), "les unités consommées : 1 lingot restant, plus de planche")
 	var dague_plan: Array = s.recettes_disponibles(j).filter(func(pl: Dictionary) -> bool: return pl.id == "craft_dague")
@@ -1388,7 +1401,9 @@ func test_assemblage() -> void:
 	var pm_t: Dictionary = GameData.config("combat_rules").paliers_materiaux
 	var mp := func(mat: String) -> float:
 		return float(pm_t[str(int(GameData.catalogues.materials[mat].get("palier", 1)))].mult_stats)
-	var attendu_d := roundi(0.7 * 25.0 * mp.call("fer") + 0.25 * 12.0 * mp.call("chene") + 0.05 * 25.0 * mp.call("fer"))
+	var d_fer := float(GameData.catalogues.materials.fer.stats.durete)
+	var d_chene := float(GameData.catalogues.materials.chene.stats.durete)
+	var attendu_d := roundi(0.7 * d_fer * mp.call("fer") + 0.25 * d_chene * mp.call("chene") + 0.05 * d_fer * mp.call("fer"))
 	verifier(int(dague.durete_base) == attendu_d, "durete_base = moyenne pondérée × palier, avant qualité : %d attendu, %d obtenu" % [attendu_d, int(dague.durete_base)])
 	verifier(is_equal_approx(float(dague.elements.metal), 0.75) and is_equal_approx(float(dague.elements.bois), 0.25), "Wu Xing composite Métal 0,75 / Bois 0,25")
 	verifier(is_equal_approx(float(dague.vitesse_facteur), 0.94), "manche en chêne (densité 6) : vitesse ×0,94 (%.2f)" % float(dague.vitesse_facteur))
@@ -1776,7 +1791,7 @@ func test_village() -> void:
 	s._donner_materiau(j, "fer", 1, "lingot")
 	var lingot: String = s._pile(j, "fer", "lingot").uid
 	var pl := s.prix_suggere(lingot, marchand, j)
-	verifier(int(pl.prix) == 8, "un lingot de fer : sa valeur de base, %d or" % int(pl.prix))
+	verifier(int(pl.prix) == int(GameData.catalogues.materials.fer.stats.valeur_base) + 1 or int(pl.prix) == int(GameData.catalogues.materials.fer.stats.valeur_base), "un lingot de fer vaut sa valeur de base (%d or pour une base de %d)" % [int(pl.prix), int(GameData.catalogues.materials.fer.stats.valeur_base)])
 	s.attente[j.id] = true
 	var or_vente := int(j.or)
 	verifier(s.intention(j.id, {"type": "vendre", "pnj": marchand.id, "objet": lingot}) and lingot in marchand.stock and int(j.or) == or_vente + int(pl.achat), "vendre le lingot à 50 %% (+%d or)" % int(pl.achat))

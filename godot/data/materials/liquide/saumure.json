@@ -1,0 +1,43 @@
+{
+  "name_key": "material.saumure.name",
+  "category": "liquide",
+  "palier": 2,
+  "stats": {
+    "durete": 0,
+    "densite": 4,
+    "valeur_base": 3,
+    "conductivite_mana": 27,
+    "flammabilite": 0,
+    "isolation": 14,
+    "conductivite_electrique": 80,
+    "flottabilite": 85,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 65,
+    "elasticite": 2,
+    "friction": 12
+  },
+  "tags": [],
+  "color": "#CFD8D6",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 403,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "seau",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null,
+  "stats_base": {
+    "durete": 0,
+    "valeur_base": 4,
+    "conductivite_mana": 32
+  }
+}

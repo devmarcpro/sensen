@@ -23,6 +23,16 @@ MATS = os.path.join(RACINE, "godot", "data", "materials")
 # la conductivité de mana départage les matières magiques qui ne sont ni dures ni chères.
 POIDS = {"durete": 1.0, "valeur_base": 0.8, "conductivite_mana": 0.4}
 
+# Le classement se fait par categorie — un bois se compare aux bois — mais toutes les categories ne
+# menent pas au meme sommet. Sans plafond, le quintile forcait chaque categorie a fournir des
+# materiaux de palier 5 : la terre fertile et la boue devenaient des matieres de fin de partie,
+# puis l'etirement des stats les multipliait par 2,8. Une categorie a donc son PLAFOND : la terre,
+# les liquides et la meteo restent des matieres du debut, la roche et le bois plafonnent avant le
+# sommet, seuls le metal, les gemmes et les fossiles vont jusqu'au palier 5.
+PLAFOND = {"terre": 2, "liquide": 2, "meteorologique": 2, "mineral": 3,
+           "bois": 4, "vegetal": 4, "animal": 4, "synthetique": 4, "roche": 4,
+           "metal": 5, "gemme": 5, "fossile": 5}
+
 
 def score(stats):
     return sum(POIDS[k] * float(stats.get(k, 0)) for k in POIDS)
@@ -59,12 +69,19 @@ def main():
             repart[int(d.get("palier", 1))] += 1
             continue
         p = tiers.get(nom, rang.get(nom, 1))
+        p = min(p, PLAFOND.get(d.get("category", ""), 5))
         repart[p] += 1
         if d.get("palier") == p:
             continue
         # Le palier se range juste après la catégorie : on lit une fiche de haut en bas.
+        # Le `palier` deja present dans la fiche doit etre SAUTE : sinon, apres l'avoir reinsere
+        # derriere `category`, la boucle retombait dessus plus loin et le reecrasait par son
+        # ancienne valeur. Les paliers ne changeaient donc plus jamais apres le premier passage,
+        # et les plafonds par categorie n'avaient aucun effet (trouve le 2026-09-02).
         neuf = {}
         for k, v in d.items():
+            if k == "palier":
+                continue
             neuf[k] = v
             if k == "category":
                 neuf["palier"] = p

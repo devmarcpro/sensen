@@ -1,12 +1,12 @@
 {
-  "name_key": "material.cuir.name",
-  "category": "vegetal",
-  "palier": 3,
+  "name_key": "material.os_massif.name",
+  "category": "animal",
+  "palier": 4,
   "stats": {
-    "durete": 8,
-    "densite": 4,
-    "valeur_base": 5,
-    "conductivite_mana": 5,
+    "durete": 30,
+    "densite": 6,
+    "valeur_base": 27,
+    "conductivite_mana": 10,
     "flammabilite": 40,
     "isolation": 50,
     "conductivite_electrique": 15,
@@ -14,14 +14,15 @@
     "luminosite": 0,
     "fertilite": 0,
     "transparence": 0,
-    "elasticite": 55,
+    "elasticite": 20,
     "friction": 55
   },
   "tags": [
     "organique",
-    "animal"
+    "animal",
+    "os_massif"
   ],
-  "color": "#8A5A33",
+  "color": "#d8ccb0",
   "noise": {
     "type": "procedural",
     "seed_offset": 135,
@@ -29,13 +30,18 @@
     "scale": 4
   },
   "harvest": {
-    "tool_category": "faucille",
-    "skill": "herboristerie"
+    "tool_category": "dague",
+    "skill": "collecte"
   },
   "world_gen": {
     "mode": "biome",
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 16,
+    "valeur_base": 14,
+    "conductivite_mana": 5
+  }
 }

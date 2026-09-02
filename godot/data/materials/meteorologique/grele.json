@@ -1,12 +1,12 @@
 {
   "name_key": "material.grele.name",
   "category": "meteorologique",
-  "palier": 4,
+  "palier": 2,
   "stats": {
-    "durete": 4,
+    "durete": 3,
     "densite": 4,
     "valeur_base": 1,
-    "conductivite_mana": 28,
+    "conductivite_mana": 24,
     "flammabilite": 0,
     "isolation": 50,
     "conductivite_electrique": 8,
@@ -33,6 +33,13 @@
     "mode": "biome",
     "biome_tags": []
   },
-  "wuxing": null,
-  "composition": null
+  "wuxing": {
+    "eau": 1.0
+  },
+  "composition": null,
+  "stats_base": {
+    "durete": 4,
+    "valeur_base": 1,
+    "conductivite_mana": 28
+  }
 }

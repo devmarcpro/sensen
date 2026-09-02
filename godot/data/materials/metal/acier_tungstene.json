@@ -3,10 +3,10 @@
   "category": "metal",
   "palier": 5,
   "stats": {
-    "durete": 50,
+    "durete": 140,
     "densite": 15,
-    "valeur_base": 55,
-    "conductivite_mana": 6,
+    "valeur_base": 154,
+    "conductivite_mana": 17,
     "flammabilite": 0,
     "isolation": 4,
     "conductivite_electrique": 35,
@@ -40,5 +40,10 @@
     "feu": 0.2,
     "terre": 0.1
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 50,
+    "valeur_base": 55,
+    "conductivite_mana": 6
+  }
 }

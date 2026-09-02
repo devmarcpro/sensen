@@ -1,12 +1,12 @@
 {
   "name_key": "material.crin.name",
-  "category": "vegetal",
-  "palier": 2,
+  "category": "animal",
+  "palier": 1,
   "stats": {
-    "durete": 4,
+    "durete": 2,
     "densite": 2,
-    "valeur_base": 6,
-    "conductivite_mana": 20,
+    "valeur_base": 3,
+    "conductivite_mana": 11,
     "flammabilite": 45,
     "isolation": 35,
     "conductivite_electrique": 2,
@@ -36,5 +36,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 4,
+    "valeur_base": 6,
+    "conductivite_mana": 20
+  }
 }

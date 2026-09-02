@@ -1,12 +1,12 @@
 {
-  "name_key": "material.os_massif.name",
-  "category": "vegetal",
-  "palier": 5,
+  "name_key": "material.croc.name",
+  "category": "animal",
+  "palier": 2,
   "stats": {
-    "durete": 16,
-    "densite": 6,
-    "valeur_base": 14,
-    "conductivite_mana": 5,
+    "durete": 9,
+    "densite": 5,
+    "valeur_base": 7,
+    "conductivite_mana": 4,
     "flammabilite": 40,
     "isolation": 50,
     "conductivite_electrique": 15,
@@ -20,12 +20,12 @@
   "tags": [
     "organique",
     "animal",
-    "os_massif"
+    "dent_croc"
   ],
-  "color": "#d8ccb0",
+  "color": "#E8DCC0",
   "noise": {
     "type": "procedural",
-    "seed_offset": 135,
+    "seed_offset": 911,
     "amplitude": 0.08,
     "scale": 4
   },
@@ -38,5 +38,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 11,
+    "valeur_base": 8,
+    "conductivite_mana": 5
+  }
 }

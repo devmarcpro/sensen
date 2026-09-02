@@ -1,0 +1,43 @@
+{
+  "name_key": "material.essence_terebenthine.name",
+  "category": "liquide",
+  "palier": 2,
+  "stats": {
+    "durete": 0,
+    "densite": 3,
+    "valeur_base": 9,
+    "conductivite_mana": 34,
+    "flammabilite": 95,
+    "isolation": 14,
+    "conductivite_electrique": 5,
+    "flottabilite": 92,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 60,
+    "elasticite": 2,
+    "friction": 10
+  },
+  "tags": [],
+  "color": "#D8CFA6",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 408,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "seau",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null,
+  "stats_base": {
+    "durete": 0,
+    "valeur_base": 11,
+    "conductivite_mana": 40
+  }
+}

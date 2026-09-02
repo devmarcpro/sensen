@@ -1,12 +1,12 @@
 {
   "name_key": "material.gaiac.name",
   "category": "bois",
-  "palier": 5,
+  "palier": 4,
   "stats": {
-    "durete": 20,
+    "durete": 38,
     "densite": 11,
-    "valeur_base": 26,
-    "conductivite_mana": 12,
+    "valeur_base": 49,
+    "conductivite_mana": 23,
     "flammabilite": 35,
     "isolation": 30,
     "conductivite_electrique": 8,
@@ -36,5 +36,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 20,
+    "valeur_base": 26,
+    "conductivite_mana": 12
+  }
 }

@@ -6,7 +6,7 @@
     "durete": 3,
     "densite": 2,
     "valeur_base": 3,
-    "conductivite_mana": 10,
+    "conductivite_mana": 8,
     "flammabilite": 75,
     "isolation": 40,
     "conductivite_electrique": 3,
@@ -36,5 +36,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 3,
+    "valeur_base": 3,
+    "conductivite_mana": 10
+  }
 }

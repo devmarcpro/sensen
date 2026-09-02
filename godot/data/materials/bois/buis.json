@@ -1,12 +1,12 @@
 {
   "name_key": "material.buis.name",
   "category": "bois",
-  "palier": 5,
+  "palier": 4,
   "stats": {
-    "durete": 19,
+    "durete": 36,
     "densite": 9,
-    "valeur_base": 18,
-    "conductivite_mana": 14,
+    "valeur_base": 34,
+    "conductivite_mana": 27,
     "flammabilite": 42,
     "isolation": 30,
     "conductivite_electrique": 6,
@@ -36,5 +36,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 19,
+    "valeur_base": 18,
+    "conductivite_mana": 14
+  }
 }

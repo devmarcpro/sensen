@@ -13,6 +13,7 @@ var frames := 0
 var cible := 60
 var sortie := "user://capture.png"
 var arene := 0
+var arene_nom := ""   # --arene accepte aussi un NOM : l'index laissait l'arène 0 inatteignable
 var temps_max := 0.0
 var temps_total := 0.0
 
@@ -33,7 +34,13 @@ func _ready() -> void:
 		elif args[i] == "--frames" and i + 1 < args.size():
 			cible = int(args[i + 1])
 		elif args[i] == "--arene" and i + 1 < args.size():
-			arene = int(args[i + 1])
+			# Un nom plutôt qu'un index : la liste est triée, donc l'arène qui vient en tête portait
+			# l'index 0 — et `if arene > 0` la rendait inatteignable (trouvé le 2026-09-02 en voulant
+			# capturer le banc d'objets, qui commence par un b).
+			if str(args[i + 1]).is_valid_int():
+				arene = int(args[i + 1])
+			else:
+				arene_nom = str(args[i + 1])
 	for il in args.size():   # --langue fr|en : force la locale AVANT la scène — vérifier le rendu anglais à l'écran
 		if args[il] == "--langue" and il + 1 < args.size():
 			TranslationServer.set_locale(str(args[il + 1]))
@@ -156,7 +163,14 @@ func _ready() -> void:
 			print("dialogue : ", scene.sim.entites[proche_id].name_key)
 			if "--commerce" in args:   # --commerce : enchaîne sur l'écran de commerce du PNJ (stock, prix, or)
 				scene.ecrans.ouvrir("commerce")
-	if arene > 0:
+	if not arene_nom.is_empty():
+		var idx: int = scene.arenes.find(arene_nom)
+		if idx < 0:
+			print("ARENE inconnue : ", arene_nom, " — connues : ", scene.arenes)
+		else:
+			scene.arene_courante = idx
+			scene._charger()
+	elif arene > 0:
 		scene.arene_courante = arene
 		scene._charger()
 	if "--donjon" in args and scene.sim != null:   # --donjon : descendre dans une ruine depuis le camp (voile, brèches…)

@@ -1,12 +1,12 @@
 {
   "name_key": "material.bois_petrifie.name",
   "category": "fossile",
-  "palier": 3,
+  "palier": 2,
   "stats": {
-    "durete": 16,
+    "durete": 14,
     "densite": 13,
-    "valeur_base": 14,
-    "conductivite_mana": 18,
+    "valeur_base": 12,
+    "conductivite_mana": 15,
     "flammabilite": 0,
     "isolation": 22,
     "conductivite_electrique": 8,
@@ -37,5 +37,10 @@
     "terre": 0.7,
     "bois": 0.3
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 16,
+    "valeur_base": 14,
+    "conductivite_mana": 18
+  }
 }

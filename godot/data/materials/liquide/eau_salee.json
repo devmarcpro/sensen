@@ -6,7 +6,7 @@
     "durete": 0,
     "densite": 10,
     "valeur_base": 1,
-    "conductivite_mana": 12,
+    "conductivite_mana": 7,
     "flammabilite": 0,
     "isolation": 20,
     "conductivite_electrique": 90,
@@ -35,6 +35,13 @@
     "mode": "biome",
     "biome_tags": []
   },
-  "wuxing": null,
-  "composition": null
+  "wuxing": {
+    "eau": 1.0
+  },
+  "composition": null,
+  "stats_base": {
+    "durete": 0,
+    "valeur_base": 1,
+    "conductivite_mana": 12
+  }
 }

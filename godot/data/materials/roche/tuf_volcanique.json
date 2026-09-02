@@ -3,10 +3,10 @@
   "category": "roche",
   "palier": 1,
   "stats": {
-    "durete": 8,
+    "durete": 4,
     "densite": 10,
-    "valeur_base": 2,
-    "conductivite_mana": 10,
+    "valeur_base": 1,
+    "conductivite_mana": 6,
     "flammabilite": 0,
     "isolation": 45,
     "conductivite_electrique": 8,
@@ -37,5 +37,10 @@
     "terre": 0.7,
     "feu": 0.3
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 8,
+    "valeur_base": 2,
+    "conductivite_mana": 10
+  }
 }

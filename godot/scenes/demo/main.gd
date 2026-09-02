@@ -189,7 +189,12 @@ func _ready() -> void:
 	pluie.z_index = 4050   # la pluie tombe devant le monde et les êtres, sous le HUD (Météo, 2026-08-31)
 	add_child(pluie)
 	EventBus.damage_dealt.connect(func(src: String, _c: String, _d: int, _det: Dictionary) -> void: if noeuds.has(src): noeuds[src].frapper())
-	arenes.assign(GameData.catalogues.get("prototype_arenas", {}).keys())
+	# Les arènes du prototype, SANS les bancs d'essai : le banc d'objets remplit vingt-quatre coffres au
+	# chargement, et comme la liste est triée il passait en tête — donc en arène de démarrage. Le jeu
+	# mettait des secondes à s'ouvrir sur une salle de démonstration (designer, 2026-09-02 : « la fenêtre
+	# Sensen debug ne se lance pas »). On y va par le menu, pas par accident.
+	arenes.assign(GameData.catalogues.get("prototype_arenas", {}).keys().filter(
+		func(a: String) -> bool: return not ("banc" in GameData.entree("prototype_arenas", a).get("tags", []))))
 	arenes.sort()
 	EventBus.journal.connect(_sur_journal)
 	EventBus.coup_critique.connect(func(_att: String, cible_id: String, mult: float) -> void:

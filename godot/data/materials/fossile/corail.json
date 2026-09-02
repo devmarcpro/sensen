@@ -1,0 +1,48 @@
+{
+  "name_key": "material.corail.name",
+  "category": "fossile",
+  "palier": 3,
+  "stats": {
+    "durete": 21,
+    "densite": 6,
+    "valeur_base": 26,
+    "conductivite_mana": 58,
+    "flammabilite": 0,
+    "isolation": 22,
+    "conductivite_electrique": 3,
+    "flottabilite": 25,
+    "luminosite": 4,
+    "fertilite": 0,
+    "transparence": 10,
+    "elasticite": 8,
+    "friction": 30
+  },
+  "tags": [
+    "marin"
+  ],
+  "color": "#E4756B",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 300,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "dague",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": {
+    "eau": 0.7,
+    "terre": 0.3
+  },
+  "composition": null,
+  "stats_base": {
+    "durete": 16,
+    "valeur_base": 20,
+    "conductivite_mana": 45
+  }
+}

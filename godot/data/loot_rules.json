@@ -335,7 +335,13 @@
     "tiers_au_dela": 1,
     "paliers_au_dela": 3,
     "_doc_paliers": "paliers_au_dela : de combien de niveaux au-dela du niveau du donjon un materiau peut encore sortir ; poids_au_dela : le poids qu'on lui donne alors, face au poids 1 des materiaux a portee. A 0,15, la trouvaille d'un cran au-dessus reste une chance, pas l'ordinaire (designer 2026-09-02).",
-    "poids_au_dela": 0.15
+    "poids_au_dela": 0.15,
+    "ecart_attendu": {
+      "_doc": "On peut fabriquer n'importe quoi avec n'importe quoi (designer 2026-09-02) : ce qui limite le CRAFT, c'est la recette qu'on possede et la station capable de travailler la matiere. Le BUTIN, lui, suit la meme liberte avec une autre regle : « plus un materiau est eloigne du materiau attendu, plus l'apparition de cette composition est rare ». Un plastron de metal est l'ordinaire ; un plastron d'eau de mer existe et ne se voit presque jamais. poids_hors_attente : le poids d'une matiere qui n'est pas celle qu'on attend pour ce composant, face au poids 1 de celles qui le sont. penalite_forme : ce qu'on retire en plus quand la matiere ne tient meme pas la forme du composant (un liquide pour une lame).",
+      "poids_hors_attente": 0.04,
+      "penalite_forme": 0.15,
+      "durete_min_piece_maitresse": 4
+    }
   },
   "identification": {
     "_doc": "Objets non identifiés (designer 2026-09-01, point 52) : ces types sortent inconnus du loot ; les essayer révèle la base pour toute la partie.",

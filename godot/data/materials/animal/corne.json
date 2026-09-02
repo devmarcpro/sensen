@@ -1,12 +1,12 @@
 {
   "name_key": "material.corne.name",
-  "category": "vegetal",
-  "palier": 5,
+  "category": "animal",
+  "palier": 4,
   "stats": {
-    "durete": 18,
+    "durete": 34,
     "densite": 6,
-    "valeur_base": 9,
-    "conductivite_mana": 25,
+    "valeur_base": 17,
+    "conductivite_mana": 48,
     "flammabilite": 25,
     "isolation": 45,
     "conductivite_electrique": 2,
@@ -36,5 +36,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 18,
+    "valeur_base": 9,
+    "conductivite_mana": 25
+  }
 }

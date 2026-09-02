@@ -1,12 +1,12 @@
 {
-  "name_key": "material.croc.name",
-  "category": "vegetal",
-  "palier": 4,
+  "name_key": "material.cuir.name",
+  "category": "animal",
+  "palier": 1,
   "stats": {
-    "durete": 11,
-    "densite": 5,
-    "valeur_base": 8,
-    "conductivite_mana": 5,
+    "durete": 4,
+    "densite": 4,
+    "valeur_base": 3,
+    "conductivite_mana": 3,
     "flammabilite": 40,
     "isolation": 50,
     "conductivite_electrique": 15,
@@ -14,29 +14,33 @@
     "luminosite": 0,
     "fertilite": 0,
     "transparence": 0,
-    "elasticite": 20,
+    "elasticite": 55,
     "friction": 55
   },
   "tags": [
     "organique",
-    "animal",
-    "dent_croc"
+    "animal"
   ],
-  "color": "#E8DCC0",
+  "color": "#8A5A33",
   "noise": {
     "type": "procedural",
-    "seed_offset": 911,
+    "seed_offset": 135,
     "amplitude": 0.08,
     "scale": 4
   },
   "harvest": {
-    "tool_category": "dague",
-    "skill": "collecte"
+    "tool_category": "faucille",
+    "skill": "herboristerie"
   },
   "world_gen": {
     "mode": "biome",
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 8,
+    "valeur_base": 5,
+    "conductivite_mana": 5
+  }
 }

@@ -1,0 +1,45 @@
+{
+  "name_key": "material.colle_d_os.name",
+  "category": "synthetique",
+  "palier": 3,
+  "stats": {
+    "durete": 4,
+    "densite": 3,
+    "valeur_base": 12,
+    "conductivite_mana": 34,
+    "flammabilite": 45,
+    "isolation": 30,
+    "conductivite_electrique": 4,
+    "flottabilite": 40,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 25,
+    "elasticite": 35,
+    "friction": 75
+  },
+  "tags": [
+    "animal"
+  ],
+  "color": "#C9A97A",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 415,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "seau",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null,
+  "stats_base": {
+    "durete": 3,
+    "valeur_base": 9,
+    "conductivite_mana": 26
+  }
+}

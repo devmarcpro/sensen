@@ -1,12 +1,12 @@
 {
   "name_key": "material.tourbe.name",
   "category": "terre",
-  "palier": 4,
+  "palier": 2,
   "stats": {
-    "durete": 4,
+    "durete": 3,
     "densite": 7,
     "valeur_base": 2,
-    "conductivite_mana": 8,
+    "conductivite_mana": 7,
     "flammabilite": 55,
     "isolation": 45,
     "conductivite_electrique": 18,
@@ -33,6 +33,14 @@
     "mode": "biome",
     "biome_tags": []
   },
-  "wuxing": null,
-  "composition": null
+  "wuxing": {
+    "terre": 0.7,
+    "bois": 0.3
+  },
+  "composition": null,
+  "stats_base": {
+    "durete": 4,
+    "valeur_base": 2,
+    "conductivite_mana": 8
+  }
 }

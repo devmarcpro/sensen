@@ -1,12 +1,12 @@
 {
   "name_key": "material.fourrure.name",
-  "category": "vegetal",
-  "palier": 2,
+  "category": "animal",
+  "palier": 1,
   "stats": {
-    "durete": 3,
+    "durete": 2,
     "densite": 2,
-    "valeur_base": 7,
-    "conductivite_mana": 5,
+    "valeur_base": 4,
+    "conductivite_mana": 3,
     "flammabilite": 60,
     "isolation": 85,
     "conductivite_electrique": 5,
@@ -37,5 +37,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 3,
+    "valeur_base": 7,
+    "conductivite_mana": 5
+  }
 }

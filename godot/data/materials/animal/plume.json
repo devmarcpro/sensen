@@ -1,12 +1,12 @@
 {
   "name_key": "material.plume.name",
-  "category": "vegetal",
-  "palier": 4,
+  "category": "animal",
+  "palier": 3,
   "stats": {
-    "durete": 2,
+    "durete": 3,
     "densite": 1,
-    "valeur_base": 5,
-    "conductivite_mana": 35,
+    "valeur_base": 6,
+    "conductivite_mana": 46,
     "flammabilite": 60,
     "isolation": 55,
     "conductivite_electrique": 1,
@@ -36,5 +36,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 2,
+    "valeur_base": 5,
+    "conductivite_mana": 35
+  }
 }

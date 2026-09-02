@@ -1,12 +1,12 @@
 {
   "name_key": "material.boyau.name",
-  "category": "vegetal",
+  "category": "animal",
   "palier": 3,
   "stats": {
-    "durete": 3,
+    "durete": 4,
     "densite": 2,
-    "valeur_base": 7,
-    "conductivite_mana": 28,
+    "valeur_base": 9,
+    "conductivite_mana": 36,
     "flammabilite": 35,
     "isolation": 25,
     "conductivite_electrique": 3,
@@ -36,5 +36,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 3,
+    "valeur_base": 7,
+    "conductivite_mana": 28
+  }
 }

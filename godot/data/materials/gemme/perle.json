@@ -1,12 +1,12 @@
 {
   "name_key": "material.perle.name",
   "category": "gemme",
-  "palier": 2,
+  "palier": 1,
   "stats": {
-    "durete": 15,
+    "durete": 8,
     "densite": 6,
-    "valeur_base": 42,
-    "conductivite_mana": 55,
+    "valeur_base": 23,
+    "conductivite_mana": 30,
     "flammabilite": 0,
     "isolation": 25,
     "conductivite_electrique": 2,
@@ -33,6 +33,14 @@
     "mode": "biome",
     "biome_tags": []
   },
-  "wuxing": null,
-  "composition": null
+  "wuxing": {
+    "eau": 0.7,
+    "terre": 0.3
+  },
+  "composition": null,
+  "stats_base": {
+    "durete": 15,
+    "valeur_base": 42,
+    "conductivite_mana": 55
+  }
 }

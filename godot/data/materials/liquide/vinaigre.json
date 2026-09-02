@@ -1,0 +1,43 @@
+{
+  "name_key": "material.vinaigre.name",
+  "category": "liquide",
+  "palier": 2,
+  "stats": {
+    "durete": 0,
+    "densite": 3,
+    "valeur_base": 5,
+    "conductivite_mana": 26,
+    "flammabilite": 10,
+    "isolation": 12,
+    "conductivite_electrique": 25,
+    "flottabilite": 88,
+    "luminosite": 0,
+    "fertilite": 5,
+    "transparence": 70,
+    "elasticite": 2,
+    "friction": 12
+  },
+  "tags": [],
+  "color": "#D9C89A",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 402,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "seau",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null,
+  "stats_base": {
+    "durete": 0,
+    "valeur_base": 6,
+    "conductivite_mana": 30
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "name_key": "material.lait.name",
+  "category": "liquide",
+  "palier": 2,
+  "stats": {
+    "durete": 0,
+    "densite": 4,
+    "valeur_base": 5,
+    "conductivite_mana": 24,
+    "flammabilite": 12,
+    "isolation": 20,
+    "conductivite_electrique": 20,
+    "flottabilite": 86,
+    "luminosite": 2,
+    "fertilite": 30,
+    "transparence": 8,
+    "elasticite": 3,
+    "friction": 14
+  },
+  "tags": [
+    "animal"
+  ],
+  "color": "#F2EFE6",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 405,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "seau",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null,
+  "stats_base": {
+    "durete": 0,
+    "valeur_base": 6,
+    "conductivite_mana": 28
+  }
+}

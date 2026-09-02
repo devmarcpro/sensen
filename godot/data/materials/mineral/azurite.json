@@ -1,12 +1,12 @@
 {
   "name_key": "material.azurite.name",
   "category": "mineral",
-  "palier": 4,
+  "palier": 3,
   "stats": {
-    "durete": 8,
+    "durete": 10,
     "densite": 7,
-    "valeur_base": 16,
-    "conductivite_mana": 38,
+    "valeur_base": 21,
+    "conductivite_mana": 49,
     "flammabilite": 0,
     "isolation": 22,
     "conductivite_electrique": 12,
@@ -34,5 +34,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 8,
+    "valeur_base": 16,
+    "conductivite_mana": 38
+  }
 }

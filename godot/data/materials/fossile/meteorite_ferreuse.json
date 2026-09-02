@@ -3,10 +3,10 @@
   "category": "fossile",
   "palier": 5,
   "stats": {
-    "durete": 38,
+    "durete": 106,
     "densite": 20,
-    "valeur_base": 60,
-    "conductivite_mana": 40,
+    "valeur_base": 168,
+    "conductivite_mana": 112,
     "flammabilite": 0,
     "isolation": 8,
     "conductivite_electrique": 65,
@@ -37,5 +37,10 @@
     "metal": 0.8,
     "feu": 0.2
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 38,
+    "valeur_base": 60,
+    "conductivite_mana": 40
+  }
 }

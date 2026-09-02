@@ -1,0 +1,43 @@
+{
+  "name_key": "material.encre.name",
+  "category": "liquide",
+  "palier": 2,
+  "stats": {
+    "durete": 0,
+    "densite": 4,
+    "valeur_base": 8,
+    "conductivite_mana": 47,
+    "flammabilite": 15,
+    "isolation": 16,
+    "conductivite_electrique": 18,
+    "flottabilite": 80,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 4,
+    "elasticite": 2,
+    "friction": 15
+  },
+  "tags": [],
+  "color": "#141318",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 407,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "seau",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null,
+  "stats_base": {
+    "durete": 0,
+    "valeur_base": 9,
+    "conductivite_mana": 55
+  }
+}

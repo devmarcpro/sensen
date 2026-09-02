@@ -1,12 +1,12 @@
 {
   "name_key": "material.teck.name",
   "category": "bois",
-  "palier": 5,
+  "palier": 4,
   "stats": {
-    "durete": 13,
+    "durete": 25,
     "densite": 7,
-    "valeur_base": 16,
-    "conductivite_mana": 10,
+    "valeur_base": 30,
+    "conductivite_mana": 19,
     "flammabilite": 42,
     "isolation": 38,
     "conductivite_electrique": 5,
@@ -36,5 +36,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 13,
+    "valeur_base": 16,
+    "conductivite_mana": 10
+  }
 }

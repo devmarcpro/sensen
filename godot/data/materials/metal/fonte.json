@@ -1,12 +1,12 @@
 {
   "name_key": "material.fonte.name",
   "category": "metal",
-  "palier": 2,
+  "palier": 1,
   "stats": {
-    "durete": 22,
+    "durete": 12,
     "densite": 7,
-    "valeur_base": 5,
-    "conductivite_mana": 15,
+    "valeur_base": 3,
+    "conductivite_mana": 8,
     "flammabilite": 0,
     "isolation": 8,
     "conductivite_electrique": 55,
@@ -34,5 +34,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 22,
+    "valeur_base": 5,
+    "conductivite_mana": 15
+  }
 }

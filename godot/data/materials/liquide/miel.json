@@ -1,0 +1,45 @@
+{
+  "name_key": "material.miel.name",
+  "category": "liquide",
+  "palier": 2,
+  "stats": {
+    "durete": 0,
+    "densite": 6,
+    "valeur_base": 14,
+    "conductivite_mana": 42,
+    "flammabilite": 30,
+    "isolation": 35,
+    "conductivite_electrique": 6,
+    "flottabilite": 60,
+    "luminosite": 4,
+    "fertilite": 25,
+    "transparence": 45,
+    "elasticite": 6,
+    "friction": 60
+  },
+  "tags": [
+    "animal"
+  ],
+  "color": "#D9A125",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 406,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "seau",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null,
+  "stats_base": {
+    "durete": 0,
+    "valeur_base": 16,
+    "conductivite_mana": 50
+  }
+}

@@ -1,12 +1,12 @@
 {
   "name_key": "material.caoutchouc.name",
   "category": "synthetique",
-  "palier": 3,
+  "palier": 4,
   "stats": {
-    "durete": 8,
+    "durete": 15,
     "densite": 6,
-    "valeur_base": 28,
-    "conductivite_mana": 2,
+    "valeur_base": 53,
+    "conductivite_mana": 4,
     "flammabilite": 30,
     "isolation": 60,
     "conductivite_electrique": 0,
@@ -40,5 +40,10 @@
     "eau": 0.3,
     "feu": 0.2
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 8,
+    "valeur_base": 28,
+    "conductivite_mana": 2
+  }
 }

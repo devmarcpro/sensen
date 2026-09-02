@@ -3,10 +3,10 @@
   "category": "roche",
   "palier": 2,
   "stats": {
-    "durete": 13,
+    "durete": 11,
     "densite": 13,
     "valeur_base": 2,
-    "conductivite_mana": 6,
+    "conductivite_mana": 5,
     "flammabilite": 5,
     "isolation": 28,
     "conductivite_electrique": 12,
@@ -33,6 +33,14 @@
     "mode": "biome",
     "biome_tags": []
   },
-  "wuxing": null,
-  "composition": null
+  "wuxing": {
+    "terre": 0.7,
+    "eau": 0.3
+  },
+  "composition": null,
+  "stats_base": {
+    "durete": 13,
+    "valeur_base": 2,
+    "conductivite_mana": 6
+  }
 }

@@ -1,0 +1,48 @@
+{
+  "name_key": "material.nacre.name",
+  "category": "fossile",
+  "palier": 4,
+  "stats": {
+    "durete": 23,
+    "densite": 5,
+    "valeur_base": 49,
+    "conductivite_mana": 95,
+    "flammabilite": 0,
+    "isolation": 20,
+    "conductivite_electrique": 2,
+    "flottabilite": 22,
+    "luminosite": 18,
+    "fertilite": 0,
+    "transparence": 20,
+    "elasticite": 7,
+    "friction": 14
+  },
+  "tags": [
+    "marin"
+  ],
+  "color": "#EDE7DC",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 301,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "dague",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": {
+    "eau": 0.8,
+    "terre": 0.2
+  },
+  "composition": null,
+  "stats_base": {
+    "durete": 12,
+    "valeur_base": 26,
+    "conductivite_mana": 50
+  }
+}

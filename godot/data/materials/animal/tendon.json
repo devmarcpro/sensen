@@ -1,12 +1,12 @@
 {
   "name_key": "material.tendon.name",
-  "category": "vegetal",
+  "category": "animal",
   "palier": 4,
   "stats": {
-    "durete": 6,
+    "durete": 11,
     "densite": 3,
-    "valeur_base": 11,
-    "conductivite_mana": 30,
+    "valeur_base": 21,
+    "conductivite_mana": 57,
     "flammabilite": 30,
     "isolation": 30,
     "conductivite_electrique": 3,
@@ -36,5 +36,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 6,
+    "valeur_base": 11,
+    "conductivite_mana": 30
+  }
 }

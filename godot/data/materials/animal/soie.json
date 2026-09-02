@@ -1,12 +1,12 @@
 {
   "name_key": "material.soie.name",
-  "category": "vegetal",
+  "category": "animal",
   "palier": 4,
   "stats": {
-    "durete": 4,
+    "durete": 8,
     "densite": 1,
-    "valeur_base": 18,
-    "conductivite_mana": 30,
+    "valeur_base": 34,
+    "conductivite_mana": 57,
     "flammabilite": 55,
     "isolation": 45,
     "conductivite_electrique": 5,
@@ -37,5 +37,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 4,
+    "valeur_base": 18,
+    "conductivite_mana": 30
+  }
 }

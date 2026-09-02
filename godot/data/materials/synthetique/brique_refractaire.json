@@ -3,10 +3,10 @@
   "category": "synthetique",
   "palier": 4,
   "stats": {
-    "durete": 20,
+    "durete": 38,
     "densite": 12,
-    "valeur_base": 24,
-    "conductivite_mana": 5,
+    "valeur_base": 46,
+    "conductivite_mana": 10,
     "flammabilite": 0,
     "isolation": 35,
     "conductivite_electrique": 10,
@@ -40,5 +40,10 @@
     "feu": 0.4,
     "metal": 0.15
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 20,
+    "valeur_base": 24,
+    "conductivite_mana": 5
+  }
 }

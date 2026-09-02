@@ -3,10 +3,10 @@
   "category": "metal",
   "palier": 3,
   "stats": {
-    "durete": 30,
+    "durete": 39,
     "densite": 8,
-    "valeur_base": 12,
-    "conductivite_mana": 12,
+    "valeur_base": 16,
+    "conductivite_mana": 16,
     "flammabilite": 0,
     "isolation": 5,
     "conductivite_electrique": 72,
@@ -34,5 +34,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 30,
+    "valeur_base": 12,
+    "conductivite_mana": 12
+  }
 }

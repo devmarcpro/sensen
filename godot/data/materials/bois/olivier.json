@@ -1,12 +1,12 @@
 {
   "name_key": "material.olivier.name",
   "category": "bois",
-  "palier": 5,
+  "palier": 4,
   "stats": {
-    "durete": 15,
+    "durete": 28,
     "densite": 8,
-    "valeur_base": 12,
-    "conductivite_mana": 16,
+    "valeur_base": 23,
+    "conductivite_mana": 30,
     "flammabilite": 45,
     "isolation": 32,
     "conductivite_electrique": 6,
@@ -36,5 +36,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 15,
+    "valeur_base": 12,
+    "conductivite_mana": 16
+  }
 }

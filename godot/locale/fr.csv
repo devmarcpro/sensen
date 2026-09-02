@@ -1848,6 +1848,15 @@ material.cuivre.name,Cuivre
 material.etain.name,Étain
 material.zinc.name,Zinc
 material.bronze.name,Bronze
+arena.banc_objets.name,"Banc d'objets"
+material.pierre_de_lave.name,"Pierre de lave"
+material.scorie.name,"Scorie"
+material.sel_marin.name,"Sel marin"
+material.eponge.name,"Éponge"
+material.varech.name,"Varech"
+material.os_de_seiche.name,"Os de seiche"
+material.nacre.name,"Nacre"
+material.corail.name,"Corail"
 material.cendre.name,"Cendre"
 material.limon.name,"Limon"
 material.grele.name,"Grêle"

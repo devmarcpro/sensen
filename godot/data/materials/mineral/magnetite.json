@@ -1,12 +1,12 @@
 {
   "name_key": "material.magnetite.name",
   "category": "mineral",
-  "palier": 5,
+  "palier": 3,
   "stats": {
-    "durete": 14,
+    "durete": 18,
     "densite": 9,
-    "valeur_base": 14,
-    "conductivite_mana": 45,
+    "valeur_base": 18,
+    "conductivite_mana": 58,
     "flammabilite": 0,
     "isolation": 18,
     "conductivite_electrique": 30,
@@ -34,5 +34,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 14,
+    "valeur_base": 14,
+    "conductivite_mana": 45
+  }
 }

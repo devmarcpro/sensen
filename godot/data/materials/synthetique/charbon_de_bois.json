@@ -3,10 +3,10 @@
   "category": "synthetique",
   "palier": 1,
   "stats": {
-    "durete": 4,
+    "durete": 2,
     "densite": 2,
-    "valeur_base": 3,
-    "conductivite_mana": 10,
+    "valeur_base": 2,
+    "conductivite_mana": 6,
     "flammabilite": 95,
     "isolation": 40,
     "conductivite_electrique": 15,
@@ -33,6 +33,14 @@
     "mode": "biome",
     "biome_tags": []
   },
-  "wuxing": null,
-  "composition": null
+  "wuxing": {
+    "feu": 0.7,
+    "bois": 0.3
+  },
+  "composition": null,
+  "stats_base": {
+    "durete": 4,
+    "valeur_base": 3,
+    "conductivite_mana": 10
+  }
 }

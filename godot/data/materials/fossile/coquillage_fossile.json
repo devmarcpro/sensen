@@ -3,10 +3,10 @@
   "category": "fossile",
   "palier": 1,
   "stats": {
-    "durete": 7,
+    "durete": 4,
     "densite": 8,
-    "valeur_base": 8,
-    "conductivite_mana": 10,
+    "valeur_base": 4,
+    "conductivite_mana": 6,
     "flammabilite": 0,
     "isolation": 22,
     "conductivite_electrique": 6,
@@ -37,5 +37,10 @@
     "terre": 0.7,
     "eau": 0.3
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 7,
+    "valeur_base": 8,
+    "conductivite_mana": 10
+  }
 }

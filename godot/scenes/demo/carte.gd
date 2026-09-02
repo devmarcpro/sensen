@@ -17,6 +17,7 @@ var centre := Vector2i.ZERO   # cellule au centre de la carte
 var dessin: Control
 var titre: Label
 var _glisse := false
+var _regions_connues: Dictionary = {}   # germes de région dont au moins une cellule est explorée
 var avatar: Paperdoll   # le joueur, dessiné sur sa cellule (designer, point 59)
 
 
@@ -92,6 +93,13 @@ func _dessiner() -> void:
 	if sim == null or sim.monde == null:
 		return
 	var surf = sim.monde.surface
+	# Les régions dont on connaît au moins une cellule : calculées une fois par redessin, depuis les
+	# chunks explorés. Connaître une région suffit à savoir ce qui y festonne — on n'a pas besoin
+	# d'avoir mis le pied sur la cellule exacte du donjon pour qu'on vous en ait parlé.
+	_regions_connues.clear()
+	var n_chunks: int = sim.monde.taille / 32
+	for ch in sim.monde.explores.keys():
+		_regions_connues[surf.germe_region(Vector2i(int(ch.x) / n_chunks, int(ch.y) / n_chunks))] = true
 	var o := _origine()
 	dessin.draw_rect(Rect2(o - Vector2(6, 6), Vector2(_fenetre().x * case_px + 12, _fenetre().y * case_px + 12)), Color(0.05, 0.05, 0.07, 0.96))
 	var j: Dictionary = main.joueur()
@@ -124,7 +132,13 @@ func _dessiner() -> void:
 			match int(sim.monde.danger_de(cell)):
 				1: dessin.draw_rect(r, Color(1.0, 0.5, 0.1, 0.25))
 				2: dessin.draw_rect(r, Color(1.0, 0.1, 0.1, 0.4))
-			var dc: Dictionary = sim.monde.donjon_de_corruption(cell, sim.jour_courant()) if exploree else {}
+			# Un donjon de corruption se sait dès qu'on connaît SA RÉGION, pas seulement sa cellule
+			# (designer 2026-09-02 : « les donjons ne sont pas générés dans le monde » — ils l'étaient,
+			# mais la carte ne les montrait que sur les cellules explorées. Tant qu'il y en avait un sur
+			# huit cellules de terre, il en tombait toujours une dans la zone parcourue ; à une grappe
+			# ou deux par région, on n'en voyait plus aucun et le monde paraissait vide).
+			var connue := exploree or _regions_connues.has(surf.germe_region(cell))
+			var dc: Dictionary = sim.monde.donjon_de_corruption(cell, sim.jour_courant()) if connue else {}
 			if not dc.is_empty():   # un donjon né de la corruption (designer, point 51) : sa teinte d'élément
 				var tel: Dictionary = GameData.config("wuxing").get("teintes", {})
 				var ce := Color.html(str(tel.get(str(dc.element), "#aa3333")))
@@ -135,7 +149,9 @@ func _dessiner() -> void:
 			if info.poi.get("donjon", false):
 				dessin.draw_rect(Rect2(r.position + Vector2(5, 5), Vector2(case_px - 11.0, case_px - 11.0)), Color(0.1, 0.05, 0.1))
 				dessin.draw_rect(Rect2(r.position + Vector2(5, 5), Vector2(case_px - 11.0, case_px - 11.0)), Color(0.9, 0.8, 0.3), false, 1.0)
-			if exploree and not sim.monde.gouffre_de(cell).is_empty():
+			# Le gouffre ne se découvre pas : c'est un repère. Une région entière sait où est son
+			# gouffre, comme elle sait où est sa montagne — on n'a pas besoin d'y être allé.
+			if not sim.monde.gouffre_de(cell).is_empty():
 				# Le gouffre de la région (designer 2026-09-02) : un repère permanent, pas un événement.
 				# Un anneau noir cerné de blanc — il ne ressemble ni au donjon doré, ni au donjon de corruption.
 				var c_g := r.position + Vector2(case_px * 0.5, case_px * 0.5)

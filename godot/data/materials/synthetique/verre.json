@@ -1,12 +1,12 @@
 {
   "name_key": "material.verre.name",
   "category": "synthetique",
-  "palier": 2,
+  "palier": 3,
   "stats": {
-    "durete": 8,
+    "durete": 10,
     "densite": 8,
-    "valeur_base": 6,
-    "conductivite_mana": 20,
+    "valeur_base": 8,
+    "conductivite_mana": 26,
     "flammabilite": 0,
     "isolation": 10,
     "conductivite_electrique": 15,
@@ -37,5 +37,10 @@
     "terre": 0.5,
     "feu": 0.5
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 8,
+    "valeur_base": 6,
+    "conductivite_mana": 20
+  }
 }

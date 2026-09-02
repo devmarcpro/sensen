@@ -3,10 +3,10 @@
   "category": "vegetal",
   "palier": 1,
   "stats": {
-    "durete": 2,
+    "durete": 1,
     "densite": 1,
-    "valeur_base": 3,
-    "conductivite_mana": 8,
+    "valeur_base": 2,
+    "conductivite_mana": 4,
     "flammabilite": 80,
     "isolation": 45,
     "conductivite_electrique": 3,
@@ -36,5 +36,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 2,
+    "valeur_base": 3,
+    "conductivite_mana": 8
+  }
 }

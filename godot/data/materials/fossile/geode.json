@@ -3,10 +3,10 @@
   "category": "fossile",
   "palier": 3,
   "stats": {
-    "durete": 13,
+    "durete": 17,
     "densite": 11,
-    "valeur_base": 22,
-    "conductivite_mana": 45,
+    "valeur_base": 29,
+    "conductivite_mana": 58,
     "flammabilite": 0,
     "isolation": 18,
     "conductivite_electrique": 12,
@@ -34,5 +34,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 13,
+    "valeur_base": 22,
+    "conductivite_mana": 45
+  }
 }

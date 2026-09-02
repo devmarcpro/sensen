@@ -111,7 +111,73 @@ func charger_arene(id: String) -> void:
 	ajouter(j.creature, Vector2i(int(j.pos[0]), int(j.pos[1])), "joueur")
 	for s: Dictionary in arene.spawns.enemies:
 		ajouter(s.creature, Vector2i(int(s.pos[0]), int(s.pos[1])), "ia")
+	if id == "banc_objets":
+		_remplir_banc_objets(arene)
 	maj_vision()
+
+
+## Le banc d'objets (designer 2026-09-02) : « un coffre par catégorie de matériaux avec 999 de chaque
+## item, et un coffre par type d'équipement avec 1 de chaque combinaison possible ». Une carte pour
+## REGARDER : elle sert à juger d'un coup d'œil ce que les paliers et l'étirement des stats ont produit.
+##
+## Le remplissage se fait ici et pas dans la fiche d'arène, parce qu'un conteneur et ses instances
+## d'objets n'existent qu'à l'exécution — une fiche ne peut décrire que la tuile qui les portera.
+func _remplir_banc_objets(arene: Dictionary) -> void:
+	var coffres: Array[Vector2i] = []
+	for c in arene.get("contents", []):
+		if str(c.get("type", "")) == "coffre":
+			coffres.append(Vector2i(int(c.pos[0]), int(c.pos[1])))
+	coffres.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.y < b.y or (a.y == b.y and a.x < b.x))
+	# Rangée du haut : les matériaux, une catégorie par coffre, 999 de chacun.
+	var par_cat := {}
+	for mid in GameData.catalogues.materials.keys():
+		var cat := str(GameData.catalogues.materials[mid].get("category", "?"))
+		if not par_cat.has(cat):
+			par_cat[cat] = []
+		(par_cat[cat] as Array).append(str(mid))
+	var cats: Array = par_cat.keys()
+	cats.sort()
+	var i := 0
+	for cat in cats:
+		if i >= coffres.size():
+			break
+		var uids: Array = []
+		for mid in par_cat[cat]:
+			var pile := generer_objet("materiau_brut", 1, {}, "commun", 0)
+			if pile.is_empty():
+				continue
+			pile.materiau = str(mid)
+			pile.forme = "brut"
+			pile.quantite = 999
+			pile.name_key = GameData.entree("materials", str(mid)).name_key
+			uids.append(pile.uid)
+		_poser_contenant(coffres[i], uids, "coffre")
+		i += 1
+	# Rangée du bas : un coffre par type d'équipement, une pièce par combinaison base × matériau.
+	var par_type := {}
+	for bid in GameData.catalogues.items.keys():
+		var it: Dictionary = GameData.catalogues.items[bid]
+		if not it.has("slots") or (it.slots as Dictionary).is_empty():
+			continue
+		var t := str(it.get("type", "?"))
+		if not par_type.has(t):
+			par_type[t] = []
+		(par_type[t] as Array).append(str(bid))
+	var types: Array = par_type.keys()
+	types.sort()
+	var rng := RandomNumberGenerator.new()
+	for t in types:
+		if i >= coffres.size():
+			break
+		var uids2: Array = []
+		for bid in par_type[t]:
+			for niveau in [1, 6, 12, 20, 30]:   # un exemplaire par palier de profondeur : la progression se voit
+				rng.seed = hash([bid, niveau, "banc"])
+				var o := generer_objet(str(bid), niveau, {"banc": true}, "commun", 0)
+				if not o.is_empty():
+					uids2.append(o.uid)
+		_poser_contenant(coffres[i], uids2, "coffre")
+		i += 1
 
 
 ## Le camp de base (Claims et persistance, étape 7) : une cellule plate revendiquée d'office. Restauré
@@ -6044,7 +6110,10 @@ func _composer_loot(inst: Dictionary, profondeur: int, rng: RandomNumberGenerato
 			for m in _candidats_famille(fam, cats_mat if slot in ["tete", "plaque", "monture"] else []):
 				if not pool.has(m):
 					pool.append(m)
-		var mat_id := _tirer_materiau(pool, profondeur, rng)
+		# Le butin n'est pas limite aux matieres ATTENDUES pour ce composant (designer 2026-09-02) :
+		# toutes peuvent sortir, mais celles qui s'eloignent de l'attendu deviennent rares. Un plastron
+		# de metal est l'ordinaire, un plastron d'eau de mer existe et ne se voit presque jamais.
+		var mat_id := _tirer_materiau(pool, profondeur, rng, _hors_attente(pool, slot))
 		if mat_id.is_empty():
 			continue
 		var mat: Dictionary = GameData.entree("materials", mat_id)
@@ -6092,7 +6161,40 @@ func _candidats_famille(fam: Dictionary, cats_mat: Array = []) -> Array[String]:
 
 ## Le tirage dans un pool de matériaux : les minerais des étages ≤ profondeur pèsent plus, ceux d'un tier
 ## trop profond ne sortent pas.
-func _tirer_materiau(candidats: Array[String], profondeur: int, rng: RandomNumberGenerator) -> String:
+## Les matieres qu'on n'attend PAS pour ce composant : tout le reste du catalogue. Elles peuvent
+## sortir, mais avec un poids qui tient compte de l'ecart — une matiere qui ne tient meme pas la forme
+## du composant (un liquide pour une lame, une poudre pour une plaque) est penalisee une seconde fois.
+func _hors_attente(attendues: Array[String], slot: String) -> Dictionary:
+	# Le résultat ne dépend que du slot et des matières attendues : on le garde. Le recalculer parcourait
+	# les deux cent trente fiches du catalogue à CHAQUE composant de CHAQUE objet généré — quarante-cinq
+	# millisecondes de plus par étage de donjon, mesurées au budget de génération (2026-09-02).
+	var cle_h := slot + "|" + str(attendues.size()) + "|" + (str(attendues[0]) if not attendues.is_empty() else "")
+	if _cache_hors_attente.has(cle_h):
+		return _cache_hors_attente[cle_h]
+	var ea: Dictionary = GameData.config("loot_rules").get("assemblage", {}).get("ecart_attendu", {})
+	var base := float(ea.get("poids_hors_attente", 0.04))
+	if base <= 0.0:
+		return {}
+	var maitresse := slot in ["tete", "plaque", "monture", "lame", "pointe"]
+	var seuil := float(ea.get("durete_min_piece_maitresse", 4))
+	var res := {}
+	for mid in GameData.catalogues.materials.keys():
+		if str(mid) in attendues:
+			continue
+		var m: Dictionary = GameData.catalogues.materials[mid]
+		var poids := base
+		# Une piece maitresse faite d'une matiere sans tenue : possible, mais c'est la curiosite meme.
+		if maitresse and float(m.get("stats", {}).get("durete", 0)) < seuil:
+			poids *= float(ea.get("penalite_forme", 0.15))
+		res[str(mid)] = poids
+	_cache_hors_attente[cle_h] = res
+	return res
+
+
+var _cache_hors_attente: Dictionary = {}   # slot + attendues → les matières hors attente et leur poids
+
+
+func _tirer_materiau(candidats: Array[String], profondeur: int, rng: RandomNumberGenerator, hors: Dictionary = {}) -> String:
 	if candidats.is_empty():
 		return ""
 	# Le PALIER du matériau décide, pas la liste des minerais (designer 2026-09-02) : les bandes de
@@ -6107,10 +6209,21 @@ func _tirer_materiau(candidats: Array[String], profondeur: int, rng: RandomNumbe
 	#     Sans ce poids réduit, un palier trop haut noyait le butin dès qu'il comptait plus de matières
 	#     que le palier légitime : un donjon de niveau 1 rendait 46 % de matériaux de palier 2 ;
 	#   - hors tolérance : écarté, on ne trouve pas de titane dans un donjon de niveau 2.
-	var poids := {}
 	var au_dela := int(la.get("paliers_au_dela", 3))
 	var poids_chance := float(la.get("poids_au_dela", 0.15))
 	var niv := maxi(1, profondeur)
+	# Le pondéré se garde en cache par (candidats, niveau) : il ne dépend que d'eux, et le tirage est
+	# appelé une fois par composant de chaque objet généré — des milliers de fois pour un étage de
+	# donjon. Le recalculer à chaque coup faisait payer la taille du catalogue à chaque objet, et le
+	# catalogue vient de passer de 166 à 197 matières (2026-09-02).
+	var cle_poids := str(candidats.size()) + ":" + str(niv) + ":" + str(hors.size()) + ":" + str(candidats[0]) + str(candidats[candidats.size() - 1])
+	if _cache_poids_paliers.has(cle_poids):
+		return _tirer_pondere_cache(_cache_poids_paliers[cle_poids], rng)
+	var poids := {}
+	for m in hors.keys():   # tout le catalogue, au poids de l'ecart
+		var pal_h := str(int(GameData.catalogues.materials.get(m, {}).get("palier", 1)))
+		if int(pm.get(pal_h, {}).get("profondeur_min", 0)) <= niv:
+			poids[m] = float(hors[m])
 	for m in candidats:
 		var pal := str(int(GameData.catalogues.materials.get(m, {}).get("palier", 1)))
 		var mini := int(pm.get(pal, {}).get("profondeur_min", 0))
@@ -6121,6 +6234,14 @@ func _tirer_materiau(candidats: Array[String], profondeur: int, rng: RandomNumbe
 	if poids.is_empty():   # aucun candidat à portée : on ne rend pas la main vide
 		for m in candidats:
 			poids[m] = 1.0
+	_cache_poids_paliers[cle_poids] = poids
+	return _tirer_pondere_cache(poids, rng)
+
+
+var _cache_poids_paliers: Dictionary = {}   # (candidats, niveau) → poids par matériau : le tirage est appelé des milliers de fois par étage
+
+
+func _tirer_pondere_cache(poids: Dictionary, rng: RandomNumberGenerator) -> String:
 	var total := 0.0
 	for m in poids.keys():
 		total += float(poids[m])

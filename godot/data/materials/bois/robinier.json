@@ -3,10 +3,10 @@
   "category": "bois",
   "palier": 4,
   "stats": {
-    "durete": 15,
+    "durete": 28,
     "densite": 7,
-    "valeur_base": 7,
-    "conductivite_mana": 9,
+    "valeur_base": 13,
+    "conductivite_mana": 17,
     "flammabilite": 50,
     "isolation": 34,
     "conductivite_electrique": 5,
@@ -36,5 +36,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 15,
+    "valeur_base": 7,
+    "conductivite_mana": 9
+  }
 }

@@ -1,12 +1,12 @@
 {
   "name_key": "material.obsidienne.name",
   "category": "roche",
-  "palier": 5,
+  "palier": 4,
   "stats": {
-    "durete": 30,
+    "durete": 57,
     "densite": 15,
-    "valeur_base": 15,
-    "conductivite_mana": 35,
+    "valeur_base": 28,
+    "conductivite_mana": 66,
     "flammabilite": 0,
     "isolation": 15,
     "conductivite_electrique": 15,
@@ -37,5 +37,10 @@
     "terre": 0.6,
     "feu": 0.4
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 30,
+    "valeur_base": 15,
+    "conductivite_mana": 35
+  }
 }

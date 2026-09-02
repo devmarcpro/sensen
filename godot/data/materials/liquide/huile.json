@@ -1,12 +1,12 @@
 {
   "name_key": "material.huile.name",
   "category": "liquide",
-  "palier": 3,
+  "palier": 1,
   "stats": {
     "durete": 0,
     "densite": 8,
-    "valeur_base": 6,
-    "conductivite_mana": 5,
+    "valeur_base": 3,
+    "conductivite_mana": 3,
     "flammabilite": 95,
     "isolation": 30,
     "conductivite_electrique": 5,
@@ -39,5 +39,10 @@
     "feu": 0.6,
     "eau": 0.4
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 0,
+    "valeur_base": 6,
+    "conductivite_mana": 5
+  }
 }

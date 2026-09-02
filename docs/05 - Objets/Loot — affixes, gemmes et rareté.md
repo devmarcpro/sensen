@@ -148,6 +148,17 @@ L'atelier consomme ce que le donjon fournit — jamais l'inverse.
 > **Garde-fou d'affichage** : un matériau vide ne produit plus « X en », l'objet garde son seul nom de base.
 
 
+> [!important] Doctrine — tranchée par le designer le 2026-09-02 : **la rareté d'une composition, c'est son écart à l'attendu**
+> « Pour le loot, évidemment le joueur aura plus de chances de trouver un plastron fait en métal qu'en eau : plus un matériau est éloigné du matériau *attendu*, plus l'apparition de cette composition est rare. »
+>
+> Le butin suit la même liberté que le craft — **toute composition existe** — mais avec sa propre règle de fréquence. Une matière attendue pour un composant sort à poids plein ; toutes les autres sortent aussi, à un poids qui décroît avec l'écart. Un plastron de métal est l'ordinaire ; un plastron d'eau de mer existe et ne se voit presque jamais.
+>
+> **Ce que le tirage ne fait plus.** Il ne choisissait que dans les familles de matières *prévues* pour le composant : le reste du catalogue était inatteignable, quel que soit le nombre de coffres ouverts. La liste des familles reste, mais elle ne dit plus « ce qui est permis » — elle dit **« ce qui est attendu »**, et sert de référence à l'écart.
+>
+> **Deux pénalités, en données** (`loot_rules.assemblage.ecart_attendu`) : `poids_hors_attente` pour toute matière qui n'est pas celle qu'on attend, et `penalite_forme` en plus quand la matière ne tient même pas la forme du composant — un liquide pour une lame, une poudre pour une plaque. Ce sont des curiosités, pas des accidents.
+>
+> **Mesuré** (robot invincible, cinq étages, 118 composants ramassés) : métal 58 %, végétal 15 %, bois 12 %, roche 5 %, synthétique 4 %, **liquide 3 %**, minéral 2 %, terre 1 %. Et les curiosités sortent bien : « Bottes de plaque en Goudron », « Masse en Calcaire, manche en boue », « Casque de plaque en Saule, sangles en encre ».
+
 ## Liens
 - **Dépend de** : [[Effets d'équipement passifs]], [[Qualité d'artisanat]], [[Génération de donjon]], [[Modificateurs d'affinité]]
 - **Alimente** : [[Trésors et artefacts]], [[Monstres rares]], [[Équipement — 14 slots]], [[Jauge de chaîne Wu Xing]], [[Cinq accès au cycle]]

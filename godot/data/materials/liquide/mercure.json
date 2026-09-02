@@ -1,0 +1,45 @@
+{
+  "name_key": "material.mercure.name",
+  "category": "liquide",
+  "palier": 2,
+  "stats": {
+    "durete": 0,
+    "densite": 14,
+    "valeur_base": 26,
+    "conductivite_mana": 60,
+    "flammabilite": 0,
+    "isolation": 8,
+    "conductivite_electrique": 85,
+    "flottabilite": 2,
+    "luminosite": 6,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 2,
+    "friction": 8
+  },
+  "tags": [
+    "toxique"
+  ],
+  "color": "#B9BCC2",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 400,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "seau",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null,
+  "stats_base": {
+    "durete": 0,
+    "valeur_base": 30,
+    "conductivite_mana": 70
+  }
+}

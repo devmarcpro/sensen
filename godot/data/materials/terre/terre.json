@@ -3,10 +3,10 @@
   "category": "terre",
   "palier": 1,
   "stats": {
-    "durete": 3,
+    "durete": 2,
     "densite": 8,
     "valeur_base": 1,
-    "conductivite_mana": 5,
+    "conductivite_mana": 3,
     "flammabilite": 5,
     "isolation": 35,
     "conductivite_electrique": 20,
@@ -34,5 +34,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 3,
+    "valeur_base": 1,
+    "conductivite_mana": 5
+  }
 }

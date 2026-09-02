@@ -1,12 +1,12 @@
 {
   "name_key": "material.acajou.name",
   "category": "bois",
-  "palier": 5,
+  "palier": 4,
   "stats": {
-    "durete": 12,
+    "durete": 23,
     "densite": 6,
-    "valeur_base": 12,
-    "conductivite_mana": 12,
+    "valeur_base": 23,
+    "conductivite_mana": 23,
     "flammabilite": 55,
     "isolation": 35,
     "conductivite_electrique": 5,
@@ -36,5 +36,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 12,
+    "valeur_base": 12,
+    "conductivite_mana": 12
+  }
 }

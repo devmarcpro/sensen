@@ -1,12 +1,12 @@
 {
   "name_key": "material.brique.name",
   "category": "synthetique",
-  "palier": 2,
+  "palier": 3,
   "stats": {
-    "durete": 18,
+    "durete": 23,
     "densite": 12,
-    "valeur_base": 4,
-    "conductivite_mana": 5,
+    "valeur_base": 5,
+    "conductivite_mana": 6,
     "flammabilite": 0,
     "isolation": 35,
     "conductivite_electrique": 10,
@@ -37,5 +37,10 @@
     "terre": 0.7,
     "feu": 0.3
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 18,
+    "valeur_base": 4,
+    "conductivite_mana": 5
+  }
 }

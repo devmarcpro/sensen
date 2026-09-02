@@ -3,10 +3,10 @@
   "category": "gemme",
   "palier": 3,
   "stats": {
-    "durete": 40,
+    "durete": 52,
     "densite": 9,
-    "valeur_base": 30,
-    "conductivite_mana": 60,
+    "valeur_base": 39,
+    "conductivite_mana": 78,
     "flammabilite": 0,
     "isolation": 10,
     "conductivite_electrique": 2,
@@ -36,5 +36,10 @@
   "wuxing": {
     "terre": 1.0
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 40,
+    "valeur_base": 30,
+    "conductivite_mana": 60
+  }
 }

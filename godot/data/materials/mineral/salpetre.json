@@ -5,8 +5,8 @@
   "stats": {
     "durete": 3,
     "densite": 7,
-    "valeur_base": 7,
-    "conductivite_mana": 5,
+    "valeur_base": 6,
+    "conductivite_mana": 4,
     "flammabilite": 80,
     "isolation": 22,
     "conductivite_electrique": 8,
@@ -37,5 +37,10 @@
     "feu": 0.5,
     "terre": 0.5
   },
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 3,
+    "valeur_base": 7,
+    "conductivite_mana": 5
+  }
 }

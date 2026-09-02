@@ -496,6 +496,15 @@ material.breche_volcanique.name,Volcanic breccia
 material.brique.name,Brick
 material.brique_refractaire.name,Firebrick
 material.bronze.name,Bronze
+arena.banc_objets.name,"Item bench"
+material.pierre_de_lave.name,"Lava stone"
+material.scorie.name,"Slag"
+material.sel_marin.name,"Sea salt"
+material.eponge.name,"Sponge"
+material.varech.name,"Kelp"
+material.os_de_seiche.name,"Cuttlebone"
+material.nacre.name,"Mother-of-pearl"
+material.corail.name,"Coral"
 material.cendre.name,"Ash"
 material.limon.name,"Silt"
 material.grele.name,"Hail"

@@ -1,12 +1,12 @@
 {
   "name_key": "material.argile.name",
   "category": "terre",
-  "palier": 3,
+  "palier": 2,
   "stats": {
-    "durete": 4,
+    "durete": 3,
     "densite": 10,
     "valeur_base": 2,
-    "conductivite_mana": 8,
+    "conductivite_mana": 7,
     "flammabilite": 0,
     "isolation": 40,
     "conductivite_electrique": 30,
@@ -34,5 +34,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 4,
+    "valeur_base": 2,
+    "conductivite_mana": 8
+  }
 }

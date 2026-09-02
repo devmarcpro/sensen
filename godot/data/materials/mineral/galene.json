@@ -1,12 +1,12 @@
 {
   "name_key": "material.galene.name",
   "category": "mineral",
-  "palier": 4,
+  "palier": 3,
   "stats": {
-    "durete": 10,
+    "durete": 13,
     "densite": 13,
-    "valeur_base": 11,
-    "conductivite_mana": 22,
+    "valeur_base": 14,
+    "conductivite_mana": 29,
     "flammabilite": 0,
     "isolation": 15,
     "conductivite_electrique": 40,
@@ -34,5 +34,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 10,
+    "valeur_base": 11,
+    "conductivite_mana": 22
+  }
 }

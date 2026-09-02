@@ -1,12 +1,12 @@
 {
   "name_key": "material.laiton.name",
   "category": "metal",
-  "palier": 2,
+  "palier": 1,
   "stats": {
-    "durete": 18,
+    "durete": 10,
     "densite": 9,
-    "valeur_base": 7,
-    "conductivite_mana": 22,
+    "valeur_base": 4,
+    "conductivite_mana": 12,
     "flammabilite": 0,
     "isolation": 5,
     "conductivite_electrique": 68,
@@ -34,5 +34,10 @@
     "biome_tags": []
   },
   "wuxing": null,
-  "composition": null
+  "composition": null,
+  "stats_base": {
+    "durete": 18,
+    "valeur_base": 7,
+    "conductivite_mana": 22
+  }
 }

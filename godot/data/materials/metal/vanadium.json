@@ -1,0 +1,43 @@
+{
+  "name_key": "material.vanadium.name",
+  "category": "metal",
+  "palier": 3,
+  "stats": {
+    "durete": 47,
+    "densite": 6,
+    "valeur_base": 31,
+    "conductivite_mana": 36,
+    "flammabilite": 0,
+    "isolation": 9,
+    "conductivite_electrique": 52,
+    "flottabilite": 4,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 18,
+    "friction": 27
+  },
+  "tags": [],
+  "color": "#7E838C",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 423,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null,
+  "stats_base": {
+    "durete": 36,
+    "valeur_base": 24,
+    "conductivite_mana": 28
+  }
+}
