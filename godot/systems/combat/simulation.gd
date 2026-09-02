@@ -32,6 +32,11 @@ var camp_sauve: Dictionary = {}      # le camp mis de côté pendant une expédi
 var lieu: String = "arene"           # "arene" | "camp" | "donjon"
 static var slot_autosave := "monde"  # l'emplacement des sauvegardes automatiques — les tests et le fuzz le détournent pour ne jamais écraser une vraie partie
 var gouffres_vides: Dictionary = {}  # "<id de gouffre>|<etage>" → true : un etage vide le reste POUR TOUJOURS (designer 2026-09-02)
+## Ce qu'on a creusé dans une mine : "<id de mine>|<etage>" → [index de tuiles]. Une mine est un
+## OUVRAGE, pas une excursion ([[Mine sous une cellule]]) : l'espace qu'on a ouvert reste ouvert, d'une
+## visite à l'autre et d'une session à l'autre. On ne stocke pas la grille — elle est déterministe —
+## seulement la LISTE de ce qu'on a enlevé, ce qui tient dans quelques centaines d'entiers.
+var mines_creusees: Dictionary = {}
 var nom_partie := ""                 # l'emplacement de CETTE partie (designer 2026-09-02) : plusieurs parties, une sauvegarde chacune
 var prochain_donjon: int = 1         # id du prochain donjon lancé depuis le camp
 var monde: Monde = null              # la surface comme fenêtre glissante (étape 8.2a)
@@ -481,6 +486,56 @@ func _descendre_au_gouffre(e: Dictionary, cell: Vector2i) -> bool:
 	return true
 
 
+## Creuser un puits (designer 2026-09-02 : « on rajoute un escalier pour descendre et l'étage du dessous
+## est généré », et « le minage en profondeur se fait sur une cellule au joueur »). Voir
+## [[Mine sous une cellule]]. Deux usages, un seul geste :
+##   - au CAMP, sur une cellule qu'on possède : le puits ouvre la mine et fait descendre à l'étage 1 ;
+##   - DANS la mine, sur n'importe quelle tuile déjà dégagée : il ouvre l'étage suivant.
+## On ne creuse pas n'importe où — la cellule doit être revendiquée. Une mine est un ouvrage, pas une
+## excursion : elle demande un territoire, et elle reste.
+func creuser_un_puits(e: Dictionary, tick: int) -> bool:
+	if e.controle != "joueur":
+		return false
+	var m: Dictionary = GameData.config("planete").get("mine", {})
+	if lieu == "camp":
+		if monde == null:
+			return false
+		var cell := monde.cellule_de(e.pos)
+		if not monde.claims.has(cell):
+			EventBus.emettre(&"journal", [&"journal.puits_hors_claim", {}])
+			return false
+		if int(e.endurance) < int(m.get("endurance_puits", 20)):
+			EventBus.emettre(&"journal", [&"journal.puits_epuise", {}])
+			return false
+		e["retour"] = e.pos
+		_sauver_camp(e)
+		expedition = {}
+		etages_visites.clear()
+		e.endurance = maxi(0, int(e.endurance) - int(m.get("endurance_puits", 20)))
+		gagner_xp(e, "terrassement", int(m.get("xp_puits", 12)))
+		var fond := int(m.get("etages_max", 999))
+		donjon = {"etages_fixes": [fond, fond], "corruption": 0.0, "cellule": cell,
+			"mine": true, "cellule_mine": cell}
+		EventBus.emettre(&"journal", [&"journal.mine_depart", {}])
+		charger_donjon("ruine", graine, Mine.id_de(graine, cell), 1, e)
+		return true
+	if not bool(donjon.get("mine", false)):
+		return false
+	if int(e.endurance) < int(m.get("endurance_puits", 20)):
+		EventBus.emettre(&"journal", [&"journal.puits_epuise", {}])
+		return false
+	# Le puits part de LA TUILE OÙ L'ON SE TIENT : c'est la promesse de Dwarf Fortress — on décide où
+	# descendre, on ne cherche pas un escalier que le monde aurait posé pour nous.
+	var prochain: int = int(donjon.etage) + 1
+	e.endurance = maxi(0, int(e.endurance) - int(m.get("endurance_puits", 20)))
+	e.compteur = tick + _ticks_avec_statuts(e, int(m.get("ticks_puits", 40)))
+	gagner_xp(e, "terrassement", int(m.get("xp_puits", 12)))
+	e.etage_depuis = int(donjon.etage)
+	EventBus.emettre(&"journal", [&"journal.puits_creuse", {"etage": prochain}])
+	charger_donjon(str(donjon.theme), int(donjon.graine), int(donjon.id), prochain, e)
+	return true
+
+
 ## Cet étage du gouffre a-t-il déjà été vidé ? Le terrain, lui, se régénère de sa graine — il est
 ## déterministe, le stocker ne servirait à rien ; ce qui ne revient pas, ce sont les êtres et le butin.
 func gouffre_etage_vide(etage: int) -> bool:
@@ -498,6 +553,11 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 	var etages: int = donjon.get("etages", 0)
 	var corruption_locale: float = float(donjon.get("corruption", 0.0))
 	var cellule_donjon: Vector2i = donjon.get("cellule", Vector2i(-9999, -9999))
+	# Une mine n'est pas un donjon : pas de salles, pas de couloirs, pas d'habitants — un bloc de roche
+	# pleine avec une chambre d'arrivee (Mine sous une cellule). Le reste de cette fonction lui va tel
+	# quel : ses `spawns`, `coffres` et `filons` sont vides, donc les boucles ne font rien.
+	var est_mine := bool(donjon.get("mine", false))
+	var cellule_mine: Vector2i = donjon.get("cellule_mine", Vector2i(-9999, -9999))
 	if etages == 0:
 		var r := RandomNumberGenerator.new()
 		r.seed = hash([graine, id_donjon])
@@ -529,19 +589,35 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 		var ou: Vector2i = sauve.donjon.escalier if (not joueur.is_empty() and int(joueur.get("etage_depuis", 0)) > etage and sauve.donjon.escalier != null) else sauve.donjon.entree
 		_reprendre(joueur, ou)
 		return
-	var e := gen.generer_etage(graine, id_donjon, etage, nb, etage == etages)
+	var e: Dictionary = Mine.generer_etage(graine, id_donjon, etage) if est_mine else gen.generer_etage(graine, id_donjon, etage, nb, etage == etages)
 	var cr: Dictionary = GameData.config("planete").get("corruption", {})
 	var corruption_etage := minf(100.0, corruption_locale + float(etage) * float(cr.get("corruption_par_etage", 8)))
 	donjon = {"theme": theme_id, "graine": graine, "id": id_donjon, "etage": etage, "etages": etages,
 		"salles": gen._nb_salles(e), "escalier": e.escalier, "boss": e.boss, "entree": e.entree,
 		"corruption": corruption_locale, "corruption_etage": corruption_etage, "cellule": cellule_donjon,
+		"mine": est_mine, "cellule_mine": cellule_mine,
 		"profondeur": etage + int(corruption_etage / float(cr.get("profondeur_par_corruption", 25)))}
 	grille = Grille.depuis_etage(e, GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
-	grille.materiau_defaut = materiau_mur_etage(theme, etage)
-	_poches_de_strates(theme, etage, graine, id_donjon)
+	var etage_matiere: int = Mine.profondeur_de(etage) if est_mine else etage
+	grille.materiau_defaut = materiau_mur_etage(theme, etage_matiere)
+	_poches_de_strates(theme, etage_matiere, graine, id_donjon)
 	for idx in e.filons.keys():
 		grille.materiaux[idx] = e.filons[idx]
 		grille.poser_contenu(Vector2i(int(idx) % grille.largeur, int(idx) / grille.largeur), "filon")
+	if est_mine:
+		# Le sol d'une mine est la ROCHE qu'on vient d'y enlever, pas l'herbe du dehors : sans ça, la
+		# chambre d'arrivée s'affichait en gazon vert à quatre étages sous terre.
+		for i_sol in grille.largeur * grille.hauteur_grille:
+			grille.sols[i_sol] = grille.materiau_defaut
+	if est_mine:
+		# La galerie déjà creusée se rouvre : le terrain est déterministe, seule la liste de ce qu'on a
+		# enlevé est mémorisée. Redescendre dans sa mine, c'est retrouver son chantier, pas la roche.
+		for idx_m in mines_creusees.get("%d|%d" % [id_donjon, etage], []):
+			var pm := grille.pos_de(int(idx_m))
+			grille.contenu[int(idx_m)] = 0
+			grille.materiaux.erase(int(idx_m))
+			grille.hauteurs[int(idx_m)] = Mine.H_BASE
+			grille.marquer(pm)
 	_reinitialiser()
 	if joueur.is_empty():
 		ajouter(theme.get("joueur", "aventurier"), e.entree, "joueur")
@@ -1320,6 +1396,11 @@ func _creuser(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	_quitter_garde(e)
 	e.orientation = vers - e.pos
 	_memoriser_terrain(vers)
+	if bool(donjon.get("mine", false)):   # dans une mine, ce qu'on ouvre reste ouvert (Mine sous une cellule)
+		var cle_m := "%d|%d" % [int(donjon.get("id", 0)), int(donjon.get("etage", 1))]
+		var deja: Array = mines_creusees.get(cle_m, [])
+		deja.append(grille.idx(vers))
+		mines_creusees[cle_m] = deja
 	grille.contenu[grille.idx(vers)] = 0
 	grille.materiaux.erase(grille.idx(vers))
 	grille.hauteurs[grille.idx(vers)] = grille.h(e.pos)   # la brèche est au niveau de celui qui creuse
@@ -5339,7 +5420,7 @@ func sauvegarder(nom: String = "") -> bool:
 	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "resume": resume_partie(), "graine": graine, "graine_monde": graine_monde, "planete_options": planete_options, "identifies": identifies, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
 		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores,
 		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire, "vacances": monde.vacances, "villages": monde.villages, "heritiers": monde.heritiers, "vacances_guildes": monde.vacances_guildes,
-		"modifs_terrain": modifs_terrain, "portails": portails, "gouffres_vides": gouffres_vides,
+		"modifs_terrain": modifs_terrain, "portails": portails, "gouffres_vides": gouffres_vides, "mines_creusees": mines_creusees,
 		"carte_cache": monde.carte_cache_serialise()})   # indexés par position monde, donc valables au rechargement
 	ok = Sauvegarde.ecrire(nom, "surface.json", surface) and ok
 	ok = Sauvegarde.ecrire(nom, "entities.json", {"entites": autres, "ordre": ordre_autres, "contenants": contenants_monde}) and ok
@@ -5468,6 +5549,7 @@ func charger_sauvegarde(nom: String = "") -> bool:
 	monde.centre = Vector2i(-1, -1)
 	modifs_terrain = w.get("modifs_terrain", {})   # après _reinitialiser, qui les vide : ce que le monde doit rendre
 	gouffres_vides = w.get("gouffres_vides", {})   # les étages de gouffre déjà vidés : ils le restent d'une session à l'autre
+	mines_creusees = w.get("mines_creusees", {})   # une mine est un ouvrage : la galerie creusée traverse les sessions
 	monde.carte_cache_charger(w.get("carte_cache", {}))   # la carte du monde se souvient d'elle-même (designer 2026-09-02)
 	portails = w.get("portails", {})               # et les brèches du Passeur, indexées par position monde
 	grille = monde.fenetre(monde.cellule_de(joueur_sauve.pos), GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
@@ -7796,6 +7878,10 @@ func intention(id: String, i: Dictionary) -> bool:
 				return true
 		"creuser":
 			ok = _creuser(e, i.get("vers", Vector2i(-1, -1)), h.ticks)
+		"puits":   # creuser un puits : ouvrir la mine, ou descendre d'un étage (Mine sous une cellule)
+			if creuser_un_puits(e, h.ticks):
+				EventBus.dispatcher()
+				return true   # la grille a changé : plus rien à finir sur l'ancienne
 		"cueillir":
 			ok = _cueillir(e, i.get("vers", Vector2i(-1, -1)), h.ticks)
 		"terrasser":

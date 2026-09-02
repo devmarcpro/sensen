@@ -178,6 +178,21 @@ func _ready() -> void:
 	elif arene > 0:
 		scene.arene_courante = arene
 		scene._charger()
+	for im in args.size():   # --mine N : la mine sous sa terre, a l'etage N (Mine sous une cellule)
+		if args[im] != "--mine" or scene.sim == null:
+			continue
+		var jm: Dictionary = scene.joueur()
+		var cellm: Vector2i = scene.sim.monde.cellule_de(jm.pos)
+		scene.sim.monde.claims[cellm] = {"role": "base"}   # on ne creuse que sur sa terre : on la lui donne
+		jm.endurance = int(jm.endurance_max)
+		scene.sim.creuser_un_puits(jm, 0)
+		var vise: int = int(args[im + 1]) if im + 1 < args.size() else 1
+		while int(scene.sim.donjon.get("etage", 1)) < vise:
+			var jm2: Dictionary = scene.joueur()
+			jm2.endurance = int(jm2.endurance_max)
+			if not scene.sim.creuser_un_puits(jm2, 0):
+				break
+		scene._apres_changement_de_grille()
 	if "--donjon" in args and scene.sim != null:   # --donjon : descendre dans une ruine depuis le camp (voile, brèches…)
 		var jd: Dictionary = scene.joueur()
 		scene.sim.charger_donjon("ruine", 7, 7, 1, jd)

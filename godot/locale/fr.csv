@@ -2724,3 +2724,10 @@ creature.ver_de_terre.name,Ver de terre
 item.carapace.name,Carapace
 item.corne.name,Corne
 item.plume.name,Plume
+journal.mine_depart,Vous ouvrez un puits sous votre terre. La mine commence.
+journal.puits_creuse,Le puits perce le plancher : étage {etage} de la mine.
+journal.puits_hors_claim,On ne creuse que sous une cellule qui vous appartient.
+journal.puits_epuise,Vous n'avez plus l'endurance de percer un puits.
+option.puits,Creuser un puits
+ui.mine,"MINE · étage {etage} · creusez ; sur place, creusez un puits pour descendre"
+ui.mode.mine,MINE — le temps n'avance qu'à l'action

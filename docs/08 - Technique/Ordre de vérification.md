@@ -60,6 +60,9 @@ Un critère de performance à valider avant de passer à l'étape suivante. **Un
 > [!info] Ajout du 2026-09-03 — **la sonde de la faune**
 > `Godot --headless --path godot res://scenes/tests/sonde_faune.tscn` — chaque bête s'instancie (action, squelette, dépouille) et chaque biome annonce sa part de paisible, jour et nuit. À passer dès qu'on touche au catalogue des créatures ou aux pools de biome : une action mal orthographiée dans une fiche ne se voit autrement qu'en jeu, au moment où la bête apparaît.
 
+> [!info] Ajout du 2026-09-03 — **la sonde de la mine**
+> `Godot --headless --path godot res://scenes/tests/sonde_mine.tscn` — le puits refuse hors claim, l'étage est plein et sans habitant, la roche durcit en descendant, et la galerie creusée est encore là après un aller-retour au jour. C'est elle qui a trouvé que la palette de mur s'inversait entre les étages 2 et 3.
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Budgets de performance]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]

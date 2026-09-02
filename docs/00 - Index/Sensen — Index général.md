@@ -35,7 +35,7 @@ Puis, selon le besoin : **[[Vers la production]]** (ce qui reste avant de coder)
 | Carte | Ce qu'elle couvre | Notes |
 |---|---|---|
 | **[[Carte — Vision]]** | pitch, identité, inspirations, direction artistique | 6 |
-| **[[Carte — Monde]]** | grille, hauteur, biomes, donjons, météo, corruption | 27 |
+| **[[Carte — Monde]]** | grille, hauteur, biomes, donjons, météo, corruption | 28 |
 | **[[Carte — Combat]]** | action-time, Wu Xing, chaîne, garde, modules | 31 |
 | **[[Carte — Progression]]** | les trois axes, talents, potentiel, races, classes | 17 |
 | **[[Carte — Objets]]** | matériaux, craft compositionnel, équipement, loot | 26 |

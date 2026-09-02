@@ -181,7 +181,7 @@
       },
       "gradient_bord": 30.0,
       "niveau_par_cellule_distance": 0.18,
-    "niveau_courbe_distance": 2.0,
+      "niveau_courbe_distance": 2.0,
       "recherche_max": 120,
       "niveau_par_fusion": 1,
       "garantie_depart": {
@@ -395,5 +395,13 @@
       "pas": 1000.0
     }
   ],
-  "monde_ratio": 0.5
+  "monde_ratio": 0.5,
+  "mine": {
+    "_doc": "La mine sous une cellule du joueur (designer 2026-09-02, voir « Mine sous une cellule »). On y descend en creusant un PUITS depuis la tuile ou l'on se tient, sur une cellule revendiquee. profondeur_par_etage : un etage de mine vaut cette part d'un etage de gouffre pour la bande de materiau — hypothese en attente d'arbitrage, un seul chiffre a changer.",
+    "profondeur_par_etage": 0.5,
+    "etages_max": 999,
+    "ticks_puits": 40,
+    "endurance_puits": 20,
+    "xp_puits": 12
+  }
 }

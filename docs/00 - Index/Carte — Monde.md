@@ -6,7 +6,7 @@ statut: décidé
 etape: 8
 ---
 
-Le monde continu : sa génération, sa structure, ce qui l'habite et ce qui le fait vivre. 27 notes.
+Le monde continu : sa génération, sa structure, ce qui l'habite et ce qui le fait vivre. 28 notes.
 
 **Génération**
 - **[[Génération par couches de bruit]]** — le principe fondateur : 8 couches qui définissent biomes et contenu.

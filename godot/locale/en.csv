@@ -2715,3 +2715,10 @@ creature.ver_de_terre.name,Earthworm
 item.carapace.name,Carapace
 item.corne.name,Horn
 item.plume.name,Feather
+journal.mine_depart,You sink a shaft under your land. The mine begins.
+journal.puits_creuse,The shaft breaks through: mine level {etage}.
+journal.puits_hors_claim,You can only dig under a cell you own.
+journal.puits_epuise,You lack the stamina to sink a shaft.
+option.puits,Sink a shaft
+ui.mine,"MINE · level {etage} · dig; where you stand, sink a shaft to go deeper"
+ui.mode.mine,MINE — time only moves when you act

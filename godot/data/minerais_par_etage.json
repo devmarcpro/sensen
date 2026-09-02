@@ -129,7 +129,7 @@
   ],
   "croissance_par_etage": 0.25,
   "palette_mur": {
-    "_doc": "Stratification verticale : matériau des murs par bande d'étage ; en dessous de etage_min, le thème garde son materiau_mur.",
+    "_doc": "Stratification verticale : materiau des murs par bande d'etage ; en dessous de etage_min, le theme garde son materiau_mur (pierre, durete 13). Les duretes doivent CROITRE de bande en bande — l'ardoise (12) etait plus tendre que la pierre des etages 1-2 et la pente s'inversait (sonde de la mine, 2026-09-03).",
     "etage_min": 3,
     "bandes": [
       {
@@ -137,32 +137,39 @@
           1,
           2
         ],
-        "materiau": "calcaire"
+        "materiau": "pierre"
       },
       {
         "etages": [
           3,
           4
         ],
-        "materiau": "ardoise"
+        "materiau": "breche_volcanique"
       },
       {
         "etages": [
           5,
           6
         ],
-        "materiau": "basalte"
+        "materiau": "andesite"
       },
       {
         "etages": [
           7,
           9
         ],
-        "materiau": "granit"
+        "materiau": "basalte"
       },
       {
         "etages": [
           10,
+          13
+        ],
+        "materiau": "granit"
+      },
+      {
+        "etages": [
+          14,
           999
         ],
         "materiau": "granit_noir"

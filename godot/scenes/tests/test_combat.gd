@@ -4864,9 +4864,31 @@ func test_palette_etage() -> void:
 	var s := Simulation.new(140)
 	var theme := GameData.entree("dungeon_themes", "ruine")
 	verifier(s.materiau_mur_etage(theme, 1) == "pierre" and s.materiau_mur_etage(theme, 2) == "pierre", "étages 1-2 : le thème (pierre)")
-	verifier(s.materiau_mur_etage(theme, 3) == "ardoise" and s.materiau_mur_etage(theme, 5) == "basalte" and s.materiau_mur_etage(theme, 8) == "granit" and s.materiau_mur_etage(theme, 12) == "granit_noir", "3 ardoise · 5 basalte · 8 granit · 12 granit noir")
+	# Le test nommait les roches une par une ; changer la palette le cassait alors que la RÈGLE tenait
+	# toujours. Ce qu'on vérifie, c'est la PENTE : chaque bande annonce la roche que la palette dit, et
+	# une bande plus profonde n'est jamais plus tendre que la précédente (sonde de la mine, 2026-09-03).
+	var bandes: Array = GameData.config("minerais_par_etage").palette_mur.bandes
+	var pente_ok := true
+	var dur_prec := 0
+	var dit_juste := true
+	for b in bandes:
+		var e_b := int(b.etages[0])
+		if e_b < int(GameData.config("minerais_par_etage").palette_mur.get("etage_min", 3)):
+			continue
+		if s.materiau_mur_etage(theme, e_b) != str(b.materiau):
+			dit_juste = false
+		var dur := int(GameData.entree("materials", str(b.materiau)).stats.durete)
+		if dur < dur_prec:
+			pente_ok = false
+		dur_prec = dur
+	verifier(dit_juste, "chaque bande de la palette rend sa roche (%d bandes)" % bandes.size())
+	verifier(pente_ok, "la dureté CROÎT de bande en bande : creuser ralentit avec l'étage")
+	var bande_6 := ""
+	for b2 in bandes:
+		if 6 >= int(b2.etages[0]) and 6 <= int(b2.etages[1]):
+			bande_6 = str(b2.materiau)
 	s.charger_donjon("ruine", 140, 17, 6)
-	verifier(s.grille.materiau_defaut == "basalte", "étage 6 chargé : les murs sont de basalte")
+	verifier(s.grille.materiau_defaut == bande_6, "étage 6 chargé : les murs sont ce que la palette annonce (%s)" % bande_6)
 	var comptes := {}
 	for y in s.grille.hauteur_grille:
 		for x in s.grille.largeur:
@@ -4874,10 +4896,12 @@ func test_palette_etage() -> void:
 			if "destructible" in s.grille.contenu_de(t).get("tags", []):
 				var m := s.grille.materiau_de(t)
 				comptes[m] = int(comptes.get(m, 0)) + 1
-	verifier(int(comptes.get("basalte", 0)) > int(comptes.get("granit", 0)) and int(comptes.get("granit", 0)) > 0 and int(comptes.get("ardoise", 0)) > 0, "poches de strates : basalte majoritaire, taches de granit et d'ardoise (%s)" % str(comptes))
-	var d_bas := int(GameData.entree("materials", "basalte").stats.durete)
-	var d_cal := int(GameData.entree("materials", "calcaire").stats.durete)
-	verifier(d_bas > d_cal, "le basalte (%d) est plus dur que le calcaire (%d) : creuser ralentit avec l'étage" % [d_bas, d_cal])
+	# Pareil pour les poches : ce qui compte est que la roche de la bande DOMINE et que des taches de la
+	# bande d'au-dessus et d'en dessous existent — pas le nom de ces trois roches.
+	var saut := int(GameData.config("minerais_par_etage").palette_mur.poches.get("saut", 2))
+	var m_dur := s.materiau_mur_etage(theme, 6 + saut)
+	var m_tendre := s.materiau_mur_etage(theme, maxi(3, 6 - saut))
+	verifier(int(comptes.get(bande_6, 0)) > int(comptes.get(m_dur, 0)) and int(comptes.get(m_dur, 0)) > 0 and int(comptes.get(m_tendre, 0)) > 0, "poches de strates : %s majoritaire, taches de %s et de %s (%s)" % [bande_6, m_dur, m_tendre, str(comptes)])
 
 
 # ---------------------------------------------------------------- Effets d'équipement types
