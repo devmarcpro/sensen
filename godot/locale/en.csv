@@ -1964,6 +1964,7 @@ journal.station_refusee,no heavy station on a field
 journal.statut,{nom} suffers {statut} ({duree} ticks)
 journal.statut_betail,"{nom} is now treated as livestock"
 journal.statut_degats,{nom} suffers from {statut}: {degats} damage
+journal.cumul," (×{n})"
 journal.statut_resident,"{nom} is now treated as a resident"
 journal.statut_soin,"{nom}: {statut} restores {soin} HP"
 journal.stock_retire,"{nom} ×{n} taken from the stock"

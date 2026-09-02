@@ -195,6 +195,12 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > **Ce qui reste à faire** : à **1000 × 620** et au-dessus, plus rien n'est coupé. À **900 × 560**, les lignes les plus longues du détail d'un objet mordent encore de quelques pixels sur le bord, et la colonne des noms du sac tronque. Il faudrait empiler les colonnes sous un seuil de largeur plutôt que continuer à les serrer — c'est une refonte du gabarit, pas un réglage. Le **débordement vertical** n'est pas traité non plus : en 560 px de haut, le bas de la liste et la hotbar sortent du cadre.
 
 
+> [!success] Codé le 2026-09-02 — un seul poison écrivait sept lignes de journal
+> Trouvé en faisant jouer le robot (`parcours.tscn`, graine 31) et en **regardant ses captures** : sur un écran de combat, sept lignes consécutives « Aventurier souffre de Poison : 2 dégâts · 3 · 2 · 1 · 2 · 1 · 1 ». Le journal ne garde que neuf lignes : un seul statut qui tique effaçait donc tout le combat. C'est le même défaut que les « Bandit attend » ×8 du parcours du 2026-08-30, corrigé à l'époque pour les attentes seulement.
+> Une ligne dont la clé est listée dans `styles.journal.cumulables` **se cumule dans la précédente** tant que ses champs d'identité (qui, quel statut) ne changent pas : le champ numérique s'additionne et la ligne porte le nombre de fois — « Aventurier souffre de Poison : 10 dégâts (×5) ». Un autre statut, ou une autre cible, ouvre une nouvelle ligne.
+> Vérifié par `scenes/tests/sonde_journal.tscn` : la suite ne charge pas les scripts d'écran, donc la sonde ouvre la scène du jeu et parle directement à son journal.
+
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

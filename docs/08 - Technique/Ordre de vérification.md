@@ -48,6 +48,12 @@ Un critère de performance à valider avant de passer à l'étape suivante. **Un
 > « refais toutes les captures et rajoutes-en, et fais-en des GIF plutôt que de simples captures ». Une image fixe ne montre ni l'horloge qui tourne, ni le combat qui se résout, ni la pluie. `capture.tscn` sait désormais rendre une **suite d'images** : `--gif N` (nombre de prises), `--gif-pas P` (images de rendu entre deux), `--gif-ticks T` (ticks de simulation avancés entre deux) et `--gif-marcher N` (pas du joueur entre deux) — c'est ce dernier qui fait vraiment le film, sans mouvement un GIF n'est qu'une image répétée. Godot ne sait pas écrire de GIF : `tools/monter_gif.py` monte les PNG, les met à l'échelle et quantifie la palette. Le README anime le camp, le village, le donjon, le combat et l'orage ; les écrans d'interface restent des images fixes, où rien ne bouge.
 
 
+> [!success] Codé le 2026-09-02 — deux sondes de plus, parce que les tests ne voient pas tout
+> `scenes/tests/sonde_monde.tscn` **compte ce que la carte montre** — donjons de corruption, gouffres, régions, part des terres. C'est elle qui a chiffré les « beaucoup beaucoup trop » de donjons (319 pour un carré de 81 cellules) et démasqué le donjon de départ de niveau 121.
+> `scenes/tests/sonde_journal.tscn` vérifie que les lignes répétées du journal se cumulent. La suite ne charge jamais les scripts d'écran : elle ouvre donc la scène du jeu et parle à son journal.
+> Les deux tournent en une poignée de secondes et disent des **chiffres**, là où une capture ne dit qu'une impression.
+
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Budgets de performance]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]

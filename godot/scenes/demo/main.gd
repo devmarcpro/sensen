@@ -605,7 +605,33 @@ func _sur_journal(cle: String, params: Dictionary) -> void:
 			p[k] = nom_objet(v)
 		else:
 			p[k] = tr(v) if (v is String and v.contains(".")) else v
+	# Les lignes qui reviennent tique apres tique se cumulent dans la precedente (styles.journal) :
+	# un seul poison ecrivait sept lignes d'affilee et noyait tout le reste du combat.
+	var champ := str(GameData.config("styles").get("journal", {}).get("cumulables", {}).get(cle, ""))
+	if not champ.is_empty() and p.has(champ):
+		var identite := {}
+		for k in p.keys():
+			if k != champ:
+				identite[k] = p[k]
+		if cle == _cumul_cle and identite == _cumul_identite and not journal.is_empty():
+			_cumul_total += float(p[champ])
+			_cumul_fois += 1
+			p[champ] = int(round(_cumul_total)) if _cumul_total == round(_cumul_total) else _cumul_total
+			journal[-1] = tr(cle).format(p) + tr("journal.cumul").format({"n": _cumul_fois})
+			return
+		_cumul_cle = cle
+		_cumul_identite = identite
+		_cumul_total = float(p[champ])
+		_cumul_fois = 1
+	else:
+		_cumul_cle = ""
 	_log(tr(cle).format(p))
+
+
+var _cumul_cle := ""              # la derniere ligne de journal cumulable, et de quoi savoir si la suivante la continue
+var _cumul_identite: Dictionary = {}
+var _cumul_total := 0.0
+var _cumul_fois := 0
 
 
 func _log(t: String) -> void:

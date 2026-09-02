@@ -121,6 +121,7 @@ ui.capacite.preview,{nom} sur {def} : {des}{bonus} ×{dom} → zone {zone} ×{mu
 ui.entite.mana,mana {mana}/{mana_max}
 journal.statut,{nom} subit {statut} ({duree} ticks)
 journal.statut_degats,{nom} souffre de {statut} : {degats} dégâts
+journal.cumul," (×{n})"
 journal.chaine_interrompue,la chaîne de {nom} est INTERROMPUE : un segment tombe
 journal.tir_refuse,tir impossible : {raison}
 raison.munitions,plus de munitions

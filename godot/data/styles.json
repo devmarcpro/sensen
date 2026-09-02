@@ -127,6 +127,16 @@
     "part_apercu": 2.6,
     "part_detail": 1.0
   },
+  "journal": {
+    "_doc": "Les lignes de journal qui se REPETENT tique apres tique (poison, saignement, brulure, faim, froid) noyaient tout le reste : sept lignes d'affilee pour un seul poison. Une cle listee ici se cumule dans la ligne precedente au lieu d'en ecrire une nouvelle, tant que ses champs d'identite ne changent pas ; la valeur est le champ numerique a additionner. Vu au parcours robot du 2026-09-02.",
+    "cumulables": {
+      "journal.statut_degats": "degats",
+      "journal.regen": "soin",
+      "journal.faim_degats": "degats",
+      "journal.froid_degats": "degats",
+      "journal.chaud_degats": "degats"
+    }
+  },
   "ecrans": {
     "_doc": "Mise en page commune des ecrans (designer 2026-09-01, point 67) : la colonne de liste est une part de la largeur du panneau, bornee.",
     "part_liste": 0.38,
