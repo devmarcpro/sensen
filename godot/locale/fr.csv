@@ -698,6 +698,8 @@ ui.sac,"sac : {liste}"
 ui.hotbar,"{liste}"
 ui.hotbar.lourde,Attaque lourde
 ui.hotbar.garde,Garde
+ui.hotbar.page,"barre {n}/10 — Ctrl + chiffre pour changer"
+journal.hotbar_page,"barre {n}"
 ui.hotbar.attendre,Attendre
 ui.hotbar.selection,"[{k} {nom}]"
 ui.ecran.menu,MENU (Tab / Échap ferme)

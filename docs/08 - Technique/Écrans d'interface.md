@@ -174,6 +174,10 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > L'ordre s'inverse : **les capacités d'abord** — elles sont l'identité du personnage et doivent rester sous les mêmes touches toute la partie —, puis le râtelier, puis les objets. Une arme ramassée se pose donc **à la suite**, sans rien déplacer. Les affectations manuelles du joueur (point 35) continuent de recouvrir la hotbar dérivée, case par case.
 
 
+> [!success] Codé le 2026-09-02 — dix hotbars, `Ctrl` + chiffre pour changer (designer)
+> Dix cases suffisaient tant qu'un personnage n'avait que trois sorts et deux armes ; avec les modules sans plafond, elles débordent. Le personnage porte désormais **dix pages** de dix cases : `Ctrl + 1` à `Ctrl + 0` passe de l'une à l'autre, la page courante est écrite au-dessus de la barre. Chaque page se remplit comme avant, en glissant une capacité ou une arme depuis l'inventaire (point 35) ; les pages jamais touchées retombent sur la hotbar **dérivée** — capacités, puis râtelier, puis objets —, si bien qu'une page neuve n'est jamais vide. Le loadout de classe reste la page 1.
+
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

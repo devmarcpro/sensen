@@ -878,6 +878,8 @@ ui.heure,"{heure} h · {phase} · {saison} · {meteo} · {temp} °C{confort}"
 ui.hotbar,"{liste}"
 ui.hotbar.attendre,Wait
 ui.hotbar.garde,Guard
+ui.hotbar.page,"bar {n}/10 — Ctrl + digit to switch"
+journal.hotbar_page,"bar {n}"
 ui.hotbar.lourde,Heavy attack
 ui.hotbar.objet,"{nom} ×{n}"
 ui.hotbar.selection,"[{k} {nom}]"

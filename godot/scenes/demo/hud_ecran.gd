@@ -143,6 +143,8 @@ func _dessiner_hotbar(sim, j: Dictionary, o: Vector2) -> void:
 		draw_rect(r, Color(0.05, 0.05, 0.08, 0.85))
 		draw_rect(r, Color(1.0, 0.9, 0.5) if sel else Color(0.6, 0.55, 0.4, 0.8), false, 2.0 if sel else 1.0)
 		draw_string(ThemeDB.fallback_font, r.position + Vector2(3.0, 11.0), str((k + 1) % 10), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.7, 0.65, 0.5))
+		if k == 0:   # la page courante, au-dessus de la barre (designer 2026-09-02)
+			draw_string(ThemeDB.fallback_font, o + Vector2(0.0, -4.0), tr("ui.hotbar.page").format({"n": int(j.get("hotbar_page", 0)) + 1}), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.75, 0.7, 0.55))
 		if k < entrees.size() and not str(entrees[k].get("type", "")).is_empty():
 			var nom := str(entrees[k].nom)
 			if str(entrees[k].type) == "capacite":   # l'icône combinée du sort (Pictos), au-dessus de son nom

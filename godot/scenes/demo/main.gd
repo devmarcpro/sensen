@@ -936,7 +936,11 @@ func _unhandled_input(ev: InputEvent) -> void:
 				lourde_armee = false
 				visee_objet = ""
 			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_0:
-				_hotbar(9 if ev.keycode == KEY_0 else ev.keycode - KEY_1)
+				var n_touche: int = 9 if ev.keycode == KEY_0 else int(ev.keycode) - int(KEY_1)
+				if ev.ctrl_pressed:   # Ctrl + chiffre : changer de page de hotbar (designer 2026-09-02)
+					_changer_page_hotbar(n_touche)
+				else:
+					_hotbar(n_touche)
 
 
 ## La hotbar (Écrans d'interface, contrôles) : armes du râtelier, capacités, lourde, garde, attendre — dix cases.
@@ -2159,3 +2163,26 @@ func _dessiner_porte(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, contenu
 	var trav := (p0 + p1) * 0.5 + haut * 0.55
 	ci.draw_line(p0 + haut * 0.5, p1 + haut * 0.5, bois.darkened(0.25), 1.0)   # la traverse
 	ci.draw_circle(trav.lerp(p1 + haut * 0.55, 0.45), 1.6, Color(0.85, 0.75, 0.35) * teinte)   # la poignée
+
+## Dix pages de hotbar (designer 2026-09-02) : `Ctrl` + chiffre. La page courante vit dans `j.hotbar`
+## — tout le reste du code continue de la lire —, les autres attendent dans `j.hotbar_pages`.
+func _changer_page_hotbar(page: int) -> void:
+	var j := joueur()
+	if j.is_empty() or page < 0 or page > 9:
+		return
+	if not j.has("hotbar_pages"):
+		var pages: Array = []
+		for i in 10:
+			pages.append([])
+		j["hotbar_pages"] = pages
+		j["hotbar_page"] = 0
+	j.hotbar_pages[int(j.get("hotbar_page", 0))] = j.get("hotbar", []).duplicate(true)   # on range la page qu'on quitte
+	j["hotbar_page"] = page
+	var suivante: Array = j.hotbar_pages[page]
+	if suivante.is_empty():
+		j.erase("hotbar")   # page jamais touchée : la hotbar dérivée reprend la main, elle n'est jamais vide
+	else:
+		j["hotbar"] = suivante.duplicate(true)
+	hotbar_sel = -1
+	_log(tr("journal.hotbar_page").format({"n": page + 1}))
+	hud_ecran.queue_redraw()
