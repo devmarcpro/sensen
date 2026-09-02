@@ -1,0 +1,43 @@
+{
+  "name_key": "material.vessie.name",
+  "category": "animal",
+  "palier": 3,
+  "stats": {
+    "durete": 3,
+    "densite": 2,
+    "valeur_base": 9,
+    "conductivite_mana": 31,
+    "flammabilite": 35,
+    "isolation": 40,
+    "conductivite_electrique": 3,
+    "flottabilite": 88,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 18,
+    "elasticite": 70,
+    "friction": 40
+  },
+  "tags": [],
+  "color": "#D8CDB4",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 503,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "dague",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null,
+  "stats_base": {
+    "durete": 2,
+    "valeur_base": 7,
+    "conductivite_mana": 24
+  }
+}

@@ -64,6 +64,11 @@ Race et classe **s'additionnent** : le plancher final est la moyenne des deux va
 > **Corrigé des deux côtés** : chaque classe reçoit le kit de son style (arme, bouclier ou arc, armure de cuir, torche) et son râtelier ; et une main vide frappe désormais avec la fonctionnalité `mains_nues` — `1d3` contondant, portée 1, dureté 1 — qui existait partout sauf là où il fallait.
 
 
+> [!success] Tranché le 2026-09-02 — **retravailler les classes en profondeur** (designer)
+> « Retravaille les classes en profondeur. » Le banc mesure un écart de **43 fois** entre la première et la dernière : Le Sabre rend 16,20 PV par tick avec Projection, Le Fossoyeur 0,38 avec Roche. Les trois classes de tête frappent toutes **au contact** — le contact ne paie ni portée, ni dilution, ni atténuation, et frappe une seule cible à pleine puissance. Les dernières sont lointaines et lentes : vingt ticks pour deux points de vie.
+> Le designer ne demande pas un réglage mais une **reprise de fond**. Ce n'est donc pas « ajouter des dés aux classes faibles » : c'est relire ce que chaque classe **promet** et vérifier que son kit de départ le tient. Une classe lointaine doit payer sa distance par autre chose que l'impuissance — de la portée utile, du contrôle, de la zone, ou des noyaux assez gros pour que la dilution ne la vide pas.
+> **La règle que je ne toucherai pas sans qu'on me le dise** : la dilution en 1/√n, l'atténuation par la distance et le coût en ticks de la portée sont des décisions du designer. C'est le **contenu** des classes qui bouge, pas le moteur.
+
 ## Liens
 - **Dépend de** : [[Création de personnage]], [[Les trois axes — race, classe, fonction]]
 - **Alimente** : [[Talents de classe]], [[Potentiel]], [[Début de partie]], [[Fonctions]]

@@ -1848,6 +1848,21 @@ material.cuivre.name,Cuivre
 material.etain.name,Étain
 material.zinc.name,Zinc
 material.bronze.name,Bronze
+material.parchemin.name,"Parchemin"
+material.savon.name,"Savon"
+material.sable_noir.name,"Sable noir"
+material.laterite.name,"Latérite"
+material.marne.name,"Marne"
+material.humus.name,"Humus"
+material.amidon.name,"Amidon"
+material.gomme_arabique.name,"Gomme arabique"
+material.latex.name,"Latex"
+material.resine.name,"Résine"
+material.venin.name,"Venin"
+material.vessie.name,"Vessie"
+material.soie_araignee.name,"Soie d'araignée"
+material.carapace.name,"Carapace"
+material.suif.name,"Suif"
 arena.banc_objets.name,"Banc d'objets"
 material.pierre_de_lave.name,"Pierre de lave"
 material.scorie.name,"Scorie"

@@ -221,6 +221,12 @@
       "potentiel": 10
     }
   },
+  "peuplement_etage": {
+    "_doc": "Qui peuple un etage de donjon (designer 2026-09-02 : « premier etage : ennemis tres bas niveau »). Le pool d'un theme allait du rat geant au troll, et le PREMIER etage y puisait comme le dixieme : on pouvait tomber sur un lindworm au premier pas. La puissance d'un etre se mesure a ses stats (force + endurance + dexterite / 2, plus un bonus par action speciale) ; un etage n'accepte que ceux qui tiennent sous son plafond. L'etage 1 est donc peuple de tres bas niveau, et la difficulte redevient une PENTE. Si aucun etre ne passe le plafond, le plus faible du theme sort quand meme : un etage vide n'est pas un etage.",
+    "puissance_base": 26,
+    "puissance_par_etage": 6,
+    "bonus_par_action": 4
+  },
   "paliers_materiaux": {
     "_doc": "Paliers de materiau (designer 2026-09-02) : chaque fiche de materiau porte un `palier` 1..5, pose par tools/poser_paliers.py. Le palier commande TROIS choses a la fois — ou le materiau tombe (profondeur_min), ce qu'il vaut une fois assemble (mult_stats, applique aux stats de l'objet), et ce qu'il coute a extraire (extraction_ticks multiplie les ticks de recolte, outil_min multiplie le seuil de durete d'outil exige). Un materiau de fin de partie ne se ramasse donc pas a la pioche de depart, meme si on le trouve.",
     "1": { "profondeur_min": 0, "mult_stats": 1.0, "extraction_ticks": 1.0, "outil_min": 1.0 },

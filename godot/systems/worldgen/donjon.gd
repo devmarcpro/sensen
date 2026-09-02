@@ -32,6 +32,15 @@ func _init(p_salles: Dictionary, p_connecteurs: Dictionary, p_theme: Dictionary)
 
 ## Génère un étage : {largeur, hauteur, hauteurs, murs, sol, bord, pieces: [{id, kind, rect, attaches}],
 ##  entree (escalier montant), escalier (descendant, null au dernier), boss, spawns, coffres, graphe}.
+## La puissance d'un etre, telle qu'on peut la lire sur sa fiche : ce qu'il porte de force et
+## d'endurance, sa vitesse pour moitie, et un bonus par action speciale — un troll ne fait pas que
+## frapper fort, il a des tours dans son sac. Sert a decider quel etage peut l'accueillir.
+static func puissance_creature(c: Dictionary, bonus_action: float) -> float:
+	var st: Dictionary = c.get("corps", {}).get("stats", {})
+	return float(st.get("force", 5)) + float(st.get("endurance", 5)) + float(st.get("dexterite", 5)) * 0.5 \
+		+ float((c.get("actions", []) as Array).size()) * bonus_action
+
+
 func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dernier: bool, taille: int = -1) -> Dictionary:
 	if taille < 0:
 		taille = int(GameData.config("planete").taille_cellule)   # un étage = une cellule (Grille continue)
@@ -516,6 +525,25 @@ func _peupler(e: Dictionary, etage: int) -> void:
 	var pool: Array = theme.get("creatures", [])
 	if pool.is_empty():
 		return
+	# Qui a le droit d'être là (designer 2026-09-02 : « premier étage : ennemis très bas niveau »). Le
+	# pool d'un thème va du rat géant au troll, et le PREMIER étage y puisait comme le dixième : on
+	# pouvait tomber sur un lindworm au premier pas. Chaque étage a désormais son plafond de puissance.
+	var pe: Dictionary = GameData.config("combat_rules").get("peuplement_etage", {})
+	var plafond := float(pe.get("puissance_base", 22)) + float(pe.get("puissance_par_etage", 9)) * float(maxi(0, etage - 1))
+	var bonus_a := float(pe.get("bonus_par_action", 4))
+	var pool_etage: Array = []
+	var plus_faible: Dictionary = {}
+	var p_faible := INF
+	for c in pool:
+		var fiche: Dictionary = GameData.entree("creatures", str(c.id))
+		var puiss := puissance_creature(fiche, bonus_a)
+		if puiss < p_faible:
+			p_faible = puiss
+			plus_faible = c
+		if puiss <= plafond:
+			pool_etage.append(c)
+	if pool_etage.is_empty():   # un étage vide n'est pas un étage : le plus faible du thème y reste
+		pool_etage.append(plus_faible)
 	var facteur: float = 1.0 + float(etage) * float(theme.get("croissance_par_etage", 0.25))
 	for i in e.pieces.size():
 		var p: Dictionary = e.pieces[i]
@@ -529,7 +557,7 @@ func _peupler(e: Dictionary, etage: int) -> void:
 				e.spawns.append({"creature": boss, "pos": e.boss})
 		var poses := {}
 		for k in n:
-			var c: Dictionary = pool[rng.randi_range(0, pool.size() - 1)]
+			var c: Dictionary = pool_etage[rng.randi_range(0, pool_etage.size() - 1)]
 			var pos := Vector2i(r.position.x + rng.randi_range(1, r.size.x - 2), r.position.y + rng.randi_range(1, r.size.y - 2))
 			if not e.sol.has(pos.y * e.largeur + pos.x) or poses.has(pos) or pos == e.boss or pos == e.escalier:
 				continue

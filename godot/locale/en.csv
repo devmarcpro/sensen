@@ -496,6 +496,21 @@ material.breche_volcanique.name,Volcanic breccia
 material.brique.name,Brick
 material.brique_refractaire.name,Firebrick
 material.bronze.name,Bronze
+material.parchemin.name,"Parchment"
+material.savon.name,"Soap"
+material.sable_noir.name,"Black sand"
+material.laterite.name,"Laterite"
+material.marne.name,"Marl"
+material.humus.name,"Humus"
+material.amidon.name,"Starch"
+material.gomme_arabique.name,"Gum arabic"
+material.latex.name,"Latex"
+material.resine.name,"Resin"
+material.venin.name,"Venom"
+material.vessie.name,"Bladder"
+material.soie_araignee.name,"Spider silk"
+material.carapace.name,"Carapace"
+material.suif.name,"Tallow"
 arena.banc_objets.name,"Item bench"
 material.pierre_de_lave.name,"Lava stone"
 material.scorie.name,"Slag"

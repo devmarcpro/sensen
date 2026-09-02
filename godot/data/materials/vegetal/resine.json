@@ -1,0 +1,43 @@
+{
+  "name_key": "material.resine.name",
+  "category": "vegetal",
+  "palier": 4,
+  "stats": {
+    "durete": 6,
+    "densite": 3,
+    "valeur_base": 19,
+    "conductivite_mana": 72,
+    "flammabilite": 75,
+    "isolation": 40,
+    "conductivite_electrique": 2,
+    "flottabilite": 70,
+    "luminosite": 4,
+    "fertilite": 0,
+    "transparence": 40,
+    "elasticite": 25,
+    "friction": 70
+  },
+  "tags": [],
+  "color": "#C08A3A",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 505,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "hache",
+    "skill": "bucheronnage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null,
+  "stats_base": {
+    "durete": 3,
+    "valeur_base": 10,
+    "conductivite_mana": 38
+  }
+}

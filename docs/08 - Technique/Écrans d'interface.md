@@ -201,6 +201,10 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > Vérifié par `scenes/tests/sonde_journal.tscn` : la suite ne charge pas les scripts d'écran, donc la sonde ouvre la scène du jeu et parle directement à son journal.
 
 
+> [!success] Tranché le 2026-09-02 — **tout doit être visible à l'écran, jamais coupé** (designer)
+> « Fais en sorte que tout soit toujours visible à l'écran sans être coupé. » La réponse ferme le point 67, resté en `todo` avec deux impasses documentées : sous 1000 px de large, serrer les colonnes ne converge pas.
+> **La consigne est absolue et tranche donc la méthode** : puisqu'on ne peut pas tout faire tenir côte à côte, il faut **empiler**. Sous un seuil de largeur, les colonnes passent les unes sous les autres au lieu de se serrer jusqu'à mordre. C'est une refonte du gabarit des écrans, pas un réglage — et c'était la seule issue restante après le `ScrollContainer` (qui casse le cas nominal) et le `HFlowContainer` (qui ne passe jamais à la ligne parce qu'il décide sur des minimums que nos colonnes ne déclarent pas).
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

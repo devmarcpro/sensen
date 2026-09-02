@@ -1,0 +1,43 @@
+{
+  "name_key": "material.soie_araignee.name",
+  "category": "animal",
+  "palier": 4,
+  "stats": {
+    "durete": 10,
+    "densite": 1,
+    "valeur_base": 61,
+    "conductivite_mana": 104,
+    "flammabilite": 30,
+    "isolation": 35,
+    "conductivite_electrique": 2,
+    "flottabilite": 70,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 30,
+    "elasticite": 92,
+    "friction": 45
+  },
+  "tags": [],
+  "color": "#E9E9E4",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 502,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "dague",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null,
+  "stats_base": {
+    "durete": 5,
+    "valeur_base": 32,
+    "conductivite_mana": 55
+  }
+}

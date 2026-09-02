@@ -1,0 +1,43 @@
+{
+  "name_key": "material.suif.name",
+  "category": "animal",
+  "palier": 2,
+  "stats": {
+    "durete": 1,
+    "densite": 3,
+    "valeur_base": 5,
+    "conductivite_mana": 17,
+    "flammabilite": 80,
+    "isolation": 55,
+    "conductivite_electrique": 2,
+    "flottabilite": 75,
+    "luminosite": 3,
+    "fertilite": 0,
+    "transparence": 8,
+    "elasticite": 30,
+    "friction": 35
+  },
+  "tags": [],
+  "color": "#E7DFC6",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 500,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "dague",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null,
+  "stats_base": {
+    "durete": 1,
+    "valeur_base": 6,
+    "conductivite_mana": 20
+  }
+}

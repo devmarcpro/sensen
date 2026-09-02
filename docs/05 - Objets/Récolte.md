@@ -52,6 +52,11 @@ XP gagnée par bloc récolté = durete_materiau
 >
 > Deux règles de survie l'accompagnent, dans l'esprit de *Rogue*. **La faim tue** : à jauge vide, la famine ronge les PV par paliers (`faim.degats_par_palier` tous les `ticks_par_palier`) — la nourriture redevient l'horloge qui pousse à avancer. Et les **objets ne sont plus tous identifiés** : consommables et gemmes sortent du loot **inconnus** (`loot_rules.identification`), sous un nom d'apparence ; les essayer révèle la base **pour toute la partie**, comme les potions de Rogue. Le pari revient dans le jeu.
 
+> [!success] Tranché le 2026-09-02 — **la mine se creuse sous une cellule du joueur** (designer)
+> « Le minage en profondeur se fait sur une cellule au joueur. » L'idée venait du designer, façon Dwarf Fortress : on pose un escalier, l'étage du dessous se génère, et plus on descend plus les minerais sont rares et les roches dures.
+> **La réponse tranche la question de l'emplacement** : on ne creuse pas n'importe où — il faut que la cellule **vous appartienne**, donc qu'elle soit revendiquée ([[Expansion territoriale]]). Une mine est un ouvrage, pas une excursion : elle demande un territoire, elle reste, et elle donne une raison de plus de revendiquer une cellule pour ce qu'il y a **dessous** plutôt que dessus.
+> **Ce qui reste à décider quand j'y viendrai** : est-ce que la mine partage l'échelle de profondeur du gouffre ou tient la sienne, et est-ce que des créatures y descendent — ou n'y risque-t-on que l'effondrement et la faim ?
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Catégories de matériaux]], [[Progression par l'usage]], [[Qualité d'artisanat]]
 - **Alimente** : [[Stratification verticale]], [[Rôles de cases]], [[Population et exploitation]]

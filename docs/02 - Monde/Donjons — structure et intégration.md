@@ -85,6 +85,9 @@ Les donjons sont une des sources principales de contenu du jeu, et le premier es
 > **Deux natures de donjon coexistent, et c'est voulu.** Les donjons de corruption sont des **événements** : ils naissent d'une corruption qui monte, ils infectent leurs voisines, on les vide pour changer la carte, et ils disparaissent quand leur boss tombe ([[Dérive de la corruption]]). Le gouffre est un **lieu permanent** : il ne change rien au monde, il mesure le joueur, et son butin monte avec la profondeur. Le gouffre n'est donc jamais un foyer — il ne s'éteint pas, ne se repeuple pas, n'infecte rien.
 > **Ce que « ne se régénère jamais » veut dire dans le code** (mon choix d'implémentation, à corriger si ce n'est pas l'intention) : le terrain d'un étage se régénère de sa graine, comme aujourd'hui — il est déterministe, le stocker ne servirait à rien. Ce qui ne revient pas, ce sont **les êtres et le butin** : la partie retient les étages déjà vidés, et un étage déjà vidé se regénère désert. Redescendre est donc rapide et sans danger jusqu'à sa profondeur record, ce qui rend inutile tout raccourci payant — la question du prix du raccourci tombe d'elle-même.
 
+> [!success] Tranché le 2026-09-02 — **le gouffre ne donne pas de butin unique** (designer)
+> « Pas de butin unique pour le gouffre. » Il donne de la quantité et de la qualité qui montent avec la profondeur, rien qu'on ne puisse trouver ailleurs. L'unique reste aux **donjons de corruption**, ce qui leur garde une raison d'exister : le gouffre mesure le joueur, les donjons de corruption récompensent celui qui change la carte. Sans cette séparation, le gouffre — permanent, gratuit, toujours là — aurait rendu les donjons de corruption inutiles.
+
 ## Liens
 - **Dépend de** : [[Grille continue]], [[Hauteur de terrain ±10]], [[Décisions fondatrices]]
 - **Alimente** : [[Génération de donjon]], [[Salles et connecteurs]], [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Grimoires et manuels]]

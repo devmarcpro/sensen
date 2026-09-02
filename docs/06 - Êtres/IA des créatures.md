@@ -84,6 +84,10 @@ Morphologies (12) : les volants ignorent les contraintes de dénivelé
 > [!success] Codé le 2026-08-30 — reculer, soutenir, guetter
 > Pour les [[Créatures]] nouvelles (tireur, invocateur, soigneur, embusqueur), trois considérations et deux actions de plus dans l'utility — invisibles aux profils qui ne les pondèrent pas. **`reculer`** (`cible_au_contact`) : proposé quand la cible est à `combat_rules.ia.reculer_distance` (1) ou moins et que l'être a une action de portée minimale ≥ 2 ; exécuté comme un pas de fuite. **`soutenir`** (`allie_a_soutenir`) : proposé quand `_meilleur_soutien` trouve quelque chose — l'allié le plus blessé sous `ia.soin_seuil` (0,7) à portée d'un soin, ou une invocation sous le plafond `max` de l'action quand un ennemi est pris pour cible ; les actions de soutien (cible `allie`, effets `soin` / `invoquer`) ne sont **jamais** choisies comme attaques. **`guet`** (considération d'`attendre`) : 1 quand la cible est à plus de `ia.guet_distance` (3) tuiles — l'embusqueur la laisse venir. Un profil `tank` a `seuil_fuite_sante` 0 ; un `fuyard` 0,5.
 
+> [!success] Tranché le 2026-09-02 — **la faune paisible se tue sans conséquence** (designer)
+> « La faune paisible peut être tuée sans répercussions. » Pas de perte de réputation, pas de raréfaction, pas de prédateurs affamés : un écureuil abattu est un écureuil abattu. C'est une simplification assumée, et elle a une vertu — elle évite d'ajouter un système de conséquences écologiques à un jeu qui en porte déjà beaucoup.
+> **Ce que cela change pour le peuplement** : les bêtes paisibles sont là pour que le monde soit **vivant** et pour nourrir la chasse, pas pour poser un dilemme moral. Elles peuvent donc être nombreuses et fragiles sans qu'on craigne de vider le monde.
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Data-driven design]], [[Boucle de tick]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[LOD de simulation]], [[Compagnons]], [[Raids et menaces]], [[Lois et infractions]], [[Minimap et brouillard de guerre]]
