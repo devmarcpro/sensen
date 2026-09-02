@@ -203,3 +203,7 @@ Un callout daté dans la note liée (`> [!success] Tranché le <date>`) — la b
 > **Ce n'est pas seulement mon fait** : la plaine était déjà paisible aux trois quarts avant que je touche à quoi que ce soit — le cerf (0,5) et le renard (0,3) y pèsent plus lourd que le sanglier (0,2) et les abeilles (0,15). J'ai déjà raboté mes ajouts de moitié en plaine et en forêt pour ne pas aggraver.
 > **Ce que je ne tranche pas** : est-ce que traverser une plaine de jour doit être **sûr** — auquel cas le chiffre est bon et c'est la nuit qui fait le danger — ou est-ce que le monde doit mordre partout ? C'est de l'équilibrage, et le ressenti compte plus que le pourcentage. Un seul chiffre à changer par biome si tu veux l'autre réponse.
 
+> [!warning] 2026-09-03 — **la pré-release v0.4.1-alpha est prête mais je ne peux pas la publier**
+> Le tag `v0.4.1-alpha` est poussé sur `origin`, l'exécutable est construit **depuis ce tag** et empaqueté dans `build/Sensen-v0.4.1-alpha-win64.zip` (37 Mo), et les notes de version sont dans `build/NOTES-v0.4.1-alpha.md`. Ce qui manque : `gh` n'est plus authentifié sur cette machine — `gh auth login` ou une variable `GH_TOKEN` — donc je ne peux pas créer la page Release sur GitHub.
+> **Ce que tu as à faire** : `gh auth login` une fois, et je publierai les suivantes moi-même. En attendant, la commande est prête : `gh release create v0.4.1-alpha build/Sensen-v0.4.1-alpha-win64.zip --title "v0.4.1-alpha — les six décisions du designer, livrées" --notes-file build/NOTES-v0.4.1-alpha.md`.
+
