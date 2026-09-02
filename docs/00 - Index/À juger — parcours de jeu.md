@@ -147,6 +147,32 @@ Un callout daté dans la note liée (`> [!success] Tranché le <date>`) — la b
 
 - **Une fiche gabarit tombe dans le butin** (2026-09-02) : le catalogue contient un objet `composant` **générique** — `composant: ""`, `materiau: ""`, aucun slot — qui sert de modèle aux vrais composants. Le tirage du butin choisit par **catégorie** (« tout objet qui répond au filtre entre dans le loot du jour où il existe »), et ce gabarit répond au filtre : on ramasse donc un « Composant » qui n'est rien. L'affichage ne dit plus « Composant en », mais l'objet reste ramassable. **À trancher** : donner aux fiches gabarit un marqueur que le tirage ignore, ou les sortir du catalogue et les traiter comme des schémas. — [[Loot — affixes, gemmes et rareté]]
 
+- **Le rendement des dix-neuf classes, mesuré (banc rejoué le 2026-09-02)**. Le point ouvert du 2026-09-02 disait « de 1 à 100 » sans donner la liste ; la voici, une ligne par classe, **son meilleur sort offensif** (les utilitaires sont exclus, comme tu l'as demandé). L'écart du premier au dernier est de **43 fois**.
+
+| classe | meilleur sort offensif | PV par tick |
+| --- | --- | --- |
+| le_sabre | projection (81 PV en 5 ticks) | **16.20** |
+| le_porteur | projection (32 PV en 5 ticks) | **6.40** |
+| l_ombre | projection (32 PV en 5 ticks) | **6.40** |
+| le_vent | ronce (28 PV en 10 ticks) | **2.80** |
+| le_sceau | aiguille (14 PV en 5 ticks) | **2.80** |
+| le_rieur | botte (13 PV en 5 ticks) | **2.60** |
+| l_ecarlate | estoc (13 PV en 5 ticks) | **2.60** |
+| la_trace | projection (25 PV en 10 ticks) | **2.50** |
+| le_masque | brasier (32 PV en 19 ticks) | **1.68** |
+| la_paume | aiguille (7 PV en 5 ticks) | **1.40** |
+| le_sablier | epine (4 PV en 3 ticks) | **1.33** |
+| la_braise | ronce (11 PV en 9 ticks) | **1.22** |
+| le_creuset | ronce (12 PV en 10 ticks) | **1.20** |
+| la_meche | ronce (14 PV en 13 ticks) | **1.08** |
+| l_engrenage | epine (3 PV en 3 ticks) | **1.00** |
+| le_souffle | eboulement (20 PV en 21 ticks) | **0.95** |
+| le_passeur | brasier (13 PV en 24 ticks) | **0.54** |
+| la_balance | eboulement (9 PV en 18 ticks) | **0.50** |
+| le_fossoyeur | roche (3 PV en 8 ticks) | **0.38** |
+
+> Le contact ne paie ni portée, ni dilution, ni atténuation, et frappe une seule cible à pleine puissance : les trois premières classes frappent toutes au corps à corps. Les dernières sont lointaines et lentes — vingt ticks pour deux points de vie chez Le Fossoyeur. Ce n'est pas un bug, c'est la règle qui s'applique ; mais un débutant qui choisit Le Fossoyeur ou La Balance ne peut pas jouer. **Trois leviers, au choix du designer** : relever le plancher de dilution, adoucir l'atténuation par la distance, ou **donner aux classes lointaines des noyaux plus gros au départ** — ma préférence, parce qu'elle garde la règle et corrige le contenu. — [[Classes]]
+
 ## Liens
 - **Dépend de** : [[Vers la production]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]
