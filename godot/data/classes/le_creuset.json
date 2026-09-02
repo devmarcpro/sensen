@@ -1,82 +1,78 @@
 {
-  "name_key": "classe.le_creuset.name",
-  "bonus_stats": {
-    "perception": 2,
-    "volonte": 1
+ "name_key": "classe.le_creuset.name",
+ "bonus_stats": {
+  "perception": 2,
+  "volonte": 1
+ },
+ "equipement": [
+  "craft_baton_magique",
+  "craft_cuirasse",
+  "torche"
+ ],
+ "ratelier": [
+  "craft_faucille",
+  "craft_seau"
+ ],
+ "competences": {
+  "alchimie": 5,
+  "herboristerie": 5
+ },
+ "base_potentials": {
+  "_defaut": 80,
+  "alchimie": 120,
+  "herboristerie": 120,
+  "cuisine": 100,
+  "masse": 60,
+  "hache_d_armes": 60,
+  "deux_mains": 60
+ },
+ "talent": "fiole_vive",
+ "points_creation_bonus": 0,
+ "tags": [
+  "visible"
+ ],
+ "capacites": [
+  {
+   "id": "le_creuset_fiole",
+   "name_key": "module.fiole.name",
+   "modules": [
+    "chemin",
+    "sur_soi",
+    "fiole"
+   ]
   },
-  "equipement": [
-    "craft_baton_magique",
-    "craft_cuirasse",
-    "torche"
-  ],
-  "ratelier": [
-    "craft_faucille",
-    "craft_seau"
-  ],
-  "competences": {
-    "alchimie": 5,
-    "herboristerie": 5
+  {
+   "id": "le_creuset_gel",
+   "name_key": "module.gel.name",
+   "modules": [
+    "point",
+    "jet_court",
+    "gel"
+   ]
   },
-  "base_potentials": {
-    "_defaut": 80,
-    "alchimie": 120,
-    "herboristerie": 120,
-    "cuisine": 100,
-    "masse": 60,
-    "hache_d_armes": 60,
-    "deux_mains": 60
+  {
+   "id": "le_creuset_eclat",
+   "name_key": "module.eclat.name",
+   "modules": [
+    "point",
+    "jet_court",
+    "eclat"
+   ]
+  }
+ ],
+ "hotbar": [
+  {
+   "type": "capacite",
+   "ref": 0
   },
-  "talent": "fiole_vive",
-  "points_creation_bonus": 0,
-  "tags": [
-    "visible"
-  ],
-  "capacites": [
-    {
-      "id": "le_creuset_fiole",
-      "name_key": "module.fiole.name",
-      "modules": [
-        "chemin",
-        "sur_soi",
-        "fiole"
-      ]
-    },
-    {
-      "id": "le_creuset_eboulement",
-      "name_key": "module.eboulement.name",
-      "modules": [
-        "point",
-        "jet_court",
-        "eboulement"
-      ]
-    },
-    {
-      "id": "le_creuset_ronce",
-      "name_key": "module.ronce.name",
-      "modules": [
-        "point",
-        "jet_court",
-        "ronce"
-      ]
-    }
-  ],
-  "hotbar": [
-    {
-      "type": "arme",
-      "ref": "craft_dague"
-    },
-    {
-      "type": "capacite",
-      "ref": 0
-    },
-    {
-      "type": "capacite",
-      "ref": 1
-    },
-    {
-      "type": "capacite",
-      "ref": 2
-    }
-  ],
-  "signature": "fiole"
+  {
+   "type": "capacite",
+   "ref": 1
+  },
+  {
+   "type": "capacite",
+   "ref": 2
+  }
+ ],
+ "signature": "fiole"
 }

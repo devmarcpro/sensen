@@ -1,69 +1,69 @@
 {
-  "name_key": "classe.le_masque.name",
-  "bonus_stats": {
-    "dexterite": 3
+ "name_key": "classe.le_masque.name",
+ "bonus_stats": {
+  "dexterite": 3
+ },
+ "equipement": [
+  "craft_jambieres",
+  "torche"
+ ],
+ "ratelier": [
+  "craft_dague"
+ ],
+ "competences": {
+  "mains_nues": 4,
+  "athletisme": 4
+ },
+ "base_potentials": {
+  "_defaut": 100
+ },
+ "talent": "masques",
+ "points_creation_bonus": 4,
+ "tags": [
+  "cache"
+ ],
+ "capacites": [
+  {
+   "id": "le_masque_ecaille_elementaire",
+   "name_key": "module.ecaille_elementaire.name",
+   "modules": [
+    "chemin",
+    "sur_soi",
+    "ecaille_elementaire"
+   ]
   },
-  "equipement": [
-    "craft_jambieres",
-    "torche"
-  ],
-  "ratelier": [
-    "craft_dague"
-  ],
-  "competences": {
-    "mains_nues": 4,
-    "athletisme": 4
+  {
+   "id": "le_masque_brasier",
+   "name_key": "module.brasier.name",
+   "modules": [
+    "point",
+    "hast",
+    "brasier"
+   ]
   },
-  "base_potentials": {
-    "_defaut": 100
+  {
+   "id": "le_masque_flamme",
+   "name_key": "module.flamme.name",
+   "modules": [
+    "point",
+    "hast",
+    "flamme"
+   ]
+  }
+ ],
+ "hotbar": [
+  {
+   "type": "capacite",
+   "ref": 0
   },
-  "talent": "masques",
-  "points_creation_bonus": 4,
-  "tags": [
-    "cache"
-  ],
-  "capacites": [
-    {
-      "id": "le_masque_roche",
-      "name_key": "module.roche.name",
-      "modules": [
-        "chemin",
-        "sur_soi",
-        "roche"
-      ]
-    },
-    {
-      "id": "le_masque_brasier",
-      "name_key": "module.brasier.name",
-      "modules": [
-        "colonne",
-        "contact",
-        "brasier"
-      ]
-    },
-    {
-      "id": "le_masque_flamme",
-      "name_key": "module.flamme.name",
-      "modules": [
-        "croix",
-        "contact",
-        "flamme"
-      ]
-    }
-  ],
-  "hotbar": [
-    {
-      "type": "capacite",
-      "ref": 0
-    },
-    {
-      "type": "capacite",
-      "ref": 1
-    },
-    {
-      "type": "capacite",
-      "ref": 2
-    }
-  ],
-  "signature": ""
+  {
+   "type": "capacite",
+   "ref": 1
+  },
+  {
+   "type": "capacite",
+   "ref": 2
+  }
+ ],
+ "signature": "ecaille_elementaire"
 }

@@ -1,73 +1,73 @@
 {
-  "name_key": "classe.le_vent.name",
-  "bonus_stats": {
-    "force": 1,
-    "dexterite": 1,
-    "endurance": 1,
-    "volonte": 1,
-    "perception": 1,
-    "charisme": 1
+ "name_key": "classe.le_vent.name",
+ "bonus_stats": {
+  "force": 1,
+  "dexterite": 1,
+  "endurance": 1,
+  "volonte": 1,
+  "perception": 1,
+  "charisme": 1
+ },
+ "equipement": [
+  "craft_lance",
+  "craft_jambieres",
+  "torche"
+ ],
+ "ratelier": [
+  "craft_arc",
+  "craft_dague"
+ ],
+ "competences": {},
+ "base_potentials": {
+  "_defaut": 100
+ },
+ "talent": "sans_maitre",
+ "points_creation_bonus": 4,
+ "tags": [
+  "visible"
+ ],
+ "capacites": [
+  {
+   "id": "le_vent_eclat",
+   "name_key": "module.eclat.name",
+   "modules": [
+    "point",
+    "jet_court",
+    "eclat"
+   ]
   },
-  "equipement": [
-    "craft_lance",
-    "craft_jambieres",
-    "torche"
-  ],
-  "ratelier": [
-    "craft_arc",
-    "craft_dague"
-  ],
-  "competences": {},
-  "base_potentials": {
-    "_defaut": 100
+  {
+   "id": "le_vent_ronce",
+   "name_key": "module.ronce.name",
+   "modules": [
+    "point",
+    "jet_court",
+    "ronce"
+   ]
   },
-  "talent": "sans_maitre",
-  "points_creation_bonus": 4,
-  "tags": [
-    "visible"
-  ],
-  "capacites": [
-    {
-      "id": "le_vent_eboulement",
-      "name_key": "module.eboulement.name",
-      "modules": [
-        "point",
-        "jet_court",
-        "eboulement"
-      ]
-    },
-    {
-      "id": "le_vent_ronce",
-      "name_key": "module.ronce.name",
-      "modules": [
-        "point",
-        "jet_court",
-        "ronce"
-      ]
-    },
-    {
-      "id": "le_vent_fonte",
-      "name_key": "module.fonte.name",
-      "modules": [
-        "chemin",
-        "sur_soi",
-        "fonte"
-      ]
-    }
-  ],
-  "hotbar": [
-    {
-      "type": "capacite",
-      "ref": 0
-    },
-    {
-      "type": "capacite",
-      "ref": 1
-    },
-    {
-      "type": "capacite",
-      "ref": 2
-    }
-  ],
-  "signature": ""
+  {
+   "id": "le_vent_gravier",
+   "name_key": "module.gravier.name",
+   "modules": [
+    "point",
+    "jet_court",
+    "gravier"
+   ]
+  }
+ ],
+ "hotbar": [
+  {
+   "type": "capacite",
+   "ref": 0
+  },
+  {
+   "type": "capacite",
+   "ref": 1
+  },
+  {
+   "type": "capacite",
+   "ref": 2
+  }
+ ],
+ "signature": "eclat"
 }

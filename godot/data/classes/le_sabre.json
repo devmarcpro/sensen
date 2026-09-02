@@ -1,87 +1,79 @@
 {
-  "name_key": "classe.le_sabre.name",
-  "bonus_stats": {
-    "force": 2,
-    "endurance": 1
+ "name_key": "classe.le_sabre.name",
+ "bonus_stats": {
+  "force": 2,
+  "endurance": 1
+ },
+ "equipement": [
+  "craft_epee",
+  "craft_bouclier",
+  "craft_cuirasse",
+  "torche"
+ ],
+ "ratelier": [
+  "craft_lance",
+  "craft_dague"
+ ],
+ "competences": {
+  "epee": 5,
+  "bouclier": 5
+ },
+ "base_potentials": {
+  "_defaut": 80,
+  "epee": 120,
+  "bouclier": 120,
+  "deux_mains": 120,
+  "encaissement": 120,
+  "magie": 60,
+  "alchimie": 60
+ },
+ "talent": "ratelier_vivant",
+ "points_creation_bonus": 0,
+ "tags": [
+  "visible"
+ ],
+ "capacites": [
+  {
+   "id": "le_sabre_frappe",
+   "name_key": "module.frappe.name",
+   "modules": [
+    "point",
+    "contact",
+    "frappe"
+   ]
   },
-  "equipement": [
-    "craft_epee",
-    "craft_bouclier",
-    "craft_cuirasse",
-    "torche"
-  ],
-  "ratelier": [
-    "craft_lance",
-    "craft_dague"
-  ],
-  "competences": {
-    "epee": 5,
-    "bouclier": 5
+  {
+   "id": "le_sabre_estoc",
+   "name_key": "module.estoc.name",
+   "modules": [
+    "point",
+    "contact",
+    "estoc"
+   ]
   },
-  "base_potentials": {
-    "_defaut": 80,
-    "epee": 120,
-    "bouclier": 120,
-    "deux_mains": 120,
-    "encaissement": 120,
-    "magie": 60,
-    "alchimie": 60
+  {
+   "id": "le_sabre_projection",
+   "name_key": "module.projection.name",
+   "modules": [
+    "point",
+    "contact",
+    "projection"
+   ]
+  }
+ ],
+ "hotbar": [
+  {
+   "type": "capacite",
+   "ref": 0
   },
-  "talent": "ratelier_vivant",
-  "points_creation_bonus": 0,
-  "tags": [
-    "visible"
-  ],
-  "capacites": [
-    {
-      "id": "le_sabre_frappe",
-      "name_key": "module.frappe.name",
-      "modules": [
-        "point",
-        "contact",
-        "frappe"
-      ]
-    },
-    {
-      "id": "le_sabre_estoc",
-      "name_key": "module.estoc.name",
-      "modules": [
-        "point",
-        "contact",
-        "estoc"
-      ]
-    },
-    {
-      "id": "le_sabre_projection",
-      "name_key": "module.projection.name",
-      "modules": [
-        "point",
-        "contact",
-        "projection"
-      ]
-    }
-  ],
-  "hotbar": [
-    {
-      "type": "arme",
-      "ref": "craft_epee"
-    },
-    {
-      "type": "arme",
-      "ref": "craft_bouclier"
-    },
-    {
-      "type": "capacite",
-      "ref": 0
-    },
-    {
-      "type": "capacite",
-      "ref": 1
-    },
-    {
-      "type": "capacite",
-      "ref": 2
-    }
-  ],
-  "signature": "frappe"
+  {
+   "type": "capacite",
+   "ref": 1
+  },
+  {
+   "type": "capacite",
+   "ref": 2
+  }
+ ],
+ "signature": "frappe"
 }

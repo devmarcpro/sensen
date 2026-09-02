@@ -1,72 +1,72 @@
 {
-  "name_key": "classe.l_engrenage.name",
-  "bonus_stats": {
-    "dexterite": 2,
-    "perception": 1
+ "name_key": "classe.l_engrenage.name",
+ "bonus_stats": {
+  "dexterite": 2,
+  "perception": 1
+ },
+ "equipement": [
+  "craft_arc",
+  "craft_casque",
+  "torche"
+ ],
+ "ratelier": [
+  "craft_dague",
+  "craft_masse"
+ ],
+ "competences": {
+  "arbalete": 4,
+  "forge": 4
+ },
+ "base_potentials": {
+  "_defaut": 100
+ },
+ "talent": "affut",
+ "points_creation_bonus": 4,
+ "tags": [
+  "cache"
+ ],
+ "capacites": [
+  {
+   "id": "l_engrenage_tourelle",
+   "name_key": "module.tourelle.name",
+   "modules": [
+    "point",
+    "jet_long",
+    "tourelle"
+   ]
   },
-  "equipement": [
-    "craft_arc",
-    "craft_casque",
-    "torche"
-  ],
-  "ratelier": [
-    "craft_dague",
-    "craft_masse"
-  ],
-  "competences": {
-    "arbalete": 4,
-    "forge": 4
+  {
+   "id": "l_engrenage_eclat",
+   "name_key": "module.eclat.name",
+   "modules": [
+    "point",
+    "jet_long",
+    "eclat"
+   ]
   },
-  "base_potentials": {
-    "_defaut": 100
+  {
+   "id": "l_engrenage_epine",
+   "name_key": "module.epine.name",
+   "modules": [
+    "point",
+    "jet_long",
+    "epine"
+   ]
+  }
+ ],
+ "hotbar": [
+  {
+   "type": "capacite",
+   "ref": 0
   },
-  "talent": "affut",
-  "points_creation_bonus": 4,
-  "tags": [
-    "cache"
-  ],
-  "capacites": [
-    {
-      "id": "l_engrenage_tourelle",
-      "name_key": "module.tourelle.name",
-      "modules": [
-        "point",
-        "jet_long",
-        "tourelle"
-      ]
-    },
-    {
-      "id": "l_engrenage_epine",
-      "name_key": "module.epine.name",
-      "modules": [
-        "chemin",
-        "sur_soi",
-        "epine"
-      ]
-    },
-    {
-      "id": "l_engrenage_aiguille",
-      "name_key": "module.aiguille.name",
-      "modules": [
-        "point",
-        "jet_long",
-        "aiguille"
-      ]
-    }
-  ],
-  "hotbar": [
-    {
-      "type": "capacite",
-      "ref": 0
-    },
-    {
-      "type": "capacite",
-      "ref": 1
-    },
-    {
-      "type": "capacite",
-      "ref": 2
-    }
-  ],
-  "signature": "tourelle"
+  {
+   "type": "capacite",
+   "ref": 1
+  },
+  {
+   "type": "capacite",
+   "ref": 2
+  }
+ ],
+ "signature": "tourelle"
 }

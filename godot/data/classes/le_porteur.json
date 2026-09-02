@@ -1,69 +1,69 @@
 {
-  "name_key": "classe.le_porteur.name",
-  "bonus_stats": {
-    "force": 3
+ "name_key": "classe.le_porteur.name",
+ "bonus_stats": {
+  "force": 3
+ },
+ "equipement": [
+  "craft_cuirasse",
+  "torche"
+ ],
+ "ratelier": [
+  "craft_masse"
+ ],
+ "competences": {
+  "mains_nues": 4,
+  "athletisme": 4
+ },
+ "base_potentials": {
+  "_defaut": 100
+ },
+ "talent": "saisie",
+ "points_creation_bonus": 4,
+ "tags": [
+  "cache"
+ ],
+ "capacites": [
+  {
+   "id": "le_porteur_empoigne",
+   "name_key": "module.empoigne.name",
+   "modules": [
+    "point",
+    "contact",
+    "empoigne"
+   ]
   },
-  "equipement": [
-    "craft_cuirasse",
-    "torche"
-  ],
-  "ratelier": [
-    "craft_masse"
-  ],
-  "competences": {
-    "mains_nues": 4,
-    "athletisme": 4
+  {
+   "id": "le_porteur_projection",
+   "name_key": "module.projection.name",
+   "modules": [
+    "point",
+    "contact",
+    "projection"
+   ]
   },
-  "base_potentials": {
-    "_defaut": 100
+  {
+   "id": "le_porteur_estoc",
+   "name_key": "module.estoc.name",
+   "modules": [
+    "point",
+    "contact",
+    "estoc"
+   ]
+  }
+ ],
+ "hotbar": [
+  {
+   "type": "capacite",
+   "ref": 0
   },
-  "talent": "saisie",
-  "points_creation_bonus": 4,
-  "tags": [
-    "cache"
-  ],
-  "capacites": [
-    {
-      "id": "le_porteur_projection",
-      "name_key": "module.projection.name",
-      "modules": [
-        "point",
-        "contact",
-        "projection"
-      ]
-    },
-    {
-      "id": "le_porteur_flamme",
-      "name_key": "module.flamme.name",
-      "modules": [
-        "croix",
-        "contact",
-        "flamme"
-      ]
-    },
-    {
-      "id": "le_porteur_fosse",
-      "name_key": "module.fosse.name",
-      "modules": [
-        "cone",
-        "contact",
-        "fosse"
-      ]
-    }
-  ],
-  "hotbar": [
-    {
-      "type": "capacite",
-      "ref": 0
-    },
-    {
-      "type": "capacite",
-      "ref": 1
-    },
-    {
-      "type": "capacite",
-      "ref": 2
-    }
-  ],
-  "signature": "projection"
+  {
+   "type": "capacite",
+   "ref": 1
+  },
+  {
+   "type": "capacite",
+   "ref": 2
+  }
+ ],
+ "signature": "empoigne"
 }

@@ -1,79 +1,75 @@
 {
-  "name_key": "classe.la_meche.name",
-  "bonus_stats": {
-    "dexterite": 2,
-    "perception": 1
+ "name_key": "classe.la_meche.name",
+ "bonus_stats": {
+  "dexterite": 2,
+  "perception": 1
+ },
+ "equipement": [
+  "craft_dague",
+  "craft_casque",
+  "torche"
+ ],
+ "ratelier": [
+  "craft_arc",
+  "craft_pelle"
+ ],
+ "competences": {
+  "forge": 3,
+  "terrassement": 5
+ },
+ "base_potentials": {
+  "_defaut": 80,
+  "forge": 110,
+  "terrassement": 120,
+  "athletisme": 100
+ },
+ "talent": "chaine_d_amorces",
+ "points_creation_bonus": 0,
+ "tags": [
+  "cache"
+ ],
+ "capacites": [
+  {
+   "id": "la_meche_bombe",
+   "name_key": "module.bombe.name",
+   "modules": [
+    "point",
+    "jet_long",
+    "bombe"
+   ]
   },
-  "equipement": [
-    "craft_dague",
-    "craft_casque",
-    "torche"
-  ],
-  "ratelier": [
-    "craft_arc",
-    "craft_pelle"
-  ],
-  "competences": {
-    "forge": 3,
-    "terrassement": 5
+  {
+   "id": "la_meche_foudroiement",
+   "name_key": "module.foudroiement.name",
+   "modules": [
+    "point",
+    "jet_long",
+    "foudroiement"
+   ]
   },
-  "base_potentials": {
-    "_defaut": 80,
-    "forge": 110,
-    "terrassement": 120,
-    "athletisme": 100
+  {
+   "id": "la_meche_fonte",
+   "name_key": "module.fonte.name",
+   "modules": [
+    "point",
+    "jet_long",
+    "fonte"
+   ]
+  }
+ ],
+ "hotbar": [
+  {
+   "type": "capacite",
+   "ref": 0
   },
-  "talent": "chaine_d_amorces",
-  "points_creation_bonus": 0,
-  "tags": [
-    "cache"
-  ],
-  "capacites": [
-    {
-      "id": "la_meche_bombe",
-      "name_key": "module.bombe.name",
-      "modules": [
-        "point",
-        "jet_long",
-        "bombe"
-      ]
-    },
-    {
-      "id": "la_meche_ronce",
-      "name_key": "module.ronce.name",
-      "modules": [
-        "point",
-        "jet_long",
-        "ronce"
-      ]
-    },
-    {
-      "id": "la_meche_fonte",
-      "name_key": "module.fonte.name",
-      "modules": [
-        "chemin",
-        "sur_soi",
-        "fonte"
-      ]
-    }
-  ],
-  "hotbar": [
-    {
-      "type": "arme",
-      "ref": "craft_masse"
-    },
-    {
-      "type": "capacite",
-      "ref": 0
-    },
-    {
-      "type": "capacite",
-      "ref": 1
-    },
-    {
-      "type": "capacite",
-      "ref": 2
-    }
-  ],
-  "signature": "bombe"
+  {
+   "type": "capacite",
+   "ref": 1
+  },
+  {
+   "type": "capacite",
+   "ref": 2
+  }
+ ],
+ "signature": "bombe"
 }

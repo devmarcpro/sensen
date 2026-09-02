@@ -1,71 +1,71 @@
 {
-  "name_key": "classe.le_sceau.name",
-  "bonus_stats": {
-    "endurance": 1,
-    "volonte": 2
+ "name_key": "classe.le_sceau.name",
+ "bonus_stats": {
+  "endurance": 1,
+  "volonte": 2
+ },
+ "equipement": [
+  "craft_baton_magique",
+  "craft_cuirasse",
+  "torche"
+ ],
+ "ratelier": [
+  "craft_masse"
+ ],
+ "competences": {
+  "enchantement": 4,
+  "encaissement": 4
+ },
+ "base_potentials": {
+  "_defaut": 100
+ },
+ "talent": "graveur",
+ "points_creation_bonus": 4,
+ "tags": [
+  "cache"
+ ],
+ "capacites": [
+  {
+   "id": "le_sceau_balise",
+   "name_key": "module.balise.name",
+   "modules": [
+    "point",
+    "jet_court",
+    "balise"
+   ]
   },
-  "equipement": [
-    "craft_baton_magique",
-    "craft_cuirasse",
-    "torche"
-  ],
-  "ratelier": [
-    "craft_masse"
-  ],
-  "competences": {
-    "enchantement": 4,
-    "encaissement": 4
+  {
+   "id": "le_sceau_epine",
+   "name_key": "module.epine.name",
+   "modules": [
+    "point",
+    "jet_court",
+    "epine"
+   ]
   },
-  "base_potentials": {
-    "_defaut": 100
+  {
+   "id": "le_sceau_gel",
+   "name_key": "module.gel.name",
+   "modules": [
+    "point",
+    "jet_court",
+    "gel"
+   ]
+  }
+ ],
+ "hotbar": [
+  {
+   "type": "capacite",
+   "ref": 0
   },
-  "talent": "graveur",
-  "points_creation_bonus": 4,
-  "tags": [
-    "cache"
-  ],
-  "capacites": [
-    {
-      "id": "le_sceau_balise",
-      "name_key": "module.balise.name",
-      "modules": [
-        "point",
-        "jet_court",
-        "balise"
-      ]
-    },
-    {
-      "id": "le_sceau_aiguille",
-      "name_key": "module.aiguille.name",
-      "modules": [
-        "point",
-        "jet_court",
-        "aiguille"
-      ]
-    },
-    {
-      "id": "le_sceau_etincelle",
-      "name_key": "module.etincelle.name",
-      "modules": [
-        "ligne",
-        "jet_court",
-        "etincelle"
-      ]
-    }
-  ],
-  "hotbar": [
-    {
-      "type": "capacite",
-      "ref": 0
-    },
-    {
-      "type": "capacite",
-      "ref": 1
-    },
-    {
-      "type": "capacite",
-      "ref": 2
-    }
-  ],
-  "signature": "balise"
+  {
+   "type": "capacite",
+   "ref": 1
+  },
+  {
+   "type": "capacite",
+   "ref": 2
+  }
+ ],
+ "signature": "balise"
 }

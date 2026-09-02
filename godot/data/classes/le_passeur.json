@@ -1,71 +1,71 @@
 {
-  "name_key": "classe.le_passeur.name",
-  "bonus_stats": {
-    "dexterite": 1,
-    "volonte": 2
+ "name_key": "classe.le_passeur.name",
+ "bonus_stats": {
+  "dexterite": 1,
+  "volonte": 2
+ },
+ "equipement": [
+  "craft_baton_magique",
+  "craft_jambieres",
+  "torche"
+ ],
+ "ratelier": [
+  "craft_dague"
+ ],
+ "competences": {
+  "magie_espace": 4,
+  "athletisme": 4
+ },
+ "base_potentials": {
+  "_defaut": 100
+ },
+ "talent": "breche",
+ "points_creation_bonus": 4,
+ "tags": [
+  "cache"
+ ],
+ "capacites": [
+  {
+   "id": "le_passeur_portail",
+   "name_key": "module.portail.name",
+   "modules": [
+    "point",
+    "jet_long",
+    "portail"
+   ]
   },
-  "equipement": [
-    "craft_baton_magique",
-    "craft_jambieres",
-    "torche"
-  ],
-  "ratelier": [
-    "craft_dague"
-  ],
-  "competences": {
-    "magie_espace": 4,
-    "athletisme": 4
+  {
+   "id": "le_passeur_flamme",
+   "name_key": "module.flamme.name",
+   "modules": [
+    "point",
+    "jet_long",
+    "flamme"
+   ]
   },
-  "base_potentials": {
-    "_defaut": 100
+  {
+   "id": "le_passeur_brasier",
+   "name_key": "module.brasier.name",
+   "modules": [
+    "point",
+    "jet_long",
+    "brasier"
+   ]
+  }
+ ],
+ "hotbar": [
+  {
+   "type": "capacite",
+   "ref": 0
   },
-  "talent": "breche",
-  "points_creation_bonus": 4,
-  "tags": [
-    "cache"
-  ],
-  "capacites": [
-    {
-      "id": "le_passeur_portail",
-      "name_key": "module.portail.name",
-      "modules": [
-        "point",
-        "jet_long",
-        "portail"
-      ]
-    },
-    {
-      "id": "le_passeur_brasier",
-      "name_key": "module.brasier.name",
-      "modules": [
-        "colonne",
-        "jet_long",
-        "brasier"
-      ]
-    },
-    {
-      "id": "le_passeur_flamme",
-      "name_key": "module.flamme.name",
-      "modules": [
-        "croix",
-        "jet_long",
-        "flamme"
-      ]
-    }
-  ],
-  "hotbar": [
-    {
-      "type": "capacite",
-      "ref": 0
-    },
-    {
-      "type": "capacite",
-      "ref": 1
-    },
-    {
-      "type": "capacite",
-      "ref": 2
-    }
-  ],
-  "signature": "portail"
+  {
+   "type": "capacite",
+   "ref": 1
+  },
+  {
+   "type": "capacite",
+   "ref": 2
+  }
+ ],
+ "signature": "portail"
 }

@@ -1,81 +1,77 @@
 {
-  "name_key": "classe.la_paume.name",
-  "bonus_stats": {
-    "volonte": 2,
-    "charisme": 1
+ "name_key": "classe.la_paume.name",
+ "bonus_stats": {
+  "volonte": 2,
+  "charisme": 1
+ },
+ "equipement": [
+  "craft_baton_magique",
+  "craft_cuirasse",
+  "torche"
+ ],
+ "ratelier": [
+  "craft_faucille"
+ ],
+ "competences": {
+  "magie_bois": 5,
+  "alchimie": 5
+ },
+ "base_potentials": {
+  "_defaut": 80,
+  "magie_bois": 120,
+  "meditation": 120,
+  "alchimie": 100,
+  "masse": 60,
+  "hache_d_armes": 60,
+  "deux_mains": 60
+ },
+ "talent": "souffle_rendu",
+ "points_creation_bonus": 0,
+ "tags": [
+  "visible"
+ ],
+ "capacites": [
+  {
+   "id": "la_paume_baume",
+   "name_key": "module.baume.name",
+   "modules": [
+    "chemin",
+    "sur_soi",
+    "baume"
+   ]
   },
-  "equipement": [
-    "craft_baton_magique",
-    "craft_cuirasse",
-    "torche"
-  ],
-  "ratelier": [
-    "craft_faucille"
-  ],
-  "competences": {
-    "magie_bois": 5,
-    "alchimie": 5
+  {
+   "id": "la_paume_seve",
+   "name_key": "module.seve.name",
+   "modules": [
+    "point",
+    "jet_court",
+    "seve"
+   ]
   },
-  "base_potentials": {
-    "_defaut": 80,
-    "magie_bois": 120,
-    "meditation": 120,
-    "alchimie": 100,
-    "masse": 60,
-    "hache_d_armes": 60,
-    "deux_mains": 60
+  {
+   "id": "la_paume_gel",
+   "name_key": "module.gel.name",
+   "modules": [
+    "point",
+    "jet_court",
+    "gel"
+   ]
+  }
+ ],
+ "hotbar": [
+  {
+   "type": "capacite",
+   "ref": 0
   },
-  "talent": "souffle_rendu",
-  "points_creation_bonus": 0,
-  "tags": [
-    "visible"
-  ],
-  "capacites": [
-    {
-      "id": "la_paume_baume",
-      "name_key": "module.baume.name",
-      "modules": [
-        "chemin",
-        "sur_soi",
-        "baume"
-      ]
-    },
-    {
-      "id": "la_paume_aiguille",
-      "name_key": "module.aiguille.name",
-      "modules": [
-        "point",
-        "jet_court",
-        "aiguille"
-      ]
-    },
-    {
-      "id": "la_paume_etincelle",
-      "name_key": "module.etincelle.name",
-      "modules": [
-        "ligne",
-        "jet_court",
-        "etincelle"
-      ]
-    }
-  ],
-  "hotbar": [
-    {
-      "type": "arme",
-      "ref": "craft_baton_magique"
-    },
-    {
-      "type": "capacite",
-      "ref": 0
-    },
-    {
-      "type": "capacite",
-      "ref": 1
-    },
-    {
-      "type": "capacite",
-      "ref": 2
-    }
-  ],
-  "signature": "baume"
+  {
+   "type": "capacite",
+   "ref": 1
+  },
+  {
+   "type": "capacite",
+   "ref": 2
+  }
+ ],
+ "signature": "baume"
 }
