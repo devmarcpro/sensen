@@ -24,7 +24,7 @@
       "name_key": "module.saignement.name",
       "modules": [
         "point",
-        "jet_long",
+        "contact",
         "saignement"
       ]
     },
@@ -33,7 +33,7 @@
       "name_key": "module.estoc.name",
       "modules": [
         "point",
-        "jet_long",
+        "contact",
         "estoc"
       ]
     },
@@ -42,7 +42,7 @@
       "name_key": "module.frappe.name",
       "modules": [
         "point",
-        "jet_long",
+        "contact",
         "frappe"
       ]
     }

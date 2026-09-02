@@ -547,7 +547,7 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 > **71. Compétence Chasseur** — « détermine si on obtient du loot spécifique à l'ennemi (dents, peau, yeux, fourrure etc), plus le niveau de compétence est élevé plus on en obtient ». Aujourd'hui la dépouille tombe toujours, sans jet ni compétence. Il faut un jet sur Chasseur à la mise à mort, dont la réussite et la quantité suivent le niveau.
 
 
-> [!todo] Ajout du designer (2026-09-01) : 72. **Retravailler toutes les capacités de départ des classes**
+> [!done] Ajout du designer (2026-09-01) : 72. **Fait le 2026-09-02** — 46 capacités reportées sur la portée de leur style, banc et vérification rejoués, écart de rendement mesuré et consigné dans [[À juger — parcours de jeu]]. **Retravailler toutes les capacités de départ des classes**
 > « vu qu'on a modifié comment fonctionnent les modules ». Les 56 capacités des 19 classes ont reçu leur module de portée par **transcription mécanique** de l'ancienne portée implicite de leur forme — elles portent exactement aussi loin qu'avant, mais personne n'a jugé si c'est ce qu'on veut. Depuis, quatre règles ont changé : la portée se paie en ticks, la surface dilue la puissance en 1/√n, la distance l'atténue encore, et chaque étape pose son segment. Il faut **relire chaque classe** — sa portée est-elle celle de son style ? son sort d'ouverture est-il encore viable ? — et rejouer le banc (`banc_classes.tscn`) pour mesurer, comme le 2026-08-31.
 
 

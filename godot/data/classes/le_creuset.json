@@ -34,7 +34,7 @@
       "name_key": "module.fiole.name",
       "modules": [
         "chemin",
-        "jet_long",
+        "sur_soi",
         "fiole"
       ]
     },
@@ -43,7 +43,7 @@
       "name_key": "module.eboulement.name",
       "modules": [
         "point",
-        "jet_long",
+        "jet_court",
         "eboulement"
       ]
     },
@@ -52,7 +52,7 @@
       "name_key": "module.ronce.name",
       "modules": [
         "point",
-        "jet_long",
+        "jet_court",
         "ronce"
       ]
     }

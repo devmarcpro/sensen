@@ -33,7 +33,7 @@
       "name_key": "module.brasier.name",
       "modules": [
         "colonne",
-        "aveugle",
+        "jet_long",
         "brasier"
       ]
     },

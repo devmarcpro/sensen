@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "id",
+    "name_key",
+    "desc_key",
+    "predicat",
+    "bonus"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name_key": {
+      "type": "string"
+    },
+    "desc_key": {
+      "type": "string"
+    },
+    "nom": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "predicat": {
+      "type": "string",
+      "enum": [
+        "aucune_armure",
+        "aucune_arme",
+        "or_max",
+        "jamais_potion",
+        "jamais_viande",
+        "jamais_livre"
+      ]
+    },
+    "bonus": {
+      "type": "object"
+    },
+    "rupture": {
+      "type": "string"
+    }
+  }
+}

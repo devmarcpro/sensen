@@ -24,7 +24,7 @@
       "name_key": "module.pari.name",
       "modules": [
         "point",
-        "jet_long",
+        "contact",
         "pari"
       ]
     },
@@ -33,7 +33,7 @@
       "name_key": "module.botte.name",
       "modules": [
         "chemin",
-        "jet_long",
+        "sur_soi",
         "botte"
       ]
     },
@@ -42,7 +42,7 @@
       "name_key": "module.charge_d_epaule.name",
       "modules": [
         "diagonale",
-        "jet_long",
+        "contact",
         "charge_d_epaule"
       ]
     }

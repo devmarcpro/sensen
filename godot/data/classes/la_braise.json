@@ -37,7 +37,7 @@
       "name_key": "module.trempe.name",
       "modules": [
         "point",
-        "jet_long",
+        "hast",
         "trempe"
       ]
     },
@@ -46,7 +46,7 @@
       "name_key": "module.eboulement.name",
       "modules": [
         "point",
-        "jet_long",
+        "hast",
         "eboulement"
       ]
     },
@@ -55,7 +55,7 @@
       "name_key": "module.ronce.name",
       "modules": [
         "point",
-        "jet_long",
+        "hast",
         "ronce"
       ]
     }

@@ -25,7 +25,7 @@
       "name_key": "module.eboulement.name",
       "modules": [
         "point",
-        "jet_long",
+        "jet_court",
         "eboulement"
       ]
     },
@@ -34,7 +34,7 @@
       "name_key": "module.ronce.name",
       "modules": [
         "point",
-        "jet_long",
+        "jet_court",
         "ronce"
       ]
     },
@@ -43,7 +43,7 @@
       "name_key": "module.fonte.name",
       "modules": [
         "chemin",
-        "jet_long",
+        "sur_soi",
         "fonte"
       ]
     }

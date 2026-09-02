@@ -23,7 +23,7 @@
       "name_key": "module.releve.name",
       "modules": [
         "point",
-        "jet_long",
+        "jet_court",
         "releve"
       ]
     },
@@ -32,7 +32,7 @@
       "name_key": "module.banquise.name",
       "modules": [
         "diagonale",
-        "jet_long",
+        "jet_court",
         "banquise"
       ]
     },
@@ -41,7 +41,7 @@
       "name_key": "module.roche.name",
       "modules": [
         "chemin",
-        "jet_long",
+        "sur_soi",
         "roche"
       ]
     }
