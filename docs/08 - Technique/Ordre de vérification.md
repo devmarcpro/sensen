@@ -44,6 +44,10 @@ Un critère de performance à valider avant de passer à l'étape suivante. **Un
 > **Le garde-fou** : `tools/verif_scripts.py` ouvre la scène principale dans Godot et **refuse** toute *Parse Error*, *Compilation failed* ou *SCRIPT ERROR*. Il tourne avec les autres outils avant chaque commit et chaque publication. Une suite verte ne prouvait pas que le jeu démarre ; maintenant si.
 
 
+> [!success] Codé le 2026-09-02 — les scènes de monde se montrent en **GIF** (designer)
+> « refais toutes les captures et rajoutes-en, et fais-en des GIF plutôt que de simples captures ». Une image fixe ne montre ni l'horloge qui tourne, ni le combat qui se résout, ni la pluie. `capture.tscn` sait désormais rendre une **suite d'images** : `--gif N` (nombre de prises), `--gif-pas P` (images de rendu entre deux), `--gif-ticks T` (ticks de simulation avancés entre deux) et `--gif-marcher N` (pas du joueur entre deux) — c'est ce dernier qui fait vraiment le film, sans mouvement un GIF n'est qu'une image répétée. Godot ne sait pas écrire de GIF : `tools/monter_gif.py` monte les PNG, les met à l'échelle et quantifie la palette. Le README anime le camp, le village, le donjon, le combat et l'orage ; les écrans d'interface restent des images fixes, où rien ne bouge.
+
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Budgets de performance]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]

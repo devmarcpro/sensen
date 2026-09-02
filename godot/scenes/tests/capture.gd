@@ -3,6 +3,12 @@ extends Node
 ##   & Godot --path godot res://scenes/tests/capture.tscn -- --sortie C:/chemin/capture.png [--arene N] [--frames 60]
 ## Sert à vérifier le rendu sans œil humain disponible ; ne remplace pas le jugement de game feel.
 
+var gif_images := 0      # --gif N : N images espacées, pour un GIF monté hors du jeu
+var gif_pas := 8         # --gif-pas P : images de rendu entre deux prises
+var gif_ticks := 6       # --gif-ticks T : ticks de simulation avancés entre deux prises
+var gif_marche := 0      # --gif-marcher N : N pas du joueur entre deux prises — sans mouvement, un GIF est une image fixe
+var gif_prises := 0
+var scene: Node = null      # la scène du jeu, gardée pour faire vivre le monde entre deux prises de GIF
 var frames := 0
 var cible := 60
 var sortie := "user://capture.png"
@@ -14,6 +20,14 @@ var temps_total := 0.0
 func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
 	for i in args.size():
+		if args[i] == "--gif" and i + 1 < args.size():
+			gif_images = int(args[i + 1])
+		elif args[i] == "--gif-pas" and i + 1 < args.size():
+			gif_pas = int(args[i + 1])
+		elif args[i] == "--gif-ticks" and i + 1 < args.size():
+			gif_ticks = int(args[i + 1])
+		elif args[i] == "--gif-marcher" and i + 1 < args.size():
+			gif_marche = int(args[i + 1])
 		if args[i] == "--sortie" and i + 1 < args.size():
 			sortie = args[i + 1]
 		elif args[i] == "--frames" and i + 1 < args.size():
@@ -25,7 +39,7 @@ func _ready() -> void:
 			TranslationServer.set_locale(str(args[il + 1]))
 	if "--plein-ecran" in args:   # --plein-ecran : la fenêtre passe en plein écran AVANT la capture (README, designer 2026-08-31)
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
-	var scene: Node = load("res://scenes/demo/main.tscn").instantiate()
+	scene = load("res://scenes/demo/main.tscn").instantiate()
 	add_child(scene)
 	for ig in args.size():   # --graine N : un monde CONNU pour les captures (sinon chaque prise tombe ailleurs)
 		if args[ig] == "--graine" and ig + 1 < args.size():
@@ -427,6 +441,38 @@ func _process(delta: float) -> void:
 	if frames > 5:   # les premières images chargent ; on mesure ensuite (critère É0 : 60 fps)
 		temps_max = maxf(temps_max, delta)
 		temps_total += delta
+	if gif_images > 0 and frames >= 5 and (frames - 5) % maxi(1, gif_pas) == 0 and gif_prises < gif_images:
+		var img_g := get_viewport().get_texture().get_image()
+		if img_g != null and not img_g.is_empty():
+			img_g.save_png("%s_%02d.png" % [sortie.get_basename(), gif_prises])
+		gif_prises += 1
+		if scene.sim != null and gif_marche > 0:   # le joueur marche entre deux prises : c'est ça qui fait le film
+			var jg: Dictionary = scene.joueur()
+			var rng_g := RandomNumberGenerator.new()
+			rng_g.seed = hash([gif_prises, "gif"])
+			for _p in gif_marche:
+				var garde_g := 60
+				while garde_g > 0 and not scene.sim.attente.has(jg.id) and jg.vivant:
+					scene.sim.pas("monde")
+					for nom_g in scene.sim.combats.keys():
+						scene.sim.pas(nom_g)
+					garde_g -= 1
+				var dirs: Array = Grille.DIRS.duplicate()
+				dirs.shuffle()
+				for d_g in dirs:
+					if scene.sim.intention(jg.id, {"type": "deplacer", "vers": jg.pos + d_g}):
+						break
+		if scene.sim != null and gif_ticks > 0:   # le monde vit entre deux prises : sans ça le GIF est fixe
+			for _t in gif_ticks:
+				scene.sim.pas("monde")
+				for nom_c in scene.sim.combats.keys():
+					scene.sim.pas(nom_c)
+			scene._apres_changement_de_grille()
+		if gif_prises >= gif_images:
+			print("gif : %d images -> %s_XX.png" % [gif_prises, sortie.get_basename()])
+			get_tree().quit()
+			return
+		return
 	if frames == cible:
 		var img := get_viewport().get_texture().get_image()
 		if img == null or img.is_empty():   # headless : pas d'image — on quitte quand même (sinon le processus reste)
