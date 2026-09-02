@@ -169,6 +169,11 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > Défaut de mon propre travail du point 67 : la largeur de la liste était recalculée **sur le signal `resized` du panneau**, et ce signal ne se déclenche pas quand un écran s'ouvre à une taille qu'il a déjà. Tous les écrans s'ouvraient donc à la **largeur plancher de 340 px** — le correctif ne s'appliquait qu'après un redimensionnement manuel de la fenêtre. Vu à l'écran sur le volet Serments : la ligne d'onglets s'arrêtait sur « Pose [… » et les six serments perdaient la moitié de leur texte. La largeur se pose maintenant aussi à l'ouverture.
 
 
+> [!bug] Corrigé le 2026-09-02 — une arme ramassée se plaçait en tête de hotbar (designer)
+> « quand le joueur récupère une arme elle se met au début de sa hotbar, ce qui n'est pas bon ». La hotbar dérivée se construisait **râtelier d'abord**, puis capacités, puis bombes, le tout coupé à dix. Équiper une arme trouvée l'ajoute au râtelier — donc chaque ramassage **repoussait toutes les capacités d'un cran**, changeait les raccourcis sous les doigts en plein donjon, et finissait par **évincer les sorts de classe** au-delà de la dixième case. Sur la partie du robot, les cases 1 à 5 étaient devenues Dague, Lance, Lance, Dague, Bouclier, et les trois sorts de L'Écarlate étaient repoussés en 6, 7, 8.
+> L'ordre s'inverse : **les capacités d'abord** — elles sont l'identité du personnage et doivent rester sous les mêmes touches toute la partie —, puis le râtelier, puis les objets. Une arme ramassée se pose donc **à la suite**, sans rien déplacer. Les affectations manuelles du joueur (point 35) continuent de recouvrir la hotbar dérivée, case par case.
+
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

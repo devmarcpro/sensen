@@ -942,10 +942,12 @@ func _unhandled_input(ev: InputEvent) -> void:
 ## La hotbar (Écrans d'interface, contrôles) : armes du râtelier, capacités, lourde, garde, attendre — dix cases.
 func hotbar_entrees(j: Dictionary) -> Array:
 	var res: Array = []
-	for k in j.ratelier.size():
-		res.append({"type": "arme", "ref": j.ratelier[k], "nom": tr(sim.items[j.ratelier[k]].name_key)})
+	# Les capacités d'abord (designer 2026-09-02) : elles sont l'identité du personnage et doivent rester
+	# sous les mêmes touches. Une arme ramassée entre au râtelier, donc à la SUITE, sans rien déplacer.
 	for k in j.get("capacites", []).size():
 		res.append({"type": "capacite", "ref": k, "nom": tr(j.capacites[k].get("name_key", j.capacites[k].id))})
+	for k in j.ratelier.size():
+		res.append({"type": "arme", "ref": j.ratelier[k], "nom": tr(sim.items[j.ratelier[k]].name_key)})
 	for uid in j.sac:   # les bombes du sac (Explosions)
 		var it: Dictionary = sim.items.get(uid, {})
 		if it.has("bombe"):
