@@ -137,15 +137,19 @@ func _equiper_et_composer() -> void:
 		var formes: Array[String] = []
 		var noyaux: Array[String] = []
 		var modifs: Array[String] = []
+		var portees: Array[String] = []   # la portée est un module depuis le 2026-09-01 : sans elle, tout se lance au contact
 		for id in j.get("modules_connus", []):
 			match str(GameData.catalogues.modules.get(str(id), {}).get("module_type", "")):
 				"forme": formes.append(str(id))
 				"noyau": noyaux.append(str(id))
 				"modificateur": modifs.append(str(id))
+				"portee": portees.append(str(id))
 		for k in sorts:
 			if formes.is_empty() or noyaux.is_empty():
 				break
 			var seq: Array = [formes[rng_bot.randi() % formes.size()], noyaux[rng_bot.randi() % noyaux.size()]]
+			if not portees.is_empty():
+				seq.insert(1, portees[rng_bot.randi() % portees.size()])
 			if not modifs.is_empty() and rng_bot.randf() < 0.5:
 				seq.append(modifs[rng_bot.randi() % modifs.size()])
 			if not sim.composer_capacite(j, seq, "bot_%d" % k):

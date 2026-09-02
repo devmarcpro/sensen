@@ -193,6 +193,7 @@ func basculer(nom: String) -> void:
 
 func ouvrir(nom: String) -> void:
 	courant = nom
+	_replacer_liste()   # la colonne suit la largeur du panneau : le signal resized ne suffit pas à l'ouverture
 	selection = 0
 	panneau.visible = true
 	apercu_sort.visible = false

@@ -165,6 +165,10 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > Le moteur enchaîne autant d'étapes qu'on veut — un déclencheur encapsule tout ce qui le suit, et l'assemblage se rappelle lui-même (`test_chaine_a_trois_etapes`). L'écran, lui, n'en exprimait que **deux** : ses créneaux étant groupés **par type**, tout ce qui suivait le premier déclencheur tombait dans une seule case « Suite », et un second déclencheur se rangeait avec le premier — la troisième étape était donc impossible à écrire à la souris. Le composeur tient maintenant une **liste d'étapes** : une ligne d'onglets « Étape 1 · 2 · 3 · + » ouvre celle qu'on modifie, chaque étape a ses propres créneaux (portée, forme, noyaux, modificateurs, conditions, liaisons) et son **déclencheur**, qui est précisément ce qui ouvre la suivante. Le groupe « Suite » disparaît : ce n'était que l'étape 2 sans le dire. Ajouter une étape exige un déclencheur dans la précédente — sans lui, rien ne partirait.
 
 
+> [!bug] Corrigé le 2026-09-02 — la largeur de la colonne ne se calculait qu'au redimensionnement
+> Défaut de mon propre travail du point 67 : la largeur de la liste était recalculée **sur le signal `resized` du panneau**, et ce signal ne se déclenche pas quand un écran s'ouvre à une taille qu'il a déjà. Tous les écrans s'ouvraient donc à la **largeur plancher de 340 px** — le correctif ne s'appliquait qu'après un redimensionnement manuel de la fenêtre. Vu à l'écran sur le volet Serments : la ligne d'onglets s'arrêtait sur « Pose [… » et les six serments perdaient la moitié de leur texte. La largeur se pose maintenant aussi à l'ouverture.
+
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]
