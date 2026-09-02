@@ -165,6 +165,7 @@ func _ready() -> void:
 	_lancer("test_recuperation")
 	_lancer("test_serments")
 	_lancer("test_conditions_payantes")
+	_lancer("test_familles_non_vides")
 	_lancer("test_types_ennemis")
 	_lancer("test_loot_assemble")
 	_lancer("test_budgets")
@@ -1168,7 +1169,7 @@ func test_paperdoll_et_tutoriels() -> void:
 
 func test_materiaux() -> void:
 	var mats: Dictionary = GameData.catalogues.materials
-	verifier(mats.size() == 164, "les 164 matériaux des catalogues sont chargés — dont le croc (%d)" % mats.size())
+	verifier(mats.size() == 166, "les 166 matériaux des catalogues sont chargés — dont croc, écaille et ivoire (%d)" % mats.size())
 	var fer: Dictionary = mats.fer
 	verifier(int(fer.stats.durete) == 25 and int(fer.stats.conductivite_electrique) == 75, "le Fer suit sa table (Dur 25, CÉl 75)")
 	verifier("conducteur" in fer.tags and not ("inflammable" in fer.tags), "tags dérivés au seuil 50 (fer : conducteur)")
@@ -1277,7 +1278,7 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 61, "61 recettes : 22 transformations (dont os, croc, fourrure), 3 plats, 2 distillations, la torche, et 33 dérivées des objets qui portent leur coût (24 meubles, 9 stations)")
+	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 63, "63 recettes : 24 transformations (dont os, croc, fourrure, écaille, ivoire), 3 plats, 2 distillations, la torche, et 33 dérivées des objets qui portent leur coût (24 meubles, 9 stations)")
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")
@@ -7694,3 +7695,26 @@ func test_conditions_payantes() -> void:
 		if not b.is_empty() and Capacites.cout_condition(b) <= 0:
 			gratuites.append(mid)
 	verifier(gratuites.is_empty(), "aucune condition ne donne sans rien coûter (%s)" % str(gratuites))
+
+
+## Une famille de matériaux vide fait sauter sa recette au loot (designer 2026-09-01, mesuré) : aucune
+## famille citée par une recette de composant ne doit être sans matériau.
+func test_familles_non_vides() -> void:
+	var fams: Dictionary = GameData.config("material_families")
+	var vides: Array = []
+	for rid: String in GameData.catalogues.component_recipes.keys():
+		var fid := str(GameData.catalogues.component_recipes[rid].get("material_family", ""))
+		var fam: Dictionary = fams.get(fid, {})
+		var n := 0
+		if fam.has("material"):
+			n = 1 if GameData.catalogues.materials.has(str(fam.material)) else 0
+		elif fam.has("materials"):
+			n = (fam.materials as Array).size()
+		else:
+			for m: String in GameData.catalogues.materials.keys():
+				var d: Dictionary = GameData.catalogues.materials[m]
+				if (fam.has("category") and str(d.get("category", "")) == str(fam.category)) or (fam.has("tag") and str(fam.tag) in d.get("tags", [])):
+					n += 1
+		if n == 0 and not vides.has(fid):
+			vides.append(fid)
+	verifier(vides.is_empty(), "aucune famille de composant n'est vide (%s)" % str(vides))

@@ -1168,6 +1168,12 @@ recipe.scier_planche.name,Saw planks
 recipe.tailler_gemme.name,Cut a gem
 recipe.tailler_pierre.name,Cut stone
 recipe.tanner_cuir.name,Tan a hide
+item.defense.name,Tusk
+material.ivoire.name,ivory
+recipe.polir_ivoire.name,Polish ivory
+item.ecaille.name,Scale
+material.ecaille.name,scale
+recipe.durcir_ecaille.name,Harden scales
 material.croc.name,fang
 recipe.travailler_os.name,Work bone
 recipe.tailler_croc.name,Carve a fang

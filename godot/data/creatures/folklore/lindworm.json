@@ -41,6 +41,8 @@
   "depouille": [],
   "drops_chasse": [
     "peau",
-    "dent"
+    "dent",
+    "ecaille",
+    "defense"
   ]
 }

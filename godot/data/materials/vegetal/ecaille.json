@@ -1,0 +1,41 @@
+{
+  "name_key": "material.ecaille.name",
+  "category": "vegetal",
+  "stats": {
+    "durete": 10,
+    "densite": 3,
+    "valeur_base": 9,
+    "conductivite_mana": 5,
+    "flammabilite": 40,
+    "isolation": 45,
+    "conductivite_electrique": 15,
+    "flottabilite": 60,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 60,
+    "friction": 55
+  },
+  "tags": [
+    "organique",
+    "animal",
+    "ecaille"
+  ],
+  "color": "#5F7A55",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 613,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "dague",
+    "skill": "collecte"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": null,
+  "composition": null
+}

@@ -1,0 +1,19 @@
+{
+  "name_key": "recipe.polir_ivoire.name",
+  "station": "etabli",
+  "craft_skill": "menuiserie",
+  "inputs": [
+    {
+      "item": "defense",
+      "forme": "",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "material": "ivoire",
+    "forme": "brut",
+    "amount": 1,
+    "herite_espece": true
+  },
+  "fuel": null
+}

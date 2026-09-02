@@ -437,6 +437,12 @@ recipe.fondre_lingot.name,Fondre un lingot
 recipe.scier_planche.name,Scier des planches
 recipe.tailler_pierre.name,Tailler la pierre
 recipe.tanner_cuir.name,Tanner une peau
+item.defense.name,Défense
+material.ivoire.name,ivoire
+recipe.polir_ivoire.name,Polir de l’ivoire
+item.ecaille.name,Écaille
+material.ecaille.name,écaille
+recipe.durcir_ecaille.name,Durcir des écailles
 material.croc.name,croc
 recipe.travailler_os.name,Travailler l’os
 recipe.tailler_croc.name,Tailler un croc

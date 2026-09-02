@@ -49,6 +49,10 @@ Les catégories de matériaux, chacune liée à un outil, une compétence de ré
 > **Deux familles mortes rouvertes** : `dent_croc` et `fourrure` n'avaient aucun matériau au catalogue — les recettes de composant qui les demandaient étaient donc **toujours sautées** au loot, ce qui appauvrissait le tirage exactement comme l'écaille. Le croc entre au catalogue ; la fourrure y était déjà mais rien ne la produisait.
 
 
+> [!bug] Corrigé le 2026-09-02 — la famille `ecaille` était vide, et le loot s'en trouvait appauvri
+> Dernière des trois familles mortes repérées le 2026-09-01 : `ecaille` ne désignait **aucun matériau**. La recette de composant `plaque_ecaille` était donc **toujours sautée** au tirage — une armure ne pouvait sortir qu'en os massif ou en métal, alors que le catalogue promettait trois voies. Les six bêtes écailleuses (crocodile, serpents, basilic, lindworm, kappa) laissent désormais une **écaille** au jet de Chasseur ; deux écailles se durcissent en matériau `ecaille` (recette `durcir_ecaille`, héritant l'espèce comme le cuir et l'os). Une écaille de basilic n'est pas une écaille de crocodile. Les trois familles annoncées pour une plaque d'armure existent enfin toutes les trois.
+
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Schéma matériau]]
 - **Alimente** : [[Récolte]], [[Stations de transformation]], [[Composants]], [[Wu Xing hors combat]]

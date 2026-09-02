@@ -1,0 +1,19 @@
+{
+  "name_key": "recipe.durcir_ecaille.name",
+  "station": "etabli",
+  "craft_skill": "cuir",
+  "inputs": [
+    {
+      "item": "ecaille",
+      "forme": "",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "material": "ecaille",
+    "forme": "brut",
+    "amount": 1,
+    "herite_espece": true
+  },
+  "fuel": null
+}
