@@ -22,6 +22,9 @@ var planete: Dictionary
 var bruits: Dictionary = {}   # nom de couche → FastNoiseLite
 var graine: int = 0
 var plaques: Array = []       # tectonique (Décision — Monde fini) : [{centre: Vector2 (tuiles), continentale: bool, derive}]
+var continent_de_plaque: Array = []   # plaque → id de continent (designer 2026-09-02) : les plaques continentales qui se touchent n'en font qu'un
+var continents: Dictionary = {}       # id de continent → {id, nom, plaques}
+var regions_cache: Dictionary = {}    # Vector2i (germe de région) → {id, nom, germe, continent}
 var points_chauds: Array = [] # [Vector2] : chapelets d'îles en plein océan
 var seuil_mer: float = 0.0    # continentalité au-dessus de laquelle la terre émerge (calibré sur planete.tectonique.terres)
 var warp: FastNoiseLite       # domain warping (un seul niveau)
@@ -465,6 +468,147 @@ func _tectonique() -> void:
 	valeurs.sort()
 	var part_terres: float = float(tc.get("terres", 0.35))
 	seuil_mer = valeurs[clampi(int(float(valeurs.size()) * (1.0 - part_terres)), 0, valeurs.size() - 1)]
+	_continents()   # le seuil de mer est posé : les masses de terre peuvent être réunies et nommées
+
+
+## ---------------------------------------------------------------- continents et régions (designer 2026-09-02)
+##
+## Le designer a écarté « la région est le territoire d'un royaume » d'une phrase juste : « les territoires
+## sont voués à changer ». Une région dont les frontières bougent au gré des conquêtes ne peut porter ni un
+## nom stable, ni un gouffre permanent, ni la mémoire de ce qu'on y a fait. La découpe est donc purement
+## géographique, et lue à la demande comme la tectonique — aucune passe sur le monde entier.
+
+## Les continents : les plaques continentales qui se touchent n'en forment qu'un. Deux plaques se touchent
+## si aucune troisième ne s'intercale entre leurs centres — l'approximation de Voronoï qui suffit ici, et
+## qui évite de parcourir un million de cellules pour un remplissage par diffusion.
+func _continents() -> void:
+	continent_de_plaque.clear()
+	continents.clear()
+	var parent: Array[int] = []
+	for k in plaques.size():
+		parent.append(k)
+		continent_de_plaque.append(-1)
+	var trouver := func(a: int) -> int:
+		var r := a
+		while parent[r] != r:
+			r = parent[r]
+		return r
+	for a in plaques.size():
+		if not bool(plaques[a].continentale):
+			continue
+		for b in range(a + 1, plaques.size()):
+			if not bool(plaques[b].continentale) or not _plaques_voisines(a, b):
+				continue
+			var ra: int = trouver.call(a)
+			var rb: int = trouver.call(b)
+			if ra != rb:
+				parent[rb] = ra
+	var rng := RandomNumberGenerator.new()
+	var cultures: Dictionary = GameData.catalogues.get("name_cultures", {})
+	for k in plaques.size():
+		if not bool(plaques[k].continentale):
+			continue
+		var racine: int = trouver.call(k)
+		continent_de_plaque[k] = racine
+		if not continents.has(racine):
+			rng.seed = hash([graine, racine, "continent"])
+			continents[racine] = {"id": racine, "nom": _nom_de_terre(rng, cultures), "plaques": []}
+		(continents[racine].plaques as Array).append(k)
+
+
+## Deux plaques sont voisines si le milieu de leurs centres appartient à l'une des deux (test de Voronoï).
+func _plaques_voisines(a: int, b: int) -> bool:
+	var m: Vector2 = (plaques[a].centre + plaques[b].centre) * 0.5
+	var d_ab: float = m.distance_to(plaques[a].centre)
+	for k in plaques.size():
+		if k != a and k != b and m.distance_to(plaques[k].centre) < d_ab:
+			return false
+	return true
+
+
+## Un nom de terre : le générateur de noms de ville d'une culture tirée au sort — les cultures portent
+## déjà des sonorités par race, et une terre se nomme comme une ville, pas comme une personne.
+func _nom_de_terre(rng: RandomNumberGenerator, cultures: Dictionary) -> String:
+	if cultures.is_empty():
+		return "Terre-%d" % (rng.randi() % 1000)
+	var ids: Array = cultures.keys()
+	ids.sort()
+	return Noms.ville(cultures[str(ids[rng.randi() % ids.size()])], rng)
+
+
+## Le pas du réseau de germes de région, en cellules.
+func _pas_region() -> int:
+	return maxi(2, int(planete.get("regions", {}).get("pas_cellules", 24)))
+
+
+## Le germe de région le plus proche d'une cellule. Les germes sont posés sur un réseau régulier puis
+## déplacés d'un hash — un Voronoï jitteré, qui donne des régions de taille comparable sans les rendre
+## carrées, et qui se lit en neuf comparaisons quelle que soit la taille du monde.
+func germe_region(c: Vector2i) -> Vector2i:
+	var pas := _pas_region()
+	var amp: float = float(planete.get("regions", {}).get("jitter", 0.38)) * float(pas)
+	var base := Vector2i(floori(float(c.x) / float(pas)), floori(float(c.y) / float(pas)))
+	var meilleur := base
+	var d_min := INF
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var g: Vector2i = base + Vector2i(dx, dy)
+			var h := hash([graine, g.x, g.y, "region"])
+			var jx := (float(h % 1000) / 1000.0 - 0.5) * 2.0 * amp
+			var jy := (float((h / 1000) % 1000) / 1000.0 - 0.5) * 2.0 * amp
+			var centre := Vector2((float(g.x) + 0.5) * pas + jx, (float(g.y) + 0.5) * pas + jy)
+			var d := centre.distance_squared_to(Vector2(c))
+			if d < d_min:
+				d_min = d
+				meilleur = g
+	return meilleur
+
+
+## La région d'une cellule : {id, nom, germe, cellule (le centre de la région), continent}. La mer n'a
+## pas de région — on ne nomme pas le large, et le gouffre d'une région doit avoir un sol où s'ouvrir.
+func region_de(c: Vector2i) -> Dictionary:
+	var g := germe_region(c)
+	if regions_cache.has(g):
+		return regions_cache[g]
+	var pas := _pas_region()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, g.x, g.y, "nom_region"])
+	# Où s'ouvre le gouffre de la région. Le prendre au centre géométrique donnait une grille de gouffres
+	# parfaitement régulière sur la carte — on lisait le réseau de germes à l'œil nu. On part donc d'un
+	# point tiré au hasard DANS la région, et on cherche le sol autour : même coût, plus de grille.
+	var h_c := hash([graine, g.x, g.y, "coeur"])
+	var ecart := pas / 3
+	var centre := Vector2i(g.x * pas + pas / 2 + (h_c % (2 * ecart + 1)) - ecart,
+		g.y * pas + pas / 2 + ((h_c / 977) % (2 * ecart + 1)) - ecart)
+	var sol := Vector2i(-9999, -9999)
+	for rayon in range(0, pas):
+		for dy in range(-rayon, rayon + 1):
+			for dx in range(-rayon, rayon + 1):
+				if absi(dx) != rayon and absi(dy) != rayon:
+					continue
+				var v: Vector2i = centre + Vector2i(dx, dy)
+				if sol.x == -9999 and germe_region(v) == g and terre_a(v):
+					sol = v
+		if sol.x != -9999:
+			break
+	var res := {"id": "%d_%d" % [g.x, g.y], "germe": g, "cellule": sol,
+		"nom": _nom_de_terre(rng, GameData.catalogues.get("name_cultures", {})),
+		"continent": continent_de(sol) if sol.x != -9999 else {}}
+	regions_cache[g] = res
+	return res
+
+
+## Le continent d'une cellule : {} en mer, sinon le continent de sa plaque.
+func continent_de(c: Vector2i) -> Dictionary:
+	if not terre_a(c):
+		return {}
+	if continent_de_plaque.is_empty():
+		_continents()
+	var t: int = int(planete.taille_cellule)
+	var q := _warpe(Vector2(c.x * t + t / 2, c.y * t + t / 2))
+	var k: int = int(_plaques_proches(q)[0])
+	var racine: int = int(continent_de_plaque[k]) if k >= 0 and k < continent_de_plaque.size() else -1
+	return continents.get(racine, {})
 
 
 func _warpe(p: Vector2) -> Vector2:

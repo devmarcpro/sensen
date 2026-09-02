@@ -136,9 +136,12 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 		var m: Dictionary = GameData.catalogues.meubles.get(str(e.meubles[i]), {})
 		g.meubles[g.idx(p)] = str(e.meubles[i])
 		g.poser_contenu(p, "meuble" if bool(m.get("bloque_passage", true)) else "meuble_sol")
+	if not gouffre_de(cell).is_empty():
+		e["a_donjon"] = true   # le gouffre de la région : une entrée permanente, dessinée comme les autres
+		e["gouffre"] = true
 	if bool(e.get("a_donjon", false)):
 		g.poser_contenu(base + e.entree_donjon, "entree_donjon")
-		foyer(cell)   # le donjon devient un foyer connu de la dérive
+		foyer(cell)   # le donjon devient un foyer connu de la dérive (le gouffre, lui, n'en a pas)
 	if cell == cellule_camp:
 		if not claims.has(cell):
 			claims[cell] = {"role": "base"}
@@ -253,6 +256,22 @@ func _cr() -> Dictionary:
 	return planete.get("corruption", {})
 
 
+## Le gouffre de la région : un donjon infini, gratuit, dont un étage vidé le reste pour toujours
+## (designer 2026-09-02). Il s'ouvre sur la cellule de sol qui fait le centre de sa région — un repère
+## permanent, pas un événement : il ne s'éteint jamais, ne se repeuple pas et n'infecte rien.
+func gouffre_de(cell: Vector2i) -> Dictionary:
+	if cell == cellule_camp or not surface.terre_a(cell):
+		return {}
+	if surface.poi_de(cell).get("village", false):
+		return {}
+	var r: Dictionary = surface.region_de(cell)
+	if r.is_empty() or Vector2i(r.get("cellule", Vector2i(-9999, -9999))) != cell:
+		return {}
+	return {"id": int(hash([surface.graine, cell.x, cell.y, "gouffre"]) & 0x7fffffff),
+		"region": str(r.id), "nom": str(r.nom), "cellule": cell,
+		"element": surface.element_dominant(cell)}
+
+
 ## Cette cellule porte-t-elle une entrée de donjon DESSINÉE ? Une entrée posée se voit et s'efface
 ## (grâce, répit, retour) ; un donjon de corruption n'a rien à dessiner — la cellule happe qui y met
 ## le pied. Les deux ne suivent donc pas le même cycle, et c'est ici qu'on les distingue.
@@ -270,6 +289,8 @@ func foyer(cell: Vector2i) -> Dictionary:
 	# génération de surface : c'est la corruption qui les fait naître, et c'est donc elle qui allume le
 	# foyer. Tant que cette condition ne regardait que `poi_de().donjon`, toute la machinerie
 	# hebdomadaire — infection, plafonds, répit, générations — tournait à vide.
+	if not gouffre_de(cell).is_empty():
+		return {}   # le gouffre n'est pas un foyer : il ne s'éteint pas, ne se repeuple pas, n'infecte rien
 	if not entree_posee(cell) and not donjon_corrompu(cell, jour_monde):
 		return {}
 	# `pose` fige à la naissance ce qu'est ce foyer, car `entree_posee` ne peut pas servir de mémoire :
@@ -318,6 +339,8 @@ func donjon_corrompu(cell: Vector2i, jour: int) -> bool:
 		return false
 	if surface.poi_de(cell, cell == cellule_camp).get("donjon", false):
 		return false   # une cellule qui a déjà son donjon garde son entrée : la corruption ne la double pas
+	if not gouffre_de(cell).is_empty():
+		return false   # le gouffre tient déjà la cellule : la corruption n'ouvre pas un second trou dedans
 	# Un donjon vaincu DISPARAÎT (designer 2026-09-02) : pendant le répit, la cellule ne peut plus se
 	# cristalliser, quelle que soit sa corruption. Passé ce délai, si la corruption est toujours au-dessus
 	# du seuil, un NOUVEAU donjon naît là — au niveau 1, pas à celui qu'on venait de vaincre.
@@ -332,12 +355,35 @@ func donjon_corrompu(cell: Vector2i, jour: int) -> bool:
 		return true   # le donjon garanti du début de partie (designer 2026-09-01)
 	if corruption_jour(cell, jour) < float(cfg.get("seuil", 62.0)):
 		return false
-	# La densité se règle par un TIRAGE déterministe plutôt qu'en comptant les voisins : avec le
-	# gradient d'éloignement (point 62), presque toute une marge dépasse le seuil, et un comptage
-	# aurait tout retenu ou tout refusé. Ici, la part de cellules retenues est stable et dispersée.
-	var densite := int(cfg.get("densite_max_pct", 18))
-	var per_t := maxi(1, int(cfg.get("periode_jours", 3)))
-	return absi(hash([cell.x, cell.y, jour / per_t, "corruption"])) % 100 < densite
+	return _dans_une_grappe(cell, jour)
+
+
+## Combien de donjons de corruption le monde porte-t-il ? (designer 2026-09-02 : « il y en a beaucoup
+## trop, vraiment beaucoup beaucoup trop » — mesuré à 18,8 par région, une cellule de terre sur 8.)
+##
+## La densité se réglait par un tirage à plat, `densite_max_pct` % des cellules au-dessus du seuil. Deux
+## défauts : le pourcentage ne dit rien de ce qu'on voit à l'écran, et le gradient d'éloignement (point 62)
+## met presque toute une marge au-dessus du seuil, si bien que ce pourcentage s'appliquait à presque tout
+## le monde. Un donjon devenait le décor au lieu d'être un événement.
+##
+## Maintenant que les régions existent (designer 2026-09-02), la densité s'exprime dans l'unité qui se lit
+## sur la carte : **N grappes par région et par période**. Chaque grappe est tirée de (région, période) et
+## couvre un petit carré ; une cellule cristallise si elle tombe dans une grappe ET passe le seuil. La
+## fusion des cellules contiguës continue d'opérer à l'intérieur d'une grappe — un donjon large reste
+## possible — mais le nombre de donjons par région ne dépend plus du hasard : il est borné par les données.
+func _dans_une_grappe(cell: Vector2i, jour: int) -> bool:
+	var cfg: Dictionary = planete.corruption.get("donjons", {})
+	var per := maxi(1, int(cfg.get("periode_jours", 3)))
+	var vague := jour / per
+	var g := surface.germe_region(cell)
+	var pas: int = surface._pas_region()
+	var rayon := maxi(0, int(cfg.get("rayon_grappe", 1)))
+	for k in maxi(0, int(cfg.get("grappes_par_region", 2))):
+		var h := absi(hash([surface.graine, g.x, g.y, vague, k, "grappe"]))
+		var centre := Vector2i(g.x * pas + h % pas, g.y * pas + (h / pas) % pas)
+		if absi(cell.x - centre.x) <= rayon and absi(cell.y - centre.y) <= rayon:
+			return true
+	return false
 
 
 ## Les cellules corrompues contiguës forment UN donjon (designer 2026-09-01, point 51) : on remonte
@@ -373,6 +419,11 @@ func donjon_de_corruption(cell: Vector2i, jour: int) -> Dictionary:
 	var depuis := 0   # depuis combien de périodes cette cellule est-elle corrompue sans discontinuer ?
 	while depuis < int(cfg.get("recherche_max", 120)) and donjon_corrompu(cell, jour - (depuis + 1) * per):
 		depuis += 1
+	if cell == cellule_amorce():
+		# Le donjon garanti du début de partie est cristallisé « depuis toujours », puisqu'il ne dépend
+		# pas du bruit : la recherche en arrière remontait donc jusqu'à `recherche_max` et lui donnait le
+		# niveau 121 — le tout premier donjon d'une partie était le plus dur du jeu. Il a l'âge du monde : zéro.
+		depuis = 0
 	var nettoye := int(nettoyages.get(cell, -1))
 	if nettoye >= 0:
 		depuis = mini(depuis, maxi(0, (jour - nettoye) / per))

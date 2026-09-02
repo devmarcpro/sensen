@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://sensen_sonde_monde"]
+
+[ext_resource type="Script" path="res://scenes/tests/sonde_monde.gd" id="1"]
+
+[node name="SondeMonde" type="Node"]
+script = ExtResource("1")

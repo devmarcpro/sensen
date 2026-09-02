@@ -729,11 +729,13 @@ ui.capacite.visee,AIMING: {nom} — click a tile
 ui.capacites.ligne,"{nom} — {modules}"
 ui.capacites.nouvelle,+ New ability
 ui.carte.capitale," (capital)"
-ui.carte.depart,=== CHOOSE YOUR STARTING TILE — click a land cell (colour: biome · orange/red: danger · gold square: dungeon) ===
-ui.carte.legende,"ochre line: road · circled green: your camp · circled blue: you are here · gold square: dungeon · light dot: major vein · dark: never explored"
+ui.carte.depart,=== CHOOSE YOUR STARTING TILE — click a land cell (colour: biome · orange/red: danger · gold square: dungeon · black ring: the abyss) ===
+ui.carte.legende,"ochre line: road · circled green: your camp · circled blue: you are here · gold square: dungeon · black ring: the abyss · light dot: major vein · dark: never explored"
 ui.carte.mer,sea
 ui.carte.royaume,"{nom} — {gouv}, {n} cells"
 ui.carte.survol,"({x},{y}) · {biome} · danger {danger}"
+ui.carte.survol_region," · {region}, {continent}"
+ui.carte.survol_gouffre,"  ·  THE ABYSS — bottomless, free to enter; a cleared floor stays cleared"
 ui.carte.survol_derive," · drift {d}"
 ui.carte.survol_lieu," · place: {a} {pa} % · {b} {pb} %"
 ui.carte.survol_royaume," · {nom}{capitale} — {gouv}, {taille}, {n} cells · {etat}"
@@ -2534,6 +2536,7 @@ dungeon_theme.eau.name,"Drowning"
 
 ui.carte.survol_donjon,"  ·  {nom} ({element}) — level {niveau}, {etages} floors, corruption {corruption}%"
 journal.donjon_corrompu,"Corruption swallows you: {nom} ({element}) — level {n}, {etages} floors, corruption {corruption}%."
+journal.gouffre_depart,"You descend into the abyss of {region}. It has no bottom."
 ui.mode.donjon_corrompu," · corrupted, level {n} ({corruption}%)"
 ui.inventaire.fiche,"— THE BEARER —"
 ui.inventaire.charge,"Load {poids} / {capacite}"

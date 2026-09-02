@@ -153,6 +153,7 @@ func _ready() -> void:
 	_lancer("test_zones_au_sol")
 	_lancer("test_conditions_et_modificateurs")
 	_lancer("test_camp")
+	_lancer("test_geographie")
 	_lancer("test_faim_et_poids")
 	_lancer("test_donjon")
 	_lancer("test_donjon_temps_a_l_action")
@@ -6359,10 +6360,13 @@ func test_camp() -> void:
 	verifier(s.intention(j.id, {"type": "remonter"}), "ressortir par l'entrée de l'étage 1")
 	if s.lieu != "camp":
 		verifier(false, "le retour au camp a échoué")
-	verifier(s.lieu == "camp" and s.grille.meubles.get(s.grille.idx(devant), "") == "lit_de_paille" and s.contenants[s.grille.idx(ou)] == [pioche], "retour au camp : le lit et le coffre sont toujours là")
-	if s.monde.cellule_de(j.pos) != camp_c:   # on est ressorti sur la cellule corrompue : rentrer au camp
+	# Ressortir sans vaincre rend DEHORS, pas au camp : on rentre d'abord, on vérifie le camp ensuite.
+	# L'ordre inverse ne passait que tant que les cellules corrompues étaient assez nombreuses pour qu'il
+	# y en ait une contre le camp ; à deux grappes par région (designer 2026-09-02) ce n'est plus le cas.
+	if s.monde.cellule_de(j.pos) != camp_c:
 		s.monde.nettoyages[cell_corr] = s.jour_courant()   # nettoyée, elle ne happe plus le voyageur
 		verifier(s.voyager(j, camp_c), "rentrer au camp après l'expédition")
+	verifier(s.lieu == "camp" and s.grille.meubles.get(s.grille.idx(devant), "") == "lit_de_paille" and s.contenants[s.grille.idx(ou)] == [pioche], "retour au camp : le lit et le coffre sont toujours là")
 	# 8.2a : traverser à pied vers la cellule voisine — la fenêtre se recentre, rien ne bouge, tout revient.
 	var mur2: Vector2i = j.pos + Vector2i(0, 2)
 	s._donner_materiau(j, "chene", 1, "planche")
@@ -6390,8 +6394,6 @@ func test_camp() -> void:
 	verifier(s.grille.decouvert.has(s.grille.idx(base + Vector2i(3, 3))), "la cellule du camp reste entièrement découverte")
 	s.monde.fermer()
 
-
-# ---------------------------------------------------------------- Étape 7.2 : faim, nourriture, poids porté
 
 	# Donjons nés de la corruption (2026-09-01, point 51)
 	var m51 = s.monde
@@ -6547,6 +6549,56 @@ func test_camp() -> void:
 		verifier(paye >= attendu / 2 and paye <= attendu * 2, "voyager coûte une marche : %d ticks pour 2 cellules (marche ≈ %d)" % [paye, attendu])
 		verifier(paye > 0 and j_v.compteur > t_av, "le voyage occupe le personnage d'autant de ticks")
 	s_v2.monde.fermer()
+
+## Continents et régions (designer 2026-09-02) : la découpe géographique du monde, immuable et lue à la
+## demande. Ce qui compte : elle est déterministe, elle ne dépend pas des royaumes, et une région a un sol.
+func test_geographie() -> void:
+	var s := Simulation.new(77)
+	s.charger_camp()
+	var su = s.monde.surface
+	var camp: Vector2i = s.monde.cellule_camp
+	# Déterminisme : deux lectures de la même cellule donnent la même région, le même continent.
+	var r1: Dictionary = su.region_de(camp)
+	var r2: Dictionary = su.region_de(camp)
+	verifier(not r1.is_empty() and str(r1.id) == str(r2.id) and str(r1.nom) == str(r2.nom), "la région d'une cellule est stable (%s)" % str(r1.nom))
+	verifier(su.terre_a(camp) == false or not str(su.continent_de(camp).get("nom", "")).is_empty(), "une cellule de terre appartient à un continent nommé (%s)" % str(su.continent_de(camp).get("nom", "—")))
+	verifier(su.continent_de(Vector2i(0, 0)).is_empty() or su.terre_a(Vector2i(0, 0)), "la mer n'appartient à aucun continent")
+	# Une région est contiguë autour de son germe, et le camp est dans la sienne.
+	verifier(Vector2i(r1.germe) == su.germe_region(camp), "le camp appartient à la région de son germe")
+	verifier(Vector2i(r1.cellule).x != -9999 and su.terre_a(Vector2i(r1.cellule)), "la région a une cellule de sol pour centre %s" % str(Vector2i(r1.cellule)))
+	# Plusieurs régions, de taille comparable : on balaie un carré et on compte.
+	var vues := {}
+	var pas: int = int(GameData.config("planete").regions.pas_cellules)
+	for dy in range(-pas * 2, pas * 2 + 1, 3):
+		for dx in range(-pas * 2, pas * 2 + 1, 3):
+			var c: Vector2i = camp + Vector2i(dx, dy)
+			var g: Vector2i = su.germe_region(c)
+			vues[g] = int(vues.get(g, 0)) + 1
+	verifier(vues.size() >= 4, "un carré de %d cellules de côté couvre %d régions" % [pas * 4, vues.size()])
+	# La découpe ne suit pas les royaumes : elle est géographique, et les territoires bougent (designer).
+	var noms_regions := {}
+	for g in vues.keys():
+		noms_regions[str(su.regions_cache.get(g, {}).get("nom", ""))] = true
+	verifier(noms_regions.size() >= 1, "chaque région porte son nom")
+	# Le gouffre de la région (designer 2026-09-02) : un par région, sur sa cellule de sol centrale.
+	var cg: Vector2i = Vector2i(r1.cellule)
+	var g: Dictionary = s.monde.gouffre_de(cg)
+	verifier(not g.is_empty() and str(g.nom) == str(r1.nom), "la région %s a son gouffre en %s" % [str(r1.nom), str(cg)])
+	verifier(s.monde.gouffre_de(cg + Vector2i(1, 0)).is_empty(), "une seule cellule de la région porte le gouffre")
+	verifier(s.monde.foyer(cg).is_empty(), "le gouffre n'est pas un foyer : il ne s'éteint ni ne se repeuple")
+	verifier(not s.monde.donjon_corrompu(cg, s.jour_courant()), "la corruption n'ouvre pas un second trou dans la cellule du gouffre")
+	# Ne se régénère jamais : descendre marque l'étage, et l'étage marqué revient désert.
+	var joueur_g: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	s.donjon = {"gouffre": int(g.id)}
+	verifier(not s.gouffre_etage_vide(1), "l'étage 1 n'est pas encore vidé")
+	s.gouffres_vides["%d|1" % int(g.id)] = true
+	verifier(s.gouffre_etage_vide(1) and not s.gouffre_etage_vide(2), "un étage vidé le reste, l'étage suivant non")
+	s.donjon = {}
+	verifier(not s.gouffre_etage_vide(1), "hors d'un gouffre, la question ne se pose pas")
+	s.monde.fermer()
+
+
+# ---------------------------------------------------------------- Étape 7.2 : faim, nourriture, poids porté
 
 func test_faim_et_poids() -> void:
 	var s := Simulation.new(29)

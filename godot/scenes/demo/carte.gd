@@ -135,6 +135,12 @@ func _dessiner() -> void:
 			if info.poi.get("donjon", false):
 				dessin.draw_rect(Rect2(r.position + Vector2(5, 5), Vector2(case_px - 11.0, case_px - 11.0)), Color(0.1, 0.05, 0.1))
 				dessin.draw_rect(Rect2(r.position + Vector2(5, 5), Vector2(case_px - 11.0, case_px - 11.0)), Color(0.9, 0.8, 0.3), false, 1.0)
+			if exploree and not sim.monde.gouffre_de(cell).is_empty():
+				# Le gouffre de la région (designer 2026-09-02) : un repère permanent, pas un événement.
+				# Un anneau noir cerné de blanc — il ne ressemble ni au donjon doré, ni au donjon de corruption.
+				var c_g := r.position + Vector2(case_px * 0.5, case_px * 0.5)
+				dessin.draw_circle(c_g, case_px * 0.32, Color(0.03, 0.02, 0.05))
+				dessin.draw_arc(c_g, case_px * 0.32, 0.0, TAU, 20, Color(0.95, 0.95, 1.0), 1.5)
 			if info.poi.get("filon_majeur", false):
 				dessin.draw_circle(r.position + Vector2(case_px * 0.5, case_px * 0.5), 3.0, Color(0.8, 0.85, 0.9))
 			if sim.monde.claims.has(cell):
@@ -166,6 +172,13 @@ func _dessiner() -> void:
 	if survol != Vector2i(-1, -1):
 		var info_s: Dictionary = surf.resume_cellule(survol)
 		var texte := tr("ui.carte.survol").format({"x": survol.x, "y": survol.y, "biome": tr(GameData.entree("biomes", str(info_s.biome)).name_key) if info_s.terre else tr("ui.carte.mer"), "danger": int(sim.monde.danger_de(survol))})
+		if info_s.terre:   # la géographie du monde (designer 2026-09-02) : région et continent, immuables
+			var reg: Dictionary = surf.region_de(survol)
+			texte += tr("ui.carte.survol_region").format({
+				"region": str(reg.get("nom", "—")),
+				"continent": str(reg.get("continent", {}).get("nom", "—"))})
+			if not sim.monde.gouffre_de(survol).is_empty():
+				texte += tr("ui.carte.survol_gouffre")
 		var dsurv: Dictionary = sim.monde.donjon_de_corruption(survol, sim.jour_courant())
 		if not dsurv.is_empty():   # le donjon dit sa difficulté au survol (designer, point 61)
 			var cr_s: Dictionary = GameData.config("planete").corruption

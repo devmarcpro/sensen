@@ -72,6 +72,12 @@
     70,
     90
   ],
+  "regions": {
+    "_doc": "Continents et regions (designer 2026-09-02) : le monde se lit en continents (les plaques continentales qui se touchent) et en regions (Voronoi jittere sur un reseau de germes). pas_cellules = le pas du reseau, jitter = le deplacement du germe en part du pas. Chaque region porte un gouffre : un donjon infini, gratuit, dont un etage vide le reste pour toujours.",
+    "pas_cellules": 24,
+    "jitter": 0.46,
+    "gouffre_etages_max": 999
+  },
   "tectonique": {
     "plaques": 24,
     "continentales": 0.4,
@@ -145,7 +151,7 @@
     "corruption_par_etage": 8,
     "profondeur_par_corruption": 25,
     "donjons": {
-      "_doc": "Les donjons naissent de la corruption (designer 2026-09-01, point 51) : bruit calculé à la demande pour (cellule, jour), cristallisation au-delà du seuil, thème par élément dominant, niveau qui monte tant que personne ne nettoie. Garde-fous : lieux habités épargnés, plafond de densité par région, fusion plafonnée. La corruption croît avec la distance au centre (gradient_bord) et le niveau n'est plus plafonné : il vaut le maximum de l'âge et du plancher géographique (designer 2026-09-01, point 62).",
+      "_doc": "Les donjons naissent de la corruption (designer 2026-09-01, point 51) : bruit calcule a la demande pour (cellule, jour), cristallisation au-dela du seuil, theme par element dominant, niveau qui monte tant que personne ne nettoie. La corruption croit avec la distance au centre (gradient_bord) et le niveau vaut le maximum de l'age et du plancher geographique (point 62). Densite (designer 2026-09-02, « beaucoup beaucoup trop ») : exprimee en GRAPPES PAR REGION et par periode, pas en pourcentage a plat — grappes_par_region grappes de rayon_grappe cellules, tirees de (region, periode) ; la fusion opere a l'interieur d'une grappe. Garde-fous : lieux habites epargnes, gouffre epargne, fusion plafonnee.",
       "seuil": 62.0,
       "periode_jours": 3,
       "amplitude": 28.0,

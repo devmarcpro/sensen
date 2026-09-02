@@ -432,6 +432,15 @@ func _ready() -> void:
 		if e.id != j.id and Grille.distance(e.pos, j.pos) < plus_proche:
 			plus_proche = Grille.distance(e.pos, j.pos)
 			scene.survol = e.pos
+	for ir in args.size():   # --revele N : marque explorées les cellules à N cases autour du camp, pour
+		if args[ir] == "--revele" and ir + 1 < args.size() and scene.sim != null and scene.sim.monde != null:
+			# que la carte montre ce qu'un joueur finirait par voir (gouffres, donjons, royaumes).
+			var m_r = scene.sim.monde
+			var n_r: int = m_r.taille / 32
+			for dy_r in range(-int(args[ir + 1]), int(args[ir + 1]) + 1):
+				for dx_r in range(-int(args[ir + 1]), int(args[ir + 1]) + 1):
+					var c_r: Vector2i = m_r.cellule_camp + Vector2i(dx_r, dy_r)
+					m_r.explores[Vector2i(c_r.x * n_r, c_r.y * n_r)] = true
 	if "--carte" in args:   # la carte s'ouvre après l'exploration : elle montre ce que le joueur a vu
 		scene.carte.ouvrir("voyage")
 	if "--debug-survol" in args:

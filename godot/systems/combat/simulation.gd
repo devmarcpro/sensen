@@ -31,6 +31,7 @@ var expedition: Dictionary = {}      # compteurs de l'expédition en cours : tu�
 var camp_sauve: Dictionary = {}      # le camp mis de côté pendant une expédition (Claims et persistance)
 var lieu: String = "arene"           # "arene" | "camp" | "donjon"
 static var slot_autosave := "monde"  # l'emplacement des sauvegardes automatiques — les tests et le fuzz le détournent pour ne jamais écraser une vraie partie
+var gouffres_vides: Dictionary = {}  # "<id de gouffre>|<etage>" → true : un etage vide le reste POUR TOUJOURS (designer 2026-09-02)
 var nom_partie := ""                 # l'emplacement de CETTE partie (designer 2026-09-02) : plusieurs parties, une sauvegarde chacune
 var prochain_donjon: int = 1         # id du prochain donjon lancé depuis le camp
 var monde: Monde = null              # la surface comme fenêtre glissante (étape 8.2a)
@@ -343,6 +344,8 @@ func _partir_en_expedition(e: Dictionary) -> bool:
 	if lieu != "camp" or not ("entree_donjon" in grille.contenu_de(e.pos).get("tags", [])):
 		return false
 	var cell := monde.cellule_de(e.pos)
+	if _descendre_au_gouffre(e, cell):
+		return true
 	e["retour"] = e.pos   # ressortir ramène devant l'entrée (Donjons — structure et intégration)
 	_sauver_camp(e)
 	expedition = {}
@@ -363,6 +366,38 @@ func _partir_en_expedition(e: Dictionary) -> bool:
 	EventBus.emettre(&"journal", [&"journal.expedition_depart", {}])
 	charger_donjon(theme, graine, id, 1, e)
 	return true
+
+
+## Le gouffre de la région (designer 2026-09-02) : infini, gratuit, et qui ne se régénère jamais.
+## Rien ne verrouille l'entrée — la profondeur est déjà la porte, elle est gratuite et ne se contourne
+## pas. Ce qui l'empêche d'être une machine à farmer, c'est qu'un étage vidé le reste pour toujours.
+func _descendre_au_gouffre(e: Dictionary, cell: Vector2i) -> bool:
+	var g := monde.gouffre_de(cell)
+	if g.is_empty():
+		return false
+	e["retour"] = e.pos
+	_sauver_camp(e)
+	expedition = {}
+	etages_visites.clear()
+	var cr: Dictionary = GameData.config("planete").corruption
+	var b: Dictionary = GameData.catalogues.biomes.get(str(monde.surface.resume_cellule(cell).biome), {})
+	var theme := "repaire" if ("marecage" in b.get("tags", []) or "corrompu" in b.get("tags", [])) else "ruine"
+	# « Infini » n'est pas un nombre : c'est l'absence de fond. On donne un plafond assez haut pour que
+	# rien ne le rencontre, et le boss du dernier étage n'arrive donc jamais — on descend jusqu'à mourir.
+	var fond := int(GameData.config("planete").get("regions", {}).get("gouffre_etages_max", 999))
+	donjon = {"etages_fixes": [fond, fond], "corruption": monde.corruption_de(cell),
+		"cellule": cell, "gouffre": int(g.id), "region": str(g.nom)}
+	EventBus.emettre(&"journal", [&"journal.gouffre_depart", {"region": str(g.nom)}])
+	charger_donjon(theme, graine, int(g.id), 1, e)
+	return true
+
+
+## Cet étage du gouffre a-t-il déjà été vidé ? Le terrain, lui, se régénère de sa graine — il est
+## déterministe, le stocker ne servirait à rien ; ce qui ne revient pas, ce sont les êtres et le butin.
+func gouffre_etage_vide(etage: int) -> bool:
+	if not donjon.has("gouffre"):
+		return false
+	return bool(gouffres_vides.get("%d|%d" % [int(donjon.gouffre), etage], false))
 
 
 ## Génère et charge l'étage `etage` d'un donjon (Génération de donjon). `joueur` : la fiche du
@@ -423,6 +458,13 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 		ajouter(theme.get("joueur", "aventurier"), e.entree, "joueur")
 	else:
 		_reprendre(joueur, e.entree)
+	if gouffre_etage_vide(etage):
+		# Un étage du gouffre déjà vidé le reste pour toujours (designer 2026-09-02) : le terrain revient,
+		# les êtres et les coffres non. Redescendre à sa profondeur record est donc rapide et sans butin.
+		maj_vision()
+		return
+	if donjon.has("gouffre"):
+		gouffres_vides["%d|%d" % [int(donjon.gouffre), etage]] = true
 	var n_spawns := int(ceil(float(e.spawns.size()) * (1.0 + corruption_etage / 100.0)))   # la corruption densifie
 	var k_spawn := 0
 	for s: Dictionary in e.spawns:
@@ -5204,7 +5246,7 @@ func sauvegarder(nom: String = "") -> bool:
 	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "resume": resume_partie(), "graine": graine, "graine_monde": graine_monde, "planete_options": planete_options, "identifies": identifies, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
 		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores,
 		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire, "vacances": monde.vacances, "villages": monde.villages, "heritiers": monde.heritiers, "vacances_guildes": monde.vacances_guildes,
-		"modifs_terrain": modifs_terrain, "portails": portails})   # indexés par position monde, donc valables au rechargement
+		"modifs_terrain": modifs_terrain, "portails": portails, "gouffres_vides": gouffres_vides})   # indexés par position monde, donc valables au rechargement
 	ok = Sauvegarde.ecrire(nom, "surface.json", surface) and ok
 	ok = Sauvegarde.ecrire(nom, "entities.json", {"entites": autres, "ordre": ordre_autres, "contenants": contenants_monde}) and ok
 	ok = Sauvegarde.ecrire(nom, "items.json", instances) and ok
@@ -5331,6 +5373,7 @@ func charger_sauvegarde(nom: String = "") -> bool:
 	_reinitialiser()
 	monde.centre = Vector2i(-1, -1)
 	modifs_terrain = w.get("modifs_terrain", {})   # après _reinitialiser, qui les vide : ce que le monde doit rendre
+	gouffres_vides = w.get("gouffres_vides", {})   # les étages de gouffre déjà vidés : ils le restent d'une session à l'autre
 	portails = w.get("portails", {})               # et les brèches du Passeur, indexées par position monde
 	grille = monde.fenetre(monde.cellule_de(joueur_sauve.pos), GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
 	monde.tick(int(w.ticks))   # les grâces échues avant la sauvegarde
