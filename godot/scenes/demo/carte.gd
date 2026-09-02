@@ -232,22 +232,19 @@ func _peindre_cellule(cell: Vector2i, r: Rect2, col: Color, surf, tc: int) -> vo
 	# Le relief d'une cellule ne change jamais : on le calcule une fois, on s'en souvient, et la
 	# sauvegarde s'en souvient aussi (designer 2026-09-02). Avant, ouvrir la carte relançait vingt-cinq
 	# sondes de tectonique par cellule visible, à chaque image.
-	var memoire: PackedColorArray = main.sim.monde.carte_couleurs(cell, sp)
-	if not memoire.is_empty():
-		var k := 0
-		for sy0 in sp:
-			for sx0 in sp:
-				dessin.draw_rect(Rect2(r.position + Vector2(sx0 * pas, sy0 * pas), Vector2(pas + 1.0, pas + 1.0)), memoire[k])
-				k += 1
-		return
-	var calculees := PackedColorArray()
+	var memoire: PackedByteArray = main.sim.monde.carte_altitudes(cell, sp)
+	var calculees := PackedByteArray()
 	var mer := Color(0.10, 0.22, 0.42)
 	for sy in sp:
 		for sx in sp:
-			var px := cell.x * tc + int((sx + 0.5) / sp * tc)
-			var py := cell.y * tc + int((sy + 0.5) / sp * tc)
-			var t: Dictionary = surf.tectonique_a(px, py)
-			var alt := float(t.get("altitude", 0.0))
+			var alt := 0.0
+			if memoire.is_empty():
+				var px := cell.x * tc + int((sx + 0.5) / sp * tc)
+				var py := cell.y * tc + int((sy + 0.5) / sp * tc)
+				alt = float(surf.tectonique_a(px, py).get("altitude", 0.0))
+				calculees.append(clampi(roundi(alt * 255.0), 0, 255))
+			else:
+				alt = float(memoire[sy * sp + sx]) / 255.0
 			var c := col
 			if alt < 0.30:                       # sous le niveau de la mer : la profondeur se voit
 				c = mer.lerp(Color(0.20, 0.38, 0.62), clampf(alt / 0.30, 0.0, 1.0))
@@ -257,9 +254,9 @@ func _peindre_cellule(cell: Vector2i, r: Rect2, col: Color, surf, tc: int) -> vo
 				c = col.lerp(Color(0.93, 0.93, 0.96), clampf((alt - 0.72) / 0.28, 0.0, 1.0) * 0.8)
 			else:
 				c = col.lerp(Color.BLACK, (0.55 - alt) * 0.25)
-			calculees.append(c)
 			dessin.draw_rect(Rect2(r.position + Vector2(sx * pas, sy * pas), Vector2(pas + 0.5, pas + 0.5)), c)
-	main.sim.monde.carte_retenir(cell, sp, calculees)   # la prochaine ouverture n'aura plus rien à calculer
+	if memoire.is_empty():
+		main.sim.monde.carte_retenir(cell, sp, calculees)   # la prochaine ouverture n'aura plus rien à calculer
 
 
 func _entree(ev: InputEvent) -> void:

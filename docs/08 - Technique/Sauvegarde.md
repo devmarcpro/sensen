@@ -60,6 +60,13 @@ connexion, exporté à la déconnexion).
 > L'écran principal offre **Nouvelle partie**, **Continuer** (la partie touchée le plus récemment), **Charger**, **Options**, **Quitter**. Le menu en jeu n'a plus d'entrée « Charger » : on passe par l'écran principal, on ne recharge pas sa propre partie d'un coup de menu.
 > **L'écran Charger montre la partie avant de l'ouvrir** : le personnage dessiné en pied et en portrait, ses trois jauges, puis race, classe, niveau, PV, or, sac, jour, heure, saison, où l'on était (surface ou étage de donjon), le biome du camp, la graine du monde, les cellules parcourues, les cellules revendiquées, les villages connus, la corruption au camp et la date d'écriture. Tout cela vient d'un bloc `resume` écrit dans `world.json` à chaque sauvegarde : charger un monde entier par ligne de liste coûterait des secondes, et l'écran doit s'ouvrir tout de suite. Les parties d'avant ce bloc se listent sous leur seul nom de dossier plutôt que de disparaître.
 
+> [!success] Codé le 2026-09-02 — le souvenir de la carte tenait 718 Ko dans la sauvegarde
+> La carte du monde se souvient de son relief au lieu de le recalculer à chaque ouverture (demande du designer). En **vérifiant que ce souvenir survivait bien à un rechargement**, j'ai mesuré ce qu'il coûtait : **718 Ko pour une seule ouverture de carte**, soit 91 % du fichier de sauvegarde. Une partie qui explore aurait grossi sans fin.
+> **Deux corrections.** On retient l'**altitude** des sous-points, pas leur couleur : c'est l'altitude qui coûte cher à calculer — un warp de bruit, la distance aux vingt-quatre plaques, la continentalité, les points chauds — alors que la couleur s'en déduit en trois comparaisons. Retenir la couleur pesait trois fois plus pour rien, et figeait une teinte qui peut changer (biome, danger, saison). Et tout part en **un seul bloc compressé** (ZSTD) au lieu d'une entrée JSON par cellule, dont les clés `_v2i` et le base64 coûtaient plus que la donnée : **136 Ko** pour les mêmes 5 253 cellules, et la sauvegarde entière passe de 791 à 235 Ko.
+> **Un piège de méthode** : ma première vérification disait « cache vide » et j'ai cru le mécanisme cassé. Il ne l'était pas — l'outil de capture écrivait la sauvegarde **avant** d'ouvrir les écrans, alors que son propre commentaire promettait « après la mise en place ». La sauvegarde ne contenait donc jamais ce que les écrans avaient produit. Corrigé : elle s'écrit en dernier.
+> Rechargement vérifié : 5 253 cellules écrites, 5 253 relues.
+
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Arborescence du projet]]
 - **Alimente** : [[Multijoueur]], [[Abstraction hors-site]], [[Minimap et brouillard de guerre]], [[Donjons — structure et intégration]]

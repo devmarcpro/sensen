@@ -93,7 +93,8 @@ func _ready() -> void:
 	elif scene.titre_ouvert and "--charger" in args:   # --charger : le chemin Continuer de l'écran principal, à froid (Sauvegarde)
 		scene._charger_partie("essai_capture")   # l'emplacement de la sonde — jamais « monde », qui peut être une vraie partie
 		if scene.sim != null:
-			print("charge : lieu=", scene.sim.lieu, " expedition=", str(scene.sim.expedition))
+			print("charge : lieu=", scene.sim.lieu, " expedition=", str(scene.sim.expedition),
+				" carte retenue=", scene.sim.monde.carte_cache.size() if scene.sim.monde != null else 0)
 			Sauvegarde.effacer("essai_capture")   # la paire --sauvegarder / --charger est à usage unique : l'écran Charger reste net
 	elif scene.titre_ouvert and "--parties" in args:   # --parties : l'ecran Charger, sa liste et son portrait (designer 2026-09-02)
 		scene.ecrans.ouvrir("charger")
@@ -216,8 +217,6 @@ func _ready() -> void:
 					sp.grille.placer(jp.id, libre)
 					break
 			scene._apres_changement_de_grille()
-	if "--sauvegarder" in args and scene.sim != null:   # --sauvegarder : écrit la partie après la mise en place — pour tester Continuer à froid
-		print("sauvegarde : ", scene.sim.sauvegarder("essai_capture"))   # jamais « monde », qui peut être une vraie partie
 	for i3 in args.size():   # --heure H : l'heure du monde (cycle jour-nuit) — après le chargement, qui remet l'horloge
 		if args[i3] == "--heure" and i3 + 1 < args.size() and scene.sim != null:
 			scene.sim.horloge_monde.ticks = int(float(args[i3 + 1]) / 24.0 * 24000.0)
@@ -448,6 +447,15 @@ func _ready() -> void:
 					m_r.explores[Vector2i(c_r.x * n_r, c_r.y * n_r)] = true
 	if "--carte" in args:   # la carte s'ouvre après l'exploration : elle montre ce que le joueur a vu
 		scene.carte.ouvrir("voyage")
+		scene.carte.dessin.queue_redraw()
+		await scene.get_tree().process_frame
+		await scene.get_tree().process_frame
+		print("carte : %d cellules retenues" % scene.sim.monde.carte_cache.size())
+	# « Après la mise en place », c'est bien après TOUT : la sauvegarde était écrite avant l'ouverture des
+	# écrans, donc elle ne contenait jamais ce qu'ils avaient produit — le souvenir de la carte, entre
+	# autres, ressortait vide et je l'ai cru cassé (2026-09-02).
+	if "--sauvegarder" in args and scene.sim != null:
+		print("sauvegarde : ", scene.sim.sauvegarder("essai_capture"))   # jamais « monde », qui peut être une vraie partie
 	if "--debug-survol" in args:
 		print("survol=", scene.survol, " occ=", scene.sim.grille.occupant(scene.survol), " voit=", scene.sim.voit(j, scene.survol), " ecran=", scene.ecrans.est_ouvert(), " j=", j.pos)
 

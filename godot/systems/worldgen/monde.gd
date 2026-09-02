@@ -27,7 +27,7 @@ var teintes: Dictionary = {}           # Vector2i (chunk) → Color : teinte dom
 # La carte du monde se REDESSINAIT entièrement à chaque ouverture : vingt-cinq sondes de tectonique par
 # cellule, sur toutes les cellules de la vue, à chaque image. Le relief d'une cellule ne change jamais —
 # il se calcule donc une fois et se garde, ici et dans la sauvegarde (designer 2026-09-02).
-var carte_cache: Dictionary = {}       # Vector2i (cellule) → PackedByteArray : 3 octets par sous-point
+var carte_cache: Dictionary = {}       # Vector2i (cellule) → PackedByteArray : un octet d'altitude par sous-point
 var carte_cache_sp: int = 0            # le nombre de sous-points par côté du cache : s'il change, le cache est périmé
 var delta: Dictionary = {}             # Vector2i (cellule) → int : dérive de la corruption, borné (sauvegardé)
 var foyers: Dictionary = {}            # Vector2i (cellule) → {actif, majeur, generation, repit, nettoye_tick} (donjons connus)
@@ -358,30 +358,66 @@ func gouffre_de(cell: Vector2i) -> Dictionary:
 		"element": surface.element_dominant(cell)}
 
 
-## Les couleurs mémorisées d'une cellule de la carte, ou un tableau vide si on ne les a pas encore
-## calculées. `sp` : le nombre de sous-points par côté demandé — s'il a changé, le souvenir est périmé.
-func carte_couleurs(cell: Vector2i, sp: int) -> PackedColorArray:
+## L'altitude mémorisée des sous-points d'une cellule (un octet chacun), ou un tableau vide si on ne
+## l'a pas encore calculée. `sp` : le nombre de sous-points par côté — s'il a changé, le souvenir est périmé.
+##
+## On retient l'**altitude**, pas la couleur. C'est l'altitude qui coûte cher — chaque sous-point demande
+## un warp de bruit, la distance aux vingt-quatre plaques, un bruit de continentalité et les points
+## chauds — alors que la couleur s'en déduit par trois comparaisons. Retenir la couleur coûtait trois
+## fois plus de place pour rien, et figeait une teinte qui, elle, peut changer (biome, danger, saison).
+func carte_altitudes(cell: Vector2i, sp: int) -> PackedByteArray:
 	if carte_cache_sp != sp or not carte_cache.has(cell):
-		return PackedColorArray()
-	var octets: PackedByteArray = carte_cache[cell]
-	var res := PackedColorArray()
-	for i in octets.size() / 3:
-		res.append(Color8(octets[i * 3], octets[i * 3 + 1], octets[i * 3 + 2]))
-	return res
+		return PackedByteArray()
+	return carte_cache[cell]
 
 
-## Retient les couleurs d'une cellule. Trois octets par sous-point : une cellule pèse 75 octets à
-## cinq sous-points, et la sauvegarde ne garde que les cellules qu'on a réellement regardées.
-func carte_retenir(cell: Vector2i, sp: int, couleurs: PackedColorArray) -> void:
+## Retient les altitudes d'une cellule : un octet par sous-point, vingt-cinq octets à cinq sous-points.
+func carte_retenir(cell: Vector2i, sp: int, altitudes: PackedByteArray) -> void:
 	if carte_cache_sp != sp:
 		carte_cache.clear()
 		carte_cache_sp = sp
-	var octets := PackedByteArray()
-	for c in couleurs:
-		octets.append(clampi(roundi(c.r * 255.0), 0, 255))
-		octets.append(clampi(roundi(c.g * 255.0), 0, 255))
-		octets.append(clampi(roundi(c.b * 255.0), 0, 255))
-	carte_cache[cell] = octets
+	carte_cache[cell] = altitudes
+
+
+## Le souvenir de la carte, en UN bloc compressé (designer 2026-09-02). Écrit cellule par cellule dans
+## le JSON, il pesait 718 Ko pour une seule ouverture de carte — 91 % du fichier de sauvegarde, à cause
+## des clés `_v2i` et du base64 de chaque cellule. Un seul tableau d'octets compressé tombe à quelques
+## dizaines de kilo-octets : des altitudes voisines se ressemblent, et la compression aime ça.
+func carte_cache_serialise() -> Dictionary:
+	if carte_cache.is_empty():
+		return {}
+	var sp := carte_cache_sp
+	var n := sp * sp
+	var brut := PackedByteArray()
+	for cell in carte_cache.keys():
+		var octets: PackedByteArray = carte_cache[cell]
+		if octets.size() != n:
+			continue
+		brut.append((int(cell.x) >> 8) & 0xFF)
+		brut.append(int(cell.x) & 0xFF)
+		brut.append((int(cell.y) >> 8) & 0xFF)
+		brut.append(int(cell.y) & 0xFF)
+		brut.append_array(octets)
+	return {"sp": sp, "taille": brut.size(), "octets": brut.compress(FileAccess.COMPRESSION_ZSTD)}
+
+
+func carte_cache_charger(d: Dictionary) -> void:
+	carte_cache.clear()
+	carte_cache_sp = 0
+	if d.is_empty() or not d.has("octets"):
+		return
+	var sp := int(d.get("sp", 0))
+	var n := sp * sp
+	if n <= 0:
+		return
+	var octets: PackedByteArray = d.octets
+	var brut := octets.decompress(int(d.get("taille", 0)), FileAccess.COMPRESSION_ZSTD)
+	var pas := 4 + n
+	carte_cache_sp = sp
+	for i in brut.size() / pas:
+		var b := i * pas
+		var cell := Vector2i((brut[b] << 8) | brut[b + 1], (brut[b + 2] << 8) | brut[b + 3])
+		carte_cache[cell] = brut.slice(b + 4, b + 4 + n)
 
 
 ## Cette cellule porte-t-elle une entrée de donjon DESSINÉE ? Une entrée posée se voit et s'efface

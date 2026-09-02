@@ -5274,7 +5274,7 @@ func sauvegarder(nom: String = "") -> bool:
 		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores,
 		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire, "vacances": monde.vacances, "villages": monde.villages, "heritiers": monde.heritiers, "vacances_guildes": monde.vacances_guildes,
 		"modifs_terrain": modifs_terrain, "portails": portails, "gouffres_vides": gouffres_vides,
-		"carte_cache": monde.carte_cache, "carte_cache_sp": monde.carte_cache_sp})   # indexés par position monde, donc valables au rechargement
+		"carte_cache": monde.carte_cache_serialise()})   # indexés par position monde, donc valables au rechargement
 	ok = Sauvegarde.ecrire(nom, "surface.json", surface) and ok
 	ok = Sauvegarde.ecrire(nom, "entities.json", {"entites": autres, "ordre": ordre_autres, "contenants": contenants_monde}) and ok
 	ok = Sauvegarde.ecrire(nom, "items.json", instances) and ok
@@ -5402,8 +5402,7 @@ func charger_sauvegarde(nom: String = "") -> bool:
 	monde.centre = Vector2i(-1, -1)
 	modifs_terrain = w.get("modifs_terrain", {})   # après _reinitialiser, qui les vide : ce que le monde doit rendre
 	gouffres_vides = w.get("gouffres_vides", {})   # les étages de gouffre déjà vidés : ils le restent d'une session à l'autre
-	monde.carte_cache = w.get("carte_cache", {})   # la carte du monde se souvient d'elle-même (designer 2026-09-02)
-	monde.carte_cache_sp = int(w.get("carte_cache_sp", 0))
+	monde.carte_cache_charger(w.get("carte_cache", {}))   # la carte du monde se souvient d'elle-même (designer 2026-09-02)
 	portails = w.get("portails", {})               # et les brèches du Passeur, indexées par position monde
 	grille = monde.fenetre(monde.cellule_de(joueur_sauve.pos), GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
 	monde.tick(int(w.ticks))   # les grâces échues avant la sauvegarde
