@@ -90,6 +90,8 @@ func _ready() -> void:
 		if scene.sim != null:
 			print("charge : lieu=", scene.sim.lieu, " expedition=", str(scene.sim.expedition))
 			Sauvegarde.effacer("essai_capture")   # la paire --sauvegarder / --charger est à usage unique : l'écran Charger reste net
+	elif scene.titre_ouvert and "--parties" in args:   # --parties : l'ecran Charger, sa liste et son portrait (designer 2026-09-02)
+		scene.ecrans.ouvrir("charger")
 	elif scene.titre_ouvert and not ("--titre" in args):   # la capture saute l'écran principal, la création et l'écran Monde
 		scene._nouvelle_partie()
 		scene._creer_personnage()

@@ -57,6 +57,7 @@ Captures prises par `scenes/tests/capture.tscn` (tout est dessiné par code — 
 | ![Inventaire](captures/inventaire.png) **L'inventaire** — l'avatar et ses cases d'équipement, le sac en liste triable, le Wu Xing de l'objet | ![Atelier](captures/atelier.png) **L'atelier** — les recettes en cartes, l'obtention de chaque composant dépliée |
 | ![Orage](captures/anim/pluie.gif) **Un orage sur le camp** — la pluie dessinée par code, la foudre au journal, la météo au HUD | ![Création du monde](captures/monde.png) **La création du monde** — l'aperçu de la mappemonde entière et les sept réglages de génération |
 | ![Capacités](captures/capacites.png) **Les capacités** — les sorts assemblés, leur coût, la hotbar en glisser-déposer | ![Commerce](captures/commerce.png) **Le commerce** — le stock d'un marchand, ses prix, et les objets encore non identifiés |
+| ![Charger une partie](captures/parties.png) **Charger une partie** — une sauvegarde par partie ; la ligne pointée dessine le personnage et déplie l'état de son monde | |
 
 ---
 

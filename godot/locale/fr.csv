@@ -710,7 +710,6 @@ ui.menu.carte,Carte du monde
 ui.menu.gestion,Territoire
 ui.menu.registre,Registre d'élevage
 ui.menu.sauvegarder,Sauvegarder
-ui.menu.charger,Charger
 ui.menu.minimap_zoom,Minimap : zoom
 ui.menu.minimap_masquer,Minimap : afficher / masquer
 ui.menu.arene,Débogage : arène suivante puis le camp
@@ -2257,6 +2256,22 @@ ui.titre.options,Options…
 ui.titre.quitter,Quitter
 ui.titre.d_nouvelle,"Créer un personnage, puis un monde, puis choisir sa case de départ."
 ui.titre.d_continuer,"Reprendre la dernière sauvegarde."
+ui.titre.charger,"Charger"
+ui.titre.d_charger,"Charger une partie"
+ui.charger.ecrit_le,"Sauvegardée le {date} ({slot})"
+ui.charger.corruption,"Corruption au camp : {n} %"
+ui.charger.monde,"Monde {graine} · {vues} cellules parcourues · {claims} revendiquées · {villages} villages connus"
+ui.charger.en_donjon,"En expédition, étage {etage}"
+ui.charger.en_surface,"En surface"
+ui.charger.ou,"{ou} · biome du camp : {biome}"
+ui.charger.temps,"Jour {jour}, {heure} h · {saison}"
+ui.charger.corps,"{pv}/{pv_max} PV · {or} or · {sac} objets au sac"
+ui.charger.perso,"{nom} — {race} {classe}, niveau {niveau}"
+ui.charger.illisible,"Sauvegarde « {slot} » illisible : elle vient d’une version trop ancienne."
+ui.charger.ligne,"{nom} — {classe} niv. {niveau} — jour {jour}"
+ui.charger.ligne_muette,"{slot} — partie d’avant les résumés"
+ui.charger.aucune,"(aucune partie)"
+ui.ecran.charger,"Charger"
 ui.titre.d_charger,"Choisir une sauvegarde."
 ui.titre.d_options,"Langue, plein écran."
 ui.titre.d_quitter,"Fermer le jeu."
@@ -2271,9 +2286,6 @@ ui.options.langue,"Langue : {langue} (Entrée : changer)"
 ui.options.d_langue,"Français / English, à chaud."
 ui.options.plein_ecran,"Plein écran : {etat}"
 ui.options.retour,Retour
-ui.ecran.charger,"CHARGER — Entrée : charger · Échap : retour"
-ui.charger.aucune,"(aucune sauvegarde)"
-ui.charger.d_slot,"Charger la sauvegarde « {nom} »."
 ui.menu.titre,Retour à l'écran principal
 ui.composer.taille_courte,taille
 journal.epuisement,"{nom} s’épuise : {deficit} d’endurance manquants, {degats} PV"

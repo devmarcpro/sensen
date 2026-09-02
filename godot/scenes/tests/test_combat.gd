@@ -6455,6 +6455,36 @@ func test_camp() -> void:
 	verifier(max_groupe <= int(GameData.config("planete").corruption.donjons.fusion_max), "la fusion plafonne à %d cellules (max vu : %d)" % [int(GameData.config("planete").corruption.donjons.fusion_max), max_groupe])
 	verifier(max_groupe >= 1, "chaque donjon connaît son groupe (%d cellules fusionnées vues)" % fusionne)
 
+	# Le cycle de foyer sur un donjon de corruption (designer 2026-09-02) : le foyer s'allume tout seul
+	# sur la cellule cristallisée, il infecte ses voisines, et vaincre le boss efface le donjon.
+	var cf: Vector2i = Vector2i(-9999, -9999)
+	m51.jour_monde = jour51
+	for dyf in range(-6, 7):
+		for dxf in range(-6, 7):
+			var c: Vector2i = m51.cellule_camp + Vector2i(dxf, dyf)
+			if cf.x == -9999 and m51.surface.terre_a(c) and m51.donjon_corrompu(c, jour51):
+				cf = c
+	if cf.x != -9999:
+		var ff: Dictionary = m51.foyer(cf)
+		verifier(not ff.is_empty() and bool(ff.actif) and not bool(ff.get("pose", true)), "un donjon de corruption allume son foyer, sans entrée posée")
+		m51.explores[Vector2i(cf.x * (m51.taille / 32), cf.y * (m51.taille / 32))] = true
+		var d_av := int(m51.delta.get(cf, 0))
+		m51.semaine(1)
+		verifier(int(m51.delta.get(cf, 0)) > d_av, "le foyer de corruption infecte sa cellule chaque semaine (%d → %d)" % [d_av, int(m51.delta.get(cf, 0))])
+		# Vaincu : la cellule cesse d'être un donjon, et le reste pendant tout le répit.
+		m51.nettoyer(cf, 1000)
+		m51.nettoyages[cf] = jour51
+		verifier(not m51.donjon_corrompu(cf, jour51) and m51.donjon_de_corruption(cf, jour51).is_empty(), "un donjon vaincu disparaît de la carte")
+		var repit_j: int = int(ff.repit_initial) * (int(GameData.config("planete").corruption.ticks_par_semaine) / int(m51.planete.cycle.ticks_par_jour))
+		verifier(not m51.donjon_corrompu(cf, jour51 + repit_j - 1), "pendant le répit (%d jours) la cellule reste stérile" % repit_j)
+		# Passé le répit, si la corruption est toujours haute, un NOUVEAU donjon naît — au niveau du jour, pas à l'ancien.
+		var renait := false
+		for k in 40:
+			if m51.donjon_corrompu(cf, jour51 + repit_j + k * 3):
+				renait = true
+				break
+		verifier(renait or m51.corruption_jour(cf, jour51 + repit_j) < float(GameData.config("planete").corruption.donjons.seuil), "passé le répit, la cellule peut cristalliser de nouveau (ou sa corruption est retombée)")
+
 	# La corruption croît avec l'éloignement, et le niveau n'a plus de plafond (2026-09-01, point 62)
 	var pl62: Dictionary = m51.planete
 	var larg62: int = int(pl62.monde_cellules)
@@ -7380,6 +7410,19 @@ func test_progression() -> void:
 	verifier(p.intention(jp.id, {"type": "respawn"}), "respawn")
 	verifier(jp.vivant and jp.sante == jp.sante_max and jp.pos == spawn and jp.equipement.has("main_principale"), "relevé au point d'entrée, PV pleins, équipement conservé")
 	verifier(int(jp.or) == 45, "Mort et pénalité : −10 %% de l'or porté (%d)" % int(jp.or))
+	# Le sac tombe sur UN jet de dé (designer 2026-09-02) : on peut tout perdre, la moitié, ou rien.
+	# Un tirage par objet donnait toujours la même perte ; ici la distribution doit vraiment s'étaler.
+	var faces_vues := {}
+	for essai in 60:
+		for uid_r in jp.sac.duplicate():
+			jp.sac.erase(uid_r)
+		for k_r in 8:
+			p.donner(jp, p.generer_objet("proto_dague", 1).uid)
+		var avant_r: int = jp.sac.size()
+		jp.vivant = false
+		p._respawn(jp)
+		faces_vues[int(round(float(avant_r - jp.sac.size()) * 4.0 / maxf(1.0, float(avant_r))))] = true
+	verifier(faces_vues.has(0) and faces_vues.has(4) and faces_vues.size() >= 3, "le sac tombe sur un jet de dé : rien, tout, et des parts entre les deux (%d faces vues sur 60 morts)" % faces_vues.size())
 	# Faim : la régénération de santé d'équipement suit les paliers (< 50 : −10 %, < 25 : plus rien)
 	jp["mecaniques"] = {"regen_sante": {"pct": 100}}
 	jp.faim = 100

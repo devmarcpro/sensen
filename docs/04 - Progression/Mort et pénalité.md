@@ -38,6 +38,11 @@ usage-based rend la perte d'XP très punitive, on pénalise l'économie à la pl
 > [!success] Codé le 2026-08-31 — le butin de mort retourne à la poussière
 > La note promettait des objets « récupérables pendant 1 jour in-game » ; le code posait le contenant sans péremption — le tas restait pour toujours. Chaque objet tombé à la mort porte désormais `peremption_tick` (1 jour, `combat_rules.mort.peremption_jours`) ; un passage horaire de l'horloge du monde (`_perimer_butin`, camp comme donjon) retire les objets périmés et rend la tuile quand le tas est vide. Les coffres, étals et butins de combat ordinaires ne périment pas — seule la dépouille de la mort est concernée, comme la note le dit.
 
+> [!success] Tranché le 2026-09-02 — ce qu'on perd est **un jet de dé**, pas une chance par objet (designer)
+> « Pour les items perdus c'est un jet de dé, on peut tout perdre, la moitié, rien du tout, c'est totalement aléatoire. » La règle précédente tirait **par objet** à 10 % : sur un sac de trente objets, on perdait toujours à peu près trois — jamais rien, jamais tout. Une loi des grands nombres déguisée en hasard, qui ne fait battre le cœur de personne.
+> Désormais **un seul jet** décide de la part du sac qui tombe : `combat_rules.mort.perte_sac_faces` donne les faces du dé (rien, un quart, la moitié, trois quarts, tout), chacune également probable. Les objets emportés sont ensuite tirés au hasard dans le sac. Sortir vivant d'un donjon avec un sac plein redevient un pari : le même mort peut ne rien coûter ou tout coûter.
+> Inchangé : l'équipement **porté** est conservé, l'XP ne se perd jamais, les −10 % d'or restent, le tas périme en un jour de jeu.
+
 ## Liens
 - **Dépend de** : [[Progression par l'usage]]
 - **Alimente** : [[Économie — sources et puits]]

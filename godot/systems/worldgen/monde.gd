@@ -27,6 +27,7 @@ var teintes: Dictionary = {}           # Vector2i (chunk) → Color : teinte dom
 var delta: Dictionary = {}             # Vector2i (cellule) → int : dérive de la corruption, borné (sauvegardé)
 var foyers: Dictionary = {}            # Vector2i (cellule) → {actif, majeur, generation, repit, nettoye_tick} (donjons connus)
 var semaine_courante: int = 0          # dernière semaine passée (ticks / ticks_par_semaine)
+var jour_monde: int = 0                # le jour courant, poussé par la simulation : `foyer()` doit savoir si la cellule est cristallisée AUJOURD'HUI (designer 2026-09-02)
 var grille_active: Grille = null       # la fenêtre courante, pour effacer une entrée après la grâce
 var peuplees: Dictionary = {}          # Vector2i (cellule) → true : ses PNJ ont été instanciés (première visite)
 var claims: Dictionary = {}            # Vector2i (cellule) → {role} : le territoire du joueur (Expansion territoriale)
@@ -252,13 +253,29 @@ func _cr() -> Dictionary:
 	return planete.get("corruption", {})
 
 
+## Cette cellule porte-t-elle une entrée de donjon DESSINÉE ? Une entrée posée se voit et s'efface
+## (grâce, répit, retour) ; un donjon de corruption n'a rien à dessiner — la cellule happe qui y met
+## le pied. Les deux ne suivent donc pas le même cycle, et c'est ici qu'on les distingue.
+func entree_posee(cell: Vector2i) -> bool:
+	if cellules.has(cell):
+		return bool(cellules[cell].get("a_donjon", false))
+	return bool(surface.poi_de(cell, cell == cellule_camp).donjon)
+
+
 ## Le foyer d'une cellule à donjon (créé à la première demande) ; {} si la cellule n'en a pas.
 func foyer(cell: Vector2i) -> Dictionary:
 	if foyers.has(cell):
 		return foyers[cell]
-	if not surface.poi_de(cell, cell == cellule_camp).donjon:
+	# Le foyer d'une cellule EST son donjon (designer 2026-09-02). Il n'y a plus de donjon posé par la
+	# génération de surface : c'est la corruption qui les fait naître, et c'est donc elle qui allume le
+	# foyer. Tant que cette condition ne regardait que `poi_de().donjon`, toute la machinerie
+	# hebdomadaire — infection, plafonds, répit, générations — tournait à vide.
+	if not entree_posee(cell) and not donjon_corrompu(cell, jour_monde):
 		return {}
-	foyers[cell] = {"actif": true, "majeur": surface.danger_de(cell) >= 2, "generation": 0, "repit": 0, "nettoye_tick": -1}
+	# `pose` fige à la naissance ce qu'est ce foyer, car `entree_posee` ne peut pas servir de mémoire :
+	# effacer l'entrée après la grâce remet `a_donjon` à false, et un foyer posé passerait pour un foyer
+	# de corruption au milieu de son propre cycle. Les foyers d'anciennes sauvegardes sont tous posés.
+	foyers[cell] = {"actif": true, "majeur": surface.danger_de(cell) >= 2, "generation": 0, "repit": 0, "nettoye_tick": -1, "pose": entree_posee(cell)}
 	return foyers[cell]
 
 
@@ -301,7 +318,17 @@ func donjon_corrompu(cell: Vector2i, jour: int) -> bool:
 		return false
 	if surface.poi_de(cell, cell == cellule_camp).get("donjon", false):
 		return false   # une cellule qui a déjà son donjon garde son entrée : la corruption ne la double pas
-	if cell == cellule_amorce() and not nettoyages.has(cell):
+	# Un donjon vaincu DISPARAÎT (designer 2026-09-02) : pendant le répit, la cellule ne peut plus se
+	# cristalliser, quelle que soit sa corruption. Passé ce délai, si la corruption est toujours au-dessus
+	# du seuil, un NOUVEAU donjon naît là — au niveau 1, pas à celui qu'on venait de vaincre.
+	var nettoye_le := int(nettoyages.get(cell, -9999))
+	if nettoye_le > -9999:
+		var f_c: Dictionary = foyers.get(cell, {})
+		var repit_sem: int = int(f_c.get("repit_initial", _cr().get("repit_mineur", 4)))
+		var jours_repit := repit_sem * maxi(1, int(_cr().get("ticks_par_semaine", 168000)) / maxi(1, int(planete.get("cycle", {}).get("ticks_par_jour", 24000))))
+		if jour - nettoye_le < jours_repit:
+			return false
+	if cell == cellule_amorce() and nettoye_le == -9999:
 		return true   # le donjon garanti du début de partie (designer 2026-09-01)
 	if corruption_jour(cell, jour) < float(cfg.get("seuil", 62.0)):
 		return false
@@ -403,6 +430,24 @@ func semaine(tick: int) -> Array[Vector2i]:
 		var f := foyer(cell)
 		if f.is_empty():
 			continue
+		# Un foyer de corruption n'a pas de vie propre : il EST le donjon de la cellule (designer
+		# 2026-09-02). Son activité suit donc la cristallisation, et sa renaissance ne « repose » aucune
+		# entrée — une cellule corrompue happe qui y met le pied, elle n'a pas de trappe à dessiner.
+		if not bool(f.get("pose", true)):
+			var vivant := donjon_corrompu(cell, jour_monde)
+			if vivant != bool(f.actif):
+				f.actif = vivant
+				if vivant:
+					f.generation = int(f.generation) + 1
+					f.majeur = danger_de(cell) >= 2
+					f.nettoye_tick = -1
+					nettoyages.erase(cell)
+				touchees.append(cell)
+			if not vivant:
+				if int(f.repit) > 0:
+					f.repit = int(f.repit) - 1
+				continue
+			actifs[cell] = true
 		if bool(f.actif):
 			actifs[cell] = true
 			var plafond := int(cr.get("plafond_majeur", 25)) if bool(f.majeur) else int(cr.get("plafond_mineur", 10))
@@ -450,6 +495,7 @@ func nettoyer(cell: Vector2i, tick: int) -> void:
 	var cr := _cr()
 	f.actif = false
 	f.repit = int(cr.get("repit_majeur", 12)) if bool(f.majeur) else int(cr.get("repit_mineur", 4))
+	f["repit_initial"] = int(f.repit)   # `donjon_corrompu` en déduit combien de jours la cellule reste stérile
 	f.nettoye_tick = tick
 	_ajouter_delta(cell, int(cr.get("nettoyage_cellule", -8)))
 	for dy in range(-1, 2):

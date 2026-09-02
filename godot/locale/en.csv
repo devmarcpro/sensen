@@ -898,7 +898,6 @@ ui.menu.arene,Debug: next arena then the camp
 ui.menu.atelier,Workshop
 ui.menu.capacites,Abilities
 ui.menu.carte,World map
-ui.menu.charger,Load
 ui.menu.fermer,Close
 ui.menu.feuille,Character sheet
 ui.menu.gestion,Territory
@@ -2248,6 +2247,22 @@ ui.titre.options,Options…
 ui.titre.quitter,Quit
 ui.titre.d_nouvelle,"Create a character, then a world, then pick a starting cell."
 ui.titre.d_continuer,"Resume the last save."
+ui.titre.charger,"Load"
+ui.titre.d_charger,"Load a game"
+ui.charger.ecrit_le,"Saved on {date} ({slot})"
+ui.charger.corruption,"Corruption at camp: {n}%"
+ui.charger.monde,"World {graine} · {vues} cells travelled · {claims} claimed · {villages} villages known"
+ui.charger.en_donjon,"On an expedition, floor {etage}"
+ui.charger.en_surface,"On the surface"
+ui.charger.ou,"{ou} · camp biome: {biome}"
+ui.charger.temps,"Day {jour}, {heure}:00 · {saison}"
+ui.charger.corps,"{pv}/{pv_max} HP · {or} gold · {sac} items carried"
+ui.charger.perso,"{nom} — {race} {classe}, level {niveau}"
+ui.charger.illisible,"Save ""{slot}"" cannot be read: it comes from too old a version."
+ui.charger.ligne,"{nom} — {classe} lv. {niveau} — day {jour}"
+ui.charger.ligne_muette,"{slot} — game from before summaries"
+ui.charger.aucune,"(no saved game)"
+ui.ecran.charger,"Load"
 ui.titre.d_charger,"Pick a save."
 ui.titre.d_options,"Language, fullscreen."
 ui.titre.d_quitter,"Close the game."
@@ -2262,9 +2277,6 @@ ui.options.langue,"Language: {langue} (Enter: switch)"
 ui.options.d_langue,"Français / English, live."
 ui.options.plein_ecran,"Fullscreen: {etat}"
 ui.options.retour,Back
-ui.ecran.charger,"LOAD — Enter: load · Esc: back"
-ui.charger.aucune,"(no save)"
-ui.charger.d_slot,"Load save “{nom}”."
 ui.menu.titre,Back to the main screen
 ui.composer.taille_courte,size
 journal.epuisement,"{nom} is exhausted: {deficit} stamina short, {degats} HP"

@@ -178,6 +178,10 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > Dix cases suffisaient tant qu'un personnage n'avait que trois sorts et deux armes ; avec les modules sans plafond, elles débordent. Le personnage porte désormais **dix pages** de dix cases : `Ctrl + 1` à `Ctrl + 0` passe de l'une à l'autre, la page courante est écrite au-dessus de la barre. Chaque page se remplit comme avant, en glissant une capacité ou une arme depuis l'inventaire (point 35) ; les pages jamais touchées retombent sur la hotbar **dérivée** — capacités, puis râtelier, puis objets —, si bien qu'une page neuve n'est jamais vide. Le loadout de classe reste la page 1.
 
 
+> [!success] Codé le 2026-09-02 — l'écran Charger montre la partie avant de l'ouvrir (designer)
+> Une sauvegarde par partie ([[Sauvegarde]]) : l'écran principal offre **Nouvelle partie**, **Continuer**, **Charger**, **Options**, **Quitter**. Choisir une ligne de Charger dessine le personnage **en pied et en portrait** avec son équipement (le paperdoll lit l'être tel qu'il est sauvegardé), ses trois jauges, et liste tout l'état du monde : race, classe, niveau, PV, or, sac, jour, heure, saison, surface ou étage de donjon, biome du camp, graine, cellules parcourues, revendiquées, villages connus, corruption au camp, date d'écriture. L'entrée « Charger » du menu en jeu est retirée : recharger sa propre partie d'un coup de menu annulait le jet de dé de la mort ; on repasse par l'écran principal.
+
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

@@ -222,8 +222,8 @@
     }
   },
   "mort": {
-    "_doc": "Mort et pénalité : respawn, −perte_or de l'or porté (prélevé depuis le 2026-08-31), 10 % de chance par objet du sac de tomber, équipement et XP conservés ; les objets tombes periment apres peremption_jours (recuperables 1 jour)",
-    "chance_perte_objet": 0.1,
+    "_doc": "Mort et pénalité : respawn, −perte_or de l'or porté, équipement et XP conservés ; les objets tombes periment apres peremption_jours. Depuis le 2026-09-02 (designer) UN SEUL JET decide de la part du sac qui tombe : perte_sac_faces donne les faces du de, equiprobables — rien, un quart, la moitie, trois quarts, tout.",
+    "perte_sac_faces": [0.0, 0.25, 0.5, 0.75, 1.0],
     "perte_or": 0.1,
     "peremption_jours": 1
   },

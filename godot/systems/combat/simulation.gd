@@ -31,6 +31,7 @@ var expedition: Dictionary = {}      # compteurs de l'expédition en cours : tu�
 var camp_sauve: Dictionary = {}      # le camp mis de côté pendant une expédition (Claims et persistance)
 var lieu: String = "arene"           # "arene" | "camp" | "donjon"
 static var slot_autosave := "monde"  # l'emplacement des sauvegardes automatiques — les tests et le fuzz le détournent pour ne jamais écraser une vraie partie
+var nom_partie := ""                 # l'emplacement de CETTE partie (designer 2026-09-02) : plusieurs parties, une sauvegarde chacune
 var prochain_donjon: int = 1         # id du prochain donjon lancé depuis le camp
 var monde: Monde = null              # la surface comme fenêtre glissante (étape 8.2a)
 var bombes: Array = []               # les bombes posées, en attente d'explosion (Explosions)
@@ -5117,7 +5118,50 @@ func _tiquer_meteo(tick: int) -> void:
 # ---------------------------------------------------------------- sauvegarde (Sauvegarde, E.10)
 
 ## Sauvegarde la partie (surface seulement : au camp ou à pied). Retourne vrai si tout est écrit.
-func sauvegarder(nom: String = "monde") -> bool:
+## L'emplacement où cette partie s'écrit. Un outil (tests, fuzz, robot) détourne `slot_autosave` pour ne
+## jamais toucher à une vraie partie ; sinon c'est le dossier de la partie en cours (designer 2026-09-02).
+func slot() -> String:
+	if slot_autosave != "monde":
+		return slot_autosave
+	return nom_partie if not nom_partie.is_empty() else "monde"
+
+
+## Ce qu'il faut savoir d'une partie SANS la charger (designer 2026-09-02 : « sélectionner une partie
+## devrait afficher le portrait de personnage et toutes les stats du monde »). Charger un monde entier
+## pour peupler une liste coûterait des secondes par ligne ; ce résumé est écrit à chaque sauvegarde.
+func resume_partie() -> Dictionary:
+	var j := {}
+	for x in entites.values():
+		if x.controle == "joueur":
+			j = x
+			break
+	var nd: Dictionary = progression.niveaux_derives(j) if not j.is_empty() else {}
+	var chunks_par_cellule := maxi(1, (monde.taille / 32) * (monde.taille / 32)) if monde != null else 1
+	return {
+		"nom": tr(str(fiche_joueur.get("name_key", j.get("name_key", "creature.aventurier.name")))),
+		"race": str(fiche_joueur.get("race", j.get("race", ""))),
+		"classe": str(fiche_joueur.get("classe", j.get("classe", ""))),
+		"niveau": int(round(maxf(float(nd.get("combat", 0.0)), float(nd.get("general", 0.0))))),
+		"sante": int(j.get("sante", 0)), "sante_max": int(j.get("sante_max", 0)),
+		"or": int(j.get("or", 0)), "sac": int((j.get("sac", []) as Array).size()),
+		"lieu": lieu, "etage": int(donjon.get("etage", 0)) if lieu == "donjon" else 0,
+		"jour": jour_courant(), "heure": int(heure()),
+		"saison": str(_saison_info().get("id", "")),
+		"graine_monde": graine_monde,
+		"biome": str(camp_sauve.get("biome", "")),
+		"cellule_camp": monde.cellule_camp if monde != null else Vector2i.ZERO,
+		"cellules_vues": int(ceil(float(monde.explores.size()) / float(chunks_par_cellule))) if monde != null else 0,
+		"claims": monde.claims.size() if monde != null else 0,
+		"villages_connus": monde.villages.size() if monde != null else 0,
+		"corruption_camp": roundi(monde.corruption_de(monde.cellule_camp)) if monde != null else 0,
+		"options_monde": planete_options,
+		"ecrit_le": Time.get_datetime_string_from_system(false, true),
+	}
+
+
+func sauvegarder(nom: String = "") -> bool:
+	if nom.is_empty():
+		nom = slot()
 	# Sauvegarde possible partout (designer, 2026-08-31) : au camp comme en donjon. Seule l'arène de test reste hors jeu.
 	if not (lieu in ["camp", "donjon"]) or monde == null:
 		return false
@@ -5157,7 +5201,7 @@ func sauvegarder(nom: String = "monde") -> bool:
 	var contenants_monde := {}
 	for gi in contenants.keys():
 		contenants_monde[grille.pos_de(int(gi))] = contenants[gi]
-	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "graine": graine, "graine_monde": graine_monde, "planete_options": planete_options, "identifies": identifies, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
+	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "resume": resume_partie(), "graine": graine, "graine_monde": graine_monde, "planete_options": planete_options, "identifies": identifies, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
 		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores,
 		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire, "vacances": monde.vacances, "villages": monde.villages, "heritiers": monde.heritiers, "vacances_guildes": monde.vacances_guildes,
 		"modifs_terrain": modifs_terrain, "portails": portails})   # indexés par position monde, donc valables au rechargement
@@ -5182,7 +5226,10 @@ func sauvegarder(nom: String = "monde") -> bool:
 
 
 ## Recharge une partie : le monde depuis la graine, puis les modifications, les êtres et le joueur.
-func charger_sauvegarde(nom: String = "monde") -> bool:
+func charger_sauvegarde(nom: String = "") -> bool:
+	if nom.is_empty():
+		nom = slot()
+	nom_partie = nom
 	var w: Variant = Sauvegarde.lire(nom, "world.json")
 	if w == null:
 		return false
@@ -5803,7 +5850,7 @@ func _sortir(e: Dictionary) -> bool:
 				EventBus.emettre(&"journal", [&"journal.repousse_corruption", {}])
 			_quetes_sur_donjon(cell_donjon, e.id)
 			EventBus.emettre(&"dungeon_cleared", [cell_donjon, e.id])
-		sauvegarder(slot_autosave)   # autosave au retour (Sauvegarde : sur événements clés)
+		sauvegarder()   # autosave au retour (Sauvegarde : sur événements clés)
 		return true
 	var suivant: int = int(donjon.id) + 1
 	charger_donjon(donjon.theme, int(donjon.graine), suivant, 1, e)
@@ -6471,11 +6518,20 @@ func _ramasser(e: Dictionary, tick: int) -> bool:
 func _respawn(e: Dictionary) -> bool:
 	if e.vivant or e.controle != "joueur":
 		return false
+	# Mort et pénalité (designer 2026-09-02) : UN SEUL jet de dé décide de la part du sac qui tombe.
+	# Un tirage par objet donnait toujours à peu près la même perte sur un gros sac ; ici on peut
+	# tout perdre, la moitié, ou rien — et les objets emportés sont ensuite tirés au hasard.
+	var faces: Array = regles.r.mort.get("perte_sac_faces", [0.0, 0.25, 0.5, 0.75, 1.0])
+	var part := 0.0
+	if not faces.is_empty():
+		part = float(faces[des.entier(0, faces.size() - 1)])
+	var restants: Array = e.sac.duplicate()
+	var combien := int(round(float(restants.size()) * part))
 	var perdus: Array = []
-	for uid in e.sac.duplicate():
-		if des.reel() < float(regles.r.mort.chance_perte_objet):
-			e.sac.erase(uid)
-			perdus.append(uid)
+	while perdus.size() < combien and not restants.is_empty():
+		var uid: Variant = restants.pop_at(des.entier(0, restants.size() - 1))
+		e.sac.erase(uid)
+		perdus.append(uid)
 	_poser_contenant(e.pos, perdus, "butin")
 	if horloge_monde != null:   # Mort et pénalité : récupérable pendant 1 jour in-game, puis poussière
 		for uid_p in perdus:
@@ -7039,6 +7095,7 @@ func _tiquer_monde(tick: int) -> void:
 	if monde == null:
 		return
 	var cr: Dictionary = GameData.config("planete").corruption
+	monde.jour_monde = jour_courant()   # `foyer()` s'allume sur les donjons de corruption : il lui faut le jour
 	var semaine := tick / int(cr.ticks_par_semaine)
 	while monde.semaine_courante < semaine:
 		monde.semaine_courante += 1

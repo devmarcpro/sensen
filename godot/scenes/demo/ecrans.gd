@@ -30,6 +30,7 @@ var corps: HBoxContainer      # liste + détail : caché quand le composeur est 
 var boutons: HBoxContainer
 var entrees: Array = []                 # ce que chaque ligne de la liste représente
 var selection := 0
+var parties_listees: Array = []         # l'écran Charger : {slot, resume} par partie (designer 2026-09-02)
 var minuterie := 0.0
 var pnj_id := ""                     # le PNJ du dialogue / du commerce en cours
 var replique_key := ""
@@ -518,6 +519,8 @@ func rafraichir() -> void:
 		liste.select(selection)
 	_montrer_detail()
 	cadre_perso.visible = courant == "creation"
+	if courant == "charger" and selection < entrees.size():
+		_portrait_partie(str(entrees[selection].get("id", "")))   # `cadre_perso` reste visible : c'est le portrait de la partie
 	apercu_monde.visible = courant == "monde"
 	inventaire_visuel.visible = courant == "inventaire"
 	hotbar_ecran.visible = courant == "inventaire" or courant == "capacites"
@@ -599,6 +602,8 @@ func _montrer_detail() -> void:
 		detail.text = ""
 		return
 	var en: Dictionary = entrees[selection]
+	if courant == "charger":   # le portrait suit la ligne pointée, flèches comme souris (designer 2026-09-02)
+		_portrait_partie(str(en.get("id", "")))
 	match str(en.get("kind", "")):
 		"objet":
 			detail.text = texte_objet(str(en.uid))
@@ -692,7 +697,7 @@ func _action_principale() -> void:
 		"titre":
 			match str(en.id):
 				"nouvelle": main._nouvelle_partie()
-				"continuer": main._charger_partie("monde")
+				"continuer": main._charger_partie()
 				"charger": ouvrir("charger")
 				"options": ouvrir("options")
 				"quitter": get_tree().quit()
@@ -1359,10 +1364,12 @@ func _valider_composition() -> void:
 ## L'écran principal (Écrans d'interface, 2026-08-30) : Nouvelle partie, Continuer, Charger, Options, Quitter.
 func _construire_titre() -> void:
 	titre.text = tr("ui.ecran.titre")
+	# Plusieurs parties, UNE sauvegarde par partie (designer 2026-09-02) : « Continuer » reprend la
+	# dernière jouée, « Charger » montre les autres avec leur personnage et l'état de leur monde.
 	var ids: Array[String] = ["nouvelle"]
-	if Sauvegarde.existe("monde"):
-		ids.append("continuer")
-	ids.append_array(["charger", "options", "quitter"])
+	if not main.parties_presentes().is_empty():
+		ids.append_array(["continuer", "charger"])
+	ids.append_array(["options", "quitter"])
 	for id in ids:
 		liste.add_item(tr("ui.titre." + id))
 		entrees.append({"kind": "titre", "id": id, "texte": tr("ui.titre.d_" + id)})
@@ -1792,22 +1799,89 @@ func _construire_options() -> void:
 	entrees.append({"kind": "options", "id": "retour", "texte": ""})
 
 
-## Charger : les sauvegardes présentes dans user://sauvegardes/.
+## Charger : une ligne par partie (designer 2026-09-02 — plusieurs parties, une sauvegarde chacune).
+## Chaque ligne dit qui on y jouait et où on en était ; le panneau de droite ajoute le portrait et
+## l'état du monde. Tout vient du `resume` écrit à la sauvegarde : aucun monde n'est chargé pour cela.
 func _construire_charger() -> void:
 	titre.text = tr("ui.ecran.charger")
-	var noms: Array[String] = main.sauvegardes_presentes()
-	if noms.is_empty():
+	parties_listees = main.parties_presentes()
+	if parties_listees.is_empty():
 		liste.add_item(tr("ui.charger.aucune"))
 		entrees.append({"kind": "charger_slot", "id": "", "texte": ""})
-	for nom in noms:
-		liste.add_item(nom)
-		entrees.append({"kind": "charger_slot", "id": nom, "texte": tr("ui.charger.d_slot").format({"nom": nom})})
+		return
+	for pa in parties_listees:
+		var r: Dictionary = pa.resume
+		if r.is_empty():   # une partie d'avant le résumé : on la liste quand même, sous son seul nom de dossier
+			liste.add_item(tr("ui.charger.ligne_muette").format({"slot": str(pa.slot)}))
+			entrees.append({"kind": "charger_slot", "id": str(pa.slot), "texte": _detail_partie(pa)})
+			continue
+		liste.add_item(tr("ui.charger.ligne").format({
+			"nom": str(r.get("nom", pa.slot)), "niveau": int(r.get("niveau", 0)),
+			"classe": _nom_de("classes", str(r.get("classe", ""))),
+			"jour": int(r.get("jour", 0))}))
+		entrees.append({"kind": "charger_slot", "id": str(pa.slot), "texte": _detail_partie(pa)})
+
+
+## Le nom lisible d'une entrée de catalogue, ou son identifiant si le catalogue ne la connaît plus
+## (une partie peut avoir été jouée avec une race ou une classe depuis renommée).
+func _nom_de(catalogue: String, id: String) -> String:
+	if id.is_empty():
+		return "\u2014"
+	var e: Dictionary = GameData.catalogues.get(catalogue, {}).get(id, {})
+	return tr(str(e.get("name_key", id))) if not e.is_empty() else id
+
+
+## Toutes les stats du monde d'une partie, pour le panneau de droite (demande du designer).
+func _detail_partie(pa: Dictionary) -> String:
+	var r: Dictionary = pa.resume
+	if r.is_empty():
+		return tr("ui.charger.illisible").format({"slot": str(pa.slot)})
+	var biome_id := str(r.get("biome", ""))
+	var ou := tr("ui.charger.en_donjon").format({"etage": int(r.get("etage", 0))}) if str(r.get("lieu", "")) == "donjon" else tr("ui.charger.en_surface")
+	var l: Array[String] = [
+		tr("ui.charger.perso").format({"nom": str(r.get("nom", "\u2014")), "race": _nom_de("races", str(r.get("race", ""))), "classe": _nom_de("classes", str(r.get("classe", ""))), "niveau": int(r.get("niveau", 0))}),
+		tr("ui.charger.corps").format({"pv": int(r.get("sante", 0)), "pv_max": int(r.get("sante_max", 0)), "or": int(r.get("or", 0)), "sac": int(r.get("sac", 0))}),
+		"",
+		tr("ui.charger.temps").format({"jour": int(r.get("jour", 0)), "heure": int(r.get("heure", 0)), "saison": tr("saison." + str(r.get("saison", "printemps")))}),
+		tr("ui.charger.ou").format({"ou": ou, "biome": _nom_de("biomes", biome_id)}),
+		tr("ui.charger.monde").format({"graine": int(r.get("graine_monde", 0)), "vues": int(r.get("cellules_vues", 0)), "claims": int(r.get("claims", 0)), "villages": int(r.get("villages_connus", 0))}),
+		tr("ui.charger.corruption").format({"n": int(r.get("corruption_camp", 0))}),
+		tr("ui.charger.ecrit_le").format({"date": str(r.get("ecrit_le", "\u2014")), "slot": str(pa.slot)}),
+	]
+	return "\n".join(l)
+
+
+## Le portrait de la partie pointée : l'être du joueur est dans sa sauvegarde et le paperdoll sait le
+## dessiner tel quel — avec son équipement, puisque les instances d'objets sont sauvegardées à côté.
+func _portrait_partie(slot: String) -> void:
+	var pj: Variant = Sauvegarde.lire(slot, "players/joueur.json")
+	if not (pj is Dictionary) or not (pj as Dictionary).has("etre"):
+		cadre_perso.visible = false
+		return
+	var e: Dictionary = (pj as Dictionary).etre
+	var items: Dictionary = {}
+	var inst: Variant = Sauvegarde.lire(slot, "items.json")
+	if inst is Dictionary:
+		items = inst
+	var rig: Dictionary = GameData.entree("rigs", str(e.get("skeleton_template", "humanoide")))
+	cadre_perso.visible = true
+	apercu_perso.configurer(e, rig, items, GameData.catalogues.functionalities, GameData.config("palette_materiaux"))
+	apercu_perso.queue_redraw()
+	cadre_visage.visible = not (e.get("apparence", {}) as Dictionary).is_empty()
+	portrait_perso.configurer(e, rig, items, GameData.catalogues.functionalities, GameData.config("palette_materiaux"))
+	portrait_perso.queue_redraw()
+	barres_perso.valeurs = [
+		["sante", int(e.get("sante_max", 0))],
+		["endurance", int(e.get("endurance_max", 0))],
+		["mana", int(e.get("mana_max", 0))],
+	]
+	barres_perso.queue_redraw()
 
 
 ## Le menu (Tab) : les écrans et les actions générales (Écrans d'interface, contrôles).
 func _construire_menu(_j: Dictionary) -> void:
 	titre.text = tr("ui.ecran.menu")
-	var ids: Array = ["inventaire", "atelier", "feuille", "capacites", "carte", "gestion", "registre", "sauvegarder", "charger", "minimap_zoom", "minimap_masquer", "titre", "arene", "recharger", "fermer"]
+	var ids: Array = ["inventaire", "atelier", "feuille", "capacites", "carte", "gestion", "registre", "sauvegarder", "minimap_zoom", "minimap_masquer", "titre", "arene", "recharger", "fermer"]
 	for id in ids:
 		if id in ["carte", "gestion"] and main.sim.lieu != "camp":
 			continue

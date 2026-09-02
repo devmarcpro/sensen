@@ -284,6 +284,41 @@ func _ouvrir_titre() -> void:
 	ecrans.ouvrir("titre")
 
 
+## Les parties enregistrées (un dossier par partie), la plus récente d'abord, avec leur résumé — assez
+## pour peupler l'écran Charger sans charger un seul monde (designer 2026-09-02).
+static func parties_presentes() -> Array:
+	var parties: Array = []
+	var d := DirAccess.open(Sauvegarde.RACINE)
+	if d == null:
+		return parties
+	for nom in d.get_directories():
+		if not Sauvegarde.existe(nom):
+			continue
+		var w: Variant = Sauvegarde.lire(nom, "world.json")
+		var res: Dictionary = (w as Dictionary).get("resume", {}) if w is Dictionary else {}
+		parties.append({"slot": nom, "resume": res})
+	parties.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return str(a.resume.get("ecrit_le", "")) > str(b.resume.get("ecrit_le", "")))
+	return parties
+
+
+## L'emplacement d'une partie neuve : le nom du personnage, rendu sûr pour un dossier, plus un suffixe
+## qui évite d'écraser une partie précédente jouée avec le même nom (designer 2026-09-02).
+static func slot_neuf(nom_perso: String) -> String:
+	var base := ""
+	for c in nom_perso.to_lower():
+		base += c if c in "abcdefghijklmnopqrstuvwxyz0123456789" else "_"
+	base = base.strip_edges().trim_prefix("_").trim_suffix("_")
+	if base.is_empty():
+		base = "partie"
+	var slot := base
+	var n := 2
+	while Sauvegarde.existe(slot):
+		slot = "%s_%d" % [base, n]
+		n += 1
+	return slot
+
+
 ## Nouvelle partie : l'écran de création du personnage, puis l'écran Monde, puis la carte (case de départ).
 func _nouvelle_partie() -> void:
 	ecrans.fermer()
@@ -302,7 +337,10 @@ func _nouvelle_partie() -> void:
 
 
 ## Continuer / Charger : la sauvegarde `nom` ; sans elle, retour au titre.
-func _charger_partie(nom: String = "monde") -> void:
+func _charger_partie(nom: String = "") -> void:
+	if nom.is_empty():   # « Continuer » : la partie touchée le plus récemment
+		var toutes := parties_presentes()
+		nom = str(toutes[0].slot) if not toutes.is_empty() else "monde"
 	ecrans.fermer()
 	titre_ouvert = false
 	minimap.visible = true
@@ -326,23 +364,11 @@ func _commencer_monde() -> void:
 	minimap.visible = true
 	arene_courante = arenes.size()   # une partie commence au camp, sur le monde (Début de partie)
 	_charger(fiche_monde)
+	sim.nom_partie = slot_neuf(tr(str(fiche_monde.get("name_key", "creature.aventurier.name"))))   # un dossier par partie
 	_kit_de_test()
 	fiche_en_attente = fiche_monde
 	fiche_monde = {}
 	carte.ouvrir("depart")
-
-
-## Les sauvegardes présentes (dossiers de user://sauvegardes/), pour l'écran Charger.
-static func sauvegardes_presentes() -> Array[String]:
-	var noms: Array[String] = []
-	var d := DirAccess.open(Sauvegarde.RACINE)
-	if d == null:
-		return noms
-	for nom in d.get_directories():
-		if Sauvegarde.existe(nom):
-			noms.append(nom)
-	noms.sort()
-	return noms
 
 
 ## L'écran de création : R race, C classe, ↑↓ stat, +/− points, ← → année de naissance, Entrée.
@@ -1279,17 +1305,6 @@ func _action_menu(id: String) -> void:
 			ecrans.fermer()
 			if not sim.sauvegarder():
 				_log(tr("journal.sauvegarde_impossible"))
-		"charger":
-			ecrans.fermer()
-			if sim.charger_sauvegarde():
-				joueur_id = ""
-				for e in sim.vivants():
-					if e.controle == "joueur":
-						joueur_id = e.id
-				_apres_changement_de_grille()
-				_log(tr("journal.chargement"))
-			else:
-				_log(tr("journal.pas_de_sauvegarde"))
 		"minimap_zoom":
 			minimap.cycler_zoom()
 			minimap.rafraichir(true)
