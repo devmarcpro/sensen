@@ -49,6 +49,10 @@ Méthode, non négociable :
   scripts d'écran : une Parse Error dans main.gd la laisse verte et tue le jeu),
   et une capture d'écran REGARDÉE. Si un écran change,
   refais sa capture du README.
+- **La numérotation avance d'un cran, sur le DERNIER chiffre** (designer, 2026-09-02 : « arrête de skip
+  le dernier chiffre et de changer que le deuxième, on avance pas aussi vite que ça »). Après
+  `v0.4.0-alpha` vient `v0.4.1-alpha`, puis `v0.4.2-alpha`. Le deuxième chiffre ne bouge que si le
+  designer le dit : c'est lui qui juge si le jeu a franchi une marche, pas la taille du diff.
 - Une pré-version tous les ~10 commits, **avec son exécutable** : construire depuis le tag
   (`git checkout <tag>`, export « Windows Desktop », retour sur main), zipper, joindre à la release.
   Une release sans binaire n'est pas une release — vérifier avec `gh release view <tag> --json assets`.

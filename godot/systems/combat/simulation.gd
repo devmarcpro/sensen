@@ -7945,7 +7945,7 @@ func _premier_sur_trajectoire(e: Dictionary, cible: Dictionary) -> Dictionary:
 
 ## Ce que verrait un tir : {ok, raison, bloqueur} — pour l'UI (la cible grisée, la tuile bloquante).
 func verifier_tir(e: Dictionary, cible: Dictionary) -> Dictionary:
-	var arme := Etres.arme(e, items)
+	var arme := arme_utilisable(Etres.arme(e, items))
 	var fonct: Dictionary = fonct_arme(arme)
 	if fonct.is_empty() or not est_projectile(fonct):
 		return {"ok": true}
@@ -8745,7 +8745,7 @@ func _resoudre_action_engagee(e: Dictionary, a: Dictionary) -> void:
 	var cible: Dictionary = entites.get(a.get("cible", ""), {})
 	match str(a.type):
 		"arme":
-			var arme := Etres.arme(e, items)
+			var arme := arme_utilisable(Etres.arme(e, items))
 			var fonct: Dictionary = fonct_arme(arme)
 			var cible_du_lot: bool = not cible.is_empty() and cible.id in lot_simultane   # tuée dans le même lot : elle était vivante à l'instant du coup
 			if cible.is_empty() or (not cible.vivant and not cible_du_lot) or not _cible_atteignable(e, cible, _portee_effective(e, arme, fonct), true):
@@ -9245,7 +9245,7 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 ## « arme », et l'**affinité** de la fonctionnalité pour tous les sorts (Structure compétences-modules-slots :
 ## un sceptre porte les sorts de mana, une épée ceux d'endurance). C'est aussi ce que l'écran Composer lit.
 func plan_sequence(e: Dictionary, sequence: Array) -> Dictionary:
-	var arme := Etres.arme(e, items)
+	var arme := arme_utilisable(Etres.arme(e, items))
 	var fonct: Dictionary = fonct_arme(arme)
 	var ticks_arme := regles.ticks_attaque(fonct, false, arme) if not fonct.is_empty() else int(regles.r.actions.attaque_base)
 	var plan := capacites.assembler(sequence, ticks_arme, fonct.get("degats_des", "1d4"), _vecteur_arme_de(e, arme), e.competences_eff)
@@ -10799,6 +10799,15 @@ func mult_serments(e: Dictionary) -> float:
 func fonct_arme(arme: Dictionary) -> Dictionary:
 	var f: Dictionary = fonctionnalites.get(str(arme.get("functionality", "")), {})
 	return f if f.has("portee") else fonctionnalites.get("mains_nues", {})
+
+
+## L'arme dont on frappe VRAIMENT. Rendre seulement la fonctionnalité des poings ne suffisait pas :
+## la résolution continuait ensuite avec l'objet tenu et lisait sur lui une dureté et une qualité qu'un
+## meuble ou un bijou n'a pas — le tick s'arrêtait une ligne plus loin (fuzz, graines 55 et 777).
+## Un objet qui n'est pas une arme ne le devient pas : on frappe aux poings, l'objet reste en main.
+func arme_utilisable(arme: Dictionary) -> Dictionary:
+	var f: Dictionary = fonctionnalites.get(str(arme.get("functionality", "")), {})
+	return arme if (f.has("portee") and arme.has("durete_base")) else arme_mains_nues()
 
 
 func arme_mains_nues() -> Dictionary:
