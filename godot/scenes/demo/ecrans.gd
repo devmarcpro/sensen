@@ -160,8 +160,11 @@ var penta_objet: Composeur.PentagrammeSort   # le Wu Xing de l'objet choisi
 ## Le panneau prend PART de la fenêtre, jamais moins que LARGEUR × HAUTEUR.
 func _dimensionner() -> void:
 	var v := get_viewport().get_visible_rect().size
-	var l := maxf(LARGEUR, v.x * PART.x)
-	var h := maxf(HAUTEUR, v.y * PART.y)
+	# Le plancher de taille (LARGEUR × HAUTEUR) sert les grandes fenêtres ; sur une petite, il faisait
+	# déborder le panneau HORS de la fenêtre, et tout ce qui dépassait était coupé sans un mot
+	# (file d'attente du designer, point 67). On le borne donc à la fenêtre elle-même.
+	var l := minf(maxf(LARGEUR, v.x * PART.x), v.x)
+	var h := minf(maxf(HAUTEUR, v.y * PART.y), v.y)
 	panneau.custom_minimum_size = Vector2(l, h)
 	panneau.set_anchor_and_offset(SIDE_LEFT, 0.5, -l / 2.0)
 	panneau.set_anchor_and_offset(SIDE_TOP, 0.5, -h / 2.0)
@@ -527,20 +530,27 @@ func rafraichir() -> void:
 	atelier_visuel.visible = courant == "atelier"
 	liste.visible = not (courant in ["inventaire", "atelier"])
 	penta_objet.visible = courant == "inventaire"
+	# Chaque écran demandait une largeur en pixels fixes pour sa colonne de droite ; additionnée à la
+	# liste (340 px), la somme dépassait une fenêtre étroite et le contenu sortait du cadre. Ces
+	# largeurs sont désormais des PARTS du panneau, plafonnées à la valeur d'origine (point 67).
+	var large := panneau.size.x if panneau.size.x > 1.0 else panneau.custom_minimum_size.x
+	var part_droite := func(px: float, part: float) -> float: return minf(px, maxf(120.0, large * part))
+	liste.custom_minimum_size = Vector2(minf(float(GameData.config("styles").get("ecrans", {}).get("liste_min", 340.0)), large * 0.42), 0)
 	if courant == "monde":   # la carte du monde prend presque toute la fenêtre (designer, point 49)
-		droite.custom_minimum_size = Vector2(900, 0)
+		droite.custom_minimum_size = Vector2(part_droite.call(900.0, 0.62), 0)
 		droite.size_flags_stretch_ratio = 3.0
 		detail.size_flags_vertical = Control.SIZE_SHRINK_END   # le texte se tasse : la carte prend le reste
 		detail.custom_minimum_size = Vector2(0, 44)
 		apercu_monde.custom_minimum_size = Vector2(0, 880)
 	elif courant == "inventaire":
-		droite.custom_minimum_size = Vector2(360, 0)
+		droite.custom_minimum_size = Vector2(part_droite.call(360.0, 0.30), 0)
 		droite.size_flags_stretch_ratio = 0.9
 		detail.size_flags_vertical = Control.SIZE_FILL   # le Wu Xing de l'objet juste sous le détail, pas au fond du panneau
 		detail.custom_minimum_size = Vector2(0, 340)
+		inventaire_visuel.ajuster_largeur(large - droite.custom_minimum_size.x)
 		inventaire_visuel.reconstruire()
 	elif courant == "atelier":
-		droite.custom_minimum_size = Vector2(380, 0)
+		droite.custom_minimum_size = Vector2(part_droite.call(380.0, 0.36), 0)
 		droite.size_flags_stretch_ratio = 0.8
 		detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		atelier_visuel.reconstruire()

@@ -39,6 +39,11 @@ func _ready() -> void:
 			TranslationServer.set_locale(str(args[il + 1]))
 	if "--plein-ecran" in args:   # --plein-ecran : la fenêtre passe en plein écran AVANT la capture (README, designer 2026-08-31)
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	for it in args.size():   # --fenetre L H : une fenêtre de taille CHOISIE, pour vérifier qu'aucun écran
+		if args[it] == "--fenetre" and it + 2 < args.size():
+			# n'est coupé quand elle rétrécit (file d'attente du designer, point 67).
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+			DisplayServer.window_set_size(Vector2i(int(args[it + 1]), int(args[it + 2])))
 	scene = load("res://scenes/demo/main.tscn").instantiate()
 	add_child(scene)
 	for ig in args.size():   # --graine N : un monde CONNU pour les captures (sinon chaque prise tombe ailleurs)

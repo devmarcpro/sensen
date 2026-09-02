@@ -322,3 +322,20 @@ class FichePorteur extends Control:
 		y += 16.0
 		var nd: Dictionary = sim.progression.niveaux_derives(j)
 		draw_string(f, Vector2(6, y), tr("ui.inventaire.niveaux").format({"combat": "%.1f" % float(nd.combat), "general": "%.1f" % float(nd.general)}), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.8, 0.85, 0.9))
+
+
+## Rendre les largeurs fixes du haut proportionnelles à la place offerte (file d'attente du designer,
+## point 67). Un conteneur Godot ne descend jamais un enfant sous sa taille minimale : la somme des
+## minimums (grille des slots + avatar + fiche + colonne de détail) dépassait une fenêtre étroite, et
+## l'excédent sortait du cadre sans un mot. On rabote donc les minimums quand la place manque.
+func ajuster_largeur(dispo: float) -> void:
+	if cadre_avatar == null or fiche == null:
+		return
+	var k := clampf(dispo / 1010.0, 0.45, 1.0)   # 1010 : la somme des minimums à pleine taille
+	# L'avatar est décoratif : c'est lui qui cède. La fiche, elle, porte des chiffres — sous 210 px ses
+	# valeurs de jauges passaient hors cadre et disparaissaient, ce qui est une autre façon de couper.
+	cadre_avatar.custom_minimum_size.x = 190.0 * k
+	fiche.custom_minimum_size.x = maxf(210.0, 230.0 * k)
+	if avatar != null:
+		avatar.scale = Vector2(4.2 * k, 4.2 * k)
+		avatar.position = Vector2(95.0 * k, 200.0 * k)

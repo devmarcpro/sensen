@@ -182,6 +182,14 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > Une sauvegarde par partie ([[Sauvegarde]]) : l'écran principal offre **Nouvelle partie**, **Continuer**, **Charger**, **Options**, **Quitter**. Choisir une ligne de Charger dessine le personnage **en pied et en portrait** avec son équipement (le paperdoll lit l'être tel qu'il est sauvegardé), ses trois jauges, et liste tout l'état du monde : race, classe, niveau, PV, or, sac, jour, heure, saison, surface ou étage de donjon, biome du camp, graine, cellules parcourues, revendiquées, villages connus, corruption au camp, date d'écriture. L'entrée « Charger » du menu en jeu est retirée : recharger sa propre partie d'un coup de menu annulait le jet de dé de la mort ; on repasse par l'écran principal.
 
 
+> [!success] Codé le 2026-09-02 — plus rien n'est coupé en fenêtre étroite (file d'attente, point 67)
+> Vérifié en capturant chaque écran à **1000 × 620** (`capture.tscn --fenetre L H`, ajouté pour ça) puis en plein écran. Deux causes, toutes deux invisibles à la lecture du code :
+> **Le panneau débordait de la fenêtre.** Sa taille était `max(1000 px, 94 % de la fenêtre)` — un plancher pensé pour les grands écrans, qui sur une fenêtre de 1000 px de large rendait le panneau plus large qu'elle. Tout ce qui dépassait était rogné sans un mot. Le plancher est désormais borné par la fenêtre elle-même.
+> **Les colonnes ne savaient pas rétrécir.** Un conteneur Godot ne descend jamais un enfant sous sa taille minimale : il déborde. Or la colonne de détail (360 px), la liste (340 px), la grille d'équipement, l'avatar et la fiche du porteur étaient tous en pixels fixes, et leur somme dépassait une fenêtre étroite. Ces largeurs sont devenues des **parts du panneau**, plafonnées à leur valeur d'origine.
+> **Un piège en corrigeant** : raboter la fiche du porteur proportionnellement faisait disparaître les **chiffres de ses jauges** hors du cadre — une autre façon de couper, moins visible. L'avatar est décoratif et c'est lui qui cède ; la fiche garde un plancher de 210 px.
+> **Reste** : en 620 px de haut, la ligne de la hotbar au bas de l'inventaire touche le bord. Le débordement vertical n'est pas traité.
+
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]
