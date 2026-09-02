@@ -140,6 +140,14 @@ L'atelier consomme ce que le donjon fournit — jamais l'inverse.
 > **Ce qu'il n'est pas** : un livre. Un grimoire *enseigne* un module, définitivement ; un parchemin *prête* un sort, le temps de ses charges.
 
 
+> [!success] Codé le 2026-09-02 — « Torche en  (misérable 0,25) » : deux défauts pour le prix d'un
+> Trouvé en relisant la collecte du robot invincible : une torche assemblée de pièces de qualité **0,89 et 0,95** sortait « **misérable 0,25** », et son nom s'arrêtait au milieu, sur un « en » sans matière.
+> **La même cause pour les deux.** La table des parts (`craft.poids`) ne connaît que les armes, armures, boucliers et bijoux. La torche est un « outil » fait d'un **manche** et de **sangles** : elle tombait sur la table des armes, où « sangles » ne figure pas. La part des sangles valait donc zéro — la qualité de l'objet ne devait presque rien à ses composants — et aucune pièce n'était « maîtresse », donc l'objet n'héritait d'aucun matériau.
+> **Corrigé pour toute la classe, pas pour la torche** : les slots absents de la table se partagent ce qui reste et le total est ramené à 1 ; à défaut de tête, de plaque ou de monture, la pièce maîtresse est la **première déclarée par la fiche de l'objet** — celle que l'auteur a mise en tête parce qu'elle le définit. Une torche est d'abord un manche. Résultat : « Torche en Acier trempé (correct 1,05) », « Torche en Cuivre (excellent 1,84) ».
+> Les armes, armures, boucliers et bijoux ne bougent pas : leurs parts couvraient déjà tous leurs slots.
+> **Garde-fou d'affichage** : un matériau vide ne produit plus « X en », l'objet garde son seul nom de base.
+
+
 ## Liens
 - **Dépend de** : [[Effets d'équipement passifs]], [[Qualité d'artisanat]], [[Génération de donjon]], [[Modificateurs d'affinité]]
 - **Alimente** : [[Trésors et artefacts]], [[Monstres rares]], [[Équipement — 14 slots]], [[Jauge de chaîne Wu Xing]], [[Cinq accès au cycle]]

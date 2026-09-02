@@ -6096,6 +6096,28 @@ func _tirer_materiau(candidats: Array[String], profondeur: int, rng: RandomNumbe
 ## l'atelier (_assembler) et le loot (_composer_loot).
 func _appliquer_composition(inst: Dictionary, def: Dictionary, pieces: Array[Dictionary], jet: float) -> void:
 	var poids: Dictionary = regles.r.craft.poids.get(str(def.get("type", "arme")), regles.r.craft.poids.arme)   # une part par type
+	# La table des parts ne connaît que les armes, armures, boucliers et bijoux. Un objet dont les slots
+	# s'appellent autrement — la torche est un « outil » fait d'un manche et de sangles — tombait sur la
+	# table des armes, où « sangles » ne figure pas : sa part valait zéro, et la qualité de l'objet ne
+	# devait presque rien à ses composants (une torche de pièces à 0,9 sortait « misérable 0,25 »).
+	# Les slots inconnus se partagent donc ce qui reste, et le total est ramené à 1.
+	var parts := {}
+	var connus := 0.0
+	var inconnus := 0
+	for c0 in pieces:
+		if poids.has(c0.slot):
+			connus += float(poids[c0.slot])
+		else:
+			inconnus += 1
+	var chacun := maxf(0.0, 1.0 - connus) / float(maxi(1, inconnus))
+	var somme_parts := 0.0
+	for c0 in pieces:
+		var pw: float = float(poids[c0.slot]) if poids.has(c0.slot) else chacun
+		parts[c0.slot] = pw
+		somme_parts += pw
+	if somme_parts > 0.0:
+		for k0 in parts.keys():
+			parts[k0] = float(parts[k0]) / somme_parts
 	var stats := {}
 	var elements := {}
 	var q_somme := 0.0
@@ -6103,7 +6125,7 @@ func _appliquer_composition(inst: Dictionary, def: Dictionary, pieces: Array[Dic
 	var tete: Dictionary = {}
 	var manche: Dictionary = {}
 	for c in pieces:
-		var w := float(poids.get(c.slot, 0.0))
+		var w := float(parts.get(c.slot, 0.0))
 		for s in c.stats.keys():
 			stats[s] = float(stats.get(s, 0.0)) + float(c.stats[s]) * w
 		for el in c.elements.keys():
@@ -6119,6 +6141,19 @@ func _appliquer_composition(inst: Dictionary, def: Dictionary, pieces: Array[Dic
 	inst.qualite = snappedf(q_somme * jet, 0.01)
 	inst.elements = elements
 	inst.element = wuxing.dominante(elements)
+	# La pièce maîtresse donne son matériau à l'objet ; sans tête, plaque ni monture, c'est la pièce qui
+	# pèse le plus — sinon le nom s'arrêtait au milieu, sur « Torche en  ».
+	if tete.is_empty():
+		# Sans tête, plaque ni monture : la PREMIÈRE pièce déclarée par l'objet. C'est celle que l'auteur
+		# de la fiche a mise en tête parce qu'elle définit l'objet — une torche est d'abord un manche, pas
+		# des sangles, même si les sangles pèsent plus dans la table des parts.
+		for slot_def in def.get("slots", {}).keys():
+			for c1 in pieces:
+				if str(c1.slot) == str(slot_def):
+					tete = c1
+					break
+			if not tete.is_empty():
+				break
 	inst.materiau = str(tete.get("materiau", ""))
 	inst.composants = composants
 	if not manche.is_empty():

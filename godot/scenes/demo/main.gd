@@ -2164,7 +2164,10 @@ func _sur_fin_de_combat(_nom: String) -> void:
 ## paramètres tirés (Loot — affixes : NOM ET PROVENANCE).
 func nom_objet(n: Dictionary) -> String:
 	var base := tr(str(n.base))
-	if n.has("materiau"):   # craft : « Dague en fer », « Casque de plaque en cuivre », « Lame courte en fer »
+	# Un matériau VIDE ne doit pas produire « Torche en  » : un objet sans matière connue garde son seul
+	# nom de base. Le défaut se voyait sur les objets dont aucune pièce n'était maîtresse, et sur les
+	# fiches gabarit qui traînent dans le catalogue (le « Composant » générique).
+	if n.has("materiau") and not str(n.materiau).is_empty():   # craft : « Dague en fer », « Casque de plaque en cuivre »
 		var mat := tr(str(n.materiau))
 		if n.has("espece"):   # la matière tirée d'une bête dit laquelle : « cuir d'ours des cavernes » (point 69)
 			mat = tr("nom.matiere_espece").format({"materiau": mat, "creature": tr(str(n.espece))})
