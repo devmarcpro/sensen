@@ -238,6 +238,9 @@
         "filtre": {
           "types_any": [
             "munition"
+          ],
+          "tags_any": [
+            "assemble"
           ]
         }
       }
