@@ -1,6 +1,7 @@
 {
   "name_key": "material.bouleau.name",
   "category": "bois",
+  "palier": 2,
   "stats": {
     "durete": 9,
     "densite": 4,

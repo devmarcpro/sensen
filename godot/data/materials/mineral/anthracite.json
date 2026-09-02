@@ -1,6 +1,7 @@
 {
   "name_key": "material.anthracite.name",
   "category": "mineral",
+  "palier": 3,
   "stats": {
     "durete": 9,
     "densite": 9,

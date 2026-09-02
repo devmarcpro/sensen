@@ -1,6 +1,7 @@
 {
   "name_key": "material.olivier.name",
   "category": "bois",
+  "palier": 5,
   "stats": {
     "durete": 15,
     "densite": 8,

@@ -1,6 +1,7 @@
 {
   "name_key": "material.os_fossile.name",
   "category": "fossile",
+  "palier": 1,
   "stats": {
     "durete": 10,
     "densite": 9,

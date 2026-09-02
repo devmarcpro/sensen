@@ -1,6 +1,7 @@
 {
   "name_key": "material.pin.name",
   "category": "bois",
+  "palier": 1,
   "stats": {
     "durete": 8,
     "densite": 4,

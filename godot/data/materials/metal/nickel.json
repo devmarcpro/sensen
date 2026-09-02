@@ -1,6 +1,7 @@
 {
   "name_key": "material.nickel.name",
   "category": "metal",
+  "palier": 2,
   "stats": {
     "durete": 22,
     "densite": 12,

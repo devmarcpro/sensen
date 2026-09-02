@@ -229,6 +229,18 @@ func _placer_avatar(r: Rect2) -> void:
 func _peindre_cellule(cell: Vector2i, r: Rect2, col: Color, surf, tc: int) -> void:
 	var sp: int = int(GameData.config("styles").get("carte", {}).get("sous_points", 5))
 	var pas := r.size.x / float(sp)
+	# Le relief d'une cellule ne change jamais : on le calcule une fois, on s'en souvient, et la
+	# sauvegarde s'en souvient aussi (designer 2026-09-02). Avant, ouvrir la carte relançait vingt-cinq
+	# sondes de tectonique par cellule visible, à chaque image.
+	var memoire: PackedColorArray = main.sim.monde.carte_couleurs(cell, sp)
+	if not memoire.is_empty():
+		var k := 0
+		for sy0 in sp:
+			for sx0 in sp:
+				dessin.draw_rect(Rect2(r.position + Vector2(sx0 * pas, sy0 * pas), Vector2(pas + 1.0, pas + 1.0)), memoire[k])
+				k += 1
+		return
+	var calculees := PackedColorArray()
 	var mer := Color(0.10, 0.22, 0.42)
 	for sy in sp:
 		for sx in sp:
@@ -245,7 +257,9 @@ func _peindre_cellule(cell: Vector2i, r: Rect2, col: Color, surf, tc: int) -> vo
 				c = col.lerp(Color(0.93, 0.93, 0.96), clampf((alt - 0.72) / 0.28, 0.0, 1.0) * 0.8)
 			else:
 				c = col.lerp(Color.BLACK, (0.55 - alt) * 0.25)
+			calculees.append(c)
 			dessin.draw_rect(Rect2(r.position + Vector2(sx * pas, sy * pas), Vector2(pas + 0.5, pas + 0.5)), c)
+	main.sim.monde.carte_retenir(cell, sp, calculees)   # la prochaine ouverture n'aura plus rien à calculer
 
 
 func _entree(ev: InputEvent) -> void:

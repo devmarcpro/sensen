@@ -1,6 +1,7 @@
 {
   "name_key": "material.pyrite.name",
   "category": "mineral",
+  "palier": 2,
   "stats": {
     "durete": 16,
     "densite": 13,

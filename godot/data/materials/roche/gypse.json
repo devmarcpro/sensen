@@ -1,6 +1,7 @@
 {
   "name_key": "material.gypse.name",
   "category": "roche",
+  "palier": 1,
   "stats": {
     "durete": 5,
     "densite": 10,

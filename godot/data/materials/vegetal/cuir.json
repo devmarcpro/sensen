@@ -1,6 +1,7 @@
 {
   "name_key": "material.cuir.name",
   "category": "vegetal",
+  "palier": 3,
   "stats": {
     "durete": 8,
     "densite": 4,

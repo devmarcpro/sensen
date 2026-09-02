@@ -1,6 +1,7 @@
 {
   "name_key": "material.emeraude.name",
   "category": "gemme",
+  "palier": 4,
   "stats": {
     "durete": 24,
     "densite": 9,

@@ -1,6 +1,7 @@
 {
   "name_key": "material.acajou.name",
   "category": "bois",
+  "palier": 5,
   "stats": {
     "durete": 12,
     "densite": 6,

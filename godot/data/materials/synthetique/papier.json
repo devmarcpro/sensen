@@ -1,6 +1,7 @@
 {
   "name_key": "material.papier.name",
   "category": "synthetique",
+  "palier": 1,
   "stats": {
     "durete": 1,
     "densite": 1,

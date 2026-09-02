@@ -1245,7 +1245,9 @@ func test_recolte() -> void:
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "creuser", "vers": mur}), "creuser à mains nues")
 	verifier(j.sac.size() == sac0 and j.compteur == int(GameData.config("combat_rules").creuser.ticks), "sans outil : 10 ticks, rien récolté")
-	# Avec la pioche de fer (dureté 25) : la pierre (dureté 15) se récolte en ⌈15 / 25 × 10⌉ = 6 ticks.
+	# Avec la pioche de fer (dureté 25), la pierre (dureté 15) : ⌈15 / 25 × 10 × mult_palier⌉ ticks. Le
+	# chiffre se DÉDUIT des règles depuis que le palier du matériau allonge l'extraction (designer
+	# 2026-09-02) — le recopier ici obligeait à corriger le test à chaque réglage du designer.
 	var pioche := s.generer_objet("proto_pioche", 1, {}, "commun", 0)
 	j.sac.append(pioche.uid)
 	s.attente[j.id] = true
@@ -1254,7 +1256,10 @@ func test_recolte() -> void:
 	s.attente[j.id] = true
 	var xp0: int = int(j.xp_competences.get("minage", 0))
 	verifier(s.intention(j.id, {"type": "creuser", "vers": mur}), "récolter le mur de pierre à la pioche")
-	verifier(j.compteur == 6, "pierre à la pioche de fer : 6 ticks (%d)" % j.compteur)
+	var pal_pierre := str(int(GameData.catalogues.materials.pierre.get("palier", 1)))
+	var mult_pierre := float(GameData.config("combat_rules").paliers_materiaux[pal_pierre].extraction_ticks)
+	var attendu_p := ceili(15.0 / 25.0 * float(GameData.config("combat_rules").recolte.ticks_par_seconde) * mult_pierre)
+	verifier(j.compteur == attendu_p, "pierre à la pioche de fer : %d ticks (palier %s, ×%.1f) — obtenu %d" % [attendu_p, pal_pierre, mult_pierre, j.compteur])
 	var brut := {}
 	for uid in j.sac:
 		var it: Dictionary = s.items[uid]
@@ -1267,15 +1272,19 @@ func test_recolte() -> void:
 	s.attente[j.id] = true
 	s.intention(j.id, {"type": "creuser", "vers": mur})
 	verifier(int(brut.quantite) > q1, "la pierre s'empile (%d → %d)" % [q1, int(brut.quantite)])
-	# Un filon de tungstène (dureté 42) : 25 × 1.0 ≥ 21, récoltable ; le diamant (40) aussi ; une pioche de cuivre (16) rebondit sur le tungstène.
+	# Un filon de tungstène : le palier du matériau relève le seuil d'outil exigé (designer 2026-09-02,
+	# « un matériau de fin de partie ne se ramasse pas à la pioche de départ »). La pioche de fer, qui
+	# suffisait avant, rebondit désormais dessus ; il faut un outil à la hauteur du palier.
 	s.grille.poser_contenu(mur, "filon")
 	s.grille.materiaux[s.grille.idx(mur)] = "tungstene"
-	pioche.durete_base = 16
-	s.attente[j.id] = true
-	verifier(not s.intention(j.id, {"type": "creuser", "vers": mur}), "outil trop faible : l'outil rebondit (16 < 42 × 0,5)")
+	var pal_tung := str(int(GameData.catalogues.materials.tungstene.get("palier", 1)))
+	var seuil_tung := float(GameData.catalogues.materials.tungstene.stats.durete) * float(GameData.config("combat_rules").recolte.seuil_irrecoltable) * float(GameData.config("combat_rules").paliers_materiaux[pal_tung].outil_min)
 	pioche.durete_base = 25
 	s.attente[j.id] = true
-	verifier(s.intention(j.id, {"type": "creuser", "vers": mur}), "la pioche de fer entame le tungstène")
+	verifier(not s.intention(j.id, {"type": "creuser", "vers": mur}), "la pioche de fer (25) rebondit sur le tungstène de palier %s : il en faut %d" % [pal_tung, ceili(seuil_tung)])
+	pioche.durete_base = ceili(seuil_tung) + 1   # l'outil qu'exige ce palier
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "creuser", "vers": mur}), "un outil à la hauteur du palier entame le tungstène")
 	var tung := false
 	for uid in j.sac:
 		if s.items[uid].get("materiau", "") == "tungstene":
@@ -1365,8 +1374,13 @@ func test_assemblage() -> void:
 		if s.items[uid].get("base", "") == "craft_dague":
 			dague = s.items[uid]
 	verifier(not dague.is_empty() and dague.materiau == "fer" and dague.element == "metal", "Dague en fer, élément Métal (la tête domine)")
-	# durete_base = 0,7 × 25 (lame fer) + 0,25 × 12 (poignée chêne) + 0,05 × 25 (fixations fer) = 21,75 → 22
-	verifier(int(dague.durete_base) == 22, "durete_base = moyenne pondérée avant qualité (%d)" % int(dague.durete_base))
+	# durete_base = Σ part × dureté × mult_palier du matériau de la pièce (designer 2026-09-02) : le
+	# palier creuse l'écart entre une lame de début et une lame de fin, au-delà de la seule dureté.
+	var pm_t: Dictionary = GameData.config("combat_rules").paliers_materiaux
+	var mp := func(mat: String) -> float:
+		return float(pm_t[str(int(GameData.catalogues.materials[mat].get("palier", 1)))].mult_stats)
+	var attendu_d := roundi(0.7 * 25.0 * mp.call("fer") + 0.25 * 12.0 * mp.call("chene") + 0.05 * 25.0 * mp.call("fer"))
+	verifier(int(dague.durete_base) == attendu_d, "durete_base = moyenne pondérée × palier, avant qualité : %d attendu, %d obtenu" % [attendu_d, int(dague.durete_base)])
 	verifier(is_equal_approx(float(dague.elements.metal), 0.75) and is_equal_approx(float(dague.elements.bois), 0.25), "Wu Xing composite Métal 0,75 / Bois 0,25")
 	verifier(is_equal_approx(float(dague.vitesse_facteur), 0.94), "manche en chêne (densité 6) : vitesse ×0,94 (%.2f)" % float(dague.vitesse_facteur))
 	verifier(float(dague.qualite) > 0.0 and dague.composants.has("tete") and dague.composants.has("manche"), "qualité posée, composants mémorisés pour l'infobulle")
@@ -1410,7 +1424,15 @@ func test_surface() -> void:
 		verifier(sd.grille.niveau_liquide(jd.pos) == 0 and not ("liquide" in sd.grille.contenu_de(jd.pos).get("tags", [])), "graine %d : le camp est sur la terre ferme" % g)
 	var planete: Dictionary = GameData.config("planete")
 	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
-	verifier(GameData.config("noise_layers").size() == 8 and GameData.catalogues.biomes.size() == 12, "8 couches de bruit, 12 biomes")
+	# Le nombre de biomes n'est pas une constante à recopier : le designer en ajoute et en retire (le
+	# 2026-09-02, Forêt de mana et Montagne cristalline sont parties, « retire les biomes fantaisistes »).
+	# Ce qui doit tenir, c'est qu'il y en ait assez pour peupler le monde, et que chacun soit lisible.
+	verifier(GameData.config("noise_layers").size() == 8, "8 couches de bruit")
+	verifier(GameData.catalogues.biomes.size() >= 8, "%d biomes au catalogue (au moins 8)" % GameData.catalogues.biomes.size())
+	for bid_v in GameData.catalogues.biomes.keys():
+		var bv: Dictionary = GameData.catalogues.biomes[bid_v]
+		if not bv.has("conditions") or not bv.has("priority"):
+			verifier(false, "le biome %s a ses conditions et sa priorité" % bid_v)
 	# Tectonique : 24 plaques, ~35 % de terres (quantile calibré), mers et montagnes déterministes.
 	verifier(surf.plaques.size() == 24 and surf.points_chauds.size() >= 8 and surf.points_chauds.size() <= 14, "24 plaques, 8 à 14 points chauds")
 	var terres := 0

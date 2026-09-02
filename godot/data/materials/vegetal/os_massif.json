@@ -1,6 +1,7 @@
 {
   "name_key": "material.os_massif.name",
   "category": "vegetal",
+  "palier": 5,
   "stats": {
     "durete": 34,
     "densite": 6,

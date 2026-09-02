@@ -1,6 +1,7 @@
 {
   "name_key": "material.obsidienne.name",
   "category": "roche",
+  "palier": 5,
   "stats": {
     "durete": 30,
     "densite": 15,

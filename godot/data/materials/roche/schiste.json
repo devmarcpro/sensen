@@ -1,6 +1,7 @@
 {
   "name_key": "material.schiste.name",
   "category": "roche",
+  "palier": 2,
   "stats": {
     "durete": 13,
     "densite": 13,

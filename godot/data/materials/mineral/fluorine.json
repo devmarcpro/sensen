@@ -1,6 +1,7 @@
 {
   "name_key": "material.fluorine.name",
   "category": "mineral",
+  "palier": 2,
   "stats": {
     "durete": 12,
     "densite": 10,

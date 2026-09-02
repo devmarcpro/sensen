@@ -1,6 +1,7 @@
 {
   "name_key": "material.boue.name",
   "category": "liquide",
+  "palier": 1,
   "stats": {
     "durete": 1,
     "densite": 12,

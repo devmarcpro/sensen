@@ -1,6 +1,7 @@
 {
   "name_key": "material.palmier.name",
   "category": "bois",
+  "palier": 1,
   "stats": {
     "durete": 6,
     "densite": 5,

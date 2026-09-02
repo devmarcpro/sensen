@@ -1,6 +1,7 @@
 {
   "name_key": "material.tungstene.name",
   "category": "metal",
+  "palier": 5,
   "stats": {
     "durete": 42,
     "densite": 24,

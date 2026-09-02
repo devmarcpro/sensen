@@ -1,6 +1,7 @@
 {
   "name_key": "material.tuf_volcanique.name",
   "category": "roche",
+  "palier": 1,
   "stats": {
     "durete": 8,
     "densite": 10,

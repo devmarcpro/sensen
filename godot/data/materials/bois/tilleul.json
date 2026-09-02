@@ -1,6 +1,7 @@
 {
   "name_key": "material.tilleul.name",
   "category": "bois",
+  "palier": 2,
   "stats": {
     "durete": 8,
     "densite": 4,

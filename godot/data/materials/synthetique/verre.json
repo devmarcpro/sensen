@@ -1,6 +1,7 @@
 {
   "name_key": "material.verre.name",
   "category": "synthetique",
+  "palier": 2,
   "stats": {
     "durete": 8,
     "densite": 8,

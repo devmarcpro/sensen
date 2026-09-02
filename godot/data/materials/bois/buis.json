@@ -1,6 +1,7 @@
 {
   "name_key": "material.buis.name",
   "category": "bois",
+  "palier": 5,
   "stats": {
     "durete": 19,
     "densite": 9,

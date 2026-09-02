@@ -1,6 +1,7 @@
 {
   "name_key": "material.brique.name",
   "category": "synthetique",
+  "palier": 2,
   "stats": {
     "durete": 18,
     "densite": 12,

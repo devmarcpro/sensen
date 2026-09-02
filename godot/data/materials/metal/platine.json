@@ -1,6 +1,7 @@
 {
   "name_key": "material.platine.name",
   "category": "metal",
+  "palier": 4,
   "stats": {
     "durete": 14,
     "densite": 21,

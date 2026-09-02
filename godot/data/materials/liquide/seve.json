@@ -1,6 +1,7 @@
 {
   "name_key": "material.seve.name",
   "category": "liquide",
+  "palier": 4,
   "stats": {
     "durete": 1,
     "densite": 9,

@@ -1324,12 +1324,10 @@ animal.tigre,Tiger
 biome.cote_plage.name,Coast
 biome.desert_aride.name,Arid desert
 biome.desert_de_cendres.name,Ash desert
-biome.foret_de_mana.name,Mana forest
 biome.foret_temperee.name,Temperate forest
 biome.marecage.name,Marsh
 biome.marecage_corrompu.name,Corrupted marsh
 biome.montagne.name,Mountain
-biome.montagne_cristalline.name,Crystal mountain
 biome.plaine_temperee.name,Temperate plain
 biome.taiga.name,Taiga
 biome.toundra.name,Tundra

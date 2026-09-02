@@ -1,6 +1,7 @@
 {
   "name_key": "material.rubis.name",
   "category": "gemme",
+  "palier": 4,
   "stats": {
     "durete": 27,
     "densite": 9,

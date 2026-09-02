@@ -1,6 +1,7 @@
 {
   "name_key": "material.zinc.name",
   "category": "metal",
+  "palier": 1,
   "stats": {
     "durete": 13,
     "densite": 9,

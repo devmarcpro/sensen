@@ -1,6 +1,7 @@
 {
   "name_key": "material.pierre_ponce.name",
   "category": "roche",
+  "palier": 1,
   "stats": {
     "durete": 4,
     "densite": 4,

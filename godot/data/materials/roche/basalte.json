@@ -1,6 +1,7 @@
 {
   "name_key": "material.basalte.name",
   "category": "roche",
+  "palier": 4,
   "stats": {
     "durete": 25,
     "densite": 17,

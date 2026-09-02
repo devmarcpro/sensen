@@ -1,6 +1,7 @@
 {
   "name_key": "material.coton.name",
   "category": "vegetal",
+  "palier": 1,
   "stats": {
     "durete": 2,
     "densite": 1,

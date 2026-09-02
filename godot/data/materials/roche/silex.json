@@ -1,6 +1,7 @@
 {
   "name_key": "material.silex.name",
   "category": "roche",
+  "palier": 3,
   "stats": {
     "durete": 22,
     "densite": 14,

@@ -1,6 +1,7 @@
 {
   "name_key": "material.bois_petrifie.name",
   "category": "fossile",
+  "palier": 3,
   "stats": {
     "durete": 16,
     "densite": 13,

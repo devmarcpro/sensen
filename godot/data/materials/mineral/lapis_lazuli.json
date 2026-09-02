@@ -1,6 +1,7 @@
 {
   "name_key": "material.lapis_lazuli.name",
   "category": "mineral",
+  "palier": 3,
   "stats": {
     "durete": 15,
     "densite": 10,

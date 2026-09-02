@@ -1,6 +1,7 @@
 {
   "name_key": "material.or.name",
   "category": "metal",
+  "palier": 3,
   "stats": {
     "durete": 10,
     "densite": 19,

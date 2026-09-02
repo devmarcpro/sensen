@@ -1,6 +1,7 @@
 {
   "name_key": "material.travertin.name",
   "category": "roche",
+  "palier": 2,
   "stats": {
     "durete": 11,
     "densite": 12,

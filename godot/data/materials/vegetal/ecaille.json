@@ -1,6 +1,7 @@
 {
   "name_key": "material.ecaille.name",
   "category": "vegetal",
+  "palier": 3,
   "stats": {
     "durete": 10,
     "densite": 3,

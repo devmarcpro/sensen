@@ -1,6 +1,7 @@
 {
   "name_key": "material.if.name",
   "category": "bois",
+  "palier": 5,
   "stats": {
     "durete": 13,
     "densite": 6,

@@ -1,6 +1,7 @@
 {
   "name_key": "material.chaume_tresse.name",
   "category": "synthetique",
+  "palier": 1,
   "stats": {
     "durete": 3,
     "densite": 2,

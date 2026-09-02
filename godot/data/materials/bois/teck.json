@@ -1,6 +1,7 @@
 {
   "name_key": "material.teck.name",
   "category": "bois",
+  "palier": 5,
   "stats": {
     "durete": 13,
     "densite": 7,

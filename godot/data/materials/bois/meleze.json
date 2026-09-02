@@ -1,6 +1,7 @@
 {
   "name_key": "material.meleze.name",
   "category": "bois",
+  "palier": 2,
   "stats": {
     "durete": 10,
     "densite": 5,

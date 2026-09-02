@@ -1,6 +1,7 @@
 {
   "name_key": "material.terre.name",
   "category": "terre",
+  "palier": 1,
   "stats": {
     "durete": 3,
     "densite": 8,

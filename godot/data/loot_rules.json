@@ -281,6 +281,12 @@
       "par_etage": 4,
       "variance": 0.4,
       "mult_boss": 6
+    },
+    "boss_final": {
+      "_doc": "Le boss du DERNIER etage d'un donjon (designer 2026-09-02 : « le loot du boss final du donjon est de meilleure qualite ») : son butin est tire a un niveau majore et ne descend pas sous une certaine rarete. Le gouffre n'a pas de dernier etage, donc pas de boss final : on y descend jusqu'a mourir.",
+      "bonus_niveau": 4,
+      "rarete_min": "rare",
+      "objets": 2
     }
   },
   "monstres_rares": {
@@ -333,7 +339,10 @@
     "niveau_base": 15,
     "niveau_par_profondeur": 10,
     "poids_etage": 6,
-    "tiers_au_dela": 1
+    "tiers_au_dela": 1,
+    "paliers_au_dela": 3,
+    "_doc_paliers": "paliers_au_dela : de combien de niveaux au-dela du niveau du donjon un materiau peut encore sortir ; poids_au_dela : le poids qu'on lui donne alors, face au poids 1 des materiaux a portee. A 0,15, la trouvaille d'un cran au-dessus reste une chance, pas l'ordinaire (designer 2026-09-02).",
+    "poids_au_dela": 0.15
   },
   "identification": {
     "_doc": "Objets non identifiés (designer 2026-09-01, point 52) : ces types sortent inconnus du loot ; les essayer révèle la base pour toute la partie.",

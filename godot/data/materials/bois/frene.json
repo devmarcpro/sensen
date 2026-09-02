@@ -1,6 +1,7 @@
 {
   "name_key": "material.frene.name",
   "category": "bois",
+  "palier": 3,
   "stats": {
     "durete": 11,
     "densite": 4,

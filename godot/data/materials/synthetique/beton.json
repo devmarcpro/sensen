@@ -1,6 +1,7 @@
 {
   "name_key": "material.beton.name",
   "category": "synthetique",
+  "palier": 5,
   "stats": {
     "durete": 40,
     "densite": 12,

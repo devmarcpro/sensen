@@ -1,6 +1,7 @@
 {
   "name_key": "material.ebene.name",
   "category": "bois",
+  "palier": 5,
   "stats": {
     "durete": 18,
     "densite": 10,

@@ -53,6 +53,16 @@ Les catégories de matériaux, chacune liée à un outil, une compétence de ré
 > Dernière des trois familles mortes repérées le 2026-09-01 : `ecaille` ne désignait **aucun matériau**. La recette de composant `plaque_ecaille` était donc **toujours sautée** au tirage — une armure ne pouvait sortir qu'en os massif ou en métal, alors que le catalogue promettait trois voies. Les six bêtes écailleuses (crocodile, serpents, basilic, lindworm, kappa) laissent désormais une **écaille** au jet de Chasseur ; deux écailles se durcissent en matériau `ecaille` (recette `durcir_ecaille`, héritant l'espèce comme le cuir et l'os). Une écaille de basilic n'est pas une écaille de crocodile. Les trois familles annoncées pour une plaque d'armure existent enfin toutes les trois.
 
 
+> [!success] Tranché le 2026-09-02 — chaque matériau porte un **palier** (designer)
+> « Pour les matériaux il va falloir rajouter des paliers de rareté/puissance pour vraiment différencier le loot early/mid/endgame, et du coup plus différencier les stats des équipements qui en découlent, et leur difficulté à extraire. »
+> **Ce qui existait déjà, et pourquoi ça ne suffisait pas.** `minerais_par_etage.tiers` range déjà les **minerais** en bandes de profondeur — mais seulement eux : les bois, les cuirs, les os, les tissus, les gemmes taillées n'y figurent pas, et rien ne les empêche de tomber dès le premier étage. Et ces bandes ne servaient qu'à **où** un matériau apparaît : ni ses stats, ni sa récolte n'en tenaient compte.
+> **Les cinq paliers.** Chaque matériau porte désormais `palier`, de **1** (ce qu'on ramasse au camp) à **5** (ce qu'on arrache au fond d'un gouffre). Le palier commande trois choses à la fois, et c'est là tout son intérêt :
+> - **où il tombe** : un palier a sa profondeur minimale ; le titane ne sort pas à l'étage 2, et le drap de soie non plus ;
+> - **ce qu'il vaut** : un multiplicateur de stats par palier, appliqué à l'objet assemblé — c'est ce qui creuse l'écart entre une épée du début et une épée de la fin, au-delà du seul écart de dureté écrit dans les fiches ;
+> - **ce qu'il coûte à extraire** : les ticks de récolte et le seuil d'outil montent avec le palier. Un matériau de fin de partie ne se ramasse pas à la pioche de départ, même si on le trouve.
+> **Comment les paliers ont été posés.** Par dérivation, pas à la main : un minerai hérite du tier de `minerais_par_etage` ; les autres sont classés **dans leur catégorie** par un score de puissance (dureté, valeur de base, conductivité de mana) et répartis en cinq quintiles. Le classement se fait par catégorie parce qu'un bois de palier 5 reste un bois : on compare un chêne aux autres bois, pas au platine. Les valeurs sont **en données**, une par fiche : le designer peut en corriger une sans toucher au reste.
+
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Schéma matériau]]
 - **Alimente** : [[Récolte]], [[Stations de transformation]], [[Composants]], [[Wu Xing hors combat]]

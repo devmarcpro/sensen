@@ -1,6 +1,7 @@
 {
   "name_key": "material.meteorite_ferreuse.name",
   "category": "fossile",
+  "palier": 5,
   "stats": {
     "durete": 38,
     "densite": 20,

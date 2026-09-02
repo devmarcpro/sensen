@@ -1,6 +1,7 @@
 {
   "name_key": "material.craie.name",
   "category": "roche",
+  "palier": 1,
   "stats": {
     "durete": 6,
     "densite": 11,

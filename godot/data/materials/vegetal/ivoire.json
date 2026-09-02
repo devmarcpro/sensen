@@ -1,6 +1,7 @@
 {
   "name_key": "material.ivoire.name",
   "category": "vegetal",
+  "palier": 5,
   "stats": {
     "durete": 12,
     "densite": 5,

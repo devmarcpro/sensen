@@ -1,6 +1,7 @@
 {
   "name_key": "material.acier_inox.name",
   "category": "metal",
+  "palier": 5,
   "stats": {
     "durete": 42,
     "densite": 13,

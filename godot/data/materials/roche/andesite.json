@@ -1,6 +1,7 @@
 {
   "name_key": "material.andesite.name",
   "category": "roche",
+  "palier": 3,
   "stats": {
     "durete": 24,
     "densite": 15,

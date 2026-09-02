@@ -1,6 +1,7 @@
 {
   "name_key": "material.grenat.name",
   "category": "gemme",
+  "palier": 3,
   "stats": {
     "durete": 24,
     "densite": 10,

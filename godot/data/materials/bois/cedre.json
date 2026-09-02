@@ -1,6 +1,7 @@
 {
   "name_key": "material.cedre.name",
   "category": "bois",
+  "palier": 3,
   "stats": {
     "durete": 9,
     "densite": 4,

@@ -1,6 +1,7 @@
 {
   "name_key": "material.amiante.name",
   "category": "mineral",
+  "palier": 3,
   "stats": {
     "durete": 4,
     "densite": 7,

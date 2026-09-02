@@ -1,6 +1,7 @@
 {
   "name_key": "material.huile.name",
   "category": "liquide",
+  "palier": 3,
   "stats": {
     "durete": 0,
     "densite": 8,

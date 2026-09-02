@@ -72,11 +72,20 @@
     70,
     90
   ],
+  "depart_garanti": {
+    "_doc": "Ou une partie a le droit de commencer (designer 2026-09-02) : « garantir que le joueur spawn sur un continent avec sur sa masse terrestre au moins un gouffre, 2 villes de 2 royaumes differents ». Une graine qui pose le camp sur un ilot desert donne une partie sans rien a faire — il faut donc CHERCHER une case de depart qui tienne ces promesses, pas seulement une case de terre. rayon_cellules : jusqu'ou on regarde autour du candidat pour compter ce qu'il a sous la main ; rayon_recherche : jusqu'ou on deplace le camp si le candidat ne convient pas.",
+    "gouffres_min": 1,
+    "villes_min": 2,
+    "royaumes_min": 2,
+    "rayon_cellules": 30,
+    "rayon_recherche": 140
+  },
   "regions": {
     "_doc": "Continents et regions (designer 2026-09-02) : le monde se lit en continents (les plaques continentales qui se touchent) et en regions (Voronoi jittere sur un reseau de germes). pas_cellules = le pas du reseau, jitter = le deplacement du germe en part du pas. Chaque region porte un gouffre : un donjon infini, gratuit, dont un etage vide le reste pour toujours.",
     "pas_cellules": 24,
     "jitter": 0.46,
-    "gouffre_etages_max": 999
+    "gouffre_etages_max": 999,
+    "gouffre_niveau_par_etage": 1.5
   },
   "tectonique": {
     "plaques": 24,
@@ -95,7 +104,10 @@
     "bordure_tuiles": 20000.0,
     "suture_tuiles": 6000.0,
     "calibrage_echantillons": 48,
-    "ocean_bord": 0.1
+    "ocean_bord": 0.1,
+    "cote_frequence": 0.0007,
+    "cote_amplitude": 0.38,
+    "cote_fenetre": 0.35
   },
   "mer": {
     "altitude": 0.3,
@@ -168,9 +180,10 @@
         "eau": "eau"
       },
       "gradient_bord": 30.0,
-      "niveau_par_cellule_distance": 0.09,
+      "niveau_par_cellule_distance": 0.18,
+    "niveau_courbe_distance": 2.0,
       "recherche_max": 120,
-      "niveau_par_fusion": 3,
+      "niveau_par_fusion": 1,
       "garantie_depart": {
         "_doc": "Une nouvelle partie commence toujours avec un donjon a portee : la cellule d'amorce est tiree entre rayon_min et rayon_max cases du camp (designer 2026-09-01). Nettoyee, elle redevient ordinaire.",
         "rayon_min": 3,

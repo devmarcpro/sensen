@@ -1,6 +1,7 @@
 {
   "name_key": "material.plomb.name",
   "category": "metal",
+  "palier": 1,
   "stats": {
     "durete": 9,
     "densite": 18,

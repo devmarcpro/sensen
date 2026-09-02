@@ -1,6 +1,7 @@
 {
   "name_key": "material.gres.name",
   "category": "roche",
+  "palier": 1,
   "stats": {
     "durete": 10,
     "densite": 12,

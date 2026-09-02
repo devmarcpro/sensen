@@ -1,6 +1,7 @@
 {
   "name_key": "material.os.name",
   "category": "vegetal",
+  "palier": 4,
   "stats": {
     "durete": 22,
     "densite": 6,

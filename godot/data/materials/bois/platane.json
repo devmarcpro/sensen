@@ -1,6 +1,7 @@
 {
   "name_key": "material.platane.name",
   "category": "bois",
+  "palier": 2,
   "stats": {
     "durete": 11,
     "densite": 6,

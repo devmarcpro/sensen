@@ -1,6 +1,7 @@
 {
   "name_key": "material.acier_tungstene.name",
   "category": "metal",
+  "palier": 5,
   "stats": {
     "durete": 50,
     "densite": 16,

@@ -84,6 +84,12 @@ Coût : un passage hebdomadaire sur les cellules à delta non nul ou à
 >
 > **Un défaut trouvé en mesurant** : le donjon garanti du début de partie était de **niveau 121**. Il est cristallisé « depuis toujours » puisqu'il ne dépend pas du bruit, donc la recherche en arrière qui calcule son âge remontait jusqu'à `recherche_max` — le tout premier donjon d'une partie était le plus dur du jeu, et une trentaine d'étages. Il a désormais l'âge du monde : zéro, donc niveau 1.
 
+> [!success] Tranché le 2026-09-02 — la **pente géographique** décide du niveau des donjons (designer, choix 2)
+> Le designer a vu la conséquence de la baisse de densité avant moi : « il y a un problème si on n'a pas de donjons à proximité ». Mesure faite (`sonde_monde`) : depuis n'importe quelle cellule de terre, le donjon de corruption le plus proche est à **9 cellules** de médiane, le gouffre à **8** — jamais aucun introuvable. La densité n'était donc pas le problème. Le vrai manque était ailleurs : **pas de donjon à SON niveau**. Autour du camp, les niveaux allaient de 1 à 16, médiane 13 — et depuis que le butin suit le niveau du donjon, un débutant entouré de niveau 13 n'a plus rien qui lui corresponde.
+> Sur trois façons de traiter ça — un plancher qui suit le joueur, une pente géographique, ou ne rien garantir — le designer a choisi la **pente**. Elle ne triche pas avec le monde et donne un sens à la carte : le centre est calme, les marges sont mortelles.
+> **Deux essais.** Une pente **droite** donnait 13 · 31 · 53 · 69 · 87 par bande d'éloignement : la pente existait, mais le pied du camp était déjà à 13 — aucun berceau où apprendre. Une pente **courbe** (`niveau_courbe_distance`) tient la promesse : **4 · 11 · 30 · 51 · 79**, et autour du camp médiane 4, de 1 à 5.
+> **Ce qui écrasait la géographie** : le bonus de fusion valait **3 niveaux par cellule fusionnée**, jusqu'à +9. Il vaut 1 — un donjon large est un peu plus fort, pas trois fois plus.
+
 ## Liens
 - **Dépend de** : [[Niveau de danger]], [[Catalogue des couches de bruit]], [[Sauvegarde]]
 - **Alimente** : [[Raids et menaces]], [[Loot — affixes, gemmes et rareté]], [[Villages PNJ — repeuplement et décimation]], [[Génération de donjon]], [[Créatures]]

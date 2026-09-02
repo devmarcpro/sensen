@@ -1,6 +1,7 @@
 {
   "name_key": "material.terre_fertile.name",
   "category": "terre",
+  "palier": 5,
   "stats": {
     "durete": 3,
     "densite": 8,

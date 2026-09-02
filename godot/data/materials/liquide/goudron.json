@@ -1,6 +1,7 @@
 {
   "name_key": "material.goudron.name",
   "category": "liquide",
+  "palier": 2,
   "stats": {
     "durete": 1,
     "densite": 11,

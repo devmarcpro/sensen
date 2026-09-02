@@ -1,6 +1,7 @@
 {
   "name_key": "material.chanvre.name",
   "category": "vegetal",
+  "palier": 2,
   "stats": {
     "durete": 3,
     "densite": 2,

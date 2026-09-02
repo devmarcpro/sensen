@@ -1,6 +1,7 @@
 {
   "name_key": "material.turquoise.name",
   "category": "mineral",
+  "palier": 1,
   "stats": {
     "durete": 14,
     "densite": 9,

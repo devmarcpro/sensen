@@ -1,6 +1,7 @@
 {
   "name_key": "material.diamant.name",
   "category": "gemme",
+  "palier": 5,
   "stats": {
     "durete": 40,
     "densite": 9,

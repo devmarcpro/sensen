@@ -1,6 +1,7 @@
 {
   "name_key": "material.marbre.name",
   "category": "roche",
+  "palier": 4,
   "stats": {
     "durete": 18,
     "densite": 15,

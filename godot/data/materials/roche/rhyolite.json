@@ -1,6 +1,7 @@
 {
   "name_key": "material.rhyolite.name",
   "category": "roche",
+  "palier": 3,
   "stats": {
     "durete": 23,
     "densite": 12,

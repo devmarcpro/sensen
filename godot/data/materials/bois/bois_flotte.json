@@ -1,6 +1,7 @@
 {
   "name_key": "material.bois_flotte.name",
   "category": "bois",
+  "palier": 1,
   "stats": {
     "durete": 7,
     "densite": 4,

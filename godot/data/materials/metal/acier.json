@@ -1,6 +1,7 @@
 {
   "name_key": "material.acier.name",
   "category": "metal",
+  "palier": 3,
   "stats": {
     "durete": 30,
     "densite": 13,

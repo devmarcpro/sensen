@@ -29,6 +29,7 @@ var points_chauds: Array = [] # [Vector2] : chapelets d'îles en plein océan
 var seuil_mer: float = 0.0    # continentalité au-dessus de laquelle la terre émerge (calibré sur planete.tectonique.terres)
 var warp: FastNoiseLite       # domain warping (un seul niveau)
 var conti: FastNoiseLite      # bruit basse fréquence de la continentalité
+var cote: FastNoiseLite       # bruit crêté du rivage : ce qui découpe les côtes (designer 2026-09-02)
 var ridged: FastNoiseLite     # chaînes de montagnes sur les sutures
 
 
@@ -454,6 +455,12 @@ func _tectonique() -> void:
 	conti.seed = graine + 102
 	conti.frequency = float(tc.get("continentalite_frequence", 0.00012))
 	conti.fractal_octaves = 3
+	cote = FastNoiseLite.new()   # le ciselage du rivage (designer 2026-09-02)
+	cote.seed = graine + 104
+	cote.frequency = float(tc.get("cote_frequence", 0.0022))
+	cote.fractal_type = FastNoiseLite.FRACTAL_RIDGED
+	cote.fractal_octaves = 4
+	cote.fractal_gain = 0.55
 	ridged = FastNoiseLite.new()
 	ridged.seed = graine + 103
 	ridged.frequency = float(tc.get("ridged_frequence", 0.0015))
@@ -611,6 +618,16 @@ func continent_de(c: Vector2i) -> Dictionary:
 	return continents.get(racine, {})
 
 
+## Combien le relief de rivage doit peser en ce point : 1 sur le trait de côte, 0 dès qu'on s'en
+## éloigne. Sans cette fenêtre, un bruit assez fort pour ciseler les côtes trouerait aussi l'intérieur
+## des terres et sèmerait des cailloux au milieu de l'océan.
+func _fenetre_cote(c: float) -> float:
+	var largeur := float(planete.get("tectonique", {}).get("cote_fenetre", 0.35))
+	if largeur <= 0.0:
+		return 0.0
+	return maxf(0.0, 1.0 - absf(c - seuil_mer) / largeur)
+
+
 func _warpe(p: Vector2) -> Vector2:
 	var amp := float(planete.get("tectonique", {}).get("warp_amplitude", 6000.0))
 	return p + Vector2(warp.get_noise_2d(p.x, p.y), warp.get_noise_2d(p.x + 7919.0, p.y - 1013.0)) * amp
@@ -642,6 +659,22 @@ func _continentalite(p: Vector2) -> float:
 	var base: float = 1.0 if plaques[pp[0]].continentale else -1.0
 	var bordure: float = clampf((float(pp[3]) - float(pp[1])) / float(planete.get("tectonique", {}).get("bordure_tuiles", 20000.0)), 0.0, 1.0)
 	var c := base * (0.35 + 0.65 * bordure) + conti.get_noise_2d(q.x, q.y) * 0.6
+	# Le dessin des côtes (designer 2026-09-02 : « plus réaliste et moins plat »). La continentalité seule
+	# donne des rivages lisses, en galets — parce que ses deux termes sont à très basse fréquence : la
+	# plaque et un bruit de 0,00012. Les vraies côtes doivent leur découpe à des accidents BIEN plus
+	# fins que le continent qui les porte : caps, baies, presqu'îles, chapelets d'îles.
+	# On ajoute donc un relief de rivage à haute fréquence, mais dont l'effet est **concentré près du
+	# niveau de la mer** : `_fenetre_cote` vaut 1 sur le trait de côte et retombe à 0 dès qu'on entre
+	# dans les terres ou au large. Le continent garde ainsi sa forme d'ensemble — seul son bord est
+	# ciselé. Un bruit ajouté partout aurait troué les continents et semé des îles dans tout l'océan.
+	var tcz: Dictionary = planete.get("tectonique", {})
+	var amp_cote := float(tcz.get("cote_amplitude", 0.0))
+	if amp_cote > 0.0 and cote != null:
+		var brut := cote.get_noise_2d(q.x, q.y)
+		# Le bruit crêté (`FRACTAL_RIDGED`) donne des arêtes franches plutôt que des ondulations molles :
+		# des pointes de terre qui avancent dans l'eau, pas des bosses.
+		var decoupe := brut + 0.45 * cote.get_noise_2d(q.x * 2.7 + 4111.0, q.y * 2.7 - 907.0)
+		c += decoupe * amp_cote * _fenetre_cote(c)
 	var r := float(planete.get("tectonique", {}).get("point_chaud_rayon", 9000.0))
 	for pc in points_chauds:
 		var dp: float = q.distance_to(pc)

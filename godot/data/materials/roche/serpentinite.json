@@ -1,6 +1,7 @@
 {
   "name_key": "material.serpentinite.name",
   "category": "roche",
+  "palier": 4,
   "stats": {
     "durete": 17,
     "densite": 14,

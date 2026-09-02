@@ -1,6 +1,7 @@
 {
   "name_key": "material.cuivre.name",
   "category": "metal",
+  "palier": 1,
   "stats": {
     "durete": 16,
     "densite": 10,

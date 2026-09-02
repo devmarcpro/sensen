@@ -1,6 +1,7 @@
 {
   "name_key": "material.neige.name",
   "category": "meteorologique",
+  "palier": 1,
   "stats": {
     "durete": 1,
     "densite": 3,

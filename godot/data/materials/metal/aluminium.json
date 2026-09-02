@@ -1,6 +1,7 @@
 {
   "name_key": "material.aluminium.name",
   "category": "metal",
+  "palier": 1,
   "stats": {
     "durete": 14,
     "densite": 5,

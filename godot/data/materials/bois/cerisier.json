@@ -1,6 +1,7 @@
 {
   "name_key": "material.cerisier.name",
   "category": "bois",
+  "palier": 4,
   "stats": {
     "durete": 11,
     "densite": 6,

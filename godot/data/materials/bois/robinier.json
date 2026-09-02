@@ -1,6 +1,7 @@
 {
   "name_key": "material.robinier.name",
   "category": "bois",
+  "palier": 4,
   "stats": {
     "durete": 15,
     "densite": 7,

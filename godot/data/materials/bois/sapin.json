@@ -1,6 +1,7 @@
 {
   "name_key": "material.sapin.name",
   "category": "bois",
+  "palier": 1,
   "stats": {
     "durete": 7,
     "densite": 3,

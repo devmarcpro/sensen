@@ -1,6 +1,7 @@
 {
   "name_key": "material.graphite.name",
   "category": "mineral",
+  "palier": 3,
   "stats": {
     "durete": 3,
     "densite": 8,

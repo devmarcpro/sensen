@@ -1,6 +1,7 @@
 {
   "name_key": "material.noyer.name",
   "category": "bois",
+  "palier": 4,
   "stats": {
     "durete": 13,
     "densite": 6,

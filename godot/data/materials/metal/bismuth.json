@@ -1,6 +1,7 @@
 {
   "name_key": "material.bismuth.name",
   "category": "metal",
+  "palier": 4,
   "stats": {
     "durete": 8,
     "densite": 17,

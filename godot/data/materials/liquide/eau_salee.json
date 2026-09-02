@@ -1,6 +1,7 @@
 {
   "name_key": "material.eau_salee.name",
   "category": "liquide",
+  "palier": 1,
   "stats": {
     "durete": 0,
     "densite": 10,

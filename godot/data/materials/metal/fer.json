@@ -1,6 +1,7 @@
 {
   "name_key": "material.fer.name",
   "category": "metal",
+  "palier": 2,
   "stats": {
     "durete": 25,
     "densite": 12,

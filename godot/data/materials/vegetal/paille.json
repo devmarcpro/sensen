@@ -1,6 +1,7 @@
 {
   "name_key": "material.paille.name",
   "category": "vegetal",
+  "palier": 1,
   "stats": {
     "durete": 1,
     "densite": 1,

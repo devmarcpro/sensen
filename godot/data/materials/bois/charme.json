@@ -1,6 +1,7 @@
 {
   "name_key": "material.charme.name",
   "category": "bois",
+  "palier": 4,
   "stats": {
     "durete": 14,
     "densite": 7,

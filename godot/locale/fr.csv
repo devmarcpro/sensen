@@ -1308,14 +1308,12 @@ journal.sauvegarde,partie sauvegardée ({nom})
 journal.sauvegarde_impossible,on ne sauvegarde qu'en surface (au camp ou à pied)
 journal.chargement,partie chargée
 journal.pas_de_sauvegarde,aucune sauvegarde
-biome.foret_de_mana.name,Forêt de mana
 biome.desert_de_cendres.name,Désert de cendres
 biome.toundra.name,Toundra
 biome.taiga.name,Taïga
 biome.marecage.name,Marécage
 biome.marecage_corrompu.name,Marécage corrompu
 biome.montagne.name,Montagne
-biome.montagne_cristalline.name,Montagne cristalline
 item.proto_faucille.name,Faucille de fer
 functionality.faucille.name,Faucille
 biome.plaine_temperee.name,Plaine tempérée

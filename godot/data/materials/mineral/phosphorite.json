@@ -1,6 +1,7 @@
 {
   "name_key": "material.phosphorite.name",
   "category": "mineral",
+  "palier": 2,
   "stats": {
     "durete": 6,
     "densite": 10,

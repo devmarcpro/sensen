@@ -1,6 +1,7 @@
 {
   "name_key": "material.bronze.name",
   "category": "metal",
+  "palier": 2,
   "stats": {
     "durete": 20,
     "densite": 11,

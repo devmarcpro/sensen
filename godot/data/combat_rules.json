@@ -221,6 +221,14 @@
       "potentiel": 10
     }
   },
+  "paliers_materiaux": {
+    "_doc": "Paliers de materiau (designer 2026-09-02) : chaque fiche de materiau porte un `palier` 1..5, pose par tools/poser_paliers.py. Le palier commande TROIS choses a la fois — ou le materiau tombe (profondeur_min), ce qu'il vaut une fois assemble (mult_stats, applique aux stats de l'objet), et ce qu'il coute a extraire (extraction_ticks multiplie les ticks de recolte, outil_min multiplie le seuil de durete d'outil exige). Un materiau de fin de partie ne se ramasse donc pas a la pioche de depart, meme si on le trouve.",
+    "1": { "profondeur_min": 0, "mult_stats": 1.0, "extraction_ticks": 1.0, "outil_min": 1.0 },
+    "2": { "profondeur_min": 2, "mult_stats": 1.15, "extraction_ticks": 1.3, "outil_min": 1.1 },
+    "3": { "profondeur_min": 5, "mult_stats": 1.35, "extraction_ticks": 1.7, "outil_min": 1.25 },
+    "4": { "profondeur_min": 9, "mult_stats": 1.6, "extraction_ticks": 2.2, "outil_min": 1.45 },
+    "5": { "profondeur_min": 14, "mult_stats": 2.0, "extraction_ticks": 3.0, "outil_min": 1.7 }
+  },
   "mort": {
     "_doc": "Mort et pénalité : respawn, −perte_or de l'or porté, équipement et XP conservés ; les objets tombes periment apres peremption_jours. Depuis le 2026-09-02 (designer) UN SEUL JET decide de la part du sac qui tombe : perte_sac_faces donne les faces du de, equiprobables — rien, un quart, la moitie, trois quarts, tout.",
     "perte_sac_faces": [0.0, 0.25, 0.5, 0.75, 1.0],

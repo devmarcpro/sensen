@@ -1,6 +1,7 @@
 {
   "name_key": "material.caoutchouc.name",
   "category": "synthetique",
+  "palier": 3,
   "stats": {
     "durete": 8,
     "densite": 6,

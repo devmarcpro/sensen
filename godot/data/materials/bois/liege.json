@@ -1,6 +1,7 @@
 {
   "name_key": "material.liege.name",
   "category": "bois",
+  "palier": 1,
   "stats": {
     "durete": 4,
     "densite": 2,

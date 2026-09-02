@@ -1,6 +1,7 @@
 {
   "name_key": "material.soie.name",
   "category": "vegetal",
+  "palier": 4,
   "stats": {
     "durete": 4,
     "densite": 1,

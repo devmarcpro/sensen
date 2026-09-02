@@ -1,6 +1,7 @@
 {
   "name_key": "material.tourbe_compactee.name",
   "category": "mineral",
+  "palier": 1,
   "stats": {
     "durete": 5,
     "densite": 8,

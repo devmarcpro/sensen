@@ -1,6 +1,7 @@
 {
   "name_key": "material.argile.name",
   "category": "terre",
+  "palier": 3,
   "stats": {
     "durete": 4,
     "densite": 10,

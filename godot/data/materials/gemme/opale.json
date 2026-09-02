@@ -1,6 +1,7 @@
 {
   "name_key": "material.opale.name",
   "category": "gemme",
+  "palier": 4,
   "stats": {
     "durete": 12,
     "densite": 7,

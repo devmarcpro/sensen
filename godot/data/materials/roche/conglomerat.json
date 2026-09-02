@@ -1,6 +1,7 @@
 {
   "name_key": "material.conglomerat.name",
   "category": "roche",
+  "palier": 2,
   "stats": {
     "durete": 12,
     "densite": 13,

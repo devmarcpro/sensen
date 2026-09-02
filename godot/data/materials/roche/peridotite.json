@@ -1,6 +1,7 @@
 {
   "name_key": "material.peridotite.name",
   "category": "roche",
+  "palier": 5,
   "stats": {
     "durete": 33,
     "densite": 21,

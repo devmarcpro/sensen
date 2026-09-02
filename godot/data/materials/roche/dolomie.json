@@ -1,6 +1,7 @@
 {
   "name_key": "material.dolomie.name",
   "category": "roche",
+  "palier": 2,
   "stats": {
     "durete": 14,
     "densite": 13,

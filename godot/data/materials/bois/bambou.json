@@ -1,6 +1,7 @@
 {
   "name_key": "material.bambou.name",
   "category": "bois",
+  "palier": 2,
   "stats": {
     "durete": 7,
     "densite": 3,

@@ -147,6 +147,14 @@ func charger_camp(joueur: Dictionary = {}, cellule_choisie: Vector2i = Vector2i(
 	var depart := monde.cellule_camp if cellule_choisie == Vector2i(-1, -1) else cellule_choisie
 	# Garde-fou (Début de partie) : si la cellule de départ est en mer, la première cellule de terre en spirale.
 	var essais := 0
+	# Une partie ne commence pas n'importe où (designer 2026-09-02) : la masse de terre du camp doit
+	# porter un gouffre et deux villes de deux royaumes différents. On cherche donc une case qui tienne
+	# ces promesses, et pas seulement une case de terre — une graine peut poser le camp sur un îlot
+	# désert, et on ne s'en aperçoit qu'après avoir joué une heure.
+	# Sauf si le joueur a choisi sa case lui-même sur la carte : c'est son droit de commencer au bout
+	# du monde, et le garde-fou de terre ferme ci-dessous suffit alors.
+	if cellule_choisie == Vector2i(-1, -1):
+		depart = monde.chercher_depart(depart)
 	var origine_spirale := depart
 	while essais < 400 and not surface.terre_a(depart):
 		essais += 1
@@ -312,13 +320,28 @@ func commencer_en_donjon(e: Dictionary) -> bool:
 ## Entrer sur la cellule d'un donjon de corruption y fait entrer d'office (designer 2026-09-01,
 ## point 51) : la surface n'est plus un lieu qu'on traverse. Le niveau du donjon décide de sa
 ## profondeur — un donjon que personne n'a nettoyé depuis longtemps est un gouffre.
-func entrer_donjon_corrompu(e: Dictionary) -> bool:
+## Arriver sur la cellule d'un donjon, c'est y entrer — quelle que soit sa nature (designer 2026-09-02 :
+## « entrer dans un donjon depuis la carte monde ne fait pas rentrer dans le donjon mais dans la cellule
+## que le donjon occupe »). Un donjon de corruption happe qui y met le pied, un gouffre s'ouvre sous les
+## pas : côté joueur c'est le même geste — cliquer le donjon sur la carte, et y être. Le garde-fou de
+## `cellule_vue` vaut pour les deux : on n'entre qu'en ARRIVANT sur la cellule, sinon ressortir du
+## donjon vous y replongerait au pas suivant, et on ne pourrait plus jamais en sortir.
+func entrer_donjon_de_la_cellule(e: Dictionary) -> bool:
 	if lieu != "camp" or monde == null or e.controle != "joueur":
 		return false
 	var cell := monde.cellule_de(e.pos)
 	if cell == Vector2i(e.get("cellule_vue", Vector2i(-9999, -9999))):
-		return false   # on ne se fait happer qu'en ENTRANT dans la cellule, pas à chaque pas
+		return false
 	e["cellule_vue"] = cell
+	if not monde.donjon_de_corruption(cell, jour_courant()).is_empty():
+		return entrer_donjon_corrompu(e)
+	return _descendre_au_gouffre(e, cell)
+
+
+func entrer_donjon_corrompu(e: Dictionary) -> bool:
+	if lieu != "camp" or monde == null or e.controle != "joueur":
+		return false
+	var cell := monde.cellule_de(e.pos)
 	var dc := monde.donjon_de_corruption(cell, jour_courant())
 	if dc.is_empty():
 		return false
@@ -484,7 +507,7 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 	for c: Dictionary in e.coffres:
 		var uids: Array = []
 		for base in c.bases:
-			var o := generer_objet(str(base), int(donjon.profondeur), {"donjon": theme_id, "etage": etage})
+			var o := generer_objet(str(base), niveau_loot(), {"donjon": theme_id, "etage": etage})   # le niveau du donjon, pas l'étage
 			if not o.is_empty():
 				uids.append(o.uid)
 		_poser_contenant(c.pos, uids, "coffre")
@@ -1213,15 +1236,19 @@ func _creuser(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 		var rr: Dictionary = regles.r.recolte
 		var force := float(outil.get("durete_base", rr.mains_nues_durete)) * float(outil.get("qualite", 1.0))
 		var durete := float(mat.stats.durete)
+		# Ce qui se trouve au fond ne se ramasse pas à la pioche de départ (designer 2026-09-02) : le
+		# palier du matériau relève le seuil d'outil exigé et allonge le temps d'extraction. La dureté
+		# seule ne suffisait pas — deux matières de même dureté ne coûtent pas le même effort.
+		var pex: Dictionary = regles.r.get("paliers_materiaux", {}).get(str(int(mat.get("palier", 1))), {})
 		var lent := false
-		if force < durete * float(rr.seuil_irrecoltable):
+		if force < durete * float(rr.seuil_irrecoltable) * float(pex.get("outil_min", 1.0)):
 			if a_talent(e, "oeil_de_la_pierre"):   # Œil de la pierre (Talents de race) : rien n'est irrécoltable, mais ÷ 3
 				lent = true
 			else:
 				EventBus.emettre(&"journal", [&"journal.rebondit", {"materiau": mat.name_key}])
 				return false
 		var n := regles.niveau(e.competences_eff, str(mat.harvest.skill))
-		ticks = maxi(1, ceili(durete / (force * regles.skill_factor(n)) * float(rr.ticks_par_seconde)))
+		ticks = maxi(1, ceili(durete / (force * regles.skill_factor(n)) * float(rr.ticks_par_seconde) * float(pex.get("extraction_ticks", 1.0))))
 		if lent:
 			ticks = ticks * int(regles.r.talents.oeil_de_la_pierre.recolte_div)
 	_quitter_garde(e)
@@ -1570,7 +1597,7 @@ func voyager(e: Dictionary, cell: Vector2i) -> bool:
 	horloge_monde.avancer(cout)
 	maj_vision()
 	EventBus.emettre(&"journal", [&"journal.voyage", {"nom": e.name_key, "x": cell.x, "y": cell.y, "ticks": cout}])
-	entrer_donjon_corrompu(e)   # arriver sur une cellule corrompue, c'est y entrer (point 51)
+	entrer_donjon_de_la_cellule(e)   # arriver sur la cellule d'un donjon, c'est y entrer (designer 2026-09-02)
 	return true
 
 
@@ -5246,7 +5273,8 @@ func sauvegarder(nom: String = "") -> bool:
 	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "resume": resume_partie(), "graine": graine, "graine_monde": graine_monde, "planete_options": planete_options, "identifies": identifies, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
 		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores,
 		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire, "vacances": monde.vacances, "villages": monde.villages, "heritiers": monde.heritiers, "vacances_guildes": monde.vacances_guildes,
-		"modifs_terrain": modifs_terrain, "portails": portails, "gouffres_vides": gouffres_vides})   # indexés par position monde, donc valables au rechargement
+		"modifs_terrain": modifs_terrain, "portails": portails, "gouffres_vides": gouffres_vides,
+		"carte_cache": monde.carte_cache, "carte_cache_sp": monde.carte_cache_sp})   # indexés par position monde, donc valables au rechargement
 	ok = Sauvegarde.ecrire(nom, "surface.json", surface) and ok
 	ok = Sauvegarde.ecrire(nom, "entities.json", {"entites": autres, "ordre": ordre_autres, "contenants": contenants_monde}) and ok
 	ok = Sauvegarde.ecrire(nom, "items.json", instances) and ok
@@ -5374,6 +5402,8 @@ func charger_sauvegarde(nom: String = "") -> bool:
 	monde.centre = Vector2i(-1, -1)
 	modifs_terrain = w.get("modifs_terrain", {})   # après _reinitialiser, qui les vide : ce que le monde doit rendre
 	gouffres_vides = w.get("gouffres_vides", {})   # les étages de gouffre déjà vidés : ils le restent d'une session à l'autre
+	monde.carte_cache = w.get("carte_cache", {})   # la carte du monde se souvient d'elle-même (designer 2026-09-02)
+	monde.carte_cache_sp = int(w.get("carte_cache_sp", 0))
 	portails = w.get("portails", {})               # et les brèches du Passeur, indexées par position monde
 	grille = monde.fenetre(monde.cellule_de(joueur_sauve.pos), GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
 	monde.tick(int(w.ticks))   # les grâces échues avant la sauvegarde
@@ -6066,29 +6096,41 @@ func _candidats_famille(fam: Dictionary, cats_mat: Array = []) -> Array[String]:
 func _tirer_materiau(candidats: Array[String], profondeur: int, rng: RandomNumberGenerator) -> String:
 	if candidats.is_empty():
 		return ""
-	var tiers: Dictionary = GameData.config("minerais_par_etage").get("tiers", {})
+	# Le PALIER du matériau décide, pas la liste des minerais (designer 2026-09-02) : les bandes de
+	# `minerais_par_etage` ne couvraient que les minerais, et un drap de soie ou un os massif tombait
+	# dès le premier étage. Chaque fiche porte maintenant son palier, et chaque palier sa profondeur
+	# minimale — lue sur le NIVEAU DU DONJON, puisque c'est lui qui commande la rareté.
 	var la: Dictionary = GameData.config("loot_rules").get("assemblage", {})
-	var favoris := {}
-	var trop_profonds := {}   # un minerai d'un tier trop profond pour l'étage n'apparaît pas (pas de titane à l'étage 2)
-	for k in tiers.keys():
-		for m in tiers[k]:
-			if int(k) <= maxi(1, profondeur):
-				favoris[str(m)] = true
-			elif int(k) > maxi(1, profondeur) + int(la.get("tiers_au_dela", 1)):
-				trop_profonds[str(m)] = true
-	var sans := candidats.filter(func(m: String) -> bool: return not trop_profonds.has(m))
-	if not sans.is_empty():
-		candidats = sans
-	var poids_fav := float(la.get("poids_etage", 3))
+	var pm: Dictionary = regles.r.get("paliers_materiaux", {})
+	# Trois sorts pour un candidat, selon la place de son palier par rapport au niveau du donjon :
+	#   - à sa portée (profondeur_min ≤ niveau) : poids plein, c'est le butin normal du donjon ;
+	#   - un cran au-dessus, dans la tolérance : poids RÉDUIT — la trouvaille chanceuse, pas l'ordinaire.
+	#     Sans ce poids réduit, un palier trop haut noyait le butin dès qu'il comptait plus de matières
+	#     que le palier légitime : un donjon de niveau 1 rendait 46 % de matériaux de palier 2 ;
+	#   - hors tolérance : écarté, on ne trouve pas de titane dans un donjon de niveau 2.
+	var poids := {}
+	var au_dela := int(la.get("paliers_au_dela", 3))
+	var poids_chance := float(la.get("poids_au_dela", 0.15))
+	var niv := maxi(1, profondeur)
+	for m in candidats:
+		var pal := str(int(GameData.catalogues.materials.get(m, {}).get("palier", 1)))
+		var mini := int(pm.get(pal, {}).get("profondeur_min", 0))
+		if mini <= niv:
+			poids[m] = 1.0
+		elif mini <= niv + au_dela:
+			poids[m] = poids_chance
+	if poids.is_empty():   # aucun candidat à portée : on ne rend pas la main vide
+		for m in candidats:
+			poids[m] = 1.0
 	var total := 0.0
-	for m in candidats:
-		total += poids_fav if favoris.has(m) else 1.0
+	for m in poids.keys():
+		total += float(poids[m])
 	var t := rng.randf() * total
-	for m in candidats:
-		t -= poids_fav if favoris.has(m) else 1.0
+	for m in poids.keys():
+		t -= float(poids[m])
 		if t < 0.0:
-			return m
-	return candidats[candidats.size() - 1]
+			return str(m)
+	return str(poids.keys()[poids.size() - 1])
 
 
 ## Ce que les composants font à l'objet (Stats et qualité de l'assemblage) : stats = Σ stat × poids, durete_base avant
@@ -6124,10 +6166,15 @@ func _appliquer_composition(inst: Dictionary, def: Dictionary, pieces: Array[Dic
 	var composants := {}
 	var tete: Dictionary = {}
 	var manche: Dictionary = {}
+	# Le palier du matériau multiplie ce qu'il apporte (designer 2026-09-02 : « plus différencier les
+	# stats des équipements qui en découlent »). Sans lui, une épée de fin de partie ne valait que
+	# l'écart de dureté écrit dans les fiches — trop peu pour qu'on sente qu'on a changé d'époque.
+	var pmat: Dictionary = regles.r.get("paliers_materiaux", {})
 	for c in pieces:
 		var w := float(parts.get(c.slot, 0.0))
+		var mult_pal := float(pmat.get(str(int(GameData.catalogues.materials.get(str(c.materiau), {}).get("palier", 1))), {}).get("mult_stats", 1.0))
 		for s in c.stats.keys():
-			stats[s] = float(stats.get(s, 0.0)) + float(c.stats[s]) * w
+			stats[s] = float(stats.get(s, 0.0)) + float(c.stats[s]) * w * mult_pal
 		for el in c.elements.keys():
 			elements[el] = float(elements.get(el, 0.0)) + float(c.elements[el]) * w
 		q_somme += float(c.qualite) * w
@@ -6744,12 +6791,39 @@ func _effet_echec_lecture(e: Dictionary, grave: bool, tick: int) -> void:
 				break
 
 
+## Le niveau qui commande le butin (designer 2026-09-02 : « la rareté du loot ne se fait pas par étage
+## mais par niveau du donjon »). Un donjon de corruption vaut son niveau à tous ses étages : descendre
+## n'enrichit pas le butin, c'est le donjon qu'on a choisi qui le décide. Le gouffre fait exception, et
+## il le doit à sa nature : sans fond, il n'a pas de niveau propre, c'est la descente qui en tient lieu.
+func niveau_loot() -> int:
+	if donjon.is_empty():
+		return 0
+	if donjon.has("gouffre"):
+		var pg: Dictionary = GameData.config("planete").get("regions", {})
+		return maxi(1, roundi(float(donjon.get("etage", 1)) * float(pg.get("gouffre_niveau_par_etage", 1.5))))
+	if donjon.has("niveau"):
+		return maxi(1, int(donjon.niveau))
+	return maxi(1, int(donjon.get("profondeur", donjon.get("etage", 1))))
+
+
+## Le boss du dernier étage : celui qui garde le fond. Le gouffre n'en a pas — il n'a pas de fond.
+func est_boss_final(cible: Dictionary) -> bool:
+	if not bool(cible.get("chain_gauge", false)) or lieu != "donjon" or donjon.has("gouffre"):
+		return false
+	return int(donjon.get("etage", 0)) >= int(donjon.get("etages", 0))
+
+
 ## À la mort : un drop (chance du tout-venant ; garanti et renforcé pour une variante rare).
 func _drop(cible: Dictionary, source: String) -> void:
 	var lr: Dictionary = GameData.config("loot_rules")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([graine, "drop", cible.id])
-	var profondeur: int = int(donjon.get("profondeur", donjon.get("etage", 0)))
+	# Le NIVEAU du donjon, pas l'étage : deux étages du même donjon donnent le même calibre de butin.
+	var profondeur: int = niveau_loot()
+	var bf: Dictionary = lr.drops.get("boss_final", {})
+	var final := est_boss_final(cible)
+	if final:
+		profondeur += int(bf.get("bonus_niveau", 0))
 	var uids: Array = []
 	if cible.get("rare", false):
 		var base := str(loot._base_pour(rng, profondeur, true))
@@ -6781,6 +6855,13 @@ func _drop(cible: Dictionary, source: String) -> void:
 		var plan_i := generer_objet("plan_industriel", profondeur, {"creature": cible.name_key}, "commun", 0)
 		if not plan_i.is_empty():
 			uids.append(plan_i.uid)
+	# Le boss du DERNIER étage garde le fond : son butin est tiré au-dessus du niveau du donjon (plus
+	# haut), et ne descend pas sous une rareté plancher (designer 2026-09-02).
+	if final and not bf.is_empty():
+		for k_bf in maxi(1, int(bf.get("objets", 1))):
+			var ob := generer_objet(str(loot._base_pour(rng, profondeur, true)), profondeur, {"boss": cible.name_key}, str(bf.get("rarete_min", "rare")))
+			if not ob.is_empty():
+				uids.append(ob.uid)
 	# Le boss d'un donjon : un artefact, garanti si le donjon est majeur (Trésors et artefacts).
 	if bool(cible.get("chain_gauge", false)) and lieu != "camp" and lr.drops.has("artefact"):
 		var majeur := int(donjon.get("etages", 1)) >= int(lr.drops.artefact.etages_majeur)
@@ -7817,7 +7898,7 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 			EventBus.dispatcher()
 			return true
 	# Une cellule corrompue happe qui y met le pied (designer 2026-09-01, point 51).
-	if e.controle == "joueur" and lieu == "camp" and monde != null and entrer_donjon_corrompu(e):
+	if e.controle == "joueur" and lieu == "camp" and monde != null and entrer_donjon_de_la_cellule(e):
 		EventBus.dispatcher()
 		return true
 	return true

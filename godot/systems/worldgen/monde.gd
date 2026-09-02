@@ -24,6 +24,11 @@ var contenants_hors: Dictionary = {}   # Vector2i → {idx local: [uids]}
 var dormants: Dictionary = {}          # Vector2i → [êtres] hors fenêtre
 var explores: Dictionary = {}          # Vector2i (chunk de 32) → true : bit d'exploration (minimap, sauvegardé)
 var teintes: Dictionary = {}           # Vector2i (chunk) → Color : teinte dominante, calculée une fois
+# La carte du monde se REDESSINAIT entièrement à chaque ouverture : vingt-cinq sondes de tectonique par
+# cellule, sur toutes les cellules de la vue, à chaque image. Le relief d'une cellule ne change jamais —
+# il se calcule donc une fois et se garde, ici et dans la sauvegarde (designer 2026-09-02).
+var carte_cache: Dictionary = {}       # Vector2i (cellule) → PackedByteArray : 3 octets par sous-point
+var carte_cache_sp: int = 0            # le nombre de sous-points par côté du cache : s'il change, le cache est périmé
 var delta: Dictionary = {}             # Vector2i (cellule) → int : dérive de la corruption, borné (sauvegardé)
 var foyers: Dictionary = {}            # Vector2i (cellule) → {actif, majeur, generation, repit, nettoye_tick} (donjons connus)
 var semaine_courante: int = 0          # dernière semaine passée (ticks / ticks_par_semaine)
@@ -256,6 +261,87 @@ func _cr() -> Dictionary:
 	return planete.get("corruption", {})
 
 
+## Ce qu'une case de départ a sous la main, sur SA masse de terre (designer 2026-09-02) : combien de
+## gouffres, combien de villes, et de combien de royaumes différents. Une graine qui pose le camp sur
+## un îlot désert donne une partie sans rien à faire — et on ne s'en aperçoit qu'après avoir joué une
+## heure. On compte donc avant de commencer.
+##
+## Deux raccourcis assumés, pour que le calcul tienne en une fraction de seconde. On ne parcourt pas
+## la masse de terre entière mais un **voisinage** — un gouffre à l'autre bout d'un continent n'est de
+## toute façon pas « sous la main ». Et on n'inspecte pas chaque cellule : les gouffres se déduisent
+## des germes de région, les villes des capitales des royaumes du secteur. C'est exact pour ce qu'on
+## cherche, et cent fois moins cher qu'un balayage.
+func inventaire_depart(cell: Vector2i) -> Dictionary:
+	var cfg: Dictionary = planete.get("depart_garanti", {})
+	var rayon := int(cfg.get("rayon_cellules", 30))
+	var cont: Dictionary = surface.continent_de(cell)
+	if cont.is_empty():
+		return {"gouffres": 0, "villes": 0, "royaumes": 0}
+	var id_cont: int = int(cont.id)
+	var gouffres := 0
+	var pas := surface._pas_region()
+	var vus := {}
+	for dy in range(-rayon, rayon + 1, maxi(1, pas / 2)):
+		for dx in range(-rayon, rayon + 1, maxi(1, pas / 2)):
+			var g: Vector2i = surface.germe_region(cell + Vector2i(dx, dy))
+			if vus.has(g):
+				continue
+			vus[g] = true
+			var r: Dictionary = surface.region_de(cell + Vector2i(dx, dy))
+			var cg: Vector2i = Vector2i(r.get("cellule", Vector2i(-9999, -9999)))
+			if cg.x == -9999 or maxi(absi(cg.x - cell.x), absi(cg.y - cell.y)) > rayon:
+				continue
+			if int(surface.continent_de(cg).get("id", -1)) == id_cont and not gouffre_de(cg).is_empty():
+				gouffres += 1
+	var royaumes := {}
+	var villes := 0
+	var s_min := surface.secteur_de(cell - Vector2i(rayon, rayon))
+	var s_max := surface.secteur_de(cell + Vector2i(rayon, rayon))
+	for sy in range(s_min.y, s_max.y + 1):
+		for sx in range(s_min.x, s_max.x + 1):
+			for roy in surface.royaumes_secteur(Vector2i(sx, sy)).values():
+				var cap: Vector2i = Vector2i(roy.capital_poi)
+				if maxi(absi(cap.x - cell.x), absi(cap.y - cell.y)) > rayon:
+					continue
+				if int(surface.continent_de(cap).get("id", -1)) != id_cont:
+					continue
+				villes += 1
+				royaumes[str(roy.id)] = true
+	return {"gouffres": gouffres, "villes": villes, "royaumes": royaumes.size()}
+
+
+## La case de départ tient-elle ses promesses ?
+func depart_valable(cell: Vector2i) -> bool:
+	if not surface.terre_a(cell):
+		return false
+	var cfg: Dictionary = planete.get("depart_garanti", {})
+	var inv := inventaire_depart(cell)
+	return int(inv.gouffres) >= int(cfg.get("gouffres_min", 1)) \
+		and int(inv.villes) >= int(cfg.get("villes_min", 2)) \
+		and int(inv.royaumes) >= int(cfg.get("royaumes_min", 2))
+
+
+## Cherche autour de `origine` une case de départ qui tienne les promesses. À défaut, la première
+## case de TERRE trouvée : mieux vaut une partie pauvre qu'une partie dans l'océan.
+func chercher_depart(origine: Vector2i) -> Vector2i:
+	var cfg: Dictionary = planete.get("depart_garanti", {})
+	var rayon_max := int(cfg.get("rayon_recherche", 60))
+	var repli := Vector2i(-9999, -9999)
+	for r in range(0, rayon_max + 1, 3):
+		for dy in range(-r, r + 1, 3):
+			for dx in range(-r, r + 1, 3):
+				if r > 0 and absi(dx) < r and absi(dy) < r:
+					continue
+				var c: Vector2i = origine + Vector2i(dx, dy)
+				if not surface.terre_a(c):
+					continue
+				if repli.x == -9999:
+					repli = c
+				if depart_valable(c):
+					return c
+	return repli if repli.x != -9999 else origine
+
+
 ## Le gouffre de la région : un donjon infini, gratuit, dont un étage vidé le reste pour toujours
 ## (designer 2026-09-02). Il s'ouvre sur la cellule de sol qui fait le centre de sa région — un repère
 ## permanent, pas un événement : il ne s'éteint jamais, ne se repeuple pas et n'infecte rien.
@@ -270,6 +356,32 @@ func gouffre_de(cell: Vector2i) -> Dictionary:
 	return {"id": int(hash([surface.graine, cell.x, cell.y, "gouffre"]) & 0x7fffffff),
 		"region": str(r.id), "nom": str(r.nom), "cellule": cell,
 		"element": surface.element_dominant(cell)}
+
+
+## Les couleurs mémorisées d'une cellule de la carte, ou un tableau vide si on ne les a pas encore
+## calculées. `sp` : le nombre de sous-points par côté demandé — s'il a changé, le souvenir est périmé.
+func carte_couleurs(cell: Vector2i, sp: int) -> PackedColorArray:
+	if carte_cache_sp != sp or not carte_cache.has(cell):
+		return PackedColorArray()
+	var octets: PackedByteArray = carte_cache[cell]
+	var res := PackedColorArray()
+	for i in octets.size() / 3:
+		res.append(Color8(octets[i * 3], octets[i * 3 + 1], octets[i * 3 + 2]))
+	return res
+
+
+## Retient les couleurs d'une cellule. Trois octets par sous-point : une cellule pèse 75 octets à
+## cinq sous-points, et la sauvegarde ne garde que les cellules qu'on a réellement regardées.
+func carte_retenir(cell: Vector2i, sp: int, couleurs: PackedColorArray) -> void:
+	if carte_cache_sp != sp:
+		carte_cache.clear()
+		carte_cache_sp = sp
+	var octets := PackedByteArray()
+	for c in couleurs:
+		octets.append(clampi(roundi(c.r * 255.0), 0, 255))
+		octets.append(clampi(roundi(c.g * 255.0), 0, 255))
+		octets.append(clampi(roundi(c.b * 255.0), 0, 255))
+	carte_cache[cell] = octets
 
 
 ## Cette cellule porte-t-elle une entrée de donjon DESSINÉE ? Une entrée posée se voit et s'efface
@@ -429,7 +541,13 @@ func donjon_de_corruption(cell: Vector2i, jour: int) -> Dictionary:
 		depuis = mini(depuis, maxi(0, (jour - nettoye) / per))
 	# Le niveau n'a plus de plafond (point 62) : l'âge, ou le plancher géographique s'il est plus haut.
 	# Nettoyer un donjon lointain le ramène à son plancher, jamais à 1 : la marge reste la marge.
-	var plancher := int(round(float(cfg.get("niveau_par_cellule_distance", 0.0)) * eloignement(cell) * float(planete.monde_cellules) * 0.5))
+	# La pente géographique (designer 2026-09-02, choix 2) : le niveau monte avec l'éloignement du centre
+	# du monde — « le sud est calme, l'est est mortel ». Elle n'est pas droite mais **courbe** : linéaire,
+	# elle donnait déjà du niveau 13 au pied du camp, sans berceau où apprendre à jouer. Avec un exposant,
+	# le centre reste plat sur un bon rayon puis le niveau grimpe vite : on choisit sa difficulté en
+	# s'éloignant, et on ne se la fait pas imposer par l'endroit où la partie a commencé.
+	var loin_n := pow(eloignement(cell), float(cfg.get("niveau_courbe_distance", 1.0)))
+	var plancher := int(round(float(cfg.get("niveau_par_cellule_distance", 0.0)) * loin_n * float(planete.monde_cellules) * 0.5))
 	var el := str(surface.element_dominant(cell)) if surface.has_method("element_dominant") else "terre"
 	# La fusion (point 51) : le groupe de cellules contiguës donne un seul donjon, plus grand et plus
 	# fort — sa tête est la cellule de tête du groupe, pour que toutes y mènent au même endroit.

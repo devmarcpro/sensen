@@ -1,6 +1,7 @@
 {
   "name_key": "material.laiton.name",
   "category": "metal",
+  "palier": 2,
   "stats": {
     "durete": 18,
     "densite": 11,

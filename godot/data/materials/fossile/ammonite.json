@@ -1,6 +1,7 @@
 {
   "name_key": "material.ammonite.name",
   "category": "fossile",
+  "palier": 2,
   "stats": {
     "durete": 9,
     "densite": 9,

@@ -1,6 +1,7 @@
 {
   "name_key": "material.sable.name",
   "category": "terre",
+  "palier": 1,
   "stats": {
     "durete": 2,
     "densite": 9,

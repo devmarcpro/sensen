@@ -1,6 +1,7 @@
 {
   "name_key": "material.chene.name",
   "category": "bois",
+  "palier": 3,
   "stats": {
     "durete": 12,
     "densite": 6,

@@ -1,6 +1,7 @@
 {
   "name_key": "material.onyx.name",
   "category": "gemme",
+  "palier": 2,
   "stats": {
     "durete": 26,
     "densite": 9,

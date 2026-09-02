@@ -1,6 +1,7 @@
 {
   "name_key": "material.calcaire.name",
   "category": "roche",
+  "palier": 1,
   "stats": {
     "durete": 12,
     "densite": 13,

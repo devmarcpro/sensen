@@ -1,6 +1,7 @@
 {
   "name_key": "material.jade.name",
   "category": "gemme",
+  "palier": 4,
   "stats": {
     "durete": 26,
     "densite": 10,
