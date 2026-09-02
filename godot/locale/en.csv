@@ -977,6 +977,7 @@ ui.hotbar.objet,"{nom} ×{n}"
 ui.hotbar.selection,"[{k} {nom}]"
 ui.lieu,"place: {a} {pa} % · {b} {pb} %"
 ui.menu.arene,Debug: next arena then the camp
+ui.menu.banc_objets,Debug: the object bench
 ui.menu.atelier,Workshop
 ui.menu.capacites,Abilities
 ui.menu.carte,World map

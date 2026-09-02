@@ -27,10 +27,11 @@ var menu_contextuel_objet: PopupMenu   # clic droit sur un objet du sac (designe
 var barres_perso: BarresCreation   # vie, endurance, mana sous l'aperçu (designer, point 42)
 var composeur: Composeur      # le composeur en glisser-déposer (écran Composer)
 var corps: HBoxContainer      # liste + détail : caché quand le composeur est ouvert
-var boutons: HBoxContainer
+var boutons: HFlowContainer
 var entrees: Array = []                 # ce que chaque ligne de la liste représente
 var selection := 0
 var largeur_panneau := LARGEUR          # la largeur du panneau calculée au dernier `_dimensionner`
+var hauteur_panneau := HAUTEUR          # sa hauteur, même règle : une colonne ne demande jamais plus que ça
 var parties_listees: Array = []         # l'écran Charger : {slot, resume} par partie (designer 2026-09-02)
 var minuterie := 0.0
 var pnj_id := ""                     # le PNJ du dialogue / du commerce en cours
@@ -106,7 +107,7 @@ func _ready() -> void:
 	apercu_monde.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	droite.add_child(apercu_monde)
 	cadre_perso = Control.new()   # Création : le personnage en grand, au-dessus du détail
-	cadre_perso.custom_minimum_size = Vector2(0, 380)
+	cadre_perso.custom_minimum_size = Vector2(0, 380)   # replacé à la hauteur réelle par `rafraichir`
 	cadre_perso.size_flags_vertical = Control.SIZE_EXPAND_FILL   # il prend la hauteur offerte (point 67)
 	cadre_perso.size_flags_stretch_ratio = float(GameData.config("styles").get("creation", {}).get("part_apercu", 2.6))
 	cadre_perso.visible = false
@@ -141,13 +142,21 @@ func _ready() -> void:
 	detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	detail.size_flags_stretch_ratio = float(GameData.config("styles").get("creation", {}).get("part_detail", 1.0))
+	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART   # une ligne longue se replie au lieu de sortir du panneau (point 67)
+	detail.fit_content = false
+	detail.clip_contents = true
 	detail.add_theme_font_size_override("normal_font_size", 13)
 	droite.add_child(detail)
 	penta_objet = Composeur.PentagrammeSort.new()
 	penta_objet.visible = false
 	droite.add_child(penta_objet)
 	droite.add_child(apercu_sort)
-	boutons = HBoxContainer.new()
+	# La rangée d'actions passe à la ligne quand elle ne tient plus (point 67). Le `HFlowContainer` avait
+	# échoué sur les colonnes de l'inventaire — il décide sur les tailles minimales des enfants, que ces
+	# colonnes ne déclarent pas. Ici c'est l'inverse : un Button déclare exactement la largeur de son
+	# texte, donc le passage à la ligne tombe juste. Dix actions sur un objet équipable sortaient du
+	# panneau par la droite, et « Fermer » — la seule dont on ne peut pas se passer — était la coupée.
+	boutons = HFlowContainer.new()
 	v.add_child(boutons)
 
 
@@ -167,6 +176,7 @@ func _dimensionner() -> void:
 	var l := minf(maxf(LARGEUR, v.x * PART.x), v.x)
 	var h := minf(maxf(HAUTEUR, v.y * PART.y), v.y)
 	largeur_panneau = l   # la largeur DE CE TOUR : `panneau.size` est encore celle du tour d'avant
+	hauteur_panneau = h   # et sa hauteur : les minimums en pixels du contenu s'y mesurent (point 67)
 	panneau.custom_minimum_size = Vector2(l, h)
 	panneau.set_anchor_and_offset(SIDE_LEFT, 0.5, -l / 2.0)
 	panneau.set_anchor_and_offset(SIDE_TOP, 0.5, -h / 2.0)
@@ -531,7 +541,7 @@ func rafraichir() -> void:
 	hotbar_ecran.visible = courant == "inventaire" or courant == "capacites"
 	atelier_visuel.visible = courant == "atelier"
 	liste.visible = not (courant in ["inventaire", "atelier"])
-	penta_objet.visible = courant == "inventaire"
+	penta_objet.visible = courant == "inventaire"   # la place qu'on lui laisse se décide plus bas, à la hauteur connue
 	# Chaque écran demandait une largeur en pixels fixes pour sa colonne de droite ; additionnée à la
 	# liste (340 px), la somme dépassait une fenêtre étroite et le contenu sortait du cadre. Ces
 	# largeurs sont désormais des PARTS du panneau, plafonnées à la valeur d'origine (point 67).
@@ -543,6 +553,12 @@ func rafraichir() -> void:
 	# largeur brute laissait les colonnes déborder d'une trentaine de pixels, juste assez pour manger
 	# la fin de chaque ligne de texte. On travaille donc sur la largeur UTILE.
 	var large := largeur_panneau - 48.0
+	# Même raisonnement en HAUTEUR, et c'est là que ça coupait vraiment : le panneau de l'inventaire
+	# demandait 724 px de haut quoi qu'il arrive (détail 340 + pentagramme 222 + en-têtes), donc il
+	# débordait de toute fenêtre plus courte — et un PanelContainer ne rétrécit jamais sous le minimum
+	# de son contenu, si bien que `custom_minimum_size` ne le retenait pas. La sonde des écrans le
+	# mesure maintenant à chaque passage. On réserve le titre, la hotbar et la rangée de boutons.
+	var haut := maxf(220.0, hauteur_panneau - 150.0)
 	var part_droite := func(px: float, part: float) -> float: return minf(px, maxf(120.0, large * part))
 	liste.custom_minimum_size = Vector2(minf(float(GameData.config("styles").get("ecrans", {}).get("liste_min", 340.0)), large * 0.42), 0)
 	if courant == "monde":   # la carte du monde prend presque toute la fenêtre (designer, point 49)
@@ -550,7 +566,7 @@ func rafraichir() -> void:
 		droite.size_flags_stretch_ratio = 3.0
 		detail.size_flags_vertical = Control.SIZE_SHRINK_END   # le texte se tasse : la carte prend le reste
 		detail.custom_minimum_size = Vector2(0, 44)
-		apercu_monde.custom_minimum_size = Vector2(0, 880)
+		apercu_monde.custom_minimum_size = Vector2(0, minf(880.0, haut * 0.92))
 	elif courant == "inventaire":
 		# L'inventaire a quatre colonnes de front : grille d'équipement, avatar, fiche, détail. On sert
 		# d'abord les trois qui portent de l'information, et le détail prend ce qui reste — jamais moins
@@ -558,7 +574,13 @@ func rafraichir() -> void:
 		droite.custom_minimum_size = Vector2(clampf(large - 500.0, 200.0, 360.0), 0)
 		droite.size_flags_stretch_ratio = 0.9
 		detail.size_flags_vertical = Control.SIZE_FILL   # le Wu Xing de l'objet juste sous le détail, pas au fond du panneau
-		detail.custom_minimum_size = Vector2(0, 340)
+		# Le détail prend la moitié haute, le Wu Xing de l'objet un tiers, et les deux se rabotent
+		# ensemble quand la fenêtre raccourcit : c'est ce qui empêche la colonne de pousser le panneau
+		# hors de l'écran. Sous 96 px le pentagramme n'est plus lisible — il s'efface alors.
+		detail.custom_minimum_size = Vector2(0, clampf(haut * 0.48, 110.0, 340.0))
+		var cote_penta := clampf(haut * 0.34, 0.0, Composeur.PentagrammeSort.TAILLE)
+		penta_objet.visible = cote_penta >= 96.0
+		penta_objet.custom_minimum_size = Vector2(0, cote_penta + 18.0 if cote_penta >= 96.0 else 0.0)
 		inventaire_visuel.ajuster_largeur(large - droite.custom_minimum_size.x)
 		inventaire_visuel.reconstruire()
 	elif courant == "atelier":
@@ -1903,7 +1925,7 @@ func _portrait_partie(slot: String) -> void:
 ## Le menu (Tab) : les écrans et les actions générales (Écrans d'interface, contrôles).
 func _construire_menu(_j: Dictionary) -> void:
 	titre.text = tr("ui.ecran.menu")
-	var ids: Array = ["inventaire", "atelier", "feuille", "capacites", "carte", "gestion", "registre", "sauvegarder", "minimap_zoom", "minimap_masquer", "titre", "arene", "recharger", "fermer"]
+	var ids: Array = ["inventaire", "atelier", "feuille", "capacites", "carte", "gestion", "registre", "sauvegarder", "minimap_zoom", "minimap_masquer", "titre", "arene", "banc_objets", "recharger", "fermer"]
 	for id in ids:
 		if id in ["carte", "gestion"] and main.sim.lieu != "camp":
 			continue

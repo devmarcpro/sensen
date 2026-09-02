@@ -165,7 +165,12 @@ func _ready() -> void:
 				scene.ecrans.ouvrir("commerce")
 	if not arene_nom.is_empty():
 		var idx: int = scene.arenes.find(arene_nom)
-		if idx < 0:
+		if idx < 0 and GameData.catalogues.get("prototype_arenas", {}).has(arene_nom):
+			# Les bancs d'essai sont hors du cycle des arènes (ils passeraient en arène de démarrage) :
+			# on les nomme donc directement, comme le menu le fait (point 74).
+			scene.arene_banc = arene_nom
+			scene._charger()
+		elif idx < 0:
 			print("ARENE inconnue : ", arene_nom, " — connues : ", scene.arenes)
 		else:
 			scene.arene_courante = idx

@@ -714,6 +714,7 @@ ui.menu.sauvegarder,Sauvegarder
 ui.menu.minimap_zoom,Minimap : zoom
 ui.menu.minimap_masquer,Minimap : afficher / masquer
 ui.menu.arene,Débogage : arène suivante puis le camp
+ui.menu.banc_objets,Débogage : le banc d'objets
 ui.menu.recharger,Débogage : recharger les données
 ui.menu.fermer,Fermer
 ui.ecran.contexte,"OPTIONS — ({x},{y}) (Entrée : choisir · Échap : fermer)"

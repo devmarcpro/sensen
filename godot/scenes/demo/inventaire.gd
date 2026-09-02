@@ -14,6 +14,8 @@ const LARGEURS := {"type": 125.0, "qualite": 70.0, "poids": 60.0, "quantite": 50
 
 var ecrans: Node
 var cadre_avatar: Control
+var rangee_haute: HBoxContainer   # slots + personnage + fiche
+var grille_slots: GridContainer   # la grille d'équipement : sa largeur RÉELLE sert au calcul de place
 var fiche: FichePorteur   # la fiche du porteur : stats, jauges, charge (designer, point 64)
 var avatar: Paperdoll
 var cases: Dictionary = {}        # slot → CaseSlot
@@ -29,14 +31,14 @@ func _ready() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
 	add_theme_constant_override("separation", 8)
-	var haut := HBoxContainer.new()   # les slots à gauche du personnage
-	haut.add_theme_constant_override("separation", 16)
-	add_child(haut)
-	var grille_slots := GridContainer.new()
+	rangee_haute = HBoxContainer.new()   # les slots à gauche du personnage
+	rangee_haute.add_theme_constant_override("separation", 16)
+	add_child(rangee_haute)
+	grille_slots = GridContainer.new()
 	grille_slots.columns = 5
 	grille_slots.add_theme_constant_override("h_separation", 6)
 	grille_slots.add_theme_constant_override("v_separation", 6)
-	haut.add_child(grille_slots)
+	rangee_haute.add_child(grille_slots)
 	for slot in ["main_principale", "main_secondaire", "casque", "cuirasse", "brassards", "jambieres", "bottes", "dos", "anneau_1", "anneau_2", "amulette", "carquois", "accessoire_1", "accessoire_2"]:
 		var c := CaseSlot.new()
 		c.inventaire = self
@@ -46,7 +48,7 @@ func _ready() -> void:
 	cadre_avatar = Control.new()
 	cadre_avatar.custom_minimum_size = Vector2(190, FichePorteur.hauteur_requise())   # le personnage en grand (designer, point 64), aussi haut que la fiche
 	cadre_avatar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	haut.add_child(cadre_avatar)
+	rangee_haute.add_child(cadre_avatar)
 	avatar = Paperdoll.new()
 	avatar.scale = Vector2(4.2, 4.2)
 	avatar.position = Vector2(95, 200)
@@ -56,7 +58,7 @@ func _ready() -> void:
 	fiche.custom_minimum_size = Vector2(230, FichePorteur.hauteur_requise())
 	fiche.clip_contents = true   # rien ne mord sur la liste du sac, même si la fiche grandit (point 67)
 	fiche.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	haut.add_child(fiche)
+	rangee_haute.add_child(fiche)
 	entete = HBoxContainer.new()   # l'en-tête triable
 	entete.add_theme_constant_override("separation", 0)
 	add_child(entete)
@@ -335,7 +337,13 @@ func ajuster_largeur(dispo: float) -> void:
 	# plutôt que d'écraser ce qui porte de l'information. La grille d'équipement (280 px) et la fiche
 	# (210 px) sont incompressibles — sous 210 px, les chiffres des jauges passent hors du cadre et
 	# s'évanouissent, ce qui est une autre façon de couper, plus sournoise puisque rien ne dépasse.
-	var reste := dispo - 280.0 - 210.0
+	# On mesurait la grille à 280 px et on oubliait les 32 px de séparation de la rangée : l'inventaire
+	# demandait donc 36 px de plus qu'annoncé, et le panneau sortait de la fenêtre de très peu — assez
+	# pour couper le bord droit du détail sans que rien n'ait l'air anormal. On prend maintenant la
+	# largeur que la grille déclare vraiment, séparations comprises (sonde des écrans, point 67).
+	var sep := float(rangee_haute.get_theme_constant("separation")) * 2.0
+	var l_grille: float = grille_slots.get_combined_minimum_size().x if grille_slots != null else 284.0
+	var reste := dispo - l_grille - 210.0 - sep
 	cadre_avatar.visible = reste >= 90.0
 	cadre_avatar.custom_minimum_size.x = clampf(reste, 0.0, 190.0)
 	fiche.custom_minimum_size.x = 210.0

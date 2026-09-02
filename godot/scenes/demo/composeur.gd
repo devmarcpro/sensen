@@ -689,13 +689,21 @@ class PentagrammeSort extends Control:
 		var wx: Dictionary = GameData.config("wuxing")
 		var elements: Array = wx.get("elements", ["bois", "feu", "terre", "metal", "eau"])
 		var teintes: Dictionary = wx.get("teintes", {})
-		draw_rect(Rect2(Vector2.ZERO, Vector2(TAILLE, TAILLE)), Color(0.06, 0.06, 0.08, 1.0))
-		draw_rect(Rect2(Vector2.ZERO, Vector2(TAILLE, TAILLE)), Color(0.6, 0.55, 0.4, 0.6), false, 1.0)
-		var centre := Vector2(TAILLE * 0.5, TAILLE * 0.5 + 6.0)
+		# Le pentagramme se dessinait à TAILLE fixe, quelle que soit la case qu'on lui donnait : dans une
+		# fenêtre courte il sortait par le bas du panneau (point 67). Il tient désormais dans SA boîte, et
+		# tout ce qu'il trace suit la même échelle.
+		var cote := minf(size.x, size.y - 18.0)
+		if cote < 60.0:
+			return
+		var k_ech := cote / TAILLE
+		var rayon := RAYON * k_ech
+		draw_rect(Rect2(Vector2.ZERO, Vector2(cote, cote)), Color(0.06, 0.06, 0.08, 1.0))
+		draw_rect(Rect2(Vector2.ZERO, Vector2(cote, cote)), Color(0.6, 0.55, 0.4, 0.6), false, 1.0)
+		var centre := Vector2(cote * 0.5, cote * 0.5 + 6.0 * k_ech)
 		var pts: Array[Vector2] = []
 		for k in elements.size():   # le cercle d'engendrement, le premier élément en haut
 			var a := -PI / 2.0 + TAU * float(k) / float(elements.size())
-			pts.append(centre + Vector2(cos(a), sin(a)) * RAYON)
+			pts.append(centre + Vector2(cos(a), sin(a)) * rayon)
 		var parts: Dictionary = plan.get("elements", {}) if not plan.is_empty() else {}
 		var total := 0.0
 		for v in parts.values():
@@ -724,17 +732,17 @@ class PentagrammeSort extends Control:
 			if part > poids:
 				poids = part
 				dominante = el
-			draw_circle(pts[k], 4.0 + 10.0 * part, Color(c.r, c.g, c.b, 0.35 + 0.65 * part) if part > 0.0 else Color(c.r, c.g, c.b, 0.3))
+			draw_circle(pts[k], (4.0 + 10.0 * part) * k_ech, Color(c.r, c.g, c.b, 0.35 + 0.65 * part) if part > 0.0 else Color(c.r, c.g, c.b, 0.3))
 			var etiquette := tr("element." + el) + (" %d %%" % roundi(part * 100.0) if part > 0.0 else "")
 			var dir := (pts[k] - centre).normalized()
-			draw_string(ThemeDB.fallback_font, pts[k] + dir * 14.0 + Vector2(-14.0, 4.0), etiquette, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.9, 0.9, 0.85))
+			draw_string(ThemeDB.fallback_font, pts[k] + dir * 14.0 * k_ech + Vector2(-14.0, 4.0), etiquette, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.9, 0.9, 0.85))
 		draw_string(ThemeDB.fallback_font, Vector2(6.0, 12.0), tr("ui.composeur.wuxing_legende"), HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0.7, 0.7, 0.65))
 		var legende: String
 		if dominante.is_empty():
 			legende = tr("ui.composeur.wuxing_vide")
 		else:
 			legende = tr("ui.composeur.wuxing").format({"dominante": tr("element." + dominante), "engendre": tr("element." + str(wx.engendre.get(dominante, ""))), "domine": tr("element." + str(wx.domine.get(dominante, "")))})
-		draw_string(ThemeDB.fallback_font, Vector2(2.0, TAILLE + 13.0), legende, HORIZONTAL_ALIGNMENT_LEFT, TAILLE - 4.0, 9, Color(0.85, 0.85, 0.8))   # bornée à son carré : pas de chevauchement avec l'aperçu
+		draw_string(ThemeDB.fallback_font, Vector2(2.0, cote + 13.0), legende, HORIZONTAL_ALIGNMENT_LEFT, size.x - 4.0, 9, Color(0.85, 0.85, 0.8))   # bornée à son carré : pas de chevauchement avec l'aperçu
 
 	static func _teinte(teintes: Dictionary, el: String) -> Color:
 		var t: Array = teintes.get(el, [0.7, 0.7, 0.7])

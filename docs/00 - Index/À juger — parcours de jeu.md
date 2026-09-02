@@ -193,3 +193,7 @@ Un callout daté dans la note liée (`> [!success] Tranché le <date>`) — la b
 - **Dépend de** : [[Vers la production]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]
 - **Voir aussi** : [[Prototype de combat — spécification]], [[Écrans d'interface]]
+
+> [!question] 2026-09-03 — **la sonde des écrans ne regarde pas le HUD**
+> La règle « rien n'est coupé » est désormais tenue par une sonde pour les huit écrans du panneau (inventaire, atelier, feuille, menu, options, capacités, quêtes, territoire). Le **HUD en jeu** n'y est pas : sur la capture du banc d'objets à 1200×700, la ligne « sac : Établi » passe sous le bloc des jauges et les libellés de la hotbar se serrent (« Attaque lourde » sur deux lignes minuscules). Le HUD n'a pas de cadre unique auquel comparer les rectangles — c'est ce qui rend l'extension de la sonde moins évidente qu'un copier-coller.
+> **Ce que je ferais** : donner au HUD un cadre nommé par zone (bandeau haut, bloc des jauges, hotbar) et faire vérifier par la sonde que ces zones ne se recouvrent pas. **Ce que je ne tranche pas** : c'est du game-feel autant que de la mise en page — la densité d'un HUD est un choix, pas un défaut.

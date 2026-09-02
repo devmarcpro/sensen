@@ -54,6 +54,9 @@ Un critère de performance à valider avant de passer à l'étape suivante. **Un
 > Les deux tournent en une poignée de secondes et disent des **chiffres**, là où une capture ne dit qu'une impression.
 
 
+> [!info] Ajout du 2026-09-03 — **la sonde des écrans**
+> `Godot --headless --path godot res://scenes/tests/sonde_ecrans.tscn` — huit écrans, quatre tailles de fenêtre, et l'échec nomme le fautif. À passer avec les autres avant de pousser dès qu'un écran change de mise en page : c'est la seule vérification qui rende durable la règle « rien n'est coupé », qu'une capture regardée une fois ne fait que constater.
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Budgets de performance]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]

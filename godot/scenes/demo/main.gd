@@ -18,6 +18,10 @@ var decouvert_dessine := -1                 # nombre de tuiles découvertes à l
 var sim: Simulation
 var arenes: Array[String] = []
 var arene_courante := 0
+## Le banc d'essai ouvert par le menu, s'il y en a un. Les bancs sont hors du cycle des arènes (Tab)
+## depuis qu'un banc en tête de liste devenait l'arène de démarrage ; ils restaient donc INATTEIGNABLES
+## (file d'attente du designer, point 74). On y va par le menu, nommément, et on en sort en rechargeant.
+var arene_banc := ""
 var joueur_id := ""
 var chemin_en_cours: Array[Vector2i] = []
 var minuterie_pas := 0.0
@@ -368,6 +372,7 @@ func _commencer_monde() -> void:
 	titre_ouvert = false
 	minimap.visible = true
 	arene_courante = arenes.size()   # une partie commence au camp, sur le monde (Début de partie)
+	arene_banc = ""   # une partie ne commence jamais sur un banc d'essai
 	_charger(fiche_monde)
 	sim.nom_partie = slot_neuf(tr(str(fiche_monde.get("name_key", "creature.aventurier.name"))))   # un dossier par partie
 	_kit_de_test()
@@ -506,7 +511,9 @@ func _charger(fiche: Dictionary = {}) -> void:
 	sim = Simulation.new(0x68EE)
 	sim.graine_monde = graine_monde
 	sim.fiche_joueur = fiche
-	if arene_courante >= arenes.size():
+	if not arene_banc.is_empty():
+		sim.charger_arene(arene_banc)
+	elif arene_courante >= arenes.size():
 		sim.charger_camp()   # Tab après les arènes : le camp de base (E sur l'entrée : le donjon)
 	else:
 		sim.charger_arene(arenes[arene_courante])
@@ -1344,7 +1351,12 @@ func _action_menu(id: String) -> void:
 			minimap.rafraichir(true)
 		"arene":
 			ecrans.fermer()
+			arene_banc = ""
 			arene_courante = (arene_courante + 1) % (arenes.size() + 1)
+			_charger()
+		"banc_objets":   # un coffre par catégorie de matériaux, un par type d'équipement (designer, point 74)
+			ecrans.fermer()
+			arene_banc = "banc_objets"
 			_charger()
 		"titre":
 			_ouvrir_titre()
@@ -1905,7 +1917,7 @@ func _segments(e: Dictionary) -> Array:
 func _maj_ui() -> void:
 	var j := joueur()
 	var g := sim.grille
-	var titre: String = tr("ui.camp").format({"biome": tr(str(GameData.catalogues.biomes.get(str(sim.camp_sauve.get("biome", "plaine_temperee")), {}).get("name_key", "")))}) if sim.lieu == "camp" else (tr(GameData.entree("prototype_arenas", arenes[arene_courante]).name_key) if sim.donjon.is_empty() else tr("ui.donjon").format({"theme": tr(GameData.entree("dungeon_themes", sim.donjon.theme).name_key), "etage": sim.donjon.etage, "etages": sim.donjon.etages, "salles": sim.donjon.salles}))
+	var titre: String = tr("ui.camp").format({"biome": tr(str(GameData.catalogues.biomes.get(str(sim.camp_sauve.get("biome", "plaine_temperee")), {}).get("name_key", "")))}) if sim.lieu == "camp" else (tr(GameData.entree("prototype_arenas", arene_banc if not arene_banc.is_empty() else arenes[arene_courante]).name_key) if sim.donjon.is_empty() else tr("ui.donjon").format({"theme": tr(GameData.entree("dungeon_themes", sim.donjon.theme).name_key), "etage": sim.donjon.etage, "etages": sim.donjon.etages, "salles": sim.donjon.salles}))
 	var lignes: Array[String] = [tr("ui.titre") + " · " + titre]
 	var mode := tr("ui.mode.combat") if sim.en_combat(j) else (tr("ui.mode.donjon") if sim.horloge_monde.mode == Horloge.Mode.ACTION else tr("ui.mode.exploration").format({"tps": sim.regles.r.ticks_par_seconde_exploration}))
 	if sim.lieu == "donjon" and bool(sim.donjon.get("corrompu", false)):   # le donjon corrompu dit sa difficulté (point 61)
