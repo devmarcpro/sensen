@@ -977,11 +977,7 @@ func hotbar_entrees(j: Dictionary) -> Array:
 				"capacite":
 					if int(a.ref) < j.get("capacites", []).size():
 						res[k] = {"type": "capacite", "ref": int(a.ref), "nom": tr(j.capacites[int(a.ref)].get("name_key", j.capacites[int(a.ref)].id))}
-				"parchemin":
-			visee_parchemin = str(en.ref)
-			visee_objet = ""
-			visee = -1
-		"objet":
+				"objet":
 					if str(a.ref) in j.sac and sim.items.has(str(a.ref)):
 						res[k] = {"type": "objet", "ref": str(a.ref), "nom": tr(sim.items[str(a.ref)].get("name_key", "?"))}
 				"arme":
@@ -1018,8 +1014,15 @@ func _hotbar(k: int) -> void:
 				visee = int(en.ref)
 				hotbar_sel = k
 			lourde_armee = false
+		"parchemin":   # un parchemin visé : le clic lit son sort, gratuitement (2026-09-02)
+			visee_parchemin = str(en.ref)
+			visee_objet = ""
+			visee = -1
+			hotbar_sel = k
+			lourde_armee = false
 		"objet":
 			visee_objet = str(en.ref)
+			visee_parchemin = ""
 			visee = -1
 			hotbar_sel = k
 			lourde_armee = false

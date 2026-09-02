@@ -45,7 +45,9 @@ Méthode, non négociable :
 - Ne touche jamais à .obsidian/.
 - Avant de pousser : la suite complète en tâche de fond (jamais pendant que tu
   édites un script de test), tools/audit_donnees.py, tools/i18n_couverture.py,
-  tools/check_vault.py, et une capture d'écran REGARDÉE. Si un écran change,
+  tools/check_vault.py, **tools/verif_scripts.py** (la suite ne charge JAMAIS les
+  scripts d'écran : une Parse Error dans main.gd la laisse verte et tue le jeu),
+  et une capture d'écran REGARDÉE. Si un écran change,
   refais sa capture du README.
 - Une pré-version tous les ~10 commits, **avec son exécutable** : construire depuis le tag
   (`git checkout <tag>`, export « Windows Desktop », retour sur main), zipper, joindre à la release.

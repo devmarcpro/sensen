@@ -1025,6 +1025,9 @@ module.corps_a_corps.name,Close Quarters
 module.corruption.name,Corruption
 module.croix.name,Cross
 module.portee_hast.name,Polearm reach
+module.portee_en_ligne.name,In line
+module.portee_en_biais.name,Diagonal
+module.portee_zigzag.name,Zigzag
 module.portee_mortier.name,Mortar
 module.couronne.name,Crown
 module.portee_sur_soi.name,On self

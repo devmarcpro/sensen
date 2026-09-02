@@ -168,6 +168,7 @@ func _ready() -> void:
 	_lancer("test_familles_non_vides")
 	_lancer("test_kit_de_depart")
 	_lancer("test_parchemins")
+	_lancer("test_portees_a_motif")
 	_lancer("test_types_ennemis")
 	_lancer("test_loot_assemble")
 	_lancer("test_budgets")
@@ -2879,7 +2880,7 @@ func test_creation_de_sorts() -> void:
 		par_type[t].append(str(mid))
 	for t in par_type.keys():
 		par_type[t].sort()
-	verifier(par_type.get("noyau", []).size() >= 86 and par_type.get("forme", []).size() == 16 and par_type.get("portee", []).size() == 8, "le catalogue : %d noyaux, %d formes, %d portees" % [par_type.get("noyau", []).size(), par_type.get("forme", []).size(), par_type.get("portee", []).size()])
+	verifier(par_type.get("noyau", []).size() >= 86 and par_type.get("forme", []).size() == 16 and par_type.get("portee", []).size() == 11, "le catalogue : %d noyaux, %d formes, %d portées (dont trois à motif)" % [par_type.get("noyau", []).size(), par_type.get("forme", []).size(), par_type.get("portee", []).size()])
 
 	# 1. chaque noyau, seul : un plan complet et cohérent
 	var noyaux_ko: Array[String] = []
@@ -7811,3 +7812,22 @@ func test_parchemins() -> void:
 	s.pas(j.horloge)
 	s.intention(j.id, {"type": "parchemin", "objet": par.uid, "cible": loup.pos})
 	verifier(not (par.uid in j.sac), "à zéro charge, le parchemin tombe en poussière")
+
+## Les portées à motif (designer 2026-09-02) : la zone de lancer a une forme — alignée, diagonale, en
+## escalier — au lieu d'être tout le disque.
+func test_portees_a_motif() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var o: Vector2i = j.pos
+	verifier(Simulation.motif_atteint("", o, o + Vector2i(3, 2)), "sans motif, tout le disque est atteignable")
+	verifier(Simulation.motif_atteint("ligne", o, o + Vector2i(4, 0)) and not Simulation.motif_atteint("ligne", o, o + Vector2i(3, 2)), "en ligne : aligné oui, oblique non")
+	verifier(Simulation.motif_atteint("diagonale", o, o + Vector2i(3, 3)) and not Simulation.motif_atteint("diagonale", o, o + Vector2i(3, 2)), "en biais : la diagonale exacte, rien d'autre")
+	verifier(Simulation.motif_atteint("zigzag", o, o + Vector2i(3, 2)) and not Simulation.motif_atteint("zigzag", o, o + Vector2i(4, 0)), "zigzag : l'escalier oui, la ligne droite non")
+	var cap := Capacites.new(GameData.catalogues["modules"])
+	var p_l: Dictionary = cap.assembler(["en_ligne", "point", "etincelle"], 5, "1d4", {})
+	verifier(str(p_l.get("motif", "")) == "ligne" and int(p_l.portee.y) == 6, "le plan porte le motif de sa portée (%s, jusqu'à %d)" % [str(p_l.get("motif", "")), int(p_l.portee.y)])
+	# En jeu : la même cible est visable en ligne, pas en biais.
+	var droit: Vector2i = o + Vector2i(0, -4)
+	var oblique: Vector2i = o + Vector2i(3, -2)
+	verifier(s.capacite_visable(j, p_l, droit) or not s.grille.dans(droit), "en ligne : une cible alignée à 4 est visable")
+	verifier(not s.capacite_visable(j, p_l, oblique), "en ligne : une cible oblique ne l'est pas")

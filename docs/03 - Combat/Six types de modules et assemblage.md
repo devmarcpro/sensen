@@ -105,6 +105,11 @@ Le même vocabulaire produit une attaque, un contrôle de zone, un piège et un 
 > Une condition **paie désormais en ticks ce qu'elle promet**, et le prix se **déduit du don** au lieu d'être écrit fichier par fichier : `cout_par_de` ticks par dé accordé, `cout_par_dixieme_mult` par tranche de multiplicateur, plus les remises de ticks ou de portée qu'elle offre (`combat_rules.conditions`). Frapper de dos coûte donc trois fois plus cher à composer que la Marque, parce qu'il rapporte trois fois plus — et si la condition est fausse au lancer, le sort ne part pas et ne rend que la moitié de ces ticks. Le pari devient réel. Rien à maintenir à la main : une condition neuve est tarifée par sa propre générosité.
 
 
+> [!success] Codé le 2026-09-02 — des portées qui ont une **forme d'atteinte** (designer)
+> « rajoute des modules de portée en ligne, en zig-zag, etc. ». Jusqu'ici une portée était un **disque** : tout ce qui est entre `min` et `max`. Une portée porte désormais aussi un **motif** — la figure que dessinent les cases où l'on peut poser le sort. Trois de plus : **En ligne** (uniquement les cases alignées avec le lanceur, même rangée ou même colonne — 1-6, +3 ticks), **En biais** (les quatre diagonales exactes — 1-5, +3), **Zigzag** (les cases en escalier, où les deux écarts diffèrent d'au plus un — 1-5, +4). Elles portent aussi loin qu'un jet, pour moins de ticks qu'`Au loin`, mais **il faut se placer** : c'est une portée qui se mérite par la position au lieu de se payer en temps.
+> Rien à faire côté écran : la zone verte en jeu et l'aperçu du composeur passent tous deux par `capacite_visable`, donc ils dessinent le motif tout seuls.
+
+
 ## Liens
 - **Dépend de** : [[Vocabulaire des modules — six axes]], [[Structure compétences-modules-slots]]
 - **Alimente** : [[Familles de capacités de la grille]], [[Modules]], [[Jauge de chaîne Wu Xing]]

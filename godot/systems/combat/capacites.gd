@@ -58,7 +58,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 		"geometrie": "point", "origine": "cible", "portee": Vector2i(1, 1), "taille": 1, "ligne_de_vue": true,
 		"ticks": 0, "monnaie": "", "ressource": 0, "des": null, "des_bonus": 0, "mult": 1.0,
 		"elements": {}, "effets": [], "conditions": [], "drapeaux": {}, "parametres": {},
-		"liaisons": [], "charge_suivante": {}, "charges_sup": [], "formes_sup": [], "fois": 1, "portee_posee": false,
+		"liaisons": [], "charge_suivante": {}, "charges_sup": [], "formes_sup": [], "fois": 1, "portee_posee": false, "motif": "",
 	}
 	var pas_rep := int(GameData.config("combat_rules").get("surface", {}).get("increment_repetition", 1))   # répéter incrémente d'un cran (2026-09-01)
 	var alternance := false   # Alternance (Modules) : la séquence a droit à deux noyaux
@@ -194,6 +194,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 					continue
 				plan.portee = Vector2i(int(pb[0]), int(pb[1]))
 				plan.origine = str(m.get("origine", "cible"))   # la portée dit où la figure s'ancre (2026-09-01)
+				plan["motif"] = str(m.get("motif", ""))   # et parfois la FORME de son atteinte (2026-09-02)
 				plan.ligne_de_vue = bool(m.get("ligne_de_vue", true))
 				plan["portee_posee"] = true
 				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)

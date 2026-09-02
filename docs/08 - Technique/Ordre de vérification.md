@@ -38,6 +38,12 @@ Un critère de performance à valider avant de passer à l'étape suivante. **Un
 > Deux drapeaux de plus au parcours : **`--invincible`** (PV, endurance et mana rendus à chaque image) pour mesurer ce que le jeu **donne** plutôt que si l'on survit, et **`--inventaire <chemin>`** qui écrit le sac complet en JSON à la fin — une entrée par objet avec son nom rendu, son type, son matériau, son espèce, sa qualité, sa rareté, son poids, son vecteur Wu Xing, ses affixes et ses composants. Six étages, 97 objets : c'est ce qui a montré que 41 % du butin est une fiole non identifiée et que les boucliers ne sont pas assemblés.
 
 
+> [!bug] Corrigé le 2026-09-02 — la v0.3.0-alpha ne se lançait pas, et la suite était verte
+> Le designer : « le jeu ne se lance pas, même l'alpha 0.3.0 sur le repo » — puis « je crois que le problème est sur `main.gd` ». Exact. En ajoutant le parchemin à la hotbar, mon remplacement de texte a visé la **mauvaise occurrence** de `"objet":` : le cas s'est inséré au milieu du `match` de `hotbar_entrees` au lieu de celui de la sélection, et `main.gd` ne compilait plus. **Parse Error dès le chargement, jeu mort au lancement.**
+> **Pourquoi rien ne l'a vu** : la suite de tests ne charge **jamais** `scenes/demo/*.gd`. Elle instancie la simulation, pas les écrans. Elle est donc restée verte sur un jeu qui ne démarrait pas, et j'ai publié une release à partir de là.
+> **Le garde-fou** : `tools/verif_scripts.py` ouvre la scène principale dans Godot et **refuse** toute *Parse Error*, *Compilation failed* ou *SCRIPT ERROR*. Il tourne avec les autres outils avant chaque commit et chaque publication. Une suite verte ne prouvait pas que le jeu démarre ; maintenant si.
+
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Budgets de performance]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]

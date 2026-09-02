@@ -1,0 +1,21 @@
+{
+  "id": "en_ligne",
+  "nom": "En ligne",
+  "name_key": "module.portee_en_ligne.name",
+  "module_type": "portee",
+  "description": "uniquement les cases **alignées** avec le lanceur — se placer, pas payer",
+  "classe_signature": null,
+  "tags": [
+    "portee"
+  ],
+  "portee_base": [
+    1,
+    6
+  ],
+  "surcout_ticks": 3,
+  "ligne_de_vue": true,
+  "origine": "cible",
+  "motif": "ligne",
+  "famille": "Portée",
+  "style": "neutre"
+}

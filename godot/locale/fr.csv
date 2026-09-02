@@ -1644,6 +1644,9 @@ module.corps_a_corps.name,Corps à corps
 module.corruption.name,Corruption
 module.croix.name,Croix
 module.portee_hast.name,Hast
+module.portee_en_ligne.name,En ligne
+module.portee_en_biais.name,En biais
+module.portee_zigzag.name,Zigzag
 module.portee_mortier.name,Mortier
 module.couronne.name,Couronne
 module.portee_sur_soi.name,Sur soi

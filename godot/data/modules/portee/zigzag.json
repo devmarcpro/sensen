@@ -1,0 +1,21 @@
+{
+  "id": "zigzag",
+  "nom": "Zigzag",
+  "name_key": "module.portee_zigzag.name",
+  "module_type": "portee",
+  "description": "les cases **en escalier** : les deux écarts ne diffèrent que d'un",
+  "classe_signature": null,
+  "tags": [
+    "portee"
+  ],
+  "portee_base": [
+    1,
+    5
+  ],
+  "surcout_ticks": 4,
+  "ligne_de_vue": true,
+  "origine": "cible",
+  "motif": "zigzag",
+  "famille": "Portée",
+  "style": "neutre"
+}

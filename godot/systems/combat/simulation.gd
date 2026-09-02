@@ -9182,6 +9182,8 @@ func capacite_visable(e: Dictionary, plan: Dictionary, cible: Vector2i) -> bool:
 	var d := Grille.portee_entre(e.pos, cible)   # une portée est un disque, pas un carré (designer 2026-09-01)
 	if d < plan.portee.x or d > plan.portee.y:
 		return false
+	if not motif_atteint(str(plan.get("motif", "")), e.pos, cible):   # certaines portées ont une forme (2026-09-02)
+		return false
 	return not plan.ligne_de_vue or grille.ligne_de_vue(e.pos, cible)
 
 
@@ -10706,4 +10708,20 @@ func _lire_parchemin(e: Dictionary, uid: String, cible: Vector2i, tick: int) -> 
 	if int(it.charges) <= 0:   # le parchemin tombe en poussière
 		e.sac.erase(uid)
 		EventBus.emettre(&"journal", [&"journal.parchemin_use", {"nom": e.name_key}])
+	return true
+
+## La forme d'atteinte d'une portée (designer 2026-09-02) : sans motif, tout le disque ; sinon la figure
+## que dessinent les cases où le sort peut être posé. Il faut se placer au lieu de payer des ticks.
+static func motif_atteint(motif: String, de: Vector2i, vers: Vector2i) -> bool:
+	if motif.is_empty():
+		return true
+	var dx := absi(vers.x - de.x)
+	var dy := absi(vers.y - de.y)
+	match motif:
+		"ligne":
+			return dx == 0 or dy == 0
+		"diagonale":
+			return dx == dy and dx > 0
+		"zigzag":
+			return dx > 0 and dy > 0 and absi(dx - dy) <= 1
 	return true

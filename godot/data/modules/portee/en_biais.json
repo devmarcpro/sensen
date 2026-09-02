@@ -1,0 +1,21 @@
+{
+  "id": "en_biais",
+  "nom": "En biais",
+  "name_key": "module.portee_en_biais.name",
+  "module_type": "portee",
+  "description": "uniquement les quatre **diagonales** exactes",
+  "classe_signature": null,
+  "tags": [
+    "portee"
+  ],
+  "portee_base": [
+    1,
+    5
+  ],
+  "surcout_ticks": 3,
+  "ligne_de_vue": true,
+  "origine": "cible",
+  "motif": "diagonale",
+  "famille": "Portée",
+  "style": "neutre"
+}
