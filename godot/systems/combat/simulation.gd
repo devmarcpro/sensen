@@ -7946,7 +7946,7 @@ func _premier_sur_trajectoire(e: Dictionary, cible: Dictionary) -> Dictionary:
 ## Ce que verrait un tir : {ok, raison, bloqueur} — pour l'UI (la cible grisée, la tuile bloquante).
 func verifier_tir(e: Dictionary, cible: Dictionary) -> Dictionary:
 	var arme := Etres.arme(e, items)
-	var fonct: Dictionary = fonctionnalites.get(arme.get("functionality", ""), {})
+	var fonct: Dictionary = fonct_arme(arme)
 	if fonct.is_empty() or not est_projectile(fonct):
 		return {"ok": true}
 	if e.munitions <= 0:
@@ -8746,7 +8746,7 @@ func _resoudre_action_engagee(e: Dictionary, a: Dictionary) -> void:
 	match str(a.type):
 		"arme":
 			var arme := Etres.arme(e, items)
-			var fonct: Dictionary = fonctionnalites.get(arme.get("functionality", ""), {})
+			var fonct: Dictionary = fonct_arme(arme)
 			var cible_du_lot: bool = not cible.is_empty() and cible.id in lot_simultane   # tuée dans le même lot : elle était vivante à l'instant du coup
 			if cible.is_empty() or (not cible.vivant and not cible_du_lot) or not _cible_atteignable(e, cible, _portee_effective(e, arme, fonct), true):
 				return   # la cible s'est dérobée : le coup passe dans le vide
@@ -9246,7 +9246,7 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 ## un sceptre porte les sorts de mana, une épée ceux d'endurance). C'est aussi ce que l'écran Composer lit.
 func plan_sequence(e: Dictionary, sequence: Array) -> Dictionary:
 	var arme := Etres.arme(e, items)
-	var fonct: Dictionary = fonctionnalites.get(arme.get("functionality", ""), {})
+	var fonct: Dictionary = fonct_arme(arme)
 	var ticks_arme := regles.ticks_attaque(fonct, false, arme) if not fonct.is_empty() else int(regles.r.actions.attaque_base)
 	var plan := capacites.assembler(sequence, ticks_arme, fonct.get("degats_des", "1d4"), _vecteur_arme_de(e, arme), e.competences_eff)
 	plan["arme"] = arme
@@ -10792,6 +10792,15 @@ func mult_serments(e: Dictionary) -> float:
 
 ## L'arme d'une main vide : les poings. Le catalogue avait la compétence, la dureté et l'affinité de sorts
 ## des mains nues, mais aucune fonctionnalité — donc un personnage désarmé ne pouvait pas frapper.
+## La fonctionnalité de combat d'une arme. Un objet équipé qui n'en a pas — une torche, une station
+## portative, un bijou glissé en main principale — ne doit pas arrêter la résolution : on frappe alors
+## comme à mains nues. Trouvé par le fuzz (graine 909) : lire `portee` sur un dictionnaire vide coupait
+## le tick en plein combat, et la partie continuait comme si le coup n'avait jamais eu lieu.
+func fonct_arme(arme: Dictionary) -> Dictionary:
+	var f: Dictionary = fonctionnalites.get(str(arme.get("functionality", "")), {})
+	return f if f.has("portee") else fonctionnalites.get("mains_nues", {})
+
+
 func arme_mains_nues() -> Dictionary:
 	return {"uid": "", "name_key": "item.mains_nues.name", "type": "arme", "functionality": "mains_nues",
 		"durete_base": int(regles.r.recolte.get("mains_nues_durete", 1)), "qualite": 1.0, "hands": 0,

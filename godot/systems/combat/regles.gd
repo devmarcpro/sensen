@@ -135,7 +135,9 @@ func palier_qualite(q: float) -> String:
 
 ## Portée en tuiles de Chebyshev : [min, floor(max)] (décision du 2026-08-26, Stats d'armes).
 func portee_de(fonct: Dictionary) -> Vector2i:
-	return Vector2i(int(fonct.get("portee_min", 1)), int(floorf(float(fonct.portee))))
+	# Le maximum se lisait en dur : une fonctionnalité absente (objet non guerrier en main) arrêtait le
+	# tick. Sans portée connue, on est au contact — la valeur d'un poing.
+	return Vector2i(int(fonct.get("portee_min", 1)), int(floorf(float(fonct.get("portee", 1.0)))))
 
 
 func a_portee(fonct: Dictionary, d: int) -> bool:

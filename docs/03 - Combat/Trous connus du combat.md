@@ -16,6 +16,12 @@ etape: 0
 - **Projectiles** : portée en tuiles, ligne de vue, formes d'effet, friendly fire en coop. → [[Décision — Projectiles]]
 - **Endgame « Dark Continent »** (idée retenue, non spécifiée) : au-delà d'une barrière géographique, le même monde continu avec des **règles** différentes — corruption au-delà de 100, météo létale, nourriture qui se corrompt, endurance qui ne régénère pas normalement, statuts insoignables sur place. Une **expédition** que le royaume finance, pas une zone à nettoyer. Coûte du contenu, presque aucun système. → [[Ouvert — Dark Continent]]
 
+> [!success] Codé le 2026-09-02 — frapper avec une torche coupait le tick (fuzz, graine 909)
+> `portee_de` lisait `fonct.portee` **en dur**. Une arme dont la fonctionnalité est introuvable — une torche, une station portative, un bijou glissé en main principale — donne un dictionnaire **vide** : la lecture échouait, le tick s'arrêtait en plein combat, et la partie repartait comme si le coup n'avait jamais eu lieu.
+> Le repli à mains nues existait déjà, mais seulement pour la **main vide**. Il couvre désormais aussi la main qui tient quelque chose **d'inoffensif** : `fonct_arme()` rend la fonctionnalité de l'objet, ou celle des poings quand l'objet n'en a pas. Et `portee_de` ne lit plus rien en dur — sans portée connue, on est au contact, la portée d'un poing.
+> Le fuzz ne trouvait cela qu'au bout de plusieurs centaines d'intentions, parce qu'il faut d'abord équiper une torche **puis** engager un combat.
+
+
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Jauge de chaîne Wu Xing]]
 - **Alimente** : [[Ordre de construction]]
