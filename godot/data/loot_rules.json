@@ -243,6 +243,14 @@
             "assemble"
           ]
         }
+      },
+      "parchemins": {
+        "poids": 2,
+        "filtre": {
+          "types_any": [
+            "parchemin"
+          ]
+        }
       }
     }
   },
@@ -344,5 +352,13 @@
       "terne",
       "ambree"
     ]
+  },
+  "parchemins": {
+    "_doc": "Un parchemin porte une sequence de modules deja composee et se lance GRATUITEMENT (designer 2026-09-02) : ni mana, ni endurance, ni module a connaitre — seulement ses ticks et une charge. La profondeur decide des charges et de la generosite de la sequence.",
+    "charges_base": 1,
+    "charges_par_etage": 0.5,
+    "charges_max": 5,
+    "chance_modificateur": 0.35,
+    "chance_modificateur_par_etage": 0.1
   }
 }

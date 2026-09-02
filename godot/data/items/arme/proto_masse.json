@@ -6,10 +6,29 @@
   "functionality": "masse",
   "durete_base": 20,
   "qualite": 1.0,
-  "element": "terre",
   "tags": [
     "arme",
-    "prototype"
+    "prototype",
+    "fortune"
   ],
-  "materiau": "fer"
+  "materiau": "fer",
+  "stats": {
+    "durete": 25,
+    "densite": 12,
+    "valeur_base": 8,
+    "conductivite_mana": 10,
+    "flammabilite": 0,
+    "isolation": 5,
+    "conductivite_electrique": 75,
+    "flottabilite": 3,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 10,
+    "friction": 25
+  },
+  "elements": {
+    "metal": 1.0
+  },
+  "poids": 3.0
 }

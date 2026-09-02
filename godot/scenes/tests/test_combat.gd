@@ -167,6 +167,7 @@ func _ready() -> void:
 	_lancer("test_conditions_payantes")
 	_lancer("test_familles_non_vides")
 	_lancer("test_kit_de_depart")
+	_lancer("test_parchemins")
 	_lancer("test_types_ennemis")
 	_lancer("test_loot_assemble")
 	_lancer("test_budgets")
@@ -7773,3 +7774,40 @@ func test_kit_de_depart() -> void:
 	var pv: int = loup.sante
 	verifier(s.intention(j.id, {"type": "attaquer", "cible": loup.id}), "les mains vides, on frappe quand même")
 	verifier(loup.sante < pv, "et le coup porte (%d → %d)" % [pv, loup.sante])
+
+## Les parchemins (designer 2026-09-02) : un sort pré-assemblé, lancé GRATUITEMENT, à charges.
+func test_parchemins() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var loup: Dictionary = {}
+	for x in s.vivants():
+		if x.controle != "joueur" and x.get("camp", "") == "hostile":
+			loup = x
+			break
+	s.grille.liberer(loup.pos)
+	loup.pos = j.pos + Vector2i(1, 0)
+	s.grille.placer(loup.id, loup.pos)
+	s._engager_combat(j, loup)
+	var h := s.horloge_de(j)
+	# Un parchemin généré porte une séquence prête et ses charges.
+	var par := s.generer_objet("parchemin", 3, {}, "commun", 0)
+	verifier(not par.is_empty() and (par.get("modules", []) as Array).size() >= 2 and int(par.get("charges", 0)) >= 1, "un parchemin porte sa séquence (%s) et %d charge(s)" % [str(par.get("modules", [])), int(par.get("charges", 0))])
+	# On le force sur une portée sûre pour le test, et un noyau offensif.
+	par["modules"] = ["contact", "point", "etincelle"]
+	par["charges"] = 2
+	j.sac.append(par.uid)
+	# Le lecteur ne connaît PAS ces modules : le parchemin les prête.
+	j["modules_connus"] = []
+	var mana0: int = j.mana
+	var pv0: int = loup.sante
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	verifier(s.intention(j.id, {"type": "parchemin", "objet": par.uid, "cible": loup.pos}), "lire le parchemin sans connaître ses modules")
+	verifier(loup.sante < pv0, "le sort du parchemin frappe (%d → %d)" % [pv0, loup.sante])
+	verifier(j.mana == mana0, "et ne coûte pas une goutte de mana (%d)" % j.mana)
+	verifier(int(s.items[par.uid].charges) == 1, "une charge en moins (%d restante)" % int(s.items[par.uid].charges))
+	# Dernière charge : le parchemin tombe en poussière.
+	j.compteur = h.ticks
+	s.pas(j.horloge)
+	s.intention(j.id, {"type": "parchemin", "objet": par.uid, "cible": loup.pos})
+	verifier(not (par.uid in j.sac), "à zéro charge, le parchemin tombe en poussière")

@@ -6,11 +6,30 @@
   "functionality": "seau",
   "durete_base": 8,
   "qualite": 1.0,
-  "element": "bois",
   "tags": [
     "outil",
-    "prototype"
+    "prototype",
+    "fortune"
   ],
   "materiau": "chene",
-  "genre_grammatical": "ms"
+  "genre_grammatical": "ms",
+  "stats": {
+    "durete": 12,
+    "densite": 6,
+    "valeur_base": 4,
+    "conductivite_mana": 10,
+    "flammabilite": 60,
+    "isolation": 35,
+    "conductivite_electrique": 5,
+    "flottabilite": 80,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 25,
+    "friction": 45
+  },
+  "elements": {
+    "bois": 1.0
+  },
+  "poids": 1.5
 }

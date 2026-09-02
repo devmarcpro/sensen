@@ -26,6 +26,7 @@ var minuterie_clavier := 0.0        # cadence des pas au clavier (ZQSD maintenu)
 var hotbar_sel := -1                 # l'action sélectionnée dans la hotbar (1 → 0), −1 = aucune
 var lourde_armee := false            # la prochaine attaque au clic est une lourde
 var visee_objet := ""                # une bombe sélectionnée dans la hotbar, à lancer au clic
+var visee_parchemin := ""            # un parchemin sélectionné : le clic lit le sort qu'il porte
 var survol := Vector2i(-1, -1)
 var journal: Array[String] = []
 var telegraphes: Dictionary = {}   # id → action engagée
@@ -952,6 +953,10 @@ func hotbar_entrees(j: Dictionary) -> Array:
 		res.append({"type": "capacite", "ref": k, "nom": tr(j.capacites[k].get("name_key", j.capacites[k].id))})
 	for k in j.ratelier.size():
 		res.append({"type": "arme", "ref": j.ratelier[k], "nom": tr(sim.items[j.ratelier[k]].name_key)})
+	for uid in j.sac:   # les parchemins du sac (designer 2026-09-02) : un sort prêt, à viser comme une bombe
+		var it_p: Dictionary = sim.items.get(uid, {})
+		if str(it_p.get("type", "")) == "parchemin" and int(it_p.get("charges", 0)) > 0:
+			res.append({"type": "parchemin", "ref": uid, "nom": tr("ui.hotbar.parchemin").format({"nom": nom_objet(sim.nom_objet(uid)), "n": int(it_p.charges)})})
 	for uid in j.sac:   # les bombes du sac (Explosions)
 		var it: Dictionary = sim.items.get(uid, {})
 		if it.has("bombe"):
@@ -972,7 +977,11 @@ func hotbar_entrees(j: Dictionary) -> Array:
 				"capacite":
 					if int(a.ref) < j.get("capacites", []).size():
 						res[k] = {"type": "capacite", "ref": int(a.ref), "nom": tr(j.capacites[int(a.ref)].get("name_key", j.capacites[int(a.ref)].id))}
-				"objet":
+				"parchemin":
+			visee_parchemin = str(en.ref)
+			visee_objet = ""
+			visee = -1
+		"objet":
 					if str(a.ref) in j.sac and sim.items.has(str(a.ref)):
 						res[k] = {"type": "objet", "ref": str(a.ref), "nom": tr(sim.items[str(a.ref)].get("name_key", "?"))}
 				"arme":
@@ -1302,6 +1311,14 @@ func _clic(t: Vector2i, lourde: bool) -> void:
 	if t.x < 0:
 		return
 	var j := joueur()
+	if not visee_parchemin.is_empty():   # un parchemin visé : le clic lit son sort, gratuitement
+		if sim.attente.has(joueur_id):
+			if sim.intention(joueur_id, {"type": "parchemin", "objet": visee_parchemin, "cible": t}):
+				visee_parchemin = ""
+				hotbar_sel = -1
+			else:
+				_log(tr("journal.inaccessible"))
+		return
 	if not visee_objet.is_empty():   # une bombe visée : le clic la lance
 		if sim.attente.has(joueur_id):
 			if sim.intention(joueur_id, {"type": "lancer", "objet": visee_objet, "cible": t}):
@@ -2113,6 +2130,8 @@ func nom_objet(n: Dictionary) -> String:
 		return tr("nom.arme_en").format({"base": base, "materiau": mat}) + q
 	if n.has("espece"):   # une pile de matière brute tirée d'une bête
 		return tr("nom.matiere_espece").format({"materiau": base, "creature": tr(str(n.espece))})
+	if n.has("parchemin"):
+		return tr("nom.parchemin").format({"module": tr(str(n.parchemin.module)), "charges": int(n.parchemin.charges)})
 	if n.has("de_creature"):   # la statue 1:1 (Créatures)
 		return tr("nom.de_creature").format({"base": base, "creature": tr(str(n.de_creature))})
 	if n.has("taille"):

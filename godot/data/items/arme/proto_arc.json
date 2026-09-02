@@ -6,10 +6,29 @@
   "functionality": "arc",
   "durete_base": 20,
   "qualite": 1.0,
-  "element": "bois",
   "tags": [
     "arme",
-    "prototype"
+    "prototype",
+    "fortune"
   ],
-  "materiau": "if"
+  "materiau": "if",
+  "stats": {
+    "durete": 13,
+    "densite": 6,
+    "valeur_base": 9,
+    "conductivite_mana": 20,
+    "flammabilite": 55,
+    "isolation": 30,
+    "conductivite_electrique": 5,
+    "flottabilite": 78,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 78,
+    "friction": 45
+  },
+  "elements": {
+    "bois": 1.0
+  },
+  "poids": 1.5
 }

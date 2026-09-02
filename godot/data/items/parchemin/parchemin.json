@@ -1,0 +1,12 @@
+{
+  "name_key": "item.parchemin.name",
+  "type": "parchemin",
+  "equip_slot": "",
+  "hands": 0,
+  "poids": 0.2,
+  "quantite": 1,
+  "tags": [
+    "parchemin",
+    "empilable"
+  ]
+}

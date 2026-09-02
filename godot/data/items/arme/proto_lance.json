@@ -6,10 +6,29 @@
   "functionality": "lance",
   "durete_base": 20,
   "qualite": 1.0,
-  "element": "bois",
   "tags": [
     "arme",
-    "prototype"
+    "prototype",
+    "fortune"
   ],
-  "materiau": "frene"
+  "materiau": "frene",
+  "stats": {
+    "durete": 11,
+    "densite": 4,
+    "valeur_base": 5,
+    "conductivite_mana": 12,
+    "flammabilite": 60,
+    "isolation": 35,
+    "conductivite_electrique": 5,
+    "flottabilite": 84,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 62,
+    "friction": 45
+  },
+  "elements": {
+    "bois": 1.0
+  },
+  "poids": 1.0
 }

@@ -10,10 +10,27 @@
   "niveau_construction": 0,
   "tags": [
     "armure",
-    "prototype"
+    "prototype",
+    "fortune"
   ],
   "elements": {
     "bois": 1.0
   },
-  "materiau": "cuir"
+  "materiau": "cuir",
+  "stats": {
+    "durete": 8,
+    "densite": 4,
+    "valeur_base": 5,
+    "conductivite_mana": 5,
+    "flammabilite": 40,
+    "isolation": 50,
+    "conductivite_electrique": 15,
+    "flottabilite": 60,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 55,
+    "friction": 55
+  },
+  "poids": 2.0
 }

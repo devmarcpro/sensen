@@ -2066,6 +2066,12 @@ ui.triche.statut,S'appliquer un statut
 ui.triche.race,Devenir une race
 journal.triche,"Triche : {action}"
 nom.de_creature,{base} de {creature}
+item.parchemin.name,Parchemin
+nom.parchemin,"Parchemin de {module} ({charges} charge(s))"
+journal.parchemin,"{nom} lit un parchemin — {charges} charge(s) restante(s)"
+journal.parchemin_use,"le parchemin tombe en poussière"
+journal.parchemin_illisible,"{nom} ne parvient pas à lire ce parchemin"
+ui.hotbar.parchemin,"{nom} ({n})"
 nom.matiere_espece,"{materiau} de {creature}"
 journal.statue,Une statue de {nom} tombe — trophée rare
 journal.bourse,"{nom} ramasse {or} pièces"

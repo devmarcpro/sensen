@@ -2057,6 +2057,12 @@ ui.triche.statut,Apply a status to myself
 ui.triche.race,Become a race
 journal.triche,"Cheat: {action}"
 nom.de_creature,{base} of {creature}
+item.parchemin.name,Scroll
+nom.parchemin,"Scroll of {module} ({charges} charge(s))"
+journal.parchemin,"{nom} reads a scroll — {charges} charge(s) left"
+journal.parchemin_use,"the scroll crumbles to dust"
+journal.parchemin_illisible,"{nom} cannot read this scroll"
+ui.hotbar.parchemin,"{nom} ({n})"
 nom.matiere_espece,"{creature} {materiau}"
 journal.statue,A statue of {nom} drops — rare trophy
 journal.bourse,"{nom} picks up {or} coins"

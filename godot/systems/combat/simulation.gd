@@ -6257,6 +6257,8 @@ func nom_objet(uid: String) -> Dictionary:
 	if inconnu(it):   # non identifié (designer 2026-09-01, point 52) : une apparence, pas un nom
 		return {"base": "objet.inconnu.%s" % str(it.get("type", "objet")), "affixe": "", "params": {"apparence": apparence_inconnue(it)}, "rarete": "commun", "inconnu": true}
 	var res := {"base": it.get("name_key", uid), "affixe": nom.get("affixe", ""), "params": nom.get("params", {}), "rarete": it.get("rarete", "commun")}
+	if nom.has("parchemin"):   # « Parchemin de Flamme (2 charges) » — le sort qu'il porte et ce qui reste
+		res["parchemin"] = {"module": str(nom.parchemin.module), "charges": int(it.get("charges", nom.parchemin.get("charges", 1)))}
 	if nom.has("de_creature"):   # « Statue de loup » : le nom porte la créature dont l'objet est tiré
 		res["de_creature"] = str(nom.de_creature)
 	if it.get("type", "") in ["grimoire", "manuel"] and it.has("modules"):   # un livre dit son domaine et sa difficulté
@@ -7419,6 +7421,8 @@ func intention(id: String, i: Dictionary) -> bool:
 	match str(i.get("type", "")):
 		"deplacer":
 			ok = _deplacer(e, i.vers, h.ticks)
+		"parchemin":   # lire un parchemin : le sort part gratuitement, une charge en moins (2026-09-02)
+			ok = _lire_parchemin(e, str(i.get("objet", "")), i.get("cible", Vector2i(-1, -1)), h.ticks)
 		"attaquer":
 			if entites.has(i.cible):
 				ok = _attaquer_bete(e, entites[i.cible], h.ticks) if (bool(e.get("forme_bestiale", false)) or (Etres.arme(e, items).is_empty() and not e.get("actions", []).is_empty())) else _attaquer_arme(e, entites[i.cible], bool(i.get("lourde", false)), h.ticks)
@@ -10678,3 +10682,28 @@ func _assembler_kit(e: Dictionary) -> void:
 		var inst_r := generer_objet(rid, prof, {}, "commun", 0)
 		if not inst_r.is_empty():
 			rat[k] = str(inst_r.uid)
+
+## Lire un parchemin (designer 2026-09-02) : le sort qu'il porte part SANS RIEN COÛTER — ni mana, ni
+## endurance, ni le fait de connaître ses modules. Il ne prend que ses ticks et une charge ; à zéro, il
+## tombe en poussière.
+func _lire_parchemin(e: Dictionary, uid: String, cible: Vector2i, tick: int) -> bool:
+	var it: Dictionary = items.get(uid, {})
+	if not (uid in e.sac) or str(it.get("type", "")) != "parchemin" or int(it.get("charges", 0)) <= 0:
+		return false
+	var plan := plan_sequence(e, it.get("modules", []))
+	if not plan.erreurs.is_empty():
+		EventBus.emettre(&"journal", [&"journal.parchemin_illisible", {"nom": e.name_key}])
+		return false
+	plan.ressource = 0   # gratuit : c'est tout l'intérêt du parchemin
+	plan["name_key"] = it.get("name_key", "item.parchemin.name")
+	identifier(it)
+	if not capacite_visable(e, plan, cible):
+		return false
+	it["charges"] = int(it.charges) - 1
+	EventBus.emettre(&"journal", [&"journal.parchemin", {"nom": e.name_key, "charges": int(it.charges)}])
+	_executer_capacite(e, plan, cible)
+	e.compteur = tick + int(plan.ticks)
+	if int(it.charges) <= 0:   # le parchemin tombe en poussière
+		e.sac.erase(uid)
+		EventBus.emettre(&"journal", [&"journal.parchemin_use", {"nom": e.name_key}])
+	return true

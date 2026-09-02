@@ -65,6 +65,10 @@ Les pools d'adjectifs des gabarits de nom sont donc déclarés en **quatre forme
 > [!success] Codé le 2026-08-28 — nommage et `genre_grammatical`
 > Les objets assemblés se **décrivent** : « Dague en fer », « Casque de plaque en cuivre » (`nom.arme_en`, `nom.armure_en` en locale, le client formate ; le manche est dans l'infobulle du sac). `genre_grammatical` est porté par chaque fonctionnalité (`data/functionalities/`) et chaque pièce assemblée (`data/items/craft_*`), selon la table de la note ; les pools d'adjectifs en quatre formes attendent les gabarits de noms du loot rare. Les champs `sprite`/`sprite_slots` restent inutilisés (le paperdoll teinte par matériau).
 
+> [!success] Codé le 2026-09-02 — les objets de **prototype** sont enfin définis pour de bon (designer)
+> « définis bien tous les items qui sont restés en prototype ». Depuis que tout l'équipement est assemblé, les vingt `proto_*` ne servent plus au jeu — mais ils restaient des ébauches : `element` en chaîne là où le reste du jeu porte un `elements` pondéré, aucune des **13 stats de matériau**, aucun poids, pas de description. Ils sont désormais des objets complets : leurs stats et leur vecteur Wu Xing sont **dérivés de leur matériau** (celui qu'ils déclarent déjà), leur poids de sa densité, et ils portent tous le tag `fortune` en plus de `prototype`. Ce qu'ils sont : des **objets de fortune** — une épée de fer sans façon, un casque de cuir sans doublure — qui servent de repli quand un assemblage manque et de fixtures aux tests. Le butin ne les tire pas : chaque catégorie d'équipement exige l'assemblage.
+
+
 ## Liens
 - **Dépend de** : [[Fabrication d'outils]], [[Fonctionnalité]], [[Data-driven design]]
 - **Alimente** : [[Effets d'équipement passifs]], [[Composant et recette d'obtention]], [[Éditeur de sculpture]]

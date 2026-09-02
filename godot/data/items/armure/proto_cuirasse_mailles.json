@@ -10,10 +10,27 @@
   "niveau_construction": 0,
   "tags": [
     "armure",
-    "prototype"
+    "prototype",
+    "fortune"
   ],
   "elements": {
     "metal": 1.0
   },
-  "materiau": "fer"
+  "materiau": "fer",
+  "stats": {
+    "durete": 25,
+    "densite": 12,
+    "valeur_base": 8,
+    "conductivite_mana": 10,
+    "flammabilite": 0,
+    "isolation": 5,
+    "conductivite_electrique": 75,
+    "flottabilite": 3,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 10,
+    "friction": 25
+  },
+  "poids": 6.0
 }

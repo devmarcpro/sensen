@@ -83,7 +83,40 @@ func generer(base_id: String, profondeur: int, rng: RandomNumberGenerator, prove
 	# Un livre tire son domaine, sa difficulté et ses modules (Grimoires et manuels).
 	if base.get("type", "") in ["grimoire", "manuel"]:
 		_composer_livre(inst, base, profondeur, rng)
+	# Un parchemin porte un sort déjà composé (designer 2026-09-02).
+	if base.get("type", "") == "parchemin":
+		_composer_parchemin(inst, profondeur, rng)
 	return inst
+
+
+## Un parchemin : une portée, une forme, un noyau — parfois un modificateur — et ses charges. Le sort est
+## prêt à partir, gratuitement ; la profondeur décide du nombre de charges et de la générosité.
+func _composer_parchemin(inst: Dictionary, profondeur: int, rng: RandomNumberGenerator) -> void:
+	var cfg: Dictionary = GameData.config("loot_rules").get("parchemins", {})
+	var par_type := {"portee": [], "forme": [], "noyau": [], "modificateur": []}
+	var ids: Array = GameData.catalogues.modules.keys()
+	ids.sort()
+	for mid in ids:
+		var t := str(GameData.catalogues.modules[mid].get("module_type", ""))
+		if par_type.has(t):
+			par_type[t].append(str(mid))
+	if par_type.forme.is_empty() or par_type.noyau.is_empty():
+		return
+	var seq: Array = []
+	if not par_type.portee.is_empty():
+		seq.append(str(par_type.portee[rng.randi_range(0, par_type.portee.size() - 1)]))
+	seq.append(str(par_type.forme[rng.randi_range(0, par_type.forme.size() - 1)]))
+	seq.append(str(par_type.noyau[rng.randi_range(0, par_type.noyau.size() - 1)]))
+	var chance_mod := float(cfg.get("chance_modificateur", 0.35)) + float(profondeur) * float(cfg.get("chance_modificateur_par_etage", 0.1))
+	if not par_type.modificateur.is_empty() and rng.randf() < chance_mod:
+		seq.append(str(par_type.modificateur[rng.randi_range(0, par_type.modificateur.size() - 1)]))
+	inst["modules"] = seq
+	inst["charges"] = clampi(int(round(float(cfg.get("charges_base", 1)) + float(profondeur) * float(cfg.get("charges_par_etage", 0.5)))), 1, int(cfg.get("charges_max", 5)))
+	var noyau_id := str(seq[seq.size() - 1]) if seq.size() > 0 else ""
+	for m in seq:
+		if str(GameData.catalogues.modules[str(m)].get("module_type", "")) == "noyau":
+			noyau_id = str(m)
+	inst["nom"] = {"affixe": "", "params": {}, "parchemin": {"module": str(GameData.catalogues.modules[noyau_id].get("name_key", noyau_id)), "charges": int(inst.charges)}}
 
 
 ## Tailler une gemme CHOISIT sa spécialisation ; la qualité de taille place la valeur dans la fourchette.

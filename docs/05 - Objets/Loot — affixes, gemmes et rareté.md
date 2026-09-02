@@ -134,6 +134,12 @@ L'atelier consomme ce que le donjon fournit — jamais l'inverse.
 > **Conséquence mesurable** : la vitesse d'une arme dépend de la densité de son manche, donc « l'épée fait 5 ticks » n'est plus une constante — deux tests l'écrivaient en dur et calculent maintenant depuis l'arme. Deux autres cherchaient `proto_epee` dans le sac : ils cherchent l'instance.
 
 
+> [!success] Codé le 2026-09-02 — les **parchemins** : un sort pré-assemblé, gratuit, à charges (designer)
+> « une nouvelle catégorie d'item, les parchemins : en gros c'est un sort pré-assemblé, gratuit, à une utilisation ou plus ». Un parchemin porte une **séquence de modules déjà composée** — portée, forme, noyau — et se lance **sans rien payer** : ni mana, ni endurance, ni les modules qu'il faudrait connaître. Il ne coûte que ses **ticks** et une **charge** ; à zéro charge, il tombe en poussière. C'est le seul objet du jeu qui met un sort dans les mains d'un personnage qui ne l'a pas appris — un mage de fortune pour une classe de mêlée, un mur de flammes pour qui n'a jamais lu un grimoire.
+> **Ce que la profondeur décide** : le nombre de charges et la générosité de la séquence. Un parchemin d'étage 1 porte un noyau simple à une charge ; plus bas, il gagne des charges et un modificateur. Le tirage réutilise la grammaire des modules — donc un parchemin neuf existe le jour où un module neuf existe, sans rien écrire.
+> **Ce qu'il n'est pas** : un livre. Un grimoire *enseigne* un module, définitivement ; un parchemin *prête* un sort, le temps de ses charges.
+
+
 ## Liens
 - **Dépend de** : [[Effets d'équipement passifs]], [[Qualité d'artisanat]], [[Génération de donjon]], [[Modificateurs d'affinité]]
 - **Alimente** : [[Trésors et artefacts]], [[Monstres rares]], [[Équipement — 14 slots]], [[Jauge de chaîne Wu Xing]], [[Cinq accès au cycle]]

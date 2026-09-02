@@ -6,6 +6,26 @@
   "materiau": "or",
   "tags": [
     "bijou",
-    "prototype"
-  ]
+    "prototype",
+    "fortune"
+  ],
+  "stats": {
+    "durete": 10,
+    "densite": 19,
+    "valeur_base": 35,
+    "conductivite_mana": 65,
+    "flammabilite": 0,
+    "isolation": 5,
+    "conductivite_electrique": 95,
+    "flottabilite": 2,
+    "luminosite": 8,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 20,
+    "friction": 20
+  },
+  "elements": {
+    "metal": 1.0
+  },
+  "poids": 4.75
 }
