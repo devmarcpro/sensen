@@ -5,13 +5,13 @@
     "endurance": 1
   },
   "equipement": [
-    "proto_epee",
-    "proto_cuirasse_cuir",
+    "craft_epee",
+    "craft_cuirasse",
     "torche"
   ],
   "ratelier": [
-    "proto_dague",
-    "proto_lance"
+    "craft_dague",
+    "craft_lance"
   ],
   "competences": {
     "epee": 4,

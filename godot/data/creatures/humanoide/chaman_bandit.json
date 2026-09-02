@@ -20,8 +20,8 @@
     "appel_des_follets"
   ],
   "equipement": [
-    "proto_baton_magique",
-    "proto_cuirasse_cuir"
+    "craft_baton_magique",
+    "craft_cuirasse"
   ],
   "ratelier": [],
   "chain_gauge": false,

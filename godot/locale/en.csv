@@ -306,6 +306,12 @@ slot.accessoire_2,Trinket II
 item.craft_cuirasse.name,Cuirass
 item.craft_dague.name,Dagger
 item.craft_epee.name,Sword
+item.craft_arc.name,Bow
+item.craft_baton_magique.name,Magic staff
+item.craft_hache.name,Axe
+item.craft_faucille.name,Sickle
+item.craft_seau.name,Bucket
+item.craft_fleches.name,Arrows
 item.craft_jambieres.name,Greaves
 item.craft_lance.name,Spear
 item.craft_masse.name,Mace

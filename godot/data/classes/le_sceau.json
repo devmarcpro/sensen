@@ -5,12 +5,12 @@
     "volonte": 2
   },
   "equipement": [
-    "proto_baton_magique",
-    "proto_cuirasse_cuir",
+    "craft_baton_magique",
+    "craft_cuirasse",
     "torche"
   ],
   "ratelier": [
-    "proto_masse"
+    "craft_masse"
   ],
   "competences": {
     "enchantement": 4,

@@ -1555,6 +1555,12 @@ component.garde.name,Garde
 component.contrepoids.name,Contrepoids
 item.craft_dague.name,Dague
 item.craft_epee.name,Épée
+item.craft_arc.name,Arc
+item.craft_baton_magique.name,Bâton magique
+item.craft_hache.name,Hache
+item.craft_faucille.name,Faucille
+item.craft_seau.name,Seau
+item.craft_fleches.name,Flèches
 item.craft_masse.name,Masse
 item.craft_lance.name,Lance
 item.craft_pioche.name,Pioche

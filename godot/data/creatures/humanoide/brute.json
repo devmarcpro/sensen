@@ -19,10 +19,10 @@
     "coup_de_masse"
   ],
   "equipement": [
-    "proto_masse",
-    "proto_casque_fer",
-    "proto_cuirasse_mailles",
-    "proto_bouclier"
+    "craft_masse",
+    "craft_casque",
+    "craft_cuirasse",
+    "craft_bouclier"
   ],
   "ratelier": [],
   "chain_gauge": true,

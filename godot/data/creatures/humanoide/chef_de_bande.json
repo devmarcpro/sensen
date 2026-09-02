@@ -20,10 +20,10 @@
     "enchainement"
   ],
   "equipement": [
-    "proto_epee",
-    "proto_casque_fer",
-    "proto_cuirasse_mailles",
-    "proto_bouclier"
+    "craft_epee",
+    "craft_casque",
+    "craft_cuirasse",
+    "craft_bouclier"
   ],
   "ratelier": [],
   "chain_gauge": true,

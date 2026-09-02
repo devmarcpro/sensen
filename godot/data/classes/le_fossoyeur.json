@@ -4,13 +4,13 @@
     "volonte": 3
   },
   "equipement": [
-    "proto_masse",
-    "proto_cuirasse_cuir",
+    "craft_masse",
+    "craft_cuirasse",
     "torche"
   ],
   "ratelier": [
-    "proto_pelle",
-    "proto_dague"
+    "craft_pelle",
+    "craft_dague"
   ],
   "competences": {
     "magie_corruption": 4,

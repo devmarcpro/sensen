@@ -5,12 +5,12 @@
     "perception": 1
   },
   "equipement": [
-    "proto_baton_magique",
-    "proto_casque_cuir",
+    "craft_baton_magique",
+    "craft_casque",
     "torche"
   ],
   "ratelier": [
-    "proto_dague"
+    "craft_dague"
   ],
   "competences": {
     "magie_feu": 5,
@@ -61,7 +61,7 @@
   "hotbar": [
     {
       "type": "arme",
-      "ref": "proto_baton_magique"
+      "ref": "craft_baton_magique"
     },
     {
       "type": "capacite",

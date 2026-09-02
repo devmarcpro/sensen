@@ -4,11 +4,11 @@
     "dexterite": 3
   },
   "equipement": [
-    "proto_jambieres_cuir",
+    "craft_jambieres",
     "torche"
   ],
   "ratelier": [
-    "proto_dague"
+    "craft_dague"
   ],
   "competences": {
     "mains_nues": 4,

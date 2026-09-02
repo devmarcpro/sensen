@@ -4,12 +4,12 @@
     "volonte": 3
   },
   "equipement": [
-    "proto_baton_magique",
-    "proto_casque_cuir",
+    "craft_baton_magique",
+    "craft_casque",
     "torche"
   ],
   "ratelier": [
-    "proto_dague"
+    "craft_dague"
   ],
   "competences": {
     "magie_arcane": 4,

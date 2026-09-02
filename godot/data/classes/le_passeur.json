@@ -5,12 +5,12 @@
     "volonte": 2
   },
   "equipement": [
-    "proto_baton_magique",
-    "proto_jambieres_cuir",
+    "craft_baton_magique",
+    "craft_jambieres",
     "torche"
   ],
   "ratelier": [
-    "proto_dague"
+    "craft_dague"
   ],
   "competences": {
     "magie_espace": 4,

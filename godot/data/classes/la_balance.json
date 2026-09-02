@@ -5,12 +5,12 @@
     "perception": 1
   },
   "equipement": [
-    "proto_baton_magique",
-    "proto_cuirasse_cuir",
+    "craft_baton_magique",
+    "craft_cuirasse",
     "torche"
   ],
   "ratelier": [
-    "proto_dague"
+    "craft_dague"
   ],
   "competences": {
     "negociation": 5,
@@ -63,7 +63,7 @@
   "hotbar": [
     {
       "type": "arme",
-      "ref": "proto_dague"
+      "ref": "craft_dague"
     },
     {
       "type": "capacite",

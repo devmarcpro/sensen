@@ -5,13 +5,13 @@
     "dexterite": 1
   },
   "equipement": [
-    "proto_dague",
-    "proto_casque_cuir",
+    "craft_dague",
+    "craft_casque",
     "torche"
   ],
   "ratelier": [
-    "proto_epee",
-    "proto_arc"
+    "craft_epee",
+    "craft_arc"
   ],
   "competences": {
     "negociation": 3,

@@ -5,13 +5,13 @@
     "volonte": 1
   },
   "equipement": [
-    "proto_baton_magique",
-    "proto_cuirasse_cuir",
+    "craft_baton_magique",
+    "craft_cuirasse",
     "torche"
   ],
   "ratelier": [
-    "proto_faucille",
-    "proto_seau"
+    "craft_faucille",
+    "craft_seau"
   ],
   "competences": {
     "alchimie": 5,
@@ -63,7 +63,7 @@
   "hotbar": [
     {
       "type": "arme",
-      "ref": "proto_dague"
+      "ref": "craft_dague"
     },
     {
       "type": "capacite",

@@ -7,6 +7,15 @@
   "poids": 1,
   "tags": [
     "outil",
-    "lumiere"
-  ]
+    "lumiere",
+    "assemble"
+  ],
+  "slots": {
+    "manche": "manche_court",
+    "sangles": "sangles"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie"
+  }
 }

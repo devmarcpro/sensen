@@ -17,19 +17,19 @@
   "ai_profile": "compagnon",
   "actions": [],
   "equipement": [
-    "proto_epee",
-    "proto_casque_cuir",
-    "proto_cuirasse_cuir",
-    "proto_fleches"
+    "craft_epee",
+    "craft_casque",
+    "craft_cuirasse",
+    "craft_fleches"
   ],
   "ratelier": [
-    "proto_dague",
-    "proto_epee",
-    "proto_masse",
-    "proto_lance",
-    "proto_arc",
-    "proto_baton_magique",
-    "proto_bouclier"
+    "craft_dague",
+    "craft_epee",
+    "craft_masse",
+    "craft_lance",
+    "craft_arc",
+    "craft_baton_magique",
+    "craft_bouclier"
   ],
   "chain_gauge": true,
   "elements": null,

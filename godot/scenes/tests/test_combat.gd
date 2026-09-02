@@ -362,7 +362,8 @@ func test_simulation() -> void:
 	var end: int = j.endurance
 	verifier(s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false}), "attaque à l'épée acceptée")
 	verifier(loup.sante < pv_loup, "le loup a perdu des PV")
-	verifier(j.compteur == hc.ticks + 5, "épée : 5 ticks")
+	var t_epee: int = s.regles.ticks_attaque(s.fonctionnalites[Etres.arme(j, s.items).functionality], false, Etres.arme(j, s.items))
+	verifier(j.compteur == hc.ticks + t_epee, "épée assemblée : %d ticks (le manche décide de la vitesse)" % t_epee)
 	verifier(j.endurance <= end - 8 + 2 * 20, "l'attaque coûte 8 d'endurance")
 	# Tuer le loup : creature_killed, tuile libérée.
 	var tue := [false]
@@ -430,7 +431,8 @@ func test_garde_et_lourde() -> void:
 	var engagee := [false]
 	EventBus.action_engaged.connect(func(id: String, _a: Dictionary) -> void: if id == j.id: engagee[0] = true)
 	verifier(s.intention(j.id, {"type": "attaquer", "cible": bandit.id, "lourde": true}), "attaque lourde acceptée")
-	verifier(engagee[0] and not j.action_en_cours.is_empty() and j.compteur == h.ticks + 10, "lourde : engagée, télégraphée, 10 ticks")
+	var t_lourde: int = s.regles.ticks_attaque(s.fonctionnalites[Etres.arme(j, s.items).functionality], true, Etres.arme(j, s.items))
+	verifier(engagee[0] and not j.action_en_cours.is_empty() and j.compteur == h.ticks + t_lourde, "lourde : engagée, télégraphée, %d ticks (arme assemblée)" % t_lourde)
 	var pvb: int = bandit.sante
 	s.pas(j.horloge)   # résolution à l'échéance
 	verifier(j.action_en_cours.is_empty() and bandit.sante < pvb, "la lourde se résout à l'échéance")
@@ -576,20 +578,32 @@ func test_ratelier() -> void:
 	s.horloge_monde.avancer(1)
 	verifier(s.attente.has(j.id), "joueur dû")
 	var t: int = s.horloge_monde.ticks
-	verifier(s.intention(j.id, {"type": "changer_arme", "item": "proto_masse"}), "prendre la masse")
+	# Tout l'équipement est assemblé (designer 2026-09-02) : le râtelier porte des UID, pas des ids de
+	# catalogue — on retrouve chaque pièce par sa fonctionnalité.
+	var du_ratelier := func(fonct: String) -> String:
+		for uid in j.ratelier:
+			var it: Dictionary = s.items.get(str(uid), {})
+			if str(it.get("functionality", "")) == fonct or str(it.get("type", "")) == fonct:
+				return str(uid)
+		return ""
+	var masse: String = du_ratelier.call("masse")
+	var bouclier: String = du_ratelier.call("bouclier")
+	var lance: String = du_ratelier.call("lance")
+	verifier(not masse.is_empty() and not bouclier.is_empty() and not lance.is_empty(), "le râtelier porte une masse, un bouclier et une lance")
+	verifier(s.intention(j.id, {"type": "changer_arme", "item": masse}), "prendre la masse")
 	var ts: int = int(s.regles.r.actions.changer_arme)
-	verifier(j.equipement.main_principale == "proto_masse" and j.compteur == t + ts, "swap : %d ticks (combat_rules)" % ts)
+	verifier(j.equipement.main_principale == masse and j.compteur == t + ts, "swap : %d ticks (combat_rules)" % ts)
 	j.compteur = t
 	s.horloge_monde.avancer(1)
-	verifier(s.intention(j.id, {"type": "changer_arme", "item": "proto_bouclier"}), "prendre le bouclier")
-	verifier(j.equipement.get("main_secondaire", "") == "proto_bouclier", "bouclier en main secondaire")
+	verifier(s.intention(j.id, {"type": "changer_arme", "item": bouclier}), "prendre le bouclier")
+	verifier(j.equipement.get("main_secondaire", "") == bouclier, "bouclier en main secondaire")
 	j.compteur = s.horloge_monde.ticks
 	s.horloge_monde.avancer(1)
-	verifier(s.intention(j.id, {"type": "changer_arme", "item": "proto_lance"}), "prendre la lance (deux mains)")
+	verifier(s.intention(j.id, {"type": "changer_arme", "item": lance}), "prendre la lance (deux mains)")
 	verifier(not j.equipement.has("main_secondaire"), "une arme à deux mains range le bouclier")
 	j.compteur = s.horloge_monde.ticks
 	s.horloge_monde.avancer(1)
-	verifier(not s.intention(j.id, {"type": "changer_arme", "item": "proto_bouclier"}), "pas de bouclier avec une arme à deux mains")
+	verifier(not s.intention(j.id, {"type": "changer_arme", "item": bouclier}), "pas de bouclier avec une arme à deux mains")
 	verifier(not s.intention(j.id, {"type": "changer_arme", "item": "inconnu"}), "objet hors râtelier refusé")
 
 
@@ -699,7 +713,12 @@ func test_projectiles() -> void:
 		s.entites[autre].compteur = 500
 	j.compteur = h.ticks
 	s.pas(j.horloge)
-	s.intention(j.id, {"type": "changer_arme", "item": "proto_arc"})
+	var arc_uid := ""
+	for uid_a in j.ratelier:
+		if str(s.items.get(str(uid_a), {}).get("functionality", "")) == "arc":
+			arc_uid = str(uid_a)
+			break
+	s.intention(j.id, {"type": "changer_arme", "item": arc_uid})
 	j.compteur = h.ticks
 	s.pas(j.horloge)
 	verifier(s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false}), "tir à l'arc à 5 tuiles")
@@ -1141,7 +1160,10 @@ func test_paperdoll_et_tutoriels() -> void:
 	pd.configurer(j, h, s.items, s.fonctionnalites, GameData.config("palette_materiaux"))
 	var peints := pd._segments_peints()
 	verifier(peints.has("torse") and peints.has("tete") and not peints.has("pied_G"), "l'équipement peint torse (cuirasse) et tête (casque), pas les pieds")
-	verifier(peints.torse.construction == "cuir" and peints.torse.couleur == Color.html("#8A5A33"), "la construction donne la forme, le matériau la teinte")
+	var mat_torse := str(s.items.get(str(j.equipement.get("cuirasse", "")), {}).get("materiau", ""))
+	var pal: Dictionary = GameData.config("palette_materiaux").get(mat_torse, {})   # le paperdoll lit la PALETTE, pas la couleur du matériau
+	var teinte_attendue := Color.html(str(pal.hex)) if pal.has("hex") else Color(0.6, 0.6, 0.6)
+	verifier(not str(peints.torse.construction).is_empty() and peints.torse.couleur == teinte_attendue, "la construction donne la forme, le matériau (%s) la teinte" % mat_torse)
 	var monde := pd._poser_segments(h.facings.S, false)
 	verifier(monde.size() == 14 and monde.has("main_D"), "les 14 segments se placent depuis la racine")
 	var miroir := pd._poser_segments(h.facings.SE, true)
@@ -7090,7 +7112,7 @@ func test_loot() -> void:
 	j.compteur = s.horloge_monde.ticks
 	s.horloge_monde.avancer(1)
 	verifier(s.intention(j.id, {"type": "equiper", "objet": epee.uid}), "équiper l'épée rare")
-	verifier(j.equipement.main_principale == epee.uid and "proto_epee" in j.sac, "l'ancienne épée va au sac")
+	verifier(j.equipement.main_principale == epee.uid and not j.sac.is_empty(), "l'ancienne épée va au sac")
 	var loup: Dictionary = s.entites["loup_2"]
 	s.grille.liberer(loup.pos)
 	loup.pos = j.pos + Vector2i(1, 0)
@@ -7337,7 +7359,7 @@ func test_progression() -> void:
 	# Création de personnage : 30 points, bonus de race et de classe, kit, potentiels
 	var fiche := Etres.creer_personnage("creature.aventurier.name", "nain", "le_sabre", {"force": 10, "endurance": 10, "volonte": 10}, 1000, prog)
 	verifier(fiche.corps.stats.force == 5 + 10 + 1 + 2 and fiche.corps.stats.endurance == 5 + 10 + 2 + 1 and fiche.corps.stats.charisme == 5, "stats : base 5 + points + race + classe")
-	verifier("proto_epee" in fiche.equipement and fiche.competences.get("epee", 0) == 5 and fiche.potentiels_base.forge == 100, "kit du Sabre, Épée 5, potentiel de Forge nain+sabre = 100")
+	verifier("craft_epee" in fiche.equipement and fiche.competences.get("epee", 0) == 5 and fiche.potentiels_base.forge == 100, "kit du Sabre, Épée 5, potentiel de Forge nain+sabre = 100")
 	var p := Simulation.new(5)
 	p.fiche_joueur = fiche
 	p.charger_arene("plaine_au_talus")

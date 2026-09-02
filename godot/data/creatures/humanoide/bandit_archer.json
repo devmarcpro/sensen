@@ -19,8 +19,8 @@
     "tir_a_l_arc"
   ],
   "equipement": [
-    "proto_dague",
-    "proto_cuirasse_cuir"
+    "craft_dague",
+    "craft_cuirasse"
   ],
   "ratelier": [],
   "chain_gauge": false,

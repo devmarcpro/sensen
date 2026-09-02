@@ -199,6 +199,12 @@ func _process(_delta: float) -> void:
 		j.sante = int(j.sante_max)
 		j.endurance = int(j.endurance_max)
 		j.mana = int(j.mana_max)
+	if invincible and not j.vivant:   # un coup peut tuer entre deux images : on relève sans compter la mort
+		j.vivant = true
+		j.sante = int(j.sante_max)
+		j.endurance = int(j.endurance_max)
+		j.statuts.clear()
+		return
 	if not j.vivant:
 		morts += 1
 		_note("MORT à l'étage %d (%d coups reçus, %d dégâts)" % [int(sim.donjon.etage), coups_recus, degats_recus])

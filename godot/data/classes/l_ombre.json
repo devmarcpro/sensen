@@ -5,13 +5,13 @@
     "perception": 1
   },
   "equipement": [
-    "proto_dague",
-    "proto_jambieres_cuir",
+    "craft_dague",
+    "craft_jambieres",
     "torche"
   ],
   "ratelier": [
-    "proto_arc",
-    "proto_epee"
+    "craft_arc",
+    "craft_epee"
   ],
   "competences": {
     "discretion": 6,

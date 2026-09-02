@@ -4,11 +4,11 @@
     "force": 3
   },
   "equipement": [
-    "proto_cuirasse_cuir",
+    "craft_cuirasse",
     "torche"
   ],
   "ratelier": [
-    "proto_masse"
+    "craft_masse"
   ],
   "competences": {
     "mains_nues": 4,

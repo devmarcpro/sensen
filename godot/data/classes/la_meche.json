@@ -5,13 +5,13 @@
     "perception": 1
   },
   "equipement": [
-    "proto_dague",
-    "proto_casque_cuir",
+    "craft_dague",
+    "craft_casque",
     "torche"
   ],
   "ratelier": [
-    "proto_arc",
-    "proto_pelle"
+    "craft_arc",
+    "craft_pelle"
   ],
   "competences": {
     "forge": 3,
@@ -60,7 +60,7 @@
   "hotbar": [
     {
       "type": "arme",
-      "ref": "proto_masse"
+      "ref": "craft_masse"
     },
     {
       "type": "capacite",

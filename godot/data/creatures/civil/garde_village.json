@@ -34,10 +34,10 @@
   "ai_profile": "garde",
   "actions": [],
   "equipement": [
-    "proto_epee",
-    "proto_bouclier",
-    "proto_casque_fer",
-    "proto_cuirasse_mailles"
+    "craft_epee",
+    "craft_bouclier",
+    "craft_casque",
+    "craft_cuirasse"
   ],
   "ratelier": [],
   "chain_gauge": false,

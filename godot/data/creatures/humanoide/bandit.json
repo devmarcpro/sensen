@@ -17,8 +17,8 @@
   "ai_profile": "hostile",
   "actions": [],
   "equipement": [
-    "proto_epee",
-    "proto_cuirasse_cuir"
+    "craft_epee",
+    "craft_cuirasse"
   ],
   "ratelier": [],
   "chain_gauge": false,

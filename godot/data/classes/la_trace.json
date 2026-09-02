@@ -5,13 +5,13 @@
     "perception": 1
   },
   "equipement": [
-    "proto_arc",
-    "proto_jambieres_cuir",
+    "craft_arc",
+    "craft_jambieres",
     "torche"
   ],
   "ratelier": [
-    "proto_dague",
-    "proto_lance"
+    "craft_dague",
+    "craft_lance"
   ],
   "competences": {
     "arc": 5,
@@ -64,11 +64,11 @@
   "hotbar": [
     {
       "type": "arme",
-      "ref": "proto_arc"
+      "ref": "craft_arc"
     },
     {
       "type": "arme",
-      "ref": "proto_dague"
+      "ref": "craft_dague"
     },
     {
       "type": "capacite",

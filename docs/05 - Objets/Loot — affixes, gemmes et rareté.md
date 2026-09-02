@@ -128,6 +128,12 @@ L'atelier consomme ce que le donjon fournit — jamais l'inverse.
 > **La profondeur décidait déjà de la qualité** (`niveau_base + niveau_par_profondeur × étage`, et les paliers de rareté par étage) ; elle décide maintenant aussi de ce qui **peut** sortir : chaque catégorie porte une `profondeur_min`. Les stations, les meubles et les artefacts n'apparaissent qu'en descendant, les consommables et les matériaux sont là dès le premier étage. Un coffre d'étage 1 rend de quoi survivre, un coffre d'étage 5 de quoi s'équiper.
 
 
+> [!success] Codé le 2026-09-02 — **tout** l'équipement est assemblé (designer)
+> « tous les équipements devraient être assemblés ». Il restait deux mondes parallèles : les objets `craft_*`, composés de leurs pièces avec matière, dureté et qualité, et les `proto_*` — épée, arc, casque de cuir, bouclier, anneau — plats, sans composants, distribués en **kit de départ** aux 19 classes et à toutes les créatures. Le premier butin l'avait montré : « Bouclier, qualité 1,00, bois 100 % ».
+> Six pièces manquaient au catalogue assemblé (arc, bâton magique, hache, faucille, seau, flèches) : elles existent. Les **29 fiches** de classes, créatures, PNJ et du camp pointent désormais sur les versions assemblées, et la **torche** elle-même a ses composants. Surtout, un kit de départ n'est plus une liste d'ids de catalogue : `_assembler_kit` en fait de **vraies instances composées** à la naissance de l'être — sans quoi une épée de classe n'avait ni matériau, ni dureté, ni qualité, juste des slots vides.
+> **Conséquence mesurable** : la vitesse d'une arme dépend de la densité de son manche, donc « l'épée fait 5 ticks » n'est plus une constante — deux tests l'écrivaient en dur et calculent maintenant depuis l'arme. Deux autres cherchaient `proto_epee` dans le sac : ils cherchent l'instance.
+
+
 ## Liens
 - **Dépend de** : [[Effets d'équipement passifs]], [[Qualité d'artisanat]], [[Génération de donjon]], [[Modificateurs d'affinité]]
 - **Alimente** : [[Trésors et artefacts]], [[Monstres rares]], [[Équipement — 14 slots]], [[Jauge de chaîne Wu Xing]], [[Cinq accès au cycle]]

@@ -5,13 +5,13 @@
     "force": 1
   },
   "equipement": [
-    "proto_masse",
-    "proto_cuirasse_cuir",
+    "craft_masse",
+    "craft_cuirasse",
     "torche"
   ],
   "ratelier": [
-    "proto_hache",
-    "proto_pioche"
+    "craft_hache",
+    "craft_pioche"
   ],
   "competences": {
     "forge": 5,
@@ -66,7 +66,7 @@
   "hotbar": [
     {
       "type": "arme",
-      "ref": "proto_masse"
+      "ref": "craft_masse"
     },
     {
       "type": "capacite",

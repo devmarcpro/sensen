@@ -9,13 +9,13 @@
     "charisme": 1
   },
   "equipement": [
-    "proto_lance",
-    "proto_jambieres_cuir",
+    "craft_lance",
+    "craft_jambieres",
     "torche"
   ],
   "ratelier": [
-    "proto_arc",
-    "proto_dague"
+    "craft_arc",
+    "craft_dague"
   ],
   "competences": {},
   "base_potentials": {

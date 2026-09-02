@@ -2,9 +2,9 @@
   "_doc": "Le camp de base (docs: Claims et persistance, callout du 2026-08-28) : ce qui se greffe sur la cellule de départ générée par la surface — le coffre de départ, un kit choisi (décision de design, pas une catégorie).",
   "taille": 64,
   "coffre_depart": [
-    "proto_hache",
-    "proto_pioche",
-    "proto_faucille",
+    "craft_hache",
+    "craft_pioche",
+    "craft_faucille",
     "meuble_lit_de_paille",
     "ble",
     "ble",

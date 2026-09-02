@@ -1,0 +1,21 @@
+{
+  "name_key": "item.craft_fleches.name",
+  "type": "munition",
+  "equip_slot": "carquois",
+  "hands": 0,
+  "slots": {
+    "tete": "pointe",
+    "manche": "manche_court",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie"
+  },
+  "genre_grammatical": "fp",
+  "tags": [
+    "munition",
+    "assemble"
+  ],
+  "quantite": 20
+}

@@ -5,13 +5,13 @@
     "perception": 1
   },
   "equipement": [
-    "proto_arc",
-    "proto_casque_cuir",
+    "craft_arc",
+    "craft_casque",
     "torche"
   ],
   "ratelier": [
-    "proto_dague",
-    "proto_masse"
+    "craft_dague",
+    "craft_masse"
   ],
   "competences": {
     "arbalete": 4,

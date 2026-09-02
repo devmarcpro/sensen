@@ -4695,6 +4695,7 @@ func _mort_compagnon(x: Dictionary) -> void:
 	if maitre.is_empty():
 		return
 	var ame := generer_objet("ame", 1, {}, "commun", 0)
+	identifier(ame)   # une âme qu'on récolte soi-même n'est pas un mystère (2026-09-02)
 	if ame.is_empty():
 		return
 	ame["compagnon"] = x.id
@@ -5854,6 +5855,7 @@ func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 	if e.chain_gauge:
 		e.chaine = wuxing.jauge_neuve()
 	e.spawn = pos
+	_assembler_kit(e)   # tout l'équipement est assemblé (designer 2026-09-02) : composants, matière, qualité
 	Etres.recalculer(e, items, affixes_defs, regles)
 	entites[id] = e
 	ordre.append(id)
@@ -6659,7 +6661,7 @@ func _drop(cible: Dictionary, source: String) -> void:
 			pieces *= float(lo.get("mult_boss", 6))
 		pieces *= 1.0 + (rng.randf() * 2.0 - 1.0) * float(lo.get("variance", 0.4))
 		var n_or := maxi(1, roundi(pieces))
-		var bourse := generer_objet("or", profondeur, {"creature": cible.name_key}, "commun", 0)
+		var bourse: Dictionary = generer_objet("or", profondeur, {"creature": cible.name_key}, "commun", 0) if GameData.catalogues.items.has("or") else {}
 		if bourse.is_empty():   # pas d'objet « or » au catalogue : on crédite le tueur directement
 			var t_or: Dictionary = entites.get(source, {})
 			if not t_or.is_empty():
@@ -6723,6 +6725,7 @@ func _drop(cible: Dictionary, source: String) -> void:
 		rp.seed = hash([graine, "partie", cible.id])
 		var pid: String = str(parties[rp.randi() % parties.size()])
 		var partie := generer_objet(pid, profondeur, {"creature": cible.name_key}, "commun", 0)
+		identifier(partie)
 		if not partie.is_empty():
 			partie["puissance"] = _puissance_de(int(stats_c.get(str(al.parties[pid]), 10)))
 			partie["nom"] = {"params": {"creature": cible.name_key}}
@@ -10652,3 +10655,26 @@ func arme_mains_nues() -> Dictionary:
 	return {"uid": "", "name_key": "item.mains_nues.name", "type": "arme", "functionality": "mains_nues",
 		"durete_base": int(regles.r.recolte.get("mains_nues_durete", 1)), "qualite": 1.0, "hands": 0,
 		"materiau": "", "affixes": [], "sertissures": {"nombre": 0, "contenu": []}, "tags": ["arme"]}
+
+## Le kit de départ d'un être : les entrées de catalogue marquées `assemble` deviennent de vraies
+## instances composées (designer 2026-09-02). Sans ça, une épée de classe n'avait ni matériau, ni
+## dureté, ni qualité — juste des slots vides.
+func _assembler_kit(e: Dictionary) -> void:
+	var prof := int(donjon.get("profondeur", donjon.get("etage", 0)))
+	for slot: String in e.get("equipement", {}).keys().duplicate():
+		var id := str(e.equipement[slot])
+		var fiche_i: Dictionary = GameData.catalogues.items.get(id, {})
+		if fiche_i.is_empty() or not ("assemble" in fiche_i.get("tags", [])) or items.get(id, {}).has("composants"):
+			continue   # rien à assembler, ou déjà une instance composée
+		var inst := generer_objet(id, prof, {}, "commun", 0)
+		if not inst.is_empty():
+			e.equipement[slot] = str(inst.uid)
+	var rat: Array = e.get("ratelier", [])
+	for k in rat.size():
+		var rid := str(rat[k])
+		var fiche_r: Dictionary = GameData.catalogues.items.get(rid, {})
+		if fiche_r.is_empty() or not ("assemble" in fiche_r.get("tags", [])) or items.get(rid, {}).has("composants"):
+			continue
+		var inst_r := generer_objet(rid, prof, {}, "commun", 0)
+		if not inst_r.is_empty():
+			rat[k] = str(inst_r.uid)
