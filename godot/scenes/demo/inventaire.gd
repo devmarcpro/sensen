@@ -331,11 +331,15 @@ class FichePorteur extends Control:
 func ajuster_largeur(dispo: float) -> void:
 	if cadre_avatar == null or fiche == null:
 		return
-	var k := clampf(dispo / 1010.0, 0.45, 1.0)   # 1010 : la somme des minimums à pleine taille
-	# L'avatar est décoratif : c'est lui qui cède. La fiche, elle, porte des chiffres — sous 210 px ses
-	# valeurs de jauges passaient hors cadre et disparaissaient, ce qui est une autre façon de couper.
-	cadre_avatar.custom_minimum_size.x = 190.0 * k
-	fiche.custom_minimum_size.x = maxf(210.0, 230.0 * k)
+	# L'avatar est décoratif : c'est lui qui cède, et quand la place manque vraiment il DISPARAÎT
+	# plutôt que d'écraser ce qui porte de l'information. La grille d'équipement (280 px) et la fiche
+	# (210 px) sont incompressibles — sous 210 px, les chiffres des jauges passent hors du cadre et
+	# s'évanouissent, ce qui est une autre façon de couper, plus sournoise puisque rien ne dépasse.
+	var reste := dispo - 280.0 - 210.0
+	cadre_avatar.visible = reste >= 90.0
+	cadre_avatar.custom_minimum_size.x = clampf(reste, 0.0, 190.0)
+	fiche.custom_minimum_size.x = 210.0
+	var k := clampf(cadre_avatar.custom_minimum_size.x / 190.0, 0.5, 1.0)
 	if avatar != null:
 		avatar.scale = Vector2(4.2 * k, 4.2 * k)
 		avatar.position = Vector2(95.0 * k, 200.0 * k)

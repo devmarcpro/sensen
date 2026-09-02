@@ -30,6 +30,7 @@ var corps: HBoxContainer      # liste + détail : caché quand le composeur est 
 var boutons: HBoxContainer
 var entrees: Array = []                 # ce que chaque ligne de la liste représente
 var selection := 0
+var largeur_panneau := LARGEUR          # la largeur du panneau calculée au dernier `_dimensionner`
 var parties_listees: Array = []         # l'écran Charger : {slot, resume} par partie (designer 2026-09-02)
 var minuterie := 0.0
 var pnj_id := ""                     # le PNJ du dialogue / du commerce en cours
@@ -165,6 +166,7 @@ func _dimensionner() -> void:
 	# (file d'attente du designer, point 67). On le borne donc à la fenêtre elle-même.
 	var l := minf(maxf(LARGEUR, v.x * PART.x), v.x)
 	var h := minf(maxf(HAUTEUR, v.y * PART.y), v.y)
+	largeur_panneau = l   # la largeur DE CE TOUR : `panneau.size` est encore celle du tour d'avant
 	panneau.custom_minimum_size = Vector2(l, h)
 	panneau.set_anchor_and_offset(SIDE_LEFT, 0.5, -l / 2.0)
 	panneau.set_anchor_and_offset(SIDE_TOP, 0.5, -h / 2.0)
@@ -533,7 +535,14 @@ func rafraichir() -> void:
 	# Chaque écran demandait une largeur en pixels fixes pour sa colonne de droite ; additionnée à la
 	# liste (340 px), la somme dépassait une fenêtre étroite et le contenu sortait du cadre. Ces
 	# largeurs sont désormais des PARTS du panneau, plafonnées à la valeur d'origine (point 67).
-	var large := panneau.size.x if panneau.size.x > 1.0 else panneau.custom_minimum_size.x
+	# La largeur vient de `_dimensionner`, pas de `panneau.size` : la taille d'un Control n'est à jour
+	# qu'après le tour de mise en page suivant, et s'en servir ici rendait des largeurs d'un cran en
+	# retard — les colonnes se calculaient pour la fenêtre précédente et débordaient de la nouvelle.
+	_dimensionner()
+	# Le panneau a ses propres marges intérieures et les conteneurs leur séparation : compter sur la
+	# largeur brute laissait les colonnes déborder d'une trentaine de pixels, juste assez pour manger
+	# la fin de chaque ligne de texte. On travaille donc sur la largeur UTILE.
+	var large := largeur_panneau - 48.0
 	var part_droite := func(px: float, part: float) -> float: return minf(px, maxf(120.0, large * part))
 	liste.custom_minimum_size = Vector2(minf(float(GameData.config("styles").get("ecrans", {}).get("liste_min", 340.0)), large * 0.42), 0)
 	if courant == "monde":   # la carte du monde prend presque toute la fenêtre (designer, point 49)
@@ -543,7 +552,10 @@ func rafraichir() -> void:
 		detail.custom_minimum_size = Vector2(0, 44)
 		apercu_monde.custom_minimum_size = Vector2(0, 880)
 	elif courant == "inventaire":
-		droite.custom_minimum_size = Vector2(part_droite.call(360.0, 0.30), 0)
+		# L'inventaire a quatre colonnes de front : grille d'équipement, avatar, fiche, détail. On sert
+		# d'abord les trois qui portent de l'information, et le détail prend ce qui reste — jamais moins
+		# de 200 px, sous quoi une description d'objet redevient illisible.
+		droite.custom_minimum_size = Vector2(clampf(large - 500.0, 200.0, 360.0), 0)
 		droite.size_flags_stretch_ratio = 0.9
 		detail.size_flags_vertical = Control.SIZE_FILL   # le Wu Xing de l'objet juste sous le détail, pas au fond du panneau
 		detail.custom_minimum_size = Vector2(0, 340)
