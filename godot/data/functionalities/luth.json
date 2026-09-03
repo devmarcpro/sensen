@@ -1,0 +1,19 @@
+{
+  "name_key": "functionality.luth.name",
+  "kind": "arme",
+  "hands": 1,
+  "combat_skill": "musique",
+  "degats_des": "1d4",
+  "crit_range": 20,
+  "vitesse_base": 1.8,
+  "portee": 1.0,
+  "portee_min": 1,
+  "type_degats": "contondant",
+  "volume": 1.4,
+  "genre_grammatical": "ms",
+  "affinite_sorts": {
+    "mana": 0.85,
+    "endurance": 1.45
+  },
+  "poids_reference": 1.68
+}

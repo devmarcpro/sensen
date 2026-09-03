@@ -1,0 +1,20 @@
+{
+  "name_key": "item.craft_cor.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "slots": {
+    "tete": "monture",
+    "manche": "manche_court"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie"
+  },
+  "genre_grammatical": "ms",
+  "tags": [
+    "arme",
+    "assemble"
+  ],
+  "functionality": "cor"
+}

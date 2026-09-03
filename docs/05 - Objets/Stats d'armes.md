@@ -109,6 +109,24 @@ Le résultat du jet est ensuite modulé par matériaux/qualité (formule [[Pipel
 >
 > **La sonde `sonde_armes.tscn` tient la règle après moi.** Elle échoue si deux armes se ressemblent sur **tous** les axes à la fois — même type de dégâts, mêmes mains, dés à moins de 15 %, vitesse à moins de 15 %, portée à moins d'une tuile, même critique : ce ne sont alors pas deux armes, c'est la même avec deux noms. Elle échoue aussi si un type de dégâts n'est porté que par une arme, ce qui rendrait la matrice d'armure décorative. C'est la seule façon que la demande du designer — « fais en sorte que toutes se différencient » — reste vraie à la centième arme.
 
+> [!success] Tranché le 2026-09-03 — **une arme par stat** (designer)
+> « Un type d'arme et d'armure par stat ; charisme, ça pourrait être des instruments. » Puis : « donc ça fait une classe, une façon de jouer par stat. »
+> **La mesure d'abord.** Sur vingt-cinq armes : force **9**, dextérité **10**, volonté **6** — et endurance, perception, charisme **zéro**. Trois stats sur six dans lesquelles un joueur pouvait investir sans rien avoir à tenir.
+>
+> | stat | armes ajoutées | ce qui les définit |
+> |---|---|---|
+> | **charisme** | luth, tambour, cor | focus des sorts qui coûtent de l'**endurance** |
+> | **perception** | stylet, sarbacane, arc long | peu de dés, la fenêtre de critique la plus large (stylet : **17**) |
+> | **endurance** | hallebarde, pavois | lentes, longues, faites pour tenir une position |
+>
+> **Pourquoi les instruments tombent si juste.** Le système de focus existait déjà — `affinite_sorts` — mais il ne servait que la monnaie **mana**. Or **dix-huit noyaux coûtent de l'endurance** : les cris, les charges, les ralliements, les frappes. Ils n'avaient aucun focus. Un instrument est ce qui porte la voix : le luth, le tambour et le cor sont aux sorts d'endurance ce que l'orbe et le sceptre sont aux sorts de mana. Le mécanisme ne servait qu'à moitié.
+> **Mesuré** sur un sort d'endurance : tambour ×1,65 · luth ×1,45 · cor ×1,25 · épée ×1,20 · mains nues ×1,00 · **orbe ×0,55**. Les deux familles de focus se repoussent proprement — un orbe est mauvais aux cris, un tambour est mauvais aux sortilèges.
+>
+> > [!question] « Une façon de jouer par stat » — ce que ça dit des dix-neuf classes
+> > Le designer en tire une conclusion de fond : une stat = une façon de jouer. Les classes existantes n'y répondent qu'à moitié. Leur stat dominante se répartit ainsi : **dextérité 6, volonté 6, force 4, charisme 2, perception 1, endurance 0**.
+> > Autrement dit : douze classes sur dix-neuf se partagent deux stats, **une seule** est de perception, et **aucune** n'est d'endurance. Les armes existent désormais pour ces six façons de jouer ; les **classes**, elles, n'en couvrent que quatre.
+> > **Ce que je ne tranche pas** : faut-il rééquilibrer les dix-neuf vers les six stats, ou assumer que certaines stats sont des voies qu'on se construit soi-même plutôt que des classes de départ ? La deuxième réponse est défendable — mais alors il faut le dire, parce qu'aujourd'hui c'est un accident, pas un choix.
+
 ## Liens
 - **Dépend de** : [[Fonctionnalité]], [[Stats d'un objet crafté]], [[Qualité d'artisanat]], [[Matériaux — 13 stats]]
 - **Alimente** : [[Pipeline de résolution du combat]], [[Action-time à ticks]], [[Combat tactique sur grille]]

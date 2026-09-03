@@ -1,0 +1,19 @@
+{
+  "name_key": "functionality.pavois.name",
+  "kind": "arme",
+  "hands": 2,
+  "combat_skill": "hast",
+  "degats_des": "2d4",
+  "crit_range": 20,
+  "vitesse_base": 1.0,
+  "portee": 1.5,
+  "portee_min": 1,
+  "type_degats": "contondant",
+  "volume": 4.6,
+  "genre_grammatical": "ms",
+  "affinite_sorts": {
+    "mana": 0.7,
+    "endurance": 1.3
+  },
+  "poids_reference": 5.52
+}

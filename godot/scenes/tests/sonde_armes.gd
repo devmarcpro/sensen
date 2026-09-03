@@ -84,6 +84,21 @@ func _ready() -> void:
 		tete.append("%s %d/%d" % [aid, int(podium[aid]), constructions.size()])
 	tete.sort()
 	print("armes sur le podium par construction d'armure : %s" % ", ".join(tete))
+	# UNE ARME PAR STAT (designer 2026-09-03). Mesure avant : force 9 armes, dexterite 10, volonte 6,
+	# et endurance, perception, charisme ZERO — trois stats sur six dans lesquelles un personnage
+	# pouvait investir sans rien avoir a tenir. La sonde garde la regle : chaque stat de combat a au
+	# moins une arme qui s'y entraine.
+	var par_stat := {}
+	for a3 in armes:
+		var sk := str(a3.d.get("combat_skill", ""))
+		var st := str(GameData.catalogues.competences.get(sk, {}).get("stat", "?"))
+		par_stat[st] = int(par_stat.get(st, 0)) + 1
+	var tete_s: Array[String] = []
+	for st in ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]:
+		tete_s.append("%s %d" % [st, int(par_stat.get(st, 0))])
+		if int(par_stat.get(st, 0)) == 0:
+			soucis.append("  aucune arme ne s'entraine sur « %s » : investir dans cette stat ne donne rien a tenir" % st)
+	print("armes par stat : %s" % ", ".join(tete_s))
 	for s in soucis:
 		print(s)
 	if not soucis.is_empty():

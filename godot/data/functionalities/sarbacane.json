@@ -1,0 +1,20 @@
+{
+  "name_key": "functionality.sarbacane.name",
+  "kind": "arme",
+  "hands": 1,
+  "combat_skill": "precision",
+  "degats_des": "1d3",
+  "crit_range": 18,
+  "vitesse_base": 1.9,
+  "portee": 9.0,
+  "portee_min": 2,
+  "projectile": true,
+  "type_degats": "perforant",
+  "volume": 0.6,
+  "genre_grammatical": "fs",
+  "affinite_sorts": {
+    "mana": 1.0,
+    "endurance": 1.0
+  },
+  "poids_reference": 0.72
+}

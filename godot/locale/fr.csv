@@ -2815,3 +2815,22 @@ construction.cuir.nom,cuir
 construction.mailles.nom,mailles
 construction.ecailles.nom,écailles
 construction.rituel.nom,rituel
+functionality.luth.name,Luth
+item.craft_luth.name,Luth
+functionality.tambour.name,Tambour
+item.craft_tambour.name,Tambour
+functionality.cor.name,Cor
+item.craft_cor.name,Cor
+functionality.stylet.name,Stylet
+item.craft_stylet.name,Stylet
+functionality.sarbacane.name,Sarbacane
+item.craft_sarbacane.name,Sarbacane
+functionality.arc_long.name,Arc long
+item.craft_arc_long.name,Arc long
+functionality.hallebarde.name,Hallebarde
+item.craft_hallebarde.name,Hallebarde
+functionality.pavois.name,Pavois
+item.craft_pavois.name,Pavois
+competence.musique.name,Musique
+competence.precision.name,Précision
+competence.hast.name,Armes d'hast

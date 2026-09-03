@@ -77,6 +77,37 @@ func _ready() -> void:
 		vus.append(sig)
 	if focus.size() < 4:
 		soucis.append("  seulement %d focus : une famille d'une ou deux armes n'est pas une famille" % focus.size())
+	# L'AUTRE MONNAIE. Les instruments (designer 2026-09-03 : « charisme ça pourrait être des
+	# instruments ») sont aux sorts qui coutent de l'ENDURANCE — les cris, les charges, les
+	# ralliements — ce que l'orbe et le sceptre sont aux sorts de mana. Dix-huit noyaux coutent de
+	# l'endurance et n'avaient aucun focus : le mecanisme existait, il ne servait qu'a moitie.
+	var seq_e: Array = ["point", "contact", "frappe"]
+	for m in seq_e:
+		if not (str(m) in j.get("modules_connus", [])):
+			j.modules_connus.append(str(m))
+	if s.composer_capacite(j, seq_e, "sonde_endurance"):
+		var idx_e: int = j.capacites.size() - 1
+		print("")
+		print("%-20s %10s %10s" % ["arme tenue", "monnaie", "puissance"])
+		var par_e := {}
+		for aid in ["", "tambour", "luth", "cor", "epee", "orbe"]:
+			if not aid.is_empty():
+				var it2: Dictionary = s.generer_objet("craft_" + aid, 3, {}, "commun", 0)
+				if it2.is_empty():
+					continue
+				j.sac.append(str(it2.uid))
+				j.equipement["main_principale"] = str(it2.uid)
+			else:
+				j.equipement.erase("main_principale")
+			var pe: Dictionary = s.plan_capacite(j, idx_e)
+			var nom_e: String = aid if not aid.is_empty() else "mains nues"
+			par_e[nom_e] = float(pe.get("affinite_arme", 1.0))
+			print("%-20s %10s %10.2f" % [nom_e, str(pe.get("monnaie", "?")), float(pe.get("mult", 1.0))])
+		for instr in ["tambour", "luth", "cor"]:
+			if par_e.has(instr) and par_e.has("mains nues") and float(par_e[instr]) <= float(par_e["mains nues"]):
+				soucis.append("  %s ne porte pas mieux un sort d'endurance que les mains nues" % instr)
+		if par_e.has("tambour") and par_e.has("orbe") and float(par_e.tambour) <= float(par_e.orbe):
+			soucis.append("  le tambour ne bat pas l'orbe sur un sort d'ENDURANCE : les deux familles ne se distinguent pas")
 	for x in soucis:
 		print(x)
 	if not soucis.is_empty():

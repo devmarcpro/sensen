@@ -1,0 +1,21 @@
+{
+  "name_key": "item.craft_stylet.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "slots": {
+    "tete": "lame_courte",
+    "manche": "poignee",
+    "garde": "garde"
+  },
+  "recipe": {
+    "station": "forge",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "ms",
+  "tags": [
+    "arme",
+    "assemble"
+  ],
+  "functionality": "stylet"
+}

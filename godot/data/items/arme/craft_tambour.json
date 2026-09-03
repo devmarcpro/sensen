@@ -1,0 +1,21 @@
+{
+  "name_key": "item.craft_tambour.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 2,
+  "slots": {
+    "plaque": "etoffe",
+    "sangles": "sangles",
+    "doublure": "doublure"
+  },
+  "recipe": {
+    "station": "atelier_tissage",
+    "craft_skill": "tissage"
+  },
+  "genre_grammatical": "ms",
+  "tags": [
+    "arme",
+    "assemble"
+  ],
+  "functionality": "tambour"
+}

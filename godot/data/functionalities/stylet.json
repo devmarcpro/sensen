@@ -1,0 +1,19 @@
+{
+  "name_key": "functionality.stylet.name",
+  "kind": "arme",
+  "hands": 1,
+  "combat_skill": "precision",
+  "degats_des": "1d4",
+  "crit_range": 17,
+  "vitesse_base": 2.8,
+  "portee": 1.0,
+  "portee_min": 1,
+  "type_degats": "perforant",
+  "volume": 0.4,
+  "genre_grammatical": "ms",
+  "affinite_sorts": {
+    "mana": 1.0,
+    "endurance": 1.0
+  },
+  "poids_reference": 0.48
+}

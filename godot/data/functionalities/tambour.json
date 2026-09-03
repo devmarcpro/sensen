@@ -1,0 +1,19 @@
+{
+  "name_key": "functionality.tambour.name",
+  "kind": "arme",
+  "hands": 2,
+  "combat_skill": "musique",
+  "degats_des": "1d6",
+  "crit_range": 20,
+  "vitesse_base": 1.2,
+  "portee": 1.0,
+  "portee_min": 1,
+  "type_degats": "contondant",
+  "volume": 2.4,
+  "genre_grammatical": "ms",
+  "affinite_sorts": {
+    "mana": 0.7,
+    "endurance": 1.65
+  },
+  "poids_reference": 2.88
+}

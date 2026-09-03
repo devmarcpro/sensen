@@ -1,0 +1,21 @@
+{
+  "name_key": "item.craft_luth.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "slots": {
+    "tete": "monture",
+    "manche": "manche_court",
+    "corde": "corde"
+  },
+  "recipe": {
+    "station": "atelier_tissage",
+    "craft_skill": "menuiserie"
+  },
+  "genre_grammatical": "ms",
+  "tags": [
+    "arme",
+    "assemble"
+  ],
+  "functionality": "luth"
+}

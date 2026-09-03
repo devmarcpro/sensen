@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.precision.name",
+  "category": "combat",
+  "stat": "perception",
+  "famille": "armes",
+  "tags": [
+    "combat",
+    "armes"
+  ]
+}

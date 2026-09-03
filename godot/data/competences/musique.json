@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.musique.name",
+  "category": "combat",
+  "stat": "charisme",
+  "famille": "armes",
+  "tags": [
+    "combat",
+    "armes"
+  ]
+}

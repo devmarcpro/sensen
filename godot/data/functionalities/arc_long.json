@@ -1,0 +1,20 @@
+{
+  "name_key": "functionality.arc_long.name",
+  "kind": "arme",
+  "hands": 2,
+  "combat_skill": "precision",
+  "degats_des": "2d8",
+  "crit_range": 19,
+  "vitesse_base": 1.1,
+  "portee": 30.0,
+  "portee_min": 3,
+  "projectile": true,
+  "type_degats": "perforant",
+  "volume": 1.8,
+  "genre_grammatical": "ms",
+  "affinite_sorts": {
+    "mana": 0.9,
+    "endurance": 1.1
+  },
+  "poids_reference": 2.16
+}

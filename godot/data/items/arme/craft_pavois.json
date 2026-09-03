@@ -1,0 +1,21 @@
+{
+  "name_key": "item.craft_pavois.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 2,
+  "slots": {
+    "plaque": "plaque",
+    "manche": "poignee",
+    "sangles": "sangles"
+  },
+  "recipe": {
+    "station": "forge",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "ms",
+  "tags": [
+    "arme",
+    "assemble"
+  ],
+  "functionality": "pavois"
+}

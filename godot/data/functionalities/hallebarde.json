@@ -1,0 +1,19 @@
+{
+  "name_key": "functionality.hallebarde.name",
+  "kind": "arme",
+  "hands": 2,
+  "combat_skill": "hast",
+  "degats_des": "2d8",
+  "crit_range": 20,
+  "vitesse_base": 1.1,
+  "portee": 2.5,
+  "portee_min": 2,
+  "type_degats": "tranchant",
+  "volume": 4.0,
+  "genre_grammatical": "fs",
+  "affinite_sorts": {
+    "mana": 0.8,
+    "endurance": 1.2
+  },
+  "poids_reference": 4.8
+}
