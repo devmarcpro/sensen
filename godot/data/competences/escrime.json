@@ -1,7 +1,7 @@
 {
-  "name_key": "competence.lance.name",
+  "name_key": "competence.escrime.name",
   "category": "combat",
-  "stat": "endurance",
+  "stat": "dexterite",
   "famille": "armes",
   "tags": [
     "combat",

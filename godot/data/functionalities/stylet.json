@@ -2,7 +2,7 @@
   "name_key": "functionality.stylet.name",
   "kind": "arme",
   "hands": 1,
-  "combat_skill": "precision",
+  "combat_skill": "dague",
   "degats_des": "1d4",
   "crit_range": 17,
   "vitesse_base": 2.8,

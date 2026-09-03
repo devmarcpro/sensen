@@ -1,7 +1,7 @@
 {
   "name_key": "competence.arc.name",
   "category": "combat",
-  "stat": "dexterite",
+  "stat": "perception",
   "famille": "armes",
   "tags": [
     "combat",

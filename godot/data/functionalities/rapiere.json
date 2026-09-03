@@ -2,7 +2,7 @@
   "name_key": "functionality.rapiere.name",
   "kind": "arme",
   "hands": 1,
-  "combat_skill": "epee",
+  "combat_skill": "escrime",
   "degats_des": "1d10",
   "crit_range": 18,
   "vitesse_base": 2.4,

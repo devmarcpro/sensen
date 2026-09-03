@@ -1,7 +1,7 @@
 {
   "name_key": "competence.baton.name",
   "category": "combat",
-  "stat": "dexterite",
+  "stat": "endurance",
   "famille": "armes",
   "tags": [
     "combat",

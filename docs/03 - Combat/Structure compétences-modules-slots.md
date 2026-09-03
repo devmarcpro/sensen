@@ -133,3 +133,50 @@ Monter un module en niveau le rend plus puissant ET moins coûteux (puissance : 
 - **Dépend de** : [[Combat tactique sur grille]], [[Progression par l'usage]]
 - **Alimente** : [[Six types de modules et assemblage]], [[Mana]], [[Vocabulaire des modules — six axes]]
 - **Voir aussi** : [[Grimoires et manuels]], [[Le vocabulaire des modules et l'absence d'arbre de talents]], [[Écrans d'interface]], [[Tooltips contextuels]]
+
+## 2026-09-03 — L'identité des six stats, et le rangement des armes qui en découle
+
+Le designer tranche, et il tranche dans le bon ordre : **l'identité d'abord, le reste ensuite.**
+
+> « force c'est le guerrier donc des grosses armes au corps à corps, dextérité c'est des armes plus
+> petites genre des dagues c'est la vitesse qui prime, volonté c'est le mage, perception c'est le
+> tireur le sniper il attaque de loin, le charisme c'est le barde avec ses instruments il boost ses
+> alliés et endurance c'est les armes de corps à corps à grandes allonges genre les lances hallebarde »
+
+| stat | l'archétype | le critère d'une arme |
+|---|---|---|
+| force | le guerrier | contact, lourde ou d'impact |
+| dextérité | la lame rapide | contact, légère — la vitesse prime |
+| endurance | la ligne | contact, **allonge ≥ 2** |
+| volonté | le mage | focus de mana |
+| perception | le tireur | **projectile, à distance** |
+| charisme | le barde | instrument, il soutient les siens |
+
+Le catalogue n'était pas rangé comme ça. La dextérité tenait **tout** le tir du jeu (arc, arbalète,
+fronde, pistolet) alors que le tir est l'identité de la perception ; la lance était sous la force
+alors que son allonge de 2,5 en fait l'arme de l'endurance ; et la perception avait un stylet
+d'allonge 1 — une dague, sous la stat du sniper.
+
+**Ce qui bouge** (les compétences changent de stat ; les armes ne changent pas de chiffre) :
+
+    arc, arbalète, fronde, armes à poudre   dextérité -> PERCEPTION   le tir est au tireur
+    lance, bâton                            dex/force -> ENDURANCE    allonge 2,5 et 2,0
+    rapière                                 force     -> DEXTÉRITÉ    via une compétence `escrime`
+    stylet                                  perception-> DEXTÉRITÉ    via la compétence `dague`
+
+La rapière avait besoin d'une compétence à elle : elle partageait `epee` avec l'épée et le sabre,
+et on ne déplace pas les trois pour une seule. `escrime` est donc la lame de finesse — vitesse 2,4,
+volume 2,2 — là où `epee` reste la lame du guerrier.
+
+Après : force 7, dextérité 7, endurance 4, perception 6, volonté 6, charisme 3. Avant, c'était
+force 9 / dextérité 10 contre endurance 2 / perception 3. Aucune voie n'est plus un placard.
+
+**Deux choses que je n'ai pas déplacées, et pourquoi.** Les armes de **jet** (couteau, hachette,
+javelot) portent à 5-8 cases : à la lettre du critère c'est « de loin », mais un couteau lancé est un
+geste de main rapide, pas un tir posé — elles restent à la dextérité. Le **fouet** a la plus grande
+allonge du jeu (3,0) et devrait donc partir à l'endurance, mais il pèse 1,0 pour une vitesse de 2,2 :
+c'est une arme de finesse, elle reste à la dextérité. Dans les deux cas le critère de l'archétype bat
+le chiffre brut ; si le designer préfère la lettre, c'est une ligne à changer dans `competences/`.
+
+**Ce que ça ne règle pas :** le charisme n'a que trois armes, toutes des instruments, et l'endurance
+quatre. Ce sont les deux voies à étoffer — et l'identité, maintenant, dit quoi y écrire.
