@@ -91,6 +91,24 @@ Le résultat du jet est ensuite modulé par matériaux/qualité (formule [[Pipel
 > > [!warning] Le compteur qui mentait
 > > Au troisième jet, la sonde affichait « 1 en main » alors que la main était vide. La pile était bien retirée de l'équipement, mais je ne remettais pas son compteur à zéro : le dictionnaire orphelin **mentait sur son compte**. Sans conséquence visible aujourd'hui, et exactement le genre de valeur périmée qui donne un bug incompréhensible trois semaines plus tard, quand quelque chose garde une référence.
 
+> [!success] Rendu le 2026-09-03 — **sept armes de contact, et une sonde qui interdit les doublons** (designer, point 79)
+> « Rajoute des types d'armes mais fais en sorte que toutes se différencie (type de dégât, vitesse d'attaque, jet, etc.) »
+> **J'ai mesuré avant d'ajouter.** Treize armes, et trois trous nets : le **tranchant** n'était porté que par deux d'entre elles alors que la matrice d'armure lui donne un vrai rôle (mauvais contre la plaque à 1,30, bon contre le matelassé à 0,95) ; la **portée 2-3** au contact n'était tenue que par la lance ; et rien de lent et énorme n'existait à côté de la masse.
+>
+> | arme | dés | vitesse | portée | mains | type | son axe |
+> |---|---|---|---|---|---|---|
+> | Hache d'armes | 3d6 | 1,3 | 1,5 | 2 | tranchant | le tranchant lourd, qui manquait |
+> | Marteau de guerre | 4d6 | 0,8 | 1,5 | 2 | contondant | les plus gros dés du jeu, payés par la lenteur |
+> | Fléau | 2d8 | 1,3 | **2,0** | 2 | contondant | de l'allonge en contondant |
+> | Rapière | 1d10 | 2,4 | 1,5 | 1 | perforant | crit **18** : la précision, pas la force |
+> | Sabre | 1d10 | 2,2 | 1,5 | 1 | tranchant | le tranchant rapide |
+> | Bâton | 2d4 | **2,6** | 2,0 | 2 | contondant | vitesse et allonge, dégâts minces |
+> | Fouet | 1d4 | 2,2 | **3,0** / 2 | 1 | tranchant | la plus longue allonge du contact, presque sans dégâts |
+>
+> **Vingt armes au total**, réparties 8 perforant / 7 contondant / 5 tranchant.
+>
+> **La sonde `sonde_armes.tscn` tient la règle après moi.** Elle échoue si deux armes se ressemblent sur **tous** les axes à la fois — même type de dégâts, mêmes mains, dés à moins de 15 %, vitesse à moins de 15 %, portée à moins d'une tuile, même critique : ce ne sont alors pas deux armes, c'est la même avec deux noms. Elle échoue aussi si un type de dégâts n'est porté que par une arme, ce qui rendrait la matrice d'armure décorative. C'est la seule façon que la demande du designer — « fais en sorte que toutes se différencient » — reste vraie à la centième arme.
+
 ## Liens
 - **Dépend de** : [[Fonctionnalité]], [[Stats d'un objet crafté]], [[Qualité d'artisanat]], [[Matériaux — 13 stats]]
 - **Alimente** : [[Pipeline de résolution du combat]], [[Action-time à ticks]], [[Combat tactique sur grille]]

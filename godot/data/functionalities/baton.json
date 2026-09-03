@@ -1,0 +1,19 @@
+{
+  "name_key": "functionality.baton.name",
+  "kind": "arme",
+  "hands": 2,
+  "combat_skill": "baton",
+  "degats_des": "2d4",
+  "crit_range": 20,
+  "vitesse_base": 2.6,
+  "portee": 2.0,
+  "portee_min": 1,
+  "type_degats": "contondant",
+  "volume": 2.0,
+  "genre_grammatical": "ms",
+  "poids_reference": 2.4,
+  "affinite_sorts": {
+    "mana": 0.9,
+    "endurance": 1.1
+  }
+}

@@ -2767,3 +2767,19 @@ competence.fronde.name,Fronde
 competence.jet.name,Armes de jet
 competence.armes_a_poudre.name,Armes à poudre
 journal.jet_dernier,"{nom} lance son dernier {arme} : la main est vide."
+functionality.hache_d_armes.name,Hache d'armes
+item.craft_hache_d_armes.name,Hache d'armes
+functionality.marteau_de_guerre.name,Marteau de guerre
+item.craft_marteau_de_guerre.name,Marteau de guerre
+functionality.fleau.name,Fléau
+item.craft_fleau.name,Fléau
+functionality.rapiere.name,Rapière
+item.craft_rapiere.name,Rapière
+functionality.sabre.name,Sabre
+item.craft_sabre.name,Sabre
+functionality.baton.name,Bâton
+item.craft_baton.name,Bâton
+functionality.fouet.name,Fouet
+item.craft_fouet.name,Fouet
+competence.baton.name,Bâton
+competence.fouet.name,Fouet

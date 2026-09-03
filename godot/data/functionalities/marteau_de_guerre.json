@@ -1,0 +1,19 @@
+{
+  "name_key": "functionality.marteau_de_guerre.name",
+  "kind": "arme",
+  "hands": 2,
+  "combat_skill": "masse",
+  "degats_des": "4d6",
+  "crit_range": 20,
+  "vitesse_base": 0.8,
+  "portee": 1.5,
+  "portee_min": 1,
+  "type_degats": "contondant",
+  "volume": 4.4,
+  "genre_grammatical": "ms",
+  "poids_reference": 5.28,
+  "affinite_sorts": {
+    "mana": 0.9,
+    "endurance": 1.1
+  }
+}

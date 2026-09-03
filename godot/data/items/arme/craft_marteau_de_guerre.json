@@ -1,0 +1,21 @@
+{
+  "name_key": "item.craft_marteau_de_guerre.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 2,
+  "slots": {
+    "tete": "tete_arme_lourde",
+    "manche": "manche_long",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "forge",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "ms",
+  "tags": [
+    "arme",
+    "assemble"
+  ],
+  "functionality": "marteau_de_guerre"
+}

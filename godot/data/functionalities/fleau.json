@@ -1,0 +1,19 @@
+{
+  "name_key": "functionality.fleau.name",
+  "kind": "arme",
+  "hands": 2,
+  "combat_skill": "masse",
+  "degats_des": "2d8",
+  "crit_range": 20,
+  "vitesse_base": 1.3,
+  "portee": 2.0,
+  "portee_min": 1,
+  "type_degats": "contondant",
+  "volume": 3.0,
+  "genre_grammatical": "ms",
+  "poids_reference": 3.6,
+  "affinite_sorts": {
+    "mana": 0.9,
+    "endurance": 1.1
+  }
+}

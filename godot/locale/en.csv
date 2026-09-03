@@ -2758,3 +2758,19 @@ competence.fronde.name,Sling
 competence.jet.name,Thrown weapons
 competence.armes_a_poudre.name,Powder weapons
 journal.jet_dernier,"{nom} throws their last {arme}: empty-handed now."
+functionality.hache_d_armes.name,Battle axe
+item.craft_hache_d_armes.name,Battle axe
+functionality.marteau_de_guerre.name,War hammer
+item.craft_marteau_de_guerre.name,War hammer
+functionality.fleau.name,Flail
+item.craft_fleau.name,Flail
+functionality.rapiere.name,Rapier
+item.craft_rapiere.name,Rapier
+functionality.sabre.name,Sabre
+item.craft_sabre.name,Sabre
+functionality.baton.name,Quarterstaff
+item.craft_baton.name,Quarterstaff
+functionality.fouet.name,Whip
+item.craft_fouet.name,Whip
+competence.baton.name,Quarterstaff
+competence.fouet.name,Whip

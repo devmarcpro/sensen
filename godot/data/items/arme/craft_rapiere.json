@@ -1,0 +1,21 @@
+{
+  "name_key": "item.craft_rapiere.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "slots": {
+    "tete": "lame_longue",
+    "manche": "poignee",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "forge",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "fs",
+  "tags": [
+    "arme",
+    "assemble"
+  ],
+  "functionality": "rapiere"
+}

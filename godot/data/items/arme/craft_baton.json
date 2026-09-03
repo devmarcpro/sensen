@@ -1,0 +1,21 @@
+{
+  "name_key": "item.craft_baton.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 2,
+  "slots": {
+    "tete": "manche_long",
+    "manche": "poignee",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie"
+  },
+  "genre_grammatical": "ms",
+  "tags": [
+    "arme",
+    "assemble"
+  ],
+  "functionality": "baton"
+}

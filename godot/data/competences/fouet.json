@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.fouet.name",
+  "category": "combat",
+  "stat": "dexterite",
+  "famille": "armes",
+  "tags": [
+    "combat",
+    "armes"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name_key": "item.craft_fouet.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "slots": {
+    "tete": "sangles",
+    "manche": "poignee",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "tissage"
+  },
+  "genre_grammatical": "ms",
+  "tags": [
+    "arme",
+    "assemble"
+  ],
+  "functionality": "fouet"
+}

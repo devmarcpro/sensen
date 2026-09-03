@@ -1,0 +1,19 @@
+{
+  "name_key": "functionality.sabre.name",
+  "kind": "arme",
+  "hands": 1,
+  "combat_skill": "epee",
+  "degats_des": "1d10",
+  "crit_range": 19,
+  "vitesse_base": 2.2,
+  "portee": 1.5,
+  "portee_min": 1,
+  "type_degats": "tranchant",
+  "volume": 2.6,
+  "genre_grammatical": "ms",
+  "poids_reference": 3.12,
+  "affinite_sorts": {
+    "mana": 1.0,
+    "endurance": 1.0
+  }
+}

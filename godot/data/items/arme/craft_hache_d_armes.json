@@ -1,0 +1,21 @@
+{
+  "name_key": "item.craft_hache_d_armes.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 2,
+  "slots": {
+    "tete": "tete_outil",
+    "manche": "manche_long",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "forge",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "fs",
+  "tags": [
+    "arme",
+    "assemble"
+  ],
+  "functionality": "hache_d_armes"
+}
