@@ -1,10 +1,3 @@
 # Rouille connue du coffre : identifiants cites par les notes et absents du code.
 # Chaque passe de reconciliation en retire ; `python tools/verif_doc_code.py --geler` regele.
-05 - Objets\Schéma matériau.md : noise_layer
-05 - Objets\Schéma matériau.md : noise_layer_id
-05 - Objets\Schéma matériau.md : texture_path
-06 - Êtres\Blocs de l'être.md : housing_default
-09 - Contenu\Biomes de départ.md : foret_de_mana
-99 - Ouvert\Ouvert — Pools de noms des cultures.md : culture_sino
-99 - Ouvert\Ouvert — Pools de noms des cultures.md : famille_b
-99 - Ouvert\Ouvert — Pools de noms des cultures.md : prenom_b
+

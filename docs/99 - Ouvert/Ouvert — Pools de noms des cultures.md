@@ -23,7 +23,7 @@ etape: 9
 **Cas particulier :** `famille_b: [""]` (chaîne vide) pour les cultures à noms de famille « pleins » plutôt que composés — comme le sino.
 
 > [!success] Constaté le 2026-09-03 — codé sous d'autres noms : voir [[Cultures de nommage]]
-> `culture_sino` est `sino` ; `famille_b` et `prenom_b` sont dédoublés par genre (`famille_b_m` / `famille_b_f`, `prenom_b_m` / `prenom_b_f`).
+> `culture_sino` est renommé `sino` ; `famille_b` et `prenom_b` sont remplacés par des pools dédoublés par genre (`famille_b_m` / `famille_b_f`, `prenom_b_m` / `prenom_b_f`).
 
 ## Liens
 - **Dépend de** : [[Cultures de nommage]], [[Culture de nommage — schéma]], [[Génération de noms]]
