@@ -26,8 +26,8 @@
     "scale": 4
   },
   "harvest": {
-    "tool_category": "dague",
-    "skill": "collecte"
+    "tool_category": "faucille",
+    "skill": "herboristerie"
   },
   "world_gen": {
     "mode": "biome",
@@ -39,5 +39,6 @@
     "durete": 1,
     "valeur_base": 9,
     "conductivite_mana": 30
-  }
+  },
+  "sous_categorie": "liant"
 }

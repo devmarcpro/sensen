@@ -437,6 +437,43 @@ for mid, m in modules_cat.items():
     if not st or st not in STYLES:
         probs.setdefault("28. style de module absent ou inconnu (styles.json)", []).append("%s : %s" % (mid, st))
 
+# 29. Sous-categories de materiaux (designer 2026-09-03) : une sous-categorie qui n'existe pas dans
+#     `material_categories.<cat>.sous` est une faute de frappe silencieuse — la fiche se comporterait
+#     comme si elle n'en avait pas, et personne ne le verrait. On verifie aussi que la fiche suit
+#     bien l'outil et la competence que sa sous-categorie declare : declarer un rangement puis y
+#     contredire est pire que ne rien declarer.
+_cats = conf("material_categories")
+for mid, m in cat("materials").items():
+    sc = m.get("sous_categorie")
+    if not sc:
+        continue
+    _c = _cats.get(str(m.get("category", "")), {})
+    _sous = _c.get("sous", {})
+    if sc not in _sous:
+        probs.setdefault("29. sous-categorie inconnue (material_categories.<cat>.sous)", []).append("%s : %s/%s" % (mid, m.get("category"), sc))
+        continue
+    _d = _sous[sc]
+    _h = m.get("harvest", {}) or {}
+    if _d.get("tool") and str(_h.get("tool_category", "")) != str(_d["tool"]):
+        probs.setdefault("29. la fiche contredit l'outil de sa sous-categorie", []).append("%s : %s au lieu de %s" % (mid, _h.get("tool_category"), _d["tool"]))
+    if _d.get("harvest_skill") and str(_h.get("skill", "")) != str(_d["harvest_skill"]):
+        probs.setdefault("29. la fiche contredit la competence de sa sous-categorie", []).append("%s : %s au lieu de %s" % (mid, _h.get("skill"), _d["harvest_skill"]))
+
+# 29b. Et la station qu'une sous-categorie nomme doit exister comme objet-station.
+_stations = set()
+for iid, it in cat("items").items():
+    if str(it.get("type", "")) == "station":
+        _stations.add(str(it.get("station", "")))
+for _cn, _cd in _cats.items():
+    if not isinstance(_cd, dict):
+        continue
+    for _sn, _sd in (_cd.get("sous", {}) or {}).items():
+        if _sn.startswith("_") or not isinstance(_sd, dict):
+            continue
+        _st = _sd.get("station_transform")
+        if _st and _st not in _stations:
+            probs.setdefault("29. station de sous-categorie inexistante", []).append("%s/%s -> %s" % (_cn, _sn, _st))
+
 for k in sorted(probs):
     print("\n== %s (%d)" % (k, len(probs[k])))
     for v in probs[k][:12]:

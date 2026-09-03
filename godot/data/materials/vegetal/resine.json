@@ -26,8 +26,8 @@
     "scale": 4
   },
   "harvest": {
-    "tool_category": "hache",
-    "skill": "bucheronnage"
+    "tool_category": "faucille",
+    "skill": "herboristerie"
   },
   "world_gen": {
     "mode": "biome",
@@ -39,5 +39,6 @@
     "durete": 3,
     "valeur_base": 10,
     "conductivite_mana": 38
-  }
+  },
+  "sous_categorie": "liant"
 }

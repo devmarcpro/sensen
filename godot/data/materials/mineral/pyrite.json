@@ -43,5 +43,6 @@
     "durete": 16,
     "valeur_base": 4,
     "conductivite_mana": 8
-  }
+  },
+  "sous_categorie": "minerai"
 }

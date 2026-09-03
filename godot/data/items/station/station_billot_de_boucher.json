@@ -1,0 +1,26 @@
+{
+  "name_key": "station.billot_de_boucher.name",
+  "type": "station",
+  "equip_slot": "",
+  "station": "billot_de_boucher",
+  "tags": [
+    "station",
+    "portative"
+  ],
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie",
+    "inputs": [
+      {
+        "category": "bois",
+        "forme": "planche",
+        "amount": 3
+      },
+      {
+        "category": "metal",
+        "forme": "lingot",
+        "amount": 1
+      }
+    ]
+  }
+}

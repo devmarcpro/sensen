@@ -1334,7 +1334,29 @@ func test_fabrication() -> void:
 	var s := Simulation.new(13)
 	s.charger_donjon("ruine", 13, 6, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.stations.size() == 9 and GameData.catalogues.recipes.size() == 63, "63 recettes : 24 transformations (dont os, croc, fourrure, écaille, ivoire), 3 plats, 2 distillations, la torche, et 33 dérivées des objets qui portent leur coût (24 meubles, 9 stations)")
+	# Le test comptait les recettes et les stations. Ajouter une station le cassait alors que RIEN
+	# n'était faux — c'est le sixième test à nombre figé que je convertis. Ce qui doit tenir, c'est la
+	# RÈGLE : toute station se construit, et toute recette se fait quelque part qui existe.
+	var sans_recette: Array = []
+	for sid in GameData.catalogues.stations.keys():
+		var trouvee := false
+		for rid in GameData.catalogues.recipes.keys():
+			var rr: Dictionary = GameData.catalogues.recipes[rid]
+			if str(rr.get("sortie", {}).get("station", "")) == str(sid) or str(rr.get("station_produite", "")) == str(sid):
+				trouvee = true
+		for iid in GameData.catalogues.items.keys():
+			var itt: Dictionary = GameData.catalogues.items[iid]
+			if str(itt.get("type", "")) == "station" and str(itt.get("station", "")) == str(sid) and itt.has("recipe"):
+				trouvee = true
+		if not trouvee:
+			sans_recette.append(str(sid))
+	verifier(sans_recette.is_empty(), "chaque station se construit (%d stations, %d recettes) — sans recette : %s" % [GameData.catalogues.stations.size(), GameData.catalogues.recipes.size(), str(sans_recette)])
+	var station_fantome: Array = []
+	for rid2 in GameData.catalogues.recipes.keys():
+		var st_r := str(GameData.catalogues.recipes[rid2].get("station", ""))
+		if not st_r.is_empty() and not GameData.catalogues.stations.has(st_r):
+			station_fantome.append("%s -> %s" % [rid2, st_r])
+	verifier(station_fantome.is_empty(), "chaque recette se fait à une station qui existe (%s)" % str(station_fantome))
 	s._donner_materiau(j, "fer", 3)
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "sans forge dans le sac : rien")

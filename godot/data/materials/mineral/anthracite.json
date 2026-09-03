@@ -42,5 +42,6 @@
     "durete": 9,
     "valeur_base": 6,
     "conductivite_mana": 2
-  }
+  },
+  "sous_categorie": "combustible"
 }

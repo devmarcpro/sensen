@@ -28,8 +28,8 @@
     "scale": 4
   },
   "harvest": {
-    "tool_category": "pelle",
-    "skill": "collecte"
+    "tool_category": "pioche",
+    "skill": "minage"
   },
   "world_gen": {
     "mode": "biome",
@@ -44,5 +44,6 @@
     "durete": 4,
     "valeur_base": 6,
     "conductivite_mana": 30
-  }
+  },
+  "sous_categorie": "sel"
 }

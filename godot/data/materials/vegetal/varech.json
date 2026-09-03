@@ -28,8 +28,8 @@
     "scale": 4
   },
   "harvest": {
-    "tool_category": "faucille",
-    "skill": "collecte"
+    "tool_category": "hache",
+    "skill": "bucheronnage"
   },
   "world_gen": {
     "mode": "biome",
@@ -44,5 +44,6 @@
     "durete": 2,
     "valeur_base": 6,
     "conductivite_mana": 34
-  }
+  },
+  "sous_categorie": "ecorce"
 }

@@ -2731,3 +2731,20 @@ journal.puits_epuise,Vous n'avez plus l'endurance de percer un puits.
 option.puits,Creuser un puits
 ui.mine,"MINE · étage {etage} · creusez ; sur place, creusez un puits pour descendre"
 ui.mode.mine,MINE — le temps n'avance qu'à l'action
+station.tannerie.name,Tannerie
+station.billot_de_boucher.name,Billot de boucher
+sous_categorie.peau.name,Peau
+sous_categorie.os.name,Os
+sous_categorie.fibre.name,Fibre
+sous_categorie.carapace.name,Carapace
+sous_categorie.organe.name,Organe
+sous_categorie.liant.name,Liant
+sous_categorie.ecorce.name,Écorce
+sous_categorie.eau.name,Eau
+sous_categorie.huile.name,Huile
+sous_categorie.toxique.name,Toxique
+sous_categorie.organique.name,Organique
+sous_categorie.minerai.name,Minerai
+sous_categorie.combustible.name,Combustible
+sous_categorie.sel.name,Sel
+slotc.monture,monture

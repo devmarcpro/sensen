@@ -1,5 +1,5 @@
 {
-  "_doc": "Catégories de matériaux (docs: Catégories de matériaux — 11 catégories figées). tool : catégorie d'outil de récolte ; harvest_skill : compétence (data/competences/) ; station_transform : station de transformation (Stations de transformation). mineral, fossile : pioche/minage comme les en-têtes de catalogue ; meteorologique : pelle/terrassement (décidé le 2026-08-28, la note ne précisait pas).",
+  "_doc": "Catégories de matériaux (docs: Catégories de matériaux — 11 catégories figées). tool : catégorie d'outil de récolte ; harvest_skill : compétence (data/competences/) ; station_transform : station de transformation (Stations de transformation). mineral, fossile : pioche/minage comme les en-têtes de catalogue ; meteorologique : pelle/terrassement (décidé le 2026-08-28, la note ne précisait pas). Une SOUS-CATEGORIE (bloc `sous`) raffine la categorie sans la remplacer (designer 2026-09-03) : elle ne surcharge que les cles qu'elle declare, et l'element Wu Xing reste celui de la categorie. Une fiche sans sous-categorie se comporte comme avant.",
   "bois": {
     "tool": "hache",
     "harvest_skill": "bucheronnage",
@@ -18,7 +18,28 @@
   "mineral": {
     "tool": "pioche",
     "harvest_skill": "minage",
-    "station_transform": "forge"
+    "station_transform": "forge",
+    "sous": {
+      "_doc": "Le minerai qu'on fond, le sel qu'on recolte et le combustible qu'on brule ne vont pas au meme feu.",
+      "minerai": {
+        "_doc": "Ce qui donne du metal une fois fondu : hematite, magnetite, galene, pyrite, cinabre, malachite, azurite.",
+        "tool": "pioche",
+        "harvest_skill": "minage",
+        "station_transform": "forge"
+      },
+      "combustible": {
+        "_doc": "Ce qui brule : houille, lignite, anthracite, tourbe compactee, bitume, graphite, soufre.",
+        "tool": "pioche",
+        "harvest_skill": "minage",
+        "station_transform": "forge"
+      },
+      "sel": {
+        "_doc": "Ce qui se dissout et se cristallise : sel gemme, sel marin, alun, borax, potasse, salpetre, chaux.",
+        "tool": "pioche",
+        "harvest_skill": "minage",
+        "station_transform": "alambic"
+      }
+    }
   },
   "fossile": {
     "tool": "pioche",
@@ -38,12 +59,60 @@
   "vegetal": {
     "tool": "faucille",
     "harvest_skill": "herboristerie",
-    "station_transform": "atelier_tissage"
+    "station_transform": "atelier_tissage",
+    "sous": {
+      "_doc": "Une plante donne des fibres qu'on file et des liants qu'on cuit : deux stations, deux metiers.",
+      "fibre": {
+        "_doc": "Ce qui se file et se tresse : lin, chanvre, coton, jute, sisal, osier, rotin, paille.",
+        "tool": "faucille",
+        "harvest_skill": "herboristerie",
+        "station_transform": "atelier_tissage"
+      },
+      "liant": {
+        "_doc": "Ce qui colle, vernit et fixe : resine, latex, gomme arabique, amidon, tanin.",
+        "tool": "faucille",
+        "harvest_skill": "herboristerie",
+        "station_transform": "alambic"
+      },
+      "ecorce": {
+        "_doc": "Ce qui enveloppe la tige : ecorce, varech.",
+        "tool": "hache",
+        "harvest_skill": "bucheronnage",
+        "station_transform": "scierie"
+      }
+    }
   },
   "liquide": {
     "tool": "seau",
     "harvest_skill": "collecte",
-    "station_transform": "alambic"
+    "station_transform": "alambic",
+    "sous": {
+      "_doc": "Tous les liquides se puisent, mais tous ne se gardent pas dans le meme seau.",
+      "eau": {
+        "_doc": "Ce qui se boit ou s'y apparente : eau, eau salee, saumure, seve, lait.",
+        "tool": "seau",
+        "harvest_skill": "collecte",
+        "station_transform": "alambic"
+      },
+      "huile": {
+        "_doc": "Ce qui graisse et ce qui brule : huile, essence de terebenthine, goudron, poix, alcool, vinaigre.",
+        "tool": "seau",
+        "harvest_skill": "collecte",
+        "station_transform": "alambic"
+      },
+      "toxique": {
+        "_doc": "Ce qui ne se manipule pas a mains nues : mercure, venin, lave, lessive de cendre.",
+        "tool": "seau",
+        "harvest_skill": "collecte",
+        "station_transform": "alambic"
+      },
+      "organique": {
+        "_doc": "Ce qui sort d'un vivant : sang, miel, encre.",
+        "tool": "seau",
+        "harvest_skill": "collecte",
+        "station_transform": "alambic"
+      }
+    }
   },
   "meteorologique": {
     "tool": "pelle",
@@ -58,6 +127,39 @@
   "animal": {
     "tool": "dague",
     "harvest_skill": "collecte",
-    "station_transform": "atelier_tissage"
+    "station_transform": "atelier_tissage",
+    "sous": {
+      "_doc": "Une bete ne se travaille pas d'un seul geste : la peau se tanne, l'os se taille, la fibre se file, l'organe se traite au billot.",
+      "peau": {
+        "_doc": "Ce qui couvre : peau, fourrure, cuir. Se tanne.",
+        "tool": "dague",
+        "harvest_skill": "collecte",
+        "station_transform": "tannerie"
+      },
+      "os": {
+        "_doc": "Ce qui porte et ce qui mord : os, croc, corne, ivoire, defense. Se taille.",
+        "tool": "dague",
+        "harvest_skill": "collecte",
+        "station_transform": "tailleur_de_pierre"
+      },
+      "fibre": {
+        "_doc": "Ce qui se file : laine, soie, crin, tendon.",
+        "tool": "dague",
+        "harvest_skill": "collecte",
+        "station_transform": "atelier_tissage"
+      },
+      "carapace": {
+        "_doc": "Ce qui blinde sans etre un os : ecaille, carapace, nacre de seiche.",
+        "tool": "dague",
+        "harvest_skill": "collecte",
+        "station_transform": "tailleur_de_pierre"
+      },
+      "organe": {
+        "_doc": "Ce qui vient du dedans : boyau, vessie, suif, eponge. Perissable, et c'est le billot du boucher qui le traite — l'exemple donne par le designer le 2026-09-03.",
+        "tool": "dague",
+        "harvest_skill": "collecte",
+        "station_transform": "billot_de_boucher"
+      }
+    }
   }
 }

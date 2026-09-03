@@ -1,0 +1,26 @@
+{
+  "name_key": "station.tannerie.name",
+  "type": "station",
+  "equip_slot": "",
+  "station": "tannerie",
+  "tags": [
+    "station",
+    "portative"
+  ],
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie",
+    "inputs": [
+      {
+        "category": "bois",
+        "forme": "planche",
+        "amount": 4
+      },
+      {
+        "category": "animal",
+        "forme": "brut",
+        "amount": 2
+      }
+    ]
+  }
+}

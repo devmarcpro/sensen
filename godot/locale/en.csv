@@ -2722,3 +2722,20 @@ journal.puits_epuise,You lack the stamina to sink a shaft.
 option.puits,Sink a shaft
 ui.mine,"MINE · level {etage} · dig; where you stand, sink a shaft to go deeper"
 ui.mode.mine,MINE — time only moves when you act
+station.tannerie.name,Tannery
+station.billot_de_boucher.name,Butcher's block
+sous_categorie.peau.name,Hide
+sous_categorie.os.name,Bone
+sous_categorie.fibre.name,Fibre
+sous_categorie.carapace.name,Carapace
+sous_categorie.organe.name,Organ
+sous_categorie.liant.name,Binder
+sous_categorie.ecorce.name,Bark
+sous_categorie.eau.name,Water
+sous_categorie.huile.name,Oil
+sous_categorie.toxique.name,Toxic
+sous_categorie.organique.name,Organic
+sous_categorie.minerai.name,Ore
+sous_categorie.combustible.name,Fuel
+sous_categorie.sel.name,Salt
+slotc.monture,setting

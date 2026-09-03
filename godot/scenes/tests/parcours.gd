@@ -176,7 +176,15 @@ func _capturer(nom: String) -> void:
 	if frames - derniere_capture_frame < 20:
 		return
 	derniere_capture_frame = frames
-	var img := get_viewport().get_texture().get_image()
+	# En --headless il n'y a pas de rendu : `get_texture()` rend un objet dont la texture est nulle, et
+	# chaque tentative de capture crachait trois lignes d'erreur moteur dans le rapport du parcours. On
+	# ne capture donc que s'il y a une fenetre — le parcours reste utile sans images.
+	if DisplayServer.get_name() == "headless":
+		return
+	var tex := get_viewport().get_texture()
+	if tex == null:
+		return
+	var img := tex.get_image()
 	if img != null:
 		img.save_png("%s/%02d_%s.png" % [sortie, captures, nom])
 		captures += 1
@@ -184,7 +192,7 @@ func _capturer(nom: String) -> void:
 
 func _process(_delta: float) -> void:
 	frames += 1
-	if Time.get_ticks_msec() - derniere_capture_30s >= 30000 and frames > 5:   # le film du parcours : une image toutes les 30 s
+	if Time.get_ticks_msec() - derniere_capture_30s >= 30000 and frames > 5 and DisplayServer.get_name() != "headless":   # le film du parcours : une image toutes les 30 s
 		derniere_capture_30s = Time.get_ticks_msec()
 		var img30 := get_viewport().get_texture().get_image()
 		if img30 != null:

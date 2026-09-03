@@ -125,6 +125,13 @@
         "object",
         "null"
       ]
+    },
+    "sous_categorie": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Sous-categorie facultative (designer 2026-09-03) : raffine la categorie pour l'outil, la competence et la station, sans changer l'element Wu Xing. Doit exister dans material_categories.<categorie>.sous."
     }
   }
 }

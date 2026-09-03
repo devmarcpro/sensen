@@ -29,8 +29,8 @@
     "scale": 4
   },
   "harvest": {
-    "tool_category": "faucille",
-    "skill": "herboristerie"
+    "tool_category": "dague",
+    "skill": "collecte"
   },
   "world_gen": {
     "mode": "biome",
@@ -42,5 +42,6 @@
     "durete": 4,
     "valeur_base": 18,
     "conductivite_mana": 30
-  }
+  },
+  "sous_categorie": "fibre"
 }

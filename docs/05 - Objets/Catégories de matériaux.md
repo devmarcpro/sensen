@@ -80,6 +80,24 @@ Les catégories de matériaux, chacune liée à un outil, une compétence de ré
 >
 > **Ce qui reste ouvert** : l'os d'une créature dont la fiche ne dit rien rend les stats de base du catalogue, sans modification. C'est le comportement prudent, mais c'est un choix — si le designer préfère qu'une espèce inconnue soit impossible plutôt que moyenne, c'est une ligne.
 
+> [!success] Trancé le 2026-09-03 — **les sous-catégories** (designer)
+> « Pour les matériaux tu peux rajouter des sous catégories ce serait peut-être mieux (genre dans animal rajouter organes). »
+> **Le problème que ça résout.** La catégorie décide de l'**outil**, de la **compétence** et de la **station**. C'est une maille trop large dès qu'une catégorie grossit : dans `animal`, une peau se tanne, un os se taille, une laine se file et un boyau se traite au billot — quatre gestes, quatre stations, une seule catégorie. La sous-catégorie ne **remplace** pas la catégorie, elle la **raffine** : la catégorie garde ce qui la définit — son élément Wu Xing, son plafond de palier — et la sous-catégorie ne surcharge que ce qu'elle déclare. Une fiche sans sous-catégorie se comporte exactement comme avant.
+>
+> **Ce qui est rangé** (74 fiches sur 4 catégories) :
+> - **`animal`** — `peau` (cuir, fourrure, vessie → tannerie), `os` (os, croc, ivoire, corne → tailleur de pierre), `fibre` (laine, soie, crin, tendon → atelier de tissage), `carapace` (écaille, carapace, os de seiche), `organe` (boyau, suif, éponge, plume → **billot de boucher**) ;
+> - **`vegetal`** — `fibre` (lin, chanvre, coton, jute, sisal, osier, rotin, paille), `liant` (résine, latex, gomme arabique, amidon, tanin → alambic), `ecorce` ;
+> - **`liquide`** — `eau`, `huile`, `toxique` (mercure, venin, lave, lessive de cendre), `organique` (sang, miel, encre) ;
+> - **`mineral`** — `minerai` (ce qui donne du métal une fois fondu), `combustible` (ce qui brûle), `sel` (ce qui se dissout et se cristallise).
+>
+> **Deux stations manquaient** et j'ai dû les créer avant de m'y référer : la **tannerie** et le **billot de boucher**. Déclarer une sous-catégorie qui pointe vers une station inexistante aurait été un mensonge dans la donnée, invisible jusqu'au jour où quelqu'un aurait essayé de tanner.
+>
+> **Ce que l'audit vérifie maintenant** (règle 29, `tools/audit_donnees.py`) : une sous-catégorie inconnue est une faute de frappe silencieuse — la fiche se comporterait comme si elle n'en avait pas et personne ne le verrait ; une fiche qui **contredit** l'outil ou la compétence de sa sous-catégorie est pire que pas de rangement du tout ; et une station nommée par une sous-catégorie doit exister comme objet-station. Vérifié en cassant une fiche exprès : l'audit la nomme.
+>
+> **Une station vit dans DEUX catalogues, et je n'en avais rempli qu'un.** `stations/` dit ce qu'elle est — poids, compétence d'artisanat — et `items/station/` est l'objet qu'on porte et qu'on construit. J'avais créé l'objet sans la fiche : la tannerie et le billot existaient à moitié, et une recette qui s'y serait faite n'aurait **jamais été craftable**. C'est un test à nombre figé qui l'a dit, en annonçant « 9 stations » alors que j'en avais ajouté deux — le sixième test de ce genre que je convertis en règle. Il vérifie désormais que **toute station se construit** et que **toute recette se fait quelque part qui existe**, ce qui aurait attrapé la faute directement au lieu de la signaler par ricochet.
+>
+> **Ce que je n'ai pas fait, faute de raison** : dix minéraux restent sans sous-catégorie (ambre, amiante, argile réfractaire, fluorine, guano, lapis-lazuli, mica, ocre, phosphorite, turquoise). Ils ne forment pas un groupe cohérent — les ranger de force aurait créé une sous-catégorie fourre-tout, ce qui est exactement ce qu'on cherche à éviter. Ils suivent leur catégorie, et c'est légal.
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Schéma matériau]]
 - **Alimente** : [[Récolte]], [[Stations de transformation]], [[Composants]], [[Wu Xing hors combat]]

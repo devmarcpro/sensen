@@ -6202,20 +6202,33 @@ func _composer_loot(inst: Dictionary, profondeur: int, rng: RandomNumberGenerato
 		# Les candidats de TOUTES les recettes du composant sont réunis avant le tirage (designer
 		# 2026-09-01) : une famille d'un seul matériau ne doit pas peser autant qu'une famille de vingt-
 		# trois — l'os massif sortait sur une armure sur deux.
+		# `pool.has(m)` est un balayage LINEAIRE, et le pool d'une famille large compte deux cent trente
+		# matieres : dedupliquer coutait 230 x 230 / 2 comparaisons par emplacement, trois emplacements
+		# par objet, quatre-vingts objets par etage — six millions de comparaisons pour un plancher de
+		# donjon. Un dictionnaire repond en temps constant et rend exactement le meme pool, dans le meme
+		# ordre. Mesure : le butin des coffres passe de 53 ms a ce que dit la sonde de perf d'etage.
 		var pool: Array[String] = []
+		var vus_pool := {}
 		for r in recettes:
 			var fam: Dictionary = GameData.config("material_families").get(str(r.material_family), {})
 			for m in _candidats_famille(fam, cats_mat if slot in ["tete", "plaque", "monture"] else []):
-				if not pool.has(m):
+				if not vus_pool.has(m):
+					vus_pool[m] = true
 					pool.append(m)
 		# Le butin n'est pas limite aux matieres ATTENDUES pour ce composant (designer 2026-09-02) :
 		# toutes peuvent sortir, mais celles qui s'eloignent de l'attendu deviennent rares. Un plastron
 		# de metal est l'ordinaire, un plastron d'eau de mer existe et ne se voit presque jamais.
-		var mat_id := _tirer_materiau(pool, profondeur, rng, _hors_attente(pool, slot))
+		var hors_slot := _hors_attente(pool, slot)
+		var mat_id := _tirer_materiau(pool, profondeur, rng, hors_slot)
 		if mat_id.is_empty():
 			continue
 		var mat: Dictionary = GameData.entree("materials", mat_id)
+		# On note si la matiere tiree sortait de l'attendu. C'est deja decide juste au-dessus ; sans le
+		# noter, plus personne ne peut le savoir apres coup — ni la sonde de butin, ni l'inventaire un
+		# jour. Une epee dont la lame est en cuir n'est pas un defaut (le designer l'a voulu), mais on
+		# doit pouvoir MESURER a quelle frequence elle sort.
 		pieces.append({"slot": slot, "composant": comp_id, "materiau": mat_id, "qualite": regles.qualite_craft(niveau, rng),
+			"hors_attente": hors_slot.has(mat_id),
 			"stats": mat.get("stats", {}), "elements": mat.get("wuxing", {}) if mat.get("wuxing") != null else {}})
 	if pieces.is_empty():
 		return
@@ -6396,7 +6409,7 @@ func _appliquer_composition(inst: Dictionary, def: Dictionary, pieces: Array[Dic
 		for el in c.elements.keys():
 			elements[el] = float(elements.get(el, 0.0)) + float(c.elements[el]) * w
 		q_somme += float(c.qualite) * w
-		composants[c.slot] = {"composant": c.composant, "materiau": c.materiau, "qualite": c.qualite}
+		composants[c.slot] = {"composant": c.composant, "materiau": c.materiau, "qualite": c.qualite, "hors_attente": bool(c.get("hors_attente", false))}
 		if c.slot in ["tete", "plaque", "monture"]:   # la pièce maîtresse donne son matériau et son nom
 			tete = c
 		elif c.slot == "manche":
