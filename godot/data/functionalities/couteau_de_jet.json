@@ -1,0 +1,20 @@
+{
+  "name_key": "functionality.couteau_de_jet.name",
+  "kind": "arme",
+  "hands": 1,
+  "combat_skill": "jet",
+  "degats_des": "1d6",
+  "crit_range": 19,
+  "vitesse_base": 2.6,
+  "portee": 6.0,
+  "portee_min": 2,
+  "jet": true,
+  "type_degats": "perforant",
+  "volume": 0.5,
+  "genre_grammatical": "ms",
+  "affinite_sorts": {
+    "mana": 1.0,
+    "endurance": 1.0
+  },
+  "poids_reference": 0.6
+}

@@ -1,0 +1,20 @@
+{
+  "name_key": "functionality.javelot.name",
+  "kind": "arme",
+  "hands": 1,
+  "combat_skill": "jet",
+  "degats_des": "2d6",
+  "crit_range": 20,
+  "vitesse_base": 1.6,
+  "portee": 8.0,
+  "portee_min": 2,
+  "jet": true,
+  "type_degats": "perforant",
+  "volume": 2.0,
+  "genre_grammatical": "ms",
+  "affinite_sorts": {
+    "mana": 0.9,
+    "endurance": 1.1
+  },
+  "poids_reference": 2.4
+}

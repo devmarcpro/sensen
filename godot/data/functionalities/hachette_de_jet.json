@@ -1,0 +1,20 @@
+{
+  "name_key": "functionality.hachette_de_jet.name",
+  "kind": "arme",
+  "hands": 1,
+  "combat_skill": "jet",
+  "degats_des": "2d4",
+  "crit_range": 20,
+  "vitesse_base": 1.8,
+  "portee": 5.0,
+  "portee_min": 2,
+  "jet": true,
+  "type_degats": "tranchant",
+  "volume": 1.2,
+  "genre_grammatical": "fs",
+  "affinite_sorts": {
+    "mana": 0.9,
+    "endurance": 1.1
+  },
+  "poids_reference": 1.44
+}

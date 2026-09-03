@@ -1,0 +1,24 @@
+{
+  "name_key": "item.craft_hachette_de_jet.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "slots": {
+    "tete": "tete_outil",
+    "manche": "manche_court",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "fs",
+  "tags": [
+    "arme",
+    "assemble",
+    "jet",
+    "empilable"
+  ],
+  "functionality": "hachette_de_jet",
+  "quantite": 4
+}

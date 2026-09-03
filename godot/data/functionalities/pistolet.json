@@ -1,0 +1,20 @@
+{
+  "name_key": "functionality.pistolet.name",
+  "kind": "arme",
+  "hands": 1,
+  "combat_skill": "armes_a_poudre",
+  "degats_des": "3d8",
+  "crit_range": 18,
+  "vitesse_base": 0.7,
+  "portee": 12.0,
+  "portee_min": 2,
+  "projectile": true,
+  "type_degats": "perforant",
+  "volume": 1.0,
+  "genre_grammatical": "ms",
+  "affinite_sorts": {
+    "mana": 0.7,
+    "endurance": 1.0
+  },
+  "poids_reference": 1.2
+}

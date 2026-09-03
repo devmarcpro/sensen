@@ -1,0 +1,24 @@
+{
+  "name_key": "item.craft_couteau_de_jet.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "slots": {
+    "tete": "lame_courte",
+    "manche": "poignee",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "ms",
+  "tags": [
+    "arme",
+    "assemble",
+    "jet",
+    "empilable"
+  ],
+  "functionality": "couteau_de_jet",
+  "quantite": 8
+}

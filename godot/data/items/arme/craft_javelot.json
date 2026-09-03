@@ -1,0 +1,24 @@
+{
+  "name_key": "item.craft_javelot.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "slots": {
+    "tete": "pointe",
+    "manche": "manche_long",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie"
+  },
+  "genre_grammatical": "ms",
+  "tags": [
+    "arme",
+    "assemble",
+    "jet",
+    "empilable"
+  ],
+  "functionality": "javelot",
+  "quantite": 5
+}

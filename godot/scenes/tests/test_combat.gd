@@ -7499,7 +7499,23 @@ func test_gemmes_et_livres() -> void:
 func test_progression() -> void:
 	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
 	verifier(prog.xp_next(1) == 303 and prog.xp_next(10) == roundi(100.0 * pow(11.0, 1.6)) and prog.xp_next(50) == roundi(100.0 * pow(51.0, 1.6)), "xp_next : 303 · ~4 600 · ~54 000 (100 × (N+1)^1.6)")
-	verifier(GameData.catalogues.competences.size() == 62, "62 compétences en données, dont Chasse et Récupération (catégorie, stat, famille)")
+	# Septième test à nombre figé que je convertis : compter les compétences le cassait chaque fois
+	# qu'on en ajoutait une, alors que RIEN n'était faux. Ce qui doit tenir, c'est que chaque fiche soit
+	# COMPLÈTE — une compétence sans stat ne progresse pas, une compétence sans catégorie n'apparaît
+	# nulle part — et que toute compétence d'arme citée par une fonctionnalité existe vraiment.
+	var incompletes: Array[String] = []
+	for cid in GameData.catalogues.competences.keys():
+		var cd: Dictionary = GameData.catalogues.competences[cid]
+		if str(cd.get("category", "")).is_empty() or str(cd.get("stat", "")).is_empty() or str(cd.get("famille", "")).is_empty():
+			incompletes.append(str(cid))
+	verifier(incompletes.is_empty(), "chaque compétence a catégorie, stat et famille (%d compétences) — incomplètes : %s" % [GameData.catalogues.competences.size(), str(incompletes)])
+	var skills_fantomes: Array[String] = []
+	for fid in GameData.catalogues.functionalities.keys():
+		var sk := str(GameData.catalogues.functionalities[fid].get("combat_skill", ""))
+		if not sk.is_empty() and not GameData.catalogues.competences.has(sk):
+			skills_fantomes.append("%s -> %s" % [fid, sk])
+	verifier(skills_fantomes.is_empty(), "chaque arme s'entraîne à une compétence qui existe (%s)" % str(skills_fantomes))
+	verifier(GameData.catalogues.competences.has("chasse") and GameData.catalogues.competences.has("recuperation"), "Chasse et Récupération sont au catalogue")
 	var humain := GameData.entree("races", "humain")
 	var nain := GameData.entree("races", "nain")
 	var sabre := GameData.entree("classes", "le_sabre")

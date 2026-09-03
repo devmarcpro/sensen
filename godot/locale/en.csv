@@ -2739,3 +2739,22 @@ sous_categorie.minerai.name,Ore
 sous_categorie.combustible.name,Fuel
 sous_categorie.sel.name,Salt
 slotc.monture,setting
+functionality.fronde.name,Sling
+functionality.arbalete.name,Crossbow
+functionality.pistolet.name,Pistol
+functionality.javelot.name,Javelin
+functionality.couteau_de_jet.name,Throwing knife
+functionality.hachette_de_jet.name,Throwing axe
+item.craft_fronde.name,Sling
+item.craft_arbalete.name,Crossbow
+item.craft_pistolet.name,Pistol
+item.craft_javelot.name,Javelins
+item.craft_couteau_de_jet.name,Throwing knives
+item.craft_hachette_de_jet.name,Throwing axes
+item.craft_billes.name,Sling bullets
+item.craft_carreaux.name,Crossbow bolts
+item.craft_balles.name,Bullets
+competence.fronde.name,Sling
+competence.jet.name,Thrown weapons
+competence.armes_a_poudre.name,Powder weapons
+journal.jet_dernier,"{nom} throws their last {arme}: empty-handed now."

@@ -1,0 +1,20 @@
+{
+  "name_key": "item.craft_billes.name",
+  "type": "munition",
+  "equip_slot": "carquois",
+  "hands": 0,
+  "slots": {
+    "tete": "pointe",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie"
+  },
+  "genre_grammatical": "fp",
+  "tags": [
+    "munition",
+    "assemble"
+  ],
+  "quantite": 30
+}

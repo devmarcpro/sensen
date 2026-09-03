@@ -68,6 +68,29 @@ Le résultat du jet est ensuite modulé par matériaux/qualité (formule [[Pipel
 > [!success] Décidé le 2026-08-26 — portées sur la grille
 > Le tableau donne des portées en « blocs » (1.5, 2.5) antérieures au pivot. Sur la grille, une portée se lit en **tuiles de Chebyshev** (les 8 voisines sont à distance 1), **arrondie à l'entier inférieur** : Dague/Épée/Masse/Bâton = 1, Lance = 2, Arc = 25, Arbalète = 30. Le `portee_min` est 1 par défaut, **2 pour la lance et l'arc** (zone morte au contact — *« une lance est mauvaise au contact »*). Le déplacement se fait en **8 directions au même coût** (3 ticks, modulé par le dénivelé). Le prototype fixe `durete_base = 20` (fer étalon) et `qualite = 1.0` sur ses armes, l'élément étant un champ de l'objet (`data/items/proto_*.json`) en attendant le craft.
 
+> [!success] Rendu le 2026-09-03 — **les armes à distance : à munitions, et de jet** (designer, point 78)
+> « Rajoute les armes d'attaque à distance à munitions (fronde, pistolet, arc etc.) et les armes de jets (l'item en lui-même est la munition, le stack s'équipe en main, javelots etc.) »
+>
+> **La moitié « à munitions » existait déjà, entièrement.** Ma note d'état des lieux disait le contraire et j'ai failli réécrire un système entier : `functionality.projectile: true` marque l'arme, le **carquois** fournit le compte, chaque tir décrémente, un tir sans munition est refusé et le dit, la trajectoire est réelle — un allié sur la ligne bloque, un ennemi prend la flèche — et les munitions se **récupèrent** après le combat. Il manquait du **contenu**, pas de la mécanique.
+>
+> **La mécanique de JET, elle, n'existait pas.** C'est ce qui sépare les deux familles : l'arc reste en main et vide un carquois ; le javelot **quitte la main**. La pile équipée diminue d'un à chaque jet, l'objet lancé retombe sur la tuile visée — **copié depuis celui qu'on tenait**, même matière, même qualité, même affixe, pour qu'un javelot ramassé vaille exactement celui qu'on a lancé — et quand la pile est vide, l'emplacement se libère. Mesuré par `res://scenes/tests/sonde_jet.tscn` : 3 en main → 2, 1, 0, et 3 au sol.
+>
+> **Six armes, différenciées sur quatre axes à la fois** — jamais un seul, parce que deux armes qui ne diffèrent que par leurs dés ne sont pas deux armes :
+>
+> | arme | dés | vitesse | portée | type | ce qui la définit |
+> |---|---|---|---|---|---|
+> | Fronde | 1d8 | 1,7 | 14 / 3 | contondant | la seule contondante à distance ; munitions ramassables partout |
+> | Arbalète | 3d6 | 0,9 | 22 / 2 | perforant | la portée et la force, payées par la lenteur |
+> | Pistolet | 3d8 | 0,7 | 12 / 2 | perforant, crit **18** | brutal et lent ; c'est la rareté de sa poudre qui l'équilibre |
+> | Javelot | 2d6 | 1,6 | 8 / 2 | perforant | l'arme de jet complète : portée ET dégâts |
+> | Couteau de jet | 1d6 | 2,6 | 6 / 2 | perforant, crit 19 | le plus rapide du jeu, à bout portant |
+> | Hachette de jet | 2d4 | 1,8 | 5 / 2 | **tranchant** | la seule tranchante à distance |
+>
+> Avec leurs munitions (billes, carreaux, balles) et trois compétences qui manquaient : `fronde`, `jet`, `armes_a_poudre`.
+>
+> > [!warning] Le compteur qui mentait
+> > Au troisième jet, la sonde affichait « 1 en main » alors que la main était vide. La pile était bien retirée de l'équipement, mais je ne remettais pas son compteur à zéro : le dictionnaire orphelin **mentait sur son compte**. Sans conséquence visible aujourd'hui, et exactement le genre de valeur périmée qui donne un bug incompréhensible trois semaines plus tard, quand quelque chose garde une référence.
+
 ## Liens
 - **Dépend de** : [[Fonctionnalité]], [[Stats d'un objet crafté]], [[Qualité d'artisanat]], [[Matériaux — 13 stats]]
 - **Alimente** : [[Pipeline de résolution du combat]], [[Action-time à ticks]], [[Combat tactique sur grille]]

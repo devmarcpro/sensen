@@ -1,0 +1,20 @@
+{
+  "name_key": "functionality.arbalete.name",
+  "kind": "arme",
+  "hands": 2,
+  "combat_skill": "arbalete",
+  "degats_des": "3d6",
+  "crit_range": 19,
+  "vitesse_base": 0.9,
+  "portee": 22.0,
+  "portee_min": 2,
+  "projectile": true,
+  "type_degats": "perforant",
+  "volume": 2.6,
+  "genre_grammatical": "fs",
+  "affinite_sorts": {
+    "mana": 0.9,
+    "endurance": 1.1
+  },
+  "poids_reference": 3.12
+}

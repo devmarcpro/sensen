@@ -1,0 +1,20 @@
+{
+  "name_key": "functionality.fronde.name",
+  "kind": "arme",
+  "hands": 1,
+  "combat_skill": "fronde",
+  "degats_des": "1d8",
+  "crit_range": 20,
+  "vitesse_base": 1.7,
+  "portee": 14.0,
+  "portee_min": 3,
+  "projectile": true,
+  "type_degats": "contondant",
+  "volume": 0.6,
+  "genre_grammatical": "fs",
+  "affinite_sorts": {
+    "mana": 1.0,
+    "endurance": 1.0
+  },
+  "poids_reference": 0.72
+}

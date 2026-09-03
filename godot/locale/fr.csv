@@ -2748,3 +2748,22 @@ sous_categorie.minerai.name,Minerai
 sous_categorie.combustible.name,Combustible
 sous_categorie.sel.name,Sel
 slotc.monture,monture
+functionality.fronde.name,Fronde
+functionality.arbalete.name,Arbalète
+functionality.pistolet.name,Pistolet
+functionality.javelot.name,Javelot
+functionality.couteau_de_jet.name,Couteau de jet
+functionality.hachette_de_jet.name,Hachette de jet
+item.craft_fronde.name,Fronde
+item.craft_arbalete.name,Arbalète
+item.craft_pistolet.name,Pistolet
+item.craft_javelot.name,Javelots
+item.craft_couteau_de_jet.name,Couteaux de jet
+item.craft_hachette_de_jet.name,Hachettes de jet
+item.craft_billes.name,Billes
+item.craft_carreaux.name,Carreaux
+item.craft_balles.name,Balles
+competence.fronde.name,Fronde
+competence.jet.name,Armes de jet
+competence.armes_a_poudre.name,Armes à poudre
+journal.jet_dernier,"{nom} lance son dernier {arme} : la main est vide."

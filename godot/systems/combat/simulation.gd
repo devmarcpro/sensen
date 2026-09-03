@@ -8218,9 +8218,10 @@ func _attaquer_arme(e: Dictionary, cible: Dictionary, lourde: bool, tick: int) -
 	var fonct: Dictionary = fonctionnalites.get(arme.functionality, {})
 	if not _cible_atteignable(e, cible, _portee_effective(e, arme, fonct), true):
 		return false
-	if est_projectile(fonct):
+	if est_projectile(fonct) or est_jet(fonct):
 		# Projectile (Décision — Projectiles) : munitions, trajectoire réelle, tir refusé si un allié masque.
-		if e.munitions <= 0:
+		# Une arme de JET suit la même trajectoire, mais sa munition est elle-même : pas de carquois.
+		if est_projectile(fonct) and e.munitions <= 0:
 			return false
 		var masque := _premier_sur_trajectoire(e, cible)
 		if not masque.is_empty():
@@ -8251,6 +8252,41 @@ func est_distance(fonct: Dictionary) -> bool:
 ## La zone morte au contact (portee_min > 1) est commune ; le carquois ne l'est pas.
 func est_projectile(fonct: Dictionary) -> bool:
 	return bool(fonct.get("projectile", false))
+
+
+## Arme de JET (designer 2026-09-03, point 78) : « l'item en lui-même est la munition, le stack
+## s'équipe en main ». C'est ce qui la sépare d'une arme à munitions : l'arc reste en main et vide un
+## carquois, le javelot QUITTE LA MAIN. La pile équipée diminue d'un à chaque jet, l'objet lancé tombe
+## au sol où on peut le reprendre, et quand la pile est vide la main l'est aussi.
+func est_jet(fonct: Dictionary) -> bool:
+	return bool(fonct.get("jet", false))
+
+
+## Le javelot part : un de moins dans la pile, et il retombe sur la tuile visée. S'il n'en reste
+## aucun, l'emplacement se vide — on ne se bat pas avec une pile de zéro javelot.
+func _lancer_arme_de_jet(e: Dictionary, arme: Dictionary, ou: Vector2i) -> void:
+	var reste := int(arme.get("quantite", 1)) - 1
+	# L'objet qui tombe est une pile d'UN, copiée sur celle qu'on tient : même matière, même qualité,
+	# même affixe. Un javelot ramassé vaut exactement celui qu'on a lancé.
+	var tombe: Dictionary = arme.duplicate(true)
+	tombe["uid"] = "%s_jet_%d" % [str(arme.uid), objets.size()]
+	tombe["quantite"] = 1
+	items[str(tombe.uid)] = tombe
+	objets[str(tombe.uid)] = tombe
+	var cible_sol := ou
+	if not grille.dans(cible_sol) or grille.bloque_passage(cible_sol):
+		cible_sol = e.pos
+	_poser_contenant(cible_sol, [str(tombe.uid)], "butin")
+	arme.quantite = maxi(0, reste)   # meme quand la pile part : un dictionnaire encore reference ne doit pas mentir sur son compte
+	if reste <= 0:
+		for slot in e.get("equipement", {}).keys():
+			if str(e.equipement[slot]) == str(arme.uid):
+				e.equipement.erase(slot)
+				break
+		e.sac.erase(str(arme.uid))
+		items.erase(str(arme.uid))
+		EventBus.emettre(&"journal", [&"journal.jet_dernier", {"nom": e.name_key, "arme": arme.name_key}])
+
 
 
 ## Coût en ticks modulé par les statuts (Ralentissement, Hâte) — Statuts.
@@ -8287,6 +8323,8 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 	if est_projectile(fonct):
 		e.munitions -= 1
 		e.munitions_tirees += 1
+	var jet_en_cours: bool = est_jet(fonct)   # l'arme quitte la main : on la lit AVANT que le coup la retire
+	var jet_pos: Vector2i = cible.pos
 	# Affixes de l'arme (Loot — affixes) : vecteur, dés, armure ignorée, multiplicateurs — avant le jet.
 	var ax := _affixes_offensifs(e, arme, cible)
 	e["riposte_des"] = 0   # les bonus armés (riposte à cadence, combo) sont dépensés par ce coup — raté compris, la fenêtre passe
@@ -8340,6 +8378,8 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 	_affixes_apres_coup(e, arme, cible, res)
 	_poser_segment(e, vecteur, tick_de(e))
 	_communion_tourner(e, arme)
+	if jet_en_cours:   # le javelot est parti : il retombe au sol, et la pile en main diminue d'un
+		_lancer_arme_de_jet(e, arme, jet_pos)
 
 
 ## Portée de l'arme, allongée par l'affixe « +N allonge ».

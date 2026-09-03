@@ -1,0 +1,21 @@
+{
+  "name_key": "item.craft_arbalete.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 2,
+  "slots": {
+    "tete": "pointe",
+    "manche": "manche_long",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie"
+  },
+  "genre_grammatical": "fs",
+  "tags": [
+    "arme",
+    "assemble"
+  ],
+  "functionality": "arbalete"
+}

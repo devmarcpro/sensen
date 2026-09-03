@@ -66,6 +66,9 @@ Un critère de performance à valider avant de passer à l'étape suivante. **Un
 > [!info] Ajout du 2026-09-03 — **la sonde de l'espèce**
 > `Godot --headless --path godot res://scenes/tests/sonde_espece.tscn` — la bête voyage-t-elle de la dépouille jusqu'à la matière ? Elle tabule la dureté de l'os pour sept espèces et vérifie sur pied qu'une matière brute tirée d'un corps porte bien son espèce. À passer dès qu'on touche au dépeçage, aux recettes ou à `materiau_espece`.
 
+> [!info] Ajout du 2026-09-03 — **les sondes de l'IA et du jet**
+> `res://scenes/tests/sonde_ia.tscn` : le roam mène quelque part (éloignement mesuré après cent tours), l'aggro vise qui a frappé, l'alerte réveille les voisins, et le temps fait tout retomber. `res://scenes/tests/sonde_jet.tscn` : la pile diminue, l'objet lancé retombe au sol avec sa matière, la main se vide. À passer dès qu'on touche aux profils d'IA ou à la résolution d'attaque.
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Budgets de performance]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]

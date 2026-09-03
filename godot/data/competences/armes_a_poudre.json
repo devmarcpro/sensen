@@ -1,0 +1,10 @@
+{
+  "name_key": "competence.armes_a_poudre.name",
+  "category": "combat",
+  "stat": "dexterite",
+  "famille": "armes",
+  "tags": [
+    "combat",
+    "armes"
+  ]
+}
