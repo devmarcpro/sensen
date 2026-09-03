@@ -77,18 +77,26 @@ func _ready() -> void:
 		vus.append(sig)
 	if focus.size() < 4:
 		soucis.append("  seulement %d focus : une famille d'une ou deux armes n'est pas une famille" % focus.size())
-	# L'AUTRE MONNAIE. Les instruments (designer 2026-09-03 : « charisme ça pourrait être des
-	# instruments ») sont aux sorts qui coutent de l'ENDURANCE — les cris, les charges, les
-	# ralliements — ce que l'orbe et le sceptre sont aux sorts de mana. Dix-huit noyaux coutent de
-	# l'endurance et n'avaient aucun focus : le mecanisme existait, il ne servait qu'a moitie.
-	var seq_e: Array = ["point", "contact", "frappe"]
-	for m in seq_e:
-		if not (str(m) in j.get("modules_connus", [])):
-			j.modules_connus.append(str(m))
-	if s.composer_capacite(j, seq_e, "sonde_endurance"):
+	# LES DEUX MONNAIES ET LEURS FOCUS (designer 2026-09-03, corrigé le même soir). Les instruments
+	# sont les armes du CHARISME, et le charisme est l'invité du MANA : un instrument porte donc les
+	# sorts de mana (buffs, débuffs, invocations) — la vielle à 1,85 — et NON les sorts de vigueur,
+	# qu'il porte moins bien que les mains nues (tambour 0,70). La première version de cette sonde
+	# disait l'inverse, parce que les instruments avaient été écrits comme focus d'endurance ; la
+	# journée a montré qu'ils punissaient la voie qu'ils devaient servir. L'épée, elle, porte la
+	# vigueur (1,20) : c'est l'arme du guerrier qui paie chaque coup dans cette monnaie.
+	var essais := [["mana", ["point", "contact", "etincelle"]], ["vigueur", ["point", "contact", "frappe"]]]
+	for essai in essais:
+		var monnaie_e := str(essai[0])
+		var seq_e: Array = essai[1]
+		for m in seq_e:
+			if not (str(m) in j.get("modules_connus", [])):
+				j.modules_connus.append(str(m))
+		if not s.composer_capacite(j, seq_e, "sonde_" + monnaie_e):
+			soucis.append("  le sort de %s ne se compose pas" % monnaie_e)
+			continue
 		var idx_e: int = j.capacites.size() - 1
 		print("")
-		print("%-20s %10s %10s" % ["arme tenue", "monnaie", "puissance"])
+		print("%-20s %10s %10s   (sort de %s)" % ["arme tenue", "monnaie", "affinite", monnaie_e])
 		var par_e := {}
 		for aid in ["", "tambour", "luth", "cor", "epee", "orbe"]:
 			if not aid.is_empty():
@@ -102,12 +110,18 @@ func _ready() -> void:
 			var pe: Dictionary = s.plan_capacite(j, idx_e)
 			var nom_e: String = aid if not aid.is_empty() else "mains nues"
 			par_e[nom_e] = float(pe.get("affinite_arme", 1.0))
-			print("%-20s %10s %10.2f" % [nom_e, str(pe.get("monnaie", "?")), float(pe.get("mult", 1.0))])
-		for instr in ["tambour", "luth", "cor"]:
-			if par_e.has(instr) and par_e.has("mains nues") and float(par_e[instr]) <= float(par_e["mains nues"]):
-				soucis.append("  %s ne porte pas mieux un sort d'endurance que les mains nues" % instr)
-		if par_e.has("tambour") and par_e.has("orbe") and float(par_e.tambour) <= float(par_e.orbe):
-			soucis.append("  le tambour ne bat pas l'orbe sur un sort d'ENDURANCE : les deux familles ne se distinguent pas")
+			print("%-20s %10s %10.2f" % [nom_e, str(pe.get("monnaie", "?")), float(pe.get("affinite_arme", 1.0))])
+		if monnaie_e == "mana":
+			for instr in ["tambour", "luth", "cor"]:
+				if par_e.has(instr) and par_e.has("mains nues") and float(par_e[instr]) <= float(par_e["mains nues"]):
+					soucis.append("  %s ne porte pas mieux un sort de mana que les mains nues" % instr)
+			if par_e.has("tambour") and par_e.has("epee") and float(par_e.tambour) <= float(par_e.epee):
+				soucis.append("  le tambour ne bat pas l'épée sur un sort de MANA : l'instrument n'est pas un focus")
+		else:
+			if par_e.has("epee") and par_e.has("mains nues") and float(par_e.epee) <= float(par_e["mains nues"]):
+				soucis.append("  l'épée ne porte pas mieux un sort de vigueur que les mains nues")
+			if par_e.has("tambour") and par_e.has("epee") and float(par_e.tambour) >= float(par_e.epee):
+				soucis.append("  le tambour porte la vigueur aussi bien que l'épée : les deux familles ne se distinguent pas")
 	for x in soucis:
 		print(x)
 	if not soucis.is_empty():
