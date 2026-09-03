@@ -326,3 +326,37 @@ partout où c'est d'elle qu'on parle.
 Il reste un endroit où les deux se ressemblent encore, et c'est voulu : `sante_max_par_endurance`
 dit bien que **les PV sont la rareté de la stat endurance** — l'invitée de la vigueur n'est pas
 démunie, elle a sa propre barre.
+
+### Un noyau martial est une autre façon d'utiliser son arme — ou son corps (designer 2026-09-03)
+
+> « Je pense que la bonne façon de voir les modules pour les capacités autres que les sorts, c'est de
+> voir ça comme une autre façon d'utiliser son arme entre autres. »
+> « On peut même s'amuser en faisant des modules qui utilisent les parties du corps du personnage,
+> par exemple coup de tête. »
+
+La mesure d'abord : sur les **20 noyaux martiaux** (ceux qui coûtent de la vigueur ou du sang-froid),
+**3 seulement montaient sur l'arme** (`power_base: "arme"`). Les 17 autres se répartissaient en deux
+cas très différents, et il fallait les séparer avant de toucher à quoi que ce soit :
+
+- **quinze n'ont aucun dé.** Empoigne saisit, désarmement fait lâcher, ancrage pose un statut,
+  poussée déplace. Ils n'ont rien à hériter de l'arme : ce ne sont pas des coups.
+- **deux frappaient avec des dés inventés** — charge d'épaule (1d6) et saignement (1d4). Ceux-là
+  rendaient l'arme tenue **sans importance** : charger avec un marteau de guerre ou avec une flûte
+  faisait exactement le même mal. Ils montent désormais sur l'arme, dés et élément compris.
+
+Et le **corps** est l'exception assumée à ce principe, parce qu'elle en est le miroir :
+
+| noyau | voie | monnaie | dés | sa signature |
+|---|---|---|---|---|
+| coup de tête | force | vigueur 10 | 1d6 | +5 ticks au compteur de la cible |
+| coup de genou | force | vigueur 8 | 1d8 | le plus fort du répertoire, au contact strict |
+| coup de coude | dextérité | sang-froid 6 | 1d4 | trois ticks : le plus rapide du jeu |
+| coup de pied | endurance | vigueur 9 | 1d4 | repousse d'une tuile — on fait de la place |
+
+Leurs dés sont **fixes et ne viennent jamais de l'arme**. C'est leur faiblesse et c'est leur raison
+d'être : ils fonctionnent **les mains prises et une fois désarmé**. Un noyau martial est une autre
+façon d'utiliser son arme ; un noyau de corps est ce qui reste quand on n'en a plus.
+
+L'endurance passe de quatre noyaux à cinq, la dextérité de six à sept. **La perception reste à deux**
+— et cette fois ce n'est plus faute de contenu à écrire, c'est que sa voie ne s'exprime pas par des
+coups. Elle attend des noyaux d'information : voir avant, viser mieux, savoir où frapper.

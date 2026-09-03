@@ -1,0 +1,28 @@
+{
+  "id": "coup_de_genou",
+  "nom": "Coup de genou",
+  "name_key": "module.coup_de_genou.name",
+  "module_type": "noyau",
+  "description": "ce qui reste quand on est saisi : le genou monte, et il monte fort",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "corps"
+  ],
+  "famille": "Corps",
+  "elements": {},
+  "element_special": null,
+  "power_base": "1d8",
+  "cout_ticks": 4,
+  "cout_mana": 0,
+  "cout_vigueur": 8,
+  "cout_sang_froid": 0,
+  "effets": [
+    "degats"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {},
+  "style": "assaut",
+  "stat": "force"
+}

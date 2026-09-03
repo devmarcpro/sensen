@@ -1,0 +1,34 @@
+{
+  "id": "coup_de_pied",
+  "nom": "Coup de pied",
+  "name_key": "module.coup_de_pied.name",
+  "module_type": "noyau",
+  "description": "on ne frappe pas pour tuer, on frappe pour faire de la place : repousse d'une tuile",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "corps"
+  ],
+  "famille": "Corps",
+  "elements": {},
+  "element_special": null,
+  "power_base": "1d4",
+  "cout_ticks": 5,
+  "cout_mana": 0,
+  "cout_vigueur": 9,
+  "cout_sang_froid": 0,
+  "effets": [
+    "degats",
+    "deplacement"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "deplacement": {
+      "mode": "projection",
+      "distance": "1"
+    }
+  },
+  "style": "controle",
+  "stat": "endurance"
+}

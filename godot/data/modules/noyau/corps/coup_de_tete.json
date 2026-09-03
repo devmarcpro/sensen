@@ -1,0 +1,31 @@
+{
+  "id": "coup_de_tete",
+  "nom": "Coup de tête",
+  "name_key": "module.coup_de_tete.name",
+  "module_type": "noyau",
+  "description": "le front dans le nez : dégâts et +5 ticks au compteur — au contact strict, arme ou pas",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "corps"
+  ],
+  "famille": "Corps",
+  "elements": {},
+  "element_special": null,
+  "power_base": "1d6",
+  "cout_ticks": 5,
+  "cout_mana": 0,
+  "cout_vigueur": 10,
+  "cout_sang_froid": 0,
+  "effets": [
+    "degats",
+    "tempo"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "tempo": 5
+  },
+  "style": "assaut",
+  "stat": "force"
+}

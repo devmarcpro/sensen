@@ -2853,3 +2853,7 @@ monnaie.sang_froid,sang-froid
 journal.sang_froid_rompu,"{nom} perd son sang-froid : {deficit} manquants, {degats} PV"
 barre.sang_froid,Sang-froid
 journal.onde_sonore,"{nom} fait résonner {arme} : {n} corps pris dans l’onde"
+module.coup_de_tete.name,Coup de tête
+module.coup_de_genou.name,Coup de genou
+module.coup_de_coude.name,Coup de coude
+module.coup_de_pied.name,Coup de pied

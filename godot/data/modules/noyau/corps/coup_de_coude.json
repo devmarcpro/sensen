@@ -1,0 +1,28 @@
+{
+  "id": "coup_de_coude",
+  "nom": "Coup de coude",
+  "name_key": "module.coup_de_coude.name",
+  "module_type": "noyau",
+  "description": "le plus rapide du répertoire : trois ticks, aucun élan à prendre",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "corps"
+  ],
+  "famille": "Corps",
+  "elements": {},
+  "element_special": null,
+  "power_base": "1d4",
+  "cout_ticks": 3,
+  "cout_mana": 0,
+  "cout_vigueur": 0,
+  "cout_sang_froid": 6,
+  "effets": [
+    "degats"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {},
+  "style": "assaut",
+  "stat": "dexterite"
+}

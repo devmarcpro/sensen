@@ -2844,3 +2844,7 @@ monnaie.sang_froid,composure
 journal.sang_froid_rompu,"{nom} loses composure: {deficit} short, {degats} HP"
 barre.sang_froid,Composure
 journal.onde_sonore,"{nom} sounds {arme}: {n} caught in the wave"
+module.coup_de_tete.name,Headbutt
+module.coup_de_genou.name,Knee strike
+module.coup_de_coude.name,Elbow strike
+module.coup_de_pied.name,Kick
