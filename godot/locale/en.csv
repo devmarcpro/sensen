@@ -909,7 +909,7 @@ ui.ecran.sertir,Socket (T)
 ui.ecran.slot_vide,(empty slot)
 ui.ecran.suivre,Follow me (S)
 ui.ecran.vendre,Sell (Enter)
-ui.entite.ligne,{nom} hp {pv}/{pv_max} · sta {end} · acts at t={compteur} · h={h}
+ui.entite.ligne,{nom} hp {pv}/{pv_max} · vig {end} · acts at t={compteur} · h={h}
 ui.entite.mana,mana {mana}/{mana_max}
 ui.entrainer.aucune,nothing to train here
 ui.entrainer.competence,"{nom} — level {niveau} · potential {potentiel} · {cout} gold"
@@ -929,7 +929,7 @@ ui.feuille.stat,  {stat} {valeur} (potential {potentiel})
 ui.feuille.stats,Stats
 ui.feuille.talent,"{nom} — {desc}"
 ui.feuille.talents,Talents
-ui.feuille.vitaux,"HP {pv}/{pv_max} · stamina {end} · mana {mana}/{mana_max}"
+ui.feuille.vitaux,"HP {pv}/{pv_max} · vigor {end} · mana {mana}/{mana_max}"
 ui.fiche.age,"{genre} · {age} years old ({categorie}) · sign {signe} · level ≈ {niveau}"
 ui.fiche.apparence,A stranger. Nothing is known about them.
 ui.fiche.base,"{nom} · {fonction} · {village}"
@@ -2323,7 +2323,7 @@ ui.composer.contribution_nulle,"This module adds nothing to this sequence"
 ui.composer.cout,"Actual cost: {min}–{max} {monnaie} · weapon affinity ({arme}) x{affinite}"
 functionality.mains_nues.name,Bare hands
 barre.sante,Health
-barre.endurance,Stamina
+barre.vigueur,Vigor
 barre.mana,Mana
 barre.faim,Hunger
 barre.charge,Load

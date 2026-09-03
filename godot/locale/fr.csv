@@ -77,7 +77,7 @@ ui.mode.exploration,exploration ({tps} ticks/s)
 ui.mode.combat,COMBAT — le temps n'avance qu'à l'action
 ui.mode.donjon,DONJON — le temps n'avance qu'à l'action
 ui.aide,ZQSD : se déplacer (8 directions) · R : ramasser · clic : se déplacer / frapper / creuser un mur adjacent (la pioche en main récolte) · maj+clic : attaque lourde · G : garde · espace : attendre · tab : arène suivante puis le camp · F5 : recharger les données
-ui.entite.ligne,{nom} pv {pv}/{pv_max} · end {end} · agit à t={compteur} · h={h}
+ui.entite.ligne,{nom} pv {pv}/{pv_max} · vig {end} · agit à t={compteur} · h={h}
 ui.case,"case ({x},{y}) h={h} · Δh vs toi : {dh}"
 ui.timeline,prochaines actions :
 ui.preview,{nom} : {des}×{dur} +{stat} → zone {zone} ×{mult} − armure {armure} ⇒ {min}–{max} ({ticks} ticks)
@@ -1532,7 +1532,7 @@ ui.recette.sans_source,(pas de source encore : parties de créatures)
 ui.recette.recolte,← récolte (pioche sur un mur ou un filon)
 ui.recette.qualite_composant,(qualité A.3 sur la compétence de la station)
 ui.recette.assemblage,(qualité = Σ composants × poids × jet d'assemblage)
-ui.feuille.vitaux,"PV {pv}/{pv_max} · endurance {end} · mana {mana}/{mana_max}"
+ui.feuille.vitaux,"PV {pv}/{pv_max} · vigueur {end} · mana {mana}/{mana_max}"
 ui.feuille.stats,Stats
 ui.feuille.cat.combat,Compétences de combat
 ui.feuille.cat.general,Compétences générales
@@ -2332,7 +2332,7 @@ ui.composer.contribution_nulle,"Ce module n’ajoute rien à cette séquence"
 ui.composer.cout,"Coût réel : {min}–{max} {monnaie} · affinité de l’arme ({arme}) ×{affinite}"
 functionality.mains_nues.name,Mains nues
 barre.sante,Vie
-barre.endurance,Endurance
+barre.vigueur,Vigueur
 barre.mana,Mana
 barre.faim,Faim
 barre.charge,Charge

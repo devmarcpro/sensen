@@ -2517,7 +2517,7 @@ class HotbarEcran extends Control:
 ## Les trois jauges de l'écran de création : vie, endurance, mana, pleines, avec leur valeur écrite.
 ## Les mêmes couleurs que le HUD, la même lecture « valeur / max » — jamais un pourcentage seul.
 class BarresCreation extends Control:
-	const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "vigueur": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95)}
+	const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "vigueur": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95), "sang_froid": Color(0.55, 0.75, 0.8)}
 	const BARRE_L := 190.0
 	const BARRE_H := 12.0
 	var valeurs: Array = []
