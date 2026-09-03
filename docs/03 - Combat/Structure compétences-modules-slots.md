@@ -213,3 +213,32 @@ notée ici parce que l'idée est bonne et que le jour où l'endurance s'étoffer
 faut commencer.
 
 Total : 36 armes, six par voie.
+
+### Les instruments jouaient contre leur propre voie (2026-09-03)
+
+Le designer groupe les monnaies : **mana pour la volonté et le charisme**. Cette phrase révèle une
+contradiction que les données portaient déjà, et que personne n'avait vue.
+
+Les quatorze noyaux de charisme coûtent du **mana**. Les six instruments du charisme, eux, avaient
+été écrits comme focus de l'**endurance** — la vielle donnait 1,85 en endurance et **0,55 en mana**.
+Autrement dit : un barde qui équipait son meilleur instrument **divisait par deux la puissance de ses
+propres sorts**. La famille entière punissait la voie qu'elle était censée servir.
+
+Les deux valeurs sont donc échangées. L'échelle ne change pas de forme — plus un instrument
+s'engage, plus il est exclusif — elle change simplement de monnaie :
+
+| instrument | mana | endurance |
+|---|---|---|
+| flûte | 1,20 | 1,05 |
+| cor | 1,25 | 0,90 |
+| cymbales | 1,35 | 0,75 |
+| luth | 1,45 | 0,85 |
+| tambour | 1,65 | 0,70 |
+| vielle | **1,85** | 0,55 |
+
+**Pour revenir en arrière**, il suffit de ré-échanger `mana` et `endurance` dans les six fichiers de
+`functionalities/`. Aucune autre donnée n'en dépend.
+
+C'est le genre d'erreur qu'aucune sonde ne trouve : chaque valeur était valide, l'échelle était
+cohérente, l'audit passait au vert. Il fallait qu'une décision de design vienne dire à quelle monnaie
+la voie appartenait pour que le contresens devienne visible.

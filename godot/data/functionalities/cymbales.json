@@ -11,8 +11,8 @@
   "volume": 1.8,
   "genre_grammatical": "fp",
   "affinite_sorts": {
-    "mana": 0.75,
-    "endurance": 1.35
+    "mana": 1.35,
+    "endurance": 0.75
   },
   "combat_skill": "musique",
   "poids_reference": 2.16

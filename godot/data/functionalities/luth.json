@@ -12,8 +12,8 @@
   "volume": 1.4,
   "genre_grammatical": "ms",
   "affinite_sorts": {
-    "mana": 0.85,
-    "endurance": 1.45
+    "mana": 1.45,
+    "endurance": 0.85
   },
   "poids_reference": 1.68
 }
