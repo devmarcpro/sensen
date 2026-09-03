@@ -130,6 +130,16 @@ func _ready() -> void:
 		if "resurrection" in effets_c or ef_c.get("ressource", {}).has("releve_allie_pct") or str(ef_c.get("invocation", {}).get("mode", "")) == "releve":
 			m.vivant = false   # un mort à relever
 			s.grille.liberer(m.pos)
+		if "resurrection" in effets_c:
+			# Renaissance ne relève pas un corps : elle rappelle un COMPAGNON par l'âme qu'on porte. Sans âme
+			# dans le sac, le sort dit « rien » et le mannequin ne bouge pas — c'était le seul noyau muet de
+			# la passe, et c'est le mannequin qui manquait, pas le sort. On lui donne l'âme du mort.
+			var ame := s.generer_objet("ame", 1, {}, "commun", 0)
+			if not ame.is_empty():
+				ame["compagnon"] = m.id
+				ame["name_key"] = m.name_key
+				m["maitre"] = j.id
+				j.sac.append(ame.uid)
 		var cible_e: Vector2i = m.pos if (loin or au_contact) else cible   # une convocation se vise sur l'allié, une saisie sur le voisin
 		var avant := _photo(s, j, m, cible)
 		s._executer_capacite(j, pl, cible_e)
