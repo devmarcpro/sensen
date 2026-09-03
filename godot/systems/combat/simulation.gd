@@ -6301,7 +6301,18 @@ func _hors_attente(attendues: Array[String], slot: String) -> Dictionary:
 		if str(mid) in attendues:
 			continue
 		var m: Dictionary = GameData.catalogues.materials[mid]
-		var poids := base * float(echelle.get(str(m.get("category", "")), 1.0))
+		# Du plus PRECIS au plus general : « animal/peau » l'emporte sur « animal ». Une peau fait des
+		# sangles evidentes, un tendon une fixation evidente, un boyau une corde acceptable, un organe
+		# non — et la maille categorie les mettait tous au meme rang (designer 2026-09-03 : « developpe
+		# encore plus ce systeme avec les sous categories pour qu'on ait aucune lacune »).
+		var cat := str(m.get("category", ""))
+		var sous := str(m.get("sous_categorie", ""))
+		var f_ech := 1.0
+		if not sous.is_empty() and echelle.has(cat + "/" + sous):
+			f_ech = float(echelle[cat + "/" + sous])
+		else:
+			f_ech = float(echelle.get(cat, 1.0))
+		var poids := base * f_ech
 		# Une piece maitresse faite d'une matiere sans tenue : possible, mais c'est la curiosite meme.
 		if maitresse and float(m.get("stats", {}).get("durete", 0)) < seuil:
 			poids *= float(ea.get("penalite_forme", 0.15))

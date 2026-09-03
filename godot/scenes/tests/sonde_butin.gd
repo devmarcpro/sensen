@@ -109,10 +109,15 @@ func _echelle(s, tirages: int) -> void:
 		var o: Dictionary = s.generer_objet(base, 12, {"sonde": true})
 		for slot in o.get("composants", {}).keys():
 			var m: Dictionary = GameData.catalogues.materials.get(str(o.composants[slot].materiau), {})
+			# On compte la SOUS-CATEGORIE quand il y en a une : c'est la maille a laquelle l'echelle
+			# travaille depuis le 2026-09-03, et une mesure par categorie seule ne montrerait rien —
+			# les sous-categories se redistribuent A L'INTERIEUR d'une categorie.
 			var cat := str(m.get("category", "?"))
+			var sous := str(m.get("sous_categorie", ""))
+			var cle_c := cat if sous.is_empty() else cat + "/" + sous
 			if not par_slot.has(slot):
 				par_slot[slot] = {}
-			par_slot[slot][cat] = int(par_slot[slot].get(cat, 0)) + 1
+			par_slot[slot][cle_c] = int(par_slot[slot].get(cle_c, 0)) + 1
 	print("")
 	print("echelle de frequence : ce qui sort VRAIMENT, par emplacement (niveau 12)")
 	var slots: Array = par_slot.keys()
@@ -126,7 +131,9 @@ func _echelle(s, tirages: int) -> void:
 		cats.sort_custom(func(a, b): return int(t[a]) > int(t[b]))
 		var parts: Array[String] = []
 		for c in cats:
-			parts.append("%s %d %%" % [c, roundi(100.0 * float(t[c]) / maxf(1.0, float(total)))])
+			var pct := 100.0 * float(t[c]) / maxf(1.0, float(total))
+			if pct >= 0.5:
+				parts.append("%s %d %%" % [c, roundi(pct)])
 		print("  %-11s %s" % [slot, " · ".join(parts)])
 
 

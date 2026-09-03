@@ -83,6 +83,21 @@ Un objet n'est plus une recette monolithique mais un assemblage de composants, c
 > **L'effet d'ensemble** : les pièces hors de l'attendu passent de 20-25 % à **4-8 %**, et les objets qui en portent une de 46-51 % à **10-19 %**. « Presque jamais » redevient vrai, et ce qui sort est plausible — des sangles en fourrure plutôt qu'une lame en cuir.
 >
 > > [!warning] Le piège de cache qu'il a fallu voir en même temps
+> **Étendu le même jour — jusqu'à la sous-catégorie** (designer : « développe encore plus ce système avec toutes les catégories, les sous catégories et tous les crafts pour qu'on ait aucune lacune »). La maille « catégorie » était trop grosse : dans `animal`, une **peau** fait des sangles évidentes, un **tendon** une fixation évidente, un **boyau** une corde acceptable — et un **organe**, non. Tous valaient pareil. La lecture va désormais du plus précis au plus général : `catégorie/sous_catégorie`, puis `catégorie`, puis 1,0 — une fiche sans sous-catégorie se comporte donc exactement comme avant.
+>
+> **Ce que ça donne, mesuré à la maille fine** (mille six cents tirages, niveau 12) :
+>
+> | emplacement | ce qu'on trouve |
+> |---|---|
+> | **sangles** | végétal/fibre 52 % · animal/fibre 21 % · animal/peau 18 % · synthétique 5 % · **animal/organe 1 %** |
+> | **manche** | bois 56 % · métal 39 % · **animal/os 4 %** |
+> | **plaque** | métal 88 % · **animal/carapace 5 %** · animal/os 4 % · animal/peau 1 % |
+> | **fixations** | métal 85 % · végétal/fibre 8 % · liquide/organique 3 % · animal/fibre 1 % |
+>
+> La carapace fait une meilleure plaque que la peau, la peau de meilleures sangles que l'os, et l'organe reste une curiosité partout. **Aucune lacune** : chacun des six emplacements couvre les douze catégories et les quinze sous-catégories, vérifié paire par paire.
+>
+> Au passage, la **sève** et le **lait** quittent `liquide/eau` pour `liquide/organique` : ce sont des liquides aqueux, mais ils sortent d'un vivant — et c'est la sève qui colle, pas l'eau.
+>
 > > Les poids de tirage sont **mis en cache** par pool de candidats. Or deux emplacements peuvent puiser dans le même pool — une tête et une plaque sont toutes deux limitées aux matières dures — et ils ont désormais des poids **différents** pour l'inattendu. Sans ajouter l'emplacement à la clé, le second aurait récupéré les poids du premier et l'échelle n'aurait servi qu'à moitié, **en silence**. Un cache qui ignore une dimension nouvelle ne se plaint jamais.
 
 ## Liens
