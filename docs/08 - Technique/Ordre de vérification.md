@@ -63,6 +63,9 @@ Un critère de performance à valider avant de passer à l'étape suivante. **Un
 > [!info] Ajout du 2026-09-03 — **la sonde de la mine**
 > `Godot --headless --path godot res://scenes/tests/sonde_mine.tscn` — le puits refuse hors claim, l'étage est plein et sans habitant, la roche durcit en descendant, et la galerie creusée est encore là après un aller-retour au jour. C'est elle qui a trouvé que la palette de mur s'inversait entre les étages 2 et 3.
 
+> [!info] Ajout du 2026-09-03 — **la sonde de l'espèce**
+> `Godot --headless --path godot res://scenes/tests/sonde_espece.tscn` — la bête voyage-t-elle de la dépouille jusqu'à la matière ? Elle tabule la dureté de l'os pour sept espèces et vérifie sur pied qu'une matière brute tirée d'un corps porte bien son espèce. À passer dès qu'on touche au dépeçage, aux recettes ou à `materiau_espece`.
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Budgets de performance]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]

@@ -5982,7 +5982,23 @@ func _fabriquer(e: Dictionary, rid: String, tick: int) -> bool:
 		_progresser_quetes(e, "fabriquer", tags_q)
 		EventBus.emettre(&"journal", [&"journal.fabrique", {"nom": e.name_key, "quantite": int(sortie.quantite), "objet": nom_obj, "recette": r.name_key}])
 		return true
-	_donner_materiau(e, sortie.materiau, int(sortie.quantite), sortie.forme, str(sortie.get("espece", "")))
+	# L'espèce traverse la recette (point 73). Elle ne pouvait pas : `sortie` est la DÉCLARATION de la
+	# recette, qui ne connaît aucune bête — tanner une peau d'ours rendait du cuir anonyme, et tout le
+	# travail fait sur la dépouille se perdait au premier atelier. On la reprend donc des ENTRÉES. Si
+	# plusieurs bêtes ont contribué, la première déclarée l'emporte : mélanger deux peaux ne fait pas
+	# une chimère, et il faut bien trancher.
+	var espece_sortie := str(sortie.get("espece", ""))
+	if espece_sortie.is_empty():
+		for entree in plan.entrees:
+			var esp_e := str(entree.pile.get("espece", ""))
+			# `espece` porte DEUX choses selon l'objet : l'id d'une CRÉATURE sur la matière tirée d'un
+			# corps, et l'id d'une espèce d'ÉLEVAGE sur un spécimen. Seule la première module les stats,
+			# et n'hériter que d'elle évite qu'un ver à soie tamponne son élevage sur la soie qu'il file —
+			# ce que la suite a attrapé le 2026-09-03, la pile de soie brute s'étant scindée en deux.
+			if not esp_e.is_empty() and GameData.catalogues.creatures.has(esp_e):
+				espece_sortie = esp_e
+				break
+	_donner_materiau(e, sortie.materiau, int(sortie.quantite), sortie.forme, espece_sortie)
 	var mat: Dictionary = GameData.catalogues.materials.get(str(sortie.materiau), {})
 	gagner_xp(e, str(r.craft_skill), int(mat.get("stats", {}).get("durete", 1)))
 	_progresser_quetes(e, "fabriquer", ["materiau"])
@@ -7158,6 +7174,14 @@ func _drop(cible: Dictionary, source: String) -> void:
 				brut.materiau = mat_id
 				brut["forme"] = "brut"
 				brut.quantite = 1
+				# « L'os appartient à une créature et donc ses stats en sont dérivés » (designer 2026-09-02,
+				# point 73). Le mécanisme existait pour le cuir depuis le 2026-09-01 — mais la MATIÈRE
+				# brute, celle qui devient une pointe de lance, sortait sans espèce : un os de lièvre et
+				# un os de troll donnaient exactement la même arme. L'espèce est posée ici, et les stats
+				# recalculées avec elle — `generer_objet` les avait figées sur le matériau nu.
+				brut["espece"] = str(cible.def)
+				brut.stats = stats_materiau(GameData.entree("materials", mat_id), str(cible.def))
+				brut["nom"] = {"params": {"creature": cible.name_key}}
 				uids.append(brut.uid)
 	# Ce que le mort portait tombe aussi (l'équipement est une donnée d'instance).
 	for slot in cible.equipement.keys():

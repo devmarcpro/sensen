@@ -69,6 +69,17 @@ Les catégories de matériaux, chacune liée à un outil, une compétence de ré
 > Le test qui comptait « 11 catégories » vérifie désormais la **règle** : toute catégorie utilisée par une fiche doit être décrite, sinon on ne sait ni la récolter ni la travailler.
 
 
+> [!check] Rendu le 2026-09-03 — **l'os appartient à une créature, et ses stats en dérivent enfin**
+> Le mécanisme existait depuis le 2026-09-01 : l'espèce voyage sur l'objet et module les stats du matériau (`combat_rules.craft.materiau_espece`), un seul `cuir` au catalogue et l'ours le durcit là où le serpent l'assouplit. Il **s'interrompait deux fois**, et c'est ce qui rendait la demande du designer encore ouverte :
+> 1. **La matière brute sortait sans espèce.** Le corps d'une bête donne une partie tirée au sort (œil, peau, griffe, dent, os) et, si cette partie existe aussi comme matériau, la matière brute correspondante — celle qui devient une pointe de lance. Cette matière-là ne recevait pas l'espèce : **un os de lièvre et un os de troll donnaient exactement la même arme**. Ses stats étaient en plus figées à l'instanciation, avant même qu'on sache de quelle bête il s'agissait ; elles sont désormais recalculées.
+> 2. **Une recette perdait l'espèce de ses entrées.** L'espèce était lue sur `sortie`, c'est-à-dire sur la **déclaration** de la recette, qui ne connaît aucune bête : tanner une peau d'ours rendait du cuir anonyme, et tout le travail fait sur la dépouille se perdait au premier atelier. Elle est maintenant reprise des **entrées**. Si plusieurs bêtes ont contribué, la première déclarée l'emporte — mélanger deux peaux ne fait pas une chimère, et il faut bien trancher.
+>
+> **Ce que ça donne, mesuré** (`res://scenes/tests/sonde_espece.tscn`) : os de lièvre dureté **4,2**, d'écureuil 4,0, de renard 4,8, de loup 6,6, de sanglier 10,1, d'ours brun **13,9**. Un facteur **3,3** entre la plus petite et la plus grosse bête, sur un `os` qui vaut 8 au catalogue. La chaîne complète — dépouille → matière brute → composant → objet assemblé — porte l'espèce d'un bout à l'autre, et les onze matières animales (os, cuir, corne, croc, écaille, ivoire, plume, tendon, crin, boyau, carapace) en bénéficient sans qu'aucune ait à le déclarer : la règle est générique.
+>
+> **Un piège trouvé en chemin, par la suite de tests.** Le champ `espece` porte **deux choses différentes** selon l'objet : l'id d'une **créature** sur la matière tirée d'un corps, et l'id d'une espèce d'**élevage** sur un spécimen ([[Récolte]] / registre). En faisant hériter naïvement l'espèce des entrées, un ver à soie tamponnait son élevage sur la soie qu'il filait — et la pile de soie brute se scindait en deux, ce que la suite a attrapé immédiatement. On n'hérite donc que d'une espèce qui **existe au catalogue des créatures** : c'est exactement ce que la modulation exige, et ça laisse l'élevage tranquille. Les deux usages du même nom restent une dette ; les séparer serait plus propre que de les distinguer à l'usage.
+>
+> **Ce qui reste ouvert** : l'os d'une créature dont la fiche ne dit rien rend les stats de base du catalogue, sans modification. C'est le comportement prudent, mais c'est un choix — si le designer préfère qu'une espèce inconnue soit impossible plutôt que moyenne, c'est une ligne.
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Schéma matériau]]
 - **Alimente** : [[Récolte]], [[Stations de transformation]], [[Composants]], [[Wu Xing hors combat]]
