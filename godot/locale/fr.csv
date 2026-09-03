@@ -2387,8 +2387,8 @@ ui.apercu.horizon,"Horizon : toutes les entités en vue"
 ui.composeur.nom,"Nom du sort :"
 ui.composeur.nom_auto,"(le nom du noyau)"
 ui.composeur.slot_vide,"glisser ici"
-ui.composeur.aide,"glisser une carte dans un slot · double-clic : premier slot libre · clic droit : vider · ← → Entrée Suppr"
-ui.composeur.glisser,"Glissez une forme et un noyau dans les slots — ou Entrée sur une carte."
+ui.composeur.aide,"— glisser une carte dans la grille · R : tourner · clic droit ou Suppr : retirer · l’ordre de lecture (ligne par ligne) est l’ordre du sort"
+ui.composeur.glisser,"Glissez une portée, une forme et un noyau dans la grille — ou Entrée sur une carte."
 ui.composeur.wuxing,"{dominante} domine · engendre {engendre} · domine {domine}"
 ui.composeur.wuxing_vide,"Wu Xing du sort : —"
 ui.composeur.groupe.portee,Portée
@@ -2876,3 +2876,5 @@ module.vers_eau.name,Vers l’eau
 module.vers_bois.name,Vers le bois
 module.vers_metal.name,Vers le métal
 module.vers_terre.name,Vers la terre
+ui.composeur.ne_rentre_pas,"cette pièce ne rentre pas là"
+ui.composeur.rotation,rotation {n} — R pour tourner

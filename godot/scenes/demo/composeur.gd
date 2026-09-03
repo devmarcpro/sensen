@@ -1,26 +1,25 @@
 class_name Composeur
 extends VBoxContainer
-## Le composeur de sorts en glisser-déposer (Écrans d'interface, décision du designer du 2026-08-30) : des **groupes de
-## slots par type** (Formes · Noyaux · Modificateurs · Conditions · Liaisons · Déclencheur · Suite), chacun avec ses
-## boutons + / −, on glisse un module du catalogue dans un slot de son type ou on l'en sort, chaque module a son
-## **icône** dessinée par code (un glyphe par type, teinté par son élément), le joueur **nomme** son sort. Le clavier
-## reste possible : ← → ↑ ↓ parcourent le catalogue, Entrée ajoute, Suppr retire, V valide. Sous la rangée : le
-## catalogue à gauche, section par type ; à droite le détail, le Wu Xing du sort et l'aperçu visuel.
+## Le composeur de sorts : **une grille, et on fait son Tetris** (Six types de modules et assemblage, décision du
+## designer du 2026-09-03 : « on retire l'assembleur qu'on avait, ça devient du drag and drop directement dans la
+## grille »). La grille est la silhouette de l'arme tenue ; chaque module est une pièce dont la forme dit ce qu'il
+## fait. On prend une carte dans le catalogue et on la pose dans la grille, R la tourne, clic droit ou Suppr la
+## retire, on la reprend pour la déplacer. **L'ordre de lecture est l'ordre du sort** : ligne par ligne, de gauche
+## à droite — un modificateur posé au-dessus ou à gauche de son noyau s'y rattache. Le clavier reste possible :
+## ← → ↑ ↓ parcourent le catalogue, Entrée pose au premier endroit libre, Suppr retire, R tourne, V valide.
+## Sous la grille : le catalogue à gauche, section par type ; à droite le détail, le Wu Xing du sort et l'aperçu.
 
-const CARTE := Vector2(48, 48)   # cartes et slots : des carrés, de la même taille (uniformité, 2026-08-30 ; 48 px à la demande du designer)
+const CARTE := Vector2(48, 48)   # les cartes du catalogue : des carrés (uniformité, 2026-08-30 ; 48 px à la demande du designer)
 const SLOT := Vector2(48, 48)
 const COLONNES := 8
 const GLYPHES := {"portee": "⟿", "forme": "◇", "noyau": "●", "modificateur": "▲", "condition": "?", "declencheur": "⚡", "liaison": "∞"}
 const ORDRE_TYPES: Array[String] = ["portee", "forme", "noyau", "modificateur", "condition", "declencheur", "liaison"]
-## Les groupes d'UNE étape, dans l'ordre de la séquence. Le déclencheur ferme l'étape : ce qui le suit est
-## l'étape suivante, et le moteur les imbrique sans limite (Six types de modules · designer 2026-09-01).
-const GROUPES: Array[String] = ["portee", "forme", "noyau", "modificateur", "condition", "liaison", "declencheur"]
 
 var ecrans: Node                       # l'écran parent (Ecrans) : _apercu_plan, _contribution_module, sequence_composee
 var main: Node
-var groupes: Dictionary = {}           # groupe → Array[String] de l'étape courante (un module par slot)
-var etapes: Array[Dictionary] = []     # les étapes du sort : chacune ses groupes, son déclencheur ouvre la suivante
-var etape := 0                         # l'étape qu'on modifie
+var placements: Array[Dictionary] = []   # les pièces posées : {module, rot, ancre: Vector2i, cases: Array}
+var rotation_courante := 0             # la rotation qu'aura la prochaine pièce posée (R sur une carte du catalogue)
+var piece_choisie := -1                # l'index dans `placements` de la pièce sélectionnée dans la grille (−1 : aucune)
 var selection := 0                     # la carte sélectionnée au clavier / au clic
 var cartes: Array[Control] = []
 var ids: Array[String] = []            # les modules du catalogue, dans l'ordre des cartes
@@ -31,12 +30,11 @@ var rangee_filtres: HBoxContainer
 var etiquette_style: Label            # le style du sort en composition
 var nom: LineEdit
 var icone_sort: Control                # l'icône combinée du sort en cours, à côté du nom
-var rangee_slots: HBoxContainer
-var rangee_etapes: HBoxContainer
+var grille_ctrl: GrilleControl         # LA surface de composition (designer 2026-09-03)
+var defil_grille: ScrollContainer      # sa rangée : haute comme la grille, pas plus
 var catalogue: VBoxContainer
 var detail: RichTextLabel
 var apercu: ApercuSort
-var grille_ctrl: GrilleControl               # la grille de composition dessinée (designer 2026-09-03)
 var pentagramme: Control
 
 
@@ -67,14 +65,13 @@ func _ready() -> void:
 	aide.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	aide.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h1.add_child(aide)
-	rangee_etapes = HBoxContainer.new()   # rangée 1 bis : les étapes du sort (designer 2026-09-01)
-	add_child(rangee_etapes)
-	var defil_slots := ScrollContainer.new()   # rangée 2 : les groupes de slots, défilables si la composition s'allonge
-	defil_slots.custom_minimum_size = Vector2(0, SLOT.y + 34)
-	defil_slots.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	add_child(defil_slots)
-	rangee_slots = HBoxContainer.new()
-	defil_slots.add_child(rangee_slots)
+	defil_grille = ScrollContainer.new()   # rangée 2 : la grille, défilable si la silhouette est large
+	defil_grille.custom_minimum_size = Vector2(0, GrilleControl.HAUTEUR_MIN)
+	defil_grille.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	add_child(defil_grille)
+	grille_ctrl = GrilleControl.new()
+	grille_ctrl.composeur = self
+	defil_grille.add_child(grille_ctrl)
 	var h2 := HBoxContainer.new()   # rangée 3 : le catalogue à gauche, le détail + Wu Xing + aperçu à droite
 	h2.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	add_child(h2)
@@ -89,7 +86,7 @@ func _ready() -> void:
 	defil.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	defil.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	gauche.add_child(defil)
-	var zone := ZoneCatalogue.new()   # accepte qu'on y ramène un module d'un slot : le slot se vide
+	var zone := ZoneCatalogue.new()   # accepte qu'on y ramène une pièce prise dans la grille : elle en sort
 	zone.composeur = self
 	zone.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	zone.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -111,9 +108,6 @@ func _ready() -> void:
 	bas.add_child(pentagramme)
 	apercu = ApercuSort.new()
 	bas.add_child(apercu)
-	grille_ctrl = GrilleControl.new()
-	grille_ctrl.composeur = self
-	bas.add_child(grille_ctrl)
 
 
 ## Les filtres de style (Six types de modules, 2026-08-30) : Tous, puis un bouton par style de data/styles.json.
@@ -121,8 +115,8 @@ func _construire_filtres() -> void:
 	for c in rangee_filtres.get_children():
 		c.queue_free()
 	var cfg: Dictionary = GameData.config("styles")
-	var ids: Array = [""] + Array(cfg.get("ordre", []))
-	for st in ids:
+	var liste: Array = [""] + Array(cfg.get("ordre", []))
+	for st in liste:
 		var b := Button.new()
 		b.text = tr("ui.composeur.filtre_tous") if str(st).is_empty() else tr(str(cfg.styles.get(st, {}).get("name_key", "style." + str(st) + ".name")))
 		b.flat = str(st) != filtre_style
@@ -167,67 +161,128 @@ func texte_style_sort() -> String:
 	return tr("ui.composeur.style").format({"liste": " · ".join(parts)})
 
 
-# ---------------------------------------------------------------- la séquence
+# ---------------------------------------------------------------- la grille et la séquence
 
-## Le groupe naturel d'un module : les formes ensemble, quelle que soit leur origine.
-static func groupe_de(m: String) -> String:
-	var t := type_de(m)
-	if t.begins_with("forme"):
-		return "forme"
-	return t if t in GROUPES else "noyau"   # un type inconnu échoue sur le noyau plutôt que dans un fourre-tout
+func grille_sort() -> GrilleSort:
+	return main.sim.grille_sort
 
 
+## Les cases de la grille de l'arme tenue, et sa voie.
+func grille_courante() -> Dictionary:
+	return main.sim.grille_composition(main.joueur())
+
+
+## La séquence lue dans la grille : ligne par ligne, de gauche à droite, chaque pièce à sa case la plus
+## haute puis la plus à gauche. C'est ce que le moteur assemble — l'ancienne barre de slots, à deux dimensions.
 func sequence() -> Array:
+	var tri: Array = placements.duplicate()
+	tri.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var ca: Vector2i = _case_de_lecture(a)
+		var cb: Vector2i = _case_de_lecture(b)
+		return ca.y < cb.y or (ca.y == cb.y and ca.x < cb.x))
 	var seq: Array = []
-	for e in etapes:   # étape après étape ; le déclencheur de chacune ouvre la suivante
-		for g in GROUPES:
-			for m in e.get(g, []):
-				if not str(m).is_empty():
-					seq.append(str(m))
+	for p in tri:
+		seq.append(str(p.module))
 	return seq
 
 
-## Répartit une séquence dans les groupes : par type avant le déclencheur, tout ce qui le suit dans « suite ».
-func _repartir(depart: Array) -> void:
-	etapes = [_etape_vide()]
-	for m in depart:
-		var id := str(m)
-		var g := groupe_de(id)
-		etapes[etapes.size() - 1][g].append(id)
-		if g == "declencheur":   # le déclencheur ferme l'étape : la suite est une étape de plus
-			etapes.append(_etape_vide())
-	if etapes.size() > 1 and _etape_creuse(etapes[etapes.size() - 1]):
-		etapes.remove_at(etapes.size() - 1)   # un déclencheur sans suite : pas d'étape fantôme
-	etape = clampi(etape, 0, etapes.size() - 1)
-	groupes = etapes[etape]
-	if groupes.forme.is_empty():   # deux slots d'accueil : une forme, un noyau
-		groupes.forme.append("")
-	if groupes.noyau.is_empty():
-		groupes.noyau.append("")
+static func _case_de_lecture(p: Dictionary) -> Vector2i:
+	var meilleure := Vector2i(999999, 999999)
+	for c in p.cases:
+		if c.y < meilleure.y or (c.y == meilleure.y and c.x < meilleure.x):
+			meilleure = c
+	return meilleure
 
 
-## Une étape neuve : un slot par groupe, tous vides.
-static func _etape_vide() -> Dictionary:
-	var e := {}
-	for g in GROUPES:
-		e[g] = []
-	return e
+func _occupees(sauf: int = -1) -> Dictionary:
+	var occ := {}
+	for k in placements.size():
+		if k == sauf:
+			continue
+		for c in placements[k].cases:
+			occ[c] = true
+	return occ
 
 
-static func _etape_creuse(e: Dictionary) -> bool:
-	for g in GROUPES:
-		for m in e.get(g, []):
-			if not str(m).is_empty():
-				return false
+## Pose `module` avec la rotation `rot`, ancré en `ancre` ; `deplace` = l'index d'une pièce qu'on déplace
+## (ses cases ne comptent pas comme prises). Retourne vrai si la pièce tient là.
+func poser(module: String, rot: int, ancre: Vector2i, deplace: int = -1) -> bool:
+	var g := grille_sort()
+	var forme: Array = g.tournee(g.forme_de(module), rot)
+	var cases: Array = g.poser(forme, ancre, grille_courante().cases, _occupees(deplace))
+	if cases.is_empty():
+		grille_ctrl.refuser()
+		return false
+	if deplace >= 0 and deplace < placements.size():
+		placements.remove_at(deplace)
+	placements.append({"module": module, "rot": rot, "ancre": ancre, "cases": cases})
+	piece_choisie = placements.size() - 1
+	reconstruire(main.joueur())
 	return true
+
+
+## Pose `module` au premier endroit où il tient — sa rotation courante d'abord, puis les autres.
+func poser_quelque_part(module: String) -> bool:
+	var g := grille_sort()
+	var cases_g: Array = grille_courante().cases
+	var occ := _occupees()
+	for k in 4:
+		var rot := (rotation_courante + k) % 4
+		var forme: Array = g.tournee(g.forme_de(module), rot)
+		for ancre in cases_g:
+			if occ.get(ancre, false):
+				continue
+			var cases: Array = g.poser(forme, ancre, cases_g, occ)
+			if not cases.is_empty():
+				return poser(module, rot, ancre)
+	grille_ctrl.refuser()
+	return false
+
+
+func retirer(index: int) -> void:
+	if index < 0 or index >= placements.size():
+		return
+	placements.remove_at(index)
+	piece_choisie = -1
+	reconstruire(main.joueur())
+
+
+## Tourne la pièce posée `index` d'un quart de tour, si elle tient encore ; sinon rien ne bouge.
+func tourner(index: int) -> void:
+	if index < 0 or index >= placements.size():
+		return
+	var p: Dictionary = placements[index]
+	var g := grille_sort()
+	var forme: Array = g.tournee(g.forme_de(str(p.module)), int(p.rot) + 1)
+	var cases: Array = g.poser(forme, p.ancre, grille_courante().cases, _occupees(index))
+	if cases.is_empty():
+		grille_ctrl.refuser()
+		return
+	placements[index] = {"module": p.module, "rot": (int(p.rot) + 1) % 4, "ancre": p.ancre, "cases": cases}
+	reconstruire(main.joueur())
+
+
+func vider_grille() -> void:
+	placements = []
+	piece_choisie = -1
+
+
+## Une séquence venue d'ailleurs (hotbar, capture) est rangée d'office par le moteur, qui cherche un emboîtement.
+func _ranger(depart: Array) -> void:
+	placements = []
+	piece_choisie = -1
+	var emb: Dictionary = main.sim.emboitement(main.joueur(), depart)
+	if not emb.ok:
+		return
+	for p in emb.placement:
+		placements.append({"module": str(p.module), "rot": 0, "ancre": _case_de_lecture({"cases": p.cases}), "cases": p.cases})
 
 
 ## Reconstruit tout depuis l'état du joueur ; `depart` = une séquence à pré-remplir (hotbar, capture).
 func reconstruire(j: Dictionary, depart: Array = []) -> void:
-	if etapes.is_empty() or (not depart.is_empty() and sequence() != depart):
-		_repartir(depart)
+	if not depart.is_empty() and sequence() != depart:
+		_ranger(depart)
 	_reconstruire_catalogue(j)
-	_reconstruire_slots()
 	_rafraichir_detail(j)
 
 
@@ -237,6 +292,7 @@ func _reconstruire_catalogue(j: Dictionary) -> void:
 	cartes = []
 	ids = []
 	var connus: Array = j.get("modules_connus", []).duplicate()
+	var seq := sequence()
 	for type in ORDRE_TYPES:
 		var du_type: Array = []
 		for m in connus:
@@ -244,7 +300,6 @@ func _reconstruire_catalogue(j: Dictionary) -> void:
 				du_type.append(str(m))
 		if du_type.is_empty():
 			continue
-		du_type.sort()
 		du_type.sort()   # plus de charges (designer 2026-08-31) : l'ordre alphabétique suffit
 		var ferme: bool = bool(replie.get(type, false))
 		var entete := Button.new()   # une section par type, repliable d'un clic (demande du designer)
@@ -263,10 +318,8 @@ func _reconstruire_catalogue(j: Dictionary) -> void:
 			continue
 		# Les noyaux se rangent par FAMILLE (designer 2026-09-02 : « sépare dans le composeur les noyaux
 		# par types »). Ils sont quatre-vingt-huit : en une seule grille, on ne trouve rien, et le
-		# joueur ne voit même pas qu'il existe des familles. Les données les portaient déjà — Arme,
-		# Contrôle, Défense, Dégâts léger/moyen/lourd, Espace, Ressource, Soin, Terrain — le composeur
-		# ne s'en servait pas. Les autres types restent en une grille : ils sont assez peu nombreux.
-		var groupes: Array = []
+		# joueur ne voit même pas qu'il existe des familles. Les autres types restent en une grille.
+		var groupes_cat: Array = []
 		if type == "noyau":
 			var par_famille := {}
 			for m in du_type:
@@ -277,10 +330,10 @@ func _reconstruire_catalogue(j: Dictionary) -> void:
 			var familles: Array = par_famille.keys()
 			familles.sort()
 			for fam in familles:
-				groupes.append({"titre": str(fam), "cle": type + "/" + str(fam), "modules": par_famille[fam]})
+				groupes_cat.append({"titre": str(fam), "cle": type + "/" + str(fam), "modules": par_famille[fam]})
 		else:
-			groupes.append({"titre": "", "cle": type, "modules": du_type})
-		for gr in groupes:
+			groupes_cat.append({"titre": "", "cle": type, "modules": du_type})
+		for gr in groupes_cat:
 			if not str(gr.titre).is_empty():
 				var sous_ferme: bool = bool(replie.get(str(gr.cle), false))
 				var sous := Button.new()
@@ -297,17 +350,17 @@ func _reconstruire_catalogue(j: Dictionary) -> void:
 				catalogue.add_child(sous)
 				if sous_ferme:
 					continue
-			var grille := GridContainer.new()
-			grille.columns = COLONNES
-			catalogue.add_child(grille)
+			var grille_cat := GridContainer.new()
+			grille_cat.columns = COLONNES
+			catalogue.add_child(grille_cat)
 			for m in gr.modules:
 				var carte := CarteModule.new()
 				carte.composeur = self
 				carte.module = str(m)
 				carte.charges = -1   # un module connu l'est pour toujours : rien à afficher en coin
-				carte.fois = sequence().count(str(m))
+				carte.fois = seq.count(str(m))
 				carte.index = ids.size()
-				grille.add_child(carte)
+				grille_cat.add_child(carte)
 				cartes.append(carte)
 				ids.append(str(m))
 	selection = clampi(selection, 0, maxi(0, ids.size() - 1))
@@ -316,70 +369,25 @@ func _reconstruire_catalogue(j: Dictionary) -> void:
 		cartes[k].queue_redraw()
 
 
-func _reconstruire_slots() -> void:
-	for c in rangee_slots.get_children():
-		c.queue_free()
-	_reconstruire_etapes()
-	for g in GROUPES:
-		var bloc := VBoxContainer.new()
-		rangee_slots.add_child(bloc)
-		var entete := HBoxContainer.new()
-		bloc.add_child(entete)
-		var l := Label.new()
-		l.text = tr("ui.composeur.groupe." + g)
-		l.add_theme_font_size_override("font_size", 11)
-		l.modulate = Color(0.85, 0.8, 0.6)
-		entete.add_child(l)
-		var moins := Button.new()
-		moins.text = "−"
-		moins.focus_mode = Control.FOCUS_NONE
-		moins.add_theme_font_size_override("font_size", 10)
-		moins.pressed.connect(func() -> void: _retirer_slot(g))
-		entete.add_child(moins)
-		var plus := Button.new()
-		plus.text = "+"
-		plus.focus_mode = Control.FOCUS_NONE
-		plus.add_theme_font_size_override("font_size", 10)
-		plus.pressed.connect(func() -> void: _ajouter_slot(g))
-		entete.add_child(plus)
-		var rangee := HBoxContainer.new()
-		bloc.add_child(rangee)
-		var slots: Array = groupes.get(g, [])
-		if slots.is_empty():
-			var vide := Label.new()   # un groupe sans slot : un simple tiret, le + en ouvre un
-			vide.text = "—"
-			vide.custom_minimum_size = Vector2(SLOT.x, SLOT.y)
-			vide.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			vide.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-			vide.modulate = Color(0.45, 0.45, 0.45)
-			rangee.add_child(vide)
-		for k in slots.size():
-			var s := SlotModule.new()
-			s.composeur = self
-			s.groupe = g
-			s.index = k
-			s.module = str(slots[k])
-			rangee.add_child(s)
-		rangee_slots.add_child(VSeparator.new())
-
-
 func _rafraichir_detail(j: Dictionary) -> void:
 	var seq := sequence()
 	ecrans.sequence_composee = seq.duplicate()
 	var plan: Dictionary = main.sim.plan_sequence(j, seq.duplicate()) if not seq.is_empty() else {}
 	apercu.montrer(plan)
 	pentagramme.montrer(plan)
-	grille_ctrl.montrer(main.sim.emboitement(j, seq))
+	grille_ctrl.montrer(grille_courante())
 	icone_sort.queue_redraw()
 	var texte := ""
-	if selection < ids.size():
+	if piece_choisie >= 0 and piece_choisie < placements.size():   # une pièce de la grille : c'est elle qu'on décrit
+		var mp := str(placements[piece_choisie].module)
+		var mdp: Dictionary = GameData.catalogues.modules.get(mp, {})
+		texte = tr("ui.composer.module").format({"nom": tr(mdp.get("name_key", mp)), "desc": str(mdp.get("description", ""))}) \
+			+ "\n" + ecrans._contribution_module(j, mp, false) + "\n\n"
+	elif selection < ids.size():
 		var m := ids[selection]
 		var md: Dictionary = GameData.catalogues.modules.get(m, {})
 		texte = tr("ui.composer.module").format({"nom": tr(md.get("name_key", m)), "desc": str(md.get("description", ""))}) \
-			+ "
-" + ecrans._contribution_module(j, m, false) + "
-
-"
+			+ "\n" + ecrans._contribution_module(j, m, false) + "\n\n"
 	if not plan.is_empty():
 		texte += ecrans._apercu_plan(plan)
 	else:
@@ -403,79 +411,47 @@ func nom_choisi() -> String:
 
 # ---------------------------------------------------------------- actions
 
-func _ajouter_slot(g: String) -> void:
-	groupes[g].append("")
-	_reconstruire_slots()
-
-
-func _retirer_slot(g: String) -> void:
-	if groupes[g].is_empty():
-		return
-	groupes[g].remove_at(groupes[g].size() - 1)   # le dernier slot du groupe part, plein ou vide
-	reconstruire(main.joueur())
-
-
-## Un module peut-il aller dans ce groupe ? Chaque groupe n'accepte que son type.
-func accepte(g: String, module: String) -> bool:
-	return groupe_de(module) == g
-
-
-## Pose `module` dans le slot (`g`, `index`) — depuis le catalogue, ou depuis le slot (`g_de`, `i_de`) : échange.
-func poser(g: String, index: int, module: String, g_de: String = "", i_de: int = -1) -> void:
-	if not groupes.has(g) or index < 0 or index >= groupes[g].size() or not accepte(g, module):
-		return
-	if not g_de.is_empty() and groupes.has(g_de) and i_de >= 0 and i_de < groupes[g_de].size():
-		var ancien: String = str(groupes[g][index])
-		if not ancien.is_empty() and not accepte(g_de, ancien):
-			return   # l'échange mettrait un module dans un groupe qui n'est pas le sien
-		groupes[g][index] = module
-		groupes[g_de][i_de] = ancien
-	else:
-		groupes[g][index] = module
-	reconstruire(main.joueur())
-
-
-func vider(g: String, index: int) -> void:
-	if groupes.has(g) and index >= 0 and index < groupes[g].size():
-		groupes[g][index] = ""
-		reconstruire(main.joueur())
-
-
-## Ajoute le module sélectionné dans son groupe : premier slot vide, sinon un slot de plus.
+## Entrée : le module sélectionné au catalogue va au premier endroit libre de la grille.
 func ajouter_selection() -> void:
 	if selection >= ids.size():
 		return
-	var m := ids[selection]
-	var g := groupe_de(m)
-	var libre: int = groupes[g].find("")
-	if libre < 0:
-		groupes[g].append("")
-		libre = groupes[g].size() - 1
-	poser(g, libre, m)
+	poser_quelque_part(ids[selection])
 
 
-## Retire la dernière occurrence du module sélectionné (sinon le dernier slot plein, groupes à rebours).
+## Suppr : la pièce choisie dans la grille ; sinon la dernière pièce posée du module sélectionné ; sinon la dernière posée.
 func retirer_selection() -> void:
+	if piece_choisie >= 0:
+		retirer(piece_choisie)
+		return
 	var m := ids[selection] if selection < ids.size() else ""
-	for gi in range(GROUPES.size() - 1, -1, -1):
-		var g := GROUPES[gi]
-		var i: int = groupes[g].rfind(m) if not m.is_empty() else -1
-		if i >= 0:
-			vider(g, i)
+	for k in range(placements.size() - 1, -1, -1):
+		if m.is_empty() or str(placements[k].module) == m:
+			retirer(k)
 			return
-	for gi in range(GROUPES.size() - 1, -1, -1):
-		var g := GROUPES[gi]
-		for k in range(groupes[g].size() - 1, -1, -1):
-			if not str(groupes[g][k]).is_empty():
-				vider(g, k)
-				return
+	if not placements.is_empty():
+		retirer(placements.size() - 1)
+
+
+## R : tourne la pièce choisie dans la grille ; sinon la rotation de la prochaine pièce posée.
+func tourner_selection() -> void:
+	if piece_choisie >= 0:
+		tourner(piece_choisie)
+	else:
+		rotation_courante = (rotation_courante + 1) % 4
+		grille_ctrl.queue_redraw()
 
 
 func selectionner(index: int) -> void:
 	selection = clampi(index, 0, maxi(0, ids.size() - 1))
+	piece_choisie = -1
 	for k in cartes.size():
 		cartes[k].selectionnee = k == selection
 		cartes[k].queue_redraw()
+	_rafraichir_detail(main.joueur())
+
+
+func choisir_piece(index: int) -> void:
+	piece_choisie = index if index >= 0 and index < placements.size() else -1
 	_rafraichir_detail(main.joueur())
 
 
@@ -502,13 +478,8 @@ func touche(ev: InputEventKey) -> bool:
 		KEY_DELETE, KEY_BACKSPACE:
 			retirer_selection()
 			return true
-		KEY_KP_ADD, KEY_EQUAL, KEY_PLUS:
-			if selection < ids.size():
-				_ajouter_slot(groupe_de(ids[selection]))
-			return true
-		KEY_KP_SUBTRACT, KEY_MINUS:
-			if selection < ids.size():
-				_retirer_slot(groupe_de(ids[selection]))
+		KEY_R:
+			tourner_selection()
 			return true
 	return false
 
@@ -517,18 +488,16 @@ func touche(ev: InputEventKey) -> bool:
 
 static func type_de(m: String) -> String:
 	var md: Dictionary = GameData.catalogues.modules.get(m, {})
-	var t := str(md.get("module_type", ""))
-	return t
+	return str(md.get("module_type", ""))
 
 
 static func couleur_de(m: String) -> Color:
 	return Pictos.couleur_module(GameData.catalogues.modules.get(m, {}))
 
 
-## Une carte carrée complète : le cadre teinté, le glyphe, le nom en bas, les charges en coin, « ×n » si déjà posé.
+## Une carte carrée complète : le cadre teinté, le pictogramme, le nom en bas, les charges en coin, « ×n » si déjà posé.
 static func dessiner_carte(ci: CanvasItem, taille: Vector2, m: String, charges: int, fois: int, alpha: float = 1.0) -> void:
 	var c := couleur_de(m)
-	var t := type_de(m)
 	var r := Rect2(Vector2(2, 2), taille - Vector2(4, 4))
 	ci.draw_rect(r, Color(c.r * 0.22, c.g * 0.22, c.b * 0.22, alpha))
 	ci.draw_rect(r, Color(c.r, c.g, c.b, alpha), false, 1.5)
@@ -547,14 +516,36 @@ static func dessiner_carte(ci: CanvasItem, taille: Vector2, m: String, charges: 
 		ci.draw_circle(Vector2(7, taille.y * 0.5), 3.0, Color(cs.r, cs.g, cs.b, alpha))
 
 
-## L'icône d'un module, dessinée par code : un cadre teinté, le glyphe de son type.
+## L'icône d'un module, dessinée par code : un cadre teinté, le pictogramme de son effet.
 static func dessiner_icone(ci: CanvasItem, r: Rect2, m: String, alpha: float = 1.0) -> void:
 	var c := couleur_de(m)
-	var t := type_de(m)
 	ci.draw_rect(r, Color(c.r * 0.25, c.g * 0.25, c.b * 0.25, alpha))
 	ci.draw_rect(r, Color(c.r, c.g, c.b, alpha), false, 2.0)
 	var marge := r.size.x * 0.18
 	Pictos.dessiner(ci, Pictos.icone_de(GameData.catalogues.modules.get(m, {})), Rect2(r.position + Vector2(marge, marge), r.size - Vector2(2.0 * marge, 2.0 * marge)), Color(c.r, c.g, c.b, alpha))
+
+
+## L'aperçu d'une pièce pendant qu'on la glisse : sa silhouette, dans la couleur du module.
+func apercu_piece(module: String, rot: int) -> Control:
+	var g := grille_sort()
+	var forme: Array = g.tournee(g.forme_de(module), rot)
+	var ctrl := Control.new()
+	var mx := 0
+	var my := 0
+	var minx := 0
+	var miny := 0
+	for c in forme:
+		mx = maxi(mx, c.x)
+		my = maxi(my, c.y)
+		minx = mini(minx, c.x)
+		miny = mini(miny, c.y)
+	var cs := GrilleControl.CASE
+	ctrl.custom_minimum_size = Vector2(float(mx - minx + 1), float(my - miny + 1)) * cs
+	var col := couleur_de(module)
+	ctrl.draw.connect(func() -> void:
+		for c in forme:
+			ctrl.draw_rect(Rect2(Vector2(float(c.x - minx), float(c.y - miny)) * cs + Vector2(1, 1), Vector2(cs - 2.0, cs - 2.0)), Color(col.r, col.g, col.b, 0.85)))
+	return ctrl
 
 
 # ---------------------------------------------------------------- les Control internes
@@ -570,7 +561,7 @@ class IconeSort extends Control:
 		Pictos.dessiner_sort(self, composeur.sequence(), Rect2(Vector2(2, 2), Composeur.SLOT - Vector2(4, 4)))
 
 
-## Une carte du catalogue : icône + nom court + charges ; source de glisser-déposer.
+## Une carte du catalogue : icône + nom court ; source de glisser-déposer vers la grille.
 class CarteModule extends Control:
 	var composeur: Composeur
 	var module := ""
@@ -603,76 +594,173 @@ class CarteModule extends Control:
 
 	func _get_drag_data(_at: Vector2) -> Variant:
 		composeur.selectionner(index)
-		var apercu := Control.new()
-		apercu.custom_minimum_size = Vector2(40, 40)
-		var m := module
-		apercu.draw.connect(func() -> void: Composeur.dessiner_icone(apercu, Rect2(Vector2.ZERO, Vector2(40, 40)), m, 0.9))
-		set_drag_preview(apercu)
-		return {"module": module, "groupe": "", "index": -1}
+		set_drag_preview(composeur.apercu_piece(module, composeur.rotation_courante))
+		return {"module": module, "rot": composeur.rotation_courante, "deplace": -1}
 
 
-## Un slot d'un groupe : reçoit un module de son type (du catalogue ou d'un autre slot), se laisse vider par glissement.
-class SlotModule extends Control:
-	var composeur: Composeur
-	var groupe := ""
-	var index := 0
-	var module := ""
-	var depot_possible := false   # un module compatible est en train d'être glissé au-dessus
-
-	func _ready() -> void:
-		custom_minimum_size = Composeur.SLOT
-		mouse_filter = Control.MOUSE_FILTER_STOP
-		mouse_exited.connect(func() -> void: depot_possible = false; queue_redraw())
-
-	func _draw() -> void:
-		if depot_possible:
-			draw_rect(Rect2(Vector2.ZERO, Composeur.SLOT), Color(1, 1, 0.6, 0.25))
-		if module.is_empty():
-			var r := Rect2(Vector2(2, 2), Composeur.SLOT - Vector2(4, 4))
-			draw_rect(r, Color(0.1, 0.1, 0.12, 1.0))
-			draw_rect(r, Color(0.6, 0.55, 0.4, 0.9), false, 1.0)
-			var g_glyphe: String = Composeur.GLYPHES.get(groupe, "·")
-			draw_string(ThemeDB.fallback_font, Vector2(Composeur.SLOT.x * 0.5 - 7, Composeur.SLOT.y * 0.5 + 6), g_glyphe, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.35, 0.35, 0.35))
-		else:
-			Composeur.dessiner_carte(self, Composeur.SLOT, module, -1, 0, 1.0)
-			draw_rect(Rect2(Vector2(1, 1), Composeur.SLOT - Vector2(2, 2)), Color(0.6, 0.55, 0.4, 0.9), false, 1.0)
-
-	func _can_drop_data(_at: Vector2, data: Variant) -> bool:
-		var ok: bool = data is Dictionary and data.has("module") and composeur.accepte(groupe, str(data.module))
-		if ok != depot_possible:
-			depot_possible = ok
-			queue_redraw()
-		return ok
-
-	func _drop_data(_at: Vector2, data: Variant) -> void:
-		depot_possible = false
-		composeur.poser(groupe, index, str(data.module), str(data.get("groupe", "")), int(data.get("index", -1)))
-
-	func _get_drag_data(_at: Vector2) -> Variant:
-		if module.is_empty():
-			return null
-		var apercu := Control.new()
-		apercu.custom_minimum_size = Vector2(40, 40)
-		var m := module
-		apercu.draw.connect(func() -> void: Composeur.dessiner_icone(apercu, Rect2(Vector2.ZERO, Vector2(40, 40)), m, 0.9))
-		set_drag_preview(apercu)
-		return {"module": module, "groupe": groupe, "index": index}
-
-	func _gui_input(ev: InputEvent) -> void:
-		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_RIGHT and not module.is_empty():
-			composeur.vider(groupe, index)   # clic droit : le slot se vide
-			accept_event()
-
-
-## La zone du catalogue : y ramener un module pris dans un slot vide ce slot.
+## La zone du catalogue : y ramener une pièce prise dans la grille la retire.
 class ZoneCatalogue extends MarginContainer:
 	var composeur: Composeur
 
 	func _can_drop_data(_at: Vector2, data: Variant) -> bool:
-		return data is Dictionary and not str(data.get("groupe", "")).is_empty()
+		return data is Dictionary and int(data.get("deplace", -1)) >= 0
 
 	func _drop_data(_at: Vector2, data: Variant) -> void:
-		composeur.vider(str(data.groupe), int(data.index))
+		composeur.retirer(int(data.deplace))
+
+
+## La grille de composition (designer 2026-09-03) : la silhouette de l'arme tenue, où l'on pose les pièces.
+## Chaque pièce est teintée par son module et porte son nom court ; la pièce choisie a un liseré blanc ;
+## la case survolée pendant un glissement montre en clair ou en rouge si la pièce y tiendrait. Sous la
+## grille : combien de cases sont prises, et la voie de l'arme.
+class GrilleControl extends Control:
+	const CASE := 30.0
+	const HAUTEUR_MIN := 3.0 * 30.0 + 40.0   # trois rangées au moins ; la rangée grandit avec la silhouette
+	var composeur: Composeur
+	var grille: Dictionary = {}          # {stat, niveau, cases}
+	var survol := Vector2i(-1, -1)      # la case sous la souris pendant un glissement
+	var survol_ok := false
+	var donnees_survol: Dictionary = {}
+	var refus_jusqua := 0.0             # un flash rouge quand une pose est refusée
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_STOP
+		custom_minimum_size = Vector2(300, HAUTEUR_MIN)
+
+	func montrer(g: Dictionary) -> void:
+		grille = g
+		var mx := 0
+		var my := 0
+		for c in g.get("cases", []):
+			mx = maxi(mx, c.x)
+			my = maxi(my, c.y)
+		custom_minimum_size = Vector2(maxf(300.0, float(mx + 1) * CASE + 220.0), maxf(HAUTEUR_MIN, float(my + 1) * CASE + 40.0))
+		if composeur.defil_grille != null:   # la rangée suit la hauteur de la grille : pas de bande vide sous une petite silhouette
+			composeur.defil_grille.custom_minimum_size = Vector2(0, custom_minimum_size.y)
+		queue_redraw()
+
+	func refuser() -> void:
+		refus_jusqua = Time.get_ticks_msec() / 1000.0 + 0.4
+		queue_redraw()
+
+	func _origine() -> Vector2:
+		return Vector2(6.0, 22.0)
+
+	func case_a(pos: Vector2) -> Vector2i:
+		var rel := (pos - _origine()) / CASE
+		return Vector2i(int(floorf(rel.x)), int(floorf(rel.y)))
+
+	func _piece_a(case: Vector2i) -> int:
+		for k in composeur.placements.size():
+			if case in composeur.placements[k].cases:
+				return k
+		return -1
+
+	func _draw() -> void:
+		var cases: Array = grille.get("cases", [])
+		var o := _origine()
+		var refuse := Time.get_ticks_msec() / 1000.0 < refus_jusqua
+		draw_string(ThemeDB.fallback_font, Vector2(0, 12), tr("ui.composeur.grille"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.85, 0.8, 0.6))
+		var fond := Color(0.35, 0.1, 0.1) if refuse else Color(0.12, 0.12, 0.16)
+		var maxy := 0
+		var maxx := 0
+		for c in cases:
+			maxy = maxi(maxy, c.y)
+			maxx = maxi(maxx, c.x)
+			draw_rect(Rect2(o + Vector2(c.x, c.y) * CASE, Vector2(CASE - 1.0, CASE - 1.0)), fond)
+			draw_rect(Rect2(o + Vector2(c.x, c.y) * CASE, Vector2(CASE - 1.0, CASE - 1.0)), Color(0.35, 0.33, 0.28, 0.8), false, 1.0)
+		for k in composeur.placements.size():
+			var p: Dictionary = composeur.placements[k]
+			var md: Dictionary = GameData.catalogues.modules.get(str(p.module), {})
+			var col := Pictos.couleur_module(md)
+			for c in p.cases:
+				draw_rect(Rect2(o + Vector2(c.x, c.y) * CASE + Vector2(2, 2), Vector2(CASE - 5.0, CASE - 5.0)), Color(col.r * 0.55, col.g * 0.55, col.b * 0.55))
+				if k == composeur.piece_choisie:
+					draw_rect(Rect2(o + Vector2(c.x, c.y) * CASE + Vector2(1, 1), Vector2(CASE - 3.0, CASE - 3.0)), Color(1, 1, 1, 0.9), false, 2.0)
+			var cl := Composeur._case_de_lecture(p)   # le pictogramme et le nom sur la case de lecture : l'ordre se voit
+			var r_ic := Rect2(o + Vector2(cl.x, cl.y) * CASE + Vector2(5, 3), Vector2(CASE - 11.0, CASE - 11.0))
+			Pictos.dessiner(self, Pictos.icone_de(md), r_ic, col)
+			var nom_c := TranslationServer.translate(str(md.get("name_key", p.module))).left(6)
+			draw_string(ThemeDB.fallback_font, o + Vector2(cl.x, cl.y) * CASE + Vector2(3, CASE - 4.0), nom_c, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.95, 0.95, 0.9))
+		if survol.x >= 0 and not donnees_survol.is_empty():   # la pièce en train d'être glissée, en clair ou en rouge
+			var g := composeur.grille_sort()
+			var forme: Array = g.tournee(g.forme_de(str(donnees_survol.module)), int(donnees_survol.rot))
+			for c in forme:
+				var pos: Vector2i = survol + c
+				draw_rect(Rect2(o + Vector2(pos.x, pos.y) * CASE + Vector2(2, 2), Vector2(CASE - 5.0, CASE - 5.0)), Color(0.5, 1.0, 0.6, 0.45) if survol_ok else Color(1.0, 0.3, 0.3, 0.45))
+		var pris := 0
+		for p in composeur.placements:
+			pris += (p.cases as Array).size()
+		var bas_y := o.y + float(maxy + 1) * CASE + 12.0
+		var msg := tr("ui.composeur.grille_ok").format({"demande": pris, "cases": cases.size()})
+		draw_string(ThemeDB.fallback_font, Vector2(0, bas_y), msg, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.8, 0.9, 0.8))
+		var stat := str(grille.get("stat", ""))
+		var voie := tr("stat." + stat) if not stat.is_empty() else tr("ui.composeur.mains_nues")
+		var x_droite := o.x + float(maxx + 1) * CASE + 14.0
+		draw_string(ThemeDB.fallback_font, Vector2(x_droite, o.y + 12.0), tr("ui.composeur.grille_voie").format({"stat": voie}), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.7, 0.7, 0.65))
+		# la prochaine pièce, à la rotation courante, pour qu'on sache ce que R a fait
+		if composeur.selection < composeur.ids.size() and composeur.piece_choisie < 0:
+			var m_sel: String = composeur.ids[composeur.selection]
+			var g2 := composeur.grille_sort()
+			var f2: Array = g2.tournee(g2.forme_de(m_sel), composeur.rotation_courante)
+			var minx := 0
+			var miny := 0
+			for c in f2:
+				minx = mini(minx, c.x)
+				miny = mini(miny, c.y)
+			var col2 := Composeur.couleur_de(m_sel)
+			var petit := CASE * 0.5
+			for c in f2:
+				draw_rect(Rect2(Vector2(x_droite, o.y + 20.0) + Vector2(float(c.x - minx), float(c.y - miny)) * petit, Vector2(petit - 1.0, petit - 1.0)), Color(col2.r, col2.g, col2.b, 0.8))
+			draw_string(ThemeDB.fallback_font, Vector2(x_droite, o.y + 20.0 + 2.5 * petit + 12.0), tr("ui.composeur.rotation").format({"n": composeur.rotation_courante}), HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.6, 0.6, 0.55))
+		if refuse:
+			draw_string(ThemeDB.fallback_font, Vector2(0, bas_y + 13.0), tr("ui.composeur.ne_rentre_pas"), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1.0, 0.55, 0.5))
+			get_tree().create_timer(0.45).timeout.connect(queue_redraw)
+
+	func _gui_input(ev: InputEvent) -> void:
+		if ev is InputEventMouseButton and ev.pressed:
+			var k := _piece_a(case_a(ev.position))
+			if ev.button_index == MOUSE_BUTTON_LEFT:
+				composeur.choisir_piece(k)
+				queue_redraw()
+				accept_event()
+			elif ev.button_index == MOUSE_BUTTON_RIGHT and k >= 0:
+				composeur.retirer(k)   # clic droit : la pièce sort de la grille
+				accept_event()
+
+	func _get_drag_data(at: Vector2) -> Variant:
+		var k := _piece_a(case_a(at))
+		if k < 0:
+			return null
+		var p: Dictionary = composeur.placements[k]
+		composeur.choisir_piece(k)
+		set_drag_preview(composeur.apercu_piece(str(p.module), int(p.rot)))
+		return {"module": str(p.module), "rot": int(p.rot), "deplace": k}
+
+	func _can_drop_data(at: Vector2, data: Variant) -> bool:
+		if not (data is Dictionary and data.has("module")):
+			return false
+		var case := case_a(at)
+		var g := composeur.grille_sort()
+		var forme: Array = g.tournee(g.forme_de(str(data.module)), int(data.get("rot", 0)))
+		var ok := not g.poser(forme, case, grille.get("cases", []), composeur._occupees(int(data.get("deplace", -1)))).is_empty()
+		if case != survol or ok != survol_ok or donnees_survol != data:
+			survol = case
+			survol_ok = ok
+			donnees_survol = data
+			queue_redraw()
+		return true   # on accepte toujours le dépôt pour pouvoir dire « non » en rouge, pas en silence
+
+	func _drop_data(at: Vector2, data: Variant) -> void:
+		survol = Vector2i(-1, -1)
+		donnees_survol = {}
+		composeur.poser(str(data.module), int(data.get("rot", 0)), case_a(at), int(data.get("deplace", -1)))
+
+	func _notification(what: int) -> void:
+		if what == NOTIFICATION_DRAG_END or what == NOTIFICATION_MOUSE_EXIT:
+			survol = Vector2i(-1, -1)
+			donnees_survol = {}
+			queue_redraw()
 
 
 ## Le Wu Xing du sort : le pentagramme des cinq éléments, chaque sommet gonflé selon la part de l'élément dans le
@@ -765,88 +853,3 @@ class PentagrammeSort extends Control:
 		for k in n:
 			if k % 2 == 0:
 				draw_line(a.lerp(b, float(k) / n), a.lerp(b, float(k + 1) / n), c, largeur)
-
-## La ligne des étapes : « Étape 1 · 2 · 3 · + ». Un déclencheur ferme une étape et ouvre la suivante ;
-## sans lui, une étape de plus ne partirait jamais — le bouton + l'exige (designer 2026-09-01).
-func _reconstruire_etapes() -> void:
-	if rangee_etapes == null:
-		return
-	for c in rangee_etapes.get_children():
-		c.queue_free()
-	for k in etapes.size():
-		var b := Button.new()
-		b.text = tr("ui.composeur.etape").format({"n": k + 1})
-		b.focus_mode = Control.FOCUS_NONE
-		b.add_theme_font_size_override("font_size", 11)
-		b.disabled = k == etape
-		var i := k
-		b.pressed.connect(func() -> void:
-			etape = i
-			groupes = etapes[etape]
-			reconstruire(main.joueur()))
-		rangee_etapes.add_child(b)
-	var derniere: Dictionary = etapes[etapes.size() - 1]
-	var a_declencheur := false
-	for m in derniere.get("declencheur", []):
-		if not str(m).is_empty():
-			a_declencheur = true
-	var plus := Button.new()
-	plus.text = "+"
-	plus.focus_mode = Control.FOCUS_NONE
-	plus.disabled = not a_declencheur
-	plus.tooltip_text = tr("ui.composeur.etape_aide")
-	plus.pressed.connect(func() -> void:
-		etapes.append(_etape_vide())
-		etape = etapes.size() - 1
-		groupes = etapes[etape]
-		groupes.forme.append("")
-		groupes.noyau.append("")
-		reconstruire(main.joueur()))
-	rangee_etapes.add_child(plus)
-
-
-## La grille de composition (Six types de modules et assemblage, designer 2026-09-03) : la silhouette de
-## l'arme tenue, et les pièces des modules posées dedans par le moteur — chaque pièce teintée par le type
-## de son module. Quand ça ne rentre pas, la grille passe au rouge et dit combien de cases manquent :
-## le joueur voit l'interdit sans qu'on ait eu à l'écrire.
-class GrilleControl extends Control:
-	const CASE := 14.0
-	var composeur: Composeur
-	var emb: Dictionary = {}
-
-	func _init() -> void:
-		custom_minimum_size = Vector2(150, 150)
-
-	func montrer(e: Dictionary) -> void:
-		emb = e
-		queue_redraw()
-
-	func _draw() -> void:
-		if emb.is_empty():
-			return
-		var cases: Array = emb.get("cases", [])
-		var ok := bool(emb.get("ok", false)) or (emb.get("placement", []) as Array).is_empty() and int(emb.get("demande", 0)) == 0
-		var titre := tr("ui.composeur.grille")
-		draw_string(ThemeDB.fallback_font, Vector2(0, 12), titre, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.85, 0.8, 0.6))
-		var maxx := 0
-		var maxy := 0
-		for c in cases:
-			maxx = maxi(maxx, c.x)
-			maxy = maxi(maxy, c.y)
-		var o := Vector2(4.0, 20.0)
-		var fond := Color(0.12, 0.12, 0.16) if ok else Color(0.35, 0.1, 0.1)
-		for c in cases:
-			draw_rect(Rect2(o + Vector2(c.x, c.y) * CASE, Vector2(CASE - 1.0, CASE - 1.0)), fond)
-		var par_module := {}
-		for p in emb.get("placement", []):
-			par_module[str(p.module)] = true
-			var md: Dictionary = GameData.catalogues.modules.get(str(p.module), {})
-			var col := Pictos.couleur_module(md)
-			for c in p.cases:
-				draw_rect(Rect2(o + Vector2(c.x, c.y) * CASE + Vector2(1, 1), Vector2(CASE - 3.0, CASE - 3.0)), col)
-		var bas_y := o.y + float(maxy + 1) * CASE + 12.0
-		var msg := tr("ui.composeur.grille_ok" if ok else "ui.composeur.grille_ko").format({"demande": int(emb.get("demande", 0)), "cases": cases.size()})
-		draw_string(ThemeDB.fallback_font, Vector2(0, bas_y), msg, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.8, 0.9, 0.8) if ok else Color(1.0, 0.55, 0.5))
-		var stat := str(emb.get("stat", ""))
-		var voie := tr("stat." + stat) if not stat.is_empty() else tr("ui.composeur.mains_nues")
-		draw_string(ThemeDB.fallback_font, Vector2(0, bas_y + 13.0), tr("ui.composeur.grille_voie").format({"stat": voie}), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.7, 0.7, 0.65))

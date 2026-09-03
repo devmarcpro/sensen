@@ -129,6 +129,29 @@ func _placer(pieces: Array, i: int, libres: Dictionary, placement: Array) -> boo
 	return false
 
 
+## La silhouette tournée `k` quarts de tour (0 à 3), normalisée : c'est ce que le composeur pose quand
+## le joueur appuie sur R — la même figure que le moteur essaie de lui-même dans `emboiter`.
+func tournee(forme: Array, k: int) -> Array:
+	var courante: Array = _normaliser(forme)
+	for i in (k % 4 + 4) % 4:
+		var t: Array = []
+		for c in courante:
+			t.append(Vector2i(-c.y, c.x))
+		courante = _normaliser(t)
+	return courante
+
+
+## Les cases qu'occuperait `forme` ancrée en `ancre`, ou [] si une case sort de `grille` ou est prise.
+func poser(forme: Array, ancre: Vector2i, grille: Array, occupees: Dictionary) -> Array:
+	var cases: Array = []
+	for c in forme:
+		var pos: Vector2i = ancre + c
+		if not (pos in grille) or occupees.get(pos, false):
+			return []
+		cases.append(pos)
+	return cases
+
+
 ## Les rotations distinctes d'une silhouette (quatre au plus, jamais de miroir). Chaque rotation est
 ## ramenée en coin haut-gauche, et l'ancre est toujours sa première case : on essaie donc chaque
 ## rotation posée par sa case (0, 0) sur chaque case libre, ce qui couvre tous les placements.

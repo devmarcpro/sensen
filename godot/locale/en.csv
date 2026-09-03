@@ -2378,8 +2378,8 @@ ui.apercu.horizon,"Horizon: every entity in sight"
 ui.composeur.nom,"Spell name:"
 ui.composeur.nom_auto,"(the core’s name)"
 ui.composeur.slot_vide,"drop here"
-ui.composeur.aide,"drag a card into a slot · double-click: first free slot · right-click: clear · ← → Enter Del"
-ui.composeur.glisser,"Drag a form and a core into the slots — or Enter on a card."
+ui.composeur.aide,"— drag a card onto the grid · R: rotate · right-click or Delete: remove · reading order (row by row) is the spell’s order"
+ui.composeur.glisser,"Drag a range, a shape and a core onto the grid — or Enter on a card."
 ui.composeur.wuxing,"{dominante} leads · generates {engendre} · overcomes {domine}"
 ui.composeur.wuxing_vide,"Spell Wu Xing: —"
 ui.composeur.groupe.portee,Range
@@ -2867,3 +2867,5 @@ module.vers_eau.name,Into water
 module.vers_bois.name,Into wood
 module.vers_metal.name,Into metal
 module.vers_terre.name,Into earth
+ui.composeur.ne_rentre_pas,"this piece does not fit there"
+ui.composeur.rotation,rotation {n} — R to rotate

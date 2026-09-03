@@ -1398,7 +1398,7 @@ func _valider_composition() -> void:
 	var seq: Array = composeur.sequence()
 	if main.sim.composer_capacite(j, seq, composeur.nom_choisi()):
 		sequence_composee = []
-		composeur.groupes = {}
+		composeur.vider_grille()
 		composeur.nom.text = ""
 		ouvrir("capacites")
 	else:
