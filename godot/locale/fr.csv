@@ -2834,3 +2834,9 @@ item.craft_pavois.name,Pavois
 competence.musique.name,Musique
 competence.precision.name,Précision
 competence.hast.name,Armes d'hast
+classe_mere.guerrier.name,Guerrier
+classe_mere.rodeur.name,Rôdeur
+classe_mere.mage.name,Mage
+classe_mere.sentinelle.name,Sentinelle
+classe_mere.erudit.name,Érudit
+classe_mere.meneur.name,Meneur

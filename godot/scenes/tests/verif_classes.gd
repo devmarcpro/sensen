@@ -58,6 +58,30 @@ func _ready() -> void:
 			lignes.append("SIGNATURE ABSENTE (%s)" % sig)
 			soucis += 1
 		print("CLASSE %-14s | %s" % [cid, " · ".join(PackedStringArray(lignes))])
+	# CLASSE ET SOUS-CLASSE (designer 2026-09-03) : chaque sous-classe releve d'une classe mere, et
+	# chaque mere porte une stat. Une sous-classe orpheline serait injouable a la creation ; une mere
+	# sans sous-classe serait un nom vide dans le menu.
+	var meres: Dictionary = GameData.config("classes_meres")
+	var rangees := {}
+	for k in meres.keys():
+		if str(k).begins_with("_"):
+			continue
+		var sc: Array = meres[k].get("sous_classes", [])
+		if sc.is_empty():
+			print("  la classe « %s » n'a aucune sous-classe" % str(k))
+			soucis += 1
+		for x in sc:
+			rangees[str(x)] = str(k)
+	for cid in GameData.catalogues.classes.keys():
+		if not rangees.has(str(cid)):
+			print("  la sous-classe « %s » ne releve d'aucune classe" % str(cid))
+			soucis += 1
+	var par_mere: Array[String] = []
+	for k in meres.keys():
+		if not str(k).begins_with("_"):
+			par_mere.append("%s(%s) %d" % [str(k), str(meres[k].get("stat", "?")), (meres[k].get("sous_classes", []) as Array).size()])
+	par_mere.sort()
+	print("classes : %s" % ", ".join(par_mere))
 	print("VERIF : %d classes, %d soucis" % [ids.size(), soucis])
 	get_tree().quit()
 

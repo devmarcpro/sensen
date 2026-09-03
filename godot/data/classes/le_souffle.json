@@ -1,76 +1,77 @@
 {
- "name_key": "classe.le_souffle.name",
- "bonus_stats": {
-  "volonte": 2,
-  "perception": 1
- },
- "equipement": [
-  "craft_baton_magique",
-  "craft_casque",
-  "torche"
- ],
- "ratelier": [
-  "craft_dague"
- ],
- "competences": {
-  "magie_feu": 5,
-  "meditation": 5
- },
- "base_potentials": {
-  "_defaut": 80,
-  "magie": 120,
-  "meditation": 120,
-  "controle_mana": 120,
-  "masse": 60,
-  "hache_d_armes": 60,
-  "deux_mains": 60
- },
- "talent": "communion_des_cinq",
- "points_creation_bonus": 0,
- "tags": [
-  "visible"
- ],
- "capacites": [
-  {
-   "id": "le_souffle_meditation",
-   "name_key": "module.meditation.name",
-   "modules": [
-    "soi",
-    "meditation"
-   ]
+  "name_key": "classe.le_souffle.name",
+  "bonus_stats": {
+    "volonte": 2,
+    "perception": 1
   },
-  {
-   "id": "le_souffle_flamme",
-   "name_key": "module.flamme.name",
-   "modules": [
-    "point",
-    "jet_long",
-    "flamme"
-   ]
+  "equipement": [
+    "craft_baton_magique",
+    "craft_casque",
+    "torche"
+  ],
+  "ratelier": [
+    "craft_dague"
+  ],
+  "competences": {
+    "magie_feu": 5,
+    "meditation": 5
   },
-  {
-   "id": "le_souffle_eboulement",
-   "name_key": "module.eboulement.name",
-   "modules": [
-    "point",
-    "jet_long",
-    "eboulement"
-   ]
-  }
- ],
- "hotbar": [
-  {
-   "type": "capacite",
-   "ref": 0
+  "base_potentials": {
+    "_defaut": 80,
+    "magie": 120,
+    "meditation": 120,
+    "controle_mana": 120,
+    "masse": 60,
+    "hache_d_armes": 60,
+    "deux_mains": 60
   },
-  {
-   "type": "capacite",
-   "ref": 1
-  },
-  {
-   "type": "capacite",
-   "ref": 2
-  }
- ],
- "signature": "meditation"
+  "talent": "communion_des_cinq",
+  "points_creation_bonus": 0,
+  "tags": [
+    "visible"
+  ],
+  "capacites": [
+    {
+      "id": "le_souffle_meditation",
+      "name_key": "module.meditation.name",
+      "modules": [
+        "soi",
+        "meditation"
+      ]
+    },
+    {
+      "id": "le_souffle_flamme",
+      "name_key": "module.flamme.name",
+      "modules": [
+        "point",
+        "jet_long",
+        "flamme"
+      ]
+    },
+    {
+      "id": "le_souffle_eboulement",
+      "name_key": "module.eboulement.name",
+      "modules": [
+        "point",
+        "jet_long",
+        "eboulement"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
+  ],
+  "signature": "meditation",
+  "classe_mere": "mage"
 }

@@ -1,70 +1,71 @@
 {
- "name_key": "classe.le_sablier.name",
- "bonus_stats": {
-  "volonte": 3
- },
- "equipement": [
-  "craft_baton_magique",
-  "craft_casque",
-  "torche"
- ],
- "ratelier": [
-  "craft_dague"
- ],
- "competences": {
-  "magie_arcane": 4,
-  "esquive": 4
- },
- "base_potentials": {
-  "_defaut": 100
- },
- "talent": "maitre_du_tempo",
- "points_creation_bonus": 4,
- "tags": [
-  "cache"
- ],
- "capacites": [
-  {
-   "id": "le_sablier_celerite",
-   "name_key": "module.celerite.name",
-   "modules": [
-    "point",
-    "jet_court",
-    "celerite"
-   ]
+  "name_key": "classe.le_sablier.name",
+  "bonus_stats": {
+    "volonte": 3
   },
-  {
-   "id": "le_sablier_gel",
-   "name_key": "module.gel.name",
-   "modules": [
-    "point",
-    "jet_court",
-    "gel"
-   ]
+  "equipement": [
+    "craft_baton_magique",
+    "craft_casque",
+    "torche"
+  ],
+  "ratelier": [
+    "craft_dague"
+  ],
+  "competences": {
+    "magie_arcane": 4,
+    "esquive": 4
   },
-  {
-   "id": "le_sablier_eclat",
-   "name_key": "module.eclat.name",
-   "modules": [
-    "point",
-    "jet_court",
-    "eclat"
-   ]
-  }
- ],
- "hotbar": [
-  {
-   "type": "capacite",
-   "ref": 0
+  "base_potentials": {
+    "_defaut": 100
   },
-  {
-   "type": "capacite",
-   "ref": 1
-  },
-  {
-   "type": "capacite",
-   "ref": 2
-  }
- ],
- "signature": "celerite"
+  "talent": "maitre_du_tempo",
+  "points_creation_bonus": 4,
+  "tags": [
+    "cache"
+  ],
+  "capacites": [
+    {
+      "id": "le_sablier_celerite",
+      "name_key": "module.celerite.name",
+      "modules": [
+        "point",
+        "jet_court",
+        "celerite"
+      ]
+    },
+    {
+      "id": "le_sablier_gel",
+      "name_key": "module.gel.name",
+      "modules": [
+        "point",
+        "jet_court",
+        "gel"
+      ]
+    },
+    {
+      "id": "le_sablier_eclat",
+      "name_key": "module.eclat.name",
+      "modules": [
+        "point",
+        "jet_court",
+        "eclat"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
+  ],
+  "signature": "celerite",
+  "classe_mere": "mage"
 }

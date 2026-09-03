@@ -1,0 +1,58 @@
+{
+  "_doc": "Classe et SOUS-CLASSE (designer 2026-09-03). Une classe mere par stat — comme il y a une famille d'armes par stat — et les dix-neuf classes historiques deviennent ses sous-classes. Le tri suit la stat dominante que chaque sous-classe declarait deja dans `bonus_stats` : il ne decide rien, il rend visible ce qui y etait ecrit. Le desequilibre est donc HERITE, pas invente : la sentinelle n'a que deux sous-classes et l'erudit une seule, quand le rodeur et le mage en ont cinq.",
+  "guerrier": {
+    "name_key": "classe_mere.guerrier.name",
+    "stat": "force",
+    "sous_classes": [
+      "l_ecarlate",
+      "le_porteur",
+      "le_sabre",
+      "la_braise"
+    ]
+  },
+  "rodeur": {
+    "name_key": "classe_mere.rodeur.name",
+    "stat": "dexterite",
+    "sous_classes": [
+      "l_engrenage",
+      "l_ombre",
+      "la_meche",
+      "la_trace",
+      "le_masque"
+    ]
+  },
+  "mage": {
+    "name_key": "classe_mere.mage.name",
+    "stat": "volonte",
+    "sous_classes": [
+      "la_paume",
+      "le_fossoyeur",
+      "le_passeur",
+      "le_sablier",
+      "le_souffle"
+    ]
+  },
+  "sentinelle": {
+    "name_key": "classe_mere.sentinelle.name",
+    "stat": "endurance",
+    "sous_classes": [
+      "le_vent",
+      "le_sceau"
+    ]
+  },
+  "erudit": {
+    "name_key": "classe_mere.erudit.name",
+    "stat": "perception",
+    "sous_classes": [
+      "le_creuset"
+    ]
+  },
+  "meneur": {
+    "name_key": "classe_mere.meneur.name",
+    "stat": "charisme",
+    "sous_classes": [
+      "la_balance",
+      "le_rieur"
+    ]
+  }
+}

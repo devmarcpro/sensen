@@ -74,6 +74,22 @@ Race et classe **s'additionnent** : le plancher final est la moyenne des deux va
 > **Résultat** : zéro souci au banc, et l'écart du meilleur au pire rendement offensif passe de **43 fois à 11 fois** — Le Rieur à 6,75 PV par tick, Le Passeur à 0,62. Ce qui reste tient à la règle : le contact ne paie ni portée ni dilution, et les gros noyaux lointains coûtent vingt ticks. **Les chiffres du banc varient d'un passage à l'autre** (l'arme équipée change les sorts de contact) : ils disent un ordre de grandeur, pas une valeur.
 > **La règle que je ne toucherai pas sans qu'on me le dise** : la dilution en 1/√n, l'atténuation par la distance et le coût en ticks de la portée sont des décisions du designer. C'est le **contenu** des classes qui bouge, pas le moteur.
 
+> [!success] Tranché le 2026-09-03 — **classe et sous-classe** (designer)
+> « Il y a la classe du personnage, et la classe/style de jeu — par exemple mage avec volonté. » Puis : « ce qu'on a qu'à faire, c'est la classe et la sous-classe : les 19 qu'on a, triées par classes. »
+> **Une classe mère par stat**, comme il y a désormais une famille d'armes par stat, et les dix-neuf classes historiques deviennent ses **sous-classes**. Le tri suit la **stat dominante que chaque sous-classe déclarait déjà** dans son `bonus_stats` : il ne décide rien, il rend visible ce qui y était écrit.
+>
+> | classe | stat | sous-classes |
+> |---|---|---|
+> | **Guerrier** | force | L'Écarlate · Le Porteur · Le Sabre · La Braise |
+> | **Rôdeur** | dextérité | L'Engrenage · L'Ombre · La Mèche · La Trace · Le Masque |
+> | **Mage** | volonté | La Paume · Le Fossoyeur · Le Passeur · Le Sablier · Le Souffle |
+> | **Sentinelle** | endurance | Le Vent · Le Sceau |
+> | **Érudit** | perception | Le Creuset |
+> | **Meneur** | charisme | La Balance · Le Rieur |
+>
+> **Le déséquilibre est hérité, pas inventé** : cinq sous-classes pour le rôdeur et le mage, **une seule** pour l'érudit. C'est la répartition qui existait déjà dans les données ; la ranger l'a simplement rendue visible. Reste au designer de décider s'il faut la corriger ou l'assumer.
+> **`verif_classes.tscn` garde la structure** : elle échoue si une sous-classe ne relève d'aucune classe — elle serait injouable à la création — ou si une classe n'a aucune sous-classe, ce qui serait un nom vide dans le menu.
+
 ## Liens
 - **Dépend de** : [[Création de personnage]], [[Les trois axes — race, classe, fonction]]
 - **Alimente** : [[Talents de classe]], [[Potentiel]], [[Début de partie]], [[Fonctions]]

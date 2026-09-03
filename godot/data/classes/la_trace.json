@@ -1,79 +1,80 @@
 {
- "name_key": "classe.la_trace.name",
- "bonus_stats": {
-  "dexterite": 2,
-  "perception": 1
- },
- "equipement": [
-  "craft_arc",
-  "craft_jambieres",
-  "torche"
- ],
- "ratelier": [
-  "craft_dague",
-  "craft_lance"
- ],
- "competences": {
-  "arc": 5,
-  "dressage": 5
- },
- "base_potentials": {
-  "_defaut": 80,
-  "arc": 120,
-  "arbalete": 120,
-  "dressage": 120,
-  "discretion": 120,
-  "herboristerie": 120,
-  "forge": 60,
-  "encaissement": 60
- },
- "talent": "meute",
- "points_creation_bonus": 0,
- "tags": [
-  "visible"
- ],
- "capacites": [
-  {
-   "id": "la_trace_traque",
-   "name_key": "module.traque.name",
-   "modules": [
-    "point",
-    "jet_long",
-    "traque"
-   ]
+  "name_key": "classe.la_trace.name",
+  "bonus_stats": {
+    "dexterite": 2,
+    "perception": 1
   },
-  {
-   "id": "la_trace_gravier",
-   "name_key": "module.gravier.name",
-   "modules": [
-    "point",
-    "jet_long",
-    "gravier"
-   ]
+  "equipement": [
+    "craft_arc",
+    "craft_jambieres",
+    "torche"
+  ],
+  "ratelier": [
+    "craft_dague",
+    "craft_lance"
+  ],
+  "competences": {
+    "arc": 5,
+    "dressage": 5
   },
-  {
-   "id": "la_trace_eclat",
-   "name_key": "module.eclat.name",
-   "modules": [
-    "point",
-    "jet_long",
-    "eclat"
-   ]
-  }
- ],
- "hotbar": [
-  {
-   "type": "capacite",
-   "ref": 0
+  "base_potentials": {
+    "_defaut": 80,
+    "arc": 120,
+    "arbalete": 120,
+    "dressage": 120,
+    "discretion": 120,
+    "herboristerie": 120,
+    "forge": 60,
+    "encaissement": 60
   },
-  {
-   "type": "capacite",
-   "ref": 1
-  },
-  {
-   "type": "capacite",
-   "ref": 2
-  }
- ],
- "signature": "traque"
+  "talent": "meute",
+  "points_creation_bonus": 0,
+  "tags": [
+    "visible"
+  ],
+  "capacites": [
+    {
+      "id": "la_trace_traque",
+      "name_key": "module.traque.name",
+      "modules": [
+        "point",
+        "jet_long",
+        "traque"
+      ]
+    },
+    {
+      "id": "la_trace_gravier",
+      "name_key": "module.gravier.name",
+      "modules": [
+        "point",
+        "jet_long",
+        "gravier"
+      ]
+    },
+    {
+      "id": "la_trace_eclat",
+      "name_key": "module.eclat.name",
+      "modules": [
+        "point",
+        "jet_long",
+        "eclat"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
+  ],
+  "signature": "traque",
+  "classe_mere": "rodeur"
 }

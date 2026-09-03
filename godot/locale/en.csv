@@ -2825,3 +2825,9 @@ item.craft_pavois.name,Pavise
 competence.musique.name,Music
 competence.precision.name,Precision
 competence.hast.name,Polearms
+classe_mere.guerrier.name,Warrior
+classe_mere.rodeur.name,Ranger
+classe_mere.mage.name,Mage
+classe_mere.sentinelle.name,Sentinel
+classe_mere.erudit.name,Scholar
+classe_mere.meneur.name,Leader

@@ -1,78 +1,79 @@
 {
- "name_key": "classe.la_balance.name",
- "bonus_stats": {
-  "charisme": 2,
-  "perception": 1
- },
- "equipement": [
-  "craft_baton_magique",
-  "craft_cuirasse",
-  "torche"
- ],
- "ratelier": [
-  "craft_dague"
- ],
- "competences": {
-  "negociation": 5,
-  "lecture": 5
- },
- "base_potentials": {
-  "_defaut": 80,
-  "negociation": 120,
-  "leadership": 120,
-  "lecture": 120,
-  "minage": 60,
-  "masse": 60,
-  "hache_d_armes": 60,
-  "deux_mains": 60
- },
- "talent": "oeil_du_prix",
- "points_creation_bonus": 0,
- "tags": [
-  "visible"
- ],
- "capacites": [
-  {
-   "id": "la_balance_estimation",
-   "name_key": "module.estimation.name",
-   "modules": [
-    "point",
-    "jet_court",
-    "estimation"
-   ]
+  "name_key": "classe.la_balance.name",
+  "bonus_stats": {
+    "charisme": 2,
+    "perception": 1
   },
-  {
-   "id": "la_balance_gel",
-   "name_key": "module.gel.name",
-   "modules": [
-    "point",
-    "jet_court",
-    "gel"
-   ]
+  "equipement": [
+    "craft_baton_magique",
+    "craft_cuirasse",
+    "torche"
+  ],
+  "ratelier": [
+    "craft_dague"
+  ],
+  "competences": {
+    "negociation": 5,
+    "lecture": 5
   },
-  {
-   "id": "la_balance_eclat",
-   "name_key": "module.eclat.name",
-   "modules": [
-    "point",
-    "jet_court",
-    "eclat"
-   ]
-  }
- ],
- "hotbar": [
-  {
-   "type": "capacite",
-   "ref": 0
+  "base_potentials": {
+    "_defaut": 80,
+    "negociation": 120,
+    "leadership": 120,
+    "lecture": 120,
+    "minage": 60,
+    "masse": 60,
+    "hache_d_armes": 60,
+    "deux_mains": 60
   },
-  {
-   "type": "capacite",
-   "ref": 1
-  },
-  {
-   "type": "capacite",
-   "ref": 2
-  }
- ],
- "signature": "estimation"
+  "talent": "oeil_du_prix",
+  "points_creation_bonus": 0,
+  "tags": [
+    "visible"
+  ],
+  "capacites": [
+    {
+      "id": "la_balance_estimation",
+      "name_key": "module.estimation.name",
+      "modules": [
+        "point",
+        "jet_court",
+        "estimation"
+      ]
+    },
+    {
+      "id": "la_balance_gel",
+      "name_key": "module.gel.name",
+      "modules": [
+        "point",
+        "jet_court",
+        "gel"
+      ]
+    },
+    {
+      "id": "la_balance_eclat",
+      "name_key": "module.eclat.name",
+      "modules": [
+        "point",
+        "jet_court",
+        "eclat"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
+  ],
+  "signature": "estimation",
+  "classe_mere": "meneur"
 }

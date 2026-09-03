@@ -1,72 +1,73 @@
 {
- "name_key": "classe.l_ombre.name",
- "bonus_stats": {
-  "dexterite": 2,
-  "perception": 1
- },
- "equipement": [
-  "craft_dague",
-  "craft_jambieres",
-  "torche"
- ],
- "ratelier": [
-  "craft_arc",
-  "craft_epee"
- ],
- "competences": {
-  "discretion": 6,
-  "dague": 4
- },
- "base_potentials": {
-  "_defaut": 100
- },
- "talent": "dissimulation",
- "points_creation_bonus": 4,
- "tags": [
-  "cache"
- ],
- "capacites": [
-  {
-   "id": "l_ombre_voile",
-   "name_key": "module.voile.name",
-   "modules": [
-    "point",
-    "contact",
-    "voile"
-   ]
+  "name_key": "classe.l_ombre.name",
+  "bonus_stats": {
+    "dexterite": 2,
+    "perception": 1
   },
-  {
-   "id": "l_ombre_estoc",
-   "name_key": "module.estoc.name",
-   "modules": [
-    "point",
-    "contact",
-    "estoc"
-   ]
+  "equipement": [
+    "craft_dague",
+    "craft_jambieres",
+    "torche"
+  ],
+  "ratelier": [
+    "craft_arc",
+    "craft_epee"
+  ],
+  "competences": {
+    "discretion": 6,
+    "dague": 4
   },
-  {
-   "id": "l_ombre_projection",
-   "name_key": "module.projection.name",
-   "modules": [
-    "point",
-    "contact",
-    "projection"
-   ]
-  }
- ],
- "hotbar": [
-  {
-   "type": "capacite",
-   "ref": 0
+  "base_potentials": {
+    "_defaut": 100
   },
-  {
-   "type": "capacite",
-   "ref": 1
-  },
-  {
-   "type": "capacite",
-   "ref": 2
-  }
- ],
- "signature": "voile"
+  "talent": "dissimulation",
+  "points_creation_bonus": 4,
+  "tags": [
+    "cache"
+  ],
+  "capacites": [
+    {
+      "id": "l_ombre_voile",
+      "name_key": "module.voile.name",
+      "modules": [
+        "point",
+        "contact",
+        "voile"
+      ]
+    },
+    {
+      "id": "l_ombre_estoc",
+      "name_key": "module.estoc.name",
+      "modules": [
+        "point",
+        "contact",
+        "estoc"
+      ]
+    },
+    {
+      "id": "l_ombre_projection",
+      "name_key": "module.projection.name",
+      "modules": [
+        "point",
+        "contact",
+        "projection"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
+  ],
+  "signature": "voile",
+  "classe_mere": "rodeur"
 }

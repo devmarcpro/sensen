@@ -1,72 +1,73 @@
 {
- "name_key": "classe.le_rieur.name",
- "bonus_stats": {
-  "charisme": 2,
-  "dexterite": 1
- },
- "equipement": [
-  "craft_dague",
-  "craft_casque",
-  "torche"
- ],
- "ratelier": [
-  "craft_epee",
-  "craft_arc"
- ],
- "competences": {
-  "negociation": 3,
-  "dague": 3
- },
- "base_potentials": {
-  "_defaut": 100
- },
- "talent": "deux_queues",
- "points_creation_bonus": 4,
- "tags": [
-  "cache"
- ],
- "capacites": [
-  {
-   "id": "le_rieur_pari",
-   "name_key": "module.pari.name",
-   "modules": [
-    "point",
-    "contact",
-    "pari"
-   ]
+  "name_key": "classe.le_rieur.name",
+  "bonus_stats": {
+    "charisme": 2,
+    "dexterite": 1
   },
-  {
-   "id": "le_rieur_botte",
-   "name_key": "module.botte.name",
-   "modules": [
-    "point",
-    "contact",
-    "botte"
-   ]
+  "equipement": [
+    "craft_dague",
+    "craft_casque",
+    "torche"
+  ],
+  "ratelier": [
+    "craft_epee",
+    "craft_arc"
+  ],
+  "competences": {
+    "negociation": 3,
+    "dague": 3
   },
-  {
-   "id": "le_rieur_charge_d_epaule",
-   "name_key": "module.charge_d_epaule.name",
-   "modules": [
-    "point",
-    "contact",
-    "charge_d_epaule"
-   ]
-  }
- ],
- "hotbar": [
-  {
-   "type": "capacite",
-   "ref": 0
+  "base_potentials": {
+    "_defaut": 100
   },
-  {
-   "type": "capacite",
-   "ref": 1
-  },
-  {
-   "type": "capacite",
-   "ref": 2
-  }
- ],
- "signature": "pari"
+  "talent": "deux_queues",
+  "points_creation_bonus": 4,
+  "tags": [
+    "cache"
+  ],
+  "capacites": [
+    {
+      "id": "le_rieur_pari",
+      "name_key": "module.pari.name",
+      "modules": [
+        "point",
+        "contact",
+        "pari"
+      ]
+    },
+    {
+      "id": "le_rieur_botte",
+      "name_key": "module.botte.name",
+      "modules": [
+        "point",
+        "contact",
+        "botte"
+      ]
+    },
+    {
+      "id": "le_rieur_charge_d_epaule",
+      "name_key": "module.charge_d_epaule.name",
+      "modules": [
+        "point",
+        "contact",
+        "charge_d_epaule"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
+  ],
+  "signature": "pari",
+  "classe_mere": "meneur"
 }

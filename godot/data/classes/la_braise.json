@@ -1,81 +1,82 @@
 {
- "name_key": "classe.la_braise.name",
- "bonus_stats": {
-  "dexterite": 2,
-  "force": 1
- },
- "equipement": [
-  "craft_masse",
-  "craft_cuirasse",
-  "torche"
- ],
- "ratelier": [
-  "craft_hache",
-  "craft_pioche"
- ],
- "competences": {
-  "forge": 5,
-  "menuiserie": 5
- },
- "base_potentials": {
-  "_defaut": 80,
-  "forge": 120,
-  "menuiserie": 120,
-  "tissage": 120,
-  "taille_de_pierre": 120,
-  "cuisine": 120,
-  "magie": 60,
-  "masse": 60,
-  "hache_d_armes": 60,
-  "deux_mains": 60
- },
- "talent": "main_du_metal",
- "points_creation_bonus": 0,
- "tags": [
-  "visible"
- ],
- "capacites": [
-  {
-   "id": "la_braise_trempe",
-   "name_key": "module.trempe.name",
-   "modules": [
-    "point",
-    "hast",
-    "trempe"
-   ]
+  "name_key": "classe.la_braise.name",
+  "bonus_stats": {
+    "dexterite": 2,
+    "force": 1
   },
-  {
-   "id": "la_braise_fonte",
-   "name_key": "module.fonte.name",
-   "modules": [
-    "point",
-    "hast",
-    "fonte"
-   ]
+  "equipement": [
+    "craft_masse",
+    "craft_cuirasse",
+    "torche"
+  ],
+  "ratelier": [
+    "craft_hache",
+    "craft_pioche"
+  ],
+  "competences": {
+    "forge": 5,
+    "menuiserie": 5
   },
-  {
-   "id": "la_braise_ronce",
-   "name_key": "module.ronce.name",
-   "modules": [
-    "point",
-    "hast",
-    "ronce"
-   ]
-  }
- ],
- "hotbar": [
-  {
-   "type": "capacite",
-   "ref": 0
+  "base_potentials": {
+    "_defaut": 80,
+    "forge": 120,
+    "menuiserie": 120,
+    "tissage": 120,
+    "taille_de_pierre": 120,
+    "cuisine": 120,
+    "magie": 60,
+    "masse": 60,
+    "hache_d_armes": 60,
+    "deux_mains": 60
   },
-  {
-   "type": "capacite",
-   "ref": 1
-  },
-  {
-   "type": "capacite",
-   "ref": 2
-  }
- ],
- "signature": "trempe"
+  "talent": "main_du_metal",
+  "points_creation_bonus": 0,
+  "tags": [
+    "visible"
+  ],
+  "capacites": [
+    {
+      "id": "la_braise_trempe",
+      "name_key": "module.trempe.name",
+      "modules": [
+        "point",
+        "hast",
+        "trempe"
+      ]
+    },
+    {
+      "id": "la_braise_fonte",
+      "name_key": "module.fonte.name",
+      "modules": [
+        "point",
+        "hast",
+        "fonte"
+      ]
+    },
+    {
+      "id": "la_braise_ronce",
+      "name_key": "module.ronce.name",
+      "modules": [
+        "point",
+        "hast",
+        "ronce"
+      ]
+    }
+  ],
+  "hotbar": [
+    {
+      "type": "capacite",
+      "ref": 0
+    },
+    {
+      "type": "capacite",
+      "ref": 1
+    },
+    {
+      "type": "capacite",
+      "ref": 2
+    }
+  ],
+  "signature": "trempe",
+  "classe_mere": "guerrier"
 }
