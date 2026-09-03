@@ -379,10 +379,111 @@
     "_doc_paliers": "paliers_au_dela : de combien de niveaux au-dela du niveau du donjon un materiau peut encore sortir ; poids_au_dela : le poids qu'on lui donne alors, face au poids 1 des materiaux a portee. A 0,15, la trouvaille d'un cran au-dessus reste une chance, pas l'ordinaire (designer 2026-09-02).",
     "poids_au_dela": 0.15,
     "ecart_attendu": {
-      "_doc": "On peut fabriquer n'importe quoi avec n'importe quoi (designer 2026-09-02) : ce qui limite le CRAFT, c'est la recette qu'on possede et la station capable de travailler la matiere. Le BUTIN, lui, suit la meme liberte avec une autre regle : « plus un materiau est eloigne du materiau attendu, plus l'apparition de cette composition est rare ». Un plastron de metal est l'ordinaire ; un plastron d'eau de mer existe et ne se voit presque jamais. poids_hors_attente : le poids d'une matiere qui n'est pas celle qu'on attend pour ce composant, face au poids 1 de celles qui le sont. penalite_forme : ce qu'on retire en plus quand la matiere ne tient meme pas la forme du composant (un liquide pour une lame).",
+      "_doc": "On peut fabriquer n'importe quoi avec n'importe quoi (designer 2026-09-02) : ce qui limite le CRAFT, c'est la recette qu'on possede et la station capable de travailler la matiere. Le BUTIN, lui, suit la meme liberte avec une autre regle : « plus un materiau est eloigne du materiau attendu, plus l'apparition de cette composition est rare ». Un plastron de metal est l'ordinaire ; un plastron d'eau de mer existe et ne se voit presque jamais. L'ECHELLE (echelle_frequence) donne, slot par slot, la frequence relative de chaque CATEGORIE de matiere : un manche est le plus souvent en bois, moins souvent en metal, presque jamais en eau. Elle remplace le poids plat, qui donnait la meme chance a toutes les matieres inattendues. penalite_forme : ce qu'on retire EN PLUS quand la matiere ne tient meme pas la forme du composant (un liquide pour une lame). poids_hors_attente reste le facteur d'ensemble applique a l'echelle — le bouton qui dit a quel point l'inattendu est rare, toutes categories confondues.",
       "poids_hors_attente": 0.04,
       "penalite_forme": 0.15,
-      "durete_min_piece_maitresse": 4
+      "durete_min_piece_maitresse": 4,
+      "echelle_frequence": {
+        "_doc": "Frequence relative d'une CATEGORIE de matiere pour un slot donne (designer 2026-09-03 : « un manche, le plus frequent c'est qu'il soit en bois, un peu moins en metal, et le plus absurde c'est en eau »). Remplace le poids plat `poids_hors_attente`, qui donnait la meme chance a un manche en metal et a un manche en eau de mer. 1,0 = la matiere evidente, 0,3 = plausible, 0,05 = etrange, 0,005 = absurde. Une matiere qui fait partie du pool ATTENDU du composant garde son poids plein : cette echelle ne decide que du reste.",
+        "manche": {
+          "bois": 1.0,
+          "vegetal": 0.45,
+          "animal": 0.35,
+          "metal": 0.3,
+          "synthetique": 0.14,
+          "fossile": 0.06,
+          "roche": 0.05,
+          "mineral": 0.03,
+          "gemme": 0.02,
+          "terre": 0.01,
+          "meteorologique": 0.004,
+          "liquide": 0.002
+        },
+        "tete": {
+          "metal": 1.0,
+          "roche": 0.4,
+          "mineral": 0.28,
+          "fossile": 0.22,
+          "animal": 0.18,
+          "gemme": 0.12,
+          "bois": 0.1,
+          "synthetique": 0.07,
+          "vegetal": 0.03,
+          "terre": 0.015,
+          "meteorologique": 0.008,
+          "liquide": 0.003
+        },
+        "plaque": {
+          "metal": 1.0,
+          "animal": 0.5,
+          "roche": 0.2,
+          "synthetique": 0.18,
+          "fossile": 0.14,
+          "bois": 0.12,
+          "mineral": 0.09,
+          "vegetal": 0.05,
+          "gemme": 0.04,
+          "terre": 0.02,
+          "meteorologique": 0.01,
+          "liquide": 0.003
+        },
+        "sangles": {
+          "animal": 1.0,
+          "vegetal": 0.75,
+          "synthetique": 0.28,
+          "metal": 0.09,
+          "bois": 0.05,
+          "mineral": 0.03,
+          "roche": 0.02,
+          "fossile": 0.02,
+          "gemme": 0.01,
+          "terre": 0.01,
+          "meteorologique": 0.005,
+          "liquide": 0.002
+        },
+        "fixations": {
+          "metal": 1.0,
+          "animal": 0.45,
+          "vegetal": 0.4,
+          "bois": 0.28,
+          "synthetique": 0.18,
+          "mineral": 0.08,
+          "roche": 0.06,
+          "fossile": 0.05,
+          "gemme": 0.03,
+          "terre": 0.02,
+          "meteorologique": 0.008,
+          "liquide": 0.004
+        },
+        "monture": {
+          "metal": 1.0,
+          "gemme": 0.45,
+          "animal": 0.18,
+          "bois": 0.15,
+          "mineral": 0.14,
+          "fossile": 0.11,
+          "roche": 0.09,
+          "synthetique": 0.07,
+          "vegetal": 0.05,
+          "terre": 0.02,
+          "meteorologique": 0.01,
+          "liquide": 0.004
+        },
+        "_defaut": {
+          "metal": 1.0,
+          "bois": 0.5,
+          "animal": 0.4,
+          "roche": 0.25,
+          "vegetal": 0.25,
+          "mineral": 0.2,
+          "synthetique": 0.15,
+          "fossile": 0.12,
+          "gemme": 0.08,
+          "terre": 0.04,
+          "meteorologique": 0.01,
+          "liquide": 0.004
+        }
+      }
     }
   },
   "identification": {

@@ -6219,7 +6219,7 @@ func _composer_loot(inst: Dictionary, profondeur: int, rng: RandomNumberGenerato
 		# toutes peuvent sortir, mais celles qui s'eloignent de l'attendu deviennent rares. Un plastron
 		# de metal est l'ordinaire, un plastron d'eau de mer existe et ne se voit presque jamais.
 		var hors_slot := _hors_attente(pool, slot)
-		var mat_id := _tirer_materiau(pool, profondeur, rng, hors_slot)
+		var mat_id := _tirer_materiau(pool, profondeur, rng, hors_slot, slot)
 		if mat_id.is_empty():
 			continue
 		var mat: Dictionary = GameData.entree("materials", mat_id)
@@ -6288,12 +6288,20 @@ func _hors_attente(attendues: Array[String], slot: String) -> Dictionary:
 		return {}
 	var maitresse := slot in ["tete", "plaque", "monture", "lame", "pointe"]
 	var seuil := float(ea.get("durete_min_piece_maitresse", 4))
+	# L'ECHELLE DE FREQUENCE, categorie par categorie (designer 2026-09-03 : « un manche, le plus
+	# frequent c'est qu'il soit en bois, un peu moins en metal, et le plus absurde c'est en eau »).
+	# Avant, un seul poids valait pour TOUT l'inattendu : un manche en metal et un manche en eau de mer
+	# sortaient aussi souvent l'un que l'autre, alors que l'un est inhabituel et l'autre une curiosite
+	# de foire. Le slot est la bonne maille — un manche est un manche, sur une hache comme sur une
+	# torche — et c'est l'exemple meme du designer.
+	var echelles: Dictionary = ea.get("echelle_frequence", {})
+	var echelle: Dictionary = echelles.get(slot, echelles.get("_defaut", {}))
 	var res := {}
 	for mid in GameData.catalogues.materials.keys():
 		if str(mid) in attendues:
 			continue
 		var m: Dictionary = GameData.catalogues.materials[mid]
-		var poids := base
+		var poids := base * float(echelle.get(str(m.get("category", "")), 1.0))
 		# Une piece maitresse faite d'une matiere sans tenue : possible, mais c'est la curiosite meme.
 		if maitresse and float(m.get("stats", {}).get("durete", 0)) < seuil:
 			poids *= float(ea.get("penalite_forme", 0.15))
@@ -6305,7 +6313,7 @@ func _hors_attente(attendues: Array[String], slot: String) -> Dictionary:
 var _cache_hors_attente: Dictionary = {}   # slot + attendues → les matières hors attente et leur poids
 
 
-func _tirer_materiau(candidats: Array[String], profondeur: int, rng: RandomNumberGenerator, hors: Dictionary = {}) -> String:
+func _tirer_materiau(candidats: Array[String], profondeur: int, rng: RandomNumberGenerator, hors: Dictionary = {}, slot: String = "") -> String:
 	if candidats.is_empty():
 		return ""
 	# Le PALIER du matériau décide, pas la liste des minerais (designer 2026-09-02) : les bandes de
@@ -6327,7 +6335,11 @@ func _tirer_materiau(candidats: Array[String], profondeur: int, rng: RandomNumbe
 	# appelé une fois par composant de chaque objet généré — des milliers de fois pour un étage de
 	# donjon. Le recalculer à chaque coup faisait payer la taille du catalogue à chaque objet, et le
 	# catalogue vient de passer de 166 à 197 matières (2026-09-02).
-	var cle_poids := str(candidats.size()) + ":" + str(niv) + ":" + str(hors.size()) + ":" + str(candidats[0]) + str(candidats[candidats.size() - 1])
+	# Le SLOT entre dans la cle depuis que l'echelle de frequence depend de lui (2026-09-03) : deux
+	# emplacements qui puisent dans le meme pool — une tete et une plaque, toutes deux limitees aux
+	# matieres dures — ont desormais des poids DIFFERENTS pour l'inattendu. Sans le slot ici, le second
+	# aurait recupere les poids du premier, et l'echelle n'aurait servi qu'a moitie, en silence.
+	var cle_poids := slot + ":" + str(candidats.size()) + ":" + str(niv) + ":" + str(hors.size()) + ":" + str(candidats[0]) + str(candidats[candidats.size() - 1])
 	if _cache_poids_paliers.has(cle_poids):
 		return _tirer_pondere_cache(_cache_poids_paliers[cle_poids], rng)
 	var poids := {}
@@ -9638,21 +9650,15 @@ func _appliquer_affinite_arme(plan: Dictionary, fonct: Dictionary) -> void:
 	var aff: Dictionary = fonct.get("affinite_sorts", regles.r.get("modules", {}).get("affinite_mains_nues", {"mana": 1.0, "endurance": 1.0}))
 	var monnaie := str(plan.get("monnaie", ""))
 	var f := float(aff.get(monnaie, 1.0)) if not monnaie.is_empty() else 1.0
-	# Deux axes de plus pour distinguer les armes magiques entre elles (designer 2026-09-03 : « fais en
-	# sorte qu'elles aient toutes leurs specificites »). Sans eux, dix baguettes ne different que par un
-	# seul chiffre, et neuf d'entre elles n'ont aucune raison d'exister.
-	#   - `affinite_element` : un baton de cendre pousse le Feu et rien d'autre. C'est le Wu Xing qui
-	#     entre dans la main, et ca donne une raison de PORTER PLUSIEURS focus selon le sort qu'on lance.
-	#   - `cout_mana_mult` : un talisman ne rend pas les sorts plus forts, il les rend moins chers —
-	#     donc plus nombreux. C'est l'autre facon de servir un lanceur, et la seule qui reponde au vrai
-	#     goulot mesure le meme jour : six sorts par etage, faute de mana.
-	var el_dom := wuxing.dominante(plan.get("elements", {}) if plan.get("elements") is Dictionary else {})
-	var aff_el: Dictionary = fonct.get("affinite_element", {})
-	var f_el := float(aff_el.get(el_dom, 1.0)) if not el_dom.is_empty() else 1.0
-	plan["affinite_arme"] = f * f_el
-	plan["affinite_element_arme"] = f_el
+	# `cout_mana_mult` : un talisman ne rend pas les sorts plus forts, il les rend moins CHERS — donc
+	# plus nombreux. C'est l'autre facon de servir un lanceur, et la seule qui reponde au vrai goulot
+	# mesure le 2026-09-03 : six sorts par etage, faute de mana.
+	# (Une affinite par ELEMENT a existe une heure le meme jour — un baton de cendre poussant le Feu —
+	# et le designer a retire ces armes-la. Le levier est parti avec elles : un mecanisme que plus
+	# aucune fiche n'utilise trompe le prochain lecteur, qui le croit vivant.)
+	plan["affinite_arme"] = f
 	plan["cout_mana_mult_arme"] = float(fonct.get("cout_mana_mult", 1.0))
-	plan.mult = float(plan.mult) * f * f_el
+	plan.mult = float(plan.mult) * f
 
 
 ## La fourchette du coût réel d'un plan (« aucun chiffre fixe » : la ressource payée est un jet autour de sa base).

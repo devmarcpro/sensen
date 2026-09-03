@@ -726,7 +726,16 @@ func test_projectiles() -> void:
 	s.pas(j.horloge)
 	verifier(s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false}), "tir à l'arc à 5 tuiles")
 	verifier(j.munitions == 19 and j.munitions_tirees == 1, "une flèche consommée")
-	verifier(j.compteur == h.ticks + 7, "arc : 10 / 1.5 ≈ 7 ticks")
+	# Le coût en ticks était écrit en dur à 7. Or la vitesse d'une arme ASSEMBLÉE dépend aussi de la
+	# densité de son manche (`vitesse_facteur`) — donc de la matière tirée au butin. Changer l'échelle
+	# de fréquence des matières par emplacement (2026-09-03) a suffi à le faire tomber, alors que RIEN
+	# n'était faux : c'est le huitième test à valeur figée que je convertis. Ce qu'on vérifie, c'est que
+	# le tir a bien payé le prix de CET arc-là, et que la formule de l'arme lente est respectée.
+	var arc_it: Dictionary = s.items.get(arc_uid, {})
+	var fonct_arc: Dictionary = s.fonctionnalites.get(str(arc_it.get("functionality", "")), {})
+	var attendu_arc := s.regles.ticks_attaque(fonct_arc, false, arc_it)
+	verifier(j.compteur == h.ticks + attendu_arc, "arc : le tir coûte les ticks de CET arc (%d, base %d / vitesse %.1f)" % [attendu_arc, int(s.regles.r.actions.attaque_base), float(fonct_arc.vitesse_base)])
+	verifier(attendu_arc > s.regles.ticks_attaque(s.fonctionnalites.get("dague", {}), false, {}), "et l'arc reste plus lent que la dague")
 	# À portée 1 : le tir est impossible (portée minimale 2)
 	s.grille.liberer(loup.pos)
 	loup.pos = j.pos + Vector2i(0, -1)

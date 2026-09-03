@@ -62,6 +62,29 @@ Un objet n'est plus une recette monolithique mais un assemblage de composants, c
 >
 > **Ce que j'avais compris de travers, écrit ici pour que personne ne le refasse.** Le 2026-09-02, voyant qu'aucune matière d'Eau ne pouvait entrer dans un objet, j'ai créé des recettes « lame de corail », « plaque d'obsidienne », « sangles de varech » — c'est-à-dire exactement le modèle que le designer venait d'écarter : des paires fixes, décidées d'avance, qui referment ce que le design veut ouvert. Elles ont été retirées. **La bonne question n'était pas « quelles paires autoriser » mais « quelle station et quelle recette ouvrent quelle classe de matière ».**
 
+> [!success] Tranché le 2026-09-03 — **une échelle de fréquence par composant** (designer)
+> « Il faudrait que chaque loot ait par composant une échelle de fréquence/absurdité : par exemple un manche, le plus fréquent c'est qu'il soit en bois, un peu moins en métal, et le plus absurde c'est en eau — plus c'est absurde, moins ça a de chance d'apparaître. »
+> **Ce qui existait** : un seul poids, `poids_hors_attente` = 0,04, pour **tout** ce qui n'est pas la matière attendue. Un manche en métal et un manche en eau de mer avaient donc exactement la même chance de sortir — l'un est un peu inhabituel, l'autre est une curiosité de foire. La mesure du même jour disait la conséquence : **46 % des objets assemblés** portaient une pièce hors de l'attendu, là où la note promettait « presque jamais ». Le plat de la règle expliquait les deux défauts à la fois — trop souvent, et sans gradation.
+> **Ce qu'on met à la place** : une échelle **par emplacement**, catégorie par catégorie. L'emplacement est la bonne maille — un manche est un manche, qu'il aille sur une hache ou sur une torche — et c'est exactement l'exemple du designer. Les valeurs se lisent comme des fréquences relatives : 1,0 la matière évidente, 0,3 plausible, 0,05 étrange, 0,005 absurde. Le liquide et le météorologique ferment toutes les échelles.
+>
+> **Ce qui sort vraiment, mesuré sur mille tirages au niveau 12** :
+>
+> | emplacement | ce qu'on trouve |
+> |---|---|
+> | **manche** | bois **52 %** · métal **43 %** · animal 4 % · végétal 1 % |
+> | **sangles** | végétal 56 % · animal 36 % · synthétique 4 % · métal 2 % |
+> | **tête** | métal 73 % · roche 15 % · animal 7 % · végétal 2 % |
+> | **plaque** | métal 91 % · animal 7 % |
+> | **monture** | métal 95 % · animal 3 % |
+> | **fixations** | métal 83 % · végétal 10 % · **liquide 3 %** · animal 2 % |
+>
+> Le manche suit l'exemple à la lettre. Et le liquide en fixations n'est pas une anomalie : `fixations_std_seve` est une recette **écrite à la main** — la sève comme colle. L'échelle ne s'applique qu'à ce qui est **hors** du pool attendu ; ce qu'une recette déclare garde son poids plein.
+>
+> **L'effet d'ensemble** : les pièces hors de l'attendu passent de 20-25 % à **4-8 %**, et les objets qui en portent une de 46-51 % à **10-19 %**. « Presque jamais » redevient vrai, et ce qui sort est plausible — des sangles en fourrure plutôt qu'une lame en cuir.
+>
+> > [!warning] Le piège de cache qu'il a fallu voir en même temps
+> > Les poids de tirage sont **mis en cache** par pool de candidats. Or deux emplacements peuvent puiser dans le même pool — une tête et une plaque sont toutes deux limitées aux matières dures — et ils ont désormais des poids **différents** pour l'inattendu. Sans ajouter l'emplacement à la clé, le second aurait récupéré les poids du premier et l'échelle n'aurait servi qu'à moitié, **en silence**. Un cache qui ignore une dimension nouvelle ne se plaint jamais.
+
 ## Liens
 - **Dépend de** : [[Composants]], [[Composant et recette d'obtention]], [[Stations de transformation]], [[Qualité d'artisanat]]
 - **Alimente** : [[Stats et qualité de l'assemblage]], [[Palier industriel]], [[Équipement — 14 slots]], [[Armure par zone et constructions]], [[Véhicules]]

@@ -89,10 +89,45 @@ func _ready() -> void:
 			% [niv, assembles, " ".join(parts), _moyenne(duretes), _moyenne(valeurs),
 			roundi(100.0 * float(pieces_hors) / maxf(1.0, float(pieces_tot))), roundi(100.0 * float(objets_hors) / maxf(1.0, float(assembles)))])
 		print("             qualite moyenne %.2f · %d %% d'objets a affixe · %s" % [q_moy, roundi(100.0 * float(n_affixes) / maxf(1.0, float(n_objets))), " ".join(parts_r)])
+	_echelle(s, tirages)
 	if lister > 0:
 		_lister(s, niveaux, lister)
 	s.monde.fermer()
 	get_tree().quit()
+
+
+## L'echelle de frequence par slot (designer 2026-09-03 : « un manche, le plus frequent c'est qu'il
+## soit en bois, un peu moins en metal, et le plus absurde c'est en eau »). On tire beaucoup de pieces
+## et on compte, par emplacement, la CATEGORIE de ce qui sort. C'est la seule facon de savoir si la
+## gradation existe vraiment : un tableau de poids dans un fichier ne prouve rien.
+func _echelle(s, tirages: int) -> void:
+	var par_slot := {}
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([4242, "echelle"])
+	for k in tirages * 2:
+		var base := str(s.loot._base_pour(rng, 12))
+		var o: Dictionary = s.generer_objet(base, 12, {"sonde": true})
+		for slot in o.get("composants", {}).keys():
+			var m: Dictionary = GameData.catalogues.materials.get(str(o.composants[slot].materiau), {})
+			var cat := str(m.get("category", "?"))
+			if not par_slot.has(slot):
+				par_slot[slot] = {}
+			par_slot[slot][cat] = int(par_slot[slot].get(cat, 0)) + 1
+	print("")
+	print("echelle de frequence : ce qui sort VRAIMENT, par emplacement (niveau 12)")
+	var slots: Array = par_slot.keys()
+	slots.sort()
+	for slot in slots:
+		var t: Dictionary = par_slot[slot]
+		var total := 0
+		for v in t.values():
+			total += int(v)
+		var cats: Array = t.keys()
+		cats.sort_custom(func(a, b): return int(t[a]) > int(t[b]))
+		var parts: Array[String] = []
+		for c in cats:
+			parts.append("%s %d %%" % [c, roundi(100.0 * float(t[c]) / maxf(1.0, float(total)))])
+		print("  %-11s %s" % [slot, " · ".join(parts)])
 
 
 ## `--lister N` : N objets TIRES POUR DE VRAI a chaque niveau, avec leur nom, leur rarete, leur

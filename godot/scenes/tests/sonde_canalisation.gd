@@ -66,18 +66,14 @@ func _ready() -> void:
 	# trois axes qui les separent : la puissance brute, l'element favorise, et le cout en mana. Deux
 	# focus identiques sur les trois sont le meme objet avec deux noms.
 	print("")
-	print("%-20s %6s %-16s %6s %5s %6s" % ["focus", "mana", "element favorise", "cout", "des", "mains"])
+	print("%-20s %6s %6s %5s %6s" % ["focus", "mana", "cout", "des", "mains"])
 	var vus: Array[String] = []
 	for fid in focus:
 		var fd: Dictionary = GameData.catalogues.functionalities[fid]
-		var el: Dictionary = fd.get("affinite_element", {})
-		var el_txt := "—"
-		for k in el.keys():
-			el_txt = "%s x%.2f" % [str(k), float(el[k])]
-		var sig := "%.2f|%s|%.2f|%d" % [float(fd.affinite_sorts.mana), el_txt, float(fd.get("cout_mana_mult", 1.0)), int(fd.hands)]
-		print("%-20s %6.2f %-16s %6.2f %5s %5d" % [fid, float(fd.affinite_sorts.mana), el_txt, float(fd.get("cout_mana_mult", 1.0)), str(fd.degats_des), int(fd.hands)])
+		var sig := "%.2f|%.2f|%d|%s" % [float(fd.affinite_sorts.mana), float(fd.get("cout_mana_mult", 1.0)), int(fd.hands), str(fd.degats_des)]
+		print("%-20s %6.2f %6.2f %5s %5d" % [fid, float(fd.affinite_sorts.mana), float(fd.get("cout_mana_mult", 1.0)), str(fd.degats_des), int(fd.hands)])
 		if sig in vus:
-			soucis.append("  %s ne se distingue d'aucun autre focus : meme puissance, meme element, meme cout, memes mains" % fid)
+			soucis.append("  %s ne se distingue d'aucun autre focus : meme puissance, meme cout, memes mains, memes des" % fid)
 		vus.append(sig)
 	if focus.size() < 4:
 		soucis.append("  seulement %d focus : une famille d'une ou deux armes n'est pas une famille" % focus.size())

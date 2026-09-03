@@ -79,8 +79,7 @@ Monter un module en niveau le rend plus puissant ET moins coûteux (puissance : 
 
 > [!success] Tranché le 2026-09-03 — **dix focus, trois axes pour les séparer** (designer)
 > « Rajoute des armes magiques et fais en sorte qu'elles aient toutes leurs spécificités. »
-> Un seul axe — la puissance canalisée — ne suffisait pas : dix baguettes qui ne diffèrent que par un chiffre, c'est neuf baguettes de trop. **Deux axes ont donc été ajoutés au moteur** :
-> - **`affinite_element`** : un bâton de cendre pousse le **Feu** et rien d'autre (×1,40). C'est le Wu Xing qui entre dans la main, et surtout c'est ce qui donne une raison de **porter plusieurs focus** et d'en changer selon le sort qu'on lance — un objet qu'on choisit par situation, pas une fois pour toutes ;
+> Un seul axe — la puissance canalisée — ne suffisait pas : dix baguettes qui ne diffèrent que par un chiffre, c'est neuf baguettes de trop. **Un axe a donc été ajouté au moteur** :
 > - **`cout_mana_mult`** : le **talisman** ne rend pas les sorts plus forts (×1,05, presque rien), il les rend **moins chers** (×0,65) — donc plus nombreux. C'est la seule réponse au vrai goulot mesuré le même jour : *six sorts par étage*, faute de mana.
 >
 > | focus | mana | élément | coût | dés | mains | ce qui n'appartient qu'à lui |
@@ -90,11 +89,11 @@ Monter un module en niveau le rend plus puissant ET moins coûteux (puissance : 
 > | **Sceptre** | ×1,45 | — | — | 1d6 | 1 | le compromis : on canalise et on frappe encore |
 > | **Bâton magique** | ×1,30 | — | — | 1d4 | 1 | l'historique, inchangé |
 > | **Baguette** | ×1,25 | — | — | 1d4 | 1 | vitesse 2,4 : le plus rapide |
-> | **Bâton de cendre** | ×1,15 | feu ×1,40 | — | 1d6 | 2 | le Feu |
-> | **Sceptre de jade** | ×1,15 | bois ×1,40 | — | 1d6 | 1 | le Bois, à une main |
-> | **Trident rituel** | ×1,15 | eau ×1,40 | — | 1d8 | 2 | l'Eau, **et 2,5 de portée** — le seul focus qui tient à distance |
-> | **Marteau runique** | ×1,10 | métal ×1,30 | — | **2d6** | 1 | le semi-lanceur : il frappe encore vraiment |
 > | **Talisman** | ×1,05 | — | **×0,65** | 1d3 | 1 | le nombre plutôt que la force |
+>
+> > [!warning] Retiré le 2026-09-03, une heure après — **les quatre focus élémentaires** (designer)
+> > « Retire les armes magiques élémentaires ». Bâton de cendre, sceptre de jade, trident rituel et marteau runique sont partis, **et le levier `affinite_element` avec eux** : un mécanisme que plus aucune fiche n'utilise trompe le prochain lecteur, qui le croit vivant. Il reste **six focus**, séparés par la puissance canalisée, le coût en mana, les mains et les dés.
+> > **Ce que j'en retiens** : l'affinité élémentaire par l'arme faisait porter le Wu Xing par un objet, quand le Wu Xing du jeu se joue déjà dans le **sort** et dans la **matière**. J'ai ajouté un troisième endroit où le même système se décide, sans que personne me l'ait demandé.
 >
 > **La règle qui tient l'ensemble** : une arme magique se paie en **capacité à frapper**, jamais en autre chose. L'orbe frappe moins fort que les poings ; le marteau runique, qui frappe vraiment, ne canalise que ×1,10.
 > **La sonde le garde** : `sonde_canalisation.tscn` échoue si un focus ne canalise pas mieux que les mains nues, si une arme physique ne coûte rien, si l'écart orbe/épée tombe sous 1,5, ou si **deux focus ont la même puissance, le même élément et le même coût**. Et `sonde_armes.tscn` compare désormais aussi ces trois axes — sans quoi elle déclarait un sceptre de jade identique à un sceptre ordinaire, puisqu'ils frappent pareil.
