@@ -10,7 +10,11 @@ note pour retrouver comment marche un systeme, elle ment.
 On ne verifie que ce qui est VERIFIABLE sans ambiguite :
   - les chemins `data/...` et `res://...` cites entre accents graves ;
   - les cles de configuration de la forme `fichier.cle` quand `fichier` est un catalogue connu ;
-  - les noms de fonction de la forme `nom_de_fonction()` en snake_case.
+  - les noms de fonction de la forme `nom_de_fonction()` en snake_case ;
+  - les CLES DE DONNEES citees nues entre accents graves (`cout_vigueur`, `forme_grille`) : un
+    snake_case avec un tiret bas, qui doit exister comme cle JSON, identifiant de code ou nom de
+    fichier. Ajoute le 2026-09-03 : six notes citaient encore `cout_endurance`, renomme la veille,
+    et l'outil ne le voyait pas parce qu'il ne regardait que les cles de la forme `fichier.cle`.
 
 Le reste — les tournures en prose, les noms de concepts — est laisse tranquille : un outil qui crie
 au loup sur du francais serait ignore en une semaine, et un outil ignore ne sert a rien.
@@ -37,6 +41,8 @@ EXT_FICHIER = {"json", "md", "gd", "tscn", "csv", "png", "py"}
 
 # Ce qui ressemble a une fonction mais n'en est pas : on ne va pas se battre avec le francais.
 IGNORE_FONCTIONS = {"etc", "cf", "ex"}
+# Une cle de donnees citee nue : snake_case, au moins un tiret bas, pas de point ni de parenthese.
+RE_CLE_NUE = re.compile(r"`([a-z][a-z0-9]*(?:_[a-z0-9]+)+)`")
 
 
 def lire(chemin):
@@ -71,6 +77,7 @@ def main():
     }
     problemes = {}
     n_notes = 0
+    stems = {os.path.splitext(n)[0] for n in fichiers}
     for chemin in glob.glob(os.path.join(DOCS, "**", "*.md"), recursive=True):
         n_notes += 1
         note = os.path.relpath(chemin, DOCS)
@@ -104,13 +111,65 @@ def main():
                 continue
             problemes.setdefault("cle de configuration citee qui n'existe pas", []).append(
                 "%s : %s.%s" % (note, fichier, cle))
+        # Une note d'audit d'un heritage retire cite a dessein des identifiants morts : on ne la juge
+        # pas. De meme, une ligne qui dit qu'un nom est ANCIEN (renomme, perime) cite l'ancien nom
+        # pour dire qu'il n'existe plus — c'est le contraire d'une promesse.
+        historique = ("Héritage" in os.path.basename(chemin)) or ("historique" in texte[:400])
+        for m in RE_CLE_NUE.finditer(texte):
+            if historique:
+                break
+            cle = m.group(1)
+            debut = texte.rfind("\n", 0, m.start()) + 1
+            fin = texte.find("\n", m.end())
+            ligne = texte[debut:fin if fin >= 0 else len(texte)].lower()
+            if "renomm" in ligne or "périmé" in ligne or "perime" in ligne or "ancien nom" in ligne or "s'appel" in ligne or "~~" in ligne or "→" in ligne or "->" in ligne:
+                continue
+            # une cle existe si elle est ecrite entre guillemets (JSON ou chaine de code), comme
+            # identifiant nu dans le code, ou comme nom de fichier de donnees
+            if ('"%s"' % cle) in code or ("&\"%s\"" % cle) in code or cle in stems:
+                continue
+            if re.search(r"\b%s\b" % re.escape(cle), code):
+                continue
+            problemes.setdefault("cle de donnees citee qui n'existe pas", []).append("%s : %s" % (note, cle))
+    # Le CLIQUET (2026-09-03). Le premier passage du controle des cles nues a trouve cent trois
+    # identifiants cites par quarante-cinq notes et absents du code : des champs proposes par le
+    # design et codes sous un autre nom, des restes du voxel, des exemples entre accents graves. On
+    # ne peut pas les regler en une passe, et un outil rouge pendant une semaine est un outil qu'on
+    # n'ecoute plus. Donc : la rouille CONNUE est gelee dans `verif_doc_code_baseline.txt` — c'est la
+    # file de travail des passes suivantes, chacune en retire des lignes — et seule une rouille
+    # NOUVELLE fait echouer. `--geler` reecrit le gel depuis l'etat courant ; on ne le fait qu'apres
+    # avoir regle ce qu'on pouvait, jamais pour faire taire l'outil.
+    chemin_gel = os.path.join(RACINE, "tools", "verif_doc_code_baseline.txt")
+    gel = set()
+    if os.path.exists(chemin_gel):
+        gel = {l.strip() for l in lire(chemin_gel).splitlines() if l.strip() and not l.startswith("#")}
+    if "--geler" in sys.argv:
+        lignes_gel = sorted(set(problemes.get("cle de donnees citee qui n'existe pas", [])))
+        io.open(chemin_gel, "w", encoding="utf-8", newline="\n").write(
+            "# Rouille connue du coffre : identifiants cites par les notes et absents du code.\n"
+            "# Chaque passe de reconciliation en retire ; `python tools/verif_doc_code.py --geler` regele.\n"
+            + "\n".join(lignes_gel) + "\n")
+        print("gel reecrit : %d lignes de rouille connue" % len(lignes_gel))
+        gel = set(lignes_gel)
+    connues = []
+    if "cle de donnees citee qui n'existe pas" in problemes:
+        restantes = []
+        for ligne in problemes["cle de donnees citee qui n'existe pas"]:
+            (connues if ligne in gel else restantes).append(ligne)
+        if restantes:
+            problemes["cle de donnees citee qui n'existe pas"] = restantes
+        else:
+            del problemes["cle de donnees citee qui n'existe pas"]
     total = sum(len(v) for v in problemes.values())
     for titre in sorted(problemes):
         print("\n== %s (%d)" % (titre, len(problemes[titre])))
-        for ligne in sorted(set(problemes[titre]))[:20]:
+        for ligne in sorted(set(problemes[titre]))[:500]:
             print("   ", ligne)
+    regle = len(gel) - len(set(connues))
+    if connues:
+        print("rouille connue : %d citation(s) encore dans le gel%s" % (len(set(connues)), (" — %d reglee(s) depuis le gel, relancer --geler" % regle) if regle > 0 else ""))
     if not problemes:
-        print("%d notes : chaque chemin, fonction et cle citee existe dans le code" % n_notes)
+        print("%d notes : chaque chemin, fonction et cle citee existe dans le code (hors rouille connue)" % n_notes)
     return 1 if total else 0
 
 

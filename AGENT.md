@@ -73,6 +73,8 @@ Plus **les sondes concernées** (`godot/scenes/tests/sonde_*.tscn` : écrans, IA
 
 **`verif_scripts.py` n'est pas optionnel** : la suite ne charge jamais les scripts d'écran, donc une Parse Error dans `main.gd` la laisse verte et tue le jeu.
 
+**`verif_doc_code.py` a un cliquet** : les identifiants cités par les notes et absents du code sont gelés dans `tools/verif_doc_code_baseline.txt` — c'est la **file de travail** de la réconciliation coffre ↔ code (une centaine de lignes au 2026-09-03 : champs de design codés sous un autre nom, restes du voxel, exemples entre accents graves). Chaque passe autonome en retire quelques-unes en écrivant le callout qui dit comment la chose s'appelle vraiment, puis relance `--geler`. Seule une rouille **nouvelle** fait échouer l'outil. Ne jamais regeler pour faire taire une alerte.
+
 ## Pièges déjà payés — les relire évite de les repayer
 
 - **Un test qui compte est un test qui se trompe de sujet.** Sept tests à nombre figé (« 62 compétences », « 63 recettes », « 9 stations ») ont cassé sur des ajouts parfaitement corrects. Vérifie la **règle**, jamais le total : *chaque station se construit*, *chaque arme s'entraîne à une compétence qui existe*.
