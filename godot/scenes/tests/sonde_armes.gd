@@ -59,6 +59,34 @@ func _ready() -> void:
 			var magie_identique: bool = absf(m_a - m_b) < 0.05 and el_a == el_b and absf(c_a - c_b) < 0.05
 			if d_moy < 0.15 and d_vit < 0.15 and d_por < 1.0 and int(a.d.crit_range) == int(b.d.crit_range) and magie_identique:
 				soucis.append("  %s et %s ne se distinguent sur aucun axe" % [a.id, b.id])
+	# Une arme ne doit pas etre la meilleure CONTRE TOUT. La matrice d'armure est faite pour qu'un type
+	# de degats brille ici et souffre la ; une arme qui domine les cinq constructions annule la matrice
+	# et rend le choix d'arme inutile. C'etait le cas de la masse jusqu'au 2026-09-03 : 60 a 80 %
+	# au-dessus de tout le reste contre mailles, ecailles et plaque, sans aucune faiblesse.
+	var matrice: Dictionary = GameData.config("combat_rules").armure.matrice
+	var constructions: Array = matrice.keys()
+	var podium := {}
+	for c in constructions:
+		var classement: Array = []
+		for a2 in armes:
+			var d2: Dictionary = a2.d
+			var t2 := maxf(1.0, roundi(base_t / float(d2.vitesse_base)))
+			var f2 := float((matrice[c] as Dictionary).get(str(d2.type_degats), 1.0))
+			classement.append({"id": str(a2.id), "v": float(a2.moy) / t2 / f2})
+		classement.sort_custom(func(x, y): return float(x.v) > float(y.v))
+		for r in mini(2, classement.size()):
+			podium[str(classement[r].id)] = int(podium.get(str(classement[r].id), 0)) + 1
+	for aid in podium.keys():
+		# Le seuil est a QUATRE constructions sur cinq, pas cinq : la masse d'avant le 2026-09-03 etait
+		# premiere ou deuxieme contre quatre des cinq — seul le matelasse lui echappait — et c'etait deja
+		# une arme sans contrepartie. Verifie en remettant ses 3d8 : la sonde la nomme.
+		if int(podium[aid]) >= constructions.size() - 1:
+			soucis.append("  %s est dans les deux meilleures contre %d des %d constructions d'armure : la matrice ne sert plus a rien" % [aid, int(podium[aid]), constructions.size()])
+	var tete: Array = []
+	for aid in podium.keys():
+		tete.append("%s %d/%d" % [aid, int(podium[aid]), constructions.size()])
+	tete.sort()
+	print("armes sur le podium par construction d'armure : %s" % ", ".join(tete))
 	for s in soucis:
 		print(s)
 	if not soucis.is_empty():
