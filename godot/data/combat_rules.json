@@ -1363,7 +1363,7 @@
     "cout_min": 1
   },
   "stats_materiau": {
-    "_doc": "Application des stats de materiau (note « Application des stats de materiau », decidee de longue date, JAMAIS implementee jusqu'au 2026-09-03). Quatre des treize stats ne servaient a rien dans le code : elasticite, friction, conductivite_mana et flottabilite. Les trois premieres ont ici leur formule, telle que la note la donne. La flottabilite attend les vehicules navals.",
+    "_doc": "Application des stats de materiau (note « Application des stats de materiau », decidee de longue date, JAMAIS implementee jusqu'au 2026-09-03). Quatre des treize stats ne servaient a rien dans le code : elasticite, friction, conductivite_mana et flottabilite. Les trois premieres ont ici leur formule, telle que la note la donne. La flottabilite attend les vehicules navals. | flottabilite_seuil (2026-09-04) : sous ce seuil, un objet tombe dans l'eau COULE (jet, jeter, courant) ; au-dessus il flotte et le courant l'emporte. Sans matiere (livre, fiole), un objet flotte.",
     "arc_elasticite_base": 0.8,
     "arc_elasticite_div": 250.0,
     "chute_elasticite_div": 150.0,
@@ -1372,7 +1372,8 @@
     "friction_min": 0.85,
     "friction_max": 1.15,
     "mana_conductivite_div": 140.0,
-    "transparence_seuil": 50
+    "transparence_seuil": 50,
+    "flottabilite_seuil": 50
   },
   "sang_froid": {
     "_doc": "Sang-froid (designer 2026-09-03) : la troisieme monnaie, celle du groupe perception + dexterite. La DEXTERITE en DEPEND — feintes, desarmements, empoignes sont tout son combat — et porte donc la reserve ; la PERCEPTION s'en sert en BONUS, par-dessus sa propre rarete qui est la portee et l'information. Son comportement est l'INVERSE des deux autres : elle ne se gagne pas en agissant, elle se gagne en NE bougeant PAS. Hors combat elle revient seule ; en combat il faut etre immobile depuis `seuil_ticks` pour qu'elle monte — celui qui se replace perd son sang-froid, celui qui tient sa ligne le construit. C'est le tireur qui retient son souffle, et c'est aussi ce qui donne enfin un prix a la vitesse de la dexterite. Dépenser a vide se paie en PV, comme la surchauffe du mana et l'epuisement de la vigueur.",

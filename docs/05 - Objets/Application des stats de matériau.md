@@ -63,6 +63,9 @@ Transparence : transparence >= 50 → la tuile laisse passer lumière et
 > [!success] Codé le 2026-09-03 — trace ajoutée le 2026-09-04
 > Les treize stats de matériau agissent toutes depuis ce jour (six étaient décoratives : élasticité des arcs, friction du sol, conductivité de mana, transparence, luminosité, isolation) — `combat_rules.stats_materiau` porte les formules, `sonde_stats_matiere.tscn` lit le code source pour vérifier que chaque stat est lue quelque part.
 
+> [!success] Décidé et codé le 2026-09-04 — la **flottabilité** : dans l'eau, ce qui ne flotte pas **coule**
+> La sonde des stats de matière avait encore une stat qu'aucune formule ne lisait : la flottabilité (1 à 4 pour les métaux et les roches, 80 pour les bois). Le jeu avait pourtant déjà la place qui l'attendait — « le courant emporte ce qui flotte » (`_tiquer_courant`) emportait *tout* ce qui traînait au sol, une enclume comme une bûche. Désormais : un objet posé ou tombé **sur une tuile d'eau** dont la flottabilité est sous `combat_rules.stats_materiau.flottabilite_seuil` (50) **coule** — il disparaît, le journal le dit (`journal.coule`) ; un javelot d'acier lancé au-dessus d'un lac est perdu, un javelot de frêne flotte et se ramasse plus loin. Et le courant n'emporte que ce qui flotte : ce qui n'a pas de matière (un livre, une fiole) flotte par défaut, comme avant. Trois entrées, une règle : la chute d'une arme de jet, le jet d'un objet du sac en nageant, le courant.
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Stats d'un objet crafté]]
 - **Alimente** : [[Mana]], [[Armure par zone et constructions]], [[Météo]], [[Éclairage]], [[Agriculture et élevage]], [[Véhicules]], [[Eau et liquides]]

@@ -890,10 +890,18 @@ func _tiquer_courant(tick: int) -> void:
 		if d2 == Vector2i.ZERO or not grille.dans(t + d2) or grille.bloque_passage(t + d2):
 			continue
 		var uids: Array = contenants[idx]
+		var emportes: Array = []   # le courant n'emporte que ce qui flotte : une enclume reste au fond
+		var restent: Array = []
+		for uid in uids:
+			(emportes if flotte(str(uid)) else restent).append(uid)
+		if emportes.is_empty():
+			continue
 		contenants.erase(idx)
 		grille.contenu[int(idx)] = 0
 		EventBus.emettre(&"tile_changed", [t])
-		_poser_contenant(t + d2, uids, "butin")
+		if not restent.is_empty():
+			_poser_contenant(t, restent, "butin")
+		_poser_contenant(t + d2, emportes, "butin")
 
 
 ## Une tuile d'écoulement est alimentée si, en remontant le courant (voisine plus haute portant un liquide, ou de même hauteur d'un niveau
@@ -2173,6 +2181,35 @@ func a_unique_ax(e: Dictionary, mecanique: String) -> Dictionary:
 ## Une tuile d'eau à nager (Eau et liquides) — gelée, elle se marche.
 func dans_l_eau(pos: Vector2i) -> bool:
 	return grille.dans(pos) and grille.nageable(pos)
+
+
+## Un objet flotte-t-il ? Sa flottabilité (stat de matière, 1 à 4 pour les métaux et les roches, 80 pour
+## les bois) contre `stats_materiau.flottabilite_seuil`. Sans matière — un livre, une fiole — il flotte :
+## c'est le comportement d'avant, et la stat ne doit mordre que là où elle existe (2026-09-04).
+func flotte(uid: String) -> bool:
+	var it: Dictionary = items.get(uid, {})
+	if not it.get("stats", {}).has("flottabilite"):
+		return true
+	return float(it.get("stats", {}).get("flottabilite", 100.0)) >= float(regles.r.get("stats_materiau", {}).get("flottabilite_seuil", 50.0))
+
+
+## Pose des objets sur une tuile ; sur l'eau, ceux qui ne flottent pas COULENT — retirés du jeu, dits au
+## journal — et seuls les autres se posent. Retourne ce qui reste à la surface.
+func _poser_ou_couler(pos: Vector2i, uids: Array, sorte: String) -> Array:
+	if not dans_l_eau(pos):
+		_poser_contenant(pos, uids, sorte)
+		return uids
+	var restent: Array = []
+	for uid in uids:
+		if flotte(str(uid)):
+			restent.append(uid)
+		else:
+			EventBus.emettre(&"journal", [&"journal.coule", {"objet": nom_objet(str(uid))}])
+			items.erase(str(uid))
+			objets.erase(str(uid))
+	if not restent.is_empty():
+		_poser_contenant(pos, restent, sorte)
+	return restent
 
 
 ## La température au centre de la cellule chargée (biome, saison, météo, nuit) — pour le gel (Météo).
@@ -6873,9 +6910,10 @@ func _jeter(e: Dictionary, uid: String, tick: int) -> bool:
 		return false
 	e.sac.erase(uid)
 	e.ratelier.erase(uid)
-	_poser_contenant(e.pos, [uid], "butin")
+	var nom_jete := nom_objet(uid)   # avant : s'il coule, l'objet n'existe plus quand le journal parle
+	_poser_ou_couler(e.pos, [uid], "butin")
 	e.compteur = tick + int(regles.r.actions.objet)
-	EventBus.emettre(&"journal", [&"journal.jette", {"nom": e.name_key, "objet": nom_objet(uid)}])
+	EventBus.emettre(&"journal", [&"journal.jette", {"nom": e.name_key, "objet": nom_jete}])
 	return true
 
 
@@ -8391,7 +8429,7 @@ func _lancer_arme_de_jet(e: Dictionary, arme: Dictionary, ou: Vector2i) -> void:
 	var cible_sol := ou
 	if not grille.dans(cible_sol) or grille.bloque_passage(cible_sol):
 		cible_sol = e.pos
-	_poser_contenant(cible_sol, [str(tombe.uid)], "butin")
+	_poser_ou_couler(cible_sol, [str(tombe.uid)], "butin")   # au-dessus d'un lac, un javelot d'acier est perdu ; un javelot de frêne flotte
 	arme.quantite = maxi(0, reste)   # meme quand la pile part : un dictionnaire encore reference ne doit pas mentir sur son compte
 	if reste <= 0:
 		for slot in e.get("equipement", {}).keys():

@@ -148,6 +148,7 @@ func _ready() -> void:
 	_lancer("test_bombes")
 	_lancer("test_grille_sort")
 	_lancer("test_element_module")
+	_lancer("test_flottabilite")
 	_lancer("test_composer_capacites")
 	_lancer("test_charges_de_modules")
 	_lancer("test_assemblage_sans_limite")
@@ -3580,6 +3581,36 @@ func test_element_module() -> void:
 	verifier(g.taille_de(["gel"]) < g.taille_de(["trait_nu", "vers_eau"]), "le noyau signé (%d cases) est un raccourci sur l'élément composé (%d cases)" % [g.taille_de(["gel"]), g.taille_de(["trait_nu", "vers_eau"])])
 
 
+func test_flottabilite() -> void:
+	# La flottabilité (Application des stats de matériau, 2026-09-04) : dans l'eau, ce qui ne flotte
+	# pas coule. On ne passe pas par le générateur d'objets — la matière y est tirée au hasard — on fabrique
+	# deux objets qui ne diffèrent que par cette stat, et on regarde ce qu'il en reste.
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var lourd := {"uid": "test_enclume", "name_key": "item.craft_javelot.name", "type": "arme", "tags": ["arme"], "stats": {"flottabilite": 3}}
+	var leger := {"uid": "test_buche", "name_key": "item.craft_javelot.name", "type": "arme", "tags": ["arme"], "stats": {"flottabilite": 80}}
+	var livre := {"uid": "test_livre", "name_key": "item.craft_javelot.name", "type": "livre", "tags": []}
+	for it in [lourd, leger, livre]:
+		s.items[it.uid] = it
+		s.objets[it.uid] = it
+		j.sac.append(it.uid)
+	verifier(not s.flotte("test_enclume") and s.flotte("test_buche") and s.flotte("test_livre"), "l'acier coule, le bois flotte, et ce qui n'a pas de matière flotte")
+	# sur la terre ferme, rien ne change : les trois tombent en butin
+	var t0 := s.horloge_monde.ticks
+	verifier(s._jeter(j, "test_enclume", t0) and s.items.has("test_enclume"), "jeté sur la terre ferme, l'acier reste")
+	j.sac.append("test_enclume")   # on le reprend pour l'essai suivant
+	s.contenants.clear()
+	s._poser_eau(j.pos, 8)
+	verifier(s.dans_l_eau(j.pos), "le joueur a de l'eau sous les pieds")
+	s._jeter(j, "test_enclume", t0)
+	s._jeter(j, "test_buche", t0)
+	s._jeter(j, "test_livre", t0)
+	verifier(not s.items.has("test_enclume"), "jeté dans l'eau, l'acier coule et disparaît")
+	verifier(s.items.has("test_buche") and s.items.has("test_livre"), "le bois et le livre flottent et restent ramassables")
+	var au_sol: Array = s.contenants.get(s.grille.idx(j.pos), [])
+	verifier(("test_buche" in au_sol) and not ("test_enclume" in au_sol), "à la surface : la bûche, pas l'enclume")
+
+
 func test_composer_capacites() -> void:
 	var s := Simulation.new(119)
 	s.charger_donjon("ruine", 119, 11, 1)
@@ -4383,16 +4414,23 @@ func test_courant() -> void:
 	verifier(s.courant_de(base + Vector2i(2, 0)) == Vector2i.ZERO, "une source n'a pas de courant")
 	s.grille.poser_contenu(base + Vector2i(2, 0), "eau_ecoulement")
 	s.grille.niveau_eau[s.grille.idx(base + Vector2i(2, 0))] = 5
-	# Un objet au sol part au fil de l'eau
-	var o := s.generer_objet("proto_epee", 1, {}, "commun", 0)
-	s._poser_contenant(base, [str(o.uid)], "butin")
+	# Un objet au sol part au fil de l'eau — s'il FLOTTE (flottabilité, 2026-09-04) : une bûche dérive,
+	# une épée de fer attend au fond. Deux objets fabriqués qui ne diffèrent que par cette stat.
+	var buche := {"uid": "test_buche_riv", "name_key": "item.craft_javelot.name", "type": "arme", "tags": ["arme"], "stats": {"flottabilite": 80}}
+	var fer := {"uid": "test_fer_riv", "name_key": "item.craft_epee.name", "type": "arme", "tags": ["arme"], "stats": {"flottabilite": 3}}
+	for it in [buche, fer]:
+		s.items[it.uid] = it
+		s.objets[it.uid] = it
+	s._poser_contenant(base, ["test_buche_riv", "test_fer_riv"], "butin")
 	var parti := false
 	for k in 40:
 		s._tiquer_courant(2000 + k)
-		if not s.contenants.has(s.grille.idx(base)):
+		if not ("test_buche_riv" in s.contenants.get(s.grille.idx(base), [])):
 			parti = true
 			break
-	verifier(parti and s.contenants.size() > 0, "le butin tombé dans la rivière part au fil de l'eau")
+	verifier(parti, "la bûche tombée dans la rivière part au fil de l'eau")
+	verifier("test_fer_riv" in s.contenants.get(s.grille.idx(base), []), "l'épée de fer, elle, reste au fond")
+	verifier(s.items.has("test_buche_riv") and s.items.has("test_fer_riv"), "le courant ne détruit rien : il déplace ce qui flotte")
 	# Un être léger dérive, un être surchargé tient
 	var loup := s.ajouter("loup", base, "ia")
 	var derive := false
