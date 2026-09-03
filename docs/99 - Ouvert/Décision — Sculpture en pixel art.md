@@ -28,7 +28,7 @@ blocs      : 16×16      structures : 64×64      véhicules  : 96×64
 - Le pixel s'affiche à la **couleur réelle du matériau** ([[Palette de couleurs des matériaux]]), avec son bruit généré en shader par pixel — pas de remapping nécessaire pendant la sculpture, comme avant.
 - **Stats = comptage de pixels par matériau** ([[Stats d'un objet crafté]] : moyenne pondérée, formule inchangée) × qualité ([[Qualité d'artisanat]]). La forme reste cosmétique.
 - **Rendu en jeu :** le modèle est un **billboard** — une vue isométrique de référence, déclinée par miroir horizontal pour l'orientation. Pas de 8 directions à dessiner : cohérent avec [[Direction artistique]] (peu d'animation, beaucoup de feedback d'interface).
-- **Blocs fonctionnels des véhicules ([[Véhicules]]) :** des **pixels-marqueurs typés**, mêmes couleurs réservées que les points d'attache ([[Squelette modulaire et points d'attache]], `data/reserved_colors.json`) — siège, gouvernail, mât, roues, coffres. La validation vérifie les requis, comme avant.
+- **Blocs fonctionnels des véhicules ([[Véhicules]]) :** des **pixels-marqueurs typés**, mêmes couleurs réservées que les points d'attache ([[Squelette modulaire et points d'attache]], `data/palette_materiaux.json`) — siège, gouvernail, mât, roues, coffres. La validation vérifie les requis, comme avant.
 - Validation → sprite + `stat_weights` + entrée d'objet ([[Schéma objet et recette]]) dans le profil joueur ; partage vers le catalogue de groupe sur action explicite (inchangé).
 
 ## Ce que ça préserve

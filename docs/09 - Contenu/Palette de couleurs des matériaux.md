@@ -35,7 +35,7 @@ Chaque hex est unique dans le catalogue — un doublon est une erreur bloquante 
 
 **Synthétiques :** Verre #C6DEE4 · Brique #A9502F · Chaume tressé #D3B76A · Papier #F3EEDF
 
-**Validation au boot ([[Schéma matériau]]) :** GameData valide qu'aucune couleur n'est dupliquée dans tout le catalogue ET qu'aucune n'entre en collision avec les **couleurs réservées** (stand-in matériaux + marqueurs d'attache, `data/reserved_colors.json`) — *un doublon = erreur bloquante de données*.
+**Validation au boot ([[Schéma matériau]]) :** GameData valide qu'aucune couleur n'est dupliquée dans tout le catalogue ET qu'aucune n'entre en collision avec les **couleurs réservées** (stand-in matériaux + marqueurs d'attache, `data/palette_materiaux.json`) — *un doublon = erreur bloquante de données*.
 
 **Couleurs réservées à ne pas heurter ([[Squelette modulaire et points d'attache]]) :** #00FF00, #FF00FF, #00FFFF, #FFFF00. *Aucune de ces valeurs n'existe dans la palette F.1.1 (vérifié).*
 

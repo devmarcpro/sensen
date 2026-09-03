@@ -44,7 +44,7 @@ res://
 
 **Système à ajouter ([[Habitat des PNJ]]) :** la détection de pièce est à ranger dans `systems/` — voir [[Détection de pièces]].
 
-**Autres dossiers de données cités ailleurs :** `data/functionalities/`, `data/recipes/`, `data/components/`, `data/component_recipes/`, `data/status_effects/`, `data/ai_profiles/`, `data/tutorials/`, `data/dialogue/`, `data/kingdoms/`, `data/name_cultures/`, `data/dungeon_rooms/`, `data/dungeon_connectors/`, `data/plants/`, `data/weather_states.json`, `data/strata.json`, `data/ore_bands.json`, `data/reserved_colors.json`, `data/reading_failures.json`, `data/rare_epithets.json`, `data/absurd_laws_pool.json`, `data/noise_layers.json`, `data/material_categories.json`.
+**Autres dossiers de données cités ailleurs :** `data/functionalities/`, `data/recipes/`, `data/components/`, `data/component_recipes/`, `data/status_effects/`, `data/ai_profiles/`, `data/tutorials/`, `data/dialogue/`, `data/kingdoms/`, `data/name_cultures/`, `data/dungeon_rooms/`, `data/dungeon_connectors/`, `data/plants/`, `data/weather_states/`, `data/minerais_par_etage.json`, `data/minerais_par_etage.json`, `data/palette_materiaux.json`, `data/reading_failures.json`, `data/rare_epithets.json`, `data/absurd_laws_pool.json`, `data/noise_layers.json`, `data/material_categories.json`.
 
 **Le pipeline des catalogues data/ est décidé et squeletté :** [[Décision — Pipeline de contenu]] (`godot/data/README.md` + un `_template.json` par dossier).
 

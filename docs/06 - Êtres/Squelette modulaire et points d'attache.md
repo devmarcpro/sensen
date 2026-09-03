@@ -101,7 +101,7 @@ Neuf types, avec un suffixe `_G` / `_D` plutôt qu'une couleur par côté :
 | `poignet` | bras bas → main | | `dos` | torse → cape, sac |
 | `prise` | main → arme, outil | | | |
 
-**Couleurs réservées** (`data/reserved_colors.json`, section `anchors`) :
+**Couleurs réservées** (`data/palette_materiaux.json`, section `anchors`) :
 
 | Couleur | Ancrage | | Couleur | Ancrage |
 |---|---|---|---|---|

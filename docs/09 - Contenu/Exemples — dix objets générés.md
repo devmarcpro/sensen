@@ -196,7 +196,12 @@ Comme pour [[Exemples — dix PNJ générés]], générer pour de vrai a trouvé
 | Les noms générés **ne s'accordaient pas en genre** | « Arc exacte », « Bottes fervent » | [[Schéma objet et recette]] — champ `genre_grammatical` (`ms`/`fs`/`mp`/`fp`) par fonctionnalité et par pièce |
 
 > [!question] Ce que le générateur a refusé de produire — et il a eu raison
-> La rareté **artefact** existe dans la grille, mais [[Loot — affixes, gemmes et rareté]] la définit par *« effets uniques hors pools, ni sertissable ni infusable »*. Un générateur ne peut donc rien en produire : sans pool, il sortirait un objet **vide**. Ce n'est pas un trou de spec, c'est la spec qui dit que **les artefacts sont du contenu écrit à la main** — comme les PNJ uniques. À écrire un par un dans `data/items/artefacts/`, jamais à générer.
+> La rareté **artefact** existe dans la grille, mais [[Loot — affixes, gemmes et rareté]] la définit par *« effets uniques hors pools, ni sertissable ni infusable »*. Un générateur ne peut donc rien en produire : sans pool, il sortirait un objet **vide**. Ce n'est pas un trou de spec, c'est la spec qui dit que **les artefacts sont du contenu écrit à la main** — comme les PNJ uniques.
+>
+> [!warning] Rattrapé le 2026-09-03 — **le code a pris un autre chemin, et la note ne le disait pas**
+> Cette note annonçait des artefacts à écrire un par un dans un dossier data/items/artefacts/ (cité ici en texte simple : il n'existe pas). Ce dossier n'existe pas, et n'a jamais été créé : le code génère les artefacts comme les autres objets, mais avec un **budget qui dépasse les fourchettes** (`raretes.artefact.depassement` = 1,25) et un pool d'affixes réservé — ceux qui portent le tag `artefact_seulement`. Le boss d'un donjon majeur en laisse un à coup sûr, un autre boss une fois sur quatre (`drops.artefact`).
+> **Ce qui reste vrai de l'intention** : un artefact porte un effet **unique**, hors des pools ordinaires. Il y en a trois aujourd'hui — `unique_vol_de_mana`, `unique_second_souffle`, `unique_chaine_eternelle`. Trois effets pour toute la fin de partie, c'est peu, et c'est du contenu à écrire : la mécanique, elle, est en place.
+> **Ce que je ne tranche pas** : garder les artefacts générés (et alors il faut plus d'effets uniques), ou revenir à l'intention d'origine et les écrire un par un. Le code a déjà choisi ; la note disait le contraire depuis assez longtemps pour que personne ne s'en aperçoive.
 
 ## Liens
 - **Dépend de** : [[Schéma objet et recette]], [[Craft compositionnel]], [[Stats et qualité de l'assemblage]], [[Loot — affixes, gemmes et rareté]]

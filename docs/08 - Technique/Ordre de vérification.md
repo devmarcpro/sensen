@@ -69,6 +69,11 @@ Un critère de performance à valider avant de passer à l'étape suivante. **Un
 > [!info] Ajout du 2026-09-03 — **les sondes de l'IA et du jet**
 > `res://scenes/tests/sonde_ia.tscn` : le roam mène quelque part (éloignement mesuré après cent tours), l'aggro vise qui a frappé, l'alerte réveille les voisins, et le temps fait tout retomber. `res://scenes/tests/sonde_jet.tscn` : la pile diminue, l'objet lancé retombe au sol avec sa matière, la main se vide. À passer dès qu'on touche aux profils d'IA ou à la résolution d'attaque.
 
+> [!info] Ajout du 2026-09-03 — **la documentation promet-elle des choses que le code n'a pas ?**
+> `python tools/verif_doc_code.py` — `check_vault.py` vérifie que les **liens entre notes** tiennent ; personne ne vérifiait que les **identifiants cités dans les notes** existent. Une note peut nommer un fichier, une clé de configuration ou une fonction disparus depuis six semaines, et rien ne le dit. C'est la rouille la plus sournoise d'un coffre qui fait autorité : le jour où on le relit pour retrouver comment marche un système, il ment.
+> **Ce qu'il a trouvé du premier coup** : six notes nommaient `data/reserved_colors.json`, renommé en `palette_materiaux.json` ; deux autres citaient `ore_bands.json` et `strata.json`, fondus dans `minerais_par_etage.json` ; une clé `loot_rules.bases_consommables` qui n'existe pas ; et surtout une note qui décrivait les artefacts comme du contenu écrit à la main dans un dossier jamais créé, **alors que le code les génère** depuis longtemps.
+> **Le principe qui le rend utilisable** : il ne juge que ce qui est vérifiable sans ambiguïté — chemins, clés de catalogue connu, fonctions en snake_case entre accents graves. La prose française est laissée tranquille. Un outil qui crie au loup est un outil qu'on désactive, et son premier jet donnait dix-neuf faux positifs sur la seule forme `combat_rules.json`, où « json » était pris pour une clé.
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Budgets de performance]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]
