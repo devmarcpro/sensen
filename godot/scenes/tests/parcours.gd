@@ -136,12 +136,23 @@ func _equiper_et_composer() -> void:
 	# restés là depuis l'époque où les bijoux et les boucliers n'avaient pas de version assemblée. Le
 	# robot mesurait donc un personnage moins bien équipé qu'un vrai joueur (2026-09-02).
 	var bases: Array = ["craft_epee", "craft_dague", "craft_masse", "craft_lance", "craft_casque", "craft_cuirasse", "craft_jambieres", "craft_bouclier", "craft_anneau", "craft_amulette"]
+	# Le robot n'ecrase JAMAIS le kit de sa classe (2026-09-04) : la matrice des six voies donnait a
+	# chaque classe la meme lance generee par-dessus son arme de depart — L'Engrenage se battait a la
+	# lance, pas a l'arc, et la matrice ne mesurait plus les voies. Un objet genere ne s'equipe que dans
+	# un emplacement encore vide ; sinon il reste au sac, et on le dit.
+	for slot_k in j.equipement.keys():
+		_note("kit : %s en %s" % [scene.nom_objet(sim.nom_objet(str(j.equipement[slot_k]))), str(slot_k)])
 	for k in equiper:
 		var base: String = bases[rng_bot.randi() % bases.size()]
 		var o: Dictionary = sim.generer_objet(base, 3, {}, "rare" if rng_bot.randf() < 0.5 else "commun")
 		if o.is_empty():
 			continue
 		j.sac.append(o.uid)
+		var slot_o := str(o.get("equip_slot", ""))
+		var pris: bool = j.equipement.has(slot_o) or (slot_o == "anneau" and j.equipement.has("anneau_1") and j.equipement.has("anneau_2"))
+		if pris:
+			_note("au sac (le kit garde l'emplacement %s) : %s" % [slot_o, scene.nom_objet(sim.nom_objet(o.uid))])
+			continue
 		sim.attente[jid] = true
 		if sim.intention(jid, {"type": "equiper", "objet": o.uid}):
 			_note("équipé : %s" % scene.nom_objet(sim.nom_objet(o.uid)))

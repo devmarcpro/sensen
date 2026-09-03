@@ -385,3 +385,10 @@ avec un représentant par classe mère, même graine : voir le tableau dans
 2. **Le Sceau** (sentinelle) ne prend aucun coup et descend d'un étage : les glyphes posés devant lui
    tiennent tout à distance. Si c'est voulu, c'est l'identité de la sentinelle ; si c'est trop, c'est
    le prix ou la durée des glyphes qui se règle en données.
+
+3. **Refaite avec le kit gardé** (2026-09-04, même nuit) : avec le seul kit de départ, **quatre classes
+   sur six ne tuent rien** en 2 500 images, et quatre partent avec **le même bâton magique en cuivre**
+   (pauvre 0,54). Ce qui se règle en données : la qualité des armes de départ (`Etres.creer_personnage`
+   les génère au niveau 1), et une arme de départ par voie — les kits des classes mères mage,
+   sentinelle, érudit et meneur ne se distinguent pas par l'arme, alors que les six voies ont chacune
+   six armes depuis le 3 septembre. C'est une décision de contenu, pas une mesure.

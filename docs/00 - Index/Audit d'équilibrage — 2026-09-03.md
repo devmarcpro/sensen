@@ -108,7 +108,22 @@ L'écart reste modéré — 21 % au-dessus de l'épée — mais il va dans le m�
 > | érudit | Le Creuset | 2 | 41 | 2 (4) | 1 | 0 |
 > | meneur | La Balance | 3 | 41 | 6 (9) | 5 | 0 |
 >
-> Deux extrêmes qui méritent un œil : **Le Sceau** ne prend aucun coup et descend (les glyphes tiennent les ennemis à distance) ; **L'Engrenage** prend cent dégâts pour un seul tué et meurt deux fois — il part avec une arme de tir et une tourelle, et le robot se bat probablement au contact avec. C'est peut-être le robot (il ne sait pas prendre de la distance), peut-être la classe. Consigné dans [[À juger — parcours de jeu]].
+> **Une réserve avant de lire le tableau** : `--equiper 3` a donné à chaque classe **les mêmes trois objets** — une lance, une dague, des jambières de plaque — et la lance a remplacé l'arme de départ de la classe. La matrice compare donc les stats et les capacités de kit, **pas les voies d'armes** : L'Engrenage s'est battu avec une lance, pas avec son arc. C'est un défaut du robot (il équipe par-dessus le kit), corrigé ensuite ; le tableau reste vrai pour ce qu'il mesure.
+>
+> **Refaite avec le kit gardé** (le robot n'écrase plus l'arme de départ ; les objets générés vont dans les emplacements vides) — mêmes réglages :
+>
+> | classe mère | représentant | arme de départ | combats | coups portés | coups reçus (dégâts) | tués | morts |
+> |---|---|---|---|---|---|---|---|
+> | guerrier | L'Écarlate | épée en fonte (pauvre 0,60) | 2 | 30 | 20 (42) | 1 | 1 |
+> | rôdeur | L'Engrenage | arc en plomb (misérable 0,48) | 3 | 23 | 7 (21) | 2 | 0 |
+> | mage | La Paume | bâton magique en cuivre (pauvre 0,54) | 1 | 39 | 0 | 0 | 0 |
+> | sentinelle | Le Sceau | bâton magique en cuivre | 1 | 29 | 1 (1) | 0 | 0 |
+> | érudit | Le Creuset | bâton magique en cuivre | 1 | 57 | 0 | 0 | 0 |
+> | meneur | La Balance | bâton magique en cuivre | 4 | 52 | 3 (5) | 1 | 0 |
+>
+> Lue avec son arme, la matrice dit autre chose : **avec le seul kit de départ, quatre classes sur six ne tuent rien** en 2 500 images — cinquante-sept coups portés pour zéro tué, c'est un bâton de cuivre à 1d4 et pauvre 0,54, pas un manque de coups. L'Engrenage, lui, s'en sort mieux à l'arc qu'à la lance qu'on lui avait mise. **Quatre classes sur six partent avec le même bâton magique en cuivre** : les kits des classes mères mage, sentinelle, érudit et meneur ne se distinguent pas par l'arme. Deux questions pour le designer, dans [[À juger — parcours de jeu]] : la qualité des armes de départ (pauvre / misérable), et une arme de départ par voie.
+>
+> Deux extrêmes qui méritaient un œil dans la première matrice (avec la lance) : **Le Sceau** ne prend aucun coup et descend (les glyphes tiennent les ennemis à distance) ; **L'Engrenage** prend cent dégâts pour un seul tué et meurt deux fois — il part avec une arme de tir et une tourelle, et le robot se bat probablement au contact avec. C'est peut-être le robot (il ne sait pas prendre de la distance), peut-être la classe. Consigné dans [[À juger — parcours de jeu]].
 
 ## Liens
 
