@@ -147,6 +147,7 @@ func _ready() -> void:
 	_lancer("test_uniques_artefacts")
 	_lancer("test_bombes")
 	_lancer("test_grille_sort")
+	_lancer("test_element_module")
 	_lancer("test_composer_capacites")
 	_lancer("test_charges_de_modules")
 	_lancer("test_assemblage_sans_limite")
@@ -3560,6 +3561,18 @@ func test_grille_sort() -> void:
 	# La rotation : un domino vertical rentre dans une ligne horizontale.
 	var ligne_1x2 := GrilleSort._cases_des_lignes(["##"])
 	verifier(g3.emboiter(["d"], ligne_1x2).ok, "un domino tourne pour se coucher dans une ligne")
+
+
+func test_element_module() -> void:
+	# L'élément comme module (Six types de modules, 2026-09-03) : cinq « Vers … » sur le drapeau que
+	# Transmutation portait déjà, codé en dur sur le feu. Rien n'est supprimé : la grille fait le prix.
+	var s := nouvelle_sim("plaine_au_talus")
+	for el in ["feu", "eau", "bois", "metal", "terre"]:
+		var plan := s.capacites.assembler(["point", "trait_nu", "vers_" + el], 10, "1d4", {}, {})
+		verifier(plan.erreurs.is_empty() and str(plan.drapeaux.get("element_vers", "")) == el, "Trait nu + Vers %s : le plan porte l'élément (%s)" % [el, str(plan.drapeaux.get("element_vers", ""))])
+	# Le raccourci contre la composition : Gel tient sur moins de cases que Trait nu + Vers l'eau.
+	var g: GrilleSort = s.grille_sort
+	verifier(g.taille_de(["gel"]) < g.taille_de(["trait_nu", "vers_eau"]), "le noyau signé (%d cases) est un raccourci sur l'élément composé (%d cases)" % [g.taille_de(["gel"]), g.taille_de(["trait_nu", "vers_eau"])])
 
 
 func test_composer_capacites() -> void:

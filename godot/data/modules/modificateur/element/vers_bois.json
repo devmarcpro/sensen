@@ -1,0 +1,18 @@
+{
+  "id": "vers_bois",
+  "nom": "Vers le bois",
+  "name_key": "module.vers_bois.name",
+  "module_type": "modificateur",
+  "description": "convertit l'élément du noyau vers le bois — l'élément est un module, et il coûte une case",
+  "classe_signature": null,
+  "tags": [
+    "modificateur"
+  ],
+  "famille": "Élément",
+  "surcout_ticks": 2,
+  "surcout_ressource": "+6",
+  "effet": {
+    "element_vers": "bois"
+  },
+  "style": "neutre"
+}

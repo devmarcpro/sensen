@@ -2862,3 +2862,8 @@ ui.composeur.grille_ok,fits — {demande}/{cases} cells
 ui.composeur.grille_ko,does not fit — {demande} cells for {cases}
 ui.composeur.grille_voie,path: {stat}
 ui.composeur.mains_nues,bare hands
+module.vers_feu.name,Into fire
+module.vers_eau.name,Into water
+module.vers_bois.name,Into wood
+module.vers_metal.name,Into metal
+module.vers_terre.name,Into earth

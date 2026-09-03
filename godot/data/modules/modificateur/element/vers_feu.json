@@ -1,9 +1,9 @@
 {
-  "id": "transmutation",
-  "nom": "Transmutation",
-  "name_key": "module.transmutation.name",
+  "id": "vers_feu",
+  "nom": "Vers le feu",
+  "name_key": "module.vers_feu.name",
   "module_type": "modificateur",
-  "description": "convertit l'élément du noyau vers le feu — l'ancêtre des cinq « Vers … », gardé tel quel",
+  "description": "convertit l'élément du noyau vers le feu — l'élément est un module, et il coûte une case",
   "classe_signature": null,
   "tags": [
     "modificateur"

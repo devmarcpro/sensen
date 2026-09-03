@@ -2871,3 +2871,8 @@ ui.composeur.grille_ok,ça rentre — {demande}/{cases} cases
 ui.composeur.grille_ko,ça ne rentre pas — {demande} cases pour {cases}
 ui.composeur.grille_voie,la voie : {stat}
 ui.composeur.mains_nues,mains nues
+module.vers_feu.name,Vers le feu
+module.vers_eau.name,Vers l’eau
+module.vers_bois.name,Vers le bois
+module.vers_metal.name,Vers le métal
+module.vers_terre.name,Vers la terre
