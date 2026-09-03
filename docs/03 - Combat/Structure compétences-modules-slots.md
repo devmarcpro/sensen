@@ -180,3 +180,36 @@ le chiffre brut ; si le designer préfère la lettre, c'est une ligne à changer
 
 **Ce que ça ne règle pas :** le charisme n'a que trois armes, toutes des instruments, et l'endurance
 quatre. Ce sont les deux voies à étoffer — et l'identité, maintenant, dit quoi y écrire.
+
+### Six armes par stat (designer 2026-09-03)
+
+> « fais en sorte que chaque stat ait 6 armes et qu'elles se différencient toutes »
+
+Deux armes rejoignent l'endurance **par le critère d'allonge déjà posé**, pas pour faire le compte :
+le **fléau** porte à 2,0 et le **fouet** à 3,0. Le fouet est le cas que j'avais laissé en suspens la
+veille — je disais que son poids de 1,0 en faisait une arme de finesse ; l'allonge l'emporte, c'est
+la plus grande du jeu. Le fléau partageait la compétence `masse` avec la masse et le marteau, qui
+frappent au contact : il lui fallait la sienne, `armes_a_chaine` — ce qui se balance au bout d'une
+longe.
+
+Le charisme passe de trois instruments à six, et la famille se lit sur **une seule échelle** : plus
+un instrument s'engage dans l'endurance, moins il sert au mana.
+
+| instrument | mains | dés | vitesse | mana | endurance | sa signature |
+|---|---|---|---|---|---|---|
+| flûte | 1 | 1d3 | 2,8 | **1,05** | 1,20 | la seule du charisme qui serve *aussi* au mana |
+| cor | 1 | 1d3 | 2,0 | 0,90 | 1,25 | la plus légère à porter |
+| cymbales | 1 | 1d8 | 1,6 | 0,75 | 1,35 | la seule qui frappe vraiment (crit 19) |
+| luth | 1 | 1d4 | 1,8 | 0,85 | 1,45 | l'équilibre de la famille |
+| tambour | 2 | 1d6 | 1,2 | 0,70 | 1,65 | deux mains, la puissance sans le mana |
+| vielle | 2 | 2d4 | 0,9 | **0,55** | **1,85** | la plus forte affinité d'endurance du jeu |
+
+Six échelons distincts, dans les deux sens. Aucune n'est le doublon d'une autre — la sonde le
+vérifie, et l'échelle donne au joueur charisme un vrai arbitrage plutôt qu'un choix cosmétique.
+
+**Une arme écrite puis retirée :** une `pique` à portée 3,5 et portée minimale 2 — la seule arme
+lourde qui ne peut pas frapper au corps à corps. Elle aurait porté l'endurance à sept. Elle est
+notée ici parce que l'idée est bonne et que le jour où l'endurance s'étoffera, c'est par là qu'il
+faut commencer.
+
+Total : 36 armes, six par voie.

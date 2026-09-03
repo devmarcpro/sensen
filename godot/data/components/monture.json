@@ -1,5 +1,8 @@
 {
   "name_key": "component.monture.name",
   "slot_type": "monture",
-  "used_by": []
+  "used_by": [
+    "flute",
+    "vielle"
+  ]
 }

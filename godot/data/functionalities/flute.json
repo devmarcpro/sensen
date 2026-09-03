@@ -1,0 +1,19 @@
+{
+  "name_key": "functionality.flute.name",
+  "kind": "arme",
+  "hands": 1,
+  "degats_des": "1d3",
+  "crit_range": 20,
+  "vitesse_base": 2.8,
+  "portee": 1.0,
+  "portee_min": 1,
+  "type_degats": "contondant",
+  "volume": 0.4,
+  "genre_grammatical": "fs",
+  "affinite_sorts": {
+    "mana": 1.05,
+    "endurance": 1.2
+  },
+  "combat_skill": "musique",
+  "poids_reference": 0.48
+}

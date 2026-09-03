@@ -2841,3 +2841,11 @@ classe_mere.sentinelle.name,Sentinelle
 classe_mere.erudit.name,Érudit
 classe_mere.meneur.name,Meneur
 competence.escrime.name,Escrime
+item.craft_pique.name,Pique
+functionality.flute.name,Flûte
+item.craft_flute.name,Flûte
+functionality.vielle.name,Vielle
+item.craft_vielle.name,Vielle
+functionality.cymbales.name,Cymbales
+item.craft_cymbales.name,Cymbales
+competence.armes_a_chaine.name,Armes à chaîne

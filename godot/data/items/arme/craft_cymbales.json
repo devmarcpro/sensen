@@ -1,0 +1,20 @@
+{
+  "name_key": "item.craft_cymbales.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "slots": {
+    "plaque": "plaque",
+    "manche": "poignee"
+  },
+  "recipe": {
+    "station": "forge",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "fp",
+  "tags": [
+    "arme",
+    "assemble"
+  ],
+  "functionality": "cymbales"
+}

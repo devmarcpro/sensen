@@ -2832,3 +2832,11 @@ classe_mere.sentinelle.name,Sentinel
 classe_mere.erudit.name,Scholar
 classe_mere.meneur.name,Leader
 competence.escrime.name,Fencing
+item.craft_pique.name,Pike
+functionality.flute.name,Flute
+item.craft_flute.name,Flute
+functionality.vielle.name,Hurdy-gurdy
+item.craft_vielle.name,Hurdy-gurdy
+functionality.cymbales.name,Cymbals
+item.craft_cymbales.name,Cymbals
+competence.armes_a_chaine.name,Chain weapons

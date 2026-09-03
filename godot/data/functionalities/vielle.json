@@ -1,0 +1,19 @@
+{
+  "name_key": "functionality.vielle.name",
+  "kind": "arme",
+  "hands": 2,
+  "degats_des": "2d4",
+  "crit_range": 20,
+  "vitesse_base": 0.9,
+  "portee": 1.0,
+  "portee_min": 1,
+  "type_degats": "contondant",
+  "volume": 3.2,
+  "genre_grammatical": "fs",
+  "affinite_sorts": {
+    "mana": 0.55,
+    "endurance": 1.85
+  },
+  "combat_skill": "musique",
+  "poids_reference": 3.84
+}

@@ -1,0 +1,19 @@
+{
+  "name_key": "functionality.cymbales.name",
+  "kind": "arme",
+  "hands": 1,
+  "degats_des": "1d8",
+  "crit_range": 19,
+  "vitesse_base": 1.6,
+  "portee": 1.0,
+  "portee_min": 1,
+  "type_degats": "contondant",
+  "volume": 1.8,
+  "genre_grammatical": "fp",
+  "affinite_sorts": {
+    "mana": 0.75,
+    "endurance": 1.35
+  },
+  "combat_skill": "musique",
+  "poids_reference": 2.16
+}

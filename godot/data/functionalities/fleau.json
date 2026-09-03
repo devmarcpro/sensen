@@ -2,7 +2,7 @@
   "name_key": "functionality.fleau.name",
   "kind": "arme",
   "hands": 2,
-  "combat_skill": "masse",
+  "combat_skill": "armes_a_chaine",
   "degats_des": "2d8",
   "crit_range": 20,
   "vitesse_base": 1.3,
