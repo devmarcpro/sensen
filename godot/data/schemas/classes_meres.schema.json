@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "properties": {
+      "name_key": {
+        "type": "string"
+      },
+      "stat": {
+        "type": "string",
+        "enum": [
+          "force",
+          "dexterite",
+          "endurance",
+          "volonte",
+          "perception",
+          "charisme"
+        ]
+      },
+      "sous_classes": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "name_key",
+      "stat",
+      "sous_classes"
+    ]
+  }
+}

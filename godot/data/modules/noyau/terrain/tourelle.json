@@ -25,5 +25,6 @@
       "mode": "tourelle"
     }
   },
-  "style": "terrain"
+  "style": "terrain",
+  "stat": "endurance"
 }

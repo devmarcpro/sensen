@@ -27,5 +27,6 @@
       "vol_mana": 12
     }
   },
-  "style": "soutien"
+  "style": "soutien",
+  "stat": "volonte"
 }

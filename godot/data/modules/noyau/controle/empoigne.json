@@ -20,5 +20,6 @@
   ],
   "forme": null,
   "portee": null,
-  "style": "controle"
+  "style": "controle",
+  "stat": "dexterite"
 }

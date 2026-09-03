@@ -98,6 +98,22 @@ Monter un module en niveau le rend plus puissant ET moins coûteux (puissance : 
 > **La règle qui tient l'ensemble** : une arme magique se paie en **capacité à frapper**, jamais en autre chose. L'orbe frappe moins fort que les poings ; le marteau runique, qui frappe vraiment, ne canalise que ×1,10.
 > **La sonde le garde** : `sonde_canalisation.tscn` échoue si un focus ne canalise pas mieux que les mains nues, si une arme physique ne coûte rien, si l'écart orbe/épée tombe sous 1,5, ou si **deux focus ont la même puissance, le même élément et le même coût**. Et `sonde_armes.tscn` compare désormais aussi ces trois axes — sans quoi elle déclarait un sceptre de jade identique à un sceptre ordinaire, puisqu'ils frappent pareil.
 
+> [!success] Tranché le 2026-09-03 — **chaque noyau monte sur sa propre stat** (designer : « on va retravailler les modules pour que ça rentre dans notre nouveau système »)
+> **Le point de blocage, mesuré.** `degats_sort` lit **une seule stat pour tous les sorts** : `volonte`. Un cri de ralliement, une frappe d'épaule, un tir précis — tout montait sur la volonté. Le système venait pourtant d'acquérir six voies : une classe, une famille d'armes et une construction d'armure par stat. Les **modules étaient la seule pièce qui n'y entrait pas**, et c'est la plus importante : ils sont l'identité du jeu.
+> **Ce qui change** : chaque noyau déclare la stat qui le porte (`stat`), et `degats_sort` la lit au lieu de supposer la volonté. Rien d'autre ne bouge — ni les dés, ni les coûts, ni les écoles élémentaires.
+> **Le tri suit ce que les noyaux disaient déjà**, comme pour les classes : la monnaie et la famille. Un noyau qui coûte du **mana** relève de la **volonté** ; un noyau qui coûte de l'**endurance** relève du corps, et sa famille dit lequel.
+>
+> | stat | noyaux | ce qu'elle porte |
+> |---|---|---|
+> | **volonté** | les 68 noyaux à mana | tout ce qui se paie en mana reste à l'esprit |
+> | **force** | Arme lourde, Espace physique | frappe, charge d'épaule, fauchage, projection, élan, poussée |
+> | **dextérité** | Arme fine, Contrôle physique | estoc, botte, feinte, désarmement, empoigne, rupture |
+> | **endurance** | Défense et Terrain physiques | ancrage, trempe, bombe, tourelle |
+> | **perception** | Ressource d'observation | estimation, traque |
+> | **charisme** | Ressource sociale | pari, offrande |
+>
+> **La règle de conception** : on ne déplace pas un noyau pour équilibrer un tableau. Chaque affectation doit se lire sur ce que le noyau **fait** — un désarmement est une affaire de main, pas de bras ; une estimation est une affaire d'œil. Là où le doute existait, la monnaie a tranché.
+
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Progression par l'usage]]
 - **Alimente** : [[Six types de modules et assemblage]], [[Mana]], [[Vocabulaire des modules — six axes]]

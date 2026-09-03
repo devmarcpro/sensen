@@ -29,5 +29,6 @@
       "chute": true
     }
   },
-  "style": "terrain"
+  "style": "terrain",
+  "stat": "volonte"
 }

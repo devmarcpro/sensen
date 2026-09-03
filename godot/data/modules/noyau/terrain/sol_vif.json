@@ -27,5 +27,6 @@
       "degats": "1d6"
     }
   },
-  "style": "terrain"
+  "style": "terrain",
+  "stat": "volonte"
 }

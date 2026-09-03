@@ -23,5 +23,6 @@
   "effet": {
     "sans_segment": true
   },
-  "style": "assaut"
+  "style": "assaut",
+  "stat": "volonte"
 }

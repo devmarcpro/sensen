@@ -256,7 +256,7 @@ func cout_garde_impact(degats: int, bouclier: bool, competences: Dictionary = {}
 
 ## Les dégâts bruts d'un SORT (designer 2026-09-01) : le miroir de ceux d'une arme —
 ## jet × (focus × école × affinités) + stat/stat_div. Sans focus en main, le facteur vaut 1.
-func degats_sort(stats: Dictionary, competences: Dictionary, vecteur: Dictionary, focus: Dictionary, des: Des, notation: Variant, des_bonus: int = 0) -> Dictionary:
+func degats_sort(stats: Dictionary, competences: Dictionary, vecteur: Dictionary, focus: Dictionary, des: Des, notation: Variant, des_bonus: int = 0, stat_noyau: String = "") -> Dictionary:
 	var cfg: Dictionary = r.degats.get("sort", {})
 	var jet := des.jet(notation, des_bonus)
 	var f := 1.0
@@ -272,8 +272,14 @@ func degats_sort(stats: Dictionary, competences: Dictionary, vecteur: Dictionary
 		for el: String in vecteur.keys():
 			somme += float(vecteur[el]) * (1.0 + float(niveau(competences, "element_" + el)) / 100.0)
 		f *= somme
-	var stat := int(stats.get(str(cfg.get("stat", "volonte")), 0)) / int(r.degats.stat_div)
-	return {"jet": jet, "mult": f, "stat": stat, "bruts": float(jet) * f + float(stat), "des": notation}
+	# CHAQUE NOYAU MONTE SUR SA PROPRE STAT (designer 2026-09-03). On lisait `cfg.stat` — volonte —
+	# pour TOUS les sorts : un cri de ralliement, une frappe d'epaule et un tir precis montaient tous
+	# sur la volonte. Le jeu venait pourtant d'acquerir six voies, une par stat ; les modules etaient la
+	# seule piece qui n'y entrait pas. Le noyau dit desormais sa stat, et `cfg.stat` n'est plus que le
+	# defaut de ceux qui n'en declarent pas.
+	var nom_stat := stat_noyau if not stat_noyau.is_empty() else str(cfg.get("stat", "volonte"))
+	var stat := int(stats.get(nom_stat, 0)) / int(r.degats.stat_div)
+	return {"jet": jet, "mult": f, "stat": stat, "stat_nom": nom_stat, "bruts": float(jet) * f + float(stat), "des": notation}
 
 
 ## Le focus en main : le premier objet équipé dont un tag figure dans degats.sort.focus_tags.

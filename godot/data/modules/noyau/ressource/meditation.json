@@ -27,5 +27,6 @@
       "rompt_si_touche": true
     }
   },
-  "style": "soutien"
+  "style": "soutien",
+  "stat": "volonte"
 }

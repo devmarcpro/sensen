@@ -27,5 +27,6 @@
       "distance": "3"
     }
   },
-  "style": "mobilite"
+  "style": "mobilite",
+  "stat": "force"
 }

@@ -74,6 +74,22 @@
         "string",
         "null"
       ]
+    },
+    "stat": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "force",
+        "dexterite",
+        "endurance",
+        "volonte",
+        "perception",
+        "charisme",
+        null
+      ],
+      "description": "La stat qui porte ce noyau (designer 2026-09-03) : un cri monte sur le charisme, une frappe sur la force. Avant, tous les sorts montaient sur la volonte."
     }
   },
   "required": [

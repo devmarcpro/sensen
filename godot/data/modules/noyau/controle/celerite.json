@@ -24,5 +24,6 @@
     "tempo": -10,
     "cible": "allie"
   },
-  "style": "controle"
+  "style": "controle",
+  "stat": "volonte"
 }

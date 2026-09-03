@@ -28,5 +28,6 @@
       "duree_ticks": 50
     }
   },
-  "style": "terrain"
+  "style": "terrain",
+  "stat": "volonte"
 }

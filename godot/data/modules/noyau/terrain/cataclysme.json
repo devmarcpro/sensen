@@ -31,5 +31,6 @@
     }
   },
   "unique_par_combat": true,
-  "style": "terrain"
+  "style": "terrain",
+  "stat": "volonte"
 }

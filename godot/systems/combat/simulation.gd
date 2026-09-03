@@ -10594,9 +10594,9 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 		type_degats = str(plan.fonct.type_degats)
 	else:
 		# Un sort roule comme un coup d'arme (designer 2026-09-01) : école, affinités, focus et Volonté.
-		d = regles.degats_sort(e.stats_eff, e.competences_eff, plan.elements, regles.focus_de(e.equipement, items), des, plan.des, des_bonus)
+		d = regles.degats_sort(e.stats_eff, e.competences_eff, plan.elements, regles.focus_de(e.equipement, items), des, plan.des, des_bonus, str(plan.get("noyau", {}).get("stat", "")))
 		if Etres.bloque_statuts(e, "relance", statuts_defs):   # Pari : le second résultat s'applique, quel qu'il soit
-			d = regles.degats_sort(e.stats_eff, e.competences_eff, plan.elements, regles.focus_de(e.equipement, items), des, plan.des, des_bonus)
+			d = regles.degats_sort(e.stats_eff, e.competences_eff, plan.elements, regles.focus_de(e.equipement, items), des, plan.des, des_bonus, str(plan.get("noyau", {}).get("stat", "")))
 			_retirer_statut(e, "pari")
 			EventBus.emettre(&"journal", [&"journal.pari", {"nom": e.name_key, "jet": int(d.jet)}])
 	var bruts: float = d.bruts * float(plan.mult) * mult_serments(e)   # les serments tenus paient (point Nen)

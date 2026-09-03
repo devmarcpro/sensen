@@ -26,5 +26,6 @@
       "duree_ticks": 60
     }
   },
-  "style": "controle"
+  "style": "controle",
+  "stat": "volonte"
 }

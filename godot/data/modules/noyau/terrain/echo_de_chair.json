@@ -25,5 +25,6 @@
       "mode": "creature"
     }
   },
-  "style": "terrain"
+  "style": "terrain",
+  "stat": "volonte"
 }

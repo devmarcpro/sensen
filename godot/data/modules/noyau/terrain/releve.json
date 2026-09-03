@@ -25,5 +25,6 @@
       "mode": "releve"
     }
   },
-  "style": "terrain"
+  "style": "terrain",
+  "stat": "volonte"
 }

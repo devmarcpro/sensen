@@ -26,5 +26,6 @@
       "duree_ticks": 15
     }
   },
-  "style": "controle"
+  "style": "controle",
+  "stat": "dexterite"
 }

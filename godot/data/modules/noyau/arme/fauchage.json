@@ -30,5 +30,6 @@
       "duree_ticks": 40
     }
   },
-  "style": "controle"
+  "style": "controle",
+  "stat": "force"
 }

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://sensen_sonde_noyaux_stats"]
+
+[ext_resource type="Script" path="res://scenes/tests/sonde_noyaux_stats.gd" id="1"]
+
+[node name="SondeNoyauxStats" type="Node"]
+script = ExtResource("1")

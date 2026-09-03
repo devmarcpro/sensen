@@ -27,5 +27,6 @@
       "des": 1
     }
   },
-  "style": "terrain"
+  "style": "terrain",
+  "stat": "volonte"
 }

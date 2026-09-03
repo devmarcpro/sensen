@@ -26,5 +26,6 @@
       "duree_ticks": 200
     }
   },
-  "style": "mobilite"
+  "style": "mobilite",
+  "stat": "volonte"
 }

@@ -20,5 +20,6 @@
   ],
   "forme": null,
   "portee": null,
-  "style": "assaut"
+  "style": "assaut",
+  "stat": "force"
 }

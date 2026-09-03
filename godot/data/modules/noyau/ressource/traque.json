@@ -26,5 +26,6 @@
       "duree_ticks": 100
     }
   },
-  "style": "ruse"
+  "style": "ruse",
+  "stat": "perception"
 }

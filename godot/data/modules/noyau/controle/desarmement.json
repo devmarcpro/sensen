@@ -25,5 +25,6 @@
       "desarme": true
     }
   },
-  "style": "controle"
+  "style": "controle",
+  "stat": "dexterite"
 }

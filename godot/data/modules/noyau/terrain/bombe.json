@@ -25,5 +25,6 @@
       "mode": "bombe"
     }
   },
-  "style": "terrain"
+  "style": "terrain",
+  "stat": "endurance"
 }

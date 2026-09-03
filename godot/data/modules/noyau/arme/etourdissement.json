@@ -23,5 +23,6 @@
   "effet": {
     "tempo": 6
   },
-  "style": "controle"
+  "style": "controle",
+  "stat": "force"
 }
