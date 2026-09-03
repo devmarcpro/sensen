@@ -32,17 +32,20 @@
       "type": "object"
     },
     "ia": {
-      "type": "object",
-      "properties": {"soin_seuil": {"type": "number"}, "reculer_distance": {"type": "integer"}, "guet_distance": {"type": "integer"}},
-      "required": ["soin_seuil", "reculer_distance", "guet_distance"]
+      "type": "object"
     },
     "eclairage": {
       "type": "object",
-      "properties": {"donjon_ambiante": {"type": "integer", "minimum": 0, "maximum": 15}},
-      "required": ["donjon_ambiante"]
-    },
-    "ia": {
-      "type": "object"
+      "properties": {
+        "donjon_ambiante": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 15
+        }
+      },
+      "required": [
+        "donjon_ambiante"
+      ]
     },
     "mana": {
       "type": "object"
@@ -52,8 +55,14 @@
     },
     "donjon": {
       "type": "object",
-      "properties": {"temps_a_l_action": {"type": "boolean"}},
-      "required": ["temps_a_l_action"]
+      "properties": {
+        "temps_a_l_action": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "temps_a_l_action"
+      ]
     },
     "anti_stunlock": {
       "type": "object"
@@ -121,7 +130,7 @@
     "capacites": {
       "type": "object"
     },
-    "camp": {
+    "sang_froid": {
       "type": "object"
     }
   },

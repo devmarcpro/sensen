@@ -45,7 +45,7 @@
     "telegraphe_seuil_ticks": 10
   },
   "endurance": {
-    "_doc": "Endurance (A.6.1) ; epuisement_mult : deficit d'endurance d'un sort inflige en PV x mult (le pendant de la surchauffe du mana)",
+    "_doc": "Endurance (A.6.1) ; epuisement_mult : deficit d'endurance d'un sort inflige en PV x mult (le pendant de la surchauffe du mana) | VIGUEUR (designer 2026-09-03) : la barre n'a plus un plafond fixe, elle est portee par la stat FORCE — max_base + force x max_par_force. A force 10 elle vaut 100, la valeur fixe d'avant : un personnage moyen ne sent rien, ce sont les extremes qui parlent. `max` reste comme repli pour tout ce qui n'a pas de stats sous la main.",
     "max": 100,
     "attaque": 8,
     "lourde": 18,
@@ -56,7 +56,9 @@
     "epuisement_mult": 1,
     "competence": "recuperation",
     "regen_par_niveau": 0.05,
-    "xp_periode_ticks": 20
+    "xp_periode_ticks": 20,
+    "max_base": 60,
+    "max_par_force": 4
   },
   "garde": {
     "_doc": "Garde en posture · Décision — Boucliers",
@@ -212,8 +214,9 @@
     }
   },
   "vision": {
-    "_doc": "Hauteur de terrain ±10 : un relief plus haut que la ligne tireur→cible coupe la vue",
-    "hauteur_oeil": 1
+    "_doc": "Hauteur de terrain ±10 : un relief plus haut que la ligne tireur→cible coupe la vue | La PERCEPTION allonge le tir (designer 2026-09-03, solution B : chaque stat desserre une rarete qui existe deja). Ce bloc etait le seul des six a etre vide — la force avait `poids.par_force`, le charisme `compagnons.par_charisme`, l'endurance et la volonte leurs barres. Une arme a projectile gagne perception x portee_par_perception tuiles ; le contact n'y gagne rien.",
+    "hauteur_oeil": 1,
+    "portee_par_perception": 0.5
   },
   "eclairage": {
     "_doc": "Éclairage (2026-08-30) : niveau de lumière ambiante (0-15) de chaque tuile d'un étage de donjon, sous les sources ; un thème peut le remplacer par lumiere_ambiante",
@@ -1379,5 +1382,23 @@
     "friction_max": 1.15,
     "mana_conductivite_div": 140.0,
     "transparence_seuil": 50
+  },
+  "sang_froid": {
+    "_doc": "Sang-froid (designer 2026-09-03) : la troisieme monnaie, celle du groupe perception + dexterite. La DEXTERITE en DEPEND — feintes, desarmements, empoignes sont tout son combat — et porte donc la reserve ; la PERCEPTION s'en sert en BONUS, par-dessus sa propre rarete qui est la portee et l'information. Son comportement est l'INVERSE des deux autres : elle ne se gagne pas en agissant, elle se gagne en NE bougeant PAS. Hors combat elle revient seule ; en combat il faut etre immobile depuis `seuil_ticks` pour qu'elle monte — celui qui se replace perd son sang-froid, celui qui tient sa ligne le construit. C'est le tireur qui retient son souffle, et c'est aussi ce qui donne enfin un prix a la vitesse de la dexterite. Dépenser a vide se paie en PV, comme la surchauffe du mana et l'epuisement de la vigueur.",
+    "max_base": 20,
+    "regen_par_tick": 1,
+    "seuil_ticks": 6,
+    "epuisement_mult": 2,
+    "max_par_dexterite": 3
+  },
+  "monnaies": {
+    "_doc": "Les monnaies qu'un plan de capacite peut porter, et que `_payer` sait payer. La liste est ici pour que le code ET les tests la lisent au meme endroit : une monnaie ajoutee sans etre declaree ici doit echouer, une monnaie declaree doit etre payable.",
+    "liste": [
+      "mana",
+      "endurance",
+      "sang_froid",
+      "sante",
+      "or"
+    ]
   }
 }

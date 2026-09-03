@@ -14,12 +14,13 @@
   "power_base": null,
   "cout_ticks": 8,
   "cout_mana": 0,
-  "cout_endurance": 12,
+  "cout_endurance": 0,
   "effets": [
     "saisie"
   ],
   "forme": null,
   "portee": null,
   "style": "controle",
-  "stat": "dexterite"
+  "stat": "dexterite",
+  "cout_sang_froid": 12
 }

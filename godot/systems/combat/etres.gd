@@ -31,10 +31,12 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 		"corps": {"stats": stats.duplicate(), "silhouette": def.corps.silhouette},
 		"sante": regles.sante_max(stats),
 		"sante_max": regles.sante_max(stats),
-		"endurance": int(regles.r.endurance.max),
-		"endurance_max": int(regles.r.endurance.max),
+		"endurance": regles.vigueur_max(stats),
+		"endurance_max": regles.vigueur_max(stats),
 		"mana": regles.mana_max(stats),
 		"mana_max": regles.mana_max(stats),
+		"sang_froid": regles.sang_froid_max(stats),
+		"sang_froid_max": regles.sang_froid_max(stats),
 		"tick_endurance": 0,                       # dernier tick où la régénération a été appliquée
 		"equipement": equip,
 		"ratelier": def.get("ratelier", []).duplicate(),
@@ -244,9 +246,14 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 		endurance_bonus += int(regles.r.get("talents", {}).get("chair_de_mana", {}).get("endurance_max", -20))
 	if talent_race != null and str(talent_race) == "oeil_de_la_pierre" and not ("detection_filons" in tags):
 		tags.append("detection_filons")
-	var end_max: int = int(regles.r.endurance.max) + endurance_bonus
+	var end_max: int = regles.vigueur_max(stats) + endurance_bonus
 	e.endurance = mini(int(e.endurance), end_max) if int(e.endurance_max) != end_max else int(e.endurance)
 	e.endurance_max = end_max
+	# Le sang-froid suit la dextérité comme la vigueur suit la force : la barre du propriétaire de la
+	# monnaie bouge quand sa stat bouge, et ce qu'on avait dedans est rogné si le plafond descend.
+	var sf_max := regles.sang_froid_max(stats)
+	e["sang_froid"] = mini(int(e.get("sang_froid", sf_max)), sf_max) if int(e.get("sang_froid_max", -1)) != sf_max else int(e.get("sang_froid", sf_max))
+	e["sang_froid_max"] = sf_max
 	# Les maxima dérivés des stats effectives ; la valeur courante est clampée, plancher 1 pour la santé.
 	e.sante_max = maxi(1, regles.sante_max(stats) + sante_bonus - int(e.get("erosion", 0)))   # Érosion : PV max rognés pour le combat
 	e.sante = clampi(int(e.sante), 1, int(e.sante_max)) if int(e.sante) > 0 else int(e.sante)

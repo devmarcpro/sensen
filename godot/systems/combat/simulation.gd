@@ -7883,6 +7883,14 @@ func _regenerer(e: Dictionary, tick: int) -> void:
 			if des.reel() < float(regles.r.mana.chance):
 				e.mana = mini(e.mana_max, e.mana + roundi((float(regles.r.mana.regen_base) + float(e.competences_eff.get("meditation", 0)) * float(regles.r.mana.regen_par_meditation)) * (float(regles.r.talents.chair_de_mana.mana_regen_mult) if a_talent(e, "chair_de_mana") else 1.0)))
 				gagner_xp(e, "meditation", 1)
+		# Sang-froid : l'inverse des deux autres monnaies. Hors combat elle revient seule ; EN combat
+		# elle ne monte que si le corps est immobile depuis `seuil_ticks` — celui qui se replace perd
+		# son sang-froid, celui qui tient sa ligne le construit. On réutilise `immobile_depuis`, que la
+		# canalisation et Pied ferme lisent déjà : un seul compteur d'immobilité pour tout le jeu.
+		var sf_r: Dictionary = regles.r.get("sang_froid", {})
+		var immobile_sf := tick - int(e.get("immobile_depuis", tick))
+		if not en_combat(e) or immobile_sf >= int(sf_r.get("seuil_ticks", 6)):
+			e["sang_froid"] = mini(int(e.get("sang_froid_max", 0)), int(e.get("sang_froid", 0)) + int(round(float(ecoules) * float(sf_r.get("regen_par_tick", 1)))))
 		var f_faim: Dictionary = regles.r.faim
 		var faim_e := int(e.get("faim", 100))
 		if e.get("mecaniques", {}).has("regen_sante") and not en_combat(e) and faim_e >= int(f_faim.seuil_stats):   # Effets d'équipement : 1 PV toutes les 200 × 100 / pct ticks ; Faim : plus de régén sous seuil_stats
@@ -8447,7 +8455,7 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 
 ## Portée de l'arme, allongée par l'affixe « +N allonge ».
 func _portee_effective(e: Dictionary, arme: Dictionary, fonct: Dictionary) -> Vector2i:
-	var p := regles.portee_de(fonct)
+	var p := regles.portee_de(fonct, e.get("stats_eff", {}))
 	for ax in Loot.affixes_de_type(arme, affixes_defs, "meca_allonge"):
 		p.y += int(ax.params.n)
 	return p
@@ -9252,7 +9260,7 @@ func _executer_action_creature(e: Dictionary, action: Dictionary, cible: Diction
 				var arme := Etres.arme(e, items)
 				if not arme.is_empty() and not cible.is_empty() and cible.vivant:
 					var fonct: Dictionary = fonctionnalites.get(arme.functionality, {})
-					if _cible_atteignable(e, cible, regles.portee_de(fonct), true):
+					if _cible_atteignable(e, cible, regles.portee_de(fonct, e.get("stats_eff", {})), true):
 						_frapper_arme(e, cible, arme, fonct, false, int(action.cout_ticks))
 			"fuite":
 				e.fuite = true
@@ -9956,6 +9964,14 @@ func _payer(e: Dictionary, plan: Dictionary) -> void:
 				if degats_e > 0:
 					EventBus.emettre(&"journal", [&"journal.epuisement", {"nom": e.name_key, "deficit": deficit_e, "degats": degats_e}])
 					_appliquer_degats(e, degats_e, "", {"surchauffe": true})
+		"sang_froid":   # Le sang-froid se paie comme les deux autres : dépenser à vide coûte des PV.
+			var deficit_s: int = maxi(0, int(plan.ressource) - int(e.get("sang_froid", 0)))
+			e["sang_froid"] = maxi(0, int(e.get("sang_froid", 0)) - int(plan.ressource))
+			if deficit_s > 0:
+				var degats_s := roundi(float(deficit_s) * float(regles.r.sang_froid.get("epuisement_mult", 2)))
+				if degats_s > 0:
+					EventBus.emettre(&"journal", [&"journal.sang_froid_rompu", {"nom": e.name_key, "deficit": deficit_s, "degats": degats_s}])
+					_appliquer_degats(e, degats_s, "", {"surchauffe": true})
 
 
 ## Exécute une capacité : forme → cibles (friendly fire des zones), puis les effets du noyau.
@@ -11253,7 +11269,7 @@ func _meilleure_attaque(e: Dictionary, cible: Dictionary) -> Dictionary:
 	var arme := Etres.arme(e, items)
 	if not arme.is_empty():
 		var fonct: Dictionary = fonctionnalites.get(arme.functionality, {})
-		if _cible_atteignable(e, cible, regles.portee_de(fonct), true):
+		if _cible_atteignable(e, cible, regles.portee_de(fonct, e.get("stats_eff", {})), true):
 			var f := Des.fourchette(fonct.degats_des)
 			var m := float(f.x + f.y) * 0.5 * float(arme.durete_base) / float(regles.r.degats.durete_reference) + _bonus_chaine_ia(e, vecteur_arme(arme))
 			if m > moy:

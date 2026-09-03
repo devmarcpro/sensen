@@ -2176,7 +2176,7 @@ status.ancrage.name,Ancrage
 status.reflet.name,Reflet
 status.voile.name,Voile
 monnaie.mana,mana
-monnaie.endurance,endurance
+monnaie.endurance,vigueur
 monnaie.sante,PV
 monnaie.or,or
 journal.monnaie_bloquee,"{nom} ne peut plus puiser dans son {monnaie}"
@@ -2849,3 +2849,6 @@ item.craft_vielle.name,Vielle
 functionality.cymbales.name,Cymbales
 item.craft_cymbales.name,Cymbales
 competence.armes_a_chaine.name,Armes à chaîne
+monnaie.sang_froid,sang-froid
+journal.sang_froid_rompu,"{nom} perd son sang-froid : {deficit} manquants, {degats} PV"
+barre.sang_froid,Sang-froid

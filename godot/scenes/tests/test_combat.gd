@@ -333,7 +333,43 @@ func test_simulation() -> void:
 	var s := nouvelle_sim("plaine_au_talus")
 	var j := joueur_de(s)
 	verifier(not j.is_empty() and j.controle == "joueur" and j.def == "aventurier", "le joueur est un être comme un autre (contrôle = attribut)")
-	verifier(j.sante_max == 68 and j.endurance == 100, "PV 20 + 12×4 = 68, endurance 100")
+	# Les deux barres ne sont plus des constantes : les PV suivent l'endurance, la vigueur suit la force
+	# (designer 2026-09-03, la philosophie des paires). Ce qui compte n'est pas leur valeur mais QUI les
+	# fait bouger — un test qui gèle 68 et 100 ne dit rien le jour où la formule change.
+	var st_j: Dictionary = j.corps.stats
+	var st_f: Dictionary = st_j.duplicate()
+	st_f.force = int(st_f.force) + 1
+	var st_e: Dictionary = st_j.duplicate()
+	st_e.endurance = int(st_e.endurance) + 1
+	verifier(j.sante_max == s.regles.sante_max(st_j) and j.endurance == s.regles.vigueur_max(st_j), "les PV et la vigueur sont ceux des formules, pas des constantes")
+	verifier(s.regles.vigueur_max(st_f) > s.regles.vigueur_max(st_j) and s.regles.sante_max(st_f) == s.regles.sante_max(st_j), "+1 Force agrandit la vigueur et ne touche pas aux PV")
+	verifier(s.regles.sante_max(st_e) > s.regles.sante_max(st_j) and s.regles.vigueur_max(st_e) == s.regles.vigueur_max(st_j), "+1 Endurance agrandit les PV et ne touche pas à la vigueur")
+
+	# --- la troisième monnaie (designer 2026-09-03) -----------------------------------------------
+	# Le sang-froid appartient à la dextérité, qui en dépend, et la perception s'en sert en bonus.
+	var st_d: Dictionary = st_j.duplicate()
+	st_d.dexterite = int(st_d.dexterite) + 1
+	verifier(s.regles.sang_froid_max(st_d) > s.regles.sang_froid_max(st_j), "+1 Dextérité agrandit le sang-froid")
+	verifier(int(j.get("sang_froid_max", 0)) == s.regles.sang_froid_max(j.stats_eff), "le personnage naît avec sa barre de sang-froid")
+	var plan_sf := s.capacites.assembler(["estoc"], 10, "1d4", {}, j.competences_eff)
+	verifier(str(plan_sf.monnaie) == "sang_froid" and int(plan_sf.ressource) > 0, "un noyau de dextérité se paie en sang-froid (%s)" % str(plan_sf.monnaie))
+	# Dépenser à vide n'est pas refusé : ça se paie en PV, comme la surchauffe du mana.
+	j["sang_froid"] = 0
+	var pv_sf: int = int(j.sante)
+	s._payer(j, plan_sf)
+	verifier(int(j.sante) < pv_sf, "sang-froid à vide : le déficit se paie en PV (%d → %d)" % [pv_sf, int(j.sante)])
+	# Et il ne remonte qu'à l'immobilité : c'est l'inverse des deux autres monnaies.
+	j["immobile_depuis"] = s.horloge_monde.ticks - 100
+	j.tick_endurance = s.horloge_monde.ticks
+	s._regenerer(j, s.horloge_monde.ticks + 10)
+	verifier(int(j.get("sang_froid", 0)) > 0, "immobile, le sang-froid remonte (%d)" % int(j.get("sang_froid", 0)))
+
+	# --- la perception allonge le tir, et seulement le tir (solution B) ----------------------------
+	var arc_f: Dictionary = GameData.entree("functionalities", "arc")
+	var epee_f: Dictionary = GameData.entree("functionalities", "epee")
+	var vue: Dictionary = {"perception": 20}
+	verifier(s.regles.portee_de(arc_f, vue).y > s.regles.portee_de(arc_f).y, "20 de Perception allongent la portée de l'arc")
+	verifier(s.regles.portee_de(epee_f, vue).y == s.regles.portee_de(epee_f).y, "voir mieux n'allonge pas le bras : l'épée ne gagne rien")
 	verifier(s.vivants().size() == 4, "1 joueur + 3 loups")
 	# Hors combat : le joueur attend une intention dès que l'horloge du monde le rend dû.
 	s.horloge_monde.avancer(1)
@@ -2790,7 +2826,7 @@ func test_talents() -> void:
 	j.race = "elfe"
 	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
 	var end0 := int(j.endurance_max)
-	verifier(s.a_talent(j, "chair_de_mana") and end0 == int(s.regles.r.endurance.max) - 20, "Chair de mana : endurance max −20 (%d)" % end0)
+	verifier(s.a_talent(j, "chair_de_mana") and end0 == s.regles.vigueur_max(j.stats_eff) - 20, "Chair de mana : vigueur max −20 (%d)" % end0)
 	j.mana = 0
 	var sante0 := int(j.sante)
 	j.endurance = 50
@@ -3006,7 +3042,7 @@ func test_creation_de_sorts() -> void:
 			continue
 		if plan.noyau.is_empty() or int(plan.ticks) <= 0 or int(plan.portee.x) > int(plan.portee.y) or int(plan.taille) < 0:
 			incoherents.append(nid)
-		elif int(plan.ressource) < 0 or (not str(plan.monnaie).is_empty() and not (str(plan.monnaie) in ["mana", "endurance", "sante", "or"])):
+		elif int(plan.ressource) < 0 or (not str(plan.monnaie).is_empty() and not (str(plan.monnaie) in Array(s.regles.r.monnaies.liste))):
 			incoherents.append(nid + " (monnaie " + str(plan.monnaie) + ")")
 	verifier(noyaux_ko.is_empty(), "les 86 noyaux s'assemblent seuls (%s)" % str(noyaux_ko.slice(0, 4)))
 	verifier(incoherents.is_empty(), "chacun rend un plan cohérent — ticks, portée, taille, monnaie (%s)" % str(incoherents.slice(0, 4)))
@@ -6302,12 +6338,21 @@ func test_cycle_et_meteo() -> void:
 	verifier(is_equal_approx(s.heure(), 5.0) or absf(s.heure() - 5.0) < 0.2, "réveil à l'aube, 5 h (%.1f h)" % s.heure())
 	# Le froid : un être nu par −20 °C prend des dégâts par palier.
 	j.equipement.clear()
-	j["ecart_confort"] = -25.0
 	var end0: int = j.endurance
+	# On MESURE les deux régénérations au lieu de figer un nombre : la même durée, le même personnage,
+	# une fois au confort et une fois à −25 °C. Le seuil en dur passait au vert par hasard — il a cassé
+	# le jour où la vigueur max a cessé d'être une constante, parce que le personnage récupérait plus
+	# souvent, gagnait plus vite la compétence Récupération, et dépassait le chiffre gelé.
+	j["ecart_confort"] = 0.0
 	j.endurance = 0
 	j.tick_endurance = s.horloge_monde.ticks
 	s._regenerer(j, s.horloge_monde.ticks + 10)
-	verifier(int(j.endurance) <= 10, "hors confort, l'endurance régénère moitié moins (%d)" % int(j.endurance))
+	var regen_confort: int = int(j.endurance)
+	j["ecart_confort"] = -25.0
+	j.endurance = 0
+	j.tick_endurance = s.horloge_monde.ticks
+	s._regenerer(j, s.horloge_monde.ticks + 10)
+	verifier(int(j.endurance) < regen_confort, "hors confort, la vigueur régénère moins qu'au confort (%d contre %d)" % [int(j.endurance), regen_confort])
 	s.monde.fermer()
 
 
@@ -7334,7 +7379,7 @@ func test_loot() -> void:
 	j.compteur = s.horloge_monde.ticks
 	s.horloge_monde.avancer(1)
 	s.intention(j.id, {"type": "equiper", "objet": amulette.uid})
-	verifier(j.endurance_max == 110 and j.chaine.capacite == 6, "endurance max 110, jauge à 6 segments")
+	verifier(j.endurance_max == s.regles.vigueur_max(j.stats_eff) + 10 and j.chaine.capacite == 6, "l'affixe ajoute 10 à la vigueur du personnage, jauge à 6 segments")
 	# Affixe rythmique : « une attaque sur 2 porte Feu » — le 2e coup pose un segment Feu
 	var epee := s.generer_objet("proto_epee", 2, {}, "rare", 1)
 	epee.affixes = [{"id": "cadence_element", "params": {"n": 2, "element": "feu"}, "compteur": 0, "etat": {}}]

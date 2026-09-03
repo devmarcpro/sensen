@@ -1616,8 +1616,9 @@ func _apercu_personnage(fiche: Dictionary) -> void:
 	var stats: Dictionary = fiche.corps.stats
 	barres_perso.valeurs = [
 		["sante", regles.sante_max(stats)],
-		["endurance", int(GameData.config("combat_rules").endurance.max)],
+		["endurance", regles.vigueur_max(stats)],
 		["mana", regles.mana_max(stats)],
+		["sang_froid", regles.sang_froid_max(stats)],
 	]
 	barres_perso.queue_redraw()
 

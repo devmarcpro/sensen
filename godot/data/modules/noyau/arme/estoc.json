@@ -14,7 +14,7 @@
   "power_base": "arme",
   "cout_ticks": 0,
   "cout_mana": 0,
-  "cout_endurance": 9,
+  "cout_endurance": 0,
   "effets": [
     "degats"
   ],
@@ -24,5 +24,6 @@
     "ignore_armure_points": 4
   },
   "style": "assaut",
-  "stat": "dexterite"
+  "stat": "dexterite",
+  "cout_sang_froid": 9
 }

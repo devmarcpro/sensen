@@ -242,3 +242,58 @@ s'engage, plus il est exclusif — elle change simplement de monnaie :
 C'est le genre d'erreur qu'aucune sonde ne trouve : chaque valeur était valide, l'échelle était
 cohérente, l'audit passait au vert. Il fallait qu'une décision de design vienne dire à quelle monnaie
 la voie appartenait pour que le contresens devienne visible.
+
+### Trois monnaies, et la philosophie des paires (designer 2026-09-03)
+
+Le designer groupe : **mana** pour volonté + charisme, une monnaie pour force + endurance, une pour
+perception + dextérité. Puis il corrige la lecture que j'en avais faite :
+
+> « C'est pas vraiment qu'une stat tient et l'autre dépense, mais plutôt que **volonté est dépendante
+> du mana pour le combat alors que charisme s'en sert en bonus** — c'est plutôt la philosophie des
+> paires. »
+
+C'est une correction de fond, pas de vocabulaire. Ma version faisait de la paire un **couple
+mécanique** : l'une remplit, l'autre vide, personne ne se suffit. La sienne en fait un **rapport de
+dépendance** : chaque monnaie a un **propriétaire**, dont tout le combat en dépend et qui porte donc
+la réserve, et un **invité**, qui s'en sert par-dessus sa propre façon de se battre.
+
+| monnaie | le propriétaire (en dépend, porte la réserve) | l'invité (s'en sert en bonus) |
+|---|---|---|
+| mana | volonté — le mage ne fait que ça | charisme |
+| vigueur | force — chaque coup la paie | endurance |
+| sang-froid | dextérité — feintes, désarmements, empoignes | perception |
+
+Et l'invité n'est pas démuni, parce que **la solution B tient en même temps** : chaque stat desserre
+une rareté qui existe déjà. L'endurance a les PV, le charisme a les corps alliés, la perception a la
+portée. Le propriétaire a la barre, l'invité a la rareté — les deux systèmes ne s'excluent pas, ils
+se complètent.
+
+```
+mana_max      = 20 + volonté   × 3     (inchangé)
+vigueur_max   = 60 + force     × 4     (avant : un plafond FIXE de 100)
+sangfroid_max = 20 + dextérité × 3     (nouveau)
+santé_max     = 20 + endurance × 4     (inchangé — c'est la rareté de l'endurance)
+```
+
+**Le sang-froid est le troisième comportement, et il est l'inverse des deux autres.** La vigueur
+revient à 2/tick — elle limite ton *rythme*. Le mana revient 160× plus lentement — il limite ton
+*budget* sur un étage. Le sang-froid, lui, **ne se gagne pas en agissant : il se gagne en ne bougeant
+pas.** Hors combat il revient seul ; en combat il ne monte que si le corps est immobile depuis six
+ticks. Celui qui se replace perd son sang-froid, celui qui tient sa ligne le construit. On réutilise
+`immobile_depuis`, que la canalisation et Pied ferme lisent déjà : un seul compteur d'immobilité pour
+tout le jeu.
+
+Huit noyaux changent de monnaie — les six de dextérité (estoc, botte, feinte, désarmement, empoigne,
+rupture) et les deux de perception (estimation, traque). Dépenser à vide se paie en PV, comme la
+surchauffe du mana et l'épuisement de la vigueur.
+
+**Ce que je n'ai pas fait, et pourquoi.** La monnaie s'appelle « vigueur » à l'écran mais sa clé
+interne reste `endurance` : le renommage touchait 92 fichiers de données et 118 endroits du code, dont
+le HUD, au moment même où j'ajoutais une monnaie. Le gain était la clarté du nom, le risque était de
+casser l'existant — j'ai pris le nom d'affichage et laissé la clé. C'est une dette, elle est écrite
+ici.
+
+**Et la perception a enfin sa rareté.** Le bloc `vision` était le seul des six à être vide — il ne
+contenait qu'une hauteur d'œil, quand la force avait `poids.par_force` et le charisme
+`compagnons.par_charisme` depuis toujours. Une arme à projectile gagne désormais
+`perception × 0,5` tuiles de portée. Le contact n'y gagne rien : voir mieux n'allonge pas le bras.

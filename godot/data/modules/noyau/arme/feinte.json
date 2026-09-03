@@ -14,7 +14,7 @@
   "power_base": null,
   "cout_ticks": 4,
   "cout_mana": 0,
-  "cout_endurance": 7,
+  "cout_endurance": 0,
   "effets": [
     "statut"
   ],
@@ -27,5 +27,6 @@
     }
   },
   "style": "controle",
-  "stat": "dexterite"
+  "stat": "dexterite",
+  "cout_sang_froid": 7
 }

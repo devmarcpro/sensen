@@ -53,6 +53,26 @@ func mana_max(stats: Dictionary) -> int:
 	return int(r.stats.mana_max_base) + int(stats.volonte) * int(r.stats.mana_max_par_volonte)
 
 
+## Les trois monnaies, une par groupe de deux stats (designer 2026-09-03). La philosophie de la paire
+## n'est PAS « l'une tient, l'autre dépense » — le designer a corrigé : « la volonté est DÉPENDANTE du
+## mana pour le combat, alors que le charisme s'en sert en BONUS ». Chaque monnaie a donc un
+## propriétaire, dont tout le combat en dépend et qui porte la réserve, et un invité, qui s'en sert
+## par-dessus sa propre façon de se battre :
+##
+##     mana         volonté dépend (le mage ne fait que ça)   · charisme en bonus
+##     vigueur      force dépend (chaque coup la paie)        · endurance en bonus
+##     sang-froid   dextérité dépend (feintes, désarmements)  · perception en bonus
+##
+## Et l'invité n'est pas démuni pour autant : il a sa propre rareté (les PV pour l'endurance, les corps
+## alliés pour le charisme, la portée et l'information pour la perception).
+func vigueur_max(stats: Dictionary) -> int:
+	return int(r.endurance.get("max_base", 60)) + int(stats.force) * int(r.endurance.get("max_par_force", 4))
+
+
+func sang_froid_max(stats: Dictionary) -> int:
+	return int(r.sang_froid.get("max_base", 20)) + int(stats.dexterite) * int(r.sang_froid.get("max_par_dexterite", 3))
+
+
 # ---------------------------------------------------------------- tempo
 
 ## `attaque : 10 / vitesse_arme` ticks, ×2 pour la lourde (Boucle de tick).
@@ -134,14 +154,23 @@ func palier_qualite(q: float) -> String:
 
 
 ## Portée en tuiles de Chebyshev : [min, floor(max)] (décision du 2026-08-26, Stats d'armes).
-func portee_de(fonct: Dictionary) -> Vector2i:
+##
+## La PERCEPTION allonge le tir (designer 2026-09-03) : c'est la rareté que sa voie desserre, et c'est
+## celle que le bloc `vision` laissait vide — il ne contenait qu'une hauteur d'œil. Une arme de jet
+## gagne `perception × portee_par_perception` tuiles ; le contact n'y gagne rien, parce que voir mieux
+## n'allonge pas le bras. Sans stats, on rend la portée nue : les appels qui n'ont pas de porteur sous
+## la main (l'IA qui évalue une arme au sol, l'affichage d'une fiche) lisent la valeur de base.
+func portee_de(fonct: Dictionary, stats: Dictionary = {}) -> Vector2i:
 	# Le maximum se lisait en dur : une fonctionnalité absente (objet non guerrier en main) arrêtait le
 	# tick. Sans portée connue, on est au contact — la valeur d'un poing.
-	return Vector2i(int(fonct.get("portee_min", 1)), int(floorf(float(fonct.get("portee", 1.0)))))
+	var maxi_p := floorf(float(fonct.get("portee", 1.0)))
+	if bool(fonct.get("projectile", false)) and not stats.is_empty():
+		maxi_p += floorf(float(stats.get("perception", 0)) * float(r.get("vision", {}).get("portee_par_perception", 0.0)))
+	return Vector2i(int(fonct.get("portee_min", 1)), int(maxi_p))
 
 
-func a_portee(fonct: Dictionary, d: int) -> bool:
-	var p := portee_de(fonct)
+func a_portee(fonct: Dictionary, d: int, stats: Dictionary = {}) -> bool:
+	var p := portee_de(fonct, stats)
 	return d >= p.x and d <= p.y
 
 

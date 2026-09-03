@@ -13,7 +13,7 @@
   "element_special": null,
   "power_base": null,
   "cout_ticks": 4,
-  "cout_mana": 8,
+  "cout_mana": 0,
   "cout_endurance": 0,
   "effets": [
     "statut"
@@ -27,5 +27,6 @@
     }
   },
   "style": "ruse",
-  "stat": "perception"
+  "stat": "perception",
+  "cout_sang_froid": 8
 }

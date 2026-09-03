@@ -133,9 +133,13 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 					var sf_sup := 1.0 + float(niveaux.get(id, 0)) * par_niveau
 					# Un sort a une monnaie (celle de son premier noyau) ; un noyau de l'autre monnaie paie dans
 					# celle du sort, 1 pour 1 — rien n'est gratuit (Six types de modules).
-					var cout_sup: int = int(m.get("cout_mana", 0)) if int(m.get("cout_mana", 0)) > 0 else int(m.get("cout_endurance", 0))
+					var cout_sup: int = int(m.get("cout_mana", 0))
+					if cout_sup == 0:
+						cout_sup = int(m.get("cout_endurance", 0))
+					if cout_sup == 0:
+						cout_sup = int(m.get("cout_sang_froid", 0))
 					if plan.monnaie == "":
-						plan.monnaie = "mana" if int(m.get("cout_mana", 0)) > 0 else ("endurance" if cout_sup > 0 else "")
+						plan.monnaie = _monnaie_de(m)
 					plan.ressource += roundi(float(cout_sup) / sf_sup)
 					continue
 				plan.noyau = m
@@ -153,6 +157,9 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				elif int(m.get("cout_endurance", 0)) > 0:
 					plan.monnaie = "endurance"
 					plan.ressource = roundi(float(m.cout_endurance) / sf_noyau)
+				elif int(m.get("cout_sang_froid", 0)) > 0:
+					plan.monnaie = "sang_froid"
+					plan.ressource = roundi(float(m.cout_sang_froid) / sf_noyau)
 				plan.parametres = m.get("effet", {}).duplicate()
 			"forme":
 				if not plan.forme.is_empty():
@@ -455,3 +462,16 @@ static func cout_condition(bonus: Dictionary) -> int:
 	if prix <= 0.0:
 		return 0
 	return maxi(int(c.get("cout_min", 1)), int(round(prix)))
+
+
+## La monnaie d'un noyau : celle du coût qu'il porte. Trois monnaies depuis le 2026-09-03 — mana pour
+## le groupe volonté/charisme, endurance (la « vigueur ») pour force/endurance, sang-froid pour
+## perception/dextérité. Un noyau n'en porte jamais deux.
+func _monnaie_de(m: Dictionary) -> String:
+	if int(m.get("cout_mana", 0)) > 0:
+		return "mana"
+	if int(m.get("cout_endurance", 0)) > 0:
+		return "endurance"
+	if int(m.get("cout_sang_froid", 0)) > 0:
+		return "sang_froid"
+	return ""
