@@ -17,12 +17,19 @@ etape: 10
 
 ## 1. Un écart de quatre-vingt-quatre entre le meilleur et le pire sort de classe
 
-Même robot, même graine, même équipement, huit mille images :
+> [!error] Résolu le 2026-09-03 — **le robot se tuait lui-même, le jeu n'y était pour rien**
+> J'avais rapporté que le robot armé de sorts mourait trois fois à l'étage 1 quand le même robot sans sorts descendait et faisait vingt tués, et j'en avais tiré des conclusions sur les sorts. La dernière ligne de son journal disait pourtant tout : « **SURCHAUFFE : 9 de mana manquant → 18 PV** », puis « tombe » — **combat déjà gagné, aucun ennemi en vue**.
+> Lancer à sec n'est pas *refusé* par le jeu : c'est la **surchauffe**, qui prend le déficit en points de vie, doublé. Le robot tirait un sort au hasard une fois sur deux sans jamais regarder son mana, et se suicidait. Ses trois morts étaient portées au compte de la difficulté du donjon ; **aucune** n'était due aux ennemis.
+> **Après correction du robot** — il vérifie qu'il peut payer —, même graine, même équipement :
+>
+> | profil | étages | tués | morts | PV à la fin |
+> |---|---|---|---|---|
+> | 3 objets, 0 sort | 1 | 20 | 1 | 68/68 |
+> | 3 objets, **3 sorts** | **1** | **22** | 2 | 63/68 |
+>
+> Les deux profils se valent. **Un robot qui joue comme aucun humain ne joue ne mesure rien** — et il m'a fait écrire deux conclusions fausses d'affilée sur le même sujet.
 
-| profil | étages descendus | tués | coups portés |
-|---|---|---|---|
-| 3 objets, **0 sort** | 1 | **20** | 88 (fin à 68/68 PV) |
-| 3 objets, **3 sorts** | 0 | 1 | 8 — et 15 sorts lancés |
+**Ce qui reste, et qui est réel.** Le robot n'a lancé que **six sorts en huit mille images**, parce que le mana se régénère d'un point tous les quatre-vingts ticks environ — un sort à 8 de mana coûte donc **six cent quarante ticks** de régénération. Ce n'est pas un défaut : la régénération suit la **Méditation** (`1 + Méditation × 0,2`), et le robot a Méditation zéro. C'est le taux de départ, pas celui d'un lanceur établi. Mais cela dit quelque chose du jeu de début de partie : **au niveau zéro, on est un guerrier qui a six sorts en réserve**, et les classes dont les sorts sont au contact — donc qui montent sur l'arme — s'en sortent bien mieux que celles qui dépendent de sorts élémentaires à distance.
 
 > [!error] Corrigé le 2026-09-03 — **ma comparaison arme/sort était fausse, et dans le mauvais sens**
 > J'avais écrit qu'une épée rend **14,0 PV par tick** et une masse **16,2**, contre 6,75 pour le meilleur sort. C'était une **erreur d'unité** : `vitesse_base` **divise** le coût en ticks (`ticks = actions.attaque_base / vitesse`), elle ne le multiplie pas. J'ai calculé `moyenne × vitesse` et appelé ça des dégâts par tick : le classement **entre armes** restait juste, mais la valeur était **dix fois trop grande**, et je m'en suis servi pour comparer les armes aux sorts.

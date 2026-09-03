@@ -272,7 +272,16 @@ func _process(_delta: float) -> void:
 		scene.chemin_en_cours.clear()
 		if sorts > 0 and rng_bot.randf() < 0.5 and j.capacites.size() > 0:   # un sort au hasard sur la cible (30)
 			var k_s: int = rng_bot.randi() % j.capacites.size()
-			if int(capacites_a_sec.get(k_s, -1)) <= frames:
+			# Le robot lançait sans regarder son mana. Lancer à sec n'est pas REFUSÉ par le jeu : c'est la
+			# SURCHAUFFE, qui prend le déficit en points de vie, doublé. Le robot se tuait donc lui-même —
+			# journal du 2026-09-03 : « SURCHAUFFE : 9 de mana manquant → 18 PV » puis « tombe », combat
+			# déjà gagné. Trois morts à l'étage 1 imputées à la difficulté du donjon, alors qu'aucune
+			# n'était due aux ennemis. Un robot qui joue comme aucun humain ne joue ne mesure rien.
+			var plan_s: Dictionary = sim.plan_capacite(j, k_s)
+			var cout_s: int = int(plan_s.get("ressource", 0)) if str(plan_s.get("monnaie", "")) == "mana" else 0
+			if cout_s > int(j.mana):
+				capacites_a_sec[k_s] = frames + 300   # à sec : on repassera quand le mana sera revenu
+			elif int(capacites_a_sec.get(k_s, -1)) <= frames:
 				if sim.intention(jid, {"type": "capacite", "index": k_s, "cible": cible.pos}):
 					sorts_lances += 1
 					return
