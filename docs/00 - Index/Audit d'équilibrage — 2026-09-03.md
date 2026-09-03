@@ -96,6 +96,20 @@ L'écart reste modéré — 21 % au-dessus de l'épée — mais il va dans le m�
 > [!warning] Trouvé le 2026-09-04 — **le robot jouait toujours Le Sabre**, quelle que soit la classe demandée
 > `parcours.tscn` ne créait son personnage que si l'écran titre était ouvert — et en headless, `main.gd` ne l'ouvre jamais. Les options `--classe` et `--race` étaient donc ignorées **sans un mot** : toute « matrice de classes » jouée par le robot (le point 30 du 2026-08-31, les comparaisons de kits) comparait Le Sabre à Le Sabre. Trouvé quand le robot a enfin **dit qui il était** (une ligne de journal de plus). Corrigé : il crée son personnage dès qu'une classe ou une race est demandée. Les mesures de cette note qui n'opposaient pas des classes (le robot avec et sans sorts, la surchauffe) tiennent ; celles qui les opposaient sont à refaire.
 
+> [!check] Refait le 2026-09-04 — la matrice des six voies, jouée par un robot qui change vraiment de classe
+> Même graine, même étage, 2 500 images, trois objets et trois sorts composés par classe ; un représentant par classe mère (la première dans l'ordre alphabétique). Ce sont des **mesures**, pas des jugements — l'équilibrage est au designer.
+>
+> | classe mère | représentant | combats | coups portés | coups reçus (dégâts) | tués | morts |
+> |---|---|---|---|---|---|---|
+> | guerrier | L'Écarlate | 5 | 62 | 21 (44) | 8 | 1 |
+> | rôdeur | L'Engrenage | 4 | 26 | **37 (100)** | **1** | **2** |
+> | mage | La Paume | 2 | 27 | 5 (8) | 2 | 0 |
+> | sentinelle | Le Sceau | 6 | 25 | **0 (0)** | 4 | 0, et un étage descendu |
+> | érudit | Le Creuset | 2 | 41 | 2 (4) | 1 | 0 |
+> | meneur | La Balance | 3 | 41 | 6 (9) | 5 | 0 |
+>
+> Deux extrêmes qui méritent un œil : **Le Sceau** ne prend aucun coup et descend (les glyphes tiennent les ennemis à distance) ; **L'Engrenage** prend cent dégâts pour un seul tué et meurt deux fois — il part avec une arme de tir et une tourelle, et le robot se bat probablement au contact avec. C'est peut-être le robot (il ne sait pas prendre de la distance), peut-être la classe. Consigné dans [[À juger — parcours de jeu]].
+
 ## Liens
 
 - **Détaille** : [[À juger — parcours de jeu]], [[Vers la production]]

@@ -370,3 +370,18 @@ pas dire, et qu'il faut jouer pour savoir :
 5. **Faut-il garder la rotation ?** Elle rend le placement forgiving. Sans elle, la ligne du tireur
    n'accepterait que des barres couchées — plus dur, plus identitaire. Un booléen
    (`combat_rules.grille.rotations`).
+
+## 2026-09-04 — La matrice des classes, enfin mesurée avec le bon robot
+
+Le robot jouait Le Sabre quelle que soit la classe demandée (trouvé et corrigé cette nuit). Refaite
+avec un représentant par classe mère, même graine : voir le tableau dans
+[[Audit d'équilibrage — 2026-09-03]]. Deux choses à trancher :
+
+1. **L'Engrenage** (rôdeur, arme de tir + tourelle) prend 100 dégâts pour un tué et meurt deux fois
+   quand les cinq autres ne meurent pas ou presque. Avant d'y toucher, il faut savoir si c'est la
+   classe ou le robot — le robot ne sait pas garder ses distances avec une arme de tir. Un robot qui
+   recule quand il tient un projectile est une mesure à faire ; un rééquilibrage de la classe est une
+   décision.
+2. **Le Sceau** (sentinelle) ne prend aucun coup et descend d'un étage : les glyphes posés devant lui
+   tiennent tout à distance. Si c'est voulu, c'est l'identité de la sentinelle ; si c'est trop, c'est
+   le prix ou la durée des glyphes qui se règle en données.
