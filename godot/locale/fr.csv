@@ -235,7 +235,7 @@ affixe.meca_vol_de_vie.nom,{base} vampirique (vol de vie {pct} %)
 affixe.meca_allonge.nom,{base} long (+{n} allonge)
 affixe.meca_garde.nom,{base} de la garde (garde −{pct} % d'endurance)
 affixe.meca_capacite.nom,{base} du porteur (+{kg} capacité)
-affixe.meca_endurance_max.nom,{base} du souffle (+{n} endurance max)
+affixe.meca_vigueur_max.nom,{base} du souffle (+{n} vigueur max)
 affixe.meca_armure.nom,{base} renforcé (+{n} armure)
 affixe.passif_stat.nom,{base} de {stat} (+{n})
 affixe.passif_competence.nom,{base} de {competence} (+{n})
@@ -2176,7 +2176,7 @@ status.ancrage.name,Ancrage
 status.reflet.name,Reflet
 status.voile.name,Voile
 monnaie.mana,mana
-monnaie.endurance,vigueur
+monnaie.vigueur,vigueur
 monnaie.sante,PV
 monnaie.or,or
 journal.monnaie_bloquee,"{nom} ne peut plus puiser dans son {monnaie}"
@@ -2852,3 +2852,4 @@ competence.armes_a_chaine.name,Armes à chaîne
 monnaie.sang_froid,sang-froid
 journal.sang_froid_rompu,"{nom} perd son sang-froid : {deficit} manquants, {degats} PV"
 barre.sang_froid,Sang-froid
+journal.onde_sonore,"{nom} fait résonner {arme} : {n} corps pris dans l’onde"

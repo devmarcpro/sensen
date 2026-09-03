@@ -10,7 +10,7 @@
   "cible": "soi",
   "ligne_de_vue": false,
   "cout_ticks": 0,
-  "cout_endurance": 0,
+  "cout_vigueur": 0,
   "degats_des": null,
   "type_degats": null,
   "conditions": [],

@@ -17,7 +17,7 @@
       "cible_perdue": 1.0
     },
     "attendre": {
-      "endurance_basse": 0.7
+      "vigueur_basse": 0.7
     }
   },
   "seuil_fuite_sante": 0.25,

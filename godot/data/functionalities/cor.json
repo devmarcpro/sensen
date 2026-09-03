@@ -13,7 +13,8 @@
   "genre_grammatical": "ms",
   "affinite_sorts": {
     "mana": 1.25,
-    "endurance": 0.9
+    "vigueur": 0.9
   },
-  "poids_reference": 0.96
+  "poids_reference": 0.96,
+  "attaque_zone": 4
 }

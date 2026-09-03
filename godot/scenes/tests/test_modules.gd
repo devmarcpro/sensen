@@ -34,7 +34,7 @@ func _ready() -> void:
 			return
 		j.sante = 999
 		j.mana = 999
-		j.endurance = 999
+		j.vigueur = 999
 		j.vivant = true
 		s._executer_capacite(j, pl, cible)
 		s.bombes.clear()
@@ -124,7 +124,7 @@ func _ready() -> void:
 		j.sante = 30
 		j.sante_max = 40
 		j.mana = 40
-		j.endurance = 40
+		j.vigueur = 40
 		j.compteur = 50
 		m.compteur = 50   # un compteur à entamer : la célérité et le tempo se voient
 		if "resurrection" in effets_c or ef_c.get("ressource", {}).has("releve_allie_pct") or str(ef_c.get("invocation", {}).get("mode", "")) == "releve":
@@ -179,6 +179,6 @@ func _photo(s: Simulation, j: Dictionary, m: Dictionary, cible: Vector2i) -> Arr
 		entites += 1
 	var statuts_m: Array = m.get("statuts", []).map(func(st: Dictionary) -> String: return str(st.get("id", "")))
 	var statuts_j: Array = j.get("statuts", []).map(func(st: Dictionary) -> String: return str(st.get("id", "")))
-	return [int(m.sante), int(j.sante), int(j.mana), int(j.endurance), int(m.get("mana", 0)), int(m.get("endurance", 0)), m.pos, j.pos, statuts_m, statuts_j,
+	return [int(m.sante), int(j.sante), int(j.mana), int(j.vigueur), int(m.get("mana", 0)), int(m.get("vigueur", 0)), m.pos, j.pos, statuts_m, statuts_j,
 		int(m.compteur), int(j.compteur), s.bombes.size(), s.affuts.size(), s.zones.size(), entites, s.grille.h(cible), s.grille.contenu[s.grille.idx(cible)],
 		str(j.get("saisie", "")), bool(m.vivant), int(j.get("sang", 0)), str(m.get("equipement", {}).get("main_principale", "")), int(j.get("or", 0)), s.grille.h(j.pos), str(j.get("chaine", {}))]

@@ -341,7 +341,7 @@ func test_simulation() -> void:
 	st_f.force = int(st_f.force) + 1
 	var st_e: Dictionary = st_j.duplicate()
 	st_e.endurance = int(st_e.endurance) + 1
-	verifier(j.sante_max == s.regles.sante_max(st_j) and j.endurance == s.regles.vigueur_max(st_j), "les PV et la vigueur sont ceux des formules, pas des constantes")
+	verifier(j.sante_max == s.regles.sante_max(st_j) and j.vigueur == s.regles.vigueur_max(st_j), "les PV et la vigueur sont ceux des formules, pas des constantes")
 	verifier(s.regles.vigueur_max(st_f) > s.regles.vigueur_max(st_j) and s.regles.sante_max(st_f) == s.regles.sante_max(st_j), "+1 Force agrandit la vigueur et ne touche pas aux PV")
 	verifier(s.regles.sante_max(st_e) > s.regles.sante_max(st_j) and s.regles.vigueur_max(st_e) == s.regles.vigueur_max(st_j), "+1 Endurance agrandit les PV et ne touche pas à la vigueur")
 
@@ -360,7 +360,7 @@ func test_simulation() -> void:
 	verifier(int(j.sante) < pv_sf, "sang-froid à vide : le déficit se paie en PV (%d → %d)" % [pv_sf, int(j.sante)])
 	# Et il ne remonte qu'à l'immobilité : c'est l'inverse des deux autres monnaies.
 	j["immobile_depuis"] = s.horloge_monde.ticks - 100
-	j.tick_endurance = s.horloge_monde.ticks
+	j.tick_vigueur = s.horloge_monde.ticks
 	s._regenerer(j, s.horloge_monde.ticks + 10)
 	verifier(int(j.get("sang_froid", 0)) > 0, "immobile, le sang-froid remonte (%d)" % int(j.get("sang_froid", 0)))
 
@@ -370,6 +370,26 @@ func test_simulation() -> void:
 	var vue: Dictionary = {"perception": 20}
 	verifier(s.regles.portee_de(arc_f, vue).y > s.regles.portee_de(arc_f).y, "20 de Perception allongent la portée de l'arc")
 	verifier(s.regles.portee_de(epee_f, vue).y == s.regles.portee_de(epee_f).y, "voir mieux n'allonge pas le bras : l'épée ne gagne rien")
+
+	# --- l'onde sonore : l'attaque des instruments part du porteur (designer 2026-09-03) -----------
+	# Ce qu'on vérifie n'est pas un chiffre de dégâts mais la FORME de l'attaque : deux ennemis dans le
+	# rayon perdent des PV pour un seul coup porté, et un troisième hors du rayon n'en perd aucun.
+	var cor_f: Dictionary = GameData.entree("functionalities", "cor")
+	verifier(int(cor_f.get("attaque_zone", 0)) > int(GameData.entree("functionalities", "cymbales").get("attaque_zone", 0)), "le cor porte plus loin que les cymbales")
+	var loups: Array[Dictionary] = []
+	for v in s.vivants():
+		if v.camp != j.camp:
+			loups.append(v)
+	if loups.size() >= 2:
+		var rayon_c := int(cor_f.get("attaque_zone", 0))
+		loups[0].pos = j.pos + Vector2i(1, 0)
+		loups[1].pos = j.pos + Vector2i(0, 1)
+		# On compte les CORPS ATTEINTS, pas les PV perdus : un coup peut rater, et un test qui lit les
+		# dégâts mesure les dés, pas la forme de l'attaque.
+		var faux_arme := {"name_key": &"x", "functionality": "cor", "stats": {}}
+		verifier(s._onde_sonore(j, loups[0], faux_arme, cor_f, 10) == 1, "l'onde ramasse les autres, pas la cible déjà frappée")
+		loups[1].pos = j.pos + Vector2i(rayon_c + 3, 0)
+		verifier(s._onde_sonore(j, loups[0], faux_arme, cor_f, 10) == 0, "hors du rayon, l'onde ne touche personne")
 	verifier(s.vivants().size() == 4, "1 joueur + 3 loups")
 	# Hors combat : le joueur attend une intention dès que l'horloge du monde le rend dû.
 	s.horloge_monde.avancer(1)
@@ -398,12 +418,12 @@ func test_simulation() -> void:
 	verifier(s.attente.has(j.id), "en combat, l'horloge s'arrête sur le joueur")
 	# Frappe à l'épée : 5 ticks, 8 d'endurance, PV du loup diminuent.
 	var pv_loup: int = loup.sante
-	var end: int = j.endurance
+	var end: int = j.vigueur
 	verifier(s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false}), "attaque à l'épée acceptée")
 	verifier(loup.sante < pv_loup, "le loup a perdu des PV")
 	var t_epee: int = s.regles.ticks_attaque(s.fonctionnalites[Etres.arme(j, s.items).functionality], false, Etres.arme(j, s.items))
 	verifier(j.compteur == hc.ticks + t_epee, "épée assemblée : %d ticks (le manche décide de la vitesse)" % t_epee)
-	verifier(j.endurance <= end - 8 + 2 * 20, "l'attaque coûte 8 d'endurance")
+	verifier(j.vigueur <= end - 8 + 2 * 20, "l'attaque coûte 8 d'endurance")
 	# Tuer le loup : creature_killed, tuile libérée.
 	var tue := [false]
 	EventBus.creature_killed.connect(func(id: String, _t: String) -> void: if id == loup.id: tue[0] = true)
@@ -445,12 +465,12 @@ func test_garde_et_lourde() -> void:
 	var coups: Array = []
 	EventBus.damage_dealt.connect(func(_s: String, c: String, _d: int, detail: Dictionary) -> void: if c == j.id: coups.append(detail))
 	var pv: int = j.sante
-	var end: int = j.endurance
+	var end: int = j.vigueur
 	bandit.compteur = h.ticks
 	s.pas(j.horloge)
 	var perdu: int = pv - j.sante
 	verifier(coups.size() == 1 and coups[0].garde and coups[0].direction == "front", "de face, la garde tient (perdu %d)" % perdu)
-	verifier(j.endurance < end, "la garde coûte de l'endurance à l'impact")
+	verifier(j.vigueur < end, "la garde coûte de l'endurance à l'impact")
 	verifier(j.garde, "la garde dure jusqu'à la prochaine action")
 	# Une attaque de flanc ignore la garde.
 	s.grille.liberer(bandit.pos)
@@ -477,16 +497,16 @@ func test_garde_et_lourde() -> void:
 	verifier(j.action_en_cours.is_empty() and bandit.sante < pvb, "la lourde se résout à l'échéance")
 	verifier(not bandit.garde, "la lourde brise la garde")
 	# Attendre : 5 ticks, +20 d'endurance.
-	j.endurance = 10
+	j.vigueur = 10
 	j.compteur = h.ticks
 	bandit.compteur = h.ticks + 100
 	s.pas(j.horloge)
 	var t: int = h.ticks
 	verifier(s.intention(j.id, {"type": "attendre"}), "attendre")
-	verifier(j.endurance == 30 and j.compteur == t + 5, "attendre : +20 endurance, 5 ticks")
+	verifier(j.vigueur == 30 and j.compteur == t + 5, "attendre : +20 endurance, 5 ticks")
 	# À zéro d'endurance : garde impossible.
-	j.endurance = 0
-	j.tick_endurance = h.ticks + 100
+	j.vigueur = 0
+	j.tick_vigueur = h.ticks + 100
 	j.compteur = h.ticks + 5
 	s.pas(j.horloge)
 	verifier(not s.intention(j.id, {"type": "garde"}), "à zéro d'endurance, garde impossible")
@@ -656,7 +676,7 @@ func test_capacites() -> void:
 	verifier(p.des == "2d6" and p.des_bonus == 2 and p.geometrie == "ligne" and p.taille == 4 and p.elements == {"feu": 1.0}, "4d6 de Feu sur 4 tuiles en ligne (Flamme, palier moyen : +1 dé ; Concentration : +1)")
 	# [Ligne] + [Frappe] + [Concentration] avec une épée : 9 ticks · 10 endurance, à l'élément de l'arme
 	p = cap.assembler(["ligne", "frappe", "concentration"], 5, "2d6", {"metal": 1.0})
-	verifier(p.ticks == 9 and p.monnaie == "endurance" and p.ressource == 10 and p.elements == {"metal": 1.0}, "[Ligne]+[Frappe]+[Concentration] : 9 ticks · 10 endurance · Métal")
+	verifier(p.ticks == 9 and p.monnaie == "vigueur" and p.ressource == 10 and p.elements == {"metal": 1.0}, "[Ligne]+[Frappe]+[Concentration] : 9 ticks · 10 vigueur · Métal")
 	# Vivacité : −3 ticks, ressource ×1.3 ; Soi rend 2 ticks
 	p = cap.assembler(["point", "etincelle", "vivacite"], 5, "1d4", {})
 	verifier(p.ticks == 1 and p.ressource == 4, "Étincelle + Vivacité : max(1, 3−3) tick · 3×1.3 ≈ 4 mana")
@@ -2825,13 +2845,13 @@ func test_talents() -> void:
 	# L'Elfe : la surchauffe coûte de l'endurance, pas de santé.
 	j.race = "elfe"
 	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
-	var end0 := int(j.endurance_max)
+	var end0 := int(j.vigueur_max)
 	verifier(s.a_talent(j, "chair_de_mana") and end0 == s.regles.vigueur_max(j.stats_eff) - 20, "Chair de mana : vigueur max −20 (%d)" % end0)
 	j.mana = 0
 	var sante0 := int(j.sante)
-	j.endurance = 50
+	j.vigueur = 50
 	s._payer(j, {"monnaie": "mana", "ressource": 5, "charge_suivante": {}})
-	verifier(int(j.sante) == sante0 and int(j.endurance) == 50 - 10, "surchauffe de 5 : −10 d'endurance, santé intacte")
+	verifier(int(j.sante) == sante0 and int(j.vigueur) == 50 - 10, "surchauffe de 5 : −10 d'endurance, santé intacte")
 	# Le Nain : rien n'est irrécoltable.
 	j.race = "nain"
 	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
@@ -3092,7 +3112,7 @@ func test_creation_de_sorts() -> void:
 	j.capacites = []
 	j.mana = 9999
 	j.mana_max = 9999
-	j.endurance = 9999
+	j.vigueur = 9999
 	var lances := 0
 	var refus: Array[String] = []
 	for fid in ["point", "ligne", "cone", "carre", "soi"]:
@@ -3106,7 +3126,7 @@ func test_creation_de_sorts() -> void:
 		var cible: Vector2i = j.pos if fid == "soi" else j.pos + Vector2i(1, 0)
 		s.attente[j.id] = true
 		j.mana = 9999
-		j.endurance = 9999
+		j.vigueur = 9999
 		if s.intention(j.id, {"type": "capacite", "index": idx, "cible": cible}):
 			lances += 1
 		else:
@@ -3137,7 +3157,7 @@ func test_creation_de_sorts() -> void:
 		var vivants_avant: int = s.vivants().size()
 		var zones_avant: int = s.zones.size()
 		j.mana = 9999
-		j.endurance = 9999
+		j.vigueur = 9999
 		j.sante = int(j.sante_max)   # certains noyaux coûtent des PV (Cataclysme, Offrande, Saignée)
 		mannequin.sante = 100000
 		mannequin.vivant = true
@@ -3217,13 +3237,13 @@ func test_assemblage_sans_limite() -> void:
 	verifier(s.bombes.size() == n_tuiles and str(s.bombes[0].degats) == "4d6", "Concentration ajoute son dé à la bombe (%s)" % str(s.bombes[0].degats))
 	s.bombes.clear()
 	var p_bb: Dictionary = plan_de.call(["carre", "bombe", "baume"])
-	verifier(str(p_bb.monnaie) == "endurance" and int(p_bb.ressource) == int(p_bombe.ressource) + int(GameData.entree("modules", "baume").cout_mana), "un noyau de mana dans un sort d'endurance paie en endurance, 1 pour 1 (%d)" % int(p_bb.ressource))
-	j.endurance = 10   # Épuisement (Mana) : un sort d'endurance au-delà du pool se paie en PV (sans tuer le mannequin)
+	verifier(str(p_bb.monnaie) == "vigueur" and int(p_bb.ressource) == int(p_bombe.ressource) + int(GameData.entree("modules", "baume").cout_mana), "un noyau de mana dans un sort de vigueur paie en vigueur, 1 pour 1 (%d)" % int(p_bb.ressource))
+	j.vigueur = 10   # Épuisement (Mana) : un sort d'endurance au-delà du pool se paie en PV (sans tuer le mannequin)
 	j.sante = 40
-	s._payer(j, {"monnaie": "endurance", "ressource": 25, "charge_suivante": {}})
-	verifier(int(j.endurance) == 0 and int(j.sante) == 40 - 15 * int(s.regles.r.endurance.epuisement_mult), "l'épuisement : 15 d'endurance manquants → PV (%d)" % int(j.sante))
+	s._payer(j, {"monnaie": "vigueur", "ressource": 25, "charge_suivante": {}})
+	verifier(int(j.vigueur) == 0 and int(j.sante) == 40 - 15 * int(s.regles.r.vigueur.epuisement_mult), "l'épuisement : 15 d'endurance manquants → PV (%d)" % int(j.sante))
 	j.sante = 40
-	j.endurance = 80
+	j.vigueur = 80
 	var xp_vus: Array = []   # l'XP s'annonce à chaque versement (XP de combat, 2026-08-30)
 	var cb_xp := func(id: String, cle: String, xp: int) -> void: xp_vus.append([id, cle, xp])
 	EventBus.xp_gagnee.connect(cb_xp)
@@ -3462,7 +3482,7 @@ func test_charges_de_modules() -> void:
 	var hors_domaine: Array[String] = []
 	for mid in ["fiole", "meditation", "offrande", "ponction", "saignee", "second_souffle"]:
 		var md: Dictionary = GameData.entree("modules", mid)
-		if not md.get("elements", {}).is_empty() or int(md.get("cout_endurance", 0)) > 0:
+		if not md.get("elements", {}).is_empty() or int(md.get("cout_vigueur", 0)) > 0:
 			hors_domaine.append(mid)
 	verifier(hors_domaine.is_empty(), "les noyaux sans coût sont arcanes, donc distribuables (%s)" % str(hors_domaine))
 	var vus := {}
@@ -5015,7 +5035,7 @@ func test_effets_equipement() -> void:
 	verifier(s.poids_de(j).capacite == cap0 + 40.0, "capacité de poids +40 (%.0f → %.0f)" % [cap0, s.poids_de(j).capacite])
 	verifier(not s.appliquer_statut(j, "poison", 100, ""), "immunisé au poison")
 	j.sante = 10
-	j.tick_endurance = 0
+	j.tick_vigueur = 0
 	s._regenerer(j, 1000)
 	verifier(int(j.sante) == 15, "régénération : +5 PV en 1000 ticks à +100 %% (%d)" % int(j.sante))
 	var t: Vector2i = j.pos + Vector2i(1, 0)
@@ -5101,7 +5121,7 @@ func test_cataclysme() -> void:
 	var h := s.horloge_de(j)
 	j.mana = 99999   # un cataclysme 7 × 7 remodèle 49 tuiles : 49 × 40 = 1 960 mana — le prix suit la surface
 	j.mana_max = 99999
-	j.endurance = j.endurance_max
+	j.vigueur = j.vigueur_max
 	_capacite_test(s, j, "k", ["carre", "cataclysme", "ampleur", "ampleur"])
 	var centre: Vector2i = j.pos + Vector2i(0, -3)
 	var h0 := s.grille.h(centre)
@@ -5110,7 +5130,7 @@ func test_cataclysme() -> void:
 	verifier(s.intention(j.id, {"type": "capacite", "index": j.capacites.size() - 1, "cible": centre}), "le cataclysme est canalisé (télégraphié)")
 	verifier(not j.action_en_cours.is_empty(), "la canalisation est visible : une action en cours")
 	s.pas(j.horloge)
-	verifier(s.grille.h(centre) == maxi(0, h0 - 4) and int(j.endurance) == 0 and s.modifs_terrain.has(centre), "cratère : %d → %d, endurance vidée, terrain mémorisé" % [h0, s.grille.h(centre)])
+	verifier(s.grille.h(centre) == maxi(0, h0 - 4) and int(j.vigueur) == 0 and s.modifs_terrain.has(centre), "cratère : %d → %d, endurance vidée, terrain mémorisé" % [h0, s.grille.h(centre)])
 	j.mana = 300
 	j.compteur = h.ticks
 	verifier(not s.intention(j.id, {"type": "capacite", "index": j.capacites.size() - 1, "cible": centre}), "un seul cataclysme par combat")
@@ -6338,21 +6358,21 @@ func test_cycle_et_meteo() -> void:
 	verifier(is_equal_approx(s.heure(), 5.0) or absf(s.heure() - 5.0) < 0.2, "réveil à l'aube, 5 h (%.1f h)" % s.heure())
 	# Le froid : un être nu par −20 °C prend des dégâts par palier.
 	j.equipement.clear()
-	var end0: int = j.endurance
+	var end0: int = j.vigueur
 	# On MESURE les deux régénérations au lieu de figer un nombre : la même durée, le même personnage,
 	# une fois au confort et une fois à −25 °C. Le seuil en dur passait au vert par hasard — il a cassé
 	# le jour où la vigueur max a cessé d'être une constante, parce que le personnage récupérait plus
 	# souvent, gagnait plus vite la compétence Récupération, et dépassait le chiffre gelé.
 	j["ecart_confort"] = 0.0
-	j.endurance = 0
-	j.tick_endurance = s.horloge_monde.ticks
+	j.vigueur = 0
+	j.tick_vigueur = s.horloge_monde.ticks
 	s._regenerer(j, s.horloge_monde.ticks + 10)
-	var regen_confort: int = int(j.endurance)
+	var regen_confort: int = int(j.vigueur)
 	j["ecart_confort"] = -25.0
-	j.endurance = 0
-	j.tick_endurance = s.horloge_monde.ticks
+	j.vigueur = 0
+	j.tick_vigueur = s.horloge_monde.ticks
 	s._regenerer(j, s.horloge_monde.ticks + 10)
-	verifier(int(j.endurance) < regen_confort, "hors confort, la vigueur régénère moins qu'au confort (%d contre %d)" % [int(j.endurance), regen_confort])
+	verifier(int(j.vigueur) < regen_confort, "hors confort, la vigueur régénère moins qu'au confort (%d contre %d)" % [int(j.vigueur), regen_confort])
 	s.monde.fermer()
 
 
@@ -7374,12 +7394,12 @@ func test_loot() -> void:
 	verifier(j.compteur == t + int(s.regles.r.actions.objet), "équiper un bijou : 5 ticks")
 	# Endurance max +N et +1 segment de chaîne
 	var amulette := s.generer_objet("proto_amulette", 2, {}, "rare", 1)
-	amulette.affixes = [{"id": "meca_endurance_max", "params": {"n": 10}, "compteur": 0, "etat": {}}, {"id": "wuxing_segment", "params": {}, "compteur": 0, "etat": {}}]
+	amulette.affixes = [{"id": "meca_vigueur_max", "params": {"n": 10}, "compteur": 0, "etat": {}}, {"id": "wuxing_segment", "params": {}, "compteur": 0, "etat": {}}]
 	s.donner(j, amulette.uid)
 	j.compteur = s.horloge_monde.ticks
 	s.horloge_monde.avancer(1)
 	s.intention(j.id, {"type": "equiper", "objet": amulette.uid})
-	verifier(j.endurance_max == s.regles.vigueur_max(j.stats_eff) + 10 and j.chaine.capacite == 6, "l'affixe ajoute 10 à la vigueur du personnage, jauge à 6 segments")
+	verifier(j.vigueur_max == s.regles.vigueur_max(j.stats_eff) + 10 and j.chaine.capacite == 6, "l'affixe ajoute 10 à la vigueur du personnage, jauge à 6 segments")
 	# Affixe rythmique : « une attaque sur 2 porte Feu » — le 2e coup pose un segment Feu
 	var epee := s.generer_objet("proto_epee", 2, {}, "rare", 1)
 	epee.affixes = [{"id": "cadence_element", "params": {"n": 2, "element": "feu"}, "compteur": 0, "etat": {}}]
@@ -7686,17 +7706,17 @@ func test_progression() -> void:
 	jp["mecaniques"] = {"regen_sante": {"pct": 100}}
 	jp.faim = 100
 	jp.sante = 1
-	jp.tick_endurance = 0
+	jp.tick_vigueur = 0
 	p._regenerer(jp, 2000)
 	var regen_plein: int = int(jp.sante) - 1
 	jp.faim = 40
 	jp.sante = 1
-	jp.tick_endurance = 0
+	jp.tick_vigueur = 0
 	p._regenerer(jp, 2000)
 	var regen_faim: int = int(jp.sante) - 1
 	jp.faim = 10
 	jp.sante = 1
-	jp.tick_endurance = 0
+	jp.tick_vigueur = 0
 	p._regenerer(jp, 2000)
 	verifier(regen_plein > 0 and regen_faim < regen_plein and int(jp.sante) == 1, "faim : régén %d à 100, %d sous 50, rien sous 25" % [regen_plein, regen_faim])
 	jp.faim = 100
@@ -7925,7 +7945,7 @@ func test_chasse() -> void:
 func test_recuperation() -> void:
 	var s := nouvelle_sim("gorge")
 	var j := joueur_de(s)
-	var cfg: Dictionary = s.regles.r.endurance
+	var cfg: Dictionary = s.regles.r.vigueur
 	verifier(GameData.catalogues.competences.has(str(cfg.competence)), "la compétence %s existe au catalogue" % str(cfg.competence))
 	# Une attaque coûte son endurance (hors capacité).
 	var loup: Dictionary = {}
@@ -7938,33 +7958,33 @@ func test_recuperation() -> void:
 	s.grille.placer(loup.id, loup.pos)
 	s._engager_combat(j, loup)
 	var h := s.horloge_de(j)
-	j.endurance = int(j.endurance_max)
+	j.vigueur = int(j.vigueur_max)
 	j.compteur = h.ticks
 	s.pas(j.horloge)
-	var avant: int = j.endurance
+	var avant: int = j.vigueur
 	s.intention(j.id, {"type": "attaquer", "cible": loup.id})
-	verifier(j.endurance <= avant - int(cfg.attaque) or j.endurance < avant, "frapper coûte de l'endurance (%d → %d)" % [avant, j.endurance])
+	verifier(j.vigueur <= avant - int(cfg.attaque) or j.vigueur < avant, "frapper coûte de l'endurance (%d → %d)" % [avant, j.vigueur])
 	# Deux niveaux de Récupération, même durée : le confirmé en reprend plus.
 	var repris := [0, 0]
 	for essai in 2:
 		j.competences[str(cfg.competence)] = 0 if essai == 0 else 40
 		j.competences_eff = j.competences.duplicate()
-		j.endurance = 10
-		j.tick_endurance = h.ticks
+		j.vigueur = 10
+		j.tick_vigueur = h.ticks
 		s._regenerer(j, h.ticks + 20)
-		repris[essai] = j.endurance - 10
+		repris[essai] = j.vigueur - 10
 	verifier(repris[1] > repris[0], "le confirmé récupère plus vite (%d contre %d sur 20 ticks)" % [repris[1], repris[0]])
 	# Récupérer entraîne, mais pas à endurance pleine.
 	j.competences[str(cfg.competence)] = 0
 	j.competences_eff = j.competences.duplicate()
 	var xp_avant: float = float(j.get("xp_competences", {}).get(str(cfg.competence), 0.0))
-	j.endurance = 10
-	j.tick_endurance = h.ticks
+	j.vigueur = 10
+	j.tick_vigueur = h.ticks
 	s._regenerer(j, h.ticks + 60)
 	var xp_apres: float = float(j.get("xp_competences", {}).get(str(cfg.competence), 0.0))
 	verifier(xp_apres > xp_avant, "récupérer entraîne (%.1f → %.1f)" % [xp_avant, xp_apres])
-	j.endurance = int(j.endurance_max)
-	j.tick_endurance = h.ticks + 60
+	j.vigueur = int(j.vigueur_max)
+	j.tick_vigueur = h.ticks + 60
 	var xp_plein: float = float(j.get("xp_competences", {}).get(str(cfg.competence), 0.0))
 	s._regenerer(j, h.ticks + 120)
 	verifier(is_equal_approx(float(j.get("xp_competences", {}).get(str(cfg.competence), 0.0)), xp_plein), "à endurance pleine, rien ne s'apprend")

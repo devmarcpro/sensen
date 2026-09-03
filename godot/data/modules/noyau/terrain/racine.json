@@ -16,7 +16,7 @@
   "power_base": null,
   "cout_ticks": 11,
   "cout_mana": 12,
-  "cout_endurance": 0,
+  "cout_vigueur": 0,
   "effets": [
     "terrain",
     "statut"

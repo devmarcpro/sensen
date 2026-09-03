@@ -12,7 +12,7 @@
   "cible": "allie",
   "ligne_de_vue": false,
   "cout_ticks": 12,
-  "cout_endurance": 6,
+  "cout_vigueur": 6,
   "degats_des": null,
   "type_degats": null,
   "conditions": [],

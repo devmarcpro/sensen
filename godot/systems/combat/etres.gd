@@ -31,13 +31,13 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 		"corps": {"stats": stats.duplicate(), "silhouette": def.corps.silhouette},
 		"sante": regles.sante_max(stats),
 		"sante_max": regles.sante_max(stats),
-		"endurance": regles.vigueur_max(stats),
-		"endurance_max": regles.vigueur_max(stats),
+		"vigueur": regles.vigueur_max(stats),
+		"vigueur_max": regles.vigueur_max(stats),
 		"mana": regles.mana_max(stats),
 		"mana_max": regles.mana_max(stats),
 		"sang_froid": regles.sang_froid_max(stats),
 		"sang_froid_max": regles.sang_froid_max(stats),
-		"tick_endurance": 0,                       # dernier tick où la régénération a été appliquée
+		"tick_vigueur": 0,                       # dernier tick où la régénération a été appliquée
 		"equipement": equip,
 		"ratelier": def.get("ratelier", []).duplicate(),
 		"actions": def.get("actions", []).duplicate(),
@@ -156,7 +156,7 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 			stats[nom_st] = int(stats.get(nom_st, 0)) + int(sd.bonus.stat[nom_st])
 	var comp: Dictionary = e.competences.duplicate()
 	var segments_bonus := 0
-	var endurance_bonus := 0
+	var vigueur_bonus := 0
 	var sante_bonus := 0
 	var mana_bonus := 0
 	var par_competence := {}   # plafond +15 par compétence toutes gemmes confondues
@@ -194,8 +194,8 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 					e.mecaniques[str(d.effet.mecanique)] = ax.params
 				"wuxing_segment":
 					segments_bonus += 1
-				"meca_endurance_max":
-					endurance_bonus += int(ax.params.n)
+				"meca_vigueur_max":
+					vigueur_bonus += int(ax.params.n)
 				"meca_capacite":   # du porteur : capacité de poids cumulée (lue par poids_de)
 					e.mecaniques["capacite_poids"] = {"n": int(e.mecaniques.get("capacite_poids", {}).get("n", 0)) + int(ax.params.kg)}
 		# Gemmes serties : tous les bonus plats (Loot — GEMMES = TOUS LES BONUS PLATS, jamais une règle).
@@ -222,8 +222,8 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 					sante_bonus += int(t.valeur)
 				"mana_max":
 					mana_bonus += int(t.valeur)
-				"endurance_max":
-					endurance_bonus += int(t.valeur)
+				"vigueur_max":
+					vigueur_bonus += int(t.valeur)
 	if int(e.get("faim", 100)) < int(regles.r.faim.seuil_stats):   # Faim < 25 : −10 % à toutes les stats
 		for k in stats.keys():
 			stats[k] = maxi(1, roundi(float(stats[k]) * float(regles.r.faim.malus_stats)))
@@ -243,12 +243,12 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 	e.tags_acquis = tags
 	var talent_race = GameData.catalogues.get("races", {}).get(str(e.get("race", "")), {}).get("talent")
 	if talent_race != null and str(talent_race) == "chair_de_mana":   # Chair de mana (Talents de race)
-		endurance_bonus += int(regles.r.get("talents", {}).get("chair_de_mana", {}).get("endurance_max", -20))
+		vigueur_bonus += int(regles.r.get("talents", {}).get("chair_de_mana", {}).get("vigueur_max", -20))
 	if talent_race != null and str(talent_race) == "oeil_de_la_pierre" and not ("detection_filons" in tags):
 		tags.append("detection_filons")
-	var end_max: int = regles.vigueur_max(stats) + endurance_bonus
-	e.endurance = mini(int(e.endurance), end_max) if int(e.endurance_max) != end_max else int(e.endurance)
-	e.endurance_max = end_max
+	var end_max: int = regles.vigueur_max(stats) + vigueur_bonus
+	e.vigueur = mini(int(e.vigueur), end_max) if int(e.vigueur_max) != end_max else int(e.vigueur)
+	e.vigueur_max = end_max
 	# Le sang-froid suit la dextérité comme la vigueur suit la force : la barre du propriétaire de la
 	# monnaie bouge quand sa stat bouge, et ce qu'on avait dedans est rogné si le plafond descend.
 	var sf_max := regles.sang_froid_max(stats)

@@ -66,7 +66,7 @@ func mana_max(stats: Dictionary) -> int:
 ## Et l'invité n'est pas démuni pour autant : il a sa propre rareté (les PV pour l'endurance, les corps
 ## alliés pour le charisme, la portée et l'information pour la perception).
 func vigueur_max(stats: Dictionary) -> int:
-	return int(r.endurance.get("max_base", 60)) + int(stats.force) * int(r.endurance.get("max_par_force", 4))
+	return int(r.vigueur.get("max_base", 60)) + int(stats.force) * int(r.vigueur.get("max_par_force", 4))
 
 
 func sang_froid_max(stats: Dictionary) -> int:
@@ -213,7 +213,7 @@ func degats_finaux(bruts: float, zone_mult: float, armure: float, garde_tient: b
 
 ## bruts = jet(dés) × (dureté_base/20) × qualité + For/4 (mêlée) ou Dex/4 (distance),
 ## ×2.2 en lourde, ×0.6 à zéro d'endurance.
-func degats_arme(stats: Dictionary, arme: Dictionary, fonct: Dictionary, des: Des, lourde: bool, endurance_a_zero: bool, des_bonus: int = 0, competences: Dictionary = {}, vecteur: Dictionary = {}) -> Dictionary:
+func degats_arme(stats: Dictionary, arme: Dictionary, fonct: Dictionary, des: Des, lourde: bool, vigueur_a_zero: bool, des_bonus: int = 0, competences: Dictionary = {}, vecteur: Dictionary = {}) -> Dictionary:
 	var jet := des.jet(fonct.degats_des, des_bonus)
 	# Ni la dureté ni la qualité ne se lisent en dur : un objet qui n'est pas une arme ne doit pas
 	# arrêter le tick, il doit compter comme un poing (fuzz, graines 55 et 777).
@@ -223,31 +223,31 @@ func degats_arme(stats: Dictionary, arme: Dictionary, fonct: Dictionary, des: De
 	var bruts := float(jet) * mult + float(stat)
 	if lourde:
 		bruts *= float(r.actions.lourde_mult_degats)
-	if endurance_a_zero:
-		bruts *= float(r.endurance.a_zero_degats_mult)
+	if vigueur_a_zero:
+		bruts *= float(r.vigueur.a_zero_degats_mult)
 	return {"jet": jet, "mult": mult, "stat": stat, "bruts": bruts, "lourde": lourde, "des": fonct.degats_des}
 
 
 ## Dégâts bruts d'une action de créature : jet(dés + dés bonus) + For/4, ×0.6 à zéro d'endurance.
-func degats_action(stats: Dictionary, action: Dictionary, des: Des, endurance_a_zero: bool, des_bonus: int) -> Dictionary:
+func degats_action(stats: Dictionary, action: Dictionary, des: Des, vigueur_a_zero: bool, des_bonus: int) -> Dictionary:
 	var jet := des.jet(action.get("degats_des"), des_bonus)
 	var stat := int(stats.force) / int(r.degats.stat_div)
 	var bruts := float(jet + stat)
-	if endurance_a_zero:
-		bruts *= float(r.endurance.a_zero_degats_mult)
+	if vigueur_a_zero:
+		bruts *= float(r.vigueur.a_zero_degats_mult)
 	return {"jet": jet, "mult": 1.0, "stat": stat, "bruts": bruts, "lourde": false, "des": action.get("degats_des")}
 
 
 ## Fourchette [min, max] des dégâts finaux d'une arme (prévisualisation UI, détail du calcul).
 ## `k_ext` : facteur externe (Wu Xing : domination × gain × chaîne).
-func fourchette_arme(stats: Dictionary, arme: Dictionary, fonct: Dictionary, lourde: bool, zone_mult: float, armure: float, endurance_a_zero: bool, k_ext: float = 1.0, competences: Dictionary = {}, vecteur: Dictionary = {}) -> Vector2i:
+func fourchette_arme(stats: Dictionary, arme: Dictionary, fonct: Dictionary, lourde: bool, zone_mult: float, armure: float, vigueur_a_zero: bool, k_ext: float = 1.0, competences: Dictionary = {}, vecteur: Dictionary = {}) -> Vector2i:
 	var f := Des.fourchette(fonct.degats_des)
 	# Ni la dureté ni la qualité ne se lisent en dur : un objet qui n'est pas une arme ne doit pas
 	# arrêter le tick, il doit compter comme un poing (fuzz, graines 55 et 777).
 	var mult := float(arme.get("durete_base", 1)) / float(r.degats.durete_reference) * float(arme.get("qualite", 1.0)) * facteur_competences(competences, fonct, vecteur)
 	var distance := int(fonct.get("portee_min", 1)) > 1
 	var stat := int(stats.dexterite if distance else stats.force) / int(r.degats.stat_div)
-	var k := (float(r.actions.lourde_mult_degats) if lourde else 1.0) * (float(r.endurance.a_zero_degats_mult) if endurance_a_zero else 1.0) * k_ext
+	var k := (float(r.actions.lourde_mult_degats) if lourde else 1.0) * (float(r.vigueur.a_zero_degats_mult) if vigueur_a_zero else 1.0) * k_ext
 	return Vector2i(degats_finaux((f.x * mult + stat) * k, zone_mult, armure, false),
 		degats_finaux((f.y * mult + stat) * k, zone_mult, armure, false))
 
@@ -281,7 +281,7 @@ func garde_tient(direction: String, bouclier: bool, lourde: bool) -> bool:
 func cout_garde_impact(degats: int, bouclier: bool, competences: Dictionary = {}) -> int:
 	if bouclier:   # Décision — Boucliers : la compétence Bouclier réduit le coût à l'impact
 		return maxi(1, roundi(float(int(r.garde.bouclier_impact_base) + degats / int(r.garde.bouclier_impact_div)) / skill_factor(niveau(competences, "bouclier"))))
-	return int(r.endurance.garde_impact_base) + degats / int(r.endurance.garde_impact_div)
+	return int(r.vigueur.garde_impact_base) + degats / int(r.vigueur.garde_impact_div)
 
 ## Les dégâts bruts d'un SORT (designer 2026-09-01) : le miroir de ceux d'une arme —
 ## jet × (focus × école × affinités) + stat/stat_div. Sans focus en main, le facteur vaut 1.

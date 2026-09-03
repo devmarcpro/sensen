@@ -41,10 +41,10 @@
     "objet": 5,
     "garde": 2,
     "attendre": 5,
-    "attendre_endurance": 20,
+    "attendre_vigueur": 20,
     "telegraphe_seuil_ticks": 10
   },
-  "endurance": {
+  "vigueur": {
     "_doc": "Endurance (A.6.1) ; epuisement_mult : deficit d'endurance d'un sort inflige en PV x mult (le pendant de la surchauffe du mana) | VIGUEUR (designer 2026-09-03) : la barre n'a plus un plafond fixe, elle est portee par la stat FORCE — max_base + force x max_par_force. A force 10 elle vaut 100, la valeur fixe d'avant : un personnage moyen ne sent rien, ce sont les extremes qui parlent. `max` reste comme repli pour tout ce qui n'a pas de stats sous la main.",
     "max": 100,
     "attaque": 8,
@@ -341,7 +341,7 @@
     "_doc": "Destruction du terrain : détruire un mur (la tuile redevient sol). Coût en ticks d'une tuile de mur ; XP versée à Terrassement. Décision du 2026-08-27.",
     "ticks": 10,
     "xp": 5,
-    "endurance": 6
+    "vigueur": 6
   },
   "recolte": {
     "_doc": "Récolte : ticks = ceil(durete_mat / (durete_outil × qualite × skill_factor(N)) × ticks_par_seconde) ; irrécoltable si durete_outil × qualite < durete_mat × seuil_irrecoltable ; quantite = 1 + N / niveaux_par_unite ; XP = durete_mat.",
@@ -1064,7 +1064,7 @@
     "apprendre_relation": 75,
     "chair_de_mana": {
       "mana_regen_mult": 1.2,
-      "endurance_max": -20
+      "vigueur_max": -20
     },
     "oeil_de_la_pierre": {
       "recolte_div": 3.0,
@@ -1177,7 +1177,7 @@
   "terrasser": {
     "_doc": "Destruction du terrain : abaisser ou élever une tuile de ±1 (Hauteur de terrain ±10, plancher 0, plafond 20) ; l'élévation demande une pioche en main. XP à Terrassement.",
     "ticks": 12,
-    "endurance": 8,
+    "vigueur": 8,
     "xp": 5,
     "h_min": 0,
     "h_max": 20,
@@ -1307,7 +1307,7 @@
     "cout_variance_moyenne": 7.0,
     "affinite_mains_nues": {
       "mana": 1.0,
-      "endurance": 1.0
+      "vigueur": 1.0
     },
     "tout_au_depart": false
   },
@@ -1395,10 +1395,16 @@
     "_doc": "Les monnaies qu'un plan de capacite peut porter, et que `_payer` sait payer. La liste est ici pour que le code ET les tests la lisent au meme endroit : une monnaie ajoutee sans etre declaree ici doit echouer, une monnaie declaree doit etre payable.",
     "liste": [
       "mana",
-      "endurance",
+      "vigueur",
       "sang_froid",
       "sante",
       "or"
     ]
+  },
+  "armes": {
+    "zone_sonore": {
+      "_doc": "L'attaque des instruments (designer 2026-09-03) : « les attaques au cac des armes charisme sont des zones autour du lanceur, he oui logique c'est du son ». L'onde part du PORTEUR et non de la cible, elle ne demande AUCUNE ligne de vue — le son passe les angles — et elle frappe moins fort chacun parce qu'elle les frappe tous. La cible designee prend son coup plein ; l'onde ramasse les autres a `mult_degats`. Le rayon est sur l'arme (`attaque_zone`), parce qu'un cor porte plus loin qu'une flute.",
+      "mult_degats": 0.5
+    }
   }
 }

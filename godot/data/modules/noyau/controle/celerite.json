@@ -14,7 +14,7 @@
   "power_base": null,
   "cout_ticks": 8,
   "cout_mana": 14,
-  "cout_endurance": 0,
+  "cout_vigueur": 0,
   "effets": [
     "tempo"
   ],

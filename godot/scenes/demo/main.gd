@@ -1937,7 +1937,7 @@ func _maj_ui() -> void:
 	proches = proches.slice(0, 10)   # les êtres en vue seulement : l'écran n'est pas un registre
 	for e in proches:
 		lignes.append("  " + tr("ui.entite.ligne").format({"nom": tr(e.name_key) + ((" " + tr(e.epithete)) if e.get("rare", false) else ""), "pv": e.sante, "pv_max": e.sante_max,
-			"end": e.endurance, "compteur": e.compteur, "h": g.h(e.pos)}) + (" · GARDE" if e.garde else "")
+			"end": e.vigueur, "compteur": e.compteur, "h": g.h(e.pos)}) + (" · GARDE" if e.garde else "")
 			+ (" · " + tr(sim.items[e.equipement.main_principale].name_key) if e.equipement.has("main_principale") else "")
 			+ (" + " + tr(sim.items[e.equipement.main_secondaire].name_key) if e.equipement.has("main_secondaire") else "")
 			+ (" · " + _texte_chaine(e) if e.has("chaine") else "")
@@ -2044,7 +2044,7 @@ func _lignes_bulle(j: Dictionary, cible: Dictionary) -> Array[String]:
 		var zone: Dictionary = sim.regles.zone_de_coup(g_h(j.pos), g_h(cible.pos))
 		var piece := Etres.piece_zone(cible, zone.zone, sim.items)
 		var armure := sim.regles.armure_piece(piece, fonct.type_degats)
-		var a_zero: bool = j.endurance <= 0
+		var a_zero: bool = j.vigueur <= 0
 		var vecteur := sim.vecteur_arme(arme)
 		var wx: Dictionary = sim._facteur_wuxing(j, cible, vecteur, sim.horloge_de(j).ticks)
 		var f := sim.regles.fourchette_arme(j.stats_eff, arme, fonct, false, zone.mult, armure, a_zero, wx.total, j.competences_eff, vecteur)
@@ -2071,7 +2071,7 @@ func _preview(j: Dictionary, cible: Dictionary) -> Array[String]:
 	var zone: Dictionary = sim.regles.zone_de_coup(g_h(j.pos), g_h(cible.pos))
 	var piece := Etres.piece_zone(cible, zone.zone, sim.items)
 	var armure := sim.regles.armure_piece(piece, fonct.type_degats)
-	var a_zero: bool = j.endurance <= 0
+	var a_zero: bool = j.vigueur <= 0
 	var vecteur := sim.vecteur_arme(arme)
 	var wx: Dictionary = sim._facteur_wuxing(j, cible, vecteur, sim.horloge_de(j).ticks)
 	var f := sim.regles.fourchette_arme(j.stats_eff, arme, fonct, false, zone.mult, armure, a_zero, wx.total, j.competences_eff, vecteur)

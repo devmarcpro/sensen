@@ -14,7 +14,7 @@
   "power_base": null,
   "cout_ticks": 2,
   "cout_mana": 6,
-  "cout_endurance": 0,
+  "cout_vigueur": 0,
   "effets": [
     "statut"
   ],

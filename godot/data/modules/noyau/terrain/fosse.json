@@ -16,7 +16,7 @@
   "power_base": "2d6",
   "cout_ticks": 14,
   "cout_mana": 14,
-  "cout_endurance": 0,
+  "cout_vigueur": 0,
   "effets": [
     "terrain",
     "degats"

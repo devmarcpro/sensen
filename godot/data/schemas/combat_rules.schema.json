@@ -7,7 +7,7 @@
     "actions": {
       "type": "object"
     },
-    "endurance": {
+    "vigueur": {
       "type": "object"
     },
     "garde": {
@@ -138,7 +138,7 @@
     "ticks_par_seconde_exploration",
     "deplacement",
     "actions",
-    "endurance",
+    "vigueur",
     "garde",
     "zones",
     "armure",

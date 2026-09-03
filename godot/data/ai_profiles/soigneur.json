@@ -23,7 +23,7 @@
       "sante_basse": 1.5
     },
     "attendre": {
-      "endurance_basse": 0.7
+      "vigueur_basse": 0.7
     }
   },
   "seuil_fuite_sante": 0.3,

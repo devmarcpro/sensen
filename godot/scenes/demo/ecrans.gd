@@ -1616,7 +1616,7 @@ func _apercu_personnage(fiche: Dictionary) -> void:
 	var stats: Dictionary = fiche.corps.stats
 	barres_perso.valeurs = [
 		["sante", regles.sante_max(stats)],
-		["endurance", regles.vigueur_max(stats)],
+		["vigueur", regles.vigueur_max(stats)],
 		["mana", regles.mana_max(stats)],
 		["sang_froid", regles.sang_froid_max(stats)],
 	]
@@ -1917,7 +1917,7 @@ func _portrait_partie(slot: String) -> void:
 	portrait_perso.queue_redraw()
 	barres_perso.valeurs = [
 		["sante", int(e.get("sante_max", 0))],
-		["endurance", int(e.get("endurance_max", 0))],
+		["vigueur", int(e.get("vigueur_max", 0))],
 		["mana", int(e.get("mana_max", 0))],
 	]
 	barres_perso.queue_redraw()
@@ -2419,7 +2419,7 @@ func _construire_feuille(j: Dictionary) -> void:
 	var sim = main.sim
 	var nd: Dictionary = sim.progression.niveaux_derives(j)
 	var l: Array[String] = [tr("ui.niveaux").format({"combat": "%.1f" % nd.combat, "general": "%.1f" % nd.general})]
-	l.append(tr("ui.feuille.vitaux").format({"pv": j.sante, "pv_max": j.sante_max, "end": j.endurance, "mana": j.mana, "mana_max": j.mana_max}))
+	l.append(tr("ui.feuille.vitaux").format({"pv": j.sante, "pv_max": j.sante_max, "end": j.vigueur, "mana": j.mana, "mana_max": j.mana_max}))
 	l.append("")
 	l.append("[b]" + tr("ui.feuille.stats") + "[/b]")
 	for st in ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]:
@@ -2517,7 +2517,7 @@ class HotbarEcran extends Control:
 ## Les trois jauges de l'écran de création : vie, endurance, mana, pleines, avec leur valeur écrite.
 ## Les mêmes couleurs que le HUD, la même lecture « valeur / max » — jamais un pourcentage seul.
 class BarresCreation extends Control:
-	const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "endurance": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95)}
+	const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "vigueur": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95)}
 	const BARRE_L := 190.0
 	const BARRE_H := 12.0
 	var valeurs: Array = []

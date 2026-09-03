@@ -16,7 +16,7 @@
   "power_base": "4d6",
   "cout_ticks": 16,
   "cout_mana": 20,
-  "cout_endurance": 0,
+  "cout_vigueur": 0,
   "effets": [
     "degats",
     "statut"

@@ -12,7 +12,7 @@ const RAYON_PENTA := 30.0
 const BARRE_L := 160.0
 const BARRE_H := 10.0
 const CASE := 56.0   # assez large pour lire « Étincelle » ou « Attaque » sans les tronquer
-const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "endurance": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95), "faim": Color(0.55, 0.35, 0.15), "charge": Color(0.55, 0.55, 0.6)}
+const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "vigueur": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95), "faim": Color(0.55, 0.35, 0.15), "charge": Color(0.55, 0.55, 0.6)}
 
 
 func _ready() -> void:
@@ -117,7 +117,7 @@ func _dessiner_barres(j: Dictionary, o: Vector2) -> void:
 	# La charge est la cinquième barre : le rapport du parcours (2026-08-30) notait qu'on passait à
 	# 126/55 — surcharge ×3 — sans que rien à l'écran ne le dise.
 	var pds: Dictionary = main.sim.poids_de(j) if main.sim != null else {"poids": 0.0, "capacite": 1.0}
-	var lignes := [["sante", int(j.sante), int(j.sante_max)], ["endurance", int(j.endurance), int(j.endurance_max)],
+	var lignes := [["sante", int(j.sante), int(j.sante_max)], ["vigueur", int(j.vigueur), int(j.vigueur_max)],
 		["mana", int(j.mana), int(j.mana_max)], ["faim", int(j.get("faim", 100)), 100],
 		["charge", int(round(float(pds.poids))), maxi(1, int(round(float(pds.capacite))))]]
 	for k in lignes.size():

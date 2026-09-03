@@ -14,7 +14,7 @@
   "power_base": null,
   "cout_ticks": 8,
   "cout_mana": 0,
-  "cout_endurance": 0,
+  "cout_vigueur": 0,
   "effets": [
     "ressource"
   ],
@@ -22,7 +22,7 @@
   "portee": null,
   "effet": {
     "ressource": {
-      "endurance": 30,
+      "vigueur": 30,
       "cible": "soi"
     }
   },

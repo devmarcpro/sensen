@@ -14,7 +14,7 @@
   "power_base": "arme",
   "cout_ticks": 0,
   "cout_mana": 0,
-  "cout_endurance": 0,
+  "cout_vigueur": 0,
   "effets": [
     "degats",
     "deplacement"

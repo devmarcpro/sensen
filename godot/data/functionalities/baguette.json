@@ -13,7 +13,7 @@
   "genre_grammatical": "fs",
   "affinite_sorts": {
     "mana": 1.25,
-    "endurance": 0.85
+    "vigueur": 0.85
   },
   "poids_reference": 0.72
 }

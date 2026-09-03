@@ -17,7 +17,7 @@
       "sante_basse": 2.0
     },
     "attendre": {
-      "endurance_basse": 0.7,
+      "vigueur_basse": 0.7,
       "heure_de_repos": 1.2
     },
     "errer": {

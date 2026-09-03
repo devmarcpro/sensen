@@ -14,7 +14,7 @@
   "power_base": "3d8",
   "cout_ticks": 7,
   "cout_mana": 14,
-  "cout_endurance": 0,
+  "cout_vigueur": 0,
   "effets": [
     "statut"
   ],

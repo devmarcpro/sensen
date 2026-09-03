@@ -102,7 +102,7 @@ func _essai(s: Simulation, j: Dictionary, seq: Array, origine: Vector2i, cible: 
 	j.sante = 999
 	j.sante_max = 999
 	j.mana = 999
-	j.endurance = 999
+	j.vigueur = 999
 	j.orientation = Vector2i(1, 0)
 	j.declencheurs_armes = []
 	if not s.grille.occupant(cible).is_empty():

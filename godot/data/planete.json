@@ -300,7 +300,7 @@
       "montagne": -6,
       "haute_montagne": -10
     },
-    "endurance_regen_hors_confort": 0.5,
+    "vigueur_regen_hors_confort": 0.5,
     "degats_hors_confort_ecart": 10.0,
     "degats_periode": 300
   },
@@ -401,7 +401,7 @@
     "profondeur_par_etage": 0.5,
     "etages_max": 999,
     "ticks_puits": 40,
-    "endurance_puits": 20,
+    "vigueur_puits": 20,
     "xp_puits": 12
   }
 }

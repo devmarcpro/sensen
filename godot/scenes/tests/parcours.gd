@@ -208,12 +208,12 @@ func _process(_delta: float) -> void:
 	var j: Dictionary = sim.entites[jid]
 	if invincible and j.vivant:   # on rend les PV et l'endurance à chaque image : la collecte n'est pas un test de survie
 		j.sante = int(j.sante_max)
-		j.endurance = int(j.endurance_max)
+		j.vigueur = int(j.vigueur_max)
 		j.mana = int(j.mana_max)
 	if invincible and not j.vivant:   # un coup peut tuer entre deux images : on relève sans compter la mort
 		j.vivant = true
 		j.sante = int(j.sante_max)
-		j.endurance = int(j.endurance_max)
+		j.vigueur = int(j.vigueur_max)
 		j.statuts.clear()
 		return
 	if not j.vivant:

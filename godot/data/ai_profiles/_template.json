@@ -2,11 +2,24 @@
   "_doc": "Profil Utility AI (docs: IA des créatures / E.16). considerations: {action: {consideration: poids}} ; score = Σ considération × poids sur des considérations 0-1 ; une action infaisable est ignorée. Actions : attaquer, poursuivre, fuir, retour, attendre, errer.",
   "name_key": "ai_profile.<id>.name",
   "considerations": {
-    "attaquer": { "cible_a_portee": 1.0, "agressivite": 0.8 },
-    "poursuivre": { "cible_visible": 0.6, "distance_cible": 0.3 },
-    "fuir": { "sante_basse": 1.5 },
-    "retour": { "loin_de_l_ancre": 1.0, "cible_perdue": 1.0 },
-    "attendre": { "endurance_basse": 0.7 }
+    "attaquer": {
+      "cible_a_portee": 1.0,
+      "agressivite": 0.8
+    },
+    "poursuivre": {
+      "cible_visible": 0.6,
+      "distance_cible": 0.3
+    },
+    "fuir": {
+      "sante_basse": 1.5
+    },
+    "retour": {
+      "loin_de_l_ancre": 1.0,
+      "cible_perdue": 1.0
+    },
+    "attendre": {
+      "vigueur_basse": 0.7
+    }
   },
   "seuil_fuite_sante": 0.25,
   "chute_max_degats": 10,

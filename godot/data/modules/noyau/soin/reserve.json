@@ -14,7 +14,7 @@
   "power_base": "3d6",
   "cout_ticks": 8,
   "cout_mana": 18,
-  "cout_endurance": 0,
+  "cout_vigueur": 0,
   "effets": [
     "soin",
     "statut"

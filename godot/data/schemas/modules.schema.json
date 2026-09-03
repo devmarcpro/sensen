@@ -31,7 +31,7 @@
     "cout_mana": {
       "type": "integer"
     },
-    "cout_endurance": {
+    "cout_vigueur": {
       "type": "integer"
     },
     "surcout_ticks": {

@@ -277,7 +277,7 @@ class LigneObjet extends Control:
 ## ce que l'équipement leur ajoute, ses quatre jauges, sa charge, son or et ses niveaux.
 ## Elle ne calcule rien : elle lit l'être et les règles, comme le HUD le fait en jeu.
 class FichePorteur extends Control:
-	const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "endurance": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95), "faim": Color(0.55, 0.35, 0.15)}
+	const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "vigueur": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95), "faim": Color(0.55, 0.35, 0.15)}
 	const TITRE_H := 14.0 + 18.0
 	const STAT_H := 15.0
 	const JAUGE_H := 16.0
@@ -307,7 +307,7 @@ class FichePorteur extends Control:
 			draw_string(f, Vector2(6, y), texte, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.85, 0.85, 0.8) if eff == base else Color(0.6, 0.9, 0.7))
 			y += 15.0
 		y += 6.0
-		var jauges := [["sante", int(j.sante), int(j.sante_max)], ["endurance", int(j.endurance), int(j.endurance_max)],
+		var jauges := [["sante", int(j.sante), int(j.sante_max)], ["vigueur", int(j.vigueur), int(j.vigueur_max)],
 			["mana", int(j.mana), int(j.mana_max)], ["faim", int(j.get("faim", 100)), 100]]
 		for jg in jauges:
 			var part := clampf(float(jg[1]) / maxf(1.0, float(jg[2])), 0.0, 1.0)

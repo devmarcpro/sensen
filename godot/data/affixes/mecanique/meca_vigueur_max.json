@@ -1,5 +1,5 @@
 {
-  "name_key": "affixe.meca_endurance_max.nom",
+  "name_key": "affixe.meca_vigueur_max.nom",
   "famille": "mecanique",
   "slots_valides": [
     "casque",
@@ -17,7 +17,7 @@
     ]
   },
   "effet": {
-    "type": "meca_endurance_max"
+    "type": "meca_vigueur_max"
   },
   "meilleur": {
     "n": "haut"

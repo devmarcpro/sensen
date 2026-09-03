@@ -260,7 +260,7 @@ func charger_camp(joueur: Dictionary = {}, cellule_choisie: Vector2i = Vector2i(
 		_reprendre(joueur, entree)
 	for x in entites.values():   # les compteurs des premiers êtres partent de l'heure de départ, pas de minuit
 		x.compteur = horloge_monde.ticks
-		x.tick_endurance = horloge_monde.ticks
+		x.tick_vigueur = horloge_monde.ticks
 		if x.has("faim_tick"):
 			x.faim_tick = horloge_monde.ticks
 		joueur.spawn = entree
@@ -504,14 +504,14 @@ func creuser_un_puits(e: Dictionary, tick: int) -> bool:
 		if not monde.claims.has(cell):
 			EventBus.emettre(&"journal", [&"journal.puits_hors_claim", {}])
 			return false
-		if int(e.endurance) < int(m.get("endurance_puits", 20)):
+		if int(e.vigueur) < int(m.get("vigueur_puits", 20)):
 			EventBus.emettre(&"journal", [&"journal.puits_epuise", {}])
 			return false
 		e["retour"] = e.pos
 		_sauver_camp(e)
 		expedition = {}
 		etages_visites.clear()
-		e.endurance = maxi(0, int(e.endurance) - int(m.get("endurance_puits", 20)))
+		e.vigueur = maxi(0, int(e.vigueur) - int(m.get("vigueur_puits", 20)))
 		gagner_xp(e, "terrassement", int(m.get("xp_puits", 12)))
 		var fond := int(m.get("etages_max", 999))
 		donjon = {"etages_fixes": [fond, fond], "corruption": 0.0, "cellule": cell,
@@ -521,13 +521,13 @@ func creuser_un_puits(e: Dictionary, tick: int) -> bool:
 		return true
 	if not bool(donjon.get("mine", false)):
 		return false
-	if int(e.endurance) < int(m.get("endurance_puits", 20)):
+	if int(e.vigueur) < int(m.get("vigueur_puits", 20)):
 		EventBus.emettre(&"journal", [&"journal.puits_epuise", {}])
 		return false
 	# Le puits part de LA TUILE OÙ L'ON SE TIENT : c'est la promesse de Dwarf Fortress — on décide où
 	# descendre, on ne cherche pas un escalier que le monde aurait posé pour nous.
 	var prochain: int = int(donjon.etage) + 1
-	e.endurance = maxi(0, int(e.endurance) - int(m.get("endurance_puits", 20)))
+	e.vigueur = maxi(0, int(e.vigueur) - int(m.get("vigueur_puits", 20)))
 	e.compteur = tick + _ticks_avec_statuts(e, int(m.get("ticks_puits", 40)))
 	gagner_xp(e, "terrassement", int(m.get("xp_puits", 12)))
 	e.etage_depuis = int(donjon.etage)
@@ -773,7 +773,7 @@ func _reprendre(e: Dictionary, pos: Vector2i) -> void:
 	e.ancre = pos
 	e.compteur = 0
 	e.horloge = "monde"
-	e.tick_endurance = 0
+	e.tick_vigueur = 0
 	e.action_en_cours = {}
 	e.statuts = []
 	e.declencheurs_armes = []
@@ -1292,7 +1292,7 @@ func _terrasser(e: Dictionary, vers: Vector2i, sens: int, tick: int) -> bool:
 		if not (str(fonct.get("outil", "")) in tr.outils_elever):   # pioche ou pelle (Destruction du terrain)
 			EventBus.emettre(&"journal", [&"journal.terrasser_outil", {}])
 			return false
-	if e.endurance < int(tr.endurance):
+	if e.vigueur < int(tr.vigueur):
 		return false
 	_memoriser_terrain(vers)
 	grille.hauteurs[grille.idx(vers)] = h
@@ -1301,7 +1301,7 @@ func _terrasser(e: Dictionary, vers: Vector2i, sens: int, tick: int) -> bool:
 			_retirer_source(vers)
 		else:
 			_retirer_eau(vers, true)
-	e.endurance -= int(tr.endurance)
+	e.vigueur -= int(tr.vigueur)
 	e.compteur = tick + int(tr.ticks)
 	e["vue_sale"] = true
 	gagner_xp(e, "terrassement", int(tr.xp))
@@ -1405,7 +1405,7 @@ func _creuser(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	grille.materiaux.erase(grille.idx(vers))
 	grille.hauteurs[grille.idx(vers)] = grille.h(e.pos)   # la brèche est au niveau de celui qui creuse
 	grille.marquer(vers)
-	e.endurance = maxi(0, int(e.endurance) - int(cr.endurance))
+	e.vigueur = maxi(0, int(e.vigueur) - int(cr.vigueur))
 	e.compteur = tick + _ticks_avec_statuts(e, ticks)
 	if recolte:
 		var rr2: Dictionary = regles.r.recolte
@@ -1695,8 +1695,8 @@ func _dormir(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	e.sante = e.sante_max
 	e["sang"] = 0
 	e.mana = e.mana_max
-	e.endurance = e.endurance_max
-	e.tick_endurance = horloge_monde.ticks
+	e.vigueur = e.vigueur_max
+	e.tick_vigueur = horloge_monde.ticks
 	e["repose_jusqua"] = horloge_monde.ticks + int(cp.repose_ticks)
 	e["xp_mult"] = float(cp.repose_xp_mult)
 	# +potentiel aux compétences consommées récemment (Potentiel : Reposé).
@@ -6948,7 +6948,7 @@ func _respawn(e: Dictionary) -> bool:
 		_quitter_combat(e)
 	e.vivant = true
 	e.sante = e.sante_max
-	e.endurance = e.endurance_max
+	e.vigueur = e.vigueur_max
 	e.statuts = []
 	e.action_en_cours = {}
 	if monde != null and lieu != "arene" and not a_talent(e, "sans_chair") and monde.corruption_de(_cell_de(e.pos)) >= float(regles.r.talents.sans_chair.corruption_seuil):
@@ -7861,24 +7861,24 @@ func _declencher_glyphe(entrant: Dictionary, pos: Vector2i) -> void:
 
 ## Régénération d'endurance : +2 par tick écoulé depuis la dernière application (Endurance).
 func _regenerer(e: Dictionary, tick: int) -> void:
-	var ecoules := tick - int(e.tick_endurance)
+	var ecoules := tick - int(e.tick_vigueur)
 	if ecoules > 0:
 		# Récupération (designer 2026-09-01) : le pendant de Méditation pour l'endurance — le niveau
 		# augmente le gain par tick, et l'usage entraîne, mais seulement si le corps regagne vraiment.
-		var nv_rec := regles.niveau(e.get("competences_eff", e.get("competences", {})), str(regles.r.endurance.get("competence", "recuperation")))
-		var regen := int(round(float(ecoules) * float(regles.r.endurance.regen_par_tick) * (1.0 + float(nv_rec) * float(regles.r.endurance.get("regen_par_niveau", 0.0)))))
+		var nv_rec := regles.niveau(e.get("competences_eff", e.get("competences", {})), str(regles.r.vigueur.get("competence", "recuperation")))
+		var regen := int(round(float(ecoules) * float(regles.r.vigueur.regen_par_tick) * (1.0 + float(nv_rec) * float(regles.r.vigueur.get("regen_par_niveau", 0.0)))))
 		if float(e.get("ecart_confort", 0.0)) != 0.0:
-			regen = int(float(regen) * float(GameData.config("planete").get("meteo", {}).get("endurance_regen_hors_confort", 0.5)))
-		var avant_end: int = e.endurance
-		e.endurance = mini(e.endurance_max, e.endurance + regen)
-		if e.endurance > avant_end:   # on ne s'entraîne pas à récupérer quand on est déjà au maximum
-			var per_r := maxi(1, int(regles.r.endurance.get("xp_periode_ticks", 20)))
-			var tr_r := tick / per_r - int(e.tick_endurance) / per_r
+			regen = int(float(regen) * float(GameData.config("planete").get("meteo", {}).get("vigueur_regen_hors_confort", 0.5)))
+		var avant_end: int = e.vigueur
+		e.vigueur = mini(e.vigueur_max, e.vigueur + regen)
+		if e.vigueur > avant_end:   # on ne s'entraîne pas à récupérer quand on est déjà au maximum
+			var per_r := maxi(1, int(regles.r.vigueur.get("xp_periode_ticks", 20)))
+			var tr_r := tick / per_r - int(e.tick_vigueur) / per_r
 			if tr_r > 0:
-				gagner_xp(e, str(regles.r.endurance.get("competence", "recuperation")), tr_r)
+				gagner_xp(e, str(regles.r.vigueur.get("competence", "recuperation")), tr_r)
 		# Mana (A.5) : à chaque tranche de 10 ticks franchie, 1 chance sur 8 de rendre 1 + N_meditation × 0.2.
 		var periode := int(regles.r.mana.periode_ticks)
-		var tranches := tick / periode - int(e.tick_endurance) / periode
+		var tranches := tick / periode - int(e.tick_vigueur) / periode
 		for i in tranches:
 			if des.reel() < float(regles.r.mana.chance):
 				e.mana = mini(e.mana_max, e.mana + roundi((float(regles.r.mana.regen_base) + float(e.competences_eff.get("meditation", 0)) * float(regles.r.mana.regen_par_meditation)) * (float(regles.r.talents.chair_de_mana.mana_regen_mult) if a_talent(e, "chair_de_mana") else 1.0)))
@@ -7898,10 +7898,10 @@ func _regenerer(e: Dictionary, tick: int) -> void:
 			if faim_e < int(f_faim.seuil_regen):
 				pct_regen *= float(f_faim.get("malus_regen", 0.9))   # Faim < 50 : −10 % de régénération
 			var per := maxi(1, roundi(float(regles.r.effets_equipement.regen_base_ticks) * 100.0 / pct_regen))
-			var pv := tick / per - int(e.tick_endurance) / per
+			var pv := tick / per - int(e.tick_vigueur) / per
 			if pv > 0:
 				e.sante = mini(e.sante_max, int(e.sante) + pv)
-	e.tick_endurance = tick
+	e.tick_vigueur = tick
 
 
 # ---------------------------------------------------------------- intentions (client → serveur)
@@ -8208,7 +8208,7 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 
 
 func _prendre_garde(e: Dictionary, tick: int) -> bool:
-	if e.endurance <= 0 or Etres.bloque_statuts(e, "garde", statuts_defs):
+	if e.vigueur <= 0 or Etres.bloque_statuts(e, "garde", statuts_defs):
 		return false   # à zéro d'endurance (ou feinté), garde impossible
 	if a_talent(e, "masques"):   # Le Masque : la main secondaire est prise
 		EventBus.emettre(&"journal", [&"journal.garde_masque", {}])
@@ -8224,7 +8224,7 @@ func _prendre_garde(e: Dictionary, tick: int) -> bool:
 
 func _attendre(e: Dictionary, tick: int) -> bool:
 	_quitter_garde(e)
-	e.endurance = mini(e.endurance_max, e.endurance + int(regles.r.actions.attendre_endurance))
+	e.vigueur = mini(e.vigueur_max, e.vigueur + int(regles.r.actions.attendre_vigueur))
 	e.compteur = tick + int(regles.r.actions.attendre)
 	EventBus.emettre(&"journal", [&"journal.attendre", {"nom": e.name_key}])
 	return true
@@ -8301,7 +8301,35 @@ func _attaquer_arme(e: Dictionary, cible: Dictionary, lourde: bool, tick: int) -
 		return true
 	e.compteur = horloge_de(e).ticks + ticks
 	_frapper_arme(e, cible, arme, fonct, false, ticks)
+	_onde_sonore(e, cible, arme, fonct, ticks)
 	return true
+
+
+## L'attaque des instruments est une ONDE, pas un coup (designer 2026-09-03 : « les attaques au cac des
+## armes charisme sont des zones autour du lanceur, hé oui logique c'est du son »).
+##
+## Trois choses la distinguent de tout le reste du jeu, et elles découlent toutes de la même idée :
+##   — elle part du PORTEUR, pas de la cible : se coller à un barde ne met pas à l'abri ;
+##   — elle ne demande AUCUNE ligne de vue : le son passe les angles, c'est sa signature ;
+##   — elle touche moins fort chacun, parce qu'elle les touche tous.
+## La cible désignée a déjà pris son coup plein juste avant : l'onde ramasse les autres.
+func _onde_sonore(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Dictionary, ticks: int) -> int:
+	var rayon := int(fonct.get("attaque_zone", 0))
+	if rayon <= 0:
+		return 0
+	var z: Dictionary = regles.r.get("armes", {}).get("zone_sonore", {})
+	var mult := float(z.get("mult_degats", 0.5))
+	var touches := 0
+	for c in vivants():
+		if c.id == e.id or c.id == cible.id or c.camp == e.camp:
+			continue
+		if Grille.distance(e.pos, c.pos) > rayon:
+			continue
+		_frapper_arme(e, c, arme, fonct, false, ticks, mult)
+		touches += 1
+	if touches > 0:
+		EventBus.emettre(&"journal", [&"journal.onde_sonore", {"nom": e.name_key, "arme": arme.name_key, "n": touches}])
+	return touches
 
 
 func est_distance(fonct: Dictionary) -> bool:
@@ -8377,9 +8405,9 @@ func verifier_tir(e: Dictionary, cible: Dictionary) -> Dictionary:
 	return {"ok": true, "devie": m.get("id", "")}
 
 
-func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Dictionary, lourde: bool, ticks: int) -> void:
-	var a_zero: bool = e.endurance <= 0
-	e.endurance = maxi(0, e.endurance - int(regles.r.endurance.lourde if lourde else regles.r.endurance.attaque))
+func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Dictionary, lourde: bool, ticks: int, mult_degats: float = 1.0) -> void:
+	var a_zero: bool = e.vigueur <= 0
+	e.vigueur = maxi(0, e.vigueur - int(regles.r.vigueur.lourde if lourde else regles.r.vigueur.attaque))
 	if est_projectile(fonct):
 		e.munitions -= 1
 		e.munitions_tirees += 1
@@ -8411,6 +8439,7 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 		EventBus.emettre(&"coup_critique", [e.id, cible.id, mult_coup])
 	if bool(arme.get("fantome", false)):   # Armes fantomatiques : pures, mais ×0,7
 		mult_coup *= float(regles.r.armes_fantomes.degats_mult)
+	mult_coup *= mult_degats   # l'onde sonore touche plusieurs corps : chacun prend moins
 	if a_talent(e, "jauge_de_sang"):   # L'Écarlate : jusqu'à ×1,8 la jauge pleine
 		mult_coup *= 1.0 + (float(regles.r.talents.jauge_de_sang.mult_max) - 1.0) * float(e.get("sang", 0)) / float(regles.r.talents.jauge_de_sang.max)
 	for s0 in e.statuts:   # Poison de lame : chaque coup d'arme applique un statut à la cible
@@ -8731,18 +8760,18 @@ func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degat
 			var cout := regles.cout_garde_impact(sans_garde, bouclier, cible.competences_eff)
 			if bouclier:
 				gagner_xp(cible, "bouclier", sans_garde)   # la compétence Bouclier progresse à chaque impact bloqué
-			for ax in Etres.affixes_equipes(cible, items, affixes_defs, "meca_garde_endurance"):
+			for ax in Etres.affixes_equipes(cible, items, affixes_defs, "meca_garde_vigueur"):
 				cout = roundi(float(cout) * (1.0 - float(ax.params.pct) / 100.0))   # garde −N % d'endurance
-			cible.endurance = maxi(0, cible.endurance - cout)
-			for ax in Etres.affixes_equipes(cible, items, affixes_defs, "decl_parade_endurance"):
-				cible.endurance = mini(cible.endurance_max, cible.endurance + int(ax.params.endurance))
-			for ax in Etres.affixes_equipes(cible, items, affixes_defs, "cadence_garde_endurance"):
+			cible.vigueur = maxi(0, cible.vigueur - cout)
+			for ax in Etres.affixes_equipes(cible, items, affixes_defs, "decl_parade_vigueur"):
+				cible.vigueur = mini(cible.vigueur_max, cible.vigueur + int(ax.params.vigueur))
+			for ax in Etres.affixes_equipes(cible, items, affixes_defs, "cadence_garde_vigueur"):
 				ax.instance.compteur = int(ax.instance.compteur) + 1
 				if int(ax.instance.compteur) % int(ax.params.n) == 0:
-					cible.endurance = mini(cible.endurance_max, cible.endurance + int(ax.params.endurance))
+					cible.vigueur = mini(cible.vigueur_max, cible.vigueur + int(ax.params.vigueur))
 			_declencher(cible, "parade", att.pos)
 			EventBus.emettre(&"journal", [&"journal.garde_tient", {"nom": cible.name_key, "avant": sans_garde, "apres": degats}])
-			if cible.endurance <= 0:
+			if cible.vigueur <= 0:
 				cible.garde = false
 		elif lourde and not bouclier:
 			cible.garde = false   # la lourde brise la garde
@@ -8765,7 +8794,7 @@ func triche(e: Dictionary, action: String, arg: String = "") -> bool:
 			e.or = int(e.or) + 10000
 		"soin":
 			e.sante = int(e.sante_max)
-			e.endurance = int(e.endurance_max)
+			e.vigueur = int(e.vigueur_max)
 			e.mana = int(e.mana_max)
 			e["faim"] = 100
 			e.statuts.clear()
@@ -9233,8 +9262,8 @@ func _lancer_action_creature(e: Dictionary, action: Dictionary, cible: Dictionar
 
 
 func _executer_action_creature(e: Dictionary, action: Dictionary, cible: Dictionary) -> void:
-	var a_zero: bool = e.endurance <= 0
-	e.endurance = maxi(0, e.endurance - int(action.cout_endurance))
+	var a_zero: bool = e.vigueur <= 0
+	e.vigueur = maxi(0, e.vigueur - int(action.cout_vigueur))
 	var cibles: Array[Dictionary] = _cibles_de_forme(e, action, cible)
 	for effet: Dictionary in action.effets:
 		match str(effet.type):
@@ -9710,7 +9739,7 @@ func plan_sequence(e: Dictionary, sequence: Array) -> Dictionary:
 
 ## L'affinité d'arme d'un plan : ×mana ou ×endurance selon la monnaie, sur la puissance (dés et soins).
 func _appliquer_affinite_arme(plan: Dictionary, fonct: Dictionary) -> void:
-	var aff: Dictionary = fonct.get("affinite_sorts", regles.r.get("modules", {}).get("affinite_mains_nues", {"mana": 1.0, "endurance": 1.0}))
+	var aff: Dictionary = fonct.get("affinite_sorts", regles.r.get("modules", {}).get("affinite_mains_nues", {"mana": 1.0, "vigueur": 1.0}))
 	var monnaie := str(plan.get("monnaie", ""))
 	var f := float(aff.get(monnaie, 1.0)) if not monnaie.is_empty() else 1.0
 	# `cout_mana_mult` : un talisman ne rend pas les sorts plus forts, il les rend moins CHERS — donc
@@ -9953,14 +9982,14 @@ func _payer(e: Dictionary, plan: Dictionary) -> void:
 				var degats := roundi(float(deficit * int(regles.r.mana.surchauffe_mult)) * float(e.get("mecaniques", {}).get("surchauffe_mult", {}).get("mult", 100)) / 100.0)
 				EventBus.emettre(&"journal", [&"journal.surchauffe", {"nom": e.name_key, "deficit": deficit, "degats": degats}])
 				if a_talent(e, "chair_de_mana"):   # Chair de mana (Talents de race) : le corps paie en endurance
-					e.endurance = maxi(0, int(e.endurance) - degats)
+					e.vigueur = maxi(0, int(e.vigueur) - degats)
 				else:
 					_appliquer_degats(e, degats, "", {"surchauffe": true})
-		"endurance":   # Épuisement (Mana) : au-delà du pool, le déficit se paie en PV — rien n'est gratuit
-			var deficit_e: int = maxi(0, int(plan.ressource) - int(e.endurance))
-			e.endurance = maxi(0, int(e.endurance) - int(plan.ressource))
+		"vigueur":   # Épuisement (Mana) : au-delà du pool, le déficit se paie en PV — rien n'est gratuit
+			var deficit_e: int = maxi(0, int(plan.ressource) - int(e.vigueur))
+			e.vigueur = maxi(0, int(e.vigueur) - int(plan.ressource))
 			if deficit_e > 0:
-				var degats_e := roundi(float(deficit_e) * float(regles.r.endurance.get("epuisement_mult", 1)))
+				var degats_e := roundi(float(deficit_e) * float(regles.r.vigueur.get("epuisement_mult", 1)))
 				if degats_e > 0:
 					EventBus.emettre(&"journal", [&"journal.epuisement", {"nom": e.name_key, "deficit": deficit_e, "degats": degats_e}])
 					_appliquer_degats(e, degats_e, "", {"surchauffe": true})
@@ -9978,7 +10007,7 @@ func _payer(e: Dictionary, plan: Dictionary) -> void:
 func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, segment: bool = true) -> void:
 	var tick := tick_de(e)
 	if "cataclysme" in plan.noyau.get("tags", []):   # Sorts cataclysmiques : le coût mord — l'endurance est vidée, et c'est noté pour le combat
-		e.endurance = 0
+		e.vigueur = 0
 		if not e.has("cataclysmes_combat"):
 			e["cataclysmes_combat"] = []
 		if not (str(plan.noyau.id) in e.cataclysmes_combat):
@@ -10351,8 +10380,8 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 							continue
 						if rs.has("mana"):
 							c.mana = clampi(int(c.mana) + int(rs.mana), 0, int(c.mana_max))
-						if rs.has("endurance"):
-							c.endurance = clampi(int(c.endurance) + int(rs.endurance), 0, int(c.endurance_max))
+						if rs.has("vigueur"):
+							c.vigueur = clampi(int(c.vigueur) + int(rs.vigueur), 0, int(c.vigueur_max))
 						if rs.has("sang"):   # L'Écarlate : la jauge monte d'un cran
 							c["sang"] = mini(int(regles.r.talents.jauge_de_sang.max), int(c.get("sang", 0)) + int(rs.sang) * int(regles.r.talents.jauge_de_sang.max) / 4)
 						if rs.has("purge"):   # retire un statut négatif, le premier trouvé
@@ -10600,7 +10629,7 @@ func _bonus_balise(e: Dictionary, pos: Vector2i) -> int:
 
 
 func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dictionary) -> Dictionary:
-	var a_zero: bool = e.endurance <= 0 and plan.monnaie == "endurance"
+	var a_zero: bool = e.vigueur <= 0 and plan.monnaie == "vigueur"
 	var arme_noyau: bool = plan.noyau.get("power_base") == "arme"
 	var d: Dictionary
 	var type_degats := "magique"
@@ -10634,8 +10663,8 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 	var sans_garde := regles.degats_finaux(bruts, zone.mult, armure, false)
 	var degats := regles.degats_finaux(bruts, zone.mult, armure, tient)
 	if tient:
-		c.endurance = maxi(0, c.endurance - regles.cout_garde_impact(sans_garde, bouclier))
-		if c.endurance <= 0:
+		c.vigueur = maxi(0, c.vigueur - regles.cout_garde_impact(sans_garde, bouclier))
+		if c.vigueur <= 0:
 			c.garde = false
 	return {"zone": zone.zone, "mult": zone.mult, "armure": armure, "direction": direction, "garde": tient,
 		"degats": degats, "bruts": bruts, "type": type_degats, "element": plan.elements, "dom": dom.mult,
@@ -10681,7 +10710,7 @@ func _rejoindre(e: Dictionary, nom: String) -> void:
 	var de := horloge_de(e)
 	var vers: Horloge = combats[nom].horloge
 	e.compteur = vers.ticks + maxi(0, e.compteur - de.ticks)
-	e.tick_endurance = vers.ticks - maxi(0, de.ticks - e.tick_endurance)
+	e.tick_vigueur = vers.ticks - maxi(0, de.ticks - e.tick_vigueur)
 	if en_combat(e):
 		combats[e.horloge].participants.erase(e.id)
 	e.horloge = nom
@@ -10692,7 +10721,7 @@ func _quitter_combat(e: Dictionary) -> void:
 	var de := horloge_de(e)
 	combats[e.horloge].participants.erase(e.id)
 	e.compteur = horloge_monde.ticks + maxi(0, e.compteur - de.ticks)
-	e.tick_endurance = horloge_monde.ticks
+	e.tick_vigueur = horloge_monde.ticks
 	e.horloge = "monde"
 	e.action_en_cours = {}
 
@@ -10968,7 +10997,7 @@ func _actions_candidates(e: Dictionary, cible: Dictionary, profil: Dictionary, t
 	# `heure_de_repos` le voient : rien ne change pour un garde ou un assaillant.
 	var nocturne: bool = "nocturne" in e.get("tags", [])
 	var repos: bool = (est_nuit() != nocturne) and not a_cible
-	c["attendre"] = {"endurance_basse": 1.0 if e.endurance < 20 else 0.0, "calme": 0.0 if a_cible else 1.0,
+	c["attendre"] = {"vigueur_basse": 1.0 if e.vigueur < 20 else 0.0, "calme": 0.0 if a_cible else 1.0,
 		"heure_de_repos": 1.0 if repos else 0.0}
 	# Types d'ennemis (Créatures, 2026-08-30) : le tireur recule au contact, le soigneur / l'invocateur soutient,
 	# l'embusqueur guette tant que la cible est loin. Seuls les profils qui pondèrent ces considérations les voient.

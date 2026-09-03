@@ -12,7 +12,7 @@
   "cible": "toute_entite",
   "ligne_de_vue": false,
   "cout_ticks": 10,
-  "cout_endurance": 0,
+  "cout_vigueur": 0,
   "degats_des": "1",
   "type_degats": "perforant",
   "conditions": [],

@@ -28,7 +28,7 @@ func _ready() -> void:
 		soucis.append("  le puits s'est ouvert sur une cellule qui n'est pas au joueur")
 	# 2. avec le claim, la mine s'ouvre.
 	sim.monde.claims[cell] = {"role": "base"}
-	j.endurance = int(j.endurance_max)
+	j.vigueur = int(j.vigueur_max)
 	if not sim.creuser_un_puits(j, 0):
 		print("SONDE MINE : ECHEC — le puits refuse sur une cellule revendiquee")
 		get_tree().quit(1)
@@ -38,13 +38,13 @@ func _ready() -> void:
 	for etage in [1, 4, 8, 16]:
 		if int(sim.donjon.etage) != etage:
 			j = _joueur(sim)
-			j.endurance = int(j.endurance_max)
+			j.vigueur = int(j.vigueur_max)
 			while int(sim.donjon.etage) < etage:
 				if not sim.creuser_un_puits(j, 0):
 					soucis.append("  le puits refuse a l'etage %d" % int(sim.donjon.etage))
 					break
 				j = _joueur(sim)
-				j.endurance = int(j.endurance_max)
+				j.vigueur = int(j.vigueur_max)
 		# la mine est-elle pleine, et vide d'habitants ?
 		var libres := 0
 		var betes := 0
@@ -87,7 +87,7 @@ func _ready() -> void:
 			voisines.append(q)
 	var creusees := 0
 	for q2 in voisines:
-		j.endurance = int(j.endurance_max)
+		j.vigueur = int(j.vigueur_max)
 		j.compteur = 0
 		if sim._creuser(j, q2, 0):
 			creusees += 1
@@ -95,7 +95,7 @@ func _ready() -> void:
 	var id_mine: int = int(sim.donjon.id)
 	sim._sortir(j)   # on remonte au jour
 	j = _joueur(sim)
-	j.endurance = int(j.endurance_max)
+	j.vigueur = int(j.vigueur_max)
 	sim.creuser_un_puits(j, 0)   # et on redescend dans SA mine
 	var rouvertes := 0
 	for q3 in voisines:

@@ -118,8 +118,8 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 						var sf_r := 1.0 + float(niveaux.get(id, 0)) * par_niveau
 						if int(m.get("cout_mana", 0)) > 0:
 							plan.ressource += roundi(float(m.cout_mana) / sf_r)
-						elif int(m.get("cout_endurance", 0)) > 0:
-							plan.ressource += roundi(float(m.cout_endurance) / sf_r)
+						elif int(m.get("cout_vigueur", 0)) > 0:
+							plan.ressource += roundi(float(m.cout_vigueur) / sf_r)
 						continue
 					# Aucune limite d'assemblage (Six types de modules) : le noyau de plus est une charge de
 					# plus, avec ses dés, ses effets et son coût. Le prix, pas l'assembleur, est la borne.
@@ -135,7 +135,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 					# celle du sort, 1 pour 1 — rien n'est gratuit (Six types de modules).
 					var cout_sup: int = int(m.get("cout_mana", 0))
 					if cout_sup == 0:
-						cout_sup = int(m.get("cout_endurance", 0))
+						cout_sup = int(m.get("cout_vigueur", 0))
 					if cout_sup == 0:
 						cout_sup = int(m.get("cout_sang_froid", 0))
 					if plan.monnaie == "":
@@ -154,9 +154,9 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				if int(m.get("cout_mana", 0)) > 0:
 					plan.monnaie = "mana"
 					plan.ressource = roundi(float(m.cout_mana) / sf_noyau)
-				elif int(m.get("cout_endurance", 0)) > 0:
-					plan.monnaie = "endurance"
-					plan.ressource = roundi(float(m.cout_endurance) / sf_noyau)
+				elif int(m.get("cout_vigueur", 0)) > 0:
+					plan.monnaie = "vigueur"
+					plan.ressource = roundi(float(m.cout_vigueur) / sf_noyau)
 				elif int(m.get("cout_sang_froid", 0)) > 0:
 					plan.monnaie = "sang_froid"
 					plan.ressource = roundi(float(m.cout_sang_froid) / sf_noyau)
@@ -470,8 +470,8 @@ static func cout_condition(bonus: Dictionary) -> int:
 func _monnaie_de(m: Dictionary) -> String:
 	if int(m.get("cout_mana", 0)) > 0:
 		return "mana"
-	if int(m.get("cout_endurance", 0)) > 0:
-		return "endurance"
+	if int(m.get("cout_vigueur", 0)) > 0:
+		return "vigueur"
 	if int(m.get("cout_sang_froid", 0)) > 0:
 		return "sang_froid"
 	return ""

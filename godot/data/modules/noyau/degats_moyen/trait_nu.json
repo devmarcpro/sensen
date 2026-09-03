@@ -14,7 +14,7 @@
   "power_base": "1d8",
   "cout_ticks": 5,
   "cout_mana": 4,
-  "cout_endurance": 0,
+  "cout_vigueur": 0,
   "effets": [
     "degats"
   ],

@@ -14,7 +14,7 @@
   "power_base": "(h−2)×5",
   "cout_ticks": 5,
   "cout_mana": 0,
-  "cout_endurance": 10,
+  "cout_vigueur": 10,
   "effets": [
     "deplacement",
     "degats"

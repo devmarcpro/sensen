@@ -58,6 +58,9 @@
         "mp",
         "fp"
       ]
+    },
+    "attaque_zone": {
+      "type": "integer"
     }
   },
   "required": [

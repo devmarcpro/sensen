@@ -12,7 +12,7 @@
   "cible": "ennemi",
   "ligne_de_vue": true,
   "cout_ticks": 8,
-  "cout_endurance": 4,
+  "cout_vigueur": 4,
   "degats_des": "1d6",
   "type_degats": "perforant",
   "conditions": [],

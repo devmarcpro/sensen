@@ -14,7 +14,7 @@
   "genre_grammatical": "fs",
   "affinite_sorts": {
     "mana": 0.8,
-    "endurance": 1.2
+    "vigueur": 1.2
   },
   "_doc": "La masse etait l'arme sans contrepartie du jeu (mesure du 2026-09-03) : 3d8 en UNE main, le plus haut brut du catalogue, ET le type contondant que la matrice d'armure favorise contre les protections lourdes. Resultat : 60 a 80 % au-dessus de toute autre arme contre une cible en mailles, en ecailles ou en plaque, sans malus de portee ni de mains. On ramene ses des a 2d8 : son identite d'arme anti-armure lui vient desormais de la MATRICE, pas d'un cumul. Revenir en arriere = remettre 3d8 ici."
 }

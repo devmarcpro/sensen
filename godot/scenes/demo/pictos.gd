@@ -65,7 +65,7 @@ static func icone_de(md: Dictionary) -> String:
 				if r.has("sang"): return "sang"
 				if r.has("releve_allie_pct") or r.has("transfert_pv"): return "coeur"
 				if r.has("mana") or r.has("vol_mana"): return "lune"
-				if r.has("endurance"): return "coeur"
+				if r.has("vigueur"): return "coeur"
 				return "lune"
 			if "terrain" in effets:
 				var delta := float(ef.get("terrain", {}).get("delta", 0))
@@ -128,7 +128,7 @@ static func couleur_module(md: Dictionary) -> Color:
 	if not meilleur.is_empty() and teintes.has(meilleur):
 		var t: Array = teintes[meilleur]
 		return Color(float(t[0]), float(t[1]), float(t[2]))
-	if int(md.get("cout_endurance", 0)) > 0:
+	if int(md.get("cout_vigueur", 0)) > 0:
 		return Color(0.85, 0.6, 0.3)
 	return Color(0.7, 0.7, 0.8)
 

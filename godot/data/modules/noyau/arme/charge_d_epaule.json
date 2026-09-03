@@ -14,7 +14,7 @@
   "power_base": "1d6",
   "cout_ticks": 6,
   "cout_mana": 0,
-  "cout_endurance": 11,
+  "cout_vigueur": 11,
   "effets": [
     "degats",
     "deplacement"

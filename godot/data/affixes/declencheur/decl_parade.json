@@ -9,16 +9,16 @@
     "bottes"
   ],
   "parametres": {
-    "endurance": [
+    "vigueur": [
       3,
       8
     ]
   },
   "effet": {
-    "type": "decl_parade_endurance"
+    "type": "decl_parade_vigueur"
   },
   "meilleur": {
-    "endurance": "haut"
+    "vigueur": "haut"
   },
   "inerte": false,
   "tags": []

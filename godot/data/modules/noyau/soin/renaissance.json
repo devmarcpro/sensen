@@ -17,7 +17,7 @@
   "power_base": "0",
   "cout_ticks": 20,
   "cout_mana": 40,
-  "cout_endurance": 0,
+  "cout_vigueur": 0,
   "effets": [
     "resurrection"
   ],

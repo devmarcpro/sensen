@@ -12,8 +12,9 @@
   "genre_grammatical": "fs",
   "affinite_sorts": {
     "mana": 1.85,
-    "endurance": 0.55
+    "vigueur": 0.55
   },
   "combat_skill": "musique",
-  "poids_reference": 3.84
+  "poids_reference": 3.84,
+  "attaque_zone": 2
 }

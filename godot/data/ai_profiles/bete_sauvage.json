@@ -17,7 +17,7 @@
       "cible_perdue": 1.0
     },
     "attendre": {
-      "endurance_basse": 0.7,
+      "vigueur_basse": 0.7,
       "heure_de_repos": 0.9
     }
   },

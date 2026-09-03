@@ -10,7 +10,7 @@
   "cible": "ennemi",
   "ligne_de_vue": true,
   "cout_ticks": 14,
-  "cout_endurance": 12,
+  "cout_vigueur": 12,
   "degats_des": null,
   "type_degats": null,
   "conditions": [],

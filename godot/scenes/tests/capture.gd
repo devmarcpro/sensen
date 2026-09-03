@@ -184,12 +184,12 @@ func _ready() -> void:
 		var jm: Dictionary = scene.joueur()
 		var cellm: Vector2i = scene.sim.monde.cellule_de(jm.pos)
 		scene.sim.monde.claims[cellm] = {"role": "base"}   # on ne creuse que sur sa terre : on la lui donne
-		jm.endurance = int(jm.endurance_max)
+		jm.vigueur = int(jm.vigueur_max)
 		scene.sim.creuser_un_puits(jm, 0)
 		var vise: int = int(args[im + 1]) if im + 1 < args.size() else 1
 		while int(scene.sim.donjon.get("etage", 1)) < vise:
 			var jm2: Dictionary = scene.joueur()
-			jm2.endurance = int(jm2.endurance_max)
+			jm2.vigueur = int(jm2.vigueur_max)
 			if not scene.sim.creuser_un_puits(jm2, 0):
 				break
 		scene._apres_changement_de_grille()

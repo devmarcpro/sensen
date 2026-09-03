@@ -1372,7 +1372,7 @@ affixe.decl_zone_saigne.nom,{base} cruel (on a blow to the {zone}: bleeds for {d
 affixe.meca_allonge.nom,{base} long (+{n} reach)
 affixe.meca_armure.nom,{base} reinforced (+{n} armour)
 affixe.meca_capacite.nom,{base} of the bearer (+{kg} capacity)
-affixe.meca_endurance_max.nom,{base} of breath (+{n} max stamina)
+affixe.meca_vigueur_max.nom,{base} of breath (+{n} max stamina)
 affixe.meca_garde.nom,{base} of the guard (guarding costs −{pct} % stamina)
 affixe.meca_vol_de_vie.nom,{base} vampiric (life steal {pct} %)
 affixe.passif_competence.nom,{base} of {competence} (+{n})
@@ -2167,7 +2167,7 @@ status.ancrage.name,Anchoring
 status.reflet.name,Reflection
 status.voile.name,Veil
 monnaie.mana,mana
-monnaie.endurance,vigor
+monnaie.vigueur,vigor
 monnaie.sante,HP
 monnaie.or,gold
 journal.monnaie_bloquee,"{nom} can no longer draw on their {monnaie}"
@@ -2843,3 +2843,4 @@ competence.armes_a_chaine.name,Chain weapons
 monnaie.sang_froid,composure
 journal.sang_froid_rompu,"{nom} loses composure: {deficit} short, {degats} HP"
 barre.sang_froid,Composure
+journal.onde_sonore,"{nom} sounds {arme}: {n} caught in the wave"

@@ -14,7 +14,7 @@
       "distance_cible": 0.3
     },
     "attendre": {
-      "endurance_basse": 0.7,
+      "vigueur_basse": 0.7,
       "guet": 1.2
     },
     "fuir": {

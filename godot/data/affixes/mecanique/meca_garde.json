@@ -15,7 +15,7 @@
     ]
   },
   "effet": {
-    "type": "meca_garde_endurance"
+    "type": "meca_garde_vigueur"
   },
   "meilleur": {
     "pct": "haut"

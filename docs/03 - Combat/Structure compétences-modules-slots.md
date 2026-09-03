@@ -297,3 +297,32 @@ ici.
 contenait qu'une hauteur d'œil, quand la force avait `poids.par_force` et le charisme
 `compagnons.par_charisme` depuis toujours. Une arme à projectile gagne désormais
 `perception × 0,5` tuiles de portée. Le contact n'y gagne rien : voir mieux n'allonge pas le bras.
+
+### La vigueur et l'endurance ne portent plus le même nom (designer 2026-09-03)
+
+> « Sépare bien vigueur et endurance. »
+
+La dette écrite trois heures plus tôt est payée. La **stat** s'appelle `endurance`, la **monnaie**
+s'appelle `vigueur`, et plus rien ne les confond : ni les données, ni le code, ni l'écran.
+
+Ce qui a bougé : `cout_endurance` → `cout_vigueur` sur 92 modules et actions de créature · le bloc
+`endurance` de `combat_rules` → `vigueur` · les champs d'être `endurance`, `endurance_max`,
+`tick_endurance` → `vigueur`, `vigueur_max`, `tick_vigueur` · la monnaie d'un plan · les clés
+`affinite_sorts` des 33 armes · l'affixe `meca_endurance_max` → `meca_vigueur_max` (fichier compris)
+et les trois types d'affixe de parade · la clé de traduction. **182 fichiers de données, 20 de code.**
+
+Ce qui n'a PAS bougé, et c'est tout l'intérêt de l'opération : `stats.endurance`,
+`sante_max_par_endurance`, `souffle_par_endurance`, les listes des six stats. La stat garde son nom
+partout où c'est d'elle qu'on parle.
+
+> [!warning] Le piège du renommage global, payé et documenté
+> Remplacer `"endurance"` par `"vigueur"` partout a corrompu **neuf littéraux de stats** — des
+> dictionnaires comme `sante_max({"endurance": 10})` ou `{"force": 8, "dexterite": 3, "endurance": 3}`
+> devenus muets. La suite les a tous attrapés : trois plantages francs et six assertions fausses.
+> **Un renommage qui traverse la frontière stat/monnaie ne peut pas être aveugle** : il faut lister
+> les formes composées (`cout_`, `tick_`, `_max`), puis les receveurs d'entité un par un, et mettre
+> à l'abri les formes de stats avant de toucher au reste.
+
+Il reste un endroit où les deux se ressemblent encore, et c'est voulu : `sante_max_par_endurance`
+dit bien que **les PV sont la rareté de la stat endurance** — l'invitée de la vigueur n'est pas
+démunie, elle a sa propre barre.

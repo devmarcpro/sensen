@@ -13,7 +13,7 @@
       "sante_basse": 1.5
     },
     "attendre": {
-      "endurance_basse": 0.7
+      "vigueur_basse": 0.7
     },
     "assaut": {
       "vers_le_coeur": 1.2

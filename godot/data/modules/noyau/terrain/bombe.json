@@ -14,7 +14,7 @@
   "power_base": "3d6",
   "cout_ticks": 8,
   "cout_mana": 0,
-  "cout_endurance": 14,
+  "cout_vigueur": 14,
   "effets": [
     "invocation"
   ],

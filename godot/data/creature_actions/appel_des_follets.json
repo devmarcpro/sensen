@@ -12,7 +12,7 @@
   "cible": "soi",
   "ligne_de_vue": false,
   "cout_ticks": 14,
-  "cout_endurance": 8,
+  "cout_vigueur": 8,
   "degats_des": null,
   "type_degats": null,
   "conditions": [],
