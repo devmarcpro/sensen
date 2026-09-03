@@ -3550,7 +3550,12 @@ func test_grille_sort() -> void:
 	var faux_cat := {"gros_noyau": {"module_type": "noyau", "cout_ticks": 30, "forme_grille": [[0, 0], [1, 0], [0, 1], [1, 1]]}}
 	var g2 := GrilleSort.new(s.regles.r.grille, faux_cat)
 	verifier(g2.forme_de("gros_noyau").size() == carre_2x2.size(), "forme_grille explicite : quatre cases")
-	verifier(not g2.emboiter(["gros_noyau"], ligne).ok and g2.emboiter(["gros_noyau"], bloc).ok, "un carré ne rentre pas dans la ligne du tireur, il rentre dans le bloc du guerrier")
+	# La ligne du tireur a un TALON de deux cases (calibrage sur les kits, 2026-09-03) : UN carré y tient,
+	# jamais deux — le bloc du guerrier en prend deux sans peine. L'identité est dans la différence.
+	verifier(g2.emboiter(["gros_noyau"], ligne).ok and not g2.emboiter(["gros_noyau", "gros_noyau"], ligne).ok, "un seul carré tient dans la ligne du tireur, pas deux")
+	# Un 3×3 ne prend qu'un carré 2×2 (le deuxième chevaucherait) : c'est au palier 10, en 4×3, que le
+	# guerrier en tient deux — là où la ligne du tireur n'en tiendra jamais qu'un.
+	verifier(g2.emboiter(["gros_noyau", "gros_noyau"], g.grille_de("force", 10)).ok, "deux carrés tiennent dans le bloc du guerrier au palier 10")
 	# Le retour arrière : trois dominos dans un 2×3 tiennent ; quatre ne tiennent pas, et le manque est dit.
 	var dom := {"d": {"module_type": "noyau", "cout_ticks": 5}}
 	var g3 := GrilleSort.new(s.regles.r.grille, dom)

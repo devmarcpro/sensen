@@ -3139,6 +3139,8 @@ func niveau_arme(e: Dictionary) -> int:
 ## arme, la grille de poche. C'est ce contenant qui borne ce qu'on peut composer, et rien d'autre.
 func grille_composition(e: Dictionary) -> Dictionary:
 	var arme := Etres.arme(e, items)
+	if arme.is_empty():   # les mains nues sont une arme de force (compétence `mains_nues`) : la grille du guerrier, pas une grille de poche
+		arme = arme_mains_nues()
 	var fonct: Dictionary = fonctionnalites.get(str(arme.get("functionality", "")), {})
 	var comp: Dictionary = GameData.catalogues.competences.get(str(fonct.get("combat_skill", "")), {})
 	var stat := str(comp.get("stat", ""))

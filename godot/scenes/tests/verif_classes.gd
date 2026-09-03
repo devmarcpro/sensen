@@ -56,6 +56,25 @@ func _ready() -> void:
 			lignes.append("%s %s" % [str(seq[seq.size() - 1]), etiquette])
 		if sig != "" and not a_sig:
 			lignes.append("SIGNATURE ABSENTE (%s)" % sig)
+		# La grille de composition (2026-09-03) : chaque capacité du kit doit TENIR dans la grille de
+		# l'arme de départ au palier 0 — sinon la classe commence avec un sort que son joueur ne
+		# pourrait pas recomposer, et la grille ne vaut rien pour elle.
+		var stat_arme := ""
+		for eq in cl.get("equipement", []):
+			var it_def: Dictionary = GameData.catalogues.items.get(str(eq), {})
+			if str(it_def.get("type", "")) == "arme":
+				var fo: Dictionary = GameData.catalogues.functionalities.get(str(it_def.get("functionality", "")), {})
+				stat_arme = str(GameData.catalogues.competences.get(str(fo.get("combat_skill", "")), {}).get("stat", ""))
+				break
+		if stat_arme.is_empty():   # à poings nus, la grille du guerrier — comme dans le jeu (grille_composition)
+			var fo_mn: Dictionary = GameData.catalogues.functionalities.get("mains_nues", {})
+			stat_arme = str(GameData.catalogues.competences.get(str(fo_mn.get("combat_skill", "")), {}).get("stat", ""))
+		var grille_k: Array = s.grille_sort.grille_de(stat_arme, 0)
+		for cap in fiche.get("capacites", []):
+			var emb := s.grille_sort.emboiter(Array(cap.modules), grille_k)
+			if not emb.ok:
+				lignes.append("%s: NE RENTRE PAS dans la grille de %s (%d cases pour %d)" % [str(cap.id), stat_arme if not stat_arme.is_empty() else "mains nues", s.grille_sort.taille_de(Array(cap.modules)), grille_k.size()])
+				soucis += 1
 			soucis += 1
 		print("CLASSE %-14s | %s" % [cid, " · ".join(PackedStringArray(lignes))])
 	# CLASSE ET SOUS-CLASSE (designer 2026-09-03) : chaque sous-classe releve d'une classe mere, et
