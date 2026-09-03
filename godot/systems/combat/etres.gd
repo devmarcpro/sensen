@@ -162,8 +162,20 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 	e.degats_element = {}
 	e.affinites = {}
 	e.mecaniques = {}   # affixes passif_mecanique : mécanique → paramètres (Effets d'équipement types)
+	# CHAQUE CONSTRUCTION DONNE UNE STAT, par piece portee (designer 2026-09-03). La regle qui tient
+	# l'ensemble : le bonus va CONTRE LE GRAIN — plus une construction protege, moins elle donne. Sans
+	# cela la plaque cumulerait la meilleure armure ET le meilleur bonus, elle serait strictement
+	# superieure, et le choix d'armure n'existerait plus. C'est aussi ce qui donne enfin une raison de
+	# porter du tissu : il ne protege de rien, mais il vous presente.
+	var bonus_c: Dictionary = regles.r.armure.get("bonus_construction", {})
 	for slot: String in e.equipement.keys():
 		var it: Dictionary = items.get(e.equipement[slot], {})
+		var constr := str(it.get("construction", ""))
+		if not constr.is_empty() and bonus_c.has(constr):
+			var bc: Dictionary = bonus_c[constr]
+			var nom_bc := str(bc.get("stat", ""))
+			if not nom_bc.is_empty():
+				stats[nom_bc] = int(stats.get(nom_bc, 0)) + int(bc.get("valeur", 0))
 		var q := float(it.get("qualite", 1.0))
 		for ax: Dictionary in it.get("affixes", []):
 			var d: Dictionary = affixes_defs.get(ax.id, {})

@@ -64,7 +64,8 @@
         "mailles",
         "ecailles",
         "plaque",
-        "tissu"
+        "tissu",
+        "rituel"
       ]
     },
     "durete_composite": {

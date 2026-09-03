@@ -16,8 +16,8 @@
   "tags": [
     "armure",
     "assemble",
-    "vetement"
+    "rituel"
   ],
   "zone": "torse",
-  "construction": "tissu"
+  "construction": "rituel"
 }

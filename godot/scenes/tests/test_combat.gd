@@ -2244,7 +2244,10 @@ func test_alchimie() -> void:
 	potion.qualite = 1.5
 	potion.statut = "potion_force_forte"
 	potion["puissance"] = 2.0
-	var force0 := int(j.corps.stats.force)
+	# On mesure la stat EFFECTIVE avant, pas la stat de base : depuis que l'armure portee donne un
+	# bonus de construction, « base + 12 » n'est plus l'effective attendue. Ce qu'on verifie, c'est
+	# l'ECART que la potion apporte — et lui n'a pas bouge.
+	var force0 := int(j.stats_eff.force)
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "manger", "objet": potion.uid}), "boire la potion")
 	var actif := false
@@ -7312,13 +7315,17 @@ func test_loot() -> void:
 	verifier(ok, "chaque paramètre est dans sa fourchette")
 	# Effets passifs : un anneau +Force change la stat effective, pas la stat de base
 	var j := joueur_de(s)
+	var force_avant := int(j.stats_eff.force)
+	var base_avant := int(j.corps.stats.force)
 	var anneau := s.generer_objet("proto_anneau", 2, {}, "rare", 1)
 	anneau.affixes = [{"id": "passif_stat", "params": {"stat": "force", "n": 3}, "compteur": 0, "etat": {}}]
 	s.donner(j, anneau.uid)
 	s.horloge_monde.avancer(1)
 	var t: int = s.horloge_monde.ticks
 	verifier(s.intention(j.id, {"type": "equiper", "objet": anneau.uid}), "équiper l'anneau")
-	verifier(j.equipement.anneau_1 == anneau.uid and j.stats_eff.force == 15 and j.corps.stats.force == 12, "Force effective 15, base 12 (Résolveur : base + Σ add)")
+	# Meme raison : on compare l'AVANT et l'APRES, pas une valeur absolue. Ce que le test dit vraiment,
+	# c'est qu'un affixe change la stat EFFECTIVE et laisse la stat de BASE tranquille.
+	verifier(j.equipement.anneau_1 == anneau.uid and j.stats_eff.force == force_avant + 3 and j.corps.stats.force == base_avant, "l'affixe +3 Force change l'effective (%d → %d) et pas la base (%d)" % [force_avant, int(j.stats_eff.force), int(j.corps.stats.force)])
 	verifier(j.compteur == t + int(s.regles.r.actions.objet), "équiper un bijou : 5 ticks")
 	# Endurance max +N et +1 segment de chaîne
 	var amulette := s.generer_objet("proto_amulette", 2, {}, "rare", 1)

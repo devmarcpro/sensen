@@ -127,6 +127,50 @@
         "perforant": 1.55,
         "contondant": 1.5,
         "magique": 0.5
+      },
+      "rituel": {
+        "tranchant": 1.45,
+        "perforant": 1.55,
+        "contondant": 1.5,
+        "magique": 0.45
+      }
+    },
+    "bonus_construction": {
+      "_doc": "Chaque construction donne une stat, par piece portee (designer 2026-09-03). La regle qui tient l'ensemble : le bonus va CONTRE LE GRAIN — plus une construction protege, moins elle donne. Sans cela la plaque cumulerait la meilleure armure et le meilleur bonus, elle serait strictement superieure, et le choix d'armure disparaitrait. Une plaque complete rend +5 de force, une tenue rituelle complete +15 de volonte : la premiere protege, la seconde n'a que ca. `matiere_type` : la matiere REPRESENTATIVE de la construction, qui sert a classer sa protection reelle — car elle vient d'abord de la durete (acier 39 contre cuir 4), pas de la matrice.",
+      "plaque": {
+        "stat": "force",
+        "valeur": 1,
+        "matiere_type": "acier"
+      },
+      "mailles": {
+        "stat": "endurance",
+        "valeur": 1,
+        "matiere_type": "fer"
+      },
+      "ecailles": {
+        "stat": "perception",
+        "valeur": 2,
+        "matiere_type": "ecaille"
+      },
+      "cuir": {
+        "stat": "dexterite",
+        "valeur": 2,
+        "matiere_type": "cuir"
+      },
+      "matelasse": {
+        "stat": "endurance",
+        "valeur": 3,
+        "matiere_type": "laine"
+      },
+      "rituel": {
+        "stat": "volonte",
+        "valeur": 3,
+        "matiere_type": "lin"
+      },
+      "tissu": {
+        "stat": "charisme",
+        "valeur": 3,
+        "matiere_type": "lin"
       }
     }
   },

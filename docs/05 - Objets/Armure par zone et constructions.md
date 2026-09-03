@@ -71,6 +71,25 @@ Le **matériau reste libre dans la construction** : la construction donne le pro
 > > Aujourd'hui, non : rien ne lie ce qu'on porte au coût ou à la puissance d'un sort, et la conductivité de mana n'est lue que sur **l'arme tenue** (c'est ce que dit [[Application des stats de matériau]] : « via l'arme tenue »). Une robe de soie d'araignée n'aide donc pas encore un lanceur autrement que par son poids plume.
 > > **Deux façons de le faire, si tu le veux** : (1) étendre la formule de conductivité aux pièces portées — une ligne, mais c'est modifier une formule décidée ; (2) une pénalité de sort liée au poids de l'armure, ce qui rendrait le tissu structurant pour un mage sans toucher à l'existant. Je penche pour la (2), qui crée un vrai choix au lieu d'un bonus de plus — mais c'est ta décision, pas la mienne.
 
+> [!success] Tranché le 2026-09-03 — **chaque construction donne une stat** (designer)
+> « Je me dis, est-ce que ça serait pas mal de donner des bonus de stats par type d'armure : un type d'armure améliore la force, les armures type mage la volonté, les vêtements le charisme, etc. »
+> **Oui — et c'est ce qui répond à la question laissée ouverte deux heures plus tôt** (« l'armure doit-elle gêner les sorts ? »). Plutôt qu'une pénalité, une **identité positive** : chaque construction donne quelque chose, et c'est ce qu'elle donne qui décide de ce qu'on porte.
+> **La condition pour que ça marche, et elle n'est pas négociable** : le bonus doit aller **contre le grain**, jamais avec. Si la plaque donnait à la fois la meilleure armure **et** le plus gros bonus, elle serait strictement supérieure et il n'y aurait plus de choix du tout — le système entier ne servirait qu'à rendre les guerriers plus forts. Donc : **plus une construction protège, moins elle donne**.
+>
+> | construction | stat | par pièce | pourquoi |
+> |---|---|---|---|
+> | **plaque** | force | +1 | porter l'acier, c'est déjà de la force |
+> | **mailles** | endurance | +1 | le poids qu'on encaisse toute la journée |
+> | **écailles** | perception | +1 | la vigilance de qui ne peut pas tourner la tête vite |
+> | **cuir** | dextérité | +2 | la souplesse, sa raison d'être |
+> | **matelassé** | endurance | +2 | le rembourrage, plus proche du corps |
+> | **rituel** | **volonté** | +3 | la tenue de mage : rien pour le corps, tout pour l'esprit |
+> | **tissu** | **charisme** | +3 | un vêtement ne protège pas, il vous présente |
+>
+> Une armure complète de plaque donne **+5 force** ; une tenue rituelle complète, **+15 volonté**. L'écart est voulu : la première protège, la seconde n'a que ça.
+> **La tenue de mage se sépare des vêtements** : `rituel` (robe, coiffe, étole) contre `tissu` (tunique, chausses, capuche, manchettes, chaussons). Le designer distinguait les deux dans sa phrase — volonté pour le mage, charisme pour le vêtement — et il avait raison : ce ne sont pas les mêmes objets.
+> **Les valeurs sont un premier jet**, mesurées et à juger : c'est le rapport entre elles qui compte, pas leur niveau absolu.
+
 ## Liens
 - **Dépend de** : [[Zones de coup par dénivelé]], [[Équipement — 14 slots]], [[Composant et recette d'obtention]], [[Qualité d'artisanat]]
 - **Alimente** : [[XP de combat]], [[Pipeline de résolution du combat]], [[Compétences — liste]]
