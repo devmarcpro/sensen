@@ -89,6 +89,9 @@ func _cellule_sous(p: Vector2) -> Vector2i:
 
 
 func _dessiner() -> void:
+	# La carte couvre tout l'écran : un fond opaque d'abord, sinon le HUD du dessous (texte du haut,
+	# journal, barres, hotbar) transparaît et se mêle au titre et à la légende (capture du 2026-09-04).
+	dessin.draw_rect(Rect2(Vector2.ZERO, dessin.size), Color(0.05, 0.05, 0.06, 1.0))
 	var sim = main.sim
 	if sim == null or sim.monde == null:
 		return
