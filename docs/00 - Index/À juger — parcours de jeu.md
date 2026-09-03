@@ -289,3 +289,44 @@ Un callout daté dans la note liée (`> [!success] Tranché le <date>`) — la b
 > 4. **assumer que la fin de partie se joue ailleurs** — qualité, affixes, gemmes, Wu Xing — et alors le plateau de matériaux est voulu, mais il faut que ces autres axes montent vraiment, ce que je n'ai pas mesuré.
 > Mon avis, s'il compte : la 1 est la moins chère et la plus sûre ; la 3 est la plus honnête si tu ne veux pas d'un contenu de niveau 90.
 
+
+## 2026-09-03 — Trois monnaies, deux stats chacune ? (discussion ouverte, rien de code)
+
+Le designer : « comment répartir mana et endurance (rajouter une autre monnaie ? 3 comme ça 2 stats
+par monnaie ?) ». Ce que la mesure dit avant qu'on décide quoi que ce soit :
+
+**Les réserves n'appartiennent qu'à une stat et demie.** `mana_max = 20 + volonté×3`. `santé_max =
+20 + endurance×4`. Et l'endurance-la-monnaie a un `max: 100` **fixe** : investir dans l'endurance
+n'agrandit pas la barre d'endurance, ça agrandit les PV. Quatre stats sur six n'agrandissent
+strictement aucune réserve.
+
+**Les coûts sont à sens unique.** 68 noyaux coûtent du mana, 18 de l'endurance, 6 sont gratuits.
+Et 52 des 68 noyaux de mana sont des noyaux de volonté : la volonté remplit la barre *et* la vide.
+C'est la seule stat du jeu qui se suffit à elle-même — le vrai déséquilibre n'est pas le nombre de
+modules, c'est celui-là.
+
+**La forme qui règle les deux d'un coup :** une monnaie n'appartient pas à une stat, elle en lie
+deux — **l'une la REMPLIT, l'autre la DÉPENSE bien**. Personne ne se suffit, chaque style est une
+paire, et les six stats se lisent d'un coup :
+
+| monnaie | la remplit (réserve) | la dépense (puissance) | ce que ça donne |
+|---|---|---|---|
+| vigueur | endurance | force | le corps : on encaisse et on frappe |
+| mana | volonté | perception | l'esprit : on porte et on vise |
+| élan (nouveau) | dextérité | charisme | la présence : on prend le tempo et on l'impose |
+
+L'élan est la monnaie qui manque, et le jeu en a déjà le vocabulaire (`chaine`, `tempo`) : elle ne
+se régénère pas toute seule, elle se **gagne en agissant** — toucher, esquiver, enchaîner — et se
+dépense en buffs, débuffs et invocations. Ça donne au charisme la boucle que la volonté a déjà, et
+ça donne enfin une raison mécanique de monter la dextérité au-delà du toucher.
+
+Trois questions restent au designer, et ce sont des questions de design, pas de mesure :
+
+1. **Qui remplit, qui dépense ?** Rien n'oblige la volonté à être la réserve : on peut lire la
+   perception comme celle qui a des réserves (elle voit le flux) et la volonté comme celle qui
+   l'impose. Le tableau ci-dessus est le choix conservateur — il ne bouge pas `mana_max`.
+2. **Que devient la santé ?** Si l'endurance remplit la vigueur, il faut décider si elle donne
+   *encore* les PV. Sinon les PV n'ont plus de stat du tout.
+3. **Les 52 noyaux de volonté.** Trois monnaies ne rééquilibrent rien tant que les trois quarts du
+   catalogue restent sur une seule voie. Redécouper ces 52 est le vrai travail ; la monnaie n'est
+   que le cadre qui dit où les ranger.
