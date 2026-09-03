@@ -293,8 +293,14 @@ func _process(_delta: float) -> void:
 			# déjà gagné. Trois morts à l'étage 1 imputées à la difficulté du donjon, alors qu'aucune
 			# n'était due aux ennemis. Un robot qui joue comme aucun humain ne joue ne mesure rien.
 			var plan_s: Dictionary = sim.plan_capacite(j, k_s)
-			var cout_s: int = int(plan_s.get("ressource", 0)) if str(plan_s.get("monnaie", "")) == "mana" else 0
-			if cout_s > int(j.mana):
+			# Trois monnaies depuis le 2026-09-03, et dépenser à vide se paie en PV dans les trois (surchauffe,
+			# épuisement, sang-froid rompu). Le robot ne regardait que le mana : un sort de vigueur ou de
+			# sang-froid partait à sec et le robot se blessait lui-même — la même erreur que la surchauffe,
+			# deux monnaies plus loin (2026-09-04). On regarde la réserve de LA monnaie du sort.
+			var monnaie_s := str(plan_s.get("monnaie", ""))
+			var reserve_s: int = int(j.get(monnaie_s, 0)) if monnaie_s in ["mana", "vigueur", "sang_froid"] else 999999
+			var cout_s: int = int(plan_s.get("ressource", 0)) if monnaie_s in ["mana", "vigueur", "sang_froid"] else 0
+			if cout_s > reserve_s:
 				capacites_a_sec[k_s] = frames + 300   # à sec : on repassera quand le mana sera revenu
 			elif int(capacites_a_sec.get(k_s, -1)) <= frames:
 				if sim.intention(jid, {"type": "capacite", "index": k_s, "cible": cible.pos}):
@@ -304,7 +310,7 @@ func _process(_delta: float) -> void:
 				capacites_a_sec[k_s] = frames + 2000   # à sec ou hors géométrie : on n'insiste pas à chaque tour
 		var arme_b: Dictionary = Etres.arme(j, sim.items)
 		var fonct_b: Dictionary = sim.fonctionnalites.get(arme_b.get("functionality", ""), {})
-		var pa: Vector2i = sim.regles.portee_de(fonct_b) if not fonct_b.is_empty() else Vector2i(1, 1)
+		var pa: Vector2i = sim.regles.portee_de(fonct_b, j.get("stats_eff", {})) if not fonct_b.is_empty() else Vector2i(1, 1)   # la perception allonge le tir : le robot vise aussi loin que le jeu le laisse
 		var d_c := Grille.distance(j.pos, cible.pos)
 		if str(cible.id) == poursuite_cible and d_c >= poursuite_d:
 			poursuite_sterile += 1
