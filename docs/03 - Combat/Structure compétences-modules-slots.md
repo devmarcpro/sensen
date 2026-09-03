@@ -114,6 +114,21 @@ Monter un module en niveau le rend plus puissant ET moins coûteux (puissance : 
 >
 > **La règle de conception** : on ne déplace pas un noyau pour équilibrer un tableau. Chaque affectation doit se lire sur ce que le noyau **fait** — un désarmement est une affaire de main, pas de bras ; une estimation est une affaire d'œil. Là où le doute existait, la monnaie a tranché.
 
+> [!success] Tranché le 2026-09-03 — **le charisme, ce sont les buffs, les débuffs et les invocations** (designer)
+> « Pour le charisme je me dis que le mieux serait d'en faire des sorts de buff, débuff, invocation, etc. »
+> **Et ces sorts existent déjà** — ils étaient simplement tous rangés sous la volonté, comme les 68 autres noyaux à mana. Il n'y a donc rien à écrire : il y a à **trier**, exactement comme pour les classes et pour les armes.
+> **Le critère** : le charisme agit sur **l'esprit d'autrui** ou **rallie les siens** ; la volonté agit sur la **matière et l'énergie**. Un effroi fait fuir — c'est du charisme. Une entrave immobilise avec des racines — c'est de la volonté. La distinction n'est pas « bon ou mauvais sort », c'est **sur quoi le sort agit**.
+>
+> | passent au charisme | pourquoi |
+> |---|---|
+> | **effroi**, **torpeur**, **silence**, **épuisement**, **marque** | on brise le moral, on impose sa présence |
+> | **célérité**, **égide**, **communion**, **transfert**, **réserve** | on soutient un allié — la moitié utile d'un meneur |
+> | **convocation**, **rappel à la vie**, **renaissance** | on appelle, et quelqu'un vient |
+> | **pari**, **offrande** | déjà là : l'aplomb et le don |
+>
+> **Ce que ça donne** : la volonté passe de 70 à 56 noyaux, le charisme de 2 à **16**. Le déséquilibre ne disparaît pas — la volonté garde tous les élémentaires et tout le terrain — mais le charisme cesse d'être une voie sans répertoire.
+> **Ce que ça ne règle pas, et qu'il faut dire** : la perception reste à 2 et l'endurance à 4. Elles n'ont pas d'équivalent naturel dans le catalogue actuel, qui a été écrit avant que les six voies existent. Là, il faudra écrire du contenu — ou assumer que ces voies s'expriment par les armes plutôt que par les sorts.
+
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Progression par l'usage]]
 - **Alimente** : [[Six types de modules et assemblage]], [[Mana]], [[Vocabulaire des modules — six axes]]

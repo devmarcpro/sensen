@@ -29,6 +29,12 @@ func _ready() -> void:
 		if int(par.get(st, 0)) == 0:
 			soucis.append("  aucun noyau ne monte sur « %s » : cette voie n'a pas de sorts" % st)
 	print("noyaux par stat : %s" % ", ".join(parts))
+	# Une voie qui n'a qu'un ou deux noyaux n'a pas de repertoire : on peut y investir sans jamais
+	# avoir de quoi jouer. Le seuil est bas — trois — parce qu'il signale une voie VIDE, pas une voie
+	# moins fournie qu'une autre : l'ecart entre les six est une question d'equilibrage, pas de sonde.
+	for st in STATS:
+		if int(par.get(st, 0)) > 0 and int(par.get(st, 0)) < 3:
+			print("  voie maigre : « %s » n'a que %d noyau(x)" % [st, int(par.get(st, 0))])
 	if not sans.is_empty():
 		soucis.append("  %d noyaux sans stat declaree : %s" % [sans.size(), str(sans.slice(0, 6))])
 	# LA question : la stat change-t-elle les degats ? On roule le meme noyau sur deux personnages
