@@ -15,7 +15,7 @@ etape: 10
 
 **L'équilibrage, lui, a quatre problèmes de fond.** Ils sont tous mesurés, aucun n'est tranché ici — ce sont des décisions de designer. Ils sont classés par ce qu'ils coûtent au jeu, pas par difficulté de correction.
 
-## 1. Les sorts sont dominés par le fait de taper
+## 1. Un écart de quatre-vingt-quatre entre le meilleur et le pire sort de classe
 
 Même robot, même graine, même équipement, huit mille images :
 
@@ -24,11 +24,17 @@ Même robot, même graine, même équipement, huit mille images :
 | 3 objets, **0 sort** | 1 | **20** | 88 (fin à 68/68 PV) |
 | 3 objets, **3 sorts** | 0 | 1 | 8 — et 15 sorts lancés |
 
-Le banc donne la raison : le **meilleur** sort de classe rend **6,75 PV par tick** (Le Rieur, Botte), le pire **0,08** (La Paume, Sève). Une épée en rend **14,0**, une masse **16,2**. Et ce qui tue les sorts n'est pas tant leurs dés que leur **temps** : 10 à 21 ticks contre 4 pour un coup d'épée.
+> [!error] Corrigé le 2026-09-03 — **ma comparaison arme/sort était fausse, et dans le mauvais sens**
+> J'avais écrit qu'une épée rend **14,0 PV par tick** et une masse **16,2**, contre 6,75 pour le meilleur sort. C'était une **erreur d'unité** : `vitesse_base` **divise** le coût en ticks (`ticks = actions.attaque_base / vitesse`), elle ne le multiplie pas. J'ai calculé `moyenne × vitesse` et appelé ça des dégâts par tick : le classement **entre armes** restait juste, mais la valeur était **dix fois trop grande**, et je m'en suis servi pour comparer les armes aux sorts.
+> **Les vrais chiffres** : masse **1,69** PV/tick, épée 1,40, rapière 1,38, lance 1,29, dague 1,05, mains nues 0,40. Les armes vont donc de **0,40 à 1,69**, et non de 4 à 16.
 
-**Pourquoi c'est le plus grave** : le système de modules est l'identité du jeu. Aujourd'hui, rien ne pousse mécaniquement à s'en servir. Les sorts ont pour eux la portée, la zone et les statuts — que le banc ne mesure pas — mais le robot joue vraiment, et il conclut pareil.
+**Le vrai problème n'est pas « les sorts contre les armes », c'est l'écart ENTRE LES SORTS.** Le banc mesure de **0,08** (La Paume, Sève : 1 PV en 12 ticks) à **6,75** (Le Rieur, Botte : 27 PV en 4 ticks) — un facteur **quatre-vingt-quatre**. Et la coupure n'est pas aléatoire : les sorts au **contact** (Botte 6,75, Projection 6,4, Estoc 4,25) portent **les dégâts de l'arme équipée en plus des leurs**, quand les sorts élémentaires à distance (Éclat 1,69, Flamme 0,8, Gel 0,7) ne comptent que sur eux-mêmes. Quatre classes ont tiré le bon numéro, les autres non.
 
-**Les leviers** : monter les dés des noyaux offensifs ; baisser le coût en ticks ; ou assumer que les sorts sont **situationnels** et donner alors aux classes de meilleures armes. Le choix dit ce qu'est le jeu.
+**Ce qui reste vrai malgré l'erreur** : le robot armé de sorts meurt trois fois à l'étage 1 quand le même robot sans sorts descend et fait vingt tués. La mesure tient ; c'est mon **explication** qui était fausse. La cause reste à trouver — coût en mana, choix de cible du robot, ou temps perdu à lancer des sorts utilitaires — et je ne la devinerai pas deux fois de suite.
+
+**Pourquoi c'est le plus grave** : ce n'est pas le système qui est mauvais, c'est le **tirage au sort du kit**. Un joueur qui choisit La Paume ou La Trace reçoit des sorts vingt à quatre-vingts fois moins efficaces que celui qui choisit Le Rieur ou Le Sabre, sans que rien ne l'en avertisse. Le choix de classe, qui devrait être un choix de **style**, est en réalité un choix de puissance.
+
+**Les leviers, revus après correction** : (1) faire en sorte qu'un sort à distance rapporte autant qu'un sort de contact — aujourd'hui le contact encaisse en plus les dégâts de l'arme, ce qui est une double rémunération ; (2) relever les noyaux du bas (Sève, Gravier, Épine sont sous les mains nues) ; (3) revoir les kits pour qu'aucune classe ne parte avec trois sorts faibles. La (1) est la plus structurante, la (3) la moins risquée.
 
 ## 2. Le monde va jusqu'au niveau 90, le butin s'arrête au niveau 15
 
@@ -59,13 +65,14 @@ Un personnage de niveau 50 n'est donc pas atteignable en temps de jeu réaliste,
 
 ## 4. La masse n'a aucune contrepartie
 
-**16,2 dégâts par tick**, le meilleur du jeu — devant l'épée (14,0) et la lance (13,5, qui coûte pourtant deux mains). Et elle est **contondante**, le type que la matrice d'armure favorise contre les protections lourdes (0,95 contre la plaque, quand le tranchant paie 1,30). La plus forte dans l'absolu **et** la meilleure contre ce qui protège le mieux, en une seule main, sans malus de portée.
+**1,69 PV par tick** (chiffre corrigé), le meilleur du jeu — devant l'épée (1,40), la rapière (1,38) et la lance (1,29, qui coûte pourtant deux mains). Et elle est **contondante**, le type que la matrice d'armure favorise contre les protections lourdes (0,95 contre la plaque, quand le tranchant paie 1,30). La plus forte dans l'absolu **et** la meilleure contre ce qui protège le mieux, en une seule main, sans malus de portée.
 
-Les sept armes de contact ajoutées le même jour ont été conçues pour ne pas aggraver — le marteau de guerre frappe plus fort (14,0 de moyenne) mais si lentement qu'il tombe à 11,2 par tick, et coûte deux mains.
+L'écart reste modéré — 21 % au-dessus de l'épée — mais il va dans le même sens sur les deux axes, et c'est ce cumul qui la rend sans rivale. Les sept armes de contact ajoutées le même jour ont été conçues pour ne pas aggraver : le marteau de guerre frappe plus fort (14,0 de moyenne) mais si lentement qu'il tombe à 1,17 par tick, et coûte deux mains.
 
 ## Ce qui a été corrigé pendant l'audit
 
 - **Le mur du premier étage** venait de `puissance_creature`, la formule qui décide qui peut peupler un étage : elle comptait les stats et le nombre d'actions, et **ignorait l'équipement**. Un bandit en cuirasse avec une épée valait autant qu'un bandit à mains nues. Il passe de 25 à 42 et quitte l'étage 1. Trois hypothèses avaient été écartées par la mesure avant d'y arriver — l'aggro coupée, l'alerte de meute à zéro, et une rejouée au tag `v0.4.1-alpha`.
+- **Une erreur d'unité dans ma propre mesure**, qui a faussé la conclusion principale de la première version de cet audit : `vitesse_base` divise le coût en ticks, elle ne le multiplie pas. Les valeurs annoncées pour les armes étaient dix fois trop grandes, et j'en avais conclu — à tort — que taper battait tous les sorts. Corrigée dans la mesure, dans la sonde des armes qui la portait, et ici.
 - **Deux fautes de mes propres sondes**, corrigées avant d'être rapportées comme des défauts du jeu : l'une appelait une fonction inexistante et faisait croire à un blocage ; l'autre inventait une rareté « légendaire » qui n'existe pas (la bonne s'appelle **artefact**) et annonçait donc 0 % à tous les niveaux.
 
 ## Liens

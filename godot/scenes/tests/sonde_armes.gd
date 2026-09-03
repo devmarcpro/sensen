@@ -18,14 +18,20 @@ func _ready() -> void:
 		if str(d.get("kind", "")) != "arme" or str(fid) == "_template":
 			continue
 		armes.append({"id": str(fid), "d": d, "moy": float(Des.fourchette(str(d.get("degats_des", "1d1"))).x + Des.fourchette(str(d.get("degats_des", "1d1"))).y) * 0.5})
-	armes.sort_custom(func(a, b): return float(a.moy) * float(a.d.vitesse_base) > float(b.moy) * float(b.d.vitesse_base))
-	print("%-18s %-6s %5s %5s %6s %7s %-11s %s %s" % ["arme", "des", "moy", "vit", "deg/t", "portee", "type", "m", "crit"])
+	# `vitesse_base` DIVISE le cout en ticks (ticks = actions.attaque_base / vitesse), elle ne le
+	# multiplie pas. J'avais ecrit `moyenne x vitesse` et appele ca « degats par tick » : le classement
+	# entre armes restait juste, mais la VALEUR etait dix fois trop grande, et je m'en suis servi pour
+	# comparer les armes aux sorts. La comparaison etait fausse dans le mauvais sens (2026-09-03).
+	var base_t := float(GameData.config("combat_rules").actions.attaque_base)
+	armes.sort_custom(func(a, b): return float(a.moy) / maxf(1.0, roundi(base_t / float(a.d.vitesse_base))) > float(b.moy) / maxf(1.0, roundi(base_t / float(b.d.vitesse_base))))
+	print("%-18s %-6s %5s %5s %6s %7s %-11s %s %s" % ["arme", "des", "moy", "vit", "PV/tick", "portee", "type", "m", "crit"])
 	var par_type := {}
 	for a in armes:
 		var d: Dictionary = a.d
-		var dt := (float(a.moy) * float(d.vitesse_base))
+		var ticks := maxf(1.0, roundi(base_t / float(d.vitesse_base)))
+		var dt := float(a.moy) / ticks
 		par_type[str(d.type_degats)] = int(par_type.get(str(d.type_degats), 0)) + 1
-		print("%-18s %-6s %5.1f %5.2f %6.1f %7s %-11s %d %d" % [a.id, str(d.degats_des), float(a.moy), float(d.vitesse_base), dt,
+		print("%-18s %-6s %5.1f %5.2f %6.2f %7s %-11s %d %d" % [a.id, str(d.degats_des), float(a.moy), float(d.vitesse_base), dt,
 			"%.0f/%d" % [float(d.portee), int(d.portee_min)], str(d.type_degats), int(d.hands), int(d.crit_range)])
 	print("couverture par type de degats : %s" % str(par_type))
 	for t in ["tranchant", "perforant", "contondant"]:
