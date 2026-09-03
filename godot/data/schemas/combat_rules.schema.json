@@ -127,10 +127,10 @@
     "bombes": {
       "type": "object"
     },
-    "capacites": {
+    "sang_froid": {
       "type": "object"
     },
-    "sang_froid": {
+    "grille": {
       "type": "object"
     }
   },

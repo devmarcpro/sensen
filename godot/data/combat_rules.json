@@ -1165,15 +1165,6 @@
     "durete_defaut": 10,
     "chance_drop": 0.5
   },
-  "capacites": {
-    "_doc": "Structure compétences-modules-slots : capacités max = base + N_arme/par_niveau_capacites (max), modules par capacité = base + N_arme/par_niveau_modules (max).",
-    "capacites_base": 2,
-    "par_niveau_capacites": 20,
-    "capacites_max": 6,
-    "modules_base": 2,
-    "par_niveau_modules": 25,
-    "modules_max": 5
-  },
   "terrasser": {
     "_doc": "Destruction du terrain : abaisser ou élever une tuile de ±1 (Hauteur de terrain ±10, plancher 0, plafond 20) ; l'élévation demande une pioche en main. XP à Terrassement.",
     "ticks": 12,
@@ -1405,6 +1396,409 @@
     "zone_sonore": {
       "_doc": "L'attaque des instruments (designer 2026-09-03) : « les attaques au cac des armes charisme sont des zones autour du lanceur, he oui logique c'est du son ». L'onde part du PORTEUR et non de la cible, elle ne demande AUCUNE ligne de vue — le son passe les angles — et elle frappe moins fort chacun parce qu'elle les frappe tous. La cible designee prend son coup plein ; l'onde ramasse les autres a `mult_degats`. Le rayon est sur l'arme (`attaque_zone`), parce qu'un cor porte plus loin qu'une flute.",
       "mult_degats": 0.5
+    }
+  },
+  "grille": {
+    "_doc": "La grille de composition (designer 2026-09-03, « comme la grille de personnage dans Jump Ultimate Stars ») : un sort se compose en emboitant les silhouettes de ses modules dans la silhouette de l'arme tenue. `formes_par_type` deduit la forme d'un module de son type et de son prix en ticks — la premiere entree dont `ticks_min` est atteint gagne, les entrees sont lues dans l'ordre. `grilles_par_stat` donne la silhouette par voie et par palier de niveau de la competence d'arme (`#` une case, `.` rien). Les pieces tournent (quatre rotations, pas de miroir). La grille borne la COMPOSITION, jamais l'assembleur ni les creatures.",
+    "rotations": true,
+    "formes_par_type": {
+      "noyau": [
+        {
+          "ticks_min": 20,
+          "cellules": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        },
+        {
+          "ticks_min": 10,
+          "cellules": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "ticks_min": 5,
+          "cellules": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        {
+          "ticks_min": -999,
+          "cellules": [
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "forme": [
+        {
+          "ticks_min": 3,
+          "cellules": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        },
+        {
+          "ticks_min": -999,
+          "cellules": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        }
+      ],
+      "portee": [
+        {
+          "ticks_min": 5,
+          "cellules": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ]
+        },
+        {
+          "ticks_min": 1,
+          "cellules": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "ticks_min": -999,
+          "cellules": [
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "modificateur": [
+        {
+          "ticks_min": 4,
+          "cellules": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        {
+          "ticks_min": -999,
+          "cellules": [
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "condition": [
+        {
+          "ticks_min": -999,
+          "cellules": [
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "liaison": [
+        {
+          "ticks_min": 5,
+          "cellules": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        },
+        {
+          "ticks_min": -999,
+          "cellules": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        }
+      ],
+      "declencheur": [
+        {
+          "ticks_min": -999,
+          "cellules": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    "grilles_par_stat": {
+      "force": [
+        {
+          "niveau_min": 0,
+          "lignes": [
+            "###",
+            "###",
+            "###"
+          ]
+        },
+        {
+          "niveau_min": 10,
+          "lignes": [
+            "####",
+            "####",
+            "####"
+          ]
+        },
+        {
+          "niveau_min": 25,
+          "lignes": [
+            "####",
+            "####",
+            "####",
+            "####"
+          ]
+        }
+      ],
+      "dexterite": [
+        {
+          "niveau_min": 0,
+          "lignes": [
+            "#####",
+            "####."
+          ]
+        },
+        {
+          "niveau_min": 10,
+          "lignes": [
+            "######",
+            "######"
+          ]
+        },
+        {
+          "niveau_min": 25,
+          "lignes": [
+            "#######",
+            "#######",
+            "##....."
+          ]
+        }
+      ],
+      "endurance": [
+        {
+          "niveau_min": 0,
+          "lignes": [
+            "##",
+            "##",
+            "##",
+            "##",
+            "#."
+          ]
+        },
+        {
+          "niveau_min": 10,
+          "lignes": [
+            "##",
+            "##",
+            "##",
+            "##",
+            "##",
+            "##"
+          ]
+        },
+        {
+          "niveau_min": 25,
+          "lignes": [
+            "###",
+            "###",
+            "###",
+            "###",
+            "###",
+            "#.."
+          ]
+        }
+      ],
+      "volonte": [
+        {
+          "niveau_min": 0,
+          "lignes": [
+            ".#.",
+            "###",
+            "###",
+            ".#."
+          ]
+        },
+        {
+          "niveau_min": 10,
+          "lignes": [
+            ".##.",
+            "####",
+            "####",
+            ".##."
+          ]
+        },
+        {
+          "niveau_min": 25,
+          "lignes": [
+            ".###.",
+            "#####",
+            "#####",
+            "#####",
+            ".###."
+          ]
+        }
+      ],
+      "perception": [
+        {
+          "niveau_min": 0,
+          "lignes": [
+            "#######"
+          ]
+        },
+        {
+          "niveau_min": 10,
+          "lignes": [
+            "#########",
+            "#........"
+          ]
+        },
+        {
+          "niveau_min": 25,
+          "lignes": [
+            "##########",
+            "####......"
+          ]
+        }
+      ],
+      "charisme": [
+        {
+          "niveau_min": 0,
+          "lignes": [
+            "###",
+            "#.#",
+            "###"
+          ]
+        },
+        {
+          "niveau_min": 10,
+          "lignes": [
+            ".###.",
+            "##.##",
+            "#...#",
+            "##.##",
+            ".###."
+          ]
+        },
+        {
+          "niveau_min": 25,
+          "lignes": [
+            ".####.",
+            "######",
+            "##..##",
+            "##..##",
+            "######",
+            ".####."
+          ]
+        }
+      ]
+    },
+    "mains_nues": {
+      "lignes": [
+        "##",
+        "##"
+      ]
     }
   }
 }

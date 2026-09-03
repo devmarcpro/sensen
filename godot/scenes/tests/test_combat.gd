@@ -146,6 +146,7 @@ func _ready() -> void:
 	_lancer("test_sauvegarde_terrain")
 	_lancer("test_uniques_artefacts")
 	_lancer("test_bombes")
+	_lancer("test_grille_sort")
 	_lancer("test_composer_capacites")
 	_lancer("test_charges_de_modules")
 	_lancer("test_assemblage_sans_limite")
@@ -3218,7 +3219,17 @@ func test_assemblage_sans_limite() -> void:
 	for m in ["carre", "bombe", "etincelle", "concentration", "gel", "baume"]:
 		if not (m in j.modules_connus):
 			j.modules_connus.append(m)
-	verifier(s.composer_capacite(j, ["carre", "bombe", "etincelle", "concentration", "gel", "baume"]) and j.capacites.size() == 1, "six modules se composent au niveau 0 : la longueur n'est plus bornée par les slots (%d capacité)" % j.capacites.size())
+	# La grille de composition (designer 2026-09-03) : la longueur n'est bornée par aucun COMPTE, elle est
+	# bornée par ce qui RENTRE dans la silhouette de l'arme tenue. Six modules lourds ne tiennent pas dans
+	# une grille de palier 0 ; le même sort tient dans la grille de force au palier 25.
+	var six: Array = ["carre", "bombe", "etincelle", "concentration", "gel", "baume"]
+	var emb0 := s.emboitement(j, six)
+	verifier(not emb0.ok and int(emb0.demande) > (emb0.cases as Array).size(), "six modules lourds : %d cases demandées, %d dans la grille — refusé" % [int(emb0.demande), (emb0.cases as Array).size()])
+	verifier(not s.composer_capacite(j, six) and j.capacites.is_empty(), "et composer_capacite le refuse")
+	var grande := s.grille_sort.grille_de("force", 25)
+	verifier(s.grille_sort.emboiter(six, grande).ok, "la même séquence tient dans la grille de force au palier 25 (%d cases)" % grande.size())
+	verifier(s.emboitement(j, ["jet_court", "point", "etincelle"]).ok, "un sort de base — portée, forme, noyau — tient dans la grille de palier 0")
+	verifier(s.composer_capacite(j, ["point", "etincelle"]) and j.capacites.size() == 1, "et se compose")
 	for k in 12:   # pas de limite de sorts créés non plus (2026-08-30)
 		s.composer_capacite(j, ["point", "etincelle", "concentration"] if k % 2 == 0 else ["carre", "gel"])
 	verifier(j.capacites.size() == 13, "treize capacités composées sans refus (%d)" % j.capacites.size())
@@ -3512,6 +3523,45 @@ func test_charges_de_modules() -> void:
 	verifier(au_moins_un, "les noyaux arcanes sortent bien dans des livres")
 
 
+func test_grille_sort() -> void:
+	# La forme d'un module vient de ce qu'il fait : un noyau cher est une grosse pièce, une condition une case.
+	var s := nouvelle_sim("plaine_au_talus")
+	var g: GrilleSort = s.grille_sort
+	var gros := 0
+	var petits := 0
+	for mid in GameData.catalogues.modules.keys():
+		var m: Dictionary = GameData.catalogues.modules[mid]
+		if m.get("module_type") == "noyau":
+			if int(m.get("cout_ticks", 0)) >= 20:
+				gros += 1 if g.forme_de(mid).size() == 4 else 0
+			elif int(m.get("cout_ticks", 0)) < 5:
+				petits += 1 if g.forme_de(mid).size() == 1 else 0
+		elif m.get("module_type") == "condition" and g.forme_de(mid).size() != 1:
+			verifier(false, "une condition tient sur une case (%s)" % mid)
+	verifier(gros > 0 and petits > 0, "les noyaux à 20 ticks font 4 cases, ceux sous 5 ticks une seule (%d, %d)" % [gros, petits])
+	# La grille grandit avec le niveau, et chaque voie a la sienne.
+	verifier(g.grille_de("force", 0).size() < g.grille_de("force", 25).size(), "la grille de force grandit du palier 0 au palier 25")
+	verifier(g.grille_de("perception", 0).size() > 0 and g.grille_de("", 0).size() == 4, "la perception a sa grille, les mains nues leur grille de poche")
+	# L'identité par la forme : un carré 2×2 ne rentre JAMAIS dans la ligne de la perception, même vide.
+	var carre_2x2 := [Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)]
+	var ligne: Array = g.grille_de("perception", 0)
+	var bloc: Array = g.grille_de("force", 0)
+	var faux_cat := {"gros_noyau": {"module_type": "noyau", "cout_ticks": 30, "forme_grille": [[0, 0], [1, 0], [0, 1], [1, 1]]}}
+	var g2 := GrilleSort.new(s.regles.r.grille, faux_cat)
+	verifier(g2.forme_de("gros_noyau").size() == carre_2x2.size(), "forme_grille explicite : quatre cases")
+	verifier(not g2.emboiter(["gros_noyau"], ligne).ok and g2.emboiter(["gros_noyau"], bloc).ok, "un carré ne rentre pas dans la ligne du tireur, il rentre dans le bloc du guerrier")
+	# Le retour arrière : trois dominos dans un 2×3 tiennent ; quatre ne tiennent pas, et le manque est dit.
+	var dom := {"d": {"module_type": "noyau", "cout_ticks": 5}}
+	var g3 := GrilleSort.new(s.regles.r.grille, dom)
+	var deux_trois := GrilleSort._cases_des_lignes(["##", "##", "##"])
+	verifier(g3.emboiter(["d", "d", "d"], deux_trois).ok, "trois dominos remplissent un 2×3")
+	var trop := g3.emboiter(["d", "d", "d", "d"], deux_trois)
+	verifier(not trop.ok and int(trop.manque) == 2, "quatre dominos : refusé, deux cases de trop (%d)" % int(trop.manque))
+	# La rotation : un domino vertical rentre dans une ligne horizontale.
+	var ligne_1x2 := GrilleSort._cases_des_lignes(["##"])
+	verifier(g3.emboiter(["d"], ligne_1x2).ok, "un domino tourne pour se coucher dans une ligne")
+
+
 func test_composer_capacites() -> void:
 	var s := Simulation.new(119)
 	s.charger_donjon("ruine", 119, 11, 1)
@@ -3519,8 +3569,8 @@ func test_composer_capacites() -> void:
 	j.modules_connus = []
 	for m0 in ["point", "etincelle", "ligne", "renaissance", "soi", "jet_court"]:
 		s.crediter_module(j, m0, 99)
-	var slots := s.slots_capacites(j)
-	verifier(int(slots.capacites) >= 2 and int(slots.modules) >= 2, "slots : %d capacités, %d modules" % [int(slots.capacites), int(slots.modules)])
+	var grille := s.grille_composition(j)
+	verifier((grille.cases as Array).size() >= 4, "la grille de l'arme tenue a au moins la grille de poche (%d cases, voie « %s »)" % [(grille.cases as Array).size(), str(grille.stat)])
 	var n0: int = j.capacites.size()
 	j.capacites = []
 	verifier(not s.composer_capacite(j, ["point"]), "sans noyau : refusé")
@@ -3531,7 +3581,7 @@ func test_composer_capacites() -> void:
 	verifier(s.composer_capacite(j, ["soi", "renaissance"]) and j.capacites.size() == 2, "soi + Renaissance : une capacité sur soi")
 	for k in 6:
 		s.composer_capacite(j, ["point", "etincelle"])
-	verifier(j.capacites.size() == 8 and int(slots.capacites) >= 2, "plus de plafond de capacités : huit composées (%d)" % j.capacites.size())
+	verifier(j.capacites.size() == 8, "plus de plafond de capacités : huit composées (%d)" % j.capacites.size())
 	verifier(s.supprimer_capacite(j, 0) and j.capacites.size() >= 1, "supprimer une capacité")
 	# Renaissance : un compagnon mort, son âme dans le sac, le sort le rappelle contre du mana.
 	var v := s.ajouter("villageois", j.pos + Vector2i(1, 1), "ia")

@@ -93,6 +93,17 @@
     },
     "cout_sang_froid": {
       "type": "integer"
+    },
+    "forme_grille": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "minItems": 2,
+        "maxItems": 2
+      }
     }
   },
   "required": [

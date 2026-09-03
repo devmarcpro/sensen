@@ -667,7 +667,7 @@ ui.menu.capacites,Capacités
 ui.ecran.capacites,"CAPACITÉS — {n}, sans plafond (Entrée : supprimer)"
 ui.capacites.nouvelle,+ Nouvelle capacité
 ui.capacites.ligne,"{nom} — {modules}"
-ui.ecran.composer,"COMPOSER — {sequence} ({n} modules, sans plafond) · V : valider"
+ui.ecran.composer,COMPOSER — {sequence} · grille de l’arme tenue : {n}/{max} cases · V : valider
 ui.composer.type,[{type}]
 ui.composer.module,"{nom} — {desc}"
 ui.composer.valider,Valider (V)
@@ -2865,3 +2865,9 @@ status.visee.name,Visée
 status.point_faible.name,Point faible
 status.lu.name,Lu
 status.aux_aguets.name,Aux aguets
+journal.capacite_trop_grande,"ça ne rentre pas dans la grille : {demande} cases pour {cases} ({manque} de trop)"
+ui.composeur.grille,Grille de l’arme tenue
+ui.composeur.grille_ok,ça rentre — {demande}/{cases} cases
+ui.composeur.grille_ko,ça ne rentre pas — {demande} cases pour {cases}
+ui.composeur.grille_voie,la voie : {stat}
+ui.composeur.mains_nues,mains nues

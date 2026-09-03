@@ -11,6 +11,7 @@ var des: Des
 var regles: Regles
 var wuxing: WuXing
 var capacites: Capacites
+var grille_sort: GrilleSort                  # la grille de composition (Six types de modules, 2026-09-03)
 var grille: Grille
 var arene_id: String
 var donjon: Dictionary = {}           # {theme, graine, id, etage, etages, salles} quand la grille est un étage de donjon
@@ -88,6 +89,7 @@ func _init(p_graine: int) -> void:
 	regles = Regles.new(GameData.config("combat_rules"))
 	wuxing = WuXing.new(GameData.config("wuxing"))
 	capacites = Capacites.new(GameData.catalogues.get("modules", {}))
+	grille_sort = GrilleSort.new(regles.r.get("grille", {}), GameData.catalogues.modules)
 	capacites.par_niveau = float(regles.r.progression.skill_factor_par_niveau)
 	capacites.plancher = float(regles.r.progression.ticks_plancher_module)
 	items = GameData.catalogues.get("items", {}).duplicate()   # catalogue + instances de loot (uid)
@@ -3132,10 +3134,27 @@ func niveau_arme(e: Dictionary) -> int:
 	return regles.niveau(e.competences_eff, str(fonct.get("combat_skill", "")))
 
 
-func slots_capacites(e: Dictionary) -> Dictionary:
-	var c: Dictionary = regles.r.capacites
-	var n := niveau_arme(e)
-	return {"capacites": mini(int(c.capacites_max), int(c.capacites_base) + n / int(c.par_niveau_capacites)), "modules": mini(int(c.modules_max), int(c.modules_base) + n / int(c.par_niveau_modules))}
+## La grille de composition d'un être (Six types de modules et assemblage, designer 2026-09-03) : la
+## silhouette de la VOIE de l'arme tenue — la stat de sa compétence — au palier de son niveau. Sans
+## arme, la grille de poche. C'est ce contenant qui borne ce qu'on peut composer, et rien d'autre.
+func grille_composition(e: Dictionary) -> Dictionary:
+	var arme := Etres.arme(e, items)
+	var fonct: Dictionary = fonctionnalites.get(str(arme.get("functionality", "")), {})
+	var comp: Dictionary = GameData.catalogues.competences.get(str(fonct.get("combat_skill", "")), {})
+	var stat := str(comp.get("stat", ""))
+	var niveau := niveau_arme(e)
+	return {"stat": stat, "niveau": niveau, "cases": grille_sort.grille_de(stat, niveau)}
+
+
+## L'emboîtement d'une séquence dans la grille de l'être : {ok, placement, manque, cases, demande}.
+## L'écran s'en sert pour dessiner ; la composition pour refuser.
+func emboitement(e: Dictionary, sequence: Array) -> Dictionary:
+	var g := grille_composition(e)
+	var res := grille_sort.emboiter(sequence, g.cases)
+	res["cases"] = g.cases
+	res["stat"] = g.stat
+	res["demande"] = grille_sort.taille_de(sequence)
+	return res
 
 
 ## Composer une capacité depuis des modules connus : l'assembleur juge la séquence, les slots bornent le **nombre**
@@ -3151,6 +3170,12 @@ func composer_capacite(e: Dictionary, sequence: Array, nom: String = "") -> bool
 	var plan := capacites.assembler(sequence.duplicate(), 10, "1d4", {}, e.competences_eff)
 	if not plan.erreurs.is_empty():
 		EventBus.emettre(&"journal", [&"journal.capacite_refusee", {}])
+		return false
+	# La grille (designer 2026-09-03) : la seule borne structurelle. Elle ne juge pas la séquence —
+	# l'assembleur l'a déjà acceptée — elle juge si les pièces TIENNENT dans le contenant de l'arme.
+	var emb := emboitement(e, sequence)
+	if not emb.ok:
+		EventBus.emettre(&"journal", [&"journal.capacite_trop_grande", {"demande": int(emb.demande), "cases": (emb.cases as Array).size(), "manque": int(emb.manque)}])
 		return false
 	var noyau: Dictionary = plan.noyau
 	var nom_key := str(noyau.get("name_key", "capacite.etincelle.name"))

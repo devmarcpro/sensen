@@ -866,7 +866,7 @@ ui.ecran.capacites,"ABILITIES — {n}, no cap (Enter: delete)"
 ui.ecran.capturer,Net (Y) — capture on a neighbouring water tile
 ui.ecran.commerce,"TRADE — {nom} · their purse: {or} gold · yours: {joueur} gold"
 ui.ecran.commercer,Trade (C)
-ui.ecran.composer,"COMPOSE — {sequence} ({n} modules, no cap) · V: confirm"
+ui.ecran.composer,COMPOSE — {sequence} · grid of the held weapon: {n}/{max} cells · V: confirm
 ui.ecran.conquerir,Conquer this village
 ui.ecran.contexte,"OPTIONS — ({x},{y}) (Enter: choose · Esc: close)"
 ui.ecran.deposer,Deposit 50 gold (D)
@@ -2856,3 +2856,9 @@ status.visee.name,Aim
 status.point_faible.name,Weak point
 status.lu.name,Read
 status.aux_aguets.name,On watch
+journal.capacite_trop_grande,"it does not fit the grid: {demande} cells for {cases} ({manque} too many)"
+ui.composeur.grille,Grid of the held weapon
+ui.composeur.grille_ok,fits — {demande}/{cases} cells
+ui.composeur.grille_ko,does not fit — {demande} cells for {cases}
+ui.composeur.grille_voie,path: {stat}
+ui.composeur.mains_nues,bare hands

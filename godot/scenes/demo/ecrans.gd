@@ -1243,8 +1243,8 @@ func _texte_quete(q: Dictionary) -> String:
 
 ## Les capacités du joueur (Structure compétences-modules-slots) : la liste, et la porte vers la composition.
 func _construire_capacites(j: Dictionary) -> void:
-	var slots: Dictionary = main.sim.slots_capacites(j)
-	titre.text = tr("ui.ecran.capacites").format({"n": j.get("capacites", []).size(), "max": int(slots.capacites), "modules": int(slots.modules)})
+	var grille: Dictionary = main.sim.grille_composition(j)   # la grille de l'arme tenue (Six types de modules, 2026-09-03)
+	titre.text = tr("ui.ecran.capacites").format({"n": j.get("capacites", []).size(), "cases": (grille.cases as Array).size(), "voie": tr("stat." + str(grille.stat)) if not str(grille.stat).is_empty() else tr("ui.composeur.mains_nues")})
 	for k in j.get("capacites", []).size():
 		var cap: Dictionary = j.capacites[k]
 		var noms: Array[String] = []
@@ -1381,11 +1381,11 @@ func _apercu_plan(plan: Dictionary) -> String:
 
 ## Composer : les modules connus, groupés par type ; Entrée les ajoute à la séquence (ou les en retire) ; V valide.
 func _construire_composer(j: Dictionary) -> void:
-	var slots: Dictionary = main.sim.slots_capacites(j)
+	var emb: Dictionary = main.sim.emboitement(j, sequence_composee)   # la grille (Six types de modules, 2026-09-03)
 	var noms: Array[String] = []
 	for m in sequence_composee:
 		noms.append(tr(GameData.catalogues.modules.get(str(m), {}).get("name_key", str(m))))
-	titre.text = tr("ui.ecran.composer").format({"sequence": " → ".join(noms) if not noms.is_empty() else "—", "n": sequence_composee.size(), "max": int(slots.modules)})
+	titre.text = tr("ui.ecran.composer").format({"sequence": " → ".join(noms) if not noms.is_empty() else "—", "n": int(emb.demande), "max": (emb.cases as Array).size()})
 	# Le composeur en glisser-déposer (décision du designer, 2026-08-30) remplace la liste : slots, cartes, nom, Wu Xing.
 	corps.visible = false
 	composeur.visible = true

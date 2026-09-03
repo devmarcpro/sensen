@@ -36,6 +36,7 @@ var rangee_etapes: HBoxContainer
 var catalogue: VBoxContainer
 var detail: RichTextLabel
 var apercu: ApercuSort
+var grille_ctrl: GrilleControl               # la grille de composition dessinée (designer 2026-09-03)
 var pentagramme: Control
 
 
@@ -110,6 +111,9 @@ func _ready() -> void:
 	bas.add_child(pentagramme)
 	apercu = ApercuSort.new()
 	bas.add_child(apercu)
+	grille_ctrl = GrilleControl.new()
+	grille_ctrl.composeur = self
+	bas.add_child(grille_ctrl)
 
 
 ## Les filtres de style (Six types de modules, 2026-08-30) : Tous, puis un bouton par style de data/styles.json.
@@ -365,6 +369,7 @@ func _rafraichir_detail(j: Dictionary) -> void:
 	var plan: Dictionary = main.sim.plan_sequence(j, seq.duplicate()) if not seq.is_empty() else {}
 	apercu.montrer(plan)
 	pentagramme.montrer(plan)
+	grille_ctrl.montrer(main.sim.emboitement(j, seq))
 	icone_sort.queue_redraw()
 	var texte := ""
 	if selection < ids.size():
@@ -798,3 +803,50 @@ func _reconstruire_etapes() -> void:
 		groupes.noyau.append("")
 		reconstruire(main.joueur()))
 	rangee_etapes.add_child(plus)
+
+
+## La grille de composition (Six types de modules et assemblage, designer 2026-09-03) : la silhouette de
+## l'arme tenue, et les pièces des modules posées dedans par le moteur — chaque pièce teintée par le type
+## de son module. Quand ça ne rentre pas, la grille passe au rouge et dit combien de cases manquent :
+## le joueur voit l'interdit sans qu'on ait eu à l'écrire.
+class GrilleControl extends Control:
+	const CASE := 14.0
+	var composeur: Composeur
+	var emb: Dictionary = {}
+
+	func _init() -> void:
+		custom_minimum_size = Vector2(150, 150)
+
+	func montrer(e: Dictionary) -> void:
+		emb = e
+		queue_redraw()
+
+	func _draw() -> void:
+		if emb.is_empty():
+			return
+		var cases: Array = emb.get("cases", [])
+		var ok := bool(emb.get("ok", false)) or (emb.get("placement", []) as Array).is_empty() and int(emb.get("demande", 0)) == 0
+		var titre := tr("ui.composeur.grille")
+		draw_string(ThemeDB.fallback_font, Vector2(0, 12), titre, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.85, 0.8, 0.6))
+		var maxx := 0
+		var maxy := 0
+		for c in cases:
+			maxx = maxi(maxx, c.x)
+			maxy = maxi(maxy, c.y)
+		var o := Vector2(4.0, 20.0)
+		var fond := Color(0.12, 0.12, 0.16) if ok else Color(0.35, 0.1, 0.1)
+		for c in cases:
+			draw_rect(Rect2(o + Vector2(c.x, c.y) * CASE, Vector2(CASE - 1.0, CASE - 1.0)), fond)
+		var par_module := {}
+		for p in emb.get("placement", []):
+			par_module[str(p.module)] = true
+			var md: Dictionary = GameData.catalogues.modules.get(str(p.module), {})
+			var col := Pictos.couleur_module(md)
+			for c in p.cases:
+				draw_rect(Rect2(o + Vector2(c.x, c.y) * CASE + Vector2(1, 1), Vector2(CASE - 3.0, CASE - 3.0)), col)
+		var bas_y := o.y + float(maxy + 1) * CASE + 12.0
+		var msg := tr("ui.composeur.grille_ok" if ok else "ui.composeur.grille_ko").format({"demande": int(emb.get("demande", 0)), "cases": cases.size()})
+		draw_string(ThemeDB.fallback_font, Vector2(0, bas_y), msg, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.8, 0.9, 0.8) if ok else Color(1.0, 0.55, 0.5))
+		var stat := str(emb.get("stat", ""))
+		var voie := tr("stat." + stat) if not stat.is_empty() else tr("ui.composeur.mains_nues")
+		draw_string(ThemeDB.fallback_font, Vector2(0, bas_y + 13.0), tr("ui.composeur.grille_voie").format({"stat": voie}), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.7, 0.7, 0.65))
