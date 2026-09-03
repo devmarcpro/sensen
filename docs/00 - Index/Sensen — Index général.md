@@ -38,7 +38,7 @@ Puis, selon le besoin : **[[Vers la production]]** (ce qui reste avant de coder)
 |---|---|---|
 | **[[Carte — Vision]]** | pitch, identité, inspirations, direction artistique | 6 |
 | **[[Carte — Monde]]** | grille, hauteur, biomes, donjons, météo, corruption | 28 |
-| **[[Carte — Combat]]** | action-time, Wu Xing, chaîne, garde, modules | 31 |
+| **[[Carte — Combat]]** | action-time, Wu Xing, chaîne, garde, modules | 32 |
 | **[[Carte — Progression]]** | les trois axes, talents, potentiel, races, classes | 17 |
 | **[[Carte — Objets]]** | matériaux, craft compositionnel, équipement, loot | 26 |
 | **[[Carte — Êtres]]** | l'être unique, apparence, IA, compagnons, familles | 17 |

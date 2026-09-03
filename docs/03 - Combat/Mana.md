@@ -47,6 +47,9 @@ Monter un module en niveau le rend plus puissant ET moins coûteux (puissance : 
 > [!success] Décidé et codé le 2026-08-30 — l'**épuisement** : le pendant de la surchauffe pour l'endurance
 > Le « no limit » de l'assemblage rendait les sorts d'**endurance** presque gratuits au-delà du pool : `endurance = max(0, endurance − coût)` — une salle entière de Bombes (noyau d'endurance) pour « toute mon endurance », quel que soit le coût réel. Désormais l'endurance a le même garde-fou que le mana : **le déficit est infligé en PV × `endurance.epuisement_mult`** (1, `combat_rules.json` — la moitié de la surchauffe : le corps encaisse mieux l'effort que le feu du mana), journal `journal.epuisement`. Lancer reste permis ; se tuer d'épuisement aussi — « la seule limite, c'est le résultat et les stats ». Chair de mana ne s'applique pas (elle convertit déjà le mana en endurance).
 
+> [!success] Décidé le 2026-09-03 — le mana **appartient à la volonté**, le charisme en est l'**invité**
+> Trois monnaies depuis ce jour, une par paire de stats, selon la **philosophie des paires** du designer : chaque monnaie a un propriétaire dont tout le combat en dépend et qui porte la réserve, et un invité qui s'en sert en bonus. Pour le mana : la **volonté** (le mage ne fait que ça, `mana_max = 20 + volonté × 3`, inchangé) et le **charisme** (buffs, débuffs, invocations — quinze noyaux triés le même jour, et six instruments qui sont des focus de mana). Les deux autres : [[Endurance]] (la vigueur, à la force et à l'endurance) et [[Sang-froid]] (à la dextérité et à la perception — l'inverse du mana : elle ne se gagne pas en agissant). Le tableau complet est dans [[Structure compétences-modules-slots]].
+
 ## Liens
 - **Dépend de** : [[Stats de personnage]], [[Progression par l'usage]], [[Boucle de tick]]
 - **Alimente** : [[Structure compétences-modules-slots]], [[Pipeline de résolution du combat]], [[Armes fantomatiques]], [[Modules]]
