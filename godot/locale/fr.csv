@@ -664,7 +664,7 @@ ui.objet.plan,"plan : {recette} (difficulté {difficulte})"
 journal.communion,"{nom} : l'élément tourne vers {element} (Communion des cinq)"
 module.renaissance.name,Renaissance
 ui.menu.capacites,Capacités
-ui.ecran.capacites,"CAPACITÉS — {n}, sans plafond (Entrée : supprimer)"
+ui.ecran.capacites,"CAPACITÉS — {n} · grille de l’arme tenue : {cases} cases — {voie} (Entrée : supprimer)"
 ui.capacites.nouvelle,+ Nouvelle capacité
 ui.capacites.ligne,"{nom} — {modules}"
 ui.ecran.composer,COMPOSER — {sequence} · grille de l’arme tenue : {n}/{max} cases · V : valider

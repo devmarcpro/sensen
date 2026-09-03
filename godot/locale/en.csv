@@ -862,7 +862,7 @@ ui.ecran.assigner,Assign here (X)
 ui.ecran.atelier,"WORKSHOP — stations in reach: {stations}"
 ui.ecran.attendre,Wait here (A)
 ui.ecran.betail,Treat as livestock
-ui.ecran.capacites,"ABILITIES — {n}, no cap (Enter: delete)"
+ui.ecran.capacites,"ABILITIES — {n} · grid of the held weapon: {cases} cells — {voie} (Enter: delete)"
 ui.ecran.capturer,Net (Y) — capture on a neighbouring water tile
 ui.ecran.commerce,"TRADE — {nom} · their purse: {or} gold · yours: {joueur} gold"
 ui.ecran.commercer,Trade (C)
