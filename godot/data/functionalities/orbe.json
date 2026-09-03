@@ -1,0 +1,19 @@
+{
+  "name_key": "functionality.orbe.name",
+  "kind": "arme",
+  "hands": 1,
+  "combat_skill": "controle_mana",
+  "degats_des": "1d3",
+  "crit_range": 20,
+  "vitesse_base": 1.4,
+  "portee": 1.0,
+  "portee_min": 1,
+  "type_degats": "contondant",
+  "volume": 0.8,
+  "genre_grammatical": "ms",
+  "affinite_sorts": {
+    "mana": 1.7,
+    "endurance": 0.55
+  },
+  "poids_reference": 0.96
+}

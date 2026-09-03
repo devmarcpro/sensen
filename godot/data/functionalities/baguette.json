@@ -1,0 +1,19 @@
+{
+  "name_key": "functionality.baguette.name",
+  "kind": "arme",
+  "hands": 1,
+  "combat_skill": "controle_mana",
+  "degats_des": "1d4",
+  "crit_range": 20,
+  "vitesse_base": 2.4,
+  "portee": 1.5,
+  "portee_min": 1,
+  "type_degats": "perforant",
+  "volume": 0.6,
+  "genre_grammatical": "fs",
+  "affinite_sorts": {
+    "mana": 1.25,
+    "endurance": 0.85
+  },
+  "poids_reference": 0.72
+}

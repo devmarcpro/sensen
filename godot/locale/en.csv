@@ -2774,3 +2774,9 @@ functionality.fouet.name,Whip
 item.craft_fouet.name,Whip
 competence.baton.name,Quarterstaff
 competence.fouet.name,Whip
+functionality.orbe.name,Orb
+item.craft_orbe.name,Orb
+functionality.sceptre.name,Sceptre
+item.craft_sceptre.name,Sceptre
+functionality.baguette.name,Wand
+item.craft_baguette.name,Wand

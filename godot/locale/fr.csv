@@ -2783,3 +2783,9 @@ functionality.fouet.name,Fouet
 item.craft_fouet.name,Fouet
 competence.baton.name,Bâton
 competence.fouet.name,Fouet
+functionality.orbe.name,Orbe
+item.craft_orbe.name,Orbe
+functionality.sceptre.name,Sceptre
+item.craft_sceptre.name,Sceptre
+functionality.baguette.name,Baguette
+item.craft_baguette.name,Baguette

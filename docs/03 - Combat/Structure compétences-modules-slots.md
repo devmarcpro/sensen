@@ -62,6 +62,21 @@ Monter un module en niveau le rend plus puissant ET moins coûteux (puissance : 
 > [!success] Décidé et codé le 2026-08-30 — plus de plafond de **modules par capacité** ; les slots de **capacités** restent
 > **Instruction du designer** (assemblage sans limite) : « tous les modules devraient pouvoir s'assembler entre eux, no limit, la seule limite c'est le résultat et les stats ». Or `composer_capacite` refusait encore toute séquence plus longue que `modules_base + N_arme / par_niveau_modules` — **deux modules** au niveau 0, ce qui interdisait de fait l'assemblage libre dès la première partie. Désormais la **longueur d'une séquence n'est plus bornée** : c'est le prix (ticks, mana ou endurance, × la surface pour les effets par tuile) et les charges de modules qui limitent, comme le veut la note [[Six types de modules et assemblage]]. ~~Le **nombre de capacités composées** reste borné par les slots~~ **Levé aussi le 2026-08-30** (« pas de limite de sorts créés ») : on compose autant de capacités qu'on veut ; la hotbar n'en montre que dix à la fois, les autres se lancent depuis l'écran Capacités. `slots_capacites()` ne borne plus rien ; il reste dans les règles pour une éventuelle marche arrière. `slots_capacites().modules` n'est plus lu par la composition ; il reste dans les règles pour l'affichage historique et une éventuelle marche arrière. **Fait le 2026-08-30** : le composeur avertit dès que la séquence dépasse le seuil de télégraphie (`actions.telegraphe_seuil_ticks`) — visible de tous, interruptible. **À juger** : sans plafond, une séquence de dix modules à 60 ticks se joue-t-elle encore ?
 
+> [!success] Tranché le 2026-09-03 — **il n'y avait qu'une seule arme magique** (designer)
+> « La puissance du sort devrait être affectée par l'arme à dégât magique équipée : sceptre, bâton magique, etc. »
+> **La règle existait déjà** — c'est la même instruction, donnée le 2026-08-31, qui a produit `affinite_sorts` : un sort *mana* est plus efficace avec une arme magique, un sort *endurance* avec une arme physique. **Ce qui manquait, c'est le contenu.** Le designer nommait « un sceptre » dès la première fois ; il n'y en a jamais eu. Le catalogue comptait **une** arme magique, le bâton, à ×1,30 mana — quand les **mains nues** sont à ×1,00. Choisir de canaliser ne rapportait que trente pour cent, payés par une arme qui frappe à 0,42 PV par tick.
+> **Ce que ça change au déséquilibre mesuré le même jour** : les sorts au contact montent sur les dégâts de l'arme équipée, les sorts élémentaires à distance ne comptent que sur eux-mêmes — d'où un facteur quatre-vingt-quatre entre les kits de classe. Une vraie famille d'armes magiques donne aux seconds **leur propre axe de progression**, au lieu de raboter les premiers.
+> **Trois armes ajoutées, un seul axe qui les sépare** — combien de sort contre combien de coup :
+>
+> | arme | mana | endurance | dés | vitesse | ce qu'elle est |
+> |---|---|---|---|---|---|
+> | **Orbe** | **×1,70** | ×0,55 | 1d3 | 1,4 | le maximum de sort, presque aucune arme |
+> | **Sceptre** | ×1,45 | ×0,75 | 1d6 | 1,6 | le compromis : on canalise, on peut encore frapper |
+> | **Baguette** | ×1,25 | ×0,85 | 1d4 | 2,4 | rapide, moins puissante — pour qui alterne |
+> | Bâton magique *(existant)* | ×1,30 | ×0,70 | 1d4 | 1,8 | inchangé |
+>
+> **Le principe, pour les prochaines** : une arme magique se paie en **capacité à frapper**, jamais en autre chose. L'orbe est le cas extrême — 1d3, soit moins que les poings — et c'est ce qui rend son ×1,70 acceptable.
+
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Progression par l'usage]]
 - **Alimente** : [[Six types de modules et assemblage]], [[Mana]], [[Vocabulaire des modules — six axes]]
