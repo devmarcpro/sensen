@@ -89,7 +89,7 @@ journal.attaque_lourde,{att} ATTAQUE LOURDE sur {def} ({zone}) : {degats} dégâ
 journal.telegraphe,{nom} prépare {action} ({ticks} ticks)
 journal.garde,{nom} prend la garde (2 ticks)
 journal.garde_tient,la garde de {nom} absorbe le coup : {avant} → {apres}
-journal.attendre,"{nom} attend (5 ticks, +20 endurance)"
+journal.attendre,"{nom} attend (5 ticks, +20 vigueur)"
 journal.mort,{nom} tombe.
 journal.engagement,{nom} t'a vu — COMBAT : le temps n'avance plus qu'à l'action
 journal.desengagement,plus d'hostile en vue — le combat est fini
@@ -209,7 +209,7 @@ affixe.cadence_element.nom,{base} {epithete} (une attaque sur {n} porte {element
 affixe.cadence_des.nom,{base} fervent (une sur {n} : +{des} dé)
 affixe.cadence_percant.nom,{base} perçant (tous les {n} coups : ignore {pct} % d'armure)
 affixe.cadence_saignee.nom,{base} sanglant (un coup sur {n} saigne)
-affixe.cadence_parade.nom,{base} du parieur (une parade sur {n} rend {endurance} endurance)
+affixe.cadence_parade.nom,{base} du parieur (une parade sur {n} rend {endurance} vigueur)
 affixe.cadence_riposte.nom,{base} vengeur (un coup reçu sur {n} : riposte +{des} dé)
 affixe.cond_pv_bas.nom,{base} du dernier souffle (sous {pct_pv} % PV : +{des} dé)
 affixe.cond_element_cible.nom,{base} du chasseur (contre {element} : +{pct} %)
@@ -227,13 +227,13 @@ affixe.wuxing_purete.nom,{base} pur (+{pct} % à l'élément dominant)
 affixe.wuxing_domination.nom,{base} accordé (matchups défensifs +{pct} %)
 affixe.decl_zone_etourdit.nom,{base} assommant (au coup en {zone} : étourdit {duree_ticks} ticks)
 affixe.decl_zone_saigne.nom,{base} cruel (au coup en {zone} : saigne {duree_ticks} ticks)
-affixe.decl_parade.nom,{base} du rempart (à la parade : rend {endurance} endurance)
+affixe.decl_parade.nom,{base} du rempart (à la parade : rend {endurance} vigueur)
 affixe.decl_mise_a_mort.nom,{base} du prédateur (à la mise à mort : +{pct} % vitesse {ticks} ticks)
 affixe.decl_touche_etourdit.nom,{base} hérissé (touché : {chance} % d'étourdir {duree_ticks} ticks)
 affixe.decl_touche_saigne.nom,{base} épineux (touché : {chance} % de faire saigner)
 affixe.meca_vol_de_vie.nom,{base} vampirique (vol de vie {pct} %)
 affixe.meca_allonge.nom,{base} long (+{n} allonge)
-affixe.meca_garde.nom,{base} de la garde (garde −{pct} % d'endurance)
+affixe.meca_garde.nom,{base} de la garde (garde −{pct} % de vigueur)
 affixe.meca_capacite.nom,{base} du porteur (+{kg} capacité)
 affixe.meca_vigueur_max.nom,{base} du souffle (+{n} vigueur max)
 affixe.meca_armure.nom,{base} renforcé (+{n} armure)
@@ -271,7 +271,7 @@ taille.affinite,affinité +
 taille.qualite,qualité +
 taille.mana_max,mana max +
 taille.sante_max,PV max +
-taille.endurance_max,endurance max +
+taille.endurance_max,vigueur max +
 taille.duree_statuts,durée des statuts +
 taille.stat,stat +
 domaine.feu,de Feu
@@ -759,7 +759,7 @@ talent.sans_maitre.desc,"Commence sans talent ; apprend celui d'un PNJ (relation
 talent.polyvalent.name,Polyvalent
 talent.polyvalent.desc,"Porte deux talents de classe : le sien et un appris."
 talent.chair_de_mana.name,Chair de mana
-talent.chair_de_mana.desc,"La surchauffe coûte de l'endurance ; mana ×1,2 ; endurance max −20."
+talent.chair_de_mana.desc,"La surchauffe coûte de la vigueur ; mana ×1,2 ; vigueur max −20."
 talent.oeil_de_la_pierre.name,Œil de la pierre
 talent.oeil_de_la_pierre.desc,"Rien n'est irrécoltable (÷ 3 au-dessus du seuil) ; vision −20 % ; sent les filons."
 ui.feuille.talents,Talents
@@ -927,9 +927,9 @@ item.potion_perception.name,Potion de perception
 status.potion_perception.name,Potion de perception
 status.potion_perception_forte.name,Potion de perception forte
 item.peau.name,Peau
-item.potion_endurance.name,Potion d'endurance
-status.potion_endurance.name,Potion d'endurance
-status.potion_endurance_forte.name,Potion d'endurance forte
+item.potion_endurance.name,Potion de vigueur
+status.potion_endurance.name,Potion de vigueur
+status.potion_endurance_forte.name,Potion de vigueur forte
 item.griffe.name,Griffe
 item.potion_force.name,Potion de force
 status.potion_force.name,Potion de force
@@ -1532,7 +1532,7 @@ ui.recette.sans_source,(pas de source encore : parties de créatures)
 ui.recette.recolte,← récolte (pioche sur un mur ou un filon)
 ui.recette.qualite_composant,(qualité A.3 sur la compétence de la station)
 ui.recette.assemblage,(qualité = Σ composants × poids × jet d'assemblage)
-ui.feuille.vitaux,"PV {pv}/{pv_max} · vigueur {end} · mana {mana}/{mana_max}"
+ui.feuille.vitaux,"PV {pv}/{pv_max} · vigueur {end}/{end_max} · mana {mana}/{mana_max} · sang-froid {sf}/{sf_max}"
 ui.feuille.stats,Stats
 ui.feuille.cat.combat,Compétences de combat
 ui.feuille.cat.general,Compétences générales
@@ -1704,7 +1704,7 @@ module.fonte.name,Fonte
 module.fosse.name,Fosse
 module.cataclysme.name,Cataclysme
 journal.cataclysme_unique,un cataclysme par combat — le corps ne suit pas
-journal.cataclysme,"{nom} déchaîne un cataclysme : l'endurance est vidée"
+journal.cataclysme,"{nom} déchaîne un cataclysme : la vigueur est vidée"
 module.foudroiement.name,Foudroiement
 module.fragmentation.name,Fragmentation
 module.frappe.name,Frappe
@@ -2140,7 +2140,7 @@ ui.ecran.triche_liste,"TRICHE — {quoi} (Entrée : donner / déclencher · Éch
 ui.triche.oui,oui
 ui.triche.non,non
 ui.triche.or,+10 000 or
-ui.triche.soin,"Tout restaurer (PV, endurance, mana, faim, statuts)"
+ui.triche.soin,"Tout restaurer (PV, vigueur, mana, faim, statuts)"
 ui.triche.invincible,Invincibilité (bascule)
 ui.triche.competences,Toutes les compétences au niveau 50
 ui.triche.talents,Tous les talents
@@ -2379,7 +2379,7 @@ ui.options.plein_ecran,"Plein écran : {etat}"
 ui.options.retour,Retour
 ui.menu.titre,Retour à l'écran principal
 ui.composer.taille_courte,taille
-journal.epuisement,"{nom} s’épuise : {deficit} d’endurance manquants, {degats} PV"
+journal.epuisement,"{nom} s’épuise : {deficit} de vigueur manquants, {degats} PV"
 ui.composer.telegraphe,"⚠ {ticks} ticks : au-delà de {seuil}, le sort est télégraphié — visible de tous, interruptible"
 ui.apercu.vide,"Aperçu : ajoutez une forme et un noyau"
 ui.apercu.tuiles,"{n} tuiles · {origine} · portée {portee} · visée nominale vers le nord"

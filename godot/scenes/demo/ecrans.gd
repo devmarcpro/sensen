@@ -2419,7 +2419,7 @@ func _construire_feuille(j: Dictionary) -> void:
 	var sim = main.sim
 	var nd: Dictionary = sim.progression.niveaux_derives(j)
 	var l: Array[String] = [tr("ui.niveaux").format({"combat": "%.1f" % nd.combat, "general": "%.1f" % nd.general})]
-	l.append(tr("ui.feuille.vitaux").format({"pv": j.sante, "pv_max": j.sante_max, "end": j.vigueur, "mana": j.mana, "mana_max": j.mana_max}))
+	l.append(tr("ui.feuille.vitaux").format({"pv": j.sante, "pv_max": j.sante_max, "end": j.vigueur, "end_max": j.vigueur_max, "mana": j.mana, "mana_max": j.mana_max, "sf": int(j.get("sang_froid", 0)), "sf_max": int(j.get("sang_froid_max", 0))}))
 	l.append("")
 	l.append("[b]" + tr("ui.feuille.stats") + "[/b]")
 	for st in ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]:
@@ -2514,18 +2514,19 @@ class HotbarEcran extends Control:
 				ecrans.main.hud_ecran.queue_redraw()
 
 
-## Les trois jauges de l'écran de création : vie, endurance, mana, pleines, avec leur valeur écrite.
+## Les quatre jauges de l'écran de création : vie, vigueur, mana, sang-froid, pleines, avec leur valeur écrite.
 ## Les mêmes couleurs que le HUD, la même lecture « valeur / max » — jamais un pourcentage seul.
 class BarresCreation extends Control:
 	const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "vigueur": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95), "sang_froid": Color(0.55, 0.75, 0.8)}
 	const BARRE_L := 190.0
-	const BARRE_H := 12.0
+	const BARRE_H := 10.0   # quatre jauges depuis le sang-froid (2026-09-03) dans la place prévue pour trois : plus fines, même bloc
+	const PAS := 4.0
 	var valeurs: Array = []
 
 	func _draw() -> void:
 		for k in valeurs.size():
 			var l: Array = valeurs[k]
-			var y := k * (BARRE_H + 6.0)
+			var y := k * (BARRE_H + PAS)
 			draw_rect(Rect2(0.0, y, BARRE_L, BARRE_H), Color(0.05, 0.05, 0.08, 0.85))
 			draw_rect(Rect2(0.0, y, BARRE_L, BARRE_H), COULEURS.get(str(l[0]), Color.WHITE))
 			draw_rect(Rect2(0.0, y, BARRE_L, BARRE_H), Color(0.6, 0.55, 0.4, 0.8), false, 1.0)

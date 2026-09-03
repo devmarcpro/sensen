@@ -43,7 +43,7 @@ journal.attaque,{att} strikes {def} on the {zone}: {degats} damage ({ticks} tick
 journal.attaque_lourde,{att} HEAVY ATTACK on {def} ({zone}): {degats} damage — guard broken
 journal.telegraphe,{nom} prepares {action} ({ticks} ticks)
 journal.garde,{nom} takes guard (2 ticks)
-journal.attendre,"{nom} waits (5 ticks, +20 stamina)"
+journal.attendre,"{nom} waits (5 ticks, +20 vigor)"
 journal.mort,{nom} falls.
 journal.engagement,{nom} saw you — COMBAT: time only moves when you act
 journal.desengagement,no hostile in sight — the fight is over
@@ -157,8 +157,8 @@ status.potion_charisme.name,Charisma potion
 status.potion_charisme_forte.name,Strong charisma potion
 status.potion_dexterite.name,Dexterity potion
 status.potion_dexterite_forte.name,Strong dexterity potion
-status.potion_endurance.name,Endurance potion
-status.potion_endurance_forte.name,Strong endurance potion
+status.potion_endurance.name,Vigor potion
+status.potion_endurance_forte.name,Strong vigor potion
 status.potion_force.name,Strength potion
 status.potion_force_forte.name,Strong strength potion
 status.potion_perception.name,Perception potion
@@ -357,7 +357,7 @@ item.pomme_de_terre.name,Potato
 item.potion_antipoison.name,Antidote potion
 item.potion_charisme.name,Charisma potion
 item.potion_dexterite.name,Dexterity potion
-item.potion_endurance.name,Endurance potion
+item.potion_endurance.name,Vigor potion
 item.potion_force.name,Strength potion
 item.potion_mana.name,Mana potion
 item.potion_perception.name,Perception potion
@@ -929,7 +929,7 @@ ui.feuille.stat,  {stat} {valeur} (potential {potentiel})
 ui.feuille.stats,Stats
 ui.feuille.talent,"{nom} — {desc}"
 ui.feuille.talents,Talents
-ui.feuille.vitaux,"HP {pv}/{pv_max} · vigor {end} · mana {mana}/{mana_max}"
+ui.feuille.vitaux,"HP {pv}/{pv_max} · vigor {end}/{end_max} · mana {mana}/{mana_max} · composure {sf}/{sf_max}"
 ui.fiche.age,"{genre} · {age} years old ({categorie}) · sign {signe} · level ≈ {niveau}"
 ui.fiche.apparence,A stranger. Nothing is known about them.
 ui.fiche.base,"{nom} · {fonction} · {village}"
@@ -1302,7 +1302,7 @@ talent.breche.desc,"Two paired portals, repositionable; max mana −30 %."
 talent.chaine_d_amorces.name,Chain of Primers
 talent.chaine_d_amorces.desc,"An explosion primes the bombs in its radius — yours too."
 talent.chair_de_mana.name,Mana Flesh
-talent.chair_de_mana.desc,"Overheat costs stamina; mana ×1.2; max stamina −20."
+talent.chair_de_mana.desc,"Overheat costs vigor; mana ×1.2; max vigor −20."
 talent.communion_des_cinq.name,Communion of the Five
 talent.communion_des_cinq.desc,"Their weapon's element turns through the cycle on its own with each blow, for a little mana."
 talent.deux_queues.name,Two Tails
@@ -1353,7 +1353,7 @@ accord.tribut_paie,tribute paid
 accord.tribut_recoit,tribute received
 affixe.cadence_des.nom,{base} of fervour (one in {n}: +{des} dice)
 affixe.cadence_element.nom,{base} {epithete} (one attack in {n} carries {element})
-affixe.cadence_parade.nom,{base} of the gambler (one parry in {n} returns {endurance} stamina)
+affixe.cadence_parade.nom,{base} of the gambler (one parry in {n} returns {endurance} vigor)
 affixe.cadence_percant.nom,{base} piercing (every {n} blows: ignores {pct} % armour)
 affixe.cadence_riposte.nom,{base} avenging (one blow taken in {n}: riposte +{des} dice)
 affixe.cadence_saignee.nom,{base} bloody (one blow in {n} draws blood)
@@ -1364,7 +1364,7 @@ affixe.cond_nuit.nom,{base} nocturnal (at night: +{pct} % speed)
 affixe.cond_profondeur.nom,{base} of the depths (floor ≥ {etage}: +{des} dice)
 affixe.cond_pv_bas.nom,{base} of the last breath (below {pct_pv} % HP: +{des} dice)
 affixe.decl_mise_a_mort.nom,{base} of the predator (on a kill: +{pct} % speed for {ticks} ticks)
-affixe.decl_parade.nom,{base} of the rampart (on a parry: returns {endurance} stamina)
+affixe.decl_parade.nom,{base} of the rampart (on a parry: returns {endurance} vigor)
 affixe.decl_touche_etourdit.nom,{base} bristling (when hit: {chance} % to stun for {duree_ticks} ticks)
 affixe.decl_touche_saigne.nom,{base} thorned (when hit: {chance} % to draw blood)
 affixe.decl_zone_etourdit.nom,{base} stunning (on a blow to the {zone}: stuns for {duree_ticks} ticks)
@@ -1372,8 +1372,8 @@ affixe.decl_zone_saigne.nom,{base} cruel (on a blow to the {zone}: bleeds for {d
 affixe.meca_allonge.nom,{base} long (+{n} reach)
 affixe.meca_armure.nom,{base} reinforced (+{n} armour)
 affixe.meca_capacite.nom,{base} of the bearer (+{kg} capacity)
-affixe.meca_vigueur_max.nom,{base} of breath (+{n} max stamina)
-affixe.meca_garde.nom,{base} of the guard (guarding costs −{pct} % stamina)
+affixe.meca_vigueur_max.nom,{base} of breath (+{n} max vigor)
+affixe.meca_garde.nom,{base} of the guard (guarding costs −{pct} % vigor)
 affixe.meca_vol_de_vie.nom,{base} vampiric (life steal {pct} %)
 affixe.passif_competence.nom,{base} of {competence} (+{n})
 affixe.passif_faim.nom,"{base} of temperance (hunger ×{mult} %)"
@@ -1761,7 +1761,7 @@ taille.affinite,affinity +
 taille.competence,skill +
 taille.degats_element,elemental damage +
 taille.duree_statuts,status duration +
-taille.endurance_max,max stamina +
+taille.endurance_max,max vigor +
 taille.mana_max,max mana +
 taille.qualite,quality +
 taille.sante_max,max HP +
@@ -1831,7 +1831,7 @@ journal.capture_nuit,this trap only catches at night
 journal.capture_ratee,"the net comes back empty ({jet} against {dd})"
 journal.capture_reussie,"{nom} catches {espece} (colour {couleur}, pattern {motif})"
 journal.capture_rien,no water within reach of the net
-journal.cataclysme,"{nom} unleashes a cataclysm: their stamina is spent"
+journal.cataclysme,"{nom} unleashes a cataclysm: vigor is drained"
 journal.cataclysme_unique,one cataclysm per fight — the body cannot take more
 journal.chaine_interrompue,{nom}'s chain is BROKEN: a segment falls
 journal.changer_arme,{nom} draws {objet} ({ticks} ticks)
@@ -2131,7 +2131,7 @@ ui.ecran.triche_liste,"CHEATS — {quoi} (Enter: give / trigger · Esc: back)"
 ui.triche.oui,yes
 ui.triche.non,no
 ui.triche.or,+10 000 gold
-ui.triche.soin,"Restore everything (HP, stamina, mana, hunger, statuses)"
+ui.triche.soin,"Restore everything (HP, vigor, mana, hunger, statuses)"
 ui.triche.invincible,Invincibility (toggle)
 ui.triche.competences,All skills to level 50
 ui.triche.talents,All talents
@@ -2370,7 +2370,7 @@ ui.options.plein_ecran,"Fullscreen: {etat}"
 ui.options.retour,Back
 ui.menu.titre,Back to the main screen
 ui.composer.taille_courte,size
-journal.epuisement,"{nom} is exhausted: {deficit} stamina short, {degats} HP"
+journal.epuisement,"{nom} is exhausted: {deficit} vigor short, {degats} HP"
 ui.composer.telegraphe,"⚠ {ticks} ticks: beyond {seuil}, the spell is telegraphed — visible to all, interruptible"
 ui.apercu.vide,"Preview: add a form and a core"
 ui.apercu.tuiles,"{n} tiles · {origine} · range {portee} · nominal aim northwards"
