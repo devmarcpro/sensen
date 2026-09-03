@@ -203,6 +203,9 @@ Comme pour [[Exemples — dix PNJ générés]], générer pour de vrai a trouvé
 > **Ce qui reste vrai de l'intention** : un artefact porte un effet **unique**, hors des pools ordinaires. Il y en a trois aujourd'hui — `unique_vol_de_mana`, `unique_second_souffle`, `unique_chaine_eternelle`. Trois effets pour toute la fin de partie, c'est peu, et c'est du contenu à écrire : la mécanique, elle, est en place.
 > **Ce que je ne tranche pas** : garder les artefacts générés (et alors il faut plus d'effets uniques), ou revenir à l'intention d'origine et les écrire un par un. Le code a déjà choisi ; la note disait le contraire depuis assez longtemps pour que personne ne s'en aperçoive.
 
+> [!success] Constaté le 2026-09-03 — `poids_reel` n'est pas un champ : c'est `Regles.poids_objet()`
+> Le poids d'un objet assemblé se **calcule** (densité des composants pondérée par leur part, volume du slot) ; seul `poids_reference` est écrit sur la fonctionnalité, comme repli. Le mot désignait la valeur calculée, pas une clé.
+
 ## Liens
 - **Dépend de** : [[Schéma objet et recette]], [[Craft compositionnel]], [[Stats et qualité de l'assemblage]], [[Loot — affixes, gemmes et rareté]]
 - **Alimente** : [[Décision — Pipeline de contenu]], [[Prix suggéré]], [[Armure par zone et constructions]]

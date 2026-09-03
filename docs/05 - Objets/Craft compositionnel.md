@@ -124,6 +124,9 @@ Un objet n'est plus une recette monolithique mais un assemblage de composants, c
 > **La règle qui rend C différent de B** : chaque troisième pièce a un **effet mécanique propre**, pas seulement un nom. Une garde qui ne ferait rien serait une fixation repeinte.
 > **Et la corde répond à une demande du même jour** : le designer voulait que l'élasticité fasse la puissance d'un arc. Elle la faisait déjà, mais à travers la moyenne pondérée de *toutes* les pièces — une corde de soie d'araignée noyée dans un fût de chêne. Avec une pièce dédiée, la puissance vient de **ce qui se tend**, ce qui est à la fois plus juste et plus lisible.
 
+> [!success] Constaté le 2026-09-03 — `fixations_std_seve` a été retirée avec les fixations (troisième pièce, 2026-09-03)
+> La fixation standard, sur quarante objets sur quarante-trois, ne différenciait rien ; elle a cédé la place à une troisième pièce qui dit ce qu'est l'objet (garde, contrepoids, corde, doublure, sertissure). La recette de sève est partie avec elle. Voir le callout du 2026-09-03 dans [[Structure compétences-modules-slots]].
+
 ## Liens
 - **Dépend de** : [[Composants]], [[Composant et recette d'obtention]], [[Stations de transformation]], [[Qualité d'artisanat]]
 - **Alimente** : [[Stats et qualité de l'assemblage]], [[Palier industriel]], [[Équipement — 14 slots]], [[Armure par zone et constructions]], [[Véhicules]]

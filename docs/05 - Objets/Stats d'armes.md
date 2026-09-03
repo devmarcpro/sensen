@@ -127,6 +127,9 @@ Le résultat du jet est ensuite modulé par matériaux/qualité (formule [[Pipel
 > > Autrement dit : douze classes sur dix-neuf se partagent deux stats, **une seule** est de perception, et **aucune** n'est d'endurance. Les armes existent désormais pour ces six façons de jouer ; les **classes**, elles, n'en couvrent que quatre.
 > > **Ce que je ne tranche pas** : faut-il rééquilibrer les dix-neuf vers les six stats, ou assumer que certaines stats sont des voies qu'on se construit soi-même plutôt que des classes de départ ? La deuxième réponse est défendable — mais alors il faut le dire, parce qu'aujourd'hui c'est un accident, pas un choix.
 
+> [!success] Constaté le 2026-09-03 — `poids_reel` n'est pas un champ : c'est `Regles.poids_objet()`
+> Le poids d'un objet assemblé se **calcule** (densité des composants pondérée par leur part, volume du slot) ; seul `poids_reference` est écrit sur la fonctionnalité, comme repli. Le mot désignait la valeur calculée, pas une clé.
+
 ## Liens
 - **Dépend de** : [[Fonctionnalité]], [[Stats d'un objet crafté]], [[Qualité d'artisanat]], [[Matériaux — 13 stats]]
 - **Alimente** : [[Pipeline de résolution du combat]], [[Action-time à ticks]], [[Combat tactique sur grille]]

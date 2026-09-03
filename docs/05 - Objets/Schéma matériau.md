@@ -52,6 +52,9 @@ Le format de données d'un matériau, avec ses stats, son bruit, sa récolte et 
 > [!success] Codé le 2026-08-28 — chargement et validation
 > `GameData` charge `data/materials/` et `data/material_categories.json` ; au boot : **couleur unique** (erreur bloquante en debug), **tags dérivés** au seuil ≥ 50 (`inflammable`, `conducteur_mana`, `flottant`, `isolant`, `luminescent`, `transparent`, `conducteur`), **vecteur `wuxing` résolu** (surcharge, sinon règle de la catégorie). **Décision** : `composition` reste optionnel (null) — la chimie élémentaire ayant été supprimée le 2026-08-09, rien ne le lit encore ; `reserved_colors.json` attend le pipeline de sprites (étape 1 n'a pas de stand-ins bitmap, les couleurs viennent de la palette).
 
+> [!success] Constaté le 2026-09-03 — `noise_layer_id` et `texture_path` ne sont pas codés
+> Un matériau porte `world_gen` (`mode: "biome"` avec `biome_tags`) et `noise` (`type: "procedural"`, `seed_offset`, `amplitude`, `scale`). Le mode `noise_layer` avec `noise_layer_id` n'a pas été écrit — les matériaux se placent par biome ; et `texture` avec `texture_path` non plus, parce qu'il n'y a **aucun asset** : tout se dessine par code. Les deux restent possibles ; ni l'un ni l'autre n'a manqué.
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Data-driven design]]
 - **Alimente** : [[Catégories de matériaux]], [[Palette de couleurs des matériaux]], [[Récolte]], [[Catalogue matériaux — Paramétriques]]

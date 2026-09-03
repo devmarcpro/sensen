@@ -29,6 +29,9 @@ XP d'Esquive : se déplacer en combat en étant adjacent à un hostile
 > [!success] Codé (vérifié le 2026-08-28)
 > `Regles.ticks_deplacement` : en combat, `× (1 − min(esquive_max, N_esquive × esquive_par_niveau))`, plancher `deplacement_min` ; l'XP d'Esquive tombe à chaque pas en combat adjacent à un hostile (`_deplacer`). Rien d'autre à coder.
 
+> [!success] Constaté le 2026-09-03 — `malus_poids_armure` est codé sous `facteur_surcharge`
+> Le poids ne pénalise que le déplacement, par la capacité de poids : `Regles.facteur_surcharge(poids, capacite)` multiplie les ticks de déplacement au-delà de la capacité (`poids.pente`, `poids.plafond`). Il n'y a plus de malus de défense.
+
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Compétences — liste]], [[Trous connus du combat]]
 - **Alimente** : [[Boucle de tick]], [[XP de combat]], [[Double niveau combat et général]]

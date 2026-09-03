@@ -63,6 +63,9 @@ Appliqués à la naissance ou à la récolte :
 
 **C'est le coût qui crée l'arbitrage**, pas la rareté : un ver à soie filé est un ver à soie mort ([[Catalogue des groupes d'élevage]], famille *coût par croisement*).
 
+> [!success] Constaté le 2026-09-03 — les drapeaux ci-dessus sont codés sous `repro.conditions` et `repro.couts`
+> Une espèce porte `repro` : `moteur`, une liste de `conditions` (`{c: "habitat"}`, `{c: "temperature", min, max}`, `{c: "sexe"}`, `{c: "place"}`…), une `portee` et des `couts`. `consomme_ressource` est un coût dans `couts` ; `fenetre_courte`, `tue_a_la_recolte` et `tue_parent` n'existent pas tels quels — aucune espèce du catalogue n'en avait besoin. Ils s'ajouteraient comme conditions ou coûts, pas comme drapeaux.
+
 ## Liens
 - **Dépend de** : [[Loci — les dix types]], [[Blocs de l'être]], [[Élevage — intention et familles]]
 - **Alimente** : [[Catalogue des groupes d'élevage]], [[Vivarium — capture et élevage]], [[Écrans d'interface]]

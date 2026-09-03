@@ -73,6 +73,9 @@ Coût : ces trois systèmes ne tournent que sur des POI/entités
 > [!success] Codé le 2026-08-28 — étape 10.5, repeuplement et décimation
 > Au passage de semaine, pour chaque village instancié de la fenêtre : `capacité = nombre de lits initiaux`, `chance = 0,15 × (1 − population/capacité) × (1 − corruption/100)` → un villageois générique naît sur un lit libre. Population 0 → village **abandonné** (`abandonne` sur la cellule, journal), plus de repeuplement ; ses bâtiments restent.
 
+> [!success] Constaté le 2026-09-03 — `royaume_id` est codé sous le nom `royaume`
+> Le village porte `royaume` (l'id du royaume, sur `e.village` à la génération et dans `monde.villages[nom]` avec `conquis_par` et `defense_jusqua`). Même chose, un suffixe de moins.
+
 ## Liens
 - **Dépend de** : [[Villages PNJ — repeuplement et décimation]], [[Jet de compétence universel]], [[Détection de pièces]]
 - **Alimente** : [[Expansion territoriale]], [[Familles et succession]], [[Réputation et relations]]

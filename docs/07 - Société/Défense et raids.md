@@ -42,6 +42,9 @@ Défendre son territoire avec des gardes, des tourelles et des murs — et le se
 > [!success] Corrigé le 2026-08-29 — le « niveau mêlée » des gardes valait toujours 0
 > `defense_totale` lisait `regles.niveau(competences, "melee")` — et **`melee` n'est pas une compétence du jeu** (les compétences d'armes sont épée, masse, dague… et les techniques tranchant/contondant/perforant). Le facteur `(1 + niveau/5)` de la formule était donc toujours 1 : un garde vétéran défendait comme une recrue. Le niveau lu est désormais celui de la **compétence de l'arme que le garde tient** (`functionality.combat_skill`, *mains nues* sans arme). Trouvé par le contrôle inverse des précédents : les noms que le **code** cite, comparés à ce que les **données** portent. Le même contrôle a montré que le tag `plat` (le Vampire « ne mange plus de plats ») n'était porté par **aucun objet** : ragoût, viande grillée, ration, pain et poisson grillé le portent maintenant.
 
+> [!success] Constaté le 2026-09-03 — `force_raid` n'est pas un champ : la force du raid se tire dans `_jet_raid`
+> Le jet lit `combat_rules.royaume.raids` (`proba_base`, `par_corruption`, `par_valeur`, `par_reputation`, `proba_max`) et la valeur du territoire ; `defense_totale` existe bien, en face. Le nom `force_raid` désignait le résultat du tirage, pas une clé.
+
 ## Liens
 - **Dépend de** : [[Population et exploitation]], [[Expansion territoriale]], [[Abstraction hors-site]], [[Construction cadrée]]
 - **Alimente** : [[Raids et menaces]], [[Gouvernance, lois et diplomatie]], [[Schéma royaume]], [[Entretien et taxes]]

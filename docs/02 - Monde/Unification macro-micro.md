@@ -73,6 +73,9 @@ continues f(x, z) sur les coordonnées MONDE (en tuiles).
 > [!success] Mesuré et optimisé le 2026-08-29 — la génération d'une cellule passe de 390 à 157 ms
 > Le budget de la note (2 ms par chunk, 32 ms par cellule) n'était pas tenu : **390 ms** mesurés en régime permanent (hors amorçage des bruits, qui coûte une seconde à la première cellule). Trois causes trouvées et corrigées, sans changer un seul résultat de génération (les tests de déterminisme le vérifient) : une **table `par_tuile` de 16 384 entrées** qui ne servait qu'à retrouver la clé de bloc — recalculée à la volée (−53 %) ; le **matériau de sol** relu par `biomes.get(...).get(...)` à chaque tuile — mis en cache dans le bloc ; les **constantes de la mer** (`planete.mer.altitude`, `.hauteur`) relues 16 384 fois — hoistées. Reste **157 ms**, dominés par les trois dictionnaires de 16 k entrées (`sol`, `sols`, `eau`) : descendre à 32 ms demanderait de passer à des `PackedByteArray`, ce qui touche `Grille`, `Monde` et le générateur de donjon — une refonte, pas un réglage. Le seuil du test passe de 600 à **250 ms** pour verrouiller le gain.
 
+> [!success] Constaté le 2026-09-03 — la table `par_tuile` a été retirée (c'était l'une des trois causes du 390 ms)
+> Le callout de perf ci-dessus la nomme comme ce qu'on a supprimé : elle n'existe plus dans le code, et c'est le but.
+
 ## Liens
 - **Dépend de** : [[Génération par couches de bruit]], [[Catalogue des couches de bruit]], [[Grille continue]]
 - **Alimente** : [[Décision — Monde fini, continents et océan]], [[Carte du monde]], [[Biomes — schéma]], [[Génération de donjon]], [[Génération des royaumes PNJ]], [[Eau et liquides]]

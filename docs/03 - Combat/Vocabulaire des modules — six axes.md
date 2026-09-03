@@ -83,6 +83,9 @@ Le schéma de données d'un module et les six axes du vocabulaire commun — la 
 > [!success] Renommé le 2026-09-03 — `cout_endurance` s'appelle `cout_vigueur`, et il existe `cout_sang_froid`
 > Le designer a séparé la stat de la monnaie : la monnaie que les noyaux martiaux paient s'appelle **vigueur** (`cout_vigueur`, sur 92 modules et actions de créature), et une **troisième** monnaie est née le même jour, le **sang-froid** (`cout_sang_froid`, sur les noyaux de dextérité et de perception). L'axe 4 compte donc **quatre économies** — les ticks, et trois monnaies — mais la règle du dessus tient telle quelle : **un seul type porte une monnaie**, le noyau ; un noyau n'en porte jamais deux ; les modificateurs paient dans celle du noyau qu'ils servent. L'exemple JSON ci-dessus garde l'ancien nom de clé : il date de la transcription. Les trois monnaies sont décrites dans [[Mana]], [[Endurance]] (la vigueur) et [[Sang-froid]].
 
+> [!success] Constaté le 2026-09-03 — `book_type` et `cibles_valides` n'ont pas été codés sous ces noms
+> Un livre est un **objet** dont le type et le dossier disent la nature (`items/grimoire/`, `items/manuel/`, `livre_module`), et ses domaines sont dans `loot_rules.livres.domaines_grimoire` et `domaines_manuel` — pas de champ `book_type`. Une forme n'a pas de `cibles_valides` : depuis que la portée est un module (2026-09-01), c'est la **portée** et sa ligne de vue qui décident où l'on peut poser le sort, et la forme ne connaît que sa géométrie et sa taille.
+
 ## Liens
 - **Dépend de** : [[Le vocabulaire des modules et l'absence d'arbre de talents]], [[Data-driven design]], [[Wu Xing — cycles et vecteurs]]
 - **Alimente** : [[Six types de modules et assemblage]], [[Modules]], [[Familles de capacités de la grille]]

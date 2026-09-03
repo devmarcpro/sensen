@@ -117,6 +117,9 @@ NETTOYAGE ET DISPARITION (3.5) : à la mort du boss (`creature_killed`
 > **Instruction** : « fais en sorte que les portes ne soient pas des blocs complets mais vraiment des portes et qu'il y en ait qu'une de générée, pas deux côte à côte ». Deux défauts distincts. **Au dessin** : une porte fermée bloque le passage, et tout ce qui bloque le passage était rendu par `_dessine_bloc` — un cube plein, indiscernable d'un mur. Elle est désormais dessinée comme un **battant** : le sol de la tuile, deux montants, un panneau dressé en travers de l'ouverture (l'axe est déduit des murs voisins), une poignée ; ouverte, le battant se range contre son montant et laisse le seuil libre. **À la génération** : `_poser_portes` marquait *chaque* tuile de bord touchant un couloir — un couloir large de deux tuiles, ou un angle de salle, donnait deux portes côte à côte. Les seuils contigus sont maintenant **groupés en ouvertures** et une seule tuile par ouverture reçoit son battant (celle du milieu).
 
 
+> [!success] Constaté le 2026-09-03 — `taille_salles` est renommé `tailles_salles` dans les thèmes
+> La clé du thème est au pluriel (`tailles_salles`, à côté de `salles_par_etage`, `poids_salles`, `salles_carrees`) ; le callout ci-dessus l'écrivait au singulier.
+
 ## Liens
 - **Dépend de** : [[Donjons — structure et intégration]], [[Salles et connecteurs]], [[Unification macro-micro]], [[Dérive de la corruption]]
 - **Alimente** : [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Créatures]], [[Gabarit de quête]]

@@ -36,6 +36,9 @@ Le jeu doit permettre de **changer de langue d'affichage** dans les réglages, �
 > [!important] Constat du 2026-08-31 — les descriptions de modules échappent à la localisation
 > Le détail du Composeur affiche `module.description` **lu tel quel depuis le JSON de données** (`data/modules/…`) : en anglais, l'écran mêle l'interface traduite et 178 descriptions restées en français (« Point — une seule cible… »). La couverture i18n ne le voit pas — ces textes ne passent pas par `locale/*.csv`. Deux voies quand la passe de traduction viendra (elle est planifiée « les textes peuvent suivre », § 4 de [[Vers la production]]) : donner aux modules un `description_key` sur le modèle de `name_key`, ou traduire les JSON par langue. Constat consigné, pas de correctif — c'est un lot de contenu, pas un bug ponctuel.
 
+> [!success] Constaté le 2026-09-03 — `description_key` : **non codé**, les descriptions de modules restent en français
+> Le callout ci-dessus le dit déjà : le composeur lit `description` tel quel depuis le JSON. Le champ `description_key` était la proposition pour les traduire ; elle n'a pas été faite, et c'est le seul texte joueur qui échappe encore à `i18n_couverture.py`. À faire le jour où l'anglais compte.
+
 ## Liens
 - **Dépend de** : [[Data-driven design]], [[Contraintes permanentes]]
 - **Alimente** : [[Arborescence du projet]], [[EventBus]], [[Écrans d'interface]], [[Gabarit de quête]], [[Dialogue PNJ]]
