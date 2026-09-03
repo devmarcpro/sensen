@@ -1,9 +1,0 @@
-{
-  "component": "contrepoids",
-  "material_family": "or",
-  "station": "enclume",
-  "unlocked_by_default": false,
-  "unlock_sources": [
-    "marchand_specialise"
-  ]
-}

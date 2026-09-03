@@ -1552,8 +1552,6 @@ component.plaque.name,Plaque
 component.sangles.name,Sangles
 component.rembourrage.name,Rembourrage
 component.fixations_std.name,Fixations standard
-component.garde.name,Garde
-component.contrepoids.name,Contrepoids
 item.craft_dague.name,Dague
 item.craft_epee.name,Épée
 item.craft_arc.name,Arc
@@ -2793,3 +2791,4 @@ functionality.grimoire_de_main.name,Grimoire de main
 item.craft_grimoire_de_main.name,Grimoire de main
 functionality.talisman.name,Talisman
 item.craft_talisman.name,Talisman
+item.craft_gambison.name,Gambison

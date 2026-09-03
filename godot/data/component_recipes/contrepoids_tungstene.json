@@ -1,9 +1,0 @@
-{
-  "component": "contrepoids",
-  "material_family": "tungstene",
-  "station": "laminoir",
-  "unlocked_by_default": false,
-  "unlock_sources": [
-    "guilde_forgerons_rang_4"
-  ]
-}

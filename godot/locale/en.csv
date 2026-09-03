@@ -1445,9 +1445,7 @@ categorie.roche,rock
 categorie.synthetique,synthetic
 categorie.terre,soil
 categorie.vegetal,plant and fibre
-component.contrepoids.name,Counterweight
 component.fixations_std.name,Standard fittings
-component.garde.name,Crossguard
 component.lame_courte.name,Short blade
 component.lame_longue.name,Long blade
 component.manche_court.name,Short haft
@@ -2784,3 +2782,4 @@ functionality.grimoire_de_main.name,Hand grimoire
 item.craft_grimoire_de_main.name,Hand grimoire
 functionality.talisman.name,Talisman
 item.craft_talisman.name,Talisman
+item.craft_gambison.name,Gambeson

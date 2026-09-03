@@ -100,6 +100,12 @@ Un objet n'est plus une recette monolithique mais un assemblage de composants, c
 >
 > > Les poids de tirage sont **mis en cache** par pool de candidats. Or deux emplacements peuvent puiser dans le même pool — une tête et une plaque sont toutes deux limitées aux matières dures — et ils ont désormais des poids **différents** pour l'inattendu. Sans ajouter l'emplacement à la clé, le second aurait récupéré les poids du premier et l'échelle n'aurait servi qu'à moitié, **en silence**. Un cache qui ignore une dimension nouvelle ne se plaint jamais.
 
+> [!success] Tranché le 2026-09-03 — **trois composants maximum par objet** (designer)
+> « Non, c'est trop : 3 composants max par craft. »
+> **Le contexte de la décision, parce qu'elle corrige une de mes initiatives.** En cherchant les lacunes de la chaîne de craft, j'avais trouvé trois composants — `garde`, `contrepoids`, `rembourrage` — qui existaient avec leurs recettes, leurs traductions et un `used_by` désignant l'épée et la masse, **sans qu'aucun objet ne les porte**. Du contenu mort et invisible. J'ai comblé le trou en ajoutant une quatrième pièce à l'épée et à la masse.
+> **La lacune était réelle, ma façon de la combler non.** La bonne réponse n'était pas d'agrandir l'objet mais de **retirer ce qui ne rentre pas** : au-delà de trois pièces, l'assemblage devient illisible et chaque pièce de plus dilue le poids des autres dans la moyenne pondérée. `garde` et `contrepoids` sont supprimés avec leurs recettes ; le `rembourrage`, lui, avait sa place — il devient la pièce souple du **gambison**, une cuirasse matelassée, qui reste à trois composants.
+> **La limite est désormais vérifiée** : `loot_rules.assemblage.composants_max` = 3, et la règle 30 de `audit_donnees.py` refuse tout objet qui la dépasse. Testé en ajoutant un quatrième emplacement à l'épée : l'audit la nomme.
+
 ## Liens
 - **Dépend de** : [[Composants]], [[Composant et recette d'obtention]], [[Stations de transformation]], [[Qualité d'artisanat]]
 - **Alimente** : [[Stats et qualité de l'assemblage]], [[Palier industriel]], [[Équipement — 14 slots]], [[Armure par zone et constructions]], [[Véhicules]]

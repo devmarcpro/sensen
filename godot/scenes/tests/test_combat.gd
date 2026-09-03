@@ -1400,7 +1400,33 @@ func test_assemblage() -> void:
 	var s := Simulation.new(17)
 	s.charger_donjon("ruine", 17, 8, 1)
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(GameData.catalogues.components.size() == 15 and GameData.catalogues.component_recipes.size() == 59, "15 composants (dont la monture), 59 recettes d'obtention")
+	# Dixieme test a nombre fige converti : il comptait « 15 composants, 59 recettes » et tombait des
+	# qu'on en retirait un — ici la garde et le contrepoids, supprimes parce qu'aucun objet ne pouvait
+	# les porter sous la limite de trois pieces. Ce qui doit tenir, c'est la CHAINE : tout composant se
+	# fabrique, tout composant sert a quelque chose, et aucun objet ne depasse la limite.
+	var sans_recette: Array[String] = []
+	var jamais_porte: Array[String] = []
+	var portes := {}
+	var trop_gros: Array[String] = []
+	var maxi_comp := int(GameData.config("loot_rules").assemblage.get("composants_max", 3))
+	for iid in GameData.catalogues.items.keys():
+		var sl: Dictionary = GameData.catalogues.items[iid].get("slots", {})
+		if sl.size() > maxi_comp:
+			trop_gros.append("%s (%d)" % [str(iid), sl.size()])
+		for c in sl.values():
+			portes[str(c)] = true
+	for cid in GameData.catalogues.components.keys():
+		var a_recette := false
+		for rid in GameData.catalogues.component_recipes.keys():
+			if str(GameData.catalogues.component_recipes[rid].get("component", "")) == str(cid):
+				a_recette = true
+		if not a_recette:
+			sans_recette.append(str(cid))
+		if not portes.has(str(cid)):
+			jamais_porte.append(str(cid))
+	verifier(sans_recette.is_empty(), "chaque composant se fabrique (%d composants, %d recettes) — sans recette : %s" % [GameData.catalogues.components.size(), GameData.catalogues.component_recipes.size(), str(sans_recette)])
+	verifier(jamais_porte.is_empty(), "chaque composant est porte par au moins un objet (%s)" % str(jamais_porte))
+	verifier(trop_gros.is_empty(), "aucun objet ne depasse %d composants (%s)" % [maxi_comp, str(trop_gros)])
 	for st in ["etabli", "enclume", "scierie"]:   # l'aventurier des donjons de test n'est pas un personnage créé
 		j.sac.append(s.generer_objet("station_" + st, 1, {}, "commun", 0).uid)
 	s._donner_materiau(j, "fer", 3, "lingot")
@@ -6930,12 +6956,17 @@ func test_loot_assemble() -> void:
 	var n_ok := 0
 	for k in 12:
 		var inst := s.generer_objet("craft_epee", 3)
-		if inst.has("composants") and inst.composants.size() == 3 and GameData.catalogues.materials.has(str(inst.materiau)) and float(inst.qualite) > 0.0 and int(inst.durete_base) > 0:
+		# Le nombre de pieces etait fige a 3. L'epee en a quatre depuis qu'elle porte sa GARDE — un
+		# composant qui existait avec ses recettes et qu'aucun objet ne portait. Neuvieme test a nombre
+		# fige que je convertis : ce qui doit tenir, c'est qu'un objet assemble ait AUTANT DE PIECES QUE
+		# SA FICHE DECLARE D'EMPLACEMENTS, chacune d'une matiere reelle.
+		var slots_epee: int = (GameData.entree("items", "craft_epee").get("slots", {}) as Dictionary).size()
+		if inst.has("composants") and inst.composants.size() == slots_epee and GameData.catalogues.materials.has(str(inst.materiau)) and float(inst.qualite) > 0.0 and int(inst.durete_base) > 0:
 			n_ok += 1
 		for slot in inst.get("composants", {}).keys():
 			mats[str(inst.composants[slot].materiau)] = true
 		quals[snappedf(float(inst.qualite), 0.01)] = true
-	verifier(n_ok == 12, "12 épées de loot : tête, manche, fixations, matériau de tête, qualité, dureté (%d)" % n_ok)
+	verifier(n_ok == 12, "12 épées de loot : autant de pièces que d'emplacements déclarés, matière, qualité, dureté (%d/12)" % n_ok)
 	verifier(mats.size() >= 3 and quals.size() >= 6, "matériaux (%d) et qualités (%d) variés" % [mats.size(), quals.size()])
 	var epee := s.generer_objet("craft_epee", 1)
 	verifier(epee.composants.has("manche") and epee.composants.manche.materiau != epee.materiau or true, "le manche a son propre matériau (%s / tête %s)" % [str(epee.composants.get("manche", {}).get("materiau", "?")), str(epee.materiau)])

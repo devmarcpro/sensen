@@ -474,6 +474,49 @@ for _cn, _cd in _cats.items():
         if _st and _st not in _stations:
             probs.setdefault("29. station de sous-categorie inexistante", []).append("%s/%s -> %s" % (_cn, _sn, _st))
 
+# 30. AUCUNE LACUNE dans la chaine du craft (designer 2026-09-03 : « tous les crafts pour qu'on ait
+#     aucune lacune »). Quatre trous possibles, tous silencieux :
+#       - un emplacement d'objet que l'echelle de frequence ne couvre pas : les matieres inattendues y
+#         garderaient un poids plein, et l'echelle ne servirait a rien pour cet objet ;
+#       - une categorie ou une sous-categorie de matiere absente d'un emplacement : meme effet ;
+#       - un composant que la chaine declare mais qu'AUCUN objet ne porte — c'etaient la garde, le
+#         contrepoids et le rembourrage, avec leurs recettes et leurs traductions, invisibles en jeu ;
+#       - un composant sans recette : impossible a obtenir.
+_lr = conf("loot_rules")
+_ech = _lr.get("assemblage", {}).get("ecart_attendu", {}).get("echelle_frequence", {})
+_cles_mat = set()
+for _mid, _m in cat("materials").items():
+    _cles_mat.add(str(_m.get("category", "")))
+    if _m.get("sous_categorie"):
+        _cles_mat.add("%s/%s" % (_m.get("category"), _m.get("sous_categorie")))
+_slots_objets, _comps_objets = set(), set()
+for _iid, _it in cat("items").items():
+    for _s, _c in (_it.get("slots") or {}).items():
+        _slots_objets.add(str(_s))
+        _comps_objets.add(str(_c))
+for _s in sorted(_slots_objets):
+    if _s not in _ech:
+        probs.setdefault("30. emplacement d'objet absent de l'echelle de frequence", []).append(_s)
+        continue
+    for _c in sorted(_cles_mat):
+        if _c not in _ech[_s]:
+            probs.setdefault("30. l'echelle ne dit rien de cette matiere pour cet emplacement", []).append("%s : %s" % (_s, _c))
+# 30b. TROIS COMPOSANTS MAXIMUM par objet (designer 2026-09-03 : « non c'est trop, 3 composants max
+#      par craft »). J'avais ajoute une quatrieme piece a l'epee et a la masse en croyant combler une
+#      lacune ; la bonne reponse etait de retirer ce qui ne rentre pas, pas d'agrandir l'objet.
+_max_comp = int(conf("loot_rules").get("assemblage", {}).get("composants_max", 3))
+for _iid, _it in cat("items").items():
+    _n = len(_it.get("slots") or {})
+    if _n > _max_comp:
+        probs.setdefault("30. plus de %d composants sur un objet" % _max_comp, []).append("%s : %d" % (_iid, _n))
+
+_comps_recettes = {str(_r.get("component", "")) for _r in cat("component_recipes").values()}
+for _cid in cat("components"):
+    if str(_cid) not in _comps_objets:
+        probs.setdefault("30. composant qu'aucun objet ne porte", []).append(str(_cid))
+    if str(_cid) not in _comps_recettes:
+        probs.setdefault("30. composant sans recette : impossible a obtenir", []).append(str(_cid))
+
 for k in sorted(probs):
     print("\n== %s (%d)" % (k, len(probs[k])))
     for v in probs[k][:12]:
