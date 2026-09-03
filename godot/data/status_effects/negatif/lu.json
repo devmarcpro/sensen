@@ -1,15 +1,15 @@
 {
-  "name_key": "status.epuisement.name",
+  "name_key": "status.lu.name",
   "degats_des": null,
   "element": null,
   "periode_ticks": 10,
-  "duree_ticks": 25,
+  "duree_ticks": 40,
   "controle": false,
   "cumule": false,
   "modifiers": [
     {
-      "cible": "vigueur",
-      "bloque": true
+      "cible": "armure",
+      "mult": 0.75
     }
   ],
   "tags": [

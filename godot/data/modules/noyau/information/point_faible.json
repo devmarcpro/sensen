@@ -1,0 +1,33 @@
+{
+  "id": "point_faible",
+  "nom": "Point faible",
+  "name_key": "module.point_faible.name",
+  "module_type": "noyau",
+  "description": "on a vu où ça cède : la cible prend +35 % pendant 50 ticks",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "information"
+  ],
+  "famille": "Information",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 5,
+  "cout_mana": 0,
+  "cout_vigueur": 0,
+  "cout_sang_froid": 12,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "point_faible",
+      "duree_ticks": 50
+    }
+  },
+  "style": "ruse",
+  "stat": "perception"
+}

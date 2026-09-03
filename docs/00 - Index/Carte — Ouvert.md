@@ -6,7 +6,7 @@ statut: décidé
 etape: 0
 ---
 
-**Il ne reste aucune question bloquante.** Tout ce qui était ouvert a reçu soit une décision, soit un **défaut chiffré implémentable** — le code n'a rien à inventer. Cette carte liste ce qui reste révisable, et à quel titre. 42 notes.
+**Il ne reste aucune question bloquante.** Tout ce qui était ouvert a reçu soit une décision, soit un **défaut chiffré implémentable** — le code n'a rien à inventer. Cette carte liste ce qui reste révisable, et à quel titre. 43 notes.
 
 ## Décisions prises (le code s'appuie dessus)
 
@@ -59,3 +59,4 @@ Chacun porte une valeur chiffrée que le code applique telle quelle ; les révis
 
 ## Liens
 - **Voir aussi** : [[Sensen — Index général]], [[Vers la production]], [[Décisions fondatrices]], [[Héritage voxel — audit]]
+- [[Décision — Grille de composition des sorts]] — l'idée du 2026-09-03 : composer un sort en emboîtant des formes dans une grille, pour interdire des combinaisons sans écrire d'interdit. Rien n'est engagé.

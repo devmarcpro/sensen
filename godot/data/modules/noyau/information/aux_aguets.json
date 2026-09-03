@@ -1,0 +1,34 @@
+{
+  "id": "aux_aguets",
+  "nom": "Aux aguets",
+  "name_key": "module.aux_aguets.name",
+  "module_type": "noyau",
+  "description": "on écoute au lieu d'agir : détection ×1,6 pendant 60 ticks",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "information"
+  ],
+  "famille": "Information",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 4,
+  "cout_mana": 0,
+  "cout_vigueur": 0,
+  "cout_sang_froid": 7,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "aux_aguets",
+      "duree_ticks": 60,
+      "sur": "soi"
+    }
+  },
+  "style": "ruse",
+  "stat": "perception"
+}

@@ -2848,3 +2848,11 @@ module.coup_de_tete.name,Headbutt
 module.coup_de_genou.name,Knee strike
 module.coup_de_coude.name,Elbow strike
 module.coup_de_pied.name,Kick
+module.visee.name,Aim
+module.point_faible.name,Weak point
+module.lecture_du_geste.name,Read the guard
+module.aux_aguets.name,On watch
+status.visee.name,Aim
+status.point_faible.name,Weak point
+status.lu.name,Read
+status.aux_aguets.name,On watch

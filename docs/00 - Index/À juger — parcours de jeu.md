@@ -330,3 +330,23 @@ Trois questions restent au designer, et ce sont des questions de design, pas de 
 3. **Les 52 noyaux de volonté.** Trois monnaies ne rééquilibrent rien tant que les trois quarts du
    catalogue restent sur une seule voie. Redécouper ces 52 est le vrai travail ; la monnaie n'est
    que le cadre qui dit où les ranger.
+
+## 2026-09-03 — Le budget É2 n'est pas tenu, et ne l'a jamais été
+
+`Décision — Budgets et critères de performance tactiques` demande **un étage de donjon généré en
+moins de 100 ms**. Mesuré proprement (cinq générations à chaud, après trois tours de chauffe) :
+**153 ms au minimum, 169 de médiane, 207 au pire.**
+
+Ce n'est **pas** une régression. Vérifié dans un worktree sur le dépôt d'il y a trois heures : 132 et
+239 ms, la même dispersion. Le test passait parce qu'il mesurait une seule génération **au milieu de
+la suite complète**, quand le processus est chaud — et il rougissait dès qu'on le lançait seul. Il
+mesurait le démarrage de Godot autant que le générateur.
+
+Ce qu'on sait du coût, mesuré par `sonde_perf_generation` : l'étage fabrique **292 objets** à
+0,157 ms pièce, soit **~46 ms — un tiers du total**. Et ça rejoint une question déjà ouverte : les
+**42 coffres par étage**. Moins de coffres, c'est moins d'objets, donc un étage plus rapide *et* un
+butin qui vaut quelque chose — les deux problèmes ont peut-être la même réponse.
+
+Le test garde désormais contre l'**aggravation** (seuil à 260 ms) et dit dans son message que le
+budget n'est pas tenu. Il ne prétend plus le contraire. La décision revient au designer : optimiser
+la génération, ou desserrer le chiffre.

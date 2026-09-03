@@ -360,3 +360,26 @@ façon d'utiliser son arme ; un noyau de corps est ce qui reste quand on n'en a 
 L'endurance passe de quatre noyaux à cinq, la dextérité de six à sept. **La perception reste à deux**
 — et cette fois ce n'est plus faute de contenu à écrire, c'est que sa voie ne s'exprime pas par des
 coups. Elle attend des noyaux d'information : voir avant, viser mieux, savoir où frapper.
+
+### La perception ne frappe pas, elle sait (2026-09-03)
+
+La voie du tireur n'avait que deux noyaux, et j'ai d'abord cru que c'était faute de contenu à écrire.
+C'était faux : **sa voie ne s'exprime pas par des coups.** Un noyau de perception ne fait pas de
+dégâts — il transforme du temps passé à regarder en avantage. Quatre noyaux d'**information**, tous
+payés en sang-froid, la monnaie qui se gagne en ne bougeant pas : la boucle se referme sur elle-même.
+
+| noyau | sur | ce que ça donne | sang-froid |
+|---|---|---|---|
+| visée | soi | +2 dés pendant 40 ticks | 10 |
+| point faible | la cible | vulnérabilité ×1,35 pendant 50 ticks | 12 |
+| lecture du geste | la cible | armure ×0,75 pendant 40 ticks | 11 |
+| aux aguets | soi | détection ×1,6 pendant 60 ticks | 7 |
+
+Chacun réutilise un modificateur de statut que le moteur lisait déjà (`des`, `vulnerabilite`,
+`armure`, `detection`) : aucune ligne de simulation n'a changé. La perception passe de deux noyaux à
+six, et la sonde ne signale plus aucune voie maigre.
+
+> [!warning] Une régression du renommage, trouvée en passant
+> Le statut **Épuisement** bloque une monnaie. Sa cible disait `endurance` quand le plan dit désormais
+> `vigueur` : il ne bloquait plus rien, **sans le moindre message**. Corrigé, et un test parcourt
+> désormais tous les statuts qui bloquent une monnaie pour vérifier qu'ils en nomment une qui existe.

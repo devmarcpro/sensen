@@ -1,0 +1,33 @@
+{
+  "id": "lecture_du_geste",
+  "nom": "Lecture du geste",
+  "name_key": "module.lecture_du_geste.name",
+  "module_type": "noyau",
+  "description": "on lit la garde avant qu'elle se ferme : −25 % d'armure sur la cible",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "information"
+  ],
+  "famille": "Information",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 5,
+  "cout_mana": 0,
+  "cout_vigueur": 0,
+  "cout_sang_froid": 11,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "lu",
+      "duree_ticks": 40
+    }
+  },
+  "style": "ruse",
+  "stat": "perception"
+}
