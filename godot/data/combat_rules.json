@@ -87,7 +87,7 @@
     }
   },
   "armure": {
-    "_doc": "Armure par zone et constructions : armure_zone = dureté/4 × qualité × (1 + niv/100) × matrice ; colonne magique = facteur d'armure contre les degats magiques (type a part entiere)",
+    "_doc": "Armure par zone et constructions : armure_zone = dureté/4 × qualité × (1 + niv/100) × matrice ; colonne magique = facteur d'armure contre les degats magiques (type a part entiere) La construction `tissu` (2026-09-03) est la plus legere et la moins protectrice : elle existe pour les vetements et la tenue de mage, dont l'interet est le POIDS et l'isolation, pas l'armure.",
     "durete_div": 4,
     "degats_min": 1,
     "magie_facteur": 0.5,
@@ -120,6 +120,12 @@
         "tranchant": 1.3,
         "perforant": 1.2,
         "contondant": 0.95,
+        "magique": 0.5
+      },
+      "tissu": {
+        "tranchant": 1.45,
+        "perforant": 1.55,
+        "contondant": 1.5,
         "magique": 0.5
       }
     }

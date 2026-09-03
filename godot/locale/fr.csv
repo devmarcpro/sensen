@@ -2800,3 +2800,17 @@ slotc.contrepoids,contrepoids
 slotc.corde,corde
 slotc.doublure,doublure
 slotc.sertissure,sertissure
+item.craft_tunique.name,Tunique
+item.craft_chausses.name,Chausses
+item.craft_capuche.name,Capuche
+item.craft_manchettes.name,Manchettes
+item.craft_chaussons.name,Chaussons
+item.craft_robe.name,Robe
+item.craft_coiffe.name,Coiffe
+item.craft_etole.name,Étole
+component.etoffe.name,Étoffe
+construction.tissu.nom,tissu
+construction.matelasse.nom,matelassée
+construction.cuir.nom,cuir
+construction.mailles.nom,mailles
+construction.ecailles.nom,écailles

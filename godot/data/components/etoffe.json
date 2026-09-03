@@ -1,0 +1,14 @@
+{
+  "name_key": "component.etoffe.name",
+  "slot_type": "plaque",
+  "used_by": [
+    "tunique",
+    "robe",
+    "capuche",
+    "coiffe",
+    "chausses",
+    "manchettes",
+    "chaussons",
+    "etole"
+  ]
+}

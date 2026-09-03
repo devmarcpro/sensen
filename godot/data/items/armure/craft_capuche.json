@@ -1,0 +1,23 @@
+{
+  "name_key": "item.craft_capuche.name",
+  "type": "armure",
+  "equip_slot": "casque",
+  "hands": 0,
+  "slots": {
+    "plaque": "etoffe",
+    "sangles": "sangles",
+    "doublure": "doublure"
+  },
+  "recipe": {
+    "station": "atelier_tissage",
+    "craft_skill": "tissage"
+  },
+  "genre_grammatical": "fs",
+  "tags": [
+    "armure",
+    "assemble",
+    "vetement"
+  ],
+  "zone": "tete",
+  "construction": "tissu"
+}

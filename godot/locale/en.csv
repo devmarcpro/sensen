@@ -2791,3 +2791,17 @@ slotc.contrepoids,counterweight
 slotc.corde,cord
 slotc.doublure,lining
 slotc.sertissure,setting
+item.craft_tunique.name,Tunic
+item.craft_chausses.name,Hose
+item.craft_capuche.name,Hood
+item.craft_manchettes.name,Sleeves
+item.craft_chaussons.name,Slippers
+item.craft_robe.name,Robe
+item.craft_coiffe.name,Headdress
+item.craft_etole.name,Stole
+component.etoffe.name,Cloth panel
+construction.tissu.nom,cloth
+construction.matelasse.nom,padded
+construction.cuir.nom,leather
+construction.mailles.nom,mail
+construction.ecailles.nom,scale

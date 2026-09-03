@@ -1,0 +1,23 @@
+{
+  "name_key": "item.craft_chaussons.name",
+  "type": "armure",
+  "equip_slot": "bottes",
+  "hands": 0,
+  "slots": {
+    "plaque": "etoffe",
+    "sangles": "sangles",
+    "doublure": "doublure"
+  },
+  "recipe": {
+    "station": "atelier_tissage",
+    "craft_skill": "tissage"
+  },
+  "genre_grammatical": "mp",
+  "tags": [
+    "armure",
+    "assemble",
+    "vetement"
+  ],
+  "zone": "pieds",
+  "construction": "tissu"
+}

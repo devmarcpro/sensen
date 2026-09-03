@@ -57,6 +57,20 @@ Le **matériau reste libre dans la construction** : la construction donne le pro
 
 **Formule héritée (dés d'armure) :** voir [[Armures et poids porté]] — remplacée par la réduction plate ci-dessus, conservée pour référence.
 
+> [!success] Tranché le 2026-09-03 — **le tissu, les vêtements et la tenue de mage** (designer)
+> « Rajoute des équipements, notamment tout ce qui est vêtements, mage, etc. »
+> **Le catalogue n'avait que de l'armure** — plaque, cuir, mailles, écailles, matelassé. Rien à se mettre quand on ne part pas se battre, et rien pour un personnage qui mise sur les sorts. Alors que la **matière existait déjà** pour ça : la soie d'araignée conduit le mana à **104** pour une densité de **1**, la laine isole, le lin ne pèse rien.
+> **Une construction de plus** : `tissu`, la plus légère et la moins protectrice de la matrice (1,45 tranchant · 1,55 perforant · 1,50 contondant — plus le facteur est haut, moins l'armure vaut). Son intérêt n'est pas de protéger : c'est le **poids** et l'**isolation**.
+> **Et la pièce qui manquait pour l'habiter** : l'**étoffe**, le grand pan d'un vêtement, là où une armure a une plaque. Un vêtement se lit alors comme tout le reste — étoffe · sangles · doublure, trois pièces.
+> **Huit vêtements** : tunique, chausses, capuche, manchettes, chaussons pour l'habillement courant ; robe, coiffe, étole pour la tenue de mage. Tous se fabriquent à l'atelier de tissage.
+>
+> > [!bug] Quatre constructions sur cinq n'avaient pas de nom
+> > Trouvé par accident en ajoutant le tissu : le gabarit `nom.armure_en` = « {base} de {construction} en {matériau} » lit `construction.<c>.nom`, et **seule la plaque en avait un**. Une cuirasse de mailles s'affichait donc « Cuirasse de construction.mailles.nom en Fer ». Les cinq ont désormais leur nom.
+>
+> > [!question] Ce que je n'ai pas tranché — **l'armure doit-elle gêner les sorts ?**
+> > Aujourd'hui, non : rien ne lie ce qu'on porte au coût ou à la puissance d'un sort, et la conductivité de mana n'est lue que sur **l'arme tenue** (c'est ce que dit [[Application des stats de matériau]] : « via l'arme tenue »). Une robe de soie d'araignée n'aide donc pas encore un lanceur autrement que par son poids plume.
+> > **Deux façons de le faire, si tu le veux** : (1) étendre la formule de conductivité aux pièces portées — une ligne, mais c'est modifier une formule décidée ; (2) une pénalité de sort liée au poids de l'armure, ce qui rendrait le tissu structurant pour un mage sans toucher à l'existant. Je penche pour la (2), qui crée un vrai choix au lieu d'un bonus de plus — mais c'est ta décision, pas la mienne.
+
 ## Liens
 - **Dépend de** : [[Zones de coup par dénivelé]], [[Équipement — 14 slots]], [[Composant et recette d'obtention]], [[Qualité d'artisanat]]
 - **Alimente** : [[XP de combat]], [[Pipeline de résolution du combat]], [[Compétences — liste]]
