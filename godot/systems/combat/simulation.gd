@@ -8813,6 +8813,8 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 			EventBus.emettre(&"journal", [&"journal.second_souffle", {"nom": cible.name_key, "soin": soin}])
 	if a_talent(cible, "jauge_de_sang"):   # L'Écarlate : les dégâts subis remplissent la jauge
 		cible["sang"] = mini(int(regles.r.talents.jauge_de_sang.max), int(cible.get("sang", 0)) + degats)
+	if degats > 0:
+		_monter_aggro(cible, source, float(degats) * float(regles.r.get("ia", {}).get("aggro_par_degat", 1.0)), true)
 	EventBus.emettre(&"damage_dealt", [source, cible.id, degats, detail])
 	var att: Dictionary = entites.get(source, {})
 	if not att.is_empty() and att.controle == "joueur" and cible.camp == "civil" and "civil" in cible.get("tags", []):
@@ -10632,6 +10634,7 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 			if a_talent(x, "sans_chair") and voit_ia(e, x):
 				appliquer_statut(e, "terreur", int(regles.r.talents.sans_chair.terreur_ticks), x.id)
 				break
+	_decroitre_aggro(e)   # le temps efface : sans ca, une rencontre devient une course a travers l'etage
 	var cible := _chercher_cible(e, tick)
 	var candidates := _actions_candidates(e, cible, profil, tick)
 	var meilleure := ""
@@ -10682,6 +10685,78 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 			_attendre(e, tick)
 
 
+## L'AGGRO (designer 2026-09-03, point 77 : « rajoute du roam de l'aggro etc »). Chaque être tient une
+## table « qui m'a fait quoi » : frapper la fait monter, le temps la fait redescendre, et la cible est
+## celle qui pèse le plus — pas la plus proche. Avant, un être visait le premier ennemi visible : on
+## pouvait le cribler de flèches depuis l'ombre sans jamais devenir sa cible, et un soigneur d'arrière-
+## garde n'était jamais inquiété tant qu'un allié se tenait devant lui.
+## `alerter` propage aux camarades proches, à poids réduit : une meute réagit ENSEMBLE. C'est ce qui
+## rend un loup effrayant, et c'est ce qui donne enfin un effet au cri de ralliement, qui existait
+## comme action et ne réveillait personne.
+func _monter_aggro(e: Dictionary, source: String, valeur: float, alerter: bool) -> void:
+	if source.is_empty() or source == e.id or valeur <= 0.0 or not e.vivant:
+		return
+	var att: Dictionary = entites.get(source, {})
+	if att.is_empty() or not ennemis(e, att):
+		return
+	var ia: Dictionary = regles.r.get("ia", {})
+	var t: Dictionary = e.get("aggro", {})
+	t[source] = minf(float(t.get(source, 0.0)) + valeur, float(ia.get("aggro_max", 500.0)))
+	e["aggro"] = t
+	if not alerter:
+		return
+	var rayon := int(ia.get("aggro_rayon_alerte", 8))
+	var part := float(ia.get("aggro_part_alerte", 0.5))
+	for allie in vivants():
+		if allie.id == e.id or allie.camp != e.camp or allie.controle == "joueur":
+			continue
+		if Grille.distance(allie.pos, e.pos) > rayon:
+			continue
+		_monter_aggro(allie, source, valeur * part, false)   # un seul rebond : pas de proche en proche
+
+
+## L'aggro s'efface avec le temps : sans elle, une rencontre devient une course à travers l'étage.
+## Rendue chaque tour de décision, elle laisse un être rentrer chez lui quand plus rien ne le retient.
+func _decroitre_aggro(e: Dictionary) -> void:
+	var ia: Dictionary = regles.r.get("ia", {})
+	var d := float(ia.get("aggro_decroissance", 0.12))
+	if d <= 0.0 or not e.has("aggro"):
+		return
+	var t: Dictionary = e.aggro
+	var oubli := float(ia.get("aggro_seuil_oubli", 1.0))
+	for k in t.keys():
+		t[k] = float(t[k]) - d
+	for k in t.keys().duplicate():
+		if float(t[k]) < oubli:
+			t.erase(k)
+			if str(e.get("cible", "")) == str(k):
+				e.cible = ""   # plus rien ne le retient : il rentre
+	if t.is_empty():
+		e.erase("aggro")
+
+
+## Celui qui pèse le plus dans la table d'aggro, s'il est encore vivant ET qu'on le PERÇOIT.
+## La distinction a coûté un test avant que je la comprenne : l'aggro dit qui on VEUT, la perception
+## dit si on peut y faire quelque chose. Sans le filtre, un être gardait pour cible un joueur passé en
+## Discrétion parce qu'il l'avait vu une seconde plus tôt — et toute la furtivité tombait avec.
+## Ce que l'aggro décide, c'est LEQUEL des ennemis visibles on vise : l'archer qui vous a blessé plutôt
+## que le colosse planté devant vous. Pas de voir à travers les murs.
+func _cible_par_aggro(e: Dictionary, seulement_vus: bool = true) -> Dictionary:
+	var t: Dictionary = e.get("aggro", {})
+	var meilleur := ""
+	var poids := 0.0
+	for k in t.keys():
+		var x: Dictionary = entites.get(str(k), {})
+		if x.is_empty() or not x.vivant or not ennemis(e, x):
+			continue
+		if seulement_vus and not voit_ia(e, x):
+			continue
+		if float(t[k]) > poids:
+			poids = float(t[k])
+			meilleur = str(k)
+	return entites.get(meilleur, {})
+
+
 ## Détection : un ennemi à portée de Perception et en ligne de vue devient la cible ;
 ## la perte d'intérêt suit les seuils de Décision — Fuite et désengagement.
 func _chercher_cible(e: Dictionary, tick: int) -> Dictionary:
@@ -10705,16 +10780,24 @@ func _chercher_cible(e: Dictionary, tick: int) -> Dictionary:
 				e.cible = ""   # semée : la cible s'est dérobée assez longtemps (Discrétion, nuit, obstacle)
 			if Grille.distance(e.pos, e.ancre) > int(regles.r.engagement.ia_distance_ancre):
 				e.cible = ""
+	# Voir un ennemi met un peu d'aggro sur lui : c'est ce qui remplace « le plus proche visible ». Un
+	# tireur embusque monte alors dans la table de sa victime par ses DEGATS, meme sans etre vu, la ou
+	# l'ancienne regle le laissait tranquille tant qu'un allie se tenait devant elle (point 77).
+	var ia_agg: Dictionary = regles.r.get("ia", {})
+	for vu in vivants():
+		if ennemis(e, vu) and voit_ia(e, vu):
+			_monter_aggro(e, str(vu.id), float(ia_agg.get("aggro_par_vue", 2.0)), false)
 	if e.cible.is_empty():
-		var meilleure := {}
-		var dmin := 1 << 30
-		for autre in vivants():
-			if not ennemis(e, autre):
-				continue
-			var d := Grille.distance(e.pos, autre.pos)
-			if d < dmin and voit_ia(e, autre):
-				dmin = d
-				meilleure = autre
+		var meilleure: Dictionary = _cible_par_aggro(e)
+		if meilleure.is_empty():
+			var dmin := 1 << 30
+			for autre in vivants():
+				if not ennemis(e, autre):
+					continue
+				var d := Grille.distance(e.pos, autre.pos)
+				if d < dmin and voit_ia(e, autre):
+					dmin = d
+					meilleure = autre
 		if not meilleure.is_empty():
 			e.cible = meilleure.id
 			e.tick_derniere_vue = tick
@@ -10949,11 +11032,34 @@ func _ia_pas_routine(e: Dictionary, cible: Vector2i, tick: int) -> void:
 
 ## Errer : un pas au hasard sur une case libre, sans s'éloigner de plus de 12 tuiles de l'ancrage.
 func _ia_errer(e: Dictionary, tick: int) -> void:
+	# On tirait une case ADJACENTE au hasard a chaque tick. Une marche au hasard ne s'eloigne que d'une
+	# dizaine de tuiles en cent pas : un etre ne se promenait pas, il TREMBLAIT SUR PLACE — un garde ne
+	# quittait jamais sa salle, un cerf ne traversait jamais sa clairiere (designer 2026-09-03, point 77).
+	# Il a maintenant un BUT : il le rejoint par le chemin, souffle en arrivant, puis en choisit un autre.
+	var ia: Dictionary = regles.r.get("ia", {})
+	var but: Vector2i = e.get("but_roam", Vector2i(-9999, -9999))
+	if int(e.get("roam_pause", 0)) > tick:
+		_attendre(e, tick)
+		return
+	if but.x > -9000 and e.pos != but and grille.dans(but) and not grille.bloque_passage(but):
+		_ia_pas_vers(e, but, tick, "")
+		return
+	if but.x > -9000 and e.pos == but:   # arrive : on souffle, comme une bete qui broute ou un garde qui veille
+		e["roam_pause"] = tick + int(ia.get("roam_pause_ticks", 12))
+		e.erase("but_roam")
+		_attendre(e, tick)
+		return
 	var rng := RandomNumberGenerator.new()
-	rng.seed = hash([graine, e.id, tick])
-	var d: Vector2i = Grille.DIRS[rng.randi_range(0, Grille.DIRS.size() - 1)]
-	var q: Vector2i = e.pos + d
-	if grille.dans(q) and not grille.bloque_passage(q) and grille.occupant(q).is_empty() and Grille.distance(q, e.ancre) <= 12 and _deplacer(e, q, tick):
+	rng.seed = hash([graine, e.id, tick, "roam"])
+	var rayon := int(ia.get("roam_rayon", 14))
+	for essai in int(ia.get("roam_essais", 12)):
+		var q: Vector2i = e.ancre + Vector2i(rng.randi_range(-rayon, rayon), rng.randi_range(-rayon, rayon))
+		if not grille.dans(q) or grille.bloque_passage(q) or not grille.occupant(q).is_empty() or q == e.pos:
+			continue
+		if grille.chemin(e.pos, q, Etres.est_volant(e), "", refuse_nage(e)).is_empty():
+			continue   # un but injoignable fait pietiner : on en cherche un autre plutot que de s'entêter
+		e["but_roam"] = q
+		_ia_pas_vers(e, q, tick, "")
 		return
 	_attendre(e, tick)
 

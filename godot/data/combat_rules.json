@@ -183,11 +183,21 @@
     "portee_min": 1
   },
   "ia": {
-    "_doc": "IA des créatures : ticks_entre_decisions (une décision tous les 10 ticks) ; types d'ennemis (2026-08-30) : soin_seuil = fraction de PV sous laquelle un soigneur soigne un allié ; reculer_distance = un tireur recule si la cible est à cette distance ou moins ; guet_distance = un embusqueur attend tant que la cible est plus loin. (Une clé « ia » dupliquée écrasait ces trois réglages jusqu'au 2026-08-31.)",
+    "_doc": "IA des creatures. DECISION : ticks_entre_decisions (une decision tous les 10 ticks) ; types d'ennemis (2026-08-30) : soin_seuil = fraction de PV sous laquelle un soigneur soigne un allie ; reculer_distance = un tireur recule si la cible est a cette distance ou moins ; guet_distance = un embusqueur attend tant que la cible est plus loin. ROAM et AGGRO (designer 2026-09-03) : un etre qui erre choisit un BUT dans son rayon et y va, au lieu de tirer une case adjacente au hasard a chaque tick — une marche au hasard ne s'eloigne que d'une dizaine de tuiles en cent pas, si bien que personne n'allait nulle part ; arrive, il souffle roam_pause_ticks. Chaque etre tient une table d'aggro « qui m'a fait quoi » et vise celle qui pese le plus, pas la plus proche : frapper monte de aggro_par_degat x degats, voir un ennemi de aggro_par_vue ; elle decroit de aggro_decroissance par tick et sous aggro_seuil_oubli l'etre rentre ; elle se transmet aux allies dans aggro_rayon_alerte a aggro_part_alerte de sa valeur. (Une cle « ia » dupliquee a ecrase les reglages de decision le 2026-08-31 ; la meme faute a ete refaite le 2026-09-03 en REMPLACANT le bloc au lieu de l'etendre — ce bloc se fusionne, il ne se reecrit pas.)",
     "ticks_entre_decisions": 10,
     "soin_seuil": 0.7,
     "reculer_distance": 1,
-    "guet_distance": 3
+    "guet_distance": 3,
+    "roam_rayon": 14,
+    "roam_pause_ticks": 12,
+    "roam_essais": 12,
+    "aggro_par_degat": 1.0,
+    "aggro_par_vue": 2.0,
+    "aggro_decroissance": 0.12,
+    "aggro_seuil_oubli": 1.0,
+    "aggro_rayon_alerte": 8,
+    "aggro_part_alerte": 0.5,
+    "aggro_max": 500.0
   },
   "anti_stunlock": {
     "_doc": "Statuts de contrôle et anti-stunlock : aucun contrôle dur > 20 ticks, pas de réapplication dans les 50 ticks suivant la fin",
@@ -229,15 +239,46 @@
   },
   "paliers_materiaux": {
     "_doc": "Paliers de materiau (designer 2026-09-02) : chaque fiche de materiau porte un `palier` 1..5, pose par tools/poser_paliers.py. Le palier commande TROIS choses a la fois — ou le materiau tombe (profondeur_min), ce qu'il vaut une fois assemble (mult_stats, applique aux stats de l'objet), et ce qu'il coute a extraire (extraction_ticks multiplie les ticks de recolte, outil_min multiplie le seuil de durete d'outil exige). Un materiau de fin de partie ne se ramasse donc pas a la pioche de depart, meme si on le trouve.",
-    "1": { "profondeur_min": 0, "mult_stats": 1.0, "extraction_ticks": 1.0, "outil_min": 1.0 },
-    "2": { "profondeur_min": 2, "mult_stats": 1.15, "extraction_ticks": 1.3, "outil_min": 1.1 },
-    "3": { "profondeur_min": 5, "mult_stats": 1.35, "extraction_ticks": 1.7, "outil_min": 1.25 },
-    "4": { "profondeur_min": 9, "mult_stats": 1.6, "extraction_ticks": 2.2, "outil_min": 1.45 },
-    "5": { "profondeur_min": 14, "mult_stats": 2.0, "extraction_ticks": 3.0, "outil_min": 1.7 }
+    "1": {
+      "profondeur_min": 0,
+      "mult_stats": 1.0,
+      "extraction_ticks": 1.0,
+      "outil_min": 1.0
+    },
+    "2": {
+      "profondeur_min": 2,
+      "mult_stats": 1.15,
+      "extraction_ticks": 1.3,
+      "outil_min": 1.1
+    },
+    "3": {
+      "profondeur_min": 5,
+      "mult_stats": 1.35,
+      "extraction_ticks": 1.7,
+      "outil_min": 1.25
+    },
+    "4": {
+      "profondeur_min": 9,
+      "mult_stats": 1.6,
+      "extraction_ticks": 2.2,
+      "outil_min": 1.45
+    },
+    "5": {
+      "profondeur_min": 14,
+      "mult_stats": 2.0,
+      "extraction_ticks": 3.0,
+      "outil_min": 1.7
+    }
   },
   "mort": {
     "_doc": "Mort et pénalité : respawn, −perte_or de l'or porté, équipement et XP conservés ; les objets tombes periment apres peremption_jours. Depuis le 2026-09-02 (designer) UN SEUL JET decide de la part du sac qui tombe : perte_sac_faces donne les faces du de, equiprobables — rien, un quart, la moitie, trois quarts, tout.",
-    "perte_sac_faces": [0.0, 0.25, 0.5, 0.75, 1.0],
+    "perte_sac_faces": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
     "perte_or": 0.1,
     "peremption_jours": 1
   },

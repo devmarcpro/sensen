@@ -95,6 +95,37 @@ Morphologies (12) : les volants ignorent les contraintes de dénivelé
 >
 > **Ce que mesure la sonde** (`res://scenes/tests/sonde_faune.tscn`) : d'abord que chaque bête s'instancie — une action inconnue ou un squelette absent s'y voit, pas en jeu ; ensuite la part de paisible dans le **tirage pondéré** de chaque biome, jour et nuit, qui est ce qu'un joueur rencontre vraiment et non ce que la liste des fiches laisse croire. Elle échoue si un biome descend sous 15 % de paisible, sauf les deux corrompus où c'est le propos.
 
+> [!success] Tranché le 2026-09-03 — **du roam et de l'aggro** (designer)
+> « Retravaille les IA PNJ hostile comme pacifique, rajoute du roam de l'aggro etc. »
+> **L'architecture n'est pas en cause.** Quatorze profils, chacun fait de considérations pondérées — `attaquer`, `fuir`, `errer`, `retour`, `attendre` — et le meilleur score l'emporte. C'est la bonne forme. Ce qui manque, ce sont trois comportements que ces considérations ne savent pas exprimer :
+>
+> **1. Le roam n'a pas de destination.** `_ia_errer` tire une case adjacente au hasard à chaque tick, bornée à douze tuiles de l'ancre. Un être ne se promène donc pas : il **tremble sur place**. Sur cent ticks, une marche au hasard s'éloigne en moyenne de dix tuiles de son point de départ — autant dire qu'un garde reste dans sa salle et qu'un cerf ne traverse jamais une clairière. Un donjon est une collection d'êtres plantés qui attendent qu'on entre.
+> **Ce qu'on met à la place** : un **but**. L'être choisit une destination dans son rayon de roam, y va par le chemin, s'arrête un moment en arrivant, puis en choisit une autre. Le mouvement devient lisible — on voit quelqu'un *aller quelque part*.
+>
+> **2. L'aggro n'existe pas comme notion.** Un être attaque ce qui est à portée. Il ne se souvient pas de qui l'a frappé : tirer une flèche depuis l'ombre ne désigne pas le tireur. Il ne transmet rien : `cri_de_ralliement` et `hurlement` existent comme **actions** et ne réveillent personne. Et il ne désengage jamais vraiment — seuls une distance à l'ancre et un compteur de ticks sans vue le ramènent.
+> **Ce qu'on met à la place** : une **table d'aggro** par être — qui m'a fait quoi, et combien. Frapper en monte, soigner l'ennemi en monte, le temps la fait redescendre. La cible est celle qui pèse le plus, pas la plus proche.
+>
+> **3. Le pacifique ne fait rien de pacifique.** `proie` et `fuyard` fuient le joueur, et c'est tout leur répertoire. Rien ne broute, ne dort, ne va boire. Les vingt-huit espèces paisibles ajoutées le 2026-09-03 sont vivantes au sens statistique et immobiles au sens visuel.
+>
+> **Les trois hypothèses que je pose, faute d'arbitrage — chacune est un chiffre ou une ligne :**
+> - **l'aggro se transmet** aux alliés proches, dans un rayon, et à poids réduit. Une meute qui réagit ensemble est ce qui rend un loup effrayant ; sinon on les tue un par un pendant que les autres regardent. C'est aussi ce qui donne enfin un effet au cri de ralliement ;
+> - **on désengage** : l'aggro décroît à chaque tick, et quand elle tombe sous un seuil l'être rentre. Poursuivre indéfiniment transforme chaque rencontre en course à travers l'étage ;
+> - **le roam est une marche vers un but tiré au hasard**, pas une patrouille sur un chemin fixe. Les donjons sont générés et personne n'y a tracé de rondes ; une patrouille demanderait des points de passage écrits à la main dans chaque salle.
+
+> [!check] Rendu le 2026-09-03 — **le roam mène quelque part, l'aggro désigne qui a frappé**
+> Mesuré par `res://scenes/tests/sonde_ia.tscn` :
+> - **roam** : huit êtres, cent tours d'errance — **10,3 tuiles** d'éloignement moyen de leur point de départ, 14 pour le plus loin. L'ancienne marche au hasard, bornée à douze tuiles, tremblait sur place ;
+> - **aggro** : un loup frappé de loin par le joueur **le vise, lui**, alors qu'un autre ennemi se tient à une tuile ;
+> - **alerte** : un loup voisin monte à 10 d'aggro sur le joueur **sans avoir été touché**. Un seul rebond, pas de proche en proche : un étage entier ne se lève pas d'un coup ;
+> - **oubli** : 60 d'aggro, puis 0 après deux mille tours. C'est ce qui permet de désengager.
+>
+> > [!warning] La distinction qui m'a coûté deux tests avant que je la comprenne
+> > **L'aggro dit qui on VEUT ; la perception dit si on peut y faire quelque chose.** Ma première version prenait pour cible celui qui pesait le plus dans la table, sans vérifier qu'on le voyait — et un être gardait donc pour cible un joueur passé en Discrétion parce qu'il l'avait aperçu une seconde plus tôt. **Toute la furtivité tombait avec.** L'aggro décide LEQUEL des ennemis visibles on vise — l'archer qui vous a blessé plutôt que le colosse planté devant vous — et non pas de voir à travers les murs.
+> > C'est la suite de tests qui l'a dit, avec deux échecs nets (« discret : le loup ne le voit pas, pas de cible » et « semé en Discrétion »). Sans eux, j'aurais livré une aggro qui annule une mécanique entière sans que rien ne le signale.
+>
+> > [!bug] Et une faute que la documentation a rattrapée
+> > En ajoutant les réglages d'aggro, j'ai **remplacé** le bloc `ia` des règles au lieu de l'étendre : `ticks_entre_decisions`, `soin_seuil`, `reculer_distance` et `guet_distance` ont disparu — de quoi faire qu'un soigneur ne soigne plus, qu'un tireur ne recule plus et qu'un embusqueur ne guette plus, en silence. Ce qui m'a sauvé, c'est que le `_doc` du bloc **racontait que ça s'était déjà produit** le 2026-08-31, une clé dupliquée ayant écrasé ces trois mêmes réglages. Restauré, comparé valeur par valeur, et le `_doc` dit maintenant que ce bloc **se fusionne, il ne se réécrit pas**.
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Data-driven design]], [[Boucle de tick]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[LOD de simulation]], [[Compagnons]], [[Raids et menaces]], [[Lois et infractions]], [[Minimap et brouillard de guerre]]
