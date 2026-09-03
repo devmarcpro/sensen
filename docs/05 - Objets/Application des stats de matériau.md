@@ -42,6 +42,24 @@ Transparence : transparence >= 50 → la tuile laisse passer lumière et
 
 **Usage par la météo ([[Météo]]) :** l'isolation contre la température ressentie, la conductivité électrique pour le ciblage de la foudre (paratonnerre émergent), la flammabilité pour l'ignition spontanée en canicule et l'arrachage des blocs `durete <= 3` en tempête.
 
+> [!bug] Rattrapé le 2026-09-03 — **six des treize stats étaient décoratives** (designer)
+> « Pour l'arc, les stats devraient être affectées par l'élasticité, tu ne penses pas ? » — puis, sur ma première réponse : « t'es sûr que les autres 9 stats sont vraiment utilisées ? »
+> **Non.** Cette note donne une formule pour chacune des treize stats, elle est datée et marquée décidée, et **le code n'en lisait que sept**. Une stat qu'on affiche sur la fiche d'un matériau et que rien ne lit est une promesse en l'air : le joueur compare deux bois par leur élasticité et choisit celui qui ne changera rien.
+>
+> | stat | ce que la note promet | l'état avant le 2026-09-03 |
+> |---|---|---|
+> | `elasticite` | `degats *= (0.8 + elasticite / 250)` pour l'arc, amortissement des chutes | **jamais lue** |
+> | `friction` | vitesse au sol `*= (0.85 + friction × 0.003)` | **jamais lue** |
+> | `conductivite_mana` | coût du sort `*= (1 - conductivite / 140)` | **jamais lue** |
+> | `luminosite` | lumière émise | lue **sur l'objet**, jamais sur la matière — une lampe taillée dans une matière lumineuse ne brillait pas |
+> | `transparence` | `>= 50` laisse passer lumière et regard | lue **sur le contenu de tuile**, jamais sur la matière — un mur de verre arrêtait la lumière comme du granit |
+> | `flottabilite` | véhicule naval si moyenne ≥ 50 | jamais lue — **et c'est normal** : il n'y a pas de bateau |
+>
+> Les cinq premières sont branchées, avec les formules **exactement telles que la note les donne** ; les constantes vivent dans `combat_rules.stats_materiau`. Écart mesuré sur l'arc : de la matière la plus raide à la plus élastique, **×1,46** sur les dégâts.
+>
+> > [!warning] Et ma première vérification était fausse elle aussi
+> > La sonde que j'avais écrite portait la liste des stats « lues » **tapée à la main**. Elle annonçait douze sur treize, et c'est le designer qui a demandé si j'en étais sûr. Deux de plus ne servaient à rien. La sonde **cherche désormais dans le code source** — `stats.get("<stat>")` et ses variantes — et croit ce qu'elle trouve. C'est la huitième fois de la journée qu'une liste écrite à la main ment ; celle-ci, je ne l'avais pas vue venir alors que je venais d'écrire la règle dans l'AGENT.md.
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Stats d'un objet crafté]]
 - **Alimente** : [[Mana]], [[Armure par zone et constructions]], [[Météo]], [[Éclairage]], [[Agriculture et élevage]], [[Véhicules]], [[Eau et liquides]]

@@ -217,13 +217,32 @@ func cout_pas(de: Vector2i, vers: Vector2i, volant: bool = false, eviter_nage: b
 	if dh >= int(dep["falaise_delta"]) or dh <= -int(dep["chute_delta"]):
 		return -1
 	var sur := int(dep.get("neige_surcout", 1)) if neige else 0   # Météo : la neige ralentit
+	var brut := base + sur
 	if dh == 2:
-		return int(dep["montee_2"]) + sur
-	if dh == 1:
-		return int(dep["montee_1"]) + sur
-	if dh < 0:
-		return int(dep["descente"]) + sur
-	return base + sur
+		brut = int(dep["montee_2"]) + sur
+	elif dh == 1:
+		brut = int(dep["montee_1"]) + sur
+	elif dh < 0:
+		brut = int(dep["descente"]) + sur
+	# La FRICTION du sol change la vitesse : x (0,85 + friction x 0,003), bornée [0,85 ; 1,15]
+	# (« Application des stats de matériau »). Une des quatre stats de matière que le code n'avait
+	# jamais lues : la glace à friction 0 fait glisser, les pavés à 100 donnent quinze pour cent.
+	# Le coût en ticks est l'INVERSE de la vitesse — aller plus vite, c'est payer moins.
+	return maxi(1, int(round(float(brut) / _mult_friction(vers))))
+
+
+## Le multiplicateur de vitesse du sol d'une tuile, borné. Sans matériau connu, rien ne change.
+func _mult_friction(t: Vector2i) -> float:
+	var sm: Dictionary = GameData.config("combat_rules").get("stats_materiau", {})
+	if sm.is_empty():
+		return 1.0
+	var mid := str(sols.get(idx(t), materiau_defaut))
+	var m: Dictionary = GameData.catalogues.materials.get(mid, {})
+	if m.is_empty():
+		return 1.0
+	var f := float(m.get("stats", {}).get("friction", 50.0))
+	return clampf(float(sm.get("friction_base", 0.85)) + f * float(sm.get("friction_par_point", 0.003)),
+		float(sm.get("friction_min", 0.85)), float(sm.get("friction_max", 1.15)))
 
 
 ## Une chute (descente ≥ chute_delta) est autorisée en un pas volontaire : dégâts = (niveaux − franchise) × 5.

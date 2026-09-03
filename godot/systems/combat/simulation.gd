@@ -8141,7 +8141,12 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	gagner_xp(e, "athletisme", 1)
 	EventBus.emettre(&"journal", [&"journal.deplacement", {"nom": e.name_key, "cout": e.compteur - tick}])
 	if chute > 0:
-		var d := grille.degats_chute(chute)
+		# Le SOL qui recoit amortit : degats x (1 - elasticite / 150). Tomber sur de la tourbe ou du
+		# caoutchouc n'est pas tomber sur du granit — la note le disait, le code l'ignorait.
+		var sm_c: Dictionary = regles.r.get("stats_materiau", {})
+		var mat_sol: Dictionary = GameData.catalogues.materials.get(str(grille.sols.get(grille.idx(vers), grille.materiau_defaut)), {})
+		var amorti := 1.0 - float(mat_sol.get("stats", {}).get("elasticite", 0.0)) / float(sm_c.get("chute_elasticite_div", 150.0))
+		var d := maxi(0, roundi(float(grille.degats_chute(chute)) * clampf(amorti, 0.0, 1.0)))
 		EventBus.emettre(&"journal", [&"journal.chute", {"nom": e.name_key, "niveaux": chute, "degats": d}])
 		_appliquer_degats(e, d, "", {"chute": true})
 	# De vrais escaliers (Génération de donjon, designer 2026-08-31) : marcher dessus change d'étage.
@@ -8381,7 +8386,16 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 	var plat := int(e.get("degats_element", {}).get(dom, 0))
 	for el_h in e.get("degats_element_bonus", {}).keys():   # Nourriture : l'huile d'arme, le temps d'un combat —
 		plat += des.jet(str(e.degats_element_bonus[el_h]))   # ses dés s'ajoutent quel que soit l'élément de l'arme
-	var res := _resoudre_coup(e, cible, (d.bruts + float(plat)) * wx.total * float(ax.mult) * mult_coup * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur, float(ax.ignore_armure))
+	# L'ELASTICITE fait la puissance d'un arc (« Application des stats de materiau » : degats x (0,8 +
+	# elasticite / 250)). La note le decidait depuis longtemps et le code ne l'avait jamais lue : sur les
+	# treize stats de matiere, quatre ne servaient a rien. Un arc d'if — elastique — vaut desormais
+	# nettement plus qu'un arc de pierre, ce que tout le monde attend d'un arc.
+	var mult_elastique := 1.0
+	if est_projectile(fonct) or est_jet(fonct):
+		var sm: Dictionary = regles.r.get("stats_materiau", {})
+		var elas := float(arme.get("stats", {}).get("elasticite", 0.0))
+		mult_elastique = float(sm.get("arc_elasticite_base", 0.8)) + elas / float(sm.get("arc_elasticite_div", 250.0))
+	var res := _resoudre_coup(e, cible, (d.bruts + float(plat)) * wx.total * float(ax.mult) * mult_coup * mult_elastique * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur, float(ax.ignore_armure))
 	res.merge(wx)
 	res["competence"] = str(fonct.get("combat_skill", ""))
 	var cle := &"journal.attaque_lourde" if lourde else &"journal.attaque"
@@ -9873,7 +9887,17 @@ func _payer(e: Dictionary, plan: Dictionary) -> void:
 		"mana":
 			# Le focus tenu peut rendre le sort moins cher (`cout_mana_mult`) : c'est la specificite du
 			# talisman, qui ne frappe pas plus fort mais permet de lancer plus souvent.
-			var cout := roundi(float(plan.ressource) * mult_mana_lieu(e, plan) * mult_mana_sources(e) * float(plan.get("cout_mana_mult_arme", 1.0)))
+			# La CONDUCTIVITE DE MANA de la matiere tenue reduit le cout : cout x (1 - conductivite / 140).
+			# La note « Application des stats de materiau » le decidait — « le choix de la gemme du baton
+			# devient structurant » — et le code ne lisait pas cette stat du tout. C'est la version
+			# MATIERE de ce que j'avais ajoute une heure plus tot au niveau de la fonctionnalite
+			# (`cout_mana_mult`, la signature du talisman) : les deux se cumulent, l'archetype et la
+			# matiere, et c'est ce qui rend un talisman d'opale different d'un talisman de plomb.
+			var sm_m: Dictionary = regles.r.get("stats_materiau", {})
+			var arme_m: Dictionary = Etres.arme(e, items)
+			var cond := float(arme_m.get("stats", {}).get("conductivite_mana", 0.0))
+			var mult_cond := clampf(1.0 - cond / float(sm_m.get("mana_conductivite_div", 140.0)), 0.2, 1.0)
+			var cout := roundi(float(plan.ressource) * mult_mana_lieu(e, plan) * mult_mana_sources(e) * float(plan.get("cout_mana_mult_arme", 1.0)) * mult_cond)
 			var deficit: int = maxi(0, cout - int(e.mana))
 			e.mana = maxi(0, int(e.mana) - cout)
 			if deficit > 0:
@@ -10933,9 +10957,17 @@ func _actions_candidates(e: Dictionary, cible: Dictionary, profil: Dictionary, t
 
 ## La lumière qu'un être porte (Éclairage) : le plus lumineux de ses objets en main, 0-100.
 func lumiere_de(e: Dictionary) -> int:
+	# La LUMINOSITE DE LA MATIERE compte autant que celle de la fiche. On ne lisait que le champ
+	# `luminosite` pose a la main sur l'objet — la torche a 70 — et jamais `stats.luminosite`, qui
+	# vient des matieres assemblees. Une lampe taillee dans une matiere lumineuse ne brillait donc pas,
+	# alors que la fiche du materiau annonce une luminosite. Une stat qu'on montre au joueur et que
+	# rien ne lit est une promesse en l'air (designer 2026-09-03 : « t'es sur que les autres 9 stats
+	# sont vraiment utilisees ? » — non, et voici les deux qui ne l'etaient pas).
 	var lum := 0
 	for slot in ["main_principale", "main_secondaire"]:
-		lum = maxi(lum, int(items.get(e.get("equipement", {}).get(slot, ""), {}).get("luminosite", 0)))
+		var it: Dictionary = items.get(e.get("equipement", {}).get(slot, ""), {})
+		lum = maxi(lum, int(it.get("luminosite", 0)))
+		lum = maxi(lum, int(float(it.get("stats", {}).get("luminosite", 0.0))))
 	return lum
 
 
@@ -10979,8 +11011,14 @@ func _recalculer_lumiere() -> void:
 			continue
 		var p := grille.pos_de(gi)
 		var c := grille.contenu_de(p)
-		if c.get("bloque_vue", false) and int(c.get("transparence", 0)) < 50 and not grille.meubles.has(gi):
-			continue   # un mur est éclairé mais ne laisse rien passer
+		# La TRANSPARENCE DE LA MATIERE ouvre le mur : « transparence >= 50 -> la tuile laisse passer
+		# lumiere et regard (fenetres, serres) » (Application des stats de materiau). On ne lisait que
+		# la transparence du CONTENU de tuile, jamais celle de la matiere — un mur de verre arretait
+		# donc la lumiere exactement comme un mur de granit.
+		var seuil_t := int(GameData.config("combat_rules").get("stats_materiau", {}).get("transparence_seuil", 50))
+		var trans_mat := int(float(GameData.catalogues.materials.get(grille.materiau_de(p), {}).get("stats", {}).get("transparence", 0.0)))
+		if c.get("bloque_vue", false) and int(c.get("transparence", 0)) < seuil_t and trans_mat < seuil_t and not grille.meubles.has(gi):
+			continue   # un mur est éclairé mais ne laisse rien passer — sauf s'il est de verre
 		for d in Grille.DIRS:
 			var q: Vector2i = p + d
 			if not grille.dans(q):

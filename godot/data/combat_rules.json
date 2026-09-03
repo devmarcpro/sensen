@@ -1311,5 +1311,17 @@
     "cout_par_portee": 2,
     "cout_par_taille": 3,
     "cout_min": 1
+  },
+  "stats_materiau": {
+    "_doc": "Application des stats de materiau (note « Application des stats de materiau », decidee de longue date, JAMAIS implementee jusqu'au 2026-09-03). Quatre des treize stats ne servaient a rien dans le code : elasticite, friction, conductivite_mana et flottabilite. Les trois premieres ont ici leur formule, telle que la note la donne. La flottabilite attend les vehicules navals.",
+    "arc_elasticite_base": 0.8,
+    "arc_elasticite_div": 250.0,
+    "chute_elasticite_div": 150.0,
+    "friction_base": 0.85,
+    "friction_par_point": 0.003,
+    "friction_min": 0.85,
+    "friction_max": 1.15,
+    "mana_conductivite_div": 140.0,
+    "transparence_seuil": 50
   }
 }
