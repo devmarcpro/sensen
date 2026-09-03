@@ -32,13 +32,36 @@ func _init(p_salles: Dictionary, p_connecteurs: Dictionary, p_theme: Dictionary)
 
 ## Génère un étage : {largeur, hauteur, hauteurs, murs, sol, bord, pieces: [{id, kind, rect, attaches}],
 ##  entree (escalier montant), escalier (descendant, null au dernier), boss, spawns, coffres, graphe}.
-## La puissance d'un etre, telle qu'on peut la lire sur sa fiche : ce qu'il porte de force et
-## d'endurance, sa vitesse pour moitie, et un bonus par action speciale — un troll ne fait pas que
-## frapper fort, il a des tours dans son sac. Sert a decider quel etage peut l'accueillir.
+## La puissance d'un etre : ce qu'il porte de force et d'endurance, sa vitesse pour moitie, un bonus
+## par action speciale — un troll ne fait pas que frapper fort, il a des tours dans son sac — ET CE
+## QU'IL PORTE VRAIMENT, arme et armure. Sert a decider quel etage peut l'accueillir.
+##
+## L'equipement manquait, et c'etait le trou par lequel passait tout le probleme du premier etage :
+## un bandit en cuirasse avec une epee marquait exactement le meme score qu'un bandit a mains nues.
+## Mesure du 2026-09-03 : sur la graine 73, le robot equipe mourait TROIS fois a l'etage 1 la ou la
+## note du 2026-08-31 le voyait descendre quatre etages — et le meme robot sans sorts, sur la meme
+## graine, en descendait deux. Ce n'etait ni l'aggro (verifie en la coupant : resultat identique),
+## ni une regression recente (verifie sur le tag v0.4.1) : c'etait cette formule.
+## Le bandit passe ainsi de 25 a 42 et quitte l'etage 1, dont le plafond est 26.
+##
+## Une arme vaut ses degats par tick ; une piece d'armure vaut un forfait, parce que sa vraie valeur
+## depend du materiau, decide a l'instanciation et donc inconnu au moment du peuplement.
 static func puissance_creature(c: Dictionary, bonus_action: float) -> float:
 	var st: Dictionary = c.get("corps", {}).get("stats", {})
-	return float(st.get("force", 5)) + float(st.get("endurance", 5)) + float(st.get("dexterite", 5)) * 0.5 \
+	var p := float(st.get("force", 5)) + float(st.get("endurance", 5)) + float(st.get("dexterite", 5)) * 0.5 \
 		+ float((c.get("actions", []) as Array).size()) * bonus_action
+	var pe: Dictionary = GameData.config("combat_rules").get("peuplement_etage", {})
+	for iid in c.get("equipement", []):
+		var it: Dictionary = GameData.catalogues.items.get(str(iid), {})
+		if it.is_empty():
+			continue
+		var fo: Dictionary = GameData.catalogues.functionalities.get(str(it.get("functionality", "")), {})
+		if str(fo.get("kind", "")) == "arme":
+			var fr := Des.fourchette(str(fo.get("degats_des", "1d1")))
+			p += float(fr.x + fr.y) * 0.5 * float(fo.get("vitesse_base", 1.0)) * float(pe.get("poids_arme", 1.0))
+		else:
+			p += float(pe.get("bonus_par_piece", 3.0))
+	return p
 
 
 func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dernier: bool, taille: int = -1) -> Dictionary:

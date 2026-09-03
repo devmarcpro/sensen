@@ -69,6 +69,32 @@ func _ready() -> void:
 	print("javelots au sol de la meme matiere : %d" % meme)
 	if meme < 3:
 		soucis.append("  le javelot ramasse n'a pas la matiere de celui qu'on a lance")
+	# 4. et le chemin que prend VRAIMENT le joueur : `_attaquer`, pas `_frapper_arme`. Une arme dont la
+	# mecanique marche mais que l'interface ne sait pas declencher n'est pas livree. La zone morte doit
+	# refuser le contact, et la portee doit accepter la distance.
+	var arme2: Dictionary = s.generer_objet("craft_javelot", 3, {}, "commun", 0)
+	arme2["quantite"] = 4
+	j.sac.append(str(arme2.uid))
+	j.equipement["main_principale"] = str(arme2.uid)
+	var colle := {}
+	for d in Grille.DIRS:
+		var q: Vector2i = j.pos + d
+		if s.grille.dans(q) and not s.grille.bloque_passage(q) and s.grille.occupant(q).is_empty():
+			colle = s.ajouter("loup", q, "ia")
+			break
+	if not colle.is_empty():
+		j.compteur = 0
+		var au_contact: bool = s._attaquer_arme(j, colle, false, 0)
+		print("au contact (zone morte) : %s" % ("le javelot part — la zone morte ne tient pas" if au_contact else "refuse, comme prevu"))
+		if au_contact:
+			soucis.append("  le javelot frappe au contact : sa zone morte de 2 tuiles ne tient pas")
+	j.compteur = 0
+	cible.sante = int(cible.sante_max)
+	cible.vivant = true
+	var a_distance: bool = s._attaquer_arme(j, cible, false, 0)
+	print("a %d tuiles : %s" % [Grille.distance(j.pos, cible.pos), "le javelot part" if a_distance else "REFUSE — l'arme est injouable"])
+	if not a_distance:
+		soucis.append("  le javelot ne part pas a portee : l'arme existe mais ne se joue pas")
 	for x in soucis:
 		print(x)
 	if not soucis.is_empty():

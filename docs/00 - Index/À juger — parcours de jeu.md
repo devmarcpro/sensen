@@ -234,3 +234,22 @@ Un callout daté dans la note liée (`> [!success] Tranché le <date>`) — la b
 > Mesuré : pistolet **9,4** dégâts par tick, arc **10,5**. Le pistolet a une portée moindre (12 contre 25) et demande de la poudre. Sa seule supériorité est son critique large (18 contre 20), ce qui ne compense pas.
 > **La question de design derrière** : est-ce que le pistolet doit être une arme **rare et brutale** — auquel cas ses dés devraient monter et sa munition rester chère — ou une **curiosité** que peu de gens jouent ? J'ai écrit ses chiffres en supposant la première, mais ils ne la servent pas. Je ne tranche pas : la place des armes à poudre dans un monde de Wu Xing est une décision de ton ressort, pas un réglage.
 
+> [!bug] 2026-09-03 — **taper avec un bâton bat tous les sorts de toutes les classes**
+> Mesure demandée par le designer (« vérifie que tout marche comme il faut, l'équilibrage etc »). Même robot, même graine 73, même équipement, 8 000 images :
+>
+> | profil | étages descendus | tués | coups portés |
+> |---|---|---|---|
+> | 3 objets, **0 sort** | 1 | **20** | 88 (fin à 68/68 PV) |
+> | 3 objets, **3 sorts** | 0 | 1 | 8 — et 15 sorts lancés |
+>
+> **Le banc des classes donne la raison, chiffrée.** Le meilleur sort de classe rend **6,75 PV par tick** (Le Rieur, Botte : 27 PV en 4 ticks) ; le pire **0,08** (La Paume, Sève : 1 PV en 12 ticks). Une simple **épée** en rend **14,0**, une **masse 16,2**. Tous les sorts de toutes les classes sont donc dominés par l'attaque de base — d'un facteur 2 pour le meilleur, de plus de cent pour le pire. Un personnage qui joue sa classe est nettement plus faible qu'un personnage qui tape.
+>
+> **Ce que la mesure ne capture pas, et qu'il faut peser** : un sort porte plus loin, touche une zone, pose un statut. Le banc ne mesure que les PV sur cible unique. Mais le robot, lui, joue vraiment — et il confirme : quinze lancers pour un tué contre quatre-vingt-huit coups pour vingt.
+>
+> **Ce que je ne tranche pas** : c'est de l'équilibrage, et c'est le cœur de l'identité du jeu — le système de modules ne doit pas être un ornement qu'on n'a jamais de raison d'utiliser. Trois leviers, du plus ciblé au plus large : (1) monter les dés des noyaux offensifs ; (2) baisser le coût en ticks des sorts, qui est ce qui les tue vraiment (10 à 21 ticks contre 4 pour un coup d'épée) ; (3) accepter que les sorts soient une réponse **situationnelle** — portée, zone, statut — et alors donner aux classes de meilleures armes plutôt que de meilleurs sorts. Les trois se défendent, et le choix dit ce qu'est le jeu.
+
+> [!done] 2026-09-03 — **le mur du premier étage venait de ma formule de puissance, pas de la difficulté**
+> Le robot équipé mourait trois fois à l'étage 1 sur la graine 73, là où la note du 2026-08-31 le voyait descendre quatre étages. **Trois hypothèses écartées par la mesure avant de trouver** : l'aggro (coupée entièrement, résultat identique au point près), l'alerte de meute (rayon mis à zéro, identique), et une régression récente (rejouée sur un arbre de travail au tag `v0.4.1-alpha` : même mort).
+> **La vraie cause** : `puissance_creature`, que j'avais écrite pour le plafond de l'étage 1, compte les stats et le NOMBRE d'actions — et **ignore l'équipement**. Un bandit en cuirasse avec une épée marquait donc exactement le même score qu'un bandit à mains nues. Il passe désormais de **25 à 42** et quitte l'étage 1, dont le plafond est 26.
+> **Effet mesuré** : le robot nu descend un étage au lieu de zéro ; à trois objets sans sorts, il descend et finit **à 68/68 PV** avec vingt tués contre zéro auparavant.
+
