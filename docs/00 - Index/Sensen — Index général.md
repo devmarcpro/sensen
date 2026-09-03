@@ -28,6 +28,8 @@ Trois notes à lire avant toutes les autres :
 
 Puis, selon le besoin : **[[Vers la production]]** (ce qui reste avant de coder), **[[Carte des dépendances]]** (ce qui repose sur quoi) et **[[Carte — Ouvert]]** (ce qui n'est pas tranché).
 
+**L'état de l'équilibrage, mesuré :** **[[Audit d'équilibrage — 2026-09-03]]** — quatre problèmes de fond, chacun chiffré, aucun tranché. Le technique est sain ; c'est le réglage qui demande des décisions.
+
 ---
 
 ## Les cartes de domaine
