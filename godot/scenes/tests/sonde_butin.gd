@@ -30,6 +30,10 @@ func _ready() -> void:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = hash([4242, niv, "sonde"])
 		var paliers := {}
+		var qualites: Array[float] = []
+		var raretes := {}
+		var n_objets := 0
+		var n_affixes := 0
 		var pieces_hors := 0
 		var pieces_tot := 0
 		var objets_hors := 0
@@ -41,6 +45,12 @@ func _ready() -> void:
 			var o := s.generer_objet(base, niv, {"sonde": true})
 			if o.is_empty():
 				continue
+			n_objets += 1
+			raretes[str(o.get("rarete", "commun"))] = int(raretes.get(str(o.get("rarete", "commun")), 0)) + 1
+			if not str(o.get("nom", {}).get("affixe", "")).is_empty():
+				n_affixes += 1
+			if o.has("qualite"):
+				qualites.append(float(o.qualite))
 			var a_du_hors := false
 			for slot in o.get("composants", {}).keys():
 				var m := str(o.composants[slot].materiau)
@@ -59,12 +69,26 @@ func _ready() -> void:
 		var total := 0
 		for p in paliers.values():
 			total += int(p)
+		# La QUALITE et les AFFIXES sont l'autre axe de progression : si les materiaux plafonnent au
+		# niveau 15 (mesure du 2026-09-03), c'est eux qui doivent porter la fin de partie — ou personne.
+		var q_moy := 0.0
+		for q in qualites:
+			q_moy += q
+		q_moy = q_moy / maxf(1.0, float(qualites.size()))
+		var parts_r: Array[String] = []
+		# La liste des raretes se LIT dans les regles. Je l'avais tapee a la main en y mettant
+		# « legendaire », qui n'existe pas — la rarete haute s'appelle « artefact » — et la sonde
+		# annoncait donc 0 % de legendaires a tous les niveaux, ce qui ressemblait a un defaut du jeu
+		# alors que c'etait un defaut de la sonde. Une sonde qui invente son vocabulaire ment.
+		for r in GameData.config("loot_rules").raretes.keys():
+			parts_r.append("%s %2d %%" % [r.substr(0, 3), roundi(100.0 * float(raretes.get(r, 0)) / maxf(1.0, float(n_objets)))])
 		var parts: Array[String] = []
 		for p in [1, 2, 3, 4, 5]:
 			parts.append("P%d %2d %%" % [p, roundi(100.0 * float(paliers.get(p, 0)) / maxf(1.0, float(total)))])
 		print("  niveau %2d · %3d objets assemblés · %s · dureté moyenne %5.1f · valeur moyenne %5.1f · %2d %% des pieces hors de l'attendu, %2d %% des objets en portent une"
 			% [niv, assembles, " ".join(parts), _moyenne(duretes), _moyenne(valeurs),
 			roundi(100.0 * float(pieces_hors) / maxf(1.0, float(pieces_tot))), roundi(100.0 * float(objets_hors) / maxf(1.0, float(assembles)))])
+		print("             qualite moyenne %.2f · %d %% d'objets a affixe · %s" % [q_moy, roundi(100.0 * float(n_affixes) / maxf(1.0, float(n_objets))), " ".join(parts_r)])
 	if lister > 0:
 		_lister(s, niveaux, lister)
 	s.monde.fermer()

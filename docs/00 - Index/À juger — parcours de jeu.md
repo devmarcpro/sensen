@@ -266,6 +266,19 @@ Un callout daté dans la note liée (`> [!success] Tranché le <date>`) — la b
 >
 > **À partir du niveau 15, plus rien ne change.** Même répartition de paliers, même dureté, même valeur. La raison est nette : `paliers_materiaux` ouvre le palier 5 à la profondeur **14**, et il n'y a pas de palier 6. Passé ce seuil, tout le catalogue est débloqué et les poids ne bougent plus.
 > **Or le monde, lui, continue.** La sonde du monde mesure la pente : niveau médian **10** à un cinquième de la carte, **25** aux deux cinquièmes, **52** aux trois cinquièmes, **75** au bord (jusqu'à 90). Et la profondeur suit : un donjon de niveau 15 a 5 étages, un de niveau 90 en a **24**. Donc les six septièmes de l'échelle de niveau demandent de plus en plus de travail et ne donnent **rien de mieux**.
+> **Les trois autres axes plafonnent aussi, et j'ai la cause de chacun.** Le matériau n'est pas le seul à s'arrêter :
+>
+> | axe | niveau 5 | niveau 15 | niveau 90 | la cause |
+> |---|---|---|---|---|
+> | palier de matière (P5) | 0 % | 11 % | 10 % | `paliers_materiaux` ouvre P5 à la profondeur 14, et il n'y a pas de P6 |
+> | rareté (exceptionnel) | 15 % | 15 % | 16 % | `poids_par_profondeur` n'a que **cinq lignes** et s'arrête à la profondeur 4 |
+> | objets à affixe | 20 % | 23 % | 23 % | conséquence directe du plateau de rareté |
+> | qualité moyenne | 1,87 | 2,25 | 2,55 | `niveau / (niveau + 25) × 2` — pas de plateau dur, mais **+12 % sur soixante-quinze niveaux** |
+>
+> Seule la qualité continue de monter, et si peu que la différence ne se sent pas. Les trois autres sont plats par construction.
+>
+> **Une chose que j'ai failli te signaler à tort** : ma sonde annonçait « 0 % de légendaires » à tous les niveaux. Le défaut était dans la sonde, pas dans le jeu — la rareté haute s'appelle **artefact**, pas « légendaire », et j'avais tapé la liste à la main. Corrigée, elle lit la liste dans les règles. Et l'artefact est bien à 0 % dans les coffres — **c'est voulu** : la table de rareté n'a que quatre colonnes, et l'artefact vient d'ailleurs (`drops.artefact` : un boss de donjon majeur, une chance sur quatre). J'ai vérifié avant de crier au bug.
+>
 > **Ce que je ne tranche pas — et c'est une vraie fourche de design, pas un réglage** :
 > 1. **étirer les paliers existants** : porter la profondeur minimale du palier 5 de 14 à 60, pour que les cinq paliers couvrent la carte. Cinq chiffres à changer, aucun contenu à écrire ;
 > 2. **ajouter des paliers 6 et 7** avec les matières qui vont avec — c'est du contenu, et ça repousse le plafond plutôt que de l'étirer ;
