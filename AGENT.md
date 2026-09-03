@@ -1,62 +1,102 @@
 # Prompt — développement autonome de Sensen
 
-> Copier tout ce qui suit dans une nouvelle session d'agent. Ce fichier est versionné : le mettre à jour si les règles changent.
+> Copier tout ce qui suit dans une nouvelle session d'agent. Ce fichier est versionné : le mettre à jour quand les règles ou l'état du jeu changent.
+>
+> **Revu le 2026-09-03.** La version précédente datait du 2026-08-26 et envoyait un agent neuf construire l'étape 0, terminée depuis longtemps. Un fichier d'amorçage périmé fait perdre une session entière avant que quiconque s'en aperçoive : le relire fait partie du travail.
 
 ---
 
 Tu travailles sur **Sensen** (森森), un roguelike tactique en monde-planète continu, vue isométrique sur grille, combat en **action-time à ticks**. Dépôt : `c:\Sensen`, remote `https://github.com/devmarcpro/sensen`. Moteur : **Godot 4.6.3**, binaire local : `C:\Users\ciryl\Documents\Godot_v4.6.3-stable_win64.exe`.
 
-**Ta mission : développer le jeu en autonomie**, incrément par incrément, en suivant l'ordre de construction déjà décidé. Tu ne conçois pas le jeu — il est déjà entièrement conçu. Tu l'implémentes.
+## Où en est le jeu
+
+**Les étapes 0 à 10 sont codées et jouables.** On entre dans un donjon, on combat, on loote, on progresse, on ressort ; il y a un monde continu avec des biomes, des royaumes, des villages, des claims, de l'agriculture et de l'élevage. L'étape 11 (coop) attend un jugement humain sur la qualité du solo — elle ne commence pas sans instruction.
+
+Ordres de grandeur au 2026-09-03 : **277 notes** dans le coffre, **203 modules**, **245 matériaux**, **85 créatures**, **20 armes**, une suite de tests d'environ sept minutes, **dix sondes** headless et cinq bancs de mesure.
+
+**Tu ne pars donc jamais d'une page blanche.** Le travail est : combler les écarts entre le coffre et le code, répondre à la file du designer, et regarder le jeu avec un œil neuf.
 
 ## La source de vérité
 
-Le design complet vit dans `docs/` — un coffre Obsidian de 272 notes atomiques. **Tout est déjà décidé et chiffré** : formules, coûts en ticks, schémas JSON, catalogues. Avant de coder quoi que ce soit, lis les notes concernées. Points d'entrée :
+Le design vit dans `docs/`, un coffre Obsidian de notes atomiques. **Le callout daté le plus récent gagne** sur tout le reste de la note. Points d'entrée :
 
 - `docs/00 - Index/Sensen — Index général.md` — la carte du coffre
-- `docs/00 - Index/Ordre de construction.md` — **la séquence à suivre** (11 étapes, chacune jouable et jugeable)
-- `docs/00 - Index/Vers la production.md` — l'état d'avancement, à tenir à jour
-- `docs/00 - Index/Contraintes permanentes.md` — **5 règles non négociables**, à relire avant chaque système
-- `docs/03 - Combat/Prototype de combat — spécification.md` — l'étape 0, spécification exécutable
+- `docs/00 - Index/Vers la production.md` — **la file du designer**, elle prime sur tout
+- `docs/00 - Index/À juger — parcours de jeu.md` — ce qui attend un œil humain
+- `docs/00 - Index/Audit d'équilibrage — 2026-09-03.md` — l'état chiffré du réglage
+- `docs/00 - Index/Prompt de la boucle.md` — la consigne de travail autonome, dont ce fichier est le complément
+- `docs/08 - Technique/Ordre de vérification.md` — **tout ce qu'il faut passer avant de pousser**
 
-Une **démo 0** existe déjà (`godot/scenes/demo/`) : grille iso 24×24 avec relief, A* aux coûts de pente, horloge à ticks, un loup hostile. C'est le point de départ — étends-la vers le prototype de combat au lieu de repartir de zéro.
+## Où chercher du travail, dans cet ordre
 
-## Les règles de travail
+1. **La file du designer** dans `Vers la production`. Elle prime sur tout.
+2. **Un écart entre le coffre et le code** : une note décrit un comportement que le jeu n'a pas, ou le code fait ce qu'aucune note ne dit. `python tools/verif_doc_code.py` en trouve une partie mécaniquement.
+3. **Le jeu regardé sous un angle neuf** : joue une scène, prends une capture, **lis-la vraiment**. Les défauts d'affichage ne se voient qu'à l'écran — une sonde prouve qu'un système obéit à ses règles, elle ne voit pas qu'il raconte la mauvaise histoire.
 
-1. **Ne réinvente rien.** Si une note donne une formule, c'est cette formule. Si tu crois qu'une note se contredit avec une autre, la plus récente fait foi (cherche les callouts datés) ; signale le conflit dans ton rapport.
-2. **Si un détail manque réellement** : tranche avec la solution la plus simple cohérente avec le design, puis **écris la décision dans la note concernée** (callout daté `> [!success] Décidé le <date>`) avant de la coder. Le code ne doit jamais être en avance sur les notes.
-3. **Data-driven strict** : aucune valeur de gameplay en dur dans le code. Tout vient de `godot/data/*.json` (un fichier = une entrée, `_template.json` par dossier, validation de schéma au boot, bloquante en debug). Les 176 modules, les exemples de PNJ et d'objets y sont déjà.
-4. **Le joueur n'est pas un type à part** : même schéma d'entité que tout être, le contrôle est un attribut. Aucun `if (espèce == x)` — on teste la présence d'un bloc, jamais le type.
-5. **Aucun asset** : tout se dessine en polygones/couleurs par code. Les vrais sprites viendront plus tard ; la construction donne la forme, le matériau la teinte.
-6. **GDScript typé**, commentaires en français, sobres, dans le style des fichiers existants. Pas de GDExtension/Rust avant qu'un profiling le justifie.
+## Trois natures de contraintes, à ne jamais mélanger
 
-## La boucle de validation — après CHAQUE incrément
+- **REFUSÉ, ne jamais ajouter** : tacle, boss à mécaniques, PA/PM, initiative, relances, cases de départ.
+- **DÉCIDÉ, à respecter et faire vivre sans y toucher** : horloge à ticks et action-time, résolution simultanée, no-limit des modules, loot et boutiques assemblés, temps à l'action en donjon, sauvegarde partout.
+- **PAS À TOI DE TRANCHER** : équilibrage, game feel, réécriture de design. Consigne dans `À juger` **et continue** — ne bloque jamais sur une question. *(Le designer peut lever cette réserve ponctuellement en te demandant de traiter un point ; alors choisis l'option la plus conservatrice, écris pourquoi, et dis-lui comment revenir en arrière.)*
+
+## Méthode, non négociable
+
+1. **Le callout daté s'écrit AVANT le code.** Le code ne doit jamais être en avance sur les notes.
+2. **Tout en données** : un JSON par entrée, schéma validé au démarrage, **aucun nombre de gameplay en dur**.
+3. **Un bloc de configuration se FUSIONNE, il ne se réécrit pas.** Remplacer un bloc au lieu de l'étendre efface des réglages en silence — c'est arrivé deux fois sur le bloc `ia`.
+4. **GDScript typé**, commentaires en français, sobres, dans le style existant. Pas de GDExtension.
+5. **Le joueur n'est pas un type à part** : même schéma d'entité que tout être, le contrôle est un attribut. On teste la présence d'un bloc, jamais le type.
+6. **Aucun asset** : tout se dessine par code. C'est une phase, pas un dogme.
+7. **Ne touche jamais à `.obsidian/`.**
+
+## Avant de pousser
 
 ```powershell
-# 1. le projet tourne sans erreur (120 frames headless)
-& "C:\Users\ciryl\Documents\Godot_v4.6.3-stable_win64.exe" --headless --path C:\Sensen\godot res://scenes/demo/main.tscn --quit-after 120
-
-# 2. le coffre est intègre (liens, frontmatter, comptages)
-python C:\Sensen\tools\check_vault.py
-
-# 3. commit + push (messages en français, décrivant le POURQUOI)
-git add -A ; git commit ; git push origin main
+$godot = "C:\Users\ciryl\Documents\Godot_v4.6.3-stable_win64.exe"
+& $godot --headless --path godot res://scenes/tests/test_combat.tscn   # la suite (~7 min)
+& $godot --headless --path godot res://scenes/demo/main.tscn --quit-after 60
+python tools/check_vault.py ; python tools/audit_donnees.py
+python tools/i18n_couverture.py ; python tools/verif_scripts.py ; python tools/verif_doc_code.py
 ```
 
-Un incrément n'est terminé que si les trois passent. Si tu ajoutes des scènes de test, mets-les dans `godot/scenes/tests/` et fais-les tourner en headless avec des `assert` — c'est ta seule harnais de test, sers-t'en.
+Plus **les sondes concernées** (`godot/scenes/tests/sonde_*.tscn` : écrans, IA, faune, mine, butin, armes, jet, espèce, journal, monde) et **une capture d'écran réellement regardée** si un écran a changé.
+
+**Un seul Godot à la fois.** Deux instances en parallèle faussent toute mesure de performance — le budget de génération d'étage a été déclaré cassé à tort pour cette raison.
+
+**Un test ciblé** : `-- --seul <fragment>` — vingt secondes au lieu de sept minutes.
+
+**`verif_scripts.py` n'est pas optionnel** : la suite ne charge jamais les scripts d'écran, donc une Parse Error dans `main.gd` la laisse verte et tue le jeu.
+
+## Pièges déjà payés — les relire évite de les repayer
+
+- **Un test qui compte est un test qui se trompe de sujet.** Sept tests à nombre figé (« 62 compétences », « 63 recettes », « 9 stations ») ont cassé sur des ajouts parfaitement corrects. Vérifie la **règle**, jamais le total : *chaque station se construit*, *chaque arme s'entraîne à une compétence qui existe*.
+- **Une sonde qui invente son vocabulaire ment avec aplomb.** Une liste de raretés tapée à la main annonçait « 0 % de légendaires » — la rareté haute s'appelle *artefact*. Lis les listes dans les données.
+- **Vérifie que ton outil a tort avant d'accuser le jeu.** Quatre fausses alertes en une journée, toutes de cette forme.
+- **Une considération d'IA qu'aucun profil ne pondère est du code mort** : le moteur la calcule et l'ignore.
+- **Le cache des classes Godot** : après avoir ajouté un `class_name`, lancer `--headless --path godot --import` avant que quoi que ce soit compile.
+- **Un exit code 0 ne veut rien dire** : la suite peut finir par `TESTS : N échec(s)` avec un code 0. Lis la dernière ligne.
+- **Ne lance jamais la suite pendant que tu édites un script de test.**
+
+## Versions et pré-releases
+
+**La numérotation avance d'un cran sur le DERNIER chiffre** : après `v0.4.1-alpha` vient `v0.4.2-alpha`. Le deuxième chiffre ne bouge **que** si le designer le dit — c'est lui qui juge si le jeu a franchi une marche, pas la taille du diff.
+
+Une pré-version tous les ~10 commits, **avec son exécutable construit depuis le tag** :
+
+```powershell
+git tag -a v0.4.N-alpha -m "..." ; git push origin v0.4.N-alpha
+& $godot --headless --path godot --export-release "Windows Desktop" ../build/Sensen.exe
+gh release create v0.4.N-alpha build/Sensen-v0.4.N-alpha-win64.zip --prerelease --notes-file ...
+```
+
+Une release sans binaire n'est pas une release. Si `gh` n'est pas connecté, le jeton que `git push` utilise déjà se récupère par `git credential fill` et s'accepte via `GH_TOKEN` — sans jamais l'écrire sur le disque.
+
+**Ne déplace jamais un tag déjà poussé** pour y glisser du travail en plus : c'est ce qui rend une version irreproductible.
 
 ## Ce que tu ne peux pas juger seul
 
-Le **game feel** (lisibilité de l'iso, vitesse perçue, clarté des télégraphes) exige un œil humain. Quand un incrément en dépend : termine-le, note précisément **quoi regarder et quelle question trancher** dans ton rapport et dans `Vers la production.md`, et passe à l'incrément suivant qui n'en dépend pas. Ne bloque jamais en attente d'une validation visuelle.
+Le **game feel** — lisibilité de l'iso, vitesse perçue, clarté des télégraphes — exige un œil humain. Termine l'incrément, écris précisément **quoi regarder et quelle question trancher** dans `À juger`, et passe à la suite.
 
-## L'ordre de travail
+## En fin de passe
 
-Suis `Ordre de construction.md`. En résumé : **étape 0 = le prototype de combat isolé** (sa spécification liste ses propres jalons internes — grille, garde, zones de coup, Wu Xing, jauge de chaîne, modules, IA, fuite). Rien d'autre ne commence tant que l'étape 0 n'est pas complète. Chaque étape suivante n'est entamée que quand la précédente tourne.
-
-À chaque étape terminée : coche-la dans `Vers la production.md`, mets à jour le `README.md` si le lancement change, commit, push.
-
-## Interdits
-
-- Créer des fichiers `.obsidian/` — jamais.
-- Réseau/multijoueur, sauvegarde, génération de monde complet : **pas avant leur étape**.
-- Refactoriser le design dans les notes — tu peux *compléter* (combler un trou, dater une décision), jamais *réécrire* une décision existante sans instruction humaine.
-- Dépendances externes (addons, plugins) sans nécessité démontrée.
+Dis ce que tu as trouvé et changé, en une poignée de lignes. **Pas de plan, pas d'options : agis.** Et quand tu t'es trompé, dis-le simplement — la moitié de ce fichier vient d'erreurs écrites noir sur blanc au moment où elles ont été comprises.
