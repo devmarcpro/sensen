@@ -132,6 +132,9 @@
     },
     "grille": {
       "type": "object"
+    },
+    "equipement": {
+      "type": "object"
     }
   },
   "required": [

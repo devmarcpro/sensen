@@ -54,6 +54,9 @@ UNICITÉ — non garantie (deux "Li Wei" peuvent exister dans des
   une fois (évite les doublons directs sans complexifier l'algorithme).
 ```
 
+> [!success] Codé à l'étape 9 — trace ajoutée le 2026-09-04
+> `systems/noms.gd` : `Noms.generer()` tire prénom et famille dans la culture du lieu, `Noms.culture_pour()` choisit la culture par affinité de race ; les noms générés sont enregistrés comme clés de traduction (`GameData.enregistrer_nom`).
+
 ## Liens
 - **Dépend de** : [[Noms culturels]], [[Culture de nommage — schéma]], [[Schéma créature]]
 - **Alimente** : [[Génération des royaumes PNJ]], [[Familles et succession]], [[Dialogue PNJ]]

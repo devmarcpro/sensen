@@ -46,6 +46,9 @@ Le principe `seed + liste des modifications` est inchangé. Plus d'octree séria
 - **`c_data` reste en u16** : il code l'état du contenu **persistant** (stade de croissance 0-15, orientation 0-3, ouvert/fermé, dégâts) — largement suffisant. Ce qui déborde d'un u16 n'a rien à faire dans la tuile.
 - **Les glyphes et effets persistants de combat ne vivent PAS dans la tuile** : ils sont dans une **couche d'overlay runtime** `Dictionary[index_tuile] → [effets]`, propre à la grille courante. Raison : ils sont temporaires, portent une source (le lanceur), une durée en ticks et un vecteur élémentaire — et **ils ne doivent jamais être sauvegardés** ([[Sauvegarde]] : seuls les diffs de terrain persistent). Un combat qui se termine vide l'overlay.
 
+> [!success] Codé — trace ajoutée le 2026-09-04
+> `systems/grid/grille.gd` : tableaux plats indexés (`hauteurs`, `contenu`, `sols`, `meubles`), origine monde (`Grille.origine`, `idx`, `pos_de`), mutations marquées (`marquer`) et signalées (`tile_changed`). Les RPC réseau restent pour l'étape 11.
+
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Grille continue]], [[Décisions d'architecture]]
 - **Alimente** : [[Sauvegarde]], [[Réseau]], [[Génération de donjon]]

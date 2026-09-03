@@ -2024,7 +2024,7 @@ func _construire_echange(j: Dictionary) -> void:
 		entrees.append({"kind": "donner", "uid": uid})
 	liste.add_item(tr("ui.echange.reprendre").format({"nom": tr(pnj.name_key)}), null, false)
 	entrees.append({"kind": "texte", "texte": ""})
-	for slot in ["main_principale", "main_secondaire", "casque", "cuirasse", "jambieres", "anneau_1", "anneau_2", "amulette", "carquois"]:
+	for slot in Array(GameData.config("combat_rules").equipement.slots):
 		var uid: String = str(pnj.equipement.get(slot, ""))
 		if uid.is_empty():
 			continue
@@ -2040,7 +2040,7 @@ func _construire_echange(j: Dictionary) -> void:
 
 func _construire_inventaire(j: Dictionary) -> void:
 	titre.text = tr("ui.ecran.inventaire").format({"n": j.sac.size()})
-	var slots: Array = ["main_principale", "main_secondaire", "casque", "cuirasse", "jambieres", "anneau_1", "anneau_2", "amulette", "carquois"]
+	var slots: Array = Array(GameData.config("combat_rules").equipement.slots)
 	for slot in slots:
 		var uid: String = str(j.equipement.get(slot, ""))
 		var nom: String = main.nom_objet(main.sim.nom_objet(uid)) if not uid.is_empty() else "—"

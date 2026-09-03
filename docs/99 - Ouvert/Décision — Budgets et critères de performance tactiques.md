@@ -51,6 +51,9 @@ La règle de [[Ordre de vérification]] (*un critère raté = on optimise avant 
 
 Les chiffres ci-dessus sont des **cibles à tenir sur la machine de référence** : *PC de milieu de gamme 2020 — CPU 4 cœurs ~3 GHz, 8 Go de RAM, GPU intégré récent, 1080p*. C'est le profil du public visé ([[Public visé]] : joueurs de RPG bac-à-sable, pas de matériel haut de gamme requis). Un budget raté sur cette machine déclenche l'optimisation avant l'étape suivante ([[Ordre de vérification]]) ; les mesurer ailleurs n'a pas de valeur.
 
+> [!success] Mesuré — trace ajoutée le 2026-09-04
+> `test_budgets` mesure le tick, l'objet généré, le recalcul des stats et l'étage ; **É2 (étage < 100 ms) n'a jamais été tenu** (153–207 ms à chaud, pareil sur le dépôt d'avant) — consigné dans [[À juger — parcours de jeu]] le 2026-09-03, le test garde contre l'aggravation.
+
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Budgets de performance]], [[Ordre de vérification]], [[Ordre de construction]]
 - **Alimente** : [[Optimisation — principes]], [[Entités et pathfinding — performance]]

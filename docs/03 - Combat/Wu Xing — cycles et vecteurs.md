@@ -35,6 +35,9 @@ Aucun élément n'est supérieur : chacun **domine un élément, est dominé par
 
 **Questions ouvertes :** [[Ouvert — Répartitions Arcane Espace Corruption]], [[Ouvert — Compensation de l'arme mixte]].
 
+> [!success] Codé depuis l'étape 0 — trace ajoutée le 2026-09-04
+> `data/wuxing.json` porte les cinq éléments, `engendre` et `domine` ; l'élément d'une capacité est le **vecteur** de ses modules (`plan.elements`), l'arme mixte garde son vecteur complet, et la jauge de chaîne pose un segment par capacité qui touche (`Simulation._poser_segment`). Voir [[Jauge de chaîne Wu Xing]].
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Identité visuelle chinoise]]
 - **Alimente** : [[Jauge de chaîne Wu Xing]], [[Domination et multiplicateurs]], [[Modificateurs d'affinité]], [[Armes fantomatiques]], [[Cinq accès au cycle]], [[Wu Xing hors combat]], [[XP de combat]]

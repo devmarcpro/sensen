@@ -68,6 +68,9 @@ Ce sont des **presets** — des combinaisons nommées pour la génération et le
 - **Les élites sont un flag**, pas un profil : `chain_gauge: true` sur Chef de bande et Ermite.
 - **Le vieillissement, la succession et l'élevage** tournent sur tous ces PNJ sans distinction ([[Blocs de l'être]] : *aucun test d'espèce*).
 
+> [!success] Codé à l'étape 9 — trace ajoutée le 2026-09-04
+> `data/ai_profiles/` (civil, garde, proie, bête sauvage, tireur, invocateur, soigneur, tank, embusqueur, fuyard, élite, assaillant…) : des considérations pondérées par profil, lues par `_decider`. Une considération qu'aucun profil ne pondère est du code mort — piège écrit dans [[IA des créatures]].
+
 ## Liens
 - **Dépend de** : [[Les trois axes — race, classe, fonction]], [[Schéma créature]], [[Fonctions]], [[Talents de classe]]
 - **Alimente** : [[Génération des royaumes PNJ]], [[Villages PNJ — repeuplement et décimation]], [[Génération de donjon]], [[Barèmes économiques]]

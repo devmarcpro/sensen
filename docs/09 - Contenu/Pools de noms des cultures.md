@@ -52,6 +52,9 @@ Les pools A+B des 7 cultures ([[Cultures de nommage]]) — la Sino est déjà é
 
 *(L'anarchie n'a pas de titre — pas de leadership_role, [[Gouvernance, lois et diplomatie]]. Les titres sont des text_keys localisées, [[Localisation]].)*
 
+> [!success] Codé — trace ajoutée le 2026-09-04
+> Les pools sont transcrits dans `data/name_cultures/` (générés par `tools/gen_name_cultures.py`), séparés par genre — voir [[Cultures de nommage]].
+
 ## Liens
 - **Dépend de** : [[Cultures de nommage]], [[Culture de nommage — schéma]], [[Génération de noms]]
 - **Alimente** : [[Noms culturels]], [[Génération des royaumes PNJ]]

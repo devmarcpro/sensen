@@ -24,6 +24,9 @@ Un générateur préfixe + suffixe piloté par culture — aucun nom écrit à l
 
 **Contenu à produire :** [[Ouvert — Pools de noms des cultures]].
 
+> [!success] Codé à l'étape 9 — trace ajoutée le 2026-09-04
+> Voir [[Génération de noms]] et [[Cultures de nommage]] : sept cultures dans `data/name_cultures/`, un générateur dans `systems/noms.gd`.
+
 ## Liens
 - **Dépend de** : [[Culture de nommage — schéma]], [[Schéma créature]], [[Races]]
 - **Alimente** : [[Génération de noms]], [[Génération des royaumes PNJ]], [[Cultures de nommage]]

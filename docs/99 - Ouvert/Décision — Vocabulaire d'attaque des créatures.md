@@ -20,6 +20,9 @@ etape: 0
 
 **Le catalogue** ([[Créatures]] : 19 races animales) : produit dans [[Actions des créatures]] — **24 actions** les couvrent toutes par partage familial. Les **humains** n'ont pas d'actions dédiées : ils utilisent le système standard du joueur ([[Profils de PNJ]]).
 
+> [!success] Codé — trace ajoutée le 2026-09-04
+> `data/creature_actions/` (une action = dés, portée, ticks, `cout_vigueur`, effets : soin, invocation, statut…) et `combat_rules.actions` ; les créatures listent leurs actions, l'IA choisit par considérations. Sept fiches et six actions ajoutées le 2026-08-30 pour les types d'ennemis.
+
 ## Liens
 - **Dépend de** : [[Vocabulaire des modules — six axes]], [[Schéma créature]], [[IA des créatures]], [[Trous connus du combat]]
 - **Alimente** : [[Actions des créatures]], [[Combat tactique sur grille]], [[Attaque lourde et télégraphe]]

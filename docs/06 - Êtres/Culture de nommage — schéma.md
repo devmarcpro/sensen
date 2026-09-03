@@ -40,6 +40,9 @@ Le format de données d'une culture de nommage : des pools A/B, des affinités d
 
 **Les pools sont écrits :** [[Pools de noms des cultures]] — les 7 cultures ([[Cultures de nommage]]).
 
+> [!success] Codé à l'étape 9 — trace ajoutée le 2026-09-04
+> `data/name_cultures/` (sept cultures, pools par genre — voir [[Cultures de nommage]]) et `systems/noms.gd` (`Noms.generer`, `Noms.culture_pour`).
+
 ## Liens
 - **Dépend de** : [[Noms culturels]], [[Data-driven design]]
 - **Alimente** : [[Génération de noms]], [[Cultures de nommage]], [[Génération des royaumes PNJ]], [[Schéma royaume]]

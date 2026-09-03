@@ -33,6 +33,9 @@ Coûts de référence (E.1) :
 
 **Détail chiffré de la boucle :** [[Boucle de tick]].
 
+> [!success] Codé depuis l'étape 0 (2026-08-26) — trace ajoutée le 2026-09-04
+> C'est la boucle même du jeu : chaque être a un `compteur` en ticks, agit quand l'horloge l'atteint, et le coût d'une action est son délai (`Regles.ticks_attaque()`, `ticks_deplacement()`). Deux horloges coexistent, monde et combat (`horloge_de()`) — voir [[Temporalités parallèles]]. La suite le vérifie à chaque passe (« descente −1 : 2 ticks », « montée +1 : 5 ticks »).
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Simulation à ticks]]
 - **Alimente** : [[Boucle de tick]], [[Combat tactique sur grille]], [[Jauge de chaîne Wu Xing]], [[Endurance]], [[Sorts cataclysmiques]]

@@ -56,6 +56,9 @@ Les trois pressions alignées (risque = corruption/étage, dureté du sol, valeu
 - **Densité de filons muraux en donjon** : `0-2 par salle`, tirage pondéré par `size_category` ([[Salles et connecteurs]]) — petite 0-1, moyenne 0-1, grande 1-2, immense 1-2. Une salle sur trois environ en porte.
 - **Verrou d'outil : la règle d'irrécoltabilité suffit**, aucun gate supplémentaire ([[Récolte]] : `durete_outil × qualite_outil < durete_materiau × 0.5` → l'outil rebondit). Elle est déjà exactement le verrou voulu — les tiers profonds sont durs (tungstène 42, diamant 40), donc inaccessibles sans progression matérielle. **Aucune règle à écrire.**
 
+> [!success] Codé — trace ajoutée le 2026-09-04
+> Les filons sont posés par la surface et les mines (`Mine sous une cellule`), les poches de strates existent (`poches` dans la génération), et le minerai se récolte à la pioche (`creuser`, XP Terrassement). Les catalogues de matériaux disent la profondeur de chaque roche.
+
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Minerais par profondeur]], [[Stratification verticale]], [[Dérive de la corruption]]
 - **Alimente** : [[Récolte]], [[Génération de donjon]], [[Salles et connecteurs]]

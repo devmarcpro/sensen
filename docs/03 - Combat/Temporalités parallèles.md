@@ -16,6 +16,9 @@ Le monde a son horloge, chaque combat a la sienne, chaque donjon aussi. C'est ce
 
 **Contrainte permanente ([[Contraintes permanentes]]) :** *Les temporalités parallèles sont une notion du modèle dès le départ : une horloge du monde, une par combat, une par donjon. Écrire une horloge unique globale en solo garantit de tout réécrire plus tard.*
 
+> [!success] Codé depuis l'étape 0 — trace ajoutée le 2026-09-04
+> L'horloge du monde et celle du combat sont deux objets ; un être appartient à l'une ou à l'autre (`e.horloge`, `horloge_de()`), le donjon vit en temps à l'action et le camp en exploration. Le monde ne tourne plus sans fin pendant un combat depuis le 2026-08-31 (voir [[Boucle de tick]]).
+
 ## Liens
 - **Dépend de** : [[Action-time à ticks]], [[Contraintes permanentes]]
 - **Alimente** : [[Multijoueur]], [[Décisions d'architecture]], [[Donjons — structure et intégration]]

@@ -59,6 +59,9 @@ DÉGÂTS PAR COMPOSANTES ET NIVEAUX :
 > [!failure] Supprimé par le designer le 2026-08-31 — Arcane, Espace et Corruption ne sont plus des domaines
 > Les vecteurs hors-cycle de l'annexe ci-dessus (« Arcane {0.2 partout} · Espace {eau 0.6, metal 0.4} · Corruption {terre 0.5, feu 0.5} ») sont retirés : un module sans élément ne pose pas de segment et ne subit aucune domination. Voir [[Ouvert — Répartitions Arcane Espace Corruption]].
 
+> [!success] Codé depuis l'étape 0 — trace ajoutée le 2026-09-04
+> Le cycle de domination est lu dans `wuxing.json` (`domine`, `engendre`) et appliqué au pipeline de dégâts par élément dominant ; le composeur dessine le pentagramme du sort avec ce qu'il engendre et ce qu'il domine. Voir [[Wu Xing — cycles et vecteurs]] et [[Pipeline de résolution du combat]].
+
 ## Liens
 - **Dépend de** : [[Wu Xing — cycles et vecteurs]], [[Progression par l'usage]]
 - **Alimente** : [[Jauge de chaîne Wu Xing]], [[Pipeline de résolution du combat]], [[Armure par zone et constructions]], [[XP de combat]], [[Armes fantomatiques]]

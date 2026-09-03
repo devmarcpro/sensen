@@ -20,6 +20,9 @@ Les **modificateurs** façon Noita opèrent sur ces axes, pas seulement sur des 
 
 **Infobulle exhaustive** (leçon de ToME) : chaque module affiche ses valeurs calculées pour le personnage courant, avec le détail du calcul. Profondeur maximale, opacité nulle.
 
+> [!success] Codé — trace ajoutée le 2026-09-04
+> Il n'y a pas d'arbre de talents dans le jeu : la progression est **par l'usage** (`Progression`, `skill_factor()`), le build est la composition ([[Six types de modules et assemblage]]) et la classe n'est qu'un talent de départ ([[Talents de classe]]). Rien de cette note ne demande de code : elle décrit une absence, et l'absence tient.
+
 ## Liens
 - **Dépend de** : [[Progression par l'usage]], [[Structure compétences-modules-slots]]
 - **Alimente** : [[Vocabulaire des modules — six axes]], [[Six types de modules et assemblage]], [[Familles de capacités de la grille]]

@@ -39,6 +39,9 @@ Trois questions, trois catalogues, aucun recouvrement.
 
 Si chaque PNJ porte les trois axes, alors **rien ne distingue structurellement le personnage joueur d'un PNJ** — sinon un drapeau de contrôle. C'est ce qui rend possible, plus tard, de **changer de personnage principal** ([[Ouvert — Changer de personnage]]), et c'est désormais une contrainte d'architecture permanente ([[Contraintes permanentes]], règle 5).
 
+> [!success] Codé — trace ajoutée le 2026-09-04
+> Les trois axes sont trois catalogues : `data/races/`, `data/classes/` (avec `classes_meres.json` depuis le 2026-09-03), `data/functions/`. Un être les porte comme trois champs (`race`, `classe`, `fonction`) et `Etres.creer_personnage()` les combine.
+
 ## Liens
 - **Dépend de** : [[Blocs de l'être]], [[Schéma unifié créature-PNJ]]
 - **Alimente** : [[Talents de race]], [[Talents de classe]], [[Fonctions]], [[Schéma créature]], [[Contraintes permanentes]]

@@ -22,6 +22,9 @@ Les contrôles durs se mesurent en ticks, s'affichent, et ne peuvent jamais ench
 > [!note] Chiffre rafraîchi le 2026-08-31
 > « 14 statuts en données » date du prototype : `data/status_effects/` en compte 67 (contrôle, négatifs, positifs, potions).
 
+> [!success] Codé depuis l'étape 0 — trace ajoutée le 2026-09-04
+> Les statuts de contrôle (`status_effects/`, drapeau `controle`) passent par le budget `combat_rules.anti_stunlock` : un être déjà contrôlé résiste de plus en plus dans la fenêtre. Le test « statut terreur en données » et les tests de tempo le couvrent.
+
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Boucle de tick]]
 - **Alimente** : [[Statuts]], [[Familles de capacités de la grille]]

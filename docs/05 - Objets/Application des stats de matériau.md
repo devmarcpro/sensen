@@ -60,6 +60,9 @@ Transparence : transparence >= 50 → la tuile laisse passer lumière et
 > > [!warning] Et ma première vérification était fausse elle aussi
 > > La sonde que j'avais écrite portait la liste des stats « lues » **tapée à la main**. Elle annonçait douze sur treize, et c'est le designer qui a demandé si j'en étais sûr. Deux de plus ne servaient à rien. La sonde **cherche désormais dans le code source** — `stats.get("<stat>")` et ses variantes — et croit ce qu'elle trouve. C'est la huitième fois de la journée qu'une liste écrite à la main ment ; celle-ci, je ne l'avais pas vue venir alors que je venais d'écrire la règle dans l'AGENT.md.
 
+> [!success] Codé le 2026-09-03 — trace ajoutée le 2026-09-04
+> Les treize stats de matériau agissent toutes depuis ce jour (six étaient décoratives : élasticité des arcs, friction du sol, conductivité de mana, transparence, luminosité, isolation) — `combat_rules.stats_materiau` porte les formules, `sonde_stats_matiere.tscn` lit le code source pour vérifier que chaque stat est lue quelque part.
+
 ## Liens
 - **Dépend de** : [[Matériaux — 13 stats]], [[Stats d'un objet crafté]]
 - **Alimente** : [[Mana]], [[Armure par zone et constructions]], [[Météo]], [[Éclairage]], [[Agriculture et élevage]], [[Véhicules]], [[Eau et liquides]]

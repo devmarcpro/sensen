@@ -34,6 +34,9 @@ Création : 30 points à répartir (base 5 par stat, max 15 à la création), + 
 > [!success] Décidé le 2026-08-26
 > Formule de santé, lue dans [[Exemples — dix PNJ générés]] (End 6 → 44, End 10 → 60, End 11 → 64) : **`sante_max = 20 + Endurance × 4`**. Elle vaut pour tout être, bêtes comprises (aucun test d'espèce — [[Blocs de l'être]]). Chiffrée dans `data/combat_rules.json` (`stats`).
 
+> [!success] Codé — trace ajoutée le 2026-09-04
+> Les six stats vivent dans `corps.stats` et leurs valeurs effectives dans `stats_eff` (`Etres.recalculer`) ; les dérivées sont dans `combat_rules.stats` (`sante_max_base`, `sante_max_par_endurance`, `mana_max_par_volonte`) et, depuis le 2026-09-03, chaque stat a sa voie ([[Structure compétences-modules-slots]]).
+
 ## Liens
 - **Dépend de** : [[Création de personnage]]
 - **Alimente** : [[Mana]], [[Armures et poids porté]], [[Compagnons]], [[Potentiel]], [[Pipeline de résolution du combat]]

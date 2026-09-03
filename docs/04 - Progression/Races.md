@@ -56,6 +56,9 @@ La **maturité** (22 % de l'espérance) est le plancher d'âge de toute fonction
 
 **Réputation par race ([[Réputation et relations]]) :** chaque race a sa propre perception du joueur ; les rivalités entre races sont déclarées en données (`rivals`).
 
+> [!success] Codé — trace ajoutée le 2026-09-04
+> `data/races/` : bonus de départ, talent de race (`talents.chair_de_mana`, `deux_queues`…), niveaux de départ par compétence ; les trois races cachées (vampire, spectre, lycanthrope) sont codées avec l'incarnation.
+
 ## Liens
 - **Dépend de** : [[Création de personnage]]
 - **Alimente** : [[Potentiel]], [[Stats de personnage]], [[Génération des royaumes PNJ]], [[Cultures de nommage]], [[Âge des PNJ]]

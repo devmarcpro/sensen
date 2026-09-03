@@ -41,6 +41,9 @@ Chaque créature du jeu est un assemblage choisi dans ces bibliothèques de part
 
 **Extension Annexe H :** le schéma se généralise en six blocs — `génome`, `corps`, `esprit`, `social`, `agenda`, `repro` ([[Blocs de l'être]]) — et le statut d'un être devient un champ `role` ([[Rôles de l'être]]). C'est ce qui rend l'élevage ([[Élevage — intention et familles]]) possible **sans aucun système parallèle** : un mouton est une fiche qui a `génome` et `repro` ; un bandit est une fiche qui a `esprit`, `social` et `agenda`.
 
+> [!success] Codé — trace ajoutée le 2026-09-04
+> Un seul schéma, `creatures.schema.json`, pour les bêtes, les humanoïdes et les civils (`data/creatures/{bete,humanoide,civil,invocation}/`) ; le joueur est un être comme un autre, le contrôle est un attribut (`controle`). Les blocs civils (`role`, `social`, `agenda`, `recruitable`) sont optionnels et testés par présence, jamais par type.
+
 ## Liens
 - **Dépend de** : [[Data-driven design]], [[Direction artistique]]
 - **Alimente** : [[Squelette modulaire et points d'attache]], [[Schéma créature]], [[Compagnons]], [[IA des créatures]], [[Apprivoisement et recrutement]]

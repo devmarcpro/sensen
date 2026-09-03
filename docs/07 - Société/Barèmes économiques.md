@@ -41,6 +41,9 @@ ENTRETIEN DU ROYAUME (hebdomadaire, prélevé sur le trésor du royaume,
 
 **Paliers de dette :** voir [[Entretien et taxes]].
 
+> [!success] Codé à l'étape 10 — trace ajoutée le 2026-09-04
+> Les barèmes sont dans `combat_rules.royaume` (`claim_cout_par_cellule`, `entretien_pnj`, `entretien_structure`, `dette_paliers`), `combat_rules.commerce` et `combat_rules.guildes` ; aucun chiffre n'est dans le code.
+
 ## Liens
 - **Dépend de** : [[Économie — sources et puits]], [[Prix suggéré]], [[Schéma royaume]]
 - **Alimente** : [[Entretien et taxes]], [[Quêtes et guildes]], [[Boutique passive]]

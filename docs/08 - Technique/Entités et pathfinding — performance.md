@@ -31,6 +31,9 @@ par transform de parties (pivots 12.1), pas de skinning.
 
 **Coût du niveau logique ([[LOD de simulation]]) :** ~100 PNJ logiques ≈ le coût de 3 PNJ pleins.
 
+> [!success] Codé — trace ajoutée le 2026-09-04
+> A* sur la grille avec coût de pente et de friction (`Grille.cout_pas`), atteignables mémoïsés par image, êtres hors fenêtre non redessinés ; les mesures sont dans [[Budgets de performance]] et `test_budgets`.
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[IA des créatures]], [[Budgets de performance]]
 - **Alimente** : [[Monstres rares]], [[LOD de simulation]], [[Créatures]]

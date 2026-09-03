@@ -1802,5 +1802,24 @@
         "##"
       ]
     }
+  },
+  "equipement": {
+    "_doc": "Les quatorze emplacements d'equipement (Equipement — 14 slots), dans l'ordre d'affichage. Quatre listes en dur les recopiaient — deux a neuf, deux a quatorze — et l'ecran d'echange avec un compagnon ne voyait donc ni ses bottes, ni ses brassards, ni sa cape : une seule source, ici, lue partout (2026-09-04).",
+    "slots": [
+      "main_principale",
+      "main_secondaire",
+      "casque",
+      "cuirasse",
+      "brassards",
+      "jambieres",
+      "bottes",
+      "dos",
+      "anneau_1",
+      "anneau_2",
+      "amulette",
+      "carquois",
+      "accessoire_1",
+      "accessoire_2"
+    ]
   }
 }

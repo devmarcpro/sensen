@@ -49,6 +49,9 @@ mécanisme, zéro système supplémentaire — les villages paraissent vivants.
 
 **Meubles comme nœuds du graphe ([[Meubles]]) :** lits, étals, garde-mangers, tables — *requis pour l'habitat et les POI du graphe E.18*.
 
+> [!success] Partiellement codé — trace ajoutée le 2026-09-04
+> Le LOD 1 existe : la fenêtre 3×3 de cellules autour du joueur est simulée (`Monde`, `_verifier_fenetre`), le reste du monde avance par semaines abstraites (`_tiquer_monde`, `_semaine_territoire`). Le **LOD 2** décrit ici — un graphe de POI où les PNJ voyagent hors fenêtre — **n'est pas codé** ; les villages hors fenêtre sont figés.
+
 ## Liens
 - **Dépend de** : [[IA des créatures]], [[Détection de pièces]], [[Boucle de tick]]
 - **Alimente** : [[Abstraction hors-site]], [[Villages PNJ — repeuplement et décimation]], [[Raids et menaces]]

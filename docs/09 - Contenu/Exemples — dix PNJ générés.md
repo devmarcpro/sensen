@@ -179,6 +179,9 @@ Générer pour de vrai a trouvé cinq manques que la relecture n'avait pas vus. 
 
 **Pendant pour les objets :** [[Exemples — dix objets générés]].
 
+> [!success] Vérifiable — trace ajoutée le 2026-09-04
+> Ces dix PNJ sont des exemples de ce que `Etres.creer_personnage()` et `Noms.generer()` produisent ; ils ne sont pas des données du jeu. `sonde_espece` et `verif_classes` génèrent les leurs à chaque passe.
+
 ## Liens
 - **Dépend de** : [[Blocs de l'être]], [[Schéma créature]], [[Les trois axes — race, classe, fonction]], [[Loci — les dix types]]
 - **Alimente** : [[Décision — Pipeline de contenu]], [[Profils de PNJ]], [[Apparence — données et équipement]]

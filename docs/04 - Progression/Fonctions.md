@@ -68,6 +68,9 @@ La classe d'un PNJ est tirée dans un **pool restreint par sa fonction** ([[Tale
 
 Les **11 postes de travail figés** de [[Défense et raids]] deviennent ce catalogue, avec deux changements : `vendeur` devient **commerçant**, et `forgeron` devient **artisan** (le métal vient désormais de la classe). Tout le reste — mapping vers une compétence, rendement, assignation — est inchangé.
 
+> [!success] Codé à l'étape 9 (2026-08-28) — trace ajoutée le 2026-09-04
+> `data/functions/` (le portefeuille des fonctions) et le champ `fonction` des créatures civiles ; les routines par fonction sont dans les profils d'IA (`_cible_routine`).
+
 ## Liens
 - **Dépend de** : [[Les trois axes — race, classe, fonction]], [[Blocs de l'être]]
 - **Alimente** : [[Population et exploitation]], [[Abstraction hors-site]], [[Talents de classe]], [[Schéma créature]]

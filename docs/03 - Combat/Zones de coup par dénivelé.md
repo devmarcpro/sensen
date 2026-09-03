@@ -27,6 +27,9 @@ Pour tout ce qui **n'a pas de zone** (explosions, sorts de zone, auras, environn
 
 **Affixes déclencheurs :** « au coup en [zone] : [étourdit/saigne] » ([[Loot — affixes, gemmes et rareté]]).
 
+> [!success] Codé depuis l'étape 0 — trace ajoutée le 2026-09-04
+> `Regles.zone_de_coup()` choisit la zone frappée selon le dénivelé attaquant → cible (la tête depuis le haut, les jambes depuis le bas), jamais visée ; l'armure se lit par zone (`piece_zone()`), et chaque pièce couvre les segments du rig qu'elle protège.
+
 ## Liens
 - **Dépend de** : [[Hauteur de terrain ±10]], [[Combat tactique sur grille]]
 - **Alimente** : [[Armure par zone et constructions]], [[Équipement — 14 slots]], [[Pipeline de résolution du combat]]

@@ -31,6 +31,9 @@ action, et elle est FRONTALE : flanc et dos l'ignorent.
 > [!success] Décidé le 2026-08-26 — le « front » sur une grille à 8 voisines
 > L'orientation d'un être est la direction de son dernier déplacement ou de sa dernière attaque. Un coup vient du **front** s'il arrive des **3 tuiles devant** (angle ≤ 45°), du **flanc** pour les **2 tuiles latérales** (90°), du **dos** pour les **3 tuiles arrière**. La garde simple ne tient que de front ; la garde-bouclier tient front + flancs. Tomber à **zéro d'endurance à l'impact** fait tomber la garde (et la reprendre est impossible tant qu'on est à zéro). La garde est levée par toute action de son porteur, déplacement compris.
 
+> [!success] Codé depuis l'étape 0 — trace ajoutée le 2026-09-04
+> La garde est une posture qui dure jusqu'à la prochaine action (`e.garde`), frontale (`Regles.garde_tient()` : front, flancs avec bouclier, jamais le dos), payée à l'impact (`cout_garde_impact()`, `vigueur.garde_impact_base`). La suite vérifie « garde frontale », « garde-bouclier : front + flancs, tient la lourde », « coup dans le dos ».
+
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Endurance]], [[Action-time à ticks]]
 - **Alimente** : [[Attaque lourde et télégraphe]], [[Armure par zone et constructions]]

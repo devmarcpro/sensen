@@ -20,6 +20,9 @@ où les sources de modificateurs sont : équipement ([[Effets d'équipement pass
 
 **Affixes ([[Loot — affixes, gemmes et rareté]]) :** implémentés en StatModifiers avec la source `affixe:<uid>`.
 
+> [!success] Codé — trace ajoutée le 2026-09-04
+> `Etres.recalculer()` : `stats_eff = (base + Σ add) × Π mult`, en lisant les affixes passifs équipés et les statuts (`add_statuts`, `mult_statuts`) ; la suite vérifie qu'un affixe +3 Force change l'effective et pas la base.
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Data-driven design]]
 - **Alimente** : [[Effets d'équipement passifs]], [[Statuts]], [[Nourriture, potentiel et potions]], [[Loot — affixes, gemmes et rareté]]

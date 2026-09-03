@@ -70,6 +70,9 @@ métal → `{metal:1}` · bois, végétal/fibre → `{bois:1}` · roche, terre, 
 
 **Suivent la règle sans surcharge (vérifié)** : tous les bois et fibres (Bois), tous les métaux purs (Métal), toutes les roches non volcaniques, terres et minéraux restants (Terre), eau/eau salée/boue (Eau), cuir/fourrure/laine/soie (Bois — parti pris assumé : la fibre prime sur l'origine animale), papier/chaume (Bois), Lapis-lazuli/Turquoise/Fluorine/Calcite/Mica/Graphite/Amiante/Phosphorite/Ocre/Argile réfractaire (Terre).
 
+> [!success] Codé — trace ajoutée le 2026-09-04
+> Chaque matériau porte son vecteur `wuxing` dans sa fiche (`data/materials/`), et une arme assemblée prend le vecteur de sa matière (arme mixte : vecteur complet, choix du segment). Les surcharges décidées ici sont les valeurs des fiches.
+
 ## Liens
 - **Dépend de** : [[Wu Xing hors combat]], [[Schéma matériau]], [[Matériaux — 13 stats]]
 - **Alimente** : [[Craft compositionnel]], [[Stats et qualité de l'assemblage]], [[Domination et multiplicateurs]], [[Catalogue matériaux — Gemmes]]

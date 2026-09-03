@@ -23,6 +23,9 @@ L'action qui brise la garde — et le gain décisif de la direction tactique : l
 > [!success] Décidé le 2026-08-26 — quand se résout une action télégraphée
 > Une action télégraphée (attaque lourde, action de créature > 10 ticks, canalisation) est **engagée** à la décision — le compteur est poussé de son coût, l'intention et sa zone deviennent visibles — et **résolue à l'échéance**, quand le compteur revient : la cible a donc tout ce temps pour bouger, prendre la garde ou interrompre ([[Décision — Chaîne côté ennemis]]). Si la cible n'est plus à portée ou en vue à l'échéance, le coup passe dans le vide. Une action **non** télégraphée (≤ 10 ticks) se résout **immédiatement**, son coût est le temps de récupération. C'est ce qui rend le tempo rapide « sans préavis » et le tempo lourd lisible.
 
+> [!success] Codé depuis l'étape 0 — trace ajoutée le 2026-09-04
+> `Regles.ticks_attaque()` double les ticks d'une lourde (`actions.lourde_mult_ticks`) et `degats_arme()` multiplie ses dégâts (`lourde_mult_degats`) ; toute action plus longue que `actions.telegraphe_seuil_ticks` est télégraphiée (`est_telegraphee()`) — visible de tous, interruptible — et le composeur avertit dès qu'un sort passe le seuil.
+
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Garde en posture]], [[Boucle de tick]]
 - **Alimente** : [[Jauge de chaîne Wu Xing]], [[Sorts cataclysmiques]]

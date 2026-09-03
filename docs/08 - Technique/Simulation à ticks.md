@@ -24,6 +24,9 @@ Tous les systèmes (combat, mana [[Mana]], faim [[Faim]], IA, croissance des cul
 
 **Timer wheel ([[Simulation du monde — performance]]) :** cultures, faim PNJ et timers ne tournent pas par tick — chaque instance stocke son échéance et s'enregistre dans une timer wheel globale.
 
+> [!success] Codé depuis l'étape 0 — trace ajoutée le 2026-09-04
+> `Simulation.pas()` avance l'horloge, résout ce qui est dû dans un lot simultané (`lot_simultane`), applique les intentions ; le client fait `pas("monde")` en exploration et laisse le combat en temps à l'action. Le budget « tick < 8 ms » est mesuré par `test_budgets`.
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Action-time à ticks]], [[Contraintes permanentes]]
 - **Alimente** : [[Boucle de tick]], [[Réseau]], [[Simulation du monde — performance]]

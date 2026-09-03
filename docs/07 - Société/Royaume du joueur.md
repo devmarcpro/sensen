@@ -20,6 +20,9 @@ La destination naturelle d'une partie : passer d'aventurier à bâtisseur de roy
 
 **Boucle endgame ([[Boucle de jeu]]) :** Claim de territoire → recrutement/assignation de PNJ → exploitation automatisée → richesse et rangs de guilde → expansion, halls de guilde, diplomatie, défense contre les raids.
 
+> [!success] Codé à l'étape 10 (2026-08-28) — trace ajoutée le 2026-09-04
+> Claims contigus payés en or (`revendiquer`, `Monde.claims`), rôles de case, résidents et lits, production et entretien hebdomadaires (`_semaine_territoire`), défense et raids (`_jet_raid`), gouvernance (`changer_gouvernance`), conquête (`_conquerir`) — écran de gestion K.
+
 ## Liens
 - **Dépend de** : [[Claims et persistance]], [[Boucle de jeu]]
 - **Alimente** : [[Expansion territoriale]], [[Population et exploitation]], [[Halls de guilde]], [[Gouvernance, lois et diplomatie]], [[Défense et raids]], [[Entretien et taxes]]

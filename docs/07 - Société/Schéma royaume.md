@@ -45,6 +45,9 @@ Le format de données d'un royaume : gouvernance, culture, territoire, taxes, ta
 
 **Création pour le joueur ([[Défense et raids]]) :** une entrée B.9 est créée pour le joueur au seuil de 8+ cellules claim ET 5+ PNJ résidents.
 
+> [!success] Codé à l'étape 10 — trace ajoutée le 2026-09-04
+> Le royaume du joueur est `territoire` sur la simulation (claims, stocks, trésor, résidents, commande, cultures) et les royaumes PNJ sont dans `Monde` (`royaumes_secteur`, `royaume_de`, capitales et dirigeants — `_semaine_royaumes_pnj`).
+
 ## Liens
 - **Dépend de** : [[Gouvernance, lois et diplomatie]], [[Data-driven design]], [[Culture de nommage — schéma]]
 - **Alimente** : [[Lois et infractions]], [[Génération des royaumes PNJ]], [[Barèmes économiques]], [[Familles et succession]], [[Défense et raids]]

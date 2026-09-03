@@ -34,6 +34,9 @@ Coopératif host-and-join, 4 à 8 joueurs, PvP restreint au duel consenti.
 
 **Détail technique :** [[Réseau]] et [[Réseau et sauvegarde — performance]].
 
+> [!success] Étape 11 — non commencé, trace ajoutée le 2026-09-04
+> Rien du transport réseau n'est écrit, et c'est voulu : l'étape 11 attend le jugement humain du solo ([[Ordre de construction]]). Ce que la note range en « solo déjà compatible » (simulation déterministe, host autoritaire, mutations de tuiles discrètes — `tile_changed`) est en place.
+
 ## Liens
 - **Dépend de** : [[Contraintes permanentes]], [[Construction cadrée]], [[Temporalités parallèles]]
 - **Alimente** : [[Réseau]], [[Sauvegarde]], [[Début de partie]]

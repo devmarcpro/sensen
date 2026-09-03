@@ -16,6 +16,9 @@ Ce que le temps réel ne permettait pas de concevoir proprement, et qui devient 
 
 **Rappel des dégâts de chute ([[Hauteur de terrain ±10]]) :** `−3 et plus → chute autorisée, dégâts = (hauteur − 2) × 5`. C'est ce qui rend la poussée dans le vide réellement létale.
 
+> [!success] Codé — trace ajoutée le 2026-09-04
+> Les familles décrites ici (projectiles, lignes, cônes, zones au sol, déplacements, invocations) sont toutes des combinaisons de formes, portées et noyaux du catalogue ; `test_modules.tscn` assemble et exécute chaque forme avec chaque noyau — dix mille plans, aucun refus. La note reste la lecture « par famille » du même vocabulaire.
+
 ## Liens
 - **Dépend de** : [[Six types de modules et assemblage]], [[Vocabulaire des modules — six axes]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[Modules]], [[Sorts cataclysmiques]]

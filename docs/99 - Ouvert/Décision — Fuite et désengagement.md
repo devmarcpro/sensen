@@ -27,6 +27,9 @@ La nuit donne +4 au jet de Discrétion ([[Cycle jour-nuit et sommeil]]).
 
 **Cohérence :** les actions `fuir(...)` des profils utility ([[IA des créatures]]) utilisent les mêmes seuils en sens inverse — une bête qui fuit le joueur est semée par les mêmes règles.
 
+> [!success] Codé — trace ajoutée le 2026-09-04
+> Chaque être a un point d'ancrage (`e.ancre`) ; le désengagement rend la fin de combat (`fin_combat`), l'IA fuit sous son seuil (`fuite` dans les profils) et revient à l'ancre, l'aggro s'oublie avec le temps ([[IA des créatures]], 2026-09-03).
+
 ## Liens
 - **Dépend de** : [[Temporalités parallèles]], [[IA des créatures]], [[Jet de compétence universel]], [[Trous connus du combat]]
 - **Alimente** : [[Combat tactique sur grille]], [[Action-time à ticks]]

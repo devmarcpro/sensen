@@ -39,7 +39,7 @@ func _ready() -> void:
 	grille_slots.add_theme_constant_override("h_separation", 6)
 	grille_slots.add_theme_constant_override("v_separation", 6)
 	rangee_haute.add_child(grille_slots)
-	for slot in ["main_principale", "main_secondaire", "casque", "cuirasse", "brassards", "jambieres", "bottes", "dos", "anneau_1", "anneau_2", "amulette", "carquois", "accessoire_1", "accessoire_2"]:
+	for slot in Array(GameData.config("combat_rules").equipement.slots):
 		var c := CaseSlot.new()
 		c.inventaire = self
 		c.slot = slot
@@ -138,7 +138,7 @@ func reconstruire() -> void:
 	for c in cases.values():
 		c.uid = ""
 		c.index = -1
-	var slots_ordre: Array = ["main_principale", "main_secondaire", "casque", "cuirasse", "brassards", "jambieres", "bottes", "dos", "anneau_1", "anneau_2", "amulette", "carquois", "accessoire_1", "accessoire_2"]
+	var slots_ordre: Array = Array(GameData.config("combat_rules").equipement.slots)
 	var k := 0
 	for en in ecrans.entrees:
 		var kind := str(en.get("kind", ""))

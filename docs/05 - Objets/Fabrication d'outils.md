@@ -23,6 +23,9 @@ La voie de base du craft : une recette qui demande des catégories de matériaux
 
 **Objets craftés simples et effets ([[Effets d'équipement passifs]]) :** les objets craftés simples n'ont **pas** d'effets par défaut — les effets apparaissent sur le loot généré.
 
+> [!success] Codé à l'étape 6 — trace ajoutée le 2026-09-04
+> Les outils sont des objets assemblés comme les armes (`items/outil/`, tête d'outil `tete_outil` à matériau libre + manche) ; la pioche, la pelle, la faucille, le seau existent et leurs verbes sont dans `combat_rules.outils_verbes`.
+
 ## Liens
 - **Dépend de** : [[Catégories de matériaux]], [[Qualité d'artisanat]], [[Stations de transformation]]
 - **Alimente** : [[Schéma objet et recette]], [[Stats d'un objet crafté]]

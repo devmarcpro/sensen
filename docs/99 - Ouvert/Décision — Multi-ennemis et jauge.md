@@ -22,6 +22,9 @@ etape: 0
 - La géométrie borne d'elle-même : 8 tuiles adjacentes maximum, et chaque attaquant occupe sa tuile ([[Familles de capacités de la grille]] : une créature occupe une tuile).
 - Aucune règle d'exception à écrire — cohérent avec le principe des contraintes structurelles ([[Jauge de chaîne Wu Xing]]).
 
+> [!success] Codé — trace ajoutée le 2026-09-04
+> Une capacité qui touche plusieurs cibles pose **un seul** segment de chaîne (`_poser_segment`, une fois par capacité), et la jauge se résout sur la cible désignée ; les tests « Ligne + Frappe + Concentration » et ceux de la chaîne le couvrent. La question « limite d'ennemis au contact » reste dans [[À juger — parcours de jeu]].
+
 ## Liens
 - **Dépend de** : [[Jauge de chaîne Wu Xing]], [[Garde en posture]], [[Trous connus du combat]]
 - **Alimente** : [[XP de combat]], [[Six types de modules et assemblage]], [[Loot — affixes, gemmes et rareté]]

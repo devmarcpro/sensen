@@ -35,6 +35,9 @@ Tous les malus/bonus chiffrés de [[Habitat des PNJ]] (−15 sans logement, −5
 - **Surface minimale : 6 tuiles** (et non 4). En isométrique, une pièce de 2×2 avec un meuble et une porte est illisible ; 6 tuiles (2×3) est le plus petit espace qui se lit comme une chambre. Le strict équivalent volumétrique cède devant la lisibilité — c'est le principe de [[Direction artistique]].
 - **Bonus de taille : +5 à partir de 12 tuiles** (3×4) — assez grand pour se distinguer nettement du minimum.
 
+> [!success] Codé à l'étape 2 — trace ajoutée le 2026-09-04
+> Les salles et connecteurs sont des grilles de caractères 2D (`data/dungeon_rooms/`, `data/dungeon_connectors/`), gardés en données ; depuis le 2026-08-27 les étages sont surtout des rectangles tirés au hasard ([[Génération de donjon]]).
+
 ## Liens
 - **Dépend de** : [[Héritage voxel — audit]], [[Détection de pièces]], [[Habitat des PNJ]], [[Construction cadrée]]
 - **Alimente** : [[Villages PNJ — repeuplement et décimation]], [[Conquête de village]], [[Quêtes et guildes]]
