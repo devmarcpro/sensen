@@ -66,7 +66,7 @@
     }
   },
   "poids_par_profondeur": {
-    "_doc": "poids de tirage [commun, inhabituel, rare, exceptionnel] par étage ; au-delà du dernier, la dernière ligne",
+    "_doc": "poids de tirage [commun, inhabituel, rare, exceptionnel] par NIVEAU DE DONJON ; au-dela de la derniere ligne, la derniere ligne. La table s'arretait au niveau 4 (et le code y plafonnait EN DUR) : la rarete du butin etait donc plate du niveau 5 au niveau 90, mesuree a 15 % d'exceptionnel partout, alors que la carte propose des donjons jusqu'au niveau 90. Etendue le 2026-09-03 pour que la rarete monte encore, doucement, sur toute la portee du monde. Les lignes 0 a 4 sont INCHANGEES : le debut de partie, que tout le monde joue, se comporte exactement comme avant.",
     "0": [
       70,
       25,
@@ -96,6 +96,48 @@
       35,
       30,
       15
+    ],
+    "6": [
+      15,
+      32,
+      33,
+      20
+    ],
+    "9": [
+      10,
+      28,
+      37,
+      25
+    ],
+    "13": [
+      7,
+      24,
+      39,
+      30
+    ],
+    "18": [
+      5,
+      20,
+      40,
+      35
+    ],
+    "25": [
+      3,
+      16,
+      41,
+      40
+    ],
+    "40": [
+      2,
+      12,
+      41,
+      45
+    ],
+    "60": [
+      1,
+      9,
+      40,
+      50
     ]
   },
   "contenants": {

@@ -23,7 +23,16 @@ func _init(p_regles: Dictionary, p_affixes: Dictionary, p_items: Dictionary, p_e
 ## La rareté tirée pour une profondeur (grille de rareté suivant l'étage).
 func rarete_pour(profondeur: int, rng: RandomNumberGenerator) -> String:
 	var table: Dictionary = regles.poids_par_profondeur
-	var cle := str(mini(profondeur, 4))
+	# Le plafond etait ECRIT EN DUR : `mini(profondeur, 4)`. Ajouter des lignes a la table ne servait
+	# donc a rien — un donjon de niveau 90 tirait sa rarete sur la ligne du niveau 4, et la rarete du
+	# butin etait plate de bout en bout (mesure du 2026-09-03 : 15 % d'exceptionnel au niveau 5 comme au
+	# niveau 90). C'est aussi un nombre de gameplay en dur, ce que les contraintes du projet interdisent.
+	# On prend desormais la plus haute ligne que la TABLE declare, et le plafond redevient une donnee.
+	var plafond := 0
+	for k in table.keys():
+		if str(k).is_valid_int():
+			plafond = maxi(plafond, int(k))
+	var cle := str(mini(profondeur, plafond))
 	while not table.has(cle) and int(cle) > 0:
 		cle = str(int(cle) - 1)
 	var poids: Array = table.get(cle, [70, 25, 5, 0])

@@ -56,7 +56,18 @@ Quatre axes de progression, quatre plateaux, quatre causes distinctes :
 
 Pendant ce temps, la profondeur, elle, continue : cinq étages à niveau 15, **vingt-quatre** à niveau 90.
 
-**Les leviers** : étirer les cinq paliers existants pour couvrir la carte (cinq chiffres, aucun contenu) ; ajouter des paliers 6 et 7 (du contenu) ; plafonner la courbe de niveau du monde ; ou assumer le plateau et faire porter la fin de partie par autre chose — qualité et affixes ne le font pas aujourd'hui, c'est mesuré.
+> [!check] Résolu à moitié le 2026-09-03 — **le plafond de rareté était écrit en dur dans le code**
+> La table `poids_par_profondeur` s'arrêtait à la ligne 4, mais surtout le générateur y **plafonnait en dur** : `mini(profondeur, 4)`. Ajouter des lignes n'aurait rien fait — un donjon de niveau 90 tirait sa rareté sur la ligne du niveau 4. C'était aussi un nombre de gameplay en dur, ce que les contraintes du projet interdisent. Le plafond est redevenu une **donnée** : le code prend la plus haute ligne que la table déclare.
+> **La table est étendue jusqu'au niveau 60**, et les lignes 0 à 4 sont **inchangées** — le début de partie, que tout le monde joue, se comporte exactement comme avant. Mesure après coup :
+>
+> | niveau | 1 | 5 | 15 | 25 | 50 | 90 |
+> |---|---|---|---|---|---|---|
+> | exceptionnel | 1 % | 15 % | **29 %** | **42 %** | 43 % | **51 %** |
+> | objets à affixe | 5 % | 20 % | **34 %** | **40 %** | 41 % | **44 %** |
+>
+> Deux des quatre axes progressent donc de nouveau sur toute la portée du monde. **Le palier de matière reste plat** après le niveau 14 : celui-là demande soit d'étirer les cinq paliers existants — ce qui appauvrirait le début de partie — soit d'écrire des matières de palier 6 et 7. C'est du contenu et un choix de fond : il reste au designer.
+
+**Les leviers pour le palier de matière** : étirer les cinq paliers existants (cinq chiffres, mais le début de partie s'appauvrit) ; ajouter des paliers 6 et 7 (du contenu à écrire) ; ou plafonner la courbe de niveau du monde.
 
 ## 3. Les deux échelles de niveau ne parlent pas la même langue
 
