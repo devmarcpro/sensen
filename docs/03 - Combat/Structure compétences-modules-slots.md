@@ -129,6 +129,8 @@ Monter un module en niveau le rend plus puissant ET moins coûteux (puissance : 
 > **Ce que ça donne** : la volonté passe de 70 à 56 noyaux, le charisme de 2 à **16**. Le déséquilibre ne disparaît pas — la volonté garde tous les élémentaires et tout le terrain — mais le charisme cesse d'être une voie sans répertoire.
 > **Ce que ça ne règle pas, et qu'il faut dire** : la perception reste à 2 et l'endurance à 4. Elles n'ont pas d'équivalent naturel dans le catalogue actuel, qui a été écrit avant que les six voies existent. Là, il faudra écrire du contenu — ou assumer que ces voies s'expriment par les armes plutôt que par les sorts.
 
+> [!note] Réglages — `combat_rules.monnaies.liste` : les monnaies qu'un plan de capacité peut porter et que `_payer` sait payer (mana, vigueur, sang_froid, sante, or) ; le code et les tests la lisent au même endroit. `combat_rules.soins.reserve_seuil_pct` : le seuil de PV sous lequel le noyau Réserve se déclenche. Pointeur ajouté le 2026-09-04.
+
 ## Liens
 - **Dépend de** : [[Combat tactique sur grille]], [[Progression par l'usage]]
 - **Alimente** : [[Six types de modules et assemblage]], [[Mana]], [[Vocabulaire des modules — six axes]]

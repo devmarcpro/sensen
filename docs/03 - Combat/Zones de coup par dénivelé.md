@@ -30,6 +30,8 @@ Pour tout ce qui **n'a pas de zone** (explosions, sorts de zone, auras, environn
 > [!success] Codé depuis l'étape 0 — trace ajoutée le 2026-09-04
 > `Regles.zone_de_coup()` choisit la zone frappée selon le dénivelé attaquant → cible (la tête depuis le haut, les jambes depuis le bas), jamais visée ; l'armure se lit par zone (`piece_zone()`), et chaque pièce couvre les segments du rig qu'elle protège.
 
+> [!note] Réglages — `combat_rules.zones` : `plus_haut`, `egal`, `plus_bas` (la zone frappée selon le dénivelé) et `moyenne`. Pointeur ajouté le 2026-09-04 : aucune note ne nommait le bloc.
+
 ## Liens
 - **Dépend de** : [[Hauteur de terrain ±10]], [[Combat tactique sur grille]]
 - **Alimente** : [[Armure par zone et constructions]], [[Équipement — 14 slots]], [[Pipeline de résolution du combat]]

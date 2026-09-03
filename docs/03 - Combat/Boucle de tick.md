@@ -53,6 +53,8 @@ Le temps calendaire (jour/nuit, semaine in-game) est un compteur de ticks :
 > [!success] Corrigé le 2026-08-31 — le donjon ne gèle plus entre deux actions du joueur
 > **Retour du designer** : « le jeu lague énormément en donjon, ça galère à calculer tous les PNJ ? ». Ce n'était pas le calcul : le client faisait avancer l'horloge du monde en mode action **au même rythme de lisibilité que les combats** (un pas toutes les 0,12 s) — or chaque « attend » de chaque PNJ de l'étage consomme un pas : 30 PNJ ≈ 4 secondes de gel réel après chaque action du joueur, d'autant plus long que l'étage est peuplé. Désormais l'horloge du monde se vide **chaque image** (jusqu'à ce qu'elle bute sur le joueur, garde-fou de 128 pas) ; les horloges de combat gardent leur cadence de 0,12 s, qui est un choix de lisibilité des coups. Le coût CPU réel d'un pas de simulation est mesuré par `test_budgets` (< 8 ms). La question C++/GDExtension ([[Vers la production]] 5) reste ouverte mais rien ne la justifie à ces mesures.
 
+> [!note] Réglages — `combat_rules.ticks_par_seconde_exploration` (10) : la vitesse de l'horloge du monde en exploration, hors combat. Pointeur ajouté le 2026-09-04.
+
 ## Liens
 - **Dépend de** : [[Action-time à ticks]], [[Simulation à ticks]]
 - **Alimente** : [[Pipeline de résolution du combat]], [[Endurance]], [[Mana]], [[Faim]], [[Cycle jour-nuit et sommeil]], [[Dérive de la corruption]]

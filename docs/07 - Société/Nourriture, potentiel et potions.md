@@ -35,6 +35,8 @@ POTION : intensité = effet_base * qualite_potion (A.3, Alchimie)
 > [!success] Corrigé le 2026-08-30 — l'huile d'arme ne brûlait qu'avec une arme de Feu
 > Le bonus de l'huile (`degats_element_bonus`) était lu **par l'élément dominant de l'arme** : une huile de Feu sur une dague de fer (Métal) n'ajoutait jamais son `1d4`. Le test qui devait le garantir comparait quarante coups « avec » à quarante coups « sans » — deux distributions identiques, donc un tirage à pile ou face qu'il avait gagné jusqu'ici ; un décalage du générateur l'a fait perdre, et le bug est apparu. Les dés de l'huile s'ajoutent désormais **quel que soit l'élément de l'arme** — c'est une couche sur la lame, pas une affinité. Le bonus des plats (`degats_element`) reste lié à l'élément de l'arme : un plat aligne, une huile enduit.
 
+> [!note] Réglages — `combat_rules.cru_facteur` (0,5) : ce que vaut un aliment mangé cru par rapport au plat cuisiné. Pointeur ajouté le 2026-09-04.
+
 ## Liens
 - **Dépend de** : [[Cuisine et alchimie]], [[Qualité d'artisanat]], [[Potentiel]], [[Faim]]
 - **Alimente** : [[Potions]], [[Nourriture]], [[Statuts]]

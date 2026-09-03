@@ -30,6 +30,8 @@ vol/discrétion, désamorçage, etc. UNE grammaire pour tout le jeu.
 > [!success] Constaté codé le 2026-08-31 — la grammaire vit, la note n'avait pas de callout
 > Le jet universel est bien la résolution hors combat, vérifié site par site : **conquête** (`1d20 + Leadership/2 + Charisme/4`), **dressage** (`1d20 + Dressage/2 + Charisme/4`), **détection d'infraction** (jet opposé Perception/2 du témoin contre Discrétion du joueur — le +4 de nuit vient du cycle), **négociation** (`1d20 + Charisme/4` contre `commerce.parler_charisme_dd`), bras de fer du courant (`Force/2` opposé). La **capture d'élevage** emploie sa compétence à taux plein + palier — c'est le callout de sa propre note qui l'emporte, comme la règle du coffre le veut. Les degrés (succès supérieur à +10, échec grave à −10) restent à brancher là où une table d'effets aggravés existera.
 
+> [!note] Réglages — l'apprivoisement, un jet universel parmi d'autres : `combat_rules.apprivoisement` (`dd_base`, `bonus_50`, `bonus_25` — le bonus sous la moitié et sous le quart des PV). Pointeur ajouté le 2026-09-04.
+
 ## Liens
 - **Dépend de** : [[Pipeline de résolution du combat]], [[Progression par l'usage]], [[Stats de personnage]]
 - **Alimente** : [[Lecture des livres]], [[Apprivoisement et recrutement]], [[Conquête de village]], [[Lois et infractions]], [[IA des créatures]]

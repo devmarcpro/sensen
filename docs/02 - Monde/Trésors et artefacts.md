@@ -27,6 +27,8 @@ Une catégorie d'objets à part : très rares, non craftables, non sculptables, 
 > [!success] Codé le 2026-08-28 — trois effets uniques hors pools
 > Gabarits `affixes/unique_*.json`, tag **`artefact_seulement`** : le générateur ne les tire que pour la rareté `artefact` (jamais sur un objet commun, même « très rare »). **Second souffle** (toute pièce) : une fois par combat, quand un coup laisse le porteur sous 20 % de PV, il regagne 30 % de ses PV max (réarmé à l'engagement). **Vol de mana** (arme) : chaque coup rend `pct` % des dégâts en mana. **Chaîne éternelle** (anneau, amulette) : la jauge de chaîne **ne décroît plus** entre deux coups. Décision : pas de fourchette poussée pour ces trois-là — l'effet *est* la rareté ; leur nombre reste petit (3 gabarits, 41 en tout) pour qu'un artefact se reconnaisse.
 
+> [!note] Réglages — les effets uniques hors pools : `combat_rules.uniques` (`second_souffle_seuil_pct`, le seuil sous lequel Second souffle se déclenche, une fois par combat). Pointeur ajouté le 2026-09-04.
+
 ## Liens
 - **Dépend de** : [[Carte du monde]], [[Donjons — structure et intégration]]
 - **Alimente** : [[Loot — affixes, gemmes et rareté]], [[Quêtes et guildes]]
