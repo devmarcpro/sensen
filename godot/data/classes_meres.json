@@ -14,10 +14,8 @@
     "name_key": "classe_mere.rodeur.name",
     "stat": "dexterite",
     "sous_classes": [
-      "l_engrenage",
       "l_ombre",
       "la_meche",
-      "la_trace",
       "le_masque"
     ]
   },
@@ -44,6 +42,8 @@
     "name_key": "classe_mere.erudit.name",
     "stat": "perception",
     "sous_classes": [
+      "l_engrenage",
+      "la_trace",
       "le_creuset"
     ]
   },
