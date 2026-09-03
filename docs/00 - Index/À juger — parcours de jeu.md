@@ -253,3 +253,23 @@ Un callout daté dans la note liée (`> [!success] Tranché le <date>`) — la b
 > **La vraie cause** : `puissance_creature`, que j'avais écrite pour le plafond de l'étage 1, compte les stats et le NOMBRE d'actions — et **ignore l'équipement**. Un bandit en cuirasse avec une épée marquait donc exactement le même score qu'un bandit à mains nues. Il passe désormais de **25 à 42** et quitte l'étage 1, dont le plafond est 26.
 > **Effet mesuré** : le robot nu descend un étage au lieu de zéro ; à trois objets sans sorts, il descend et finit **à 68/68 PV** avec vingt tués contre zéro auparavant.
 
+> [!bug] 2026-09-03 — **le monde va jusqu'au niveau 90, le butin s'arrête au niveau 15**
+> Mesuré sur 500 tirages par niveau, avec la sonde de butin étendue aux niveaux lointains :
+>
+> | niveau du donjon | P1 | P2 | P3 | P4 | P5 | dureté moyenne | valeur moyenne |
+> |---|---|---|---|---|---|---|---|
+> | 10 | 25 % | 23 % | 22 % | 30 % | **0 %** | 31,1 | 31,7 |
+> | 15 | 24 % | 22 % | 20 % | 27 % | 8 % | 49,6 | 49,3 |
+> | 25 | 24 % | 20 % | 19 % | 28 % | 9 % | 53,4 | 52,6 |
+> | 50 | 23 % | 22 % | 19 % | 26 % | 10 % | 49,1 | 50,2 |
+> | **90** | 24 % | 22 % | 20 % | 24 % | 10 % | 54,0 | 54,8 |
+>
+> **À partir du niveau 15, plus rien ne change.** Même répartition de paliers, même dureté, même valeur. La raison est nette : `paliers_materiaux` ouvre le palier 5 à la profondeur **14**, et il n'y a pas de palier 6. Passé ce seuil, tout le catalogue est débloqué et les poids ne bougent plus.
+> **Or le monde, lui, continue.** La sonde du monde mesure la pente : niveau médian **10** à un cinquième de la carte, **25** aux deux cinquièmes, **52** aux trois cinquièmes, **75** au bord (jusqu'à 90). Et la profondeur suit : un donjon de niveau 15 a 5 étages, un de niveau 90 en a **24**. Donc les six septièmes de l'échelle de niveau demandent de plus en plus de travail et ne donnent **rien de mieux**.
+> **Ce que je ne tranche pas — et c'est une vraie fourche de design, pas un réglage** :
+> 1. **étirer les paliers existants** : porter la profondeur minimale du palier 5 de 14 à 60, pour que les cinq paliers couvrent la carte. Cinq chiffres à changer, aucun contenu à écrire ;
+> 2. **ajouter des paliers 6 et 7** avec les matières qui vont avec — c'est du contenu, et ça repousse le plafond plutôt que de l'étirer ;
+> 3. **plafonner le monde** : si un donjon de niveau 90 n'a pas vocation à exister, c'est la courbe de niveau par éloignement qu'il faut raboter, pas le butin ;
+> 4. **assumer que la fin de partie se joue ailleurs** — qualité, affixes, gemmes, Wu Xing — et alors le plateau de matériaux est voulu, mais il faut que ces autres axes montent vraiment, ce que je n'ai pas mesuré.
+> Mon avis, s'il compte : la 1 est la moins chère et la plus sûre ; la 3 est la plus honnête si tu ne veux pas d'un contenu de niveau 90.
+

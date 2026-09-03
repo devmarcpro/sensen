@@ -17,7 +17,14 @@ func _ready() -> void:
 			lister = int(args[i + 1])
 	var s := Simulation.new(4242)
 	s.charger_camp()
+	# `--niveaux a,b,c` : la sonde s'arretait a 25 alors que le monde va jusqu'au niveau 90 (sonde du
+	# monde). On doit pouvoir regarder ce que donne le butin la-bas.
 	var niveaux: Array[int] = [1, 3, 6, 10, 15, 25]
+	for i2 in args.size():
+		if args[i2] == "--niveaux" and i2 + 1 < args.size():
+			niveaux.clear()
+			for part in str(args[i2 + 1]).split(","):
+				niveaux.append(int(part))
 	print("butin par niveau de donjon — %d tirages par niveau" % tirages)
 	for niv in niveaux:
 		var rng := RandomNumberGenerator.new()
