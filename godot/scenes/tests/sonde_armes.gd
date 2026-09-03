@@ -47,7 +47,17 @@ func _ready() -> void:
 			var d_moy: float = absf(float(a.moy) - float(b.moy)) / maxf(1.0, float(a.moy))
 			var d_vit: float = absf(float(a.d.vitesse_base) - float(b.d.vitesse_base)) / maxf(0.1, float(a.d.vitesse_base))
 			var d_por: float = absf(float(a.d.portee) - float(b.d.portee))
-			if d_moy < 0.15 and d_vit < 0.15 and d_por < 1.0 and int(a.d.crit_range) == int(b.d.crit_range):
+			# Les armes MAGIQUES se distinguent aussi par ce qu'elles font aux sorts : puissance canalisee,
+			# element favorise, cout en mana. Sans ces trois axes, la sonde declarait un sceptre de jade
+			# identique a un sceptre ordinaire — ils frappent pareil, mais l'un pousse le Bois de 40 %.
+			var m_a := float(a.d.get("affinite_sorts", {}).get("mana", 1.0))
+			var m_b := float(b.d.get("affinite_sorts", {}).get("mana", 1.0))
+			var el_a := str((a.d.get("affinite_element", {}) as Dictionary).keys())
+			var el_b := str((b.d.get("affinite_element", {}) as Dictionary).keys())
+			var c_a := float(a.d.get("cout_mana_mult", 1.0))
+			var c_b := float(b.d.get("cout_mana_mult", 1.0))
+			var magie_identique: bool = absf(m_a - m_b) < 0.05 and el_a == el_b and absf(c_a - c_b) < 0.05
+			if d_moy < 0.15 and d_vit < 0.15 and d_por < 1.0 and int(a.d.crit_range) == int(b.d.crit_range) and magie_identique:
 				soucis.append("  %s et %s ne se distinguent sur aucun axe" % [a.id, b.id])
 	for s in soucis:
 		print(s)

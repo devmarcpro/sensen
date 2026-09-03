@@ -1,0 +1,22 @@
+{
+  "name_key": "item.craft_baton_de_cendre.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 2,
+  "slots": {
+    "tete": "monture",
+    "manche": "manche_long",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "table_enchantement",
+    "craft_skill": "enchantement"
+  },
+  "genre_grammatical": "ms",
+  "tags": [
+    "arme",
+    "assemble",
+    "magique"
+  ],
+  "functionality": "baton_de_cendre"
+}

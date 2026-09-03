@@ -1,0 +1,19 @@
+{
+  "name_key": "functionality.grimoire_de_main.name",
+  "kind": "arme",
+  "combat_skill": "controle_mana",
+  "crit_range": 20,
+  "hands": 2,
+  "degats_des": "1d3",
+  "vitesse_base": 1.2,
+  "portee": 1.0,
+  "portee_min": 1,
+  "type_degats": "contondant",
+  "volume": 1.8,
+  "genre_grammatical": "ms",
+  "affinite_sorts": {
+    "mana": 1.55,
+    "endurance": 0.5
+  },
+  "poids_reference": 2.16
+}

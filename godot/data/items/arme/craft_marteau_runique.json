@@ -1,0 +1,22 @@
+{
+  "name_key": "item.craft_marteau_runique.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "slots": {
+    "tete": "tete_arme_lourde",
+    "manche": "manche_court",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "forge",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "ms",
+  "tags": [
+    "arme",
+    "assemble",
+    "magique"
+  ],
+  "functionality": "marteau_runique"
+}

@@ -29,7 +29,13 @@ func _ready() -> void:
 	var idx: int = j.capacites.size() - 1
 	var mesures: Array = []
 	print("%-18s %8s %10s %s" % ["arme tenue", "mana", "puissance", "affinite"])
-	for aid in ["", "orbe", "sceptre", "baton_magique", "baguette", "epee", "masse"]:
+	var focus: Array[String] = []
+	for fid in GameData.catalogues.functionalities.keys():
+		var fd: Dictionary = GameData.catalogues.functionalities[fid]
+		if str(fd.get("kind", "")) == "arme" and float(fd.get("affinite_sorts", {}).get("mana", 1.0)) > 1.0:
+			focus.append(str(fid))
+	focus.sort()
+	for aid in ([""] + focus + ["epee", "masse"]):
 		if not aid.is_empty():
 			var it: Dictionary = s.generer_objet("craft_" + aid, 3, {}, "commun", 0)
 			if it.is_empty():
@@ -56,6 +62,25 @@ func _ready() -> void:
 			soucis.append("  %s canalise autant que les mains nues : l'arme physique doit coûter" % lourde)
 	if par.has("orbe") and par.has("epee") and float(par.orbe) / maxf(0.01, float(par.epee)) < 1.5:
 		soucis.append("  l'ecart orbe/epee est de %.2f : trop faible pour qu'on choisisse de canaliser" % (float(par.orbe) / maxf(0.01, float(par.epee))))
+	# Chaque focus doit avoir UNE specificite que nul autre n'a (designer 2026-09-03). On compare les
+	# trois axes qui les separent : la puissance brute, l'element favorise, et le cout en mana. Deux
+	# focus identiques sur les trois sont le meme objet avec deux noms.
+	print("")
+	print("%-20s %6s %-16s %6s %5s %6s" % ["focus", "mana", "element favorise", "cout", "des", "mains"])
+	var vus: Array[String] = []
+	for fid in focus:
+		var fd: Dictionary = GameData.catalogues.functionalities[fid]
+		var el: Dictionary = fd.get("affinite_element", {})
+		var el_txt := "—"
+		for k in el.keys():
+			el_txt = "%s x%.2f" % [str(k), float(el[k])]
+		var sig := "%.2f|%s|%.2f|%d" % [float(fd.affinite_sorts.mana), el_txt, float(fd.get("cout_mana_mult", 1.0)), int(fd.hands)]
+		print("%-20s %6.2f %-16s %6.2f %5s %5d" % [fid, float(fd.affinite_sorts.mana), el_txt, float(fd.get("cout_mana_mult", 1.0)), str(fd.degats_des), int(fd.hands)])
+		if sig in vus:
+			soucis.append("  %s ne se distingue d'aucun autre focus : meme puissance, meme element, meme cout, memes mains" % fid)
+		vus.append(sig)
+	if focus.size() < 4:
+		soucis.append("  seulement %d focus : une famille d'une ou deux armes n'est pas une famille" % focus.size())
 	for x in soucis:
 		print(x)
 	if not soucis.is_empty():

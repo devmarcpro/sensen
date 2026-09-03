@@ -9638,8 +9638,21 @@ func _appliquer_affinite_arme(plan: Dictionary, fonct: Dictionary) -> void:
 	var aff: Dictionary = fonct.get("affinite_sorts", regles.r.get("modules", {}).get("affinite_mains_nues", {"mana": 1.0, "endurance": 1.0}))
 	var monnaie := str(plan.get("monnaie", ""))
 	var f := float(aff.get(monnaie, 1.0)) if not monnaie.is_empty() else 1.0
-	plan["affinite_arme"] = f
-	plan.mult = float(plan.mult) * f
+	# Deux axes de plus pour distinguer les armes magiques entre elles (designer 2026-09-03 : « fais en
+	# sorte qu'elles aient toutes leurs specificites »). Sans eux, dix baguettes ne different que par un
+	# seul chiffre, et neuf d'entre elles n'ont aucune raison d'exister.
+	#   - `affinite_element` : un baton de cendre pousse le Feu et rien d'autre. C'est le Wu Xing qui
+	#     entre dans la main, et ca donne une raison de PORTER PLUSIEURS focus selon le sort qu'on lance.
+	#   - `cout_mana_mult` : un talisman ne rend pas les sorts plus forts, il les rend moins chers —
+	#     donc plus nombreux. C'est l'autre facon de servir un lanceur, et la seule qui reponde au vrai
+	#     goulot mesure le meme jour : six sorts par etage, faute de mana.
+	var el_dom := wuxing.dominante(plan.get("elements", {}) if plan.get("elements") is Dictionary else {})
+	var aff_el: Dictionary = fonct.get("affinite_element", {})
+	var f_el := float(aff_el.get(el_dom, 1.0)) if not el_dom.is_empty() else 1.0
+	plan["affinite_arme"] = f * f_el
+	plan["affinite_element_arme"] = f_el
+	plan["cout_mana_mult_arme"] = float(fonct.get("cout_mana_mult", 1.0))
+	plan.mult = float(plan.mult) * f * f_el
 
 
 ## La fourchette du coût réel d'un plan (« aucun chiffre fixe » : la ressource payée est un jet autour de sa base).
@@ -9852,7 +9865,9 @@ func _payer(e: Dictionary, plan: Dictionary) -> void:
 		_payer(e, plan.charge_suivante)   # la charge différée paie aussi, dans sa propre monnaie
 	match str(plan.monnaie):
 		"mana":
-			var cout := roundi(float(plan.ressource) * mult_mana_lieu(e, plan) * mult_mana_sources(e))   # le lieu module le mana (Wu Xing hors combat)
+			# Le focus tenu peut rendre le sort moins cher (`cout_mana_mult`) : c'est la specificite du
+			# talisman, qui ne frappe pas plus fort mais permet de lancer plus souvent.
+			var cout := roundi(float(plan.ressource) * mult_mana_lieu(e, plan) * mult_mana_sources(e) * float(plan.get("cout_mana_mult_arme", 1.0)))
 			var deficit: int = maxi(0, cout - int(e.mana))
 			e.mana = maxi(0, int(e.mana) - cout)
 			if deficit > 0:

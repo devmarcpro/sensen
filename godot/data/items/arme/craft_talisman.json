@@ -1,0 +1,21 @@
+{
+  "name_key": "item.craft_talisman.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 1,
+  "slots": {
+    "tete": "monture",
+    "fixations": "fixations_std"
+  },
+  "recipe": {
+    "station": "table_enchantement",
+    "craft_skill": "enchantement"
+  },
+  "genre_grammatical": "ms",
+  "tags": [
+    "arme",
+    "assemble",
+    "magique"
+  ],
+  "functionality": "talisman"
+}

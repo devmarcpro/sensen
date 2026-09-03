@@ -2780,3 +2780,15 @@ functionality.sceptre.name,Sceptre
 item.craft_sceptre.name,Sceptre
 functionality.baguette.name,Wand
 item.craft_baguette.name,Wand
+functionality.grimoire_de_main.name,Hand grimoire
+item.craft_grimoire_de_main.name,Hand grimoire
+functionality.talisman.name,Talisman
+item.craft_talisman.name,Talisman
+functionality.baton_de_cendre.name,Ash staff
+item.craft_baton_de_cendre.name,Ash staff
+functionality.sceptre_de_jade.name,Jade sceptre
+item.craft_sceptre_de_jade.name,Jade sceptre
+functionality.trident_rituel.name,Ritual trident
+item.craft_trident_rituel.name,Ritual trident
+functionality.marteau_runique.name,Runic hammer
+item.craft_marteau_runique.name,Runic hammer

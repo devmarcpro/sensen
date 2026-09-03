@@ -1,0 +1,22 @@
+{
+  "name_key": "functionality.baton_de_cendre.name",
+  "kind": "arme",
+  "combat_skill": "controle_mana",
+  "crit_range": 20,
+  "hands": 2,
+  "degats_des": "1d6",
+  "vitesse_base": 1.5,
+  "portee": 1.5,
+  "portee_min": 1,
+  "type_degats": "contondant",
+  "volume": 2.0,
+  "genre_grammatical": "ms",
+  "affinite_sorts": {
+    "mana": 1.15,
+    "endurance": 0.8
+  },
+  "affinite_element": {
+    "feu": 1.4
+  },
+  "poids_reference": 2.4
+}
