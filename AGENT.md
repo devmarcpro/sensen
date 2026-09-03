@@ -12,7 +12,13 @@ Tu travailles sur **Sensen** (森森), un roguelike tactique en monde-planète c
 
 **Les étapes 0 à 10 sont codées et jouables.** On entre dans un donjon, on combat, on loote, on progresse, on ressort ; il y a un monde continu avec des biomes, des royaumes, des villages, des claims, de l'agriculture et de l'élevage. L'étape 11 (coop) attend un jugement humain sur la qualité du solo — elle ne commence pas sans instruction.
 
-Ordres de grandeur au 2026-09-03 : **277 notes** dans le coffre, **203 modules**, **245 matériaux**, **85 créatures**, **20 armes**, une suite de tests d'environ sept minutes, **dix sondes** headless et cinq bancs de mesure.
+Ordres de grandeur au soir du 2026-09-03 : **279 notes** dans le coffre, **216 modules**, **245 matériaux**, **85 créatures**, **36 armes** (six par voie), une suite de tests d'environ sept minutes, **vingt-cinq sondes** headless et cinq bancs de mesure. Dernière pré-version : `v0.4.3-alpha`.
+
+**Le squelette du jeu a changé le 2026-09-03, et il faut le connaître avant de toucher au combat :**
+
+- **Six voies, une par stat** — force le guerrier, dextérité la lame rapide, endurance la ligne, volonté le mage, perception le tireur, charisme le barde. Chaque voie a six armes, une construction d'armure, ses noyaux (`stat` sur chaque noyau, lue par `degats_sort`). Lis `docs/03 - Combat/Structure compétences-modules-slots.md` (callouts du 2026-09-03) et `docs/00 - Index/Synthèse — les six voies, les monnaies et les modules.md`.
+- **Trois monnaies** — `mana` (volonté, invité charisme), `vigueur` (force, invitée endurance ; c'est l'ancienne « endurance », renommée : **la stat s'appelle `endurance`, la monnaie `vigueur`**), `sang_froid` (dextérité, invitée perception ; elle ne monte qu'immobile). Chaque monnaie a un propriétaire dont tout le combat en dépend et un invité qui s'en sert en bonus.
+- **La grille de composition** — un sort se compose en emboîtant les silhouettes de ses modules dans la silhouette de l'arme tenue (`GrilleSort`, `combat_rules.grille`) ; le composeur est un Tetris en glisser-déposer, et **l'ordre de lecture est l'ordre du sort**. C'est la seule borne structurelle de l'assemblage — le « no-limit » reste vrai pour l'assembleur lui-même.
 
 **Tu ne pars donc jamais d'une page blanche.** Le travail est : combler les écarts entre le coffre et le code, répondre à la file du designer, et regarder le jeu avec un œil neuf.
 
@@ -59,7 +65,7 @@ python tools/check_vault.py ; python tools/audit_donnees.py
 python tools/i18n_couverture.py ; python tools/verif_scripts.py ; python tools/verif_doc_code.py
 ```
 
-Plus **les sondes concernées** (`godot/scenes/tests/sonde_*.tscn` : écrans, IA, faune, mine, butin, armes, jet, espèce, journal, monde) et **une capture d'écran réellement regardée** si un écran a changé.
+Plus **les sondes concernées** (`godot/scenes/tests/sonde_*.tscn` : écrans, IA, faune, mine, butin, armes, jet, espèce, journal, monde, noyaux par stat, constructions, perf de génération…), `verif_classes.tscn` (les kits des classes tiennent-ils dans leur grille), `test_modules.tscn` (« essaye tout », dix mille plans) et **une capture d'écran réellement regardée** si un écran a changé.
 
 **Un seul Godot à la fois.** Deux instances en parallèle faussent toute mesure de performance — le budget de génération d'étage a été déclaré cassé à tort pour cette raison.
 
@@ -76,6 +82,9 @@ Plus **les sondes concernées** (`godot/scenes/tests/sonde_*.tscn` : écrans, IA
 - **Le cache des classes Godot** : après avoir ajouté un `class_name`, lancer `--headless --path godot --import` avant que quoi que ce soit compile.
 - **Un exit code 0 ne veut rien dire** : la suite peut finir par `TESTS : N échec(s)` avec un code 0. Lis la dernière ligne.
 - **Ne lance jamais la suite pendant que tu édites un script de test.**
+- **Un renommage qui traverse une frontière de sens ne peut pas être aveugle.** Remplacer `"endurance"` par `"vigueur"` partout a corrompu neuf littéraux de **stats** et laissé un statut bloquer un mot que plus personne n'employait. Liste les formes composées, les receveurs un par un, et mets les autres sens à l'abri d'abord.
+- **Un budget de performance se mesure à chaud, et plusieurs fois.** Le test « étage < 100 ms » passait dans la suite et rougissait lancé seul : il mesurait le démarrage de Godot. Avant de crier à la régression, mesure sur le dépôt d'avant dans un worktree — c'est ce qui a montré que le budget n'avait jamais été tenu.
+- **Une note « à faire » peut être en retard sur le code.** Deux points de la file du designer étaient livrés depuis des jours. Mesure avant de coder ce qu'une note réclame.
 
 ## Versions et pré-releases
 

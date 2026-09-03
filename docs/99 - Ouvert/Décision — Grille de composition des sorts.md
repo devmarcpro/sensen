@@ -1,12 +1,16 @@
 ---
 aliases: ["Grille de composition", "Grille de sort"]
-tags: [ouvert, combat, idee]
+tags: [décidé, combat, codé]
 domaine: combat
-statut: ouvert
+statut: décidé
 etape: 11
 ---
 
-# Décision — Grille de composition des sorts (à instruire)
+# Décision — Grille de composition des sorts
+
+> [!success] Décidé et codé le 2026-09-03, la nuit même
+> Les trois questions ci-dessous ont été tranchées et le tout est codé — voir les trois callouts du 2026-09-03 dans [[Six types de modules et assemblage]]. En bref : **la grille vient de l'arme tenue** (une silhouette par voie, qui grandit avec le niveau de la compétence d'arme) ; **elle s'ajoute au coût** (la grille borne ce qu'on compose, la monnaie ce qu'on lance) ; **la forme d'un module vient de ce qu'il fait** (type et prix en ticks, `combat_rules.grille.formes_par_type`). Et, sur instruction du designer une heure plus tard, **la grille a remplacé l'assembleur** : on fait son Tetris, l'ordre de lecture est l'ordre du sort. Le reste de cette note est l'état de la réflexion avant le code, gardé tel quel.
+
 
 > [!important] L'idée du designer, 2026-09-03
 > « J'ai eu une idée qui permettrait de rendre la composition de capacités plus ludique et
