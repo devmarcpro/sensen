@@ -53,6 +53,7 @@ Les modules ne se craftent pas : ils s'obtiennent en lisant des livres à usage 
 > Deux règles de ce chapitre tombent, sur décision du designer, et le callout le plus récent l'emporte : **les charges de module n'existent plus**. Apprendre un module, c'est le connaître **pour toujours** — plus de munitions, plus de `charges_des`, plus de compte à rebours dans le composeur. Ce qui limite un sort reste le **mana**, l'**endurance**, les **ticks** et la **surchauffe** — les coûts qui se paient à chaque lancer, pas un stock qui s'épuise.
 >
 > Et **tout livre n'enseigne qu'un seul module** : le grimoire « sort en kit » à 2-4 modules disparaît au profit du livre à module unique, déjà en place (`module_unique`), désormais la règle pour le grimoire comme pour le manuel — le domaine et la difficulté continuent de les distinguer. Un livre lu est un module gagné, définitivement, ou un jet raté et un livre perdu.
+> **Ce qui a disparu du code avec cette décision (constaté le 2026-09-03)** : les clés `modules_charges`, `charges_des`, `charges_depart`, `charges_depart_des`, `charges_lues` et `charges_par_module` des callouts du 29 et du 30 août sont périmées — il n'y a plus de compteur de charges, un module connu l'est pour toujours. Les callouts plus anciens restent pour l'histoire de la décision.
 
 ## Liens
 - **Dépend de** : [[Vocabulaire des modules — six axes]], [[Donjons — structure et intégration]]

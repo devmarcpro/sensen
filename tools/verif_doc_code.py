@@ -115,14 +115,23 @@ def main():
         # pas. De meme, une ligne qui dit qu'un nom est ANCIEN (renomme, perime) cite l'ancien nom
         # pour dire qu'il n'existe plus — c'est le contraire d'une promesse.
         historique = ("Héritage" in os.path.basename(chemin)) or ("historique" in texte[:400])
+        # Le coffre ecrit son histoire en callouts dates, et le plus recent gagne : une cle citee dans
+        # un vieux callout puis declaree perimee ou renommee dans un plus recent n'est pas une promesse.
+        # On releve donc d'abord, note par note, les cles que la note elle-meme dit anciennes — sur
+        # une ligne qui parle de renommage, de peremption ou de remplacement — et on les exempte partout
+        # dans cette note. C'est la convention du coffre, pas une tolerance de l'outil.
+        MARQUEURS = ("renomm", "périmé", "perime", "ancien nom", "s'appel", "~~", "→", "->", "devien", "remplac", "retiré", "retire")
+        anciennes = set()
+        for ligne_brute in texte.splitlines():
+            bas = ligne_brute.lower()
+            if any(mq in bas for mq in MARQUEURS):
+                for m2 in RE_CLE_NUE.finditer(ligne_brute):
+                    anciennes.add(m2.group(1))
         for m in RE_CLE_NUE.finditer(texte):
             if historique:
                 break
             cle = m.group(1)
-            debut = texte.rfind("\n", 0, m.start()) + 1
-            fin = texte.find("\n", m.end())
-            ligne = texte[debut:fin if fin >= 0 else len(texte)].lower()
-            if "renomm" in ligne or "périmé" in ligne or "perime" in ligne or "ancien nom" in ligne or "s'appel" in ligne or "~~" in ligne or "→" in ligne or "->" in ligne:
+            if cle in anciennes:
                 continue
             # une cle existe si elle est ecrite entre guillemets (JSON ou chaine de code), comme
             # identifiant nu dans le code, ou comme nom de fichier de donnees
