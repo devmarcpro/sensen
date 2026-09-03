@@ -123,6 +123,19 @@ L'écart reste modéré — 21 % au-dessus de l'épée — mais il va dans le m�
 >
 > Lue avec son arme, la matrice dit autre chose : **avec le seul kit de départ, quatre classes sur six ne tuent rien** en 2 500 images — cinquante-sept coups portés pour zéro tué, c'est un bâton de cuivre à 1d4 et pauvre 0,54, pas un manque de coups. L'Engrenage, lui, s'en sort mieux à l'arc qu'à la lance qu'on lui avait mise. **Quatre classes sur six partent avec le même bâton magique en cuivre** : les kits des classes mères mage, sentinelle, érudit et meneur ne se distinguent pas par l'arme. Deux questions pour le designer, dans [[À juger — parcours de jeu]] : la qualité des armes de départ (pauvre / misérable), et une arme de départ par voie.
 >
+> **Troisième passe, avec les kits alignés sur la voie** (même graine, chaque classe tient l'arme de sa voie) :
+>
+> | classe mère | représentant | arme de départ | coups portés | coups reçus (dégâts) | tués | morts |
+> |---|---|---|---|---|---|---|
+> | guerrier | L'Écarlate | épée en fonte (0,60) | 30 | 21 (45) | 1 | 1 |
+> | érudit | L'Engrenage | arc en plomb (0,48) | 16 | 0 | 1 | 0 |
+> | mage | La Paume | bâton magique en cuivre (0,54) | 35 | 0 | 0 | 0 |
+> | sentinelle | Le Sceau | lance en aluminium (0,56) | 17 | 0 | 0 | 0 |
+> | érudit | Le Creuset | sarbacane en étain (0,63) | 12 | 17 (38) | 1 | 0 |
+> | meneur | La Balance | luth en manganèse (0,60) | **90** | 20 (40) | **0** | 1 |
+>
+> La lecture ne change pas : le kit de départ est trop faible pour tuer au premier étage, quelle que soit la voie. Et une donnée neuve : **la meneuse frappe quatre-vingt-dix fois au luth sans tuer personne** — un instrument est un focus, pas une arme (1d4, pauvre 0,60), et une classe de soutien jouée seule par un robot qui ne compose que des sorts au hasard n'a rien pour tuer. C'est cohérent avec l'identité du barde ; c'est aussi la preuve que la matrice du robot mesure le **solo brut**, pas le jeu.
+>
 > Deux extrêmes qui méritaient un œil dans la première matrice (avec la lance) : **Le Sceau** ne prend aucun coup et descend (les glyphes tiennent les ennemis à distance) ; **L'Engrenage** prend cent dégâts pour un seul tué et meurt deux fois — il part avec une arme de tir et une tourelle, et le robot se bat probablement au contact avec. C'est peut-être le robot (il ne sait pas prendre de la distance), peut-être la classe. Consigné dans [[À juger — parcours de jeu]].
 
 ## Liens
