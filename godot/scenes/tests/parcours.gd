@@ -86,7 +86,10 @@ func _ready() -> void:
 	rng_bot.seed = graine
 	scene = load("res://scenes/demo/main.tscn").instantiate()
 	add_child(scene)
-	if scene.titre_ouvert:
+	# En headless, main.gd n'ouvre jamais l'écran titre (`titre_ouvert` reste faux) : ce bloc ne tournait
+	# donc JAMAIS en robot, et --classe / --race étaient ignorés sans un mot — chaque « matrice de
+	# classes » jouée par le robot jouait Le Sabre (trouvé le 2026-09-04, quand il a dit qui il était).
+	if scene.titre_ouvert or not classe.is_empty() or not race.is_empty():
 		scene._nouvelle_partie()
 		if not classe.is_empty():   # la classe et la race demandées (30 : plein de classes)
 			var classes: Array = scene._classes_visibles()
@@ -166,6 +169,7 @@ func _equiper_et_composer() -> void:
 	if equiper > 0 or sorts > 0:
 		Etres.recalculer(j, sim.items, sim.affixes_defs, sim.regles)
 		_note("kit : %d objets équipables générés · %d sorts composés · %d capacités" % [equiper, sorts, j.capacites.size()])
+		_note("personnage : classe %s · race %s" % [str(j.get("classe", "")), str(j.get("race", ""))])   # le robot dit qui il est : sans ça, --classe pouvait être ignoré sans que rien ne le montre
 
 
 func _note(t: String) -> void:

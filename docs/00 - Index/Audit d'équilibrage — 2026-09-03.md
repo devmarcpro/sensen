@@ -93,6 +93,9 @@ L'écart reste modéré — 21 % au-dessus de l'épée — mais il va dans le m�
 - **Une erreur d'unité dans ma propre mesure**, qui a faussé la conclusion principale de la première version de cet audit : `vitesse_base` divise le coût en ticks, elle ne le multiplie pas. Les valeurs annoncées pour les armes étaient dix fois trop grandes, et j'en avais conclu — à tort — que taper battait tous les sorts. Corrigée dans la mesure, dans la sonde des armes qui la portait, et ici.
 - **Deux fautes de mes propres sondes**, corrigées avant d'être rapportées comme des défauts du jeu : l'une appelait une fonction inexistante et faisait croire à un blocage ; l'autre inventait une rareté « légendaire » qui n'existe pas (la bonne s'appelle **artefact**) et annonçait donc 0 % à tous les niveaux.
 
+> [!warning] Trouvé le 2026-09-04 — **le robot jouait toujours Le Sabre**, quelle que soit la classe demandée
+> `parcours.tscn` ne créait son personnage que si l'écran titre était ouvert — et en headless, `main.gd` ne l'ouvre jamais. Les options `--classe` et `--race` étaient donc ignorées **sans un mot** : toute « matrice de classes » jouée par le robot (le point 30 du 2026-08-31, les comparaisons de kits) comparait Le Sabre à Le Sabre. Trouvé quand le robot a enfin **dit qui il était** (une ligne de journal de plus). Corrigé : il crée son personnage dès qu'une classe ou une race est demandée. Les mesures de cette note qui n'opposaient pas des classes (le robot avec et sans sorts, la surchauffe) tiennent ; celles qui les opposaient sont à refaire.
+
 ## Liens
 
 - **Détaille** : [[À juger — parcours de jeu]], [[Vers la production]]
