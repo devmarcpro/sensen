@@ -35,7 +35,8 @@
     "hostile",
     "meute",
     "volant",
-    "essaim"
+    "essaim",
+    "nocturne"
   ],
   "meute": "1d4+2",
   "depouille": [],

@@ -17,7 +17,11 @@
       "sante_basse": 2.0
     },
     "attendre": {
-      "endurance_basse": 0.7
+      "endurance_basse": 0.7,
+      "heure_de_repos": 1.2
+    },
+    "errer": {
+      "calme": 0.9
     }
   },
   "seuil_fuite_sante": 0.5,

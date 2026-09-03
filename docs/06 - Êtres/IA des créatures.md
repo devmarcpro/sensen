@@ -126,6 +126,14 @@ Morphologies (12) : les volants ignorent les contraintes de dénivelé
 > > [!bug] Et une faute que la documentation a rattrapée
 > > En ajoutant les réglages d'aggro, j'ai **remplacé** le bloc `ia` des règles au lieu de l'étendre : `ticks_entre_decisions`, `soin_seuil`, `reculer_distance` et `guet_distance` ont disparu — de quoi faire qu'un soigneur ne soigne plus, qu'un tireur ne recule plus et qu'un embusqueur ne guette plus, en silence. Ce qui m'a sauvé, c'est que le `_doc` du bloc **racontait que ça s'était déjà produit** le 2026-08-31, une clé dupliquée ayant écrasé ces trois mêmes réglages. Restauré, comparé valeur par valeur, et le `_doc` dit maintenant que ce bloc **se fusionne, il ne se réécrit pas**.
 
+> [!check] Rendu le 2026-09-03 — **le versant pacifique : brouter, boire, dormir**
+> Une bête paisible ne se promène plus au hasard : quand elle choisit un but de roam, elle **préfère une case près d'une plante ou d'une eau**, et se rabat sur un but quelconque si rien ne se broute dans son rayon. C'est assez pour que le monde ait l'air habité par des bêtes qui *font* quelque chose — sans inventer un système de faim et de soif pour la faune, que personne n'a demandé et qui doublerait la complexité pour un gain visuel identique.
+> Elle **dort** aussi : une nouvelle considération `heure_de_repos` la fait se reposer hors de son heure. Les **nocturnes** font l'inverse — c'est le même drapeau, lu à l'envers. Marqués : hibou, luciole, grillon, chauve-souris, essaim de chauves-souris.
+>
+> > [!warning] Une considération que personne ne pondère n'existe pas
+> > Le moteur la calcule et l'ignore : elle ne pèse dans aucun score. J'ai donc dû donner du poids à `heure_de_repos` dans `proie` (1,4), `fuyard` (1,2) et `bete_sauvage` (0,9) — sans quoi j'aurais écrit du **code mort en croyant avoir livré un comportement**, et rien ne me l'aurait dit. C'est le revers de l'architecture par considérations pondérées : ajouter une entrée au dictionnaire des candidates ne suffit jamais, il faut aussi qu'un profil la regarde.
+> > Au passage, l'envie d'errer des profils paisibles passe de 0,6 à **0,9** : maintenant qu'errer mène quelque part, ça vaut la peine d'y aller. Rien ne change pour un garde ou un assaillant, qui ne pondèrent pas ces considérations.
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Data-driven design]], [[Boucle de tick]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[LOD de simulation]], [[Compagnons]], [[Raids et menaces]], [[Lois et infractions]], [[Minimap et brouillard de guerre]]

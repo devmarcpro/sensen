@@ -10821,7 +10821,13 @@ func _actions_candidates(e: Dictionary, cible: Dictionary, profil: Dictionary, t
 	if e.pos != e.ancre:
 		c["retour"] = {"loin_de_l_ancre": 1.0 if Grille.distance(e.pos, e.ancre) > int(regles.r.engagement.ia_distance_ancre) else 0.0,
 			"cible_perdue": 0.0 if a_cible else 1.0}
-	c["attendre"] = {"endurance_basse": 1.0 if e.endurance < 20 else 0.0, "calme": 0.0 if a_cible else 1.0}
+	# L'heure du repos : une bete paisible dort quand ce n'est pas son heure. Les nocturnes font
+	# l'inverse — c'est le meme drapeau, lu a l'envers (point 77). Seuls les profils qui ponderent
+	# `heure_de_repos` le voient : rien ne change pour un garde ou un assaillant.
+	var nocturne: bool = "nocturne" in e.get("tags", [])
+	var repos: bool = (est_nuit() != nocturne) and not a_cible
+	c["attendre"] = {"endurance_basse": 1.0 if e.endurance < 20 else 0.0, "calme": 0.0 if a_cible else 1.0,
+		"heure_de_repos": 1.0 if repos else 0.0}
 	# Types d'ennemis (Créatures, 2026-08-30) : le tireur recule au contact, le soigneur / l'invocateur soutient,
 	# l'embusqueur guette tant que la cible est loin. Seuls les profils qui pondèrent ces considérations les voient.
 	var ia_r: Dictionary = regles.r.get("ia", {})
@@ -11052,16 +11058,43 @@ func _ia_errer(e: Dictionary, tick: int) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([graine, e.id, tick, "roam"])
 	var rayon := int(ia.get("roam_rayon", 14))
+	# Une bete PAISIBLE ne se promene pas au hasard : elle va vers ce qui se broute et ce qui se boit.
+	# On garde le premier but valable, mais si l'un des essais tombe pres d'une plante ou d'une eau, on
+	# le prefere. C'est assez pour que le monde ait l'air d'etre habite par des betes qui font quelque
+	# chose, sans inventer un systeme de faim et de soif pour la faune (designer 2026-09-03, point 77).
+	var paisible: bool = "paisible" in e.get("tags", [])
+	var repli := Vector2i(-9999, -9999)
 	for essai in int(ia.get("roam_essais", 12)):
 		var q: Vector2i = e.ancre + Vector2i(rng.randi_range(-rayon, rayon), rng.randi_range(-rayon, rayon))
 		if not grille.dans(q) or grille.bloque_passage(q) or not grille.occupant(q).is_empty() or q == e.pos:
 			continue
 		if grille.chemin(e.pos, q, Etres.est_volant(e), "", refuse_nage(e)).is_empty():
 			continue   # un but injoignable fait pietiner : on en cherche un autre plutot que de s'entêter
+		if paisible and not _pature_proche(q):
+			if repli.x < -9000:
+				repli = q
+			continue
 		e["but_roam"] = q
 		_ia_pas_vers(e, q, tick, "")
 		return
+	if repli.x > -9000:   # rien a brouter dans le rayon : on se promene quand meme
+		e["but_roam"] = repli
+		_ia_pas_vers(e, repli, tick, "")
+		return
 	_attendre(e, tick)
+
+
+## Y a-t-il de quoi brouter ou boire a cote de cette tuile ? Une plante, ou de l'eau.
+func _pature_proche(t: Vector2i) -> bool:
+	for d in Grille.DIRS + [Vector2i.ZERO]:
+		var q: Vector2i = t + d
+		if not grille.dans(q):
+			continue
+		if int(grille.niveau_eau.get(grille.idx(q), 0)) > 0:
+			return true
+		if "plante" in grille.contenu_de(q).get("tags", []):
+			return true
+	return false
 
 
 ## L'attaque faisable la plus forte (dégâts moyens) : action de créature ou arme.

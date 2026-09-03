@@ -7,10 +7,11 @@
       "sante_basse": 1.0
     },
     "errer": {
-      "calme": 0.6
+      "calme": 0.9
     },
     "attendre": {
-      "calme": 0.4
+      "calme": 0.4,
+      "heure_de_repos": 1.4
     },
     "retour": {
       "loin_de_l_ancre": 0.8
