@@ -216,6 +216,9 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 >
 > **Où s'arrête la promesse.** Le mobilier — slots, fiche, boutons, pentagramme — ne défile jamais : il est toujours entièrement visible. Un **texte libre** de longueur inconnue (le détail d'un objet) défile dans sa boîte : c'est la seule réponse honnête, puisqu'on ne peut pas garantir qu'une description tienne dans une fenêtre courte. Ce qui est proscrit, c'est le contenu coupé **sans le dire** ; une barre de défilement le dit.
 
+> [!success] Refait le 2026-09-03 — le composeur est une **grille**, et on y fait son Tetris (designer)
+> Le composeur à groupes de slots décrit plus haut (portée, formes, noyaux, modificateurs, conditions, liaisons, déclencheur, avec leurs boutons + / − et la ligne des étapes) a disparu de l'écran. À sa place, **la grille de composition** : la silhouette de l'arme tenue, où l'on glisse les cartes du catalogue — chaque module est une pièce dont la forme dit ce qu'il fait — R tourne, clic droit ou Suppr retire, on reprend une pièce pour la déplacer, la case survolée s'éclaire en vert ou en rouge selon que la pièce y tiendrait. **L'ordre de lecture est l'ordre du sort.** Sous la grille, le catalogue, le détail, le Wu Xing et l'aperçu sont inchangés ; le clavier aussi (Entrée pose au premier endroit libre). Le pourquoi et les règles sont dans [[Six types de modules et assemblage]] (callouts du 2026-09-03) ; le titre de l'écran Capacités dit désormais la grille de l'arme tenue et sa voie.
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]
