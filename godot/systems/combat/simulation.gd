@@ -5291,6 +5291,7 @@ func temperature_ressentie(e: Dictionary) -> Dictionary:
 		for slot in e.equipement.keys():
 			var it: Dictionary = items.get(e.equipement[slot], {})
 			iso += float(it.get("stats", {}).get("isolation", 0.0))
+			iso += float(it.get("doublure_isolation", 0.0))   # la DOUBLURE compte en plus : c'est sa raison d'etre
 		temp += iso / float(m.isolation_div)
 		if temp < float(confort[0]):
 			ecart = temp - float(confort[0])
@@ -6460,6 +6461,29 @@ func _appliquer_composition(inst: Dictionary, def: Dictionary, pieces: Array[Dic
 	if not manche.is_empty():
 		var v: Dictionary = regles.r.craft.vitesse
 		inst.vitesse_facteur = snappedf(1.0 + (float(manche.stats.get("densite", v.densite_reference)) - float(v.densite_reference)) * float(v.par_point), 0.01)
+	# LA TROISIEME PIECE DIT CE QU'EST L'OBJET (designer 2026-09-03, option C). Chacune a un effet
+	# MECANIQUE propre — sans quoi ce serait l'ancienne fixation repeinte, la piece que quarante objets
+	# sur quarante-trois portaient sans qu'elle ne differencie jamais rien.
+	var tr: Dictionary = regles.r.craft.get("troisieme_piece", {})
+	for c3 in pieces:
+		match str(c3.slot):
+			"contrepoids":
+				# L'EQUILIBRE : le contrepoids compense la densite du manche. Une masse a manche de plomb
+				# reste maniable si son contrepoids est bien mis — c'est le geste meme du forgeron.
+				var comp := float(c3.stats.get("densite", 0.0)) * float(tr.get("contrepoids_par_densite", 0.004))
+				inst.vitesse_facteur = snappedf(maxf(float(tr.get("vitesse_facteur_min", 0.6)), float(inst.get("vitesse_facteur", 1.0)) - comp), 0.01)
+			"garde":
+				# LA PARADE : la durete de la garde protege la main qui tient. Elle s'ajoute a l'armure
+				# de celui qui porte l'arme, comme une piece d'armure minuscule et toujours au bon endroit.
+				inst["garde_armure"] = snappedf(float(c3.stats.get("durete", 0.0)) * float(tr.get("garde_par_durete", 0.05)), 0.01)
+			"corde":
+				# LA PUISSANCE DU TIR : c'est ce qui se TEND qui arme le trait, pas le fut. On retient
+				# donc l'elasticite de la corde seule, la ou la formule prenait la moyenne de tout
+				# l'objet — une corde de soie d'araignee noyee dans un fut de chene.
+				inst["elasticite_corde"] = float(c3.stats.get("elasticite", 0.0))
+			"doublure":
+				# L'ISOLATION : une doublure de fourrure tient chaud, une doublure de lin non.
+				inst["doublure_isolation"] = float(c3.stats.get("isolation", 0.0))
 	if def.type == "armure":
 		inst.durete_composite = inst.durete_base
 		inst.niveau_construction = 0
@@ -8404,7 +8428,9 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 	var mult_elastique := 1.0
 	if est_projectile(fonct) or est_jet(fonct):
 		var sm: Dictionary = regles.r.get("stats_materiau", {})
-		var elas := float(arme.get("stats", {}).get("elasticite", 0.0))
+		# La corde d'abord : c'est elle qui se tend. A defaut — une fronde de fortune, une arme sans
+		# piece dediee — on retombe sur la moyenne de l'objet.
+		var elas := float(arme.get("elasticite_corde", arme.get("stats", {}).get("elasticite", 0.0)))
 		mult_elastique = float(sm.get("arc_elasticite_base", 0.8)) + elas / float(sm.get("arc_elasticite_div", 250.0))
 	var res := _resoudre_coup(e, cible, (d.bruts + float(plat)) * wx.total * float(ax.mult) * mult_coup * mult_elastique * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur, float(ax.ignore_armure))
 	res.merge(wx)
@@ -8682,6 +8708,10 @@ func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degat
 		* float(Etres.mult_statuts(cible, "armure", statuts_defs))   # Rupture : −50 % de réduction de zone
 	for ax in Etres.affixes_equipes(cible, items, affixes_defs, "meca_armure"):
 		armure += float(ax.params.n)
+	# La GARDE de l'arme tenue protege son porteur : une piece d'armure minuscule, toujours au bon
+	# endroit (designer 2026-09-03, option C — chaque troisieme piece a un effet mecanique propre).
+	for slot_g in ["main_principale", "main_secondaire"]:
+		armure += float(items.get(cible.get("equipement", {}).get(slot_g, ""), {}).get("garde_armure", 0.0))
 	armure *= 1.0 - ignore_armure
 	var direction := Regles.direction_relative(cible.orientation, att.pos - cible.pos)
 	var bouclier := Etres.a_bouclier(cible, items)

@@ -1432,9 +1432,9 @@ func test_assemblage() -> void:
 	s._donner_materiau(j, "fer", 3, "lingot")
 	s._donner_materiau(j, "chene", 1, "planche")
 	var ids: Array = s.recettes_disponibles(j).filter(func(pl: Dictionary) -> bool: return pl.faisable).map(func(pl: Dictionary) -> String: return pl.id)
-	verifier("lame_courte_lingot_metal" in ids and "poignee_bois" in ids and "fixations_std_lingot_metal" in ids and not ("lame_courte_obsidienne" in ids), "recettes de composants faisables : lame (lingot), poignée (planche) ; l'obsidienne non (%s)" % str(ids))
+	verifier("lame_courte_lingot_metal" in ids and "poignee_bois" in ids and "garde_lingot_metal" in ids and not ("lame_courte_obsidienne" in ids), "recettes de composants faisables : lame (lingot), poignée (planche), garde (lingot) ; l'obsidienne non (%s)" % str(ids))
 	verifier(not ("lame_courte_or_argent" in s.recettes_disponibles(j).map(func(pl: Dictionary) -> String: return pl.id)), "les recettes exotiques non apprises ne sont pas listées")
-	for rid in ["lame_courte_lingot_metal", "poignee_bois", "fixations_std_lingot_metal"]:
+	for rid in ["lame_courte_lingot_metal", "poignee_bois", "garde_lingot_metal"]:
 		s.attente[j.id] = true
 		verifier(s.intention(j.id, {"type": "fabriquer", "recette": rid}), "façonner " + rid)
 	var comps: Array = j.sac.filter(func(uid: String) -> bool: return s.items[uid].get("type", "") == "composant")
@@ -5730,7 +5730,7 @@ func test_reforge_et_fiole() -> void:
 	j.sac.append(etabli.uid)
 	# Une épée assemblée (fer) avec un affixe, reforgée avec une lame de cuivre.
 	var epee := s.generer_objet("craft_epee", 2, {}, "rare", 1)
-	epee["composants"] = {"tete": {"composant": "lame_longue", "materiau": "fer", "qualite": 1.0}, "manche": {"composant": "poignee", "materiau": "chene", "qualite": 1.0}, "fixations": {"composant": "fixations_std", "materiau": "fer", "qualite": 1.0}}
+	epee["composants"] = {"tete": {"composant": "lame_longue", "materiau": "fer", "qualite": 1.0}, "manche": {"composant": "poignee", "materiau": "chene", "qualite": 1.0}, "garde": {"composant": "garde", "materiau": "fer", "qualite": 1.0}}
 	epee.materiau = "fer"
 	j.sac.append(epee.uid)
 	var n_aff: int = epee.affixes.size()

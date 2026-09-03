@@ -5,8 +5,7 @@
   "hands": 1,
   "slots": {
     "tete": "monture",
-    "manche": "poignee",
-    "fixations": "fixations_std"
+    "manche": "poignee"
   },
   "recipe": {
     "station": "table_enchantement",

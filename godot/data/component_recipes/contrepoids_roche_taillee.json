@@ -1,0 +1,7 @@
+{
+  "component": "contrepoids",
+  "material_family": "roche_taillee",
+  "station": "tailleur_de_pierre",
+  "unlocked_by_default": true,
+  "unlock_sources": []
+}

@@ -1,0 +1,12 @@
+{
+  "name_key": "component.doublure.name",
+  "slot_type": "doublure",
+  "used_by": [
+    "cuirasse",
+    "casque",
+    "brassards",
+    "jambieres",
+    "bottes",
+    "gambison"
+  ]
+}

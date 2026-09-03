@@ -1,0 +1,12 @@
+{
+  "name_key": "component.garde.name",
+  "slot_type": "garde",
+  "used_by": [
+    "epee",
+    "sabre",
+    "rapiere",
+    "dague",
+    "lance",
+    "hache_d_armes"
+  ]
+}

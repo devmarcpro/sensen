@@ -4,8 +4,7 @@
   "equip_slot": "main_principale",
   "hands": 1,
   "slots": {
-    "tete": "monture",
-    "fixations": "fixations_std"
+    "tete": "monture"
   },
   "recipe": {
     "station": "table_enchantement",

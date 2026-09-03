@@ -6,7 +6,7 @@
   "slots": {
     "tete": "tete_outil",
     "manche": "manche_long",
-    "fixations": "fixations_std"
+    "garde": "garde"
   },
   "recipe": {
     "station": "forge",

@@ -106,6 +106,24 @@ Un objet n'est plus une recette monolithique mais un assemblage de composants, c
 > **La lacune était réelle, ma façon de la combler non.** La bonne réponse n'était pas d'agrandir l'objet mais de **retirer ce qui ne rentre pas** : au-delà de trois pièces, l'assemblage devient illisible et chaque pièce de plus dilue le poids des autres dans la moyenne pondérée. `garde` et `contrepoids` sont supprimés avec leurs recettes ; le `rembourrage`, lui, avait sa place — il devient la pièce souple du **gambison**, une cuirasse matelassée, qui reste à trois composants.
 > **La limite est désormais vérifiée** : `loot_rules.assemblage.composants_max` = 3, et la règle 30 de `audit_donnees.py` refuse tout objet qui la dépasse. Testé en ajoutant un quatrième emplacement à l'épée : l'audit la nomme.
 
+> [!success] Tranché le 2026-09-03 — **la troisième pièce dit ce qu'est l'objet** (designer : « on va faire C »)
+> **Le constat qui a ouvert la discussion.** `fixations_std` était sur **40 objets sur 43**, et c'était le **seul** composant de fixation du catalogue. Ce n'était donc pas un choix mais une constante déguisée en variable — et sous la limite de trois pièces, elle mangeait **un tiers de chaque objet**, un tiers du poids de ses stats, sans jamais rien différencier. Vingt-neuf objets sur quarante-trois avaient exactement la même formule : tête, manche, fixations.
+> **Trois issues avaient été posées** : (A) supprimer la fixation et n'avoir que deux pièces qui pèsent 50 % chacune ; (B) écrire plusieurs fixations réelles ; (C) faire varier la troisième pièce selon la **famille** d'objet. Le designer a choisi **C**.
+>
+> **Ce que devient la troisième pièce, famille par famille** :
+>
+> | famille | pièces | ce que la troisième apporte |
+> |---|---|---|
+> | arme tranchante ou perforante de contact | tête · manche · **garde** | la parade : sa dureté protège la main qui tient |
+> | arme contondante ou lourde | tête · manche · **contrepoids** | l'équilibre : il compense la densité du manche et rend l'arme plus vive |
+> | arme à distance | tête · manche · **corde** | la puissance : c'est **son élasticité** qui arme le tir |
+> | armure | plaque · sangles · **doublure** | l'isolation : ce qui protège du froid et du chaud |
+> | bijou | monture · **sertissure** | ce qui tient la gemme |
+> | outil, arme de jet, focus | tête · manche | **deux pièces** — la limite est un plafond, pas une obligation |
+>
+> **La règle qui rend C différent de B** : chaque troisième pièce a un **effet mécanique propre**, pas seulement un nom. Une garde qui ne ferait rien serait une fixation repeinte.
+> **Et la corde répond à une demande du même jour** : le designer voulait que l'élasticité fasse la puissance d'un arc. Elle la faisait déjà, mais à travers la moyenne pondérée de *toutes* les pièces — une corde de soie d'araignée noyée dans un fût de chêne. Avec une pièce dédiée, la puissance vient de **ce qui se tend**, ce qui est à la fois plus juste et plus lisible.
+
 ## Liens
 - **Dépend de** : [[Composants]], [[Composant et recette d'obtention]], [[Stations de transformation]], [[Qualité d'artisanat]]
 - **Alimente** : [[Stats et qualité de l'assemblage]], [[Palier industriel]], [[Équipement — 14 slots]], [[Armure par zone et constructions]], [[Véhicules]]

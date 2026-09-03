@@ -1,6 +1,6 @@
 {
-  "component": "rembourrage",
-  "material_family": "fourrure",
+  "component": "corde",
+  "material_family": "fibre",
   "station": "atelier_tissage",
   "unlocked_by_default": true,
   "unlock_sources": []

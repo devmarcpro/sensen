@@ -6,7 +6,7 @@
   "slots": {
     "tete": "lame_courte",
     "manche": "manche_long",
-    "fixations": "fixations_std"
+    "corde": "corde"
   },
   "recipe": {
     "station": "etabli",

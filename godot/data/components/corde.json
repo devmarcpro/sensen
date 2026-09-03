@@ -1,0 +1,9 @@
+{
+  "name_key": "component.corde.name",
+  "slot_type": "corde",
+  "used_by": [
+    "arc",
+    "arbalete",
+    "fronde"
+  ]
+}

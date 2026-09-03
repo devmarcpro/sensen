@@ -5,8 +5,8 @@
   "hands": 0,
   "slots": {
     "plaque": "plaque",
-    "sangles": "rembourrage",
-    "fixations": "fixations_std"
+    "sangles": "sangles",
+    "doublure": "doublure"
   },
   "recipe": {
     "station": "atelier_tissage",

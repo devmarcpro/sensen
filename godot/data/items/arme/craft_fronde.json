@@ -6,7 +6,7 @@
   "slots": {
     "tete": "sangles",
     "manche": "poignee",
-    "fixations": "fixations_std"
+    "corde": "corde"
   },
   "recipe": {
     "station": "etabli",

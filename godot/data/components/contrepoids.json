@@ -1,0 +1,10 @@
+{
+  "name_key": "component.contrepoids.name",
+  "slot_type": "contrepoids",
+  "used_by": [
+    "masse",
+    "marteau_de_guerre",
+    "fleau",
+    "baton"
+  ]
+}

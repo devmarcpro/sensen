@@ -1,6 +1,6 @@
 {
-  "component": "fixations_std",
-  "material_family": "fibre",
+  "component": "corde",
+  "material_family": "soie",
   "station": "atelier_tissage",
   "unlocked_by_default": true,
   "unlock_sources": []

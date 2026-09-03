@@ -1,0 +1,7 @@
+{
+  "component": "garde",
+  "material_family": "os",
+  "station": "tailleur_de_pierre",
+  "unlocked_by_default": true,
+  "unlock_sources": []
+}

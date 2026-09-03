@@ -418,6 +418,12 @@
           "max": 90
         }
       }
+    },
+    "troisieme_piece": {
+      "_doc": "La troisieme piece d'un objet assemble a un effet MECANIQUE propre (designer 2026-09-03, option C) : sans cela ce serait l'ancienne fixation repeinte, portee par quarante objets sur quarante-trois sans jamais rien differencier. contrepoids_par_densite : ce que le contrepoids retire au facteur de vitesse par point de densite (il compense le manche). garde_par_durete : l'armure que la garde ajoute a celui qui tient l'arme, par point de durete. La corde donne son elasticite au tir, la doublure son isolation au porteur.",
+      "contrepoids_par_densite": 0.004,
+      "garde_par_durete": 0.05,
+      "vitesse_facteur_min": 0.6
     }
   },
   "camp": {

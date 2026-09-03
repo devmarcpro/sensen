@@ -1445,7 +1445,6 @@ categorie.roche,rock
 categorie.synthetique,synthetic
 categorie.terre,soil
 categorie.vegetal,plant and fibre
-component.fixations_std.name,Standard fittings
 component.lame_courte.name,Short blade
 component.lame_longue.name,Long blade
 component.manche_court.name,Short haft
@@ -1453,7 +1452,6 @@ component.manche_long.name,Long haft
 component.plaque.name,Plate
 component.poignee.name,Grip
 component.pointe.name,Point
-component.rembourrage.name,Padding
 component.sangles.name,Straps
 component.tete_arme_lourde.name,Heavy weapon head
 component.tete_outil.name,Tool head
@@ -2783,3 +2781,13 @@ item.craft_grimoire_de_main.name,Hand grimoire
 functionality.talisman.name,Talisman
 item.craft_talisman.name,Talisman
 item.craft_gambison.name,Gambeson
+component.garde.name,Guard
+component.contrepoids.name,Counterweight
+component.corde.name,Cord
+component.doublure.name,Lining
+component.sertissure.name,Setting
+slotc.garde,guard
+slotc.contrepoids,counterweight
+slotc.corde,cord
+slotc.doublure,lining
+slotc.sertissure,setting

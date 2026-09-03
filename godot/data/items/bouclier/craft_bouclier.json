@@ -6,8 +6,7 @@
   "functionality": "bouclier",
   "slots": {
     "plaque": "plaque",
-    "sangles": "sangles",
-    "fixations": "fixations_std"
+    "sangles": "sangles"
   },
   "recipe": {
     "station": "etabli",

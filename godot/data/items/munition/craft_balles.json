@@ -4,8 +4,7 @@
   "equip_slot": "carquois",
   "hands": 0,
   "slots": {
-    "tete": "pointe",
-    "fixations": "fixations_std"
+    "tete": "pointe"
   },
   "recipe": {
     "station": "etabli",

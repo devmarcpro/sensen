@@ -5,8 +5,7 @@
   "hands": 1,
   "slots": {
     "tete": "plaque",
-    "sangles": "sangles",
-    "fixations": "fixations_std"
+    "sangles": "sangles"
   },
   "recipe": {
     "station": "etabli",

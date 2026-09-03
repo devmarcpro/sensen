@@ -6,7 +6,7 @@
   "slots": {
     "plaque": "plaque",
     "sangles": "sangles",
-    "fixations": "fixations_std"
+    "doublure": "doublure"
   },
   "recipe": {
     "station": "etabli",

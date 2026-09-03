@@ -1,0 +1,7 @@
+{
+  "component": "doublure",
+  "material_family": "cuir",
+  "station": "tannerie",
+  "unlocked_by_default": true,
+  "unlock_sources": []
+}

@@ -5,8 +5,7 @@
   "hands": 1,
   "slots": {
     "tete": "lame_courte",
-    "manche": "poignee",
-    "fixations": "fixations_std"
+    "manche": "poignee"
   },
   "recipe": {
     "station": "etabli",

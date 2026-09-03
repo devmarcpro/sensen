@@ -6,7 +6,7 @@
   "slots": {
     "tete": "tete_arme_lourde",
     "manche": "manche_court",
-    "fixations": "fixations_std"
+    "contrepoids": "contrepoids"
   },
   "recipe": {
     "station": "etabli",

@@ -1,0 +1,8 @@
+{
+  "name_key": "component.sertissure.name",
+  "slot_type": "sertissure",
+  "used_by": [
+    "anneau",
+    "amulette"
+  ]
+}

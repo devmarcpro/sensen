@@ -4,7 +4,8 @@
   "equip_slot": "anneau",
   "hands": 0,
   "slots": {
-    "monture": "monture"
+    "monture": "monture",
+    "sertissure": "sertissure"
   },
   "recipe": {
     "station": "enclume",
