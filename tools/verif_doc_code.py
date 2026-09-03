@@ -120,7 +120,8 @@ def main():
         # On releve donc d'abord, note par note, les cles que la note elle-meme dit anciennes — sur
         # une ligne qui parle de renommage, de peremption ou de remplacement — et on les exempte partout
         # dans cette note. C'est la convention du coffre, pas une tolerance de l'outil.
-        MARQUEURS = ("renomm", "périmé", "perime", "ancien nom", "s'appel", "~~", "→", "->", "devien", "remplac", "retiré", "retire")
+        MARQUEURS = ("renomm", "périmé", "perime", "ancien nom", "s'appel", "~~", "→", "->", "devien", "devenu", "remplac", "retiré", "retire",
+                     "codé sous", "code sous", "codés sous", "n'existe pas", "n'existent pas", "pas un identifiant", "non codé", "non code", "n'est pas un champ", "n'est pas un signal")
         anciennes = set()
         for ligne_brute in texte.splitlines():
             bas = ligne_brute.lower()

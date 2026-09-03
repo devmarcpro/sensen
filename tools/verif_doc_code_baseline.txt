@@ -1,58 +1,28 @@
 # Rouille connue du coffre : identifiants cites par les notes et absents du code.
 # Chaque passe de reconciliation en retire ; `python tools/verif_doc_code.py --geler` regele.
-00 - Index\Vers la production.md : items_any
 02 - Monde\Conquête de village.md : royaume_id
 02 - Monde\Génération de donjon.md : taille_salles
 02 - Monde\Unification macro-micro.md : par_tuile
-02 - Monde\Villages PNJ — repeuplement et décimation.md : jobs_compatible
-03 - Combat\Décision — Transcription du catalogue de modules.md : cout_endurance
-03 - Combat\Endurance.md : cout_endurance
 03 - Combat\Vocabulaire des modules — six axes.md : book_type
 03 - Combat\Vocabulaire des modules — six axes.md : cibles_valides
 04 - Progression\Domaines de grimoires et manuels.md : grimoire_domains
-05 - Objets\Construction cadrée.md : block_destroyed
-05 - Objets\Construction cadrée.md : block_placed
 05 - Objets\Craft compositionnel.md : fixations_std_seve
-05 - Objets\Loot — affixes, gemmes et rareté.md : bases_armes
-05 - Objets\Loot — affixes, gemmes et rareté.md : bases_armures
-05 - Objets\Loot — affixes, gemmes et rareté.md : bases_gemmes
 05 - Objets\Schéma matériau.md : noise_layer_id
 05 - Objets\Schéma matériau.md : texture_path
 05 - Objets\Stats d'armes.md : poids_reel
 06 - Êtres\Blocs de l'être.md : housing_default
-06 - Êtres\Rôles de l'être.md : housing_default
-07 - Société\Commerce et boutiques.md : inventaire_marchand
 07 - Société\Conditions de reproduction.md : consomme_ressource
 07 - Société\Conditions de reproduction.md : fenetre_courte
 07 - Société\Conditions de reproduction.md : tue_a_la_recolte
 07 - Société\Conditions de reproduction.md : tue_parent
-07 - Société\Cuisine et alchimie.md : distiller_achillee
-07 - Société\Cuisine et alchimie.md : distiller_amanite
-07 - Société\Cuisine et alchimie.md : distiller_oeil
 07 - Société\Défense et raids.md : force_raid
-07 - Société\Gabarit de quête.md : item_crafted
-07 - Société\Population et exploitation.md : jobs_compatible
-08 - Technique\Décisions d'architecture.md : item_crafted
-08 - Technique\Décisions d'architecture.md : modify_tile
-08 - Technique\Décisions d'architecture.md : place_tile
-08 - Technique\Décisions d'architecture.md : tile_destroyed
-08 - Technique\EventBus.md : border_crossed
-08 - Technique\EventBus.md : item_crafted
-08 - Technique\EventBus.md : item_possessed
 08 - Technique\Localisation.md : description_key
-08 - Technique\Réseau.md : modify_tile
-08 - Technique\Réseau.md : place_tile
-08 - Technique\Sauvegarde.md : aldric_2
-08 - Technique\Sauvegarde.md : scratch_partout
-08 - Technique\Sauvegarde.md : scratch_retour
 09 - Contenu\Biomes de départ.md : foret_de_mana
-09 - Contenu\Catalogue matériaux — Roches.md : tete_pioche_obsidienne
-09 - Contenu\Cultures de nommage.md : culture_sino
+09 - Contenu\Catalogue matériaux — Roches.md : guilde_artisans_rang_3
 09 - Contenu\Exemples — dix objets générés.md : poids_reel
 09 - Contenu\Recettes de composants.md : guilde_artisans_rang_3
 99 - Ouvert\Décision — Esquive active.md : malus_poids_armure
 99 - Ouvert\Ouvert — Pools de noms des cultures.md : culture_sino
 99 - Ouvert\Ouvert — Pools de noms des cultures.md : famille_b
 99 - Ouvert\Ouvert — Pools de noms des cultures.md : prenom_b
-99 - Ouvert\Ouvert — Recettes de composants par famille.md : tete_pioche_metal
-99 - Ouvert\Ouvert — Recettes de composants par famille.md : tete_pioche_obsidienne
+99 - Ouvert\Ouvert — Recettes de composants par famille.md : guilde_artisans_rang_3

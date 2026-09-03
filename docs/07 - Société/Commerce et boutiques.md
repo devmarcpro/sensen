@@ -37,6 +37,9 @@ Vendre aux marchands, ou tenir sa propre boutique passive sur son claim — faç
 > Mesuré sur la collecte du robot : six étages, 179 kills, 47 ramassages… et **0 or**. Rien dans le jeu ne donnait de monnaie : ni les hostiles, ni les coffres. Toute l'économie — acheter chez le forgeron, payer l'entretien, commander à un artisan — reposait donc sur la seule **vente** de son butin. Un hostile laisse désormais une **bourse** : un nombre de pièces tiré autour de sa valeur (ses PV et son niveau de combat), avec une chance par palier de profondeur. Un bandit d'étage 1 laisse quelques pièces, un boss d'étage 5 de quoi s'équiper. Les réglages sont dans `loot_rules.drops.or`.
 
 
+> [!success] Constaté le 2026-09-03 — `inventaire_marchand` est codé sous le nom `stock_marchand`
+> La fiche d'une créature marchande porte `stock_marchand` (une liste de blocs de sélection, assemblée au boot en boutique) ; le nom proposé ici n'a jamais été celui du code. Rien d'autre ne change.
+
 ## Liens
 - **Dépend de** : [[Qualité d'artisanat]], [[Claims et persistance]]
 - **Alimente** : [[Prix suggéré]], [[Boutique passive]], [[Économie — sources et puits]]

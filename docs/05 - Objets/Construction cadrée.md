@@ -27,6 +27,9 @@ La construction libre à la Minecraft est **écartée** : elle n'a pas de sens s
 > [!success] Complété le 2026-08-29 — le modelage du terrain, et le signal réel
 > Le callout ci-dessus disait « le modelage du terrain (élever/abaisser) attend la surface » : il est codé depuis (intention `terrasser`, ±1 de hauteur, pioche en main pour élever, bornes `terrasser.h_min`/`h_max`, terrain mémorisé et régénéré hors claim — voir *Destruction du terrain*). **Le signal** : la note prévoyait `block_placed` / `block_destroyed` ; l'implémentation n'en a qu'un, **`tile_changed(pos)`**, émis par toute mutation de tuile (contenu, hauteur, meuble, eau, feu) — le client redessine, et les quêtes de construction progressent par appel direct (`_progresser_quetes`) plutôt que par abonnement. Décision : un seul signal de mutation plutôt que deux signaux typés, tant qu'aucun système n'a besoin de distinguer *poser* de *détruire*.
 
+> [!success] Constaté le 2026-09-03 — `block_placed` / `block_destroyed` sont devenus `tile_changed`
+> Le pivot au 2D a fondu les deux signaux en un seul, `tile_changed(pos)`, émis pour toute mutation de tuile : poser, creuser, terrasser, brûler. Les quêtes de bâtisseur ne l'écoutent pas — elles avancent par appel direct (`_progresser_quetes`).
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Claims et persistance]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[Détection de pièces]], [[Habitat des PNJ]], [[Expansion territoriale]], [[Destruction du terrain]]

@@ -89,7 +89,7 @@ Onze entrées emploient des unités ou des mécaniques que le pivot a supprimée
 > **Décision retenue :** les modules de manuel coûtent **de l'endurance**, les modules de grimoire du **mana**, et les rares hybrides les deux. Ça donne enfin son rôle à l'endurance, ça rend *Le Sabre* jouable sans Volonté, et ça fait de l'action « attendre » (5 ticks, rend 20 d'endurance — [[Endurance]]) une décision de combat au lieu d'un bouton.
 
 > [!success] Mis à jour le 2026-09-03 — les « trois économies » sont devenues quatre, et l'endurance s'appelle vigueur
-> La décision ci-dessus tient : les modules d'arme paient une monnaie du corps, pas du mana. Cette monnaie s'appelle désormais **vigueur** (`cout_vigueur`), et les noyaux de **dextérité** et de **perception** paient une troisième, le **sang-froid** (`cout_sang_froid`) — voir [[Sang-froid]] et [[Structure compétences-modules-slots]].
+> La décision ci-dessus tient : les modules d'arme paient une monnaie du corps, pas du mana. Cette monnaie s'appelle désormais **vigueur** — `cout_endurance` est renommé `cout_vigueur` — et les noyaux de **dextérité** et de **perception** paient une troisième, le **sang-froid** (`cout_sang_froid`) — voir [[Sang-froid]] et [[Structure compétences-modules-slots]].
 
 ## Liens
 - **Dépend de** : [[Vocabulaire des modules — six axes]], [[Modules]], [[Action-time à ticks]]

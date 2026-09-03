@@ -25,6 +25,9 @@ Latine/romane (Humain) · Nordique/germanique (Nain, Humain) · Sino (Humain) ·
 
 **Les pools sont écrits :** [[Pools de noms des cultures]] (les 9 cultures restantes ; la Sino vit dans [[Culture de nommage — schéma]]).
 
+> [!success] Constaté le 2026-09-03 — les identifiants des cultures et des pools ne portent pas le préfixe
+> Une culture s'appelle `sino`, `celte`, `nordique`… (pas `culture_sino`), et ses pools sont séparés par genre : `prenom_a`, `prenom_b_m` / `prenom_b_f`, `famille_a`, `famille_b_m` / `famille_b_f`, `ville_a`, `ville_b`, `titres` — `famille_b` et `prenom_b` n'existent pas tels quels.
+
 ## Liens
 - **Dépend de** : [[Noms culturels]], [[Culture de nommage — schéma]], [[Races]]
 - **Alimente** : [[Génération de noms]], [[Génération des royaumes PNJ]]

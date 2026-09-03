@@ -32,6 +32,9 @@ après 30 s ; le passage en tactique fige les ticks pour tous.
 
 **Optimisation :** voir [[Réseau et sauvegarde — performance]].
 
+> [!success] Constaté le 2026-09-03 — `place_tile` / `modify_tile` : **non codés**, étape 11
+> Le réseau n'existe pas encore ; ces RPC sont la forme décidée, et ils s'écriront sur la mutation de tuile qui existe déjà en solo (`tile_changed`). Rien ne s'y oppose, rien n'est commencé.
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Contraintes permanentes]], [[Simulation à ticks]]
 - **Alimente** : [[Multijoueur]], [[Sauvegarde]], [[Réseau et sauvegarde — performance]]

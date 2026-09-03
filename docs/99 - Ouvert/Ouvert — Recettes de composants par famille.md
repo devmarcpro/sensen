@@ -24,6 +24,9 @@ etape: 6
 
 **Question liée :** [[Ouvert — Axe des niveaux de recette]].
 
+> [!success] Constaté le 2026-09-03 — pas de tête de pioche par matière : `tete_pioche_obsidienne` et `tete_pioche_metal` sont codés sous **`tete_outil`**
+> Un composant est **à matériau libre** (Craft compositionnel) : la tête d'un outil est `tete_outil`, la matière vient de la recette de composant (`component_recipes/`), pas du nom. `guilde_artisans_rang_3` n'est pas non plus un identifiant : les débloquages se déclarent dans `unlock_sources` d'une recette.
+
 ## Liens
 - **Dépend de** : [[Composant et recette d'obtention]], [[Composants]], [[Craft compositionnel]]
 - **Alimente** : [[Palier industriel]], [[Loot — affixes, gemmes et rareté]], [[Quêtes et guildes]]

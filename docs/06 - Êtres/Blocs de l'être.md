@@ -66,6 +66,9 @@ Il n'y a **pas de refus par type**. Un compagnon porte une arme s'il a un slot d
 > [!success] Corrigé le 2026-08-29 — « agilité » n'existe pas
 > Les six stats du jeu sont **Force, Dextérité, Endurance, Volonté, Perception, Charisme**. Huit fiches citaient pourtant une **`agilite`** ou un **`esprit`** : cinq classes cachées (**Le Masque**, **Le Passeur**, **Le Fossoyeur**, **Le Sablier**, **Le Sceau**) — des points de création perdus —, la **tomate** (objet et plante) et **deux masques** (Renard et Hibou), dont les bonus ne s'appliquaient à rien. `agilite` est reversée sur **Dextérité**, `esprit` sur **Volonté** — les noms courants de ces deux idées dans ce jeu. Les points sont **additionnés**, jamais écrasés : Le Masque avait *agilité 2 + dextérité 1*, il a désormais **dextérité 3** (ma première passe, qui remplaçait la clé sans additionner, lui en avait fait perdre deux — attrapé en relisant le diff). Trouvé par le même contrôle que les compétences fantômes des classes cachées : comparer chaque nom cité en données à la liste réelle. `tools/audit_donnees.py` vérifie désormais **tout nom de stat** cité par une classe, une race, un objet, une plante ou un statut (`stat:<nom>`).
 
+> [!success] Constaté le 2026-09-03 — pas de `housing_default` : le logement est un **lit** dans le territoire
+> Le bloc « rôle » proposait un champ `housing_default`. Le code l'a résolu autrement : la fiche porte `role` et `fonction`, et le logement d'un résident est un **lit** posé dans le territoire du joueur — c'est l'attribution d'un lit qui fait l'humeur, pas un défaut de fiche (`_recalculer_humeurs`). Le champ n'existe donc pas, et n'a pas à exister.
+
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Data-driven design]]
 - **Alimente** : [[Rôles de l'être]], [[Apparence — données et équipement]], [[Schéma créature]], [[Élevage — intention et familles]], [[Compagnons]]

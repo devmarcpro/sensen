@@ -28,6 +28,9 @@ Plaine tempérée, Forêt tempérée, Forêt de mana\*, Désert aride, Désert d
 > [!success] Codé le 2026-08-28 — les 12 biomes en données
 > Plaine tempérée, forêt tempérée, forêt de mana\*, désert aride, désert de cendres\* (sismique ≥ 0,75), toundra, taïga, marécage, marécage corrompu\* (danger ≥ 0,7), montagne, montagne cristalline\* (mana ≥ 0,6), côte/plage ; les spéciaux à priorité haute. Les conditions portent sur `altitude` (tectonique), `temperature`, `humidite`, `mana`, `danger`, `sismique` ; chaque biome déclare sol, arbres, plantes, rochers, `filons_mult`, `accidents_mult` (montagnes : ×2,5).
 
+> [!success] Constaté le 2026-09-03 — `foret_de_mana` n'est pas un biome du jeu
+> Les douze biomes codés sont tempérés, arides, côtiers, montagnards… (`data/biomes/`) ; la forêt de mana était une idée de départ qui n'a pas eu de fiche. Si elle revient, ce sera un biome de plus, pas celui-ci.
+
 ## Liens
 - **Dépend de** : [[Biomes — schéma]], [[Génération par couches de bruit]]
 - **Alimente** : [[Carte du monde]], [[Créatures]], [[Génération des royaumes PNJ]], [[Agriculture et élevage]]

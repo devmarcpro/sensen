@@ -33,6 +33,9 @@ La table des signaux standards — et la règle de couplage qui rend l'interacti
 
 **Onboarding ([[Tooltips contextuels]]) :** un système léger abonné à l'EventBus.
 
+> [!success] Constaté le 2026-09-03 — les signaux ont été codés sous d'autres noms, ou pas comme des signaux
+> Les noms proposés ici étaient des intentions. Dans `autoload/event_bus.gd` : `tile_destroyed` est devenu `tile_changed` (toute mutation de tuile) ; `border_crossed` est `fenetre_recentree` (la fenêtre du monde glisse) ; `item_crafted` et `item_possessed` **n'existent pas** — les quêtes de fabrication et de possession avancent par un appel direct, `_progresser_quetes`, pas par un signal, et rien ne le regrette. Les signaux qui existent vraiment : `damage_dealt`, `creature_killed`, `skill_xp_gained`, `skill_level_up`, `combat_started`, `combat_ended`, `expedition_terminee`, `chunk_explored`, `sauvegarde_faite`, `item_sold`, `dungeon_cleared`, `quest_completed`, `creature_recruited`, `cell_claimed`, `cell_role_changed`, `raid_resolved`, `leadership_changed`, `village_conquered`, `explosion`, `action_engaged`, `action_resolved`, `journal`, `book_read`, `controle_change`, `tile_changed`.
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Data-driven design]], [[Arborescence du projet]]
 - **Alimente** : [[Détection de pièces]], [[Tooltips contextuels]], [[Gabarit de quête]], [[Minimap et brouillard de guerre]], [[Lois et infractions]], [[Résolveur de modificateurs]]

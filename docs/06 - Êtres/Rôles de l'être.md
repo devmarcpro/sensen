@@ -47,6 +47,9 @@ Les prix déjà chiffrés dans le coffre s'appliquent tels quels :
 
 **Le nouveau : un être à `esprit` développé peut refuser activement.** Sous un seuil de relation, une transition vers `bétail` déclenche la fuite (l'être quitte le territoire, [[Entretien et taxes]] a déjà le précédent : *1 PNJ peut quitter le territoire par semaine*) ou l'hostilité. C'est le pendant de la dressabilité, pas une règle d'espèce.
 
+> [!success] Constaté le 2026-09-03 — `housing_default` n'est pas un champ : voir [[Blocs de l'être]]
+> Le logement est un lit dans le territoire, attribué au résident ; la fiche ne porte que `role` et `fonction`.
+
 ## Liens
 - **Dépend de** : [[Blocs de l'être]], [[Apprivoisement et recrutement]], [[Réputation et relations]]
 - **Alimente** : [[Habitat des PNJ]], [[Population et exploitation]], [[Compagnons]], [[Conditions de reproduction]]

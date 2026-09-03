@@ -39,6 +39,9 @@ Le format d'un gabarit de quête procédurale, avec son sélecteur de cible et s
 > [!success] Corrigé le 2026-08-29 — la livraison tirait dans cinq ids
 > Dernière liste d'ids du chantier « des catégories, pas des choses » : `livraison.target_selector.items_any` nommait cinq denrées. Devenu `target_selector.filtre` (les consommables empilables, ni partie, ni âme, ni potion, ni bombe) résolu par `GameData.tirer` — tout aliment ajouté au jeu peut être demandé en livraison. L'audit refuse désormais `items_any`. **Ce qui reste volontairement des listes** : le coffre de départ (`camp.json`, un kit choisi — c'est une décision de design, et ses trois champs morts `arbres/rochers/filons` sont retirés), les plans de bâtiments (`village_buildings.*.meubles`, un plan est une chose), les faunes de biome (des espèces choisies par biome, comme la note *Biomes* le prescrit).
 
+> [!success] Constaté le 2026-09-03 — `item_crafted` n'est pas un signal, et le sélecteur s'appelle `kinds_any`
+> Une quête de fabrication avance par un appel direct, `_progresser_quetes(e, "fabriquer", tags)`, au moment où l'objet sort de l'atelier ; il n'y a pas de signal `item_crafted`. Le sélecteur d'objets d'un gabarit est codé sous `kinds_any` (une liste de sortes : plat, potion, objet…), pas `items_any`.
+
 ## Liens
 - **Dépend de** : [[Quêtes et guildes]], [[Data-driven design]], [[Double niveau combat et général]]
 - **Alimente** : [[Donjons — structure et intégration]], [[Économie — sources et puits]]

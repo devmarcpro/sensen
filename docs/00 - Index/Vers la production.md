@@ -566,6 +566,8 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 > **À trancher avant de coder** : est-ce qu'une bête paisible peut être **tuée sans conséquence**, ou est-ce que massacrer la faune a un prix (réputation, raréfaction, faim des prédateurs) ? Et est-ce que la faune se **reproduit** dans le monde, ou repeuple-t-elle par génération comme les villages ?
 
 
+> [!success] Constaté le 2026-09-03 — `items_any` est codé sous le nom `kinds_any` (sélecteur des gabarits de quête)
+
 ## Liens
 - **Dépend de** : [[Ordre de construction]], [[Héritage voxel — audit]], [[Trous connus du combat]]
 - **Alimente** : [[Ordre de vérification]], [[Carte — Ouvert]]

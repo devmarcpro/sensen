@@ -23,6 +23,9 @@ Les décisions d'architecture Godot qu'on ne peut pas rattraper après coup.
 
 **Rappel ([[Grille continue]]) :** les donjons sont des grilles séparées en étages discrets — aucune exception d'architecture ([[Donjons — structure et intégration]]).
 
+> [!success] Constaté le 2026-09-03 — les noms de signaux et de RPC ci-dessus sont des intentions
+> `tile_destroyed` est codé sous `tile_changed`, `item_crafted` n'est pas un signal (appel direct des quêtes) — la liste réelle est dans [[EventBus]]. `place_tile` et `modify_tile` sont les RPC du réseau : **étape 11, non codés**, l'architecture host-autoritaire attend le jugement du solo.
+
 ## Liens
 - **Dépend de** : [[Data-driven design]], [[Arborescence du projet]], [[Contraintes permanentes]]
 - **Alimente** : [[Simulation à ticks]], [[EventBus]], [[Sauvegarde]], [[Réseau]], [[Décision — Structure de données de la grille]]
