@@ -264,7 +264,7 @@ class LigneEchange extends Control:
 			match col:
 				"prix":
 					if volet.echange.mode == "commerce":
-						texte = "%d or" % prix()
+						texte = tr("ui.prix.or").format({"n": prix()})   # « 5 or » / « 5 gold » (vu sur la capture anglaise, 2026-09-04)
 						teinte = Color(0.95, 0.8, 0.35)
 				"quantite": texte = ("×%d" % int(it.quantite)) if int(it.get("quantite", 1)) > 1 else ""
 				"qualite":

@@ -3234,7 +3234,8 @@ ui.assigner.perimetre,"{fonction} · périmètre {type} ({x},{y}) · {richesse} 
 journal.perimetre_cree,"Périmètre {type} sur ({x},{y}) : {richesse} tuiles"
 journal.perimetre_retire,"Le périmètre de ({x},{y}) est retiré"
 perimetre.residentiel.name,résidentiel
-ui.perimetre.titre,PÉRIMÈTRE — quel type ? (puis deux clics sur la carte, Échap annule)
+ui.perimetre.titre,PÉRIMÈTRE — quel type ? Puis deux clics sur la carte
+ui.prix.or,{n} or
 ui.perimetre.aide,Entrée : choisir ce type, puis cliquer les deux coins du rectangle
 journal.perimetre_dessin,Périmètre {type} : clique les deux coins
 journal.perimetre_hors_claim,Le périmètre doit être sur une cellule revendiquée
@@ -3261,3 +3262,52 @@ ui.echange.volet_marchand,"{nom} — À VENDRE (Entrée : acheter · à toi : ve
 ui.echange.volet_autre,"{nom} — SON SAC (Entrée : reprendre · à toi : donner)"
 ui.echange.col_prix,Prix
 ui.echange.aide,T : trier · Tab : l'autre volet · Entrée : l'action du volet
+tag.ame,âme
+tag.arme,arme
+tag.armure,armure
+tag.assemble,assemblé
+tag.bijou,bijou
+tag.bombe,bombe
+tag.bouclier,bouclier
+tag.buisson,buisson
+tag.champignon,champignon
+tag.composant,composant
+tag.consommable,consommable
+tag.craft,artisanat
+tag.culture,culture
+tag.decorative,décoratif
+tag.dos,dos
+tag.elevage,élevage
+tag.empilable,empilable
+tag.fortune,de fortune
+tag.gemme,gemme
+tag.grimoire,grimoire
+tag.herbe,herbe
+tag.ingredient,ingrédient
+tag.jet,de jet
+tag.livre,livre
+tag.loot,butin
+tag.lumiere,lumière
+tag.magique,magique
+tag.manuel,manuel
+tag.materiau,matériau
+tag.meuble,meuble
+tag.module_unique,module unique
+tag.munition,munition
+tag.outil,outil
+tag.parchemin,parchemin
+tag.partie,partie
+tag.plan,plan
+tag.plat,plat
+tag.portative,portative
+tag.posable,posable
+tag.potion,potion
+tag.prototype,prototype
+tag.rituel,rituel
+tag.sac,sac
+tag.soin,soin
+tag.specimen,spécimen
+tag.station,station
+tag.trame,trame
+tag.vetement,vêtement
+tag.viande,viande

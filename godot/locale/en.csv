@@ -3225,7 +3225,8 @@ ui.assigner.perimetre,"{fonction} · {type} perimeter ({x},{y}) · {richesse} ti
 journal.perimetre_cree,"{type} perimeter at ({x},{y}): {richesse} tiles"
 journal.perimetre_retire,"The perimeter at ({x},{y}) is removed"
 perimetre.residentiel.name,residential
-ui.perimetre.titre,PERIMETER — which type? (then two clicks on the map, Esc cancels)
+ui.perimetre.titre,PERIMETER — which type? Then two clicks on the map
+ui.prix.or,{n} gold
 ui.perimetre.aide,Enter: pick this type, then click the two corners of the rectangle
 journal.perimetre_dessin,{type} perimeter: click the two corners
 journal.perimetre_hors_claim,The perimeter must be on a claimed cell
@@ -3252,3 +3253,52 @@ ui.echange.volet_marchand,"{nom} — FOR SALE (Enter: buy · yours: sell)"
 ui.echange.volet_autre,"{nom} — THEIR BAG (Enter: take back · yours: give)"
 ui.echange.col_prix,Price
 ui.echange.aide,T: sort · Tab: the other pane · Enter: the pane's action
+tag.ame,soul
+tag.arme,weapon
+tag.armure,armour
+tag.assemble,assembled
+tag.bijou,jewel
+tag.bombe,bomb
+tag.bouclier,shield
+tag.buisson,bush
+tag.champignon,mushroom
+tag.composant,component
+tag.consommable,consumable
+tag.craft,crafted
+tag.culture,crop
+tag.decorative,decorative
+tag.dos,back
+tag.elevage,breeding
+tag.empilable,stackable
+tag.fortune,makeshift
+tag.gemme,gem
+tag.grimoire,grimoire
+tag.herbe,herb
+tag.ingredient,ingredient
+tag.jet,thrown
+tag.livre,book
+tag.loot,loot
+tag.lumiere,light
+tag.magique,magic
+tag.manuel,manual
+tag.materiau,material
+tag.meuble,furniture
+tag.module_unique,unique module
+tag.munition,ammunition
+tag.outil,tool
+tag.parchemin,scroll
+tag.partie,part
+tag.plan,blueprint
+tag.plat,dish
+tag.portative,portable
+tag.posable,placeable
+tag.potion,potion
+tag.prototype,prototype
+tag.rituel,ritual
+tag.sac,bag
+tag.soin,healing
+tag.specimen,specimen
+tag.station,station
+tag.trame,weave
+tag.vetement,clothing
+tag.viande,meat

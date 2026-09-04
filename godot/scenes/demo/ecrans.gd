@@ -1107,13 +1107,13 @@ func _construire_commerce(j: Dictionary) -> void:
 	entrees.append({"kind": "texte", "texte": ""})
 	for uid in pnj.get("stock", []):
 		var p: Dictionary = main.sim.prix_suggere(uid, pnj, j)
-		liste.add_item("%s — %d or" % [_nom_court(uid), int(p.prix)])
+		liste.add_item("%s — %s" % [_nom_court(uid), tr("ui.prix.or").format({"n": int(p.prix)})])
 		entrees.append({"kind": "achat", "uid": uid, "prix": p})
 	liste.add_item(tr("ui.commerce.sac").format({"pct": int(float(cm.achat_ratio) * 100.0)}), null, false)
 	entrees.append({"kind": "texte", "texte": ""})
 	for uid in j.sac:
 		var p2: Dictionary = main.sim.prix_suggere(uid, pnj, j)
-		liste.add_item("%s — %d or" % [_nom_court(uid), int(p2.achat)])
+		liste.add_item("%s — %s" % [_nom_court(uid), tr("ui.prix.or").format({"n": int(p2.achat)})])
 		entrees.append({"kind": "vente", "uid": uid, "prix": p2})
 	_bouton(tr("ui.ecran.acheter"), _action_principale)
 	_bouton(tr("ui.ecran.vendre"), _action_principale)
@@ -2457,7 +2457,12 @@ func texte_objet(uid: String) -> String:
 		var stn: Dictionary = GameData.entree("stations", str(it.station))
 		l.append(tr("ui.objet.station").format({"poids": int(stn.poids), "competence": tr(sim._nom_competence(str(stn.craft_skill)))}))
 	if not it.get("tags", []).is_empty():
-		l.append("[color=#888]" + " · ".join(it.tags) + "[/color]")
+		var tags_tr: Array[String] = []   # les étiquettes ont leur mot (« portative » s'affichait en anglais, 2026-09-04) ; une inconnue reste telle quelle
+		for t in it.tags:
+			var cle_t := "tag." + str(t)
+			var mot := tr(cle_t)
+			tags_tr.append(mot if mot != cle_t else str(t))
+		l.append("[color=#888]" + " · ".join(tags_tr) + "[/color]")
 	return "\n".join(l)
 
 
