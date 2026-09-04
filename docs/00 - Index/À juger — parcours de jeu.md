@@ -351,6 +351,12 @@ Le test garde désormais contre l'**aggravation** (seuil à 260 ms) et dit dans 
 budget n'est pas tenu. Il ne prétend plus le contraire. La décision revient au designer : optimiser
 la génération, ou desserrer le chiffre.
 
+**Remesuré le 2026-09-04** : 88 à 96 ms sur six passages de la suite dans la journée, 94-96 ms à la
+sonde (`sonde_perf_generation` : un objet généré 0,080 ms au lieu de 0,157, un étage de ~200 objets
+au lieu de 292). **Le budget est tenu aujourd'hui.** Rien n'a été optimisé exprès ; la mesure du
+3 septembre a sans doute été prise sur une machine chargée — le robot a montré le même jour que la
+charge fausse ces chiffres. Le garde reste à 260 ms et le message du test dit l'état du jour.
+
 ## 2026-09-03 — La grille de composition : ce qu'un œil humain doit trancher
 
 La grille est codée et c'est la surface du composeur (on fait son Tetris). Ce que la mesure ne peut

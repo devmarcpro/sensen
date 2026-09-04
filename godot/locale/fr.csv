@@ -114,7 +114,7 @@ journal.condition_fausse,{capacite} ne part pas : {condition} n'est pas remplie 
 capacite.etincelle.name,Étincelle
 capacite.gel_en_ligne.name,Gel en ligne
 capacite.baume.name,Baume
-ui.aide.capacites,I : inventaire · F : atelier · C : feuille (Échap ferme) · M : carte du monde (clic sur une cellule voisine : revendiquer) · K : territoire · B : registre d'élevage · V : apprivoiser · N : zoom minimap (⇧N : masquer) · F6 sauvegarder · F7 charger · F1-F3 : viser une capacité puis cliquer (Échap : annuler) — {liste}
+ui.aide.capacites,I : inventaire · F : atelier · C : feuille (Échap ferme) · M : carte du monde (clic sur une cellule voisine : revendiquer) · K : territoire · B : registre d'élevage · V : apprivoiser · N : zoom minimap (⇧N : masquer) · F6 sauvegarder · F7 charger · F1-F3 : viser une capacité puis cliquer (Échap : annuler) · P : dessiner un périmètre (au camp) — {liste}
 ui.capacite,{touche} {nom} [{modules}] : {forme} portée {pmin}-{pmax} taille {taille} · {ticks} ticks · {ressource} {monnaie} · {des}{bonus}
 ui.capacite.visee,VISÉE : {nom} — cliquer une tuile
 ui.capacite.preview,{nom} sur {def} : {des}{bonus} ×{dom} → zone {zone} ×{mult} − armure {armure} ⇒ {min}–{max}
@@ -709,6 +709,7 @@ ui.menu.atelier,Atelier
 ui.menu.feuille,Feuille de personnage
 ui.menu.carte,Carte du monde
 ui.menu.gestion,Territoire
+ui.menu.perimetre,Dessiner un périmètre (P)
 ui.menu.registre,Registre d'élevage
 ui.menu.sauvegarder,Sauvegarder
 ui.menu.minimap_zoom,Minimap : zoom

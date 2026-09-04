@@ -790,7 +790,7 @@ titre.slave.republique.f,Starosta
 titre.slave.theocratie.m,Patriarch
 titre.slave.theocratie.f,Matriarch
 ui.aide.armes,1-7: switch weapon ({ticks} ticks) — {liste}
-ui.aide.capacites,I: inventory · F: workshop · C: character sheet (Esc closes) · M: world map (click a neighbouring cell: claim it) · K: territory · B: breeding register · V: tame · N: minimap zoom (Shift+N: hide) · F6 save · F7 load · F1-F3: aim an ability then click (Esc: cancel) — {liste}
+ui.aide.capacites,I: inventory · F: workshop · C: character sheet (Esc closes) · M: world map (click a neighbouring cell: claim it) · K: territory · B: breeding register · V: tame · N: minimap zoom (Shift+N: hide) · F6 save · F7 load · F1-F3: aim an ability then click (Esc: cancel) · P: draw a perimeter (at camp) — {liste}
 ui.assigner.fonction,"{fonction} · produces: {produit} · base yield {rendement}"
 ui.assigner.rien,nothing
 ui.assigner.titre,"ASSIGN {nom} — choose their role"
@@ -984,6 +984,7 @@ ui.menu.carte,World map
 ui.menu.fermer,Close
 ui.menu.feuille,Character sheet
 ui.menu.gestion,Territory
+ui.menu.perimetre,Draw a perimeter (P)
 ui.menu.inventaire,Inventory
 ui.menu.minimap_masquer,Minimap: show / hide
 ui.menu.minimap_zoom,Minimap: zoom

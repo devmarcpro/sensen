@@ -566,6 +566,14 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 > **À trancher avant de coder** : est-ce qu'une bête paisible peut être **tuée sans conséquence**, ou est-ce que massacrer la faune a un prix (réputation, raréfaction, faim des prédateurs) ? Et est-ce que la faune se **reproduit** dans le monde, ou repeuple-t-elle par génération comme les villages ?
 > *Hypothèses posées et codées le 2026-09-04 : la raréfaction locale (pas la réputation), la génération (pas la reproduction), pas de faim des prédateurs — voir le callout dans [[Créatures]].*
 
+> [!done] Demandes du designer (2026-09-03, de 9 h à 13 h) — **les cinq sont faites le 2026-09-03 et le 2026-09-04**
+> **77. Le sac de pièces et les étapes** (9 h 20) : « une grille n'est pas forcément 3×3, pas de sens de lecture dans la grille, pour les étapes c'est une forme de grille par étape ». Fait : la séquence se déduit de l'ordre canonique des types, un déclencheur ferme une étape, chaque étape a sa grille ([[Décision — Grille de composition des sorts]]).
+> **78. Le cran de puissance n'est pas une multiplication** (9 h 30) : « chaque incrément rajoute ou enlève 1 de taille, pour la puissance ça suit la même division, pas de changement de taille du module dans la grille, c'est vraiment au niveau des monnaies que ça change ». Fait : ±1 tuile, ±1 dé, ±1 de portée ; la pièce garde sa forme ; le prix suit la division du module.
+> **79. Gestion de base en mode Dwarf Fortress** (11 h 40, puis 12 h 10 et 12 h 30) : périmètres dessinés par le joueur, par type de récolte et résidentiel ; PNJ engagés et assignés ; efficacité selon les stats du PNJ et des tuiles ; maisons bâties d'elles-mêmes quand il y a des assignés et les matériaux ; un stockage par poste. Fait en six étapes, chiffres en données, ouverts pour le designer dans [[À juger — parcours de jeu]] ([[Décision — Gestion de base, périmètres de récolte]]).
+> **80. Les écrans d'échange refaits comme l'inventaire** (12 h 50) : commerce et échange montrent les deux sacs, avec pictogrammes et tri ([[Écrans d'interface]]).
+> **81. Un voile sous tout menu** (13 h 05) : l'écran derrière se grise et rien ne se clique au travers.
+> *Même journée, sans demande : les 36 armes relues une à une (« tu as pu voir pour les 6×6 armes ? »), les sous-classes laissées de côté (« pour l'instant on ne s'en occupe pas »).*
+
 
 > [!success] Constaté le 2026-09-03 — `items_any` est codé sous le nom `kinds_any` (sélecteur des gabarits de quête)
 

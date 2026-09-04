@@ -35,7 +35,8 @@ La partie démarre par la **création de personnage** (R race, C classe, ↑↓ 
 | **E** | interagir avec ce qui est sous la souris si adjacent, sinon la première chose interactive autour (PNJ, coffre, lit, escalier, parcelle, place de village, eau, bête, plante, mur) |
 | **R** | ramasser ce qui est au sol |
 | **Clic droit** | **toutes** les options possibles sur la tuile ou l'être visé — c'est le geste à connaître |
-| **Tab** | le menu : inventaire, atelier, feuille, capacités, carte, territoire, registre, sauvegarder, charger, minimap, débogage |
+| **Tab** | le menu : inventaire, atelier, feuille, capacités, carte, territoire, périmètre, registre, sauvegarder, charger, minimap, débogage |
+| **P** | au camp : dessiner un périmètre (récolte de bois, de minerai, de plantes, résidentiel, stockage) — choisir le type, puis cliquer les deux coins |
 | **1 → 0** | la hotbar : armes du râtelier, capacités, bombes, attaque lourde, garde, attendre — la touche sélectionne, la ligne de visée suit la souris, le clic lance |
 | **Échap** | fermer un écran / annuler une visée |
 | molette, clic milieu | zoomer, déplacer la vue |

@@ -2042,9 +2042,9 @@ func _portrait_partie(slot: String) -> void:
 ## Le menu (Tab) : les écrans et les actions générales (Écrans d'interface, contrôles).
 func _construire_menu(_j: Dictionary) -> void:
 	titre.text = tr("ui.ecran.menu")
-	var ids: Array = ["inventaire", "atelier", "feuille", "capacites", "carte", "gestion", "registre", "sauvegarder", "minimap_zoom", "minimap_masquer", "titre", "arene", "banc_objets", "recharger", "fermer"]
+	var ids: Array = ["inventaire", "atelier", "feuille", "capacites", "carte", "gestion", "perimetre", "registre", "sauvegarder", "minimap_zoom", "minimap_masquer", "titre", "arene", "banc_objets", "recharger", "fermer"]
 	for id in ids:
-		if id in ["carte", "gestion"] and main.sim.lieu != "camp":
+		if id in ["carte", "gestion", "perimetre"] and main.sim.lieu != "camp":
 			continue
 		liste.add_item(tr("ui.menu." + str(id)))
 		entrees.append({"kind": "menu", "id": str(id), "texte": ""})

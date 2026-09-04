@@ -4010,6 +4010,18 @@ func test_perimetres() -> void:
 	verifier(int(s.territoire.stocks.get("chene|brut", 0)) == 20 - int(s.regles.r.royaume.maisons.cout[0].n), "le bois est pris sur le stock (reste %d)" % int(s.territoire.stocks.get("chene|brut", 0)))
 	verifier(not s._piece_du_lit(h.lit, s.pieces_de_cellule(camp)).is_empty(), "la chaumière est une pièce valide au sens de Détection de pièces")
 	verifier(s._batir_maisons() == 0, "logé : on ne lui bâtit pas une seconde maison")
+	# Sauvegarde partout (décidé) : les périmètres dessinés, leurs tuiles, le stockage et le logement reviennent typés
+	var tuiles0: Array = s.tuiles_de_perimetre(pid_d)
+	var cap_s: int = int(s.perimetres()[pid_s].capacite)
+	verifier(s.sauvegarder("test_perimetres"), "sauvegarder avec des périmètres dessinés")
+	var s2 := Simulation.new(31)
+	verifier(s2.charger_sauvegarde("test_perimetres"), "recharger dans une simulation neuve")
+	var per2: Dictionary = s2.perimetres().get(pid_d, {})
+	verifier(not per2.is_empty() and per2.cellule is Vector2i and per2.cellule == camp and s2.tuiles_de_perimetre(pid_d) == tuiles0 and int(per2.richesse) == 5, "le périmètre dessiné revient : cellule et quinze tuiles typées, richesse %d" % int(per2.get("richesse", -1)))
+	verifier(s2.perimetres().has(pid_s) and int(s2.perimetres()[pid_s].capacite) == cap_s and s2.place_stockage(pid_s) == cap_s, "le stockage revient avec sa capacité (%d) et sa place" % cap_s)
+	var loges: Array = s2.vivants().filter(func(x: Dictionary) -> bool: return str(x.get("assignation", {}).get("residence", "")) == pid_r)
+	verifier(loges.size() == 1 and loges[0].has("lit") and loges[0].lit is Vector2i and s2.grille.meubles.get(s2.grille.idx(loges[0].lit), "").begins_with("lit"), "le résident revient logé, son lit typé et toujours meublé")
+	s2.monde.fermer()
 	s.monde.fermer()
 
 
@@ -7524,7 +7536,9 @@ func test_budgets() -> void:
 	# même attend une décision du designer (optimiser, ou desserrer le chiffre). Consigné dans
 	# « À juger ». Ce qu'on sait du coût : l'étage fabrique 292 objets à 0,157 ms pièce, soit ~46 ms —
 	# un tiers du total, et ça renvoie à la question ouverte des 42 coffres par étage.
-	verifier(dt_etage < 260.0, "É2 : un étage de donjon généré en %.0f ms — budget 100 ms NON TENU, garde contre l'aggravation à 260" % dt_etage)
+	# 2026-09-04 : remesuré à 88-96 ms sur six passages de la suite, 94-96 ms à la sonde (un objet généré 0,080 ms au lieu de 0,157) —
+	# le budget est tenu aujourd'hui. Le garde reste à 260 (la machine chargée fausse la mesure) ; le message dit l'état du jour.
+	verifier(dt_etage < 260.0, "É2 : un étage de donjon généré en %.0f ms — budget 100 ms %s, garde contre l'aggravation à 260" % [dt_etage, "tenu" if dt_etage < 100.0 else "NON TENU"])
 	t0 = Time.get_ticks_usec()
 	for k in 100:
 		s.generer_objet("proto_epee", 3)
@@ -8475,11 +8489,18 @@ func test_chasse() -> void:
 	verifier(GameData.catalogues.competences.has(str(ch.competence)), "la compétence %s existe au catalogue" % str(ch.competence))
 	# Deux chasseurs, même bête : le novice repart moins chargé que l'expert.
 	var pieces := [0, 0]
+	var ou_bete: Vector2i = j.pos   # une tuile libre DANS la grille : la gorge est étroite, (+3, +3) en sortait
+	for r in range(1, 6):
+		for d in [Vector2i(r, 0), Vector2i(-r, 0), Vector2i(0, r), Vector2i(0, -r), Vector2i(r, r), Vector2i(-r, -r)]:
+			var q: Vector2i = j.pos + d
+			if ou_bete == j.pos and s.grille.dans(q) and not s.grille.bloque_passage(q) and s.grille.occupant(q).is_empty():
+				ou_bete = q
+	verifier(ou_bete != j.pos, "une tuile libre pour la bête, dans la grille")
 	for essai in 2:
 		j.competences[str(ch.competence)] = 0 if essai == 0 else 40
 		j.competences_eff = j.competences.duplicate()
 		for k in 30:
-			var proie: Dictionary = s.ajouter("ours_polaire", j.pos + Vector2i(3, 3), "ia")   # une bête qui a des pièces
+			var proie: Dictionary = s.ajouter("ours_polaire", ou_bete, "ia")   # une bête qui a des pièces
 			if proie.is_empty():
 				break
 			s.contenants.clear()   # le butin tombe au sol, pas dans le sac

@@ -7613,7 +7613,7 @@ func _perimer_butin(tick: int) -> void:
 
 
 func _poser_contenant(pos: Vector2i, uids: Array, type: String) -> void:
-	if uids.is_empty():
+	if uids.is_empty() or not grille.dans(pos):   # hors grille : rien à poser (un être hors grille est une erreur du test qui l'a mis là)
 		return
 	var idx := grille.idx(pos)
 	if contenants.has(idx):

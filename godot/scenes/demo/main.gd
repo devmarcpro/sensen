@@ -1350,6 +1350,9 @@ func _action_menu(id: String) -> void:
 		"gestion":
 			if sim.lieu == "camp":
 				ecrans.ouvrir("gestion")
+		"perimetre":   # la même chose que P — le menu ne cache aucun raccourci global (README, contrôles)
+			if sim.lieu == "camp" and sim.monde != null:
+				ecrans.ouvrir("perimetre")
 		"carte":
 			ecrans.fermer()
 			if sim.lieu == "camp":

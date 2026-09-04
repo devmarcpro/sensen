@@ -50,3 +50,7 @@ Les chiffres (prix d'un engagement, rythme des migrants, rendement par tuile), l
 - **Dépend de** : [[Population et exploitation]], [[Rôles de cases]], [[Apprivoisement et recrutement]], [[Compagnons]], [[Habitat des PNJ]]
 - **Alimente** : [[Royaume du joueur]], [[Abstraction hors-site]], [[Écrans d'interface]]
 - **Voir aussi** : [[Expansion territoriale]], [[Agriculture et élevage]], [[LOD de simulation]]
+
+> [!success] 2026-09-04 — P n'est plus un raccourci caché
+> Le README promet « aucun raccourci global caché » : la touche P (dessiner un périmètre, au camp) est désormais aussi une entrée du menu Tab, une ligne du tableau des contrôles du README et un mot de l'aide du HUD, en français et en anglais. Le menu ne la montre qu'au camp, comme Territoire et Carte.
+> Même jour : le test des périmètres fait l'aller-retour de sauvegarde — un périmètre dessiné, son stockage et un résident logé reviennent typés (cellule, tuiles, lit en `Vector2i`) ; le sérialiseur générique (`Sauvegarde.encoder`) les portait déjà, c'est maintenant vérifié.
