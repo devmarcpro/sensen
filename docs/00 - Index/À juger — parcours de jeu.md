@@ -459,7 +459,7 @@ Le designer, 14 h : « simule une grande base sur plusieurs cases avec une vingt
 
 **4. Un résidentiel de 24×12 loge douze personnes.** Une chaumière fait 6×4 = 24 tuiles, elles se serrent sans intervalle : douze maisons, huit résidents sans toit (−15 d'humeur chacun). Compter **24 tuiles par habitant** en dessinant le résidentiel — l'écran le dit désormais : la ligne du résidentiel écrit « place pour ≈ N chaumière(s) » sur ses tuiles encore libres, et le détail rappelle qu'une chaumière fait 6×4.
 
-**5. Un raid arrive la deuxième semaine** (8 assaillants contre un garde : subi, 50 % des stocks et de la caisse perdus). Le mécanisme existe déjà et frappe une base neuve ; avec vingt résidents et un garde, il ne se défend pas.
+**5. Un raid arrive la deuxième semaine** (8 assaillants, force 20, contre un garde : subi, 50 % des stocks et de la caisse perdus). Le mécanisme existe déjà et frappe une base neuve. *Réserve : la sonde fait passer la semaine d'un coup, le combat du raid n'a pas lieu et il est compté comme subi ; en jeu, le joueur et le garde se battent. Ce que la sonde dit vraiment, c'est qu'un raid de huit arrive dès la deuxième semaine d'une base de vingt.*
 
 **6. Les migrants ne viennent pas** tant que la base est pleine (4 par cellule × 5 = 20), et une fois les départs commencés la chance (0,2 par semaine) n'en a amené aucun en quatre semaines.
 
