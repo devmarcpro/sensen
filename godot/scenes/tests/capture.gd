@@ -385,10 +385,17 @@ func _ready() -> void:
 		if args[isort] == "--sorts" and isort + 1 < args.size() and scene.sim != null:
 			var js: Dictionary = scene.joueur()
 			for seq_s in args[isort + 1].split("|"):
-				var mods_s: Array = Array(seq_s.split(","))
+				var mods_s: Array = []
+				var crans_s: Array = []   # « gel+1 » : le module et son cran (designer 2026-09-04)
+				for brut_s in seq_s.split(","):
+					var re_s := RegEx.new()
+					re_s.compile("^([a-z_]+)([+-][0-9]+)?$")   # sans échappement : les heredocs les mangent
+					var mm := re_s.search(str(brut_s))
+					mods_s.append(mm.get_string(1) if mm != null else str(brut_s))
+					crans_s.append(int(mm.get_string(2)) if mm != null and not mm.get_string(2).is_empty() else 0)
 				for m_s in mods_s:
 					scene.sim.crediter_module(js, str(m_s))
-				scene.sim.composer_capacite(js, mods_s)
+				scene.sim.composer_capacite(js, mods_s, "", [], crans_s)
 	for ip in args.size():   # --pose seg:angle[,seg:angle…] : une pose de repos, pour juger l'articulation
 		if args[ip] == "--pose" and ip + 1 < args.size() and scene.sim != null:
 			var jp: Dictionary = scene.joueur()

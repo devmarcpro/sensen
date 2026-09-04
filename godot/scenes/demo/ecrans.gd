@@ -1327,8 +1327,16 @@ func _construire_capacites(j: Dictionary) -> void:
 	for k in j.get("capacites", []).size():
 		var cap: Dictionary = j.capacites[k]
 		var noms: Array[String] = []
-		for m in cap.get("modules", []):
-			noms.append(tr(GameData.catalogues.modules.get(str(m), {}).get("name_key", str(m))))
+		var crans_c: Array = cap.get("crans", [])   # le cran de chaque pièce se lit dans la liste (designer 2026-09-04)
+		for k_m in cap.get("modules", []).size():
+			var m_k: String = str(cap.modules[k_m])
+			var nom_m: String = tr(GameData.catalogues.modules.get(m_k, {}).get("name_key", m_k))
+			var c_m: int = int(crans_c[k_m]) if k_m < crans_c.size() else 0
+			if c_m > 0:
+				nom_m += " +%d" % c_m
+			elif c_m < 0:
+				nom_m += " −%d" % -c_m
+			noms.append(nom_m)
 		liste.add_item(tr("ui.capacites.ligne").format({"nom": tr(str(cap.get("name_key", cap.id))), "modules": " → ".join(noms)}))
 		entrees.append({"kind": "capacite", "index": k, "texte": _texte_capacite_plan(j, k)})
 	liste.add_item(tr("ui.capacites.nouvelle"))
