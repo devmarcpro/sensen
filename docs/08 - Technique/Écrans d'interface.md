@@ -258,3 +258,6 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 
 > [!note] 2026-09-04, 20 h 30 — la capture des compagnons en donjon : 67 erreurs « Grille.h hors bornes » au retour au camp
 > Les gros flottants (CRITIQUE / RATÉ) et la tuile survolée gardaient des positions du donjon après le retour au camp ; sur l'autre grille, l'index est négatif. Le changement de grille les efface (`_apres_changement_de_grille`), et les deux lectures vérifient `dans` avant `h`. Vu parce que la capture garde tout le journal d'erreurs : un GIF n'est pas qu'une image.
+
+> [!note] 2026-09-04, 20 h 50 — la ligne « sac : … » du bas de l'écran quitte aussi l'écran quand le volet est affiché
+> Vu sur le GIF des compagnons : le volet listait l'inventaire et le bas de l'écran répétait « sac : Établi · Torche… · Vladka Cernic · Ingn Ulfvik ». Même règle que pour le journal : quand le volet est visible, le bas ne montre que l'écran de fin et la défaite.

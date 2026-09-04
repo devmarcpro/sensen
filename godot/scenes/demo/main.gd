@@ -2042,7 +2042,7 @@ func _maj_ui() -> void:
 				lignes.append("  " + _preview_capacite(j, plan, sim.entites[g.occupant(survol)]))
 	ui.text = "\n".join(lignes)
 	var bas: Array[String] = []
-	if not j.is_empty() and not j.sac.is_empty():
+	if not j.is_empty() and not j.sac.is_empty() and (volet == null or not volet.visible):   # l'inventaire est dans le volet quand il est affiché
 		var objets: Array[String] = []
 		for k in mini(9, j.sac.size()):
 			var it_k: Dictionary = sim.items[j.sac[k]]
