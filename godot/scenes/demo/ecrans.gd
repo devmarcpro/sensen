@@ -1168,7 +1168,12 @@ func _construire_gestion(j: Dictionary) -> void:
 			entrees.append({"kind": "perimetre", "id": pid_c, "cellule": cell, "texte": (st_long + "
 " if not st_long.is_empty() else "") + detail_p + "
 " + tr("ui.gestion.perimetre_aide")})
-	for x in sim.residents():
+	var residents_tries: Array = sim.residents().duplicate()   # par métier puis par nom : vingt lignes se lisent par groupes (2026-09-04)
+	residents_tries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var fa := tr(GameData.entree("functions", str(a.assignation.fonction)).name_key)
+		var fb := tr(GameData.entree("functions", str(b.assignation.fonction)).name_key)
+		return fa < fb if fa != fb else tr(a.name_key) < tr(b.name_key))
+	for x in residents_tries:
 		var poste: Vector2i = x.get("poste", x.pos)
 		var cell_p: Vector2i = sim._cell_de(poste)
 		var per_x: Dictionary = sim.perimetres().get(str(x.assignation.get("perimetre", "")), {})   # son poste : le périmètre, sinon la cellule (grande base, 2026-09-04)
