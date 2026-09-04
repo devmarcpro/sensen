@@ -3236,3 +3236,7 @@ ui.gestion.sans_stockage,SANS STOCKAGE (ne produit pas)
 journal.poste_sans_stockage,{nom} n'a pas de stockage où ranger sa récolte : rien cette semaine
 journal.stockage_plein,"Le stockage en ({x},{y}) est plein : le surplus est perdu"
 ui.gestion.perimetre_detail,"réserve {reserve} · matière dominante : {dominant}"
+ui.feuille.grilles,Grilles de composition
+ui.feuille.grille,  {nom} ({cases} cases){active}
+ui.feuille.grille_active, · celle où l'on compose
+ui.feuille.modules,modules connus : {n}

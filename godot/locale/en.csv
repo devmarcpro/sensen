@@ -3227,3 +3227,7 @@ ui.gestion.sans_stockage,NO STORAGE (does not produce)
 journal.poste_sans_stockage,{nom} has no storage for the harvest: nothing this week
 journal.stockage_plein,"The storage at ({x},{y}) is full: the surplus is lost"
 ui.gestion.perimetre_detail,"reserve {reserve} · dominant material: {dominant}"
+ui.feuille.grilles,Composition grids
+ui.feuille.grille,  {nom} ({cases} cells){active}
+ui.feuille.grille_active, · the one in use
+ui.feuille.modules,known modules: {n}

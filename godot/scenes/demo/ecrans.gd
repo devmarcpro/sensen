@@ -2536,6 +2536,17 @@ func _construire_feuille(j: Dictionary) -> void:
 		lt.append(tr("ui.feuille.talent").format({"nom": tr(td.name_key), "desc": tr(td.desc_key)}))
 	l.append("")
 	l.append_array(lt)
+	var lg: Array[String] = ["", "[b]" + tr("ui.feuille.grilles") + "[/b]"]   # la collection de grilles (designer 2026-09-04) se lit ici aussi, pas seulement au composeur
+	var active_g: String = str(sim.grille_composition(j).get("grille", ""))
+	for gid in j.get("grilles", []):
+		var fiche_g: Dictionary = GameData.catalogues.get("grilles", {}).get(str(gid), {})
+		lg.append(tr("ui.feuille.grille").format({"nom": tr(str(fiche_g.get("name_key", gid))), "cases": sim.grille_sort.cases_de_grille(str(gid)).size(), "active": tr("ui.feuille.grille_active") if str(gid) == active_g else ""}))
+	if j.get("grilles", []).is_empty():   # sans collection (robot, vieille sauvegarde) : la grille de sa voie, comme au composeur
+		var g_v: Dictionary = sim.grille_composition(j)
+		var fiche_v: Dictionary = GameData.catalogues.get("grilles", {}).get(str(g_v.get("grille", "")), {})
+		lg.append(tr("ui.feuille.grille").format({"nom": tr(str(fiche_v.name_key)) if fiche_v.has("name_key") else tr("ui.composeur.grille_arme"), "cases": (g_v.cases as Array).size(), "active": tr("ui.feuille.grille_active")}))
+	lg.append(tr("ui.feuille.modules").format({"n": j.get("modules_connus", []).size()}))
+	l.append_array(lg)
 	liste.add_item(tr("ui.feuille.stats"))
 	entrees.append({"kind": "texte", "texte": "\n".join(l)})
 	var cles: Array = j.competences.keys()
