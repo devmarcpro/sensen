@@ -392,3 +392,28 @@ avec un représentant par classe mère, même graine : voir le tableau dans
    les génère au niveau 1), et une arme de départ par voie — les kits des classes mères mage,
    sentinelle, érudit et meneur ne se distinguent pas par l'arme, alors que les six voies ont chacune
    six armes depuis le 3 septembre. C'est une décision de contenu, pas une mesure.
+
+## Les 36 armes relues contre leurs identités (2026-09-04)
+
+Le designer a demandé si les six armes par voie « correspondent bien à leurs attributs et sont toutes
+différentes ». Vérifié sur les données : les 36 fonctionnalités sont sur une compétence de la bonne
+voie, et aucune paire ne partage dés, vitesse, allonge, mains, type de dégâts et critique (la sonde
+des armes le revérifie). Les paires les plus proches : lance / hallebarde, grimoire / orbe / talisman.
+Ce qui ne colle pas à l'identité fixée le 3 septembre, à trancher :
+
+1. **Le pavois** a une allonge de 1,5 sous l'endurance (critère : allonge ≥ 2). Un bouclier rangé
+   avec les armes d'hast — le sortir de la voie, ou lui donner une allonge de 2 ?
+2. **La vitesse ne prime pas** sur deux armes de dextérité : hachette de jet 1,8, javelot 1,6, plus
+   lents que l'épée du guerrier (2,0). Les accélérer, ou accepter que le jet soit l'exception ?
+3. **Le sabre** (1d10, 2,2, critique 19) se lit comme une lame de dextérité rangée sous la force.
+4. **La sarbacane** fait 1d3, l'arme la plus faible du jeu, et c'est celle du kit du Creuset — sans
+   poison à livrer, elle n'a rien pour elle.
+5. **Aucune arme n'a d'affinité de sang-froid** : les armes de dextérité et de perception portent des
+   affinités mana / vigueur que leurs noyaux ne dépensent jamais (la dague favorise même la vigueur).
+   L'échelle des instruments a été refaite pour le mana ; rien d'équivalent pour le sang-froid.
+6. Six objets `proto_*` doublent exactement six armes craft (tests seulement ; le butin pioche dans
+   les bases assemblables).
+
+Les points 1, 2 et 5 sont des réglages de données, faisables en un commit sur un mot du designer ;
+3 et 4 sont des choix d'identité.
+

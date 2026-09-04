@@ -135,6 +135,24 @@
     },
     "equipement": {
       "type": "object"
+    },
+    "cran": {
+      "type": "object",
+      "properties": {
+        "_doc": {
+          "type": "string"
+        },
+        "min": {
+          "type": "integer"
+        },
+        "max": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ]
     }
   },
   "required": [

@@ -1733,5 +1733,10 @@
       "accessoire_1",
       "accessoire_2"
     ]
+  },
+  "cran": {
+    "_doc": "Le cran de puissance (designer 2026-09-04) : un pas de 1 dans les deux sens — une case de taille pour une forme, une tuile pour une portee, un de pour un noyau ; la piece garde sa taille dans la grille, seule la monnaie bouge (proportion n-ieme du prix). min et max bornent le cran d'une piece.",
+    "min": -2,
+    "max": 3
   }
 }

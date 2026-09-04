@@ -3266,14 +3266,16 @@ func test_assemblage_sans_limite() -> void:
 	verifier(s.bombes.size() - n_bombes0 == n_tuiles, "un carré de Bombe pose %d charges d'un geste" % (s.bombes.size() - n_bombes0))
 	var puissance_1: float = float(s.bombes[s.bombes.size() - 1].puissance)
 	s.bombes.clear()
-	# Un noyau répété est un noyau plus puissant (décision du 2026-08-30) : Bombe + Bombe = une bombe par tuile, × 2
+	# Un noyau répété est UN CRAN de plus (designer 2026-09-04, corrigeant le « × n » du 30 août) : Bombe + Bombe
+	# = une bombe par tuile, un dé de plus, le prix d'une division de plus — et la même puissance de souffle.
 	var p_b2: Dictionary = plan_de.call(["carre", "bombe", "bombe"])
-	verifier(p_b2.erreurs.is_empty() and p_b2.charges_sup.is_empty() and int(p_b2.fois) == 2 and int(p_b2.ressource) == 2 * int(p_bombe.ressource), "Bombe × 2 : un seul noyau à fois = 2, le prix × 2 (%d)" % int(p_b2.ressource))
+	var div_bombe: int = s.capacites.divisions_de(GameData.entree("modules", "bombe"))
+	verifier(p_b2.erreurs.is_empty() and p_b2.charges_sup.is_empty() and int(p_b2.fois) == 1 and int(p_b2.des_bonus) == 1 and absi(int(p_b2.ressource) - (int(p_bombe.ressource) + roundi(float(p_bombe.ressource) / float(div_bombe)))) <= 1, "Bombe + Bombe : un cran, un dé de plus, une division de prix de plus (%d → %d)" % [int(p_bombe.ressource), int(p_b2.ressource)])
 	s._executer_capacite(j, p_b2, j.pos + Vector2i(2, 0))
-	verifier(s.bombes.size() == n_tuiles and float(s.bombes[0].puissance) == 2.0 * puissance_1 and str(s.bombes[0].degats) == "6d6", "une bombe par tuile, deux fois plus puissante (%s, %.0f)" % [str(s.bombes[0].degats), float(s.bombes[0].puissance)])
+	verifier(s.bombes.size() == n_tuiles and float(s.bombes[0].puissance) == puissance_1 and str(s.bombes[0].degats) == "4d6", "une bombe par tuile, à 4d6, même souffle (%s, %.0f)" % [str(s.bombes[0].degats), float(s.bombes[0].puissance)])
 	s.bombes.clear()
 	var p_e2: Dictionary = plan_de.call(["point", "etincelle", "etincelle", "etincelle"])
-	verifier(str(p_e2.des) == "3d4" and p_e2.charges_sup.is_empty() and int(p_e2.ressource) == 3 * int(plan_de.call(["point", "etincelle"]).ressource), "Étincelle × 3 : 3d4, prix × 3 (%s, %d)" % [str(p_e2.des), int(p_e2.ressource)])
+	verifier(str(p_e2.des) == "1d4" and int(p_e2.des_bonus) == 2 and p_e2.charges_sup.is_empty() and int(p_e2.ressource) == 3 * int(plan_de.call(["point", "etincelle"]).ressource), "Étincelle trois fois : 1d4 + 2 dés, prix × 3 — à un dé de base, une division est le prix entier (%s+%d, %d)" % [str(p_e2.des), int(p_e2.des_bonus), int(p_e2.ressource)])
 	var p_mix: Dictionary = plan_de.call(["point", "etincelle", "gel"])
 	verifier(p_mix.charges_sup.size() == 1 and int(p_mix.fois) == 1, "deux noyaux différents restent deux charges")
 	verifier(str(GameData.entree("modules", "etincelle").get("power_base", "")) == "1d4", "le catalogue n'a pas été modifié par la répétition")
@@ -3437,9 +3439,9 @@ func test_assemblage_sans_limite() -> void:
 	s.bombes.clear()
 	var p_folie: Dictionary = plan_de.call(["ligne", "croix", "bombe", "bombe"])
 	var t_folie: int = s.tuiles_du_plan(j, p_folie, j.pos + Vector2i(2, 0)).size()
-	verifier(p_folie.erreurs.is_empty() and p_folie.charges_sup.is_empty() and int(p_folie.fois) == 2 and p_folie.formes_sup.size() == 1, "Ligne + Croix + Bombe + Bombe : assemblé sans un mot, la Bombe doublée")
+	verifier(p_folie.erreurs.is_empty() and p_folie.charges_sup.is_empty() and int(p_folie.fois) == 1 and int(p_folie.des_bonus) == 1 and p_folie.formes_sup.size() == 1, "Ligne + Croix + Bombe + Bombe : assemblé sans un mot, la Bombe un cran plus haut (designer 2026-09-04 : pas un doublement)")
 	s._executer_capacite(j, p_folie, j.pos + Vector2i(2, 0))
-	verifier(s.bombes.size() == t_folie and float(s.bombes[0].puissance) == 80.0, "une charge deux fois plus forte par tuile de l'union : %d bombes" % s.bombes.size())
+	verifier(s.bombes.size() == t_folie and float(s.bombes[0].puissance) == 40.0 and str(s.bombes[0].degats) == "4d6", "une charge à 4d6 par tuile de l'union, même souffle : %d bombes" % s.bombes.size())
 	verifier(s._facteur_surface(j, p_folie, j.pos + Vector2i(2, 0)) == t_folie, "et le prix × %d tuiles" % t_folie)
 	s.bombes.clear()
 	# 5. L'origine ne vient plus de la forme mais de la PORTÉE (designer 2026-09-01) : le même cône part
@@ -3592,9 +3594,9 @@ func test_grille_sort() -> void:
 	verifier(g3.emboiter(["d1", "d2", "d3"], deux_trois).ok, "trois dominos remplissent un 2×3")
 	var trop := g3.emboiter(["d1", "d2", "d3", "d4"], deux_trois)
 	verifier(not trop.ok and int(trop.manque) == 2, "quatre dominos : refusé, deux cases de trop (%d)" % int(trop.manque))
-	# Et le même domino quatre fois est UNE pièce ×4 : huit cases, qui ne tiennent pas non plus dans six.
+	# Et le même domino quatre fois, c'est quatre pièces (le cran ne grossit pas une pièce, designer 2026-09-04) : huit cases.
 	var quatre := g3.emboiter(["d1", "d1", "d1", "d1"], deux_trois)
-	verifier(not quatre.ok and int(quatre.demande) == 8 and int(quatre.manque) == 2, "le même domino quatre fois est une pièce ×4 de huit cases")
+	verifier(not quatre.ok and int(quatre.demande) == 8 and int(quatre.manque) == 2, "le même domino quatre fois : quatre pièces, huit cases, deux de trop")
 	# La rotation : un domino vertical rentre dans une ligne horizontale.
 	var colonne_2x1 := GrilleSort._cases_des_lignes(["#", "#"])
 	verifier(g3.emboiter(["d1"], colonne_2x1).ok, "un domino tourne pour se dresser dans une colonne")
@@ -3695,21 +3697,43 @@ func test_trames() -> void:
 
 
 func test_cran_de_puissance() -> void:
-	# Le cran de puissance (designer 2026-09-04) : une pièce ×n prend n fois la place, sa forme suit le
-	# prix ×n, et pour l'assembleur c'est le module n fois de suite — la règle du 1er septembre.
+	# Le cran de puissance (designer 2026-09-04, corrigé le jour même) : un pas de 1 dans les deux sens — une case
+	# pour une forme, une tuile pour une portée, un dé pour un noyau ; la pièce garde sa taille dans la grille ;
+	# c'est la monnaie qui bouge, à proportion des divisions. Répéter une pièce est un cran de plus.
 	var s := nouvelle_sim("plaine_au_talus")
 	var g: GrilleSort = s.grille_sort
-	var base := g.forme_de("etincelle").size()
-	verifier(g.forme_de("etincelle", 2).size() == base * 2 and g.forme_de("etincelle", 3).size() == base * 3, "une pièce ×n prend n fois la place (%d, %d, %d)" % [base, g.forme_de("etincelle", 2).size(), g.forme_de("etincelle", 3).size()])
-	var pieces := GrilleSort.pieces_de(["point", "gel", "gel", "gel", "point"])
-	verifier(pieces.size() == 3 and int(pieces[1].fois) == 3 and str(pieces[1].module) == "gel", "trois Gel de suite sont une pièce ×3 ; un Point avant et un après restent deux pièces")
-	verifier(g.taille_de(["gel", "gel"]) == g.forme_de("gel", 2).size(), "la taille d'une séquence compte les pièces ×n")
-	var emb := g.emboiter(["point", "gel", "gel"], g.grille_de("force", 25))
-	verifier(emb.ok and (emb.placement as Array).size() == 2 and int(emb.placement[1].fois) == 2, "l'emboîtement range Gel ×2 comme une seule pièce, avec son cran")
-	# l'assembleur, lui, voit toujours deux Gel : deux fois plus fort, payé deux fois
-	var plan1 := s.capacites.assembler(["point", "contact", "gel"], 10, "1d4", {}, {})
-	var plan2 := s.capacites.assembler(["point", "contact", "gel", "gel"], 10, "1d4", {}, {})
-	verifier(int(plan2.ressource) == 2 * int(plan1.ressource) and int(plan2.get("fois", 1)) == 2, "pour l'assembleur, ×2 est le module deux fois : prix double (%d → %d)" % [int(plan1.ressource), int(plan2.ressource)])
+	verifier(g.forme_de("gel").size() == g.forme_de("gel", 3).size() and g.forme_de("gel").size() == g.forme_de("gel", -2).size(), "le cran ne change pas la taille de la pièce dans la grille")
+	var gel: Dictionary = GameData.entree("modules", "gel")
+	var n := s.capacites.divisions_de(gel)
+	verifier(n >= 2, "Gel a plusieurs dés : plusieurs divisions (%d)" % n)
+	var base := s.capacites.assembler(["point", "gel"], 10, "1d4", {}, {})
+	var plus1 := s.capacites.assembler(["point", "gel"], 10, "1d4", {}, {}, [0, 1])
+	verifier(int(plus1.des_bonus) == int(base.des_bonus) + 1 and int(plus1.ressource) == roundi(float(base.ressource) * float(n + 1) / float(n)) and int(plus1.ticks) == int(base.ticks) and int(plus1.cran) == 1, "un cran de plus sur Gel : un dé de plus, le prix d'une division de plus (%d → %d), les ticks inchangés" % [int(base.ressource), int(plus1.ressource)])
+	var moins := s.capacites.assembler(["point", "gel"], 10, "1d4", {}, {}, [0, -9])
+	verifier(int(moins.des_bonus) == int(base.des_bonus) + 1 - n and int(moins.ressource) == roundi(float(base.ressource) / float(n)), "un cran trop bas s'arrête à un dé : %d dés en moins, un n-ième du prix (%d)" % [n - 1, int(moins.ressource)])
+	var rep := s.capacites.assembler(["point", "gel", "gel"], 10, "1d4", {}, {})
+	verifier(int(rep.des_bonus) == int(plus1.des_bonus) and absi(int(rep.ressource) - int(plus1.ressource)) <= 1 and int(rep.fois) == 1, "répéter Gel est un cran de plus, pas un doublement (%d ≈ %d)" % [int(rep.ressource), int(plus1.ressource)])
+	var carre_0 := s.capacites.assembler(["carre", "etincelle"], 10, "1d4", {}, {})
+	var carre_1 := s.capacites.assembler(["carre", "etincelle"], 10, "1d4", {}, {}, [1, 0])
+	verifier(int(carre_1.taille) == int(carre_0.taille) + 1 and int(carre_1.ticks) > int(carre_0.ticks), "un cran sur une forme : une case de taille, des ticks à proportion (%d → %d)" % [int(carre_0.ticks), int(carre_1.ticks)])
+	var jet_0 := s.capacites.assembler(["jet_court", "point", "etincelle"], 10, "1d4", {}, {})
+	var jet_2 := s.capacites.assembler(["jet_court", "point", "etincelle"], 10, "1d4", {}, {}, [2, 0, 0])
+	verifier(int(jet_2.portee.y) == int(jet_0.portee.y) + 2 and int(jet_2.ticks) > int(jet_0.ticks), "deux crans sur une portée : deux tuiles de plus (%d → %d)" % [int(jet_0.portee.y), int(jet_2.portee.y)])
+	var borne: Dictionary = s.regles.r.get("cran", {})
+	var trop := s.capacites.assembler(["point", "gel"], 10, "1d4", {}, {}, [0, 99])
+	verifier(int(trop.cran) == int(borne.get("max", 3)), "le cran est borné par combat_rules.cran.max (%d)" % int(trop.cran))
+	var emb := g.emboiter(["gel", "point"], g.grille_de("force", 0))
+	verifier(emb.ok and int(emb.placement[0].index) == 1 and int(emb.placement[1].index) == 0, "l'emboîtement dit l'index de chaque pièce dans la séquence reçue")
+	# la capacité garde ses crans, et son plan les relit
+	var j := joueur_de(s)
+	for m in ["point", "gel"]:
+		if not (m in j.modules_connus):
+			j.modules_connus.append(m)
+	var caps: Array = j.capacites.duplicate()
+	j.capacites = []
+	verifier(s.composer_capacite(j, ["point", "gel"], "", [], [0, 1]) and Array(j.capacites[0].get("crans", [])) == [0, 1], "une capacité composée garde le cran de chaque pièce")
+	verifier(int(s.plan_capacite(j, 0).cran) == 1, "et son plan relit le cran")
+	j.capacites = caps
 
 
 func test_etapes() -> void:

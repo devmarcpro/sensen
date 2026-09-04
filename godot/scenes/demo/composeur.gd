@@ -18,7 +18,7 @@ const ORDRE_TYPES: Array[String] = ["portee", "forme", "noyau", "modificateur", 
 
 var ecrans: Node                       # l'écran parent (Ecrans) : _apercu_plan, _contribution_module, sequence_composee
 var main: Node
-var placements: Array[Dictionary] = []   # les pièces posées : {module, fois, rot, ancre: Vector2i, cases: Array} — fois = le cran de puissance
+var placements: Array[Dictionary] = []   # les pièces posées de l'étape courante : {module, cran, rot, ancre: Vector2i, cases: Array}
 var etapes: Array[Dictionary] = []     # les étapes du sort (designer 2026-09-04) : {grille, placements} — `placements` EST celui de l'étape courante
 var etape := 0                         # l'étape qu'on compose
 var rangee_etapes: HBoxContainer       # sa ligne de boutons : Étape 1, Étape 2, +
@@ -212,11 +212,13 @@ func ajouter_etape() -> void:
 	choisir_etape(etapes.size() - 1)
 
 
-## Les pièces d'une étape, telles que le moteur les a rangées (rotation, ancre, cran).
-func _placer_depuis(k: int, placement: Array) -> void:
+## Les pièces d'une étape, telles que le moteur les a rangées (rotation, ancre) ; `crans_etape` suit l'ordre de
+## la séquence reçue, et `index` dit à quelle pièce chaque cran revient.
+func _placer_depuis(k: int, placement: Array, crans_etape: Array = []) -> void:
 	var liste: Array[Dictionary] = []
 	for p in placement:
-		liste.append({"module": str(p.module), "fois": int(p.get("fois", 1)), "rot": int(p.rot), "ancre": p.ancre, "cases": p.cases})
+		var idx := int(p.get("index", -1))
+		liste.append({"module": str(p.module), "cran": int(crans_etape[idx]) if idx >= 0 and idx < crans_etape.size() else 0, "rot": int(p.rot), "ancre": p.ancre, "cases": p.cases})
 	etapes[k].placements = liste
 	if k == etape:
 		placements = liste
@@ -301,15 +303,34 @@ func sequence() -> Array:
 	return seq
 
 
-## Les modules d'une étape, dans l'ordre canonique ; une pièce ×n est le module n fois de suite.
+## Les modules d'une étape, dans l'ordre canonique.
 func _sequence_etape(k: int) -> Array:
+	var seq: Array = []
+	for p in _pieces_etape(k):
+		seq.append(str(p.module))
+	return seq
+
+
+## Les pièces d'une étape dans l'ordre canonique : [{module, cran}].
+func _pieces_etape(k: int) -> Array:
 	if k < 0 or k >= etapes.size():
 		return []
 	var brut: Array = []
 	for p in etapes[k].placements:
-		for f in maxi(1, int(p.get("fois", 1))):
-			brut.append(str(p.module))
-	return grille_sort().ordonner(brut)
+		brut.append(str(p.module))
+	var res: Array = []
+	for i in grille_sort().ordre(brut):
+		res.append({"module": brut[i], "cran": int(etapes[k].placements[i].get("cran", 0))})
+	return res
+
+
+## Le cran de chaque pièce, dans l'ordre de `sequence()` — ce que la capacité garde (designer 2026-09-04).
+func crans() -> Array:
+	var res: Array = []
+	for k in etapes.size():
+		for p in _pieces_etape(k):
+			res.append(int(p.cran))
+	return res
 
 
 static func _case_de_lecture(p: Dictionary) -> Vector2i:
@@ -328,18 +349,18 @@ func _occupees(sauf: int = -1) -> Dictionary:
 
 ## Pose `module` avec la rotation `rot`, ancré en `ancre` ; `deplace` = l'index d'une pièce qu'on déplace
 ## (ses cases ne comptent pas comme prises). Retourne vrai si la pièce tient là.
-func poser(module: String, rot: int, ancre: Vector2i, deplace: int = -1, choisir: bool = true, fois: int = 1) -> bool:
+func poser(module: String, rot: int, ancre: Vector2i, deplace: int = -1, choisir: bool = true, cran: int = 0) -> bool:
 	var g := grille_sort()
 	if deplace >= 0 and deplace < placements.size():
-		fois = int(placements[deplace].get("fois", 1))   # une pièce qu'on déplace garde son cran
-	var forme: Array = g.tournee(g.forme_de(module, fois), rot)
+		cran = int(placements[deplace].get("cran", 0))   # une pièce qu'on déplace garde son cran
+	var forme: Array = g.tournee(g.forme_de(module), rot)
 	var cases: Array = g.poser(forme, ancre, grille_courante().cases, _occupees(deplace))
 	if cases.is_empty():
 		grille_ctrl.refuser()
 		return false
 	if deplace >= 0 and deplace < placements.size():
 		placements.remove_at(deplace)
-	placements.append({"module": module, "fois": fois, "rot": rot, "ancre": ancre, "cases": cases})
+	placements.append({"module": module, "cran": cran, "rot": rot, "ancre": ancre, "cases": cases})
 	# À la souris, la pièce posée devient la pièce choisie ; au clavier (Entrée), on reste sur le
 	# catalogue — sinon le R suivant tournait la pièce posée au lieu de préparer la prochaine, et Suppr
 	# retirait la dernière posée quel que soit le module sélectionné (revue du 2026-09-04).
@@ -380,31 +401,26 @@ func tourner(index: int) -> void:
 		return
 	var p: Dictionary = placements[index]
 	var g := grille_sort()
-	var forme: Array = g.tournee(g.forme_de(str(p.module), int(p.get("fois", 1))), int(p.rot) + 1)
+	var forme: Array = g.tournee(g.forme_de(str(p.module)), int(p.rot) + 1)
 	var cases: Array = g.poser(forme, p.ancre, grille_courante().cases, _occupees(index))
 	if cases.is_empty():
 		grille_ctrl.refuser()
 		return
-	placements[index] = {"module": p.module, "fois": int(p.get("fois", 1)), "rot": (int(p.rot) + 1) % g.rotations_permises(), "ancre": p.ancre, "cases": cases}
+	placements[index] = {"module": p.module, "cran": int(p.get("cran", 0)), "rot": (int(p.rot) + 1) % g.rotations_permises(), "ancre": p.ancre, "cases": cases}
 	reconstruire(main.joueur())
 
 
-## Le cran de puissance de la pièce posée `index` : +1 ou −1 (jamais sous ×1). La pièce grossit ou
-## rétrécit à la même ancre et la même rotation ; si elle ne tient plus, rien ne bouge et la grille rougit.
-func changer_fois(index: int, delta: int) -> void:
+## Le cran de puissance de la pièce posée `index` : +1 ou −1, entre `combat_rules.cran.min` et `.max` (designer
+## 2026-09-04 : un pas de 1, la pièce garde sa taille, c'est la monnaie qui bouge). Hors bornes, la grille rougit.
+func changer_cran(index: int, delta: int) -> void:
 	if index < 0 or index >= placements.size():
 		return
-	var p: Dictionary = placements[index]
-	var fois := maxi(1, int(p.get("fois", 1)) + delta)
-	if fois == int(p.get("fois", 1)):
-		return
-	var g := grille_sort()
-	var forme: Array = g.tournee(g.forme_de(str(p.module), fois), int(p.rot))
-	var cases: Array = g.poser(forme, p.ancre, grille_courante().cases, _occupees(index))
-	if cases.is_empty():
+	var borne: Dictionary = GameData.config("combat_rules").get("cran", {})
+	var cran := clampi(int(placements[index].get("cran", 0)) + delta, int(borne.get("min", -2)), int(borne.get("max", 3)))
+	if cran == int(placements[index].get("cran", 0)):
 		grille_ctrl.refuser()
 		return
-	placements[index] = {"module": p.module, "fois": fois, "rot": int(p.rot), "ancre": p.ancre, "cases": cases}
+	placements[index].cran = cran
 	reconstruire(main.joueur())
 
 
@@ -427,8 +443,9 @@ func _dans_la_grille() -> bool:
 	return true
 
 
-## Une séquence venue d'ailleurs (hotbar, capture) est rangée d'office par le moteur, étape par étape.
-func _ranger(depart: Array, grilles: Array = []) -> void:
+## Une séquence venue d'ailleurs (hotbar, capture) est rangée d'office par le moteur, étape par étape ;
+## `crans` suit l'ordre de `depart`.
+func _ranger(depart: Array, grilles: Array = [], crans_depart: Array = []) -> void:
 	var grilles_v: Array = grilles if not grilles.is_empty() else grilles_des_etapes()
 	vider_grille()
 	var emb: Dictionary = main.sim.emboitement(main.joueur(), depart, grilles_v)
@@ -439,9 +456,14 @@ func _ranger(depart: Array, grilles: Array = []) -> void:
 		grille_ctrl.refuser()
 		return
 	etapes = []
-	for et in emb.etapes:   # le moteur dit la rotation, l'ancre et le cran qu'il a choisis ; l'écran les reprend tels quels
+	var debut := 0
+	var etapes_seq: Array = grille_sort().etapes_de(depart)
+	for k in (emb.etapes as Array).size():   # le moteur dit la rotation et l'ancre qu'il a choisies ; l'écran les reprend tels quels
+		var et: Dictionary = emb.etapes[k]
+		var n_et: int = (etapes_seq[k] as Array).size() if k < etapes_seq.size() else 0
 		etapes.append({"grille": str(et.grille), "placements": [] as Array[Dictionary]})
-		_placer_depuis(etapes.size() - 1, et.placement)
+		_placer_depuis(etapes.size() - 1, et.placement, crans_depart.slice(debut, debut + n_et) if debut < crans_depart.size() else [])
+		debut += n_et
 	if etapes.is_empty():
 		etapes = [{"grille": "", "placements": [] as Array[Dictionary]}]
 	etape = clampi(etape, 0, etapes.size() - 1)
@@ -449,12 +471,14 @@ func _ranger(depart: Array, grilles: Array = []) -> void:
 
 
 ## Reconstruit tout depuis l'état du joueur ; `depart` = une séquence à pré-remplir (hotbar, capture).
-func reconstruire(j: Dictionary, depart: Array = []) -> void:
+func reconstruire(j: Dictionary, depart: Array = [], crans_depart: Array = []) -> void:
 	if etapes.is_empty():
 		vider_grille()
 	var g := grille_sort()
-	if not depart.is_empty() and g.canonique(sequence()) != g.canonique(depart) and sequence_refusee != depart:
-		_ranger(depart)
+	var autre := not depart.is_empty() and sequence_refusee != depart \
+		and (g.canonique(sequence()) != g.canonique(depart) or (not crans_depart.is_empty() and crans() != g.canonique_crans(depart, crans_depart)))
+	if autre:
+		_ranger(depart, [], crans_depart)
 	elif not sequence().is_empty() and not _dans_la_grille():
 		_ranger(sequence())   # l'arme (ou la grille) a changé : une pièce hors de la grille n'a plus de sens, on range à nouveau
 	_reconstruire_onglets_grilles(j)
@@ -550,7 +574,7 @@ func _rafraichir_detail(j: Dictionary) -> void:
 	var seq := sequence()
 	if sequence_refusee.is_empty():
 		ecrans.sequence_composee = seq.duplicate()
-	var plan: Dictionary = main.sim.plan_sequence(j, seq.duplicate()) if not seq.is_empty() else {}
+	var plan: Dictionary = main.sim.plan_sequence(j, seq.duplicate(), crans()) if not seq.is_empty() else {}   # l'aperçu lit les crans (capture regardée : il les ignorait)
 	apercu.montrer(plan)
 	pentagramme.montrer(plan)
 	grille_ctrl.montrer(grille_courante())
@@ -656,10 +680,10 @@ func touche(ev: InputEventKey) -> bool:
 			tourner_selection()
 			return true
 		KEY_KP_ADD, KEY_EQUAL, KEY_PLUS:   # le cran de puissance de la pièce choisie (designer 2026-09-04)
-			changer_fois(piece_choisie, 1)
+			changer_cran(piece_choisie, 1)
 			return true
 		KEY_KP_SUBTRACT, KEY_MINUS:
-			changer_fois(piece_choisie, -1)
+			changer_cran(piece_choisie, -1)
 			return true
 		KEY_TAB:   # l'étape suivante (designer 2026-09-04 : une grille par étape)
 			if etapes.size() > 1:
@@ -871,8 +895,8 @@ class GrilleControl extends Control:
 			var cl := Composeur._case_de_lecture(p)   # le pictogramme et le nom sur la case du haut à gauche
 			var r_ic := Rect2(o + Vector2(cl.x, cl.y) * CASE + Vector2(5, 3), Vector2(CASE - 11.0, CASE - 11.0))
 			Pictos.dessiner(self, Pictos.icone_de(md), r_ic, col)
-			if int(p.get("fois", 1)) > 1:   # le cran de puissance, en coin
-				draw_string(ThemeDB.fallback_font, o + Vector2(cl.x, cl.y) * CASE + Vector2(CASE - 13.0, 10.0), "×%d" % int(p.fois), HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(1, 1, 1, 0.95))
+			if int(p.get("cran", 0)) != 0:   # le cran de puissance, en coin : +1, −2 — la pièce garde sa taille (designer 2026-09-04)
+				draw_string(ThemeDB.fallback_font, o + Vector2(cl.x, cl.y) * CASE + Vector2(CASE - 14.0, 10.0), ("+%d" % int(p.cran)) if int(p.cran) > 0 else ("−%d" % -int(p.cran)), HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(1, 1, 1, 0.95))
 			var nom_c := TranslationServer.translate(str(md.get("name_key", p.module))).left(6)
 			draw_string(ThemeDB.fallback_font, o + Vector2(cl.x, cl.y) * CASE + Vector2(3, CASE - 4.0), nom_c, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.95, 0.95, 0.9))
 		if survol.x >= 0 and not donnees_survol.is_empty():   # la pièce en train d'être glissée, en clair ou en rouge

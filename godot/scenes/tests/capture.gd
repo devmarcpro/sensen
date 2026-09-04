@@ -409,6 +409,12 @@ func _ready() -> void:
 			for m in seq:
 				scene.sim.crediter_module(jc, str(m), 9)
 			scene.ecrans.sequence_composee = seq
+	for i4b in args.size():   # --crans a,b,c : le cran de chaque pièce de --sequence (designer 2026-09-04)
+		if args[i4b] == "--crans" and i4b + 1 < args.size():
+			var crans_c: Array = []
+			for c in args[i4b + 1].split(","):
+				crans_c.append(int(c))
+			scene.ecrans.crans_composes = crans_c
 	if "--planche-combinaisons" in args and scene.sim != null:
 		# Toutes les combinaisons portée × forme, en une planche par portée (designer 2026-09-01) : on
 		# recompose la séquence, on laisse une image se dessiner, et on découpe l'aperçu dans la fenêtre.

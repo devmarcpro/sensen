@@ -3261,7 +3261,7 @@ func emboitement(e: Dictionary, sequence: Array, grilles: Array = []) -> Diction
 
 ## Composer une capacité depuis des modules connus : l'assembleur juge la séquence, les slots bornent le **nombre**
 ## de capacités tenues prêtes — pas la longueur d'une séquence (assemblage sans limite, 2026-08-30).
-func composer_capacite(e: Dictionary, sequence: Array, nom: String = "", grilles: Array = []) -> bool:
+func composer_capacite(e: Dictionary, sequence: Array, nom: String = "", grilles: Array = [], crans: Array = []) -> bool:
 	if sequence.is_empty():   # plus de plafond de capacités non plus (décision du designer, 2026-08-30) : on en compose autant qu'on veut
 		EventBus.emettre(&"journal", [&"journal.capacite_refusee", {}])
 		return false
@@ -3269,7 +3269,7 @@ func composer_capacite(e: Dictionary, sequence: Array, nom: String = "", grilles
 		if not (str(m) in e.get("modules_connus", [])):
 			EventBus.emettre(&"journal", [&"journal.capacite_refusee", {}])
 			return false
-	var plan := capacites.assembler(sequence.duplicate(), 10, "1d4", {}, e.competences_eff)
+	var plan := capacites.assembler(sequence.duplicate(), 10, "1d4", {}, e.competences_eff, crans)
 	if not plan.erreurs.is_empty():
 		EventBus.emettre(&"journal", [&"journal.capacite_refusee", {}])
 		return false
@@ -3286,6 +3286,10 @@ func composer_capacite(e: Dictionary, sequence: Array, nom: String = "", grilles
 	var cap := {"id": "cap_%d_%d" % [e.get("capacites", []).size(), sequence.hash()], "name_key": nom_key, "modules": sequence.duplicate()}
 	if not grilles.is_empty():   # la grille de chaque étape, pour recomposer dans les mêmes (designer 2026-09-04)
 		cap["grilles"] = grilles.duplicate()
+	for c in crans:   # le cran de chaque pièce, s'il y en a un qui n'est pas zéro (designer 2026-09-04)
+		if int(c) != 0:
+			cap["crans"] = crans.duplicate()
+			break
 	if not e.has("capacites"):
 		e["capacites"] = []
 	e.capacites.append(cap)
@@ -9863,11 +9867,11 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 ## Le plan d'une SÉQUENCE pour `e`, avec l'arme tenue : ticks, dés et élément de l'arme pour les noyaux
 ## « arme », et l'**affinité** de la fonctionnalité pour tous les sorts (Structure compétences-modules-slots :
 ## un sceptre porte les sorts de mana, une épée ceux d'endurance). C'est aussi ce que l'écran Composer lit.
-func plan_sequence(e: Dictionary, sequence: Array) -> Dictionary:
+func plan_sequence(e: Dictionary, sequence: Array, crans: Array = []) -> Dictionary:
 	var arme := arme_utilisable(Etres.arme(e, items))
 	var fonct: Dictionary = fonct_arme(arme)
 	var ticks_arme := regles.ticks_attaque(fonct, false, arme) if not fonct.is_empty() else int(regles.r.actions.attaque_base)
-	var plan := capacites.assembler(sequence, ticks_arme, fonct.get("degats_des", "1d4"), _vecteur_arme_de(e, arme), e.competences_eff)
+	var plan := capacites.assembler(sequence, ticks_arme, fonct.get("degats_des", "1d4"), _vecteur_arme_de(e, arme), e.competences_eff, crans)
 	plan["arme"] = arme
 	plan["fonct"] = fonct
 	_appliquer_affinite_arme(plan, fonct)
@@ -9916,7 +9920,7 @@ func plan_capacite(e: Dictionary, index: int) -> Dictionary:
 	var caps: Array = e.get("capacites", [])
 	if index < 0 or index >= caps.size():
 		return {}
-	var plan := plan_sequence(e, caps[index].modules)
+	var plan := plan_sequence(e, caps[index].modules, caps[index].get("crans", []))   # le cran de chaque pièce (designer 2026-09-04)
 	plan["id"] = caps[index].id
 	plan["name_key"] = caps[index].get("name_key", "")
 	if plan.has("alt"):   # Alternance : le plan du second noyau est lancé tel quel — il lui faut les mêmes attaches

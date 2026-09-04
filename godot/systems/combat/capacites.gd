@@ -52,7 +52,7 @@ static func _sans_noyau(sequence: Array, modules: Dictionary, n: int) -> Array:
 	return res
 
 
-func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme: Dictionary, niveaux: Dictionary = {}) -> Dictionary:
+func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme: Dictionary, niveaux: Dictionary = {}, crans: Array = []) -> Dictionary:
 	var plan := {
 		"modules": sequence, "noyau": {}, "forme": {}, "erreurs": [], "avertissements": [],
 		"geometrie": "point", "origine": "cible", "portee": Vector2i(1, 1), "taille": 1, "ligne_de_vue": true,
@@ -61,6 +61,9 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 		"liaisons": [], "charge_suivante": {}, "charges_sup": [], "formes_sup": [], "fois": 1, "portee_posee": false, "motif": "",
 	}
 	var pas_rep := int(GameData.config("combat_rules").get("surface", {}).get("increment_repetition", 1))   # répéter incrémente d'un cran (2026-09-01)
+	# Le CRAN DE PUISSANCE (designer 2026-09-04) : `crans[k]` est le cran de la pièce k — un pas de 1, dans les deux
+	# sens : une case pour une forme, une tuile pour une portée, un dé pour un noyau. Jamais une multiplication.
+	var borne: Dictionary = GameData.config("combat_rules").get("cran", {})
 	var alternance := false   # Alternance (Modules) : la séquence a droit à deux noyaux
 	var noyaux := 0
 	for id0 in sequence:
@@ -82,6 +85,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 		if m.is_empty():
 			plan.erreurs.append("module inconnu : " + id)
 			continue
+		var cran_k := clampi(int(crans[k]) if k < crans.size() else 0, int(borne.get("min", -2)), int(borne.get("max", 3)))
 		if str(m.module_type) == "declencheur":
 			# Un déclencheur encapsule tout ce qui le suit comme charge utile (Six types de modules).
 			var ef: Dictionary = m.get("effet", {})
@@ -89,7 +93,7 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				plan.avertissements.append("déclencheur non résolu dans le prototype : " + id)
 				plan.ticks += int(m.get("surcout_ticks", 0))
 				break
-			var suite := assembler(sequence.slice(k + 1), ticks_arme, des_arme, element_arme, niveaux)
+			var suite := assembler(sequence.slice(k + 1), ticks_arme, des_arme, element_arme, niveaux, crans.slice(k + 1) if crans.size() > k + 1 else [])
 			suite["declencheur"] = str(ef.declencheur)
 			suite["duree_declencheur"] = int(ef.get("duree_ticks", 100))
 			suite["ticks_declencheur"] = int(ef.get("ticks", 20))
@@ -113,13 +117,12 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 						if str(sup_r.noyau.id) == id:
 							repete = sup_r
 					if not repete.is_empty():
-						repete.fois = int(repete.get("fois", 1)) + 1
-						plan.ticks += ticks_arme if m.get("power_base") == "arme" else ticks_module(int(m.cout_ticks), id, niveaux)
+						# Répéter est UN CRAN de plus (designer 2026-09-04), pas un doublement : un dé de plus, le prix
+						# d'une division de plus — et pas un tick, c'est la monnaie qui bouge.
+						repete.des_bonus = int(repete.get("des_bonus", 0)) + 1
+						repete["cran"] = int(repete.get("cran", 0)) + 1
 						var sf_r := 1.0 + float(niveaux.get(id, 0)) * par_niveau
-						if int(m.get("cout_mana", 0)) > 0:
-							plan.ressource += roundi(float(m.cout_mana) / sf_r)
-						elif int(m.get("cout_vigueur", 0)) > 0:
-							plan.ressource += roundi(float(m.cout_vigueur) / sf_r)
+						plan.ressource += roundi(float(cout_de(m)) / sf_r / float(divisions_de(m)))
 						continue
 					# Aucune limite d'assemblage (Six types de modules) : le noyau de plus est une charge de
 					# plus, avec ses dés, ses effets et son coût. Le prix, pas l'assembleur, est la borne.
@@ -140,7 +143,10 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 						cout_sup = int(m.get("cout_sang_froid", 0))
 					if plan.monnaie == "":
 						plan.monnaie = _monnaie_de(m)
-					plan.ressource += roundi(float(cout_sup) / sf_sup)
+					var c_sup := maxi(cran_k, 1 - divisions_de(m))   # jamais sous un dé
+					sup.des_bonus = int(sup.des_bonus) + c_sup
+					sup["cran"] = c_sup
+					plan.ressource += a_la_division(roundi(float(cout_sup) / sf_sup), divisions_de(m), c_sup)
 					continue
 				plan.noyau = m
 				var arme: bool = m.get("power_base") == "arme"
@@ -160,6 +166,10 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 				elif int(m.get("cout_sang_froid", 0)) > 0:
 					plan.monnaie = "sang_froid"
 					plan.ressource = roundi(float(m.cout_sang_froid) / sf_noyau)
+				var c_n := maxi(cran_k, 1 - divisions_de(m))   # le cran du noyau : un dé par cran, jamais sous un dé
+				plan.des_bonus += c_n
+				plan["cran"] = c_n
+				plan.ressource = a_la_division(int(plan.ressource), divisions_de(m), c_n)
 				plan.parametres = m.get("effet", {}).duplicate()
 			"forme":
 				if not plan.forme.is_empty():
@@ -178,18 +188,18 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 						plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 						continue
 					# Deux formes : les tuiles s'additionnent (union), la portée retenue est la plus longue.
-					plan.formes_sup.append({"id": id, "geometrie": str(m.geometrie), "taille": int(m.taille_base)})
-					plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
+					plan.formes_sup.append({"id": id, "geometrie": str(m.geometrie), "taille": maxi(1, int(m.taille_base) + cran_k)})
+					plan.ticks += ticks_module(a_la_division(int(m.get("surcout_ticks", 0)), int(m.taille_base), cran_k), id, niveaux)
 					continue
 				plan.forme = m
 				plan.geometrie = str(m.geometrie)
-				plan.taille = int(m.taille_base)
+				plan.taille = maxi(1, int(m.taille_base) + cran_k)   # le cran d'une forme : une case de taille (designer 2026-09-04)
 				# La portée est un module à part depuis le 2026-09-01 : sans lui, la forme retombe sur sa
 				# portée par défaut, courte. Un module de portée déjà lu ne se laisse pas écraser.
 				if not plan.get("portee_posee", false):
 					var pd: Array = m.get("portee_defaut", [1, 1])
 					plan.portee = Vector2i(int(pd[0]), int(pd[1]))
-				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
+				plan.ticks += ticks_module(a_la_division(int(m.get("surcout_ticks", 0)), int(m.taille_base), cran_k), id, niveaux)   # sa monnaie, ce sont ses ticks
 			"portee":
 				# Le module de portée porte la distance ET la ligne de vue, et les paie en ticks. Répété,
 				# il ALLONGE la distance comme une forme répétée s'agrandit (designer 2026-09-01) : la
@@ -199,12 +209,12 @@ func assembler(sequence: Array, ticks_arme: int, des_arme: Variant, element_arme
 					plan.portee.y += pas_rep
 					plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 					continue
-				plan.portee = Vector2i(int(pb[0]), int(pb[1]))
+				plan.portee = Vector2i(int(pb[0]), maxi(int(pb[0]), int(pb[1]) + cran_k))   # le cran d'une portée : une tuile (designer 2026-09-04)
 				plan.origine = str(m.get("origine", "cible"))   # la portée dit où la figure s'ancre (2026-09-01)
 				plan["motif"] = str(m.get("motif", ""))   # et parfois la FORME de son atteinte (2026-09-02)
 				plan.ligne_de_vue = bool(m.get("ligne_de_vue", true))
 				plan["portee_posee"] = true
-				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
+				plan.ticks += ticks_module(a_la_division(int(m.get("surcout_ticks", 0)), int(pb[1]), cran_k), id, niveaux)
 			"modificateur":
 				plan.ticks += ticks_module(int(m.get("surcout_ticks", 0)), id, niveaux)
 				var s := lire_surcout(m.get("surcout_ressource"))
@@ -415,9 +425,30 @@ static func tuiles_de_forme(g: Grille, geometrie: String, origine: Vector2i, cib
 	return res
 
 
-## Un noyau présent n fois dans la séquence (Six types de modules, 2026-08-30) : le lot (plan ou charge de plus)
-## devient n fois plus puissant — dés × n (« arme » et formules : mult × n), paramètres numériques × n. Les
-## identités (cible, mode, statut, zone, drapeaux) ne bougent pas. Le prix, lui, a déjà été compté n fois.
+## Le cran de puissance (designer 2026-09-04) se compte en DIVISIONS : les dés d'un noyau (« 2d6 » : deux),
+## une seule pour un noyau sans dés ou qui frappe avec l'arme. Un cran vaut une division en plus ou en moins,
+## et le prix suit la proportion — `a_la_division(prix, n, cran)` = prix × (n + cran) / n, jamais sous 1 / n.
+static func divisions_de(m: Dictionary) -> int:
+	var d: Dictionary = Des.analyser(str(m.get("power_base", "")))
+	return maxi(1, int(d.get("n", 1))) if int(d.get("faces", 0)) > 0 else 1
+
+
+static func a_la_division(valeur: int, base: int, cran: int) -> int:
+	var n := maxi(1, base)
+	return roundi(float(valeur) * float(maxi(1, n + cran)) / float(n))
+
+
+## Le coût d'un module dans sa monnaie — la première écrite : mana, vigueur, sang-froid.
+static func cout_de(m: Dictionary) -> int:
+	for cle in ["cout_mana", "cout_vigueur", "cout_sang_froid"]:
+		if int(m.get(cle, 0)) > 0:
+			return int(m.get(cle, 0))
+	return 0
+
+
+## Un noyau présent n fois dans la séquence — RÈGLE DU 30 AOÛT, retirée le 2026-09-04 : `fois` reste à 1
+## depuis que répéter est un cran (un dé de plus), pas un doublement. Gardé pour une sauvegarde qui porterait
+## encore un plan à fois > 1 : dés × n (« arme » et formules : mult × n), paramètres numériques × n.
 const CLES_IDENTITE: Array[String] = ["mode", "cible", "id", "zone", "contenu", "statut", "paire", "chute",
 	"rompt_si_touche", "desarme", "estime", "segment_de_la_cible"]
 

@@ -185,6 +185,7 @@ func _dimensionner() -> void:
 
 
 var sequence_composee: Array = []   # la séquence en cours de composition (écran composer)
+var crans_composes: Array = []      # le cran de chaque pièce de cette séquence, dans le même ordre (designer 2026-09-04)
 var triche_categorie := ""   # menu de triche : le catalogue en cours de parcours
 var contexte_tuile := Vector2i(-1, -1)   # clic droit : la tuile et ses options
 var contexte_options: Array = []
@@ -779,6 +780,7 @@ func _action_principale() -> void:
 			main.sim.supprimer_capacite(j, int(en.index))
 		"nouvelle_capacite":
 			sequence_composee = []
+			crans_composes = []
 			ouvrir("composer")
 			return
 		"module_composer":   # Entrée ajoute (même déjà présent : la séquence se cumule) ; Suppr / Retour arrière retire
@@ -1391,15 +1393,16 @@ func _construire_composer(j: Dictionary) -> void:
 	# Le composeur en glisser-déposer (décision du designer, 2026-08-30) remplace la liste : slots, cartes, nom, Wu Xing.
 	corps.visible = false
 	composeur.visible = true
-	composeur.reconstruire(j, sequence_composee.duplicate())
+	composeur.reconstruire(j, sequence_composee.duplicate(), crans_composes.duplicate())
 	_bouton(tr("ui.composer.valider"), _valider_composition)
 
 
 func _valider_composition() -> void:
 	var j: Dictionary = main.joueur()
 	var seq: Array = composeur.sequence()
-	if main.sim.composer_capacite(j, seq, composeur.nom_choisi(), composeur.grilles_des_etapes()):
+	if main.sim.composer_capacite(j, seq, composeur.nom_choisi(), composeur.grilles_des_etapes(), composeur.crans()):
 		sequence_composee = []
+		crans_composes = []
 		composeur.vider_grille()
 		composeur.nom.text = ""
 		ouvrir("capacites")
