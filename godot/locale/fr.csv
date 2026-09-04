@@ -3235,6 +3235,8 @@ ui.gestion.stockage_capacite,place {reste}/{capacite}
 ui.gestion.stockage_vers,stockage en {cellule}
 ui.gestion.sans_stockage,SANS STOCKAGE : le poste ne produit pas tant qu'aucun stockage ne lui est désigné (S)
 ui.gestion.sans_stockage_court,SANS STOCKAGE
+ui.gestion.residentiel_place,place pour ≈ {n} chaumière(s)
+ui.gestion.residentiel_detail,"une chaumière = {w}×{h} = {t} tuiles : compte {t} tuiles libres par habitant à loger"
 ui.gestion.stockage_vers_court,→ {cellule}
 journal.poste_sans_stockage,{nom} n'a pas de stockage où ranger sa récolte : rien cette semaine
 journal.stockage_plein,"Le stockage en ({x},{y}) est plein : le surplus est perdu"

@@ -1152,6 +1152,15 @@ func _construire_gestion(j: Dictionary) -> void:
 				else:
 					st_txt = tr("ui.gestion.sans_stockage_court")
 					st_long = tr("ui.gestion.sans_stockage")
+			else:   # résidentiel : combien de chaumières tiennent encore sur ses tuiles libres (grande base, 2026-09-04)
+				var bat_r: Dictionary = GameData.catalogues.get("village_buildings", {}).get(str(sim.regles.r.royaume.maisons.get("plan", "chaumiere")), {})
+				var plan_r: Array = bat_r.get("plan", [])
+				var w_r := 0
+				for l_r in plan_r:
+					w_r = maxi(w_r, str(l_r).length())
+				var t_r: int = maxi(1, w_r * plan_r.size())
+				st_txt = tr("ui.gestion.residentiel_place").format({"n": int(per_c.richesse) / t_r})
+				st_long = tr("ui.gestion.residentiel_detail").format({"w": w_r, "h": plan_r.size(), "t": t_r})
 			liste.add_item(tr("ui.gestion.perimetre").format({"type": tr("perimetre.%s.name" % str(per_c.type)), "richesse": int(per_c.richesse), "reserve": int(per_c.reserve), "dominant": tr(GameData.entree("materials", str(per_c.dominant)).get("name_key", "ui.assigner.rien")) if not str(per_c.dominant).is_empty() else tr("ui.assigner.rien"), "n": n_res, "stockage": st_txt}))
 			var detail_p: String = tr("ui.gestion.perimetre_detail").format({"reserve": int(per_c.reserve), "dominant": tr(GameData.entree("materials", str(per_c.dominant)).get("name_key", "ui.assigner.rien")) if not str(per_c.dominant).is_empty() else tr("ui.assigner.rien")})
 			entrees.append({"kind": "perimetre", "id": pid_c, "cellule": cell, "texte": (st_long + "

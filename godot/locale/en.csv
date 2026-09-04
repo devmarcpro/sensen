@@ -3226,6 +3226,8 @@ ui.gestion.stockage_capacite,room {reste}/{capacite}
 ui.gestion.stockage_vers,storage at {cellule}
 ui.gestion.sans_stockage,NO STORAGE: the post produces nothing until a storage is assigned to it (S)
 ui.gestion.sans_stockage_court,NO STORAGE
+ui.gestion.residentiel_place,room for ≈ {n} cottage(s)
+ui.gestion.residentiel_detail,"a cottage = {w}×{h} = {t} tiles: count {t} free tiles per resident to house"
 ui.gestion.stockage_vers_court,→ {cellule}
 journal.poste_sans_stockage,{nom} has no storage for the harvest: nothing this week
 journal.stockage_plein,"The storage at ({x},{y}) is full: the surplus is lost"

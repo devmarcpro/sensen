@@ -457,7 +457,7 @@ Le designer, 14 h : « simule une grande base sur plusieurs cases avec une vingt
 
 **3. Le bois : une zone de 12×8 en forêt rend 48 unités puis repousse de 10 % par semaine.** Six bûcherons vident les trois zones en quatre semaines (réserve 0 / 6 / 5 à la fin) ; la repousse (`perimetres.repousse_hebdo` 0,1 × richesse × 1,5) tient ensuite ~9 bois par semaine. Vingt chaumières coûtent 240 bois : c'est le rythme qui limite les maisons (2 par semaine au plus, `maisons.max_par_semaine`), pas le bois. Sur une plaine (monde 31 ou 42), il n'y a **pas de bois du tout** : rien ne se bâtit.
 
-**4. Un résidentiel de 24×12 loge douze personnes.** Une chaumière fait 6×4 = 24 tuiles, elles se serrent sans intervalle : douze maisons, huit résidents sans toit (−15 d'humeur chacun). Compter **24 tuiles par habitant** en dessinant le résidentiel — l'écran ne le dit pas encore.
+**4. Un résidentiel de 24×12 loge douze personnes.** Une chaumière fait 6×4 = 24 tuiles, elles se serrent sans intervalle : douze maisons, huit résidents sans toit (−15 d'humeur chacun). Compter **24 tuiles par habitant** en dessinant le résidentiel — l'écran le dit désormais : la ligne du résidentiel écrit « place pour ≈ N chaumière(s) » sur ses tuiles encore libres, et le détail rappelle qu'une chaumière fait 6×4.
 
 **5. Un raid arrive la deuxième semaine** (8 assaillants contre un garde : subi, 50 % des stocks et de la caisse perdus). Le mécanisme existe déjà et frappe une base neuve ; avec vingt résidents et un garde, il ne se défend pas.
 
