@@ -7503,7 +7503,10 @@ func nom_objet(uid: String) -> Dictionary:
 		res["parchemin"] = {"module": str(nom.parchemin.module), "charges": int(it.get("charges", nom.parchemin.get("charges", 1)))}
 	if nom.has("de_creature"):   # « Statue de loup » : le nom porte la créature dont l'objet est tiré
 		res["de_creature"] = str(nom.de_creature)
-	if it.get("type", "") in ["grimoire", "manuel"] and it.has("modules"):   # un livre dit son domaine et sa difficulté
+	if it.has("grille") and not str(it.grille).is_empty():   # une trame dit sa grille, pas un domaine (vu « Pattern — {grille} », 2026-09-04)
+		res.params = res.params.duplicate()
+		res.params["grille"] = str(GameData.catalogues.grilles.get(str(it.grille), {}).get("name_key", str(it.grille)))
+	elif it.get("type", "") in ["grimoire", "manuel"] and it.has("modules"):   # un livre dit son domaine et sa difficulté
 		res["livre"] = {"domaine": str(it.get("domaine", "")), "difficulte": int(it.get("difficulte", 0)), "n": it.modules.size()}
 		if nom.has("module"):   # un livre de module : le module au nom
 			res["module_livre"] = str(nom.module)

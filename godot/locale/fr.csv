@@ -1444,6 +1444,7 @@ type.bijou,bijou
 type.gemme,gemme
 type.grimoire,grimoire
 type.manuel,manuel
+type.parchemin,parchemin
 type.materiau,matériau
 type.station,station portative
 type.composant,composant
@@ -2506,6 +2507,7 @@ journal.mort_or,{nom} laisse {or} pièces d'or dans la mort
 journal.faim_conseil,{nom} a l'estomac qui gronde — il faudrait manger
 item.livre_module.name,Livre de module
 nom.livre_module,"Livre : {module} (difficulté {difficulte})"
+nom.livre,"{base} {domaine} (difficulté {difficulte}, {n} modules)"
 ui.creation.depart_l,"Départ : {lieu} (← →)"
 ui.creation.depart_camp,au camp
 ui.creation.depart_donjon,dans un donjon

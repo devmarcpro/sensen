@@ -1789,6 +1789,7 @@ type.consommable,consumable
 type.gemme,gem
 type.grimoire,grimoire
 type.manuel,manual
+type.parchemin,scroll
 type.materiau,material
 type.munition,ammunition
 type.outil,tool
@@ -2497,6 +2498,7 @@ journal.mort_or,{nom} loses {or} gold in death
 journal.faim_conseil,{nom}'s stomach is rumbling — time to eat
 item.livre_module.name,Module book
 nom.livre_module,"Book: {module} (difficulty {difficulte})"
+nom.livre,"{base} {domaine} (difficulty {difficulte}, {n} modules)"
 ui.creation.depart_l,"Start: {lieu} (← →)"
 ui.creation.depart_camp,at camp
 ui.creation.depart_donjon,in a dungeon
