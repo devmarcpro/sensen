@@ -503,7 +503,7 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 - [x] **Bestiaire restructuré** : [[Créatures]] = 19 races animales, [[Profils de PNJ]] = combinaisons tirées.
 - [ ] **Modules signature** de chaque classe cachée (au-delà du talent) — contenu, étape 4+.
 - [x] **Fiches de races cachées** : Vampire, Spectre, Lycanthrope (`data/races/`) — en données avec leurs statuts (soleil, sang de la nuit) ; case cochée le 2026-09-04.
-- [ ] **Pools de classes par fonction** pour la génération de PNJ ([[Talents de classe]] : classes cachées ≈ 2 %) — étape 9.
+- [x] **Pools de classes par fonction** pour la génération de PNJ ([[Talents de classe]] : classes cachées ≈ 2 %) — les pools suivent la table de [[Fonctions]] et les cachées se tirent à 2 % avant le pool depuis le 2026-09-04.
 
 ## 5. Assets à produire (aucun n'existe)
 
