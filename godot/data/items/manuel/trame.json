@@ -1,0 +1,13 @@
+{
+  "name_key": "item.trame.name",
+  "type": "manuel",
+  "equip_slot": "",
+  "hands": 0,
+  "materiau": "papier",
+  "tags": [
+    "livre",
+    "manuel",
+    "trame"
+  ],
+  "_doc": "Une trame apprend une GRILLE de composition, comme un livre apprend un module (designer 2026-09-04 : le joueur peut debloquer d'autres grilles). Sa grille est tiree a la generation dans data/grilles/, hors grille de poche."
+}

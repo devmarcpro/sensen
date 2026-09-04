@@ -2891,3 +2891,6 @@ grille.poche.name,Pocket grid
 journal.grille_apprise,{nom} learns a grid: {grille}
 journal.grille_choisie,{nom} now composes on: {grille}
 ui.composeur.grilles,Owned grids
+item.trame.name,Pattern — {grille}
+journal.grille_deja,{nom} already knows this grid: {grille} — the pattern stays in the bag
+journal.trame_lue,{nom} reads a pattern and learns a grid: {grille}

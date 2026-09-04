@@ -7119,8 +7119,26 @@ func _lire(e: Dictionary, objet: String, tick: int) -> bool:
 	var total := jet + n_lecture / 2 + int(e.stats_eff.perception) / 4
 	var dd := int(lv.dd_base) + int(livre.difficulte) / 2
 	var marge := total - dd
-	e.sac.erase(objet)   # consommé dans tous les cas
 	var succes := marge >= 0 and jet != 1
+	# Une TRAME (designer 2026-09-04 : « le joueur peut débloquer d'autres grilles ») apprend une grille
+	# comme un livre apprend un module. Une grille déjà possédée ne consomme pas la trame : on la garde,
+	# on la vendra — une trame est rare, la gâcher sur un doublon serait une punition sans décision.
+	if livre.has("grille") and not str(livre.grille).is_empty():
+		if str(livre.grille) in e.get("grilles", []):
+			EventBus.emettre(&"journal", [&"journal.grille_deja", {"nom": e.name_key, "grille": GameData.catalogues.grilles.get(str(livre.grille), {}).get("name_key", "")}])
+			return false
+		e.sac.erase(objet)
+		if succes:
+			apprendre_grille(e, str(livre.grille))
+			gagner_xp(e, "lecture", int(livre.difficulte) * int(lv.xp_succes))
+		else:
+			gagner_xp(e, "lecture", int(livre.difficulte) * int(lv.xp_echec))
+			_effet_echec_lecture(e, marge <= -10 or jet == 1, tick)
+			EventBus.emettre(&"journal", [&"journal.lecture_echouee", {"nom": e.name_key, "livre": nom_objet(objet), "grave": marge <= -10 or jet == 1}])
+		e.compteur = tick + int(regles.r.actions.objet)
+		EventBus.emettre(&"book_read", [e.id, objet, succes])
+		return true
+	e.sac.erase(objet)   # consommé dans tous les cas
 	var appris: Array = []
 	if succes and livre.has("recette") and not str(livre.recette).is_empty():   # un plan industriel : une recette apprise
 		if not e.has("recettes_connues"):

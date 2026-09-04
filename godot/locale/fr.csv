@@ -2900,3 +2900,6 @@ grille.poche.name,Grille de poche
 journal.grille_apprise,{nom} apprend une grille : {grille}
 journal.grille_choisie,{nom} compose sur : {grille}
 ui.composeur.grilles,Grilles possédées
+item.trame.name,Trame — {grille}
+journal.grille_deja,{nom} connaît déjà cette grille : {grille} — la trame reste au sac
+journal.trame_lue,{nom} lit une trame et apprend une grille : {grille}

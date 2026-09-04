@@ -150,6 +150,7 @@ func _ready() -> void:
 	_lancer("test_element_module")
 	_lancer("test_flottabilite")
 	_lancer("test_grilles_possedees")
+	_lancer("test_trames")
 	_lancer("test_composer_capacites")
 	_lancer("test_charges_de_modules")
 	_lancer("test_assemblage_sans_limite")
@@ -3640,6 +3641,28 @@ func test_grilles_possedees() -> void:
 	s.gagner_xp(j, "epee", 100000)
 	verifier(int(j.competences.epee) >= 10, "l'épée a franchi le palier 10 (%d)" % int(j.competences.epee))
 	verifier("bloc_2" in j.grilles, "le palier 10 de l'épée apprend le grand bloc du guerrier (%s)" % str(j.grilles))
+
+
+func test_trames() -> void:
+	# Une trame apprend une grille comme un livre apprend un module (designer 2026-09-04). Ce qui doit
+	# tenir : la trame naît avec une grille du catalogue (jamais la poche), la lire l'apprend, et une
+	# grille déjà possédée ne consomme pas la trame.
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var t := s.generer_objet("trame", 3, {}, "commun", 0)
+	verifier(not t.is_empty() and GameData.catalogues.grilles.has(str(t.get("grille", ""))) and str(t.grille) != "poche", "une trame porte une grille du catalogue, jamais la poche (%s)" % str(t.get("grille", "")))
+	j.sac.append(t.uid)
+	j["grilles"] = []
+	j["grille_active"] = ""
+	j.competences_eff["lecture"] = 60   # un lecteur sûr : le jet ne peut échouer que sur un 1 naturel
+	var lu := s._lire(j, t.uid, s.horloge_monde.ticks)
+	verifier(lu and (str(t.grille) in j.grilles or not (t.uid in j.sac)), "lire la trame l'apprend (ou l'échec rare l'a consommée) : grilles = %s" % str(j.grilles))
+	# une seconde trame de la même grille : déjà connue, elle reste au sac
+	if str(t.grille) in j.grilles:
+		var t2 := s.generer_objet("trame", 3, {}, "commun", 0)
+		t2["grille"] = str(t.grille)
+		j.sac.append(t2.uid)
+		verifier(not s._lire(j, t2.uid, s.horloge_monde.ticks) and (t2.uid in j.sac), "une grille déjà possédée ne consomme pas la trame")
 
 
 func test_composer_capacites() -> void:
