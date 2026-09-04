@@ -9,6 +9,7 @@ const HAUTEUR := 660.0
 const PART := Vector2(0.94, 0.92)
 
 var main: Node                          # la scène principale (sim, joueur(), nom_objet())
+var voile: ColorRect                    # le voile sous tout écran ouvert : grise le jeu, absorbe la souris (designer 2026-09-04)
 var courant := ""                       # "inventaire" | "atelier" | "feuille" | ""
 var panneau: PanelContainer
 var titre: Label
@@ -55,6 +56,12 @@ func _ready() -> void:
 	panneau.add_theme_stylebox_override("panel", style)
 	panneau.resized.connect(_replacer_liste)   # la colonne suit la largeur du panneau (point 67)
 	panneau.visible = false
+	voile = ColorRect.new()   # sous le panneau : le jeu se grise, et rien derrière ne se clique (designer 2026-09-04, 13 h 05)
+	voile.color = Color(0.0, 0.0, 0.0, 0.55)
+	voile.set_anchors_preset(Control.PRESET_FULL_RECT)
+	voile.mouse_filter = Control.MOUSE_FILTER_STOP
+	voile.visible = false
+	add_child(voile)
 	add_child(panneau)
 	var v := VBoxContainer.new()
 	panneau.add_child(v)
@@ -218,6 +225,7 @@ func ouvrir(nom: String) -> void:
 	_replacer_liste()   # la colonne suit la largeur du panneau : le signal resized ne suffit pas à l'ouverture
 	selection = 0
 	panneau.visible = true
+	voile.visible = true
 	apercu_sort.visible = false
 	corps.visible = nom != "composer"
 	composeur.visible = nom == "composer"
@@ -227,6 +235,7 @@ func ouvrir(nom: String) -> void:
 func fermer() -> void:
 	courant = ""
 	panneau.visible = false
+	voile.visible = false
 	apercu_sort.visible = false
 	composeur.visible = false
 	corps.visible = true
