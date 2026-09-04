@@ -154,6 +154,7 @@ func _ready() -> void:
 	_lancer("test_cran_de_puissance")
 	_lancer("test_etapes")
 	_lancer("test_lod_projection")
+	_lancer("test_faune_rarefaction")
 	_lancer("test_composer_capacites")
 	_lancer("test_charges_de_modules")
 	_lancer("test_assemblage_sans_limite")
@@ -3825,6 +3826,42 @@ func test_lod_projection() -> void:
 	b["dormant_depuis"] = 0
 	s._projeter_routine(b)
 	verifier(b.pos == pos_b, "une bête sans routine reste où elle dormait")
+
+
+func test_faune_rarefaction() -> void:
+	# Massacrer la faune vide la forêt, et elle revient (Créatures, hypothèses du 2026-09-04) : chaque bête
+	# paisible tuée par le joueur raréfie la faune de sa cellule, le tirage la lit, la semaine la fait revenir.
+	var s := Simulation.new(31)
+	s.charger_camp()
+	var j := joueur_de(s)
+	var ra: Dictionary = GameData.config("planete").faune.rarefaction
+	verifier(s.densite_faune(j.pos) == 1.0, "une cellule jamais chassée a une densité de 1")
+	var pos: Vector2i = j.pos + Vector2i(1, 0)
+	for k in 8:   # une place libre à côté du joueur
+		if s.grille.dans(pos) and not s.grille.bloque_passage(pos) and s.grille.occupant(pos).is_empty():
+			break
+		pos = j.pos + Vector2i(k % 3 - 1, k / 3 - 1)
+	var cerf := s.ajouter("cerf", pos, "ia")
+	cerf["spawn_faune"] = true
+	cerf.ai_profile = "proie"
+	verifier(Simulation.est_faune_paisible(cerf), "un cerf en proie est une bête paisible")
+	s._appliquer_degats(cerf, 100000, j.id, {})
+	verifier(not cerf.vivant and absf(s.densite_faune(j.pos) - (1.0 - float(ra.par_mort))) < 0.001, "tuer un cerf raréfie la faune de la cellule (%.2f)" % s.densite_faune(j.pos))
+	for k in 20:   # on ne descend jamais sous le plancher
+		s._rarefier_faune(j.pos)
+	verifier(absf(s.densite_faune(j.pos) - float(ra.plancher)) < 0.001, "vingt cerfs de plus : la densité s'arrête au plancher (%.2f)" % s.densite_faune(j.pos))
+	var loup := s.ajouter("loup", pos, "ia")
+	loup["spawn_faune"] = true
+	loup.ai_profile = "hostile"
+	var avant := s.densite_faune(j.pos)
+	s._appliquer_degats(loup, 100000, j.id, {})
+	verifier(not loup.vivant and s.densite_faune(j.pos) == avant, "tuer un loup qui chasse ne raréfie rien")
+	s._regenerer_faune_hebdo()
+	verifier(absf(s.densite_faune(j.pos) - (float(ra.plancher) + float(ra.retour_hebdo))) < 0.001, "une semaine plus tard, la faune revient d'un cran (%.2f)" % s.densite_faune(j.pos))
+	for k in 40:
+		s._regenerer_faune_hebdo()
+	verifier(s.densite_faune(j.pos) == 1.0 and s.monde.faune_densite.is_empty(), "et au bout de quarante semaines, la cellule est comme neuve")
+	s.monde.fermer()
 
 
 func test_composer_capacites() -> void:

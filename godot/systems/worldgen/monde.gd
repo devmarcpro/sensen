@@ -22,6 +22,7 @@ var modifications: Dictionary = {}     # Vector2i → {idx local: {h, contenu, m
 var decouvert: Dictionary = {}         # Vector2i → {idx local: true}
 var contenants_hors: Dictionary = {}   # Vector2i → {idx local: [uids]}
 var dormants: Dictionary = {}          # Vector2i → [êtres] hors fenêtre
+var faune_densite: Dictionary = {}     # Vector2i (cellule) → float < 1 : la faune raréfiée par la chasse (Créatures, 2026-09-04 ; sauvegardé)
 var explores: Dictionary = {}          # Vector2i (chunk de 32) → true : bit d'exploration (minimap, sauvegardé)
 var teintes: Dictionary = {}           # Vector2i (chunk) → Color : teinte dominante, calculée une fois
 # La carte du monde se REDESSINAIT entièrement à chaque ouverture : vingt-cinq sondes de tectonique par

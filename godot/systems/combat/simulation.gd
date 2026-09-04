@@ -5616,7 +5616,7 @@ func sauvegarder(nom: String = "") -> bool:
 		contenants_monde[grille.pos_de(int(gi))] = contenants[gi]
 	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "resume": resume_partie(), "graine": graine, "graine_monde": graine_monde, "planete_options": planete_options, "identifies": identifies, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
 		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores,
-		"delta": monde.delta, "foyers": monde.foyers, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire, "vacances": monde.vacances, "villages": monde.villages, "heritiers": monde.heritiers, "vacances_guildes": monde.vacances_guildes,
+		"delta": monde.delta, "foyers": monde.foyers, "faune_densite": monde.faune_densite, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire, "vacances": monde.vacances, "villages": monde.villages, "heritiers": monde.heritiers, "vacances_guildes": monde.vacances_guildes,
 		"modifs_terrain": modifs_terrain, "portails": portails, "gouffres_vides": gouffres_vides, "mines_creusees": mines_creusees,
 		"carte_cache": monde.carte_cache_serialise()})   # indexés par position monde, donc valables au rechargement
 	ok = Sauvegarde.ecrire(nom, "surface.json", surface) and ok
@@ -5669,6 +5669,7 @@ func charger_sauvegarde(nom: String = "") -> bool:
 	monde.explores = w.get("explores", {})
 	monde.delta = w.get("delta", {})
 	monde.foyers = w.get("foyers", {})
+	monde.faune_densite = w.get("faune_densite", {})
 	monde.semaine_courante = int(w.get("semaine", 0))
 	monde.peuplees = w.get("peuplees", {})
 	monde.claims = w.get("claims", {})
@@ -7708,8 +7709,8 @@ func _tiquer_faune(tick: int) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([graine, "faune", tick])
 	var nuit := est_nuit()
-	if rng.randf() > float(fa.chance_base) * (float(fa.nuit_mult) if nuit else 1.0):
-		return
+	if rng.randf() > float(fa.chance_base) * (float(fa.nuit_mult) if nuit else 1.0) * densite_faune(j.pos):
+		return   # une clairière qu'on a vidée se repeuple moins (Créatures, 2026-09-04)
 	for essai in 12:
 		var d := rng.randi_range(int(fa.anneau[0]), int(fa.anneau[1]))
 		var a := rng.randf() * TAU
@@ -7768,6 +7769,7 @@ func _tiquer_monde(tick: int) -> void:
 			if x.controle == "joueur":
 				_semaine_territoire(x)
 		_regenerer_terrain_sauvage()
+		_regenerer_faune_hebdo()
 		for x in entites.values():   # les bourses des PNJ se rechargent (+15 % par semaine, Barèmes économiques)
 			if x.has("or_max"):
 				x.or = mini(int(x.or_max), int(x.or) + int(ceil(float(x.or_max) * float(regles.r.commerce.recharge_hebdo))))
@@ -7786,6 +7788,40 @@ func _tiquer_monde(tick: int) -> void:
 		EventBus.emettre(&"journal", [&"journal.donjon_disparu", {"x": cell.x, "y": cell.y}])
 		if lieu == "camp":
 			EventBus.emettre(&"tile_changed", [monde.pos_monde(cell, monde.cellule(cell).entree_donjon)])
+
+
+## Une bête PAISIBLE de la faune : proie, fuyarde ou bête sauvage — pas le loup qui chasse la nuit.
+static func est_faune_paisible(x: Dictionary) -> bool:
+	return str(x.get("ai_profile", "")) in ["proie", "fuyard", "bete_sauvage"]
+
+
+## La densité de faune de la cellule de `pos` : 1 sauf si la chasse l'a raréfiée (Monde.faune_densite).
+func densite_faune(pos: Vector2i) -> float:
+	if monde == null:
+		return 1.0
+	return float(monde.faune_densite.get(monde.cellule_de(pos), 1.0))
+
+
+## Une bête paisible tuée par le joueur : la faune de sa cellule se raréfie, jusqu'au plancher.
+func _rarefier_faune(pos: Vector2i) -> void:
+	if monde == null:
+		return
+	var ra: Dictionary = GameData.config("planete").faune.get("rarefaction", {})
+	var cell := monde.cellule_de(pos)
+	monde.faune_densite[cell] = maxf(float(ra.get("plancher", 0.25)), float(monde.faune_densite.get(cell, 1.0)) - float(ra.get("par_mort", 0.15)))
+
+
+## Le passage hebdomadaire : la faune revient par génération, jamais par reproduction (Créatures, 2026-09-04).
+func _regenerer_faune_hebdo() -> void:
+	if monde == null:
+		return
+	var retour := float(GameData.config("planete").faune.get("rarefaction", {}).get("retour_hebdo", 0.05))
+	for cell in monde.faune_densite.keys().duplicate():
+		var d := float(monde.faune_densite[cell]) + retour
+		if d >= 1.0:
+			monde.faune_densite.erase(cell)
+		else:
+			monde.faune_densite[cell] = d
 
 
 ## La faim (Faim) : −1 par `ticks_par_point` sur l'horloge du monde, pour les êtres qui ont une jauge
@@ -9184,6 +9220,8 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		EventBus.emettre(&"journal", [&"journal.mort", {"nom": cible.name_key}])
 		EventBus.emettre(&"creature_killed", [cible.id, source])
 		_quetes_sur_mort(cible, source)
+		if not att.is_empty() and att.controle == "joueur" and bool(cible.get("spawn_faune", false)) and est_faune_paisible(cible):
+			_rarefier_faune(cible.pos)   # massacrer la faune vide la forêt (Créatures, 2026-09-04)
 		if not att.is_empty() and a_talent(att, "dissimulation"):   # L'Ombre : dissimulé après chaque mise à mort
 			appliquer_statut(att, "dissimule", int(statuts_defs.get("dissimule", {}).get("duree_ticks", 24000)), att.id)
 			EventBus.emettre(&"journal", [&"journal.dissimule", {"nom": att.name_key}])

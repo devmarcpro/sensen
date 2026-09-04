@@ -331,7 +331,13 @@
     ],
     "despawn": 60,
     "nuit_mult": 2.0,
-    "chance_base": 0.5
+    "chance_base": 0.5,
+    "rarefaction": {
+      "_doc": "Massacrer la faune vide la foret (Creatures, 2026-09-04) : chaque bete paisible tuee par le joueur baisse la densite de faune de sa cellule de par_mort, jusqu'au plancher ; la densite remonte de retour_hebdo par semaine, jusqu'a 1.",
+      "par_mort": 0.15,
+      "plancher": 0.25,
+      "retour_hebdo": 0.05
+    }
   },
   "routine": {
     "_doc": "Routines des PNJ (IA des créatures) : rayon de patrouille des gardes, distance à laquelle l'A* remplace le pas glouton. projection_min_ticks (LOD de simulation, 2026-09-04) : une absence hors fenetre plus courte ne projette pas le PNJ sur sa routine.",
