@@ -3231,3 +3231,8 @@ ui.feuille.grilles,Composition grids
 ui.feuille.grille,  {nom} ({cases} cells){active}
 ui.feuille.grille_active, · the one in use
 ui.feuille.modules,known modules: {n}
+ui.echange.volet_joueur,"YOUR BAG — {n} item(s) · {or} gold"
+ui.echange.volet_marchand,"{nom} — FOR SALE (Enter: buy · yours: sell)"
+ui.echange.volet_autre,"{nom} — THEIR BAG (Enter: take back · yours: give)"
+ui.echange.col_prix,Price
+ui.echange.aide,T: sort · Tab: the other pane · Enter: the pane's action

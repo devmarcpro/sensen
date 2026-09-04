@@ -468,6 +468,15 @@ func _ready() -> void:
 			print("planche : ", portees[ip])
 		get_tree().quit()
 		return
+	if "--echange" in args and scene.sim != null:   # --echange : un compagnon avec un objet dans son sac, et l'ecran Echange (designer 2026-09-04)
+		var je: Dictionary = scene.joueur()
+		var xe: Dictionary = scene.sim.ajouter("villageois", je.pos + Vector2i(1, 0), "ia")
+		scene.sim._devenir_compagnon(je, xe)
+		var oe: Dictionary = scene.sim.generer_objet("craft_dague", 1, {}, "commun", 0)
+		if not oe.is_empty():
+			xe.sac.append(oe.uid)
+		scene.ecrans.pnj_id = xe.id
+		scene.ecrans.ouvrir("echange")
 	if "--maison" in args and scene.sim != null and scene.sim.monde != null:   # --maison : un residentiel dessine, un resident, du bois, une chaumiere batie (Gestion de base, 2026-09-04)
 		var jm: Dictionary = scene.joueur()
 		var pid_r: String = scene.sim.dessiner_perimetre(jm.pos + Vector2i(-9, -3), jm.pos + Vector2i(-2, 2), "residentiel")

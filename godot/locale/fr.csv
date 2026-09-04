@@ -3240,3 +3240,8 @@ ui.feuille.grilles,Grilles de composition
 ui.feuille.grille,  {nom} ({cases} cases){active}
 ui.feuille.grille_active, · celle où l'on compose
 ui.feuille.modules,modules connus : {n}
+ui.echange.volet_joueur,"TON SAC — {n} objet(s) · {or} or"
+ui.echange.volet_marchand,"{nom} — À VENDRE (Entrée : acheter · à toi : vendre)"
+ui.echange.volet_autre,"{nom} — SON SAC (Entrée : reprendre · à toi : donner)"
+ui.echange.col_prix,Prix
+ui.echange.aide,T : trier · Tab : l'autre volet · Entrée : l'action du volet

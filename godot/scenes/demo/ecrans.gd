@@ -77,6 +77,10 @@ func _ready() -> void:
 	inventaire_visuel.ecrans = self
 	inventaire_visuel.visible = false
 	h.add_child(inventaire_visuel)
+	echange_visuel = EchangeVisuel.new()
+	echange_visuel.ecrans = self
+	echange_visuel.visible = false
+	h.add_child(echange_visuel)
 	atelier_visuel = AtelierVisuel.new()
 	atelier_visuel.ecrans = self
 	atelier_visuel.visible = false
@@ -163,6 +167,7 @@ func _ready() -> void:
 var reforge_objet := ""   # Main du métal : l'objet choisi, en attente de son composant
 var droite: VBoxContainer          # la colonne de droite : le détail, sous lui le Wu Xing de l'objet ou l'aperçu du sort
 var inventaire_visuel: InventaireVisuel   # l'inventaire en icônes (Écrans d'interface, 2026-08-30)
+var echange_visuel: EchangeVisuel         # commerce et échange à deux volets, comme l'inventaire (designer 2026-09-04)
 var atelier_visuel: AtelierVisuel         # l'atelier en cartes de recettes
 var penta_objet: Composeur.PentagrammeSort   # le Wu Xing de l'objet choisi
 
@@ -244,6 +249,9 @@ func touche(ev: InputEventKey) -> bool:
 		return true
 	if ev.keycode == KEY_TAB:
 		if courant == "creation":
+			return true
+		if courant in ["commerce", "echange"]:   # Tab : l'autre volet (designer 2026-09-04)
+			echange_visuel.basculer_volet()
 			return true
 		fermer()
 		return true
@@ -357,6 +365,9 @@ func touche(ev: InputEventKey) -> bool:
 		KEY_T:
 			if courant == "inventaire":
 				_sertir()
+				return true
+			if courant in ["commerce", "echange"]:   # T : trier le volet courant (designer 2026-09-04)
+				echange_visuel.trier_suivant()
 				return true
 		KEY_P:
 			if courant == "inventaire":
@@ -580,9 +591,10 @@ func rafraichir() -> void:
 		_portrait_partie(str(entrees[selection].get("id", "")))   # `cadre_perso` reste visible : c'est le portrait de la partie
 	apercu_monde.visible = courant == "monde"
 	inventaire_visuel.visible = courant == "inventaire"
+	echange_visuel.visible = courant in ["commerce", "echange"]
 	hotbar_ecran.visible = courant == "inventaire" or courant == "capacites"
 	atelier_visuel.visible = courant == "atelier"
-	liste.visible = not (courant in ["inventaire", "atelier"])
+	liste.visible = not (courant in ["inventaire", "atelier", "commerce", "echange"])
 	penta_objet.visible = courant == "inventaire"   # la place qu'on lui laisse se décide plus bas, à la hauteur connue
 	# Chaque écran demandait une largeur en pixels fixes pour sa colonne de droite ; additionnée à la
 	# liste (340 px), la somme dépassait une fenêtre étroite et le contenu sortait du cadre. Ces
@@ -625,6 +637,11 @@ func rafraichir() -> void:
 		penta_objet.custom_minimum_size = Vector2(0, cote_penta + 18.0 if cote_penta >= 96.0 else 0.0)
 		inventaire_visuel.ajuster_largeur(large - droite.custom_minimum_size.x)
 		inventaire_visuel.reconstruire()
+	elif courant in ["commerce", "echange"]:   # deux volets d'objets, le détail à droite (designer 2026-09-04)
+		droite.custom_minimum_size = Vector2(part_droite.call(300.0, 0.28), 0)
+		droite.size_flags_stretch_ratio = 0.6
+		detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		echange_visuel.reconstruire(courant)
 	elif courant == "atelier":
 		droite.custom_minimum_size = Vector2(part_droite.call(380.0, 0.36), 0)
 		droite.size_flags_stretch_ratio = 0.8

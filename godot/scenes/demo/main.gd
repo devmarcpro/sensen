@@ -2246,6 +2246,12 @@ func nom_objet(n: Dictionary) -> String:
 	if n.has("livre"):
 		return "%s %s (difficulté %d, %d modules)" % [base, tr("domaine." + str(n.livre.domaine)), int(n.livre.difficulte), int(n.livre.n)]
 	if str(n.get("affixe", "")).is_empty():
+		if bool(n.get("inconnu", false)) and n.has("params"):   # « Fiole {apparence} » : l'apparence remplit le nom (vu au commerce, 2026-09-04)
+			var pa: Dictionary = n.params.duplicate()
+			if pa.has("apparence"):
+				var cle_a := "apparence." + str(pa.apparence)
+				pa["apparence"] = tr(cle_a) if tr(cle_a) != cle_a else str(pa.apparence)
+			return base.format(pa)
 		return base
 	var p: Dictionary = n.params.duplicate()
 	for k in p.keys():
