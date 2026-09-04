@@ -114,5 +114,43 @@ func _ready() -> void:
 				elif not s.grille.bloque_passage(q) and s.grille.occupant(q).is_empty():
 					libres += 1
 		print("résidentiel à la fin : %d tuiles bâties, %d libres, %d occupées par quelqu'un debout" % [construit, libres, debout])
+	if "--sauvegarde" in args:   # sauvegarde partout (décidé) : la grande base revient entière d'un rechargement
+		verifier_sauvegarde(s)
 	print("SONDE GRANDE BASE : fin")
 	get_tree().quit()
+
+
+## L'aller-retour de sauvegarde de la base entière : mêmes résidents (poste ET logement), mêmes périmètres, mêmes stocks.
+func verifier_sauvegarde(s: Simulation) -> void:
+	var avant: Dictionary = GrandeBase.etat(s)
+	var postes_avant := {}
+	for x in s.residents():
+		postes_avant[str(x.id)] = [str(x.assignation.get("perimetre", "")), str(x.assignation.get("residence", "")), str(x.fonction), bool(x.get("affame", false))]
+	if not s.sauvegarder("sonde_grande_base"):
+		print("SAUVEGARDE : échec d'écriture")
+		return
+	var s2 := Simulation.new(s.graine)
+	if not s2.charger_sauvegarde("sonde_grande_base"):
+		print("SAUVEGARDE : échec de relecture")
+		return
+	var apres: Dictionary = GrandeBase.etat(s2)
+	var ecarts: Array[String] = []
+	for cle in ["residents", "loges", "lits", "tresor", "dette", "stocks"]:
+		if str(avant[cle]) != str(apres[cle]):
+			ecarts.append("%s : %s → %s" % [cle, str(avant[cle]), str(apres[cle])])
+	if avant.zones != apres.zones:
+		ecarts.append("zones : %s → %s" % [str(avant.zones), str(apres.zones)])
+	if avant.stockages != apres.stockages:
+		ecarts.append("stockages : %s → %s" % [str(avant.stockages), str(apres.stockages)])
+	for x in s2.residents():
+		var p0: Array = postes_avant.get(str(x.id), [])
+		var p1 := [str(x.assignation.get("perimetre", "")), str(x.assignation.get("residence", "")), str(x.fonction), bool(x.get("affame", false))]
+		if p0 != p1:
+			ecarts.append("%s : %s → %s" % [str(x.id), str(p0), str(p1)])
+	if ecarts.is_empty():
+		print("SAUVEGARDE : la base revient entière (%d résidents, %d périmètres, %d lits)" % [apres.residents, s2.perimetres().size(), apres.lits])
+	else:
+		print("SAUVEGARDE : %d écart(s)" % ecarts.size())
+		for e in ecarts:
+			print("  " + e)
+	s2.monde.fermer()
