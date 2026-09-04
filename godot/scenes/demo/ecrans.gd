@@ -2074,7 +2074,7 @@ func _texte_production(pr: Dictionary) -> String:
 	var nom := tr(str(fiche.get("name_key", base)))
 	var forme := str(pr.get("forme", ""))
 	if not forme.is_empty():   # « chêne (planche) » : la clé de forme est un gabarit, comme pour les objets
-		var cle_f := "forme.%s.name" % forme
+		var cle_f := "forme.%s" % forme   # la clé d'une forme est un gabarit « {materiau} (planche) », sans suffixe
 		var gabarit := tr(cle_f)
 		nom = gabarit.format({"materiau": nom}) if gabarit != cle_f else nom + " " + forme
 	var txt := tr("ui.gestion.prod_matiere").format({"nom": nom, "n": int(pr.get("n", 0))})
