@@ -11,6 +11,16 @@ etape: 10
 > [!important] Ce que la boucle autonome ne peut pas juger (2026-08-28)
 > **Remis dans l'ordre du parcours le 2026-08-29** : à force d'ajouts en tête de note, la première section avait absorbé 28 questions dont la moitié se rencontrent en donjon, au village ou au vivarium. Elle lance les tests, la scène headless et des captures ; elle ne ressent ni le rythme, ni la lisibilité, ni le plaisir. Les questions ci-dessous sont **les seules** qui bloquent : le solo doit être « bon » avant la coop ([[Ordre de construction]], étape 11).
 
+> [!tip] Sommaire des sections datées, après les Liens (ajouté le 2026-09-04)
+> Les mesures et les questions des 3 et 4 septembre sont en fin de note, dans l'ordre où elles sont arrivées :
+> - 2026-09-03 — Trois monnaies, deux stats chacune ? (discussion ouverte, rien de code)
+> - 2026-09-03 — Le budget É2 n'est pas tenu, et ne l'a jamais été
+> - 2026-09-03 — La grille de composition : ce qu'un œil humain doit trancher
+> - 2026-09-04 — La matrice des classes, enfin mesurée avec le bon robot
+> - Les 36 armes relues contre leurs identités (2026-09-04)
+> - La gestion de base (2026-09-04) — les chiffres sont des points de départ
+> - 2026-09-04 — Une grande base simulée : vingt résidents, cinq cellules, douze semaines
+
 ## 1. Arriver — le camp, l'iso, le corps (10 min)
 
 - **Lisibilité de l'iso** 32×32 : le relief se lit-il, faut-il des ombres de flanc ou une grille ? (molette : zoom, clic milieu : déplacer) — [[Prototype de combat — spécification]]
