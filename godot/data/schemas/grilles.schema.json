@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "name_key",
+    "lignes",
+    "voie",
+    "source"
+  ],
+  "properties": {
+    "name_key": {
+      "type": "string"
+    },
+    "lignes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "voie": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "depart",
+        "palier",
+        "trame"
+      ]
+    },
+    "niveau_min": {
+      "type": "integer"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "_doc": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name_key": "grille.colonne_1.name",
+  "lignes": [
+    "##",
+    "##",
+    "##",
+    "##",
+    "#."
+  ],
+  "voie": "endurance",
+  "source": "depart",
+  "niveau_min": 0,
+  "tags": [
+    "grille",
+    "endurance"
+  ]
+}

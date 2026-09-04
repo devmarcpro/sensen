@@ -89,7 +89,7 @@ func _init(p_graine: int) -> void:
 	regles = Regles.new(GameData.config("combat_rules"))
 	wuxing = WuXing.new(GameData.config("wuxing"))
 	capacites = Capacites.new(GameData.catalogues.get("modules", {}))
-	grille_sort = GrilleSort.new(regles.r.get("grille", {}), GameData.catalogues.modules)
+	grille_sort = GrilleSort.new(regles.r.get("grille", {}), GameData.catalogues.modules, GameData.catalogues.get("grilles", {}))
 	capacites.par_niveau = float(regles.r.progression.skill_factor_par_niveau)
 	capacites.plancher = float(regles.r.progression.ticks_plancher_module)
 	items = GameData.catalogues.get("items", {}).duplicate()   # catalogue + instances de loot (uid)
@@ -3184,7 +3184,53 @@ func grille_composition(e: Dictionary) -> Dictionary:
 	# le niveau de LA compétence de l'arme résolue — à poings nus, celle des mains nues (revue du 2026-09-04 :
 	# `niveau_arme` relisait la main vide et rendait toujours le palier 0 au bagarreur)
 	var niveau := regles.niveau(e.get("competences_eff", e.get("competences", {})), str(fonct.get("combat_skill", "")))
-	return {"stat": stat, "niveau": niveau, "cases": grille_sort.grille_de(stat, niveau)}
+	# Le joueur possède plusieurs grilles (designer 2026-09-04) : s'il en a choisi une qu'il possède,
+	# c'est là qu'il compose ; sinon — créature, robot, vieille sauvegarde — la grille de sa voie.
+	var active := str(e.get("grille_active", ""))
+	if not active.is_empty() and active in e.get("grilles", []):
+		var cases_a: Array = grille_sort.cases_de_grille(active)
+		if not cases_a.is_empty():
+			var fiche: Dictionary = GameData.catalogues.get("grilles", {}).get(active, {})
+			return {"stat": str(fiche.get("voie", stat)), "niveau": niveau, "cases": cases_a, "grille": active}
+	return {"stat": stat, "niveau": niveau, "cases": grille_sort.grille_de(stat, niveau), "grille": grille_sort.id_grille_de(stat, niveau)}
+
+
+## Apprendre une grille (une trame lue, un palier franchi, le kit de départ) : elle entre dans la
+## collection, et devient celle où l'on compose si l'on n'en avait pas encore choisi.
+func apprendre_grille(e: Dictionary, id: String) -> bool:
+	if not GameData.catalogues.get("grilles", {}).has(id):
+		return false
+	if not e.has("grilles"):
+		e["grilles"] = []
+	if id in e.grilles:
+		return false
+	e.grilles.append(id)
+	if str(e.get("grille_active", "")).is_empty():
+		e["grille_active"] = id
+	EventBus.emettre(&"journal", [&"journal.grille_apprise", {"nom": e.name_key, "grille": GameData.catalogues.grilles[id].name_key}])
+	return true
+
+
+## Choisir la grille où l'on compose : une de celles qu'on possède, ou "" pour revenir à celle de sa voie.
+func choisir_grille(e: Dictionary, id: String) -> bool:
+	if not id.is_empty() and not (id in e.get("grilles", [])):
+		return false
+	e["grille_active"] = id
+	if not id.is_empty():
+		EventBus.emettre(&"journal", [&"journal.grille_choisie", {"nom": e.name_key, "grille": GameData.catalogues.grilles[id].name_key}])
+	return true
+
+
+## Les grilles que les paliers d'une compétence d'arme accordent à ce niveau : celles de sa voie,
+## jusqu'au palier atteint. Appelé à chaque niveau gagné.
+func _debloquer_grilles_de_palier(e: Dictionary, competence: String, niveau: int) -> void:
+	var comp: Dictionary = GameData.catalogues.competences.get(competence, {})
+	if str(comp.get("famille", "")) != "armes":
+		return
+	var stat := str(comp.get("stat", ""))
+	for p in grille_sort.paliers_de(stat):
+		if niveau >= int(p.get("niveau_min", 0)) and p.has("grille"):
+			apprendre_grille(e, str(p.grille))
 
 
 ## L'emboîtement d'une séquence dans la grille de l'être : {ok, placement, manque, cases, demande}.
@@ -9154,6 +9200,7 @@ func gagner_xp(e: Dictionary, cle: String, xp: int) -> void:
 	if gagnes > 0:
 		niveaux_gagnes.append({"id": e.id, "competence": cle, "niveau": int(e.competences[cle])})
 		EventBus.emettre(&"skill_level_up", [e.id, cle, int(e.competences[cle])])
+		_debloquer_grilles_de_palier(e, cle, int(e.competences[cle]))   # un palier d'arme franchi apprend la grille suivante de sa voie (2026-09-04)
 		EventBus.emettre(&"journal", [&"journal.niveau", {"nom": e.name_key, "competence": _nom_competence(cle), "niveau": int(e.competences[cle]), "potentiel": int(e.potentiels.get(cle, 80))}])
 		Etres.recalculer(e, items, affixes_defs, regles)
 

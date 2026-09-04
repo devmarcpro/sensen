@@ -119,7 +119,28 @@ static func creer_personnage(nom_key: String, race_id: String, classe_id: String
 		"capacites": classe.get("capacites", []).duplicate(true),   # les sorts de départ sont ceux de la classe (designer, point 47)
 		"hotbar": classe.get("hotbar", []).duplicate(true),         # et son loadout de hotbar
 		"modules_connus": _modules_de_classe(classe),               # et ses seuls modules : le reste s'apprend dans les livres
+		"grilles": _grilles_de_classe(classe),                      # la grille de départ de sa voie, et la grille de poche (designer 2026-09-04)
+		"grille_active": _grilles_de_classe(classe)[0] if not _grilles_de_classe(classe).is_empty() else "",
 	}
+
+
+## Les grilles qu'une classe apporte : la grille de départ de la voie de sa classe mère (palier 0 de
+## `combat_rules.grille.grilles_par_stat`), puis la grille de poche. Une classe sans classe mère n'a
+## que la poche.
+static func _grilles_de_classe(classe: Dictionary) -> Array:
+	var res: Array = []
+	var meres: Dictionary = GameData.config("classes_meres")
+	var mere: Dictionary = meres.get(str(classe.get("classe_mere", "")), {})
+	var stat := str(mere.get("stat", ""))
+	var paliers: Array = GameData.config("combat_rules").get("grille", {}).get("grilles_par_stat", {}).get(stat, [])
+	for p in paliers:
+		if int(p.get("niveau_min", 0)) == 0 and p.has("grille"):
+			res.append(str(p.grille))
+			break
+	var poche := str(GameData.config("combat_rules").get("grille", {}).get("mains_nues", {}).get("grille", ""))
+	if not poche.is_empty() and not (poche in res):
+		res.append(poche)
+	return res
 
 
 ## Les modules que la classe apporte : ceux de ses capacités de départ, sans doublon.

@@ -14,11 +14,13 @@ extends RefCounted
 
 var cfg: Dictionary
 var catalogue: Dictionary   # les modules, pour lire type, prix et `forme_grille`
+var grilles: Dictionary     # le catalogue des silhouettes (`data/grilles/`) — le joueur en possède plusieurs (2026-09-04)
 
 
-func _init(regles_grille: Dictionary, modules: Dictionary) -> void:
+func _init(regles_grille: Dictionary, modules: Dictionary, catalogue_grilles: Dictionary = {}) -> void:
 	cfg = regles_grille
 	catalogue = modules
+	grilles = catalogue_grilles
 
 
 # ---------------------------------------------------------------- l'ordre de lecture
@@ -97,7 +99,8 @@ func poser(forme: Array, ancre: Vector2i, grille: Array, occupees: Dictionary) -
 # ---------------------------------------------------------------- la grille d'une voie
 
 ## La silhouette d'une voie à un niveau : la dernière entrée de `grilles_par_stat[stat]` dont
-## `niveau_min` est atteint. Sans voie (stat inconnue) : la grille de poche.
+## `niveau_min` est atteint — une fiche du catalogue, ou des lignes écrites en place. Sans voie
+## (stat inconnue) : la grille de poche.
 func grille_de(stat: String, niveau: int) -> Array:
 	var paliers: Array = cfg.get("grilles_par_stat", {}).get(stat, [])
 	var choisi: Dictionary = {}
@@ -106,7 +109,39 @@ func grille_de(stat: String, niveau: int) -> Array:
 			choisi = p
 	if choisi.is_empty():
 		choisi = cfg.get("mains_nues", {"lignes": ["##", "##"]})
-	return _cases_des_lignes(choisi.get("lignes", []))
+	return _cases_de(choisi)
+
+
+## L'id de la fiche qu'une voie donne à un niveau ("" si la table écrit ses lignes en place).
+func id_grille_de(stat: String, niveau: int) -> String:
+	var paliers: Array = cfg.get("grilles_par_stat", {}).get(stat, [])
+	var choisi := ""
+	for p in paliers:
+		if niveau >= int(p.get("niveau_min", 0)):
+			choisi = str(p.get("grille", ""))
+	return choisi
+
+
+## Les paliers d'une voie : [{niveau_min, grille}], pour débloquer au bon moment.
+func paliers_de(stat: String) -> Array:
+	return cfg.get("grilles_par_stat", {}).get(stat, [])
+
+
+## Les cases d'une fiche du catalogue (vide si l'id est inconnu).
+func cases_de_grille(id: String) -> Array:
+	var fiche: Dictionary = grilles.get(id, {})
+	if fiche.is_empty():
+		return []
+	return _cases_des_lignes(fiche.get("lignes", []))
+
+
+## Une entrée de table : soit `grille` (une fiche), soit `lignes` (en place).
+func _cases_de(entree: Dictionary) -> Array:
+	if entree.has("grille"):
+		var c := cases_de_grille(str(entree.grille))
+		if not c.is_empty():
+			return c
+	return _cases_des_lignes(entree.get("lignes", []))
 
 
 ## Les lignes de texte (`#` une case, `.` rien) → la liste des cases.

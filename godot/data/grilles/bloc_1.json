@@ -1,0 +1,15 @@
+{
+  "name_key": "grille.bloc_1.name",
+  "lignes": [
+    "###",
+    "###",
+    "###"
+  ],
+  "voie": "force",
+  "source": "depart",
+  "niveau_min": 0,
+  "tags": [
+    "grille",
+    "force"
+  ]
+}

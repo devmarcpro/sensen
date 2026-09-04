@@ -1,0 +1,17 @@
+{
+  "name_key": "grille.croix_3.name",
+  "lignes": [
+    ".###.",
+    "#####",
+    "#####",
+    "#####",
+    ".###."
+  ],
+  "voie": "volonte",
+  "source": "palier",
+  "niveau_min": 25,
+  "tags": [
+    "grille",
+    "volonte"
+  ]
+}

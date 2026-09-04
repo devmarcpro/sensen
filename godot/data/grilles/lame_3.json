@@ -1,0 +1,15 @@
+{
+  "name_key": "grille.lame_3.name",
+  "lignes": [
+    "#######",
+    "#######",
+    "##....."
+  ],
+  "voie": "dexterite",
+  "source": "palier",
+  "niveau_min": 25,
+  "tags": [
+    "grille",
+    "dexterite"
+  ]
+}

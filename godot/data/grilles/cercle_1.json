@@ -1,0 +1,15 @@
+{
+  "name_key": "grille.cercle_1.name",
+  "lignes": [
+    "###",
+    "#.#",
+    "###"
+  ],
+  "voie": "charisme",
+  "source": "depart",
+  "niveau_min": 0,
+  "tags": [
+    "grille",
+    "charisme"
+  ]
+}

@@ -2878,3 +2878,25 @@ module.vers_metal.name,Vers le métal
 module.vers_terre.name,Vers la terre
 ui.composeur.ne_rentre_pas,"cette pièce ne rentre pas là"
 ui.composeur.rotation,rotation {n} — R pour tourner
+grille.bloc_1.name,Bloc du guerrier
+grille.bloc_2.name,Grand bloc
+grille.bloc_3.name,Bloc entier
+grille.lame_1.name,Lame
+grille.lame_2.name,Lame large
+grille.lame_3.name,Lame longue
+grille.colonne_1.name,Colonne
+grille.colonne_2.name,Haute colonne
+grille.colonne_3.name,Colonne double
+grille.croix_1.name,Croix du mage
+grille.croix_2.name,Grande croix
+grille.croix_3.name,Croix entière
+grille.ligne_1.name,Ligne du tireur
+grille.ligne_2.name,Longue ligne
+grille.ligne_3.name,Ligne à talon
+grille.cercle_1.name,Cercle du barde
+grille.cercle_2.name,Grand cercle
+grille.cercle_3.name,Cercle plein
+grille.poche.name,Grille de poche
+journal.grille_apprise,{nom} apprend une grille : {grille}
+journal.grille_choisie,{nom} compose sur : {grille}
+ui.composeur.grilles,Grilles possédées

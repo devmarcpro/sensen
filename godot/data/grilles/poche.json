@@ -1,0 +1,13 @@
+{
+  "name_key": "grille.poche.name",
+  "lignes": [
+    "##",
+    "##"
+  ],
+  "voie": "",
+  "source": "depart",
+  "niveau_min": 0,
+  "tags": [
+    "grille"
+  ]
+}

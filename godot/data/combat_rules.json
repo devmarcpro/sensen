@@ -1400,7 +1400,7 @@
     }
   },
   "grille": {
-    "_doc": "La grille de composition (designer 2026-09-03, « comme la grille de personnage dans Jump Ultimate Stars ») : un sort se compose en emboitant les silhouettes de ses modules dans la silhouette de l'arme tenue. `formes_par_type` deduit la forme d'un module de son type et de son prix en ticks — la premiere entree dont `ticks_min` est atteint gagne, les entrees sont lues dans l'ordre. `grilles_par_stat` donne la silhouette par voie et par palier de niveau de la competence d'arme (`#` une case, `.` rien). Les pieces tournent (quatre rotations, pas de miroir). La grille borne la COMPOSITION, jamais l'assembleur ni les creatures.",
+    "_doc": "La grille de composition (designer 2026-09-03, « comme la grille de personnage dans Jump Ultimate Stars ») : un sort se compose en emboitant les silhouettes de ses modules dans la silhouette de l'arme tenue. `formes_par_type` deduit la forme d'un module de son type et de son prix en ticks — la premiere entree dont `ticks_min` est atteint gagne, les entrees sont lues dans l'ordre. `grilles_par_stat` donne la silhouette par voie et par palier de niveau de la competence d'arme (`#` une case, `.` rien). Les pieces tournent (quatre rotations, pas de miroir). La grille borne la COMPOSITION, jamais l'assembleur ni les creatures. | Depuis le 2026-09-04 (« le joueur a plusieurs formes de grille et peut en debloquer d'autres »), les silhouettes vivent dans le catalogue `data/grilles/` : `grilles_par_stat` ne dit plus que QUELLE fiche a QUEL niveau de la competence d'arme — c'est la table de progression, pas de dessin. Un etre porte `grilles` (ses fiches) et `grille_active` (celle ou il compose) ; sans collection, il compose dans la grille de sa voie.",
     "rotations": true,
     "formes_par_type": {
       "noyau": [
@@ -1629,179 +1629,90 @@
       "force": [
         {
           "niveau_min": 0,
-          "lignes": [
-            "###",
-            "###",
-            "###"
-          ]
+          "grille": "bloc_1"
         },
         {
           "niveau_min": 10,
-          "lignes": [
-            "####",
-            "####",
-            "####"
-          ]
+          "grille": "bloc_2"
         },
         {
           "niveau_min": 25,
-          "lignes": [
-            "####",
-            "####",
-            "####",
-            "####"
-          ]
+          "grille": "bloc_3"
         }
       ],
       "dexterite": [
         {
           "niveau_min": 0,
-          "lignes": [
-            "#####",
-            "#####"
-          ]
+          "grille": "lame_1"
         },
         {
           "niveau_min": 10,
-          "lignes": [
-            "######",
-            "######"
-          ]
+          "grille": "lame_2"
         },
         {
           "niveau_min": 25,
-          "lignes": [
-            "#######",
-            "#######",
-            "##....."
-          ]
+          "grille": "lame_3"
         }
       ],
       "endurance": [
         {
           "niveau_min": 0,
-          "lignes": [
-            "##",
-            "##",
-            "##",
-            "##",
-            "#."
-          ]
+          "grille": "colonne_1"
         },
         {
           "niveau_min": 10,
-          "lignes": [
-            "##",
-            "##",
-            "##",
-            "##",
-            "##",
-            "##"
-          ]
+          "grille": "colonne_2"
         },
         {
           "niveau_min": 25,
-          "lignes": [
-            "###",
-            "###",
-            "###",
-            "###",
-            "###",
-            "#.."
-          ]
+          "grille": "colonne_3"
         }
       ],
       "volonte": [
         {
           "niveau_min": 0,
-          "lignes": [
-            ".#.",
-            "###",
-            "###",
-            "###",
-            ".#."
-          ]
+          "grille": "croix_1"
         },
         {
           "niveau_min": 10,
-          "lignes": [
-            ".##.",
-            "####",
-            "####",
-            ".##."
-          ]
+          "grille": "croix_2"
         },
         {
           "niveau_min": 25,
-          "lignes": [
-            ".###.",
-            "#####",
-            "#####",
-            "#####",
-            ".###."
-          ]
+          "grille": "croix_3"
         }
       ],
       "perception": [
         {
           "niveau_min": 0,
-          "lignes": [
-            "#########",
-            ".......##"
-          ]
+          "grille": "ligne_1"
         },
         {
           "niveau_min": 10,
-          "lignes": [
-            "##########",
-            ".......###"
-          ]
+          "grille": "ligne_2"
         },
         {
           "niveau_min": 25,
-          "lignes": [
-            "##########",
-            "####......"
-          ]
+          "grille": "ligne_3"
         }
       ],
       "charisme": [
         {
           "niveau_min": 0,
-          "lignes": [
-            "###",
-            "#.#",
-            "###"
-          ]
+          "grille": "cercle_1"
         },
         {
           "niveau_min": 10,
-          "lignes": [
-            ".###.",
-            "##.##",
-            "#...#",
-            "##.##",
-            ".###."
-          ]
+          "grille": "cercle_2"
         },
         {
           "niveau_min": 25,
-          "lignes": [
-            ".####.",
-            "######",
-            "##..##",
-            "##..##",
-            "######",
-            ".####."
-          ]
+          "grille": "cercle_3"
         }
       ]
     },
     "mains_nues": {
-      "lignes": [
-        "##",
-        "##"
-      ]
+      "grille": "poche"
     }
   },
   "equipement": {

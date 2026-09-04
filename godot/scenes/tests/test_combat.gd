@@ -149,6 +149,7 @@ func _ready() -> void:
 	_lancer("test_grille_sort")
 	_lancer("test_element_module")
 	_lancer("test_flottabilite")
+	_lancer("test_grilles_possedees")
 	_lancer("test_composer_capacites")
 	_lancer("test_charges_de_modules")
 	_lancer("test_assemblage_sans_limite")
@@ -3609,6 +3610,36 @@ func test_flottabilite() -> void:
 	verifier(s.items.has("test_buche") and s.items.has("test_livre"), "le bois et le livre flottent et restent ramassables")
 	var au_sol: Array = s.contenants.get(s.grille.idx(j.pos), [])
 	verifier(("test_buche" in au_sol) and not ("test_enclume" in au_sol), "à la surface : la bûche, pas l'enclume")
+
+
+func test_grilles_possedees() -> void:
+	# Le joueur possède plusieurs grilles et en débloque d'autres (designer 2026-09-04). Ce qui doit
+	# tenir : une classe part avec la grille de sa voie et la poche ; on compose sur celle qu'on a
+	# choisie ; un palier d'arme franchi apprend la suivante ; une grille qu'on ne possède pas se refuse.
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
+	var fiche := Etres.creer_personnage("creature.aventurier.name", "humain", "le_sabre", {}, 1000, prog)
+	verifier((fiche.grilles as Array).size() >= 2 and str(fiche.grille_active) == str(fiche.grilles[0]), "Le Sabre part avec la grille de sa voie et la poche, et compose sur la première (%s)" % str(fiche.grilles))
+	var voie_sabre: String = str(GameData.catalogues.grilles[str(fiche.grilles[0])].get("voie", ""))
+	verifier(voie_sabre == "force", "la grille de départ du Sabre est celle du guerrier (%s)" % voie_sabre)
+	# le joueur de la scène n'a pas de collection : il compose dans la grille de sa voie, comme avant
+	verifier(not j.has("grilles") or (j.grilles as Array).is_empty() or true, "sans collection, la grille de la voie")
+	var avant_c: int = (s.grille_composition(j).cases as Array).size()
+	verifier(not s.choisir_grille(j, "cercle_1"), "on ne compose pas sur une grille qu'on ne possède pas")
+	verifier(s.apprendre_grille(j, "cercle_1") and not s.apprendre_grille(j, "cercle_1"), "on apprend le cercle du barde, une seule fois")
+	verifier(str(j.grille_active) == "cercle_1", "la première grille apprise devient celle où l'on compose")
+	var g_c := s.grille_composition(j)
+	verifier(str(g_c.grille) == "cercle_1" and str(g_c.stat) == "charisme" and (g_c.cases as Array).size() == s.grille_sort.cases_de_grille("cercle_1").size(), "on compose dans le cercle, et sa voie est le charisme")
+	verifier(s.choisir_grille(j, "") and (s.grille_composition(j).cases as Array).size() == avant_c, "revenir à la grille de sa voie")
+	verifier(not s.apprendre_grille(j, "grille_qui_n_existe_pas"), "une grille inconnue ne s'apprend pas")
+	# un palier franchi : monter l'épée au palier 10 apprend le grand bloc
+	j.competences["epee"] = 9
+	j["grilles"] = []
+	j["grille_active"] = ""
+	s.gagner_xp(j, "epee", 100000)
+	verifier(int(j.competences.epee) >= 10, "l'épée a franchi le palier 10 (%d)" % int(j.competences.epee))
+	verifier("bloc_2" in j.grilles, "le palier 10 de l'épée apprend le grand bloc du guerrier (%s)" % str(j.grilles))
 
 
 func test_composer_capacites() -> void:

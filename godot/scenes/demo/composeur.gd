@@ -33,6 +33,7 @@ var nom: LineEdit
 var icone_sort: Control                # l'icône combinée du sort en cours, à côté du nom
 var grille_ctrl: GrilleControl         # LA surface de composition (designer 2026-09-03)
 var defil_grille: ScrollContainer      # sa rangée : haute comme la grille, pas plus
+var rangee_grilles: HBoxContainer      # les grilles possédées, un onglet chacune (designer 2026-09-04)
 var catalogue: VBoxContainer
 var detail: RichTextLabel
 var apercu: ApercuSort
@@ -66,6 +67,8 @@ func _ready() -> void:
 	aide.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	aide.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h1.add_child(aide)
+	rangee_grilles = HBoxContainer.new()   # rangée 1 ter : les grilles possédées — on choisit celle où l'on compose
+	add_child(rangee_grilles)
 	defil_grille = ScrollContainer.new()   # rangée 2 : la grille, défilable si la silhouette est large
 	defil_grille.custom_minimum_size = Vector2(0, GrilleControl.HAUTEUR_MIN)
 	defil_grille.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -109,6 +112,37 @@ func _ready() -> void:
 	bas.add_child(pentagramme)
 	apercu = ApercuSort.new()
 	bas.add_child(apercu)
+
+
+## Les grilles possédées (designer 2026-09-04) : un onglet par silhouette, celle où l'on compose en clair. Cliquer
+## en choisit une autre ; la séquence est rangée à nouveau dedans, et refusée si elle n'y tient pas.
+func _reconstruire_onglets_grilles(j: Dictionary) -> void:
+	for c in rangee_grilles.get_children():
+		c.queue_free()
+	var possedees: Array = j.get("grilles", [])
+	if possedees.is_empty():
+		return
+	var l := Label.new()
+	l.text = tr("ui.composeur.grilles")
+	l.add_theme_font_size_override("font_size", 11)
+	l.modulate = Color(0.85, 0.8, 0.6)
+	rangee_grilles.add_child(l)
+	var active := str(grille_courante().get("grille", ""))
+	for gid in possedees:
+		var fiche: Dictionary = GameData.catalogues.get("grilles", {}).get(str(gid), {})
+		var b := Button.new()
+		b.text = tr(str(fiche.get("name_key", gid))) + " (%d)" % grille_sort().cases_de_grille(str(gid)).size()
+		b.flat = str(gid) != active
+		b.focus_mode = Control.FOCUS_NONE
+		b.add_theme_font_size_override("font_size", 10)
+		var gid_c := str(gid)
+		b.pressed.connect(func() -> void:
+			if main.sim.choisir_grille(main.joueur(), gid_c):
+				var seq := sequence() if sequence_refusee.is_empty() else sequence_refusee
+				placements = []
+				_ranger(seq)
+				reconstruire(main.joueur()))
+		rangee_grilles.add_child(b)
 
 
 ## Les filtres de style (Six types de modules, 2026-08-30) : Tous, puis un bouton par style de data/styles.json.
@@ -297,6 +331,7 @@ func reconstruire(j: Dictionary, depart: Array = []) -> void:
 		_ranger(depart)
 	elif not placements.is_empty() and not _dans_la_grille():
 		_ranger(sequence())   # l'arme (ou la grille) a changé : une pièce hors de la grille n'a plus de sens, on range à nouveau
+	_reconstruire_onglets_grilles(j)
 	_reconstruire_catalogue(j)
 	_rafraichir_detail(j)
 

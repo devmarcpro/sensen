@@ -1,0 +1,14 @@
+{
+  "name_key": "grille.ligne_3.name",
+  "lignes": [
+    "##########",
+    "####......"
+  ],
+  "voie": "perception",
+  "source": "palier",
+  "niveau_min": 25,
+  "tags": [
+    "grille",
+    "perception"
+  ]
+}

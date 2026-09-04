@@ -2869,3 +2869,25 @@ module.vers_metal.name,Into metal
 module.vers_terre.name,Into earth
 ui.composeur.ne_rentre_pas,"this piece does not fit there"
 ui.composeur.rotation,rotation {n} — R to rotate
+grille.bloc_1.name,Warrior's block
+grille.bloc_2.name,Large block
+grille.bloc_3.name,Full block
+grille.lame_1.name,Blade
+grille.lame_2.name,Wide blade
+grille.lame_3.name,Long blade
+grille.colonne_1.name,Column
+grille.colonne_2.name,Tall column
+grille.colonne_3.name,Double column
+grille.croix_1.name,Mage's cross
+grille.croix_2.name,Large cross
+grille.croix_3.name,Full cross
+grille.ligne_1.name,Marksman's line
+grille.ligne_2.name,Long line
+grille.ligne_3.name,Heeled line
+grille.cercle_1.name,Bard's circle
+grille.cercle_2.name,Large circle
+grille.cercle_3.name,Full circle
+grille.poche.name,Pocket grid
+journal.grille_apprise,{nom} learns a grid: {grille}
+journal.grille_choisie,{nom} now composes on: {grille}
+ui.composeur.grilles,Owned grids
