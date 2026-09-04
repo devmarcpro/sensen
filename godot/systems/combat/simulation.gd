@@ -3240,6 +3240,7 @@ func emboitement(e: Dictionary, sequence: Array) -> Dictionary:
 	var res := grille_sort.emboiter(sequence, g.cases)   # porte déjà demande, capacite, manque
 	res["cases"] = g.cases
 	res["stat"] = g.stat
+	res["grille"] = str(g.get("grille", ""))   # la fiche active, pour que l'écran la nomme
 	return res
 
 

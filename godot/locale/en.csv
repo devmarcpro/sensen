@@ -866,7 +866,7 @@ ui.ecran.capacites,"ABILITIES — {n} · grid of the held weapon: {cases} cells 
 ui.ecran.capturer,Net (Y) — capture on a neighbouring water tile
 ui.ecran.commerce,"TRADE — {nom} · their purse: {or} gold · yours: {joueur} gold"
 ui.ecran.commercer,Trade (C)
-ui.ecran.composer,COMPOSE — {sequence} · grid of the held weapon: {n}/{max} cells · V: confirm
+ui.ecran.composer,COMPOSE — {sequence} · {grille}: {n}/{max} cells · V: confirm
 ui.ecran.conquerir,Conquer this village
 ui.ecran.contexte,"OPTIONS — ({x},{y}) (Enter: choose · Esc: close)"
 ui.ecran.deposer,Deposit 50 gold (D)
@@ -2922,3 +2922,5 @@ module.tir_aux_jambes.name,Leg shot
 module.tir_a_la_main.name,Disarming shot
 module.tir_de_suppression.name,Suppressing shot
 module.embuscade.name,Ambush
+ui.composeur.sequence_vide,(nothing yet)
+ui.composeur.grille_arme,held weapon’s grid

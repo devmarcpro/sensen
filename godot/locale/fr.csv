@@ -667,7 +667,7 @@ ui.menu.capacites,Capacités
 ui.ecran.capacites,"CAPACITÉS — {n} · grille de l’arme tenue : {cases} cases — {voie} (Entrée : supprimer)"
 ui.capacites.nouvelle,+ Nouvelle capacité
 ui.capacites.ligne,"{nom} — {modules}"
-ui.ecran.composer,COMPOSER — {sequence} · grille de l’arme tenue : {n}/{max} cases · V : valider
+ui.ecran.composer,COMPOSER — {sequence} · {grille} : {n}/{max} cases · V : valider
 ui.composer.type,[{type}]
 ui.composer.module,"{nom} — {desc}"
 ui.composer.valider,Valider (V)
@@ -2931,3 +2931,5 @@ module.tir_aux_jambes.name,Tir aux jambes
 module.tir_a_la_main.name,Tir à la main
 module.tir_de_suppression.name,Tir de suppression
 module.embuscade.name,Embuscade
+ui.composeur.sequence_vide,(rien encore)
+ui.composeur.grille_arme,grille de l’arme tenue

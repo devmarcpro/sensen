@@ -1385,7 +1385,9 @@ func _construire_composer(j: Dictionary) -> void:
 	var noms: Array[String] = []
 	for m in sequence_composee:
 		noms.append(tr(GameData.catalogues.modules.get(str(m), {}).get("name_key", str(m))))
-	titre.text = tr("ui.ecran.composer").format({"sequence": " → ".join(noms) if not noms.is_empty() else "—", "n": int(emb.demande), "max": (emb.cases as Array).size()})
+	var fiche_g: Dictionary = GameData.catalogues.get("grilles", {}).get(str(emb.get("grille", "")), {})
+	var nom_grille: String = tr(str(fiche_g.name_key)) if fiche_g.has("name_key") else tr("ui.composeur.grille_arme")
+	titre.text = tr("ui.ecran.composer").format({"sequence": " → ".join(noms) if not noms.is_empty() else tr("ui.composeur.sequence_vide"), "grille": nom_grille, "n": int(emb.demande), "max": (emb.cases as Array).size()})
 	# Le composeur en glisser-déposer (décision du designer, 2026-08-30) remplace la liste : slots, cartes, nom, Wu Xing.
 	corps.visible = false
 	composeur.visible = true
