@@ -159,6 +159,12 @@ func _ready() -> void:
 			if not proche_id.is_empty():
 				break
 		if not proche_id.is_empty():
+			for ir in args.size():   # --relation N : la relation du PNJ avec le joueur, pour voir Recruter / Engager (2026-09-04)
+				if args[ir] == "--relation" and ir + 1 < args.size():
+					var xr: Dictionary = scene.sim.entites[proche_id]
+					if not xr.has("social"):
+						xr["social"] = {"culture": "", "relations": {}}
+					xr.social.relations[jq.id] = int(args[ir + 1])
 			scene.ecrans.ouvrir_dialogue(proche_id)
 			print("dialogue : ", scene.sim.entites[proche_id].name_key)
 			if "--commerce" in args:   # --commerce : enchaîne sur l'écran de commerce du PNJ (stock, prix, or)

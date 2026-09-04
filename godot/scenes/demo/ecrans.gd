@@ -343,6 +343,9 @@ func touche(ev: InputEventKey) -> bool:
 			if courant == "inventaire":
 				_action_principale()
 				return true
+			if courant == "dialogue":   # engager pour la base (Gestion de base, 2026-09-04)
+				_option("engager")
+				return true
 		KEY_J:
 			if courant == "inventaire":
 				_jeter()
