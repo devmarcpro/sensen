@@ -494,7 +494,7 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 - [x] **Catalogue `species/`** squeletté avec son template ([[Décision — Pipeline de contenu]]).
 - [x] **Saisons activées** à l'étape 10 — [[Décision — Saisons activées à l'étape 10]] renverse [[Ouvert — Saisons]].
 - [ ] **Assets d'élevage** (étape 10) : silhouettes 13×13 des 32 espèces d'insectes, 20 motifs procéduraux, écran de registre.
-- [ ] Fiches `species/` des 6 groupes recommandés au lancement (un par famille).
+- [x] Fiches `species/` des 6 groupes recommandés au lancement (un par famille) — carpe, serpent, ver à soie, ruche, tortue, phalène, codées le 2026-08-28 ([[Catalogue des groupes d'élevage]]) ; case cochée le 2026-09-04.
 
 ## 4 ter. Les trois axes et les talents *(décidé le 2026-08-26)*
 
@@ -502,7 +502,7 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 - [x] **19 classes nommées et dotées d'un talent** ([[Classes]], [[Talents de classe]]) — 8 visibles en français évocateur, 11 cachées dont 2 technologiques.
 - [x] **Bestiaire restructuré** : [[Créatures]] = 19 races animales, [[Profils de PNJ]] = combinaisons tirées.
 - [ ] **Modules signature** de chaque classe cachée (au-delà du talent) — contenu, étape 4+.
-- [ ] **Fiches de races cachées** : Vampire, Spectre, Lycanthrope (`data/races/`) — étape 4+.
+- [x] **Fiches de races cachées** : Vampire, Spectre, Lycanthrope (`data/races/`) — en données avec leurs statuts (soleil, sang de la nuit) ; case cochée le 2026-09-04.
 - [ ] **Pools de classes par fonction** pour la génération de PNJ ([[Talents de classe]] : classes cachées ≈ 2 %) — étape 9.
 
 ## 5. Assets à produire (aucun n'existe)
