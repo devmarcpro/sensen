@@ -309,6 +309,21 @@ func touche(ev: InputEventKey) -> bool:
 						sequence_composee.remove_at(i_c)
 						rafraichir()
 				return true
+		KEY_S:
+			if courant == "gestion":   # le stockage d'un poste, à tour de rôle parmi les stockages (designer 2026-09-04)
+				var en_s: Dictionary = entrees[selection] if selection < entrees.size() else {}
+				if en_s.get("kind", "") == "perimetre":
+					var sim_s = main.sim
+					var stockages: Array = []
+					for pid_s in sim_s.perimetres().keys():
+						if bool(sim_s.regles.r.royaume.perimetres.types.get(str(sim_s.perimetres()[pid_s].type), {}).get("stockage", false)):
+							stockages.append(str(pid_s))
+					stockages.sort()
+					var actuel_s: String = str(sim_s.perimetres()[str(en_s.id)].get("stockage", ""))
+					var k_s: int = stockages.find(actuel_s)
+					sim_s.assigner_stockage(str(en_s.id), str(stockages[k_s + 1]) if k_s + 1 < stockages.size() else "")
+					rafraichir()
+				return true
 		KEY_P:
 			if courant == "gestion":   # le périmètre de récolte d'une cellule : bois → minerai → plantes → aucun (2026-09-04)
 				var en_p: Dictionary = entrees[selection] if selection < entrees.size() else {}
@@ -1087,15 +1102,23 @@ func _construire_gestion(j: Dictionary) -> void:
 	for cell in cells:
 		liste.add_item(tr("ui.gestion.cellule").format({"x": cell.x, "y": cell.y, "role": tr("role." + str(sim.monde.claims[cell].role)), "camp": tr("ui.gestion.camp") if cell == sim.monde.cellule_camp else ""}))
 		entrees.append({"kind": "cellule", "cellule": cell, "texte": tr("ui.gestion.role_aide") + "\n" + tr("ui.gestion.perimetre_touche")})
-		var pid_c: String = sim.perimetre_de(cell)   # le périmètre de récolte de la cellule (Population et exploitation, 2026-09-04)
-		if not pid_c.is_empty():
+		for pid_c in sim.perimetres_de(cell):   # les périmètres de la cellule (Population et exploitation, 2026-09-04) — dessinés ou entiers
 			var per_c: Dictionary = sim.perimetres()[pid_c]
+			var tp_c: Dictionary = sim.regles.r.royaume.perimetres.types.get(str(per_c.type), {})
 			var n_res := 0
 			for x_r in sim.residents():
-				if str(x_r.assignation.get("perimetre", "")) == pid_c:
+				if str(x_r.assignation.get("perimetre", "")) == pid_c or str(x_r.assignation.get("residence", "")) == pid_c:
 					n_res += 1
-			liste.add_item(tr("ui.gestion.perimetre").format({"type": tr("perimetre.%s.name" % str(per_c.type)), "richesse": int(per_c.richesse), "reserve": int(per_c.reserve), "dominant": tr(GameData.entree("materials", str(per_c.dominant)).get("name_key", "ui.assigner.rien")) if not str(per_c.dominant).is_empty() else tr("ui.assigner.rien"), "n": n_res}))
-			entrees.append({"kind": "perimetre", "id": pid_c, "cellule": cell, "texte": tr("ui.gestion.perimetre_aide")})
+			var st_txt: String = ""
+			if bool(tp_c.get("stockage", false)):
+				st_txt = tr("ui.gestion.stockage_capacite").format({"reste": sim.place_stockage(pid_c), "capacite": int(per_c.get("capacite", 0))})
+			elif not bool(tp_c.get("residentiel", false)):
+				var st_id: String = str(per_c.get("stockage", ""))
+				st_txt = tr("ui.gestion.stockage_vers").format({"cellule": "(%d,%d)" % [sim.perimetres()[st_id].cellule.x, sim.perimetres()[st_id].cellule.y]}) if sim.perimetres().has(st_id) else tr("ui.gestion.sans_stockage")
+			liste.add_item(tr("ui.gestion.perimetre").format({"type": tr("perimetre.%s.name" % str(per_c.type)), "richesse": int(per_c.richesse), "reserve": int(per_c.reserve), "dominant": tr(GameData.entree("materials", str(per_c.dominant)).get("name_key", "ui.assigner.rien")) if not str(per_c.dominant).is_empty() else tr("ui.assigner.rien"), "n": n_res, "stockage": st_txt}))
+			var detail_p: String = tr("ui.gestion.perimetre_detail").format({"reserve": int(per_c.reserve), "dominant": tr(GameData.entree("materials", str(per_c.dominant)).get("name_key", "ui.assigner.rien")) if not str(per_c.dominant).is_empty() else tr("ui.assigner.rien")})
+			entrees.append({"kind": "perimetre", "id": pid_c, "cellule": cell, "texte": detail_p + "
+" + tr("ui.gestion.perimetre_aide")})
 	for x in sim.residents():
 		var poste: Vector2i = x.get("poste", x.pos)
 		liste.add_item(tr("ui.gestion.resident").format({"nom": tr(x.name_key), "fonction": tr(GameData.entree("functions", str(x.assignation.fonction)).name_key), "betail": tr("ui.gestion.betail") if str(x.get("statut_habitat", "normal")) == "betail" else "", "humeur": int(x.get("humeur", 60)), "facteur": "%.2f" % sim.facteur_humeur(x), "logement": tr("ui.gestion.loge" if x.has("lit") else "ui.gestion.sans_lit"), "x": poste.x, "y": poste.y}))

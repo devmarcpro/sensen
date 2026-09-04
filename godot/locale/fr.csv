@@ -3215,8 +3215,8 @@ journal.renvoye,{nom} est renvoyé : il redevient villageois
 perimetre.bois.name,bois
 perimetre.minerai.name,minerai
 perimetre.plantes.name,plantes sauvages
-ui.gestion.perimetre,"  périmètre {type} : {richesse} tuiles · réserve {reserve} · {dominant} · {n} assigné(s)"
-ui.gestion.perimetre_aide,P : changer le type (bois → minerai → plantes → aucun) · assigne des résidents dessus depuis leur fiche
+ui.gestion.perimetre,"  {type} : {richesse} tuiles · {n} assigné(s) · {stockage}"
+ui.gestion.perimetre_aide,P : changer le type · S : son stockage (à tour de rôle) · assigne des résidents dessus depuis leur fiche
 ui.gestion.perimetre_touche,P : un périmètre de récolte sur cette cellule (bois → minerai → plantes → aucun)
 ui.assigner.perimetre,"{fonction} sur le périmètre {type} de ({x},{y}) — {richesse} tuiles"
 journal.perimetre_cree,"Périmètre {type} sur ({x},{y}) : {richesse} tuiles"
@@ -3229,3 +3229,10 @@ journal.perimetre_hors_claim,Le périmètre doit être sur une cellule revendiqu
 journal.maison_batie,"Une chaumière est bâtie pour {nom} en ({x},{y})"
 journal.maison_pas_de_place,Pas de place dans le résidentiel pour loger {nom}
 journal.maison_pas_de_materiaux,Pas assez de matériaux au stock pour loger {nom}
+perimetre.stockage.name,stockage
+ui.gestion.stockage_capacite,place {reste}/{capacite}
+ui.gestion.stockage_vers,stockage en {cellule}
+ui.gestion.sans_stockage,SANS STOCKAGE (ne produit pas)
+journal.poste_sans_stockage,{nom} n'a pas de stockage où ranger sa récolte : rien cette semaine
+journal.stockage_plein,"Le stockage en ({x},{y}) est plein : le surplus est perdu"
+ui.gestion.perimetre_detail,"réserve {reserve} · matière dominante : {dominant}"

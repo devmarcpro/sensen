@@ -3206,8 +3206,8 @@ journal.renvoye,{nom} is dismissed: a villager again
 perimetre.bois.name,wood
 perimetre.minerai.name,ore
 perimetre.plantes.name,wild plants
-ui.gestion.perimetre,"  perimeter {type}: {richesse} tiles · reserve {reserve} · {dominant} · {n} assigned"
-ui.gestion.perimetre_aide,P: change the type (wood → ore → plants → none) · assign residents to it from their entry
+ui.gestion.perimetre,"  {type}: {richesse} tiles · {n} assigned · {stockage}"
+ui.gestion.perimetre_aide,P: change the type · S: its storage (cycling) · assign residents to it from their entry
 ui.gestion.perimetre_touche,P: a harvest perimeter on this cell (wood → ore → plants → none)
 ui.assigner.perimetre,"{fonction} on the {type} perimeter at ({x},{y}) — {richesse} tiles"
 journal.perimetre_cree,"{type} perimeter at ({x},{y}): {richesse} tiles"
@@ -3220,3 +3220,10 @@ journal.perimetre_hors_claim,The perimeter must be on a claimed cell
 journal.maison_batie,"A cottage is built for {nom} at ({x},{y})"
 journal.maison_pas_de_place,No room in the residential area to house {nom}
 journal.maison_pas_de_materiaux,Not enough materials in stock to house {nom}
+perimetre.stockage.name,storage
+ui.gestion.stockage_capacite,room {reste}/{capacite}
+ui.gestion.stockage_vers,storage at {cellule}
+ui.gestion.sans_stockage,NO STORAGE (does not produce)
+journal.poste_sans_stockage,{nom} has no storage for the harvest: nothing this week
+journal.stockage_plein,"The storage at ({x},{y}) is full: the surplus is lost"
+ui.gestion.perimetre_detail,"reserve {reserve} · dominant material: {dominant}"

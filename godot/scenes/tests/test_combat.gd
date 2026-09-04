@@ -3935,6 +3935,18 @@ func test_perimetres() -> void:
 	var v := s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
 	v.camp = "joueur"
 	verifier(s._assigner(j, v.id, "bucheron", 0, pid) and str(v.assignation.get("perimetre", "")) == pid, "un bûcheron assigné sur le périmètre")
+	# Un stockage par poste (designer, 10 h 35) : sans stockage désigné, rien ne se récolte
+	verifier(bool(s.production_de(v).get("sans_stockage", false)), "sans stockage désigné, le poste ne produit pas")
+	var coin_s := Vector2i(-1, -1)   # deux tuiles libres pour un stockage, à l'ouest du joueur
+	for dx in range(-3, -12, -1):
+		var qs: Vector2i = j.pos + Vector2i(dx, 0)
+		if s.grille.dans(qs) and s.grille.dans(qs + Vector2i(0, 1)) and not s.grille.bloque_passage(qs) and not s.grille.bloque_passage(qs + Vector2i(0, 1)) and s.grille.occupant(qs).is_empty() and s.grille.occupant(qs + Vector2i(0, 1)).is_empty() and s._cell_de(qs + Vector2i(0, 1)) == camp:
+			coin_s = qs
+			break
+	verifier(coin_s != Vector2i(-1, -1), "deux tuiles libres pour un stockage")
+	var pid_s := s.dessiner_perimetre(coin_s, coin_s + Vector2i(0, 1), "stockage")
+	verifier(not pid_s.is_empty() and int(s.perimetres()[pid_s].capacite) == 2 * int(s.regles.r.royaume.stockage.unites_par_tuile) and s.place_stockage(pid_s) == int(s.perimetres()[pid_s].capacite), "un stockage de deux tuiles : capacité %d, toute libre" % int(s.perimetres().get(pid_s, {}).get("capacite", 0)))
+	verifier(not s.assigner_stockage(pid, pid) and s.assigner_stockage(pid, pid_s), "un poste désigne un stockage — pas un périmètre de production")
 	var au_bord := false   # il travaille dedans : son poste touche un arbre
 	for vv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 		var qq: Vector2i = v.poste + vv
@@ -3947,6 +3959,11 @@ func test_perimetres() -> void:
 	s.territoire.tresor = 10000   # l'entretien ne doit pas brouiller la mesure
 	s._semaine_territoire(j)
 	verifier(int(s.territoire.stocks.get(dom + "|brut", 0)) >= 1 and float(per.reserve) < reserve0, "après la semaine : du bois brut au stock (%d), la réserve a baissé (%.1f → %.1f)" % [int(s.territoire.stocks.get(dom + "|brut", 0)), reserve0, float(per.reserve)])
+	var st: Dictionary = s.perimetres()[pid_s]
+	verifier(int(st.contenu.get(dom + "|brut", 0)) == int(s.territoire.stocks.get(dom + "|brut", 0)) and s.place_stockage(pid_s) == int(st.capacite) - int(st.contenu.get(dom + "|brut", 0)), "le bois est rangé dans le stockage, qui compte sa place (%d/%d)" % [s.place_stockage(pid_s), int(st.capacite)])
+	verifier(int(s.production_de(v).get("n", 0)) <= s.place_stockage(pid_s), "la production suivante se borne à la place qui reste")
+	s.retirer_stock(j, dom + "|brut")
+	verifier(int(st.contenu.get(dom + "|brut", 0)) == 0 and s.place_stockage(pid_s) == int(st.capacite), "ce que le joueur prend au stock sort aussi du stockage")
 	# la repousse : seulement sur une cellule Ressources naturelles
 	var r1: float = float(per.reserve)
 	s._repousser_perimetres()
@@ -3956,14 +3973,15 @@ func test_perimetres() -> void:
 	verifier(float(per.reserve) > r1, "sur une cellule Ressources naturelles, elle repousse (%.1f → %.1f)" % [r1, float(per.reserve)])
 	s.monde.claims[camp].role = "base"
 	# retirer le périmètre : le bûcheron revient à la production de sa fonction
-	verifier(s.retirer_perimetre(pid) and not v.assignation.has("perimetre") and s.perimetre_de(camp).is_empty(), "périmètre retiré : le résident revient à sa fonction")
+	verifier(s.retirer_perimetre(pid) and not v.assignation.has("perimetre") and not s.perimetres().has(pid), "périmètre retiré : le résident revient à sa fonction")
 	# Les périmètres DESSINÉS (designer, 10 h 25) : un rectangle de trois sur trois autour des pins ne compte qu'eux
 	var coin_a: Vector2i = j.pos + Vector2i(3, 1)
 	var coin_b: Vector2i = j.pos + Vector2i(7, 3)
 	var pid_d := s.dessiner_perimetre(coin_a, coin_b, "bois")
 	var per_d: Dictionary = s.perimetres().get(pid_d, {})
 	verifier(not pid_d.is_empty() and per_d.has("tuiles") and (per_d.tuiles as Array).size() == 15 and int(per_d.richesse) == 5 and s.tuiles_de_perimetre(pid_d).size() == 15, "un rectangle dessiné de 5×3 : quinze tuiles, cinq pins comptés (%d tuiles, richesse %d)" % [(per_d.get("tuiles", []) as Array).size(), int(per_d.get("richesse", 0))])
-	verifier(s.dessiner_perimetre(coin_a, coin_b, "minerai") != pid_d and s.perimetres_de(camp).size() == 2, "un second périmètre dessiné sur la même cellule : deux périmètres")
+	var n_per: int = s.perimetres_de(camp).size()
+	verifier(s.dessiner_perimetre(coin_a, coin_b, "minerai") != pid_d and s.perimetres_de(camp).size() == n_per + 1, "un second périmètre dessiné sur la même cellule : un de plus (%d)" % s.perimetres_de(camp).size())
 	verifier(s.dessiner_perimetre(Vector2i(-50, -50), Vector2i(-40, -40), "bois").is_empty(), "hors d'une cellule revendiquée : refusé")
 	# Le résidentiel et les maisons automatiques (designer, 10 h 25) : un résident assigné, du bois au stock, une chaumière
 	var libre := Vector2i(-1, -1)   # un carré de 8×6 de tuiles libres, à l'ouest ou au sud du joueur

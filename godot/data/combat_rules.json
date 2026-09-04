@@ -1014,13 +1014,22 @@
           "par_tuile_semaine": 0.0,
           "materiau_defaut": "",
           "residentiel": true
+        },
+        "stockage": {
+          "tag": "",
+          "skill": "",
+          "fonction": "oisif",
+          "par_tuile_semaine": 0.0,
+          "materiau_defaut": "",
+          "stockage": true
         }
       },
       "ordre": [
         "bois",
         "minerai",
         "plantes",
-        "residentiel"
+        "residentiel",
+        "stockage"
       ],
       "unites_par_tuile": 1.5,
       "tuiles_max_par_resident": 20,
@@ -1045,6 +1054,11 @@
           0.6,
           0.5,
           0.9
+        ],
+        "stockage": [
+          0.85,
+          0.7,
+          0.35
         ]
       }
     },
@@ -1058,6 +1072,10 @@
         }
       ],
       "max_par_semaine": 2
+    },
+    "stockage": {
+      "_doc": "Un stockage par poste (Population et exploitation, 2026-09-04) : la capacite d'un perimetre de stockage = unites_par_tuile x ses tuiles libres ; la production d'un poste y va, jusqu'a la capacite.",
+      "unites_par_tuile": 10
     }
   },
   "alchimie": {

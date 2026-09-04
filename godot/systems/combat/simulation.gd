@@ -3102,9 +3102,13 @@ func production_de(x: Dictionary) -> Dictionary:
 		var qp := float(tp.get("par_tuile_semaine", 0.5)) * minf(float(per.get("richesse", 0)), float(pcfg.get("tuiles_max_par_resident", 20))) \
 			* regles.skill_factor(niv) * facteur_humeur(x) * float(territoire.get("productivite", 1.0))
 		var np := mini(int(floor(qp)), int(floor(float(per.get("reserve", 0.0)))))
+		var stock: Dictionary = perimetres().get(str(per.get("stockage", "")), {})
+		if stock.is_empty():   # un stockage par poste (designer 2026-09-04) : sans stockage, rien ne se récolte
+			return {"sans_stockage": true, "perimetre": str(per.id)}
+		np = mini(np, place_stockage(str(stock.id)))
 		if np <= 0 or str(per.get("dominant", "")).is_empty():
 			return {}
-		return {"base": str(per.dominant), "forme": "brut", "n": np, "perimetre": str(per.id)}
+		return {"base": str(per.dominant), "forme": "brut", "n": np, "perimetre": str(per.id), "stockage": str(stock.id)}
 	var f: Dictionary = GameData.catalogues.functions.get(str(x.assignation.fonction), {})
 	var prod = f.get("produit")
 	if prod == null:
@@ -3129,6 +3133,9 @@ func _semaine_territoire(e: Dictionary) -> void:
 		var pr := production_de(x)
 		if pr.is_empty():
 			continue
+		if bool(pr.get("sans_stockage", false)):   # un poste sans stockage ne produit pas, et on le dit
+			EventBus.emettre(&"journal", [&"journal.poste_sans_stockage", {"nom": x.name_key}])
+			continue
 		if pr.has("or"):
 			or_prod += int(pr.or)
 			prod_txt.append("%d or" % int(pr.or))
@@ -3139,6 +3146,13 @@ func _semaine_territoire(e: Dictionary) -> void:
 			if pr.has("perimetre") and perimetres().has(str(pr.perimetre)):   # pris sur la réserve du périmètre
 				var per_p: Dictionary = perimetres()[str(pr.perimetre)]
 				per_p.reserve = maxf(0.0, float(per_p.get("reserve", 0.0)) - float(pr.n))
+			if pr.has("stockage") and perimetres().has(str(pr.stockage)):   # et rangé dans son stockage
+				var st: Dictionary = perimetres()[str(pr.stockage)]
+				if not st.has("contenu"):
+					st["contenu"] = {}
+				st.contenu[cle] = int(st.contenu.get(cle, 0)) + int(pr.n)
+				if place_stockage(str(st.id)) <= 0:
+					EventBus.emettre(&"journal", [&"journal.stockage_plein", {"x": st.cellule.x, "y": st.cellule.y}])
 	territoire.tresor = int(territoire.tresor) + or_prod
 	# Ressources naturelles : la régénération efface le bâti de la cellule.
 	for cell in monde.claims.keys():
@@ -3257,6 +3271,7 @@ func retirer_stock(e: Dictionary, cle: String) -> bool:
 			if not o.is_empty():
 				donner(e, o.uid)
 	territoire.stocks.erase(cle)
+	_retirer_des_stockages(cle, n)   # le joueur a pris : les stockages suivent
 	EventBus.emettre(&"journal", [&"journal.stock_retire", {"nom": parts[0], "n": n}])
 	return true
 
@@ -5135,7 +5150,7 @@ func scanner_perimetre(pid: String) -> int:
 	for pos in tuiles_de_perimetre(pid):
 		if not grille.dans(pos):
 			continue
-		if bool(tp.get("residentiel", false)):   # un résidentiel : sa richesse, ce sont ses tuiles libres
+		if bool(tp.get("residentiel", false)) or bool(tp.get("stockage", false)):   # résidentiel, stockage : la richesse, ce sont les tuiles libres
 			if not grille.bloque_passage(pos) and grille.occupant(pos).is_empty():
 				n += 1
 			continue
@@ -5157,6 +5172,10 @@ func scanner_perimetre(pid: String) -> int:
 	per.matieres = matieres
 	per.dominant = dominant
 	per.reserve = float(n) * float(pcfg.get("unites_par_tuile", 1.5))
+	if bool(tp.get("stockage", false)):   # un stockage : sa capacité suit ses tuiles (un stockage par poste, 2026-09-04)
+		per["capacite"] = n * int(_ry().get("stockage", {}).get("unites_par_tuile", 10))
+		if not per.has("contenu"):
+			per["contenu"] = {}
 	return n
 
 
@@ -5210,10 +5229,52 @@ func _prendre_stock_famille(famille: String, n: int) -> bool:
 		territoire.stocks[cle] = int(territoire.stocks[cle]) - pris
 		if int(territoire.stocks[cle]) <= 0:
 			territoire.stocks.erase(cle)
+		_retirer_des_stockages(str(cle), pris)
 		reste -= pris
 		if reste <= 0:
 			break
 	return true
+
+
+## La place qui reste dans un stockage : sa capacité moins ce qu'il contient.
+func place_stockage(pid: String) -> int:
+	var st: Dictionary = perimetres().get(pid, {})
+	if st.is_empty():
+		return 0
+	var total := 0
+	for cle in st.get("contenu", {}).keys():
+		total += int(st.contenu[cle])
+	return maxi(0, int(st.get("capacite", 0)) - total)
+
+
+## Désigner le stockage d'un périmètre de production ("" pour aucun) : un stockage par poste (designer 2026-09-04).
+func assigner_stockage(pid: String, pid_stockage: String) -> bool:
+	if not perimetres().has(pid):
+		return false
+	if pid_stockage.is_empty():
+		perimetres()[pid].erase("stockage")
+		return true
+	var st: Dictionary = perimetres().get(pid_stockage, {})
+	if st.is_empty() or not bool(_ry().get("perimetres", {}).get("types", {}).get(str(st.type), {}).get("stockage", false)):
+		return false
+	perimetres()[pid]["stockage"] = pid_stockage
+	return true
+
+
+## Ce qu'on prend au stock du territoire sort aussi des stockages qui le tenaient.
+func _retirer_des_stockages(cle: String, n: int) -> void:
+	var reste := n
+	for pid in perimetres().keys():
+		var st: Dictionary = perimetres()[pid]
+		if not st.has("contenu") or int(st.contenu.get(cle, 0)) <= 0:
+			continue
+		var pris := mini(reste, int(st.contenu[cle]))
+		st.contenu[cle] = int(st.contenu[cle]) - pris
+		if int(st.contenu[cle]) <= 0:
+			st.contenu.erase(cle)
+		reste -= pris
+		if reste <= 0:
+			return
 
 
 ## Les maisons automatiques (Population et exploitation, 2026-09-04) : au passage de semaine, chaque résident
