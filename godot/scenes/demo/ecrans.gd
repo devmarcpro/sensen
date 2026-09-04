@@ -2175,7 +2175,13 @@ func _construire_assigner(j: Dictionary) -> void:
 		if fid in ["aventurier", "dirigeant", "oisif"]:
 			continue
 		var prod = f.get("produit")
-		var ptxt: String = tr("ui.assigner.rien") if prod == null else (("%s or/unité" % str(prod.or)) if prod.has("or") else str(prod.get("item", prod.get("materiau", ""))))
+		var ptxt: String = tr("ui.assigner.rien")   # ce que la fonction produit : de l'or par unité, ou une matière nommée (traduit — vu « or/unité » en anglais, 2026-09-04)
+		if prod != null and prod.has("or"):
+			ptxt = tr("ui.assigner.or_unite").format({"n": str(prod.or)})
+		elif prod != null:
+			var base_p := str(prod.get("item", prod.get("materiau", "")))
+			var fiche_p: Dictionary = GameData.catalogues.materials.get(base_p, GameData.catalogues.items.get(base_p, {}))
+			ptxt = tr(str(fiche_p.get("name_key", base_p)))
 		liste.add_item(tr(f.name_key))
 		entrees.append({"kind": "fonction", "fonction": fid, "texte": tr("ui.assigner.fonction").format({"fonction": tr(f.name_key), "produit": ptxt, "rendement": str(f.get("rendement_base", 0))})})
 	for pid in main.sim.perimetres().keys():   # les périmètres de récolte du territoire (Population et exploitation, 2026-09-04)

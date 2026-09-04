@@ -793,6 +793,7 @@ ui.aide.armes,1-7: switch weapon ({ticks} ticks) — {liste}
 ui.aide.capacites,I: inventory · F: workshop · C: character sheet (Esc closes) · M: world map (click a neighbouring cell: claim it) · K: territory · B: breeding register · V: tame · N: minimap zoom (Shift+N: hide) · F6 save · F7 load · F1-F3: aim an ability then click (Esc: cancel) · P: draw a perimeter (at camp) — {liste}
 ui.assigner.fonction,"{fonction} · produces: {produit} · base yield {rendement}"
 ui.assigner.rien,nothing
+ui.assigner.or_unite,"{n} gold per unit"
 ui.assigner.titre,"ASSIGN {nom} — choose their role"
 ui.atelier,=== WORKSHOP (F to close) — number: craft ===
 ui.atelier.ingredient,"      {coche} {nom} — optional ingredient (Enter: toggle)"

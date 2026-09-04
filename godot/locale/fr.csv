@@ -1105,6 +1105,7 @@ ui.ecran.assigner,Assigner ici (X)
 ui.assigner.titre,"ASSIGNER {nom} — choisis sa fonction"
 ui.assigner.fonction,"{fonction} · produit : {produit} · rendement de base {rendement}"
 ui.assigner.rien,rien
+ui.assigner.or_unite,"{n} or par unité"
 role.base,base
 role.habitation,habitation
 role.champs,champs
