@@ -26,3 +26,7 @@ Les puits d'or qui contrebalancent la richesse territoriale — avec des malus p
 - **Dépend de** : [[Économie — sources et puits]], [[Barèmes économiques]], [[Boutique passive]], [[Population et exploitation]]
 - **Alimente** : [[Défense et raids]], [[Habitat des PNJ]]
 - **Voir aussi** : [[Abstraction hors-site]], [[Halls de guilde]], [[Stations de transformation]], [[Quêtes et guildes]], [[Écrans d'interface]], [[Schéma royaume]]
+
+> [!important] 2026-09-04, 16 h 45 — la grande base sur cinquante-deux semaines : deux écarts avec la note
+> `sonde_grande_base --semaines 52` : la base se vide en trente-deux semaines (attendu, point 1 d'[[À juger — parcours de jeu]]), mais **l'humeur descendait à −43** et **les partants restaient debout dans le résidentiel** (vingt et un « civils » plantés là à la fin). Deux écarts de code avec la note : (1) l'humeur n'était plus recalculée tant que la dette durait, si bien que le « −5 » du palier s'empilait chaque semaine — la note dit une **humeur générale −5**, un état ; l'humeur est désormais recalculée chaque semaine (logement, faim) puis le malus de dette s'applique une fois : en dette, un résident sans toit ni repas reste à 30, pas à moins l'infini. (2) Le palier « 1 PNJ peut **quitter le territoire** » ne faisait que retirer l'assignation : le partant quitte la fenêtre pour de bon (il n'est plus dans la simulation ; son lit se libère), et le journal le dit.
+

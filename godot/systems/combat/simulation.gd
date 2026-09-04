@@ -2028,6 +2028,19 @@ func residents() -> Array:
 	return res
 
 
+## Un résident quitte le territoire (palier de dette, Entretien et taxes) : il sort de la fenêtre et de la simulation,
+## son lit se libère. Pas un civil planté là : la grande base en comptait vingt et un debout dans le résidentiel.
+func _quitter_le_territoire(x: Dictionary) -> void:
+	x.erase("assignation")
+	x.erase("lit")
+	x.camp = "civil"
+	if entites.has(x.id):
+		grille.liberer(x.pos)
+		ordre.erase(x.id)
+		entites.erase(x.id)
+	EventBus.emettre(&"journal", [&"journal.quitte_territoire", {"nom": x.name_key}])
+
+
 ## Le facteur d'humeur d'un résident (Population et exploitation) : humeur/100 × 1,5, borné [0,4 ; 1,2].
 func facteur_humeur(x: Dictionary) -> float:
 	var b: Array = _ry().facteur_humeur_bornes
@@ -3205,6 +3218,7 @@ func _semaine_territoire(e: Dictionary) -> void:
 		territoire.tresor = 0
 		territoire.semaines_dette = int(territoire.semaines_dette) + 1
 	var pal: Dictionary = ry.dette_paliers
+	_recalculer_humeurs()   # chaque semaine (Habitat des PNJ) — en dette aussi : le palier est un état, pas une pente (2026-09-04)
 	if int(territoire.semaines_dette) >= int(pal.humeur[0]):
 		for x in residents():
 			x.humeur = int(x.get("humeur", ry.humeur_base)) + int(pal.humeur[1])
@@ -3217,11 +3231,8 @@ func _semaine_territoire(e: Dictionary) -> void:
 		for x in residents():
 			if relation_de(x, e) < relation_de(moins_fidele, e):
 				moins_fidele = x
-		moins_fidele.erase("assignation")
-		moins_fidele.camp = "civil"
+		_quitter_le_territoire(moins_fidele)   # il part pour de bon (Entretien et taxes : « quitter le territoire », 2026-09-04)
 		EventBus.emettre(&"journal", [&"journal.dette_palier", {"texte": "dette.depart"}])
-	if int(territoire.semaines_dette) == 0:
-		_recalculer_humeurs()
 	# Taxe de guilde sur les gains de quêtes de la semaine (Entretien et taxes).
 	var gains := int(territoire.get("gains_quetes", 0))
 	if gains > 0:

@@ -3313,3 +3313,4 @@ tag.station,station
 tag.trame,trame
 tag.vetement,vêtement
 tag.viande,viande
+journal.quitte_territoire,{nom} quitte le territoire

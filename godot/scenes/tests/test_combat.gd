@@ -158,6 +158,7 @@ func _ready() -> void:
 	_lancer("test_engager_et_migrants")
 	_lancer("test_perimetres")
 	_lancer("test_faim_des_residents")
+	_lancer("test_dette_paliers")
 	_lancer("test_classes_des_pnj")
 	_lancer("test_composer_capacites")
 	_lancer("test_charges_de_modules")
@@ -1967,7 +1968,7 @@ func test_territoire() -> void:
 	# La semaine : production en stock, entretien 10 or ; sans trésor → dette et palier humeur.
 	s._semaine_territoire(j)
 	verifier(int(s.territoire.stocks.get("chene|planche", 0)) > 0 and int(s.territoire.dette) == 10 and int(s.territoire.semaines_dette) == 1, "semaine 1 : planches en stock, dette 10 or")
-	verifier(int(v.humeur) == 45 - 5, "palier 1 : humeur −5")
+	verifier(int(v.humeur) == 60 - 15 - 10 - 5, "palier 1 : humeur recalculée (60, sans toit −15, sans repas −10) puis le −5 de la dette = %d" % int(v.humeur))
 	s.deposer(j, 40)
 	s._semaine_territoire(j)
 	verifier(int(s.territoire.dette) == 0 and int(s.territoire.tresor) == 40 - 20, "trésor : la dette et l'entretien sont réglés (reste %d)" % int(s.territoire.tresor))
@@ -3946,6 +3947,33 @@ func test_classes_des_pnj() -> void:
 	verifier(not (GameData.entree("functions", "aventurier").classes_possibles as Array).any(func(c: String) -> bool: return bool(GameData.entree("classes", c).get("cachee", false))), "aucun pool ne contient de classe cachée")
 	for f in ["eleveur", "cuisinier", "couturier", "transporteur"]:
 		verifier(GameData.catalogues.functions.has(f), "la fonction %s du catalogue de la note existe en données" % f)
+
+
+## Les paliers de dette (Entretien et taxes, 2026-09-04) : l'humeur est un état (−5, pas une pente), et le partant
+## quitte le territoire pour de bon.
+func test_dette_paliers() -> void:
+	var s := Simulation.new(31)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var a: Dictionary = s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
+	var b: Dictionary = s.ajouter("villageois", j.pos + Vector2i(-1, 0), "ia")
+	a.camp = "joueur"
+	b.camp = "joueur"
+	verifier(s._assigner(j, a.id, "oisif", 0) and s._assigner(j, b.id, "oisif", 0), "deux résidents")
+	var ry: Dictionary = s.regles.r.royaume
+	s.territoire.tresor = 0
+	s.territoire.stocks.clear()
+	var attendu := int(ry.humeur_base) + int(ry.sans_logement) + int(ry.get("faim_pnj", -10)) + int(ry.dette_paliers.humeur[1])
+	var n_depart := int(ry.dette_paliers.depart[0])
+	for k in n_depart - 1:
+		s._semaine_territoire(j)
+	verifier(int(s.territoire.semaines_dette) == n_depart - 1 and s.residents().size() == 2, "%d semaines de dette : les deux sont encore là" % (n_depart - 1))
+	verifier(int(a.humeur) == attendu and int(b.humeur) == attendu, "l'humeur en dette est un état : %d (= base %d − sans toit − faim − palier), pas une pente" % [int(a.humeur), int(ry.humeur_base)])
+	s._semaine_territoire(j)
+	verifier(s.residents().size() == 1, "au palier de départ, un résident est parti")
+	var parti: Dictionary = a if not s.entites.has(a.id) else b
+	verifier(not s.entites.has(parti.id) and not parti.has("assignation") and s.grille.occupant(parti.pos) != parti.id, "le partant a quitté le territoire : plus dans la simulation ni sur la grille")
+	s.monde.fermer()
 
 
 func test_faim_des_residents() -> void:
