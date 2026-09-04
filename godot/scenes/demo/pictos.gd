@@ -448,7 +448,7 @@ const ALIAS_OBJET := {"sabre": "epee", "rapiere": "epee", "stylet": "dague", "co
 	"hache_d_armes": "hache", "hachette_de_jet": "hache", "marteau_de_guerre": "masse", "fleau": "masse",
 	"javelot": "lance", "pique": "lance", "hallebarde": "lance", "arc_long": "arc", "arbalete": "arc",
 	"baguette": "baton_magique", "sceptre": "baton_magique", "orbe": "gemme", "talisman": "amulette",
-	"grimoire_de_main": "grimoire", "pavois": "bouclier", "cor": "instrument", "flute": "instrument",
+	"grimoire_de_main": "grimoire", "pavois": "bouclier", "dos": "cuirasse", "cor": "instrument", "flute": "instrument",
 	"luth": "instrument", "vielle": "instrument", "cymbales": "tambour"}
 
 
@@ -577,6 +577,16 @@ static func dessiner_objet(ci: CanvasItem, it: Dictionary, r: Rect2) -> void:
 			ci.draw_colored_polygon(PackedVector2Array([p.call(3, 3), p.call(7, 3), p.call(6.5, 9), p.call(3.5, 9)]), c)
 			ci.draw_line(p.call(4, 3), p.call(4.5, 0.8), sombre, 1.2)
 			ci.draw_line(p.call(6, 3), p.call(6.2, 0.8), sombre, 1.2)
+		"bottes":   # une botte de profil : la tige et le pied
+			ci.draw_rect(Rect2(p.call(3, 2), Vector2(u * 3, u * 4.5)), c)
+			ci.draw_rect(Rect2(p.call(3, 6.2), Vector2(u * 5, u * 2)), c)
+			ci.draw_rect(Rect2(p.call(3, 2), Vector2(u * 3, u * 4.5)), sombre, false, 1.0)
+			ci.draw_rect(Rect2(p.call(3, 6.2), Vector2(u * 5, u * 2)), sombre, false, 1.0)
+		"brassards":   # deux manchons, l'un sur l'autre
+			ci.draw_rect(Rect2(p.call(2.5, 2), Vector2(u * 5, u * 2.4)), c)
+			ci.draw_rect(Rect2(p.call(2.5, 5.6), Vector2(u * 5, u * 2.4)), c)
+			ci.draw_rect(Rect2(p.call(2.5, 2), Vector2(u * 5, u * 2.4)), sombre, false, 1.0)
+			ci.draw_rect(Rect2(p.call(2.5, 5.6), Vector2(u * 5, u * 2.4)), sombre, false, 1.0)
 		"baton":   # une hampe nue, deux virons aux bouts
 			ci.draw_line(p.call(1.5, 8.5), p.call(8.5, 1.5), Color(0.55, 0.4, 0.2), 2.2)
 			ci.draw_line(p.call(1.2, 8.8), p.call(2.2, 7.8), c, 3.0)
