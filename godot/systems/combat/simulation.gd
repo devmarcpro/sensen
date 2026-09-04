@@ -8169,6 +8169,8 @@ func en_combat(e: Dictionary) -> bool:
 ## Fait agir la prochaine entité de l'horloge `nom`. Retourne false si l'horloge est bloquée
 ## sur une entité contrôlée qui attend une intention (réfléchir est gratuit).
 func pas(nom: String) -> bool:
+	if nom != "monde" and not combats.has(nom):   # un combat dissous par le pas précédent (le client itère sur une copie des noms)
+		return false
 	var h: Horloge = horloge_monde if nom == "monde" else combats[nom].horloge
 	var e := _prochaine(nom)
 	# Les bombes de cette horloge dues avant l'entité suivante explosent d'abord (Explosions).

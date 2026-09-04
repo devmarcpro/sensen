@@ -409,6 +409,12 @@ avec un représentant par classe mère, même graine : voir le tableau dans
    sentinelle, érudit et meneur ne se distinguent pas par l'arme, alors que les six voies ont chacune
    six armes depuis le 3 septembre. C'est une décision de contenu, pas une mesure.
 
+4. **Refaite une quatrième fois le 4 septembre au soir, après un bug d'horloge** : les monstres qui ouvraient
+   eux-mêmes le combat restaient figés (voir [[Boucle de tick]]), donc les trois passes précédentes les
+   sous-estimaient. La quatrième passe est dans l'[[Audit d'équilibrage — 2026-09-03]] : la lecture ne change
+   pas (le kit de départ ne tue pas au premier étage, sauf l'épée et la sarbacane), mais les chiffres de coups
+   reçus et de morts d'avant ne valent plus rien.
+
 ## Les 36 armes relues contre leurs identités (2026-09-04)
 
 Le designer a demandé si les six armes par voie « correspondent bien à leurs attributs et sont toutes

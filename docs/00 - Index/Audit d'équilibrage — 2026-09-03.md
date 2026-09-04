@@ -138,6 +138,22 @@ L'écart reste modéré — 21 % au-dessus de l'épée — mais il va dans le m�
 >
 > Deux extrêmes qui méritaient un œil dans la première matrice (avec la lance) : **Le Sceau** ne prend aucun coup et descend (les glyphes tiennent les ennemis à distance) ; **L'Engrenage** prend cent dégâts pour un seul tué et meurt deux fois — il part avec une arme de tir et une tourelle, et le robot se bat probablement au contact avec. C'est peut-être le robot (il ne sait pas prendre de la distance), peut-être la classe. Consigné dans [[À juger — parcours de jeu]].
 
+> [!warning] 2026-09-04, 21 h 45 — les trois matrices ci-dessus ont été jouées avec des monstres à moitié figés
+> Un bug d'horloge trouvé le soir même ([[Boucle de tick]]) : un monstre qui **ouvrait lui-même** le combat (il voit le joueur, l'engage, agit) gardait un compteur de l'horloge du monde, et ne rejouait plus jamais dans le combat — seul un monstre engagé par l'attaque du joueur se battait vraiment. Les coups reçus et les morts des matrices ci-dessus sont donc **sous-estimés** ; les coups portés et les tués, surestimés (frapper un monstre figé ne coûte rien). Le robot à deux compagnons, même graine, passe de 11 combats, 8 tués et 3 morts avant la correction à 5 combats, 1 tué et 0 mort après : les monstres se défendent.
+>
+> **Quatrième passe, après la correction** (mêmes réglages : même graine, 2 500 images, `--etages 2 --sorts 3 --equiper 3`, kit de la voie gardé) :
+>
+> | classe mère | représentant | arme de départ | combats | coups portés | coups reçus (dégâts) | tués | morts |
+> |---|---|---|---|---|---|---|---|
+> | guerrier | L'Écarlate | épée en fonte (0,60) | 1 | 26 | 22 (46) | 2 | 0 |
+> | érudit | L'Engrenage | arc en plomb (0,48) | 1 | 18 | 0 | 0 | 0 |
+> | mage | La Paume | bâton magique en cuivre (0,54) | 1 | 35 | 0 | 0 | 0 |
+> | sentinelle | Le Sceau | lance en aluminium (0,56) | 1 | 9 | 0 | 0 | 0 |
+> | érudit | Le Creuset | sarbacane en étain (0,63) | 3 | 33 | 18 (41) | 2 | 0 |
+> | meneur | La Balance | luth en manganèse (0,60) | 1 | 23 | 15 (29) | 0 | 0 |
+>
+> Ce que la quatrième passe dit de neuf : quatre classes sur six passent **tout le budget dans un seul combat** — La Paume frappe trente-cinq fois une banshee à 1 dégât le coup sans la tuer ; L'Engrenage pique un scorpion à 1-3 ; Le Sceau abandonne une banshee « à distance 1, portée (2, 2) » parce que sa lance ne frappe pas au contact et que le robot ne recule pas. Les « 0 coup reçu » de ces trois-là ne sont plus un artefact d'horloge : vérifié à la sonde (`capture --donjon --creature banshee --dump`), une banshee posée à côté du joueur bouge et joue sur l'horloge du combat ; mais ses deux actions sont un hurlement et un cri de ralliement, et le scorpion pique au poison — le robot ne compte ni la peur ni le poison comme des coups. La lecture qui reste : **le kit de départ ne tue pas au premier étage**, sauf l'épée et la sarbacane, et le robot ne sait ni reculer avec une lance ni fuir une banshee. Les deux premières sont des décisions de contenu ; la troisième est une limite de la mesure.
+
 ## Liens
 
 - **Détaille** : [[À juger — parcours de jeu]], [[Vers la production]]
