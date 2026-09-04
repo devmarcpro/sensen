@@ -1138,15 +1138,24 @@ func _construire_gestion(j: Dictionary) -> void:
 			for x_r in sim.residents():
 				if str(x_r.assignation.get("perimetre", "")) == pid_c or str(x_r.assignation.get("residence", "")) == pid_c:
 					n_res += 1
-			var st_txt: String = ""
+			var st_txt: String = ""   # court sur la ligne (la colonne coupe à quarante signes), entier dans le détail
+			var st_long: String = ""
 			if bool(tp_c.get("stockage", false)):
 				st_txt = tr("ui.gestion.stockage_capacite").format({"reste": sim.place_stockage(pid_c), "capacite": int(per_c.get("capacite", 0))})
+				st_long = st_txt
 			elif not bool(tp_c.get("residentiel", false)):
 				var st_id: String = str(per_c.get("stockage", ""))
-				st_txt = tr("ui.gestion.stockage_vers").format({"cellule": "(%d,%d)" % [sim.perimetres()[st_id].cellule.x, sim.perimetres()[st_id].cellule.y]}) if sim.perimetres().has(st_id) else tr("ui.gestion.sans_stockage")
+				if sim.perimetres().has(st_id):
+					var cs: Vector2i = sim.perimetres()[st_id].cellule
+					st_txt = tr("ui.gestion.stockage_vers_court").format({"cellule": "(%d,%d)" % [cs.x, cs.y]})
+					st_long = tr("ui.gestion.stockage_vers").format({"cellule": "(%d,%d)" % [cs.x, cs.y]})
+				else:
+					st_txt = tr("ui.gestion.sans_stockage_court")
+					st_long = tr("ui.gestion.sans_stockage")
 			liste.add_item(tr("ui.gestion.perimetre").format({"type": tr("perimetre.%s.name" % str(per_c.type)), "richesse": int(per_c.richesse), "reserve": int(per_c.reserve), "dominant": tr(GameData.entree("materials", str(per_c.dominant)).get("name_key", "ui.assigner.rien")) if not str(per_c.dominant).is_empty() else tr("ui.assigner.rien"), "n": n_res, "stockage": st_txt}))
 			var detail_p: String = tr("ui.gestion.perimetre_detail").format({"reserve": int(per_c.reserve), "dominant": tr(GameData.entree("materials", str(per_c.dominant)).get("name_key", "ui.assigner.rien")) if not str(per_c.dominant).is_empty() else tr("ui.assigner.rien")})
-			entrees.append({"kind": "perimetre", "id": pid_c, "cellule": cell, "texte": detail_p + "
+			entrees.append({"kind": "perimetre", "id": pid_c, "cellule": cell, "texte": (st_long + "
+" if not st_long.is_empty() else "") + detail_p + "
 " + tr("ui.gestion.perimetre_aide")})
 	for x in sim.residents():
 		var poste: Vector2i = x.get("poste", x.pos)

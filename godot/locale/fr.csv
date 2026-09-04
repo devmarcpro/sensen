@@ -3216,7 +3216,7 @@ journal.renvoye,{nom} est renvoyé : il redevient villageois
 perimetre.bois.name,bois
 perimetre.minerai.name,minerai
 perimetre.plantes.name,plantes sauvages
-ui.gestion.perimetre,"  {type} : {richesse} tuiles · {n} assigné(s) · {stockage}"
+ui.gestion.perimetre,"  {type} · {stockage} · richesse {richesse} · {n} assigné(s)"
 ui.gestion.perimetre_aide,P : changer le type · S : son stockage (à tour de rôle) · assigne des résidents dessus depuis leur fiche
 ui.gestion.perimetre_touche,P : un périmètre de récolte sur cette cellule (bois → minerai → plantes → aucun)
 ui.assigner.perimetre,"{fonction} · périmètre {type} ({x},{y}) · {richesse} tuiles"
@@ -3233,10 +3233,12 @@ journal.maison_pas_de_materiaux,Pas assez de matériaux au stock pour loger {nom
 perimetre.stockage.name,stockage
 ui.gestion.stockage_capacite,place {reste}/{capacite}
 ui.gestion.stockage_vers,stockage en {cellule}
-ui.gestion.sans_stockage,SANS STOCKAGE (ne produit pas)
+ui.gestion.sans_stockage,SANS STOCKAGE : le poste ne produit pas tant qu'aucun stockage ne lui est désigné (S)
+ui.gestion.sans_stockage_court,SANS STOCKAGE
+ui.gestion.stockage_vers_court,→ {cellule}
 journal.poste_sans_stockage,{nom} n'a pas de stockage où ranger sa récolte : rien cette semaine
 journal.stockage_plein,"Le stockage en ({x},{y}) est plein : le surplus est perdu"
-ui.gestion.perimetre_detail,"réserve {reserve} · matière dominante : {dominant}"
+ui.gestion.perimetre_detail,"richesse = tuiles de ressource du périmètre · réserve {reserve} · matière dominante : {dominant}"
 ui.feuille.grilles,Grilles de composition
 ui.feuille.grille,  {nom} ({cases} cases){active}
 ui.feuille.grille_active, · celle où l'on compose
