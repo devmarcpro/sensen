@@ -6,7 +6,7 @@
       "cible_perdue": 1.0
     },
     "attaquer": {
-      "acculee": 1.5
+      "acculee": 2.5
     },
     "poursuivre": {
       "cible_visible": 0.6,

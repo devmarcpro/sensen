@@ -12,10 +12,24 @@ var echecs := 0
 var _filtre := ""
 
 
+var _lances: Array[String] = []   # ce que la suite a lancé : un test défini mais absent de la liste est un échec (2026-09-04)
+
+
 func _lancer(nom: String) -> void:
+	_lances.append(nom)
 	if not _filtre.is_empty() and not nom.contains(_filtre):
 		return
 	call(nom)
+
+
+## La liste ci-dessous est écrite à la main : quatre tests neufs et un ancien (test_brouillard) n'y figuraient pas, et
+## « --seul » les cherchait dans la liste — il ne prouvait rien, la suite disait « tout passe » sans les jouer. Un test
+## défini et jamais lancé compte désormais comme un échec.
+func _verifier_tous_lances() -> void:
+	for m in get_method_list():
+		var nom := str(m.name)
+		if nom.begins_with("test_") and not (nom in _lances):
+			verifier(false, "test défini mais jamais lancé : %s" % nom)
 
 
 func _ready() -> void:
@@ -198,6 +212,12 @@ func _ready() -> void:
 	_lancer("test_progression")
 	_lancer("test_expedition")
 	_lancer("test_arenes_autonomes")
+	_lancer("test_brouillard")
+	_lancer("test_bete_engage_sur_son_horloge")
+	_lancer("test_cri_de_ralliement")
+	_lancer("test_routine_civile")
+	_lancer("test_proie_n_engage_pas")
+	_verifier_tous_lances()
 	Monde.fermer_tous()   # aucun thread de pré-génération ne doit survivre aux autoloads
 	for nom_s in ["test_terrain", "test_sensen", "test_sensen2", "test_graine", "test_partout", "test_partout2", "test_auto"]:
 		Sauvegarde.effacer(nom_s)   # la suite nettoie derrière elle : l'écran Charger ne liste que de vraies parties

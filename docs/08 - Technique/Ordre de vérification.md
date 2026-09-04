@@ -81,3 +81,6 @@ Un critère de performance à valider avant de passer à l'étape suivante. **Un
 - **Dépend de** : [[Optimisation — principes]], [[Budgets de performance]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]
 - **Voir aussi** : [[Décision — Budgets et critères de performance tactiques]], [[Contraintes permanentes]], [[Génération procédurale — performance]], [[Entités et pathfinding — performance]], [[Réseau et sauvegarde — performance]], [[LOD de simulation]]
+
+> [!bug] 2026-09-04, 23 h 15 — cinq tests définis que la suite ne lançait jamais, et un « --seul » qui ne prouvait rien
+> La suite `test_combat.tscn` lance ses tests par une **liste écrite à la main** (`_lancer("test_…")`), pas par découverte. Quatre tests écrits le soir même (`test_bete_engage_sur_son_horloge`, `test_cri_de_ralliement`, `test_routine_civile`, `test_proie_n_engage_pas`) et un ancien (`test_brouillard`, 27 août) n'y figuraient pas ; `--seul <fragment>` filtre cette même liste, si bien que « --seul cri_de_ralliement » affichait « TESTS : tout passe » en ne jouant **que** la vérification des données. Vu en comparant `func test_` (177) et `_lancer(` (172). Désormais `_verifier_tous_lances` compte comme un échec tout `test_*` défini et absent de la liste, et les cinq sont lancés. Leçon d'outillage : un « ok 1 » après un `--seul` est le signe que rien n'a tourné.

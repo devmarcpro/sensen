@@ -920,6 +920,8 @@ func _maj_noeuds(delta: float = 0.0) -> void:
 func _dessiner_occulteurs(n: Paperdoll) -> void:
 	var g := sim.grille
 	var e: Dictionary = n.e
+	if not g.dans(e.pos):   # un paperdoll libéré au changement de grille dessine encore une fois, avec une position de l'autre grille (GIF des compagnons, 2026-09-04)
+		return
 	var he := g.h(e.pos)
 	var base := _ecran(e.pos, he)
 	for d in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 0), Vector2i(0, 2), Vector2i(2, 1), Vector2i(1, 2)]:
