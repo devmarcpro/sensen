@@ -14,5 +14,6 @@
   "effet": {
     "portee_min": 1
   },
-  "style": "neutre"
+  "style": "neutre",
+  "famille_key": "famille.portee.name"
 }

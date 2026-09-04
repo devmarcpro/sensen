@@ -27,5 +27,6 @@
   },
   "style": "controle",
   "stat": "dexterite",
-  "cout_sang_froid": 16
+  "cout_sang_froid": 16,
+  "famille_key": "famille.controle.name"
 }

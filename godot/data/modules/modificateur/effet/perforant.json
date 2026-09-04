@@ -14,5 +14,6 @@
   "effet": {
     "ignore_armure": true
   },
-  "style": "neutre"
+  "style": "neutre",
+  "famille_key": "famille.effet.name"
 }

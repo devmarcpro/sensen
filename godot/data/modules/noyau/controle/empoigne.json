@@ -22,5 +22,6 @@
   "portee": null,
   "style": "controle",
   "stat": "dexterite",
-  "cout_sang_froid": 12
+  "cout_sang_froid": 12,
+  "famille_key": "famille.controle.name"
 }

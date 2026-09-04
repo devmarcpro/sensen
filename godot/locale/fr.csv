@@ -2936,3 +2936,269 @@ ui.composeur.grille_arme,grille de l’arme tenue
 ui.composeur.etapes,Étapes
 functionality.pique.name,Pique
 item.craft_flechettes.name,Fléchettes
+module.achevement.desc,la cible est basse
+module.affinite.desc,la cible porte l'élément désigné
+module.entravee.desc,la cible ne peut pas se déplacer
+module.escorte.desc,la cible touche un de tes alliés
+module.isolement.desc,aucun allié adjacent à la cible
+module.marquee.desc,"la cible porte une **Marque** : **+2 dés**, et la marque est **consommée**"
+module.prise.desc,la cible est saisie ou en lévitation
+module.corruption.desc,l'arme qui aime le danger ([[Niveau de danger]])
+module.heure.desc,selon le [[Cycle jour-nuit et sommeil]]
+module.intemperie.desc,selon la [[Météo]] — l'orage nourrit la Foudre
+module.terroir.desc,le lieu porte l'élément du noyau
+module.chaine_pleine.desc,les 5 segments sont posés
+module.dernier_souffle.desc,le lanceur est bas
+module.ombre.desc,le lanceur est Dissimulé
+module.pleine_garde.desc,le lanceur tient une posture
+module.resonance.desc,le segment désigné est posé dans la jauge
+module.alignement.desc,"la cible est **alignée** avec le lanceur — même ligne, même colonne ou même diagonale : **+1 dé**"
+module.angle_mort.desc,frappe de dos ou de flanc — le plus gros bonus du jeu
+module.champ_libre.desc,rien entre le lanceur et la cible
+module.contrebas.desc,le lanceur est plus bas — la portée gagne à monter
+module.pied_ferme.desc,le lanceur n'a pas bougé depuis 20 ticks
+module.surplomb.desc,le lanceur est plus haut que la cible
+module.a_l_impact.desc,la charge qui suit part quand le noyau précédent touche
+module.accord.desc,la charge part quand un **segment de chaîne** se pose
+module.curee.desc,la charge part **à la mise à mort**
+module.derobade.desc,la charge part **quand le porteur esquive**
+module.ouverture.desc,la charge part **au premier contact du combat**
+module.parade.desc,la charge part **quand le porteur pare** ([[Garde en posture]])
+module.riposte.desc,la charge part **quand le porteur est touché**
+module.testament.desc,"la charge part **quand le porteur tombe** — gratuite, il ne paiera pas les ticks"
+module.veille.desc,la charge part quand un **allié** passe sous 40 % PV
+module.cadence.desc,la charge part **tous les N emplois** de la capacité (2 à 5)
+module.meche.desc,"la charge part après **N ticks** (10 à 50, réglable à l'assemblage)"
+module.sceau.desc,"pose la charge au sol : elle part quand une entité **entre** sur la tuile, jusqu'à 100 ticks"
+module.anneau.desc,"tout autour d'une tuile, **sans toucher le centre**"
+module.arc.desc,"le **revers** de la cible : les tuiles à distance exacte, du côté opposé au lanceur"
+module.carre.desc,"zone pleine, centre compris — **friendly fire intégral**"
+module.chemin.desc,suit le trajet du lanceur : tout ce qu'il longe est touché
+module.colonne.desc,toute la **hauteur** d'une tuile — touche ce qui vole et ce qui est en contrebas
+module.cone.desc,"s'élargit avec la distance, 3 tuiles de profondeur"
+module.couronne.desc,les tuiles a distance exacte du centre — **epargne le centre et ses voisins**
+module.croix.desc,les quatre axes depuis une tuile
+module.damier.desc,un carré **une case sur deux** — couvre le terrain sans l'enfermer : on peut encore y marcher
+module.diagonale.desc,les quatre obliques — le complément de la Croix
+module.ligne.desc,traverse tout sur 4 tuiles en ligne droite
+module.mur.desc,une ligne **perpendiculaire** à la visée — barre un couloir
+module.nuee.desc,"4 tuiles **aléatoires** dans le rayon — imprévisible, bon marché"
+module.point.desc,"une seule cible — gratuite en ticks, la forme par défaut"
+module.sillage.desc,les 3 tuiles **derrière** la cible — pour ce qui traverse
+module.soi.desc,sur soi-même — **rend 2 ticks**
+module.tuile.desc,"au sol, sans cible vivante — la forme des glyphes et des zones"
+module.vague.desc,large et courte : tout le devant sur 2 tuiles de profondeur
+module.contagion.desc,les **statuts** du noyau se propagent aux ennemis adjacents des cibles touchées
+module.focalisation.desc,annule la **dilution par la surface** : la forme large frappe à pleine puissance
+module.meute.desc,la charge s'applique aussi depuis la position de ton **compagnon** ([[Compagnons]])
+module.miroir.desc,applique aussi la charge à la position **symétrique** par rapport au lanceur
+module.partage.desc,la charge s'applique **aussi au lanceur** — pour les soins et les défenses
+module.propagation.desc,"se propage **de proche en proche** tant qu'elle touche, −1 dé par pas"
+module.ricochet.desc,"la charge saute à **1d3 cibles proches**, −1 dé par saut"
+module.salve.desc,"lance **3 charges simultanées** à 60 %, réparties dans la forme"
+module.alternance.desc,alterne entre les **deux noyaux suivants** à chaque emploi
+module.boucle.desc,"rejoue tant qu'il reste de la ressource, **−1 dé** cumulé par tour de boucle"
+module.echo.desc,rejoue la charge à **50 %** après 20 ticks
+module.repetition.desc,"rejoue la charge 2 fois, chacune à **−1 dé**"
+module.sans_trace.desc,la capacité **ne révèle pas** son lanceur — reste Dissimulé après le coup
+module.silencieux.desc,"aucun bruit : ne rompt pas Dissimulé, n'alerte pas les voisins"
+module.detonation.desc,"×2 dégâts contre les **invocations, tourelles, bombes et barrières**"
+module.emprise.desc,toute cible touchée ne peut plus se déplacer 10 ticks
+module.erosif.desc,"**érosion** : un quart des dégâts infligés rogne aussi les **PV max** de la cible, jusqu'à la fin du combat"
+module.gravite.desc,toute cible touchée est **attirée** d'une tuile vers le centre
+module.ligature.desc,les invocations et tourelles alliées dans la forme **rejouent** leur attaque
+module.perforant.desc,ignore intégralement la réduction d'armure de zone
+module.persistance.desc,toutes les durées du noyau ×2
+module.remanence.desc,la zone touchée **reste active** 30 ticks et réapplique à l'entrée
+module.repulsion.desc,toute cible touchée est **repoussée** d'une tuile
+module.vampirique.desc,le lanceur récupère 50 % des dégâts infligés
+module.amorce.desc,la capacité pose **un segment de chaîne de plus** ([[Jauge de chaîne Wu Xing]]) — rare
+module.prisme.desc,le noyau prend l'élément qui **domine** la cible ([[Domination et multiplicateurs]])
+module.purete.desc,"concentre le vecteur : +40 % de l'élément dominant, retire les autres"
+module.transmutation.desc,"convertit l'élément du noyau vers le feu — l'ancêtre des cinq « Vers … », gardé tel quel"
+module.vers_bois.desc,"convertit l'élément du noyau vers le bois — l'élément est un module, et il coûte une case"
+module.vers_eau.desc,"convertit l'élément du noyau vers l'eau — l'élément est un module, et il coûte une case"
+module.vers_feu.desc,"convertit l'élément du noyau vers le feu — l'élément est un module, et il coûte une case"
+module.vers_metal.desc,"convertit l'élément du noyau vers le métal — l'élément est un module, et il coûte une case"
+module.vers_terre.desc,"convertit l'élément du noyau vers la terre — l'élément est un module, et il coûte une case"
+module.evasement.desc,"transforme une Ligne en Cône, ou un Anneau en Carré"
+module.ricochet_mural.desc,la charge **rebondit** sur les obstacles au lieu de s'arrêter
+module.tracant.desc,la charge **suit** la cible : ignore le couvert et les obstacles
+module.allonge.desc,portée +2 tuiles
+module.corps_a_corps.desc,"portée forcée à 1, mais **+2 dés** — la récompense du risque"
+module.longue_vue.desc,"portée ×2, mais **−1 dé**"
+module.sans_angle_mort.desc,supprime la portée minimale — une lance devient bonne au contact
+module.canalisation.desc,+1 dé **par tranche de 5 ticks** passés immobile avant de lâcher
+module.concentration.desc,+1 dé
+module.surcharge.desc,+2 dés
+module.ampleur.desc,taille de la forme +1
+module.focale.desc,"taille −1, mais **+1 dé**"
+module.fragmentation.desc,"divise la charge en 3 à 40 % chacune, réparties dans la forme"
+module.enchainement.desc,"si la capacité précédente a **touché**, celle-ci coûte **0 tick**"
+module.patience.desc,"**+5 ticks**, ressource −40 % — le module de l'attrition"
+module.precipitation.desc,"**−6 ticks**, ressource ×1.8 et **−1 dé** — quand seul le tempo compte"
+module.vivacite.desc,**−3 ticks** — le module du burst
+module.assommoir.desc,le coup qui laisse l'autre sur place : neuf ticks de retard
+module.bond_lourd.desc,on saute de deux tuiles et on frappe en retombant
+module.botte.desc,frappe puis recule d'une tuile — sortir de portée après le coup
+module.charge_d_epaule.desc,projette la cible de 2 tuiles — chute si le vide suit
+module.coup_de_talon.desc,le bout de la hampe : trois ticks de retard pour l'autre
+module.ecrasement.desc,le coup qui fend la cuirasse : armure −3 pendant 40 ticks
+module.entaille.desc,une entaille rapide qui saigne 20 ticks
+module.estoc.desc,"comme Frappe, mais **perforante par nature** — ignore 4 points de réduction"
+module.etourdissement.desc,coup de crosse : +6 ticks au compteur de la cible · budget anti-stunlock
+module.fauchage.desc,"jet opposé de Force — la cible tombe, se relever coûte 8 ticks"
+module.feinte.desc,annule la garde de la cible 15 ticks ([[Garde en posture]])
+module.frappe.desc,"les dégâts de l'arme équipée, à son élément et à ses ticks"
+module.harpon.desc,on accroche et on tire : la cible vient de deux tuiles
+module.pique.desc,"deux ticks, une pointe, deux ticks de retard pour l'autre"
+module.saignement.desc,"hémorragie : 1d4 par tranche de 10 ticks, 40 ticks, **ne s'arrête pas seule**"
+module.tir_ajuste.desc,le trait passe où l'armure ne couvre pas : ignore 2 points d'armure
+module.tir_de_recul.desc,on tire et on recule de deux tuiles
+module.aveuglement.desc,"portée et ligne de vue de la cible réduites à 1 tuile, 20 ticks"
+module.celerite.desc,"**−10 ticks** au compteur d'un allié — l'autre face du tempo, sans plafond"
+module.croc_en_jambe.desc,"la cible est au sol 20 ticks, sa garde ne compte plus"
+module.crochet_de_hampe.desc,on accroche la garde : −2 dés à la cible pendant 30 ticks
+module.desarmement.desc,jet opposé — l'arme de la cible tombe sur sa tuile
+module.effroi.desc,jet de Volonté ou la cible fuit 20 ticks · budget anti-stunlock
+module.empoigne.desc,saisit l'adjacent : il libère sa tuile et devient projetable
+module.entrave.desc,immobilise 20 ticks — jet de Force · budget anti-stunlock
+module.epuisement.desc,"la cible ne peut plus employer de noyau à coût en **endurance**, 25 ticks"
+module.glissade.desc,on passe entre les rangs : deux tuiles à travers ce qui bloque
+module.marque.desc,**marque** la cible 60 ticks — une condition *Marquée* la consomme pour frapper plus fort
+module.pointe_tenue.desc,la pointe reste dans la plaie : la cible ne bouge plus 30 ticks
+module.rapt_de_tempo.desc,"**vole** 8 ticks à la cible et se les donne — un seul transfert, deux effets"
+module.rupture.desc,"la cible perd 50 % de sa réduction d'armure de zone, 20 ticks"
+module.silence.desc,"la cible ne peut plus employer de noyau à coût en **mana**, 25 ticks"
+module.tir_a_la_main.desc,"on vise la main qui tient l'arme : jet opposé, l'arme tombe"
+module.tir_aux_jambes.desc,la cible se déplace deux fois plus lentement pendant 30 ticks
+module.tir_de_suppression.desc,on lui fait baisser la tête : garde −2 pendant 30 ticks
+module.torpeur.desc,+10 ticks au compteur de la cible · budget anti-stunlock
+module.volte.desc,on change de place avec la cible
+module.coup_de_coude.desc,"le plus rapide du répertoire : trois ticks, aucun élan à prendre"
+module.coup_de_genou.desc,"ce qui reste quand on est saisi : le genou monte, et il monte fort"
+module.coup_de_pied.desc,"on ne frappe pas pour tuer, on frappe pour faire de la place : repousse d'une tuile"
+module.coup_de_tete.desc,"le front dans le nez : dégâts et +5 ticks au compteur — au contact strict, arme ou pas"
+module.absorption.desc,matelas de PV qui encaisse puis disparaît — bon contre un gros coup
+module.ancrage.desc,"immunité aux projections, aux reculs et à la saisie, 40 ticks"
+module.ecaille_elementaire.desc,"immunité **totale** à un élément au choix, 30 ticks — vulnérabilité +50 % à l'élément qu'il domine"
+module.egide.desc,"**+6 de réduction plate** sur toutes les zones, 50 ticks ([[Armure par zone et constructions]])"
+module.reflet.desc,"renvoie **30 %** des dégâts subis à l'attaquant, 40 ticks"
+module.rempart.desc,on se met devant : +4 d'armure à un allié pendant 50 ticks
+module.souffle_long.desc,"on tient le rythme : ticks ×0,9 pendant 60 ticks"
+module.voile.desc,le **prochain** coup subi est esquivé automatiquement
+module.aiguille.desc,charge légère de Métal — le noyau de la chaîne rapide
+module.bruine.desc,charge légère de Eau — le noyau de la chaîne rapide
+module.epine.desc,charge légère de Bois — le noyau de la chaîne rapide
+module.etincelle.desc,charge légère de Feu — le noyau de la chaîne rapide
+module.gravier.desc,charge légère de Terre — le noyau de la chaîne rapide
+module.banquise.desc,charge lourde de Eau — un seul emploi coûte deux tours d'épée
+module.brasier.desc,charge lourde de Feu — un seul emploi coûte deux tours d'épée
+module.eboulement.desc,charge lourde de Terre — un seul emploi coûte deux tours d'épée
+module.fonte.desc,charge lourde de Métal — un seul emploi coûte deux tours d'épée
+module.foudroiement.desc,charge lourde de Bois — un seul emploi coûte deux tours d'épée
+module.eclat.desc,charge standard de Métal
+module.flamme.desc,charge standard de Feu
+module.gel.desc,charge standard de Eau
+module.roche.desc,charge standard de Terre
+module.ronce.desc,charge standard de Bois
+module.trait_nu.desc,"sans élément : bon marché, mais **ne pose aucun segment de chaîne**"
+module.aimanter.desc,le métal qu'elle porte **la trahit** : sa garde s'ouvre et ses pas traînent
+module.alourdir.desc,l'équipement de la cible **pèse le double** : chaque pas coûte
+module.durcir.desc,"l'armure que tu portes **encaisse davantage** : le métal se resserre, la maille se serre"
+module.emousser.desc,"l'arme de la cible perd **un dé** — elle frappe toujours, mais mal"
+module.ancre.desc,"pose un point de retour sur la tuile, 200 ticks"
+module.attraction.desc,attire de 2 tuiles — la télékinésie de base
+module.convocation.desc,"attire un **allié consentant** à ses côtés, depuis n'importe où en vue"
+module.elan.desc,**le lanceur** se déplace de 3 tuiles
+module.envol.desc,"le lanceur ignore le terrain, le dénivelé et les zones au sol, 40 ticks"
+module.levitation.desc,"**soulève** une entité : elle flotte, ne peut ni agir ni bloquer, 25 ticks — la vraie télékinésie"
+module.permutation.desc,échange sa position avec la cible
+module.portail.desc,pose **deux tuiles appairées** : y entrer sort par l'autre. Permanentes jusqu'au repositionnement
+module.poussee.desc,repousse de 2 tuiles
+module.projection.desc,lance l'entité **saisie ou lévitée** sur 5 tuiles — dégâts de chute à l'arrivée
+module.retour.desc,"revient instantanément à l'**Ancre** — 3 ticks, l'échappatoire la moins chère du jeu"
+module.traversee.desc,le lanceur traverse murs et entités sur 4 tuiles
+module.aux_aguets.desc,"on écoute au lieu d'agir : détection ×1,6 pendant 60 ticks"
+module.embuscade.desc,vingt ticks pour un seul trait : +4 dés
+module.lecture_du_geste.desc,on lit la garde avant qu'elle se ferme : −25 % d'armure sur la cible
+module.point_faible.desc,on a vu où ça cède : la cible prend +35 % pendant 50 ticks
+module.visee.desc,on prend le temps : +2 dés sur les coups des 40 prochains ticks
+module.estimation.desc,"révèle les stats exactes, le vecteur, les résistances et la table de butin de la cible ([[Barèmes économiques]])"
+module.fiole.desc,projette une potion préparée : son effet s'applique **en zone** au lieu d'une gorgée ([[Potions]])
+module.meditation.desc,immobile : rend 25 de mana ([[Mana]]) — se rompt si on est touché
+module.offrande.desc,"convertit 20 PV en 10 mana, immédiatement"
+module.pari.desc,"**relance** le jet de la capacité suivante, le second résultat s'applique quel qu'il soit"
+module.ponction.desc,vole 12 de mana à la cible et se les donne — coûte 8 PV
+module.saignee.desc,"−15 PV : la **jauge de sang** monte d'un cran, les dégâts infligés ×1.15 par cran (max 4)"
+module.second_souffle.desc,rend 30 d'endurance ([[Endurance]]) — le pendant physique de Méditation
+module.souffle_rendu.desc,pose un **segment de chaîne de l'élément de la cible soignée** ([[Jauge de chaîne Wu Xing]])
+module.traque.desc,marque une cible 100 ticks : les capacités du porteur la trouvent **sans ligne de vue**
+module.trempe.desc,"chauffe l'arme équipée : **+1 dé** et son élément passe à Feu, 60 ticks"
+module.vapeur.desc,"nuage alchimique : applique le statut d'une potion à tout ce qui entre, 40 ticks"
+module.baume.desc,soin instantané
+module.communion.desc,"pendant 60 ticks, le lanceur encaisse **la moitié** des dégâts subis par la cible"
+module.purge.desc,retire un statut négatif
+module.rappel_a_la_vie.desc,relève un allié tombé à 25 % PV — hors combat ou très cher en combat
+module.renaissance.desc,rappelle un compagnon dont l'âme est portée
+module.reserve.desc,soin **dormant** : se déclenche tout seul quand la cible passe sous 30 % PV
+module.seve.desc,1d4 par tranche de 10 ticks pendant 50 ticks
+module.transfert.desc,"donne ses propres PV, 1:1 — le soin qui ne coûte presque pas de mana"
+module.balise.desc,"tuile marquée : les capacités du porteur y gagnent **+1 dé**, 80 ticks"
+module.barriere.desc,"occupe la tuile et bloque le passage, 50 ticks"
+module.bombe.desc,pose une charge qui explose après N ticks et **amorce les bombes adjacentes** — friendly fire intégral
+module.cataclysme.desc,"creuse un cratère : −4 niveaux, chute, toute l'endurance, une fois par combat"
+module.echo_de_chair.desc,invoque une créature alliée temporaire — occupe une tuile
+module.exhaussement.desc,élève ou abaisse la tuile d'un niveau ([[Hauteur de terrain ±10]])
+module.feu_follet.desc,"invoque un **feu follet** par tuile libre de la forme : il crache des flammèches à 4 tuiles, 60 ticks"
+module.fosse.desc,abaisse brutalement de 3 niveaux — ce qui est dessus chute
+module.nappe.desc,"la tuile devient glissante (friction 5) — glisse, chute, propage la foudre"
+module.racine.desc,"la tuile entrave ce qui s'y arrête, 50 ticks"
+module.releve.desc,relève un **cadavre** présent en invocation temporaire — réputation en chute
+module.sol_vif.desc,"la tuile blesse ce qui la traverse, 50 ticks"
+module.tourelle.desc,"déploie une tourelle qui tire à chaque tick, **hérite de l'élément de l'arme**, consomme le carquois"
+module.voile_de_brume.desc,"coupe la ligne de vue dans la zone, 60 ticks"
+module.au_loin.desc,"jusqu'à douze tuiles, à vue — très long à lancer"
+module.autour.desc,"les **huit voisines** — le sort part de toi et frappe à côté, jamais loin"
+module.aveugle.desc,quatre tuiles **à travers les murs** — cher
+module.contact.desc,la tuile adjacente : il faut être là
+module.en_biais.desc,uniquement les quatre **diagonales** exactes
+module.en_etoile.desc,"loin, mais seulement dans les **huit directions** — se placer sur un axe, ou renoncer"
+module.en_ligne.desc,"uniquement les cases **alignées** avec le lanceur — se placer, pas payer"
+module.hast.desc,deux tuiles : l'allonge d'une arme d'hast
+module.jet_court.desc,"jusqu'à trois tuiles, à vue"
+module.jet_long.desc,"jusqu'à six tuiles, à vue — le temps de viser"
+module.mortier.desc,"**trois tuiles au minimum**, jusqu'a huit, par-dessus les murs — inutilisable au corps a corps"
+module.sur_soi.desc,sur soi — aucune distance
+module.transperce.desc,"**à travers la pierre**, mais en ligne droite seulement — ce qui se cache derrière un mur n'est plus à l'abri"
+module.zigzag.desc,les cases **en escalier** : les deux écarts ne diffèrent que d'un
+famille.arme.name,Arme
+famille.cible.name,Cible
+famille.cibles.name,Cibles
+famille.controle.name,Contrôle
+famille.corps.name,Corps
+famille.discretion.name,Discrétion
+famille.defense.name,Défense
+famille.degats_lourd.name,Dégâts · lourd
+famille.degats_leger.name,Dégâts · léger
+famille.degats_moyen.name,Dégâts · moyen
+famille.effet.name,Effet
+famille.espace.name,Espace
+famille.forme.name,Forme
+famille.formes.name,Formes
+famille.information.name,Information
+famille.minuterie.name,Minuterie
+famille.monde.name,Monde
+famille.porteur.name,Porteur
+famille.portee.name,Portée
+famille.position.name,Position
+famille.puissance.name,Puissance
+famille.rejeu.name,Rejeu
+famille.ressource.name,Ressource
+famille.soin.name,Soin
+famille.taille.name,Taille
+famille.tempo.name,Tempo
+famille.terrain.name,Terrain
+famille.element.name,Élément
+famille.equipement.name,Équipement
+famille.evenement.name,Événement

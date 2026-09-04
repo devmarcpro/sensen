@@ -14,5 +14,6 @@
     "pct": 40
   },
   "famille": "Événement",
-  "style": "ruse"
+  "style": "ruse",
+  "famille_key": "famille.evenement.name"
 }

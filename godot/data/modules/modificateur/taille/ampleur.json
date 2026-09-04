@@ -14,5 +14,6 @@
   "effet": {
     "taille": 1
   },
-  "style": "neutre"
+  "style": "neutre",
+  "famille_key": "famille.taille.name"
 }

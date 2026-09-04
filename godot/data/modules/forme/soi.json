@@ -16,5 +16,6 @@
   "portee_defaut": [
     0,
     0
-  ]
+  ],
+  "famille_key": "famille.formes.name"
 }

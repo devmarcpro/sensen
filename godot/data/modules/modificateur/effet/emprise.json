@@ -14,5 +14,6 @@
   "effet": {
     "emprise": 10
   },
-  "style": "neutre"
+  "style": "neutre",
+  "famille_key": "famille.effet.name"
 }

@@ -30,5 +30,6 @@
     }
   },
   "style": "controle",
-  "stat": "endurance"
+  "stat": "endurance",
+  "famille_key": "famille.arme.name"
 }

@@ -27,5 +27,6 @@
     "tempo": 3
   },
   "style": "assaut",
-  "stat": "endurance"
+  "stat": "endurance",
+  "famille_key": "famille.arme.name"
 }

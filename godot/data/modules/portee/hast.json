@@ -16,5 +16,6 @@
   "ligne_de_vue": true,
   "origine": "cible",
   "famille": "Portée",
-  "style": "neutre"
+  "style": "neutre",
+  "famille_key": "famille.portee.name"
 }

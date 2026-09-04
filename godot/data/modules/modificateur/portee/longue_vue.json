@@ -15,5 +15,6 @@
     "des": -1,
     "portee_mult": 2
   },
-  "style": "neutre"
+  "style": "neutre",
+  "famille_key": "famille.portee.name"
 }

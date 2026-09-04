@@ -14,5 +14,6 @@
   "effet": {
     "detonation": 2.0
   },
-  "style": "neutre"
+  "style": "neutre",
+  "famille_key": "famille.effet.name"
 }

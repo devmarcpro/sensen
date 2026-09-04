@@ -28,5 +28,6 @@
     }
   },
   "style": "assaut",
-  "stat": "force"
+  "stat": "force",
+  "famille_key": "famille.arme.name"
 }

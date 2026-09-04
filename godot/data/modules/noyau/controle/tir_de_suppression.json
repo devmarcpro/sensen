@@ -29,5 +29,6 @@
     }
   },
   "style": "controle",
-  "stat": "perception"
+  "stat": "perception",
+  "famille_key": "famille.controle.name"
 }

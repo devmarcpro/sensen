@@ -14,5 +14,6 @@
   "effet": {
     "enchainement": true
   },
-  "style": "neutre"
+  "style": "neutre",
+  "famille_key": "famille.tempo.name"
 }

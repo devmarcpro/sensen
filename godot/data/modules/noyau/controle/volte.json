@@ -28,5 +28,6 @@
     }
   },
   "style": "mobilite",
-  "stat": "dexterite"
+  "stat": "dexterite",
+  "famille_key": "famille.controle.name"
 }

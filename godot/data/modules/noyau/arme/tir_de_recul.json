@@ -31,5 +31,6 @@
     }
   },
   "style": "assaut",
-  "stat": "perception"
+  "stat": "perception",
+  "famille_key": "famille.arme.name"
 }

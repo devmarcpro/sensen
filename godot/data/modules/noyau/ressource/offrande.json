@@ -28,5 +28,6 @@
     }
   },
   "style": "soutien",
-  "stat": "charisme"
+  "stat": "charisme",
+  "famille_key": "famille.ressource.name"
 }

@@ -25,5 +25,6 @@
   },
   "style": "assaut",
   "stat": "dexterite",
-  "cout_sang_froid": 9
+  "cout_sang_froid": 9,
+  "famille_key": "famille.arme.name"
 }

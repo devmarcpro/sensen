@@ -39,6 +39,9 @@ Le jeu doit permettre de **changer de langue d'affichage** dans les réglages, �
 > [!success] Constaté le 2026-09-03 — `description_key` : **non codé**, les descriptions de modules restent en français
 > Le callout ci-dessus le dit déjà : le composeur lit `description` tel quel depuis le JSON. Le champ `description_key` était la proposition pour les traduire ; elle n'a pas été faite, et c'est le seul texte joueur qui échappe encore à `i18n_couverture.py`. À faire le jour où l'anglais compte.
 
+> [!success] Codé le 2026-09-04 — les descriptions des 236 modules passent par les CSV
+> Une clé par module, `module.<id>.desc` : en français, le texte du JSON tel quel ; en anglais, sa traduction. Le composeur lit la clé (`Composeur.description_de`) et retombe sur `description` si elle manque — une nouvelle fiche s'affiche donc en français tant qu'on ne l'a pas traduite, plutôt que de montrer une clé nue. `description` reste dans le JSON, source d'écriture : `i18n_couverture.py` vérifie que `fr.csv` n'en dérive pas (une description changée dans les données sans son CSV est un échec). Plus aucun texte joueur n'échappe à la couverture. *(Même jour, vu sur la capture anglaise : les **familles** de noyaux — « Arme », « Contrôle »… — s'affichaient en français ; chaque module porte `famille_key`, trente et une clés `famille.<nom>.name`, le composeur les lit.)*
+
 ## Liens
 - **Dépend de** : [[Data-driven design]], [[Contraintes permanentes]]
 - **Alimente** : [[Arborescence du projet]], [[EventBus]], [[Écrans d'interface]], [[Gabarit de quête]], [[Dialogue PNJ]]

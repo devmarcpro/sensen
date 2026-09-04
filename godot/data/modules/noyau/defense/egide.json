@@ -28,5 +28,6 @@
     "cible": "allie"
   },
   "style": "soutien",
-  "stat": "charisme"
+  "stat": "charisme",
+  "famille_key": "famille.defense.name"
 }

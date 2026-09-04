@@ -30,5 +30,6 @@
     }
   },
   "style": "assaut",
-  "stat": "volonte"
+  "stat": "volonte",
+  "famille_key": "famille.degats_lourd.name"
 }

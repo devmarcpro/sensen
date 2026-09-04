@@ -30,5 +30,6 @@
     }
   },
   "style": "soutien",
-  "stat": "perception"
+  "stat": "perception",
+  "famille_key": "famille.information.name"
 }

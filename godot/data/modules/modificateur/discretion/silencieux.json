@@ -14,5 +14,6 @@
   "effet": {
     "silencieux": true
   },
-  "style": "ruse"
+  "style": "ruse",
+  "famille_key": "famille.discretion.name"
 }

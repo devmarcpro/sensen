@@ -24,5 +24,6 @@
     "sans_segment": true
   },
   "style": "assaut",
-  "stat": "volonte"
+  "stat": "volonte",
+  "famille_key": "famille.degats_moyen.name"
 }

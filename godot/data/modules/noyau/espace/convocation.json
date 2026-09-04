@@ -26,5 +26,6 @@
     }
   },
   "style": "mobilite",
-  "stat": "charisme"
+  "stat": "charisme",
+  "famille_key": "famille.espace.name"
 }

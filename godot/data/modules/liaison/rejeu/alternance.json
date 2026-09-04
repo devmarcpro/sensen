@@ -13,5 +13,6 @@
     "alternance": true
   },
   "famille": "Rejeu",
-  "style": "ruse"
+  "style": "ruse",
+  "famille_key": "famille.rejeu.name"
 }

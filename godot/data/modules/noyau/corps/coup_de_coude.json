@@ -24,5 +24,6 @@
   "portee": null,
   "effet": {},
   "style": "assaut",
-  "stat": "dexterite"
+  "stat": "dexterite",
+  "famille_key": "famille.corps.name"
 }

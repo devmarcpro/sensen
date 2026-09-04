@@ -14,5 +14,6 @@
   "effet": {
     "portee": 2
   },
-  "style": "neutre"
+  "style": "neutre",
+  "famille_key": "famille.portee.name"
 }

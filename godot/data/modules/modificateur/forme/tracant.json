@@ -14,5 +14,6 @@
   "effet": {
     "tracant": true
   },
-  "style": "neutre"
+  "style": "neutre",
+  "famille_key": "famille.forme.name"
 }

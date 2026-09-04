@@ -32,5 +32,6 @@
   },
   "unique_par_combat": true,
   "style": "terrain",
-  "stat": "volonte"
+  "stat": "volonte",
+  "famille_key": "famille.terrain.name"
 }

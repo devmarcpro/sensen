@@ -27,5 +27,6 @@
   },
   "style": "ruse",
   "stat": "perception",
-  "cout_sang_froid": 6
+  "cout_sang_froid": 6,
+  "famille_key": "famille.ressource.name"
 }

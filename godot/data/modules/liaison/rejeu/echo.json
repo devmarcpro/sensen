@@ -14,5 +14,6 @@
     "apres_ticks": 20
   },
   "famille": "Rejeu",
-  "style": "ruse"
+  "style": "ruse",
+  "famille_key": "famille.rejeu.name"
 }

@@ -2927,3 +2927,269 @@ ui.composeur.grille_arme,held weapon’s grid
 ui.composeur.etapes,Steps
 functionality.pique.name,Pike
 item.craft_flechettes.name,Darts
+module.achevement.desc,the target is low
+module.affinite.desc,the target carries the named element
+module.entravee.desc,the target cannot move
+module.escorte.desc,the target is adjacent to one of your allies
+module.isolement.desc,no ally adjacent to the target
+module.marquee.desc,"the target carries a **Mark**: **+2 dice**, and the mark is **consumed**"
+module.prise.desc,the target is grabbed or levitating
+module.corruption.desc,the weapon that loves danger ([[Niveau de danger]])
+module.heure.desc,depends on the [[Cycle jour-nuit et sommeil]]
+module.intemperie.desc,depends on the [[Météo]] — a storm feeds Lightning
+module.terroir.desc,the place carries the core's element
+module.chaine_pleine.desc,all 5 segments are set
+module.dernier_souffle.desc,the caster is low
+module.ombre.desc,the caster is Hidden
+module.pleine_garde.desc,the caster holds a stance
+module.resonance.desc,the named segment is set in the gauge
+module.alignement.desc,"the target is **aligned** with the caster — same row, same column or same diagonal: **+1 die**"
+module.angle_mort.desc,a strike from behind or from the flank — the biggest bonus in the game
+module.champ_libre.desc,nothing between the caster and the target
+module.contrebas.desc,the caster is lower — range gains from climbing
+module.pied_ferme.desc,the caster has not moved for 20 ticks
+module.surplomb.desc,the caster stands higher than the target
+module.a_l_impact.desc,the next charge fires when the previous core hits
+module.accord.desc,the charge fires when a **chain segment** is set
+module.curee.desc,the charge fires **on a kill**
+module.derobade.desc,the charge fires **when the bearer dodges**
+module.ouverture.desc,the charge fires **at the first contact of the fight**
+module.parade.desc,the charge fires **when the bearer parries** ([[Garde en posture]])
+module.riposte.desc,the charge fires **when the bearer is hit**
+module.testament.desc,"the charge fires **when the bearer falls** — free, they will not pay the ticks"
+module.veille.desc,the charge fires when an **ally** drops below 40% HP
+module.cadence.desc,the charge fires **every N uses** of the ability (2 to 5)
+module.meche.desc,"the charge fires after **N ticks** (10 to 50, set at assembly)"
+module.sceau.desc,"lays the charge on the ground: it fires when an entity **steps** onto the tile, for up to 100 ticks"
+module.anneau.desc,"all around a tile, **without touching the centre**"
+module.arc.desc,"the **far side** of the target: the tiles at exact distance, opposite the caster"
+module.carre.desc,"a full area, centre included — **full friendly fire**"
+module.chemin.desc,follows the caster's path: everything they pass along is hit
+module.colonne.desc,the whole **height** of a tile — hits what flies and what lies below
+module.cone.desc,"widens with distance, 3 tiles deep"
+module.couronne.desc,the tiles at exact distance from the centre — **spares the centre and its neighbours**
+module.croix.desc,the four axes from a tile
+module.damier.desc,a square **every other cell** — covers the ground without sealing it: one can still walk there
+module.diagonale.desc,the four obliques — the complement of the Cross
+module.ligne.desc,goes through everything over 4 tiles in a straight line
+module.mur.desc,a line **perpendicular** to the aim — bars a corridor
+module.nuee.desc,"4 **random** tiles within the radius — unpredictable, cheap"
+module.point.desc,"a single target — free in ticks, the default shape"
+module.sillage.desc,the 3 tiles **behind** the target — for what passes through
+module.soi.desc,on oneself — **refunds 2 ticks**
+module.tuile.desc,"on the ground, with no living target — the shape of glyphs and zones"
+module.vague.desc,"wide and short: the whole front, 2 tiles deep"
+module.contagion.desc,the core's **statuses** spread to the enemies adjacent to the targets hit
+module.focalisation.desc,cancels the **dilution by area**: the wide shape strikes at full power
+module.meute.desc,the charge also applies from the position of your **companion** ([[Compagnons]])
+module.miroir.desc,also applies the charge at the position **mirrored** through the caster
+module.partage.desc,the charge **also applies to the caster** — for heals and defences
+module.propagation.desc,"spreads **from one to the next** as long as it hits, −1 die per step"
+module.ricochet.desc,"the charge jumps to **1d3 nearby targets**, −1 die per jump"
+module.salve.desc,"fires **3 simultaneous charges** at 60%, spread across the shape"
+module.alternance.desc,alternates between the **next two cores** on each use
+module.boucle.desc,"replays as long as resource remains, **−1 die** stacking per loop"
+module.echo.desc,replays the charge at **50%** after 20 ticks
+module.repetition.desc,"replays the charge twice, each at **−1 die**"
+module.sans_trace.desc,the ability **does not reveal** its caster — stays Hidden after the blow
+module.silencieux.desc,"no noise: does not break Hidden, does not alert neighbours"
+module.detonation.desc,"×2 damage against **summons, turrets, bombs and barriers**"
+module.emprise.desc,any target hit can no longer move for 10 ticks
+module.erosif.desc,"**erosion**: a quarter of the damage dealt also eats the target's **max HP**, until the end of the fight"
+module.gravite.desc,any target hit is **pulled** one tile toward the centre
+module.ligature.desc,allied summons and turrets within the shape **replay** their attack
+module.perforant.desc,ignores the area armour reduction entirely
+module.persistance.desc,all the core's durations ×2
+module.remanence.desc,the area hit **stays active** 30 ticks and reapplies on entry
+module.repulsion.desc,any target hit is **pushed** one tile away
+module.vampirique.desc,the caster recovers 50% of the damage dealt
+module.amorce.desc,the ability sets **one more chain segment** ([[Jauge de chaîne Wu Xing]]) — rare
+module.prisme.desc,the core takes the element that **dominates** the target ([[Domination et multiplicateurs]])
+module.purete.desc,"concentrates the vector: +40% of the dominant element, removes the others"
+module.transmutation.desc,"converts the core's element to fire — the ancestor of the five ""Toward…"", kept as is"
+module.vers_bois.desc,"converts the core's element to wood — the element is a module, and it costs a cell"
+module.vers_eau.desc,"converts the core's element to water — the element is a module, and it costs a cell"
+module.vers_feu.desc,"converts the core's element to fire — the element is a module, and it costs a cell"
+module.vers_metal.desc,"converts the core's element to metal — the element is a module, and it costs a cell"
+module.vers_terre.desc,"converts the core's element to earth — the element is a module, and it costs a cell"
+module.evasement.desc,"turns a Line into a Cone, or a Ring into a Square"
+module.ricochet_mural.desc,the charge **bounces** off obstacles instead of stopping
+module.tracant.desc,the charge **follows** the target: ignores cover and obstacles
+module.allonge.desc,range +2 tiles
+module.corps_a_corps.desc,"range forced to 1, but **+2 dice** — the reward of risk"
+module.longue_vue.desc,"range ×2, but **−1 die**"
+module.sans_angle_mort.desc,removes the minimum range — a spear becomes good up close
+module.canalisation.desc,+1 die **per 5 ticks** spent motionless before release
+module.concentration.desc,+1 die
+module.surcharge.desc,+2 dice
+module.ampleur.desc,shape size +1
+module.focale.desc,"size −1, but **+1 die**"
+module.fragmentation.desc,"splits the charge into 3 at 40% each, spread across the shape"
+module.enchainement.desc,"if the previous ability **hit**, this one costs **0 ticks**"
+module.patience.desc,"**+5 ticks**, resource −40% — the module of attrition"
+module.precipitation.desc,"**−6 ticks**, resource ×1.8 and **−1 die** — when only tempo matters"
+module.vivacite.desc,**−3 ticks** — the burst module
+module.assommoir.desc,the blow that leaves them standing still: nine ticks of delay
+module.bond_lourd.desc,leap two tiles and strike on landing
+module.botte.desc,strike then step back one tile — out of reach after the blow
+module.charge_d_epaule.desc,throws the target 2 tiles — a fall if the void follows
+module.coup_de_talon.desc,the butt of the shaft: three ticks of delay for them
+module.ecrasement.desc,the blow that splits the plate: armour −3 for 40 ticks
+module.entaille.desc,a quick gash that bleeds for 20 ticks
+module.estoc.desc,"like Strike, but **piercing by nature** — ignores 4 points of reduction"
+module.etourdissement.desc,a pommel blow: +6 ticks on the target's counter · anti-stunlock budget
+module.fauchage.desc,"an opposed Strength roll — the target falls, standing up costs 8 ticks"
+module.feinte.desc,cancels the target's guard for 15 ticks ([[Garde en posture]])
+module.frappe.desc,"the damage of the equipped weapon, with its element and its ticks"
+module.harpon.desc,hook and pull: the target comes two tiles closer
+module.pique.desc,"two ticks, one point, two ticks of delay for them"
+module.saignement.desc,"haemorrhage: 1d4 per 10 ticks, for 40 ticks, **does not stop on its own**"
+module.tir_ajuste.desc,the shot goes where the armour does not cover: ignores 2 armour points
+module.tir_de_recul.desc,"shoot, then fall back two tiles"
+module.aveuglement.desc,"the target's range and line of sight reduced to 1 tile, 20 ticks"
+module.celerite.desc,"**−10 ticks** on an ally's counter — the other face of tempo, uncapped"
+module.croc_en_jambe.desc,"the target is down for 20 ticks, no guard"
+module.crochet_de_hampe.desc,hook the guard: −2 dice to the target for 30 ticks
+module.desarmement.desc,an opposed roll — the target's weapon drops on their tile
+module.effroi.desc,a Will roll or the target flees for 20 ticks · anti-stunlock budget
+module.empoigne.desc,grabs the adjacent one: they free their tile and can be thrown
+module.entrave.desc,immobilises for 20 ticks — a Strength roll · anti-stunlock budget
+module.epuisement.desc,"the target can no longer use cores that cost **vigour**, 25 ticks"
+module.glissade.desc,slip through the ranks: two tiles through whatever blocks
+module.marque.desc,**marks** the target for 60 ticks — a *Marked* condition consumes it to strike harder
+module.pointe_tenue.desc,the point stays in the wound: the target cannot move for 30 ticks
+module.rapt_de_tempo.desc,"**steals** 8 ticks from the target and takes them — one transfer, two effects"
+module.rupture.desc,"the target loses 50% of its area armour reduction, 20 ticks"
+module.silence.desc,"the target can no longer use cores that cost **mana**, 25 ticks"
+module.tir_a_la_main.desc,"aim at the hand holding the weapon: opposed roll, the weapon drops"
+module.tir_aux_jambes.desc,the target moves twice as slowly for 30 ticks
+module.tir_de_suppression.desc,make them keep their head down: guard −2 for 30 ticks
+module.torpeur.desc,+10 ticks on the target's counter · anti-stunlock budget
+module.volte.desc,swap places with the target
+module.coup_de_coude.desc,"the fastest in the repertoire: three ticks, no wind-up"
+module.coup_de_genou.desc,"what is left when grabbed: the knee comes up, and it comes up hard"
+module.coup_de_pied.desc,"not a blow to kill, a blow to make room: pushes one tile away"
+module.coup_de_tete.desc,"forehead to the nose: damage and +5 ticks on the counter — strictly at contact, weapon or not"
+module.absorption.desc,a cushion of HP that absorbs then vanishes — good against a big hit
+module.ancrage.desc,"immunity to throws, pushes and grabs, 40 ticks"
+module.ecaille_elementaire.desc,"**total** immunity to one element of your choice, 30 ticks — +50% vulnerability to the element it dominates"
+module.egide.desc,"**+6 flat reduction** on every zone, 50 ticks ([[Armure par zone et constructions]])"
+module.reflet.desc,"reflects **30%** of the damage taken back to the attacker, 40 ticks"
+module.rempart.desc,step in front: +4 armour to an ally for 50 ticks
+module.souffle_long.desc,keep the pace: ticks ×0.9 for 60 ticks
+module.voile.desc,the **next** blow taken is dodged automatically
+module.aiguille.desc,a light charge of Metal — the core of the quick chain
+module.bruine.desc,a light charge of Water — the core of the quick chain
+module.epine.desc,a light charge of Wood — the core of the quick chain
+module.etincelle.desc,a light charge of Fire — the core of the quick chain
+module.gravier.desc,a light charge of Earth — the core of the quick chain
+module.banquise.desc,a heavy charge of Water — a single use costs two sword turns
+module.brasier.desc,a heavy charge of Fire — a single use costs two sword turns
+module.eboulement.desc,a heavy charge of Earth — a single use costs two sword turns
+module.fonte.desc,a heavy charge of Metal — a single use costs two sword turns
+module.foudroiement.desc,a heavy charge of Wood — a single use costs two sword turns
+module.eclat.desc,a standard charge of Metal
+module.flamme.desc,a standard charge of Fire
+module.gel.desc,a standard charge of Water
+module.roche.desc,a standard charge of Earth
+module.ronce.desc,a standard charge of Wood
+module.trait_nu.desc,"no element: cheap, but **sets no chain segment**"
+module.aimanter.desc,the metal they carry **betrays them**: their guard opens and their steps drag
+module.alourdir.desc,the target's equipment **weighs double**: every step costs
+module.durcir.desc,"the armour you wear **takes more**: the metal tightens, the mail closes"
+module.emousser.desc,"the target's weapon loses **one die** — it still strikes, but badly"
+module.ancre.desc,"sets a return point on the tile, 200 ticks"
+module.attraction.desc,pulls 2 tiles closer — basic telekinesis
+module.convocation.desc,"pulls a **consenting ally** to your side, from anywhere in sight"
+module.elan.desc,**the caster** moves 3 tiles
+module.envol.desc,"the caster ignores terrain, height and ground zones, 40 ticks"
+module.levitation.desc,"**lifts** an entity: it floats, can neither act nor block, 25 ticks — true telekinesis"
+module.permutation.desc,swaps positions with the target
+module.portail.desc,sets **two paired tiles**: stepping into one comes out of the other. Permanent until repositioned
+module.poussee.desc,pushes 2 tiles away
+module.projection.desc,throws the **grabbed or levitated** entity over 5 tiles — fall damage on landing
+module.retour.desc,"returns instantly to the **Anchor** — 3 ticks, the cheapest escape in the game"
+module.traversee.desc,the caster passes through walls and entities over 4 tiles
+module.aux_aguets.desc,listen instead of acting: detection ×1.6 for 60 ticks
+module.embuscade.desc,twenty ticks for a single shot: +4 dice
+module.lecture_du_geste.desc,read the guard before it closes: −25% armour on the target
+module.point_faible.desc,you saw where it gives: the target takes +35% for 50 ticks
+module.visee.desc,take your time: +2 dice on the blows of the next 40 ticks
+module.estimation.desc,"reveals the target's exact stats, vector, resistances and loot table ([[Barèmes économiques]])"
+module.fiole.desc,throws a prepared potion: its effect applies **as an area** instead of a sip ([[Potions]])
+module.meditation.desc,motionless: restores 25 mana ([[Mana]]) — breaks if hit
+module.offrande.desc,"converts 20 HP into 10 mana, immediately"
+module.pari.desc,"**rerolls** the next ability's roll, the second result applies whatever it is"
+module.ponction.desc,steals 12 mana from the target and takes it — costs 8 HP
+module.saignee.desc,"−15 HP: the **blood gauge** rises one step, damage dealt ×1.15 per step (max 4)"
+module.second_souffle.desc,restores 30 vigour ([[Endurance]]) — the physical counterpart of Meditation
+module.souffle_rendu.desc,sets a **chain segment of the healed target's element** ([[Jauge de chaîne Wu Xing]])
+module.traque.desc,marks a target for 100 ticks: the bearer's abilities find it **without line of sight**
+module.trempe.desc,"heats the equipped weapon: **+1 die** and its element turns to Fire, 60 ticks"
+module.vapeur.desc,"an alchemical cloud: applies a potion's status to everything that enters, 40 ticks"
+module.baume.desc,instant healing
+module.communion.desc,"for 60 ticks, the caster takes **half** of the damage suffered by the target"
+module.purge.desc,removes one negative status
+module.rappel_a_la_vie.desc,"raises a fallen ally at 25% HP — out of combat, or very expensive in combat"
+module.renaissance.desc,calls back a companion whose soul is carried
+module.reserve.desc,a **dormant** heal: triggers on its own when the target drops below 30% HP
+module.seve.desc,1d4 per 10 ticks for 50 ticks
+module.transfert.desc,"gives your own HP, 1:1 — the heal that costs almost no mana"
+module.balise.desc,"a marked tile: the bearer's abilities gain **+1 die** there, 80 ticks"
+module.barriere.desc,"occupies the tile and blocks passage, 50 ticks"
+module.bombe.desc,lays a charge that explodes after N ticks and **sets off adjacent bombs** — full friendly fire
+module.cataclysme.desc,"digs a crater: −4 levels, a fall, all your vigour, once per fight"
+module.echo_de_chair.desc,summons a temporary allied creature — occupies a tile
+module.exhaussement.desc,raises or lowers the tile by one level ([[Hauteur de terrain ±10]])
+module.feu_follet.desc,"summons a **will-o'-the-wisp** on each free tile of the shape: it spits small flames 4 tiles away, 60 ticks"
+module.fosse.desc,drops the ground 3 levels at once — whatever stands on it falls
+module.nappe.desc,"the tile becomes slippery (friction 5) — slide, fall, spread lightning"
+module.racine.desc,"the tile snares whatever stops on it, 50 ticks"
+module.releve.desc,raises a **corpse** present as a temporary summon — reputation drops
+module.sol_vif.desc,"the tile wounds whatever crosses it, 50 ticks"
+module.tourelle.desc,"deploys a turret that fires every tick, **inherits the weapon's element**, consumes the quiver"
+module.voile_de_brume.desc,"cuts line of sight within the area, 60 ticks"
+module.au_loin.desc,"up to twelve tiles, in sight — very slow to cast"
+module.autour.desc,"the **eight neighbours** — the spell starts from you and strikes next to you, never far"
+module.aveugle.desc,four tiles **through walls** — expensive
+module.contact.desc,the adjacent tile: you have to be there
+module.en_biais.desc,only the four exact **diagonals**
+module.en_etoile.desc,"far, but only in the **eight directions** — get on an axis, or give up"
+module.en_ligne.desc,"only the cells **aligned** with the caster — position yourself, don't pay"
+module.hast.desc,two tiles: the reach of a polearm
+module.jet_court.desc,"up to three tiles, in sight"
+module.jet_long.desc,"up to six tiles, in sight — time to aim"
+module.mortier.desc,"**three tiles at least**, up to eight, over walls — useless up close"
+module.sur_soi.desc,on oneself — no distance
+module.transperce.desc,"**through stone**, but in a straight line only — what hides behind a wall is no longer safe"
+module.zigzag.desc,the **staircase** cells: the two offsets differ by exactly one
+famille.arme.name,Weapon
+famille.cible.name,Target
+famille.cibles.name,Targets
+famille.controle.name,Control
+famille.corps.name,Body
+famille.discretion.name,Stealth
+famille.defense.name,Defence
+famille.degats_lourd.name,Damage · heavy
+famille.degats_leger.name,Damage · light
+famille.degats_moyen.name,Damage · medium
+famille.effet.name,Effect
+famille.espace.name,Space
+famille.forme.name,Shape
+famille.formes.name,Shapes
+famille.information.name,Information
+famille.minuterie.name,Timer
+famille.monde.name,World
+famille.porteur.name,Bearer
+famille.portee.name,Range
+famille.position.name,Position
+famille.puissance.name,Power
+famille.rejeu.name,Replay
+famille.ressource.name,Resource
+famille.soin.name,Healing
+famille.taille.name,Size
+famille.tempo.name,Tempo
+famille.terrain.name,Terrain
+famille.element.name,Element
+famille.equipement.name,Equipment
+famille.evenement.name,Event

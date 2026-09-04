@@ -14,5 +14,6 @@
     "des": -1
   },
   "famille": "Cibles",
-  "style": "ruse"
+  "style": "ruse",
+  "famille_key": "famille.cibles.name"
 }

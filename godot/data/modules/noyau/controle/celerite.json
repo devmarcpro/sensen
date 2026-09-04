@@ -25,5 +25,6 @@
     "cible": "allie"
   },
   "style": "controle",
-  "stat": "charisme"
+  "stat": "charisme",
+  "famille_key": "famille.controle.name"
 }

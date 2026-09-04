@@ -14,5 +14,6 @@
   },
   "famille": "Cibles",
   "style": "ruse",
-  "surcout_ressource": "×1.6"
+  "surcout_ressource": "×1.6",
+  "famille_key": "famille.cibles.name"
 }

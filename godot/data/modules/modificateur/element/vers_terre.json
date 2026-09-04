@@ -14,5 +14,6 @@
   "effet": {
     "element_vers": "terre"
   },
-  "style": "neutre"
+  "style": "neutre",
+  "famille_key": "famille.element.name"
 }

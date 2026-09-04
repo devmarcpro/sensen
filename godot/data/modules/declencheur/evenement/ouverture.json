@@ -13,5 +13,6 @@
     "declencheur": "ouverture"
   },
   "famille": "Événement",
-  "style": "ruse"
+  "style": "ruse",
+  "famille_key": "famille.evenement.name"
 }

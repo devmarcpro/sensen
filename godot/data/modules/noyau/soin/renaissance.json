@@ -24,5 +24,6 @@
   "forme": null,
   "portee": null,
   "style": "soutien",
-  "stat": "charisme"
+  "stat": "charisme",
+  "famille_key": "famille.soin.name"
 }

@@ -531,7 +531,10 @@ func _reconstruire_catalogue(j: Dictionary) -> void:
 			var familles: Array = par_famille.keys()
 			familles.sort()
 			for fam in familles:
-				groupes_cat.append({"titre": str(fam), "cle": type + "/" + str(fam), "modules": par_famille[fam]})
+				# le titre est traduit (`famille_key`, Localisation 2026-09-04) ; la clé de repli reste le nom brut, stable
+				var fk := str(GameData.catalogues.modules.get(str(par_famille[fam][0]), {}).get("famille_key", ""))
+				var titre_f: String = tr(fk) if not fk.is_empty() and tr(fk) != fk else str(fam)
+				groupes_cat.append({"titre": titre_f, "cle": type + "/" + str(fam), "modules": par_famille[fam]})
 		else:
 			groupes_cat.append({"titre": "", "cle": type, "modules": du_type})
 		for gr in groupes_cat:
@@ -584,7 +587,7 @@ func _rafraichir_detail(j: Dictionary) -> void:
 	var m_decrit := str(placements[piece_choisie].module) if piece_choisie >= 0 and piece_choisie < placements.size() else (ids[selection] if selection < ids.size() else "")
 	if not m_decrit.is_empty():
 		var md: Dictionary = GameData.catalogues.modules.get(m_decrit, {})
-		texte = tr("ui.composer.module").format({"nom": tr(md.get("name_key", m_decrit)), "desc": str(md.get("description", ""))}) \
+		texte = tr("ui.composer.module").format({"nom": tr(md.get("name_key", m_decrit)), "desc": Composeur.description_de(m_decrit)}) \
 			+ "\n" + ecrans._contribution_module(j, m_decrit, false) + "\n\n"
 	if not plan.is_empty():
 		texte += ecrans._apercu_plan(plan)
@@ -700,6 +703,16 @@ func touche(ev: InputEventKey) -> bool:
 static func type_de(m: String) -> String:
 	var md: Dictionary = GameData.catalogues.modules.get(m, {})
 	return str(md.get("module_type", ""))
+
+
+## La description d'un module, traduite (Localisation, 2026-09-04) : `module.<id>.desc` dans les CSV ; à défaut,
+## le texte du JSON — une fiche neuve s'affiche en français plutôt qu'en clé nue.
+static func description_de(m: String) -> String:
+	var cle := "module.%s.desc" % m
+	var t := TranslationServer.translate(cle)
+	if t != cle and not t.is_empty():
+		return t
+	return str(GameData.catalogues.modules.get(m, {}).get("description", ""))
 
 
 static func couleur_de(m: String) -> Color:

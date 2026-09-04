@@ -14,5 +14,6 @@
   "effet": {
     "des": 2
   },
-  "style": "neutre"
+  "style": "neutre",
+  "famille_key": "famille.puissance.name"
 }

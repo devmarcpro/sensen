@@ -28,5 +28,6 @@
     }
   },
   "style": "mobilite",
-  "stat": "force"
+  "stat": "force",
+  "famille_key": "famille.espace.name"
 }

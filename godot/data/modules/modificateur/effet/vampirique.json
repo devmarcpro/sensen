@@ -14,5 +14,6 @@
   "effet": {
     "vampirique": 0.5
   },
-  "style": "neutre"
+  "style": "neutre",
+  "famille_key": "famille.effet.name"
 }

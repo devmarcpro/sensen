@@ -23,5 +23,6 @@
     },
     "echec_ticks_rendus": 0.5
   },
-  "style": "ruse"
+  "style": "ruse",
+  "famille_key": "famille.position.name"
 }

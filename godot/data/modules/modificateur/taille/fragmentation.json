@@ -17,5 +17,6 @@
       "mult": 0.4
     }
   },
-  "style": "neutre"
+  "style": "neutre",
+  "famille_key": "famille.taille.name"
 }

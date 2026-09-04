@@ -26,5 +26,6 @@
     "ignore_armure_points": 2
   },
   "style": "assaut",
-  "stat": "perception"
+  "stat": "perception",
+  "famille_key": "famille.arme.name"
 }

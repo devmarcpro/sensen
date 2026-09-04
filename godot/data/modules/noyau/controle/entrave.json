@@ -27,5 +27,6 @@
     }
   },
   "style": "controle",
-  "stat": "volonte"
+  "stat": "volonte",
+  "famille_key": "famille.controle.name"
 }

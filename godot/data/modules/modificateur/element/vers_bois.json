@@ -14,5 +14,6 @@
   "effet": {
     "element_vers": "bois"
   },
-  "style": "neutre"
+  "style": "neutre",
+  "famille_key": "famille.element.name"
 }

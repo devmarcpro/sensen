@@ -17,5 +17,6 @@
   "origine": "cible",
   "motif": "diagonale",
   "famille": "Portée",
-  "style": "neutre"
+  "style": "neutre",
+  "famille_key": "famille.portee.name"
 }

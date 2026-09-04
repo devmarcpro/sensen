@@ -53,7 +53,7 @@ for k, f in absentes:
 print("cles litterales du code : %d, absentes de fr.csv : %d" % (len(cles_code), len(absentes)))
 if absentes:
     echec = True
-sys.exit(1 if echec else 0)
+# (la sortie est tout en bas : deux verifications ajoutees apres cette ligne ne tournaient jamais — 2026-09-04)
 
 # Un gabarit d'affixe sans {base} efface le nom de l'objet : « de portage (+40) » au lieu de
 # « Anneau de portage (+40) ». Trouve le 2026-09-02 sur une collecte de 97 objets.
@@ -67,3 +67,28 @@ if _sans_base:
     for _x in _sans_base:
         print("   ", _x)
     sys.exit(1)
+
+# Les descriptions de modules (Localisation, 2026-09-04) : `module.<id>.desc` en fr.csv doit etre le texte du JSON.
+# Le JSON reste la source d'ecriture ; une description changee sans son CSV est un echec.
+import json as _json, glob as _glob
+_derives = []
+for _f in sorted(_glob.glob(os.path.join(RACINE, "..", "data", "modules", "**", "*.json"), recursive=True)):
+    _d = _json.load(io.open(_f, encoding="utf-8"))
+    if str(_d.get("id", "")).startswith("_"):
+        continue
+    _k = "module.%s.desc" % _d["id"]
+    _attendu = str(_d.get("description", ""))
+    _v = fr.get(_k)
+    if _v is None:
+        _derives.append("%s : absente de fr.csv" % _k)
+        continue
+    if _v.startswith('"') and _v.endswith('"'):
+        _v = _v[1:-1].replace('""', '"')
+    if _v != _attendu:
+        _derives.append("%s : fr.csv ne dit plus ce que dit le JSON" % _k)
+for _l in _derives[:10]:
+    print("description de module : " + _l)
+print("descriptions de modules : %d, en derive : %d" % (len(_derives) + sum(1 for _ in _glob.glob(os.path.join(RACINE, "..", "data", "modules", "**", "*.json"), recursive=True)) - len(_derives), len(_derives)))
+if _derives:
+    echec = True
+sys.exit(1 if echec else 0)

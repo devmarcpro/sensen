@@ -26,5 +26,6 @@
     }
   },
   "style": "terrain",
-  "stat": "endurance"
+  "stat": "endurance",
+  "famille_key": "famille.terrain.name"
 }

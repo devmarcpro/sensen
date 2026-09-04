@@ -14,5 +14,6 @@
     "ticks": 20
   },
   "famille": "Minuterie",
-  "style": "ruse"
+  "style": "ruse",
+  "famille_key": "famille.minuterie.name"
 }

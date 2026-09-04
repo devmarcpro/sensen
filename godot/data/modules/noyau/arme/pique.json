@@ -27,5 +27,6 @@
     "tempo": 2
   },
   "style": "assaut",
-  "stat": "dexterite"
+  "stat": "dexterite",
+  "famille_key": "famille.arme.name"
 }
