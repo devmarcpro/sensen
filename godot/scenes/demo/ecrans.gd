@@ -1248,9 +1248,9 @@ func _construire_registre(_j: Dictionary) -> void:
 	for a in pal.atteints:
 		atteints.append(tr(str(a)).format({"n": pal.get(str(a).trim_prefix("palier."), 0)}))
 	titre.text = tr("ui.ecran.registre").format({"n": nv, "especes": reg.size(), "total": GameData.catalogues.species.size(), "paliers": ", ".join(atteints) if not atteints.is_empty() else tr("ui.registre.paliers_aucun")})
-	if reg.is_empty():
-		liste.add_item(tr("ui.registre.aucun"), null, false)
-		entrees.append({"kind": "texte", "texte": ""})
+	if reg.is_empty():   # la ligne était coupée dans la colonne et le détail restait vide : la phrase entière se lit à droite
+		liste.add_item(tr("ui.registre.aucun"))
+		entrees.append({"kind": "texte", "texte": tr("ui.registre.aucun")})
 		return
 	var ids: Array = reg.keys()
 	ids.sort()
