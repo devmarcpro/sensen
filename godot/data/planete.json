@@ -334,9 +334,10 @@
     "chance_base": 0.5
   },
   "routine": {
-    "_doc": "Routines des PNJ (IA des créatures) : rayon de patrouille des gardes, distance à laquelle l'A* remplace le pas glouton.",
+    "_doc": "Routines des PNJ (IA des créatures) : rayon de patrouille des gardes, distance à laquelle l'A* remplace le pas glouton. projection_min_ticks (LOD de simulation, 2026-09-04) : une absence hors fenetre plus courte ne projette pas le PNJ sur sa routine.",
     "rayon_patrouille": 8,
-    "astar_sous": 20
+    "astar_sous": 20,
+    "projection_min_ticks": 100
   },
   "monde": {
     "pregen_par_appel": 1,

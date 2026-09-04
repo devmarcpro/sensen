@@ -202,6 +202,8 @@ func charger_camp(joueur: Dictionary = {}, cellule_choisie: Vector2i = Vector2i(
 			entites[id] = sauve.entites[id]
 			ordre.append(id)
 			if entites[id].vivant:
+				if entites[id].has("dormant_depuis"):
+					_projeter_routine(entites[id])   # le niveau 2 du LOD : le camp a vécu pendant l'expédition
 				grille.placer(id, entites[id].pos)
 		contenants = sauve.contenants
 		if not joueur.is_empty():
@@ -332,6 +334,7 @@ func _verifier_fenetre(e: Dictionary) -> void:
 			var cell := _cell_de(x.pos)
 			if not monde.dormants.has(cell):
 				monde.dormants[cell] = []
+			x["dormant_depuis"] = horloge_monde.ticks   # LOD de simulation : au réveil, sa routine le remettra à sa place
 			monde.dormants[cell].append(x)
 			ordre.erase(id)
 			entites.erase(id)
@@ -346,11 +349,70 @@ func _verifier_fenetre(e: Dictionary) -> void:
 	nouvelle.modifies.clear()
 	for id in ordre:
 		if entites[id].vivant:
+			if entites[id].has("dormant_depuis"):
+				_projeter_routine(entites[id])   # le niveau 2 du LOD : là où sa routine l'aurait mené
 			grille.placer(id, entites[id].pos)
 	_peupler_fenetre()
 	maj_vision()
 	monde.pregenerer_voisins()
 	EventBus.emettre(&"fenetre_recentree", [grille.origine])
+
+
+## Le niveau 2 du LOD (LOD de simulation, 2026-09-04) par PROJECTION AU RÉVEIL : un PNJ mis de côté hors
+## fenêtre reprend là où sa routine l'aurait mené — à son poste, sa place ou son lit selon l'heure, ou EN
+## CHEMIN entre l'ancien et le nouveau but si l'heure vient de tourner, au pas près sur le chemin réel. Rien
+## ne tique pendant l'absence : le résultat observable est le même, le coût est nul. Appelé sur la nouvelle
+## grille, avant que l'être y soit placé.
+func _projeter_routine(x: Dictionary) -> void:
+	var depuis := int(x.get("dormant_depuis", -1))
+	x.erase("dormant_depuis")
+	if depuis < 0 or not bool(x.get("vivant", true)) or str(x.get("controle", "")) != "ia":
+		return
+	var profil: Dictionary = GameData.catalogues.get("ai_profiles", {}).get(str(x.get("ai_profile", "")), {})
+	if not profil.has("horaires") or not x.has("lit"):
+		return
+	var tick := horloge_monde.ticks
+	if tick - depuis < int(GameData.config("planete").routine.get("projection_min_ticks", 100)):
+		return   # une absence trop courte : rien à projeter
+	var jour := int(_cycle().get("ticks_par_jour", 24000))
+	var h := heure(tick)
+	var debut_h := float(_plage_routine(profil, h).debut)
+	var ecart_h := h - debut_h if h >= debut_h else h + 24.0 - debut_h
+	var depuis_debut := roundi(ecart_h / 24.0 * float(jour))   # ticks écoulés depuis le début de la plage horaire
+	var cible: Vector2i = _cible_routine(x, profil, tick)
+	var avant: Vector2i = _cible_routine(x, profil, tick - depuis_debut - 1)
+	var dest := cible
+	if cible != avant:
+		var chemin: Array = grille.chemin(avant, cible, Etres.est_volant(x), "", refuse_nage(x))
+		var pas := regles.ticks_deplacement(int(regles.r.deplacement.cout_base), x.get("competences_eff", {}), false)
+		var faits := depuis_debut / maxi(1, pas)
+		if not chemin.is_empty() and faits < chemin.size():
+			dest = avant if faits <= 0 else chemin[faits - 1]
+	x.pos = _tuile_libre_pres(x, dest)
+	x["ancre"] = x.pos
+
+
+## La case libre la plus proche de `p` (rayon 3), sans compter `x` lui-même ; sinon `p`.
+func _tuile_libre_pres(x: Dictionary, p: Vector2i) -> Vector2i:
+	for r in 4:
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				if maxi(absi(dx), absi(dy)) != r:
+					continue
+				var q := p + Vector2i(dx, dy)
+				if not grille.dans(q) or grille.bloque_passage(q):
+					continue
+				var occ := grille.occupant(q)
+				if not occ.is_empty() and occ != str(x.id):
+					continue
+				var pris := false
+				for y in entites.values():
+					if y.id != x.id and bool(y.get("vivant", true)) and y.pos == q:
+						pris = true
+						break
+				if not pris:
+					return q
+	return p
 
 
 ## Met le camp de côté avant une expédition : grille, meubles, coffres, êtres — tout reste.
@@ -360,6 +422,7 @@ func _sauver_camp(joueur: Dictionary) -> void:
 		monde.capturer(grille)
 	for id in ordre:
 		if id != joueur.id:
+			entites[id]["dormant_depuis"] = horloge_monde.ticks   # LOD de simulation : au retour, sa routine le remettra à sa place
 			sauve.entites[id] = entites[id]
 			sauve.ordre.append(id)
 	grille.liberer(joueur.pos)
@@ -11318,16 +11381,22 @@ func discretion_reduction(e: Dictionary) -> float:
 	return minf(float(en.get("discretion_max_pct", 0.6)), niveau * float(en.get("discretion_par_niveau", 0.02)))
 
 
-## La cible de la routine horaire d'un PNJ (IA des créatures) : poste, place ou lit selon l'heure.
-func _cible_routine(e: Dictionary, profil: Dictionary) -> Vector2i:
-	var h := heure()
-	var activite := "poste"
-	for plage in profil.horaires.keys():
+## La plage horaire d'un profil à l'heure `h` : {activite, debut} — « poste » par défaut, début 0.
+func _plage_routine(profil: Dictionary, h: float) -> Dictionary:
+	var res := {"activite": "poste", "debut": 0.0}
+	for plage in profil.get("horaires", {}).keys():
 		var parts: PackedStringArray = str(plage).split("-")
 		var a := float(parts[0])
 		var b := float(parts[1])
 		if (a <= b and h >= a and h < b) or (a > b and (h >= a or h < b)):
-			activite = str(profil.horaires[plage])
+			res = {"activite": str(profil.horaires[plage]), "debut": a}
+	return res
+
+
+## La cible de la routine horaire d'un PNJ (IA des créatures) : poste, place ou lit selon l'heure — celle de
+## `tick` si on le donne (la projection du LOD 2 relit la routine à un autre moment que maintenant).
+func _cible_routine(e: Dictionary, profil: Dictionary, tick: int = -1) -> Vector2i:
+	var activite := str(_plage_routine(profil, heure(tick)).activite)
 	match activite:
 		"lit":
 			return e.get("lit", e.ancre)

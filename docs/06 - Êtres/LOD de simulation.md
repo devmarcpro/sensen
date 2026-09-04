@@ -52,6 +52,12 @@ mécanisme, zéro système supplémentaire — les villages paraissent vivants.
 > [!success] Partiellement codé — trace ajoutée le 2026-09-04
 > Le LOD 1 existe : la fenêtre 3×3 de cellules autour du joueur est simulée (`Monde`, `_verifier_fenetre`), le reste du monde avance par semaines abstraites (`_tiquer_monde`, `_semaine_territoire`). Le **LOD 2** décrit ici — un graphe de POI où les PNJ voyagent hors fenêtre — **n'est pas codé** ; les villages hors fenêtre sont figés.
 
+
+> [!success] Codé le 2026-09-04 — le niveau 2 par **projection au réveil**
+> Le designer a demandé de finaliser les systèmes plutôt que les sous-classes ; le niveau logique était le plus gros « non codé » du coffre. Ce qui est codé n'est pas le graphe de POI qu'on tique : c'est **son résultat observable, calculé au moment où il compte**. Un PNJ mis de côté hors fenêtre porte `dormant_depuis` (le tick du monde) ; quand sa cellule rentre dans la fenêtre — retour d'expédition, marche, chargement —, `Simulation._projeter_routine` le remet **là où sa routine l'aurait mené** : à son poste, sa place ou son lit selon l'heure (`ai_profiles.horaires`, la même table que le niveau 1), ou **en chemin** entre l'ancien et le nouveau but si l'heure vient de tourner — au pas près, sur le chemin réel de la grille (`Grille.chemin`, `Regles.ticks_deplacement`). Jamais de téléportation visible : la cellule était hors fenêtre, donc hors vue.
+> **Pourquoi pas un graphe qui tique.** Le résultat est le même — la position d'un PNJ de routine ne dépend que de l'heure et du chemin entre ses deux buts — et le coût pendant l'absence est **nul** au lieu d'un timer par PNJ. Le jour où un PNJ dormi devra *produire* ou *acheter*, c'est le passage hebdomadaire (`_tiquer_monde`, niveau 3) qui le fait déjà par formules, comme la note le veut. Une absence plus courte que `planete.routine.projection_min_ticks` ne projette rien.
+> **Ce qui reste non codé** : les arêtes précalculées du graphe (inutiles tant qu'on projette), et les **événements en zone logique** — un raid sur un quartier hors écran se résout aujourd'hui par le passage hebdomadaire des royaumes, pas par une matérialisation forcée.
+
 ## Liens
 - **Dépend de** : [[IA des créatures]], [[Détection de pièces]], [[Boucle de tick]]
 - **Alimente** : [[Abstraction hors-site]], [[Villages PNJ — repeuplement et décimation]], [[Raids et menaces]]

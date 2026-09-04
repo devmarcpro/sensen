@@ -153,6 +153,7 @@ func _ready() -> void:
 	_lancer("test_trames")
 	_lancer("test_cran_de_puissance")
 	_lancer("test_etapes")
+	_lancer("test_lod_projection")
 	_lancer("test_composer_capacites")
 	_lancer("test_charges_de_modules")
 	_lancer("test_assemblage_sans_limite")
@@ -3771,6 +3772,59 @@ func test_etapes() -> void:
 	verifier(s.composer_capacite(j, seq2, "", ["", ""]) and j.capacites.size() == 1 and j.capacites[0].modules == seq2, "et le sort se compose, avec ses étapes")
 	verifier(Array(j.capacites[0].get("grilles", [])).size() == 2, "la capacité garde la grille de chaque étape")
 	j.capacites = caps
+
+
+func test_lod_projection() -> void:
+	# Le niveau 2 du LOD (LOD de simulation, 2026-09-04) : un PNJ dormi hors fenêtre reprend là où sa routine
+	# l'aurait mené — au poste à midi, au lit à vingt-trois heures, EN CHEMIN quand l'heure vient de tourner.
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var lit: Vector2i = j.pos + Vector2i(2, 0)
+	var poste := Vector2i(-1, -1)
+	for dx in range(12, 5, -1):   # un poste à une dizaine de tuiles, joignable à pied
+		var q: Vector2i = j.pos + Vector2i(dx, 0)
+		if s.grille.dans(q) and not s.grille.bloque_passage(q) and not s.grille.chemin(lit, q).is_empty():
+			poste = q
+			break
+	verifier(poste.x >= 0, "un poste joignable à pied existe à l'est (%s)" % str(poste))
+	var v := s.ajouter("villageois", lit, "ia")
+	v.ai_profile = "civil"
+	v["lit"] = lit
+	v["poste"] = poste
+	v["place"] = lit
+	var jour := int(s._cycle().get("ticks_par_jour", 24000))
+	var base := jour * 3
+	# midi : au poste
+	s.horloge_monde.ticks = base + jour / 2
+	v["dormant_depuis"] = 0
+	v.pos = lit
+	s._projeter_routine(v)
+	verifier(Grille.distance(v.pos, poste) <= 1, "à midi, le villageois dormi est à son poste (%s pour %s)" % [str(v.pos), str(poste)])
+	# six heures et trois pas : en chemin, ni au lit ni au poste
+	var pas := s.regles.ticks_deplacement(int(s.regles.r.deplacement.cout_base), v.get("competences_eff", {}), false)
+	s.horloge_monde.ticks = base + jour * 6 / 24 + pas * 3
+	v["dormant_depuis"] = 0
+	v.pos = lit
+	s._projeter_routine(v)
+	var d_lit := Grille.distance(v.pos, lit)
+	verifier(d_lit >= 2 and d_lit <= 4 and Grille.distance(v.pos, poste) > 1, "à six heures et trois pas, il est en chemin (%d tuiles du lit, %d du poste)" % [d_lit, Grille.distance(v.pos, poste)])
+	# vingt-trois heures : au lit
+	s.horloge_monde.ticks = base + jour * 23 / 24
+	v["dormant_depuis"] = 0
+	v.pos = poste
+	s._projeter_routine(v)
+	verifier(Grille.distance(v.pos, lit) <= 1, "à vingt-trois heures, il est au lit (%s)" % str(v.pos))
+	# une absence trop courte ne projette rien, et le drapeau est effacé dans tous les cas
+	v.pos = poste
+	v["dormant_depuis"] = s.horloge_monde.ticks - 10
+	s._projeter_routine(v)
+	verifier(v.pos == poste and not v.has("dormant_depuis"), "dix ticks d'absence : il n'a pas bougé, et le drapeau est effacé")
+	# un être sans routine (une bête) n'est jamais projeté
+	var b := s.ajouter("sanglier", j.pos + Vector2i(0, 3), "ia")
+	var pos_b: Vector2i = b.pos
+	b["dormant_depuis"] = 0
+	s._projeter_routine(b)
+	verifier(b.pos == pos_b, "une bête sans routine reste où elle dormait")
 
 
 func test_composer_capacites() -> void:
