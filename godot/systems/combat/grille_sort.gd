@@ -46,12 +46,25 @@ static func case_de_lecture(cases: Array) -> Vector2i:
 ## la première entrée de la table dont le seuil est atteint gagne. Le prix est `cout_ticks` s'il est
 ## écrit, sinon `surcout_ticks` : on teste la présence de la clé, pas sa valeur (un noyau à 0 tick est
 ## un noyau à 0 tick, pas un modificateur).
-func forme_de(module_id: String) -> Array:
+func forme_de(module_id: String, fois: int = 1) -> Array:
 	var m: Dictionary = catalogue.get(module_id, {})
+	var base: Array = []
 	if m.has("forme_grille") and not (m.forme_grille as Array).is_empty():
-		return _normaliser(_vec(m.forme_grille))
-	var type := str(m.get("module_type", ""))
-	var ticks := int(m.cout_ticks) if m.has("cout_ticks") else int(m.get("surcout_ticks", 0))
+		base = _normaliser(_vec(m.forme_grille))
+	else:
+		var type := str(m.get("module_type", ""))
+		var ticks := int(m.cout_ticks) if m.has("cout_ticks") else int(m.get("surcout_ticks", 0))
+		base = _forme_au_prix(type, ticks)
+	if fois > 1:
+		# Le CRAN DE PUISSANCE (designer 2026-09-04) : une pièce ×n prend n fois la place, en un BLOC
+		# aussi carré que possible. Un domino ×2 est un carré, ×3 un rectangle 3×2. La première version
+		# allongeait la pièce en ligne : trop large pour les petites grilles, et impossible à prévoir.
+		return _bloc(base.size() * fois)
+	return base
+
+
+## La forme de la table pour un type et un prix : la première entrée dont le seuil est atteint.
+func _forme_au_prix(type: String, ticks: int) -> Array:
 	var table: Array = cfg.get("formes_par_type", {}).get(type, [])
 	for entree in table:
 		if ticks >= int(entree.get("ticks_min", -999)):
@@ -59,11 +72,32 @@ func forme_de(module_id: String) -> Array:
 	return [Vector2i.ZERO]
 
 
+## Un bloc de `n` cases, aussi carré que possible : la largeur est la racine carrée arrondie au-dessus,
+## les rangées se remplissent de gauche à droite, la dernière peut être incomplète.
+static func _bloc(n: int) -> Array:
+	var largeur := maxi(1, int(ceil(sqrt(float(n)))))
+	var res: Array = []
+	for k in n:
+		res.append(Vector2i(k % largeur, k / largeur))
+	return _normaliser(res)
+
+
+## Les pièces d'une séquence : une suite de modules identiques est UNE pièce ×n (le cran de puissance).
+static func pieces_de(sequence: Array) -> Array:
+	var pieces: Array = []
+	for m in sequence:
+		if not pieces.is_empty() and str(pieces[pieces.size() - 1].module) == str(m):
+			pieces[pieces.size() - 1].fois += 1
+		else:
+			pieces.append({"module": str(m), "fois": 1})
+	return pieces
+
+
 ## Le nombre de cases qu'une séquence demande, toutes pièces confondues.
 func taille_de(sequence: Array) -> int:
 	var n := 0
-	for m in sequence:
-		n += forme_de(str(m)).size()
+	for p in pieces_de(sequence):
+		n += forme_de(str(p.module), int(p.fois)).size()
 	return n
 
 
@@ -165,9 +199,9 @@ static func _cases_des_lignes(lignes: Array) -> Array:
 ## que les formes ne s'emboîtent pas dans cet ordre — `ok` est alors faux quand même.
 func emboiter(sequence: Array, grille: Array) -> Dictionary:
 	var pieces: Array = []
-	for m in sequence:
-		var forme: Array = forme_de(str(m))
-		pieces.append({"module": str(m), "forme": forme, "rotations": _rotations(forme)})
+	for pc in pieces_de(sequence):   # une suite de modules identiques est une pièce ×n
+		var forme: Array = forme_de(str(pc.module), int(pc.fois))
+		pieces.append({"module": str(pc.module), "fois": int(pc.fois), "forme": forme, "rotations": _rotations(forme)})
 	var demande := 0
 	for p in pieces:
 		demande += (p.forme as Array).size()
@@ -209,7 +243,7 @@ func _placer(pieces: Array, i: int, cases_lues: Array, libres: Dictionary, place
 				continue
 			for c in cases:
 				libres[c] = false
-			placement.append({"module": piece.module, "rot": int(rot.k), "ancre": ancre, "cases": cases})
+			placement.append({"module": piece.module, "fois": int(piece.get("fois", 1)), "rot": int(rot.k), "ancre": ancre, "cases": cases})
 			if _placer(pieces, i + 1, cases_lues, libres, placement, ancre):
 				return true
 			placement.pop_back()

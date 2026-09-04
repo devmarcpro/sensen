@@ -17,7 +17,7 @@ const ORDRE_TYPES: Array[String] = ["portee", "forme", "noyau", "modificateur", 
 
 var ecrans: Node                       # l'écran parent (Ecrans) : _apercu_plan, _contribution_module, sequence_composee
 var main: Node
-var placements: Array[Dictionary] = []   # les pièces posées : {module, rot, ancre: Vector2i, cases: Array}
+var placements: Array[Dictionary] = []   # les pièces posées : {module, fois, rot, ancre: Vector2i, cases: Array} — fois = le cran de puissance
 var sequence_refusee: Array = []         # une séquence reçue qui ne tient pas dans la grille : gardée pour le dire
 var rotation_courante := 0             # la rotation qu'aura la prochaine pièce posée (R sur une carte du catalogue)
 var piece_choisie := -1                # l'index dans `placements` de la pièce sélectionnée dans la grille (−1 : aucune)
@@ -214,7 +214,8 @@ func sequence() -> Array:
 	tri.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return GrilleSort.avant(_case_de_lecture(a), _case_de_lecture(b)))
 	var seq: Array = []
 	for p in tri:
-		seq.append(str(p.module))
+		for k in maxi(1, int(p.get("fois", 1))):   # une pièce ×n, c'est le module n fois de suite pour l'assembleur
+			seq.append(str(p.module))
 	return seq
 
 
@@ -234,16 +235,18 @@ func _occupees(sauf: int = -1) -> Dictionary:
 
 ## Pose `module` avec la rotation `rot`, ancré en `ancre` ; `deplace` = l'index d'une pièce qu'on déplace
 ## (ses cases ne comptent pas comme prises). Retourne vrai si la pièce tient là.
-func poser(module: String, rot: int, ancre: Vector2i, deplace: int = -1, choisir: bool = true) -> bool:
+func poser(module: String, rot: int, ancre: Vector2i, deplace: int = -1, choisir: bool = true, fois: int = 1) -> bool:
 	var g := grille_sort()
-	var forme: Array = g.tournee(g.forme_de(module), rot)
+	if deplace >= 0 and deplace < placements.size():
+		fois = int(placements[deplace].get("fois", 1))   # une pièce qu'on déplace garde son cran
+	var forme: Array = g.tournee(g.forme_de(module, fois), rot)
 	var cases: Array = g.poser(forme, ancre, grille_courante().cases, _occupees(deplace))
 	if cases.is_empty():
 		grille_ctrl.refuser()
 		return false
 	if deplace >= 0 and deplace < placements.size():
 		placements.remove_at(deplace)
-	placements.append({"module": module, "rot": rot, "ancre": ancre, "cases": cases})
+	placements.append({"module": module, "fois": fois, "rot": rot, "ancre": ancre, "cases": cases})
 	# À la souris, la pièce posée devient la pièce choisie ; au clavier (Entrée), on reste sur le
 	# catalogue — sinon le R suivant tournait la pièce posée au lieu de préparer la prochaine, et Suppr
 	# retirait la dernière posée quel que soit le module sélectionné (revue du 2026-09-04).
@@ -284,12 +287,31 @@ func tourner(index: int) -> void:
 		return
 	var p: Dictionary = placements[index]
 	var g := grille_sort()
-	var forme: Array = g.tournee(g.forme_de(str(p.module)), int(p.rot) + 1)
+	var forme: Array = g.tournee(g.forme_de(str(p.module), int(p.get("fois", 1))), int(p.rot) + 1)
 	var cases: Array = g.poser(forme, p.ancre, grille_courante().cases, _occupees(index))
 	if cases.is_empty():
 		grille_ctrl.refuser()
 		return
-	placements[index] = {"module": p.module, "rot": (int(p.rot) + 1) % g.rotations_permises(), "ancre": p.ancre, "cases": cases}
+	placements[index] = {"module": p.module, "fois": int(p.get("fois", 1)), "rot": (int(p.rot) + 1) % g.rotations_permises(), "ancre": p.ancre, "cases": cases}
+	reconstruire(main.joueur())
+
+
+## Le cran de puissance de la pièce posée `index` : +1 ou −1 (jamais sous ×1). La pièce grossit ou
+## rétrécit à la même ancre et la même rotation ; si elle ne tient plus, rien ne bouge et la grille rougit.
+func changer_fois(index: int, delta: int) -> void:
+	if index < 0 or index >= placements.size():
+		return
+	var p: Dictionary = placements[index]
+	var fois := maxi(1, int(p.get("fois", 1)) + delta)
+	if fois == int(p.get("fois", 1)):
+		return
+	var g := grille_sort()
+	var forme: Array = g.tournee(g.forme_de(str(p.module), fois), int(p.rot))
+	var cases: Array = g.poser(forme, p.ancre, grille_courante().cases, _occupees(index))
+	if cases.is_empty():
+		grille_ctrl.refuser()
+		return
+	placements[index] = {"module": p.module, "fois": fois, "rot": int(p.rot), "ancre": p.ancre, "cases": cases}
 	reconstruire(main.joueur())
 
 
@@ -321,8 +343,8 @@ func _ranger(depart: Array) -> void:
 		sequence_refusee = depart.duplicate()
 		grille_ctrl.refuser()
 		return
-	for p in emb.placement:   # le moteur dit la rotation et l'ancre qu'il a choisies ; l'écran les reprend telles quelles
-		placements.append({"module": str(p.module), "rot": int(p.rot), "ancre": p.ancre, "cases": p.cases})
+	for p in emb.placement:   # le moteur dit la rotation, l'ancre et le cran qu'il a choisis ; l'écran les reprend tels quels
+		placements.append({"module": str(p.module), "fois": int(p.get("fois", 1)), "rot": int(p.rot), "ancre": p.ancre, "cases": p.cases})
 
 
 ## Reconstruit tout depuis l'état du joueur ; `depart` = une séquence à pré-remplir (hotbar, capture).
@@ -528,6 +550,12 @@ func touche(ev: InputEventKey) -> bool:
 		KEY_R:
 			tourner_selection()
 			return true
+		KEY_KP_ADD, KEY_EQUAL, KEY_PLUS:   # le cran de puissance de la pièce choisie (designer 2026-09-04)
+			changer_fois(piece_choisie, 1)
+			return true
+		KEY_KP_SUBTRACT, KEY_MINUS:
+			changer_fois(piece_choisie, -1)
+			return true
 	return false
 
 
@@ -728,6 +756,8 @@ class GrilleControl extends Control:
 			var cl := Composeur._case_de_lecture(p)   # le pictogramme et le nom sur la case de lecture : l'ordre se voit
 			var r_ic := Rect2(o + Vector2(cl.x, cl.y) * CASE + Vector2(5, 3), Vector2(CASE - 11.0, CASE - 11.0))
 			Pictos.dessiner(self, Pictos.icone_de(md), r_ic, col)
+			if int(p.get("fois", 1)) > 1:   # le cran de puissance, en coin
+				draw_string(ThemeDB.fallback_font, o + Vector2(cl.x, cl.y) * CASE + Vector2(CASE - 13.0, 10.0), "×%d" % int(p.fois), HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(1, 1, 1, 0.95))
 			var nom_c := TranslationServer.translate(str(md.get("name_key", p.module))).left(6)
 			draw_string(ThemeDB.fallback_font, o + Vector2(cl.x, cl.y) * CASE + Vector2(3, CASE - 4.0), nom_c, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.95, 0.95, 0.9))
 		if survol.x >= 0 and not donnees_survol.is_empty():   # la pièce en train d'être glissée, en clair ou en rouge

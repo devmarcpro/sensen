@@ -151,6 +151,7 @@ func _ready() -> void:
 	_lancer("test_flottabilite")
 	_lancer("test_grilles_possedees")
 	_lancer("test_trames")
+	_lancer("test_cran_de_puissance")
 	_lancer("test_composer_capacites")
 	_lancer("test_charges_de_modules")
 	_lancer("test_assemblage_sans_limite")
@@ -3550,25 +3551,31 @@ func test_grille_sort() -> void:
 	var carre_2x2 := [Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)]
 	var ligne: Array = g.grille_de("perception", 0)
 	var bloc: Array = g.grille_de("force", 0)
-	var faux_cat := {"gros_noyau": {"module_type": "noyau", "cout_ticks": 30, "forme_grille": [[0, 0], [1, 0], [0, 1], [1, 1]]}}
+	# Deux modules DIFFÉRENTS de même forme : depuis le cran de puissance (2026-09-04), deux modules
+	# identiques de suite sont une seule pièce ×2 — pour tester deux pièces, il en faut deux distincts.
+	var faux_cat := {"gros_a": {"module_type": "noyau", "cout_ticks": 30, "forme_grille": [[0, 0], [1, 0], [0, 1], [1, 1]]},
+		"gros_b": {"module_type": "noyau", "cout_ticks": 30, "forme_grille": [[0, 0], [1, 0], [0, 1], [1, 1]]}}
 	var g2 := GrilleSort.new(s.regles.r.grille, faux_cat)
-	verifier(g2.forme_de("gros_noyau").size() == carre_2x2.size(), "forme_grille explicite : quatre cases")
+	verifier(g2.forme_de("gros_a").size() == carre_2x2.size(), "forme_grille explicite : quatre cases")
 	# La ligne du tireur a un TALON de deux cases (calibrage sur les kits, 2026-09-03) : UN carré y tient,
 	# jamais deux — le bloc du guerrier en prend deux sans peine. L'identité est dans la différence.
-	verifier(g2.emboiter(["gros_noyau"], ligne).ok and not g2.emboiter(["gros_noyau", "gros_noyau"], ligne).ok, "un seul carré tient dans la ligne du tireur, pas deux")
+	verifier(g2.emboiter(["gros_a"], ligne).ok and not g2.emboiter(["gros_a", "gros_b"], ligne).ok, "un seul carré tient dans la ligne du tireur, pas deux")
 	# Un 3×3 ne prend qu'un carré 2×2 (le deuxième chevaucherait) : c'est au palier 10, en 4×3, que le
 	# guerrier en tient deux — là où la ligne du tireur n'en tiendra jamais qu'un.
-	verifier(g2.emboiter(["gros_noyau", "gros_noyau"], g.grille_de("force", 10)).ok, "deux carrés tiennent dans le bloc du guerrier au palier 10")
-	# Le retour arrière : trois dominos dans un 2×3 tiennent ; quatre ne tiennent pas, et le manque est dit.
-	var dom := {"d": {"module_type": "noyau", "cout_ticks": 5}}
+	verifier(g2.emboiter(["gros_a", "gros_b"], g.grille_de("force", 10)).ok, "deux carrés tiennent dans le bloc du guerrier au palier 10")
+	# Le retour arrière : trois dominos distincts dans un 2×3 tiennent ; quatre ne tiennent pas, et le manque est dit.
+	var dom := {"d1": {"module_type": "noyau", "cout_ticks": 5}, "d2": {"module_type": "noyau", "cout_ticks": 5}, "d3": {"module_type": "noyau", "cout_ticks": 5}, "d4": {"module_type": "noyau", "cout_ticks": 5}}
 	var g3 := GrilleSort.new(s.regles.r.grille, dom)
 	var deux_trois := GrilleSort._cases_des_lignes(["##", "##", "##"])
-	verifier(g3.emboiter(["d", "d", "d"], deux_trois).ok, "trois dominos remplissent un 2×3")
-	var trop := g3.emboiter(["d", "d", "d", "d"], deux_trois)
+	verifier(g3.emboiter(["d1", "d2", "d3"], deux_trois).ok, "trois dominos remplissent un 2×3")
+	var trop := g3.emboiter(["d1", "d2", "d3", "d4"], deux_trois)
 	verifier(not trop.ok and int(trop.manque) == 2, "quatre dominos : refusé, deux cases de trop (%d)" % int(trop.manque))
+	# Et le même domino quatre fois est UNE pièce ×4 : huit cases, qui ne tiennent pas non plus dans six.
+	var quatre := g3.emboiter(["d1", "d1", "d1", "d1"], deux_trois)
+	verifier(not quatre.ok and int(quatre.demande) == 8 and int(quatre.manque) == 2, "le même domino quatre fois est une pièce ×4 de huit cases")
 	# La rotation : un domino vertical rentre dans une ligne horizontale.
-	var ligne_1x2 := GrilleSort._cases_des_lignes(["##"])
-	verifier(g3.emboiter(["d"], ligne_1x2).ok, "un domino tourne pour se coucher dans une ligne")
+	var colonne_2x1 := GrilleSort._cases_des_lignes(["#", "#"])
+	verifier(g3.emboiter(["d1"], colonne_2x1).ok, "un domino tourne pour se dresser dans une colonne")
 
 
 func test_element_module() -> void:
@@ -3663,6 +3670,24 @@ func test_trames() -> void:
 		t2["grille"] = str(t.grille)
 		j.sac.append(t2.uid)
 		verifier(not s._lire(j, t2.uid, s.horloge_monde.ticks) and (t2.uid in j.sac), "une grille déjà possédée ne consomme pas la trame")
+
+
+func test_cran_de_puissance() -> void:
+	# Le cran de puissance (designer 2026-09-04) : une pièce ×n prend n fois la place, sa forme suit le
+	# prix ×n, et pour l'assembleur c'est le module n fois de suite — la règle du 1er septembre.
+	var s := nouvelle_sim("plaine_au_talus")
+	var g: GrilleSort = s.grille_sort
+	var base := g.forme_de("etincelle").size()
+	verifier(g.forme_de("etincelle", 2).size() == base * 2 and g.forme_de("etincelle", 3).size() == base * 3, "une pièce ×n prend n fois la place (%d, %d, %d)" % [base, g.forme_de("etincelle", 2).size(), g.forme_de("etincelle", 3).size()])
+	var pieces := GrilleSort.pieces_de(["point", "gel", "gel", "gel", "point"])
+	verifier(pieces.size() == 3 and int(pieces[1].fois) == 3 and str(pieces[1].module) == "gel", "trois Gel de suite sont une pièce ×3 ; un Point avant et un après restent deux pièces")
+	verifier(g.taille_de(["gel", "gel"]) == g.forme_de("gel", 2).size(), "la taille d'une séquence compte les pièces ×n")
+	var emb := g.emboiter(["point", "gel", "gel"], g.grille_de("force", 25))
+	verifier(emb.ok and (emb.placement as Array).size() == 2 and int(emb.placement[1].fois) == 2, "l'emboîtement range Gel ×2 comme une seule pièce, avec son cran")
+	# l'assembleur, lui, voit toujours deux Gel : deux fois plus fort, payé deux fois
+	var plan1 := s.capacites.assembler(["point", "contact", "gel"], 10, "1d4", {}, {})
+	var plan2 := s.capacites.assembler(["point", "contact", "gel", "gel"], 10, "1d4", {}, {})
+	verifier(int(plan2.ressource) == 2 * int(plan1.ressource) and int(plan2.get("fois", 1)) == 2, "pour l'assembleur, ×2 est le module deux fois : prix double (%d → %d)" % [int(plan1.ressource), int(plan2.ressource)])
 
 
 func test_composer_capacites() -> void:
@@ -7438,7 +7463,9 @@ func test_donjon_temps_a_l_action() -> void:
 			s38.crediter_module(j38, str(m38), 9)
 		if not s38.composer_capacite(j38, Array(r38.modules).duplicate()):
 			tous38 = false
-	verifier(tous38, "chaque sort recommandé s'assemble avec des modules du catalogue")
+			var emb38: Dictionary = s38.emboitement(j38, Array(r38.modules))
+			print("    sort recommandé refusé : %s — %d cases pour %d (grille de « %s »)" % [str(r38.modules), int(emb38.demande), (emb38.cases as Array).size(), str(emb38.stat)])
+	verifier(tous38, "chaque sort recommandé s'assemble avec des modules du catalogue, et tient dans la grille de départ")
 	s38.monde.fermer()
 	var s2 := Simulation.new(22)
 	s2.charger_camp()
