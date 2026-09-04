@@ -772,7 +772,7 @@ ui.commerce.bourse_cachee,?
 journal.swap_gratuit,"{nom} change d'arme sans perdre un tick (Râtelier vivant)"
 journal.artefact,"un artefact repose sur la dépouille de {nom}"
 journal.objet_fini,"cet objet est fini par nature : ni sertissure ni infusion"
-journal.pnj_affame,"{nom} n'a rien trouvé au garde-manger (humeur −10)"
+journal.pnj_affame,"{n} résident(s) n'ont rien trouvé au garde-manger (humeur −10)"
 ui.gestion.pieces,"pièces valides : {n} ({logees} résidents logés)"
 journal.tourelle_tire,"une tourelle touche {nom} : {degats}"
 ui.specimen.chatoyant," chatoyant"
@@ -3242,7 +3242,7 @@ ui.perimetre.aide,Entrée : choisir ce type, puis cliquer les deux coins du rect
 journal.perimetre_dessin,Périmètre {type} : clique les deux coins
 journal.perimetre_hors_claim,Le périmètre doit être sur une cellule revendiquée
 journal.maison_batie,"Une chaumière est bâtie pour {nom} en ({x},{y})"
-journal.maison_pas_de_place,Pas de place dans le résidentiel pour loger {nom}
+journal.maison_pas_de_place,Pas de place dans le résidentiel pour loger {n} résident(s)
 journal.maison_pas_de_materiaux,Pas assez de matériaux au stock pour loger {nom}
 perimetre.stockage.name,stockage
 ui.gestion.stockage_capacite,place {reste}/{capacite}

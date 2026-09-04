@@ -1995,7 +1995,7 @@ journal.plante,"{nom} plants {plante}"
 journal.planter_refuse,planting: you need a free neighbouring tile in a Fields cell
 journal.plat_refuse,a vampire no longer eats cooked food
 journal.pluie_creux,the rain fills the hollows
-journal.pnj_affame,"{nom} found nothing in the pantry (mood −10)"
+journal.pnj_affame,"{n} resident(s) found nothing in the pantry (mood −10)"
 journal.portail_pose,"{nom} opens a breach"
 journal.porte,you are carrying someone: no attack and no guard
 journal.pose,"{nom} places {objet}"
@@ -3233,7 +3233,7 @@ ui.perimetre.aide,Enter: pick this type, then click the two corners of the recta
 journal.perimetre_dessin,{type} perimeter: click the two corners
 journal.perimetre_hors_claim,The perimeter must be on a claimed cell
 journal.maison_batie,"A cottage is built for {nom} at ({x},{y})"
-journal.maison_pas_de_place,No room in the residential area to house {nom}
+journal.maison_pas_de_place,No room in the residential area to house {n} resident(s)
 journal.maison_pas_de_materiaux,Not enough materials in stock to house {nom}
 perimetre.stockage.name,storage
 ui.gestion.stockage_capacite,room {reste}/{capacite}

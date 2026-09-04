@@ -3100,6 +3100,7 @@ func _recalculer_humeurs() -> void:
 ## puis au stock du territoire — tout consommable à nutrition > 0, là où tombe la récolte des fermiers. Une seule
 ## fois par semaine, avant le bilan ; laisse `affame` sur chacun, que `_recalculer_humeurs` lit.
 func _nourrir_residents() -> void:
+	var affames := 0   # une ligne de journal pour tous, pas une par personne (grande base, 2026-09-04)
 	var garde_manger: Array = []
 	for gi in grille.meubles.keys():
 		if str(GameData.entree("meubles", str(grille.meubles[gi])).type_meuble) == "garde_manger" and monde.claims.has(_cell_de(grille.pos_de(int(gi)))):
@@ -3129,7 +3130,9 @@ func _nourrir_residents() -> void:
 					break
 		x["affame"] = not mange
 		if not mange:
-			EventBus.emettre(&"journal", [&"journal.pnj_affame", {"nom": x.name_key}])
+			affames += 1
+	if affames > 0:
+		EventBus.emettre(&"journal", [&"journal.pnj_affame", {"n": affames}])
 
 
 ## La production hebdomadaire d'un résident (Abstraction hors-site) : rendement × heures × humeur.
@@ -5343,6 +5346,7 @@ func _batir_maisons() -> int:
 	var plan: Array = bat.plan
 	var meubles: Dictionary = bat.get("meubles", {})
 	var baties := 0
+	var sans_place := 0   # une ligne pour tous ceux qu'on n'a pas pu loger (grande base, 2026-09-04)
 	for x in residents():
 		if baties >= int(mc.get("max_par_semaine", 2)):
 			break
@@ -5356,7 +5360,7 @@ func _batir_maisons() -> int:
 			continue   # déjà logé dans une pièce valide
 		var origine := _emplacement_maison(pid, plan)
 		if origine == Vector2i(-1, -1):
-			EventBus.emettre(&"journal", [&"journal.maison_pas_de_place", {"nom": x.name_key}])
+			sans_place += 1
 			continue
 		var ok := true
 		for c in mc.get("cout", []):
@@ -5412,6 +5416,8 @@ func _batir_maisons() -> int:
 		baties += 1
 		scanner_perimetre(pid)   # ses tuiles libres viennent de diminuer : la place restante se lit juste (2026-09-04)
 		EventBus.emettre(&"journal", [&"journal.maison_batie", {"nom": x.name_key, "x": origine.x, "y": origine.y}])
+	if sans_place > 0:
+		EventBus.emettre(&"journal", [&"journal.maison_pas_de_place", {"n": sans_place}])
 	if baties > 0:
 		_recalculer_humeurs()
 	return baties
