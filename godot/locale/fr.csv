@@ -1086,11 +1086,11 @@ function.herboriste.name,Herboriste
 ui.ecran.gestion,"TERRITOIRE — {n} cellules · {pnj} résidents · trésor {tresor} or · dette {dette} · prévisionnel {prev} or/semaine"
 ui.gestion.cellule,"cellule ({x},{y}) — {role}{camp}"
 ui.gestion.camp," · camp"
-ui.gestion.resident,"{nom} — {fonction}{betail} · humeur {humeur} · rendement ×{facteur}"
+ui.gestion.resident,"{nom} — {fonction}{betail} · humeur {humeur} · rendement ×{facteur} · {logement} · poste ({x},{y})"
 ui.gestion.stock,"stock : {nom} ×{n}"
 ui.gestion.rapport,{texte}
 ui.gestion.role_aide,"Entrée : changer de rôle (base → habitation → champs → ressources naturelles ; ressources naturelles efface les constructions au passage de la semaine)"
-ui.gestion.resident_aide,Entrée : retirer son affectation (il redevient compagnon)
+ui.gestion.resident_aide,"Entrée : réassigner (choisir sa fonction) · Suppr : renvoyer"
 ui.gestion.stock_aide,Entrée : retirer le stock dans ton sac
 ui.ecran.deposer,Déposer 50 or (D)
 ui.ecran.retirer,Retirer 50 or (W)
@@ -3207,3 +3207,8 @@ journal.engage,{nom} part s'installer à la base ({or} or)
 journal.engager_or,Il faut {or} or pour engager quelqu'un
 journal.pas_de_base,Aucune cellule revendiquée : personne ne peut s'y installer
 journal.migrant,{nom} arrive s'installer à la base
+ui.gestion.loge,logé
+ui.gestion.sans_lit,sans lit (humeur −15)
+ui.gestion.compagnon,"compagnon : {nom} — {ordre} · PV {sante}/{sante_max}"
+ui.gestion.compagnon_aide,Entrée : suis-moi ⇄ attends ici
+journal.renvoye,{nom} est renvoyé : il redevient villageois

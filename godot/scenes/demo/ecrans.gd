@@ -295,6 +295,12 @@ func touche(ev: InputEventKey) -> bool:
 			_action_principale()
 			return true
 		KEY_DELETE, KEY_BACKSPACE:
+			if courant == "gestion":   # renvoyer un résident (Décision — Gestion de base, étape 2)
+				var en_g: Dictionary = entrees[selection] if selection < entrees.size() else {}
+				if en_g.get("kind", "") == "resident":
+					main.sim.desassigner(main.joueur(), str(en_g.id), true)
+					rafraichir()
+				return true
 			if courant == "composer":   # retirer la dernière occurrence du module sélectionné
 				var en_c: Dictionary = entrees[selection] if selection < entrees.size() else {}
 				if en_c.get("kind", "") == "module_composer":
@@ -721,8 +727,13 @@ func _action_principale() -> void:
 			var cell: Vector2i = en.cellule
 			var actuel := str(main.sim.monde.claims[cell].role)
 			main.sim.changer_role(cell, str(roles[(roles.find(actuel) + 1) % roles.size()]))
-		"resident":
-			main.sim.desassigner(j, str(en.id))
+		"resident":   # Entrée : réassigner — le choix de fonction s'ouvre depuis l'écran (Gestion de base, étape 2)
+			pnj_id = str(en.id)
+			ouvrir("assigner")
+			return
+		"compagnon":   # Entrée : suis-moi ⇄ attends ici (étape 3)
+			var c_o: Dictionary = main.sim.entites.get(str(en.id), {})
+			main.sim.ordonner(j, str(en.id), "attendre" if str(c_o.get("ordre", "suivre")) == "suivre" else "suivre")
 		"stock":
 			main.sim.retirer_stock(j, str(en.cle))
 		"donner", "reprendre":
@@ -1055,9 +1066,13 @@ func _construire_gestion(j: Dictionary) -> void:
 		liste.add_item(tr("ui.gestion.cellule").format({"x": cell.x, "y": cell.y, "role": tr("role." + str(sim.monde.claims[cell].role)), "camp": tr("ui.gestion.camp") if cell == sim.monde.cellule_camp else ""}))
 		entrees.append({"kind": "cellule", "cellule": cell, "texte": tr("ui.gestion.role_aide")})
 	for x in sim.residents():
-		liste.add_item(tr("ui.gestion.resident").format({"nom": tr(x.name_key), "fonction": tr(GameData.entree("functions", str(x.assignation.fonction)).name_key), "betail": tr("ui.gestion.betail") if str(x.get("statut_habitat", "normal")) == "betail" else "", "humeur": int(x.get("humeur", 60)), "facteur": "%.2f" % sim.facteur_humeur(x)}))
+		var poste: Vector2i = x.get("poste", x.pos)
+		liste.add_item(tr("ui.gestion.resident").format({"nom": tr(x.name_key), "fonction": tr(GameData.entree("functions", str(x.assignation.fonction)).name_key), "betail": tr("ui.gestion.betail") if str(x.get("statut_habitat", "normal")) == "betail" else "", "humeur": int(x.get("humeur", 60)), "facteur": "%.2f" % sim.facteur_humeur(x), "logement": tr("ui.gestion.loge" if x.has("lit") else "ui.gestion.sans_lit"), "x": poste.x, "y": poste.y}))
 		var pr: Dictionary = sim.production_de(x)
 		entrees.append({"kind": "resident", "id": x.id, "texte": tr("ui.gestion.resident_aide") + "\n" + str(pr)})
+	for c in sim.compagnons_de(j, true):   # l'escorte, sous les résidents (Décision — Gestion de base, étape 3)
+		liste.add_item(tr("ui.gestion.compagnon").format({"nom": tr(c.name_key), "ordre": tr("ordre." + str(c.get("ordre", "suivre"))), "sante": int(c.sante), "sante_max": int(c.sante_max)}))
+		entrees.append({"kind": "compagnon", "id": c.id, "texte": tr("ui.gestion.compagnon_aide")})
 	for cle in t.stocks.keys():
 		liste.add_item(tr("ui.gestion.stock").format({"nom": str(cle).split("|")[0], "n": int(t.stocks[cle])}))
 		entrees.append({"kind": "stock", "cle": cle, "texte": tr("ui.gestion.stock_aide")})

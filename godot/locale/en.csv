@@ -955,8 +955,8 @@ ui.gestion.parcelles,"plots: {n} ({mures} ripe)"
 ui.gestion.pieces,"valid rooms: {n} ({logees} residents housed)"
 ui.gestion.raid,"strength {force} vs defence {defense} — {issue} (losses {perte} %)"
 ui.gestion.rapport,{texte}
-ui.gestion.resident,"{nom} — {fonction}{betail} · mood {humeur} · yield ×{facteur}"
-ui.gestion.resident_aide,Enter: remove their assignment (they become a companion again)
+ui.gestion.resident,"{nom} — {fonction}{betail} · mood {humeur} · yield ×{facteur} · {logement} · post ({x},{y})"
+ui.gestion.resident_aide,"Enter: reassign (choose a function) · Delete: dismiss"
 ui.gestion.role_aide,"Enter: change the role (base → housing → fields → wild resources ; wild resources wipes buildings when the week turns)"
 ui.gestion.royaume,"{statut} · government: {gouv}{transition} · defence {defense} · value {valeur} · last raid: {raid}"
 ui.gestion.royaume_statut,kingdom
@@ -3198,3 +3198,8 @@ journal.engage,{nom} leaves to settle at the base ({or} gold)
 journal.engager_or,Hiring someone costs {or} gold
 journal.pas_de_base,No claimed cell: nobody can settle there
 journal.migrant,{nom} arrives to settle at the base
+ui.gestion.loge,housed
+ui.gestion.sans_lit,no bed (mood −15)
+ui.gestion.compagnon,"companion: {nom} — {ordre} · HP {sante}/{sante_max}"
+ui.gestion.compagnon_aide,Enter: follow me ⇄ wait here
+journal.renvoye,{nom} is dismissed: a villager again

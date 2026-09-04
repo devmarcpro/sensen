@@ -2041,6 +2041,8 @@ func _assigner(e: Dictionary, pnj_id: String, fonction: String, tick: int) -> bo
 	var conquis: bool = str(monde.villages.get(str(x.get("village", "")), {}).get("conquis_par", "")) == e.id
 	if not monde.claims.has(cell) or (str(x.get("maitre", "")) != e.id and x.camp != "joueur" and not conquis):
 		return false
+	if str(x.get("maitre", "")) == e.id:
+		x["ancien_compagnon"] = true   # renvoyé un jour, il redeviendra compagnon, pas villageois (Gestion de base, étape 2)
 	x.erase("maitre")
 	if not conquis:
 		x.camp = "joueur"
@@ -2084,11 +2086,20 @@ func _meilleure_guilde(e: Dictionary) -> String:
 	return meilleure if rang_max >= int(_ry().villes.hall_rang_min) else ""
 
 
-func desassigner(e: Dictionary, pnj_id: String) -> bool:
+## Retirer son affectation à un résident : il redevient compagnon — ou, avec `renvoyer`, un villageois libre
+## (Décision — Gestion de base, étape 2 : un engagé ou un migrant renvoyé ne prend pas une place d'escorte).
+func desassigner(e: Dictionary, pnj_id: String, renvoyer: bool = false) -> bool:
 	var x: Dictionary = entites.get(pnj_id, {})
 	if x.is_empty() or not x.has("assignation"):
 		return false
 	x.erase("assignation")
+	if renvoyer and not bool(x.get("ancien_compagnon", false)):
+		x.erase("maitre")
+		x.camp = "civil"
+		x.ai_profile = "civil"
+		x["fonction"] = str(x.get("fonction", "oisif"))
+		EventBus.emettre(&"journal", [&"journal.renvoye", {"nom": x.name_key}])
+		return true
 	_devenir_compagnon(e, x)
 	EventBus.emettre(&"journal", [&"journal.desassigne", {"nom": x.name_key}])
 	return true

@@ -24,8 +24,8 @@ L'idée du designer du 2026-09-04, ce que le coffre en avait déjà, ce qui manq
 ## L'ordre, celui du designer
 
 1. **Recrutement** — *engager* un PNJ pour la base (il part s'y installer, sans prendre de place d'escorte), et des **migrants** qui viennent d'eux-mêmes quand la base a de la place et une réputation. → codé le jour même, voir [[Population et exploitation]].
-2. **Gestion de base** — l'écran Gestion devient un vrai tableau des résidents : fonction, poste, logement, humeur, et les actions *réassigner* / *renvoyer* sans aller parler à chacun.
-3. **Compagnons** — la même vue pour l'escorte : qui suit, qui attend à la base, et le passage de l'un à l'autre.
+2. **Gestion de base** — l'écran Gestion devient un vrai tableau des résidents : fonction, poste, logement, humeur, et les actions *réassigner* / *renvoyer* sans aller parler à chacun. → codé le jour même : chaque résident dit s'il est logé et où est son poste ; **Entrée** ouvre le choix de fonction, **Suppr** le renvoie (un engagé ou un migrant redevient villageois, un ancien compagnon redevient compagnon).
+3. **Compagnons** — la même vue pour l'escorte : qui suit, qui attend à la base, et le passage de l'un à l'autre. → codé le jour même : les compagnons sont listés sous les résidents avec leur ordre, **Entrée** bascule *suis-moi* / *attends ici*.
 4. **Périmètres de récolte** — le cœur de l'idée : un périmètre = des tuiles d'une cellule revendiquée + un type de récolte (bois, pierre, minerai, plantes, pêche, champ) ; on y assigne des résidents ; la production hebdomadaire se calcule **depuis ce qu'il y a sur les tuiles** (arbres, filons, plantes, fertilité) × la compétence et l'humeur du PNJ ; et, quand le joueur est là, le résident **travaille dedans** (son poste est une tuile du périmètre, la routine l'y mène).
 
 ## Ce qui est au designer

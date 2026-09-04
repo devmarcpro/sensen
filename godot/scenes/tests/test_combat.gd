@@ -3905,6 +3905,8 @@ func test_engager_et_migrants() -> void:
 	verifier(s.residents().size() == n1 + 1, "la base pleine n'attire plus personne")
 	s.regles.r.royaume.migrants.residents_par_cellule = 4
 	s.regles.r.royaume.migrants.chance_base = 0.2
+	# renvoyer (Gestion de base, étape 2) : un engagé redevient villageois, pas compagnon
+	verifier(s.desassigner(j, v.id, true) and not v.has("assignation") and not v.has("maitre") and v.camp == "civil", "renvoyé depuis l'écran : il redevient villageois, sans prendre une place d'escorte")
 	s.monde.fermer()
 
 
