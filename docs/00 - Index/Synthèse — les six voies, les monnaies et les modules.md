@@ -192,7 +192,7 @@ n'apparaît que si des noyaux de charisme sont équipés. Six terrains distincts
 3. **Que deviennent les PV ?** Si l'endurance remplit la vigueur, lui laisse-t-on *encore*
    `santé_max` ? Lui laisser les deux la rend très forte ; la lui retirer laisse les PV orphelins ;
    une troisième voie les donne à la force.
-4. **Les 52 noyaux de volonté.** Aucune monnaie ne rééquilibre quoi que ce soit tant que les trois
+4. **Les 52 noyaux de volonté.** *(Codé depuis 2026-09-04 : vingt noyaux martiaux de plus — force 13, dextérité 12, endurance 11, perception 12 ; voir « Douze façons de jouer par voie » dans Structure compétences-modules-slots.)* Aucune monnaie ne rééquilibre quoi que ce soit tant que les trois
    quarts du catalogue tiennent sur une voie. C'est le vrai travail ; la monnaie n'est que le cadre
    qui dit où ranger.
 5. **L'élément comme module** (§4).

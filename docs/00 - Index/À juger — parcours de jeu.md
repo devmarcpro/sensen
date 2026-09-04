@@ -327,7 +327,7 @@ Trois questions restent au designer, et ce sont des questions de design, pas de 
    l'impose. Le tableau ci-dessus est le choix conservateur — il ne bouge pas `mana_max`.
 2. **Que devient la santé ?** Si l'endurance remplit la vigueur, il faut décider si elle donne
    *encore* les PV. Sinon les PV n'ont plus de stat du tout.
-3. **Les 52 noyaux de volonté.** Trois monnaies ne rééquilibrent rien tant que les trois quarts du
+3. **Les 52 noyaux de volonté.** *(Fait le 2026-09-04 : vingt noyaux martiaux écrits, force 13 · dextérité 12 · endurance 11 · perception 12 ; leurs coûts, 5 à 14 de vigueur ou de sang-froid, sont des points de départ à juger.)* Trois monnaies ne rééquilibrent rien tant que les trois quarts du
    catalogue restent sur une seule voie. Redécouper ces 52 est le vrai travail ; la monnaie n'est
    que le cadre qui dit où les ranger.
 
