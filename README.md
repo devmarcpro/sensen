@@ -159,6 +159,25 @@ Aucune sortie ne doit contenir `SCRIPT ERROR`, et la suite doit finir par `TESTS
 
 Un seul Godot à la fois (le fuzz dure ~4 min, la suite ~5). Une capture statique ne juge pas la fluidité — il faut le dire à l'humain qui lit.
 
+### Les sondes
+
+Vingt-huit scènes `scenes/tests/sonde_*.tscn`, chacune mesure une chose et l'écrit en clair (`python tools/verif_scripts.py` les compile toutes). Les plus utiles :
+
+```powershell
+& $godot --headless --path godot res://scenes/tests/sonde_ecrans.tscn            # chaque écran à quatre tailles de fenêtre : rien ne sort du cadre
+& $godot --headless --path godot res://scenes/tests/sonde_perf_etage.tscn        # où passent les millisecondes d'un étage de donjon (budget É2 : 100 ms)
+& $godot --headless --path godot res://scenes/tests/sonde_perf_generation.tscn   # le coût d'un objet généré
+& $godot --headless --path godot res://scenes/tests/sonde_ia.tscn                # errance, cible, meute
+& $godot --headless --path godot res://scenes/tests/sonde_journal.tscn           # les lignes identiques du journal se cumulent
+# Une grande base sur la durée : cinq cellules, zones de récolte, vingt engagés, puis N semaines (Gestion de base)
+& $godot --headless --path godot res://scenes/tests/sonde_grande_base.tscn -- --graine_monde 9 --residents 20 --semaines 12 --tresor 1000
+#   options : --etal (un étal garni du stock) · --tempo (le coût d'une image au camp) · --profil (la semaine étape par étape) · --sauvegarde (aller-retour)
+# Un hameau sur la durée : la moitié tuée, combien de semaines pour se repeupler ; décimé, devient-il abandonné (Villages PNJ)
+& $godot --headless --path godot res://scenes/tests/sonde_village.tscn -- --graine_monde 9 --semaines 30
+# Le robot joue le client : descend les étages, se bat, meurt ou pas (fenêtré ; --equiper N --sorts N pour un robot équipé)
+& $godot --path godot res://scenes/tests/parcours.tscn -- --graine 73 --etages 4 --frames 8000 --equiper 3 --sorts 3 --sortie user://robot
+```
+
 ### Générateurs de données
 
 `audit_donnees.py` vérifie les liens **entre** catalogues, que ni les schémas ni `check_vault.py` ne voient : une famille de matériaux qu'aucune recette ne produit, une dépouille sans objet, un habitat d'élevage sans meuble. `tools/gen_*.py` transcrivent des tableaux des notes en JSON (`gen_materials.py`, `gen_affixes.py`, `gen_status_effects.py`, `gen_creature_actions.py`, `gen_dungeon_prefabs.py`, `gen_name_cultures.py`, `gen_palette.py`, `gen_progression_data.py`, `gen_rigs.py`, `gen_arenas.py`), et `structure_modules.py` ajoute la forme structurée des effets de modules. Ils écrivent dans les sous-dossiers de rangement et **effacent ce qu'ils régénèrent** : ne pas éditer à la main un fichier qu'un générateur possède.
