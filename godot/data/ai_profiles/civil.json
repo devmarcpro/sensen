@@ -8,6 +8,9 @@
     "attendre": {
       "calme": 1.0
     },
+    "routine": {
+      "hors_poste": 1.2
+    },
     "retour": {
       "loin_de_l_ancre": 0.8,
       "cible_perdue": 0.6

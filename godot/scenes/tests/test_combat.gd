@@ -4056,6 +4056,87 @@ func test_bete_engage_sur_son_horloge() -> void:
 	verifier(int(j.sante) < sante0 or not j.vivant, "le rat a mordu pendant que le joueur attendait (%d → %d)" % [sante0, int(j.sante)])
 
 
+## Le cri de ralliement est poussé (IA des créatures, 2026-09-04) : un chef engagé, un acolyte à côté sans le
+## statut — le chef crie avant de charger, l'acolyte est rallié. Avant, aucune action d'allié à statut n'était choisie.
+func test_cri_de_ralliement() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	s.horloge_monde.ticks = 8000
+	var chef: Dictionary = s.ajouter("chef_de_bande", j.pos + Vector2i(3, 0), "ia")
+	var acolyte: Dictionary = s.ajouter("bandit", j.pos + Vector2i(4, 1), "ia")
+	verifier(not chef.is_empty() and not acolyte.is_empty(), "un chef de bande et son acolyte")
+	verifier(not s._meilleur_soutien(chef).is_empty() or str(chef.get("cible", "")).is_empty(), "sans cible, pas de cri ; avec, le cri est proposé")
+	var rallie := false
+	for k in 30:
+		s.attente[j.id] = true
+		s.intention(j.id, {"type": "attendre"})
+		s.horloge_monde.avancer(3)
+		var garde := 100
+		while garde > 0 and s.pas("monde"):
+			garde -= 1
+		for nom in s.combats.keys():
+			garde = 100
+			while garde > 0 and s.combats.has(nom) and s.pas(nom):
+				garde -= 1
+		if Etres.a_statut_id(acolyte, "ralliement"):
+			rallie = true
+			break
+	verifier(rallie, "le chef a crié : l'acolyte porte le statut ralliement")
+
+
+## Voir un ennemi n'ouvre un combat que pour qui attaque à vue (IA des créatures, 2026-09-04) : un cerf à deux tuiles
+## d'un joueur qui attend prend la cible, ne l'engage pas — avant, le joueur passait « en combat » avec une bête qui fuit.
+func test_proie_n_engage_pas() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var cerf: Dictionary = s.ajouter("cerf", j.pos + Vector2i(2, 0), "ia")
+	var loup: Dictionary = s.ajouter("loup", j.pos + Vector2i(-6, 0), "ia")
+	verifier(not s._profil_offensif(cerf) and s._profil_offensif(loup), "le cerf n'attaque pas à vue, le loup si")
+	for k in 12:
+		s.attente[j.id] = true
+		s.intention(j.id, {"type": "attendre"})
+		s.horloge_monde.avancer(3)
+		var garde := 100
+		while garde > 0 and s.pas("monde"):
+			garde -= 1
+		for nom in s.combats.keys():
+			garde = 100
+			while garde > 0 and s.combats.has(nom) and s.pas(nom):
+				garde -= 1
+		if s.en_combat(loup):
+			break
+	verifier(not s.en_combat(cerf), "le cerf n'a ouvert aucun combat")
+	verifier(s.en_combat(loup) and s.en_combat(j), "le loup, lui, engage le joueur à vue")
+
+
+## La routine civile joue dans la fenêtre (IA des créatures, 2026-09-04) : à 23 h, un villageois va vers son lit.
+## Avant, `routine` n'avait aucun poids dans `civil` et `garde` : ils attendaient toute la journée.
+func test_routine_civile() -> void:
+	var s := Simulation.new(151)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var v: Dictionary = s.ajouter("villageois", j.pos + Vector2i(2, 0), "ia")
+	var lit: Vector2i = Vector2i(-1, -1)
+	for d in range(5, 2, -1):
+		for dir in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)]:
+			var q: Vector2i = v.pos + dir * d
+			if s.grille.dans(q) and not s.grille.bloque_passage(q) and s.grille.occupant(q).is_empty() and lit == Vector2i(-1, -1):
+				lit = q
+	verifier(lit != Vector2i(-1, -1), "une tuile libre pour le lit")
+	v["lit"] = lit
+	var jour := int(s._cycle().get("ticks_par_jour", 24000))
+	s.horloge_monde.ticks = 3 * jour + int(23.0 / 24.0 * float(jour))
+	var avant := Grille.distance(v.pos, lit)
+	for k in 30:
+		s.attente[j.id] = true
+		s.intention(j.id, {"type": "attendre"})
+		s.horloge_monde.avancer(3)
+		var garde := 100
+		while garde > 0 and s.pas("monde"):
+			garde -= 1
+	verifier(Grille.distance(v.pos, lit) < avant, "à 23 h le villageois s'approche de son lit (%d → %d tuiles)" % [avant, Grille.distance(v.pos, lit)])
+
+
 ## Deux compagnons armés défendent le joueur (Compagnons, 2026-09-04) : le bandit est contre le joueur, pas contre
 ## eux — ils doivent s'approcher et frapper pendant que le joueur ne fait qu'attendre.
 func test_compagnons_defendent() -> void:

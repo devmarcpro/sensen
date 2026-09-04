@@ -15,6 +15,9 @@
     },
     "attendre": {
       "calme": 1.0
+    },
+    "routine": {
+      "hors_poste": 1.2
     }
   },
   "seuil_fuite_sante": 0.1,

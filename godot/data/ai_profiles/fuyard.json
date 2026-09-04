@@ -6,14 +6,15 @@
       "cible_perdue": 1.0
     },
     "attaquer": {
-      "cible_a_portee": 1.0,
-      "agressivite": 0.8
+      "acculee": 1.5
     },
     "poursuivre": {
       "cible_visible": 0.6,
       "distance_cible": 0.3
     },
     "fuir": {
+      "menace_en_vue": 1.0,
+      "joueur_proche": 1.0,
       "sante_basse": 2.0
     },
     "attendre": {

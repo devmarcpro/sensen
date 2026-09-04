@@ -501,3 +501,13 @@ Les faits, lus dans le journal et les données :
 - l'équipement d'une créature est généré à la **profondeur 1 quelle que soit sa place** (`Simulation.ajouter`, `generer_objet(base, 1, …)`) : le bandit d'un raid de semaine 2 au camp et celui de l'étage 5 ont le même kit — c'est le choix des créatures par étage qui fait la difficulté, pas leur matériel.
 
 Ce que cela pose : c'est la même question que les kits de départ (matrice des classes, plus haut) vue de l'autre côté. Un bandit, l'ennemi humain le plus commun (raids du territoire, ruines), est de fait un adversaire de niveau intermédiaire à cause de sa cuirasse ; un joueur de niveau 0 avec deux recrues n'a aucune chance. Trois lectures possibles, toutes à trancher par le designer : (a) c'est voulu, on fuit les bandits au début ; (b) le bandit devrait avoir une armure de cuir (`craft_cuir…`) et garder sa cuirasse pour un « chef » ; (c) la cuirasse absorbe trop face aux armes de fonte. Rien de codé ; le GIF le montre tel quel.
+
+## 2026-09-04 — Les IA des PNJ vérifiées (soir) : ce qui est au designer
+
+La sonde `sonde_ia_pnj.tscn` est verte après quatre corrections (voir [[IA des créatures]]). Trois choses qu'elle mesure et que je ne tranche pas :
+
+1. **La banshee n'a pas d'attaque.** Ses deux actions, hurlement et cri de ralliement, sont des soutiens d'allié (elles sont enfin poussées). Seule, elle engage le joueur, le suit, et ne peut rien lui faire — elle est pourtant classée hostile. Une attaque (un cri qui blesse, un toucher glacé) est une ligne de fiche ; ou c'est voulu, et elle n'a de sens qu'en meute.
+2. **Le rat géant mord coincé, pas à vue.** Il est tagué hostile *et* fuyard ; le profil `fuyard` fuit maintenant à vue et ne mord qu'au contact (comme les dix autres fuyards : écureuil, lièvre, pie, taupe…). Un rat qui charge à vue, c'est `ai_profile: hostile` dans sa fiche — une ligne.
+3. **Le tireur ne recule que d'une tuile.** Posé au contact, l'archer s'écarte à deux tuiles et tire (`ia.reculer_distance` 1) : il garde sa portée minimale, pas ses distances. S'il doit se tenir à quatre ou cinq tuiles, c'est ce chiffre.
+
+Et une promesse de la note *IA des créatures* que je n'ai pas codée : « civil : alerter gardes » — un villageois n'alerte personne à vue ; seul un coup reçu transmet l'aggro aux gardes proches. À coder si on le veut (une considération `alerter` et un cri), à rayer sinon.

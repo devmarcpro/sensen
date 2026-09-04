@@ -5,6 +5,9 @@
       "cible_a_portee": 1.0,
       "agressivite": 0.8
     },
+    "soutenir": {
+      "allie_a_soutenir": 0.9
+    },
     "poursuivre": {
       "cible_visible": 0.6,
       "distance_cible": 0.3

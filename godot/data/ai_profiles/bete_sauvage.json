@@ -2,7 +2,6 @@
   "name_key": "ai_profile.bete_sauvage.name",
   "considerations": {
     "attaquer": {
-      "cible_a_portee": 0.6,
       "acculee": 1.5
     },
     "fuir": {

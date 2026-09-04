@@ -10317,6 +10317,16 @@ func _meilleur_soutien(e: Dictionary) -> Dictionary:
 				"invoquer":
 					if not str(e.get("cible", "")).is_empty() and _invocations_de(e) < int(effet.get("max", 2)):
 						return {"action": a, "cible": e}
+				"statut":   # un cri, un hurlement : l'anneau autour de soi, pour les alliés qui n'ont pas encore le statut (IA des créatures, 2026-09-04)
+					if str(a.get("cible", "")) != "allie" or str(e.get("cible", "")).is_empty():
+						continue
+					for p in grille.anneau(e.pos, int(a.get("taille", 1))):
+						var occ := grille.occupant(p)
+						if occ.is_empty() or occ == e.id or not entites.has(occ):
+							continue
+						var x: Dictionary = entites[occ]
+						if x.vivant and not ennemis(e, x) and not Etres.a_statut_id(x, str(effet.id)):
+							return {"action": a, "cible": e}
 	return {}
 
 
@@ -11773,7 +11783,7 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 			meilleur_score = score
 			meilleure = nom
 	# Aggro (designer 2026-08-31, point 48) : une bête qui a une cible hostile en vue ne flâne pas.
-	if e.camp == "hostile" and not cible.is_empty() and cible.vivant and ennemis(e, cible) and meilleure in ["errer", "routine", "attendre", ""]:
+	if e.camp == "hostile" and _profil_offensif(e) and not cible.is_empty() and cible.vivant and ennemis(e, cible) and meilleure in ["errer", "routine", "attendre", ""]:
 		meilleure = "poursuivre"
 	match meilleure:
 		"attaquer":
@@ -11928,8 +11938,16 @@ func _chercher_cible(e: Dictionary, tick: int) -> Dictionary:
 			e.cible = meilleure.id
 			e.tick_derniere_vue = tick
 			e.pos_connue = meilleure.pos
-			_engager_combat(e, meilleure)
+			if _profil_offensif(e):   # un cerf qui voit le joueur ne lui ouvre pas un combat : il prend la cible pour la fuir (IA des créatures, 2026-09-04)
+				_engager_combat(e, meilleure)
 	return entites.get(e.cible, {})
+
+
+## Un profil qui attaque à vue : il pondère `attaquer` par `cible_a_portee`. Les proies, les civils, les fuyards et
+## les bêtes sauvages (acculées seulement) n'engagent un combat qu'en frappant vraiment — sinon voir un ennemi
+## suffisait à mettre le joueur « en combat » avec une bête qui fuit, et le monde s'arrêtait pour un cerf.
+func _profil_offensif(e: Dictionary) -> bool:
+	return profils_ia.get(str(e.get("ai_profile", "")), {}).get("considerations", {}).get("attaquer", {}).has("cible_a_portee")
 
 
 ## Considérations normalisées (0-1) par action candidate ; une action infaisable est absente.
