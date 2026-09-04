@@ -217,6 +217,7 @@ func _ready() -> void:
 	_lancer("test_cri_de_ralliement")
 	_lancer("test_routine_civile")
 	_lancer("test_proie_n_engage_pas")
+	_lancer("test_sprites_objets")
 	_verifier_tous_lances()
 	Monde.fermer_tous()   # aucun thread de pré-génération ne doit survivre aux autoloads
 	for nom_s in ["test_terrain", "test_sensen", "test_sensen2", "test_graine", "test_partout", "test_partout2", "test_auto"]:
@@ -4074,6 +4075,18 @@ func test_bete_engage_sur_son_horloge() -> void:
 		for nom in s.combats.keys():
 			s.pas(nom)
 	verifier(int(j.sante) < sante0 or not j.vivant, "le rat a mordu pendant que le joueur attendait (%d → %d)" % [sante0, int(j.sante)])
+
+
+## Les sprites d'objets (Direction artistique, 2026-09-05) : le nom attendu suit la convention, et sans fichier le jeu
+## garde son pictogramme — texture_objet rend null et ne plante pas.
+func test_sprites_objets() -> void:
+	verifier(Pictos.nom_sprite({"id": "craft_epee", "type": "arme"}) == "epee", "craft_epee → epee.png")
+	verifier(Pictos.nom_sprite({"id": "proto_masse", "type": "arme"}) == "masse", "proto_masse → masse.png (même silhouette que sa base)")
+	verifier(Pictos.nom_sprite({"id": "gemme_rubis", "type": "gemme"}) == "gemme_rubis", "gemme_rubis → gemme_rubis.png")
+	verifier(Pictos.nom_sprite({"id": "composant", "type": "composant", "composant": "lame_longue", "materiau": "fer"}) == "composants/lame_longue", "un composant → composants/<id>.png")
+	verifier(Pictos.nom_sprite({"id": "materiau_brut", "type": "materiau", "forme": "planche", "materiau": "chene"}) == "matieres/planche", "une matière → matieres/<forme>.png")
+	verifier(Pictos.texture_objet({"id": "craft_epee", "type": "arme"}) == null, "sans fichier, pas de texture : le pictogramme reste")
+	verifier(Pictos.texture_objet({"id": "", "type": "arme"}) == null, "un objet sans id ne cherche rien")
 
 
 ## Le cri de ralliement est poussé (IA des créatures, 2026-09-04) : un chef engagé, un acolyte à côté sans le

@@ -452,8 +452,46 @@ const ALIAS_OBJET := {"sabre": "epee", "rapiere": "epee", "stylet": "dague", "co
 	"luth": "instrument", "vielle": "instrument", "cymbales": "tambour"}
 
 
+## Les sprites d'objets (Direction artistique, 2026-09-05) : le designer les génère ; le jeu regarde d'abord dans
+## `styles.sprites.dossier` (`res://assets/objets`) et dessine le fichier s'il existe, sinon le pictogramme par code.
+## Objets : `<id sans craft_ ni proto_>.png` ; composants : `composants/<id>.png` et matières : `matieres/<forme>.png`,
+## tous deux teintés par la couleur de leur matière. Le cache retient aussi les absents (une recherche par nom, pas par image).
+static var _sprites: Dictionary = {}
+
+
+static func nom_sprite(it: Dictionary) -> String:
+	var t := str(it.get("type", ""))
+	if t == "composant":
+		return "composants/" + str(it.get("composant", ""))
+	if t == "materiau":
+		return "matieres/" + str(it.get("forme", "brut"))
+	var id := str(it.get("id", ""))
+	for prefixe in ["craft_", "proto_"]:
+		if id.begins_with(prefixe):
+			return id.substr(prefixe.length())
+	return id
+
+
+static func texture_objet(it: Dictionary) -> Texture2D:
+	var nom := nom_sprite(it)
+	if nom.is_empty() or nom.ends_with("/"):
+		return null
+	if _sprites.has(nom):
+		return _sprites[nom]
+	var dossier := str(GameData.config("styles").get("sprites", {}).get("dossier", "res://assets/objets"))
+	var chemin := dossier.path_join(nom + ".png")
+	var tex: Texture2D = load(chemin) if ResourceLoader.exists(chemin, "Texture2D") else null
+	_sprites[nom] = tex
+	return tex
+
+
 static func dessiner_objet(ci: CanvasItem, it: Dictionary, r: Rect2) -> void:
 	if it.is_empty():
+		return
+	var tex := texture_objet(it)
+	if tex != null:   # un sprite du designer : à la place du pictogramme, teinté par sa matière s'il en a une
+		var teinte := couleur_objet(it) if str(it.get("type", "")) in ["composant", "materiau"] else Color.WHITE
+		ci.draw_texture_rect(tex, r, false, teinte)
 		return
 	var c := couleur_objet(it)
 	var o := r.position

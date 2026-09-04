@@ -9,126 +9,128 @@ etape: 1
 > [!important] Demande du designer (2026-09-05) : « je vais générer les sprites des items, donne-moi la liste des armes avec leurs composants, pareil pour les outils, l'équipement et autres items »
 > Cette note est **générée** par `tools/liste_objets.py` depuis `godot/data` et `locale/fr.csv` : rien n'y est écrit à la main, la relancer la remet à jour. Elle compte ce que le jeu sait fabriquer, ramasser ou poser, avec ce qui fait la silhouette d'un objet : son **type**, son **emplacement**, ses **composants** et les **familles de matériaux** que chaque composant accepte.
 >
+> **Où vont les sprites.** `godot/assets/objets/` : un fichier par objet, nommé comme la colonne « sprite » de chaque table (l'id sans `craft_` ni `proto_`), `composants/<id>.png` pour les composants et `matieres/<forme>.png` pour les matières, ces deux-là teintés par leur matière dans le jeu ([[Direction artistique]]). Carré, fond transparent ; le jeu les prend dès qu'ils existent et garde son pictogramme par code sinon ; `tools/verif_sprites.py` dit ce qui manque.
+>
 > **Ce qui fait un objet, pour le dessin.** Un objet assemblé est une *base* (la silhouette : épée, cuirasse, pioche) dont chaque *composant* est taillé dans un *matériau* — c'est le matériau qui donne la couleur ([[Palette de couleurs des matériaux]]) et la qualité qui donne l'état. Un sprite par base suffit donc, si ses composants sont des zones qu'on peut teinter séparément (lame, poignée, garde). Les objets `proto_*` sont les pièces de fortune du prototype (une matière fixe, pas de composants) : mêmes silhouettes que leurs bases assemblées. Le jeu dessine aujourd'hui des pictogrammes par code (`Pictos.dessiner_objet`, une case de 10 × 10 unités, avec des alias : sabre et rapière → épée, stylet → dague, hallebarde → lance, baguette → bâton magique…) — les sprites peuvent suivre ces regroupements ou distinguer chaque objet. Conventions : [[Direction artistique]] (lisibilité avant réalisme, teintes des cinq éléments) et le gabarit d'encrage `gabarit-encrage-sprites.pdf` dans ce dossier.
 
 ## 1. Les armes (42, dont 6 de fortune)
 
 Par voie (la stat de la compétence de l'arme). Dés, type de dégâts et portée viennent de la fonctionnalité ; les composants et leurs matériaux des recettes de composants.
 
-| Arme | id | Voie · compétence | Mains | Dés · type · portée | Composants (slot → composant — matériaux) |
+| Arme | id · sprite | Voie · compétence | Mains | Dés · type · portée | Composants (slot → composant — matériaux) |
 |---|---|---|---|---|---|
-| **Hache d'armes** | `craft_hache_d_armes` | Force · Hache d'armes | 2 | 3d6 · tranchant · 1–1.5 | `tete` → **Tête d'outil** — lingot de métal, obsidienne taillée, os massif, roche taillée<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`garde` → **Garde** — lingot de métal, os |
-| **Marteau de guerre** | `craft_marteau_de_guerre` | Force · Masse | 2 | 4d6 · contondant · 1–1.5 | `tete` → **Tête d'arme lourde** — granit noir taillé, lingot de métal, météorite (lingot), roche taillée<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`contrepoids` → **Contrepoids** — lingot de métal, roche taillée |
-| **Masse** | `craft_masse` | Force · Masse | 1 | 2d8 · contondant · 1–1.5 | `tete` → **Tête d'arme lourde** — granit noir taillé, lingot de métal, météorite (lingot), roche taillée<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os<br>`contrepoids` → **Contrepoids** — lingot de métal, roche taillée |
-| **Masse** *(fortune, fer)* | `proto_masse` | Force · Masse | 1 | 2d8 · contondant · 1–1.5 | — |
-| **Pavois** | `craft_pavois` | Force · Masse | 2 | 2d4 · contondant · 1–1.5 | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie |
-| **Sabre** | `craft_sabre` | Force · Épée | 1 | 1d12 · tranchant · 1–1.5 | `tete` → **Lame longue** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os<br>`garde` → **Garde** — lingot de métal, os |
-| **Épée** | `craft_epee` | Force · Épée | 1 | 2d6 · tranchant · 1–1.5 | `tete` → **Lame longue** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os<br>`garde` → **Garde** — lingot de métal, os |
-| **Épée** *(fortune, fer)* | `proto_epee` | Force · Épée | 1 | 2d6 · tranchant · 1–1.5 | — |
-| **Couteaux de jet** | `craft_couteau_de_jet` | Dextérité · Armes de jet | 1 | 1d6 · perforant · 2–6.0 | `tete` → **Lame courte** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
-| **Dague** | `craft_dague` | Dextérité · Dague | 1 | 1d6 · perforant · 1–1.0 | `tete` → **Lame courte** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os<br>`garde` → **Garde** — lingot de métal, os |
-| **Dague** *(fortune, fer)* | `proto_dague` | Dextérité · Dague | 1 | 1d6 · perforant · 1–1.0 | — |
-| **Hachettes de jet** | `craft_hachette_de_jet` | Dextérité · Armes de jet | 1 | 2d4 · tranchant · 2–5.0 | `tete` → **Tête d'outil** — lingot de métal, obsidienne taillée, os massif, roche taillée<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os |
-| **Javelots** | `craft_javelot` | Dextérité · Armes de jet | 1 | 2d6 · perforant · 2–8.0 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os |
-| **Rapière** | `craft_rapiere` | Dextérité · Escrime | 1 | 1d10 · perforant · 1–1.5 | `tete` → **Lame longue** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os<br>`garde` → **Garde** — lingot de métal, os |
-| **Stylet** | `craft_stylet` | Dextérité · Dague | 1 | 1d4 · perforant · 1–1.0 | `tete` → **Lame courte** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os<br>`garde` → **Garde** — lingot de métal, os |
-| **Bâton** | `craft_baton` | Endurance · Bâton | 2 | 2d4 · contondant · 1–2.0 | `tete` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os<br>`contrepoids` → **Contrepoids** — lingot de métal, roche taillée |
-| **Fléau** | `craft_fleau` | Endurance · Armes à chaîne | 2 | 2d8 · contondant · 1–2.0 | `tete` → **Tête d'arme lourde** — granit noir taillé, lingot de métal, météorite (lingot), roche taillée<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os<br>`contrepoids` → **Contrepoids** — lingot de métal, roche taillée |
-| **Fouet** | `craft_fouet` | Endurance · Fouet | 1 | 1d4 · tranchant · 2–3.0 | `tete` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
-| **Hallebarde** | `craft_hallebarde` | Endurance · Armes d'hast | 2 | 2d8 · tranchant · 2–2.5 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`contrepoids` → **Contrepoids** — lingot de métal, roche taillée |
-| **Lance** | `craft_lance` | Endurance · Lance | 2 | 2d8 · perforant · 2–2.5 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`garde` → **Garde** — lingot de métal, os |
-| **Lance** *(fortune, frene)* | `proto_lance` | Endurance · Lance | 2 | 2d8 · perforant · 2–2.5 | — |
-| **Pique** | `craft_pique` | Endurance · Armes d'hast | 2 | 2d6 · perforant · 2–3.5 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`garde` → **Garde** — lingot de métal, os |
-| **Baguette** | `craft_baguette` | Volonté · Contrôle du mana | 1 | 1d4 · perforant · 1–1.5 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
-| **Bâton magique** | `craft_baton_magique` | Volonté · Bâton magique | 1 | 1d4 · contondant · 1–1.0 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os |
-| **Bâton magique** *(fortune, chene)* | `proto_baton_magique` | Volonté · Bâton magique | 1 | 1d4 · contondant · 1–1.0 | — |
-| **Grimoire de main** | `craft_grimoire_de_main` | Volonté · Contrôle du mana | 2 | 1d3 · contondant · 1–1.0 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
-| **Orbe** | `craft_orbe` | Volonté · Contrôle du mana | 1 | 1d3 · contondant · 1–1.0 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
-| **Sceptre** | `craft_sceptre` | Volonté · Contrôle du mana | 1 | 1d6 · contondant · 1–1.5 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os |
-| **Talisman** | `craft_talisman` | Volonté · Contrôle du mana | 1 | 1d3 · contondant · 1–1.0 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os |
-| **Arbalète** | `craft_arbalete` | Perception · Arbalète | 2 | 3d6 · perforant · 2–22.0 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`corde` → **Corde** — fibre (lin, chanvre, coton), soie |
-| **Arc** | `craft_arc` | Perception · Arc | 1 | 2d6 · perforant · 2–25.0 | `tete` → **Lame courte** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`corde` → **Corde** — fibre (lin, chanvre, coton), soie |
-| **Arc** *(fortune, if)* | `proto_arc` | Perception · Arc | 2 | 2d6 · perforant · 2–25.0 | — |
-| **Arc long** | `craft_arc_long` | Perception · Précision | 2 | 2d8 · perforant · 3–30.0 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`corde` → **Corde** — fibre (lin, chanvre, coton), soie |
-| **Fronde** | `craft_fronde` | Perception · Fronde | 1 | 1d8 · contondant · 3–14.0 | `tete` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os<br>`corde` → **Corde** — fibre (lin, chanvre, coton), soie |
-| **Pistolet** | `craft_pistolet` | Perception · Armes à poudre | 1 | 3d8 · perforant · 2–12.0 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
-| **Sarbacane** | `craft_sarbacane` | Perception · Précision | 1 | 1d4 · perforant · 2–9.0 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os |
-| **Cor** | `craft_cor` | Charisme · Musique | 1 | 1d3 · contondant · 1–1.0 · zone 4 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os |
-| **Cymbales** | `craft_cymbales` | Charisme · Musique | 1 | 1d8 · contondant · 1–1.0 · zone 1 | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
-| **Flûte** | `craft_flute` | Charisme · Musique | 1 | 1d3 · contondant · 1–1.0 · zone 3 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os |
-| **Luth** | `craft_luth` | Charisme · Musique | 1 | 1d4 · contondant · 1–1.0 · zone 2 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os<br>`corde` → **Corde** — fibre (lin, chanvre, coton), soie |
-| **Tambour** | `craft_tambour` | Charisme · Musique | 2 | 1d6 · contondant · 1–1.0 · zone 3 | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Vielle** | `craft_vielle` | Charisme · Musique | 2 | 2d4 · contondant · 1–1.0 · zone 2 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os<br>`corde` → **Corde** — fibre (lin, chanvre, coton), soie |
+| **Hache d'armes** | `craft_hache_d_armes`<br>`hache_d_armes.png` | Force · Hache d'armes | 2 | 3d6 · tranchant · 1–1.5 | `tete` → **Tête d'outil** — lingot de métal, obsidienne taillée, os massif, roche taillée<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`garde` → **Garde** — lingot de métal, os |
+| **Marteau de guerre** | `craft_marteau_de_guerre`<br>`marteau_de_guerre.png` | Force · Masse | 2 | 4d6 · contondant · 1–1.5 | `tete` → **Tête d'arme lourde** — granit noir taillé, lingot de métal, météorite (lingot), roche taillée<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`contrepoids` → **Contrepoids** — lingot de métal, roche taillée |
+| **Masse** | `craft_masse`<br>`masse.png` | Force · Masse | 1 | 2d8 · contondant · 1–1.5 | `tete` → **Tête d'arme lourde** — granit noir taillé, lingot de métal, météorite (lingot), roche taillée<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os<br>`contrepoids` → **Contrepoids** — lingot de métal, roche taillée |
+| **Masse** *(fortune, fer)* | `proto_masse`<br>`masse.png` | Force · Masse | 1 | 2d8 · contondant · 1–1.5 | — |
+| **Pavois** | `craft_pavois`<br>`pavois.png` | Force · Masse | 2 | 2d4 · contondant · 1–1.5 | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie |
+| **Sabre** | `craft_sabre`<br>`sabre.png` | Force · Épée | 1 | 1d12 · tranchant · 1–1.5 | `tete` → **Lame longue** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os<br>`garde` → **Garde** — lingot de métal, os |
+| **Épée** | `craft_epee`<br>`epee.png` | Force · Épée | 1 | 2d6 · tranchant · 1–1.5 | `tete` → **Lame longue** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os<br>`garde` → **Garde** — lingot de métal, os |
+| **Épée** *(fortune, fer)* | `proto_epee`<br>`epee.png` | Force · Épée | 1 | 2d6 · tranchant · 1–1.5 | — |
+| **Couteaux de jet** | `craft_couteau_de_jet`<br>`couteau_de_jet.png` | Dextérité · Armes de jet | 1 | 1d6 · perforant · 2–6.0 | `tete` → **Lame courte** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
+| **Dague** | `craft_dague`<br>`dague.png` | Dextérité · Dague | 1 | 1d6 · perforant · 1–1.0 | `tete` → **Lame courte** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os<br>`garde` → **Garde** — lingot de métal, os |
+| **Dague** *(fortune, fer)* | `proto_dague`<br>`dague.png` | Dextérité · Dague | 1 | 1d6 · perforant · 1–1.0 | — |
+| **Hachettes de jet** | `craft_hachette_de_jet`<br>`hachette_de_jet.png` | Dextérité · Armes de jet | 1 | 2d4 · tranchant · 2–5.0 | `tete` → **Tête d'outil** — lingot de métal, obsidienne taillée, os massif, roche taillée<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os |
+| **Javelots** | `craft_javelot`<br>`javelot.png` | Dextérité · Armes de jet | 1 | 2d6 · perforant · 2–8.0 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os |
+| **Rapière** | `craft_rapiere`<br>`rapiere.png` | Dextérité · Escrime | 1 | 1d10 · perforant · 1–1.5 | `tete` → **Lame longue** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os<br>`garde` → **Garde** — lingot de métal, os |
+| **Stylet** | `craft_stylet`<br>`stylet.png` | Dextérité · Dague | 1 | 1d4 · perforant · 1–1.0 | `tete` → **Lame courte** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os<br>`garde` → **Garde** — lingot de métal, os |
+| **Bâton** | `craft_baton`<br>`baton.png` | Endurance · Bâton | 2 | 2d4 · contondant · 1–2.0 | `tete` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os<br>`contrepoids` → **Contrepoids** — lingot de métal, roche taillée |
+| **Fléau** | `craft_fleau`<br>`fleau.png` | Endurance · Armes à chaîne | 2 | 2d8 · contondant · 1–2.0 | `tete` → **Tête d'arme lourde** — granit noir taillé, lingot de métal, météorite (lingot), roche taillée<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os<br>`contrepoids` → **Contrepoids** — lingot de métal, roche taillée |
+| **Fouet** | `craft_fouet`<br>`fouet.png` | Endurance · Fouet | 1 | 1d4 · tranchant · 2–3.0 | `tete` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
+| **Hallebarde** | `craft_hallebarde`<br>`hallebarde.png` | Endurance · Armes d'hast | 2 | 2d8 · tranchant · 2–2.5 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`contrepoids` → **Contrepoids** — lingot de métal, roche taillée |
+| **Lance** | `craft_lance`<br>`lance.png` | Endurance · Lance | 2 | 2d8 · perforant · 2–2.5 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`garde` → **Garde** — lingot de métal, os |
+| **Lance** *(fortune, frene)* | `proto_lance`<br>`lance.png` | Endurance · Lance | 2 | 2d8 · perforant · 2–2.5 | — |
+| **Pique** | `craft_pique`<br>`pique.png` | Endurance · Armes d'hast | 2 | 2d6 · perforant · 2–3.5 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`garde` → **Garde** — lingot de métal, os |
+| **Baguette** | `craft_baguette`<br>`baguette.png` | Volonté · Contrôle du mana | 1 | 1d4 · perforant · 1–1.5 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
+| **Bâton magique** | `craft_baton_magique`<br>`baton_magique.png` | Volonté · Bâton magique | 1 | 1d4 · contondant · 1–1.0 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os |
+| **Bâton magique** *(fortune, chene)* | `proto_baton_magique`<br>`baton_magique.png` | Volonté · Bâton magique | 1 | 1d4 · contondant · 1–1.0 | — |
+| **Grimoire de main** | `craft_grimoire_de_main`<br>`grimoire_de_main.png` | Volonté · Contrôle du mana | 2 | 1d3 · contondant · 1–1.0 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
+| **Orbe** | `craft_orbe`<br>`orbe.png` | Volonté · Contrôle du mana | 1 | 1d3 · contondant · 1–1.0 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
+| **Sceptre** | `craft_sceptre`<br>`sceptre.png` | Volonté · Contrôle du mana | 1 | 1d6 · contondant · 1–1.5 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os |
+| **Talisman** | `craft_talisman`<br>`talisman.png` | Volonté · Contrôle du mana | 1 | 1d3 · contondant · 1–1.0 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os |
+| **Arbalète** | `craft_arbalete`<br>`arbalete.png` | Perception · Arbalète | 2 | 3d6 · perforant · 2–22.0 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`corde` → **Corde** — fibre (lin, chanvre, coton), soie |
+| **Arc** | `craft_arc`<br>`arc.png` | Perception · Arc | 1 | 2d6 · perforant · 2–25.0 | `tete` → **Lame courte** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`corde` → **Corde** — fibre (lin, chanvre, coton), soie |
+| **Arc** *(fortune, if)* | `proto_arc`<br>`arc.png` | Perception · Arc | 2 | 2d6 · perforant · 2–25.0 | — |
+| **Arc long** | `craft_arc_long`<br>`arc_long.png` | Perception · Précision | 2 | 2d8 · perforant · 3–30.0 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os<br>`corde` → **Corde** — fibre (lin, chanvre, coton), soie |
+| **Fronde** | `craft_fronde`<br>`fronde.png` | Perception · Fronde | 1 | 1d8 · contondant · 3–14.0 | `tete` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os<br>`corde` → **Corde** — fibre (lin, chanvre, coton), soie |
+| **Pistolet** | `craft_pistolet`<br>`pistolet.png` | Perception · Armes à poudre | 1 | 3d8 · perforant · 2–12.0 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
+| **Sarbacane** | `craft_sarbacane`<br>`sarbacane.png` | Perception · Précision | 1 | 1d4 · perforant · 2–9.0 | `tete` → **Pointe** — dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé<br>`manche` → **Manche long** — bois (planche), ivoire, lingot de métal, os |
+| **Cor** | `craft_cor`<br>`cor.png` | Charisme · Musique | 1 | 1d3 · contondant · 1–1.0 · zone 4 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os |
+| **Cymbales** | `craft_cymbales`<br>`cymbales.png` | Charisme · Musique | 1 | 1d8 · contondant · 1–1.0 · zone 1 | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
+| **Flûte** | `craft_flute`<br>`flute.png` | Charisme · Musique | 1 | 1d3 · contondant · 1–1.0 · zone 3 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os |
+| **Luth** | `craft_luth`<br>`luth.png` | Charisme · Musique | 1 | 1d4 · contondant · 1–1.0 · zone 2 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os<br>`corde` → **Corde** — fibre (lin, chanvre, coton), soie |
+| **Tambour** | `craft_tambour`<br>`tambour.png` | Charisme · Musique | 2 | 1d6 · contondant · 1–1.0 · zone 3 | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Vielle** | `craft_vielle`<br>`vielle.png` | Charisme · Musique | 2 | 2d4 · contondant · 1–1.0 · zone 2 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os<br>`corde` → **Corde** — fibre (lin, chanvre, coton), soie |
 
 ## 2. Les outils (11) et les boucliers (2)
 
-| Outil | id | Fonction | Mains · emplacement | Composants |
+| Outil | id · sprite | Fonction | Mains · emplacement | Composants |
 |---|---|---|---|---|
-| **Faucille** | `craft_faucille` | Faucille | 1 · Main principale | `tete` → **Lame courte** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
-| **Faucille de fer** *(fortune, fer)* | `proto_faucille` | Faucille | 1 · Main principale | — |
-| **Hache** | `craft_hache` | Hache | 1 · Main principale | `tete` → **Tête d'outil** — lingot de métal, obsidienne taillée, os massif, roche taillée<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os |
-| **Hache de fer** *(fortune, fer)* | `proto_hache` | Hache | 1 · Main principale | — |
-| **Pelle** | `craft_pelle` | Pelle | 1 · Main principale | `tete` → **Tête d'outil** — lingot de métal, obsidienne taillée, os massif, roche taillée<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os |
-| **Pelle de fer** *(fortune, fer)* | `proto_pelle` | Pelle | 1 · Main principale | — |
-| **Pioche** | `craft_pioche` | Pioche | 1 · Main principale | `tete` → **Tête d'outil** — lingot de métal, obsidienne taillée, os massif, roche taillée<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os |
-| **Pioche de fer** *(fortune, fer)* | `proto_pioche` | Pioche | 1 · Main principale | — |
-| **Seau** | `craft_seau` | Seau | 1 · Main principale | `tete` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie |
-| **Seau de bois** *(fortune, chene)* | `proto_seau` | Seau | 1 · Main principale | — |
-| **Torche** | `torche` | — · lumière 70 | 1 · Main secondaire | `manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie |
-| **Bouclier** | `craft_bouclier` | Bouclier · bras, plaque | 1 · Main secondaire | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie |
-| **Bouclier** *(fortune, chene)* | `proto_bouclier` | Bouclier | 1 · Main secondaire | — |
+| **Faucille** | `craft_faucille`<br>`faucille.png` | Faucille | 1 · Main principale | `tete` → **Lame courte** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
+| **Faucille de fer** *(fortune, fer)* | `proto_faucille`<br>`faucille.png` | Faucille | 1 · Main principale | — |
+| **Hache** | `craft_hache`<br>`hache.png` | Hache | 1 · Main principale | `tete` → **Tête d'outil** — lingot de métal, obsidienne taillée, os massif, roche taillée<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os |
+| **Hache de fer** *(fortune, fer)* | `proto_hache`<br>`hache.png` | Hache | 1 · Main principale | — |
+| **Pelle** | `craft_pelle`<br>`pelle.png` | Pelle | 1 · Main principale | `tete` → **Tête d'outil** — lingot de métal, obsidienne taillée, os massif, roche taillée<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os |
+| **Pelle de fer** *(fortune, fer)* | `proto_pelle`<br>`pelle.png` | Pelle | 1 · Main principale | — |
+| **Pioche** | `craft_pioche`<br>`pioche.png` | Pioche | 1 · Main principale | `tete` → **Tête d'outil** — lingot de métal, obsidienne taillée, os massif, roche taillée<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os |
+| **Pioche de fer** *(fortune, fer)* | `proto_pioche`<br>`pioche.png` | Pioche | 1 · Main principale | — |
+| **Seau** | `craft_seau`<br>`seau.png` | Seau | 1 · Main principale | `tete` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie |
+| **Seau de bois** *(fortune, chene)* | `proto_seau`<br>`seau.png` | Seau | 1 · Main principale | — |
+| **Torche** | `torche`<br>`torche.png` | — · lumière 70 | 1 · Main secondaire | `manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie |
+| **Bouclier** | `craft_bouclier`<br>`bouclier.png` | Bouclier · bras, plaque | 1 · Main secondaire | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie |
+| **Bouclier** *(fortune, chene)* | `proto_bouclier`<br>`bouclier.png` | Bouclier | 1 · Main secondaire | — |
 
 ## 3. Armures et vêtements (21)
 
 L'emplacement dit où la pièce se porte, la zone ce qu'elle couvre, la construction sa matière dominante (plaque, tissu, matelassé, rituel, cuir, mailles). Les vêtements ont une *étoffe* là où les armures ont une *plaque*.
 
-| Pièce | id | Emplacement · zone | Construction | Composants |
+| Pièce | id · sprite | Emplacement · zone | Construction | Composants |
 |---|---|---|---|---|
-| **Bottes** | `craft_bottes` | Bottes · pieds | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Brassards** | `craft_brassards` | Brassards · bras | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Cape** | `cape` | Dos · torse | matelassée | dos, cape |
-| **Capuche** | `craft_capuche` | Casque · tête | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Casque** | `craft_casque` | Casque · tête | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Casque de cuir** *(fortune, cuir)* | `proto_casque_cuir` | Casque · tête | cuir | fortune |
-| **Casque de fer** *(fortune, fer)* | `proto_casque_fer` | Casque · tête | plaque | fortune |
-| **Chausses** | `craft_chausses` | Jambières · jambes | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Chaussons** | `craft_chaussons` | Bottes · pieds | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Coiffe** | `craft_coiffe` | Casque · tête | rituel | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Cuirasse** | `craft_cuirasse` | Cuirasse · torse | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Cuirasse de cuir** *(fortune, cuir)* | `proto_cuirasse_cuir` | Cuirasse · torse | cuir | fortune |
-| **Cuirasse de mailles** *(fortune, fer)* | `proto_cuirasse_mailles` | Cuirasse · torse | mailles | fortune |
-| **Gambison** | `craft_gambison` | Cuirasse · torse | matelassée | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Jambières** | `craft_jambieres` | Jambières · jambes | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Jambières de cuir** *(fortune, cuir)* | `proto_jambieres_cuir` | Jambières · jambes | cuir | fortune |
-| **Manchettes** | `craft_manchettes` | Brassards · bras | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Robe** | `craft_robe` | Cuirasse · torse | rituel | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Sac à dos** | `sac_a_dos` | Dos · torse | matelassée | dos, sac |
-| **Tunique** | `craft_tunique` | Cuirasse · torse | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Étole** | `craft_etole` | Dos · torse | rituel | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Bottes** | `craft_bottes`<br>`bottes.png` | Bottes · pieds | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Brassards** | `craft_brassards`<br>`brassards.png` | Brassards · bras | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Cape** | `cape`<br>`cape.png` | Dos · torse | matelassée | dos, cape |
+| **Capuche** | `craft_capuche`<br>`capuche.png` | Casque · tête | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Casque** | `craft_casque`<br>`casque.png` | Casque · tête | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Casque de cuir** *(fortune, cuir)* | `proto_casque_cuir`<br>`casque_cuir.png` | Casque · tête | cuir | fortune |
+| **Casque de fer** *(fortune, fer)* | `proto_casque_fer`<br>`casque_fer.png` | Casque · tête | plaque | fortune |
+| **Chausses** | `craft_chausses`<br>`chausses.png` | Jambières · jambes | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Chaussons** | `craft_chaussons`<br>`chaussons.png` | Bottes · pieds | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Coiffe** | `craft_coiffe`<br>`coiffe.png` | Casque · tête | rituel | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Cuirasse** | `craft_cuirasse`<br>`cuirasse.png` | Cuirasse · torse | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Cuirasse de cuir** *(fortune, cuir)* | `proto_cuirasse_cuir`<br>`cuirasse_cuir.png` | Cuirasse · torse | cuir | fortune |
+| **Cuirasse de mailles** *(fortune, fer)* | `proto_cuirasse_mailles`<br>`cuirasse_mailles.png` | Cuirasse · torse | mailles | fortune |
+| **Gambison** | `craft_gambison`<br>`gambison.png` | Cuirasse · torse | matelassée | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Jambières** | `craft_jambieres`<br>`jambieres.png` | Jambières · jambes | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Jambières de cuir** *(fortune, cuir)* | `proto_jambieres_cuir`<br>`jambieres_cuir.png` | Jambières · jambes | cuir | fortune |
+| **Manchettes** | `craft_manchettes`<br>`manchettes.png` | Brassards · bras | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Robe** | `craft_robe`<br>`robe.png` | Cuirasse · torse | rituel | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Sac à dos** | `sac_a_dos`<br>`sac_a_dos.png` | Dos · torse | matelassée | dos, sac |
+| **Tunique** | `craft_tunique`<br>`tunique.png` | Cuirasse · torse | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Étole** | `craft_etole`<br>`etole.png` | Dos · torse | rituel | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
 
 ## 4. Bijoux (4) et gemmes (10)
 
-| Bijou | id | Emplacement | Composants |
+| Bijou | id · sprite | Emplacement | Composants |
 |---|---|---|---|
-| **Amulette** | `craft_amulette` | Amulette | `monture` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`sertissure` → **Sertissure** — fibre (lin, chanvre, coton), lingot de métal |
-| **Amulette** *(fortune, or)* | `proto_amulette` | Amulette | — |
-| **Anneau** | `craft_anneau` | Anneau | `monture` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`sertissure` → **Sertissure** — fibre (lin, chanvre, coton), lingot de métal |
-| **Anneau** *(fortune, argent)* | `proto_anneau` | Anneau | — |
+| **Amulette** | `craft_amulette`<br>`amulette.png` | Amulette | `monture` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`sertissure` → **Sertissure** — fibre (lin, chanvre, coton), lingot de métal |
+| **Amulette** *(fortune, or)* | `proto_amulette`<br>`amulette.png` | Amulette | — |
+| **Anneau** | `craft_anneau`<br>`anneau.png` | Anneau | `monture` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`sertissure` → **Sertissure** — fibre (lin, chanvre, coton), lingot de métal |
+| **Anneau** *(fortune, argent)* | `proto_anneau`<br>`anneau.png` | Anneau | — |
 
 Une gemme se sertit dans la sertissure d'un bijou ; sa couleur est celle de son élément quand elle en a un.
 
-| Gemme | id | Matériau | Élément | Ce qu'elle porte |
+| Gemme | id · sprite | Matériau | Élément | Ce qu'elle porte |
 |---|---|---|---|---|
-| **Ambre** | `gemme_ambre` | Ambre | — | endurance_max, Athlétisme, Esquive |
-| **Améthyste** | `gemme_amethyste` | Améthyste | — | mana_max, Méditation |
-| **Diamant** | `gemme_diamant` | Diamant | — | qualite |
-| **Grenat** | `gemme_grenat` | Grenat | — | sante_max, Force, Endurance |
-| **Onyx** | `gemme_onyx` | Onyx | Métal | dégâts Métal, Métal, affinite |
-| **Opale** | `gemme_opale` | Opale | — | duree_statuts, Volonté, Charisme |
-| **Rubis** | `gemme_rubis` | Rubis | Feu | dégâts Feu, Feu, affinite |
-| **Saphir** | `gemme_saphir` | Saphir | Eau | dégâts Eau, Eau/Glace, affinite |
-| **Topaze** | `gemme_topaze` | Topaze | Terre | dégâts Terre, Terre, affinite |
-| **Émeraude** | `gemme_emeraude` | Émeraude | Bois | dégâts Bois, Foudre/Vie, affinite |
+| **Ambre** | `gemme_ambre`<br>`gemme_ambre.png` | Ambre | — | endurance_max, Athlétisme, Esquive |
+| **Améthyste** | `gemme_amethyste`<br>`gemme_amethyste.png` | Améthyste | — | mana_max, Méditation |
+| **Diamant** | `gemme_diamant`<br>`gemme_diamant.png` | Diamant | — | qualite |
+| **Grenat** | `gemme_grenat`<br>`gemme_grenat.png` | Grenat | — | sante_max, Force, Endurance |
+| **Onyx** | `gemme_onyx`<br>`gemme_onyx.png` | Onyx | Métal | dégâts Métal, Métal, affinite |
+| **Opale** | `gemme_opale`<br>`gemme_opale.png` | Opale | — | duree_statuts, Volonté, Charisme |
+| **Rubis** | `gemme_rubis`<br>`gemme_rubis.png` | Rubis | Feu | dégâts Feu, Feu, affinite |
+| **Saphir** | `gemme_saphir`<br>`gemme_saphir.png` | Saphir | Eau | dégâts Eau, Eau/Glace, affinite |
+| **Topaze** | `gemme_topaze`<br>`gemme_topaze.png` | Topaze | Terre | dégâts Terre, Terre, affinite |
+| **Émeraude** | `gemme_emeraude`<br>`gemme_emeraude.png` | Émeraude | Bois | dégâts Bois, Foudre/Vie, affinite |
 
 ## 5. Munitions (6)
 
@@ -145,25 +147,25 @@ Une gemme se sertit dans la sertissure d'un bijou ; sa couleur est celle de son 
 
 Chaque composant est une pièce à part entière (elle se fabrique, se ramasse, se stocke) : un sprite par composant, teinté par sa matière.
 
-| Composant | id | Slot | Familles de matériaux | Station | Sert à |
+| Composant | id · sprite | Slot | Familles de matériaux | Station | Sert à |
 |---|---|---|---|---|---|
-| **Contrepoids** | `contrepoids` | contrepoids | lingot de métal, roche taillée | enclume, tailleur_de_pierre | Masse, Marteau de guerre, Fléau, Bâton |
-| **Corde** | `corde` | corde | fibre (lin, chanvre, coton), soie | atelier_tissage | Arc, Arbalète, Fronde, Vielle |
-| **Doublure** | `doublure` | doublure | cuir, fibre (lin, chanvre, coton) | atelier_tissage, tannerie | Cuirasse, Casque, Brassards, Jambières, Bottes, Gambison |
-| **Garde** | `garde` | garde | lingot de métal, os | enclume, tailleur_de_pierre | Épée, Sabre, Rapière, Dague, Lance, Hache d'armes |
-| **Lame courte** | `lame_courte` | tete | lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre | enclume, etabli, tailleur_de_pierre | Dague |
-| **Lame longue** | `lame_longue` | tete | lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre | enclume, etabli, tailleur_de_pierre | Épée |
-| **Manche court** | `manche_court` | manche | bois (planche), ivoire, lingot de métal, os | enclume, etabli, scierie | Pioche, Masse, Dague, Flûte, Vielle |
-| **Manche long** | `manche_long` | manche | bois (planche), ivoire, lingot de métal, os | enclume, etabli, scierie | Lance |
-| **Monture** | `monture` | monture | lingot de métal, or ou argent (lingot), os | enclume, etabli | Flûte, Vielle |
-| **Plaque** | `plaque` | plaque | écaille, lingot de métal, os massif | enclume, etabli | Cymbales |
-| **Poignée** | `poignee` | manche | bois (planche), ivoire, lingot de métal, os | enclume, etabli, scierie | Épée, Dague, Cymbales |
-| **Pointe** | `pointe` | tete | dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé | enclume, etabli, tailleur_de_pierre | Lance, Arc |
-| **Sangles** | `sangles` | sangles | cuir, fibre (lin, chanvre, coton), soie | atelier_tissage | — |
-| **Sertissure** | `sertissure` | sertissure | fibre (lin, chanvre, coton), lingot de métal | atelier_tissage, enclume | Anneau, Amulette |
-| **Tête d'arme lourde** | `tete_arme_lourde` | tete | granit noir taillé, lingot de métal, météorite (lingot), roche taillée | enclume, tailleur_de_pierre | Masse |
-| **Tête d'outil** | `tete_outil` | tete | lingot de métal, obsidienne taillée, os massif, roche taillée | enclume, etabli, tailleur_de_pierre | Pioche |
-| **Étoffe** | `etoffe` | plaque | cuir, fibre (lin, chanvre, coton), soie | atelier_tissage, tannerie | Tunique, Robe, Capuche, Coiffe, Chausses, Manchettes, Chaussons, Étole |
+| **Contrepoids** | `contrepoids`<br>`composants/contrepoids.png` | contrepoids | lingot de métal, roche taillée | enclume, tailleur_de_pierre | Masse, Marteau de guerre, Fléau, Bâton |
+| **Corde** | `corde`<br>`composants/corde.png` | corde | fibre (lin, chanvre, coton), soie | atelier_tissage | Arc, Arbalète, Fronde, Vielle |
+| **Doublure** | `doublure`<br>`composants/doublure.png` | doublure | cuir, fibre (lin, chanvre, coton) | atelier_tissage, tannerie | Cuirasse, Casque, Brassards, Jambières, Bottes, Gambison |
+| **Garde** | `garde`<br>`composants/garde.png` | garde | lingot de métal, os | enclume, tailleur_de_pierre | Épée, Sabre, Rapière, Dague, Lance, Hache d'armes |
+| **Lame courte** | `lame_courte`<br>`composants/lame_courte.png` | tete | lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre | enclume, etabli, tailleur_de_pierre | Dague |
+| **Lame longue** | `lame_longue`<br>`composants/lame_longue.png` | tete | lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre | enclume, etabli, tailleur_de_pierre | Épée |
+| **Manche court** | `manche_court`<br>`composants/manche_court.png` | manche | bois (planche), ivoire, lingot de métal, os | enclume, etabli, scierie | Pioche, Masse, Dague, Flûte, Vielle |
+| **Manche long** | `manche_long`<br>`composants/manche_long.png` | manche | bois (planche), ivoire, lingot de métal, os | enclume, etabli, scierie | Lance |
+| **Monture** | `monture`<br>`composants/monture.png` | monture | lingot de métal, or ou argent (lingot), os | enclume, etabli | Flûte, Vielle |
+| **Plaque** | `plaque`<br>`composants/plaque.png` | plaque | écaille, lingot de métal, os massif | enclume, etabli | Cymbales |
+| **Poignée** | `poignee`<br>`composants/poignee.png` | manche | bois (planche), ivoire, lingot de métal, os | enclume, etabli, scierie | Épée, Dague, Cymbales |
+| **Pointe** | `pointe`<br>`composants/pointe.png` | tete | dent ou croc, lingot de métal, obsidienne taillée, os, silex taillé | enclume, etabli, tailleur_de_pierre | Lance, Arc |
+| **Sangles** | `sangles`<br>`composants/sangles.png` | sangles | cuir, fibre (lin, chanvre, coton), soie | atelier_tissage | — |
+| **Sertissure** | `sertissure`<br>`composants/sertissure.png` | sertissure | fibre (lin, chanvre, coton), lingot de métal | atelier_tissage, enclume | Anneau, Amulette |
+| **Tête d'arme lourde** | `tete_arme_lourde`<br>`composants/tete_arme_lourde.png` | tete | granit noir taillé, lingot de métal, météorite (lingot), roche taillée | enclume, tailleur_de_pierre | Masse |
+| **Tête d'outil** | `tete_outil`<br>`composants/tete_outil.png` | tete | lingot de métal, obsidienne taillée, os massif, roche taillée | enclume, etabli, tailleur_de_pierre | Pioche |
+| **Étoffe** | `etoffe`<br>`composants/etoffe.png` | plaque | cuir, fibre (lin, chanvre, coton), soie | atelier_tissage, tannerie | Tunique, Robe, Capuche, Coiffe, Chausses, Manchettes, Chaussons, Étole |
 
 ## 7. Livres et parchemins (6)
 
@@ -284,7 +286,7 @@ Une potion non identifiée se montre comme une **fiole** d'une des 8 apparences 
 
 ## 9. Les matériaux : 245 matières, 6 formes
 
-Une matière brute ou transformée est un objet empilable : un sprite par **forme** (teinté par la matière) suffit. Formes : `brut`, `lingot`, `pierre_taillee`, `planche`, `taillee`, `tissu`.
+Une matière brute ou transformée est un objet empilable : un sprite par **forme** (teinté par la matière) suffit — `assets/objets/matieres/<forme>.png`. Formes : `brut`, `lingot`, `pierre_taillee`, `planche`, `taillee`, `tissu`.
 
 | Catégorie | Matières |
 |---|---|

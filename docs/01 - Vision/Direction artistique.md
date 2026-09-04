@@ -43,6 +43,13 @@ Comment le jeu se donne à voir : isométrique, tuiles teintées, billboards pap
 > Les deux corrections valent aussi pour les **poses d'action** en jeu, qui cassaient la chaîne de la même façon sans que personne l'ait remarqué à la taille où l'on voit les personnages.
 
 
+> [!success] Codé le 2026-09-05 — **les sprites d'objets ont leur place, et le jeu les prend dès qu'ils existent**
+> Le designer génère les sprites des objets (liste : [[Objets — liste pour les sprites]]). Le jeu dessine ses pictogrammes par code ; il regarde désormais d'abord dans `godot/assets/objets/` et, **si le fichier existe**, le dessine à la place du pictogramme, dans la même case — sinon rien ne change. La convention, une par ligne de la liste :
+> - **objets** : `assets/objets/<id sans craft_ ni proto_>.png` — `epee.png`, `cuirasse.png`, `pioche.png`, `gemme_rubis.png`, `achillee.png`, `meuble_lit.png`, `station_forge.png`, `livre_module.png` ; un `proto_epee` prend `epee.png` comme sa base ;
+> - **composants** : `assets/objets/composants/<id>.png` — `lame_longue.png`, `poignee.png`… ; le sprite est **teinté par sa matière** (la couleur de [[Palette de couleurs des matériaux]] en `modulate`) : un seul dessin par composant, en gris clair ;
+> - **matières** : `assets/objets/matieres/<forme>.png` — `brut.png`, `lingot.png`, `planche.png`, `pierre_taillee.png`, `bloc.png`, `fil.png`… — teintées de même : un dessin par forme.
+> Carré, fond transparent, n'importe quelle taille (la case du jeu est petite : 32 à 48 px à l'écran, 64 ou 128 px conviennent) ; Godot les importe à `--import` et l'export les embarque (`export_filter = all_resources`). `tools/verif_sprites.py` dit ce qui manque et ce qui est en trop ; la colonne « sprite » de la liste donne le nom attendu. Ce n'est qu'une convention de chemin : la changer, c'est `styles.sprites.dossier` et une fonction (`Pictos.nom_sprite`).
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Piliers d'inspiration]]
 - **Alimente** : [[Squelette modulaire et points d'attache]], [[Écrans d'interface]], [[Palette de couleurs des matériaux]]

@@ -178,6 +178,8 @@ Vingt-huit scènes `scenes/tests/sonde_*.tscn`, chacune mesure une chose et l'é
 & $godot --headless --path godot res://scenes/tests/sonde_perf_generation.tscn   # le coût d'un objet généré
 & $godot --headless --path godot res://scenes/tests/sonde_ia.tscn                # errance, cible, meute
 & $godot --headless --path godot res://scenes/tests/sonde_ia_pnj.tscn            # ennemis et alliés, scène par scène (--seulement compagnons,camp)
+python -X utf8 tools/liste_objets.py       # la liste des objets pour les sprites (note générée)
+python -X utf8 tools/verif_sprites.py      # les sprites d'objets attendus dans godot/assets/objets/, présents, manquants
 & $godot --headless --path godot res://scenes/tests/sonde_journal.tscn           # les lignes identiques du journal se cumulent
 # Une grande base sur la durée : cinq cellules, zones de récolte, vingt engagés, puis N semaines (Gestion de base)
 & $godot --headless --path godot res://scenes/tests/sonde_grande_base.tscn -- --graine_monde 9 --residents 20 --semaines 12 --tresor 1000

@@ -131,6 +131,14 @@ def est_proto(d):
     return "prototype" in d.get("tags", [])
 
 
+def nom_sprite(iid):
+    """Le fichier attendu dans assets/objets/ (Direction artistique, 2026-09-05) : l'id sans craft_ ni proto_."""
+    for p in ("craft_", "proto_"):
+        if iid.startswith(p):
+            return iid[len(p):] + ".png"
+    return iid + ".png"
+
+
 # ---------------------------------------------------------------- sections
 
 def section_armes():
@@ -153,7 +161,7 @@ def section_armes():
                 ("portee", "%s–%s" % (f.get("portee_min", 1), f.get("portee", 1))),
                 ("zone", f.get("attaque_zone", "")),
                 ("composants", composants_de(d)), ("proto", est_proto(d)),
-                ("materiau", d.get("materiau", "")),
+                ("materiau", d.get("materiau", "")), ("sprite", nom_sprite(i)),
             ]))
     return rows
 
@@ -170,7 +178,7 @@ def section_simple(type_, avec_fonct=True):
             ("tags", [t for t in d.get("tags", []) if t not in (type_, "assemble", "prototype")]),
             ("quantite", d.get("quantite", 1)), ("luminosite", d.get("luminosite", 0)),
             ("materiaux_recette", [(e.get("category", ""), e.get("forme", ""), e.get("amount", 0)) for e in d.get("recipe", {}).get("inputs", [])]),
-            ("element", d.get("element") or ""), ("meuble", d.get("meuble", "")), ("station", d.get("station", "")),
+            ("element", d.get("element") or ""), ("meuble", d.get("meuble", "")), ("station", d.get("station", "")), ("sprite", nom_sprite(i)),
         ]))
     return rows
 
@@ -183,6 +191,7 @@ def section_composants():
             ("familles", [nom_famille(f) for f in familles_par_comp.get(cid, [])]),
             ("stations", sorted(set(r.get("station", "") for r in recettes_comp.values() if r.get("component") == cid))),
             ("utilise_par", [nom_fonct(u) if u in fonctionnalites else tr("item.craft_%s.name" % u, u) for u in c.get("used_by", [])]),
+            ("sprite", "composants/%s.png" % cid),
         ]))
     return rows
 
@@ -203,7 +212,7 @@ def section_gemmes():
                 effets.append(typ)
         rows.append(collections.OrderedDict([
             ("id", i), ("nom", nom_item(i, d)), ("materiau", tr("material.%s.name" % d.get("materiau", ""), d.get("materiau", ""))),
-            ("element", nom_element(d["element"]) if d.get("element") else "—"), ("effets", effets),
+            ("element", nom_element(d["element"]) if d.get("element") else "—"), ("effets", effets), ("sprite", nom_sprite(i)),
         ]))
     return rows
 
@@ -226,7 +235,7 @@ def section_consommables():
             ("tags", [nom_tag(t) for t in tags if t not in ("consommable", "empilable")]),
             ("distillat", tr("item.%s.name" % d["distillat"], d["distillat"]) if d.get("distillat") else ""),
             ("wuxing", ", ".join("%s %d %%" % (nom_element(e), round(v * 100)) for e, v in d.get("wuxing", {}).items())),
-            ("cru", d.get("cru", False)),
+            ("cru", d.get("cru", False)), ("sprite", nom_sprite(i)),
         ]))
     return groupes, rows
 
@@ -261,50 +270,52 @@ def ecrire_note(armes, outils, boucliers, armures, bijoux, gemmes, munitions, co
     w("> [!important] Demande du designer (2026-09-05) : « je vais générer les sprites des items, donne-moi la liste des armes avec leurs composants, pareil pour les outils, l'équipement et autres items »")
     w("> Cette note est **générée** par `tools/liste_objets.py` depuis `godot/data` et `locale/fr.csv` : rien n'y est écrit à la main, la relancer la remet à jour. Elle compte ce que le jeu sait fabriquer, ramasser ou poser, avec ce qui fait la silhouette d'un objet : son **type**, son **emplacement**, ses **composants** et les **familles de matériaux** que chaque composant accepte.")
     w(">")
+    w("> **Où vont les sprites.** `godot/assets/objets/` : un fichier par objet, nommé comme la colonne « sprite » de chaque table (l'id sans `craft_` ni `proto_`), `composants/<id>.png` pour les composants et `matieres/<forme>.png` pour les matières, ces deux-là teintés par leur matière dans le jeu ([[Direction artistique]]). Carré, fond transparent ; le jeu les prend dès qu'ils existent et garde son pictogramme par code sinon ; `tools/verif_sprites.py` dit ce qui manque.")
+    w(">")
     w("> **Ce qui fait un objet, pour le dessin.** Un objet assemblé est une *base* (la silhouette : épée, cuirasse, pioche) dont chaque *composant* est taillé dans un *matériau* — c'est le matériau qui donne la couleur ([[Palette de couleurs des matériaux]]) et la qualité qui donne l'état. Un sprite par base suffit donc, si ses composants sont des zones qu'on peut teinter séparément (lame, poignée, garde). Les objets `proto_*` sont les pièces de fortune du prototype (une matière fixe, pas de composants) : mêmes silhouettes que leurs bases assemblées. Le jeu dessine aujourd'hui des pictogrammes par code (`Pictos.dessiner_objet`, une case de 10 × 10 unités, avec des alias : sabre et rapière → épée, stylet → dague, hallebarde → lance, baguette → bâton magique…) — les sprites peuvent suivre ces regroupements ou distinguer chaque objet. Conventions : [[Direction artistique]] (lisibilité avant réalisme, teintes des cinq éléments) et le gabarit d'encrage `gabarit-encrage-sprites.pdf` dans ce dossier.")
     w("")
     w("## 1. Les armes (%d, dont %d de fortune)" % (len(armes), sum(1 for a in armes if a["proto"])))
     w("")
     w("Par voie (la stat de la compétence de l'arme). Dés, type de dégâts et portée viennent de la fonctionnalité ; les composants et leurs matériaux des recettes de composants.")
     w("")
-    w("| Arme | id | Voie · compétence | Mains | Dés · type · portée | Composants (slot → composant — matériaux) |")
+    w("| Arme | id · sprite | Voie · compétence | Mains | Dés · type · portée | Composants (slot → composant — matériaux) |")
     w("|---|---|---|---|---|---|")
     for a in armes:
-        w("| **%s**%s | `%s` | %s · %s | %d | %s · %s · %s%s | %s |" % (
-            a["nom"], " *(fortune, %s)*" % a["materiau"] if a["proto"] else "", a["id"], a["voie"], a["competence"], a["mains"],
+        w("| **%s**%s | `%s`<br>`%s` | %s · %s | %d | %s · %s · %s%s | %s |" % (
+            a["nom"], " *(fortune, %s)*" % a["materiau"] if a["proto"] else "", a["id"], a["sprite"], a["voie"], a["competence"], a["mains"],
             a["degats"], a["type_degats"], a["portee"], (" · zone %s" % a["zone"]) if a["zone"] else "", md_composants(a["composants"])))
     w("")
     w("## 2. Les outils (%d) et les boucliers (%d)" % (len(outils), len(boucliers)))
     w("")
-    w("| Outil | id | Fonction | Mains · emplacement | Composants |")
+    w("| Outil | id · sprite | Fonction | Mains · emplacement | Composants |")
     w("|---|---|---|---|---|")
     for o in outils + boucliers:
         extra = (" · %s, %s" % (o["zone"], o["construction"])) if o["construction"] else ""
         lum = (" · lumière %d" % o["luminosite"]) if o["luminosite"] else ""
-        w("| **%s**%s | `%s` | %s%s%s | %d · %s | %s |" % (o["nom"], " *(fortune, %s)*" % o["materiau"] if o["proto"] else "", o["id"], o["fonction"] or "—", extra, lum, o["mains"], o["emplacement"], md_composants(o["composants"])))
+        w("| **%s**%s | `%s`<br>`%s` | %s%s%s | %d · %s | %s |" % (o["nom"], " *(fortune, %s)*" % o["materiau"] if o["proto"] else "", o["id"], o["sprite"], o["fonction"] or "—", extra, lum, o["mains"], o["emplacement"], md_composants(o["composants"])))
     w("")
     w("## 3. Armures et vêtements (%d)" % len(armures))
     w("")
     w("L'emplacement dit où la pièce se porte, la zone ce qu'elle couvre, la construction sa matière dominante (plaque, tissu, matelassé, rituel, cuir, mailles). Les vêtements ont une *étoffe* là où les armures ont une *plaque*.")
     w("")
-    w("| Pièce | id | Emplacement · zone | Construction | Composants |")
+    w("| Pièce | id · sprite | Emplacement · zone | Construction | Composants |")
     w("|---|---|---|---|---|")
     for a in armures:
-        w("| **%s**%s | `%s` | %s · %s | %s | %s |" % (a["nom"], " *(fortune, %s)*" % a["materiau"] if a["proto"] else "", a["id"], a["emplacement"], a["zone"], a["construction"] or "—", md_composants(a["composants"]) if a["composants"] else ("—" if not a["tags"] else ", ".join(a["tags"]))))
+        w("| **%s**%s | `%s`<br>`%s` | %s · %s | %s | %s |" % (a["nom"], " *(fortune, %s)*" % a["materiau"] if a["proto"] else "", a["id"], a["sprite"], a["emplacement"], a["zone"], a["construction"] or "—", md_composants(a["composants"]) if a["composants"] else ("—" if not a["tags"] else ", ".join(a["tags"]))))
     w("")
     w("## 4. Bijoux (%d) et gemmes (%d)" % (len(bijoux), len(gemmes)))
     w("")
-    w("| Bijou | id | Emplacement | Composants |")
+    w("| Bijou | id · sprite | Emplacement | Composants |")
     w("|---|---|---|---|")
     for b in bijoux:
-        w("| **%s**%s | `%s` | %s | %s |" % (b["nom"], " *(fortune, %s)*" % b["materiau"] if b["proto"] else "", b["id"], b["emplacement"], md_composants(b["composants"])))
+        w("| **%s**%s | `%s`<br>`%s` | %s | %s |" % (b["nom"], " *(fortune, %s)*" % b["materiau"] if b["proto"] else "", b["id"], b["sprite"], b["emplacement"], md_composants(b["composants"])))
     w("")
     w("Une gemme se sertit dans la sertissure d'un bijou ; sa couleur est celle de son élément quand elle en a un.")
     w("")
-    w("| Gemme | id | Matériau | Élément | Ce qu'elle porte |")
+    w("| Gemme | id · sprite | Matériau | Élément | Ce qu'elle porte |")
     w("|---|---|---|---|---|")
     for g in gemmes:
-        w("| **%s** | `%s` | %s | %s | %s |" % (g["nom"], g["id"], g["materiau"], g["element"], ", ".join(g["effets"])))
+        w("| **%s** | `%s`<br>`%s` | %s | %s | %s |" % (g["nom"], g["id"], g["sprite"], g["materiau"], g["element"], ", ".join(g["effets"])))
     w("")
     w("## 5. Munitions (%d)" % len(munitions))
     w("")
@@ -317,10 +328,10 @@ def ecrire_note(armes, outils, boucliers, armures, bijoux, gemmes, munitions, co
     w("")
     w("Chaque composant est une pièce à part entière (elle se fabrique, se ramasse, se stocke) : un sprite par composant, teinté par sa matière.")
     w("")
-    w("| Composant | id | Slot | Familles de matériaux | Station | Sert à |")
+    w("| Composant | id · sprite | Slot | Familles de matériaux | Station | Sert à |")
     w("|---|---|---|---|---|---|")
     for c in comps:
-        w("| **%s** | `%s` | %s | %s | %s | %s |" % (c["nom"], c["id"], c["slot"], ", ".join(c["familles"]) or "—", ", ".join(s for s in c["stations"] if s) or "—", ", ".join(c["utilise_par"]) or "—"))
+        w("| **%s** | `%s`<br>`%s` | %s | %s | %s | %s |" % (c["nom"], c["id"], c["sprite"], c["slot"], ", ".join(c["familles"]) or "—", ", ".join(s for s in c["stations"] if s) or "—", ", ".join(c["utilise_par"]) or "—"))
     w("")
     w("## 7. Livres et parchemins (%d)" % len(livres))
     w("")
@@ -346,7 +357,7 @@ def ecrire_note(armes, outils, boucliers, armures, bijoux, gemmes, munitions, co
         w("")
     w("## 9. Les matériaux : %d matières, %d formes" % (sum(len(v) for v in cats_mat.values()), len(formes)))
     w("")
-    w("Une matière brute ou transformée est un objet empilable : un sprite par **forme** (teinté par la matière) suffit. Formes : %s." % ", ".join("`%s`" % f for f in formes))
+    w("Une matière brute ou transformée est un objet empilable : un sprite par **forme** (teinté par la matière) suffit — `assets/objets/matieres/<forme>.png`. Formes : %s." % ", ".join("`%s`" % f for f in formes))
     w("")
     w("| Catégorie | Matières |")
     w("|---|---|")

@@ -162,5 +162,9 @@
     ],
     "lissage": "gris",
     "hinting": "leger"
+  },
+  "sprites": {
+    "_doc": "Les sprites d'objets du designer (Direction artistique, 2026-09-05) : dossier res:// ou le jeu cherche <id sans craft_/proto_>.png, composants/<id>.png, matieres/<forme>.png ; absent = pictogramme par code.",
+    "dossier": "res://assets/objets"
   }
 }
