@@ -9760,7 +9760,8 @@ func triche(e: Dictionary, action: String, arg: String = "") -> bool:
 			var x := ajouter(arg, libre, "ia")
 			if x.is_empty():
 				return false
-			_habiller_pnj(x, GameData.entree("creatures", arg))
+			if "civil" in GameData.entree("creatures", arg).get("tags", []):   # habiller un loup ou un bandit en faisait un civil nommé qui ne se battait plus (GIF du combat, 2026-09-04)
+				_habiller_pnj(x, GameData.entree("creatures", arg))
 		"meteo":
 			meteo_force = arg
 		"heure":   # bascule jour ↔ nuit : saute à midi quand il fait nuit, à minuit quand il fait jour

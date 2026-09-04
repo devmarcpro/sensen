@@ -60,6 +60,7 @@ Des GIF pris par `scenes/tests/capture.tscn` (tout est dessiné par code — auc
 | ![Orage](captures/anim/pluie.gif) **Un orage sur le camp** — la pluie dessinée par code, la foudre au journal, la météo au HUD | ![Création du monde](captures/anim/monde.gif) **La création du monde** — l'aperçu de la mappemonde entière et les sept réglages de génération |
 | ![Capacités](captures/anim/capacites.gif) **Les capacités** — les sorts assemblés, leur coût, la hotbar en glisser-déposer | ![Commerce](captures/anim/commerce.gif) **Le commerce** — le stock d'un marchand, ses prix, et les objets encore non identifiés |
 | ![Charger une partie](captures/anim/parties.gif) **Charger une partie** — une sauvegarde par partie ; la ligne pointée dessine le personnage et déplie l'état de son monde | ![Grande base](captures/anim/grande_base.gif) **Une grande base** — cinq cellules revendiquées, zones de récolte et stockages dessinés, douze chaumières bâties d'elles-mêmes pour vingt résidents (six semaines simulées) |
+| ![Compagnons en donjon](captures/anim/compagnons.gif) **Deux compagnons en donjon** — recrutés au camp, ils descendent avec le joueur, entrent dans ses combats et frappent ; le HUD les suit (nom, vie, ordre), le volet de droite aussi | |
 
 ---
 

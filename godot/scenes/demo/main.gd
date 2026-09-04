@@ -582,6 +582,8 @@ func _apres_changement_de_grille() -> void:
 	noeuds.clear()
 	chemin_en_cours.clear()
 	telegraphes.clear()
+	gros_flottants.clear()          # ils portaient des positions de l'ancienne grille (Grille.h hors bornes au retour au camp)
+	survol = Vector2i(-1, -1)       # idem pour la tuile survolée, tant que la souris n'a pas bougé
 
 
 func _recentrer() -> void:
@@ -1936,6 +1938,8 @@ func _dessiner_hud(ci: CanvasItem) -> void:
 	_dessiner_etats(ci)
 	if sim != null:
 		for f in gros_flottants:   # CRITIQUE / RATÉ en gros, qui montent et s'effacent (Écrans d'interface)
+			if not sim.grille.dans(f.pos):
+				continue
 			var pg := _ecran(f.pos, sim.grille.h(f.pos)) + Vector2(-36.0, -66.0 - f.t * 30.0)
 			var ag: float = clampf(1.2 - f.t, 0.0, 1.0)
 			var cg: Color = f.couleur
@@ -1990,7 +1994,7 @@ func _maj_ui() -> void:
 			+ (tr("ui.etat_grille_neige") if sim.grille.neige else "") + (tr("ui.etat_grille_gel") if sim.grille.gel else "")
 			+ (tr("ui.sang").format({"n": int(e.get("sang", 0))}) if sim.a_talent(e, "jauge_de_sang") else "")
 			+ (" · " + _texte_statuts(e) if not e.statuts.is_empty() else ""))
-	if survol.x >= 0 and not j.is_empty():
+	if survol.x >= 0 and g.dans(survol) and not j.is_empty():
 		var cl := _coord_locale(survol)
 		lignes.append("  " + tr("ui.case").format({"x": cl.x, "y": cl.y, "h": g.h(survol), "dh": g.h(survol) - g.h(j.pos)}))
 		var occ := g.occupant(survol)
