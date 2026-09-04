@@ -574,6 +574,8 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 > **81. Un voile sous tout menu** (13 h 05) : l'écran derrière se grise et rien ne se clique au travers.
 > *Même journée, sans demande : les 36 armes relues une à une (« tu as pu voir pour les 6×6 armes ? »), les sous-classes laissées de côté (« pour l'instant on ne s'en occupe pas »).*
 
+> [!done] Demande du designer (2026-09-04, 14 h) : 82. **Fait le 2026-09-04** — « simule une grande base sur plusieurs cases avec une vingtaine de résidents, des zones de récolte etc ». Sonde `sonde_grande_base` et capture `--grande_base N` ; le rapport chiffré et les six questions qu'il pose sont dans [[À juger — parcours de jeu]]. Trois trous de code bouchés en l'écrivant : un résident a un poste ET un logement ; le repas hebdomadaire ne compte qu'une fois et mange la récolte des fermiers ; quelqu'un debout ne bloque plus une chaumière. Le journal ne raconte plus les pas, les attentes et les niveaux des résidents.
+
 
 > [!success] Constaté le 2026-09-03 — `items_any` est codé sous le nom `kinds_any` (sélecteur des gabarits de quête)
 

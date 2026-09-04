@@ -237,3 +237,7 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]
 - **Voir aussi** : [[Minimap et brouillard de guerre]], [[Wu Xing — cycles et vecteurs]], [[Vocabulaire des modules — six axes]], [[Tooltips contextuels]], [[Dialogue PNJ]], [[Éditeur de sculpture]], [[Arborescence du projet]]
+
+> [!success] 2026-09-04, 14 h — le journal ne raconte plus les pas et les attentes des PNJ
+> Vu sur la capture de la grande base : neuf lignes « Untel attend (5 ticks, +20 vigueur) » d'affilée, écrites par les résidents oisifs autour du joueur, et des dizaines de « Untel : Récupération atteint le niveau 2 » par semaine. `journal.attendre` et `journal.deplacement` ne s'écrivent que pour le joueur ; `journal.niveau` pour le joueur et ses compagnons (ceux qui ont un maître), pas pour les résidents — leur progression se lit dans Territoire.
+

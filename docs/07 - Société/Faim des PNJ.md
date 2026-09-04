@@ -21,6 +21,9 @@ Les PNJ résidents ont la même jauge de faim que le joueur (même système, [[S
 > [!success] Codé le 2026-08-28
 > Chaque semaine, chaque résident mange **une unité** prise dans les **garde-manger** du territoire (fenêtre chargée ; tout consommable à nutrition > 0, une unité par pile) ; garde-manger vide → **humeur −10** (`combat_rules.royaume.faim_pnj`) et journal. Pas de jauge par tick pour les PNJ : une seule échéance hebdomadaire.
 
+> [!important] 2026-09-04, 14 h — la grande base simulée mangeait deux fois, et ne mangeait pas ce que ses fermiers récoltaient
+> Vingt résidents, deux fermiers, douze semaines (`sonde_grande_base`) : **quarante** lignes « affamé » par semaine pour vingt résidents, et trente-cinq baies qui s'entassaient au stock du territoire pendant que tout le monde avait faim. Deux causes. (1) Le repas vivait dans `_recalculer_humeurs`, appelée **deux fois** par semaine — après les maisons bâties, puis au bilan — donc deux repas, ou deux malus. Le repas est désormais une étape à part (`_nourrir_residents`), une fois par semaine, avant le bilan ; `_recalculer_humeurs` lit ce qu'elle a laissé. (2) La note dit « les stocks de nourriture du claim » ; le code ne lisait que les **meubles** garde-manger, jamais `territoire.stocks`, où tombe pourtant la production des fermiers. Le stock du territoire est un garde-manger de fait : un résident y prend une unité de tout consommable à nutrition > 0 quand les meubles sont vides. Priorité aux meubles (ce que le joueur a rangé lui-même), puis le stock.
+
 ## Liens
 - **Dépend de** : [[Faim]], [[Schéma unifié créature-PNJ]], [[Agriculture et élevage]]
 - **Alimente** : [[Habitat des PNJ]], [[Population et exploitation]], [[Abstraction hors-site]]

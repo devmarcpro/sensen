@@ -1,4 +1,5 @@
 extends Node
+const GrandeBase := preload("res://scenes/tests/grande_base.gd")
 ## Capture d'écran automatique de la scène principale (fenêtrée, pas headless) :
 ##   & Godot --path godot res://scenes/tests/capture.tscn -- --sortie C:/chemin/capture.png [--arene N] [--frames 60]
 ## Sert à vérifier le rendu sans œil humain disponible ; ne remplace pas le jugement de game feel.
@@ -472,6 +473,17 @@ func _ready() -> void:
 		if args[ipr] == "--perimetre" and ipr + 1 < args.size() and scene.sim != null and scene.sim.monde != null:
 			var jp: Dictionary = scene.joueur()   # dessiné : un rectangle de 6×4 à l'est du joueur, pour voir la teinte sur la carte
 			scene.sim.dessiner_perimetre(jp.pos + Vector2i(2, -1), jp.pos + Vector2i(7, 2), str(args[ipr + 1]))
+	for ig in args.size():   # --grande_base N : la grande base du designer (2026-09-04, 14 h), N semaines passées — voir grande_base.gd
+		if args[ig] == "--grande_base" and scene.sim != null and scene.sim.monde != null:
+			var semaines_gb: int = int(args[ig + 1]) if ig + 1 < args.size() and args[ig + 1].is_valid_int() else 0
+			var jg: Dictionary = scene.joueur()
+			var rg: Dictionary = GrandeBase.batir(scene.sim, jg, 20, 1000)
+			var journal_gb: Array = []
+			for k in semaines_gb:
+				GrandeBase.semaine(scene.sim, journal_gb, jg)
+			var eg: Dictionary = GrandeBase.etat(scene.sim)
+			print("grande base : %d cellules, %d zones, %d résidents, %d logés, %d lits, trésor %d" % [rg.cellules.size(), rg.zones.size(), eg.residents, eg.loges, eg.lits, eg.tresor])
+			EventBus.emettre(&"fenetre_recentree", [scene.sim.grille.origine])   # le client redessine tout ce qui a été bâti
 	if "--echange" in args and scene.sim != null:   # --echange : un compagnon avec un objet dans son sac, et l'ecran Echange (designer 2026-09-04)
 		var je: Dictionary = scene.joueur()
 		var xe: Dictionary = scene.sim.ajouter("villageois", je.pos + Vector2i(1, 0), "ia")

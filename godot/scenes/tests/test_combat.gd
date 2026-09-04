@@ -157,6 +157,7 @@ func _ready() -> void:
 	_lancer("test_faune_rarefaction")
 	_lancer("test_engager_et_migrants")
 	_lancer("test_perimetres")
+	_lancer("test_faim_des_residents")
 	_lancer("test_composer_capacites")
 	_lancer("test_charges_de_modules")
 	_lancer("test_assemblage_sans_limite")
@@ -3911,6 +3912,31 @@ func test_engager_et_migrants() -> void:
 	s.monde.fermer()
 
 
+## Le repas hebdomadaire des résidents (Faim des PNJ, 2026-09-04) : une unité par résident et par semaine, au
+## garde-manger puis au stock du territoire (la récolte des fermiers) ; un seul repas — un seul malus — par semaine.
+func test_faim_des_residents() -> void:
+	var s := Simulation.new(31)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var a: Dictionary = s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
+	var b: Dictionary = s.ajouter("villageois", j.pos + Vector2i(-1, 0), "ia")
+	a.camp = "joueur"
+	b.camp = "joueur"
+	verifier(s._assigner(j, a.id, "oisif", 0) and s._assigner(j, b.id, "oisif", 0), "deux résidents oisifs")
+	s.territoire.tresor = 10000
+	s.territoire.stocks.clear()
+	s.territoire.stocks["baies"] = 1   # ce que les fermiers récoltent tombe là
+	s._semaine_territoire(j)
+	var ry: Dictionary = s.regles.r.royaume
+	verifier(not s.territoire.stocks.has("baies"), "la baie du stock a été mangée")
+	verifier(int(bool(a.get("affame", false))) + int(bool(b.get("affame", false))) == 1, "un seul des deux a faim")
+	var nourri: Dictionary = a if not bool(a.get("affame", false)) else b
+	var affame: Dictionary = b if nourri.id == a.id else a
+	var attendu_nourri := int(ry.humeur_base) + int(ry.sans_logement)
+	verifier(int(nourri.humeur) == attendu_nourri and int(affame.humeur) == attendu_nourri + int(ry.get("faim_pnj", -10)), "humeurs : nourri %d, affamé %d — le malus de faim compte une fois" % [int(nourri.humeur), int(affame.humeur)])
+	s.monde.fermer()
+
+
 func test_perimetres() -> void:
 	# Les périmètres de récolte (Population et exploitation, 2026-09-04) : c'est ce qu'il y a sur les tuiles qui
 	# produit — on plante cinq pins, on déclare la cellule en périmètre bois, on y assigne un bûcheron.
@@ -4005,11 +4031,18 @@ func test_perimetres() -> void:
 	s.territoire.stocks.clear()
 	verifier(s._batir_maisons() == 0 and not h.has("lit"), "sans matériaux au stock : rien ne se bâtit")
 	s.territoire.stocks["chene|brut"] = 20
+	var debout: Dictionary = s.ajouter("villageois", libre + Vector2i(1, 1), "ia")   # quelqu'un se tient sur le chantier
+	debout.camp = "joueur"
 	var n_maisons: int = s._batir_maisons()
+	verifier(n_maisons == 1 and not s.grille.bloque_passage(debout.pos) and not s.grille.meubles.has(s.grille.idx(debout.pos)) and s.grille.occupant(debout.pos) == debout.id, "un être debout ne bloque pas le chantier : il est déplacé (%s)" % str(debout.pos))
 	verifier(n_maisons == 1 and h.has("lit") and s.grille.meubles.get(s.grille.idx(h.lit), "").begins_with("lit"), "avec vingt chênes bruts au stock : une chaumière, et son lit (%s)" % str(h.get("lit", Vector2i(-1, -1))))
 	verifier(int(s.territoire.stocks.get("chene|brut", 0)) == 20 - int(s.regles.r.royaume.maisons.cout[0].n), "le bois est pris sur le stock (reste %d)" % int(s.territoire.stocks.get("chene|brut", 0)))
 	verifier(not s._piece_du_lit(h.lit, s.pieces_de_cellule(camp)).is_empty(), "la chaumière est une pièce valide au sens de Détection de pièces")
 	verifier(s._batir_maisons() == 0, "logé : on ne lui bâtit pas une seconde maison")
+	# Un poste ET un logement (14 h) : assigné ensuite au périmètre de bois, il garde sa résidence ; réassigné au
+	# résidentiel, il garde son métier et son périmètre de travail.
+	verifier(s._assigner(j, h.id, "bucheron", 0, pid_d) and str(h.assignation.get("perimetre", "")) == pid_d and str(h.assignation.get("residence", "")) == pid_r, "assigné au bois : il garde sa résidence")
+	verifier(s._assigner(j, h.id, "oisif", 0, pid_r) and str(h.fonction) == "bucheron" and str(h.assignation.get("perimetre", "")) == pid_d and str(h.assignation.get("residence", "")) == pid_r, "réassigné au résidentiel : il reste bûcheron du même périmètre")
 	# Sauvegarde partout (décidé) : les périmètres dessinés, leurs tuiles, le stockage et le logement reviennent typés
 	var tuiles0: Array = s.tuiles_de_perimetre(pid_d)
 	var cap_s: int = int(s.perimetres()[pid_s].capacite)
@@ -6434,6 +6467,7 @@ func test_habitat_pnj() -> void:
 	s._habiller_pnj(b, GameData.entree("creatures", "villageois"))
 	b["assignation"] = {"fonction": "fermier", "cellule": cell}
 	b.camp = "joueur"
+	s._nourrir_residents()   # le repas est une étape à part depuis le 2026-09-04 (Faim des PNJ) : rien à manger ici
 	s._recalculer_humeurs()
 	verifier(int(a.humeur) == 60 + 2 - 10 and int(b.humeur) == 60 - 15 - 10, "logé : 60 +2 meubles −10 faim = %d ; sans pièce : 60 −15 −10 = %d" % [int(a.humeur), int(b.humeur)])
 	var gm: Vector2i = j.pos + Vector2i(0, -2)
@@ -6443,6 +6477,7 @@ func test_habitat_pnj() -> void:
 	var pain := s.generer_objet("pain", 1, {}, "commun", 0)
 	pain.quantite = 5
 	s.contenants[s.grille.idx(gm)] = [pain.uid]
+	s._nourrir_residents()
 	s._recalculer_humeurs()
 	verifier(int(a.humeur) == 62 and int(b.humeur) == 45 and int(pain.quantite) == 3, "garde-manger garni : plus de malus de faim, deux pains mangés")
 	s.monde.fermer()

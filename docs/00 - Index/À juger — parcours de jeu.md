@@ -439,3 +439,29 @@ Le designer a demandé une base façon Dwarf Fortress ([[Décision — Gestion d
    ~10 bois par semaine au niveau 0 : à comparer à ce qu'on coupe à la main en une heure de jeu.
 4. **L'outil de dessin** des périmètres : rectangle, pinceau, ou la cellule entière comme aujourd'hui ?
 
+## 2026-09-04 — Une grande base simulée : vingt résidents, cinq cellules, douze semaines
+
+Le designer, 14 h : « simule une grande base sur plusieurs cases avec une vingtaine de résidents, des zones de récolte etc ». La sonde `sonde_grande_base` (et la capture `--grande_base N`) bâtit la base par le code du jeu, monde 9 (camp en forêt tempérée) : **cinq cellules** revendiquées, **trois zones de bois** (richesse 32, 35, 25) et **deux de plantes** dessinées sur les tuiles les plus riches, deux stockages de 160, un résidentiel de 24×12, **vingt engagés** (6 bûcherons, 4 herboristes, 2 commerçants, 2 artisans, 2 fermiers, 1 garde, 3 oisifs), 1 000 or en caisse. Puis douze semaines passent par le passage hebdomadaire normal. Capture : `captures/grande_base.png` (après six semaines). Trois trous de code trouvés et bouchés en l'écrivant (un poste ET un logement, le repas double et le stock non mangé, les gens debout qui bloquaient le chantier — voir [[Décision — Gestion de base, périmètres de récolte]] et [[Faim des PNJ]]). Ce qui suit est ce que **les chiffres actuels** font, et c'est au designer de dire s'il les veut.
+
+| semaine | logés | trésor | dette | humeur moy. | bois au stock | affamés |
+|---|---|---|---|---|---|---|
+| 1 | 2 | 814 | 0 | 46 | 12 | — |
+| 3 | 6 | 442 | 0 | 45 | 33 | — |
+| 6 | 12 | 0 | 127 | 43 | 23 | 14 |
+| 9 | 11 (19 résidents) | 0 | 699 | 27 | 50 | 16 |
+| 12 | 8 (16 résidents) | 0 | 1 221 | 9 | 77 | 14 |
+
+**1. La base est un puits d'or : −190 or par semaine.** L'entretien est de 10 or par résident (200), et les deux commerçants et deux artisans rapportent une dizaine d'or à eux quatre. La caisse de 1 000 tient cinq semaines ; ensuite les paliers de dette : humeur −5, productivité, puis **un départ par semaine** dès la neuvième (20 → 16 résidents à la douzième). Tout le reste découle de là. Les questions : l'entretien de 10 or par tête est-il le bon ordre de grandeur pour une base qui ne vend rien ? Faut-il que le bois et les plantes se **vendent** (aujourd'hui ils s'entassent : 77 chênes bruts au stock à la fin, invendus) ? Ou que la boutique passive écoule le stock du territoire ?
+
+**2. Deux fermiers nourrissent six personnes.** Chaque résident mange une unité par semaine ; un fermier récolte trois baies par semaine (rendement 0,05 × heures × humeur), les herboristes ajoutent quelques orties et champignons. Sur vingt bouches, **quatorze ont faim** chaque semaine à partir de la quatrième, −10 d'humeur chacune. Un fermier pour trois habitants, est-ce voulu ? (Le rendement des fonctions est dans `data/functions/`.)
+
+**3. Le bois : une zone de 12×8 en forêt rend 48 unités puis repousse de 10 % par semaine.** Six bûcherons vident les trois zones en quatre semaines (réserve 0 / 6 / 5 à la fin) ; la repousse (`perimetres.repousse_hebdo` 0,1 × richesse × 1,5) tient ensuite ~9 bois par semaine. Vingt chaumières coûtent 240 bois : c'est le rythme qui limite les maisons (2 par semaine au plus, `maisons.max_par_semaine`), pas le bois. Sur une plaine (monde 31 ou 42), il n'y a **pas de bois du tout** : rien ne se bâtit.
+
+**4. Un résidentiel de 24×12 loge douze personnes.** Une chaumière fait 6×4 = 24 tuiles, elles se serrent sans intervalle : douze maisons, huit résidents sans toit (−15 d'humeur chacun). Compter **24 tuiles par habitant** en dessinant le résidentiel — l'écran ne le dit pas encore.
+
+**5. Un raid arrive la deuxième semaine** (8 assaillants contre un garde : subi, 50 % des stocks et de la caisse perdus). Le mécanisme existe déjà et frappe une base neuve ; avec vingt résidents et un garde, il ne se défend pas.
+
+**6. Les migrants ne viennent pas** tant que la base est pleine (4 par cellule × 5 = 20), et une fois les départs commencés la chance (0,2 par semaine) n'en a amené aucun en quatre semaines.
+
+**Ce que je propose, si le designer me laisse trancher** : rien de tout cela n'est un bug, ce sont les chiffres. Les deux qui rendent la base injouable sont l'entretien (1) et la faim (2). Le geste conservateur : que le bois, le minerai et les plantes récoltés **valent de l'or au rapport de la semaine** (vendus au prix suggéré × la marge de la boutique) — la base se paierait avec ses zones, ce qui est la promesse des périmètres —, et un rendement de fermier à **une bouche par tuile de champ** plutôt qu'à l'heure. Les deux se règlent en données.
+

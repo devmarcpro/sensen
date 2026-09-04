@@ -2048,16 +2048,27 @@ func _assigner(e: Dictionary, pnj_id: String, fonction: String, tick: int, perim
 	x.erase("maitre")
 	if not conquis:
 		x.camp = "joueur"
+	# Un poste ET un logement (Décision — Gestion de base, 2026-09-04, 14 h) : assigner un périmètre de production
+	# garde la résidence ; assigner un résidentiel ne change que le logement et garde la fonction et le poste.
+	var avant: Dictionary = x.get("assignation", {})
+	var vers_residentiel := false
+	if not perimetre.is_empty() and perimetres().has(perimetre):
+		var tp_a: Dictionary = _ry().get("perimetres", {}).get("types", {}).get(str(perimetres()[perimetre].type), {})
+		vers_residentiel = bool(tp_a.get("residentiel", false))
+	if vers_residentiel and avant.has("fonction") and str(avant.get("cellule", "")) != "":
+		fonction = str(avant.fonction)   # il garde son métier : on ne lui donne qu'un toit
 	x.ai_profile = "civil" if fonction != "garde" else "garde"
 	x["fonction"] = fonction
 	x["role"] = "resident"
 	x["assignation"] = {"fonction": fonction, "cellule": cell}
-	if not perimetre.is_empty() and perimetres().has(perimetre):   # assigné sur un périmètre de récolte (2026-09-04)
-		var tp_a: Dictionary = _ry().get("perimetres", {}).get("types", {}).get(str(perimetres()[perimetre].type), {})
-		if bool(tp_a.get("residentiel", false)):
-			x.assignation["residence"] = perimetre   # il y habite : une maison s'y bâtira (Population et exploitation)
-		else:
-			x.assignation["perimetre"] = perimetre
+	if vers_residentiel:
+		x.assignation["residence"] = perimetre   # il y habite : une maison s'y bâtira (Population et exploitation)
+		if avant.has("perimetre") and perimetres().has(str(avant.perimetre)):
+			x.assignation["perimetre"] = str(avant.perimetre)
+	elif not perimetre.is_empty() and perimetres().has(perimetre):   # assigné sur un périmètre de récolte (2026-09-04)
+		x.assignation["perimetre"] = perimetre
+	if not vers_residentiel and avant.has("residence") and perimetres().has(str(avant.residence)):
+		x.assignation["residence"] = str(avant.residence)
 	x["poste"] = x.pos
 	x.ancre = x.pos
 	x["place"] = x.pos
@@ -3042,10 +3053,6 @@ func _recalculer_humeurs() -> void:
 	var pc: Dictionary = ry.pieces
 	var pieces_par_cell: Dictionary = {}
 	var res := residents()
-	var garde_manger: Array = []
-	for gi in grille.meubles.keys():
-		if str(GameData.entree("meubles", str(grille.meubles[gi])).type_meuble) == "garde_manger" and monde.claims.has(_cell_de(grille.pos_de(int(gi)))):
-			garde_manger.append(int(gi))
 	for x in res:
 		var h := int(ry.humeur_base)
 		var lit: Vector2i = x.get("lit", Vector2i(-1, -1))
@@ -3071,7 +3078,20 @@ func _recalculer_humeurs() -> void:
 				if autre.id != x.id and autre.get("lit", Vector2i(-2, -2)) in piece.tuiles:
 					co += 1
 			h += int(pc.co_occupant) * co
-		# La faim : une unité au garde-manger, sinon le malus.
+		if bool(x.get("affame", false)):   # le repas de la semaine a manqué (_nourrir_residents)
+			h += int(ry.get("faim_pnj", -10))
+		x.humeur = h
+
+
+## Le repas hebdomadaire des résidents (Faim des PNJ, 2026-09-04) : une unité par résident, au garde-manger d'abord,
+## puis au stock du territoire — tout consommable à nutrition > 0, là où tombe la récolte des fermiers. Une seule
+## fois par semaine, avant le bilan ; laisse `affame` sur chacun, que `_recalculer_humeurs` lit.
+func _nourrir_residents() -> void:
+	var garde_manger: Array = []
+	for gi in grille.meubles.keys():
+		if str(GameData.entree("meubles", str(grille.meubles[gi])).type_meuble) == "garde_manger" and monde.claims.has(_cell_de(grille.pos_de(int(gi)))):
+			garde_manger.append(int(gi))
+	for x in residents():
 		var mange := false
 		for gi in garde_manger:
 			for uid in contenants.get(gi, []):
@@ -3085,10 +3105,18 @@ func _recalculer_humeurs() -> void:
 					break
 			if mange:
 				break
+		if not mange:   # le stock du territoire est un garde-manger de fait
+			for cle in territoire.stocks.keys():
+				var def: Dictionary = GameData.catalogues.items.get(str(cle).split("|")[0], {})
+				if str(def.get("type", "")) == "consommable" and float(def.get("nutrition", 0)) > 0.0 and int(territoire.stocks[cle]) > 0:
+					territoire.stocks[cle] = int(territoire.stocks[cle]) - 1
+					if int(territoire.stocks[cle]) <= 0:
+						territoire.stocks.erase(cle)
+					mange = true
+					break
+		x["affame"] = not mange
 		if not mange:
-			h += int(ry.get("faim_pnj", -10))
 			EventBus.emettre(&"journal", [&"journal.pnj_affame", {"nom": x.name_key}])
-		x.humeur = h
 
 
 ## La production hebdomadaire d'un résident (Abstraction hors-site) : rendement × heures × humeur.
@@ -3128,6 +3156,7 @@ func _semaine_territoire(e: Dictionary) -> void:
 		return
 	var ry := _ry()
 	var prod_txt: Array[String] = []
+	var prod_par := {}   # cumulé par matière, l'or en une somme (grande base, 2026-09-04)
 	var or_prod := 0
 	for x in residents():
 		var pr := production_de(x)
@@ -3138,11 +3167,11 @@ func _semaine_territoire(e: Dictionary) -> void:
 			continue
 		if pr.has("or"):
 			or_prod += int(pr.or)
-			prod_txt.append("%d or" % int(pr.or))
+			prod_par["or"] = int(prod_par.get("or", 0)) + int(pr.or)
 		elif int(pr.n) > 0:
 			var cle: String = pr.base + ("|" + pr.forme if not str(pr.forme).is_empty() else "")
 			territoire.stocks[cle] = int(territoire.stocks.get(cle, 0)) + int(pr.n)
-			prod_txt.append("%s ×%d" % [pr.base, int(pr.n)])
+			prod_par[str(pr.base)] = int(prod_par.get(str(pr.base), 0)) + int(pr.n)
 			if pr.has("perimetre") and perimetres().has(str(pr.perimetre)):   # pris sur la réserve du périmètre
 				var per_p: Dictionary = perimetres()[str(pr.perimetre)]
 				per_p.reserve = maxf(0.0, float(per_p.get("reserve", 0.0)) - float(pr.n))
@@ -3159,6 +3188,7 @@ func _semaine_territoire(e: Dictionary) -> void:
 		if str(monde.claims[cell].role) == "ressources":
 			monde.modifications.erase(cell)
 	_repousser_perimetres()
+	_nourrir_residents()   # le repas de la semaine (Faim des PNJ) : une fois, avant les maisons et le bilan
 	_batir_maisons()   # les maisons automatiques du résidentiel (Population et exploitation, 2026-09-04)
 	var entretien := int(ry.entretien_pnj) * residents().size() + int(ry.entretien_structure) * _structures_speciales()
 	if not str(territoire.gouvernance).is_empty():
@@ -3210,6 +3240,12 @@ func _semaine_territoire(e: Dictionary) -> void:
 			EventBus.emettre(&"journal", [&"journal.gouvernance_faite", {"gouv": GameData.entree("governments", str(territoire.gouvernance)).name_key}])
 	_semaine_accords()
 	_jet_raid(e, horloge_monde.ticks)
+	for b in prod_par.keys():
+		if str(b) == "or":
+			prod_txt.append("%d or" % int(prod_par[b]))
+		else:   # le nom traduit de la matière ou de l'objet, pas son id (vu « champignon_des_pres » au rapport)
+			var fiche_b: Dictionary = GameData.catalogues.materials.get(str(b), GameData.catalogues.items.get(str(b), {}))
+			prod_txt.append("%s ×%d" % [TranslationServer.translate(str(fiche_b.get("name_key", str(b)))), int(prod_par[b])])
 	var rapport := {"prod": " · ".join(prod_txt) if not prod_txt.is_empty() else "—", "entretien": entretien, "tresor": int(territoire.tresor), "dette": int(territoire.dette)}
 	territoire.rapports.append(rapport)
 	while territoire.rapports.size() > 8:
@@ -5334,6 +5370,24 @@ func _batir_maisons() -> int:
 						lit = pos
 				grille.marquer(pos)
 				EventBus.emettre(&"tile_changed", [pos])
+		for y2 in plan.size():   # quiconque se tenait sur un mur ou un meuble est déplacé sur la tuile libre la plus proche (2026-09-04)
+			for x2 in str(plan[y2]).length():
+				var pos2 := origine + Vector2i(x2, y2)
+				var occ := str(grille.occupant(pos2))
+				if occ.is_empty() or not entites.has(occ) or not (grille.bloque_passage(pos2) or grille.meubles.has(grille.idx(pos2))):
+					continue
+				var y_o: Dictionary = entites[occ]
+				var q_o := _tuile_libre_pres(y_o, pos2)
+				if q_o == Vector2i(-1, -1) or q_o == pos2:
+					continue
+				grille.liberer(pos2)
+				var dedans_o: bool = y_o.get("poste", pos2) == pos2
+				y_o.pos = q_o
+				grille.placer(y_o.id, q_o)
+				if dedans_o:
+					y_o["poste"] = q_o
+					y_o.ancre = q_o
+					y_o["place"] = q_o
 		if lit != Vector2i(-1, -1):
 			x["lit"] = lit
 		x.humeur = int(_ry().humeur_base)
@@ -5373,7 +5427,8 @@ func _emplacement_maison(pid: String, plan: Array) -> Vector2i:
 		for y in h:
 			for x in w:
 				var pos: Vector2i = o + Vector2i(x, y)
-				if not dedans.has(pos) or not grille.dans(pos) or grille.bloque_passage(pos) or not grille.occupant(pos).is_empty() \
+				# un être debout ne bloque pas le chantier : il sera déplacé (2026-09-04) — murs et meubles bloquent toujours
+				if not dedans.has(pos) or not grille.dans(pos) or grille.bloque_passage(pos) \
 					or grille.meubles.has(grille.idx(pos)) or ("construit" in grille.contenu_de(pos).get("tags", [])):
 					ok = false
 					break
@@ -8962,7 +9017,8 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 				break
 	e["immobile_depuis"] = e.compteur   # Canalisation : l'immobilité repart de zéro à chaque pas
 	gagner_xp(e, "athletisme", 1)
-	EventBus.emettre(&"journal", [&"journal.deplacement", {"nom": e.name_key, "cout": e.compteur - tick}])
+	if e.controle == "joueur":   # le pas d'un PNJ ne s'écrit pas dans le journal du joueur (grande base, 2026-09-04)
+		EventBus.emettre(&"journal", [&"journal.deplacement", {"nom": e.name_key, "cout": e.compteur - tick}])
 	if chute > 0:
 		# Le SOL qui recoit amortit : degats x (1 - elasticite / 150). Tomber sur de la tourbe ou du
 		# caoutchouc n'est pas tomber sur du granit — la note le disait, le code l'ignorait.
@@ -9006,7 +9062,8 @@ func _attendre(e: Dictionary, tick: int) -> bool:
 	_quitter_garde(e)
 	e.vigueur = mini(e.vigueur_max, e.vigueur + int(regles.r.actions.attendre_vigueur))
 	e.compteur = tick + int(regles.r.actions.attendre)
-	EventBus.emettre(&"journal", [&"journal.attendre", {"nom": e.name_key}])
+	if e.controle == "joueur":   # vingt résidents qui attendent n'écrivent pas vingt lignes (grande base, 2026-09-04)
+		EventBus.emettre(&"journal", [&"journal.attendre", {"nom": e.name_key}])
 	return true
 
 
@@ -9871,7 +9928,8 @@ func gagner_xp(e: Dictionary, cle: String, xp: int) -> void:
 		niveaux_gagnes.append({"id": e.id, "competence": cle, "niveau": int(e.competences[cle])})
 		EventBus.emettre(&"skill_level_up", [e.id, cle, int(e.competences[cle])])
 		_debloquer_grilles_de_palier(e, cle, int(e.competences[cle]))   # un palier d'arme franchi apprend la grille suivante de sa voie (2026-09-04)
-		EventBus.emettre(&"journal", [&"journal.niveau", {"nom": e.name_key, "competence": _nom_competence(cle), "niveau": int(e.competences[cle]), "potentiel": int(e.potentiels.get(cle, 80))}])
+		if e.controle == "joueur" or str(e.get("maitre", "")) != "":   # le joueur et ses compagnons ; pas les vingt résidents (2026-09-04)
+			EventBus.emettre(&"journal", [&"journal.niveau", {"nom": e.name_key, "competence": _nom_competence(cle), "niveau": int(e.competences[cle]), "potentiel": int(e.potentiels.get(cle, 80))}])
 		Etres.recalculer(e, items, affixes_defs, regles)
 
 
@@ -9884,7 +9942,8 @@ func _verser_stat(e: Dictionary, stat: String, xp: int) -> void:
 	var gagnes := progression.verser(e, cle, xp)
 	if gagnes > 0:
 		e.corps.stats[stat] = int(e.corps.stats[stat]) + gagnes
-		EventBus.emettre(&"journal", [&"journal.niveau", {"nom": e.name_key, "competence": "stat." + stat, "niveau": int(e.corps.stats[stat]), "potentiel": int(e.potentiels.get(cle, 80))}])
+		if e.controle == "joueur" or str(e.get("maitre", "")) != "":
+			EventBus.emettre(&"journal", [&"journal.niveau", {"nom": e.name_key, "competence": "stat." + stat, "niveau": int(e.corps.stats[stat]), "potentiel": int(e.potentiels.get(cle, 80))}])
 		Etres.recalculer(e, items, affixes_defs, regles)
 	e.competences.erase(cle)
 
