@@ -419,3 +419,17 @@ Les six points sont réglés dans le sens des identités (pavois → force, piqu
 rapides, sabre lourd, sarbacane rapide à critique 17, affinité de sang-froid) : voir « Les 36 relues »
 dans Structure compétences-modules-slots. Les chiffres restent à juger en jouant.
 
+## La gestion de base (2026-09-04) — les chiffres sont des points de départ
+
+Le designer a demandé une base façon Dwarf Fortress ([[Décision — Gestion de base, périmètres de récolte]]) ; les quatre étapes sont codées, avec des chiffres que personne n'a joués :
+
+1. **Engager** coûte 20 or (`royaume.engagement.or`), au seuil de relation de la fiche moins 10.
+   Trop bon marché, et la base se remplit en une visite de village ; trop cher, et personne n'engage.
+2. **Les migrants** : 20 % par semaine, × (1 + réputation globale / 100), jusqu'à 4 résidents par
+   cellule revendiquée. Une base seule au monde attire-t-elle trop vite ?
+3. **Les périmètres** : 0,5 unité de bois par arbre et par semaine, 0,3 par filon, 0,8 par plante,
+   plafonnés à 20 tuiles par résident, 1,5 unité de réserve par tuile, repousse de 10 % par semaine
+   sur une cellule Ressources naturelles. Un bûcheron sur une forêt de 267 arbres produit donc
+   ~10 bois par semaine au niveau 0 : à comparer à ce qu'on coupe à la main en une heure de jeu.
+4. **L'outil de dessin** des périmètres : rectangle, pinceau, ou la cellule entière comme aujourd'hui ?
+

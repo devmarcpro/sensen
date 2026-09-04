@@ -2057,6 +2057,11 @@ func _assigner(e: Dictionary, pnj_id: String, fonction: String, tick: int, perim
 	x["poste"] = x.pos
 	x.ancre = x.pos
 	x["place"] = x.pos
+	if x.assignation.has("perimetre"):   # il travaille dedans : son poste est une tuile au bord de la ressource
+		var poste_p := _poste_de_perimetre(str(x.assignation.perimetre), x.pos)
+		if poste_p != Vector2i(-1, -1):
+			x["poste"] = poste_p
+			x.ancre = poste_p
 	x["humeur"] = int(_ry().humeur_base)
 	# Logement : un lit libre de la cellule.
 	x.erase("lit")
@@ -5091,6 +5096,34 @@ func scanner_perimetre(pid: String) -> int:
 	per.dominant = dominant
 	per.reserve = float(n) * float(pcfg.get("unites_par_tuile", 1.5))
 	return n
+
+
+## Une tuile de travail dans un périmètre : la case libre au bord de la ressource la plus proche de `depuis`,
+## ou (−1, −1) si la cellule n'est pas dans la fenêtre (le poste reste alors là où l'on est).
+func _poste_de_perimetre(pid: String, depuis: Vector2i) -> Vector2i:
+	if not perimetres().has(pid) or monde == null or lieu != "camp":
+		return Vector2i(-1, -1)
+	var per: Dictionary = perimetres()[pid]
+	var cell: Vector2i = per.cellule
+	if absi(cell.x - monde.centre.x) > monde.rayon or absi(cell.y - monde.centre.y) > monde.rayon:
+		return Vector2i(-1, -1)
+	var tag := str(_ry().get("perimetres", {}).get("types", {}).get(str(per.type), {}).get("tag", ""))
+	var meilleur := Vector2i(-1, -1)
+	var dmin := 999999
+	for ly in monde.taille:
+		for lx in monde.taille:
+			var pos := monde.pos_monde(cell, Vector2i(lx, ly))
+			if not grille.dans(pos) or not (tag in grille.contenu_de(pos).get("tags", [])):
+				continue
+			for v: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var q: Vector2i = pos + v
+				if not grille.dans(q) or grille.bloque_passage(q) or not grille.occupant(q).is_empty():
+					continue
+				var d := Grille.distance(depuis, q)
+				if d < dmin:
+					dmin = d
+					meilleur = q
+	return meilleur
 
 
 ## Le passage de semaine : la réserve d'un périmètre repousse sur une cellule Ressources naturelles (Rôles de cases).

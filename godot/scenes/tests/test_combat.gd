@@ -3935,6 +3935,12 @@ func test_perimetres() -> void:
 	var v := s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
 	v.camp = "joueur"
 	verifier(s._assigner(j, v.id, "bucheron", 0, pid) and str(v.assignation.get("perimetre", "")) == pid, "un bûcheron assigné sur le périmètre")
+	var au_bord := false   # il travaille dedans : son poste touche un arbre
+	for vv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var qq: Vector2i = v.poste + vv
+		if s.grille.dans(qq) and "arbre" in s.grille.contenu_de(qq).get("tags", []):
+			au_bord = true
+	verifier(au_bord and v.poste != v.pos, "son poste est une tuile au bord des arbres (%s), pas là où il se tenait" % str(v.poste))
 	var pr := s.production_de(v)
 	verifier(not pr.is_empty() and str(pr.base) == dom and int(pr.n) >= 1 and str(pr.perimetre) == pid, "sa production vient des tuiles : du bois brut de l'essence dominante (%s ×%d)" % [str(pr.get("base", "")), int(pr.get("n", 0))])
 	var reserve0: float = float(per.reserve)
