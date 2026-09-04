@@ -1587,6 +1587,10 @@ forme.planche,{materiau} (plank)
 forme.taillee,{materiau} (cut)
 forme.tissu,{materiau} (cloth)
 function.artisan.name,Artisan
+function.eleveur.name,Breeder
+function.cuisinier.name,Cook
+function.couturier.name,Tailor
+function.transporteur.name,Carrier
 function.aventurier.name,Adventurer
 function.bucheron.name,Woodcutter
 function.commercant.name,Trader

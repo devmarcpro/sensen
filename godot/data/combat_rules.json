@@ -1845,5 +1845,9 @@
     "_doc": "Le cran de puissance (designer 2026-09-04) : un pas de 1 dans les deux sens — une case de taille pour une forme, une tuile pour une portee, un de pour un noyau ; la piece garde sa taille dans la grille, seule la monnaie bouge (proportion n-ieme du prix). min et max bornent le cran d'une piece.",
     "min": -2,
     "max": 3
+  },
+  "pnj": {
+    "_doc": "Generation des PNJ (Fonctions, Talents de classe) : une classe cachee est tiree AVANT le pool de la fonction, a classe_cachee_chance, sur n'importe quelle fonction ; sinon la classe vient de classes_possibles.",
+    "classe_cachee_chance": 0.02
   }
 }

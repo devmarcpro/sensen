@@ -67,5 +67,6 @@
     }
   ],
   "signature": "celerite",
-  "classe_mere": "mage"
+  "classe_mere": "mage",
+  "cachee": true
 }

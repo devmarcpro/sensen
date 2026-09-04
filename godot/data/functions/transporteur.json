@@ -1,6 +1,6 @@
 {
-  "name_key": "function.commercant.name",
-  "skill": "negociation",
+  "name_key": "function.transporteur.name",
+  "skill": "",
   "rendement_base": 0.02,
   "horaires": {
     "6-20": "poste",
@@ -8,14 +8,10 @@
     "22-6": "lit"
   },
   "classes_possibles": [
-    "la_balance",
     "le_vent",
-    "le_creuset"
+    "la_balance"
   ],
   "leadership": false,
-  "portefeuille": 300,
-  "tags": [],
-  "produit": {
-    "or": 2.0
-  }
+  "portefeuille": 50,
+  "tags": []
 }

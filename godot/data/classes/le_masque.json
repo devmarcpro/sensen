@@ -66,5 +66,6 @@
     }
   ],
   "signature": "ecaille_elementaire",
-  "classe_mere": "rodeur"
+  "classe_mere": "rodeur",
+  "cachee": true
 }

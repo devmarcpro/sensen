@@ -1,6 +1,6 @@
 {
-  "name_key": "function.commercant.name",
-  "skill": "negociation",
+  "name_key": "function.cuisinier.name",
+  "skill": "cuisine",
   "rendement_base": 0.02,
   "horaires": {
     "6-20": "poste",
@@ -8,12 +8,11 @@
     "22-6": "lit"
   },
   "classes_possibles": [
-    "la_balance",
-    "le_vent",
-    "le_creuset"
+    "le_creuset",
+    "la_paume"
   ],
   "leadership": false,
-  "portefeuille": 300,
+  "portefeuille": 40,
   "tags": [],
   "produit": {
     "or": 2.0

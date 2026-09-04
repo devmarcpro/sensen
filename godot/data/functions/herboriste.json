@@ -8,9 +8,9 @@
     "22-6": "lit"
   },
   "classes_possibles": [
-    "la_trace",
-    "le_vent",
-    "la_braise"
+    "le_creuset",
+    "la_paume",
+    "la_trace"
   ],
   "leadership": false,
   "portefeuille": 30,

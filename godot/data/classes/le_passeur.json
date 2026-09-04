@@ -68,5 +68,6 @@
     }
   ],
   "signature": "portail",
-  "classe_mere": "mage"
+  "classe_mere": "mage",
+  "cachee": true
 }

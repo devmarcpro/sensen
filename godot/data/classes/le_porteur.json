@@ -66,5 +66,6 @@
     }
   ],
   "signature": "empoigne",
-  "classe_mere": "guerrier"
+  "classe_mere": "guerrier",
+  "cachee": true
 }

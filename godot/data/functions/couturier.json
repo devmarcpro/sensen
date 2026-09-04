@@ -1,6 +1,6 @@
 {
-  "name_key": "function.bucheron.name",
-  "skill": "bucheronnage",
+  "name_key": "function.couturier.name",
+  "skill": "tissage",
   "rendement_base": 0.02,
   "horaires": {
     "6-20": "poste",
@@ -9,15 +9,12 @@
   },
   "classes_possibles": [
     "la_braise",
-    "la_trace",
     "le_vent"
   ],
   "leadership": false,
-  "portefeuille": 30,
+  "portefeuille": 40,
   "tags": [],
   "produit": {
-    "materiau": "chene",
-    "forme": "planche",
-    "par_unite": 1.0
+    "or": 2.0
   }
 }

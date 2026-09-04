@@ -9,7 +9,9 @@
   },
   "classes_possibles": [
     "la_balance",
-    "le_sabre"
+    "le_sabre",
+    "le_souffle",
+    "la_paume"
   ],
   "leadership": false,
   "portefeuille": 2000,

@@ -84,6 +84,9 @@
     },
     "signature": {
       "type": "string"
+    },
+    "cachee": {
+      "type": "boolean"
     }
   }
 }

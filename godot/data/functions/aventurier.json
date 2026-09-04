@@ -8,13 +8,14 @@
     "22-6": "lit"
   },
   "classes_possibles": [
-    "l_ombre",
-    "le_passeur",
-    "le_sablier",
-    "le_masque",
-    "le_sceau",
-    "le_fossoyeur",
-    "l_engrenage"
+    "la_braise",
+    "le_creuset",
+    "la_paume",
+    "le_souffle",
+    "la_balance",
+    "le_vent",
+    "le_sabre",
+    "la_trace"
   ],
   "leadership": false,
   "portefeuille": 30,

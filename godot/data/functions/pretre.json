@@ -8,9 +8,7 @@
     "22-6": "lit"
   },
   "classes_possibles": [
-    "le_souffle",
-    "la_paume",
-    "le_fossoyeur"
+    "la_paume"
   ],
   "leadership": false,
   "portefeuille": 500,

@@ -7311,8 +7311,15 @@ func _habiller_pnj(e: Dictionary, def: Dictionary, culture_id: String = "") -> v
 	e["fonction"] = str(def.get("fonction", "oisif"))
 	e["role"] = str(def.get("role", "resident"))
 	if str(e.get("classe", "")).is_empty():   # une classe tirée parmi celles de sa fonction (Les trois axes)
+		# Les classes cachées ignorent le pool : tirées AVANT lui, rares, sur n'importe quelle fonction (Fonctions, 2026-09-04)
+		var cachees: Array = []
+		for cid in GameData.catalogues.classes.keys():
+			if bool(GameData.catalogues.classes[cid].get("cachee", false)):
+				cachees.append(str(cid))
 		var possibles: Array = GameData.catalogues.functions.get(e.fonction, {}).get("classes_possibles", [])
-		if not possibles.is_empty():
+		if not cachees.is_empty() and rng.randf() < float(regles.r.get("pnj", {}).get("classe_cachee_chance", 0.0)):
+			e.classe = str(cachees[rng.randi() % cachees.size()])
+		elif not possibles.is_empty():
 			e.classe = str(possibles[rng.randi() % possibles.size()])
 	e["social"] = {"culture": culture_id, "relations": {}}
 	var f: Dictionary = GameData.catalogues.functions.get(e.fonction, {})

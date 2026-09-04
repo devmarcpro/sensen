@@ -9,11 +9,7 @@
   },
   "classes_possibles": [
     "le_sabre",
-    "la_trace",
-    "l_ecarlate",
-    "le_sablier",
-    "le_masque",
-    "l_engrenage"
+    "la_trace"
   ],
   "leadership": false,
   "portefeuille": 60,

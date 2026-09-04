@@ -69,5 +69,6 @@
     }
   ],
   "signature": "saignement",
-  "classe_mere": "guerrier"
+  "classe_mere": "guerrier",
+  "cachee": true
 }

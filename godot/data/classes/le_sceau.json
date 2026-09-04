@@ -68,5 +68,6 @@
     }
   ],
   "signature": "balise",
-  "classe_mere": "sentinelle"
+  "classe_mere": "sentinelle",
+  "cachee": true
 }

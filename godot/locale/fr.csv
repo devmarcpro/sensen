@@ -1208,6 +1208,10 @@ ai_profile.proie.name,Proie
 function.oisif.name,Villageois
 function.fermier.name,Fermier
 function.artisan.name,Artisan
+function.eleveur.name,Éleveur
+function.cuisinier.name,Cuisinier
+function.couturier.name,Couturier
+function.transporteur.name,Transporteur
 function.commercant.name,Commerçant
 function.garde.name,Garde
 function.dirigeant.name,Dirigeant

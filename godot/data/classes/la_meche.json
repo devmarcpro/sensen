@@ -72,5 +72,6 @@
     }
   ],
   "signature": "bombe",
-  "classe_mere": "rodeur"
+  "classe_mere": "rodeur",
+  "cachee": true
 }

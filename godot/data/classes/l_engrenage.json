@@ -70,5 +70,6 @@
     }
   ],
   "signature": "tourelle",
-  "classe_mere": "erudit"
+  "classe_mere": "erudit",
+  "cachee": true
 }

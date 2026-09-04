@@ -158,6 +158,7 @@ func _ready() -> void:
 	_lancer("test_engager_et_migrants")
 	_lancer("test_perimetres")
 	_lancer("test_faim_des_residents")
+	_lancer("test_classes_des_pnj")
 	_lancer("test_composer_capacites")
 	_lancer("test_charges_de_modules")
 	_lancer("test_assemblage_sans_limite")
@@ -3914,6 +3915,39 @@ func test_engager_et_migrants() -> void:
 
 ## Le repas hebdomadaire des résidents (Faim des PNJ, 2026-09-04) : une unité par résident et par semaine, au
 ## garde-manger puis au stock du territoire (la récolte des fermiers) ; un seul repas — un seul malus — par semaine.
+## La classe d'un PNJ (Fonctions, Talents de classe, 2026-09-04) : tirée dans le pool de sa fonction, sauf une
+## classe cachée, rare, tirée avant le pool sur n'importe quelle fonction.
+func test_classes_des_pnj() -> void:
+	var s := nouvelle_sim("gorge")
+	var def: Dictionary = GameData.entree("creatures", "villageois")
+	var pool: Array = GameData.entree("functions", "artisan").classes_possibles
+	var chance: float = float(s.regles.r.pnj.classe_cachee_chance)
+	var cachees := 0
+	var hors_pool := 0
+	var sans := 0
+	var n := 2000
+	for k in n:
+		var x := Etres.instancier("pnj_test_%d" % k, def, Vector2i.ZERO, "ia", s.regles, s.items)
+		x["fonction"] = "artisan"
+		x.erase("classe")
+		def = def.duplicate()
+		def["fonction"] = "artisan"
+		s._habiller_pnj(x, def)
+		var c := str(x.get("classe", ""))
+		if c.is_empty():
+			sans += 1
+		elif bool(GameData.entree("classes", c).get("cachee", false)):
+			cachees += 1
+		elif not (c in pool):
+			hors_pool += 1
+	verifier(sans == 0 and hors_pool == 0, "%d artisans : tous ont une classe, toutes visibles viennent du pool (%d sans, %d hors pool)" % [n, sans, hors_pool])
+	var part := float(cachees) / float(n)
+	verifier(part > chance * 0.4 and part < chance * 2.5, "les classes cachées sont rares : %.1f %% pour %.0f %% attendus" % [part * 100.0, chance * 100.0])
+	verifier(not (GameData.entree("functions", "aventurier").classes_possibles as Array).any(func(c: String) -> bool: return bool(GameData.entree("classes", c).get("cachee", false))), "aucun pool ne contient de classe cachée")
+	for f in ["eleveur", "cuisinier", "couturier", "transporteur"]:
+		verifier(GameData.catalogues.functions.has(f), "la fonction %s du catalogue de la note existe en données" % f)
+
+
 func test_faim_des_residents() -> void:
 	var s := Simulation.new(31)
 	s.charger_camp()

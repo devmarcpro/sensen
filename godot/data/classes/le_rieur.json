@@ -69,5 +69,6 @@
     }
   ],
   "signature": "pari",
-  "classe_mere": "meneur"
+  "classe_mere": "meneur",
+  "cachee": true
 }
