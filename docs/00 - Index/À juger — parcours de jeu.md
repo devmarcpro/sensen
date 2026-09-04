@@ -477,5 +477,7 @@ Le designer, 14 h : « simule une grande base sur plusieurs cases avec une vingt
 
 **7. En passant, sur la capture : « XP : Méditation +10 455 ».** Six semaines d'attente d'un coup — la régénération de mana donne 1 XP de Méditation à chaque tranche de 10 ticks tirée (1 chance sur 8), et la Récupération pareil sur la vigueur. Une nuit de sommeil (8 000 ticks) en donne donc une centaine sans rien faire. Est-ce voulu que dormir entraîne ?
 
+**9. Le hameau voisin du camp se repeuple en vingt-neuf semaines** (`sonde_village`, monde 9) : quatre habitants pour quatre lits, corruption 79 % ; la moitié tuée, la chance de repeuplement tombe à 1,5 % par semaine (`repeuplement.chance` 0,15 × sous-capacité × (1 − corruption)), personne n'y est marié donc aucune naissance. Décimé, il est abandonné la semaine suivante et le reste. C'est la note ; la question est de savoir si une corruption de 79 % au premier hameau est celle qu'on veut au début d'une partie.
+
 **Ce que je propose, si le designer me laisse trancher** : rien de tout cela n'est un bug, ce sont les chiffres. Les deux qui rendent la base injouable sont l'entretien (1) et la faim (2). Le geste conservateur : que le bois, le minerai et les plantes récoltés **valent de l'or au rapport de la semaine** (vendus au prix suggéré × la marge de la boutique) — la base se paierait avec ses zones, ce qui est la promesse des périmètres —, et un rendement de fermier à **une bouche par tuile de champ** plutôt qu'à l'heure. Les deux se règlent en données.
 

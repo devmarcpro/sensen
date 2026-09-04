@@ -30,3 +30,7 @@ Comment un village vit, se repeuple, et ce qui arrive quand on le vide entièrem
 - **Dépend de** : [[Détection de pièces]], [[Dérive de la corruption]], [[Habitat des PNJ]]
 - **Alimente** : [[Conquête de village]], [[Population et exploitation]], [[Génération des royaumes PNJ]]
 - **Voir aussi** : [[Âge des PNJ]], [[Claims et persistance]], [[Créatures]], [[Simulation du monde — performance]]
+
+> [!success] Mesuré le 2026-09-04 — un hameau sur la durée (`sonde_village`)
+> Monde 9, le hameau voisin du camp : quatre habitants pour quatre lits, **corruption 79 %**. La moitié tuée : chance de repeuplement `0,15 × (1 − 2/4) × (1 − 0,79)` = **1,5 % par semaine** — la première arrivée tombe à la **vingt-neuvième semaine**, aucune naissance (personne n'y est marié). Décimé : abandonné dès la semaine suivante, et toujours vide douze semaines plus tard. C'est la note à la lettre : « un village menacé stagne ou décline » ; la pacification par le joueur est ce qui le ferait repeupler — les chiffres sont dans [[À juger — parcours de jeu]].
+
