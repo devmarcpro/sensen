@@ -2032,7 +2032,7 @@ func _detail_partie(pa: Dictionary) -> String:
 		"",
 		tr("ui.charger.temps").format({"jour": int(r.get("jour", 0)), "heure": int(r.get("heure", 0)), "saison": tr("saison." + str(r.get("saison", "printemps")))}),
 		tr("ui.charger.ou").format({"ou": ou, "biome": _nom_de("biomes", biome_id)}),
-		tr("ui.charger.monde").format({"graine": int(r.get("graine_monde", 0)), "vues": int(r.get("cellules_vues", 0)), "claims": int(r.get("claims", 0)), "villages": int(r.get("villages_connus", 0))}),
+		tr("ui.charger.monde").format({"graine": int(r.get("graine_monde", -1)) if int(r.get("graine_monde", -1)) >= 0 else int(GameData.config("planete").graine), "vues": int(r.get("cellules_vues", 0)), "claims": int(r.get("claims", 0)), "villages": int(r.get("villages_connus", 0))}),
 		tr("ui.charger.corruption").format({"n": int(r.get("corruption_camp", 0))}),
 		tr("ui.charger.ecrit_le").format({"date": str(r.get("ecrit_le", "\u2014")), "slot": str(pa.slot)}),
 	]
