@@ -3,9 +3,9 @@
   "kind": "arme",
   "hands": 1,
   "combat_skill": "precision",
-  "degats_des": "1d3",
-  "crit_range": 18,
-  "vitesse_base": 1.9,
+  "degats_des": "1d4",
+  "crit_range": 17,
+  "vitesse_base": 2.4,
   "portee": 9.0,
   "portee_min": 2,
   "projectile": true,
@@ -14,7 +14,9 @@
   "genre_grammatical": "fs",
   "affinite_sorts": {
     "mana": 1.0,
-    "vigueur": 1.0
+    "vigueur": 1.0,
+    "sang_froid": 1.35
   },
-  "poids_reference": 0.72
+  "poids_reference": 0.72,
+  "_doc": "La plus rapide des armes de tir et celle qui trouve le defaut de la cuirasse (2026-09-04) : la plus faible, plus jamais inutile."
 }

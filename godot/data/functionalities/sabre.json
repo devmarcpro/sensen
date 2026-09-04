@@ -3,17 +3,18 @@
   "kind": "arme",
   "hands": 1,
   "combat_skill": "epee",
-  "degats_des": "1d10",
+  "degats_des": "1d12",
   "crit_range": 19,
-  "vitesse_base": 2.2,
+  "vitesse_base": 1.7,
   "portee": 1.5,
   "portee_min": 1,
   "type_degats": "tranchant",
   "volume": 2.6,
   "genre_grammatical": "ms",
-  "poids_reference": 3.12,
+  "poids_reference": 3.6,
   "affinite_sorts": {
     "mana": 1.0,
     "vigueur": 1.0
-  }
+  },
+  "_doc": "Une lame lourde qui tranche (2026-09-04) : entre l'epee (2d6, 2,0) et la hache d'armes (3d6, 1,3), avec le critique du fil."
 }

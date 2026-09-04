@@ -13,7 +13,8 @@
   "genre_grammatical": "ms",
   "affinite_sorts": {
     "mana": 1.0,
-    "vigueur": 1.0
+    "vigueur": 1.0,
+    "sang_froid": 1.3
   },
   "poids_reference": 0.48
 }

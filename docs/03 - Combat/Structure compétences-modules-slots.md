@@ -216,6 +216,26 @@ faut commencer.
 
 Total : 36 armes, six par voie.
 
+### Les 36 relues contre leurs identités (2026-09-04)
+
+Le designer a demandé si les six armes par voie « correspondent bien à leurs attributs et sont toutes
+différentes ». Vérifié sur les données, pas sur la note : les 36 fonctionnalités sont sur une compétence
+de la bonne voie, et aucune paire ne partage dés, vitesse, allonge, mains, type de dégâts et critique.
+Six écarts trouvés, consignés dans « À juger » ; le designer : « je te laisse décider mais tu sais déjà
+ce que je veux ». Ce que je sais qu'il veut, c'est que chaque voie tienne son critère. Donc :
+
+| écart | ce qui change |
+|---|---|
+| le **pavois** avait une allonge de 1,5 sous l'endurance (critère : allonge ≥ 2) | il passe sous la **force** — un bouclier d'impact, deux mains, contondant, compétence `masse` ; la force a six armes et les mains nues en plus |
+| l'endurance perdait une arme | la **pique** que la note du 3 septembre disait être la prochaine : 2d6, allonge **3,5**, portée minimale **2** — la seule arme lourde qui ne frappe pas au contact |
+| la vitesse ne primait pas sur deux armes de dextérité | hachette de jet 1,8 → **2,3**, javelot 1,6 → **2,1** : toute la dextérité est plus rapide que l'épée (2,0) |
+| le **sabre** (1d10 à 2,2, critique 19) se lisait comme une lame de dextérité | il devient une lame lourde : **1d12 à 1,7**, critique 19 — entre l'épée (2d6, 2,0) et la hache (3d6, 1,3) |
+| la **sarbacane** faisait 1d3 sans rien pour elle | **1d4 à 2,4, critique 17** : la plus rapide des armes de tir et celle qui trouve le défaut de la cuirasse ; toujours la plus faible, plus jamais inutile |
+| aucune arme n'avait d'affinité de **sang-froid** | les douze armes de dextérité et de perception en ont une, sur une échelle comme celle des instruments (stylet 1,30 · arc long 1,30 · sarbacane 1,35 … javelot 0,95 · pistolet 0,90), et leurs affinités mana / vigueur redeviennent neutres — elles ne servaient à rien |
+
+Les six `proto_*` restent : ce sont les armes des tests, hors butin. Le compte : **36 armes et les
+mains nues**, six par voie.
+
 ### Les instruments jouaient contre leur propre voie (2026-09-03)
 
 Le designer groupe les monnaies : **mana pour la volonté et le charisme**. Cette phrase révèle une

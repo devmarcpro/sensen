@@ -14,7 +14,8 @@
   "genre_grammatical": "fs",
   "outil": "dague",
   "affinite_sorts": {
-    "mana": 0.9,
-    "vigueur": 1.1
+    "mana": 1.0,
+    "vigueur": 1.0,
+    "sang_froid": 1.2
   }
 }

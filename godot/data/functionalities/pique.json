@@ -1,0 +1,20 @@
+{
+  "name_key": "functionality.pique.name",
+  "kind": "arme",
+  "hands": 2,
+  "combat_skill": "hast",
+  "degats_des": "2d6",
+  "crit_range": 20,
+  "vitesse_base": 1.2,
+  "portee": 3.5,
+  "portee_min": 2,
+  "type_degats": "perforant",
+  "volume": 4.2,
+  "poids_reference": 4.8,
+  "genre_grammatical": "fs",
+  "affinite_sorts": {
+    "mana": 0.8,
+    "vigueur": 1.2
+  },
+  "_doc": "La plus longue hampe du jeu (Structure competences-modules-slots, 2026-09-03 puis 2026-09-04) : allonge 3,5, portee minimale 2 — la seule arme lourde qui ne frappe pas au contact."
+}

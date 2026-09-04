@@ -5,7 +5,7 @@
   "combat_skill": "jet",
   "degats_des": "2d4",
   "crit_range": 20,
-  "vitesse_base": 1.8,
+  "vitesse_base": 2.3,
   "portee": 5.0,
   "portee_min": 2,
   "jet": true,
@@ -13,8 +13,9 @@
   "volume": 1.2,
   "genre_grammatical": "fs",
   "affinite_sorts": {
-    "mana": 0.9,
-    "vigueur": 1.1
+    "mana": 1.0,
+    "vigueur": 1.0,
+    "sang_froid": 1.0
   },
   "poids_reference": 1.44
 }

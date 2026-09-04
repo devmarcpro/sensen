@@ -2925,3 +2925,4 @@ module.embuscade.name,Ambush
 ui.composeur.sequence_vide,(nothing yet)
 ui.composeur.grille_arme,held weapon’s grid
 ui.composeur.etapes,Steps
+functionality.pique.name,Pike

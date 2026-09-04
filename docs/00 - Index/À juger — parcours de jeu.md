@@ -414,6 +414,8 @@ Ce qui ne colle pas à l'identité fixée le 3 septembre, à trancher :
 6. Six objets `proto_*` doublent exactement six armes craft (tests seulement ; le butin pioche dans
    les bases assemblables).
 
-Les points 1, 2 et 5 sont des réglages de données, faisables en un commit sur un mot du designer ;
-3 et 4 sont des choix d'identité.
+**Tranché le 2026-09-04** — le designer : « je te laisse décider mais tu sais déjà ce que je veux ».
+Les six points sont réglés dans le sens des identités (pavois → force, pique en endurance, jets plus
+rapides, sabre lourd, sarbacane rapide à critique 17, affinité de sang-froid) : voir « Les 36 relues »
+dans Structure compétences-modules-slots. Les chiffres restent à juger en jouant.
 

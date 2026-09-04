@@ -1298,7 +1298,8 @@
     "cout_variance_moyenne": 7.0,
     "affinite_mains_nues": {
       "mana": 1.0,
-      "vigueur": 1.0
+      "vigueur": 1.0,
+      "sang_froid": 1.0
     },
     "tout_au_depart": false
   },

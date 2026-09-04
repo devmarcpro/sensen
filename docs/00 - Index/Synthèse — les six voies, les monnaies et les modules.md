@@ -51,13 +51,15 @@ jeu**, la lance était sous la force malgré son allonge de 2,5, et la perceptio
 d'allonge 1.
 
 ```
-force       épée, sabre, hache d'armes, masse, marteau de guerre, mains nues
+force       épée, sabre, hache d'armes, masse, marteau de guerre, pavois (+ les mains nues)
 dextérité   dague, stylet, rapière, couteau de jet, hachette de jet, javelot
-endurance   lance, bâton, hallebarde, pavois, fléau, fouet
+endurance   lance, bâton, hallebarde, pique, fléau, fouet
 volonté     bâton magique, baguette, orbe, sceptre, talisman, grimoire de main
 perception  arc, arc long, arbalète, fronde, pistolet, sarbacane
 charisme    flûte, cor, cymbales, luth, tambour, vielle
 ```
+
+*(Relu le 2026-09-04 : le pavois passe sous la force, la pique entre en endurance, le sabre et la sarbacane changent de chiffres, la dextérité et la perception ont leur affinité de sang-froid — voir « Les 36 relues » dans Structure compétences-modules-slots.)*
 
 Les six instruments du charisme se lisent sur **une seule échelle** — plus un instrument s'engage
 dans l'endurance, moins il sert au mana : flûte 1,05/1,20 · cor 0,90/1,25 · cymbales 0,75/1,35 ·

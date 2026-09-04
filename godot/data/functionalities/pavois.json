@@ -2,7 +2,7 @@
   "name_key": "functionality.pavois.name",
   "kind": "arme",
   "hands": 2,
-  "combat_skill": "hast",
+  "combat_skill": "masse",
   "degats_des": "2d4",
   "crit_range": 20,
   "vitesse_base": 1.0,
@@ -15,5 +15,6 @@
     "mana": 0.7,
     "vigueur": 1.3
   },
-  "poids_reference": 5.52
+  "poids_reference": 5.52,
+  "_doc": "Un bouclier d'impact : deux mains, contondant, lent. Sous la force depuis le 2026-09-04 (son allonge de 1,5 ne tenait pas le critere de l'endurance, allonge >= 2)."
 }

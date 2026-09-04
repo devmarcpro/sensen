@@ -1,0 +1,21 @@
+{
+  "name_key": "item.craft_pique.name",
+  "type": "arme",
+  "equip_slot": "main_principale",
+  "hands": 2,
+  "slots": {
+    "tete": "pointe",
+    "manche": "manche_long",
+    "garde": "garde"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "forge"
+  },
+  "genre_grammatical": "fs",
+  "tags": [
+    "arme",
+    "assemble"
+  ],
+  "functionality": "pique"
+}
