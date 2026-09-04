@@ -485,3 +485,13 @@ Le designer, 14 h : « simule une grande base sur plusieurs cases avec une vingt
 
 **Ce que je propose, si le designer me laisse trancher** : rien de tout cela n'est un bug, ce sont les chiffres. Les deux qui rendent la base injouable sont l'entretien (1) et la faim (2). Le geste conservateur : que le bois, le minerai et les plantes récoltés **valent de l'or au rapport de la semaine** (vendus au prix suggéré × la marge de la boutique) — la base se paierait avec ses zones, ce qui est la promesse des périmètres —, et un rendement de fermier à **une bouche par tuile de champ** plutôt qu'à l'heure. Les deux se règlent en données.
 
+## 2026-09-04 — Deux compagnons en donjon : un bandit seul bat le trio (soir)
+
+Le GIF « compagnons » du README (graine 9, deux villageois recrutés avec une épée, un bandit posé par la triche à l'étage 1 d'une ruine) montre le combat en entier : les deux compagnons rejoignent le combat de leur maître et frappent — puis les trois tombent, en 102 ticks, contre **un seul bandit**.
+
+Les faits, lus dans le journal et les données :
+- le bandit (`creatures/humanoide/bandit.json`) a force 11, dextérité 10, endurance 9, une **épée et une cuirasse** assemblées (classe Le Sabre) ; ses coups font **10 à 14** au torse du joueur (52 PV) comme des compagnons (44 PV) ;
+- le joueur (force 9, épée en fonte « pauvre 0,60 » du kit de départ) et les compagnons (épée assemblée « commun » donnée par la capture) lui font **1 à 3** par coup : la cuirasse absorbe presque tout. À trois, 56 PV de bandit demandent une trentaine de coups ; lui en a besoin de cinq ;
+- l'équipement d'une créature est généré à la **profondeur 1 quelle que soit sa place** (`Simulation.ajouter`, `generer_objet(base, 1, …)`) : le bandit d'un raid de semaine 2 au camp et celui de l'étage 5 ont le même kit — c'est le choix des créatures par étage qui fait la difficulté, pas leur matériel.
+
+Ce que cela pose : c'est la même question que les kits de départ (matrice des classes, plus haut) vue de l'autre côté. Un bandit, l'ennemi humain le plus commun (raids du territoire, ruines), est de fait un adversaire de niveau intermédiaire à cause de sa cuirasse ; un joueur de niveau 0 avec deux recrues n'a aucune chance. Trois lectures possibles, toutes à trancher par le designer : (a) c'est voulu, on fuit les bandits au début ; (b) le bandit devrait avoir une armure de cuir (`craft_cuir…`) et garder sa cuirasse pour un « chef » ; (c) la cuirasse absorbe trop face aux armes de fonte. Rien de codé ; le GIF le montre tel quel.
