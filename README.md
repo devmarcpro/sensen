@@ -78,7 +78,7 @@ Les étapes 0 à 10 de l'ordre de construction sont codées. Par thème :
 
 **Vivre** — faim et nourriture, sommeil, PNJ nommés avec relations, rumeurs et routines horaires, dialogue, commerce au prix suggéré, quêtes et guildes, compagnons (recrutement, ordres, postures, échange d'équipement, résurrection), apprivoisement, agriculture, élevage à génétique (8 espèces, registre et paliers).
 
-**Territoire** — claims, rôles de cellule, résidents assignés, stocks et trésor, boutique passive, raids hebdomadaires, gouvernances, royaumes PNJ avec lois et douanes, accords diplomatiques, conquête de village.
+**Territoire** — claims, rôles de cellule, résidents engagés ou arrivés d'eux-mêmes, assignés à une fonction et à un périmètre de récolte dessiné (bois, minerai, plantes) avec un stockage par poste, résidentiel où les chaumières se bâtissent seules, repas hebdomadaire, stocks et trésor, boutique passive, raids hebdomadaires, gouvernances, royaumes PNJ avec lois et douanes, accords diplomatiques, conquête de village.
 
 Ce qui reste ouvert, en détail : **`docs/00 - Index/Vers la production.md`**.
 
