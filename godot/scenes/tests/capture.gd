@@ -9,6 +9,8 @@ var gif_pas := 8         # --gif-pas P : images de rendu entre deux prises
 var gif_ticks := 6       # --gif-ticks T : ticks de simulation avancés entre deux prises
 var gif_marche := 0      # --gif-marcher N : N pas du joueur entre deux prises — sans mouvement, un GIF est une image fixe
 var gif_prises := 0
+var gif_action := ""      # --gif-action defiler|composer|carte|monde|creation|semaine : ce qui change entre deux prises d'un écran (designer 2026-09-04)
+var gif_sequence: Array = []   # la séquence de --sequence, que l'action « composer » pose pièce par pièce
 var scene: Node = null      # la scène du jeu, gardée pour faire vivre le monde entre deux prises de GIF
 var frames := 0
 var cible := 60
@@ -30,6 +32,10 @@ func _ready() -> void:
 			gif_ticks = int(args[i + 1])
 		elif args[i] == "--gif-marcher" and i + 1 < args.size():
 			gif_marche = int(args[i + 1])
+		elif args[i] == "--gif-action" and i + 1 < args.size():
+			gif_action = str(args[i + 1])
+		elif args[i] == "--sequence" and i + 1 < args.size():
+			gif_sequence = Array(str(args[i + 1]).split(","))
 		if args[i] == "--sortie" and i + 1 < args.size():
 			sortie = args[i + 1]
 		elif args[i] == "--frames" and i + 1 < args.size():
@@ -579,6 +585,8 @@ func _process(delta: float) -> void:
 				for d_g in dirs:
 					if scene.sim.intention(jg.id, {"type": "deplacer", "vers": jg.pos + d_g}):
 						break
+		if not gif_action.is_empty():
+			_gif_action(gif_prises)
 		if scene.sim != null and gif_ticks > 0:   # le monde vit entre deux prises : sans ça le GIF est fixe
 			for _t in gif_ticks:
 				scene.sim.pas("monde")
@@ -600,3 +608,49 @@ func _process(delta: float) -> void:
 		print("capture : ", sortie)
 		print("image : moyenne %.1f ms, pire %.1f ms sur %d images" % [temps_total / float(frames - 5) * 1000.0, temps_max * 1000.0, frames - 5])
 		get_tree().quit()
+
+
+## Ce qui se passe dans un écran entre deux prises d'un GIF (designer 2026-09-04 : « des GIF avec simulation complète »).
+## Un écran ne bouge pas tout seul : on fait défiler sa liste, on pose les pièces d'un sort une à une, on
+## fait glisser la carte, on retire le monde, on change de volet à la création, ou une semaine passe à la base.
+func _gif_action(prise: int) -> void:
+	var ec = scene.ecrans
+	match gif_action:
+		"defiler":
+			if ec.est_ouvert() and ec.entrees.size() > 0:
+				var k: int = (int(ec.selection) + 1) % ec.entrees.size()
+				if ec.courant == "inventaire":   # les cases d'équipement vides n'ont rien à montrer : on va d'objet en objet
+					var garde_k: int = ec.entrees.size()
+					while garde_k > 0 and str(ec.entrees[k].get("kind", "")) != "objet":
+						k = (k + 1) % ec.entrees.size()
+						garde_k -= 1
+				match str(ec.courant):
+					"inventaire": ec.inventaire_visuel.selectionner(k)
+					"atelier": ec.atelier_visuel.selectionner(k)
+					"commerce", "echange": ec.echange_visuel.selectionner(k)
+					_:
+						ec.selection = k
+						if ec.liste.item_count > k:
+							ec.liste.select(k)
+						ec._montrer_detail()
+		"composer":
+			if ec.est_ouvert() and ec.courant == "composer" and not gif_sequence.is_empty():
+				var n: int = prise % (gif_sequence.size() + 1)
+				ec.composeur.reconstruire(scene.joueur(), gif_sequence.slice(0, n), [])
+		"carte":
+			if scene.carte.ouverte:
+				scene.carte.decalage += Vector2(22.0, -6.0)   # vers la droite, doucement : la légende du bas reste lisible
+				scene.carte.dessin.queue_redraw()
+		"monde":
+			if ec.est_ouvert() and ec.courant == "monde":
+				scene.graine_monde = randi() % 1000000
+				ec.rafraichir()
+		"creation":
+			if ec.est_ouvert() and ec.courant == "creation":
+				scene.creation.volet = (int(scene.creation.get("volet", 0)) + 1) % 4
+				ec.rafraichir()
+		"semaine":
+			if scene.sim != null and scene.sim.monde != null:
+				GrandeBase.semaine(scene.sim, [], scene.joueur())
+				scene._apres_changement_de_grille()   # les chaumières bâties se dessinent ; pas de recentrage, il remettrait l'écran de chargement
+
