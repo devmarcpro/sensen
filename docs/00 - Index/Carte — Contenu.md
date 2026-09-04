@@ -6,7 +6,7 @@ statut: décidé
 etape: 6
 ---
 
-Les catalogues prêts à transcrire en JSON. 34 notes.
+Les catalogues prêts à transcrire en JSON. 35 notes.
 
 *Toutes les valeurs sont fixées et implémentables telles quelles ; le playtest les ajuste, il n'a rien à inventer.*
 
@@ -29,6 +29,7 @@ Les catalogues prêts à transcrire en JSON. 34 notes.
 - **[[Statuts]]** (14) · **[[Nourriture]]** (18) · **[[Meubles]]** (16)
 - **[[Effets d'équipement types]]** — les pools par slot pour le générateur de loot.
 - **[[Plantes]]** (22) · **[[Potions]]** (12) · **[[Composants]]** (14)
+- **[[Objets — liste pour les sprites]]** — la liste générée de tout ce que le jeu fabrique, ramasse ou pose (222 objets), pour dessiner les sprites (designer 2026-09-05)
 
 - **[[Actions des créatures]]** (24) — les attaques des bêtes ; les humains utilisent le système standard.
 - **[[Recettes de composants]]** — la matrice composant × famille, bases et exotiques.
