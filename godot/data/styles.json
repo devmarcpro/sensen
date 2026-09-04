@@ -151,5 +151,16 @@
     "largeur_max": 380.0,
     "lignes_journal": 9,
     "lignes_inventaire": 12
+  },
+  "police": {
+    "_doc": "La police du jeu (designer 2026-09-04 : « plus lisible ») : familles systeme essayees dans l'ordre, aucun asset ; lissage gris | lcd | aucun ; hinting leger | normal | aucun. MingLiU-ExtB (2026-08-30) : familles [\"MingLiU-ExtB\"], lissage aucun, hinting normal.",
+    "familles": [
+      "Segoe UI",
+      "Noto Sans",
+      "DejaVu Sans",
+      "Arial"
+    ],
+    "lissage": "gris",
+    "hinting": "leger"
   }
 }

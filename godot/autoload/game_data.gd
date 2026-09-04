@@ -435,16 +435,23 @@ func _rapport() -> void:
 		get_tree().quit(1)
 
 
-## La police du jeu (Écrans d'interface, décision du 2026-08-30) : MingLiU-ExtB, police **système** — aucun asset dans
-## le dépôt. Posée en police de repli du thème (tous les draw_string du client) et sur le thème de la fenêtre racine
-## (tous les Control). Si la famille manque sur la machine, Godot garde sa police par défaut.
+## La police du jeu (Écrans d'interface — designer 2026-09-04, 22 h 20 : « change la police de caractère pour que ce
+## soit plus lisible ») : une police **système** lue dans `styles.police` — aucun asset dans le dépôt. Les familles sont
+## essayées dans l'ordre (Segoe UI sur Windows, puis Noto Sans, DejaVu Sans, Arial), lissées et hintées ; les glyphes
+## absents (CJK) passent par le repli système. Posée en police de repli du thème (tous les draw_string du client) et sur
+## le thème par défaut (tous les Control). MingLiU-ExtB (décision du 2026-08-30) reste disponible : c'est une ligne de
+## données. Si toutes les familles manquent, Godot garde sa police par défaut.
 func _installer_police() -> void:
+	var st: Dictionary = config("styles").get("police", {})
 	var police := SystemFont.new()
-	police.font_names = PackedStringArray(["MingLiU-ExtB", "MingLiU_HKSCS-ExtB", "PMingLiU-ExtB"])
+	var familles: Array = st.get("familles", ["Segoe UI", "Noto Sans", "DejaVu Sans", "Arial"])
+	police.font_names = PackedStringArray(familles)
 	police.allow_system_fallback = true
-	police.antialiasing = TextServer.FONT_ANTIALIASING_NONE   # le tracé bitmap de MingLiU, net
-	police.hinting = TextServer.HINTING_NORMAL
-	police.subpixel_positioning = TextServer.SUBPIXEL_POSITIONING_DISABLED
+	var lissage := str(st.get("lissage", "gris"))
+	police.antialiasing = TextServer.FONT_ANTIALIASING_NONE if lissage == "aucun" else (TextServer.FONT_ANTIALIASING_LCD if lissage == "lcd" else TextServer.FONT_ANTIALIASING_GRAY)
+	var hinting := str(st.get("hinting", "leger"))
+	police.hinting = TextServer.HINTING_NONE if hinting == "aucun" else (TextServer.HINTING_NORMAL if hinting == "normal" else TextServer.HINTING_LIGHT)
+	police.subpixel_positioning = TextServer.SUBPIXEL_POSITIONING_DISABLED if lissage == "aucun" else TextServer.SUBPIXEL_POSITIONING_AUTO
 	ThemeDB.fallback_font = police
 	# Le thème par défaut porte sa propre police : les Control sous un Node2D ou un CanvasLayer n'ont pas de
 	# propriétaire de thème (seuls Control et Window propagent), le thème de la fenêtre racine ne les atteint pas.

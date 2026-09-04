@@ -261,3 +261,6 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 
 > [!note] 2026-09-04, 20 h 50 — la ligne « sac : … » du bas de l'écran quitte aussi l'écran quand le volet est affiché
 > Vu sur le GIF des compagnons : le volet listait l'inventaire et le bas de l'écran répétait « sac : Établi · Torche… · Vladka Cernic · Ingn Ulfvik ». Même règle que pour le journal : quand le volet est visible, le bas ne montre que l'écran de fin et la défaite.
+
+> [!important] 2026-09-04, 22 h 20 — le designer : « change la police de caractère pour que ce soit plus lisible »
+> La police MingLiU-ExtB (décision du 2026-08-30 : trait bitmap sans lissage) laisse la place à une **police système lissée**, lue dans `styles.police` : les familles sont essayées dans l'ordre — Segoe UI (Windows), Noto Sans, DejaVu Sans, Arial —, lissage gris, hinting léger, repli système pour les glyphes absents (CJK). Toujours **aucun asset** dans le dépôt. Rien ne change dans les tailles : ce sont les tracés qui deviennent lisibles à 10-12 px. Revenir à MingLiU tient en trois valeurs de données (la `_doc` de `styles.police` les donne). Vérifié sur des captures en français et en anglais, avec le volet.
