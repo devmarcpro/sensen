@@ -5183,11 +5183,17 @@ func scanner_perimetre(pid: String) -> int:
 	var tag := str(tp.get("tag", ""))
 	var matieres := {}
 	var n := 0
+	var interieur := {}   # résidentiel : l'intérieur d'une maison n'est pas à bâtir (2026-09-04)
+	if bool(tp.get("residentiel", false)):
+		for piece in pieces_de_cellule(cell):
+			for t in piece.get("tuiles", []):
+				interieur[t] = true
 	for pos in tuiles_de_perimetre(pid):
 		if not grille.dans(pos):
 			continue
 		if bool(tp.get("residentiel", false)) or bool(tp.get("stockage", false)):   # résidentiel, stockage : la richesse, ce sont les tuiles libres
-			if not grille.bloque_passage(pos) and grille.occupant(pos).is_empty():
+			# libre = ni mur, ni meuble, ni bâti, ni intérieur d'une pièce ; quelqu'un debout ne compte pas (il bouge)
+			if not grille.bloque_passage(pos) and not grille.meubles.has(grille.idx(pos)) and not interieur.has(pos) 				and not ("construit" in grille.contenu_de(pos).get("tags", [])):
 				n += 1
 			continue
 		if not (tag in grille.contenu_de(pos).get("tags", [])):
@@ -5393,6 +5399,7 @@ func _batir_maisons() -> int:
 		x.humeur = int(_ry().humeur_base)
 		lumiere_sale = true
 		baties += 1
+		scanner_perimetre(pid)   # ses tuiles libres viennent de diminuer : la place restante se lit juste (2026-09-04)
 		EventBus.emettre(&"journal", [&"journal.maison_batie", {"nom": x.name_key, "x": origine.x, "y": origine.y}])
 	if baties > 0:
 		_recalculer_humeurs()

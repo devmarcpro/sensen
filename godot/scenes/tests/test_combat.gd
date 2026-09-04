@@ -4037,6 +4037,7 @@ func test_perimetres() -> void:
 	verifier(n_maisons == 1 and not s.grille.bloque_passage(debout.pos) and not s.grille.meubles.has(s.grille.idx(debout.pos)) and s.grille.occupant(debout.pos) == debout.id, "un être debout ne bloque pas le chantier : il est déplacé (%s)" % str(debout.pos))
 	verifier(n_maisons == 1 and h.has("lit") and s.grille.meubles.get(s.grille.idx(h.lit), "").begins_with("lit"), "avec vingt chênes bruts au stock : une chaumière, et son lit (%s)" % str(h.get("lit", Vector2i(-1, -1))))
 	verifier(int(s.territoire.stocks.get("chene|brut", 0)) == 20 - int(s.regles.r.royaume.maisons.cout[0].n), "le bois est pris sur le stock (reste %d)" % int(s.territoire.stocks.get("chene|brut", 0)))
+	verifier(int(s.perimetres()[pid_r].richesse) <= 48 - 24, "la richesse du résidentiel (ses tuiles libres) a baissé d'une chaumière : %d" % int(s.perimetres()[pid_r].richesse))
 	verifier(not s._piece_du_lit(h.lit, s.pieces_de_cellule(camp)).is_empty(), "la chaumière est une pièce valide au sens de Détection de pièces")
 	verifier(s._batir_maisons() == 0, "logé : on ne lui bâtit pas une seconde maison")
 	# Un poste ET un logement (14 h) : assigné ensuite au périmètre de bois, il garde sa résidence ; réassigné au
