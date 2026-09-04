@@ -132,9 +132,14 @@ static func semaine(s: Simulation, journal: Array, j: Dictionary = {}) -> Dictio
 	if not j.is_empty():   # le joueur mange : une semaine entière sans manger le tuerait (c'est lui qu'on ne simule pas)
 		j.faim = int(j.get("faim_max", 100))
 	var t0 := Time.get_ticks_usec()
+	var tick0: int = s.horloge_monde.ticks
+	var sem0: int = s.monde.semaine_courante
 	s.horloge_monde.avancer(tps)
 	s._tiquer_monde(s.horloge_monde.ticks)
 	var dt := (Time.get_ticks_usec() - t0) / 1000.0
+	EventBus.dispatcher()   # le bus livre par image ; sans image, le journal d'une semaine arrivait à la suivante
+	if s.horloge_monde.ticks - tick0 != tps or s.monde.semaine_courante - sem0 != 1:   # l'horloge a bougé plus que la semaine demandée : qui ?
+		print("  HORLOGE : +%d ticks pour %d demandés, %d semaine(s) passée(s)" % [s.horloge_monde.ticks - tick0, tps, s.monde.semaine_courante - sem0])
 	if not j.is_empty():
 		j.faim = int(j.get("faim_max", 100))
 	var cles := {}
