@@ -117,7 +117,7 @@ Le résultat du jet est ensuite modulé par matériaux/qualité (formule [[Pipel
 > |---|---|---|
 > | **charisme** | luth, tambour, cor | focus des sorts qui coûtent de l'**endurance** |
 > | **perception** | stylet, sarbacane, arc long | peu de dés, la fenêtre de critique la plus large (stylet : **17**) |
-> | **endurance** | hallebarde, pavois | lentes, longues, faites pour tenir une position |
+> | **endurance** | hallebarde, pavois *(2026-09-04 : le pavois passe sous la force ; l'endurance tient lance, bâton, hallebarde, pique, fléau, fouet)* | lentes, longues, faites pour tenir une position |
 >
 > **Pourquoi les instruments tombent si juste.** Le système de focus existait déjà — `affinite_sorts` — mais il ne servait que la monnaie **mana**. Or **dix-huit noyaux coûtent de l'endurance** : les cris, les charges, les ralliements, les frappes. Ils n'avaient aucun focus. Un instrument est ce qui porte la voix : le luth, le tambour et le cor sont aux sorts d'endurance ce que l'orbe et le sceptre sont aux sorts de mana. Le mécanisme ne servait qu'à moitié.
 > **Mesuré** sur un sort d'endurance : tambour ×1,65 · luth ×1,45 · cor ×1,25 · épée ×1,20 · mains nues ×1,00 · **orbe ×0,55**. Les deux familles de focus se repoussent proprement — un orbe est mauvais aux cris, un tambour est mauvais aux sortilèges.
