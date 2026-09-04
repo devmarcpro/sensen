@@ -3218,7 +3218,7 @@ perimetre.plantes.name,plantes sauvages
 ui.gestion.perimetre,"  {type} : {richesse} tuiles · {n} assigné(s) · {stockage}"
 ui.gestion.perimetre_aide,P : changer le type · S : son stockage (à tour de rôle) · assigne des résidents dessus depuis leur fiche
 ui.gestion.perimetre_touche,P : un périmètre de récolte sur cette cellule (bois → minerai → plantes → aucun)
-ui.assigner.perimetre,"{fonction} sur le périmètre {type} de ({x},{y}) — {richesse} tuiles"
+ui.assigner.perimetre,"{fonction} · périmètre {type} ({x},{y}) · {richesse} tuiles"
 journal.perimetre_cree,"Périmètre {type} sur ({x},{y}) : {richesse} tuiles"
 journal.perimetre_retire,"Le périmètre de ({x},{y}) est retiré"
 perimetre.residentiel.name,résidentiel

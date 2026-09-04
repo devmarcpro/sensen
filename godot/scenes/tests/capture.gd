@@ -461,6 +461,17 @@ func _ready() -> void:
 			print("planche : ", portees[ip])
 		get_tree().quit()
 		return
+	if "--maison" in args and scene.sim != null and scene.sim.monde != null:   # --maison : un residentiel dessine, un resident, du bois, une chaumiere batie (Gestion de base, 2026-09-04)
+		var jm: Dictionary = scene.joueur()
+		var pid_r: String = scene.sim.dessiner_perimetre(jm.pos + Vector2i(-9, -3), jm.pos + Vector2i(-2, 2), "residentiel")
+		var xm: Dictionary = scene.sim.ajouter("villageois", jm.pos + Vector2i(1, 1), "ia")
+		xm.camp = "joueur"
+		scene.sim._assigner(jm, xm.id, "oisif", 0, pid_r)
+		scene.sim.territoire.stocks["chene|brut"] = 20
+		print("maison : ", scene.sim._batir_maisons(), " batie(s), lit ", str(xm.get("lit", "aucun")))
+		if "--assigner" in args:   # et l'ecran Assigner de ce resident, avec les perimetres proposes
+			scene.ecrans.pnj_id = xm.id
+			scene.ecrans.ouvrir("assigner")
 	for ipr in args.size():   # --perimetre bois|minerai|plantes : un périmètre de récolte sur la cellule du camp (Gestion de base, 2026-09-04)
 		if args[ipr] == "--perimetre" and ipr + 1 < args.size() and scene.sim != null and scene.sim.monde != null:
 			var jp: Dictionary = scene.joueur()   # dessiné : un rectangle de 6×4 à l'est du joueur, pour voir la teinte sur la carte
