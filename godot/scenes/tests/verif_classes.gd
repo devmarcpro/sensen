@@ -76,7 +76,8 @@ func _ready() -> void:
 				var emb := s.grille_sort.emboiter(et, grille_k)
 				if not emb.ok:
 					lignes.append("%s: NE RENTRE PAS dans la grille de %s (%d cases pour %d)" % [str(cap.id), stat_arme if not stat_arme.is_empty() else "mains nues", s.grille_sort.taille_de(et), grille_k.size()])
-					soucis += 1			soucis += 1
+					soucis += 1
+			soucis += 1
 		print("CLASSE %-14s | %s" % [cid, " · ".join(PackedStringArray(lignes))])
 	# CLASSE ET SOUS-CLASSE (designer 2026-09-03) : chaque sous-classe releve d'une classe mere, et
 	# chaque mere porte une stat. Une sous-classe orpheline serait injouable a la creation ; une mere
