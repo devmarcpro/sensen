@@ -33,4 +33,5 @@ Comment un village vit, se repeuple, et ce qui arrive quand on le vide entièrem
 
 > [!success] Mesuré le 2026-09-04 — un hameau sur la durée (`sonde_village`)
 > Monde 9, le hameau voisin du camp : quatre habitants pour quatre lits, **corruption 79 %**. La moitié tuée : chance de repeuplement `0,15 × (1 − 2/4) × (1 − 0,79)` = **1,5 % par semaine** — la première arrivée tombe à la **vingt-neuvième semaine**, aucune naissance (personne n'y est marié). Décimé : abandonné dès la semaine suivante, et toujours vide douze semaines plus tard. C'est la note à la lettre : « un village menacé stagne ou décline » ; la pacification par le joueur est ce qui le ferait repeupler — les chiffres sont dans [[À juger — parcours de jeu]].
+> Sur cinquante-deux semaines : le hameau revient à quatre sur quatre (arrivées à la vingt-neuvième puis plus tard) ; ses habitants ont de 24 à 39 ans pour 72 à 90 d'espérance — personne ne meurt de vieillesse dans l'année, le moteur démographique ne se voit qu'à l'échelle de décennies.
 

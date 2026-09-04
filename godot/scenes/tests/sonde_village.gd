@@ -36,6 +36,10 @@ func _ready() -> void:
 		get_tree().quit()
 		return
 	var cap: int = int(s.monde.villages[choisi].get("capacite", 0))
+	var ages: Array[String] = []   # les âges et l'espérance (Âge des PNJ) : qui mourra de vieillesse dans l'année ?
+	for x in s.population_village(choisi):
+		ages.append("%s %.0f ans / %.0f (%s)" % [tr(x.name_key), float(x.get("age", 0.0)), float(x.get("lifespan", 0.0)), s.categorie_age(x)])
+	print("  âges : " + " · ".join(ages))
 	var rp: Dictionary = s.regles.r.royaume.repeuplement
 	# 1. La moitié meurt.
 	var habitants: Array = s.population_village(choisi)
@@ -51,7 +55,7 @@ func _ready() -> void:
 		var w: Dictionary = GrandeBase.semaine(s, journal, j)
 		var pop: int = s.population_village(choisi).size()
 		var ev: Array[String] = []
-		for cle in ["journal.repeuplement", "journal.naissance", "journal.village_abandonne", "journal.mort"]:
+		for cle in ["journal.repeuplement", "journal.naissance", "journal.village_abandonne", "journal.mort", "journal.mort_vieillesse"]:
 			if w.journal.has(cle):
 				ev.append("%s ×%d" % [cle.trim_prefix("journal."), int(w.journal[cle])])
 		if premiere_arrivee < 0 and pop > pop0:
