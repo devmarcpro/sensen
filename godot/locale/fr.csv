@@ -2935,3 +2935,4 @@ ui.composeur.sequence_vide,(rien encore)
 ui.composeur.grille_arme,grille de l’arme tenue
 ui.composeur.etapes,Étapes
 functionality.pique.name,Pique
+item.craft_flechettes.name,Fléchettes

@@ -36,3 +36,7 @@ etape: 0
 - **Dépend de** : [[Hauteur de terrain ±10]], [[Stats d'armes]], [[Vocabulaire des modules — six axes]], [[Trous connus du combat]]
 - **Alimente** : [[Combat tactique sur grille]], [[Multijoueur]], [[Équipement — 14 slots]]
 - **Voir aussi** : [[Boucle de tick]], [[Météo]], [[Eau et liquides]], [[Écrans d'interface]]
+
+> [!bug] Constaté le 2026-09-04 — trois kits de tir partaient **sans carquois**, donc sans un seul tir possible
+> Le robot, en jouant Le Creuset après la relecture des armes : un combat, **zéro coup porté**. Une arme à projectile refuse de tirer à `munitions <= 0`, et le compteur se lit dans le carquois équipé — que le kit ne donnait pas. Le Creuset (sarbacane), L'Engrenage et La Trace (arc) commençaient la partie avec une arme qu'ils ne pouvaient pas utiliser ; la matrice du 3 septembre les avait notés « ne tue rien » sans voir pourquoi. Et il n'existait **aucune munition pour la sarbacane**.
+> **Corrigé** : des **fléchettes** (`items/munition/craft_flechettes.json`, 25 par carquois, pointe seule, à l'établi) ; les trois kits reçoivent leur carquois (flèches pour les arcs, fléchettes pour la sarbacane) ; et `verif_classes` refuse désormais toute classe dont l'arme de départ est un projectile sans carquois dans le kit — c'est le genre d'erreur qu'on ne revoit qu'en jouant, la sonde la voit à chaque passage.

@@ -1,0 +1,20 @@
+{
+  "name_key": "item.craft_flechettes.name",
+  "type": "munition",
+  "equip_slot": "carquois",
+  "hands": 0,
+  "slots": {
+    "tete": "pointe"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie"
+  },
+  "genre_grammatical": "fp",
+  "tags": [
+    "munition",
+    "assemble"
+  ],
+  "quantite": 25,
+  "_doc": "Les munitions de la sarbacane (2026-09-04) : il n'en existait aucune, et Le Creuset partait sans pouvoir tirer."
+}

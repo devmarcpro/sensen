@@ -7,7 +7,8 @@
   "equipement": [
     "craft_arc",
     "craft_jambieres",
-    "torche"
+    "torche",
+    "craft_fleches"
   ],
   "ratelier": [
     "craft_dague",

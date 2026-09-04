@@ -7,7 +7,8 @@
   "equipement": [
     "craft_sarbacane",
     "craft_cuirasse",
-    "torche"
+    "torche",
+    "craft_flechettes"
   ],
   "ratelier": [
     "craft_faucille",

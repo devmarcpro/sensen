@@ -69,6 +69,20 @@ func _ready() -> void:
 		if stat_arme.is_empty():   # à poings nus, la grille du guerrier — comme dans le jeu (grille_composition)
 			var fo_mn: Dictionary = GameData.catalogues.functionalities.get("mains_nues", {})
 			stat_arme = str(GameData.catalogues.competences.get(str(fo_mn.get("combat_skill", "")), {}).get("stat", ""))
+		# Une arme a PROJECTILE sans carquois ne tire pas (Decision — Projectiles) : Le Creuset, L'Engrenage et La
+		# Trace partaient ainsi le 2026-09-04, et la matrice les notait « ne tue rien » sans voir pourquoi.
+		var tire := false
+		var carquois := false
+		for it_id2 in fiche.get("equipement", []):
+			var it_def2: Dictionary = GameData.catalogues.items.get(str(it_id2), {})
+			var fo2: Dictionary = GameData.catalogues.functionalities.get(str(it_def2.get("functionality", "")), {})
+			if bool(fo2.get("projectile", false)):
+				tire = true
+			if str(it_def2.get("equip_slot", "")) == "carquois":
+				carquois = true
+		if tire and not carquois:
+			lignes.append("NE PEUT PAS TIRER : une arme a projectile dans le kit, aucun carquois")
+			soucis += 1
 		var grille_k: Array = s.grille_sort.grille_de(stat_arme, 0)
 		for cap in fiche.get("capacites", []):
 			# une grille par ETAPE (designer 2026-09-04) : un declencheur ouvre une etape, qui a sa propre grille — on juge chaque etape seule
