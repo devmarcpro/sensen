@@ -57,6 +57,9 @@ La couche stratégique : une vue abstraite de la même grille, servant de voyage
 > Vérifié sur six graines : **six fois tenu**, après avoir porté le rayon de recherche à 140 cellules pour l'une d'elles.
 > **Une erreur de méthode corrigée au passage** : `sonde_monde` ne passait la graine qu'aux jets de dés, pas au **monde**. Toutes les mesures de monde de la journée — régions, gouffres, densité — décrivaient donc un seul et même monde, présenté à tort comme un cas général.
 
+> [!success] Corrigé le 2026-09-04 — la teinte des donjons de corruption sur la carte
+> Vu sur une capture de la carte, dans la console : « Invalid color code: [0.9, 0.25, 0.15] », trois fois par image. La carte lisait `wuxing.teintes` comme des codes HTML alors que ce sont des triplets RVB (tout le reste du jeu les lit ainsi) : les donjons nés de la corruption se dessinaient d'une couleur de repli, pas de celle de leur élément. Corrigé dans `carte.gd`.
+
 ## Liens
 - **Dépend de** : [[Décision — Monde fini, continents et océan]], [[Grille continue]], [[Unification macro-micro]], [[Génération par couches de bruit]]
 - **Alimente** : [[Début de partie]], [[Boucle de jeu]], [[Donjons — structure et intégration]], [[Minimap et brouillard de guerre]]

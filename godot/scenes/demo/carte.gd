@@ -144,7 +144,8 @@ func _dessiner() -> void:
 			var dc: Dictionary = sim.monde.donjon_de_corruption(cell, sim.jour_courant()) if connue else {}
 			if not dc.is_empty():   # un donjon né de la corruption (designer, point 51) : sa teinte d'élément
 				var tel: Dictionary = GameData.config("wuxing").get("teintes", {})
-				var ce := Color.html(str(tel.get(str(dc.element), "#aa3333")))
+				var t_el: Array = tel.get(str(dc.element), [0.66, 0.2, 0.2])   # les teintes sont des triplets RVB, pas des codes HTML (vu sur une capture : « Invalid color code », 2026-09-04)
+				var ce := Color(float(t_el[0]), float(t_el[1]), float(t_el[2]))
 				dessin.draw_rect(Rect2(r.position + Vector2(2, 2), r.size - Vector2(4, 4)), ce.darkened(0.35))
 				dessin.draw_rect(Rect2(r.position + Vector2(2, 2), r.size - Vector2(4, 4)), ce, false, 1.0)
 				if case_px >= 16.0:
