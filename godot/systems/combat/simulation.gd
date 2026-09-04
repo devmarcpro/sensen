@@ -353,6 +353,8 @@ func _verifier_fenetre(e: Dictionary) -> void:
 				_projeter_routine(entites[id])   # le niveau 2 du LOD : là où sa routine l'aurait mené
 			grille.placer(id, entites[id].pos)
 	_peupler_fenetre()
+	for pid in perimetres().keys():   # une cellule qui rentre dans la fenêtre : son périmètre se rescanne (2026-09-04)
+		scanner_perimetre(str(pid))
 	maj_vision()
 	monde.pregenerer_voisins()
 	EventBus.emettre(&"fenetre_recentree", [grille.origine])
@@ -2033,7 +2035,7 @@ func facteur_humeur(x: Dictionary) -> float:
 
 
 ## Assigner un compagnon ou un PNJ ami à une fonction, sur la cellule où il se trouve.
-func _assigner(e: Dictionary, pnj_id: String, fonction: String, tick: int) -> bool:
+func _assigner(e: Dictionary, pnj_id: String, fonction: String, tick: int, perimetre: String = "") -> bool:
 	var x: Dictionary = entites.get(pnj_id, {})
 	if x.is_empty() or monde == null or not GameData.catalogues.functions.has(fonction):
 		return false
@@ -2050,6 +2052,8 @@ func _assigner(e: Dictionary, pnj_id: String, fonction: String, tick: int) -> bo
 	x["fonction"] = fonction
 	x["role"] = "resident"
 	x["assignation"] = {"fonction": fonction, "cellule": cell}
+	if not perimetre.is_empty() and perimetres().has(perimetre):   # assigné sur un périmètre de récolte (2026-09-04)
+		x.assignation["perimetre"] = perimetre
 	x["poste"] = x.pos
 	x.ancre = x.pos
 	x["place"] = x.pos
@@ -3080,6 +3084,18 @@ func _recalculer_humeurs() -> void:
 
 ## La production hebdomadaire d'un résident (Abstraction hors-site) : rendement × heures × humeur.
 func production_de(x: Dictionary) -> Dictionary:
+	# Un périmètre de récolte (Population et exploitation, 2026-09-04) : c'est ce qu'il y a sur les tuiles qui produit.
+	var per: Dictionary = perimetres().get(str(x.assignation.get("perimetre", "")), {})
+	if not per.is_empty():
+		var pcfg: Dictionary = _ry().get("perimetres", {})
+		var tp: Dictionary = pcfg.get("types", {}).get(str(per.type), {})
+		var niv := regles.niveau(x.competences_eff, str(tp.get("skill", "")))
+		var qp := float(tp.get("par_tuile_semaine", 0.5)) * minf(float(per.get("richesse", 0)), float(pcfg.get("tuiles_max_par_resident", 20))) \
+			* regles.skill_factor(niv) * facteur_humeur(x) * float(territoire.get("productivite", 1.0))
+		var np := mini(int(floor(qp)), int(floor(float(per.get("reserve", 0.0)))))
+		if np <= 0 or str(per.get("dominant", "")).is_empty():
+			return {}
+		return {"base": str(per.dominant), "forme": "brut", "n": np, "perimetre": str(per.id)}
 	var f: Dictionary = GameData.catalogues.functions.get(str(x.assignation.fonction), {})
 	var prod = f.get("produit")
 	if prod == null:
@@ -3111,11 +3127,15 @@ func _semaine_territoire(e: Dictionary) -> void:
 			var cle: String = pr.base + ("|" + pr.forme if not str(pr.forme).is_empty() else "")
 			territoire.stocks[cle] = int(territoire.stocks.get(cle, 0)) + int(pr.n)
 			prod_txt.append("%s ×%d" % [pr.base, int(pr.n)])
+			if pr.has("perimetre") and perimetres().has(str(pr.perimetre)):   # pris sur la réserve du périmètre
+				var per_p: Dictionary = perimetres()[str(pr.perimetre)]
+				per_p.reserve = maxf(0.0, float(per_p.get("reserve", 0.0)) - float(pr.n))
 	territoire.tresor = int(territoire.tresor) + or_prod
 	# Ressources naturelles : la régénération efface le bâti de la cellule.
 	for cell in monde.claims.keys():
 		if str(monde.claims[cell].role) == "ressources":
 			monde.modifications.erase(cell)
+	_repousser_perimetres()
 	var entretien := int(ry.entretien_pnj) * residents().size() + int(ry.entretien_structure) * _structures_speciales()
 	if not str(territoire.gouvernance).is_empty():
 		var g: Dictionary = GameData.entree("governments", str(territoire.gouvernance))
@@ -4990,6 +5010,98 @@ func _recruter(e: Dictionary, pnj_id: String, tick: int) -> bool:
 	_devenir_compagnon(e, pnj)
 	EventBus.emettre(&"journal", [&"journal.recrute", {"nom": pnj.name_key, "places": places_escorte(e)}])
 	return true
+
+
+# ---------------------------------------------------------------- périmètres de récolte (Population et exploitation, 2026-09-04)
+
+## Les périmètres du territoire : id → {id, cellule, type, richesse, reserve, dominant, matieres}.
+func perimetres() -> Dictionary:
+	if not territoire.has("perimetres"):
+		territoire["perimetres"] = {}
+	return territoire.perimetres
+
+
+## Le périmètre d'une cellule, s'il y en a un ("" sinon) : un type par cellule.
+func perimetre_de(cell: Vector2i) -> String:
+	for pid in perimetres().keys():
+		if perimetres()[pid].cellule == cell:
+			return str(pid)
+	return ""
+
+
+## Créer (ou retyper) le périmètre d'une cellule revendiquée, et le scanner si la cellule est dans la fenêtre.
+func creer_perimetre(cell: Vector2i, type: String) -> String:
+	if monde == null or not monde.claims.has(cell) or not _ry().get("perimetres", {}).get("types", {}).has(type):
+		return ""
+	var pid := perimetre_de(cell)
+	if pid.is_empty():
+		pid = "per_%d_%d" % [cell.x, cell.y]
+	perimetres()[pid] = {"id": pid, "cellule": cell, "type": type, "richesse": 0, "reserve": 0.0, "dominant": "", "matieres": {}}
+	scanner_perimetre(pid)
+	EventBus.emettre(&"journal", [&"journal.perimetre_cree", {"type": tr("perimetre.%s.name" % type), "x": cell.x, "y": cell.y, "richesse": int(perimetres()[pid].richesse)}])
+	return pid
+
+
+## Retirer un périmètre : ses résidents reviennent à la production de leur fonction.
+func retirer_perimetre(pid: String) -> bool:
+	if not perimetres().has(pid):
+		return false
+	var cell: Vector2i = perimetres()[pid].cellule
+	perimetres().erase(pid)
+	for x in residents():
+		if str(x.assignation.get("perimetre", "")) == pid:
+			x.assignation.erase("perimetre")
+	EventBus.emettre(&"journal", [&"journal.perimetre_retire", {"x": cell.x, "y": cell.y}])
+	return true
+
+
+## Scanner un périmètre : combien de tuiles de sa cellule portent la ressource, et quelle matière domine. Ne
+## regarde que la fenêtre ; hors fenêtre, la dernière mesure reste. Retourne la richesse.
+func scanner_perimetre(pid: String) -> int:
+	if not perimetres().has(pid) or monde == null or lieu != "camp":
+		return 0
+	var per: Dictionary = perimetres()[pid]
+	var cell: Vector2i = per.cellule
+	if absi(cell.x - monde.centre.x) > monde.rayon or absi(cell.y - monde.centre.y) > monde.rayon:
+		return int(per.richesse)
+	var pcfg: Dictionary = _ry().get("perimetres", {})
+	var tp: Dictionary = pcfg.get("types", {}).get(str(per.type), {})
+	var tag := str(tp.get("tag", ""))
+	var matieres := {}
+	var n := 0
+	for ly in monde.taille:
+		for lx in monde.taille:
+			var pos := monde.pos_monde(cell, Vector2i(lx, ly))
+			if not grille.dans(pos) or not (tag in grille.contenu_de(pos).get("tags", [])):
+				continue
+			n += 1
+			var m := grille.materiau_de(pos)
+			if m.is_empty():
+				m = str(tp.get("materiau_defaut", ""))
+			if not m.is_empty():
+				matieres[m] = int(matieres.get(m, 0)) + 1
+	var dominant := str(tp.get("materiau_defaut", ""))
+	var meilleur := 0
+	for m in matieres.keys():
+		if int(matieres[m]) > meilleur:
+			meilleur = int(matieres[m])
+			dominant = str(m)
+	per.richesse = n
+	per.matieres = matieres
+	per.dominant = dominant
+	per.reserve = float(n) * float(pcfg.get("unites_par_tuile", 1.5))
+	return n
+
+
+## Le passage de semaine : la réserve d'un périmètre repousse sur une cellule Ressources naturelles (Rôles de cases).
+func _repousser_perimetres() -> void:
+	var pcfg: Dictionary = _ry().get("perimetres", {})
+	for pid in perimetres().keys():
+		var per: Dictionary = perimetres()[pid]
+		if str(monde.claims.get(per.cellule, {}).get("role", "")) != "ressources":
+			continue
+		var plein := float(per.get("richesse", 0)) * float(pcfg.get("unites_par_tuile", 1.5))
+		per.reserve = minf(plein, float(per.get("reserve", 0.0)) + plein * float(pcfg.get("repousse_hebdo", 0.1)))
 
 
 ## La cellule de la base (Décision — Gestion de base) : la revendiquée de rôle « base », sinon la première.
@@ -8403,7 +8515,7 @@ func intention(id: String, i: Dictionary) -> bool:
 		"engager":
 			ok = _engager(e, str(i.get("pnj", "")), h.ticks)
 		"assigner":
-			ok = _assigner(e, str(i.get("pnj", "")), str(i.get("fonction", "")), h.ticks)
+			ok = _assigner(e, str(i.get("pnj", "")), str(i.get("fonction", "")), h.ticks, str(i.get("perimetre", "")))
 		"conquerir":
 			ok = _conquerir(e, i.get("vers", e.pos), h.ticks)
 		"capturer":

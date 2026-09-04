@@ -455,6 +455,9 @@ func _ready() -> void:
 			print("planche : ", portees[ip])
 		get_tree().quit()
 		return
+	for ipr in args.size():   # --perimetre bois|minerai|plantes : un périmètre de récolte sur la cellule du camp (Gestion de base, 2026-09-04)
+		if args[ipr] == "--perimetre" and ipr + 1 < args.size() and scene.sim != null and scene.sim.monde != null:
+			scene.sim.creer_perimetre(scene.sim.monde.cellule_camp, str(args[ipr + 1]))
 	for i2 in args.size():   # --ecran inventaire|atelier|feuille|menu : l'écran ouvert — après le chargement
 		if args[i2] == "--ecran" and i2 + 1 < args.size():
 			scene.ecrans.ouvrir(args[i2 + 1])

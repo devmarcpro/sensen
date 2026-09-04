@@ -156,6 +156,7 @@ func _ready() -> void:
 	_lancer("test_lod_projection")
 	_lancer("test_faune_rarefaction")
 	_lancer("test_engager_et_migrants")
+	_lancer("test_perimetres")
 	_lancer("test_composer_capacites")
 	_lancer("test_charges_de_modules")
 	_lancer("test_assemblage_sans_limite")
@@ -3907,6 +3908,49 @@ func test_engager_et_migrants() -> void:
 	s.regles.r.royaume.migrants.chance_base = 0.2
 	# renvoyer (Gestion de base, étape 2) : un engagé redevient villageois, pas compagnon
 	verifier(s.desassigner(j, v.id, true) and not v.has("assignation") and not v.has("maitre") and v.camp == "civil", "renvoyé depuis l'écran : il redevient villageois, sans prendre une place d'escorte")
+	s.monde.fermer()
+
+
+func test_perimetres() -> void:
+	# Les périmètres de récolte (Population et exploitation, 2026-09-04) : c'est ce qu'il y a sur les tuiles qui
+	# produit — on plante cinq pins, on déclare la cellule en périmètre bois, on y assigne un bûcheron.
+	var s := Simulation.new(31)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var camp: Vector2i = s.monde.cellule_camp
+	var pcfg: Dictionary = s.regles.r.royaume.perimetres
+	verifier(s.creer_perimetre(camp, "pierre").is_empty(), "un type inconnu : refusé")
+	var plantes := 0
+	for dx in range(3, 12):
+		var q: Vector2i = j.pos + Vector2i(dx, 2)
+		if s.grille.dans(q) and s.grille.occupant(q).is_empty() and not s.grille.bloque_passage(q) and plantes < 5:
+			s.grille.poser_contenu(q, "arbre")
+			s.grille.materiaux[s.grille.idx(q)] = "pin"
+			plantes += 1
+	verifier(plantes == 5, "cinq pins plantés près du joueur")
+	var pid := s.creer_perimetre(camp, "bois")
+	var per: Dictionary = s.perimetres()[pid]
+	var dom: String = str(per.dominant)   # le camp est en forêt : le chêne peut dominer les cinq pins plantés
+	verifier(not pid.is_empty() and int(per.richesse) >= 5 and str(GameData.entree("materials", dom).get("harvest", {}).get("skill", "")) == "bucheronnage" and float(per.reserve) >= float(per.richesse) * float(pcfg.unites_par_tuile), "le périmètre bois compte au moins les cinq pins, une essence domine (%d tuiles, %s, réserve %.0f)" % [int(per.richesse), dom, float(per.reserve)])
+	var v := s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
+	v.camp = "joueur"
+	verifier(s._assigner(j, v.id, "bucheron", 0, pid) and str(v.assignation.get("perimetre", "")) == pid, "un bûcheron assigné sur le périmètre")
+	var pr := s.production_de(v)
+	verifier(not pr.is_empty() and str(pr.base) == dom and int(pr.n) >= 1 and str(pr.perimetre) == pid, "sa production vient des tuiles : du bois brut de l'essence dominante (%s ×%d)" % [str(pr.get("base", "")), int(pr.get("n", 0))])
+	var reserve0: float = float(per.reserve)
+	s.territoire.tresor = 10000   # l'entretien ne doit pas brouiller la mesure
+	s._semaine_territoire(j)
+	verifier(int(s.territoire.stocks.get(dom + "|brut", 0)) >= 1 and float(per.reserve) < reserve0, "après la semaine : du bois brut au stock (%d), la réserve a baissé (%.1f → %.1f)" % [int(s.territoire.stocks.get(dom + "|brut", 0)), reserve0, float(per.reserve)])
+	# la repousse : seulement sur une cellule Ressources naturelles
+	var r1: float = float(per.reserve)
+	s._repousser_perimetres()
+	verifier(float(per.reserve) == r1, "sur une cellule de base, la réserve ne repousse pas")
+	s.monde.claims[camp].role = "ressources"
+	s._repousser_perimetres()
+	verifier(float(per.reserve) > r1, "sur une cellule Ressources naturelles, elle repousse (%.1f → %.1f)" % [r1, float(per.reserve)])
+	s.monde.claims[camp].role = "base"
+	# retirer le périmètre : le bûcheron revient à la production de sa fonction
+	verifier(s.retirer_perimetre(pid) and not v.assignation.has("perimetre") and s.perimetre_de(camp).is_empty(), "périmètre retiré : le résident revient à sa fonction")
 	s.monde.fermer()
 
 

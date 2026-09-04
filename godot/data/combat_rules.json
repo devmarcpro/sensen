@@ -982,6 +982,40 @@
       "chance_base": 0.2,
       "residents_par_cellule": 4,
       "creature": "villageois"
+    },
+    "perimetres": {
+      "_doc": "Les perimetres de recolte (Population et exploitation, 2026-09-04) : un type par cellule revendiquee ; tag de tuile scanne, competence, fonction proposee, unites produites par tuile et par semaine ; reserve = richesse x unites_par_tuile ; repousse hebdomadaire sur une cellule Ressources naturelles.",
+      "types": {
+        "bois": {
+          "tag": "arbre",
+          "skill": "bucheronnage",
+          "fonction": "bucheron",
+          "par_tuile_semaine": 0.5,
+          "materiau_defaut": "pin"
+        },
+        "minerai": {
+          "tag": "filon",
+          "skill": "minage",
+          "fonction": "mineur",
+          "par_tuile_semaine": 0.3,
+          "materiau_defaut": "cuivre"
+        },
+        "plantes": {
+          "tag": "plante_sauvage",
+          "skill": "herboristerie",
+          "fonction": "herboriste",
+          "par_tuile_semaine": 0.8,
+          "materiau_defaut": ""
+        }
+      },
+      "ordre": [
+        "bois",
+        "minerai",
+        "plantes"
+      ],
+      "unites_par_tuile": 1.5,
+      "tuiles_max_par_resident": 20,
+      "repousse_hebdo": 0.1
     }
   },
   "alchimie": {

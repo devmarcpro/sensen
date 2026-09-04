@@ -309,6 +309,21 @@ func touche(ev: InputEventKey) -> bool:
 						sequence_composee.remove_at(i_c)
 						rafraichir()
 				return true
+		KEY_P:
+			if courant == "gestion":   # le périmètre de récolte d'une cellule : bois → minerai → plantes → aucun (2026-09-04)
+				var en_p: Dictionary = entrees[selection] if selection < entrees.size() else {}
+				if en_p.get("kind", "") in ["cellule", "perimetre"]:
+					var sim_p = main.sim
+					var cell_p: Vector2i = en_p.cellule
+					var ordre_p: Array = sim_p.regles.r.royaume.perimetres.ordre
+					var pid_p: String = sim_p.perimetre_de(cell_p)
+					var k_p: int = -1 if pid_p.is_empty() else ordre_p.find(str(sim_p.perimetres()[pid_p].type))
+					if k_p + 1 < ordre_p.size():
+						sim_p.creer_perimetre(cell_p, str(ordre_p[k_p + 1]))
+					else:
+						sim_p.retirer_perimetre(pid_p)
+					rafraichir()
+				return true
 		KEY_E:
 			if courant == "inventaire":
 				_action_principale()
@@ -739,7 +754,7 @@ func _action_principale() -> void:
 		"donner", "reprendre":
 			main.sim.echanger(j, pnj_id, str(en.uid), str(en.kind))
 		"fonction":
-			main.sim.intention(j.id, {"type": "assigner", "pnj": pnj_id, "fonction": str(en.fonction)})
+			main.sim.intention(j.id, {"type": "assigner", "pnj": pnj_id, "fonction": str(en.fonction), "perimetre": str(en.get("perimetre", ""))})
 			fermer()
 			return
 		"competence_entrainer":
@@ -1064,7 +1079,16 @@ func _construire_gestion(j: Dictionary) -> void:
 	cells.sort()
 	for cell in cells:
 		liste.add_item(tr("ui.gestion.cellule").format({"x": cell.x, "y": cell.y, "role": tr("role." + str(sim.monde.claims[cell].role)), "camp": tr("ui.gestion.camp") if cell == sim.monde.cellule_camp else ""}))
-		entrees.append({"kind": "cellule", "cellule": cell, "texte": tr("ui.gestion.role_aide")})
+		entrees.append({"kind": "cellule", "cellule": cell, "texte": tr("ui.gestion.role_aide") + "\n" + tr("ui.gestion.perimetre_touche")})
+		var pid_c: String = sim.perimetre_de(cell)   # le périmètre de récolte de la cellule (Population et exploitation, 2026-09-04)
+		if not pid_c.is_empty():
+			var per_c: Dictionary = sim.perimetres()[pid_c]
+			var n_res := 0
+			for x_r in sim.residents():
+				if str(x_r.assignation.get("perimetre", "")) == pid_c:
+					n_res += 1
+			liste.add_item(tr("ui.gestion.perimetre").format({"type": tr("perimetre.%s.name" % str(per_c.type)), "richesse": int(per_c.richesse), "reserve": int(per_c.reserve), "dominant": tr(GameData.entree("materials", str(per_c.dominant)).get("name_key", "ui.assigner.rien")) if not str(per_c.dominant).is_empty() else tr("ui.assigner.rien"), "n": n_res}))
+			entrees.append({"kind": "perimetre", "id": pid_c, "cellule": cell, "texte": tr("ui.gestion.perimetre_aide")})
 	for x in sim.residents():
 		var poste: Vector2i = x.get("poste", x.pos)
 		liste.add_item(tr("ui.gestion.resident").format({"nom": tr(x.name_key), "fonction": tr(GameData.entree("functions", str(x.assignation.fonction)).name_key), "betail": tr("ui.gestion.betail") if str(x.get("statut_habitat", "normal")) == "betail" else "", "humeur": int(x.get("humeur", 60)), "facteur": "%.2f" % sim.facteur_humeur(x), "logement": tr("ui.gestion.loge" if x.has("lit") else "ui.gestion.sans_lit"), "x": poste.x, "y": poste.y}))
@@ -2033,6 +2057,13 @@ func _construire_assigner(j: Dictionary) -> void:
 		var ptxt: String = tr("ui.assigner.rien") if prod == null else (("%s or/unité" % str(prod.or)) if prod.has("or") else str(prod.get("item", prod.get("materiau", ""))))
 		liste.add_item(tr(f.name_key))
 		entrees.append({"kind": "fonction", "fonction": fid, "texte": tr("ui.assigner.fonction").format({"fonction": tr(f.name_key), "produit": ptxt, "rendement": str(f.get("rendement_base", 0))})})
+	for pid in main.sim.perimetres().keys():   # les périmètres de récolte du territoire (Population et exploitation, 2026-09-04)
+		var per: Dictionary = main.sim.perimetres()[pid]
+		var tp: Dictionary = main.sim.regles.r.royaume.perimetres.types.get(str(per.type), {})
+		var f_p: Dictionary = GameData.catalogues.functions.get(str(tp.get("fonction", "")), {})
+		var txt_p: String = tr("ui.assigner.perimetre").format({"fonction": tr(f_p.get("name_key", "ui.assigner.rien")), "type": tr("perimetre.%s.name" % str(per.type)), "x": per.cellule.x, "y": per.cellule.y, "richesse": int(per.richesse)})
+		liste.add_item(txt_p)
+		entrees.append({"kind": "fonction", "fonction": str(tp.get("fonction", "")), "perimetre": str(pid), "texte": txt_p})
 
 
 ## L'échange d'équipement avec un compagnon (Compagnons) : ton sac à donner, son équipement et son sac à reprendre.

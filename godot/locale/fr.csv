@@ -3212,3 +3212,12 @@ ui.gestion.sans_lit,sans lit (humeur −15)
 ui.gestion.compagnon,"compagnon : {nom} — {ordre} · PV {sante}/{sante_max}"
 ui.gestion.compagnon_aide,Entrée : suis-moi ⇄ attends ici
 journal.renvoye,{nom} est renvoyé : il redevient villageois
+perimetre.bois.name,bois
+perimetre.minerai.name,minerai
+perimetre.plantes.name,plantes sauvages
+ui.gestion.perimetre,"  périmètre {type} : {richesse} tuiles · réserve {reserve} · {dominant} · {n} assigné(s)"
+ui.gestion.perimetre_aide,P : changer le type (bois → minerai → plantes → aucun) · assigne des résidents dessus depuis leur fiche
+ui.gestion.perimetre_touche,P : un périmètre de récolte sur cette cellule (bois → minerai → plantes → aucun)
+ui.assigner.perimetre,"{fonction} sur le périmètre {type} de ({x},{y}) — {richesse} tuiles"
+journal.perimetre_cree,"Périmètre {type} sur ({x},{y}) : {richesse} tuiles"
+journal.perimetre_retire,"Le périmètre de ({x},{y}) est retiré"

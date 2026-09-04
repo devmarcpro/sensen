@@ -25,6 +25,7 @@ Le joueur peut assigner un **rôle** à chaque case revendiquée ([[Claims et pe
 **Signal :** `cell_role_changed` sur l'EventBus, écouté par la régénération et les restrictions ([[EventBus]]).
 
 > [!success] Codé le 2026-08-28 — étape 10.1
+> *2026-09-04 : les **périmètres de récolte** ([[Population et exploitation]]) donnent enfin au rôle Ressources naturelles sa réserve « récoltable en boucle par les PNJ assignés » — la réserve d'un périmètre ne repousse que sur une cellule de ce rôle.*
 > Les quatre rôles en données (`combat_rules.royaume.roles`), assignés dans l'écran Territoire (Tab → Territoire ; anciennement K) et changeables à tout moment ; **Ressources naturelles** rend la cellule à la régénération hebdomadaire (ses modifications sont effacées — la confirmation explicite est affichée dans l'écran avant le changement) ; **Champs** refuse les stations lourdes (poser une station y est refusé) ; Habitation compte les lits pour le logement. Signal `cell_role_changed`.
 
 ## Liens
