@@ -3996,6 +3996,10 @@ func test_faim_des_residents() -> void:
 	var affame: Dictionary = b if nourri.id == a.id else a
 	var attendu_nourri := int(ry.humeur_base) + int(ry.sans_logement)
 	verifier(int(nourri.humeur) == attendu_nourri and int(affame.humeur) == attendu_nourri + int(ry.get("faim_pnj", -10)), "humeurs : nourri %d, affamé %d — le malus de faim compte une fois" % [int(nourri.humeur), int(affame.humeur)])
+	# Retirer au stock la récolte d'un périmètre de plantes (« ortie|brut ») : des objets, pas une matière (grande base, 2026-09-04)
+	s.territoire.stocks["ortie|brut"] = 2
+	var sac0: int = j.sac.size()
+	verifier(s.retirer_stock(j, "ortie|brut") and not s.territoire.stocks.has("ortie|brut") and j.sac.size() > sac0, "deux orties retirées du stock : des objets dans le sac (%d → %d)" % [sac0, j.sac.size()])
 	s.monde.fermer()
 
 

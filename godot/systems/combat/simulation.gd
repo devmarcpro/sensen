@@ -3313,9 +3313,9 @@ func retirer_stock(e: Dictionary, cle: String) -> bool:
 	if n <= 0:
 		return false
 	var parts: PackedStringArray = cle.split("|")
-	if parts.size() > 1:
+	if parts.size() > 1 and GameData.catalogues.materials.has(parts[0]):
 		_donner_materiau(e, parts[0], n, parts[1])
-	else:
+	else:   # un objet (baies, ortie, champignon : la récolte d'un périmètre de plantes porte aussi « |brut »), pas une matière
 		for k in n:
 			var o := generer_objet(parts[0], 1, {}, "commun", 0)
 			if not o.is_empty():

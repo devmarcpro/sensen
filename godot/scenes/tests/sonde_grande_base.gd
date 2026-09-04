@@ -87,10 +87,53 @@ func _ready() -> void:
 			if x.controle == "ia" and str(x.camp) == "joueur":
 				pas_n += 1
 		print("tempo : %.2f ms par image de %d ticks avec %d résidents en vue (budget %.0f ms par image : %s)" % [dt_img, par_image, pas_n, budget_ms, "tenu" if dt_img < budget_ms else "DÉPASSÉ"])
+	var pos_etal := Vector2i(-1, -1)   # --etal : un étal de vente à côté du joueur, garni chaque semaine du bois du stock (Boutique passive)
+	if "--etal" in args:
+		# les engagés entourent le joueur : on cherche deux tuiles libres voisines à quelques pas, l'étal sur l'une, le joueur sur l'autre
+		for rayon_e in range(1, 6):
+			if pos_etal != Vector2i(-1, -1):
+				break
+			for dy in range(-rayon_e, rayon_e + 1):
+				for dx in range(-rayon_e, rayon_e + 1):
+					var q: Vector2i = j.pos + Vector2i(dx, dy)
+					if not (s.grille.dans(q) and not s.grille.bloque_passage(q) and s.grille.occupant(q).is_empty() and not s.grille.meubles.has(s.grille.idx(q))):
+						continue
+					for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+						var q2: Vector2i = q + d
+						if s.grille.dans(q2) and not s.grille.bloque_passage(q2) and (s.grille.occupant(q2).is_empty() or q2 == j.pos) and not s.grille.meubles.has(s.grille.idx(q2)):
+							pos_etal = q
+							if q2 != j.pos:
+								s.grille.liberer(j.pos)
+								j.pos = q2
+								s.grille.placer(j.id, q2)
+							break
+					if pos_etal != Vector2i(-1, -1):
+						break
+				if pos_etal != Vector2i(-1, -1):
+					break
+		if pos_etal != Vector2i(-1, -1):
+			s.grille.poser_contenu(pos_etal, "meuble")
+			s.grille.meubles[s.grille.idx(pos_etal)] = "etal_de_vente"
+			s.territoire.etals[s._pm(pos_etal)] = true
+			var cell_e: Vector2i = s.monde.cellule_de(s._pm(pos_etal))
+			var b: Dictionary = s.regles.r.royaume.boutique
+			print("étal posé en %s : %d villageois à %d cellules → trafic %.2f client(s) par heure%s · marge ×%.2f" % [str(pos_etal), s.population_autour(cell_e), int(b.rayon), float(b.clients_base) + float(b.par_habitant) * float(s.population_autour(cell_e)), " (sur une route ×%.1f)" % float(b.get("route_mult", 1.0)) if not s.monde.surface.route_de(cell_e).is_empty() else "", float(s.territoire.marge)])
 	print("semaine | ms | résidents | logés | lits | trésor | dette | humeur | stocks | journal")
 	for k in semaines:
+		var ventes0 := 0
+		if pos_etal != Vector2i(-1, -1):   # le bois du stock part à l'étal, jusqu'à ses douze places
+			ventes0 = int(s.territoire.absence.ventes)
+			for cle in s.territoire.stocks.keys():
+				if str(cle).ends_with("|brut") and (s.contenants.get(s.grille.idx(pos_etal), []) as Array).size() < 12:
+					var mat := str(cle).split("|")[0]
+					if s.retirer_stock(j, str(cle)):
+						var pile: Dictionary = s._pile(j, mat, "brut")
+						if not pile.is_empty():
+							s._ranger(j, str(pile.uid), pos_etal, s.horloge_monde.ticks)
 		var w: Dictionary = GrandeBase.semaine(s, journal, j)
 		var e: Dictionary = w.etat
+		if pos_etal != Vector2i(-1, -1):
+			print("  étal : %d vente(s) cette semaine · caisse %d or · %d objet(s) en rayon" % [int(s.territoire.absence.ventes) - ventes0, int(s.territoire.caisse), (s.contenants.get(s.grille.idx(pos_etal), []) as Array).size()])
 		print("  %2d | %4.0f | %2d | %2d | %2d | %5d | %4d | %3d | %s | %s" % [k + 1, w.ms, e.residents, e.loges, e.lits, e.tresor, e.dette, e.humeur, str(e.stocks), str(w.journal)])
 	var ef: Dictionary = GrandeBase.etat(s)
 	print("zones à la fin : %s" % ", ".join(ef.zones))
