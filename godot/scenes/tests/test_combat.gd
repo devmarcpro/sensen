@@ -158,6 +158,9 @@ func _ready() -> void:
 	_lancer("test_engager_et_migrants")
 	_lancer("test_perimetres")
 	_lancer("test_faim_des_residents")
+	_lancer("test_escorte_en_donjon")
+	_lancer("test_compagnon_se_bat")
+	_lancer("test_compagnons_defendent")
 	_lancer("test_dette_paliers")
 	_lancer("test_classes_des_pnj")
 	_lancer("test_composer_capacites")
@@ -3974,6 +3977,87 @@ func test_dette_paliers() -> void:
 	var parti: Dictionary = a if not s.entites.has(a.id) else b
 	verifier(not s.entites.has(parti.id) and not parti.has("assignation") and s.grille.occupant(parti.pos) != parti.id, "le partant a quitté le territoire : plus dans la simulation ni sur la grille")
 	s.monde.fermer()
+
+
+## L'escorte suit en donjon (Compagnons, designer 2026-09-04) : elle descend, change d'étage, remonte et rentre
+## au camp avec le joueur ; un étage mis de côté ne la garde pas (pas de doublon) ; « attends ici » reste sur place.
+func test_escorte_en_donjon() -> void:
+	var s := Simulation.new(31)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var a: Dictionary = s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
+	var b: Dictionary = s.ajouter("villageois", j.pos + Vector2i(-1, 0), "ia")
+	s._devenir_compagnon(j, a)
+	s._devenir_compagnon(j, b)
+	verifier(s.compagnons_de(j, false).size() == 2, "deux compagnons au camp")
+	s.donjon = {"etages": 3}
+	s.charger_donjon("ruine", s.graine, 7, 1, j)
+	var la := s.compagnons_de(j, false)
+	verifier(la.size() == 2 and s.entites.has(a.id) and s.entites.has(b.id) and Grille.distance(a.pos, j.pos) <= 5 and Grille.distance(b.pos, j.pos) <= 5, "à l'étage 1 : les deux sont descendus, à côté du joueur (%d)" % la.size())
+	verifier(not s.camp_sauve.entites.has(a.id), "le camp mis de côté ne garde pas l'escorte")
+	b.ordre = "attendre"
+	s.charger_donjon("ruine", s.graine, 7, 2, j)
+	verifier(s.entites.has(a.id) and not s.entites.has(b.id) and s.etages_visites[1].entites.has(b.id), "à l'étage 2 : celui qui suit est là, celui qui attend est resté à l'étage 1")
+	s.charger_donjon("ruine", s.graine, 7, 1, j)
+	verifier(s.compagnons_de(j, false).size() == 2 and s.entites.has(a.id) and s.entites.has(b.id), "retour à l'étage 1 : les deux, sans doublon (%d)" % s.compagnons_de(j, false).size())
+	b.ordre = "suivre"
+	s.charger_camp(j)
+	verifier(s.lieu == "camp" and s.compagnons_de(j, false).size() == 2 and s.entites.has(a.id) and s.entites.has(b.id), "rentrés au camp avec le joueur (%d)" % s.compagnons_de(j, false).size())
+	s.monde.fermer()
+
+
+## Un compagnon se bat (Compagnons, 2026-09-04) : loin de sa tuile d'arrivée — son maître est son ancre —, il frappe
+## le bandit qui se tient contre lui, même en posture défensive, pendant que le joueur ne fait qu'attendre.
+func test_compagnon_se_bat() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var c: Dictionary = s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
+	s._devenir_compagnon(j, c)
+	c.ancre = c.pos + Vector2i(40, 0)   # il a suivi le joueur loin de là où il est arrivé
+	var b: Dictionary = s.ajouter("bandit", c.pos + Vector2i(1, 0), "ia")
+	verifier(not b.is_empty() and s.ennemis(c, b), "un bandit contre le compagnon")
+	var sante0 := int(b.sante)
+	var sante_c0 := int(c.sante)
+	for k in 40:
+		s.attente[j.id] = true
+		s.intention(j.id, {"type": "attendre"})
+		s.pas("monde")
+		for nom in s.combats.keys():
+			s.pas(nom)
+		if int(b.sante) < sante0 or not b.vivant:
+			break
+	verifier(int(b.sante) < sante0 or not b.vivant, "le compagnon a frappé le bandit (%d → %d) alors que le joueur attendait" % [sante0, int(b.sante)])
+	verifier(int(c.sante) <= sante_c0, "le bandit a rendu les coups ou pas, mais le compagnon est resté dans le combat (%d/%d)" % [int(c.sante), sante_c0])
+
+
+## Deux compagnons armés défendent le joueur (Compagnons, 2026-09-04) : le bandit est contre le joueur, pas contre
+## eux — ils doivent s'approcher et frapper pendant que le joueur ne fait qu'attendre.
+func test_compagnons_defendent() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var comps: Array = []
+	for d in [Vector2i(-2, 0), Vector2i(0, -2)]:
+		var c: Dictionary = s.ajouter("villageois", j.pos + d, "ia")
+		s._devenir_compagnon(j, c)
+		var epee: Dictionary = s.generer_objet("craft_epee", 1, {}, "commun", 0)
+		c.sac.append(epee.uid)
+		s._equiper(c, epee.uid, 0)
+		comps.append(c)
+	var b: Dictionary = s.ajouter("bandit", j.pos + Vector2i(1, 0), "ia")
+	var sante0 := int(b.sante)
+	var coups := 0
+	EventBus.damage_dealt.connect(func(src: String, cible: String, _d: int, _det: Dictionary) -> void:
+		if cible == b.id and (src == comps[0].id or src == comps[1].id):
+			coups += 1)
+	for k in 60:
+		s.attente[j.id] = true
+		s.intention(j.id, {"type": "attendre"})
+		s.pas("monde")
+		for nom in s.combats.keys():
+			s.pas(nom)
+		if not b.vivant:
+			break
+	verifier(coups > 0 or int(b.sante) < sante0 or not b.vivant, "les compagnons ont frappé le bandit contre le joueur (%d coup(s), %d → %d)" % [coups, sante0, int(b.sante)])
 
 
 func test_faim_des_residents() -> void:

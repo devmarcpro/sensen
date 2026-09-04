@@ -38,6 +38,7 @@ func _draw() -> void:
 	_dessiner_compas(sim, j, Vector2(taille.x - MARGE - float(Minimap.TAILLE) * 0.5, sous_minimap + RAYON_COMPAS))
 	_dessiner_pentagramme(sim, j, Vector2(taille.x - MARGE - float(Minimap.TAILLE) * 0.5, sous_minimap + RAYON_COMPAS * 2 + 30.0 + RAYON_PENTA))
 	_dessiner_barres(j, Vector2(MARGE, taille.y - MARGE - CASE - float(NB_BARRES) * (BARRE_H + 6.0) - 12.0))
+	_dessiner_compagnons(sim, j, Vector2(MARGE + BARRE_L + 150.0, taille.y - MARGE - CASE - float(NB_BARRES) * (BARRE_H + 6.0) - 12.0))
 
 	_dessiner_hotbar(sim, j, Vector2(MARGE, taille.y - MARGE - CASE))
 
@@ -161,3 +162,36 @@ func _nom_ajuste(nom: String, r: Rect2) -> void:
 	while taille_police > 7 and f.get_string_size(nom, HORIZONTAL_ALIGNMENT_LEFT, -1, taille_police).x > large:
 		taille_police -= 1
 	draw_string(f, r.position + Vector2(3.0, CASE - 6.0), nom, HORIZONTAL_ALIGNMENT_LEFT, large, taille_police, Color(0.95, 0.95, 0.9))
+
+
+## Les compagnons (designer 2026-09-04 : « un HUD qui affiche chaque compagnon ») : à droite des barres du joueur,
+## une ligne par compagnon actif — nom, barre de vie et chiffre, ordre, « hors de vue » s'il n'est pas dans la fenêtre.
+## Six lignes au plus (les places d'escorte), puis « +N ».
+const COMP_MAX := 6
+const COMP_BARRE_L := 90.0
+func _dessiner_compagnons(sim, j: Dictionary, o: Vector2) -> void:
+	var compagnons: Array = sim.compagnons_de(j, false)
+	if compagnons.is_empty():
+		return
+	var font := ThemeDB.fallback_font
+	var y := o.y
+	draw_string(font, Vector2(o.x, y - 4.0), tr("hud.compagnons"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.75, 0.7, 0.55))
+	for k in mini(compagnons.size(), COMP_MAX):
+		var c: Dictionary = compagnons[k]
+		y = o.y + (k + 1) * (BARRE_H + 6.0)
+		var part := clampf(float(c.sante) / maxf(1.0, float(c.sante_max)), 0.0, 1.0)
+		var col := COULEURS["sante"] if part > 0.5 else (Color(0.9, 0.55, 0.2) if part > 0.25 else Color(0.95, 0.25, 0.25))
+		draw_rect(Rect2(o.x, y, COMP_BARRE_L, BARRE_H), Color(0.05, 0.05, 0.08, 0.85))
+		draw_rect(Rect2(o.x, y, COMP_BARRE_L * part, BARRE_H), col)
+		draw_rect(Rect2(o.x, y, COMP_BARRE_L, BARRE_H), Color(0.6, 0.55, 0.4, 0.8), false, 1.0)
+		var ordre := str(c.get("ordre", "suivre"))
+		var etat := tr("ordre." + ordre)
+		if not sim.entites.has(c.id):   # resté hors de la fenêtre (mis de côté, dormant)
+			etat = tr("hud.compagnon_hors_vue")
+		elif not bool(c.vivant):
+			etat = tr("hud.compagnon_mort")
+		var texte := "%s · %d/%d · %s" % [tr(c.name_key), int(c.sante), int(c.sante_max), etat]
+		draw_string(font, Vector2(o.x + COMP_BARRE_L + 6.0, y + BARRE_H), texte, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.9, 0.88, 0.8))
+	if compagnons.size() > COMP_MAX:
+		draw_string(font, Vector2(o.x, o.y + (COMP_MAX + 1) * (BARRE_H + 6.0) + BARRE_H), "+%d" % (compagnons.size() - COMP_MAX), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.75, 0.7, 0.55))
+

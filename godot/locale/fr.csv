@@ -3314,3 +3314,19 @@ tag.trame,trame
 tag.vetement,vêtement
 tag.viande,viande
 journal.quitte_territoire,{nom} quitte le territoire
+hud.compagnons,compagnons
+hud.compagnon_hors_vue,hors de vue
+hud.compagnon_mort,à terre
+ui.menu.volet,Volet latéral : afficher / masquer (F4)
+volet.monde,MONDE
+volet.personnage,PERSONNAGE
+volet.compagnons,COMPAGNONS
+volet.journal,JOURNAL
+volet.inventaire,INVENTAIRE — {n} objet(s)
+volet.heure,"{heure} · {phase} · jour {jour}"
+volet.saison,"{saison} · {meteo} · {temp} °C"
+volet.lieu_camp,"cellule ({x},{y}) · {biome}"
+volet.corruption,corruption {n} %
+volet.lieu_donjon,"{theme} · étage {etage}/{etages}"
+volet.horloge_donjon,horloge {ticks}
+volet.arme,en main : {arme}

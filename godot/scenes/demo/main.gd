@@ -103,6 +103,8 @@ var zoom := 2.0   # au maximum par défaut (décision du designer, 2026-08-30)
 var terrain: Terrain              # couche statique : les tuiles, dessinées une fois (perf É0)
 var hud: Hud                      # couche au-dessus des êtres : barres, garde, télégraphes, jauges
 var hud_ecran: HudEcran           # le HUD fixe à l'écran : compas-horloge, pentagramme, barres, hotbar (Écrans d'interface)
+var volet: VoletLateral           # le volet latéral : monde, personnage, compagnons, journal, inventaire (designer 2026-09-04)
+var volet_visible := true
 var chargement_restant := 0.0     # écran de chargement entre cellules (Grille continue) : secondes restantes, 0 = fermé
 var chargement_cellule := Vector2i.ZERO
 var chargement: ColorRect         # le voile noir de l'écran de chargement, sur le CanvasLayer
@@ -241,6 +243,9 @@ func _ready() -> void:
 	hud_ecran = HudEcran.new()
 	hud_ecran.main = self
 	$CanvasLayer.add_child(hud_ecran)
+	volet = VoletLateral.new()
+	volet.main = self
+	$CanvasLayer.add_child(volet)
 	chargement = ColorRect.new()   # l'écran de chargement : par-dessus tout, fermé par défaut
 	chargement.color = Color(0.02, 0.02, 0.03, 1.0)
 	chargement.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -589,6 +594,8 @@ func _recentrer() -> void:
 	# elle suit le paperdoll qui glisse, pas la tuile, pour ne pas sauter.
 	var p: Vector2 = noeuds[joueur_id].position if noeuds.has(joueur_id) else _ecran(j.pos, sim.grille.h(j.pos))
 	position = taille * 0.5 - p * zoom
+	if volet != null and volet.visible:   # le volet couvre le bord droit : le joueur reste au centre de ce qui se voit
+		position.x -= volet.largeur * 0.5
 
 
 func joueur() -> Dictionary:
@@ -990,6 +997,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 				ecrans.basculer("menu")
 			KEY_V:
 				ecrans.basculer("triche")   # menu de triche : tout obtenir, tout déclencher
+			KEY_F4:
+				volet_visible = not volet_visible   # le volet latéral (aussi au menu Tab)
 			KEY_P:
 				if sim.lieu == "camp" and sim.monde != null:   # dessiner un périmètre de récolte (Décision — Gestion de base)
 					ecrans.basculer("perimetre")
@@ -1350,6 +1359,8 @@ func _action_menu(id: String) -> void:
 		"gestion":
 			if sim.lieu == "camp":
 				ecrans.ouvrir("gestion")
+		"volet":
+			volet_visible = not volet_visible
 		"perimetre":   # la même chose que P — le menu ne cache aucun raccourci global (README, contrôles)
 			if sim.lieu == "camp" and sim.monde != null:
 				ecrans.ouvrir("perimetre")
@@ -2039,7 +2050,8 @@ func _maj_ui() -> void:
 	if not ecran_fin.is_empty():
 		bas.append_array(ecran_fin)
 		bas.append("")
-	bas.append_array(journal)
+	if volet == null or not volet.visible:   # le journal est dans le volet quand il est affiché
+		bas.append_array(journal)
 	if not j.vivant:
 		bas.append(tr("journal.defaite"))
 	ui_bas.text = "\n".join(bas)

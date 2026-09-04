@@ -15,7 +15,11 @@ var classe := ""            # --classe id : la classe du personnage (30 : tester
 var race := ""              # --race id
 var equiper := 0            # --equiper N : N objets assemblés générés, les équipables portés
 var invincible := false     # --invincible : PV rendus à chaque image, pour une collecte longue
-var fichier_inventaire := ""  # --inventaire <chemin> : le sac complet écrit en JSON à la fin
+var fichier_inventaire := ""
+var compagnons_voulus := 0   # --compagnons N : N villageois recrutés au départ, qui suivent en donjon
+var compagnons_ids: Array = []
+var coups_compagnons := 0
+var etage_note := 0   # le dernier étage où l'état de l'escorte a été noté  # --inventaire <chemin> : le sac complet écrit en JSON à la fin
 var sorts := 0              # --sorts N : N sorts composés au hasard (forme + noyau [+ modificateur]), lancés en combat
 var rng_bot := RandomNumberGenerator.new()
 var sorts_lances := 0
@@ -81,6 +85,8 @@ func _ready() -> void:
 			invincible = true
 		elif args[i] == "--inventaire" and i + 1 < args.size():
 			fichier_inventaire = str(args[i + 1])
+		elif args[i] == "--compagnons" and i + 1 < args.size():   # N villageois recrutés au départ (designer 2026-09-04)
+			compagnons_voulus = int(args[i + 1])
 	DirAccess.make_dir_recursive_absolute(sortie)
 	DirAccess.make_dir_recursive_absolute(sortie + "/toutes_les_30s")
 	rng_bot.seed = graine
@@ -105,6 +111,22 @@ func _ready() -> void:
 		scene.ecrans.fermer()
 	var j: Dictionary = scene.joueur()
 	jid = j.id
+	for k in compagnons_voulus:   # l'escorte : des villageois recrutés à côté du joueur, avec leur kit
+		var q := Vector2i(-1, -1)
+		for d in Grille.DIRS:
+			var q2: Vector2i = j.pos + d * (1 + k / 4)
+			if scene.sim.grille.dans(q2) and not scene.sim.grille.bloque_passage(q2) and scene.sim.grille.occupant(q2).is_empty():
+				q = q2
+				break
+		if q == Vector2i(-1, -1):
+			break
+		var c: Dictionary = scene.sim.ajouter("villageois", q, "ia")
+		scene.sim._devenir_compagnon(j, c)
+		var epee: Dictionary = scene.sim.generer_objet("craft_epee", 1, {}, "commun", 0)   # ce qu'un joueur ferait par l'échange
+		if not epee.is_empty():
+			c.sac.append(epee.uid)
+			scene.sim._equiper(c, epee.uid, 0)
+		compagnons_ids.append(c.id)
 	scene.sim.donjon = {"etages": etages_voulus + 1}   # un donjon assez profond pour le parcours demandé
 	scene.sim.charger_donjon(theme, graine, 7, 1, j)
 	scene.sim.maj_vision()
@@ -117,7 +139,9 @@ func _ready() -> void:
 			coups_recus += 1
 			degats_recus += degats
 		elif src == jid:
-			coups_portes += 1)
+			coups_portes += 1
+		elif src in compagnons_ids:
+			coups_compagnons += 1)
 	EventBus.creature_killed.connect(func(_id: String, tueur: String) -> void:
 		if tueur == jid:
 			kills += 1)
@@ -126,6 +150,8 @@ func _ready() -> void:
 		if str(cle) == "journal.porte_ouverte":
 			portes_ouvertes += 1)
 	_note("étage %d : arrivée (%d salles, %s)" % [etage_depart, int(scene.sim.donjon.salles), str(scene.sim.donjon.theme)])
+	if not compagnons_ids.is_empty():
+		_note("compagnons : %s" % _etat_compagnons())
 
 
 ## L'équipement et les sorts du parcours (30) : des objets assemblés générés et portés, des sorts composés au hasard.
@@ -206,6 +232,9 @@ func _capturer(nom: String) -> void:
 
 
 func _process(_delta: float) -> void:
+	if not compagnons_ids.is_empty() and scene.sim.lieu == "donjon" and int(scene.sim.donjon.get("etage", 0)) != etage_note:
+		etage_note = int(scene.sim.donjon.get("etage", 0))
+		_note("compagnons à l'étage %d : %s" % [etage_note, _etat_compagnons()])
 	frames += 1
 	if Time.get_ticks_msec() - derniere_capture_30s >= 30000 and frames > 5 and DisplayServer.get_name() != "headless":   # le film du parcours : une image toutes les 30 s
 		derniere_capture_30s = Time.get_ticks_msec()
@@ -426,6 +455,8 @@ func _hostile_en_vue(j: Dictionary) -> Dictionary:
 
 
 func _fin(raison: String) -> void:
+	if not compagnons_ids.is_empty():
+		print("COMPAGNONS : " + _etat_compagnons())
 	set_process(false)
 	var j: Dictionary = scene.sim.entites.get(jid, {})
 	_capturer("fin")
@@ -460,3 +491,16 @@ func _fin(raison: String) -> void:
 	for l in scene.journal:
 		print("  journal : ", l)
 	get_tree().quit()
+
+
+## L'état de l'escorte, pour le rapport : présents sur l'étage, vivants, à terre, restés en arrière.
+func _etat_compagnons() -> String:
+	var presents := 0
+	var vivants := 0
+	for cid in compagnons_ids:
+		if scene.sim.entites.has(cid):
+			presents += 1
+			if bool(scene.sim.entites[cid].vivant):
+				vivants += 1
+	return "%d/%d présents, %d vivants, %d coups portés par eux" % [presents, compagnons_ids.size(), vivants, coups_compagnons]
+

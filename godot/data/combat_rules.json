@@ -631,7 +631,7 @@
     "quetes_par_semaine": 2
   },
   "compagnons": {
-    "_doc": "Compagnons : places_escorte = base + Charisme/par_charisme + Leadership/par_leadership ; distance de suivi ; résurrection à l'autel : or_par_niveau × niveau × autel_mult ; affaibli : malus et durée.",
+    "_doc": "Compagnons : places_escorte = base + Charisme/par_charisme + Leadership/par_leadership ; distance de suivi ; résurrection à l'autel : or_par_niveau × niveau × autel_mult ; affaibli : malus et durée. distance_engagement : a cette distance ou moins, l'escorte qui suit entre dans le combat de son maitre.",
     "places_base": 1,
     "par_charisme": 5,
     "par_leadership": 10,
@@ -641,7 +641,8 @@
     "affaibli_mult": 0.8,
     "affaibli_ticks": 24000,
     "pretre_mult": 1.0,
-    "statut_resurrection": "affaibli"
+    "statut_resurrection": "affaibli",
+    "distance_engagement": 6
   },
   "apprivoisement": {
     "_doc": "Jet universel : 1d20 + Dressage/2 + Charisme/4 ≥ 10 + niveau/2 ; bonus sous 50 % / 25 % de PV ; une tentative par créature et par jour.",

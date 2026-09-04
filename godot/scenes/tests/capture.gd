@@ -479,6 +479,20 @@ func _ready() -> void:
 		if args[ipr] == "--perimetre" and ipr + 1 < args.size() and scene.sim != null and scene.sim.monde != null:
 			var jp: Dictionary = scene.joueur()   # dessiné : un rectangle de 6×4 à l'est du joueur, pour voir la teinte sur la carte
 			scene.sim.dessiner_perimetre(jp.pos + Vector2i(2, -1), jp.pos + Vector2i(7, 2), str(args[ipr + 1]))
+	for ic in args.size():   # --compagnons N : N villageois recrutés à côté du joueur, qui le suivent (HUD des compagnons, 2026-09-04)
+		if args[ic] == "--compagnons" and ic + 1 < args.size() and scene.sim != null:
+			var jc: Dictionary = scene.joueur()
+			for k in int(args[ic + 1]):
+				for d in Grille.DIRS:
+					var q2: Vector2i = jc.pos + d * (1 + k / 4)
+					if scene.sim.grille.dans(q2) and not scene.sim.grille.bloque_passage(q2) and scene.sim.grille.occupant(q2).is_empty():
+						var c: Dictionary = scene.sim.ajouter("villageois", q2, "ia")
+						scene.sim._devenir_compagnon(jc, c)
+						var epee: Dictionary = scene.sim.generer_objet("craft_epee", 1, {}, "commun", 0)
+						if not epee.is_empty():
+							c.sac.append(epee.uid)
+							scene.sim._equiper(c, epee.uid, 0)
+						break
 	for ig in args.size():   # --grande_base N : la grande base du designer (2026-09-04, 14 h), N semaines passées — voir grande_base.gd
 		if args[ig] == "--grande_base" and scene.sim != null and scene.sim.monde != null:
 			var semaines_gb: int = int(args[ig + 1]) if ig + 1 < args.size() and args[ig + 1].is_valid_int() else 0
@@ -528,10 +542,12 @@ func _ready() -> void:
 				scene.ecrans.selection = int(args[i5 + 1])
 				scene.ecrans.liste.select(scene.ecrans.selection)
 				scene.ecrans._montrer_detail()
-	# Un survol simulé sur une créature, pour voir la prévisualisation.
+	# Un survol simulé sur une créature, pour voir la prévisualisation (--sans-survol : aucun, un villageois n'est pas une cible).
 	var j: Dictionary = scene.joueur()
 	var plus_proche := 999999
 	for e in scene.sim.vivants():   # la créature la plus proche du joueur est sous la souris (bulle, prévisualisation)
+		if "--sans-survol" in args:
+			break
 		if e.id != j.id and Grille.distance(e.pos, j.pos) < plus_proche:
 			plus_proche = Grille.distance(e.pos, j.pos)
 			scene.survol = e.pos
@@ -589,7 +605,9 @@ func _process(delta: float) -> void:
 			_gif_action(gif_prises)
 		if scene.sim != null and gif_ticks > 0:   # le monde vit entre deux prises : sans ça le GIF est fixe
 			for _t in gif_ticks:
-				scene.sim.pas("monde")
+				# L'horloge du monde avance d'un tick (les êtres agissent, les timers tournent) : un simple pas("monde")
+				# ne faisait rien tant que personne n'était dû — un raid restait à 25 tuiles pendant tout le film (2026-09-04).
+				scene.sim.horloge_monde.avancer(1)
 				for nom_c in scene.sim.combats.keys():
 					scene.sim.pas(nom_c)
 			scene._apres_changement_de_grille()

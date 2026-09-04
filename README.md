@@ -35,8 +35,9 @@ La partie démarre par la **création de personnage** (R race, C classe, ↑↓ 
 | **E** | interagir avec ce qui est sous la souris si adjacent, sinon la première chose interactive autour (PNJ, coffre, lit, escalier, parcelle, place de village, eau, bête, plante, mur) |
 | **R** | ramasser ce qui est au sol |
 | **Clic droit** | **toutes** les options possibles sur la tuile ou l'être visé — c'est le geste à connaître |
-| **Tab** | le menu : inventaire, atelier, feuille, capacités, carte, territoire, périmètre, registre, sauvegarder, charger, minimap, débogage |
+| **Tab** | le menu : inventaire, atelier, feuille, capacités, carte, territoire, périmètre, registre, sauvegarder, volet latéral, minimap, débogage |
 | **P** | au camp : dessiner un périmètre (récolte de bois, de minerai, de plantes, résidentiel, stockage) — choisir le type, puis cliquer les deux coins |
+| **F4** | le volet latéral (monde, personnage, compagnons, journal, inventaire) : afficher / masquer — aussi au menu |
 | **1 → 0** | la hotbar : armes du râtelier, capacités, bombes, attaque lourde, garde, attendre — la touche sélectionne, la ligne de visée suit la souris, le clic lance |
 | **Échap** | fermer un écran / annuler une visée |
 | molette, clic milieu | zoomer, déplacer la vue |
@@ -79,6 +80,10 @@ Les étapes 0 à 10 de l'ordre de construction sont codées. Par thème :
 **Vivre** — faim et nourriture, sommeil, PNJ nommés avec relations, rumeurs et routines horaires, dialogue, commerce au prix suggéré, quêtes et guildes, compagnons (recrutement, ordres, postures, échange d'équipement, résurrection), apprivoisement, agriculture, élevage à génétique (8 espèces, registre et paliers).
 
 **Territoire** — claims, rôles de cellule, résidents engagés ou arrivés d'eux-mêmes, assignés à une fonction et à un périmètre de récolte dessiné (bois, minerai, plantes) avec un stockage par poste, résidentiel où les chaumières se bâtissent seules, repas hebdomadaire, stocks et trésor, boutique passive, raids hebdomadaires, gouvernances, royaumes PNJ avec lois et douanes, accords diplomatiques, conquête de village.
+
+**Compagnons** — recrutés au village ou apprivoisés, ils suivent partout : en donjon, d'étage en étage, et rentrent au camp avec le joueur ; ordres et postures, un HUD les montre (nom, vie, ordre) ; désarmés, ils frappent à mains nues.
+
+**Interface** — un volet latéral (F4) : monde, personnage, compagnons, journal, inventaire ; les écrans d'inventaire, d'atelier, de composition, de commerce et de territoire ; un voile sous tout menu.
 
 Ce qui reste ouvert, en détail : **`docs/00 - Index/Vers la production.md`**.
 
@@ -156,6 +161,7 @@ Aucune sortie ne doit contenir `SCRIPT ERROR`, et la suite doit finir par `TESTS
 #   --langue en · --graine N · --perimetre bois · --maison --assigner · --commerce --echange · --sorts gel+1 · --grande_base N (N semaines) · --ligne N (sélectionne la N-ième ligne de l'écran)
 #   GIF : --gif N --gif-pas P --gif-ticks T [--gif-marcher M] --frames 400, puis python tools/monter_gif.py user://prefixe sortie.gif 900 350
 #   --gif-action defiler|composer|carte|monde|creation|semaine : ce qui change entre deux prises d'un écran (liste qui défile, sort posé pièce à pièce, carte qui glisse, autre graine, volet suivant, une semaine à la base)
+#   --arene gorge (un NOM d'arène, pas un index) · --sans-survol : pas de bulle de prévisualisation sur la créature la plus proche
 #   les PNG sortent dans %APPDATA%\Godot\app_userdata\Sensen\
 ```
 
@@ -176,7 +182,7 @@ Vingt-huit scènes `scenes/tests/sonde_*.tscn`, chacune mesure une chose et l'é
 #   options : --etal (un étal garni du stock) · --tempo (le coût d'une image au camp) · --profil (la semaine étape par étape) · --sauvegarde (aller-retour)
 # Un hameau sur la durée : la moitié tuée, combien de semaines pour se repeupler ; décimé, devient-il abandonné (Villages PNJ)
 & $godot --headless --path godot res://scenes/tests/sonde_village.tscn -- --graine_monde 9 --semaines 30
-# Le robot joue le client : descend les étages, se bat, meurt ou pas (fenêtré ; --equiper N --sorts N pour un robot équipé)
+# Le robot joue le client : descend les étages, se bat, meurt ou pas (fenêtré ; --equiper N --sorts N pour un robot équipé ; --compagnons N pour une escorte armée, notée à chaque étage)
 & $godot --path godot res://scenes/tests/parcours.tscn -- --graine 73 --etages 4 --frames 8000 --equiper 3 --sorts 3 --sortie user://robot
 ```
 

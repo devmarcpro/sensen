@@ -3305,3 +3305,19 @@ tag.trame,weave
 tag.vetement,clothing
 tag.viande,meat
 journal.quitte_territoire,{nom} leaves the territory
+hud.compagnons,companions
+hud.compagnon_hors_vue,out of sight
+hud.compagnon_mort,down
+ui.menu.volet,Side panel: show / hide (F4)
+volet.monde,WORLD
+volet.personnage,CHARACTER
+volet.compagnons,COMPANIONS
+volet.journal,LOG
+volet.inventaire,INVENTORY — {n} item(s)
+volet.heure,"{heure} · {phase} · day {jour}"
+volet.saison,"{saison} · {meteo} · {temp} °C"
+volet.lieu_camp,"cell ({x},{y}) · {biome}"
+volet.corruption,corruption {n} %
+volet.lieu_donjon,"{theme} · floor {etage}/{etages}"
+volet.horloge_donjon,clock {ticks}
+volet.arme,in hand: {arme}

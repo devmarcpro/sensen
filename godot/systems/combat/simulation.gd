@@ -191,6 +191,7 @@ func _remplir_banc_objets(arene: Dictionary) -> void:
 ## tel quel s'il a déjà été visité ; sinon généré, avec le coffre de départ. `joueur` : l'être qui
 ## revient d'expédition (vide au premier chargement : créé depuis la fiche).
 func charger_camp(joueur: Dictionary = {}, cellule_choisie: Vector2i = Vector2i(-1, -1)) -> void:
+	var escorte: Array = _escorte_qui_suit(joueur) if lieu == "donjon" else []   # elle rentre avec lui (Compagnons, 2026-09-04)
 	arene_id = "camp"
 	lieu = "camp"
 	donjon = {}
@@ -212,6 +213,7 @@ func charger_camp(joueur: Dictionary = {}, cellule_choisie: Vector2i = Vector2i(
 			joueur.erase("retour")
 			_reprendre(joueur, ou)
 			joueur.spawn = joueur.get("lit", sauve.entree)
+			_placer_escorte(joueur, escorte)
 		maj_vision()
 		return
 	# Première venue : le monde (fenêtre glissante) centré sur la cellule de départ.
@@ -422,12 +424,17 @@ func _sauver_camp(joueur: Dictionary) -> void:
 	var sauve := {"entree": camp_sauve.get("entree", joueur.pos), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO), "grille": grille, "entites": {}, "ordre": [], "contenants": contenants}
 	if monde != null:
 		monde.capturer(grille)
+	var partants: Array = []   # l'escorte descend avec le joueur (Compagnons, 2026-09-04)
+	for x in _escorte_qui_suit(joueur):
+		partants.append(x.id)
 	for id in ordre:
-		if id != joueur.id:
+		if id != joueur.id and not (id in partants):
 			entites[id]["dormant_depuis"] = horloge_monde.ticks   # LOD de simulation : au retour, sa routine le remettra à sa place
 			sauve.entites[id] = entites[id]
 			sauve.ordre.append(id)
 	grille.liberer(joueur.pos)
+	for id_p in partants:
+		grille.liberer(entites[id_p].pos)
 	camp_sauve = sauve
 
 
@@ -615,6 +622,7 @@ func gouffre_etage_vide(etage: int) -> bool:
 ## joueur au premier étage, ou son état courant pour le faire descendre avec ses PV et son sac.
 func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, joueur: Dictionary = {}) -> void:
 	var theme := GameData.entree("dungeon_themes", theme_id)
+	var escorte: Array = _escorte_qui_suit(joueur)   # elle change d'étage avec lui (Compagnons, 2026-09-04)
 	if lieu == "camp" and not joueur.is_empty() and monde != null and not camp_sauve.has("grille"):
 		_sauver_camp(joueur)   # descendre depuis le camp sans passer par l'expédition : le camp est quand même mis de côté
 	var etages: int = donjon.get("etages", 0)
@@ -655,6 +663,7 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 		contenants = sauve.contenants
 		var ou: Vector2i = sauve.donjon.escalier if (not joueur.is_empty() and int(joueur.get("etage_depuis", 0)) > etage and sauve.donjon.escalier != null) else sauve.donjon.entree
 		_reprendre(joueur, ou)
+		_placer_escorte(joueur, escorte)
 		return
 	var e: Dictionary = Mine.generer_etage(graine, id_donjon, etage) if est_mine else gen.generer_etage(graine, id_donjon, etage, nb, etage == etages)
 	var cr: Dictionary = GameData.config("planete").get("corruption", {})
@@ -690,6 +699,7 @@ func charger_donjon(theme_id: String, graine: int, id_donjon: int, etage: int, j
 		ajouter(theme.get("joueur", "aventurier"), e.entree, "joueur")
 	else:
 		_reprendre(joueur, e.entree)
+		_placer_escorte(joueur, escorte)
 	if gouffre_etage_vide(etage):
 		# Un étage du gouffre déjà vidé le reste pour toujours (designer 2026-09-02) : le terrain revient,
 		# les êtres et les coffres non. Redescendre à sa profondeur record est donc rapide et sans butin.
@@ -5049,6 +5059,44 @@ func _fin_suiveur(x: Dictionary) -> void:
 	x.ancre = x.get("poste", x.pos)
 
 
+## L'escorte qui SUIT le joueur d'un lieu à l'autre (Compagnons, 2026-09-04) : ses compagnons à l'ordre « suis-moi »,
+## vivants, présents dans la fenêtre — pas le suiveur territorial, qui refuse de quitter le territoire.
+func _escorte_qui_suit(joueur: Dictionary) -> Array:
+	var res: Array = []
+	if joueur.is_empty():
+		return res
+	for id in ordre:
+		var x: Dictionary = entites.get(id, {})
+		if x.is_empty() or not bool(x.vivant) or str(x.get("maitre", "")) != joueur.id:
+			continue
+		if str(x.get("ordre", "suivre")) != "suivre" or bool(x.get("suiveur_local", false)):
+			continue
+		res.append(x)
+	return res
+
+
+## L'escorte arrive avec le joueur : chacun sur une tuile libre près de lui, compteur remis, cible oubliée.
+func _placer_escorte(joueur: Dictionary, escorte: Array) -> void:
+	for x in escorte:
+		if entites.has(x.id):
+			continue
+		var q := _tuile_libre_pres(x, joueur.pos)
+		if q == Vector2i(-1, -1):
+			continue
+		x.pos = q
+		x.ancre = q
+		x.compteur = 0
+		x.horloge = "monde"
+		x.tick_vigueur = 0
+		x.action_en_cours = {}
+		x.cible = ""
+		x.contact = false
+		x.erase("dormant_depuis")
+		entites[x.id] = x
+		ordre.append(x.id)
+		grille.placer(x.id, q)
+
+
 ## Faire d'un être un compagnon du joueur.
 func _devenir_compagnon(e: Dictionary, x: Dictionary) -> void:
 	x.camp = "joueur"
@@ -6812,11 +6860,16 @@ func _fabriquer(e: Dictionary, rid: String, tick: int) -> bool:
 ## L'état de l'étage courant, sans le joueur, mis de côté : rien ne repop, tout reste où c'est.
 func _sauver_etage(joueur: Dictionary) -> void:
 	var sauve := {"donjon": donjon.duplicate(), "grille": grille, "entites": {}, "ordre": [], "contenants": contenants}
+	var partants: Array = []   # l'escorte part avec le joueur : pas dans l'étage mis de côté, sinon un doublon au retour
+	for x in _escorte_qui_suit(joueur):
+		partants.append(x.id)
 	for id in ordre:
-		if id != joueur.id:
+		if id != joueur.id and not (id in partants):
 			sauve.entites[id] = entites[id]
 			sauve.ordre.append(id)
 	grille.liberer(joueur.pos)
+	for id_p in partants:
+		grille.liberer(entites[id_p].pos)
 	etages_visites[int(donjon.etage)] = sauve
 
 
@@ -11580,6 +11633,21 @@ func _engager_combat(a: Dictionary, b: Dictionary) -> void:
 	for e in [a, b]:
 		if e.horloge != nom:
 			_rejoindre(e, nom)
+	# L'escorte entre dans le combat de son maître (Compagnons, 2026-09-04) : sans ça les compagnons restaient sur
+	# l'horloge du monde, figés à deux pas pendant que le joueur se battait — deux compagnons, huit combats, zéro coup.
+	var d_eng := int(regles.r.compagnons.get("distance_engagement", 6))
+	for p in [a, b]:
+		var adversaire: Dictionary = b if p.id == a.id else a
+		for c in compagnons_de(p, false):
+			if c.horloge == nom or not bool(c.vivant) or str(c.get("ordre", "suivre")) != "suivre" or str(c.get("posture", "defensive")) == "eviter":
+				continue
+			if Grille.distance(c.pos, p.pos) > d_eng or not ennemis(c, adversaire):
+				continue
+			_rejoindre(c, nom)
+			if str(c.cible).is_empty():
+				c.cible = adversaire.id
+				c.tick_derniere_vue = horloge_de(c).ticks
+				c.pos_connue = adversaire.pos
 
 
 func _rejoindre(e: Dictionary, nom: String) -> void:
@@ -11825,8 +11893,8 @@ func _chercher_cible(e: Dictionary, tick: int) -> Dictionary:
 				e.pos_connue = c.pos
 			elif tick - int(e.tick_derniere_vue) > int(regles.r.engagement.ia_ticks_sans_vue):
 				e.cible = ""   # semée : la cible s'est dérobée assez longtemps (Discrétion, nuit, obstacle)
-			if Grille.distance(e.pos, e.ancre) > int(regles.r.engagement.ia_distance_ancre):
-				e.cible = ""
+			if not e.has("maitre") and Grille.distance(e.pos, e.ancre) > int(regles.r.engagement.ia_distance_ancre):
+				e.cible = ""   # un compagnon n'a pas d'ancre : son maître en tient lieu (deux compagnons en donjon, 2026-09-04)
 	# Voir un ennemi met un peu d'aggro sur lui : c'est ce qui remplace « le plus proche visible ». Un
 	# tireur embusque monte alors dans la table de sa victime par ses DEGATS, meme sans etre vu, la ou
 	# l'ancienne regle le laissait tranquille tant qu'un allie se tenait devant elle (point 77).
@@ -12178,6 +12246,8 @@ func _meilleure_attaque(e: Dictionary, cible: Dictionary) -> Dictionary:
 			moy = m
 			meilleure = {"type": "creature", "action": a}
 	var arme := Etres.arme(e, items)
+	if arme.is_empty() and ("humanoide" in e.get("tags", [])):   # un humanoïde désarmé frappe à mains nues, comme le joueur (compagnons, 2026-09-04)
+		arme = arme_mains_nues()
 	if not arme.is_empty():
 		var fonct: Dictionary = fonctionnalites.get(arme.functionality, {})
 		if _cible_atteignable(e, cible, regles.portee_de(fonct, e.get("stats_eff", {})), true):

@@ -143,5 +143,13 @@
     "liste_min": 340.0,
     "liste_max": 820.0,
     "liste_gestion": 620.0
+  },
+  "volet": {
+    "_doc": "Le volet lateral (Ecrans d'interface, designer 2026-09-04) : part de la largeur de la fenetre, bornee ; lignes de journal et d'inventaire affichees.",
+    "part": 0.24,
+    "largeur_min": 240.0,
+    "largeur_max": 380.0,
+    "lignes_journal": 9,
+    "lignes_inventaire": 12
   }
 }
