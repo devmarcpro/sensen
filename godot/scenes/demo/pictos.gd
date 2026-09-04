@@ -441,6 +441,17 @@ static func couleur_qualite(it: Dictionary) -> Color:
 
 
 ## Le pictogramme d'un objet : sa fonctionnalité (épée, pioche…) ou son type (casque, gemme, livre, fiole…).
+## Les 36 armes du 3 septembre n'avaient pas toutes leur pictogramme : à l'atelier, vingt cartes étaient un carré
+## gris (vu sur une capture, 2026-09-04). Une arme cousine prend le dessin de sa famille ; les familles sans
+## dessin en reçoivent un (bâton, fouet, fronde, sarbacane, pistolet, instrument, tambour).
+const ALIAS_OBJET := {"sabre": "epee", "rapiere": "epee", "stylet": "dague", "couteau_de_jet": "dague",
+	"hache_d_armes": "hache", "hachette_de_jet": "hache", "marteau_de_guerre": "masse", "fleau": "masse",
+	"javelot": "lance", "pique": "lance", "hallebarde": "lance", "arc_long": "arc", "arbalete": "arc",
+	"baguette": "baton_magique", "sceptre": "baton_magique", "orbe": "gemme", "talisman": "amulette",
+	"grimoire_de_main": "grimoire", "pavois": "bouclier", "cor": "instrument", "flute": "instrument",
+	"luth": "instrument", "vielle": "instrument", "cymbales": "tambour"}
+
+
 static func dessiner_objet(ci: CanvasItem, it: Dictionary, r: Rect2) -> void:
 	if it.is_empty():
 		return
@@ -457,6 +468,7 @@ static func dessiner_objet(ci: CanvasItem, it: Dictionary, r: Rect2) -> void:
 		nom = "meuble"
 	if f.is_empty() and (it.get("tags", []) as Array).has("lumiere"):   # une source de lumière se reconnaît à sa flamme
 		nom = "lumiere"
+	nom = str(ALIAS_OBJET.get(nom, nom))
 	match nom:
 		"epee":
 			ci.draw_line(p.call(2, 8), p.call(8, 2), c, 2.4)
@@ -468,7 +480,7 @@ static func dessiner_objet(ci: CanvasItem, it: Dictionary, r: Rect2) -> void:
 			ci.draw_line(p.call(2.2, 7.8), p.call(3.1, 6.9), Color(0.45, 0.3, 0.15), 2.4)
 		"lance":
 			ci.draw_line(p.call(1.5, 8.5), p.call(7.5, 2.5), Color(0.55, 0.4, 0.2), 1.8)
-			ci.draw_colored_polygon(PackedVector2Array([p.call(6.4, 3.6), p.call(9, 1), p.call(7.6, 3.4), p.call(8.8, 1.2)]), c)
+			ci.draw_colored_polygon(PackedVector2Array([p.call(6.4, 3.6), p.call(8.8, 1.2), p.call(9, 1), p.call(7.6, 3.4)]), c)   # un quadrilatère dans l'ordre du contour : croisé, il ne se triangulait pas (vu à l'atelier, 2026-09-04)
 			ci.draw_colored_polygon(PackedVector2Array([p.call(6.2, 3.8), p.call(9, 1), p.call(7.4, 4.2)]), c)
 		"masse":
 			ci.draw_line(p.call(2, 8), p.call(6, 4), Color(0.5, 0.35, 0.2), 1.8)
@@ -565,6 +577,37 @@ static func dessiner_objet(ci: CanvasItem, it: Dictionary, r: Rect2) -> void:
 			ci.draw_colored_polygon(PackedVector2Array([p.call(3, 3), p.call(7, 3), p.call(6.5, 9), p.call(3.5, 9)]), c)
 			ci.draw_line(p.call(4, 3), p.call(4.5, 0.8), sombre, 1.2)
 			ci.draw_line(p.call(6, 3), p.call(6.2, 0.8), sombre, 1.2)
+		"baton":   # une hampe nue, deux virons aux bouts
+			ci.draw_line(p.call(1.5, 8.5), p.call(8.5, 1.5), Color(0.55, 0.4, 0.2), 2.2)
+			ci.draw_line(p.call(1.2, 8.8), p.call(2.2, 7.8), c, 3.0)
+			ci.draw_line(p.call(7.8, 2.2), p.call(8.8, 1.2), c, 3.0)
+		"fouet":   # un manche court et une lanière qui ondule
+			ci.draw_line(p.call(2, 8), p.call(3.5, 6.5), Color(0.45, 0.3, 0.15), 2.6)
+			ci.draw_polyline(PackedVector2Array([p.call(3.5, 6.5), p.call(5, 4), p.call(6.5, 5), p.call(8, 2.5), p.call(8.8, 1.5)]), c, 1.6)
+		"fronde":   # une fourche et sa poche
+			ci.draw_line(p.call(5, 8.5), p.call(5, 5), Color(0.5, 0.35, 0.2), 2.0)
+			ci.draw_line(p.call(5, 5), p.call(2.5, 2), Color(0.5, 0.35, 0.2), 1.8)
+			ci.draw_line(p.call(5, 5), p.call(7.5, 2), Color(0.5, 0.35, 0.2), 1.8)
+			ci.draw_line(p.call(2.5, 2), p.call(7.5, 2), c, 1.4)
+			ci.draw_circle(p.call(5, 2.4), u * 0.9, c)
+		"sarbacane":   # un tube, une embouchure
+			ci.draw_line(p.call(1.5, 8.5), p.call(8.5, 1.5), c, 3.2)
+			ci.draw_line(p.call(1.5, 8.5), p.call(8.5, 1.5), sombre, 1.0)
+			ci.draw_circle(p.call(1.7, 8.3), u * 1.0, sombre)
+		"pistolet":   # un canon et une crosse
+			ci.draw_line(p.call(2, 4), p.call(8.5, 4), c, 3.0)
+			ci.draw_line(p.call(3.5, 4), p.call(2.5, 8), Color(0.45, 0.3, 0.15), 3.2)
+			ci.draw_line(p.call(4.5, 5.5), p.call(5.2, 6.6), sombre, 1.6)
+		"instrument":   # une caisse ronde, un manche, deux cordes
+			ci.draw_circle(p.call(4, 6.5), u * 2.6, c)
+			ci.draw_circle(p.call(4, 6.5), u * 0.9, sombre)
+			ci.draw_line(p.call(5.5, 5), p.call(9, 1.5), Color(0.45, 0.3, 0.15), 2.4)
+			ci.draw_line(p.call(3.2, 6.2), p.call(8.6, 1.6), Color(0.9, 0.9, 0.85), 0.8)
+			ci.draw_line(p.call(4.2, 7.2), p.call(9.2, 2.2), Color(0.9, 0.9, 0.85), 0.8)
+		"tambour":   # une peau tendue, un fût
+			ci.draw_rect(Rect2(p.call(2, 4), Vector2(u * 6, u * 4)), sombre)
+			ci.draw_circle(p.call(5, 4), u * 3.0, c)
+			ci.draw_circle(p.call(5, 4), u * 3.0, sombre.darkened(0.3), false, 1.0)
 		_:
 			ci.draw_rect(Rect2(p.call(2, 2), Vector2(u * 6, u * 6)), c)
 			ci.draw_rect(Rect2(p.call(2, 2), Vector2(u * 6, u * 6)), sombre, false, 1.0)
