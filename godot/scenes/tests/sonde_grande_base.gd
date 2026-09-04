@@ -74,6 +74,19 @@ func _ready() -> void:
 		for x in s.residents():
 			s.production_de(x)
 		print("  profil %-28s %7.1f ms" % ["production_de ×résidents", (Time.get_ticks_usec() - t2) / 1000.0])
+	if "--tempo" in args:   # le coût d'une image de jeu au camp avec la base peuplée : 5 ticks par image (combat_rules.tempo)
+		var par_image: int = int(s.regles.r.get("tempo", {}).get("ticks_max_par_image", 5))
+		var budget_ms: float = float(s.regles.r.get("tempo", {}).get("ms_max_par_image", 12))
+		var images := 300
+		var t3 := Time.get_ticks_usec()
+		for k in images:
+			s.horloge_monde.avancer(par_image)
+		var dt_img := (Time.get_ticks_usec() - t3) / 1000.0 / float(images)
+		var pas_n := 0
+		for x in s.vivants():
+			if x.controle == "ia" and str(x.camp) == "joueur":
+				pas_n += 1
+		print("tempo : %.2f ms par image de %d ticks avec %d résidents en vue (budget %.0f ms par image : %s)" % [dt_img, par_image, pas_n, budget_ms, "tenu" if dt_img < budget_ms else "DÉPASSÉ"])
 	print("semaine | ms | résidents | logés | lits | trésor | dette | humeur | stocks | journal")
 	for k in semaines:
 		var w: Dictionary = GrandeBase.semaine(s, journal, j)
