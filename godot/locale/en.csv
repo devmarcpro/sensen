@@ -2894,3 +2894,31 @@ ui.composeur.grilles,Owned grids
 item.trame.name,Pattern — {grille}
 journal.grille_deja,{nom} already knows this grid: {grille} — the pattern stays in the bag
 journal.trame_lue,{nom} reads a pattern and learns a grid: {grille}
+status.armure_fendue.name,Split armor
+status.cloue.name,Pinned
+status.rempart.name,Bulwark
+status.souffle_long.name,Long breath
+status.desequilibre.name,Off balance
+status.jambe_touchee.name,Leg shot
+status.tete_baissee.name,Head down
+status.embuscade.name,Ambush
+module.ecrasement.name,Crushing blow
+module.bond_lourd.name,Heavy leap
+module.assommoir.name,Bludgeon
+module.glissade.name,Slide
+module.croc_en_jambe.name,Trip
+module.pique.name,Prick
+module.volte.name,Volte
+module.entaille.name,Gash
+module.harpon.name,Harpoon
+module.pointe_tenue.name,Held point
+module.rempart.name,Bulwark
+module.souffle_long.name,Long breath
+module.coup_de_talon.name,Butt strike
+module.crochet_de_hampe.name,Shaft hook
+module.tir_ajuste.name,Aimed shot
+module.tir_de_recul.name,Parting shot
+module.tir_aux_jambes.name,Leg shot
+module.tir_a_la_main.name,Disarming shot
+module.tir_de_suppression.name,Suppressing shot
+module.embuscade.name,Ambush

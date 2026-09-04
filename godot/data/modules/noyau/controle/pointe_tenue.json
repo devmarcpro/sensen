@@ -1,0 +1,33 @@
+{
+  "id": "pointe_tenue",
+  "nom": "Pointe tenue",
+  "name_key": "module.pointe_tenue.name",
+  "module_type": "noyau",
+  "description": "la pointe reste dans la plaie : la cible ne bouge plus 30 ticks",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "controle"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 6,
+  "cout_mana": 0,
+  "cout_vigueur": 11,
+  "cout_sang_froid": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "cloue",
+      "duree_ticks": 30
+    }
+  },
+  "style": "controle",
+  "stat": "endurance"
+}

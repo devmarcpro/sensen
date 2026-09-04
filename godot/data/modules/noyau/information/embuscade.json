@@ -1,0 +1,34 @@
+{
+  "id": "embuscade",
+  "nom": "Embuscade",
+  "name_key": "module.embuscade.name",
+  "module_type": "noyau",
+  "description": "vingt ticks pour un seul trait : +4 dés",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "information"
+  ],
+  "famille": "Information",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 4,
+  "cout_mana": 0,
+  "cout_vigueur": 0,
+  "cout_sang_froid": 12,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "embuscade",
+      "duree_ticks": 20,
+      "sur": "soi"
+    }
+  },
+  "style": "soutien",
+  "stat": "perception"
+}

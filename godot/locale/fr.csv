@@ -2903,3 +2903,31 @@ ui.composeur.grilles,Grilles possédées
 item.trame.name,Trame — {grille}
 journal.grille_deja,{nom} connaît déjà cette grille : {grille} — la trame reste au sac
 journal.trame_lue,{nom} lit une trame et apprend une grille : {grille}
+status.armure_fendue.name,Armure fendue
+status.cloue.name,Cloué
+status.rempart.name,Rempart
+status.souffle_long.name,Souffle long
+status.desequilibre.name,Déséquilibre
+status.jambe_touchee.name,Jambe touchée
+status.tete_baissee.name,Tête baissée
+status.embuscade.name,Embuscade
+module.ecrasement.name,Écrasement
+module.bond_lourd.name,Bond lourd
+module.assommoir.name,Assommoir
+module.glissade.name,Glissade
+module.croc_en_jambe.name,Croc-en-jambe
+module.pique.name,Pique
+module.volte.name,Volte
+module.entaille.name,Entaille
+module.harpon.name,Harpon
+module.pointe_tenue.name,Pointe tenue
+module.rempart.name,Rempart
+module.souffle_long.name,Souffle long
+module.coup_de_talon.name,Coup de talon
+module.crochet_de_hampe.name,Crochet de hampe
+module.tir_ajuste.name,Tir ajusté
+module.tir_de_recul.name,Tir de recul
+module.tir_aux_jambes.name,Tir aux jambes
+module.tir_a_la_main.name,Tir à la main
+module.tir_de_suppression.name,Tir de suppression
+module.embuscade.name,Embuscade

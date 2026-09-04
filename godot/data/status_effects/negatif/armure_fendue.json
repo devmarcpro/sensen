@@ -1,0 +1,19 @@
+{
+  "name_key": "status.armure_fendue.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 40,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "armure",
+      "add": -3
+    }
+  ],
+  "tags": [
+    "negatif",
+    "armure"
+  ]
+}

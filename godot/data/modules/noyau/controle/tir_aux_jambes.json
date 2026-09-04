@@ -1,0 +1,33 @@
+{
+  "id": "tir_aux_jambes",
+  "nom": "Tir aux jambes",
+  "name_key": "module.tir_aux_jambes.name",
+  "module_type": "noyau",
+  "description": "la cible se déplace deux fois plus lentement pendant 30 ticks",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "controle"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 5,
+  "cout_mana": 0,
+  "cout_vigueur": 0,
+  "cout_sang_froid": 10,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "jambe_touchee",
+      "duree_ticks": 30
+    }
+  },
+  "style": "controle",
+  "stat": "perception"
+}

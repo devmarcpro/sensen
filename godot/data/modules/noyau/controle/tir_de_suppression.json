@@ -1,0 +1,33 @@
+{
+  "id": "tir_de_suppression",
+  "nom": "Tir de suppression",
+  "name_key": "module.tir_de_suppression.name",
+  "module_type": "noyau",
+  "description": "on lui fait baisser la tête : garde −2 pendant 30 ticks",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "controle"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 6,
+  "cout_mana": 0,
+  "cout_vigueur": 0,
+  "cout_sang_froid": 9,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "tete_baissee",
+      "duree_ticks": 30
+    }
+  },
+  "style": "controle",
+  "stat": "perception"
+}

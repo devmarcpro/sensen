@@ -1,0 +1,34 @@
+{
+  "id": "souffle_long",
+  "nom": "Souffle long",
+  "name_key": "module.souffle_long.name",
+  "module_type": "noyau",
+  "description": "on tient le rythme : ticks ×0,9 pendant 60 ticks",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "defense"
+  ],
+  "famille": "Défense",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 5,
+  "cout_mana": 0,
+  "cout_vigueur": 10,
+  "cout_sang_froid": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "souffle_long",
+      "duree_ticks": 60,
+      "sur": "soi"
+    }
+  },
+  "style": "soutien",
+  "stat": "endurance"
+}

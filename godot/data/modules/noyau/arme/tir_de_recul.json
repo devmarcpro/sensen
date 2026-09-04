@@ -1,0 +1,35 @@
+{
+  "id": "tir_de_recul",
+  "nom": "Tir de recul",
+  "name_key": "module.tir_de_recul.name",
+  "module_type": "noyau",
+  "description": "on tire et on recule de deux tuiles",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "arme"
+  ],
+  "famille": "Arme",
+  "elements": {},
+  "element_special": null,
+  "power_base": "arme",
+  "cout_ticks": 5,
+  "cout_mana": 0,
+  "cout_vigueur": 0,
+  "cout_sang_froid": 9,
+  "effets": [
+    "degats",
+    "deplacement"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "deplacement": {
+      "mode": "recul",
+      "cible": "soi",
+      "distance": "2"
+    }
+  },
+  "style": "assaut",
+  "stat": "perception"
+}

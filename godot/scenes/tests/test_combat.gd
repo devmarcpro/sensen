@@ -3169,23 +3169,38 @@ func test_creation_de_sorts() -> void:
 		var statuts_avant: int = mannequin.statuts.size() + j.statuts.size()
 		var vivants_avant: int = s.vivants().size()
 		var zones_avant: int = s.zones.size()
+		var pos_j_avant: Vector2i = j.pos   # un déplacement est un des neuf effets : il compte
+		var pos_m_avant: Vector2i = mannequin.pos
+		var compteur_avant: int = int(mannequin.compteur)   # le tempo aussi : il retarde la prochaine action
 		j.mana = 9999
 		j.vigueur = 9999
 		j.sante = int(j.sante_max)   # certains noyaux coûtent des PV (Cataclysme, Offrande, Saignée)
 		mannequin.sante = 100000
 		mannequin.vivant = true
+		mannequin.anti_stunlock_jusqua = 0   # un mannequin n'a pas de mémoire : sans ça, seul le premier tempo compte
 		s._executer_capacite(j, plan, mannequin.pos)
 		executes += 1
 		# Un noyau qui touche doit faire QUELQUE CHOSE : des PV, un statut, une invocation, ou du terrain.
 		var agi: bool = int(mannequin.sante) != pv_avant or (mannequin.statuts.size() + j.statuts.size()) != statuts_avant \
-			or s.vivants().size() != vivants_avant or not s.grille.modifies.is_empty() or s.zones.size() != zones_avant
+			or s.vivants().size() != vivants_avant or not s.grille.modifies.is_empty() or s.zones.size() != zones_avant \
+			or j.pos != pos_j_avant or mannequin.pos != pos_m_avant or int(mannequin.compteur) != compteur_avant
 		if not agi:
 			sans_effet.append(nid)
 		s.grille.modifies.clear()
+		if j.pos != pos_j_avant or mannequin.pos != pos_m_avant:   # on remet les deux en place pour le noyau suivant
+			s.grille.liberer(j.pos)
+			s.grille.liberer(mannequin.pos)
+			j.pos = pos_j_avant
+			s.grille.placer(j.id, j.pos)
+			mannequin.pos = pos_m_avant
+			s.grille.placer(mannequin.id, mannequin.pos)
 	verifier(executes >= 80, "%d noyaux exécutés sur une cible réelle" % executes)
 	# Chantier connu (Structure compétences-modules-slots, constat du 2026-08-29) : 47 noyaux ont un `effet`
 	# vide et ne produisent rien. Le test tient le compte et refuse qu'il AUGMENTE, comme l'audit.
-	verifier(sans_effet.size() <= 34, "noyaux sans effet visible : %d (budget 34, mesure du banc) — %s" % [sans_effet.size(), str(sans_effet.slice(0, 6))])
+	# 2026-09-04 : le banc compte aussi un déplacement et un tempo, et remet l'anti-stunlock du mannequin à
+	# zéro. Mesure : 29 muets — le chantier, plus ce qui ne peut rien sur un mannequin hostile et désarmé
+	# (rempart vise un allié, tir à la main un porteur d'arme). Avant : 34, sans les déplacements ni le tempo.
+	verifier(sans_effet.size() <= 29, "noyaux sans effet visible : %d (budget 29, mesure du banc) — %s" % [sans_effet.size(), str(sans_effet)])
 	verifier(j.vivant and mannequin.vivant, "le lanceur et le mannequin survivent aux 86 sorts")
 
 

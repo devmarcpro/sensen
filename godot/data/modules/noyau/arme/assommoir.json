@@ -1,0 +1,31 @@
+{
+  "id": "assommoir",
+  "nom": "Assommoir",
+  "name_key": "module.assommoir.name",
+  "module_type": "noyau",
+  "description": "le coup qui laisse l'autre sur place : neuf ticks de retard",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "arme"
+  ],
+  "famille": "Arme",
+  "elements": {},
+  "element_special": null,
+  "power_base": "arme",
+  "cout_ticks": 8,
+  "cout_mana": 0,
+  "cout_vigueur": 14,
+  "cout_sang_froid": 0,
+  "effets": [
+    "degats",
+    "tempo"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "tempo": 9
+  },
+  "style": "controle",
+  "stat": "force"
+}

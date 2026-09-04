@@ -1,0 +1,18 @@
+{
+  "name_key": "status.souffle_long.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 10,
+  "duree_ticks": 60,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "cout_ticks",
+      "mult": 0.9
+    }
+  ],
+  "tags": [
+    "positif"
+  ]
+}

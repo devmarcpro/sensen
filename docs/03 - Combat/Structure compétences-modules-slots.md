@@ -381,6 +381,31 @@ Chacun réutilise un modificateur de statut que le moteur lisait déjà (`des`, 
 `armure`, `detection`) : aucune ligne de simulation n'a changé. La perception passe de deux noyaux à
 six, et la sonde ne signale plus aucune voie maigre.
 
+### Douze façons de jouer par voie (2026-09-04)
+
+Le designer, le 4 septembre : « plusieurs styles de jeu, équilibrage, tous les modules ne dépendent
+plus du mana ». Compté ce matin : volonté 57 noyaux, charisme 15, force 10, dextérité 7, perception 6,
+endurance 5. Trois monnaies ne font pas trois styles si deux voies sur trois n'ont rien à acheter.
+**Vingt noyaux martiaux de plus**, écrits avec les mécanismes que le moteur lit déjà — un statut, un
+déplacement, un tempo, une ressource — et aucune ligne de simulation : chaque voie martiale a
+maintenant **onze à treize noyaux**, dont trois ou quatre pièces d'une case (moins de 5 ticks) pour
+les grilles serrées du palier 0.
+
+| voie | noyaux neufs | ce qu'ils ajoutent |
+|---|---|---|
+| force (+3 → 13) | écrasement, bond lourd, assommoir | fendre l'armure (−3 pendant 40 ticks), sauter sur la cible, un tempo de 9 |
+| dextérité (+5 → 12) | glissade, croc-en-jambe, pique, volte, entaille | traverser les rangs, mettre au sol 20 ticks, un tempo de 2 en 2 ticks, changer de place avec la cible, une entaille qui saigne 20 ticks |
+| endurance (+6 → 11) | harpon, pointe tenue, rempart, souffle long, coup de talon, crochet de hampe | attirer de deux tuiles, clouer 30 ticks, +4 d'armure à un allié, ticks ×0,9 sur soi, un tempo de 3 avec le bout de la hampe, −2 dés à la cible |
+| perception (+6 → 12) | tir ajusté, tir de recul, tir aux jambes, tir à la main, tir de suppression, embuscade | ignorer 2 points d'armure, tirer puis reculer de deux, déplacement ×2 à la cible, désarmer de loin, garde −2, +4 dés pendant 20 ticks |
+
+Huit statuts neufs les portent (armure fendue, cloué, rempart, souffle long, déséquilibre, jambe
+touchée, tête baissée, embuscade), tous sur des cibles de modificateur que le moteur lisait déjà
+(`armure`, `deplacement`, `cout_ticks`, `des`, `garde`). Deux idées sont restées dans le tiroir
+parce que le moteur ne les lit pas : un tir à portée allongée (le schéma des modules a `portee_base`
+mais la simulation ne le lit pas) et un tir en cloche sans ligne de vue. Les coûts suivent l'échelle
+existante — 5 à 14 de vigueur ou de sang-froid, pour des réserves de 72 et de 29 à la création ; les
+chiffres sont des points de départ, l'équilibrage reste à juger.
+
 > [!warning] Une régression du renommage, trouvée en passant
 > Le statut **Épuisement** bloque une monnaie. Sa cible disait `endurance` quand le plan dit désormais
 > `vigueur` : il ne bloquait plus rien, **sans le moindre message**. Corrigé, et un test parcourt

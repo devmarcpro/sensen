@@ -1,0 +1,35 @@
+{
+  "id": "bond_lourd",
+  "nom": "Bond lourd",
+  "name_key": "module.bond_lourd.name",
+  "module_type": "noyau",
+  "description": "on saute de deux tuiles et on frappe en retombant",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "arme"
+  ],
+  "famille": "Arme",
+  "elements": {},
+  "element_special": null,
+  "power_base": "arme",
+  "cout_ticks": 7,
+  "cout_mana": 0,
+  "cout_vigueur": 13,
+  "cout_sang_froid": 0,
+  "effets": [
+    "deplacement",
+    "degats"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "deplacement": {
+      "mode": "saut",
+      "cible": "soi",
+      "distance": "2"
+    }
+  },
+  "style": "assaut",
+  "stat": "force"
+}

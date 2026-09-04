@@ -1,0 +1,30 @@
+{
+  "id": "tir_ajuste",
+  "nom": "Tir ajusté",
+  "name_key": "module.tir_ajuste.name",
+  "module_type": "noyau",
+  "description": "le trait passe où l'armure ne couvre pas : ignore 2 points d'armure",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "arme"
+  ],
+  "famille": "Arme",
+  "elements": {},
+  "element_special": null,
+  "power_base": "arme",
+  "cout_ticks": 5,
+  "cout_mana": 0,
+  "cout_vigueur": 0,
+  "cout_sang_froid": 8,
+  "effets": [
+    "degats"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "ignore_armure_points": 2
+  },
+  "style": "assaut",
+  "stat": "perception"
+}

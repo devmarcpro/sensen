@@ -1,0 +1,31 @@
+{
+  "id": "pique",
+  "nom": "Pique",
+  "name_key": "module.pique.name",
+  "module_type": "noyau",
+  "description": "deux ticks, une pointe, deux ticks de retard pour l'autre",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "arme"
+  ],
+  "famille": "Arme",
+  "elements": {},
+  "element_special": null,
+  "power_base": "arme",
+  "cout_ticks": 2,
+  "cout_mana": 0,
+  "cout_vigueur": 0,
+  "cout_sang_froid": 5,
+  "effets": [
+    "degats",
+    "tempo"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "tempo": 2
+  },
+  "style": "assaut",
+  "stat": "dexterite"
+}

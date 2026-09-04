@@ -1,0 +1,34 @@
+{
+  "id": "ecrasement",
+  "nom": "Écrasement",
+  "name_key": "module.ecrasement.name",
+  "module_type": "noyau",
+  "description": "le coup qui fend la cuirasse : armure −3 pendant 40 ticks",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "arme"
+  ],
+  "famille": "Arme",
+  "elements": {},
+  "element_special": null,
+  "power_base": "arme",
+  "cout_ticks": 6,
+  "cout_mana": 0,
+  "cout_vigueur": 12,
+  "cout_sang_froid": 0,
+  "effets": [
+    "degats",
+    "statut"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "armure_fendue",
+      "duree_ticks": 40
+    }
+  },
+  "style": "assaut",
+  "stat": "force"
+}

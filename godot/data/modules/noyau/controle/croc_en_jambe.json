@@ -1,0 +1,33 @@
+{
+  "id": "croc_en_jambe",
+  "nom": "Croc-en-jambe",
+  "name_key": "module.croc_en_jambe.name",
+  "module_type": "noyau",
+  "description": "la cible est au sol 20 ticks, sa garde ne compte plus",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "controle"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 4,
+  "cout_mana": 0,
+  "cout_vigueur": 0,
+  "cout_sang_froid": 9,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "au_sol",
+      "duree_ticks": 20
+    }
+  },
+  "style": "controle",
+  "stat": "dexterite"
+}

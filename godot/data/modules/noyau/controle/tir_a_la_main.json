@@ -1,0 +1,32 @@
+{
+  "id": "tir_a_la_main",
+  "nom": "Tir à la main",
+  "name_key": "module.tir_a_la_main.name",
+  "module_type": "noyau",
+  "description": "on vise la main qui tient l'arme : jet opposé, l'arme tombe",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "controle"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 8,
+  "cout_mana": 0,
+  "cout_vigueur": 0,
+  "cout_sang_froid": 12,
+  "effets": [
+    "ressource"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "ressource": {
+      "desarme": true
+    }
+  },
+  "style": "controle",
+  "stat": "perception"
+}

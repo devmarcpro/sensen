@@ -1,0 +1,33 @@
+{
+  "id": "crochet_de_hampe",
+  "nom": "Crochet de hampe",
+  "name_key": "module.crochet_de_hampe.name",
+  "module_type": "noyau",
+  "description": "on accroche la garde : −2 dés à la cible pendant 30 ticks",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "controle"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 5,
+  "cout_mana": 0,
+  "cout_vigueur": 9,
+  "cout_sang_froid": 0,
+  "effets": [
+    "statut"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "statut": {
+      "id": "desequilibre",
+      "duree_ticks": 30
+    }
+  },
+  "style": "controle",
+  "stat": "endurance"
+}

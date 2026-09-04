@@ -1,0 +1,32 @@
+{
+  "id": "volte",
+  "nom": "Volte",
+  "name_key": "module.volte.name",
+  "module_type": "noyau",
+  "description": "on change de place avec la cible",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "controle"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 6,
+  "cout_mana": 0,
+  "cout_vigueur": 0,
+  "cout_sang_froid": 10,
+  "effets": [
+    "deplacement"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "deplacement": {
+      "mode": "permutation"
+    }
+  },
+  "style": "mobilite",
+  "stat": "dexterite"
+}

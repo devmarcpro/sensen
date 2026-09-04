@@ -1,0 +1,34 @@
+{
+  "id": "glissade",
+  "nom": "Glissade",
+  "name_key": "module.glissade.name",
+  "module_type": "noyau",
+  "description": "on passe entre les rangs : deux tuiles à travers ce qui bloque",
+  "classe_signature": null,
+  "tags": [
+    "noyau",
+    "controle"
+  ],
+  "famille": "Contrôle",
+  "elements": {},
+  "element_special": null,
+  "power_base": null,
+  "cout_ticks": 3,
+  "cout_mana": 0,
+  "cout_vigueur": 0,
+  "cout_sang_froid": 6,
+  "effets": [
+    "deplacement"
+  ],
+  "forme": null,
+  "portee": null,
+  "effet": {
+    "deplacement": {
+      "mode": "traversee",
+      "cible": "soi",
+      "distance": "2"
+    }
+  },
+  "style": "mobilite",
+  "stat": "dexterite"
+}
