@@ -5,10 +5,11 @@ extends RefCounted
 ## sa voie et son niveau, la silhouette dans laquelle tout doit tenir. Ce fichier ne connaît ni les
 ## êtres ni la simulation : il reçoit des modules et une grille, il dit si ça rentre et où.
 ##
-## Il possède aussi la règle de LECTURE — « l'ordre de lecture est l'ordre du sort » : ligne par ligne,
-## de gauche à droite, chaque pièce prise à sa case la plus haute puis la plus à gauche. L'écran la lit
-## ici ; l'emboîtement automatique la respecte (revue du 2026-09-04 : il rangeait les grosses pièces
-## d'abord et rendait un sort dans un autre ordre que celui qu'on lui donnait).
+## La grille n'a PAS de sens de lecture (designer 2026-09-04) : c'est un sac de pièces, où l'on pose ne
+## change rien au sort, seul compte ce qui rentre. La séquence qu'on en tire suit un ORDRE CANONIQUE par
+## type (`ordonner`), sans effet sur le plan ; et un sort se compose par ÉTAPES — un déclencheur ferme la
+## sienne et ouvre la suivante — chacune dans sa propre grille (`etapes_de`). `avant` et `case_de_lecture`
+## ne sont plus que des commodités de dessin et de parcours déterministe.
 ##
 ## Tout est lu dans `combat_rules.grille` — aucune forme n'est écrite ici.
 
@@ -37,6 +38,56 @@ static func case_de_lecture(cases: Array) -> Vector2i:
 		if avant(c, meilleure):
 			meilleure = c
 	return meilleure
+
+
+# ---------------------------------------------------------------- les étapes et l'ordre canonique
+
+## L'ordre canonique d'une étape : par type — portée, forme, noyaux, modificateurs, conditions, liaisons,
+## déclencheur — et, à type égal, l'ordre reçu. C'est l'ordre des groupes du composeur du 1er septembre. Il est
+## sans effet sur le plan (l'assembleur applique un modificateur au sort entier) ; il sert à ce que deux grilles
+## qui contiennent les mêmes pièces donnent la même séquence, et à ce que deux pièces d'un même module se suivent.
+const ORDRE_CANONIQUE: Array[String] = ["portee", "forme", "noyau", "modificateur", "condition", "liaison", "declencheur"]
+
+
+func rang_de(id: String) -> int:
+	var k := ORDRE_CANONIQUE.find(str(catalogue.get(id, {}).get("module_type", "")))
+	return k if k >= 0 else ORDRE_CANONIQUE.size()
+
+
+func ordonner(modules: Array) -> Array:
+	var indices: Array = []
+	for i in modules.size():
+		indices.append(i)
+	var rangs: Array = []
+	for m in modules:
+		rangs.append(rang_de(str(m)))
+	indices.sort_custom(func(a: int, b: int) -> bool:   # tri stable : à rang égal, l'ordre reçu
+		return rangs[a] < rangs[b] or (rangs[a] == rangs[b] and a < b))
+	var tri: Array = []
+	for i in indices:
+		tri.append(str(modules[i]))
+	return tri
+
+
+## Les étapes d'une séquence : un déclencheur ferme la sienne et ouvre la suivante (sa charge utile). Une
+## séquence sans déclencheur est une seule étape ; une étape vide en queue (déclencheur sans suite) est ignorée.
+func etapes_de(sequence: Array) -> Array:
+	var etapes: Array = [[]]
+	for m in sequence:
+		(etapes.back() as Array).append(str(m))
+		if str(catalogue.get(str(m), {}).get("module_type", "")) == "declencheur":
+			etapes.append([])
+	if etapes.size() > 1 and (etapes.back() as Array).is_empty():
+		etapes.pop_back()
+	return etapes
+
+
+## La séquence canonique : chaque étape dans l'ordre canonique, les étapes à la suite.
+func canonique(sequence: Array) -> Array:
+	var res: Array = []
+	for et in etapes_de(sequence):
+		res.append_array(ordonner(et))
+	return res
 
 
 # ---------------------------------------------------------------- la silhouette d'un module
@@ -191,15 +242,14 @@ static func _cases_des_lignes(lignes: Array) -> Array:
 
 # ---------------------------------------------------------------- l'emboîtement
 
-## Cherche un emboîtement des modules de `sequence` dans `grille`, DANS L'ORDRE DE LA SÉQUENCE : la
-## case de lecture de chaque pièce vient strictement après celle de la précédente, si bien qu'une
-## grille rangée par le moteur se relit exactement comme la séquence qu'on lui a donnée. Retourne
-## {"ok", "placement": [{"module", "rot", "ancre", "cases"}], "demande", "capacite", "manque"}.
-## `manque` est le nombre de cases qui dépassent la grille ; il vaut 0 quand la place brute suffit mais
-## que les formes ne s'emboîtent pas dans cet ordre — `ok` est alors faux quand même.
+## Cherche un emboîtement des modules de `sequence` dans `grille` — un sac de pièces, sans ordre (designer
+## 2026-09-04) : les pièces s'essaient dans l'ordre canonique, sur chaque case libre et dans chaque rotation,
+## avec retour arrière. Retourne {"ok", "placement": [{"module", "fois", "rot", "ancre", "cases"}], "demande",
+## "capacite", "manque"}. `manque` est le nombre de cases qui dépassent la grille ; il vaut 0 quand la place
+## brute suffit mais que les formes ne s'emboîtent pas — `ok` est alors faux quand même.
 func emboiter(sequence: Array, grille: Array) -> Dictionary:
 	var pieces: Array = []
-	for pc in pieces_de(sequence):   # une suite de modules identiques est une pièce ×n
+	for pc in pieces_de(ordonner(sequence)):   # une suite de modules identiques est une pièce ×n
 		var forme: Array = forme_de(str(pc.module), int(pc.fois))
 		pieces.append({"module": str(pc.module), "fois": int(pc.fois), "forme": forme, "rotations": _rotations(forme)})
 	var demande := 0
@@ -208,27 +258,26 @@ func emboiter(sequence: Array, grille: Array) -> Dictionary:
 	var res := {"ok": false, "placement": [], "demande": demande, "capacite": grille.size(), "manque": maxi(0, demande - grille.size())}
 	if demande > grille.size():
 		return res
-	var cases_lues: Array = grille.duplicate()   # les ancres s'essaient dans l'ordre de lecture
-	cases_lues.sort_custom(avant)
+	var ancres: Array = grille.duplicate()   # du haut à gauche vers le bas à droite : déterministe, pas une règle
+	ancres.sort_custom(avant)
 	var libres := {}
 	for c in grille:
 		libres[c] = true
 	var placement: Array = []
-	if _placer(pieces, 0, cases_lues, libres, placement, Vector2i(-1, -1)):
+	if _placer(pieces, 0, ancres, libres, placement):
 		res.ok = true
 		res.placement = placement
 	return res
 
 
-## Le retour arrière : la pièce `i` s'ancre sur une case libre qui vient après `apres` dans l'ordre de
-## lecture, dans l'une de ses rotations ; on essaie chaque case libre et chaque rotation, on descend, on
-## remonte si rien ne tient plus loin.
-func _placer(pieces: Array, i: int, cases_lues: Array, libres: Dictionary, placement: Array, apres: Vector2i) -> bool:
+## Le retour arrière : la pièce `i` s'ancre sur une case libre, dans l'une de ses rotations ; on essaie
+## chaque case libre et chaque rotation, on descend, on remonte si rien ne tient plus loin.
+func _placer(pieces: Array, i: int, ancres: Array, libres: Dictionary, placement: Array) -> bool:
 	if i >= pieces.size():
 		return true
 	var piece: Dictionary = pieces[i]
-	for ancre in cases_lues:
-		if not libres[ancre] or not avant(apres, ancre):
+	for ancre in ancres:
+		if not libres[ancre]:
 			continue
 		for rot in piece.rotations:
 			var cases: Array = []
@@ -244,7 +293,7 @@ func _placer(pieces: Array, i: int, cases_lues: Array, libres: Dictionary, place
 			for c in cases:
 				libres[c] = false
 			placement.append({"module": piece.module, "fois": int(piece.get("fois", 1)), "rot": int(rot.k), "ancre": ancre, "cases": cases})
-			if _placer(pieces, i + 1, cases_lues, libres, placement, ancre):
+			if _placer(pieces, i + 1, ancres, libres, placement):
 				return true
 			placement.pop_back()
 			for c in cases:

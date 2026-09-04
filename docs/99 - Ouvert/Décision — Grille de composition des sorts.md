@@ -68,3 +68,9 @@ Trois choses qu'elle règle et que rien d'autre ne réglait :
 - [[Six types de modules et assemblage]] — le modèle actuel, celui que la grille remplacerait
 - [[Structure compétences-modules-slots]] — les voies, les monnaies, les noyaux
 - [[Le vocabulaire des modules et l'absence d'arbre de talents]]
+
+## Correction du designer (2026-09-04)
+
+> « Une grille n'est pas forcément 3×3, tu l'as compris ça n'est-ce pas ? Pas de sens de lecture dans la grille ; pour les étapes, c'est une forme de grille par étape. »
+
+Trois réponses : les dix-neuf fiches ont chacune leur silhouette (le 3×3 n'est que le bloc du guerrier au palier 0) ; **le sens de lecture est retiré** — la grille est un sac de pièces, la séquence en est dérivée dans un ordre canonique par type, sans effet sur le plan ; et **chaque étape du sort a sa grille** — la ligne des étapes du 1er septembre revient, une grille par étape. Codé le jour même : callout dans [[Six types de modules et assemblage]].

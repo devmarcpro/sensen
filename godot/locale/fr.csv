@@ -2387,7 +2387,7 @@ ui.apercu.horizon,"Horizon : toutes les entités en vue"
 ui.composeur.nom,"Nom du sort :"
 ui.composeur.nom_auto,"(le nom du noyau)"
 ui.composeur.slot_vide,"glisser ici"
-ui.composeur.aide,"— glisser une carte dans la grille · R : tourner · + / − : le cran de puissance · clic droit ou Suppr : retirer · l’ordre de lecture (ligne par ligne) est l’ordre du sort"
+ui.composeur.aide,"— glisser une carte dans la grille · R : tourner · + / − : le cran de puissance · clic droit ou Suppr : retirer · pas de sens de lecture : seul compte ce qui rentre · Tab : l’étape suivante · N : une étape de plus (il faut un déclencheur)"
 ui.composeur.glisser,"Glissez une portée, une forme et un noyau dans la grille — ou Entrée sur une carte."
 ui.composeur.wuxing,"{dominante} domine · engendre {engendre} · domine {domine}"
 ui.composeur.wuxing_vide,"Wu Xing du sort : —"
@@ -2933,3 +2933,4 @@ module.tir_de_suppression.name,Tir de suppression
 module.embuscade.name,Embuscade
 ui.composeur.sequence_vide,(rien encore)
 ui.composeur.grille_arme,grille de l’arme tenue
+ui.composeur.etapes,Étapes

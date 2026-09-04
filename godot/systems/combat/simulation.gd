@@ -3174,7 +3174,7 @@ func niveau_arme(e: Dictionary) -> int:
 ## La grille de composition d'un être (Six types de modules et assemblage, designer 2026-09-03) : la
 ## silhouette de la VOIE de l'arme tenue — la stat de sa compétence — au palier de son niveau. Sans
 ## arme, la grille de poche. C'est ce contenant qui borne ce qu'on peut composer, et rien d'autre.
-func grille_composition(e: Dictionary) -> Dictionary:
+func grille_composition(e: Dictionary, id_grille: String = "") -> Dictionary:
 	var arme := Etres.arme(e, items)
 	if arme.is_empty():   # les mains nues sont une arme de force (compétence `mains_nues`) : la grille du guerrier, pas une grille de poche
 		arme = arme_mains_nues()
@@ -3186,7 +3186,8 @@ func grille_composition(e: Dictionary) -> Dictionary:
 	var niveau := regles.niveau(e.get("competences_eff", e.get("competences", {})), str(fonct.get("combat_skill", "")))
 	# Le joueur possède plusieurs grilles (designer 2026-09-04) : s'il en a choisi une qu'il possède,
 	# c'est là qu'il compose ; sinon — créature, robot, vieille sauvegarde — la grille de sa voie.
-	var active := str(e.get("grille_active", ""))
+	# Une grille par étape (designer 2026-09-04) : l'étape peut nommer une fiche possédée ; sinon l'active.
+	var active := id_grille if (not id_grille.is_empty() and id_grille in e.get("grilles", [])) else str(e.get("grille_active", ""))
 	if not active.is_empty() and active in e.get("grilles", []):
 		var cases_a: Array = grille_sort.cases_de_grille(active)
 		if not cases_a.is_empty():
@@ -3233,20 +3234,34 @@ func _debloquer_grilles_de_palier(e: Dictionary, competence: String, niveau: int
 			apprendre_grille(e, str(p.grille))
 
 
-## L'emboîtement d'une séquence dans la grille de l'être : {ok, placement, manque, cases, demande}.
-## L'écran s'en sert pour dessiner ; la composition pour refuser.
-func emboitement(e: Dictionary, sequence: Array) -> Dictionary:
-	var g := grille_composition(e)
-	var res := grille_sort.emboiter(sequence, g.cases)   # porte déjà demande, capacite, manque
-	res["cases"] = g.cases
-	res["stat"] = g.stat
-	res["grille"] = str(g.get("grille", ""))   # la fiche active, pour que l'écran la nomme
+## L'emboîtement d'une séquence dans les grilles de l'être — une grille par ÉTAPE (designer 2026-09-04) :
+## un déclencheur ferme une étape et ouvre la suivante, chacune se range dans sa grille (`grilles[k]` si
+## l'étape en nomme une possédée, sinon l'active). Retourne {ok, etapes: [{ok, placement, demande, capacite,
+## manque, cases, stat, grille}], placement (toutes étapes), demande, capacite, manque, cases, stat, grille
+## (ceux de la première étape)}. L'écran s'en sert pour dessiner ; la composition pour refuser.
+func emboitement(e: Dictionary, sequence: Array, grilles: Array = []) -> Dictionary:
+	var res := {"ok": true, "etapes": [], "placement": [], "demande": 0, "capacite": 0, "manque": 0, "cases": [], "stat": "", "grille": ""}
+	var etapes: Array = grille_sort.etapes_de(sequence)
+	for k in etapes.size():
+		var g := grille_composition(e, str(grilles[k]) if k < grilles.size() else "")
+		var emb := grille_sort.emboiter(etapes[k], g.cases)   # porte déjà demande, capacite, manque
+		res.etapes.append({"ok": bool(emb.ok), "placement": emb.placement, "demande": int(emb.demande), "capacite": int(emb.capacite),
+			"manque": int(emb.manque), "cases": g.cases, "stat": g.stat, "grille": str(g.get("grille", ""))})
+		res.ok = res.ok and bool(emb.ok)
+		(res.placement as Array).append_array(emb.placement)
+		res.demande += int(emb.demande)
+		res.capacite += int(emb.capacite)
+		res.manque += int(emb.manque)
+		if k == 0:
+			res.cases = g.cases
+			res.stat = g.stat
+			res.grille = str(g.get("grille", ""))
 	return res
 
 
 ## Composer une capacité depuis des modules connus : l'assembleur juge la séquence, les slots bornent le **nombre**
 ## de capacités tenues prêtes — pas la longueur d'une séquence (assemblage sans limite, 2026-08-30).
-func composer_capacite(e: Dictionary, sequence: Array, nom: String = "") -> bool:
+func composer_capacite(e: Dictionary, sequence: Array, nom: String = "", grilles: Array = []) -> bool:
 	if sequence.is_empty():   # plus de plafond de capacités non plus (décision du designer, 2026-08-30) : on en compose autant qu'on veut
 		EventBus.emettre(&"journal", [&"journal.capacite_refusee", {}])
 		return false
@@ -3260,15 +3275,17 @@ func composer_capacite(e: Dictionary, sequence: Array, nom: String = "") -> bool
 		return false
 	# La grille (designer 2026-09-03) : la seule borne structurelle. Elle ne juge pas la séquence —
 	# l'assembleur l'a déjà acceptée — elle juge si les pièces TIENNENT dans le contenant de l'arme.
-	var emb := emboitement(e, sequence)
+	var emb := emboitement(e, sequence, grilles)
 	if not emb.ok:
-		EventBus.emettre(&"journal", [&"journal.capacite_trop_grande", {"demande": int(emb.demande), "cases": (emb.cases as Array).size(), "manque": int(emb.manque)}])
+		EventBus.emettre(&"journal", [&"journal.capacite_trop_grande", {"demande": int(emb.demande), "cases": int(emb.capacite), "manque": int(emb.manque)}])
 		return false
 	var noyau: Dictionary = plan.noyau
 	var nom_key := str(noyau.get("name_key", "capacite.etincelle.name"))
 	if not nom.strip_edges().is_empty():   # le nom choisi par le joueur (Écrans d'interface) : tr() le rend tel quel
 		nom_key = nom.strip_edges()
 	var cap := {"id": "cap_%d_%d" % [e.get("capacites", []).size(), sequence.hash()], "name_key": nom_key, "modules": sequence.duplicate()}
+	if not grilles.is_empty():   # la grille de chaque étape, pour recomposer dans les mêmes (designer 2026-09-04)
+		cap["grilles"] = grilles.duplicate()
 	if not e.has("capacites"):
 		e["capacites"] = []
 	e.capacites.append(cap)

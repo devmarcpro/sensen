@@ -2378,7 +2378,7 @@ ui.apercu.horizon,"Horizon: every entity in sight"
 ui.composeur.nom,"Spell name:"
 ui.composeur.nom_auto,"(the core’s name)"
 ui.composeur.slot_vide,"drop here"
-ui.composeur.aide,"— drag a card onto the grid · R: rotate · + / −: power rank · right-click or Delete: remove · reading order (row by row) is the spell’s order"
+ui.composeur.aide,"— drag a card onto the grid · R: rotate · + / −: power step · right-click or Delete: remove · no reading order: only what fits matters · Tab: next step · N: one more step (needs a trigger)"
 ui.composeur.glisser,"Drag a range, a shape and a core onto the grid — or Enter on a card."
 ui.composeur.wuxing,"{dominante} leads · generates {engendre} · overcomes {domine}"
 ui.composeur.wuxing_vide,"Spell Wu Xing: —"
@@ -2924,3 +2924,4 @@ module.tir_de_suppression.name,Suppressing shot
 module.embuscade.name,Ambush
 ui.composeur.sequence_vide,(nothing yet)
 ui.composeur.grille_arme,held weapon’s grid
+ui.composeur.etapes,Steps

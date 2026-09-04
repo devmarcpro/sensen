@@ -4,8 +4,9 @@ extends VBoxContainer
 ## designer du 2026-09-03 : « on retire l'assembleur qu'on avait, ça devient du drag and drop directement dans la
 ## grille »). La grille est la silhouette de l'arme tenue ; chaque module est une pièce dont la forme dit ce qu'il
 ## fait. On prend une carte dans le catalogue et on la pose dans la grille, R la tourne, clic droit ou Suppr la
-## retire, on la reprend pour la déplacer. **L'ordre de lecture est l'ordre du sort** : ligne par ligne, de gauche
-## à droite — un modificateur posé au-dessus ou à gauche de son noyau s'y rattache. Le clavier reste possible :
+## retire, on la reprend pour la déplacer. **Pas de sens de lecture** (designer 2026-09-04) : où l'on pose ne change
+## rien, seul compte ce qui rentre ; et **une grille par étape** — un déclencheur ferme une étape et ouvre la suivante,
+## chacune se compose dans sa propre grille (Tab : l'étape suivante, N : une de plus). Le clavier reste possible :
 ## ← → ↑ ↓ parcourent le catalogue, Entrée pose au premier endroit libre, Suppr retire, R tourne, V valide.
 ## Sous la grille : le catalogue à gauche, section par type ; à droite le détail, le Wu Xing du sort et l'aperçu.
 
@@ -18,6 +19,9 @@ const ORDRE_TYPES: Array[String] = ["portee", "forme", "noyau", "modificateur", 
 var ecrans: Node                       # l'écran parent (Ecrans) : _apercu_plan, _contribution_module, sequence_composee
 var main: Node
 var placements: Array[Dictionary] = []   # les pièces posées : {module, fois, rot, ancre: Vector2i, cases: Array} — fois = le cran de puissance
+var etapes: Array[Dictionary] = []     # les étapes du sort (designer 2026-09-04) : {grille, placements} — `placements` EST celui de l'étape courante
+var etape := 0                         # l'étape qu'on compose
+var rangee_etapes: HBoxContainer       # sa ligne de boutons : Étape 1, Étape 2, +
 var sequence_refusee: Array = []         # une séquence reçue qui ne tient pas dans la grille : gardée pour le dire
 var rotation_courante := 0             # la rotation qu'aura la prochaine pièce posée (R sur une carte du catalogue)
 var piece_choisie := -1                # l'index dans `placements` de la pièce sélectionnée dans la grille (−1 : aucune)
@@ -69,6 +73,8 @@ func _ready() -> void:
 	h1.add_child(aide)
 	rangee_grilles = HBoxContainer.new()   # rangée 1 ter : les grilles possédées — on choisit celle où l'on compose
 	add_child(rangee_grilles)
+	rangee_etapes = HBoxContainer.new()   # rangée 1 quater : les étapes du sort — une grille par étape (designer 2026-09-04)
+	add_child(rangee_etapes)
 	defil_grille = ScrollContainer.new()   # rangée 2 : la grille, défilable si la silhouette est large
 	defil_grille.custom_minimum_size = Vector2(0, GrilleControl.HAUTEUR_MIN)
 	defil_grille.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -127,7 +133,7 @@ func _reconstruire_onglets_grilles(j: Dictionary) -> void:
 	l.add_theme_font_size_override("font_size", 11)
 	l.modulate = Color(0.85, 0.8, 0.6)
 	rangee_grilles.add_child(l)
-	var active := str(grille_courante().get("grille", ""))
+	var active := str(grille_courante().get("grille", ""))   # celle de l'étape courante
 	for gid in possedees:
 		var fiche: Dictionary = GameData.catalogues.get("grilles", {}).get(str(gid), {})
 		var b := Button.new()
@@ -136,13 +142,92 @@ func _reconstruire_onglets_grilles(j: Dictionary) -> void:
 		b.focus_mode = Control.FOCUS_NONE
 		b.add_theme_font_size_override("font_size", 10)
 		var gid_c := str(gid)
-		b.pressed.connect(func() -> void:
-			if main.sim.choisir_grille(main.joueur(), gid_c):
-				var seq := sequence() if sequence_refusee.is_empty() else sequence_refusee
-				placements = []
-				_ranger(seq)
-				reconstruire(main.joueur()))
+		b.pressed.connect(func() -> void:   # la grille de L'ÉTAPE courante ; ses pièces y sont rangées à nouveau, refusées si ça ne tient pas
+			var g_c := grille_sort()
+			var emb_c: Dictionary = g_c.emboiter(_sequence_etape(etape), g_c.cases_de_grille(gid_c))
+			if not emb_c.ok:
+				grille_ctrl.refuser()
+				return
+			main.sim.choisir_grille(main.joueur(), gid_c)   # elle devient aussi celle par défaut des étapes suivantes
+			etapes[etape].grille = gid_c
+			_placer_depuis(etape, emb_c.placement)
+			reconstruire(main.joueur()))
 		rangee_grilles.add_child(b)
+
+
+## La ligne des étapes (designer 2026-09-04, comme au 1er septembre) : un bouton par étape, celle qu'on compose
+## en clair, et « + » quand la dernière a son déclencheur — une étape de plus part de lui.
+func _reconstruire_etapes() -> void:
+	for c in rangee_etapes.get_children():
+		c.queue_free()
+	if etapes.size() <= 1 and not _a_declencheur(etapes.size() - 1):
+		return   # un sort d'une étape sans déclencheur : rien à montrer
+	var l := Label.new()
+	l.text = tr("ui.composeur.etapes")
+	l.add_theme_font_size_override("font_size", 11)
+	l.modulate = Color(0.85, 0.8, 0.6)
+	rangee_etapes.add_child(l)
+	for k in etapes.size():
+		var b := Button.new()
+		b.text = tr("ui.composeur.etape").format({"n": k + 1})
+		b.flat = k != etape
+		b.focus_mode = Control.FOCUS_NONE
+		b.add_theme_font_size_override("font_size", 10)
+		var i := k
+		b.pressed.connect(func() -> void: choisir_etape(i))
+		rangee_etapes.add_child(b)
+	var plus := Button.new()
+	plus.text = "+"
+	plus.focus_mode = Control.FOCUS_NONE
+	plus.disabled = not _a_declencheur(etapes.size() - 1)
+	plus.tooltip_text = tr("ui.composeur.etape_aide")
+	plus.add_theme_font_size_override("font_size", 10)
+	plus.pressed.connect(ajouter_etape)
+	rangee_etapes.add_child(plus)
+
+
+func _a_declencheur(k: int) -> bool:
+	if k < 0 or k >= etapes.size():
+		return false
+	for p in etapes[k].placements:
+		if type_de(str(p.module)) == "declencheur":
+			return true
+	return false
+
+
+func choisir_etape(i: int) -> void:
+	if i < 0 or i >= etapes.size():
+		return
+	etape = i
+	placements = etapes[i].placements
+	piece_choisie = -1
+	reconstruire(main.joueur())
+
+
+func ajouter_etape() -> void:
+	if not _a_declencheur(etapes.size() - 1):
+		grille_ctrl.refuser()
+		return
+	etapes.append({"grille": str(grille_courante().get("grille", "")), "placements": [] as Array[Dictionary]})
+	choisir_etape(etapes.size() - 1)
+
+
+## Les pièces d'une étape, telles que le moteur les a rangées (rotation, ancre, cran).
+func _placer_depuis(k: int, placement: Array) -> void:
+	var liste: Array[Dictionary] = []
+	for p in placement:
+		liste.append({"module": str(p.module), "fois": int(p.get("fois", 1)), "rot": int(p.rot), "ancre": p.ancre, "cases": p.cases})
+	etapes[k].placements = liste
+	if k == etape:
+		placements = liste
+
+
+## La grille de chaque étape, dans l'ordre — ce que la capacité garde pour se recomposer au même endroit.
+func grilles_des_etapes() -> Array:
+	var res: Array = []
+	for et in etapes:
+		res.append(str(et.grille))
+	return res
 
 
 ## Les filtres de style (Six types de modules, 2026-08-30) : Tous, puis un bouton par style de data/styles.json.
@@ -202,25 +287,33 @@ func grille_sort() -> GrilleSort:
 	return main.sim.grille_sort
 
 
-## Les cases de la grille de l'arme tenue, et sa voie.
+## La grille de l'étape courante : celle qu'elle nomme si on la possède, sinon celle où l'on compose.
 func grille_courante() -> Dictionary:
-	return main.sim.grille_composition(main.joueur())
+	return main.sim.grille_composition(main.joueur(), str(etapes[etape].grille) if etape < etapes.size() else "")
 
 
-## La séquence lue dans la grille : ligne par ligne, de gauche à droite, chaque pièce à sa case la plus
-## haute puis la plus à gauche. C'est ce que le moteur assemble — l'ancienne barre de slots, à deux dimensions.
+## La séquence du sort : les étapes à la suite, chacune dans l'ordre canonique du moteur — la grille n'a pas
+## de sens de lecture (designer 2026-09-04), où l'on pose ne change rien. C'est ce que le moteur assemble.
 func sequence() -> Array:
-	var tri: Array = placements.duplicate()
-	tri.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return GrilleSort.avant(_case_de_lecture(a), _case_de_lecture(b)))
 	var seq: Array = []
-	for p in tri:
-		for k in maxi(1, int(p.get("fois", 1))):   # une pièce ×n, c'est le module n fois de suite pour l'assembleur
-			seq.append(str(p.module))
+	for k in etapes.size():
+		seq.append_array(_sequence_etape(k))
 	return seq
 
 
+## Les modules d'une étape, dans l'ordre canonique ; une pièce ×n est le module n fois de suite.
+func _sequence_etape(k: int) -> Array:
+	if k < 0 or k >= etapes.size():
+		return []
+	var brut: Array = []
+	for p in etapes[k].placements:
+		for f in maxi(1, int(p.get("fois", 1))):
+			brut.append(str(p.module))
+	return grille_sort().ordonner(brut)
+
+
 static func _case_de_lecture(p: Dictionary) -> Vector2i:
-	return GrilleSort.case_de_lecture(p.cases)   # la règle de lecture vit dans le moteur, l'écran la lit
+	return GrilleSort.case_de_lecture(p.cases)   # la case du haut à gauche d'une pièce : là où l'on dessine son nom
 
 
 func _occupees(sauf: int = -1) -> Dictionary:
@@ -316,44 +409,56 @@ func changer_fois(index: int, delta: int) -> void:
 
 
 func vider_grille() -> void:
-	placements = []
+	etapes = [{"grille": "", "placements": [] as Array[Dictionary]}]
+	etape = 0
+	placements = etapes[0].placements
 	piece_choisie = -1
 	sequence_refusee = []
 
 
-## Toutes les pièces posées tiennent-elles encore dans la grille courante ?
+## Toutes les pièces posées tiennent-elles encore, étape par étape, dans leur grille ?
 func _dans_la_grille() -> bool:
-	var cases_g: Array = grille_courante().cases
-	for p in placements:
-		for c in p.cases:
-			if not (c in cases_g):
-				return false
+	for k in etapes.size():
+		var cases_g: Array = main.sim.grille_composition(main.joueur(), str(etapes[k].grille)).cases
+		for p in etapes[k].placements:
+			for c in p.cases:
+				if not (c in cases_g):
+					return false
 	return true
 
 
-## Une séquence venue d'ailleurs (hotbar, capture) est rangée d'office par le moteur, qui cherche un emboîtement.
-func _ranger(depart: Array) -> void:
-	placements = []
-	piece_choisie = -1
-	sequence_refusee = []
-	var emb: Dictionary = main.sim.emboitement(main.joueur(), depart)
+## Une séquence venue d'ailleurs (hotbar, capture) est rangée d'office par le moteur, étape par étape.
+func _ranger(depart: Array, grilles: Array = []) -> void:
+	var grilles_v: Array = grilles if not grilles.is_empty() else grilles_des_etapes()
+	vider_grille()
+	var emb: Dictionary = main.sim.emboitement(main.joueur(), depart, grilles_v)
 	if not emb.ok:
-		# Une séquence qui ne tient pas dans la grille n'est pas jetée en silence : la grille rougit, dit
+		# Une séquence qui ne tient pas dans ses grilles n'est pas jetée en silence : la grille rougit, dit
 		# combien de cases il faudrait, et la séquence reçue reste celle de l'écran.
 		sequence_refusee = depart.duplicate()
 		grille_ctrl.refuser()
 		return
-	for p in emb.placement:   # le moteur dit la rotation, l'ancre et le cran qu'il a choisis ; l'écran les reprend tels quels
-		placements.append({"module": str(p.module), "fois": int(p.get("fois", 1)), "rot": int(p.rot), "ancre": p.ancre, "cases": p.cases})
+	etapes = []
+	for et in emb.etapes:   # le moteur dit la rotation, l'ancre et le cran qu'il a choisis ; l'écran les reprend tels quels
+		etapes.append({"grille": str(et.grille), "placements": [] as Array[Dictionary]})
+		_placer_depuis(etapes.size() - 1, et.placement)
+	if etapes.is_empty():
+		etapes = [{"grille": "", "placements": [] as Array[Dictionary]}]
+	etape = clampi(etape, 0, etapes.size() - 1)
+	placements = etapes[etape].placements
 
 
 ## Reconstruit tout depuis l'état du joueur ; `depart` = une séquence à pré-remplir (hotbar, capture).
 func reconstruire(j: Dictionary, depart: Array = []) -> void:
-	if not depart.is_empty() and sequence() != depart and sequence_refusee != depart:
+	if etapes.is_empty():
+		vider_grille()
+	var g := grille_sort()
+	if not depart.is_empty() and g.canonique(sequence()) != g.canonique(depart) and sequence_refusee != depart:
 		_ranger(depart)
-	elif not placements.is_empty() and not _dans_la_grille():
+	elif not sequence().is_empty() and not _dans_la_grille():
 		_ranger(sequence())   # l'arme (ou la grille) a changé : une pièce hors de la grille n'a plus de sens, on range à nouveau
 	_reconstruire_onglets_grilles(j)
+	_reconstruire_etapes()
 	_reconstruire_catalogue(j)
 	_rafraichir_detail(j)
 
@@ -556,6 +661,13 @@ func touche(ev: InputEventKey) -> bool:
 		KEY_KP_SUBTRACT, KEY_MINUS:
 			changer_fois(piece_choisie, -1)
 			return true
+		KEY_TAB:   # l'étape suivante (designer 2026-09-04 : une grille par étape)
+			if etapes.size() > 1:
+				choisir_etape((etape + 1) % etapes.size())
+			return true
+		KEY_N:   # une étape de plus, depuis le déclencheur de la dernière
+			ajouter_etape()
+			return true
 	return false
 
 
@@ -736,7 +848,10 @@ class GrilleControl extends Control:
 		var cases: Array = grille.get("cases", [])
 		var o := _origine()
 		var refuse := Time.get_ticks_msec() / 1000.0 < refus_jusqua
-		draw_string(ThemeDB.fallback_font, Vector2(0, 12), tr("ui.composeur.grille"), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.85, 0.8, 0.6))
+		var titre_g := tr("ui.composeur.grille")
+		if composeur.etapes.size() > 1:
+			titre_g += " — " + tr("ui.composeur.etape").format({"n": composeur.etape + 1})
+		draw_string(ThemeDB.fallback_font, Vector2(0, 12), titre_g, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.85, 0.8, 0.6))
 		var fond := Color(0.35, 0.1, 0.1) if refuse else Color(0.12, 0.12, 0.16)
 		var maxy := 0
 		var maxx := 0
@@ -753,7 +868,7 @@ class GrilleControl extends Control:
 				draw_rect(Rect2(o + Vector2(c.x, c.y) * CASE + Vector2(2, 2), Vector2(CASE - 5.0, CASE - 5.0)), Color(col.r * 0.55, col.g * 0.55, col.b * 0.55))
 				if k == composeur.piece_choisie:
 					draw_rect(Rect2(o + Vector2(c.x, c.y) * CASE + Vector2(1, 1), Vector2(CASE - 3.0, CASE - 3.0)), Color(1, 1, 1, 0.9), false, 2.0)
-			var cl := Composeur._case_de_lecture(p)   # le pictogramme et le nom sur la case de lecture : l'ordre se voit
+			var cl := Composeur._case_de_lecture(p)   # le pictogramme et le nom sur la case du haut à gauche
 			var r_ic := Rect2(o + Vector2(cl.x, cl.y) * CASE + Vector2(5, 3), Vector2(CASE - 11.0, CASE - 11.0))
 			Pictos.dessiner(self, Pictos.icone_de(md), r_ic, col)
 			if int(p.get("fois", 1)) > 1:   # le cran de puissance, en coin

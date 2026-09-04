@@ -152,6 +152,7 @@ func _ready() -> void:
 	_lancer("test_grilles_possedees")
 	_lancer("test_trames")
 	_lancer("test_cran_de_puissance")
+	_lancer("test_etapes")
 	_lancer("test_composer_capacites")
 	_lancer("test_charges_de_modules")
 	_lancer("test_assemblage_sans_limite")
@@ -3165,6 +3166,8 @@ func test_creation_de_sorts() -> void:
 			s.grille.liberer(mannequin.pos)
 			mannequin.pos = j.pos + Vector2i(1, 0)
 			s.grille.placer(mannequin.id, mannequin.pos)
+		mannequin.statuts.clear()   # un statut non cumulable posé par un noyau précédent rendait le suivant « muet »
+		j.statuts.clear()
 		var pv_avant: int = int(mannequin.sante)
 		var statuts_avant: int = mannequin.statuts.size() + j.statuts.size()
 		var vivants_avant: int = s.vivants().size()
@@ -3172,6 +3175,8 @@ func test_creation_de_sorts() -> void:
 		var pos_j_avant: Vector2i = j.pos   # un déplacement est un des neuf effets : il compte
 		var pos_m_avant: Vector2i = mannequin.pos
 		var compteur_avant: int = int(mannequin.compteur)   # le tempo aussi : il retarde la prochaine action
+		var pv_j_avant: int = int(j.sante)   # un noyau qui coûte des PV, ou qui en rend, agit aussi
+		var mana_m_avant: int = int(mannequin.get("mana", 0))   # ponction : le mana pris à la cible
 		j.mana = 9999
 		j.vigueur = 9999
 		j.sante = int(j.sante_max)   # certains noyaux coûtent des PV (Cataclysme, Offrande, Saignée)
@@ -3183,7 +3188,8 @@ func test_creation_de_sorts() -> void:
 		# Un noyau qui touche doit faire QUELQUE CHOSE : des PV, un statut, une invocation, ou du terrain.
 		var agi: bool = int(mannequin.sante) != pv_avant or (mannequin.statuts.size() + j.statuts.size()) != statuts_avant \
 			or s.vivants().size() != vivants_avant or not s.grille.modifies.is_empty() or s.zones.size() != zones_avant \
-			or j.pos != pos_j_avant or mannequin.pos != pos_m_avant or int(mannequin.compteur) != compteur_avant
+			or j.pos != pos_j_avant or mannequin.pos != pos_m_avant or int(mannequin.compteur) != compteur_avant \
+			or int(j.sante) != pv_j_avant or int(mannequin.get("mana", 0)) != mana_m_avant
 		if not agi:
 			sans_effet.append(nid)
 		s.grille.modifies.clear()
@@ -3198,9 +3204,10 @@ func test_creation_de_sorts() -> void:
 	# Chantier connu (Structure compétences-modules-slots, constat du 2026-08-29) : 47 noyaux ont un `effet`
 	# vide et ne produisent rien. Le test tient le compte et refuse qu'il AUGMENTE, comme l'audit.
 	# 2026-09-04 : le banc compte aussi un déplacement et un tempo, et remet l'anti-stunlock du mannequin à
-	# zéro. Mesure : 29 muets — le chantier, plus ce qui ne peut rien sur un mannequin hostile et désarmé
+	# zéro, efface les statuts entre deux noyaux, compte les PV du lanceur et le mana de la cible. Mesure : 23 muets —
+	# le chantier, plus ce qui ne peut rien sur un mannequin hostile et désarmé, sans allié ni tuile libre
 	# (rempart vise un allié, tir à la main un porteur d'arme). Avant : 34, sans les déplacements ni le tempo.
-	verifier(sans_effet.size() <= 29, "noyaux sans effet visible : %d (budget 29, mesure du banc) — %s" % [sans_effet.size(), str(sans_effet)])
+	verifier(sans_effet.size() <= 23, "noyaux sans effet visible : %d (budget 23, mesure du banc) — %s" % [sans_effet.size(), str(sans_effet)])
 	verifier(j.vivant and mannequin.vivant, "le lanceur et le mannequin survivent aux 86 sorts")
 
 
@@ -3703,6 +3710,43 @@ func test_cran_de_puissance() -> void:
 	var plan1 := s.capacites.assembler(["point", "contact", "gel"], 10, "1d4", {}, {})
 	var plan2 := s.capacites.assembler(["point", "contact", "gel", "gel"], 10, "1d4", {}, {})
 	verifier(int(plan2.ressource) == 2 * int(plan1.ressource) and int(plan2.get("fois", 1)) == 2, "pour l'assembleur, ×2 est le module deux fois : prix double (%d → %d)" % [int(plan1.ressource), int(plan2.ressource)])
+
+
+func test_etapes() -> void:
+	# Pas de sens de lecture, une grille par étape (designer 2026-09-04) : la grille est un sac de pièces,
+	# la séquence en sort dans un ordre canonique par type, et un déclencheur ouvre une étape — une grille de plus.
+	var s := nouvelle_sim("plaine_au_talus")
+	var g: GrilleSort = s.grille_sort
+	verifier(g.canonique(["etincelle", "point", "jet_court"]) == ["jet_court", "point", "etincelle"], "l'ordre canonique : portée, forme, noyau — quel que soit l'ordre reçu")
+	verifier(g.canonique(["gel", "point", "gel"]) == ["point", "gel", "gel"], "deux pièces d'un même noyau se suivent : c'est un cran ×2 pour l'assembleur")
+	var decl := ""
+	for mid in GameData.catalogues.modules.keys():
+		var m: Dictionary = GameData.catalogues.modules[mid]
+		if m.get("module_type") == "declencheur" and not (m.get("effet", {}) as Dictionary).is_empty():
+			decl = str(mid)
+			break
+	verifier(not decl.is_empty(), "un déclencheur avec effet existe (%s)" % decl)
+	var deux: Array = g.etapes_de(["point", "etincelle", decl, "carre", "gel"])
+	verifier(deux.size() == 2 and deux[0] == ["point", "etincelle", decl] and deux[1] == ["carre", "gel"], "un déclencheur ferme son étape et ouvre la suivante")
+	verifier(g.etapes_de(["point", "etincelle", decl]).size() == 1 and g.etapes_de(["point", "etincelle"]).size() == 1, "un déclencheur sans suite n'ouvre pas d'étape fantôme")
+	# Sans ordre, ce qui compte est ce qui rentre : deux pièces qui tiennent tiennent dans n'importe quel ordre.
+	var j := joueur_de(s)
+	for m in ["point", "etincelle", "carre", "gel", "jet_court", decl]:
+		if not (m in j.modules_connus):
+			j.modules_connus.append(m)
+	var e1 := s.emboitement(j, ["point", "etincelle"])
+	var e2 := s.emboitement(j, ["etincelle", "point"])
+	verifier(e1.ok and e2.ok and e1.placement.size() == 2 and e2.placement.size() == 2, "un sort de base tient, dans un ordre comme dans l'autre")
+	# Une grille par étape : un sort à deux étapes a deux fois la place — chaque étape dans la sienne.
+	var seq2: Array = ["point", "etincelle", decl, "carre", "gel"]
+	var emb2 := s.emboitement(j, seq2)
+	verifier(emb2.etapes.size() == 2 and int(emb2.capacite) == 2 * (emb2.cases as Array).size(), "deux étapes : deux grilles (%d cases)" % int(emb2.capacite))
+	verifier(int(emb2.demande) == int(emb2.etapes[0].demande) + int(emb2.etapes[1].demande), "la demande est la somme des étapes")
+	var caps: Array = j.capacites.duplicate()
+	j.capacites = []
+	verifier(s.composer_capacite(j, seq2, "", ["", ""]) and j.capacites.size() == 1 and j.capacites[0].modules == seq2, "et le sort se compose, avec ses étapes")
+	verifier(Array(j.capacites[0].get("grilles", [])).size() == 2, "la capacité garde la grille de chaque étape")
+	j.capacites = caps
 
 
 func test_composer_capacites() -> void:

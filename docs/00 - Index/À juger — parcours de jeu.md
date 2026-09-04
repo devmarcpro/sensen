@@ -359,9 +359,9 @@ pas dire, et qu'il faut jouer pour savoir :
 1. **Le puzzle est-il amusant ou pénible ?** Compose trois sorts avec une épée (bloc 3×3), puis les
    mêmes avec un arc (une ligne avec un talon). Si la ligne du tireur donne envie d'y revenir, la
    grille fait son travail ; si elle donne envie de changer d'arme, elle punit au lieu de définir.
-2. **L'ordre de lecture se comprend-il sans l'expliquer ?** Pose un modificateur *après* son noyau
-   et regarde si tu comprends pourquoi il ne s'applique pas. Le pictogramme est sur la case de
-   lecture pour ça ; si ça ne suffit pas, il faudra une flèche ou une numérotation.
+2. ~~L'ordre de lecture se comprend-il sans l'expliquer ?~~ **Tranché par le designer le 2026-09-04 :
+   pas de sens de lecture** — la grille est un sac de pièces. La question devient : la ligne des
+   étapes (une grille par étape, N en ouvre une depuis un déclencheur) se comprend-elle sans l'aide ?
 3. **Les silhouettes ont-elles une identité à l'œil ?** Bloc, lame, colonne, croix, ligne, cercle :
    dis laquelle est laquelle sans lire la légende. Celle que tu n'identifies pas est à redessiner.
 4. **La taille du palier 0** est calée sur les kits des classes, pas sur le plaisir. Trop serrée, on
