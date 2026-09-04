@@ -153,7 +153,7 @@ Aucune sortie ne doit contenir `SCRIPT ERROR`, et la suite doit finir par `TESTS
 # Capture d'écran (fenêtré — le `--` avant les options est obligatoire)
 & $godot --path godot --disable-vsync res://scenes/tests/capture.tscn -- --arene 3 --heure 12 --frames 8 --sortie user://c.png
 #   autres options : --donjon --torche --raid --talents --carte --ecran inventaire|menu|gestion|atelier|composer
-#   --langue en · --graine N · --perimetre bois · --maison --assigner · --commerce --echange · --sorts gel+1 · --grande_base N (N semaines)
+#   --langue en · --graine N · --perimetre bois · --maison --assigner · --commerce --echange · --sorts gel+1 · --grande_base N (N semaines) · --ligne N (sélectionne la N-ième ligne de l'écran)
 #   les PNG sortent dans %APPDATA%\Godot\app_userdata\Sensen\
 ```
 

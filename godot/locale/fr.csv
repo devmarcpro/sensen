@@ -1087,7 +1087,12 @@ function.herboriste.name,Herboriste
 ui.ecran.gestion,"TERRITOIRE — {n} cellules · {pnj} résidents · trésor {tresor} or · dette {dette} · prévisionnel {prev} or/semaine"
 ui.gestion.cellule,"cellule ({x},{y}) — {role}{camp}"
 ui.gestion.camp," · camp"
-ui.gestion.resident,"{nom} — {fonction}{betail} · humeur {humeur} · rendement ×{facteur} · {logement} · poste ({x},{y})"
+ui.gestion.resident,"{nom} — {fonction}{betail} · humeur {humeur} · rendement ×{facteur} · {logement} · {poste}"
+ui.gestion.poste_perimetre,"poste : {type} ({x},{y})"
+ui.gestion.poste_cellule,"poste : cellule ({x},{y})"
+ui.gestion.prod_rien,ne produit rien cette semaine
+ui.gestion.prod_or,"production : {n} or par semaine"
+ui.gestion.prod_matiere,"production : {nom} ×{n} par semaine"
 ui.gestion.stock,"stock : {nom} ×{n}"
 ui.gestion.rapport,{texte}
 ui.gestion.role_aide,"Entrée : changer de rôle (base → habitation → champs → ressources naturelles ; ressources naturelles efface les constructions au passage de la semaine)"

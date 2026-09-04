@@ -507,6 +507,10 @@ func _ready() -> void:
 	for i2 in args.size():   # --ecran inventaire|atelier|feuille|menu : l'écran ouvert — après le chargement
 		if args[i2] == "--ecran" and i2 + 1 < args.size():
 			scene.ecrans.ouvrir(args[i2 + 1])
+	for il in args.size():   # --ligne N : la N-ième ligne de la liste sélectionnée, son détail à droite (2026-09-04)
+		if args[il] == "--ligne" and il + 1 < args.size() and scene.ecrans.est_ouvert() and int(args[il + 1]) < scene.ecrans.liste.item_count:
+			scene.ecrans.liste.select(int(args[il + 1]))
+			scene.ecrans._sur_selection(int(args[il + 1]))
 	for i11 in args.size():   # --tri colonne : trie la liste de l'inventaire (nom, type, qualite, poids, quantite)
 		if args[i11] == "--tri" and i11 + 1 < args.size() and scene.ecrans.est_ouvert():
 			scene.ecrans.inventaire_visuel.trier(str(args[i11 + 1]))

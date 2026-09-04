@@ -1168,9 +1168,11 @@ func _construire_gestion(j: Dictionary) -> void:
 " + tr("ui.gestion.perimetre_aide")})
 	for x in sim.residents():
 		var poste: Vector2i = x.get("poste", x.pos)
-		liste.add_item(tr("ui.gestion.resident").format({"nom": tr(x.name_key), "fonction": tr(GameData.entree("functions", str(x.assignation.fonction)).name_key), "betail": tr("ui.gestion.betail") if str(x.get("statut_habitat", "normal")) == "betail" else "", "humeur": int(x.get("humeur", 60)), "facteur": "%.2f" % sim.facteur_humeur(x), "logement": tr("ui.gestion.loge" if x.has("lit") else "ui.gestion.sans_lit"), "x": poste.x, "y": poste.y}))
-		var pr: Dictionary = sim.production_de(x)
-		entrees.append({"kind": "resident", "id": x.id, "texte": tr("ui.gestion.resident_aide") + "\n" + str(pr)})
+		var cell_p: Vector2i = sim._cell_de(poste)
+		var per_x: Dictionary = sim.perimetres().get(str(x.assignation.get("perimetre", "")), {})   # son poste : le périmètre, sinon la cellule (grande base, 2026-09-04)
+		var poste_txt: String = tr("ui.gestion.poste_perimetre").format({"type": tr("perimetre.%s.name" % str(per_x.type)), "x": cell_p.x, "y": cell_p.y}) if not per_x.is_empty() else tr("ui.gestion.poste_cellule").format({"x": cell_p.x, "y": cell_p.y})
+		liste.add_item(tr("ui.gestion.resident").format({"nom": tr(x.name_key), "fonction": tr(GameData.entree("functions", str(x.assignation.fonction)).name_key), "betail": tr("ui.gestion.betail") if str(x.get("statut_habitat", "normal")) == "betail" else "", "humeur": int(x.get("humeur", 60)), "facteur": "%.2f" % sim.facteur_humeur(x), "logement": tr("ui.gestion.loge" if x.has("lit") else "ui.gestion.sans_lit"), "poste": poste_txt}))
+		entrees.append({"kind": "resident", "id": x.id, "texte": poste_txt + " · " + _texte_production(sim.production_de(x)) + "\n" + tr("ui.gestion.resident_aide")})
 	for c in sim.compagnons_de(j, true):   # l'escorte, sous les résidents (Décision — Gestion de base, étape 3)
 		liste.add_item(tr("ui.gestion.compagnon").format({"nom": tr(c.name_key), "ordre": tr("ordre." + str(c.get("ordre", "suivre"))), "sante": int(c.sante), "sante_max": int(c.sante_max)}))
 		entrees.append({"kind": "compagnon", "id": c.id, "texte": tr("ui.gestion.compagnon_aide")})
@@ -2055,6 +2057,29 @@ func _portrait_partie(slot: String) -> void:
 		["mana", int(e.get("mana_max", 0))],
 	]
 	barres_perso.queue_redraw()
+
+
+## La production hebdomadaire d'un résident, en mots (le détail affichait le dictionnaire brut — grande base, 2026-09-04).
+func _texte_production(pr: Dictionary) -> String:
+	if pr.is_empty():
+		return tr("ui.gestion.prod_rien")
+	if bool(pr.get("sans_stockage", false)):
+		return tr("ui.gestion.sans_stockage")
+	if pr.has("or"):
+		return tr("ui.gestion.prod_or").format({"n": int(pr.or)})
+	var base := str(pr.get("base", ""))
+	var fiche: Dictionary = GameData.catalogues.materials.get(base, GameData.catalogues.items.get(base, {}))
+	var nom := tr(str(fiche.get("name_key", base)))
+	var forme := str(pr.get("forme", ""))
+	if not forme.is_empty():   # « chêne (planche) » : la clé de forme est un gabarit, comme pour les objets
+		var cle_f := "forme.%s.name" % forme
+		var gabarit := tr(cle_f)
+		nom = gabarit.format({"materiau": nom}) if gabarit != cle_f else nom + " " + forme
+	var txt := tr("ui.gestion.prod_matiere").format({"nom": nom, "n": int(pr.get("n", 0))})
+	if pr.has("stockage") and main.sim.perimetres().has(str(pr.stockage)):
+		var cs: Vector2i = main.sim.perimetres()[str(pr.stockage)].cellule
+		txt += " · " + tr("ui.gestion.stockage_vers").format({"cellule": "(%d,%d)" % [cs.x, cs.y]})
+	return txt
 
 
 ## Le menu (Tab) : les écrans et les actions générales (Écrans d'interface, contrôles).

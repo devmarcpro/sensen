@@ -955,7 +955,12 @@ ui.gestion.parcelles,"plots: {n} ({mures} ripe)"
 ui.gestion.pieces,"valid rooms: {n} ({logees} residents housed)"
 ui.gestion.raid,"strength {force} vs defence {defense} — {issue} (losses {perte} %)"
 ui.gestion.rapport,{texte}
-ui.gestion.resident,"{nom} — {fonction}{betail} · mood {humeur} · yield ×{facteur} · {logement} · post ({x},{y})"
+ui.gestion.resident,"{nom} — {fonction}{betail} · mood {humeur} · yield ×{facteur} · {logement} · {poste}"
+ui.gestion.poste_perimetre,"post: {type} ({x},{y})"
+ui.gestion.poste_cellule,"post: cell ({x},{y})"
+ui.gestion.prod_rien,produces nothing this week
+ui.gestion.prod_or,"production: {n} gold a week"
+ui.gestion.prod_matiere,"production: {nom} ×{n} a week"
 ui.gestion.resident_aide,"Enter: reassign (choose a function) · Delete: dismiss"
 ui.gestion.role_aide,"Enter: change the role (base → housing → fields → wild resources ; wild resources wipes buildings when the week turns)"
 ui.gestion.royaume,"{statut} · government: {gouv}{transition} · defence {defense} · value {valeur} · last raid: {raid}"
