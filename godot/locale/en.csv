@@ -3321,3 +3321,7 @@ volet.corruption,corruption {n} %
 volet.lieu_donjon,"{theme} · floor {etage}/{etages}"
 volet.horloge_donjon,clock {ticks}
 volet.arme,in hand: {arme}
+piste.element,element
+piste.competence,skill
+piste.type,attack type
+piste.construction,armour

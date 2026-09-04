@@ -38,3 +38,6 @@ Parité totale avec les PNJ et compagnons qui progressent ([[Compagnons]]).
 - **Dépend de** : [[Combat tactique sur grille]], [[Jauge de chaîne Wu Xing]], [[Potentiel]], [[Progression par l'usage]]
 - **Alimente** : [[Armure par zone et constructions]], [[Double niveau combat et général]], [[Domination et multiplicateurs]]
 - **Voir aussi** : [[Le vocabulaire des modules et l'absence d'arbre de talents]], [[Compagnons]], [[Trous connus du combat]], [[Pipeline de résolution du combat]], [[Décision — Multi-ennemis et jauge]]
+
+> [!note] 2026-09-04, 21 h — l'écran de fin nomme ses pistes dans la langue et tait celles qui sont vides
+> Vu sur le GIF des compagnons : « element : — · competence : — · type : — · construction : plaque 9 ». Les quatre pistes s'écrivaient par leur identifiant (en anglais aussi), les vides affichaient « — », et les gains s'écrivaient par leur clé brute (« plaque »). Désormais `piste.<id>` (fr/en) nomme la piste, la compétence et le type passent par `_nom_competence`, la construction par `construction.<id>.nom`, et une piste vide n'est pas écrite.

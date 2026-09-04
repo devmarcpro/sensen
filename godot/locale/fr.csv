@@ -3330,3 +3330,7 @@ volet.corruption,corruption {n} %
 volet.lieu_donjon,"{theme} · étage {etage}/{etages}"
 volet.horloge_donjon,horloge {ticks}
 volet.arme,en main : {arme}
+piste.element,élément
+piste.competence,compétence
+piste.type,type d'attaque
+piste.construction,armure

@@ -2219,11 +2219,21 @@ func _sur_fin_de_combat(_nom: String) -> void:
 		return
 	ecran_fin = [tr("ui.fin.titre").format({"issue": tr("ui.fin.victoire") if dc.victoire else tr("ui.fin.defaite"), "ticks": dc.ticks})]
 	for piste in ["element", "competence", "type", "construction"]:
+		if j.xp[piste].is_empty():
+			continue   # une piste vide ne dit rien (elle affichait « — »)
 		var parts: Array[String] = []
 		for k in j.xp[piste].keys():
-			var nom: String = tr("element." + k) if piste == "element" else str(k)
+			var nom := str(k)   # les identifiants bruts (« plaque », « epee ») passent par leur clé (XP de combat, 2026-09-04)
+			match piste:
+				"element":
+					nom = tr("element." + str(k))
+				"competence", "type":
+					nom = tr(sim._nom_competence(str(k)))
+				"construction":
+					var ck := "construction." + str(k) + ".nom"
+					nom = tr(ck) if tr(ck) != ck else str(k)
 			parts.append("%s %d" % [nom, j.xp[piste][k]])
-		ecran_fin.append(tr("ui.fin.piste").format({"piste": piste, "detail": ", ".join(parts) if not parts.is_empty() else "—"}))
+		ecran_fin.append(tr("ui.fin.piste").format({"piste": tr("piste." + piste), "detail": ", ".join(parts)}))
 	var gagnes: Array[String] = []
 	for g in dc.get("niveaux", []):
 		if g.id == j.id:
