@@ -3212,3 +3212,11 @@ ui.gestion.perimetre_touche,P: a harvest perimeter on this cell (wood → ore �
 ui.assigner.perimetre,"{fonction} on the {type} perimeter at ({x},{y}) — {richesse} tiles"
 journal.perimetre_cree,"{type} perimeter at ({x},{y}): {richesse} tiles"
 journal.perimetre_retire,"The perimeter at ({x},{y}) is removed"
+perimetre.residentiel.name,residential
+ui.perimetre.titre,PERIMETER — which type? (then two clicks on the map, Esc cancels)
+ui.perimetre.aide,Enter: pick this type, then click the two corners of the rectangle
+journal.perimetre_dessin,{type} perimeter: click the two corners
+journal.perimetre_hors_claim,The perimeter must be on a claimed cell
+journal.maison_batie,"A cottage is built for {nom} at ({x},{y})"
+journal.maison_pas_de_place,No room in the residential area to house {nom}
+journal.maison_pas_de_materiaux,Not enough materials in stock to house {nom}

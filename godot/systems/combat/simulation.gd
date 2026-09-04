@@ -2053,7 +2053,11 @@ func _assigner(e: Dictionary, pnj_id: String, fonction: String, tick: int, perim
 	x["role"] = "resident"
 	x["assignation"] = {"fonction": fonction, "cellule": cell}
 	if not perimetre.is_empty() and perimetres().has(perimetre):   # assigné sur un périmètre de récolte (2026-09-04)
-		x.assignation["perimetre"] = perimetre
+		var tp_a: Dictionary = _ry().get("perimetres", {}).get("types", {}).get(str(perimetres()[perimetre].type), {})
+		if bool(tp_a.get("residentiel", false)):
+			x.assignation["residence"] = perimetre   # il y habite : une maison s'y bâtira (Population et exploitation)
+		else:
+			x.assignation["perimetre"] = perimetre
 	x["poste"] = x.pos
 	x.ancre = x.pos
 	x["place"] = x.pos
@@ -3141,6 +3145,7 @@ func _semaine_territoire(e: Dictionary) -> void:
 		if str(monde.claims[cell].role) == "ressources":
 			monde.modifications.erase(cell)
 	_repousser_perimetres()
+	_batir_maisons()   # les maisons automatiques du résidentiel (Population et exploitation, 2026-09-04)
 	var entretien := int(ry.entretien_pnj) * residents().size() + int(ry.entretien_structure) * _structures_speciales()
 	if not str(territoire.gouvernance).is_empty():
 		var g: Dictionary = GameData.entree("governments", str(territoire.gouvernance))
@@ -5026,25 +5031,76 @@ func perimetres() -> Dictionary:
 	return territoire.perimetres
 
 
-## Le périmètre d'une cellule, s'il y en a un ("" sinon) : un type par cellule.
+## Le premier périmètre d'une cellule ("" sinon) — celui que la touche P de l'écran Gestion fait tourner.
 func perimetre_de(cell: Vector2i) -> String:
-	for pid in perimetres().keys():
-		if perimetres()[pid].cellule == cell:
-			return str(pid)
+	for pid in perimetres_de(cell):
+		return str(pid)
 	return ""
 
 
-## Créer (ou retyper) le périmètre d'une cellule revendiquée, et le scanner si la cellule est dans la fenêtre.
-func creer_perimetre(cell: Vector2i, type: String) -> String:
+## Tous les périmètres d'une cellule : depuis le 2026-09-04 (10 h 25) le joueur les DESSINE, il peut y en avoir plusieurs.
+func perimetres_de(cell: Vector2i) -> Array:
+	var res: Array = []
+	for pid in perimetres().keys():
+		if perimetres()[pid].cellule == cell:
+			res.append(str(pid))
+	return res
+
+
+## Les tuiles d'un périmètre, en coordonnées monde : celles qu'il porte (dessinées), sinon toute la cellule.
+func tuiles_de_perimetre(pid: String) -> Array:
+	var per: Dictionary = perimetres().get(pid, {})
+	if per.is_empty() or monde == null:
+		return []
+	var cell: Vector2i = per.cellule
+	var res: Array = []
+	if per.has("tuiles") and not (per.tuiles as Array).is_empty():
+		for t in per.tuiles:
+			res.append(monde.pos_monde(cell, t))
+		return res
+	for ly in monde.taille:
+		for lx in monde.taille:
+			res.append(monde.pos_monde(cell, Vector2i(lx, ly)))
+	return res
+
+
+## Créer un périmètre sur une cellule revendiquée : dessiné (`tuiles`, en coordonnées locales) ou, sans tuiles,
+## la cellule entière — un seul de ce genre par cellule, retypé s'il existe. Scanné si la cellule est dans la fenêtre.
+func creer_perimetre(cell: Vector2i, type: String, tuiles: Array = []) -> String:
 	if monde == null or not monde.claims.has(cell) or not _ry().get("perimetres", {}).get("types", {}).has(type):
 		return ""
-	var pid := perimetre_de(cell)
+	var pid := ""
+	if tuiles.is_empty():
+		for autre in perimetres_de(cell):
+			if not perimetres()[autre].has("tuiles"):
+				pid = str(autre)
 	if pid.is_empty():
-		pid = "per_%d_%d" % [cell.x, cell.y]
+		var n := 1
+		while perimetres().has("per_%d_%d_%d" % [cell.x, cell.y, n]):
+			n += 1
+		pid = "per_%d_%d_%d" % [cell.x, cell.y, n]
 	perimetres()[pid] = {"id": pid, "cellule": cell, "type": type, "richesse": 0, "reserve": 0.0, "dominant": "", "matieres": {}}
+	if not tuiles.is_empty():
+		perimetres()[pid]["tuiles"] = tuiles.duplicate()
 	scanner_perimetre(pid)
 	EventBus.emettre(&"journal", [&"journal.perimetre_cree", {"type": tr("perimetre.%s.name" % type), "x": cell.x, "y": cell.y, "richesse": int(perimetres()[pid].richesse)}])
 	return pid
+
+
+## Dessiner un périmètre depuis deux coins en coordonnées monde (Écrans d'interface, 2026-09-04) : le rectangle,
+## coupé à la cellule du premier coin. Retourne l'id, ou "" si la cellule n'est pas revendiquée.
+func dessiner_perimetre(a: Vector2i, b: Vector2i, type: String) -> String:
+	if monde == null:
+		return ""
+	var cell := monde.cellule_de(a)
+	var tuiles: Array = []
+	for y in range(mini(a.y, b.y), maxi(a.y, b.y) + 1):
+		for x in range(mini(a.x, b.x), maxi(a.x, b.x) + 1):
+			var pos := Vector2i(x, y)
+			if monde.cellule_de(pos) == cell:
+				var li := monde.idx_local(pos)
+				tuiles.append(Vector2i(li % monde.taille, li / monde.taille))
+	return creer_perimetre(cell, type, tuiles)
 
 
 ## Retirer un périmètre : ses résidents reviennent à la production de leur fonction.
@@ -5056,6 +5112,8 @@ func retirer_perimetre(pid: String) -> bool:
 	for x in residents():
 		if str(x.assignation.get("perimetre", "")) == pid:
 			x.assignation.erase("perimetre")
+		if str(x.assignation.get("residence", "")) == pid:
+			x.assignation.erase("residence")
 	EventBus.emettre(&"journal", [&"journal.perimetre_retire", {"x": cell.x, "y": cell.y}])
 	return true
 
@@ -5074,17 +5132,21 @@ func scanner_perimetre(pid: String) -> int:
 	var tag := str(tp.get("tag", ""))
 	var matieres := {}
 	var n := 0
-	for ly in monde.taille:
-		for lx in monde.taille:
-			var pos := monde.pos_monde(cell, Vector2i(lx, ly))
-			if not grille.dans(pos) or not (tag in grille.contenu_de(pos).get("tags", [])):
-				continue
-			n += 1
-			var m := grille.materiau_de(pos)
-			if m.is_empty():
-				m = str(tp.get("materiau_defaut", ""))
-			if not m.is_empty():
-				matieres[m] = int(matieres.get(m, 0)) + 1
+	for pos in tuiles_de_perimetre(pid):
+		if not grille.dans(pos):
+			continue
+		if bool(tp.get("residentiel", false)):   # un résidentiel : sa richesse, ce sont ses tuiles libres
+			if not grille.bloque_passage(pos) and grille.occupant(pos).is_empty():
+				n += 1
+			continue
+		if not (tag in grille.contenu_de(pos).get("tags", [])):
+			continue
+		n += 1
+		var m := grille.materiau_de(pos)
+		if m.is_empty():
+			m = str(tp.get("materiau_defaut", ""))
+		if not m.is_empty():
+			matieres[m] = int(matieres.get(m, 0)) + 1
 	var dominant := str(tp.get("materiau_defaut", ""))
 	var meilleur := 0
 	for m in matieres.keys():
@@ -5110,20 +5172,155 @@ func _poste_de_perimetre(pid: String, depuis: Vector2i) -> Vector2i:
 	var tag := str(_ry().get("perimetres", {}).get("types", {}).get(str(per.type), {}).get("tag", ""))
 	var meilleur := Vector2i(-1, -1)
 	var dmin := 999999
-	for ly in monde.taille:
-		for lx in monde.taille:
-			var pos := monde.pos_monde(cell, Vector2i(lx, ly))
-			if not grille.dans(pos) or not (tag in grille.contenu_de(pos).get("tags", [])):
+	if tag.is_empty():
+		return meilleur
+	for pos in tuiles_de_perimetre(pid):
+		if not grille.dans(pos) or not (tag in grille.contenu_de(pos).get("tags", [])):
+			continue
+		for v: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var q: Vector2i = pos + v
+			if not grille.dans(q) or grille.bloque_passage(q) or not grille.occupant(q).is_empty():
 				continue
-			for v: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-				var q: Vector2i = pos + v
-				if not grille.dans(q) or grille.bloque_passage(q) or not grille.occupant(q).is_empty():
-					continue
-				var d := Grille.distance(depuis, q)
-				if d < dmin:
-					dmin = d
-					meilleur = q
+			var d := Grille.distance(depuis, q)
+			if d < dmin:
+				dmin = d
+				meilleur = q
 	return meilleur
+
+
+## Prendre `n` unités d'une famille de matériaux sur le stock du territoire, n'importe quelle forme : vrai si on a pu.
+func _prendre_stock_famille(famille: String, n: int) -> bool:
+	var fam: Dictionary = GameData.config("material_families").get(famille, {})
+	var cles: Array = []
+	var total := 0
+	for cle in territoire.stocks.keys():
+		var mat_id := str(cle).split("|")[0]
+		var mat: Dictionary = GameData.catalogues.materials.get(mat_id, {})
+		var ok: bool = (fam.has("category") and str(mat.get("category", "")) == str(fam.category)) \
+			or (fam.has("material") and mat_id == str(fam.material)) \
+			or (fam.has("tag") and str(fam.tag) in mat.get("tags", []))
+		if ok:
+			cles.append(cle)
+			total += int(territoire.stocks[cle])
+	if total < n:
+		return false
+	var reste := n
+	for cle in cles:
+		var pris := mini(reste, int(territoire.stocks[cle]))
+		territoire.stocks[cle] = int(territoire.stocks[cle]) - pris
+		if int(territoire.stocks[cle]) <= 0:
+			territoire.stocks.erase(cle)
+		reste -= pris
+		if reste <= 0:
+			break
+	return true
+
+
+## Les maisons automatiques (Population et exploitation, 2026-09-04) : au passage de semaine, chaque résident
+## assigné à un périmètre résidentiel sans lit valide se fait bâtir le préfab `royaume.maisons.plan` sur les tuiles
+## libres du périmètre, si le stock a `royaume.maisons.cout`. Seulement quand la cellule est dans la fenêtre.
+func _batir_maisons() -> int:
+	var mc: Dictionary = _ry().get("maisons", {})
+	if mc.is_empty() or monde == null or lieu != "camp":
+		return 0
+	var bat: Dictionary = GameData.catalogues.get("village_buildings", {}).get(str(mc.get("plan", "chaumiere")), {})
+	if bat.is_empty():
+		return 0
+	var plan: Array = bat.plan
+	var meubles: Dictionary = bat.get("meubles", {})
+	var baties := 0
+	for x in residents():
+		if baties >= int(mc.get("max_par_semaine", 2)):
+			break
+		var pid := str(x.assignation.get("residence", ""))
+		if pid.is_empty() or not perimetres().has(pid):
+			continue
+		var cell: Vector2i = perimetres()[pid].cellule
+		if absi(cell.x - monde.centre.x) > monde.rayon or absi(cell.y - monde.centre.y) > monde.rayon:
+			continue
+		if x.has("lit") and not _piece_du_lit(x.lit, pieces_de_cellule(cell)).is_empty():
+			continue   # déjà logé dans une pièce valide
+		var origine := _emplacement_maison(pid, plan)
+		if origine == Vector2i(-1, -1):
+			EventBus.emettre(&"journal", [&"journal.maison_pas_de_place", {"nom": x.name_key}])
+			continue
+		var ok := true
+		for c in mc.get("cout", []):
+			if not _prendre_stock_famille(str(c.famille), int(c.n)):
+				ok = false
+		if not ok:
+			EventBus.emettre(&"journal", [&"journal.maison_pas_de_materiaux", {"nom": x.name_key}])
+			return baties
+		var lit := Vector2i(-1, -1)
+		var mat_mur := _materiau_de_famille(str(mc.get("cout", [{"famille": "bois"}])[0].famille))
+		for y in plan.size():
+			var ligne: String = plan[y]
+			for xx in ligne.length():
+				var ch := ligne[xx]
+				var pos := origine + Vector2i(xx, y)
+				var idx := grille.idx(pos)
+				if ch == "#":
+					grille.poser_contenu(pos, "mur_construit")
+					grille.materiaux[idx] = mat_mur
+				elif ch == "P":
+					grille.poser_contenu(pos, "porte")
+					grille.materiaux[idx] = mat_mur
+				elif meubles.has(ch):
+					var m: Dictionary = GameData.entree("meubles", str(meubles[ch]))
+					grille.poser_contenu(pos, "meuble" if bool(m.get("bloque_passage", false)) else "meuble_sol")
+					grille.meubles[idx] = str(meubles[ch])
+					if str(meubles[ch]).begins_with("lit"):
+						lit = pos
+				grille.marquer(pos)
+				EventBus.emettre(&"tile_changed", [pos])
+		if lit != Vector2i(-1, -1):
+			x["lit"] = lit
+		x.humeur = int(_ry().humeur_base)
+		lumiere_sale = true
+		baties += 1
+		EventBus.emettre(&"journal", [&"journal.maison_batie", {"nom": x.name_key, "x": origine.x, "y": origine.y}])
+	if baties > 0:
+		_recalculer_humeurs()
+	return baties
+
+
+## Un matériau de la famille pour les murs : le premier du catalogue qui en est, sinon le nom de la famille.
+func _materiau_de_famille(famille: String) -> String:
+	var fam: Dictionary = GameData.config("material_families").get(famille, {})
+	if fam.has("material"):
+		return str(fam.material)
+	for mid in GameData.catalogues.materials.keys():
+		var mat: Dictionary = GameData.catalogues.materials[mid]
+		if fam.has("category") and str(mat.get("category", "")) == str(fam.category):
+			return str(mid)
+	return famille
+
+
+## Où poser le préfab dans un périmètre : la première origine dont toute l'empreinte tient sur des tuiles du
+## périmètre, libres, praticables, sans construction ni meuble ; (−1, −1) sinon.
+func _emplacement_maison(pid: String, plan: Array) -> Vector2i:
+	var tuiles: Array = tuiles_de_perimetre(pid)
+	var dedans := {}
+	for t in tuiles:
+		dedans[t] = true
+	var h: int = plan.size()
+	var w: int = 0
+	for ligne in plan:
+		w = maxi(w, str(ligne).length())
+	for o in tuiles:
+		var ok := true
+		for y in h:
+			for x in w:
+				var pos: Vector2i = o + Vector2i(x, y)
+				if not dedans.has(pos) or not grille.dans(pos) or grille.bloque_passage(pos) or not grille.occupant(pos).is_empty() \
+					or grille.meubles.has(grille.idx(pos)) or ("construit" in grille.contenu_de(pos).get("tags", [])):
+					ok = false
+					break
+			if not ok:
+				break
+		if ok:
+			return o
+	return Vector2i(-1, -1)
 
 
 ## Le passage de semaine : la réserve d'un périmètre repousse sur une cellule Ressources naturelles (Rôles de cases).

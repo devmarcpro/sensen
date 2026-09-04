@@ -535,6 +535,8 @@ func rafraichir() -> void:
 			_construire_registre(j)
 		"assigner":
 			_construire_assigner(j)
+		"perimetre":
+			_construire_perimetre(j)
 		"echange":
 			_construire_echange(j)
 		"entrainer":
@@ -742,6 +744,11 @@ func _action_principale() -> void:
 			var cell: Vector2i = en.cellule
 			var actuel := str(main.sim.monde.claims[cell].role)
 			main.sim.changer_role(cell, str(roles[(roles.find(actuel) + 1) % roles.size()]))
+		"type_perimetre":   # le type choisi : le monde attend deux clics
+			main.mode_perimetre = {"type": str(en.type)}
+			fermer()
+			main._log(tr("journal.perimetre_dessin").format({"type": tr("perimetre.%s.name" % str(en.type))}))
+			return
 		"resident":   # Entrée : réassigner — le choix de fonction s'ouvre depuis l'écran (Gestion de base, étape 2)
 			pnj_id = str(en.id)
 			ouvrir("assigner")
@@ -2039,6 +2046,15 @@ func _construire_contexte(_j: Dictionary) -> void:
 	for opt in contexte_options:
 		liste.add_item(tr("option." + str(opt.id)))
 		entrees.append({"kind": "contexte", "opt": opt, "texte": ""})
+
+
+## Le type d'un périmètre à dessiner (Gestion de base, 2026-09-04) : on choisit, l'écran se ferme, deux clics dessinent.
+func _construire_perimetre(_j: Dictionary) -> void:
+	titre.text = tr("ui.perimetre.titre")
+	var pcfg: Dictionary = main.sim.regles.r.royaume.get("perimetres", {})
+	for t in pcfg.get("ordre", []):
+		liste.add_item(tr("perimetre.%s.name" % str(t)))
+		entrees.append({"kind": "type_perimetre", "type": str(t), "texte": tr("ui.perimetre.aide")})
 
 
 func _construire_assigner(j: Dictionary) -> void:

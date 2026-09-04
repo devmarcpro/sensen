@@ -457,7 +457,8 @@ func _ready() -> void:
 		return
 	for ipr in args.size():   # --perimetre bois|minerai|plantes : un périmètre de récolte sur la cellule du camp (Gestion de base, 2026-09-04)
 		if args[ipr] == "--perimetre" and ipr + 1 < args.size() and scene.sim != null and scene.sim.monde != null:
-			scene.sim.creer_perimetre(scene.sim.monde.cellule_camp, str(args[ipr + 1]))
+			var jp: Dictionary = scene.joueur()   # dessiné : un rectangle de 6×4 à l'est du joueur, pour voir la teinte sur la carte
+			scene.sim.dessiner_perimetre(jp.pos + Vector2i(2, -1), jp.pos + Vector2i(7, 2), str(args[ipr + 1]))
 	for i2 in args.size():   # --ecran inventaire|atelier|feuille|menu : l'écran ouvert — après le chargement
 		if args[i2] == "--ecran" and i2 + 1 < args.size():
 			scene.ecrans.ouvrir(args[i2 + 1])

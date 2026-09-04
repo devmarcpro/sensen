@@ -3221,3 +3221,11 @@ ui.gestion.perimetre_touche,P : un périmètre de récolte sur cette cellule (bo
 ui.assigner.perimetre,"{fonction} sur le périmètre {type} de ({x},{y}) — {richesse} tuiles"
 journal.perimetre_cree,"Périmètre {type} sur ({x},{y}) : {richesse} tuiles"
 journal.perimetre_retire,"Le périmètre de ({x},{y}) est retiré"
+perimetre.residentiel.name,résidentiel
+ui.perimetre.titre,PÉRIMÈTRE — quel type ? (puis deux clics sur la carte, Échap annule)
+ui.perimetre.aide,Entrée : choisir ce type, puis cliquer les deux coins du rectangle
+journal.perimetre_dessin,Périmètre {type} : clique les deux coins
+journal.perimetre_hors_claim,Le périmètre doit être sur une cellule revendiquée
+journal.maison_batie,"Une chaumière est bâtie pour {nom} en ({x},{y})"
+journal.maison_pas_de_place,Pas de place dans le résidentiel pour loger {nom}
+journal.maison_pas_de_materiaux,Pas assez de matériaux au stock pour loger {nom}

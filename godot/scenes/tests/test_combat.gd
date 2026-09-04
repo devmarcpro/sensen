@@ -3957,6 +3957,41 @@ func test_perimetres() -> void:
 	s.monde.claims[camp].role = "base"
 	# retirer le périmètre : le bûcheron revient à la production de sa fonction
 	verifier(s.retirer_perimetre(pid) and not v.assignation.has("perimetre") and s.perimetre_de(camp).is_empty(), "périmètre retiré : le résident revient à sa fonction")
+	# Les périmètres DESSINÉS (designer, 10 h 25) : un rectangle de trois sur trois autour des pins ne compte qu'eux
+	var coin_a: Vector2i = j.pos + Vector2i(3, 1)
+	var coin_b: Vector2i = j.pos + Vector2i(7, 3)
+	var pid_d := s.dessiner_perimetre(coin_a, coin_b, "bois")
+	var per_d: Dictionary = s.perimetres().get(pid_d, {})
+	verifier(not pid_d.is_empty() and per_d.has("tuiles") and (per_d.tuiles as Array).size() == 15 and int(per_d.richesse) == 5 and s.tuiles_de_perimetre(pid_d).size() == 15, "un rectangle dessiné de 5×3 : quinze tuiles, cinq pins comptés (%d tuiles, richesse %d)" % [(per_d.get("tuiles", []) as Array).size(), int(per_d.get("richesse", 0))])
+	verifier(s.dessiner_perimetre(coin_a, coin_b, "minerai") != pid_d and s.perimetres_de(camp).size() == 2, "un second périmètre dessiné sur la même cellule : deux périmètres")
+	verifier(s.dessiner_perimetre(Vector2i(-50, -50), Vector2i(-40, -40), "bois").is_empty(), "hors d'une cellule revendiquée : refusé")
+	# Le résidentiel et les maisons automatiques (designer, 10 h 25) : un résident assigné, du bois au stock, une chaumière
+	var libre := Vector2i(-1, -1)   # un carré de 8×6 de tuiles libres, à l'ouest ou au sud du joueur
+	for essai in [Vector2i(-12, -3), Vector2i(-12, 4), Vector2i(3, 6), Vector2i(-6, 8), Vector2i(8, 8)]:
+		var o: Vector2i = j.pos + essai
+		var ok_l := true
+		for y in 6:
+			for x in 8:
+				var q2: Vector2i = o + Vector2i(x, y)
+				if not s.grille.dans(q2) or s.grille.bloque_passage(q2) or not s.grille.occupant(q2).is_empty() or s.grille.meubles.has(s.grille.idx(q2)) or s._cell_de(q2) != camp:
+					ok_l = false
+		if ok_l:
+			libre = o
+			break
+	verifier(libre != Vector2i(-1, -1), "un carré libre de 8×6 existe près du camp")
+	var pid_r := s.dessiner_perimetre(libre, libre + Vector2i(7, 5), "residentiel")
+	verifier(not pid_r.is_empty() and int(s.perimetres()[pid_r].richesse) >= 40, "un périmètre résidentiel dessiné : ses tuiles libres sont sa richesse (%d)" % int(s.perimetres().get(pid_r, {}).get("richesse", 0)))
+	var h := s.ajouter("villageois", j.pos + Vector2i(-1, 0), "ia")
+	h.camp = "joueur"
+	verifier(s._assigner(j, h.id, "oisif", 0, pid_r) and str(h.assignation.get("residence", "")) == pid_r and not h.assignation.has("perimetre"), "assigné au résidentiel : il y habite, ce n'est pas une production")
+	s.territoire.stocks.clear()
+	verifier(s._batir_maisons() == 0 and not h.has("lit"), "sans matériaux au stock : rien ne se bâtit")
+	s.territoire.stocks["chene|brut"] = 20
+	var n_maisons: int = s._batir_maisons()
+	verifier(n_maisons == 1 and h.has("lit") and s.grille.meubles.get(s.grille.idx(h.lit), "").begins_with("lit"), "avec vingt chênes bruts au stock : une chaumière, et son lit (%s)" % str(h.get("lit", Vector2i(-1, -1))))
+	verifier(int(s.territoire.stocks.get("chene|brut", 0)) == 20 - int(s.regles.r.royaume.maisons.cout[0].n), "le bois est pris sur le stock (reste %d)" % int(s.territoire.stocks.get("chene|brut", 0)))
+	verifier(not s._piece_du_lit(h.lit, s.pieces_de_cellule(camp)).is_empty(), "la chaumière est une pièce valide au sens de Détection de pièces")
+	verifier(s._batir_maisons() == 0, "logé : on ne lui bâtit pas une seconde maison")
 	s.monde.fermer()
 
 

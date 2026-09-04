@@ -1006,16 +1006,58 @@
           "fonction": "herboriste",
           "par_tuile_semaine": 0.8,
           "materiau_defaut": ""
+        },
+        "residentiel": {
+          "tag": "",
+          "skill": "",
+          "fonction": "oisif",
+          "par_tuile_semaine": 0.0,
+          "materiau_defaut": "",
+          "residentiel": true
         }
       },
       "ordre": [
         "bois",
         "minerai",
-        "plantes"
+        "plantes",
+        "residentiel"
       ],
       "unites_par_tuile": 1.5,
       "tuiles_max_par_resident": 20,
-      "repousse_hebdo": 0.1
+      "repousse_hebdo": 0.1,
+      "teintes": {
+        "bois": [
+          0.3,
+          0.7,
+          0.3
+        ],
+        "minerai": [
+          0.7,
+          0.6,
+          0.3
+        ],
+        "plantes": [
+          0.5,
+          0.8,
+          0.5
+        ],
+        "residentiel": [
+          0.6,
+          0.5,
+          0.9
+        ]
+      }
+    },
+    "maisons": {
+      "_doc": "Les maisons automatiques (Population et exploitation, 2026-09-04) : un resident assigne a un perimetre residentiel sans lit valide se fait batir `plan` (un prefab de village_buildings) sur les tuiles libres du perimetre, au passage de semaine, si le stock du territoire a `cout` (par famille de materiau, n'importe quelle forme). max_par_semaine borne le chantier.",
+      "plan": "chaumiere",
+      "cout": [
+        {
+          "famille": "bois",
+          "n": 12
+        }
+      ],
+      "max_par_semaine": 2
     }
   },
   "alchimie": {

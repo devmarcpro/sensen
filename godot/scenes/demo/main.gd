@@ -32,6 +32,7 @@ var lourde_armee := false            # la prochaine attaque au clic est une lour
 var visee_objet := ""                # une bombe sélectionnée dans la hotbar, à lancer au clic
 var visee_parchemin := ""            # un parchemin sélectionné : le clic lit le sort qu'il porte
 var survol := Vector2i(-1, -1)
+var mode_perimetre: Dictionary = {}   # un périmètre en cours de dessin : {type, coin} (Gestion de base, 2026-09-04)
 var journal: Array[String] = []
 var telegraphes: Dictionary = {}   # id → action engagée
 var atteignables: Dictionary = {}
@@ -989,6 +990,9 @@ func _unhandled_input(ev: InputEvent) -> void:
 				ecrans.basculer("menu")
 			KEY_V:
 				ecrans.basculer("triche")   # menu de triche : tout obtenir, tout déclencher
+			KEY_P:
+				if sim.lieu == "camp" and sim.monde != null:   # dessiner un périmètre de récolte (Décision — Gestion de base)
+					ecrans.basculer("perimetre")
 			KEY_E:
 				_interagir()
 			KEY_R:
@@ -998,6 +1002,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 			KEY_ESCAPE:
 				visee = -1
 				hotbar_sel = -1
+				mode_perimetre = {}   # un dessin de périmètre en cours s'annule
 				lourde_armee = false
 				visee_objet = ""
 			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_0:
@@ -1382,6 +1387,16 @@ func _clic(t: Vector2i, lourde: bool) -> void:
 	if t.x < 0:
 		return
 	var j := joueur()
+	if not mode_perimetre.is_empty():   # le dessin d'un périmètre : deux coins, puis le rectangle (Gestion de base, 2026-09-04)
+		if not mode_perimetre.has("coin"):
+			mode_perimetre["coin"] = t
+			return
+		var pid: String = sim.dessiner_perimetre(mode_perimetre.coin, t, str(mode_perimetre.type))
+		if pid.is_empty():
+			_log(tr("journal.perimetre_hors_claim"))
+		mode_perimetre = {}
+		queue_redraw()
+		return
 	if not visee_parchemin.is_empty():   # un parchemin visé : le clic lit son sort, gratuitement
 		if sim.attente.has(joueur_id):
 			if sim.intention(joueur_id, {"type": "parchemin", "objet": visee_parchemin, "cible": t}):
@@ -1483,6 +1498,21 @@ func _draw() -> void:
 	var g := sim.grille
 	var j := joueur()
 	# Superpositions translucides sur les tuiles (atteignables, télégraphes, survol, forme visée).
+	if sim.lieu == "camp" and sim.monde != null:   # les périmètres de récolte, teintés par type (Gestion de base, 2026-09-04)
+		var teintes: Dictionary = sim.regles.r.royaume.get("perimetres", {}).get("teintes", {})
+		for pid in sim.perimetres().keys():
+			var per: Dictionary = sim.perimetres()[pid]
+			if not per.has("tuiles"):
+				continue   # un périmètre « cellule entière » ne se dessine pas : il couvrirait tout
+			var tc: Array = teintes.get(str(per.type), [0.8, 0.8, 0.8])
+			for t in sim.tuiles_de_perimetre(str(pid)):
+				if g.dans(t):
+					_losange(t, Color(float(tc[0]), float(tc[1]), float(tc[2]), 0.28))
+		if mode_perimetre.has("coin") and survol.x >= 0:   # le rectangle en cours
+			var c0: Vector2i = mode_perimetre.coin
+			for y in range(mini(c0.y, survol.y), maxi(c0.y, survol.y) + 1):
+				for x in range(mini(c0.x, survol.x), maxi(c0.x, survol.x) + 1):
+					_losange(Vector2i(x, y), Color(1, 1, 1, 0.3))
 	if survol.x >= 0:
 		_losange(survol, Color(1, 1, 1, 0.22))
 	for b in sim.bombes:
