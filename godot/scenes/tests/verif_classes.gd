@@ -71,11 +71,12 @@ func _ready() -> void:
 			stat_arme = str(GameData.catalogues.competences.get(str(fo_mn.get("combat_skill", "")), {}).get("stat", ""))
 		var grille_k: Array = s.grille_sort.grille_de(stat_arme, 0)
 		for cap in fiche.get("capacites", []):
-			var emb := s.grille_sort.emboiter(Array(cap.modules), grille_k)
-			if not emb.ok:
-				lignes.append("%s: NE RENTRE PAS dans la grille de %s (%d cases pour %d)" % [str(cap.id), stat_arme if not stat_arme.is_empty() else "mains nues", s.grille_sort.taille_de(Array(cap.modules)), grille_k.size()])
-				soucis += 1
-			soucis += 1
+			# une grille par ETAPE (designer 2026-09-04) : un declencheur ouvre une etape, qui a sa propre grille — on juge chaque etape seule
+			for et in s.grille_sort.etapes_de(Array(cap.modules)):
+				var emb := s.grille_sort.emboiter(et, grille_k)
+				if not emb.ok:
+					lignes.append("%s: NE RENTRE PAS dans la grille de %s (%d cases pour %d)" % [str(cap.id), stat_arme if not stat_arme.is_empty() else "mains nues", s.grille_sort.taille_de(et), grille_k.size()])
+					soucis += 1			soucis += 1
 		print("CLASSE %-14s | %s" % [cid, " · ".join(PackedStringArray(lignes))])
 	# CLASSE ET SOUS-CLASSE (designer 2026-09-03) : chaque sous-classe releve d'une classe mere, et
 	# chaque mere porte une stat. Une sous-classe orpheline serait injouable a la creation ; une mere
