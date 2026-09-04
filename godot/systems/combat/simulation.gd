@@ -9754,6 +9754,8 @@ func triche(e: Dictionary, action: String, arg: String = "") -> bool:
 		"materiau":
 			_donner_materiau(e, arg, 20, "brut")
 		"creature":
+			if not GameData.existe("creatures", arg):   # un identifiant inconnu (« rat » pour rat_geant) plantait dans instancier
+				return false
 			var libre := _tuile_libre_autour(e.pos)
 			if libre == Vector2i(-1, -1):
 				return false
@@ -10177,12 +10179,15 @@ func _action_creature_possible(e: Dictionary, action: Dictionary, cible: Diction
 	return true   # anneau/soi : toujours lançable
 
 
-func _lancer_action_creature(e: Dictionary, action: Dictionary, cible: Dictionary, tick: int) -> void:
+func _lancer_action_creature(e: Dictionary, action: Dictionary, cible: Dictionary, _tick: int) -> void:
 	var ticks := int(action.cout_ticks)
 	if not cible.is_empty():
 		e.orientation = Vector2i(signi(cible.pos.x - e.pos.x), signi(cible.pos.y - e.pos.y))
 	_quitter_garde(e)
-	e.compteur = tick + ticks
+	# Sur l'horloge de l'être, pas sur le tick reçu : l'engagement qui précède (_engager_combat) vient de le faire
+	# changer d'horloge, et « tick + coût » restait un tampon du monde — un rat posé au camp mordait puis restait
+	# « agit à t=8007 » dans un combat à t=15, figé, le joueur seul en combat avec lui (capture --dump, 2026-09-04).
+	e.compteur = horloge_de(e).ticks + ticks
 	if regles.est_telegraphee(ticks) or "telegraphe" in action.tags:
 		e.action_en_cours = {"type": "creature", "action": action.id, "cible": cible.get("id", ""), "ticks": ticks, "name_key": action.name_key}
 		EventBus.emettre(&"journal", [&"journal.telegraphe", {"nom": e.name_key, "action": action.name_key, "ticks": ticks}])
@@ -11751,7 +11756,10 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 				appliquer_statut(e, "terreur", int(regles.r.talents.sans_chair.terreur_ticks), x.id)
 				break
 	_decroitre_aggro(e)   # le temps efface : sans ca, une rencontre devient une course a travers l'etage
+	var horloge_avant := str(e.horloge)
 	var cible := _chercher_cible(e, tick)
+	if e.horloge != horloge_avant:   # la recherche vient d'ouvrir ou de rejoindre un combat : la suite (déplacement, attente, attaque) se compte sur cette horloge-là, pas sur le tick du monde reçu
+		tick = horloge_de(e).ticks
 	var candidates := _actions_candidates(e, cible, profil, tick)
 	var meilleure := ""
 	var meilleur_score := -1.0

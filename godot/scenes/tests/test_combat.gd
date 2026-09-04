@@ -4030,6 +4030,32 @@ func test_compagnon_se_bat() -> void:
 	verifier(int(c.sante) <= sante_c0, "le bandit a rendu les coups ou pas, mais le compagnon est resté dans le combat (%d/%d)" % [int(c.sante), sante_c0])
 
 
+## Une bête qui ouvre le combat par sa propre morsure rejoue sur l'horloge du combat (Boucle de tick, 2026-09-04) :
+## son compteur était « tick du monde + coût », un tampon que l'horloge du combat n'atteignait jamais — figée.
+func test_bete_engage_sur_son_horloge() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	s.horloge_monde.ticks = 8000   # loin de zéro : un tampon du monde ne peut pas passer pour celui d'un combat
+	var r: Dictionary = s.ajouter("rat_geant", j.pos + Vector2i(1, 0), "ia")
+	verifier(not r.is_empty() and s.ennemis(r, j), "un rat géant hostile au contact du joueur")
+	for k in 6:
+		s.attente[j.id] = true
+		s.intention(j.id, {"type": "attendre"})
+		s.pas("monde")
+		if s.en_combat(r):
+			break
+	verifier(s.en_combat(r), "le rat a ouvert le combat de lui-même")
+	var h: int = s.horloge_de(r).ticks
+	verifier(int(r.compteur) >= h and int(r.compteur) <= h + 100, "le rat rejoue sur l'horloge du combat (compteur %d, combat à t=%d)" % [int(r.compteur), h])
+	var sante0 := int(j.sante)
+	for k in 12:   # et il joue vraiment : le joueur qui attend prend des morsures
+		s.attente[j.id] = true
+		s.intention(j.id, {"type": "attendre"})
+		for nom in s.combats.keys():
+			s.pas(nom)
+	verifier(int(j.sante) < sante0 or not j.vivant, "le rat a mordu pendant que le joueur attendait (%d → %d)" % [sante0, int(j.sante)])
+
+
 ## Deux compagnons armés défendent le joueur (Compagnons, 2026-09-04) : le bandit est contre le joueur, pas contre
 ## eux — ils doivent s'approcher et frapper pendant que le joueur ne fait qu'attendre.
 func test_compagnons_defendent() -> void:

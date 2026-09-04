@@ -59,3 +59,6 @@ Le temps calendaire (jour/nuit, semaine in-game) est un compteur de ticks :
 - **Dépend de** : [[Action-time à ticks]], [[Simulation à ticks]]
 - **Alimente** : [[Pipeline de résolution du combat]], [[Endurance]], [[Mana]], [[Faim]], [[Cycle jour-nuit et sommeil]], [[Dérive de la corruption]]
 - **Voir aussi** : [[Hauteur de terrain ±10]], [[EventBus]], [[Réseau]], [[Budgets de performance]], [[Temporalités parallèles]]
+
+> [!bug] 2026-09-04, 21 h 15 — une bête qui ouvre un combat par sa propre action restait sur le tampon du monde
+> Vu par `capture --creature rat_geant --dump` : le rat mord le joueur (ce qui crée le combat et fait passer le rat sur l'horloge du combat), puis `_lancer_action_creature` écrivait `compteur = tick + coût` avec le tick **du monde** reçu en argument : « agit à t=8007 » dans un combat à t=15. Le rat ne rejouait jamais, le joueur restait seul « en combat » avec une bête figée tant qu'il ne s'éloignait pas de douze tuiles. Les attaques d'arme lisaient déjà `horloge_de(e).ticks` après l'engagement ; les actions de créature font pareil. Test `test_bete_engage_sur_son_horloge`. Le drapeau `--dump` de la capture reste : à chaque prise, les combats et les êtres à huit tuiles du joueur sur la sortie standard.

@@ -162,7 +162,7 @@ Aucune sortie ne doit contenir `SCRIPT ERROR`, et la suite doit finir par `TESTS
 #   --langue en · --graine N · --perimetre bois · --maison --assigner · --commerce --echange · --sorts gel+1 · --grande_base N (N semaines) · --ligne N (sélectionne la N-ième ligne de l'écran)
 #   GIF : --gif N --gif-pas P --gif-ticks T [--gif-marcher M] --frames 400, puis python tools/monter_gif.py user://prefixe sortie.gif 900 350
 #   --gif-action defiler|composer|carte|monde|creation|semaine : ce qui change entre deux prises d'un écran (liste qui défile, sort posé pièce à pièce, carte qui glisse, autre graine, volet suivant, une semaine à la base)
-#   --arene gorge (un NOM d'arène, pas un index) · --sans-survol : pas de bulle de prévisualisation sur la créature la plus proche
+#   --arene gorge (un NOM d'arène, pas un index) · --sans-survol : pas de bulle de prévisualisation sur la créature la plus proche · --dump : à chaque prise, les combats (horloge, participants) et les êtres à huit tuiles du joueur sur la sortie standard
 #   les PNG sortent dans %APPDATA%\Godot\app_userdata\Sensen\
 ```
 

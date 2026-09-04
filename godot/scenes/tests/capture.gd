@@ -7,6 +7,7 @@ const GrandeBase := preload("res://scenes/tests/grande_base.gd")
 var gif_images := 0      # --gif N : N images espacées, pour un GIF monté hors du jeu
 var gif_pas := 8         # --gif-pas P : images de rendu entre deux prises
 var gif_ticks := 6       # --gif-ticks T : ticks de simulation avancés entre deux prises
+var dump := false        # --dump : à chaque prise, les combats et les êtres autour du joueur sur la sortie standard (débogage d'un GIF)
 var gif_marche := 0      # --gif-marcher N : N pas du joueur entre deux prises — sans mouvement, un GIF est une image fixe
 var gif_prises := 0
 var gif_action := ""      # --gif-action defiler|composer|carte|monde|creation|semaine : ce qui change entre deux prises d'un écran (designer 2026-09-04)
@@ -30,6 +31,8 @@ func _ready() -> void:
 			gif_pas = int(args[i + 1])
 		elif args[i] == "--gif-ticks" and i + 1 < args.size():
 			gif_ticks = int(args[i + 1])
+		elif args[i] == "--dump":
+			dump = true
 		elif args[i] == "--gif-marcher" and i + 1 < args.size():
 			gif_marche = int(args[i + 1])
 		elif args[i] == "--gif-action" and i + 1 < args.size():
@@ -603,6 +606,8 @@ func _process(delta: float) -> void:
 						break
 		if not gif_action.is_empty():
 			_gif_action(gif_prises)
+		if dump and scene.sim != null:
+			_dump_etat(gif_prises)
 		if scene.sim != null and gif_ticks > 0:   # le monde vit entre deux prises : sans ça le GIF est fixe
 			for _t in gif_ticks:
 				# L'horloge du monde avance d'un tick (les êtres agissent, les timers tournent) : un simple pas("monde")
@@ -631,6 +636,19 @@ func _process(delta: float) -> void:
 ## Ce qui se passe dans un écran entre deux prises d'un GIF (designer 2026-09-04 : « des GIF avec simulation complète »).
 ## Un écran ne bouge pas tout seul : on fait défiler sa liste, on pose les pièces d'un sort une à une, on
 ## fait glisser la carte, on retire le monde, on change de volet à la création, ou une semaine passe à la base.
+## --dump : l'état qui explique une image — les combats (horloge, participants) et les êtres à 8 tuiles du joueur.
+func _dump_etat(prise: int) -> void:
+	var sim = scene.sim
+	var jd: Dictionary = scene.joueur()
+	print("dump prise %d · monde t=%d · lieu %s" % [prise, sim.horloge_monde.ticks, sim.lieu])
+	for nom in sim.combats.keys():
+		print("  combat %s · t=%d · participants %s" % [nom, sim.combats[nom].horloge.ticks, str(sim.combats[nom].participants)])
+	for e in sim.entites.values():
+		if jd.is_empty() or Grille.distance(e.pos, jd.pos) > 8:
+			continue
+		print("  %s (%s) pos %s horloge %s compteur %d cible '%s' vivant %s" % [e.id, str(e.get("def", "")), str(e.pos), str(e.horloge), int(e.compteur), str(e.get("cible", "")), str(e.vivant)])
+
+
 func _gif_action(prise: int) -> void:
 	var ec = scene.ecrans
 	match gif_action:
