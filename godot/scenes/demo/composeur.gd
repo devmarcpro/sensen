@@ -732,12 +732,43 @@ static func dessiner_carte(ci: CanvasItem, taille: Vector2, m: String, charges: 
 		ci.draw_string(ThemeDB.fallback_font, Vector2(12, 12), "×%d" % fois, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(1, 1, 1, alpha))
 	if charges >= 0:
 		ci.draw_string(ThemeDB.fallback_font, Vector2(taille.x - 20, 12), str(charges), HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0.9, 0.9, 0.8, 0.8 * alpha))
-	var nom_c := TranslationServer.translate(md.get("name_key", m)).left(8)
-	ci.draw_string(ThemeDB.fallback_font, Vector2(4, taille.y - 5), nom_c, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0.95, 0.95, 0.9, alpha))
+	var lignes_nom := nom_ajuste(TranslationServer.translate(md.get("name_key", m)), taille.x - 8.0, 8, 2)
+	var y_nom := taille.y - 5.0 - float(lignes_nom.size() - 1) * 8.0
+	for ln in lignes_nom:   # un nom plié sur deux lignes plutôt que coupé (Écrans d'interface, 2026-09-04)
+		ci.draw_string(ThemeDB.fallback_font, Vector2(4, y_nom), str(ln), HORIZONTAL_ALIGNMENT_LEFT, -1, 7 if lignes_nom.size() > 1 else 8, Color(0.95, 0.95, 0.9, alpha))
+		y_nom += 8.0
 	var st := str(md.get("style", "neutre"))   # la pastille du style de jeu, en haut à gauche
 	if st != "neutre":
 		var cs := teinte_style(st)
 		ci.draw_circle(Vector2(7, taille.y * 0.5), 3.0, Color(cs.r, cs.g, cs.b, alpha))
+
+
+## Un nom qui tient dans `largeur` pixels (Écrans d'interface, 2026-09-04) : plié sur `max_lignes` lignes au
+## dernier espace ou tiret qui tient, puis coupé avec « … » quand il ne tient toujours pas — coupé, mais en le disant.
+static func nom_ajuste(nom: String, largeur: float, police: int, max_lignes: int) -> Array:
+	var font := ThemeDB.fallback_font
+	var tient := func(t: String) -> bool: return font.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, police).x <= largeur
+	if tient.call(nom):
+		return [nom]
+	var lignes: Array = []
+	var reste := nom
+	while lignes.size() < max_lignes - 1 and not reste.is_empty():
+		var coupe := -1
+		for i in reste.length():   # le dernier séparateur après lequel le début tient encore
+			if (reste[i] == " " or reste[i] == "-") and tient.call(reste.substr(0, i)):
+				coupe = i
+		if coupe <= 0:
+			break
+		lignes.append(reste.substr(0, coupe))
+		reste = reste.substr(coupe + 1).strip_edges()
+	if tient.call(reste):
+		lignes.append(reste)
+		return lignes
+	var n := reste.length()
+	while n > 1 and not tient.call(reste.substr(0, n) + "…"):
+		n -= 1
+	lignes.append(reste.substr(0, n) + "…")
+	return lignes
 
 
 ## L'icône d'un module, dessinée par code : un cadre teinté, le pictogramme de son effet.
@@ -910,7 +941,7 @@ class GrilleControl extends Control:
 			Pictos.dessiner(self, Pictos.icone_de(md), r_ic, col)
 			if int(p.get("cran", 0)) != 0:   # le cran de puissance, en coin : +1, −2 — la pièce garde sa taille (designer 2026-09-04)
 				draw_string(ThemeDB.fallback_font, o + Vector2(cl.x, cl.y) * CASE + Vector2(CASE - 14.0, 10.0), ("+%d" % int(p.cran)) if int(p.cran) > 0 else ("−%d" % -int(p.cran)), HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(1, 1, 1, 0.95))
-			var nom_c := TranslationServer.translate(str(md.get("name_key", p.module))).left(6)
+			var nom_c: String = Composeur.nom_ajuste(TranslationServer.translate(str(md.get("name_key", p.module))), CASE - 5.0, 7, 1)[0]
 			draw_string(ThemeDB.fallback_font, o + Vector2(cl.x, cl.y) * CASE + Vector2(3, CASE - 4.0), nom_c, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.95, 0.95, 0.9))
 		if survol.x >= 0 and not donnees_survol.is_empty():   # la pièce en train d'être glissée, en clair ou en rouge
 			var g := composeur.grille_sort()
