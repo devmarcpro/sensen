@@ -240,4 +240,4 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 
 > [!success] 2026-09-04, 14 h — le journal ne raconte plus les pas et les attentes des PNJ
 > Vu sur la capture de la grande base : neuf lignes « Untel attend (5 ticks, +20 vigueur) » d'affilée, écrites par les résidents oisifs autour du joueur, et des dizaines de « Untel : Récupération atteint le niveau 2 » par semaine. `journal.attendre` et `journal.deplacement` ne s'écrivent que pour le joueur ; `journal.niveau` pour le joueur et ses compagnons (ceux qui ont un maître), pas pour les résidents — leur progression se lit dans Territoire.
-
+> *Même jour : la triche « invincible » (le joueur ne perd plus de PV) laissait passer la famine, qui écrit la santé directement — vu sur la capture de la grande base, où six semaines d'un coup tuaient le joueur malgré la triche. Elle vaut désormais aussi contre la faim.*

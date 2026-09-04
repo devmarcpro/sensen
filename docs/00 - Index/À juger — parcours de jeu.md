@@ -463,5 +463,7 @@ Le designer, 14 h : « simule une grande base sur plusieurs cases avec une vingt
 
 **6. Les migrants ne viennent pas** tant que la base est pleine (4 par cellule × 5 = 20), et une fois les départs commencés la chance (0,2 par semaine) n'en a amené aucun en quatre semaines.
 
+**7. En passant, sur la capture : « XP : Méditation +10 455 ».** Six semaines d'attente d'un coup — la régénération de mana donne 1 XP de Méditation à chaque tranche de 10 ticks tirée (1 chance sur 8), et la Récupération pareil sur la vigueur. Une nuit de sommeil (8 000 ticks) en donne donc une centaine sans rien faire. Est-ce voulu que dormir entraîne ?
+
 **Ce que je propose, si le designer me laisse trancher** : rien de tout cela n'est un bug, ce sont les chiffres. Les deux qui rendent la base injouable sont l'entretien (1) et la faim (2). Le geste conservateur : que le bois, le minerai et les plantes récoltés **valent de l'or au rapport de la semaine** (vendus au prix suggéré × la marge de la boutique) — la base se paierait avec ses zones, ce qui est la promesse des périmètres —, et un rendement de fermier à **une bouche par tuile de champ** plutôt qu'à l'heure. Les deux se règlent en données.
 

@@ -8433,7 +8433,7 @@ func _tiquer_faim(tick: int) -> void:
 			# jusqu'au bout, et le compte à rebours de la nourriture redevient une vraie horloge.
 			var pz := int(f.periode_zero)
 			var coups := tick / pz - int(e.faim_tick) / pz
-			if coups > 0:
+			if coups > 0 and not (invincible and e.controle == "joueur"):   # la triche « invincible » vaut aussi contre la famine (2026-09-04)
 				var degats := coups * maxi(int(f.get("degats_par_palier", 2)), int(e.sante_max) * int(f.pct_sante_max) / 100)
 				e.sante = int(e.sante) - degats
 				EventBus.emettre(&"journal", [&"journal.famine", {"nom": e.name_key, "n": degats}])
