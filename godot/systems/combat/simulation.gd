@@ -3181,7 +3181,9 @@ func grille_composition(e: Dictionary) -> Dictionary:
 	var fonct: Dictionary = fonctionnalites.get(str(arme.get("functionality", "")), {})
 	var comp: Dictionary = GameData.catalogues.competences.get(str(fonct.get("combat_skill", "")), {})
 	var stat := str(comp.get("stat", ""))
-	var niveau := niveau_arme(e)
+	# le niveau de LA compétence de l'arme résolue — à poings nus, celle des mains nues (revue du 2026-09-04 :
+	# `niveau_arme` relisait la main vide et rendait toujours le palier 0 au bagarreur)
+	var niveau := regles.niveau(e.get("competences_eff", e.get("competences", {})), str(fonct.get("combat_skill", "")))
 	return {"stat": stat, "niveau": niveau, "cases": grille_sort.grille_de(stat, niveau)}
 
 
@@ -3189,10 +3191,9 @@ func grille_composition(e: Dictionary) -> Dictionary:
 ## L'écran s'en sert pour dessiner ; la composition pour refuser.
 func emboitement(e: Dictionary, sequence: Array) -> Dictionary:
 	var g := grille_composition(e)
-	var res := grille_sort.emboiter(sequence, g.cases)
+	var res := grille_sort.emboiter(sequence, g.cases)   # porte déjà demande, capacite, manque
 	res["cases"] = g.cases
 	res["stat"] = g.stat
-	res["demande"] = grille_sort.taille_de(sequence)
 	return res
 
 

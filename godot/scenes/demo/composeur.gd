@@ -18,6 +18,7 @@ const ORDRE_TYPES: Array[String] = ["portee", "forme", "noyau", "modificateur", 
 var ecrans: Node                       # l'écran parent (Ecrans) : _apercu_plan, _contribution_module, sequence_composee
 var main: Node
 var placements: Array[Dictionary] = []   # les pièces posées : {module, rot, ancre: Vector2i, cases: Array}
+var sequence_refusee: Array = []         # une séquence reçue qui ne tient pas dans la grille : gardée pour le dire
 var rotation_courante := 0             # la rotation qu'aura la prochaine pièce posée (R sur une carte du catalogue)
 var piece_choisie := -1                # l'index dans `placements` de la pièce sélectionnée dans la grille (−1 : aucune)
 var selection := 0                     # la carte sélectionnée au clavier / au clic
@@ -176,10 +177,7 @@ func grille_courante() -> Dictionary:
 ## haute puis la plus à gauche. C'est ce que le moteur assemble — l'ancienne barre de slots, à deux dimensions.
 func sequence() -> Array:
 	var tri: Array = placements.duplicate()
-	tri.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
-		var ca: Vector2i = _case_de_lecture(a)
-		var cb: Vector2i = _case_de_lecture(b)
-		return ca.y < cb.y or (ca.y == cb.y and ca.x < cb.x))
+	tri.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return GrilleSort.avant(_case_de_lecture(a), _case_de_lecture(b)))
 	var seq: Array = []
 	for p in tri:
 		seq.append(str(p.module))
@@ -187,11 +185,7 @@ func sequence() -> Array:
 
 
 static func _case_de_lecture(p: Dictionary) -> Vector2i:
-	var meilleure := Vector2i(999999, 999999)
-	for c in p.cases:
-		if c.y < meilleure.y or (c.y == meilleure.y and c.x < meilleure.x):
-			meilleure = c
-	return meilleure
+	return GrilleSort.case_de_lecture(p.cases)   # la règle de lecture vit dans le moteur, l'écran la lit
 
 
 func _occupees(sauf: int = -1) -> Dictionary:
@@ -206,7 +200,7 @@ func _occupees(sauf: int = -1) -> Dictionary:
 
 ## Pose `module` avec la rotation `rot`, ancré en `ancre` ; `deplace` = l'index d'une pièce qu'on déplace
 ## (ses cases ne comptent pas comme prises). Retourne vrai si la pièce tient là.
-func poser(module: String, rot: int, ancre: Vector2i, deplace: int = -1) -> bool:
+func poser(module: String, rot: int, ancre: Vector2i, deplace: int = -1, choisir: bool = true) -> bool:
 	var g := grille_sort()
 	var forme: Array = g.tournee(g.forme_de(module), rot)
 	var cases: Array = g.poser(forme, ancre, grille_courante().cases, _occupees(deplace))
@@ -216,7 +210,10 @@ func poser(module: String, rot: int, ancre: Vector2i, deplace: int = -1) -> bool
 	if deplace >= 0 and deplace < placements.size():
 		placements.remove_at(deplace)
 	placements.append({"module": module, "rot": rot, "ancre": ancre, "cases": cases})
-	piece_choisie = placements.size() - 1
+	# À la souris, la pièce posée devient la pièce choisie ; au clavier (Entrée), on reste sur le
+	# catalogue — sinon le R suivant tournait la pièce posée au lieu de préparer la prochaine, et Suppr
+	# retirait la dernière posée quel que soit le module sélectionné (revue du 2026-09-04).
+	piece_choisie = placements.size() - 1 if choisir else -1
 	reconstruire(main.joueur())
 	return true
 
@@ -226,15 +223,15 @@ func poser_quelque_part(module: String) -> bool:
 	var g := grille_sort()
 	var cases_g: Array = grille_courante().cases
 	var occ := _occupees()
-	for k in 4:
-		var rot := (rotation_courante + k) % 4
+	for k in g.rotations_permises():
+		var rot := (rotation_courante + k) % g.rotations_permises()
 		var forme: Array = g.tournee(g.forme_de(module), rot)
 		for ancre in cases_g:
 			if occ.get(ancre, false):
 				continue
 			var cases: Array = g.poser(forme, ancre, cases_g, occ)
 			if not cases.is_empty():
-				return poser(module, rot, ancre)
+				return poser(module, rot, ancre, -1, false)
 	grille_ctrl.refuser()
 	return false
 
@@ -258,30 +255,48 @@ func tourner(index: int) -> void:
 	if cases.is_empty():
 		grille_ctrl.refuser()
 		return
-	placements[index] = {"module": p.module, "rot": (int(p.rot) + 1) % 4, "ancre": p.ancre, "cases": cases}
+	placements[index] = {"module": p.module, "rot": (int(p.rot) + 1) % g.rotations_permises(), "ancre": p.ancre, "cases": cases}
 	reconstruire(main.joueur())
 
 
 func vider_grille() -> void:
 	placements = []
 	piece_choisie = -1
+	sequence_refusee = []
+
+
+## Toutes les pièces posées tiennent-elles encore dans la grille courante ?
+func _dans_la_grille() -> bool:
+	var cases_g: Array = grille_courante().cases
+	for p in placements:
+		for c in p.cases:
+			if not (c in cases_g):
+				return false
+	return true
 
 
 ## Une séquence venue d'ailleurs (hotbar, capture) est rangée d'office par le moteur, qui cherche un emboîtement.
 func _ranger(depart: Array) -> void:
 	placements = []
 	piece_choisie = -1
+	sequence_refusee = []
 	var emb: Dictionary = main.sim.emboitement(main.joueur(), depart)
 	if not emb.ok:
+		# Une séquence qui ne tient pas dans la grille n'est pas jetée en silence : la grille rougit, dit
+		# combien de cases il faudrait, et la séquence reçue reste celle de l'écran.
+		sequence_refusee = depart.duplicate()
+		grille_ctrl.refuser()
 		return
-	for p in emb.placement:
-		placements.append({"module": str(p.module), "rot": 0, "ancre": _case_de_lecture({"cases": p.cases}), "cases": p.cases})
+	for p in emb.placement:   # le moteur dit la rotation et l'ancre qu'il a choisies ; l'écran les reprend telles quelles
+		placements.append({"module": str(p.module), "rot": int(p.rot), "ancre": p.ancre, "cases": p.cases})
 
 
 ## Reconstruit tout depuis l'état du joueur ; `depart` = une séquence à pré-remplir (hotbar, capture).
 func reconstruire(j: Dictionary, depart: Array = []) -> void:
-	if not depart.is_empty() and sequence() != depart:
+	if not depart.is_empty() and sequence() != depart and sequence_refusee != depart:
 		_ranger(depart)
+	elif not placements.is_empty() and not _dans_la_grille():
+		_ranger(sequence())   # l'arme (ou la grille) a changé : une pièce hors de la grille n'a plus de sens, on range à nouveau
 	_reconstruire_catalogue(j)
 	_rafraichir_detail(j)
 
@@ -371,23 +386,20 @@ func _reconstruire_catalogue(j: Dictionary) -> void:
 
 func _rafraichir_detail(j: Dictionary) -> void:
 	var seq := sequence()
-	ecrans.sequence_composee = seq.duplicate()
+	if sequence_refusee.is_empty():
+		ecrans.sequence_composee = seq.duplicate()
 	var plan: Dictionary = main.sim.plan_sequence(j, seq.duplicate()) if not seq.is_empty() else {}
 	apercu.montrer(plan)
 	pentagramme.montrer(plan)
 	grille_ctrl.montrer(grille_courante())
 	icone_sort.queue_redraw()
 	var texte := ""
-	if piece_choisie >= 0 and piece_choisie < placements.size():   # une pièce de la grille : c'est elle qu'on décrit
-		var mp := str(placements[piece_choisie].module)
-		var mdp: Dictionary = GameData.catalogues.modules.get(mp, {})
-		texte = tr("ui.composer.module").format({"nom": tr(mdp.get("name_key", mp)), "desc": str(mdp.get("description", ""))}) \
-			+ "\n" + ecrans._contribution_module(j, mp, false) + "\n\n"
-	elif selection < ids.size():
-		var m := ids[selection]
-		var md: Dictionary = GameData.catalogues.modules.get(m, {})
-		texte = tr("ui.composer.module").format({"nom": tr(md.get("name_key", m)), "desc": str(md.get("description", ""))}) \
-			+ "\n" + ecrans._contribution_module(j, m, false) + "\n\n"
+	# la pièce choisie dans la grille, sinon la carte sélectionnée au catalogue : un seul bloc pour les deux
+	var m_decrit := str(placements[piece_choisie].module) if piece_choisie >= 0 and piece_choisie < placements.size() else (ids[selection] if selection < ids.size() else "")
+	if not m_decrit.is_empty():
+		var md: Dictionary = GameData.catalogues.modules.get(m_decrit, {})
+		texte = tr("ui.composer.module").format({"nom": tr(md.get("name_key", m_decrit)), "desc": str(md.get("description", ""))}) \
+			+ "\n" + ecrans._contribution_module(j, m_decrit, false) + "\n\n"
 	if not plan.is_empty():
 		texte += ecrans._apercu_plan(plan)
 	else:
@@ -437,7 +449,7 @@ func tourner_selection() -> void:
 	if piece_choisie >= 0:
 		tourner(piece_choisie)
 	else:
-		rotation_courante = (rotation_courante + 1) % 4
+		rotation_courante = (rotation_courante + 1) % grille_sort().rotations_permises()
 		grille_ctrl.queue_redraw()
 
 
@@ -642,6 +654,7 @@ class GrilleControl extends Control:
 	func refuser() -> void:
 		refus_jusqua = Time.get_ticks_msec() / 1000.0 + 0.4
 		queue_redraw()
+		get_tree().create_timer(0.45).timeout.connect(queue_redraw)   # UN minuteur par refus, pas un par image (revue du 2026-09-04)
 
 	func _origine() -> Vector2:
 		return Vector2(6.0, 22.0)
@@ -713,9 +726,10 @@ class GrilleControl extends Control:
 			for c in f2:
 				draw_rect(Rect2(Vector2(x_droite, o.y + 20.0) + Vector2(float(c.x - minx), float(c.y - miny)) * petit, Vector2(petit - 1.0, petit - 1.0)), Color(col2.r, col2.g, col2.b, 0.8))
 			draw_string(ThemeDB.fallback_font, Vector2(x_droite, o.y + 20.0 + 2.5 * petit + 12.0), tr("ui.composeur.rotation").format({"n": composeur.rotation_courante}), HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.6, 0.6, 0.55))
-		if refuse:
+		if not composeur.sequence_refusee.is_empty():   # une séquence reçue qui ne tient pas : on le dit, avec les chiffres
+			draw_string(ThemeDB.fallback_font, Vector2(0, bas_y + 13.0), tr("ui.composeur.grille_ko").format({"demande": composeur.grille_sort().taille_de(composeur.sequence_refusee), "cases": cases.size()}), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1.0, 0.55, 0.5))
+		elif refuse:
 			draw_string(ThemeDB.fallback_font, Vector2(0, bas_y + 13.0), tr("ui.composeur.ne_rentre_pas"), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1.0, 0.55, 0.5))
-			get_tree().create_timer(0.45).timeout.connect(queue_redraw)
 
 	func _gui_input(ev: InputEvent) -> void:
 		if ev is InputEventMouseButton and ev.pressed:
@@ -741,15 +755,16 @@ class GrilleControl extends Control:
 		if not (data is Dictionary and data.has("module")):
 			return false
 		var case := case_a(at)
+		if case == survol and donnees_survol == data:
+			return survol_ok   # la souris n'a pas changé de case : rien à recalculer
 		var g := composeur.grille_sort()
 		var forme: Array = g.tournee(g.forme_de(str(data.module)), int(data.get("rot", 0)))
 		var ok := not g.poser(forme, case, grille.get("cases", []), composeur._occupees(int(data.get("deplace", -1)))).is_empty()
-		if case != survol or ok != survol_ok or donnees_survol != data:
-			survol = case
-			survol_ok = ok
-			donnees_survol = data
-			queue_redraw()
-		return true   # on accepte toujours le dépôt pour pouvoir dire « non » en rouge, pas en silence
+		survol = case
+		survol_ok = ok
+		donnees_survol = data
+		queue_redraw()
+		return ok   # la réponse honnête : Godot en fait le curseur et le sort du glisser ; la case rouge se voit quand même
 
 	func _drop_data(at: Vector2, data: Variant) -> void:
 		survol = Vector2i(-1, -1)
