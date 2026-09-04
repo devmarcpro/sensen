@@ -58,7 +58,7 @@ Captures prises par `scenes/tests/capture.tscn` (tout est dessiné par code — 
 | ![Inventaire](captures/inventaire.png) **L'inventaire** — l'avatar et ses cases d'équipement, le sac en liste triable, le Wu Xing de l'objet | ![Atelier](captures/atelier.png) **L'atelier** — les recettes en cartes, l'obtention de chaque composant dépliée |
 | ![Orage](captures/anim/pluie.gif) **Un orage sur le camp** — la pluie dessinée par code, la foudre au journal, la météo au HUD | ![Création du monde](captures/monde.png) **La création du monde** — l'aperçu de la mappemonde entière et les sept réglages de génération |
 | ![Capacités](captures/capacites.png) **Les capacités** — les sorts assemblés, leur coût, la hotbar en glisser-déposer | ![Commerce](captures/commerce.png) **Le commerce** — le stock d'un marchand, ses prix, et les objets encore non identifiés |
-| ![Charger une partie](captures/parties.png) **Charger une partie** — une sauvegarde par partie ; la ligne pointée dessine le personnage et déplie l'état de son monde | |
+| ![Charger une partie](captures/parties.png) **Charger une partie** — une sauvegarde par partie ; la ligne pointée dessine le personnage et déplie l'état de son monde | ![Grande base](captures/grande_base.png) **Une grande base** — cinq cellules revendiquées, zones de récolte et stockages dessinés, douze chaumières bâties d'elles-mêmes pour vingt résidents (six semaines simulées) |
 
 ---
 
@@ -152,7 +152,8 @@ Aucune sortie ne doit contenir `SCRIPT ERROR`, et la suite doit finir par `TESTS
 
 # Capture d'écran (fenêtré — le `--` avant les options est obligatoire)
 & $godot --path godot --disable-vsync res://scenes/tests/capture.tscn -- --arene 3 --heure 12 --frames 8 --sortie user://c.png
-#   autres options : --donjon --torche --raid --talents --carte --ecran inventaire|menu|gestion|atelier
+#   autres options : --donjon --torche --raid --talents --carte --ecran inventaire|menu|gestion|atelier|composer
+#   --langue en · --graine N · --perimetre bois · --maison --assigner · --commerce --echange · --sorts gel+1 · --grande_base N (N semaines)
 #   les PNG sortent dans %APPDATA%\Godot\app_userdata\Sensen\
 ```
 
