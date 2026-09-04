@@ -3202,3 +3202,8 @@ famille.terrain.name,Terrain
 famille.element.name,Élément
 famille.equipement.name,Équipement
 famille.evenement.name,Événement
+ui.ecran.engager,Engager pour la base ({or} or)
+journal.engage,{nom} part s'installer à la base ({or} or)
+journal.engager_or,Il faut {or} or pour engager quelqu'un
+journal.pas_de_base,Aucune cellule revendiquée : personne ne peut s'y installer
+journal.migrant,{nom} arrive s'installer à la base

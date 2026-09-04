@@ -155,6 +155,7 @@ func _ready() -> void:
 	_lancer("test_etapes")
 	_lancer("test_lod_projection")
 	_lancer("test_faune_rarefaction")
+	_lancer("test_engager_et_migrants")
 	_lancer("test_composer_capacites")
 	_lancer("test_charges_de_modules")
 	_lancer("test_assemblage_sans_limite")
@@ -3861,6 +3862,49 @@ func test_faune_rarefaction() -> void:
 	for k in 40:
 		s._regenerer_faune_hebdo()
 	verifier(s.densite_faune(j.pos) == 1.0 and s.monde.faune_densite.is_empty(), "et au bout de quarante semaines, la cellule est comme neuve")
+	s.monde.fermer()
+
+
+func test_engager_et_migrants() -> void:
+	# Le recrutement pour la base (Décision — Gestion de base, étape 1, 2026-09-04) : engager un PNJ qui part
+	# s'installer à la base, et des migrants qui viennent d'eux-mêmes au passage de semaine.
+	var s := Simulation.new(31)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	verifier(s._cellule_base() == s.monde.cellule_camp, "la base est la cellule du camp (revendiquée d'office)")
+	var eng: Dictionary = s.regles.r.royaume.engagement
+	var v := s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
+	if not v.has("social"):
+		v["social"] = {"culture": "", "relations": {}}
+	v.social.relations[j.id] = 10
+	j.or = 100
+	verifier(not s._engager(j, v.id, 0), "une relation trop basse : il refuse")
+	v.social.relations[j.id] = 60
+	j.or = 5
+	verifier(not s._engager(j, v.id, 0) and int(j.or) == 5, "sans l'or de l'engagement : refusé, rien n'est pris")
+	j.or = 100
+	var n0: int = s.residents().size()
+	var or_v0: int = int(v.get("or", 0))   # un villageois a déjà une bourse
+	verifier(s._engager(j, v.id, 0), "avec la relation et l'or : engagé")
+	verifier(int(j.or) == 100 - int(eng.or) and int(v.or) == or_v0 + int(eng.or), "l'or passe de la bourse du joueur à la sienne (+%d)" % (int(v.or) - or_v0))
+	verifier(v.has("assignation") and str(v.assignation.fonction) == str(eng.fonction_defaut) and v.assignation.cellule == s.monde.cellule_camp and not v.has("maitre") and v.camp == "joueur", "il est résident oisif de la base, pas compagnon")
+	verifier(s.residents().size() == n0 + 1 and s.entites.has(v.id) and s.grille.occupant(v.pos) == v.id, "déjà sur la base : il s'installe sur place, et reste dans la fenêtre")
+	verifier(not s._engager(j, v.id, 0), "un résident ne s'engage pas deux fois")
+	# les migrants : au passage de semaine, une chance que la réputation multiplie
+	var n1: int = s.residents().size()
+	s.regles.r.royaume.migrants.chance_base = 0.0
+	s._semaine_migrants(j)
+	verifier(s.residents().size() == n1, "chance nulle : personne ne vient")
+	s.regles.r.royaume.migrants.chance_base = 1.0
+	s._semaine_migrants(j)
+	verifier(s.residents().size() == n1 + 1, "chance pleine : un villageois arrive s'installer (%d résidents)" % s.residents().size())
+	var arrive: Dictionary = s.residents().back()
+	verifier(str(arrive.assignation.fonction) == str(eng.fonction_defaut) and arrive.camp == "joueur" and (s.entites.has(arrive.id) or not s.monde.dormants.get(s.monde.cellule_camp, []).is_empty()), "le migrant est oisif, au camp du joueur — dans la fenêtre ou mis de côté")
+	s.regles.r.royaume.migrants.residents_par_cellule = 1
+	s._semaine_migrants(j)
+	verifier(s.residents().size() == n1 + 1, "la base pleine n'attire plus personne")
+	s.regles.r.royaume.migrants.residents_par_cellule = 4
+	s.regles.r.royaume.migrants.chance_base = 0.2
 	s.monde.fermer()
 
 

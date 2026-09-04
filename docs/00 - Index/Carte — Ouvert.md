@@ -6,7 +6,7 @@ statut: décidé
 etape: 0
 ---
 
-**Il ne reste aucune question bloquante.** Tout ce qui était ouvert a reçu soit une décision, soit un **défaut chiffré implémentable** — le code n'a rien à inventer. Cette carte liste ce qui reste révisable, et à quel titre. 43 notes.
+**Il ne reste aucune question bloquante.** Tout ce qui était ouvert a reçu soit une décision, soit un **défaut chiffré implémentable** — le code n'a rien à inventer. Cette carte liste ce qui reste révisable, et à quel titre. 44 notes.
 
 ## Décisions prises (le code s'appuie dessus)
 
@@ -60,3 +60,4 @@ Chacun porte une valeur chiffrée que le code applique telle quelle ; les révis
 ## Liens
 - **Voir aussi** : [[Sensen — Index général]], [[Vers la production]], [[Décisions fondatrices]], [[Héritage voxel — audit]]
 - [[Décision — Grille de composition des sorts]] — l'idée du 2026-09-03 : composer un sort en emboîtant des formes dans une grille, pour interdire des combinaisons sans écrire d'interdit. Rien n'est engagé.
+- [[Décision — Gestion de base, périmètres de récolte]] — l'idée du 2026-09-04 : une base façon Dwarf Fortress, des périmètres par type de récolte, des résidents assignés dessus, l'efficacité par les stats du PNJ et des tuiles ; d'abord le recrutement (codé), la vue de base, les compagnons.

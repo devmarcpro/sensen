@@ -872,6 +872,9 @@ func _construire_dialogue(j: Dictionary) -> void:
 		if (str(rc.get("method", "")) == "relation" and rel >= int(rc.get("threshold", 60)) - 10) or bool(pnj.get("recrutable_hors_condition", false)):
 			liste.add_item(tr("ui.ecran.recruter"))
 			entrees.append({"kind": "option", "option": "recruter"})
+			if main.sim.monde != null and not main.sim.monde.claims.is_empty() and not pnj.has("assignation"):   # engager pour la base (2026-09-04)
+				liste.add_item(tr("ui.ecran.engager").format({"or": int(main.sim._ry().get("engagement", {}).get("or", 20))}))
+				entrees.append({"kind": "option", "option": "engager"})
 	if str(pnj.get("maitre", "")) == j.id or pnj.has("assignation"):
 		var betail: bool = str(pnj.get("statut_habitat", "normal")) == "betail"
 		liste.add_item(tr("ui.ecran.resident" if betail else "ui.ecran.betail"))
@@ -914,6 +917,8 @@ func _option(opt: String) -> void:
 			ouvrir("quetes")
 		"recruter":
 			main.sim.intention(j.id, {"type": "recruter", "pnj": pnj_id})
+		"engager":
+			main.sim.intention(j.id, {"type": "engager", "pnj": pnj_id})
 			rafraichir()
 		"suiveur":
 			main.sim.suiveur_local(j, pnj_id, true)

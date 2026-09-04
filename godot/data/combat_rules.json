@@ -970,6 +970,18 @@
       "abri_rayon": 3,
       "retrogradation_relation": -30,
       "retrogradation_humeur": -20
+    },
+    "engagement": {
+      "_doc": "Engager un PNJ pour la base (Population et exploitation, 2026-09-04) : prix en or (qui va dans sa bourse), tolerance sur le seuil de relation de sa fiche, fonction a l'arrivee.",
+      "or": 20,
+      "tolerance_relation": 10,
+      "fonction_defaut": "oisif"
+    },
+    "migrants": {
+      "_doc": "Les migrants (Population et exploitation, 2026-09-04) : au passage de semaine, si la base a de la place (residents_par_cellule x cellules revendiquees), un villageois arrive de lui-meme avec chance_base x (1 + reputation globale / 100), un par semaine au plus.",
+      "chance_base": 0.2,
+      "residents_par_cellule": 4,
+      "creature": "villageois"
     }
   },
   "alchimie": {

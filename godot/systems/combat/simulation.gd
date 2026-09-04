@@ -4981,6 +4981,118 @@ func _recruter(e: Dictionary, pnj_id: String, tick: int) -> bool:
 	return true
 
 
+## La cellule de la base (Décision — Gestion de base) : la revendiquée de rôle « base », sinon la première.
+func _cellule_base() -> Vector2i:
+	if monde == null or monde.claims.is_empty():
+		return Vector2i(-1, -1)
+	for cell in monde.claims.keys():
+		if str(monde.claims[cell].get("role", "")) == "base":
+			return cell
+	var cells: Array = monde.claims.keys()
+	cells.sort()
+	return cells[0]
+
+
+## Un PNJ devient résident oisif de la base (Population et exploitation, 2026-09-04) : engagé ou migrant. S'il est
+## dans la fenêtre, il s'installe sur une case libre près de `chez` ; sinon il est mis de côté dans la cellule de la
+## base, et la projection du LOD 2 le placera à son réveil. Retourne la position qu'il a prise.
+func _installer_a_la_base(x: Dictionary, base: Vector2i) -> Vector2i:
+	var ry := _ry()
+	x.erase("maitre")
+	x.camp = "joueur"
+	x.ai_profile = "civil"
+	x["fonction"] = str(ry.get("engagement", {}).get("fonction_defaut", "oisif"))
+	x["role"] = "resident"
+	x["assignation"] = {"fonction": x.fonction, "cellule": base}
+	x["humeur"] = int(ry.humeur_base) + int(ry.sans_logement)   # sans logement tant qu'on ne l'assigne pas à un lit
+	x.erase("lit")
+	x["village"] = ""
+	var centre := Vector2i(monde.taille / 2, monde.taille / 2)
+	var chez: Vector2i = camp_sauve.get("entree", monde.pos_monde(base, centre)) if base == monde.cellule_camp else monde.pos_monde(base, centre)
+	var dans_fenetre: bool = lieu == "camp" and absi(base.x - monde.centre.x) <= monde.rayon and absi(base.y - monde.centre.y) <= monde.rayon
+	if dans_fenetre and grille.dans(chez):
+		if _cell_de(x.pos) != base or not entites.has(x.id):
+			var q := _tuile_libre_pres(x, chez)
+			if entites.has(x.id):
+				grille.liberer(x.pos)
+			x.pos = q
+			if not entites.has(x.id):
+				entites[x.id] = x
+				ordre.append(x.id)
+			grille.placer(x.id, x.pos)
+	else:
+		if entites.has(x.id):   # il part : hors de la grille, dormant dans la cellule de la base
+			grille.liberer(x.pos)
+			ordre.erase(x.id)
+			entites.erase(x.id)
+		x.pos = chez
+		x["dormant_depuis"] = horloge_monde.ticks
+		if not monde.dormants.has(base):
+			monde.dormants[base] = []
+		monde.dormants[base].append(x)
+	x["poste"] = x.pos
+	x.ancre = x.pos
+	x["place"] = x.pos
+	return x.pos
+
+
+## Engager un PNJ pour la base (Décision — Gestion de base, étape 1) : même seuil de relation que le recrutement,
+## moins une tolérance, contre de l'or qui va dans sa bourse ; il part s'installer, résident oisif, sans place d'escorte.
+func _engager(e: Dictionary, pnj_id: String, tick: int) -> bool:
+	var pnj: Dictionary = entites.get(pnj_id, {})
+	if pnj.is_empty() or not pnj.vivant or pnj.has("maitre") or pnj.has("assignation") or Grille.distance(e.pos, pnj.pos) > 2:
+		return false
+	var base := _cellule_base()
+	if base == Vector2i(-1, -1):
+		EventBus.emettre(&"journal", [&"journal.pas_de_base", {}])
+		return false
+	var def: Dictionary = GameData.catalogues.creatures.get(str(pnj.def), {})
+	var rc: Dictionary = def.get("recruitable", {"method": "jamais"})
+	var eng: Dictionary = _ry().get("engagement", {})
+	var seuil := int(rc.get("threshold", 60)) - int(eng.get("tolerance_relation", 10))
+	var ok := (str(rc.get("method", "jamais")) == "relation" and relation_de(pnj, e) >= seuil) or bool(pnj.get("recrutable_hors_condition", false))
+	if not ok:
+		EventBus.emettre(&"journal", [&"journal.pas_recrutable", {"nom": pnj.name_key}])
+		return false
+	var prix := int(eng.get("or", 20))
+	if int(e.get("or", 0)) < prix:
+		EventBus.emettre(&"journal", [&"journal.engager_or", {"or": prix}])
+		return false
+	e.or = int(e.or) - prix
+	pnj["or"] = int(pnj.get("or", 0)) + prix
+	_installer_a_la_base(pnj, base)
+	e.compteur = tick + int(regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.engage", {"nom": pnj.name_key, "or": prix}])
+	_verifier_royaume(e)
+	return true
+
+
+## Les migrants (Population et exploitation, 2026-09-04) : au passage de semaine, si la base a de la place, un
+## villageois vient de lui-même — une chance de base, que la réputation globale multiplie. Un par semaine au plus.
+func _semaine_migrants(e: Dictionary) -> void:
+	var mg: Dictionary = _ry().get("migrants", {})
+	if mg.is_empty() or monde == null:
+		return
+	var base := _cellule_base()
+	if base == Vector2i(-1, -1):
+		return
+	if residents().size() >= int(mg.get("residents_par_cellule", 4)) * monde.claims.size():
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "migrant", monde.semaine_courante])
+	var chance := float(mg.get("chance_base", 0.2)) * (1.0 + float(e.get("reputations", {}).get("_globale", 0)) / 100.0)
+	if rng.randf() > chance:
+		return
+	_n_entites += 1
+	var def_id := str(mg.get("creature", "villageois"))
+	var def: Dictionary = GameData.entree("creatures", def_id)
+	var x := Etres.instancier("%s_%d" % [def_id, _n_entites], def, Vector2i.ZERO, "ia", regles, items)
+	x["or"] = 0
+	_habiller_pnj(x, def)
+	_installer_a_la_base(x, base)
+	EventBus.emettre(&"journal", [&"journal.migrant", {"nom": x.name_key}])
+
+
 ## Échange d'équipement avec un compagnon (Compagnons) : donner (il s'équipe s'il peut) ou reprendre (il se déséquipe).
 func echanger(e: Dictionary, id: String, uid: String, sens: String) -> bool:
 	var x: Dictionary = entites.get(id, {})
@@ -7768,6 +7880,7 @@ func _tiquer_monde(tick: int) -> void:
 		for x in entites.values():
 			if x.controle == "joueur":
 				_semaine_territoire(x)
+				_semaine_migrants(x)   # la base attire (Population et exploitation, 2026-09-04)
 		_regenerer_terrain_sauvage()
 		_regenerer_faune_hebdo()
 		for x in entites.values():   # les bourses des PNJ se rechargent (+15 % par semaine, Barèmes économiques)
@@ -8276,6 +8389,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _accepter_quete(e, str(i.get("pnj", "")), str(i.get("quete", "")), h.ticks)
 		"recruter":
 			ok = _recruter(e, str(i.get("pnj", "")), h.ticks)
+		"engager":
+			ok = _engager(e, str(i.get("pnj", "")), h.ticks)
 		"assigner":
 			ok = _assigner(e, str(i.get("pnj", "")), str(i.get("fonction", "")), h.ticks)
 		"conquerir":

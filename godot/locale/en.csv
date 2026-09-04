@@ -3193,3 +3193,8 @@ famille.terrain.name,Terrain
 famille.element.name,Element
 famille.equipement.name,Equipment
 famille.evenement.name,Event
+ui.ecran.engager,Hire for the base ({or} gold)
+journal.engage,{nom} leaves to settle at the base ({or} gold)
+journal.engager_or,Hiring someone costs {or} gold
+journal.pas_de_base,No claimed cell: nobody can settle there
+journal.migrant,{nom} arrives to settle at the base
