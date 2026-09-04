@@ -955,7 +955,8 @@ ui.gestion.parcelles,"plots: {n} ({mures} ripe)"
 ui.gestion.pieces,"valid rooms: {n} ({logees} residents housed)"
 ui.gestion.raid,"strength {force} vs defence {defense} — {issue} (losses {perte} %)"
 ui.gestion.rapport,{texte}
-ui.gestion.resident,"{nom} — {fonction}{betail} · mood {humeur} · yield ×{facteur} · {logement} · {poste}"
+ui.gestion.resident,"{nom} — {fonction}{betail} · mood {humeur} · {logement}"
+ui.gestion.resident_detail,"yield ×{facteur} · {poste}"
 ui.gestion.poste_perimetre,"post: {type} ({x},{y})"
 ui.gestion.poste_cellule,"post: cell ({x},{y})"
 ui.gestion.prod_rien,produces nothing this week

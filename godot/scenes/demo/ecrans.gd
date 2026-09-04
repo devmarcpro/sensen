@@ -624,6 +624,8 @@ func rafraichir() -> void:
 	var haut := maxf(220.0, hauteur_panneau - 150.0)
 	var part_droite := func(px: float, part: float) -> float: return minf(px, maxf(120.0, large * part))
 	liste.custom_minimum_size = Vector2(minf(float(GameData.config("styles").get("ecrans", {}).get("liste_min", 340.0)), large * 0.42), 0)
+	if courant == "gestion":   # Territoire : ses lignes sont longues et son détail court — la liste prend la moitié du panneau (2026-09-04)
+		liste.custom_minimum_size = Vector2(minf(float(GameData.config("styles").get("ecrans", {}).get("liste_gestion", 620.0)), large * 0.5), 0)
 	if courant == "monde":   # la carte du monde prend presque toute la fenêtre (designer, point 49)
 		droite.custom_minimum_size = Vector2(part_droite.call(900.0, 0.62), 0)
 		droite.size_flags_stretch_ratio = 3.0
@@ -1172,7 +1174,7 @@ func _construire_gestion(j: Dictionary) -> void:
 		var per_x: Dictionary = sim.perimetres().get(str(x.assignation.get("perimetre", "")), {})   # son poste : le périmètre, sinon la cellule (grande base, 2026-09-04)
 		var poste_txt: String = tr("ui.gestion.poste_perimetre").format({"type": tr("perimetre.%s.name" % str(per_x.type)), "x": cell_p.x, "y": cell_p.y}) if not per_x.is_empty() else tr("ui.gestion.poste_cellule").format({"x": cell_p.x, "y": cell_p.y})
 		liste.add_item(tr("ui.gestion.resident").format({"nom": tr(x.name_key), "fonction": tr(GameData.entree("functions", str(x.assignation.fonction)).name_key), "betail": tr("ui.gestion.betail") if str(x.get("statut_habitat", "normal")) == "betail" else "", "humeur": int(x.get("humeur", 60)), "facteur": "%.2f" % sim.facteur_humeur(x), "logement": tr("ui.gestion.loge" if x.has("lit") else "ui.gestion.sans_lit"), "poste": poste_txt}))
-		entrees.append({"kind": "resident", "id": x.id, "texte": poste_txt + " · " + _texte_production(sim.production_de(x)) + "\n" + tr("ui.gestion.resident_aide")})
+		entrees.append({"kind": "resident", "id": x.id, "texte": tr("ui.gestion.resident_detail").format({"facteur": "%.2f" % sim.facteur_humeur(x), "poste": poste_txt}) + " · " + _texte_production(sim.production_de(x)) + "\n" + tr("ui.gestion.resident_aide")})
 	for c in sim.compagnons_de(j, true):   # l'escorte, sous les résidents (Décision — Gestion de base, étape 3)
 		liste.add_item(tr("ui.gestion.compagnon").format({"nom": tr(c.name_key), "ordre": tr("ordre." + str(c.get("ordre", "suivre"))), "sante": int(c.sante), "sante_max": int(c.sante_max)}))
 		entrees.append({"kind": "compagnon", "id": c.id, "texte": tr("ui.gestion.compagnon_aide")})

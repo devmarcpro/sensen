@@ -1087,7 +1087,8 @@ function.herboriste.name,Herboriste
 ui.ecran.gestion,"TERRITOIRE — {n} cellules · {pnj} résidents · trésor {tresor} or · dette {dette} · prévisionnel {prev} or/semaine"
 ui.gestion.cellule,"cellule ({x},{y}) — {role}{camp}"
 ui.gestion.camp," · camp"
-ui.gestion.resident,"{nom} — {fonction}{betail} · humeur {humeur} · rendement ×{facteur} · {logement} · {poste}"
+ui.gestion.resident,"{nom} — {fonction}{betail} · humeur {humeur} · {logement}"
+ui.gestion.resident_detail,"rendement ×{facteur} · {poste}"
 ui.gestion.poste_perimetre,"poste : {type} ({x},{y})"
 ui.gestion.poste_cellule,"poste : cellule ({x},{y})"
 ui.gestion.prod_rien,ne produit rien cette semaine
