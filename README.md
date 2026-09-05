@@ -68,7 +68,7 @@ Des GIF pris par `scenes/tests/capture.tscn` (tout est dessiné par code — auc
 
 Les étapes 0 à 10 de l'ordre de construction sont codées. Par thème :
 
-**Combat** — action-time à ticks (une horloge par combat, une par être), grille isométrique avec relief, zones de coup par dénivelé, garde en posture, attaque lourde télégraphée, endurance, mana, jauge de chaîne Wu Xing, capacités composées depuis les modules appris (forme + noyau + modificateurs + liaisons), statuts et anti-stunlock, IA utility pilotée par les données.
+**Combat** — action-time à ticks (une horloge par combat, une par être), grille isométrique avec relief, zones de coup par dénivelé, garde en posture, attaque lourde télégraphée, le blessé qui tremble et rougit à chaque coup, endurance, mana, jauge de chaîne Wu Xing, capacités composées depuis les modules appris (forme + noyau + modificateurs + liaisons), statuts et anti-stunlock, IA utility pilotée par les données.
 
 **Exploration** — donjons de 128×128 (14-24 salles reliées en réseau maillé), brouillard de guerre par ligne de vue et Perception, éclairage (torches, meubles lumineux), creuser et terrasser, filons par profondeur et strates, coffres, monstres rares.
 
@@ -82,7 +82,7 @@ Les étapes 0 à 10 de l'ordre de construction sont codées. Par thème :
 
 **Territoire** — claims, rôles de cellule, résidents engagés ou arrivés d'eux-mêmes, assignés à une fonction et à un périmètre de récolte dessiné (bois, minerai, plantes) avec un stockage par poste, résidentiel où les chaumières se bâtissent seules, repas hebdomadaire, stocks et trésor, boutique passive, raids hebdomadaires, gouvernances, royaumes PNJ avec lois et douanes, accords diplomatiques, conquête de village.
 
-**Compagnons** — recrutés au village ou apprivoisés, ils suivent partout : en donjon, d'étage en étage, et rentrent au camp avec le joueur ; ordres et postures, un HUD les montre (nom, vie, ordre) ; désarmés, ils frappent à mains nues.
+**Compagnons** — recrutés au village (tout humanoïde non hostile : gratuit au seuil de relation, sinon 40 or) ou apprivoisés, ils suivent partout : en donjon, d'étage en étage, et rentrent au camp avec le joueur ; ordres et postures, un HUD les montre (nom, vie, ordre) ; désarmés, ils frappent à mains nues.
 
 **Interface** — un volet latéral (F4) : monde, personnage, compagnons, journal, inventaire ; les écrans d'inventaire, d'atelier, de composition, de commerce et de territoire ; un voile sous tout menu.
 
