@@ -1,0 +1,42 @@
+{
+  "name_key": "creature.caleche.name",
+  "race": "vehicule",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 14,
+      "dexterite": 8,
+      "endurance": 16,
+      "volonte": 1,
+      "perception": 8,
+      "charisme": 3
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "bois": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.5,
+    0.35,
+    0.2
+  ],
+  "tags": [
+    "vehicule",
+    "caleche",
+    "civil",
+    "paisible"
+  ],
+  "capacites": [],
+  "competences": {},
+  "recruitable": {
+    "method": "jamais"
+  }
+}

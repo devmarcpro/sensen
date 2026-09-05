@@ -1,5 +1,5 @@
 {
-  "_doc": "Les villes (Villes — population, quartiers et économie, B1, 2026-09-05). La population décide de tout : paliers et fourchettes ; situations (hors royaume, dans un territoire, sur une route, capitale par taille de royaume) → tirage du palier ; habitants_par_cellule → l'emprise (au plus neuf cellules, le centre puis la spirale) ; quartiers par palier dans l'ordre de la spirale ; parts de population par type de quartier ; composition d'un quartier (ratios par habitant, préfabs de logement, siège, halls, place) ; fonctions par bâtiment ; tresor_depart par palier ; rues (largeur) ; gardes par habitant.",
+  "_doc": "Les villes (Villes — population, quartiers et économie, B1, 2026-09-05). La population décide de tout : paliers et fourchettes ; situations (hors royaume, dans un territoire, sur une route, capitale par taille de royaume) → tirage du palier ; habitants_par_cellule → l'emprise (au plus neuf cellules, le centre puis la spirale) ; quartiers par palier dans l'ordre de la spirale ; parts de population par type de quartier ; composition d'un quartier (ratios par habitant, préfabs de logement, siège, halls, place) ; fonctions par bâtiment ; tresor_depart par palier ; rues (largeur) ; gardes par habitant. champs : les champs (B2) — taille, ratios par habitant, quartiers qui en ont, fermiers par champ, quota de récolte par fermier et par semaine, cultures par tag de biome. enclos : les enclos (B2) — taille, nombre par quartier, bêtes par enclos, profil d'IA, espèces par tag de biome, produits hebdomadaires par espèce (une matière brute). economie : les catégories économiques (par type d'objet, sinon par catégorie de matière), la consommation par habitant et par semaine, les bornes de prix (surplus à semaines_surplus de besoin → prix_min ; pénurie → prix_max), les caravanes (marchands itinérants des villes reliées par une route : distance en cellules, chance par jour de marché, part du surplus transférée, la fiche, le garnissage de l'étal). transports (B4) : les trains (fiche, heures de passage, attente au quai, prix et temps par cellule, portée en cellules de rail), les calèches (fiche, attente, prix par quartier, paliers qui en ont, heures), les montures (facteur de vitesse, prix à l'écurie, la bête vendue).",
   "paliers": {
     "hameau": {
       "pop": [
@@ -228,7 +228,8 @@
       ],
       "ateliers_par_habitant": 0,
       "entrepots": 2,
-      "zones": []
+      "zones": [],
+      "ecurie": true
     },
     "agricole": {
       "place": false,
@@ -275,7 +276,8 @@
     "mairie": "maire",
     "chateau": "seigneur",
     "comptoir": "syndic",
-    "caserne": "commandant"
+    "caserne": "commandant",
+    "ecurie": "commercant"
   },
   "fiches": {
     "atelier": "villageois",
@@ -286,7 +288,8 @@
     "chateau": "villageois",
     "temple": "pretre",
     "comptoir": "villageois",
-    "caserne": "garde_village"
+    "caserne": "garde_village",
+    "ecurie": "marchand"
   },
   "tresor_depart": {
     "hameau": 20,
@@ -300,5 +303,223 @@
   "rayon_placette": 3,
   "gardes_par_habitant": 25,
   "zone_tuiles_max": 40,
-  "budget_ms_cellule": 120
+  "budget_ms_cellule": 120,
+  "champs": {
+    "taille": [
+      8,
+      5
+    ],
+    "par_habitant": 6,
+    "par_habitant_hors_agricole": 20,
+    "quartiers": [
+      "agricole",
+      "centre",
+      "residentiel"
+    ],
+    "fermiers_par_champ": 2,
+    "tuiles_par_fermier_semaine": 30,
+    "cultures_par_biome": {
+      "_defaut": [
+        "ble",
+        "carotte",
+        "chou",
+        "oignon"
+      ],
+      "chaud": [
+        "orge",
+        "tomate",
+        "oignon"
+      ],
+      "froid": [
+        "pomme_de_terre",
+        "chou",
+        "orge"
+      ],
+      "humide": [
+        "citrouille",
+        "chou",
+        "carotte"
+      ]
+    }
+  },
+  "enclos": {
+    "taille": [
+      7,
+      5
+    ],
+    "par_quartier": {
+      "agricole": 1
+    },
+    "betes": [
+      2,
+      4
+    ],
+    "profil": "proie",
+    "especes_par_biome": {
+      "_defaut": [
+        "mouflon",
+        "sanglier",
+        "canard_sauvage"
+      ],
+      "froid": [
+        "renne",
+        "mouflon"
+      ],
+      "chaud": [
+        "chameau",
+        "mouflon"
+      ],
+      "plaine": [
+        "bison",
+        "cheval_sauvage",
+        "mouflon"
+      ]
+    },
+    "produits": {
+      "mouflon": {
+        "materiau": "laine",
+        "n": 1
+      },
+      "bison": {
+        "materiau": "lait",
+        "n": 2
+      },
+      "renne": {
+        "materiau": "lait",
+        "n": 1
+      },
+      "chameau": {
+        "materiau": "lait",
+        "n": 1
+      }
+    }
+  },
+  "economie": {
+    "categories": {
+      "par_type": {
+        "consommable": "nourriture",
+        "arme": "outils",
+        "armure": "outils",
+        "bouclier": "outils",
+        "outil": "outils",
+        "munition": "outils",
+        "gemme": "luxe",
+        "bijou": "luxe",
+        "grimoire": "luxe",
+        "parchemin": "luxe",
+        "manuel": "luxe",
+        "meuble": "bois",
+        "station": "bois"
+      },
+      "par_materiau": {
+        "bois": "bois",
+        "roche": "pierre",
+        "mineral": "pierre",
+        "terre": "pierre",
+        "fossile": "pierre",
+        "metal": "metal",
+        "vegetal": "tissu",
+        "animal": "tissu",
+        "liquide": "nourriture",
+        "gemme": "luxe",
+        "synthetique": "luxe"
+      }
+    },
+    "consommation": {
+      "nourriture": 1.0,
+      "bois": 0.3,
+      "tissu": 0.1,
+      "outils": 0.05,
+      "pierre": 0.05,
+      "metal": 0.05,
+      "luxe": 0.02
+    },
+    "prix_min": 0.7,
+    "prix_max": 1.6,
+    "semaines_surplus": 4,
+    "caravane": {
+      "distance_max": 6,
+      "chance": 1.0,
+      "part_transferee": 0.1,
+      "creature": "marchand_itinerant",
+      "objets_par_categorie": 3,
+      "selection": [
+        {
+          "filtre": {
+            "types_any": [
+              "consommable"
+            ],
+            "tags_none": [
+              "partie",
+              "ame",
+              "specimen"
+            ]
+          },
+          "nombre": [
+            4,
+            7
+          ]
+        },
+        {
+          "filtre": {
+            "types_any": [
+              "outil",
+              "arme"
+            ],
+            "tags_any": [
+              "assemble"
+            ]
+          },
+          "nombre": [
+            1,
+            3
+          ]
+        },
+        {
+          "filtre": {
+            "types_any": [
+              "bijou",
+              "gemme"
+            ]
+          },
+          "nombre": [
+            0,
+            2
+          ]
+        }
+      ]
+    }
+  },
+  "transports": {
+    "trains": {
+      "creature": "train",
+      "horaires": [
+        8,
+        14,
+        20
+      ],
+      "attente_ticks": 600,
+      "prix_par_cellule": 5,
+      "ticks_par_cellule": 200,
+      "distance_max": 12
+    },
+    "caleches": {
+      "creature": "caleche",
+      "attente_ticks": 300,
+      "prix_par_quartier": 3,
+      "paliers": [
+        "bourg",
+        "ville",
+        "cite"
+      ],
+      "heure_debut": 7,
+      "heure_fin": 21,
+      "ticks_trajet": 120
+    },
+    "montures": {
+      "facteur_vitesse": 0.5,
+      "prix_monture": 120,
+      "creature_vendue": "cheval_sauvage"
+    }
+  }
 }

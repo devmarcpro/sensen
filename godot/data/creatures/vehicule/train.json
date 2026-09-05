@@ -1,0 +1,42 @@
+{
+  "name_key": "creature.train.name",
+  "race": "vehicule",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 30,
+      "dexterite": 4,
+      "endurance": 40,
+      "volonte": 1,
+      "perception": 6,
+      "charisme": 1
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "metal": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.25,
+    0.22,
+    0.2
+  ],
+  "tags": [
+    "vehicule",
+    "train",
+    "civil",
+    "paisible"
+  ],
+  "capacites": [],
+  "competences": {},
+  "recruitable": {
+    "method": "jamais"
+  }
+}

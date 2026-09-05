@@ -247,5 +247,28 @@
       "destructible"
     ],
     "couleur": "#6a4a22"
+  },
+  "rail": {
+    "name_key": "tile_content.rail.name",
+    "bloque_passage": false,
+    "bloque_vue": false,
+    "hauteur_vue": 0,
+    "tags": [
+      "rail",
+      "construit"
+    ],
+    "couleur": "#5a5650"
+  },
+  "quai": {
+    "name_key": "tile_content.quai.name",
+    "bloque_passage": false,
+    "bloque_vue": false,
+    "hauteur_vue": 0,
+    "tags": [
+      "rail",
+      "quai",
+      "construit"
+    ],
+    "couleur": "#8a7a5a"
   }
 }

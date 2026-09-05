@@ -1,0 +1,12 @@
+{
+  "text_key": "dialogue.caleche.text",
+  "conditions": {
+    "metier": null,
+    "phase": null,
+    "relation_min": null,
+    "relation_max": null,
+    "meteo": null,
+    "tag": "caleche"
+  },
+  "poids": 20
+}

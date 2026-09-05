@@ -45,5 +45,6 @@
   "drops_chasse": [
     "peau",
     "os"
-  ]
+  ],
+  "monture": true
 }

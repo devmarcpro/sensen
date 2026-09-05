@@ -224,6 +224,9 @@ func _ready() -> void:
 	_lancer("test_calendrier")
 	_lancer("test_territoires")
 	_lancer("test_villes")
+	_lancer("test_champs_et_betes")
+	_lancer("test_economie")
+	_lancer("test_transports")
 	_verifier_tous_lances()
 	Monde.fermer_tous()   # aucun thread de pré-génération ne doit survivre aux autoloads
 	for nom_s in ["test_terrain", "test_sensen", "test_sensen2", "test_graine", "test_partout", "test_partout2", "test_auto"]:
@@ -2458,8 +2461,8 @@ func test_saisons_et_elevage() -> void:
 	s.charger_camp()
 	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
 	var jour := int(s._cycle().ticks_par_jour)
-	verifier(s.saison(0) == "printemps" and s.saison(35 * jour) == "ete" and s.saison(55 * jour) == "fin_ete" and s.saison(70 * jour) == "automne" and s.saison(100 * jour) == "hiver" and s.saison(125 * jour) == "printemps", "cinq saisons sur 120 jours, puis l'année recommence")
-	verifier(s._saison_info(100 * jour).temp == -10.0 and s._saison_info(35 * jour).temp == 8.0, "l'écart de température : hiver −10, été +8")
+	verifier(s.saison(0) == "printemps" and s.saison(105 * jour) == "ete" and s.saison(165 * jour) == "fin_ete" and s.saison(210 * jour) == "automne" and s.saison(300 * jour) == "hiver" and s.saison(375 * jour) == "printemps", "cinq saisons sur 360 jours, puis l'année recommence")
+	verifier(s._saison_info(300 * jour).temp == -10.0 and s._saison_info(105 * jour).temp == 8.0, "l'écart de température : hiver −10, été +8")
 	# Capture : une tuile d'eau voisine, un jet forcé.
 	var eau: Vector2i = j.pos + Vector2i(1, 0)
 	s.grille.poser_contenu(eau, "eau")
@@ -7218,16 +7221,16 @@ func test_village_vivant() -> void:
 	s.horloge_monde.ticks = jour_calme + 12000
 	verifier(s._cible_routine(v, profil) == v.poste, "midi : au poste")
 	s.horloge_monde.ticks = jour_calme + 21000
-	verifier(s._cible_routine(v, profil) == v.place, "21 h : sur la place")
+	verifier(s._cible_routine(v, profil) == s._coin_de_place(v), "21 h : sur son coin de la place")
 	# Un villageois loin de sa cible s'en rapproche par la routine.
-	var loin: Vector2i = v.place + Vector2i(6, 0)
+	var loin: Vector2i = s._coin_de_place(v) + Vector2i(6, 0)
 	if s.grille.dans(loin) and not s.grille.bloque_passage(loin) and s.grille.occupant(loin).is_empty():
 		s.grille.liberer(v.pos)
 		v.pos = loin
 		s.grille.placer(v.id, loin)
 		# On mesure le CHEMIN restant, pas la distance à vol d'oiseau : contourner un mur éloigne
 		# d'abord le villageois de sa place, ce qui ne veut pas dire qu'il n'y va pas.
-		var d0 := s.grille.chemin(v.pos, v.place, false, "", false).size()
+		var d0 := s.grille.chemin(v.pos, s._coin_de_place(v), false, "", false).size()
 		if s.en_combat(v):
 			s._quitter_combat(v)   # un villageois pris dans une échauffourée ne rentre évidemment pas
 		v["horloge"] = "monde"
@@ -7237,8 +7240,8 @@ func test_village_vivant() -> void:
 		for k in 24:
 			v.compteur = 0
 			s._ia_pas_routine(v, s._cible_routine(v, profil), s.horloge_monde.ticks + k * 10)
-		var d1 := s.grille.chemin(v.pos, v.place, false, "", false).size()
-		verifier(v.pos == v.place or d1 < d0, "la routine rapproche le villageois de la place (%d → %d pas)" % [d0, d1])
+		var d1 := s.grille.chemin(v.pos, s._coin_de_place(v), false, "", false).size()
+		verifier(v.pos == s._coin_de_place(v) or d1 < d0, "la routine rapproche le villageois de la place (%d → %d pas)" % [d0, d1])
 	# Le garde patrouille de jour.
 	var gardes: Array = s.vivants().filter(func(x: Dictionary) -> bool: return x.ai_profile == "garde")
 	if not gardes.is_empty():
@@ -9413,4 +9416,215 @@ func test_villes() -> void:
 		verifier(n_res >= 4 and n_per >= 1, "%d résidents assignés, %d périmètres" % [n_res, n_per])
 		verifier(s2.territoire.id == "joueur" and s2.residents().is_empty(), "le joueur n'a ni la ville ni ses gens")
 		verifier(int(s2.monde.villages[nom].capacite) == int(f.population) and Vector2i(s2.monde.villages[nom].cellule) == centre, "le registre des villages sait la population et le centre")
+
+
+## Les champs et les bêtes (Villes — B2, 2026-09-05) : une ville sème de vraies parcelles dans son territoire, ses
+## fermiers les récoltent et les ressèment chaque semaine, ses bêtes sont des créatures au statut bétail qui produisent.
+func test_champs_et_betes() -> void:
+	var s := Simulation.new(9)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var cfg: Dictionary = GameData.config("villes")
+	var c0: Vector2i = s.monde.cellule_camp
+	var f: Dictionary = {}
+	for dy in range(-20, 21):
+		for dx in range(-20, 21):
+			var cv := c0 + Vector2i(dx, dy)
+			if surf.terre_a(cv) and bool(surf.poi_de(cv).get("village", false)):
+				var fa: Dictionary = surf.fiche_agglomeration(cv)
+				if "agricole" in fa.quartiers and (f.is_empty() or int(fa.population) > int(f.population)):
+					f = fa
+	verifier(not f.is_empty(), "une ville avec un quartier agricole à 20 cellules")
+	if f.is_empty():
+		return
+	var k_agr: int = f.quartiers.find("agricole")
+	var cell_a: Vector2i = f.cellules[k_agr]
+	var e: Dictionary = surf.generer_cellule(cell_a.x, cell_a.y, {}, false)
+	var v: Dictionary = e.village
+	var attendu := int(v.population_quartier) / int(cfg.champs.par_habitant)
+	verifier(v.champs.size() >= mini(attendu, 2) and v.champs.size() <= attendu, "le quartier agricole a %d champs pour %d habitants (au plus %d)" % [v.champs.size(), int(v.population_quartier), attendu])
+	verifier(v.betes.size() >= int(cfg.enclos.betes[0]), "un enclos de %d bêtes" % v.betes.size())
+	var fermiers_champs := 0
+	for pj in v.pnj:
+		if pj.has("perimetre") and str(v.territoire.perimetres[int(pj.perimetre)].type) == "champs":
+			fermiers_champs += 1
+	verifier(fermiers_champs >= 2, "%d fermiers assignés aux champs" % fermiers_champs)
+	# Chargée : les parcelles sont dans le territoire de la ville, les bêtes dans l'enclos, au statut bétail.
+	var s2 := Simulation.new(9)
+	s2.charger_camp({}, cell_a + Vector2i(2, 0))
+	var j: Dictionary = s2.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var n_sub: int = s2.monde.taille / 32
+	for cy in n_sub:
+		for cx in n_sub:
+			s2.monde.explores[Vector2i(cell_a.x * n_sub + cx, cell_a.y * n_sub + cy)] = true
+	verifier(s2.voyager(j, cell_a), "voyager jusqu'au quartier agricole")
+	var nom := str(f.nom)
+	var t: Dictionary = s2.territoires.get(nom, {})
+	verifier(not t.is_empty() and t.cultures.size() >= v.champs.size() * 10, "%d parcelles semées dans le territoire de la ville" % t.get("cultures", {}).size())
+	var betes: Array = s2.vivants().filter(func(x: Dictionary) -> bool: return str(x.get("betail", "")) == nom)
+	var betail_ok := true
+	for bt in betes:
+		betail_ok = betail_ok and str(bt.get("statut_habitat", "")) == "betail" and bt.camp == "civil"
+	verifier(betes.size() >= 2 and betail_ok, "%d bêtes au statut bétail, camp civil" % betes.size())
+	verifier(s2.territoire.cultures.is_empty(), "les parcelles de la ville ne sont pas celles du joueur")
+	# Six jours : les parcelles mûrissent ; une semaine : les fermiers récoltent, ressèment, le bétail produit.
+	var jour := int(GameData.config("planete").cycle.ticks_par_jour)
+	var tps: int = int(GameData.config("planete").corruption.ticks_par_semaine)
+	s2.horloge_monde.avancer(6 * jour)
+	var mures := 0
+	for pm in t.cultures.keys():
+		if bool(t.cultures[pm].mure):
+			mures += 1
+	verifier(mures > 0, "après six jours, %d parcelles mûres" % mures)
+	s2.horloge_monde.avancer(tps)
+	s2._tiquer_monde(s2.horloge_monde.ticks)
+	EventBus.dispatcher()
+	var recolte := 0
+	for cle in t.stocks.keys():
+		if GameData.catalogues.plants.has(str(cle)):
+			recolte += int(t.stocks[cle])
+	verifier(recolte > 0, "la ville a récolté ses champs (%d) : %s" % [recolte, str(t.stocks)])
+	var ressemees := 0
+	for pm in t.cultures.keys():
+		if not bool(t.cultures[pm].mure):
+			ressemees += 1
+	verifier(ressemees > 0, "des parcelles ressemées (%d)" % ressemees)
+	var laine := false
+	for cle in t.stocks.keys():
+		laine = laine or str(cle).begins_with("laine") or str(cle).begins_with("lait")
+	var produit_attendu := false
+	for bt in betes:
+		produit_attendu = produit_attendu or cfg.enclos.produits.has(str(bt.def))
+	verifier(laine == produit_attendu, "le bétail a produit (%s) selon ses espèces" % str(laine))
+
+
+## L'économie (Villes — B3, 2026-09-05) : les stocks d'une ville font ses prix, elle use ce qu'elle consomme, verse sa
+## taxe, et un marchand itinérant apporte le surplus d'une ville reliée.
+func test_economie() -> void:
+	var s := Simulation.new(31)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var eco: Dictionary = GameData.config("villes").economie
+	verifier(s.categorie_economique(GameData.catalogues.items.pain) == "nourriture" and s.categorie_economique(GameData.catalogues.items.craft_epee) == "outils" and s._categorie_cle("chene|brut") == "bois" and s._categorie_cle("laine|brut") == "tissu", "les catégories : pain, épée, chêne, laine")
+	var camp: Vector2i = s.monde.cellule_camp
+	var cell_v := camp + Vector2i(1, 0)
+	var t := s.creer_territoire("Marchopolis", "royaume_test", 500)
+	t.cellules[cell_v] = {"role": "base"}
+	t["agglomeration"] = {"palier": "bourg", "population": 50, "centre": cell_v, "culture": "latine", "gouvernance": "republique_elue"}
+	t.stocks = {"ble": 400, "chene|brut": 4, "laine|brut": 3}
+	s._dans_territoire("Marchopolis", func() -> void: s._semaine_economie())
+	verifier(is_equal_approx(float(t.prix.nourriture), float(eco.prix_min)) and is_equal_approx(float(t.prix.metal), float(eco.prix_max)), "le blé en surplus est au prix plancher, le métal absent au prix plafond (%s)" % str(t.prix))
+	verifier(not t.stocks.has("chene|brut") and int(t.stocks.get("laine|brut", 0)) < 3, "la ville a usé son bois et son tissu (%s)" % str(t.stocks))
+	var m := s.ajouter("marchand", j.pos + Vector2i(1, 0), "ia")
+	m["village"] = "Marchopolis"
+	var pain: String = s.generer_objet("pain", 1).uid
+	var lingot := s.generer_objet("materiau_brut", 1, {}, "commun", 0)
+	lingot.materiau = "fer"
+	lingot["forme"] = "lingot"
+	var p_pain := s.prix_suggere(pain, m, j)
+	var p_fer := s.prix_suggere(lingot.uid, m, j)
+	verifier(is_equal_approx(float(p_pain.economie), float(eco.prix_min)) and is_equal_approx(float(p_fer.economie), float(eco.prix_max)), "chez son marchand, le pain est bradé (× %.2f) et le fer hors de prix (× %.2f)" % [float(p_pain.economie), float(p_fer.economie)])
+	# La taxe au royaume.
+	var surf: Surface = s.monde.surface
+	var r := {"id": "royaume_test", "nom": "Testia", "government_type": "republique_elue", "culture": "latine", "race": "humain", "taille": "petit", "capital_poi": cell_v, "territory_cells": [cell_v],
+		"taxes": {"base_rate": 0.1, "tariff_default": 0.1}, "tariffs": {}, "laws": [], "diplomacy": {}, "rivals": [], "tags": []}
+	surf.royaumes_cache[surf.secteur_de(cell_v)] = {"royaume_test": r}
+	var tresor0 := int(t.tresor)
+	s._dans_territoire("Marchopolis", func() -> void: s._taxe_royaume(200))
+	verifier(int(t.tresor) == tresor0 - 20 and int(s.monde.tresors_royaumes.get("royaume_test", 0)) == 20, "la ville verse 10 % de ses 200 or à Testia")
+	# Un marchand itinérant venu d'une ville en surplus : il arrive avec un étal, le surplus passe, il repart le lendemain.
+	var o := s.creer_territoire("Blevaux", "royaume_test", 100)
+	o["agglomeration"] = {"palier": "village", "population": 20, "centre": camp + Vector2i(2, 0), "culture": "latine", "gouvernance": ""}
+	o.stocks = {"ble": 1000}
+	var fiche_o := {"nom": "Blevaux", "culture": "latine", "royaume": "royaume_test", "centre": camp + Vector2i(2, 0)}
+	var ble_avant: int = int(t.stocks.get("ble", 0))
+	var it := s._arrivee_itinerant("Marchopolis", fiche_o, s.jour_courant())
+	verifier(not it.is_empty() and "itinerant" in it.tags and it.stock.size() >= 4 and str(it.village) == "Blevaux", "un marchand itinérant de Blevaux, l'étal garni (%d)" % it.get("stock", []).size())
+	verifier(int(t.stocks.get("ble", 0)) > ble_avant and int(o.stocks.ble) < 1000, "le surplus de blé de Blevaux est passé à Marchopolis (%d → %d)" % [ble_avant, int(t.stocks.get("ble", 0))])
+	s._caravanes_du_jour(s.jour_courant() + 1)
+	verifier(not s.entites.has(it.id), "le lendemain, l'itinérant a repris la route")
+
+
+## Les transports (Villes — B4, 2026-09-05) : des rails sur la route d'un royaume et un quai ; un train à quai
+## emmène le joueur à une autre gare contre de l'or ; une monture double le pas et se laisse en combat ; le maquignon vend.
+func test_transports() -> void:
+	var s := Simulation.new(83)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var surf: Surface = s.monde.surface
+	var cell: Vector2i = s.monde.cellule_camp + Vector2i(1, 0)
+	var voisine: Vector2i = cell + Vector2i(1, 0)
+	var r := {"id": "roy_rail", "nom": "Ferrovia", "government_type": "republique_elue", "culture": "latine", "race": "humain", "taille": "petit", "capital_poi": cell, "territory_cells": [cell, voisine],
+		"taxes": {"base_rate": 0.08, "tariff_default": 0.1}, "tariffs": {}, "laws": [], "diplomacy": {}, "rivals": [], "tags": []}
+	surf.royaumes_cache[surf.secteur_de(cell)] = {"roy_rail": r}
+	surf.royaume_par_cellule[cell] = "roy_rail"
+	surf.royaume_par_cellule[voisine] = "roy_rail"
+	surf.routes_par_cellule[cell] = [voisine]
+	surf.routes_par_cellule[voisine] = [cell]
+	surf.fiches_agglo.erase(cell)
+	var fiche: Dictionary = surf.fiche_agglomeration(cell)
+	var agglo: Dictionary = fiche.duplicate()
+	agglo["quartier"] = "centre"
+	agglo["index"] = 0
+	var e: Dictionary = surf.generer_cellule(cell.x, cell.y, {}, false)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 83
+	if e.village.is_empty():
+		surf._poser_quartier(e, cell, rng, agglo)
+	surf._poser_route(e, cell)
+	verifier(e.rails.size() > 10 and e.village.has("quai") and e.village.has("entrees_rail"), "des rails sur la route du royaume, un quai, une entrée (%d rails)" % e.rails.size())
+	# La ville chargée : le train vient à l'heure, attend au quai, emmène le joueur à la gare voisine.
+	s.monde.cellules[cell] = e
+	s.monde.peuplees.erase(cell)
+	s._peupler_fenetre()
+	var nom := str(e.village.nom)
+	verifier(s.territoires.has(nom), "la ville de Ferrovia est un territoire")
+	var train := s._faire_venir_train(nom, cell, e.village)
+	verifier(not train.is_empty() and "vehicule" in train.tags and str(train.vehicule_etat.etat) == "arrive", "le train entre par le rail du bord")
+	var quai: Vector2i = train.vehicule_etat.quai
+	for k in 200:
+		if train.pos == quai or str(train.vehicule_etat.etat) != "arrive":
+			break
+		s._ia_vehicule(train, s.horloge_monde.ticks + k * 10)
+	verifier(str(train.vehicule_etat.etat) == "attend", "le train roule jusqu'au quai et attend (%s)" % str(train.vehicule_etat.etat))
+	var pres := s._tuile_libre_autour(train.pos)
+	s.grille.liberer(j.pos)
+	j.pos = pres
+	s.grille.placer(j.id, pres)
+	j.or = 100
+	var n_sub: int = s.monde.taille / 32
+	for cy in n_sub:
+		for cx in n_sub:
+			s.monde.explores[Vector2i(voisine.x * n_sub + cx, voisine.y * n_sub + cy)] = true
+	verifier(not s._monter(j, train.id, {"pnj": train.id}, s.horloge_monde.ticks), "sans gare choisie, on ne monte pas")
+	var or0: int = int(j.or)
+	verifier(s._monter(j, train.id, {"pnj": train.id, "cellule": voisine}, s.horloge_monde.ticks) and s.monde.cellule_de(j.pos) == voisine and int(j.or) == or0 - int(GameData.config("villes").transports.trains.prix_par_cellule), "le train emmène le joueur à la cellule voisine contre %d or" % (or0 - int(j.or)))
+	# La monture : un cheval compagnon, on monte, le pas coûte moitié moins, on descend.
+	var ch := s.ajouter("cheval_sauvage", s._tuile_libre_autour(j.pos), "ia")
+	s._devenir_compagnon(j, ch)
+	var cible_pas := Vector2i(-1, -1)
+	for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var q: Vector2i = j.pos + d
+		if s.grille.dans(q) and not s.grille.bloque_passage(q) and s.grille.occupant(q).is_empty() and s.grille.h(q) == s.grille.h(j.pos):
+			cible_pas = q
+			break
+	var t0 := s.horloge_monde.ticks
+	var ticks_a_pied := 0
+	var origine_pas: Vector2i = j.pos
+	if cible_pas != Vector2i(-1, -1):
+		s._deplacer(j, cible_pas, t0)
+		ticks_a_pied = int(j.compteur) - t0
+		s._deplacer(j, origine_pas, t0)
+	verifier(s._monter(j, ch.id, {"pnj": ch.id}, t0) and j.has("monture") and not s.entites.has(ch.id), "le joueur monte son cheval, qui quitte la grille")
+	if cible_pas != Vector2i(-1, -1) and j.pos == origine_pas and s.grille.occupant(cible_pas).is_empty():
+		s._deplacer(j, cible_pas, t0)
+		var ticks_monte := int(j.compteur) - t0
+		verifier(ticks_monte < ticks_a_pied, "à cheval, le pas coûte moins (%d contre %d ticks)" % [ticks_monte, ticks_a_pied])
+	verifier(s._descendre(j, t0) and not j.has("monture") and s.entites.has(ch.id), "descendu, le cheval est là")
+	# Le maquignon vend une monture.
+	var m := s.ajouter("marchand", s._tuile_libre_autour(j.pos), "ia")
+	m.tags.append("maquignon")
+	j.or = 500
+	var n_comp: int = s.compagnons_de(j).size()
+	verifier(s._acheter_monture(j, m.id, t0) and s.compagnons_de(j).size() == n_comp + 1 and int(j.or) == 500 - int(GameData.config("villes").transports.montures.prix_monture), "le maquignon vend un cheval, compagnon")
 

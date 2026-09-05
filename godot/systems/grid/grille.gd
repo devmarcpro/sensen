@@ -256,21 +256,20 @@ func degats_chute(niveaux: int) -> int:
 
 ## A* 8-directions sur les coûts de pente. Retourne les étapes SANS la case de départ.
 ## `ignorer` : id d'entité dont on ignore l'occupation (la cible, pour s'approcher d'elle).
-func chemin(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignorer: String = "", eviter_nage: bool = false) -> Array[Vector2i]:
+func chemin(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignorer: String = "", eviter_nage: bool = false, max_noeuds: int = 0) -> Array[Vector2i]:
 	var vide: Array[Vector2i] = []
 	if depart == arrivee or not dans(arrivee):
 		return vide
-	var ouverts: Array[Vector3i] = [Vector3i(depart.x, depart.y, 0)]
+	var ouverts: Array[Vector3i] = [Vector3i(depart.x, depart.y, 0)]   # un tas binaire sur z (Villes B1 : la liste se fouillait en entier à chaque pas)
 	var g := {depart: 0}
 	var vient_de := {}
 	var base: int = dep["cout_base"]
+	var explores := 0
 	while not ouverts.is_empty():
-		var k := 0
-		for i in ouverts.size():
-			if ouverts[i].z < ouverts[k].z:
-				k = i
-		var c3 := ouverts[k]
-		ouverts.remove_at(k)
+		explores += 1
+		if max_noeuds > 0 and explores > max_noeuds:
+			return vide   # un budget de nœuds (Villes B1) : une cible inaccessible ne fait pas fouiller toute la grille
+		var c3 := _tas_pop(ouverts)
 		var courant := Vector2i(c3.x, c3.y)
 		if courant == arrivee:
 			var pas: Array[Vector2i] = []
@@ -293,8 +292,47 @@ func chemin(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignorer: 
 			if ng < int(g.get(voisin, 1 << 30)):
 				g[voisin] = ng
 				vient_de[voisin] = courant
-				ouverts.append(Vector3i(voisin.x, voisin.y, ng + base * distance(voisin, arrivee)))
+				_tas_push(ouverts, Vector3i(voisin.x, voisin.y, ng + base * distance(voisin, arrivee)))
 	return vide
+
+
+## Un tas binaire minimal sur la composante z (le coût estimé) — push et pop en O(log n).
+static func _tas_push(tas: Array[Vector3i], v: Vector3i) -> void:
+	tas.append(v)
+	var i := tas.size() - 1
+	while i > 0:
+		var parent := (i - 1) / 2
+		if tas[parent].z <= tas[i].z:
+			break
+		var tmp := tas[parent]
+		tas[parent] = tas[i]
+		tas[i] = tmp
+		i = parent
+
+
+static func _tas_pop(tas: Array[Vector3i]) -> Vector3i:
+	var racine := tas[0]
+	var dernier: Vector3i = tas.pop_back()
+	if tas.is_empty():
+		return racine
+	tas[0] = dernier
+	var i := 0
+	var n := tas.size()
+	while true:
+		var gauche := 2 * i + 1
+		var droite := gauche + 1
+		var plus_petit := i
+		if gauche < n and tas[gauche].z < tas[plus_petit].z:
+			plus_petit = gauche
+		if droite < n and tas[droite].z < tas[plus_petit].z:
+			plus_petit = droite
+		if plus_petit == i:
+			break
+		var tmp := tas[i]
+		tas[i] = tas[plus_petit]
+		tas[plus_petit] = tmp
+		i = plus_petit
+	return racine
 
 
 ## Dijkstra borné : tuile → coût en ticks pour l'atteindre (UI : coûts sur les tuiles atteignables).

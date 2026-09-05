@@ -41,6 +41,7 @@ var vacances: Dictionary = {}          # id de royaume → semaine de résolutio
 var heritiers: Dictionary = {}         # id de royaume → id de l'héritier désigné à la mort du dirigeant
 var vacances_guildes: Dictionary = {}  # "guilde|village" → semaine de résolution : hall sans maître
 var villages: Dictionary = {}          # nom de village → {cellule, royaume, conquis_par, defense_jusqua, abandonne} (Conquête de village)
+var tresors_royaumes: Dictionary = {}  # id de royaume → or prélevé sur ses villes (Villes B3 ; les royaumes-pays de D)
 var mutex := Mutex.new()
 var tache: int = -1                    # plus utilisé (pré-génération synchrone) — gardé pour compatibilité des sauvegardes en mémoire
 static var ouverts: Array = []          # plus utilisé depuis que la pré-génération est synchrone (gardé : `fermer_tous` reste appelé)
@@ -142,6 +143,14 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 		var m: Dictionary = GameData.catalogues.meubles.get(str(e.meubles[i]), {})
 		g.meubles[g.idx(p)] = str(e.meubles[i])
 		g.poser_contenu(p, "meuble" if bool(m.get("bloque_passage", true)) else "meuble_sol")
+	for i in e.get("rails", {}).keys():   # les rails du royaume (Villes B4), franchissables
+		var p := base + Vector2i(int(i) % taille, int(i) / taille)
+		if g.contenu[g.idx(p)] == 0:
+			g.poser_contenu(p, "rail")
+	if e.get("village", {}).has("quai"):
+		var pq: Vector2i = base + Vector2i(e.village.quai)
+		if g.contenu[g.idx(pq)] == 0 or "rail" in g.contenu_de(pq).get("tags", []):
+			g.poser_contenu(pq, "quai")
 	for i in e.get("stations", {}).keys():   # les stations des ateliers d'une ville (Villes B1) : de vraies stations fixes
 		var p := base + Vector2i(int(i) % taille, int(i) / taille)
 		g.stations_fixes[g.idx(p)] = str(e.stations[i])

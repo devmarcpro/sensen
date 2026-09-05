@@ -921,6 +921,35 @@ func _construire_dialogue(j: Dictionary) -> void:
 	if "quetes" in pnj.get("tags", []):
 		liste.add_item(tr("ui.ecran.quetes"))
 		entrees.append({"kind": "option", "option": "quetes"})
+	if pnj.has("vehicule_etat"):   # un train à quai, une calèche à l'arrêt (Villes B4)
+		var ve: Dictionary = pnj.vehicule_etat
+		var tcfg: Dictionary = GameData.config("villes").get("transports", {})
+		if str(ve.type) == "train" and str(ve.etat) == "attend":
+			var t_v: Dictionary = main.sim.territoires.get(str(ve.ville), {})
+			var centre_v: Vector2i = t_v.get("agglomeration", {}).get("centre", Vector2i(-99999, -99999))
+			var roy_v := str(main.sim.monde.surface.royaume_de(centre_v).get("id", ""))
+			for f in main.sim.villes_reliees(centre_v, int(tcfg.trains.distance_max)):
+				if str(f.get("royaume", "")) != roy_v:
+					continue
+				var prix_t: int = Grille.distance(centre_v, Vector2i(f.centre)) * int(tcfg.trains.prix_par_cellule)
+				liste.add_item(tr("ui.ecran.train_vers").format({"ville": str(f.nom), "prix": prix_t}))
+				entrees.append({"kind": "option", "option": "train:%d,%d" % [int(f.centre.x), int(f.centre.y)]})
+		elif str(ve.type) == "caleche" and str(ve.etat) == "attend":
+			for k in ve.places.size():
+				var pl: Vector2i = ve.places[k]
+				if Grille.distance(pl, j.pos) <= 8:
+					continue
+				liste.add_item(tr("ui.ecran.caleche_vers").format({"quartier": tr("quartier." + str(ve.quartiers[k])), "prix": int(tcfg.caleches.prix_par_quartier)}))
+				entrees.append({"kind": "option", "option": "caleche:%d,%d" % [pl.x, pl.y]})
+	if str(pnj.get("maitre", "")) == j.id and bool(GameData.catalogues.creatures.get(str(pnj.def), {}).get("monture", false)) and not j.has("monture"):
+		liste.add_item(tr("ui.ecran.monter").format({"nom": tr(str(pnj.name_key))}))
+		entrees.append({"kind": "option", "option": "monter"})
+	if j.has("monture"):
+		liste.add_item(tr("ui.ecran.descendre"))
+		entrees.append({"kind": "option", "option": "descendre"})
+	if "maquignon" in pnj.get("tags", []):
+		liste.add_item(tr("ui.ecran.acheter_monture").format({"prix": int(GameData.config("villes").get("transports", {}).get("montures", {}).get("prix_monture", 120))}))
+		entrees.append({"kind": "option", "option": "acheter_monture"})
 	if pnj.has("assignation") and not pnj.has("maitre"):   # Compagnons : le suiveur territorial
 		liste.add_item(tr("ui.ecran.suiveur"))
 		entrees.append({"kind": "option", "option": "suiveur"})
@@ -984,6 +1013,15 @@ func _construire_dialogue(j: Dictionary) -> void:
 
 func _option(opt: String) -> void:
 	var j: Dictionary = main.joueur()
+	if opt.begins_with("train:") or opt.begins_with("caleche:"):   # le train vers une gare, la calèche vers une place (Villes B4)
+		var parts: PackedStringArray = opt.split(":")[1].split(",")
+		var cible_v := Vector2i(int(parts[0]), int(parts[1]))
+		if opt.begins_with("train:"):
+			main.sim.intention(j.id, {"type": "monter", "pnj": pnj_id, "cellule": cible_v})
+		else:
+			main.sim.intention(j.id, {"type": "monter", "pnj": pnj_id, "vers": cible_v})
+		fermer()
+		return
 	match opt:
 		"parler":
 			if main.sim.intention(j.id, {"type": "parler", "pnj": pnj_id}):
@@ -995,6 +1033,15 @@ func _option(opt: String) -> void:
 			ouvrir("commerce")
 		"quetes":
 			ouvrir("quetes")
+		"monter":
+			main.sim.intention(j.id, {"type": "monter", "pnj": pnj_id})
+			fermer()
+		"descendre":
+			main.sim.intention(j.id, {"type": "descendre"})
+			fermer()
+		"acheter_monture":
+			main.sim.intention(j.id, {"type": "acheter_monture", "pnj": pnj_id})
+			rafraichir()
 		"recruter":
 			main.sim.intention(j.id, {"type": "recruter", "pnj": pnj_id})
 		"engager":

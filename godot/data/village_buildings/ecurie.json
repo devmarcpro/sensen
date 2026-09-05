@@ -1,0 +1,18 @@
+{
+  "plan": [
+    "#########",
+    "#E.....l#",
+    "#.......#",
+    "#.......#",
+    "####P####"
+  ],
+  "meubles": {
+    "E": "etal_de_vente",
+    "l": "lit_de_paille"
+  },
+  "tags": [
+    "ville",
+    "ecurie"
+  ],
+  "poste": "E"
+}

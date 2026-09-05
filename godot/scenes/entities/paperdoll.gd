@@ -86,6 +86,11 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	if e.is_empty() or rig.is_empty():
 		return
+	if "vehicule" in e.get("tags", []):   # un train, une calèche : une caisse et des roues tant qu'il n'y a pas de sprite (Villes B4)
+		_dessine_vehicule()
+		return
+	if e.has("monture"):
+		_dessine_monture()
 	# Une seule vue : de face (designer 2026-09-01, point 54). L'orientation de l'être continue de
 	# décider la garde, les zones de coup et le champ de vision — elle ne décide plus le dessin.
 	var f: Dictionary = rig.facings.get("S", {})
@@ -122,6 +127,33 @@ func _draw() -> void:
 	_dessine_tenus(monde)
 	if dessine_apres.is_valid():
 		dessine_apres.call(self)
+
+
+func _dessine_vehicule() -> void:
+	var col := Color(e.teinte[0], e.teinte[1], e.teinte[2])
+	var h := float(rig.hauteur_pieds)
+	var train: bool = "train" in e.get("tags", [])
+	draw_rect(Rect2(-9.0, -h - 8.0, 18.0, 8.0), col)
+	draw_rect(Rect2(-9.0, -h - 8.0, 18.0, 8.0), Color(0.1, 0.1, 0.1), false, 1.0)
+	if train:
+		draw_rect(Rect2(4.0, -h - 13.0, 3.0, 5.0), col.darkened(0.3))
+		draw_rect(Rect2(-7.0, -h - 6.0, 4.0, 3.0), Color(0.85, 0.8, 0.5))
+	else:
+		draw_rect(Rect2(-7.0, -h - 6.0, 5.0, 4.0), Color(0.85, 0.8, 0.5))
+	for x in [-5.0, 5.0]:
+		draw_circle(Vector2(x, -h + 1.0), 3.0, Color(0.15, 0.15, 0.15))
+		draw_circle(Vector2(x, -h + 1.0), 1.2, col.lightened(0.3))
+
+
+func _dessine_monture() -> void:
+	var m: Dictionary = e.monture.get("etre", {})
+	var t: Array = m.get("teinte", [0.5, 0.4, 0.3])
+	var col := Color(t[0], t[1], t[2])
+	var h := float(rig.hauteur_pieds)
+	draw_rect(Rect2(-9.0, -h + 1.0, 18.0, 5.0), col)
+	draw_circle(Vector2(10.0, -h + 1.0), 3.0, col)
+	for x in [-7.0, -3.0, 3.0, 7.0]:
+		draw_line(Vector2(x, -h + 6.0), Vector2(x, -h + 10.0), col.darkened(0.2), 1.5)
 
 
 ## Place chaque segment dans le repère du nœud : {origine, direction, perp, longueur, largeur}.

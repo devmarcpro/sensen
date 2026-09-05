@@ -16,7 +16,11 @@
     "tresor_depart",
     "rue_largeur",
     "rayon_place",
-    "gardes_par_habitant"
+    "gardes_par_habitant",
+    "champs",
+    "enclos",
+    "economie",
+    "transports"
   ],
   "properties": {
     "paliers": {
@@ -77,6 +81,47 @@
     "gardes_par_habitant": {
       "type": "integer",
       "minimum": 1
+    },
+    "champs": {
+      "type": "object",
+      "required": [
+        "taille",
+        "par_habitant",
+        "quartiers",
+        "fermiers_par_champ",
+        "tuiles_par_fermier_semaine",
+        "cultures_par_biome"
+      ]
+    },
+    "enclos": {
+      "type": "object",
+      "required": [
+        "taille",
+        "par_quartier",
+        "betes",
+        "profil",
+        "especes_par_biome",
+        "produits"
+      ]
+    },
+    "economie": {
+      "type": "object",
+      "required": [
+        "categories",
+        "consommation",
+        "prix_min",
+        "prix_max",
+        "semaines_surplus",
+        "caravane"
+      ]
+    },
+    "transports": {
+      "type": "object",
+      "required": [
+        "trains",
+        "caleches",
+        "montures"
+      ]
     }
   }
 }

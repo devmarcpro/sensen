@@ -1,0 +1,61 @@
+{
+  "name_key": "creature.marchand_itinerant.name",
+  "race": "humain",
+  "fonction": "commercant",
+  "role": "resident",
+  "skeleton_template": "humanoide",
+  "corps": {
+    "stats": {
+      "force": 6,
+      "dexterite": 8,
+      "endurance": 7,
+      "volonte": 8,
+      "perception": 9,
+      "charisme": 11
+    },
+    "silhouette": "humanoide"
+  },
+  "esprit": {
+    "intelligence": 60,
+    "temperament": "calme",
+    "dressabilite": 20
+  },
+  "social": {
+    "culture": "",
+    "relations": {}
+  },
+  "agenda": {
+    "metier": "commercant"
+  },
+  "recruitable": {
+    "method": "relation",
+    "threshold": 80
+  },
+  "ai_profile": "civil",
+  "actions": [],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.85,
+    0.75,
+    0.6
+  ],
+  "tags": [
+    "humanoide",
+    "civil",
+    "humain",
+    "marchand",
+    "commerce_possible",
+    "itinerant"
+  ],
+  "capacites": [],
+  "competences": {
+    "negociation": 20
+  },
+  "stock_marchand": []
+}

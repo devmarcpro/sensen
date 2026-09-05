@@ -6,7 +6,7 @@ statut: décidé
 etape: 9
 ---
 
-**Un roi et un mouton sont la même fiche, avec des blocs différents remplis.** C'est de là que tout découle. 18 notes.
+**Un roi et un mouton sont la même fiche, avec des blocs différents remplis.** C'est de là que tout découle. 19 notes.
 
 **Le socle, à lire en premier :**
 - **[[Profils de PNJ]]** — un forgeron n'est pas une espèce, c'est `humain · La Braise · artisan · résident`. Les PNJ se **génèrent**, ils ne s'énumèrent pas.
@@ -35,6 +35,8 @@ etape: 9
 - **[[Noms culturels]]** — préfixe + suffixe piloté par culture. Culture ≠ race, deux axes indépendants.
 - **[[Génération de noms]]** · **[[Culture de nommage — schéma]]**
 - **[[Dialogue PNJ]]** — menu contextuel façon Elona. *La profondeur vient des conditions, pas de la ramification.*
+
+- **[[PNJ — traits, histoires et souhaits]]** — le programme C : deux traits, une histoire, un souhait, des opinions, la fiche par palier de relation.
 
 ## Liens
 - **Voir aussi** : [[Sensen — Index général]], [[Carte — Société]], [[Carte — Contenu]], [[Carte des dépendances]]

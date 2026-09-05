@@ -1,5 +1,5 @@
 {
-  "_doc": "Réplique d'ambiance (docs: Dialogue PNJ, E.23) : conditions nulles = toujours ; metier (id de fonction), phase (aube/jour/crepuscule/nuit), relation_min/max, meteo (id d'état) ; fete / marche / anniversaire (booléens, Calendrier : un jour de fête pour la culture du PNJ, le jour de marché de son village, son anniversaire) ; poids : tirage pondéré, anti-répétition sur les 3 dernières.",
+  "_doc": "Réplique d'ambiance (docs: Dialogue PNJ, E.23) : conditions nulles = toujours ; metier (id de fonction), phase (aube/jour/crepuscule/nuit), relation_min/max, meteo (id d'état) ; tag (un tag que le PNJ doit porter) ; fete / marche / anniversaire (booléens, Calendrier : un jour de fête pour la culture du PNJ, le jour de marché de son village, son anniversaire) ; poids : tirage pondéré, anti-répétition sur les 3 dernières.",
   "text_key": "dialogue.<id>.text",
   "conditions": {
     "metier": null,

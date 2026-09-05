@@ -556,3 +556,20 @@ La demande : « la taille de la ville dépend de la population, plusieurs cellul
 - **82 oisifs sur 126** dans une ville : ils dorment, mangent, vont sur la place, mais ne travaillent pas encore. Les champs de B2 en feront des fermiers ; dis si tu préfères d'autres métiers pour le résidentiel (tisserands, porteurs).
 - **8,8 ms par tick** du monde avec 170 êtres à l'écran : ça tient sous les 12 ms d'une image, sans marge. Le gain suivant est de ne recalculer la vision que de qui a bougé (`_fin_de_pas`) — je le ferai si une cité de neuf cellules dépasse le budget.
 - **Le camp à côté d'une ville** : la cellule du camp n'est jamais un quartier ; une ville née à côté du camp a une cellule de moins.
+
+## 2026-09-05 — Les champs et les bêtes (B2) : ce que j'ai choisi
+
+- **Un champ par six habitants** en quartier agricole (un par vingt ailleurs), 8 × 5 tuiles, deux fermiers par champ, trente tuiles récoltées par fermier et par semaine. Les cultures par biome sont une table (`villes.champs.cultures_par_biome`).
+- **Un enclos par quartier agricole**, deux à quatre bêtes, la laine et le lait comme produits (une unité de laine par mouflon et par semaine, deux de lait par bison, une par renne ou chameau). Les espèces par biome sont une table aussi ; le sanglier, le canard et le cheval ne donnent rien tant qu'il n'y a ni œuf ni viande hebdomadaire — dis si tu veux que le bétail se mange (une bête abattue par semaine → viande).
+- **Le vol dans les champs et les enclos** n'est pas encore une infraction : cueillir la parcelle d'une ville ou tuer son mouflon reste impuni. À brancher sur [[Lois et infractions]] quand tu diras comment (amende, gardes hostiles).
+- **Les bêtes du joueur** ne produisent rien : il lui faudrait poser un enclos et y garder ses bêtes apprivoisées — même règle que la ville, à faire si tu la veux.
+
+## 2026-09-05 — Le premier matin d'une ville (18 h 45)
+
+Quand une ville de deux cents habitants se charge, tout le monde part en même temps vers son poste ou son coin de place : pendant les premières secondes, le monde coûte 40 à 50 ms par tick (contre 3 en régime de croisière). C'est un à-coup à l'arrivée, pas une lenteur de fond. Deux façons de l'effacer si tu le sens à la manette : étaler les départs (chaque PNJ part à sa propre minute, une donnée), ou placer chacun à son poste dès le chargement quand on arrive en pleine journée (la projection du LOD le fait déjà pour qui revient). Dis laquelle, ou si ça passe.
+
+## 2026-09-05 — Les transports (B4) : ce que j'ai choisi avant de coder
+
+- **Le train n'est pas simulé entre deux gares** : il passe à heures fixes, on monte, on paie, on arrive — un voyage plus rapide que la marche. Un train qui roule d'une ville à l'autre sous les yeux du joueur serait une autre affaire (des rails sur toutes les cellules du chemin, un être qui traverse la fenêtre) ; dis si tu la veux.
+- **Pas de combat monté** : à la première action de combat, le joueur descend. Le combat à cheval changerait les règles (allonge, charge, cible) : c'est à toi.
+- **Les chiffres** : trois trains par jour (8 h, 14 h, 20 h), une minute d'arrêt, un prix par cellule, la monture à demi-coût de marche, l'écurie vend un cheval au prix d'une bonne arme. Tout est dans `villes.transports`.

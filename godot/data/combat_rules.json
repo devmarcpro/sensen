@@ -933,7 +933,7 @@
       "creature": "villageois"
     },
     "perimetres": {
-      "_doc": "Les perimetres de recolte (Population et exploitation, 2026-09-04) : un type par cellule revendiquee ; tag de tuile scanne, competence, fonction proposee, unites produites par tuile et par semaine ; reserve = richesse x unites_par_tuile ; repousse hebdomadaire sur une cellule Ressources naturelles.",
+      "_doc": "Les perimetres de recolte (Population et exploitation, 2026-09-04) : un type par cellule revendiquee ; tag de tuile scanne, competence, fonction proposee, unites produites par tuile et par semaine ; reserve = richesse x unites_par_tuile ; repousse hebdomadaire sur une cellule Ressources naturelles. Le type champs (Villes B2) : ses parcelles mûres se récoltent et se ressèment chaque semaine par ses fermiers (villes.champs.tuiles_par_fermier_semaine), sans production abstraite.",
       "types": {
         "bois": {
           "tag": "arbre",
@@ -971,6 +971,14 @@
           "par_tuile_semaine": 0.0,
           "materiau_defaut": "",
           "stockage": true
+        },
+        "champs": {
+          "tag": "culture",
+          "skill": "agriculture",
+          "fonction": "fermier",
+          "par_tuile_semaine": 0.0,
+          "materiau_defaut": "",
+          "champs": true
         }
       },
       "ordre": [
@@ -978,7 +986,8 @@
         "minerai",
         "plantes",
         "residentiel",
-        "stockage"
+        "stockage",
+        "champs"
       ],
       "unites_par_tuile": 1.5,
       "tuiles_max_par_resident": 20,
@@ -1007,6 +1016,11 @@
         "stockage": [
           0.85,
           0.7,
+          0.35
+        ],
+        "champs": [
+          0.85,
+          0.75,
           0.35
         ]
       }

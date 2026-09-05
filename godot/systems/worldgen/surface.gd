@@ -326,8 +326,12 @@ func _poser_route(e: Dictionary, cell: Vector2i) -> void:
 	var sol := str(b.get("village_palette", {}).get("sol", "calcaire"))
 	var depart: Vector2i = Vector2i(e.village.centre) if not e.village.is_empty() and e.village.has("centre") else Vector2i(taille / 2, taille / 2)
 	e["route"] = {}
+	var roy := royaume_de(cell)
+	var rayon_q: int = int(GameData.config("villes").get("rayon_place", 6)) + 1
 	for v in voisines:
 		var d: Vector2i = v - cell
+		# Les rails suivent la route quand elle relie deux cellules du même royaume (Villes B4) — jamais hors territoire.
+		var rail: bool = not roy.is_empty() and str(royaume_de(v).get("id", "")) == str(roy.id)
 		var arrivee := Vector2i(taille / 2 + d.x * (taille / 2), taille / 2 + d.y * (taille / 2))
 		arrivee = Vector2i(clampi(arrivee.x, 0, taille - 1), clampi(arrivee.y, 0, taille - 1))
 		var q := depart
@@ -342,6 +346,15 @@ func _poser_route(e: Dictionary, cell: Vector2i) -> void:
 					e.sols[i] = sol
 					_degager(e, i)
 					e.route[i] = true
+			var iq := q.y * taille + q.x
+			if rail and _dans(q, taille) and not e.eau.has(iq) and not e.murs.has(iq):
+				e.rails[iq] = true
+				if not e.village.is_empty() and Grille.distance(q, depart) == rayon_q and not e.village.has("quai"):
+					e.village["quai"] = q   # la gare : là où le rail touche la place
+				if not e.village.is_empty() and q == arrivee:
+					if not e.village.has("entrees_rail"):
+						e.village["entrees_rail"] = []
+					e.village.entrees_rail.append(q)
 
 
 func _tirer_pondere(poids: Dictionary, rng: RandomNumberGenerator) -> String:
@@ -887,6 +900,7 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 	e["meubles"] = {}
 	e["village"] = {}
 	e["stations"] = {}
+	e["rails"] = {}
 	var agglo := agglomeration_de(Vector2i(cx, cy)) if camp.is_empty() else {}   # une cellule d'agglomération : un quartier (Villes B1)
 	if not agglo.is_empty():
 		_poser_quartier(e, Vector2i(cx, cy), rng, agglo)
@@ -1121,7 +1135,7 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 	var rue := {}
 	var rues_h: Array[int] = [centre.y]
 	var rues_v: Array[int] = [centre.x]
-	if palier in ["bourg", "ville", "cite"]:
+	if palier != "hameau":   # dès le village : un village de trente-cinq âmes ne loge pas le long de deux rues
 		rues_h.append_array([centre.y - taille / 4, centre.y + taille / 4])
 		rues_v.append_array([centre.x - taille / 4, centre.x + taille / 4])
 	for yr in rues_h:
@@ -1157,6 +1171,8 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 		file.append(["chapelle", "", "", "", ""])
 	if bool(comp.auberge):
 		file.append(["auberge", "", "", "", ""])
+	if bool(comp.get("ecurie", false)) and bats.has("ecurie"):   # le maquignon vend des montures (Villes B4)
+		file.append(["ecurie", "", "", "", ""])
 	var stations: Array = cfg.stations_ateliers.duplicate()
 	var n_ateliers: int = pop / maxi(1, int(comp.ateliers_par_habitant)) if int(comp.ateliers_par_habitant) > 0 else 0
 	for k in n_ateliers:
@@ -1282,8 +1298,75 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 						pj["fonction"] = "oisif"
 				break
 		e.village.pnj.append({"creature": str(GameData.config("combat_rules").royaume.succession.creature_dirigeant), "pos": ou, "lit": lit_d, "poste": ou, "fonction": "dirigeant"})
-	# 8. Le plan du territoire : le résidentiel, les stockages (les entrepôts), les zones de récolte en lisière.
+	# 8. Les champs et l'enclos (Villes B2) : des rectangles de terre libre derrière les maisons, hors rues.
 	var per: Array = e.village.territoire.perimetres
+	var tags_b: Array = b.get("tags", [])
+	var ch: Dictionary = cfg.get("champs", {})
+	e.village["champs"] = []
+	e.village["betes"] = []
+	var n_champs := 0
+	if quartier in ch.get("quartiers", []):
+		n_champs = pop / maxi(1, int(ch.par_habitant if quartier == "agricole" else ch.get("par_habitant_hors_agricole", 20)))
+	var liste_c: Array = _liste_par_biome(ch.get("cultures_par_biome", {}), tags_b)
+	for k in n_champs:
+		if liste_c.is_empty():
+			break
+		var r := _rectangle_libre(e, Vector2i(int(ch.taille[0]), int(ch.taille[1])), pris, rue, rng)
+		if r.position == Vector2i(-1, -1):
+			break
+		pris.append(r)
+		var tuiles_c: Array = []
+		for y in r.size.y:
+			for x in r.size.x:
+				var q := r.position + Vector2i(x, y)
+				var i := q.y * taille + q.x
+				_degager(e, i)
+				lots[i] = true
+				tuiles_c.append(q)
+		var plante := str(liste_c[(k + rng.randi_range(0, liste_c.size() - 1)) % liste_c.size()])
+		e.village.champs.append({"rect": r, "plante": plante, "tuiles": tuiles_c})
+		per.append({"type": "champs", "tuiles": tuiles_c, "plante": plante})
+		var n_f := 0   # deux fermiers du quartier (ou deux oisifs qui le deviennent) y travaillent
+		for pj in e.village.pnj:
+			if n_f >= int(ch.get("fermiers_par_champ", 2)):
+				break
+			if not pj.has("perimetre") and str(pj.get("fonction", "oisif")) in ["fermier", "oisif"] and str(pj.get("creature", "")) in ["villageois", "fermier"]:
+				pj["fonction"] = "fermier"
+				pj["perimetre"] = per.size() - 1
+				n_f += 1
+	var en: Dictionary = cfg.get("enclos", {})
+	var especes: Array = _liste_par_biome(en.get("especes_par_biome", {}), tags_b)
+	for k in int(en.get("par_quartier", {}).get(quartier, 0)):
+		if especes.is_empty():
+			break
+		var r := _rectangle_libre(e, Vector2i(int(en.taille[0]), int(en.taille[1])), pris, rue, rng)
+		if r.position == Vector2i(-1, -1):
+			break
+		pris.append(r)
+		var interieur: Array = []
+		for y in r.size.y:
+			for x in r.size.x:
+				var q := r.position + Vector2i(x, y)
+				var i := q.y * taille + q.x
+				_degager(e, i)
+				lots[i] = true
+				if x == 0 or y == 0 or x == r.size.x - 1 or y == r.size.y - 1:
+					e.meubles[i] = "enclos"
+				else:
+					interieur.append(q)
+		for kb in rng.randi_range(int(en.betes[0]), int(en.betes[1])):
+			if interieur.is_empty():
+				break
+			var q_b: Vector2i = interieur[rng.randi_range(0, interieur.size() - 1)]
+			interieur.erase(q_b)
+			e.village.betes.append({"espece": str(especes[rng.randi_range(0, especes.size() - 1)]), "pos": q_b})
+		for pj in e.village.pnj:   # un éleveur devant l'enclos
+			if str(pj.get("fonction", "oisif")) == "oisif" and str(pj.get("creature", "")) == "villageois" and not pj.has("perimetre"):
+				pj["fonction"] = "eleveur"
+				pj["poste"] = r.position + Vector2i(-1, r.size.y / 2)
+				pj["pos"] = pj.poste
+				break
+	# 9. Le plan du territoire : le résidentiel, les stockages (les entrepôts), les zones de récolte en lisière.
 	if not residentiel.is_empty():
 		var tuiles_r: Array = residentiel.keys()
 		per.append({"type": "residentiel", "tuiles": tuiles_r})
@@ -1326,6 +1409,37 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 					pj["fonction"] = fonction_z
 					pj["perimetre"] = per.size() - 1
 					n_ouvriers += 1
+
+
+## La liste d'une table par tag de biome (`_defaut` sinon).
+func _liste_par_biome(table: Dictionary, tags: Array) -> Array:
+	for t in tags:
+		if table.has(str(t)):
+			return table[str(t)]
+	return table.get("_defaut", [])
+
+
+## Un rectangle de terre libre (ni rue, ni parcelle prise, ni eau), tiré au sort ; position (-1,-1) s'il n'y en a pas.
+func _rectangle_libre(e: Dictionary, dims: Vector2i, pris: Array[Rect2i], rue: Dictionary, rng: RandomNumberGenerator) -> Rect2i:
+	var taille: int = e.largeur
+	for essai in 80:
+		var origine := Vector2i(rng.randi_range(2, taille - 3 - dims.x), rng.randi_range(2, taille - 3 - dims.y))
+		var r := Rect2i(origine, dims)
+		var libre := true
+		for pr in pris:
+			if pr.grow(1).intersects(r):
+				libre = false
+				break
+		if not libre:
+			continue
+		for y in dims.y:
+			for x in dims.x:
+				var i := (origine.y + y) * taille + origine.x + x
+				if e.eau.has(i) or rue.has(i) or e.murs.has(i):
+					libre = false
+		if libre:
+			return r
+	return Rect2i(Vector2i(-1, -1), dims)
 
 
 ## Le nombre de lits d'un plan.

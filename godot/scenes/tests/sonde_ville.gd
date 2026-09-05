@@ -93,7 +93,7 @@ func _ready() -> void:
 			per_types[str(per.type)] = int(per_types.get(str(per.type), 0)) + per.tuiles.size()
 		lits_total += lits
 		pnj_total += v.pnj.size()
-		print("  cellule %s · %s · %d habitants prévus · %d bâtiments %s · %d lits · %d PNJ %s · rues : %d/%d portes jointes · périmètres %s · %d stations · %.0f ms" % [str(c), str(v.quartier), int(v.population_quartier), v.batiments.size(), str(par_id), lits, v.pnj.size(), str(fonctions), portes_jointes, v.batiments.size(), str(per_types), e.get("stations", {}).size(), dt])
+		print("  cellule %s · %s · %d habitants prévus · %d bâtiments %s · %d lits · %d PNJ %s · rues : %d/%d portes jointes · périmètres %s · %d stations · %d champs · %d bêtes · %.0f ms" % [str(c), str(v.quartier), int(v.population_quartier), v.batiments.size(), str(par_id), lits, v.pnj.size(), str(fonctions), portes_jointes, v.batiments.size(), str(per_types), e.get("stations", {}).size(), v.get("champs", []).size(), v.get("betes", []).size(), dt])
 		if lits < int(v.population_quartier):
 			soucis.append("cellule %s (%s) : %d lits pour %d habitants" % [str(c), str(v.quartier), lits, int(v.population_quartier)])
 		if portes_jointes < v.batiments.size():
@@ -128,8 +128,9 @@ func _ready() -> void:
 	if s2.territoire.id != "joueur":
 		soucis.append("le contexte n'est pas revenu au joueur")
 	# 4. Le tempo : deux cents ticks du monde à l'allure du jeu, le coût d'un tick (le client en paie dix par seconde).
+	for k in 300:   # la ruée du premier matin (tout le monde part vers son poste) n'est pas le régime de croisière
+		s2.horloge_monde.avancer(1)
 	var t_tempo := Time.get_ticks_usec()
-	var pas_avant: float = float(s2.chrono.get("pas", 0.0))
 	s2.chrono.clear()
 	for k in 200:
 		s2.horloge_monde.avancer(1)
@@ -149,6 +150,7 @@ func _ready() -> void:
 		for l in journal:
 			cles[str(l.cle)] = int(cles.get(str(l.cle), 0)) + 1
 		print("  semaine %d (%.0f ms) : résidents %d · stocks %s · trésor %d · dette %d · rapport %s · journal %s" % [w + 1, float(etat.get("ms", 0.0)), int(r2.residents), str(r2.stocks), int(t.tresor), int(t.dette), str(t.rapports.back().get("prod", "?")) if not t.rapports.is_empty() else "—", str(cles)])
+		print("    prix : %s · trésor du royaume %s" % [str(t.get("prix", {})), str(s2.monde.tresors_royaumes)])
 		print("    chrono (ms) : %s" % str(s2.chrono))
 		if int(r2.residents) == 0:
 			soucis.append("semaine %d : plus aucun résident" % (w + 1))
@@ -159,6 +161,17 @@ func _etat(s2: Simulation) -> Dictionary:
 	var fonctions := {}
 	for x in s2.residents():
 		fonctions[str(x.fonction)] = int(fonctions.get(str(x.fonction), 0)) + 1
+	var betes := 0
+	for x in s2.vivants():
+		if str(x.get("betail", "")) == str(s2.territoire.id):
+			betes += 1
+	var mures := 0
+	for pm in s2.territoire.cultures.keys():
+		if bool(s2.territoire.cultures[pm].get("mure", false)):
+			mures += 1
+	fonctions["(bêtes)"] = betes
+	fonctions["(parcelles)"] = s2.territoire.cultures.size()
+	fonctions["(mûres)"] = mures
 	var pers := {}
 	for pid in s2.perimetres().keys():
 		var p: Dictionary = s2.perimetres()[pid]

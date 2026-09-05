@@ -3390,3 +3390,33 @@ quartier.marchand,le quartier marchand
 quartier.agricole,les faubourgs agricoles
 journal.ville,"{palier} : {nom} — {quartier} ({population} habitants)"
 journal.ville_territoire,"{nom} tient ses comptes : {n} résidents, {perimetres} périmètres"
+perimetre.champs.name,champs
+journal.recolte_champs,"Les champs ont donné {n} récolte(s) : {plantes}"
+journal.betail_produit,"Le bétail a donné {n} unité(s) : {produits}"
+creature.marchand_itinerant.name,Marchand itinérant
+dialogue.itinerant.text,"Je viens d’une autre ville, par la route : mes prix sont ceux de là-bas. Regardez mon étal avant que je reparte au soir."
+journal.itinerant_arrive,"Un marchand itinérant venu de {origine} tient l’étal au marché de {ville}"
+journal.itinerant_part,"Le marchand itinérant de {origine} a repris la route"
+journal.taxe_royaume,"{ville} verse {n} or à son royaume"
+creature.train.name,Train
+creature.caleche.name,Calèche
+creature.vehicule.name,Véhicule
+tile_content.rail.name,rails
+tile_content.quai.name,quai
+dialogue.train.text,"Le train siffle à quai. On monte, ou on le regarde partir."
+dialogue.caleche.text,"Le cocher tient les rênes : « Quel quartier ? »"
+ui.ecran.train_vers,"Prendre le train vers {ville} ({prix} or)"
+ui.ecran.caleche_vers,"Prendre la calèche vers {quartier} ({prix} or)"
+ui.ecran.monter,Monter {nom}
+ui.ecran.descendre,Descendre de sa monture
+ui.ecran.acheter_monture,Acheter une monture ({prix} or)
+journal.train_arrive,Le train entre en gare de {ville}
+journal.train_part,Le train quitte {ville}
+journal.train_voyage,{nom} prend le train pour {ville} ({prix} or)
+journal.caleche_voyage,{nom} prend la calèche ({prix} or)
+journal.monte,{nom} monte {monture}
+journal.descend,{nom} descend de {monture}
+journal.descend_combat,{nom} met pied à terre pour se battre
+journal.monture_achetee,{nom} achète {monture} pour {prix} or
+journal.transport_or,Pas assez d’or pour le voyage ({prix} or)
+journal.caleche_arrive,Une calèche fait le tour de {ville}
