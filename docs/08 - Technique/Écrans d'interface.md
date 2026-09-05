@@ -264,3 +264,6 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 
 > [!important] 2026-09-04, 22 h 20 — le designer : « change la police de caractère pour que ce soit plus lisible »
 > La police MingLiU-ExtB (décision du 2026-08-30 : trait bitmap sans lissage) laisse la place à une **police système lissée**, lue dans `styles.police` : les familles sont essayées dans l'ordre — Segoe UI (Windows), Noto Sans, DejaVu Sans, Arial —, lissage gris, hinting léger, repli système pour les glyphes absents (CJK). Toujours **aucun asset** dans le dépôt. Rien ne change dans les tailles : ce sont les tracés qui deviennent lisibles à 10-12 px. Revenir à MingLiU tient en trois valeurs de données (la `_doc` de `styles.police` les donne). Vérifié sur des captures en français et en anglais, avec le volet.
+
+> [!note] 2026-09-05, 2 h — la bulle de survol ne recouvre plus le bloc d'information du haut
+> Vu sur les captures de la chaumière : la bulle de la compagne, posée au-dessus d'elle, s'écrivait par-dessus les lignes d'état en haut à gauche. Quand elle n'a pas la place au-dessus de l'être, elle passe dessous ; elle reste aussi à gauche du volet et dans l'écran.

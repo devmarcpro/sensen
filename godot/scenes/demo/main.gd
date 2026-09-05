@@ -2097,6 +2097,15 @@ func _dessiner_bulle(ci: CanvasItem) -> void:
 		larg = minf(420.0, maxf(larg, ThemeDB.fallback_font.get_string_size(str(l), HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x + 8.0))   # 420 px au plus
 	var haut := 14.0 * lignes_b.size() + 8.0
 	var pb := _ecran(cible.pos, g.h(cible.pos)) + Vector2(-larg * 0.5 - 6.0, -70.0 - haut)
+	# La bulle ne recouvre ni le bloc d'information du haut ni le volet, et ne sort pas de l'écran (Écrans d'interface,
+	# 2026-09-05) : quand elle n'a pas la place au-dessus de l'être, elle passe dessous.
+	var ecran_l := get_viewport_rect().size
+	var bas_info := ui.position.y + ui.get_combined_minimum_size().y + 6.0
+	if pb.y < bas_info and pb.x < ui.position.x + ui.size.x:
+		pb.y = _ecran(cible.pos, g.h(cible.pos)).y + 24.0
+	var droite := ecran_l.x - ((volet.largeur) if volet != null and volet.visible else 0.0)
+	pb.x = clampf(pb.x, 6.0, maxf(6.0, droite - larg - 18.0))
+	pb.y = clampf(pb.y, 6.0, maxf(6.0, ecran_l.y - haut - 6.0))
 	ci.draw_rect(Rect2(pb, Vector2(larg + 12.0, haut)), Color(0.05, 0.05, 0.08, 0.9))
 	ci.draw_rect(Rect2(pb, Vector2(larg + 12.0, haut)), Color(0.9, 0.3, 0.25) if sim.ennemis(j, cible) else Color(0.35, 0.8, 0.45), false, 1.0)
 	for k in lignes_b.size():
