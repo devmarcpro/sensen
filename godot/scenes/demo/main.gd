@@ -1775,6 +1775,7 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 		teinte = teinte.lerp(Color(1.4, 1.4, 1.5), 0.5)
 	if g.bloque_passage(t) and not ("vegetation" in tags_c) and not ("porte" in tags_c):   # un mur : un bloc plein — le sol dessous est caché
 		_dessine_bloc(ci, g, t, c, teinte)
+		_dessiner_sprite_tuile(ci, g, t, c, teinte)
 		return
 	var haut := PackedVector2Array([
 		c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0),
@@ -1812,12 +1813,28 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 		# contenu franchissable (porte, entrée du donjon, tapis) : un losange plat coloré
 		var cf := Color.html(str(GameData.entree("meubles", str(g.meubles.get(g.idx(t), "tapis"))).couleur)) if "meuble" in contenu.get("tags", []) else Color.html(str(contenu.couleur))
 		_poly(ci, PackedVector2Array([c + Vector2(0, -TH * 0.35), c + Vector2(TW * 0.35, 0), c + Vector2(0, TH * 0.35), c + Vector2(-TW * 0.35, 0)]), cf * teinte)
+		_dessiner_sprite_tuile(ci, g, t, c, teinte)
 	if "porte" in contenu.get("tags", []):   # une porte n'est pas un mur : un battant dans son encadrement
 		_dessiner_porte(ci, g, t, c, contenu, teinte)
 	if "contenant" in contenu.get("tags", []):   # coffre ou butin : une caisse
 		var cc := (Color(0.55, 0.38, 0.18) if "coffre" in contenu.tags else Color(0.75, 0.65, 0.3)) * teinte
 		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc)
 		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc.darkened(0.5), false, 1.0)
+
+## Le sprite d'un meuble ou d'une station posés (Direction artistique, 2026-09-05) : `meuble_<id>.png` ou
+## `station_<id>.png` dans le dossier des sprites, dressé sur la tuile par-dessus le bloc de couleur — s'il existe.
+func _dessiner_sprite_tuile(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: Color) -> void:
+	var gi := g.idx(t)
+	var tex: Texture2D = null
+	if g.meubles.has(gi):
+		tex = Pictos.texture_objet({"id": "meuble_" + str(g.meubles[gi]), "type": "meuble"})
+	elif g.stations_fixes.has(gi):
+		tex = Pictos.texture_objet({"id": "station_" + str(g.stations_fixes[gi]), "type": "station"})
+	if tex == null:
+		return
+	var l := TW * 0.9
+	ci.draw_texture_rect(tex, Rect2(c + Vector2(-l * 0.5, TH * 0.4 - l), Vector2(l, l)), false, teinte)
+
 
 ## La passe du brouillard : sur la fenêtre du terrain, un voile opaque (couleur du fond) sur les tuiles
 ## jamais vues, un voile translucide sur les tuiles mémorisées hors du champ de vue. Chaque voile couvre

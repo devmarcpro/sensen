@@ -49,6 +49,7 @@ Comment le jeu se donne à voir : isométrique, tuiles teintées, billboards pap
 > - **composants** : `assets/objets/composants/<id>.png` — `lame_longue.png`, `poignee.png`… ; le sprite est **teinté par sa matière** (la couleur de [[Palette de couleurs des matériaux]] en `modulate`) : un seul dessin par composant, en gris clair ;
 > - **matières** : `assets/objets/matieres/<forme>.png` — `brut.png`, `lingot.png`, `planche.png`, `pierre_taillee.png`, `bloc.png`, `fil.png`… — teintées de même : un dessin par forme.
 > Carré, fond transparent, n'importe quelle taille (la case du jeu est petite : 32 à 48 px à l'écran, 64 ou 128 px conviennent) ; Godot les importe à `--import` et l'export les embarque (`export_filter = all_resources`). `tools/verif_sprites.py` dit ce qui manque et ce qui est en trop ; la colonne « sprite » de la liste donne le nom attendu. Ce n'est qu'une convention de chemin : la changer, c'est `styles.sprites.dossier` et une fonction (`Pictos.nom_sprite`).
+> **Sur la carte aussi** : un meuble ou une station **posés** prennent le même fichier (`meuble_lit.png`, `station_forge.png`), dressé sur leur tuile par-dessus le bloc de couleur, teinté par la lumière du lieu (`Main._dessiner_sprite_tuile`). Vérifié avec deux sprites d'essai (un lit, une épée) : le lit se dresse dans la chaumière, l'épée remplace son pictogramme à l'inventaire ; les essais ne sont pas dans le dépôt.
 
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Piliers d'inspiration]]
