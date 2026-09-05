@@ -367,6 +367,9 @@ au lieu de 292). **Le budget est tenu aujourd'hui.** Rien n'a été optimisé ex
 3 septembre a sans doute été prise sur une machine chargée — le robot a montré le même jour que la
 charge fausse ces chiffres. Le garde reste à 260 ms et le message du test dit l'état du jour.
 
+
+*2026-09-05, 14 h — **tenu**, sans l'avoir cherché : le plafond de créatures par salle (deux au premier étage) fait passer l'étage complet de 153-207 ms à **80-83 ms** (médiane 81, 14 êtres, 295 objets, `sonde_perf_generation`). Le budget de 100 ms de la note est respecté pour la première fois. La garde du test reste à 260 ms : la suite tourne aussi quand le designer joue, et un seuil serré casserait pour rien.*
+
 ## 2026-09-03 — La grille de composition : ce qu'un œil humain doit trancher
 
 La grille est codée et c'est la surface du composeur (on fait son Tetris). Ce que la mesure ne peut
