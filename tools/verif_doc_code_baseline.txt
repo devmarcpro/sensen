@@ -1,3 +1,4 @@
 # Rouille connue du coffre : identifiants cites par les notes et absents du code.
 # Chaque passe de reconciliation en retire ; `python tools/verif_doc_code.py --geler` regele.
-
+06 - Êtres\Prompt de génération — bibliothèque de sprites.md : jambe_bas
+06 - Êtres\Prompt de génération — bibliothèque de sprites.md : jambe_haut

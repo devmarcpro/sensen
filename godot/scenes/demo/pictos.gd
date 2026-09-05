@@ -502,42 +502,75 @@ static func _texture_composant(cid: String, variante: String) -> Texture2D:
 	return _charger("composants/" + cid)
 
 
-## Où chaque slot se pose dans la case d'un objet assemblé, en fractions [x, y, largeur, hauteur] : le manche en bas,
-## la tête en haut, la garde à la jonction, le contrepoids au pied, la corde ou les sangles le long, une plaque ou une
-## étoffe sur toute la case. Une lecture d'icône, pas le rig : le paperdoll assemble les pièces par leurs ancrages.
-const ZONES_ASSEMBLAGE := {"manche": [0.3, 0.42, 0.4, 0.58], "tete": [0.1, 0.0, 0.8, 0.5], "garde": [0.05, 0.4, 0.9, 0.14],
-	"contrepoids": [0.3, 0.8, 0.4, 0.2], "corde": [0.0, 0.05, 0.25, 0.9], "sangles": [0.0, 0.05, 0.25, 0.9],
-	"plaque": [0.05, 0.05, 0.9, 0.9], "etoffe": [0.05, 0.05, 0.9, 0.9], "doublure": [0.15, 0.15, 0.7, 0.7],
-	"monture": [0.2, 0.45, 0.6, 0.3], "sertissure": [0.3, 0.15, 0.4, 0.35]}
-const ORDRE_ASSEMBLAGE := ["doublure", "plaque", "etoffe", "sangles", "corde", "contrepoids", "manche", "monture", "garde", "tete", "sertissure"]
-
-
-## L'icône d'un objet assemblé, composée des sprites de ses composants, chacun teinté par sa matière (Direction
-## artistique, 2026-09-05, 9 h : on ne dessine pas les armes, on dessine les composants). Faux — et rien de dessiné —
-## dès qu'une pièce n'a pas de sprite : le pictogramme par code reste alors entier.
-static func _dessiner_assemblage(ci: CanvasItem, it: Dictionary, r: Rect2) -> bool:
+## L'ASSEMBLAGE d'un objet à partir des sprites de ses composants (Direction artistique, 2026-09-05 — le designer : « l'équipement
+## dans l'inventaire et sur le personnage, c'est le même sprite »). Un seul montage, dans un repère en unités de rig :
+## l'origine au pied du manche, +X en travers, −Y le long (vers la tête). Chaque composant a son origine au centre de son
+## bord bas et s'étend vers le haut : le manche part de l'origine, la tête et la garde ont leur origine à la jonction
+## (le sommet du manche), le contrepoids se loge sous le pied, la corde court le long du manche, à côté ; une plaque,
+## une étoffe ou une doublure (bouclier, tambour) se tiennent sur l'origine. L'inventaire dessine ce montage debout dans
+## sa case, le paperdoll le dessine dans la main tourné avec elle — même pièces, mêmes proportions, mêmes teintes.
+## Vide dès qu'une pièce n'a pas de sprite : tout ou rien, sinon on mélangerait deux dessins.
+static func assembler(it: Dictionary) -> Array:
 	var comps: Dictionary = it.get("composants", {})
 	if comps.is_empty():
-		return false
+		return []
 	var variante := str(it.get("variante_visuelle", ""))
-	var textures := {}
+	var px := float(GameData.config("styles").get("sprites", {}).get("px_par_unite", 8))
+	var pieces := {}
 	for slot in comps.keys():
 		var piece: Dictionary = comps[slot]
-		var tex := _texture_composant(str(piece.get("composant", "")), variante)
+		var cid := str(piece.get("composant", ""))
+		var tex := _texture_composant(cid, variante)
 		if tex == null:
-			return false
-		textures[slot] = tex
-	var slots: Array = ORDRE_ASSEMBLAGE.duplicate()
-	for slot in textures.keys():
-		if not (slot in slots):
-			slots.append(slot)   # un slot inconnu : au centre, en dernier
-	for slot in slots:
-		if not textures.has(slot):
-			continue
-		var z: Array = ZONES_ASSEMBLAGE.get(slot, [0.1, 0.1, 0.8, 0.8])
-		var piece: Dictionary = comps[slot]
-		var teinte := couleur_objet({"materiau": str(piece.get("materiau", ""))})
-		ci.draw_texture_rect(textures[slot], Rect2(r.position + Vector2(float(z[0]), float(z[1])) * r.size, Vector2(float(z[2]), float(z[3])) * r.size), false, teinte)
+			return []
+		var sp: Dictionary = GameData.catalogues.get("components", {}).get(cid, {}).get("sprite", {})
+		pieces[slot] = {"tex": tex, "lo": float(sp.get("longueur", tex.get_height() / px)), "la": float(sp.get("largeur", tex.get_width() / px)),
+			"teinte": couleur_objet({"materiau": str(piece.get("materiau", ""))}), "ancrages": sp.get("ancrages", {})}
+	var res: Array = []
+	var haut_manche := 0.0
+	var la_manche := 0.0
+	if pieces.has("manche"):
+		haut_manche = pieces.manche.lo
+		la_manche = pieces.manche.la
+	# [slot, origine x, origine y (le pied du composant), ordre de dessin]
+	var places: Array = []
+	for slot in pieces.keys():
+		var p: Dictionary = pieces[slot]
+		match slot:
+			"manche": places.append([slot, 0.0, 0.0, 2])
+			"contrepoids": places.append([slot, 0.0, p.lo, 1])                     # sous le pied : son sommet touche l'origine
+			"tete", "monture", "sertissure": places.append([slot, 0.0, -haut_manche, 3])
+			"garde": places.append([slot, 0.0, -haut_manche, 4])
+			"corde": places.append([slot, (la_manche + p.la) * 0.5, 0.0, 0])   # le long du manche, à côté
+			"sangles": places.append([slot, 0.0, 0.0, 1])
+			_: places.append([slot, 0.0, 0.0, 0])                              # plaque, étoffe, doublure : sur l'origine
+	places.sort_custom(func(a: Array, b: Array) -> bool: return int(a[3]) < int(b[3]))
+	for pl in places:
+		var p: Dictionary = pieces[pl[0]]
+		res.append({"tex": p.tex, "rect": Rect2(float(pl[1]) - p.la * 0.5, float(pl[2]) - p.lo, p.la, p.lo), "teinte": p.teinte, "slot": pl[0]})
+	return res
+
+
+## La boîte englobante d'un montage, en unités.
+static func boite_assemblage(parts: Array) -> Rect2:
+	var boite: Rect2 = parts[0].rect
+	for k in range(1, parts.size()):
+		boite = boite.merge(parts[k].rect)
+	return boite
+
+
+## L'icône d'un objet assemblé : le montage debout, ajusté dans la case en gardant ses proportions. Faux — et rien
+## de dessiné — si une pièce manque : le pictogramme par code reste entier.
+static func _dessiner_assemblage(ci: CanvasItem, it: Dictionary, r: Rect2) -> bool:
+	var parts := assembler(it)
+	if parts.is_empty():
+		return false
+	var boite := boite_assemblage(parts)
+	var marge := r.size.x * 0.08
+	var ech := minf((r.size.x - 2.0 * marge) / maxf(0.01, boite.size.x), (r.size.y - 2.0 * marge) / maxf(0.01, boite.size.y))
+	var origine := r.position + r.size * 0.5 - (boite.position + boite.size * 0.5) * ech   # centré
+	for p in parts:
+		ci.draw_texture_rect(p.tex, Rect2(origine + p.rect.position * ech, p.rect.size * ech), false, p.teinte)
 	return true
 
 

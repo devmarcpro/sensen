@@ -496,6 +496,17 @@ func _ready() -> void:
 							c.sac.append(epee.uid)
 							scene.sim._equiper(c, epee.uid, 0)
 						break
+	for iz in args.size():   # --zoom Z : la vue rapprochée (pour juger un sprite à sa taille réelle et en gros, 2026-09-05)
+		if args[iz] == "--zoom" and iz + 1 < args.size():
+			scene.zoom = float(args[iz + 1])
+			scene._recentrer()
+	for ia in args.size():   # --arme <base> : un objet assemblé généré et équipé en main principale (sprites des composants, 2026-09-05)
+		if args[ia] == "--arme" and ia + 1 < args.size() and scene.sim != null:
+			var ja: Dictionary = scene.joueur()
+			var arme_g: Dictionary = scene.sim.generer_objet(str(args[ia + 1]), 1, {}, "commun", 0)
+			if not arme_g.is_empty() and not ja.is_empty():
+				ja.sac.append(arme_g.uid)
+				scene.sim._equiper(ja, arme_g.uid, 0)
 	for ig in args.size():   # --grande_base N : la grande base du designer (2026-09-04, 14 h), N semaines passées — voir grande_base.gd
 		if args[ig] == "--grande_base" and scene.sim != null and scene.sim.monde != null:
 			var semaines_gb: int = int(args[ig + 1]) if ig + 1 < args.size() and args[ig + 1].is_valid_int() else 0
