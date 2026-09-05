@@ -6,7 +6,7 @@ statut: décidé
 etape: 9
 ---
 
-**Un roi et un mouton sont la même fiche, avec des blocs différents remplis.** C'est de là que tout découle. 17 notes.
+**Un roi et un mouton sont la même fiche, avec des blocs différents remplis.** C'est de là que tout découle. 18 notes.
 
 **Le socle, à lire en premier :**
 - **[[Profils de PNJ]]** — un forgeron n'est pas une espèce, c'est `humain · La Braise · artisan · résident`. Les PNJ se **génèrent**, ils ne s'énumèrent pas.
@@ -17,6 +17,7 @@ etape: 9
 **Le socle**
 - **[[Schéma unifié créature-PNJ]]** — pas de distinction technique entre monstre et villageois. *N'importe quelle créature peut devenir un compagnon.*
 - **[[Squelette modulaire et points d'attache]]** — le pipeline paperdoll : des ancrages nommés, une couleur réservée par type d'attache. Réutilisé par les donjons, les objets, les véhicules.
+- **[[Prompt de génération — bibliothèque de sprites]]** — le document du designer (2026-09-05) : image de synthèse pré-rendue années 90, gris neutre teinté par palette, les composants plutôt que les armes, le manifeste des 246 pièces et le gabarit d'une requête.
 - **[[Schéma créature]]** — le format de données unique de tout être vivant.
 
 **Le comportement**
