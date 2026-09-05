@@ -218,6 +218,7 @@ func _ready() -> void:
 	_lancer("test_routine_civile")
 	_lancer("test_proie_n_engage_pas")
 	_lancer("test_sprites_objets")
+	_lancer("test_boutiques_vendent")
 	_verifier_tous_lances()
 	Monde.fermer_tous()   # aucun thread de pré-génération ne doit survivre aux autoloads
 	for nom_s in ["test_terrain", "test_sensen", "test_sensen2", "test_graine", "test_partout", "test_partout2", "test_auto"]:
@@ -4075,6 +4076,35 @@ func test_bete_engage_sur_son_horloge() -> void:
 		for nom in s.combats.keys():
 			s.pas(nom)
 	verifier(int(j.sante) < sante0 or not j.vivant, "le rat a mordu pendant que le joueur attendait (%d → %d)" % [sante0, int(j.sante)])
+
+
+## Les boutiques vendent (Commerce et boutiques, 2026-09-05) : chaque type garnit un étal non vide, le tailleur vend des
+## vêtements et non des boucliers de fortune, et un marchand sans boutique typée se réapprovisionne comme les autres.
+func test_boutiques_vendent() -> void:
+	var s := nouvelle_sim("gorge")
+	var ids: Array = GameData.catalogues.shop_types.keys()
+	ids.sort()
+	for bid in ids:
+		var faux := {"id": "test_" + str(bid), "stock": []}
+		s._garnir_stock(faux, GameData.catalogues.shop_types[bid].selection)
+		verifier(not faux.stock.is_empty(), "l'étal %s se garnit (%d objets)" % [bid, faux.stock.size()])
+		if bid == "tailleur":
+			var que_du_tissu := true
+			for uid in faux.stock:
+				var it: Dictionary = s.items[uid]
+				var tags: Array = GameData.entree("items", str(it.base)).get("tags", [])
+				if not ("vetement" in tags or "rituel" in tags or "dos" in tags):
+					que_du_tissu = false
+			verifier(que_du_tissu, "le tailleur ne vend que des vêtements, jamais un bouclier de fortune")
+	var m: Dictionary = s.ajouter("marchand", joueur_de(s).pos + Vector2i(2, 0), "ia")
+	verifier(not m.get("stock", []).is_empty(), "un marchand sans boutique typée a le stock de sa fiche (%d)" % m.get("stock", []).size())
+	m.stock = []
+	s.horloge_monde.ticks += int(GameData.config("planete").corruption.ticks_par_semaine)   # la semaine suivante : un autre tirage
+	s._reapprovisionner(m)
+	verifier(not m.stock.is_empty(), "vidé, il se réapprovisionne la semaine suivante (%d objets)" % m.stock.size())
+	var v: Dictionary = s.ajouter("villageois", joueur_de(s).pos + Vector2i(-2, 0), "ia")
+	s._reapprovisionner(v)
+	verifier(v.get("stock", []).is_empty(), "un villageois n'a pas de stock et n'en reçoit pas")
 
 
 ## Les sprites d'objets (Direction artistique, 2026-09-05) : le nom attendu suit la convention, et sans fichier le jeu

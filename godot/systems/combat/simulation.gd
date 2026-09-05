@@ -7006,6 +7006,17 @@ func ajouter(def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 ## Le stock d'un marchand, décrit par des CATÉGORIES (`{filtre, nombre}`) et jamais par une liste d'objets :
 ## une boutique d'armurier vend « les armures de prototype en métal », donc toute armure qui le sera un jour.
 ## Complété chaque semaine quand il est vide (Commerce et boutiques).
+## Le réapprovisionnement hebdomadaire d'un marchand vidé : sa boutique typée, ou le stock de sa fiche (marchand,
+## forgeron — ceux-là ne se regarnissaient jamais, 2026-09-05 : « la plupart n'ont rien à vendre »).
+func _reapprovisionner(x: Dictionary) -> void:
+	if not x.has("stock") or not x.get("stock", []).is_empty():
+		return
+	if not str(x.get("boutique", "")).is_empty():
+		_garnir_stock(x, GameData.entree("shop_types", str(x.boutique)).selection)
+	else:
+		_garnir_stock(x, GameData.entree("creatures", str(x.get("def", ""))).get("stock_marchand", []))
+
+
 func _garnir_stock(e: Dictionary, selection: Array) -> void:
 	if not e.has("stock"):
 		e["stock"] = []
@@ -8445,8 +8456,7 @@ func _tiquer_monde(tick: int) -> void:
 			if x.has("or_max"):
 				x.or = mini(int(x.or_max), int(x.or) + int(ceil(float(x.or_max) * float(regles.r.commerce.recharge_hebdo))))
 			# … et le marchand se réapprovisionne : un stock vidé par le joueur revient la semaine suivante.
-			if not str(x.get("boutique", "")).is_empty() and x.get("stock", []).is_empty():
-				_garnir_stock(x, GameData.entree("shop_types", str(x.boutique)).selection)
+			_reapprovisionner(x)
 			for rels in [x.get("social", {}).get("relations", {}), x.get("reputations", {})]:   # Voie de rédemption : +1/semaine vers 0
 				for cle in rels.keys():
 					if int(rels[cle]) < 0:

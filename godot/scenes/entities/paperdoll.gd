@@ -222,6 +222,8 @@ func _dessine_tenus(monde: Dictionary) -> void:
 		# bien qu'articuler le bras la laissait droite dans le vide, détachée du poing (point 68).
 		var haut: Vector2 = -Vector2(m.direction)
 		var bas: Vector2 = Vector2(m.direction)
+		if _dessine_arme_sprite(it, pt, haut):   # le montage pré-rendu de l'arme, s'il existe (Squelette modulaire, 2026-09-05)
+			return
 		match str(fonct.get("combat_skill", "")):
 			"dague": draw_line(pt, pt + haut * 6, col, 1.5)
 			"epee": draw_line(pt, pt + haut * 12, col, 1.8)
