@@ -156,6 +156,8 @@ python tools/i18n_couverture.py                                                 
 
 Aucune sortie ne doit contenir `SCRIPT ERROR`, et la suite doit finir par `TESTS : tout passe`.
 
+La suite est découpée par domaine depuis le 2026-09-06 : `scenes/tests/test_combat.gd` est le **lanceur** (la liste `_lancer("…")` écrite à la main, le filtre `--seul <fragment>`, le compte des échecs) et les tests vivent dans `scenes/tests/suite/tests_<domaine>.gd` (douze fichiers qui étendent `TestsBase`, où sont les aides communes). Un test nouveau : sa `func test_…` dans le fichier de son domaine, son nom dans la liste du lanceur — un test défini et jamais lancé est un échec.
+
 ### Les autres outils
 
 ```powershell
