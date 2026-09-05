@@ -9229,9 +9229,9 @@ func test_calendrier() -> void:
 		civils = [v0]
 		s2._nouveau_jour(0)
 	var v: Dictionary = civils[0]
-	verifier(int(v.get("humeur", 0)) == int(s2._ry().humeur_base) + int(GameData.config("calendrier").fetes.humeur), "le Nouvel An a donné son humeur au civil (%d)" % int(v.get("humeur", 0)))
+	verifier(int(v.get("humeur", 0)) == clampi(int(s2._ry().humeur_base) + int(s2.trait_somme(v, "humeur")) + int(GameData.config("calendrier").fetes.humeur), 0, 100), "le Nouvel An a donné son humeur au civil (%d, traits compris)" % int(v.get("humeur", 0)))
 	s2.horloge_monde.ticks = 12000
-	verifier(s2._cible_routine(v, s2.profils_ia.civil) == v.place, "midi, jour de fête : la place")
+	verifier(s2._cible_routine(v, s2.profils_ia.civil) == s2._coin_de_place(v), "midi, jour de fête : son coin de la place")
 	s2.horloge_monde.ticks = 2 * jour + 12000   # le 3 du Rat : rien pour un sino, Yennayer pour un arabo-berbère
 	v.social.culture = "sino"
 	verifier(s2._cible_routine(v, s2.profils_ia.civil) == v.poste, "midi, un jour sans fête : le poste")
@@ -9297,7 +9297,7 @@ func test_territoires() -> void:
 	verifier(s.territoire.id == "joueur", "après la semaine, le contexte est celui du joueur")
 	verifier(int(t.stocks.get("baies", 0)) > 0, "les fermiers de la ville ont produit dans les stocks de la ville (%s)" % str(t.stocks))
 	verifier(s.territoire.stocks == stocks_j and int(s.territoire.tresor) == tresor_j, "les stocks et le trésor du joueur n'ont pas bougé")
-	verifier(int(t.tresor) < 100 or int(t.dette) > 0, "la ville a payé son entretien (trésor %d, dette %d)" % [int(t.tresor), int(t.dette)])
+	verifier(int(t.tresor) == 100 and int(t.dette) == 0, "une ville qui n'est pas au joueur ne lui doit pas de gages (trésor %d, dette %d)" % [int(t.tresor), int(t.dette)])
 	verifier(t.rapports.size() == 1, "la ville a son rapport de semaine")
 	# La cellule d'une ville ne se revendique pas ; prise, la ville est au joueur et devient son territoire courant.
 	var n_sub: int = s.monde.taille / 32
