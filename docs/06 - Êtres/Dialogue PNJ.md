@@ -59,6 +59,9 @@ langues.
 > [!success] Codé le 2026-08-28 — étape 9.A, `data/dialogue/` (28 gabarits), écran Dialogue
 > Un **menu contextuel** : la réplique d'ambiance en haut (tirage pondéré parmi les gabarits dont les `conditions` matchent — `metier`, `phase` du jour, `relation_min/max`, `meteo` —, **anti-répétition** sur les 3 dernières par PNJ), les options en dessous : **Parler** (+1 de relation une fois par jour et par PNJ, +1 de plus sur un jet de Charisme réussi : 1d20 + Charisme/4 ≥ 15 — décision), **Commercer** (tag `commerce_possible`), **Partir**. Cadeau, quêtes, recruter, ordres, assigner, négocier attendent 9.C-9.D. Un clic sur un PNJ civil adjacent ouvre le dialogue (Maj + clic pour frapper). Schéma des gabarits complété : `poids`, `relation_max`, `phase`, `meteo`.
 
+> [!success] Codé le 2026-09-05, 15 h — trois conditions de calendrier
+> Les gabarits acceptent `fete`, `marche` et `anniversaire` (booléens, nuls par défaut) : un jour de fête pour la culture du PNJ, le jour de marché de son village, son anniversaire (mois et jour tirés de son identifiant, `Calendrier.anniversaire`). Trois gabarits les portent (`fete`, `marche`, `anniversaire`), à fort poids puisque leur condition est rare. [[Un monde réel — villes, PNJ, royaumes et calendrier]].
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Réputation et relations]], [[Data-driven design]]
 - **Alimente** : [[L'information comme récompense]], [[Apprivoisement et recrutement]], [[Commerce et boutiques]], [[Compagnons]]

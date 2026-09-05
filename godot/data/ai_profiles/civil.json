@@ -23,5 +23,6 @@
     "20-22": "social",
     "22-6": "lit"
   },
-  "chain_bonus": 0.0
+  "chain_bonus": 0.0,
+  "fetes": true
 }

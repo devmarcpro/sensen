@@ -159,6 +159,9 @@ Morphologies (12) : les volants ignorent les contraintes de dénivelé
 >
 > Ce que la sonde **ne dit pas** : si c'est bien. Ce qui reste au designer est dans [[À juger — parcours de jeu]] (la banshee sans attaque, le rat géant coincé ou à vue, le recul du tireur). Et une promesse de la note toujours **non codée** : « civil : alerter gardes » — un civil n'alerte personne à vue ; ce qui existe, c'est l'aggro qui se transmet aux alliés à huit tuiles quand il est **frappé** (`_monter_aggro`, alerte), ce qui met le garde sur le loup un coup trop tard.
 
+> [!success] Codé le 2026-09-05, 15 h — la routine un jour de fête (Calendrier)
+> Un jour de fête pour sa culture ([[Un monde réel — villes, PNJ, royaumes et calendrier]], `data/calendrier.json`), la plage « poste » d'un profil qui fait la fête (`fetes: true` dans le profil — le civil, pas le garde) vaut « social » : il tient la place toute la journée (`_cible_routine`), son humeur a monté de `fetes.humeur` au lever du jour. Le garde patrouille comme les autres jours ; la nuit ne change pas. Une lecture pure du calendrier : aucun état sur le PNJ hors `fete_jour` (l'humeur donnée une fois).
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Data-driven design]], [[Boucle de tick]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[LOD de simulation]], [[Compagnons]], [[Raids et menaces]], [[Lois et infractions]], [[Minimap et brouillard de guerre]]

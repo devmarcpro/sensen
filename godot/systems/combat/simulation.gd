@@ -1857,6 +1857,12 @@ func replique(pnj: Dictionary, j: Dictionary) -> String:
 			continue
 		if c.get("relation_max") != null and rel > int(c.relation_max):
 			continue
+		if c.get("fete") != null and bool(c.fete) != (not fete_de(pnj).is_empty()):   # Calendrier : un jour de fête, de marché, d'anniversaire
+			continue
+		if c.get("marche") != null and bool(c.marche) != jour_de_marche_de(pnj):
+			continue
+		if c.get("anniversaire") != null and bool(c.anniversaire) != _anniversaire_aujourdhui(pnj):
+			continue
 		if did in recentes:
 			continue
 		candidats.append(d)
@@ -1873,6 +1879,15 @@ func replique(pnj: Dictionary, j: Dictionary) -> String:
 			pnj["dernieres_repliques"] = recentes
 			return str(d.text_key)
 	return str(candidats.back().text_key)
+
+
+## C'est l'anniversaire du PNJ ? (mois et jour tirés de son identifiant, Calendrier)
+func _anniversaire_aujourdhui(pnj: Dictionary) -> bool:
+	if monde == null or lieu != "camp":
+		return false
+	var a: Dictionary = pnj.get("anniversaire", Calendrier.anniversaire(str(pnj.id)))
+	var d := date_courante()
+	return str(a.mois) == str(d.mois) and int(a.jour) == int(d.jour_mois)
 
 
 ## Parler : la réplique, +1 de relation une fois par jour et par PNJ, +1 sur un jet de Charisme.
@@ -1920,9 +1935,10 @@ func prix_suggere(uid: String, pnj: Dictionary, acheteur: Dictionary) -> Diction
 	for pal in cm.paliers:
 		if rel >= int(pal[0]) and rel <= int(pal[1]):
 			rep *= float(pal[2])
-	var prix := maxi(1, roundi(base * float(cm.marge_artisanat) * qualite * rarete * rep))
+	var marche := float(GameData.config("calendrier").marche.prix_mult) if jour_de_marche_de(pnj) else 1.0   # le jour de marché, les prix baissent (Calendrier)
+	var prix := maxi(1, roundi(base * float(cm.marge_artisanat) * qualite * rarete * rep * marche))
 	return {"prix": prix, "base": snappedf(base, 0.1), "marge": float(cm.marge_artisanat), "qualite": snappedf(qualite, 0.01), "rarete": snappedf(rarete, 0.01), "rep": snappedf(rep, 0.01),
-		"achat": maxi(1, roundi(float(prix) * float(cm.achat_ratio)))}
+		"marche": marche, "achat": maxi(1, roundi(float(prix) * float(cm.achat_ratio)))}
 
 
 ## Acheter un objet du stock d'un marchand.
@@ -2397,6 +2413,84 @@ func _tiquer_souffle(nom: String, tick: int) -> void:
 ## Le jour de jeu écoulé (les donjons de corruption s'y accrochent — designer, point 51).
 func jour_courant() -> int:
 	return int(horloge_monde.ticks / maxi(1, int(_cycle().ticks_par_jour)))
+
+
+## La date du calendrier (Un monde réel — A) : une lecture du jour courant.
+func date_courante() -> Dictionary:
+	return Calendrier.date(jour_courant())
+
+
+func annee_courante() -> int:
+	return int(date_courante().annee)
+
+
+## Est-ce le jour de marché de l'agglomération d'un PNJ ? (Calendrier : un jour de la semaine tiré du nom du village)
+func jour_de_marche_de(pnj: Dictionary) -> bool:
+	var nom := str(pnj.get("village", ""))
+	return monde != null and lieu == "camp" and not nom.is_empty() and Calendrier.jour_de_marche(nom) == str(date_courante().jour_semaine)
+
+
+## Une fête aujourd'hui pour ce PNJ (sa culture de nommage) ?
+func fete_de(pnj: Dictionary) -> Array:
+	if monde == null or lieu != "camp":
+		return []
+	return Calendrier.fetes_du_jour(date_courante(), str(pnj.get("social", {}).get("culture", "")))
+
+
+var _jour_annonce := -1   # le dernier jour dont le journal a dit la date (Calendrier)
+
+
+## Le client qui vide son journal au chargement redemande la date du jour : le prochain tick du monde la redit
+## (l'humeur des fêtes et le regarnissage des marchés sont gardés par leurs propres marques, rien n'est redonné).
+func annoncer_jour() -> void:
+	_jour_annonce = -1
+
+
+## Un nouveau jour du calendrier (Un monde réel — A) : le journal dit la date, les fêtes du jour donnent leur
+## humeur aux civils de la culture, les marchés du jour regarnissent leurs étals.
+func _nouveau_jour(jour: int) -> void:
+	_jour_annonce = jour
+	var d := Calendrier.date(jour)
+	EventBus.emettre(&"journal", [&"journal.date", {"date": Calendrier.texte(d)}])
+	var fc: Dictionary = GameData.config("calendrier").fetes
+	var dites := {}
+	for f in Calendrier.fetes_du_jour(d, ""):   # une fête commune se dit même sans personne autour
+		dites[str(f.id)] = true
+		EventBus.emettre(&"journal", [&"journal.fete", {"fete": "calendrier.fete." + str(f.id)}])
+	for x in vivants():
+		if x.camp != "civil" or x.controle != "ia" or int(x.get("fete_jour", -1)) == jour:
+			continue
+		for f in Calendrier.fetes_du_jour(d, str(x.get("social", {}).get("culture", ""))):
+			x["fete_jour"] = jour
+			x["humeur"] = clampi(int(x.get("humeur", _ry().humeur_base)) + int(fc.humeur), 0, 100)
+			if not dites.has(str(f.id)):
+				dites[str(f.id)] = true
+				EventBus.emettre(&"journal", [&"journal.fete", {"fete": "calendrier.fete." + str(f.id)}])
+	for nom in monde.villages.keys():
+		var info: Dictionary = monde.villages[nom]
+		if Calendrier.jour_de_marche(str(nom)) != str(d.jour_semaine) or not monde.peuplees.has(info.cellule) or bool(info.get("abandonne", false)):
+			continue
+		var marchands := 0
+		for x in population_village(str(nom)):
+			if _garnir_marche(x):
+				marchands += 1
+		if marchands > 0:
+			EventBus.emettre(&"journal", [&"journal.marche", {"village": nom}])
+
+
+## Le jour de marché, un marchand regarnit son étal jusqu'à `marche.stock_mult` fois son garnissage (Calendrier).
+func _garnir_marche(x: Dictionary) -> bool:
+	var selection: Array = []
+	if not str(x.get("boutique", "")).is_empty():
+		selection = GameData.entree("shop_types", str(x.boutique)).selection
+	else:
+		selection = GameData.entree("creatures", str(x.get("def", ""))).get("stock_marchand", [])
+	if selection.is_empty():
+		return false
+	var plafond := int(ceil(float(GameData.config("calendrier").marche.stock_mult) * float(x.get("stock_garni", 0))))
+	if x.get("stock", []).size() < plafond:
+		_garnir_stock(x, selection)
+	return true
 
 
 func vecteur_lieu(pos: Vector2i) -> Dictionary:
@@ -7044,6 +7138,7 @@ func _garnir_stock(e: Dictionary, selection: Array) -> void:
 	if horloge_monde != null:
 		sem = horloge_monde.ticks / maxi(1, int(GameData.config("planete").corruption.ticks_par_semaine))
 	rng.seed = hash([graine, "stock", e.id, sem])
+	var avant: int = e.stock.size()
 	for bloc: Dictionary in selection:
 		var n := rng.randi_range(int(bloc.nombre[0]), int(bloc.nombre[1]))
 		for k in n:
@@ -7053,6 +7148,8 @@ func _garnir_stock(e: Dictionary, selection: Array) -> void:
 			var o := generer_objet(base, 1, {"categories_materiau": bloc.get("materiaux", [])}, "commun", 0)   # un forgeron assemble dans le métal
 			if not o.is_empty():
 				e.stock.append(o.uid)
+	if avant == 0:
+		e["stock_garni"] = e.stock.size()   # un garnissage complet : le plafond du jour de marché en dépend (Calendrier)
 
 
 func generer_objet(base_id: String, profondeur: int, provenance: Dictionary = {}, rarete: String = "", nb_affixes: int = -1) -> Dictionary:
@@ -7434,6 +7531,10 @@ func _habiller_pnj(e: Dictionary, def: Dictionary, culture_id: String = "") -> v
 	e["age"] = float(rng.randi_range(int(ag.depart[0]), int(ag.depart[1])))
 	var esp := float(ag.esperance.get(str(def.get("race", "humain")), ag.esperance._defaut))
 	e["lifespan"] = esp * rng.randf_range(1.0 - float(ag.variance), 1.0 + float(ag.variance))
+	# Son signe suit son année de naissance (Âge des PNJ : « dérivé gratuitement ») et son anniversaire son identifiant (Calendrier).
+	if e.get("signe", {}).is_empty() and horloge_monde != null:
+		e["signe"] = progression.signe(annee_courante() - int(e.age))
+	e["anniversaire"] = Calendrier.anniversaire(str(e.id))
 
 
 ## Deux êtres sont-ils ennemis ? Deux camps différents, sauf le joueur et les civils (IA des créatures).
@@ -8457,6 +8558,8 @@ func _tiquer_monde(tick: int) -> void:
 		return
 	var cr: Dictionary = GameData.config("planete").corruption
 	monde.jour_monde = jour_courant()   # `foyer()` s'allume sur les donjons de corruption : il lui faut le jour
+	if monde.jour_monde != _jour_annonce:
+		_nouveau_jour(monde.jour_monde)
 	var semaine := tick / int(cr.ticks_par_semaine)
 	while monde.semaine_courante < semaine:
 		monde.semaine_courante += 1
@@ -12183,6 +12286,8 @@ func _plage_routine(profil: Dictionary, h: float) -> Dictionary:
 ## `tick` si on le donne (la projection du LOD 2 relit la routine à un autre moment que maintenant).
 func _cible_routine(e: Dictionary, profil: Dictionary, tick: int = -1) -> Vector2i:
 	var activite := str(_plage_routine(profil, heure(tick)).activite)
+	if activite == "poste" and bool(profil.get("fetes", false)) and e.has("place") and not Calendrier.fetes_du_jour(Calendrier.date(int((horloge_monde.ticks if tick < 0 else tick) / maxi(1, int(_cycle().ticks_par_jour)))), str(e.get("social", {}).get("culture", ""))).is_empty():
+		activite = "social"   # un jour de fête, la place toute la journée (Calendrier)
 	match activite:
 		"lit":
 			return e.get("lit", e.ancre)

@@ -62,6 +62,9 @@ ou hors combat ; le temps saute pour tout le monde.
 > [!success] Décidé et codé le 2026-08-30 — une partie commence à 8 h
 > **Instruction du designer** : « commencer chaque nouvelle partie à 8 h du matin ». `planete.cycle.heure_depart` (8) : à la création du monde, l'horloge est posée à `heure_depart / 24 × ticks_par_jour` — la première matinée est un jour plein, la première nuit vient après. Une sauvegarde chargée garde son heure.
 
+> [!success] Codé le 2026-09-05, 15 h — le calendrier par-dessus le cycle
+> Le jour de 24 000 ticks, la semaine de sept jours et l'année de 120 jours ne bougent pas ; le calendrier les nomme ([[Un monde réel — villes, PNJ, royaumes et calendrier]], `Calendrier`) : douze mois de dix jours, sept jours nommés, les années depuis 1 020, le jour de marché, les fêtes. Une partie commence le 1 du Rat de l'an 1 020 à 8 h : le Nouvel An.
+
 ## Liens
 - **Dépend de** : [[Boucle de tick]], [[Simulation à ticks]], [[Application des stats de matériau]]
 - **Alimente** : [[IA des créatures]], [[Potentiel]], [[Abstraction hors-site]], [[Créatures]]

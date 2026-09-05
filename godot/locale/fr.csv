@@ -3336,3 +3336,41 @@ piste.type,type d'attaque
 piste.construction,armure
 ui.ecran.recruter_prix,Recruter ({prix} or)
 journal.recrutement_prix,{nom} demande {prix} pièces d'or pour te suivre.
+calendrier.date,"{jour_semaine}, {jour_mois} {mois}, an {annee}"
+calendrier.jour.soleil,jour du Soleil
+calendrier.jour.lune,jour de la Lune
+calendrier.jour.feu,jour du Feu
+calendrier.jour.eau,jour de l'Eau
+calendrier.jour.bois,jour du Bois
+calendrier.jour.metal,jour du Métal
+calendrier.jour.terre,jour de la Terre
+calendrier.mois.rat,du Rat
+calendrier.mois.boeuf,du Bœuf
+calendrier.mois.tigre,du Tigre
+calendrier.mois.lapin,du Lapin
+calendrier.mois.dragon,du Dragon
+calendrier.mois.serpent,du Serpent
+calendrier.mois.cheval,du Cheval
+calendrier.mois.chevre,de la Chèvre
+calendrier.mois.singe,du Singe
+calendrier.mois.coq,du Coq
+calendrier.mois.chien,du Chien
+calendrier.mois.cochon,du Cochon
+calendrier.fete.nouvel_an,le Nouvel An
+calendrier.fete.semailles,la fête des Semailles
+calendrier.fete.moissons,la fête des Moissons
+calendrier.fete.lanternes,la fête des Lanternes
+calendrier.fete.yule,Yule
+calendrier.fete.saturnales,les Saturnales
+calendrier.fete.samain,Samain
+calendrier.fete.hanami,Hanami
+calendrier.fete.kupala,la nuit de Kupala
+calendrier.fete.yennayer,Yennayer
+journal.date,"— {date} —"
+journal.fete,"Aujourd'hui, c'est {fete} : on fait la fête sur la place"
+journal.marche,"C'est jour de marché à {village} : les étals sont pleins et les prix baissent"
+ui.date,{date}
+volet.date,{date}
+dialogue.fete.text,"Vous tombez bien : c'est jour de fête. Venez donc sur la place !"
+dialogue.marche.text,"C'est jour de marché : les étals sont pleins, profitez des prix."
+dialogue.anniversaire.text,"Aujourd'hui, c'est mon anniversaire… une année de plus."

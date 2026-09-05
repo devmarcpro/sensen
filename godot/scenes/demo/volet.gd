@@ -113,6 +113,7 @@ func _lignes_monde(sim, j: Dictionary) -> Array[String]:
 	var l: Array[String] = []
 	if sim.lieu == "camp" and sim.monde != null:
 		var tr_: Dictionary = sim.temperature_ressentie(j)
+		l.append(tr("volet.date").format({"date": Calendrier.texte(sim.date_courante())}))   # la date du calendrier (Un monde réel — A)
 		l.append(tr("volet.heure").format({"heure": "%02d:%02d" % [int(sim.heure()), int(fmod(sim.heure(), 1.0) * 60.0)], "phase": tr("phase." + sim.phase()), "jour": sim.jour_courant()}))
 		l.append(tr("volet.saison").format({"saison": tr("saison." + str(sim.saison())), "meteo": tr(GameData.entree("weather_states", str(tr_.meteo)).name_key), "temp": "%.0f" % float(tr_.temp)}))
 		var cell: Vector2i = sim.monde.cellule_de(j.pos)

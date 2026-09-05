@@ -221,6 +221,7 @@ func _ready() -> void:
 	_lancer("test_boutiques_vendent")
 	_lancer("test_recruter_contre_or")
 	_lancer("test_plafond_par_salle")
+	_lancer("test_calendrier")
 	_verifier_tous_lances()
 	Monde.fermer_tous()   # aucun thread de pré-génération ne doit survivre aux autoloads
 	for nom_s in ["test_terrain", "test_sensen", "test_sensen2", "test_graine", "test_partout", "test_partout2", "test_auto"]:
@@ -1843,7 +1844,7 @@ static func _planete_test() -> Dictionary:
 func test_village() -> void:
 	var planete: Dictionary = GameData.config("planete")
 	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
-	verifier(GameData.catalogues.name_cultures.size() == 7 and GameData.catalogues.dialogue.size() == 28 and GameData.catalogues.functions.size() >= 6, "7 cultures, 28 répliques, les fonctions")
+	verifier(GameData.catalogues.name_cultures.size() == 7 and GameData.catalogues.dialogue.size() == 31 and GameData.catalogues.functions.size() >= 6, "7 cultures, 31 répliques, les fonctions")
 	# Un nom par culture, genré ; la fonction d'affichage unique.
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
@@ -1945,7 +1946,8 @@ func test_village() -> void:
 	s._donner_materiau(j, "fer", 1, "lingot")
 	var lingot: String = s._pile(j, "fer", "lingot").uid
 	var pl := s.prix_suggere(lingot, marchand, j)
-	verifier(int(pl.prix) == int(GameData.catalogues.materials.fer.stats.valeur_base) + 1 or int(pl.prix) == int(GameData.catalogues.materials.fer.stats.valeur_base), "un lingot de fer vaut sa valeur de base (%d or pour une base de %d)" % [int(pl.prix), int(GameData.catalogues.materials.fer.stats.valeur_base)])
+	var base_fer := roundi(float(GameData.catalogues.materials.fer.stats.valeur_base) * float(pl.marche))   # le jour de marché du village du marchand, × prix_mult (Calendrier)
+	verifier(int(pl.prix) == base_fer + 1 or int(pl.prix) == base_fer, "un lingot de fer vaut sa valeur de base (%d or pour une base de %d, marché × %.2f)" % [int(pl.prix), int(GameData.catalogues.materials.fer.stats.valeur_base), float(pl.marche)])
 	s.attente[j.id] = true
 	var or_vente := int(j.or)
 	verifier(s.intention(j.id, {"type": "vendre", "pnj": marchand.id, "objet": lingot}) and lingot in marchand.stock and int(j.or) == or_vente + int(pl.achat), "vendre le lingot à 50 %% (+%d or)" % int(pl.achat))
@@ -7195,14 +7197,16 @@ func test_village_vivant() -> void:
 	s.voyager(j, cell_v)
 	var civils: Array = s.vivants().filter(func(x: Dictionary) -> bool: return "civil" in x.get("tags", []) and x.ai_profile == "civil")
 	verifier(civils.size() >= 2 and civils[0].has("lit") and civils[0].has("place") and civils[0].has("poste"), "les villageois ont un lit, un poste et la place")
-	# À 23 h, la routine vise le lit ; à midi, le poste ; à 21 h, la place.
+	# À 23 h, la routine vise le lit ; à midi, le poste ; à 21 h, la place — un jour sans fête (le jour 0 est le
+	# Nouvel An : la place toute la journée, Calendrier), le 5 du Rat.
 	var v: Dictionary = civils[0]
 	var profil: Dictionary = s.profils_ia.civil
-	s.horloge_monde.ticks = 23000
+	var jour_calme := 4 * int(GameData.config("planete").cycle.ticks_par_jour)
+	s.horloge_monde.ticks = jour_calme + 23000
 	verifier(s._cible_routine(v, profil) == v.lit, "23 h : au lit")
-	s.horloge_monde.ticks = 12000
+	s.horloge_monde.ticks = jour_calme + 12000
 	verifier(s._cible_routine(v, profil) == v.poste, "midi : au poste")
-	s.horloge_monde.ticks = 21000
+	s.horloge_monde.ticks = jour_calme + 21000
 	verifier(s._cible_routine(v, profil) == v.place, "21 h : sur la place")
 	# Un villageois loin de sa cible s'en rapproche par la routine.
 	var loin: Vector2i = v.place + Vector2i(6, 0)
@@ -7228,7 +7232,7 @@ func test_village_vivant() -> void:
 	var gardes: Array = s.vivants().filter(func(x: Dictionary) -> bool: return x.ai_profile == "garde")
 	if not gardes.is_empty():
 		var g: Dictionary = gardes[0]
-		s.horloge_monde.ticks = 12000
+		s.horloge_monde.ticks = jour_calme + 12000
 		var p0: Vector2i = g.pos
 		for k in 8:
 			s._decider_ia(g, s.horloge_monde.ticks + k * 10)
@@ -9155,3 +9159,81 @@ func test_portees_a_motif() -> void:
 	var oblique: Vector2i = o + Vector2i(3, -2)
 	verifier(s.capacite_visable(j, p_l, droit) or not s.grille.dans(droit), "en ligne : une cible alignée à 4 est visable")
 	verifier(not s.capacite_visable(j, p_l, oblique), "en ligne : une cible oblique ne l'est pas")
+
+
+## Le calendrier (Un monde réel — A, 2026-09-05) : douze mois de dix jours, la semaine de sept jours, les années
+## depuis 1020 ; le journal dit la date et la fête ; la routine et les prix suivent le jour.
+func test_calendrier() -> void:
+	var d0 := Calendrier.date(0)
+	verifier(int(d0.annee) == 1020 and str(d0.mois) == "rat" and int(d0.jour_mois) == 1 and str(d0.jour_semaine) == "soleil", "le jour 0 est le 1 du Rat de l'an 1020, un jour du Soleil (%s)" % str(d0))
+	var d119 := Calendrier.date(119)
+	verifier(str(d119.mois) == "cochon" and int(d119.jour_mois) == 10 and int(d119.annee) == 1020, "le jour 119 est le 10 du Cochon de l'an 1020")
+	var d120 := Calendrier.date(120)
+	verifier(int(d120.annee) == 1021 and str(d120.mois) == "rat" and int(d120.jour_mois) == 1, "le jour 120 ouvre l'an 1021")
+	verifier(str(d120.jour_semaine) == "lune", "la semaine dérive d'un jour par an (120 = 7 × 17 + 1)")
+	verifier(str(Calendrier.date(7).jour_semaine) == "soleil", "sept jours plus tard, le même jour de la semaine")
+	verifier(Calendrier.texte(d0).contains("1020"), "le texte de la date dit l'année (%s)" % Calendrier.texte(d0))
+	var jm := Calendrier.jour_de_marche("Aubevaux")
+	verifier(jm in GameData.config("calendrier").jours_semaine and jm == Calendrier.jour_de_marche("Aubevaux"), "le jour de marché est un jour de la semaine, stable (%s)" % jm)
+	verifier(Calendrier.fetes_du_jour(d0, "sino").size() == 1 and str(Calendrier.fetes_du_jour(d0, "sino")[0].id) == "nouvel_an", "le 1 du Rat est le Nouvel An pour tous")
+	verifier(Calendrier.fetes_du_jour(Calendrier.date(9), "sino").size() == 1 and Calendrier.fetes_du_jour(Calendrier.date(9), "celte").is_empty(), "les lanternes sont sino, pas celtes")
+	var a := Calendrier.anniversaire("pnj_42")
+	verifier(int(a.jour) >= 1 and int(a.jour) <= 10 and a == Calendrier.anniversaire("pnj_42"), "un anniversaire stable dans le mois")
+	# Les saisons tombent sur des débuts de mois.
+	var s := Simulation.new(9)
+	s.charger_arene("gorge")
+	var jour := int(GameData.config("planete").cycle.ticks_par_jour)
+	for essai: Array in [[0, "printemps"], [30, "ete"], [50, "fin_ete"], [60, "automne"], [90, "hiver"]]:
+		verifier(s.saison(int(essai[0]) * jour) == str(essai[1]) and int(Calendrier.date(int(essai[0])).jour_mois) == 1, "le jour %d ouvre un mois et la saison %s" % [int(essai[0]), str(essai[1])])
+	# Dans le monde : le premier jour dit sa date et le Nouvel An, les civils ont eu leur humeur, la routine vise la place.
+	var s2 := Simulation.new(31)
+	s2.charger_camp()
+	var journal: Array = []
+	var cb := func(cle: String, _params: Dictionary) -> void: journal.append(cle)
+	EventBus.journal.connect(cb)
+	s2.horloge_monde.avancer(1)
+	EventBus.dispatcher()
+	EventBus.journal.disconnect(cb)
+	verifier("journal.date" in journal and "journal.fete" in journal, "le premier jour dit sa date et le Nouvel An (%s)" % str(journal))
+	var civils: Array = s2.vivants().filter(func(x: Dictionary) -> bool: return x.camp == "civil" and x.controle == "ia" and x.has("place"))
+	if civils.is_empty():
+		var v0: Dictionary = s2.ajouter("villageois", s2.vivants()[0].pos + Vector2i(2, 0), "ia")
+		v0["place"] = v0.pos + Vector2i(1, 1)
+		v0["poste"] = v0.pos + Vector2i(3, 0)
+		v0["lit"] = v0.pos
+		civils = [v0]
+		s2._nouveau_jour(0)
+	var v: Dictionary = civils[0]
+	verifier(int(v.get("humeur", 0)) == int(s2._ry().humeur_base) + int(GameData.config("calendrier").fetes.humeur), "le Nouvel An a donné son humeur au civil (%d)" % int(v.get("humeur", 0)))
+	s2.horloge_monde.ticks = 12000
+	verifier(s2._cible_routine(v, s2.profils_ia.civil) == v.place, "midi, jour de fête : la place")
+	s2.horloge_monde.ticks = 2 * jour + 12000   # le 3 du Rat : rien pour un sino, Yennayer pour un arabo-berbère
+	v.social.culture = "sino"
+	verifier(s2._cible_routine(v, s2.profils_ia.civil) == v.poste, "midi, un jour sans fête : le poste")
+	verifier(v.has("signe") and not v.signe.is_empty() and v.has("anniversaire"), "un PNJ a un signe et un anniversaire")
+	# Le jour de marché : les prix baissent d'un facteur, pas les autres jours.
+	var pnj := s2.ajouter("marchand", v.pos + Vector2i(0, 2), "ia")
+	pnj["village"] = "Aubevaux"
+	var uid: String = s2.generer_objet("potion_soin", 1).uid
+	var j: Dictionary = s2.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var jours: Array = GameData.config("calendrier").jours_semaine
+	var k := jours.find(Calendrier.jour_de_marche("Aubevaux"))
+	s2.horloge_monde.ticks = k * jour + 12000
+	verifier(is_equal_approx(float(s2.prix_suggere(uid, pnj, j).marche), float(GameData.config("calendrier").marche.prix_mult)), "le jour de marché, le prix est multiplié par %.2f" % float(GameData.config("calendrier").marche.prix_mult))
+	s2.horloge_monde.ticks = ((k + 1) % 7) * jour + 12000
+	verifier(is_equal_approx(float(s2.prix_suggere(uid, pnj, j).marche), 1.0), "le lendemain, plein prix")
+	# L'étal regarnit jusqu'au plafond du marché, pas au-delà.
+	pnj["stock"] = []
+	pnj["stock_garni"] = 0
+	s2._garnir_stock(pnj, GameData.entree("shop_types", "epicier").selection)
+	var n1: int = pnj.stock.size()
+	pnj["boutique"] = "epicier"
+	s2._garnir_marche(pnj)
+	var n2: int = pnj.stock.size()
+	for k2 in 6:
+		s2._garnir_marche(pnj)
+	var n3: int = pnj.stock.size()
+	s2._garnir_marche(pnj)
+	var plafond := int(ceil(float(GameData.config("calendrier").marche.stock_mult) * float(n1)))
+	verifier(n1 > 0 and n2 > n1 and n3 >= plafond and pnj.stock.size() == n3, "le marché regarnit (%d → %d) et plafonne (%d ≥ %d, puis rien)" % [n1, n2, n3, plafond])
+

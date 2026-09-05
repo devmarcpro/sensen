@@ -1,0 +1,147 @@
+{
+  "_doc": "Le calendrier (Un monde réel — A, 2026-09-05) : douze mois de dix jours nommés par les animaux du cycle sexagésimal (l'année de 120 jours de combat_rules.age et les cinq saisons de planete.cycle ne bougent pas), la semaine de sept jours (Soleil, Lune, les cinq éléments — sa longueur est planete.corruption.ticks_par_semaine), les années depuis annee_depart (la création propose une naissance en l'an 1000). marche : le jour de marché de chaque agglomération est un jour de la semaine tiré de son nom ; ce jour-là les étals regarnissent jusqu'à stock_mult fois leur garnissage et vendent à prix_mult. fetes : cultures vide = toutes ; ce jour-là les civils de la culture tiennent la place et gagnent humeur.",
+  "annee_depart": 1020,
+  "mois": [
+    [
+      "rat",
+      10
+    ],
+    [
+      "boeuf",
+      10
+    ],
+    [
+      "tigre",
+      10
+    ],
+    [
+      "lapin",
+      10
+    ],
+    [
+      "dragon",
+      10
+    ],
+    [
+      "serpent",
+      10
+    ],
+    [
+      "cheval",
+      10
+    ],
+    [
+      "chevre",
+      10
+    ],
+    [
+      "singe",
+      10
+    ],
+    [
+      "coq",
+      10
+    ],
+    [
+      "chien",
+      10
+    ],
+    [
+      "cochon",
+      10
+    ]
+  ],
+  "jours_semaine": [
+    "soleil",
+    "lune",
+    "feu",
+    "eau",
+    "bois",
+    "metal",
+    "terre"
+  ],
+  "decalage_semaine": 0,
+  "marche": {
+    "stock_mult": 2,
+    "prix_mult": 0.9
+  },
+  "fetes": {
+    "humeur": 10,
+    "liste": [
+      {
+        "id": "nouvel_an",
+        "mois": "rat",
+        "jour": 1,
+        "cultures": []
+      },
+      {
+        "id": "semailles",
+        "mois": "tigre",
+        "jour": 5,
+        "cultures": []
+      },
+      {
+        "id": "moissons",
+        "mois": "singe",
+        "jour": 10,
+        "cultures": []
+      },
+      {
+        "id": "lanternes",
+        "mois": "rat",
+        "jour": 10,
+        "cultures": [
+          "sino"
+        ]
+      },
+      {
+        "id": "yule",
+        "mois": "cochon",
+        "jour": 10,
+        "cultures": [
+          "nordique"
+        ]
+      },
+      {
+        "id": "saturnales",
+        "mois": "chien",
+        "jour": 7,
+        "cultures": [
+          "latine"
+        ]
+      },
+      {
+        "id": "samain",
+        "mois": "coq",
+        "jour": 1,
+        "cultures": [
+          "celte"
+        ]
+      },
+      {
+        "id": "hanami",
+        "mois": "boeuf",
+        "jour": 5,
+        "cultures": [
+          "nipponne"
+        ]
+      },
+      {
+        "id": "kupala",
+        "mois": "dragon",
+        "jour": 1,
+        "cultures": [
+          "slave"
+        ]
+      },
+      {
+        "id": "yennayer",
+        "mois": "rat",
+        "jour": 3,
+        "cultures": [
+          "arabo_berbere"
+        ]
+      }
+    ]
+  }
+}

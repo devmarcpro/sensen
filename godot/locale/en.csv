@@ -3327,3 +3327,41 @@ piste.type,attack type
 piste.construction,armour
 ui.ecran.recruter_prix,Recruit ({prix} gold)
 journal.recrutement_prix,{nom} asks {prix} gold to follow you.
+calendrier.date,"{jour_semaine}, {jour_mois} {mois}, year {annee}"
+calendrier.jour.soleil,Sunday
+calendrier.jour.lune,Moonday
+calendrier.jour.feu,Fireday
+calendrier.jour.eau,Waterday
+calendrier.jour.bois,Woodday
+calendrier.jour.metal,Metalday
+calendrier.jour.terre,Earthday
+calendrier.mois.rat,of the Rat
+calendrier.mois.boeuf,of the Ox
+calendrier.mois.tigre,of the Tiger
+calendrier.mois.lapin,of the Rabbit
+calendrier.mois.dragon,of the Dragon
+calendrier.mois.serpent,of the Snake
+calendrier.mois.cheval,of the Horse
+calendrier.mois.chevre,of the Goat
+calendrier.mois.singe,of the Monkey
+calendrier.mois.coq,of the Rooster
+calendrier.mois.chien,of the Dog
+calendrier.mois.cochon,of the Pig
+calendrier.fete.nouvel_an,the New Year
+calendrier.fete.semailles,the Sowing Festival
+calendrier.fete.moissons,the Harvest Festival
+calendrier.fete.lanternes,the Lantern Festival
+calendrier.fete.yule,Yule
+calendrier.fete.saturnales,the Saturnalia
+calendrier.fete.samain,Samhain
+calendrier.fete.hanami,Hanami
+calendrier.fete.kupala,Kupala Night
+calendrier.fete.yennayer,Yennayer
+journal.date,"— {date} —"
+journal.fete,"Today is {fete}: the square is celebrating"
+journal.marche,"Market day in {village}: the stalls are full and prices drop"
+ui.date,{date}
+volet.date,{date}
+dialogue.fete.text,"Good timing: it is a feast day. Come to the square!"
+dialogue.marche.text,"It is market day: the stalls are full, enjoy the prices."
+dialogue.anniversaire.text,"Today is my birthday… one more year."

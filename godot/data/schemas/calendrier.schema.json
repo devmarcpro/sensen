@@ -1,0 +1,93 @@
+{
+  "type": "object",
+  "required": [
+    "annee_depart",
+    "mois",
+    "jours_semaine",
+    "marche",
+    "fetes"
+  ],
+  "properties": {
+    "annee_depart": {
+      "type": "integer"
+    },
+    "mois": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2
+      }
+    },
+    "jours_semaine": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "decalage_semaine": {
+      "type": "integer"
+    },
+    "marche": {
+      "type": "object",
+      "required": [
+        "stock_mult",
+        "prix_mult"
+      ],
+      "properties": {
+        "stock_mult": {
+          "type": "number",
+          "minimum": 1
+        },
+        "prix_mult": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "fetes": {
+      "type": "object",
+      "required": [
+        "humeur",
+        "liste"
+      ],
+      "properties": {
+        "humeur": {
+          "type": "integer"
+        },
+        "liste": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "mois",
+              "jour",
+              "cultures"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "mois": {
+                "type": "string"
+              },
+              "jour": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "cultures": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

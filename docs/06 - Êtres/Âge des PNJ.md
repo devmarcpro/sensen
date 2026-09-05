@@ -28,6 +28,9 @@ La population du monde est un flux, pas un stock : les PNJ vieillissent, meurent
 > [!success] Mis à jour le 2026-08-31 — l'étape 10 est passée par là
 > Les **naissances** (le repeuplement d'un village est l'enfant d'un couple) et la **succession** (héritier, vacances de trône et de hall) sont codées — callouts de [[Familles et succession]]. Seuls les mariages en cours de partie attendent encore.
 
+> [!success] Codé le 2026-09-05, 15 h — le signe et l'anniversaire des PNJ (Calendrier)
+> Le signe promis « gratuitement » n'était pas calculé : à l'instanciation, un PNJ sans signe de fiche reçoit celui de son année de naissance (l'année courante du calendrier moins son âge, `Progression.signe`), et un anniversaire (mois et jour tirés de son identifiant). L'âge continue d'avancer par semaine (7/120 d'année) : l'anniversaire est un jour du calendrier, pas le compteur de l'âge. [[Un monde réel — villes, PNJ, royaumes et calendrier]].
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Races]], [[Boucle de tick]]
 - **Alimente** : [[Familles et succession]], [[Villages PNJ — repeuplement et décimation]], [[Génération de noms]], [[Compagnons]]

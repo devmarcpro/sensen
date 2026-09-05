@@ -40,6 +40,9 @@ Vendre aux marchands, ou tenir sa propre boutique passive sur son claim — faç
 > [!success] Constaté le 2026-09-03 — `inventaire_marchand` est codé sous le nom `stock_marchand`
 > La fiche d'une créature marchande porte `stock_marchand` (une liste de blocs de sélection, assemblée au boot en boutique) ; le nom proposé ici n'a jamais été celui du code. Rien d'autre ne change.
 
+> [!success] Codé le 2026-09-05, 15 h — le jour de marché (Calendrier)
+> Chaque agglomération a son jour de marché, un jour de la semaine tiré de son nom (`Calendrier.jour_de_marche`). Ce jour-là, au lever du jour, ses marchands regarnissent leur étal jusqu'à `marche.stock_mult` fois un garnissage complet (`_garnir_marche`, le plafond vient de `stock_garni` noté par `_garnir_stock`), et `prix_suggere` multiplie ses prix par `marche.prix_mult` (0,9 — le champ `marche` du détail). Le journal dit « c'est jour de marché à X » si un marchand a regarni ; le marchand le dit aussi (réplique `marche`). Les autres jours, rien ne change — et le réapprovisionnement hebdomadaire d'un étal vidé reste.
+
 ## Liens
 - **Dépend de** : [[Qualité d'artisanat]], [[Claims et persistance]]
 - **Alimente** : [[Prix suggéré]], [[Boutique passive]], [[Économie — sources et puits]]

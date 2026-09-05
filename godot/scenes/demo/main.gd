@@ -534,6 +534,7 @@ func _charger(fiche: Dictionary = {}) -> void:
 	chemin_en_cours.clear()
 	telegraphes.clear()
 	journal.clear()
+	sim.annoncer_jour()   # le journal vidé rouvre par la date et les fêtes du jour au premier tick (Calendrier)
 	terrain.queue_redraw()
 	for n in noeuds.values():
 		n.queue_free()
@@ -2026,6 +2027,7 @@ func _maj_ui() -> void:
 	if not j.is_empty():
 		if sim.lieu == "camp" and sim.monde != null:
 			var tr_: Dictionary = sim.temperature_ressentie(j)
+			lignes.append("  " + tr("ui.date").format({"date": Calendrier.texte(sim.date_courante())}))   # la date du calendrier (Un monde réel — A)
 			lignes.append("  " + tr("ui.heure").format({"heure": "%02d:%02d" % [int(sim.heure()), int(fmod(sim.heure(), 1.0) * 60.0)], "phase": tr("phase." + sim.phase()), "saison": tr("saison." + sim.saison()),
 				"meteo": tr(GameData.entree("weather_states", str(tr_.meteo)).name_key), "temp": "%.0f" % float(tr_.temp),
 				"confort": tr("ui.confort.froid") if float(tr_.ecart) < 0.0 else (tr("ui.confort.chaud") if float(tr_.ecart) > 0.0 else "")}))
