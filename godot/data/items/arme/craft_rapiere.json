@@ -17,5 +17,6 @@
     "arme",
     "assemble"
   ],
-  "functionality": "rapiere"
+  "functionality": "rapiere",
+  "variante_visuelle": "fine"
 }

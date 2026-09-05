@@ -4087,6 +4087,11 @@ func test_sprites_objets() -> void:
 	verifier(Pictos.nom_sprite({"id": "materiau_brut", "type": "materiau", "forme": "planche", "materiau": "chene"}) == "matieres/planche", "une matière → matieres/<forme>.png")
 	verifier(Pictos.texture_objet({"id": "craft_epee", "type": "arme"}) == null, "sans fichier, pas de texture : le pictogramme reste")
 	verifier(Pictos.texture_objet({"id": "", "type": "arme"}) == null, "un objet sans id ne cherche rien")
+	verifier(Pictos._texture_composant("lame_longue", "droite") == null, "sans fichier, ni la variante ni le composant")
+	var assemble := {"id": "craft_epee", "type": "arme", "variante_visuelle": "droite", "composants": {"tete": {"composant": "lame_longue", "materiau": "fer"}, "manche": {"composant": "poignee", "materiau": "chene"}}}
+	var toile := Node2D.new()
+	verifier(not Pictos._dessiner_assemblage(toile, assemble, Rect2(0, 0, 32, 32)), "un assemblage sans sprites de composants ne se compose pas : le pictogramme reste")
+	toile.free()
 
 
 ## Le cri de ralliement est poussé (IA des créatures, 2026-09-04) : un chef engagé, un acolyte à côté sans le

@@ -17,5 +17,6 @@
     "arme",
     "assemble"
   ],
-  "functionality": "epee"
+  "functionality": "epee",
+  "variante_visuelle": "droite"
 }

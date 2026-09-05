@@ -131,11 +131,17 @@ def est_proto(d):
     return "prototype" in d.get("tags", [])
 
 
-def nom_sprite(iid):
-    """Le fichier attendu dans assets/objets/ (Direction artistique, 2026-09-05) : l'id sans craft_ ni proto_."""
-    for p in ("craft_", "proto_"):
-        if iid.startswith(p):
-            return iid[len(p):] + ".png"
+def nom_sprite(iid, d=None):
+    """Ce qu'il faut dessiner (Direction artistique, 2026-09-05, 9 h) : un objet assemblé n'a pas de sprite propre, son
+    icône est composée des sprites de ses composants (composants/<id>.png, ou <id>_<variante>.png) ; un objet de fortune
+    (proto_) garde son pictogramme ; le reste est un fichier <id>.png."""
+    if d is not None and d.get("slots"):
+        v = d.get("variante_visuelle", "")
+        return " + ".join("composants/%s.png" % cid for cid in d["slots"].values()) + ((" · variante %s" % v) if v else "")
+    if iid.startswith("proto_"):
+        return "— (pictogramme)"
+    if iid.startswith("craft_"):
+        return iid[len("craft_"):] + ".png"
     return iid + ".png"
 
 
@@ -161,7 +167,7 @@ def section_armes():
                 ("portee", "%s–%s" % (f.get("portee_min", 1), f.get("portee", 1))),
                 ("zone", f.get("attaque_zone", "")),
                 ("composants", composants_de(d)), ("proto", est_proto(d)),
-                ("materiau", d.get("materiau", "")), ("sprite", nom_sprite(i)),
+                ("materiau", d.get("materiau", "")), ("sprite", nom_sprite(i, d)),
             ]))
     return rows
 
@@ -178,7 +184,7 @@ def section_simple(type_, avec_fonct=True):
             ("tags", [t for t in d.get("tags", []) if t not in (type_, "assemble", "prototype")]),
             ("quantite", d.get("quantite", 1)), ("luminosite", d.get("luminosite", 0)),
             ("materiaux_recette", [(e.get("category", ""), e.get("forme", ""), e.get("amount", 0)) for e in d.get("recipe", {}).get("inputs", [])]),
-            ("element", d.get("element") or ""), ("meuble", d.get("meuble", "")), ("station", d.get("station", "")), ("sprite", nom_sprite(i)),
+            ("element", d.get("element") or ""), ("meuble", d.get("meuble", "")), ("station", d.get("station", "")), ("sprite", nom_sprite(i, d)),
         ]))
     return rows
 
@@ -212,7 +218,7 @@ def section_gemmes():
                 effets.append(typ)
         rows.append(collections.OrderedDict([
             ("id", i), ("nom", nom_item(i, d)), ("materiau", tr("material.%s.name" % d.get("materiau", ""), d.get("materiau", ""))),
-            ("element", nom_element(d["element"]) if d.get("element") else "—"), ("effets", effets), ("sprite", nom_sprite(i)),
+            ("element", nom_element(d["element"]) if d.get("element") else "—"), ("effets", effets), ("sprite", nom_sprite(i, d)),
         ]))
     return rows
 
@@ -235,7 +241,7 @@ def section_consommables():
             ("tags", [nom_tag(t) for t in tags if t not in ("consommable", "empilable")]),
             ("distillat", tr("item.%s.name" % d["distillat"], d["distillat"]) if d.get("distillat") else ""),
             ("wuxing", ", ".join("%s %d %%" % (nom_element(e), round(v * 100)) for e, v in d.get("wuxing", {}).items())),
-            ("cru", d.get("cru", False)), ("sprite", nom_sprite(i)),
+            ("cru", d.get("cru", False)), ("sprite", nom_sprite(i, d)),
         ]))
     return groupes, rows
 
@@ -270,9 +276,9 @@ def ecrire_note(armes, outils, boucliers, armures, bijoux, gemmes, munitions, co
     w("> [!important] Demande du designer (2026-09-05) : « je vais générer les sprites des items, donne-moi la liste des armes avec leurs composants, pareil pour les outils, l'équipement et autres items »")
     w("> Cette note est **générée** par `tools/liste_objets.py` depuis `godot/data` et `locale/fr.csv` : rien n'y est écrit à la main, la relancer la remet à jour. Elle compte ce que le jeu sait fabriquer, ramasser ou poser, avec ce qui fait la silhouette d'un objet : son **type**, son **emplacement**, ses **composants** et les **familles de matériaux** que chaque composant accepte.")
     w(">")
-    w("> **Où vont les sprites.** `godot/assets/objets/` : un fichier par objet, nommé comme la colonne « sprite » de chaque table (l'id sans `craft_` ni `proto_`), `composants/<id>.png` pour les composants et `matieres/<forme>.png` pour les matières, ces deux-là teintés par leur matière dans le jeu ([[Direction artistique]]). Carré, fond transparent ; le jeu les prend dès qu'ils existent et garde son pictogramme par code sinon ; `tools/verif_sprites.py` dit ce qui manque.")
+    w("> **Où vont les sprites.** `godot/assets/objets/` ([[Direction artistique]], 2026-09-05). **On ne dessine pas les armes, on dessine les composants** : un objet assemblé (arme, outil, bouclier, armure, bijou, munition) n'a pas de sprite propre — son icône est composée des sprites de ses composants, `composants/<id>.png` (ou `composants/<id>_<variante>.png` quand l'objet porte `variante_visuelle` : épée droite, sabre courbe, rapière fine), chacun teinté par sa matière ; la colonne « sprite » de chaque table dit lesquels. Les objets qui ne s'assemblent pas (consommables, gemmes, livres, meubles, stations) sont un fichier `<id>.png` ; les matières, un fichier par forme dans `matieres/`. Gris neutre, carré, fond transparent ; le jeu prend un sprite dès qu'il existe et garde son pictogramme par code sinon ; `tools/verif_sprites.py` dit ce qui manque.")
     w(">")
-    w("> **Ce qui fait un objet, pour le dessin.** Un objet assemblé est une *base* (la silhouette : épée, cuirasse, pioche) dont chaque *composant* est taillé dans un *matériau* — c'est le matériau qui donne la couleur ([[Palette de couleurs des matériaux]]) et la qualité qui donne l'état. Un sprite par base suffit donc, si ses composants sont des zones qu'on peut teinter séparément (lame, poignée, garde). Les objets `proto_*` sont les pièces de fortune du prototype (une matière fixe, pas de composants) : mêmes silhouettes que leurs bases assemblées. Le jeu dessine aujourd'hui des pictogrammes par code (`Pictos.dessiner_objet`, une case de 10 × 10 unités, avec des alias : sabre et rapière → épée, stylet → dague, hallebarde → lance, baguette → bâton magique…) — les sprites peuvent suivre ces regroupements ou distinguer chaque objet. Conventions : [[Direction artistique]] (lisibilité avant réalisme, teintes des cinq éléments) et le gabarit d'encrage `gabarit-encrage-sprites.pdf` dans ce dossier.")
+    w("> **Ce qui fait un objet, pour le dessin.** Un objet assemblé est une *base* (épée, cuirasse, pioche) dont chaque *composant* est taillé dans un *matériau* — c'est le matériau qui donne la couleur ([[Palette de couleurs des matériaux]]) et la qualité qui donne l'état. Dessiner les composants, c'est donc dessiner toutes les armes à la fois : l'épée à lame d'os et poignée d'ivoire que le joueur a fabriquée ressemble à ce qu'elle est. Les objets `proto_*` sont les pièces de fortune du prototype (une matière fixe, pas de composants) : mêmes silhouettes que leurs bases assemblées. Le jeu dessine aujourd'hui des pictogrammes par code (`Pictos.dessiner_objet`, une case de 10 × 10 unités, avec des alias : sabre et rapière → épée, stylet → dague, hallebarde → lance, baguette → bâton magique…) — les sprites peuvent suivre ces regroupements ou distinguer chaque objet. Conventions : [[Direction artistique]] (lisibilité avant réalisme, teintes des cinq éléments) et le gabarit d'encrage `gabarit-encrage-sprites.pdf` dans ce dossier.")
     w("")
     w("## 1. Les armes (%d, dont %d de fortune)" % (len(armes), sum(1 for a in armes if a["proto"])))
     w("")

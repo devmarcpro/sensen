@@ -476,6 +476,11 @@ static func texture_objet(it: Dictionary) -> Texture2D:
 	var nom := nom_sprite(it)
 	if nom.is_empty() or nom.ends_with("/"):
 		return null
+	return _charger(nom)
+
+
+## Un sprite par son nom relatif au dossier, ou null ; le cache retient les absents.
+static func _charger(nom: String) -> Texture2D:
 	if _sprites.has(nom):
 		return _sprites[nom]
 	var dossier := str(GameData.config("styles").get("sprites", {}).get("dossier", "res://assets/objets"))
@@ -485,8 +490,61 @@ static func texture_objet(it: Dictionary) -> Texture2D:
 	return tex
 
 
+## Le sprite d'un composant : `composants/<id>_<variante>.png` si l'objet porte une variante visuelle et qu'elle existe,
+## sinon `composants/<id>.png` (Direction artistique, 2026-09-05 : trois formes par composant, choisies par l'objet).
+static func _texture_composant(cid: String, variante: String) -> Texture2D:
+	if cid.is_empty():
+		return null
+	if not variante.is_empty():
+		var tv := _charger("composants/" + cid + "_" + variante)
+		if tv != null:
+			return tv
+	return _charger("composants/" + cid)
+
+
+## Où chaque slot se pose dans la case d'un objet assemblé, en fractions [x, y, largeur, hauteur] : le manche en bas,
+## la tête en haut, la garde à la jonction, le contrepoids au pied, la corde ou les sangles le long, une plaque ou une
+## étoffe sur toute la case. Une lecture d'icône, pas le rig : le paperdoll assemble les pièces par leurs ancrages.
+const ZONES_ASSEMBLAGE := {"manche": [0.3, 0.42, 0.4, 0.58], "tete": [0.1, 0.0, 0.8, 0.5], "garde": [0.05, 0.4, 0.9, 0.14],
+	"contrepoids": [0.3, 0.8, 0.4, 0.2], "corde": [0.0, 0.05, 0.25, 0.9], "sangles": [0.0, 0.05, 0.25, 0.9],
+	"plaque": [0.05, 0.05, 0.9, 0.9], "etoffe": [0.05, 0.05, 0.9, 0.9], "doublure": [0.15, 0.15, 0.7, 0.7],
+	"monture": [0.2, 0.45, 0.6, 0.3], "sertissure": [0.3, 0.15, 0.4, 0.35]}
+const ORDRE_ASSEMBLAGE := ["doublure", "plaque", "etoffe", "sangles", "corde", "contrepoids", "manche", "monture", "garde", "tete", "sertissure"]
+
+
+## L'icône d'un objet assemblé, composée des sprites de ses composants, chacun teinté par sa matière (Direction
+## artistique, 2026-09-05, 9 h : on ne dessine pas les armes, on dessine les composants). Faux — et rien de dessiné —
+## dès qu'une pièce n'a pas de sprite : le pictogramme par code reste alors entier.
+static func _dessiner_assemblage(ci: CanvasItem, it: Dictionary, r: Rect2) -> bool:
+	var comps: Dictionary = it.get("composants", {})
+	if comps.is_empty():
+		return false
+	var variante := str(it.get("variante_visuelle", ""))
+	var textures := {}
+	for slot in comps.keys():
+		var piece: Dictionary = comps[slot]
+		var tex := _texture_composant(str(piece.get("composant", "")), variante)
+		if tex == null:
+			return false
+		textures[slot] = tex
+	var slots: Array = ORDRE_ASSEMBLAGE.duplicate()
+	for slot in textures.keys():
+		if not (slot in slots):
+			slots.append(slot)   # un slot inconnu : au centre, en dernier
+	for slot in slots:
+		if not textures.has(slot):
+			continue
+		var z: Array = ZONES_ASSEMBLAGE.get(slot, [0.1, 0.1, 0.8, 0.8])
+		var piece: Dictionary = comps[slot]
+		var teinte := couleur_objet({"materiau": str(piece.get("materiau", ""))})
+		ci.draw_texture_rect(textures[slot], Rect2(r.position + Vector2(float(z[0]), float(z[1])) * r.size, Vector2(float(z[2]), float(z[3])) * r.size), false, teinte)
+	return true
+
+
 static func dessiner_objet(ci: CanvasItem, it: Dictionary, r: Rect2) -> void:
 	if it.is_empty():
+		return
+	if _dessiner_assemblage(ci, it, r):   # un objet assemblé : ses composants, s'ils ont tous leur sprite
 		return
 	var tex := texture_objet(it)
 	if tex != null:   # un sprite du designer : à la place du pictogramme, teinté par sa matière s'il en a une

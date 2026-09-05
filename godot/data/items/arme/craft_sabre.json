@@ -17,5 +17,6 @@
     "arme",
     "assemble"
   ],
-  "functionality": "sabre"
+  "functionality": "sabre",
+  "variante_visuelle": "courbe"
 }

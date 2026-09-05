@@ -30,6 +30,8 @@ def attendus():
         d = json.load(io.open(f, encoding="utf-8"))
         if d.get("type") in ("composant", "materiau"):
             continue   # les composants et les matières ont leur propre dossier
+        if d.get("slots") or iid.startswith("proto_"):
+            continue   # un objet assemblé se compose de ses composants ; un objet de fortune garde son pictogramme (2026-09-05, 9 h)
         res["objets"].add(nom_sprite(iid))
     for f in glob.glob(os.path.join(DATA, "components", "*.json")):
         cid = os.path.basename(f)[:-5]

@@ -92,6 +92,10 @@
     "materiau": {
       "type": "string"
     },
+    "variante_visuelle": {
+      "type": "string",
+      "description": "Direction artistique (2026-09-05) : la forme de composant employee par les sprites de cet objet assemble (droite, courbe, fine) — composants/<id>_<variante>.png, sinon composants/<id>.png."
+    },
     "tailles": {
       "type": "array"
     },
