@@ -220,6 +220,7 @@ func _ready() -> void:
 	_lancer("test_sprites_objets")
 	_lancer("test_boutiques_vendent")
 	_lancer("test_recruter_contre_or")
+	_lancer("test_plafond_par_salle")
 	_verifier_tous_lances()
 	Monde.fermer_tous()   # aucun thread de pré-génération ne doit survivre aux autoloads
 	for nom_s in ["test_terrain", "test_sensen", "test_sensen2", "test_graine", "test_partout", "test_partout2", "test_auto"]:
@@ -4077,6 +4078,31 @@ func test_bete_engage_sur_son_horloge() -> void:
 		for nom in s.combats.keys():
 			s.pas(nom)
 	verifier(int(j.sante) < sante0 or not j.vivant, "le rat a mordu pendant que le joueur attendait (%d → %d)" % [sante0, int(j.sante)])
+
+
+## Le plafond de créatures par salle (Donjons — structure, 2026-09-05) : au premier étage, aucune salle ordinaire n'a plus
+## de max_par_salle_base occupants ; au deuxième, une de plus. Une salle immense en tirait vingt-deux.
+func test_plafond_par_salle() -> void:
+	var gen := Donjon.new(GameData.catalogues["dungeon_rooms"], GameData.catalogues["dungeon_connectors"], GameData.entree("dungeon_themes", "ruine"))
+	var pe: Dictionary = GameData.config("combat_rules").peuplement_etage
+	for etage: int in [1, 2]:
+		var plafond: int = int(pe.max_par_salle_base) + int(pe.max_par_salle_par_etage) * (etage - 1)
+		var pire := 0
+		var salles := 0
+		for g in [41, 42, 43]:
+			var e: Dictionary = gen.generer_etage(g, 5, etage, 10, false)
+			for i in range(1, e.pieces.size()):
+				var pc: Dictionary = e.pieces[i]
+				if pc.get("boss_room", false):
+					continue
+				var r: Rect2i = pc.rect
+				var n := 0
+				for sp in e.spawns:
+					if r.has_point(sp.pos):
+						n += 1
+				pire = maxi(pire, n)
+				salles += 1
+		verifier(pire <= plafond and salles > 0, "étage %d : au plus %d créature(s) par salle sur %d salles (plafond %d)" % [etage, pire, salles, plafond])
 
 
 ## Recruter sur tous les PNJ (Compagnons, 2026-09-05) : un villageois à relation nulle refuse sans or, suit contre le prix,
