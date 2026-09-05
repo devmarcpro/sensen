@@ -20,6 +20,7 @@ var compagnons_voulus := 0   # --compagnons N : N villageois recrutés au dépar
 var compagnons_ids: Array = []
 var coups_compagnons := 0
 var etage_note := 0   # le dernier étage où l'état de l'escorte a été noté  # --inventaire <chemin> : le sac complet écrit en JSON à la fin
+var etage_xp := -1   # le dernier étage où la progression a été notée
 var sorts := 0              # --sorts N : N sorts composés au hasard (forme + noyau [+ modificateur]), lancés en combat
 var rng_bot := RandomNumberGenerator.new()
 var sorts_lances := 0
@@ -235,6 +236,9 @@ func _process(_delta: float) -> void:
 	if not compagnons_ids.is_empty() and scene.sim.lieu == "donjon" and int(scene.sim.donjon.get("etage", 0)) != etage_note:
 		etage_note = int(scene.sim.donjon.get("etage", 0))
 		_note("compagnons à l'étage %d : %s" % [etage_note, _etat_compagnons()])
+	if scene.sim.lieu == "donjon" and int(scene.sim.donjon.get("etage", 0)) != etage_xp:   # la progression, à chaque étage (2026-09-05)
+		etage_xp = int(scene.sim.donjon.get("etage", 0))
+		_note("progression à l'étage %d : %s" % [etage_xp, _etat_xp()])
 	frames += 1
 	if Time.get_ticks_msec() - derniere_capture_30s >= 30000 and frames > 5 and DisplayServer.get_name() != "headless":   # le film du parcours : une image toutes les 30 s
 		derniere_capture_30s = Time.get_ticks_msec()
@@ -457,6 +461,7 @@ func _hostile_en_vue(j: Dictionary) -> Dictionary:
 func _fin(raison: String) -> void:
 	if not compagnons_ids.is_empty():
 		print("COMPAGNONS : " + _etat_compagnons())
+	print("PROGRESSION : " + _etat_xp())
 	set_process(false)
 	var j: Dictionary = scene.sim.entites.get(jid, {})
 	_capturer("fin")
@@ -494,6 +499,26 @@ func _fin(raison: String) -> void:
 
 
 ## L'état de l'escorte, pour le rapport : présents sur l'étage, vivants, à terre, restés en arrière.
+## Où en est la progression (designer 2026-09-05 : « c'est trop lent de progresser au début ») : les niveaux dérivés
+## et l'XP totale des compétences, pour mesurer un réglage avant et après.
+func _etat_xp() -> String:
+	var j: Dictionary = scene.joueur()
+	if j.is_empty():
+		return "—"
+	var nd: Dictionary = scene.sim.progression.niveaux_derives(j)
+	var total := 0
+	var niveaux := 0
+	for cid in j.get("competences", {}).keys():   # competences[cle] = le niveau, xp_competences[cle] = l'XP vers le suivant
+		niveaux += int(j.competences[cid])
+	for cid in j.get("xp_competences", {}).keys():
+		total += int(j.xp_competences[cid])
+	var gagnes: Array = []
+	for cid in j.get("competences", {}).keys():
+		if int(j.competences[cid]) > 0:
+			gagnes.append("%s %d" % [cid, int(j.competences[cid])])
+	return "combat %.1f · général %.1f · %d niveaux de compétence (%s) · %d XP en cours" % [float(nd.get("combat", 0.0)), float(nd.get("general", 0.0)), niveaux, ", ".join(gagnes) if not gagnes.is_empty() else "aucun", total]
+
+
 func _etat_compagnons() -> String:
 	var presents := 0
 	var vivants := 0

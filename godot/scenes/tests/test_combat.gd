@@ -8379,7 +8379,10 @@ func test_loot() -> void:
 	s.pas(j.horloge)
 	s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false})
 	verifier(j.sante > 30, "vol de vie")
-	# Allonge : +1 portée
+	# Allonge : +1 portée — le loup est remis sur pied d'abord : avec la courbe d'XP plus rapide (2026-09-05), l'Épée monte
+	# pendant le test, la Force avec elle, et le loup ne survivait plus aux coups précédents
+	loup.sante = int(loup.sante_max)
+	loup.vivant = true
 	epee.affixes = [{"id": "meca_allonge", "params": {"n": 1}, "compteur": 0, "etat": {}}]
 	s.grille.liberer(loup.pos)
 	loup.pos = j.pos + Vector2i(2, 0)
@@ -8531,9 +8534,26 @@ func test_gemmes_et_livres() -> void:
 
 # ---------------------------------------------------------------- Étape 4 : progression par l'usage, potentiel, création, mort
 
+## Ce que verser() doit rendre : l'XP effective (× potentiel / 100) s'ajoute au reste, consomme les seuils de la courbe
+## un à un, et chaque niveau retire potentiel_cout_base + niveau / potentiel_cout_div de potentiel (plancher : la base).
+func _consommer_xp(prog: Progression, niveau: int, reste: float, xp: float, potentiel: int, base: int) -> Dictionary:
+	var r: Dictionary = GameData.config("combat_rules").progression
+	var pot := potentiel
+	var n := niveau
+	var x := reste + xp * float(potentiel) / 100.0
+	while x >= float(prog.xp_next(n)):
+		x -= float(prog.xp_next(n))
+		n += 1
+		pot = maxi(base, pot - (int(r.potentiel_cout_base) + n / int(r.potentiel_cout_div)))
+	return {"niveau": n, "reste": x, "potentiel": pot if n > niveau else potentiel}
+
+
 func test_progression() -> void:
 	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
-	verifier(prog.xp_next(1) == 303 and prog.xp_next(10) == roundi(100.0 * pow(11.0, 1.6)) and prog.xp_next(50) == roundi(100.0 * pow(51.0, 1.6)), "xp_next : 303 · ~4 600 · ~54 000 (100 × (N+1)^1.6)")
+	var pr: Dictionary = GameData.config("combat_rules").progression   # la courbe est une donnée (designer 2026-09-05 : plus vite au début)
+	var base_xp := float(pr.xp_base)
+	var expo := float(pr.xp_exposant)
+	verifier(prog.xp_next(0) == roundi(base_xp) and prog.xp_next(1) == roundi(base_xp * pow(2.0, expo)) and prog.xp_next(10) == roundi(base_xp * pow(11.0, expo)) and prog.xp_next(50) == roundi(base_xp * pow(51.0, expo)), "xp_next : %d · %d · %d · %d (%.0f × (N+1)^%.1f)" % [prog.xp_next(0), prog.xp_next(1), prog.xp_next(10), prog.xp_next(50), base_xp, expo])
 	# Septième test à nombre figé que je convertis : compter les compétences le cassait chaque fois
 	# qu'on en ajoutait une, alors que RIEN n'était faux. Ce qui doit tenir, c'est que chaque fiche soit
 	# COMPLÈTE — une compétence sans stat ne progresse pas, une compétence sans catégorie n'apparaît
@@ -8567,11 +8587,15 @@ func test_progression() -> void:
 	j.potentiels["epee"] = 100
 	j.potentiels_base["epee"] = 80
 	var force: int = j.corps.stats.force
+	# La courbe est une donnée : l'attendu se calcule comme verser() le fait — l'XP effective consomme les seuils un à un,
+	# et chaque niveau retire potentiel_cout_base + niveau / potentiel_cout_div de potentiel (plancher : la base).
+	var attendu := _consommer_xp(prog, 0, 0.0, 310.0, 100, 80)
 	s.gagner_xp(j, "epee", 310)
-	verifier(int(j.competences.get("epee", 0)) == 1 and int(j.potentiels.epee) == 100 - 10 and is_equal_approx(float(j.xp_competences.epee), 210.0), "310 XP à potentiel 100 : Épée 1 (100 XP), potentiel 90, reste 210")
+	verifier(int(j.competences.get("epee", 0)) == int(attendu.niveau) and int(j.potentiels.epee) == int(attendu.potentiel) and is_equal_approx(float(j.xp_competences.epee), float(attendu.reste)), "310 XP à potentiel 100 : Épée %d, potentiel %d, reste %.0f" % [int(attendu.niveau), int(attendu.potentiel), float(attendu.reste)])
 	j.potentiels["epee"] = 50
+	attendu = _consommer_xp(prog, int(attendu.niveau), float(attendu.reste), 200.0, 50, 80)
 	s.gagner_xp(j, "epee", 200)
-	verifier(int(j.competences.epee) == 2 and is_equal_approx(float(j.xp_competences.epee), 7.0) and int(j.potentiels.epee) == 80, "potentiel 50 : 200 XP n'en valent que 100 → Épée 2, reste 7, potentiel au plancher 80")
+	verifier(int(j.competences.epee) == int(attendu.niveau) and is_equal_approx(float(j.xp_competences.epee), float(attendu.reste)) and int(j.potentiels.epee) == int(attendu.potentiel), "potentiel 50 : 200 XP n'en valent que 100 → Épée %d, reste %.0f, potentiel %d" % [int(attendu.niveau), float(attendu.reste), int(attendu.potentiel)])
 	verifier(float(j.xp_competences.get("stat:force", 0.0)) > 0.0 or int(j.corps.stats.force) > force, "la Force reçoit la moitié de l'XP d'Épée")
 	# Les niveaux dérivés
 	j.competences["epee"] = 20

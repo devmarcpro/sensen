@@ -574,6 +574,9 @@ func _peupler(e: Dictionary, etage: int) -> void:
 			continue
 		var r: Rect2i = p.rect
 		var n := maxi(1, int(floorf(float(r.size.x * r.size.y) / float(theme.get("tuiles_par_creature", 64)) * facteur)))   # au moins un occupant par salle
+		# … et jamais plus que le plafond de l'étage (designer 2026-09-05 : « retravaille les spawns ») : une salle immense
+		# en tirait vingt-deux au premier étage, quand le joueur de niveau 0 n'en tue pas un.
+		n = mini(n, int(pe.get("max_par_salle_base", 2)) + int(pe.get("max_par_salle_par_etage", 1)) * maxi(0, etage - 1))
 		if p.get("boss_room", false):
 			var boss: String = str(theme.get("boss", ""))
 			if not boss.is_empty():
