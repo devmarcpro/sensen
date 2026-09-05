@@ -122,7 +122,7 @@ func _init(p_graine: int) -> void:
 	progression = Progression.new(regles.r.progression, GameData.catalogues.get("competences", {}), GameData.config("astrologie"))
 
 
-# ---------------------------------------------------------------- mise en place
+# ---------------------------------------------------------------- les vivants, les joueurs, les horloges (la mise en place est dans SimLieux)
 
 func vivants() -> Array[Dictionary]:
 	var res: Array[Dictionary] = []

@@ -367,10 +367,10 @@ static func _recalculer_humeurs(sim: Simulation) -> void:
 		var h := int(ry.humeur_base)
 		var lit: Vector2i = x.get("lit", Vector2i(-1, -1))
 		var cell: Vector2i = SimCamp._cell_de(sim, lit) if lit != Vector2i(-1, -1) else Vector2i(-9999, -9999)
-		if not pieces_par_cell.has(cell):
-			pieces_par_cell[cell] = pieces_de_cellule(sim, cell) if cell != Vector2i(-9999, -9999) else []
-		var piece := _piece_du_lit(sim, lit, pieces_par_cell[cell]) if lit != Vector2i(-1, -1) else {}
 		var hors := lit != Vector2i(-1, -1) and (absi(cell.x - sim.monde.centre.x) > sim.monde.rayon or absi(cell.y - sim.monde.centre.y) > sim.monde.rayon)
+		if not pieces_par_cell.has(cell):   # hors fenêtre : pas de pièces à détecter (la grille ne porte pas cette cellule), et pas un balayage par ville endormie
+			pieces_par_cell[cell] = pieces_de_cellule(sim, cell) if cell != Vector2i(-9999, -9999) and not hors else []
+		var piece := _piece_du_lit(sim, lit, pieces_par_cell[cell]) if lit != Vector2i(-1, -1) else {}
 		if str(x.get("statut_habitat", "normal")) == "betail":   # bétail (Habitat des PNJ) : un abri suffit, il broute
 			if not _abri_a(sim, x.pos) and piece.is_empty():
 				h += int(ry.sans_logement)
