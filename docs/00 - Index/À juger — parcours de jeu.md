@@ -538,3 +538,14 @@ Le designer a demandé « le calendrier, très important pour le réalisme et le
 - **L'an 1 020 au départ** : parce que la création propose une naissance en l'an 1 000. Change `annee_depart` et l'âge du personnage change avec.
 - **Le marché** : réapprovisionnement × 2 et prix × 0,9 le jour de marché de chaque agglomération. Deux valeurs dans `marche`. Si le marché doit fermer les autres jours, c'est une autre demande.
 - **Les fêtes** : humeur + 10 et la place tenue toute la journée ; dix fêtes (trois communes, une par culture). Ajouter, retirer ou déplacer une fête est une entrée de `fetes`. Rien n'est vendu ni acheté de spécial ce jour-là : à voir avec l'économie des villes (B).
+
+## 2026-09-05 — Les villes (programme B0 et B1) : les chiffres que j'ai choisis, et comment les défaire
+
+La demande : « la taille de la ville dépend de la population, plusieurs cellules, des districts, des rues, de la variété, des logements, des commerces, des zones de production, une économie » et « un camp et une ville sont identiques ». Tout ce qui suit est dans `data/villes.json` et les préfabs de `data/village_buildings/` ([[Villes — population, quartiers et économie]]).
+
+- **Les paliers et leurs fourchettes** (hameau 6-14, village 15-40, bourg 41-100, ville 101-220, cité 221-400) et **40 habitants par cellule** — donc au plus neuf cellules (une cité couvre la fenêtre entière quand on est au centre). Plus dense ou plus étalé : deux nombres.
+- **Qui est quoi** : hors royaume, un hameau (un village une fois sur quatre) ; dans un territoire, un village (un bourg une fois sur trois sur une route) ; la capitale selon la taille du royaume. Des bourgs libres hors royaume ou des cités sans royaume : c'est la table `situations`.
+- **L'ordre des quartiers** par palier (ville : centre, résidentiel, artisanal, agricole, agricole, marchand ; cité : centre, résidentiel, résidentiel, artisanal, marchand, agricole, agricole, artisanal, résidentiel) et leurs ratios (une boutique par quinze habitants, un atelier par douze, un champ par six, un garde par vingt-cinq).
+- **Les sièges** : château / mairie / temple / comptoir / caserne / auberge selon la gouvernance, et les titres maire, seigneur, syndic, commandant. Les préfabs se dessinent en JSON.
+- **Les rues** : deux axes par cellule, deux tuiles de large, au milieu. Des rues en diagonale ou un plan en étoile seraient une autre génération.
+- **Ce qu'une ville paie** : l'entretien du camp (10 or par résident, 25 par structure) s'applique à une ville ; son trésor vient de ses ventes et de sa production d'or. Une ville qui s'endette perd ses gens comme le camp. Si c'est trop dur pour une ville sans joueur, `villes.tresor_depart` par palier est le levier.
