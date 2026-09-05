@@ -29,4 +29,4 @@ Les décisions d'architecture Godot qu'on ne peut pas rattraper après coup.
 ## Liens
 - **Dépend de** : [[Data-driven design]], [[Arborescence du projet]], [[Contraintes permanentes]]
 - **Alimente** : [[Simulation à ticks]], [[EventBus]], [[Sauvegarde]], [[Réseau]], [[Décision — Structure de données de la grille]]
-- **Voir aussi** : [[Schéma unifié créature-PNJ]], [[Squelette modulaire et points d'attache]], [[Grille continue]], [[Donjons — structure et intégration]], [[Optimisation — principes]], [[Ordre de construction]]
+- **Voir aussi** : [[Modules de la simulation et le C++]], [[Schéma unifié créature-PNJ]], [[Squelette modulaire et points d'attache]], [[Grille continue]], [[Donjons — structure et intégration]], [[Optimisation — principes]], [[Ordre de construction]]

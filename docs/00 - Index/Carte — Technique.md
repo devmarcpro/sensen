@@ -6,7 +6,7 @@ statut: décidé
 etape: 0
 ---
 
-L'architecture Godot et la stratégie de performance. 22 notes.
+L'architecture Godot et la stratégie de performance. 23 notes.
 
 > [!note] Ce dossier était le plus touché par l'**héritage voxel**. Nettoyé le 2026-08-26 : les notes corrigibles sont réécrites (texte d'origine en annexe historique), les conflits restants ont chacun leur proposition à valider — [[Héritage voxel — audit]].
 
@@ -25,6 +25,7 @@ L'architecture Godot et la stratégie de performance. 22 notes.
 
 **La performance (Annexe G — fait autorité)**
 - **[[Budgets de performance]]** — les cibles chiffrées.
+- **[[Modules de la simulation et le C++]]** — la simulation en bibliothèques statiques, les anneaux d'échelle, le C++ borné au noyau pur (décidé le 2026-09-05).
 - **[[Optimisation — principes]]** — *mesurer avant d'optimiser, mais architecturer pour l'optimisation dès le jour 1.*
 - **[[Décision — Structure de données de la grille]]** — le LOD de distance est LA parade au coût du 1px.
 - **[[Éclairage]]** — propagation incrémentale ; le cycle jour/nuit module en shader, donc ne coûte rien.

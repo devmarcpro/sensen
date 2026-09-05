@@ -1913,8 +1913,14 @@ func test_village() -> void:
 	for x in civils:
 		if x.get("fonction", "") == "commercant":
 			marchand = x
-	# Le stock d'un étal dépend du type de boutique tiré par l'agglomération (Villes B1) : quatre objets au moins, pas huit.
-	verifier(not marchand.is_empty() and marchand.has("nom") and tr(marchand.name_key) == Noms.afficher(marchand.nom) and int(marchand.or) == 300 and marchand.stock.size() >= 4, "le marchand a un nom (%s), 300 or et un stock" % tr(marchand.get("name_key", "?")))
+	# Le stock d'un étal dépend du type de boutique tiré par l'agglomération (Villes B1) : au moins le minimum de sa sélection
+	# (un armurier peut n'avoir que trois objets), jamais un nombre en dur dans le test.
+	var stock_mini := 1
+	if not marchand.is_empty() and not str(marchand.get("boutique", "")).is_empty():
+		for bloc: Dictionary in GameData.entree("shop_types", str(marchand.boutique)).selection:
+			stock_mini += int(bloc.nombre[0])
+		stock_mini = maxi(1, stock_mini - 1)
+	verifier(not marchand.is_empty() and marchand.has("nom") and tr(marchand.name_key) == Noms.afficher(marchand.nom) and int(marchand.or) == 300 and marchand.stock.size() >= stock_mini, "le marchand a un nom (%s), 300 or et un stock" % tr(marchand.get("name_key", "?")))
 	verifier(not s.ennemis(j, marchand) and s.ennemis(marchand, {"camp": "hostile"}), "un civil n'est pas l'ennemi du joueur, mais celui des hostiles")
 	if not marchand.is_empty():   # on arrive par la route : le joueur se place devant l'échoppe pour parler et commercer
 		var devant := s._tuile_libre_autour(marchand.pos)
@@ -1939,7 +1945,7 @@ func test_village() -> void:
 	verifier(rel1 >= 1 and int(marchand.social.relations.get(j.id, 0)) == rel1, "+1 (ou +2) de relation, une seule fois par jour")
 	# Commerce : acheter du pain, vendre un lingot, le marchand à sec refuse.
 	# Le stock du marchand vient de ses CATÉGORIES (Commerce et boutiques) : le test prend ce qu'il y trouve.
-	verifier(marchand.stock.size() >= 5, "le marchand tient un stock tiré de ses catégories (%d objets)" % marchand.stock.size())
+	verifier(marchand.stock.size() >= stock_mini, "le marchand tient un stock tiré de ses catégories (%d objets, %d au moins pour cette boutique)" % [marchand.stock.size(), stock_mini])
 	var pain: String = str(marchand.stock[0])
 	var p := s.prix_suggere(pain, marchand, j)
 	verifier(int(p.prix) >= 1 and p.has("base") and p.has("rarete"), "prix suggéré du premier objet du stock : %d or (détail présent)" % int(p.prix))

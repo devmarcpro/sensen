@@ -40,7 +40,7 @@ Méthode, non négociable :
 - Les notes de docs/ font foi, le callout le plus récent gagne. Toute décision
   nouvelle = un callout daté écrit AVANT le code.
 - Tout en données : un JSON par entrée, schéma validé au démarrage, aucun
-  nombre en dur. GDScript typé, commentaires en français, pas de GDExtension.
+  nombre en dur. GDScript typé, commentaires en français, pas de GDExtension hors du noyau pur de calcul ([[Modules de la simulation et le C++]]).
 - Pas d'assets pour l'instant (c'est une phase, pas un dogme).
 - Ne touche jamais à .obsidian/.
 - Avant de pousser : la suite complète en tâche de fond (jamais pendant que tu
