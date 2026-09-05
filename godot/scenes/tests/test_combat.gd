@@ -225,6 +225,7 @@ func _ready() -> void:
 	_lancer("test_territoires")
 	_lancer("test_villes")
 	_lancer("test_champs_et_betes")
+	_lancer("test_anneau_moyen")
 	_lancer("test_economie")
 	_lancer("test_transports")
 	_lancer("test_pnj_distincts")
@@ -9430,6 +9431,79 @@ func test_villes() -> void:
 
 ## Les champs et les bêtes (Villes — B2, 2026-09-05) : une ville sème de vraies parcelles dans son territoire, ses
 ## fermiers les récoltent et les ressèment chaque semaine, ses bêtes sont des créatures au statut bétail qui produisent.
+## L'anneau moyen (Modules de la simulation et le C++, 2026-09-06) : une ville quittée continue de vivre sans grille —
+## ses résidents endormis comptent, sa semaine tourne, ils vieillissent, et ils sont là au retour.
+func test_anneau_moyen() -> void:
+	var s := Simulation.new(9)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var c0: Vector2i = s.monde.cellule_camp
+	var f: Dictionary = {}
+	for dy in range(-20, 21):
+		for dx in range(-20, 21):
+			var cv := c0 + Vector2i(dx, dy)
+			if maxi(absi(dx), absi(dy)) < 4:
+				continue   # assez loin pour sortir de la fenêtre au retour
+			if surf.terre_a(cv) and bool(surf.poi_de(cv).get("village", false)):
+				var fa: Dictionary = surf.fiche_agglomeration(cv)
+				if f.is_empty() or int(fa.population) > int(f.population):
+					f = fa
+	verifier(not f.is_empty(), "une ville à plus de 4 cellules du camp")
+	if f.is_empty():
+		return
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var n_sub: int = s.monde.taille / 32
+	var centre: Vector2i = f.centre
+	for cy in n_sub:
+		for cx in n_sub:
+			s.monde.explores[Vector2i(centre.x * n_sub + cx, centre.y * n_sub + cy)] = true
+			s.monde.explores[Vector2i(c0.x * n_sub + cx, c0.y * n_sub + cy)] = true
+	verifier(s.voyager(j, centre), "voyager jusqu'à la ville « %s »" % str(f.nom))
+	var nom := str(f.nom)
+	verifier(s.territoires.has(nom), "la ville a son territoire")
+	if not s.territoires.has(nom):
+		return
+	var n_res: int = s._dans_territoire(nom, func() -> int: return s.residents().size())
+	verifier(n_res >= 3, "%d résidents chargés" % n_res)
+	# On repart au camp : la ville sort de la fenêtre, ses gens s'endorment — mais ils comptent toujours.
+	j.or = 10000
+	verifier(s.voyager(j, c0), "retour au camp")
+	verifier(not SimTerritoire._territoire_charge(s, nom), "la ville n'est plus dans la fenêtre")
+	var endormis: Array = s._dans_territoire(nom, func() -> Array: return s.residents())
+	verifier(endormis.size() == n_res, "ses %d résidents comptent toujours, endormis (%d)" % [n_res, endormis.size()])
+	if endormis.is_empty():
+		return
+	var t: Dictionary = s.territoires[nom]
+	var rapports_avant: int = t.rapports.size()
+	var age_avant := float(endormis[0].get("age", 30.0))
+	var humeur_avant := int(endormis[0].get("humeur", 50))
+	var journal: Array = []
+	var gb := load("res://scenes/tests/grande_base.gd")
+	gb.semaine(s, journal, j)
+	verifier(t.rapports.size() == rapports_avant + 1, "une semaine passe : la ville endormie a son rapport (%d)" % t.rapports.size())
+	verifier(float(endormis[0].get("age", 30.0)) > age_avant, "un endormi a vieilli d'une semaine (%.3f → %.3f)" % [age_avant, float(endormis[0].get("age", 30.0))])
+	var am: Dictionary = GameData.config("villes").anneau_moyen
+	var loge := 0
+	for x in endormis:
+		if int(x.get("humeur", 0)) >= int(s.regles.r.royaume.humeur_base) + int(am.humeur_logement) - 20:
+			loge += 1
+	verifier(loge > 0, "%d endormis logés hors fenêtre reçoivent le bonus de logement (humeur avant %d)" % [loge, humeur_avant])
+	var stocks_total := 0
+	for k in t.stocks.keys():
+		stocks_total += int(t.stocks[k])
+	verifier(stocks_total > 0 or int(t.tresor) > 0, "la ville endormie a des stocks (%d) ou un trésor (%d)" % [stocks_total, int(t.tresor)])
+	verifier(t.has("prix") and not t.prix.is_empty(), "ses prix sont recalculés")
+	# On y retourne : les endormis se réveillent, à leur compte.
+	verifier(s.voyager(j, centre), "retour à la ville")
+	var reveilles: int = s._dans_territoire(nom, func() -> int: return s.residents().size())
+	var charges := 0
+	for x in s.vivants():
+		if x.has("assignation") and str(x.assignation.get("territoire", "")) == nom:
+			charges += 1
+	verifier(reveilles == n_res and charges == n_res, "au retour, %d résidents réveillés et chargés (%d)" % [reveilles, charges])
+	s.monde.fermer()
+
+
 func test_champs_et_betes() -> void:
 	var s := Simulation.new(9)
 	s.charger_camp()

@@ -124,6 +124,7 @@ static func _incarner(sim: Simulation, e: Dictionary, pnj_id: String, tick: int)
 	if not c.has("spawn") and e.has("spawn"):
 		c["spawn"] = e.spawn
 	e.controle = "ia"
+	sim._joueurs_sale = true   # le contrôle a changé de corps : la liste des joueurs se refait
 	e["maitre"] = c.id
 	e["ordre"] = "suivre"
 	e["ai_profile"] = "compagnon"

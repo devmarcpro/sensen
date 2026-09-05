@@ -18,6 +18,7 @@
     "rayon_place",
     "gardes_par_habitant",
     "champs",
+    "anneau_moyen",
     "enclos",
     "economie",
     "transports"
@@ -92,6 +93,15 @@
         "tuiles_par_fermier_semaine",
         "cultures_par_biome"
       ]
+    },
+    "anneau_moyen": {
+      "type": "object",
+      "required": ["humeur_logement", "semaines_par_recolte", "rendement_par_parcelle"],
+      "properties": {
+        "humeur_logement": {"type": "integer"},
+        "semaines_par_recolte": {"type": "integer", "minimum": 1},
+        "rendement_par_parcelle": {"type": "integer", "minimum": 0}
+      }
     },
     "enclos": {
       "type": "object",

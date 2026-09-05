@@ -10,10 +10,13 @@ const TH := 20            # hauteur du losange
 const HSTEP := 8          # pixels par niveau de hauteur
 const DELAI_PAS := 0.12   # secondes réelles entre deux pas d'une horloge de combat (lisibilité)
 const RAYON_VUE := 20            # tuiles dessinées autour du joueur (une cellule fait taille_cellule², 64 depuis le 2026-08-30)
-var centre_terrain := Vector2i(-99, -99)   # centre de la dernière passe statique du terrain
+var centre_terrain := Vector2i(-99, -99)   # la tuile du joueur à la dernière mise à jour des morceaux de terrain
 var vue_version := -1                      # version du champ de vue dessiné (brouillard de guerre)
 var centre_brouillard := Vector2i(-99, -99) # centre de la dernière passe du brouillard
-var decouvert_dessine := -1                 # nombre de tuiles découvertes à la dernière passe du terrain (une découverte = redessin)
+var decouvert_dessine := -1                 # nombre de tuiles découvertes à la dernière mise à jour (une découverte = les morceaux du champ de vue)
+const MORCEAU := 8                          # le terrain par morceaux de 8 × 8 tuiles (Budgets de performance, 2026-09-06)
+var morceaux: Dictionary = {}               # Vector2i (colonne, ligne de morceau) → TerrainMorceau
+var terrain_a_refaire := true               # une nouvelle grille, un changement de contrôle : tous les morceaux se refont
 
 var sim: Simulation
 var arenes: Array[String] = []
@@ -126,13 +129,23 @@ const SCENE_CREATURE := preload("res://scenes/entities/creature.tscn")
 @onready var ui_bas: Label = $CanvasLayer/Bas   # journal + aide en bas : le centre de l'écran reste au joueur
 
 
-## La couche statique du terrain : ses commandes de dessin persistent d'une image à l'autre.
+## La couche statique du terrain : un conteneur de morceaux (Budgets de performance, 2026-09-06). Son propre
+## `queue_redraw()` — l'ancien signal « tout redessiner » — refait tous les morceaux à l'image suivante.
 class Terrain extends Node2D:
 	var proprio: Node2D
 	func _draw() -> void:
+		proprio.terrain_a_refaire = true
+
+
+## Un morceau de 16 × 16 tuiles : ses commandes de dessin persistent tant qu'aucune de ses tuiles ne change.
+class TerrainMorceau extends Node2D:
+	var proprio: Node2D
+	var coin: Vector2i   # la colonne et la ligne du morceau, depuis l'origine de la grille
+	func _draw() -> void:
 		var t0 := Time.get_ticks_usec()
-		proprio._dessiner_terrain(self)
+		proprio._dessiner_morceau(self, coin)
 		proprio._top_client("draw.terrain", t0)
+		proprio.chrono["n.terrain"] = float(proprio.chrono.get("n.terrain", 0.0)) + 1.0
 
 
 ## Le brouillard de guerre : une couche à part, redessinée seule quand le champ de vue change
@@ -244,7 +257,7 @@ func _ready() -> void:
 		terrain.queue_redraw()
 		queue_redraw())
 	EventBus.tile_changed.connect(func(p: Vector2i) -> void:
-		terrain.queue_redraw()
+		_salir_tuile(p)   # seul le morceau de la tuile (et ceux de ses voisines de bord) se redessine
 		if sim != null:
 			sim.lumiere_sale = true
 		lumieres.queue_redraw()
@@ -880,8 +893,7 @@ func _process(delta: float) -> void:
 			ecran_fin.clear()
 	_maj_noeuds(delta)
 	t0_c = _top_client("noeuds", t0_c)
-	if Grille.distance(j.pos, centre_terrain) > RAYON_VUE / 3 or sim.grille.decouvert.size() != decouvert_dessine:
-		terrain.queue_redraw()   # le joueur s'éloigne du centre de la passe statique, ou il a découvert des tuiles
+	_maj_morceaux(j)   # les morceaux de terrain naissent et meurent avec la distance ; une découverte salit ceux du champ de vue
 	if int(j.get("vue_version", 0)) != vue_version or Grille.distance(j.pos, centre_brouillard) > RAYON_VUE / 3:
 		brouillard.queue_redraw()   # son champ de vue a changé : seul le brouillard se redessine
 	tour_hud += 1
@@ -928,6 +940,7 @@ func _maj_noeuds(delta: float = 0.0) -> void:
 	var vivants := {}
 	var j := joueur()
 	var k := 1.0 - exp(-delta * 12.0)   # glissement exponentiel : ≈ 0,2 s pour rejoindre la tuile
+	var seuil_picto := int(sim.regles.r.get("tempo", {}).get("pictogramme_au_dela", 0))   # 0 : jamais de pictogramme
 	for e in sim.vivants():
 		vivants[e.id] = true
 		var n: Paperdoll = noeuds.get(e.id)
@@ -943,6 +956,10 @@ func _maj_noeuds(delta: float = 0.0) -> void:
 			add_child(n)
 			noeuds[e.id] = n
 		n.e = e
+		var loin: bool = seuil_picto > 0 and not j.is_empty() and e.id != j.id and Grille.distance(e.pos, j.pos) > seuil_picto
+		if loin != n.lointain:   # il franchit le seuil : silhouette ou paperdoll, une seule fois
+			n.lointain = loin
+			n.queue_redraw()
 		var cible := _ecran(e.pos, sim.grille.h(e.pos))
 		if not n.visible or n.position.distance_to(cible) > TW * 3.0:
 			n.position = cible   # apparition ou saut (changement de grille, respawn) : pas de glissement
@@ -954,7 +971,7 @@ func _maj_noeuds(delta: float = 0.0) -> void:
 		# c'était le lag en ville (designer 2026-09-05). Le tremblement et l'animation ont leur propre redraw.
 		var tour := int(n.get_meta("tour", 0)) + 1   # la signature se relit une image sur quatre, en quinconce
 		n.set_meta("tour", tour)
-		if tour % 4 == 0:
+		if tour % 4 == 0 and not n.lointain:   # un pictogramme ne dépend ni de l'orientation ni de l'équipement
 			var sig := hash([e.get("orientation", Vector2i.ZERO), e.get("action_en_cours", {}).is_empty(), e.get("equipement", {}).hash(), bool(e.get("garde", false)), e.has("monture"), e.get("apparence", {}).hash(), e.get("blason", ""), e.get("teinte", []).hash(), e.vivant, e.get("forme_bestiale", false)])
 			if int(n.get_meta("signature", -1)) != sig:
 				n.set_meta("signature", sig)
@@ -1734,33 +1751,95 @@ func _losange(t: Vector2i, col: Color) -> void:
 
 
 ## La passe statique : toutes les tuiles, une seule fois (appelée par la couche Terrain).
-func _dessiner_terrain(ci: CanvasItem) -> void:
+## Le morceau d'une tuile (colonne, ligne depuis l'origine de la grille).
+func _morceau_de(t: Vector2i) -> Vector2i:
+	var o: Vector2i = sim.grille.origine
+	return Vector2i((t.x - o.x) / MORCEAU, (t.y - o.y) / MORCEAU)
+
+
+## Une tuile a changé : son morceau se redessine, et ceux de ses voisines si elle est au bord (les flancs et
+## les blocs lisent les hauteurs voisines).
+func _salir_tuile(p: Vector2i) -> void:
+	if sim == null:
+		return
+	for d in [Vector2i.ZERO, Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var m := _morceau_de(p + d)
+		if morceaux.has(m):
+			morceaux[m].queue_redraw()
+
+
+## Chaque image : les morceaux à portée du joueur existent, les autres meurent ; une nouvelle grille les refait
+## tous ; une découverte salit les morceaux du champ de vue (c'est là que les tuiles neuves sont).
+func _maj_morceaux(j: Dictionary) -> void:
 	if sim == null or profil_sans_terrain:
 		return
 	var g := sim.grille
-	var j := joueur()
+	if terrain_a_refaire:
+		for m in morceaux.values():
+			m.queue_free()
+		morceaux.clear()
+		for v in noeuds_vegetaux.values():
+			v.queue_free()
+		noeuds_vegetaux.clear()
+		terrain_a_refaire = false
+		centre_terrain = Vector2i(-99, -99)
 	var c: Vector2i = j.pos if not j.is_empty() else g.origine + Vector2i(g.largeur / 2, g.hauteur_grille / 2)
-	centre_terrain = c
-	decouvert_dessine = g.decouvert.size()
-	var x0 := maxi(g.origine.x, c.x - RAYON_VUE)
-	var x1 := mini(g.origine.x + g.largeur - 1, c.x + RAYON_VUE)
-	var y0 := maxi(g.origine.y, c.y - RAYON_VUE)
-	var y1 := mini(g.origine.y + g.hauteur_grille - 1, c.y + RAYON_VUE)
-	var garder := {}
-	for s in range(x0 + y0, x1 + y1 + 1):     # tri de profondeur : diagonales x+y, dans la fenêtre
-		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
-			var y := s - x
-			var t := Vector2i(x, y)
-			if not g.decouvert.has(g.idx(t)):
-				continue   # jamais vue : rien (le fond de la scène est le brouillard) — le terrain se redessine à chaque découverte
-			_dessine_tuile(ci, t)   # tous les murs découverts de la fenêtre, en blocs pleins
-			if "vegetation" in g.contenu_de(t).get("tags", []):
-				garder[g.idx(t)] = true
-				_assurer_vegetal(t)
-	for idx in noeuds_vegetaux.keys().duplicate():   # hors de la fenêtre : on libère
-		if not garder.has(idx):
+	if c != centre_terrain:
+		centre_terrain = c
+		var m0 := _morceau_de(Vector2i(maxi(g.origine.x, c.x - RAYON_VUE), maxi(g.origine.y, c.y - RAYON_VUE)))
+		var m1 := _morceau_de(Vector2i(mini(g.origine.x + g.largeur - 1, c.x + RAYON_VUE), mini(g.origine.y + g.hauteur_grille - 1, c.y + RAYON_VUE)))
+		var garder := {}
+		for my in range(m0.y, m1.y + 1):
+			for mx in range(m0.x, m1.x + 1):
+				var k := Vector2i(mx, my)
+				garder[k] = true
+				if not morceaux.has(k):
+					var n := TerrainMorceau.new()
+					n.proprio = self
+					n.coin = k
+					n.z_index = mx + my   # l'ordre de profondeur isométrique entre morceaux : deux morceaux de même z ne se recouvrent pas
+					terrain.add_child(n)
+					morceaux[k] = n
+		for k in morceaux.keys().duplicate():
+			if not garder.has(k):
+				_liberer_morceau(k)
+	if not g.decouvertes_recentes.is_empty():   # les tuiles découvertes depuis la dernière image : leurs morceaux seulement
+		for i in g.decouvertes_recentes:
+			var k := _morceau_de(g.pos_de(int(i)))
+			if morceaux.has(k):
+				morceaux[k].queue_redraw()
+		g.decouvertes_recentes.clear()
+
+
+func _liberer_morceau(k: Vector2i) -> void:
+	var g := sim.grille
+	var o: Vector2i = g.origine + k * MORCEAU
+	for idx in noeuds_vegetaux.keys().duplicate():   # ses végétaux partent avec lui
+		var t := g.pos_de(int(idx))
+		if t.x >= o.x and t.x < o.x + MORCEAU and t.y >= o.y and t.y < o.y + MORCEAU:
 			noeuds_vegetaux[idx].queue_free()
 			noeuds_vegetaux.erase(idx)
+	morceaux[k].queue_free()
+	morceaux.erase(k)
+
+
+## Un morceau : ses tuiles découvertes, dans l'ordre des diagonales x+y (la profondeur isométrique).
+func _dessiner_morceau(ci: CanvasItem, coin: Vector2i) -> void:
+	if sim == null or profil_sans_terrain:
+		return
+	var g := sim.grille
+	var x0: int = g.origine.x + coin.x * MORCEAU
+	var y0: int = g.origine.y + coin.y * MORCEAU
+	var x1 := mini(g.origine.x + g.largeur - 1, x0 + MORCEAU - 1)
+	var y1 := mini(g.origine.y + g.hauteur_grille - 1, y0 + MORCEAU - 1)
+	for s in range(x0 + y0, x1 + y1 + 1):
+		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
+			var t := Vector2i(x, s - x)
+			if not g.decouvert.has(g.idx(t)):
+				continue   # jamais vue : rien (le fond de la scène est le brouillard)
+			_dessine_tuile(ci, t)
+			if "vegetation" in g.contenu_de(t).get("tags", []):
+				_assurer_vegetal(t)
 
 
 ## La profondeur d'un billboard (z relatif) : x + y, ramené à la fenêtre (les coordonnées monde dépassent CANVAS_ITEM_Z_MAX).

@@ -714,7 +714,11 @@ static func _vieillir_semaine(sim: Simulation, tick: int) -> void:
 	var ag: Dictionary = sim.regles.r.age
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([sim.graine, "age", tick])
-	for x in sim.entites.values():
+	var tous: Array = sim.entites.values()
+	if sim.monde != null:   # les endormis hors fenêtre vieillissent aussi (anneau moyen, 2026-09-06)
+		for cell in sim.monde.dormants.keys():
+			tous.append_array(sim.monde.dormants[cell])
+	for x in tous:
 		if not x.has("age") or not x.vivant:
 			continue
 		x.age = float(x.age) + 7.0 / float(ag.jours_par_an)
@@ -722,7 +726,8 @@ static func _vieillir_semaine(sim: Simulation, tick: int) -> void:
 			var ecart := float(x.age) - float(x.lifespan)
 			if rng.randf() < float(ag.chance_mort_par_an) * ecart:
 				x.vivant = false
-				sim.grille.liberer(x.pos)
+				if sim.entites.has(x.id):
+					sim.grille.liberer(x.pos)
 				EventBus.emettre(&"journal", [&"journal.mort_vieillesse", {"nom": x.name_key}])
 				continue
 		var tranches := int(maxf(0.0, float(x.age) - float(ag.age)) / float(ag.tranche))

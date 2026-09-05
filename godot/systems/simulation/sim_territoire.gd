@@ -50,6 +50,13 @@ static func residents(sim: Simulation) -> Array:
 	for x in sim.entites.values():
 		if x.vivant and x.has("assignation") and str(x.assignation.get("territoire", "joueur")) == tid:
 			res.append(x)
+	# L'anneau moyen (Modules de la simulation et le C++, 2026-09-06) : les résidents des cellules du territoire hors
+	# fenêtre dorment dans `Monde.dormants`, mais ils comptent — leur semaine tourne sans grille.
+	if sim.monde != null and not sim.monde.dormants.is_empty():
+		for cell in sim.territoire.get("cellules", {}).keys():
+			for x in sim.monde.dormants.get(cell, []):
+				if x.vivant and x.has("assignation") and str(x.assignation.get("territoire", "joueur")) == tid:
+					res.append(x)
 	return res
 
 
@@ -363,6 +370,7 @@ static func _recalculer_humeurs(sim: Simulation) -> void:
 		if not pieces_par_cell.has(cell):
 			pieces_par_cell[cell] = pieces_de_cellule(sim, cell) if cell != Vector2i(-9999, -9999) else []
 		var piece := _piece_du_lit(sim, lit, pieces_par_cell[cell]) if lit != Vector2i(-1, -1) else {}
+		var hors := lit != Vector2i(-1, -1) and (absi(cell.x - sim.monde.centre.x) > sim.monde.rayon or absi(cell.y - sim.monde.centre.y) > sim.monde.rayon)
 		if str(x.get("statut_habitat", "normal")) == "betail":   # bétail (Habitat des PNJ) : un abri suffit, il broute
 			if not _abri_a(sim, x.pos) and piece.is_empty():
 				h += int(ry.sans_logement)
@@ -370,7 +378,9 @@ static func _recalculer_humeurs(sim: Simulation) -> void:
 				h += int(ry.betail.retrogradation_humeur)
 			x.humeur = h
 			continue
-		if piece.is_empty():
+		if piece.is_empty() and hors:   # logé hors fenêtre : on ne voit pas ses meubles (anneau moyen, 2026-09-06)
+			h += int(GameData.config("villes").get("anneau_moyen", {}).get("humeur_logement", 0))
+		elif piece.is_empty():
 			h += int(ry.sans_logement)
 		else:
 			h += mini(int(pc.bonus_meubles_max), int(pc.bonus_par_meuble) * piece.meubles.size())
@@ -550,8 +560,8 @@ static func _territoire_charge(sim: Simulation, id: String) -> bool:
 ## La semaine des villes chargées : chacune dans son contexte, par les fonctions du camp.
 static func _semaine_villes(sim: Simulation) -> void:
 	for id in sim.territoires.keys():
-		if str(id) == "joueur" or not _territoire_charge(sim, str(id)):
-			continue
+		if str(id) == "joueur" or not (sim.territoires[id].has("agglomeration") or _territoire_charge(sim, str(id))):
+			continue   # toutes les villes connues, dans la fenêtre ou non (anneau moyen, 2026-09-06) ; un territoire de test chargé aussi
 		var e := _proprietaire_entite(sim, str(id))
 		_dans_territoire(sim, str(id), func() -> void: _semaine_territoire(sim, e))
 

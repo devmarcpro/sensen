@@ -723,6 +723,7 @@ static func _vider_etats_tuiles(sim: Simulation, change_de_lieu: bool = false) -
 static func _reinitialiser(sim: Simulation) -> void:
 	_vider_etats_tuiles(sim, true)
 	sim.entites.clear()
+	sim._joueurs_sale = true
 	sim.ordre.clear()
 	sim.combats.clear()
 	sim.attente.clear()

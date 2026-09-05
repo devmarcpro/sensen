@@ -342,6 +342,12 @@
       ]
     }
   },
+  "anneau_moyen": {
+    "_doc": "Les villes hors fenêtre (Modules de la simulation et le C++, 2026-09-06) : leur semaine tourne sans grille — les résidents endormis produisent, mangent, vieillissent. Un logé qu'on ne voit pas reçoit humeur_logement à la place du bonus de ses meubles ; une parcelle hors fenêtre rend rendement_par_parcelle toutes les semaines_par_recolte.",
+    "humeur_logement": 10,
+    "semaines_par_recolte": 3,
+    "rendement_par_parcelle": 4
+  },
   "enclos": {
     "taille": [
       7,

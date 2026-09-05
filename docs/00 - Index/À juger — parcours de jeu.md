@@ -608,3 +608,16 @@ Tu m'as laissé trancher ; voici les trois choix et où les changer ([[Modules d
 - **Des bibliothèques statiques, pas des objets** : les modules `Sim…` sont des `static func` qui reçoivent la simulation ; l'état reste dans `Simulation`. La raison est technique (aucun cycle de références, un appel aussi rapide qu'une méthode) et stratégique (une fonction pure sur un état se porte en C++ telle quelle). Si tu préfères des objets systèmes, c'est un choix d'écriture, pas de comportement.
 - **Le C++ n'est plus interdit, il est borné** : le noyau pur de calcul seulement (chemins, vision, inondations, plus tard le tick grossier), après mesure par la sonde d'échelle. La règle du dépôt est réécrite dans ce sens. Une réécriture complète, je ne la fais pas : trente et un mille lignes, des mois, et rien de gagné sur le rendu ni sur l'échelle, que les anneaux de simulation gagnent bien plus.
 - **L'échelle par anneaux** (proche : tout ; moyen : à l'heure sans chemins ; lointain : la semaine) est le vrai levier pour « énormément de PNJ ». Ce que tu auras à juger quand l'anneau moyen existera : ce qu'un PNJ non chargé fait sans qu'on le voie (produit-il autant ? se bat-il ?), et à quelle distance l'anneau moyen commence.
+
+## 2026-09-06 — L'anneau moyen v1 (1 h) : trois chiffres et un choix
+
+- **Ce qu'une ville fait loin des yeux** ([[Modules de la simulation et le C++]]) : sa semaine entière, sans grille — ses gens produisent, mangent, vieillissent, ses prix bougent, sa taxe part au royaume. Le choix : la **même** règle que chargée, plutôt qu'un modèle à part. Le camp du joueur en profite : ses résidents hors fenêtre comptent et produisent (avant, s'éloigner de la base l'arrêtait net).
+- **Trois chiffres de `villes.json`, bloc `anneau_moyen`** : `rendement_par_parcelle` 4 et `semaines_par_recolte` 3 (une parcelle chargée rend selon sa pousse réelle, à l'heure ; hors fenêtre, ce forfait), `humeur_logement` 10 (un logé qu'on ne voit pas reçoit ce bonus au lieu de celui de ses meubles, 5 par meuble jusqu'à 15).
+- **Ce qui n'y est pas encore** : les naissances, les migrations entre villes, les morts autres que de vieillesse, et le tick à l'heure hors fenêtre (boutiques, parcelles) — ils rattrapent au retour, comme avant. Dis si tu veux que la population des villes bouge d'elle-même.
+
+## 2026-09-06 — Le terrain par morceaux et les pictogrammes (2 h) : un choix de regard
+
+Regarde la capture de la cité : les habitants au-delà de douze tuiles sont des silhouettes de trois traits. En marchant dans une ville de deux cents habitants, on passe de 16,6 à 12–15 ms par image, et surtout plus de saccade à la découverte. Si la silhouette te déplaît, un seul chiffre à mettre à 0.
+
+- **Les êtres à plus de 12 tuiles sont des pictogrammes** (`combat_rules.tempo.pictogramme_au_dela`) : une silhouette à la couleur de peau, un liseré rouge pour un hostile. C'est ce qui rend la ville fluide en marchant, mais c'est aussi ce qu'on voit : dis si tu veux le seuil plus loin, plus près, ou pas de pictogramme du tout (0). Quand tes sprites arriveront, le pictogramme pourra devenir le sprite de loin.
+- **Le terrain par morceaux de 8 × 8** ne change rien à l'image, seulement à la saccade : une découverte ne redessine plus que les morceaux du champ de vue.

@@ -23,6 +23,7 @@ var occupants: Dictionary = {}            # index de tuile → id d'entité
 var dep: Dictionary = {}                  # combat_rules/deplacement
 var hauteur_oeil: int = 1
 var decouvert: Dictionary = {}            # index de tuile → true : tuiles déjà vues (brouillard de guerre)
+var decouvertes_recentes: PackedInt32Array = PackedInt32Array()   # les index découverts depuis que le client a lu (le terrain par morceaux, 2026-09-06)
 var materiaux: Dictionary = {}            # index de tuile → id de matériau (filons) ; sinon materiau_defaut
 var materiau_defaut: String = ""          # le matériau des murs ordinaires (materiau_mur du thème)
 var meubles: Dictionary = {}              # index de tuile → id de meuble (data/meubles/)

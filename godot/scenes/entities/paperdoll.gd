@@ -17,6 +17,7 @@ var items: Dictionary = {}
 var fonctionnalites: Dictionary = {}
 var palette: Dictionary = {}
 var dessine_apres: Callable     # le client peut dessiner par-dessus (tuiles occultantes)
+var lointain := false           # au-delà de tempo.pictogramme_au_dela tuiles du joueur : un pictogramme, pas le paperdoll (Budgets de performance, 2026-09-06)
 var pose: Dictionary = {}       # segment → delta d'angle (animation par pivots)
 var _anim_restant := 0.0
 var _anim_duree := 0.25
@@ -98,6 +99,9 @@ func _dessiner_etre() -> void:
 	if "vehicule" in e.get("tags", []):   # un train, une calèche : une caisse et des roues tant qu'il n'y a pas de sprite (Villes B4)
 		_dessine_vehicule()
 		return
+	if lointain:   # de loin, une silhouette : trois primitives, aucun redessin quand il tourne ou s'équipe
+		_dessine_pictogramme()
+		return
 	if e.has("monture"):
 		_dessine_monture()
 	# Une seule vue : de face (designer 2026-09-01, point 54). L'orientation de l'être continue de
@@ -139,6 +143,25 @@ func _dessiner_etre() -> void:
 		var h_f := float(rig.hauteur_pieds) + 6.0
 		draw_line(Vector2(6.0, -h_f), Vector2(6.0, -h_f - 9.0), Color(0.25, 0.2, 0.15), 1.0)
 		draw_colored_polygon(PackedVector2Array([Vector2(6.0, -h_f - 9.0), Vector2(11.0, -h_f - 7.5), Vector2(6.0, -h_f - 6.0)]), col)
+	if dessine_apres.is_valid():
+		dessine_apres.call(self)
+
+
+## Le pictogramme d'un être lointain (Budgets de performance, 2026-09-06) : un corps et une tête à la couleur de
+## peau, à l'échelle de sa taille, un liseré rouge s'il est hostile — lisible à la taille d'une tuile, sans détail.
+func _dessine_pictogramme() -> void:
+	var col := Color(e.teinte[0], e.teinte[1], e.teinte[2])
+	var ap: Dictionary = e.get("apparence", {})
+	if not ap.is_empty():
+		col = _teinte_de("teintes_peau", str(ap.get("teinte_peau", "")), col)
+	var fac: Dictionary = GameData.config("apparence").get("facteurs", {})
+	var ech := float(ap.get("echelle", 1.0)) * float(fac.get("taille", {}).get(str(ap.get("taille", "moyenne")), 1.0))
+	var h := maxf(6.0, float(rig.hauteur_pieds) * 0.7 * ech)
+	var l := 3.0 * ech
+	draw_rect(Rect2(-l, -h, 2.0 * l, h), col.darkened(0.2))
+	draw_circle(Vector2(0.0, -h - 2.5 * ech), 2.5 * ech, col)
+	if str(e.get("camp", "")) == "hostile":
+		draw_rect(Rect2(-l, -h, 2.0 * l, h), Color(0.9, 0.2, 0.2), false, 1.0)
 	if dessine_apres.is_valid():
 		dessine_apres.call(self)
 

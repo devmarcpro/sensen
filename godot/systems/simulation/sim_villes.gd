@@ -600,7 +600,20 @@ static func _recolter_champs(sim: Simulation) -> void:
 		if quota <= 0:
 			break
 		var c: Dictionary = sim.territoire.cultures[pm]
-		if not bool(c.get("mure", false)) or not sim.grille.dans(pm):
+		if not sim.grille.dans(pm):   # hors fenêtre (anneau moyen, 2026-09-06) : la parcelle rend au forfait, sans pousser à l'heure
+			var am: Dictionary = GameData.config("villes").get("anneau_moyen", {})
+			c["semaines_hors"] = int(c.get("semaines_hors", 0)) + 1
+			if int(c.semaines_hors) < int(am.get("semaines_par_recolte", 3)):
+				continue
+			c.semaines_hors = 0
+			var n_h := int(am.get("rendement_par_parcelle", 4))
+			var cle_h := str(c.plante)
+			sim.territoire.stocks[cle_h] = int(sim.territoire.stocks.get(cle_h, 0)) + n_h
+			recoltes[cle_h] = int(recoltes.get(cle_h, 0)) + n_h
+			total += n_h
+			quota -= 1
+			continue
+		if not bool(c.get("mure", false)):
 			continue
 		var n := _rendement_parcelle(sim, pm)
 		var cle := str(c.plante)
@@ -622,8 +635,12 @@ static func _semaine_betail(sim: Simulation) -> void:
 	var tid := str(sim.territoire.get("id", "joueur"))
 	var prod := {}
 	var total := 0
-	for x in sim.vivants():
-		if str(x.get("betail", "")) != tid:
+	var troupeau: Array = sim.vivants()
+	if sim.monde != null:   # les bêtes endormies hors fenêtre produisent aussi (anneau moyen, 2026-09-06)
+		for cell in sim.territoire.get("cellules", {}).keys():
+			troupeau.append_array(sim.monde.dormants.get(cell, []))
+	for x in troupeau:
+		if not x.vivant or str(x.get("betail", "")) != tid:
 			continue
 		var p: Dictionary = produits.get(str(x.get("def", "")), {})
 		if p.is_empty():

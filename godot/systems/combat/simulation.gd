@@ -132,6 +132,32 @@ func vivants() -> Array[Dictionary]:
 	return res
 
 
+var _joueurs: Array[Dictionary] = []
+var _joueurs_cle := -1
+var _joueurs_sale := true
+## Les êtres contrôlés par le joueur, morts compris (Modules de la simulation et le C++, sonde d'échelle, 2026-09-06) :
+## la faim, la météo et la vision ne concernent qu'eux, et balayer deux mille entités à chaque tick pour les trouver
+## coûtait plus que tout le reste. La liste tient tant que le compte d'entités ne bouge pas, que chacun est encore
+## là et encore « joueur » ; un changement de contrôle (incarner) la marque sale.
+func joueurs() -> Array[Dictionary]:
+	var cle := entites.size() * 1000003 + _n_entites
+	if not _joueurs_sale and cle == _joueurs_cle:
+		var bon := true
+		for e in _joueurs:
+			if not entites.has(e.id) or not is_same(entites[e.id], e) or e.controle != "joueur":
+				bon = false
+				break
+		if bon:
+			return _joueurs
+	_joueurs = []
+	for id in ordre:
+		if entites[id].controle == "joueur":
+			_joueurs.append(entites[id])
+	_joueurs_cle = cle
+	_joueurs_sale = false
+	return _joueurs
+
+
 func horloge_de(e: Dictionary) -> Horloge:
 	if e.horloge == "monde" or not combats.has(e.horloge):   # un combat disparu (sauvegarde, changement de grille) : l'horloge du monde
 		if e.horloge != "monde":
@@ -296,8 +322,8 @@ func _exploser(b: Dictionary) -> void:
 				bombes.erase(autre)
 				EventBus.emettre(&"journal", [&"journal.amorce", {}])
 				_exploser(autre)
-	for x in vivants():
-		if x.controle == "joueur":
+	for x in joueurs():
+		if x.vivant:
 			x["vue_sale"] = true
 
 
@@ -507,8 +533,8 @@ func _regenerer_faune_hebdo() -> void:
 ## (les joueurs) ; à zéro, la santé max s'érode ; sous le seuil, les stats baissent (Etres.recalculer).
 func _tiquer_faim(tick: int) -> void:
 	var f: Dictionary = regles.r.faim
-	for e in vivants():
-		if e.controle != "joueur":
+	for e in joueurs():
+		if not e.vivant:
 			continue
 		if not e.has("faim"):
 			e["faim"] = 100
@@ -644,8 +670,8 @@ var _vision_grille: Grille = null
 
 
 func maj_vision() -> void:
-	for e in vivants():
-		if e.controle != "joueur":
+	for e in joueurs():
+		if not e.vivant:
 			continue
 		var t_now := horloge_de(e).ticks
 		if _vision_tick == t_now and _vision_grille == grille and e.has("vue") and e.get("vue_pos", Vector2i(-1, -1)) == e.pos and not bool(e.get("vue_sale", false)):
@@ -669,7 +695,9 @@ func maj_vision() -> void:
 				if grille.dans(t) and Grille.distance(e.pos, t) <= portee and grille.ligne_de_vue(e.pos, t):
 					var idx := grille.idx(t)
 					vue[idx] = true
-					grille.decouvert[idx] = true
+					if not grille.decouvert.has(idx):
+						grille.decouvert[idx] = true
+						grille.decouvertes_recentes.append(idx)   # le client ne redessine que les morceaux de terrain touchés
 		if vue.size() != e.get("vue", {}).size() or e.get("vue_pos", Vector2i(-1, -1)) != e.pos or e.get("vue_sale", false):
 			e["vue_version"] = int(e.get("vue_version", 0)) + 1
 			if lieu == "camp" and monde != null:   # exploration à résolution chunk (minimap)

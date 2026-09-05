@@ -922,8 +922,8 @@ static func _tiquer_meteo(sim: Simulation, tick: int) -> void:
 	if sim.monde == null or sim.lieu != "camp":
 		return
 	var m: Dictionary = GameData.config("planete").get("meteo", {})
-	for e in sim.vivants():
-		if e.controle != "joueur":
+	for e in sim.joueurs():
+		if not e.vivant:
 			continue
 		var cell := sim.monde.cellule_de(e.pos)
 		var etat := meteo(sim, cell, tick)
