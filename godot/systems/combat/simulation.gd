@@ -8034,12 +8034,137 @@ func _sauver_etage(joueur: Dictionary) -> void:
 	etages_visites[int(donjon.etage)] = sauve
 
 
+# ---------------------------------------------------------------- les bâtiments à étages (Villes, 99, 2026-09-05)
+
+## Le bâtiment de la ville dont l'escalier est à cette tuile ({} sinon) : sa fiche de génération et son préfab.
+func batiment_a_escalier(pos: Vector2i) -> Dictionary:
+	if monde == null or lieu != "camp":
+		return {}
+	var cell := _cell_de(pos)
+	var v: Dictionary = monde.cellule(cell).get("village", {})
+	for bat in v.get("batiments", []):
+		if bat.has("escalier") and monde.pos_monde(cell, bat.escalier) == pos:
+			var pref: Dictionary = GameData.catalogues.village_buildings.get(str(bat.id), {})
+			if not pref.get("etages", []).is_empty():
+				return {"bat": bat, "prefab": pref, "cell": cell}
+	return {}
+
+
+## Monter l'escalier d'un bâtiment : le camp est mis de côté, le premier étage se charge comme un étage de donjon.
+func _entrer_interieur(e: Dictionary, pos: Vector2i) -> bool:
+	var b := batiment_a_escalier(pos)
+	if b.is_empty() or e.controle != "joueur":
+		return false
+	e["retour"] = pos
+	_sauver_camp(e)
+	expedition = {}
+	etages_visites.clear()
+	var palette: Dictionary = GameData.catalogues.biomes.get(str(monde.cellule(b.cell).get("biome", "")), {}).get("village_palette", {"mur": "chene", "sol": "calcaire"})
+	donjon = {"interieur": true, "batiment": str(b.bat.id), "cellule": b.cell, "plans": b.prefab.etages, "etages": b.prefab.etages.size(), "palette": palette, "theme": "interieur", "graine": graine, "id": 0}
+	charger_interieur(1, e)
+	return true
+
+
+## Un étage d'intérieur bâti sur son plan : un petit étage de donjon dont les murs, les meubles et les deux escaliers
+## viennent des lettres du plan ('v' : l'entrée, qui redescend ; '^' : l'escalier qui monte).
+func _etage_interieur(plan: Array, palette: Dictionary, meubles: Dictionary) -> Dictionary:
+	var w := 0
+	for ligne in plan:
+		w = maxi(w, str(ligne).length())
+	var h: int = plan.size()
+	var et := {"largeur": w, "hauteur": h, "hauteurs": PackedByteArray(), "sol": {}, "bord": {}, "sols": {}, "meubles": {}, "portes": {}, "escalier": null, "entree": Vector2i(1, 1), "spawns": [], "coffres": [], "boss": null, "filons": {}, "lave": {}}
+	et.hauteurs.resize(w * h)
+	et.hauteurs.fill(Donjon.H_BASE)
+	for y in h:
+		var ligne: String = str(plan[y])
+		for x in w:
+			var c := ligne[x] if x < ligne.length() else "#"
+			var i := y * w + x
+			if c == "#" or c == " ":
+				continue
+			et.sol[i] = true
+			et.sols[i] = str(palette.get("sol", "calcaire"))
+			if c == "v":
+				et.entree = Vector2i(x, y)
+			elif c == "^":
+				et.escalier = Vector2i(x, y)
+			elif meubles.has(c) and c != "P":
+				et.meubles[i] = str(meubles[c])
+	return et
+
+
+## Charger l'étage `etage` (dès 1) de l'intérieur courant ; les étages déjà visités reviennent tels quels.
+func charger_interieur(etage: int, joueur: Dictionary) -> void:
+	var escorte: Array = _escorte_qui_suit(joueur)
+	if lieu == "donjon" and not donjon.is_empty() and bool(donjon.get("interieur", false)) and int(donjon.get("etage", 0)) > 0:
+		_sauver_etage(joueur)
+	lieu = "donjon"
+	arene_id = "donjon"
+	var plans: Array = donjon.plans
+	var pref: Dictionary = GameData.catalogues.village_buildings.get(str(donjon.batiment), {})
+	var meubles: Dictionary = pref.get("meubles", {})
+	if etages_visites.has(etage):
+		var sauve: Dictionary = etages_visites[etage]
+		donjon = sauve.donjon
+		grille = sauve.grille
+		_reinitialiser()
+		for id in sauve.ordre:
+			entites[id] = sauve.entites[id]
+			ordre.append(id)
+			if entites[id].vivant:
+				grille.placer(id, entites[id].pos)
+		contenants = sauve.contenants
+		var ou: Vector2i = sauve.donjon.escalier if (int(joueur.get("etage_depuis", 0)) > etage and sauve.donjon.escalier != null) else sauve.donjon.entree
+		_reprendre(joueur, ou)
+		_placer_escorte(joueur, escorte)
+		return
+	var et := _etage_interieur(plans[etage - 1], donjon.palette, meubles)
+	if etage >= plans.size():
+		et.escalier = null   # le dernier étage n'a rien au-dessus
+	donjon = donjon.duplicate()
+	donjon["etage"] = etage
+	donjon["escalier"] = et.escalier
+	donjon["entree"] = et.entree
+	donjon["salles"] = 1
+	donjon["boss"] = null
+	donjon["corruption"] = 0.0
+	donjon["corruption_etage"] = 0.0
+	donjon["profondeur"] = 0
+	grille = Grille.depuis_etage(et, GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
+	grille.materiau_defaut = str(donjon.palette.get("mur", "chene"))
+	_reinitialiser()
+	var ou: Vector2i = Vector2i(et.entree) if int(joueur.get("etage_depuis", 0)) <= etage or et.escalier == null else Vector2i(et.escalier)
+	_reprendre(joueur, ou)
+	_placer_escorte(joueur, escorte)
+	maj_vision()
+	EventBus.emettre(&"journal", [&"journal.monte_etage", {"nom": joueur.name_key, "etage": etage, "batiment": "batiment.%s.name" % str(donjon.batiment)}])
+
+
+## Ressortir d'un bâtiment : le camp revient, le joueur devant l'escalier.
+func _sortir_interieur(e: Dictionary) -> bool:
+	etages_visites.clear()
+	expedition = {}
+	if camp_sauve.is_empty():
+		return false
+	charger_camp(e)
+	_tiquer_territoire(horloge_monde.ticks)
+	EventBus.emettre(&"journal", [&"journal.sort_batiment", {"nom": e.name_key}])
+	return true
+
+
 ## Descendre : l'être doit être sur la cage d'escalier de l'étage (Donjons : escalier = lien).
 func _descendre(e: Dictionary) -> bool:
 	if lieu == "camp":
+		if _entrer_interieur(e, e.pos):   # l'escalier d'un bâtiment à étages (99)
+			return true
 		return _partir_en_expedition(e)
 	if donjon.is_empty() or donjon.escalier == null or e.pos != donjon.escalier:
 		return false
+	if bool(donjon.get("interieur", false)):   # l'étage au-dessus (99)
+		var suivant: int = int(donjon.etage) + 1
+		e.etage_depuis = int(donjon.etage)
+		charger_interieur(suivant, e)
+		return true
 	if int(donjon.etage) >= int(donjon.etages):
 		return false
 	var prochain: int = int(donjon.etage) + 1
@@ -8055,6 +8180,13 @@ func _descendre(e: Dictionary) -> bool:
 func _remonter(e: Dictionary) -> bool:
 	if donjon.is_empty() or e.pos != Vector2i(donjon.get("entree", Vector2i(-1, -1))):
 		return false
+	if bool(donjon.get("interieur", false)):   # un bâtiment à étages (99) : l'étage du dessous, ou la rue
+		if int(donjon.etage) <= 1:
+			return _sortir_interieur(e)
+		e.etage_depuis = int(donjon.etage)
+		charger_interieur(int(donjon.etage) - 1, e)
+		EventBus.emettre(&"journal", [&"journal.descend_etage", {"nom": e.name_key}])
+		return true
 	if int(donjon.etage) <= 1:
 		return _sortir(e)
 	var precedent: int = int(donjon.etage) - 1
@@ -10518,6 +10650,10 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 		if donjon.has("entree") and vers == donjon.entree and _remonter(e):
 			EventBus.dispatcher()
 			return true
+	# L'escalier d'un bâtiment à étages : y marcher monte (Villes, 99).
+	if e.controle == "joueur" and lieu == "camp" and monde != null and str(grille.meubles.get(grille.idx(vers), "")) == "escalier" and _entrer_interieur(e, vers):
+		EventBus.dispatcher()
+		return true
 	# Une cellule corrompue happe qui y met le pied (designer 2026-09-01, point 51).
 	if e.controle == "joueur" and lieu == "camp" and monde != null and entrer_donjon_de_la_cellule(e):
 		EventBus.dispatcher()

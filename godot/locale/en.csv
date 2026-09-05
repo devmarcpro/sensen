@@ -3576,3 +3576,13 @@ motif.cercle_brise.name,the broken circle
 motif.chardon.name,the thistle
 motif.vent.name,the wind
 rumeur_royaume,(rumour)
+meuble.escalier.name,stairs
+journal.monte_etage,{nom} goes up to floor {etage} of {batiment}
+journal.descend_etage,{nom} goes back down
+journal.sort_batiment,{nom} steps back into the street
+ui.etage,{batiment} — floor {etage}
+batiment.maison_haute.name,tall house
+batiment.auberge.name,inn
+batiment.atelier.name,workshop
+batiment.chateau.name,castle
+batiment.mairie.name,town hall

@@ -229,6 +229,7 @@ func _ready() -> void:
 	_lancer("test_transports")
 	_lancer("test_pnj_distincts")
 	_lancer("test_royaume_pays")
+	_lancer("test_batiment_etages")
 	_verifier_tous_lances()
 	Monde.fermer_tous()   # aucun thread de pré-génération ne doit survivre aux autoloads
 	for nom_s in ["test_terrain", "test_sensen", "test_sensen2", "test_graine", "test_partout", "test_partout2", "test_auto"]:
@@ -9750,4 +9751,56 @@ func test_royaume_pays() -> void:
 	var s2 := Simulation.new(83)
 	s2.nom_partie = "test_royaume_pays"
 	verifier(s2.charger_sauvegarde() and s2.monde.etats_royaumes.has("roy_a") and str(s2.monde.etats_royaumes.roy_a.dirigeant) == "Titus Aurelius", "rechargé : le règne de Titus Aurelius")
+
+
+## Les bâtiments à étages (Villes, 99, 2026-09-05) : une maison haute a un escalier ; y marcher charge l'étage (un petit
+## intérieur bâti sur le plan, avec ses lits et ses meubles) ; l'escalier du haut mène au suivant, celui du bas ramène
+## dans la rue devant l'escalier.
+func test_batiment_etages() -> void:
+	var pref: Dictionary = GameData.catalogues.village_buildings.maison_haute
+	verifier(pref.has("etages") and pref.etages.size() >= 1 and "^" in "".join(pref.plan) and "v" in "".join(pref.etages[0]), "la maison haute a un escalier qui monte et un plan d'étage qui redescend")
+	var s := Simulation.new(83)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var surf: Surface = s.monde.surface
+	var cell: Vector2i = s.monde.cellule_camp + Vector2i(1, 0)
+	surf.fiches_agglo.erase(cell)
+	var fiche: Dictionary = surf.fiche_agglomeration(cell)
+	var agglo: Dictionary = fiche.duplicate()
+	agglo["quartier"] = "centre"
+	agglo["index"] = 0
+	var e: Dictionary = surf.generer_cellule(cell.x, cell.y, {}, false)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 83
+	if e.village.is_empty():
+		surf._poser_quartier(e, cell, rng, agglo)
+	var bat_e: Dictionary = {}
+	for bat in e.village.batiments:
+		if bat.has("escalier") and not GameData.catalogues.village_buildings[str(bat.id)].get("etages", []).is_empty():
+			bat_e = bat
+			break
+	if bat_e.is_empty():   # aucun préfab à étages tiré : on en pose un
+		var pos0 := Vector2i(6, 6)
+		surf._poser_batiment(e, pref, pos0, {"mur": "chene", "toit": "chaume_tresse", "sol": "calcaire"}, "maison_haute")
+		bat_e = e.village.batiments.back()
+	verifier(bat_e.has("escalier"), "un bâtiment à étages avec son escalier (%s)" % str(bat_e.id))
+	s.monde.cellules[cell] = e
+	s.grille = s.monde.fenetre(s.monde.centre, GameData.config("tile_contents"), s.regles.r.deplacement, int(s.regles.r.vision.hauteur_oeil))
+	for x in s.vivants():
+		if s.grille.dans(x.pos) and s.grille.occupant(x.pos).is_empty():
+			s.grille.placer(x.id, x.pos)
+	var esc: Vector2i = s.monde.pos_monde(cell, bat_e.escalier)
+	verifier(str(s.grille.meubles.get(s.grille.idx(esc), "")) == "escalier" and not s.grille.bloque_passage(esc), "l'escalier est un meuble franchissable de la grille")
+	var voisin := s._tuile_libre_autour(esc)
+	s.grille.liberer(j.pos)
+	j.pos = voisin
+	s.grille.placer(j.id, voisin)
+	verifier(s._entrer_interieur(j, esc), "monter l'escalier charge l'intérieur")
+	verifier(s.lieu == "donjon" and bool(s.donjon.get("interieur", false)) and int(s.donjon.etage) == 1 and s.grille.largeur == str(GameData.catalogues.village_buildings[str(bat_e.id)].etages[0][0]).length(), "au premier étage : une grille de la taille du plan de %s (%d × %d)" % [str(bat_e.id), s.grille.largeur, s.grille.hauteur_grille])
+	var lits := 0
+	for gi in s.grille.meubles.keys():
+		if str(s.grille.meubles[gi]).begins_with("lit"):
+			lits += 1
+	verifier(lits >= 2 and j.pos == Vector2i(s.donjon.entree), "l'étage a ses lits (%d) et le joueur est sur l'escalier du bas" % lits)
+	verifier(s._remonter(j) and s.lieu == "camp" and s._cell_de(j.pos) == cell and Grille.distance(j.pos, esc) <= 2, "redescendre ramène dans la rue, devant l'escalier")
 

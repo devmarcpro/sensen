@@ -1,5 +1,5 @@
 {
-  "_doc": "Bâtiment préfab de village (docs: Villages PNJ, Unification macro-micro) : grille de caractères — # mur (palette.mur), . sol (palette.sol), P porte, lettres = meubles (table `meubles`). poste : le caractère du plan qui est la case de travail du résident (Villes B1) ; stations : caractère → id de station, vide = remplie par le quartier ; tags : hameau (préfab du hameau), ville, logement, atelier, entrepot, stockage, auberge, siege, chapelle, hall.",
+  "_doc": "Bâtiment préfab de village (docs: Villages PNJ, Unification macro-micro) : grille de caractères — # mur (palette.mur), . sol (palette.sol), P porte, lettres = meubles (table `meubles`). poste : le caractère du plan qui est la case de travail du résident (Villes B1) ; stations : caractère → id de station, vide = remplie par le quartier ; tags : hameau (préfab du hameau), ville, logement, atelier, entrepot, stockage, auberge, siege, chapelle, hall. etages : les plans des étages (Villes — bâtiments à étages, 99) ; '^' l'escalier qui monte, 'v' celui qui descend ; l'étage se charge comme un étage de donjon quand le joueur marche sur l'escalier.",
   "plan": [
     "#####",
     "#L..#",
@@ -10,5 +10,6 @@
   },
   "tags": [],
   "poste": "T",
-  "stations": {}
+  "stations": {},
+  "etages": []
 }

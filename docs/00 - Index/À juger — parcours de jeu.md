@@ -588,3 +588,9 @@ Quand une ville de deux cents habitants se charge, tout le monde part en même t
 - **L'humeur d'un royaume** revient de 3 par semaine vers 55 quand aucun de ses résidents n'est chargé ; avec ses gens chargés, c'est la moyenne de leurs humeurs. Le trésor des royaumes ne sert encore à rien d'autre qu'à la levée de taxes et à la révolte : le nerf de la guerre attend la guerre.
 - **Le fanion des gardes** : un petit drapeau de la couleur du royaume au-dessus de l'épaule. Le blason lui-même (deux couleurs, un motif) n'a pas de dessin : les sprites sont à toi.
 - **La carte, case par case (98)** : chaque pas est un voyage d'une cellule au coût de la marche ; on entre d'office dans un donjon si la cellule en porte un (c'est la règle des voyages). Si tu veux un pas plus rapide sur route ou une monture qui compte sur la carte, dis-le.
+
+## 2026-09-05 — Les bâtiments à étages (99, 20 h 50) : ce qui est là et ce qui manque
+
+- **Là** : cinq préfabs ont un étage (le château en a deux) ; on monte en marchant sur l'escalier, l'étage est une petite grille meublée (lits, tables, torchères), on redescend dans la rue. Le temps y est à l'action, comme en donjon.
+- **Pas là** : les gens qui logent en haut. Un résident dont le lit est à l'étage vivrait dans une autre grille : sa routine, son sommeil, ses repas demandent que les intérieurs soient simulés avec la rue (une grille par étage chargée en même temps que la fenêtre), ce qui est un vrai chantier. Dis si tu le veux avant les sprites : en attendant, l'étage est un lieu à visiter, pas à habiter.
+- **Pas là non plus** : ce qu'on dépose à l'étage n'y reste pas d'une visite à l'autre (la grille se rebâtit). À faire avec la persistance des intérieurs.

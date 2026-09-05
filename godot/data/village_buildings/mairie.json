@@ -1,7 +1,7 @@
 {
   "plan": [
     "##########",
-    "#B.T....C#",
+    "#B.T...^C#",
     "#........#",
     "#L...U...#",
     "#........#",
@@ -12,11 +12,24 @@
     "T": "table",
     "C": "coffre",
     "B": "bibliotheque",
-    "U": "statue"
+    "U": "statue",
+    "^": "escalier",
+    "v": "escalier",
+    "o": "torchere",
+    "K": "grand_coffre"
   },
   "tags": [
     "ville",
     "siege"
   ],
-  "poste": "T"
+  "poste": "T",
+  "etages": [
+    [
+      "##########",
+      "#B......B#",
+      "#..T..T..#",
+      "#o..v...o#",
+      "##########"
+    ]
+  ]
 }

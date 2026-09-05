@@ -1,0 +1,11 @@
+{
+  "name_key": "meuble.escalier.name",
+  "type_meuble": "escalier",
+  "bloque_passage": false,
+  "dormir": false,
+  "capacite_slots": 0,
+  "luminosite": 0,
+  "bonus_humeur": 0,
+  "couleur": "#7a6a4a",
+  "emprise": 0.9
+}

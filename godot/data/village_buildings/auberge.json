@@ -1,7 +1,7 @@
 {
   "plan": [
     "##########",
-    "#T.c..T.c#",
+    "#T.c..T^c#",
     "#........#",
     "#F...E..G#",
     "#L..L..L.#",
@@ -13,11 +13,28 @@
     "c": "chaise",
     "E": "etal_de_vente",
     "F": "cheminee",
-    "G": "garde_manger"
+    "G": "garde_manger",
+    "^": "escalier",
+    "v": "escalier",
+    "C": "coffre",
+    "o": "torchere",
+    "U": "statue",
+    "K": "grand_coffre",
+    "B": "bibliotheque"
   },
   "tags": [
     "ville",
     "auberge"
   ],
-  "poste": "E"
+  "poste": "E",
+  "etages": [
+    [
+      "##########",
+      "#L.#L.#L.#",
+      "#..#..#..#",
+      "#........#",
+      "#o..v...C#",
+      "##########"
+    ]
+  ]
 }

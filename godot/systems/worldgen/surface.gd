@@ -1547,6 +1547,8 @@ func _poser_batiment(e: Dictionary, bat: Dictionary, origine: Vector2i, palette:
 				e.meubles[i] = str(meubles[c])
 				if str(meubles[c]).begins_with("lit"):
 					info.lits.append(p)
+				if c == "^":
+					info["escalier"] = p   # l'escalier qui monte : l'étage se charge quand on y marche (99)
 	if info.has("poste"):   # on ne se tient pas sur l'étal ni sur l'enclume : la case de travail est une case de sol à côté
 		var pl: Vector2i = info.poste - origine
 		var libre := Vector2i(-1, -1)

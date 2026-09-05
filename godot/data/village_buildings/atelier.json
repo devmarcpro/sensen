@@ -1,7 +1,7 @@
 {
   "plan": [
     "########",
-    "#S.....#",
+    "#S....^#",
     "#..T..C#",
     "#L.....#",
     "####P###"
@@ -9,7 +9,13 @@
   "meubles": {
     "L": "lit",
     "T": "table",
-    "C": "coffre"
+    "C": "coffre",
+    "^": "escalier",
+    "v": "escalier",
+    "o": "torchere",
+    "U": "statue",
+    "K": "grand_coffre",
+    "B": "bibliotheque"
   },
   "tags": [
     "ville",
@@ -18,5 +24,14 @@
   "stations": {
     "S": ""
   },
-  "poste": "S"
+  "poste": "S",
+  "etages": [
+    [
+      "########",
+      "#L....o#",
+      "#..T...#",
+      "#C..v..#",
+      "########"
+    ]
+  ]
 }

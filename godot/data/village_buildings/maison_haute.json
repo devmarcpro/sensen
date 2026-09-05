@@ -1,7 +1,7 @@
 {
   "plan": [
     "########",
-    "#L..T..#",
+    "#L..T.^#",
     "#......#",
     "#L.F..L#",
     "#......#",
@@ -10,10 +10,27 @@
   "meubles": {
     "L": "lit",
     "T": "table",
-    "F": "cheminee"
+    "F": "cheminee",
+    "^": "escalier",
+    "v": "escalier",
+    "C": "coffre",
+    "o": "torchere",
+    "U": "statue",
+    "K": "grand_coffre",
+    "B": "bibliotheque"
   },
   "tags": [
     "ville",
     "logement"
+  ],
+  "etages": [
+    [
+      "########",
+      "#L.T..o#",
+      "#......#",
+      "#L..v.L#",
+      "#......#",
+      "########"
+    ]
   ]
 }

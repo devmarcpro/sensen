@@ -3585,3 +3585,13 @@ motif.cercle_brise.name,le cercle brisé
 motif.chardon.name,le chardon
 motif.vent.name,le vent
 rumeur_royaume,(rumeur)
+meuble.escalier.name,escalier
+journal.monte_etage,{nom} monte à l’étage {etage} de {batiment}
+journal.descend_etage,{nom} redescend
+journal.sort_batiment,{nom} ressort dans la rue
+ui.etage,{batiment} — étage {etage}
+batiment.maison_haute.name,maison haute
+batiment.auberge.name,auberge
+batiment.atelier.name,atelier
+batiment.chateau.name,château
+batiment.mairie.name,mairie

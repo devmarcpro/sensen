@@ -26,6 +26,15 @@
     },
     "stations": {
       "type": "object"
+    },
+    "etages": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
     }
   }
 }
