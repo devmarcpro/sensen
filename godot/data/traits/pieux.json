@@ -1,0 +1,12 @@
+{
+  "name_key": "trait.pieux.name",
+  "effets": {
+    "humeur": 5
+  },
+  "exclut": [],
+  "cadeaux": [
+    "rituel",
+    "encens"
+  ],
+  "tags": []
+}

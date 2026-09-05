@@ -1,0 +1,8 @@
+{
+  "text_key": "histoire.peureux_loups.text",
+  "conditions": {
+    "fonction": null,
+    "trait": "peureux"
+  },
+  "poids": 2
+}

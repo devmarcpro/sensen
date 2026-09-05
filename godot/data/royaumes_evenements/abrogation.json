@@ -1,0 +1,13 @@
+{
+  "journal_key": "evenement.abrogation",
+  "chance": 0.06,
+  "conditions": {
+    "gouvernances": [
+      "republique_elue",
+      "anarchie"
+    ]
+  },
+  "effets": {
+    "loi": "retire"
+  }
+}

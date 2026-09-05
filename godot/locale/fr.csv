@@ -1311,7 +1311,7 @@ journal.semaine,"une semaine passe : la corruption dérive ({n} cellules)"
 journal.donjon_nettoye,"le donjon est nettoyé : il restera ouvert un jour et demi"
 journal.donjon_disparu,"l'entrée du donjon s'est effondrée en ({x},{y})"
 journal.donjon_reapparu,"un donjon est réapparu en ({x},{y})"
-ui.carte.titre,"=== CARTE DU MONDE — clic : marcher jusqu'à cette cellule, ou revendiquer une voisine · clic droit : faire glisser · flèches : défiler · Échap : fermer ==="
+ui.carte.titre,"=== CARTE DU MONDE — flèches : marcher de cellule en cellule · Maj + flèches : faire défiler · clic : marcher jusqu'à cette cellule, ou revendiquer une voisine · clic droit : faire glisser · Échap : fermer"
 ui.carte.depart,=== CHOISIS TA CASE DE DÉPART — clic sur une cellule de terre (couleur : biome · orange/rouge : danger · carré doré : donjon · anneau noir : le gouffre) ===
 ui.carte.legende,"trait ocre : route · vert cerclé : ton camp · bleu cerclé : ici · carré doré : donjon · anneau noir : le gouffre · point clair : filon majeur · sombre : jamais explorée"
 journal.voyage,"{nom} voyage jusqu'en ({x},{y}) : {ticks} ticks"
@@ -3420,3 +3420,168 @@ journal.descend_combat,{nom} met pied à terre pour se battre
 journal.monture_achetee,{nom} achète {monture} pour {prix} or
 journal.transport_or,Pas assez d’or pour le voyage ({prix} or)
 journal.caleche_arrive,Une calèche fait le tour de {ville}
+trait.bavard.name,Bavard
+dialogue.trait_bavard_1.text,"Ah, vous tombez bien ! Laissez-moi vous raconter ma journée, elle commence à peine et j’en ai déjà pour une heure."
+dialogue.trait_bavard_2.text,"On dit que je parle trop. Ceux qui le disent n’ont rien à raconter, voilà tout."
+trait.taciturne.name,Taciturne
+dialogue.trait_taciturne_1.text,"…"
+dialogue.trait_taciturne_2.text,"Oui. Non. Peut-être."
+trait.avare.name,Avare
+dialogue.trait_avare_1.text,"Chaque pièce compte. Chaque. Pièce."
+dialogue.trait_avare_2.text,"Vous voulez un prix ? Il est déjà trop bas."
+trait.genereux.name,Généreux
+dialogue.trait_genereux_1.text,"Prenez, prenez : ce qu’on donne, on l’a encore."
+dialogue.trait_genereux_2.text,"Si vous avez faim, il y a toujours une assiette ici."
+trait.mefiant.name,Méfiant
+dialogue.trait_mefiant_1.text,"Qu’est-ce que vous voulez, au juste ?"
+dialogue.trait_mefiant_2.text,"Je ne vous connais pas. Restez où je vous vois."
+trait.jovial.name,Jovial
+dialogue.trait_jovial_1.text,"Belle journée, non ? Toutes le sont, à bien y regarder."
+dialogue.trait_jovial_2.text,"Rien qu’un rire ne répare, foi de moi !"
+trait.curieux.name,Curieux
+dialogue.trait_curieux_1.text,"D’où venez-vous ? Qu’avez-vous vu ? Racontez !"
+dialogue.trait_curieux_2.text,"J’aimerais lire tout ce qui s’écrit, et il s’en écrit tant."
+trait.pieux.name,Pieux
+dialogue.trait_pieux_1.text,"Que les esprits du lieu vous gardent."
+dialogue.trait_pieux_2.text,"J’ai prié ce matin pour de la pluie. Nous verrons."
+trait.ambitieux.name,Ambitieux
+dialogue.trait_ambitieux_1.text,"Un jour, ce quartier portera mon nom."
+dialogue.trait_ambitieux_2.text,"Je ne suis pas là pour rester ce que je suis."
+trait.paresseux.name,Paresseux
+dialogue.trait_paresseux_1.text,"Demain. Tout ça peut attendre demain."
+dialogue.trait_paresseux_2.text,"Le travail ne s’enfuit pas, lui. Moi, je me repose."
+trait.courageux.name,Courageux
+dialogue.trait_courageux_1.text,"Un loup dans les champs ? Donnez-moi une fourche."
+dialogue.trait_courageux_2.text,"La peur, c’est pour les autres. Je regarde ce qui vient."
+trait.peureux.name,Peureux
+dialogue.trait_peureux_1.text,"Vous avez entendu ? Là, dehors… non ? Vraiment ?"
+dialogue.trait_peureux_2.text,"Je ne sors pas la nuit. Jamais."
+trait.grincheux.name,Grincheux
+dialogue.trait_grincheux_1.text,"Quoi encore."
+dialogue.trait_grincheux_2.text,"Le monde était mieux avant. Je ne sais plus avant quoi."
+trait.gourmand.name,Gourmand
+dialogue.trait_gourmand_1.text,"Vous sentez ? Du pain chaud. Excusez-moi."
+dialogue.trait_gourmand_2.text,"Un bon repas, et la journée est sauvée."
+trait.leve_tot.name,Lève-tôt
+dialogue.trait_leve_tot_1.text,"Debout avant le soleil, comme tous les jours."
+dialogue.trait_leve_tot_2.text,"Le matin appartient à qui le prend."
+histoire.natal.text,"{prenom} est né ici, à {ville}, et n’en est jamais parti."
+histoire.metier_pere.text,"{prenom} a repris le métier de son père : {metier}, comme lui."
+histoire.venu_de_loin.text,"{prenom} est arrivé de {ville_natale} il y a des années, avec un sac et rien d’autre."
+histoire.fermier_terre.text,"Cette terre, {prenom} la travaille depuis l’enfance ; ses mains le disent."
+histoire.artisan_forge.text,"{prenom} a appris à l’atelier d’un maître qui ne parlait jamais ; il en a gardé le geste."
+histoire.commercant_route.text,"{prenom} a suivi les routes avec des caravanes avant de tenir boutique à {ville}."
+histoire.garde_guerre.text,"{prenom} a vu une guerre de près, une seule, et n’en parle pas."
+histoire.pretre_vocation.text,"{prenom} a entendu l’appel un soir d’orage ; depuis, il tient l’autel."
+histoire.curieux_livres.text,"{prenom} a lu tous les livres de {ville} — il n’y en avait pas tant."
+histoire.peureux_loups.text,"Enfant, {prenom} a été pris par les loups une nuit entière ; il en garde une peur qu’il cache mal."
+histoire.ambitieux_capitale.text,"{prenom} rêve de la capitale et compte les pièces qui l’y mèneront."
+histoire.veuf.text,"{prenom} a perdu quelqu’un il y a longtemps et porte encore son ruban."
+souhait.gemme.name,une gemme
+souhait.bijou.name,un bijou
+souhait.livre.name,un livre
+souhait.bonne_arme.name,une bonne arme
+souhait.outil.name,un bel outil
+souhait.douceur.name,une douceur
+souhait.potion.name,une potion
+souhait.miel.name,du miel
+dialogue.souhait_realise.text,"Je n’oublierai pas ce que vous m’avez offert. Jamais."
+dialogue.opinion.aime,"{nom} ? Un brave cœur. Je l’aime bien."
+dialogue.opinion.n_aime_pas,"Ne me parlez pas de {nom}. Nous ne nous entendons pas."
+dialogue.opinion.personne,"Les gens d’ici ? Je les connais tous, et aucun ne me manque."
+ui.ecran.offrir,Offrir un cadeau
+ui.ecran.offrir_objet,Offrir : {objet}
+ui.fiche.traits,caractère : {traits}
+ui.fiche.souhait,souhaite : {souhait} · aime : {cadeaux}
+ui.fiche.histoire,{histoire}
+ui.fiche.opinions,opinions : {opinions}
+ui.fiche.opinion_aime,aime {nom}
+ui.fiche.opinion_n_aime_pas,n’aime pas {nom}
+journal.cadeau,{nom} reçoit {objet} (+{n} de relation)
+journal.souhait_realise,{nom} tenait à {souhait} : c’est chose faite (+{n})
+journal.cadeau_refuse,Pas de cadeau à offrir
+histoire,(histoire)
+opinion,(opinion)
+ui.carte.survol_pays," · {dirigeant}, an {an} de l’ère de {ere} · {population} âmes · armée {armee} · humeur {humeur}{guerre}"
+ui.carte.guerre, · en guerre avec {autre}
+volet.royaume,"{nom} — {gouv} · {dirigeant}, an {an} de l’ère de {ere}"
+ui.fiche.blason,blason : {couleur} au {motif}
+evenement.disette,Disette au royaume de {royaume} : le peuple gronde
+evenement.bonne_recolte,Bonne récolte au royaume de {royaume}
+evenement.edit,Édit au royaume de {royaume} : {loi}
+evenement.abrogation,Le royaume de {royaume} abroge une loi : {loi}
+evenement.fete_du_regne,Fête du règne au royaume de {royaume}
+evenement.levee_de_taxes,Le royaume de {royaume} lève de nouvelles taxes
+evenement.revolte,Révolte au royaume de {royaume} : le trésor pillé
+evenement.guerre,Le royaume de {royaume} déclare la guerre à {autre}
+evenement.paix,Paix entre {royaume} et {autre}
+evenement.avenement,Un nouveau règne commence au royaume de {royaume} : l’ère de {ere}
+dialogue.rumeur_royaume.prefixe,"On dit que… {rumeur}."
+dialogue.rumeur_royaume.rien,"Rien de neuf au royaume, et c’est tant mieux."
+dialogue.gouv_monarchie_hereditaire.text,"Le roi est le roi. On ne discute pas la pluie non plus."
+dialogue.gouv_republique_elue.text,"On a voté au printemps. Je ne dirai pas pour qui."
+dialogue.gouv_theocratie.text,"Les prêtres savent ce que le ciel veut. Moi, je sème quand ils le disent."
+dialogue.gouv_ploutocratie.text,"Ici, c’est l’or qui parle. Vous avez de quoi parler ?"
+dialogue.gouv_dictature_militaire.text,"Le commandant dit : au travail. Alors au travail."
+dialogue.gouv_anarchie.text,"Pas de roi, pas de taxes, pas de garde. Ça se paie autrement."
+ere.grue.name,la Grue
+ere.jade.name,le Jade
+ere.lotus.name,le Lotus
+ere.dragon_d_azur.name,le Dragon d’azur
+ere.bambou.name,le Bambou
+ere.phenix.name,le Phénix
+ere.fer.name,le Fer
+ere.corbeau.name,le Corbeau
+ere.givre.name,le Givre
+ere.chene.name,le Chêne
+ere.loup.name,le Loup
+ere.marteau.name,le Marteau
+ere.aigle.name,l’Aigle
+ere.laurier.name,le Laurier
+ere.marbre.name,le Marbre
+ere.trident.name,le Trident
+ere.louve.name,la Louve
+ere.colonne.name,la Colonne
+ere.cerf.name,le Cerf
+ere.brume.name,la Brume
+ere.torque.name,le Torque
+ere.if.name,l’If
+ere.sanglier.name,le Sanglier
+ere.source.name,la Source
+ere.cerisier.name,le Cerisier
+ere.carpe.name,la Carpe
+ere.acier.name,l’Acier
+ere.lune.name,la Lune
+ere.pin.name,le Pin
+ere.vague.name,la Vague
+ere.bouleau.name,le Bouleau
+ere.ours.name,l’Ours
+ere.ambre.name,l’Ambre
+ere.faucon.name,le Faucon
+ere.blé.name,le Blé
+ere.neige.name,la Neige
+ere.croissant.name,le Croissant
+ere.sable.name,le Sable
+ere.palmier.name,le Palmier
+ere.faucon_roux.name,le Faucon roux
+ere.cuivre.name,le Cuivre
+ere.etoile.name,l’Étoile
+motif.couronne.name,la couronne
+motif.lion.name,le lion
+motif.tour.name,la tour
+motif.balance.name,la balance
+motif.main_ouverte.name,la main ouverte
+motif.olivier.name,l’olivier
+motif.flamme.name,la flamme
+motif.soleil.name,le soleil
+motif.oeil.name,l’œil
+motif.bourse.name,la bourse
+motif.clef.name,la clef
+motif.navire.name,le navire
+motif.epee.name,l’épée
+motif.casque.name,le casque
+motif.poing.name,le poing
+motif.cercle_brise.name,le cercle brisé
+motif.chardon.name,le chardon
+motif.vent.name,le vent
+rumeur_royaume,(rumeur)

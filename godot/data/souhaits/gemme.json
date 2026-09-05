@@ -1,0 +1,13 @@
+{
+  "name_key": "souhait.gemme.name",
+  "filtre": {
+    "types_any": [
+      "gemme"
+    ]
+  },
+  "conditions": {
+    "fonction": null,
+    "trait": null
+  },
+  "relation": 25
+}

@@ -1,0 +1,13 @@
+{
+  "name_key": "trait.taciturne.name",
+  "effets": {
+    "relation_mult": 0.8
+  },
+  "exclut": [
+    "bavard"
+  ],
+  "cadeaux": [
+    "outil"
+  ],
+  "tags": []
+}

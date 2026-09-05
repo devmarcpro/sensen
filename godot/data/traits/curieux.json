@@ -1,0 +1,14 @@
+{
+  "name_key": "trait.curieux.name",
+  "effets": {
+    "relation_mult": 1.1
+  },
+  "exclut": [],
+  "cadeaux": [
+    "livre",
+    "manuel",
+    "parchemin",
+    "grimoire"
+  ],
+  "tags": []
+}

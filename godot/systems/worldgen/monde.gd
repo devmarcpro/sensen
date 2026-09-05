@@ -42,6 +42,7 @@ var heritiers: Dictionary = {}         # id de royaume → id de l'héritier dé
 var vacances_guildes: Dictionary = {}  # "guilde|village" → semaine de résolution : hall sans maître
 var villages: Dictionary = {}          # nom de village → {cellule, royaume, conquis_par, defense_jusqua, abandonne} (Conquête de village)
 var tresors_royaumes: Dictionary = {}  # id de royaume → or prélevé sur ses villes (Villes B3 ; les royaumes-pays de D)
+var etats_royaumes: Dictionary = {}    # id de royaume → son état (population, armée, humeur, règne, ère, blason, guerres, journal) — Royaumes-pays (D)
 var mutex := Mutex.new()
 var tache: int = -1                    # plus utilisé (pré-génération synchrone) — gardé pour compatibilité des sauvegardes en mémoire
 static var ouverts: Array = []          # plus utilisé depuis que la pré-génération est synchrone (gardé : `fermer_tous` reste appelé)

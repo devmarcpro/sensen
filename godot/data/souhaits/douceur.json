@@ -1,0 +1,17 @@
+{
+  "name_key": "souhait.douceur.name",
+  "filtre": {
+    "types_any": [
+      "consommable"
+    ],
+    "tags_any": [
+      "nourriture",
+      "sucre"
+    ]
+  },
+  "conditions": {
+    "fonction": null,
+    "trait": "gourmand"
+  },
+  "relation": 25
+}

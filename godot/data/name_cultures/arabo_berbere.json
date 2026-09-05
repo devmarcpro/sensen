@@ -97,5 +97,13 @@
       "m": "titre.arabo_berbere.guilde_maitre.m",
       "f": "titre.arabo_berbere.guilde_maitre.f"
     }
-  }
+  },
+  "eres": [
+    "croissant",
+    "sable",
+    "palmier",
+    "faucon_roux",
+    "cuivre",
+    "etoile"
+  ]
 }

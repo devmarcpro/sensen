@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "required": [
+    "journal_key",
+    "chance",
+    "conditions",
+    "effets"
+  ],
+  "properties": {
+    "chance": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "journal_key": "evenement.guerre",
+  "chance": 0.04,
+  "conditions": {
+    "voisin": [
+      "hostile",
+      "tension"
+    ],
+    "guerre": false
+  },
+  "effets": {
+    "guerre": "declare",
+    "humeur": -5
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name_key": "trait.bavard.name",
+  "effets": {
+    "relation_mult": 1.2
+  },
+  "exclut": [
+    "taciturne"
+  ],
+  "cadeaux": [
+    "livre",
+    "parchemin"
+  ],
+  "tags": []
+}

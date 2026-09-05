@@ -1,0 +1,8 @@
+{
+  "_doc": "Un trait de caractère (PNJ — traits, histoires et souhaits) : name_key ; effets lus là où ils comptent — prix_mult (prix_suggere), relation_mult (Parler, cadeaux), horaires_decalage (heures ajoutées aux plages de la routine), productivite (production_de), courage (divise le seuil de fuite), humeur (ajouté à l'humeur de départ) ; exclut : les traits incompatibles ; cadeaux : les tags ou types d'objets qu'il aime recevoir.",
+  "name_key": "trait.<id>.name",
+  "effets": {},
+  "exclut": [],
+  "cadeaux": [],
+  "tags": []
+}

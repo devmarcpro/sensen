@@ -1,0 +1,11 @@
+{
+  "text_key": "opinion",
+  "conditions": {
+    "metier": null,
+    "phase": null,
+    "relation_min": 75,
+    "relation_max": null,
+    "meteo": null
+  },
+  "poids": 5
+}

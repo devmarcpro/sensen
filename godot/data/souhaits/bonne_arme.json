@@ -1,0 +1,16 @@
+{
+  "name_key": "souhait.bonne_arme.name",
+  "filtre": {
+    "types_any": [
+      "arme"
+    ],
+    "tags_any": [
+      "assemble"
+    ]
+  },
+  "conditions": {
+    "fonction": "garde",
+    "trait": null
+  },
+  "relation": 25
+}

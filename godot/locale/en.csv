@@ -820,7 +820,7 @@ ui.carte.survol_gouffre,"  ·  THE ABYSS — bottomless, free to enter; a cleare
 ui.carte.survol_derive," · drift {d}"
 ui.carte.survol_lieu," · place: {a} {pa} % · {b} {pb} %"
 ui.carte.survol_royaume," · {nom}{capitale} — {gouv}, {taille}, {n} cells · {etat}"
-ui.carte.titre,"=== WORLD MAP — click: walk to that cell, or claim a neighbouring one · right-click: drag · arrows: scroll · Esc: close ==="
+ui.carte.titre,"=== WORLD MAP — arrows: walk cell by cell · Shift + arrows: scroll · click: walk to that cell, or claim a neighbour · right click: drag · Escape: close"
 ui.carte.vacance,vacant throne
 ui.case,"tile ({x},{y}) h={h} · Δh vs you: {dh}"
 ui.chaine,chain: {segments}
@@ -3411,3 +3411,168 @@ journal.descend_combat,{nom} dismounts to fight
 journal.monture_achetee,{nom} buys {monture} for {prix} gold
 journal.transport_or,Not enough gold for the trip ({prix} gold)
 journal.caleche_arrive,A carriage makes its rounds in {ville}
+trait.bavard.name,Talkative
+dialogue.trait_bavard_1.text,"Ah, good timing! Let me tell you about my day — it has barely begun and I already have an hour of it."
+dialogue.trait_bavard_2.text,"They say I talk too much. Those who say so have nothing to tell."
+trait.taciturne.name,Taciturn
+dialogue.trait_taciturne_1.text,"…"
+dialogue.trait_taciturne_2.text,"Yes. No. Maybe."
+trait.avare.name,Miserly
+dialogue.trait_avare_1.text,"Every coin counts. Every. Coin."
+dialogue.trait_avare_2.text,"You want a price? It is already too low."
+trait.genereux.name,Generous
+dialogue.trait_genereux_1.text,"Take, take: what we give, we still have."
+dialogue.trait_genereux_2.text,"If you are hungry, there is always a plate here."
+trait.mefiant.name,Wary
+dialogue.trait_mefiant_1.text,"What is it you want, exactly?"
+dialogue.trait_mefiant_2.text,"I do not know you. Stay where I can see you."
+trait.jovial.name,Jovial
+dialogue.trait_jovial_1.text,"Fine day, isn’t it? They all are, looked at properly."
+dialogue.trait_jovial_2.text,"Nothing a laugh can’t mend, on my word!"
+trait.curieux.name,Curious
+dialogue.trait_curieux_1.text,"Where are you from? What have you seen? Tell me!"
+dialogue.trait_curieux_2.text,"I would read everything ever written, and so much gets written."
+trait.pieux.name,Pious
+dialogue.trait_pieux_1.text,"May the spirits of this place keep you."
+dialogue.trait_pieux_2.text,"I prayed for rain this morning. We shall see."
+trait.ambitieux.name,Ambitious
+dialogue.trait_ambitieux_1.text,"One day this district will bear my name."
+dialogue.trait_ambitieux_2.text,"I am not here to stay what I am."
+trait.paresseux.name,Lazy
+dialogue.trait_paresseux_1.text,"Tomorrow. All that can wait until tomorrow."
+dialogue.trait_paresseux_2.text,"Work does not run away. I, however, rest."
+trait.courageux.name,Brave
+dialogue.trait_courageux_1.text,"A wolf in the fields? Hand me a pitchfork."
+dialogue.trait_courageux_2.text,"Fear is for others. I watch what comes."
+trait.peureux.name,Fearful
+dialogue.trait_peureux_1.text,"Did you hear that? Out there… no? Really?"
+dialogue.trait_peureux_2.text,"I never go out at night. Never."
+trait.grincheux.name,Grumpy
+dialogue.trait_grincheux_1.text,"What now."
+dialogue.trait_grincheux_2.text,"The world was better before. I forget before what."
+trait.gourmand.name,Gluttonous
+dialogue.trait_gourmand_1.text,"Can you smell that? Warm bread. Excuse me."
+dialogue.trait_gourmand_2.text,"A good meal, and the day is saved."
+trait.leve_tot.name,Early riser
+dialogue.trait_leve_tot_1.text,"Up before the sun, like every day."
+dialogue.trait_leve_tot_2.text,"The morning belongs to whoever takes it."
+histoire.natal.text,"{prenom} was born here in {ville} and never left."
+histoire.metier_pere.text,"{prenom} took over the father’s trade: {metier}, like him."
+histoire.venu_de_loin.text,"{prenom} arrived from {ville_natale} years ago, with a bag and nothing else."
+histoire.fermier_terre.text,"{prenom} has worked this land since childhood; the hands say so."
+histoire.artisan_forge.text,"{prenom} learned in the workshop of a master who never spoke; the gesture remains."
+histoire.commercant_route.text,"{prenom} followed the roads with caravans before keeping shop in {ville}."
+histoire.garde_guerre.text,"{prenom} saw a war up close, only one, and does not speak of it."
+histoire.pretre_vocation.text,"{prenom} heard the call one stormy evening; since then, the altar."
+histoire.curieux_livres.text,"{prenom} has read every book in {ville} — there were not that many."
+histoire.peureux_loups.text,"As a child, {prenom} was caught by wolves for a whole night; a fear badly hidden remains."
+histoire.ambitieux_capitale.text,"{prenom} dreams of the capital and counts the coins that will lead there."
+histoire.veuf.text,"{prenom} lost someone long ago and still wears their ribbon."
+souhait.gemme.name,a gem
+souhait.bijou.name,a jewel
+souhait.livre.name,a book
+souhait.bonne_arme.name,a good weapon
+souhait.outil.name,a fine tool
+souhait.douceur.name,something sweet
+souhait.potion.name,a potion
+souhait.miel.name,honey
+dialogue.souhait_realise.text,"I will not forget what you gave me. Ever."
+dialogue.opinion.aime,"{nom}? A good heart. I like them."
+dialogue.opinion.n_aime_pas,"Do not talk to me about {nom}. We do not get along."
+dialogue.opinion.personne,"The folk here? I know them all, and miss none."
+ui.ecran.offrir,Offer a gift
+ui.ecran.offrir_objet,Offer: {objet}
+ui.fiche.traits,character: {traits}
+ui.fiche.souhait,wishes for: {souhait} · likes: {cadeaux}
+ui.fiche.histoire,{histoire}
+ui.fiche.opinions,opinions: {opinions}
+ui.fiche.opinion_aime,likes {nom}
+ui.fiche.opinion_n_aime_pas,dislikes {nom}
+journal.cadeau,{nom} receives {objet} (+{n} relation)
+journal.souhait_realise,{nom} wished for {souhait}: done (+{n})
+journal.cadeau_refuse,No gift to offer
+histoire,(story)
+opinion,(opinion)
+ui.carte.survol_pays," · {dirigeant}, year {an} of the era of {ere} · {population} souls · army {armee} · mood {humeur}{guerre}"
+ui.carte.guerre, · at war with {autre}
+volet.royaume,"{nom} — {gouv} · {dirigeant}, year {an} of the era of {ere}"
+ui.fiche.blason,arms: {couleur} with {motif}
+evenement.disette,Famine in the kingdom of {royaume}: the people grumble
+evenement.bonne_recolte,Good harvest in the kingdom of {royaume}
+evenement.edit,Edict in the kingdom of {royaume}: {loi}
+evenement.abrogation,The kingdom of {royaume} repeals a law: {loi}
+evenement.fete_du_regne,Feast of the reign in the kingdom of {royaume}
+evenement.levee_de_taxes,The kingdom of {royaume} raises new taxes
+evenement.revolte,Revolt in the kingdom of {royaume}: the treasury looted
+evenement.guerre,The kingdom of {royaume} declares war on {autre}
+evenement.paix,Peace between {royaume} and {autre}
+evenement.avenement,A new reign begins in the kingdom of {royaume}: the era of {ere}
+dialogue.rumeur_royaume.prefixe,"They say… {rumeur}."
+dialogue.rumeur_royaume.rien,"Nothing new in the kingdom, and good riddance."
+dialogue.gouv_monarchie_hereditaire.text,"The king is the king. Nobody argues with the rain either."
+dialogue.gouv_republique_elue.text,"We voted in spring. I will not say for whom."
+dialogue.gouv_theocratie.text,"The priests know what heaven wants. I sow when they say."
+dialogue.gouv_ploutocratie.text,"Here, gold does the talking. Do you have anything to say?"
+dialogue.gouv_dictature_militaire.text,"The commander says: to work. So, to work."
+dialogue.gouv_anarchie.text,"No king, no taxes, no guard. It is paid for otherwise."
+ere.grue.name,the Crane
+ere.jade.name,Jade
+ere.lotus.name,the Lotus
+ere.dragon_d_azur.name,the Azure Dragon
+ere.bambou.name,Bamboo
+ere.phenix.name,the Phoenix
+ere.fer.name,Iron
+ere.corbeau.name,the Raven
+ere.givre.name,Frost
+ere.chene.name,the Oak
+ere.loup.name,the Wolf
+ere.marteau.name,the Hammer
+ere.aigle.name,the Eagle
+ere.laurier.name,the Laurel
+ere.marbre.name,Marble
+ere.trident.name,the Trident
+ere.louve.name,the She-Wolf
+ere.colonne.name,the Column
+ere.cerf.name,the Stag
+ere.brume.name,the Mist
+ere.torque.name,the Torc
+ere.if.name,the Yew
+ere.sanglier.name,the Boar
+ere.source.name,the Spring
+ere.cerisier.name,the Cherry
+ere.carpe.name,the Carp
+ere.acier.name,Steel
+ere.lune.name,the Moon
+ere.pin.name,the Pine
+ere.vague.name,the Wave
+ere.bouleau.name,the Birch
+ere.ours.name,the Bear
+ere.ambre.name,Amber
+ere.faucon.name,the Falcon
+ere.blé.name,Wheat
+ere.neige.name,Snow
+ere.croissant.name,the Crescent
+ere.sable.name,Sand
+ere.palmier.name,the Palm
+ere.faucon_roux.name,the Red Falcon
+ere.cuivre.name,Copper
+ere.etoile.name,the Star
+motif.couronne.name,the crown
+motif.lion.name,the lion
+motif.tour.name,the tower
+motif.balance.name,the scales
+motif.main_ouverte.name,the open hand
+motif.olivier.name,the olive tree
+motif.flamme.name,the flame
+motif.soleil.name,the sun
+motif.oeil.name,the eye
+motif.bourse.name,the purse
+motif.clef.name,the key
+motif.navire.name,the ship
+motif.epee.name,the sword
+motif.casque.name,the helm
+motif.poing.name,the fist
+motif.cercle_brise.name,the broken circle
+motif.chardon.name,the thistle
+motif.vent.name,the wind
+rumeur_royaume,(rumour)

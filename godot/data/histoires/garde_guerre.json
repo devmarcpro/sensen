@@ -1,0 +1,8 @@
+{
+  "text_key": "histoire.garde_guerre.text",
+  "conditions": {
+    "fonction": "garde",
+    "trait": null
+  },
+  "poids": 2
+}

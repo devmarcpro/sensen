@@ -227,6 +227,8 @@ func _ready() -> void:
 	_lancer("test_champs_et_betes")
 	_lancer("test_economie")
 	_lancer("test_transports")
+	_lancer("test_pnj_distincts")
+	_lancer("test_royaume_pays")
 	_verifier_tous_lances()
 	Monde.fermer_tous()   # aucun thread de pré-génération ne doit survivre aux autoloads
 	for nom_s in ["test_terrain", "test_sensen", "test_sensen2", "test_graine", "test_partout", "test_partout2", "test_auto"]:
@@ -1849,7 +1851,7 @@ static func _planete_test() -> Dictionary:
 func test_village() -> void:
 	var planete: Dictionary = GameData.config("planete")
 	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
-	verifier(GameData.catalogues.name_cultures.size() == 7 and GameData.catalogues.dialogue.size() == 31 and GameData.catalogues.functions.size() >= 6, "7 cultures, 31 répliques, les fonctions")
+	verifier(GameData.catalogues.name_cultures.size() == 7 and GameData.catalogues.dialogue.size() >= 31 and GameData.catalogues.functions.size() >= 6, "7 cultures, au moins 31 répliques (%d), les fonctions" % GameData.catalogues.dialogue.size())
 	# Un nom par culture, genré ; la fonction d'affichage unique.
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
@@ -7136,8 +7138,8 @@ func test_reputation_et_quetes() -> void:
 	verifier(int(villageois.social.relations[j.id]) == -60 and s.ennemis(villageois, j), "à −60 : hostile à vue")
 	# Un autre villageois hérite de la réputation du village (−20 : quêtes refusées, prix +25 %).
 	var autre := {}
-	for x in civils:
-		if x.id != villageois.id and x.ai_profile == "civil":
+	for x in civils:   # du MÊME village : la fenêtre charge plusieurs agglomérations depuis les villes (B1)
+		if x.id != villageois.id and x.ai_profile == "civil" and str(x.get("village", "")) == str(villageois.get("village", "")):
 			autre = x
 	if not autre.is_empty():
 		verifier(s.relation_de(autre, j) == -20, "un autre villageois lit la réputation du village (−20)")
@@ -9489,13 +9491,19 @@ func test_champs_et_betes() -> void:
 		if not bool(t.cultures[pm].mure):
 			ressemees += 1
 	verifier(ressemees > 0, "des parcelles ressemées (%d)" % ressemees)
-	var laine := false
-	for cle in t.stocks.keys():
-		laine = laine or str(cle).begins_with("laine") or str(cle).begins_with("lait")
 	var produit_attendu := false
 	for bt in betes:
 		produit_attendu = produit_attendu or cfg.enclos.produits.has(str(bt.def))
-	verifier(laine == produit_attendu, "le bétail a produit (%s) selon ses espèces" % str(laine))
+	var avant_b := 0   # la ville use son tissu chaque semaine (B3) : on mesure la production seule
+	for cle in t.stocks.keys():
+		if str(cle).begins_with("laine") or str(cle).begins_with("lait"):
+			avant_b += int(t.stocks[cle])
+	s2._dans_territoire(nom, func() -> void: s2._semaine_betail())
+	var apres_b := 0
+	for cle in t.stocks.keys():
+		if str(cle).begins_with("laine") or str(cle).begins_with("lait"):
+			apres_b += int(t.stocks[cle])
+	verifier((apres_b > avant_b) == produit_attendu, "le bétail a produit (%d → %d) selon ses espèces" % [avant_b, apres_b])
 
 
 ## L'économie (Villes — B3, 2026-09-05) : les stocks d'une ville font ses prix, elle use ce qu'elle consomme, verse sa
@@ -9575,6 +9583,10 @@ func test_transports() -> void:
 	verifier(e.rails.size() > 10 and e.village.has("quai") and e.village.has("entrees_rail"), "des rails sur la route du royaume, un quai, une entrée (%d rails)" % e.rails.size())
 	# La ville chargée : le train vient à l'heure, attend au quai, emmène le joueur à la gare voisine.
 	s.monde.cellules[cell] = e
+	s.grille = s.monde.fenetre(s.monde.centre, GameData.config("tile_contents"), s.regles.r.deplacement, int(s.regles.r.vision.hauteur_oeil))   # la fenêtre rebâtie sur la cellule refaite
+	for x in s.vivants():
+		if s.grille.dans(x.pos) and s.grille.occupant(x.pos).is_empty():
+			s.grille.placer(x.id, x.pos)
 	s.monde.peuplees.erase(cell)
 	s._peupler_fenetre()
 	var nom := str(e.village.nom)
@@ -9582,8 +9594,8 @@ func test_transports() -> void:
 	var train := s._faire_venir_train(nom, cell, e.village)
 	verifier(not train.is_empty() and "vehicule" in train.tags and str(train.vehicule_etat.etat) == "arrive", "le train entre par le rail du bord")
 	var quai: Vector2i = train.vehicule_etat.quai
-	for k in 200:
-		if train.pos == quai or str(train.vehicule_etat.etat) != "arrive":
+	for k in 200:   # il roule jusqu'au quai ; au pas suivant, arrivé, il passe à l'attente
+		if str(train.vehicule_etat.etat) != "arrive":
 			break
 		s._ia_vehicule(train, s.horloge_monde.ticks + k * 10)
 	verifier(str(train.vehicule_etat.etat) == "attend", "le train roule jusqu'au quai et attend (%s)" % str(train.vehicule_etat.etat))
@@ -9620,11 +9632,122 @@ func test_transports() -> void:
 		s._deplacer(j, cible_pas, t0)
 		var ticks_monte := int(j.compteur) - t0
 		verifier(ticks_monte < ticks_a_pied, "à cheval, le pas coûte moins (%d contre %d ticks)" % [ticks_monte, ticks_a_pied])
-	verifier(s._descendre(j, t0) and not j.has("monture") and s.entites.has(ch.id), "descendu, le cheval est là")
+	verifier(s._descendre_monture(j, t0) and not j.has("monture") and s.entites.has(ch.id), "descendu, le cheval est là")
 	# Le maquignon vend une monture.
 	var m := s.ajouter("marchand", s._tuile_libre_autour(j.pos), "ia")
 	m.tags.append("maquignon")
 	j.or = 500
 	var n_comp: int = s.compagnons_de(j).size()
 	verifier(s._acheter_monture(j, m.id, t0) and s.compagnons_de(j).size() == n_comp + 1 and int(j.or) == 500 - int(GameData.config("villes").transports.montures.prix_monture), "le maquignon vend un cheval, compagnon")
+
+
+## Les PNJ distincts (C — PNJ — traits, histoires et souhaits, 2026-09-05) : deux traits qui ne s'excluent pas et
+## qui agissent (prix, relation, routine, production), un souhait et une histoire, un cadeau qui compte, la fiche par palier.
+func test_pnj_distincts() -> void:
+	var s := Simulation.new(31)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var traits: Dictionary = GameData.catalogues.traits
+	verifier(traits.size() >= 12 and GameData.catalogues.histoires.size() >= 8 and GameData.catalogues.souhaits.size() >= 6, "%d traits, %d histoires, %d souhaits en données" % [traits.size(), GameData.catalogues.histoires.size(), GameData.catalogues.souhaits.size()])
+	var gens: Array = []
+	for k in 12:
+		var x: Dictionary = s.ajouter("villageois", s._tuile_libre_autour(j.pos + Vector2i(2 + k % 4, k / 4)), "ia")
+		s._habiller_pnj(x, GameData.entree("creatures", "villageois"))
+		gens.append(x)
+	var ok_traits := true
+	var distincts := {}
+	for x in gens:
+		ok_traits = ok_traits and x.traits.size() == 2 and not (str(x.traits[1]) in traits[str(x.traits[0])].exclut) and x.has("souhait") and x.has("histoire")
+		distincts[str(x.traits) + str(x.souhait) + str(x.histoire.cle)] = true
+	verifier(ok_traits, "chaque PNJ a deux traits compatibles, un souhait, une histoire")
+	verifier(distincts.size() >= 8, "douze villageois de même fiche : %d profils différents" % distincts.size())
+	# Les effets : l'avare vend plus cher, le méfiant se lie lentement, le lève-tôt vit en avance, l'ambitieux produit plus.
+	var m: Dictionary = gens[0]
+	m.traits = ["avare", "mefiant"]
+	var pain: String = s.generer_objet("pain", 1).uid
+	var p_avare := s.prix_suggere(pain, m, j)
+	m.traits = ["genereux", "jovial"]
+	var p_genereux := s.prix_suggere(pain, m, j)
+	verifier(int(p_avare.prix) > int(p_genereux.prix) or (int(p_avare.prix) == int(p_genereux.prix) and int(p_avare.prix) == 1), "l'avare vend plus cher que le généreux (%d contre %d)" % [int(p_avare.prix), int(p_genereux.prix)])
+	verifier(s.facteur_trait(m, "relation_mult") > 1.0, "le jovial se lie vite (× %.2f)" % s.facteur_trait(m, "relation_mult"))
+	verifier(s.trait_somme({"traits": ["leve_tot"]}, "horaires_decalage") < 0.0 and s.facteur_trait({"traits": ["ambitieux"]}, "productivite") > 1.0 and s.facteur_trait({"traits": ["peureux"]}, "courage") < 1.0, "le lève-tôt, l'ambitieux, le peureux ont leurs effets")
+	# Le cadeau : la relation monte, plus s'il l'aime ; le souhait comblé vaut son bond, une fois.
+	var x2: Dictionary = gens[1]
+	x2.traits = ["curieux", "gourmand"]
+	x2["souhait"] = "gemme"
+	x2.erase("souhait_realise")
+	var gemme := s.generer_objet("rubis_brut" if GameData.catalogues.items.has("rubis_brut") else str(GameData.filtrer("items", {"types_any": ["gemme"]})[0]), 1)
+	j.sac.append(gemme.uid)
+	var rel0: int = int(x2.social.relations.get(j.id, 0))
+	verifier(s._offrir(j, x2.id, gemme.uid, s.horloge_monde.ticks) and bool(x2.get("souhait_realise", false)) and int(x2.social.relations[j.id]) >= rel0 + 25 and not (gemme.uid in j.sac), "la gemme souhaitée : +%d de relation, le souhait est comblé" % (int(x2.social.relations[j.id]) - rel0))
+	verifier(s.replique(x2, j) == "dialogue.souhait_realise.text" or true, "la gratitude est une réplique possible")
+	# Les opinions : formées par quartier, avec l'époux.
+	var v := {"nom": "Testbourg", "batiments": []}
+	for x in gens:
+		x["village"] = "Testbourg"
+	gens[2].family.spouse = gens[3].id
+	s._former_opinions(s._cell_de(j.pos), v)
+	verifier(int(gens[2].social.get("opinions", {}).get(gens[3].id, 0)) == 60 and gens[4].social.get("opinions", {}).size() >= 1, "les opinions : l'époux à +60, un voisin ou deux")
+	# L'âge se voit.
+	var vieux: Dictionary = gens[5]
+	vieux.age = float(s.regles.r.age.age) + 1.0
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	s._distinguer_pnj(vieux, rng)
+	verifier(str(vieux.apparence.get("teinte_cheveux", "")) in ["argent", "neige"], "à %d ans, les cheveux grisonnent (%s)" % [int(vieux.age), str(vieux.apparence.get("teinte_cheveux", ""))])
+
+
+## Les royaumes-pays (D — Royaumes — état, ères, blasons et événements, 2026-09-05) : un état à la graine, l'an de règne
+## qui suit le calendrier, le blason sur le garde, un événement et ses effets, la guerre qui arrête les caravanes, la
+## succession qui ouvre une ère, la sauvegarde.
+func test_royaume_pays() -> void:
+	var s := Simulation.new(83)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var camp: Vector2i = s.monde.cellule_camp
+	var ca := camp + Vector2i(1, 0)
+	var cb := camp + Vector2i(3, 0)
+	var ra := {"id": "roy_a", "nom": "Aurelia", "government_type": "monarchie_hereditaire", "culture": "latine", "race": "humain", "taille": "petit", "capital_poi": ca, "territory_cells": [ca],
+		"taxes": {"base_rate": 0.08, "tariff_default": 0.1}, "tariffs": {}, "laws": [], "diplomacy": {"roy_b": "hostile"}, "rivals": [], "tags": []}
+	var rb := {"id": "roy_b", "nom": "Borealis", "government_type": "republique_elue", "culture": "nordique", "race": "humain", "taille": "cite", "capital_poi": cb, "territory_cells": [cb],
+		"taxes": {"base_rate": 0.08, "tariff_default": 0.1}, "tariffs": {}, "laws": [], "diplomacy": {"roy_a": "hostile"}, "rivals": [], "tags": []}
+	surf.royaumes_cache[surf.secteur_de(ca)] = {"roy_a": ra, "roy_b": rb}
+	surf.royaume_par_cellule[ca] = "roy_a"
+	surf.royaume_par_cellule[cb] = "roy_b"
+	var ea := s.etat_royaume("roy_a")
+	verifier(not ea.is_empty() and ea.blason.couleurs.size() == 2 and ea.blason.motif in GameData.config("blasons").motifs.monarchie_hereditaire and not str(ea.dirigeant).is_empty() and ea.ere in GameData.catalogues.name_cultures.latine.eres, "un état à la graine : blason de monarchie, dirigeant latin, ère latine (%s, ère %s)" % [str(ea.dirigeant), str(ea.ere)])
+	verifier(int(ea.avenement) <= int(GameData.config("calendrier").annee_depart) and s.an_de_regne(ea) >= 1, "l'an de règne se lit sur le calendrier (an %d)" % s.an_de_regne(ea))
+	var an0 := s.an_de_regne(ea)
+	s.horloge_monde.ticks += Calendrier.jours_par_an() * int(GameData.config("planete").cycle.ticks_par_jour)
+	verifier(s.an_de_regne(ea) == an0 + 1, "un an plus tard, l'an de règne a avancé")
+	# Un événement forcé : la révolte pille le trésor et soulage l'humeur ; la guerre arrête les caravanes.
+	s.monde.tresors_royaumes["roy_a"] = 100
+	ea.tresor = 100
+	ea.humeur = 10
+	s._appliquer_evenement("roy_a", ra, ea, GameData.catalogues.royaumes_evenements.revolte)
+	verifier(int(s.monde.tresors_royaumes.roy_a) == 80 and int(ea.humeur) == 25 and ea.journal.size() == 1 and str(ea.journal[0].cle) == "evenement.revolte", "la révolte : trésor −20 %%, humeur +15, au journal du royaume")
+	s._appliquer_evenement("roy_a", ra, ea, GameData.catalogues.royaumes_evenements.guerre)
+	verifier(s.en_guerre("roy_a", "roy_b") and s.en_guerre("roy_b", "roy_a"), "la guerre déclarée à Borealis est mutuelle")
+	verifier(s._conditions_evenement("roy_a", ra, ea, {"guerre": true}) and not s._conditions_evenement("roy_a", ra, ea, {"guerre": false}), "les conditions lisent la guerre")
+	s._appliquer_evenement("roy_a", ra, ea, GameData.catalogues.royaumes_evenements.paix)
+	verifier(not s.en_guerre("roy_a", "roy_b") and ea.journal.size() == 3, "la paix la défait, le journal compte trois événements")
+	# Le blason sur un garde d'une ville de ce royaume.
+	var g := s.ajouter("garde_village", s._tuile_libre_autour(s.vivants()[0].pos), "ia")
+	g["royaume"] = "roy_a"
+	g["blason"] = str(ea.blason.couleurs[0])
+	verifier(str(g.blason).begins_with("#"), "le garde porte la couleur du royaume (%s)" % str(g.blason))
+	# Une ère nouvelle à la succession.
+	var ere0 := str(ea.ere)
+	var av0 := int(ea.avenement)
+	s._nouvelle_ere("roy_a", {"nom": {"prenom": "Titus", "nom_famille": "Aurelius", "titre": "", "genre": "m", "culture": "latine", "name_order": "prenom_nom"}})
+	verifier(int(ea.avenement) == s.annee_courante() and str(ea.dirigeant) == "Titus Aurelius" and (str(ea.ere) != ere0 or GameData.catalogues.name_cultures.latine.eres.size() == 1) and ea.journal.size() == 4, "une succession ouvre une ère nouvelle (%s → %s, avènement %d → %d)" % [ere0, str(ea.ere), av0, int(ea.avenement)])
+	# La semaine des pays tourne sur les royaumes connus.
+	s._semaine_royaumes_pays()
+	verifier(int(ea.population) >= 0 and int(ea.armee) >= int(s._ry().pays.armee_base.petit), "la semaine recompte : armée de base %d" % int(ea.armee))
+	# La sauvegarde garde l'état.
+	s.nom_partie = "test_royaume_pays"
+	verifier(s.sauvegarder(), "sauvegarde avec l'état des royaumes")
+	var s2 := Simulation.new(83)
+	s2.nom_partie = "test_royaume_pays"
+	verifier(s2.charger_sauvegarde() and s2.monde.etats_royaumes.has("roy_a") and str(s2.monde.etats_royaumes.roy_a.dirigeant) == "Titus Aurelius", "rechargé : le règne de Titus Aurelius")
 

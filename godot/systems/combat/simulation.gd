@@ -1882,6 +1882,18 @@ func replique(pnj: Dictionary, j: Dictionary) -> String:
 			continue
 		if c.get("tag") != null and not (str(c.tag) in pnj.get("tags", [])):   # un tag que le PNJ doit porter (l'itinérant, Villes B3)
 			continue
+		if c.get("trait") != null and not (str(c.trait) in pnj.get("traits", [])):   # un trait de caractère (PNJ distincts)
+			continue
+		if c.get("gouvernance") != null and str(royaume_par_id(str(pnj.get("royaume", ""))).get("government_type", "")) != str(c.gouvernance):   # le sujet parle de son régime (D)
+			continue
+		if str(d.text_key) == "rumeur_royaume" and (str(pnj.get("royaume", "")).is_empty() or etat_royaume(str(pnj.get("royaume", ""))).get("journal", []).is_empty()):
+			continue
+		if c.get("souhait_realise") != null and bool(c.souhait_realise) != bool(pnj.get("souhait_realise", false)):
+			continue
+		if str(d.text_key) == "histoire" and not pnj.has("histoire"):
+			continue
+		if str(d.text_key) == "opinion" and pnj.get("social", {}).get("opinions", {}).is_empty():
+			continue
 		if c.get("fete") != null and bool(c.fete) != (not fete_de(pnj).is_empty()):   # Calendrier : un jour de fête, de marché, d'anniversaire
 			continue
 		if c.get("marche") != null and bool(c.marche) != jour_de_marche_de(pnj):
@@ -1904,6 +1916,179 @@ func replique(pnj: Dictionary, j: Dictionary) -> String:
 			pnj["dernieres_repliques"] = recentes
 			return str(d.text_key)
 	return str(candidats.back().text_key)
+
+
+# ---------------------------------------------------------------- les PNJ distincts (C — PNJ — traits, histoires et souhaits, 2026-09-05)
+
+## Ce qui distingue un PNJ d'un autre de même fiche : deux traits qui ne s'excluent pas, un souhait, une histoire,
+## une apparence qui dit son âge. Tiré à sa graine, une fois.
+func _distinguer_pnj(e: Dictionary, rng: RandomNumberGenerator) -> void:
+	var pc: Dictionary = regles.r.get("pnj", {})
+	var traits: Dictionary = GameData.catalogues.get("traits", {})
+	var ids: Array = traits.keys()
+	ids.sort()
+	var pris: Array = []
+	var essais := 0
+	while pris.size() < int(pc.get("traits_par_pnj", 2)) and essais < 20 and not ids.is_empty():
+		essais += 1
+		var tid := str(ids[rng.randi_range(0, ids.size() - 1)])
+		if tid in pris:
+			continue
+		var exclu := false
+		for autre in pris:
+			if tid in traits[autre].get("exclut", []) or autre in traits[tid].get("exclut", []):
+				exclu = true
+		if not exclu:
+			pris.append(tid)
+	e["traits"] = pris
+	e["humeur"] = clampi(int(e.get("humeur", _ry().humeur_base)) + int(trait_somme(e, "humeur")), 0, 100)
+	# Le souhait : parmi ceux dont les conditions matchent (fonction, trait).
+	var souhaits: Dictionary = GameData.catalogues.get("souhaits", {})
+	var candidats: Array = []
+	for sid in souhaits.keys():
+		if _conditions_pnj(souhaits[sid].get("conditions", {}), e):
+			candidats.append(str(sid))
+	candidats.sort()
+	if not candidats.is_empty():
+		e["souhait"] = str(candidats[rng.randi_range(0, candidats.size() - 1)])
+	# L'histoire : un gabarit pondéré, ses paramètres fixés une fois.
+	var histoires: Dictionary = GameData.catalogues.get("histoires", {})
+	var hids: Array = []
+	var total := 0.0
+	for hid in histoires.keys():
+		if _conditions_pnj(histoires[hid].get("conditions", {}), e):
+			hids.append(str(hid))
+	hids.sort()
+	for hid in hids:
+		total += float(histoires[hid].get("poids", 1))
+	var t := rng.randf() * total
+	for hid in hids:
+		t -= float(histoires[hid].get("poids", 1))
+		if t <= 0.0:
+			e["histoire"] = {"cle": str(histoires[hid].text_key), "params": {"prenom": str(e.nom.get("prenom", "")), "ville": str(e.get("village", "")), "ville_natale": _ville_natale(e, rng), "metier": "function.%s.name" % str(e.get("fonction", "oisif")), "age": int(e.get("age", 30))}}
+			break
+	# L'âge se voit : les cheveux grisonnent, l'enfant est petit.
+	var ap: Dictionary = e.get("apparence", {})
+	if not ap.is_empty():
+		var ag: Dictionary = regles.r.age
+		if float(e.get("age", 30)) >= float(ag.age):
+			ap["teinte_cheveux"] = "neige" if float(e.age) >= float(ag.age) + float(ag.tranche) else "argent"
+		elif float(e.get("age", 30)) < float(ag.adulte):
+			ap["taille"] = "petite"
+
+
+## Une ville natale pour l'histoire : une agglomération à trente cellules, sinon la sienne.
+func _ville_natale(e: Dictionary, rng: RandomNumberGenerator) -> String:
+	if monde == null:
+		return str(e.get("village", ""))
+	var c0 := monde.cellule_de(e.pos)
+	for essai in 12:
+		var c := c0 + Vector2i(rng.randi_range(-30, 30), rng.randi_range(-30, 30))
+		if c != c0 and monde.surface.terre_a(c) and bool(monde.surface.poi_de(c).get("village", false)):
+			return str(monde.surface.fiche_agglomeration(c).get("nom", ""))
+	return str(e.get("village", ""))
+
+
+## Les conditions d'un souhait ou d'une histoire : fonction, trait (nul = toujours).
+func _conditions_pnj(c: Dictionary, e: Dictionary) -> bool:
+	if c.get("fonction") != null and str(c.fonction) != str(e.get("fonction", "")):
+		return false
+	if c.get("trait") != null and not (str(c.trait) in e.get("traits", [])):
+		return false
+	return true
+
+
+## Le produit des effets multiplicatifs d'un nom sur les traits d'un être (1 sans trait).
+func facteur_trait(e: Dictionary, cle: String) -> float:
+	var f := 1.0
+	var traits: Dictionary = GameData.catalogues.get("traits", {})
+	for tid in e.get("traits", []):
+		f *= float(traits.get(str(tid), {}).get("effets", {}).get(cle, 1.0))
+	return f
+
+
+## La somme des effets additifs d'un nom sur les traits d'un être (0 sans trait).
+func trait_somme(e: Dictionary, cle: String) -> float:
+	var s := 0.0
+	var traits: Dictionary = GameData.catalogues.get("traits", {})
+	for tid in e.get("traits", []):
+		s += float(traits.get(str(tid), {}).get("effets", {}).get(cle, 0.0))
+	return s
+
+
+## Un PNJ aime-t-il recevoir cet objet ? (les cadeaux de ses traits : un type ou un tag de l'objet)
+func aime_cadeau(pnj: Dictionary, it: Dictionary) -> bool:
+	var traits: Dictionary = GameData.catalogues.get("traits", {})
+	for tid in pnj.get("traits", []):
+		for c in traits.get(str(tid), {}).get("cadeaux", []):
+			if str(c) == str(it.get("type", "")) or (str(c) in it.get("tags", [])) or (str(c) == "nourriture" and float(it.get("nutrition", 0)) > 0.0):
+				return true
+	return false
+
+
+## Offrir un cadeau (Dialogue PNJ) : l'objet passe au PNJ ; la relation monte selon sa valeur, son goût, son souhait.
+func _offrir(e: Dictionary, pnj_id: String, uid: String, tick: int) -> bool:
+	var pnj: Dictionary = entites.get(pnj_id, {})
+	var it: Dictionary = items.get(uid, {})
+	if pnj.is_empty() or it.is_empty() or not (uid in e.sac) or Grille.distance(e.pos, pnj.pos) > 2 or not ("civil" in pnj.get("tags", [])):
+		return false
+	var cc: Dictionary = regles.r.get("pnj", {}).get("cadeau", {"relation_base": 3, "relation_par_valeur": 0.1, "relation_max": 15, "bonus_aime": 8})
+	var valeur := float(prix_suggere(uid, {}, e).prix)
+	var gain := mini(int(cc.relation_max), int(cc.relation_base) + int(round(valeur * float(cc.relation_par_valeur))))
+	if aime_cadeau(pnj, it):
+		gain += int(cc.bonus_aime)
+	gain = maxi(1, int(round(float(gain) * facteur_trait(pnj, "relation_mult"))))
+	e.sac.erase(uid)
+	if pnj.has("sac"):
+		pnj.sac.append(uid)
+	else:
+		pnj["sac"] = [uid]
+	pnj.social.relations[e.id] = clampi(int(pnj.social.relations.get(e.id, 0)) + gain, -100, 100)
+	EventBus.emettre(&"journal", [&"journal.cadeau", {"nom": pnj.name_key, "objet": nom_objet(uid), "n": gain}])
+	var sid := str(pnj.get("souhait", ""))
+	if not sid.is_empty() and not bool(pnj.get("souhait_realise", false)) and GameData.catalogues.souhaits.has(sid) and (str(it.get("base", "")) in GameData.filtrer("items", GameData.catalogues.souhaits[sid].filtre)):
+		var bonus := int(GameData.catalogues.souhaits[sid].get("relation", 25))
+		pnj["souhait_realise"] = true
+		pnj.social.relations[e.id] = clampi(int(pnj.social.relations[e.id]) + bonus, -100, 100)
+		EventBus.emettre(&"journal", [&"journal.souhait_realise", {"nom": pnj.name_key, "souhait": "souhait.%s.name" % sid, "n": bonus}])
+	e.compteur = tick + int(regles.r.actions.objet)
+	return true
+
+
+## Les opinions d'un PNJ sur d'autres : une relation avec un ou deux voisins de son quartier, tirée de leurs signes et
+## de leurs traits (les époux s'aiment). Appelé à la formation des familles.
+func _former_opinions(cell: Vector2i, v: Dictionary) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "opinions", cell])
+	var gens: Array = []
+	for x in vivants():
+		if str(x.get("village", "")) == str(v.nom) and x.has("traits") and monde.cellule_de(x.pos) == cell:
+			gens.append(x)
+	if gens.size() < 2:
+		return
+	var n_op := int(regles.r.get("pnj", {}).get("opinions_par_pnj", 2))
+	var traits: Dictionary = GameData.catalogues.get("traits", {})
+	for x in gens:
+		if not x.social.has("opinions"):
+			x.social["opinions"] = {}
+		var conjoint := str(x.get("family", {}).get("spouse", ""))
+		if not conjoint.is_empty():
+			x.social.opinions[conjoint] = 60
+		for k in n_op:
+			var y: Dictionary = gens[rng.randi_range(0, gens.size() - 1)]
+			if y.id == x.id or x.social.opinions.has(y.id):
+				continue
+			var score := rng.randi_range(-10, 10)
+			for tx in x.get("traits", []):
+				if tx in y.get("traits", []):
+					score += 15   # les mêmes travers s'entendent
+				if str(tx) in traits.get(str(y.get("traits", [""])[0]), {}).get("exclut", []):
+					score -= 15   # l'avare et le généreux, le bavard et le taciturne
+			var sx: Dictionary = x.get("signe", {})
+			var sy: Dictionary = y.get("signe", {})
+			if not sx.is_empty() and not sy.is_empty() and str(sx.get("element", "")) == str(sy.get("element", "")):
+				score += 10
+			x.social.opinions[y.id] = clampi(score, -100, 100)
 
 
 ## C'est l'anniversaire du PNJ ? (mois et jour tirés de son identifiant, Calendrier)
@@ -1930,6 +2115,7 @@ func _parler(e: Dictionary, pnj_id: String, tick: int) -> bool:
 		var gain := int(cm.parler_relation)
 		if des.jet("1d20") + int(e.stats_eff.charisme) / 4 >= int(cm.parler_charisme_dd):
 			gain += int(cm.parler_bonus)
+		gain = maxi(1, int(round(float(gain) * facteur_trait(pnj, "relation_mult"))))   # le méfiant se lie lentement, le jovial vite (traits)
 		pnj.social.relations[e.id] = clampi(int(pnj.social.relations.get(e.id, 0)) + gain, -100, 100)
 		EventBus.emettre(&"journal", [&"journal.relation", {"nom": pnj.name_key, "n": int(pnj.social.relations[e.id])}])
 	_rumeur(pnj, e, tick)
@@ -1962,7 +2148,8 @@ func prix_suggere(uid: String, pnj: Dictionary, acheteur: Dictionary) -> Diction
 			rep *= float(pal[2])
 	var marche := float(GameData.config("calendrier").marche.prix_mult) if jour_de_marche_de(pnj) else 1.0   # le jour de marché, les prix baissent (Calendrier)
 	var economie := facteur_economie(uid, pnj)   # les stocks de la ville du marchand font ses prix (Villes B3)
-	var prix := maxi(1, roundi(base * float(cm.marge_artisanat) * qualite * rarete * rep * marche * economie))
+	var caractere := facteur_trait(pnj, "prix_mult")   # l'avare vend plus cher, le généreux moins (traits)
+	var prix := maxi(1, roundi(base * float(cm.marge_artisanat) * qualite * rarete * rep * marche * economie * caractere))
 	return {"prix": prix, "base": snappedf(base, 0.1), "marge": float(cm.marge_artisanat), "qualite": snappedf(qualite, 0.01), "rarete": snappedf(rarete, 0.01), "rep": snappedf(rep, 0.01),
 		"marche": marche, "economie": snappedf(economie, 0.01), "achat": maxi(1, roundi(float(prix) * float(cm.achat_ratio)))}
 
@@ -3298,7 +3485,7 @@ func production_de(x: Dictionary) -> Dictionary:
 		return {}
 	var niveau := regles.niveau(x.competences_eff, str(f.get("skill", ""))) if not str(f.get("skill", "")).is_empty() else 0
 	var rendement := float(f.get("rendement_base", 0.02)) * (1.0 + float(niveau) / 10.0)
-	var mult := float(territoire.get("productivite", 1.0))
+	var mult := float(territoire.get("productivite", 1.0)) * facteur_trait(x, "productivite")   # l'ambitieux produit plus, le paresseux moins (traits)
 	var q := rendement * float(_ry().heures_semaine) * facteur_humeur(x) * mult
 	if prod.has("or"):
 		return {"or": int(round(q * float(prod.or)))}
@@ -3408,6 +3595,236 @@ func _semaine_joueur(x: Dictionary) -> void:
 	_semaine_migrants(x)   # la base attire (Population et exploitation, 2026-09-04)
 
 
+# ---------------------------------------------------------------- les royaumes-pays (D — Royaumes — état, ères, blasons et événements, 2026-09-05)
+
+## Un royaume par son id, dans les secteurs déjà générés ({} sinon).
+func royaume_par_id(id: String) -> Dictionary:
+	if monde == null:
+		return {}
+	for sect in monde.surface.royaumes_cache.values():
+		if sect.has(id):
+			return sect[id]
+	return {}
+
+
+## L'état d'un royaume (créé à la première lecture, à sa graine) : population, armée, humeur, règne et ère, blason.
+func etat_royaume(id: String) -> Dictionary:
+	if monde == null:
+		return {}
+	if monde.etats_royaumes.has(id):
+		return monde.etats_royaumes[id]
+	var roy := royaume_par_id(id)
+	if roy.is_empty():
+		return {}
+	var pays: Dictionary = _ry().get("pays", {})
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, id, "etat"])
+	var culture: Dictionary = GameData.catalogues.name_cultures.get(str(roy.culture), {})
+	var eres: Array = culture.get("eres", ["grue"])
+	var bl: Dictionary = GameData.config("blasons")
+	var couleurs: Array = bl.couleurs.get(str(roy.culture), bl.couleurs._defaut).duplicate()
+	var c1: String = str(couleurs[rng.randi_range(0, couleurs.size() - 1)])
+	couleurs.erase(c1)
+	var c2: String = str(couleurs[rng.randi_range(0, couleurs.size() - 1)]) if not couleurs.is_empty() else c1
+	var motifs: Array = bl.motifs.get(str(roy.government_type), ["couronne"])
+	var etat := {"population": 0, "armee": 0, "humeur": int(pays.get("humeur_base", 55)), "dirigeant": Noms.afficher(Noms.generer(str(roy.culture), culture, "m" if rng.randf() < 0.6 else "f", rng)),
+		"ere": str(eres[rng.randi_range(0, eres.size() - 1)]), "avenement": int(GameData.config("calendrier").annee_depart) - rng.randi_range(0, int(pays.get("avenement_max", 30))),
+		"blason": {"couleurs": [c1, c2], "motif": str(motifs[rng.randi_range(0, motifs.size() - 1)])}, "guerres": [], "journal": []}
+	monde.etats_royaumes[id] = etat
+	_recompter_royaume(id, roy, etat)
+	return etat
+
+
+## La population et l'armée d'un royaume : la somme des fiches de ses agglomérations, une lecture pure.
+func _recompter_royaume(id: String, roy: Dictionary, etat: Dictionary) -> void:
+	var pop := 0
+	for c in roy.territory_cells:
+		if bool(monde.surface.poi_de(c).get("village", false)):
+			pop += int(monde.surface.fiche_agglomeration(c).get("population", 0))
+	etat.population = pop
+	var pays: Dictionary = _ry().get("pays", {})
+	etat.armee = int(pays.get("armee_base", {}).get(str(roy.taille), 2)) + pop / maxi(1, int(GameData.config("villes").get("gardes_par_habitant", 25)))
+	etat.tresor = int(monde.tresors_royaumes.get(id, 0))
+	# Le dirigeant chargé porte son nom ; sinon celui tiré à la graine reste.
+	for x in vivants():
+		if str(x.get("royaume", "")) == id and str(x.get("fonction", "")) == "dirigeant" and x.has("nom"):
+			etat.dirigeant = Noms.afficher(x.nom)
+			break
+
+
+## L'an de règne d'un royaume sur le calendrier.
+func an_de_regne(etat: Dictionary) -> int:
+	return maxi(1, annee_courante() - int(etat.get("avenement", annee_courante())) + 1)
+
+
+## Une succession ouvre une ère nouvelle, à l'année courante (Familles et succession).
+func _nouvelle_ere(id: String, dirigeant: Dictionary) -> void:
+	var etat := etat_royaume(id)
+	if etat.is_empty():
+		return
+	var roy := royaume_par_id(id)
+	var eres: Array = GameData.catalogues.name_cultures.get(str(roy.get("culture", "")), {}).get("eres", ["grue"])
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, id, "ere", monde.semaine_courante])
+	etat.ere = str(eres[rng.randi_range(0, eres.size() - 1)])
+	etat.avenement = annee_courante()
+	if dirigeant.has("nom"):
+		etat.dirigeant = Noms.afficher(dirigeant.nom)
+	_noter_evenement(id, roy, "evenement.avenement", {"ere": "ere.%s.name" % etat.ere})
+
+
+## Un événement de royaume au journal du royaume (daté du calendrier) et, si le joueur est dans ce royaume ou si c'est
+## une guerre, au journal du joueur.
+func _noter_evenement(id: String, roy: Dictionary, cle: String, params: Dictionary) -> void:
+	var etat := etat_royaume(id)
+	var p := params.duplicate()
+	p["royaume"] = str(roy.get("nom", id))
+	etat.journal.append({"jour": jour_courant(), "cle": cle, "params": p})
+	while etat.journal.size() > int(_ry().get("pays", {}).get("journal_max", 10)):
+		etat.journal.pop_front()
+	var j := _joueur()
+	var chez_lui: bool = not j.is_empty() and lieu == "camp" and str(monde.surface.royaume_de(_cell_de(j.pos)).get("id", "")) == id
+	if chez_lui or cle in ["evenement.guerre", "evenement.paix"]:
+		EventBus.emettre(&"journal", [StringName(cle), p])
+
+
+## La semaine des pays : pour chaque royaume connu, le recompte, l'humeur qui revient vers sa base, les événements.
+func _semaine_royaumes_pays() -> void:
+	if monde == null:
+		return
+	var pays: Dictionary = _ry().get("pays", {})
+	var evs: Dictionary = GameData.catalogues.get("royaumes_evenements", {})
+	var ids: Array = evs.keys()
+	ids.sort()
+	for sect in monde.surface.royaumes_cache.values():
+		for id in sect.keys():
+			var roy: Dictionary = sect[id]
+			var etat := etat_royaume(str(id))
+			if etat.is_empty():
+				continue
+			_recompter_royaume(str(id), roy, etat)
+			# L'humeur des résidents chargés compte ; sinon elle revient vers sa base.
+			var n := 0
+			var somme := 0
+			for x in vivants():
+				if str(x.get("royaume", "")) == str(id) and x.has("assignation"):
+					n += 1
+					somme += int(x.get("humeur", pays.get("humeur_base", 55)))
+			if n >= 5:
+				etat.humeur = int(round((float(etat.humeur) + float(somme) / float(n)) / 2.0))
+			else:
+				var base := int(pays.get("humeur_base", 55))
+				etat.humeur += clampi(base - int(etat.humeur), -int(pays.get("humeur_retour", 3)), int(pays.get("humeur_retour", 3)))
+			var rng := RandomNumberGenerator.new()
+			rng.seed = hash([graine, str(id), "evenements", monde.semaine_courante])
+			for eid in ids:
+				var ev: Dictionary = evs[eid]
+				if rng.randf() >= float(ev.chance) or not _conditions_evenement(str(id), roy, etat, ev.conditions):
+					continue
+				_appliquer_evenement(str(id), roy, etat, ev)
+			etat.humeur = clampi(int(etat.humeur), 0, 100)
+
+
+func _conditions_evenement(id: String, roy: Dictionary, etat: Dictionary, c: Dictionary) -> bool:
+	if c.has("humeur_max") and int(etat.humeur) > int(c.humeur_max):
+		return false
+	if c.has("humeur_min") and int(etat.humeur) < int(c.humeur_min):
+		return false
+	if c.has("tresor_max") and int(etat.tresor) > int(c.tresor_max):
+		return false
+	if c.has("guerre") and bool(c.guerre) != (not etat.guerres.is_empty()):
+		return false
+	if c.has("gouvernances") and not (str(roy.government_type) in c.gouvernances):
+		return false
+	if c.has("anniversaire_avenement"):
+		var d := date_courante()
+		var a_av: Dictionary = Calendrier.date(0)
+		if int(d.jour_de_l_an) != int(a_av.jour_de_l_an) + (int(etat.avenement) * 7) % 30:
+			return false
+	if c.has("nourriture_penurie") or c.has("nourriture_surplus"):
+		var cap := str(monde.surface.fiche_agglomeration(roy.capital_poi).get("nom", ""))
+		var t: Dictionary = territoires.get(cap, {})
+		if t.is_empty() or not t.has("prix"):
+			return false
+		var eco: Dictionary = GameData.config("villes").economie
+		var prix := float(t.prix.get("nourriture", 1.0))
+		if c.has("nourriture_penurie") and (prix < float(eco.prix_max) - 0.01):
+			return false
+		if c.has("nourriture_surplus") and (prix > float(eco.prix_min) + 0.01):
+			return false
+	if c.has("voisin"):
+		var trouve := false
+		for autre in roy.get("diplomacy", {}).keys():
+			if str(roy.diplomacy[autre]) in c.voisin and not (str(autre) in etat.guerres):
+				trouve = true
+		if not trouve:
+			return false
+	return true
+
+
+func _appliquer_evenement(id: String, roy: Dictionary, etat: Dictionary, ev: Dictionary) -> void:
+	var ef: Dictionary = ev.effets
+	var params := {}
+	if ef.has("humeur"):
+		etat.humeur = clampi(int(etat.humeur) + int(ef.humeur), 0, 100)
+	if ef.has("tresor_pct"):
+		var delta := int(round(float(etat.tresor) * float(ef.tresor_pct)))
+		monde.tresors_royaumes[id] = int(monde.tresors_royaumes.get(id, 0)) + delta
+		etat.tresor = int(monde.tresors_royaumes[id])
+	if ef.has("base_rate"):
+		roy.taxes.base_rate = snappedf(float(roy.taxes.get("base_rate", 0.08)) + float(ef.base_rate), 0.01)
+	if ef.has("loi"):
+		var pool: Dictionary = GameData.config("absurd_laws_pool")
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash([graine, id, "loi", monde.semaine_courante])
+		if str(ef.loi) == "ajoute":
+			var obj: String = str(pool.objets[rng.randi() % pool.objets.size()])
+			roy.laws.append({"id": "loi_" + obj + "_%d" % monde.semaine_courante, "type": "objet", "target": obj, "status": "illegal", "consequence": str(pool.consequences[rng.randi() % pool.consequences.size()])})
+			params["loi"] = "item.%s.name" % obj
+		else:
+			var absurdes: Array = []
+			for l in roy.laws:
+				if str(l.get("type", "")) == "objet" and not (str(l.target) in pool.get("substances_illegales", [])):
+					absurdes.append(l)
+			if absurdes.is_empty():
+				return
+			var l: Dictionary = absurdes[rng.randi() % absurdes.size()]
+			roy.laws.erase(l)
+			params["loi"] = "item.%s.name" % str(l.target)
+	if ef.has("guerre"):
+		if str(ef.guerre) == "declare":
+			var cibles: Array = []
+			for autre in roy.get("diplomacy", {}).keys():
+				if str(roy.diplomacy[autre]) in ev.conditions.get("voisin", ["hostile"]) and not (str(autre) in etat.guerres):
+					cibles.append(str(autre))
+			if cibles.is_empty():
+				return
+			cibles.sort()
+			var autre_id: String = cibles[0]
+			etat.guerres.append(autre_id)
+			var e2 := etat_royaume(autre_id)
+			if not e2.is_empty() and not (id in e2.guerres):
+				e2.guerres.append(id)
+			params["autre"] = str(royaume_par_id(autre_id).get("nom", autre_id))
+		else:
+			if etat.guerres.is_empty():
+				return
+			var autre_id2: String = str(etat.guerres[0])
+			etat.guerres.erase(autre_id2)
+			var e3 := etat_royaume(autre_id2)
+			if not e3.is_empty():
+				e3.guerres.erase(id)
+			params["autre"] = str(royaume_par_id(autre_id2).get("nom", autre_id2))
+	_noter_evenement(id, roy, str(ev.journal_key), params)
+
+
+## Deux royaumes sont-ils en guerre ?
+func en_guerre(a: String, b: String) -> bool:
+	if a.is_empty() or b.is_empty() or a == b:
+		return false
+	return b in etat_royaume(a).get("guerres", [])
+
+
 # ---------------------------------------------------------------- les transports (Villes — B4, 2026-09-05)
 
 func _transports() -> Dictionary:
@@ -3496,7 +3913,7 @@ func _ia_vehicule(e: Dictionary, tick: int) -> void:
 	if str(v.type) == "train":
 		match str(v.etat):
 			"arrive":
-				if e.pos == v.quai or Grille.distance(e.pos, v.quai) <= 1 and not grille.occupant(v.quai).is_empty():
+				if e.pos == v.quai or (Grille.distance(e.pos, v.quai) <= 1 and (not grille.occupant(v.quai).is_empty() or grille.bloque_passage(v.quai))):
 					v.etat = "attend"
 					v.attente_jusqua = tick + int(tcfg.trains.attente_ticks)
 					_attendre(e, tick)
@@ -3508,7 +3925,7 @@ func _ia_vehicule(e: Dictionary, tick: int) -> void:
 					EventBus.emettre(&"journal", [&"journal.train_part", {"ville": str(v.ville)}])
 				_attendre(e, tick)
 			_:
-				if e.pos == v.entree or Grille.distance(e.pos, v.entree) <= 1 and not grille.occupant(v.entree).is_empty():
+				if e.pos == v.entree or (Grille.distance(e.pos, v.entree) <= 1 and (not grille.occupant(v.entree).is_empty() or grille.bloque_passage(v.entree))):
 					_retirer_vehicule(e)
 				else:
 					_ia_pas_routine(e, v.entree, tick)
@@ -3604,8 +4021,8 @@ func _monter(e: Dictionary, id: String, i: Dictionary, tick: int) -> bool:
 	return true
 
 
-## Descendre : la monture reprend sa place à côté.
-func _descendre(e: Dictionary, tick: int) -> bool:
+## Descendre de sa monture : elle reprend sa place à côté.
+func _descendre_monture(e: Dictionary, tick: int) -> bool:
 	if not e.has("monture"):
 		return false
 	var v: Dictionary = e.monture.etre
@@ -3797,8 +4214,9 @@ func _caravanes_du_jour(jour: int) -> void:
 			continue
 		var rng := RandomNumberGenerator.new()
 		rng.seed = hash([graine, "caravane", str(nom), jour])
+		var roy_ici := str(monde.surface.royaume_de(centre).get("id", ""))
 		for f in villes_reliees(centre, int(cv.distance_max)):
-			if rng.randf() >= float(cv.chance):
+			if rng.randf() >= float(cv.chance) or en_guerre(roy_ici, str(f.get("royaume", ""))):   # pas de caravane entre deux royaumes en guerre (D)
 				continue
 			_arrivee_itinerant(str(nom), f, jour)
 
@@ -4928,6 +5346,7 @@ func _former_familles(cell: Vector2i, v: Dictionary) -> void:
 	for x in vivants():
 		if str(x.get("village", "")) == str(v.nom) and str(x.get("fonction", "")) in ["dirigeant", "maitre_de_guilde"]:
 			x["titre"] = titre_de(x)
+	_former_opinions(cell, v)   # qui aime qui dans le quartier (PNJ — traits, histoires et souhaits)
 
 
 ## Le titre culturel d'un PNJ à rôle (Génération de noms) : la culture, la gouvernance de son royaume, son genre.
@@ -4995,6 +5414,7 @@ func _semaine_royaumes_pnj() -> void:
 		meilleur["or_max"] = int(GameData.entree("functions", "dirigeant").portefeuille)
 		meilleur["titre"] = titre_de(meilleur)
 		monde.vacances.erase(roy_id)
+		_nouvelle_ere(str(roy_id), meilleur)   # un règne nouveau, une ère nouvelle (D)
 		EventBus.emettre(&"journal", [&"journal.succession_heritier" if par_heritier else &"journal.succession", {"royaume": nom_roy, "nom": meilleur.name_key}])
 		EventBus.emettre(&"leadership_changed", [roy_id, meilleur.id])
 	# Les halls sans maître : le plus haut niveau général du village reprend le hall (2 semaines).
@@ -7000,7 +7420,7 @@ func sauvegarder(nom: String = "") -> bool:
 		contenants_monde[grille.pos_de(int(gi))] = contenants[gi]
 	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "resume": resume_partie(), "graine": graine, "graine_monde": graine_monde, "planete_options": planete_options, "identifies": identifies, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
 		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores,
-		"delta": monde.delta, "foyers": monde.foyers, "faune_densite": monde.faune_densite, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": territoires.joueur.cellules, "territoire": territoires.joueur, "territoires": territoires, "tresors_royaumes": monde.tresors_royaumes, "vacances": monde.vacances, "villages": monde.villages, "heritiers": monde.heritiers, "vacances_guildes": monde.vacances_guildes,
+		"delta": monde.delta, "foyers": monde.foyers, "faune_densite": monde.faune_densite, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": territoires.joueur.cellules, "territoire": territoires.joueur, "territoires": territoires, "tresors_royaumes": monde.tresors_royaumes, "etats_royaumes": monde.etats_royaumes, "vacances": monde.vacances, "villages": monde.villages, "heritiers": monde.heritiers, "vacances_guildes": monde.vacances_guildes,
 		"modifs_terrain": modifs_terrain, "portails": portails, "gouffres_vides": gouffres_vides, "mines_creusees": mines_creusees,
 		"carte_cache": monde.carte_cache_serialise()})   # indexés par position monde, donc valables au rechargement
 	ok = Sauvegarde.ecrire(nom, "surface.json", surface) and ok
@@ -7063,6 +7483,7 @@ func charger_sauvegarde(nom: String = "") -> bool:
 	monde.vacances_guildes = w.get("vacances_guildes", {})
 	monde.villages = w.get("villages", {})
 	monde.tresors_royaumes = w.get("tresors_royaumes", {})
+	monde.etats_royaumes = w.get("etats_royaumes", {})
 	territoires = w.get("territoires", {})
 	territoire = territoires.get("joueur", w.get("territoire", territoire))   # une sauvegarde d'avant B0 n'a que `territoire`
 	territoire["id"] = "joueur"
@@ -8162,6 +8583,7 @@ func _habiller_pnj(e: Dictionary, def: Dictionary, culture_id: String = "") -> v
 	if e.get("signe", {}).is_empty() and horloge_monde != null:
 		e["signe"] = progression.signe(annee_courante() - int(e.age))
 	e["anniversaire"] = Calendrier.anniversaire(str(e.id))
+	_distinguer_pnj(e, rng)   # ses traits, son souhait, son histoire, son âge qui se voit (PNJ — traits, histoires et souhaits)
 
 
 ## Deux êtres sont-ils ennemis ? Deux camps différents, sauf le joueur et les civils (IA des créatures).
@@ -8312,6 +8734,10 @@ func _peupler_fenetre() -> void:
 				x.ancre = x.poste
 				if str(pj.get("batiment", "")) == "ecurie" and not ("maquignon" in x.tags):
 					x.tags.append("maquignon")   # il vend des montures (Villes B4)
+				if x.ai_profile == "garde" and not str(v.get("royaume", "")).is_empty():
+					var etat_r := etat_royaume(str(v.royaume))
+					if not etat_r.is_empty():
+						x["blason"] = str(etat_r.blason.couleurs[0])   # le garde porte la couleur de son royaume (D)
 				# Le résident du territoire (Villes B0/B1) : assigné à sa fonction, logé au résidentiel, ouvrier d'une zone.
 				var fonction := str(x.get("fonction", "oisif"))
 				if not GameData.catalogues.functions.has(fonction):
@@ -9374,6 +9800,7 @@ func _tiquer_monde(tick: int) -> void:
 		_vieillir_semaine(tick)
 		t0 = _top("vieillir", t0)
 		_semaine_royaumes_pnj()
+		_semaine_royaumes_pays()   # chaque royaume connu vit sa semaine : humeur, événements, guerres (D)
 		t0 = _top("royaumes_pnj", t0)
 		_semaine_elevage()
 		t0 = _top("elevage", t0)
@@ -9901,10 +10328,12 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = _vendre(e, str(i.get("pnj", "")), str(i.get("objet", "")), h.ticks)
 		"accepter_quete":
 			ok = _accepter_quete(e, str(i.get("pnj", "")), str(i.get("quete", "")), h.ticks)
+		"offrir":
+			ok = _offrir(e, str(i.get("pnj", "")), str(i.get("objet", "")), h.ticks)
 		"monter":
 			ok = _monter(e, str(i.get("pnj", "")), i, h.ticks)
-		"descendre":
-			ok = _descendre(e, h.ticks)
+		"descendre_monture":
+			ok = _descendre_monture(e, h.ticks)
 		"acheter_monture":
 			ok = _acheter_monture(e, str(i.get("pnj", "")), h.ticks)
 		"recruter":
@@ -12591,7 +13020,7 @@ func _degats_capacite(e: Dictionary, c: Dictionary, plan: Dictionary, prev: Dict
 func _engager_combat(a: Dictionary, b: Dictionary) -> void:
 	for x in [a, b]:   # pas de combat monté (Villes B4, décidé) : on met pied à terre
 		if x.has("monture"):
-			_descendre(x, horloge_de(x).ticks)
+			_descendre_monture(x, horloge_de(x).ticks)
 			EventBus.emettre(&"journal", [&"journal.descend_combat", {"nom": x.name_key}])
 	a.erase("relance_utilisee")   # Le Rieur : une relance par combat
 	b.erase("relance_utilisee")
@@ -12925,7 +13354,7 @@ func _profil_offensif(e: Dictionary) -> bool:
 func _actions_candidates(e: Dictionary, cible: Dictionary, profil: Dictionary, tick: int) -> Dictionary:
 	var c := {}
 	var a_cible := not cible.is_empty()
-	var sante_basse := float(e.sante) / float(e.sante_max) < float(profil.get("seuil_fuite_sante", 0.25))
+	var sante_basse := float(e.sante) / float(e.sante_max) < float(profil.get("seuil_fuite_sante", 0.25)) / maxf(0.1, facteur_trait(e, "courage"))   # le peureux fuit plus tôt (traits)
 	if a_cible and not _meilleure_attaque(e, cible).is_empty():
 		c["attaquer"] = {"cible_a_portee": 1.0, "agressivite": 1.0, "acculee": 1.0 if Grille.distance(e.pos, cible.pos) == 1 else 0.0}
 	if a_cible:
@@ -13134,7 +13563,7 @@ func _plage_routine(profil: Dictionary, h: float) -> Dictionary:
 ## La cible de la routine horaire d'un PNJ (IA des créatures) : poste, place ou lit selon l'heure — celle de
 ## `tick` si on le donne (la projection du LOD 2 relit la routine à un autre moment que maintenant).
 func _cible_routine(e: Dictionary, profil: Dictionary, tick: int = -1) -> Vector2i:
-	var activite := str(_plage_routine(profil, heure(tick)).activite)
+	var activite := str(_plage_routine(profil, fposmod(heure(tick) - trait_somme(e, "horaires_decalage"), 24.0)).activite)   # le lève-tôt vit deux heures en avance (traits)
 	if activite == "poste" and bool(profil.get("fetes", false)) and e.has("place") and not Calendrier.fetes_du_jour(Calendrier.date(int((horloge_monde.ticks if tick < 0 else tick) / maxi(1, int(_cycle().ticks_par_jour)))), str(e.get("social", {}).get("culture", ""))).is_empty():
 		activite = "social"   # un jour de fête, la place toute la journée (Calendrier)
 	match activite:

@@ -92,5 +92,13 @@
       "m": "titre.slave.guilde_maitre.m",
       "f": "titre.slave.guilde_maitre.f"
     }
-  }
+  },
+  "eres": [
+    "bouleau",
+    "ours",
+    "ambre",
+    "faucon",
+    "blé",
+    "neige"
+  ]
 }

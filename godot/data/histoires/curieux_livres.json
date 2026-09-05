@@ -1,0 +1,8 @@
+{
+  "text_key": "histoire.curieux_livres.text",
+  "conditions": {
+    "fonction": null,
+    "trait": "curieux"
+  },
+  "poids": 2
+}

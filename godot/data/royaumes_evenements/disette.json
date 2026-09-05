@@ -1,0 +1,10 @@
+{
+  "journal_key": "evenement.disette",
+  "chance": 1.0,
+  "conditions": {
+    "nourriture_penurie": true
+  },
+  "effets": {
+    "humeur": -10
+  }
+}

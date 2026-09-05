@@ -1,0 +1,8 @@
+{
+  "text_key": "histoire.commercant_route.text",
+  "conditions": {
+    "fonction": "commercant",
+    "trait": null
+  },
+  "poids": 2
+}

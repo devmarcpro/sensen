@@ -1,0 +1,12 @@
+{
+  "text_key": "dialogue.trait_bavard_2.text",
+  "conditions": {
+    "metier": null,
+    "phase": null,
+    "relation_min": null,
+    "relation_max": null,
+    "meteo": null,
+    "trait": "bavard"
+  },
+  "poids": 4
+}

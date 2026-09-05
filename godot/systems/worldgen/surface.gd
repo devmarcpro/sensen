@@ -336,6 +336,7 @@ func _poser_route(e: Dictionary, cell: Vector2i) -> void:
 		arrivee = Vector2i(clampi(arrivee.x, 0, taille - 1), clampi(arrivee.y, 0, taille - 1))
 		var q := depart
 		var garde := 0
+		var dernier_rail := Vector2i(-1, -1)
 		while q != arrivee and garde < taille * 3:
 			garde += 1
 			q += Vector2i(signi(arrivee.x - q.x), 0) if absi(arrivee.x - q.x) > absi(arrivee.y - q.y) else Vector2i(0, signi(arrivee.y - q.y))
@@ -349,12 +350,13 @@ func _poser_route(e: Dictionary, cell: Vector2i) -> void:
 			var iq := q.y * taille + q.x
 			if rail and _dans(q, taille) and not e.eau.has(iq) and not e.murs.has(iq):
 				e.rails[iq] = true
+				dernier_rail = q
 				if not e.village.is_empty() and Grille.distance(q, depart) == rayon_q and not e.village.has("quai"):
 					e.village["quai"] = q   # la gare : là où le rail touche la place
-				if not e.village.is_empty() and q == arrivee:
-					if not e.village.has("entrees_rail"):
-						e.village["entrees_rail"] = []
-					e.village.entrees_rail.append(q)
+		if rail and dernier_rail != Vector2i(-1, -1) and not e.village.is_empty():   # l'entrée du train : le dernier rail avant le bord
+			if not e.village.has("entrees_rail"):
+				e.village["entrees_rail"] = []
+			e.village.entrees_rail.append(dernier_rail)
 
 
 func _tirer_pondere(poids: Dictionary, rng: RandomNumberGenerator) -> String:

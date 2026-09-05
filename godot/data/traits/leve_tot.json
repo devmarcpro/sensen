@@ -1,0 +1,14 @@
+{
+  "name_key": "trait.leve_tot.name",
+  "effets": {
+    "horaires_decalage": -2,
+    "productivite": 1.05
+  },
+  "exclut": [
+    "paresseux"
+  ],
+  "cadeaux": [
+    "outil"
+  ],
+  "tags": []
+}

@@ -573,3 +573,18 @@ Quand une ville de deux cents habitants se charge, tout le monde part en même t
 - **Le train n'est pas simulé entre deux gares** : il passe à heures fixes, on monte, on paie, on arrive — un voyage plus rapide que la marche. Un train qui roule d'une ville à l'autre sous les yeux du joueur serait une autre affaire (des rails sur toutes les cellules du chemin, un être qui traverse la fenêtre) ; dis si tu la veux.
 - **Pas de combat monté** : à la première action de combat, le joueur descend. Le combat à cheval changerait les règles (allonge, charge, cible) : c'est à toi.
 - **Les chiffres** : trois trains par jour (8 h, 14 h, 20 h), une minute d'arrêt, un prix par cellule, la monture à demi-coût de marche, l'écurie vend un cheval au prix d'une bonne arme. Tout est dans `villes.transports`.
+
+## 2026-09-05 — L'économie et les transports vus (19 h 55)
+
+- **Les prix d'une ville** : la première semaine, tout ce qui n'est pas nourriture est à 1,6 (pénurie) parce que la ville ne stocke ni bois, ni tissu, ni métal — elle use ses vingt chênes hebdomadaires et le reste n'est produit par personne. Ce n'est pas faux (une ville de fermiers manque de tout le reste), mais c'est brutal pour le joueur qui vend un lingot : il vend cher, c'est vrai, et achète cher aussi. Deux leviers : `villes.economie.prix_max` (1,6) et donner aux ateliers une production en matières (aujourd'hui l'artisan produit de l'or). Dis ce que tu veux voir.
+- **La génération d'un quartier** : 120 à 142 ms par cellule sur la machine chargée de ce soir (55 à 62 ms cet après-midi, budget 120). Je n'ai pas touché : c'est la charge de la machine ; si tu le vois en jeu à l'arrivée dans une ville, la pré-génération du monde (le thread) devrait l'absorber.
+- **Le train** n'est pas simulé entre deux gares (décidé, B4) ; la calèche fait le tour des places ; les montures ne se battent pas. Les prix (5 or par cellule, 3 or la calèche, 120 or le cheval) sont dans `villes.transports`.
+- **Les jumeaux** : quatre paires sur 217 PNJ ont les mêmes traits, le même souhait et la même histoire. Une troisième donnée (un tic de langage, une couleur préférée) les séparerait tout à fait ; dis si ça vaut la peine.
+
+## 2026-09-05 — Les royaumes-pays (D, 20 h 20) : ce que j'ai choisi
+
+- **Les chances des événements** (`data/royaumes_evenements/*.json`) : la guerre à 4 % par semaine entre voisins hostiles ou tendus, la paix à 15 % par semaine de guerre, l'édit à 8 %, la révolte à 50 % sous 20 d'humeur, la disette dès que la capitale chargée est en pénurie de nourriture. Sur huit semaines et douze royaumes : quatorze événements, aucune guerre. Trop calme ou trop agité : chaque chiffre est dans son fichier.
+- **La guerre n'a pas d'armées qui marchent** : elle arrête les caravanes entre les deux royaumes, baisse l'humeur, et c'est tout. Des raids d'un royaume en guerre contre les villes de l'autre, des gardes doublés aux frontières, une bataille à voir — c'est une autre étape ; dis si tu la veux avant les PNJ de la 0.5.
+- **L'humeur d'un royaume** revient de 3 par semaine vers 55 quand aucun de ses résidents n'est chargé ; avec ses gens chargés, c'est la moyenne de leurs humeurs. Le trésor des royaumes ne sert encore à rien d'autre qu'à la levée de taxes et à la révolte : le nerf de la guerre attend la guerre.
+- **Le fanion des gardes** : un petit drapeau de la couleur du royaume au-dessus de l'épaule. Le blason lui-même (deux couleurs, un motif) n'a pas de dessin : les sprites sont à toi.
+- **La carte, case par case (98)** : chaque pas est un voyage d'une cellule au coût de la marche ; on entre d'office dans un donjon si la cellule en porte un (c'est la règle des voyages). Si tu veux un pas plus rapide sur route ou une monture qui compte sur la carte, dis-le.

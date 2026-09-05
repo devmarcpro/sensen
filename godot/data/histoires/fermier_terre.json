@@ -1,0 +1,8 @@
+{
+  "text_key": "histoire.fermier_terre.text",
+  "conditions": {
+    "fonction": "fermier",
+    "trait": null
+  },
+  "poids": 2
+}

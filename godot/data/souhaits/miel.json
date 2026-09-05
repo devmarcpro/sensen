@@ -1,0 +1,16 @@
+{
+  "name_key": "souhait.miel.name",
+  "filtre": {
+    "types_any": [
+      "consommable"
+    ],
+    "tags_any": [
+      "miel"
+    ]
+  },
+  "conditions": {
+    "fonction": null,
+    "trait": null
+  },
+  "relation": 25
+}

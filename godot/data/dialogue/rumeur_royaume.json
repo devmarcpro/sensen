@@ -1,0 +1,11 @@
+{
+  "text_key": "rumeur_royaume",
+  "conditions": {
+    "metier": null,
+    "phase": null,
+    "relation_min": 20,
+    "relation_max": null,
+    "meteo": null
+  },
+  "poids": 5
+}

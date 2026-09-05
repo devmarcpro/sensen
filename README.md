@@ -84,6 +84,14 @@ Les étapes 0 à 10 de l'ordre de construction sont codées. Par thème :
 
 **Villes** — la population décide de tout : cinq paliers (hameau, village, bourg, ville, cité), une agglomération couvre jusqu'à neuf cellules, chacune un quartier typé (centre, résidentiel, artisanal, marchand, agricole) avec sa grille de rues, ses parcelles le long des rues, ses logements, ses boutiques (jamais deux du même type), ses ateliers à stations, ses entrepôts, son siège du pouvoir selon la gouvernance du royaume (château, mairie, temple, comptoir, caserne), ses champs (de vraies parcelles que ses fermiers récoltent et ressèment) et son enclos de bêtes. **Une ville est un territoire, le même que le camp du joueur** : périmètres, résidents assignés, stocks, trésor, la même semaine ; le joueur qui la prend la gère avec ses outils de camp.
 
+**Économie et transports** — les stocks d'une ville font ses prix par catégorie (nourriture, bois, pierre, métal, tissu, outils, luxe : pénurie 1,6, surplus 0,7), elle use ce qu'elle consomme et verse sa taxe au royaume ; les marchands itinérants arrivent par la route le jour de marché avec le surplus de leur ville ; des rails suivent les routes d'un royaume et un train passe aux heures du calendrier (on monte, on paie, on descend à la gare voisine), une calèche fait le tour des quartiers, un cheval apprivoisé ou acheté à l'écurie se monte (le pas coûte moitié moins, pied à terre en combat).
+
+**Royaumes** — chaque royaume est un pays : population, armée, humeur du peuple, trésor nourri par ses villes, un règne daté du calendrier et une ère nommée (l'ère de la Grue, du Fer…), un blason dont ses gardes portent le fanion, des événements hebdomadaires (disette, bonne récolte, édit, révolte, levée de taxes, guerre et paix avec un voisin) que la carte affiche et que les PNJ racontent en rumeurs.
+
+**Carte du monde** — les flèches font marcher le joueur de cellule en cellule (façon Dragon Quest), Maj + flèches font défiler, le clic marche loin ou revendique.
+
+**PNJ** — chacun a deux traits de caractère qui agissent (prix, relation, horaires, production, fuite), une histoire, un souhait, des opinions sur ses voisins ; on lui offre des cadeaux ; sa fiche s'ouvre avec la relation (caractère à 50, souhait à 75, histoire et opinions à 90).
+
 **Compagnons** — recrutés au village (tout humanoïde non hostile : gratuit au seuil de relation, sinon 40 or) ou apprivoisés, ils suivent partout : en donjon, d'étage en étage, et rentrent au camp avec le joueur ; ordres et postures, un HUD les montre (nom, vie, ordre) ; désarmés, ils frappent à mains nues.
 
 **Interface** — un volet latéral (F4) : monde, personnage, compagnons, journal, inventaire ; les écrans d'inventaire, d'atelier, de composition, de commerce et de territoire ; un voile sous tout menu.
@@ -191,6 +199,10 @@ python -X utf8 tools/verif_sprites.py      # les sprites d'objets attendus dans 
 & $godot --headless --path godot res://scenes/tests/sonde_village.tscn -- --graine_monde 9 --semaines 30
 # Une ville à la population (Villes B1) : la plus grande agglomération à portée, ses quartiers, ses lits, ses rues, ses gens ; chargée, son territoire ; puis des semaines chronométrées
 & $godot --headless --path godot res://scenes/tests/sonde_ville.tscn -- --graine_monde 9 --semaines 4
+# Les PNJ d'une ville : traits, souhaits, histoires, opinions, et combien se ressemblent
+& $godot --headless --path godot res://scenes/tests/sonde_pnj.tscn -- --graine_monde 21
+# Les royaumes autour du camp : état, règne, ère, blason, puis douze semaines d'événements
+& $godot --headless --path godot res://scenes/tests/sonde_royaume.tscn -- --graine_monde 21 --semaines 12
 # Captures : --ville (la plus grande agglomération à portée, révélée, vue reculée), --village (le hameau le plus proche), --maison, --creature, --compagnons, --arme <base>, --zoom Z, --plein-ecran
 # Le robot joue le client : descend les étages, se bat, meurt ou pas (fenêtré ; --equiper N --sorts N pour un robot équipé ; --compagnons N pour une escorte armée, notée à chaque étage)
 & $godot --path godot res://scenes/tests/parcours.tscn -- --graine 73 --etages 4 --frames 8000 --equiper 3 --sorts 3 --sortie user://robot

@@ -1,0 +1,11 @@
+{
+  "journal_key": "evenement.revolte",
+  "chance": 0.5,
+  "conditions": {
+    "humeur_max": 20
+  },
+  "effets": {
+    "tresor_pct": -0.2,
+    "humeur": 15
+  }
+}

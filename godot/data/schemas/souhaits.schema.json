@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "filtre",
+    "conditions",
+    "relation"
+  ]
+}

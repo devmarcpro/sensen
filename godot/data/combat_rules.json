@@ -674,7 +674,7 @@
     "chance_mort_par_an": 0.05
   },
   "royaume": {
-    "_doc": "Territoire du joueur (Expansion territoriale, Population et exploitation, Entretien et taxes) : coût du claim, rôles, humeur, production hebdomadaire, entretien, dette, seuil de royaume.",
+    "_doc": "Territoire du joueur (Expansion territoriale, Population et exploitation, Entretien et taxes) : coût du claim, rôles, humeur, production hebdomadaire, entretien, dette, seuil de royaume. pays (D) : l humeur de base d un royaume et sa vitesse de retour, l armee de base par taille, l anciennete maximale d un regne au depart, la longueur du journal du royaume.",
     "claim_cout_par_cellule": 50,
     "roles": [
       "base",
@@ -1039,6 +1039,18 @@
     "stockage": {
       "_doc": "Un stockage par poste (Population et exploitation, 2026-09-04) : la capacite d'un perimetre de stockage = unites_par_tuile x ses tuiles libres ; la production d'un poste y va, jusqu'a la capacite.",
       "unites_par_tuile": 10
+    },
+    "pays": {
+      "humeur_base": 55,
+      "humeur_retour": 3,
+      "armee_base": {
+        "hameau": 2,
+        "cite": 6,
+        "petit": 15,
+        "grand": 40
+      },
+      "avenement_max": 30,
+      "journal_max": 10
     }
   },
   "alchimie": {
@@ -1810,7 +1822,15 @@
     "max": 3
   },
   "pnj": {
-    "_doc": "Generation des PNJ (Fonctions, Talents de classe) : une classe cachee est tiree AVANT le pool de la fonction, a classe_cachee_chance, sur n'importe quelle fonction ; sinon la classe vient de classes_possibles.",
-    "classe_cachee_chance": 0.02
+    "_doc": "Generation des PNJ (Fonctions, Talents de classe) : une classe cachee est tiree AVANT le pool de la fonction, a classe_cachee_chance, sur n'importe quelle fonction ; sinon la classe vient de classes_possibles. traits_par_pnj, cadeau (relation d'un cadeau : base + valeur × relation_par_valeur, plafonnée, + bonus_aime si le trait aime), opinions_par_pnj (PNJ — traits, histoires et souhaits).",
+    "classe_cachee_chance": 0.02,
+    "traits_par_pnj": 2,
+    "cadeau": {
+      "relation_base": 3,
+      "relation_par_valeur": 0.1,
+      "relation_max": 15,
+      "bonus_aime": 8
+    },
+    "opinions_par_pnj": 2
   }
 }

@@ -60,6 +60,9 @@ La couche stratégique : une vue abstraite de la même grille, servant de voyage
 > [!success] Corrigé le 2026-09-04 — la teinte des donjons de corruption sur la carte
 > Vu sur une capture de la carte, dans la console : « Invalid color code: [0.9, 0.25, 0.15] », trois fois par image. La carte lisait `wuxing.teintes` comme des codes HTML alors que ce sont des triplets RVB (tout le reste du jeu les lit ainsi) : les donjons nés de la corruption se dessinaient d'une couleur de repli, pas de celle de leur élément. Corrigé dans `carte.gd`.
 
+> [!success] Codé le 2026-09-05, 20 h — se déplacer case par case sur la carte (designer, point 98)
+> « Actuellement on ne peut pas se déplacer dessus ; je voudrais pouvoir me déplacer comme un vieux RPG style Dragon Quest / Final Fantasy, juste se déplacer de case en case. » Sur la carte (M), **les flèches font marcher le joueur d'une cellule** : chaque pas est un `voyager` vers la voisine, au coût de la marche (la route le divise, comme avant), la carte reste ouverte et se recentre sur lui, l'avatar suit ; arrivé sur la cellule d'un donjon, on y entre et la carte se ferme. **Maj + flèches** font défiler la carte (l'ancien rôle des flèches), le clic marche jusqu'à une cellule lointaine ou revendique une voisine comme avant, Échap ferme. Le titre de la carte le dit. Rien de nouveau dans la simulation : un pas est un voyage d'une cellule.
+
 ## Liens
 - **Dépend de** : [[Décision — Monde fini, continents et océan]], [[Grille continue]], [[Unification macro-micro]], [[Génération par couches de bruit]]
 - **Alimente** : [[Début de partie]], [[Boucle de jeu]], [[Donjons — structure et intégration]], [[Minimap et brouillard de guerre]]

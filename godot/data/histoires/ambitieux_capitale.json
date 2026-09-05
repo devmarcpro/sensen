@@ -1,0 +1,8 @@
+{
+  "text_key": "histoire.ambitieux_capitale.text",
+  "conditions": {
+    "fonction": null,
+    "trait": "ambitieux"
+  },
+  "poids": 2
+}

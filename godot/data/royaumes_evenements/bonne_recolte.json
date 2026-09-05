@@ -1,0 +1,10 @@
+{
+  "journal_key": "evenement.bonne_recolte",
+  "chance": 0.5,
+  "conditions": {
+    "nourriture_surplus": true
+  },
+  "effets": {
+    "humeur": 5
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "journal_key": "evenement.fete_du_regne",
+  "chance": 1.0,
+  "conditions": {
+    "anniversaire_avenement": true
+  },
+  "effets": {
+    "humeur": 5
+  }
+}

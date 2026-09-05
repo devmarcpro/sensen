@@ -1,0 +1,16 @@
+{
+  "name_key": "souhait.potion.name",
+  "filtre": {
+    "types_any": [
+      "consommable"
+    ],
+    "tags_any": [
+      "potion"
+    ]
+  },
+  "conditions": {
+    "fonction": null,
+    "trait": null
+  },
+  "relation": 25
+}

@@ -1,0 +1,13 @@
+{
+  "name_key": "trait.gourmand.name",
+  "effets": {
+    "humeur": 5
+  },
+  "exclut": [],
+  "cadeaux": [
+    "nourriture",
+    "consommable",
+    "miel"
+  ],
+  "tags": []
+}

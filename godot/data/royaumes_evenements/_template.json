@@ -1,0 +1,7 @@
+{
+  "_doc": "Un événement de royaume (Royaumes — état, ères, blasons et événements), tiré chaque semaine pour chaque royaume connu : chance ; conditions — humeur_min/max, tresor_max, guerre (bool), nourriture_penurie / nourriture_surplus (le prix de la capitale, si elle est chargée), gouvernances (liste), voisin (relations diplomatiques d'un voisin parmi la liste), anniversaire_avenement ; effets — humeur (±), tresor_pct (±), base_rate (±), loi (ajoute/retire une loi absurde), guerre (declare/paix). journal_key : la clé de langue, avec {royaume}, {autre}, {loi}.",
+  "journal_key": "evenement.<id>",
+  "chance": 0.1,
+  "conditions": {},
+  "effets": {}
+}

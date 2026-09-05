@@ -1005,14 +1005,33 @@ func _construire_dialogue(j: Dictionary) -> void:
 	liste.add_item(tr("ui.ecran.partir"))
 	entrees.append({"kind": "option", "option": "partir"})
 	for en in entrees:
-		en["texte"] = "[b]%s[/b]\n« %s »\n\n%s\n\n%s" % [tr(pnj.name_key), tr(replique_key), tr("ui.dialogue.relation").format({"n": rel}) + (("  ·  " + tr("ui.dialogue.compagnon").format({"ordre": tr("ordre." + str(pnj.get("ordre", "suivre")))})) if pnj.has("maitre") else ""), fiche_pnj(pnj, j)]
+		en["texte"] = "[b]%s[/b]\n« %s »\n\n%s\n\n%s" % [tr(pnj.name_key), texte_replique(pnj), tr("ui.dialogue.relation").format({"n": rel}) + (("  ·  " + tr("ui.dialogue.compagnon").format({"ordre": tr("ordre." + str(pnj.get("ordre", "suivre")))})) if pnj.has("maitre") else ""), fiche_pnj(pnj, j)]
 	_bouton(tr("ui.ecran.parler"), func() -> void: _option("parler"))
+	if "civil" in pnj.get("tags", []) and not pnj.has("vehicule_etat") and not j.get("sac", []).is_empty():   # Offrir un cadeau (PNJ distincts)
+		_bouton(tr("ui.ecran.offrir"), func() -> void: _option("offrir"))
 	if "commerce_possible" in pnj.get("tags", []):
 		_bouton(tr("ui.ecran.commercer"), func() -> void: _option("commercer"))
 
 
 func _option(opt: String) -> void:
 	var j: Dictionary = main.joueur()
+	if opt == "offrir":   # le choix du cadeau : les objets du sac en options (PNJ distincts)
+		liste.clear()
+		entrees.clear()
+		for uid in j.get("sac", []).slice(0, 12):
+			liste.add_item(tr("ui.ecran.offrir_objet").format({"objet": main.nom_objet(main.sim.nom_objet(str(uid)))}))
+			entrees.append({"kind": "option", "option": "offrir:" + str(uid)})
+		liste.add_item(tr("ui.ecran.retour"))
+		entrees.append({"kind": "option", "option": "retour_dialogue"})
+		return
+	if opt.begins_with("offrir:"):
+		main.sim.intention(j.id, {"type": "offrir", "pnj": pnj_id, "objet": opt.substr(7)})
+		replique_key = str(main.sim.replique(main.sim.entites[pnj_id], j))
+		rafraichir()
+		return
+	if opt == "retour_dialogue":
+		rafraichir()
+		return
 	if opt.begins_with("train:") or opt.begins_with("caleche:"):   # le train vers une gare, la calèche vers une place (Villes B4)
 		var parts: PackedStringArray = opt.split(":")[1].split(",")
 		var cible_v := Vector2i(int(parts[0]), int(parts[1]))
@@ -1037,7 +1056,7 @@ func _option(opt: String) -> void:
 			main.sim.intention(j.id, {"type": "monter", "pnj": pnj_id})
 			fermer()
 		"descendre":
-			main.sim.intention(j.id, {"type": "descendre"})
+			main.sim.intention(j.id, {"type": "descendre_monture"})
 			fermer()
 		"acheter_monture":
 			main.sim.intention(j.id, {"type": "acheter_monture", "pnj": pnj_id})
@@ -1092,6 +1111,38 @@ func _option(opt: String) -> void:
 
 
 ## La fiche d'un PNJ, révélée par paliers de relation (L'information comme récompense).
+## La réplique d'un PNJ telle qu'elle s'affiche : une clé, ou « histoire » / « opinion » que le client compose.
+func texte_replique(pnj: Dictionary) -> String:
+	if replique_key == "histoire" and pnj.has("histoire"):
+		return texte_histoire(pnj)
+	if replique_key == "rumeur_royaume":
+		var etat_r: Dictionary = main.sim.etat_royaume(str(pnj.get("royaume", "")))
+		var jr: Array = etat_r.get("journal", [])
+		if jr.is_empty():
+			return tr("dialogue.rumeur_royaume.rien")
+		var ev: Dictionary = jr[jr.size() - 1]
+		var pr: Dictionary = ev.get("params", {}).duplicate()
+		for k in pr.keys():
+			if pr[k] is String and str(pr[k]).contains("."):
+				pr[k] = tr(str(pr[k]))
+		return tr("dialogue.rumeur_royaume.prefixe").format({"rumeur": tr(str(ev.cle)).format(pr)})
+	if replique_key == "opinion":
+		var ops: Dictionary = pnj.get("social", {}).get("opinions", {})
+		for autre in ops.keys():
+			if main.sim.entites.has(str(autre)):
+				return tr("dialogue.opinion.aime" if int(ops[autre]) >= 0 else "dialogue.opinion.n_aime_pas").format({"nom": tr(main.sim.entites[str(autre)].name_key)})
+		return tr("dialogue.opinion.personne")
+	return tr(replique_key)
+
+
+func texte_histoire(pnj: Dictionary) -> String:
+	var h: Dictionary = pnj.get("histoire", {})
+	var params: Dictionary = h.get("params", {}).duplicate()
+	if params.has("metier"):
+		params["metier"] = tr(str(params.metier))
+	return tr(str(h.get("cle", ""))).format(params)
+
+
 func fiche_pnj(pnj: Dictionary, j: Dictionary) -> String:
 	var sim = main.sim
 	var palier: int = sim.palier_info(pnj, j)
@@ -1110,9 +1161,28 @@ func fiche_pnj(pnj: Dictionary, j: Dictionary) -> String:
 		for slot in pnj.equipement.keys():
 			equip.append(main.nom_objet(sim.nom_objet(pnj.equipement[slot])))
 		l.append(tr("ui.fiche.competences").format({"liste": " · ".join(comps) if not comps.is_empty() else "—", "equip": " · ".join(equip) if not equip.is_empty() else "—"}))
+	if palier >= 3 and pnj.has("traits"):   # le caractère se lit à 50 (PNJ distincts)
+		var noms_t: Array[String] = []
+		for tid in pnj.traits:
+			noms_t.append(tr("trait.%s.name" % str(tid)))
+		l.append(tr("ui.fiche.traits").format({"traits": " · ".join(noms_t) if not noms_t.is_empty() else "—"}))
 	if palier >= 4:
-		l.append(tr("ui.fiche.gouts").format({"tags": " · ".join(pnj.get("tags", []))}))
+		var cadeaux: Array[String] = []
+		for tid in pnj.get("traits", []):
+			for c in GameData.catalogues.get("traits", {}).get(str(tid), {}).get("cadeaux", []):
+				if not (str(c) in cadeaux):
+					cadeaux.append(str(c))
+		l.append(tr("ui.fiche.souhait").format({"souhait": tr("souhait.%s.name" % str(pnj.souhait)) if pnj.has("souhait") else "—", "cadeaux": " · ".join(cadeaux) if not cadeaux.is_empty() else "—"}))
 	if palier >= 5:
+		if pnj.has("histoire"):
+			l.append(tr("ui.fiche.histoire").format({"histoire": texte_histoire(pnj)}))
+		var ops: Dictionary = pnj.get("social", {}).get("opinions", {})
+		var textes_o: Array[String] = []
+		for autre in ops.keys():
+			if sim.entites.has(str(autre)):
+				textes_o.append(tr("ui.fiche.opinion_aime" if int(ops[autre]) >= 0 else "ui.fiche.opinion_n_aime_pas").format({"nom": tr(sim.entites[str(autre)].name_key)}))
+		if not textes_o.is_empty():
+			l.append(tr("ui.fiche.opinions").format({"opinions": " · ".join(textes_o)}))
 		l.append(tr("ui.fiche.tout"))
 		pnj["recrutable_hors_condition"] = true
 	return "\n".join(l)

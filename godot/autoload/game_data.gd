@@ -17,7 +17,7 @@ const CATALOGUES: Array[String] = [
 	"items", "status_effects", "prototype_arenas", "rigs", "tutorials",
 	"dungeon_rooms", "dungeon_connectors", "dungeon_themes", "affixes", "competences", "races", "classes",
 	"materials", "stations", "recipes", "components", "component_recipes", "meubles", "biomes", "vegetaux", "weather_states",
-	"functions", "dialogue", "name_cultures", "village_buildings", "quest_templates", "plants", "governments", "guilds", "shop_types", "species", "talents", "grilles", "serments",
+	"functions", "dialogue", "traits", "histoires", "souhaits", "royaumes_evenements", "name_cultures", "village_buildings", "quest_templates", "plants", "governments", "guilds", "shop_types", "species", "talents", "grilles", "serments",
 ]
 ## Tags dérivés des stats d'un matériau au seuil ≥ 50 (Schéma matériau).
 const TAGS_DERIVES := {"flammabilite": "inflammable", "conductivite_mana": "conducteur_mana", "flottabilite": "flottant",
@@ -27,7 +27,7 @@ const WUXING_CATEGORIE := {"metal": {"metal": 1.0}, "bois": {"bois": 1.0}, "vege
 	"terre": {"terre": 1.0}, "mineral": {"terre": 1.0}, "fossile": {"terre": 1.0}, "gemme": {"terre": 1.0},
 	"liquide": {"eau": 1.0}, "meteorologique": {"eau": 1.0}, "synthetique": {"terre": 1.0}}
 ## Configurations (fichier unique à la racine de data/).
-const CONFIGS: Array[String] = ["combat_rules", "tile_contents", "wuxing", "palette_materiaux", "loot_rules", "rare_epithets", "reading_failures", "astrologie", "calendrier", "villes", "material_categories", "minerais_par_etage", "material_families", "camp", "noise_layers", "planete", "absurd_laws_pool", "styles", "creation", "apparence", "poses", "classes_meres"]
+const CONFIGS: Array[String] = ["combat_rules", "tile_contents", "wuxing", "palette_materiaux", "loot_rules", "rare_epithets", "reading_failures", "astrologie", "calendrier", "villes", "blasons", "material_categories", "minerais_par_etage", "material_families", "camp", "noise_layers", "planete", "absurd_laws_pool", "styles", "creation", "apparence", "poses", "classes_meres"]
 
 var catalogues: Dictionary = {}   # nom → { id → Dictionary }
 var configs: Dictionary = {}      # nom → Dictionary

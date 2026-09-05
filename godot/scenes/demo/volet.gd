@@ -119,6 +119,11 @@ func _lignes_monde(sim, j: Dictionary) -> Array[String]:
 		var cell: Vector2i = sim.monde.cellule_de(j.pos)
 		var biome := str(sim.monde.cellule(cell).get("biome", ""))
 		l.append(tr("volet.lieu_camp").format({"x": cell.x, "y": cell.y, "biome": tr(GameData.catalogues.biomes.get(biome, {}).get("name_key", biome))}))
+		var roy_v: Dictionary = sim.monde.surface.royaume_de(cell)   # le pays où l'on se tient (D)
+		if not roy_v.is_empty():
+			var etat_v: Dictionary = sim.etat_royaume(str(roy_v.id))
+			if not etat_v.is_empty():
+				l.append(tr("volet.royaume").format({"nom": str(roy_v.nom), "gouv": tr(GameData.entree("governments", str(roy_v.government_type)).name_key), "dirigeant": str(etat_v.dirigeant), "an": sim.an_de_regne(etat_v), "ere": tr("ere.%s.name" % str(etat_v.ere))}))
 		l.append(tr("volet.corruption").format({"n": roundi(sim.monde.corruption_de(cell))}))
 		var vl: Dictionary = sim.vecteur_lieu(j.pos)
 		if not vl.is_empty():

@@ -1,0 +1,12 @@
+{
+  "text_key": "dialogue.gouv_monarchie_hereditaire.text",
+  "conditions": {
+    "metier": null,
+    "phase": null,
+    "relation_min": null,
+    "relation_max": null,
+    "meteo": null,
+    "gouvernance": "monarchie_hereditaire"
+  },
+  "poids": 3
+}

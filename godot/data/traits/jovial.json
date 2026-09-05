@@ -1,0 +1,16 @@
+{
+  "name_key": "trait.jovial.name",
+  "effets": {
+    "relation_mult": 1.3,
+    "humeur": 10
+  },
+  "exclut": [
+    "mefiant",
+    "grincheux"
+  ],
+  "cadeaux": [
+    "consommable",
+    "instrument"
+  ],
+  "tags": []
+}

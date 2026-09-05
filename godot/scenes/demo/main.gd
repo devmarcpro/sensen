@@ -515,6 +515,22 @@ func _voyager(cell: Vector2i) -> void:
 		_apres_changement_de_grille()
 
 
+## Un pas sur la carte du monde (designer, 2026-09-05, point 98) : le joueur marche jusqu'à la cellule voisine —
+## au coût de la marche — et la carte reste ouverte, recentrée sur lui ; arrivé sur un donjon, elle se ferme.
+func _pas_sur_la_carte(pas: Vector2i) -> void:
+	var j := joueur()
+	if j.is_empty() or sim.monde == null or sim.lieu != "camp":
+		return
+	var cell: Vector2i = sim.monde.cellule_de(j.pos) + pas
+	if not sim.voyager(j, cell):
+		return
+	_apres_changement_de_grille()
+	if sim.lieu != "camp":   # un donjon sur la cellule : on y est entré, la carte n'a plus de sens
+		carte.fermer()
+		return
+	carte.recentrer(cell)
+
+
 func _charger(fiche: Dictionary = {}) -> void:
 	if fiche.is_empty() and sim != null and not sim.fiche_joueur.is_empty():
 		fiche = sim.fiche_joueur

@@ -1,0 +1,10 @@
+{
+  "_doc": "Un souhait (PNJ — traits, histoires et souhaits) : ce qu'un PNJ veut recevoir — un filtre d'objets (le langage de GameData.filtrer), des conditions (fonction, trait ; nul = toujours), la relation gagnée quand on le comble.",
+  "name_key": "souhait.<id>.name",
+  "filtre": {},
+  "conditions": {
+    "fonction": null,
+    "trait": null
+  },
+  "relation": 25
+}

@@ -92,5 +92,13 @@
       "m": "titre.latine.guilde_maitre.m",
       "f": "titre.latine.guilde_maitre.f"
     }
-  }
+  },
+  "eres": [
+    "aigle",
+    "laurier",
+    "marbre",
+    "trident",
+    "louve",
+    "colonne"
+  ]
 }

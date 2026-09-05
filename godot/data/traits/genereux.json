@@ -1,0 +1,15 @@
+{
+  "name_key": "trait.genereux.name",
+  "effets": {
+    "prix_mult": 0.9,
+    "relation_mult": 1.1
+  },
+  "exclut": [
+    "avare"
+  ],
+  "cadeaux": [
+    "nourriture",
+    "consommable"
+  ],
+  "tags": []
+}

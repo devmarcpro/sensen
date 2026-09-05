@@ -1,0 +1,8 @@
+{
+  "text_key": "histoire.pretre_vocation.text",
+  "conditions": {
+    "fonction": "pretre",
+    "trait": null
+  },
+  "poids": 2
+}

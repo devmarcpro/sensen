@@ -96,5 +96,13 @@
       "m": "titre.nordique.guilde_maitre.m",
       "f": "titre.nordique.guilde_maitre.f"
     }
-  }
+  },
+  "eres": [
+    "fer",
+    "corbeau",
+    "givre",
+    "chene",
+    "loup",
+    "marteau"
+  ]
 }

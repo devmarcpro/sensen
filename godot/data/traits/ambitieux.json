@@ -1,0 +1,15 @@
+{
+  "name_key": "trait.ambitieux.name",
+  "effets": {
+    "productivite": 1.15,
+    "prix_mult": 1.05
+  },
+  "exclut": [
+    "paresseux"
+  ],
+  "cadeaux": [
+    "gemme",
+    "arme"
+  ],
+  "tags": []
+}

@@ -1,0 +1,12 @@
+{
+  "text_key": "dialogue.trait_taciturne_2.text",
+  "conditions": {
+    "metier": null,
+    "phase": null,
+    "relation_min": null,
+    "relation_max": null,
+    "meteo": null,
+    "trait": "taciturne"
+  },
+  "poids": 4
+}

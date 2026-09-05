@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "required": [
+    "text_key",
+    "conditions"
+  ],
+  "properties": {
+    "conditions": {
+      "type": "object"
+    },
+    "poids": {
+      "type": "number"
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "_doc": "Les blasons des royaumes (Royaumes — état, ères, blasons et événements) : deux couleurs tirées parmi celles de la culture, un motif parmi ceux de la gouvernance. Les gardes portent la première couleur en fanion.",
+  "couleurs": {
+    "_defaut": [
+      "#b8342a",
+      "#2a4fa8",
+      "#d9a520",
+      "#2f7f3a",
+      "#5a2d82",
+      "#e6e2d3",
+      "#1e1e1e"
+    ],
+    "sino": [
+      "#c8102e",
+      "#f2c531",
+      "#1b6b4a",
+      "#1f3a93",
+      "#e6e2d3"
+    ],
+    "nordique": [
+      "#2a4fa8",
+      "#8c1c1c",
+      "#e6e2d3",
+      "#3b3b3b",
+      "#d9a520"
+    ],
+    "latine": [
+      "#8c1c1c",
+      "#d9a520",
+      "#5a2d82",
+      "#e6e2d3",
+      "#1f3a93"
+    ],
+    "celte": [
+      "#2f7f3a",
+      "#d9a520",
+      "#8c1c1c",
+      "#3b6f8f",
+      "#e6e2d3"
+    ],
+    "nipponne": [
+      "#c8102e",
+      "#e6e2d3",
+      "#1e1e1e",
+      "#2f7f3a",
+      "#5a2d82"
+    ],
+    "slave": [
+      "#b8342a",
+      "#2a4fa8",
+      "#e6e2d3",
+      "#d9a520",
+      "#2f7f3a"
+    ],
+    "arabo_berbere": [
+      "#2f7f3a",
+      "#d9a520",
+      "#e6e2d3",
+      "#b8342a",
+      "#1f3a93"
+    ]
+  },
+  "motifs": {
+    "monarchie_hereditaire": [
+      "couronne",
+      "lion",
+      "tour"
+    ],
+    "republique_elue": [
+      "balance",
+      "main_ouverte",
+      "olivier"
+    ],
+    "theocratie": [
+      "flamme",
+      "soleil",
+      "oeil"
+    ],
+    "ploutocratie": [
+      "bourse",
+      "clef",
+      "navire"
+    ],
+    "dictature_militaire": [
+      "epee",
+      "casque",
+      "poing"
+    ],
+    "anarchie": [
+      "cercle_brise",
+      "chardon",
+      "vent"
+    ]
+  }
+}

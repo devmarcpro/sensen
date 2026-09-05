@@ -1,5 +1,5 @@
 {
-  "_doc": "Culture de nommage (docs: Culture de nommage — schéma / B.11).",
+  "_doc": "Culture de nommage (docs: Culture de nommage — schéma / B.11). eres : les noms d'ère de la culture (Royaumes — état, ères, blasons et événements), cles ere.<id>.name.",
   "name_key": "culture.<id>.name",
   "name_order": "prenom_nom",
   "race_affinity": {
@@ -22,5 +22,8 @@
   ],
   "famille_b_f": [
     ""
+  ],
+  "eres": [
+    "<id d ere>"
   ]
 }

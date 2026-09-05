@@ -1,0 +1,14 @@
+{
+  "journal_key": "evenement.edit",
+  "chance": 0.08,
+  "conditions": {
+    "gouvernances": [
+      "monarchie_hereditaire",
+      "theocratie",
+      "dictature_militaire"
+    ]
+  },
+  "effets": {
+    "loi": "ajoute"
+  }
+}

@@ -82,5 +82,13 @@
       "m": "titre.sino.guilde_maitre.m",
       "f": "titre.sino.guilde_maitre.f"
     }
-  }
+  },
+  "eres": [
+    "grue",
+    "jade",
+    "lotus",
+    "dragon_d_azur",
+    "bambou",
+    "phenix"
+  ]
 }

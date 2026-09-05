@@ -1,0 +1,14 @@
+{
+  "name_key": "trait.grincheux.name",
+  "effets": {
+    "humeur": -10,
+    "relation_mult": 0.8
+  },
+  "exclut": [
+    "jovial"
+  ],
+  "cadeaux": [
+    "gemme"
+  ],
+  "tags": []
+}

@@ -1,0 +1,11 @@
+{
+  "journal_key": "evenement.paix",
+  "chance": 0.15,
+  "conditions": {
+    "guerre": true
+  },
+  "effets": {
+    "guerre": "paix",
+    "humeur": 10
+  }
+}

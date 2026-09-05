@@ -97,5 +97,13 @@
       "m": "titre.nipponne.guilde_maitre.m",
       "f": "titre.nipponne.guilde_maitre.f"
     }
-  }
+  },
+  "eres": [
+    "cerisier",
+    "carpe",
+    "acier",
+    "lune",
+    "pin",
+    "vague"
+  ]
 }

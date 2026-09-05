@@ -1,0 +1,9 @@
+{
+  "_doc": "Une histoire courte (PNJ — traits, histoires et souhaits) : une phrase tirée une fois par PNJ parmi les gabarits dont les conditions matchent (fonction, trait ; nul = toujours). Placeholders : {prenom}, {ville}, {ville_natale}, {metier}, {age}.",
+  "text_key": "histoire.<id>.text",
+  "conditions": {
+    "fonction": null,
+    "trait": null
+  },
+  "poids": 1
+}

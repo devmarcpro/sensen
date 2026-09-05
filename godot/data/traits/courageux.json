@@ -1,0 +1,14 @@
+{
+  "name_key": "trait.courageux.name",
+  "effets": {
+    "courage": 1.5
+  },
+  "exclut": [
+    "peureux"
+  ],
+  "cadeaux": [
+    "arme",
+    "bouclier"
+  ],
+  "tags": []
+}

@@ -1,0 +1,8 @@
+{
+  "text_key": "histoire.artisan_forge.text",
+  "conditions": {
+    "fonction": "artisan",
+    "trait": null
+  },
+  "poids": 2
+}

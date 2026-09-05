@@ -1,0 +1,15 @@
+{
+  "name_key": "souhait.livre.name",
+  "filtre": {
+    "types_any": [
+      "manuel",
+      "grimoire",
+      "parchemin"
+    ]
+  },
+  "conditions": {
+    "fonction": null,
+    "trait": "curieux"
+  },
+  "relation": 25
+}

@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "required": [
+    "name_key",
+    "effets",
+    "exclut",
+    "cadeaux"
+  ],
+  "properties": {
+    "effets": {
+      "type": "object"
+    },
+    "exclut": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cadeaux": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "text_key": "dialogue.gouv_republique_elue.text",
+  "conditions": {
+    "metier": null,
+    "phase": null,
+    "relation_min": null,
+    "relation_max": null,
+    "meteo": null,
+    "gouvernance": "republique_elue"
+  },
+  "poids": 3
+}

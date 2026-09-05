@@ -223,6 +223,12 @@ func _dessiner() -> void:
 			var jr: Dictionary = main.joueur()
 			var etat := tr("ui.carte.vacance") if sim.monde.vacances.has(str(roy_s.id)) else tr("relation." + sim.relation_royaume(jr, roy_s))
 			texte += tr("ui.carte.survol_royaume").format({"nom": roy_s.nom, "gouv": tr(GameData.entree("governments", str(roy_s.government_type)).name_key), "taille": tr("kingdom.taille." + str(roy_s.taille)), "n": roy_s.territory_cells.size(), "etat": etat, "capitale": tr("ui.carte.capitale") if roy_s.capital_poi == survol else ""})
+			var etat_p: Dictionary = sim.etat_royaume(str(roy_s.id))   # le pays (D) : le règne, l'ère, la population, l'humeur, la guerre
+			if not etat_p.is_empty():
+				var guerre_t := ""
+				for autre in etat_p.get("guerres", []):
+					guerre_t += tr("ui.carte.guerre").format({"autre": str(sim.royaume_par_id(str(autre)).get("nom", autre))})
+				texte += tr("ui.carte.survol_pays").format({"dirigeant": str(etat_p.dirigeant), "an": sim.an_de_regne(etat_p), "ere": tr("ere.%s.name" % str(etat_p.ere)), "population": int(etat_p.population), "armee": int(etat_p.armee), "humeur": int(etat_p.humeur), "guerre": guerre_t})
 		dessin.draw_string(ThemeDB.fallback_font, o + Vector2(0, _fenetre().y * case_px + 38.0), texte, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.95, 0.9, 0.7))
 
 
@@ -314,18 +320,32 @@ func _entree(ev: InputEvent) -> void:
 			fermer()
 
 
-## Touches quand la carte est ouverte (flèches : faire défiler la carte).
+## Touches quand la carte est ouverte : les flèches font MARCHER le joueur d'une cellule (designer, 2026-09-05 :
+## « comme un vieux RPG style Dragon Quest / Final Fantasy, se déplacer de case en case ») ; Maj + flèches font
+## défiler la carte ; Échap et Tab la ferment.
 func touche(ev: InputEventKey) -> bool:
+	var pas := Vector2i.ZERO
 	match ev.keycode:
 		KEY_ESCAPE, KEY_TAB:
 			if mode != "depart":
 				fermer()
 			return true
-		KEY_LEFT: centre.x -= 4
-		KEY_RIGHT: centre.x += 4
-		KEY_UP: centre.y -= 4
-		KEY_DOWN: centre.y += 4
+		KEY_LEFT: pas = Vector2i(-1, 0)
+		KEY_RIGHT: pas = Vector2i(1, 0)
+		KEY_UP: pas = Vector2i(0, -1)
+		KEY_DOWN: pas = Vector2i(0, 1)
 		_:
 			return false
-	dessin.queue_redraw()
+	if ev.shift_pressed or mode == "depart":
+		centre += pas * 4
+		dessin.queue_redraw()
+		return true
+	main._pas_sur_la_carte(pas)
 	return true
+
+
+## Recentre la carte sur une cellule (après un pas).
+func recentrer(cell: Vector2i) -> void:
+	centre = cell
+	decalage = Vector2.ZERO
+	dessin.queue_redraw()

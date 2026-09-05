@@ -125,6 +125,11 @@ func _draw() -> void:
 			contour = float(CONTOURS.get(peint[nom].construction, 1.0))
 		_dessine_segment(m, col, contour, nom)
 	_dessine_tenus(monde)
+	if e.has("blason"):   # le garde porte le fanion de son royaume (D)
+		var col := Color.html(str(e.blason))
+		var h_f := float(rig.hauteur_pieds) + 6.0
+		draw_line(Vector2(6.0, -h_f), Vector2(6.0, -h_f - 9.0), Color(0.25, 0.2, 0.15), 1.0)
+		draw_colored_polygon(PackedVector2Array([Vector2(6.0, -h_f - 9.0), Vector2(11.0, -h_f - 7.5), Vector2(6.0, -h_f - 6.0)]), col)
 	if dessine_apres.is_valid():
 		dessine_apres.call(self)
 

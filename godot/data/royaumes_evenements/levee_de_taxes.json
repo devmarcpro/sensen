@@ -1,0 +1,11 @@
+{
+  "journal_key": "evenement.levee_de_taxes",
+  "chance": 0.1,
+  "conditions": {
+    "tresor_max": 50
+  },
+  "effets": {
+    "base_rate": 0.02,
+    "humeur": -5
+  }
+}

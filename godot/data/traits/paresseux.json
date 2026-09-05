@@ -1,0 +1,15 @@
+{
+  "name_key": "trait.paresseux.name",
+  "effets": {
+    "productivite": 0.8,
+    "horaires_decalage": 2
+  },
+  "exclut": [
+    "ambitieux",
+    "leve_tot"
+  ],
+  "cadeaux": [
+    "consommable"
+  ],
+  "tags": []
+}

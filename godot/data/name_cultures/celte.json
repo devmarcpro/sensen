@@ -98,5 +98,13 @@
       "m": "titre.celte.guilde_maitre.m",
       "f": "titre.celte.guilde_maitre.f"
     }
-  }
+  },
+  "eres": [
+    "cerf",
+    "brume",
+    "torque",
+    "if",
+    "sanglier",
+    "source"
+  ]
 }

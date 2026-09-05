@@ -1,0 +1,13 @@
+{
+  "name_key": "souhait.bijou.name",
+  "filtre": {
+    "types_any": [
+      "bijou"
+    ]
+  },
+  "conditions": {
+    "fonction": null,
+    "trait": null
+  },
+  "relation": 25
+}

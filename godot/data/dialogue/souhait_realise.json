@@ -1,0 +1,12 @@
+{
+  "text_key": "dialogue.souhait_realise.text",
+  "conditions": {
+    "metier": null,
+    "phase": null,
+    "relation_min": null,
+    "relation_max": null,
+    "meteo": null,
+    "souhait_realise": true
+  },
+  "poids": 10
+}

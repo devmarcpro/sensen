@@ -1,0 +1,13 @@
+{
+  "name_key": "trait.mefiant.name",
+  "effets": {
+    "relation_mult": 0.7
+  },
+  "exclut": [
+    "jovial"
+  ],
+  "cadeaux": [
+    "arme"
+  ],
+  "tags": []
+}

@@ -1,0 +1,14 @@
+{
+  "name_key": "trait.avare.name",
+  "effets": {
+    "prix_mult": 1.15
+  },
+  "exclut": [
+    "genereux"
+  ],
+  "cadeaux": [
+    "gemme",
+    "bijou"
+  ],
+  "tags": []
+}
