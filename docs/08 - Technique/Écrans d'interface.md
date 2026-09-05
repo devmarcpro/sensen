@@ -267,3 +267,6 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 
 > [!note] 2026-09-05, 2 h — la bulle de survol ne recouvre plus le bloc d'information du haut
 > Vu sur les captures de la chaumière : la bulle de la compagne, posée au-dessus d'elle, s'écrivait par-dessus les lignes d'état en haut à gauche. Quand elle n'a pas la place au-dessus de l'être, elle passe dessous ; elle reste aussi à gauche du volet et dans l'écran.
+
+> [!important] 2026-09-05, 13 h — le designer : « pour le combat, rajouter quand quelqu'un reçoit des dégâts un tremblement du personnage et un léger clignotement rouge »
+> Sur `damage_dealt`, le paperdoll du blessé **tremble** (un décalage aléatoire de `styles.coups.secousse_px` pixels pendant `secousse_s`, appliqué au repère de dessin — la position, que le client lisse, n'est pas touchée) et **rougit** (`self_modulate` vers `styles.coups.rouge`, qui s'éteint en `rouge_s`). L'attaquant garde son geste de frappe. Les quatre chiffres sont des données.

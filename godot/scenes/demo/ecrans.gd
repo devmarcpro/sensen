@@ -948,8 +948,9 @@ func _construire_dialogue(j: Dictionary) -> void:
 	else:
 		var def: Dictionary = GameData.catalogues.creatures.get(str(pnj.def), {})
 		var rc: Dictionary = def.get("recruitable", {"method": "jamais"})
-		if (str(rc.get("method", "")) == "relation" and rel >= int(rc.get("threshold", 60)) - 10) or bool(pnj.get("recrutable_hors_condition", false)):
-			liste.add_item(tr("ui.ecran.recruter"))
+		if (str(rc.get("method", "")) == "relation" and rel >= int(rc.get("threshold", 60)) - 10) or bool(pnj.get("recrutable_hors_condition", false)) or main.sim.recrutable(j, pnj):   # sur tous les PNJ (designer 2026-09-05)
+			var gratuit: bool = (str(rc.get("method", "")) == "relation" and rel >= int(rc.get("threshold", 60))) or bool(pnj.get("recrutable_hors_condition", false))
+			liste.add_item(tr("ui.ecran.recruter") if gratuit else tr("ui.ecran.recruter_prix").format({"prix": int(main.sim.regles.r.compagnons.get("prix_recrutement", 40))}))
 			entrees.append({"kind": "option", "option": "recruter"})
 			if main.sim.monde != null and not main.sim.monde.claims.is_empty() and not pnj.has("assignation"):   # engager pour la base (2026-09-04)
 				liste.add_item(tr("ui.ecran.engager").format({"or": int(main.sim._ry().get("engagement", {}).get("or", 20))}))

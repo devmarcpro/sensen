@@ -3334,3 +3334,5 @@ piste.element,élément
 piste.competence,compétence
 piste.type,type d'attaque
 piste.construction,armure
+ui.ecran.recruter_prix,Recruter ({prix} or)
+journal.recrutement_prix,{nom} demande {prix} pièces d'or pour te suivre.

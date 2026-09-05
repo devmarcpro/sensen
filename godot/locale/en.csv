@@ -3325,3 +3325,5 @@ piste.element,element
 piste.competence,skill
 piste.type,attack type
 piste.construction,armour
+ui.ecran.recruter_prix,Recruit ({prix} gold)
+journal.recrutement_prix,{nom} asks {prix} gold to follow you.

@@ -5113,6 +5113,15 @@ func _devenir_compagnon(e: Dictionary, x: Dictionary) -> void:
 
 
 ## Recruter un PNJ par la relation (recruitable.method relation, seuil, ou faveur du palier 90).
+## Qui peut être recruté (designer 2026-09-05 : « sur tous les PNJ ») : un humanoïde vivant, non hostile au joueur, qui
+## n'est pas déjà le compagnon de quelqu'un. La relation décide du prix, pas de la possibilité.
+func recrutable(e: Dictionary, pnj: Dictionary) -> bool:
+	if pnj.is_empty() or not pnj.vivant or pnj.has("maitre") or pnj.controle != "ia":
+		return false
+	var def: Dictionary = GameData.catalogues.creatures.get(str(pnj.def), {})
+	return ("humanoide" in def.get("tags", [])) and not ennemis(e, pnj)
+
+
 func _recruter(e: Dictionary, pnj_id: String, tick: int) -> bool:
 	var pnj: Dictionary = entites.get(pnj_id, {})
 	if pnj.is_empty() or not pnj.vivant or pnj.has("maitre") or Grille.distance(e.pos, pnj.pos) > 2:
@@ -5124,12 +5133,22 @@ func _recruter(e: Dictionary, pnj_id: String, tick: int) -> bool:
 		ok = true
 	if bool(pnj.get("recrutable_hors_condition", false)):
 		ok = true
+	var prix := 0
+	if not ok and recrutable(e, pnj):   # tout PNJ humanoïde non hostile se recrute, contre un prix quand la relation manque (designer 2026-09-05)
+		prix = int(regles.r.compagnons.get("prix_recrutement", 40))
+		if int(e.get("or", 0)) < prix:
+			EventBus.emettre(&"journal", [&"journal.recrutement_prix", {"nom": pnj.name_key, "prix": prix}])
+			return false
+		ok = true
 	if not ok:
 		EventBus.emettre(&"journal", [&"journal.pas_recrutable", {"nom": pnj.name_key}])
 		return false
 	if compagnons_de(e, false).size() >= places_escorte(e):
 		EventBus.emettre(&"journal", [&"journal.pas_de_place", {}])
 		return false
+	if prix > 0:
+		e.or = int(e.get("or", 0)) - prix
+		pnj.or = int(pnj.get("or", 0)) + prix
 	_devenir_compagnon(e, pnj)
 	EventBus.emettre(&"journal", [&"journal.recrute", {"nom": pnj.name_key, "places": places_escorte(e)}])
 	return true

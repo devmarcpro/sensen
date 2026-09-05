@@ -47,11 +47,37 @@ func frapper() -> void:
 		_anim_restant = _anim_duree
 
 
+var _encaisse_restant := 0.0   # le retour d'un coup reçu (Écrans d'interface, 2026-09-05) : tremblement et rouge, le temps de styles.coups
+var _encaisse_duree := 0.0
+var _decalage := Vector2.ZERO   # le tremblement du moment, appliqué au repère de dessin
+
+
+## Un coup reçu : le personnage tremble et clignote rouge un instant (designer 2026-09-05, 13 h).
+func encaisser() -> void:
+	var st: Dictionary = GameData.config("styles").get("coups", {})
+	_encaisse_duree = maxf(float(st.get("secousse_s", 0.22)), float(st.get("rouge_s", 0.16)))
+	_encaisse_restant = _encaisse_duree
+	queue_redraw()
+
+
 func _process(delta: float) -> void:
 	if _anim_restant > 0.0:
 		_anim_restant -= delta
 		if _anim_restant <= 0.0:
 			pose = {}
+		queue_redraw()
+	if _encaisse_restant > 0.0:
+		_encaisse_restant -= delta
+		var st: Dictionary = GameData.config("styles").get("coups", {})
+		var ecoule := _encaisse_duree - _encaisse_restant
+		var amp := float(st.get("secousse_px", 2.5)) if ecoule < float(st.get("secousse_s", 0.22)) else 0.0
+		_decalage = Vector2(randf_range(-amp, amp), randf_range(-amp, amp) * 0.5)
+		var rouge := Color.html(str(st.get("rouge", "#ff6a5a")))
+		var part := clampf(1.0 - ecoule / maxf(0.01, float(st.get("rouge_s", 0.16))), 0.0, 1.0)
+		self_modulate = Color.WHITE.lerp(rouge, part)
+		if _encaisse_restant <= 0.0:
+			_decalage = Vector2.ZERO
+			self_modulate = Color.WHITE
 		queue_redraw()
 
 
@@ -73,8 +99,8 @@ func _draw() -> void:
 	var fac: Dictionary = GameData.config("apparence").get("facteurs", {})
 	_carrure = float(fac.get("carrure", {}).get(str(_ap.get("carrure", "moyenne")), 1.0))
 	var ech := float(_ap.get("echelle", 1.0)) * float(fac.get("taille", {}).get(str(_ap.get("taille", "moyenne")), 1.0))
-	if not is_equal_approx(ech, 1.0):
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2(ech, ech))
+	if not is_equal_approx(ech, 1.0) or _decalage != Vector2.ZERO:
+		draw_set_transform(_decalage, 0.0, Vector2(ech, ech))   # le tremblement d'un coup reçu décale tout le dessin
 	var monde := _poser_segments(f, miroir)
 	_monde_dessine = monde
 	_echelle_dessin = ech
@@ -242,6 +268,26 @@ func _dessine_tenus(monde: Dictionary) -> void:
 		var pt: Vector2 = m.origine + m.direction * float(prise[0]) + m.perp * float(prise[1])
 		draw_circle(pt, 5.0, _couleur_materiau(it.get("materiau", "")))
 		draw_arc(pt, 5.0, 0.0, TAU, 12, Color(0.2, 0.15, 0.1), 1.2)
+
+
+## Le contrat de remplacement (Squelette modulaire et points d'attache, 2026-09-05) : l'arme tenue est LE MÊME montage
+## que son icône d'inventaire (`Pictos.assembler`, le designer : « c'est le même sprite »), dessiné dans la main, tourné
+## avec elle. Le repère du montage est en unités de rig, comme le paperdoll : son origine (le pied du manche) se pose à
+## « prise » unités sous la main, son axe −Y sur `haut`. Faux si une pièce n'a pas de sprite : le trait par code reste.
+func _dessine_arme_sprite(it: Dictionary, pt: Vector2, haut: Vector2) -> bool:
+	var parts: Array = Pictos.assembler(it)
+	if parts.is_empty():
+		return false
+	var manche: Dictionary = it.get("composants", {}).get("manche", {})
+	var sp: Dictionary = GameData.catalogues.get("components", {}).get(str(manche.get("composant", "")), {}).get("sprite", {})
+	var prise: Array = sp.get("ancrages", {}).get("prise", [0, 0])
+	var base: Vector2 = pt - haut * float(prise[0])
+	var local := Transform2D(haut.angle() + PI * 0.5, Vector2.ONE, 0.0, base)   # −Y du montage = haut
+	draw_set_transform_matrix(Transform2D(0.0, _decalage) * Transform2D().scaled(Vector2(_echelle_dessin, _echelle_dessin)) * local)
+	for p in parts:
+		draw_texture_rect(p.tex, p.rect, false, p.teinte)
+	draw_set_transform(_decalage, 0.0, Vector2(_echelle_dessin, _echelle_dessin))
+	return true
 
 
 ## Une teinte nommée d'une palette de `apparence.json` (peau, cheveux) ; la couleur de repli si l'id est inconnu.

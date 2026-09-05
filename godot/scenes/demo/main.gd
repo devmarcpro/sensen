@@ -195,7 +195,11 @@ func _ready() -> void:
 	pluie.z_as_relative = false
 	pluie.z_index = 4050   # la pluie tombe devant le monde et les êtres, sous le HUD (Météo, 2026-08-31)
 	add_child(pluie)
-	EventBus.damage_dealt.connect(func(src: String, _c: String, _d: int, _det: Dictionary) -> void: if noeuds.has(src): noeuds[src].frapper())
+	EventBus.damage_dealt.connect(func(src: String, cible_d: String, d: int, _det: Dictionary) -> void:
+		if noeuds.has(src):
+			noeuds[src].frapper()
+		if d > 0 and noeuds.has(cible_d):   # le blessé tremble et clignote rouge (designer 2026-09-05, 13 h)
+			noeuds[cible_d].encaisser())
 	# Les arènes du prototype, SANS les bancs d'essai : le banc d'objets remplit vingt-quatre coffres au
 	# chargement, et comme la liste est triée il passait en tête — donc en arène de démarrage. Le jeu
 	# mettait des secondes à s'ouvrir sur une salle de démonstration (designer, 2026-09-02 : « la fenêtre

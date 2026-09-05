@@ -166,5 +166,12 @@
   "sprites": {
     "_doc": "Les sprites d'objets du designer (Direction artistique, 2026-09-05) : dossier res:// ou le jeu cherche <id sans craft_/proto_>.png, composants/<id>.png, matieres/<forme>.png ; absent = pictogramme par code.",
     "dossier": "res://assets/objets"
+  },
+  "coups": {
+    "_doc": "Le retour d'un coup recu (designer 2026-09-05, 13 h : « quand quelqu'un recoit des degats, un tremblement du personnage et un leger clignotement rouge ») : secousse_px = amplitude du tremblement en pixels, secousse_s = sa duree, rouge = la teinte du clignotement, rouge_s = sa duree.",
+    "secousse_px": 2.5,
+    "secousse_s": 0.22,
+    "rouge": "#ff6a5a",
+    "rouge_s": 0.16
   }
 }
