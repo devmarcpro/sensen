@@ -29,6 +29,7 @@ res://
 │   ├── worldgen/        # Évaluation des couches de bruit, biomes, POI
 │   ├── crafting/        # Recettes, qualité, stations
 │   ├── combat/          # Résolution des modules, mana, dégâts
+│   ├── simulation/      # Les bibliothèques statiques Sim… : les règles, l'état reste dans combat/simulation.gd (2026-09-05)
 │   ├── skills/          # XP par usage, skill_factor
 │   ├── economy/         # Prix, boutiques passives, abstraction hors-site
 │   └── reputation/

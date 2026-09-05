@@ -203,6 +203,8 @@ python -X utf8 tools/verif_sprites.py      # les sprites d'objets attendus dans 
 & $godot --headless --path godot res://scenes/tests/sonde_pnj.tscn -- --graine_monde 21
 # Les royaumes autour du camp : état, règne, ère, blason, puis douze semaines d'événements
 & $godot --headless --path godot res://scenes/tests/sonde_royaume.tscn -- --graine_monde 21 --semaines 12
+# L'échelle : la plus grande ville, puis ses résidents clonés jusqu'à 500, 1 000, 2 000 êtres — le coût d'un tick et où il part (Modules de la simulation et le C++)
+& $godot --headless --path godot res://scenes/tests/sonde_echelle.tscn -- --graine_monde 9 --cibles 500,1000,2000 --ticks 200
 # Captures : --ville (la plus grande agglomération à portée, révélée, vue reculée), --village (le hameau le plus proche), --maison, --creature, --compagnons, --arme <base>, --zoom Z, --plein-ecran
 # Le robot joue le client : descend les étages, se bat, meurt ou pas (fenêtré ; --equiper N --sorts N pour un robot équipé ; --compagnons N pour une escorte armée, notée à chaque étage)
 & $godot --path godot res://scenes/tests/parcours.tscn -- --graine 73 --etages 4 --frames 8000 --equiper 3 --sorts 3 --sortie user://robot
