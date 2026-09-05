@@ -178,7 +178,7 @@ Vingt-huit scènes `scenes/tests/sonde_*.tscn`, chacune mesure une chose et l'é
 & $godot --headless --path godot res://scenes/tests/sonde_perf_generation.tscn   # le coût d'un objet généré
 & $godot --headless --path godot res://scenes/tests/sonde_ia.tscn                # errance, cible, meute
 & $godot --headless --path godot res://scenes/tests/sonde_ia_pnj.tscn            # ennemis et alliés, scène par scène (--seulement compagnons,camp)
-& $godot --headless --path godot res://scenes/tests/sonde_commerce.tscn          # les boutiques : filtres, étals garnis, marchands du village le plus proche
+& $godot --headless --path godot res://scenes/tests/sonde_commerce.tscn          # les boutiques (filtres, étals garnis, marchands du village le plus proche) et ses guichets de quêtes
 python -X utf8 tools/liste_objets.py       # la liste des objets pour les sprites (note générée)
 python -X utf8 tools/verif_sprites.py      # les sprites d'objets attendus dans godot/assets/objets/, présents, manquants
 & $godot --headless --path godot res://scenes/tests/sonde_journal.tscn           # les lignes identiques du journal se cumulent

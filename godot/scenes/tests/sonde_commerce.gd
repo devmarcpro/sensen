@@ -1,5 +1,5 @@
 extends Node
-## Sonde du commerce (designer 2026-09-05, 12 h 45 : « je crois bien que les commerces sont cassés, la plupart n'ont
+## Sonde du commerce et des quêtes (designer 2026-09-05, 12 h 45 : « je crois bien que les commerces sont cassés, la plupart n'ont
 ## rien à vendre ou sinon vendent seulement des boucliers non craft »). Elle dit ce que chaque type de boutique tire
 ## vraiment, ce que la génération d'un objet rend, et ce que les marchands du village le plus proche ont en stock.
 ##   godot --headless --path godot res://scenes/tests/sonde_commerce.tscn [-- --graine_monde N]
@@ -123,3 +123,21 @@ func _village(graine: int) -> void:
 		soucis.append("aucun marchand chargé au village")
 	elif vides > 0:
 		soucis.append("%d marchand(s) sur %d n'ont rien à vendre" % [vides, n_m])
+	# Les guichets de quêtes : qui porte le tag, et ce qu'il offre au joueur qui arrive (2026-09-05, 14 h).
+	var j2: Dictionary = s2.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var n_q := 0
+	var sans_quete := 0
+	for e in s2.vivants():
+		if e.controle == "joueur" or not ("quetes" in e.get("tags", [])):
+			continue
+		n_q += 1
+		var offres: Array = s2.quetes_offertes(e, j2)
+		var titres: Array = []
+		for q in offres:
+			titres.append(str(q.get("gabarit", q.get("id", "?"))))
+		print("  %s · fonction « %s » · %d quête(s) offerte(s) : %s" % [e.id, str(e.get("fonction", "")), offres.size(), ", ".join(titres)])
+		if offres.is_empty():
+			sans_quete += 1
+	print("guichets de quêtes : %d, dont %d sans rien à proposer" % [n_q, sans_quete])
+	if n_q > 0 and sans_quete == n_q:
+		soucis.append("aucun guichet de quêtes n'a rien à proposer")
