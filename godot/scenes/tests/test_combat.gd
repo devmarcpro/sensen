@@ -219,6 +219,7 @@ func _ready() -> void:
 	_lancer("test_proie_n_engage_pas")
 	_lancer("test_sprites_objets")
 	_lancer("test_boutiques_vendent")
+	_lancer("test_recruter_contre_or")
 	_verifier_tous_lances()
 	Monde.fermer_tous()   # aucun thread de pré-génération ne doit survivre aux autoloads
 	for nom_s in ["test_terrain", "test_sensen", "test_sensen2", "test_graine", "test_partout", "test_partout2", "test_auto"]:
@@ -4076,6 +4077,27 @@ func test_bete_engage_sur_son_horloge() -> void:
 		for nom in s.combats.keys():
 			s.pas(nom)
 	verifier(int(j.sante) < sante0 or not j.vivant, "le rat a mordu pendant que le joueur attendait (%d → %d)" % [sante0, int(j.sante)])
+
+
+## Recruter sur tous les PNJ (Compagnons, 2026-09-05) : un villageois à relation nulle refuse sans or, suit contre le prix,
+## et l'or change de mains ; un loup ne se recrute pas ; un PNJ déjà compagnon non plus.
+func test_recruter_contre_or() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var v: Dictionary = s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
+	var loup: Dictionary = s.ajouter("loup", j.pos + Vector2i(0, 1), "ia")
+	var prix := int(s.regles.r.compagnons.get("prix_recrutement", 40))
+	verifier(s.recrutable(j, v) and not s.recrutable(j, loup), "un villageois se recrute, un loup non")
+	j.or = 0
+	verifier(not s._recruter(j, v.id, 0) and not v.has("maitre"), "sans or ni relation, il refuse")
+	j.or = prix + 5
+	var or_v := int(v.get("or", 0))
+	verifier(s._recruter(j, v.id, 0) and str(v.get("maitre", "")) == j.id and int(j.or) == 5 and int(v.or) == or_v + prix, "contre %d or, il suit et l'or change de mains" % prix)
+	verifier(not s.recrutable(j, v), "déjà compagnon : plus recrutable")
+	var v2: Dictionary = s.ajouter("villageois", j.pos + Vector2i(-1, 0), "ia")
+	v2.social.relations[j.id] = 90
+	j.or = 0
+	verifier(s._recruter(j, v2.id, 0) and str(v2.get("maitre", "")) == j.id, "au seuil de relation, il suit gratuitement")
 
 
 ## Les boutiques vendent (Commerce et boutiques, 2026-09-05) : chaque type garnit un étal non vide, le tailleur vend des
