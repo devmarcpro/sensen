@@ -529,3 +529,12 @@ Deux choses à trancher :
 2. **Recruter sur tous les PNJ** : gratuit au seuil de relation de la fiche (comme avant), sinon **40 or** (`compagnons.prix_recrutement`). Mettre 0 rend tout le monde gratuit ; le seuil des fiches (`recruitable.threshold`) reste. Les hostiles ne se recrutent pas.
 3. **Les spawns** : un plafond par salle, 2 + 1 par étage au-delà du premier (`peuplement_etage.max_par_salle_*`). La densité par tuile (30 dans la ruine) et le plafond de puissance par étage ne bougent pas. Je n'ai pas touché au loot : sa densité vient d'une décision du 31 août (« le loot pour tous ») ; si c'est la *qualité* du butin des premiers étages qui déçoit, c'est `loot_rules.poids_par_profondeur` (ligne 1) et `assemblage.niveau_base`.
 4. **Les premiers niveaux** : `xp_base` 40 et `xp_exposant` 1,9 (avant 100 et 1,6). Deux fois et demie plus vite au début, le dixième niveau presque comme avant. La mesure du robot est dans [[Progression par l'usage]].
+
+## 2026-09-05 — Le calendrier (programme A) : ce que j'ai choisi, et comment le défaire
+
+Le designer a demandé « le calendrier, très important pour le réalisme et les fonctionnalités » sans en dire la forme. J'ai pris la forme qui ne bouge rien de ce qui existe (l'année de 120 jours, les cinq saisons, la semaine de sept jours qui cadence l'économie) et qui parle la langue du jeu (le cycle sexagésimal). Tout est dans `data/calendrier.json` ([[Un monde réel — villes, PNJ, royaumes et calendrier]]).
+
+- **Douze mois de dix jours, nommés par les animaux ; sept jours nommés Soleil, Lune et les cinq éléments.** Si tu préfères des mois plus longs ou des noms de ta main, ce sont les listes `mois` et `jours_semaine` — les mois doivent sommer 120 (ou changer `age.jours_par_an` avec).
+- **L'an 1 020 au départ** : parce que la création propose une naissance en l'an 1 000. Change `annee_depart` et l'âge du personnage change avec.
+- **Le marché** : réapprovisionnement × 2 et prix × 0,9 le jour de marché de chaque agglomération. Deux valeurs dans `marche`. Si le marché doit fermer les autres jours, c'est une autre demande.
+- **Les fêtes** : humeur + 10 et la place tenue toute la journée ; dix fêtes (trois communes, une par culture). Ajouter, retirer ou déplacer une fête est une entrée de `fetes`. Rien n'est vendu ni acheté de spécial ce jour-là : à voir avec l'économie des villes (B).

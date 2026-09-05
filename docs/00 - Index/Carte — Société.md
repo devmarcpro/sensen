@@ -6,7 +6,7 @@ statut: décidé
 etape: 10
 ---
 
-De la relation individuelle au royaume : commerce, réputation, guildes, territoire. 34 notes.
+De la relation individuelle au royaume : commerce, réputation, guildes, territoire. 36 notes.
 
 *Les cinq systèmes annoncés en tête de la section 7 du GDD :*
 - Quêtes de guilde
@@ -47,6 +47,8 @@ De la relation individuelle au royaume : commerce, réputation, guildes, territo
 **Le royaume**
 - **[[Royaume du joueur]]** — la destination naturelle d'une partie. Six chantiers.
 - **[[Expansion territoriale]]** · **[[Population et exploitation]]** · **[[Halls de guilde]]**
+- **[[Villes — population, quartiers et économie]]** — la ville à la population : quartiers sur plusieurs cellules, rues, logements, commerces, production, champs et bêtes, économie, siège du pouvoir.
+- **[[Un monde réel — villes, PNJ, royaumes et calendrier]]** — le programme du 5 septembre : villes à la population, PNJ distincts, royaumes-pays, calendrier, agriculture ; puis la 0.5.0.
 - **[[Gouvernance, lois et diplomatie]]** — six gouvernances, des lois propres à chaque royaume (dont des lois absurdes assumées), quatre accords diplomatiques.
 - **[[Lois et infractions]]** — *l'infraction n'a de conséquence QUE si repérée.* Pas de karma caché.
 - **[[Génération des royaumes PNJ]]** — des îlots de civilisation. *Un royaume est un événement.*
