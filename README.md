@@ -187,6 +187,9 @@ python -X utf8 tools/verif_sprites.py      # les sprites d'objets attendus dans 
 #   options : --etal (un étal garni du stock) · --tempo (le coût d'une image au camp) · --profil (la semaine étape par étape) · --sauvegarde (aller-retour)
 # Un hameau sur la durée : la moitié tuée, combien de semaines pour se repeupler ; décimé, devient-il abandonné (Villages PNJ)
 & $godot --headless --path godot res://scenes/tests/sonde_village.tscn -- --graine_monde 9 --semaines 30
+# Une ville à la population (Villes B1) : la plus grande agglomération à portée, ses quartiers, ses lits, ses rues, ses gens ; chargée, son territoire ; puis des semaines chronométrées
+& $godot --headless --path godot res://scenes/tests/sonde_ville.tscn -- --graine_monde 9 --semaines 4
+# Captures : --ville (la plus grande agglomération à portée, révélée, vue reculée), --village (le hameau le plus proche), --maison, --creature, --compagnons, --arme <base>, --zoom Z, --plein-ecran
 # Le robot joue le client : descend les étages, se bat, meurt ou pas (fenêtré ; --equiper N --sorts N pour un robot équipé ; --compagnons N pour une escorte armée, notée à chaque étage)
 & $godot --path godot res://scenes/tests/parcours.tscn -- --graine 73 --etages 4 --frames 8000 --equiper 3 --sorts 3 --sortie user://robot
 ```

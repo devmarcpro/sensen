@@ -1,0 +1,21 @@
+{
+  "horaires": {
+    "6-20": "poste",
+    "20-22": "social",
+    "22-6": "lit"
+  },
+  "classes_possibles": [
+    "la_balance",
+    "le_souffle"
+  ],
+  "leadership": false,
+  "tags": [],
+  "produit": {
+    "or": 1.5
+  },
+  "magistrat": true,
+  "name_key": "function.seigneur.name",
+  "skill": "leadership",
+  "rendement_base": 0.02,
+  "portefeuille": 800
+}

@@ -5,5 +5,9 @@
   "succession": "general",
   "meurtre_legal": false,
   "leadership": true,
-  "tags": []
+  "tags": [],
+  "siege": {
+    "batiment": "caserne",
+    "fonction": "commandant"
+  }
 }

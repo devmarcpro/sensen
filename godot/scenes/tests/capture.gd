@@ -121,11 +121,25 @@ func _ready() -> void:
 		scene._commencer_monde()
 		scene.fiche_en_attente = {}
 		scene.carte.fermer()
-	if "--village" in args and scene.sim != null:   # --village : le village le plus proche du camp, le joueur sur sa place
+	if ("--village" in args or "--ville" in args) and scene.sim != null:   # --village : le village le plus proche du camp, le joueur sur sa place ; --ville : la plus grande agglomération à 40 cellules (Villes B1)
 		var sv = scene.sim
 		var c0: Vector2i = sv.monde.cellule_camp
 		var cible := Vector2i(-9999, -9999)
-		for r in range(1, 70):   # le monde est rectangulaire : le premier village peut être loin (2026-09-01)
+		if "--ville" in args:
+			var ordre_p: Array = GameData.config("villes").ordre_paliers
+			var meilleure: Dictionary = {}
+			for dy in range(-40, 41):
+				for dx in range(-40, 41):
+					var cv0 := c0 + Vector2i(dx, dy)
+					if not (sv.monde.surface.terre_a(cv0) and bool(sv.monde.surface.poi_de(cv0).get("village", false))):
+						continue
+					var fa: Dictionary = sv.monde.surface.fiche_agglomeration(cv0)
+					if meilleure.is_empty() or ordre_p.find(str(fa.palier)) > ordre_p.find(str(meilleure.palier)) or (str(fa.palier) == str(meilleure.palier) and int(fa.population) > int(meilleure.population)):
+						meilleure = fa
+			if not meilleure.is_empty():
+				cible = meilleure.centre
+				print("ville : ", str(meilleure.nom), " (", str(meilleure.palier), ", ", int(meilleure.population), " habitants, ", meilleure.cellules.size(), " cellules)")
+		for r in range(1, 70 if cible.x == -9999 else 0):   # le monde est rectangulaire : le premier village peut être loin (2026-09-01)
 			for dy in range(-r, r + 1):
 				for dx in range(-r, r + 1):
 					if absi(dx) != r and absi(dy) != r:
@@ -142,9 +156,18 @@ func _ready() -> void:
 			if cible.x != -9999:
 				break
 		if cible.x != -9999:
-			sv.charger_camp({}, cible + Vector2i(1, 0))   # la cellule-camp elle-même n'a jamais de village : le camp à côté
-			var ev: Dictionary = sv.monde.cellule(cible)
+			sv.charger_camp({}, cible + Vector2i(2 if "--ville" in args else 1, 0))   # la cellule-camp elle-même n'a jamais de village : le camp à côté (à deux cellules d'une ville : la voisine est un quartier)
 			var jv: Dictionary = sv.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+			if "--ville" in args:   # on y voyage : la fenêtre se centre sur la ville, ses quartiers se chargent
+				var n_sub_v: int = sv.monde.taille / 32
+				for cy in n_sub_v:
+					for cx in n_sub_v:
+						sv.monde.explores[Vector2i(cible.x * n_sub_v + cx, cible.y * n_sub_v + cy)] = true
+				sv.voyager(jv, cible)
+				for i in sv.grille.largeur * sv.grille.hauteur_grille:   # la ville se regarde entière : le brouillard levé sur la fenêtre
+					sv.grille.decouvert[i] = true
+				scene.zoom = 0.8   # de quoi voir un quartier d’un coup (2,0 est le zoom par défaut)
+			var ev: Dictionary = sv.monde.cellule(cible)
 			scene.joueur_id = jv.id
 			var centre_v: Vector2i = cible * int(GameData.config("planete").taille_cellule) + Vector2i(ev.village.centre)
 			if not sv.grille.occupant(centre_v).is_empty():

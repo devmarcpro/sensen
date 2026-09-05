@@ -3,5 +3,29 @@
   "required": [
     "plan",
     "meubles"
-  ]
+  ],
+  "properties": {
+    "plan": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "string"
+      }
+    },
+    "meubles": {
+      "type": "object"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "poste": {
+      "type": "string"
+    },
+    "stations": {
+      "type": "object"
+    }
+  }
 }

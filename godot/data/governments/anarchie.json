@@ -5,5 +5,9 @@
   "succession": "aucune",
   "meurtre_legal": true,
   "leadership": false,
-  "tags": []
+  "tags": [],
+  "siege": {
+    "batiment": "auberge",
+    "fonction": ""
+  }
 }

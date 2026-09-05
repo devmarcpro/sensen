@@ -222,6 +222,8 @@ func _ready() -> void:
 	_lancer("test_recruter_contre_or")
 	_lancer("test_plafond_par_salle")
 	_lancer("test_calendrier")
+	_lancer("test_territoires")
+	_lancer("test_villes")
 	_verifier_tous_lances()
 	Monde.fermer_tous()   # aucun thread de pré-génération ne doit survivre aux autoloads
 	for nom_s in ["test_terrain", "test_sensen", "test_sensen2", "test_graine", "test_partout", "test_partout2", "test_auto"]:
@@ -1905,7 +1907,8 @@ func test_village() -> void:
 	for x in civils:
 		if x.get("fonction", "") == "commercant":
 			marchand = x
-	verifier(not marchand.is_empty() and marchand.has("nom") and tr(marchand.name_key) == Noms.afficher(marchand.nom) and int(marchand.or) == 300 and marchand.stock.size() >= 8, "le marchand a un nom (%s), 300 or et un stock" % tr(marchand.get("name_key", "?")))
+	# Le stock d'un étal dépend du type de boutique tiré par l'agglomération (Villes B1) : quatre objets au moins, pas huit.
+	verifier(not marchand.is_empty() and marchand.has("nom") and tr(marchand.name_key) == Noms.afficher(marchand.nom) and int(marchand.or) == 300 and marchand.stock.size() >= 4, "le marchand a un nom (%s), 300 or et un stock" % tr(marchand.get("name_key", "?")))
 	verifier(not s.ennemis(j, marchand) and s.ennemis(marchand, {"camp": "hostile"}), "un civil n'est pas l'ennemi du joueur, mais celui des hostiles")
 	if not marchand.is_empty():   # on arrive par la route : le joueur se place devant l'échoppe pour parler et commercer
 		var devant := s._tuile_libre_autour(marchand.pos)
@@ -2375,10 +2378,18 @@ func test_villes_et_halls() -> void:
 		"taxes": {"base_rate": 0.08, "tariff_default": 0.1}, "tariffs": {}, "laws": [], "diplomacy": {}, "rivals": [], "tags": []}
 	surf.royaumes_cache[surf.secteur_de(cell)] = {"roy_ville": r}
 	surf.royaume_par_cellule[cell] = "roy_ville"
-	var e: Dictionary = s.monde.cellule(cell)
+	# La capitale d'un grand royaume est une cité (Villes B1) : sa fiche, puis son centre posé sur une cellule neuve.
+	surf.fiches_agglo.erase(cell)
+	var fiche: Dictionary = surf.fiche_agglomeration(cell)
+	var agglo: Dictionary = fiche.duplicate()
+	agglo["quartier"] = "centre"
+	agglo["index"] = 0
+	var e: Dictionary = surf.generer_cellule(cell.x, cell.y, {}, false)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 83
-	surf._poser_village(e, cell, rng)
+	if e.village.is_empty():
+		surf._poser_quartier(e, cell, rng, agglo)
+	s.monde.cellules[cell] = e
 	var v: Dictionary = e.village
 	var boutiques: Dictionary = {}
 	var halls: Dictionary = {}
@@ -2387,7 +2398,7 @@ func test_villes_et_halls() -> void:
 			boutiques[str(b.boutique)] = int(boutiques.get(str(b.boutique), 0)) + 1
 		if not str(b.get("guilde", "")).is_empty():
 			halls[str(b.guilde)] = int(halls.get(str(b.guilde), 0)) + 1
-	verifier(v.taille == "grand" and v.batiments.size() >= 6, "capitale d'un grand royaume : %d bâtiments" % v.batiments.size())
+	verifier(str(v.palier) == "cite" and bool(v.capitale) and v.batiments.size() >= 6, "capitale d'un grand royaume : une cité de %d bâtiments au centre" % v.batiments.size())
 	verifier(boutiques.size() >= 3 and halls.size() >= 1, "%d boutiques typées, %d halls" % [boutiques.size(), halls.size()])
 	var doublon := false
 	for n in boutiques.values():
@@ -9164,27 +9175,36 @@ func test_portees_a_motif() -> void:
 ## Le calendrier (Un monde réel — A, 2026-09-05) : douze mois de dix jours, la semaine de sept jours, les années
 ## depuis 1020 ; le journal dit la date et la fête ; la routine et les prix suivent le jour.
 func test_calendrier() -> void:
+	var cal: Dictionary = GameData.config("calendrier")
+	var jpa := Calendrier.jours_par_an()
+	verifier(jpa == int(GameData.config("combat_rules").age.jours_par_an) and jpa == int(GameData.config("planete").cycle.saisons.jours_par_an) and cal.mois.size() == 12 and int(cal.mois[0][1]) == 30, "les mois somment l'année des âges et des saisons (%d jours, douze mois de trente — designer)" % jpa)
 	var d0 := Calendrier.date(0)
 	verifier(int(d0.annee) == 1020 and str(d0.mois) == "rat" and int(d0.jour_mois) == 1 and str(d0.jour_semaine) == "soleil", "le jour 0 est le 1 du Rat de l'an 1020, un jour du Soleil (%s)" % str(d0))
-	var d119 := Calendrier.date(119)
-	verifier(str(d119.mois) == "cochon" and int(d119.jour_mois) == 10 and int(d119.annee) == 1020, "le jour 119 est le 10 du Cochon de l'an 1020")
-	var d120 := Calendrier.date(120)
-	verifier(int(d120.annee) == 1021 and str(d120.mois) == "rat" and int(d120.jour_mois) == 1, "le jour 120 ouvre l'an 1021")
-	verifier(str(d120.jour_semaine) == "lune", "la semaine dérive d'un jour par an (120 = 7 × 17 + 1)")
+	var dern := Calendrier.date(jpa - 1)
+	verifier(str(dern.mois) == "cochon" and int(dern.jour_mois) == int(cal.mois[11][1]) and int(dern.annee) == 1020, "le dernier jour de l'an est le %d du Cochon" % int(cal.mois[11][1]))
+	var d_an := Calendrier.date(jpa)
+	verifier(int(d_an.annee) == 1021 and str(d_an.mois) == "rat" and int(d_an.jour_mois) == 1, "le jour %d ouvre l'an 1021" % jpa)
+	verifier(str(d_an.jour_semaine) == str(cal.jours_semaine[jpa % 7]), "la semaine dérive de %d jour(s) par an" % (jpa % 7))
 	verifier(str(Calendrier.date(7).jour_semaine) == "soleil", "sept jours plus tard, le même jour de la semaine")
 	verifier(Calendrier.texte(d0).contains("1020"), "le texte de la date dit l'année (%s)" % Calendrier.texte(d0))
 	var jm := Calendrier.jour_de_marche("Aubevaux")
-	verifier(jm in GameData.config("calendrier").jours_semaine and jm == Calendrier.jour_de_marche("Aubevaux"), "le jour de marché est un jour de la semaine, stable (%s)" % jm)
+	verifier(jm in cal.jours_semaine and jm == Calendrier.jour_de_marche("Aubevaux"), "le jour de marché est un jour de la semaine, stable (%s)" % jm)
 	verifier(Calendrier.fetes_du_jour(d0, "sino").size() == 1 and str(Calendrier.fetes_du_jour(d0, "sino")[0].id) == "nouvel_an", "le 1 du Rat est le Nouvel An pour tous")
-	verifier(Calendrier.fetes_du_jour(Calendrier.date(9), "sino").size() == 1 and Calendrier.fetes_du_jour(Calendrier.date(9), "celte").is_empty(), "les lanternes sont sino, pas celtes")
+	var lanternes: Dictionary = {}
+	for f in cal.fetes.liste:
+		if str(f.id) == "lanternes":
+			lanternes = f
+	var d_l := Calendrier.date(int(lanternes.jour) - 1)
+	verifier(Calendrier.fetes_du_jour(d_l, "sino").size() == 1 and Calendrier.fetes_du_jour(d_l, "celte").is_empty(), "les lanternes (%d du Rat) sont sino, pas celtes" % int(lanternes.jour))
 	var a := Calendrier.anniversaire("pnj_42")
-	verifier(int(a.jour) >= 1 and int(a.jour) <= 10 and a == Calendrier.anniversaire("pnj_42"), "un anniversaire stable dans le mois")
+	verifier(int(a.jour) >= 1 and int(a.jour) <= 30 and a == Calendrier.anniversaire("pnj_42"), "un anniversaire stable dans le mois")
 	# Les saisons tombent sur des débuts de mois.
 	var s := Simulation.new(9)
 	s.charger_arene("gorge")
 	var jour := int(GameData.config("planete").cycle.ticks_par_jour)
-	for essai: Array in [[0, "printemps"], [30, "ete"], [50, "fin_ete"], [60, "automne"], [90, "hiver"]]:
-		verifier(s.saison(int(essai[0]) * jour) == str(essai[1]) and int(Calendrier.date(int(essai[0])).jour_mois) == 1, "le jour %d ouvre un mois et la saison %s" % [int(essai[0]), str(essai[1])])
+	for sa in GameData.config("planete").cycle.saisons.liste:
+		var debut := int(sa[1])
+		verifier(s.saison(debut * jour) == str(sa[0]) and int(Calendrier.date(debut).jour_mois) == 1, "le jour %d ouvre un mois et la saison %s" % [debut, str(sa[0])])
 	# Dans le monde : le premier jour dit sa date et le Nouvel An, les civils ont eu leur humeur, la routine vise la place.
 	var s2 := Simulation.new(31)
 	s2.charger_camp()
@@ -9236,4 +9256,161 @@ func test_calendrier() -> void:
 	s2._garnir_marche(pnj)
 	var plafond := int(ceil(float(GameData.config("calendrier").marche.stock_mult) * float(n1)))
 	verifier(n1 > 0 and n2 > n1 and n3 >= plafond and pnj.stock.size() == n3, "le marché regarnit (%d → %d) et plafonne (%d ≥ %d, puis rien)" % [n1, n2, n3, plafond])
+
+
+## Les territoires (Villes — B0, 2026-09-05) : une ville est un territoire comme le camp ; sa semaine tourne dans son
+## contexte, ses résidents ne sont pas ceux du joueur, ses cellules ne se revendiquent pas, et la prendre la donne.
+func test_territoires() -> void:
+	var s := Simulation.new(31)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	verifier(s.territoire.id == "joueur" and s.territoires.has("joueur") and s.monde.claims == s.territoires.joueur.cellules, "le joueur est un territoire, ses claims sont ses cellules")
+	var camp: Vector2i = s.monde.cellule_camp
+	var cell_v := camp + Vector2i(1, 0)
+	var t := s.creer_territoire("Testville", "royaume_test", 100)
+	t.cellules[cell_v] = {"role": "habitation"}
+	var base_res: int = s.residents().size()
+	var citoyens: Array = []
+	for k in 2:
+		var x: Dictionary = s.ajouter("villageois", j.pos + Vector2i(2 + k, 0), "ia")
+		x["village"] = "Testville"
+		x["assignation"] = {"fonction": "fermier", "cellule": cell_v, "territoire": "Testville"}
+		x["fonction"] = "fermier"
+		x["humeur"] = int(s._ry().humeur_base)
+		citoyens.append(x)
+	verifier(s.residents().size() == base_res, "les gens de la ville ne sont pas des résidents du joueur")
+	var n_ville: int = s._dans_territoire("Testville", func() -> int: return s.residents().size())
+	verifier(n_ville == 2 and s.territoire.id == "joueur" and s.monde.claims == s.territoires.joueur.cellules, "dans son contexte, la ville a ses deux résidents ; le contexte revient au joueur")
+	verifier(s.territoire_de_cellule(cell_v) == "Testville" and s.territoire_de_cellule(camp) == "joueur", "chaque cellule sait son territoire")
+	# Une semaine : la ville produit dans ses stocks et paie son entretien ; le joueur n'y touche pas.
+	var stocks_j: Dictionary = s.territoire.stocks.duplicate()
+	var tresor_j: int = int(s.territoire.tresor)
+	var tps: int = int(GameData.config("planete").corruption.ticks_par_semaine)
+	s.horloge_monde.avancer(tps)
+	s._tiquer_monde(s.horloge_monde.ticks)
+	EventBus.dispatcher()
+	verifier(s.territoire.id == "joueur", "après la semaine, le contexte est celui du joueur")
+	verifier(int(t.stocks.get("baies", 0)) > 0, "les fermiers de la ville ont produit dans les stocks de la ville (%s)" % str(t.stocks))
+	verifier(s.territoire.stocks == stocks_j and int(s.territoire.tresor) == tresor_j, "les stocks et le trésor du joueur n'ont pas bougé")
+	verifier(int(t.tresor) < 100 or int(t.dette) > 0, "la ville a payé son entretien (trésor %d, dette %d)" % [int(t.tresor), int(t.dette)])
+	verifier(t.rapports.size() == 1, "la ville a son rapport de semaine")
+	# La cellule d'une ville ne se revendique pas ; prise, la ville est au joueur et devient son territoire courant.
+	var n_sub: int = s.monde.taille / 32
+	for cy in n_sub:
+		for cx in n_sub:
+			s.monde.explores[Vector2i(cell_v.x * n_sub + cx, cell_v.y * n_sub + cy)] = true
+	j.or = 10000
+	verifier(not s.revendiquer(j, cell_v), "la cellule d'une ville ne se revendique pas")
+	t.proprietaire = "joueur"
+	var pos_v: Vector2i = s.monde.pos_monde(cell_v, Vector2i(32, 32))
+	if s.grille.dans(pos_v):
+		s.grille.liberer(j.pos)
+		j.pos = pos_v
+		s.grille.placer(j.id, pos_v)
+		s._maj_contexte()
+		verifier(s.territoire.id == "Testville" and s.monde.claims == t.cellules and s.residents().size() == 2, "sur sa ville, le joueur la gère : contexte, claims, résidents")
+		s.grille.liberer(j.pos)
+		j.pos = s.monde.pos_monde(camp, Vector2i(32, 32))
+		s.grille.placer(j.id, j.pos)
+		s._maj_contexte()
+		verifier(s.territoire.id == "joueur", "de retour au camp, le contexte est la base")
+	# La sauvegarde garde les territoires.
+	s.nom_partie = "test_territoires"
+	verifier(s.sauvegarder(), "sauvegarde avec une ville")
+	var s2 := Simulation.new(31)
+	s2.nom_partie = "test_territoires"
+	verifier(s2.charger_sauvegarde() and s2.territoires.has("Testville") and s2.territoires.Testville.cellules.has(cell_v) and s2.territoire.id == "joueur" and s2.monde.claims == s2.territoires.joueur.cellules, "rechargée : la ville, ses cellules, le joueur relié à ses claims")
+
+
+## Les villes (Villes — population, quartiers et économie, B1, 2026-09-05) : l'emprise est une lecture pure et
+## cohérente, la population décide du palier et des cellules, chaque quartier a ses rues, ses lits, ses gens, son
+## siège et son plan de territoire ; chargée, la ville est un territoire dont le joueur n'est pas le maître.
+func test_villes() -> void:
+	var s := Simulation.new(9)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var cfg: Dictionary = GameData.config("villes")
+	var ordre: Array = cfg.ordre_paliers
+	var c0: Vector2i = s.monde.cellule_camp
+	var f: Dictionary = {}
+	for dy in range(-20, 21):
+		for dx in range(-20, 21):
+			var cv := c0 + Vector2i(dx, dy)
+			if not (surf.terre_a(cv) and bool(surf.poi_de(cv).get("village", false))):
+				continue
+			var fa: Dictionary = surf.fiche_agglomeration(cv)
+			if f.is_empty() or ordre.find(str(fa.palier)) > ordre.find(str(f.palier)) or (str(fa.palier) == str(f.palier) and int(fa.population) > int(f.population)):
+				f = fa
+	verifier(not f.is_empty(), "une agglomération à 20 cellules du camp")
+	if f.is_empty():
+		return
+	var fourchette: Array = cfg.paliers[str(f.palier)].pop
+	verifier(int(f.population) >= int(fourchette[0]) and int(f.population) <= int(fourchette[1]), "%s : %s de %d habitants, dans la fourchette du palier" % [str(f.nom), str(f.palier), int(f.population)])
+	var attendu := clampi(int(ceil(float(f.population) / float(cfg.habitants_par_cellule))), 1, int(cfg.cellules_max))
+	verifier(f.cellules.size() >= 1 and f.cellules.size() <= attendu, "%d cellule(s) pour %d habitants (au plus %d)" % [f.cellules.size(), int(f.population), attendu])
+	verifier(f.cellules.size() == 1 or ordre.find(str(f.palier)) >= ordre.find("bourg"), "une agglomération de plusieurs cellules est un bourg ou plus")
+	# Chaque cellule de l'emprise se reconnaît, avec son quartier et son rang — et le camp n'en est jamais une.
+	var coherent := true
+	for k in f.cellules.size():
+		var a: Dictionary = surf.agglomeration_de(f.cellules[k])
+		coherent = coherent and str(a.get("nom", "")) == str(f.nom) and str(a.get("quartier", "")) == str(f.quartiers[k]) and int(a.get("index", -1)) == k
+	verifier(coherent, "toutes les cellules de l'emprise sont d'accord avec la fiche (%s)" % str(f.quartiers))
+	verifier(surf.agglomeration_de(c0).is_empty(), "la cellule du camp n'est jamais un quartier")
+	# Les boutiques : jamais deux du même type dans l'agglomération.
+	var types := {}
+	var doublon := false
+	for liste in f.boutiques:
+		for t in liste:
+			doublon = doublon or types.has(str(t))
+			types[str(t)] = true
+	verifier(not doublon, "aucun type de boutique en double (%s)" % str(f.boutiques))
+	# Le centre généré : deux rues par le milieu, une place, des bâtiments le long des rues, des lits, un siège.
+	var centre: Vector2i = f.centre
+	var e: Dictionary = surf.generer_cellule(centre.x, centre.y, {}, false)
+	var v: Dictionary = e.village
+	var taille: int = e.largeur
+	var rue_ok := 0
+	for k in range(2, taille - 2):
+		if e.sol.has((taille / 2) * taille + k) and e.sol.has(k * taille + taille / 2):
+			rue_ok += 1
+	verifier(rue_ok >= (taille - 4) * 8 / 10, "les deux axes sont praticables (%d/%d)" % [rue_ok, taille - 4])
+	var lits := 0
+	for bat in v.batiments:
+		lits += bat.lits.size()
+	verifier(v.batiments.size() >= 4 and lits >= mini(int(v.population_quartier), 8), "le centre : %d bâtiments, %d lits pour %d habitants" % [v.batiments.size(), lits, int(v.population_quartier)])
+	verifier(str(v.quartier) == "centre" and str(v.nom) == str(f.nom) and int(v.population) == int(f.population) and Vector2i(v.cellule_centre) == centre, "la cellule sait sa ville, son quartier, sa population")
+	var plan_t: Dictionary = v.territoire
+	var a_res := false
+	for per in plan_t.perimetres:
+		a_res = a_res or str(per.type) == "residentiel"
+	verifier(a_res and str(plan_t.role) == str(cfg.roles.centre), "le plan de territoire : un résidentiel, le rôle du quartier")
+	if ordre.find(str(f.palier)) >= ordre.find("bourg") and not str(f.gouvernance).is_empty():
+		var siege := str(GameData.entree("governments", str(f.gouvernance)).siege.batiment)
+		var a_siege := false
+		for bat in v.batiments:
+			a_siege = a_siege or str(bat.id) == siege
+		verifier(a_siege, "le siège du pouvoir de la gouvernance %s : %s" % [str(f.gouvernance), siege])
+	var postes_ok := true
+	for pj in v.pnj:
+		postes_ok = postes_ok and pj.has("poste") and pj.has("lit")
+	verifier(postes_ok and v.pnj.size() >= 4, "chaque habitant prévu a un poste et un lit (%d)" % v.pnj.size())
+	# Chargée : la ville est un territoire, ses gens en sont les résidents, ses périmètres existent, le joueur reste chez lui.
+	var s2 := Simulation.new(9)
+	s2.charger_camp({}, centre + Vector2i(2, 0))
+	var j: Dictionary = s2.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var n_sub: int = s2.monde.taille / 32
+	for cy in n_sub:
+		for cx in n_sub:
+			s2.monde.explores[Vector2i(centre.x * n_sub + cx, centre.y * n_sub + cy)] = true
+	verifier(s2.voyager(j, centre), "voyager jusqu'à %s" % str(f.nom))
+	var nom := str(f.nom)
+	verifier(s2.territoires.has(nom), "la ville chargée est un territoire")
+	if s2.territoires.has(nom):
+		var t: Dictionary = s2.territoires[nom]
+		verifier(t.cellules.has(centre) and str(t.proprietaire) == str(f.royaume), "ses cellules, son propriétaire (%s)" % str(t.proprietaire))
+		var n_res: int = s2._dans_territoire(nom, func() -> int: return s2.residents().size())
+		var n_per: int = s2._dans_territoire(nom, func() -> int: return s2.perimetres().size())
+		verifier(n_res >= 4 and n_per >= 1, "%d résidents assignés, %d périmètres" % [n_res, n_per])
+		verifier(s2.territoire.id == "joueur" and s2.residents().is_empty(), "le joueur n'a ni la ville ni ses gens")
+		verifier(int(s2.monde.villages[nom].capacite) == int(f.population) and Vector2i(s2.monde.villages[nom].cellule) == centre, "le registre des villages sait la population et le centre")
 

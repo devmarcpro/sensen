@@ -886,8 +886,10 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 	e["portes"] = {}
 	e["meubles"] = {}
 	e["village"] = {}
-	if bool(poi.get("village", false)):
-		_poser_village(e, Vector2i(cx, cy), rng)
+	e["stations"] = {}
+	var agglo := agglomeration_de(Vector2i(cx, cy)) if camp.is_empty() else {}   # une cellule d'agglomération : un quartier (Villes B1)
+	if not agglo.is_empty():
+		_poser_quartier(e, Vector2i(cx, cy), rng, agglo)
 	_poser_route(e, Vector2i(cx, cy))
 	for d in [e.arbres, e.rochers, e.filons, e.eau]:
 		for i in d.keys():
@@ -895,133 +897,493 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 	return e   # les plantes restent du sol (franchissables) : la simulation les pose comme contenu
 
 
-## Un hameau (Villages PNJ) : une place, 3 à 5 bâtiments préfab autour, des chemins, la palette du biome.
-func _poser_village(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator) -> void:
+# ---------------------------------------------------------------- les agglomérations (Villes — B1, 2026-09-05)
+
+const SPIRALE: Array[Vector2i] = [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, -1), Vector2i(1, 1), Vector2i(-1, 1), Vector2i(-1, -1)]
+
+var agglos_cache: Dictionary = {}      # cellule → l'agglomération dont elle fait partie ({} : aucune)
+var fiches_agglo: Dictionary = {}      # cellule-centre → sa fiche
+var mutex_agglo := Mutex.new()
+var cellule_camp := Vector2i(-99999, -99999)   # la cellule du camp n'est jamais un quartier : le camp est le territoire du joueur
+
+
+## L'agglomération dont une cellule fait partie (Villes — population, quartiers et économie) : {} si aucune ; sinon
+## la fiche du centre plus `quartier` (le type de cette cellule) et `index` (son rang dans l'emprise). Une lecture
+## pure du voisinage, en cache : toutes les cellules sont d'accord sur l'emprise d'un centre, sans générer personne.
+func agglomeration_de(c: Vector2i) -> Dictionary:
+	mutex_agglo.lock()
+	if agglos_cache.has(c):
+		var r0: Dictionary = agglos_cache[c]
+		mutex_agglo.unlock()
+		return r0
+	mutex_agglo.unlock()
+	var res := {}
+	if terre_a(c) and c != cellule_camp:
+		var centres: Array = []
+		for dy in range(-1, 2):
+			for dx in range(-1, 2):
+				var k := c + Vector2i(dx, dy)
+				if k != cellule_camp and terre_a(k) and bool(poi_de(k).get("village", false)):
+					centres.append(k)
+		centres.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return _rang_centre(c, a) < _rang_centre(c, b))
+		for k in centres:
+			var fiche := fiche_agglomeration(k)
+			var idx: int = fiche.cellules.find(c)
+			if idx >= 0:
+				res = fiche.duplicate()
+				res["quartier"] = str(fiche.quartiers[idx])
+				res["index"] = idx
+				break
+	mutex_agglo.lock()
+	agglos_cache[c] = res
+	mutex_agglo.unlock()
+	return res
+
+
+## Le rang d'un centre vu d'une cellule : la distance d'abord, puis un hachage de sa position (toujours le même).
+func _rang_centre(c: Vector2i, k: Vector2i) -> int:
+	return Grille.distance(c, k) * 1000 + posmod(hash([k.x, k.y]), 1000)
+
+
+## Un autre centre revendique-t-il mieux la cellule `k` que `centre` ? (plus proche, ou de même distance et de rang plus petit)
+func _centre_plus_proche(k: Vector2i, centre: Vector2i) -> bool:
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var k2 := k + Vector2i(dx, dy)
+			if k2 == centre or k2 == k or k2 == cellule_camp or not terre_a(k2) or not bool(poi_de(k2).get("village", false)):
+				continue
+			if _rang_centre(k, k2) < _rang_centre(k, centre):
+				return true
+	return false
+
+
+func _tirer_liste(liste: Array, rng: RandomNumberGenerator) -> String:
+	var total := 0.0
+	for it in liste:
+		total += float(it[1])
+	var t := rng.randf() * total
+	for it in liste:
+		t -= float(it[1])
+		if t <= 0.0:
+			return str(it[0])
+	return str(liste[0][0])
+
+
+## La fiche d'une agglomération (son centre est une cellule-village de poi_de) : palier et population selon sa
+## situation (data/villes.json), l'emprise en spirale, le type de chaque cellule, la population de chacune, les
+## boutiques de chacune (jamais deux du même type dans l'agglomération), la culture et le nom.
+func fiche_agglomeration(centre: Vector2i) -> Dictionary:
+	mutex_agglo.lock()
+	if fiches_agglo.has(centre):
+		var f0: Dictionary = fiches_agglo[centre]
+		mutex_agglo.unlock()
+		return f0
+	mutex_agglo.unlock()
+	var cfg: Dictionary = GameData.config("villes")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, centre.x, centre.y, "agglomeration"])
+	var roy := royaume_de(centre)
+	var capitale: bool = not roy.is_empty() and roy.capital_poi == centre
+	var palier := "hameau"
+	if capitale:
+		palier = str(cfg.situations.capitale.get(str(roy.taille), "village"))
+	else:
+		var sit := "sauvage"
+		if not roy.is_empty():
+			sit = "territoire_route" if not route_de(centre).is_empty() else "territoire"
+		palier = _tirer_liste(cfg.situations[sit], rng)
+	var fourchette: Array = cfg.paliers[palier].pop
+	var population := rng.randi_range(int(fourchette[0]), int(fourchette[1]))
+	var n_cells := clampi(int(ceil(float(population) / float(cfg.habitants_par_cellule))), 1, int(cfg.cellules_max))
+	var cellules: Array = [centre]
+	for d in SPIRALE:
+		if cellules.size() >= n_cells:
+			break
+		var k: Vector2i = centre + d
+		if k == cellule_camp or not terre_a(k) or bool(poi_de(k).get("village", false)) or _centre_plus_proche(k, centre):
+			continue
+		cellules.append(k)
+	var ordre: Array = cfg.quartiers.get(palier, ["centre"])
+	var quartiers: Array = []
+	for i in cellules.size():
+		quartiers.append(str(ordre[i]) if i < ordre.size() else str(ordre[ordre.size() - 1]))
+	var total := 0.0
+	for q in quartiers:
+		total += float(cfg.parts.get(q, 1.0))
+	var pops: Array = []
+	var reste := population
+	for i in quartiers.size():
+		var n := reste if i == quartiers.size() - 1 else clampi(int(round(float(population) * float(cfg.parts.get(quartiers[i], 1.0)) / total)), 1, maxi(1, reste - (quartiers.size() - 1 - i)))
+		pops.append(n)
+		reste -= n
+	# Les boutiques : une liste de types mélangée à la graine de l'agglomération, servie quartier par quartier.
+	var types: Array = GameData.catalogues.shop_types.keys()
+	types.sort()
+	for i in range(types.size() - 1, 0, -1):
+		var k2 := rng.randi_range(0, i)
+		var tmp = types[i]
+		types[i] = types[k2]
+		types[k2] = tmp
+	var boutiques: Array = []
+	var pris := 0
+	for i in quartiers.size():
+		var comp: Dictionary = cfg.composition[str(quartiers[i])]
+		var n_b := 0
+		if i == 0:
+			var fb: Array = cfg.paliers[palier].boutiques
+			n_b = rng.randi_range(int(fb[0]), int(fb[1]))
+		else:
+			n_b = int(pops[i]) / maxi(1, int(comp.boutiques_par_habitant))
+		var liste: Array = []
+		for k3 in n_b:
+			if pris < types.size():
+				liste.append(str(types[pris]))
+				pris += 1
+		boutiques.append(liste)
+	var halls: Array = []
+	var fh: Array = cfg.paliers[palier].halls
+	var guildes: Array = GameData.catalogues.guilds.keys()
+	guildes.sort()
+	for k4 in rng.randi_range(int(fh[0]), int(fh[1])):
+		if guildes.is_empty():
+			break
+		var g: String = str(guildes[rng.randi() % guildes.size()])
+		guildes.erase(g)
+		halls.append(g)
+	var cultures: Dictionary = GameData.catalogues.name_cultures
+	var culture_id := Noms.culture_pour("humain", cultures, rng)
+	if not roy.is_empty() and cultures.has(str(roy.culture)):
+		culture_id = str(roy.culture)
+	var nom := Noms.ville(cultures.get(culture_id, {}), rng) if cultures.has(culture_id) else "Hameau"
+	var fiche := {"centre": centre, "nom": nom, "culture": culture_id, "royaume": str(roy.get("id", "")), "capitale": capitale, "gouvernance": str(roy.get("government_type", "")),
+		"palier": palier, "population": population, "cellules": cellules, "quartiers": quartiers, "populations": pops, "boutiques": boutiques, "halls": halls}
+	mutex_agglo.lock()
+	fiches_agglo[centre] = fiche
+	mutex_agglo.unlock()
+	return fiche
+
+
+## Pave une tuile au sol de la palette (une rue, une place, un chemin) et la note dans `rue`.
+func _paver(e: Dictionary, p: Vector2i, palette: Dictionary, rue: Dictionary) -> void:
+	var taille: int = e.largeur
+	var i := p.y * taille + p.x
+	if not _dans(p, taille) or e.eau.has(i) or e.murs.has(i):
+		return
+	e.sols[i] = str(palette.sol)
+	e.hauteurs[i] = H_BASE
+	_degager(e, i)
+	rue[i] = true
+
+
+## Un plan de préfab orienté : la porte vers le sud (tel quel), le nord (lignes renversées), l'est ou l'ouest (transposé).
+func _orienter(plan: Array, sens: String) -> Array:
+	var res: Array = []
+	match sens:
+		"nord":
+			for k in range(plan.size() - 1, -1, -1):
+				res.append(str(plan[k]))
+		"est", "ouest":
+			var w: int = str(plan[0]).length()
+			for x in w:
+				var ligne := ""
+				for y in plan.size():
+					ligne += str(plan[y])[x]
+				res.append(ligne.reverse() if sens == "ouest" else ligne)
+		_:
+			for ligne in plan:
+				res.append(str(ligne))
+	return res
+
+
+## Un quartier d'agglomération (Villes B1) — le hameau et le village en sont un seul, de type « centre ». Deux rues
+## par le milieu, une place au croisement, les bâtiments en parcelles le long des rues, façade sur la rue ; les gens,
+## leurs postes et leurs lits ; le plan du territoire (rôle, périmètres, stockages) que la simulation créera.
+func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, agglo: Dictionary) -> void:
+	var cfg: Dictionary = GameData.config("villes")
 	var vc: Dictionary = planete.get("village", {})
 	var taille: int = e.largeur
 	var bats: Dictionary = GameData.catalogues.village_buildings
 	var b: Dictionary = biomes.get(e.biome, {})
 	var palette: Dictionary = b.get("village_palette", {"mur": "chene", "toit": "chaume_tresse", "sol": "calcaire"})
-	# Le centre du village : au milieu de la cellule, à ± un cinquième — en unités de la cellule, pas en tuiles
-	# fixes (les ± 25 tuiles d'avant sortaient une capitale d'une cellule de 64 : bâtiments perdus).
-	var jeu: int = maxi(4, taille / 5)
-	var centre := Vector2i(taille / 2 + rng.randi_range(-jeu, jeu), taille / 2 + rng.randi_range(-jeu, jeu))
-	var rayon: int = int(vc.get("rayon_place", 6))
-	if e.has("a_donjon") and bool(e.a_donjon) and Vector2i(e.entree_donjon).distance_to(centre) < taille / 6:
-		centre = Vector2i(e.entree_donjon) + Vector2i(taille / 4, 0)
-	centre = Vector2i(clampi(centre.x, taille / 4, taille * 3 / 4), clampi(centre.y, taille / 4, taille * 3 / 4))
-	# La culture et le nom du village : la race dominante (humain) tire parmi ses cultures.
-	var cultures: Dictionary = GameData.catalogues.name_cultures
-	var culture_id := Noms.culture_pour("humain", cultures, rng)
-	var roy := royaume_de(cell)
-	if not roy.is_empty() and cultures.has(str(roy.culture)):
-		culture_id = str(roy.culture)
-	var nom_village := Noms.ville(cultures.get(culture_id, {}), rng) if not culture_id.is_empty() else "Hameau"
-	e.village = {"nom": nom_village, "culture": culture_id, "centre": centre, "batiments": [], "pnj": [], "royaume": str(roy.get("id", ""))}
-	# La place : sol de la palette, dégagée.
-	for dy in range(-rayon, rayon + 1):
-		for dx in range(-rayon, rayon + 1):
-			var p := centre + Vector2i(dx, dy)
-			var i := p.y * taille + p.x
-			if _dans(p, taille) and not e.eau.has(i):
-				e.sols[i] = str(palette.sol)
-				e.hauteurs[i] = H_BASE
-				_degager(e, i)
-	# Les bâtiments autour de la place, dans les 8 directions, sans chevauchement.
-	var ids: Array = []
-	for bid0 in bats.keys():
-		if not ("ville" in bats[bid0].get("tags", [])):
-			ids.append(bid0)
-	ids.sort()
-	# La taille de l'agglomération : celle du royaume pour sa capitale, un hameau sinon (Génération des royaumes PNJ).
-	var villes: Dictionary = GameData.config("combat_rules").royaume.villes
-	var taille_ville := "hameau"
-	if not roy.is_empty() and roy.capital_poi == cell and villes.has(str(roy.taille)):
-		taille_ville = str(roy.taille)
-	var tv: Dictionary = villes[taille_ville]
-	e.village["taille"] = taille_ville
-	var nb := rng.randi_range(int(tv.batiments[0]), int(tv.batiments[1]))
-	var nb_boutiques := rng.randi_range(int(tv.boutiques[0]), int(tv.boutiques[1]))
-	var nb_halls := rng.randi_range(int(tv.halls[0]), int(tv.halls[1]))
-	var types_boutiques: Array = GameData.catalogues.shop_types.keys()
-	types_boutiques.sort()
-	var guildes: Array = GameData.catalogues.guilds.keys()
-	guildes.sort()
-	var plan_bats: Array = []   # [bid, boutique, guilde] — sans doublon de type par ville
-	for k in nb_boutiques:
-		if types_boutiques.is_empty():
-			break
-		var t: String = str(types_boutiques[rng.randi() % types_boutiques.size()])
-		types_boutiques.erase(t)
-		plan_bats.append(["echoppe", t, ""])
-	for k in nb_halls:
-		if guildes.is_empty():
-			break
-		var g: String = str(guildes[rng.randi() % guildes.size()])
-		guildes.erase(g)
-		plan_bats.append(["hall", "", g])
-	if plan_bats.is_empty():
-		plan_bats.append(["echoppe", "", ""])
-	while plan_bats.size() < nb:
-		plan_bats.append([str(ids[rng.randi_range(0, ids.size() - 1)]), "", ""])
-	var dirs := [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(1, 1), Vector2i(-1, -1)]
+	var quartier := str(agglo.quartier)
+	var comp: Dictionary = cfg.composition[quartier]
+	var palier := str(agglo.palier)
+	var pop: int = int(agglo.populations[int(agglo.index)])
+	var centre := Vector2i(taille / 2, taille / 2)
+	var roles: Dictionary = cfg.roles
+	e.village = {"nom": str(agglo.nom), "culture": str(agglo.culture), "centre": centre, "batiments": [], "pnj": [], "royaume": str(agglo.royaume),
+		"palier": palier, "taille": palier, "population": int(agglo.population), "population_quartier": pop, "quartier": quartier, "cellule_centre": agglo.centre,
+		"index": int(agglo.index), "capitale": bool(agglo.capitale), "gouvernance": str(agglo.gouvernance),
+		"territoire": {"role": str(roles.get(quartier, "base")), "perimetres": [], "stockages": []}}
+	# 1. Les rues : deux axes par le milieu, `rue_largeur` tuiles de large — elles se raccordent d'une cellule à
+	#    l'autre ; à partir du bourg, deux rues parallèles à chaque axe (une grille de neuf îlots, plus de façades).
+	var larg: int = int(cfg.rue_largeur)
+	var rue := {}
+	var rues_h: Array[int] = [centre.y]
+	var rues_v: Array[int] = [centre.x]
+	if palier in ["bourg", "ville", "cite"]:
+		rues_h.append_array([centre.y - taille / 4, centre.y + taille / 4])
+		rues_v.append_array([centre.x - taille / 4, centre.x + taille / 4])
+	for yr in rues_h:
+		for k in taille:
+			for w in larg:
+				_paver(e, Vector2i(k, yr - larg / 2 + w), palette, rue)
+	for xr in rues_v:
+		for k in taille:
+			for w in larg:
+				_paver(e, Vector2i(xr - larg / 2 + w, k), palette, rue)
+	# 2. La place au croisement (le centre, le quartier marchand, une placette au résidentiel).
 	var pris: Array[Rect2i] = []
-	for k in plan_bats.size():
-		var bid: String = str(plan_bats[k][0])
-		var plan: Array = bats[bid].plan
-		var w: int = str(plan[0]).length()
-		var h: int = plan.size()
-		var d: Vector2i = dirs[k % dirs.size()]
-		var anneau: int = rayon + 3 + 9 * (k / dirs.size())   # au-delà de huit bâtiments, un second anneau
-		var origine := centre + d * anneau - Vector2i(w / 2, h / 2) + Vector2i(rng.randi_range(-2, 2), rng.randi_range(-2, 2))
-		var r := Rect2i(origine, Vector2i(w, h))
-		if origine.x < 2 or origine.y < 2 or r.end.x >= taille - 2 or r.end.y >= taille - 2:
+	var rayon: int = int(cfg.rayon_place) if quartier == "centre" else int(cfg.rayon_placette)
+	if bool(comp.place):
+		for dy in range(-rayon, rayon + 1):
+			for dx in range(-rayon, rayon + 1):
+				_paver(e, centre + Vector2i(dx, dy), palette, rue)
+		pris.append(Rect2i(centre - Vector2i(rayon, rayon), Vector2i(2 * rayon + 1, 2 * rayon + 1)))
+	# 3. La file des bâtiments : [préfab, boutique, guilde, station, fonction].
+	var file: Array = []
+	var siege_fonction := ""
+	if bool(comp.siege) and palier in ["bourg", "ville", "cite"] and not str(agglo.gouvernance).is_empty():
+		var siege: Dictionary = GameData.entree("governments", str(agglo.gouvernance)).get("siege", {})
+		if bats.has(str(siege.get("batiment", ""))):
+			siege_fonction = str(siege.get("fonction", ""))
+			file.append([str(siege.batiment), "", "", "", siege_fonction])
+	if bool(comp.halls):
+		for g in agglo.halls:
+			file.append(["hall", "", str(g), "", ""])
+	for t in agglo.boutiques[int(agglo.index)]:
+		file.append(["echoppe", str(t), "", "", ""])
+	if bool(comp.chapelle) and not (siege_fonction == "pretre"):
+		file.append(["chapelle", "", "", "", ""])
+	if bool(comp.auberge):
+		file.append(["auberge", "", "", "", ""])
+	var stations: Array = cfg.stations_ateliers.duplicate()
+	var n_ateliers: int = pop / maxi(1, int(comp.ateliers_par_habitant)) if int(comp.ateliers_par_habitant) > 0 else 0
+	for k in n_ateliers:
+		file.append(["atelier", "", "", str(stations[(k + rng.randi_range(0, stations.size() - 1)) % stations.size()]), ""])
+	for k in int(comp.entrepots):
+		file.append(["entrepot", "", "", "", ""])
+	# Les logements : autant de lits que d'habitants, les fonctionnels comptés.
+	var lits := 0
+	for f in file:
+		lits += _lits_du_plan(bats[str(f[0])].plan, bats[str(f[0])].meubles)
+	var logements: Array = comp.logements
+	var k_log := rng.randi_range(0, logements.size() - 1)
+	var garde_fou := 0
+	while lits < pop and garde_fou < 60:
+		garde_fou += 1
+		var bid: String = str(logements[k_log % logements.size()])
+		k_log += 1
+		if not bats.has(bid):
 			continue
-		var libre := true
-		for pr in pris:
-			if pr.grow(1).intersects(r):
-				libre = false
-		var mouille := false
-		for y in h:
-			for x in w:
-				if e.eau.has((origine.y + y) * taille + origine.x + x):
-					mouille = true
-		if not libre or mouille:
+		file.append([bid, "", "", "", ""])
+		lits += _lits_du_plan(bats[bid].plan, bats[bid].meubles)
+	# 4. Les parcelles le long des rues : les quatre côtés à tour de rôle, du centre vers les bords.
+	var cotes := ["sud", "nord", "est", "ouest"]
+	var curseurs := {"sud": 0, "nord": 0, "est": 0, "ouest": 0}
+	var lots := {}   # index de tuile → true : les emprises des bâtiments (les zones de récolte les évitent)
+	var residentiel: Dictionary = {}   # tuiles du périmètre résidentiel (les logements et une marge)
+	for k in file.size():
+		var bid: String = str(file[k][0])
+		var bat: Dictionary = bats[bid]
+		var pose := false
+		for essai in 4:
+			var sens: String = cotes[(k + essai) % 4]
+			var plan := _orienter(bat.plan, sens)
+			var w: int = str(plan[0]).length()
+			var h: int = plan.size()
+			var origine := _parcelle(e, sens, w, h, centre, larg, curseurs, pris, rues_h, rues_v)
+			if origine == Vector2i(-1, -1):
+				continue
+			var r := Rect2i(origine, Vector2i(w, h))
+			pris.append(r)
+			var b2 := bat.duplicate()
+			b2.plan = plan
+			if not str(file[k][3]).is_empty():
+				b2["station_id"] = str(file[k][3])
+			_poser_batiment(e, b2, origine, palette, bid)
+			var info: Dictionary = e.village.batiments.back()
+			info["boutique"] = str(file[k][1])
+			info["guilde"] = str(file[k][2])
+			info["station"] = str(file[k][3])
+			info["fonction"] = str(file[k][4])
+			info["rect"] = r
+			for y in h:
+				for x in w:
+					lots[(origine.y + y) * taille + origine.x + x] = true
+			if "logement" in bat.get("tags", []) or "hameau" in bat.get("tags", []) or bid in ["maison", "maison_haute", "chaumiere"]:
+				for y in range(-3, h + 3):
+					for x in range(-3, w + 3):
+						var q := origine + Vector2i(x, y)
+						if _dans(q, taille):
+							residentiel[q] = true
+			# Le chemin de la porte à la rue.
+			var dir: Vector2i = {"sud": Vector2i(0, 1), "nord": Vector2i(0, -1), "est": Vector2i(1, 0), "ouest": Vector2i(-1, 0)}[sens]
+			var q2: Vector2i = info.porte + dir
+			var pas := 0
+			while pas < 8 and _dans(q2, taille) and not rue.has(q2.y * taille + q2.x):
+				_paver(e, q2, palette, rue)
+				q2 += dir
+				pas += 1
+			pose = true
+			break
+		if not pose:
 			continue
-		pris.append(r)
-		_poser_batiment(e, bats[bid], origine, palette, bid)
-		e.village.batiments.back()["boutique"] = str(plan_bats[k][1])
-		e.village.batiments.back()["guilde"] = str(plan_bats[k][2])
-		# Le chemin du bâtiment à la place.
-		var porte: Vector2i = e.village.batiments.back().porte
-		var q := porte + Vector2i(0, 1)
-		var garde := 0
-		while Grille.distance(q, centre) > rayon and garde < 80:
-			garde += 1
-			var i := q.y * taille + q.x
-			if _dans(q, taille) and not e.eau.has(i) and not e.murs.has(i):
-				e.sols[i] = str(palette.sol)
-				e.hauteurs[i] = H_BASE
-				_degager(e, i)
-			q += Vector2i(signi(centre.x - q.x), 0) if absi(centre.x - q.x) > absi(centre.y - q.y) else Vector2i(0, signi(centre.y - q.y))
-	# La population : un résident par lit, le marchand dans l'échoppe, un garde sur la place.
+	# 5. Les gens : un résident par lit ; la fiche et la fonction du bâtiment ; le poste dans le bâtiment.
 	var residents: Dictionary = vc.residents
+	var fiches: Dictionary = cfg.fiches
+	var fonctions: Dictionary = cfg.fonctions
+	var villes: Dictionary = GameData.config("combat_rules").royaume.villes
+	var forgeron_pose := false
 	for bat in e.village.batiments:
-		var fiche := str(residents.get(bat.id, "villageois"))
+		var fiche := str(fiches.get(bat.id, residents.get(bat.id, "villageois")))
+		var fonction := str(bat.get("fonction", ""))
+		if fonction.is_empty():
+			fonction = str(fonctions.get(bat.id, ""))
 		if not str(bat.get("guilde", "")).is_empty():
 			fiche = str(villes.creature_hall)
+			fonction = "maitre_de_guilde"
 		elif not str(bat.get("boutique", "")).is_empty():
 			fiche = str(villes.creature_boutique)
+			fonction = "commercant"
+		var poste: Vector2i = bat.get("poste", bat.porte)
+		var premier := true
 		for lit in bat.lits:
-			e.village.pnj.append({"creature": fiche, "pos": lit, "lit": lit, "boutique": str(bat.get("boutique", "")), "guilde": str(bat.get("guilde", ""))})
-			if bat.id == "echoppe":
+			var pj := {"creature": fiche, "pos": poste if premier else lit, "lit": lit, "poste": poste, "boutique": str(bat.get("boutique", "")), "guilde": str(bat.get("guilde", "")), "batiment": bat.id}
+			if not fonction.is_empty() and (premier or fonction in ["oisif", "fermier"]):
+				pj["fonction"] = fonction
+			elif not premier:
+				pj["fonction"] = "oisif"
+			e.village.pnj.append(pj)
+			premier = false
+			if bat.id == "echoppe" or bat.id == "hall":
 				break
-		if bat.id == "maison" and rng.randf() < float(vc.get("forgeron_chance", 0.5)) and not bat.lits.is_empty():
+		if bat.id in ["maison", "maison_haute"] and not forgeron_pose and rng.randf() < float(vc.get("forgeron_chance", 0.5)) and not bat.lits.is_empty() and quartier != "centre":
+			forgeron_pose = true   # un forgeron au plus par quartier (la chance de la fiche vaut pour le quartier, pas par maison)
 			e.village.pnj[e.village.pnj.size() - 1].creature = "forgeron"
-	e.village.pnj.append({"creature": str(vc.garde), "pos": centre, "lit": centre})
-	if not roy.is_empty() and roy.capital_poi == cell and bool(GameData.entree("governments", str(roy.government_type)).leadership):
-		e.village.pnj.append({"creature": str(GameData.config("combat_rules").royaume.succession.creature_dirigeant), "pos": centre + Vector2i(1, 1), "lit": centre + Vector2i(1, 1), "fonction": "dirigeant"})
+			e.village.pnj[e.village.pnj.size() - 1]["fonction"] = "artisan"
+	# 6. Les gardes : un sur la place du centre, puis un par `gardes_par_habitant`, aux croisements.
+	var n_gardes: int = (1 if quartier == "centre" else 0) + pop / maxi(1, int(cfg.gardes_par_habitant))
+	for k in n_gardes:
+		var d: Vector2i = [Vector2i(0, 0), Vector2i(taille / 4, 0), Vector2i(-taille / 4, 0), Vector2i(0, taille / 4), Vector2i(0, -taille / 4)][k % 5]
+		var p := centre + d
+		e.village.pnj.append({"creature": str(vc.garde), "pos": p, "lit": p, "poste": p, "fonction": "garde"})
+	# 7. Le pouvoir : le dirigeant du royaume dans sa capitale (au siège s'il y en a un, sinon sur la place).
+	if bool(agglo.capitale) and quartier == "centre" and not str(agglo.gouvernance).is_empty() and bool(GameData.entree("governments", str(agglo.gouvernance)).leadership):
+		var ou := centre + Vector2i(1, 1)
+		var lit_d := ou
+		for bat in e.village.batiments:
+			if "siege" in bats[bat.id].get("tags", []):
+				ou = bat.get("poste", bat.porte)
+				lit_d = bat.lits[0] if not bat.lits.is_empty() else ou
+				for pj in e.village.pnj:   # le magistrat cède la place au dirigeant
+					if pj.get("batiment", "") == bat.id and pj.get("fonction", "") == siege_fonction:
+						pj.erase("fonction")
+						pj["fonction"] = "oisif"
+				break
+		e.village.pnj.append({"creature": str(GameData.config("combat_rules").royaume.succession.creature_dirigeant), "pos": ou, "lit": lit_d, "poste": ou, "fonction": "dirigeant"})
+	# 8. Le plan du territoire : le résidentiel, les stockages (les entrepôts), les zones de récolte en lisière.
+	var per: Array = e.village.territoire.perimetres
+	if not residentiel.is_empty():
+		var tuiles_r: Array = residentiel.keys()
+		per.append({"type": "residentiel", "tuiles": tuiles_r})
+	for bat in e.village.batiments:
+		if "stockage" in bats[bat.id].get("tags", []):
+			var tuiles_s: Array = []
+			var r: Rect2i = bat.rect
+			for y in range(1, r.size.y - 1):
+				for x in range(1, r.size.x - 1):
+					var q := r.position + Vector2i(x, y)
+					if not e.murs.has(q.y * taille + q.x) and not e.meubles.has(q.y * taille + q.x):
+						tuiles_s.append(q)
+			per.append({"type": "stockage", "tuiles": tuiles_s, "batiment": bat.id})
+			e.village.territoire.stockages.append(per.size() - 1)
+	var maxz: int = int(cfg.get("zone_tuiles_max", 40))
+	for z in comp.zones:
+		var source: Dictionary = {"bois": e.arbres, "minerai": e.filons, "plantes": e.plantes}.get(str(z), {})
+		var tuiles_z: Array = []
+		for i in source.keys():
+			if tuiles_z.size() >= maxz:
+				break
+			if lots.has(i) or rue.has(i):
+				continue
+			tuiles_z.append(Vector2i(int(i) % taille, int(i) / taille))
+		if str(z) == "plantes":
+			for i in e.cueillette.keys():
+				if tuiles_z.size() >= maxz:
+					break
+				if not lots.has(i) and not rue.has(i):
+					tuiles_z.append(Vector2i(int(i) % taille, int(i) / taille))
+		if tuiles_z.size() >= 4:
+			per.append({"type": str(z), "tuiles": tuiles_z})
+			# Deux résidents sans métier deviennent ses ouvriers (bûcheron, mineur, herboriste).
+			var fonction_z := str(GameData.config("combat_rules").royaume.perimetres.types[str(z)].fonction)
+			var n_ouvriers := 0
+			for pj in e.village.pnj:
+				if n_ouvriers >= 2:
+					break
+				if str(pj.get("fonction", "oisif")) == "oisif" and str(pj.get("creature", "")) == "villageois":
+					pj["fonction"] = fonction_z
+					pj["perimetre"] = per.size() - 1
+					n_ouvriers += 1
 
+
+## Le nombre de lits d'un plan.
+func _lits_du_plan(plan: Array, meubles: Dictionary) -> int:
+	var n := 0
+	for ligne in plan:
+		for x in str(ligne).length():
+			var c: String = str(ligne)[x]
+			if meubles.has(c) and str(meubles[c]).begins_with("lit"):
+				n += 1
+	return n
+
+
+## Une parcelle libre le long d'une rue, façade sur la rue, du centre vers les bords, la rue principale avant les
+## parallèles ; (-1,-1) s'il n'y en a plus. `sens` : le côté vers lequel la porte regarde — « sud » : le bâtiment
+## est au nord d'une rue est-ouest, etc.
+func _parcelle(e: Dictionary, sens: String, w: int, h: int, centre: Vector2i, larg: int, curseurs: Dictionary, pris: Array[Rect2i], rues_h: Array[int], rues_v: Array[int]) -> Vector2i:
+	var taille: int = e.largeur
+	var lignes: Array[int] = rues_h if sens in ["sud", "nord"] else rues_v
+	for li in lignes.size():
+		var cle := sens + str(li)
+		var rue0: int = int(lignes[li]) - larg / 2
+		var essais := 0
+		while essais < taille / 2:
+			essais += 1
+			var k: int = int(curseurs.get(cle, 0))
+			curseurs[cle] = k + 1
+			var pas: int = (k + 1) / 2 * (1 if k % 2 == 0 else -1)   # 0, +1, −1, +2, −2… du centre vers les bords
+			var origine := Vector2i(-1, -1)
+			match sens:
+				"sud":
+					origine = Vector2i(centre.x + pas * 2 - w / 2, rue0 - 2 - h + 1)
+				"nord":
+					origine = Vector2i(centre.x + pas * 2 - w / 2, rue0 + larg + 1)
+				"est":
+					origine = Vector2i(rue0 - 2 - w + 1, centre.y + pas * 2 - h / 2)
+				"ouest":
+					origine = Vector2i(rue0 + larg + 1, centre.y + pas * 2 - h / 2)
+			var r := Rect2i(origine, Vector2i(w, h))
+			if origine.x < 2 or origine.y < 2 or r.end.x > taille - 2 or r.end.y > taille - 2:
+				continue
+			var libre := true
+			for pr in pris:
+				if pr.grow(1).intersects(r):
+					libre = false
+					break
+			if not libre:
+				continue
+			var mouille := false
+			for y in h:
+				for x in w:
+					var idx := (origine.y + y) * taille + origine.x + x
+					if e.eau.has(idx):
+						mouille = true
+			if mouille:
+				continue
+			return origine
+	return Vector2i(-1, -1)
 
 func _degager(e: Dictionary, i: int) -> void:
 	e.arbres.erase(i)
@@ -1036,7 +1398,9 @@ func _poser_batiment(e: Dictionary, bat: Dictionary, origine: Vector2i, palette:
 	var taille: int = e.largeur
 	var plan: Array = bat.plan
 	var meubles: Dictionary = bat.meubles
-	var info := {"id": bid, "origine": origine, "porte": origine, "lits": []}
+	var info := {"id": bid, "origine": origine, "porte": origine, "lits": [], "rect": Rect2i(origine, Vector2i(str(plan[0]).length(), plan.size()))}
+	var poste_c := str(bat.get("poste", ""))
+	var stations: Dictionary = bat.get("stations", {})
 	for y in plan.size():
 		var ligne: String = plan[y]
 		for x in ligne.length():
@@ -1048,16 +1412,39 @@ func _poser_batiment(e: Dictionary, bat: Dictionary, origine: Vector2i, palette:
 			_degager(e, i)
 			e.hauteurs[i] = H_BASE
 			e.sols[i] = str(palette.sol)
+			if c == poste_c and not poste_c.is_empty():
+				info["poste"] = p   # la case de travail du résident (Villes B1)
 			if c == "#":
 				e.murs[i] = str(palette.mur)
 				e.sol.erase(i)
 			elif c == "P":
 				e.portes[i] = true
 				info.porte = p
+			elif stations.has(c):   # une station de l'atelier, celle du quartier si le préfab la laisse vide
+				var sid := str(stations[c]) if not str(stations[c]).is_empty() else str(bat.get("station_id", ""))
+				if not sid.is_empty() and GameData.catalogues.stations.has(sid):
+					if not e.has("stations"):
+						e["stations"] = {}
+					e.stations[i] = sid
+					info["poste"] = p
 			elif meubles.has(c):
 				e.meubles[i] = str(meubles[c])
 				if str(meubles[c]).begins_with("lit"):
 					info.lits.append(p)
+	if info.has("poste"):   # on ne se tient pas sur l'étal ni sur l'enclume : la case de travail est une case de sol à côté
+		var pl: Vector2i = info.poste - origine
+		var libre := Vector2i(-1, -1)
+		for d in [Vector2i(0, 1), Vector2i(1, 0), Vector2i(0, -1), Vector2i(-1, 0)]:
+			var q: Vector2i = pl + d
+			if q.y >= 0 and q.y < plan.size() and q.x >= 0 and q.x < str(plan[q.y]).length() and str(plan[q.y])[q.x] == ".":
+				libre = origine + q
+				break
+		if libre == Vector2i(-1, -1):
+			info.erase("poste")
+		else:
+			info.poste = libre
+	if not info.has("poste"):   # sans case de travail nommée : la porte
+		info["poste"] = info.porte
 	e.village.batiments.append(info)
 
 

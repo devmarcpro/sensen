@@ -57,9 +57,27 @@ var modifs_terrain: Dictionary = {}   # **position monde** → {h, contenu} d'or
                                      # (Destruction du terrain). Jamais un index de grille : la fenêtre glisse.
 var vecteur_lieu_force: Dictionary = {}   # tests et arènes : imposer le vecteur du lieu (Wu Xing hors combat)
 var portails: Dictionary = {}   # **position monde** → id du Passeur qui l'a ouverte (Talents de classe)
-var territoire: Dictionary = {"tresor": 0, "dette": 0, "semaines_dette": 0, "stocks": {}, "rapports": [], "gains_quetes": 0, "royaume": false,
+## La forme d'un territoire (Villes — B0, 2026-09-05) : celle du royaume du joueur (étape 10). Une ville générée en a
+## une aussi, avec son propriétaire (l'id de son royaume, ou « joueur » quand il la contrôle) et ses cellules à rôle —
+## « un camp et une ville sont identiques, seule différence c'est que la ville est générée » (designer).
+static func territoire_vide(id: String = "joueur", proprietaire: String = "joueur") -> Dictionary:
+	var t := {"tresor": 0, "dette": 0, "semaines_dette": 0, "stocks": {}, "rapports": [], "gains_quetes": 0, "royaume": false,
 	"cultures": {}, "fertilite": {}, "etals": {}, "caisse": 0, "marge": 1.0, "clients": 0.0, "heure_resolue": -1, "absence": {"ventes": 0, "or": 0, "mures": 0},
-	"gouvernance": "", "gouvernance_cible": "", "transition": 0, "raid": {}, "dernier_raid": {}, "accords": {}}   # le royaume du joueur (étape 10)
+	"gouvernance": "", "gouvernance_cible": "", "transition": 0, "raid": {}, "dernier_raid": {}, "accords": {}}
+	t["id"] = id
+	t["proprietaire"] = proprietaire
+	t["cellules"] = {}   # le joueur : le même dictionnaire que monde.claims ; une ville : ses cellules à rôle
+	return t
+
+
+var territoire: Dictionary = territoire_vide()   # le territoire COURANT : le joueur, ou une ville qu'il contrôle et où il se tient (Villes B0)
+var territoires: Dictionary = {}                 # id → territoire : « joueur » et les villes générées (Villes B0)
+var chrono: Dictionary = {}                      # étape → ms cumulées de la dernière semaine (les sondes le lisent : Budgets de performance)
+
+
+func _top(cle: String, t0: int) -> int:
+	chrono[cle] = float(chrono.get(cle, 0.0)) + float(Time.get_ticks_usec() - t0) / 1000.0
+	return Time.get_ticks_usec()
 var objets: Dictionary = {}          # uid → instance générée (le catalogue reste dans `items`, fusionné)
 var contenants: Dictionary = {}      # index de tuile → [uids] (coffres, butin au sol)
 var dernier_combat: Dictionary = {}   # récapitulatif du dernier combat terminé (écran de fin)
@@ -90,6 +108,7 @@ func _init(p_graine: int) -> void:
 	wuxing = WuXing.new(GameData.config("wuxing"))
 	capacites = Capacites.new(GameData.catalogues.get("modules", {}))
 	grille_sort = GrilleSort.new(regles.r.get("grille", {}), GameData.catalogues.modules, GameData.catalogues.get("grilles", {}))
+	territoires["joueur"] = territoire
 	capacites.par_niveau = float(regles.r.progression.skill_factor_par_niveau)
 	capacites.plancher = float(regles.r.progression.ticks_plancher_module)
 	items = GameData.catalogues.get("items", {}).duplicate()   # catalogue + instances de loot (uid)
@@ -221,6 +240,7 @@ func charger_camp(joueur: Dictionary = {}, cellule_choisie: Vector2i = Vector2i(
 	var planete: Dictionary = planete_options if not planete_options.is_empty() else GameData.config("planete")
 	var surface := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, graine_monde if graine_monde >= 0 else int(planete.graine))
 	monde = Monde.new(surface, planete, cfg)
+	monde.claims = territoires.joueur.cellules   # les claims du joueur et les cellules de son territoire : un seul dictionnaire (Villes B0)
 	var depart := monde.cellule_camp if cellule_choisie == Vector2i(-1, -1) else cellule_choisie
 	# Garde-fou (Début de partie) : si la cellule de départ est en mer, la première cellule de terre en spirale.
 	var essais := 0
@@ -252,6 +272,7 @@ func charger_camp(joueur: Dictionary = {}, cellule_choisie: Vector2i = Vector2i(
 			r += 1
 		break
 	monde.cellule_camp = depart
+	monde.surface.cellule_camp = depart   # jamais un quartier d'agglomération : le camp est le territoire du joueur (Villes B1)
 	grille = monde.fenetre(depart, GameData.config("tile_contents"), regles.r.deplacement, int(regles.r.vision.hauteur_oeil))
 	var e := monde.cellule(depart)
 	var entree := monde.point_marchable(depart)   # le point marchable le plus proche du centre (Début de partie)
@@ -2020,6 +2041,10 @@ func _ry() -> Dictionary:
 func revendiquer(e: Dictionary, cell: Vector2i) -> bool:
 	if monde == null or e.controle != "joueur":
 		return false
+	var tid := territoire_de_cellule(cell)
+	if not tid.is_empty() and tid != str(territoire.get("id", "joueur")):   # la cellule d'une ville ne se revendique pas (Villes B0)
+		EventBus.emettre(&"journal", [&"journal.claim_refuse", {}])
+		return false
 	if not monde.revendicable(cell, horloge_monde.ticks):
 		EventBus.emettre(&"journal", [&"journal.claim_refuse", {}])
 		return false
@@ -2048,8 +2073,9 @@ func changer_role(cell: Vector2i, role: String) -> bool:
 
 func residents() -> Array:
 	var res: Array = []
+	var tid := str(territoire.get("id", "joueur"))   # ceux du territoire courant (Villes B0) ; « joueur » par défaut : les anciennes sauvegardes
 	for x in entites.values():
-		if x.vivant and x.has("assignation"):
+		if x.vivant and x.has("assignation") and str(x.assignation.get("territoire", "joueur")) == tid:
 			res.append(x)
 	return res
 
@@ -2099,7 +2125,7 @@ func _assigner(e: Dictionary, pnj_id: String, fonction: String, tick: int, perim
 	x.ai_profile = "civil" if fonction != "garde" else "garde"
 	x["fonction"] = fonction
 	x["role"] = "resident"
-	x["assignation"] = {"fonction": fonction, "cellule": cell}
+	x["assignation"] = {"fonction": fonction, "cellule": cell, "territoire": str(territoire.get("id", "joueur"))}
 	if vers_residentiel:
 		x.assignation["residence"] = perimetre   # il y habite : une maison s'y bâtira (Population et exploitation)
 		if avant.has("perimetre") and perimetres().has(str(avant.perimetre)):
@@ -2185,8 +2211,8 @@ func pieces_de_cellule(cell: Vector2i) -> Array:
 	var pc: Dictionary = _ry().pieces
 	var vues: Dictionary = {}
 	for i in grille.contenu.size():
-		if grille.contenu[i] <= 0 or grille.contenu_ids[grille.contenu[i]] != "porte":
-			continue
+		if grille.contenu[i] <= 0 or not (str(grille.contenu_ids[grille.contenu[i]]) in ["porte", "porte_fermee"]):
+			continue   # une porte fermée (celles des villes, que les PNJ ouvrent) ferme une pièce aussi (Villes B1)
 		var porte := grille.pos_de(i)
 		if _cell_de(porte) != cell:
 			continue
@@ -3270,10 +3296,114 @@ func production_de(x: Dictionary) -> Dictionary:
 	return {"base": str(prod.get("item", prod.get("materiau", ""))), "forme": str(prod.get("forme", "")), "n": int(floor(q * float(prod.get("par_unite", 1.0))))}
 
 
+# ---------------------------------------------------------------- les territoires (Villes — B0, 2026-09-05)
+
+## Le contexte d'un territoire : le temps d'un appel, `territoire` et `monde.claims` sont ceux de `id` — tout ce qui lit
+## le territoire du joueur tourne tel quel pour une ville (« la gestion de camp et les villes sont exactement pareils »).
+func _dans_territoire(id: String, f: Callable) -> Variant:
+	if not territoires.has(id) or id == str(territoire.get("id", "joueur")):
+		return f.call()
+	var avant := str(territoire.get("id", "joueur"))
+	_entrer_contexte(id)
+	var res: Variant = f.call()
+	_entrer_contexte(avant)
+	return res
+
+
+func _entrer_contexte(id: String) -> void:
+	if not territoires.has(id):
+		return
+	territoire = territoires[id]
+	if not territoire.has("cellules"):
+		territoire["cellules"] = {}
+	if monde != null:
+		monde.claims = territoire.cellules
+
+
+## Le territoire auquel une cellule appartient ("" si aucun) : les claims du joueur, ou les cellules d'une ville.
+func territoire_de_cellule(cell: Vector2i) -> String:
+	for id in territoires.keys():
+		if territoires[id].get("cellules", {}).has(cell):
+			return str(id)
+	return ""
+
+
+## Le territoire courant du joueur : celui de la cellule où il se tient s'il le possède, sinon sa base.
+func territoire_courant() -> Dictionary:
+	var j := _joueur()
+	if not j.is_empty() and monde != null and lieu == "camp":
+		var id := territoire_de_cellule(_cell_de(j.pos))
+		if not id.is_empty() and str(territoires[id].get("proprietaire", "")) == "joueur":
+			return territoires[id]
+	return territoires.get("joueur", territoire)
+
+
+## Suit le joueur à chaque tick du monde : le contexte ambiant est son territoire courant (l'écran Gestion, P, les
+## assignations, les périmètres dessinés travaillent sur la ville qu'il contrôle quand il s'y tient).
+func _maj_contexte() -> void:
+	var voulu := str(territoire_courant().get("id", "joueur"))
+	if voulu != str(territoire.get("id", "joueur")):
+		_entrer_contexte(voulu)
+
+
+func _joueur() -> Dictionary:
+	for x in entites.values():
+		if x.controle == "joueur":
+			return x
+	return {}
+
+
+## Un territoire de ville : créé à sa première cellule chargée (B1), ou par un test.
+func creer_territoire(id: String, proprietaire: String, tresor: int = 0) -> Dictionary:
+	if territoires.has(id):
+		return territoires[id]
+	var t := territoire_vide(id, proprietaire)
+	t.tresor = tresor
+	territoires[id] = t
+	return t
+
+
+## L'entité qui répond du territoire dans sa semaine : le joueur s'il le possède, sinon son magistrat (une fonction
+## qui porte `magistrat`), sinon personne (un dictionnaire vide de droits : pas de guilde, pas d'or, pas de relation).
+func _proprietaire_entite(id: String) -> Dictionary:
+	var t: Dictionary = territoires.get(id, {})
+	if str(t.get("proprietaire", "")) == "joueur":
+		return _joueur()
+	for x in vivants():
+		if str(x.get("village", "")) == id and bool(GameData.catalogues.functions.get(str(x.get("fonction", "")), {}).get("magistrat", false)):
+			return x
+	return {"id": "", "or": 0, "guildes": {}, "reputations": {}, "name_key": "", "pos": Vector2i.ZERO}
+
+
+## Une ville est chargée si l'une de ses cellules est dans la fenêtre (rien ne vit hors fenêtre — LOD de simulation).
+func _territoire_charge(id: String) -> bool:
+	if monde == null or lieu != "camp" or not territoires.has(id):
+		return false
+	for cell in territoires[id].get("cellules", {}).keys():
+		if absi(cell.x - monde.centre.x) <= monde.rayon and absi(cell.y - monde.centre.y) <= monde.rayon:
+			return true
+	return false
+
+
+## La semaine des villes chargées : chacune dans son contexte, par les fonctions du camp.
+func _semaine_villes() -> void:
+	for id in territoires.keys():
+		if str(id) == "joueur" or not _territoire_charge(str(id)):
+			continue
+		var e := _proprietaire_entite(str(id))
+		_dans_territoire(str(id), func() -> void: _semaine_territoire(e))
+
+
+func _semaine_joueur(x: Dictionary) -> void:
+	_semaine_territoire(x)
+	_semaine_migrants(x)   # la base attire (Population et exploitation, 2026-09-04)
+
+
 ## Le passage hebdomadaire du territoire : production, entretien, dette et ses paliers, taxe de guilde, rapport.
 func _semaine_territoire(e: Dictionary) -> void:
 	if monde == null or monde.claims.is_empty():
 		return
+	var horloge_debut_semaine := Time.get_ticks_usec()
 	var ry := _ry()
 	var prod_txt: Array[String] = []
 	var prod_par := {}   # cumulé par matière, l'or en une somme (grande base, 2026-09-04)
@@ -3303,14 +3433,20 @@ func _semaine_territoire(e: Dictionary) -> void:
 				if place_stockage(str(st.id)) <= 0:
 					EventBus.emettre(&"journal", [&"journal.stockage_plein", {"x": st.cellule.x, "y": st.cellule.y}])
 	territoire.tresor = int(territoire.tresor) + or_prod
+	var t0 := _top("t.production", horloge_debut_semaine)
 	# Ressources naturelles : la régénération efface le bâti de la cellule.
 	for cell in monde.claims.keys():
 		if str(monde.claims[cell].role) == "ressources":
 			monde.modifications.erase(cell)
 	_repousser_perimetres()
+	t0 = _top("t.repousser", t0)
 	_nourrir_residents()   # le repas de la semaine (Faim des PNJ) : une fois, avant les maisons et le bilan
+	t0 = _top("t.nourrir", t0)
 	_batir_maisons()   # les maisons automatiques du résidentiel (Population et exploitation, 2026-09-04)
+	t0 = _top("t.maisons", t0)
 	var entretien := int(ry.entretien_pnj) * residents().size() + int(ry.entretien_structure) * _structures_speciales()
+	if str(territoire.get("proprietaire", "joueur")) != "joueur":
+		entretien = 0   # une ville qui n'est pas au joueur ne lui doit pas de gages : son budget propre vient avec l'économie (B3)
 	if not str(territoire.gouvernance).is_empty():
 		var g: Dictionary = GameData.entree("governments", str(territoire.gouvernance))
 		entretien = int(round(float(entretien) * float(g.base_rate) / float(ry.gouvernance.base_rate_ref)))
@@ -3326,6 +3462,7 @@ func _semaine_territoire(e: Dictionary) -> void:
 		territoire.semaines_dette = int(territoire.semaines_dette) + 1
 	var pal: Dictionary = ry.dette_paliers
 	_recalculer_humeurs()   # chaque semaine (Habitat des PNJ) — en dette aussi : le palier est un état, pas une pente (2026-09-04)
+	t0 = _top("t.humeurs", t0)
 	if int(territoire.semaines_dette) >= int(pal.humeur[0]):
 		for x in residents():
 			x.humeur = int(x.get("humeur", ry.humeur_base)) + int(pal.humeur[1])
@@ -3358,6 +3495,7 @@ func _semaine_territoire(e: Dictionary) -> void:
 			EventBus.emettre(&"journal", [&"journal.gouvernance_faite", {"gouv": GameData.entree("governments", str(territoire.gouvernance)).name_key}])
 	_semaine_accords()
 	_jet_raid(e, horloge_monde.ticks)
+	_top("t.fin", t0)
 	for b in prod_par.keys():
 		if str(b) == "or":
 			prod_txt.append("%d or" % int(prod_par[b]))
@@ -4265,6 +4403,8 @@ func _conquerir(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 		return true
 	monde.claims[cell] = {"role": "habitation"}
 	info["conquis_par"] = e.id
+	if territoires.has(str(v.nom)):   # une ville-territoire (Villes B0) : elle devient sienne, avec ses gens, ses stocks, ses dettes
+		territoires[str(v.nom)].proprietaire = "joueur"
 	monde.villages[str(v.nom)] = info
 	if not roy.is_empty():
 		var hostile := relation_royaume(e, roy) == "hostile"
@@ -4700,8 +4840,8 @@ func valeur_territoire() -> float:
 
 ## Le jet hebdomadaire de raid : probabilité par corruption, valeur et réputation ; force = valeur × aléa / échelle.
 func _jet_raid(e: Dictionary, tick: int) -> void:
-	if monde == null or not territoire.raid.is_empty():
-		return
+	if monde == null or not territoire.raid.is_empty() or str(territoire.get("id", "joueur")) != "joueur":
+		return   # une ville n'est pas raidée par ce jet : ses guerres viendront avec les royaumes (programme D)
 	var r: Dictionary = _ry().raids
 	var rep := int(e.get("reputations", {}).get("_globale", 0))
 	var valeur := valeur_territoire()
@@ -5015,6 +5155,13 @@ func _recolter_culture(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 func _tiquer_territoire(tick: int) -> void:
 	if monde == null or lieu != "camp":
 		return
+	_dans_territoire("joueur", func() -> void: _tiquer_territoire_courant(tick))
+	for id in territoires.keys():
+		if str(id) != "joueur" and _territoire_charge(str(id)):
+			_dans_territoire(str(id), func() -> void: _tiquer_territoire_courant(tick))
+
+
+func _tiquer_territoire_courant(tick: int) -> void:
 	var h_ticks := int(_cycle().get("ticks_par_jour", 24000)) / 24
 	var heure_idx := tick / h_ticks
 	if int(territoire.heure_resolue) < 0:
@@ -5292,7 +5439,7 @@ func tuiles_de_perimetre(pid: String) -> Array:
 
 ## Créer un périmètre sur une cellule revendiquée : dessiné (`tuiles`, en coordonnées locales) ou, sans tuiles,
 ## la cellule entière — un seul de ce genre par cellule, retypé s'il existe. Scanné si la cellule est dans la fenêtre.
-func creer_perimetre(cell: Vector2i, type: String, tuiles: Array = []) -> String:
+func creer_perimetre(cell: Vector2i, type: String, tuiles: Array = [], silencieux: bool = false) -> String:
 	if monde == null or not monde.claims.has(cell) or not _ry().get("perimetres", {}).get("types", {}).has(type):
 		return ""
 	var pid := ""
@@ -5309,7 +5456,8 @@ func creer_perimetre(cell: Vector2i, type: String, tuiles: Array = []) -> String
 	if not tuiles.is_empty():
 		perimetres()[pid]["tuiles"] = tuiles.duplicate()
 	scanner_perimetre(pid)
-	EventBus.emettre(&"journal", [&"journal.perimetre_cree", {"type": tr("perimetre.%s.name" % type), "x": cell.x, "y": cell.y, "richesse": int(perimetres()[pid].richesse)}])
+	if not silencieux:
+		EventBus.emettre(&"journal", [&"journal.perimetre_cree", {"type": tr("perimetre.%s.name" % type), "x": cell.x, "y": cell.y, "richesse": int(perimetres()[pid].richesse)}])
 	return pid
 
 
@@ -5508,6 +5656,7 @@ func _batir_maisons() -> int:
 	var meubles: Dictionary = bat.get("meubles", {})
 	var baties := 0
 	var sans_place := 0   # une ligne pour tous ceux qu'on n'a pas pu loger (grande base, 2026-09-04)
+	var pieces_par_cell: Dictionary = {}   # la détection de pièces d'une cellule, une fois par semaine (une ville : cent résidents)
 	for x in residents():
 		if baties >= int(mc.get("max_par_semaine", 2)):
 			break
@@ -5517,7 +5666,9 @@ func _batir_maisons() -> int:
 		var cell: Vector2i = perimetres()[pid].cellule
 		if absi(cell.x - monde.centre.x) > monde.rayon or absi(cell.y - monde.centre.y) > monde.rayon:
 			continue
-		if x.has("lit") and not _piece_du_lit(x.lit, pieces_de_cellule(cell)).is_empty():
+		if not pieces_par_cell.has(cell):
+			pieces_par_cell[cell] = pieces_de_cellule(cell)
+		if x.has("lit") and not _piece_du_lit(x.lit, pieces_par_cell[cell]).is_empty():
 			continue   # déjà logé dans une pièce valide
 		var origine := _emplacement_maison(pid, plan)
 		if origine == Vector2i(-1, -1):
@@ -6382,7 +6533,7 @@ func sauvegarder(nom: String = "") -> bool:
 		contenants_monde[grille.pos_de(int(gi))] = contenants[gi]
 	var ok := Sauvegarde.ecrire(nom, "world.json", {"version": 1, "resume": resume_partie(), "graine": graine, "graine_monde": graine_monde, "planete_options": planete_options, "identifies": identifies, "ticks": horloge_monde.ticks, "prochain_donjon": prochain_donjon, "n_entites": _n_entites,
 		"cellule_camp": monde.cellule_camp, "camp": {"entree": camp_sauve.get("entree", Vector2i.ZERO), "biome": camp_sauve.get("biome", ""), "cellule": camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": monde.explores,
-		"delta": monde.delta, "foyers": monde.foyers, "faune_densite": monde.faune_densite, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": monde.claims, "territoire": territoire, "vacances": monde.vacances, "villages": monde.villages, "heritiers": monde.heritiers, "vacances_guildes": monde.vacances_guildes,
+		"delta": monde.delta, "foyers": monde.foyers, "faune_densite": monde.faune_densite, "semaine": monde.semaine_courante, "peuplees": monde.peuplees, "claims": territoires.joueur.cellules, "territoire": territoires.joueur, "territoires": territoires, "vacances": monde.vacances, "villages": monde.villages, "heritiers": monde.heritiers, "vacances_guildes": monde.vacances_guildes,
 		"modifs_terrain": modifs_terrain, "portails": portails, "gouffres_vides": gouffres_vides, "mines_creusees": mines_creusees,
 		"carte_cache": monde.carte_cache_serialise()})   # indexés par position monde, donc valables au rechargement
 	ok = Sauvegarde.ecrire(nom, "surface.json", surface) and ok
@@ -6432,6 +6583,7 @@ func charger_sauvegarde(nom: String = "") -> bool:
 		objets[uid] = instances[uid]
 		items[uid] = instances[uid]
 	monde.cellule_camp = w.cellule_camp
+	monde.surface.cellule_camp = monde.cellule_camp
 	monde.explores = w.get("explores", {})
 	monde.delta = w.get("delta", {})
 	monde.foyers = w.get("foyers", {})
@@ -6443,7 +6595,14 @@ func charger_sauvegarde(nom: String = "") -> bool:
 	monde.heritiers = w.get("heritiers", {})
 	monde.vacances_guildes = w.get("vacances_guildes", {})
 	monde.villages = w.get("villages", {})
-	territoire = w.get("territoire", territoire)
+	territoires = w.get("territoires", {})
+	territoire = territoires.get("joueur", w.get("territoire", territoire))   # une sauvegarde d'avant B0 n'a que `territoire`
+	territoire["id"] = "joueur"
+	territoire["proprietaire"] = "joueur"
+	territoire["cellules"] = monde.claims
+	territoires["joueur"] = territoire
+	for id in territoires.keys():
+		territoires[id]["id"] = str(id)
 	for cell in surface.keys():
 		var sc: Dictionary = surface[cell]
 		if not sc.modifications.is_empty():
@@ -7628,10 +7787,13 @@ func _rumeur(pnj: Dictionary, e: Dictionary, tick: int) -> bool:
 	return true
 
 
-## Peuple les cellules à hameau de la fenêtre à leur première visite (Villages PNJ).
+## Peuple les cellules d'agglomération de la fenêtre à leur première visite (Villes B1) : les gens, puis le
+## territoire de la ville — ses cellules à rôle, ses périmètres, ses stockages — dans son contexte. « Un camp et
+## une ville sont identiques » : chaque habitant est un résident assigné, logé, à son poste.
 func _peupler_fenetre() -> void:
 	if monde == null:
 		return
+	var cfg: Dictionary = GameData.config("villes")
 	for dy in range(-monde.rayon, monde.rayon + 1):
 		for dx in range(-monde.rayon, monde.rayon + 1):
 			var cell: Vector2i = monde.centre + Vector2i(dx, dy)
@@ -7642,29 +7804,81 @@ func _peupler_fenetre() -> void:
 			if v.is_empty():
 				continue
 			monde.peuplees[cell] = true
+			var nom := str(v.nom)
+			var palier := str(v.get("palier", "hameau"))
+			var t := creer_territoire(nom, str(v.get("royaume", "")), int(cfg.tresor_depart.get(palier, 0)))
+			if not t.has("agglomeration"):
+				t["agglomeration"] = {"palier": palier, "population": int(v.get("population", v.pnj.size())), "centre": v.get("cellule_centre", cell), "culture": str(v.get("culture", "")), "gouvernance": str(v.get("gouvernance", ""))}
+			t.cellules[cell] = {"role": str(v.get("territoire", {}).get("role", "habitation"))}
+			var pids: Array = _dans_territoire(nom, func() -> Array: return _creer_perimetres_ville(cell, v))
+			var pid_res := ""
+			for k in pids.size():
+				if str(v.territoire.perimetres[k].type) == "residentiel" and not str(pids[k]).is_empty():
+					pid_res = str(pids[k])
+					break
 			for pj in v.pnj:
 				var pos: Vector2i = monde.pos_monde(cell, pj.pos)
-				if grille.occupant(pos).is_empty():
-					var x := ajouter(str(pj.creature), pos, "ia")
-					if pj.has("fonction"):
-						x.fonction = str(pj.fonction)
-					_habiller_pnj(x, GameData.entree("creatures", str(pj.creature)), str(v.culture))
-					if not str(pj.get("boutique", "")).is_empty():   # une boutique typée : les catégories du type
-						x["boutique"] = str(pj.boutique)
-						x.stock = []
-						_garnir_stock(x, GameData.entree("shop_types", str(pj.boutique)).selection)
-					if not str(pj.get("guilde", "")).is_empty():
-						x["guilde"] = str(pj.guilde)
-					x["lit"] = monde.pos_monde(cell, pj.lit)
-					x["poste"] = pos
-					x["place"] = monde.pos_monde(cell, v.centre)
-					x["village"] = str(v.nom)
-					x["royaume"] = str(v.get("royaume", ""))
-					x.ancre = pos
-			if not monde.villages.has(str(v.nom)):
-				monde.villages[str(v.nom)] = {"cellule": cell, "royaume": str(v.get("royaume", "")), "conquis_par": "", "defense_jusqua": 0, "abandonne": false, "capacite": v.pnj.size()}
+				if not grille.occupant(pos).is_empty() or grille.bloque_passage(pos):
+					pos = _tuile_libre_autour(pos)
+				if not grille.dans(pos) or not grille.occupant(pos).is_empty():
+					continue
+				var x := ajouter(str(pj.creature), pos, "ia")
+				if x.is_empty():
+					continue
+				if pj.has("fonction"):
+					x.fonction = str(pj.fonction)
+				_habiller_pnj(x, GameData.entree("creatures", str(pj.creature)), str(v.culture))
+				if not str(pj.get("boutique", "")).is_empty():   # une boutique typée : les catégories du type
+					x["boutique"] = str(pj.boutique)
+					x.stock = []
+					_garnir_stock(x, GameData.entree("shop_types", str(pj.boutique)).selection)
+				if not str(pj.get("guilde", "")).is_empty():
+					x["guilde"] = str(pj.guilde)
+				x["lit"] = monde.pos_monde(cell, pj.lit)
+				x["poste"] = monde.pos_monde(cell, pj.get("poste", pj.pos))
+				x["place"] = monde.pos_monde(cell, v.centre)
+				x["village"] = nom
+				x["royaume"] = str(v.get("royaume", ""))
+				x.ancre = x.poste
+				# Le résident du territoire (Villes B0/B1) : assigné à sa fonction, logé au résidentiel, ouvrier d'une zone.
+				var fonction := str(x.get("fonction", "oisif"))
+				if not GameData.catalogues.functions.has(fonction):
+					fonction = "oisif"
+				x["fonction"] = fonction
+				x["role"] = "resident"
+				x["assignation"] = {"fonction": fonction, "cellule": cell, "territoire": nom}
+				if not pid_res.is_empty():
+					x.assignation["residence"] = pid_res
+				if pj.has("perimetre") and int(pj.perimetre) < pids.size() and not str(pids[int(pj.perimetre)]).is_empty():
+					var pid_z := str(pids[int(pj.perimetre)])
+					x.assignation["perimetre"] = pid_z
+					var poste_p: Vector2i = _dans_territoire(nom, func() -> Vector2i: return _poste_de_perimetre(pid_z, x.pos))
+					if poste_p != Vector2i(-1, -1):
+						x.poste = poste_p
+						x.ancre = poste_p
+			if not monde.villages.has(nom):
+				monde.villages[nom] = {"cellule": v.get("cellule_centre", cell), "royaume": str(v.get("royaume", "")), "conquis_par": "", "defense_jusqua": 0, "abandonne": false, "capacite": int(v.get("population", v.pnj.size()))}
 			_former_familles(cell, v)
-			EventBus.emettre(&"journal", [&"journal.village", {"nom": v.nom}])
+			EventBus.emettre(&"journal", [&"journal.ville", {"palier": "palier." + palier, "nom": nom, "quartier": "quartier." + str(v.get("quartier", "centre")), "population": int(v.get("population", v.pnj.size()))}])
+
+
+## Les périmètres d'un quartier, dans le contexte de sa ville : le résidentiel, les stockages des entrepôts, les
+## zones de récolte ; chaque zone prend le premier stockage du quartier. Retourne les identifiants, dans l'ordre du plan.
+func _creer_perimetres_ville(cell: Vector2i, v: Dictionary) -> Array:
+	var pids: Array = []
+	var plan: Array = v.get("territoire", {}).get("perimetres", [])
+	for per in plan:
+		pids.append(creer_perimetre(cell, str(per.type), per.tuiles, true))
+	var pid_stock := ""
+	for k in pids.size():
+		if str(plan[k].type) == "stockage" and not str(pids[k]).is_empty():
+			pid_stock = str(pids[k])
+			break
+	if not pid_stock.is_empty():
+		for k in pids.size():
+			if str(plan[k].type) in ["bois", "minerai", "plantes"] and not str(pids[k]).is_empty():
+				perimetres()[str(pids[k])]["stockage"] = pid_stock
+	return pids
 
 
 ## Donne un objet à un être (dans son sac).
@@ -8343,8 +8557,11 @@ func pas(nom: String) -> bool:
 	if e.has("saisi_par") and _ia_se_debattre(e, h.ticks):
 		_fin_de_pas(nom)
 		return true
+	var t0 := Time.get_ticks_usec()
 	_decider_ia(e, h.ticks)
+	t0 = _top("pas.decider", t0)
 	_fin_de_pas(nom)
+	_top("pas.fin", t0)
 	return true
 
 
@@ -8465,18 +8682,25 @@ var _dans_avancee_monde := false
 func _sur_avancee_monde(_de: int, _a: int) -> void:
 	# Tout ce qui est dû agit, dans l'ordre des compteurs. En mode action (donjon), l'horloge saute d'elle-même
 	# dans pas() — ici on ne résout que ce qui est déjà dû (un avancer() externe : tests, voyage), sans réentrer.
+	var t0 := Time.get_ticks_usec()
 	if not _dans_avancee_monde:
 		_dans_avancee_monde = true
 		var garde_fou := 64
 		while garde_fou > 0 and (horloge_monde.mode == Horloge.Mode.TEMPS_REEL or _du_sur_monde()) and pas("monde"):
 			garde_fou -= 1
 		_dans_avancee_monde = false
+	t0 = _top("pas", t0)
 	_tiquer_faim(horloge_monde.ticks)
+	t0 = _top("faim", t0)
 	_tiquer_monde(horloge_monde.ticks)
+	t0 = _top("monde", t0)
 	_tiquer_territoire(horloge_monde.ticks)
+	t0 = _top("territoire", t0)
 	_tiquer_raid(horloge_monde.ticks)
 	_tiquer_meteo(horloge_monde.ticks)
+	t0 = _top("raid_meteo", t0)
 	_tiquer_faune(horloge_monde.ticks)
+	_top("faune", t0)
 
 
 ## La faune de surface (Créatures) : un tirage toutes les intervalle_ticks — sous le budget, une bête
@@ -8557,6 +8781,7 @@ func _tiquer_monde(tick: int) -> void:
 	if monde == null:
 		return
 	var cr: Dictionary = GameData.config("planete").corruption
+	_maj_contexte()   # le territoire courant suit le joueur (Villes B0)
 	monde.jour_monde = jour_courant()   # `foyer()` s'allume sur les donjons de corruption : il lui faut le jour
 	if monde.jour_monde != _jour_annonce:
 		_nouveau_jour(monde.jour_monde)
@@ -8565,15 +8790,22 @@ func _tiquer_monde(tick: int) -> void:
 		monde.semaine_courante += 1
 		var touchees := monde.semaine(tick)
 		var derive := int(regles.r.reputation.derive_hebdo)
+		var t0 := Time.get_ticks_usec()
 		_vieillir_semaine(tick)
+		t0 = _top("vieillir", t0)
 		_semaine_royaumes_pnj()
+		t0 = _top("royaumes_pnj", t0)
 		_semaine_elevage()
+		t0 = _top("elevage", t0)
 		for x in entites.values():
 			if x.controle == "joueur":
-				_semaine_territoire(x)
-				_semaine_migrants(x)   # la base attire (Population et exploitation, 2026-09-04)
+				_dans_territoire("joueur", func() -> void: _semaine_joueur(x))
+		t0 = _top("joueur", t0)
+		_semaine_villes()   # chaque ville chargée vit la même semaine, dans son contexte (Villes B0)
+		t0 = _top("villes", t0)
 		_regenerer_terrain_sauvage()
 		_regenerer_faune_hebdo()
+		t0 = _top("regeneration", t0)
 		for x in entites.values():   # les bourses des PNJ se rechargent (+15 % par semaine, Barèmes économiques)
 			if x.has("or_max"):
 				x.or = mini(int(x.or_max), int(x.or) + int(ceil(float(x.or_max) * float(regles.r.commerce.recharge_hebdo))))
@@ -8763,10 +8995,19 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 ## par un joueur — portée Perception × detection_par_perception, ligne de vue — est recalculé et
 ## mémorisé sur la grille (`decouvert`). `e.vue` : index de tuile → true ; `e.vue_version` change
 ## quand le champ change (le client redessine le terrain sur ce signal).
+var _vision_tick := -1          # la vision du joueur se calcule une fois par tick : un pas de PNJ ne change pas ce qu'il voit
+var _vision_grille: Grille = null
+
+
 func maj_vision() -> void:
 	for e in vivants():
 		if e.controle != "joueur":
 			continue
+		var t_now := horloge_de(e).ticks
+		if _vision_tick == t_now and _vision_grille == grille and e.has("vue") and e.get("vue_pos", Vector2i(-1, -1)) == e.pos and not bool(e.get("vue_sale", false)):
+			continue   # déjà calculée à ce tick, au même endroit, sur la même grille (Villes B1 : 218 êtres, dix pas par tick)
+		_vision_tick = t_now
+		_vision_grille = grille
 		var portee := int(float(e.stats_eff.perception) * float(regles.r.engagement.detection_par_perception))
 		if a_talent(e, "oeil_de_la_pierre"):
 			portee = maxi(1, roundi(float(portee) * float(regles.r.talents.oeil_de_la_pierre.vision_mult)))
@@ -8803,17 +9044,20 @@ func voit(e: Dictionary, t: Vector2i) -> bool:
 
 
 func _fin_de_pas(nom: String) -> void:
-	for e in vivants():
+	var vs := vivants()   # une seule liste par fin de pas (une ville : deux cents êtres, dix pas par tick)
+	for e in vs:
 		if e.controle == "joueur":
 			_verifier_fenetre(e)
+	var t0 := Time.get_ticks_usec()
 	maj_vision()
-	for e in vivants():   # fin du buff Reposé
+	_top("fin.vision", t0)
+	for e in vs:   # fin du buff Reposé
 		if e.has("repose_jusqua") and int(e.repose_jusqua) <= horloge_de(e).ticks:
 			e.erase("repose_jusqua")
 			e["xp_mult"] = 1.0
 	# Phase 2 (Boucle de tick) : les statuts de tous les êtres de cette horloge.
 	var h: Horloge = horloge_monde if nom == "monde" else combats.get(nom, {}).get("horloge", horloge_monde)
-	for e in vivants():
+	for e in vs:
 		if e.horloge == nom:
 			_tiquer_statuts(e, h.ticks)
 	_tiquer_differes(nom, h.ticks)
@@ -12318,10 +12562,25 @@ func _ia_pas_routine(e: Dictionary, cible: Vector2i, tick: int) -> void:
 	if _ia_par_portail(e, cible, tick):
 		return
 	if Grille.distance(e.pos, cible) <= int(GameData.config("planete").routine.astar_sous):
-		var chemin := grille.chemin(e.pos, cible, Etres.est_volant(e), "", refuse_nage(e))
+		# Le chemin se garde d'un pas à l'autre tant que la cible et la position sont celles prévues (Villes B1 :
+		# recalculer A* à chaque pas de chaque habitant coûtait le quart du tick d'une ville).
+		var cache: Dictionary = e.get("chemin_routine", {})
+		var chemin: Array = cache.get("chemin", []) if cache.get("cible", Vector2i(-9999, -9999)) == cible and cache.get("depuis", Vector2i(-9999, -9999)) == e.pos else []
+		if chemin.is_empty():
+			var t0 := Time.get_ticks_usec()
+			chemin = grille.chemin(e.pos, cible, Etres.est_volant(e), "", refuse_nage(e))
+			_top("ia.chemin_routine", t0)
 		if chemin.size() > 0:
-			if _deplacer(e, chemin[0], tick):
+			var prochain: Vector2i = chemin[0]
+			if _deplacer(e, prochain, tick):
+				e["chemin_routine"] = {"cible": cible, "depuis": prochain, "chemin": chemin.slice(1), "echecs": 0}
 				return
+			var echecs := int(cache.get("echecs", 0)) + 1
+			if echecs < 3:   # quelqu'un est sur le pas suivant : on attend qu'il passe plutôt que de refaire le chemin
+				e["chemin_routine"] = {"cible": cible, "depuis": e.pos, "chemin": chemin, "echecs": echecs}
+				_attendre(e, tick)
+				return
+			e.erase("chemin_routine")
 	var meilleur: Vector2i = e.pos
 	var dmin := Grille.distance(e.pos, cible)
 	var rn := refuse_nage(e)   # l'eau refuse la surcharge : le pas glouton ne la propose pas

@@ -1,54 +1,54 @@
 {
-  "_doc": "Le calendrier (Un monde réel — A, 2026-09-05) : douze mois de dix jours nommés par les animaux du cycle sexagésimal (l'année de 120 jours de combat_rules.age et les cinq saisons de planete.cycle ne bougent pas), la semaine de sept jours (Soleil, Lune, les cinq éléments — sa longueur est planete.corruption.ticks_par_semaine), les années depuis annee_depart (la création propose une naissance en l'an 1000). marche : le jour de marché de chaque agglomération est un jour de la semaine tiré de son nom ; ce jour-là les étals regarnissent jusqu'à stock_mult fois leur garnissage et vendent à prix_mult. fetes : cultures vide = toutes ; ce jour-là les civils de la culture tiennent la place et gagnent humeur.",
+  "_doc": "Le calendrier (Un monde réel — A, 2026-09-05) : douze mois de trente jours (designer, 2026-09-05 : « on va plutôt faire 12 mois de 30 jours ») nommés par les animaux du cycle sexagésimal (l'année fait 360 jours : combat_rules.age.jours_par_an et planete.cycle.saisons suivent, les cinq saisons gardent leurs proportions), la semaine de sept jours (Soleil, Lune, les cinq éléments — sa longueur est planete.corruption.ticks_par_semaine), les années depuis annee_depart (la création propose une naissance en l'an 1000). marche : le jour de marché de chaque agglomération est un jour de la semaine tiré de son nom ; ce jour-là les étals regarnissent jusqu'à stock_mult fois leur garnissage et vendent à prix_mult. fetes : cultures vide = toutes ; ce jour-là les civils de la culture tiennent la place et gagnent humeur.",
   "annee_depart": 1020,
   "mois": [
     [
       "rat",
-      10
+      30
     ],
     [
       "boeuf",
-      10
+      30
     ],
     [
       "tigre",
-      10
+      30
     ],
     [
       "lapin",
-      10
+      30
     ],
     [
       "dragon",
-      10
+      30
     ],
     [
       "serpent",
-      10
+      30
     ],
     [
       "cheval",
-      10
+      30
     ],
     [
       "chevre",
-      10
+      30
     ],
     [
       "singe",
-      10
+      30
     ],
     [
       "coq",
-      10
+      30
     ],
     [
       "chien",
-      10
+      30
     ],
     [
       "cochon",
-      10
+      30
     ]
   ],
   "jours_semaine": [
@@ -77,27 +77,27 @@
       {
         "id": "semailles",
         "mois": "tigre",
-        "jour": 5,
+        "jour": 15,
         "cultures": []
       },
       {
         "id": "moissons",
         "mois": "singe",
-        "jour": 10,
+        "jour": 30,
         "cultures": []
       },
       {
         "id": "lanternes",
         "mois": "rat",
-        "jour": 10,
+        "jour": 15,
         "cultures": [
           "sino"
         ]
       },
       {
         "id": "yule",
-        "mois": "cochon",
-        "jour": 10,
+        "mois": "chien",
+        "jour": 21,
         "cultures": [
           "nordique"
         ]
@@ -105,7 +105,7 @@
       {
         "id": "saturnales",
         "mois": "chien",
-        "jour": 7,
+        "jour": 17,
         "cultures": [
           "latine"
         ]
@@ -121,7 +121,7 @@
       {
         "id": "hanami",
         "mois": "boeuf",
-        "jour": 5,
+        "jour": 10,
         "cultures": [
           "nipponne"
         ]
@@ -129,7 +129,7 @@
       {
         "id": "kupala",
         "mois": "dragon",
-        "jour": 1,
+        "jour": 21,
         "cultures": [
           "slave"
         ]
@@ -137,7 +137,7 @@
       {
         "id": "yennayer",
         "mois": "rat",
-        "jour": 3,
+        "jour": 12,
         "cultures": [
           "arabo_berbere"
         ]

@@ -1,0 +1,304 @@
+{
+  "_doc": "Les villes (Villes — population, quartiers et économie, B1, 2026-09-05). La population décide de tout : paliers et fourchettes ; situations (hors royaume, dans un territoire, sur une route, capitale par taille de royaume) → tirage du palier ; habitants_par_cellule → l'emprise (au plus neuf cellules, le centre puis la spirale) ; quartiers par palier dans l'ordre de la spirale ; parts de population par type de quartier ; composition d'un quartier (ratios par habitant, préfabs de logement, siège, halls, place) ; fonctions par bâtiment ; tresor_depart par palier ; rues (largeur) ; gardes par habitant.",
+  "paliers": {
+    "hameau": {
+      "pop": [
+        6,
+        14
+      ],
+      "halls": [
+        0,
+        0
+      ],
+      "boutiques": [
+        0,
+        1
+      ]
+    },
+    "village": {
+      "pop": [
+        15,
+        40
+      ],
+      "halls": [
+        0,
+        0
+      ],
+      "boutiques": [
+        1,
+        2
+      ]
+    },
+    "bourg": {
+      "pop": [
+        41,
+        100
+      ],
+      "halls": [
+        1,
+        1
+      ],
+      "boutiques": [
+        2,
+        4
+      ]
+    },
+    "ville": {
+      "pop": [
+        101,
+        220
+      ],
+      "halls": [
+        2,
+        2
+      ],
+      "boutiques": [
+        4,
+        6
+      ]
+    },
+    "cite": {
+      "pop": [
+        221,
+        400
+      ],
+      "halls": [
+        3,
+        4
+      ],
+      "boutiques": [
+        6,
+        6
+      ]
+    }
+  },
+  "ordre_paliers": [
+    "hameau",
+    "village",
+    "bourg",
+    "ville",
+    "cite"
+  ],
+  "situations": {
+    "sauvage": [
+      [
+        "hameau",
+        0.75
+      ],
+      [
+        "village",
+        0.25
+      ]
+    ],
+    "territoire": [
+      [
+        "village",
+        1.0
+      ]
+    ],
+    "territoire_route": [
+      [
+        "village",
+        0.67
+      ],
+      [
+        "bourg",
+        0.33
+      ]
+    ],
+    "capitale": {
+      "hameau": "village",
+      "cite": "bourg",
+      "petit": "ville",
+      "grand": "cite"
+    }
+  },
+  "habitants_par_cellule": 40,
+  "cellules_max": 9,
+  "quartiers": {
+    "hameau": [
+      "centre"
+    ],
+    "village": [
+      "centre"
+    ],
+    "bourg": [
+      "centre",
+      "agricole",
+      "residentiel"
+    ],
+    "ville": [
+      "centre",
+      "residentiel",
+      "artisanal",
+      "agricole",
+      "agricole",
+      "marchand"
+    ],
+    "cite": [
+      "centre",
+      "residentiel",
+      "residentiel",
+      "artisanal",
+      "marchand",
+      "agricole",
+      "agricole",
+      "artisanal",
+      "residentiel"
+    ]
+  },
+  "parts": {
+    "centre": 1.0,
+    "residentiel": 1.4,
+    "artisanal": 0.9,
+    "marchand": 0.8,
+    "agricole": 0.7
+  },
+  "roles": {
+    "centre": "base",
+    "residentiel": "habitation",
+    "artisanal": "base",
+    "marchand": "base",
+    "agricole": "champs"
+  },
+  "composition": {
+    "centre": {
+      "place": true,
+      "siege": true,
+      "halls": true,
+      "boutiques_par_habitant": 15,
+      "chapelle": true,
+      "auberge": true,
+      "logements": [
+        "maison",
+        "chaumiere",
+        "maison_haute",
+        "maison"
+      ],
+      "ateliers_par_habitant": 0,
+      "entrepots": 0,
+      "zones": []
+    },
+    "residentiel": {
+      "place": true,
+      "siege": false,
+      "halls": false,
+      "boutiques_par_habitant": 30,
+      "chapelle": false,
+      "auberge": false,
+      "logements": [
+        "maison",
+        "maison_haute",
+        "chaumiere",
+        "maison"
+      ],
+      "ateliers_par_habitant": 0,
+      "entrepots": 1,
+      "zones": [
+        "plantes"
+      ]
+    },
+    "artisanal": {
+      "place": false,
+      "siege": false,
+      "halls": false,
+      "boutiques_par_habitant": 40,
+      "chapelle": false,
+      "auberge": false,
+      "logements": [
+        "maison"
+      ],
+      "ateliers_par_habitant": 12,
+      "entrepots": 1,
+      "zones": [
+        "bois",
+        "minerai"
+      ]
+    },
+    "marchand": {
+      "place": true,
+      "siege": false,
+      "halls": false,
+      "boutiques_par_habitant": 10,
+      "chapelle": false,
+      "auberge": true,
+      "logements": [
+        "maison_haute",
+        "maison"
+      ],
+      "ateliers_par_habitant": 0,
+      "entrepots": 2,
+      "zones": []
+    },
+    "agricole": {
+      "place": false,
+      "siege": false,
+      "halls": false,
+      "boutiques_par_habitant": 60,
+      "chapelle": false,
+      "auberge": false,
+      "logements": [
+        "chaumiere",
+        "grange",
+        "chaumiere"
+      ],
+      "ateliers_par_habitant": 0,
+      "entrepots": 1,
+      "zones": [
+        "plantes",
+        "bois"
+      ]
+    }
+  },
+  "stations_ateliers": [
+    "forge",
+    "scierie",
+    "tannerie",
+    "atelier_tissage",
+    "cuisine",
+    "alambic",
+    "tailleur_de_pierre",
+    "etabli"
+  ],
+  "fonctions": {
+    "atelier": "artisan",
+    "entrepot": "transporteur",
+    "auberge": "cuisinier",
+    "grange": "fermier",
+    "chaumiere": "fermier",
+    "echoppe": "commercant",
+    "chapelle": "pretre",
+    "temple": "pretre",
+    "hall": "maitre_de_guilde",
+    "maison": "oisif",
+    "maison_haute": "oisif",
+    "mairie": "maire",
+    "chateau": "seigneur",
+    "comptoir": "syndic",
+    "caserne": "commandant"
+  },
+  "fiches": {
+    "atelier": "villageois",
+    "entrepot": "villageois",
+    "auberge": "villageois",
+    "maison_haute": "villageois",
+    "mairie": "villageois",
+    "chateau": "villageois",
+    "temple": "pretre",
+    "comptoir": "villageois",
+    "caserne": "garde_village"
+  },
+  "tresor_depart": {
+    "hameau": 20,
+    "village": 60,
+    "bourg": 200,
+    "ville": 600,
+    "cite": 1500
+  },
+  "rue_largeur": 2,
+  "rayon_place": 6,
+  "rayon_placette": 3,
+  "gardes_par_habitant": 25,
+  "zone_tuiles_max": 40,
+  "budget_ms_cellule": 120
+}

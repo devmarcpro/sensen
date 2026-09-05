@@ -654,8 +654,8 @@
     "bonus_25": 10
   },
   "age": {
-    "_doc": "Âge des PNJ : 1 an = jours_par_an jours ; seuils adulte/âgé ; espérance par race (±variance) ; malus par tranche au-delà de âgé ; chance de mort de vieillesse par an d'écart, tirée chaque semaine.",
-    "jours_par_an": 120,
+    "_doc": "Âge des PNJ : 1 an = jours_par_an jours (360 : douze mois de trente jours, designer 2026-09-05) ; seuils adulte/âgé ; espérance par race (±variance) ; malus par tranche au-delà de âgé ; chance de mort de vieillesse par an d'écart, tirée chaque semaine.",
+    "jours_par_an": 360,
     "adulte": 18,
     "age": 60,
     "depart": [
@@ -900,65 +900,10 @@
       "creature": "villageois"
     },
     "villes": {
-      "hameau": {
-        "batiments": [
-          3,
-          5
-        ],
-        "boutiques": [
-          0,
-          1
-        ],
-        "halls": [
-          0,
-          0
-        ]
-      },
-      "cite": {
-        "batiments": [
-          5,
-          7
-        ],
-        "boutiques": [
-          2,
-          3
-        ],
-        "halls": [
-          1,
-          1
-        ]
-      },
-      "petit": {
-        "batiments": [
-          7,
-          9
-        ],
-        "boutiques": [
-          4,
-          5
-        ],
-        "halls": [
-          2,
-          2
-        ]
-      },
-      "grand": {
-        "batiments": [
-          9,
-          12
-        ],
-        "boutiques": [
-          5,
-          8
-        ],
-        "halls": [
-          2,
-          4
-        ]
-      },
       "creature_boutique": "marchand",
       "creature_hall": "maitre_de_guilde",
-      "hall_rang_min": 3
+      "hall_rang_min": 3,
+      "_doc": "Les créatures des boutiques et des halls, le rang minimal d'un hall ; les nombres de boutiques et de halls par palier sont dans villes.json (B1, 2026-09-05)."
     },
     "pieces": {
       "surface_min": 6,

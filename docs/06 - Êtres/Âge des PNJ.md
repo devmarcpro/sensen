@@ -31,6 +31,9 @@ La population du monde est un flux, pas un stock : les PNJ vieillissent, meurent
 > [!success] Codé le 2026-09-05, 15 h — le signe et l'anniversaire des PNJ (Calendrier)
 > Le signe promis « gratuitement » n'était pas calculé : à l'instanciation, un PNJ sans signe de fiche reçoit celui de son année de naissance (l'année courante du calendrier moins son âge, `Progression.signe`), et un anniversaire (mois et jour tirés de son identifiant). L'âge continue d'avancer par semaine (7/120 d'année) : l'anniversaire est un jour du calendrier, pas le compteur de l'âge. [[Un monde réel — villes, PNJ, royaumes et calendrier]].
 
+> [!important] Décidé par le designer le 2026-09-05, 16 h 40 — l'année fait 360 jours
+> « Pour le calendrier on va plutôt faire 12 mois de 30 jours. » La « valeur fixée » de 120 jours ci-dessus est remplacée : `combat_rules.age.jours_par_an` = 360, `planete.cycle.saisons.jours_par_an` = 360 (les saisons gardent leurs proportions), `data/calendrier.json` = douze mois de trente jours. Un an in-game vaut désormais 240 heures de temps réel à 40 min par jour ; l'âge avance toujours de 7/360 d'année par semaine ; les espérances de vie en années ne changent pas. [[Un monde réel — villes, PNJ, royaumes et calendrier]].
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Races]], [[Boucle de tick]]
 - **Alimente** : [[Familles et succession]], [[Villages PNJ — repeuplement et décimation]], [[Génération de noms]], [[Compagnons]]

@@ -1,20 +1,19 @@
 {
   "plan": [
     "########",
-    "#..E...#",
+    "#L..T..#",
     "#......#",
-    "#L....C#",
+    "#L.F..L#",
+    "#......#",
     "####P###"
   ],
   "meubles": {
-    "L": "lit_de_paille",
+    "L": "lit",
     "T": "table",
-    "E": "etal_de_vente",
-    "C": "coffre",
     "F": "cheminee"
   },
   "tags": [
-    "hameau"
-  ],
-  "poste": "E"
+    "ville",
+    "logement"
+  ]
 }

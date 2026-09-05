@@ -234,40 +234,40 @@
       ]
     },
     "saisons": {
-      "jours_par_an": 120,
+      "jours_par_an": 360,
       "liste": [
         [
           "printemps",
           0,
-          30,
+          90,
           "bois",
           0
         ],
         [
           "ete",
-          30,
-          50,
+          90,
+          150,
           "feu",
           8
         ],
         [
           "fin_ete",
-          50,
-          60,
+          150,
+          180,
           "terre",
           6
         ],
         [
           "automne",
-          60,
-          90,
+          180,
+          270,
           "metal",
           -2
         ],
         [
           "hiver",
-          90,
-          120,
+          270,
+          360,
           "eau",
           -10
         ]
@@ -316,7 +316,16 @@
       "chaumiere": "fermier",
       "grange": "fermier",
       "echoppe": "marchand",
-      "chapelle": "pretre"
+      "chapelle": "pretre",
+      "maison_haute": "villageois",
+      "atelier": "villageois",
+      "entrepot": "villageois",
+      "auberge": "villageois",
+      "mairie": "villageois",
+      "chateau": "villageois",
+      "temple": "pretre",
+      "comptoir": "villageois",
+      "caserne": "garde_village"
     },
     "garde": "garde_village",
     "forgeron_chance": 0.5

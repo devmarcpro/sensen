@@ -142,6 +142,10 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 		var m: Dictionary = GameData.catalogues.meubles.get(str(e.meubles[i]), {})
 		g.meubles[g.idx(p)] = str(e.meubles[i])
 		g.poser_contenu(p, "meuble" if bool(m.get("bloque_passage", true)) else "meuble_sol")
+	for i in e.get("stations", {}).keys():   # les stations des ateliers d'une ville (Villes B1) : de vraies stations fixes
+		var p := base + Vector2i(int(i) % taille, int(i) / taille)
+		g.stations_fixes[g.idx(p)] = str(e.stations[i])
+		g.poser_contenu(p, "station_fixe")
 	if not gouffre_de(cell).is_empty():
 		e["a_donjon"] = true   # le gouffre de la région : une entrée permanente, dessinée comme les autres
 		e["gouffre"] = true

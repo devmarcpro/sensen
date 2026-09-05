@@ -1,0 +1,22 @@
+{
+  "plan": [
+    "##########",
+    "#....A...#",
+    "#........#",
+    "#o......o#",
+    "#L......B#",
+    "#####P####"
+  ],
+  "meubles": {
+    "L": "lit",
+    "A": "autel_rituel",
+    "B": "bibliotheque",
+    "o": "torchere"
+  },
+  "tags": [
+    "ville",
+    "siege",
+    "chapelle"
+  ],
+  "poste": "A"
+}

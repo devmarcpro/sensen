@@ -110,6 +110,9 @@ SAISONS : ACTIVÉES à l'étape 10, avec l'élevage et l'agriculture
 > [!success] Décidé et codé le 2026-08-31 — la pluie se voit
 > Les états à effet `arrose` (pluie, orage) n'existaient à l'écran que comme texte du HUD. Décision (visuel, aucun asset) : le client dessine des **traits de pluie** obliques au-dessus du terrain et des êtres (sous le HUD), animés, densité double sous l'orage ; rien en donjon (pas de météo). La neige gardait déjà son sol blanchi, la glace son eau pâle, le feu ses flammes — la pluie rejoint le rang des météos lisibles. `capture.tscn -- --meteo <id>` force un état pour vérifier à l'écran.
 
+> [!important] 2026-09-05, 16 h 40 — l'année passe à 360 jours (designer : « 12 mois de 30 jours »)
+> Les cinq saisons gardent leurs proportions : printemps 0-90, été 90-150, fin d'été 150-180, automne 180-270, hiver 270-360 (`planete.cycle.saisons`). Le calendrier les découpe en mois de trente jours ([[Un monde réel — villes, PNJ, royaumes et calendrier]]).
+
 ## Liens
 - **Dépend de** : [[Génération par couches de bruit]], [[Application des stats de matériau]], [[Simulation à ticks]]
 - **Alimente** : [[Eau et liquides]], [[Agriculture et élevage]], [[Véhicules]], [[Catalogue matériaux — Météorologiques]], [[Dialogue PNJ]]

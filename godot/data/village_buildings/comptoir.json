@@ -1,0 +1,22 @@
+{
+  "plan": [
+    "##########",
+    "#E......E#",
+    "#..T.T...#",
+    "#K......C#",
+    "#L.......#",
+    "#####P####"
+  ],
+  "meubles": {
+    "L": "lit",
+    "T": "table",
+    "C": "coffre",
+    "E": "etal_de_vente",
+    "K": "grand_coffre"
+  },
+  "tags": [
+    "ville",
+    "siege"
+  ],
+  "poste": "T"
+}

@@ -1,0 +1,23 @@
+{
+  "plan": [
+    "##########",
+    "#T.c..T.c#",
+    "#........#",
+    "#F...E..G#",
+    "#L..L..L.#",
+    "#####P####"
+  ],
+  "meubles": {
+    "L": "lit",
+    "T": "table",
+    "c": "chaise",
+    "E": "etal_de_vente",
+    "F": "cheminee",
+    "G": "garde_manger"
+  },
+  "tags": [
+    "ville",
+    "auberge"
+  ],
+  "poste": "E"
+}

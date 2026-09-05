@@ -1,0 +1,26 @@
+{
+  "plan": [
+    "############",
+    "#R.....o..R#",
+    "#..........#",
+    "#L..T.T...L#",
+    "#..........#",
+    "#K...U....C#",
+    "#..........#",
+    "######P#####"
+  ],
+  "meubles": {
+    "L": "lit",
+    "T": "table",
+    "C": "coffre",
+    "R": "ratelier_d_armes",
+    "K": "grand_coffre",
+    "U": "statue",
+    "o": "torchere"
+  },
+  "tags": [
+    "ville",
+    "siege"
+  ],
+  "poste": "U"
+}

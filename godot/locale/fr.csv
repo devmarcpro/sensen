@@ -3374,3 +3374,19 @@ volet.date,{date}
 dialogue.fete.text,"Vous tombez bien : c'est jour de fête. Venez donc sur la place !"
 dialogue.marche.text,"C'est jour de marché : les étals sont pleins, profitez des prix."
 dialogue.anniversaire.text,"Aujourd'hui, c'est mon anniversaire… une année de plus."
+function.maire.name,Maire
+function.seigneur.name,Seigneur
+function.syndic.name,Syndic
+function.commandant.name,Commandant
+palier.hameau,hameau
+palier.village,village
+palier.bourg,bourg
+palier.ville,ville
+palier.cite,cité
+quartier.centre,le centre
+quartier.residentiel,le quartier résidentiel
+quartier.artisanal,le quartier des artisans
+quartier.marchand,le quartier marchand
+quartier.agricole,les faubourgs agricoles
+journal.ville,"{palier} : {nom} — {quartier} ({population} habitants)"
+journal.ville_territoire,"{nom} tient ses comptes : {n} résidents, {perimetres} périmètres"

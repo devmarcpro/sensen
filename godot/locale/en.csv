@@ -3365,3 +3365,19 @@ volet.date,{date}
 dialogue.fete.text,"Good timing: it is a feast day. Come to the square!"
 dialogue.marche.text,"It is market day: the stalls are full, enjoy the prices."
 dialogue.anniversaire.text,"Today is my birthday… one more year."
+function.maire.name,Mayor
+function.seigneur.name,Lord
+function.syndic.name,Syndic
+function.commandant.name,Commander
+palier.hameau,hamlet
+palier.village,village
+palier.bourg,town
+palier.ville,city
+palier.cite,great city
+quartier.centre,the centre
+quartier.residentiel,the residential district
+quartier.artisanal,the craftsmen's district
+quartier.marchand,the merchants' district
+quartier.agricole,the farming outskirts
+journal.ville,"{palier}: {nom} — {quartier} ({population} inhabitants)"
+journal.ville_territoire,"{nom} keeps its books: {n} residents, {perimetres} perimeters"
