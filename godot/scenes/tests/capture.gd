@@ -20,6 +20,7 @@ var arene := 0
 var arene_nom := ""   # --arene accepte aussi un NOM : l'index laissait l'arène 0 inatteignable
 var temps_max := 0.0
 var temps_total := 0.0
+var temps_process := 0.0   # la part _process (simulation, nœuds, UI) ; le reste est le rendu
 
 
 func _ready() -> void:
@@ -617,6 +618,7 @@ func _process(delta: float) -> void:
 	if frames > 5:   # les premières images chargent ; on mesure ensuite (critère É0 : 60 fps)
 		temps_max = maxf(temps_max, delta)
 		temps_total += delta
+		temps_process += float(Performance.get_monitor(Performance.TIME_PROCESS))
 	if gif_images > 0 and frames >= 5 and (frames - 5) % maxi(1, gif_pas) == 0 and gif_prises < gif_images:
 		var img_g := get_viewport().get_texture().get_image()
 		if img_g != null and not img_g.is_empty():
@@ -663,7 +665,7 @@ func _process(delta: float) -> void:
 			return
 		img.save_png(sortie)
 		print("capture : ", sortie)
-		print("image : moyenne %.1f ms, pire %.1f ms sur %d images" % [temps_total / float(frames - 5) * 1000.0, temps_max * 1000.0, frames - 5])
+		print("image : moyenne %.1f ms, pire %.1f ms sur %d images · process %.1f ms · chrono client %s" % [temps_total / float(frames - 5) * 1000.0, temps_max * 1000.0, frames - 5, temps_process / float(frames - 5) * 1000.0, str(scene.chrono) if scene != null and "chrono" in scene else "—"])
 		get_tree().quit()
 
 

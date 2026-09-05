@@ -86,6 +86,15 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	if e.is_empty() or rig.is_empty():
 		return
+	var t0_p := Time.get_ticks_usec()
+	_dessiner_etre()
+	var parent := get_parent()
+	if parent != null and "chrono" in parent:
+		parent.chrono["draw.paperdoll"] = float(parent.chrono.get("draw.paperdoll", 0.0)) + float(Time.get_ticks_usec() - t0_p) / 1000.0
+		parent.chrono["n.paperdoll"] = float(parent.chrono.get("n.paperdoll", 0.0)) + 1.0
+
+
+func _dessiner_etre() -> void:
 	if "vehicule" in e.get("tags", []):   # un train, une calèche : une caisse et des roues tant qu'il n'y a pas de sprite (Villes B4)
 		_dessine_vehicule()
 		return

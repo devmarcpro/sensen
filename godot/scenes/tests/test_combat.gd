@@ -9214,6 +9214,7 @@ func test_calendrier() -> void:
 	# Dans le monde : le premier jour dit sa date et le Nouvel An, les civils ont eu leur humeur, la routine vise la place.
 	var s2 := Simulation.new(31)
 	s2.charger_camp()
+	s2.horloge_monde.ticks = 8000   # le jour 0, le Nouvel An (une partie commence le 3 du Rat depuis le 5 septembre au soir)
 	var journal: Array = []
 	var cb := func(cle: String, _params: Dictionary) -> void: journal.append(cle)
 	EventBus.journal.connect(cb)

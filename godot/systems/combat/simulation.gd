@@ -279,7 +279,7 @@ func charger_camp(joueur: Dictionary = {}, cellule_choisie: Vector2i = Vector2i(
 	_reinitialiser()
 	# Une partie commence à heure_depart (Cycle jour-nuit, designer 2026-08-30 : 8 h) ; une sauvegarde garde son heure.
 	var cy: Dictionary = planete.get("cycle", {})
-	horloge_monde.ticks = int(float(cy.get("heure_depart", 0)) / 24.0 * float(cy.get("ticks_par_jour", 24000)))
+	horloge_monde.ticks = int(float(cy.get("heure_depart", 0)) / 24.0 * float(cy.get("ticks_par_jour", 24000))) + int(GameData.config("calendrier").get("jour_depart", 0)) * int(cy.get("ticks_par_jour", 24000))   # un jour sans fête (Calendrier)
 	if joueur.is_empty():
 		var j := ajouter("aventurier", entree, "joueur")
 		j.spawn = entree
@@ -13540,7 +13540,10 @@ func _actions_candidates(e: Dictionary, cible: Dictionary, profil: Dictionary, t
 		c["errer"] = {"calme": 1.0}
 		if profil.get("horaires") != null and lieu == "camp":
 			var cible_r := _cible_routine(e, profil)
-			c["routine"] = {"hors_poste": 1.0 if cible_r != e.pos else 0.0}
+			# À un pas de sa cible quand elle est prise, il y est : sinon deux cents habitants piétinaient sans fin
+			# autour de leur coin (designer 2026-09-05 : « les PNJ se sentent obligés de bouger constamment »).
+			var arrive: bool = cible_r == e.pos or (Grille.distance(e.pos, cible_r) <= 1 and (not grille.occupant(cible_r).is_empty() or grille.bloque_passage(cible_r)))
+			c["routine"] = {"hors_poste": 0.0 if arrive else 1.0}
 	if not a_cible and not e.get("fuite", false) and lieu == "camp":
 		for autre in vivants():   # une menace en vue sans être engagé : les proies et les civils fuient
 			if ennemis(e, autre) and Grille.distance(e.pos, autre.pos) <= 8 and voit_ia(e, autre):
@@ -13726,8 +13729,8 @@ func _cible_routine(e: Dictionary, profil: Dictionary, tick: int = -1) -> Vector
 
 ## Un pas de routine : glouton (la case adjacente libre la plus proche de la cible), A* sous 20 tuiles.
 func _ia_pas_routine(e: Dictionary, cible: Vector2i, tick: int) -> void:
-	if cible == e.pos:
-		_attendre(e, tick)
+	if cible == e.pos or (Grille.distance(e.pos, cible) <= 1 and (not grille.occupant(cible).is_empty() or grille.bloque_passage(cible))):
+		_attendre(e, tick)   # arrivé, ou à côté d'une case prise : on se tient là
 		return
 	if _ia_par_portail(e, cible, tick):
 		return

@@ -103,6 +103,13 @@ var zoom := 2.0   # au maximum par défaut (décision du designer, 2026-08-30)
 var terrain: Terrain              # couche statique : les tuiles, dessinées une fois (perf É0)
 var hud: Hud                      # couche au-dessus des êtres : barres, garde, télégraphes, jauges
 var hud_ecran: HudEcran           # le HUD fixe à l'écran : compas-horloge, pentagramme, barres, hotbar (Écrans d'interface)
+var chrono: Dictionary = {}        # étape de l'image → ms cumulées (la capture les lit : le lag en ville, designer 2026-09-05)
+var tour_hud := 0
+
+
+func _top_client(cle: String, t0: int) -> int:
+	chrono[cle] = float(chrono.get(cle, 0.0)) + float(Time.get_ticks_usec() - t0) / 1000.0
+	return Time.get_ticks_usec()
 var volet: VoletLateral           # le volet latéral : monde, personnage, compagnons, journal, inventaire (designer 2026-09-04)
 var volet_visible := true
 var chargement_restant := 0.0     # écran de chargement entre cellules (Grille continue) : secondes restantes, 0 = fermé
@@ -123,7 +130,9 @@ const SCENE_CREATURE := preload("res://scenes/entities/creature.tscn")
 class Terrain extends Node2D:
 	var proprio: Node2D
 	func _draw() -> void:
+		var t0 := Time.get_ticks_usec()
 		proprio._dessiner_terrain(self)
+		proprio._top_client("draw.terrain", t0)
 
 
 ## Le brouillard de guerre : une couche à part, redessinée seule quand le champ de vue change
@@ -131,14 +140,18 @@ class Terrain extends Node2D:
 class Brouillard extends Node2D:
 	var proprio: Node2D
 	func _draw() -> void:
+		var t0 := Time.get_ticks_usec()
 		proprio._dessiner_brouillard(self)
+		proprio._top_client("draw.brouillard", t0)
 
 
 ## La couche d'interface au-dessus des êtres (z fixe, toujours visible).
 class Hud extends Node2D:
 	var proprio: Node2D
 	func _draw() -> void:
+		var t0 := Time.get_ticks_usec()
 		proprio._dessiner_hud(self)
+		proprio._top_client("draw.hud", t0)
 
 
 ## Le grain procédural du décor (designer 2026-09-01, point 50) : un ShaderMaterial posé sur les
@@ -838,6 +851,7 @@ func _process(delta: float) -> void:
 		else:
 			chemin_en_cours.pop_front()
 	# Les horloges de combat n'avancent qu'à l'action : le client les fait avancer pas à pas.
+	var t0_c := Time.get_ticks_usec()
 	minuterie_pas -= delta
 	if minuterie_pas <= 0.0:
 		minuterie_pas = DELAI_PAS
@@ -859,23 +873,30 @@ func _process(delta: float) -> void:
 			garde_pas -= 1
 			if Time.get_ticks_msec() - t_debut >= budget_ms:
 				break
+	t0_c = _top_client("pas", t0_c)
 	if ecran_fin_reste > 0.0:   # l'écran de fin s'efface seul (point 13) : plus de surimpression jusqu'au clic
 		ecran_fin_reste -= delta
 		if ecran_fin_reste <= 0.0:
 			ecran_fin.clear()
 	_maj_noeuds(delta)
+	t0_c = _top_client("noeuds", t0_c)
 	if Grille.distance(j.pos, centre_terrain) > RAYON_VUE / 3 or sim.grille.decouvert.size() != decouvert_dessine:
 		terrain.queue_redraw()   # le joueur s'éloigne du centre de la passe statique, ou il a découvert des tuiles
 	if int(j.get("vue_version", 0)) != vue_version or Grille.distance(j.pos, centre_brouillard) > RAYON_VUE / 3:
 		brouillard.queue_redraw()   # son champ de vue a changé : seul le brouillard se redessine
-	hud.queue_redraw()
+	tour_hud += 1
+	if tour_hud % 2 == 0:   # le HUD (bulle, états, télégraphes, gardes) se redessine une image sur deux : deux cents habitants en ville
+		hud.queue_redraw()
 	_maj_atteignables()
 	minuterie_ui -= delta
 	if minuterie_ui <= 0.0 and not profil_sans_ui:
-		minuterie_ui = 0.05
+		minuterie_ui = 0.15   # le texte, la minimap et l'ambiance : sept fois par seconde suffisent (le lag en ville, 2026-09-05)
 		_maj_ui()
+		t0_c = _top_client("ui.texte", t0_c)
 		minimap.rafraichir()
+		t0_c = _top_client("ui.minimap", t0_c)
 		_maj_ambiance()
+	t0_c = _top_client("ui.ambiance", t0_c)
 	if xp_fenetre > 0.0:   # l'XP de l'action : cumulée, puis affichée d'un bloc
 		xp_fenetre -= delta
 		if xp_fenetre <= 0.0 and not xp_cumul.is_empty():
@@ -929,7 +950,15 @@ func _maj_noeuds(delta: float = 0.0) -> void:
 			n.position = n.position.lerp(cible, k)
 		n.visible = true
 		n.z_index = _profondeur(e.pos)
-		n.queue_redraw()
+		# Le paperdoll ne se redessine que si ce qu'il montre a changé : deux cents habitants redessinés à chaque image,
+		# c'était le lag en ville (designer 2026-09-05). Le tremblement et l'animation ont leur propre redraw.
+		var tour := int(n.get_meta("tour", 0)) + 1   # la signature se relit une image sur quatre, en quinconce
+		n.set_meta("tour", tour)
+		if tour % 4 == 0:
+			var sig := hash([e.get("orientation", Vector2i.ZERO), e.get("action_en_cours", {}).is_empty(), e.get("equipement", {}).hash(), bool(e.get("garde", false)), e.has("monture"), e.get("apparence", {}).hash(), e.get("blason", ""), e.get("teinte", []).hash(), e.vivant, e.get("forme_bestiale", false)])
+			if int(n.get_meta("signature", -1)) != sig:
+				n.set_meta("signature", sig)
+				n.queue_redraw()
 	for id in noeuds.keys().duplicate():
 		if not vivants.has(id):
 			noeuds[id].queue_free()
@@ -1534,6 +1563,12 @@ func _coord_locale(t: Vector2i) -> Vector2i:
 func _draw() -> void:
 	if sim == null:
 		return
+	var t0_d := Time.get_ticks_usec()
+	_dessiner_superpositions()
+	_top_client("draw.main", t0_d)
+
+
+func _dessiner_superpositions() -> void:
 	var g := sim.grille
 	var j := joueur()
 	# Superpositions translucides sur les tuiles (atteignables, télégraphes, survol, forme visée).
@@ -1950,10 +1985,10 @@ func _dessiner_etats(ci: CanvasItem) -> void:
 	if sim == null or j.is_empty() or titre_ouvert:
 		return
 	for e in sim.vivants():
-		if e.id != j.id and not sim.voit(j, e.pos):
-			continue
 		var statuts: Array = e.get("statuts", [])
 		if statuts.is_empty():
+			continue
+		if e.id != j.id and (Grille.distance(e.pos, j.pos) > RAYON_VUE or not sim.voit(j, e.pos)):
 			continue
 		var tick_e: int = sim.tick_de(e)
 		var base := _ecran(e.pos, sim.grille.h(e.pos)) + Vector2(-7.0 * mini(4, statuts.size()), -62.0)   # au-dessus de la tête
@@ -1988,8 +2023,8 @@ func _dessiner_hud(ci: CanvasItem) -> void:
 	if sim == null:
 		return
 	var j := joueur()
-	for e in sim.vivants():
-		if j.is_empty() or sim.voit(j, e.pos):
+	for e in sim.vivants():   # seulement ce qui est à l'écran : une cité en compte deux cents (designer 2026-09-05, le lag)
+		if j.is_empty() or (Grille.distance(e.pos, j.pos) <= RAYON_VUE and sim.voit(j, e.pos)):
 			_dessine_hud_entite(ci, e)
 
 

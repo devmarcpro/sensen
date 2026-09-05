@@ -1,5 +1,5 @@
 {
-  "_doc": "Le calendrier (Un monde réel — A, 2026-09-05) : douze mois de trente jours (designer, 2026-09-05 : « on va plutôt faire 12 mois de 30 jours ») nommés par les animaux du cycle sexagésimal (l'année fait 360 jours : combat_rules.age.jours_par_an et planete.cycle.saisons suivent, les cinq saisons gardent leurs proportions), la semaine de sept jours (Soleil, Lune, les cinq éléments — sa longueur est planete.corruption.ticks_par_semaine), les années depuis annee_depart (la création propose une naissance en l'an 1000). marche : le jour de marché de chaque agglomération est un jour de la semaine tiré de son nom ; ce jour-là les étals regarnissent jusqu'à stock_mult fois leur garnissage et vendent à prix_mult. fetes : cultures vide = toutes ; ce jour-là les civils de la culture tiennent la place et gagnent humeur.",
+  "_doc": "Le calendrier (Un monde réel — A, 2026-09-05) : douze mois de trente jours (designer, 2026-09-05 : « on va plutôt faire 12 mois de 30 jours ») nommés par les animaux du cycle sexagésimal (l'année fait 360 jours : combat_rules.age.jours_par_an et planete.cycle.saisons suivent, les cinq saisons gardent leurs proportions), la semaine de sept jours (Soleil, Lune, les cinq éléments — sa longueur est planete.corruption.ticks_par_semaine), les années depuis annee_depart (la création propose une naissance en l'an 1000). marche : le jour de marché de chaque agglomération est un jour de la semaine tiré de son nom ; ce jour-là les étals regarnissent jusqu'à stock_mult fois leur garnissage et vendent à prix_mult. fetes : cultures vide = toutes ; ce jour-là les civils de la culture tiennent la place et gagnent humeur. jour_depart : le jour de l'an où une partie commence (2 : le 3 du Rat, un jour sans fête — le Nouvel An au premier matin envoyait toute la ville sur la place, 2026-09-05).",
   "annee_depart": 1020,
   "mois": [
     [
@@ -143,5 +143,6 @@
         ]
       }
     ]
-  }
+  },
+  "jour_depart": 2
 }
