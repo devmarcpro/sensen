@@ -22,12 +22,15 @@ Ordres de grandeur au soir du 2026-09-03 : **279 notes** dans le coffre, **216 m
 
 **Tu ne pars donc jamais d'une page blanche.** Le travail est : combler les écarts entre le coffre et le code, répondre à la file du designer, et regarder le jeu avec un œil neuf.
 
+**La directive du 2026-09-05, à connaître avant de choisir un travail :** le designer veut **une véritable simulation de vie et de monde** — les onze références sont Dwarf Fortress, Elin/Elona, Kenshi, Cataclysm DDA, Tales of Maj'Eyal, RimWorld, Factorio, Dofus, FFT/Disgaea, Noita, le Wu Xing. Lis `docs/01 - Vision/Simulation de vie et de monde.md` : elle porte la **règle qui tranche** (un système ne compte comme simulation que s'il est causal, persistant, perceptible et actionnable), l'**audit mesuré des neuf axes** — le jeu simule très bien la matière et très peu les gens — et les **six axes ajoutés** au programme A–E (F la chronique, G la vie intérieure, H les liens entre PNJ, I le corps, J les chaînes de production, K la géopolitique). **F d'abord** : le moins cher, sans risque d'équilibrage, et tout le reste y écrit ensuite.
+
 ## La source de vérité
 
 Le design vit dans `docs/`, un coffre Obsidian de notes atomiques. **Le callout daté le plus récent gagne** sur tout le reste de la note. Points d'entrée :
 
 - `docs/00 - Index/Sensen — Index général.md` — la carte du coffre
 - `docs/00 - Index/Vers la production.md` — **la file du designer**, elle prime sur tout
+- `docs/01 - Vision/Simulation de vie et de monde.md` — **la directive de simulation** et l'audit des neuf axes
 - `docs/00 - Index/À juger — parcours de jeu.md` — ce qui attend un œil humain
 - `docs/00 - Index/Audit d'équilibrage — 2026-09-03.md` — l'état chiffré du réglage
 - `docs/00 - Index/Prompt de la boucle.md` — la consigne de travail autonome, dont ce fichier est le complément

@@ -9,7 +9,12 @@ import sys
 import re
 import io, json, glob, os, collections
 
-R = "C:/Sensen/godot/data/"
+# La racine se deduit du fichier, comme dans check_vault.py : l'outil est un verificateur
+# d'avant-poussee ([[Ordre de verification]]), il doit tourner sur toute machine — un chemin
+# Windows en dur le rendait inexecutable ailleurs (constate le 2026-09-05 sur Linux).
+RACINE = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+GODOT = os.path.join(RACINE, "godot")
+R = os.path.join(GODOT, "data") + os.sep
 def cat(nom):
     d = {}
     for f in glob.glob(R + nom + "/**/*.json", recursive=True):
@@ -284,7 +289,7 @@ for iid, it in items.items():
 # 20. tags cites par le code (`"x" in e.tags`) : chacun doit exister quelque part en donnees
 import re as _re
 _src = ""
-for _f in glob.glob("C:/Sensen/godot/**/*.gd", recursive=True):
+for _f in glob.glob(os.path.join(GODOT, "**", "*.gd"), recursive=True):
     if "tests" in _f: continue
     _src += io.open(_f, encoding="utf-8").read() + "\n"
 _tags_data = set()
