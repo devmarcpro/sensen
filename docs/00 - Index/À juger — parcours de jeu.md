@@ -634,6 +634,14 @@ La sonde des villes (monde 9, « Mokroslav ») le signale : la cellule résident
 
 `planete.json → routine.lod` : `rayon_plein` 28 tuiles (au-delà, un civil est un figurant : il bondit vers sa cible, traverse les murs sans qu'on le voie, ne redécide qu'`attente_ticks` 200 après être arrivé), `pas_par_decision` 6. Ce que ça change à l'œil : rien tant qu'on ne regarde pas — un figurant qui entre à l'écran est là où sa routine l'aurait mené, mais il peut y être arrivé en traversant une maison. Si tu veux que le rayon suive le zoom ou l'écran plutôt qu'un chiffre, dis-le.
 
+## 2026-09-06 — Les façades pierre et bois, la palette du village (13 h 30) : ce que j'ai choisi
+
+- **Le tirage** : le bois au poids des densités de la végétation du biome (en forêt tempérée, le chêne trois fois sur cinq, sinon hêtre, pin, bouleau), la pierre parmi les roches du biome, à la graine de l'agglomération — deux villages voisins du même biome peuvent différer, tous les quartiers d'une ville se ressemblent. Sans roche (le marais) : la brique ; sans bois (les cendres) : tout en pierre.
+- **Le toit** : chaume au hameau et au village, tuile d'argile dès le bourg ; ardoise partout où il fait froid ou en montagne, chaume au marais, basalte dans les cendres. Ce sont des règles de `villes.json → materiaux`, à changer sans code.
+- **La façade** : premier bloc en pierre, blocs suivants en bois — teinte du matériau, grain de sa famille. Un château, un temple en bois au-dessus de la pierre, c'est peut-être faux : dis si les sièges doivent être tout en pierre.
+- **La conséquence de jeu** : le mur d'une tuile est le bois du village (la pierre s'il n'y en a pas) — on récolte ce bois en abattant un mur, et une maison de basalte ne brûle pas.
+- **À regarder** : capture `--ville --graine 21` (plaine tempérée : chêne ou frêne sur pierre, tuiles d'argile) et un hameau de montagne ou de taïga (sapin sur granit, ardoise).
+
 ## 2026-09-06 — Les maisons de deux blocs, les toits, les immeubles (11 h 40) : ce que ça donne à l'œil
 
 - **Ce que tu verras** (capture `--ville --graine 21`) : chaque bâtiment est une boîte de deux blocs par niveau (un joint entre les blocs), coiffée d'un **toit plat** couleur chaume, avec un liseré plus sombre sur le pourtour ; le mur continue au-dessus des portes. La maison haute, l'auberge, l'atelier, la mairie font quatre blocs ; le château et le nouvel **immeuble** (résidentiel et marchand, dès le bourg) six. Un toit d'un bâtiment dont on ne voit aucun mur est assombri comme un mur mémorisé. **Le bâtiment où tu te tiens n'a pas de toit** : on voit sa pièce et ses gens ; les gens sous les autres toits ne se voient pas, et le HUD les tait.

@@ -947,6 +947,53 @@ func test_batiment_etages() -> void:
 	verifier(s._remonter(j) and s.lieu == "camp" and s._cell_de(j.pos) == cell and Grille.distance(j.pos, esc) <= 2, "redescendre ramène dans la rue, devant l'escalier")
 
 
+## La palette d'un village (Villes, designer 2026-09-06) : le bois parmi les essences du biome, la pierre parmi ses roches
+## (la brique sans roche), le toit selon le palier et les tags, le sol selon le palier ; la fiche d'un bâtiment porte tout.
+func test_palette_village() -> void:
+	var s := Simulation.new(83)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var biomes: Dictionary = GameData.catalogues.biomes
+	var m: Dictionary = GameData.config("villes").materiaux
+	var soucis := 0
+	for bid in ["foret_temperee", "taiga", "desert_aride", "marecage", "montagne", "desert_de_cendres", "cote_plage"]:
+		var b: Dictionary = biomes[bid]
+		for palier in ["hameau", "cite"]:
+			var p: Dictionary = surf._palette_village(b, {"nom": "Essai " + bid, "centre": Vector2i(3, 4), "palier": palier})
+			var essences: Array = b.get("vegetation", []).map(func(v: Dictionary) -> String: return str(v.id))
+			var roches: Array = b.get("rochers", []).map(func(v: Dictionary) -> String: return str(v.id))
+			var bois_ok: bool = (str(p.bois) in essences) if not essences.is_empty() else str(p.bois).is_empty()
+			var pierre_ok: bool = (str(p.pierre) in roches) if not roches.is_empty() else str(p.pierre) == str(m.pierre_sans_roche)
+			var toit_attendu := str(m.toit_par_palier[palier])
+			for tag in b.get("tags", []):
+				if m.toit_par_tag.has(str(tag)):
+					toit_attendu = str(m.toit_par_tag[str(tag)])
+					break
+			var mur_ok: bool = str(p.mur) == (str(p.bois) if not str(p.bois).is_empty() else str(p.pierre))
+			if not (bois_ok and pierre_ok and str(p.toit) == toit_attendu and mur_ok and GameData.catalogues.materials.has(str(p.sol))):
+				soucis += 1
+				print("  palette fausse : %s %s → %s" % [bid, palier, str(p)])
+	verifier(soucis == 0, "sept biomes × deux paliers : bois du biome, pierre du biome (brique sans roche), toit du palier ou du tag, sol connu (%d écarts)" % soucis)
+	var pf: Dictionary = surf._palette_village(biomes.foret_temperee, {"nom": "A", "centre": Vector2i(1, 1), "palier": "hameau"})
+	var pf2: Dictionary = surf._palette_village(biomes.foret_temperee, {"nom": "A", "centre": Vector2i(1, 1), "palier": "hameau"})
+	verifier(pf == pf2, "la palette d'un village est déterministe (la même à chaque tirage)")
+	var pm: Dictionary = surf._palette_village(biomes.montagne, {"nom": "B", "centre": Vector2i(2, 2), "palier": "cite"})
+	verifier(str(pm.toit) == "ardoise" and str(pm.pierre) in ["granit", "pierre"] and str(pm.sol) == str(pm.pierre), "une cité de montagne : ardoise sur granit, dallée de sa pierre (%s)" % str(pm))
+	var pc: Dictionary = surf._palette_village(biomes.desert_de_cendres, {"nom": "C", "centre": Vector2i(2, 2), "palier": "village"})
+	verifier(str(pc.bois).is_empty() and str(pc.mur) == str(pc.pierre) and str(pc.toit) == "basalte", "un village des cendres : sans bois, tout en pierre, toit de basalte (%s)" % str(pc))
+	# La fiche d'un bâtiment porte ses matériaux, et le mur posé est celui de la fiche.
+	var cell: Vector2i = s.monde.cellule_camp + Vector2i(1, 0)
+	var e: Dictionary = surf.generer_cellule(cell.x, cell.y, {}, false)
+	if e.village.is_empty():   # une cellule sans village : de quoi y poser un bâtiment quand même
+		e.village = {"batiments": [], "pnj": []}
+	var pv: Dictionary = surf._palette_village(biomes.get(e.biome, {}), {"nom": "D", "centre": cell, "palier": "bourg"})
+	surf._poser_batiment(e, GameData.catalogues.village_buildings.maison, Vector2i(8, 8), pv, "maison")
+	var bat: Dictionary = e.village.batiments.back()
+	var i_mur: int = 8 * e.largeur + 8
+	verifier(str(bat.pierre) == str(pv.pierre) and str(bat.bois) == str(pv.bois) and str(bat.toit) == str(pv.toit) and str(bat.sol) == str(pv.sol) and str(e.murs.get(i_mur, "")) == str(pv.mur), "la fiche du bâtiment dit pierre, bois, toit et sol ; le mur posé est le mur de la palette (%s)" % str(pv.mur))
+	s.monde.fermer()
+
+
 ## La population des villes (anneau moyen v2, 2026-09-06) : un couple a un enfant, l'enfant est un résident logé chez
 ## ses parents ; un malheureux migre vers la ville connue qui a de la place, endormi si elle est loin.
 func test_population_villes() -> void:

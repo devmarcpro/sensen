@@ -1120,7 +1120,7 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 	var taille: int = e.largeur
 	var bats: Dictionary = GameData.catalogues.village_buildings
 	var b: Dictionary = biomes.get(e.biome, {})
-	var palette: Dictionary = b.get("village_palette", {"mur": "chene", "toit": "chaume_tresse", "sol": "calcaire"})
+	var palette: Dictionary = _palette_village(b, agglo)
 	var quartier := str(agglo.quartier)
 	var comp: Dictionary = cfg.composition[quartier]
 	var palier := str(agglo.palier)
@@ -1509,13 +1509,61 @@ func _degager(e: Dictionary, i: int) -> void:
 	e.sol[i] = true
 
 
+## La palette d'un village (Villes, designer 2026-09-06) : le bois parmi les essences du biome, la pierre parmi ses roches,
+## le toit et le sol selon le palier et les tags du biome — tirés à la graine de l'agglomération, la même pour tous ses
+## quartiers. `mur` est ce dont la simulation fait le mur d'une tuile : le bois, ou la pierre si le village n'en a pas.
+func _palette_village(b: Dictionary, agglo: Dictionary) -> Dictionary:
+	var m: Dictionary = GameData.config("villes").get("materiaux", {})
+	if m.is_empty():   # sans bloc materiaux : la palette du biome, comme avant
+		var p: Dictionary = b.get("village_palette", {"mur": "chene", "toit": "chaume_tresse", "sol": "calcaire"}).duplicate()
+		p["pierre"] = str(p.get("sol", "pierre"))
+		p["bois"] = str(p.get("mur", "chene"))
+		return p
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, str(agglo.get("nom", "")), Vector2i(agglo.get("centre", Vector2i.ZERO)), "palette"])
+	var bois := _tirer_dans_liste(b.get("vegetation", []), rng)
+	var pierre := _tirer_dans_liste(b.get("rochers", []), rng)
+	if pierre.is_empty():
+		pierre = str(m.get("pierre_sans_roche", "brique")) if b.has("rochers") else str(m.get("pierre_defaut", "pierre"))
+	if not GameData.catalogues.materials.has(bois):
+		bois = ""
+	if not GameData.catalogues.materials.has(pierre):
+		pierre = str(m.get("pierre_defaut", "pierre"))
+	var palier := str(agglo.get("palier", "hameau"))
+	var toit := str(m.get("toit_par_palier", {}).get(palier, "chaume_tresse"))
+	for tag in b.get("tags", []):
+		if m.get("toit_par_tag", {}).has(str(tag)):
+			toit = str(m.toit_par_tag[str(tag)])
+			break
+	var sol := str(m.get("sol_par_palier", {}).get(palier, ""))
+	if sol.is_empty() or not GameData.catalogues.materials.has(sol):
+		sol = pierre
+	return {"pierre": pierre, "bois": bois, "toit": toit, "sol": sol, "mur": bois if not bois.is_empty() else pierre}
+
+
+## Un id tiré dans une liste {id, density} au poids des densités ; "" si la liste est vide.
+static func _tirer_dans_liste(liste: Array, rng: RandomNumberGenerator) -> String:
+	var total := 0.0
+	for v in liste:
+		total += float(v.get("density", 1.0))
+	if liste.is_empty() or total <= 0.0:
+		return ""
+	var r := rng.randf() * total
+	for v in liste:
+		r -= float(v.get("density", 1.0))
+		if r <= 0.0:
+			return str(v.id)
+	return str(liste.back().id)
+
+
 ## Pose un bâtiment préfab : murs de la palette, sol, porte, meubles ; note ses lits.
 func _poser_batiment(e: Dictionary, bat: Dictionary, origine: Vector2i, palette: Dictionary, bid: String) -> void:
 	var taille: int = e.largeur
 	var plan: Array = bat.plan
 	var meubles: Dictionary = bat.meubles
 	var info := {"id": bid, "origine": origine, "porte": origine, "lits": [], "rect": Rect2i(origine, Vector2i(str(plan[0]).length(), plan.size())),
-		"niveaux": 1 + bat.get("etages", []).size(), "toit": str(palette.get("toit", "chaume_tresse")), "mur": str(palette.get("mur", "chene"))}   # le dessin des façades et du toit (Villes, 2026-09-06)
+		"niveaux": 1 + bat.get("etages", []).size(), "toit": str(palette.get("toit", "chaume_tresse")), "mur": str(palette.get("mur", "chene")),   # le dessin des façades et du toit (Villes, 2026-09-06)
+		"pierre": str(palette.get("pierre", palette.get("sol", "pierre"))), "bois": str(palette.get("bois", "")), "sol": str(palette.get("sol", "calcaire"))}   # les blocs de matériaux (designer, 13 h)
 	var poste_c := str(bat.get("poste", ""))
 	var stations: Dictionary = bat.get("stations", {})
 	for y in plan.size():

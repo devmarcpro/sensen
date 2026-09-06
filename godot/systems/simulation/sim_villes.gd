@@ -356,7 +356,8 @@ static func _entrer_interieur(sim: Simulation, e: Dictionary, pos: Vector2i) -> 
 	SimLieux._sauver_camp(sim, e)
 	sim.expedition = {}
 	sim.etages_visites.clear()
-	var palette: Dictionary = GameData.catalogues.biomes.get(str(sim.monde.cellule(b.cell).get("biome", "")), {}).get("village_palette", {"mur": "chene", "sol": "calcaire"})
+	var palette_biome: Dictionary = GameData.catalogues.biomes.get(str(sim.monde.cellule(b.cell).get("biome", "")), {}).get("village_palette", {"mur": "chene", "sol": "calcaire"})
+	var palette := {"mur": str(b.bat.get("mur", palette_biome.get("mur", "chene"))), "sol": str(b.bat.get("sol", palette_biome.get("sol", "calcaire")))}   # les matériaux du bâtiment (Villes, 2026-09-06)
 	sim.donjon = {"interieur": true, "batiment": str(b.bat.id), "cellule": b.cell, "plans": b.prefab.etages, "etages": b.prefab.etages.size(), "palette": palette, "theme": "interieur", "graine": sim.graine, "id": 0}
 	charger_interieur(sim, 1, e)
 	return true

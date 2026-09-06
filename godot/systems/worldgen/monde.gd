@@ -162,7 +162,7 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 		var niveaux := int(bat.get("niveaux", 1 + pref.get("etages", []).size()))
 		var r: Rect2i = bat.rect if bat.rect is Rect2i else Rect2i(Vector2i(bat.origine), Vector2i(str(pref.get("plan", ["#"])[0]).length(), pref.get("plan", ["#"]).size()))
 		g.batiments_liste.append({"cle": "%d,%d:%d" % [cell.x, cell.y, g.batiments_liste.size()], "niveaux": niveaux, "toit": str(bat.get("toit", "chaume_tresse")),
-			"mur": str(bat.get("mur", "chene")), "rect": Rect2i(base + r.position, r.size)})
+			"mur": str(bat.get("mur", "chene")), "pierre": str(bat.get("pierre", "")), "bois": str(bat.get("bois", "")), "rect": Rect2i(base + r.position, r.size)})
 		var k := g.batiments_liste.size()
 		for y in r.size.y:
 			for x in r.size.x:

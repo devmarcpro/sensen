@@ -261,6 +261,7 @@ func _ready() -> void:
 	_lancer("test_pnj_distincts")
 	_lancer("test_royaume_pays")
 	_lancer("test_batiment_etages")
+	_lancer("test_palette_village")
 	_verifier_tous_lances()
 	Monde.fermer_tous()   # aucun thread de pré-génération ne doit survivre aux autoloads
 	for nom_s in ["test_terrain", "test_sensen", "test_sensen2", "test_graine", "test_partout", "test_partout2", "test_auto"]:

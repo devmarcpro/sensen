@@ -2206,29 +2206,44 @@ func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: C
 	var est := t + Vector2i(1, 0)
 	var face_so := not (g.dans(sud) and g.decouvert.has(g.idx(sud)) and _hauteur_bloc(g, sud) * HSTEP >= hm)
 	var face_se := not (g.dans(est) and g.decouvert.has(g.idx(est)) and _hauteur_bloc(g, est) * HSTEP >= hm)
-	# Les blocs empilés d'une façade : une bande par bloc, un peu plus sombre un bloc sur deux (« 2 blocs de haut »).
+	# Les blocs empilés d'une façade : une bande par bloc — le premier en PIERRE, les suivants en BOIS du village (designer
+	# 2026-09-06, 13 h : « une maison est en une certaine pierre et un certain bois, la teinte et la texture en sont
+	# dérivées ») ; chaque bande prend la couleur de son matériau et le grain de sa famille.
 	var bande := BLOC_UNITES * HSTEP if mur_bat else hm
+	var info_bat: Dictionary = g.batiments_liste[int(g.bat_de[idx_t]) - 1] if mur_bat else {}
 	var y := h0
-	var k := 0
+	var col_haut := haut_bloc
+	var st_haut := st_bloc
 	while y < hm:
 		var y1 := mini(hm, y + bande)
-		var ombre := 0.06 if (mur_bat and k % 2 == 1) else 0.0
+		var col_b := haut_bloc
+		var st_b := st_bloc
+		if mur_bat:
+			var bloc_k := y / (BLOC_UNITES * HSTEP)
+			var mat_b := str(info_bat.get("bois", "")) if (bloc_k > 0 and not str(info_bat.get("bois", "")).is_empty()) else str(info_bat.get("pierre", ""))
+			if mat_b.is_empty():
+				mat_b = mat_id
+			var mm: Dictionary = GameData.catalogues.materials.get(mat_b, {})
+			if not mm.is_empty():
+				col_b = Color(0.5, 0.47, 0.44).lerp(_couleur_html(str(mm.color)), 0.65) * teinte
+			st_b = _style_grain(mat_b)
 		if face_so:
 			_poly(ci, PackedVector2Array([   # face sud-ouest (gauche)
 				c + Vector2(-tw, -y), c + Vector2(0, th - y),
-				c + Vector2(0, th - y1), c + Vector2(-tw, -y1)]), haut_bloc.darkened(0.35 + ombre),
-				PackedVector2Array([Vector2(st_bloc + t.x, -float(y) / HSTEP), Vector2(st_bloc + t.x + 1, -float(y) / HSTEP), Vector2(st_bloc + t.x + 1, -float(y1) / HSTEP), Vector2(st_bloc + t.x, -float(y1) / HSTEP)]))
+				c + Vector2(0, th - y1), c + Vector2(-tw, -y1)]), col_b.darkened(0.35),
+				PackedVector2Array([Vector2(st_b + t.x, -float(y) / HSTEP), Vector2(st_b + t.x + 1, -float(y) / HSTEP), Vector2(st_b + t.x + 1, -float(y1) / HSTEP), Vector2(st_b + t.x, -float(y1) / HSTEP)]))
 		if face_se:
 			_poly(ci, PackedVector2Array([   # face sud-est (droite)
 				c + Vector2(0, th - y), c + Vector2(tw, -y),
-				c + Vector2(tw, -y1), c + Vector2(0, th - y1)]), haut_bloc.darkened(0.5 + ombre),
-				PackedVector2Array([Vector2(st_bloc + t.y, -float(y) / HSTEP), Vector2(st_bloc + t.y + 1, -float(y) / HSTEP), Vector2(st_bloc + t.y + 1, -float(y1) / HSTEP), Vector2(st_bloc + t.y, -float(y1) / HSTEP)]))
+				c + Vector2(tw, -y1), c + Vector2(0, th - y1)]), col_b.darkened(0.5),
+				PackedVector2Array([Vector2(st_b + t.y, -float(y) / HSTEP), Vector2(st_b + t.y + 1, -float(y) / HSTEP), Vector2(st_b + t.y + 1, -float(y1) / HSTEP), Vector2(st_b + t.y, -float(y1) / HSTEP)]))
+		col_haut = col_b
+		st_haut = st_b
 		y = y1
-		k += 1
 	_poly(ci, PackedVector2Array([   # dessus
 		c + Vector2(-tw, -hm), c + Vector2(0, -th - hm),
-		c + Vector2(tw, -hm), c + Vector2(0, th - hm)]), haut_bloc,
-		PackedVector2Array([Vector2(st_bloc + t.x, t.y + 1), Vector2(st_bloc + t.x, t.y), Vector2(st_bloc + t.x + 1, t.y), Vector2(st_bloc + t.x + 1, t.y + 1)]))
+		c + Vector2(tw, -hm), c + Vector2(0, th - hm)]), col_haut,
+		PackedVector2Array([Vector2(st_haut + t.x, t.y + 1), Vector2(st_haut + t.x, t.y), Vector2(st_haut + t.x + 1, t.y), Vector2(st_haut + t.x + 1, t.y + 1)]))
 	_top_client("draw.bloc", t0_b)
 
 
