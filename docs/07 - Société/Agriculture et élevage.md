@@ -40,6 +40,23 @@ Toute gestion de ville/village/base (cultures, élevage, boutique passive — [[
 
 > [!note] Réglages — `combat_rules.agriculture_recolte` : `des`, `moyenne` et `competence` — le rendement d'une parcelle mûre est base × rendement × fertilité × jet/moyenne × skill_factor(Agriculture). Pointeur ajouté le 2026-09-04.
 
+> [!important] Décidé le 2026-09-06, 23 h — les champs vivent au rythme des saisons (designer : « j'aimerais que tu travailles sur l'agriculture, donc avec les champs et les enclos »)
+> Un champ de ville était un rectangle de parcelles semées d'une seule culture, récoltées et ressemées à l'identique chaque semaine, sans mémoire ni saison. Il devient une **terre qu'on mène** :
+> - **La saison décide** : chaque culture porte ses `saisons` de semis (`data/plants/culture/`). Semée dans sa saison, elle pousse à plein ; hors saison, elle met `hors_saison_duree` fois plus longtemps et rend `hors_saison_rendement` de sa récolte ; **en hiver on ne sème pas** — le champ attend le printemps. Le fermier sème donc ce qui convient au mois, parmi les cultures de son biome.
+> - **La rotation** : un champ garde en mémoire ce qu'il a porté (`derniere_plante`). Semer autre chose que la récolte précédente vaut `rotation_bonus` de rendement ; répéter la même culture épuise la terre (la fertilité de ses tuiles baisse de `fertilite_par_recolte`).
+> - **La jachère** : après `recoltes_avant_jachere` récoltes, le champ se repose `jours_jachere` jours — rien n'y pousse, la fertilité remonte de `fertilite_rendue`. Un champ en jachère se voit (ses tuiles sont de la terre nue, sans culture).
+> - **L'irrigation** : un champ dont une tuile touche l'eau à `irrigation.distance` tuiles rend `irrigation.bonus` de plus, et **tient la canicule** (le facteur de canicule ne s'y applique pas). C'est ce qui fait qu'une ville de bord de rivière nourrit plus de monde qu'une ville de plateau — et c'est la génération qui décide, en posant les champs près de l'eau quand il y en a.
+> - **Ce que ça change pour le joueur** : ses propres parcelles suivent les mêmes règles (semer hors saison est possible et coûteux), et un fermier assigné à un périmètre « champs » applique la rotation et la jachère à sa place.
+> Ce que ça ne fait pas encore : l'irrigation construite (canaux, puits), les engrais répandus par les fermiers, les mauvaises récoltes et les famines (les prix les diront quand l'économie s'en saisira).
+
+> [!important] Décidé le 2026-09-06, 23 h 20 — un enclos est un troupeau qui vit (designer : « l'agriculture, donc avec les champs et les enclos »)
+> Les bêtes d'un enclos produisaient une matière par semaine, indéfiniment, sans manger ni vieillir : un décor à intervalle. Un troupeau devient une **économie animale** :
+> - **Il faut le nourrir.** Chaque semaine, le troupeau consomme `fourrage_par_bete` unités de culture prises dans les stocks de la ville (le grain d'abord). Une ville qui n'a pas récolté ne nourrit pas ses bêtes : sous `famine_seuil` de fourrage, une bête meurt (le journal le dit) et rien ne naît.
+> - **Il croît.** Nourri et à l'aise (moins de `capacite` bêtes par enclos), chaque bête a `naissance_chance` de donner un petit dans la semaine, `naissances_max_semaine` par enclos — la bête naît dans l'enclos, du même espèce, bétail du même territoire ; dans une ville endormie (hors fenêtre), elle naît endormie comme les enfants des PNJ.
+> - **Il se tond à sa saison.** Un produit peut porter une `saison` (la laine au printemps) : hors de cette saison, la bête ne le donne pas. Le lait, lui, coule toute l'année.
+> - **On l'abat.** Au-delà de `capacite`, le surplus part à la boucherie : `abattage` donne de la viande, du cuir et du suif aux stocks — c'est ainsi qu'une ville d'élevage nourrit ses gens et fournit ses tanneurs.
+> Ce que ça ne fait pas encore : les races et les lignées (une bête ne vaut pas mieux qu'une autre), le pâturage tuile à tuile (l'herbe ne se broute pas), les maladies du troupeau.
+
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Biomes — schéma]], [[Rôles de cases]], [[Application des stats de matériau]]
 - **Alimente** : [[Faim]], [[Cuisine et alchimie]], [[Abstraction hors-site]], [[Population et exploitation]], [[Plantes]]

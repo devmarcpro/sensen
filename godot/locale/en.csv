@@ -3616,3 +3616,6 @@ ui.choix.supprimer_capacite,Delete the ability
 ui.choix.gouvernance_suivante,Next governance
 ui.choix.marge_plus,Shop margin +
 ui.choix.marge_moins,Shop margin −
+journal.betail_naissance,"{n} young were born in the pens"
+journal.betail_abattu,"{n} beast(s) slaughtered: meat, leather and tallow to the stores"
+journal.betail_famine,"{n} beast(s) starved — the pens are short of fodder"

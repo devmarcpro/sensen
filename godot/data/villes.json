@@ -372,6 +372,27 @@
         "chou",
         "carotte"
       ]
+    },
+    "_doc": "Les champs (Villes B2, saisons et jachère le 2026-09-06) : taille et nombre par habitant, cultures par tag de biome, quota de récolte par fermier et par semaine ; jachere : après recoltes_avant_jachere récoltes le champ se repose jours_jachere jours et regagne fertilite_rendue, chaque récolte coûtant fertilite_par_recolte ; rotation_bonus : semer autre chose que la récolte précédente ; irrigation : une tuile d'eau à distance tuiles donne bonus de rendement et protège de la canicule ; hors_saison : une culture semée hors de ses saisons met duree fois plus de temps et rend rendement.",
+    "jachere": {
+      "recoltes_avant_jachere": 4,
+      "jours_jachere": 30,
+      "fertilite_rendue": 12,
+      "fertilite_par_recolte": 3,
+      "fertilite_min": 15,
+      "fertilite_max": 95
+    },
+    "rotation_bonus": 0.2,
+    "irrigation": {
+      "distance": 3,
+      "bonus": 0.35
+    },
+    "hors_saison": {
+      "duree": 1.8,
+      "rendement": 0.45,
+      "saisons_sans_semis": [
+        "hiver"
+      ]
     }
   },
   "anneau_moyen": {
@@ -426,7 +447,8 @@
     "produits": {
       "mouflon": {
         "materiau": "laine",
-        "n": 1
+        "n": 2,
+        "saison": "printemps"
       },
       "bison": {
         "materiau": "lait",
@@ -439,6 +461,32 @@
       "chameau": {
         "materiau": "lait",
         "n": 1
+      },
+      "sanglier": {
+        "materiau": "suif",
+        "n": 1
+      },
+      "cheval_sauvage": {
+        "materiau": "crin",
+        "n": 1,
+        "saison": "ete"
+      },
+      "canard_sauvage": {
+        "materiau": "plume",
+        "n": 1
+      }
+    },
+    "_doc": "Les enclos (Villes B2 ; le troupeau qui vit, 2026-09-06) : taille, nombre par quartier, bêtes de départ, profil d'IA, espèces par tag de biome, produits hebdomadaires par espèce (une matière brute ; `saison` limite le produit à une saison — la laine au printemps). troupeau : ce que le troupeau mange, sa croissance, son abattage.",
+    "troupeau": {
+      "capacite": 8,
+      "fourrage_par_bete": 1,
+      "famine_seuil": 0.5,
+      "naissance_chance": 0.12,
+      "naissances_max_semaine": 2,
+      "abattage": {
+        "viande_crue": 3,
+        "cuir": 1,
+        "suif": 1
       }
     }
   },

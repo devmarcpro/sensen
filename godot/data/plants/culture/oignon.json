@@ -13,5 +13,10 @@
   "recolte_base": 4,
   "tags": [
     "culture"
-  ]
+  ],
+  "saisons": [
+    "printemps",
+    "fin_ete"
+  ],
+  "besoin_eau": 0.4
 }

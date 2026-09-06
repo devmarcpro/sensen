@@ -1278,8 +1278,10 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 				lots[i] = true
 				tuiles_c.append(q)
 		var plante := str(liste_c[(k + rng.randi_range(0, liste_c.size() - 1)) % liste_c.size()])
-		e.village.champs.append({"rect": r, "plante": plante, "tuiles": tuiles_c})
-		per.append({"type": "champs", "tuiles": tuiles_c, "plante": plante})
+		# Le champ garde TOUTES les cultures de son biome (Agriculture et élevage, 2026-09-06) : la rotation y puise à
+		# chaque semaille, selon la saison ; `plante` reste la culture de départ, celle qu'on voit à la première visite.
+		e.village.champs.append({"rect": r, "plante": plante, "tuiles": tuiles_c, "cultures": liste_c.duplicate()})
+		per.append({"type": "champs", "tuiles": tuiles_c, "plante": plante, "cultures": liste_c.duplicate()})
 		var n_f := 0   # deux fermiers du quartier (ou deux oisifs qui le deviennent) y travaillent
 		for pj in e.village.pnj:
 			if n_f >= int(ch.get("fermiers_par_champ", 2)):

@@ -544,19 +544,24 @@ func test_champs_et_betes() -> void:
 		if not bool(t.cultures[pm].mure):
 			ressemees += 1
 	verifier(ressemees > 0, "des parcelles ressemées (%d)" % ressemees)
-	var produit_attendu := false
+	var produit_attendu := false   # depuis le 2026-09-06, un produit peut avoir sa saison (la laine au printemps)
+	var saison_ville := SimTerrain.saison(s2)
 	for bt in betes:
-		produit_attendu = produit_attendu or cfg.enclos.produits.has(str(bt.def))
-	var avant_b := 0   # la ville use son tissu chaque semaine (B3) : on mesure la production seule
-	for cle in t.stocks.keys():
-		if str(cle).begins_with("laine") or str(cle).begins_with("lait"):
-			avant_b += int(t.stocks[cle])
+		var pr_b: Dictionary = cfg.enclos.produits.get(str(bt.def), {})
+		produit_attendu = produit_attendu or (not pr_b.is_empty() and (not pr_b.has("saison") or str(pr_b.saison) == saison_ville))
+	var matieres_b: Array[String] = []   # toutes les matières que les espèces de l'enclos donnent (laine, lait, suif, crin, plume…)
+	for eid in cfg.enclos.produits.keys():
+		matieres_b.append(str(cfg.enclos.produits[eid].materiau))
+	var somme_b := func() -> int:
+		var n := 0
+		for cle in t.stocks.keys():
+			if str(cle).split("|")[0] in matieres_b:
+				n += int(t.stocks[cle])
+		return n
+	var avant_b: int = somme_b.call()   # la ville use son tissu chaque semaine (B3) : on mesure la production seule
 	s2._dans_territoire(nom, func() -> void: s2._semaine_betail())
-	var apres_b := 0
-	for cle in t.stocks.keys():
-		if str(cle).begins_with("laine") or str(cle).begins_with("lait"):
-			apres_b += int(t.stocks[cle])
-	verifier((apres_b > avant_b) == produit_attendu, "le bétail a produit (%d → %d) selon ses espèces" % [avant_b, apres_b])
+	var apres_b: int = somme_b.call()
+	verifier((apres_b > avant_b) == produit_attendu, "le bétail a produit (%d → %d) selon ses espèces et la saison (%s)" % [avant_b, apres_b, saison_ville])
 
 
 ## Les champs et les bêtes (Villes — B2, 2026-09-05) : une ville sème de vraies parcelles dans son territoire, ses
@@ -1187,3 +1192,123 @@ func test_lod_pnj() -> void:
 		s._decider_ia(v, s.horloge_monde.ticks)
 		verifier(Grille.distance(avant2, v.pos) <= 1, "près du joueur, sa décision est un pas d'une tuile (%d)" % Grille.distance(avant2, v.pos))
 	s.monde.fermer()
+
+
+## Les saisons, la rotation, la jachère et l'irrigation des champs, et le troupeau qui vit (Agriculture et élevage,
+## 2026-09-06) : les règles pures d'abord, puis une semaine de troupeau de bout en bout.
+func test_champs_saisons_et_troupeau() -> void:
+	var s := Simulation.new(11)
+	s.charger_camp()
+	var jour := int(GameData.config("planete").cycle.ticks_par_jour)
+	var cfg: Dictionary = GameData.config("villes").champs
+	# 1. Les saisons de semis : le blé au printemps, jamais l'hiver ; la tomate l'été.
+	s.horloge_monde.ticks = 10 * jour   # printemps (0-90)
+	verifier(SimTerrain.saison(s) == "printemps" and SimVilles.est_de_saison(s, "ble") and not SimVilles.est_de_saison(s, "tomate"), "au printemps : le blé se sème, pas la tomate")
+	s.horloge_monde.ticks = 100 * jour   # été (90-150)
+	verifier(SimTerrain.saison(s) == "ete" and SimVilles.est_de_saison(s, "tomate") and not SimVilles.est_de_saison(s, "ble"), "en été : la tomate se sème, pas le blé")
+	s.horloge_monde.ticks = 300 * jour   # hiver (270-360)
+	var rien_l_hiver := true
+	for c in GameData.catalogues.plants.keys():
+		if str(GameData.catalogues.plants[c].get("categorie", "")) == "culture" and SimVilles.est_de_saison(s, str(c)):
+			rien_l_hiver = false
+	verifier(SimTerrain.saison(s) == "hiver" and rien_l_hiver, "en hiver, aucune culture ne se sème")
+	# 2. La rotation : on ne resème pas ce qu'on vient de récolter, et on choisit de saison.
+	s.horloge_monde.ticks = 10 * jour
+	var champ := {"cultures": ["ble", "tomate", "orge"], "derniere_plante": "ble", "rect": Rect2i(0, 0, 8, 5), "recoltes": 1}
+	var suivante := SimVilles.plante_a_semer(s, champ)
+	verifier(suivante == "orge", "la rotation choisit une autre culture de saison (%s après du blé, au printemps)" % suivante)
+	s.horloge_monde.ticks = 300 * jour
+	verifier(SimVilles.plante_a_semer(s, champ).is_empty(), "l'hiver, le champ n'a rien à semer")
+	# 3. L'irrigation : une tuile d'eau à portée du champ.
+	s.horloge_monde.ticks = 10 * jour
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var sec: Array = []
+	var g := s.grille
+	for dx in range(2, 10):
+		var t: Vector2i = j.pos + Vector2i(dx, 6)
+		if g.dans(t):
+			sec.append(t)
+	var d_irr := int(cfg.irrigation.distance)
+	var mouille: Vector2i = j.pos + Vector2i(3, 6 + d_irr)
+	verifier(not SimVilles.champ_irrigue(s, sec), "un champ loin de l'eau n'est pas irrigué")
+	if g.dans(mouille):
+		g.poser_contenu(mouille, "eau")
+		verifier(SimVilles.champ_irrigue(s, sec), "une tuile d'eau à %d tuiles irrigue le champ" % d_irr)
+		g.poser_contenu(mouille, "")
+	# 4. Le rendement : hors saison il baisse, irrigué il monte, la rotation le hausse.
+	var pm: Vector2i = j.pos + Vector2i(4, 4)
+	SimVilles._semer_tuile(s, pm, "ble", s.horloge_monde.ticks)
+	var base := SimVilles._rendement_parcelle(s, pm, {})
+	var r_irr := SimVilles._rendement_parcelle(s, pm, {"irrigue": true})
+	var r_rot := SimVilles._rendement_parcelle(s, pm, {"derniere_plante": "chou"})
+	s.horloge_monde.ticks = 300 * jour   # semé hors saison : la parcelle porte hors_saison
+	SimVilles._semer_tuile(s, pm, "ble", s.horloge_monde.ticks)
+	var r_hors := SimVilles._rendement_parcelle(s, pm, {})
+	verifier(bool(s.territoire.cultures[pm].hors_saison) and r_hors < base and r_irr >= base and r_rot > base, "rendement : base %d, irrigué %d, rotation %d, hors saison %d" % [base, r_irr, r_rot, r_hors])
+	s.territoire.cultures.erase(pm)
+	# 5. La jachère : un champ qui a beaucoup donné se repose, sa fertilité remonte.
+	s.horloge_monde.ticks = 10 * jour
+	var cell: Vector2i = s.monde.cellule_camp
+	var tuiles: Array = []
+	for dy in 3:
+		for dx in 4:
+			var t2: Vector2i = j.pos + Vector2i(6 + dx, -4 + dy)
+			if g.dans(t2) and g.contenu_de(t2).is_empty() and g.occupant(t2).is_empty():
+				tuiles.append(t2 - s.monde.pos_monde(cell, Vector2i.ZERO))   # les tuiles d'un périmètre sont locales
+	var pid := SimPerimetres.creer_perimetre(s, cell, "champs", tuiles, true)
+	verifier(not pid.is_empty() and tuiles.size() >= 6, "un périmètre de champs de %d tuiles au camp" % tuiles.size())
+	if pid.is_empty():
+		return
+	var pr: Dictionary = SimPerimetres.perimetres(s)[pid]
+	pr["cultures"] = ["ble", "orge"]
+	pr["derniere_plante"] = "ble"
+	pr["recoltes"] = int(cfg.jachere.recoltes_avant_jachere) - 1
+	var pos_champ: Array = SimPerimetres.tuiles_de_perimetre(s, pid)
+	for t3 in pos_champ:
+		SimVilles._semer_tuile(s, t3, "ble", s.horloge_monde.ticks)
+		s.territoire.fertilite[t3] = 40
+	var types: Dictionary = s.regles.r.royaume.perimetres.types
+	SimVilles._jacheres(s, types, s.horloge_monde.ticks)   # la récolte de trop : le champ se met en jachère
+	var nues := 0
+	for t4 in pos_champ:
+		if not s.territoire.cultures.has(t4):
+			nues += 1
+	verifier(int(pr.jachere_jusqua) > s.horloge_monde.ticks and nues == pos_champ.size(), "après %d récoltes, le champ se repose : %d parcelles nues" % [int(cfg.jachere.recoltes_avant_jachere), nues])
+	var t_fin := int(pr.jachere_jusqua) + jour
+	s.horloge_monde.ticks = t_fin
+	SimVilles._jacheres(s, types, t_fin)
+	var semees := 0
+	for t5 in pos_champ:
+		if s.territoire.cultures.has(t5):
+			semees += 1
+	verifier(int(pr.jachere_jusqua) == 0 and semees == pos_champ.size() and int(s.territoire.fertilite[pos_champ[0]]) > 40, "le repos fini : %d parcelles resemées, fertilité %d (était 40)" % [semees, int(s.territoire.fertilite[pos_champ[0]])])
+	# 6. Le troupeau : il mange, il produit à sa saison, il naît.
+	var tr: Dictionary = GameData.config("villes").enclos.troupeau
+	var tid := str(s.territoire.get("id", "joueur"))
+	s.horloge_monde.ticks = 10 * jour   # printemps : la laine se tond
+	var n0 := 0
+	for k in 4:
+		var ou: Vector2i = s._tuile_libre_autour(j.pos + Vector2i(-6 - k, 0))
+		if ou == Vector2i(-1, -1):
+			continue
+		var b: Dictionary = SimObjets.ajouter(s, "mouflon", ou, "ia")
+		if b.is_empty():
+			continue
+		b["betail"] = tid
+		b["statut_habitat"] = "betail"
+		n0 += 1
+	s.territoire.stocks["ble"] = 40
+	SimVilles._semaine_betail(s)
+	var laine := int(s.territoire.stocks.get("laine|brut", 0))
+	var reste := int(s.territoire.stocks.get("ble", 0))
+	verifier(n0 >= 2 and laine >= n0 * 2 and reste == 40 - n0 * int(tr.fourrage_par_bete), "le troupeau de %d mouflons : %d laine au printemps, %d blé mangé" % [n0, laine, 40 - reste])
+	s.horloge_monde.ticks = 100 * jour   # l'été : plus de tonte
+	s.territoire.stocks["laine|brut"] = 0
+	SimVilles._semaine_betail(s)
+	verifier(int(s.territoire.stocks.get("laine|brut", 0)) == 0, "l'été, on ne tond pas : la laine attend le printemps")
+	# La famine : sans fourrage, une bête meurt et rien ne naît.
+	s.territoire.stocks.erase("ble")
+	var avant := s.vivants().filter(func(x: Dictionary) -> bool: return str(x.get("betail", "")) == tid).size()
+	SimVilles._semaine_betail(s)
+	var apres := s.vivants().filter(func(x: Dictionary) -> bool: return str(x.get("betail", "")) == tid).size()
+	verifier(apres == avant - 1, "sans fourrage, le troupeau perd une bête (%d → %d)" % [avant, apres])

@@ -3625,3 +3625,6 @@ ui.choix.supprimer_capacite,Supprimer la capacité
 ui.choix.gouvernance_suivante,Gouvernance suivante
 ui.choix.marge_plus,Marge des boutiques +
 ui.choix.marge_moins,Marge des boutiques −
+journal.betail_naissance,"{n} petit(s) sont nés dans les enclos"
+journal.betail_abattu,"{n} bête(s) abattue(s) : viande, cuir et suif aux stocks"
+journal.betail_famine,"{n} bête(s) sont mortes de faim — les enclos manquent de fourrage"
