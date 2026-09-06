@@ -187,7 +187,7 @@ Un seul Godot à la fois (le fuzz dure ~4 min, la suite ~5). Une capture statiqu
 
 ### Les sondes
 
-Vingt-huit scènes `scenes/tests/sonde_*.tscn`, chacune mesure une chose et l'écrit en clair (`python tools/verif_scripts.py` les compile toutes). Les plus utiles :
+Vingt-huit scènes `scenes/tests/sonde_*.tscn`, chacune mesure une chose et l'écrit en clair (`python tools/verif_scripts.py` les compile toutes ; `python tools/balayer_sondes.py` les joue toutes l'une après l'autre, une heure, et résume erreurs et soucis — le balayage du 2026-09-06 après la fragmentation : zéro erreur). Les plus utiles :
 
 ```powershell
 & $godot --headless --path godot res://scenes/tests/sonde_ecrans.tscn            # chaque écran à quatre tailles de fenêtre : rien ne sort du cadre

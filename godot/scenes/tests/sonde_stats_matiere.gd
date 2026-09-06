@@ -12,6 +12,11 @@ extends Node
 ## servaient a rien. On lit donc les fichiers, on cherche `stats", {}).get("<stat>"` et ses variantes,
 ## et on croit ce qu'on trouve.
 const SOURCES := ["res://systems/combat/simulation.gd", "res://systems/combat/regles.gd",
+	"res://systems/simulation/sim_lieux.gd", "res://systems/simulation/sim_terrain.gd", "res://systems/simulation/sim_camp.gd",
+	"res://systems/simulation/sim_pnj.gd", "res://systems/simulation/sim_territoire.gd", "res://systems/simulation/sim_villes.gd",
+	"res://systems/simulation/sim_perimetres.gd", "res://systems/simulation/sim_royaumes.gd", "res://systems/simulation/sim_elevage.gd",
+	"res://systems/simulation/sim_objets.gd", "res://systems/simulation/sim_sauvegarde.gd", "res://systems/simulation/sim_fabrication.gd",
+	"res://systems/simulation/sim_talents.gd",   # les regles vivent dans les modules depuis le 2026-09-06 (Modules de la simulation et le C++)
 	"res://systems/combat/etres.gd", "res://systems/grid/grille.gd", "res://systems/loot/generateur.gd",
 	"res://scenes/demo/main.gd"]
 

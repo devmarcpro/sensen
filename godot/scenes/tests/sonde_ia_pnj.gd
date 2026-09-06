@@ -601,7 +601,7 @@ func _camp() -> void:
 	v["lit"] = _libre_a(s, v.pos + Vector2i(-5, 0), 0, false) if _libre_a(s, v.pos + Vector2i(-5, 0), 0, false) != Vector2i(-1, -1) else _libre_a(s, v.pos, 4, false)
 	for plage in [[12.0, "poste"], [21.0, "place"], [23.0, "lit"]]:
 		_heure(s, float(plage[0]))
-		var cible: Vector2i = v[str(plage[1])]
+		var cible: Vector2i = s._coin_de_place(v) if str(plage[1]) == "place" else v[str(plage[1])]   # sur la place, chacun son coin (Villes B1)
 		var avant := Grille.distance(v.pos, cible)
 		for r in 30:
 			_ronde(s, j)
