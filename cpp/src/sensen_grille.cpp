@@ -87,6 +87,7 @@ void SensenGrille::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("cout_pas_entre", "grille", "de", "vers", "volant", "eviter_nage"), &SensenGrille::cout_pas_entre);
 	ClassDB::bind_method(D_METHOD("composante", "grille", "depart", "max_tuiles"), &SensenGrille::composante);
 	ClassDB::bind_method(D_METHOD("regions_cellule", "grille", "origine", "n", "classes"), &SensenGrille::regions_cellule);
+	ClassDB::bind_method(D_METHOD("morceau", "grille", "coin", "taille_morceau", "p"), &SensenGrille::morceau);
 	ClassDB::bind_method(D_METHOD("visibles", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "bat_j", "positions"), &SensenGrille::visibles);
 	ClassDB::bind_method(D_METHOD("brouillard", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "origine_dessin", "tw", "th", "hstep", "niveau_u", "bat_j", "mur_coupe_u", "voile", "col_sil"), &SensenGrille::brouillard);
 	ClassDB::bind_method(D_METHOD("toits", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "origine_dessin", "tw", "th", "hstep", "niveau_u", "bat_j", "bat_couleurs", "bat_styles", "pente_t", "haut_toit", "ombre_min", "soleil_h", "soleil_ok", "soleil_force", "uv_haut"), &SensenGrille::toits);
@@ -1270,5 +1271,381 @@ PackedByteArray SensenGrille::visibles(Object *grille, const Dictionary &vue, bo
 		}
 		w[k] = f;
 	}
+	return res;
+}
+
+
+// ---------------------------------------------------------------- les morceaux de terrain (PassesGD.morceau, file 114)
+// Transcription de PassesGD._tuile / _bloc / _porte : les triangles d'un morceau de 8 × 8 tuiles découvertes, dans
+// l'ordre des diagonales, avec les COUPURES (à tel nombre de points, telle tuile demande une commande que les triangles
+// ne portent pas : la traverse d'une porte, un contenant, un sprite) et les végétaux. Les tables (couleur et grain par
+// matériau, par meuble, par contenu ; les matériaux des bâtiments) viennent du client dans `p`.
+
+namespace {
+
+struct Morceau {
+	Triangles tr;
+	PackedInt32Array coupures, vegetaux;
+	// les tables
+	Dictionary mat_col, mat_st, meuble_col, meuble_emprise, sols, materiaux, meubles, stations, decouvert;
+	PackedColorArray contenu_col;
+	PackedStringArray bat_mur_id, bat_pierre_id, bat_bois_id;
+	std::vector<Rect2i> rects;
+	String materiau_defaut, materiau_mur_defaut;
+	Vector2i od;
+	double tw = 40, th = 20, hstep = 8, uv_haut = 4096, uv_so = -1000, uv_se = -2000, uv_pas_face = 32;
+	int niveau_u = 6, bloc_u = 2, porte_u = 4, mur_coupe_u = 1, bat_j = 0;
+	const uint8_t *nv = nullptr;
+	const int32_t *bd = nullptr;
+
+	void coupure(int idx, int genre) {
+		coupures.push_back(tr.points.size());
+		coupures.push_back(idx);
+		coupures.push_back(genre);
+	}
+	Vector2 uv_h(int x, int y, double dx, double dy, double st) const {
+		int lx = x - od.x, ly = y - od.y;
+		return Vector2((real_t)(st + lx + dx), (real_t)(uv_haut + ly + dy));
+	}
+	Vector2 uv_o(int x, int y, double dx, double hh, double st) const {
+		int lx = x - od.x, ly = y - od.y;
+		return Vector2((real_t)(st + lx + dx), (real_t)(uv_so - (ly * uv_pas_face + hh)));
+	}
+	Vector2 uv_e(int x, int y, double dy, double hh, double st) const {
+		int lx = x - od.x, ly = y - od.y;
+		return Vector2((real_t)(st + ly + dy), (real_t)(uv_se - (lx * uv_pas_face + hh)));
+	}
+	bool couleur_mat(const String &id, Color *out) const {
+		Variant v = mat_col.get(id, Variant());
+		if (v.get_type() != Variant::COLOR) {
+			return false;
+		}
+		*out = v;
+		return true;
+	}
+	double style(const String &id) const {
+		Variant v = mat_st.get(id, Variant());
+		return (v.get_type() == Variant::FLOAT || v.get_type() == Variant::INT) ? (double)v : 0.0;
+	}
+	String chaine(const Dictionary &d, int i, const String &defaut) const {
+		Variant v = d.get(i, Variant());
+		return (v.get_type() == Variant::STRING) ? (String)v : defaut;
+	}
+	bool mur_coupe(int x, int y, int i) const {
+		if (bat_j <= 0 || bat_j > (int)rects.size() || !bd || bd[i] != bat_j) {
+			return false;
+		}
+		const Rect2i &r = rects[bat_j - 1];
+		return y == r.position.y + r.size.y - 1 || x == r.position.x + r.size.x - 1;
+	}
+};
+
+} // namespace
+
+// PassesGD._bloc
+static void bloc_e(Morceau &m, const SensenGrille::Etat &s, const SensenGrille *k, int x, int y, Vector2 c, Color teinte, int base_u, int plafond_u) {
+	int i = s.idx(x, y);
+	int fl = k->drapeaux_public(s, i);
+	int n_bat = m.nv ? (int)m.nv[i] : 0;
+	bool mur_bat = n_bat > 0 && (fl & (SensenGrille::F_MUR | SensenGrille::F_PORTE));
+	int hv = (fl & SensenGrille::F_SANS_HAUTEUR_VUE) ? 3 : ((fl >> 8) & 0xFF);
+	int hm = (int)((mur_bat ? n_bat * m.niveau_u : hv) * m.hstep);
+	if (plafond_u > 0) {
+		hm = std::min(hm, (int)(plafond_u * m.hstep));
+	}
+	Color haut_bloc(0.5f, 0.47f, 0.44f);
+	String mat_id = m.chaine(m.materiaux, i, m.materiau_defaut);
+	int b_idx = m.bd ? m.bd[i] : 0;
+	if (mur_bat && (fl & SensenGrille::F_PORTE) && b_idx > 0 && b_idx <= m.bat_mur_id.size()) {
+		mat_id = m.bat_mur_id[b_idx - 1];
+	}
+	Color col_mat;
+	bool a_mat = m.couleur_mat(mat_id, &col_mat);
+	double emprise = 1.0;
+	Variant v_meuble = m.meubles.get(i, Variant());
+	if ((fl & SensenGrille::F_MEUBLE) && v_meuble.get_type() == Variant::STRING) {
+		String mid = v_meuble;
+		Variant vc = m.meuble_col.get(mid, Variant());
+		if (vc.get_type() == Variant::COLOR) {
+			haut_bloc = vc;
+		}
+		Variant ve = m.meuble_emprise.get(mid, Variant());
+		emprise = (ve.get_type() == Variant::FLOAT || ve.get_type() == Variant::INT) ? (double)ve : 0.6;
+		hm = (int)std::round((double)hm * emprise);
+	} else if ((fl & SensenGrille::F_COULEUR) && !mur_bat) {
+		haut_bloc = m.contenu_col[s.c[i]];
+	} else if (fl & SensenGrille::F_ARBRE) {
+		haut_bloc = Color(0.22f, 0.45f, 0.18f).lerp(a_mat ? col_mat : haut_bloc, 0.2f);
+	} else if (a_mat) {
+		haut_bloc = haut_bloc.lerp(col_mat, (m.materiaux.has(i) || mur_bat) ? 0.55f : 0.35f);
+	}
+	haut_bloc = haut_bloc * teinte;
+	String mat_bloc = mat_id.is_empty() ? m.materiau_mur_defaut : mat_id;
+	double st_bloc = m.style(mat_bloc);
+	double tw = m.tw * 0.5 * emprise, th = m.th * 0.5 * emprise;
+	int h0 = (int)(base_u * m.hstep);
+	auto hauteur_voisin = [&](int vx, int vy, bool *ok) -> double {
+		*ok = false;
+		if (!s.dans(vx, vy)) {
+			return 0.0;
+		}
+		int vi = s.idx(vx, vy);
+		if (!m.decouvert.has(vi)) {
+			return 0.0;
+		}
+		*ok = true;
+		Rect2i rect_j;
+		if (m.bat_j > 0 && m.bat_j <= (int)m.rects.size()) {
+			rect_j = m.rects[m.bat_j - 1];
+		}
+		return hauteur_bloc_e(s, m.nv, m.bd, k->drapeaux_public(s, vi), vi, vx, vy, m.bat_j, rect_j, m.niveau_u, m.mur_coupe_u) * m.hstep;
+	};
+	bool ok_s = false, ok_e = false;
+	double hvs = hauteur_voisin(x, y + 1, &ok_s), hve = hauteur_voisin(x + 1, y, &ok_e);
+	bool face_so = !(ok_s && hvs >= hm);
+	bool face_se = !(ok_e && hve >= hm);
+	int bande = mur_bat ? (int)(m.bloc_u * m.hstep) : hm;
+	int yy = h0;
+	Color col_haut = haut_bloc;
+	double st_haut = st_bloc;
+	while (yy < hm) {
+		int y1 = std::min(hm, yy + bande);
+		Color col_b = haut_bloc;
+		double st_b = st_bloc;
+		if (mur_bat) {
+			int bloc_k = yy / (int)(m.bloc_u * m.hstep);
+			String bois = (b_idx > 0 && b_idx <= m.bat_bois_id.size()) ? m.bat_bois_id[b_idx - 1] : String();
+			String mat_b = (bloc_k > 0 && !bois.is_empty()) ? bois : ((b_idx > 0 && b_idx <= m.bat_pierre_id.size()) ? m.bat_pierre_id[b_idx - 1] : String());
+			if (mat_b.is_empty()) {
+				mat_b = mat_id;
+			}
+			Color cm;
+			if (m.couleur_mat(mat_b, &cm)) {
+				col_b = Color(0.5f, 0.47f, 0.44f).lerp(cm, 0.65f) * teinte;
+			}
+			st_b = m.style(mat_b);
+		}
+		double fy = (double)yy / m.hstep, fy1 = (double)y1 / m.hstep;
+		if (face_so) {
+			Vector2 q[4] = { c + Vector2((real_t)-tw, (real_t)-yy), c + Vector2(0, (real_t)(th - yy)), c + Vector2(0, (real_t)(th - y1)), c + Vector2((real_t)-tw, (real_t)-y1) };
+			Vector2 uv[4] = { m.uv_o(x, y, 0, fy, st_b), m.uv_o(x, y, 1, fy, st_b), m.uv_o(x, y, 1, fy1, st_b), m.uv_o(x, y, 0, fy1, st_b) };
+			m.tr.poly(q, 4, col_b.darkened(0.35f), uv);
+		}
+		if (face_se) {
+			Vector2 q[4] = { c + Vector2(0, (real_t)(th - yy)), c + Vector2((real_t)tw, (real_t)-yy), c + Vector2((real_t)tw, (real_t)-y1), c + Vector2(0, (real_t)(th - y1)) };
+			Vector2 uv[4] = { m.uv_e(x, y, 0, fy, st_b), m.uv_e(x, y, 1, fy, st_b), m.uv_e(x, y, 1, fy1, st_b), m.uv_e(x, y, 0, fy1, st_b) };
+			m.tr.poly(q, 4, col_b.darkened(0.5f), uv);
+		}
+		col_haut = col_b;
+		st_haut = st_b;
+		yy = y1;
+	}
+	Vector2 q[4] = { c + Vector2((real_t)-tw, (real_t)-hm), c + Vector2(0, (real_t)(-th - hm)), c + Vector2((real_t)tw, (real_t)-hm), c + Vector2(0, (real_t)(th - hm)) };
+	Vector2 uv[4] = { m.uv_h(x, y, 0, 1, st_haut), m.uv_h(x, y, 0, 0, st_haut), m.uv_h(x, y, 1, 0, st_haut), m.uv_h(x, y, 1, 1, st_haut) };
+	m.tr.poly(q, 4, col_haut, uv);
+}
+
+// PassesGD._porte
+static void porte_e(Morceau &m, const SensenGrille::Etat &s, const SensenGrille *k, int x, int y, Vector2 c, int fl, Color teinte) {
+	int i = s.idx(x, y);
+	Color bois = m.contenu_col[s.c[i]] * teinte;
+	auto bloque = [&](int vx, int vy) -> bool {
+		if (!s.dans(vx, vy)) {
+			return false;
+		}
+		return (k->drapeaux_public(s, s.idx(vx, vy)) & SensenGrille::F_BLOQUE_PASSAGE) != 0;
+	};
+	bool mur_x = bloque(x + 1, y) || bloque(x - 1, y);
+	Vector2 demi = mur_x ? Vector2((real_t)(m.tw * 0.25), (real_t)(m.th * 0.25)) : Vector2((real_t)(m.tw * 0.25), (real_t)(-m.th * 0.25));
+	Vector2 a = c - demi, b = c + demi;
+	int n_bat = m.nv ? (int)m.nv[i] : 0;
+	int hv = (fl & SensenGrille::F_SANS_HAUTEUR_VUE) ? 2 : ((fl >> 8) & 0xFF);
+	Vector2 haut(0, (real_t)(-(double)(n_bat > 0 ? m.porte_u : hv) * m.hstep));
+	Vector2 uvp = m.uv_h(x, y, 0.5, 0.5, 0.0);
+	Vector2 uv[4] = { uvp, uvp, uvp, uvp };
+	Vector2 montants[2] = { a, b };
+	for (int j = 0; j < 2; ++j) {
+		Vector2 mm = montants[j];
+		Vector2 q[4] = { mm + Vector2(-1.5f, 0), mm + Vector2(1.5f, 0), mm + Vector2(1.5f, 0) + haut, mm + Vector2(-1.5f, 0) + haut };
+		m.tr.poly(q, 4, bois.darkened(0.45f), uv);
+	}
+	bool ferme = (fl & SensenGrille::F_FERMEE) != 0;
+	Vector2 p0 = ferme ? a : a.lerp(b, 0.68f);
+	Vector2 p1 = b;
+	Vector2 q1[4] = { p0, p1, p1 + haut, p0 + haut };
+	m.tr.poly(q1, 4, bois, uv);
+	Vector2 q2[4] = { p0, p1, p1 + haut * 0.08f, p0 + haut * 0.08f };
+	m.tr.poly(q2, 4, bois.darkened(0.3f), uv);
+	m.coupure(i, 1);
+}
+
+// PassesGD._tuile
+static void tuile_e(Morceau &m, const SensenGrille::Etat &s, const SensenGrille *k, int x, int y) {
+	int i = s.idx(x, y);
+	int h = (int)s.h[i];
+	Vector2 c = ecran_e(x, y, h, m.od, m.tw, m.th, m.hstep);
+	Color teinte(1, 1, 1, 1);
+	int ci = s.c[i];
+	int fl = k->drapeaux_public(s, i);
+	bool vide_def = ci <= 0;
+	double tw = m.tw, th = m.th;
+	if (fl & SensenGrille::F_LIQUIDE) {
+		Color col_eau = m.contenu_col[ci];
+		if (fl & SensenGrille::F_ECOULEMENT) {
+			col_eau = col_eau.lerp(Color(0.6f, 0.8f, 0.95f), (real_t)(1.0 - (double)k->niveau_liquide_public(s, i) / 8.0));
+		}
+		if (s.gel) {
+			col_eau = col_eau.lerp(Color(0.85f, 0.92f, 1.0f), 0.7f);
+		}
+		double st_eau = m.style("eau");
+		Vector2 q[4] = { c + Vector2(0, (real_t)(-th * 0.5)), c + Vector2((real_t)(tw * 0.5), 0), c + Vector2(0, (real_t)(th * 0.5)), c + Vector2((real_t)(-tw * 0.5), 0) };
+		Vector2 uv[4] = { m.uv_h(x, y, 0, 0, st_eau), m.uv_h(x, y, 1, 0, st_eau), m.uv_h(x, y, 1, 1, st_eau), m.uv_h(x, y, 0, 1, st_eau) };
+		m.tr.poly(q, 4, col_eau * teinte, uv);
+		return;
+	}
+	if (s.neige) {
+		teinte = teinte.lerp(Color(1.4f, 1.4f, 1.5f), 0.5f);
+	}
+	bool bloque = (fl & SensenGrille::F_BLOQUE_PASSAGE) != 0;
+	bool porte = (fl & SensenGrille::F_PORTE) != 0;
+	if (bloque && !(fl & SensenGrille::F_VEGETATION) && !porte) {
+		bloc_e(m, s, k, x, y, c, teinte, 0, m.mur_coupe(x, y, i) ? m.mur_coupe_u : 0);
+		if (m.meubles.has(i) || m.stations.has(i)) {
+			m.coupure(i, 3);
+		}
+		return;
+	}
+	double kk = std::min(1.0, std::max(0.0, (h - 4) / 12.0));
+	Color col = Color(0.20f, 0.34f, 0.18f).lerp(Color(0.62f, 0.66f, 0.42f), (real_t)kk);
+	String sol_id = m.chaine(m.sols, i, String());
+	Color cs;
+	if (!sol_id.is_empty() && m.couleur_mat(sol_id, &cs)) {
+		col = cs.lerp(Color(0.35f, 0.5f, 0.25f), sol_id.begins_with("terre") ? 0.35f : 0.0f).darkened((real_t)(0.25 - kk * 0.3));
+	}
+	col = col * teinte;
+	double st_sol = m.style(sol_id);
+	{
+		Vector2 q[4] = { c + Vector2(0, (real_t)(-th * 0.5)), c + Vector2((real_t)(tw * 0.5), 0), c + Vector2(0, (real_t)(th * 0.5)), c + Vector2((real_t)(-tw * 0.5), 0) };
+		Vector2 uv[4] = { m.uv_h(x, y, 0, 0, st_sol), m.uv_h(x, y, 1, 0, st_sol), m.uv_h(x, y, 1, 1, st_sol), m.uv_h(x, y, 0, 1, st_sol) };
+		m.tr.poly(q, 4, col, uv);
+	}
+	Color flanc = col.darkened(0.35f);
+	int hs = s.dans(x, y + 1) ? (int)s.h[s.idx(x, y + 1)] : 0;
+	if (hs < h) {
+		double d = (h - hs) * m.hstep;
+		Vector2 q[4] = { c + Vector2((real_t)(-tw * 0.5), 0), c + Vector2(0, (real_t)(th * 0.5)), c + Vector2(0, (real_t)(th * 0.5 + d)), c + Vector2((real_t)(-tw * 0.5), (real_t)d) };
+		Vector2 uv[4] = { m.uv_o(x, y, 0, h, st_sol), m.uv_o(x, y, 1, h, st_sol), m.uv_o(x, y, 1, hs, st_sol), m.uv_o(x, y, 0, hs, st_sol) };
+		m.tr.poly(q, 4, flanc, uv);
+	}
+	int he = s.dans(x + 1, y) ? (int)s.h[s.idx(x + 1, y)] : 0;
+	if (he < h) {
+		double d2 = (h - he) * m.hstep;
+		Vector2 q[4] = { c + Vector2(0, (real_t)(th * 0.5)), c + Vector2((real_t)(tw * 0.5), 0), c + Vector2((real_t)(tw * 0.5), (real_t)d2), c + Vector2(0, (real_t)(th * 0.5 + d2)) };
+		Vector2 uv[4] = { m.uv_e(x, y, 0, h, st_sol), m.uv_e(x, y, 1, h, st_sol), m.uv_e(x, y, 1, he, st_sol), m.uv_e(x, y, 0, he, st_sol) };
+		m.tr.poly(q, 4, flanc.darkened(0.15f), uv);
+	}
+	bool meuble = (fl & SensenGrille::F_MEUBLE) != 0;
+	if (!vide_def && !bloque && !porte && ((fl & SensenGrille::F_COULEUR) || meuble)) {
+		Color cf = m.contenu_col[ci];
+		if (meuble) {
+			String mid = m.chaine(m.meubles, i, "tapis");
+			Variant vc = m.meuble_col.get(mid, Variant());
+			cf = (vc.get_type() == Variant::COLOR) ? (Color)vc : Color(1, 1, 1, 1);
+		}
+		Vector2 q[4] = { c + Vector2(0, (real_t)(-th * 0.35)), c + Vector2((real_t)(tw * 0.35), 0), c + Vector2(0, (real_t)(th * 0.35)), c + Vector2((real_t)(-tw * 0.35), 0) };
+		Vector2 uv[4] = { m.uv_h(x, y, 0.15, 0.15, 0), m.uv_h(x, y, 0.85, 0.15, 0), m.uv_h(x, y, 0.85, 0.85, 0), m.uv_h(x, y, 0.15, 0.85, 0) };
+		m.tr.poly(q, 4, cf * teinte, uv);
+		if (m.meubles.has(i) || m.stations.has(i)) {
+			m.coupure(i, 3);
+		}
+	}
+	if (porte) {
+		if (m.mur_coupe(x, y, i)) {
+			Color cs2 = m.contenu_col[ci] * teinte;
+			Vector2 q[4] = { c + Vector2(0, (real_t)(-th * 0.35)), c + Vector2((real_t)(tw * 0.35), 0), c + Vector2(0, (real_t)(th * 0.35)), c + Vector2((real_t)(-tw * 0.35), 0) };
+			Vector2 uv[4] = { m.uv_h(x, y, 0.15, 0.15, 0), m.uv_h(x, y, 0.85, 0.15, 0), m.uv_h(x, y, 0.85, 0.85, 0), m.uv_h(x, y, 0.15, 0.85, 0) };
+			m.tr.poly(q, 4, cs2, uv);
+		} else {
+			porte_e(m, s, k, x, y, c, fl, teinte);
+			if (m.nv && m.nv[i] > 0) {
+				bloc_e(m, s, k, x, y, c, teinte, m.porte_u, 0);
+			}
+		}
+	}
+	if (fl & SensenGrille::F_CONTENANT) {
+		m.coupure(i, 2);
+	}
+}
+
+Dictionary SensenGrille::morceau(Object *grille, Vector2i coin, int taille_morceau, const Dictionary &p) {
+	Morceau m;
+	Etat s;
+	Dictionary res;
+	if (!charger(grille, s)) {
+		res = m.tr.vers(PackedInt32Array(), PackedInt32Array());
+		res["coupures"] = m.coupures;
+		res["vegetaux"] = m.vegetaux;
+		return res;
+	}
+	static const StringName sn_decouvert("decouvert"), sn_niv("niveaux_bat"), sn_bat("bat_de"), sn_bats("batiments_liste"), sn_rect("rect"),
+			sn_sols("sols"), sn_materiaux("materiaux"), sn_meubles("meubles"), sn_stations("stations_fixes"), sn_defaut("materiau_defaut");
+	m.decouvert = grille->get(sn_decouvert);
+	m.sols = grille->get(sn_sols);
+	m.materiaux = grille->get(sn_materiaux);
+	m.meubles = grille->get(sn_meubles);
+	m.stations = grille->get(sn_stations);
+	m.materiau_defaut = grille->get(sn_defaut);
+	PackedByteArray niv = grille->get(sn_niv);
+	m.nv = octets_ou_nul(niv, s.n);
+	PackedInt32Array bat = grille->get(sn_bat);
+	m.bd = (bat.size() >= s.n) ? bat.ptr() : nullptr;
+	Array bats = grille->get(sn_bats);
+	for (int b = 0; b < bats.size(); ++b) {
+		Dictionary info = bats[b];
+		m.rects.push_back(info.get(sn_rect, Rect2i()));
+	}
+	m.mat_col = p.get("mat_col", Dictionary());
+	m.mat_st = p.get("mat_st", Dictionary());
+	m.meuble_col = p.get("meuble_col", Dictionary());
+	m.meuble_emprise = p.get("meuble_emprise", Dictionary());
+	m.contenu_col = p.get("contenu_col", PackedColorArray());
+	m.bat_mur_id = p.get("bat_mur_id", PackedStringArray());
+	m.bat_pierre_id = p.get("bat_pierre_id", PackedStringArray());
+	m.bat_bois_id = p.get("bat_bois_id", PackedStringArray());
+	m.materiau_mur_defaut = p.get("materiau_mur_defaut", String());
+	m.od = p.get("origine_dessin", Vector2i());
+	m.tw = (double)p.get("tw", 40.0);
+	m.th = (double)p.get("th", 20.0);
+	m.hstep = (double)p.get("hstep", 8.0);
+	m.uv_haut = (double)p.get("uv_haut", 4096.0);
+	m.uv_so = (double)p.get("uv_so", -1000.0);
+	m.uv_se = (double)p.get("uv_se", -2000.0);
+	m.uv_pas_face = (double)p.get("uv_pas_face", 32.0);
+	m.niveau_u = (int)p.get("niveau_u", 6);
+	m.bloc_u = (int)p.get("bloc_u", 2);
+	m.porte_u = (int)p.get("porte_u", 4);
+	m.mur_coupe_u = (int)p.get("mur_coupe_u", 1);
+	m.bat_j = (int)p.get("bat_j", 0);
+	if (m.contenu_col.size() < (int)table.size()) {
+		m.contenu_col.resize(table.size());
+	}
+	int x0 = s.ox + coin.x * taille_morceau, y0 = s.oy + coin.y * taille_morceau;
+	int x1 = std::min(s.ox + s.L - 1, x0 + taille_morceau - 1), y1 = std::min(s.oy + s.H - 1, y0 + taille_morceau - 1);
+	for (int sd = x0 + y0; sd <= x1 + y1; ++sd) {
+		for (int x = std::max(x0, sd - y1); x <= std::min(x1, sd - y0); ++x) {
+			int y = sd - x;
+			int i = s.idx(x, y);
+			if (!m.decouvert.has(i)) {
+				continue;
+			}
+			tuile_e(m, s, this, x, y);
+			if (drapeaux(s, i) & F_VEGETATION) {
+				m.vegetaux.push_back(i);
+			}
+		}
+	}
+	res = m.tr.vers(PackedInt32Array(), PackedInt32Array());
+	res["coupures"] = m.coupures;
+	res["vegetaux"] = m.vegetaux;
 	return res;
 }

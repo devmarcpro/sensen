@@ -2229,20 +2229,115 @@ func _dessiner_morceau(ci: CanvasItem, coin: Vector2i) -> void:
 	if sim == null or profil_sans_terrain:
 		return
 	var g := sim.grille
-	var x0: int = g.origine.x + coin.x * MORCEAU
-	var y0: int = g.origine.y + coin.y * MORCEAU
-	var x1 := mini(g.origine.x + g.largeur - 1, x0 + MORCEAU - 1)
-	var y1 := mini(g.origine.y + g.hauteur_grille - 1, y0 + MORCEAU - 1)
-	_lot_ouvrir(ci)   # tout le morceau en une commande de triangles
-	for s in range(x0 + y0, x1 + y1 + 1):
-		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
-			var t := Vector2i(x, s - x)
-			if not g.decouvert.has(g.idx(t)):
-				continue   # jamais vue : rien (le fond de la scène est le brouillard)
-			_dessine_tuile(ci, t)
-			if "vegetation" in g.contenu_de(t).get("tags", []):
-				_assurer_vegetal(t)
-	_lot_fermer(ci)
+	# Le morceau en tableaux de triangles (file 114, 2026-09-06) : le noyau C++ (SensenGrille.morceau) ou PassesGD.morceau, les
+	# mêmes ; les commandes que les triangles ne portent pas (la traverse d'une porte, un contenant, un sprite) sont des
+	# COUPURES : on soumet les triangles jusqu'à la coupure, on dessine la commande, on reprend — l'ordre des diagonales tient.
+	var p := _params_morceau(g)
+	var t0 := Time.get_ticks_usec()
+	var res: Dictionary
+	if g.noyau_actif and g._noyau_pret():
+		res = g._noyau.morceau(g, coin, MORCEAU, p)
+	else:
+		res = PassesGD.morceau(g, coin, MORCEAU, p)
+	_top_client("morceau.tableaux", t0)
+	var rid := ci.get_canvas_item()
+	var pts: PackedVector2Array = res.points
+	var cols: PackedColorArray = res.couleurs
+	var uvs: PackedVector2Array = res.uvs
+	var coupures: PackedInt32Array = res.coupures
+	var debut := 0
+	var teinte := Color.WHITE.lerp(Color(1.4, 1.4, 1.5), 0.5) if g.neige else Color.WHITE
+	@warning_ignore("integer_division")
+	for k in coupures.size() / 3:
+		var fin: int = coupures[k * 3]
+		var idx: int = coupures[k * 3 + 1]
+		var genre: int = coupures[k * 3 + 2]
+		if fin > debut:
+			_soumettre_triangles(rid, pts, cols, uvs, debut, fin)
+			debut = fin
+		var t := g.pos_de(idx)
+		var c := _ecran(t, g.h(t))
+		match genre:
+			1:   # la traverse et la poignée d'une porte
+				_porte_details(ci, g, t, c, g.contenu_de(t), teinte)
+			2:   # un contenant : une caisse
+				var cc := (Color(0.55, 0.38, 0.18) if "coffre" in g.contenu_de(t).get("tags", []) else Color(0.75, 0.65, 0.3)) * teinte
+				ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc)
+				ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc.darkened(0.5), false, 1.0)
+			3:   # le sprite d'un meuble ou d'une station
+				_dessiner_sprite_tuile(ci, g, t, c, teinte)
+	if pts.size() > debut:
+		_soumettre_triangles(rid, pts, cols, uvs, debut, pts.size())
+	for idx in res.vegetaux:
+		_assurer_vegetal(g.pos_de(idx))
+
+
+## Une tranche de tableaux de triangles, en une commande.
+static func _soumettre_triangles(rid: RID, pts: PackedVector2Array, cols: PackedColorArray, uvs: PackedVector2Array, debut: int, fin: int) -> void:
+	var n := fin - debut
+	var idx := PackedInt32Array()
+	idx.resize(n)
+	for i in n:
+		idx[i] = i
+	RenderingServer.canvas_item_add_triangle_array(rid, idx, pts.slice(debut, fin), cols.slice(debut, fin), uvs.slice(debut, fin))
+
+
+## La traverse et la poignée d'une porte (la fin de _dessiner_porte) : des commandes de ligne et de disque, hors lot.
+func _porte_details(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, contenu: Dictionary, teinte: Color) -> void:
+	var bois := _couleur_html(str(contenu.get("couleur", "#6a4a22"))) * teinte
+	var mur_x: bool = (g.dans(t + Vector2i(1, 0)) and g.bloque_passage(t + Vector2i(1, 0))) or (g.dans(t - Vector2i(1, 0)) and g.bloque_passage(t - Vector2i(1, 0)))
+	var demi := Vector2(TW * 0.25, TH * 0.25) if mur_x else Vector2(TW * 0.25, -TH * 0.25)
+	var a := c - demi
+	var b := c + demi
+	var haut := Vector2(0.0, -float((PORTE_BLOCS * BLOC_UNITES) if g.niveaux_bat[g.idx(t)] > 0 else int(contenu.get("hauteur_vue", 2))) * HSTEP)
+	var ferme: bool = "fermee" in contenu.get("tags", [])
+	var p0 := a if ferme else a.lerp(b, 0.68)
+	var p1 := b
+	var trav := (p0 + p1) * 0.5 + haut * 0.55
+	ci.draw_line(p0 + haut * 0.5, p1 + haut * 0.5, bois.darkened(0.25), 1.0)
+	ci.draw_circle(trav.lerp(p1 + haut * 0.55, 0.45), 1.6, Color(0.85, 0.75, 0.35) * teinte)
+
+
+var _tables_morceau: Dictionary = {}   # les tables des passes (couleur et grain par matériau, par meuble), bâties une fois
+
+
+## Les paramètres d'un morceau pour PassesGD / le noyau : les tables (une fois), les contenus et les bâtiments de la grille.
+func _params_morceau(g: Grille) -> Dictionary:
+	if _tables_morceau.is_empty():
+		var mat_col := {}
+		var mat_st := {}
+		for mid in GameData.catalogues.materials.keys():
+			var md: Dictionary = GameData.catalogues.materials[mid]
+			if md.has("color"):
+				mat_col[str(mid)] = _couleur_html(str(md.color))
+			mat_st[str(mid)] = _style_grain(str(mid))
+		mat_st["eau"] = _style_grain("eau")
+		var defaut := str(GameData.config("styles").get("grain", {}).get("materiau_mur_defaut", "granit"))
+		mat_st[defaut] = _style_grain(defaut)
+		var meuble_col := {}
+		var meuble_emprise := {}
+		for mid in GameData.catalogues.meubles.keys():
+			var mb: Dictionary = GameData.catalogues.meubles[mid]
+			meuble_col[str(mid)] = _couleur_html(str(mb.get("couleur", "#7a6a4a")))
+			meuble_emprise[str(mid)] = float(mb.get("emprise", 0.6))
+		_tables_morceau = {"mat_col": mat_col, "mat_st": mat_st, "meuble_col": meuble_col, "meuble_emprise": meuble_emprise, "materiau_mur_defaut": defaut}
+	var contenu_col := PackedColorArray()
+	contenu_col.resize(g.contenu_ids.size())
+	for k in g.contenu_ids.size():
+		var def: Dictionary = g.contenu_defs.get(g.contenu_ids[k], {})
+		contenu_col[k] = _couleur_html(str(def.couleur)) if def.has("couleur") else Color(1, 1, 1, 1)
+	var bat_mur := PackedStringArray()
+	var bat_pierre := PackedStringArray()
+	var bat_bois := PackedStringArray()
+	for info in g.batiments_liste:
+		bat_mur.append(str(info.get("mur", "")))
+		bat_pierre.append(str(info.get("pierre", "")))
+		bat_bois.append(str(info.get("bois", "")))
+	return {"origine_dessin": origine_dessin, "tw": float(TW), "th": float(TH), "hstep": float(HSTEP), "uv_haut": UV_HAUT, "uv_so": UV_SO, "uv_se": UV_SE,
+		"uv_pas_face": UV_PAS_FACE, "niveau_u": NIVEAU_BLOCS * BLOC_UNITES, "bloc_u": BLOC_UNITES, "porte_u": PORTE_BLOCS * BLOC_UNITES, "mur_coupe_u": MUR_COUPE_UNITES,
+		"bat_j": _bat_joueur, "mat_col": _tables_morceau.mat_col, "mat_st": _tables_morceau.mat_st, "meuble_col": _tables_morceau.meuble_col,
+		"meuble_emprise": _tables_morceau.meuble_emprise, "materiau_mur_defaut": _tables_morceau.materiau_mur_defaut, "contenu_col": contenu_col,
+		"bat_mur_id": bat_mur, "bat_pierre_id": bat_pierre, "bat_bois_id": bat_bois}
 
 
 ## La profondeur d'un billboard (z relatif) : x + y, ramené à la fenêtre (les coordonnées monde dépassent CANVAS_ITEM_Z_MAX).

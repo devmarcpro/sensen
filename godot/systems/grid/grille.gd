@@ -917,5 +917,13 @@ func _table_contenus() -> PackedInt32Array:
 			f |= 1 << 18
 		if not def.has("hauteur_vue"):
 			f |= 1 << 19
+		if "meuble" in tags:
+			f |= 1 << 20
+		if "contenant" in tags:
+			f |= 1 << 21
+		if def.has("couleur"):
+			f |= 1 << 22
+		if "arbre" in tags:
+			f |= 1 << 23
 		t[i] = f
 	return t

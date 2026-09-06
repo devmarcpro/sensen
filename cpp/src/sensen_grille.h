@@ -43,6 +43,11 @@ public:
 		F_VEGETATION = 1 << 17,     // tag « vegetation »
 		F_MUR = 1 << 18,            // tag « mur »
 		F_SANS_HAUTEUR_VUE = 1 << 19,   // la définition n'a pas de hauteur_vue (le dessin en prend 3)
+		F_MEUBLE = 1 << 20,         // tag « meuble »
+		F_CONTENANT = 1 << 21,      // tag « contenant »
+		F_COULEUR = 1 << 22,        // la définition porte une couleur
+		F_ARBRE = 1 << 23,          // tag « arbre »
+		F_VIDE_DEF = 1 << 24,       // aucune définition (contenu 0)
 	};
 
 	// La vue d'une grille le temps d'un appel : des pointeurs sur ses tableaux (les références tiennent les tampons).
@@ -109,6 +114,8 @@ protected:
 
 public:
 	void configurer(const Dictionary &dep, int p_oeil, const PackedInt32Array &p_table);
+	inline int drapeaux_public(const Etat &s, int i) const { return drapeaux(s, i); }
+	inline int niveau_liquide_public(const Etat &s, int i) const { return niveau_liquide(s, i); }
 	Array chemin(Object *grille, Vector2i depart, Vector2i arrivee, bool volant, const String &ignorer, bool eviter_nage, int max_noeuds);
 	Dictionary atteignables(Object *grille, Vector2i depart, int budget, bool volant, bool eviter_nage);
 	bool ligne_de_vue(Object *grille, Vector2i a, Vector2i b);
@@ -117,6 +124,7 @@ public:
 	int cout_pas_entre(Object *grille, Vector2i de, Vector2i vers, bool volant, bool eviter_nage);
 	PackedInt32Array composante(Object *grille, Vector2i depart, int max_tuiles);
 	Dictionary regions_cellule(Object *grille, Vector2i origine, int n, const PackedInt32Array &classes);
+	Dictionary morceau(Object *grille, Vector2i coin, int taille_morceau, const Dictionary &p);
 	PackedByteArray visibles(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, int bat_j, const PackedVector2Array &positions);
 	Dictionary brouillard(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, Vector2i origine_dessin,
 			double tw, double th, double hstep, int niveau_u, int bat_j, int mur_coupe_u, Color voile, Color col_sil);

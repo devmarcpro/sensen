@@ -1407,6 +1407,67 @@ func test_noyau_passes() -> void:
 		if f & 1:
 			n_vus += 1
 	verifier(v_gd == v_cpp and v_gd.size() == positions.size() and n_vus > 0, "visibles : les mêmes drapeaux pour %d positions (%d en vue)" % [positions.size(), n_vus])
+	# les morceaux de terrain autour du joueur : les mêmes triangles, les mêmes coupures, les mêmes végétaux
+	var mat_col := {}
+	var mat_st := {}
+	var k_m := 0
+	for mid in GameData.catalogues.materials.keys():
+		var md: Dictionary = GameData.catalogues.materials[mid]
+		if md.has("color"):
+			mat_col[str(mid)] = Color.html(str(md.color))
+		mat_st[str(mid)] = float(k_m % 4) * 8192.0
+		k_m += 1
+	mat_st["eau"] = 8192.0
+	var meuble_col := {}
+	var meuble_emprise := {}
+	for mid in GameData.catalogues.meubles.keys():
+		meuble_col[str(mid)] = Color.html(str(GameData.catalogues.meubles[mid].get("couleur", "#7a6a4a")))
+		meuble_emprise[str(mid)] = float(GameData.catalogues.meubles[mid].get("emprise", 0.6))
+	var contenu_col := PackedColorArray()
+	contenu_col.resize(g.contenu_ids.size())
+	for k in g.contenu_ids.size():
+		var def: Dictionary = g.contenu_defs.get(g.contenu_ids[k], {})
+		contenu_col[k] = Color.html(str(def.couleur)) if def.has("couleur") else Color(1, 1, 1, 1)
+	var bat_mur := PackedStringArray()
+	var bat_pierre := PackedStringArray()
+	var bat_bois := PackedStringArray()
+	for info in g.batiments_liste:
+		bat_mur.append(str(info.get("mur", "")))
+		bat_pierre.append(str(info.get("pierre", "")))
+		bat_bois.append(str(info.get("bois", "")))
+	var prm := {"origine_dessin": od, "tw": 40.0, "th": 20.0, "hstep": 8.0, "uv_haut": 4096.0, "uv_so": -1000.0, "uv_se": -2000.0, "uv_pas_face": 32.0,
+		"niveau_u": 6, "bloc_u": 2, "porte_u": 4, "mur_coupe_u": 1, "bat_j": bat_j, "mat_col": mat_col, "mat_st": mat_st, "meuble_col": meuble_col,
+		"meuble_emprise": meuble_emprise, "materiau_mur_defaut": "granit", "contenu_col": contenu_col, "bat_mur_id": bat_mur, "bat_pierre_id": bat_pierre, "bat_bois_id": bat_bois}
+	var ecarts_m := 0
+	var n_tri_m := 0
+	var n_coup := 0
+	var chrono_gd_m := 0.0
+	var chrono_cpp_m := 0.0
+	var coin_j := Vector2i((j.pos.x - g.origine.x) / 8, (j.pos.y - g.origine.y) / 8)
+	for dy in range(-2, 3):
+		for dx in range(-2, 3):
+			var coin := coin_j + Vector2i(dx, dy)
+			if coin.x < 0 or coin.y < 0:
+				continue
+			var t0m := Time.get_ticks_usec()
+			var m_gd := PassesGD.morceau(g, coin, 8, prm)
+			var t1m := Time.get_ticks_usec()
+			var m_cpp: Dictionary = g._noyau.morceau(g, coin, 8, prm)
+			var t2m := Time.get_ticks_usec()
+			chrono_gd_m += float(t1m - t0m) / 1000.0
+			chrono_cpp_m += float(t2m - t1m) / 1000.0
+			n_tri_m += m_gd.points.size() / 3
+			n_coup += m_gd.coupures.size() / 3
+			if m_gd.points.size() != m_cpp.points.size() or m_gd.coupures != m_cpp.coupures or m_gd.vegetaux != m_cpp.vegetaux:
+				ecarts_m += 1
+				print("  écart de taille (morceau %s) : %d/%d points, coupures %d/%d, végétaux %d/%d" % [str(coin), m_gd.points.size(), m_cpp.points.size(), m_gd.coupures.size(), m_cpp.coupures.size(), m_gd.vegetaux.size(), m_cpp.vegetaux.size()])
+				continue
+			for i in m_gd.points.size():
+				if not m_gd.points[i].is_equal_approx(m_cpp.points[i]) or not m_gd.uvs[i].is_equal_approx(m_cpp.uvs[i]) or not m_gd.couleurs[i].is_equal_approx(m_cpp.couleurs[i]):
+					ecarts_m += 1
+					print("  écart (morceau %s) au triangle %d : %s / %s, %s / %s, uv %s / %s" % [str(coin), i / 3, str(m_gd.points[i]), str(m_cpp.points[i]), str(m_gd.couleurs[i]), str(m_cpp.couleurs[i]), str(m_gd.uvs[i]), str(m_cpp.uvs[i])])
+					break
+	verifier(ecarts_m == 0 and n_tri_m > 500 and n_coup > 0, "les morceaux de terrain : le noyau rend les mêmes tableaux que PassesGD (%d triangles, %d coupures sur 25 morceaux, GDScript %.1f ms, C++ %.1f ms)" % [n_tri_m, n_coup, chrono_gd_m, chrono_cpp_m])
 	# à l'étage : la vue par l'air, les mêmes tableaux
 	var esc := Vector2i(-1, -1)
 	for bat in e.village.batiments:

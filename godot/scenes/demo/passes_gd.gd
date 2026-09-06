@@ -207,3 +207,224 @@ static func toits(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_ci: i
 			_poly(res, pts, col_v, uvs)
 	_indices(res)
 	return res
+
+
+# ---------------------------------------------------------------- les morceaux de terrain (main._dessiner_morceau, _dessine_tuile, _dessine_bloc, _dessiner_porte)
+
+## Le mur sud ou est du bâtiment du joueur (main._mur_coupe).
+static func mur_coupe(g: Grille, t: Vector2i, bat_j: int) -> bool:
+	if bat_j <= 0 or bat_j > g.batiments_liste.size() or not g.dans(t):
+		return false
+	if int(g.bat_de[g.idx(t)]) != bat_j:
+		return false
+	var r: Rect2i = g.batiments_liste[bat_j - 1].rect
+	return t.y == r.end.y - 1 or t.x == r.end.x - 1
+
+
+static func _uv_haut(p: Dictionary, t: Vector2i, dx: float, dy: float, st: float) -> Vector2:
+	var l: Vector2i = Grille.plat(t) - p.origine_dessin
+	return Vector2(st + l.x + dx, float(p.uv_haut) + l.y + dy)
+
+
+static func _uv_so(p: Dictionary, t: Vector2i, dx: float, hh: float, st: float) -> Vector2:
+	var l: Vector2i = Grille.plat(t) - p.origine_dessin
+	return Vector2(st + l.x + dx, float(p.uv_so) - (l.y * float(p.uv_pas_face) + hh))
+
+
+static func _uv_se(p: Dictionary, t: Vector2i, dy: float, hh: float, st: float) -> Vector2:
+	var l: Vector2i = Grille.plat(t) - p.origine_dessin
+	return Vector2(st + l.y + dy, float(p.uv_se) - (l.x * float(p.uv_pas_face) + hh))
+
+
+## Une coupure du lot : à `nb` points, la tuile `idx` a besoin d'une commande que les triangles ne portent pas
+## (1 : la traverse et la poignée d'une porte ; 2 : un contenant ; 3 : le sprite d'un meuble ou d'une station).
+static func _coupure(res: Dictionary, idx: int, genre: int) -> void:
+	res.coupures.append(res.points.size())
+	res.coupures.append(idx)
+	res.coupures.append(genre)
+
+
+## Un bloc de mur (main._dessine_bloc) : le dessus et les deux faces avant, par bandes de matériaux pour une façade.
+static func _bloc(res: Dictionary, g: Grille, t: Vector2i, c: Vector2, teinte: Color, base_u: int, plafond_u: int, p: Dictionary) -> void:
+	var hstep: float = p.hstep
+	var contenu_t := g.contenu_de(t)
+	var tags_t: Array = contenu_t.get("tags", [])
+	var idx_t := g.idx(t)
+	var n_bat: int = g.niveaux_bat[idx_t]
+	var mur_bat := n_bat > 0 and ("mur" in tags_t or "porte" in tags_t)
+	var hm := int((n_bat * int(p.niveau_u) if mur_bat else int(contenu_t.get("hauteur_vue", 3))) * hstep)
+	if plafond_u > 0:
+		hm = mini(hm, int(plafond_u * hstep))
+	var haut_bloc := Color(0.5, 0.47, 0.44)
+	var mat_id := g.materiau_de(t)
+	var b_idx := int(g.bat_de[idx_t])
+	if mur_bat and "porte" in tags_t:
+		mat_id = str(p.bat_mur_id[b_idx - 1])
+	var mat_col: Dictionary = p.mat_col
+	var mat_st: Dictionary = p.mat_st
+	var a_mat := mat_col.has(mat_id)
+	var emprise := 1.0
+	if "meuble" in tags_t and g.meubles.has(idx_t):
+		var mid := str(g.meubles[idx_t])
+		haut_bloc = p.meuble_col.get(mid, haut_bloc)
+		emprise = float(p.meuble_emprise.get(mid, 0.6))
+		hm = int(roundf(float(hm) * emprise))
+	elif contenu_t.has("couleur") and not mur_bat:
+		haut_bloc = p.contenu_col[g.contenu[idx_t]]
+	elif "arbre" in tags_t:
+		haut_bloc = Color(0.22, 0.45, 0.18).lerp(mat_col[mat_id] if a_mat else haut_bloc, 0.2)
+	elif a_mat:
+		haut_bloc = haut_bloc.lerp(mat_col[mat_id], 0.55 if g.materiaux.has(idx_t) or mur_bat else 0.35)
+	haut_bloc *= teinte
+	var mat_bloc := mat_id
+	if mat_bloc.is_empty():
+		mat_bloc = str(p.materiau_mur_defaut)
+	var st_bloc := float(mat_st.get(mat_bloc, 0.0))
+	var tw := float(p.tw) * 0.5 * emprise
+	var th := float(p.th) * 0.5 * emprise
+	var h0 := int(base_u * hstep)
+	var sud := t + Vector2i(0, 1)
+	var est := t + Vector2i(1, 0)
+	var face_so := not (g.dans(sud) and g.decouvert.has(g.idx(sud)) and hauteur_bloc(g, sud, int(p.bat_j), int(p.niveau_u), int(p.mur_coupe_u)) * hstep >= hm)
+	var face_se := not (g.dans(est) and g.decouvert.has(g.idx(est)) and hauteur_bloc(g, est, int(p.bat_j), int(p.niveau_u), int(p.mur_coupe_u)) * hstep >= hm)
+	var bande := int(int(p.bloc_u) * hstep) if mur_bat else hm
+	var y := h0
+	var col_haut := haut_bloc
+	var st_haut := st_bloc
+	while y < hm:
+		var y1 := mini(hm, y + bande)
+		var col_b := haut_bloc
+		var st_b := st_bloc
+		if mur_bat:
+			@warning_ignore("integer_division")
+			var bloc_k := y / int(int(p.bloc_u) * hstep)
+			var bois := str(p.bat_bois_id[b_idx - 1])
+			var mat_b := bois if (bloc_k > 0 and not bois.is_empty()) else str(p.bat_pierre_id[b_idx - 1])
+			if mat_b.is_empty():
+				mat_b = mat_id
+			if mat_col.has(mat_b):
+				col_b = Color(0.5, 0.47, 0.44).lerp(mat_col[mat_b], 0.65) * teinte
+			st_b = float(mat_st.get(mat_b, 0.0))
+		if face_so:
+			_poly(res, PackedVector2Array([c + Vector2(-tw, -y), c + Vector2(0, th - y), c + Vector2(0, th - y1), c + Vector2(-tw, -y1)]), col_b.darkened(0.35),
+				PackedVector2Array([_uv_so(p, t, 0, float(y) / hstep, st_b), _uv_so(p, t, 1, float(y) / hstep, st_b), _uv_so(p, t, 1, float(y1) / hstep, st_b), _uv_so(p, t, 0, float(y1) / hstep, st_b)]))
+		if face_se:
+			_poly(res, PackedVector2Array([c + Vector2(0, th - y), c + Vector2(tw, -y), c + Vector2(tw, -y1), c + Vector2(0, th - y1)]), col_b.darkened(0.5),
+				PackedVector2Array([_uv_se(p, t, 0, float(y) / hstep, st_b), _uv_se(p, t, 1, float(y) / hstep, st_b), _uv_se(p, t, 1, float(y1) / hstep, st_b), _uv_se(p, t, 0, float(y1) / hstep, st_b)]))
+		col_haut = col_b
+		st_haut = st_b
+		y = y1
+	_poly(res, PackedVector2Array([c + Vector2(-tw, -hm), c + Vector2(0, -th - hm), c + Vector2(tw, -hm), c + Vector2(0, th - hm)]), col_haut,
+		PackedVector2Array([_uv_haut(p, t, 0, 1, st_haut), _uv_haut(p, t, 0, 0, st_haut), _uv_haut(p, t, 1, 0, st_haut), _uv_haut(p, t, 1, 1, st_haut)]))
+
+
+## Les montants et le battant d'une porte (main._dessiner_porte) ; la traverse et la poignée sont une coupure (genre 1).
+static func _porte(res: Dictionary, g: Grille, t: Vector2i, c: Vector2, contenu: Dictionary, teinte: Color, p: Dictionary) -> void:
+	var hstep: float = p.hstep
+	var bois: Color = p.contenu_col[g.contenu[g.idx(t)]] * teinte
+	var mur_x: bool = (g.dans(t + Vector2i(1, 0)) and g.bloque_passage(t + Vector2i(1, 0))) or (g.dans(t - Vector2i(1, 0)) and g.bloque_passage(t - Vector2i(1, 0)))
+	var demi := Vector2(float(p.tw) * 0.25, float(p.th) * 0.25) if mur_x else Vector2(float(p.tw) * 0.25, -float(p.th) * 0.25)
+	var a := c - demi
+	var b := c + demi
+	var haut := Vector2(0.0, -float(int(p.porte_u) if g.niveaux_bat[g.idx(t)] > 0 else int(contenu.get("hauteur_vue", 2))) * hstep)
+	var uv_p := PackedVector2Array([_uv_haut(p, t, 0.5, 0.5, 0.0), _uv_haut(p, t, 0.5, 0.5, 0.0), _uv_haut(p, t, 0.5, 0.5, 0.0), _uv_haut(p, t, 0.5, 0.5, 0.0)])
+	for m in [a, b]:
+		_poly(res, PackedVector2Array([m + Vector2(-1.5, 0), m + Vector2(1.5, 0), m + Vector2(1.5, 0) + haut, m + Vector2(-1.5, 0) + haut]), bois.darkened(0.45), uv_p)
+	var ferme: bool = "fermee" in contenu.get("tags", [])
+	var p0 := a if ferme else a.lerp(b, 0.68)
+	var p1 := b
+	_poly(res, PackedVector2Array([p0, p1, p1 + haut, p0 + haut]), bois, uv_p)
+	_poly(res, PackedVector2Array([p0, p1, p1 + haut * 0.08, p0 + haut * 0.08]), bois.darkened(0.3), uv_p)
+	_coupure(res, g.idx(t), 1)
+
+
+## Une tuile (main._dessine_tuile) : l'eau, un bloc, sinon le losange du sol et ses flancs, un contenu franchissable,
+## une porte, un contenant.
+static func _tuile(res: Dictionary, g: Grille, t: Vector2i, p: Dictionary) -> void:
+	var h := g.h(t)
+	var c := ecran(t, h, p.origine_dessin, float(p.tw), float(p.th), float(p.hstep))
+	var teinte := Color.WHITE
+	var idx_t := g.idx(t)
+	var ci_t: int = g.contenu[idx_t]
+	var contenu := g.contenu_de(t)
+	var tags_c: Array = contenu.get("tags", [])
+	var tw := float(p.tw)
+	var th := float(p.th)
+	var hstep: float = p.hstep
+	if "liquide" in tags_c:
+		var col_eau: Color = p.contenu_col[ci_t]
+		if "ecoulement" in tags_c:
+			col_eau = col_eau.lerp(Color(0.6, 0.8, 0.95), 1.0 - float(g.niveau_liquide(t)) / 8.0)
+		if g.gel:
+			col_eau = col_eau.lerp(Color(0.85, 0.92, 1.0), 0.7)
+		var st_eau := float(p.mat_st.get("eau", 0.0))
+		_poly(res, PackedVector2Array([c + Vector2(0, -th * 0.5), c + Vector2(tw * 0.5, 0), c + Vector2(0, th * 0.5), c + Vector2(-tw * 0.5, 0)]),
+			col_eau * teinte, PackedVector2Array([_uv_haut(p, t, 0, 0, st_eau), _uv_haut(p, t, 1, 0, st_eau), _uv_haut(p, t, 1, 1, st_eau), _uv_haut(p, t, 0, 1, st_eau)]))
+		return
+	if g.neige:
+		teinte = teinte.lerp(Color(1.4, 1.4, 1.5), 0.5)
+	if g.bloque_passage(t) and not ("vegetation" in tags_c) and not ("porte" in tags_c):
+		_bloc(res, g, t, c, teinte, 0, int(p.mur_coupe_u) if mur_coupe(g, t, int(p.bat_j)) else 0, p)
+		if g.meubles.has(idx_t) or g.stations_fixes.has(idx_t):
+			_coupure(res, idx_t, 3)
+		return
+	var k := clampf((h - 4) / 12.0, 0.0, 1.0)
+	var col := Color(0.20, 0.34, 0.18).lerp(Color(0.62, 0.66, 0.42), k)
+	var sol_id := g.materiau_sol(t)
+	if not sol_id.is_empty() and p.mat_col.has(sol_id):
+		col = (p.mat_col[sol_id] as Color).lerp(Color(0.35, 0.5, 0.25), 0.35 if sol_id.begins_with("terre") else 0.0).darkened(0.25 - k * 0.3)
+	col *= teinte
+	var st_sol := float(p.mat_st.get(sol_id, 0.0))
+	_poly(res, PackedVector2Array([c + Vector2(0, -th * 0.5), c + Vector2(tw * 0.5, 0), c + Vector2(0, th * 0.5), c + Vector2(-tw * 0.5, 0)]), col,
+		PackedVector2Array([_uv_haut(p, t, 0, 0, st_sol), _uv_haut(p, t, 1, 0, st_sol), _uv_haut(p, t, 1, 1, st_sol), _uv_haut(p, t, 0, 1, st_sol)]))
+	var flanc := col.darkened(0.35)
+	var hs := g.h(t + Vector2i(0, 1)) if g.dans(t + Vector2i(0, 1)) else 0
+	if hs < h:
+		var d := (h - hs) * hstep
+		_poly(res, PackedVector2Array([c + Vector2(-tw * 0.5, 0), c + Vector2(0, th * 0.5), c + Vector2(0, th * 0.5 + d), c + Vector2(-tw * 0.5, d)]), flanc,
+			PackedVector2Array([_uv_so(p, t, 0, h, st_sol), _uv_so(p, t, 1, h, st_sol), _uv_so(p, t, 1, hs, st_sol), _uv_so(p, t, 0, hs, st_sol)]))
+	var he := g.h(t + Vector2i(1, 0)) if g.dans(t + Vector2i(1, 0)) else 0
+	if he < h:
+		var d2 := (h - he) * hstep
+		_poly(res, PackedVector2Array([c + Vector2(0, th * 0.5), c + Vector2(tw * 0.5, 0), c + Vector2(tw * 0.5, d2), c + Vector2(0, th * 0.5 + d2)]), flanc.darkened(0.15),
+			PackedVector2Array([_uv_se(p, t, 0, h, st_sol), _uv_se(p, t, 1, h, st_sol), _uv_se(p, t, 1, he, st_sol), _uv_se(p, t, 0, he, st_sol)]))
+	if not contenu.is_empty() and not g.bloque_passage(t) and not ("porte" in tags_c) and (contenu.has("couleur") or "meuble" in tags_c):
+		var cf: Color = p.meuble_col.get(str(g.meubles.get(idx_t, "tapis")), Color.WHITE) if "meuble" in tags_c else p.contenu_col[ci_t]
+		_poly(res, PackedVector2Array([c + Vector2(0, -th * 0.35), c + Vector2(tw * 0.35, 0), c + Vector2(0, th * 0.35), c + Vector2(-tw * 0.35, 0)]), cf * teinte,
+			PackedVector2Array([_uv_haut(p, t, 0.15, 0.15, 0.0), _uv_haut(p, t, 0.85, 0.15, 0.0), _uv_haut(p, t, 0.85, 0.85, 0.0), _uv_haut(p, t, 0.15, 0.85, 0.0)]))
+		if g.meubles.has(idx_t) or g.stations_fixes.has(idx_t):
+			_coupure(res, idx_t, 3)
+	if "porte" in tags_c:
+		if mur_coupe(g, t, int(p.bat_j)):
+			var cs: Color = p.contenu_col[ci_t] * teinte
+			_poly(res, PackedVector2Array([c + Vector2(0, -th * 0.35), c + Vector2(tw * 0.35, 0), c + Vector2(0, th * 0.35), c + Vector2(-tw * 0.35, 0)]), cs,
+				PackedVector2Array([_uv_haut(p, t, 0.15, 0.15, 0.0), _uv_haut(p, t, 0.85, 0.15, 0.0), _uv_haut(p, t, 0.85, 0.85, 0.0), _uv_haut(p, t, 0.15, 0.85, 0.0)]))
+		else:
+			_porte(res, g, t, c, contenu, teinte, p)
+			if g.niveaux_bat[idx_t] > 0:
+				_bloc(res, g, t, c, teinte, int(p.porte_u), 0, p)
+	if "contenant" in tags_c:
+		_coupure(res, idx_t, 2)
+
+
+## Un morceau de terrain (main._dessiner_morceau) : ses tuiles découvertes dans l'ordre des diagonales ; les triangles, les
+## coupures (les commandes que les triangles ne portent pas, dans l'ordre), et les végétaux à dresser en billboards.
+static func morceau(g: Grille, coin: Vector2i, taille_morceau: int, p: Dictionary) -> Dictionary:
+	var res := _vide()
+	res["coupures"] = PackedInt32Array()
+	res["vegetaux"] = PackedInt32Array()
+	var x0: int = g.origine.x + coin.x * taille_morceau
+	var y0: int = g.origine.y + coin.y * taille_morceau
+	var x1 := mini(g.origine.x + g.largeur - 1, x0 + taille_morceau - 1)
+	var y1 := mini(g.origine.y + g.hauteur_grille - 1, y0 + taille_morceau - 1)
+	for s in range(x0 + y0, x1 + y1 + 1):
+		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
+			var t := Vector2i(x, s - x)
+			var idx := g.idx(t)
+			if not g.decouvert.has(idx):
+				continue
+			_tuile(res, g, t, p)
+			if "vegetation" in g.contenu_de(t).get("tags", []):
+				res.vegetaux.append(idx)
+	_indices(res)
+	return res
