@@ -157,6 +157,9 @@ Aucune ne figure dans la palette des matériaux ([[Palette de couleurs des maté
 >
 > Les actions posables et l'amplitude autorisée vivent dans `data/poses.json` — aucune n'est écrite dans le code, et un rig non humanoïde s'articule aussi bien qu'un autre.
 
+> [!important] Décidé et codé le 2026-09-06, 20 h 20 — ce qu'on tient est dessiné comme à l'inventaire, montage ou pictogramme (designer : « quand une arme est équipée, elle devrait avoir le même sprite que dans l'inventaire »)
+> Le contrat du 2026-09-05 (l'arme tenue est le même montage que son icône) ne valait que pour les objets dont toutes les pièces ont un sprite ; sans montage, le paperdoll traçait un trait par compétence (une ligne pour l'épée, un arc de cercle pour l'arc) et l'autre main dessinait toujours un disque — la torche en main secondaire était un bouclier. Désormais `Paperdoll._dessine_tenu_picto` pose dans la main **le pictogramme même de l'inventaire** (`Pictos.dessiner_objet`, par `Pictos.nom_picto`), dans une case de `styles.sprites.picto_tenu_unites` unités de rig, tourné avec la main : le point de prise et l'axe de chaque pictogramme (`styles.sprites.pictos_tenus`, en dixièmes de case) se posent sur la main et sur le bras — la diagonale d'une lame, la verticale d'un arc, le manche d'une torche. Les deux mains : l'arme, et le bouclier, la torche ou la dague de l'autre main. Le montage pré-rendu garde la priorité quand il existe.
+
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Direction artistique]], [[Décisions d'architecture]]
 - **Alimente** : [[Schéma créature]], [[Apparence — données et équipement]], [[Équipement — 14 slots]], [[Armure par zone et constructions]], [[Monstres rares]]

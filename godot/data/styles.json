@@ -177,6 +177,15 @@
     "hinting": "leger"
   },
   "sprites": {
+    "picto_tenu_unites": 14,
+    "pictos_tenus": {
+      "_doc": "Ce qu'on tient sans montage pre-rendu (designer 2026-09-06 : le meme sprite qu'a l'inventaire) : la case du pictogramme fait picto_tenu_unites unites de rig ; par nom de pictogramme, le point de prise (en dixiemes de case, comme le picto est dessine) et l'axe qui se pose sur la main — la diagonale bas-gauche vers haut-droite pour une lame.",
+      "_defaut": {"prise": [2.5, 7.5], "axe": [1, -1]},
+      "arc": {"prise": [4.7, 5.0], "axe": [0, -1]},
+      "lumiere": {"prise": [4.8, 8.5], "axe": [0.2, -1]},
+      "bouclier": {"prise": [5.0, 5.0], "axe": [0, -1]},
+      "seau": {"prise": [5.0, 4.0], "axe": [0, -1]}
+    },
     "_doc": "Les sprites d'objets du designer (Direction artistique, 2026-09-05) : dossier res:// ou le jeu cherche <id sans craft_/proto_>.png, composants/<id>.png, matieres/<forme>.png ; absent = pictogramme par code.",
     "dossier": "res://assets/objets"
   },

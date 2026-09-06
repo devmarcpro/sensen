@@ -329,31 +329,44 @@ func _dessine_tenus(monde: Dictionary) -> void:
 		var m: Dictionary = monde[main_arme]
 		var prise: Array = rig.segments[main_arme].ancrages.get("prise", [0, 0])
 		var pt: Vector2 = m.origine + m.direction * float(prise[0]) + m.perp * float(prise[1])
-		var col := _couleur_materiau(it.get("materiau", ""))
 		# L'arme suit la MAIN, pas la verticale de l'écran : elle était dessinée vers le haut absolu, si
 		# bien qu'articuler le bras la laissait droite dans le vide, détachée du poing (point 68).
 		var haut: Vector2 = -Vector2(m.direction)
-		var bas: Vector2 = Vector2(m.direction)
-		if _dessine_arme_sprite(it, pt, haut):   # le montage pré-rendu de l'arme, s'il existe (Squelette modulaire, 2026-09-05)
-			return
-		match str(fonct.get("combat_skill", "")):
-			"dague": draw_line(pt, pt + haut * 6, col, 1.5)
-			"epee": draw_line(pt, pt + haut * 12, col, 1.8)
-			"masse":
-				draw_line(pt, pt + haut * 8, col.darkened(0.3), 1.5)
-				draw_circle(pt + haut * 9, 2.5, col)
-			"lance": draw_line(pt + bas * 6, pt + haut * 16, col, 1.5)
-			"arc": draw_arc(pt + Vector2(m.perp) * 2.0 + haut * 4.0, 7.0, -PI * 0.6, PI * 0.6, 10, col, 1.5)
-			"baton_magique": draw_line(pt + bas * 6, pt + haut * 14, col, 1.8)
-			_: draw_line(pt, pt + haut * 8, col, 1.5)
+		if not _dessine_arme_sprite(it, pt, haut):   # le montage pré-rendu de l'arme, s'il existe (Squelette modulaire, 2026-09-05)
+			_dessine_tenu_picto(it, pt, haut)   # sinon le pictogramme de l'inventaire, dans la main (designer 2026-09-06)
 	var main_bouclier: Variant = rig.get("prise_bouclier")
 	if main_bouclier is String and monde.has(main_bouclier) and equip.has("main_secondaire"):
 		var it: Dictionary = items.get(equip.main_secondaire, {})
 		var m: Dictionary = monde[main_bouclier]
 		var prise: Array = rig.segments[main_bouclier].ancrages.get("prise", [0, 0])
 		var pt: Vector2 = m.origine + m.direction * float(prise[0]) + m.perp * float(prise[1])
-		draw_circle(pt, 5.0, _couleur_materiau(it.get("materiau", "")))
-		draw_arc(pt, 5.0, 0.0, TAU, 12, Color(0.2, 0.15, 0.1), 1.2)
+		var haut: Vector2 = -Vector2(m.direction)
+		if not _dessine_arme_sprite(it, pt, haut):   # l'autre main : un bouclier, une torche, une dague — son montage ou son pictogramme
+			_dessine_tenu_picto(it, pt, haut)
+
+
+## Ce qu'on tient, sans montage pré-rendu : LE MÊME pictogramme que dans l'inventaire (`Pictos.dessiner_objet`, designer
+## 2026-09-06 : « quand une arme est équipée, elle devrait avoir le même sprite que dans l'inventaire »), posé dans la main
+## et tourné avec elle. Le pictogramme est dessiné dans une case de `picto_tenu_unites` unités de rig ; son point de prise
+## et son axe (styles.sprites.pictos_tenus, par nom de pictogramme — la diagonale bas-gauche → haut-droite pour une lame)
+## se posent sur la main et sur `haut`.
+func _dessine_tenu_picto(it: Dictionary, pt: Vector2, haut: Vector2) -> void:
+	if it.is_empty():
+		return
+	var st: Dictionary = GameData.config("styles").get("sprites", {})
+	var cote := float(st.get("picto_tenu_unites", 14.0))
+	var reglages: Dictionary = st.get("pictos_tenus", {})
+	var nom := Pictos.nom_picto(it)
+	var reg: Dictionary = reglages.get(nom, reglages.get("_defaut", {}))
+	var axe_l: Array = reg.get("axe", [1.0, -1.0])
+	var prise_l: Array = reg.get("prise", [2.5, 7.5])
+	var axe := Vector2(float(axe_l[0]), float(axe_l[1])).normalized()
+	var prise := Vector2(float(prise_l[0]), float(prise_l[1])) * (cote / 10.0)
+	var local := Transform2D(haut.angle() - axe.angle(), Vector2.ZERO)
+	local.origin = pt - local.basis_xform(prise)
+	draw_set_transform_matrix(Transform2D(0.0, _decalage) * Transform2D().scaled(Vector2(_echelle_dessin, _echelle_dessin)) * local)
+	Pictos.dessiner_objet(self, it, Rect2(Vector2.ZERO, Vector2(cote, cote)))
+	draw_set_transform(_decalage, 0.0, Vector2(_echelle_dessin, _echelle_dessin))
 
 
 ## Le contrat de remplacement (Squelette modulaire et points d'attache, 2026-09-05) : l'arme tenue est LE MÊME montage

@@ -574,6 +574,20 @@ static func _dessiner_assemblage(ci: CanvasItem, it: Dictionary, r: Rect2) -> bo
 	return true
 
 
+## Le nom du pictogramme d'un objet (sa fonctionnalité, sinon son slot ou son type, les alias appliqués) : le paperdoll
+## s'en sert pour poser le même pictogramme dans la main (designer 2026-09-06 : « le même sprite que dans l'inventaire »).
+static func nom_picto(it: Dictionary) -> String:
+	var f := str(it.get("functionality", ""))
+	var t := str(it.get("type", ""))
+	var slot := str(it.get("equip_slot", ""))
+	var nom := f if not f.is_empty() else (slot if t in ["armure", "bijou"] else t)
+	if t == "meuble":
+		nom = "meuble"
+	if f.is_empty() and (it.get("tags", []) as Array).has("lumiere"):   # une source de lumière se reconnaît à sa flamme
+		nom = "lumiere"
+	return str(ALIAS_OBJET.get(nom, nom))
+
+
 static func dessiner_objet(ci: CanvasItem, it: Dictionary, r: Rect2) -> void:
 	if it.is_empty():
 		return
@@ -589,15 +603,7 @@ static func dessiner_objet(ci: CanvasItem, it: Dictionary, r: Rect2) -> void:
 	var u := r.size.x / 10.0
 	var p := func(x: float, y: float) -> Vector2: return o + Vector2(x * u, y * u)
 	var sombre := c.darkened(0.45)
-	var f := str(it.get("functionality", ""))
-	var t := str(it.get("type", ""))
-	var slot := str(it.get("equip_slot", ""))
-	var nom := f if not f.is_empty() else (slot if t in ["armure", "bijou"] else t)
-	if t == "meuble":
-		nom = "meuble"
-	if f.is_empty() and (it.get("tags", []) as Array).has("lumiere"):   # une source de lumière se reconnaît à sa flamme
-		nom = "lumiere"
-	nom = str(ALIAS_OBJET.get(nom, nom))
+	var nom := nom_picto(it)
 	match nom:
 		"epee":
 			ci.draw_line(p.call(2, 8), p.call(8, 2), c, 2.4)
