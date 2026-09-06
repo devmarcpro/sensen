@@ -634,7 +634,9 @@ static func _semaine_villes(sim: Simulation) -> void:
 		if str(id) == "joueur" or not (sim.territoires[id].has("agglomeration") or _territoire_charge(sim, str(id))):
 			continue   # toutes les villes connues, dans la fenêtre ou non (anneau moyen, 2026-09-06) ; un territoire de test chargé aussi
 		var e := _proprietaire_entite(sim, str(id))
-		_dans_territoire(sim, str(id), func() -> void: _semaine_territoire(sim, e))
+		_dans_territoire(sim, str(id), func() -> void:
+			_semaine_territoire(sim, e)
+			SimVilles._semaine_population(sim))   # naissances, majorité, migrations (anneau moyen v2, 2026-09-06)
 
 
 static func _semaine_joueur(sim: Simulation, x: Dictionary) -> void:

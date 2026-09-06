@@ -623,6 +623,7 @@ func test_anneau_moyen() -> void:
 		stocks_total += int(t.stocks[k])
 	verifier(stocks_total > 0 or int(t.tresor) > 0, "la ville endormie a des stocks (%d) ou un trésor (%d)" % [stocks_total, int(t.tresor)])
 	verifier(t.has("prix") and not t.prix.is_empty(), "ses prix sont recalculés")
+	var n_semaine: int = s._dans_territoire(nom, func() -> int: return s.residents().size())   # naissances et migrations ont pu bouger le compte (anneau moyen v2)
 	# On y retourne : les endormis se réveillent, à leur compte.
 	verifier(s.voyager(j, centre), "retour à la ville")
 	var reveilles: int = s._dans_territoire(nom, func() -> int: return s.residents().size())
@@ -630,7 +631,7 @@ func test_anneau_moyen() -> void:
 	for x in s.vivants():
 		if x.has("assignation") and str(x.assignation.get("territoire", "")) == nom:
 			charges += 1
-	verifier(reveilles == n_res and charges == n_res, "au retour, %d résidents réveillés et chargés (%d)" % [reveilles, charges])
+	verifier(reveilles == n_semaine and charges == n_semaine, "au retour, %d résidents réveillés et chargés (%d ; %d avant la semaine)" % [reveilles, charges, n_res])
 	s.monde.fermer()
 
 
@@ -930,3 +931,89 @@ func test_batiment_etages() -> void:
 			lits += 1
 	verifier(lits >= 2 and j.pos == Vector2i(s.donjon.entree), "l'étage a ses lits (%d) et le joueur est sur l'escalier du bas" % lits)
 	verifier(s._remonter(j) and s.lieu == "camp" and s._cell_de(j.pos) == cell and Grille.distance(j.pos, esc) <= 2, "redescendre ramène dans la rue, devant l'escalier")
+
+
+## La population des villes (anneau moyen v2, 2026-09-06) : un couple a un enfant, l'enfant est un résident logé chez
+## ses parents ; un malheureux migre vers la ville connue qui a de la place, endormi si elle est loin.
+func test_population_villes() -> void:
+	var s := Simulation.new(9)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var c0: Vector2i = s.monde.cellule_camp
+	var f: Dictionary = {}
+	for dy in range(-20, 21):
+		for dx in range(-20, 21):
+			var cv := c0 + Vector2i(dx, dy)
+			if surf.terre_a(cv) and bool(surf.poi_de(cv).get("village", false)):
+				var fa: Dictionary = surf.fiche_agglomeration(cv)
+				if f.is_empty() or int(fa.population) > int(f.population):
+					f = fa
+	verifier(not f.is_empty(), "une ville à 20 cellules du camp")
+	if f.is_empty():
+		return
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var n_sub: int = s.monde.taille / 32
+	var centre: Vector2i = f.centre
+	for cy in n_sub:
+		for cx in n_sub:
+			s.monde.explores[Vector2i(centre.x * n_sub + cx, centre.y * n_sub + cy)] = true
+	verifier(s.voyager(j, centre), "voyager jusqu'à la ville « %s »" % str(f.nom))
+	var nom := str(f.nom)
+	if not s.territoires.has(nom):
+		verifier(false, "la ville a son territoire")
+		return
+	var cfg: Dictionary = GameData.config("villes").anneau_moyen.population
+	var sauve := cfg.duplicate()
+	var res: Array = s._dans_territoire(nom, func() -> Array: return s.residents())
+	var couples := 0
+	for x in res:
+		var cid := str(x.get("family", {}).get("spouse", ""))
+		if not cid.is_empty() and cid < str(x.id):
+			couples += 1
+	verifier(couples >= 1, "%d couples parmi %d résidents" % [couples, res.size()])
+	# Naissances certaines : chaque couple a un enfant cette semaine.
+	cfg.naissance_par_couple_semaine = 1.0
+	cfg.age_max_parent = 1000
+	cfg.migration_chance_semaine = 0.0
+	s._dans_territoire(nom, func() -> void: SimVilles._semaine_population(s))
+	var apres: Array = s._dans_territoire(nom, func() -> Array: return s.residents())
+	var nes: Array = apres.filter(func(x: Dictionary) -> bool: return bool(x.get("ne_ici", false)))
+	verifier(nes.size() >= 1 and apres.size() == res.size() + nes.size(), "%d enfants nés, %d résidents (%d avant)" % [nes.size(), apres.size(), res.size()])
+	if nes.is_empty():
+		cfg.merge(sauve, true)
+		return
+	var bebe: Dictionary = nes[0]
+	var parents: Array = bebe.family.child_of
+	var pere: Dictionary = s.entites.get(str(parents[0]), {})
+	verifier(float(bebe.age) == 0.0 and parents.size() == 2 and not pere.is_empty() and bebe.lit == pere.lit and str(bebe.assignation.territoire) == nom and s.entites.has(bebe.id) and s.grille.occupant(bebe.pos) == bebe.id, "un nouveau-né : âge 0, deux parents, le lit des parents, résident, posé sur la grille")
+	verifier(str(bebe.id) in pere.family.parent_of and bebe.has("nom") and str(bebe.get("fonction", "")) == "oisif", "ses parents le comptent, il a un nom, il est oisif")
+	# La majorité : vieilli d'un coup, il prend le métier de son père.
+	bebe.age = float(s.regles.r.age.adulte)
+	s._dans_territoire(nom, func() -> void: SimVilles._semaine_population(s))
+	verifier(str(bebe.fonction) == str(pere.fonction) or str(pere.get("fonction", "oisif")) == "oisif", "majeur, il prend le métier de son père (%s)" % str(bebe.fonction))
+	# La migration : une autre ville connue, loin, avec de la place ; tout le monde malheureux part sûrement.
+	var loin := centre + Vector2i(12, 0)
+	var t2 := s.creer_territoire("Ailleurs", str(s.territoires[nom].get("proprietaire", "")), 0)
+	t2["agglomeration"] = {"palier": "village", "population": 3, "centre": loin, "culture": str(f.get("culture", "")), "gouvernance": ""}
+	t2.cellules[loin] = {"role": "habitation"}
+	cfg.naissance_par_couple_semaine = 0.0
+	cfg.migration_chance_semaine = 1.0
+	cfg.migration_humeur_seuil = 1000
+	var avant_m: int = s._dans_territoire(nom, func() -> int: return s.residents().size())
+	var autres_avant := 0   # les autres villes connues de la fenêtre accueillent aussi (chacune jusqu'à sa fiche)
+	for id in s.territoires.keys():
+		if str(id) != nom and str(id) != "joueur" and str(id) != "Ailleurs":
+			autres_avant += int(s._dans_territoire(str(id), func() -> int: return s.residents().size()))
+	s._dans_territoire(nom, func() -> void: SimVilles._semaine_population(s))
+	var apres_m: int = s._dans_territoire(nom, func() -> int: return s.residents().size())
+	var la_bas: Array = s._dans_territoire("Ailleurs", func() -> Array: return s.residents())
+	var autres_apres := 0
+	for id in s.territoires.keys():
+		if str(id) != nom and str(id) != "joueur" and str(id) != "Ailleurs":
+			autres_apres += int(s._dans_territoire(str(id), func() -> int: return s.residents().size()))
+	verifier(la_bas.size() == 3 and avant_m - apres_m == 3 + (autres_apres - autres_avant) and apres_m < avant_m, "les malheureux partent : trois pour Ailleurs (trois places), %d pour les autres villes connues (%d → %d ici)" % [autres_apres - autres_avant, avant_m, apres_m])
+	if not la_bas.is_empty():
+		var m: Dictionary = la_bas[0]
+		verifier(not s.entites.has(m.id) and s.monde.dormants.get(loin, []).has(m) and str(m.village) == "Ailleurs" and m.lit == Vector2i(-1, -1) and s.horloge_monde.ticks < int(m.migre_avant), "le migrant dort dans sa nouvelle ville, sans lit, et ne repartira pas de sitôt")
+	cfg.merge(sauve, true)
+	s.monde.fermer()

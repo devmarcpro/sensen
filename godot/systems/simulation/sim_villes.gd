@@ -673,3 +673,184 @@ static func _creer_perimetres_ville(sim: Simulation, cell: Vector2i, v: Dictiona
 			if str(plan[k].type) in ["bois", "minerai", "plantes"] and not str(pids[k]).is_empty():
 				SimPerimetres.perimetres(sim)[str(pids[k])]["stockage"] = pid_stock
 	return pids
+
+
+# ---------------------------------------------------------------- la population des villes (anneau moyen v2, 2026-09-06)
+
+## Chaque semaine, dans le contexte d'une ville (chargée ou non) : les naissances dans les couples, la majorité qui
+## prend un métier, les migrations des malheureux vers la ville connue qui a de la place. Les chiffres :
+## villes.json → anneau_moyen.population. On l'apprend au journal quand on est dans la ville.
+static func _semaine_population(sim: Simulation) -> void:
+	var cfg: Dictionary = GameData.config("villes").get("anneau_moyen", {}).get("population", {})
+	if cfg.is_empty() or sim.monde == null or not sim.territoire.has("agglomeration"):
+		return
+	var tid := str(sim.territoire.get("id", ""))
+	var ici := SimTerritoire._territoire_charge(sim, tid)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([sim.graine, "population", tid, sim.horloge_monde.ticks])
+	var ag: Dictionary = sim.regles.r.age
+	var res: Array = SimTerritoire.residents(sim)
+	var par_id := {}
+	for x in res:
+		par_id[str(x.id)] = x
+	# 1. Les naissances : un couple, une fois (le plus petit id tire).
+	var nes := 0
+	for x in res:
+		var fam: Dictionary = x.get("family", {})
+		var cid := str(fam.get("spouse", ""))
+		if cid.is_empty() or not par_id.has(cid) or cid < str(x.id):
+			continue
+		var c: Dictionary = par_id[cid]
+		if float(x.get("age", 30.0)) < float(ag.adulte) or float(c.get("age", 30.0)) < float(ag.adulte):
+			continue
+		if minf(float(x.get("age", 30.0)), float(c.get("age", 30.0))) > float(cfg.age_max_parent):
+			continue
+		if fam.get("parent_of", []).size() >= int(cfg.enfants_max_par_couple):
+			continue
+		if rng.randf() >= float(cfg.naissance_par_couple_semaine):
+			continue
+		var enfant := _naitre(sim, x, c, tid)
+		if enfant.is_empty():
+			continue
+		nes += 1
+		if ici:
+			EventBus.emettre(&"journal", [&"journal.naissance", {"village": str(sim.territoire.agglomeration.get("nom", tid)), "nom": x.name_key}])   # la même ligne que le repeuplement (10.5)
+	# 2. La majorité : un enfant né dans le jeu prend le métier d'un de ses parents, et son poste.
+	if bool(cfg.get("majorite_metier_herite", true)):
+		for x in res:
+			if not bool(x.get("ne_ici", false)) or float(x.get("age", 0.0)) < float(ag.adulte) or str(x.get("fonction", "oisif")) != "oisif":
+				continue
+			for pid in x.get("family", {}).get("child_of", []):
+				var parent: Dictionary = par_id.get(str(pid), {})
+				var metier := str(parent.get("fonction", "oisif"))
+				if parent.is_empty() or metier == "oisif" or not GameData.catalogues.functions.has(metier):
+					continue
+				x.fonction = metier
+				x.assignation["fonction"] = metier
+				if parent.has("poste"):
+					x["poste"] = parent.poste
+					x.ancre = parent.poste
+				if ici:
+					EventBus.emettre(&"journal", [&"journal.majorite", {"nom": x.name_key, "metier": GameData.catalogues.functions[metier].name_key}])
+				break
+	# 3. Les migrations : vers la ville connue qui a le plus de place, celle du même royaume d'abord.
+	var cibles: Array = []
+	for id in sim.territoires.keys():
+		if str(id) == tid or str(id) == "joueur" or not sim.territoires[id].has("agglomeration"):
+			continue
+		var t2: Dictionary = sim.territoires[id]
+		var n2: int = SimTerritoire._dans_territoire(sim, str(id), func() -> int: return SimTerritoire.residents(sim).size())
+		var libre := int(t2.agglomeration.get("population", 0)) - n2
+		if libre > 0:
+			cibles.append({"id": str(id), "libre": libre, "royaume": str(t2.get("proprietaire", ""))})
+	if cibles.is_empty():
+		return
+	var tps := int(GameData.config("planete").corruption.ticks_par_semaine)
+	for x in res:
+		if cibles.is_empty():
+			break
+		if str(x.get("fonction", "")) in ["dirigeant", "maitre_de_guilde"] or str(x.get("ai_profile", "")) == "garde":
+			continue
+		if sim.horloge_monde.ticks < int(x.get("migre_avant", 0)) or int(x.get("humeur", 60)) >= int(cfg.migration_humeur_seuil):
+			continue
+		if rng.randf() >= float(cfg.migration_chance_semaine):
+			continue
+		var roy := str(x.get("royaume", ""))
+		cibles.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			if (str(a.royaume) == roy) != (str(b.royaume) == roy):
+				return str(a.royaume) == roy
+			return int(a.libre) > int(b.libre))
+		var cible: Dictionary = cibles[0]
+		var de := str(sim.territoire.agglomeration.get("nom", tid))
+		_migrer(sim, x, str(cible.id))
+		x["migre_avant"] = sim.horloge_monde.ticks + int(cfg.semaines_entre_migrations) * tps
+		cible.libre = int(cible.libre) - 1
+		if int(cible.libre) <= 0:
+			cibles.erase(cible)
+		if ici:
+			EventBus.emettre(&"journal", [&"journal.migration", {"nom": x.name_key, "de": de, "vers": str(sim.territoires[cible.id].agglomeration.get("nom", cible.id))}])
+
+
+## Un enfant naît : de la race de son parent, nommé dans la culture de la ville, oisif, logé au lit de ses parents ;
+## à côté d'eux s'ils sont chargés, dans `Monde.dormants` sinon.
+static func _naitre(sim: Simulation, parent: Dictionary, conjoint: Dictionary, tid: String) -> Dictionary:
+	var def_id := str(parent.get("def", "villageois"))
+	if not GameData.catalogues.creatures.has(def_id):
+		def_id = "villageois"
+	var cell: Vector2i = parent.get("assignation", {}).get("cellule", SimCamp._cell_de(sim, parent.pos))
+	var e: Dictionary = {}
+	if sim.entites.has(parent.id):
+		var pos := sim._tuile_libre_autour(parent.pos)
+		if pos == Vector2i(-1, -1):
+			return {}
+		e = SimObjets.ajouter(sim, def_id, pos, "ia")
+	else:
+		e = SimObjets.instancier_endormi(sim, def_id, parent.pos)
+		if not sim.monde.dormants.has(cell):
+			sim.monde.dormants[cell] = []
+		sim.monde.dormants[cell].append(e)
+	if e.is_empty():
+		return {}
+	SimObjets._habiller_pnj(sim, e, GameData.entree("creatures", def_id), str(sim.territoire.agglomeration.get("culture", "")))
+	e.age = 0.0
+	e["ne_ici"] = true
+	e["fonction"] = "oisif"
+	e["role"] = "resident"
+	e["assignation"] = {"fonction": "oisif", "cellule": cell, "territoire": tid}
+	if parent.get("assignation", {}).has("residence"):
+		e.assignation["residence"] = parent.assignation.residence
+	for cle in ["lit", "poste", "place", "village", "royaume", "camp"]:
+		if parent.has(cle):
+			e[cle] = parent[cle]
+	e.ancre = e.get("poste", e.pos)
+	if not e.has("family"):
+		e["family"] = {}
+	e.family["spouse"] = ""
+	e.family["parent_of"] = []
+	e.family["child_of"] = [parent.id, conjoint.id]
+	for pa in [parent, conjoint]:
+		if not pa.has("family"):
+			pa["family"] = {}
+		if not pa.family.has("parent_of"):
+			pa.family["parent_of"] = []
+		pa.family.parent_of.append(e.id)
+	return e
+
+
+## Un résident part pour une autre ville connue : il en devient résident, sans lit, au centre ; chargé si elle est
+## dans la fenêtre, endormi sinon. Son humeur repart de la base.
+static func _migrer(sim: Simulation, x: Dictionary, vers: String) -> void:
+	var t2: Dictionary = sim.territoires[vers]
+	var centre: Vector2i = t2.agglomeration.get("centre", Vector2i.ZERO)
+	var pos_c: Vector2i = sim.monde.pos_monde(centre, Vector2i(sim.monde.taille / 2, sim.monde.taille / 2))
+	var cell_ici: Vector2i = SimCamp._cell_de(sim, x.pos)
+	if sim.entites.has(x.id):
+		sim.grille.liberer(x.pos)
+		sim.ordre.erase(x.id)
+		sim.entites.erase(x.id)
+	elif sim.monde.dormants.has(cell_ici):
+		sim.monde.dormants[cell_ici].erase(x)
+	x["assignation"] = {"fonction": str(x.get("fonction", "oisif")), "cellule": centre, "territoire": vers}
+	x["village"] = vers
+	if str(t2.get("proprietaire", "")) != "joueur":
+		x["royaume"] = str(t2.get("proprietaire", ""))
+	x["lit"] = Vector2i(-1, -1)
+	x["poste"] = pos_c
+	x["place"] = pos_c
+	x.ancre = pos_c
+	x.pos = pos_c
+	x.humeur = int(SimTerritoire._ry(sim).humeur_base)
+	x.erase("chemin_routine")
+	var charge := absi(centre.x - sim.monde.centre.x) <= sim.monde.rayon and absi(centre.y - sim.monde.centre.y) <= sim.monde.rayon and sim.grille.dans(pos_c)
+	if charge:
+		var p := sim._tuile_libre_autour(pos_c)
+		if p != Vector2i(-1, -1):
+			x.pos = p
+			sim.entites[x.id] = x
+			sim.ordre.append(x.id)
+			sim.grille.placer(x.id, p)
+			return
+	if not sim.monde.dormants.has(centre):
+		sim.monde.dormants[centre] = []
+	x["dormant_depuis"] = sim.horloge_monde.ticks
+	sim.monde.dormants[centre].append(x)

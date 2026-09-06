@@ -625,3 +625,7 @@ Regarde la capture de la cité : les habitants au-delà de douze tuiles sont des
 ## 2026-09-06 — Un quartier résidentiel à 49 lits pour 56 habitants (3 h)
 
 La sonde des villes (monde 9, « Mokroslav ») le signale : la cellule résidentielle a 56 habitants prévus et 49 lits — sept dorment dehors (humeur « sans logement »). Les parcelles le long des rues sont épuisées avant la population : `villes.json` (`habitants_par_cellule` 40, les `parts` des quartiers, `rue_largeur`) et la composition du résidentiel (chaumières contre maisons hautes) décident. Deux voies, à toi : moins d'habitants par cellule résidentielle, ou des maisons hautes (leurs étages ont des lits, 99) quand les parcelles manquent — je ne touche pas aux chiffres.
+
+## 2026-09-06 — La population des villes bouge (3 h) : les chiffres sont à toi
+
+`villes.json`, bloc `anneau_moyen.population` : `naissance_par_couple_semaine` 0,02 (une naissance tous les ans par couple, à peu près), `age_max_parent` 45, `enfants_max_par_couple` 3, `migration_humeur_seuil` 25 et `migration_chance_semaine` 0,15 (un malheureux sur sept part chaque semaine), `semaines_entre_migrations` 8, `majorite_metier_herite` vrai (l'enfant prend le métier d'un parent). Ce que je n'ai pas fait exprès : des mariages nouveaux (les couples viennent de la génération des familles — dis si tu veux que des célibataires se marient), et les migrants ne viennent pas frapper au camp du joueur (ta base a déjà ses migrants). Si une ville doit pouvoir mourir ou déborder, dis-le : aujourd'hui elle n'accueille que jusqu'au chiffre de sa fiche.

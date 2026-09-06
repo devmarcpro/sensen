@@ -3595,3 +3595,5 @@ batiment.auberge.name,auberge
 batiment.atelier.name,atelier
 batiment.chateau.name,château
 batiment.mairie.name,mairie
+journal.majorite,"{nom} est majeur et prend le métier de {metier}"
+journal.migration,"{nom} quitte {de} pour {vers}"

@@ -7,6 +7,20 @@ extends RefCounted
 
 
 static func ajouter(sim: Simulation, def_id: String, pos: Vector2i, controle: String) -> Dictionary:
+	var e := _creer(sim, def_id, pos, controle)
+	sim.entites[e.id] = e
+	sim.ordre.append(e.id)
+	sim.grille.placer(e.id, pos)
+	return e
+
+
+## Un être créé sans la grille (anneau moyen v2, 2026-09-06) : un enfant qui naît dans une ville endormie va dans
+## `Monde.dormants` — l'appelant l'y range.
+static func instancier_endormi(sim: Simulation, def_id: String, pos: Vector2i) -> Dictionary:
+	return _creer(sim, def_id, pos, "ia")
+
+
+static func _creer(sim: Simulation, def_id: String, pos: Vector2i, controle: String) -> Dictionary:
 	sim._n_entites += 1
 	var id := "%s_%d" % [def_id, sim._n_entites]
 	var def := sim.fiche_joueur if (controle == "joueur" and not sim.fiche_joueur.is_empty()) else GameData.entree("creatures", def_id)
@@ -41,9 +55,6 @@ static func ajouter(sim: Simulation, def_id: String, pos: Vector2i, controle: St
 	e.spawn = pos
 	sim._assembler_kit(e)   # tout l'équipement est assemblé (designer 2026-09-02) : composants, matière, qualité
 	Etres.recalculer(e, sim.items, sim.affixes_defs, sim.regles)
-	sim.entites[id] = e
-	sim.ordre.append(id)
-	sim.grille.placer(id, pos)
 	return e
 
 

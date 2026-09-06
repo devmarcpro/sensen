@@ -47,9 +47,19 @@ static func etat_royaume(sim: Simulation, id: String) -> Dictionary:
 ## La population et l'armée d'un royaume : la somme des fiches de ses agglomérations, une lecture pure.
 static func _recompter_royaume(sim: Simulation, id: String, roy: Dictionary, etat: Dictionary) -> void:
 	var pop := 0
+	var vues: Dictionary = {}   # une agglomération à plusieurs cellules compte une fois (2026-09-06)
 	for c in roy.territory_cells:
-		if bool(sim.monde.surface.poi_de(c).get("village", false)):
-			pop += int(sim.monde.surface.fiche_agglomeration(c).get("population", 0))
+		if not bool(sim.monde.surface.poi_de(c).get("village", false)):
+			continue
+		var f: Dictionary = sim.monde.surface.fiche_agglomeration(c)
+		var nom := str(f.get("nom", str(c)))
+		if vues.has(nom):
+			continue
+		vues[nom] = true
+		if sim.territoires.has(nom) and sim.territoires[nom].has("agglomeration"):   # une ville connue : ses résidents, qui naissent, migrent et meurent (anneau moyen v2)
+			pop += SimTerritoire._dans_territoire(sim, nom, func() -> int: return SimTerritoire.residents(sim).size())
+		else:
+			pop += int(f.get("population", 0))
 	etat.population = pop
 	var pays: Dictionary = SimTerritoire._ry(sim).get("pays", {})
 	etat.armee = int(pays.get("armee_base", {}).get(str(roy.taille), 2)) + pop / maxi(1, int(GameData.config("villes").get("gardes_par_habitant", 25)))

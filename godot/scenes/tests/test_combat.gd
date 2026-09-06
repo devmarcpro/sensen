@@ -252,6 +252,7 @@ func _ready() -> void:
 	_lancer("test_villes")
 	_lancer("test_champs_et_betes")
 	_lancer("test_anneau_moyen")
+	_lancer("test_population_villes")
 	_lancer("test_economie")
 	_lancer("test_transports")
 	_lancer("test_pnj_distincts")

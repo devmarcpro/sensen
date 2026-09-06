@@ -346,7 +346,17 @@
     "_doc": "Les villes hors fenêtre (Modules de la simulation et le C++, 2026-09-06) : leur semaine tourne sans grille — les résidents endormis produisent, mangent, vieillissent. Un logé qu'on ne voit pas reçoit humeur_logement à la place du bonus de ses meubles ; une parcelle hors fenêtre rend rendement_par_parcelle toutes les semaines_par_recolte.",
     "humeur_logement": 10,
     "semaines_par_recolte": 3,
-    "rendement_par_parcelle": 4
+    "rendement_par_parcelle": 4,
+    "population": {
+      "_doc": "La population d'une ville bouge (anneau moyen v2, 2026-09-06) : un couple a naissance_par_couple_semaine de chance d'avoir un enfant (les deux adultes, le plus jeune sous age_max_parent, moins de enfants_max_par_couple) ; à age.adulte un enfant né dans le jeu prend le métier d'un parent si majorite_metier_herite ; un résident sous migration_humeur_seuil d'humeur part avec migration_chance_semaine vers la ville connue qui a le plus de place, pas avant semaines_entre_migrations depuis sa dernière migration.",
+      "naissance_par_couple_semaine": 0.02,
+      "age_max_parent": 45,
+      "enfants_max_par_couple": 3,
+      "majorite_metier_herite": true,
+      "migration_humeur_seuil": 25,
+      "migration_chance_semaine": 0.15,
+      "semaines_entre_migrations": 8
+    }
   },
   "enclos": {
     "taille": [

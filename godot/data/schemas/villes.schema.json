@@ -96,11 +96,24 @@
     },
     "anneau_moyen": {
       "type": "object",
-      "required": ["humeur_logement", "semaines_par_recolte", "rendement_par_parcelle"],
+      "required": ["humeur_logement", "semaines_par_recolte", "rendement_par_parcelle", "population"],
       "properties": {
         "humeur_logement": {"type": "integer"},
         "semaines_par_recolte": {"type": "integer", "minimum": 1},
-        "rendement_par_parcelle": {"type": "integer", "minimum": 0}
+        "rendement_par_parcelle": {"type": "integer", "minimum": 0},
+        "population": {
+          "type": "object",
+          "required": ["naissance_par_couple_semaine", "age_max_parent", "enfants_max_par_couple", "majorite_metier_herite", "migration_humeur_seuil", "migration_chance_semaine", "semaines_entre_migrations"],
+          "properties": {
+            "naissance_par_couple_semaine": {"type": "number", "minimum": 0, "maximum": 1},
+            "age_max_parent": {"type": "number"},
+            "enfants_max_par_couple": {"type": "integer", "minimum": 0},
+            "majorite_metier_herite": {"type": "boolean"},
+            "migration_humeur_seuil": {"type": "integer"},
+            "migration_chance_semaine": {"type": "number", "minimum": 0, "maximum": 1},
+            "semaines_entre_migrations": {"type": "integer", "minimum": 0}
+          }
+        }
       }
     },
     "enclos": {

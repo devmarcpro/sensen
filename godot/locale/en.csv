@@ -3586,3 +3586,5 @@ batiment.auberge.name,inn
 batiment.atelier.name,workshop
 batiment.chateau.name,castle
 batiment.mairie.name,town hall
+journal.majorite,"{nom} comes of age and takes up the trade of {metier}"
+journal.migration,"{nom} leaves {de} for {vers}"
