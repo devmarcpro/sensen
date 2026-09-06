@@ -297,7 +297,14 @@ func _ready() -> void:
 			scene._apres_changement_de_grille()
 	for i3 in args.size():   # --heure H : l'heure du monde (cycle jour-nuit) — après le chargement, qui remet l'horloge
 		if args[i3] == "--heure" and i3 + 1 < args.size() and scene.sim != null:
-			scene.sim.horloge_monde.ticks = int(float(args[i3 + 1]) / 24.0 * 24000.0)
+			# Toujours EN AVANT : reculer l'horloge (au jour 0) faisait croire à un nouveau jour à chaque tick, et chaque
+			# image coûtait cent millisecondes de routines (vu le 2026-09-06, la capture du soleil).
+			var jour_t := int(GameData.config("planete").cycle.get("ticks_par_jour", 24000))
+			var t_now: int = scene.sim.horloge_monde.ticks
+			var cible_t := t_now - posmod(t_now, jour_t) + int(float(args[i3 + 1]) / 24.0 * float(jour_t))
+			if cible_t < t_now:
+				cible_t += jour_t
+			scene.sim.horloge_monde.ticks = cible_t
 			scene.sim.maj_vision()
 			scene._maj_ambiance()
 	for im in args.size():   # --meteo id : force la météo (triche) — pluie, orage, neige, brouillard…

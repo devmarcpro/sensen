@@ -86,6 +86,22 @@ func test_noyau_cpp() -> void:
 			frott += 1
 	verifier(miroirs == 0, "les miroirs du noyau (occupants, dangers, eau) reflètent leurs dictionnaires (%d écarts)" % miroirs)
 	verifier(frott == 0, "la friction compilée par tuile est celle de _mult_friction (%d écarts sur 400)" % frott)
+	# Les ombres portées (Éclairage) : la carte d'ombre du noyau est celle du GDScript, pour trois soleils.
+	var ecarts_ombres := 0
+	var t_o_gd := 0
+	var t_o_cpp := 0
+	for soleil in [[Vector2(0.7071, -0.7071), 2.0], [Vector2(0.9, 0.436), 4.5], [Vector2(-0.6, 0.8), 1.2]]:
+		var coin: Vector2i = j.pos - Vector2i(20, 20)
+		var t_a := Time.get_ticks_usec()
+		var o_gd: PackedByteArray = g._ombres_gd(soleil[0], soleil[1], coin, Vector2i(41, 41), 8, 4)
+		var t_b := Time.get_ticks_usec()
+		var o_cpp: PackedByteArray = g._noyau.ombres(g, soleil[0], soleil[1], coin, Vector2i(41, 41), 8, 4)
+		var t_c := Time.get_ticks_usec()
+		t_o_gd += t_b - t_a
+		t_o_cpp += t_c - t_b
+		if o_gd != o_cpp:
+			ecarts_ombres += 1
+	verifier(ecarts_ombres == 0, "les ombres portées : la même carte par le noyau, trois soleils (GDScript %.1f ms, C++ %.2f ms)" % [float(t_o_gd) / 1000.0, float(t_o_cpp) / 1000.0])
 	sm.monde.fermer()
 	# Les pièces d'une cellule de village (Détection de pièces) : les régions closes inondées par le noyau, les mêmes.
 	var sv := Simulation.new(83)

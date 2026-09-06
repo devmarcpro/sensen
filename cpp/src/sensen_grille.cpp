@@ -84,6 +84,54 @@ void SensenGrille::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("cout_pas_entre", "grille", "de", "vers", "volant", "eviter_nage"), &SensenGrille::cout_pas_entre);
 	ClassDB::bind_method(D_METHOD("composante", "grille", "depart", "max_tuiles"), &SensenGrille::composante);
 	ClassDB::bind_method(D_METHOD("regions_cellule", "grille", "origine", "n", "classes"), &SensenGrille::regions_cellule);
+	ClassDB::bind_method(D_METHOD("ombres", "grille", "dir", "pente", "coin", "taille", "max_pas", "unites_par_niveau"), &SensenGrille::ombres);
+}
+
+// La carte d'ombre d'une fenêtre de tuiles (Éclairage, le soleil, 2026-09-06) — transcription de Grille._ombres_gd :
+// depuis chaque tuile, marcher vers le soleil (`dir`, direction dans la grille, unitaire) ; au k-ième pas, ce qui se
+// dresse là (le sol, plus le bloc : hauteur_vue d'un contenu qui bloque la vue, ou les niveaux du bâtiment ×
+// unites_par_niveau) fait de l'ombre s'il dépasse le sol de la tuile de plus de `pente` × k unités. Résultat : un octet
+// par tuile du rectangle coin/taille, ligne par ligne, 1 = à l'ombre.
+PackedByteArray SensenGrille::ombres(Object *grille, Vector2 dir, double pente, Vector2i coin, Vector2i taille, int max_pas, int unites_par_niveau) {
+	PackedByteArray res;
+	Etat s;
+	if (taille.x <= 0 || taille.y <= 0 || !charger(grille, s)) {
+		return res;
+	}
+	static const StringName sn_niv("niveaux_bat");
+	PackedByteArray niv = grille->get(sn_niv);
+	const uint8_t *nv = octets_ou_nul(niv, s.L * s.H);
+	res.resize(taille.x * taille.y);
+	uint8_t *out = res.ptrw();
+	for (int ly = 0; ly < taille.y; ++ly) {
+		for (int lx = 0; lx < taille.x; ++lx) {
+			int tx = coin.x + lx, ty = coin.y + ly;
+			uint8_t ombre = 0;
+			if (s.dans(tx, ty)) {
+				int h0 = (int)s.h[s.idx(tx, ty)];
+				for (int k = 1; k <= max_pas; ++k) {
+					int qx = tx + roundi_((double)dir.x * k);
+					int qy = ty + roundi_((double)dir.y * k);
+					if (!s.dans(qx, qy)) {
+						break;
+					}
+					int qi = s.idx(qx, qy);
+					int fl = drapeaux(s, qi);
+					int hv = (fl & F_BLOQUE_VUE) ? ((fl >> 8) & 0xFF) : 0;
+					int n = nv ? (int)nv[qi] : 0;
+					if (n > 0) {
+						hv = std::max(hv, n * unites_par_niveau);
+					}
+					if ((double)((int)s.h[qi] + hv - h0) > pente * k) {
+						ombre = 1;
+						break;
+					}
+				}
+			}
+			out[ly * taille.x + lx] = ombre;
+		}
+	}
+	return res;
 }
 
 // Les règles de déplacement, lues comme Grille.cout_pas les lit (les nombres du JSON sont des flottants).

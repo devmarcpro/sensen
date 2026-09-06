@@ -211,6 +211,16 @@
     "corruption_nuit": 0.1,
     "vision_nuit": 0.6,
     "mod_nuit": -8,
+    "soleil": {
+      "_doc": "Le soleil (designer 2026-09-06) : il se lève à aube[0] à l'est (la droite de l'écran), passe au sud (le bas) au milieu du jour à elevation_max degrés, se couche à crepuscule[1] à l'ouest. Le shader de grain éclaire chaque face selon son orientation : le dessus avec la hauteur du soleil, une paroi avec l'angle à son azimut ; une face qui lui tourne le dos garde ombre_min de sa couleur. actif false : plus d'ombrage directionnel. Les ombres portées (marche 3) : ombre_portee est l'opacité du voile posé sur une tuile à l'ombre (0 : aucune ombre portée), ombre_portee_max_tuiles jusqu'où on marche vers le soleil, tuile_en_unites la longueur d'une tuile en unités de hauteur (une unité = 8 px, une arête de tuile ≈ 28 px vrais), ombre_portee_pas_deg l'angle dont le soleil doit tourner pour recalculer la carte.",
+      "actif": true,
+      "elevation_max": 65,
+      "ombre_min": 0.72,
+      "ombre_portee": 0.28,
+      "ombre_portee_max_tuiles": 8,
+      "tuile_en_unites": 3.5,
+      "ombre_portee_pas_deg": 3
+    },
     "lumiere": {
       "jour": [
         1.0,

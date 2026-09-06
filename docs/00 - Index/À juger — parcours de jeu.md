@@ -634,6 +634,13 @@ La sonde des villes (monde 9, « Mokroslav ») le signale : la cellule résident
 
 `planete.json → routine.lod` : `rayon_plein` 28 tuiles (au-delà, un civil est un figurant : il bondit vers sa cible, traverse les murs sans qu'on le voie, ne redécide qu'`attente_ticks` 200 après être arrivé), `pas_par_decision` 6. Ce que ça change à l'œil : rien tant qu'on ne regarde pas — un figurant qui entre à l'écran est là où sa routine l'aurait mené, mais il peut y être arrivé en traversant une maison. Si tu veux que le rayon suive le zoom ou l'écran plutôt qu'un chiffre, dis-le.
 
+## 2026-09-06 — Le soleil tourne (14 h 30) : la première marche
+
+- **Ce que tu verras** : le matin (capture `--ville --graine 21`, 8 h) les faces droites des bâtiments sont plus claires que les gauches ; à 19 h (`--heure 19`) c'est l'inverse, et les toits et le sol s'assombrissent avec le soleil bas ; à midi tout est éclairé de face. La nuit, rien ne bouge (le voile fait le travail). C'est discret : `cycle.soleil.ombre_min` (0,72) dit ce qu'une face à contre-jour garde de sa couleur — descends-le à 0,55 pour un relief plus dur, `elevation_max` (65°) pour un soleil plus rasant.
+- **Ce que ça coûte** : rien par image — un paramètre de shader mis à jour avec l'ambiance, aucun redessin.
+- **Les ombres portées** (15 h 15) : un voile à 28 % (`cycle.soleil.ombre_portee`) sur le sol qu'un bâtiment, un bloc ou un relief cache du soleil — à l'ouest des maisons le matin, à l'est le soir, jusqu'à huit tuiles. C'est doux, exprès : monte à 0,4 pour des ombres qui se voient de loin, 0 pour les couper. Les ombres ne tombent pas sur les façades ni sur les êtres.
+- **Ce qui vient** : la génération de cellule en C++ (109).
+
 ## 2026-09-06 — Les façades pierre et bois, la palette du village (13 h 30) : ce que j'ai choisi
 
 - **Le tirage** : le bois au poids des densités de la végétation du biome (en forêt tempérée, le chêne trois fois sur cinq, sinon hêtre, pin, bouleau), la pierre parmi les roches du biome, à la graine de l'agglomération — deux villages voisins du même biome peuvent différer, tous les quartiers d'une ville se ressemblent. Sans roche (le marais) : la brique ; sans bois (les cendres) : tout en pierre.

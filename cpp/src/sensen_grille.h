@@ -89,6 +89,7 @@ public:
 	int cout_pas_entre(Object *grille, Vector2i de, Vector2i vers, bool volant, bool eviter_nage);
 	PackedInt32Array composante(Object *grille, Vector2i depart, int max_tuiles);
 	Dictionary regions_cellule(Object *grille, Vector2i origine, int n, const PackedInt32Array &classes);
+	PackedByteArray ombres(Object *grille, Vector2 dir, double pente, Vector2i coin, Vector2i taille, int max_pas, int unites_par_niveau);
 };
 
 } // namespace godot

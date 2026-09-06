@@ -612,6 +612,44 @@ func _champ_de_vue_gd(pos: Vector2i, portee: int) -> PackedInt32Array:
 	return res
 
 
+## La carte d'ombre d'un rectangle de tuiles (Éclairage, le soleil, 2026-09-06) : depuis chaque tuile, on marche vers le
+## soleil (`dir`, direction dans la grille, unitaire) ; au k-ième pas, ce qui se dresse là — le sol, plus le bloc :
+## hauteur_vue d'un contenu qui bloque la vue, ou les niveaux du bâtiment × unites_par_niveau — fait de l'ombre s'il
+## dépasse le sol de la tuile de plus de `pente` × k unités. Un octet par tuile, ligne par ligne, 1 = à l'ombre.
+func ombres(dir: Vector2, pente: float, coin: Vector2i, taille: Vector2i, max_pas: int, unites_par_niveau: int) -> PackedByteArray:
+	if _noyau_pret():
+		return _noyau.ombres(self, dir, pente, coin, taille, max_pas, unites_par_niveau)
+	return _ombres_gd(dir, pente, coin, taille, max_pas, unites_par_niveau)
+
+
+func _ombres_gd(dir: Vector2, pente: float, coin: Vector2i, taille: Vector2i, max_pas: int, unites_par_niveau: int) -> PackedByteArray:
+	var res := PackedByteArray()
+	if taille.x <= 0 or taille.y <= 0:
+		return res
+	res.resize(taille.x * taille.y)
+	for ly in taille.y:
+		for lx in taille.x:
+			var t := coin + Vector2i(lx, ly)
+			var ombre := 0
+			if dans(t):
+				var h0 := h(t)
+				for k in range(1, max_pas + 1):
+					var q := Vector2i(t.x + roundi(dir.x * k), t.y + roundi(dir.y * k))
+					if not dans(q):
+						break
+					var qi := idx(q)
+					var c := contenu_de(q)
+					var hv := int(c.get("hauteur_vue", 0)) if bool(c.get("bloque_vue", false)) else 0
+					var n := int(niveaux_bat[qi])
+					if n > 0:
+						hv = maxi(hv, n * unites_par_niveau)
+					if float(int(hauteurs[qi]) + hv - h0) > pente * k:
+						ombre = 1
+						break
+			res[ly * taille.x + lx] = ombre
+	return res
+
+
 # ---------------------------------------------------------------- le noyau C++
 
 ## La classe SensenGrille est-elle chargée (GDExtension sensen_grille) ?

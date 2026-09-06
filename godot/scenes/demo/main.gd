@@ -15,6 +15,9 @@ var vue_version := -1                      # version du champ de vue dessiné (b
 var centre_brouillard := Vector2i(-99, -99) # centre de la dernière passe du brouillard
 var decouvert_dessine := -1                 # nombre de tuiles découvertes à la dernière mise à jour (une découverte = les morceaux du champ de vue)
 const MORCEAU := 8                          # le terrain par morceaux de 8 × 8 tuiles (Budgets de performance, 2026-09-06)
+const UV_HAUT := 4096.0                     # l'orientation d'une face, encodée dans UV.y pour le soleil (grain.gdshader, 2026-09-06) : le dessus
+const UV_SO := -1000.0                      # la face sud-ouest (gauche)
+const UV_SE := -2000.0                      # la face sud-est (droite)
 const BLOC_UNITES := 2                      # un bloc de mur : deux unités de hauteur (hauteur_vue d'un mur), seize pixels
 const NIVEAU_BLOCS := 2                     # un niveau de bâtiment : deux blocs (Villes, designer 2026-09-06 : « 2 blocs de haut et un toit »)
 var morceaux: Dictionary = {}               # Vector2i (colonne, ligne de morceau) → TerrainMorceau
@@ -123,6 +126,10 @@ var chargement: ColorRect         # le voile noir de l'écran de chargement, sur
 var chargement_texte: Label
 var brouillard: Brouillard        # couche du brouillard de guerre, au-dessus du terrain et des êtres
 var toits: Toits                  # les toits des bâtiments, au-dessus des êtres (Villes, 2026-09-06)
+var ombres: Ombres                # les ombres portées du soleil, sous les êtres (Éclairage, 2026-09-06)
+var _soleil_dir := Vector3(0.0, 0.0, 1.0)   # la direction du soleil (espace écran) telle que _maj_soleil l'a réglée
+var _soleil_force := 0.0
+var _soleil_az_ombres := -999.0             # l'azimut (degrés) pour lequel la carte d'ombre a été dessinée
 var noeuds_vegetaux: Dictionary = {}   # index de tuile → Vegetal (billboards des arbres et plantes de la fenêtre)
 var noeuds: Dictionary = {}       # id d'être → nœud creature.tscn (le paperdoll)
 const SCENE_CREATURE := preload("res://scenes/entities/creature.tscn")
@@ -171,6 +178,17 @@ class Toits extends Node2D:
 		proprio._top_client("draw.toits", t0)
 
 
+## Les ombres portées du soleil (Éclairage, 2026-09-06) : un voile sombre sur chaque tuile de sol qu'un relief, un
+## bloc ou un bâtiment cache du soleil — sous les êtres, au-dessus du terrain ; redessinées quand le soleil tourne
+## ou que le joueur se déplace.
+class Ombres extends Node2D:
+	var proprio: Node2D
+	func _draw() -> void:
+		var t0 := Time.get_ticks_usec()
+		proprio._dessiner_ombres(self)
+		proprio._top_client("draw.ombres", t0)
+
+
 ## La couche d'interface au-dessus des êtres (z fixe, toujours visible).
 class Hud extends Node2D:
 	var proprio: Node2D
@@ -194,7 +212,93 @@ func _materiau_grain() -> ShaderMaterial:
 	for cle in ["grains_par_tuile", "force_grain", "force_douce", "echelle_douce"]:
 		if cfg.has(cle):
 			mat.set_shader_parameter(cle, float(cfg[cle]))
+	var sol: Dictionary = GameData.config("planete").get("cycle", {}).get("soleil", {})
+	mat.set_shader_parameter("ombre_min", float(sol.get("ombre_min", 0.72)))
+	mat.set_shader_parameter("elevation_max", float(sol.get("elevation_max", 65.0)))
+	_materiaux_grain.append(mat)   # le soleil se règle sur tous (_maj_soleil)
 	return mat
+
+
+var _materiaux_grain: Array[ShaderMaterial] = []   # les matériaux de grain vivants : terrain, brouillard, toits, paperdolls
+var _grain_paperdolls: ShaderMaterial = null       # un seul matériau pour tous les paperdolls (leurs occulteurs s'éclairent comme le terrain)
+
+
+## La direction du soleil à cette heure (Éclairage, 2026-09-06) : il se lève à aube[0] à l'est (la droite de l'écran),
+## culmine au sud (le bas) à elevation_max, se couche à crepuscule[1] à l'ouest ; la nuit, aucun ombrage (force 0).
+func _maj_soleil(h: float, en_surface: bool) -> void:
+	var c: Dictionary = GameData.config("planete").get("cycle", {})
+	var sol: Dictionary = c.get("soleil", {})
+	var direction := Vector3(0.0, 0.0, 1.0)
+	var force := 0.0
+	if en_surface and bool(sol.get("actif", true)) and c.has("aube") and c.has("crepuscule"):
+		var lever := float(c.aube[0])
+		var coucher := float(c.crepuscule[1])
+		if h >= lever and h <= coucher and coucher > lever:
+			var f := (h - lever) / (coucher - lever)   # 0 au lever, 1 au coucher
+			var az := PI * f                            # 0 : l'est (droite), π/2 : le sud (bas), π : l'ouest (gauche)
+			var el := deg_to_rad(float(sol.get("elevation_max", 65.0))) * sin(PI * f)
+			direction = Vector3(cos(az) * cos(el), sin(az) * cos(el), sin(el))
+			force = clampf(sin(PI * f) * 4.0, 0.0, 1.0)   # s'allume et s'éteint en douceur à l'horizon
+	for m in _materiaux_grain:
+		m.set_shader_parameter("soleil", direction)
+		m.set_shader_parameter("soleil_force", force)
+	_soleil_dir = direction
+	_soleil_force = force
+	# Les ombres portées se refont quand le soleil a tourné d'ombre_portee_pas_deg (ou qu'il s'éteint / s'allume).
+	var az_deg := rad_to_deg(atan2(direction.y, direction.x)) if force > 0.0 else -999.0
+	if absf(az_deg - _soleil_az_ombres) >= float(sol.get("ombre_portee_pas_deg", 3)) and ombres != null:
+		_soleil_az_ombres = az_deg
+		ombres.queue_redraw()
+
+
+## Les ombres portées (Éclairage, 2026-09-06) : la carte d'ombre de la fenêtre autour du joueur — le noyau C++ marche
+## vers le soleil depuis chaque tuile (Grille.ombres) —, puis un losange sombre par tuile de sol à l'ombre, en un lot.
+func _dessiner_ombres(ci: CanvasItem) -> void:
+	if sim == null or profil_sans_terrain or sim.lieu != "camp" or _soleil_force <= 0.0:
+		return
+	var sol: Dictionary = GameData.config("planete").get("cycle", {}).get("soleil", {})
+	var opacite := float(sol.get("ombre_portee", 0.28)) * _soleil_force
+	if opacite <= 0.01:
+		return
+	var g := sim.grille
+	var j := joueur()
+	if j.is_empty():
+		return
+	# La direction du soleil dans la grille : l'est de l'écran est (1, -1)/√2, le sud (1, 1)/√2 ; sa pente en unités par tuile.
+	var sx := _soleil_dir.x
+	var sy := _soleil_dir.y
+	var lh := sqrt(sx * sx + sy * sy)
+	if lh < 0.001:
+		return
+	sx /= lh
+	sy /= lh
+	var dir := Vector2((sx + sy) / sqrt(2.0), (sy - sx) / sqrt(2.0))
+	var pente := float(sol.get("tuile_en_unites", 3.5)) * _soleil_dir.z / lh   # tan(élévation) × unités par tuile
+	var x0 := maxi(g.origine.x, j.pos.x - RAYON_VUE)
+	var x1 := mini(g.origine.x + g.largeur - 1, j.pos.x + RAYON_VUE)
+	var y0 := maxi(g.origine.y, j.pos.y - RAYON_VUE)
+	var y1 := mini(g.origine.y + g.hauteur_grille - 1, j.pos.y + RAYON_VUE)
+	var taille := Vector2i(x1 - x0 + 1, y1 - y0 + 1)
+	if taille.x <= 0 or taille.y <= 0:
+		return
+	var t0 := Time.get_ticks_usec()
+	var carte := g.ombres(dir, pente, Vector2i(x0, y0), taille, int(sol.get("ombre_portee_max_tuiles", 8)), NIVEAU_BLOCS * BLOC_UNITES)
+	_top_client("ombres.carte", t0)
+	var col := Color(0.02, 0.02, 0.08, opacite)
+	_lot_ouvrir(ci)
+	for ly in taille.y:
+		for lx in taille.x:
+			if carte[ly * taille.x + lx] == 0:
+				continue
+			var t := Vector2i(x0 + lx, y0 + ly)
+			var idx := g.idx(t)
+			if not g.decouvert.has(idx) or g.niveaux_bat[idx] > 0:   # jamais vue : rien ; sous un toit : le toit couvre déjà
+				continue
+			if g.bloque_passage(t) and not ("vegetation" in g.contenu_de(t).get("tags", [])):
+				continue   # un bloc : son ombre est sur ses faces, pas sur son dessus (le shader s'en charge)
+			var c := _ecran(t, g.h(t))
+			_poly(ci, PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)]), col)
+	_lot_fermer(ci)
 
 
 ## Une couleur « #rrggbb » lue une fois : le dessin d'un morceau de terrain en analysait une par tuile (2026-09-06).
@@ -245,6 +349,11 @@ func _ready() -> void:
 	toits.z_as_relative = false
 	toits.z_index = 4001   # au-dessus des êtres (1..4000), sous la pluie (4050) et le HUD (4090)
 	add_child(toits)
+	ombres = Ombres.new()
+	ombres.proprio = self
+	ombres.z_as_relative = false
+	ombres.z_index = -5   # sur le terrain (-60), sous les voiles (-4), les halos (-3), le brouillard (-2) et les êtres
+	add_child(ombres)
 	hud = Hud.new()
 	hud.proprio = self
 	hud.z_as_relative = false
@@ -298,6 +407,7 @@ func _ready() -> void:
 		lumieres.queue_redraw()
 		voiles.queue_redraw()
 		toits.queue_redraw()
+		ombres.queue_redraw()
 		var i := sim.grille.idx(p) if sim != null else -1
 		if noeuds_vegetaux.has(i):
 			noeuds_vegetaux[i].queue_free()
@@ -625,6 +735,7 @@ func _charger(fiche: Dictionary = {}) -> void:
 	centre_brouillard = Vector2i(-99, -99)
 	brouillard.queue_redraw()
 	toits.queue_redraw()
+	ombres.queue_redraw()
 	# Les rappels de touches ne s'affichent plus à l'écran (demande du designer, 2026-08-28) : ils vivent dans le README.
 	visee = -1
 	_recentrer()
@@ -663,6 +774,7 @@ func _apres_changement_de_grille() -> void:
 	centre_brouillard = Vector2i(-99, -99)
 	brouillard.queue_redraw()
 	toits.queue_redraw()
+	ombres.queue_redraw()
 	for n in noeuds.values():
 		n.queue_free()
 	noeuds.clear()
@@ -754,11 +866,13 @@ func _log(t: String) -> void:
 func _maj_ambiance() -> void:
 	if sim == null or sim.lieu != "camp" or sim.monde == null:
 		ambiance.color = Color.WHITE
+		_maj_soleil(12.0, false)   # sous terre ou en arène : pas de soleil
 		lumieres.queue_redraw()
 		voiles.queue_redraw()
 		return
 	var c: Dictionary = GameData.config("planete").cycle
 	var h := sim.heure()
+	_maj_soleil(h, true)
 	var l: Dictionary = c.lumiere
 	var jour := Color(l.jour[0], l.jour[1], l.jour[2])
 	var nuit := Color(l.nuit[0], l.nuit[1], l.nuit[2])
@@ -936,6 +1050,7 @@ func _process(delta: float) -> void:
 	if int(j.get("vue_version", 0)) != vue_version or Grille.distance(j.pos, centre_brouillard) > RAYON_VUE / 3:
 		brouillard.queue_redraw()   # son champ de vue a changé : seul le brouillard se redessine
 		toits.queue_redraw()        # et les toits avec lui (ceux qu'il voit, celui qu'il a sur la tête)
+		ombres.queue_redraw()       # et les ombres portées (la fenêtre suit le joueur)
 	tour_hud += 1
 	if tour_hud % 2 == 0:   # le HUD (bulle, états, télégraphes, gardes) se redessine une image sur deux : deux cents habitants en ville
 		hud.queue_redraw()
@@ -993,6 +1108,9 @@ func _maj_noeuds(delta: float = 0.0) -> void:
 			var rig: Dictionary = GameData.entree("rigs", str(e.corps.silhouette))
 			n.configurer(e, rig, sim.items, sim.fonctionnalites, GameData.config("palette_materiaux"))
 			n.dessine_apres = _dessiner_occulteurs
+			if _grain_paperdolls == null:
+				_grain_paperdolls = _materiau_grain()
+			n.material = _grain_paperdolls   # ses occulteurs (les tuiles redessinées par-dessus lui) prennent le grain et le soleil ; lui-même, sans UV, reste plat
 			add_child(n)
 			noeuds[e.id] = n
 		n.e = e
@@ -1029,6 +1147,13 @@ func _dessiner_occulteurs(n: Paperdoll) -> void:
 	var e: Dictionary = n.e
 	if not g.dans(e.pos):   # un paperdoll libéré au changement de grille dessine encore une fois, avec une position de l'autre grille (GIF des compagnons, 2026-09-04)
 		return
+	var t0_o := Time.get_ticks_usec()
+	_dessiner_occulteurs_de(n, g, e)
+	_top_client("draw.occulteurs", t0_o)
+	chrono["n.occulteurs"] = float(chrono.get("n.occulteurs", 0.0)) + 1.0
+
+
+func _dessiner_occulteurs_de(n: Paperdoll, g: Grille, e: Dictionary) -> void:
 	var he := g.h(e.pos)
 	var base := _ecran(e.pos, he)
 	# Jusqu'où regarder devant : deux tuiles, et plus loin si des façades de bâtiments sont hautes (Villes, 2026-09-06 :
@@ -2053,9 +2178,9 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 			col = _couleur_html(str(ms.color)).lerp(Color(0.35, 0.5, 0.25), 0.35 if sol_id.begins_with("terre") else 0.0).darkened(0.25 - k * 0.3)
 	col *= teinte
 	var st_sol := _style_grain(sol_id)   # le motif de la matière (point 58)
-	var uv_sol := PackedVector2Array([   # le grain suit le plan du sol : les UV sont les coins de la tuile
-		Vector2(st_sol + t.x, t.y), Vector2(st_sol + t.x + 1, t.y),
-		Vector2(st_sol + t.x + 1, t.y + 1), Vector2(st_sol + t.x, t.y + 1)])
+	var uv_sol := PackedVector2Array([   # le grain suit le plan du sol : les UV sont les coins de la tuile (+ UV_HAUT : un dessus, pour le soleil)
+		Vector2(st_sol + t.x, t.y + UV_HAUT), Vector2(st_sol + t.x + 1, t.y + UV_HAUT),
+		Vector2(st_sol + t.x + 1, t.y + 1 + UV_HAUT), Vector2(st_sol + t.x, t.y + 1 + UV_HAUT)])
 	_poly(ci, haut, col, uv_sol)
 	var flanc := col.darkened(0.35)
 	var hs := g.h(t + Vector2i(0, 1)) if g.dans(t + Vector2i(0, 1)) else 0
@@ -2064,14 +2189,14 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 		_poly(ci, PackedVector2Array([
 			c + Vector2(-TW * 0.5, 0), c + Vector2(0, TH * 0.5),
 			c + Vector2(0, TH * 0.5 + d), c + Vector2(-TW * 0.5, d)]), flanc,
-			PackedVector2Array([Vector2(st_sol + t.x, -h), Vector2(st_sol + t.x + 1, -h), Vector2(st_sol + t.x + 1, -hs), Vector2(st_sol + t.x, -hs)]))
+			PackedVector2Array([Vector2(st_sol + t.x, UV_SO - h), Vector2(st_sol + t.x + 1, UV_SO - h), Vector2(st_sol + t.x + 1, UV_SO - hs), Vector2(st_sol + t.x, UV_SO - hs)]))
 	var he := g.h(t + Vector2i(1, 0)) if g.dans(t + Vector2i(1, 0)) else 0
 	if he < h:
 		var d2 := (h - he) * HSTEP
 		_poly(ci, PackedVector2Array([
 			c + Vector2(0, TH * 0.5), c + Vector2(TW * 0.5, 0),
 			c + Vector2(TW * 0.5, d2), c + Vector2(0, TH * 0.5 + d2)]), flanc.darkened(0.15),
-			PackedVector2Array([Vector2(st_sol + t.y, -h), Vector2(st_sol + t.y + 1, -h), Vector2(st_sol + t.y + 1, -he), Vector2(st_sol + t.y, -he)]))
+			PackedVector2Array([Vector2(st_sol + t.y, UV_SE - h), Vector2(st_sol + t.y + 1, UV_SE - h), Vector2(st_sol + t.y + 1, UV_SE - he), Vector2(st_sol + t.y, UV_SE - he)]))
 	var contenu := g.contenu_de(t)
 	if not contenu.is_empty() and not g.bloque_passage(t) and not ("porte" in contenu.get("tags", [])) and (contenu.has("couleur") or "meuble" in contenu.get("tags", [])):
 		# contenu franchissable (porte, entrée du donjon, tapis) : un losange plat coloré
@@ -2231,19 +2356,19 @@ func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: C
 			_poly(ci, PackedVector2Array([   # face sud-ouest (gauche)
 				c + Vector2(-tw, -y), c + Vector2(0, th - y),
 				c + Vector2(0, th - y1), c + Vector2(-tw, -y1)]), col_b.darkened(0.35),
-				PackedVector2Array([Vector2(st_b + t.x, -float(y) / HSTEP), Vector2(st_b + t.x + 1, -float(y) / HSTEP), Vector2(st_b + t.x + 1, -float(y1) / HSTEP), Vector2(st_b + t.x, -float(y1) / HSTEP)]))
+				PackedVector2Array([Vector2(st_b + t.x, UV_SO - float(y) / HSTEP), Vector2(st_b + t.x + 1, UV_SO - float(y) / HSTEP), Vector2(st_b + t.x + 1, UV_SO - float(y1) / HSTEP), Vector2(st_b + t.x, UV_SO - float(y1) / HSTEP)]))
 		if face_se:
 			_poly(ci, PackedVector2Array([   # face sud-est (droite)
 				c + Vector2(0, th - y), c + Vector2(tw, -y),
 				c + Vector2(tw, -y1), c + Vector2(0, th - y1)]), col_b.darkened(0.5),
-				PackedVector2Array([Vector2(st_b + t.y, -float(y) / HSTEP), Vector2(st_b + t.y + 1, -float(y) / HSTEP), Vector2(st_b + t.y + 1, -float(y1) / HSTEP), Vector2(st_b + t.y, -float(y1) / HSTEP)]))
+				PackedVector2Array([Vector2(st_b + t.y, UV_SE - float(y) / HSTEP), Vector2(st_b + t.y + 1, UV_SE - float(y) / HSTEP), Vector2(st_b + t.y + 1, UV_SE - float(y1) / HSTEP), Vector2(st_b + t.y, UV_SE - float(y1) / HSTEP)]))
 		col_haut = col_b
 		st_haut = st_b
 		y = y1
 	_poly(ci, PackedVector2Array([   # dessus
 		c + Vector2(-tw, -hm), c + Vector2(0, -th - hm),
 		c + Vector2(tw, -hm), c + Vector2(0, th - hm)]), col_haut,
-		PackedVector2Array([Vector2(st_haut + t.x, t.y + 1), Vector2(st_haut + t.x, t.y), Vector2(st_haut + t.x + 1, t.y), Vector2(st_haut + t.x + 1, t.y + 1)]))
+		PackedVector2Array([Vector2(st_haut + t.x, t.y + 1 + UV_HAUT), Vector2(st_haut + t.x, t.y + UV_HAUT), Vector2(st_haut + t.x + 1, t.y + UV_HAUT), Vector2(st_haut + t.x + 1, t.y + 1 + UV_HAUT)]))
 	_top_client("draw.bloc", t0_b)
 
 
@@ -2318,7 +2443,7 @@ func _dessiner_toits(ci: CanvasItem) -> void:
 				col = col.darkened(0.55)
 			var c := _ecran(t, g.h(t)) - Vector2(0, n * NIVEAU_BLOCS * BLOC_UNITES * HSTEP)
 			_poly(ci, PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)]), col,
-				PackedVector2Array([Vector2(st + t.x, t.y), Vector2(st + t.x + 1, t.y), Vector2(st + t.x + 1, t.y + 1), Vector2(st + t.x, t.y + 1)]))
+				PackedVector2Array([Vector2(st + t.x, t.y + UV_HAUT), Vector2(st + t.x + 1, t.y + UV_HAUT), Vector2(st + t.x + 1, t.y + 1 + UV_HAUT), Vector2(st + t.x, t.y + 1 + UV_HAUT)]))
 	_lot_fermer(ci)
 
 
