@@ -32,6 +32,9 @@ la cellule uniquement (hash déterministe).
 
 **Quantification de la hauteur :** le mapping altitude continue → 21 niveaux est spécifié en [[Décision — Altitude sur 21 niveaux]] (le lissage local s'échantillonne aussi par tuile, cache par chunk).
 
+> [!success] Codé le 2026-09-06, 16 h — la cellule de surface, moitié par le noyau C++ (file 109)
+> `sonde_perf_generation` mesure désormais une cellule de surface, étape par étape (`Surface.chrono`) : 68 ms médian, dont **30 ms** la première passe (les couches par bloc de quatre tuiles, puis le sol, la mer et le matériau de chaque tuile) et **29 ms** la troisième (un tirage par tuile de sol : arbre, plante, cueillette, rocher, filon). Les deux boucles de tuiles sont désormais dans le noyau (`SensenGrille.sol_cellule`, `vegetation_cellule`), transcrites de `Surface._sol_gd` et `_vegetation_gd` qui restent la référence ; le RNG de la cellule (`RandomNumberGenerator`) est le même objet, consommé dans le même ordre, donc le quartier de village qui vient après tire les mêmes dés. `test_noyau_cpp` compare treize cellules autour du camp : identiques (hauteurs, sol, sols, eau, arbres, plantes, cueillette, rochers, filons, murs, portes, meubles, biomes vus, village). Résultat : **68 → 31 ms** par cellule ; la végétation 29 → 1,6 ms. Ce qui reste, **23 ms**, c'est `couches_a` sur les 256 blocs — huit bruits natifs mais la tectonique en GDScript (continentalité, warp, plaques proches, suture, biome) à 85 µs le bloc : la prochaine transcription, avec le soin des `Vector2` en simple précision.
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Unification macro-micro]], [[Catalogue des couches de bruit]]
 - **Alimente** : [[Terrain spectaculaire]], [[Génération de donjon]], [[Génération des royaumes PNJ]]

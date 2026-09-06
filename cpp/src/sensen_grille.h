@@ -90,6 +90,10 @@ public:
 	PackedInt32Array composante(Object *grille, Vector2i depart, int max_tuiles);
 	Dictionary regions_cellule(Object *grille, Vector2i origine, int n, const PackedInt32Array &classes);
 	PackedByteArray ombres(Object *grille, Vector2 dir, double pente, Vector2i coin, Vector2i taille, int max_pas, int unites_par_niveau);
+	Dictionary sol_cellule(int taille, bool bord, int pas, const PackedStringArray &bloc_sol, const PackedByteArray &bloc_mer, int mer_h, const PackedByteArray &hauteurs);
+	Dictionary vegetation_cellule(Object *rng, int taille, int pas, const PackedInt32Array &sol_keys, const Dictionary &eau, Rect2i reserve,
+			const PackedInt32Array &bloc_biome, const PackedFloat64Array &bloc_veg, const PackedFloat64Array &bloc_res, const PackedFloat64Array &bloc_danger,
+			const Array &biomes, const PackedFloat64Array &seuils, double filons_seuil, double filons_densite, const Array &tiers);
 };
 
 } // namespace godot

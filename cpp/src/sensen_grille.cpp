@@ -1,6 +1,9 @@
 #include "sensen_grille.h"
 
+#include <godot_cpp/classes/random_number_generator.hpp>
 #include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/variant/packed_string_array.hpp>
+#include <godot_cpp/variant/rect2i.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -85,6 +88,184 @@ void SensenGrille::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("composante", "grille", "depart", "max_tuiles"), &SensenGrille::composante);
 	ClassDB::bind_method(D_METHOD("regions_cellule", "grille", "origine", "n", "classes"), &SensenGrille::regions_cellule);
 	ClassDB::bind_method(D_METHOD("ombres", "grille", "dir", "pente", "coin", "taille", "max_pas", "unites_par_niveau"), &SensenGrille::ombres);
+	ClassDB::bind_method(D_METHOD("sol_cellule", "taille", "bord", "pas", "bloc_sol", "bloc_mer", "mer_h", "hauteurs"), &SensenGrille::sol_cellule);
+	ClassDB::bind_method(D_METHOD("vegetation_cellule", "rng", "taille", "pas", "sol_keys", "eau", "reserve", "bloc_biome", "bloc_veg", "bloc_res", "bloc_danger", "biomes", "seuils", "filons_seuil", "filons_densite", "tiers"), &SensenGrille::vegetation_cellule);
+}
+
+// La génération d'une cellule de surface, première passe (Surface.generer_cellule, étape 1 — transcription de
+// Surface._sol_gd, file 109) : chaque tuile hors bord est du sol, prend le matériau de sol de son bloc de `pas` tuiles,
+// et la mer (le bloc sous le niveau de la mer) la couvre à mer_h. Rend {sol, bord, sols, eau, hauteurs}, dans l'ordre
+// des tuiles — les dictionnaires ont le même ordre d'insertion que le GDScript.
+Dictionary SensenGrille::sol_cellule(int taille, bool bord, int pas, const PackedStringArray &bloc_sol, const PackedByteArray &bloc_mer, int mer_h, const PackedByteArray &hauteurs) {
+	Dictionary sol, bordd, sols, eau;
+	PackedByteArray h = hauteurs;
+	int nb = (pas > 0) ? (taille + pas - 1) / pas : 1;
+	if (pas <= 0) {
+		pas = 1;
+	}
+	for (int y = 0; y < taille; ++y) {
+		for (int x = 0; x < taille; ++x) {
+			int i = y * taille + x;
+			if (bord && (x == 0 || y == 0 || x == taille - 1 || y == taille - 1)) {
+				bordd[i] = true;
+				continue;
+			}
+			sol[i] = true;
+			int bk = (y / pas) * nb + (x / pas);
+			if (bk < bloc_sol.size()) {
+				sols[i] = bloc_sol[bk];
+			}
+			if (bk < bloc_mer.size() && bloc_mer[bk]) {
+				eau[i] = true;
+				if (i < h.size()) {
+					h.set(i, (uint8_t)mer_h);
+				}
+			}
+		}
+	}
+	Dictionary res;
+	res["sol"] = sol;
+	res["bord"] = bordd;
+	res["sols"] = sols;
+	res["eau"] = eau;
+	res["hauteurs"] = h;
+	return res;
+}
+
+namespace {
+struct EntreeBiome {
+	String id;
+	double density;
+};
+struct BiomeCompile {
+	std::vector<EntreeBiome> vegetation, plantes, cueillette, rochers;
+	double filons_mult = 1.0;
+	bool montagne = false;
+};
+void lire_entrees(const Array &liste, std::vector<EntreeBiome> &out) {
+	for (int i = 0; i < liste.size(); ++i) {
+		Array paire = liste[i];
+		if (paire.size() >= 2) {
+			out.push_back({ paire[0], (double)paire[1] });
+		}
+	}
+}
+} // namespace
+
+// La troisième passe (Surface._vegetation_gd) : pour chaque tuile de sol (dans l'ordre des clés de e.sol, hors réserve
+// et hors eau), UN tirage du RNG de la cellule décide, aux seuils cumulés, d'un arbre, d'une plante, d'une cueillette,
+// d'un rocher ou d'un filon (un second tirage choisit le minerai dans les paliers jusqu'au tier du danger). Le RNG est
+// celui du GDScript (RandomNumberGenerator), consommé dans le même ordre : la cellule est la même au bit près.
+Dictionary SensenGrille::vegetation_cellule(Object *rng_o, int taille, int pas, const PackedInt32Array &sol_keys, const Dictionary &eau, Rect2i reserve,
+		const PackedInt32Array &bloc_biome, const PackedFloat64Array &bloc_veg, const PackedFloat64Array &bloc_res, const PackedFloat64Array &bloc_danger,
+		const Array &biomes, const PackedFloat64Array &seuils, double filons_seuil, double filons_densite, const Array &tiers) {
+	Dictionary arbres, plantes, cueillette, rochers, filons, res;
+	RandomNumberGenerator *rng = Object::cast_to<RandomNumberGenerator>(rng_o);
+	if (rng == nullptr || pas <= 0) {
+		return res;
+	}
+	std::vector<BiomeCompile> table;
+	for (int b = 0; b < biomes.size(); ++b) {
+		Dictionary d = biomes[b];
+		BiomeCompile bc;
+		lire_entrees(d.get("vegetation", Array()), bc.vegetation);
+		lire_entrees(d.get("plantes", Array()), bc.plantes);
+		lire_entrees(d.get("cueillette", Array()), bc.cueillette);
+		lire_entrees(d.get("rochers", Array()), bc.rochers);
+		bc.filons_mult = (double)d.get("filons_mult", 1.0);
+		bc.montagne = (bool)d.get("montagne", false);
+		table.push_back(bc);
+	}
+	std::vector<PackedStringArray> paliers;
+	for (int t = 0; t < tiers.size(); ++t) {
+		paliers.push_back(tiers[t]);
+	}
+	int nb = (taille + pas - 1) / pas;
+	const int32_t *cles = sol_keys.ptr();
+	for (int n = 0; n < sol_keys.size(); ++n) {
+		int i = cles[n];
+		int x = i % taille, y = i / taille;
+		if (reserve.has_point(Vector2i(x, y)) || eau.has(i)) {
+			continue;
+		}
+		int bk = (y / pas) * nb + (x / pas);
+		if (bk >= bloc_biome.size() || bloc_biome[bk] < 0 || bloc_biome[bk] >= (int)table.size()) {
+			continue;
+		}
+		const BiomeCompile &b = table[bloc_biome[bk]];
+		double veg = bloc_veg[bk];
+		double ress = bloc_res[bk];
+		double tire = rng->randf();
+		bool pose = false;
+		double seuil = 0.0;
+		for (const EntreeBiome &v : b.vegetation) {
+			seuil += v.density * veg * 2.0;
+			if (tire < seuil) {
+				arbres[i] = v.id;
+				pose = true;
+				break;
+			}
+		}
+		if (pose) {
+			continue;
+		}
+		for (const EntreeBiome &pl : b.plantes) {
+			seuil += pl.density * veg * 2.0;
+			if (tire < seuil) {
+				plantes[i] = pl.id;
+				pose = true;
+				break;
+			}
+		}
+		if (pose) {
+			continue;
+		}
+		for (const EntreeBiome &cu : b.cueillette) {
+			seuil += cu.density * veg * 2.0;
+			if (tire < seuil) {
+				cueillette[i] = cu.id;
+				pose = true;
+				break;
+			}
+		}
+		if (pose) {
+			continue;
+		}
+		for (const EntreeBiome &r : b.rochers) {
+			if (tire < r.density * (1.0 - ress)) {
+				rochers[i] = r.id;
+				pose = true;
+				break;
+			}
+		}
+		if (pose) {
+			continue;
+		}
+		if (ress > filons_seuil && tire < filons_densite * b.filons_mult) {
+			double danger = bloc_danger[bk] * 100.0;
+			int tier = 1;
+			for (int k = 1; k < seuils.size(); ++k) {
+				if (danger >= seuils[k] || (k == 1 && b.montagne)) {
+					tier = k + 1;
+				}
+			}
+			PackedStringArray pool;
+			for (int t = 1; t <= tier; ++t) {
+				if (t - 1 < (int)paliers.size()) {
+					pool.append_array(paliers[t - 1]);
+				}
+			}
+			if (pool.size() > 0) {
+				filons[i] = pool[rng->randi_range(0, pool.size() - 1)];
+			}
+		}
+	}
+	res["arbres"] = arbres;
+	res["plantes"] = plantes;
+	res["cueillette"] = cueillette;
+	res["rochers"] = rochers;
+	res["filons"] = filons;
+	return res;
 }
 
 // La carte d'ombre d'une fenêtre de tuiles (Éclairage, le soleil, 2026-09-06) — transcription de Grille._ombres_gd :

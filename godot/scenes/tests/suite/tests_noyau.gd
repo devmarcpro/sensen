@@ -125,6 +125,37 @@ func test_noyau_cpp() -> void:
 	var p_cpp: Array = SimTerritoire._pieces_noyau(sv, cell)
 	var t_gd2 := Time.get_ticks_usec()
 	verifier(p_gd.size() > 0 and p_gd == p_cpp, "les pièces d'une cellule de village : les mêmes par le noyau (%d pièces, GDScript %.1f ms, C++ %.2f ms)" % [p_gd.size(), float(t_gd1 - t_gd0) / 1000.0, float(t_gd2 - t_gd1) / 1000.0])
+	# La génération d'une cellule de surface (file 109) : le sol et la végétation par le noyau, la même cellule au bit près
+	# — le même RNG consommé dans le même ordre, donc le même quartier de village derrière.
+	var c0: Vector2i = sv.monde.cellule_camp
+	var ecarts_gen := 0
+	var n_gen := 0
+	var t_gen_gd := 0
+	var t_gen_cpp := 0
+	for dy in range(-2, 3):
+		for dx in range(-2, 3):
+			var cg := c0 + Vector2i(dx * 2, dy * 2)
+			if not surf.terre_a(cg):
+				continue
+			Surface.noyau_actif = false
+			var ta := Time.get_ticks_usec()
+			var e_gd: Dictionary = surf.generer_cellule(cg.x, cg.y, {}, true)
+			var tb := Time.get_ticks_usec()
+			Surface.noyau_actif = true
+			var e_cpp: Dictionary = surf.generer_cellule(cg.x, cg.y, {}, true)
+			var tc := Time.get_ticks_usec()
+			t_gen_gd += tb - ta
+			t_gen_cpp += tc - tb
+			n_gen += 1
+			for cle in ["hauteurs", "sol", "bord", "sols", "eau", "arbres", "plantes", "cueillette", "rochers", "filons", "murs", "portes", "meubles", "biomes_vus"]:
+				if e_gd[cle] != e_cpp[cle] or (e_gd[cle] is Dictionary and e_gd[cle].keys() != e_cpp[cle].keys()):
+					ecarts_gen += 1
+					print("  cellule %s : %s diffère (%d contre %d)" % [str(cg), cle, e_gd[cle].size(), e_cpp[cle].size()])
+			if e_gd.village.is_empty() != e_cpp.village.is_empty() or (not e_gd.village.is_empty() and e_gd.village.batiments.size() != e_cpp.village.batiments.size()):
+				ecarts_gen += 1
+				print("  cellule %s : le village diffère" % str(cg))
+	Surface.noyau_actif = true
+	verifier(n_gen > 0 and ecarts_gen == 0, "%d cellules de surface : sol, végétation, filons, village — les mêmes par le noyau (GDScript %.0f ms, C++ %.0f ms)" % [n_gen, float(t_gen_gd) / 1000.0, float(t_gen_cpp) / 1000.0])
 	sv.monde.fermer()
 
 

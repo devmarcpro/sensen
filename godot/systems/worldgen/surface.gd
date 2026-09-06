@@ -21,6 +21,11 @@ var biomes: Dictionary
 var planete: Dictionary
 var bruits: Dictionary = {}   # nom de couche → FastNoiseLite
 var graine: int = 0
+static var chrono: Dictionary = {}   # étape de generer_cellule → ms cumulées (sonde_perf_generation : où passe une cellule)
+static func _top(cle: String, t0: int) -> int:
+	chrono[cle] = float(chrono.get(cle, 0.0)) + float(Time.get_ticks_usec() - t0) / 1000.0
+	return Time.get_ticks_usec()
+
 var plaques: Array = []       # tectonique (Décision — Monde fini) : [{centre: Vector2 (tuiles), continentale: bool, derive}]
 var continent_de_plaque: Array = []   # plaque → id de continent (designer 2026-09-02) : les plaques continentales qui se touchent n'en font qu'un
 var continents: Dictionary = {}       # id de continent → {id, nom, plaques}
@@ -765,6 +770,7 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 		"pieces": [], "spawns": [], "coffres": [], "escalier": null, "boss": null, "etage": 0}
 	e.hauteurs.resize(taille * taille)
 	e.hauteurs.fill(H_BASE)
+	var t_c := Time.get_ticks_usec()
 	var ox := cx * taille
 	var oy := cy * taille
 	e.biome = biome_a(ox + taille / 2, oy + taille / 2)
@@ -773,84 +779,27 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 	var par_bloc: Dictionary = {}   # la clé de bloc se recalcule (x / PAS_BRUIT) : pas de table de 16 384 entrées
 	var mer_alt := float(planete.get("mer", {}).get("altitude", 0.30))   # hors boucle : 16 384 tuiles
 	var mer_h := int(planete.get("mer", {}).get("hauteur", 8))
-	for y in taille:
-		for x in taille:
-			var i := y * taille + x
-			if bord and (x == 0 or y == 0 or x == taille - 1 or y == taille - 1):
-				e.bord[i] = true
-				continue
-			e.sol[i] = true
-			var cle := Vector2i(x / PAS_BRUIT, y / PAS_BRUIT)
-			if not par_bloc.has(cle):
-				var v := couches_a(ox + cle.x * PAS_BRUIT + PAS_BRUIT / 2, oy + cle.y * PAS_BRUIT + PAS_BRUIT / 2)
-				var b0 := _biome_de(v)
-				par_bloc[cle] = {"couches": v, "biome": b0, "sol": str(biomes.get(b0, {}).get("surface_material", "terre")),
-					"mer": float(v.get("altitude", 1.0)) < mer_alt}
-				e.biomes_vus[b0] = true
-			var bl: Dictionary = par_bloc[cle]
-			e.sols[i] = bl.sol
-			if bool(bl.mer):
-				e.eau[i] = true   # la mer (Eau et liquides : une source, niveau 8/8)
-				e.hauteurs[i] = mer_h
+	var nb := (taille + PAS_BRUIT - 1) / PAS_BRUIT
+	for by in nb:   # les blocs d'abord, dans l'ordre où la boucle des tuiles les rencontrait (ligne par ligne)
+		for bx in nb:
+			var cle := Vector2i(bx, by)
+			var v := couches_a(ox + cle.x * PAS_BRUIT + PAS_BRUIT / 2, oy + cle.y * PAS_BRUIT + PAS_BRUIT / 2)
+			var b0 := _biome_de(v)
+			par_bloc[cle] = {"couches": v, "biome": b0, "sol": str(biomes.get(b0, {}).get("surface_material", "terre")),
+				"mer": float(v.get("altitude", 1.0)) < mer_alt}
+			e.biomes_vus[b0] = true
+	var noyau: RefCounted = ClassDB.instantiate(&"SensenGrille") if (noyau_actif and Grille.noyau_present()) else null   # un par cellule : la génération tourne en thread
+	_sol(e, taille, bord, par_bloc, mer_h, nb, noyau)
+	t_c = _top("cellule.sol", t_c)
 	# 2. Le relief : des accidents posés, hors de la zone d'arrivée si un camp s'y greffe.
 	var reserve := Rect2i(e.entree - Vector2i(8, 8), Vector2i(24, 16)) if not camp.is_empty() else Rect2i(-1, -1, 0, 0)
 	_poser_accidents(e, reserve, rng)
+	t_c = _top("cellule.relief", t_c)
 	# 3. Arbres, rochers, filons selon le biome de chaque tuile et les couches vegetation / ressources.
-	var mp: Dictionary = GameData.config("minerais_par_etage")
+	_vegetation(e, taille, par_bloc, reserve, rng, nb, noyau)
+	var mp: Dictionary = GameData.config("minerais_par_etage")   # les POI en ont encore besoin (filon majeur)
 	var seuils: Array = planete.tiers_corruption
-	for i in e.sol.keys():
-		var x: int = i % taille
-		var y: int = i / taille
-		if reserve.has_point(Vector2i(x, y)) or e.eau.has(i):
-			continue
-		var bloc: Dictionary = par_bloc[Vector2i(x / PAS_BRUIT, y / PAS_BRUIT)]
-		var b: Dictionary = biomes.get(str(bloc.biome), {})
-		var veg: float = float(bloc.couches.vegetation)
-		var res: float = float(bloc.couches.ressources)
-		var tire := rng.randf()
-		var pose := false
-		var seuil := 0.0   # seuils cumulés : chaque entrée garde sa densité propre (sinon une densité plus faible qu'une précédente ne sort jamais)
-		for v in b.get("vegetation", []):
-			seuil += float(v.density) * veg * 2.0
-			if tire < seuil:
-				e.arbres[i] = str(v.id)
-				pose = true
-				break
-		if pose:
-			continue
-		for pl in b.get("plantes", []):
-			seuil += float(pl.density) * veg * 2.0
-			if tire < seuil:
-				e.plantes[i] = str(pl.id)
-				pose = true
-				break
-		if pose:
-			continue
-		for cu in b.get("cueillette", []):   # Plantes : la cueillette sauvage par biome
-			seuil += float(cu.density) * veg * 2.0
-			if tire < seuil:
-				e.cueillette[i] = str(cu.id)
-				pose = true
-				break
-		if pose:
-			continue
-		for r in b.get("rochers", []):
-			if tire < float(r.density) * (1.0 - res):
-				e.rochers[i] = str(r.id)
-				pose = true
-				break
-		if pose:
-			continue
-		if res > float(planete.filons.seuil) and tire < float(planete.filons.densite) * float(b.get("filons_mult", 1.0)):
-			var danger: float = float(bloc.couches.danger) * 100.0
-			var tier := 1
-			for k in range(1, seuils.size()):
-				if danger >= float(seuils[k]) or (k == 1 and "montagne" in b.get("tags", [])):
-					tier = k + 1
-			var pool: Array = []
-			for t in range(1, tier + 1):
-				pool.append_array(mp.tiers[str(t)])
-			e.filons[i] = str(pool[rng.randi_range(0, pool.size() - 1)])
+	t_c = _top("cellule.vegetation", t_c)
 	# 4. Les POI : l'entrée scellée d'un donjon (anneau de roche ouvert au sud), un filon majeur.
 	var poi := poi_de(Vector2i(cx, cy), not camp.is_empty())
 	e["poi"] = poi
@@ -903,13 +852,16 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 	e["village"] = {}
 	e["stations"] = {}
 	e["rails"] = {}
+	t_c = _top("cellule.poi", t_c)
 	var agglo := agglomeration_de(Vector2i(cx, cy)) if camp.is_empty() else {}   # une cellule d'agglomération : un quartier (Villes B1)
 	if not agglo.is_empty():
 		_poser_quartier(e, Vector2i(cx, cy), rng, agglo)
+	t_c = _top("cellule.village", t_c)
 	_poser_route(e, Vector2i(cx, cy))
 	for d in [e.arbres, e.rochers, e.filons, e.eau]:
 		for i in d.keys():
 			e.sol.erase(i)
+	_top("cellule.routes", t_c)
 	return e   # les plantes restent du sol (franchissables) : la simulation les pose comme contenu
 
 
@@ -1613,6 +1565,154 @@ func _poser_batiment(e: Dictionary, bat: Dictionary, origine: Vector2i, palette:
 	if not info.has("poste"):   # sans case de travail nommée : la porte
 		info["poste"] = info.porte
 	e.village.batiments.append(info)
+
+
+## Le noyau C++ génère (file 109, 2026-09-06) : `noyau_actif` à false force le GDScript — la référence, que le noyau transcrit.
+static var noyau_actif: bool = true
+
+
+## Étape 1 d'une cellule : chaque tuile hors bord est du sol, prend le matériau de son bloc, la mer la couvre.
+func _sol(e: Dictionary, taille: int, bord: bool, par_bloc: Dictionary, mer_h: int, nb: int, noyau: RefCounted) -> void:
+	if noyau != null:
+		var bloc_sol := PackedStringArray()
+		var bloc_mer := PackedByteArray()
+		bloc_sol.resize(nb * nb)
+		bloc_mer.resize(nb * nb)
+		for by in nb:
+			for bx in nb:
+				var bl: Dictionary = par_bloc[Vector2i(bx, by)]
+				bloc_sol[by * nb + bx] = str(bl.sol)
+				bloc_mer[by * nb + bx] = 1 if bool(bl.mer) else 0
+		var r: Dictionary = noyau.sol_cellule(taille, bord, PAS_BRUIT, bloc_sol, bloc_mer, mer_h, e.hauteurs)
+		e.sol = r.sol
+		e.bord = r.bord
+		e.sols = r.sols
+		e.eau = r.eau
+		e.hauteurs = r.hauteurs
+		return
+	_sol_gd(e, taille, bord, par_bloc, mer_h)
+
+
+func _sol_gd(e: Dictionary, taille: int, bord: bool, par_bloc: Dictionary, mer_h: int) -> void:
+	for y in taille:
+		for x in taille:
+			var i := y * taille + x
+			if bord and (x == 0 or y == 0 or x == taille - 1 or y == taille - 1):
+				e.bord[i] = true
+				continue
+			e.sol[i] = true
+			var bl: Dictionary = par_bloc[Vector2i(x / PAS_BRUIT, y / PAS_BRUIT)]
+			e.sols[i] = bl.sol
+			if bool(bl.mer):
+				e.eau[i] = true   # la mer (Eau et liquides : une source, niveau 8/8)
+				e.hauteurs[i] = mer_h
+
+
+## Étape 3 : arbres, plantes, cueillette, rochers et filons, un tirage par tuile de sol — le même RNG, dans le même ordre.
+func _vegetation(e: Dictionary, taille: int, par_bloc: Dictionary, reserve: Rect2i, rng: RandomNumberGenerator, nb: int, noyau: RefCounted) -> void:
+	var mp: Dictionary = GameData.config("minerais_par_etage")
+	var seuils: Array = planete.tiers_corruption
+	if noyau != null:
+		var index_biome := {}
+		var table: Array = []
+		var bloc_biome := PackedInt32Array()
+		var bloc_veg := PackedFloat64Array()
+		var bloc_res := PackedFloat64Array()
+		var bloc_danger := PackedFloat64Array()
+		bloc_biome.resize(nb * nb)
+		bloc_veg.resize(nb * nb)
+		bloc_res.resize(nb * nb)
+		bloc_danger.resize(nb * nb)
+		for by in nb:
+			for bx in nb:
+				var bl: Dictionary = par_bloc[Vector2i(bx, by)]
+				var bid := str(bl.biome)
+				if not index_biome.has(bid):
+					var b: Dictionary = biomes.get(bid, {})
+					var comp := {"filons_mult": float(b.get("filons_mult", 1.0)), "montagne": "montagne" in b.get("tags", [])}
+					for cle in ["vegetation", "plantes", "cueillette", "rochers"]:
+						var liste: Array = []
+						for v in b.get(cle, []):
+							liste.append([str(v.id), float(v.density)])
+						comp[cle] = liste
+					index_biome[bid] = table.size()
+					table.append(comp)
+				var k := by * nb + bx
+				bloc_biome[k] = int(index_biome[bid])
+				bloc_veg[k] = float(bl.couches.vegetation)
+				bloc_res[k] = float(bl.couches.ressources)
+				bloc_danger[k] = float(bl.couches.danger)
+		var tiers: Array = []
+		var t := 1
+		while mp.tiers.has(str(t)):
+			tiers.append(PackedStringArray(mp.tiers[str(t)]))
+			t += 1
+		var seuils_f := PackedFloat64Array()
+		for sv in seuils:
+			seuils_f.append(float(sv))
+		var r: Dictionary = noyau.vegetation_cellule(rng, taille, PAS_BRUIT, PackedInt32Array(e.sol.keys()), e.eau, reserve, bloc_biome, bloc_veg, bloc_res, bloc_danger,
+			table, seuils_f, float(planete.filons.seuil), float(planete.filons.densite), tiers)
+		for cle in ["arbres", "plantes", "cueillette", "rochers", "filons"]:
+			e[cle].merge(r[cle], true)
+		return
+	_vegetation_gd(e, taille, par_bloc, reserve, rng, mp, seuils)
+
+
+func _vegetation_gd(e: Dictionary, taille: int, par_bloc: Dictionary, reserve: Rect2i, rng: RandomNumberGenerator, mp: Dictionary, seuils: Array) -> void:
+	for i in e.sol.keys():
+		var x: int = i % taille
+		var y: int = i / taille
+		if reserve.has_point(Vector2i(x, y)) or e.eau.has(i):
+			continue
+		var bloc: Dictionary = par_bloc[Vector2i(x / PAS_BRUIT, y / PAS_BRUIT)]
+		var b: Dictionary = biomes.get(str(bloc.biome), {})
+		var veg: float = float(bloc.couches.vegetation)
+		var res: float = float(bloc.couches.ressources)
+		var tire := rng.randf()
+		var pose := false
+		var seuil := 0.0   # seuils cumulés : chaque entrée garde sa densité propre (sinon une densité plus faible qu'une précédente ne sort jamais)
+		for v in b.get("vegetation", []):
+			seuil += float(v.density) * veg * 2.0
+			if tire < seuil:
+				e.arbres[i] = str(v.id)
+				pose = true
+				break
+		if pose:
+			continue
+		for pl in b.get("plantes", []):
+			seuil += float(pl.density) * veg * 2.0
+			if tire < seuil:
+				e.plantes[i] = str(pl.id)
+				pose = true
+				break
+		if pose:
+			continue
+		for cu in b.get("cueillette", []):   # Plantes : la cueillette sauvage par biome
+			seuil += float(cu.density) * veg * 2.0
+			if tire < seuil:
+				e.cueillette[i] = str(cu.id)
+				pose = true
+				break
+		if pose:
+			continue
+		for r in b.get("rochers", []):
+			if tire < float(r.density) * (1.0 - res):
+				e.rochers[i] = str(r.id)
+				pose = true
+				break
+		if pose:
+			continue
+		if res > float(planete.filons.seuil) and tire < float(planete.filons.densite) * float(b.get("filons_mult", 1.0)):
+			var danger: float = float(bloc.couches.danger) * 100.0
+			var tier := 1
+			for k in range(1, seuils.size()):
+				if danger >= float(seuils[k]) or (k == 1 and "montagne" in b.get("tags", [])):
+					tier = k + 1
+			var pool: Array = []
+			for t in range(1, tier + 1):
+				pool.append_array(mp.tiers[str(t)])
+			e.filons[i] = str(pool[rng.randi_range(0, pool.size() - 1)])
+
 
 
 ## Les accidents de relief d'une cellule (planete.relief) : chacun un modificateur 2D paramétrique.
