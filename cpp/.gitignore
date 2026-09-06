@@ -8,3 +8,5 @@ godot-cpp/
 *.ilk
 .sconsign.dblite
 __pycache__/
+extension_api.json
+gdextension_interface.h
