@@ -21,6 +21,9 @@ var arene_nom := ""   # --arene accepte aussi un NOM : l'index laissait l'arène
 var temps_max := 0.0
 var temps_total := 0.0
 var temps_process := 0.0   # la part _process (simulation, nœuds, UI) ; le reste est le rendu
+var rendu_cpu := 0.0        # le temps de RENDU du viewport mesuré par le serveur (CPU, puis GPU) — ce que la machine
+var rendu_gpu := 0.0        # chargée ne fausse pas autant que le delta d'image (le regroupement des triangles, 2026-09-06)
+var appels_dessin := 0.0    # les appels de dessin par image (Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), cumulés
 
 
 func _ready() -> void:
@@ -69,6 +72,7 @@ func _ready() -> void:
 			scene.graine_monde = int(args[ig + 1])
 	scene.profil_sans_ui = "--sans-ui" in args
 	scene.profil_sans_terrain = "--sans-terrain" in args
+	scene.lots_actifs = not ("--sans-lots" in args)   # --sans-lots : le terrain et le brouillard triangle par triangle, pour comparer (2026-09-06)
 	if scene.titre_ouvert and "--monde" in args:   # --monde : l'écran de création du monde (designer, point 49)
 		scene._nouvelle_partie()
 		scene._creer_personnage()
@@ -620,10 +624,16 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	frames += 1
+	if frames == 1:
+		RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 	if frames > 5:   # les premières images chargent ; on mesure ensuite (critère É0 : 60 fps)
 		temps_max = maxf(temps_max, delta)
 		temps_total += delta
 		temps_process += float(Performance.get_monitor(Performance.TIME_PROCESS))
+		var vp := get_viewport().get_viewport_rid()
+		rendu_cpu += RenderingServer.viewport_get_measured_render_time_cpu(vp)
+		rendu_gpu += RenderingServer.viewport_get_measured_render_time_gpu(vp)
+		appels_dessin += float(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
 	if gif_images > 0 and frames >= 5 and (frames - 5) % maxi(1, gif_pas) == 0 and gif_prises < gif_images:
 		var img_g := get_viewport().get_texture().get_image()
 		if img_g != null and not img_g.is_empty():
@@ -671,6 +681,7 @@ func _process(delta: float) -> void:
 		img.save_png(sortie)
 		print("capture : ", sortie)
 		print("image : moyenne %.1f ms, pire %.1f ms sur %d images · process %.1f ms · chrono client %s" % [temps_total / float(frames - 5) * 1000.0, temps_max * 1000.0, frames - 5, temps_process / float(frames - 5) * 1000.0, str(scene.chrono) if scene != null and "chrono" in scene else "—"])
+		print("rendu : cpu %.2f ms, gpu %.2f ms par image · %.0f appels de dessin par image" % [rendu_cpu / float(frames - 5), rendu_gpu / float(frames - 5), appels_dessin / float(frames - 5)])
 		get_tree().quit()
 
 

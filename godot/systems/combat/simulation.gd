@@ -163,6 +163,7 @@ func horloge_de(e: Dictionary) -> Horloge:
 		if e.horloge != "monde":
 			e.horloge = "monde"
 			e.action_en_cours = {}
+			_dus_invalider()
 		return horloge_monde
 	return combats[e.horloge].horloge
 
@@ -173,6 +174,7 @@ func en_combat(e: Dictionary) -> bool:
 	if not combats.has(e.horloge):   # un combat disparu (rechargement, grille changée) : l'être est de fait sur le monde
 		e.horloge = "monde"
 		e.action_en_cours = {}
+		_dus_invalider()
 		return false
 	return true
 
@@ -185,9 +187,11 @@ func pas(nom: String) -> bool:
 	if nom != "monde" and not combats.has(nom):   # un combat dissous par le pas précédent (le client itère sur une copie des noms)
 		return false
 	var h: Horloge = horloge_monde if nom == "monde" else combats[nom].horloge
+	var t_p := Time.get_ticks_usec()
 	var e := _prochaine(nom)
 	# Les bombes de cette horloge dues avant l'entité suivante explosent d'abord (Explosions).
 	var prochaine_bombe := _prochaine_bombe(nom)
+	_top("pas.prochaine", t_p)
 	var bombe_due := false
 	if not prochaine_bombe.is_empty():
 		bombe_due = (e.is_empty() or int(prochaine_bombe.fin) <= int(e.compteur)) if h.mode == Horloge.Mode.ACTION else int(prochaine_bombe.fin) <= h.ticks
@@ -203,7 +207,9 @@ func pas(nom: String) -> bool:
 		h.sauter_a(e.compteur)
 	elif e.compteur > h.ticks:
 		return false
+	t_p = Time.get_ticks_usec()
 	_regenerer(e, h.ticks)
+	_top("pas.regen", t_p)
 	if not e.action_en_cours.is_empty():
 		# Résolution simultanée (Boucle de tick, 2026-08-30) : toutes les actions engagées dues à ce tick partent
 		# ensemble — détachées d'un coup, puis résolues comme si elles frappaient au même instant.
@@ -338,12 +344,62 @@ func _du_sur_monde() -> bool:
 
 
 func _prochaine(nom: String) -> Dictionary:
+	if nom == "monde" and horloge_monde.mode == Horloge.Mode.TEMPS_REEL:
+		return _prochaine_due()
 	var meilleure := {}
 	for id in ordre:
 		var e: Dictionary = entites[id]
 		if e.vivant and e.horloge == nom and (meilleure.is_empty() or e.compteur < meilleure.compteur):
 			meilleure = e
 	return meilleure
+
+
+## La file des compteurs du monde (2026-09-06, « réécriture C++ et optimisation ») : `_prochaine("monde")` balayait
+## toutes les entités à CHAQUE pas — 2,9 des 3,8 ms du tick à 2 000 êtres (sonde d'échelle). En temps réel, la file
+## tient tous les êtres du monde triés par clé (compteur, puis rang dans `ordre` : la même égalité que le balayage) et
+## chaque pas ne regarde que sa tête, VALIDÉE à la lecture : un être qui a agi (compteur changé) est replacé à sa
+## nouvelle clé ; un mort, un parti au combat, un disparu est oublié. Les écritures de compteur n'ont donc rien à
+## signaler. Ce qui doit signaler, c'est ce qui fait ENTRER un être dans le monde : un ajout (entites.size() change),
+## une résurrection, un retour de combat (`_dus_invalider()`, aux sites qui le font) — et, filet de sécurité, la file
+## se rebâtit de toute façon toutes les DUS_RAFRAICHIR ticks : un site oublié retarde un être, il ne le perd pas.
+const DUS_RAFRAICHIR := 64
+var _dus := PackedInt64Array()    # (compteur << 20) | rang, triées
+var _dus_ids: Array[String] = []   # rang → id
+var _dus_invalide := true
+var _dus_n: int = -1               # entites.size() à la construction de la file
+var _dus_tick_bati: int = -1
+func _dus_invalider() -> void:
+	_dus_invalide = true
+
+
+func _prochaine_due() -> Dictionary:
+	var t := horloge_monde.ticks
+	if _dus_invalide or _dus_n != entites.size() or absi(t - _dus_tick_bati) >= DUS_RAFRAICHIR:
+		_dus_invalide = false
+		_dus_n = entites.size()
+		_dus_tick_bati = t
+		_dus.clear()
+		_dus_ids.clear()
+		for id in ordre:
+			var e: Dictionary = entites[id]
+			if e.vivant and e.horloge == "monde":
+				_dus.append((int(e.compteur) << 20) | _dus_ids.size())
+				_dus_ids.append(id)
+		_dus.sort()
+	while not _dus.is_empty():
+		var cle := _dus[0]
+		var rang := int(cle & 0xFFFFF)
+		var e: Dictionary = entites.get(_dus_ids[rang], {})
+		if e.is_empty() or not e.vivant or e.horloge != "monde":
+			_dus.remove_at(0)
+			continue
+		var c := int(e.compteur)
+		if c == cle >> 20:
+			return e if c <= t else {}   # la tête est le plus petit compteur : au-delà de l'instant, rien n'est dû
+		_dus.remove_at(0)
+		var nc := (c << 20) | rang
+		_dus.insert(_dus.bsearch(nc), nc)
+	return {}
 
 
 var _dans_avancee_monde := false
@@ -689,15 +745,11 @@ func maj_vision() -> void:
 			facteur *= float(etat.get("visibility_mult", 1.0))
 			portee = maxi(1, roundi(float(portee) * facteur))
 		var vue := {}
-		for dy in range(-portee, portee + 1):
-			for dx in range(-portee, portee + 1):
-				var t: Vector2i = e.pos + Vector2i(dx, dy)
-				if grille.dans(t) and Grille.distance(e.pos, t) <= portee and grille.ligne_de_vue(e.pos, t):
-					var idx := grille.idx(t)
-					vue[idx] = true
-					if not grille.decouvert.has(idx):
-						grille.decouvert[idx] = true
-						grille.decouvertes_recentes.append(idx)   # le client ne redessine que les morceaux de terrain touchés
+		for idx in grille.champ_de_vue(e.pos, portee):   # le noyau C++ balaie le carré et ses lignes de vue d'un trait (2026-09-06)
+			vue[idx] = true
+			if not grille.decouvert.has(idx):
+				grille.decouvert[idx] = true
+				grille.decouvertes_recentes.append(idx)   # le client ne redessine que les morceaux de terrain touchés
 		if vue.size() != e.get("vue", {}).size() or e.get("vue_pos", Vector2i(-1, -1)) != e.pos or e.get("vue_sale", false):
 			e["vue_version"] = int(e.get("vue_version", 0)) + 1
 			if lieu == "camp" and monde != null:   # exploration à résolution chunk (minimap)
@@ -3205,7 +3257,7 @@ func _executer_capacite(e: Dictionary, plan: Dictionary, cible_pos: Vector2i, se
 				glyphes.append({"pos": cible_pos, "plan": suite, "source": e.id, "fin": tick + duree, "elements": suite.elements,
 					"cache": SimTalents.a_talent(self, e, "dissimulation")})
 				if not SimTalents.a_talent(self, e, "dissimulation"):   # L'Ombre : ses pièges ne se voient pas (Talents de classe)
-					grille.dangers[grille.idx(cible_pos)] = true
+					grille.poser_danger(grille.idx(cible_pos))
 				EventBus.emettre(&"journal", [&"journal.glyphe_pose", {"nom": e.name_key, "capacite": suite.noyau.name_key, "x": cible_pos.x, "y": cible_pos.y}])
 				var occ := grille.occupant(cible_pos)
 				if not occ.is_empty():
@@ -3456,6 +3508,7 @@ func _appliquer_charge(e: Dictionary, plan: Dictionary, touchees: Array[Dictiona
 							if c.vivant or SimPnj.ennemis(self, e, c):
 								continue
 							c.vivant = true
+							_dus_invalider()
 							c.sante = maxi(1, int(float(c.sante_max) * float(rs.releve_allie_pct) / 100.0))
 							c.statuts.clear()
 							if grille.occupant(c.pos).is_empty():
@@ -3751,6 +3804,7 @@ func _quitter_combat(e: Dictionary) -> void:
 	e.tick_vigueur = horloge_monde.ticks
 	e.horloge = "monde"
 	e.action_en_cours = {}
+	_dus_invalider()   # de retour dans la file du monde
 
 
 ## Un combat se relâche quand plus aucun hostile n'y menace un participant contrôlé :

@@ -4,6 +4,150 @@ extends TestsBase
 ## `test_combat.gd`, tels quels ; le lanceur les appelle par leur nom, dans l'ordre de sa liste.
 
 
+## Le noyau C++ de la grille (Modules de la simulation et le C++, section 3, 2026-09-06) rend EXACTEMENT ce que le
+## GDScript rend : chemins, atteignables, lignes de vue, premier obstacle, champ de vue, coûts de pas — sur l'arène
+## « gorge » (le relief) puis sur la fenêtre d'un monde (eau, portes, bâtiments, occupants, dangers, neige, gel) —
+## et ses miroirs (occ, danger_a, eau_a, frott_a) disent la même chose que les dictionnaires qu'ils reflètent.
+## Sans la bibliothèque chargée, le test le dit et passe : le jeu tourne alors tout en GDScript.
+func test_noyau_cpp() -> void:
+	if not Grille.noyau_present():
+		verifier(true, "noyau C++ absent (sensen_grille non chargée) : tout se calcule en GDScript")
+		return
+	var s := nouvelle_sim("gorge")
+	verifier(s.grille._noyau != null and s.grille._noyau_pret(), "la grille de l'arène a son noyau")
+	_comparer_noyau(s.grille, "gorge", 150)
+	# De l'eau sur l'arène : un lac (sources), un écoulement à niveaux, une tuile mouillée sous du butin (Eau et liquides).
+	var ga := s.grille
+	for y in range(5, 10):
+		for x in range(5, 10):
+			ga.poser_contenu(Vector2i(x, y), "eau")
+	for i in 3:
+		var p := Vector2i(12 + i, 20)
+		ga.poser_contenu(p, "eau_ecoulement")
+		ga.poser_eau(ga.idx(p), 1 + i * 3)
+	ga.poser_contenu(Vector2i(6, 6), "butin")
+	verifier(ga.niveau_liquide(Vector2i(6, 6)) == 8 and ga.niveau_liquide(Vector2i(13, 20)) == 4, "l'eau posée pour le test : source sous le butin, écoulement à 4")
+	_comparer_noyau(ga, "gorge, eau", 120)
+	var sm := Simulation.new(9)
+	sm.graine_monde = 9
+	sm.charger_camp()
+	var g := sm.grille
+	verifier(g._noyau != null and g._noyau_pret(), "la fenêtre du monde a son noyau")
+	var eau := 0
+	var portes := 0
+	for i in g.largeur * g.hauteur_grille:
+		var tags: Array = g.contenu_de(g.pos_de(i)).get("tags", [])
+		if "liquide" in tags:
+			eau += 1
+		if "fermee" in tags:
+			portes += 1
+	print("  noyau : fenêtre %d × %d, %d êtres, %d tuiles d'eau, %d portes fermées" % [g.largeur, g.hauteur_grille, sm.vivants().size(), eau, portes])
+	_comparer_noyau(g, "monde", 120)
+	# Les dangers (un feu), la neige et le gel changent les coûts : le noyau doit suivre.
+	var j := joueur_de(sm)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	for k in 40:
+		var p: Vector2i = j.pos + Vector2i(rng.randi_range(-30, 30), rng.randi_range(-30, 30))
+		if g.dans(p) and not g.bloque_passage(p):
+			g.poser_danger(g.idx(p))
+	g.neige = true
+	_comparer_noyau(g, "monde, neige et dangers", 40)
+	g.gel = true
+	_comparer_noyau(g, "monde, gel", 30)
+	g.neige = false
+	g.gel = false
+	# Un chemin vers un être en l'ignorant (la cible qu'on approche), et les miroirs.
+	var cibles := 0
+	var ok_ignorer := true
+	var autres: Array = sm.vivants().filter(func(x: Dictionary) -> bool: return x.id != j.id)
+	autres.sort_custom(func(x: Dictionary, y: Dictionary) -> bool: return Grille.distance(x.pos, j.pos) < Grille.distance(y.pos, j.pos))
+	for x in autres:
+		if cibles >= 12:
+			break
+		cibles += 1
+		var attendu := g._chemin_gd(j.pos, x.pos, false, x.id, false, 800)
+		var obtenu: Array[Vector2i] = g._noyau.chemin(g, j.pos, x.pos, false, x.id, false, 800)
+		if attendu != obtenu:
+			ok_ignorer = false
+	verifier(ok_ignorer and cibles > 0, "un chemin vers un être en l'ignorant : le même (%d cibles)" % cibles)
+	var miroirs := 0
+	for i in g.largeur * g.hauteur_grille:
+		if (g.occ[i] == 1) != g.occupants.has(i):
+			miroirs += 1
+		if (g.danger_a[i] == 1) != g.dangers.has(i):
+			miroirs += 1
+		if int(g.eau_a[i]) != (int(g.niveau_eau[i]) + 1 if g.niveau_eau.has(i) else 0):
+			miroirs += 1
+	var frott := 0
+	for k in 400:
+		var i := rng.randi_range(0, g.largeur * g.hauteur_grille - 1)
+		if not is_equal_approx(g.frott_a[i], g._mult_friction(g.pos_de(i))):
+			frott += 1
+	verifier(miroirs == 0, "les miroirs du noyau (occupants, dangers, eau) reflètent leurs dictionnaires (%d écarts)" % miroirs)
+	verifier(frott == 0, "la friction compilée par tuile est celle de _mult_friction (%d écarts sur 400)" % frott)
+	sm.monde.fermer()
+
+
+## Compare le noyau et le GDScript sur `n` paires tirées au sort dans la grille, toutes les fonctions.
+func _comparer_noyau(g: Grille, nom: String, n: int) -> void:
+	g._noyau_pret()   # les appels directs au noyau ci-dessous ne passent pas par les méthodes publiques : on le prépare (table des contenus, friction)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(nom)
+	var libres: Array[Vector2i] = []
+	for i in g.largeur * g.hauteur_grille:
+		var p := g.pos_de(i)
+		if not g.bloque_passage(p):
+			libres.append(p)
+	if libres.size() < 2:
+		verifier(false, "%s : pas assez de tuiles libres" % nom)
+		return
+	var ecarts := {"chemin": 0, "vue": 0, "obstacle": 0, "cout": 0, "champ": 0, "atteignables": 0}
+	var chemins_non_vides := 0
+	var t_gd := 0
+	var t_cpp := 0
+	for k in n:
+		var a: Vector2i = libres[rng.randi_range(0, libres.size() - 1)]
+		var b: Vector2i = libres[rng.randi_range(0, libres.size() - 1)]
+		if k % 2 == 1:   # une cible proche une fois sur deux : des chemins qui aboutissent
+			b = a + Vector2i(rng.randi_range(-12, 12), rng.randi_range(-12, 12))
+			if not g.dans(b):
+				b = a
+		var volant := k % 5 == 0
+		var eviter := k % 3 == 0
+		var max_n := 800 if k % 20 != 0 else 0   # sans budget une fois sur vingt : l'A* fouille toute la grille (192 × 192 : une demi-seconde en GDScript)
+		var t0 := Time.get_ticks_usec()
+		var c_gd := g._chemin_gd(a, b, volant, "", eviter, max_n)
+		var t1 := Time.get_ticks_usec()
+		var c_cpp: Array[Vector2i] = g._noyau.chemin(g, a, b, volant, "", eviter, max_n)
+		var t2 := Time.get_ticks_usec()
+		t_gd += t1 - t0
+		t_cpp += t2 - t1
+		if c_gd != c_cpp:
+			ecarts.chemin += 1
+		if not c_gd.is_empty():
+			chemins_non_vides += 1
+		if g._ligne_de_vue_gd(a, b) != g._noyau.ligne_de_vue(g, a, b):
+			ecarts.vue += 1
+		if g._premier_obstacle_vue_gd(a, b) != g._noyau.premier_obstacle_vue(g, a, b):
+			ecarts.obstacle += 1
+		for d in Grille.DIRS:
+			if g.cout_pas(a, a + d, volant, eviter) != g._noyau.cout_pas_entre(g, a, a + d, volant, eviter):
+				ecarts.cout += 1
+		if k % 10 == 0:
+			if g._champ_de_vue_gd(a, 12) != g._noyau.champ_de_vue(g, a, 12):
+				ecarts.champ += 1
+			var at_gd := g._atteignables_gd(a, 30, volant, eviter)
+			var at_cpp: Dictionary = g._noyau.atteignables(g, a, 30, volant, eviter)
+			if at_gd != at_cpp or at_gd.keys() != at_cpp.keys():
+				ecarts.atteignables += 1
+	var total := 0
+	for cle in ecarts:
+		total += int(ecarts[cle])
+	verifier(total == 0, "%s : le noyau C++ rend ce que le GDScript rend sur %d paires (%d chemins trouvés) — écarts %s" % [nom, n, chemins_non_vides, str(ecarts)])
+	print("  noyau (%s) : %d chemins, GDScript %.1f ms, C++ %.2f ms" % [nom, n, float(t_gd) / 1000.0, float(t_cpp) / 1000.0])
+
+
 func test_grille() -> void:
 	var s := nouvelle_sim("gorge")
 	var g := s.grille

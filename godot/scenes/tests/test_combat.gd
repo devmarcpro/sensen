@@ -67,6 +67,7 @@ func _ready() -> void:
 			_filtre = str(args[i + 1])
 	verifier(GameData.erreurs.is_empty(), "données valides (Décision — Pipeline de contenu)")
 	_lancer("test_grille")
+	_lancer("test_noyau_cpp")
 	_lancer("test_des")
 	_lancer("test_regles")
 	_lancer("test_simulation")

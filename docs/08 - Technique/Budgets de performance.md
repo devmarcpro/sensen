@@ -50,6 +50,28 @@ La stratégie d'optimisation complète, système par système, est consolidée e
 >
 > **Codé à 8 h 45** (`test_lod_pnj` : loin, un villageois bondit de six tuiles vers son poste sans chemin et s'y tient deux cents ticks ; près, un pas d'une tuile). Un figurant a une routine (des horaires dans son profil) : les bêtes, les itinérants, les véhicules restent entiers. Sonde d'échelle : 197 êtres 1,2 → 0,74 ms par tick ; 2 000 êtres 4,8 → 2,8 à 3,7 ms. Ce qu'un joueur verra : rien, sauf un habitant qui apparaît à l'écran là où sa journée l'a mené.
 
+> [!success] 2026-09-06, 10 h — « réécriture en C++ et optimisation » (designer) : le noyau C++ et la file des compteurs, mesurés
+> Décidé et décrit dans [[Modules de la simulation et le C++]] (section 3). Sonde d'échelle (monde 9, Mokroslav, l'éditeur du designer ouvert à côté — « machine chargée »), ms par tick du monde, avant → après :
+>
+> | êtres | avant | après | ce qui reste |
+> |---|---|---|---|
+> | 197 | 1,68 | **0,52** | régénération 0,13, raid et météo 0,14 |
+> | 501 | 2,25 | **0,72** | décisions 0,16, fin de pas 0,11 |
+> | 1 002 | 2,11 | ≈ 1,1 | |
+> | 2 000 | 4,60 | **1,82** | fin de pas 0,47, monde 0,38, décisions 0,37 |
+>
+> Le gros du gain n'est pas le C++ : `_prochaine("monde")` balayait toutes les entités à chaque pas (2,93 ms des 4,6 à 2 000 êtres — `pas.prochaine` au chrono depuis) ; la file triée validée en tête le ramène à 0,08. Une première version qui rebâtissait « la liste des dus » à chaque tick ne gagnait presque rien : à 2 000 êtres il n'y a que cinq pas par tick, et une reconstruction O(n) en GDScript coûte autant que cinq balayages — d'où la file persistante. Le noyau C++, lui, rend le chemin, la ligne et le champ de vue **deux à trois cents fois** moins chers (`test_noyau_cpp` : arène 1 746 → 6 ms pour 150 chemins ; fenêtre 192 × 192 à 800 nœuds 8 006 → 23 ms) : ce n'est pas ce qui pesait sur le tick d'une ville (les chemins de routine sont en cache, les figurants n'en font pas), c'est ce qui permettra d'en demander plus — un budget de nœuds plus large, un A* sous plus de vingt tuiles, la vision de plus d'êtres — sans revenir sur le budget. Les chiffres du rendu (le regroupement des triangles du terrain et du brouillard) suivent ci-dessous.
+
+> [!note] 2026-09-06, 10 h 30 — le rendu en ville : les triangles regroupés, et ce que la mesure a appris
+> Un morceau de terrain dessinait chaque triangle par une commande de canvas (`draw_primitive`) : quatre cents commandes par morceau, quatorze mille retenues par image. Désormais `_poly` accumule dans un **lot** (`LotTriangles`) pendant qu'un morceau ou le brouillard se dessine, et tout part en **une** commande (`RenderingServer.canvas_item_add_triangle_array`) ; une commande qu'on ne regroupe pas (sprite, caisse, traverse de porte) vide le lot avant elle, l'ordre de dessin ne change pas — regardé sur deux captures de villes : murs, portes, plantes, voiles du brouillard, rien ne diffère à l'œil. `capture.tscn` mesure désormais le rendu lui-même (`viewport_set_measure_render_time` : CPU et GPU du viewport, appels de dessin) et accepte `--sans-lots` pour comparer. Intel UHD 620, Firefox et Steam ouverts à côté, **`--disable-vsync` AVANT le `--`** (après, c'est un argument utilisateur que Godot ignore : la première série mesurait 33 ms d'images calées sur le vsync — le piège de la matinée), et **`--graine 21`** (sans graine, chaque prise tombe dans une autre ville — la première série comparait des cités de 163 à 283 habitants) :
+>
+> | cité « Ouarbah », 247 habitants, 7 cellules (deux prises chacune) | image (moyenne) | pire image | rendu CPU | rendu GPU | appels de dessin |
+> |---|---|---|---|---|---|
+> | triangle par triangle | 18,3 et 24,7 ms | 34 et 56 ms | 2,1 et 2,8 ms | 2,0 et 2,4 ms | 495 |
+> | en lots | **16,9 et 17,0 ms** | **27 et 39 ms** | **1,1 ms** | **1,7 ms** | 529 |
+>
+> Le lot divise par deux le temps de rendu CPU et gagne une à deux millisecondes d'image ; mais le rendu de Godot n'est **pas** ce qui remplit l'image : trois millisecondes sur dix-sept. Le GDScript du client en prend six (nœuds 1,5 à 2, HUD 0,7, texte et minimap 0,5, paperdolls et terrain au redessin), et le reste est le moteur lui-même — trois cents nœuds d'êtres et de végétaux à faire vivre et trier chaque image. Le C++ ne changerait rien à ça ; ce qui le changerait, c'est **moins de nœuds** : les êtres lointains sans nœud du tout (dessinés d'un trait sur une couche, comme le terrain), les végétaux fondus dans leur morceau. C'est la prochaine marche du rendu, et elle est en GDScript.
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Boucle de tick]]
 - **Alimente** : [[Optimisation — principes]], [[Entités et pathfinding — performance]], [[Ordre de vérification]]

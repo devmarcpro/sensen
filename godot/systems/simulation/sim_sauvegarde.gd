@@ -61,6 +61,7 @@ static func sauvegarder(sim: Simulation, nom: String = "") -> bool:
 			x.horloge = "monde"
 			x.compteur = sim.horloge_monde.ticks
 			x.action_en_cours = {}
+			sim._dus_invalider()
 	sim.combats.clear()
 	var j := {}
 	for e in sim.entites.values():

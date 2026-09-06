@@ -456,7 +456,7 @@ static func _oublier_glyphe(sim: Simulation, pos: Vector2i) -> void:
 	var idx := sim.grille.idx(pos)
 	if sim.feux.has(idx) or "lave" in sim.grille.contenu_de(pos).get("tags", []):
 		return
-	sim.grille.dangers.erase(idx)
+	sim.grille.oter_danger(idx)
 
 
 ## Le Sceau : déclencher à distance l'un de ses glyphes — la charge part sur la tuile, occupée ou non.

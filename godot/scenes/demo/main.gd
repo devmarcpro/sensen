@@ -1714,11 +1714,80 @@ func _dessiner_superpositions() -> void:
 			draw_string(ThemeDB.fallback_font, base + Vector2(0.0, -12.0 * (f.lignes.size() - 1 - k)), str(f.lignes[k]), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.95, 0.9, 0.5, a))
 
 
+## Le lot de triangles (2026-09-06, « réécriture C++ et optimisation ») : un morceau de terrain dessinait chaque
+## triangle par une commande de canvas (draw_primitive) — quatre cents commandes par morceau, quatorze mille par
+## image que le rendu de Godot payait une à une. Pendant qu'un lot est ouvert sur un CanvasItem, `_poly` y accumule
+## ses triangles (points, couleurs, UV) et tout part en UNE commande (canvas_item_add_triangle_array) à la fermeture.
+## Une commande qu'on ne regroupe pas (texture, rect, ligne) vide le lot avant elle : l'ordre de dessin ne change pas.
+class LotTriangles:
+	var pts := PackedVector2Array()
+	var cols := PackedColorArray()
+	var uvs := PackedVector2Array()
+
+	func ajouter(poly: PackedVector2Array, col: Color, uv: PackedVector2Array) -> void:
+		var avec_uv := uv.size() == poly.size()
+		for i in range(1, poly.size() - 1):
+			pts.append(poly[0])
+			pts.append(poly[i])
+			pts.append(poly[i + 1])
+			cols.append(col)
+			cols.append(col)
+			cols.append(col)
+			if avec_uv:
+				uvs.append(uv[0])
+				uvs.append(uv[i])
+				uvs.append(uv[i + 1])
+			else:   # sans UV, draw_primitive donnait (0, 0) : la même chose
+				uvs.append(Vector2.ZERO)
+				uvs.append(Vector2.ZERO)
+				uvs.append(Vector2.ZERO)
+
+	func vider(ci: CanvasItem) -> void:
+		if pts.is_empty():
+			return
+		var idx := PackedInt32Array()
+		idx.resize(pts.size())
+		for i in pts.size():
+			idx[i] = i
+		RenderingServer.canvas_item_add_triangle_array(ci.get_canvas_item(), idx, pts, cols, uvs)
+		pts.clear()
+		cols.clear()
+		uvs.clear()
+
+
+static var _lots: Dictionary = {}   # id d'instance du CanvasItem → LotTriangles ouvert
+var lots_actifs := true             # false (capture --sans-lots) : chaque triangle part seul, comme avant — pour mesurer
+
+
+func _lot_ouvrir(ci: CanvasItem) -> void:
+	if lots_actifs:
+		_lots[ci.get_instance_id()] = LotTriangles.new()
+
+
+## Envoie les triangles en attente (avant une commande qu'on ne regroupe pas) ; le lot reste ouvert.
+static func _lot_vider(ci: CanvasItem) -> void:
+	var lot: LotTriangles = _lots.get(ci.get_instance_id())
+	if lot != null:
+		lot.vider(ci)
+
+
+static func _lot_fermer(ci: CanvasItem) -> void:
+	var lot: LotTriangles = _lots.get(ci.get_instance_id())
+	if lot != null:
+		lot.vider(ci)
+		_lots.erase(ci.get_instance_id())
+
+
 ## Un polygone convexe dessiné en éventail de triangles par draw_primitive : draw_colored_polygon triangule en float32
 ## et juge dégénérés les polygones aux coordonnées monde (~1e6 px) — « Invalid polygon data » (brouillard, sol, blocs).
+## Dans un lot ouvert (terrain, brouillard), les triangles s'accumulent au lieu de partir un par un.
 static func _poly(ci: CanvasItem, pts: PackedVector2Array, col: Color, uvs: PackedVector2Array = PackedVector2Array()) -> void:
 	# Les UV portent la position DANS LE PLAN de la face (designer 2026-09-01, point 50) : le grain du
 	# shader suit alors l'inclinaison du sol et des parois au lieu d'être plaqué à plat sur l'écran.
+	var lot: LotTriangles = _lots.get(ci.get_instance_id())
+	if lot != null:
+		lot.ajouter(pts, col, uvs)
+		return
 	var cols := PackedColorArray([col, col, col])
 	var avec_uv := uvs.size() == pts.size()
 	for i in range(1, pts.size() - 1):
@@ -1833,6 +1902,7 @@ func _dessiner_morceau(ci: CanvasItem, coin: Vector2i) -> void:
 	var y0: int = g.origine.y + coin.y * MORCEAU
 	var x1 := mini(g.origine.x + g.largeur - 1, x0 + MORCEAU - 1)
 	var y1 := mini(g.origine.y + g.hauteur_grille - 1, y0 + MORCEAU - 1)
+	_lot_ouvrir(ci)   # tout le morceau en une commande de triangles
 	for s in range(x0 + y0, x1 + y1 + 1):
 		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
 			var t := Vector2i(x, s - x)
@@ -1841,6 +1911,7 @@ func _dessiner_morceau(ci: CanvasItem, coin: Vector2i) -> void:
 			_dessine_tuile(ci, t)
 			if "vegetation" in g.contenu_de(t).get("tags", []):
 				_assurer_vegetal(t)
+	_lot_fermer(ci)
 
 
 ## La profondeur d'un billboard (z relatif) : x + y, ramené à la fenêtre (les coordonnées monde dépassent CANVAS_ITEM_Z_MAX).
@@ -1954,6 +2025,7 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 		_dessiner_porte(ci, g, t, c, contenu, teinte)
 	if "contenant" in contenu.get("tags", []):   # coffre ou butin : une caisse
 		var cc := (Color(0.55, 0.38, 0.18) if "coffre" in contenu.tags else Color(0.75, 0.65, 0.3)) * teinte
+		_lot_vider(ci)
 		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc)
 		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc.darkened(0.5), false, 1.0)
 
@@ -1969,6 +2041,7 @@ func _dessiner_sprite_tuile(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, 
 	if tex == null:
 		return
 	var l := TW * 0.9
+	_lot_vider(ci)   # le sprite se dessine par-dessus les triangles déjà posés
 	ci.draw_texture_rect(tex, Rect2(c + Vector2(-l * 0.5, TH * 0.4 - l), Vector2(l, l)), false, teinte)
 
 
@@ -1989,6 +2062,7 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 	var x1 := mini(g.origine.x + g.largeur - 1, j.pos.x + RAYON_VUE)
 	var y0 := maxi(g.origine.y, j.pos.y - RAYON_VUE)
 	var y1 := mini(g.origine.y + g.hauteur_grille - 1, j.pos.y + RAYON_VUE)
+	_lot_ouvrir(ci)   # tous les voiles en une commande de triangles
 	for s in range(x0 + y0, x1 + y1 + 1):
 		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
 			var t := Vector2i(x, s - x)
@@ -2009,6 +2083,7 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 				_dessine_bloc(ci, g, t, c, Color(0.38, 0.38, 0.44))   # un mur mémorisé : le même bloc, sombre et opaque — pas un voile qu'on voit au travers
 				continue
 			_poly(ci, PackedVector2Array([c + Vector2(-TW * 0.5, 0), c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5)]), voile)
+	_lot_fermer(ci)
 
 
 ## Un bloc de mur : le dessus et les deux faces avant (sud-ouest, sud-est) ; une face n'est
@@ -2486,6 +2561,7 @@ func _dessiner_porte(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, contenu
 	_poly(ci, PackedVector2Array([p0, p1, p1 + haut, p0 + haut]), bois)
 	_poly(ci, PackedVector2Array([p0, p1, p1 + haut * 0.08, p0 + haut * 0.08]), bois.darkened(0.3))
 	var trav := (p0 + p1) * 0.5 + haut * 0.55
+	_lot_vider(ci)   # la traverse et la poignée par-dessus le battant
 	ci.draw_line(p0 + haut * 0.5, p1 + haut * 0.5, bois.darkened(0.25), 1.0)   # la traverse
 	ci.draw_circle(trav.lerp(p1 + haut * 0.55, 0.45), 1.6, Color(0.85, 0.75, 0.35) * teinte)   # la poignée
 

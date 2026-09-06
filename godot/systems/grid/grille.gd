@@ -20,12 +20,21 @@ var c_data := PackedInt32Array()
 var contenu_ids: Array[String] = [""]    # index de contenu → id (0 = rien)
 var contenu_defs: Dictionary = {}         # id → définition (tile_contents.json)
 var occupants: Dictionary = {}            # index de tuile → id d'entité
-var dep: Dictionary = {}                  # combat_rules/deplacement
-var hauteur_oeil: int = 1
+var dep: Dictionary = {}:                 # combat_rules/deplacement
+	set(v):
+		dep = v
+		_noyau_sale = true
+var hauteur_oeil: int = 1:
+	set(v):
+		hauteur_oeil = v
+		_noyau_sale = true
 var decouvert: Dictionary = {}            # index de tuile → true : tuiles déjà vues (brouillard de guerre)
 var decouvertes_recentes: PackedInt32Array = PackedInt32Array()   # les index découverts depuis que le client a lu (le terrain par morceaux, 2026-09-06)
 var materiaux: Dictionary = {}            # index de tuile → id de matériau (filons) ; sinon materiau_defaut
-var materiau_defaut: String = ""          # le matériau des murs ordinaires (materiau_mur du thème)
+var materiau_defaut: String = "":         # le matériau des murs ordinaires (materiau_mur du thème)
+	set(v):
+		materiau_defaut = v
+		_frott_sale = true
 var meubles: Dictionary = {}              # index de tuile → id de meuble (data/meubles/)
 var stations_fixes: Dictionary = {}       # index de tuile → id de station posée
 var niveau_eau: Dictionary = {}           # index de tuile → niveau 1-7 d'un écoulement (Eau et liquides) ; une source vaut 8
@@ -35,6 +44,26 @@ var gel := false                          # sous 0 °C : l'eau est de la glace, 
 var sols: Dictionary = {}                 # index de tuile → id de matériau de sol (surface) ; vide = sol par défaut
 var origine := Vector2i.ZERO              # coordonnée monde de la tuile locale (0, 0) — fenêtre glissante (Monde)
 var modifies: Dictionary = {}             # index de tuile → true : tuiles modifiées depuis la construction (capture par cellule)
+
+## Le noyau C++ (SensenGrille, GDExtension `sensen_grille`, Modules de la simulation et le C++, section 3, 2026-09-06) :
+## présent quand la bibliothèque est chargée, sinon tout se calcule en GDScript — les mêmes fonctions, les mêmes
+## résultats (test_noyau_cpp les compare). Le noyau lit l'état de la grille au moment de l'appel : les tableaux
+## compacts ci-dessous sont les MIROIRS des dictionnaires (occupants, dangers, niveau_eau, sols), tenus à jour par
+## les méthodes placer/liberer, poser_danger/oter_danger, poser_eau/oter_eau, recompiler_sols — écrire dans le
+## dictionnaire sans passer par elles désynchronise le noyau (test_noyau_cpp vérifie aussi les miroirs).
+static var noyau_actif: bool = true        # false : tout en GDScript (mesures, équivalence)
+static var _noyau_classe: int = -1         # -1 pas encore regardé, 0 la classe est absente, 1 présente
+var _noyau: RefCounted = null
+var _noyau_sale := true                    # règles ou œil changés : reconfigurer le noyau
+var _table_n := -1                         # taille de contenu_ids à la dernière table de drapeaux
+var occ := PackedByteArray()               # miroir de occupants : 1 = occupée
+var danger_a := PackedByteArray()          # miroir de dangers : 1 = à éviter
+var eau_a := PackedByteArray()             # miroir de niveau_eau : niveau + 1 (0 = pas d'entrée)
+var frott_a := PackedFloat64Array()        # le multiplicateur de friction de chaque tuile (sols, materiau_defaut)
+var _frott_sale := true
+var _n_occ := 0                            # les tailles des dictionnaires telles que les miroirs les ont vues (_miroirs_a_jour)
+var _n_danger := 0
+var _n_eau := 0
 
 
 ## Le niveau d'eau d'une tuile (Eau et liquides) : 8 pour une source, 1-7 pour un écoulement, 0 sinon.
@@ -63,6 +92,11 @@ func _init(l: int, h: int) -> void:
 	sol.resize(l * h)
 	contenu.resize(l * h)
 	c_data.resize(l * h)
+	occ.resize(l * h)
+	danger_a.resize(l * h)
+	eau_a.resize(l * h)
+	if noyau_present():
+		_noyau = ClassDB.instantiate(&"SensenGrille")
 
 
 ## Construit la grille d'une arène (data/prototype_arenas) avec les règles et contenus.
@@ -100,7 +134,7 @@ static func depuis_etage(etage: Dictionary, contenus: Dictionary, regles_dep: Di
 		g.poser_contenu(Vector2i(int(i) % g.largeur, int(i) / g.largeur), "porte_fermee")
 	for i in etage.get("lave", {}).keys():   # Eau et liquides : les mares de lave
 		g.poser_contenu(Vector2i(int(i) % g.largeur, int(i) / g.largeur), "lave")
-		g.dangers[int(i)] = true
+		g.poser_danger(int(i))
 	return g
 
 
@@ -131,7 +165,7 @@ func h(p: Vector2i) -> int:
 func poser_contenu(p: Vector2i, id: String) -> void:
 	var avant: Array = contenu_de(p).get("tags", [])
 	if "liquide" in avant:   # le contenu remplacé (du butin posé sur l'eau) : la tuile reste mouillée (Eau et liquides)
-		niveau_eau[idx(p)] = 8 if "source" in avant else int(niveau_eau.get(idx(p), 1))
+		poser_eau(idx(p), 8 if "source" in avant else int(niveau_eau.get(idx(p), 1)))
 	var i := contenu_ids.find(id)
 	if i < 0:
 		contenu_ids.append(id)
@@ -167,11 +201,83 @@ func occupant(p: Vector2i) -> String:
 
 
 func placer(id: String, p: Vector2i) -> void:
-	occupants[idx(p)] = id
+	var i := idx(p)
+	occupants[i] = id
+	if i >= 0 and i < occ.size():
+		occ[i] = 1
+	_n_occ = occupants.size()
 
 
 func liberer(p: Vector2i) -> void:
-	occupants.erase(idx(p))
+	var i := idx(p)
+	occupants.erase(i)
+	if i >= 0 and i < occ.size():
+		occ[i] = 0
+	_n_occ = occupants.size()
+
+
+## Une tuile à éviter en chemin (le feu, la lave, un glyphe) — et son miroir pour le noyau.
+func poser_danger(i: int) -> void:
+	dangers[i] = true
+	if i >= 0 and i < danger_a.size():
+		danger_a[i] = 1
+	_n_danger = dangers.size()
+
+
+func oter_danger(i: int) -> void:
+	dangers.erase(i)
+	if i >= 0 and i < danger_a.size():
+		danger_a[i] = 0
+	_n_danger = dangers.size()
+
+
+## Le niveau d'eau mémorisé d'une tuile (Eau et liquides) — et son miroir pour le noyau.
+func poser_eau(i: int, niveau: int) -> void:
+	niveau_eau[i] = niveau
+	if i >= 0 and i < eau_a.size():
+		eau_a[i] = clampi(niveau + 1, 0, 255)
+	_n_eau = niveau_eau.size()
+
+
+func oter_eau(i: int) -> void:
+	niveau_eau.erase(i)
+	if i >= 0 and i < eau_a.size():
+		eau_a[i] = 0
+	_n_eau = niveau_eau.size()
+
+
+## Le garde-fou des miroirs : une écriture directe dans le dictionnaire (`grille.dangers[i] = true`, comme un test le
+## fait) change sa taille sans passer par les méthodes ; avant chaque calcul du noyau, une taille qui ne correspond
+## plus à celle vue par le miroir le fait recompiler depuis le dictionnaire. Un échange à taille égale passerait,
+## d'où les méthodes ; ceci rattrape le cas courant.
+func _miroirs_a_jour() -> void:
+	var n := largeur * hauteur_grille
+	if occupants.size() != _n_occ:
+		occ.fill(0)
+		for k in occupants:
+			var i := int(k)
+			if i >= 0 and i < n:
+				occ[i] = 1
+		_n_occ = occupants.size()
+	if dangers.size() != _n_danger:
+		danger_a.fill(0)
+		for k in dangers:
+			var i := int(k)
+			if i >= 0 and i < n:
+				danger_a[i] = 1
+		_n_danger = dangers.size()
+	if niveau_eau.size() != _n_eau:
+		eau_a.fill(0)
+		for k in niveau_eau:
+			var i := int(k)
+			if i >= 0 and i < n:
+				eau_a[i] = clampi(int(niveau_eau[k]) + 1, 0, 255)
+		_n_eau = niveau_eau.size()
+
+
+## À appeler après avoir rempli `sols` en bloc (ou changé materiau_defaut) : la friction se recompile au prochain calcul.
+func recompiler_sols() -> void:
+	_frott_sale = true
 
 
 ## Distance de Tchebychev — la mesure du CONTACT et du déplacement : deux cases en diagonale sont voisines.
@@ -237,13 +343,39 @@ func _mult_friction(t: Vector2i) -> float:
 	var sm: Dictionary = GameData.config("combat_rules").get("stats_materiau", {})
 	if sm.is_empty():
 		return 1.0
-	var mid := str(sols.get(idx(t), materiau_defaut))
+	return _frott_de(str(sols.get(idx(t), materiau_defaut)), sm)
+
+
+## Le multiplicateur de friction d'un matériau de sol (la formule de « Application des stats de matériau »).
+static func _frott_de(mid: String, sm: Dictionary) -> float:
 	var m: Dictionary = GameData.catalogues.materials.get(mid, {})
 	if m.is_empty():
 		return 1.0
 	var f := float(m.get("stats", {}).get("friction", 50.0))
 	return clampf(float(sm.get("friction_base", 0.85)) + f * float(sm.get("friction_par_point", 0.003)),
 		float(sm.get("friction_min", 0.85)), float(sm.get("friction_max", 1.15)))
+
+
+## Le miroir de friction par tuile pour le noyau : recompilé quand `sols` ou materiau_defaut ont changé.
+func _recompiler_frott() -> void:
+	_frott_sale = false
+	var n := largeur * hauteur_grille
+	if frott_a.size() != n:
+		frott_a.resize(n)
+	var sm: Dictionary = GameData.config("combat_rules").get("stats_materiau", {})
+	if sm.is_empty():
+		frott_a.fill(1.0)
+		return
+	frott_a.fill(_frott_de(materiau_defaut, sm))
+	var cache := {}   # matériau → multiplicateur : une fenêtre a des milliers de tuiles et une dizaine de sols
+	for k in sols:
+		var i := int(k)
+		if i < 0 or i >= n:
+			continue
+		var mid := str(sols[k])
+		if not cache.has(mid):
+			cache[mid] = _frott_de(mid, sm)
+		frott_a[i] = cache[mid]
 
 
 ## Une chute (descente ≥ chute_delta) est autorisée en un pas volontaire : dégâts = (niveaux − franchise) × 5.
@@ -258,6 +390,14 @@ func degats_chute(niveaux: int) -> int:
 ## A* 8-directions sur les coûts de pente. Retourne les étapes SANS la case de départ.
 ## `ignorer` : id d'entité dont on ignore l'occupation (la cible, pour s'approcher d'elle).
 func chemin(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignorer: String = "", eviter_nage: bool = false, max_noeuds: int = 0) -> Array[Vector2i]:
+	if _noyau_pret():
+		var res: Array[Vector2i] = _noyau.chemin(self, depart, arrivee, volant, ignorer, eviter_nage, max_noeuds)
+		return res
+	return _chemin_gd(depart, arrivee, volant, ignorer, eviter_nage, max_noeuds)
+
+
+## La version GDScript du chemin — la référence dont le noyau C++ est la transcription.
+func _chemin_gd(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignorer: String = "", eviter_nage: bool = false, max_noeuds: int = 0) -> Array[Vector2i]:
 	var vide: Array[Vector2i] = []
 	if depart == arrivee or not dans(arrivee):
 		return vide
@@ -338,6 +478,12 @@ static func _tas_pop(tas: Array[Vector3i]) -> Vector3i:
 
 ## Dijkstra borné : tuile → coût en ticks pour l'atteindre (UI : coûts sur les tuiles atteignables).
 func atteignables(depart: Vector2i, budget: int, volant: bool = false, eviter_nage: bool = false) -> Dictionary:
+	if _noyau_pret():
+		return _noyau.atteignables(self, depart, budget, volant, eviter_nage)
+	return _atteignables_gd(depart, budget, volant, eviter_nage)
+
+
+func _atteignables_gd(depart: Vector2i, budget: int, volant: bool = false, eviter_nage: bool = false) -> Dictionary:
 	var couts := {depart: 0}
 	var file: Array[Vector2i] = [depart]
 	while not file.is_empty():
@@ -363,6 +509,12 @@ func atteignables(depart: Vector2i, budget: int, volant: bool = false, eviter_na
 
 ## Ligne de vue a → b : un relief (ou un mur) plus haut que la ligne des yeux coupe la vue.
 func ligne_de_vue(a: Vector2i, b: Vector2i) -> bool:
+	if _noyau_pret():
+		return _noyau.ligne_de_vue(self, a, b)
+	return _ligne_de_vue_gd(a, b)
+
+
+func _ligne_de_vue_gd(a: Vector2i, b: Vector2i) -> bool:
 	if a == b:
 		return true
 	if not dans(a) or not dans(b):   # une position d'une autre grille : hors de vue
@@ -380,6 +532,12 @@ func ligne_de_vue(a: Vector2i, b: Vector2i) -> bool:
 
 ## La première tuile qui coupe la vue de a vers b (même parcours que ligne_de_vue), ou (-1, -1) si la vue est dégagée.
 func premier_obstacle_vue(a: Vector2i, b: Vector2i) -> Vector2i:
+	if _noyau_pret():
+		return _noyau.premier_obstacle_vue(self, a, b)
+	return _premier_obstacle_vue_gd(a, b)
+
+
+func _premier_obstacle_vue_gd(a: Vector2i, b: Vector2i) -> Vector2i:
 	if a == b or not dans(a) or not dans(b):
 		return Vector2i(-1, -1)
 	var ha := float(h(a) + hauteur_oeil)
@@ -427,3 +585,76 @@ func anneau(centre: Vector2i, r: int) -> Array[Vector2i]:
 			if p != centre and dans(p):
 				res.append(p)
 	return res
+
+
+## Le champ de vue depuis `pos` à `portee` (Tchebychev) : les index des tuiles de la grille en ligne de vue, dans
+## l'ordre du balayage (dy puis dx) — c'est la boucle de Simulation.maj_vision, que le noyau calcule d'un trait.
+func champ_de_vue(pos: Vector2i, portee: int) -> PackedInt32Array:
+	if _noyau_pret():
+		return _noyau.champ_de_vue(self, pos, portee)
+	return _champ_de_vue_gd(pos, portee)
+
+
+func _champ_de_vue_gd(pos: Vector2i, portee: int) -> PackedInt32Array:
+	var res := PackedInt32Array()
+	if not dans(pos):
+		return res
+	for dy in range(-portee, portee + 1):
+		for dx in range(-portee, portee + 1):
+			var t := pos + Vector2i(dx, dy)
+			if dans(t) and _ligne_de_vue_gd(pos, t):
+				res.append(idx(t))
+	return res
+
+
+# ---------------------------------------------------------------- le noyau C++
+
+## La classe SensenGrille est-elle chargée (GDExtension sensen_grille) ?
+static func noyau_present() -> bool:
+	if _noyau_classe < 0:
+		_noyau_classe = 1 if ClassDB.class_exists(&"SensenGrille") else 0
+	return _noyau_classe == 1
+
+
+## Cette grille calcule-t-elle avec le noyau ? Le prépare au besoin (règles, œil, table des contenus, friction).
+func _noyau_pret() -> bool:
+	if _noyau == null or not noyau_actif:
+		return false
+	var n := largeur * hauteur_grille
+	if hauteurs.size() != n or contenu.size() != n:
+		return false   # une grille dont les tableaux ont été remplacés par d'autres tailles : le GDScript juge
+	_miroirs_a_jour()
+	if _frott_sale:
+		_recompiler_frott()
+	if _noyau_sale or contenu_ids.size() != _table_n:
+		_noyau.configurer(dep, hauteur_oeil, _table_contenus())
+		_noyau_sale = false
+		_table_n = contenu_ids.size()
+	return true
+
+
+## La table des drapeaux par index de contenu, telle que le noyau la lit (SensenGrille::Drapeaux).
+func _table_contenus() -> PackedInt32Array:
+	var t := PackedInt32Array()
+	t.resize(contenu_ids.size())
+	for i in range(1, contenu_ids.size()):
+		var def: Dictionary = contenu_defs.get(contenu_ids[i], {})
+		var tags: Array = def.get("tags", [])
+		var f := 0
+		if bool(def.get("bloque_passage", false)):
+			f |= 1
+		if "fermee" in tags:
+			f |= 2
+		if "nage" in tags:
+			f |= 4
+		if "liquide" in tags:
+			f |= 8
+		if "source" in tags:
+			f |= 16
+		if "ecoulement" in tags:
+			f |= 32
+		if bool(def.get("bloque_vue", false)):
+			f |= 64
+		f |= (int(def.get("hauteur_vue", 0)) & 0xFF) << 8
+		t[i] = f
+	return t

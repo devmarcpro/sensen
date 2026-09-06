@@ -50,7 +50,7 @@ Le design vit dans `docs/`, un coffre Obsidian de notes atomiques. **Le callout 
 1. **Le callout daté s'écrit AVANT le code.** Le code ne doit jamais être en avance sur les notes.
 2. **Tout en données** : un JSON par entrée, schéma validé au démarrage, **aucun nombre de gameplay en dur**.
 3. **Un bloc de configuration se FUSIONNE, il ne se réécrit pas.** Remplacer un bloc au lieu de l'étendre efface des réglages en silence — c'est arrivé deux fois sur le bloc `ia`.
-4. **GDScript typé**, commentaires en français, sobres, dans le style existant. Pas de GDExtension — sauf pour le noyau pur de calcul (grille : chemins, vision), après mesure, décidé le 2026-09-05 dans `docs/08 - Technique/Modules de la simulation et le C++.md`. L'état et les règles restent en GDScript et en données.
+4. **GDScript typé**, commentaires en français, sobres, dans le style existant. Une seule GDExtension, `sensen_grille` (`cpp/`, bâtie par `tools/build_cpp.ps1`, la DLL versionnée dans `godot/addons/sensen_grille/bin/`) : le **noyau pur de calcul de la grille** — chemins, atteignables, lignes et champ de vue, composantes — transcrit ligne à ligne de `grille.gd`, qui garde ses versions GDScript comme référence et comme repli (`test_noyau_cpp` prouve qu'ils rendent la même chose). Décidé le 2026-09-05 dans `docs/08 - Technique/Modules de la simulation et le C++.md`, codé le 2026-09-06. **L'état, les règles et les données restent en GDScript et en JSON** : on n'y porte jamais une règle de jeu, seulement une fonction pure sur des tableaux, mesurée chaude avant.
 5. **Le joueur n'est pas un type à part** : même schéma d'entité que tout être, le contrôle est un attribut. On teste la présence d'un bloc, jamais le type.
 6. **Aucun asset** : tout se dessine par code. C'est une phase, pas un dogme.
 7. **Ne touche jamais à `.obsidian/`.**
@@ -70,6 +70,8 @@ Plus **les sondes concernées** (`godot/scenes/tests/sonde_*.tscn` : écrans, IA
 **Un seul Godot à la fois.** Deux instances en parallèle faussent toute mesure de performance — le budget de génération d'étage a été déclaré cassé à tort pour cette raison.
 
 **Un test ciblé** : `-- --seul <fragment>` — vingt secondes au lieu de sept minutes.
+
+**Si `cpp/` a changé** : `powershell -ExecutionPolicy Bypass -File tools/build_cpp.ps1` (Build Tools C++, SCons ; godot-cpp se clone tout seul dans `cpp/godot-cpp/`), puis `--import`, puis `-- --seul test_noyau_cpp` : le noyau doit rendre exactement ce que `grille.gd` rend. La DLL bâtie se commet avec le code qui l'a produite.
 
 **`verif_scripts.py` n'est pas optionnel** : la suite ne charge jamais les scripts d'écran, donc une Parse Error dans `main.gd` la laisse verte et tue le jeu.
 

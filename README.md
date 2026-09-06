@@ -118,6 +118,7 @@ L'étape 11 (coop) ne commencera pas avant qu'un solo soit jugé bon.
 | [`godot/data/`](godot/data/) | **Tout le contenu du jeu, en JSON** — un fichier par entrée, rangé en sous-dossiers thématiques ([README](godot/data/README.md)) |
 | [`docs/`](docs/) | Le design complet : un **coffre Obsidian** de notes atomiques, reliées et navigables |
 | [`tools/`](tools/) | Outillage — `check_vault.py` (intégrité du coffre) et les générateurs de données |
+| [`cpp/`](cpp/) | Le **noyau C++ de la grille** (GDExtension `sensen_grille` : chemins, vision, composantes), bâti par `tools/build_cpp.ps1` ; la DLL est dans `godot/addons/sensen_grille/bin/` |
 | [`archive/`](archive/) | Le GDD source monolithique (v2.0) — référence historique ; les notes de `docs/` font foi |
 | [`AGENT.md`](AGENT.md) | Le prompt de développement autonome — règles de travail, boucle de validation, ordre |
 
@@ -128,6 +129,7 @@ L'étape 11 (coop) ne commencera pas avant qu'un solo soit jugé bon.
 - `systems/simulation/sim_*.gd` : les **règles** de la simulation en treize bibliothèques statiques (`SimLieux`, `SimTerrain`, `SimCamp`, `SimPnj`, `SimTerritoire`, `SimVilles`, `SimPerimetres`, `SimRoyaumes`, `SimElevage`, `SimObjets`, `SimSauvegarde`, `SimFabrication`, `SimTalents`) — chaque fonction reçoit la simulation en premier paramètre, l'état reste dans `Simulation`, les délégués en fin de `simulation.gd` gardent l'API (découpage par `tools/fragmenter.py`, décidé le 2026-09-05 : `docs/08 - Technique/Modules de la simulation et le C++.md`).
 - `scenes/demo/ecrans.gd` (`Ecrans`) ouvre, ferme et dispatche les écrans ; leur construction vit dans `scenes/demo/ecrans/ecrans_*.gd`, sept bibliothèques statiques (`EcransListe`, `EcransDialogue`, `EcransGestion`, `EcransCreation`, `EcransInventaire`, `EcransAtelier`, `EcransFeuille`) qui reçoivent l'objet `Ecrans` en premier paramètre — le même découpage que la simulation (`tools/fragmenter.py --cible ecrans`).
 - `scenes/entities/creature.tscn` est la scène **unique** de tout être — le joueur n'est pas un type à part. Rig et équipement visible viennent des données.
+- `systems/grid/grille.gd` (`Grille`) tient l'état de la grille ; ses calculs chauds — A*, atteignables, ligne et champ de vue, composante — passent par le **noyau C++** `SensenGrille` (`addons/sensen_grille/`, sources dans `cpp/`) quand la bibliothèque est chargée, et par leurs versions GDScript sinon : mêmes résultats, `test_noyau_cpp` les compare paire par paire (décidé le 2026-09-05, codé le 2026-09-06 : `docs/08 - Technique/Modules de la simulation et le C++.md`).
 
 ---
 
@@ -162,6 +164,10 @@ La suite est découpée par domaine depuis le 2026-09-06 : `scenes/tests/test_co
 ### Les autres outils
 
 ```powershell
+# Le noyau C++ de la grille : Visual Studio Build Tools (C++ x64) et SCons (pip install scons) ; godot-cpp se clone tout seul.
+# Sort la DLL dans godot/addons/sensen_grille/bin/ — puis --import, puis -- --seul test_noyau_cpp (le C++ rend ce que le GDScript rend).
+powershell -ExecutionPolicy Bypass -File tools/build_cpp.ps1
+
 # Le découpage des fichiers god en bibliothèques statiques (rapport seul sans --ecrire ; se relance depuis l'original :
 # git checkout du fichier puis rm du dossier des modules) — cibles : simulation (Sim…), ecrans (Ecrans…)
 python tools/fragmenter.py --cible simulation --ecrire

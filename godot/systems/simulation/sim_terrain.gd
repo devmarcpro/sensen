@@ -163,11 +163,11 @@ static func _retirer_eau(sim: Simulation, t: Vector2i, tout: bool = false) -> vo
 	if niveau <= 0 or niveau >= 8:
 		return
 	if niveau > 1 and not tout:
-		sim.grille.niveau_eau[ti] = niveau - 1
+		sim.grille.poser_eau(ti, niveau - 1)
 		sim.eau_active[ti] = true
 	else:
 		sim.grille.contenu[ti] = 0
-		sim.grille.niveau_eau.erase(ti)
+		sim.grille.oter_eau(ti)
 		EventBus.emettre(&"journal", [&"journal.retrait", {"x": t.x, "y": t.y}])
 	sim.grille.marquer(t)
 	sim.lumiere_sale = true
@@ -206,7 +206,7 @@ static func _poser_eau(sim: Simulation, q: Vector2i, niveau: int) -> void:
 		return
 	var nouveau := sim.grille.niveau_liquide(q) == 0
 	sim.grille.poser_contenu(q, "eau_ecoulement")
-	sim.grille.niveau_eau[qi] = clampi(niveau, 1, 7)
+	sim.grille.poser_eau(qi, clampi(niveau, 1, 7))
 	sim.grille.marquer(q)
 	sim.eau_active[qi] = true
 	sim.lumiere_sale = true
@@ -256,7 +256,7 @@ static func _tiquer_lave(sim: Simulation, tick: int) -> void:
 				if fige.is_empty():
 					fige = str(lv.get("pierre_ecoulement", "basalte"))
 				sim.grille.contenu[sim.grille.idx(q)] = 0   # l'écoulement s'évapore au contact
-				sim.grille.niveau_eau.erase(sim.grille.idx(q))
+				sim.grille.oter_eau(sim.grille.idx(q))
 				sim.grille.marquer(q)
 				EventBus.emettre(&"tile_changed", [q])
 			else:
@@ -270,7 +270,7 @@ static func _figer_lave(sim: Simulation, t: Vector2i, materiau: String) -> void:
 	var idx := sim.grille.idx(t)
 	sim.grille.poser_contenu(t, "obsidienne_figee")
 	sim.grille.materiaux[idx] = materiau
-	sim.grille.dangers.erase(idx)
+	sim.grille.oter_danger(idx)
 	sim.grille.marquer(t)
 	sim.lumiere_sale = true
 	EventBus.emettre(&"journal", [&"journal.lave_figee", {"x": t.x, "y": t.y}])
@@ -301,7 +301,7 @@ static func _enflammer(sim: Simulation, t: Vector2i) -> bool:
 	if flammabilite_de(sim, t) <= 0 or sim.feux.has(sim.grille.idx(t)):
 		return false
 	sim.feux[sim.grille.idx(t)] = {"reste": int(sim.regles.r.get("feu", {}).get("duree_ticks", 80))}
-	sim.grille.dangers[sim.grille.idx(t)] = true
+	sim.grille.poser_danger(sim.grille.idx(t))
 	sim.lumiere_sale = true
 	EventBus.emettre(&"journal", [&"journal.feu_prend", {"x": t.x, "y": t.y}])
 	EventBus.emettre(&"tile_changed", [t])
@@ -321,7 +321,7 @@ static func _tiquer_feux(sim: Simulation, tick: int) -> void:
 	if "eteint_feux" in effets or "neige" in effets or sim.grille.neige:
 		var n := sim.feux.size()
 		for idx in sim.feux.keys():
-			sim.grille.dangers.erase(idx)
+			sim.grille.oter_danger(int(idx))
 			EventBus.emettre(&"tile_changed", [sim.grille.pos_de(int(idx))])
 		sim.feux.clear()
 		sim.lumiere_sale = true
@@ -353,7 +353,7 @@ static func _tiquer_feux(sim: Simulation, tick: int) -> void:
 static func _consumer(sim: Simulation, t: Vector2i) -> void:
 	var idx := sim.grille.idx(t)
 	sim.feux.erase(idx)
-	sim.grille.dangers.erase(idx)
+	sim.grille.oter_danger(idx)
 	if sim.grille.contenu[idx] != 0 and not ("contenant" in sim.grille.contenu_de(t).get("tags", [])):
 		_memoriser_terrain(sim, t)
 		sim.grille.contenu[idx] = 0

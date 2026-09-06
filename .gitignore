@@ -12,3 +12,8 @@ godot/.godot/
 # Exports
 build/
 captures_ecran/
+
+# Le noyau C++ (cpp/) : seule la DLL est versionnée
+godot/addons/sensen_grille/bin/*.lib
+godot/addons/sensen_grille/bin/*.exp
+godot/addons/sensen_grille/bin/*.pdb

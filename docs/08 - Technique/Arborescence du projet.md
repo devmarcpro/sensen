@@ -42,7 +42,10 @@ res://
 ├── locale/              # Traductions : fr.csv, en.csv... (voir 10.1)
 ├── models/              # sources graphiques 2D (parties paperdoll, prefabs)
 └── addons/
+    └── sensen_grille/   # la GDExtension du noyau de grille : .gdextension + bin/ (la DLL bâtie, versionnée) — 2026-09-06
 ```
+
+Hors du projet Godot, à la racine du dépôt : `cpp/` — les sources C++ du noyau (`src/sensen_grille.cpp`, un `SConstruct`, `build_profile.json`), `godot-cpp/` cloné à la demande et ignoré par git ; `tools/build_cpp.ps1` bâtit tout ([[Modules de la simulation et le C++]], section 3).
 
 **Système à ajouter ([[Habitat des PNJ]]) :** la détection de pièce est à ranger dans `systems/` — voir [[Détection de pièces]].
 

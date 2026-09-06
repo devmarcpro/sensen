@@ -84,6 +84,7 @@ static func _assembler(sim: Simulation, e: Dictionary, def: Dictionary, tick: in
 			x.horloge = "monde"
 			x.compteur = sim.horloge_monde.ticks
 			x.action_en_cours = {}
+			sim._dus_invalider()
 	sim.combats.clear()
 	return true
 

@@ -749,6 +749,7 @@ static func _respawn(sim: Simulation, e: Dictionary) -> bool:
 	if sim.en_combat(e):
 		sim._quitter_combat(e)
 	e.vivant = true
+	sim._dus_invalider()   # revenu à la vie : il rentre dans la file du monde
 	e.sante = e.sante_max
 	e.vigueur = e.vigueur_max
 	e.statuts = []

@@ -588,6 +588,7 @@ static func charger_donjon(sim: Simulation, theme_id: String, graine: int, id_do
 		# chambre d'arrivée s'affichait en gazon vert à quatre étages sous terre.
 		for i_sol in sim.grille.largeur * sim.grille.hauteur_grille:
 			sim.grille.sols[i_sol] = sim.grille.materiau_defaut
+		sim.grille.recompiler_sols()
 	if est_mine:
 		# La galerie déjà creusée se rouvre : le terrain est déterministe, seule la liste de ce qu'on a
 		# enlevé est mémorisée. Redescendre dans sa mine, c'est retrouver son chantier, pas la roche.
@@ -724,6 +725,7 @@ static func _reinitialiser(sim: Simulation) -> void:
 	_vider_etats_tuiles(sim, true)
 	sim.entites.clear()
 	sim._joueurs_sale = true
+	sim._dus_invalider()
 	sim.ordre.clear()
 	sim.combats.clear()
 	sim.attente.clear()
@@ -756,6 +758,7 @@ static func _reprendre(sim: Simulation, e: Dictionary, pos: Vector2i) -> void:
 	e.horloge = "monde"
 	e.tick_vigueur = 0
 	e.action_en_cours = {}
+	sim._dus_invalider()
 	e.statuts = []
 	e.declencheurs_armes = []
 	e.cible = ""

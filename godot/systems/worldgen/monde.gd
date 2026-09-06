@@ -97,6 +97,7 @@ func fenetre(c: Vector2i, contenus: Dictionary, regles_dep: Dictionary, oeil: in
 		for dx in range(-rayon, rayon + 1):
 			var cell := c + Vector2i(dx, dy)
 			_poser_cellule(g, cell, cellule(cell))
+	g.recompiler_sols()   # les sols posés en bloc : le noyau C++ recompile leur friction au premier chemin
 	grille_active = g
 	return g
 
@@ -183,9 +184,9 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 		g.materiaux.erase(gi)
 		g.meubles.erase(gi)
 		g.stations_fixes.erase(gi)
-		g.niveau_eau.erase(gi)
+		g.oter_eau(gi)
 		if int(m.get("eau", 0)) > 0:   # le niveau d'un écoulement (Eau et liquides)
-			g.niveau_eau[gi] = int(m.eau)
+			g.poser_eau(gi, int(m.eau))
 		if not str(m.contenu).is_empty():
 			g.poser_contenu(p, str(m.contenu))
 		if not str(m.materiau).is_empty():
