@@ -601,9 +601,14 @@ func _ready() -> void:
 	if "--carte" in args:   # la carte s'ouvre après l'exploration : elle montre ce que le joueur a vu
 		scene.carte.ouvrir("voyage")
 		scene.carte.dessin.queue_redraw()
+		var attente := 0   # la carte se peint en arrière-plan (2026-09-06) : on attend qu'elle ait fini, au plus vingt secondes
+		while (not scene.carte._file.is_empty() or scene.carte._tache >= 0) and attente < 1200:
+			await scene.get_tree().process_frame
+			attente += 1
+		scene.carte.dessin.queue_redraw()
 		await scene.get_tree().process_frame
 		await scene.get_tree().process_frame
-		print("carte : %d cellules retenues" % scene.sim.monde.carte_cache.size())
+		print("carte : %d cellules retenues, %d images d'attente, %d tuiles de détail" % [scene.sim.monde.carte_cache.size(), attente, scene.carte._details.size()])
 	# « Après la mise en place », c'est bien après TOUT : la sauvegarde était écrite avant l'ouverture des
 	# écrans, donc elle ne contenait jamais ce qu'ils avaient produit — le souvenir de la carte, entre
 	# autres, ressortait vide et je l'ai cru cassé (2026-09-02).

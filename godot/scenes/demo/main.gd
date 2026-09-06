@@ -577,6 +577,7 @@ func _charger(fiche: Dictionary = {}) -> void:
 	telegraphes.clear()
 	journal.clear()
 	sim.annoncer_jour()   # le journal vidé rouvre par la date et les fêtes du jour au premier tick (Calendrier)
+	carte.preparer()   # la carte du monde se peint en arrière-plan dès maintenant (Carte du monde, 2026-09-06)
 	terrain.queue_redraw()
 	for n in noeuds.values():
 		n.queue_free()

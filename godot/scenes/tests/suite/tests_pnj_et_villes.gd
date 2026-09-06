@@ -1017,3 +1017,56 @@ func test_population_villes() -> void:
 		verifier(not s.entites.has(m.id) and s.monde.dormants.get(loin, []).has(m) and str(m.village) == "Ailleurs" and m.lit == Vector2i(-1, -1) and s.horloge_monde.ticks < int(m.migre_avant), "le migrant dort dans sa nouvelle ville, sans lit, et ne repartira pas de sitôt")
 	cfg.merge(sauve, true)
 	s.monde.fermer()
+
+
+## Le LOD des PNJ (Budgets de performance, 2026-09-06) : loin du joueur, un civil bondit vers sa cible sans chemin ;
+## près de lui, il marche pas à pas.
+func test_lod_pnj() -> void:
+	var s := Simulation.new(9)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var lod: Dictionary = GameData.config("planete").routine.lod
+	var r := int(lod.rayon_plein)
+	# Un villageois loin (à r + 10 tuiles), son poste 20 tuiles plus loin encore : figurant.
+	var loin := Vector2i(-1, -1)
+	for dx in range(r + 10, r + 30):
+		var q: Vector2i = j.pos + Vector2i(dx, 0)
+		if s.grille.dans(q) and not s.grille.bloque_passage(q) and s.grille.occupant(q).is_empty() and not s.dans_l_eau(q):
+			loin = q
+			break
+	verifier(loin != Vector2i(-1, -1), "une case libre à plus de %d tuiles du joueur" % r)
+	if loin == Vector2i(-1, -1):
+		return
+	var v: Dictionary = s.ajouter("villageois", loin, "ia")
+	var poste := loin + Vector2i(20, 0)
+	for k in 20:   # une case libre vers l'est, la plus loin possible
+		var q: Vector2i = loin + Vector2i(20 - k, 0)
+		if s.grille.dans(q) and not s.grille.bloque_passage(q) and s.grille.occupant(q).is_empty():
+			poste = q
+			break
+	v["poste"] = poste
+	v["lit"] = poste
+	v["place"] = poste
+	v.ancre = poste
+	verifier(s._figurant(v), "à %d tuiles du joueur, le villageois est un figurant" % Grille.distance(v.pos, j.pos))
+	var avant: Vector2i = v.pos
+	s._decider_ia(v, s.horloge_monde.ticks)
+	var bond := Grille.distance(avant, v.pos)
+	verifier(bond >= 2 and bond <= int(lod.pas_par_decision) and Grille.distance(v.pos, poste) < Grille.distance(avant, poste) and not v.has("chemin_routine"), "sa décision est un bond de %d tuiles vers son poste, sans chemin" % bond)
+	verifier(v.compteur > s.horloge_monde.ticks and s.grille.occupant(v.pos) == v.id and s.grille.occupant(avant).is_empty(), "le temps de marche est payé (%d ticks), la grille le sait" % (v.compteur - s.horloge_monde.ticks))
+	for k in 12:
+		s._decider_ia(v, s.horloge_monde.ticks)
+	verifier(Grille.distance(v.pos, poste) <= 1 and v.compteur >= s.horloge_monde.ticks + int(lod.attente_ticks), "douze décisions plus tard il est à son poste et s'y tient %d ticks" % int(lod.attente_ticks))
+	# Le même villageois près du joueur : un être entier, un pas à la fois.
+	var pres := s._tuile_libre_autour(j.pos + Vector2i(3, 0))
+	if pres != Vector2i(-1, -1):
+		s.grille.liberer(v.pos)
+		v.pos = pres
+		s.grille.placer(v.id, pres)
+		v.poste = j.pos + Vector2i(8, 0)
+		v.ancre = v.poste
+		verifier(not s._figurant(v), "à %d tuiles du joueur, il n'est plus un figurant" % Grille.distance(v.pos, j.pos))
+		var avant2: Vector2i = v.pos
+		s._decider_ia(v, s.horloge_monde.ticks)
+		verifier(Grille.distance(avant2, v.pos) <= 1, "près du joueur, sa décision est un pas d'une tuile (%d)" % Grille.distance(avant2, v.pos))
+	s.monde.fermer()

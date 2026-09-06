@@ -1164,8 +1164,8 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 				break
 	e["immobile_depuis"] = e.compteur   # Canalisation : l'immobilité repart de zéro à chaque pas
 	gagner_xp(e, "athletisme", 1)
-	if e.controle == "joueur":   # le pas d'un PNJ ne s'écrit pas dans le journal du joueur (grande base, 2026-09-04)
-		EventBus.emettre(&"journal", [&"journal.deplacement", {"nom": e.name_key, "cout": e.compteur - tick}])
+	# Aucun pas ne s'écrit au journal — ni ceux des PNJ (grande base, 2026-09-04), ni ceux du joueur (designer 2026-09-06 :
+	# « n'affiche pas les déplacements dans le journal »). Le coût du pas se lit dans l'en-tête (« agit à t= »).
 	if chute > 0:
 		# Le SOL qui recoit amortit : degats x (1 - elasticite / 150). Tomber sur de la tourbe ou du
 		# caoutchouc n'est pas tomber sur du granit — la note le disait, le code l'ignorait.
@@ -3807,6 +3807,9 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 		SimVilles._ia_vehicule(self, e, tick)
 		return
 	var profil: Dictionary = profils_ia.get(e.ai_profile, {})
+	if _figurant(e):   # LOD de simulation (designer 2026-09-06) : loin de tout joueur, un civil ne décide pas comme s'il était à l'écran
+		_ia_lointain(e, profil, tick)
+		return
 	if Etres.a_statut_tag(e, "confusion", statuts_defs) and des.reel() < float(regles.r.get("statuts", {}).get("confusion_chance", 0.3)):   # Confusion : l'IA aussi s'égare
 		var libres: Array[Vector2i] = []
 		for dd in Grille.DIRS:
@@ -4257,6 +4260,57 @@ func _cible_routine(e: Dictionary, profil: Dictionary, tick: int = -1) -> Vector
 					e["patrouille"] = pat
 				return pat
 			return e.get("poste", e.ancre)
+
+
+## Un figurant (Budgets de performance, le LOD des PNJ, 2026-09-06) : un civil hors combat, en surface, à plus de
+## `routine.lod.rayon_plein` tuiles de tout joueur. Personne ne le voit : il n'a pas besoin d'un chemin, d'une vision
+## ni d'ouvrir des portes.
+func _figurant(e: Dictionary) -> bool:
+	if lieu != "camp" or e.controle != "ia" or e.camp != "civil" or en_combat(e) or e.has("menace") or "vehicule" in e.get("tags", []):
+		return false
+	var lod: Dictionary = GameData.config("planete").routine.get("lod", {})
+	if lod.is_empty():
+		return false
+	var horaires = profils_ia.get(e.ai_profile, {}).get("horaires")   # un figurant a une routine : sans horaires (une bête, un itinérant), pas de bond
+	if not (horaires is Dictionary) or horaires.is_empty():
+		return false
+	var r := int(lod.get("rayon_plein", 28))
+	for j in joueurs():
+		if j.vivant and Grille.distance(e.pos, j.pos) <= r:
+			return false
+	return true
+
+
+## La décision d'un figurant : un bond de `pas_par_decision` tuiles vers sa cible de routine, en ligne droite, sur la
+## case libre la plus proche (un mur se traverse — il est hors de vue) ; le temps de marche est payé au coût de base
+## par tuile ; arrivé, il se tient là `attente_ticks` avant de redécider. Quand un joueur s'approche, `_decider_ia`
+## reprend la simulation entière à sa prochaine décision.
+func _ia_lointain(e: Dictionary, profil: Dictionary, tick: int) -> void:
+	var lod: Dictionary = GameData.config("planete").routine.get("lod", {})
+	var cible := _cible_routine(e, profil, tick)
+	var d := Grille.distance(e.pos, cible)
+	e.erase("chemin_routine")
+	if d <= 1:
+		e.compteur = tick + int(lod.get("attente_ticks", 200))
+		return
+	var n := mini(int(lod.get("pas_par_decision", 6)), d)
+	var arrivee := cible
+	if n < d:
+		var dir := Vector2(cible - e.pos).normalized()
+		arrivee = e.pos + Vector2i(roundi(dir.x * n), roundi(dir.y * n))
+	var q := arrivee
+	if not grille.dans(q) or grille.bloque_passage(q) or not grille.occupant(q).is_empty():
+		q = _tuile_libre_autour(arrivee)
+	if q == Vector2i(-1, -1) or q == e.pos:
+		e.compteur = tick + int(lod.get("attente_ticks", 200))
+		return
+	var parcouru := Grille.distance(e.pos, q)
+	grille.liberer(e.pos)
+	e.pos = q
+	grille.placer(e.id, q)
+	e.orientation = Vector2i(signi(cible.x - q.x), signi(cible.y - q.y)) if cible != q else e.get("orientation", Vector2i(0, 1))
+	e.compteur = tick + maxi(1, int(grille.dep.get("cout_base", 10)) * parcouru)
+	e["immobile_depuis"] = e.compteur
 
 
 ## Un pas de routine : glouton (la case adjacente libre la plus proche de la cible), A* sous 20 tuiles.

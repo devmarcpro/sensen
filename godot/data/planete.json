@@ -353,7 +353,13 @@
     "rayon_patrouille": 8,
     "astar_sous": 20,
     "projection_min_ticks": 100,
-    "astar_noeuds_max": 800
+    "astar_noeuds_max": 800,
+    "lod": {
+      "_doc": "Le LOD de simulation des PNJ (designer 2026-09-06 : « aucune raison d'autant lagger en ville puisque là j'avais que 2 PNJ à l'écran ») : un civil hors combat à plus de rayon_plein tuiles de tout joueur est un figurant — un bond de pas_par_decision tuiles vers sa cible de routine par décision (les murs se traversent, personne ne le voit), le temps de marche payé, puis attente_ticks sur place avant de redécider. Ni chemin, ni vision, ni portes.",
+      "rayon_plein": 28,
+      "pas_par_decision": 6,
+      "attente_ticks": 200
+    }
   },
   "monde": {
     "pregen_par_appel": 1,

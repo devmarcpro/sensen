@@ -88,7 +88,7 @@ Les étapes 0 à 10 de l'ordre de construction sont codées. Par thème :
 
 **Royaumes** — chaque royaume est un pays : population, armée, humeur du peuple, trésor nourri par ses villes, un règne daté du calendrier et une ère nommée (l'ère de la Grue, du Fer…), un blason dont ses gardes portent le fanion, des événements hebdomadaires (disette, bonne récolte, édit, révolte, levée de taxes, guerre et paix avec un voisin) que la carte affiche et que les PNJ racontent en rumeurs.
 
-**Carte du monde** — les flèches font marcher le joueur de cellule en cellule (façon Dragon Quest), Maj + flèches font défiler, le clic marche loin ou revendique.
+**Carte du monde** — gardée en images (2026-09-06 : ouvrir, fermer, zoomer à la molette de 3 à 40 pixels par cellule, se déplacer, sans rien recalculer) ; les flèches font marcher le joueur de cellule en cellule (façon Dragon Quest), Maj + flèches font défiler, le clic marche loin ou revendique.
 
 **PNJ** — chacun a deux traits de caractère qui agissent (prix, relation, horaires, production, fuite), une histoire, un souhait, des opinions sur ses voisins ; on lui offre des cadeaux ; sa fiche s'ouvre avec la relation (caractère à 50, souhait à 75, histoire et opinions à 90).
 

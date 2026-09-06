@@ -629,3 +629,7 @@ La sonde des villes (monde 9, « Mokroslav ») le signale : la cellule résident
 ## 2026-09-06 — La population des villes bouge (3 h) : les chiffres sont à toi
 
 `villes.json`, bloc `anneau_moyen.population` : `naissance_par_couple_semaine` 0,02 (une naissance tous les ans par couple, à peu près), `age_max_parent` 45, `enfants_max_par_couple` 3, `migration_humeur_seuil` 25 et `migration_chance_semaine` 0,15 (un malheureux sur sept part chaque semaine), `semaines_entre_migrations` 8, `majorite_metier_herite` vrai (l'enfant prend le métier d'un parent). Ce que je n'ai pas fait exprès : des mariages nouveaux (les couples viennent de la génération des familles — dis si tu veux que des célibataires se marient), et les migrants ne viennent pas frapper au camp du joueur (ta base a déjà ses migrants). Si une ville doit pouvoir mourir ou déborder, dis-le : aujourd'hui elle n'accueille que jusqu'au chiffre de sa fiche.
+
+## 2026-09-06 — Le LOD des PNJ (8 h) : trois chiffres
+
+`planete.json → routine.lod` : `rayon_plein` 28 tuiles (au-delà, un civil est un figurant : il bondit vers sa cible, traverse les murs sans qu'on le voie, ne redécide qu'`attente_ticks` 200 après être arrivé), `pas_par_decision` 6. Ce que ça change à l'œil : rien tant qu'on ne regarde pas — un figurant qui entre à l'écran est là où sa routine l'aurait mené, mais il peut y être arrivé en traversant une maison. Si tu veux que le rayon suive le zoom ou l'écran plutôt qu'un chiffre, dis-le.

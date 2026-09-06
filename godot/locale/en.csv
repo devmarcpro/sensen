@@ -3588,3 +3588,4 @@ batiment.chateau.name,castle
 batiment.mairie.name,town hall
 journal.majorite,"{nom} comes of age and takes up the trade of {metier}"
 journal.migration,"{nom} leaves {de} for {vers}"
+ui.carte.en_cours,"painting the map… ({n} slices)"
