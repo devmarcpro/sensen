@@ -202,7 +202,7 @@ func _ready() -> void:
 	terrain = Terrain.new()
 	terrain.proprio = self
 	terrain.material = _materiau_grain()   # le décor prend son grain (point 50)
-	terrain.z_index = -10   # couches du monde SOUS les êtres et les végétaux (z 1..4000) : brouillard, voile, halos (2026-08-30)
+	terrain.z_index = -60   # couches du monde SOUS les êtres et les végétaux (z 1..4000) : brouillard, voile, halos (2026-08-30) — les morceaux (z relatif 0..46 = colonne + ligne, 2026-09-06) restent sous le brouillard (-2), les voiles (-4), les halos (-3)
 	add_child(terrain)
 	brouillard = Brouillard.new()
 	brouillard.proprio = self
