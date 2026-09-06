@@ -3600,3 +3600,7 @@ journal.migration,"{nom} quitte {de} pour {vers}"
 ui.carte.en_cours,"la carte se peint… ({n} tranches)"
 tile_content.vide.name,Vide
 ui.ecran.page_suivante,Page suivante ({n} / {total})
+ui.ecran.action_retour,Retour à la liste des objets
+ui.ecran.equiper_objet,Équiper
+ui.ecran.desequiper,Retirer
+ui.ecran.reforger_avec,Reforger avec cet objet comme composant

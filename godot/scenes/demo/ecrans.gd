@@ -161,6 +161,7 @@ func _ready() -> void:
 	detail.fit_content = false
 	detail.clip_contents = true
 	detail.add_theme_font_size_override("normal_font_size", 13)
+	detail.meta_clicked.connect(func(meta: Variant) -> void: EcransInventaire._clic_action(self, str(meta)))   # une option d'objet cliquée (2026-09-06)
 	droite.add_child(detail)
 	penta_objet = Composeur.PentagrammeSort.new()
 	penta_objet.visible = false
@@ -184,6 +185,7 @@ var dialogue_visuel: DialogueVisuel       # la carte de dialogue : portrait, nom
 var dialogue_infos := ""                  # le texte d'informations de la carte, composé par EcransDialogue
 var page := 0                             # la page courante de l'écran (une option = une lettre, designer 2026-09-06, 17 h 55)
 var lettres: Dictionary = {}              # index d'entrée → sa lettre (« a », « b »…), posées par EcransListe._paginer
+var objet_choisi := ""                    # l'inventaire : l'objet choisi, dont les options sont les lignes lettrées (designer 2026-09-06, 18 h 25)
 var penta_objet: Composeur.PentagrammeSort   # le Wu Xing de l'objet choisi
 
 
@@ -231,6 +233,7 @@ func basculer(nom: String) -> void:
 func ouvrir(nom: String) -> void:
 	if courant != nom:
 		page = 0   # une page se garde tant que l'écran reste ouvert
+		objet_choisi = ""
 	courant = nom
 	EcransFeuille._replacer_liste(self)   # la colonne suit la largeur du panneau : le signal resized ne suffit pas à l'ouverture
 	selection = 0
@@ -285,6 +288,10 @@ func touche(ev: InputEventKey) -> bool:
 		KEY_ESCAPE:
 			if courant == "triche_liste":   # la sous-liste revient au menu de triche
 				ouvrir("triche")
+				return true
+			if courant == "inventaire" and not objet_choisi.is_empty():   # les options d'un objet : Échap revient à la liste
+				objet_choisi = ""
+				EcransListe.rafraichir(self)
 				return true
 			if courant == "titre":   # rien derrière l'écran principal : Échap n'y fait rien
 				return true
@@ -371,44 +378,9 @@ func touche(ev: InputEventKey) -> bool:
 						sim_p.retirer_perimetre(pid_p)
 					EcransListe.rafraichir(self)
 				return true
-		KEY_E:
-			if courant == "inventaire":
-				EcransListe._action_principale(self)
-				return true
-		KEY_J:
-			if courant == "inventaire":
-				EcransInventaire._jeter(self)
-				return true
-		KEY_L:
-			if courant == "inventaire":
-				EcransInventaire._lire(self)
-				return true
 		KEY_T:
-			if courant == "inventaire":
-				EcransInventaire._sertir(self)
-				return true
 			if courant in ["commerce", "echange"]:   # T : trier le volet courant (designer 2026-09-04)
 				echange_visuel.trier_suivant()
-				return true
-		KEY_P:
-			if courant == "inventaire":
-				EcransInventaire._poser(self)
-				return true
-		KEY_M:
-			if courant == "inventaire":
-				EcransInventaire._mur(self, false)
-				return true
-		KEY_O:
-			if courant == "inventaire":
-				EcransInventaire._mur(self, true)
-				return true
-		KEY_R:
-			if courant == "inventaire":
-				EcransInventaire._ranger(self)
-				return true
-		KEY_G:
-			if courant == "inventaire":
-				EcransInventaire._manger(self)
 				return true
 		KEY_D:
 			if courant == "gestion":
@@ -444,28 +416,9 @@ func touche(ev: InputEventKey) -> bool:
 				main.sim.regler_marge(-float(main.sim.regles.r.royaume.boutique.marge_pas))
 				EcransListe.rafraichir(self)
 				return true
-		KEY_B:
-			if courant == "inventaire":
-				var en: Dictionary = entrees[liste.get_selected_items()[0]] if not liste.get_selected_items().is_empty() and liste.get_selected_items()[0] < entrees.size() else {}
-				if en.get("kind", "") == "objet":
-					if reforge_objet.is_empty() or reforge_objet == str(en.uid):
-						reforge_objet = str(en.uid)
-						main._log(tr("ui.ecran.reforger"))
-					else:
-						main.sim.intention(main.joueur().id, {"type": "reforger", "objet": reforge_objet, "composant": str(en.uid)})
-						reforge_objet = ""
-						EcransListe.rafraichir(self)
-				return true
 		KEY_V:
 			if courant == "composer":
 				EcransGestion._valider_composition(self)
-				return true
-		KEY_H:
-			if courant == "inventaire":
-				var en: Dictionary = entrees[liste.get_selected_items()[0]] if not liste.get_selected_items().is_empty() and liste.get_selected_items()[0] < entrees.size() else {}
-				if en.get("kind", "") == "objet":
-					main.sim.intention(main.joueur().id, {"type": "planter", "base": str(main.sim.items[str(en.uid)].base)})
-					EcransListe.rafraichir(self)
 				return true
 		KEY_W:
 			if courant == "gestion":

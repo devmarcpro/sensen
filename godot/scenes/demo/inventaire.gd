@@ -177,6 +177,11 @@ func selectionner(index: int) -> void:
 	ecrans.selection = index
 	if ecrans.liste.item_count > index:
 		ecrans.liste.select(index)
+	var en: Dictionary = ecrans.entrees[index]
+	if str(en.get("kind", "")) == "objet" and str(en.get("uid", "")) != ecrans.objet_choisi:   # choisir un objet, c'est voir ses options (2026-09-06)
+		ecrans.objet_choisi = str(en.uid)
+		EcransListe.rafraichir(ecrans)
+		return
 	ecrans._montrer_detail()
 	rafraichir_selection()
 
@@ -198,7 +203,7 @@ class CaseSlot extends Control:
 
 	func _draw() -> void:
 		var r := Rect2(Vector2.ZERO, InventaireVisuel.CASE)
-		var choisie: bool = index >= 0 and inventaire.ecrans.selection == index
+		var choisie: bool = (index >= 0 and inventaire.ecrans.selection == index) or (not uid.is_empty() and uid == inventaire.ecrans.objet_choisi)
 		draw_rect(r, Color(0.1, 0.1, 0.13, 0.95))
 		draw_rect(r, Color(1, 1, 1, 0.95) if choisie else (Color(1, 1, 1, 0.5) if survolee else Color(0.6, 0.55, 0.4, 0.8)), false, 2.0 if choisie else 1.0)
 		if not uid.is_empty():
@@ -237,7 +242,7 @@ class LigneObjet extends Control:
 		var sim = inventaire.ecrans.main.sim
 		var it: Dictionary = sim.items.get(uid, {})
 		var r := Rect2(Vector2.ZERO, size)
-		var choisie: bool = inventaire.ecrans.selection == index
+		var choisie: bool = inventaire.ecrans.selection == index or (not uid.is_empty() and uid == inventaire.ecrans.objet_choisi)
 		var cadre := Pictos.couleur_qualite(it)
 		draw_rect(r, Color(1, 1, 1, 0.12) if choisie else (Color(1, 1, 1, 0.06) if survolee else Color(1, 1, 1, 0.02)))
 		if choisie:

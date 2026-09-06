@@ -3591,3 +3591,7 @@ journal.migration,"{nom} leaves {de} for {vers}"
 ui.carte.en_cours,"painting the map… ({n} slices)"
 tile_content.vide.name,Air
 ui.ecran.page_suivante,Next page ({n} / {total})
+ui.ecran.action_retour,Back to the items
+ui.ecran.equiper_objet,Equip
+ui.ecran.desequiper,Unequip
+ui.ecran.reforger_avec,Reforge with this item as the component

@@ -17,19 +17,118 @@ static func _construire_inventaire(ec: Ecrans, j: Dictionary) -> void:
 		ec.entrees.append({"kind": "objet", "uid": uid, "equipe": true, "slot": slot} if not uid.is_empty() else {"kind": "texte", "texte": ec.tr("ui.ecran.slot_vide")})
 	ec.liste.add_item("— " + ec.tr("ui.ecran.sac") + " —", null, false)
 	ec.entrees.append({"kind": "texte", "texte": ""})
+	# Un objet choisi (designer 2026-09-06, 18 h 25 : « une fois qu'on a sélectionné un objet, ça devrait afficher les
+	# options disponibles, et pareil avec les lettres ») : les lignes d'objets perdent leurs lettres, les options de
+	# l'objet les prennent — équiper ou retirer, lire, manger, sertir, poser, ranger, reforger, planter, jeter, retour.
+	if not ec.objet_choisi.is_empty() and not (ec.objet_choisi in j.sac or ec.objet_choisi in j.equipement.values()):
+		ec.objet_choisi = ""   # jeté, mangé, posé : il n'est plus là
+	var objet_mode := not ec.objet_choisi.is_empty()
 	for uid in j.sac:
 		ec.liste.add_item(_nom_court(ec, uid))
-		ec.entrees.append({"kind": "objet", "uid": uid, "equipe": false})
-	EcransListe._bouton(ec, ec.tr("ui.ecran.equiper"), func() -> void: EcransListe._action_principale(ec))
-	EcransListe._bouton(ec, ec.tr("ui.ecran.jeter"), _jeter)
-	EcransListe._bouton(ec, ec.tr("ui.ecran.lire"), _lire)
-	EcransListe._bouton(ec, ec.tr("ui.ecran.sertir"), _sertir)
-	EcransListe._bouton(ec, ec.tr("ui.ecran.manger"), _manger)
+		ec.entrees.append({"kind": "objet", "uid": uid, "equipe": false, "lettre": not objet_mode})
+	if objet_mode:
+		for a in _actions_objet(ec, ec.objet_choisi):
+			ec.liste.add_item(ec.tr(str(a[0])))
+			ec.entrees.append({"kind": "action_objet", "action": str(a[1]), "uid": ec.objet_choisi})
+		ec.liste.add_item(ec.tr("ui.ecran.action_retour"))
+		ec.entrees.append({"kind": "action_objet", "action": "retour", "uid": ec.objet_choisi})
+	elif ec.main.sim.lieu == "camp":   # les actions du camp qui ne portent sur aucun objet : des lignes lettrées après le sac
+		for a in [["ui.ecran.mur", "mur"], ["ui.ecran.porte", "porte"]]:
+			ec.liste.add_item(ec.tr(str(a[0])))
+			ec.entrees.append({"kind": "action_inventaire", "action": str(a[1])})
+
+
+## Les options d'un objet : [clé de libellé, action], selon ce qu'il est et où l'on est (les mêmes qu'au clic droit).
+static func _actions_objet(ec: Ecrans, uid: String) -> Array:
+	var it: Dictionary = ec.main.sim.items.get(uid, {})
+	var j: Dictionary = ec.main.joueur()
+	var tags: Array = it.get("tags", [])
+	var type_it := str(it.get("type", ""))
+	var actions: Array = []
+	if not str(it.get("equip_slot", "")).is_empty():
+		actions.append(["ui.ecran.desequiper" if uid in j.equipement.values() else "ui.ecran.equiper_objet", "equiper"])
+	if type_it in ["grimoire", "manuel"] or "ame" in tags:
+		actions.append(["ui.ecran.lire", "lire"])
+	if type_it == "consommable" or "nourriture" in tags:
+		actions.append(["ui.ecran.manger", "manger"])
+	if type_it == "gemme":
+		actions.append(["ui.ecran.sertir", "sertir"])
 	if ec.main.sim.lieu == "camp":
-		EcransListe._bouton(ec, ec.tr("ui.ecran.poser"), _poser)
-		EcransListe._bouton(ec, ec.tr("ui.ecran.mur"), func() -> void: _mur(ec, false))
-		EcransListe._bouton(ec, ec.tr("ui.ecran.porte"), func() -> void: _mur(ec, true))
-		EcransListe._bouton(ec, ec.tr("ui.ecran.ranger"), _ranger)
+		actions.append(["ui.ecran.poser", "poser"])
+		actions.append(["ui.ecran.ranger", "ranger"])
+		if GameData.catalogues.plants.has(str(it.get("base", ""))):
+			actions.append(["ui.ecran.planter", "planter"])
+	if not ec.reforge_objet.is_empty() and ec.reforge_objet != uid:
+		actions.append(["ui.ecran.reforger_avec", "reforger"])
+	elif not str(it.get("equip_slot", "")).is_empty():
+		actions.append(["ui.ecran.reforger", "reforger"])
+	actions.append(["ui.ecran.jeter", "jeter"])
+	return actions
+
+
+## Une action d'objet (une ligne lettrée, Entrée, ou un clic sur son lien dans le détail).
+static func _action_objet(ec: Ecrans, action: String, uid: String) -> void:
+	var j: Dictionary = ec.main.joueur()
+	match action:
+		"retour":
+			ec.objet_choisi = ""
+			EcransListe.rafraichir(ec)
+			return
+		"equiper":
+			if uid in j.equipement.values():
+				for slot in j.equipement.keys():
+					if str(j.equipement[slot]) == uid:
+						ec.main.sim.intention(j.id, {"type": "desequiper", "slot": str(slot)})
+						break
+			else:
+				ec.main.sim.intention(j.id, {"type": "equiper", "objet": uid})
+			EcransListe.rafraichir(ec)
+		"lire": _lire(ec)
+		"manger": _manger(ec)
+		"sertir": _sertir(ec)
+		"poser": _poser(ec)
+		"ranger": _ranger(ec)
+		"jeter": _jeter(ec)
+		"planter":
+			ec.main.sim.intention(j.id, {"type": "planter", "base": str(ec.main.sim.items[uid].base)})
+			EcransListe.rafraichir(ec)
+		"reforger":   # deux temps : l'objet, puis le composant (Main du métal)
+			if ec.reforge_objet.is_empty() or ec.reforge_objet == uid:
+				ec.reforge_objet = uid
+				ec.main._log(ec.tr("ui.ecran.reforger"))
+				ec.objet_choisi = ""
+			else:
+				ec.main.sim.intention(j.id, {"type": "reforger", "objet": ec.reforge_objet, "composant": uid})
+				ec.reforge_objet = ""
+			EcransListe.rafraichir(ec)
+
+
+## Une action du camp qui ne porte sur aucun objet (un mur, une porte devant soi).
+static func _action_inventaire(ec: Ecrans, action: String) -> void:
+	match action:
+		"mur": _mur(ec, false)
+		"porte": _mur(ec, true)
+
+
+## Le détail d'un objet choisi : sa fiche, puis ses options lettrées, chacune un lien.
+static func texte_objet_et_actions(ec: Ecrans, uid: String) -> String:
+	var lignes: Array[String] = [texte_objet(ec, uid), ""]
+	for i in ec.entrees.size():
+		var en: Dictionary = ec.entrees[i]
+		if str(en.get("kind", "")) == "action_objet" and str(en.get("uid", "")) == uid:
+			lignes.append("[url=%d]%s[/url]" % [i, ec.liste.get_item_text(i)])
+	return "\n".join(lignes)
+
+
+## Le lien d'une option cliqué dans le détail : l'index de l'entrée.
+static func _clic_action(ec: Ecrans, meta: String) -> void:
+	if not meta.is_valid_int():
+		return
+	var i := int(meta)
+	if i < 0 or i >= ec.entrees.size():
+		return
+	ec.selection = i
+	EcransListe._action_principale(ec)
 
 
 ## Le clic droit sur un objet du sac (designer 2026-08-31, point 46) : ses actions possibles,
@@ -82,6 +181,8 @@ static func _nom_court(ec: Ecrans, uid: String) -> String:
 
 
 static func _uid_selection(ec: Ecrans) -> String:
+	if not ec.objet_choisi.is_empty():   # l'objet choisi : ses options portent sur lui
+		return ec.objet_choisi
 	if ec.entrees.is_empty() or ec.selection >= ec.entrees.size() or ec.entrees[ec.selection].get("kind", "") != "objet":
 		return ""
 	return str(ec.entrees[ec.selection].uid)

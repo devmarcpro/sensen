@@ -621,6 +621,11 @@ func _ready() -> void:
 			scene.ecrans.pnj_id = xm.id
 			scene.ecrans.ouvrir("assigner")
 	for i2 in args.size():   # --ecran inventaire|atelier|feuille|menu : l'écran ouvert — après le chargement
+		if args[i2] == "--choisir-objet" and scene.sim != null and scene.ecrans.courant == "inventaire":   # l'inventaire, le premier objet du sac choisi : ses options
+			var jo: Dictionary = scene.joueur()
+			if not jo.get("sac", []).is_empty():
+				scene.ecrans.objet_choisi = str(jo.sac[0])
+				EcransListe.rafraichir(scene.ecrans)
 		if args[i2] == "--ecran" and i2 + 1 < args.size():
 			scene.ecrans.ouvrir(args[i2 + 1])
 	for il in args.size():   # --ligne N : la N-ième ligne de la liste sélectionnée, son détail à droite (2026-09-04)

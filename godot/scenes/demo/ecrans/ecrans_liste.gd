@@ -69,6 +69,11 @@ static func rafraichir(ec: Ecrans) -> void:
 			ec.fermer()
 			return
 	_paginer(ec)
+	if ec.courant == "inventaire" and not ec.objet_choisi.is_empty():   # les options de l'objet choisi : la sélection va sur la première
+		for i in ec.entrees.size():
+			if str(ec.entrees[i].get("kind", "")) == "action_objet":
+				sel = i
+				break
 	ec.selection = clampi(sel, 0, maxi(0, ec.entrees.size() - 1))
 	if ec.entrees.size() > 0:
 		ec.liste.select(ec.selection)
@@ -159,7 +164,7 @@ static func rafraichir(ec: Ecrans) -> void:
 
 ## Une ligne qui porte une lettre : tout ce qui se choisit — pas un texte d'en-tête, pas une case d'équipement (la grille).
 static func _lettrable(en: Dictionary) -> bool:
-	return str(en.get("kind", "")) != "texte" and not bool(en.get("equipe", false))
+	return str(en.get("kind", "")) != "texte" and not bool(en.get("equipe", false)) and bool(en.get("lettre", true))
 
 
 ## Une option = une lettre, une page à la fois (designer 2026-09-06, 17 h 55) : après la construction d'un écran, les lignes
@@ -207,9 +212,17 @@ static func _paginer(ec: Ecrans) -> void:
 		if _lettrable(ec.entrees[i]):
 			var lettre := char(97 + k)
 			ec.lettres[i] = lettre
-			if i < ec.liste.item_count:
-				ec.liste.set_item_text(i, "%s) %s" % [lettre, ec.liste.get_item_text(i)])
+			if i < ec.liste.item_count:   # les anciens rappels de raccourci « (E) » en fin de libellé s'effacent : la lettre est celle de la ligne
+				ec.liste.set_item_text(i, "%s) %s" % [lettre, _sans_raccourci(ec.liste.get_item_text(i))])
 			k += 1
+
+
+static var _rx_raccourci: RegEx = null
+static func _sans_raccourci(texte: String) -> String:
+	if _rx_raccourci == null:
+		_rx_raccourci = RegEx.new()
+		_rx_raccourci.compile("\\s\\((?:[A-Z]|Échap|Esc)\\)(?=\\s—|$)")
+	return _rx_raccourci.sub(texte, "")
 
 
 ## La lettre tapée (a → 0, b → 1…) joue la ligne qui la porte : la page suivante, ou l'action principale de la ligne.
@@ -282,8 +295,16 @@ static func _montrer_detail(ec: Ecrans) -> void:
 	if ec.courant == "charger":   # le portrait suit la ligne pointée, flèches comme souris (designer 2026-09-02)
 		EcransCreation._portrait_partie(ec, str(en.get("id", "")))
 	match str(en.get("kind", "")):
+		"action_objet":
+			ec.detail.text = EcransInventaire.texte_objet_et_actions(ec, str(en.uid))
+			var it_a: Dictionary = ec.main.sim.items.get(str(en.uid), {})
+			ec.penta_objet.visible = not ec.main.sim.inconnu(it_a)
+			ec.penta_objet.montrer({"elements": ec.main.sim.vecteur_objet(it_a)})
+			ec.inventaire_visuel.rafraichir_selection()
+		"action_inventaire":
+			ec.detail.text = ""
 		"objet":
-			ec.detail.text = EcransInventaire.texte_objet(ec, str(en.uid))
+			ec.detail.text = EcransInventaire.texte_objet_et_actions(ec, str(en.uid)) if (ec.courant == "inventaire" and str(en.uid) == ec.objet_choisi) else EcransInventaire.texte_objet(ec, str(en.uid))
 			if ec.courant == "inventaire":
 				var it_p: Dictionary = ec.main.sim.items.get(str(en.uid), {})
 				# Tout objet montre son Wu Xing (point 65) — sauf s'il n'est pas identifié : on ne lit
@@ -329,7 +350,17 @@ static func _action_principale(ec: Ecrans) -> void:
 		"page":
 			page_suivante(ec)
 			return
+		"action_objet":
+			EcransInventaire._action_objet(ec, str(en.action), str(en.uid))
+			return
+		"action_inventaire":
+			EcransInventaire._action_inventaire(ec, str(en.action))
+			return
 		"objet":
+			if ec.courant == "inventaire":   # choisir un objet, c'est voir ses options (designer 2026-09-06, 18 h 25)
+				ec.objet_choisi = str(en.uid)
+				rafraichir(ec)
+				return
 			if bool(en.get("equipe", false)):
 				ec.main.sim.intention(j.id, {"type": "desequiper", "slot": str(en.slot)})
 			else:
