@@ -94,7 +94,7 @@ func _ready() -> void:
 		lits_total += lits
 		pnj_total += v.pnj.size()
 		print("  cellule %s · %s · %d habitants prévus · %d bâtiments %s · %d lits · %d PNJ %s · rues : %d/%d portes jointes · périmètres %s · %d stations · %d champs · %d bêtes · %.0f ms" % [str(c), str(v.quartier), int(v.population_quartier), v.batiments.size(), str(par_id), lits, v.pnj.size(), str(fonctions), portes_jointes, v.batiments.size(), str(per_types), e.get("stations", {}).size(), v.get("champs", []).size(), v.get("betes", []).size(), dt])
-		if lits < int(v.population_quartier):
+		if lits < int(v.population_quartier) * 3 / 4:   # un quartier plein loge son surplus chez ses voisins : le compte qui vaut est celui de la ville (plus bas)
 			soucis.append("cellule %s (%s) : %d lits pour %d habitants" % [str(c), str(v.quartier), lits, int(v.population_quartier)])
 		if portes_jointes < v.batiments.size():
 			soucis.append("cellule %s : %d porte(s) sur %d ne rejoignent pas la rue" % [str(c), v.batiments.size() - portes_jointes, v.batiments.size()])
@@ -107,6 +107,12 @@ func _ready() -> void:
 		Surface.chrono.clear()
 		if v.batiments.size() == 0:
 			soucis.append("cellule %s : aucun bâtiment" % str(c))
+		var manques_util: Array = []   # un logement non posé est rattrapé (le compte des lits le dit) ; une institution, non
+		for bid_m in v.get("non_poses", []):
+			if not (str(bid_m) in ["maison", "maison_haute", "chaumiere", "immeuble", "grange"]):
+				manques_util.append(str(bid_m))
+		if not manques_util.is_empty():
+			soucis.append("cellule %s : %d bâtiment(s) utiles non posés %s" % [str(c), manques_util.size(), str(manques_util)])
 	print("  total : %d lits, %d PNJ prévus pour %d habitants" % [lits_total, pnj_total, int(f.population)])
 	# 3. La fenêtre chargée sur la ville : le territoire, ses résidents, ses périmètres, ses stocks.
 	var s2 := Simulation.new(graine)

@@ -992,18 +992,37 @@ func fiche_agglomeration(centre: Vector2i) -> Dictionary:
 		var tmp = types[i]
 		types[i] = types[k2]
 		types[k2] = tmp
+	# Les boutiques ne s'entassent pas toutes au centre (2026-09-07) : il en garde la moitié, le reste se répartit sur
+	# les quartiers qui en veulent (le marchand d'abord, à la mesure de `boutiques_par_habitant`) — une ville a des
+	# échoppes dans ses rues, pas seulement sur sa place, et son cœur reste bâtissable.
 	var boutiques: Array = []
 	var pris := 0
+	var fb: Array = cfg.paliers[palier].boutiques
+	var n_total := rng.randi_range(int(fb[0]), int(fb[1]))
+	var parts_b: Array[int] = []
+	parts_b.resize(quartiers.size())
+	parts_b[0] = int(ceil(float(n_total) / 2.0))
+	var reste_b := n_total - parts_b[0]
+	var tours_b := 0
+	while reste_b > 0 and tours_b < 40:
+		tours_b += 1
+		var avance := false
+		for i in range(1, quartiers.size()):
+			if reste_b <= 0:
+				break
+			var comp_i: Dictionary = cfg.composition[str(quartiers[i])]
+			var cap: int = int(pops[i]) / maxi(1, int(comp_i.boutiques_par_habitant)) if int(comp_i.boutiques_par_habitant) > 0 else 0
+			if parts_b[i] < cap:
+				parts_b[i] += 1
+				reste_b -= 1
+				avance = true
+		if not avance:
+			break
+	if reste_b > 0:
+		parts_b[0] += reste_b   # personne d'autre n'en veut : le centre les prend
 	for i in quartiers.size():
-		var comp: Dictionary = cfg.composition[str(quartiers[i])]
-		var n_b := 0
-		if i == 0:
-			var fb: Array = cfg.paliers[palier].boutiques
-			n_b = rng.randi_range(int(fb[0]), int(fb[1]))
-		else:
-			n_b = int(pops[i]) / maxi(1, int(comp.boutiques_par_habitant))
 		var liste: Array = []
-		for k3 in n_b:
+		for k3 in parts_b[i]:
 			if pris < types.size():
 				liste.append(str(types[pris]))
 				pris += 1
@@ -1112,15 +1131,22 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 		if bats.has(str(siege.get("batiment", ""))):
 			siege_fonction = str(siege.get("fonction", ""))
 			file.append([str(siege.batiment), "", "", "", siege_fonction])
-	if bool(comp.halls):
-		for g in agglo.halls:
-			file.append(["hall", "", str(g), "", ""])
-	for t in agglo.boutiques[int(agglo.index)]:
-		file.append(["echoppe", str(t), "", "", ""])
-	if bool(comp.chapelle) and not (siege_fonction == "pretre"):
-		file.append(["chapelle", "", "", "", ""])
+	# L'ordre compte : ce qui est posé en premier a la place (Villes, 2026-09-07). Le siège, puis l'auberge et la
+	# chapelle — une ville sans auberge ni église n'est pas une ville —, puis les halls, puis les échoppes : c'est la
+	# dernière échoppe qui manquera si le cœur est plein, pas le presbytère.
 	if bool(comp.auberge):
 		file.append(["auberge", "", "", "", ""])
+	if bool(comp.chapelle) and not (siege_fonction == "pretre"):
+		file.append(["chapelle", "", "", "", ""])
+	# Halls et échoppes en alternance : si le cœur se remplit, la ville garde au moins une guilde ET un marché, au lieu
+	# de toutes ses guildes et aucune boutique.
+	var halls_f: Array = agglo.halls if bool(comp.halls) else []
+	var boutiques_f: Array = agglo.boutiques[int(agglo.index)]
+	for k_hb in maxi(halls_f.size(), boutiques_f.size()):
+		if k_hb < boutiques_f.size():
+			file.append(["echoppe", str(boutiques_f[k_hb]), "", "", ""])
+		if k_hb < halls_f.size():
+			file.append(["hall", "", str(halls_f[k_hb]), "", ""])
 	if bool(comp.get("ecurie", false)) and bats.has("ecurie"):   # le maquignon vend des montures (Villes B4)
 		file.append(["ecurie", "", "", "", ""])
 	var stations: Array = cfg.stations_ateliers.duplicate()
@@ -1182,20 +1208,33 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 	var essais_max: int = int(cfg.get("plans", {}).get("essais_parcelle", 600))
 	var curseur_rue: Array = [0]
 	var curseur_terrain_f: Array = [0]
+	# Un balayage complet qui n'a rien trouvé pour une taille donnée n'en trouvera pas davantage plus tard (le quartier
+	# ne fait que se remplir) : on s'en souvient, sinon six échoppes de la même taille rebalaient le quartier six fois.
+	var sans_place := {}
 	for k in file.size():
 		var bid: String = str(file[k][0])
 		var bat: Dictionary = bats[bid]
 		var pose := false
-		for essai in 5:   # quatre façades, puis (essai 4) un terrain et une ruelle : rien d'essentiel ne doit manquer
+		for essai in 8:   # quatre orientations sur la rue, puis les quatre mêmes sur un terrain avec sa ruelle : un plan
+			# transposé (est/ouest) tient là où le plan droit ne tient pas — n'en essayer qu'une, c'était perdre le marché
 			var sens: String = cotes[(k + essai) % 4]
 			var plan := _orienter(bat.plan, sens)
 			var w: int = str(plan[0]).length()
 			var h: int = plan.size()
 			var origine := Vector2i(-1, -1)
+			# Les trois premiers essais de chaque genre sont bornés (le cas courant, celui qui doit rester rapide) ; le
+			# quatrième balaie TOUT — sans quoi un bâtiment ne trouve jamais sa place quand le cœur est plein, et la
+			# ville perd son marché (mesuré : le château, les halls et les six échoppes disparaissaient).
+			var cle_taille := "%s_%dx%d" % ["rue" if essai < 4 else "sol", w, h]
+			var complet := essai == 3 or essai == 7
+			if complet and sans_place.has(cle_taille):
+				continue
 			if essai < 4:
-				origine = _parcelle_sur_rue(e, sens, plan, occupe, rues_triees, essais_max, curseur_rue)
+				origine = _parcelle_sur_rue(e, sens, plan, occupe, rues_triees, essais_max if not complet else rues_triees.size(), curseur_rue)
 			else:
-				origine = _terrain_ruelle(e, cell, plan, sens, occupe, taille, tuiles_triees, rue, palette, rues_triees, curseur_terrain_f)
+				origine = _terrain_ruelle(e, cell, plan, sens, occupe, taille, tuiles_triees, rue, palette, rues_triees, curseur_terrain_f, 900 if not complet else 0)
+			if complet and origine == Vector2i(-1, -1):
+				sans_place[cle_taille] = true
 			if origine == Vector2i(-1, -1):
 				continue
 			var r := Rect2i(origine, Vector2i(w, h))
@@ -1232,6 +1271,9 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 			pose = true
 			break
 		if not pose:
+			var manques: Array = e.village.get("non_poses", [])
+			manques.append(bid)
+			e.village["non_poses"] = manques
 			continue
 	t_q = _top("village.parcelles", t_q)
 	# 4 bis. Le rattrapage des lits (2026-09-06) : sur des rues tracées, un logement peut ne pas trouver sa façade —
@@ -1247,7 +1289,7 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 	var tours := 0
 	var facades_epuisees := false   # une fois les façades prises, elles le restent : on ne les recherche plus (le rattrapage coûtait 109 ms)
 	var curseur_terrain: Array = curseur_terrain_f   # le même curseur que la file : on ne rebalaie pas le cœur déjà bâti
-	while lits_poses < pop and echecs < 6 and tours < 60:
+	while lits_poses < pop and echecs < 10 and tours < 90:
 		tours += 1
 		var bid_r := str(petits[tours % petits.size()])
 		if not bats.has(bid_r):
@@ -1299,7 +1341,12 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 			for s_l in cotes:
 				var pl_l := _orienter(bats[bid_r].plan, str(s_l))
 				var dims_l := Vector2i(str(pl_l[0]).length(), pl_l.size())
-				var rr_l := _terrain_libre(occupe, taille, dims_l, tuiles_triees, 0, 900, curseur_terrain)
+				var cle_l := "sol_%dx%d" % [dims_l.x, dims_l.y]
+				if sans_place.has(cle_l):
+					continue   # ce gabarit n'a plus de place dans le quartier : inutile de rebalayer
+				var rr_l := _terrain_libre(occupe, taille, dims_l, tuiles_triees, 0, 0, curseur_terrain)
+				if rr_l.position == Vector2i(-1, -1):
+					sans_place[cle_l] = true
 				if rr_l.position == Vector2i(-1, -1):
 					continue
 				var porte_p := _porte_du_plan(pl_l)
@@ -1380,6 +1427,34 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 			forgeron_pose = true   # un forgeron au plus par quartier (la chance de la fiche vaut pour le quartier, pas par maison)
 			e.village.pnj[e.village.pnj.size() - 1].creature = "forgeron"
 			e.village.pnj[e.village.pnj.size() - 1]["fonction"] = "artisan"
+	# 5 bis. Les bras des lieux de travail (Villes, 2026-09-07) : les résidents sans métier logés le plus près prennent
+	# la fonction du lieu et un poste dedans — un atelier a ses apprentis, une auberge ses servantes, une caserne ses gardes.
+	var emplois: Dictionary = cfg.get("emplois", {}).get("par_batiment", {})
+	for bat in e.village.batiments:
+		var n_emp := int(emplois.get(str(bat.id), 0))
+		if n_emp <= 0:
+			continue
+		var fonction_e := str(bat.get("fonction", ""))
+		if fonction_e.is_empty():
+			fonction_e = str(fonctions.get(str(bat.id), ""))
+		if not str(bat.get("guilde", "")).is_empty():
+			fonction_e = "maitre_de_guilde"
+		elif not str(bat.get("boutique", "")).is_empty():
+			fonction_e = "commercant"
+		if fonction_e.is_empty() or fonction_e == "oisif":
+			continue
+		var poste_e: Vector2i = bat.get("poste", bat.porte)
+		var libres: Array = []   # les sans-métier, du plus proche logé au plus loin
+		for pj in e.village.pnj:
+			if str(pj.get("fonction", "oisif")) == "oisif" and not pj.has("perimetre") and str(pj.get("creature", "")) in ["villageois", "fermier"]:
+				libres.append(pj)
+		libres.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			return (Vector2i(a.lit) - poste_e).length_squared() < (Vector2i(b.lit) - poste_e).length_squared())
+		for k in mini(n_emp, libres.size()):
+			var pj_e: Dictionary = libres[k]
+			pj_e["fonction"] = fonction_e
+			pj_e["poste"] = poste_e
+			pj_e["batiment"] = str(bat.id)
 	# 6. Les gardes : un sur la place du centre, puis un par `gardes_par_habitant`, aux croisements.
 	var n_gardes: int = (1 if quartier == "centre" else 0) + pop / maxi(1, int(cfg.gardes_par_habitant))
 	for k in n_gardes:
@@ -1510,11 +1585,13 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 					tuiles_z.append(Vector2i(int(i) % taille, int(i) / taille))
 		if tuiles_z.size() >= 4:
 			per.append({"type": str(z), "tuiles": tuiles_z})
-			# Deux résidents sans métier deviennent ses ouvriers (bûcheron, mineur, herboriste).
+			# Les résidents sans métier deviennent ses ouvriers (bûcheron, mineur, herboriste), à la mesure de la zone.
 			var fonction_z := str(GameData.config("combat_rules").royaume.perimetres.types[str(z)].fonction)
+			var emp: Dictionary = cfg.get("emplois", {})
+			var max_ouvriers: int = clampi(tuiles_z.size() / maxi(1, int(emp.get("ouvriers_par_tuiles", 8))), 1, int(emp.get("ouvriers_max", 6)))
 			var n_ouvriers := 0
 			for pj in e.village.pnj:
-				if n_ouvriers >= 2:
+				if n_ouvriers >= max_ouvriers:
 					break
 				if str(pj.get("fonction", "oisif")) == "oisif" and str(pj.get("creature", "")) == "villageois":
 					pj["fonction"] = fonction_z
@@ -2386,9 +2463,9 @@ func _carte_pres_eau(e: Dictionary, taille: int, dist: int) -> PackedByteArray:
 ## Un terrain libre et la ruelle qui y mène (Villes, 2026-09-07) : quand plus aucune façade n'est libre, le quartier
 ## fait pousser une ruelle jusqu'à un terrain vide et l'on bâtit au bout — c'est ainsi qu'un bourg garde son marché et
 ## ses guildes même quand son cœur est plein. Rend l'origine du plan, ou (-1,-1) si le quartier n'a plus de place.
-func _terrain_ruelle(e: Dictionary, cell: Vector2i, plan: Array, sens: String, occupe: PackedByteArray, taille: int, tuiles_triees: Array, rue: Dictionary, palette: Dictionary, rues_triees: Array, curseur: Array) -> Vector2i:
+func _terrain_ruelle(e: Dictionary, cell: Vector2i, plan: Array, sens: String, occupe: PackedByteArray, taille: int, tuiles_triees: Array, rue: Dictionary, palette: Dictionary, rues_triees: Array, curseur: Array, max_candidats: int = 900) -> Vector2i:
 	var dims := Vector2i(str(plan[0]).length(), plan.size())
-	var r := _terrain_libre(occupe, taille, dims, tuiles_triees, 0, 900, curseur)
+	var r := _terrain_libre(occupe, taille, dims, tuiles_triees, 0, max_candidats, curseur)
 	if r.position == Vector2i(-1, -1):
 		return Vector2i(-1, -1)
 	var porte := _porte_du_plan(plan)

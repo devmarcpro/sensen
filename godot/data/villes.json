@@ -148,8 +148,8 @@
     ]
   },
   "parts": {
-    "centre": 1.0,
-    "residentiel": 1.4,
+    "centre": 0.75,
+    "residentiel": 1.6,
     "artisanal": 0.9,
     "marchand": 0.8,
     "agricole": 0.7
@@ -729,5 +729,25 @@
     },
     "bruit": 2.5,
     "epaisseur": 1
+  },
+  "emplois": {
+    "_doc": "Les bras d'un lieu de travail (designer 2026-09-07) : combien de residents sans metier, loges au plus pres, y prennent la fonction du lieu en plus de celui qui le tient. ouvriers_par_tuiles / ouvriers_max : les ouvriers d'une zone de recolte, a la mesure de sa richesse.",
+    "par_batiment": {
+      "atelier": 2,
+      "echoppe": 1,
+      "entrepot": 1,
+      "auberge": 2,
+      "hall": 1,
+      "chateau": 3,
+      "mairie": 2,
+      "comptoir": 2,
+      "temple": 2,
+      "chapelle": 1,
+      "caserne": 4,
+      "ecurie": 1,
+      "grange": 1
+    },
+    "ouvriers_par_tuiles": 8,
+    "ouvriers_max": 6
   }
 }
