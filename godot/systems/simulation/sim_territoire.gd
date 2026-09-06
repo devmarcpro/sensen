@@ -188,7 +188,57 @@ static func _verifier_royaume(sim: Simulation, e: Dictionary) -> void:
 ## cellule, puis chaque tuile franchissable hors extérieur fonde une région close. Une région est une pièce si elle touche
 ## une porte, a des meubles, et tient entre `pieces.surface_min` et `pieces.fill_max`. Une porte fermée (celles des villes)
 ## ferme une pièce aussi (Villes B1). Avant, chaque porte inondait mille tuiles côté rue : 40 ms par cellule de ville.
+## Le noyau C++ inonde (`SensenGrille.regions_cellule`, 2026-09-06) quand il est chargé ; le GDScript reste la référence.
 static func pieces_de_cellule(sim: Simulation, cell: Vector2i) -> Array:
+	if sim.monde != null and sim.lieu == "camp" and sim.grille._noyau != null and Grille.noyau_actif:
+		return _pieces_noyau(sim, cell)
+	return _pieces_de_cellule_gd(sim, cell)
+
+
+## Les régions closes par le noyau : la classification des contenus et les règles (porte, meubles, surface) restent ici.
+static func _pieces_noyau(sim: Simulation, cell: Vector2i) -> Array:
+	var res: Array = []
+	var pc: Dictionary = _ry(sim).pieces
+	var g := sim.grille
+	var n: int = sim.monde.taille
+	var o: Vector2i = sim.monde.pos_monde(cell, Vector2i.ZERO)
+	if not g.dans(o) or not g.dans(o + Vector2i(n - 1, n - 1)):
+		return res   # la cellule n'est pas entière dans la fenêtre
+	var classes := PackedInt32Array()
+	classes.resize(g.contenu_ids.size())
+	for ci in range(1, g.contenu_ids.size()):
+		var def: Dictionary = g.contenu_defs.get(g.contenu_ids[ci], {})
+		var tags: Array = def.get("tags", [])
+		var cc := 0
+		if "porte" in tags:
+			cc = 2
+		elif "mur" in tags:
+			cc = 1
+		elif bool(def.get("bloque_passage", false)):
+			cc = 3   # bloquant : un mur, sauf si un meuble y est posé
+		classes[ci] = cc
+	var r: Dictionary = g._noyau.regions_cellule(g, o, n, classes)
+	var regions: Array = r.tuiles
+	var portes: PackedInt32Array = r.portes
+	for k in regions.size():
+		var locaux: PackedInt32Array = regions[k]
+		var tuiles: Array = []
+		var types: Dictionary = {}
+		for li in locaux:
+			var p := o + Vector2i(li % n, li / n)
+			tuiles.append(p)
+			var gi := g.idx(p)
+			if g.meubles.has(gi):
+				types[str(g.meubles[gi])] = true
+		var pl: int = portes[k]
+		var porte := Vector2i(-1, -1) if pl < 0 else o + Vector2i(pl % n, pl / n)
+		if porte == Vector2i(-1, -1) or types.is_empty() or tuiles.size() < int(pc.surface_min) or tuiles.size() > int(pc.fill_max):
+			continue
+		res.append({"tuiles": tuiles, "meubles": types.keys(), "porte": porte})
+	return res
+
+
+static func _pieces_de_cellule_gd(sim: Simulation, cell: Vector2i) -> Array:
 	var res: Array = []
 	if sim.monde == null or sim.lieu != "camp":
 		return res

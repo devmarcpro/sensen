@@ -83,6 +83,7 @@ void SensenGrille::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("champ_de_vue", "grille", "pos", "portee"), &SensenGrille::champ_de_vue);
 	ClassDB::bind_method(D_METHOD("cout_pas_entre", "grille", "de", "vers", "volant", "eviter_nage"), &SensenGrille::cout_pas_entre);
 	ClassDB::bind_method(D_METHOD("composante", "grille", "depart", "max_tuiles"), &SensenGrille::composante);
+	ClassDB::bind_method(D_METHOD("regions_cellule", "grille", "origine", "n", "classes"), &SensenGrille::regions_cellule);
 }
 
 // Les règles de déplacement, lues comme Grille.cout_pas les lit (les nombres du JSON sont des flottants).
@@ -412,6 +413,132 @@ PackedInt32Array SensenGrille::champ_de_vue(Object *grille, Vector2i pos, int po
 	}
 	return res;
 }
+
+// Les régions closes d'une cellule (SimTerritoire.pieces_de_cellule, « Détection de pièces », l'extérieur d'abord),
+// transcrites telles quelles : `classes` donne la classe de chaque index de contenu (0 franchissable, 1 mur, 2 porte,
+// 3 bloquant — un mur, sauf si un meuble y est posé) ; l'extérieur est inondé depuis le bord de la cellule (4 directions,
+// une pile, le même ordre de graines et de voisins), puis chaque tuile franchissable non visitée fonde une région, dont
+// la première porte rencontrée dans le parcours est notée. Retourne {"tuiles": [PackedInt32Array par région, index
+// locaux dans l'ordre du parcours], "portes": PackedInt32Array (index local de la porte, -1 sans), "region": PackedInt32Array
+// (par tuile locale : -1 extérieur, 0 mur/porte/non visité, k ≥ 1)}. Les règles (porte obligatoire, meubles, surface)
+// restent en GDScript.
+Dictionary SensenGrille::regions_cellule(Object *grille, Vector2i origine, int n, const PackedInt32Array &classes) {
+	Dictionary res;
+	Array tuiles_par_region;
+	PackedInt32Array portes;
+	PackedInt32Array region;
+	Etat s;
+	if (n <= 0 || !charger(grille, s) || !s.dans(origine.x, origine.y) || !s.dans(origine.x + n - 1, origine.y + n - 1)) {
+		res["tuiles"] = tuiles_par_region;
+		res["portes"] = portes;
+		res["region"] = region;
+		return res;
+	}
+	static const StringName sn_meubles("meubles");
+	Dictionary meubles = grille->get(sn_meubles);
+	int nn = n * n;
+	std::vector<uint8_t> classe(nn, 0), meuble_ici(nn, 0);
+	// Les meubles de la cellule : on parcourt le dictionnaire (quelques centaines d'entrées), pas les tuiles.
+	Array cles = meubles.keys();
+	for (int i = 0; i < cles.size(); ++i) {
+		int gi = (int)cles[i];
+		int gx = s.ox + gi % s.L, gy = s.oy + gi / s.L;
+		int lx = gx - origine.x, ly = gy - origine.y;
+		if (lx >= 0 && ly >= 0 && lx < n && ly < n) {
+			meuble_ici[ly * n + lx] = 1;
+		}
+	}
+	int nc = classes.size();
+	const int32_t *cl = classes.ptr();
+	for (int ly = 0; ly < n; ++ly) {
+		for (int lx = 0; lx < n; ++lx) {
+			int gi = s.idx(origine.x + lx, origine.y + ly);
+			int32_t ci = s.c[gi];
+			int c = 0;
+			if (ci > 0) {
+				c = (ci < nc) ? cl[ci] : 0;
+				if (c == 3) {
+					c = meuble_ici[ly * n + lx] ? 0 : 1;
+				}
+			}
+			classe[ly * n + lx] = (uint8_t)c;
+		}
+	}
+	std::vector<int32_t> reg(nn, 0);
+	std::vector<int> pile;
+	pile.reserve(1024);
+	const int DXC[4] = { 1, -1, 0, 0 };
+	const int DYC[4] = { 0, 0, 1, -1 };
+	for (int i = 0; i < n; ++i) {
+		int graines[4] = { i, (n - 1) * n + i, i * n, i * n + n - 1 };
+		for (int g4 = 0; g4 < 4; ++g4) {
+			int li = graines[g4];
+			if (classe[li] == 0 && reg[li] == 0) {
+				reg[li] = -1;
+				pile.push_back(li);
+			}
+		}
+	}
+	while (!pile.empty()) {
+		int li = pile.back();
+		pile.pop_back();
+		int lx = li % n, ly = li / n;
+		for (int d = 0; d < 4; ++d) {
+			int vx = lx + DXC[d], vy = ly + DYC[d];
+			if (vx < 0 || vy < 0 || vx >= n || vy >= n) {
+				continue;
+			}
+			int vi = vy * n + vx;
+			if (classe[vi] == 0 && reg[vi] == 0) {
+				reg[vi] = -1;
+				pile.push_back(vi);
+			}
+		}
+	}
+	int k = 0;
+	for (int li0 = 0; li0 < nn; ++li0) {
+		if (classe[li0] != 0 || reg[li0] != 0) {
+			continue;
+		}
+		k += 1;
+		PackedInt32Array tuiles;
+		int porte = -1;
+		reg[li0] = k;
+		pile.clear();
+		pile.push_back(li0);
+		while (!pile.empty()) {
+			int li = pile.back();
+			pile.pop_back();
+			int lx = li % n, ly = li / n;
+			tuiles.push_back(li);
+			for (int d = 0; d < 4; ++d) {
+				int vx = lx + DXC[d], vy = ly + DYC[d];
+				if (vx < 0 || vy < 0 || vx >= n || vy >= n) {
+					continue;
+				}
+				int vi = vy * n + vx;
+				if (classe[vi] == 2 && porte == -1) {
+					porte = vi;
+				} else if (classe[vi] == 0 && reg[vi] == 0) {
+					reg[vi] = k;
+					pile.push_back(vi);
+				}
+			}
+		}
+		tuiles_par_region.push_back(tuiles);
+		portes.push_back(porte);
+	}
+	region.resize(nn);
+	int32_t *rp = region.ptrw();
+	for (int i = 0; i < nn; ++i) {
+		rp[i] = reg[i];
+	}
+	res["tuiles"] = tuiles_par_region;
+	res["portes"] = portes;
+	res["region"] = region;
+	return res;
+}
+
 
 // La composante connexe des tuiles franchissables (à pied, sans nage forcée) autour de depart, en 8 directions :
 // les index visités dans l'ordre de la vague, la tuile de départ d'abord ; s'arrête à max_tuiles (0 = sans borne).

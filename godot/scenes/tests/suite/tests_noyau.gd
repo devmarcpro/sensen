@@ -87,6 +87,29 @@ func test_noyau_cpp() -> void:
 	verifier(miroirs == 0, "les miroirs du noyau (occupants, dangers, eau) reflètent leurs dictionnaires (%d écarts)" % miroirs)
 	verifier(frott == 0, "la friction compilée par tuile est celle de _mult_friction (%d écarts sur 400)" % frott)
 	sm.monde.fermer()
+	# Les pièces d'une cellule de village (Détection de pièces) : les régions closes inondées par le noyau, les mêmes.
+	var sv := Simulation.new(83)
+	sv.charger_camp()
+	var surf: Surface = sv.monde.surface
+	var cell: Vector2i = sv.monde.cellule_camp + Vector2i(1, 0)
+	surf.fiches_agglo.erase(cell)
+	var agglo: Dictionary = surf.fiche_agglomeration(cell).duplicate()
+	agglo["quartier"] = "centre"
+	agglo["index"] = 0
+	var ev: Dictionary = surf.generer_cellule(cell.x, cell.y, {}, false)
+	if ev.village.is_empty():
+		var rng_v := RandomNumberGenerator.new()
+		rng_v.seed = 83
+		surf._poser_quartier(ev, cell, rng_v, agglo)
+	sv.monde.cellules[cell] = ev
+	sv.grille = sv.monde.fenetre(sv.monde.centre, GameData.config("tile_contents"), sv.regles.r.deplacement, int(sv.regles.r.vision.hauteur_oeil))
+	var t_gd0 := Time.get_ticks_usec()
+	var p_gd: Array = SimTerritoire._pieces_de_cellule_gd(sv, cell)
+	var t_gd1 := Time.get_ticks_usec()
+	var p_cpp: Array = SimTerritoire._pieces_noyau(sv, cell)
+	var t_gd2 := Time.get_ticks_usec()
+	verifier(p_gd.size() > 0 and p_gd == p_cpp, "les pièces d'une cellule de village : les mêmes par le noyau (%d pièces, GDScript %.1f ms, C++ %.2f ms)" % [p_gd.size(), float(t_gd1 - t_gd0) / 1000.0, float(t_gd2 - t_gd1) / 1000.0])
+	sv.monde.fermer()
 
 
 ## Compare le noyau et le GDScript sur `n` paires tirées au sort dans la grille, toutes les fonctions.

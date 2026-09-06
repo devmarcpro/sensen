@@ -88,6 +88,7 @@ public:
 	PackedInt32Array champ_de_vue(Object *grille, Vector2i pos, int portee);
 	int cout_pas_entre(Object *grille, Vector2i de, Vector2i vers, bool volant, bool eviter_nage);
 	PackedInt32Array composante(Object *grille, Vector2i depart, int max_tuiles);
+	Dictionary regions_cellule(Object *grille, Vector2i origine, int n, const PackedInt32Array &classes);
 };
 
 } // namespace godot
