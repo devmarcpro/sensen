@@ -1073,6 +1073,7 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 	var bats: Dictionary = GameData.catalogues.village_buildings
 	var b: Dictionary = biomes.get(e.biome, {})
 	var palette: Dictionary = _palette_village(b, agglo)
+	var t_q0 := Time.get_ticks_usec()
 	var quartier := str(agglo.quartier)
 	var comp: Dictionary = cfg.composition[quartier]
 	var palier := str(agglo.palier)
@@ -1083,31 +1084,26 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 		"palier": palier, "taille": palier, "population": int(agglo.population), "population_quartier": pop, "quartier": quartier, "cellule_centre": agglo.centre,
 		"index": int(agglo.index), "capitale": bool(agglo.capitale), "gouvernance": str(agglo.gouvernance),
 		"territoire": {"role": str(roles.get(quartier, "base")), "perimetres": [], "stockages": []}}
-	# 1. Les rues : deux axes par le milieu, `rue_largeur` tuiles de large — elles se raccordent d'une cellule à
-	#    l'autre ; à partir du bourg, deux rues parallèles à chaque axe (une grille de neuf îlots, plus de façades).
-	var larg: int = int(cfg.rue_largeur)
+	# 1. Les rues : des TRACÉS qui suivent le terrain, selon le plan de la ville (designer 2026-09-06, 23 h 45) — les
+	#    routes viennent des quatre bords (au point que la cellule voisine trouve aussi) et convergent vers la place ;
+	#    l'archétype ajoute ses anneaux, ses ruelles, ou sa trame droite.
+	var t_q := _top("village.entete", t_q0)
+	var plan_id := plan_de_ville(agglo)
+	e.village["plan"] = plan_id
 	var rue := {}
-	var rues_h: Array[int] = [centre.y]
-	var rues_v: Array[int] = [centre.x]
-	if palier != "hameau":   # dès le village : un village de trente-cinq âmes ne loge pas le long de deux rues
-		rues_h.append_array([centre.y - taille / 4, centre.y + taille / 4])
-		rues_v.append_array([centre.x - taille / 4, centre.x + taille / 4])
-	for yr in rues_h:
-		for k in taille:
-			for w in larg:
-				_paver(e, Vector2i(k, yr - larg / 2 + w), palette, rue)
-	for xr in rues_v:
-		for k in taille:
-			for w in larg:
-				_paver(e, Vector2i(xr - larg / 2 + w, k), palette, rue)
-	# 2. La place au croisement (le centre, le quartier marchand, une placette au résidentiel).
+	_tracer_rues(e, cell, centre, plan_id, palier, palette, rue, rng)
+	t_q = _top("village.rues", t_q)
+	# 1 bis. Le rempart de la vieille ville : un bourg et plus fortifie son centre (2026-09-07).
 	var pris: Array[Rect2i] = []
+	var rayon_rempart := int(GameData.config("villes").get("remparts", {}).get("rayon", {}).get(palier, 0)) if quartier == "centre" else 0
+	if rayon_rempart > 0:
+		e.village["remparts"] = _poser_rempart(e, cell, centre, rayon_rempart, palette, rue)
+	# 2. La place : un disque irrégulier au bout des rues (le centre, le quartier marchand, une placette au résidentiel).
 	var rayon: int = int(cfg.rayon_place) if quartier == "centre" else int(cfg.rayon_placette)
 	if bool(comp.place):
-		for dy in range(-rayon, rayon + 1):
-			for dx in range(-rayon, rayon + 1):
-				_paver(e, centre + Vector2i(dx, dy), palette, rue)
-		pris.append(Rect2i(centre - Vector2i(rayon, rayon), Vector2i(2 * rayon + 1, 2 * rayon + 1)))
+		pris.append(_paver_place(e, cell, centre, rayon, palette, rue))
+		_meubler_place(e, cell, centre, rayon, palier, quartier, bool(agglo.get("capitale", false)), rue, rng)
+	t_q = _top("village.place", t_q)
 	# 3. La file des bâtiments : [préfab, boutique, guilde, station, fonction].
 	var file: Array = []
 	var siege_fonction := ""
@@ -1148,11 +1144,43 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 			continue
 		file.append([bid, "", "", "", ""])
 		lits += _lits_du_prefab(bats[bid])
-	# 4. Les parcelles le long des rues : les quatre côtés à tour de rôle, du centre vers les bords.
+	t_q = _top("village.file", t_q)
+	# 4. Les parcelles SUR LA RUE : la porte du bâtiment donne sur une tuile de rue, du centre vers les bords.
 	var cotes := ["sud", "nord", "est", "ouest"]
-	var curseurs := {"sud": 0, "nord": 0, "est": 0, "ouest": 0}
 	var lots := {}   # index de tuile → true : les emprises des bâtiments (les zones de récolte les évitent)
 	var residentiel: Dictionary = {}   # tuiles du périmètre résidentiel (les logements et une marge)
+	# La carte d'occupation : l'eau, les murs (rempart compris), les rues et la place — puis chaque emprise posée.
+	var occupe := PackedByteArray()
+	occupe.resize(taille * taille)
+	for i in e.eau.keys():
+		occupe[int(i)] = 1
+	for i in e.murs.keys():
+		occupe[int(i)] = 1
+	for i in rue.keys():
+		occupe[int(i)] = 1
+	for pr in pris:
+		_occuper(occupe, taille, pr, 1)
+	# Les tuiles du quartier, du centre vers les bords : une spirale carrée, sans tri (trier 3 600 tuiles par un
+	# comparateur GDScript coûtait plus cher que tout le reste de la pose). Les rues en sont extraites au passage.
+	var tuiles_triees: Array = []
+	var rues_triees: Array = []
+	var garder := func(q: Vector2i) -> void:
+		if q.x < 2 or q.y < 2 or q.x >= taille - 2 or q.y >= taille - 2:
+			return
+		var i := q.y * taille + q.x
+		tuiles_triees.append(i)
+		if rue.has(i):
+			rues_triees.append(i)
+	garder.call(centre)
+	for r in range(1, taille):
+		for dx in range(-r, r + 1):   # les deux côtés horizontaux de l'anneau
+			garder.call(centre + Vector2i(dx, -r))
+			garder.call(centre + Vector2i(dx, r))
+		for dy in range(-r + 1, r):   # les deux côtés verticaux, sans les coins déjà pris
+			garder.call(centre + Vector2i(-r, dy))
+			garder.call(centre + Vector2i(r, dy))
+	var essais_max: int = int(cfg.get("plans", {}).get("essais_parcelle", 600))
+	var curseur_rue: Array = [0]
 	for k in file.size():
 		var bid: String = str(file[k][0])
 		var bat: Dictionary = bats[bid]
@@ -1162,11 +1190,12 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 			var plan := _orienter(bat.plan, sens)
 			var w: int = str(plan[0]).length()
 			var h: int = plan.size()
-			var origine := _parcelle(e, sens, w, h, centre, larg, curseurs, pris, rues_h, rues_v)
+			var origine := _parcelle_sur_rue(e, sens, plan, occupe, rues_triees, essais_max, curseur_rue)
 			if origine == Vector2i(-1, -1):
 				continue
 			var r := Rect2i(origine, Vector2i(w, h))
 			pris.append(r)
+			_occuper(occupe, taille, r, 1)
 			var b2 := bat.duplicate()
 			b2.plan = plan
 			if not str(file[k][3]).is_empty():
@@ -1199,6 +1228,117 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 			break
 		if not pose:
 			continue
+	t_q = _top("village.parcelles", t_q)
+	# 4 bis. Le rattrapage des lits (2026-09-06) : sur des rues tracées, un logement peut ne pas trouver sa façade —
+	# la ville manquerait de lits pour ses habitants. On repose des logements, du plus petit au plus grand, tant qu'il
+	# reste des gens à loger et qu'une place se trouve ; trois échecs de suite arrêtent (le quartier est plein).
+	var lits_poses := 0
+	for bat_p in e.village.batiments:
+		lits_poses += (bat_p.lits as Array).size()
+	var petits: Array = logements.duplicate()
+	petits.sort_custom(func(a: Variant, b: Variant) -> bool:
+		return _lits_du_prefab(bats[str(a)]) < _lits_du_prefab(bats[str(b)]) if bats.has(str(a)) and bats.has(str(b)) else false)
+	var echecs := 0
+	var tours := 0
+	while lits_poses < pop and echecs < 6 and tours < 60:
+		tours += 1
+		var bid_r := str(petits[tours % petits.size()])
+		if not bats.has(bid_r):
+			continue
+		var pose_r := false
+		for essai_r in 4:
+			var sens_r: String = cotes[(tours + essai_r) % 4]
+			var plan_r := _orienter(bats[bid_r].plan, sens_r)
+			var origine_r := _parcelle_sur_rue(e, sens_r, plan_r, occupe, rues_triees, essais_max * 3, curseur_rue)
+			if origine_r == Vector2i(-1, -1):
+				continue
+			var r_r := Rect2i(origine_r, Vector2i(str(plan_r[0]).length(), plan_r.size()))
+			pris.append(r_r)
+			_occuper(occupe, taille, r_r, 1)
+			var b_r: Dictionary = bats[bid_r].duplicate()
+			b_r.plan = plan_r
+			_poser_batiment(e, b_r, origine_r, palette, bid_r)
+			var info_r: Dictionary = e.village.batiments.back()
+			info_r["rect"] = r_r
+			info_r["boutique"] = ""
+			info_r["guilde"] = ""
+			info_r["station"] = ""
+			info_r["fonction"] = ""
+			for y in range(-3, r_r.size.y + 3):
+				for x in range(-3, r_r.size.x + 3):
+					var q_r := origine_r + Vector2i(x, y)
+					if _dans(q_r, taille):
+						residentiel[q_r] = true
+			for y in r_r.size.y:
+				for x in r_r.size.x:
+					lots[(origine_r.y + y) * taille + origine_r.x + x] = true
+			var dir_r: Vector2i = {"sud": Vector2i(0, 1), "nord": Vector2i(0, -1), "est": Vector2i(1, 0), "ouest": Vector2i(-1, 0)}[sens_r]
+			var q3: Vector2i = info_r.porte + dir_r
+			var pas_r := 0
+			while pas_r < 8 and _dans(q3, taille) and not rue.has(q3.y * taille + q3.x):
+				_paver(e, q3, palette, rue)
+				q3 += dir_r
+				pas_r += 1
+			lits_poses += (info_r.lits as Array).size()
+			pose_r = true
+			break
+		if not pose_r:   # aucune façade libre : le quartier fait pousser une ruelle jusqu'à un terrain vide et bâtit au bout
+			# La ruelle : on cherche un terrain, dans une orientation dont le devant de la porte est libre — sinon la
+			# maison ouvrirait sur un mur (le rempart) et sa ruelle ne pourrait pas partir.
+			var sens_l := "sud"
+			var plan_l: Array = []
+			var r_l := Rect2i(Vector2i(-1, -1), Vector2i(1, 1))
+			for s_l in cotes:
+				var pl_l := _orienter(bats[bid_r].plan, str(s_l))
+				var dims_l := Vector2i(str(pl_l[0]).length(), pl_l.size())
+				var rr_l := _terrain_libre(occupe, taille, dims_l, tuiles_triees, 0)
+				if rr_l.position == Vector2i(-1, -1):
+					continue
+				var porte_p := _porte_du_plan(pl_l)
+				if porte_p == Vector2i(-1, -1):
+					porte_p = Vector2i(dims_l.x / 2, dims_l.y - 1)
+				var dev: Vector2i = rr_l.position + porte_p + {"sud": Vector2i(0, 1), "nord": Vector2i(0, -1), "est": Vector2i(1, 0), "ouest": Vector2i(-1, 0)}[str(s_l)]
+				if not _dans(dev, taille) or e.murs.has(dev.y * taille + dev.x) or e.eau.has(dev.y * taille + dev.x):
+					continue
+				sens_l = str(s_l)
+				plan_l = pl_l
+				r_l = rr_l
+				break
+			if r_l.position != Vector2i(-1, -1):
+				pris.append(r_l)
+				_occuper(occupe, taille, r_l, 1)
+				lots[r_l.position.y * taille + r_l.position.x] = true
+				var b_l: Dictionary = bats[bid_r].duplicate()
+				b_l.plan = plan_l
+				_poser_batiment(e, b_l, r_l.position, palette, bid_r)
+				var info_l: Dictionary = e.village.batiments.back()
+				info_l["rect"] = r_l
+				info_l["boutique"] = ""
+				info_l["guilde"] = ""
+				info_l["station"] = ""
+				info_l["fonction"] = ""
+				for y in range(-3, r_l.size.y + 3):
+					for x in range(-3, r_l.size.x + 3):
+						var q_l := r_l.position + Vector2i(x, y)
+						if _dans(q_l, taille):
+							residentiel[q_l] = true
+				for y in r_l.size.y:
+					for x in r_l.size.x:
+						lots[(r_l.position.y + y) * taille + r_l.position.x + x] = true
+				var porte_l: Vector2i = info_l.porte + {"sud": Vector2i(0, 1), "nord": Vector2i(0, -1), "est": Vector2i(1, 0), "ouest": Vector2i(-1, 0)}[sens_l]
+				var plus_proche := centre   # la ruelle rejoint la tuile de rue la plus proche de la porte
+				var d_min := 1 << 30
+				for ir_l in rues_triees:
+					var t_l := Vector2i(int(ir_l) % taille, int(ir_l) / taille)
+					var d_l: int = (t_l - porte_l).length_squared()
+					if d_l < d_min:
+						d_min = d_l
+						plus_proche = t_l
+				_paver_trace(e, _tracer_rue(e, cell, porte_l, plus_proche, rue, 0.3, 3.0), 1, palette, rue)
+				lits_poses += (info_l.lits as Array).size()
+				pose_r = true
+		echecs = 0 if pose_r else echecs + 1
+	t_q = _top("village.rattrapage", t_q)
 	# 5. Les gens : un résident par lit ; la fiche et la fonction du bâtiment ; le poste dans le bâtiment.
 	var residents: Dictionary = vc.residents
 	var fiches: Dictionary = cfg.fiches
@@ -1252,6 +1392,7 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 						pj["fonction"] = "oisif"
 				break
 		e.village.pnj.append({"creature": str(GameData.config("combat_rules").royaume.succession.creature_dirigeant), "pos": ou, "lit": lit_d, "poste": ou, "fonction": "dirigeant"})
+	t_q = _top("village.gens", t_q)
 	# 8. Les champs et l'enclos (Villes B2) : des rectangles de terre libre derrière les maisons, hors rues.
 	var per: Array = e.village.territoire.perimetres
 	var tags_b: Array = b.get("tags", [])
@@ -1322,6 +1463,9 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 				pj["poste"] = r.position + Vector2i(-1, r.size.y / 2)
 				pj["pos"] = pj.poste
 				break
+	t_q = _top("village.champs", t_q)
+	e.village["rues"] = rue.keys()   # les tuiles de rue du quartier (le test du plan, et ce qui suivra les routes)
+	var t_fin := Time.get_ticks_usec()
 	# 9. Le plan du territoire : le résidentiel, les stockages (les entrepôts), les zones de récolte en lisière.
 	if not residentiel.is_empty():
 		var tuiles_r: Array = residentiel.keys()
@@ -1365,9 +1509,11 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 					pj["fonction"] = fonction_z
 					pj["perimetre"] = per.size() - 1
 					n_ouvriers += 1
+	_top("village.territoire", t_fin)
 
 
 ## La liste d'une table par tag de biome (`_defaut` sinon).
+
 func _liste_par_biome(table: Dictionary, tags: Array) -> Array:
 	for t in tags:
 		if table.has(str(t)):
@@ -1376,9 +1522,9 @@ func _liste_par_biome(table: Dictionary, tags: Array) -> Array:
 
 
 ## Un rectangle de terre libre (ni rue, ni parcelle prise, ni eau), tiré au sort ; position (-1,-1) s'il n'y en a pas.
-func _rectangle_libre(e: Dictionary, dims: Vector2i, pris: Array[Rect2i], rue: Dictionary, rng: RandomNumberGenerator) -> Rect2i:
+func _rectangle_libre(e: Dictionary, dims: Vector2i, pris: Array[Rect2i], rue: Dictionary, rng: RandomNumberGenerator, essais: int = 80) -> Rect2i:
 	var taille: int = e.largeur
-	for essai in 80:
+	for essai in essais:
 		var origine := Vector2i(rng.randi_range(2, taille - 3 - dims.x), rng.randi_range(2, taille - 3 - dims.y))
 		var r := Rect2i(origine, dims)
 		var libre := true
@@ -1791,3 +1937,367 @@ func _dans(p: Vector2i, taille: int) -> bool:
 func _deltater(e: Dictionary, p: Vector2i, delta: int) -> void:
 	var i: int = p.y * e.largeur + p.x
 	e.hauteurs[i] = clampi(int(e.hauteurs[i]) + delta, 0, 20)
+
+
+# ---------------------------------------------------------------- le plan d'une ville (designer 2026-09-06, 23 h 30)
+
+## Le plan d'une agglomération : un archétype tiré à SA graine (tous ses quartiers le partagent) — pondéré par le palier
+## et poussé par la gouvernance du royaume (une monarchie trace des villes à la règle, une république les laisse pousser).
+func plan_de_ville(agglo: Dictionary) -> String:
+	var cfg: Dictionary = GameData.config("villes").get("plans", {})
+	var poids: Dictionary = cfg.get("poids", {}).get(str(agglo.get("palier", "village")), {}).duplicate()
+	if poids.is_empty():
+		return "organique"
+	for pid in cfg.get("biais_gouvernance", {}).get(str(agglo.get("gouvernance", "")), {}).keys():
+		poids[pid] = float(poids.get(pid, 0.0)) + float(cfg.biais_gouvernance[str(agglo.gouvernance)][pid])
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "plan", agglo.get("centre", Vector2i.ZERO), str(agglo.get("nom", ""))])
+	var total := 0.0
+	for pid in poids:
+		total += maxf(0.0, float(poids[pid]))
+	var tirage := rng.randf() * total
+	for pid in poids:
+		tirage -= maxf(0.0, float(poids[pid]))
+		if tirage <= 0.0:
+			return str(pid)
+	return str(poids.keys()[0])
+
+
+## Le point où une rue traverse un bord de cellule. Il est tiré à la graine de la PAIRE de cellules : les deux voisines
+## trouvent le même point, et leurs rues se rejoignent sans que l'une sache ce que l'autre a fait.
+func _sortie_bord(cell: Vector2i, cote: String, taille: int) -> Vector2i:
+	var d: Vector2i = {"est": Vector2i(1, 0), "ouest": Vector2i(-1, 0), "sud": Vector2i(0, 1), "nord": Vector2i(0, -1)}.get(cote, Vector2i(1, 0))
+	var autre := cell + d
+	var a := cell
+	var b := autre
+	if b.x < a.x or (b.x == a.x and b.y < a.y):
+		a = autre
+		b = cell
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "bord_ville", a, b])
+	var t := rng.randi_range(taille / 5, taille - 1 - taille / 5)
+	match cote:
+		"est": return Vector2i(taille - 1, t)
+		"ouest": return Vector2i(0, t)
+		"sud": return Vector2i(t, taille - 1)
+		_: return Vector2i(t, 0)
+
+
+## Le bruit d'une tuile pour la sinuosité d'une rue : déterministe, sans RNG à état — deux tracés qui passent au même
+## endroit se courbent pareil, et une rue retracée est la même.
+func _bruit_rue(cell: Vector2i, p: Vector2i) -> float:
+	var h := hash([graine, "sinuo", cell, p])
+	return float(h % 1000) / 1000.0
+
+
+## Le tracé d'une rue de `depart` à `arrivee` : une marche gloutonne qui, à chaque pas, choisit parmi les trois directions
+## qui rapprochent celle qui monte le moins, évite l'eau et suit une rue déjà tracée, avec un bruit de terrain qui la fait
+## serpenter (`sinuosite`). Rend les tuiles du tracé. C'est ce qui remplace les axes droits : une rue épouse le relief.
+func _tracer_rue(e: Dictionary, cell: Vector2i, depart: Vector2i, arrivee: Vector2i, rue: Dictionary, sinuosite: float, pente_pen: float) -> Array[Vector2i]:
+	var taille: int = e.largeur
+	var res: Array[Vector2i] = []
+	var p := depart
+	var vus := {}
+	var max_pas := taille * 3
+	while p != arrivee and res.size() < max_pas:
+		res.append(p)
+		vus[p.y * taille + p.x] = true
+		var vers := Vector2(arrivee - p)
+		var meilleur := Vector2i(0, 0)
+		var meilleur_score := 1e18
+		for d in Grille.DIRS:
+			var q: Vector2i = p + d
+			if not _dans(q, taille) or vus.has(q.y * taille + q.x):
+				continue
+			var vd := Vector2(d).normalized()
+			var cap := vd.dot(vers.normalized()) if vers.length() > 0.01 else 1.0
+			if cap < 0.2:
+				continue   # on n'avance qu'en s'approchant : une rue ne revient pas sur ses pas
+			var i := q.y * taille + q.x
+			var score := float(Vector2(arrivee - q).length()) * 2.0
+			score += absf(float(e.hauteurs[i]) - float(e.hauteurs[p.y * taille + p.x])) * pente_pen   # la pente coûte : la rue contourne la butte
+			score += _bruit_rue(cell, q) * sinuosite * 8.0                                            # le terrain la fait serpenter
+			if e.eau.has(i):
+				score += 400.0        # l'eau se contourne ; s'il n'y a que ça, on la franchit (un gué)
+			if rue.has(i):
+				score -= 6.0          # une rue existante s'emprunte : les tracés se rejoignent en tronc commun
+			if e.rochers.has(i):
+				score += 12.0
+			if score < meilleur_score:
+				meilleur_score = score
+				meilleur = d
+		if meilleur == Vector2i(0, 0):
+			break
+		p += meilleur
+	res.append(arrivee if p == arrivee else p)
+	return res
+
+
+## Pave un tracé à sa largeur : la tuile et, selon la largeur, ses voisines — une rue de trois tuiles est un ruban.
+func _paver_trace(e: Dictionary, trace: Array[Vector2i], largeur: int, palette: Dictionary, rue: Dictionary) -> void:
+	for p in trace:
+		_paver(e, p, palette, rue)
+		if largeur >= 2:
+			_paver(e, p + Vector2i(1, 0), palette, rue)
+			_paver(e, p + Vector2i(0, 1), palette, rue)
+		if largeur >= 3:
+			_paver(e, p + Vector2i(-1, 0), palette, rue)
+			_paver(e, p + Vector2i(0, -1), palette, rue)
+		if largeur >= 4:
+			_paver(e, p + Vector2i(1, 1), palette, rue)
+
+
+## Les rues d'un quartier selon son plan (Villes, 2026-09-06) : les quatre sorties de bord d'abord (une ville est
+## traversée par ses routes), puis ce que l'archétype ajoute — des anneaux autour de la place, des ruelles, ou la
+## trame droite de la ville planifiée. Rend les tuiles de rue par `rue`.
+func _tracer_rues(e: Dictionary, cell: Vector2i, centre: Vector2i, plan_id: String, palier: String, palette: Dictionary, rue: Dictionary, rng: RandomNumberGenerator) -> void:
+	var taille: int = e.largeur
+	var cfg: Dictionary = GameData.config("villes").get("plans", {})
+	var lg: Dictionary = cfg.get("largeurs", {"principale": 3, "secondaire": 2, "ruelle": 1})
+	var sinuosite := float(cfg.get("sinuosite", 0.55))
+	var pente_pen := float(cfg.get("pente_penalite", 6.0))
+	if plan_id == "grille":   # la ville tracée à la règle : la trame d'avant, mais posée sur le terrain
+		var pas: int = maxi(8, taille / 5)
+		var lignes: Array[int] = [centre.y]
+		var colonnes: Array[int] = [centre.x]
+		if palier != "hameau":
+			lignes.append_array([centre.y - pas, centre.y + pas])
+			colonnes.append_array([centre.x - pas, centre.x + pas])
+		for yr in lignes:
+			_paver_trace(e, _ligne_droite(Vector2i(0, yr), Vector2i(taille - 1, yr)), int(lg.principale) if yr == centre.y else int(lg.secondaire), palette, rue)
+		for xr in colonnes:
+			_paver_trace(e, _ligne_droite(Vector2i(xr, 0), Vector2i(xr, taille - 1)), int(lg.principale) if xr == centre.x else int(lg.secondaire), palette, rue)
+		return
+	var cotes: Array[String] = ["est", "ouest", "sud", "nord"]
+	if plan_id == "rue_marchande":   # un village-rue : une seule traversée, de bord à bord, par la place
+		var axe: Array[String] = ["est", "ouest"]
+		if rng.randf() < 0.5:
+			axe = ["sud", "nord"]
+		_paver_trace(e, _tracer_rue(e, cell, _sortie_bord(cell, axe[0], taille), centre, rue, sinuosite, pente_pen), int(lg.principale), palette, rue)
+		_paver_trace(e, _tracer_rue(e, cell, centre, _sortie_bord(cell, axe[1], taille), rue, sinuosite, pente_pen), int(lg.principale), palette, rue)
+		var perp: Array[String] = ["sud", "nord"]
+		if axe[0] != "est":
+			perp = ["est", "ouest"]
+		for c in perp:   # les deux autres bords rejoignent quand même la rue : une route ne s'arrête pas au champ
+			_paver_trace(e, _tracer_rue(e, cell, _sortie_bord(cell, c, taille), centre, rue, sinuosite, pente_pen), int(lg.secondaire), palette, rue)
+	else:   # organique et radioconcentrique : les quatre routes convergent vers la place
+		for c in cotes:
+			_paver_trace(e, _tracer_rue(e, cell, _sortie_bord(cell, c, taille), centre, rue, sinuosite, pente_pen), int(lg.principale), palette, rue)
+	if plan_id == "radioconcentrique":   # les anneaux : une rue qui fait le tour de la place, et une plus loin
+		for k in int(cfg.get("anneaux", {}).get(palier, 0)):
+			var r := int(cfg.get("rayon_anneau", 9)) * (k + 1) + rng.randi_range(-2, 2)
+			var precedent := Vector2i(-999, -999)
+			var premier := Vector2i(-999, -999)
+			for a in range(0, 360, 12):
+				var ang := deg_to_rad(float(a))
+				var rr := float(r) + _bruit_rue(cell, Vector2i(a, r)) * 2.5   # l'anneau n'est pas un cercle parfait
+				var q := centre + Vector2i(roundi(cos(ang) * rr), roundi(sin(ang) * rr * 0.85))
+				if not _dans(q, taille):
+					precedent = Vector2i(-999, -999)
+					continue
+				if premier == Vector2i(-999, -999):
+					premier = q
+				if precedent != Vector2i(-999, -999):
+					_paver_trace(e, _tracer_rue(e, cell, precedent, q, rue, sinuosite * 0.4, pente_pen), int(lg.secondaire), palette, rue)
+				precedent = q
+			if precedent != Vector2i(-999, -999) and premier != Vector2i(-999, -999):
+				_paver_trace(e, _tracer_rue(e, cell, precedent, premier, rue, sinuosite * 0.4, pente_pen), int(lg.secondaire), palette, rue)
+	# Les ruelles : elles naissent d'une rue et meurent un peu plus loin — c'est ce qui fait un tissu, pas une étoile.
+	var n_ruelles := int(cfg.get("ruelles", {}).get(palier, 0))
+	if n_ruelles > 0 and not rue.is_empty():
+		var tuiles_rue: Array = rue.keys()
+		for k in n_ruelles:
+			var i0: int = int(tuiles_rue[rng.randi_range(0, tuiles_rue.size() - 1)])
+			@warning_ignore("integer_division")
+			var depart := Vector2i(i0 % taille, i0 / taille)
+			var ang2 := rng.randf() * TAU
+			var lon := rng.randi_range(int(cfg.get("ruelle_longueur", [6, 16])[0]), int(cfg.get("ruelle_longueur", [6, 16])[1]))
+			var fin := depart + Vector2i(roundi(cos(ang2) * lon), roundi(sin(ang2) * lon))
+			fin.x = clampi(fin.x, 2, taille - 3)
+			fin.y = clampi(fin.y, 2, taille - 3)
+			_paver_trace(e, _tracer_rue(e, cell, depart, fin, rue, sinuosite * 1.4, pente_pen), int(lg.ruelle), palette, rue)
+
+
+## Une ligne droite de tuiles (la trame de la ville planifiée).
+func _ligne_droite(a: Vector2i, b: Vector2i) -> Array[Vector2i]:
+	var res: Array[Vector2i] = []
+	var n: int = maxi(absi(b.x - a.x), absi(b.y - a.y))
+	for k in n + 1:
+		var t := float(k) / float(maxi(1, n))
+		res.append(Vector2i(roundi(lerpf(a.x, b.x, t)), roundi(lerpf(a.y, b.y, t))))
+	return res
+
+
+## La place : un disque irrégulier (le bruit de la ville en mord les bords) plutôt qu'un carré — pavé, dégagé.
+func _paver_place(e: Dictionary, cell: Vector2i, centre: Vector2i, rayon: int, palette: Dictionary, rue: Dictionary) -> Rect2i:
+	for dy in range(-rayon - 1, rayon + 2):
+		for dx in range(-rayon - 1, rayon + 2):
+			var q := centre + Vector2i(dx, dy)
+			var d := sqrt(float(dx * dx + dy * dy))
+			if d <= float(rayon) - 1.0 + _bruit_rue(cell, q) * 2.0:
+				_paver(e, q, palette, rue)
+	return Rect2i(centre - Vector2i(rayon, rayon), Vector2i(2 * rayon + 1, 2 * rayon + 1))
+
+
+## La position de la porte dans un plan orienté (la lettre 'P'), en tuiles depuis l'origine du plan ; (-1,-1) sans porte.
+func _porte_du_plan(plan: Array) -> Vector2i:
+	for y in plan.size():
+		var ligne: String = str(plan[y])
+		for x in ligne.length():
+			if ligne[x] == "P":
+				return Vector2i(x, y)
+	return Vector2i(-1, -1)
+
+
+## Une parcelle le long d'une rue TRACÉE (Villes, 2026-09-06) : on cherche une tuile de rue, on pose le bâtiment de
+## façon que sa porte donne dessus, et l'on vérifie que l'emprise est libre, hors de l'eau, à peu près plate. Les
+## candidats sont parcourus du centre vers les bords : la ville se remplit du cœur.
+## `sens` dit de quel côté la porte regarde — « sud » : la rue est au sud du bâtiment.
+## `occupe` : un octet par tuile — 1 là où l'on ne bâtit pas (eau, mur, rue, place, emprise déjà prise et sa marge).
+## C'est ce qui rend la recherche tenable : un candidat se rejette au premier octet, sans parcourir une liste de rectangles
+## (le centre d'une cité passait de 136 ms à 40). `curseur` (in/out, un tableau d'un élément) : l'index de rue où la
+## dernière parcelle a été trouvée — la recherche y reprend au lieu de re-balayer le cœur déjà bâti.
+func _parcelle_sur_rue(e: Dictionary, sens: String, plan: Array, occupe: PackedByteArray, rues_triees: Array, essais_max: int, curseur: Array = []) -> Vector2i:
+	var taille: int = e.largeur
+	var w: int = str(plan[0]).length()
+	var h: int = plan.size()
+	var porte := _porte_du_plan(plan)
+	if porte == Vector2i(-1, -1):
+		porte = Vector2i(w / 2, h - 1)
+	var vers: Vector2i = {"sud": Vector2i(0, 1), "nord": Vector2i(0, -1), "est": Vector2i(1, 0), "ouest": Vector2i(-1, 0)}.get(sens, Vector2i(0, 1))
+	var essais := 0
+	var n_rues := rues_triees.size()
+	var depart: int = int(curseur[0]) if not curseur.is_empty() else 0
+	for k in n_rues:
+		if essais >= essais_max:
+			break
+		essais += 1
+		var k_rue: int = (depart + k) % n_rues
+		var ir: int = int(rues_triees[k_rue])
+		@warning_ignore("integer_division")
+		var t_rue := Vector2i(ir % taille, ir / taille)
+		var origine: Vector2i = t_rue - vers - porte   # la porte se colle à la rue : l'origine du plan s'en déduit
+		if origine.x < 2 or origine.y < 2 or origine.x + w > taille - 2 or origine.y + h > taille - 2:
+			continue
+		# Rejet rapide : les quatre coins et le milieu d'abord — presque tous les candidats tombent là, sans parcourir
+		# l'emprise entière (c'est ce qui tient le budget d'une cellule de centre : 200 ms → 40).
+		var i0 := origine.y * taille + origine.x
+		if occupe[i0] != 0 or occupe[i0 + w - 1] != 0 or occupe[i0 + (h - 1) * taille] != 0 or occupe[i0 + (h - 1) * taille + w - 1] != 0 or occupe[i0 + (h / 2) * taille + w / 2] != 0:
+			continue
+		var libre := true
+		var h0 := int(e.hauteurs[i0])
+		for y in h:
+			var base := (origine.y + y) * taille + origine.x
+			for x in w:
+				var i := base + x
+				if occupe[i] != 0 or absi(int(e.hauteurs[i]) - h0) > 2:   # pris, ou à cheval sur un talus
+					libre = false
+					break
+			if not libre:
+				break
+		if libre:
+			if not curseur.is_empty():
+				curseur[0] = maxi(0, k_rue - 24)   # on revient un peu en arrière : une parcelle laisse des voisines libres
+			return origine
+	return Vector2i(-1, -1)
+
+
+## Le premier terrain libre de `dims` dans la carte d'occupation, balayé du centre vers les bords (les tuiles sont
+## déjà triées ainsi dans `ordre`). Systématique, là où un tirage au hasard rate dans un quartier fragmenté.
+func _terrain_libre(occupe: PackedByteArray, taille: int, dims: Vector2i, ordre: Array, depuis: int = 0) -> Rect2i:
+	for k in ordre.size():
+		var i: int = int(ordre[(depuis + k) % ordre.size()])
+		@warning_ignore("integer_division")
+		var o := Vector2i(i % taille, i / taille)
+		if o.x < 2 or o.y < 2 or o.x + dims.x > taille - 2 or o.y + dims.y > taille - 2:
+			continue
+		var i0 := o.y * taille + o.x
+		if occupe[i0] != 0 or occupe[i0 + dims.x - 1] != 0 or occupe[i0 + (dims.y - 1) * taille] != 0 or occupe[i0 + (dims.y - 1) * taille + dims.x - 1] != 0:
+			continue
+		var libre := true
+		for y in dims.y:
+			var base := (o.y + y) * taille + o.x
+			for x in dims.x:
+				if occupe[base + x] != 0:
+					libre = false
+					break
+			if not libre:
+				break
+		if libre:
+			return Rect2i(o, dims)
+	return Rect2i(Vector2i(-1, -1), dims)
+
+
+## Marque une emprise (et sa marge d'une tuile) dans la carte d'occupation.
+func _occuper(occupe: PackedByteArray, taille: int, r: Rect2i, marge: int = 1) -> void:
+	for y in range(r.position.y - marge, r.end.y + marge):
+		if y < 0 or y >= taille:
+			continue
+		for x in range(r.position.x - marge, r.end.x + marge):
+			if x >= 0 and x < taille:
+				occupe[y * taille + x] = 1
+
+
+## Le rempart de la vieille ville (Villes, 2026-09-07) : un anneau irrégulier de la PIERRE du village autour de la place,
+## tracé après les rues — une porte là où une rue le traverse, et les bâtiments n'y viennent pas. Rend ses tuiles.
+## (Les tuiles du rempart sont des murs : `_parcelle_sur_rue` et `_rectangle_libre` les refusent déjà — inutile de les
+## ajouter aux emprises prises, ce qui ferait des centaines de rectangles à tester par candidat.)
+func _poser_rempart(e: Dictionary, cell: Vector2i, centre: Vector2i, rayon: int, palette: Dictionary, rue: Dictionary) -> Array[Vector2i]:
+	var taille: int = e.largeur
+	var res: Array[Vector2i] = []
+	var cfg: Dictionary = GameData.config("villes").get("remparts", {})
+	var bruit := float(cfg.get("bruit", 2.5))
+	var vus := {}
+	var pierre := str(palette.get("pierre", palette.get("mur", "granit")))
+	for a in range(0, 3600, 4):   # un pas fin : l'anneau est continu, sans trou entre deux tuiles
+		var ang := deg_to_rad(float(a) / 10.0)
+		var rr := float(rayon) + _bruit_rue(cell, Vector2i(int(a) / 40, rayon)) * bruit
+		var q := centre + Vector2i(roundi(cos(ang) * rr), roundi(sin(ang) * rr * 0.9))
+		var i := q.y * taille + q.x
+		if not _dans(q, taille) or vus.has(i):
+			continue
+		vus[i] = true
+		if e.eau.has(i):
+			continue   # le rempart s'arrête au bord de l'eau (la douve naturelle)
+		_degager(e, i)
+		e.hauteurs[i] = H_BASE
+		if rue.has(i):   # une rue traverse : c'est une porte de ville
+			e.portes[i] = true
+			e.murs.erase(i)
+		else:
+			e.murs[i] = pierre
+			e.sol.erase(i)
+			rue.erase(i)
+		res.append(q)
+	return res
+
+
+## Le mobilier de la place (Villes, 2026-09-07) : la fontaine au milieu, les torchères en couronne, les étals du marché —
+## jamais sur une rue, jamais sur une emprise prise.
+func _meubler_place(e: Dictionary, cell: Vector2i, centre: Vector2i, rayon: int, palier: String, quartier: String, capitale: bool, rue: Dictionary, rng: RandomNumberGenerator) -> void:
+	var taille: int = e.largeur
+	var cfg: Dictionary = GameData.config("villes").get("place", {})
+	if cfg.is_empty():
+		return
+	var poser := func(q: Vector2i, mid: String) -> bool:
+		var i := q.y * taille + q.x
+		if mid.is_empty() or not _dans(q, taille) or e.murs.has(i) or e.meubles.has(i) or e.eau.has(i) or not GameData.catalogues.meubles.has(mid):
+			return false
+		_degager(e, i)
+		e.meubles[i] = mid
+		rue.erase(i)   # un meuble n'est pas une rue : les bâtiments ne s'y adossent pas
+		return true
+	var au_centre := str(cfg.get("centre_capitale", "")) if capitale else str(cfg.get("centre", {}).get(palier, ""))
+	poser.call(centre, au_centre)
+	var cour: Dictionary = cfg.get("couronne", {})
+	var n := int(cour.get("n", {}).get(palier, 0))
+	for k in n:
+		var ang := TAU * float(k) / float(maxi(1, n)) + rng.randf() * 0.3
+		var r := float(rayon) * float(cour.get("rayon_part", 0.7))
+		poser.call(centre + Vector2i(roundi(cos(ang) * r), roundi(sin(ang) * r * 0.85)), str(cour.get("meuble", "torchere")))
+	if quartier == "marchand":
+		var m: Dictionary = cfg.get("marchand", {})
+		for k in int(m.get("n", 4)):
+			var ang2 := TAU * float(k) / float(maxi(1, int(m.get("n", 4)))) + 0.4
+			var r2 := float(rayon) * float(m.get("rayon_part", 0.55))
+			poser.call(centre + Vector2i(roundi(cos(ang2) * r2), roundi(sin(ang2) * r2 * 0.85)), str(m.get("meuble", "etal_de_vente")))

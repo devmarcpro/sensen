@@ -429,11 +429,34 @@ func test_villes() -> void:
 	var e: Dictionary = surf.generer_cellule(centre.x, centre.y, {}, false)
 	var v: Dictionary = e.village
 	var taille: int = e.largeur
-	var rue_ok := 0
-	for k in range(2, taille - 2):
-		if e.sol.has((taille / 2) * taille + k) and e.sol.has(k * taille + taille / 2):
-			rue_ok += 1
-	verifier(rue_ok >= (taille - 4) * 8 / 10, "les deux axes sont praticables (%d/%d)" % [rue_ok, taille - 4])
+	# Depuis le 2026-09-06, les rues ne sont plus deux axes droits mais un réseau tracé (Villes, le plan des villes) :
+	# ce qu'on vérifie, c'est qu'il est d'un seul tenant et qu'il sort de la cellule par plusieurs côtés.
+	var rues_c := {}
+	for i in v.get("rues", []):
+		rues_c[int(i)] = true
+	var vus_c := {}
+	var file_c: Array[Vector2i] = [Vector2i(v.centre)]
+	vus_c[int(v.centre.y) * taille + int(v.centre.x)] = true
+	var sorties := {}
+	while not file_c.is_empty():
+		var p_c: Vector2i = file_c.pop_back()
+		if p_c.x <= 1:
+			sorties["ouest"] = true
+		if p_c.y <= 1:
+			sorties["nord"] = true
+		if p_c.x >= taille - 2:
+			sorties["est"] = true
+		if p_c.y >= taille - 2:
+			sorties["sud"] = true
+		for d_c in Grille.DIRS:
+			var q_c: Vector2i = p_c + d_c
+			if q_c.x < 0 or q_c.y < 0 or q_c.x >= taille or q_c.y >= taille:
+				continue
+			var i_c := q_c.y * taille + q_c.x
+			if rues_c.has(i_c) and not vus_c.has(i_c):
+				vus_c[i_c] = true
+				file_c.append(q_c)
+	verifier(rues_c.size() > 150 and sorties.size() >= 3 and vus_c.size() >= rues_c.size() * 8 / 10, "le réseau de rues : %d tuiles, %d atteintes depuis la place, %d côtés desservis" % [rues_c.size(), vus_c.size(), sorties.size()])
 	var lits := 0
 	for bat in v.batiments:
 		lits += bat.lits.size()
@@ -1312,3 +1335,106 @@ func test_champs_saisons_et_troupeau() -> void:
 	SimVilles._semaine_betail(s)
 	var apres := s.vivants().filter(func(x: Dictionary) -> bool: return str(x.get("betail", "")) == tid).size()
 	verifier(apres == avant - 1, "sans fourrage, le troupeau perd une bête (%d → %d)" % [avant, apres])
+
+
+## Le plan d'une ville (Villes, designer 2026-09-06, 23 h 45) : un archétype par agglomération, des rues tracées qui
+## suivent le terrain et se rejoignent d'une cellule à l'autre, des bâtiments dont la porte donne sur la rue.
+func test_plan_de_ville() -> void:
+	var s := Simulation.new(31)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var taille: int = s.monde.taille
+	# 1. Le point de traversée d'un bord est le même vu des deux cellules : les rues se rejoignent.
+	var c0: Vector2i = s.monde.cellule_camp
+	var e_est := surf._sortie_bord(c0, "est", taille)
+	var o_ouest := surf._sortie_bord(c0 + Vector2i(1, 0), "ouest", taille)
+	var s_sud := surf._sortie_bord(c0, "sud", taille)
+	var n_nord := surf._sortie_bord(c0 + Vector2i(0, 1), "nord", taille)
+	verifier(e_est.y == o_ouest.y and e_est.x == taille - 1 and o_ouest.x == 0, "le bord est de (%s) et le bord ouest de sa voisine se croisent en y=%d" % [str(c0), e_est.y])
+	verifier(s_sud.x == n_nord.x and s_sud.y == taille - 1 and n_nord.y == 0, "le bord sud et le bord nord de la voisine se croisent en x=%d" % s_sud.x)
+	# 2. Les archétypes varient d'une ville à l'autre.
+	var plans := {}
+	var villes: Array = []
+	for dy in range(-24, 25, 3):
+		for dx in range(-24, 25, 3):
+			var cv := c0 + Vector2i(dx, dy)
+			if not surf.terre_a(cv) or not bool(surf.poi_de(cv).get("village", false)):
+				continue
+			var fa: Dictionary = surf.fiche_agglomeration(cv)
+			if fa.is_empty() or villes.has(str(fa.nom)):
+				continue
+			villes.append(str(fa.nom))
+			var pid := surf.plan_de_ville(fa)
+			plans[pid] = int(plans.get(pid, 0)) + 1
+			if villes.size() >= 14:
+				break
+		if villes.size() >= 14:
+			break
+	verifier(villes.size() >= 4 and plans.size() >= 2, "%d villes autour du camp, %d plans différents : %s" % [villes.size(), plans.size(), str(plans)])
+	# 3. Une ville générée : ses rues se tiennent, ses portes donnent dessus.
+	var cell := Vector2i(-9999, -9999)
+	var fiche: Dictionary = {}
+	for dy2 in range(-20, 21):
+		for dx2 in range(-20, 21):
+			var cv2 := c0 + Vector2i(dx2, dy2)
+			if surf.terre_a(cv2) and bool(surf.poi_de(cv2).get("village", false)):
+				var f2: Dictionary = surf.fiche_agglomeration(cv2)
+				if not f2.is_empty() and (fiche.is_empty() or int(f2.population) > int(fiche.population)):
+					fiche = f2
+					cell = f2.cellules[0]
+	verifier(not fiche.is_empty(), "une agglomération à vingt cellules du camp")
+	if fiche.is_empty():
+		return
+	var e: Dictionary = surf.generer_cellule(cell.x, cell.y, {}, false)
+	var v: Dictionary = e.village
+	verifier(not v.is_empty() and not str(v.get("plan", "")).is_empty(), "le quartier note son plan : %s (%s, %s)" % [str(v.get("plan", "")), str(v.get("nom", "")), str(v.get("palier", ""))])
+	var rues := {}
+	for i in v.get("rues", []):
+		rues[int(i)] = true
+	verifier(rues.size() > 200, "%d tuiles de rue tracées" % rues.size())
+	# les rues sont d'un seul tenant : depuis le centre, on atteint au moins un bord de la cellule
+	var centre: Vector2i = v.centre
+	var vus := {}
+	var file: Array[Vector2i] = [centre]
+	vus[centre.y * taille + centre.x] = true
+	var bords := 0
+	while not file.is_empty():
+		var p: Vector2i = file.pop_back()
+		if p.x <= 1 or p.y <= 1 or p.x >= taille - 2 or p.y >= taille - 2:   # la dernière tuile pavable (le bord même ne l'est pas)
+			bords += 1
+		for d in Grille.DIRS:
+			var q: Vector2i = p + d
+			if q.x < 0 or q.y < 0 or q.x >= taille or q.y >= taille:
+				continue
+			var i2 := q.y * taille + q.x
+			if rues.has(i2) and not vus.has(i2):
+				vus[i2] = true
+				file.append(q)
+	verifier(bords >= 2 and vus.size() > rues.size() / 2, "le réseau tient d'un bloc depuis la place : %d tuiles atteintes sur %d, %d sorties de cellule" % [vus.size(), rues.size(), bords])
+	# chaque bâtiment a sa porte sur une tuile de rue
+	var sans_rue: Array[String] = []
+	for bat in v.batiments:
+		var porte: Vector2i = bat.porte
+		var sur_rue := false
+		for d2 in Grille.DIRS:
+			var q2: Vector2i = porte + d2
+			if rues.has(q2.y * taille + q2.x):
+				sur_rue = true
+				break
+		if not sur_rue:
+			sans_rue.append(str(bat.id))
+	verifier(sans_rue.is_empty(), "les %d bâtiments ont leur porte sur la rue (%s)" % [v.batiments.size(), "aucun isolé" if sans_rue.is_empty() else str(sans_rue)])
+	# 4. Le plan « grille » trace bien des axes droits, l'organique non : deux quartiers, deux tracés
+	var droites := 0
+	for x in range(2, taille - 2):
+		var colonne := true
+		for y in range(2, taille - 2):
+			if not rues.has(y * taille + x):
+				colonne = false
+				break
+		if colonne:
+			droites += 1
+	if str(v.plan) == "grille":
+		verifier(droites >= 1, "le plan en grille a %d colonne(s) droite(s) de bord à bord" % droites)
+	else:
+		verifier(droites == 0, "le plan %s n'a aucune colonne parfaitement droite de bord à bord" % str(v.plan))

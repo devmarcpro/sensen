@@ -617,5 +617,117 @@
       "prix_monture": 120,
       "creature_vendue": "cheval_sauvage"
     }
+  },
+  "plans": {
+    "_doc": "Le plan d'une ville (designer 2026-09-06) : un archetype par agglomeration, tire a sa graine — poids par palier, biais par gouvernance. Les rues sont des traces qui suivent le terrain (sinuosite : le serpentement ; pente_penalite : ce que couter monter) ; largeurs par rang de rue ; anneaux et rayon_anneau pour le radioconcentrique ; ruelles par palier et ruelle_longueur pour le tissu des impasses.",
+    "poids": {
+      "hameau": {
+        "rue_marchande": 3,
+        "organique": 2
+      },
+      "village": {
+        "organique": 3,
+        "rue_marchande": 2,
+        "radioconcentrique": 1
+      },
+      "bourg": {
+        "organique": 3,
+        "radioconcentrique": 3,
+        "grille": 1
+      },
+      "ville": {
+        "radioconcentrique": 3,
+        "organique": 2,
+        "grille": 2
+      },
+      "cite": {
+        "radioconcentrique": 3,
+        "grille": 3,
+        "organique": 2
+      }
+    },
+    "biais_gouvernance": {
+      "monarchie_hereditaire": {
+        "grille": 2,
+        "radioconcentrique": 1
+      },
+      "empire": {
+        "grille": 3
+      },
+      "republique_elue": {
+        "organique": 2
+      },
+      "theocratie": {
+        "radioconcentrique": 2
+      },
+      "conseil_des_anciens": {
+        "organique": 2
+      },
+      "confederation_tribale": {
+        "organique": 3
+      }
+    },
+    "largeurs": {
+      "principale": 3,
+      "secondaire": 2,
+      "ruelle": 1
+    },
+    "sinuosite": 0.55,
+    "pente_penalite": 6.0,
+    "anneaux": {
+      "bourg": 1,
+      "ville": 1,
+      "cite": 2
+    },
+    "rayon_anneau": 10,
+    "ruelles": {
+      "hameau": 1,
+      "village": 3,
+      "bourg": 6,
+      "ville": 9,
+      "cite": 12
+    },
+    "ruelle_longueur": [
+      6,
+      16
+    ],
+    "essais_parcelle": 180
+  },
+  "place": {
+    "_doc": "Le mobilier de la place (designer 2026-09-07) : `centre` est pose au milieu si le palier l'a, `couronne` en anneau au rayon donne (jamais sur une rue), `marchand` s'ajoute au quartier marchand. Une capitale a sa statue.",
+    "centre": {
+      "hameau": "",
+      "village": "bassin",
+      "bourg": "bassin",
+      "ville": "bassin",
+      "cite": "bassin"
+    },
+    "centre_capitale": "statue",
+    "couronne": {
+      "meuble": "torchere",
+      "n": {
+        "hameau": 0,
+        "village": 2,
+        "bourg": 4,
+        "ville": 6,
+        "cite": 8
+      },
+      "rayon_part": 0.7
+    },
+    "marchand": {
+      "meuble": "etal_de_vente",
+      "n": 4,
+      "rayon_part": 0.55
+    }
+  },
+  "remparts": {
+    "_doc": "Les remparts de la vieille ville (designer 2026-09-07) : le quartier « centre » d'un palier liste ci-dessous recoit un anneau de la pierre du village au rayon donne, irregulier (bruit), avec une porte la ou une rue le traverse.",
+    "rayon": {
+      "bourg": 17,
+      "ville": 21,
+      "cite": 25
+    },
+    "bruit": 2.5,
+    "epaisseur": 1
   }
 }
