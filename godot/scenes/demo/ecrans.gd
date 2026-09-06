@@ -92,6 +92,10 @@ func _ready() -> void:
 	atelier_visuel.ecrans = self
 	atelier_visuel.visible = false
 	h.add_child(atelier_visuel)
+	dialogue_visuel = DialogueVisuel.new()
+	dialogue_visuel.ecrans = self
+	dialogue_visuel.visible = false
+	h.add_child(dialogue_visuel)
 	liste = ItemList.new()
 	liste.custom_minimum_size = Vector2(float(GameData.config("styles").get("ecrans", {}).get("liste_min", 340.0)), 0)
 	liste.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -176,6 +180,10 @@ var droite: VBoxContainer          # la colonne de droite : le détail, sous lui
 var inventaire_visuel: InventaireVisuel   # l'inventaire en icônes (Écrans d'interface, 2026-08-30)
 var echange_visuel: EchangeVisuel         # commerce et échange à deux volets, comme l'inventaire (designer 2026-09-04)
 var atelier_visuel: AtelierVisuel         # l'atelier en cartes de recettes
+var dialogue_visuel: DialogueVisuel       # la carte de dialogue : portrait, nom, informations, options lettrées (designer 2026-09-06)
+var dialogue_infos := ""                  # le texte d'informations de la carte, composé par EcransDialogue
+var page := 0                             # la page courante de l'écran (une option = une lettre, designer 2026-09-06, 17 h 55)
+var lettres: Dictionary = {}              # index d'entrée → sa lettre (« a », « b »…), posées par EcransListe._paginer
 var penta_objet: Composeur.PentagrammeSort   # le Wu Xing de l'objet choisi
 
 
@@ -221,6 +229,8 @@ func basculer(nom: String) -> void:
 
 
 func ouvrir(nom: String) -> void:
+	if courant != nom:
+		page = 0   # une page se garde tant que l'écran reste ouvert
 	courant = nom
 	EcransFeuille._replacer_liste(self)   # la colonne suit la largeur du panneau : le signal resized ne suffit pas à l'ouverture
 	selection = 0
@@ -266,6 +276,11 @@ func touche(ev: InputEventKey) -> bool:
 		return true
 	if courant == "composer" and ev.keycode != KEY_ESCAPE and ev.keycode != KEY_V and composeur.touche(ev):
 		return true
+	# Une option = une lettre (designer 2026-09-06, 17 h 55) : la lettre tapée joue la ligne qui la porte, sur tous les écrans ;
+	# la dernière lettre d'un écran plein tourne la page. Une lettre que nulle ligne ne porte passe aux raccourcis d'écran.
+	if ev.keycode >= KEY_A and ev.keycode <= KEY_Z and not ev.ctrl_pressed and not ev.alt_pressed and courant != "creation":
+		if EcransListe.choisir_lettre(self, ev.keycode - KEY_A):
+			return true
 	match ev.keycode:
 		KEY_ESCAPE:
 			if courant == "triche_liste":   # la sous-liste revient au menu de triche
@@ -360,9 +375,6 @@ func touche(ev: InputEventKey) -> bool:
 			if courant == "inventaire":
 				EcransListe._action_principale(self)
 				return true
-			if courant == "dialogue":   # engager pour la base (Gestion de base, 2026-09-04)
-				EcransDialogue._option(self, "engager")
-				return true
 		KEY_J:
 			if courant == "inventaire":
 				EcransInventaire._jeter(self)
@@ -397,70 +409,6 @@ func touche(ev: InputEventKey) -> bool:
 		KEY_G:
 			if courant == "inventaire":
 				EcransInventaire._manger(self)
-				return true
-		KEY_P:
-			if courant == "dialogue":
-				EcransDialogue._option(self, "parler")
-				return true
-		KEY_C:
-			if courant == "dialogue":
-				EcransDialogue._option(self, "commercer")
-				return true
-		KEY_Q:
-			if courant == "dialogue":
-				EcransDialogue._option(self, "quetes")
-				return true
-		KEY_R:
-			if courant == "dialogue":
-				EcransDialogue._option(self, "recruter")
-				return true
-		KEY_S:
-			if courant == "dialogue":
-				EcransDialogue._option(self, "suivre")
-				return true
-		KEY_A:
-			if courant == "dialogue":
-				EcransDialogue._option(self, "attendre")
-				return true
-		KEY_F:
-			if courant == "dialogue":
-				EcransDialogue._option(self, "posture")
-				return true
-		KEY_B:
-			if courant == "dialogue":
-				EcransDialogue._option(self, "retour")
-				return true
-		KEY_K:
-			if courant == "dialogue":
-				EcransDialogue._option(self, "echanger")
-				return true
-		KEY_Y:
-			if courant == "dialogue":
-				EcransDialogue._option(self, "repli")
-				return true
-		KEY_W:
-			if courant == "dialogue":
-				EcransDialogue._option(self, "suiveur")
-				return true
-		KEY_X:
-			if courant == "dialogue":
-				EcransDialogue._option(self, "assigner")
-				return true
-		KEY_U:
-			if courant == "dialogue":
-				EcransDialogue._option(self, "entrainer")
-				return true
-		KEY_Z:
-			if courant == "dialogue":
-				EcransDialogue._option(self, "livrer")
-				return true
-		KEY_N:
-			if courant == "dialogue":
-				EcransDialogue._option(self, "ressusciter")
-				return true
-		KEY_Q:
-			if courant == "dialogue":
-				EcransDialogue._option(self, "apprendre_talent")
 				return true
 		KEY_D:
 			if courant == "gestion":

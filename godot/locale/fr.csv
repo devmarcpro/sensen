@@ -3599,3 +3599,4 @@ journal.majorite,"{nom} est majeur et prend le métier de {metier}"
 journal.migration,"{nom} quitte {de} pour {vers}"
 ui.carte.en_cours,"la carte se peint… ({n} tranches)"
 tile_content.vide.name,Vide
+ui.ecran.page_suivante,Page suivante ({n} / {total})

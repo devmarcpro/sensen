@@ -34,12 +34,12 @@ static func _construire_dialogue(ec: Ecrans, j: Dictionary) -> void:
 			ftxt.append(ec.tr("famille.enfant").format({"nom": ec.tr(ec.main.sim.entites[str(pid)].name_key)}))
 	if not fam.get("parent_of", []).is_empty():
 		ftxt.append(ec.tr("famille.parent").format({"n": fam.parent_of.size()}))
-	if not ftxt.is_empty():
-		ec.liste.add_item(ec.tr("ui.dialogue.famille").format({"texte": " · ".join(ftxt)}), null, false)
-		ec.entrees.append({"kind": "texte", "texte": ""})
 	var rel := int(pnj.get("social", {}).get("relations", {}).get(j.id, 0))
 	ec.liste.add_item(ec.tr("ui.ecran.parler"))
 	ec.entrees.append({"kind": "option", "option": "parler"})
+	if "civil" in pnj.get("tags", []) and not pnj.has("vehicule_etat") and not j.get("sac", []).is_empty():   # Offrir un cadeau (PNJ distincts)
+		ec.liste.add_item(ec.tr("ui.ecran.offrir"))
+		ec.entrees.append({"kind": "option", "option": "offrir"})
 	if "commerce_possible" in pnj.get("tags", []):
 		ec.liste.add_item(ec.tr("ui.ecran.commercer"))
 		ec.entrees.append({"kind": "option", "option": "commercer"})
@@ -129,13 +129,23 @@ static func _construire_dialogue(ec: Ecrans, j: Dictionary) -> void:
 		ec.entrees.append({"kind": "option", "option": "livrer"})
 	ec.liste.add_item(ec.tr("ui.ecran.partir"))
 	ec.entrees.append({"kind": "option", "option": "partir"})
+	# La carte de dialogue (designer 2026-09-06, 17 h 35) : sous le nom, la fonction (boutique, guilde, titre), la réplique,
+	# la relation, la famille, puis la fiche révélée par paliers ; les options sont la liste lettrée de la carte.
+	var sous_titre := ec.tr(GameData.entree("functions", str(pnj.get("fonction", "oisif"))).name_key)
+	if pnj.has("boutique"):
+		sous_titre += ec.tr("ui.dialogue.boutique").format({"boutique": ec.tr(GameData.entree("shop_types", str(pnj.boutique)).name_key)})
+	if pnj.has("guilde"):
+		sous_titre += ec.tr("ui.dialogue.guilde").format({"guilde": ec.tr("guilde.%s.name" % str(pnj.guilde))})
+	if not str(pnj.get("titre", "")).is_empty():
+		sous_titre += ec.tr("ui.dialogue.titre").format({"titre": ec.tr(str(pnj.titre))})
+	var relation := ec.tr("ui.dialogue.relation").format({"n": rel}) + (("  ·  " + ec.tr("ui.dialogue.compagnon").format({"ordre": ec.tr("ordre." + str(pnj.get("ordre", "suivre")))})) if pnj.has("maitre") else "")
+	var blocs: Array[String] = [sous_titre, "« %s »" % texte_replique(ec, pnj), relation]
+	if not ftxt.is_empty():
+		blocs.append(ec.tr("ui.dialogue.famille").format({"texte": " · ".join(ftxt)}))
+	blocs.append(fiche_pnj(ec, pnj, j))
+	ec.dialogue_infos = "\n".join(blocs)
 	for en in ec.entrees:
-		en["texte"] = "[b]%s[/b]\n« %s »\n\n%s\n\n%s" % [ec.tr(pnj.name_key), texte_replique(ec, pnj), ec.tr("ui.dialogue.relation").format({"n": rel}) + (("  ·  " + ec.tr("ui.dialogue.compagnon").format({"ordre": ec.tr("ordre." + str(pnj.get("ordre", "suivre")))})) if pnj.has("maitre") else ""), fiche_pnj(ec, pnj, j)]
-	EcransListe._bouton(ec, ec.tr("ui.ecran.parler"), func() -> void: _option(ec, "parler"))
-	if "civil" in pnj.get("tags", []) and not pnj.has("vehicule_etat") and not j.get("sac", []).is_empty():   # Offrir un cadeau (PNJ distincts)
-		EcransListe._bouton(ec, ec.tr("ui.ecran.offrir"), func() -> void: _option(ec, "offrir"))
-	if "commerce_possible" in pnj.get("tags", []):
-		EcransListe._bouton(ec, ec.tr("ui.ecran.commercer"), func() -> void: _option(ec, "commercer"))
+		en["texte"] = "[b]%s[/b]\n%s" % [ec.tr(pnj.name_key), ec.dialogue_infos]
 
 
 static func _option(ec: Ecrans, opt: String) -> void:
@@ -148,6 +158,9 @@ static func _option(ec: Ecrans, opt: String) -> void:
 			ec.entrees.append({"kind": "option", "option": "offrir:" + str(uid)})
 		ec.liste.add_item(ec.tr("ui.ecran.retour"))
 		ec.entrees.append({"kind": "option", "option": "retour_dialogue"})
+		ec.selection = 0
+		EcransListe._paginer(ec)
+		ec.dialogue_visuel.reconstruire()
 		return
 	if opt.begins_with("offrir:"):
 		ec.main.sim.intention(j.id, {"type": "offrir", "pnj": ec.pnj_id, "objet": opt.substr(7)})

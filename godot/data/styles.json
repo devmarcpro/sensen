@@ -139,8 +139,19 @@
       "journal.chaud_degats": "degats"
     }
   },
+  "dialogue": {
+    "_doc": "La carte de dialogue avec un PNJ (designer 2026-09-06) : le portrait (cote en px), le nom en grand, les informations, les options lettrees. La carte prend la taille commune des ecrans (designer : tous les menus la meme taille).",
+    "portrait": 170,
+    "nom_taille": 24,
+    "infos_taille": 13,
+    "option_taille": 15,
+    "espace": 14,
+    "espace_options": 2
+  },
   "ecrans": {
     "_doc": "Mise en page commune des ecrans (designer 2026-09-01, point 67) : la colonne de liste est une part de la largeur du panneau, bornee.",
+    "lettres": 26,
+    "_doc_lettres": "Une option = une lettre (designer 2026-09-06) : le nombre de lettres d'un ecran ; au-dela, la derniere lettre tourne la page.",
     "part_liste": 0.38,
     "liste_min": 340.0,
     "liste_max": 820.0,

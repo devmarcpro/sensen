@@ -48,6 +48,8 @@ func reconstruire(mode_: String) -> void:
 			volets[0].ajouter(str(en.uid), k, en)
 		elif kind in ["achat", "reprendre"]:
 			volets[1].ajouter(str(en.uid), k, en)
+		elif kind == "page":   # la dernière lettre : la page suivante, au bas du volet du joueur (une option = une lettre)
+			volets[0].colonne.add_child(InventaireVisuel.LignePage.creer(ecrans, ecrans.liste.get_item_text(k)))
 	for v in volets:
 		v.ordonner()
 	# la sélection courante de l'écran doit tomber sur un objet, jamais sur une ligne de titre de l'ancienne liste
@@ -251,9 +253,12 @@ class LigneEchange extends Control:
 		draw_rect(r, Color(1, 1, 1, 0.12) if choisie else (Color(1, 1, 1, 0.06) if survolee else Color(1, 1, 1, 0.02)))
 		if choisie:
 			draw_rect(r, Color(1, 1, 1, 0.8), false, 1.0)
-		Pictos.dessiner_objet(self, it, Rect2(Vector2(4, 3), Vector2(20, 20)))
 		var f := ThemeDB.fallback_font
 		var y := EchangeVisuel.LIGNE * 0.5 + 4.0
+		var lettre := str(volet.echange.ecrans.lettres.get(index, ""))   # une option = une lettre (designer 2026-09-06)
+		if not lettre.is_empty():
+			draw_string(f, Vector2(4, y), lettre + ")", HORIZONTAL_ALIGNMENT_LEFT, 18, 12, Color(1.0, 0.9, 0.55))
+		Pictos.dessiner_objet(self, it, Rect2(Vector2(22, 3), Vector2(20, 20)))
 		var x_fin := size.x
 		for col in ["prix", "quantite", "qualite", "type"]:   # de droite à gauche, aux largeurs de l'en-tête
 			if col == "prix" and not volet.avec_prix:
@@ -272,7 +277,7 @@ class LigneEchange extends Control:
 					teinte = cadre
 				"type": texte = tr("type." + str(it.get("type", "")))
 			draw_string(f, Vector2(x_fin + 4.0, y), texte, HORIZONTAL_ALIGNMENT_LEFT, float(EchangeVisuel.LARGEURS[col]) - 6.0, 11, teinte)
-		draw_string(f, Vector2(30, y), nom, HORIZONTAL_ALIGNMENT_LEFT, x_fin - 34.0, 12, Color(0.95, 0.93, 0.85))
+		draw_string(f, Vector2(48, y), nom, HORIZONTAL_ALIGNMENT_LEFT, x_fin - 52.0, 12, Color(0.95, 0.93, 0.85))
 
 	func _gui_input(ev: InputEvent) -> void:
 		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:

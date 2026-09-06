@@ -68,6 +68,7 @@ static func rafraichir(ec: Ecrans) -> void:
 			push_error("Écran inconnu : « %s »" % ec.courant)
 			ec.fermer()
 			return
+	_paginer(ec)
 	ec.selection = clampi(sel, 0, maxi(0, ec.entrees.size() - 1))
 	if ec.entrees.size() > 0:
 		ec.liste.select(ec.selection)
@@ -80,7 +81,10 @@ static func rafraichir(ec: Ecrans) -> void:
 	ec.echange_visuel.visible = ec.courant in ["commerce", "echange"]
 	ec.hotbar_ecran.visible = ec.courant == "inventaire" or ec.courant == "capacites"
 	ec.atelier_visuel.visible = ec.courant == "atelier"
-	ec.liste.visible = not (ec.courant in ["inventaire", "atelier", "commerce", "echange"])
+	ec.dialogue_visuel.visible = ec.courant == "dialogue"
+	ec.droite.visible = ec.courant != "dialogue"   # la carte de dialogue porte elle-même ses informations
+	ec.titre.visible = ec.courant != "dialogue"    # et le nom du PNJ en grand : pas de titre au-dessus
+	ec.liste.visible = not (ec.courant in ["inventaire", "atelier", "commerce", "echange", "dialogue"])
 	ec.penta_objet.visible = ec.courant == "inventaire"   # la place qu'on lui laisse se décide plus bas, à la hauteur connue
 	# Chaque écran demandait une largeur en pixels fixes pour sa colonne de droite ; additionnée à la
 	# liste (340 px), la somme dépassait une fenêtre étroite et le contenu sortait du cadre. Ces
@@ -135,6 +139,8 @@ static func rafraichir(ec: Ecrans) -> void:
 		ec.droite.size_flags_stretch_ratio = 0.8
 		ec.detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		ec.atelier_visuel.reconstruire()
+	elif ec.courant == "dialogue":   # la carte : portrait, nom, informations, options lettrées (designer 2026-09-06)
+		ec.dialogue_visuel.reconstruire()
 	else:
 		ec.droite.custom_minimum_size = Vector2(0, 0)
 		ec.droite.size_flags_stretch_ratio = 1.0
@@ -149,6 +155,86 @@ static func rafraichir(ec: Ecrans) -> void:
 		_bouton(ec, ec.tr("ui.monde.retour"), func() -> void: ec.ouvrir("titre"))
 	else:
 		_bouton(ec, ec.tr("ui.ecran.fermer"), ec.fermer)
+
+
+## Une ligne qui porte une lettre : tout ce qui se choisit — pas un texte d'en-tête, pas une case d'équipement (la grille).
+static func _lettrable(en: Dictionary) -> bool:
+	return str(en.get("kind", "")) != "texte" and not bool(en.get("equipe", false))
+
+
+## Une option = une lettre, une page à la fois (designer 2026-09-06, 17 h 55) : après la construction d'un écran, les lignes
+## qui se choisissent reçoivent a), b), c)… dans l'ordre ; s'il y en a plus que de lettres (styles.ecrans.lettres), seules
+## celles de la page courante restent — les en-têtes et les cases d'équipement restent sur toutes les pages — et la
+## dernière lettre est « Page suivante (n / N) ». Les textes de la liste prennent leur lettre en préfixe ; les écrans en
+## icônes lisent `ec.lettres` (index → lettre) pour dessiner la leur.
+static func _paginer(ec: Ecrans) -> void:
+	ec.lettres.clear()
+	var n_lettres := clampi(int(GameData.config("styles").get("ecrans", {}).get("lettres", 26)), 2, 26)
+	var lettrables: Array[int] = []
+	for i in ec.entrees.size():
+		if _lettrable(ec.entrees[i]):
+			lettrables.append(i)
+	var par_page := n_lettres - 1
+	var n_pages := 1 if lettrables.size() <= n_lettres else ceili(float(lettrables.size()) / float(par_page))
+	if ec.page >= n_pages:
+		ec.page = 0   # la dernière page tourne vers la première
+	if n_pages > 1 and ec.liste.item_count == ec.entrees.size():
+		var garder := {}
+		var debut := ec.page * par_page
+		for k in lettrables.size():
+			if k >= debut and k < debut + par_page:
+				garder[lettrables[k]] = true
+		var entrees2: Array = []
+		var textes: Array[String] = []
+		var icones: Array = []
+		var choisissables: Array[bool] = []
+		for i in ec.entrees.size():
+			if garder.has(i) or not _lettrable(ec.entrees[i]):
+				entrees2.append(ec.entrees[i])
+				textes.append(ec.liste.get_item_text(i))
+				icones.append(ec.liste.get_item_icon(i))
+				choisissables.append(ec.liste.is_item_selectable(i))
+		ec.liste.clear()
+		ec.entrees = entrees2
+		for k in textes.size():
+			ec.liste.add_item(textes[k], icones[k], choisissables[k])
+		ec.liste.add_item(ec.tr("ui.ecran.page_suivante").format({"n": ec.page + 1, "total": n_pages}))
+		ec.entrees.append({"kind": "page", "texte": ""})
+	var k := 0
+	for i in ec.entrees.size():
+		if k >= n_lettres:
+			break
+		if _lettrable(ec.entrees[i]):
+			var lettre := char(97 + k)
+			ec.lettres[i] = lettre
+			if i < ec.liste.item_count:
+				ec.liste.set_item_text(i, "%s) %s" % [lettre, ec.liste.get_item_text(i)])
+			k += 1
+
+
+## La lettre tapée (a → 0, b → 1…) joue la ligne qui la porte : la page suivante, ou l'action principale de la ligne.
+static func choisir_lettre(ec: Ecrans, rang: int) -> bool:
+	if rang < 0 or rang >= 26:
+		return false
+	var lettre := char(97 + rang)
+	for i in ec.entrees.size():
+		if ec.lettres.get(i, "") != lettre:
+			continue
+		if i < ec.liste.item_count and not ec.liste.is_item_selectable(i):
+			return true   # une ligne grisée : la lettre est prise, rien ne se passe
+		ec.selection = i
+		if i < ec.liste.item_count:
+			ec.liste.select(i)
+		_action_principale(ec)
+		return true
+	return false
+
+
+## La page suivante de l'écran (la dernière lettre, ou un clic sur sa ligne).
+static func page_suivante(ec: Ecrans) -> void:
+	ec.page += 1
+	ec.selection = 0
+	rafraichir(ec)
 
 
 static func _bouton(ec: Ecrans, texte: String, action: Callable) -> void:
@@ -240,6 +326,9 @@ static func _action_principale(ec: Ecrans) -> void:
 	var en: Dictionary = ec.entrees[ec.selection]
 	var j: Dictionary = ec.main.joueur()
 	match str(en.get("kind", "")):
+		"page":
+			page_suivante(ec)
+			return
 		"objet":
 			if bool(en.get("equipe", false)):
 				ec.main.sim.intention(j.id, {"type": "desequiper", "slot": str(en.slot)})

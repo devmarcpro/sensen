@@ -157,6 +157,8 @@ func reconstruire() -> void:
 			lignes.append(l)
 		elif kind == "texte" and k < slots_ordre.size():   # un slot vide : la case k correspond à l'ordre des slots de l'écran
 			cases[slots_ordre[k]].index = k
+		elif kind == "page":   # la dernière lettre : la page suivante (une option = une lettre, designer 2026-09-06)
+			colonne.add_child(LignePage.creer(ecrans, ecrans.liste.get_item_text(k)))
 		k += 1
 	_ordonner()
 	rafraichir_selection()
@@ -240,9 +242,12 @@ class LigneObjet extends Control:
 		draw_rect(r, Color(1, 1, 1, 0.12) if choisie else (Color(1, 1, 1, 0.06) if survolee else Color(1, 1, 1, 0.02)))
 		if choisie:
 			draw_rect(r, Color(1, 1, 1, 0.8), false, 1.0)
-		Pictos.dessiner_objet(self, it, Rect2(Vector2(4, 3), Vector2(20, 20)))
 		var f := ThemeDB.fallback_font
 		var y := InventaireVisuel.LIGNE * 0.5 + 4.0
+		var lettre := str(inventaire.ecrans.lettres.get(index, ""))   # une option = une lettre (designer 2026-09-06)
+		if not lettre.is_empty():
+			draw_string(f, Vector2(4, y), lettre + ")", HORIZONTAL_ALIGNMENT_LEFT, 18, 12, Color(1.0, 0.9, 0.55))
+		Pictos.dessiner_objet(self, it, Rect2(Vector2(22, 3), Vector2(20, 20)))
 		var x_fin := size.x
 		for col in ["quantite", "poids", "qualite", "type"]:   # de droite à gauche, aux largeurs de l'en-tête
 			x_fin -= float(InventaireVisuel.LARGEURS[col])
@@ -253,7 +258,7 @@ class LigneObjet extends Control:
 				"qualite": texte = ("%.2f" % float(it.qualite)) if (it.has("qualite") and it.get("type", "") != "materiau") else "—"
 				"type": texte = tr("type." + str(it.get("type", "")))
 			draw_string(f, Vector2(x_fin + 4.0, y), texte, HORIZONTAL_ALIGNMENT_LEFT, float(InventaireVisuel.LARGEURS[col]) - 6.0, 11, cadre if col == "qualite" else Color(0.85, 0.83, 0.75))
-		draw_string(f, Vector2(30, y), nom, HORIZONTAL_ALIGNMENT_LEFT, x_fin - 34.0, 12, Color(0.95, 0.93, 0.85))
+		draw_string(f, Vector2(48, y), nom, HORIZONTAL_ALIGNMENT_LEFT, x_fin - 52.0, 12, Color(0.95, 0.93, 0.85))
 
 	func _get_drag_data(_pos: Vector2) -> Variant:   # vers la hotbar (designer, point 35)
 		var ap := Label.new()
@@ -271,6 +276,21 @@ class LigneObjet extends Control:
 			inventaire.selectionner(index)   # clic droit : les actions de l'objet (designer, point 46)
 			inventaire.ecrans.menu_objet(uid, get_global_mouse_position())
 			accept_event()
+
+
+## La ligne « z) Page suivante (n / N) » au bas d'une liste d'objets (une option = une lettre, designer 2026-09-06).
+class LignePage extends Label:
+	static func creer(ec: Node, texte: String) -> LignePage:
+		var l := LignePage.new()
+		l.text = texte
+		l.add_theme_font_size_override("font_size", 12)
+		l.add_theme_color_override("font_color", Color(1.0, 0.9, 0.55))
+		l.custom_minimum_size = Vector2(0, InventaireVisuel.LIGNE)
+		l.mouse_filter = Control.MOUSE_FILTER_STOP
+		l.gui_input.connect(func(ev: InputEvent) -> void:
+			if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+				EcransListe.page_suivante(ec))
+		return l
 
 
 ## La fiche du porteur, à droite du personnage (designer 2026-09-01, point 64) : ses six stats avec

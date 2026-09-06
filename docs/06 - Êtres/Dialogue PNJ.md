@@ -62,6 +62,9 @@ langues.
 > [!success] Codé le 2026-09-05, 15 h — trois conditions de calendrier
 > Les gabarits acceptent `fete`, `marche` et `anniversaire` (booléens, nuls par défaut) : un jour de fête pour la culture du PNJ, le jour de marché de son village, son anniversaire (mois et jour tirés de son identifiant, `Calendrier.anniversaire`). Trois gabarits les portent (`fete`, `marche`, `anniversaire`), à fort poids puisque leur condition est rare. [[Un monde réel — villes, PNJ, royaumes et calendrier]].
 
+> [!success] Codé le 2026-09-06, 17 h 40 — la carte de dialogue (designer : un croquis, « que ça ressemble à ça »)
+> L'écran Dialogue n'est plus l'écran générique mais une carte : le portrait, « Prénom NOM », la réplique et la fiche, puis les options lettrées a), b), c)… — voir [[Écrans d'interface]] (callout du 2026-09-06, 17 h 40). Les gabarits, les conditions et les paliers d'information ne changent pas.
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Réputation et relations]], [[Data-driven design]]
 - **Alimente** : [[L'information comme récompense]], [[Apprivoisement et recrutement]], [[Commerce et boutiques]], [[Compagnons]]

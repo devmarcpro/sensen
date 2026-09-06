@@ -3590,3 +3590,4 @@ journal.majorite,"{nom} comes of age and takes up the trade of {metier}"
 journal.migration,"{nom} leaves {de} for {vers}"
 ui.carte.en_cours,"painting the map… ({n} slices)"
 tile_content.vide.name,Air
+ui.ecran.page_suivante,Next page ({n} / {total})

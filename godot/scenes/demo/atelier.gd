@@ -48,6 +48,11 @@ func reconstruire() -> void:
 			carte.index = k
 			grille.add_child(carte)
 			cartes.append(carte)
+		elif kind == "page":   # la dernière lettre : la page suivante (une option = une lettre, designer 2026-09-06)
+			var lp := InventaireVisuel.LignePage.creer(ecrans, ecrans.liste.get_item_text(k))
+			lp.custom_minimum_size = AtelierVisuel.CARTE
+			lp.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			grille.add_child(lp)
 		k += 1
 	_colonnes()
 
@@ -125,6 +130,9 @@ class CarteRecette extends Control:
 		if pl.get("kind", "") == "composant":
 			nom = tr(GameData.entree("components", pl.recette.component).name_key)
 		_texte(nom, Vector2(3, AtelierVisuel.CARTE.y - 30), 8, Color(0.92, 0.9, 0.82))
+		var lettre := str(atelier.ecrans.lettres.get(index, ""))   # une option = une lettre (designer 2026-09-06)
+		if not lettre.is_empty():
+			draw_string(ThemeDB.fallback_font, Vector2(AtelierVisuel.CARTE.x - 18, 14), lettre + ")", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(1.0, 0.9, 0.55))
 		if ingredient:
 			var inclus := "☑" if "☑" in atelier.ecrans.liste.get_item_text(index) else "☐"
 			draw_string(ThemeDB.fallback_font, Vector2(4, 14), inclus, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.85, 0.95, 0.7))
