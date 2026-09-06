@@ -99,7 +99,12 @@ func _ready() -> void:
 		if portes_jointes < v.batiments.size():
 			soucis.append("cellule %s : %d porte(s) sur %d ne rejoignent pas la rue" % [str(c), v.batiments.size() - portes_jointes, v.batiments.size()])
 		if dt > budget:
-			soucis.append("cellule %s : %.0f ms, budget %.0f" % [str(c), dt, budget])
+			var detail := ""   # ce que la pose du quartier a coûté, par étape (Surface.chrono) : où passe le budget
+			for cle in Surface.chrono.keys():
+				if str(cle).begins_with("village."):
+					detail += " %s %.0f" % [str(cle).trim_prefix("village."), float(Surface.chrono[cle])]
+			soucis.append("cellule %s : %.0f ms, budget %.0f ·%s" % [str(c), dt, budget, detail])
+		Surface.chrono.clear()
 		if v.batiments.size() == 0:
 			soucis.append("cellule %s : aucun bâtiment" % str(c))
 	print("  total : %d lits, %d PNJ prévus pour %d habitants" % [lits_total, pnj_total, int(f.population)])

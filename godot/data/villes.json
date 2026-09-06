@@ -691,7 +691,7 @@
       6,
       16
     ],
-    "essais_parcelle": 180
+    "essais_parcelle": 120
   },
   "place": {
     "_doc": "Le mobilier de la place (designer 2026-09-07) : `centre` est pose au milieu si le palier l'a, `couronne` en anneau au rayon donne (jamais sur une rue), `marchand` s'ajoute au quartier marchand. Une capitale a sa statue.",

@@ -57,6 +57,10 @@ Toute gestion de ville/village/base (cultures, élevage, boutique passive — [[
 > - **On l'abat.** Au-delà de `capacite`, le surplus part à la boucherie : `abattage` donne de la viande, du cuir et du suif aux stocks — c'est ainsi qu'une ville d'élevage nourrit ses gens et fournit ses tanneurs.
 > Ce que ça ne fait pas encore : les races et les lignées (une bête ne vaut pas mieux qu'une autre), le pâturage tuile à tuile (l'herbe ne se broute pas), les maladies du troupeau.
 
+> [!important] Décidé le 2026-09-07, 1 h — les champs sont aux abords, et au bord de l'eau quand il y en a
+> Un champ se posait sur le premier rectangle libre tiré au hasard dans la cellule : on en trouvait entre deux maisons, au pied de la place. Désormais la génération les cherche **depuis les bords du quartier vers le centre** (la ville au milieu, les terres autour, comme partout où l'on a bâti avant les tracteurs) et **préfère les abords de l'eau** : parmi les emplacements libres, celui dont une tuile touche l'eau à `irrigation.distance` gagne — c'est lui qui sera irrigué et qui tiendra la canicule. Sans eau dans la cellule, le premier terrain des abords fait l'affaire. L'enclos suit la même règle, sans la préférence pour l'eau.
+> Ce que ça donne : une ville de rivière a ses champs le long de la berge et nourrit plus de monde ; une ville de plateau a ses champs en couronne et souffre l'été. La règle de rendement (irrigation) existait déjà — c'est la génération qui lui donne enfin de quoi mordre.
+
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Biomes — schéma]], [[Rôles de cases]], [[Application des stats de matériau]]
 - **Alimente** : [[Faim]], [[Cuisine et alchimie]], [[Abstraction hors-site]], [[Population et exploitation]], [[Plantes]]
