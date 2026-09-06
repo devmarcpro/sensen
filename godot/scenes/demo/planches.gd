@@ -108,7 +108,10 @@ static func dessiner(ci: CanvasItem, dossier: String, index: int, rect: Rect2, t
 		return false
 	var c := case()
 	var k := posmod(index, int(p.n))
-	ci.draw_texture_rect_region(tex, rect, Rect2(0, k * c, c, c), teinte, miroir)
+	var r := rect
+	if miroir:   # une largeur négative retourne l'image de gauche à droite (le dernier paramètre de draw_texture_rect_region est la transposition, pas le miroir)
+		r = Rect2(rect.position.x + rect.size.x, rect.position.y, -rect.size.x, rect.size.y)
+	ci.draw_texture_rect_region(tex, r, Rect2(0, k * c, c, c), teinte)
 	return true
 
 

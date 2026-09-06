@@ -1,0 +1,313 @@
+# -*- coding: utf-8 -*-
+"""Les sous-dossiers de planches et leurs spritesheets de substitution (Direction artistique, designer 2026-09-06, 21 h 10 :
+« fais les sous-dossiers et des spritesheets de substitution »).
+
+    python -X utf8 tools/gen_planches_substitution.py
+
+Crée `godot/assets/membres/<segment>/`, `godot/assets/visage/<trait>/` et, dans chacun, `00_substitution.png` : une
+planche de cases de 64 × 64 (une colonne), une case par variante — la carrure pour un membre, chaque valeur du locus
+pour un trait du visage (l'ordre de apparence.json). Les cases reprennent, en blanc-gris (le jeu les teinte), ce que le
+paperdoll dessinait par code : un membre est une pilule de la longueur de la case, un trait est à sa place dans une boîte
+de tête de 2,6 rayons. Ce sont des gabarits à remplacer, pas des dessins : le designer garde le nom `00_substitution.png`
+ou le supprime quand ses propres cases arrivent (ses fichiers, numérotés, passent après lui dans l'ordre des noms — ou
+avant, s'il le supprime).
+
+Sans Pillow : un petit rastériseur (cercles, ellipses, segments épais, polygones) sur-échantillonné 4 × 4, et le PNG écrit
+à la main (zlib). Rien de ce fichier n'est lu par le jeu : `Planches` lit les dossiers.
+"""
+import json, math, os, struct, zlib
+
+RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA = os.path.join(RACINE, "godot", "data")
+ASSETS = os.path.join(RACINE, "godot", "assets")
+SS = 4   # sur-échantillonnage par côté
+
+
+def lire_json(nom):
+    return json.load(open(os.path.join(DATA, nom), encoding="utf-8"))
+
+
+# ---------------------------------------------------------------- un rastériseur minuscule
+
+class Toile:
+    """Une case de `c` px, RGBA ; chaque forme est une fonction (x, y) -> couvert, évaluée SS × SS fois par pixel."""
+
+    def __init__(self, c):
+        self.c = c
+        self.cov = [[0.0] * c for _ in range(c)]   # couverture 0..1 (alpha)
+        self.val = [[1.0] * c for _ in range(c)]   # gris 0..1
+
+    def forme(self, dedans, gris=1.0):
+        c, n = self.c, SS
+        for y in range(c):
+            for x in range(c):
+                k = 0
+                for sy in range(n):
+                    for sx in range(n):
+                        if dedans(x + (sx + 0.5) / n, y + (sy + 0.5) / n):
+                            k += 1
+                if k:
+                    a = k / float(n * n)
+                    a0 = self.cov[y][x]
+                    # la nouvelle forme passe par-dessus : gris mêlé selon sa couverture
+                    self.val[y][x] = (self.val[y][x] * (1 - a) * a0 + gris * a) / max(1e-6, (1 - a) * a0 + a) if a0 > 0 else gris
+                    self.cov[y][x] = a + a0 * (1 - a)
+
+    def cercle(self, cx, cy, r, gris=1.0):
+        self.forme(lambda x, y: (x - cx) ** 2 + (y - cy) ** 2 <= r * r, gris)
+
+    def ellipse(self, cx, cy, rx, ry, gris=1.0):
+        self.forme(lambda x, y: ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1.0, gris)
+
+    def anneau(self, cx, cy, r, ep, gris=1.0):
+        self.forme(lambda x, y: (r - ep) ** 2 <= (x - cx) ** 2 + (y - cy) ** 2 <= (r + ep) ** 2, gris)
+
+    def arc(self, cx, cy, r, ep, a0, a1, gris=1.0):
+        def dedans(x, y):
+            d2 = (x - cx) ** 2 + (y - cy) ** 2
+            if not ((r - ep) ** 2 <= d2 <= (r + ep) ** 2):
+                return False
+            a = math.atan2(y - cy, x - cx)
+            while a < a0:
+                a += 2 * math.pi
+            return a <= a1
+        self.forme(dedans, gris)
+
+    def segment(self, x0, y0, x1, y1, ep, gris=1.0):
+        dx, dy = x1 - x0, y1 - y0
+        l2 = dx * dx + dy * dy
+
+        def dedans(x, y):
+            if l2 == 0:
+                return (x - x0) ** 2 + (y - y0) ** 2 <= ep * ep
+            t = max(0.0, min(1.0, ((x - x0) * dx + (y - y0) * dy) / l2))
+            px, py = x0 + t * dx, y0 + t * dy
+            return (x - px) ** 2 + (y - py) ** 2 <= ep * ep
+        self.forme(dedans, gris)
+
+    def polygone(self, pts, gris=1.0):
+        def dedans(x, y):
+            ok = False
+            j = len(pts) - 1
+            for i in range(len(pts)):
+                xi, yi = pts[i]
+                xj, yj = pts[j]
+                if (yi > y) != (yj > y) and x < (xj - xi) * (y - yi) / (yj - yi + 1e-12) + xi:
+                    ok = not ok
+                j = i
+            return ok
+        self.forme(dedans, gris)
+
+    def pilule(self, cx, cy, w, h, gris=1.0):
+        """Un rectangle aux bouts ronds, vertical, centré."""
+        r = w / 2.0
+        self.forme(lambda x, y: (abs(x - cx) <= r and cy - h / 2.0 + r <= y <= cy + h / 2.0 - r)
+                   or (x - cx) ** 2 + (y - (cy - h / 2.0 + r)) ** 2 <= r * r
+                   or (x - cx) ** 2 + (y - (cy + h / 2.0 - r)) ** 2 <= r * r, gris)
+
+    def rgba(self):
+        out = []
+        for y in range(self.c):
+            row = []
+            for x in range(self.c):
+                v = int(round(255 * self.val[y][x]))
+                a = int(round(255 * min(1.0, self.cov[y][x])))
+                row += [v, v, v, a]
+            out.append(row)
+        return out
+
+
+def ecrire_png(chemin, cases):
+    c = len(cases[0])
+    h = c * len(cases)
+    raw = b"".join(b"\x00" + bytes(row) for case in cases for row in case)
+
+    def chunk(t, d):
+        return struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d) & 0xFFFFFFFF)
+    png = b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", c, h, 8, 6, 0, 0, 0)) + chunk(b"IDAT", zlib.compress(raw, 9)) + chunk(b"IEND", b"")
+    os.makedirs(os.path.dirname(chemin), exist_ok=True)
+    open(chemin, "wb").write(png)
+
+
+# ---------------------------------------------------------------- les membres : une pilule de la longueur de la case
+
+def planches_membres(c, rig, facteurs):
+    carrures = lire_json("apparence.json")["loci"]
+    ordre_carrure = next(l["valeurs"] for l in carrures if l["id"] == "carrure")
+    segments = {}
+    for nom, s in rig["segments"].items():
+        base = nom
+        for suf in ("_G", "_D"):
+            if base.endswith(suf):
+                base = base[: -len(suf)]
+        if base == "tete":
+            continue   # la tête est un trait du visage (visage/tete)
+        segments.setdefault(base, (float(s["longueur"]), float(s["largeur"])))
+    for base, (lo, la) in segments.items():
+        cases = []
+        for carrure in ordre_carrure:
+            f = float(facteurs["carrure"].get(carrure, 1.0))
+            t = Toile(c)
+            w = min(c - 2.0, c * (la * f) / lo)   # la case fait la longueur du segment
+            t.pilule(c / 2.0, c / 2.0, max(4.0, w), c - 1.0, 0.92)
+            t.pilule(c / 2.0, c / 2.0, max(2.0, w - 4.0), c - 5.0, 1.0)   # un liseré : la pilule se lit une fois teintée
+            cases.append(t.rgba())
+        ecrire_png(os.path.join(ASSETS, "membres", base, "00_substitution.png"), cases)
+        print("  membres/%-11s %d variante(s) (carrure), pilule %.0f × %d" % (base, len(cases), la, lo))
+
+
+# ---------------------------------------------------------------- le visage : la boîte de tête, le trait à sa place
+
+def planches_visage(c, app, facteurs):
+    boite = float(lire_json("styles.json").get("planches", {}).get("visage_boite", 2.6))
+    r = c / boite          # le rayon de la tête, en pixels de case
+    cx = cy = c / 2.0      # le centre de la tête
+    haut = lambda k: cy - r * k   # k rayons vers le haut
+    droite = lambda k: cx + r * k
+
+    def case(trait, valeur):
+        t = Toile(c)
+        ecart = 0.42 * r
+        if trait == "tete":
+            f = float(facteurs["tete"].get(valeur, 1.0))
+            if valeur == "ronde":
+                t.cercle(cx, cy, r)
+            elif valeur == "ovale":
+                t.ellipse(cx, cy, r * 0.9, r * f)
+            elif valeur == "carree":
+                t.pilule(cx, cy, r * 1.9, r * 2.0 * f)
+            elif valeur == "allongee":
+                t.ellipse(cx, cy, r * 0.82, r * f)
+            elif valeur == "en_coeur":
+                t.cercle(cx, cy - r * 0.1, r)
+                t.polygone([(droite(-0.75), cy + r * 0.35), (droite(0.75), cy + r * 0.35), (cx, cy + r * 1.1)])
+        elif trait == "yeux":
+            for cote in (-1, 1):
+                ox, oy = cx + ecart * cote, haut(0.15)
+                if valeur == "grands":
+                    t.cercle(ox, oy, r * 0.2)
+                elif valeur == "en_amande":
+                    t.anneau(ox, oy, r * 0.2, r * 0.05)
+                elif valeur == "tombants":
+                    t.segment(ox - r * 0.14, oy, ox + r * 0.14, oy + r * 0.12, r * 0.05)
+                elif valeur == "fentes":
+                    t.segment(ox - r * 0.16, oy, ox + r * 0.16, oy, r * 0.05)
+                else:
+                    t.cercle(ox, oy, r * 0.12)
+        elif trait == "nez":
+            hx, hy = cx, haut(0.05)
+            if valeur == "fin":
+                t.segment(hx, hy, hx, hy + r * 0.3, r * 0.03)
+            elif valeur == "busque":
+                t.segment(hx, hy - r * 0.1, hx + r * 0.08, hy + r * 0.15, r * 0.05)
+                t.segment(hx + r * 0.08, hy + r * 0.15, hx, hy + r * 0.4, r * 0.05)
+            elif valeur == "crochu":
+                t.segment(hx, hy, hx + r * 0.12, hy + r * 0.35, r * 0.045)
+            elif valeur == "plat":
+                t.segment(hx - r * 0.1, hy, hx + r * 0.1, hy, r * 0.045)
+            else:
+                t.segment(hx, hy, hx, hy + r * 0.35, r * 0.045)
+        elif trait == "bouche":
+            by = cy + r * 0.5
+            demi = r * (0.3 if valeur == "large" else 0.18)
+            if valeur == "boudeuse":
+                t.arc(cx, by + r * 0.24, r * 0.3, r * 0.045, math.pi * 1.2, math.pi * 1.8)
+            elif valeur == "sourire":
+                t.arc(cx, by - r * 0.2, r * 0.32, r * 0.045, math.pi * 0.15, math.pi * 0.85)
+            else:
+                t.segment(cx - demi, by, cx + demi, by, r * 0.045)
+        elif trait == "cheveux":
+            if valeur == "crete":
+                t.segment(cx, haut(0.9), cx, haut(1.5), r * 0.2)
+            elif valeur != "chauve":
+                t.arc(cx, cy, r * 0.94, r * 0.17, math.pi * 1.06, math.pi * 1.94)
+                if valeur == "longs":
+                    for cote in (-1, 1):
+                        t.segment(cx + r * 0.85 * cote, cy, cx + r * 0.85 * cote, cy + r * 1.5, r * 0.15)
+                elif valeur == "queue":
+                    t.segment(cx, cy + r * 0.6, cx, cy + r * 1.8, r * 0.125)
+                elif valeur == "chignon":
+                    t.cercle(cx, haut(1.05), r * 0.42)
+                elif valeur == "tresses":
+                    for cote in (-1, 1):
+                        t.segment(cx + r * 0.8 * cote, haut(0.2), cx + r * 1.1 * cote, cy + r * 1.6, r * 0.11)
+        elif trait == "sourcils":
+            if valeur != "aucun":
+                for cote in (-1, 1):
+                    ox, oy = cx + ecart * cote, haut(0.42)
+                    t.segment(ox - r * 0.16, oy, ox + r * 0.16, oy, r * (0.08 if valeur == "epais" else 0.04))
+        elif trait == "barbe":
+            lg = float(facteurs["barbe"].get(valeur, 0.0)) / 8.0 * r   # en unités de rig, la tête fait 8 : ramené au rayon
+            if lg > 0:
+                t.polygone([(droite(-0.8), cy + r * 0.1), (droite(0.8), cy + r * 0.1), (droite(0.35), cy + r + lg), (droite(-0.35), cy + r + lg)])
+        elif trait == "oreilles":
+            lg = float(facteurs["oreilles"].get(valeur, 0.0)) / 8.0 * r
+            for cote in (-1, 1):
+                bx = cx + r * 0.9 * cote
+                if lg > 0:
+                    t.polygone([(bx, cy + r * 0.2), (bx, cy - r * 0.2), (bx + lg * cote, cy - lg * 0.6)])
+                else:
+                    t.cercle(bx, cy, r * 0.22)
+        elif trait == "machoire":
+            lg = {"fine": 0.42, "carree": 0.66, "lourde": 0.80}.get(valeur, 0.55) * r
+            t.segment(cx - lg, cy + r * 0.55, cx + lg, cy + r * 0.55, r * 0.035)
+        elif trait == "menton":
+            if valeur == "pointu":
+                t.polygone([(droite(-0.2), cy + r * 0.8), (droite(0.2), cy + r * 0.8), (cx, cy + r * 1.1)])
+            elif valeur == "fendu":
+                t.segment(cx, cy + r * 0.78, cx, cy + r * 0.95, r * 0.04)
+        elif trait == "pommettes":
+            if valeur in ("hautes", "saillantes"):
+                for cote in (-1, 1):
+                    ox = cx + r * 0.62 * cote
+                    oy = haut(0.05) if valeur == "hautes" else cy + r * 0.02
+                    t.segment(ox, oy - r * 0.12, ox, oy + r * 0.12, r * (0.05 if valeur == "saillantes" else 0.03))
+        elif trait == "implantation":
+            if valeur == "en_pointe":
+                t.polygone([(droite(-0.22), haut(0.72)), (droite(0.22), haut(0.72)), (cx, haut(0.42))])
+            elif valeur == "degarnie":
+                for cote in (-1, 1):
+                    t.cercle(cx + r * 0.6 * cote, haut(0.62), r * 0.2, 0.75)
+        elif trait == "paupieres":
+            for cote in (-1, 1):
+                ox = cx + ecart * cote
+                if valeur == "lourdes":
+                    t.segment(ox - r * 0.2, haut(0.30), ox + r * 0.2, haut(0.30), r * 0.055)
+                elif valeur == "plissees":
+                    t.arc(ox, haut(0.33), r * 0.2, r * 0.03, math.pi * 1.1, math.pi * 1.9)
+        elif trait == "marque":
+            if valeur == "cicatrice":
+                t.segment(droite(0.5), haut(0.5), droite(0.25), cy + r * 0.45, r * 0.04)
+            elif valeur == "tatouage":
+                t.anneau(droite(-0.45), haut(0.05), r * 0.24, r * 0.04)
+        return t.rgba()
+
+    for locus in app["loci"]:
+        if locus.get("universel", False):
+            continue   # la carrure et la taille ne sont pas des traits du visage
+        trait = locus["id"]
+        cases = [case(trait, v) for v in locus["valeurs"]]
+        ecrire_png(os.path.join(ASSETS, "visage", trait, "00_substitution.png"), cases)
+        print("  visage/%-13s %d variante(s) : %s" % (trait, len(cases), ", ".join(locus["valeurs"])))
+
+
+def main():
+    c = int(lire_json("styles.json").get("planches", {}).get("case", 64))
+    app = lire_json("apparence.json")
+    rig = lire_json(os.path.join("rigs", "humanoide.json"))
+    print("planches de substitution (cases de %d) :" % c)
+    planches_membres(c, rig, app["facteurs"])
+    planches_visage(c, app, app["facteurs"])
+    lisez = os.path.join(ASSETS, "LISEZ-MOI.md")
+    if not os.path.exists(lisez):
+        open(lisez, "w", encoding="utf-8").write(
+            "# Les planches de sprites\n\n"
+            "Un dossier = une planche (Direction artistique, 2026-09-06). Chaque PNG y est une case de 64 × 64, ou une planche de cases lues de haut en bas puis de gauche à droite ; les fichiers se lisent dans l'ordre de leurs noms (numérote-les). Le jeu assemble le dossier au premier usage.\n\n"
+            "- `membres/<segment>/` : la case fait la LONGUEUR du segment, centrée sur son axe, le dessin du bas (l'articulation) vers le haut (le bout) ; la gauche est le miroir de la droite ; une case par carrure (mince, moyenne, large, trapue, athletique) ; en blanc-gris, le jeu teinte.\n"
+            "- `visage/<trait>/` : la case est la TÊTE ENTIÈRE (un carré de 2,6 rayons de tête, centré), le trait à sa place ; une case par valeur du locus, dans l'ordre de `data/apparence.json` ; en blanc-gris, le jeu teinte (peau, cheveux, encre).\n"
+            "- `objets/<id>/` : la case de l'icône ; la variante visuelle de l'objet choisit la case. `objets/<id>.png` (un seul fichier) reste valable.\n\n"
+            "`00_substitution.png` est un gabarit généré par `tools/gen_planches_substitution.py` : remplace-le par tes cases, ou supprime-le. Un fichier dont la taille n'est pas un multiple de 64 est ignoré (`tools/verif_sprites.py` le signale).\n")
+
+
+if __name__ == "__main__":
+    main()

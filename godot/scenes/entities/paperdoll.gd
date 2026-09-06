@@ -337,11 +337,12 @@ func _planche_membre(nom: String, m: Dictionary, col: Color) -> bool:
 	var p: Vector2 = m.perp
 	var o: Vector2 = m.origine
 	var k := l / float(Planches.case())   # la case fait l unités de rig
-	var local := Transform2D(p * k, -d * k, o + d * l - p * (l * 0.5))   # (0,0) de la case : en haut à gauche, le bout du segment
+	var miroir := nom.ends_with("_G")   # le côté gauche : la case retournée, par son repère (l'axe x inversé)
+	var local := Transform2D(-p * k if miroir else p * k, -d * k, o + d * l + p * (l * 0.5) * (1.0 if miroir else -1.0))   # (0,0) de la case : en haut à gauche, le bout du segment
 	draw_set_transform_matrix(Transform2D(0.0, _decalage) * Transform2D().scaled(Vector2(_echelle_dessin, _echelle_dessin)) * local)
 	var variante := maxi(0, Planches.index_locus("carrure", str(_ap.get("carrure", "moyenne"))))
 	var c := float(Planches.case())
-	Planches.dessiner(self, dossier, variante, Rect2(0, 0, c, c), col, nom.ends_with("_G"))
+	Planches.dessiner(self, dossier, variante, Rect2(0, 0, c, c), col)
 	draw_set_transform(_decalage, 0.0, Vector2(_echelle_dessin, _echelle_dessin))
 	return true
 
