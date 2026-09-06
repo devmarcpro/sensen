@@ -30,6 +30,7 @@ res://
 │   ├── crafting/        # Recettes, qualité, stations
 │   ├── combat/          # Résolution des modules, mana, dégâts
 │   ├── simulation/      # Les bibliothèques statiques Sim… : les règles, l'état reste dans combat/simulation.gd (2026-09-05)
+│   │                    # (et scenes/demo/ecrans/ : les bibliothèques Ecrans… des écrans, même découpage, 2026-09-06)
 │   ├── skills/          # XP par usage, skill_factor
 │   ├── economy/         # Prix, boutiques passives, abstraction hors-site
 │   └── reputation/

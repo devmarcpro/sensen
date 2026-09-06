@@ -126,6 +126,7 @@ L'étape 11 (coop) ne commencera pas avant qu'un solo soit jugé bon.
 - `autoload/game_data.gd` charge et **valide** tout `data/` au boot (schémas, erreurs `fichier → champ`, bloquant en debug ; F5 recharge à chaud). Depuis le 2026-08-29, un catalogue peut être **rangé en sous-dossiers** (`data/modules/noyau/`, `data/items/arme/`…) : l'id reste le nom du fichier, le dossier n'est qu'un classement pour l'humain.
 - `systems/combat/simulation.gd` est **l'autorité** : une partie solo est une partie hébergée dont la porte est fermée. Le client (`scenes/demo/main.gd`) n'envoie que des **intentions** et n'affiche que ce que la simulation lui dit.
 - `systems/simulation/sim_*.gd` : les **règles** de la simulation en treize bibliothèques statiques (`SimLieux`, `SimTerrain`, `SimCamp`, `SimPnj`, `SimTerritoire`, `SimVilles`, `SimPerimetres`, `SimRoyaumes`, `SimElevage`, `SimObjets`, `SimSauvegarde`, `SimFabrication`, `SimTalents`) — chaque fonction reçoit la simulation en premier paramètre, l'état reste dans `Simulation`, les délégués en fin de `simulation.gd` gardent l'API (découpage par `tools/fragmenter.py`, décidé le 2026-09-05 : `docs/08 - Technique/Modules de la simulation et le C++.md`).
+- `scenes/demo/ecrans.gd` (`Ecrans`) ouvre, ferme et dispatche les écrans ; leur construction vit dans `scenes/demo/ecrans/ecrans_*.gd`, sept bibliothèques statiques (`EcransListe`, `EcransDialogue`, `EcransGestion`, `EcransCreation`, `EcransInventaire`, `EcransAtelier`, `EcransFeuille`) qui reçoivent l'objet `Ecrans` en premier paramètre — le même découpage que la simulation (`tools/fragmenter.py --cible ecrans`).
 - `scenes/entities/creature.tscn` est la scène **unique** de tout être — le joueur n'est pas un type à part. Rig et équipement visible viennent des données.
 
 ---
@@ -161,9 +162,10 @@ La suite est découpée par domaine depuis le 2026-09-06 : `scenes/tests/test_co
 ### Les autres outils
 
 ```powershell
-# Le découpage de simulation.gd en bibliothèques statiques Sim… (rapport seul sans --ecrire ; se relance depuis l'original :
-# git checkout godot/systems/combat/simulation.gd puis rm godot/systems/simulation/*.gd)
-python tools/fragmenter.py --ecrire
+# Le découpage des fichiers god en bibliothèques statiques (rapport seul sans --ecrire ; se relance depuis l'original :
+# git checkout du fichier puis rm du dossier des modules) — cibles : simulation (Sim…), ecrans (Ecrans…)
+python tools/fragmenter.py --cible simulation --ecrire
+python tools/fragmenter.py --cible ecrans --ecrire
 
 # Chasse aux bugs : des intentions au hasard pendant N pas (aussi : --bete, --ia). Lire les SCRIPT ERROR.
 # Le bilan final dit si le joueur a survécu et où il est ; « vivants 1 » juste après un voyage est normal (la faune
