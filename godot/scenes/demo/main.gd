@@ -388,9 +388,8 @@ func _ready() -> void:
 		if id == joueur_id and xp > 0:
 			xp_cumul[cle] = int(xp_cumul.get(cle, 0)) + xp
 			xp_fenetre = 0.4)
-	EventBus.fenetre_recentree.connect(func(_o: Vector2i) -> void:
-		_apres_changement_de_grille()
-		_ouvrir_chargement())
+	EventBus.fenetre_recentree.connect(func(o: Vector2i) -> void:
+		_apres_recentrage(o))
 	EventBus.action_engaged.connect(func(id: String, a: Dictionary) -> void: telegraphes[id] = a)
 	EventBus.action_resolved.connect(func(id: String, _a: Dictionary) -> void: telegraphes.erase(id))
 	EventBus.combat_ended.connect(_sur_fin_de_combat)
@@ -766,6 +765,8 @@ func _fermer_chargement() -> void:
 
 
 func _apres_changement_de_grille() -> void:
+	origine_grille = sim.grille.origine if sim != null and sim.grille != null else Vector2i(-99999, -99999)
+	origine_dessin = sim.grille.origine if sim != null and sim.grille != null else Vector2i.ZERO
 	terrain.queue_redraw()
 	for v in noeuds_vegetaux.values():
 		v.queue_free()
@@ -782,6 +783,58 @@ func _apres_changement_de_grille() -> void:
 	telegraphes.clear()
 	gros_flottants.clear()          # ils portaient des positions de l'ancienne grille (Grille.h hors bornes au retour au camp)
 	survol = Vector2i(-1, -1)       # idem pour la tuile survolée, tant que la souris n'a pas bougé
+
+
+## La fenêtre a glissé d'une cellule (2026-09-06, l'à-coup au passage d'une cellule) : le monde est le même, seules
+## l'origine et les clés changent. Les morceaux de terrain, les végétaux et les paperdolls sont dessinés en coordonnées
+## MONDE : on les garde et on les re-clé au lieu de tout refaire (36 morceaux, des centaines de végétaux et deux cents
+## paperdolls à réinstancier, c'était le gel et le voile noir à chaque cellule franchie). Un saut qui n'est pas un
+## glissement de cellules entières (un chargement) repasse par le chemin complet.
+var origine_grille := Vector2i(-99999, -99999)   # l'origine de la grille telle que le client l'a vue
+var origine_dessin := Vector2i.ZERO                # l'origine que _ecran soustrait : celle du dernier vrai changement de grille
+const RECENTRAGE_MAX_CELLULES := 16                # au-delà, on rebase (les pixels ne doivent jamais approcher 1e6)
+var recentrage_leger := true                       # false (capture --recentrage-complet) : l'ancien chemin, pour comparer
+func _apres_recentrage(nouvelle_origine: Vector2i) -> void:
+	var t0 := Time.get_ticks_usec()
+	var delta := nouvelle_origine - origine_grille
+	var g := sim.grille if sim != null else null
+	var trop_loin := g != null and (absi(nouvelle_origine.x - origine_dessin.x) > RECENTRAGE_MAX_CELLULES * g.largeur / 3 or absi(nouvelle_origine.y - origine_dessin.y) > RECENTRAGE_MAX_CELLULES * g.hauteur_grille / 3)
+	if not recentrage_leger or g == null or origine_grille == Vector2i(-99999, -99999) or delta == Vector2i.ZERO or delta.x % MORCEAU != 0 or delta.y % MORCEAU != 0 or absi(delta.x) > g.largeur or absi(delta.y) > g.hauteur_grille or trop_loin:
+		_apres_changement_de_grille()
+		_ouvrir_chargement()
+		return
+	var dk := delta / MORCEAU
+	var ancienne := origine_grille
+	origine_grille = nouvelle_origine
+	var nouveaux := {}
+	for k in morceaux.keys():
+		var nk: Vector2i = k - dk
+		var n: TerrainMorceau = morceaux[k]
+		if nk.x < 0 or nk.y < 0 or nk.x * MORCEAU >= g.largeur or nk.y * MORCEAU >= g.hauteur_grille:
+			n.queue_free()
+		else:
+			n.coin = nk
+			n.z_index = nk.x + nk.y
+			nouveaux[nk] = n
+	morceaux = nouveaux
+	var nv := {}
+	for idx in noeuds_vegetaux.keys():   # les végétaux : re-clés par leur position monde, leur profondeur refaite (elle est relative à l'origine)
+		var p: Vector2i = ancienne + Vector2i(int(idx) % g.largeur, int(idx) / g.largeur)
+		if g.dans(p):
+			nv[g.idx(p)] = noeuds_vegetaux[idx]
+			noeuds_vegetaux[idx].z_index = _profondeur(p)
+		else:
+			noeuds_vegetaux[idx].queue_free()
+	noeuds_vegetaux = nv
+	centre_terrain = Vector2i(-99, -99)   # _maj_morceaux crée ceux qui manquent au bord et libère les trop lointains
+	vue_version = -1
+	centre_brouillard = Vector2i(-99, -99)
+	brouillard.queue_redraw()
+	toits.queue_redraw()
+	ombres.queue_redraw()
+	_soleil_az_ombres = -999.0
+	_top_client("recentrage", t0)
+	chrono["n.recentrage"] = float(chrono.get("n.recentrage", 0.0)) + 1.0
 
 
 func _recentrer() -> void:
@@ -1735,8 +1788,11 @@ func _tuile_sous(p: Vector2) -> Vector2i:
 ## Tuile → écran, en coordonnées LOCALES à la fenêtre chargée : la simulation parle en coordonnées monde
 ## (cellule × 128 + tuile, jusqu'à ~65 000), mais le rendu ne doit jamais manipuler des pixels à 1e6 —
 ## précision float32, polygones dégénérés, jitter. L'origine de la fenêtre glissante est soustraite ici, une fois.
+## Depuis le 2026-09-06, l'origine soustraite est `origine_dessin`, celle du dernier VRAI changement de grille : un
+## glissement de cellule ne la bouge pas, pour que les morceaux, végétaux et paperdolls gardés restent à leur place ;
+## elle se rebase (chemin complet) quand la fenêtre s'en est éloignée de plus de RECENTRAGE_MAX_CELLULES.
 func _ecran(t: Vector2i, h: int) -> Vector2:
-	var l: Vector2i = t - (sim.grille.origine if sim != null else Vector2i.ZERO)
+	var l: Vector2i = t - origine_dessin
 	return Vector2((l.x - l.y) * TW * 0.5, (l.x + l.y) * TH * 0.5 - h * HSTEP)
 
 
@@ -2264,7 +2320,7 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 				if noeuds_vegetaux.has(idx):
 					noeuds_vegetaux[idx].modulate = Color(0.45, 0.45, 0.5)   # un billboard : on le voile lui-même (modulate)
 			elif g.bloque_passage(t) and not ("porte" in ct.get("tags", [])):
-				_dessine_bloc(ci, g, t, c, Color(0.38, 0.38, 0.44))   # un mur mémorisé : le même bloc, sombre et opaque — pas un voile qu'on voit au travers
+				_dessine_silhouette(ci, g, t, c)   # un mur mémorisé : sa silhouette, sombre et opaque — pas un voile qu'on voit au travers
 				continue
 			_poly(ci, PackedVector2Array([c + Vector2(-TW * 0.5, 0), c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5)]), voile)
 	_lot_fermer(ci)
@@ -2273,6 +2329,21 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 ## Un bloc de mur : le dessus et les deux faces avant (sud-ouest, sud-est) ; une face n'est
 ## dessinée que si la tuile devant n'est pas elle-même un mur découvert (elle la cacherait entièrement ;
 ## un mur jamais vu n'est pas dessiné, donc ne cache rien — sinon le bloc paraît creux).
+## La silhouette d'un bloc mémorisé hors de vue (le brouillard, 2026-09-06) : ses trois faces à plat, sombres et opaques,
+## sans matériau ni bandes — le brouillard se redessine à chaque pas et une ville en compte des centaines par passe ;
+## le bloc complet (`_dessine_bloc`) coûtait 73 µs, celle-ci le quart.
+func _dessine_silhouette(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2) -> void:
+	var hm := _hauteur_bloc(g, t) * HSTEP
+	if hm <= 0:
+		return
+	var tw := TW * 0.5
+	var th := TH * 0.5
+	var col := Color(0.38, 0.38, 0.44)
+	_poly(ci, PackedVector2Array([c + Vector2(-tw, 0), c + Vector2(0, th), c + Vector2(0, th - hm), c + Vector2(-tw, -hm)]), col.darkened(0.35))
+	_poly(ci, PackedVector2Array([c + Vector2(0, th), c + Vector2(tw, 0), c + Vector2(tw, -hm), c + Vector2(0, th - hm)]), col.darkened(0.5))
+	_poly(ci, PackedVector2Array([c + Vector2(-tw, -hm), c + Vector2(0, -th - hm), c + Vector2(tw, -hm), c + Vector2(0, th - hm)]), col)
+
+
 ## La hauteur dessinée du bloc d'une tuile, en unités : celle de son contenu, ou celle du bâtiment qui la couvre —
 ## un niveau de bâtiment fait NIVEAU_BLOCS blocs de BLOC_UNITES (Villes, 2026-09-06) ; 0 si rien ne s'y dresse.
 func _hauteur_bloc(g: Grille, t: Vector2i) -> int:

@@ -24,6 +24,8 @@ var temps_process := 0.0   # la part _process (simulation, nœuds, UI) ; le rest
 var rendu_cpu := 0.0        # le temps de RENDU du viewport mesuré par le serveur (CPU, puis GPU) — ce que la machine
 var rendu_gpu := 0.0        # chargée ne fausse pas autant que le delta d'image (le regroupement des triangles, 2026-09-06)
 var appels_dessin := 0.0    # les appels de dessin par image (Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), cumulés
+var traverser_cadence := 1  # --cadence-pas K : un pas toutes les K images (12 : cinq pas par seconde, le rythme d'un joueur)
+var traverser_en_jeu := 0   # --traverser-en-jeu N : un pas vers l'est PAR IMAGE pendant la mesure — le recentrage tombe dans les images mesurées
 
 
 func _ready() -> void:
@@ -393,6 +395,22 @@ func _ready() -> void:
 					scene.sim.intention(jl.id, {"type": "equiper", "objet": ol.uid})
 					scene.sim.attente[jl.id] = true
 			scene.sim.maj_vision()
+	for it2 in args.size():   # --traverser N : N pas vers l'est, en ligne — pour franchir une cellule (le recentrage, 2026-09-06)
+		if args[it2] == "--traverser" and it2 + 1 < args.size() and scene.sim != null:
+			var jt: Dictionary = scene.joueur()
+			for k in int(args[it2 + 1]):
+				scene.sim.attente[jt.id] = true
+				if not scene.sim.intention(jt.id, {"type": "deplacer", "vers": jt.pos + Vector2i(1, 0)}):
+					scene.sim.intention(jt.id, {"type": "deplacer", "vers": jt.pos + Vector2i(1, 1)})
+				scene.sim.horloge_monde.avancer(1)
+			scene.sim.maj_vision()
+			print("traversée : le joueur en %s, cellule %s, origine %s" % [str(jt.pos), str(scene.sim.monde.cellule_de(jt.pos)), str(scene.sim.grille.origine)])
+	scene.recentrage_leger = not ("--recentrage-complet" in args)
+	for it3 in args.size():
+		if args[it3] == "--traverser-en-jeu" and it3 + 1 < args.size():
+			traverser_en_jeu = int(args[it3 + 1])
+		elif args[it3] == "--cadence-pas" and it3 + 1 < args.size():
+			traverser_cadence = maxi(1, int(args[it3 + 1]))
 	for im2 in args.size():   # --marcher N : N pas au hasard, pour révéler les alentours avant la capture
 		if args[im2] == "--marcher" and im2 + 1 < args.size() and scene.sim != null:
 			var jm: Dictionary = scene.joueur()
@@ -633,6 +651,13 @@ func _process(delta: float) -> void:
 	frames += 1
 	if frames == 1:
 		RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
+	if traverser_en_jeu > 0 and frames > 5 and frames % traverser_cadence == 0 and scene != null and scene.sim != null:
+		var jt: Dictionary = scene.joueur()
+		if not jt.is_empty():
+			scene.sim.attente[jt.id] = true
+			if not scene.sim.intention(jt.id, {"type": "deplacer", "vers": jt.pos + Vector2i(1, 0)}):
+				scene.sim.intention(jt.id, {"type": "deplacer", "vers": jt.pos + Vector2i(1, 1)})
+		traverser_en_jeu -= 1
 	if frames > 5:   # les premières images chargent ; on mesure ensuite (critère É0 : 60 fps)
 		temps_max = maxf(temps_max, delta)
 		temps_total += delta
