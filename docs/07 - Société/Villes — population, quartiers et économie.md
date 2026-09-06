@@ -171,6 +171,17 @@ Le village d'une cellule de [[Villages PNJ — repeuplement et décimation]] et 
 > - **Le centre loge moins** (`parts.centre` 1,0 → 0,75, le résidentiel 1,4 → 1,6) : un quartier plein d'institutions ne peut pas loger autant qu'un quartier de maisons. Le compte des lits qui vaut est celui de **la ville entière**, pas d'un quartier : un centre plein loge son surplus chez ses voisins, et la sonde le vérifie ainsi.
 > Un bâtiment que le quartier n'a pas pu poser est noté (`village.non_poses`) : la sonde des villes le dit, et distingue un logement (rattrapé par le compte des lits) d'une institution (un vrai manque).
 
+> [!important] Décidé le 2026-09-07, 4 h — un îlot doit pouvoir tenir une maison : ce que les rues organiques avaient oublié
+> Les rues serpentaient si bien qu'elles ne laissaient plus d'îlot : dans un centre de cité, 56 % des tuiles étaient libres et **pas un seul rectangle de neuf sur sept** n'y tenait — les bâtiments tombaient les uns après les autres. Une ville, ce sont des rues **et** des îlots ; si l'écart entre deux rues est plus petit qu'une maison, ce n'est pas une ville, c'est un labyrinthe. Les règles qui en découlent :
+> - **`rayon_anneau` est la profondeur d'un îlot**, pas un rayon décoratif : 13 tuiles (au lieu de 10), soit onze tuiles bâtissables entre deux anneaux — de quoi loger le plus grand préfab et sa marge.
+> - **Un anneau se trace à la corde**, pas au tracé glouton : trente segments serpentés se tressaient en nappe. Le serpentement de l'anneau vient de son rayon bruité, ce qui suffit à lui ôter le compas.
+> - **Une rue existante ne s'emprunte qu'un peu** (le bonus de tronc commun passe de 6 à 2) : à 6, deux tracés voisins se collaient l'un à l'autre et pavaient des nappes de sept tuiles de large.
+> - **Moins de ruelles, plus courtes** (une cité : 12 → 5, longueur 6-16 → 5-11) et un serpentement général de 0,55 à 0,40. La ruelle est une impasse dans un îlot, pas une coupure au travers.
+> Mesuré sur la capitale de graine 83 : de 6 bâtiments manquants (dont un hall et une échoppe) à 2 (deux logements, rattrapés par le compte des lits de la ville).
+
+> [!important] Décidé le 2026-09-07, 4 h 30 — les halls se répartissent comme les boutiques
+> Une cité tire trois à quatre halls de guilde ; les entasser sur la place du centre, c'était y perdre les échoppes. Le centre en garde la moitié, le reste va aux quartiers **artisanal** et **marchand** (`composition.*.halls`) — la guilde des bâtisseurs est mieux chez les artisans que sur le parvis du château, et le cœur reste bâtissable.
+
 ## Liens
 - **Dépend de** : [[Un monde réel — villes, PNJ, royaumes et calendrier]], [[Villages PNJ — repeuplement et décimation]], [[Génération des royaumes PNJ]], [[Agriculture et élevage]], [[Population et exploitation]], [[Habitat des PNJ]], [[Commerce et boutiques]], [[Prix suggéré]]
 - **Alimente** : [[Économie — sources et puits]], [[Écrans d'interface]], [[Vers la production]]

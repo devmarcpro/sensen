@@ -262,11 +262,20 @@ func test_reputation_et_quetes() -> void:
 	var garde := {}
 	var villageois := {}
 	for x in civils:
-		if x.ai_profile == "garde":
+		if x.ai_profile == "garde" and garde.is_empty():
 			garde = x
-		elif villageois.is_empty():
+	# Le villageois doit être du MÊME village que le garde : la réputation est un compte par village, et la fenêtre
+	# charge plusieurs agglomérations à la fois (2026-09-07 — sinon le garde d'à côté offre ses quêtes sans rien savoir).
+	for x in civils:
+		if x.ai_profile != "garde" and str(x.get("village", "")) == str(garde.get("village", "")):
 			villageois = x
-	verifier(not garde.is_empty() and not villageois.is_empty(), "un garde et un villageois")
+			break
+	if villageois.is_empty():
+		for x in civils:
+			if x.ai_profile != "garde":
+				villageois = x
+				break
+	verifier(not garde.is_empty() and not villageois.is_empty() and str(garde.get("village", "")) == str(villageois.get("village", "")), "un garde et un villageois du même village")
 	# Paliers d'information : inconnu (0-19) → nom ; à 50, compétences ; à 90, tout.
 	verifier(s.palier_info(villageois, j) == 1, "relation 0 : palier 1 (nom, métier, village)")
 	villageois.social.relations[j.id] = 55

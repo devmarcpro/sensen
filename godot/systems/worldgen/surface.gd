@@ -1037,13 +1037,28 @@ func fiche_agglomeration(centre: Vector2i) -> Dictionary:
 		var g: String = str(guildes[rng.randi() % guildes.size()])
 		guildes.erase(g)
 		halls.append(g)
+	# Les halls de guilde ne tiennent pas tous sur la place (2026-09-07) : le centre en garde la moitié, les autres vont
+	# aux quartiers qui en veulent (`composition.halls`) — la guilde des prospecteurs est bien mieux chez les artisans.
+	var halls_q: Array = []
+	for i in quartiers.size():
+		halls_q.append([])
+	var accueillants: Array[int] = []
+	for i in quartiers.size():
+		if bool(cfg.composition[str(quartiers[i])].get("halls", false)):
+			accueillants.append(i)
+	if accueillants.is_empty():
+		accueillants.append(0)
+	var au_centre := int(ceil(float(halls.size()) / 2.0)) if accueillants.size() > 1 else halls.size()
+	for k5 in halls.size():
+		var cible: int = 0 if k5 < au_centre else int(accueillants[1 + (k5 - au_centre) % maxi(1, accueillants.size() - 1)])
+		(halls_q[cible] as Array).append(str(halls[k5]))
 	var cultures: Dictionary = GameData.catalogues.name_cultures
 	var culture_id := Noms.culture_pour("humain", cultures, rng)
 	if not roy.is_empty() and cultures.has(str(roy.culture)):
 		culture_id = str(roy.culture)
 	var nom := Noms.ville(cultures.get(culture_id, {}), rng) if cultures.has(culture_id) else "Hameau"
 	var fiche := {"centre": centre, "nom": nom, "culture": culture_id, "royaume": str(roy.get("id", "")), "capitale": capitale, "gouvernance": str(roy.get("government_type", "")),
-		"palier": palier, "population": population, "cellules": cellules, "quartiers": quartiers, "populations": pops, "boutiques": boutiques, "halls": halls}
+		"palier": palier, "population": population, "cellules": cellules, "quartiers": quartiers, "populations": pops, "boutiques": boutiques, "halls": halls, "halls_q": halls_q}
 	mutex_agglo.lock()
 	fiches_agglo[centre] = fiche
 	mutex_agglo.unlock()
@@ -1140,7 +1155,7 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 		file.append(["chapelle", "", "", "", ""])
 	# Halls et échoppes en alternance : si le cœur se remplit, la ville garde au moins une guilde ET un marché, au lieu
 	# de toutes ses guildes et aucune boutique.
-	var halls_f: Array = agglo.halls if bool(comp.halls) else []
+	var halls_f: Array = agglo.get("halls_q", []).get(int(agglo.index)) if int(agglo.index) < agglo.get("halls_q", []).size() else (agglo.halls if bool(comp.halls) else [])
 	var boutiques_f: Array = agglo.boutiques[int(agglo.index)]
 	for k_hb in maxi(halls_f.size(), boutiques_f.size()):
 		if k_hb < boutiques_f.size():
@@ -1233,6 +1248,9 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 				origine = _parcelle_sur_rue(e, sens, plan, occupe, rues_triees, essais_max if not complet else rues_triees.size(), curseur_rue)
 			else:
 				origine = _terrain_ruelle(e, cell, plan, sens, occupe, taille, tuiles_triees, rue, palette, rues_triees, curseur_terrain_f, 900 if not complet else 0)
+			if origine == Vector2i(-2, -2):
+				sans_place[cle_taille] = true   # le quartier n'a plus un terrain de cette taille : les suivants non plus
+				continue
 			if complet and origine == Vector2i(-1, -1):
 				sans_place[cle_taille] = true
 			if origine == Vector2i(-1, -1):
@@ -2108,7 +2126,8 @@ func _tracer_rue(e: Dictionary, cell: Vector2i, depart: Vector2i, arrivee: Vecto
 			if e.eau.has(i):
 				score += 400.0        # l'eau se contourne ; s'il n'y a que ça, on la franchit (un gué)
 			if rue.has(i):
-				score -= 6.0          # une rue existante s'emprunte : les tracés se rejoignent en tronc commun
+				score -= 2.0          # une rue existante s'emprunte un peu : assez pour un tronc commun, pas assez pour
+				                      # que deux tracés se tressent en nappe (2026-09-07 : à -6, la ville n'avait plus d'îlots)
 			if e.rochers.has(i):
 				score += 12.0
 			if score < meilleur_score:
@@ -2186,10 +2205,10 @@ func _tracer_rues(e: Dictionary, cell: Vector2i, centre: Vector2i, plan_id: Stri
 				if premier == Vector2i(-999, -999):
 					premier = q
 				if precedent != Vector2i(-999, -999):
-					_paver_trace(e, _tracer_rue(e, cell, precedent, q, rue, sinuosite * 0.4, pente_pen), int(lg.secondaire), palette, rue)
+					_paver_trace(e, _ligne_droite(precedent, q), int(lg.secondaire), palette, rue)   # la corde, pas un tracé glouton
 				precedent = q
 			if precedent != Vector2i(-999, -999) and premier != Vector2i(-999, -999):
-				_paver_trace(e, _tracer_rue(e, cell, precedent, premier, rue, sinuosite * 0.4, pente_pen), int(lg.secondaire), palette, rue)
+				_paver_trace(e, _ligne_droite(precedent, premier), int(lg.secondaire), palette, rue)
 	# Les ruelles : elles naissent d'une rue et meurent un peu plus loin — c'est ce qui fait un tissu, pas une étoile.
 	var n_ruelles := int(cfg.get("ruelles", {}).get(palier, 0))
 	if n_ruelles > 0 and not rue.is_empty():
@@ -2465,24 +2484,33 @@ func _carte_pres_eau(e: Dictionary, taille: int, dist: int) -> PackedByteArray:
 ## ses guildes même quand son cœur est plein. Rend l'origine du plan, ou (-1,-1) si le quartier n'a plus de place.
 func _terrain_ruelle(e: Dictionary, cell: Vector2i, plan: Array, sens: String, occupe: PackedByteArray, taille: int, tuiles_triees: Array, rue: Dictionary, palette: Dictionary, rues_triees: Array, curseur: Array, max_candidats: int = 900) -> Vector2i:
 	var dims := Vector2i(str(plan[0]).length(), plan.size())
-	var r := _terrain_libre(occupe, taille, dims, tuiles_triees, 0, max_candidats, curseur)
-	if r.position == Vector2i(-1, -1):
-		return Vector2i(-1, -1)
 	var porte := _porte_du_plan(plan)
 	if porte == Vector2i(-1, -1):
 		porte = Vector2i(dims.x / 2, dims.y - 1)
 	var dir: Vector2i = {"sud": Vector2i(0, 1), "nord": Vector2i(0, -1), "est": Vector2i(1, 0), "ouest": Vector2i(-1, 0)}.get(sens, Vector2i(0, 1))
-	var devant: Vector2i = r.position + porte + dir
-	if not _dans(devant, taille) or e.murs.has(devant.y * taille + devant.x) or e.eau.has(devant.y * taille + devant.x):
-		return Vector2i(-1, -1)   # la porte donnerait sur un mur ou sur l'eau : une autre orientation fera mieux
-	var plus_proche := devant
-	var d_min := 1 << 30
-	for ir in rues_triees:
-		@warning_ignore("integer_division")
-		var t := Vector2i(int(ir) % taille, int(ir) / taille)
-		var d: int = (t - devant).length_squared()
-		if d < d_min:
-			d_min = d
-			plus_proche = t
-	_paver_trace(e, _tracer_rue(e, cell, devant, plus_proche, rue, 0.3, 3.0), 1, palette, rue)
-	return r.position
+	# Le premier terrain venu peut avoir sa porte contre un mur : on passe au suivant (2026-09-07 — s'arrêter là, c'était
+	# garer le curseur sur ce refus et déclarer le quartier plein alors qu'il gardait la moitié de ses tuiles libres).
+	var local: Array = [int(curseur[0]) if not curseur.is_empty() else 0]
+	for essai in 24:
+		var r := _terrain_libre(occupe, taille, dims, tuiles_triees, 0, max_candidats, local)
+		if r.position == Vector2i(-1, -1):
+			# Un balayage COMPLET (max_candidats nul) qui ne trouve rien dit que le quartier n'a plus de terrain de cette
+			# taille ; un balayage borné ne dit rien de tel — il a seulement regardé les 900 tuiles suivantes.
+			return Vector2i(-2, -2) if max_candidats <= 0 else Vector2i(-1, -1)
+		var devant: Vector2i = r.position + porte + dir
+		if _dans(devant, taille) and not e.murs.has(devant.y * taille + devant.x) and not e.eau.has(devant.y * taille + devant.x):
+			var plus_proche := devant
+			var d_min := 1 << 30
+			for ir in rues_triees:
+				@warning_ignore("integer_division")
+				var t := Vector2i(int(ir) % taille, int(ir) / taille)
+				var d: int = (t - devant).length_squared()
+				if d < d_min:
+					d_min = d
+					plus_proche = t
+			_paver_trace(e, _tracer_rue(e, cell, devant, plus_proche, rue, 0.3, 3.0), 1, palette, rue)
+			if not curseur.is_empty():
+				curseur[0] = int(local[0])
+			return r.position
+		local[0] = (int(local[0]) + 1) % maxi(1, tuiles_triees.size())
+	return Vector2i(-1, -1)

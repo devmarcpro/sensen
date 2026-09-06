@@ -1985,6 +1985,9 @@ func _tuile_libre_autour(pos: Vector2i) -> Vector2i:
 	for r in range(1, 4):
 		for dy in range(-r, r + 1):
 			for dx in range(-r, r + 1):
+				if dx == 0 and dy == 0:
+					continue   # « autour », pas « ici » : rendre la tuile demandée, c'était un pas de zéro (2026-09-07,
+					           # le joueur posé sur l'escalier ne pouvait plus y monter)
 				var t := pos + Vector2i(dx, dy)
 				if grille.dans(t) and not grille.bloque_passage(t) and grille.occupant(t).is_empty():
 					return t

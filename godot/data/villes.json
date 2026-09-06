@@ -202,7 +202,7 @@
     "artisanal": {
       "place": false,
       "siege": false,
-      "halls": false,
+      "halls": true,
       "boutiques_par_habitant": 40,
       "chapelle": false,
       "auberge": false,
@@ -219,7 +219,7 @@
     "marchand": {
       "place": true,
       "siege": false,
-      "halls": false,
+      "halls": true,
       "boutiques_par_habitant": 10,
       "chapelle": false,
       "auberge": true,
@@ -619,7 +619,7 @@
     }
   },
   "plans": {
-    "_doc": "Le plan d'une ville (designer 2026-09-06) : un archetype par agglomeration, tire a sa graine — poids par palier, biais par gouvernance. Les rues sont des traces qui suivent le terrain (sinuosite : le serpentement ; pente_penalite : ce que couter monter) ; largeurs par rang de rue ; anneaux et rayon_anneau pour le radioconcentrique ; ruelles par palier et ruelle_longueur pour le tissu des impasses.",
+    "_doc": "Le plan d'une ville (designer 2026-09-06) : un archetype par agglomeration, tire a sa graine — poids par palier, biais par gouvernance. Les rues sont des traces qui suivent le terrain (sinuosite : le serpentement ; pente_penalite : ce que couter monter) ; largeurs par rang de rue ; anneaux et rayon_anneau pour le radioconcentrique ; ruelles par palier et ruelle_longueur pour le tissu des impasses. rayon_anneau (2026-09-07) : l'ecart entre deux rues, donc la profondeur d'un ilot — sous 13 tuiles, plus aucun batiment de dix sur huit ne tient entre deux rues.",
     "poids": {
       "hameau": {
         "rue_marchande": 3,
@@ -672,24 +672,24 @@
       "secondaire": 2,
       "ruelle": 1
     },
-    "sinuosite": 0.55,
+    "sinuosite": 0.4,
     "pente_penalite": 6.0,
     "anneaux": {
       "bourg": 1,
       "ville": 1,
       "cite": 2
     },
-    "rayon_anneau": 10,
+    "rayon_anneau": 13,
     "ruelles": {
       "hameau": 1,
-      "village": 3,
-      "bourg": 6,
-      "ville": 9,
-      "cite": 12
+      "village": 2,
+      "bourg": 3,
+      "ville": 4,
+      "cite": 5
     },
     "ruelle_longueur": [
-      6,
-      16
+      5,
+      11
     ],
     "essais_parcelle": 120
   },
