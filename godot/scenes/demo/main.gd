@@ -15,6 +15,8 @@ var vue_version := -1                      # version du champ de vue dessiné (b
 var centre_brouillard := Vector2i(-99, -99) # centre de la dernière passe du brouillard
 var decouvert_dessine := -1                 # nombre de tuiles découvertes à la dernière mise à jour (une découverte = les morceaux du champ de vue)
 const MORCEAU := 8                          # le terrain par morceaux de 8 × 8 tuiles (Budgets de performance, 2026-09-06)
+const BLOC_UNITES := 2                      # un bloc de mur : deux unités de hauteur (hauteur_vue d'un mur), seize pixels
+const NIVEAU_BLOCS := 2                     # un niveau de bâtiment : deux blocs (Villes, designer 2026-09-06 : « 2 blocs de haut et un toit »)
 var morceaux: Dictionary = {}               # Vector2i (colonne, ligne de morceau) → TerrainMorceau
 var terrain_a_refaire := true               # une nouvelle grille, un changement de contrôle : tous les morceaux se refont
 
@@ -120,6 +122,7 @@ var chargement_cellule := Vector2i.ZERO
 var chargement: ColorRect         # le voile noir de l'écran de chargement, sur le CanvasLayer
 var chargement_texte: Label
 var brouillard: Brouillard        # couche du brouillard de guerre, au-dessus du terrain et des êtres
+var toits: Toits                  # les toits des bâtiments, au-dessus des êtres (Villes, 2026-09-06)
 var noeuds_vegetaux: Dictionary = {}   # index de tuile → Vegetal (billboards des arbres et plantes de la fenêtre)
 var noeuds: Dictionary = {}       # id d'être → nœud creature.tscn (le paperdoll)
 const SCENE_CREATURE := preload("res://scenes/entities/creature.tscn")
@@ -156,6 +159,16 @@ class Brouillard extends Node2D:
 		var t0 := Time.get_ticks_usec()
 		proprio._dessiner_brouillard(self)
 		proprio._top_client("draw.brouillard", t0)
+
+
+## Les toits des bâtiments (Villes, 2026-09-06) : une couche AU-DESSUS des êtres — ce qui est sous un toit ne se voit
+## pas — redessinée avec le brouillard ; le bâtiment où se tient le joueur n'y est pas dessiné.
+class Toits extends Node2D:
+	var proprio: Node2D
+	func _draw() -> void:
+		var t0 := Time.get_ticks_usec()
+		proprio._dessiner_toits(self)
+		proprio._top_client("draw.toits", t0)
 
 
 ## La couche d'interface au-dessus des êtres (z fixe, toujours visible).
@@ -210,6 +223,12 @@ func _ready() -> void:
 	brouillard.z_as_relative = false
 	brouillard.z_index = -2
 	add_child(brouillard)
+	toits = Toits.new()
+	toits.proprio = self
+	toits.material = _materiau_grain()   # le chaume et la tuile prennent le grain comme les murs
+	toits.z_as_relative = false
+	toits.z_index = 4001   # au-dessus des êtres (1..4000), sous la pluie (4050) et le HUD (4090)
+	add_child(toits)
 	hud = Hud.new()
 	hud.proprio = self
 	hud.z_as_relative = false
@@ -262,6 +281,7 @@ func _ready() -> void:
 			sim.lumiere_sale = true
 		lumieres.queue_redraw()
 		voiles.queue_redraw()
+		toits.queue_redraw()
 		var i := sim.grille.idx(p) if sim != null else -1
 		if noeuds_vegetaux.has(i):
 			noeuds_vegetaux[i].queue_free()
@@ -588,6 +608,7 @@ func _charger(fiche: Dictionary = {}) -> void:
 	vue_version = -1
 	centre_brouillard = Vector2i(-99, -99)
 	brouillard.queue_redraw()
+	toits.queue_redraw()
 	# Les rappels de touches ne s'affichent plus à l'écran (demande du designer, 2026-08-28) : ils vivent dans le README.
 	visee = -1
 	_recentrer()
@@ -625,6 +646,7 @@ func _apres_changement_de_grille() -> void:
 	vue_version = -1
 	centre_brouillard = Vector2i(-99, -99)
 	brouillard.queue_redraw()
+	toits.queue_redraw()
 	for n in noeuds.values():
 		n.queue_free()
 	noeuds.clear()
@@ -897,6 +919,7 @@ func _process(delta: float) -> void:
 	_maj_morceaux(j)   # les morceaux de terrain naissent et meurent avec la distance ; une découverte salit ceux du champ de vue
 	if int(j.get("vue_version", 0)) != vue_version or Grille.distance(j.pos, centre_brouillard) > RAYON_VUE / 3:
 		brouillard.queue_redraw()   # son champ de vue a changé : seul le brouillard se redessine
+		toits.queue_redraw()        # et les toits avec lui (ceux qu'il voit, celui qu'il a sur la tête)
 	tour_hud += 1
 	if tour_hud % 2 == 0:   # le HUD (bulle, états, télégraphes, gardes) se redessine une image sur deux : deux cents habitants en ville
 		hud.queue_redraw()
@@ -946,8 +969,8 @@ func _maj_noeuds(delta: float = 0.0) -> void:
 		vivants[e.id] = true
 		var n: Paperdoll = noeuds.get(e.id)
 		# Hors de la fenêtre de vue : le nœud reste, mais n'est ni dessiné ni redessiné.
-		if n != null and not j.is_empty() and (Grille.distance(e.pos, j.pos) > RAYON_VUE or not sim.voit(j, e.pos)):
-			n.visible = false   # hors fenêtre, ou hors du champ de vue (brouillard de guerre)
+		if n != null and not j.is_empty() and (Grille.distance(e.pos, j.pos) > RAYON_VUE or not sim.voit(j, e.pos) or _sous_toit_cache(e.pos, j)):
+			n.visible = false   # hors fenêtre, hors du champ de vue (brouillard de guerre), ou sous le toit d'un autre bâtiment (Villes, 2026-09-06)
 			continue
 		if n == null:
 			n = SCENE_CREATURE.instantiate()
@@ -992,9 +1015,27 @@ func _dessiner_occulteurs(n: Paperdoll) -> void:
 		return
 	var he := g.h(e.pos)
 	var base := _ecran(e.pos, he)
-	for d in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 0), Vector2i(0, 2), Vector2i(2, 1), Vector2i(1, 2)]:
-		var t: Vector2i = e.pos + d
-		if g.dans(t) and (g.h(t) > he or (g.bloque_passage(t) and not ("vegetation" in g.contenu_de(t).get("tags", [])))):
+	# Jusqu'où regarder devant : deux tuiles, et plus loin si des façades de bâtiments sont hautes (Villes, 2026-09-06 :
+	# un mur de n niveaux cache un être jusqu'à 2n + 1 tuiles derrière lui).
+	var portee := 2
+	for b in g.batiments_liste:
+		portee = maxi(portee, 2 * int(b.get("niveaux", 1)) + 1)
+	for s in range(1, 2 * portee + 1):   # en ordre de profondeur : le plus proche d'abord, le plus devant par-dessus
+		for dx in range(maxi(0, s - portee), mini(s, portee) + 1):
+			var dy := s - dx
+			# Au-delà de deux pas, seule la bande sous l'être (|dx − dy| ≤ 1 : à vingt pixels près) et seul un mur assez
+			# haut pour monter jusqu'à lui (le pied d'un bloc à s tuiles devant est 10 s pixels plus bas) : sinon une
+			# cité coûtait soixante tuiles redessinées par paperdoll.
+			if s > 2 and absi(dx - dy) > 1:
+				continue
+			var t: Vector2i = e.pos + Vector2i(dx, dy)
+			if not g.dans(t):
+				continue
+			if s <= 2:
+				if not (g.h(t) > he or (g.bloque_passage(t) and not ("vegetation" in g.contenu_de(t).get("tags", [])))):
+					continue
+			elif _hauteur_bloc(g, t) * HSTEP + maxi(0, g.h(t) - he) * HSTEP < s * TH / 2 - 4:
+				continue
 			n.draw_set_transform(-base)
 			_dessine_tuile(n, t)
 			n.draw_set_transform(Vector2.ZERO)
@@ -2023,6 +2064,8 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 		_dessiner_sprite_tuile(ci, g, t, c, teinte)
 	if "porte" in contenu.get("tags", []):   # une porte n'est pas un mur : un battant dans son encadrement
 		_dessiner_porte(ci, g, t, c, contenu, teinte)
+		if g.niveaux_bat[g.idx(t)] > 0:   # dans un bâtiment, le mur continue au-dessus de la porte (Villes, 2026-09-06)
+			_dessine_bloc(ci, g, t, c, teinte, int(contenu.get("hauteur_vue", 2)))
 	if "contenant" in contenu.get("tags", []):   # coffre ou butin : une caisse
 		var cc := (Color(0.55, 0.38, 0.18) if "coffre" in contenu.tags else Color(0.75, 0.65, 0.3)) * teinte
 		_lot_vider(ci)
@@ -2089,47 +2132,163 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 ## Un bloc de mur : le dessus et les deux faces avant (sud-ouest, sud-est) ; une face n'est
 ## dessinée que si la tuile devant n'est pas elle-même un mur découvert (elle la cacherait entièrement ;
 ## un mur jamais vu n'est pas dessiné, donc ne cache rien — sinon le bloc paraît creux).
-func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: Color = Color.WHITE) -> void:
-	var hm := int(g.contenu_de(t).get("hauteur_vue", 3)) * HSTEP
-	var haut_bloc := Color(0.5, 0.47, 0.44)
+## La hauteur dessinée du bloc d'une tuile, en unités : celle de son contenu, ou celle du bâtiment qui la couvre —
+## un niveau de bâtiment fait NIVEAU_BLOCS blocs de BLOC_UNITES (Villes, 2026-09-06) ; 0 si rien ne s'y dresse.
+func _hauteur_bloc(g: Grille, t: Vector2i) -> int:
+	if not g.dans(t):
+		return 0
+	var ct := g.contenu_de(t)
+	if not bool(ct.get("bloque_passage", false)) and not ("porte" in ct.get("tags", [])):
+		return 0
+	var tags: Array = ct.get("tags", [])
+	if "vegetation" in tags:
+		return 0
+	var n: int = g.niveaux_bat[g.idx(t)]
+	if n > 0 and ("mur" in tags or "porte" in tags):
+		return n * NIVEAU_BLOCS * BLOC_UNITES
+	return int(ct.get("hauteur_vue", 3))
+
+
+## `base_u` : le bloc commence à cette hauteur (le mur au-dessus d'une porte) ; sinon au sol.
+func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: Color = Color.WHITE, base_u: int = 0) -> void:
+	var t0_b := Time.get_ticks_usec()
+	chrono["n.bloc"] = float(chrono.get("n.bloc", 0.0)) + 1.0
 	var contenu_t := g.contenu_de(t)
 	var tags_t: Array = contenu_t.get("tags", [])
-	var mat: Dictionary = GameData.catalogues.materials.get(g.materiau_de(t), {})
+	var idx_t := g.idx(t)
+	var n_bat: int = g.niveaux_bat[idx_t]
+	var mur_bat := n_bat > 0 and ("mur" in tags_t or "porte" in tags_t)   # une façade de bâtiment : des blocs empilés
+	var hm := (n_bat * NIVEAU_BLOCS * BLOC_UNITES if mur_bat else int(contenu_t.get("hauteur_vue", 3))) * HSTEP
+	var haut_bloc := Color(0.5, 0.47, 0.44)
+	var mat_id := g.materiau_de(t)
+	if mur_bat and "porte" in tags_t:   # au-dessus d'une porte : le mur du bâtiment, pas la couleur du battant
+		mat_id = str(g.batiments_liste[int(g.bat_de[idx_t]) - 1].get("mur", mat_id))
+	var mat: Dictionary = GameData.catalogues.materials.get(mat_id, {})
 	var emprise := 1.0   # un meuble est un bloc plus petit que sa case (designer, point 46)
-	if "meuble" in tags_t and g.meubles.has(g.idx(t)):
-		var mb: Dictionary = GameData.entree("meubles", str(g.meubles[g.idx(t)]))
+	if "meuble" in tags_t and g.meubles.has(idx_t):
+		var mb: Dictionary = GameData.entree("meubles", str(g.meubles[idx_t]))
 		haut_bloc = Color.html(str(mb.couleur))
 		emprise = float(mb.get("emprise", 0.6))
 		hm = int(roundf(float(hm) * emprise))
-	elif contenu_t.has("couleur"):
+	elif contenu_t.has("couleur") and not mur_bat:
 		haut_bloc = Color.html(str(contenu_t.couleur))
 	elif "arbre" in tags_t:
 		haut_bloc = Color(0.22, 0.45, 0.18).lerp(Color.html(mat.color) if not mat.is_empty() else haut_bloc, 0.2)   # la cime
 	elif not mat.is_empty():   # la couleur de la palette du matériau (filon ou mur du thème)
-		haut_bloc = haut_bloc.lerp(Color.html(mat.color), 0.55 if g.materiaux.has(g.idx(t)) else 0.35)
+		haut_bloc = haut_bloc.lerp(Color.html(mat.color), 0.55 if g.materiaux.has(idx_t) or mur_bat else 0.35)
 	haut_bloc *= teinte
-	var mat_bloc := g.materiau_de(t)   # murs et blocs texturés comme le sol (point 58)
+	var mat_bloc := mat_id   # murs et blocs texturés comme le sol (point 58)
 	if mat_bloc.is_empty():
 		mat_bloc = str(GameData.config("styles").get("grain", {}).get("materiau_mur_defaut", "granit"))   # un mur nu reste de la roche
 	var st_bloc := _style_grain(mat_bloc)
 	var tw := TW * 0.5 * emprise
 	var th := TH * 0.5 * emprise
+	var h0 := base_u * HSTEP   # le pied du bloc
+	# Une face n'est dessinée que si ce qui est devant ne la cache pas entièrement : une tuile de mur découverte au
+	# moins aussi haute (une façade de deux niveaux dépasse d'une maison basse).
 	var sud := t + Vector2i(0, 1)
-	if not g.dans(sud) or not g.bloque_passage(sud) or not g.decouvert.has(g.idx(sud)):
-		_poly(ci, PackedVector2Array([   # face sud-ouest (gauche)
-			c + Vector2(-tw, 0), c + Vector2(0, th),
-			c + Vector2(0, th - hm), c + Vector2(-tw, -hm)]), haut_bloc.darkened(0.35),
-			PackedVector2Array([Vector2(st_bloc + t.x, 0), Vector2(st_bloc + t.x + 1, 0), Vector2(st_bloc + t.x + 1, -3), Vector2(st_bloc + t.x, -3)]))
 	var est := t + Vector2i(1, 0)
-	if not g.dans(est) or not g.bloque_passage(est) or not g.decouvert.has(g.idx(est)):
-		_poly(ci, PackedVector2Array([   # face sud-est (droite)
-			c + Vector2(0, th), c + Vector2(tw, 0),
-			c + Vector2(tw, -hm), c + Vector2(0, th - hm)]), haut_bloc.darkened(0.5),
-			PackedVector2Array([Vector2(st_bloc + t.y, 0), Vector2(st_bloc + t.y + 1, 0), Vector2(st_bloc + t.y + 1, -3), Vector2(st_bloc + t.y, -3)]))
+	var face_so := not (g.dans(sud) and g.decouvert.has(g.idx(sud)) and _hauteur_bloc(g, sud) * HSTEP >= hm)
+	var face_se := not (g.dans(est) and g.decouvert.has(g.idx(est)) and _hauteur_bloc(g, est) * HSTEP >= hm)
+	# Les blocs empilés d'une façade : une bande par bloc, un peu plus sombre un bloc sur deux (« 2 blocs de haut »).
+	var bande := BLOC_UNITES * HSTEP if mur_bat else hm
+	var y := h0
+	var k := 0
+	while y < hm:
+		var y1 := mini(hm, y + bande)
+		var ombre := 0.06 if (mur_bat and k % 2 == 1) else 0.0
+		if face_so:
+			_poly(ci, PackedVector2Array([   # face sud-ouest (gauche)
+				c + Vector2(-tw, -y), c + Vector2(0, th - y),
+				c + Vector2(0, th - y1), c + Vector2(-tw, -y1)]), haut_bloc.darkened(0.35 + ombre),
+				PackedVector2Array([Vector2(st_bloc + t.x, -float(y) / HSTEP), Vector2(st_bloc + t.x + 1, -float(y) / HSTEP), Vector2(st_bloc + t.x + 1, -float(y1) / HSTEP), Vector2(st_bloc + t.x, -float(y1) / HSTEP)]))
+		if face_se:
+			_poly(ci, PackedVector2Array([   # face sud-est (droite)
+				c + Vector2(0, th - y), c + Vector2(tw, -y),
+				c + Vector2(tw, -y1), c + Vector2(0, th - y1)]), haut_bloc.darkened(0.5 + ombre),
+				PackedVector2Array([Vector2(st_bloc + t.y, -float(y) / HSTEP), Vector2(st_bloc + t.y + 1, -float(y) / HSTEP), Vector2(st_bloc + t.y + 1, -float(y1) / HSTEP), Vector2(st_bloc + t.y, -float(y1) / HSTEP)]))
+		y = y1
+		k += 1
 	_poly(ci, PackedVector2Array([   # dessus
 		c + Vector2(-tw, -hm), c + Vector2(0, -th - hm),
 		c + Vector2(tw, -hm), c + Vector2(0, th - hm)]), haut_bloc,
 		PackedVector2Array([Vector2(st_bloc + t.x, t.y + 1), Vector2(st_bloc + t.x, t.y), Vector2(st_bloc + t.x + 1, t.y), Vector2(st_bloc + t.x + 1, t.y + 1)]))
+	_top_client("draw.bloc", t0_b)
+
+
+## Le bâtiment qui couvre une tuile (1 + son index dans batiments_liste), 0 hors bâtiment.
+func _batiment_de(t: Vector2i) -> int:
+	if sim == null or not sim.grille.dans(t):
+		return 0
+	return int(sim.grille.bat_de[sim.grille.idx(t)])
+
+
+## Sous le toit d'un autre bâtiment que celui du joueur : ni dessiné, ni au HUD.
+func _sous_toit_cache(t: Vector2i, j: Dictionary) -> bool:
+	var b := _batiment_de(t)
+	return b > 0 and (j.is_empty() or b != _batiment_de(j.pos))
+
+
+## Les toits (Villes, 2026-09-06) : sur chaque tuile découverte de l'emprise d'un bâtiment — murs compris, pour que
+## rien ne dépasse —, un losange plat à la hauteur du haut des murs, à la couleur du matériau de toit ; le bâtiment
+## du joueur reste à ciel ouvert ; hors du champ de vue, le toit mémorisé est sombre comme un mur mémorisé.
+func _dessiner_toits(ci: CanvasItem) -> void:
+	if sim == null or profil_sans_terrain:
+		return
+	var g := sim.grille
+	if g.batiments_liste.is_empty():
+		return
+	var j := joueur()
+	if j.is_empty():
+		return
+	var bat_j := _batiment_de(j.pos)
+	var x0 := maxi(g.origine.x, j.pos.x - RAYON_VUE)
+	var x1 := mini(g.origine.x + g.largeur - 1, j.pos.x + RAYON_VUE)
+	var y0 := maxi(g.origine.y, j.pos.y - RAYON_VUE)
+	var y1 := mini(g.origine.y + g.hauteur_grille - 1, j.pos.y + RAYON_VUE)
+	var couleurs := {}   # matériau de toit → couleur
+	# Un toit se voit de la rue même si l'on ne voit pas la pièce dessous : un bâtiment dont un mur est en vue a son
+	# toit éclairé en entier ; sinon (mémorisé, hors de vue) il est sombre comme un mur mémorisé.
+	var vus := {}
+	for b in range(1, g.batiments_liste.size() + 1):
+		var r: Rect2i = g.batiments_liste[b - 1].rect
+		if r.position.x > x1 or r.end.x <= x0 or r.position.y > y1 or r.end.y <= y0:
+			continue
+		var vu := false
+		for y in r.size.y:
+			for x in r.size.x:
+				if sim.voit(j, r.position + Vector2i(x, y)):
+					vu = true
+					break
+			if vu:
+				break
+		vus[b] = vu
+	_lot_ouvrir(ci)
+	for s in range(x0 + y0, x1 + y1 + 1):
+		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
+			var t := Vector2i(x, s - x)
+			var idx := g.idx(t)
+			var n: int = g.niveaux_bat[idx]
+			if n == 0 or not g.decouvert.has(idx):
+				continue
+			var b: int = g.bat_de[idx]
+			if b == bat_j:
+				continue   # le bâtiment où l'on se tient : on voit sa pièce
+			var info: Dictionary = g.batiments_liste[b - 1]
+			var mat := str(info.get("toit", ""))
+			if not couleurs.has(mat):
+				couleurs[mat] = [Color.html(str(GameData.catalogues.materials.get(mat, {}).get("color", "#b89a55"))), _style_grain(mat)]
+			var col: Color = couleurs[mat][0]
+			var st: float = couleurs[mat][1]
+			var ct := g.contenu_de(t)
+			if bool(ct.get("bloque_passage", false)) and not ("meuble" in ct.get("tags", [])):
+				col = col.darkened(0.18)   # le pourtour (les murs) : un liseré plus sombre, le toit se lit comme un toit
+			if not bool(vus.get(b, false)):
+				col = col.darkened(0.55)
+			var c := _ecran(t, g.h(t)) - Vector2(0, n * NIVEAU_BLOCS * BLOC_UNITES * HSTEP)
+			_poly(ci, PackedVector2Array([c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5), c + Vector2(-TW * 0.5, 0)]), col,
+				PackedVector2Array([Vector2(st + t.x, t.y), Vector2(st + t.x + 1, t.y), Vector2(st + t.x + 1, t.y + 1), Vector2(st + t.x, t.y + 1)]))
+	_lot_fermer(ci)
 
 
 ## La couche d'interface : barres, garde, télégraphe et jauge de chaîne de chaque être.
@@ -2179,7 +2338,7 @@ func _dessiner_hud(ci: CanvasItem) -> void:
 		return
 	var j := joueur()
 	for e in sim.vivants():   # seulement ce qui est à l'écran : une cité en compte deux cents (designer 2026-09-05, le lag)
-		if j.is_empty() or (Grille.distance(e.pos, j.pos) <= RAYON_VUE and sim.voit(j, e.pos)):
+		if j.is_empty() or (Grille.distance(e.pos, j.pos) <= RAYON_VUE and sim.voit(j, e.pos) and not _sous_toit_cache(e.pos, j)):
 			_dessine_hud_entite(ci, e)
 
 

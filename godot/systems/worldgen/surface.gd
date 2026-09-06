@@ -1514,7 +1514,8 @@ func _poser_batiment(e: Dictionary, bat: Dictionary, origine: Vector2i, palette:
 	var taille: int = e.largeur
 	var plan: Array = bat.plan
 	var meubles: Dictionary = bat.meubles
-	var info := {"id": bid, "origine": origine, "porte": origine, "lits": [], "rect": Rect2i(origine, Vector2i(str(plan[0]).length(), plan.size()))}
+	var info := {"id": bid, "origine": origine, "porte": origine, "lits": [], "rect": Rect2i(origine, Vector2i(str(plan[0]).length(), plan.size())),
+		"niveaux": 1 + bat.get("etages", []).size(), "toit": str(palette.get("toit", "chaume_tresse")), "mur": str(palette.get("mur", "chene"))}   # le dessin des façades et du toit (Villes, 2026-09-06)
 	var poste_c := str(bat.get("poste", ""))
 	var stations: Dictionary = bat.get("stations", {})
 	for y in plan.size():

@@ -44,6 +44,9 @@ var gel := false                          # sous 0 °C : l'eau est de la glace, 
 var sols: Dictionary = {}                 # index de tuile → id de matériau de sol (surface) ; vide = sol par défaut
 var origine := Vector2i.ZERO              # coordonnée monde de la tuile locale (0, 0) — fenêtre glissante (Monde)
 var modifies: Dictionary = {}             # index de tuile → true : tuiles modifiées depuis la construction (capture par cellule)
+var niveaux_bat := PackedByteArray()      # niveaux du bâtiment qui couvre la tuile (0 : hors bâtiment) — pour le dessin des façades et des toits (Villes, 2026-09-06)
+var bat_de := PackedInt32Array()          # 1 + l'index du bâtiment dans batiments_liste (0 : aucun)
+var batiments_liste: Array = []           # les bâtiments de la fenêtre : {"cle", "niveaux", "toit", "mur", "rect"}
 
 ## Le noyau C++ (SensenGrille, GDExtension `sensen_grille`, Modules de la simulation et le C++, section 3, 2026-09-06) :
 ## présent quand la bibliothèque est chargée, sinon tout se calcule en GDScript — les mêmes fonctions, les mêmes
@@ -95,6 +98,8 @@ func _init(l: int, h: int) -> void:
 	occ.resize(l * h)
 	danger_a.resize(l * h)
 	eau_a.resize(l * h)
+	niveaux_bat.resize(l * h)
+	bat_de.resize(l * h)
 	if noyau_present():
 		_noyau = ClassDB.instantiate(&"SensenGrille")
 

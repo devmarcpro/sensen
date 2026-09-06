@@ -919,6 +919,20 @@ func test_batiment_etages() -> void:
 			s.grille.placer(x.id, x.pos)
 	var esc: Vector2i = s.monde.pos_monde(cell, bat_e.escalier)
 	verifier(str(s.grille.meubles.get(s.grille.idx(esc), "")) == "escalier" and not s.grille.bloque_passage(esc), "l'escalier est un meuble franchissable de la grille")
+	# Les façades et les toits (Villes, 2026-09-06) : l'emprise du bâtiment porte ses niveaux et son toit dans la fenêtre.
+	var g := s.grille
+	var coin: Vector2i = s.monde.pos_monde(cell, Vector2i(bat_e.origine))
+	var niveaux_attendus: int = 1 + GameData.catalogues.village_buildings[str(bat_e.id)].etages.size()
+	verifier(int(g.niveaux_bat[g.idx(coin)]) == niveaux_attendus and int(g.niveaux_bat[g.idx(esc)]) == niveaux_attendus, "l'emprise de %s porte ses %d niveaux, du mur d'angle à l'escalier" % [str(bat_e.id), niveaux_attendus])
+	var b_idx := int(g.bat_de[g.idx(esc)])
+	verifier(b_idx > 0 and b_idx == int(g.bat_de[g.idx(coin)]) and not str(g.batiments_liste[b_idx - 1].toit).is_empty() and int(g.batiments_liste[b_idx - 1].niveaux) == niveaux_attendus, "sa fiche de fenêtre dit son toit et ses niveaux")
+	verifier(int(g.niveaux_bat[g.idx(j.pos)]) == 0 and int(g.bat_de[g.idx(j.pos)]) == 0, "hors de tout bâtiment : aucun niveau, aucun toit")
+	var un_niveau := 0
+	for bat in e.village.batiments:
+		if int(bat.get("niveaux", 0)) == 1:
+			un_niveau += 1
+	verifier(un_niveau > 0, "les maisons ordinaires font un niveau (%d bâtiments)" % un_niveau)
+	verifier(GameData.catalogues.village_buildings.has("immeuble") and GameData.catalogues.village_buildings.immeuble.etages.size() == 2 and "immeuble" in GameData.config("villes").composition.residentiel.logements, "l'immeuble : deux étages, dans les logements du quartier résidentiel")
 	var voisin := s._tuile_libre_autour(esc)
 	s.grille.liberer(j.pos)
 	j.pos = voisin

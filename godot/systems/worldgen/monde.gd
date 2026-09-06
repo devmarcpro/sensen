@@ -157,6 +157,19 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 		var p := base + Vector2i(int(i) % taille, int(i) / taille)
 		g.stations_fixes[g.idx(p)] = str(e.stations[i])
 		g.poser_contenu(p, "station_fixe")
+	for bat in e.get("village", {}).get("batiments", []):   # l'emprise de chaque bâtiment : ses niveaux et son toit, pour le dessin (Villes, 2026-09-06)
+		var pref: Dictionary = GameData.catalogues.village_buildings.get(str(bat.id), {})
+		var niveaux := int(bat.get("niveaux", 1 + pref.get("etages", []).size()))
+		var r: Rect2i = bat.rect if bat.rect is Rect2i else Rect2i(Vector2i(bat.origine), Vector2i(str(pref.get("plan", ["#"])[0]).length(), pref.get("plan", ["#"]).size()))
+		g.batiments_liste.append({"cle": "%d,%d:%d" % [cell.x, cell.y, g.batiments_liste.size()], "niveaux": niveaux, "toit": str(bat.get("toit", "chaume_tresse")),
+			"mur": str(bat.get("mur", "chene")), "rect": Rect2i(base + r.position, r.size)})
+		var k := g.batiments_liste.size()
+		for y in r.size.y:
+			for x in r.size.x:
+				var gi := g.idx(base + r.position + Vector2i(x, y))
+				if gi >= 0 and gi < g.niveaux_bat.size():
+					g.niveaux_bat[gi] = niveaux
+					g.bat_de[gi] = k
 	if not gouffre_de(cell).is_empty():
 		e["a_donjon"] = true   # le gouffre de la région : une entrée permanente, dessinée comme les autres
 		e["gouffre"] = true

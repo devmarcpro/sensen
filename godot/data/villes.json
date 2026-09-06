@@ -190,6 +190,7 @@
         "maison",
         "maison_haute",
         "chaumiere",
+        "immeuble",
         "maison"
       ],
       "ateliers_par_habitant": 0,
@@ -224,6 +225,7 @@
       "auberge": true,
       "logements": [
         "maison_haute",
+        "immeuble",
         "maison"
       ],
       "ateliers_par_habitant": 0,
