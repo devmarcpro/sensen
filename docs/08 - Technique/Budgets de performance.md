@@ -42,6 +42,9 @@ La stratégie d'optimisation complète, système par système, est consolidée e
 > [!decision] 2026-09-06, 2 h — les êtres lointains en pictogramme
 > Un paperdoll complet coûte près de 2 ms à dessiner (segments, tenus, occulteurs) et un PNJ qui marche change d'orientation à chaque pas : en ville, deux cents habitants en mouvement, c'est un redessin permanent même avec la signature. Au-delà de `combat_rules.tempo.pictogramme_au_dela` tuiles du joueur (12 ; 0 pour désactiver), le paperdoll dessine un **pictogramme** — un corps et une tête à sa couleur de peau, un liseré rouge s'il est hostile — qui ne dépend ni de l'orientation ni de l'équipement : il ne se redessine qu'en franchissant le seuil. De près, rien ne change. Le seuil est un choix de regard autant que de budget : [[À juger — parcours de jeu]].
 
+> [!note] 2026-09-06, 3 h 30 — la semaine d une ville chargée
+> Sonde des villes (monde 9, 189 résidents, cinq cellules) : le passage de semaine coûtait 560 ms, dont 200 en humeurs et 44 en maisons — la détection de pièces inondait mille tuiles par porte côté rue, et chaque lit cherchait sa pièce dans chaque pièce. Après ([[Détection de pièces]], l extérieur d abord ; une table tuile → pièce par cellule) : 98 ms en humeurs, 33 en maisons. Le reste de la semaine est la production, les royaumes PNJ et les pas simulés en accéléré.
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Boucle de tick]]
 - **Alimente** : [[Optimisation — principes]], [[Entités et pathfinding — performance]], [[Ordre de vérification]]

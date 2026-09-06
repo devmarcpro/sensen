@@ -37,6 +37,9 @@ Bétail : toute tuile sous une empreinte avec toit.
 > [!success] Codé le 2026-08-28 — `Simulation.pieces_de_cellule(cell)`
 > Flood fill 2D depuis chaque **porte** d'une cellule revendiquée (dans la fenêtre chargée) : la région est close si elle ne s'échappe pas (bornée à 1 024 tuiles, murs = tag `mur`, portes = tag `porte`, l'eau et les solides bloquent) ; **surface ≥ 6**, **≥ 1 meuble**. **Toit** : décision — les empreintes de bâtiment n'existent pas encore en code, une région close par des murs est réputée couverte. Résultat `{tuiles, meubles (types), portes}` par cellule, recalculé au passage de semaine (pas de throttling par événement : le passage hebdomadaire suffit tant que le logement n'est lu qu'à la semaine). La capacité de village reste « un lit par PNJ initial ».
 
+> [!success] 2026-09-06, 3 h 20 — la détection par l'extérieur d'abord (`SimTerritoire.pieces_de_cellule`)
+> L'algorithme inondait depuis **chaque** porte, des deux côtés, jusqu'à `pieces.fill_max` (1 024) tuiles : côté rue, chaque porte remplissait mille tuiles pour rien — une cellule de ville à soixante portes, c'était 40 ms, et la semaine d'une ville de cinq cellules 160 ms rien qu'en humeurs. Désormais : les tuiles de la cellule sont classées une fois (mur, porte, franchissable — un meuble se traverse pour la pièce), **l'extérieur est inondé une fois depuis le bord de la cellule**, puis chaque tuile franchissable hors extérieur fonde une région close ; une région est une pièce si elle touche une porte, a des meubles, et tient entre `surface_min` et `fill_max`. Même résultat sur les tests d'habitat, de villes et de territoire ; coût par cellule divisé par cinq.
+
 ## Liens
 - **Dépend de** : [[Construction cadrée]], [[EventBus]], [[Claims et persistance]]
 - **Alimente** : [[Habitat des PNJ]], [[Villages PNJ — repeuplement et décimation]], [[Quêtes et guildes]], [[LOD de simulation]]

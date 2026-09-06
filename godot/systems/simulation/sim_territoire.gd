@@ -183,53 +183,107 @@ static func _verifier_royaume(sim: Simulation, e: Dictionary) -> void:
 		EventBus.emettre(&"journal", [&"journal.royaume_fonde", {"gouv": GameData.entree("governments", sim.territoire.gouvernance).name_key}])
 
 
-## Les pièces valides d'une cellule (Détection de pièces, Décision — Pièces en 2D) : flood fill depuis chaque porte.
+## Les pièces d'une cellule (Détection de pièces) : l'extérieur d'abord (2026-09-06). Les tuiles de la cellule sont classées
+## une fois (mur, porte, franchissable — un meuble se traverse pour la pièce), l'extérieur est inondé depuis le bord de la
+## cellule, puis chaque tuile franchissable hors extérieur fonde une région close. Une région est une pièce si elle touche
+## une porte, a des meubles, et tient entre `pieces.surface_min` et `pieces.fill_max`. Une porte fermée (celles des villes)
+## ferme une pièce aussi (Villes B1). Avant, chaque porte inondait mille tuiles côté rue : 40 ms par cellule de ville.
 static func pieces_de_cellule(sim: Simulation, cell: Vector2i) -> Array:
 	var res: Array = []
 	if sim.monde == null or sim.lieu != "camp":
 		return res
 	var pc: Dictionary = _ry(sim).pieces
-	var vues: Dictionary = {}
-	for i in sim.grille.contenu.size():
-		if sim.grille.contenu[i] <= 0 or not (str(sim.grille.contenu_ids[sim.grille.contenu[i]]) in ["porte", "porte_fermee"]):
-			continue   # une porte fermée (celles des villes, que les PNJ ouvrent) ferme une pièce aussi (Villes B1)
-		var porte := sim.grille.pos_de(i)
-		if SimCamp._cell_de(sim, porte) != cell:
+	var g := sim.grille
+	var n: int = sim.monde.taille
+	var o: Vector2i = sim.monde.pos_monde(cell, Vector2i.ZERO)
+	if not g.dans(o) or not g.dans(o + Vector2i(n - 1, n - 1)):
+		return res   # la cellule n'est pas entière dans la fenêtre
+	# 1. La classe de chaque tuile de la cellule : 0 franchissable, 1 mur ou bloquant sans meuble, 2 porte.
+	var classe := PackedByteArray()
+	classe.resize(n * n)
+	var meuble_ici := PackedByteArray()
+	meuble_ici.resize(n * n)
+	var classes_par_contenu: Dictionary = {}   # index de contenu → classe : la définition ne se relit pas par tuile
+	for ly in n:
+		for lx in n:
+			var q := o + Vector2i(lx, ly)
+			var gi := g.idx(q)
+			var ci: int = g.contenu[gi]
+			var a_meuble := g.meubles.has(gi)
+			var c := 0
+			if ci > 0:
+				if not classes_par_contenu.has(ci):
+					var def: Dictionary = g.contenu_defs.get(g.contenu_ids[ci], {})
+					var tags: Array = def.get("tags", [])
+					var cc := 0
+					if "porte" in tags:
+						cc = 2
+					elif "mur" in tags:
+						cc = 1
+					elif bool(def.get("bloque_passage", false)):
+						cc = 3   # bloquant : un mur, sauf si un meuble y est posé
+					classes_par_contenu[ci] = cc
+				c = int(classes_par_contenu[ci])
+				if c == 3:
+					c = 0 if a_meuble else 1
+			classe[ly * n + lx] = c
+			meuble_ici[ly * n + lx] = 1 if a_meuble else 0
+	# 2. L'extérieur : tout ce qui se rejoint depuis le bord sans franchir mur ni porte.
+	var region := PackedInt32Array()   # index local → 0 non visité, -1 extérieur, k ≥ 1 région close
+	region.resize(n * n)
+	var pile: Array[int] = []
+	for i in n:
+		for li in [i, (n - 1) * n + i, i * n, i * n + n - 1]:
+			if classe[li] == 0 and region[li] == 0:
+				region[li] = -1
+				pile.append(li)
+	while not pile.is_empty():
+		var li: int = pile.pop_back()
+		var lx := li % n
+		var ly := li / n
+		for d in [[1, 0], [-1, 0], [0, 1], [0, -1]]:
+			var vx: int = lx + d[0]
+			var vy: int = ly + d[1]
+			if vx < 0 or vy < 0 or vx >= n or vy >= n:
+				continue
+			var vi := vy * n + vx
+			if classe[vi] == 0 and region[vi] == 0:
+				region[vi] = -1
+				pile.append(vi)
+	# 3. Les régions closes : chaque tuile franchissable non visitée en fonde une.
+	var k := 0
+	for li0 in n * n:
+		if classe[li0] != 0 or region[li0] != 0:
 			continue
-		for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-			var depart: Vector2i = porte + d
-			if not sim.grille.dans(depart) or vues.has(depart) or sim.grille.bloque_passage(depart):
-				continue
-			var region: Dictionary = {}
-			var pile: Array = [depart]
-			var ouvert := false
-			while not pile.is_empty() and region.size() <= int(pc.fill_max):
-				var q: Vector2i = pile.pop_back()
-				if region.has(q):
+		k += 1
+		var tuiles: Array = []
+		var types: Dictionary = {}
+		var porte := Vector2i(-1, -1)
+		region[li0] = k
+		pile = [li0]
+		while not pile.is_empty():
+			var li: int = pile.pop_back()
+			var lx := li % n
+			var ly := li / n
+			tuiles.append(o + Vector2i(lx, ly))
+			if meuble_ici[li] == 1:
+				types[str(g.meubles[g.idx(o + Vector2i(lx, ly))])] = true
+			for d in [[1, 0], [-1, 0], [0, 1], [0, -1]]:
+				var vx: int = lx + d[0]
+				var vy: int = ly + d[1]
+				if vx < 0 or vy < 0 or vx >= n or vy >= n:
 					continue
-				if not sim.grille.dans(q) or SimCamp._cell_de(sim, q) != cell:
-					ouvert = true
-					break
-				var tags: Array = sim.grille.contenu_de(q).get("tags", [])
-				if "mur" in tags or "porte" in tags:
-					continue
-				if sim.grille.bloque_passage(q) and not sim.grille.meubles.has(sim.grille.idx(q)):
-					continue
-				region[q] = true
-				for d2 in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-					pile.append(q + d2)
-			for q in region.keys():
-				vues[q] = true
-			if ouvert or region.size() > int(pc.fill_max) or region.size() < int(pc.surface_min):
-				continue
-			var types: Dictionary = {}
-			for q in region.keys():
-				if sim.grille.meubles.has(sim.grille.idx(q)):
-					types[str(sim.grille.meubles[sim.grille.idx(q)])] = true
-			if types.is_empty():
-				continue
-			res.append({"tuiles": region.keys(), "meubles": types.keys(), "porte": porte})
+				var vi := vy * n + vx
+				if classe[vi] == 2 and porte == Vector2i(-1, -1):
+					porte = o + Vector2i(vx, vy)
+				elif classe[vi] == 0 and region[vi] == 0:
+					region[vi] = k
+					pile.append(vi)
+		if porte == Vector2i(-1, -1) or types.is_empty() or tuiles.size() < int(pc.surface_min) or tuiles.size() > int(pc.fill_max):
+			continue
+		res.append({"tuiles": tuiles, "meubles": types.keys(), "porte": porte})
 	return res
+
 
 
 ## Les poches locales (Stratification verticale) : un bruit dédié déplace le mur d'une strate, ±1, par taches.
@@ -358,19 +412,40 @@ static func _piece_du_lit(sim: Simulation, lit: Vector2i, pieces: Array) -> Dict
 
 
 ## Les humeurs recalculées au passage de semaine (Habitat des PNJ, Faim des PNJ) : logement, chambre, co-occupants, faim.
+## Chaque lit trouve sa pièce par une table tuile → pièce bâtie une fois par cellule, et les co-occupants se comptent par
+## pièce : une ville de 189 résidents y passait 200 ms par semaine à chercher chaque lit dans chaque pièce (2026-09-06).
 static func _recalculer_humeurs(sim: Simulation) -> void:
 	var ry := _ry(sim)
 	var pc: Dictionary = ry.pieces
 	var pieces_par_cell: Dictionary = {}
+	var piece_de_tuile: Dictionary = {}   # cellule → {tuile: index de pièce}
+	var lits_par_piece: Dictionary = {}   # cellule → {index de pièce: résidents qui y dorment}
 	var res := residents(sim)
+	var infos: Array = []   # par résident : [cellule, hors fenêtre, index de pièce]
 	for x in res:
-		var h := int(ry.humeur_base)
 		var lit: Vector2i = x.get("lit", Vector2i(-1, -1))
 		var cell: Vector2i = SimCamp._cell_de(sim, lit) if lit != Vector2i(-1, -1) else Vector2i(-9999, -9999)
 		var hors := lit != Vector2i(-1, -1) and (absi(cell.x - sim.monde.centre.x) > sim.monde.rayon or absi(cell.y - sim.monde.centre.y) > sim.monde.rayon)
 		if not pieces_par_cell.has(cell):   # hors fenêtre : pas de pièces à détecter (la grille ne porte pas cette cellule), et pas un balayage par ville endormie
-			pieces_par_cell[cell] = pieces_de_cellule(sim, cell) if cell != Vector2i(-9999, -9999) and not hors else []
-		var piece := _piece_du_lit(sim, lit, pieces_par_cell[cell]) if lit != Vector2i(-1, -1) else {}
+			var pieces: Array = pieces_de_cellule(sim, cell) if cell != Vector2i(-9999, -9999) and not hors else []
+			pieces_par_cell[cell] = pieces
+			var carte := {}
+			for k in pieces.size():
+				for q in pieces[k].tuiles:
+					carte[q] = k
+			piece_de_tuile[cell] = carte
+			lits_par_piece[cell] = {}
+		var k_piece: int = int(piece_de_tuile[cell].get(lit, -1)) if lit != Vector2i(-1, -1) else -1
+		if k_piece >= 0:
+			lits_par_piece[cell][k_piece] = int(lits_par_piece[cell].get(k_piece, 0)) + 1
+		infos.append([cell, hors, k_piece])
+	for i in res.size():
+		var x: Dictionary = res[i]
+		var cell: Vector2i = infos[i][0]
+		var hors: bool = infos[i][1]
+		var k_piece: int = infos[i][2]
+		var piece: Dictionary = pieces_par_cell[cell][k_piece] if k_piece >= 0 else {}
+		var h := int(ry.humeur_base)
 		if str(x.get("statut_habitat", "normal")) == "betail":   # bétail (Habitat des PNJ) : un abri suffit, il broute
 			if not _abri_a(sim, x.pos) and piece.is_empty():
 				h += int(ry.sans_logement)
@@ -386,11 +461,7 @@ static func _recalculer_humeurs(sim: Simulation) -> void:
 			h += mini(int(pc.bonus_meubles_max), int(pc.bonus_par_meuble) * piece.meubles.size())
 			if piece.tuiles.size() >= int(pc.surface_bonus):
 				h += int(pc.bonus_taille)
-			var co := 0
-			for autre in res:
-				if autre.id != x.id and autre.get("lit", Vector2i(-2, -2)) in piece.tuiles:
-					co += 1
-			h += int(pc.co_occupant) * co
+			h += int(pc.co_occupant) * (int(lits_par_piece[cell].get(k_piece, 1)) - 1)   # les autres qui dorment dans la même pièce
 		if bool(x.get("affame", false)):   # le repas de la semaine a manqué (_nourrir_residents)
 			h += int(ry.get("faim_pnj", -10))
 		x.humeur = h

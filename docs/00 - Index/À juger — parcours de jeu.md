@@ -621,3 +621,7 @@ Regarde la capture de la cité : les habitants au-delà de douze tuiles sont des
 
 - **Les êtres à plus de 12 tuiles sont des pictogrammes** (`combat_rules.tempo.pictogramme_au_dela`) : une silhouette à la couleur de peau, un liseré rouge pour un hostile. C'est ce qui rend la ville fluide en marchant, mais c'est aussi ce qu'on voit : dis si tu veux le seuil plus loin, plus près, ou pas de pictogramme du tout (0). Quand tes sprites arriveront, le pictogramme pourra devenir le sprite de loin.
 - **Le terrain par morceaux de 8 × 8** ne change rien à l'image, seulement à la saccade : une découverte ne redessine plus que les morceaux du champ de vue.
+
+## 2026-09-06 — Un quartier résidentiel à 49 lits pour 56 habitants (3 h)
+
+La sonde des villes (monde 9, « Mokroslav ») le signale : la cellule résidentielle a 56 habitants prévus et 49 lits — sept dorment dehors (humeur « sans logement »). Les parcelles le long des rues sont épuisées avant la population : `villes.json` (`habitants_par_cellule` 40, les `parts` des quartiers, `rue_largeur`) et la composition du résidentiel (chaumières contre maisons hautes) décident. Deux voies, à toi : moins d'habitants par cellule résidentielle, ou des maisons hautes (leurs étages ont des lits, 99) quand les parcelles manquent — je ne touche pas aux chiffres.
