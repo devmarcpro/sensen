@@ -93,7 +93,7 @@ func trier(col: String) -> void:
 	else:
 		tri = col
 		tri_inverse = false
-	_ordonner()
+	EcransListe.rafraichir(ecrans)   # le tri porte sur tout le sac : les pages se refont (2026-09-06)
 	for b in entete.get_children():
 		var nom_col: String = COLONNES[b.get_index()]
 		b.text = tr("ui.inventaire.col_" + nom_col) + ((" ▼" if tri_inverse else " ▲") if nom_col == tri else "")
@@ -101,13 +101,18 @@ func trier(col: String) -> void:
 
 ## La valeur de tri d'une ligne pour la colonne courante.
 func _cle(l: LigneObjet) -> Variant:
-	var it: Dictionary = ecrans.main.sim.items.get(l.uid, {})
+	return cle_uid(l.uid)
+
+
+## La valeur de tri d'un objet du sac pour la colonne courante (EcransListe._trier_objets trie tout le sac avec elle).
+func cle_uid(uid: String) -> Variant:
+	var it: Dictionary = ecrans.main.sim.items.get(uid, {})
 	match tri:
 		"type": return tr("type." + str(it.get("type", "")))
 		"qualite": return float(it.get("qualite", 0.0)) if it.get("type", "") != "materiau" else 0.0
 		"poids": return float(ecrans.main.sim.regles.poids_objet(it, ecrans.main.sim.fonctionnalites))
 		"quantite": return int(it.get("quantite", 1))
-	return l.nom.to_lower()
+	return ecrans._nom_court(uid).to_lower()
 
 
 func _ordonner() -> void:

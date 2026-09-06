@@ -32,6 +32,7 @@ func _ready() -> void:
 				await get_tree().process_frame
 			_verifier(ec, nom, t)
 		ec.fermer()
+	_verifier_pages_et_tri(scene, ec)
 	for f in fautes:
 		print(f)
 	if not fautes.is_empty():
@@ -82,3 +83,47 @@ func _chemin(n: Node, jusqu_a: Node) -> String:
 		parts.push_front("%s(%s)" % [c.name, c.get_class()])
 		c = c.get_parent()
 	return "/".join(parts)
+
+
+## Les pages et le tri (designer 2026-09-06, 19 h 20 : « le tri affecte que la page, pas l'inventaire dans sa totalité ») :
+## quarante matières dans le sac, le tri par nom, puis toutes les pages parcourues — la suite des noms doit être triée
+## d'un bout à l'autre, et compter tout le sac.
+func _verifier_pages_et_tri(scene: Node, ec: Node) -> void:
+	var sim = scene.sim
+	var j: Dictionary = scene.joueur()
+	if sim == null or j.is_empty():
+		fautes.append("  pages : pas de joueur")
+		return
+	var mats: Array = GameData.catalogues.materials.keys()
+	mats.sort()
+	for k in 40:
+		sim._donner_materiau(j, str(mats[k % mats.size()]), 1)
+	ec.ouvrir("inventaire")
+	ec.inventaire_visuel.tri = "nom"
+	ec.inventaire_visuel.tri_inverse = false
+	EcransListe.rafraichir(ec)
+	var noms: Array[String] = []
+	var pages := 1
+	while pages < 12:
+		var avec_page := false
+		for en in ec.entrees:
+			if str(en.get("kind", "")) == "objet" and not bool(en.get("equipe", false)):
+				noms.append(ec._nom_court(str(en.uid)).to_lower())
+			elif str(en.get("kind", "")) == "page":
+				avec_page = true
+		if not avec_page:
+			break
+		var p0: int = ec.page
+		EcransListe.page_suivante(ec)
+		if ec.page <= p0:
+			break
+		pages += 1
+	var attendu: Array[String] = noms.duplicate()
+	attendu.sort()
+	if noms.size() != j.sac.size():
+		fautes.append("  pages : %d objets vus sur %d pages, le sac en a %d" % [noms.size(), pages, j.sac.size()])
+	elif noms != attendu:
+		fautes.append("  tri : les noms ne sont pas tries d'un bout a l'autre des %d pages (%s…)" % [pages, ", ".join(noms.slice(0, 6))])
+	else:
+		print("pages et tri : %d objets sur %d pages, tries par nom d'un bout a l'autre" % [noms.size(), pages])
+	ec.fermer()

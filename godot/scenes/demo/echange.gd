@@ -184,7 +184,7 @@ class VoletObjets extends VBoxContainer:
 		else:
 			tri = col
 			tri_inverse = false
-		ordonner()
+		EcransListe.rafraichir(echange.ecrans)   # le tri porte sur tout le volet : les pages se refont (2026-09-06)
 		for b in entete.get_children():
 			var nom_col: String = EchangeVisuel.COLONNES[b.get_index()]
 			var base: String = tr("ui.inventaire.col_" + nom_col) if nom_col != "prix" else tr("ui.echange.col_prix")
@@ -199,14 +199,23 @@ class VoletObjets extends VBoxContainer:
 
 	## La valeur de tri d'une ligne pour la colonne courante (les mêmes clés que l'inventaire, plus le prix).
 	func cle(l: LigneEchange) -> Variant:
+		return cle_entree(l.entree)
+
+	## La valeur de tri d'une entrée (achat, vente, donner, reprendre) : EcransListe._trier_objets trie tout le volet avec elle.
+	func cle_entree(en: Dictionary) -> Variant:
 		var sim = echange.ecrans.main.sim
-		var it: Dictionary = sim.items.get(l.uid, {})
+		var uid := str(en.get("uid", ""))
+		var it: Dictionary = sim.items.get(uid, {})
 		match tri:
 			"type": return tr("type." + str(it.get("type", "")))
 			"qualite": return float(it.get("qualite", 0.0)) if it.get("type", "") != "materiau" else 0.0
 			"quantite": return int(it.get("quantite", 1))
-			"prix": return l.prix()
-		return l.nom.to_lower()
+			"prix":
+				var p: Dictionary = en.get("prix", {})
+				if p.is_empty():
+					return 0
+				return int(p.get("prix", 0)) if str(en.get("kind", "")) == "achat" else int(p.get("achat", 0))
+		return echange.ecrans._nom_court(uid).to_lower()
 
 	func ordonner() -> void:
 		var ordre: Array = lignes.duplicate()

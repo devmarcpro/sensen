@@ -68,6 +68,7 @@ static func rafraichir(ec: Ecrans) -> void:
 			push_error("Écran inconnu : « %s »" % ec.courant)
 			ec.fermer()
 			return
+	_trier_objets(ec)
 	sel = _appliquer_choix(ec, sel)
 	_paginer(ec)
 	if ec.courant == "inventaire" and not ec.objet_choisi.is_empty():   # les options de l'objet choisi : la sélection va sur la première
@@ -322,6 +323,58 @@ static func _texte_options(ec: Ecrans, i_c: int) -> String:
 		if str(en.get("kind", "")) == "option_choix" and int(en.get("cible_i", -1)) == i_c:
 			lignes.append("[url=%d]%s[/url]" % [i, ec.liste.get_item_text(i)])
 	return "\n".join(lignes)
+
+
+## Le tri des objets porte sur l'inventaire ENTIER, pas sur la page (designer 2026-09-06, 19 h 20 : « le tri affecte que la
+## page, pas l'inventaire dans sa totalité ») : avant la pagination, les entrées d'objets sont réordonnées selon la colonne
+## de tri du volet (l'inventaire : le sac ; le commerce et l'échange : chaque volet), et la liste avec elles.
+static func _trier_objets(ec: Ecrans) -> void:
+	if ec.courant == "inventaire":
+		var sac: Array[int] = []
+		for i in ec.entrees.size():
+			if str(ec.entrees[i].get("kind", "")) == "objet" and not bool(ec.entrees[i].get("equipe", false)):
+				sac.append(i)
+		_reordonner(ec, sac, func(en: Dictionary) -> Variant: return ec.inventaire_visuel.cle_uid(str(en.uid)), ec.inventaire_visuel.tri_inverse)
+	elif ec.courant in ["commerce", "echange"]:
+		for v in 2:
+			var kinds: Array = ["vente", "donner"] if v == 0 else ["achat", "reprendre"]
+			var bloc: Array[int] = []
+			for i in ec.entrees.size():
+				if str(ec.entrees[i].get("kind", "")) in kinds:
+					bloc.append(i)
+			var volet = ec.echange_visuel.volets[v]
+			_reordonner(ec, bloc, func(en: Dictionary) -> Variant: return volet.cle_entree(en), volet.tri_inverse)
+
+
+## Réordonne les entrées d'index `indices` (et les lignes de la liste avec elles) selon `cle`, sur place.
+static func _reordonner(ec: Ecrans, indices: Array[int], cle: Callable, inverse: bool) -> void:
+	if indices.size() < 2:
+		return
+	var ordre: Array = indices.duplicate()
+	ordre.sort_custom(func(a: int, b: int) -> bool:
+		var ka: Variant = cle.call(ec.entrees[a])
+		var kb: Variant = cle.call(ec.entrees[b])
+		if ka == kb:
+			return a < b
+		return (ka > kb) if inverse else (ka < kb))
+	var entrees_tri: Array = []
+	var textes: Array[String] = []
+	var icones: Array = []
+	var choisissables: Array[bool] = []
+	var avec_liste := ec.liste.item_count == ec.entrees.size()
+	for i in ordre:
+		entrees_tri.append(ec.entrees[i])
+		if avec_liste:
+			textes.append(ec.liste.get_item_text(i))
+			icones.append(ec.liste.get_item_icon(i))
+			choisissables.append(ec.liste.is_item_selectable(i))
+	for k in indices.size():
+		var i: int = indices[k]
+		ec.entrees[i] = entrees_tri[k]
+		if avec_liste:
+			ec.liste.set_item_text(i, textes[k])
+			ec.liste.set_item_icon(i, icones[k])
+			ec.liste.set_item_selectable(i, choisissables[k])
 
 
 ## Une ligne qui porte une lettre : tout ce qui se choisit — pas un texte d'en-tête, pas une case d'équipement (la grille).
