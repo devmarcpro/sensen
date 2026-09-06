@@ -174,6 +174,14 @@ func rafraichir_selection() -> void:
 		c.queue_redraw()
 	for l in lignes:
 		l.queue_redraw()
+	entete.modulate = Color(1, 1, 1, 1.0 if secteur_actif() == "sac" else 0.55)
+
+
+## Le groupe du secteur surligné de l'écran (« equipement », « sac »…), pour que chaque partie se dessine en clair ou en retrait.
+func secteur_actif() -> String:
+	if ecrans.secteurs.is_empty() or ecrans.secteur >= ecrans.secteurs.size():
+		return ""
+	return str(ecrans.secteurs[ecrans.secteur])
 
 
 func selectionner(index: int) -> void:
@@ -216,6 +224,10 @@ class CaseSlot extends Control:
 			Pictos.dessiner_objet(self, it, Rect2(Vector2(8, 6), Vector2(36, 36)))
 		else:
 			Pictos.dessiner_slot_vide(self, slot, Rect2(Vector2(12, 10), Vector2(28, 28)))
+		var lettre := str(inventaire.ecrans.lettres.get(index, ""))   # le secteur de l'équipement surligné : ses cases portent leurs lettres
+		if not lettre.is_empty():
+			draw_string(ThemeDB.fallback_font, Vector2(2, 12), lettre + ")", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1.0, 0.9, 0.55))
+		modulate = Color(1, 1, 1, 1.0 if inventaire.secteur_actif() == "equipement" else 0.55)
 		draw_string(ThemeDB.fallback_font, Vector2(2, InventaireVisuel.CASE.y - 3), tr("slot." + slot).left(9), HORIZONTAL_ALIGNMENT_LEFT, InventaireVisuel.CASE.x - 4, 8, Color(0.75, 0.72, 0.6))
 
 	func _gui_input(ev: InputEvent) -> void:
@@ -249,6 +261,7 @@ class LigneObjet extends Control:
 		var r := Rect2(Vector2.ZERO, size)
 		var choisie: bool = inventaire.ecrans.selection == index or (not uid.is_empty() and uid == inventaire.ecrans.objet_choisi)
 		var cadre := Pictos.couleur_qualite(it)
+		modulate = Color(1, 1, 1, 1.0 if inventaire.secteur_actif() == "sac" else 0.55)   # le secteur du sac surligné, ou en retrait
 		draw_rect(r, Color(1, 1, 1, 0.12) if choisie else (Color(1, 1, 1, 0.06) if survolee else Color(1, 1, 1, 0.02)))
 		if choisie:
 			draw_rect(r, Color(1, 1, 1, 0.8), false, 1.0)

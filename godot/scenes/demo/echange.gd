@@ -57,7 +57,8 @@ func reconstruire(mode_: String) -> void:
 		var premier: int = volets[0].premier_index() if not volets[0].lignes.is_empty() else volets[1].premier_index()
 		if premier >= 0:
 			ecrans.selection = premier
-	volet_courant = 1 if _volet_de(ecrans.selection) == 1 else 0
+	var groupe_actif: String = str(ecrans.secteurs[ecrans.secteur]) if ecrans.secteur < ecrans.secteurs.size() else ""
+	volet_courant = 1 if groupe_actif in ["achat", "reprendre"] else 0   # le secteur surligné (Tab) est le volet courant
 	rafraichir_selection()
 
 
@@ -258,6 +259,7 @@ class LigneEchange extends Control:
 		var it: Dictionary = sim.items.get(uid, {})
 		var r := Rect2(Vector2.ZERO, size)
 		var choisie: bool = volet.echange.ecrans.selection == index
+		modulate = Color(1, 1, 1, 1.0 if volet.get_index() == volet.echange.volet_courant else 0.55)   # le volet surligné en clair, l'autre en retrait
 		var cadre := Pictos.couleur_qualite(it)
 		draw_rect(r, Color(1, 1, 1, 0.12) if choisie else (Color(1, 1, 1, 0.06) if survolee else Color(1, 1, 1, 0.02)))
 		if choisie:

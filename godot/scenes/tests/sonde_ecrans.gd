@@ -102,6 +102,24 @@ func _verifier_pages_et_tri(scene: Node, ec: Node) -> void:
 	ec.inventaire_visuel.tri = "nom"
 	ec.inventaire_visuel.tri_inverse = false
 	EcransListe.rafraichir(ec)
+	# Les secteurs (designer 2026-09-06, 19 h 40) : l'équipement est surligné d'abord, ses cases lettrées, le sac sans lettre ;
+	# Tab passe au sac, qui prend les lettres et se pagine.
+	var lettres_sac := 0
+	for i in ec.entrees.size():
+		if ec.lettres.has(i) and str(ec.entrees[i].get("kind", "")) == "objet" and not bool(ec.entrees[i].get("equipe", false)):
+			lettres_sac += 1
+	if str(ec.secteurs[ec.secteur]) != "equipement" or lettres_sac > 0:
+		fautes.append("  secteurs : l'inventaire s'ouvre sur %s, %d lettres dans le sac (attendu : equipement, 0)" % [str(ec.secteurs[ec.secteur]), lettres_sac])
+	var tab := InputEventKey.new()
+	tab.keycode = KEY_TAB
+	tab.pressed = true
+	ec.touche(tab)
+	if str(ec.secteurs[ec.secteur]) != "sac":
+		fautes.append("  secteurs : Tab n'a pas surligne le sac (%s)" % str(ec.secteurs[ec.secteur]))
+	for i in ec.entrees.size():
+		if ec.lettres.has(i) and bool(ec.entrees[i].get("equipe", false)):
+			fautes.append("  secteurs : une case d'equipement garde une lettre quand le sac est surligne")
+			break
 	var noms: Array[String] = []
 	var pages := 1
 	while pages < 12:

@@ -77,6 +77,9 @@ static func rafraichir(ec: Ecrans) -> void:
 				sel = i
 				break
 	ec.selection = clampi(sel, 0, maxi(0, ec.entrees.size() - 1))
+	var du_secteur: Array[int] = _indices_secteur(ec)
+	if not du_secteur.is_empty() and not (ec.selection in du_secteur):   # la sélection vit dans le secteur surligné
+		ec.selection = du_secteur[0]
 	if ec.entrees.size() > 0:
 		ec.liste.select(ec.selection)
 	_montrer_detail(ec)
@@ -379,7 +382,58 @@ static func _reordonner(ec: Ecrans, indices: Array[int], cle: Callable, inverse:
 
 ## Une ligne qui porte une lettre : tout ce qui se choisit — pas un texte d'en-tête, pas une case d'équipement (la grille).
 static func _lettrable(en: Dictionary) -> bool:
-	return str(en.get("kind", "")) != "texte" and not bool(en.get("equipe", false)) and bool(en.get("lettre", true))
+	return str(en.get("kind", "")) != "texte" and bool(en.get("lettre", true))
+
+
+## Le groupe d'une entrée, ce qui fait un secteur du menu (designer 2026-09-06, 19 h 40 : « tous les menus sont par secteurs ») :
+## son genre, à quelques familles près — l'équipement porté et le sac sont deux secteurs, une cellule et ses périmètres un
+## seul, une recette et ses ingrédients un seul. Une entrée qui ne se choisit pas (un texte) n'a pas de groupe : elle suit.
+static func _groupe(en: Dictionary) -> String:
+	if not _lettrable(en):
+		return ""
+	var k := str(en.get("kind", ""))
+	if k == "objet":
+		return "equipement" if bool(en.get("equipe", false)) else "sac"
+	match k:
+		"perimetre": return "cellule"
+		"ingredient": return "recette"
+		"nouvelle_capacite": return "capacite"
+		"page": return "page"
+	return k
+
+
+## Les secteurs de l'écran : les groupes dans l'ordre où ils apparaissent ; chaque entrée reçoit `secteur`, un texte prend
+## celui de la première entrée qui le suit. Le secteur surligné est `ec.secteur`, borné ; une entrée choisie (ses options)
+## fait le secteur surligné.
+static func _secteurs(ec: Ecrans) -> void:
+	ec.secteurs = []
+	var par_groupe := {}
+	for en in ec.entrees:
+		var g := _groupe(en)
+		if g.is_empty() or g == "page" or par_groupe.has(g):
+			continue
+		par_groupe[g] = ec.secteurs.size()
+		ec.secteurs.append(g)
+	if ec.secteurs.is_empty():
+		ec.secteurs.append("")
+	var suivant := 0
+	for i in range(ec.entrees.size() - 1, -1, -1):
+		var g := _groupe(ec.entrees[i])
+		if par_groupe.has(g):
+			suivant = int(par_groupe[g])
+		ec.entrees[i]["secteur"] = suivant
+	if par_groupe.has("option_choix"):
+		ec.secteur = int(par_groupe["option_choix"])
+	ec.secteur = clampi(ec.secteur, 0, ec.secteurs.size() - 1)
+
+
+## Les index des entrées du secteur surligné qui se choisissent (les flèches y restent).
+static func _indices_secteur(ec: Ecrans) -> Array[int]:
+	var res: Array[int] = []
+	for i in ec.entrees.size():
+		if int(ec.entrees[i].get("secteur", 0)) == ec.secteur and _lettrable(ec.entrees[i]):
+			res.append(i)
+	return res
 
 
 ## Une option = une lettre, une page à la fois (designer 2026-09-06, 17 h 55) : après la construction d'un écran, les lignes
@@ -389,11 +443,9 @@ static func _lettrable(en: Dictionary) -> bool:
 ## icônes lisent `ec.lettres` (index → lettre) pour dessiner la leur.
 static func _paginer(ec: Ecrans) -> void:
 	ec.lettres.clear()
+	_secteurs(ec)
 	var n_lettres := clampi(int(GameData.config("styles").get("ecrans", {}).get("lettres", 26)), 2, 26)
-	var lettrables: Array[int] = []
-	for i in ec.entrees.size():
-		if _lettrable(ec.entrees[i]):
-			lettrables.append(i)
+	var lettrables: Array[int] = _indices_secteur(ec)   # seules les lignes du secteur surligné portent des lettres et se paginent
 	var par_page := n_lettres - 1
 	var n_pages := 1 if lettrables.size() <= n_lettres else ceili(float(lettrables.size()) / float(par_page))
 	if ec.page >= n_pages:
@@ -408,30 +460,48 @@ static func _paginer(ec: Ecrans) -> void:
 		var textes: Array[String] = []
 		var icones: Array = []
 		var choisissables: Array[bool] = []
+		var dernier_du_secteur := -1   # la ligne de page se glisse juste après la dernière ligne gardée du secteur
 		for i in ec.entrees.size():
-			if garder.has(i) or not _lettrable(ec.entrees[i]):
+			if garder.has(i) or int(ec.entrees[i].get("secteur", 0)) != ec.secteur or not _lettrable(ec.entrees[i]):
 				entrees2.append(ec.entrees[i])
 				textes.append(ec.liste.get_item_text(i))
 				icones.append(ec.liste.get_item_icon(i))
 				choisissables.append(ec.liste.is_item_selectable(i))
+				if garder.has(i):
+					dernier_du_secteur = entrees2.size() - 1
 		ec.liste.clear()
 		ec.entrees = entrees2
 		for k in textes.size():
 			ec.liste.add_item(textes[k], icones[k], choisissables[k])
-		ec.liste.add_item(ec.tr("ui.ecran.page_suivante").format({"n": ec.page + 1, "total": n_pages}))
-		ec.entrees.append({"kind": "page", "texte": ""})
+		var en_page := {"kind": "page", "texte": "", "secteur": ec.secteur}
+		var texte_page := ec.tr("ui.ecran.page_suivante").format({"n": ec.page + 1, "total": n_pages})
+		if dernier_du_secteur >= 0 and dernier_du_secteur + 1 < ec.entrees.size():
+			ec.entrees.insert(dernier_du_secteur + 1, en_page)
+			ec.liste.add_item(texte_page)
+			ec.liste.move_item(ec.liste.item_count - 1, dernier_du_secteur + 1)
+		else:
+			ec.entrees.append(en_page)
+			ec.liste.add_item(texte_page)
 	for i in ec.liste.item_count:   # les anciens rappels de raccourci « (E) » en fin de libellé s'effacent : la lettre est celle de la ligne
 		ec.liste.set_item_text(i, _sans_raccourci(ec.liste.get_item_text(i)))
 	var k := 0
 	for i in ec.entrees.size():
 		if k >= n_lettres:
 			break
-		if _lettrable(ec.entrees[i]):
+		if _lettrable(ec.entrees[i]) and int(ec.entrees[i].get("secteur", 0)) == ec.secteur:
 			var lettre := char(97 + k)
 			ec.lettres[i] = lettre
 			if i < ec.liste.item_count:
 				ec.liste.set_item_text(i, "%s) %s" % [lettre, ec.liste.get_item_text(i)])
 			k += 1
+	# Le secteur surligné : ses lignes en clair, les autres en retrait (designer : « le secteur est highlighté »).
+	if ec.liste.item_count == ec.entrees.size():
+		for i in ec.entrees.size():
+			var actif: bool = int(ec.entrees[i].get("secteur", 0)) == ec.secteur
+			if ec.liste.is_item_selectable(i):
+				ec.liste.set_item_custom_fg_color(i, Color(0.97, 0.95, 0.88) if actif else Color(0.5, 0.48, 0.45))
+			else:
+				ec.liste.set_item_custom_fg_color(i, Color(1.0, 0.9, 0.55) if actif else Color(0.5, 0.48, 0.45))
 
 
 static var _rx_raccourci: RegEx = null

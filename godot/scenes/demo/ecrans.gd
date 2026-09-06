@@ -187,6 +187,8 @@ var page := 0                             # la page courante de l'écran (une op
 var lettres: Dictionary = {}              # index d'entrée → sa lettre (« a », « b »…), posées par EcransListe._paginer
 var objet_choisi := ""                    # l'inventaire : l'objet choisi, dont les options sont les lignes lettrées (designer 2026-09-06, 18 h 25)
 var choix: Dictionary = {}                # tout écran : l'entrée choisie, dont les options sont les lignes lettrées (designer 2026-09-06, 18 h 50 : « partout »)
+var secteur := 0                          # les secteurs d'un menu (designer 2026-09-06, 19 h 40) : le secteur surligné, le seul à porter des lettres ; Tab passe au suivant
+var secteurs: Array = []                  # les groupes d'entrées de l'écran, dans l'ordre (EcransListe._secteurs) ; en.secteur en est l'index
 var penta_objet: Composeur.PentagrammeSort   # le Wu Xing de l'objet choisi
 
 
@@ -236,6 +238,7 @@ func ouvrir(nom: String) -> void:
 		page = 0   # une page se garde tant que l'écran reste ouvert
 		objet_choisi = ""
 		choix = {}
+		secteur = 0
 	courant = nom
 	EcransFeuille._replacer_liste(self)   # la colonne suit la largeur du panneau : le signal resized ne suffit pas à l'ouverture
 	selection = 0
@@ -274,8 +277,11 @@ func touche(ev: InputEventKey) -> bool:
 	if ev.keycode == KEY_TAB:
 		if courant == "creation":
 			return true
-		if courant in ["commerce", "echange"]:   # Tab : l'autre volet (designer 2026-09-04)
-			echange_visuel.basculer_volet()
+		if secteurs.size() > 1:   # Tab : le secteur suivant du menu (designer 2026-09-06, 19 h 40) — il se surligne, ses lignes prennent les lettres
+			secteur = (secteur + 1) % secteurs.size()
+			page = 0
+			selection = -1   # la première ligne du secteur, choisie par rafraichir
+			EcransListe.rafraichir(self)
 			return true
 		fermer()
 		return true
@@ -326,8 +332,10 @@ func touche(ev: InputEventKey) -> bool:
 					EcransListe.rafraichir(self)
 					return true
 		KEY_UP, KEY_DOWN:
-			if entrees.size() > 0:
-				selection = posmod(selection + (1 if ev.keycode == KEY_DOWN else -1), entrees.size())
+			var du_secteur: Array[int] = EcransListe._indices_secteur(self)   # les flèches restent dans le secteur surligné
+			if not du_secteur.is_empty():
+				var k: int = du_secteur.find(selection)
+				selection = du_secteur[posmod(k + (1 if ev.keycode == KEY_DOWN else -1), du_secteur.size())]
 				liste.select(selection)
 				EcransListe._montrer_detail(self)
 			return true
