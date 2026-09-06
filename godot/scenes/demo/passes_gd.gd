@@ -21,6 +21,24 @@ static func voit(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_ci: in
 	return false
 
 
+## Ce que le client montre de chaque être (main._maj_noeuds, _dessiner_hud, _dessiner_etats) : bit 1, à portée (distance au
+## sol ≤ rayon) et dans le champ de vue ; bit 2, et pas sous le toit d'un autre bâtiment ni d'un autre étage du sien.
+static func visibles(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_ci: int, jp: Vector2i, rayon: int, bat_j: int, positions: PackedVector2Array) -> PackedByteArray:
+	var res := PackedByteArray()
+	res.resize(positions.size())
+	var jz := Grille.z_de(jp)
+	for k in positions.size():
+		var t := Vector2i(int(positions[k].x), int(positions[k].y))
+		var f := 0
+		if Grille.distance_plate(t, jp) <= rayon and g.dans(t) and voit(g, vue, tout_vu, zj, vide_ci, t):
+			f = 1
+			var b := int(g.bat_de[g.idx(t)])
+			if not (b > 0 and (b != bat_j or Grille.z_de(t) != jz)):
+				f |= 2
+		res[k] = f
+	return res
+
+
 ## La hauteur dessinée du bloc d'une tuile, en unités (main._hauteur_bloc) : celle de son contenu, ou celle du bâtiment ;
 ## le mur sud ou est du bâtiment du joueur (`bat_j`) est un muret de `mur_coupe_u`.
 static func hauteur_bloc(g: Grille, t: Vector2i, bat_j: int, niveau_u: int, mur_coupe_u: int) -> int:

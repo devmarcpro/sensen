@@ -87,6 +87,7 @@ void SensenGrille::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("cout_pas_entre", "grille", "de", "vers", "volant", "eviter_nage"), &SensenGrille::cout_pas_entre);
 	ClassDB::bind_method(D_METHOD("composante", "grille", "depart", "max_tuiles"), &SensenGrille::composante);
 	ClassDB::bind_method(D_METHOD("regions_cellule", "grille", "origine", "n", "classes"), &SensenGrille::regions_cellule);
+	ClassDB::bind_method(D_METHOD("visibles", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "bat_j", "positions"), &SensenGrille::visibles);
 	ClassDB::bind_method(D_METHOD("brouillard", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "origine_dessin", "tw", "th", "hstep", "niveau_u", "bat_j", "mur_coupe_u", "voile", "col_sil"), &SensenGrille::brouillard);
 	ClassDB::bind_method(D_METHOD("toits", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "origine_dessin", "tw", "th", "hstep", "niveau_u", "bat_j", "bat_couleurs", "bat_styles", "pente_t", "haut_toit", "ombre_min", "soleil_h", "soleil_ok", "soleil_force", "uv_haut"), &SensenGrille::toits);
 	ClassDB::bind_method(D_METHOD("ombres", "grille", "dir", "pente", "coin", "taille", "max_pas", "unites_par_niveau"), &SensenGrille::ombres);
@@ -1233,4 +1234,41 @@ Dictionary SensenGrille::toits(Object *grille, const Dictionary &vue, bool tout_
 		}
 	}
 	return tr.vers(rien, rien);
+}
+
+
+// PassesGD.visibles : pour chaque être (sa position), ce que le client en montre — bit 1 : à portée du joueur (distance
+// au sol ≤ rayon) et dans son champ de vue ; bit 2 : et pas sous le toit d'un autre bâtiment (ni d'un autre étage du sien).
+// Un appel par image pour tous les êtres, à la place de trois fonctions par être en GDScript (file 114, 2026-09-06).
+PackedByteArray SensenGrille::visibles(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, int bat_j, const PackedVector2Array &positions) {
+	PackedByteArray res;
+	res.resize(positions.size());
+	uint8_t *w = res.ptrw();
+	Etat s;
+	if (!charger(grille, s)) {
+		for (int k = 0; k < positions.size(); ++k) {
+			w[k] = 0;
+		}
+		return res;
+	}
+	static const StringName sn_bat("bat_de");
+	PackedInt32Array bat = grille->get(sn_bat);
+	const int32_t *bd = (bat.size() >= s.n) ? bat.ptr() : nullptr;
+	int jz = SensenGrille::Etat::z_de(jp.y);
+	int jpx = jp.x, jpy = jp.y - jz * BANDE_Z;
+	for (int k = 0; k < positions.size(); ++k) {
+		int x = (int)positions[k].x, y = (int)positions[k].y;
+		int z = SensenGrille::Etat::z_de(y);
+		int py = y - z * BANDE_Z;
+		uint8_t f = 0;
+		if (std::max(std::abs(x - jpx), std::abs(py - jpy)) <= rayon && s.dans(x, y) && voit_e(s, vue, tout_vu, zj, vide_ci, x, y)) {
+			f = 1;
+			int b = bd ? bd[s.idx(x, y)] : 0;
+			if (!(b > 0 && (b != bat_j || z != jz))) {
+				f |= 2;
+			}
+		}
+		w[k] = f;
+	}
+	return res;
 }

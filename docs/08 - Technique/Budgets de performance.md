@@ -80,6 +80,7 @@ La stratégie d'optimisation complète, système par système, est consolidée e
 
 > [!success] 2026-09-06, 22 h — le brouillard et les toits par le noyau (file 114) : mesure en ville
 > `capture --ville --graine 21 --heure 10 --traverser 24`, 55 images, chrono client cumulé : `draw.brouillard` 27,7 ms → 2,7 ms (dont 1,75 ms de tableaux par le noyau), `draw.toits` 12,6 ms → 0,75 ms ; l'image moyenne 20,1 → 18,1 ms, process 23,3 → 19,3 ms. `test_noyau_passes` sur trois cas : 10 106 triangles, GDScript 94 ms, C++ 3,8 ms. Ce qui pèse encore par image, en ville : `noeuds` (la mise à jour des paperdolls, 173 ms sur 55 images, ~3 ms par image), `draw.hud` (65 ms), `ui.texte` (24 ms), `lumiere` (12 ms) — la prochaine marche de 114 est là, avant les morceaux de terrain.
+> **22 h 20, la visibilité des êtres par le noyau** (`SensenGrille.visibles`, un appel par image pour tous) : `noeuds` 173 → 135 ms sur 55 images (~2,5 ms par image), `draw.hud` 65 → 19 ms. Ce qui reste dans `noeuds` est la mise à jour des nœuds eux-mêmes (position, lumière, profondeur, signature) — du GDScript par être, sans boucle pure à déplacer.
 
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Boucle de tick]]

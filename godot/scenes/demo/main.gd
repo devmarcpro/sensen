@@ -1165,16 +1165,46 @@ func _process(delta: float) -> void:
 
 
 ## Un nœud creature.tscn par être vivant, configuré depuis sa fiche : position, profondeur, rig.
+## Ce que le client montre de chaque être, calculé une fois par image pour tous (file 114, 2026-09-06) : `_vivants_image` et
+## `_visibles_image` (bit 1 : à portée et en vue ; bit 2 : et pas sous un toit) — par le noyau C++, sinon PassesGD. Les
+## trois passes par être (nœuds, HUD, états) les lisent au lieu de refaire distance, vue et toit chacune.
+var _vivants_image: Array[Dictionary] = []
+var _visibles_image := PackedByteArray()
+
+
+func _calculer_visibles(j: Dictionary) -> void:
+	_vivants_image = sim.vivants()
+	var positions := PackedVector2Array()
+	positions.resize(_vivants_image.size())
+	for k in _vivants_image.size():
+		var p: Vector2i = _vivants_image[k].pos
+		positions[k] = Vector2(p.x, p.y)
+	if j.is_empty():
+		_visibles_image.resize(positions.size())
+		_visibles_image.fill(3)
+		return
+	var g := sim.grille
+	var vue: Dictionary = j.get("vue", {})
+	var tout_vu := not j.has("vue")
+	var vide_ci := g.contenu_ids.find("vide")
+	if g.noyau_actif and g._noyau_pret():
+		_visibles_image = g._noyau.visibles(g, vue, tout_vu, Grille.z_de(j.pos), vide_ci, j.pos, RAYON_VUE, _batiment_de(j.pos), positions)
+	else:
+		_visibles_image = PassesGD.visibles(g, vue, tout_vu, Grille.z_de(j.pos), vide_ci, j.pos, RAYON_VUE, _batiment_de(j.pos), positions)
+
+
 func _maj_noeuds(delta: float = 0.0) -> void:
 	var vivants := {}
 	var j := joueur()
 	var k := 1.0 - exp(-delta * 12.0)   # glissement exponentiel : ≈ 0,2 s pour rejoindre la tuile
 	var seuil_picto := int(sim.regles.r.get("tempo", {}).get("pictogramme_au_dela", 0))   # 0 : jamais de pictogramme
-	for e in sim.vivants():
+	_calculer_visibles(j)
+	for ke in _vivants_image.size():
+		var e: Dictionary = _vivants_image[ke]
 		vivants[e.id] = true
 		var n: Paperdoll = noeuds.get(e.id)
 		# Hors de la fenêtre de vue : le nœud reste, mais n'est ni dessiné ni redessiné.
-		if n != null and not j.is_empty() and (Grille.distance_plate(e.pos, j.pos) > RAYON_VUE or not sim.voit(j, e.pos) or _sous_toit_cache(e.pos, j)):
+		if n != null and not j.is_empty() and (_visibles_image[ke] & 2) == 0:
 			n.visible = false   # hors fenêtre, hors du champ de vue (brouillard de guerre), ou sous le toit d'un autre bâtiment (Villes, 2026-09-06)
 			continue
 		if n == null:
@@ -2630,11 +2660,14 @@ func _dessiner_etats(ci: CanvasItem) -> void:
 	var j := joueur()
 	if sim == null or j.is_empty() or titre_ouvert:
 		return
-	for e in sim.vivants():
+	if _vivants_image.size() != _visibles_image.size():
+		_calculer_visibles(j)
+	for ke in _vivants_image.size():
+		var e: Dictionary = _vivants_image[ke]
 		var statuts: Array = e.get("statuts", [])
 		if statuts.is_empty():
 			continue
-		if e.id != j.id and (Grille.distance_plate(e.pos, j.pos) > RAYON_VUE or not sim.voit(j, e.pos)):
+		if e.id != j.id and (_visibles_image[ke] & 1) == 0:
 			continue
 		var tick_e: int = sim.tick_de(e)
 		var base := _ecran(e.pos, sim.grille.h(e.pos)) + Vector2(-7.0 * mini(4, statuts.size()), -62.0)   # au-dessus de la tête
@@ -2669,9 +2702,11 @@ func _dessiner_hud(ci: CanvasItem) -> void:
 	if sim == null:
 		return
 	var j := joueur()
-	for e in sim.vivants():   # seulement ce qui est à l'écran : une cité en compte deux cents (designer 2026-09-05, le lag)
-		if j.is_empty() or (Grille.distance_plate(e.pos, j.pos) <= RAYON_VUE and sim.voit(j, e.pos) and not _sous_toit_cache(e.pos, j)):
-			_dessine_hud_entite(ci, e)
+	if _vivants_image.size() != _visibles_image.size():
+		_calculer_visibles(j)
+	for ke in _vivants_image.size():   # seulement ce qui est à l'écran : une cité en compte deux cents (designer 2026-09-05, le lag)
+		if j.is_empty() or (_visibles_image[ke] & 2) != 0:
+			_dessine_hud_entite(ci, _vivants_image[ke])
 
 
 func _dessine_hud_entite(ci: CanvasItem, e: Dictionary) -> void:

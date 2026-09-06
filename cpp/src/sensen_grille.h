@@ -117,6 +117,7 @@ public:
 	int cout_pas_entre(Object *grille, Vector2i de, Vector2i vers, bool volant, bool eviter_nage);
 	PackedInt32Array composante(Object *grille, Vector2i depart, int max_tuiles);
 	Dictionary regions_cellule(Object *grille, Vector2i origine, int n, const PackedInt32Array &classes);
+	PackedByteArray visibles(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, int bat_j, const PackedVector2Array &positions);
 	Dictionary brouillard(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, Vector2i origine_dessin,
 			double tw, double th, double hstep, int niveau_u, int bat_j, int mur_coupe_u, Color voile, Color col_sil);
 	Dictionary toits(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, Vector2i origine_dessin,

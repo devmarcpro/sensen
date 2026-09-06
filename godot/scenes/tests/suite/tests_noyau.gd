@@ -1392,6 +1392,21 @@ func test_noyau_passes() -> void:
 					print("  écart (%s, %s) au triangle %d : %s / %s, %s / %s" % [str(cas[0]), str(paire[2]), i / 3, str(a.points[i]), str(b.points[i]), str(a.couleurs[i]), str(b.couleurs[i])])
 					break
 	verifier(ecarts == 0 and n_tri > 100, "brouillard et toits : le noyau rend les mêmes tableaux que PassesGD (%d triangles sur trois cas, GDScript %.1f ms, C++ %.1f ms)" % [n_tri, chrono_gd, chrono_cpp])
+	# ce que le client montre de chaque être : les mêmes drapeaux
+	var positions := PackedVector2Array()
+	for x in s.vivants():
+		positions.append(Vector2(x.pos.x, x.pos.y))
+	var rng_p := RandomNumberGenerator.new()
+	rng_p.seed = 7
+	for k in 200:   # des positions au hasard, dans la fenêtre et hors d'elle, au sol et à l'étage
+		positions.append(Vector2(j.pos.x + rng_p.randi_range(-40, 40), j.pos.y + rng_p.randi_range(-40, 40) + (Grille.BANDE_Z if rng_p.randf() < 0.2 else 0)))
+	var v_gd := PassesGD.visibles(g, j.get("vue", {}), false, 0, g.contenu_ids.find("vide"), j.pos, 24, bat_j, positions)
+	var v_cpp: PackedByteArray = g._noyau.visibles(g, j.get("vue", {}), false, 0, g.contenu_ids.find("vide"), j.pos, 24, bat_j, positions)
+	var n_vus := 0
+	for f in v_gd:
+		if f & 1:
+			n_vus += 1
+	verifier(v_gd == v_cpp and v_gd.size() == positions.size() and n_vus > 0, "visibles : les mêmes drapeaux pour %d positions (%d en vue)" % [positions.size(), n_vus])
 	# à l'étage : la vue par l'air, les mêmes tableaux
 	var esc := Vector2i(-1, -1)
 	for bat in e.village.batiments:
