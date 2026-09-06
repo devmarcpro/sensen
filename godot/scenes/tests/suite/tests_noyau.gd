@@ -112,6 +112,37 @@ func test_noyau_cpp() -> void:
 	sv.monde.fermer()
 
 
+## La régénération rattrapée d'un coup (Mana, 2026-09-06) : après une longue absence, le mana prend son espérance en un
+## calcul, pas une tranche à la fois ; en dessous du seuil, tranche par tranche comme avant.
+func test_regen_longue() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var r: Dictionary = s.regles.r.mana
+	var periode := int(r.periode_ticks)
+	var seuil := int(r.get("tranches_exactes", 100))
+	j.mana = 0
+	j.mana_max = 100000   # assez pour que rien ne plafonne
+	j.tick_vigueur = 0
+	j["xp_depuis_repos"] = {}
+	var tranches := seuil * 100
+	var t0 := Time.get_ticks_usec()
+	s._regenerer(j, tranches * periode)
+	var duree := float(Time.get_ticks_usec() - t0) / 1000.0
+	var attendu := int(float(tranches) * float(r.chance))
+	var succes := int(j.get("xp_depuis_repos", {}).get("meditation", 0))
+	verifier(succes == attendu or succes == attendu + 1, "%d tranches rattrapées d'un coup : %d succès, l'espérance (%d ou %d)" % [tranches, succes, attendu, attendu + 1])
+	# L'XP de Méditation recalcule les stats, et le plafond de mana redevient celui de la volonté : le mana est au plafond.
+	verifier(int(j.mana) == int(j.mana_max) and int(j.mana) > 0, "le mana rendu est au plafond (%d / %d)" % [int(j.mana), int(j.mana_max)])
+	print("  régénération longue : %d tranches en %.2f ms" % [tranches, duree])
+	# En dessous du seuil : tranche par tranche, avec le RNG — jamais plus de succès que de tranches, jamais de mana sans succès.
+	j.mana = 0
+	j.tick_vigueur = 0
+	j["xp_depuis_repos"] = {}
+	s._regenerer(j, (seuil - 1) * periode)
+	var petits := int(j.get("xp_depuis_repos", {}).get("meditation", 0))
+	verifier(petits >= 0 and petits <= seuil - 1 and (int(j.mana) > 0) == (petits > 0), "sous le seuil, tranche par tranche : %d succès sur %d" % [petits, seuil - 1])
+
+
 ## Compare le noyau et le GDScript sur `n` paires tirées au sort dans la grille, toutes les fonctions.
 func _comparer_noyau(g: Grille, nom: String, n: int) -> void:
 	g._noyau_pret()   # les appels directs au noyau ci-dessous ne passent pas par les méthodes publiques : on le prépare (table des contenus, friction)

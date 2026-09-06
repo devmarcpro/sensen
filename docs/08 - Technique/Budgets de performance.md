@@ -70,6 +70,8 @@ La stratégie d'optimisation complète, système par système, est consolidée e
 > | triangle par triangle | 18,3 et 24,7 ms | 34 et 56 ms | 2,1 et 2,8 ms | 2,0 et 2,4 ms | 495 |
 > | en lots | **16,9 et 17,0 ms** | **27 et 39 ms** | **1,1 ms** | **1,7 ms** | 529 |
 >
+> **12 h 50 — la semaine d'une ville, suite** (sonde des villes, monde 9, cinq cellules, 204 êtres) : `t.humeurs` 98 → 7,5 ms et `t.maisons` 33 → 14 ms, les pièces inondées par le noyau C++ (`regions_cellule`, [[Détection de pièces]]) ; et le vrai poids de la semaine, que personne n'avait chronométré : `pas.regen` **530 ms** — la régénération de mana jouait une tranche de dix ticks par tranche écoulée depuis la dernière action, huit cents jets par dormeur au réveil ([[Mana]], `tranches_exactes`) → 0,9 ms. La semaine passe de 350-850 ms à **175-250 ms**, le tick de croisière de 0,54 à 0,39 ms.
+>
 > Le lot divise par deux le temps de rendu CPU et gagne une à deux millisecondes d'image ; mais le rendu de Godot n'est **pas** ce qui remplit l'image : trois millisecondes sur dix-sept. Le GDScript du client en prend six (nœuds 1,5 à 2, HUD 0,7, texte et minimap 0,5, paperdolls et terrain au redessin), et le reste est le moteur lui-même — trois cents nœuds d'êtres et de végétaux à faire vivre et trier chaque image. Le C++ ne changerait rien à ça ; ce qui le changerait, c'est **moins de nœuds** : les êtres lointains sans nœud du tout (dessinés d'un trait sur une couche, comme le terrain), les végétaux fondus dans leur morceau. C'est la prochaine marche du rendu, et elle est en GDScript.
 
 ## Liens

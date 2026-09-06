@@ -901,10 +901,24 @@ func _regenerer(e: Dictionary, tick: int) -> void:
 		# Mana (A.5) : à chaque tranche de 10 ticks franchie, 1 chance sur 8 de rendre 1 + N_meditation × 0.2.
 		var periode := int(regles.r.mana.periode_ticks)
 		var tranches := tick / periode - int(e.tick_vigueur) / periode
-		for i in tranches:
-			if des.reel() < float(regles.r.mana.chance):
-				e.mana = mini(e.mana_max, e.mana + roundi((float(regles.r.mana.regen_base) + float(e.competences_eff.get("meditation", 0)) * float(regles.r.mana.regen_par_meditation)) * (float(regles.r.talents.chair_de_mana.mana_regen_mult) if SimTalents.a_talent(self, e, "chair_de_mana") else 1.0)))
-				gagner_xp(e, "meditation", 1)
+		if tranches > 0:
+			var gain := roundi((float(regles.r.mana.regen_base) + float(e.competences_eff.get("meditation", 0)) * float(regles.r.mana.regen_par_meditation)) * (float(regles.r.talents.chair_de_mana.mana_regen_mult) if SimTalents.a_talent(self, e, "chair_de_mana") else 1.0))
+			var chance := float(regles.r.mana.chance)
+			if tranches > int(regles.r.mana.get("tranches_exactes", 100)):
+				# Rattrapé d'un coup (Mana, 2026-09-06) : un réveil après une nuit, une semaine en accéléré — l'espérance, en un
+				# calcul, la fraction tirée une fois. Deux cents dormeurs jouaient cent soixante mille tranches au lever du jour.
+				var esperance := float(tranches) * chance
+				var succes := int(esperance)
+				if des.reel() < esperance - float(succes):
+					succes += 1
+				if succes > 0:
+					e.mana = mini(e.mana_max, e.mana + gain * succes)
+					gagner_xp(e, "meditation", succes)
+			else:
+				for i in tranches:
+					if des.reel() < chance:
+						e.mana = mini(e.mana_max, e.mana + gain)
+						gagner_xp(e, "meditation", 1)
 		# Sang-froid : l'inverse des deux autres monnaies. Hors combat elle revient seule ; EN combat
 		# elle ne monte que si le corps est immobile depuis `seuil_ticks` — celui qui se replace perd
 		# son sang-froid, celui qui tient sa ligne le construit. On réutilise `immobile_depuis`, que la

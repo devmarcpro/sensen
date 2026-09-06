@@ -197,18 +197,34 @@ func _materiau_grain() -> ShaderMaterial:
 	return mat
 
 
+## Une couleur « #rrggbb » lue une fois : le dessin d'un morceau de terrain en analysait une par tuile (2026-09-06).
+static var _couleurs_html: Dictionary = {}
+static func _couleur_html(s: String) -> Color:
+	var c = _couleurs_html.get(s)
+	if c == null:
+		c = Color.html(s)
+		_couleurs_html[s] = c
+	return c
+
+
 ## Le style de texture d'un matériau (designer 2026-09-01, point 58) : sa famille décide du motif
 ## (roche veinée, terre grumeleuse, bois fibré…), un matériau nommé peut le surcharger. Le style est
 ## encodé dans la partie haute de UV.x — la 2D n'offre pas d'autre canal par sommet.
+static var _styles_grain: Dictionary = {}   # matériau → style : quatre lectures de configuration par tuile, sinon (2026-09-06)
 func _style_grain(materiau: String) -> float:
-	var cfg: Dictionary = GameData.config("styles").get("grain", {})
 	if materiau.is_empty():
 		return 0.0
+	var memo = _styles_grain.get(materiau)
+	if memo != null:
+		return memo
+	var cfg: Dictionary = GameData.config("styles").get("grain", {})
 	var nom := str(cfg.get("styles_par_materiau", {}).get(materiau, ""))
 	if nom.is_empty():
 		var m: Dictionary = GameData.catalogues.materials.get(materiau, {})
 		nom = str(cfg.get("styles_par_categorie", {}).get(str(m.get("category", m.get("categorie", ""))), "uni"))
-	return float(int(cfg.get("styles", {}).get(nom, 0))) * float(cfg.get("pas_style", 512.0))
+	var st := float(int(cfg.get("styles", {}).get(nom, 0))) * float(cfg.get("pas_style", 512.0))
+	_styles_grain[materiau] = st
+	return st
 
 
 func _ready() -> void:
@@ -2011,7 +2027,7 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 	var teinte := Color.WHITE   # le brouillard est une couche à part (_dessiner_brouillard)
 	var tags_c: Array = g.contenu_de(t).get("tags", [])
 	if "liquide" in tags_c:   # la mer : un losange d'eau à sa hauteur, les flancs de la rive sont ceux des tuiles voisines
-		var col_eau := Color.html(str(g.contenu_de(t).get("couleur", "#2f5f9a")))
+		var col_eau := _couleur_html(str(g.contenu_de(t).get("couleur", "#2f5f9a")))
 		if "ecoulement" in tags_c:   # un écoulement : plus le niveau est bas, plus l'eau est claire (Eau et liquides)
 			col_eau = col_eau.lerp(Color(0.6, 0.8, 0.95), 1.0 - float(g.niveau_liquide(t)) / 8.0)
 		if g.gel:   # Météo : la glace
@@ -2034,7 +2050,7 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 	if not sol_id.is_empty():   # surface : la couleur du matériau de sol du biome, nuancée par la hauteur
 		var ms: Dictionary = GameData.catalogues.materials.get(sol_id, {})
 		if not ms.is_empty():
-			col = Color.html(str(ms.color)).lerp(Color(0.35, 0.5, 0.25), 0.35 if sol_id.begins_with("terre") else 0.0).darkened(0.25 - k * 0.3)
+			col = _couleur_html(str(ms.color)).lerp(Color(0.35, 0.5, 0.25), 0.35 if sol_id.begins_with("terre") else 0.0).darkened(0.25 - k * 0.3)
 	col *= teinte
 	var st_sol := _style_grain(sol_id)   # le motif de la matière (point 58)
 	var uv_sol := PackedVector2Array([   # le grain suit le plan du sol : les UV sont les coins de la tuile
@@ -2059,7 +2075,7 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 	var contenu := g.contenu_de(t)
 	if not contenu.is_empty() and not g.bloque_passage(t) and not ("porte" in contenu.get("tags", [])) and (contenu.has("couleur") or "meuble" in contenu.get("tags", [])):
 		# contenu franchissable (porte, entrée du donjon, tapis) : un losange plat coloré
-		var cf := Color.html(str(GameData.entree("meubles", str(g.meubles.get(g.idx(t), "tapis"))).couleur)) if "meuble" in contenu.get("tags", []) else Color.html(str(contenu.couleur))
+		var cf := _couleur_html(str(GameData.entree("meubles", str(g.meubles.get(g.idx(t), "tapis"))).couleur)) if "meuble" in contenu.get("tags", []) else _couleur_html(str(contenu.couleur))
 		_poly(ci, PackedVector2Array([c + Vector2(0, -TH * 0.35), c + Vector2(TW * 0.35, 0), c + Vector2(0, TH * 0.35), c + Vector2(-TW * 0.35, 0)]), cf * teinte)
 		_dessiner_sprite_tuile(ci, g, t, c, teinte)
 	if "porte" in contenu.get("tags", []):   # une porte n'est pas un mur : un battant dans son encadrement
@@ -2167,15 +2183,15 @@ func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: C
 	var emprise := 1.0   # un meuble est un bloc plus petit que sa case (designer, point 46)
 	if "meuble" in tags_t and g.meubles.has(idx_t):
 		var mb: Dictionary = GameData.entree("meubles", str(g.meubles[idx_t]))
-		haut_bloc = Color.html(str(mb.couleur))
+		haut_bloc = _couleur_html(str(mb.couleur))
 		emprise = float(mb.get("emprise", 0.6))
 		hm = int(roundf(float(hm) * emprise))
 	elif contenu_t.has("couleur") and not mur_bat:
-		haut_bloc = Color.html(str(contenu_t.couleur))
+		haut_bloc = _couleur_html(str(contenu_t.couleur))
 	elif "arbre" in tags_t:
-		haut_bloc = Color(0.22, 0.45, 0.18).lerp(Color.html(mat.color) if not mat.is_empty() else haut_bloc, 0.2)   # la cime
+		haut_bloc = Color(0.22, 0.45, 0.18).lerp(_couleur_html(str(mat.color)) if not mat.is_empty() else haut_bloc, 0.2)   # la cime
 	elif not mat.is_empty():   # la couleur de la palette du matériau (filon ou mur du thème)
-		haut_bloc = haut_bloc.lerp(Color.html(mat.color), 0.55 if g.materiaux.has(idx_t) or mur_bat else 0.35)
+		haut_bloc = haut_bloc.lerp(_couleur_html(str(mat.color)), 0.55 if g.materiaux.has(idx_t) or mur_bat else 0.35)
 	haut_bloc *= teinte
 	var mat_bloc := mat_id   # murs et blocs texturés comme le sol (point 58)
 	if mat_bloc.is_empty():
@@ -2705,7 +2721,7 @@ func _texte_chaine(e: Dictionary) -> String:
 ## Une porte : deux montants plantés dans l'encadrement et un battant. L'axe de l'ouverture se lit sur les
 ## voisins qui bloquent le passage ; fermé, le battant barre le seuil, ouvert il se range contre son montant.
 func _dessiner_porte(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, contenu: Dictionary, teinte: Color) -> void:
-	var bois := Color.html(str(contenu.get("couleur", "#6a4a22"))) * teinte
+	var bois := _couleur_html(str(contenu.get("couleur", "#6a4a22"))) * teinte
 	var mur_x: bool = (g.dans(t + Vector2i(1, 0)) and g.bloque_passage(t + Vector2i(1, 0))) or (g.dans(t - Vector2i(1, 0)) and g.bloque_passage(t - Vector2i(1, 0)))
 	# le battant relie les deux montants : selon l'axe, l'un ou l'autre demi-diagonale de la tuile
 	var demi := Vector2(TW * 0.25, TH * 0.25) if mur_x else Vector2(TW * 0.25, -TH * 0.25)
