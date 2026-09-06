@@ -127,10 +127,10 @@ public:
 	Dictionary morceau(Object *grille, Vector2i coin, int taille_morceau, const Dictionary &p);
 	PackedByteArray visibles(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, int bat_j, const PackedVector2Array &positions);
 	Dictionary brouillard(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, Vector2i origine_dessin,
-			double tw, double th, double hstep, int niveau_u, int bat_j, int mur_coupe_u, Color voile, Color col_sil);
+			double tw, double th, double hstep, int niveau_u, int bat_j, int mur_coupe_u, Color voile, Color voile_jamais);
 	Dictionary toits(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, Vector2i origine_dessin,
 			double tw, double th, double hstep, int niveau_u, int bat_j, const PackedColorArray &bat_couleurs, const PackedFloat32Array &bat_styles,
-			double pente_t, double haut_toit, double ombre_min, Vector2 soleil_h, bool soleil_ok, double soleil_force, double uv_haut);
+			double pente_t, double haut_toit, double ombre_min, Vector2 soleil_h, bool soleil_ok, double soleil_force, double uv_haut, double sombre_jamais);
 	PackedByteArray ombres(Object *grille, Vector2 dir, double pente, Vector2i coin, Vector2i taille, int max_pas, int unites_par_niveau);
 	PackedByteArray propager_lumiere(Object *grille, const PackedInt32Array &sources_idx, const PackedByteArray &sources_niv, int ambiante,
 			const PackedByteArray &bloque_par_contenu);

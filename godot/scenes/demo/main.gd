@@ -9,7 +9,7 @@ const TW := 40            # largeur d'une tuile à l'écran
 const TH := 20            # hauteur du losange
 const HSTEP := 8          # pixels par niveau de hauteur
 const DELAI_PAS := 0.12   # secondes réelles entre deux pas d'une horloge de combat (lisibilité)
-const RAYON_VUE := 20            # tuiles dessinées autour du joueur (une cellule fait taille_cellule², 64 depuis le 2026-08-30)
+var rayon_vue := 20              # tuiles dessinées autour du joueur : suit la fenêtre et le zoom (designer 2026-09-06, 23 h : « afficher plus à l'écran »), borné par styles.vue.rayon_max
 var centre_terrain := Vector2i(-99, -99)   # la tuile du joueur à la dernière mise à jour des morceaux de terrain
 var vue_version := -1                      # version du champ de vue dessiné (brouillard de guerre)
 var centre_brouillard := Vector2i(-99, -99) # centre de la dernière passe du brouillard
@@ -300,7 +300,15 @@ func _style_grain(materiau: String) -> float:
 	return st
 
 
+## Une couleur de styles.json ([r, g, b] ou [r, g, b, a]).
+static func _couleur_liste(l: Variant) -> Color:
+	if l is Array and (l as Array).size() >= 3:
+		return Color(float(l[0]), float(l[1]), float(l[2]), float(l[3]) if (l as Array).size() > 3 else 1.0)
+	return Color.WHITE
+
+
 func _ready() -> void:
+	RenderingServer.set_default_clear_color(_couleur_liste(GameData.config("styles").get("brouillard", {}).get("fond", [0.02, 0.02, 0.04])))   # le fond de la scène : la nuit du jamais-vu, pas un gris (designer 2026-09-06)
 	terrain = Terrain.new()
 	terrain.proprio = self
 	terrain.material = _materiau_grain()   # le décor prend son grain (point 50)
@@ -928,7 +936,7 @@ func _maj_lumiere_si_besoin() -> void:
 			_top_client("lumiere.sim", t_s)
 			if sim.carte_lumiere != _locale_derniere:
 				besoin = true
-		if not besoin and Grille.distance_plate(j.pos, _lumiere_centre) > RAYON_VUE / 3:
+		if not besoin and Grille.distance_plate(j.pos, _lumiere_centre) > rayon_vue / 3:
 			besoin = true
 	if besoin:
 		var t0 := Time.get_ticks_usec()
@@ -970,10 +978,10 @@ func _maj_lumiere() -> void:
 				dir = Vector2((sx + sy) / sqrt(2.0), (sy - sx) / sqrt(2.0))   # l'est de l'écran est (1, -1)/√2 dans la grille, le sud (1, 1)/√2
 				pente = float(sol.get("tuile_en_unites", 3.5)) * _soleil_dir.z / lh
 				var jp := Grille.plat(j.pos)
-				var x0 := maxi(g.origine.x, jp.x - RAYON_VUE - 4)
-				var y0 := maxi(g.origine.y, jp.y - RAYON_VUE - 4)
-				var x1 := mini(g.origine.x + g.largeur - 1, jp.x + RAYON_VUE + 4)
-				var y1 := mini(g.origine.y + g.hauteur_grille - 1, jp.y + RAYON_VUE + 4)
+				var x0 := maxi(g.origine.x, jp.x - rayon_vue - 4)
+				var y0 := maxi(g.origine.y, jp.y - rayon_vue - 4)
+				var x1 := mini(g.origine.x + g.largeur - 1, jp.x + rayon_vue + 4)
+				var y1 := mini(g.origine.y + g.hauteur_grille - 1, jp.y + rayon_vue + 4)
 				coin = Vector2i(x0, y0)
 				taille = Vector2i(x1 - x0 + 1, y1 - y0 + 1)
 				ombre_portee = float(sol.get("ombre_portee", 0.28)) * _soleil_force
@@ -1027,7 +1035,7 @@ func _dessiner_lumieres() -> void:
 		return
 	for fi in sim.feux.keys():   # Météo : les flammes (couche additive, visibles de jour comme de nuit)
 		var ft := g.pos_de(int(fi))
-		if Grille.distance(ft, j.pos) > RAYON_VUE or not g.decouvert.has(int(fi)):
+		if Grille.distance(ft, j.pos) > rayon_vue or not g.decouvert.has(int(fi)):
 			continue
 		var fc := _ecran(ft, g.h(ft))
 		var ph := float((Time.get_ticks_msec() / 90 + int(fi)) % 6) / 6.0
@@ -1119,10 +1127,11 @@ func _process(delta: float) -> void:
 		ecran_fin_reste -= delta
 		if ecran_fin_reste <= 0.0:
 			ecran_fin.clear()
+	_maj_rayon_vue()
 	_maj_noeuds(delta)
 	t0_c = _top_client("noeuds", t0_c)
 	_maj_morceaux(j)   # les morceaux de terrain naissent et meurent avec la distance ; une découverte salit ceux du champ de vue
-	if int(j.get("vue_version", 0)) != vue_version or Grille.distance_plate(j.pos, centre_brouillard) > RAYON_VUE / 3:
+	if int(j.get("vue_version", 0)) != vue_version or Grille.distance_plate(j.pos, centre_brouillard) > rayon_vue / 3:
 		brouillard.queue_redraw()   # son champ de vue a changé : seul le brouillard se redessine
 		toits.queue_redraw()        # et les toits avec lui (ceux qu'il voit, celui qu'il a sur la tête)
 	tour_hud += 1
@@ -1188,9 +1197,25 @@ func _calculer_visibles(j: Dictionary) -> void:
 	var tout_vu := not j.has("vue")
 	var vide_ci := g.contenu_ids.find("vide")
 	if g.noyau_actif and g._noyau_pret():
-		_visibles_image = g._noyau.visibles(g, vue, tout_vu, Grille.z_de(j.pos), vide_ci, j.pos, RAYON_VUE, _batiment_de(j.pos), positions)
+		_visibles_image = g._noyau.visibles(g, vue, tout_vu, Grille.z_de(j.pos), vide_ci, j.pos, rayon_vue, _batiment_de(j.pos), positions)
 	else:
-		_visibles_image = PassesGD.visibles(g, vue, tout_vu, Grille.z_de(j.pos), vide_ci, j.pos, RAYON_VUE, _batiment_de(j.pos), positions)
+		_visibles_image = PassesGD.visibles(g, vue, tout_vu, Grille.z_de(j.pos), vide_ci, j.pos, rayon_vue, _batiment_de(j.pos), positions)
+
+
+## Le rayon dessiné suit la fenêtre et le zoom : assez de tuiles pour couvrir l'écran (une tuile fait TW/2 px de large et TH/2 de
+## haut par pas de diagonale) plus une marge pour les blocs hauts, jamais plus que styles.vue.rayon_max. S'il change, les
+## morceaux se refont et le brouillard et les toits se redessinent.
+func _maj_rayon_vue() -> void:
+	var st: Dictionary = GameData.config("styles").get("vue", {})
+	var taille := get_viewport_rect().size
+	var z := maxf(0.1, zoom)
+	var r := ceili((taille.x / (float(TW) * z) + taille.y / (float(TH) * z)) * 0.5) + int(st.get("marge", 4))
+	r = clampi(r, 8, int(st.get("rayon_max", 56)))
+	if r != rayon_vue:
+		rayon_vue = r
+		centre_terrain = Vector2i(-99, -99)   # les morceaux à portée se recalculent
+		brouillard.queue_redraw()
+		toits.queue_redraw()
 
 
 func _maj_noeuds(delta: float = 0.0) -> void:
@@ -1831,8 +1856,8 @@ func _tuile_sous(p: Vector2) -> Vector2i:
 	var g := sim.grille
 	var j := joueur()
 	var cj: Vector2i = Grille.plat(j.pos) if not j.is_empty() else Vector2i.ZERO
-	for y in range(maxi(g.origine.y, cj.y - RAYON_VUE), mini(g.origine.y + g.hauteur_grille, cj.y + RAYON_VUE + 1)):
-		for x in range(maxi(g.origine.x, cj.x - RAYON_VUE), mini(g.origine.x + g.largeur, cj.x + RAYON_VUE + 1)):
+	for y in range(maxi(g.origine.y, cj.y - rayon_vue), mini(g.origine.y + g.hauteur_grille, cj.y + rayon_vue + 1)):
+		for x in range(maxi(g.origine.x, cj.x - rayon_vue), mini(g.origine.x + g.largeur, cj.x + rayon_vue + 1)):
 			var t := Vector2i(x, y)
 			var c := _ecran(t, g.h(t))
 			var d := c.distance_squared_to(p)
@@ -2186,8 +2211,8 @@ func _maj_morceaux(j: Dictionary) -> void:
 	var c: Vector2i = Grille.plat(j.pos) if not j.is_empty() else g.origine + Vector2i(g.largeur / 2, g.hauteur_grille / 2)
 	if c != centre_terrain:
 		centre_terrain = c
-		var m0 := _morceau_de(Vector2i(maxi(g.origine.x, c.x - RAYON_VUE), maxi(g.origine.y, c.y - RAYON_VUE)))
-		var m1 := _morceau_de(Vector2i(mini(g.origine.x + g.largeur - 1, c.x + RAYON_VUE), mini(g.origine.y + g.hauteur_grille - 1, c.y + RAYON_VUE)))
+		var m0 := _morceau_de(Vector2i(maxi(g.origine.x, c.x - rayon_vue), maxi(g.origine.y, c.y - rayon_vue)))
+		var m1 := _morceau_de(Vector2i(mini(g.origine.x + g.largeur - 1, c.x + rayon_vue), mini(g.origine.y + g.hauteur_grille - 1, c.y + rayon_vue)))
 		var garder := {}
 		for my in range(m0.y, m1.y + 1):
 			for mx in range(m0.x, m1.x + 1):
@@ -2204,12 +2229,7 @@ func _maj_morceaux(j: Dictionary) -> void:
 			if not garder.has(k):
 				_liberer_morceau(k)
 	_maj_batiment_joueur(j)
-	if not g.decouvertes_recentes.is_empty():   # les tuiles découvertes depuis la dernière image : leurs morceaux seulement
-		for i in g.decouvertes_recentes:
-			var k := _morceau_de(g.pos_de(int(i)))
-			if morceaux.has(k):
-				morceaux[k].queue_redraw()
-		g.decouvertes_recentes.clear()
+	g.decouvertes_recentes.clear()   # les morceaux dessinent toutes les tuiles, vues ou non (2026-09-06) : une découverte ne les touche plus, le brouillard seul change
 
 
 func _liberer_morceau(k: Vector2i) -> void:
@@ -2359,11 +2379,12 @@ func _assurer_vegetal(t: Vector2i) -> void:
 	v.position = _ecran(t, g.h(t))
 	v.z_index = _profondeur(t)
 	var j := joueur()
+	var stb: Dictionary = GameData.config("styles").get("brouillard", {})
 	var voile := Color.WHITE
 	if not g.decouvert.has(idx):
-		voile = Color(0, 0, 0, 0)
+		voile = _couleur_liste(stb.get("vegetal_jamais_vu", [0.18, 0.18, 0.22]))   # jamais vu : sombre, mais là (plus de fond gris)
 	elif not j.is_empty() and not sim.voit(j, t):
-		voile = Color(0.45, 0.45, 0.5)
+		voile = _couleur_liste(stb.get("vegetal_memorise", [0.45, 0.45, 0.5]))
 	v.set_meta("voile", voile)
 	v.modulate = _lumiere_tuile(t) * voile
 	add_child(v)
@@ -2497,8 +2518,11 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 	vue_version = int(j.get("vue_version", 0))
 	# Le brouillard en tableaux de triangles (file 114, 2026-09-06) : le noyau C++ les bâtit (SensenGrille.brouillard), PassesGD
 	# sinon — les mêmes ; puis une seule commande de canvas. Le client garde ses réglages : le voile, la silhouette, le rayon.
-	var voile := Color(0.05, 0.05, 0.08, 0.55)   # le sol mémorisé, hors de vue
-	var col_sil := Color(0.38, 0.38, 0.44)
+	var stb: Dictionary = GameData.config("styles").get("brouillard", {})
+	var voile := _couleur_liste(stb.get("voile", [0.05, 0.05, 0.08, 0.55]))   # le sol mémorisé, hors de vue
+	var voile_jamais := _couleur_liste(stb.get("jamais_vu", [0.02, 0.02, 0.04, 0.85]))   # jamais vu : plus sombre, mais le terrain est là
+	var veg_memo := _couleur_liste(stb.get("vegetal_memorise", [0.45, 0.45, 0.5]))
+	var veg_noir := _couleur_liste(stb.get("vegetal_jamais_vu", [0.18, 0.18, 0.22]))
 	var jp := Grille.plat(j.pos)
 	var vue: Dictionary = j.get("vue", {})
 	var tout_vu := not j.has("vue")
@@ -2507,9 +2531,9 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 	var res: Dictionary
 	var t0 := Time.get_ticks_usec()
 	if g.noyau_actif and g._noyau_pret():
-		res = g._noyau.brouillard(g, vue, tout_vu, zj, vide_ci, jp, RAYON_VUE, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, _bat_joueur, MUR_COUPE_UNITES, voile, col_sil)
+		res = g._noyau.brouillard(g, vue, tout_vu, zj, vide_ci, jp, rayon_vue, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, _bat_joueur, MUR_COUPE_UNITES, voile, voile_jamais)
 	else:
-		res = PassesGD.brouillard(g, vue, tout_vu, zj, vide_ci, jp, RAYON_VUE, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, _bat_joueur, MUR_COUPE_UNITES, voile, col_sil)
+		res = PassesGD.brouillard(g, vue, tout_vu, zj, vide_ci, jp, rayon_vue, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, _bat_joueur, MUR_COUPE_UNITES, voile, voile_jamais)
 	_top_client("brouillard.tableaux", t0)
 	for idx in res.veg_vus:
 		if noeuds_vegetaux.has(idx):
@@ -2517,8 +2541,12 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 			noeuds_vegetaux[idx].modulate = _lumiere_tuile(g.pos_de(idx))
 	for idx in res.veg_voiles:
 		if noeuds_vegetaux.has(idx):
-			noeuds_vegetaux[idx].set_meta("voile", Color(0.45, 0.45, 0.5))   # un billboard : on le voile lui-même (modulate), sous sa lumière
-			noeuds_vegetaux[idx].modulate = _lumiere_tuile(g.pos_de(idx)) * Color(0.45, 0.45, 0.5)
+			noeuds_vegetaux[idx].set_meta("voile", veg_memo)   # un billboard : on le voile lui-même (modulate), sous sa lumière
+			noeuds_vegetaux[idx].modulate = _lumiere_tuile(g.pos_de(idx)) * veg_memo
+	for idx in res.veg_noirs:
+		if noeuds_vegetaux.has(idx):
+			noeuds_vegetaux[idx].set_meta("voile", veg_noir)
+			noeuds_vegetaux[idx].modulate = _lumiere_tuile(g.pos_de(idx)) * veg_noir
 	if res.points.size() > 0:
 		RenderingServer.canvas_item_add_triangle_array(ci.get_canvas_item(), res.indices, res.points, res.couleurs, res.uvs)
 
@@ -2739,10 +2767,11 @@ func _dessiner_toits(ci: CanvasItem) -> void:
 	var vide_ci := g.contenu_ids.find("vide")
 	var res: Dictionary
 	var t0 := Time.get_ticks_usec()
+	var sombre_jamais := float(GameData.config("styles").get("brouillard", {}).get("toit_jamais_vu", 0.75))
 	if g.noyau_actif and g._noyau_pret():
-		res = g._noyau.toits(g, vue, tout_vu, zj, vide_ci, jp, RAYON_VUE, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, bat_j, bat_couleurs, bat_styles, pente_t, haut_toit, ombre_min, soleil_h, soleil_ok, _soleil_force, float(UV_HAUT))
+		res = g._noyau.toits(g, vue, tout_vu, zj, vide_ci, jp, rayon_vue, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, bat_j, bat_couleurs, bat_styles, pente_t, haut_toit, ombre_min, soleil_h, soleil_ok, _soleil_force, float(UV_HAUT), sombre_jamais)
 	else:
-		res = PassesGD.toits(g, vue, tout_vu, zj, vide_ci, jp, RAYON_VUE, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, bat_j, bat_couleurs, bat_styles, pente_t, haut_toit, ombre_min, soleil_h, soleil_ok, _soleil_force, float(UV_HAUT))
+		res = PassesGD.toits(g, vue, tout_vu, zj, vide_ci, jp, rayon_vue, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, bat_j, bat_couleurs, bat_styles, pente_t, haut_toit, ombre_min, soleil_h, soleil_ok, _soleil_force, float(UV_HAUT), sombre_jamais)
 	_top_client("toits.tableaux", t0)
 	if res.points.size() > 0:
 		RenderingServer.canvas_item_add_triangle_array(ci.get_canvas_item(), res.indices, res.points, res.couleurs, res.uvs)

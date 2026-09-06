@@ -67,6 +67,21 @@
       ]
     }
   },
+  "vue": {
+    "_doc": "Le rayon dessine autour du joueur suit la fenetre et le zoom (designer 2026-09-06, 23 h : « afficher plus a l'ecran, ne pas voir le fond gris ») : assez de tuiles pour couvrir l'ecran plus une marge (les blocs hauts), borne par rayon_max — au-dela (un zoom tres recule), le fond reparait.",
+    "rayon_max": 56,
+    "marge": 4
+  },
+  "brouillard": {
+    "_doc": "Le brouillard de guerre (designer 2026-09-06, 23 h) : tout le terrain se dessine, meme jamais vu — le fond de la scene est `fond` ; une tuile memorisee hors de vue porte `voile`, une tuile jamais vue `jamais_vu` (plus sombre) ; les blocs gardent leur matiere sous le voile ; les toits s'assombrissent de toit_memorise / toit_jamais_vu ; les vegetaux (billboards) se modulent de vegetal_memorise / vegetal_jamais_vu.",
+    "fond": [0.02, 0.02, 0.04],
+    "voile": [0.05, 0.05, 0.08, 0.55],
+    "jamais_vu": [0.02, 0.02, 0.04, 0.85],
+    "toit_memorise": 0.55,
+    "toit_jamais_vu": 0.75,
+    "vegetal_memorise": [0.45, 0.45, 0.5],
+    "vegetal_jamais_vu": [0.18, 0.18, 0.22]
+  },
   "grain": {
     "_doc": "Textures procédurales du décor (designer 2026-09-01, points 50 et 58) : calculées par shader, jamais une image. Les UV portent le plan de la face (le grain suit le relief) et leur partie haute encode le style de la matière. styles_par_categorie : la famille de matériau → le motif du shader.",
     "actif": true,

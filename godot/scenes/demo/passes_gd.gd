@@ -89,7 +89,7 @@ static func _poly(res: Dictionary, pts: PackedVector2Array, col: Color, uvs: Pac
 
 static func _vide() -> Dictionary:
 	return {"points": PackedVector2Array(), "couleurs": PackedColorArray(), "uvs": PackedVector2Array(), "indices": PackedInt32Array(),
-		"veg_vus": PackedInt32Array(), "veg_voiles": PackedInt32Array()}
+		"veg_vus": PackedInt32Array(), "veg_voiles": PackedInt32Array(), "veg_noirs": PackedInt32Array()}
 
 
 static func _indices(res: Dictionary) -> void:
@@ -100,11 +100,13 @@ static func _indices(res: Dictionary) -> void:
 	res.indices = idx
 
 
-## Le brouillard (main._dessiner_brouillard) : sur les tuiles découvertes autour du joueur (`jp`, `rayon`), hors de vue —
-## un voile sur le sol, la silhouette sombre d'un bloc (trois faces à plat) sur un mur. `veg_vus` et `veg_voiles` : les
-## index des végétaux vus et voilés, pour que le client règle leurs billboards.
+## Le brouillard (main._dessiner_brouillard, designer 2026-09-06, 23 h : « ne pas voir le fond gris, tous les blocs rendus avec
+## leurs textures ») : sur TOUTES les tuiles autour du joueur (`jp`, `rayon`) hors de vue — un voile sur le sol, un voile sur
+## les trois faces d'un bloc (sa matière reste dessous) ; `voile` sur une tuile mémorisée, `voile_jamais` (plus sombre) sur
+## une tuile jamais vue. `veg_vus`, `veg_voiles`, `veg_noirs` : les index des végétaux vus, voilés, jamais vus, pour que le
+## client règle leurs billboards.
 static func brouillard(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_ci: int, jp: Vector2i, rayon: int, origine_dessin: Vector2i,
-		tw: float, th: float, hstep: float, niveau_u: int, bat_j: int, mur_coupe_u: int, voile: Color, col_sil: Color) -> Dictionary:
+		tw: float, th: float, hstep: float, niveau_u: int, bat_j: int, mur_coupe_u: int, voile: Color, voile_jamais: Color) -> Dictionary:
 	var res := _vide()
 	var x0 := maxi(g.origine.x, jp.x - rayon)
 	var x1 := mini(g.origine.x + g.largeur - 1, jp.x + rayon)
@@ -116,25 +118,28 @@ static func brouillard(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_
 		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
 			var t := Vector2i(x, s - x)
 			var idx := g.idx(t)
-			if not g.decouvert.has(idx):
-				continue
+			var decouverte := g.decouvert.has(idx)
 			var ct := g.contenu_de(t)
 			var vegetal: bool = "vegetation" in ct.get("tags", [])
-			if voit(g, vue, tout_vu, zj, vide_ci, t):
+			if decouverte and voit(g, vue, tout_vu, zj, vide_ci, t):
 				if vegetal:
 					res.veg_vus.append(idx)
 				continue
+			var col := voile if decouverte else voile_jamais
 			var c := ecran(t, g.h(t), origine_dessin, tw, th, hstep)
 			if vegetal:
-				res.veg_voiles.append(idx)
+				if decouverte:
+					res.veg_voiles.append(idx)
+				else:
+					res.veg_noirs.append(idx)
 			elif g.bloque_passage(t) and not ("porte" in ct.get("tags", [])):
 				var hm := hauteur_bloc(g, t, bat_j, niveau_u, mur_coupe_u) * hstep
-				if hm > 0:
-					_poly(res, PackedVector2Array([c + Vector2(-tw2, 0), c + Vector2(0, th2), c + Vector2(0, th2 - hm), c + Vector2(-tw2, -hm)]), col_sil.darkened(0.35), PackedVector2Array())
-					_poly(res, PackedVector2Array([c + Vector2(0, th2), c + Vector2(tw2, 0), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm)]), col_sil.darkened(0.5), PackedVector2Array())
-					_poly(res, PackedVector2Array([c + Vector2(-tw2, -hm), c + Vector2(0, -th2 - hm), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm)]), col_sil, PackedVector2Array())
+				if hm > 0:   # le voile sur les trois faces du bloc : sa matière reste dessous
+					_poly(res, PackedVector2Array([c + Vector2(-tw2, 0), c + Vector2(0, th2), c + Vector2(0, th2 - hm), c + Vector2(-tw2, -hm)]), col, PackedVector2Array())
+					_poly(res, PackedVector2Array([c + Vector2(0, th2), c + Vector2(tw2, 0), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm)]), col, PackedVector2Array())
+					_poly(res, PackedVector2Array([c + Vector2(-tw2, -hm), c + Vector2(0, -th2 - hm), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm)]), col, PackedVector2Array())
 				continue
-			_poly(res, PackedVector2Array([c + Vector2(-tw2, 0), c + Vector2(0, -th2), c + Vector2(tw2, 0), c + Vector2(0, th2)]), voile, PackedVector2Array())
+			_poly(res, PackedVector2Array([c + Vector2(-tw2, 0), c + Vector2(0, -th2), c + Vector2(tw2, 0), c + Vector2(0, th2)]), col, PackedVector2Array())
 	_indices(res)
 	return res
 
@@ -144,7 +149,7 @@ static func brouillard(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_
 ## bâtiment), sombre si aucune tuile du bâtiment n'est en vue, le versant éclairé par le soleil ; les UV sont ceux du dessus.
 static func toits(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_ci: int, jp: Vector2i, rayon: int, origine_dessin: Vector2i,
 		tw: float, th: float, hstep: float, niveau_u: int, bat_j: int, bat_couleurs: PackedColorArray, bat_styles: PackedFloat32Array,
-		pente_t: float, haut_toit: float, ombre_min: float, soleil_h: Vector2, soleil_ok: bool, soleil_force: float, uv_haut: float) -> Dictionary:
+		pente_t: float, haut_toit: float, ombre_min: float, soleil_h: Vector2, soleil_ok: bool, soleil_force: float, uv_haut: float, sombre_jamais: float = 0.75) -> Dictionary:
 	var res := _vide()
 	if g.batiments_liste.is_empty():
 		_indices(res)
@@ -172,14 +177,16 @@ static func toits(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_ci: i
 			var t := Vector2i(x, s_d - x)
 			var idx := g.idx(t)
 			var n: int = g.niveaux_bat[idx]
-			if n == 0 or not g.decouvert.has(idx):
+			if n == 0:
 				continue
 			var b: int = g.bat_de[idx]
 			if b == bat_j or b <= 0 or b > bat_couleurs.size():
 				continue
 			var col: Color = bat_couleurs[b - 1]
 			var st: float = bat_styles[b - 1] if b - 1 < bat_styles.size() else 0.0
-			if not bool(vus.get(b, false)):
+			if not g.decouvert.has(idx):   # jamais vu : le toit, très sombre (plus de fond gris, 2026-09-06)
+				col = col.darkened(sombre_jamais)
+			elif not bool(vus.get(b, false)):
 				col = col.darkened(0.55)
 			var r: Rect2i = g.batiments_liste[b - 1].rect
 			var base_px := float(g.h(t) * hstep + n * niveau_u * hstep)
@@ -285,8 +292,8 @@ static func _bloc(res: Dictionary, g: Grille, t: Vector2i, c: Vector2, teinte: C
 	var h0 := int(base_u * hstep)
 	var sud := t + Vector2i(0, 1)
 	var est := t + Vector2i(1, 0)
-	var face_so := not (g.dans(sud) and g.decouvert.has(g.idx(sud)) and hauteur_bloc(g, sud, int(p.bat_j), int(p.niveau_u), int(p.mur_coupe_u)) * hstep >= hm)
-	var face_se := not (g.dans(est) and g.decouvert.has(g.idx(est)) and hauteur_bloc(g, est, int(p.bat_j), int(p.niveau_u), int(p.mur_coupe_u)) * hstep >= hm)
+	var face_so := not (g.dans(sud) and hauteur_bloc(g, sud, int(p.bat_j), int(p.niveau_u), int(p.mur_coupe_u)) * hstep >= hm)
+	var face_se := not (g.dans(est) and hauteur_bloc(g, est, int(p.bat_j), int(p.niveau_u), int(p.mur_coupe_u)) * hstep >= hm)
 	var bande := int(int(p.bloc_u) * hstep) if mur_bat else hm
 	var y := h0
 	var col_haut := haut_bloc
@@ -421,9 +428,7 @@ static func morceau(g: Grille, coin: Vector2i, taille_morceau: int, p: Dictionar
 		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
 			var t := Vector2i(x, s - x)
 			var idx := g.idx(t)
-			if not g.decouvert.has(idx):
-				continue
-			_tuile(res, g, t, p)
+			_tuile(res, g, t, p)   # toutes les tuiles, vues ou non (designer 2026-09-06, 23 h : plus de fond gris — le brouillard voile)
 			if "vegetation" in g.contenu_de(t).get("tags", []):
 				res.vegetaux.append(idx)
 	_indices(res)
