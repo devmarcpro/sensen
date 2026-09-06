@@ -3595,3 +3595,24 @@ ui.ecran.action_retour,Back to the items
 ui.ecran.equiper_objet,Equip
 ui.ecran.desequiper,Unequip
 ui.ecran.reforger_avec,Reforge with this item as the component
+ui.choix.retour,Back to the list
+ui.choix.role_suivant,Change role (base → housing → fields → natural resources)
+ui.choix.perimetre_suivant,Next harvest perimeter (wood → ore → plants → none)
+ui.choix.stockage_suivant,Next storage for this post
+ui.choix.reassigner,Reassign
+ui.choix.renvoyer,Dismiss
+ui.choix.ordre_bascule,Follow me ⇄ wait here
+ui.choix.retirer_stock,Take the stock into your bag
+ui.choix.accord_suivant,Propose the next agreement (trade ≥ 20 · non-aggression ≥ 40 · alliance ≥ 60 · tribute)
+ui.choix.fabriquer,Craft
+ui.choix.accepter,Accept the quest
+ui.choix.rendre,Turn in the quest
+ui.choix.acheter,Buy
+ui.choix.vendre,Sell
+ui.choix.donner,Give
+ui.choix.reprendre,Take back
+ui.choix.entrainer,Train
+ui.choix.supprimer_capacite,Delete the ability
+ui.choix.gouvernance_suivante,Next governance
+ui.choix.marge_plus,Shop margin +
+ui.choix.marge_moins,Shop margin −

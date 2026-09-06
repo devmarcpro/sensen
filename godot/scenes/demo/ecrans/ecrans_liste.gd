@@ -68,6 +68,7 @@ static func rafraichir(ec: Ecrans) -> void:
 			push_error("Écran inconnu : « %s »" % ec.courant)
 			ec.fermer()
 			return
+	sel = _appliquer_choix(ec, sel)
 	_paginer(ec)
 	if ec.courant == "inventaire" and not ec.objet_choisi.is_empty():   # les options de l'objet choisi : la sélection va sur la première
 		for i in ec.entrees.size():
@@ -162,6 +163,167 @@ static func rafraichir(ec: Ecrans) -> void:
 		_bouton(ec, ec.tr("ui.ecran.fermer"), ec.fermer)
 
 
+## Une entrée choisie montre ses options, lettrées (designer 2026-09-06, 18 h 50 : « c'est ce que je veux partout ») : la clé
+## qui la retrouve après reconstruction de l'écran (son genre et ce qui la nomme).
+static func _cle_entree(en: Dictionary) -> String:
+	var k := str(en.get("kind", ""))
+	for champ in ["id", "uid", "cle", "cellule", "index", "competence", "fonction", "module"]:
+		if en.has(champ):
+			return "%s:%s" % [k, str(en[champ])]
+	if en.has("quete"):
+		return "%s:%s" % [k, str(en.quete.get("uid", ""))]
+	if en.has("plan"):
+		return "%s:%s" % [k, str(en.plan.get("id", ""))]
+	return k
+
+
+## Les options d'une entrée : [[clé de libellé, action]…] — vide si l'entrée agit d'un coup (un menu, un choix de création).
+## « defaut » est l'action principale d'avant (Entrée) ; les autres remplacent les anciennes touches fixes du territoire.
+static func _options_de(ec: Ecrans, en: Dictionary) -> Array:
+	match str(en.get("kind", "")):
+		"cellule":
+			return [["ui.choix.role_suivant", "defaut"], ["ui.choix.perimetre_suivant", "perimetre_suivant"]]
+		"perimetre":
+			return [["ui.choix.perimetre_suivant", "perimetre_suivant"], ["ui.choix.stockage_suivant", "stockage_suivant"]]
+		"resident":
+			return [["ui.choix.reassigner", "defaut"], ["ui.choix.renvoyer", "renvoyer"]]
+		"compagnon":
+			return [["ui.choix.ordre_bascule", "defaut"]]
+		"stock":
+			return [["ui.choix.retirer_stock", "defaut"]]
+		"voisin":
+			return [["ui.choix.accord_suivant", "accord_suivant"]]
+		"quete":
+			var q: Dictionary = en.get("quete", {})
+			if str(q.get("etat", "")) == "offerte":
+				return [["ui.choix.accepter", "defaut"]]
+			if str(q.get("etat", "")) == "terminee":
+				return [["ui.choix.rendre", "defaut"]]
+			return []
+		"recette":
+			return [["ui.choix.fabriquer", "defaut"]]
+		"achat":
+			return [["ui.choix.acheter", "defaut"]]
+		"vente":
+			return [["ui.choix.vendre", "defaut"]]
+		"donner":
+			return [["ui.choix.donner", "defaut"]]
+		"reprendre":
+			return [["ui.choix.reprendre", "defaut"]]
+		"competence_entrainer":
+			return [["ui.choix.entrainer", "defaut"]]
+		"capacite":
+			return [["ui.choix.supprimer_capacite", "defaut"]]
+	return []
+
+
+## Après la construction d'un écran : si une entrée est choisie, ses options deviennent les lignes lettrées — les autres
+## lignes gardent leur place sans lettre. Rend la sélection à prendre (la première option).
+static func _appliquer_choix(ec: Ecrans, sel: int) -> int:
+	if ec.choix.is_empty():
+		return sel
+	var cle := _cle_entree(ec.choix)
+	var i_c := -1
+	for i in ec.entrees.size():
+		if _cle_entree(ec.entrees[i]) == cle:
+			i_c = i
+			break
+	if i_c < 0:   # renvoyé, vendu, rendu : l'entrée n'est plus là
+		ec.choix = {}
+		return sel
+	var options := _options_de(ec, ec.entrees[i_c])
+	if options.is_empty():
+		ec.choix = {}
+		return sel
+	for en in ec.entrees:
+		en["lettre"] = false
+	var premiere := ec.entrees.size()
+	for o in options:
+		ec.liste.add_item(ec.tr(str(o[0])))
+		ec.entrees.append({"kind": "option_choix", "action": str(o[1]), "cible_i": i_c, "texte": ""})
+	ec.liste.add_item(ec.tr("ui.choix.retour"))
+	ec.entrees.append({"kind": "option_choix", "action": "retour", "cible_i": i_c, "texte": ""})
+	return premiere
+
+
+## Une option de l'entrée choisie.
+static func _action_choix(ec: Ecrans, en: Dictionary) -> void:
+	var cible: Dictionary = ec.entrees[int(en.cible_i)] if int(en.cible_i) < ec.entrees.size() else {}
+	var sim = ec.main.sim
+	var j: Dictionary = ec.main.joueur()
+	match str(en.action):
+		"retour":
+			ec.choix = {}
+			rafraichir(ec)
+		"defaut":
+			_action_defaut(ec, cible)
+		"perimetre_suivant":   # bois → minerai → plantes → aucun (2026-09-04)
+			var cell_p: Vector2i = cible.cellule
+			var ordre_p: Array = sim.regles.r.royaume.perimetres.ordre
+			var pid_p: String = sim.perimetre_de(cell_p)
+			var k_p: int = -1 if pid_p.is_empty() else ordre_p.find(str(sim.perimetres()[pid_p].type))
+			if k_p + 1 < ordre_p.size():
+				sim.creer_perimetre(cell_p, str(ordre_p[k_p + 1]))
+			else:
+				sim.retirer_perimetre(pid_p)
+			rafraichir(ec)
+		"stockage_suivant":   # le stockage d'un poste, à tour de rôle parmi les stockages (2026-09-04)
+			var stockages: Array = []
+			for pid_s in sim.perimetres().keys():
+				if bool(sim.regles.r.royaume.perimetres.types.get(str(sim.perimetres()[pid_s].type), {}).get("stockage", false)):
+					stockages.append(str(pid_s))
+			stockages.sort()
+			var actuel_s: String = str(sim.perimetres()[str(cible.id)].get("stockage", ""))
+			var k_s: int = stockages.find(actuel_s)
+			sim.assigner_stockage(str(cible.id), str(stockages[k_s + 1]) if k_s + 1 < stockages.size() else "")
+			rafraichir(ec)
+		"renvoyer":   # un résident renvoyé (Gestion de base, étape 2)
+			sim.desassigner(j, str(cible.id), true)
+			ec.choix = {}
+			rafraichir(ec)
+		"accord_suivant":   # commercial → non-agression → alliance → tribut
+			var types: Array = ["commercial", "non_agression", "alliance", "tribut"]
+			var actuel: String = str(sim.territoire.accords.get(str(cible.id), ""))
+			if actuel.begins_with("tribut"):
+				actuel = "tribut"
+			sim.proposer_accord(j, str(cible.id), str(types[(types.find(actuel) + 1) % types.size()]))
+			rafraichir(ec)
+
+
+## Une action d'écran qui ne porte sur aucune entrée (le territoire : déposer, retirer, la gouvernance, la marge).
+static func _action_ecran(ec: Ecrans, action: String) -> void:
+	var sim = ec.main.sim
+	var j: Dictionary = ec.main.joueur()
+	match action:
+		"deposer": sim.deposer(j, 50)
+		"retirer": sim.retirer(j, 50)
+		"gouvernance_suivante":
+			var ids: Array = GameData.catalogues.governments.keys()
+			ids.sort()
+			var actuel: String = str(sim.territoire.gouvernance_cible) if not str(sim.territoire.gouvernance_cible).is_empty() else str(sim.territoire.gouvernance)
+			sim.changer_gouvernance(str(ids[(ids.find(actuel) + 1) % ids.size()]))
+		"marge_plus": sim.regler_marge(float(sim.regles.r.royaume.boutique.marge_pas))
+		"marge_moins": sim.regler_marge(-float(sim.regles.r.royaume.boutique.marge_pas))
+	rafraichir(ec)
+
+
+## Les lignes d'action d'un écran, lettrées après ses entrées.
+static func _actions_ecran(ec: Ecrans, actions: Array) -> void:
+	for a in actions:
+		ec.liste.add_item(ec.tr(str(a[0])))
+		ec.entrees.append({"kind": "action_ecran", "action": str(a[1]), "texte": ""})
+
+
+## Le détail de l'entrée choisie, suivi de ses options lettrées, chacune un lien.
+static func _texte_options(ec: Ecrans, i_c: int) -> String:
+	var lignes: Array[String] = [""]
+	for i in ec.entrees.size():
+		var en: Dictionary = ec.entrees[i]
+		if str(en.get("kind", "")) == "option_choix" and int(en.get("cible_i", -1)) == i_c:
+			lignes.append("[url=%d]%s[/url]" % [i, ec.liste.get_item_text(i)])
+	return "\n".join(lignes)
+
+
 ## Une ligne qui porte une lettre : tout ce qui se choisit — pas un texte d'en-tête, pas une case d'équipement (la grille).
 static func _lettrable(en: Dictionary) -> bool:
 	return str(en.get("kind", "")) != "texte" and not bool(en.get("equipe", false)) and bool(en.get("lettre", true))
@@ -205,6 +367,8 @@ static func _paginer(ec: Ecrans) -> void:
 			ec.liste.add_item(textes[k], icones[k], choisissables[k])
 		ec.liste.add_item(ec.tr("ui.ecran.page_suivante").format({"n": ec.page + 1, "total": n_pages}))
 		ec.entrees.append({"kind": "page", "texte": ""})
+	for i in ec.liste.item_count:   # les anciens rappels de raccourci « (E) » en fin de libellé s'effacent : la lettre est celle de la ligne
+		ec.liste.set_item_text(i, _sans_raccourci(ec.liste.get_item_text(i)))
 	var k := 0
 	for i in ec.entrees.size():
 		if k >= n_lettres:
@@ -212,8 +376,8 @@ static func _paginer(ec: Ecrans) -> void:
 		if _lettrable(ec.entrees[i]):
 			var lettre := char(97 + k)
 			ec.lettres[i] = lettre
-			if i < ec.liste.item_count:   # les anciens rappels de raccourci « (E) » en fin de libellé s'effacent : la lettre est celle de la ligne
-				ec.liste.set_item_text(i, "%s) %s" % [lettre, _sans_raccourci(ec.liste.get_item_text(i))])
+			if i < ec.liste.item_count:
+				ec.liste.set_item_text(i, "%s) %s" % [lettre, ec.liste.get_item_text(i)])
 			k += 1
 
 
@@ -292,6 +456,19 @@ static func _montrer_detail(ec: Ecrans) -> void:
 		ec.detail.text = ""
 		return
 	var en: Dictionary = ec.entrees[ec.selection]
+	var i_choix := -1   # une option de l'entrée choisie : le détail de cette entrée, ses options dessous
+	if str(en.get("kind", "")) == "option_choix":
+		i_choix = int(en.get("cible_i", -1))
+		if i_choix >= 0 and i_choix < ec.entrees.size():
+			en = ec.entrees[i_choix]
+	elif not ec.choix.is_empty() and _cle_entree(en) == _cle_entree(ec.choix):
+		i_choix = ec.selection
+	_detail_de(ec, en)
+	if i_choix >= 0:
+		ec.detail.text += _texte_options(ec, i_choix)
+
+
+static func _detail_de(ec: Ecrans, en: Dictionary) -> void:
 	if ec.courant == "charger":   # le portrait suit la ligne pointée, flèches comme souris (designer 2026-09-02)
 		EcransCreation._portrait_partie(ec, str(en.get("id", "")))
 	match str(en.get("kind", "")):
@@ -345,7 +522,6 @@ static func _action_principale(ec: Ecrans) -> void:
 	if ec.entrees.is_empty() or ec.selection >= ec.entrees.size():
 		return
 	var en: Dictionary = ec.entrees[ec.selection]
-	var j: Dictionary = ec.main.joueur()
 	match str(en.get("kind", "")):
 		"page":
 			page_suivante(ec)
@@ -356,6 +532,23 @@ static func _action_principale(ec: Ecrans) -> void:
 		"action_inventaire":
 			EcransInventaire._action_inventaire(ec, str(en.action))
 			return
+		"option_choix":
+			_action_choix(ec, en)
+			return
+		"action_ecran":
+			_action_ecran(ec, str(en.action))
+			return
+	if ec.choix.is_empty() and not _options_de(ec, en).is_empty():   # choisir une entrée, c'est voir ses options (designer 2026-09-06, 18 h 50)
+		ec.choix = en.duplicate()
+		rafraichir(ec)
+		return
+	_action_defaut(ec, en)
+
+
+## L'action principale d'une entrée (Entrée d'avant, « defaut » parmi ses options).
+static func _action_defaut(ec: Ecrans, en: Dictionary) -> void:
+	var j: Dictionary = ec.main.joueur()
+	match str(en.get("kind", "")):
 		"objet":
 			if ec.courant == "inventaire":   # choisir un objet, c'est voir ses options (designer 2026-09-06, 18 h 25)
 				ec.objet_choisi = str(en.uid)

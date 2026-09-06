@@ -957,7 +957,7 @@ journal.repeuplement,"{village} : un nouvel habitant s'installe"
 journal.village_abandonne,"{village} est abandonné"
 function.dirigeant.name,Dirigeant
 ui.gestion.voisin,"{nom} ({gouv}, {n} cellules) — réputation {rep} · relation {rel} · accord : {accord}"
-ui.gestion.voisin_aide,T : proposer l'accord suivant (commercial ≥ 20 · non-agression ≥ 40 · alliance ≥ 60 · tribut)
+ui.gestion.voisin_aide,Choisir : proposer l'accord suivant (commercial ≥ 20 · non-agression ≥ 40 · alliance ≥ 60 · tribut)
 accord.aucun,aucun
 accord.commercial,accord commercial
 accord.non_agression,non-agression
@@ -1096,9 +1096,9 @@ ui.gestion.prod_or,"production : {n} or par semaine"
 ui.gestion.prod_matiere,"production : {nom} ×{n} par semaine"
 ui.gestion.stock,"stock : {nom} ×{n}"
 ui.gestion.rapport,{texte}
-ui.gestion.role_aide,"Entrée : changer de rôle (base → habitation → champs → ressources naturelles ; ressources naturelles efface les constructions au passage de la semaine)"
+ui.gestion.role_aide,"Choisir : changer de rôle (base → habitation → champs → ressources naturelles ; ressources naturelles efface les constructions au passage de la semaine)"
 ui.gestion.resident_aide,"Entrée : réassigner (choisir sa fonction) · Suppr : renvoyer"
-ui.gestion.stock_aide,Entrée : retirer le stock dans ton sac
+ui.gestion.stock_aide,Choisir : retirer le stock dans ton sac
 ui.ecran.deposer,Déposer 50 or (D)
 ui.ecran.retirer,Retirer 50 or (W)
 ui.ecran.assigner,Assigner ici (X)
@@ -3224,14 +3224,14 @@ journal.migrant,{nom} arrive s'installer à la base
 ui.gestion.loge,logé
 ui.gestion.sans_lit,sans lit (humeur −15)
 ui.gestion.compagnon,"compagnon : {nom} — {ordre} · PV {sante}/{sante_max}"
-ui.gestion.compagnon_aide,Entrée : suis-moi ⇄ attends ici
+ui.gestion.compagnon_aide,Choisir : suis-moi ⇄ attends ici
 journal.renvoye,{nom} est renvoyé : il redevient villageois
 perimetre.bois.name,bois
 perimetre.minerai.name,minerai
 perimetre.plantes.name,plantes sauvages
 ui.gestion.perimetre,"  {type} · {stockage} · richesse {richesse} · {n} assigné(s)"
 ui.gestion.perimetre_aide,P : changer le type · S : son stockage (à tour de rôle) · assigne des résidents dessus depuis leur fiche
-ui.gestion.perimetre_touche,P : un périmètre de récolte sur cette cellule (bois → minerai → plantes → aucun)
+ui.gestion.perimetre_touche,Choisir : un périmètre de récolte sur cette cellule (bois → minerai → plantes → aucun)
 ui.assigner.perimetre,"{fonction} · périmètre {type} ({x},{y}) · {richesse} tuiles"
 journal.perimetre_cree,"Périmètre {type} sur ({x},{y}) : {richesse} tuiles"
 journal.perimetre_retire,"Le périmètre de ({x},{y}) est retiré"
@@ -3604,3 +3604,24 @@ ui.ecran.action_retour,Retour à la liste des objets
 ui.ecran.equiper_objet,Équiper
 ui.ecran.desequiper,Retirer
 ui.ecran.reforger_avec,Reforger avec cet objet comme composant
+ui.choix.retour,Retour à la liste
+ui.choix.role_suivant,Changer de rôle (base → habitation → champs → ressources naturelles)
+ui.choix.perimetre_suivant,Périmètre de récolte suivant (bois → minerai → plantes → aucun)
+ui.choix.stockage_suivant,Stockage suivant pour ce poste
+ui.choix.reassigner,Réassigner
+ui.choix.renvoyer,Renvoyer
+ui.choix.ordre_bascule,Suis-moi ⇄ attends ici
+ui.choix.retirer_stock,Retirer le stock dans ton sac
+ui.choix.accord_suivant,Proposer l'accord suivant (commercial ≥ 20 · non-agression ≥ 40 · alliance ≥ 60 · tribut)
+ui.choix.fabriquer,Fabriquer
+ui.choix.accepter,Accepter la quête
+ui.choix.rendre,Rendre la quête
+ui.choix.acheter,Acheter
+ui.choix.vendre,Vendre
+ui.choix.donner,Donner
+ui.choix.reprendre,Reprendre
+ui.choix.entrainer,Entraîner
+ui.choix.supprimer_capacite,Supprimer la capacité
+ui.choix.gouvernance_suivante,Gouvernance suivante
+ui.choix.marge_plus,Marge des boutiques +
+ui.choix.marge_moins,Marge des boutiques −

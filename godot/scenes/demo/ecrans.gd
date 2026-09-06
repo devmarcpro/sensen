@@ -186,6 +186,7 @@ var dialogue_infos := ""                  # le texte d'informations de la carte,
 var page := 0                             # la page courante de l'écran (une option = une lettre, designer 2026-09-06, 17 h 55)
 var lettres: Dictionary = {}              # index d'entrée → sa lettre (« a », « b »…), posées par EcransListe._paginer
 var objet_choisi := ""                    # l'inventaire : l'objet choisi, dont les options sont les lignes lettrées (designer 2026-09-06, 18 h 25)
+var choix: Dictionary = {}                # tout écran : l'entrée choisie, dont les options sont les lignes lettrées (designer 2026-09-06, 18 h 50 : « partout »)
 var penta_objet: Composeur.PentagrammeSort   # le Wu Xing de l'objet choisi
 
 
@@ -234,6 +235,7 @@ func ouvrir(nom: String) -> void:
 	if courant != nom:
 		page = 0   # une page se garde tant que l'écran reste ouvert
 		objet_choisi = ""
+		choix = {}
 	courant = nom
 	EcransFeuille._replacer_liste(self)   # la colonne suit la largeur du panneau : le signal resized ne suffit pas à l'ouverture
 	selection = 0
@@ -293,6 +295,10 @@ func touche(ev: InputEventKey) -> bool:
 				objet_choisi = ""
 				EcransListe.rafraichir(self)
 				return true
+			if not choix.is_empty():   # les options d'une entrée : Échap revient à la liste
+				choix = {}
+				EcransListe.rafraichir(self)
+				return true
 			if courant == "titre":   # rien derrière l'écran principal : Échap n'y fait rien
 				return true
 			if not pose_edition.is_empty():   # Échap : on sort du pantin sans quitter la création
@@ -334,12 +340,6 @@ func touche(ev: InputEventKey) -> bool:
 			EcransListe._action_principale(self)
 			return true
 		KEY_DELETE, KEY_BACKSPACE:
-			if courant == "gestion":   # renvoyer un résident (Décision — Gestion de base, étape 2)
-				var en_g: Dictionary = entrees[selection] if selection < entrees.size() else {}
-				if en_g.get("kind", "") == "resident":
-					main.sim.desassigner(main.joueur(), str(en_g.id), true)
-					EcransListe.rafraichir(self)
-				return true
 			if courant == "composer":   # retirer la dernière occurrence du module sélectionné
 				var en_c: Dictionary = entrees[selection] if selection < entrees.size() else {}
 				if en_c.get("kind", "") == "module_composer":
@@ -348,82 +348,13 @@ func touche(ev: InputEventKey) -> bool:
 						sequence_composee.remove_at(i_c)
 						EcransListe.rafraichir(self)
 				return true
-		KEY_S:
-			if courant == "gestion":   # le stockage d'un poste, à tour de rôle parmi les stockages (designer 2026-09-04)
-				var en_s: Dictionary = entrees[selection] if selection < entrees.size() else {}
-				if en_s.get("kind", "") == "perimetre":
-					var sim_s = main.sim
-					var stockages: Array = []
-					for pid_s in sim_s.perimetres().keys():
-						if bool(sim_s.regles.r.royaume.perimetres.types.get(str(sim_s.perimetres()[pid_s].type), {}).get("stockage", false)):
-							stockages.append(str(pid_s))
-					stockages.sort()
-					var actuel_s: String = str(sim_s.perimetres()[str(en_s.id)].get("stockage", ""))
-					var k_s: int = stockages.find(actuel_s)
-					sim_s.assigner_stockage(str(en_s.id), str(stockages[k_s + 1]) if k_s + 1 < stockages.size() else "")
-					EcransListe.rafraichir(self)
-				return true
-		KEY_P:
-			if courant == "gestion":   # le périmètre de récolte d'une cellule : bois → minerai → plantes → aucun (2026-09-04)
-				var en_p: Dictionary = entrees[selection] if selection < entrees.size() else {}
-				if en_p.get("kind", "") in ["cellule", "perimetre"]:
-					var sim_p = main.sim
-					var cell_p: Vector2i = en_p.cellule
-					var ordre_p: Array = sim_p.regles.r.royaume.perimetres.ordre
-					var pid_p: String = sim_p.perimetre_de(cell_p)
-					var k_p: int = -1 if pid_p.is_empty() else ordre_p.find(str(sim_p.perimetres()[pid_p].type))
-					if k_p + 1 < ordre_p.size():
-						sim_p.creer_perimetre(cell_p, str(ordre_p[k_p + 1]))
-					else:
-						sim_p.retirer_perimetre(pid_p)
-					EcransListe.rafraichir(self)
-				return true
 		KEY_T:
 			if courant in ["commerce", "echange"]:   # T : trier le volet courant (designer 2026-09-04)
 				echange_visuel.trier_suivant()
 				return true
-		KEY_D:
-			if courant == "gestion":
-				main.sim.deposer(main.joueur(), 50)
-				EcransListe.rafraichir(self)
-				return true
-		KEY_T:
-			if courant == "gestion":
-				var en: Dictionary = entrees[liste.get_selected_items()[0]] if not liste.get_selected_items().is_empty() and liste.get_selected_items()[0] < entrees.size() else {}
-				if en.get("kind", "") == "voisin":
-					var types: Array = ["commercial", "non_agression", "alliance", "tribut"]
-					var actuel: String = str(main.sim.territoire.accords.get(str(en.id), ""))
-					if actuel.begins_with("tribut"):
-						actuel = "tribut"
-					main.sim.proposer_accord(main.joueur(), str(en.id), str(types[(types.find(actuel) + 1) % types.size()]))
-					EcransListe.rafraichir(self)
-				return true
-		KEY_G:
-			if courant == "gestion":
-				var ids: Array = GameData.catalogues.governments.keys()
-				ids.sort()
-				var actuel: String = str(main.sim.territoire.gouvernance_cible) if not str(main.sim.territoire.gouvernance_cible).is_empty() else str(main.sim.territoire.gouvernance)
-				main.sim.changer_gouvernance(str(ids[(ids.find(actuel) + 1) % ids.size()]))
-				EcransListe.rafraichir(self)
-				return true
-		KEY_PLUS, KEY_KP_ADD, KEY_EQUAL:
-			if courant == "gestion":
-				main.sim.regler_marge(float(main.sim.regles.r.royaume.boutique.marge_pas))
-				EcransListe.rafraichir(self)
-				return true
-		KEY_MINUS, KEY_KP_SUBTRACT:
-			if courant == "gestion":
-				main.sim.regler_marge(-float(main.sim.regles.r.royaume.boutique.marge_pas))
-				EcransListe.rafraichir(self)
-				return true
 		KEY_V:
 			if courant == "composer":
 				EcransGestion._valider_composition(self)
-				return true
-		KEY_W:
-			if courant == "gestion":
-				main.sim.retirer(main.joueur(), 50)
-				EcransListe.rafraichir(self)
 				return true
 	return false
 

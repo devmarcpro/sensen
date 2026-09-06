@@ -626,6 +626,12 @@ func _ready() -> void:
 			if not jo.get("sac", []).is_empty():
 				scene.ecrans.objet_choisi = str(jo.sac[0])
 				EcransListe.rafraichir(scene.ecrans)
+		if args[i2] == "--choisir-entree" and scene.sim != null and scene.ecrans.est_ouvert():   # la première entrée qui a des options : choisie, ses options lettrées
+			for en_c in scene.ecrans.entrees:
+				if not EcransListe._options_de(scene.ecrans, en_c).is_empty():
+					scene.ecrans.choix = en_c.duplicate()
+					EcransListe.rafraichir(scene.ecrans)
+					break
 		if args[i2] == "--ecran" and i2 + 1 < args.size():
 			scene.ecrans.ouvrir(args[i2 + 1])
 	for il in args.size():   # --ligne N : la N-ième ligne de la liste sélectionnée, son détail à droite (2026-09-04)

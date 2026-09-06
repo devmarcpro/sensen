@@ -30,7 +30,6 @@ static func _construire_atelier(ec: Ecrans, j: Dictionary) -> void:
 	if plans.is_empty():
 		ec.liste.add_item(ec.tr("ui.atelier.vide"))
 		ec.entrees.append({"kind": "texte", "texte": ec.tr("ui.atelier.vide")})
-	EcransListe._bouton(ec, ec.tr("ui.ecran.fabriquer"), func() -> void: EcransListe._action_principale(ec))
 
 
 static func _titre_plan(ec: Ecrans, pl: Dictionary) -> String:

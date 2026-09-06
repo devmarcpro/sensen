@@ -348,8 +348,6 @@ static func _construire_quetes(ec: Ecrans, j: Dictionary) -> void:
 			var texte: String = EcransGestion._texte_quete(ec, q)
 			ec.liste.add_item((ec.tr("ui.quetes.terminee") if q.etat == "terminee" else ec.tr("ui.quetes.en_cours")).format({"texte": texte, "fait": int(q.fait), "count": int(q.count)}))
 			ec.entrees.append({"kind": "quete", "quete": q, "texte": texte + "\n" + ec.tr("ui.quetes.recompense").format({"or": int(q.or), "xp": int(q.xp)})})
-	EcransListe._bouton(ec, ec.tr("ui.ecran.accepter"), func() -> void: EcransListe._action_principale(ec))
-	EcransListe._bouton(ec, ec.tr("ui.ecran.rendre"), func() -> void: EcransListe._action_principale(ec))
 
 
 static func _construire_commerce(ec: Ecrans, j: Dictionary) -> void:
@@ -371,8 +369,6 @@ static func _construire_commerce(ec: Ecrans, j: Dictionary) -> void:
 		var p2: Dictionary = ec.main.sim.prix_suggere(uid, pnj, j)
 		ec.liste.add_item("%s — %s" % [EcransInventaire._nom_court(ec, uid), ec.tr("ui.prix.or").format({"n": int(p2.achat)})])
 		ec.entrees.append({"kind": "vente", "uid": uid, "prix": p2})
-	EcransListe._bouton(ec, ec.tr("ui.ecran.acheter"), func() -> void: EcransListe._action_principale(ec))
-	EcransListe._bouton(ec, ec.tr("ui.ecran.vendre"), func() -> void: EcransListe._action_principale(ec))
 
 
 # ---------------------------------------------------------------- territoire (Population et exploitation, Entretien et taxes)

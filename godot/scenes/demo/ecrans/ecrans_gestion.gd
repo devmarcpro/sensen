@@ -112,8 +112,8 @@ static func _construire_gestion(ec: Ecrans, j: Dictionary) -> void:
 	var cmd: Dictionary = t.get("commande", {})
 	ec.liste.add_item(ec.tr("ui.gestion.commande").format({"espece": ec.tr(GameData.entree("species", str(cmd.espece)).name_key), "couleur": cmd.couleur, "motif": cmd.motif, "or": int(cmd.or), "chatoyant": ec.tr("ui.gestion.commande_chatoyant") if bool(cmd.get("chatoyant", false)) else ""}) if not cmd.is_empty() else ec.tr("ui.gestion.commande_aucune"), null, false)
 	ec.entrees.append({"kind": "texte", "texte": ""})
-	EcransListe._bouton(ec, ec.tr("ui.ecran.deposer"), func() -> void: ec.main.sim.deposer(ec.main.joueur(), 50); EcransListe.rafraichir(ec))
-	EcransListe._bouton(ec, ec.tr("ui.ecran.retirer"), func() -> void: ec.main.sim.retirer(ec.main.joueur(), 50); EcransListe.rafraichir(ec))
+	# Les actions du territoire qui ne portent sur aucune entrée : des lignes lettrées après la liste (designer 2026-09-06, 18 h 50)
+	EcransListe._actions_ecran(ec, [["ui.ecran.deposer", "deposer"], ["ui.ecran.retirer", "retirer"], ["ui.choix.gouvernance_suivante", "gouvernance_suivante"], ["ui.choix.marge_plus", "marge_plus"], ["ui.choix.marge_moins", "marge_moins"]])
 
 
 static func _lois_txt(ec: Ecrans, roy: Dictionary) -> String:
