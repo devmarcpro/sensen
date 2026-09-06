@@ -881,9 +881,11 @@ func test_royaume_pays() -> void:
 	verifier(s2.charger_sauvegarde() and s2.monde.etats_royaumes.has("roy_a") and str(s2.monde.etats_royaumes.roy_a.dirigeant) == "Titus Aurelius", "rechargé : le règne de Titus Aurelius")
 
 
-## Les bâtiments à étages (Villes, 99, 2026-09-05) : une maison haute a un escalier ; y marcher charge l'étage (un petit
-## intérieur bâti sur le plan, avec ses lits et ses meubles) ; l'escalier du haut mène au suivant, celui du bas ramène
-## dans la rue devant l'escalier.
+## Les bâtiments à étages sont la dimension Z du monde (designer 2026-09-06, 16 h : « changer d'étage change juste la
+## dimension Z du monde, ce n'est pas une dimension à part ») : la fenêtre a une couche par étage, le plan de l'étage est
+## posé sur l'emprise du bâtiment à la couche z, l'escalier lie la marche du bas à l'arrivée du haut ; y poser le pied
+## monte, sans quitter la ville ; de là-haut, la rue se voit par l'air ; un chemin de la rue au lit de l'étage passe
+## l'escalier, le noyau C++ et le GDScript d'accord.
 func test_batiment_etages() -> void:
 	var pref: Dictionary = GameData.catalogues.village_buildings.maison_haute
 	verifier(pref.has("etages") and pref.etages.size() >= 1 and "^" in "".join(pref.plan) and "v" in "".join(pref.etages[0]), "la maison haute a un escalier qui monte et un plan d'étage qui redescend")
@@ -912,15 +914,20 @@ func test_batiment_etages() -> void:
 		surf._poser_batiment(e, pref, pos0, {"mur": "chene", "toit": "chaume_tresse", "sol": "calcaire"}, "maison_haute")
 		bat_e = e.village.batiments.back()
 	verifier(bat_e.has("escalier"), "un bâtiment à étages avec son escalier (%s)" % str(bat_e.id))
+	var lits_haut := 0
+	for l in bat_e.lits:
+		if Grille.z_de(l) > 0:
+			lits_haut += 1
+	verifier(lits_haut > 0, "sa fiche note les lits de l'étage (%d), à leur couche" % lits_haut)
 	s.monde.cellules[cell] = e
 	s.grille = s.monde.fenetre(s.monde.centre, GameData.config("tile_contents"), s.regles.r.deplacement, int(s.regles.r.vision.hauteur_oeil))
 	for x in s.vivants():
 		if s.grille.dans(x.pos) and s.grille.occupant(x.pos).is_empty():
 			s.grille.placer(x.id, x.pos)
-	var esc: Vector2i = s.monde.pos_monde(cell, bat_e.escalier)
-	verifier(str(s.grille.meubles.get(s.grille.idx(esc), "")) == "escalier" and not s.grille.bloque_passage(esc), "l'escalier est un meuble franchissable de la grille")
-	# Les façades et les toits (Villes, 2026-09-06) : l'emprise du bâtiment porte ses niveaux et son toit dans la fenêtre.
 	var g := s.grille
+	var esc: Vector2i = s.monde.pos_monde(cell, bat_e.escalier)
+	verifier(str(g.meubles.get(g.idx(esc), "")) == "escalier" and not g.bloque_passage(esc), "l'escalier est un meuble franchissable de la grille")
+	# Les façades et les toits (Villes, 2026-09-06) : l'emprise du bâtiment porte ses niveaux et son toit dans la fenêtre.
 	var coin: Vector2i = s.monde.pos_monde(cell, Vector2i(bat_e.origine))
 	var niveaux_attendus: int = 1 + GameData.catalogues.village_buildings[str(bat_e.id)].etages.size()
 	verifier(int(g.niveaux_bat[g.idx(coin)]) == niveaux_attendus and int(g.niveaux_bat[g.idx(esc)]) == niveaux_attendus, "l'emprise de %s porte ses %d niveaux, du mur d'angle à l'escalier" % [str(bat_e.id), niveaux_attendus])
@@ -933,18 +940,67 @@ func test_batiment_etages() -> void:
 			un_niveau += 1
 	verifier(un_niveau > 0, "les maisons ordinaires font un niveau (%d bâtiments)" % un_niveau)
 	verifier(GameData.catalogues.village_buildings.has("immeuble") and GameData.catalogues.village_buildings.immeuble.etages.size() == 2 and "immeuble" in GameData.config("villes").composition.residentiel.logements, "l'immeuble : deux étages, dans les logements du quartier résidentiel")
+	# Les couches Z de la fenêtre
+	verifier(g.couches >= 2 and g.hauteurs.size() == g.n_tuiles() and g.contenu.size() == g.n_tuiles() and g.lien_a.size() == g.n_tuiles(), "la fenêtre a ses couches Z (%d) et ses tableaux à leur taille" % g.couches)
+	verifier(g.a_lien(esc), "l'escalier du rez-de-chaussée est lié à l'étage")
+	var haut := g.lien_de(esc)
+	var rect: Rect2i = g.batiments_liste[b_idx - 1].rect
+	verifier(Grille.z_de(haut) == 1 and rect.has_point(Grille.plat(haut)) and str(g.meubles.get(g.idx(haut), "")) == "escalier" and g.lien_de(haut) == esc, "son autre bout est l'arrivée de l'étage 1, dans l'emprise, liée en retour")
+	var murs_z := 0
+	var lits_z := 0
+	var lit_z := Vector2i(-1, -1)
+	for y in rect.size.y:
+		for x in rect.size.x:
+			var t := Grille.en_couche(rect.position + Vector2i(x, y), 1)
+			if "mur" in g.contenu_de(t).get("tags", []):
+				murs_z += 1
+			if str(g.meubles.get(g.idx(t), "")).begins_with("lit"):
+				lits_z += 1
+				lit_z = t
+			verifier(int(g.bat_de[g.idx(t)]) == b_idx and int(g.niveaux_bat[g.idx(t)]) == 1, "la tuile d'étage %s est au bâtiment, un niveau" % str(t))
+	verifier(murs_z >= 2 * (rect.size.x + rect.size.y) - 4 and lits_z >= 1, "l'étage a ses murs (%d) et ses lits (%d) sur la couche 1" % [murs_z, lits_z])
+	var air := Grille.en_couche(j.pos, 1)
+	verifier(g.dans(air) and "vide" in g.contenu_de(air).get("tags", []) and g.bloque_passage(air) and not bool(g.contenu_de(air).get("bloque_vue", false)) and g.h(air) == g.h(j.pos), "hors des bâtiments, l'étage est de l'air : on n'y marche pas, on voit au travers, à la hauteur du sol")
+	# Le chemin de la rue au chevet du lit de l'étage, par l'escalier : noyau et GDScript d'accord
 	var voisin := s._tuile_libre_autour(esc)
-	s.grille.liberer(j.pos)
+	g.liberer(j.pos)
 	j.pos = voisin
-	s.grille.placer(j.id, voisin)
-	verifier(s._entrer_interieur(j, esc), "monter l'escalier charge l'intérieur")
-	verifier(s.lieu == "donjon" and bool(s.donjon.get("interieur", false)) and int(s.donjon.etage) == 1 and s.grille.largeur == str(GameData.catalogues.village_buildings[str(bat_e.id)].etages[0][0]).length(), "au premier étage : une grille de la taille du plan de %s (%d × %d)" % [str(bat_e.id), s.grille.largeur, s.grille.hauteur_grille])
-	var lits := 0
-	for gi in s.grille.meubles.keys():
-		if str(s.grille.meubles[gi]).begins_with("lit"):
-			lits += 1
-	verifier(lits >= 2 and j.pos == Vector2i(s.donjon.entree), "l'étage a ses lits (%d) et le joueur est sur l'escalier du bas" % lits)
-	verifier(s._remonter(j) and s.lieu == "camp" and s._cell_de(j.pos) == cell and Grille.distance(j.pos, esc) <= 2, "redescendre ramène dans la rue, devant l'escalier")
+	g.placer(j.id, voisin)
+	var chevet := s._tuile_libre_autour(lit_z)
+	verifier(Grille.z_de(chevet) == 1, "un chevet libre à l'étage, près du lit %s" % str(lit_z))
+	var ch := g.chemin(voisin, chevet, false, j.id, false, 4000)
+	var ch_gd := g._chemin_gd(voisin, chevet, false, j.id, false, 4000)
+	var passe_escalier := false
+	for pas in ch:
+		if pas == haut:
+			passe_escalier = true
+	verifier(not ch.is_empty() and ch.back() == chevet and passe_escalier and ch == ch_gd, "un chemin de la rue au chevet du lit de l'étage passe l'escalier (%d pas), noyau et GDScript d'accord" % ch.size())
+	var att := g.atteignables(voisin, 60)
+	var att_gd := g._atteignables_gd(voisin, 60)
+	verifier(att.has(haut) and att == att_gd, "les atteignables franchissent l'escalier (%d tuiles), noyau et GDScript d'accord" % att.size())
+	# Monter : un pas sur l'escalier arrive en haut, toujours en ville
+	var n_ent := s.ordre.size()
+	verifier(s._deplacer(j, esc, s.horloge_monde.ticks) and j.pos == haut and s.lieu == "camp" and s.grille == g and s.ordre.size() == n_ent, "un pas sur l'escalier : le joueur est à l'étage, dans la même ville, la même grille, avec les mêmes gens")
+	j["vue_sale"] = true
+	s.maj_vision()
+	var rue := Vector2i(-1, -1)
+	for dy in range(-6, 7):
+		for dx in range(-6, 7):
+			var t := Grille.plat(j.pos) + Vector2i(dx, dy)
+			var ta := Grille.en_couche(t, 1)
+			if g.dans(ta) and not rect.has_point(t) and "vide" in g.contenu_de(ta).get("tags", []) and j.vue.has(g.idx(ta)):
+				rue = t
+				break
+		if rue.x >= 0:
+			break
+	verifier(rue.x >= 0 and s.voit(j, rue), "depuis l'étage, la rue se voit par l'air, par-dessus les murs (%s)" % str(rue))
+	verifier(not s.voit(j, voisin), "la pièce du bas, sous le plancher, ne se voit pas")
+	# Redescendre : depuis l'escalier du haut, un pas sur la marche du bas
+	verifier(SimLieux._descendre(s, j) and j.pos == esc and Grille.z_de(j.pos) == 0, "descendre depuis l'escalier du haut ramène sur la marche du bas")
+	# Et remonter en marchant : l'autre bout, puis un pas de côté, puis revenir sur l'escalier
+	verifier(s._deplacer(j, haut, s.horloge_monde.ticks) and j.pos == haut, "depuis la marche du bas, l'autre bout est à un pas")
+	var cote := s._tuile_libre_autour(haut)
+	verifier(Grille.z_de(cote) == 1 and s._deplacer(j, cote, s.horloge_monde.ticks) and s._deplacer(j, haut, s.horloge_monde.ticks) and j.pos == esc, "un pas de côté à l'étage, puis un pas sur l'escalier : en bas")
 
 
 ## La palette d'un village (Villes, designer 2026-09-06) : le bois parmi les essences du biome, la pierre parmi ses roches

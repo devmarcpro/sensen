@@ -750,6 +750,19 @@ func maj_vision() -> void:
 			if not grille.decouvert.has(idx):
 				grille.decouvert[idx] = true
 				grille.decouvertes_recentes.append(idx)   # le client ne redessine que les morceaux de terrain touchés
+		if Grille.z_de(e.pos) > 0:   # à l'étage (les couches Z) : par-dessus les murs de son niveau, l'air se voit — et la rue par lui (voit)
+			var oeil_bas: int = grille.hauteur_oeil
+			grille.hauteur_oeil = oeil_bas + int(regles.r.vision.get("etage_surplomb", 2))
+			for idx in grille.champ_de_vue(e.pos, portee):
+				if vue.has(idx):
+					continue
+				var ci: int = grille.contenu[idx]
+				if ci > 0 and grille.contenu_ids[ci] == "vide":
+					vue[idx] = true
+					if not grille.decouvert.has(idx):
+						grille.decouvert[idx] = true
+						grille.decouvertes_recentes.append(idx)
+			grille.hauteur_oeil = oeil_bas
 		if vue.size() != e.get("vue", {}).size() or e.get("vue_pos", Vector2i(-1, -1)) != e.pos or e.get("vue_sale", false):
 			e["vue_version"] = int(e.get("vue_version", 0)) + 1
 			if lieu == "camp" and monde != null:   # exploration à résolution chunk (minimap)
@@ -764,7 +777,15 @@ func maj_vision() -> void:
 ## Un être voit-il la tuile `t` ? (les êtres sans champ de vue calculé — IA — voient tout : leur
 ## détection a sa propre règle)
 func voit(e: Dictionary, t: Vector2i) -> bool:
-	return not e.has("vue") or e.vue.has(grille.idx(t))
+	if not e.has("vue") or e.vue.has(grille.idx(t)):
+		return true
+	# Depuis un étage (les couches Z, 2026-09-06), la rue se voit par l'air : la tuile au-dessus de t, à la couche de e,
+	# est en vue et n'est que du vide. Le sol ne voit pas les étages (les murs et le toit).
+	var ze := Grille.z_de(e.pos)
+	if ze > 0 and Grille.z_de(t) == 0:
+		var ta := Grille.en_couche(t, ze)
+		return grille.dans(ta) and e.vue.has(grille.idx(ta)) and "vide" in grille.contenu_de(ta).get("tags", [])
+	return false
 
 
 func _fin_de_pas(nom: String) -> void:
@@ -1175,12 +1196,35 @@ func facteurs_franchissement(e: Dictionary) -> Dictionary:
 
 
 func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
-	if Grille.distance(e.pos, vers) != 1 or not grille.occupant(vers).is_empty():
+	# Les escaliers des couches Z (designer 2026-09-06 : « changer d'étage change juste la dimension Z du monde ») : poser
+	# le pied sur un escalier, c'est arriver à son autre bout, une couche plus haut ou plus bas ; depuis l'escalier où
+	# l'on se tient, l'autre bout est à un pas de base. Un chemin donne l'autre bout comme pas suivant : la marche est
+	# la tuile voisine qui y mène.
+	var arrivee := vers
+	var par_escalier := false
+	if Grille.distance(e.pos, vers) != 1:
+		if grille.a_lien(e.pos) and grille.lien_de(e.pos) == vers:
+			par_escalier = true
+		else:
+			var marche_ok := false
+			for d in Grille.DIRS:
+				var m: Vector2i = e.pos + d
+				if grille.dans(m) and grille.a_lien(m) and grille.lien_de(m) == vers:
+					vers = m
+					marche_ok = true
+					break
+			if not marche_ok:
+				return false
+	if not grille.occupant(vers).is_empty():
 		return false
+	if not par_escalier and grille.a_lien(vers):
+		arrivee = grille.lien_de(vers)
+		if not grille.occupant(arrivee).is_empty():
+			return false
 	if "fermee" in grille.contenu_de(vers).get("tags", []):   # une porte fermée : ce pas l'ouvre, le suivant passe
 		return _basculer_porte(e, vers, tick)
 	var volant := Etres.est_volant(e)
-	var cout := grille.cout_pas(e.pos, vers, volant, false, facteurs_franchissement(e))
+	var cout := int(regles.r.deplacement.cout_base) if par_escalier else grille.cout_pas(e.pos, vers, volant, false, facteurs_franchissement(e))
 	var chute := 0
 	if cout < 0:
 		if not volant and grille.est_chute(e.pos, vers):
@@ -1202,7 +1246,11 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 		return false
 	_quitter_garde(e)
 	grille.liberer(e.pos)
-	e.orientation = vers - e.pos
+	e.orientation = Grille.plat(vers) - Grille.plat(e.pos)
+	if arrivee != vers or par_escalier:   # l'escalier franchi : on est à l'autre bout, un étage plus haut ou plus bas
+		vers = arrivee
+		if e.controle == "joueur":
+			EventBus.emettre(&"journal", [&"journal.monte_etage" if Grille.z_de(vers) > Grille.z_de(e.pos) else &"journal.descend_etage", {"nom": e.name_key, "etage": Grille.z_de(vers), "batiment": ""}])
 	e.pos = vers
 	grille.placer(e.id, vers)
 	var ticks_dep := regles.ticks_deplacement(cout, e.competences_eff, en_combat(e))
@@ -1249,10 +1297,6 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 		if donjon.has("entree") and vers == donjon.entree and SimLieux._remonter(self, e):
 			EventBus.dispatcher()
 			return true
-	# L'escalier d'un bâtiment à étages : y marcher monte (Villes, 99).
-	if e.controle == "joueur" and lieu == "camp" and monde != null and str(grille.meubles.get(grille.idx(vers), "")) == "escalier" and SimVilles._entrer_interieur(self, e, vers):
-		EventBus.dispatcher()
-		return true
 	# Une cellule corrompue happe qui y met le pied (designer 2026-09-01, point 51).
 	if e.controle == "joueur" and lieu == "camp" and monde != null and SimLieux.entrer_donjon_de_la_cellule(self, e):
 		EventBus.dispatcher()
@@ -4246,7 +4290,7 @@ func _recalculer_lumiere_noyau() -> void:
 
 
 func _recalculer_lumiere_gd() -> void:
-	var n := grille.largeur * grille.hauteur_grille
+	var n := grille.n_tuiles()
 	carte_lumiere.resize(n)
 	var ambiante := 0
 	if lieu == "donjon" and not donjon.is_empty():   # Éclairage (2026-08-30) : une lueur ambiante de l'étage, le thème peut la fixer
@@ -4300,7 +4344,7 @@ func _recalculer_lumiere_gd() -> void:
 
 ## Le niveau 0-15 d'une tuile (recalcul au plus une fois par tick de monde, et seulement quand on lit).
 func niveau_lumiere(pos: Vector2i) -> int:
-	if lumiere_sale or lumiere_tick != horloge_monde.ticks or carte_lumiere.size() != grille.largeur * grille.hauteur_grille:
+	if lumiere_sale or lumiere_tick != horloge_monde.ticks or carte_lumiere.size() != grille.n_tuiles():
 		_recalculer_lumiere()
 	return int(carte_lumiere[grille.idx(pos)]) if grille.dans(pos) else 0
 
@@ -5473,8 +5517,6 @@ func harmonie_prevue(plan: Dictionary) -> Dictionary:
 
 # SimVilles
 
-func _entrer_interieur(e: Dictionary, pos: Vector2i) -> bool:
-	return SimVilles._entrer_interieur(self, e, pos)
 
 # SimLieux
 

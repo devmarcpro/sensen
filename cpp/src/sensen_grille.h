@@ -38,19 +38,36 @@ public:
 	};
 
 	// La vue d'une grille le temps d'un appel : des pointeurs sur ses tableaux (les références tiennent les tampons).
+	// Les couches Z (Grille.gd, 2026-09-06) : y porte z × BANDE_Z, les index s'empilent par couche (n0 tuiles chacune).
+	static const int BANDE_Z = 1 << 20;
+
 	struct Etat {
 		int L = 0, H = 0, ox = 0, oy = 0;
+		int couches = 1, n0 = 0, n = 0;   // n0 : tuiles d'une couche ; n : toutes couches
 		PackedByteArray hauteurs, occ, dangers, eau;
-		PackedInt32Array contenu;
+		PackedInt32Array contenu, lien;
 		PackedFloat64Array frottement;
 		const uint8_t *h = nullptr, *o = nullptr, *d = nullptr, *e = nullptr;
-		const int32_t *c = nullptr;
+		const int32_t *c = nullptr, *li = nullptr;   // li : l'escalier de chaque tuile (−1 sans), ou nul
 		const double *f = nullptr;
 		bool neige = false, gel = false;
 		Dictionary occupants;
 
-		inline bool dans(int x, int y) const { return x >= ox && y >= oy && x < ox + L && y < oy + H; }
-		inline int idx(int x, int y) const { return (y - oy) * L + (x - ox); }
+		static inline int z_de(int y) { return y >= 0 ? y / BANDE_Z : 0; }
+		inline bool dans(int x, int y) const {
+			int z = z_de(y);
+			if (z >= couches) {
+				return false;
+			}
+			int ly = y - z * BANDE_Z;
+			return x >= ox && ly >= oy && x < ox + L && ly < oy + H;
+		}
+		inline int idx(int x, int y) const {
+			int z = z_de(y);
+			return z * n0 + (y - z * BANDE_Z - oy) * L + (x - ox);
+		}
+		inline int px(int i) const { return ox + (i % n0) % L; }
+		inline int py(int i) const { return oy + (i % n0) / L + (i / n0) * BANDE_Z; }
 	};
 
 private:

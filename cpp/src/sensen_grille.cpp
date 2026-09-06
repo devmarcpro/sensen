@@ -334,7 +334,7 @@ PackedByteArray SensenGrille::propager_lumiere(Object *grille, const PackedInt32
 	if (!charger(grille, s)) {
 		return res;
 	}
-	int n = s.L * s.H;
+	int n = s.n;
 	res.resize(n);
 	uint8_t *carte = res.ptrw();
 	for (int i = 0; i < n; ++i) {
@@ -379,7 +379,7 @@ PackedByteArray SensenGrille::propager_lumiere(Object *grille, const PackedInt32
 			if (bloque && !passe[gi]) {
 				continue;   // un mur est éclairé mais ne laisse rien passer — sauf s'il est de verre ou porte un meuble
 			}
-			int px = s.ox + gi % s.L, py = s.oy + gi / s.L;
+			int px = s.px(gi), py = s.py(gi);
 			for (int d = 0; d < 8; ++d) {
 				int qx = px + DX[d], qy = py + DY[d];
 				if (!s.dans(qx, qy)) {
@@ -469,7 +469,7 @@ void SensenGrille::configurer(const Dictionary &dep, int p_oeil, const PackedInt
 bool SensenGrille::charger(Object *grille, Etat &s) const {
 	static const StringName sn_largeur("largeur"), sn_hauteur("hauteur_grille"), sn_origine("origine"), sn_hauteurs("hauteurs"),
 			sn_contenu("contenu"), sn_occ("occ"), sn_dangers("danger_a"), sn_eau("eau_a"), sn_frott("frott_a"), sn_neige("neige"),
-			sn_gel("gel"), sn_occupants("occupants");
+			sn_gel("gel"), sn_occupants("occupants"), sn_couches("couches"), sn_lien("lien_a");
 	if (grille == nullptr) {
 		return false;
 	}
@@ -478,10 +478,14 @@ bool SensenGrille::charger(Object *grille, Etat &s) const {
 	Vector2i o = grille->get(sn_origine);
 	s.ox = o.x;
 	s.oy = o.y;
-	int n = s.L * s.H;
-	if (n <= 0) {
+	s.n0 = s.L * s.H;
+	if (s.n0 <= 0) {
 		return false;
 	}
+	Variant vc = grille->get(sn_couches);
+	s.couches = (vc.get_type() == Variant::INT) ? std::max(1, (int)vc) : 1;
+	s.n = s.n0 * s.couches;
+	int n = s.n;
 	s.hauteurs = grille->get(sn_hauteurs);
 	s.contenu = grille->get(sn_contenu);
 	if (s.hauteurs.size() < n || s.contenu.size() < n) {
@@ -500,6 +504,8 @@ bool SensenGrille::charger(Object *grille, Etat &s) const {
 	s.neige = (bool)grille->get(sn_neige);
 	s.gel = (bool)grille->get(sn_gel);
 	s.occupants = grille->get(sn_occupants);
+	s.lien = grille->get(sn_lien);
+	s.li = (s.lien.size() >= n) ? s.lien.ptr() : nullptr;
 	return true;
 }
 
@@ -585,7 +591,7 @@ Array SensenGrille::chemin(Object *grille, Vector2i depart, Vector2i arrivee, bo
 	if (depart == arrivee || !charger(grille, s) || !s.dans(arrivee.x, arrivee.y) || !s.dans(depart.x, depart.y)) {
 		return vide;
 	}
-	int n = s.L * s.H;
+	int n = s.n;
 	g_cout.assign(n, INF);
 	vient_de.assign(n, -1);
 	std::vector<Noeud> ouverts;
@@ -615,18 +621,30 @@ Array SensenGrille::chemin(Object *grille, Vector2i depart, Vector2i arrivee, bo
 			res.set_typed(Variant::VECTOR2I, StringName(), Variant());
 			for (size_t k = pas.size(); k > 0; --k) {
 				int t = pas[k - 1];
-				res.push_back(Vector2i(s.ox + t % s.L, s.oy + t / s.L));
+				res.push_back(Vector2i(s.px(t), s.py(t)));
 			}
 			return res;
 		}
 		int gc = g_cout[ci];
-		for (int k = 0; k < 8; ++k) {
-			int vx = cx + DX[k], vy = cy + DY[k];
-			int cout = cout_pas(s, ci, vx, vy, volant, eviter_nage);
-			if (cout < 0) {
-				continue;
+		// Les huit pas, et — depuis l'escalier où l'on se tient (le départ) — son autre bout, au coût de base.
+		bool depuis_escalier = (ci == i_dep && s.li && s.li[ci] >= 0);
+		for (int k = 0; k < (depuis_escalier ? 9 : 8); ++k) {
+			int vi, cout;
+			if (k == 8) {
+				vi = s.li[ci];
+				cout = cout_base;
+			} else {
+				int vx = cx + DX[k], vy = cy + DY[k];
+				cout = cout_pas(s, ci, vx, vy, volant, eviter_nage);
+				if (cout < 0) {
+					continue;
+				}
+				vi = s.idx(vx, vy);
+				if (s.li && s.li[vi] >= 0) {
+					vi = s.li[vi];   // un escalier ne se tient pas : y poser le pied, c'est arriver à l'autre bout
+				}
 			}
-			int vi = s.idx(vx, vy);
+			int vx = s.px(vi), vy = s.py(vi);
 			bool est_arrivee = (vx == arrivee.x && vy == arrivee.y);
 			if (s.o && s.o[vi] && !est_arrivee) {
 				// Occupée : on passe seulement si l'occupant est celui qu'on ignore.
@@ -645,7 +663,7 @@ Array SensenGrille::chemin(Object *grille, Vector2i depart, Vector2i arrivee, bo
 			if (ng < g_cout[vi]) {
 				g_cout[vi] = ng;
 				vient_de[vi] = ci;
-				tas_push(ouverts, { vx, vy, ng + base * distance_(Vector2i(vx, vy), arrivee) });
+				tas_push(ouverts, { vx, vy, ng + base * distance_(Vector2i(vx, vy - Etat::z_de(vy) * BANDE_Z), Vector2i(arrivee.x, arrivee.y - Etat::z_de(arrivee.y) * BANDE_Z)) });
 			}
 		}
 	}
@@ -660,7 +678,7 @@ Dictionary SensenGrille::atteignables(Object *grille, Vector2i depart, int budge
 		res[depart] = 0;
 		return res;
 	}
-	int n = s.L * s.H;
+	int n = s.n;
 	g_cout.assign(n, INF);
 	std::vector<int> ordre;
 	std::vector<int> file;
@@ -677,14 +695,24 @@ Dictionary SensenGrille::atteignables(Object *grille, Vector2i depart, int budge
 		}
 		int c = file[k];
 		file.erase(file.begin() + k);
-		int cx = s.ox + c % s.L, cy = s.oy + c / s.L;
-		for (int d = 0; d < 8; ++d) {
-			int vx = cx + DX[d], vy = cy + DY[d];
-			int cout = cout_pas(s, c, vx, vy, volant, eviter_nage);
-			if (cout < 0) {
-				continue;
+		int cx = s.px(c), cy = s.py(c);
+		bool depuis_escalier = (c == i_dep && s.li && s.li[c] >= 0);
+		for (int d = 0; d < (depuis_escalier ? 9 : 8); ++d) {
+			int vi, cout;
+			if (d == 8) {
+				vi = s.li[c];
+				cout = cout_base;
+			} else {
+				int vx = cx + DX[d], vy = cy + DY[d];
+				cout = cout_pas(s, c, vx, vy, volant, eviter_nage);
+				if (cout < 0) {
+					continue;
+				}
+				vi = s.idx(vx, vy);
+				if (s.li && s.li[vi] >= 0) {
+					vi = s.li[vi];   // l'escalier mène à l'autre bout
+				}
 			}
-			int vi = s.idx(vx, vy);
 			if (s.o && s.o[vi]) {
 				continue;
 			}
@@ -699,13 +727,16 @@ Dictionary SensenGrille::atteignables(Object *grille, Vector2i depart, int budge
 		}
 	}
 	for (int t : ordre) {
-		res[Vector2i(s.ox + t % s.L, s.oy + t / s.L)] = g_cout[t];
+		res[Vector2i(s.px(t), s.py(t))] = g_cout[t];
 	}
 	return res;
 }
 
 // Grille.ligne_de_vue / premier_obstacle_vue : la même ligne interpolée, les mêmes arrondis.
 bool SensenGrille::ligne_de_vue_e(const Etat &s, Vector2i a, Vector2i b, Vector2i *obstacle) const {
+	if (Etat::z_de(a.y) != Etat::z_de(b.y)) {
+		return false;   // une autre couche : hors de vue (l'escalier ne se voit pas au travers)
+	}
 	double ha = (double)((int)s.h[s.idx(a.x, a.y)] + oeil);
 	double hb = (double)((int)s.h[s.idx(b.x, b.y)] + oeil);
 	int n = std::max(std::abs(b.x - a.x), std::abs(b.y - a.y));
@@ -905,7 +936,7 @@ PackedInt32Array SensenGrille::composante(Object *grille, Vector2i depart, int m
 	if (!charger(grille, s) || !s.dans(depart.x, depart.y)) {
 		return res;
 	}
-	int n = s.L * s.H;
+	int n = s.n;
 	marque.assign(n, 0);
 	std::vector<int> file;
 	int i0 = s.idx(depart.x, depart.y);
@@ -918,17 +949,20 @@ PackedInt32Array SensenGrille::composante(Object *grille, Vector2i depart, int m
 		if (max_tuiles > 0 && (int)res.size() >= max_tuiles) {
 			break;
 		}
-		int cx = s.ox + c % s.L, cy = s.oy + c / s.L;
+		int cx = s.px(c), cy = s.py(c);
 		for (int d = 0; d < 8; ++d) {
 			int vx = cx + DX[d], vy = cy + DY[d];
 			if (!s.dans(vx, vy)) {
 				continue;
 			}
 			int vi = s.idx(vx, vy);
-			if (marque[vi]) {
+			if (cout_pas(s, c, vx, vy, false, false) < 0) {
 				continue;
 			}
-			if (cout_pas(s, c, vx, vy, false, false) < 0) {
+			if (s.li && s.li[vi] >= 0) {
+				vi = s.li[vi];   // l'escalier : la composante continue à l'autre bout
+			}
+			if (marque[vi]) {
 				continue;
 			}
 			marque[vi] = 1;

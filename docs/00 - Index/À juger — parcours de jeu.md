@@ -634,11 +634,27 @@ La sonde des villes (monde 9, « Mokroslav ») le signale : la cellule résident
 
 `planete.json → routine.lod` : `rayon_plein` 28 tuiles (au-delà, un civil est un figurant : il bondit vers sa cible, traverse les murs sans qu'on le voie, ne redécide qu'`attente_ticks` 200 après être arrivé), `pas_par_decision` 6. Ce que ça change à l'œil : rien tant qu'on ne regarde pas — un figurant qui entre à l'écran est là où sa routine l'aurait mené, mais il peut y être arrivé en traversant une maison. Si tu veux que le rayon suive le zoom ou l'écran plutôt qu'un chiffre, dis-le.
 
-## 2026-09-06 — « Un paperdoll emmène des blocs avec lui » (18 h 30) : corrigé
+## 2026-09-06 — Les étages en Z (17 h 30) : ce que ça donne, et ce que je n'ai pas tranché
+
+- **À regarder** : `--ville --graine 21 --heure 10 --a-l-etage` — le joueur à l'étage d'une maison haute : le plancher, les meubles, les murs nord et ouest du niveau, les murs sud et est en muret, et la ville autour, vue par-dessus le parapet (les rues en clair, les pièces des autres bâtiments derrière leurs murs). Le toit de son bâtiment est ôté. En jeu : marcher sur l'escalier monte, marcher dessus à l'étage redescend, « descendre » aussi.
+- **Ce que j'ai choisi** : l'œil s'élève de deux unités à l'étage (`vision.etage_surplomb`) pour voir par-dessus les murs de son niveau — sinon, une pièce d'étage sans fenêtre ne voit rien, et « toujours dans la même ville » perdrait son sens. Une fenêtre (un mur de verre) serait la vraie règle ; c'est un préfab à dessiner, pas une mécanique.
+- **Un étage prend la lumière de sa tuile au sol** : le plancher du premier étage est éclairé comme la rue dessous. Une lumière propre par couche demanderait une texture de lumière par étage (le noyau la propage déjà sur toutes les couches, le client ne lit que le sol).
+- **La souris** atteint les tuiles de l'étage quand on y est ; en bas, elle ne monte pas — on monte par l'escalier.
+- **Les parties sauvées avant ce jour** : les PNJ qui « logeaient » à l'étage (point 99) étaient au sol ; ils y restent, leur lit est désormais à l'étage, ils y montent le soir.
+
+## 2026-09-06 — Les toits à pans, les murs coupés, les rues, plus de halo (17 h) : ce que j'ai vu dans les captures
+
+- **Les toits à pans** (`--ville --graine 21 --heure 10`) : pente, plat, pente se lit — un faîte sur les bâtiments longs, une pyramide sur les carrés, le versant au soleil plus clair que l'autre. `toits.pente_tuiles` (1 tuile) et `toits.hauteur_blocs` (1 bloc) dans `villes.json` : plus de pente_tuiles fait des toits plus doux, plus de hauteur_blocs des toits plus pointus. À ton œil.
+- **Les bâtiments plus grands** (deux colonnes et deux lignes de plus par plan) : une ville a moins de bâtiments par cellule mais chacun loge plus (un lit de plus par logement) ; test_village passe, les quartiers tiennent leurs habitants. Les rues à trois tuiles vont avec.
+- **Dans un bâtiment** (`--dans-batiment`) : les murs sud et est sont des murets, on voit la pièce, ses meubles, ses gens. Le muret fait une unité (`MUR_COUPE_UNITES`) : assez pour lire l'emprise, pas assez pour cacher un lit contre le mur. Si tu le veux invisible tout à fait, c'est ce nombre à 0 — mais alors l'emprise ne se lit plus.
+- **Plus de halo** : la nuit, la torche en main éclaire les tuiles autour par la propagation (niveaux 0-15 de tuile en tuile). C'est plus discret qu'un disque : `torche_force` (planete.json, 0,7) règle ce qu'elle ajoute au ciel de nuit ; monte-le si la torche ne se voit pas assez.
+- **Ce qui m'a frappé, et qui n'est pas à moi** : de jour, en ville, on ne voit qu'à `perception × detection_par_perception` tuiles (Per 8 × 1,0 = huit tuiles) — sur la place, les façades d'en face sont déjà « mémorisées », en silhouette sombre, et la ville paraît éteinte à midi. La règle est la tienne (`combat_rules.engagement.detection_par_perception`) ; un facteur de jour en surface (deux à trois fois la portée quand le ciel est clair, la nuit gardant sa règle) rendrait la ville lisible sans toucher au combat. Je ne l'ai pas changé.
+
+## 2026-09-06 — « Un paperdoll emmène des blocs avec lui » (15 h 45) : corrigé
 
 Les tuiles redessinées par-dessus un être (les murs devant lui, pour qu'il passe derrière) étaient dessinées sur le paperdoll lui-même, qui glisse d'une tuile à l'autre en 0,2 s : elles glissaient avec lui. Elles vivent désormais sur un enfant fixé au monde, replacé chaque image à la tuile visée. Le paperdoll glisse, les murs restent.
 
-## 2026-09-06 — La lumière par tuile (18 h) : ce que ça change à l'œil
+## 2026-09-06 — La lumière par tuile (15 h 20) : ce que ça change à l’œil
 
 - **Une seule lumière** : le ciel de l'heure, l'ombre portée et les torches se composent par tuile, en niveau et en teinte. Une ruelle à l'ombre à midi vaut 72 % ; la nuit vaut 30 % et bleutée ; une torche la nuit fait une tache chaude qui décroît sur quinze tuiles ; à midi elle ne se voit pas. Sous terre, la lueur de l'étage est froide, les torches chaudes.
 - **Les réglages** sont tous dans `planete.json → cycle.lumiere` (les quatre couleurs du ciel, `torche_teinte`, `torche_force`, `donjon_teinte`) et `cycle.soleil.ombre_portee`. Si la nuit te paraît trop claire ou trop bleue, c'est `nuit` ; si les torches doivent porter plus loin, c'est la propagation de la simulation (`luminosite` des meubles), pas le client.

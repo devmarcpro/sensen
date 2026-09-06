@@ -3577,7 +3577,7 @@ motif.chardon.name,the thistle
 motif.vent.name,the wind
 rumeur_royaume,(rumour)
 meuble.escalier.name,stairs
-journal.monte_etage,{nom} goes up to floor {etage} of {batiment}
+journal.monte_etage,{nom} goes up to floor {etage}
 journal.descend_etage,{nom} goes back down
 journal.sort_batiment,{nom} steps back into the street
 ui.etage,{batiment} — floor {etage}
@@ -3589,3 +3589,4 @@ batiment.mairie.name,town hall
 journal.majorite,"{nom} comes of age and takes up the trade of {metier}"
 journal.migration,"{nom} leaves {de} for {vers}"
 ui.carte.en_cours,"painting the map… ({n} slices)"
+tile_content.vide.name,Air

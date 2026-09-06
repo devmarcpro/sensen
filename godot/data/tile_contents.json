@@ -270,5 +270,16 @@
       "construit"
     ],
     "couleur": "#8a7a5a"
+  },
+  "vide": {
+    "name_key": "tile_content.vide.name",
+    "bloque_passage": true,
+    "bloque_vue": false,
+    "hauteur_vue": 0,
+    "tags": [
+      "vide",
+      "air"
+    ],
+    "_doc": "L'air d'une couche Z hors des bâtiments (Villes, 2026-09-06) : on n'y marche pas, on voit au travers — depuis un étage, la rue se voit par ces tuiles."
   }
 }

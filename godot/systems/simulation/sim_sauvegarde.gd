@@ -252,7 +252,9 @@ static func charger_sauvegarde(sim: Simulation, nom: String = "") -> bool:
 	for cell in sim.monde.contenants_hors.keys().duplicate():
 		if absi(cell.x - sim.monde.centre.x) <= sim.monde.rayon and absi(cell.y - sim.monde.centre.y) <= sim.monde.rayon:
 			for li in sim.monde.contenants_hors[cell].keys():
-				var pos: Vector2i = sim.monde.pos_monde(cell, Vector2i(int(li) % sim.monde.taille, int(li) / sim.monde.taille))
+				var pos: Vector2i = sim.monde.pos_monde(cell, sim.monde.local_pos(int(li)))
+				if not sim.grille.dans(pos):
+					continue
 				sim.contenants[sim.grille.idx(pos)] = sim.monde.contenants_hors[cell][li]
 			sim.monde.contenants_hors.erase(cell)
 	for id in sim.ordre:

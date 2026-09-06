@@ -1,7 +1,7 @@
 extends Node
 const GrandeBase := preload("res://scenes/tests/grande_base.gd")
 ## Capture d'écran automatique de la scène principale (fenêtrée, pas headless) :
-##   & Godot --path godot res://scenes/tests/capture.tscn -- --sortie C:/chemin/capture.png [--arene N] [--frames 60]
+##   & Godot --path godot res://scenes/tests/capture.tscn -- --sortie C:/chemin/capture.png [--arene N] [--frames 60] [--ville --graine G --heure H --dans-batiment | --a-l-etage] [--dump-lumiere]
 ## Sert à vérifier le rendu sans œil humain disponible ; ne remplace pas le jugement de game feel.
 
 var gif_images := 0      # --gif N : N images espacées, pour un GIF monté hors du jeu
@@ -179,12 +179,41 @@ func _ready() -> void:
 			var centre_v: Vector2i = cible * int(GameData.config("planete").taille_cellule) + Vector2i(ev.village.centre)
 			if not sv.grille.occupant(centre_v).is_empty():
 				centre_v = sv._tuile_libre_autour(centre_v)   # la place peut être occupée par un PNJ
+			if "--dans-batiment" in args:   # --dans-batiment : le joueur dans la pièce du bâtiment le plus proche de la place (les murs coupés, 2026-09-06)
+				var meilleur_d := 999999
+				for bat in ev.village.get("batiments", []):
+					var pref_b: Dictionary = GameData.catalogues.village_buildings.get(str(bat.id), {})
+					var plan_b: Array = pref_b.get("plan", [])
+					for yb in plan_b.size():
+						for xb in str(plan_b[yb]).length():
+							if str(plan_b[yb])[xb] != ".":
+								continue
+							var pb: Vector2i = sv.monde.pos_monde(cible, Vector2i(bat.origine) + Vector2i(xb, yb))
+							var d_b := Grille.distance(pb, centre_v)
+							if d_b < meilleur_d and sv.grille.occupant(pb).is_empty() and not sv.grille.bloque_passage(pb):
+								meilleur_d = d_b
+								centre_v = pb
+			if "--a-l-etage" in args:   # --a-l-etage : le joueur à l'étage du bâtiment à étages le plus proche de la place (les couches Z, 2026-09-06)
+				var meilleur_e := 999999
+				for bat in ev.village.get("batiments", []):
+					if not bat.has("escalier") or GameData.catalogues.village_buildings.get(str(bat.id), {}).get("etages", []).is_empty():
+						continue
+					var esc_b: Vector2i = sv.monde.pos_monde(cible, Vector2i(bat.escalier))
+					if not sv.grille.a_lien(esc_b):
+						continue
+					var haut_b: Vector2i = sv.grille.lien_de(esc_b)
+					var libre_b: Vector2i = sv._tuile_libre_autour(haut_b)
+					var d_e := Grille.distance(esc_b, centre_v)
+					if d_e < meilleur_e and Grille.z_de(libre_b) > 0:
+						meilleur_e = d_e
+						centre_v = libre_b
 			sv.grille.liberer(jv.pos)
 			jv.pos = centre_v
 			sv.grille.placer(jv.id, centre_v)
+			jv["vue_sale"] = true
 			sv.maj_vision()
 			scene._apres_changement_de_grille()
-			print("village : ", str(ev.village.get("nom", "?")), " en ", cible)
+			print("village : ", str(ev.village.get("nom", "?")), " en ", cible, " · joueur en ", centre_v, " (couche ", Grille.z_de(centre_v), ")")
 	if "--dialogue" in args and scene.sim != null:   # --dialogue : ouvre le dialogue avec le PNJ civil le plus proche (options, commerce, quêtes)
 		var jq: Dictionary = scene.joueur()
 		var proche_id := ""
@@ -712,6 +741,22 @@ func _process(delta: float) -> void:
 			return
 		img.save_png(sortie)
 		print("capture : ", sortie)
+		if "--dump-lumiere" in OS.get_cmdline_user_args() and scene.sim != null:   # la lumière autour du joueur : la carte propagée de la simulation et l'image du client
+			var jd: Dictionary = scene.joueur()
+			var gd: Grille = scene.sim.grille
+			print("lumiere : sources joueur = %d (lumiere_de), carte %d octets pour %d tuiles, ciel %s, image %s" % [scene.sim.lumiere_de(jd), scene.sim.carte_lumiere.size(), gd.largeur * gd.hauteur_grille, str(scene._ciel), str(scene._lumiere_img.get_size()) if scene._lumiere_img != null else "nulle"])
+			for dy in range(-4, 5):
+				var ligne := ""
+				for dx in range(-4, 5):
+					var td: Vector2i = jd.pos + Vector2i(dx, dy)
+					var niv := int(scene.sim.carte_lumiere[gd.idx(td)]) if gd.dans(td) and scene.sim.carte_lumiere.size() > gd.idx(td) else -1
+					ligne += "%3d" % niv
+				ligne += "   "
+				for dx in range(-4, 5):
+					var td2: Vector2i = jd.pos + Vector2i(dx, dy)
+					var cl: Color = scene._lumiere_tuile(td2)
+					ligne += " %02x%02x%02x" % [int(cl.r * 255), int(cl.g * 255), int(cl.b * 255)]
+				print(ligne)
 		print("image : moyenne %.1f ms, pire %.1f ms sur %d images · process %.1f ms · chrono client %s" % [temps_total / float(frames - 5) * 1000.0, temps_max * 1000.0, frames - 5, temps_process / float(frames - 5) * 1000.0, str(scene.chrono) if scene != null and "chrono" in scene else "—"])
 		print("rendu : cpu %.2f ms, gpu %.2f ms par image · %.0f appels de dessin par image" % [rendu_cpu / float(frames - 5), rendu_gpu / float(frames - 5), appels_dessin / float(frames - 5)])
 		if scene != null and scene.sim != null:

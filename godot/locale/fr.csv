@@ -3586,7 +3586,7 @@ motif.chardon.name,le chardon
 motif.vent.name,le vent
 rumeur_royaume,(rumeur)
 meuble.escalier.name,escalier
-journal.monte_etage,{nom} monte à l’étage {etage} de {batiment}
+journal.monte_etage,{nom} monte à l’étage {etage}
 journal.descend_etage,{nom} redescend
 journal.sort_batiment,{nom} ressort dans la rue
 ui.etage,{batiment} — étage {etage}
@@ -3598,3 +3598,4 @@ batiment.mairie.name,mairie
 journal.majorite,"{nom} est majeur et prend le métier de {metier}"
 journal.migration,"{nom} quitte {de} pour {vers}"
 ui.carte.en_cours,"la carte se peint… ({n} tranches)"
+tile_content.vide.name,Vide

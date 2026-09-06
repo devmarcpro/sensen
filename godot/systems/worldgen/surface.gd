@@ -1136,7 +1136,7 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 	# Les logements : autant de lits que d'habitants, les fonctionnels comptés.
 	var lits := 0
 	for f in file:
-		lits += _lits_du_plan(bats[str(f[0])].plan, bats[str(f[0])].meubles)
+		lits += _lits_du_prefab(bats[str(f[0])])
 	var logements: Array = comp.logements
 	var k_log := rng.randi_range(0, logements.size() - 1)
 	var garde_fou := 0
@@ -1147,7 +1147,7 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 		if not bats.has(bid):
 			continue
 		file.append([bid, "", "", "", ""])
-		lits += _lits_du_plan(bats[bid].plan, bats[bid].meubles)
+		lits += _lits_du_prefab(bats[bid])
 	# 4. Les parcelles le long des rues : les quatre côtés à tour de rôle, du centre vers les bords.
 	var cotes := ["sud", "nord", "est", "ouest"]
 	var curseurs := {"sud": 0, "nord": 0, "est": 0, "ouest": 0}
@@ -1396,6 +1396,14 @@ func _rectangle_libre(e: Dictionary, dims: Vector2i, pris: Array[Rect2i], rue: D
 	return Rect2i(Vector2i(-1, -1), dims)
 
 
+## Le nombre de lits d'un préfab : son plan et ses étages (les couches Z, 2026-09-06).
+func _lits_du_prefab(bat: Dictionary) -> int:
+	var n := _lits_du_plan(bat.plan, bat.meubles)
+	for plan_z in bat.get("etages", []):
+		n += _lits_du_plan(plan_z, bat.meubles)
+	return n
+
+
 ## Le nombre de lits d'un plan.
 func _lits_du_plan(plan: Array, meubles: Dictionary) -> int:
 	var n := 0
@@ -1550,6 +1558,17 @@ func _poser_batiment(e: Dictionary, bat: Dictionary, origine: Vector2i, palette:
 					info.lits.append(p)
 				if c == "^":
 					info["escalier"] = p   # l'escalier qui monte : l'étage se charge quand on y marche (99)
+	# Les lits des étages (les couches Z, 2026-09-06) : à leur tuile de l'étage z — la position locale porte z × BANDE_Z,
+	# Monde.pos_monde la garde ; le résident y dort, y naît, y rentre par l'escalier.
+	var etages: Array = bat.get("etages", [])
+	for z in etages.size():
+		var plan_z: Array = etages[z]
+		for y in plan_z.size():
+			var ligne_z: String = str(plan_z[y])
+			for x in ligne_z.length():
+				var cz := ligne_z[x]
+				if meubles.has(cz) and str(meubles[cz]).begins_with("lit"):
+					info.lits.append(Grille.en_couche(origine + Vector2i(x, y), z + 1))
 	if info.has("poste"):   # on ne se tient pas sur l'étal ni sur l'enclume : la case de travail est une case de sol à côté
 		var pl: Vector2i = info.poste - origine
 		var libre := Vector2i(-1, -1)

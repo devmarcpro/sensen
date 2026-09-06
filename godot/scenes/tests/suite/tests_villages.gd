@@ -162,6 +162,10 @@ func test_village_vivant() -> void:
 	# À 23 h, la routine vise le lit ; à midi, le poste ; à 21 h, la place — un jour sans fête (le jour 0 est le
 	# Nouvel An : la place toute la journée, Calendrier), le 5 du Rat.
 	var v: Dictionary = civils[0]
+	for c_v in civils:   # un villageois sans trait « lève-tôt » ou « couche-tard » : la routine aux heures nominales
+		if SimPnj.trait_somme(s, c_v, "horaires_decalage") == 0.0:
+			v = c_v
+			break
 	var profil: Dictionary = s.profils_ia.civil
 	var jour_calme := 4 * int(GameData.config("planete").cycle.ticks_par_jour)
 	s.horloge_monde.ticks = jour_calme + 23000

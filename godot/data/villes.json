@@ -300,7 +300,7 @@
     "ville": 600,
     "cite": 1500
   },
-  "rue_largeur": 2,
+  "rue_largeur": 3,
   "rayon_place": 6,
   "rayon_placette": 3,
   "gardes_par_habitant": 25,

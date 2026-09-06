@@ -22,9 +22,11 @@ const UV_PAS_FACE := 32.0                   # sur une face, la coordonnée de tu
 const BLOC_UNITES := 2                      # un bloc de mur : deux unités de hauteur (hauteur_vue d'un mur), seize pixels
 const NIVEAU_BLOCS := 3                     # un niveau de bâtiment : trois blocs (designer 2026-09-06, 15 h 30 : « change la hauteur de 1 étage de 2 blocs à 3 blocs »)
 const PORTE_BLOCS := 2                      # une porte fait deux blocs (designer, 18 h)
+const MUR_COUPE_UNITES := 1                 # la hauteur (en unités) d'un mur coupé : le mur sud ou est du bâtiment où l'on est (designer 2026-09-06, 16 h 30 : « quand on rentre dans un bâtiment, qu'on ne voie pas les murs sud et est »)
 const MUR_TRANSLUCIDE := 0.45               # l'opacité d'un mur redessiné devant le joueur
 var morceaux: Dictionary = {}               # Vector2i (colonne, ligne de morceau) → TerrainMorceau
 var terrain_a_refaire := true               # une nouvelle grille, un changement de contrôle : tous les morceaux se refont
+var _bat_joueur := 0                        # le bâtiment où se tient le joueur (0 : dehors) : ses murs sud et est sont coupés (designer 2026-09-06, 16 h 30)
 
 var sim: Simulation
 var arenes: Array[String] = []
@@ -128,6 +130,7 @@ var chargement: ColorRect         # le voile noir de l'écran de chargement, sur
 var chargement_texte: Label
 var brouillard: Brouillard        # couche du brouillard de guerre, au-dessus du terrain et des êtres
 var toits: Toits                  # les toits des bâtiments, au-dessus des êtres (Villes, 2026-09-06)
+var etage: Etage                  # l'étage du joueur, ses tuiles à leur hauteur (les couches Z, 2026-09-06)
 var _soleil_dir := Vector3(0.0, 0.0, 1.0)   # la direction du soleil (espace écran) telle que _maj_soleil l'a réglée
 var _soleil_force := 0.0
 var _soleil_az_lumiere := -999.0            # l'azimut (degrés) pour lequel la lumière des tuiles a été calculée
@@ -189,6 +192,16 @@ class Toits extends Node2D:
 		var t0 := Time.get_ticks_usec()
 		proprio._dessiner_toits(self)
 		proprio._top_client("draw.toits", t0)
+
+
+## L'étage où se tient le joueur (les couches Z, 2026-09-06) : les tuiles de la couche z de son bâtiment, dessinées à
+## leur hauteur au-dessus de la rue — le sol de l'étage, ses murs (nord et ouest entiers, sud et est en muret), ses meubles.
+class Etage extends Node2D:
+	var proprio: Node2D
+	func _draw() -> void:
+		var t0 := Time.get_ticks_usec()
+		proprio._dessiner_etage(self)
+		proprio._top_client("draw.etage", t0)
 
 
 
@@ -305,6 +318,12 @@ func _ready() -> void:
 	toits.z_as_relative = false
 	toits.z_index = 4001   # au-dessus des êtres (1..4000), sous la pluie (4050) et le HUD (4090)
 	add_child(toits)
+	etage = Etage.new()
+	etage.proprio = self
+	etage.material = _materiau_grain()
+	etage.z_as_relative = false
+	etage.z_index = -1   # au-dessus du terrain et du brouillard, sous les êtres
+	add_child(etage)
 	hud = Hud.new()
 	hud.proprio = self
 	hud.z_as_relative = false
@@ -357,6 +376,7 @@ func _ready() -> void:
 			sim.lumiere_sale = true
 		lumieres.queue_redraw()
 		toits.queue_redraw()
+		etage.queue_redraw()
 		var i := sim.grille.idx(p) if sim != null else -1
 		if noeuds_vegetaux.has(i):
 			noeuds_vegetaux[i].queue_free()
@@ -679,6 +699,7 @@ func _charger(fiche: Dictionary = {}) -> void:
 	centre_brouillard = Vector2i(-99, -99)
 	brouillard.queue_redraw()
 	toits.queue_redraw()
+	etage.queue_redraw()
 	# Les rappels de touches ne s'affichent plus à l'écran (demande du designer, 2026-08-28) : ils vivent dans le README.
 	visee = -1
 	_recentrer()
@@ -907,7 +928,7 @@ func _maj_lumiere_si_besoin() -> void:
 			_top_client("lumiere.sim", t_s)
 			if sim.carte_lumiere != _locale_derniere:
 				besoin = true
-		if not besoin and Grille.distance(j.pos, _lumiere_centre) > RAYON_VUE / 3:
+		if not besoin and Grille.distance_plate(j.pos, _lumiere_centre) > RAYON_VUE / 3:
 			besoin = true
 	if besoin:
 		var t0 := Time.get_ticks_usec()
@@ -948,10 +969,11 @@ func _maj_lumiere() -> void:
 				sy /= lh
 				dir = Vector2((sx + sy) / sqrt(2.0), (sy - sx) / sqrt(2.0))   # l'est de l'écran est (1, -1)/√2 dans la grille, le sud (1, 1)/√2
 				pente = float(sol.get("tuile_en_unites", 3.5)) * _soleil_dir.z / lh
-				var x0 := maxi(g.origine.x, j.pos.x - RAYON_VUE - 4)
-				var y0 := maxi(g.origine.y, j.pos.y - RAYON_VUE - 4)
-				var x1 := mini(g.origine.x + g.largeur - 1, j.pos.x + RAYON_VUE + 4)
-				var y1 := mini(g.origine.y + g.hauteur_grille - 1, j.pos.y + RAYON_VUE + 4)
+				var jp := Grille.plat(j.pos)
+				var x0 := maxi(g.origine.x, jp.x - RAYON_VUE - 4)
+				var y0 := maxi(g.origine.y, jp.y - RAYON_VUE - 4)
+				var x1 := mini(g.origine.x + g.largeur - 1, jp.x + RAYON_VUE + 4)
+				var y1 := mini(g.origine.y + g.hauteur_grille - 1, jp.y + RAYON_VUE + 4)
 				coin = Vector2i(x0, y0)
 				taille = Vector2i(x1 - x0 + 1, y1 - y0 + 1)
 				ombre_portee = float(sol.get("ombre_portee", 0.28)) * _soleil_force
@@ -989,11 +1011,13 @@ func _maj_lumiere() -> void:
 func _lumiere_tuile(t: Vector2i) -> Color:
 	if _lumiere_img == null or sim == null or not sim.grille.dans(t):
 		return Color.WHITE
-	var l: Vector2i = t - sim.grille.origine
+	var l: Vector2i = Grille.plat(t) - sim.grille.origine   # un étage prend la lumière de sa tuile au sol
 	return _lumiere_img.get_pixel(l.x, l.y)
 
 
-## Les halos des sources locales (meubles lumineux, torche en main), visibles quand l'ambiance baisse.
+## Les flammes des feux (Météo). Plus de halo rond (designer 2026-09-06, 16 h 40 : « la lumière qui émane ne doit pas être
+## un halo rond sur le personnage mais une luminosité qui se propage sur les cellules voisines ») : la lumière d'une torche
+## ou d'un meuble est la propagation par tuile de la simulation (Éclairage), que le shader applique à chaque tuile.
 func _dessiner_lumieres() -> void:
 	if sim == null:
 		return
@@ -1009,33 +1033,6 @@ func _dessiner_lumieres() -> void:
 		var ph := float((Time.get_ticks_msec() / 90 + int(fi)) % 6) / 6.0
 		lumieres.draw_colored_polygon(PackedVector2Array([fc + Vector2(-9, 2), fc + Vector2(0, -22 - 8.0 * ph), fc + Vector2(9, 2)]), Color(1.0, 0.45, 0.1, 0.85))
 		lumieres.draw_colored_polygon(PackedVector2Array([fc + Vector2(-5, 2), fc + Vector2(0, -12 - 6.0 * ph), fc + Vector2(5, 2)]), Color(1.0, 0.85, 0.3, 0.9))
-		if sim.lieu == "camp" and _ciel.r <= 0.9:
-			_halo(fc, (1.0 - _ciel.r) * 0.8)
-	if sim.lieu == "donjon":
-		return   # le voile du donjon est dessiné par la couche `voiles` (mélange normal)
-	if sim.lieu != "camp" or _ciel.r > 0.9:
-		return
-	var force := 1.0 - _ciel.r
-	for gi in g.meubles.keys():
-		var m: Dictionary = GameData.entree("meubles", str(g.meubles[gi]))
-		var lum := int(m.get("luminosite", 0))
-		if lum <= 0:
-			continue
-		var t := g.pos_de(int(gi))
-		if Grille.distance(t, j.pos) > RAYON_VUE:
-			continue
-		_halo(_ecran(t, g.h(t)), float(lum) / 100.0 * force)
-	for slot in ["main_principale", "main_secondaire"]:
-		var it: Dictionary = sim.items.get(j.equipement.get(slot, ""), {})
-		if int(it.get("luminosite", 0)) > 0:
-			_halo(_ecran(j.pos, g.h(j.pos)), float(it.luminosite) / 100.0 * force)
-
-
-func _halo(c: Vector2, intensite: float) -> void:
-	var r := 22.0 + 60.0 * intensite
-	for k in 4:
-		var f := 1.0 - float(k) / 4.0
-		lumieres.draw_circle(c + Vector2(0, -6), r * f, Color(1.0, 0.85, 0.55, 0.12 * intensite))
 
 
 ## À la fermeture : attendre la pré-génération en thread (elle lit GameData, qui va disparaître).
@@ -1125,7 +1122,7 @@ func _process(delta: float) -> void:
 	_maj_noeuds(delta)
 	t0_c = _top_client("noeuds", t0_c)
 	_maj_morceaux(j)   # les morceaux de terrain naissent et meurent avec la distance ; une découverte salit ceux du champ de vue
-	if int(j.get("vue_version", 0)) != vue_version or Grille.distance(j.pos, centre_brouillard) > RAYON_VUE / 3:
+	if int(j.get("vue_version", 0)) != vue_version or Grille.distance_plate(j.pos, centre_brouillard) > RAYON_VUE / 3:
 		brouillard.queue_redraw()   # son champ de vue a changé : seul le brouillard se redessine
 		toits.queue_redraw()        # et les toits avec lui (ceux qu'il voit, celui qu'il a sur la tête)
 	tour_hud += 1
@@ -1177,7 +1174,7 @@ func _maj_noeuds(delta: float = 0.0) -> void:
 		vivants[e.id] = true
 		var n: Paperdoll = noeuds.get(e.id)
 		# Hors de la fenêtre de vue : le nœud reste, mais n'est ni dessiné ni redessiné.
-		if n != null and not j.is_empty() and (Grille.distance(e.pos, j.pos) > RAYON_VUE or not sim.voit(j, e.pos) or _sous_toit_cache(e.pos, j)):
+		if n != null and not j.is_empty() and (Grille.distance_plate(e.pos, j.pos) > RAYON_VUE or not sim.voit(j, e.pos) or _sous_toit_cache(e.pos, j)):
 			n.visible = false   # hors fenêtre, hors du champ de vue (brouillard de guerre), ou sous le toit d'un autre bâtiment (Villes, 2026-09-06)
 			continue
 		if n == null:
@@ -1191,7 +1188,7 @@ func _maj_noeuds(delta: float = 0.0) -> void:
 			add_child(n)
 			noeuds[e.id] = n
 		n.e = e
-		var loin: bool = seuil_picto > 0 and not j.is_empty() and e.id != j.id and Grille.distance(e.pos, j.pos) > seuil_picto
+		var loin: bool = seuil_picto > 0 and not j.is_empty() and e.id != j.id and Grille.distance_plate(e.pos, j.pos) > seuil_picto
 		if loin != n.lointain:   # il franchit le seuil : silhouette ou paperdoll, une seule fois
 			n.lointain = loin
 			n.queue_redraw()
@@ -1261,7 +1258,7 @@ func _dessiner_occulteurs_de(n: Paperdoll, g: Grille, e: Dictionary) -> void:
 				continue
 			n.occulteurs.draw_set_transform(-base)
 			if translucide and mur:
-				_dessine_bloc(n.occulteurs, g, t, _ecran(t, g.h(t)), Color(1, 1, 1, MUR_TRANSLUCIDE))   # le mur devant le joueur, en transparence
+				_dessine_bloc(n.occulteurs, g, t, _ecran(t, g.h(t)), Color(1, 1, 1, MUR_TRANSLUCIDE), 0, MUR_COUPE_UNITES if _mur_coupe(g, t) else 0)   # le mur devant le joueur, en transparence
 			else:
 				_dessine_tuile(n.occulteurs, t)
 			n.occulteurs.draw_set_transform(Vector2.ZERO)
@@ -1803,7 +1800,7 @@ func _tuile_sous(p: Vector2) -> Vector2i:
 	var meilleure_d := 1e9
 	var g := sim.grille
 	var j := joueur()
-	var cj: Vector2i = j.pos if not j.is_empty() else Vector2i.ZERO
+	var cj: Vector2i = Grille.plat(j.pos) if not j.is_empty() else Vector2i.ZERO
 	for y in range(maxi(g.origine.y, cj.y - RAYON_VUE), mini(g.origine.y + g.hauteur_grille, cj.y + RAYON_VUE + 1)):
 		for x in range(maxi(g.origine.x, cj.x - RAYON_VUE), mini(g.origine.x + g.largeur, cj.x + RAYON_VUE + 1)):
 			var t := Vector2i(x, y)
@@ -1812,6 +1809,19 @@ func _tuile_sous(p: Vector2) -> Vector2i:
 			if d < meilleure_d and d < float(TW * TW) * 0.3:
 				meilleure_d = d
 				meilleur = t
+	var zj := Grille.z_de(j.pos) if not j.is_empty() else 0
+	if zj > 0 and _bat_joueur > 0 and _bat_joueur <= g.batiments_liste.size():   # à l'étage : ses tuiles, soulevées, passent devant la rue
+		var r: Rect2i = g.batiments_liste[_bat_joueur - 1].rect
+		for y in r.size.y:
+			for x in r.size.x:
+				var t := Grille.en_couche(r.position + Vector2i(x, y), zj)
+				if not g.dans(t):
+					continue
+				var c := _ecran(t, g.h(t))
+				var d := c.distance_squared_to(p)
+				if d < float(TW * TW) * 0.3 and d <= meilleure_d + 1.0:
+					meilleure_d = d
+					meilleur = t
 	return meilleur
 
 
@@ -1824,17 +1834,17 @@ func _tuile_sous(p: Vector2) -> Vector2i:
 ## l'origine de dessin) pour la lumière — le dessus porte (x, 4096 + y), la face sud-ouest (x, −1000 − (y × 32 + h)),
 ## la face sud-est (y, −2000 − (x × 32 + h)) ; le style de grain s'ajoute à u par pas de `pas_style`.
 func _uv_haut(t: Vector2i, dx: float, dy: float, st: float) -> Vector2:
-	var l: Vector2i = t - origine_dessin
+	var l: Vector2i = Grille.plat(t) - origine_dessin
 	return Vector2(st + l.x + dx, UV_HAUT + l.y + dy)
 
 
 func _uv_so(t: Vector2i, dx: float, hh: float, st: float) -> Vector2:
-	var l: Vector2i = t - origine_dessin
+	var l: Vector2i = Grille.plat(t) - origine_dessin
 	return Vector2(st + l.x + dx, UV_SO - (l.y * UV_PAS_FACE + hh))
 
 
 func _uv_se(t: Vector2i, dy: float, hh: float, st: float) -> Vector2:
-	var l: Vector2i = t - origine_dessin
+	var l: Vector2i = Grille.plat(t) - origine_dessin
 	return Vector2(st + l.y + dy, UV_SE - (l.x * UV_PAS_FACE + hh))
 
 
@@ -1842,8 +1852,9 @@ func _uv_se(t: Vector2i, dy: float, hh: float, st: float) -> Vector2:
 ## glissement de cellule ne la bouge pas, pour que les morceaux, végétaux et paperdolls gardés restent à leur place ;
 ## elle se rebase (chemin complet) quand la fenêtre s'en est éloignée de plus de RECENTRAGE_MAX_CELLULES.
 func _ecran(t: Vector2i, h: int) -> Vector2:
-	var l: Vector2i = t - origine_dessin
-	return Vector2((l.x - l.y) * TW * 0.5, (l.x + l.y) * TH * 0.5 - h * HSTEP)
+	var z := Grille.z_de(t)   # une tuile d'étage (les couches Z) : à sa place au sol, soulevée d'un niveau de bâtiment par couche
+	var l: Vector2i = Grille.plat(t) - origine_dessin
+	return Vector2((l.x - l.y) * TW * 0.5, (l.x + l.y) * TH * 0.5 - h * HSTEP - z * NIVEAU_BLOCS * BLOC_UNITES * HSTEP)
 
 
 ## Le nom d'une piste d'XP (XP de combat) : l'élément, la compétence, le module, sinon la clé.
@@ -2112,7 +2123,8 @@ func _losange(t: Vector2i, col: Color) -> void:
 ## Le morceau d'une tuile (colonne, ligne depuis l'origine de la grille).
 func _morceau_de(t: Vector2i) -> Vector2i:
 	var o: Vector2i = sim.grille.origine
-	return Vector2i((t.x - o.x) / MORCEAU, (t.y - o.y) / MORCEAU)
+	var f := Grille.plat(t)
+	return Vector2i((f.x - o.x) / MORCEAU, (f.y - o.y) / MORCEAU)
 
 
 ## Une tuile a changé : son morceau se redessine, et ceux de ses voisines si elle est au bord (les flancs et
@@ -2141,7 +2153,7 @@ func _maj_morceaux(j: Dictionary) -> void:
 		noeuds_vegetaux.clear()
 		terrain_a_refaire = false
 		centre_terrain = Vector2i(-99, -99)
-	var c: Vector2i = j.pos if not j.is_empty() else g.origine + Vector2i(g.largeur / 2, g.hauteur_grille / 2)
+	var c: Vector2i = Grille.plat(j.pos) if not j.is_empty() else g.origine + Vector2i(g.largeur / 2, g.hauteur_grille / 2)
 	if c != centre_terrain:
 		centre_terrain = c
 		var m0 := _morceau_de(Vector2i(maxi(g.origine.x, c.x - RAYON_VUE), maxi(g.origine.y, c.y - RAYON_VUE)))
@@ -2161,6 +2173,7 @@ func _maj_morceaux(j: Dictionary) -> void:
 		for k in morceaux.keys().duplicate():
 			if not garder.has(k):
 				_liberer_morceau(k)
+	_maj_batiment_joueur(j)
 	if not g.decouvertes_recentes.is_empty():   # les tuiles découvertes depuis la dernière image : leurs morceaux seulement
 		for i in g.decouvertes_recentes:
 			var k := _morceau_de(g.pos_de(int(i)))
@@ -2205,7 +2218,8 @@ func _dessiner_morceau(ci: CanvasItem, coin: Vector2i) -> void:
 ## La profondeur d'un billboard (z relatif) : x + y, ramené à la fenêtre (les coordonnées monde dépassent CANVAS_ITEM_Z_MAX).
 func _profondeur(t: Vector2i) -> int:
 	var o: Vector2i = sim.grille.origine
-	return clampi((t.x - o.x) + (t.y - o.y) + 1, 1, 4000)
+	var f := Grille.plat(t)
+	return clampi((f.x - o.x) + (f.y - o.y) + 1, 1, 4000)
 
 
 ## Un billboard pour le végétal d'une tuile (Direction artistique : les ressources récoltables sont des sprites).
@@ -2273,7 +2287,7 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 	if g.neige:   # Météo : le sol blanchit sous la neige
 		teinte = teinte.lerp(Color(1.4, 1.4, 1.5), 0.5)
 	if g.bloque_passage(t) and not ("vegetation" in tags_c) and not ("porte" in tags_c):   # un mur : un bloc plein — le sol dessous est caché
-		_dessine_bloc(ci, g, t, c, teinte)
+		_dessine_bloc(ci, g, t, c, teinte, 0, MUR_COUPE_UNITES if _mur_coupe(g, t) else 0)
 		_dessiner_sprite_tuile(ci, g, t, c, teinte)
 		return
 	var haut := PackedVector2Array([
@@ -2314,9 +2328,14 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 			PackedVector2Array([_uv_haut(t, 0.15, 0.15, 0.0), _uv_haut(t, 0.85, 0.15, 0.0), _uv_haut(t, 0.85, 0.85, 0.0), _uv_haut(t, 0.15, 0.85, 0.0)]))
 		_dessiner_sprite_tuile(ci, g, t, c, teinte)
 	if "porte" in contenu.get("tags", []):   # une porte n'est pas un mur : un battant dans son encadrement
-		_dessiner_porte(ci, g, t, c, contenu, teinte)
-		if g.niveaux_bat[g.idx(t)] > 0:   # dans un bâtiment, le mur continue au-dessus de la porte (Villes, 2026-09-06)
-			_dessine_bloc(ci, g, t, c, teinte, PORTE_BLOCS * BLOC_UNITES)
+		if _mur_coupe(g, t):   # dans le mur coupé du bâtiment du joueur : le seuil seulement, à plat
+			var cs := _couleur_html(str(contenu.get("couleur", "#6a4a22"))) * teinte
+			_poly(ci, PackedVector2Array([c + Vector2(0, -TH * 0.35), c + Vector2(TW * 0.35, 0), c + Vector2(0, TH * 0.35), c + Vector2(-TW * 0.35, 0)]), cs,
+				PackedVector2Array([_uv_haut(t, 0.15, 0.15, 0.0), _uv_haut(t, 0.85, 0.15, 0.0), _uv_haut(t, 0.85, 0.85, 0.0), _uv_haut(t, 0.15, 0.85, 0.0)]))
+		else:
+			_dessiner_porte(ci, g, t, c, contenu, teinte)
+			if g.niveaux_bat[g.idx(t)] > 0:   # dans un bâtiment, le mur continue au-dessus de la porte (Villes, 2026-09-06)
+				_dessine_bloc(ci, g, t, c, teinte, PORTE_BLOCS * BLOC_UNITES)
 	if "contenant" in contenu.get("tags", []):   # coffre ou butin : une caisse
 		var cc := (Color(0.55, 0.38, 0.18) if "coffre" in contenu.tags else Color(0.75, 0.65, 0.3)) * teinte
 		_lot_vider(ci)
@@ -2352,10 +2371,11 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 	centre_brouillard = j.pos
 	vue_version = int(j.get("vue_version", 0))
 	var voile := Color(0.05, 0.05, 0.08, 0.55)   # le sol mémorisé, hors de vue
-	var x0 := maxi(g.origine.x, j.pos.x - RAYON_VUE)
-	var x1 := mini(g.origine.x + g.largeur - 1, j.pos.x + RAYON_VUE)
-	var y0 := maxi(g.origine.y, j.pos.y - RAYON_VUE)
-	var y1 := mini(g.origine.y + g.hauteur_grille - 1, j.pos.y + RAYON_VUE)
+	var jp := Grille.plat(j.pos)
+	var x0 := maxi(g.origine.x, jp.x - RAYON_VUE)
+	var x1 := mini(g.origine.x + g.largeur - 1, jp.x + RAYON_VUE)
+	var y0 := maxi(g.origine.y, jp.y - RAYON_VUE)
+	var y1 := mini(g.origine.y + g.hauteur_grille - 1, jp.y + RAYON_VUE)
 	_lot_ouvrir(ci)   # tous les voiles en une commande de triangles
 	for s in range(x0 + y0, x1 + y1 + 1):
 		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
@@ -2413,12 +2433,12 @@ func _hauteur_bloc(g: Grille, t: Vector2i) -> int:
 		return 0
 	var n: int = g.niveaux_bat[g.idx(t)]
 	if n > 0 and ("mur" in tags or "porte" in tags):
-		return n * NIVEAU_BLOCS * BLOC_UNITES
+		return MUR_COUPE_UNITES if _mur_coupe(g, t) else n * NIVEAU_BLOCS * BLOC_UNITES
 	return int(ct.get("hauteur_vue", 3))
 
 
 ## `base_u` : le bloc commence à cette hauteur (le mur au-dessus d'une porte) ; sinon au sol.
-func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: Color = Color.WHITE, base_u: int = 0) -> void:
+func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: Color = Color.WHITE, base_u: int = 0, plafond_u: int = 0) -> void:
 	var t0_b := Time.get_ticks_usec()
 	chrono["n.bloc"] = float(chrono.get("n.bloc", 0.0)) + 1.0
 	var contenu_t := g.contenu_de(t)
@@ -2427,6 +2447,8 @@ func _dessine_bloc(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: C
 	var n_bat: int = g.niveaux_bat[idx_t]
 	var mur_bat := n_bat > 0 and ("mur" in tags_t or "porte" in tags_t)   # une façade de bâtiment : des blocs empilés
 	var hm := (n_bat * NIVEAU_BLOCS * BLOC_UNITES if mur_bat else int(contenu_t.get("hauteur_vue", 3))) * HSTEP
+	if plafond_u > 0:   # un mur coupé (le mur sud ou est du bâtiment du joueur) : un muret, pour lire l'emprise sans cacher la pièce
+		hm = mini(hm, plafond_u * HSTEP)
 	var haut_bloc := Color(0.5, 0.47, 0.44)
 	var mat_id := g.materiau_de(t)
 	if mur_bat and "porte" in tags_t:   # au-dessus d'une porte : le mur du bâtiment, pas la couleur du battant
@@ -2506,10 +2528,66 @@ func _batiment_de(t: Vector2i) -> int:
 	return int(sim.grille.bat_de[sim.grille.idx(t)])
 
 
+## L'étage du joueur (les couches Z, 2026-09-06) : les tuiles de la couche z de son bâtiment, en ordre de profondeur,
+## dessinées comme le terrain (`_dessine_tuile` : leur hauteur d'écran est soulevée par `_ecran`). Rien quand il est au sol.
+func _dessiner_etage(ci: CanvasItem) -> void:
+	if sim == null or profil_sans_terrain:
+		return
+	var j := joueur()
+	if j.is_empty():
+		return
+	var zj := Grille.z_de(j.pos)
+	var g := sim.grille
+	if zj <= 0 or _bat_joueur <= 0 or _bat_joueur > g.batiments_liste.size():
+		return
+	var r: Rect2i = g.batiments_liste[_bat_joueur - 1].rect
+	_lot_ouvrir(ci)
+	for s_d in range(r.position.x + r.position.y, r.end.x + r.end.y - 1):
+		for x in range(maxi(r.position.x, s_d - r.end.y + 1), mini(r.end.x - 1, s_d - r.position.y) + 1):
+			var t := Grille.en_couche(Vector2i(x, s_d - x), zj)
+			if not g.dans(t) or not g.decouvert.has(g.idx(t)):
+				continue
+			_dessine_tuile(ci, t)
+	_lot_fermer(ci)
+
+
+## Le mur sud ou est du bâtiment où se tient le joueur (designer 2026-09-06, 16 h 30 : « quand on rentre dans un bâtiment,
+## fais en sorte qu'on ne voie pas les murs sud et est ») : ces deux murs sont devant la pièce, entre elle et l'œil ;
+## ils se dessinent en muret (MUR_COUPE_UNITES), le toit est déjà ôté. Les murs nord et ouest, derrière, restent entiers.
+func _mur_coupe(g: Grille, t: Vector2i) -> bool:
+	if _bat_joueur <= 0 or not g.dans(t):
+		return false
+	var idx_t := g.idx(t)
+	if int(g.bat_de[idx_t]) != _bat_joueur:
+		return false
+	var r: Rect2i = g.batiments_liste[_bat_joueur - 1].rect
+	return t.y == r.end.y - 1 or t.x == r.end.x - 1
+
+
+## Le joueur change de bâtiment (entre, sort) : les murs coupés changent, l'emprise de l'ancien et du nouveau se redessinent.
+func _maj_batiment_joueur(j: Dictionary) -> void:
+	var b := _batiment_de(j.pos) if not j.is_empty() else 0
+	if b == _bat_joueur:
+		return
+	var g := sim.grille
+	for k in [_bat_joueur, b]:
+		if k > 0 and k <= g.batiments_liste.size():
+			var r: Rect2i = g.batiments_liste[k - 1].rect
+			for y in r.size.y:
+				_salir_tuile(r.position + Vector2i(r.size.x - 1, y))
+			for x in r.size.x:
+				_salir_tuile(r.position + Vector2i(x, r.size.y - 1))
+	_bat_joueur = b
+	etage.queue_redraw()
+	for n in noeuds.values():   # ses occulteurs redessinent le mur coupé
+		if n.occulteurs != null:
+			n.occulteurs.queue_redraw()
+
+
 ## Sous le toit d'un autre bâtiment que celui du joueur : ni dessiné, ni au HUD.
 func _sous_toit_cache(t: Vector2i, j: Dictionary) -> bool:
 	var b := _batiment_de(t)
-	return b > 0 and (j.is_empty() or b != _batiment_de(j.pos))
+	return b > 0 and (j.is_empty() or b != _batiment_de(j.pos) or Grille.z_de(t) != Grille.z_de(j.pos))   # un autre étage du même bâtiment : caché aussi
 
 
 ## Les toits (Villes, 2026-09-06) : sur chaque tuile découverte de l'emprise d'un bâtiment — murs compris, pour que
@@ -2525,10 +2603,11 @@ func _dessiner_toits(ci: CanvasItem) -> void:
 	if j.is_empty():
 		return
 	var bat_j := _batiment_de(j.pos)
-	var x0 := maxi(g.origine.x, j.pos.x - RAYON_VUE)
-	var x1 := mini(g.origine.x + g.largeur - 1, j.pos.x + RAYON_VUE)
-	var y0 := maxi(g.origine.y, j.pos.y - RAYON_VUE)
-	var y1 := mini(g.origine.y + g.hauteur_grille - 1, j.pos.y + RAYON_VUE)
+	var jp := Grille.plat(j.pos)
+	var x0 := maxi(g.origine.x, jp.x - RAYON_VUE)
+	var x1 := mini(g.origine.x + g.largeur - 1, jp.x + RAYON_VUE)
+	var y0 := maxi(g.origine.y, jp.y - RAYON_VUE)
+	var y1 := mini(g.origine.y + g.hauteur_grille - 1, jp.y + RAYON_VUE)
 	var couleurs := {}   # matériau de toit → [couleur, style de grain]
 	# Un toit se voit de la rue même si l'on ne voit pas la pièce dessous : un bâtiment dont un mur est en vue a son
 	# toit éclairé en entier ; sinon (mémorisé, hors de vue) il est sombre comme un mur mémorisé.
@@ -2612,7 +2691,7 @@ func _dessiner_etats(ci: CanvasItem) -> void:
 		var statuts: Array = e.get("statuts", [])
 		if statuts.is_empty():
 			continue
-		if e.id != j.id and (Grille.distance(e.pos, j.pos) > RAYON_VUE or not sim.voit(j, e.pos)):
+		if e.id != j.id and (Grille.distance_plate(e.pos, j.pos) > RAYON_VUE or not sim.voit(j, e.pos)):
 			continue
 		var tick_e: int = sim.tick_de(e)
 		var base := _ecran(e.pos, sim.grille.h(e.pos)) + Vector2(-7.0 * mini(4, statuts.size()), -62.0)   # au-dessus de la tête
@@ -2648,7 +2727,7 @@ func _dessiner_hud(ci: CanvasItem) -> void:
 		return
 	var j := joueur()
 	for e in sim.vivants():   # seulement ce qui est à l'écran : une cité en compte deux cents (designer 2026-09-05, le lag)
-		if j.is_empty() or (Grille.distance(e.pos, j.pos) <= RAYON_VUE and sim.voit(j, e.pos) and not _sous_toit_cache(e.pos, j)):
+		if j.is_empty() or (Grille.distance_plate(e.pos, j.pos) <= RAYON_VUE and sim.voit(j, e.pos) and not _sous_toit_cache(e.pos, j)):
 			_dessine_hud_entite(ci, e)
 
 
@@ -2680,7 +2759,7 @@ func _maj_ui() -> void:
 	if sim.lieu == "donjon" and bool(sim.donjon.get("corrompu", false)):   # le donjon corrompu dit sa difficulté (point 61)
 		mode += tr("ui.mode.donjon_corrompu").format({"n": int(sim.donjon.get("niveau", 1)), "corruption": roundi(float(sim.donjon.get("corruption", 0.0)))})
 	lignes.append(tr("ui.horloge").format({"horloge": sim.horloge_de(j).ticks, "mode": mode}))
-	var proches := sim.vivants().filter(func(e: Dictionary) -> bool: return e.id == joueur_id or (Grille.distance(e.pos, j.pos) <= 12 and sim.voit(j, e.pos)))
+	var proches := sim.vivants().filter(func(e: Dictionary) -> bool: return e.id == joueur_id or (Grille.distance_plate(e.pos, j.pos) <= 12 and sim.voit(j, e.pos)))
 	proches = proches.slice(0, 10)   # les êtres en vue seulement : l'écran n'est pas un registre
 	for e in proches:
 		lignes.append("  " + tr("ui.entite.ligne").format({"nom": tr(e.name_key) + ((" " + tr(e.epithete)) if e.get("rare", false) else ""), "pv": e.sante, "pv_max": e.sante_max,

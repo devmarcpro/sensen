@@ -56,17 +56,43 @@ func _init(p_surface: Surface, p_planete: Dictionary, p_camp: Dictionary) -> voi
 	cellule_camp = Vector2i(int(planete.cellule_depart[0]), int(planete.cellule_depart[1]))
 
 
+## La cellule d'une position, quelle que soit sa couche Z (Grille.plat : les étages sont au-dessus de leur cellule).
 func cellule_de(p: Vector2i) -> Vector2i:
-	return Vector2i(floori(float(p.x) / float(taille)), floori(float(p.y) / float(taille)))
+	var f := Grille.plat(p)
+	return Vector2i(floori(float(f.x) / float(taille)), floori(float(f.y) / float(taille)))
 
 
+## `local` peut porter une couche (y + z × BANDE_Z) : la position monde la garde.
 func pos_monde(cell: Vector2i, local: Vector2i) -> Vector2i:
 	return cell * taille + local
 
 
+## L'index local d'une position dans sa cellule ; une tuile d'étage est décalée de z × taille² (les modifications et
+## les découvertes mémorisées par cellule portent ainsi leur couche).
 func idx_local(p: Vector2i) -> int:
-	var l := p - cellule_de(p) * taille
-	return l.y * taille + l.x
+	var f := Grille.plat(p)
+	var l := f - cellule_de(p) * taille
+	return Grille.z_de(p) * taille * taille + l.y * taille + l.x
+
+
+## L'inverse : la position locale (avec sa couche) d'un index local.
+func local_pos(li: int) -> Vector2i:
+	var n0 := taille * taille
+	@warning_ignore("integer_division")
+	var z := li / n0
+	var r := li % n0
+	@warning_ignore("integer_division")
+	return Vector2i(r % taille, r / taille) + Vector2i(0, z * Grille.BANDE_Z)
+
+
+## Le nombre de couches d'une fenêtre : le sol, plus autant d'étages que le plus haut préfab de village en a.
+static var _couches_villes := -1
+static func couches_villes() -> int:
+	if _couches_villes < 0:
+		_couches_villes = 1
+		for bid in GameData.catalogues.village_buildings.keys():
+			_couches_villes = maxi(_couches_villes, 1 + GameData.catalogues.village_buildings[bid].get("etages", []).size())
+	return _couches_villes
 
 
 ## La cellule (générée à la demande, mise en cache — le thread de pré-génération y contribue).
@@ -97,6 +123,13 @@ func fenetre(c: Vector2i, contenus: Dictionary, regles_dep: Dictionary, oeil: in
 		for dx in range(-rayon, rayon + 1):
 			var cell := c + Vector2i(dx, dy)
 			_poser_cellule(g, cell, cellule(cell))
+	# Les étages des bâtiments : la dimension Z du monde (designer 2026-09-06, 16 h) — les couches au-dessus du sol,
+	# puis chaque bâtiment y pose ses plans d'étage aux mêmes coordonnées que son emprise.
+	g.poser_couches(couches_villes())
+	for dy in range(-rayon, rayon + 1):
+		for dx in range(-rayon, rayon + 1):
+			var cell := c + Vector2i(dx, dy)
+			_poser_etages(g, cell, cellule(cell))
 	g.recompiler_sols()   # les sols posés en bloc : le noyau C++ recompile leur friction au premier chemin
 	grille_active = g
 	return g
@@ -187,10 +220,80 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 			for cy in taille / 32:
 				for cx in taille / 32:
 					explores[Vector2i(cell.x * (taille / 32) + cx, cell.y * (taille / 32) + cy)] = true
-	# Les modifications (seed + liste des modifications) puis les découvertes.
+	_appliquer_memoire(g, cell, 0)
+	g.modifies.clear()
+
+
+## Les étages des bâtiments d'une cellule, sur les couches Z de la fenêtre (Villes, 2026-09-06, 16 h) : pour chaque
+## bâtiment à `etages`, le plan de l'étage z est posé à la couche z sur l'emprise — murs de la palette du bâtiment,
+## sol, meubles et lits, l'escalier `^` du niveau du dessous lié à l'arrivée `v` de l'étage. L'emprise garde niveaux_bat
+## à 1 sur les couches (un mur d'étage fait un niveau au dessin) et bat_de au bâtiment. Puis la mémoire de la cellule
+## (modifications, découvertes) pour ces couches.
+func _poser_etages(g: Grille, cell: Vector2i, e: Dictionary) -> void:
+	var base := pos_monde(cell, Vector2i.ZERO)
+	for bat in e.get("village", {}).get("batiments", []):
+		var pref: Dictionary = GameData.catalogues.village_buildings.get(str(bat.id), {})
+		var etages: Array = pref.get("etages", [])
+		if etages.is_empty():
+			continue
+		var r: Rect2i = bat.rect if bat.rect is Rect2i else Rect2i(Vector2i(bat.origine), Vector2i(str(pref.get("plan", ["#"])[0]).length(), pref.get("plan", ["#"]).size()))
+		var rect_monde := Rect2i(base + r.position, r.size)
+		var k := 0
+		for b in g.batiments_liste.size():
+			if g.batiments_liste[b].rect == rect_monde:
+				k = b + 1
+				break
+		var meubles: Dictionary = pref.get("meubles", {})
+		var mur := str(bat.get("mur", "chene"))
+		var sol_b := str(bat.get("sol", "calcaire"))
+		var bas: Vector2i = base + Vector2i(bat.escalier) if bat.has("escalier") else Vector2i(-1, -1)   # le `^` du niveau du dessous
+		for z in range(1, etages.size() + 1):
+			if z >= g.couches:
+				break
+			var plan: Array = etages[z - 1]
+			var haut := Vector2i(-1, -1)
+			var arrivee := Vector2i(-1, -1)
+			for y in plan.size():
+				var ligne: String = str(plan[y])
+				for x in ligne.length():
+					var c := ligne[x]
+					if c == " ":
+						continue
+					var p := Grille.en_couche(base + r.position + Vector2i(x, y), z)
+					if not g.dans(p):
+						continue
+					var gi := g.idx(p)
+					g.contenu[gi] = 0
+					g.niveaux_bat[gi] = 1
+					g.bat_de[gi] = k
+					g.sols[gi] = sol_b
+					if c == "#":
+						g.materiaux[gi] = mur
+						g.poser_contenu(p, "mur_construit")
+					elif meubles.has(c) and c != "P":
+						var m: Dictionary = GameData.catalogues.meubles.get(str(meubles[c]), {})
+						g.meubles[gi] = str(meubles[c])
+						g.poser_contenu(p, "meuble" if bool(m.get("bloque_passage", true)) else "meuble_sol")
+						if c == "^":
+							haut = p
+						elif c == "v":
+							arrivee = p
+			if bas.x >= 0 and arrivee.x >= 0 and g.dans(bas) and g.dans(arrivee):
+				g.poser_lien(bas, arrivee)
+			bas = haut
+	for z in range(1, g.couches):
+		_appliquer_memoire(g, cell, z)
+	g.modifies.clear()
+
+
+## Les modifications (seed + liste des modifications) puis les découvertes mémorisées d'une cellule, pour une couche.
+func _appliquer_memoire(g: Grille, cell: Vector2i, z: int) -> void:
+	var base := pos_monde(cell, Vector2i.ZERO)
 	for i in modifications.get(cell, {}).keys():
 		var m: Dictionary = modifications[cell][i]
-		var p := base + Vector2i(int(i) % taille, int(i) / taille)
+		var p := base + local_pos(int(i))
+		if Grille.z_de(p) != z or not g.dans(p):
+			continue
 		var gi := g.idx(p)
 		g.hauteurs[gi] = int(m.h)
 		g.contenu[gi] = 0
@@ -209,8 +312,9 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 		if not str(m.station).is_empty():
 			g.stations_fixes[gi] = str(m.station)
 	for i in decouvert.get(cell, {}).keys():
-		g.decouvert[g.idx(base + Vector2i(int(i) % taille, int(i) / taille))] = true
-	g.modifies.clear()
+		var p := base + local_pos(int(i))
+		if Grille.z_de(p) == z and g.dans(p):
+			g.decouvert[g.idx(p)] = true
 
 
 ## Capture ce que la fenêtre a changé : tuiles modifiées et découvertes, par cellule.
@@ -236,7 +340,7 @@ func capturer(g: Grille) -> void:
 func explorer(vue: Dictionary, g: Grille) -> Array[Vector2i]:
 	var nouveaux: Array[Vector2i] = []
 	for gi in vue.keys():
-		var p := g.pos_de(int(gi))
+		var p := Grille.plat(g.pos_de(int(gi)))
 		var ch := Vector2i(floori(float(p.x) / 32.0), floori(float(p.y) / 32.0))
 		if not explores.has(ch):
 			explores[ch] = true

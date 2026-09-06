@@ -228,7 +228,9 @@ static func _verifier_fenetre(sim: Simulation, e: Dictionary) -> void:
 	for cell in sim.monde.contenants_hors.keys().duplicate():
 		if absi(cell.x - c.x) <= sim.monde.rayon and absi(cell.y - c.y) <= sim.monde.rayon:
 			for li in sim.monde.contenants_hors[cell].keys():
-				var pos: Vector2i = sim.monde.pos_monde(cell, Vector2i(int(li) % sim.monde.taille, int(li) / sim.monde.taille))
+				var pos: Vector2i = sim.monde.pos_monde(cell, sim.monde.local_pos(int(li)))
+				if not nouvelle.dans(pos):
+					continue
 				sim.contenants[nouvelle.idx(pos)] = sim.monde.contenants_hors[cell][li]
 				if nouvelle.contenu_de(pos).is_empty():
 					nouvelle.poser_contenu(pos, "butin")
@@ -771,16 +773,11 @@ static func _reprendre(sim: Simulation, e: Dictionary, pos: Vector2i) -> void:
 ## Descendre : l'être doit être sur la cage d'escalier de l'étage (Donjons : escalier = lien).
 static func _descendre(sim: Simulation, e: Dictionary) -> bool:
 	if sim.lieu == "camp":
-		if SimVilles._entrer_interieur(sim, e, e.pos):   # l'escalier d'un bâtiment à étages (99)
-			return true
+		if sim.grille.a_lien(e.pos):   # l'escalier d'un bâtiment (les couches Z, 2026-09-06) : l'autre bout, dans la même ville
+			return sim._deplacer(e, sim.grille.lien_de(e.pos), sim.horloge_de(e).ticks)
 		return _partir_en_expedition(sim, e)
 	if sim.donjon.is_empty() or sim.donjon.escalier == null or e.pos != sim.donjon.escalier:
 		return false
-	if bool(sim.donjon.get("interieur", false)):   # l'étage au-dessus (99)
-		var suivant: int = int(sim.donjon.etage) + 1
-		e.etage_depuis = int(sim.donjon.etage)
-		SimVilles.charger_interieur(sim, suivant, e)
-		return true
 	if int(sim.donjon.etage) >= int(sim.donjon.etages):
 		return false
 	var prochain: int = int(sim.donjon.etage) + 1
@@ -794,15 +791,10 @@ static func _descendre(sim: Simulation, e: Dictionary) -> bool:
 ## Remonter : sur la tuile d'entrée de l'étage. À l'étage 1, c'est la sortie du donjon — le jalon
 ## « entrer, combattre, looter, progresser, ressortir » se ferme ici.
 static func _remonter(sim: Simulation, e: Dictionary) -> bool:
+	if sim.lieu == "camp":   # sur l'escalier d'un étage (les couches Z) : redescendre
+		return sim.grille.a_lien(e.pos) and sim._deplacer(e, sim.grille.lien_de(e.pos), sim.horloge_de(e).ticks)
 	if sim.donjon.is_empty() or e.pos != Vector2i(sim.donjon.get("entree", Vector2i(-1, -1))):
 		return false
-	if bool(sim.donjon.get("interieur", false)):   # un bâtiment à étages (99) : l'étage du dessous, ou la rue
-		if int(sim.donjon.etage) <= 1:
-			return SimVilles._sortir_interieur(sim, e)
-		e.etage_depuis = int(sim.donjon.etage)
-		SimVilles.charger_interieur(sim, int(sim.donjon.etage) - 1, e)
-		EventBus.emettre(&"journal", [&"journal.descend_etage", {"nom": e.name_key}])
-		return true
 	if int(sim.donjon.etage) <= 1:
 		return _sortir(sim, e)
 	var precedent: int = int(sim.donjon.etage) - 1

@@ -13,6 +13,15 @@ const DIRS: Array[Vector2i] = [
 
 var largeur: int
 var hauteur_grille: int
+## Les couches Z (designer 2026-09-06, 16 h : « changer d'étage change juste la dimension Z du monde, ce n'est pas une
+## dimension à part ») : la grille a `couches` niveaux de largeur × hauteur_grille tuiles, la couche 0 est le sol, la
+## couche z l'étage z des bâtiments. Une position reste un Vector2i : la couche est portée par y — la tuile (x, y) de
+## l'étage z est (x, y + z × BANDE_Z). Les index de tuile s'empilent : idx(x, y, z) = z × n0 + idx(x, y). Tout ce qui
+## parle en positions (occupants, chemins, vue, dangers) marche sans changer ; deux tuiles de couches différentes ne
+## sont jamais voisines — sauf par un escalier (`lien_a`), qui relie une tuile à une tuile d'une autre couche.
+const BANDE_Z := 1 << 20                  # y + z × BANDE_Z : au-delà de toute coordonnée monde (le noyau C++ porte la même)
+var couches: int = 1                      # 1 + le nombre d'étages que la fenêtre porte
+var lien_a := PackedInt32Array()          # index de tuile → index de la tuile liée par un escalier (−1 : aucun)
 var hauteurs := PackedByteArray()
 var sol := PackedInt32Array()
 var contenu := PackedInt32Array()
@@ -148,12 +157,127 @@ static func depuis_etage(etage: Dictionary, contenus: Dictionary, regles_dep: Di
 # ---------------------------------------------------------------- accès
 
 func idx(p: Vector2i) -> int:
-	return (p.y - origine.y) * largeur + (p.x - origine.x)
+	@warning_ignore("integer_division")
+	var z := p.y / BANDE_Z   # une coordonnée négative (hors du monde) tombe sur la couche 0
+	return z * (largeur * hauteur_grille) + (p.y - z * BANDE_Z - origine.y) * largeur + (p.x - origine.x)
 
 
-## La position monde d'un index de tuile.
+## La position monde d'un index de tuile (sur sa couche : y porte z × BANDE_Z).
 func pos_de(i: int) -> Vector2i:
-	return origine + Vector2i(i % largeur, i / largeur)
+	var n0 := largeur * hauteur_grille
+	@warning_ignore("integer_division")
+	var z := i / n0
+	var r := i % n0
+	@warning_ignore("integer_division")
+	return origine + Vector2i(r % largeur, r / largeur) + Vector2i(0, z * BANDE_Z)
+
+
+## La couche d'une position (0 : le sol).
+static func z_de(p: Vector2i) -> int:
+	@warning_ignore("integer_division")
+	return p.y / BANDE_Z if p.y >= 0 else 0
+
+
+## La position au sol d'une position de n'importe quelle couche.
+static func plat(p: Vector2i) -> Vector2i:
+	return Vector2i(p.x, p.y - z_de(p) * BANDE_Z)
+
+
+## La même tuile à la couche z.
+static func en_couche(p: Vector2i, z: int) -> Vector2i:
+	return Vector2i(p.x, p.y - z_de(p) * BANDE_Z + z * BANDE_Z)
+
+
+## La distance au sol, couches confondues (le client : ce qui est à l'écran, quelle que soit la hauteur).
+static func distance_plate(a: Vector2i, b: Vector2i) -> int:
+	return distance(plat(a), plat(b))
+
+
+## Le nombre de tuiles de la grille, toutes couches comprises (la taille de ses tableaux par tuile).
+func n_tuiles() -> int:
+	return largeur * hauteur_grille * couches
+
+
+## Donne à la grille `k` couches (Monde.fenetre, après le sol) : les tableaux par tuile s'allongent ; les couches neuves
+## ont les hauteurs du sol (un étage est à plat sur sa tuile) et sont pleines de `vide` (l'air : on n'y marche pas, on
+## voit au travers) — les bâtiments y posent ensuite leurs étages.
+func poser_couches(k: int) -> void:
+	k = maxi(1, k)
+	if k == couches:
+		return
+	var n0 := largeur * hauteur_grille
+	var sol_h := hauteurs.slice(0, n0)
+	var vide_id := _index_contenu("vide")
+	var couche_c := PackedInt32Array()
+	couche_c.resize(n0)
+	couche_c.fill(vide_id)
+	var couche_z := PackedInt32Array()
+	couche_z.resize(n0)
+	var couche_b := PackedByteArray()
+	couche_b.resize(n0)
+	hauteurs = sol_h
+	contenu = contenu.slice(0, n0)
+	c_data = c_data.slice(0, n0)
+	sol = sol.slice(0, n0)
+	for z in range(1, k):
+		hauteurs += sol_h
+		contenu += couche_c
+		c_data += couche_z
+		sol += couche_z
+	couches = k
+	var n := n0 * k
+	occ.resize(n)
+	danger_a.resize(n)
+	eau_a.resize(n)
+	niveaux_bat.resize(n)
+	bat_de.resize(n)
+	lien_a.resize(n)
+	lien_a.fill(-1)
+	occ.fill(0)
+	danger_a.fill(0)
+	eau_a.fill(0)
+	_n_occ = -1
+	_n_danger = -1
+	_n_eau = -1
+	_n_materiaux = -1
+	_frott_sale = true
+
+
+## L'index d'un contenu par son id, ajouté à la table s'il manque (0 : inconnu du catalogue).
+func _index_contenu(id: String) -> int:
+	if id.is_empty() or not contenu_defs.has(id):
+		return 0
+	var ci := contenu_ids.find(id)
+	if ci < 0:
+		contenu_ids.append(id)
+		ci = contenu_ids.size() - 1
+	return ci
+
+
+## Un escalier : la tuile `a` (la marche du bas) et la tuile `b` (l'arrivée, une autre couche) se répondent.
+func poser_lien(a: Vector2i, b: Vector2i) -> void:
+	var ia := idx(a)
+	var ib := idx(b)
+	if lien_a.size() != n_tuiles():
+		lien_a.resize(n_tuiles())
+		lien_a.fill(-1)
+	if ia < 0 or ib < 0 or ia >= lien_a.size() or ib >= lien_a.size():
+		return
+	lien_a[ia] = ib
+	lien_a[ib] = ia
+
+
+func a_lien(p: Vector2i) -> bool:
+	if lien_a.is_empty() or not dans(p):
+		return false
+	return lien_a[idx(p)] >= 0
+
+
+## L'autre bout de l'escalier de `p` (`p` s'il n'en a pas).
+func lien_de(p: Vector2i) -> Vector2i:
+	if not a_lien(p):
+		return p
+	return pos_de(lien_a[idx(p)])
 
 
 ## Marque une tuile modifiée (Monde.capturer la mémorise par cellule).
@@ -162,7 +286,12 @@ func marquer(p: Vector2i) -> void:
 
 
 func dans(p: Vector2i) -> bool:
-	return p.x >= origine.x and p.y >= origine.y and p.x < origine.x + largeur and p.y < origine.y + hauteur_grille
+	@warning_ignore("integer_division")
+	var z := p.y / BANDE_Z
+	if z >= couches:
+		return false
+	var ly := p.y - z * BANDE_Z
+	return p.x >= origine.x and ly >= origine.y and p.x < origine.x + largeur and ly < origine.y + hauteur_grille
 
 
 func h(p: Vector2i) -> int:
@@ -258,7 +387,7 @@ func oter_eau(i: int) -> void:
 ## plus à celle vue par le miroir le fait recompiler depuis le dictionnaire. Un échange à taille égale passerait,
 ## d'où les méthodes ; ceci rattrape le cas courant.
 func _miroirs_a_jour() -> void:
-	var n := largeur * hauteur_grille
+	var n := n_tuiles()
 	if occupants.size() != _n_occ:
 		occ.fill(0)
 		for k in occupants:
@@ -290,10 +419,10 @@ func recompiler_sols() -> void:
 ## Le miroir des matières transparentes, recompilé quand `materiaux` a changé de taille (les tuiles de verre) :
 ## `transparents` est la liste des ids qui laissent passer la lumière (Éclairage, la propagation par le noyau).
 func transparents_a_jour(transparents: PackedStringArray) -> void:
-	if materiaux.size() == _n_materiaux and transparent_a.size() == largeur * hauteur_grille:
+	if materiaux.size() == _n_materiaux and transparent_a.size() == n_tuiles():
 		return
 	_n_materiaux = materiaux.size()
-	var n := largeur * hauteur_grille
+	var n := n_tuiles()
 	transparent_a.resize(n)
 	transparent_a.fill(0)
 	if transparents.size() <= 1:   # rien que l'entrée vide : aucune matière transparente au catalogue
@@ -383,7 +512,7 @@ static func _frott_de(mid: String, sm: Dictionary) -> float:
 ## Le miroir de friction par tuile pour le noyau : recompilé quand `sols` ou materiau_defaut ont changé.
 func _recompiler_frott() -> void:
 	_frott_sale = false
-	var n := largeur * hauteur_grille
+	var n := n_tuiles()
 	if frott_a.size() != n:
 		frott_a.resize(n)
 	var sm: Dictionary = GameData.config("combat_rules").get("stats_materiau", {})
@@ -443,11 +572,22 @@ func _chemin_gd(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignor
 				pas.push_front(c)
 				c = vient_de[c]
 			return pas
+		var voisins: Array[Vector2i] = []   # les huit pas, et l'autre bout de l'escalier où l'on se tient (un pas de base)
+		var couts: Array[int] = []
 		for d in DIRS:
-			var voisin := courant + d
-			var cout := cout_pas(courant, voisin, volant, eviter_nage)
+			var v := courant + d
+			var cout := cout_pas(courant, v, volant, eviter_nage)
 			if cout < 0:
 				continue
+			# Un escalier ne se tient pas : y poser le pied, c'est arriver à l'autre bout (une autre couche).
+			voisins.append(lien_de(v) if a_lien(v) else v)
+			couts.append(cout)
+		if courant == depart and a_lien(courant):
+			voisins.append(lien_de(courant))
+			couts.append(base)
+		for k in voisins.size():
+			var voisin: Vector2i = voisins[k]
+			var cout: int = couts[k]
 			var occ := occupant(voisin)
 			if not occ.is_empty() and occ != ignorer and voisin != arrivee:
 				continue
@@ -457,7 +597,7 @@ func _chemin_gd(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignor
 			if ng < int(g.get(voisin, 1 << 30)):
 				g[voisin] = ng
 				vient_de[voisin] = courant
-				_tas_push(ouverts, Vector3i(voisin.x, voisin.y, ng + base * distance(voisin, arrivee)))
+				_tas_push(ouverts, Vector3i(voisin.x, voisin.y, ng + base * distance_plate(voisin, arrivee)))
 	return vide
 
 
@@ -517,12 +657,23 @@ func _atteignables_gd(depart: Vector2i, budget: int, volant: bool = false, evite
 				k = i
 		var c: Vector2i = file[k]
 		file.remove_at(k)
+		var voisins: Array[Vector2i] = []
+		var couts_v: Array[int] = []
 		for d in DIRS:
 			var v := c + d
 			var cout := cout_pas(c, v, volant, eviter_nage)
-			if cout < 0 or not occupant(v).is_empty():
+			if cout < 0:
 				continue
-			var nc: int = couts[c] + cout
+			voisins.append(lien_de(v) if a_lien(v) else v)   # l'escalier mène à l'autre bout
+			couts_v.append(cout)
+		if c == depart and a_lien(c):
+			voisins.append(lien_de(c))
+			couts_v.append(int(dep["cout_base"]))
+		for kv in voisins.size():
+			var v: Vector2i = voisins[kv]
+			if not occupant(v).is_empty():
+				continue
+			var nc: int = couts[c] + couts_v[kv]
 			if nc <= budget and nc < int(couts.get(v, 1 << 30)):
 				couts[v] = nc
 				file.append(v)
@@ -541,7 +692,7 @@ func ligne_de_vue(a: Vector2i, b: Vector2i) -> bool:
 func _ligne_de_vue_gd(a: Vector2i, b: Vector2i) -> bool:
 	if a == b:
 		return true
-	if not dans(a) or not dans(b):   # une position d'une autre grille : hors de vue
+	if not dans(a) or not dans(b) or z_de(a) != z_de(b):   # une position d'une autre grille, ou d'une autre couche : hors de vue
 		return false
 	var ha := float(h(a) + hauteur_oeil)
 	var hb := float(h(b) + hauteur_oeil)
@@ -562,7 +713,7 @@ func premier_obstacle_vue(a: Vector2i, b: Vector2i) -> Vector2i:
 
 
 func _premier_obstacle_vue_gd(a: Vector2i, b: Vector2i) -> Vector2i:
-	if a == b or not dans(a) or not dans(b):
+	if a == b or not dans(a) or not dans(b) or z_de(a) != z_de(b):
 		return Vector2i(-1, -1)
 	var ha := float(h(a) + hauteur_oeil)
 	var hb := float(h(b) + hauteur_oeil)
@@ -722,7 +873,7 @@ static func noyau_present() -> bool:
 func _noyau_pret() -> bool:
 	if _noyau == null or not noyau_actif:
 		return false
-	var n := largeur * hauteur_grille
+	var n := n_tuiles()
 	if hauteurs.size() != n or contenu.size() != n:
 		return false   # une grille dont les tableaux ont été remplacés par d'autres tailles : le GDScript juge
 	_miroirs_a_jour()

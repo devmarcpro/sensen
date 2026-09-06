@@ -217,7 +217,9 @@
   "vision": {
     "_doc": "Hauteur de terrain ±10 : un relief plus haut que la ligne tireur→cible coupe la vue | La PERCEPTION allonge le tir (designer 2026-09-03, solution B : chaque stat desserre une rarete qui existe deja). Ce bloc etait le seul des six a etre vide — la force avait `poids.par_force`, le charisme `compagnons.par_charisme`, l'endurance et la volonte leurs barres. Une arme a projectile gagne perception x portee_par_perception tuiles ; le contact n'y gagne rien.",
     "hauteur_oeil": 1,
-    "portee_par_perception": 0.5
+    "portee_par_perception": 0.5,
+    "etage_surplomb": 2,
+    "_doc_etage": "etage_surplomb (les couches Z, 2026-09-06) : à l'étage, l'œil s'élève d'autant au-dessus de hauteur_oeil pour voir PAR-DESSUS les murs de son niveau (hauteur_vue 2) — l'air alentour se voit, et la rue par lui ; les pièces des autres bâtiments restent derrière leurs murs."
   },
   "eclairage": {
     "_doc": "Éclairage (2026-08-30) : niveau de lumière ambiante (0-15) de chaque tuile d'un étage de donjon, sous les sources ; un thème peut le remplacer par lumiere_ambiante",
