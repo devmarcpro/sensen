@@ -634,6 +634,17 @@ La sonde des villes (monde 9, « Mokroslav ») le signale : la cellule résident
 
 `planete.json → routine.lod` : `rayon_plein` 28 tuiles (au-delà, un civil est un figurant : il bondit vers sa cible, traverse les murs sans qu'on le voie, ne redécide qu'`attente_ticks` 200 après être arrivé), `pas_par_decision` 6. Ce que ça change à l'œil : rien tant qu'on ne regarde pas — un figurant qui entre à l'écran est là où sa routine l'aurait mené, mais il peut y être arrivé en traversant une maison. Si tu veux que le rayon suive le zoom ou l'écran plutôt qu'un chiffre, dis-le.
 
+## 2026-09-06 — « Un paperdoll emmène des blocs avec lui » (18 h 30) : corrigé
+
+Les tuiles redessinées par-dessus un être (les murs devant lui, pour qu'il passe derrière) étaient dessinées sur le paperdoll lui-même, qui glisse d'une tuile à l'autre en 0,2 s : elles glissaient avec lui. Elles vivent désormais sur un enfant fixé au monde, replacé chaque image à la tuile visée. Le paperdoll glisse, les murs restent.
+
+## 2026-09-06 — La lumière par tuile (18 h) : ce que ça change à l'œil
+
+- **Une seule lumière** : le ciel de l'heure, l'ombre portée et les torches se composent par tuile, en niveau et en teinte. Une ruelle à l'ombre à midi vaut 72 % ; la nuit vaut 30 % et bleutée ; une torche la nuit fait une tache chaude qui décroît sur quinze tuiles ; à midi elle ne se voit pas. Sous terre, la lueur de l'étage est froide, les torches chaudes.
+- **Les réglages** sont tous dans `planete.json → cycle.lumiere` (les quatre couleurs du ciel, `torche_teinte`, `torche_force`, `donjon_teinte`) et `cycle.soleil.ombre_portee`. Si la nuit te paraît trop claire ou trop bleue, c'est `nuit` ; si les torches doivent porter plus loin, c'est la propagation de la simulation (`luminosite` des meubles), pas le client.
+- **Ce que tu ne verras plus** : le voile noir uniforme du donjon (remplacé par la même carte, avec la lueur de l'étage) et l'ombre portée dessinée à part.
+- **À regarder** : `--ville --graine 21 --heure 23` (la nuit en ville, les torches des rues), `--heure 8` (le matin, l'ombre à l'ouest des maisons), et un étage de donjon.
+
 ## 2026-09-06 — Le soleil tourne (14 h 30) : la première marche
 
 - **Ce que tu verras** : le matin (capture `--ville --graine 21`, 8 h) les faces droites des bâtiments sont plus claires que les gauches ; à 19 h (`--heure 19`) c'est l'inverse, et les toits et le sol s'assombrissent avec le soleil bas ; à midi tout est éclairé de face. La nuit, rien ne bouge (le voile fait le travail). C'est discret : `cycle.soleil.ombre_min` (0,72) dit ce qu'une face à contre-jour garde de sa couleur — descends-le à 0,55 pour un relief plus dur, `elevation_max` (65°) pour un soleil plus rasant.

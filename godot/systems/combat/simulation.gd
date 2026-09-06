@@ -4179,7 +4179,73 @@ var lumiere_tick := -1
 var lumiere_sale := true
 
 
+## Le noyau C++ propage (`SensenGrille.propager_lumiere`, 2026-09-06 : une ville la nuit, cent millisecondes par tick en
+## GDScript) ; `_recalculer_lumiere_gd` reste la référence — les sources, dans le même ordre, la même file.
 func _recalculer_lumiere() -> void:
+	if grille._noyau != null and Grille.noyau_actif and grille._noyau_pret():
+		_recalculer_lumiere_noyau()
+		return
+	_recalculer_lumiere_gd()
+
+
+static var _lum_transparents := PackedStringArray()   # les matières transparentes, lues une fois au catalogue
+static var _lum_meubles_niv: Dictionary = {}           # id de meuble → niveau de lumière (0 : n'éclaire pas)
+var _lum_meubles_grille: Grille = null                # la grille dont _lum_meubles_idx/_src listent les meubles lumineux
+var _lum_meubles_n := -1
+var _lum_meubles_idx := PackedInt32Array()
+var _lum_meubles_src := PackedByteArray()
+func _recalculer_lumiere_noyau() -> void:
+	var t_l0 := Time.get_ticks_usec()
+	var ambiante := 0
+	if lieu == "donjon" and not donjon.is_empty():   # Éclairage (2026-08-30) : une lueur ambiante de l'étage, le thème peut la fixer
+		ambiante = clampi(int(GameData.entree("dungeon_themes", str(donjon.theme)).get("lumiere_ambiante", regles.r.get("eclairage", {}).get("donjon_ambiante", 0))), 0, 15)
+	# Les meubles lumineux ne bougent pas d'un tick à l'autre : leur liste ne se refait que si la grille a changé ou
+	# qu'une tuile a été touchée (lumiere_sale) — deux mille meubles par fenêtre de ville, à chaque tick sinon.
+	if lumiere_sale or _lum_meubles_grille != grille or _lum_meubles_n != grille.meubles.size():
+		_lum_meubles_grille = grille
+		_lum_meubles_n = grille.meubles.size()
+		_lum_meubles_idx = PackedInt32Array()
+		_lum_meubles_src = PackedByteArray()
+		for gi in grille.meubles.keys():
+			var mid_m := str(grille.meubles[gi])
+			if not _lum_meubles_niv.has(mid_m):
+				var l := int(GameData.entree("meubles", mid_m).get("luminosite", 0))
+				_lum_meubles_niv[mid_m] = clampi(roundi(float(l) / 100.0 * 15.0), 1, 15) if l > 0 else 0
+			var niv_m: int = _lum_meubles_niv[mid_m]
+			if niv_m > 0:
+				_lum_meubles_idx.append(int(gi))
+				_lum_meubles_src.append(niv_m)
+	var sources_idx := _lum_meubles_idx.duplicate()
+	var sources_niv := _lum_meubles_src.duplicate()
+	for id in ordre:   # les êtres, dans l'ordre de vivants() — sans bâtir la liste
+		var e: Dictionary = entites[id]
+		if not e.vivant:
+			continue
+		var l := lumiere_de(e)
+		if l > 0:
+			sources_idx.append(grille.idx(e.pos))
+			sources_niv.append(clampi(roundi(float(l) / 100.0 * 15.0), 1, 15))
+	t_l0 = _top("lumiere.sources", t_l0)
+	chrono["n.lumiere"] = float(chrono.get("n.lumiere", 0.0)) + 1.0
+	var seuil_t := int(GameData.config("combat_rules").get("stats_materiau", {}).get("transparence_seuil", 50))
+	var bloque := PackedByteArray()
+	bloque.resize(grille.contenu_ids.size())
+	for ci in range(1, grille.contenu_ids.size()):
+		var c: Dictionary = grille.contenu_defs.get(grille.contenu_ids[ci], {})
+		bloque[ci] = 1 if (bool(c.get("bloque_vue", false)) and int(c.get("transparence", 0)) < seuil_t) else 0
+	if _lum_transparents.is_empty():   # les matières qui laissent passer la lumière (le verre) : quelques ids, lus une fois ; le noyau parcourt les tuiles
+		_lum_transparents.append("")
+		for mid in GameData.catalogues.materials.keys():
+			if int(float(GameData.catalogues.materials[mid].get("stats", {}).get("transparence", 0.0))) >= seuil_t:
+				_lum_transparents.append(str(mid))
+	grille.transparents_a_jour(_lum_transparents)
+	carte_lumiere = grille._noyau.propager_lumiere(grille, sources_idx, sources_niv, ambiante, bloque)
+	_top("lumiere.noyau", t_l0)
+	lumiere_sale = false
+	lumiere_tick = horloge_monde.ticks
+
+
+func _recalculer_lumiere_gd() -> void:
 	var n := grille.largeur * grille.hauteur_grille
 	carte_lumiere.resize(n)
 	var ambiante := 0

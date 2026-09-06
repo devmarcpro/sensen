@@ -64,6 +64,8 @@ var danger_a := PackedByteArray()          # miroir de dangers : 1 = à éviter
 var eau_a := PackedByteArray()             # miroir de niveau_eau : niveau + 1 (0 = pas d'entrée)
 var frott_a := PackedFloat64Array()        # le multiplicateur de friction de chaque tuile (sols, materiau_defaut)
 var _frott_sale := true
+var transparent_a := PackedByteArray()     # miroir de materiaux : 1 = une matière qui laisse passer la lumière (le verre) — pour la propagation
+var _n_materiaux := -1                     # materiaux.size() à la dernière compilation de transparent_a
 var _n_occ := 0                            # les tailles des dictionnaires telles que les miroirs les ont vues (_miroirs_a_jour)
 var _n_danger := 0
 var _n_eau := 0
@@ -283,6 +285,23 @@ func _miroirs_a_jour() -> void:
 ## À appeler après avoir rempli `sols` en bloc (ou changé materiau_defaut) : la friction se recompile au prochain calcul.
 func recompiler_sols() -> void:
 	_frott_sale = true
+
+
+## Le miroir des matières transparentes, recompilé quand `materiaux` a changé de taille (les tuiles de verre) :
+## `transparents` est la liste des ids qui laissent passer la lumière (Éclairage, la propagation par le noyau).
+func transparents_a_jour(transparents: PackedStringArray) -> void:
+	if materiaux.size() == _n_materiaux and transparent_a.size() == largeur * hauteur_grille:
+		return
+	_n_materiaux = materiaux.size()
+	var n := largeur * hauteur_grille
+	transparent_a.resize(n)
+	transparent_a.fill(0)
+	if transparents.size() <= 1:   # rien que l'entrée vide : aucune matière transparente au catalogue
+		return
+	for k in materiaux:
+		var i := int(k)
+		if i >= 0 and i < n and str(materiaux[k]) in transparents:
+			transparent_a[i] = 1
 
 
 ## Distance de Tchebychev — la mesure du CONTACT et du déplacement : deux cases en diagonale sont voisines.
@@ -647,6 +666,46 @@ func _ombres_gd(dir: Vector2, pente: float, coin: Vector2i, taille: Vector2i, ma
 						ombre = 1
 						break
 			res[ly * taille.x + lx] = ombre
+	return res
+
+
+## La lumière de chaque tuile (Éclairage, designer 2026-09-06 : « une tuile n'est pas juste éclairée ou pas, c'est une
+## échelle et il y a une teinte ») : le ciel (niveau et teinte de l'heure), assombri de `ombre_portee` sur les tuiles
+## à l'ombre du rectangle coin/taille, plus la lumière locale (`locale` : 0-15 par tuile — torches, meubles, propagés
+## par la simulation) × force à sa teinte, borné à 1. Trois octets par tuile (RGB) : la texture que le shader multiplie.
+func carte_lumiere(ciel: Color, locale: PackedByteArray, teinte_locale: Color, force_locale: float, dir: Vector2, pente: float, max_pas: int, unites_par_niveau: int, ombre_portee: float, coin: Vector2i, taille: Vector2i) -> PackedByteArray:
+	if _noyau_pret():
+		return _noyau.carte_lumiere(self, ciel, locale, teinte_locale, force_locale, dir, pente, max_pas, unites_par_niveau, ombre_portee, coin, taille)
+	return _carte_lumiere_gd(ciel, locale, teinte_locale, force_locale, dir, pente, max_pas, unites_par_niveau, ombre_portee, coin, taille)
+
+
+func _carte_lumiere_gd(ciel: Color, locale: PackedByteArray, teinte_locale: Color, force_locale: float, dir: Vector2, pente: float, max_pas: int, unites_par_niveau: int, ombre_portee: float, coin: Vector2i, taille: Vector2i) -> PackedByteArray:
+	var n := largeur * hauteur_grille
+	var res := PackedByteArray()
+	res.resize(n * 3)
+	var avec_ombre := ombre_portee > 0.0 and max_pas > 0 and taille.x > 0 and taille.y > 0
+	var ombre := _ombres_gd(dir, pente, coin, taille, max_pas, unites_par_niveau) if avec_ombre else PackedByteArray()
+	var loc_ok := locale.size() >= n
+	for i in n:
+		var x := origine.x + i % largeur
+		var y := origine.y + i / largeur
+		var r := float(ciel.r)
+		var g := float(ciel.g)
+		var b := float(ciel.b)
+		if avec_ombre:
+			var lx := x - coin.x
+			var ly := y - coin.y
+			if lx >= 0 and ly >= 0 and lx < taille.x and ly < taille.y and ombre[ly * taille.x + lx] != 0:
+				r *= (1.0 - ombre_portee)
+				g *= (1.0 - ombre_portee)
+				b *= (1.0 - ombre_portee)
+		var l := float(locale[i]) / 15.0 * force_locale if loc_ok else 0.0
+		r = minf(1.0, r + float(teinte_locale.r) * l)
+		g = minf(1.0, g + float(teinte_locale.g) * l)
+		b = minf(1.0, b + float(teinte_locale.b) * l)
+		res[i * 3] = roundi(r * 255.0)
+		res[i * 3 + 1] = roundi(g * 255.0)
+		res[i * 3 + 2] = roundi(b * 255.0)
 	return res
 
 

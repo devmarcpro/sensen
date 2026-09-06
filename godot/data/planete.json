@@ -222,6 +222,10 @@
       "ombre_portee_pas_deg": 3
     },
     "lumiere": {
+      "_doc": "La lumière d'une tuile (designer 2026-09-06) est un NIVEAU et une TEINTE : le ciel de l'heure (jour, aube, crépuscule, nuit — des couleurs, dont la luminance est le niveau), assombri de soleil.ombre_portee à l'ombre, plus la lumière locale propagée (torches, meubles, feux) à torche_teinte × torche_force — un tour à l'ombre à midi reste plus clair que la nuit, une torche teinte la nuit et n'ajoute rien au plein soleil. Sous terre le ciel est nul et la lueur de l'étage porte donjon_teinte.",
+      "torche_teinte": [1.0, 0.85, 0.6],
+      "torche_force": 0.7,
+      "donjon_teinte": [0.82, 0.82, 0.92],
       "jour": [
         1.0,
         1.0,

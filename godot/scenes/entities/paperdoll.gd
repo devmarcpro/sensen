@@ -17,6 +17,11 @@ var items: Dictionary = {}
 var fonctionnalites: Dictionary = {}
 var palette: Dictionary = {}
 var dessine_apres: Callable     # le client peut dessiner par-dessus (tuiles occultantes)
+## Les occulteurs se dessinent sur un ENFANT fixé au monde (2026-09-06, designer : « quand un paperdoll se déplace il
+## emmène avec lui des blocs ») : le paperdoll glisse d'une tuile à l'autre (~0,2 s) et tout ce qui est dessiné sur lui
+## glissait aussi — les murs redessinés par-dessus lui suivaient sa marche. L'enfant est replacé chaque image à la
+## tuile visée (le client règle sa position à cible − position), ses commandes restent où sont les tuiles.
+var occulteurs: Node2D = null
 var lointain := false           # au-delà de tempo.pictogramme_au_dela tuiles du joueur : un pictogramme, pas le paperdoll (Budgets de performance, 2026-09-06)
 var pose: Dictionary = {}       # segment → delta d'angle (animation par pivots)
 var _anim_restant := 0.0
@@ -144,7 +149,19 @@ func _dessiner_etre() -> void:
 		draw_line(Vector2(6.0, -h_f), Vector2(6.0, -h_f - 9.0), Color(0.25, 0.2, 0.15), 1.0)
 		draw_colored_polygon(PackedVector2Array([Vector2(6.0, -h_f - 9.0), Vector2(11.0, -h_f - 7.5), Vector2(6.0, -h_f - 6.0)]), col)
 	if dessine_apres.is_valid():
-		dessine_apres.call(self)
+		_assurer_occulteurs()
+		occulteurs.queue_redraw()
+
+
+func _assurer_occulteurs() -> void:
+	if occulteurs != null:
+		return
+	occulteurs = Node2D.new()
+	occulteurs.use_parent_material = true   # le grain et la lumière du terrain
+	occulteurs.draw.connect(func() -> void:
+		if dessine_apres.is_valid():
+			dessine_apres.call(self))
+	add_child(occulteurs)
 
 
 ## Le pictogramme d'un être lointain (Budgets de performance, 2026-09-06) : un corps et une tête à la couleur de

@@ -102,6 +102,40 @@ func test_noyau_cpp() -> void:
 		if o_gd != o_cpp:
 			ecarts_ombres += 1
 	verifier(ecarts_ombres == 0, "les ombres portées : la même carte par le noyau, trois soleils (GDScript %.1f ms, C++ %.2f ms)" % [float(t_o_gd) / 1000.0, float(t_o_cpp) / 1000.0])
+	# La lumière des tuiles (Éclairage, designer 2026-09-06 : « une échelle et une teinte ») : la même carte par le noyau,
+	# avec le ciel de midi et son ombre, puis la nuit et les torches de la ville.
+	var locale := PackedByteArray()
+	locale.resize(g.largeur * g.hauteur_grille)
+	for k in 200:   # des torches semées : des niveaux 1-15
+		locale[(k * 7919) % locale.size()] = 1 + (k * 13) % 15
+	var ecarts_lum := 0
+	var t_l_gd := 0
+	var t_l_cpp := 0
+	for cas in [[Color(1, 1, 1), Vector2(0.7071, -0.7071), 3.0, 0.28], [Color(0.28, 0.3, 0.45), Vector2.ZERO, 0.0, 0.0], [Color(0.8, 0.6, 0.55), Vector2(-0.6, 0.8), 1.2, 0.2]]:
+		var coin_l: Vector2i = j.pos - Vector2i(24, 24)
+		var ta_l := Time.get_ticks_usec()
+		var c_gd: PackedByteArray = g._carte_lumiere_gd(cas[0], locale, Color(1.0, 0.85, 0.6), 1.0, cas[1], cas[2], 8, 4, cas[3], coin_l, Vector2i(49, 49))
+		var tb_l := Time.get_ticks_usec()
+		var c_cpp: PackedByteArray = g._noyau.carte_lumiere(g, cas[0], locale, Color(1.0, 0.85, 0.6), 1.0, cas[1], cas[2], 8, 4, cas[3], coin_l, Vector2i(49, 49))
+		var tc_l := Time.get_ticks_usec()
+		t_l_gd += tb_l - ta_l
+		t_l_cpp += tc_l - tb_l
+		if c_gd != c_cpp:
+			ecarts_lum += 1
+	verifier(ecarts_lum == 0, "la lumière des tuiles : la même carte par le noyau (midi et ombre, nuit et torches, crépuscule) — GDScript %.0f ms, C++ %.2f ms" % [float(t_l_gd) / 1000.0, float(t_l_cpp) / 1000.0])
+	# Les règles de la lumière (designer) : à l'ombre à midi, plus clair que la nuit ; une torche teinte la nuit, pas le plein soleil.
+	var force_t := float(GameData.config("planete").cycle.lumiere.get("torche_force", 0.7))
+	var midi: PackedByteArray = g._carte_lumiere_gd(Color(1, 1, 1), PackedByteArray(), Color(1.0, 0.85, 0.6), force_t, Vector2.ZERO, 0.0, 0, 4, 0.0, Vector2i.ZERO, Vector2i.ZERO)
+	var i0 := g.idx(j.pos)
+	var ombre_midi := 255.0 * (1.0 - 0.28)
+	var nuit_c: PackedByteArray = g._carte_lumiere_gd(Color(0.28, 0.3, 0.45), PackedByteArray(), Color(1.0, 0.85, 0.6), force_t, Vector2.ZERO, 0.0, 0, 4, 0.0, Vector2i.ZERO, Vector2i.ZERO)
+	verifier(midi[i0 * 3] == 255 and ombre_midi > float(nuit_c[i0 * 3]) and nuit_c[i0 * 3 + 2] > nuit_c[i0 * 3], "à midi une tuile vaut 1, à l'ombre 0,72 — plus clair que la nuit (%d/255, bleutée)" % nuit_c[i0 * 3])
+	var torche := PackedByteArray()
+	torche.resize(g.largeur * g.hauteur_grille)
+	torche[i0] = 15
+	var nuit_t: PackedByteArray = g._carte_lumiere_gd(Color(0.28, 0.3, 0.45), torche, Color(1.0, 0.85, 0.6), force_t, Vector2.ZERO, 0.0, 0, 4, 0.0, Vector2i.ZERO, Vector2i.ZERO)
+	var midi_t: PackedByteArray = g._carte_lumiere_gd(Color(1, 1, 1), torche, Color(1.0, 0.85, 0.6), force_t, Vector2.ZERO, 0.0, 0, 4, 0.0, Vector2i.ZERO, Vector2i.ZERO)
+	verifier(nuit_t[i0 * 3] > nuit_t[i0 * 3 + 2] and nuit_t[i0 * 3] > nuit_c[i0 * 3] and midi_t[i0 * 3] == 255 and midi_t[i0 * 3 + 2] == 255, "une torche la nuit éclaire et teinte en chaud (%d, %d, %d) ; en plein soleil elle n'ajoute rien" % [nuit_t[i0 * 3], nuit_t[i0 * 3 + 1], nuit_t[i0 * 3 + 2]])
 	sm.monde.fermer()
 	# Les pièces d'une cellule de village (Détection de pièces) : les régions closes inondées par le noyau, les mêmes.
 	var sv := Simulation.new(83)
@@ -125,6 +159,18 @@ func test_noyau_cpp() -> void:
 	var p_cpp: Array = SimTerritoire._pieces_noyau(sv, cell)
 	var t_gd2 := Time.get_ticks_usec()
 	verifier(p_gd.size() > 0 and p_gd == p_cpp, "les pièces d'une cellule de village : les mêmes par le noyau (%d pièces, GDScript %.1f ms, C++ %.2f ms)" % [p_gd.size(), float(t_gd1 - t_gd0) / 1000.0, float(t_gd2 - t_gd1) / 1000.0])
+	# La propagation de la lumière (les torches et meubles du village, les êtres) : la même carte 0-15 par le noyau.
+	var t_p0 := Time.get_ticks_usec()
+	sv._recalculer_lumiere_gd()
+	var lum_gd: PackedByteArray = sv.carte_lumiere.duplicate()
+	var t_p1 := Time.get_ticks_usec()
+	sv._recalculer_lumiere_noyau()
+	var t_p2 := Time.get_ticks_usec()
+	var sources := 0
+	for v_l in lum_gd:
+		if v_l > 0:
+			sources += 1
+	verifier(lum_gd == sv.carte_lumiere and sources > 0, "la propagation de la lumière : la même carte par le noyau (%d tuiles éclairées, GDScript %.1f ms, C++ %.2f ms)" % [sources, float(t_p1 - t_p0) / 1000.0, float(t_p2 - t_p1) / 1000.0])
 	# La génération d'une cellule de surface (file 109) : le sol et la végétation par le noyau, la même cellule au bit près
 	# — le même RNG consommé dans le même ordre, donc le même quartier de village derrière.
 	var c0: Vector2i = sv.monde.cellule_camp

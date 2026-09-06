@@ -7,10 +7,12 @@
 
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/variant/array.hpp>
+#include <godot_cpp/variant/color.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/variant/packed_float64_array.hpp>
 #include <godot_cpp/variant/packed_int32_array.hpp>
+#include <godot_cpp/variant/packed_string_array.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/vector2i.hpp>
 
@@ -75,6 +77,7 @@ private:
 		return (int)s.h[i] + ((fl & F_BLOQUE_VUE) ? ((fl >> 8) & 0xFF) : 0);
 	}
 	bool ligne_de_vue_e(const Etat &s, Vector2i a, Vector2i b, Vector2i *obstacle) const;
+	void ombres_e(const Etat &s, const uint8_t *nv, Vector2 dir, double pente, Vector2i coin, Vector2i taille, int max_pas, int unites_par_niveau, uint8_t *out) const;
 
 protected:
 	static void _bind_methods();
@@ -90,6 +93,10 @@ public:
 	PackedInt32Array composante(Object *grille, Vector2i depart, int max_tuiles);
 	Dictionary regions_cellule(Object *grille, Vector2i origine, int n, const PackedInt32Array &classes);
 	PackedByteArray ombres(Object *grille, Vector2 dir, double pente, Vector2i coin, Vector2i taille, int max_pas, int unites_par_niveau);
+	PackedByteArray propager_lumiere(Object *grille, const PackedInt32Array &sources_idx, const PackedByteArray &sources_niv, int ambiante,
+			const PackedByteArray &bloque_par_contenu);
+	PackedByteArray carte_lumiere(Object *grille, Color ciel, const PackedByteArray &locale, Color teinte_locale, double force_locale,
+			Vector2 dir, double pente, int max_pas, int unites_par_niveau, double ombre_portee, Vector2i coin, Vector2i taille);
 	Dictionary sol_cellule(int taille, bool bord, int pas, const PackedStringArray &bloc_sol, const PackedByteArray &bloc_mer, int mer_h, const PackedByteArray &hauteurs);
 	Dictionary vegetation_cellule(Object *rng, int taille, int pas, const PackedInt32Array &sol_keys, const Dictionary &eau, Rect2i reserve,
 			const PackedInt32Array &bloc_biome, const PackedFloat64Array &bloc_veg, const PackedFloat64Array &bloc_res, const PackedFloat64Array &bloc_danger,

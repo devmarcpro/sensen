@@ -714,6 +714,12 @@ func _process(delta: float) -> void:
 		print("capture : ", sortie)
 		print("image : moyenne %.1f ms, pire %.1f ms sur %d images · process %.1f ms · chrono client %s" % [temps_total / float(frames - 5) * 1000.0, temps_max * 1000.0, frames - 5, temps_process / float(frames - 5) * 1000.0, str(scene.chrono) if scene != null and "chrono" in scene else "—"])
 		print("rendu : cpu %.2f ms, gpu %.2f ms par image · %.0f appels de dessin par image" % [rendu_cpu / float(frames - 5), rendu_gpu / float(frames - 5), appels_dessin / float(frames - 5)])
+		if scene != null and scene.sim != null:
+			var lum := {}
+			for k in scene.sim.chrono.keys():
+				if str(k).begins_with("lumiere"):
+					lum[k] = scene.sim.chrono[k]
+			print("simulation (lumière) : ", str(lum))
 		get_tree().quit()
 
 

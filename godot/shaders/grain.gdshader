@@ -6,23 +6,30 @@ shader_type canvas_item;
 //   · la couleur du matériau (venue des données) n'est jamais remplacée, seulement modulée ;
 //   · un STYLE par famille de matériau (roche veinée, terre grumeleuse, bois fibré, métal brossé…),
 //     encodé par le client dans la partie haute de UV.x — un canal de plus n'existe pas en 2D ;
-//   · l'ORIENTATION de la face est encodée dans UV.y (le soleil, designer 2026-09-06) : le dessus et le sol portent
-//     y + 4096, la face sud-ouest −1000 − hauteur, la face sud-est −2000 − hauteur. Sans UV (v près de 0), la matière
-//     est « plate » : le soleil ne la touche pas (les êtres, l'eau, les voiles, les sprites).
+//   · l'ORIENTATION de la face et la TUILE sont encodées dans les UV (le soleil et la lumière, designer 2026-09-06) :
+//     le dessus et le sol : (style × pas_style + x, 4096 + y) en coordonnées de tuile locales à l'origine de dessin ;
+//     la face sud-ouest : (style × pas_style + x, −1000 − (y × 32 + hauteur)) ; la face sud-est :
+//     (style × pas_style + y, −2000 − (x × 32 + hauteur)). Sans UV (v près de 0), la matière est « plate » : ni soleil ni
+//     lumière de tuile (les êtres reçoivent la leur par modulate, les voiles restent des voiles).
 
 uniform float grains_par_tuile = 8.0;   // combien de « pixels » de grain sur le côté d'une tuile
 uniform float force_grain = 0.10;       // amplitude du grain fin (0 = aplat)
 uniform float force_douce = 0.07;       // amplitude de la variation basse fréquence
 uniform float echelle_douce = 0.35;     // fréquence des taches douces, en tuiles
-uniform float pas_style = 512.0;        // le décalage qui encode le style dans UV.x
+uniform float pas_style = 8192.0;       // le décalage qui encode le style dans UV.x (au-dessus de toute coordonnée locale)
 uniform vec3 soleil = vec3(0.0, 0.0, 1.0);   // la direction du soleil, espace écran : x à droite, y en bas, z vers le ciel
 uniform float soleil_force = 0.0;            // 0 : aucun ombrage directionnel (la nuit, ou le soleil désactivé)
 uniform float ombre_min = 0.72;              // ce qu'une face qui tourne le dos au soleil garde de sa couleur
 uniform float elevation_max = 65.0;          // en degrés : la hauteur du soleil à midi, où le sol vaut 1
+uniform sampler2D lumiere_tex : filter_nearest, repeat_disable;   // la lumière de chaque tuile (niveau et teinte), RGB
+uniform vec2 lumiere_taille = vec2(1.0, 1.0);   // la taille de la grille (la texture)
+uniform vec2 lumiere_decalage = vec2(0.0, 0.0); // origine de la grille − origine de dessin, en tuiles
+uniform float lumiere_active = 0.0;             // 0 : pas de lumière par tuile (arène)
 
 const float DECALAGE_HAUT = 4096.0;
 const float DECALAGE_SO = -1000.0;
 const float DECALAGE_SE = -2000.0;
+const float PAS_FACE = 32.0;   // les faces empilent la coordonnée de tuile × 32 et la hauteur (moins de 32 unités)
 
 float hache(vec2 p) {   // bruit blanc déterministe : même case, même teinte, à jamais
 	return fract(sin(dot(floor(p), vec2(127.1, 311.7))) * 43758.5453);
@@ -41,19 +48,28 @@ float doux(vec2 p) {   // bruit de valeur interpolé : les taches larges
 
 void fragment() {
 	float style = floor(UV.x / pas_style);
+	float u = UV.x - style * pas_style;
 	float v = UV.y;
-	int face = 0;   // 0 plat (sans soleil), 1 le dessus, 2 la face sud-ouest, 3 la face sud-est
+	int face = 0;   // 0 plat (sans soleil ni lumière), 1 le dessus, 2 la face sud-ouest, 3 la face sud-est
+	vec2 tuile = vec2(0.0);
 	if (v > 2000.0) {
 		face = 1;
 		v -= DECALAGE_HAUT;
+		tuile = floor(vec2(u, v));
 	} else if (v < -1500.0) {
 		face = 3;
-		v -= DECALAGE_SE;
+		float vp = DECALAGE_SE - v;   // x × 32 + hauteur
+		float tx = floor(vp / PAS_FACE);
+		tuile = vec2(tx, floor(u));
+		v = -(vp - tx * PAS_FACE);   // la hauteur, négative comme avant : le grain de la paroi
 	} else if (v < -500.0) {
 		face = 2;
-		v -= DECALAGE_SO;
+		float vp = DECALAGE_SO - v;   // y × 32 + hauteur
+		float ty = floor(vp / PAS_FACE);
+		tuile = vec2(floor(u), ty);
+		v = -(vp - ty * PAS_FACE);
 	}
-	vec2 uv = vec2(UV.x - style * pas_style, v);
+	vec2 uv = vec2(u, v);
 	vec2 p = uv * max(grains_par_tuile, 1.0);
 	float g = hache(p) - 0.5;                          // le grain commun à toutes les matières
 	float t = doux(uv * max(echelle_douce, 0.01)) - 0.5;
@@ -98,5 +114,14 @@ void fragment() {
 		}
 		k_soleil = mix(1.0, mix(ombre_min, 1.0, d), soleil_force);
 	}
-	COLOR.rgb = clamp(COLOR.rgb * k * k_soleil, vec3(0.0), vec3(1.0));
+	// La lumière de la tuile (designer 2026-09-06 : « une échelle et une teinte ») : le ciel de l'heure, l'ombre portée,
+	// les torches — une texture RGB par tuile de la grille, multipliée ici.
+	vec3 lumiere = vec3(1.0);
+	if (lumiere_active > 0.0 && face > 0) {
+		vec2 g_tuile = tuile - lumiere_decalage;
+		if (g_tuile.x >= 0.0 && g_tuile.y >= 0.0 && g_tuile.x < lumiere_taille.x && g_tuile.y < lumiere_taille.y) {
+			lumiere = texture(lumiere_tex, (g_tuile + vec2(0.5)) / lumiere_taille).rgb;
+		}
+	}
+	COLOR.rgb = clamp(COLOR.rgb * k * k_soleil * lumiere, vec3(0.0), vec3(1.0));
 }

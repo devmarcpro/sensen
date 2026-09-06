@@ -88,6 +88,8 @@ void SensenGrille::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("composante", "grille", "depart", "max_tuiles"), &SensenGrille::composante);
 	ClassDB::bind_method(D_METHOD("regions_cellule", "grille", "origine", "n", "classes"), &SensenGrille::regions_cellule);
 	ClassDB::bind_method(D_METHOD("ombres", "grille", "dir", "pente", "coin", "taille", "max_pas", "unites_par_niveau"), &SensenGrille::ombres);
+	ClassDB::bind_method(D_METHOD("propager_lumiere", "grille", "sources_idx", "sources_niv", "ambiante", "bloque_par_contenu"), &SensenGrille::propager_lumiere);
+	ClassDB::bind_method(D_METHOD("carte_lumiere", "grille", "ciel", "locale", "teinte_locale", "force_locale", "dir", "pente", "max_pas", "unites_par_niveau", "ombre_portee", "coin", "taille"), &SensenGrille::carte_lumiere);
 	ClassDB::bind_method(D_METHOD("sol_cellule", "taille", "bord", "pas", "bloc_sol", "bloc_mer", "mer_h", "hauteurs"), &SensenGrille::sol_cellule);
 	ClassDB::bind_method(D_METHOD("vegetation_cellule", "rng", "taille", "pas", "sol_keys", "eau", "reserve", "bloc_biome", "bloc_veg", "bloc_res", "bloc_danger", "biomes", "seuils", "filons_seuil", "filons_densite", "tiers"), &SensenGrille::vegetation_cellule);
 }
@@ -273,17 +275,7 @@ Dictionary SensenGrille::vegetation_cellule(Object *rng_o, int taille, int pas, 
 // dresse là (le sol, plus le bloc : hauteur_vue d'un contenu qui bloque la vue, ou les niveaux du bâtiment ×
 // unites_par_niveau) fait de l'ombre s'il dépasse le sol de la tuile de plus de `pente` × k unités. Résultat : un octet
 // par tuile du rectangle coin/taille, ligne par ligne, 1 = à l'ombre.
-PackedByteArray SensenGrille::ombres(Object *grille, Vector2 dir, double pente, Vector2i coin, Vector2i taille, int max_pas, int unites_par_niveau) {
-	PackedByteArray res;
-	Etat s;
-	if (taille.x <= 0 || taille.y <= 0 || !charger(grille, s)) {
-		return res;
-	}
-	static const StringName sn_niv("niveaux_bat");
-	PackedByteArray niv = grille->get(sn_niv);
-	const uint8_t *nv = octets_ou_nul(niv, s.L * s.H);
-	res.resize(taille.x * taille.y);
-	uint8_t *out = res.ptrw();
+void SensenGrille::ombres_e(const Etat &s, const uint8_t *nv, Vector2 dir, double pente, Vector2i coin, Vector2i taille, int max_pas, int unites_par_niveau, uint8_t *out) const {
 	for (int ly = 0; ly < taille.y; ++ly) {
 		for (int lx = 0; lx < taille.x; ++lx) {
 			int tx = coin.x + lx, ty = coin.y + ly;
@@ -311,6 +303,142 @@ PackedByteArray SensenGrille::ombres(Object *grille, Vector2 dir, double pente, 
 			}
 			out[ly * taille.x + lx] = ombre;
 		}
+	}
+}
+
+PackedByteArray SensenGrille::ombres(Object *grille, Vector2 dir, double pente, Vector2i coin, Vector2i taille, int max_pas, int unites_par_niveau) {
+	PackedByteArray res;
+	Etat s;
+	if (taille.x <= 0 || taille.y <= 0 || !charger(grille, s)) {
+		return res;
+	}
+	static const StringName sn_niv("niveaux_bat");
+	PackedByteArray niv = grille->get(sn_niv);
+	const uint8_t *nv = octets_ou_nul(niv, s.L * s.H);
+	res.resize(taille.x * taille.y);
+	ombres_e(s, nv, dir, pente, coin, taille, max_pas, unites_par_niveau, res.ptrw());
+	return res;
+}
+
+
+// La propagation 0-15 de la lumière (Simulation._recalculer_lumiere_gd, Éclairage) : la carte part à `ambiante`, chaque
+// source y pose son niveau, puis la lumière descend d'un niveau par tuile vers les huit voisines — une tuile dont le
+// contenu bloque la lumière (bloque_par_contenu[contenu]) n'en laisse rien passer, sauf si sa matière est transparente
+// (Grille.transparent_a) ou qu'un meuble y est posé. La carte finale est le maximum, sur toutes les sources, de
+// niveau − distance : elle ne dépend pas de l'ordre — on propage donc par SEAUX de niveau décroissant, chaque tuile
+// traitée une fois, là où la file du GDScript la relaxait plusieurs fois. Le même résultat, test_noyau_cpp le vérifie.
+PackedByteArray SensenGrille::propager_lumiere(Object *grille, const PackedInt32Array &sources_idx, const PackedByteArray &sources_niv, int ambiante,
+		const PackedByteArray &bloque_par_contenu) {
+	PackedByteArray res;
+	Etat s;
+	if (!charger(grille, s)) {
+		return res;
+	}
+	int n = s.L * s.H;
+	res.resize(n);
+	uint8_t *carte = res.ptrw();
+	for (int i = 0; i < n; ++i) {
+		carte[i] = (uint8_t)ambiante;
+	}
+	static const StringName sn_transp("transparent_a"), sn_meubles("meubles");
+	PackedByteArray transp = grille->get(sn_transp);
+	const uint8_t *tr = octets_ou_nul(transp, n);
+	std::vector<uint8_t> passe(n, 0);   // 1 : la tuile laisse passer quoi qu'en dise son contenu (verre, meuble)
+	if (tr) {
+		for (int i = 0; i < n; ++i) {
+			passe[i] = tr[i];
+		}
+	}
+	Dictionary meubles = grille->get(sn_meubles);
+	Array cles_m = meubles.keys();
+	for (int k = 0; k < cles_m.size(); ++k) {
+		int i = (int)cles_m[k];
+		if (i >= 0 && i < n) {
+			passe[i] = 1;
+		}
+	}
+	std::vector<std::vector<int>> seaux(16);
+	for (int k = 0; k < sources_idx.size() && k < sources_niv.size(); ++k) {
+		int gi = sources_idx[k];
+		int niv = sources_niv[k];
+		if (gi >= 0 && gi < n && niv > carte[gi] && niv <= 15) {
+			carte[gi] = (uint8_t)niv;
+			seaux[niv].push_back(gi);
+		}
+	}
+	int nbc = bloque_par_contenu.size();
+	for (int niv = 15; niv >= 2; --niv) {
+		std::vector<int> &seau = seaux[niv];
+		for (size_t k = 0; k < seau.size(); ++k) {
+			int gi = seau[k];
+			if ((int)carte[gi] != niv) {
+				continue;   // relevée depuis par une source plus forte : déjà propagée à son niveau
+			}
+			int32_t ci = s.c[gi];
+			bool bloque = (ci > 0 && ci < nbc) ? bloque_par_contenu[ci] != 0 : false;
+			if (bloque && !passe[gi]) {
+				continue;   // un mur est éclairé mais ne laisse rien passer — sauf s'il est de verre ou porte un meuble
+			}
+			int px = s.ox + gi % s.L, py = s.oy + gi / s.L;
+			for (int d = 0; d < 8; ++d) {
+				int qx = px + DX[d], qy = py + DY[d];
+				if (!s.dans(qx, qy)) {
+					continue;
+				}
+				int qi = s.idx(qx, qy);
+				if (niv - 1 > (int)carte[qi]) {
+					carte[qi] = (uint8_t)(niv - 1);
+					seaux[niv - 1].push_back(qi);
+				}
+			}
+		}
+	}
+	return res;
+}
+
+// La lumière de chaque tuile (Éclairage, designer 2026-09-06 : « une tuile n'est pas juste éclairée ou pas, c'est une
+// échelle et une teinte ») — transcription de Grille._carte_lumiere_gd : le ciel (niveau et teinte de l'heure), assombri
+// de ombre_portee sur les tuiles à l'ombre du rectangle coin/taille (au-delà, pas d'ombre), plus la lumière locale
+// (`locale` : 0-15 par tuile, torches et meubles propagés par la simulation) × force à sa teinte, le tout borné à 1.
+// Trois octets par tuile (RGB), pour la texture que le shader multiplie.
+PackedByteArray SensenGrille::carte_lumiere(Object *grille, Color ciel, const PackedByteArray &locale, Color teinte_locale, double force_locale,
+		Vector2 dir, double pente, int max_pas, int unites_par_niveau, double ombre_portee, Vector2i coin, Vector2i taille) {
+	PackedByteArray res;
+	Etat s;
+	if (!charger(grille, s)) {
+		return res;
+	}
+	int n = s.L * s.H;
+	std::vector<uint8_t> ombre;
+	bool avec_ombre = ombre_portee > 0.0 && max_pas > 0 && taille.x > 0 && taille.y > 0;
+	if (avec_ombre) {
+		static const StringName sn_niv("niveaux_bat");
+		PackedByteArray niv = grille->get(sn_niv);
+		const uint8_t *nv = octets_ou_nul(niv, n);
+		ombre.assign(taille.x * taille.y, 0);
+		ombres_e(s, nv, dir, pente, coin, taille, max_pas, unites_par_niveau, ombre.data());
+	}
+	const uint8_t *loc = octets_ou_nul(locale, n);
+	res.resize(n * 3);
+	uint8_t *out = res.ptrw();
+	for (int i = 0; i < n; ++i) {
+		int x = s.ox + i % s.L, y = s.oy + i / s.L;
+		double r = ciel.r, g = ciel.g, b = ciel.b;
+		if (avec_ombre) {
+			int lx = x - coin.x, ly = y - coin.y;
+			if (lx >= 0 && ly >= 0 && lx < taille.x && ly < taille.y && ombre[ly * taille.x + lx]) {
+				r *= (1.0 - ombre_portee);
+				g *= (1.0 - ombre_portee);
+				b *= (1.0 - ombre_portee);
+			}
+		}
+		double l = loc ? (double)loc[i] / 15.0 * force_locale : 0.0;
+		r = std::min(1.0, r + teinte_locale.r * l);
+		g = std::min(1.0, g + teinte_locale.g * l);
+		b = std::min(1.0, b + teinte_locale.b * l);
+		out[i * 3] = (uint8_t)roundi_(r * 255.0);
+		out[i * 3 + 1] = (uint8_t)roundi_(g * 255.0);
+		out[i * 3 + 2] = (uint8_t)roundi_(b * 255.0);
 	}
 	return res;
 }

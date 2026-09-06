@@ -74,7 +74,7 @@
     "force_grain": 0.12,
     "force_douce": 0.07,
     "echelle_douce": 0.35,
-    "pas_style": 512.0,
+    "pas_style": 8192.0,
     "styles": {
       "uni": 0,
       "roche": 1,

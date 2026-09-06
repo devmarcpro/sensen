@@ -306,6 +306,11 @@
   "gardes_par_habitant": 25,
   "zone_tuiles_max": 40,
   "budget_ms_cellule": 120,
+  "toits": {
+    "_doc": "Les toits (designer 2026-09-06) : pente, plat, pente — les coins de tuile s'élèvent avec leur distance au bord de l'emprise du bâtiment, jusqu'à hauteur_blocs blocs à pente_tuiles tuiles du bord ; au-delà, le faîte est plat.",
+    "pente_tuiles": 1.0,
+    "hauteur_blocs": 1
+  },
   "materiaux": {
     "_doc": "Les matériaux d'un village (designer 2026-09-06) : le bois est tiré parmi les essences de la végétation du biome (au poids de leur densité), la pierre parmi ses roches, sinon pierre_sans_roche ; le toit suit le palier, sauf si un tag du biome en décide (toit_par_tag, le premier tag qui a une règle) ; le sol suit le palier ('' = la pierre du village). Le premier bloc d'une façade est en pierre, les blocs au-dessus en bois.",
     "pierre_defaut": "pierre",
