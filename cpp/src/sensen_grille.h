@@ -10,6 +10,10 @@
 #include <godot_cpp/variant/color.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
+#include <godot_cpp/variant/packed_color_array.hpp>
+#include <godot_cpp/variant/packed_float32_array.hpp>
+#include <godot_cpp/variant/packed_vector2_array.hpp>
+#include <godot_cpp/variant/vector2.hpp>
 #include <godot_cpp/variant/packed_float64_array.hpp>
 #include <godot_cpp/variant/packed_int32_array.hpp>
 #include <godot_cpp/variant/packed_string_array.hpp>
@@ -35,6 +39,10 @@ public:
 		F_ECOULEMENT = 32,
 		F_BLOQUE_VUE = 64,
 		// bits 8..15 : hauteur_vue du contenu
+		F_PORTE = 1 << 16,          // tag « porte »
+		F_VEGETATION = 1 << 17,     // tag « vegetation »
+		F_MUR = 1 << 18,            // tag « mur »
+		F_SANS_HAUTEUR_VUE = 1 << 19,   // la définition n'a pas de hauteur_vue (le dessin en prend 3)
 	};
 
 	// La vue d'une grille le temps d'un appel : des pointeurs sur ses tableaux (les références tiennent les tampons).
@@ -109,6 +117,11 @@ public:
 	int cout_pas_entre(Object *grille, Vector2i de, Vector2i vers, bool volant, bool eviter_nage);
 	PackedInt32Array composante(Object *grille, Vector2i depart, int max_tuiles);
 	Dictionary regions_cellule(Object *grille, Vector2i origine, int n, const PackedInt32Array &classes);
+	Dictionary brouillard(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, Vector2i origine_dessin,
+			double tw, double th, double hstep, int niveau_u, int bat_j, int mur_coupe_u, Color voile, Color col_sil);
+	Dictionary toits(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, Vector2i origine_dessin,
+			double tw, double th, double hstep, int niveau_u, int bat_j, const PackedColorArray &bat_couleurs, const PackedFloat32Array &bat_styles,
+			double pente_t, double haut_toit, double ombre_min, Vector2 soleil_h, bool soleil_ok, double soleil_force, double uv_haut);
 	PackedByteArray ombres(Object *grille, Vector2 dir, double pente, Vector2i coin, Vector2i taille, int max_pas, int unites_par_niveau);
 	PackedByteArray propager_lumiere(Object *grille, const PackedInt32Array &sources_idx, const PackedByteArray &sources_niv, int ambiante,
 			const PackedByteArray &bloque_par_contenu);

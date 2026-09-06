@@ -87,6 +87,8 @@ void SensenGrille::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("cout_pas_entre", "grille", "de", "vers", "volant", "eviter_nage"), &SensenGrille::cout_pas_entre);
 	ClassDB::bind_method(D_METHOD("composante", "grille", "depart", "max_tuiles"), &SensenGrille::composante);
 	ClassDB::bind_method(D_METHOD("regions_cellule", "grille", "origine", "n", "classes"), &SensenGrille::regions_cellule);
+	ClassDB::bind_method(D_METHOD("brouillard", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "origine_dessin", "tw", "th", "hstep", "niveau_u", "bat_j", "mur_coupe_u", "voile", "col_sil"), &SensenGrille::brouillard);
+	ClassDB::bind_method(D_METHOD("toits", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "origine_dessin", "tw", "th", "hstep", "niveau_u", "bat_j", "bat_couleurs", "bat_styles", "pente_t", "haut_toit", "ombre_min", "soleil_h", "soleil_ok", "soleil_force", "uv_haut"), &SensenGrille::toits);
 	ClassDB::bind_method(D_METHOD("ombres", "grille", "dir", "pente", "coin", "taille", "max_pas", "unites_par_niveau"), &SensenGrille::ombres);
 	ClassDB::bind_method(D_METHOD("propager_lumiere", "grille", "sources_idx", "sources_niv", "ambiante", "bloque_par_contenu"), &SensenGrille::propager_lumiere);
 	ClassDB::bind_method(D_METHOD("carte_lumiere", "grille", "ciel", "locale", "teinte_locale", "force_locale", "dir", "pente", "max_pas", "unites_par_niveau", "ombre_portee", "coin", "taille"), &SensenGrille::carte_lumiere);
@@ -970,4 +972,265 @@ PackedInt32Array SensenGrille::composante(Object *grille, Vector2i depart, int m
 		}
 	}
 	return res;
+}
+
+
+// ---------------------------------------------------------------- les passes de dessin (file 114, 2026-09-06)
+// Transcription de PassesGD (scenes/demo/passes_gd.gd) : le brouillard et les toits en tableaux de triangles que le
+// client soumet d'un coup (canvas_item_add_triangle_array). Les mêmes boucles, le même éventail de triangles par
+// polygone (0, i, i+1), les mêmes couleurs — test_noyau_cpp compare les tableaux.
+
+namespace {
+
+struct Triangles {
+	PackedVector2Array points;
+	PackedColorArray couleurs;
+	PackedVector2Array uvs;
+
+	void poly(const Vector2 *pts, int n, const Color &col, const Vector2 *uv) {
+		for (int i = 1; i < n - 1; ++i) {
+			points.push_back(pts[0]);
+			points.push_back(pts[i]);
+			points.push_back(pts[i + 1]);
+			couleurs.push_back(col);
+			couleurs.push_back(col);
+			couleurs.push_back(col);
+			if (uv) {
+				uvs.push_back(uv[0]);
+				uvs.push_back(uv[i]);
+				uvs.push_back(uv[i + 1]);
+			} else {
+				uvs.push_back(Vector2());
+				uvs.push_back(Vector2());
+				uvs.push_back(Vector2());
+			}
+		}
+	}
+
+	Dictionary vers(const PackedInt32Array &veg_vus, const PackedInt32Array &veg_voiles) const {
+		Dictionary res;
+		PackedInt32Array indices;
+		indices.resize(points.size());
+		int32_t *w = indices.ptrw();
+		for (int i = 0; i < points.size(); ++i) {
+			w[i] = i;
+		}
+		res["points"] = points;
+		res["couleurs"] = couleurs;
+		res["uvs"] = uvs;
+		res["indices"] = indices;
+		res["veg_vus"] = veg_vus;
+		res["veg_voiles"] = veg_voiles;
+		return res;
+	}
+};
+
+// Une tuile est-elle vue (PassesGD.voit) : dans `vue`, ou — depuis un étage — l'air au-dessus d'elle.
+inline bool voit_e(const SensenGrille::Etat &s, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, int x, int y) {
+	if (tout_vu) {
+		return true;
+	}
+	if (vue.has(s.idx(x, y))) {
+		return true;
+	}
+	if (zj > 0 && SensenGrille::Etat::z_de(y) == 0) {
+		int ya = y + zj * SensenGrille::BANDE_Z;
+		if (!s.dans(x, ya)) {
+			return false;
+		}
+		int ia = s.idx(x, ya);
+		return vue.has(ia) && s.c[ia] == vide_ci;
+	}
+	return false;
+}
+
+inline Vector2 ecran_e(int x, int y, int h, Vector2i od, double tw, double th, double hstep) {
+	int lx = x - od.x, ly = y - od.y;
+	return Vector2((real_t)((lx - ly) * tw * 0.5), (real_t)((lx + ly) * th * 0.5 - h * hstep));
+}
+
+} // namespace
+
+// PassesGD.hauteur_bloc : la hauteur dessinée du bloc d'une tuile, en unités.
+static int hauteur_bloc_e(const SensenGrille::Etat &s, const uint8_t *nv, const int32_t *bd, int fl, int i, int x, int y, int bat_j, const Rect2i &rect_j, int niveau_u, int mur_coupe_u) {
+	if (!(fl & SensenGrille::F_BLOQUE_PASSAGE) && !(fl & SensenGrille::F_PORTE)) {
+		return 0;
+	}
+	if (fl & SensenGrille::F_VEGETATION) {
+		return 0;
+	}
+	int n = nv ? (int)nv[i] : 0;
+	if (n > 0 && (fl & (SensenGrille::F_MUR | SensenGrille::F_PORTE))) {
+		if (bat_j > 0 && bd && bd[i] == bat_j && (y == rect_j.position.y + rect_j.size.y - 1 || x == rect_j.position.x + rect_j.size.x - 1)) {
+			return mur_coupe_u;
+		}
+		return n * niveau_u;
+	}
+	return (fl & SensenGrille::F_SANS_HAUTEUR_VUE) ? 3 : ((fl >> 8) & 0xFF);
+}
+
+Dictionary SensenGrille::brouillard(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, Vector2i origine_dessin,
+		double tw, double th, double hstep, int niveau_u, int bat_j, int mur_coupe_u, Color voile, Color col_sil) {
+	Triangles tr;
+	PackedInt32Array veg_vus, veg_voiles;
+	Etat s;
+	if (!charger(grille, s)) {
+		return tr.vers(veg_vus, veg_voiles);
+	}
+	static const StringName sn_decouvert("decouvert"), sn_niv("niveaux_bat"), sn_bat("bat_de"), sn_bats("batiments_liste"), sn_rect("rect");
+	Dictionary decouvert = grille->get(sn_decouvert);
+	PackedByteArray niv = grille->get(sn_niv);
+	const uint8_t *nv = octets_ou_nul(niv, s.n);
+	PackedInt32Array bat = grille->get(sn_bat);
+	const int32_t *bd = (bat.size() >= s.n) ? bat.ptr() : nullptr;
+	Rect2i rect_j;
+	if (bat_j > 0) {
+		Array bats = grille->get(sn_bats);
+		if (bat_j <= bats.size()) {
+			Dictionary info = bats[bat_j - 1];
+			rect_j = info.get(sn_rect, Rect2i());
+		} else {
+			bat_j = 0;
+		}
+	}
+	int x0 = std::max(s.ox, jp.x - rayon), x1 = std::min(s.ox + s.L - 1, jp.x + rayon);
+	int y0 = std::max(s.oy, jp.y - rayon), y1 = std::min(s.oy + s.H - 1, jp.y + rayon);
+	double tw2 = tw * 0.5, th2 = th * 0.5;
+	Color sil_a = col_sil.darkened(0.35), sil_b = col_sil.darkened(0.5);
+	for (int sd = x0 + y0; sd <= x1 + y1; ++sd) {
+		for (int x = std::max(x0, sd - y1); x <= std::min(x1, sd - y0); ++x) {
+			int y = sd - x;
+			int i = s.idx(x, y);
+			if (!decouvert.has(i)) {
+				continue;
+			}
+			int fl = drapeaux(s, i);
+			bool vegetal = (fl & F_VEGETATION) != 0;
+			if (voit_e(s, vue, tout_vu, zj, vide_ci, x, y)) {
+				if (vegetal) {
+					veg_vus.push_back(i);
+				}
+				continue;
+			}
+			Vector2 c = ecran_e(x, y, (int)s.h[i], origine_dessin, tw, th, hstep);
+			if (vegetal) {
+				veg_voiles.push_back(i);
+			} else if ((fl & F_BLOQUE_PASSAGE) && !(fl & F_PORTE)) {
+				double hm = hauteur_bloc_e(s, nv, bd, fl, i, x, y, bat_j, rect_j, niveau_u, mur_coupe_u) * hstep;
+				if (hm > 0) {
+					Vector2 a[4] = { c + Vector2(-tw2, 0), c + Vector2(0, th2), c + Vector2(0, th2 - hm), c + Vector2(-tw2, -hm) };
+					Vector2 b[4] = { c + Vector2(0, th2), c + Vector2(tw2, 0), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm) };
+					Vector2 d[4] = { c + Vector2(-tw2, -hm), c + Vector2(0, -th2 - hm), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm) };
+					tr.poly(a, 4, sil_a, nullptr);
+					tr.poly(b, 4, sil_b, nullptr);
+					tr.poly(d, 4, col_sil, nullptr);
+				}
+				continue;
+			}
+			Vector2 v[4] = { c + Vector2(-tw2, 0), c + Vector2(0, -th2), c + Vector2(tw2, 0), c + Vector2(0, th2) };
+			tr.poly(v, 4, voile, nullptr);
+		}
+	}
+	return tr.vers(veg_vus, veg_voiles);
+}
+
+Dictionary SensenGrille::toits(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, Vector2i origine_dessin,
+		double tw, double th, double hstep, int niveau_u, int bat_j, const PackedColorArray &bat_couleurs, const PackedFloat32Array &bat_styles,
+		double pente_t, double haut_toit, double ombre_min, Vector2 soleil_h, bool soleil_ok, double soleil_force, double uv_haut) {
+	Triangles tr;
+	PackedInt32Array rien;
+	Etat s;
+	if (!charger(grille, s)) {
+		return tr.vers(rien, rien);
+	}
+	static const StringName sn_decouvert("decouvert"), sn_niv("niveaux_bat"), sn_bat("bat_de"), sn_bats("batiments_liste"), sn_rect("rect");
+	Array bats = grille->get(sn_bats);
+	int nb = bats.size();
+	if (nb == 0) {
+		return tr.vers(rien, rien);
+	}
+	Dictionary decouvert = grille->get(sn_decouvert);
+	PackedByteArray niv = grille->get(sn_niv);
+	const uint8_t *nv = octets_ou_nul(niv, s.n);
+	PackedInt32Array bat = grille->get(sn_bat);
+	const int32_t *bd = (bat.size() >= s.n) ? bat.ptr() : nullptr;
+	if (!nv || !bd) {
+		return tr.vers(rien, rien);
+	}
+	std::vector<Rect2i> rects(nb);
+	for (int b = 0; b < nb; ++b) {
+		Dictionary info = bats[b];
+		rects[b] = info.get(sn_rect, Rect2i());
+	}
+	int x0 = std::max(s.ox, jp.x - rayon), x1 = std::min(s.ox + s.L - 1, jp.x + rayon);
+	int y0 = std::max(s.oy, jp.y - rayon), y1 = std::min(s.oy + s.H - 1, jp.y + rayon);
+	std::vector<uint8_t> vus(nb, 0);
+	for (int b = 0; b < nb; ++b) {
+		const Rect2i &r = rects[b];
+		int ex = r.position.x + r.size.x, ey = r.position.y + r.size.y;
+		if (r.position.x > x1 || ex <= x0 || r.position.y > y1 || ey <= y0) {
+			continue;
+		}
+		bool vu = false;
+		for (int y = 0; y < r.size.y && !vu; ++y) {
+			for (int x = 0; x < r.size.x; ++x) {
+				if (voit_e(s, vue, tout_vu, zj, vide_ci, r.position.x + x, r.position.y + y)) {
+					vu = true;
+					break;
+				}
+			}
+		}
+		vus[b] = vu ? 1 : 0;
+	}
+	for (int sd = x0 + y0; sd <= x1 + y1; ++sd) {
+		for (int x = std::max(x0, sd - y1); x <= std::min(x1, sd - y0); ++x) {
+			int y = sd - x;
+			int i = s.idx(x, y);
+			int n = (int)nv[i];
+			if (n == 0 || !decouvert.has(i)) {
+				continue;
+			}
+			int b = bd[i];
+			if (b == bat_j || b <= 0 || b > bat_couleurs.size()) {
+				continue;
+			}
+			Color col = bat_couleurs[b - 1];
+			double st = (b - 1 < bat_styles.size()) ? (double)bat_styles[b - 1] : 0.0;
+			if (!vus[b - 1]) {
+				col = col.darkened(0.55);
+			}
+			const Rect2i &r = rects[b - 1];
+			int ex = r.position.x + r.size.x, ey = r.position.y + r.size.y;
+			double base_px = (double)s.h[i] * hstep + (double)(n * niveau_u) * hstep;
+			int cx[4] = { x, x + 1, x + 1, x };
+			int cy[4] = { y, y, y + 1, y + 1 };
+			Vector2 pts[4];
+			double eleves[4];
+			for (int k = 0; k < 4; ++k) {
+				int d = std::min(std::min(cx[k] - r.position.x, ex - cx[k]), std::min(cy[k] - r.position.y, ey - cy[k]));
+				double eleve = std::min((double)d, pente_t) / pente_t * haut_toit;
+				eleves[k] = eleve;
+				int lx = cx[k] - origine_dessin.x, ly = cy[k] - origine_dessin.y;
+				pts[k] = Vector2((real_t)((lx - ly) * tw * 0.5), (real_t)((lx + ly) * th * 0.5 - th * 0.5 - base_px - eleve));
+			}
+			Color col_v = col;
+			if (soleil_ok) {
+				double gx = (eleves[1] + eleves[2] - eleves[0] - eleves[3]) * 0.5;
+				double gy = (eleves[2] + eleves[3] - eleves[0] - eleves[1]) * 0.5;
+				if (std::abs(gx) + std::abs(gy) > 0.01) {
+					Vector2 dehors = Vector2((real_t)-gx, (real_t)-gy).normalized();
+					Vector2 n_ecran = Vector2((real_t)((dehors.x - dehors.y) / std::sqrt(2.0)), (real_t)((dehors.x + dehors.y) / std::sqrt(2.0)));
+					double lambert = std::min(1.0, std::max(0.0, (double)n_ecran.dot(soleil_h)));
+					double f = 1.0 + ((ombre_min + (1.0 - ombre_min) * lambert) - 1.0) * soleil_force;   // lerp(1, lerp(ombre_min, 1, lambert), force)
+					col_v = col * (real_t)f;
+					col_v.a = col.a;
+				}
+			}
+			int lx0 = x - origine_dessin.x, ly0 = y - origine_dessin.y;
+			Vector2 uv[4] = { Vector2((real_t)(st + lx0), (real_t)(uv_haut + ly0)), Vector2((real_t)(st + lx0 + 1), (real_t)(uv_haut + ly0)),
+				Vector2((real_t)(st + lx0 + 1), (real_t)(uv_haut + ly0 + 1)), Vector2((real_t)(st + lx0), (real_t)(uv_haut + ly0 + 1)) };
+			tr.poly(pts, 4, col_v, uv);
+		}
+	}
+	return tr.vers(rien, rien);
 }

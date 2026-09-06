@@ -909,5 +909,13 @@ func _table_contenus() -> PackedInt32Array:
 		if bool(def.get("bloque_vue", false)):
 			f |= 64
 		f |= (int(def.get("hauteur_vue", 0)) & 0xFF) << 8
+		if "porte" in tags:   # les drapeaux des passes de dessin (file 114) : ce que le client lit des tags
+			f |= 1 << 16
+		if "vegetation" in tags:
+			f |= 1 << 17
+		if "mur" in tags:
+			f |= 1 << 18
+		if not def.has("hauteur_vue"):
+			f |= 1 << 19
 		t[i] = f
 	return t

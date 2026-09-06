@@ -2370,36 +2370,32 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 		return
 	centre_brouillard = j.pos
 	vue_version = int(j.get("vue_version", 0))
+	# Le brouillard en tableaux de triangles (file 114, 2026-09-06) : le noyau C++ les bâtit (SensenGrille.brouillard), PassesGD
+	# sinon — les mêmes ; puis une seule commande de canvas. Le client garde ses réglages : le voile, la silhouette, le rayon.
 	var voile := Color(0.05, 0.05, 0.08, 0.55)   # le sol mémorisé, hors de vue
+	var col_sil := Color(0.38, 0.38, 0.44)
 	var jp := Grille.plat(j.pos)
-	var x0 := maxi(g.origine.x, jp.x - RAYON_VUE)
-	var x1 := mini(g.origine.x + g.largeur - 1, jp.x + RAYON_VUE)
-	var y0 := maxi(g.origine.y, jp.y - RAYON_VUE)
-	var y1 := mini(g.origine.y + g.hauteur_grille - 1, jp.y + RAYON_VUE)
-	_lot_ouvrir(ci)   # tous les voiles en une commande de triangles
-	for s in range(x0 + y0, x1 + y1 + 1):
-		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
-			var t := Vector2i(x, s - x)
-			var idx := g.idx(t)
-			var vu := g.decouvert.has(idx)
-			if not vu:
-				continue   # jamais vue : la passe du terrain n'a rien dessiné, le fond de la scène suffit
-			if sim.voit(j, t):
-				if noeuds_vegetaux.has(idx):
-					noeuds_vegetaux[idx].set_meta("voile", Color.WHITE)
-					noeuds_vegetaux[idx].modulate = _lumiere_tuile(t)
-				continue
-			var c := _ecran(t, g.h(t))
-			var ct := g.contenu_de(t)
-			if "vegetation" in ct.get("tags", []):
-				if noeuds_vegetaux.has(idx):
-					noeuds_vegetaux[idx].set_meta("voile", Color(0.45, 0.45, 0.5))   # un billboard : on le voile lui-même (modulate), sous sa lumière
-					noeuds_vegetaux[idx].modulate = _lumiere_tuile(t) * Color(0.45, 0.45, 0.5)
-			elif g.bloque_passage(t) and not ("porte" in ct.get("tags", [])):
-				_dessine_silhouette(ci, g, t, c)   # un mur mémorisé : sa silhouette, sombre et opaque — pas un voile qu'on voit au travers
-				continue
-			_poly(ci, PackedVector2Array([c + Vector2(-TW * 0.5, 0), c + Vector2(0, -TH * 0.5), c + Vector2(TW * 0.5, 0), c + Vector2(0, TH * 0.5)]), voile)
-	_lot_fermer(ci)
+	var vue: Dictionary = j.get("vue", {})
+	var tout_vu := not j.has("vue")
+	var zj := Grille.z_de(j.pos)
+	var vide_ci := g.contenu_ids.find("vide")
+	var res: Dictionary
+	var t0 := Time.get_ticks_usec()
+	if g.noyau_actif and g._noyau_pret():
+		res = g._noyau.brouillard(g, vue, tout_vu, zj, vide_ci, jp, RAYON_VUE, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, _bat_joueur, MUR_COUPE_UNITES, voile, col_sil)
+	else:
+		res = PassesGD.brouillard(g, vue, tout_vu, zj, vide_ci, jp, RAYON_VUE, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, _bat_joueur, MUR_COUPE_UNITES, voile, col_sil)
+	_top_client("brouillard.tableaux", t0)
+	for idx in res.veg_vus:
+		if noeuds_vegetaux.has(idx):
+			noeuds_vegetaux[idx].set_meta("voile", Color.WHITE)
+			noeuds_vegetaux[idx].modulate = _lumiere_tuile(g.pos_de(idx))
+	for idx in res.veg_voiles:
+		if noeuds_vegetaux.has(idx):
+			noeuds_vegetaux[idx].set_meta("voile", Color(0.45, 0.45, 0.5))   # un billboard : on le voile lui-même (modulate), sous sa lumière
+			noeuds_vegetaux[idx].modulate = _lumiere_tuile(g.pos_de(idx)) * Color(0.45, 0.45, 0.5)
+	if res.points.size() > 0:
+		RenderingServer.canvas_item_add_triangle_array(ci.get_canvas_item(), res.indices, res.points, res.couleurs, res.uvs)
 
 
 ## Un bloc de mur : le dessus et les deux faces avant (sud-ouest, sud-est) ; une face n'est
@@ -2423,18 +2419,7 @@ func _dessine_silhouette(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2) -> 
 ## La hauteur dessinée du bloc d'une tuile, en unités : celle de son contenu, ou celle du bâtiment qui la couvre —
 ## un niveau de bâtiment fait NIVEAU_BLOCS blocs de BLOC_UNITES (Villes, 2026-09-06) ; 0 si rien ne s'y dresse.
 func _hauteur_bloc(g: Grille, t: Vector2i) -> int:
-	if not g.dans(t):
-		return 0
-	var ct := g.contenu_de(t)
-	if not bool(ct.get("bloque_passage", false)) and not ("porte" in ct.get("tags", [])):
-		return 0
-	var tags: Array = ct.get("tags", [])
-	if "vegetation" in tags:
-		return 0
-	var n: int = g.niveaux_bat[g.idx(t)]
-	if n > 0 and ("mur" in tags or "porte" in tags):
-		return MUR_COUPE_UNITES if _mur_coupe(g, t) else n * NIVEAU_BLOCS * BLOC_UNITES
-	return int(ct.get("hauteur_vue", 3))
+	return PassesGD.hauteur_bloc(g, t, _bat_joueur, NIVEAU_BLOCS * BLOC_UNITES, MUR_COUPE_UNITES)   # la même règle que les passes (file 114)
 
 
 ## `base_u` : le bloc commence à cette hauteur (le mur au-dessus d'une porte) ; sinon au sol.
@@ -2602,32 +2587,18 @@ func _dessiner_toits(ci: CanvasItem) -> void:
 	var j := joueur()
 	if j.is_empty():
 		return
+	# Les toits en tableaux de triangles (file 114) : le noyau C++ (SensenGrille.toits) ou PassesGD.toits, les mêmes ; le client
+	# passe la couleur et le grain du toit de chaque bâtiment, le soleil, la pente (villes.json → toits).
 	var bat_j := _batiment_de(j.pos)
-	var jp := Grille.plat(j.pos)
-	var x0 := maxi(g.origine.x, jp.x - RAYON_VUE)
-	var x1 := mini(g.origine.x + g.largeur - 1, jp.x + RAYON_VUE)
-	var y0 := maxi(g.origine.y, jp.y - RAYON_VUE)
-	var y1 := mini(g.origine.y + g.hauteur_grille - 1, jp.y + RAYON_VUE)
 	var couleurs := {}   # matériau de toit → [couleur, style de grain]
-	# Un toit se voit de la rue même si l'on ne voit pas la pièce dessous : un bâtiment dont un mur est en vue a son
-	# toit éclairé en entier ; sinon (mémorisé, hors de vue) il est sombre comme un mur mémorisé.
-	var vus := {}
-	for b in range(1, g.batiments_liste.size() + 1):
-		var r: Rect2i = g.batiments_liste[b - 1].rect
-		if r.position.x > x1 or r.end.x <= x0 or r.position.y > y1 or r.end.y <= y0:
-			continue
-		var vu := false
-		for y in r.size.y:
-			for x in r.size.x:
-				if sim.voit(j, r.position + Vector2i(x, y)):
-					vu = true
-					break
-			if vu:
-				break
-		vus[b] = vu
-	# Le toit en pente (designer 2026-09-06, 15 h 30 : « pas juste plats mais en pente : pente, plat, pente ») : chaque coin
-	# de tuile s'élève avec sa distance au bord de l'emprise, jusqu'à toits.hauteur_blocs à toits.pente_tuiles du bord —
-	# les versants montent depuis le haut des murs, le faîte est plat. Un versant s'éclaire selon le soleil.
+	var bat_couleurs := PackedColorArray()
+	var bat_styles := PackedFloat32Array()
+	for info in g.batiments_liste:
+		var mat := str(info.get("toit", ""))
+		if not couleurs.has(mat):
+			couleurs[mat] = [Color.html(str(GameData.catalogues.materials.get(mat, {}).get("color", "#b89a55"))), _style_grain(mat)]
+		bat_couleurs.append(couleurs[mat][0])
+		bat_styles.append(couleurs[mat][1])
 	var cfg_t: Dictionary = GameData.config("villes").get("toits", {})
 	var pente_t := maxf(0.5, float(cfg_t.get("pente_tuiles", 1.0)))
 	var haut_toit := float(cfg_t.get("hauteur_blocs", 1.0)) * BLOC_UNITES * HSTEP
@@ -2636,48 +2607,20 @@ func _dessiner_toits(ci: CanvasItem) -> void:
 	var soleil_ok := _soleil_force > 0.0 and soleil_h.length() > 0.001
 	if soleil_ok:
 		soleil_h = soleil_h.normalized()
-	_lot_ouvrir(ci)
-	for s_d in range(x0 + y0, x1 + y1 + 1):
-		for x in range(maxi(x0, s_d - y1), mini(x1, s_d - y0) + 1):
-			var t := Vector2i(x, s_d - x)
-			var idx := g.idx(t)
-			var n: int = g.niveaux_bat[idx]
-			if n == 0 or not g.decouvert.has(idx):
-				continue
-			var b: int = g.bat_de[idx]
-			if b == bat_j:
-				continue   # le bâtiment où l'on se tient : on voit sa pièce
-			var info: Dictionary = g.batiments_liste[b - 1]
-			var mat := str(info.get("toit", ""))
-			if not couleurs.has(mat):
-				couleurs[mat] = [Color.html(str(GameData.catalogues.materials.get(mat, {}).get("color", "#b89a55"))), _style_grain(mat)]
-			var col: Color = couleurs[mat][0]
-			var st: float = couleurs[mat][1]
-			if not bool(vus.get(b, false)):
-				col = col.darkened(0.55)
-			var r: Rect2i = info.rect
-			var base_px := float(g.h(t) * HSTEP + n * NIVEAU_BLOCS * BLOC_UNITES * HSTEP)
-			var coins := [Vector2i(t.x, t.y), Vector2i(t.x + 1, t.y), Vector2i(t.x + 1, t.y + 1), Vector2i(t.x, t.y + 1)]   # N, E, S, O
-			var pts := PackedVector2Array()
-			var eleves: Array[float] = []
-			for cn in coins:
-				var d := mini(mini(cn.x - r.position.x, r.end.x - cn.x), mini(cn.y - r.position.y, r.end.y - cn.y))
-				var eleve := minf(float(d), pente_t) / pente_t * haut_toit
-				eleves.append(eleve)
-				var l: Vector2i = cn - origine_dessin
-				pts.append(Vector2((l.x - l.y) * TW * 0.5, (l.x + l.y) * TH * 0.5 - TH * 0.5 - base_px - eleve))
-			var col_v := col
-			if soleil_ok:   # le versant : sa pente (gradient des coins) donne sa normale, le soleil son éclat
-				var gx := (eleves[1] + eleves[2] - eleves[0] - eleves[3]) * 0.5
-				var gy := (eleves[2] + eleves[3] - eleves[0] - eleves[1]) * 0.5
-				if absf(gx) + absf(gy) > 0.01:
-					var dehors := Vector2(-gx, -gy).normalized()   # vers le bas de la pente, dans la grille
-					var n_ecran := Vector2((dehors.x - dehors.y) / sqrt(2.0), (dehors.x + dehors.y) / sqrt(2.0))
-					var lambert := clampf(n_ecran.dot(soleil_h), 0.0, 1.0)
-					col_v = col * lerpf(1.0, lerpf(ombre_min, 1.0, lambert), _soleil_force)
-					col_v.a = col.a
-			_poly(ci, pts, col_v, PackedVector2Array([_uv_haut(t, 0, 0, st), _uv_haut(t, 1, 0, st), _uv_haut(t, 1, 1, st), _uv_haut(t, 0, 1, st)]))
-	_lot_fermer(ci)
+	var jp := Grille.plat(j.pos)
+	var vue: Dictionary = j.get("vue", {})
+	var tout_vu := not j.has("vue")
+	var zj := Grille.z_de(j.pos)
+	var vide_ci := g.contenu_ids.find("vide")
+	var res: Dictionary
+	var t0 := Time.get_ticks_usec()
+	if g.noyau_actif and g._noyau_pret():
+		res = g._noyau.toits(g, vue, tout_vu, zj, vide_ci, jp, RAYON_VUE, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, bat_j, bat_couleurs, bat_styles, pente_t, haut_toit, ombre_min, soleil_h, soleil_ok, _soleil_force, float(UV_HAUT))
+	else:
+		res = PassesGD.toits(g, vue, tout_vu, zj, vide_ci, jp, RAYON_VUE, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, bat_j, bat_couleurs, bat_styles, pente_t, haut_toit, ombre_min, soleil_h, soleil_ok, _soleil_force, float(UV_HAUT))
+	_top_client("toits.tableaux", t0)
+	if res.points.size() > 0:
+		RenderingServer.canvas_item_add_triangle_array(ci.get_canvas_item(), res.indices, res.points, res.couleurs, res.uvs)
 
 
 ## La couche d'interface : barres, garde, télégraphe et jauge de chaîne de chaque être.

@@ -4,7 +4,7 @@ Un **roguelike tactique** en monde infini, généré procéduralement et totalem
 
 > **L'identité du jeu tient en une phrase :** un jeu de **décisions**, pas de dextérité.
 
-**Moteur : Godot 4.6** · GDScript typé (pas de GDExtension) · PC (Steam), solo et coop 4-8 en host-and-join · aucun asset : tout est dessiné par code.
+**Moteur : Godot 4.6** · GDScript typé, plus un **noyau C++** pour les boucles pures de la grille (GDExtension `sensen_grille` : chemins, vision, lumière, génération, passes de dessin — le GDScript reste la référence et le repli) · PC (Steam), solo et coop 4-8 en host-and-join · tout est dessiné par code, et chaque membre, trait de visage ou objet prend son sprite dès qu'une **planche** existe dans `godot/assets/` (`64 × 64`, un dossier par chose).
 
 ---
 
@@ -35,14 +35,14 @@ La partie démarre par la **création de personnage** (R race, C classe, ↑↓ 
 | **E** | interagir avec ce qui est sous la souris si adjacent, sinon la première chose interactive autour (PNJ, coffre, lit, escalier, parcelle, place de village, eau, bête, plante, mur) |
 | **R** | ramasser ce qui est au sol |
 | **Clic droit** | **toutes** les options possibles sur la tuile ou l'être visé — c'est le geste à connaître |
-| **Tab** | le menu : inventaire, atelier, feuille, capacités, carte, territoire, périmètre, registre, sauvegarder, volet latéral, minimap, débogage |
+| **Tab** | le menu : inventaire, atelier, feuille, capacités, carte, territoire, périmètre, registre, sauvegarder, volet latéral, minimap, débogage — et, dans un écran, le **secteur suivant** du menu |
 | **P** | au camp : dessiner un périmètre (récolte de bois, de minerai, de plantes, résidentiel, stockage) — choisir le type, puis cliquer les deux coins |
 | **F4** | le volet latéral (monde, personnage, compagnons, journal, inventaire) : afficher / masquer — aussi au menu |
 | **1 → 0** | la hotbar : armes du râtelier, capacités, bombes, attaque lourde, garde, attendre — la touche sélectionne, la ligne de visée suit la souris, le clic lance |
 | **Échap** | fermer un écran / annuler une visée |
 | molette, clic milieu | zoomer, déplacer la vue |
 
-Dans les écrans : flèches et Entrée, plus les raccourcis lettres **affichés dans l'en-tête** de chaque écran (aucun raccourci global caché).
+Dans les écrans (tranché le 2026-09-06) : **une option = une lettre**. Un écran est fait de **secteurs** (à l'inventaire, l'équipement puis le sac ; au territoire, les cellules, les résidents, les compagnons, les stocks…) ; **Tab** passe de secteur en secteur, le secteur surligné est le seul à porter des lettres — a), b), c)… — et la lettre tapée joue la ligne. Plus de lignes que de lettres : la dernière lettre tourne la page. **Choisir une entrée montre ses options**, lettrées elles aussi (un objet du sac : équiper, lire, manger, poser, jeter… ; un résident : réassigner, renvoyer ; une cellule : changer de rôle, son périmètre). Flèches et Entrée marchent aussi ; Échap revient à la liste, puis ferme. Le dialogue avec un PNJ est une **carte** : son portrait, « Prénom NOM », sa réplique et sa fiche, puis ses options.
 
 ---
 
@@ -94,7 +94,13 @@ Les étapes 0 à 10 de l'ordre de construction sont codées. Par thème :
 
 **Compagnons** — recrutés au village (tout humanoïde non hostile : gratuit au seuil de relation, sinon 40 or) ou apprivoisés, ils suivent partout : en donjon, d'étage en étage, et rentrent au camp avec le joueur ; ordres et postures, un HUD les montre (nom, vie, ordre) ; désarmés, ils frappent à mains nues.
 
-**Interface** — un volet latéral (F4) : monde, personnage, compagnons, journal, inventaire ; les écrans d'inventaire, d'atelier, de composition, de commerce et de territoire ; un voile sous tout menu.
+**Interface** — un volet latéral (F4) : monde, personnage, compagnons, journal, inventaire ; les écrans d'inventaire, d'atelier, de composition, de commerce et de territoire ; un voile sous tout menu ; depuis le 2026-09-06, tous les menus à la même taille, par secteurs (Tab), une option = une lettre, une page à la fois, l'entrée choisie qui montre ses options ; la carte de dialogue (portrait, nom, réplique, fiche, options).
+
+**Lumière** (2026-09-06) — le soleil tourne avec l'heure (lever à l'est, coucher à l'ouest) : les faces des blocs s'éclairent selon leur orientation, les bâtiments portent une ombre ; chaque tuile a un **niveau et une teinte** de lumière (le ciel de l'heure, assombri à l'ombre, plus les torches et les meubles lumineux propagés de tuile en tuile par le noyau) — une torche teinte la nuit et n'ajoute rien à midi ; plus de halo rond.
+
+**Bâtiments et étages** (2026-09-06) — un bâtiment est fait de blocs de matériaux : un soubassement de la pierre du village, un corps du bois du village (la palette vient du biome), un toit à pans (pente, plat, pente) de chaume, d'ardoise ou de basalte ; un niveau fait trois blocs, une porte deux ; les rues font trois tuiles. Les **étages sont la dimension Z du monde** : monter l'escalier ne quitte pas la ville — la rue vit en bas, on la voit par-dessus les murs de l'étage ; les gens logent en haut et y montent le soir. Dans le bâtiment du joueur, le toit s'ôte et les murs sud et est deviennent des murets ; le mur qui le cache est translucide.
+
+**Sprites** (2026-09-06) — des **planches** : sous `godot/assets/`, un dossier par membre (`membres/torse/`…), par trait du visage (`visage/yeux/`…), par objet ; chaque PNG y est une case de 64 × 64 ou une planche de cases, lues dans l'ordre des noms ; le jeu assemble chaque dossier lui-même au premier usage, et dessine par code là où un dossier est vide. Vingt et un dossiers existent, avec une planche de substitution à remplacer (`tools/gen_planches_substitution.py`, `assets/LISEZ-MOI.md`). Une arme équipée est le même dessin que dans l'inventaire.
 
 Ce qui reste ouvert, en détail : **`docs/00 - Index/Vers la production.md`**.
 
@@ -117,8 +123,9 @@ L'étape 11 (coop) ne commencera pas avant qu'un solo soit jugé bon.
 | [`godot/`](godot/) | Le projet Godot — `autoload/`, `data/`, `systems/`, `scenes/`, `locale/` |
 | [`godot/data/`](godot/data/) | **Tout le contenu du jeu, en JSON** — un fichier par entrée, rangé en sous-dossiers thématiques ([README](godot/data/README.md)) |
 | [`docs/`](docs/) | Le design complet : un **coffre Obsidian** de notes atomiques, reliées et navigables |
-| [`tools/`](tools/) | Outillage — `check_vault.py` (intégrité du coffre) et les générateurs de données |
-| [`cpp/`](cpp/) | Le **noyau C++ de la grille** (GDExtension `sensen_grille` : chemins, vision, composantes), bâti par `tools/build_cpp.ps1` ; la DLL est dans `godot/addons/sensen_grille/bin/` |
+| [`tools/`](tools/) | Outillage — `check_vault.py` (intégrité du coffre), `verif_sprites.py` (sprites et planches attendus), `gen_planches_substitution.py`, les générateurs de données |
+| [`godot/assets/`](godot/assets/) | Les **planches de sprites** — un dossier par membre, par trait du visage, par objet ; cases de 64 × 64 ([LISEZ-MOI](godot/assets/LISEZ-MOI.md)) |
+| [`cpp/`](cpp/) | Le **noyau C++ de la grille** (GDExtension `sensen_grille` : chemins, atteignables, lignes et champ de vue, composantes, pièces d'une cellule, ombres et lumière, sol et végétation d'une cellule, les couches Z, le brouillard et les toits en tableaux de triangles, la visibilité des êtres), bâti par `tools/build_cpp.ps1` ; la DLL est dans `godot/addons/sensen_grille/bin/` ; chaque fonction a son original GDScript et `test_noyau_cpp` / `test_noyau_passes` prouvent l'égalité |
 | [`archive/`](archive/) | Le GDD source monolithique (v2.0) — référence historique ; les notes de `docs/` font foi |
 | [`AGENT.md`](AGENT.md) | Le prompt de développement autonome — règles de travail, boucle de validation, ordre |
 
@@ -129,7 +136,8 @@ L'étape 11 (coop) ne commencera pas avant qu'un solo soit jugé bon.
 - `systems/simulation/sim_*.gd` : les **règles** de la simulation en treize bibliothèques statiques (`SimLieux`, `SimTerrain`, `SimCamp`, `SimPnj`, `SimTerritoire`, `SimVilles`, `SimPerimetres`, `SimRoyaumes`, `SimElevage`, `SimObjets`, `SimSauvegarde`, `SimFabrication`, `SimTalents`) — chaque fonction reçoit la simulation en premier paramètre, l'état reste dans `Simulation`, les délégués en fin de `simulation.gd` gardent l'API (découpage par `tools/fragmenter.py`, décidé le 2026-09-05 : `docs/08 - Technique/Modules de la simulation et le C++.md`).
 - `scenes/demo/ecrans.gd` (`Ecrans`) ouvre, ferme et dispatche les écrans ; leur construction vit dans `scenes/demo/ecrans/ecrans_*.gd`, sept bibliothèques statiques (`EcransListe`, `EcransDialogue`, `EcransGestion`, `EcransCreation`, `EcransInventaire`, `EcransAtelier`, `EcransFeuille`) qui reçoivent l'objet `Ecrans` en premier paramètre — le même découpage que la simulation (`tools/fragmenter.py --cible ecrans`).
 - `scenes/entities/creature.tscn` est la scène **unique** de tout être — le joueur n'est pas un type à part. Rig et équipement visible viennent des données.
-- `systems/grid/grille.gd` (`Grille`) tient l'état de la grille ; ses calculs chauds — A*, atteignables, ligne et champ de vue, composante — passent par le **noyau C++** `SensenGrille` (`addons/sensen_grille/`, sources dans `cpp/`) quand la bibliothèque est chargée, et par leurs versions GDScript sinon : mêmes résultats, `test_noyau_cpp` les compare paire par paire (décidé le 2026-09-05, codé le 2026-09-06 : `docs/08 - Technique/Modules de la simulation et le C++.md`).
+- `scenes/demo/passes_gd.gd` (`PassesGD`) : les passes de dessin du client en tableaux de triangles (brouillard, toits, visibilité des êtres), l'original que le noyau transcrit ; `scenes/demo/planches.gd` (`Planches`) : les dossiers de sprites assemblés au premier usage ; `scenes/demo/dialogue.gd` (`DialogueVisuel`) : la carte de dialogue.
+- `systems/grid/grille.gd` (`Grille`) tient l'état de la grille — en **couches Z** depuis le 2026-09-06 (la couche 0 est le sol, la couche z l'étage z des bâtiments ; une position reste un `Vector2i`, la couche est portée par y ; un escalier est un lien entre deux tuiles) ; ses calculs chauds — A*, atteignables, ligne et champ de vue, composante — passent par le **noyau C++** `SensenGrille` (`addons/sensen_grille/`, sources dans `cpp/`) quand la bibliothèque est chargée, et par leurs versions GDScript sinon : mêmes résultats, `test_noyau_cpp` les compare paire par paire (décidé le 2026-09-05, codé le 2026-09-06 : `docs/08 - Technique/Modules de la simulation et le C++.md`).
 
 ---
 
@@ -139,7 +147,7 @@ Quatre contraintes permanentes, dès la première ligne de code :
 
 1. **Une partie solo EST une partie multijoueur hébergée** dont la porte est fermée — serveur autoritaire même en solo, intentions côté client, déterminisme par ticks.
 2. **Une brique à la fois**, avec un critère de sortie formulé avant de commencer.
-3. **`tr()` dès le premier écran** — aucune string affichable en dur, jamais. **Français et anglais sont complets** (1 983 clés chacun) ; japonais et chinois visés au lancement.
+3. **`tr()` dès le premier écran** — aucune string affichable en dur, jamais. **Français et anglais sont complets** (3 600 clés chacun) ; japonais et chinois visés au lancement.
 4. **Tout le contenu est de la donnée** — JSON validé au boot, hot-reload, zéro valeur de gameplay en dur.
 
 ### La boucle de validation
@@ -165,7 +173,8 @@ La suite est découpée par domaine depuis le 2026-09-06 : `scenes/tests/test_co
 
 ```powershell
 # Le noyau C++ de la grille : Visual Studio Build Tools (C++ x64) et SCons (pip install scons) ; godot-cpp se clone tout seul.
-# Sort la DLL dans godot/addons/sensen_grille/bin/ — puis --import, puis -- --seul test_noyau_cpp (le C++ rend ce que le GDScript rend).
+# Sort la DLL dans godot/addons/sensen_grille/bin/ — puis --import, puis -- --seul test_noyau (test_noyau_cpp et test_noyau_passes :
+# le C++ rend ce que le GDScript rend). Aucun Godot ne doit tourner pendant le build (la DLL serait verrouillée).
 powershell -ExecutionPolicy Bypass -File tools/build_cpp.ps1
 
 # Le découpage des fichiers god en bibliothèques statiques (rapport seul sans --ecrire ; se relance depuis l'original :
@@ -184,6 +193,9 @@ python tools/fragmenter.py --cible ecrans --ecrire
 # Capture d'écran (fenêtré — le `--` avant les options est obligatoire)
 & $godot --path godot --disable-vsync res://scenes/tests/capture.tscn -- --arene 3 --heure 12 --frames 8 --sortie user://c.png
 #   autres options : --donjon --torche --raid --talents --carte --ecran inventaire|menu|gestion|atelier|composer
+#   --ville --graine G --heure H (la ville la plus grande à l'heure H) · --dans-batiment (le joueur dans une pièce) · --a-l-etage (à l'étage d'une maison haute)
+#   --dialogue (la carte de dialogue du PNJ le plus proche) · --choisir-objet (l'inventaire, un objet choisi et ses options) · --choisir-entree (un écran, l'entrée choisie et ses options)
+#   --dump-lumiere (la carte de lumière autour du joueur sur la sortie standard) · --traverser N (N pas en ville, le coût des passes de dessin au chrono client)
 #   --langue en · --graine N · --perimetre bois · --maison --assigner · --commerce --echange · --sorts gel+1 · --grande_base N (N semaines) · --ligne N (sélectionne la N-ième ligne de l'écran)
 #   GIF : --gif N --gif-pas P --gif-ticks T [--gif-marcher M] --frames 400, puis python tools/monter_gif.py user://prefixe sortie.gif 900 350
 #   --gif-action defiler|composer|carte|monde|creation|semaine : ce qui change entre deux prises d'un écran (liste qui défile, sort posé pièce à pièce, carte qui glisse, autre graine, volet suivant, une semaine à la base)

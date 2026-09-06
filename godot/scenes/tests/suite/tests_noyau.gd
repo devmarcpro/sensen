@@ -1315,3 +1315,100 @@ func test_planches() -> void:
 	verifier(Planches.variantes("user://planches_test/absent") == 0 and Planches.variantes("membres/nul_part") == 0, "un dossier absent : zéro variante, le code dessine")
 	verifier(Planches.index_locus("yeux", "grands") == 2 and Planches.index_locus("yeux", "inconnu") == -1, "la variante d'un trait est l'index de la valeur de son locus")
 	Planches.vider()
+
+
+## Les passes de dessin par le noyau (file 114, 2026-09-06) : le brouillard et les toits en tableaux de triangles — le noyau
+## C++ rend les mêmes tableaux que PassesGD (points, couleurs, UV, végétaux), sur une fenêtre de ville, de jour et de nuit,
+## avec et sans champ de vue, au sol et à l'étage.
+func test_noyau_passes() -> void:
+	verifier(Grille.noyau_present(), "le noyau C++ est chargé (sensen_grille)")
+	if not Grille.noyau_present():
+		return
+	var s := Simulation.new(21)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var surf: Surface = s.monde.surface
+	var cell: Vector2i = s.monde.cellule_camp + Vector2i(1, 0)
+	surf.fiches_agglo.erase(cell)
+	var fiche: Dictionary = surf.fiche_agglomeration(cell)
+	var agglo: Dictionary = fiche.duplicate()
+	agglo["quartier"] = "centre"
+	agglo["index"] = 0
+	var e: Dictionary = surf.generer_cellule(cell.x, cell.y, {}, false)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 21
+	if e.village.is_empty():
+		surf._poser_quartier(e, cell, rng, agglo)
+	s.monde.cellules[cell] = e
+	s.grille = s.monde.fenetre(s.monde.centre, GameData.config("tile_contents"), s.regles.r.deplacement, int(s.regles.r.vision.hauteur_oeil))
+	var g := s.grille
+	verifier(g._noyau_pret(), "la fenêtre a son noyau")
+	# le joueur sur la place du village, tout découvert autour, un champ de vue réel
+	var centre: Vector2i = s.monde.pos_monde(cell, Vector2i(e.village.centre))
+	g.liberer(j.pos)
+	j.pos = s._tuile_libre_autour(centre)
+	g.placer(j.id, j.pos)
+	for dy in range(-30, 31):
+		for dx in range(-30, 31):
+			var t: Vector2i = j.pos + Vector2i(dx, dy)
+			if g.dans(t):
+				g.decouvert[g.idx(t)] = true
+	j["vue_sale"] = true
+	s.maj_vision()
+	var od: Vector2i = g.origine + Vector2i(7, 3)
+	var bat_j := int(g.bat_de[g.idx(j.pos)])
+	var couleurs := PackedColorArray()
+	var styles := PackedFloat32Array()
+	for k in g.batiments_liste.size():
+		couleurs.append(Color(0.2 + 0.1 * (k % 5), 0.5, 0.3, 1.0))
+		styles.append(float(k % 3) * 8192.0)
+	var ecarts := 0
+	var n_tri := 0
+	var chrono_gd := 0.0
+	var chrono_cpp := 0.0
+	for cas in [["vue", false, Vector2(0.6, 0.4), true, 0.8], ["tout vu", true, Vector2(0.0, 0.0), false, 0.0], ["nuit", false, Vector2(-0.5, 0.7), false, 0.0]]:
+		var tout_vu: bool = cas[1]
+		var vue: Dictionary = j.get("vue", {})
+		var t0 := Time.get_ticks_usec()
+		var b_gd := PassesGD.brouillard(g, vue, tout_vu, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.38, 0.38, 0.44))
+		var t_gd := PassesGD.toits(g, vue, tout_vu, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, couleurs, styles, 1.0, 8.0, 0.72, cas[2], cas[3], cas[4], 4096.0)
+		var t1 := Time.get_ticks_usec()
+		var b_cpp: Dictionary = g._noyau.brouillard(g, vue, tout_vu, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.38, 0.38, 0.44))
+		var t_cpp: Dictionary = g._noyau.toits(g, vue, tout_vu, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, couleurs, styles, 1.0, 8.0, 0.72, cas[2], cas[3], cas[4], 4096.0)
+		var t2 := Time.get_ticks_usec()
+		chrono_gd += float(t1 - t0) / 1000.0
+		chrono_cpp += float(t2 - t1) / 1000.0
+		n_tri += b_gd.points.size() / 3 + t_gd.points.size() / 3
+		for paire in [[b_gd, b_cpp, "brouillard"], [t_gd, t_cpp, "toits"]]:
+			var a: Dictionary = paire[0]
+			var b: Dictionary = paire[1]
+			if a.points.size() != b.points.size() or a.couleurs.size() != b.couleurs.size() or a.uvs.size() != b.uvs.size() or a.indices != b.indices or a.veg_vus != b.veg_vus or a.veg_voiles != b.veg_voiles:
+				ecarts += 1
+				print("  écart de taille (%s, %s) : %d/%d points, %d/%d végétaux vus" % [str(cas[0]), str(paire[2]), a.points.size(), b.points.size(), a.veg_vus.size(), b.veg_vus.size()])
+				continue
+			for i in a.points.size():
+				if not a.points[i].is_equal_approx(b.points[i]) or not a.uvs[i].is_equal_approx(b.uvs[i]) or not a.couleurs[i].is_equal_approx(b.couleurs[i]):
+					ecarts += 1
+					print("  écart (%s, %s) au triangle %d : %s / %s, %s / %s" % [str(cas[0]), str(paire[2]), i / 3, str(a.points[i]), str(b.points[i]), str(a.couleurs[i]), str(b.couleurs[i])])
+					break
+	verifier(ecarts == 0 and n_tri > 100, "brouillard et toits : le noyau rend les mêmes tableaux que PassesGD (%d triangles sur trois cas, GDScript %.1f ms, C++ %.1f ms)" % [n_tri, chrono_gd, chrono_cpp])
+	# à l'étage : la vue par l'air, les mêmes tableaux
+	var esc := Vector2i(-1, -1)
+	for bat in e.village.batiments:
+		if bat.has("escalier") and g.a_lien(s.monde.pos_monde(cell, bat.escalier)):
+			esc = s.monde.pos_monde(cell, bat.escalier)
+			break
+	if esc.x >= 0:
+		var haut := g.lien_de(esc)
+		g.liberer(j.pos)
+		j.pos = haut
+		g.placer(j.id, haut)
+		j["vue_sale"] = true
+		s.maj_vision()
+		var bj := int(g.bat_de[g.idx(haut)])
+		var vue_e: Dictionary = j.get("vue", {})
+		var b_gd := PassesGD.brouillard(g, vue_e, false, 1, g.contenu_ids.find("vide"), Grille.plat(haut), 24, od, 40.0, 20.0, 4.0, 6, bj, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.38, 0.38, 0.44))
+		var b_cpp: Dictionary = g._noyau.brouillard(g, vue_e, false, 1, g.contenu_ids.find("vide"), Grille.plat(haut), 24, od, 40.0, 20.0, 4.0, 6, bj, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.38, 0.38, 0.44))
+		var t_gd := PassesGD.toits(g, vue_e, false, 1, g.contenu_ids.find("vide"), Grille.plat(haut), 24, od, 40.0, 20.0, 4.0, 6, bj, couleurs, styles, 1.0, 8.0, 0.72, Vector2(0.6, 0.4), true, 0.8, 4096.0)
+		var t_cpp: Dictionary = g._noyau.toits(g, vue_e, false, 1, g.contenu_ids.find("vide"), Grille.plat(haut), 24, od, 40.0, 20.0, 4.0, 6, bj, couleurs, styles, 1.0, 8.0, 0.72, Vector2(0.6, 0.4), true, 0.8, 4096.0)
+		verifier(b_gd.points == b_cpp.points and b_gd.couleurs == b_cpp.couleurs and t_gd.points == t_cpp.points and t_gd.couleurs == t_cpp.couleurs and b_gd.points.size() > 0, "à l'étage, la rue vue par l'air : les mêmes tableaux (%d triangles de brouillard)" % (b_gd.points.size() / 3))
