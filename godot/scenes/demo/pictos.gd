@@ -598,6 +598,13 @@ static func dessiner_objet(ci: CanvasItem, it: Dictionary, r: Rect2) -> void:
 		var teinte := couleur_objet(it) if str(it.get("type", "")) in ["composant", "materiau"] else Color.WHITE
 		ci.draw_texture_rect(tex, r, false, teinte)
 		return
+	var nom_d := nom_sprite(it)   # une planche de l'objet (assets/objets/<nom>/, cases de 64, Planches) : sa variante visuelle choisit la case
+	if not nom_d.is_empty() and not nom_d.ends_with("/") and Planches.variantes("objets/" + nom_d) > 0:
+		var teinte_p := couleur_objet(it) if str(it.get("type", "")) in ["composant", "materiau"] else Color.WHITE
+		var variante := str(it.get("variante_visuelle", ""))
+		var k := int(variante) if variante.is_valid_int() else (0 if variante.is_empty() else absi(hash(variante)))
+		if Planches.dessiner(ci, "objets/" + nom_d, k, r, teinte_p):
+			return
 	var c := couleur_objet(it)
 	var o := r.position
 	var u := r.size.x / 10.0

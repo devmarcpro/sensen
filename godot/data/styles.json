@@ -176,6 +176,11 @@
     "lissage": "gris",
     "hinting": "leger"
   },
+  "planches": {
+    "_doc": "Les planches de sprites (designer 2026-09-06, 20 h 50) : un dossier par membre, par trait du visage, par objet, sous assets/ ; chaque PNG y est une case de `case` px ou une planche de cases ; le jeu assemble le dossier au premier usage (Planches). visage_boite : le cote de la case d'un trait du visage, en rayons de tete.",
+    "case": 64,
+    "visage_boite": 2.6
+  },
   "sprites": {
     "picto_tenu_unites": 14,
     "pictos_tenus": {

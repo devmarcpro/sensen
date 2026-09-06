@@ -1286,3 +1286,32 @@ func test_paperdoll_et_tutoriels() -> void:
 
 
 # ---------------------------------------------------------------- Étape 6 : matériaux
+
+
+## Les planches de sprites (Direction artistique, designer 2026-09-06, 20 h 50) : un dossier de PNG — des cases seules et des
+## planches de cases —, assemblé par le jeu en une colonne de cases, dans l'ordre des noms ; un fichier hors format est
+## ignoré ; un dossier absent compte zéro variante (le code dessine).
+func test_planches() -> void:
+	var dossier := "user://planches_test/a"
+	DirAccess.make_dir_recursive_absolute(dossier)
+	for f in DirAccess.get_files_at(dossier):
+		DirAccess.remove_absolute(dossier + "/" + f)
+	var c := Planches.case()
+	var seule := Image.create(c, c, false, Image.FORMAT_RGBA8)
+	seule.fill(Color(1, 0, 0, 1))
+	seule.save_png(dossier + "/01_rouge.png")
+	var planche := Image.create(c, c * 2, false, Image.FORMAT_RGBA8)
+	planche.fill_rect(Rect2i(0, 0, c, c), Color(0, 1, 0, 1))
+	planche.fill_rect(Rect2i(0, c, c, c), Color(0, 0, 1, 1))
+	planche.save_png(dossier + "/02_vert_bleu.png")
+	var travers := Image.create(50, 50, false, Image.FORMAT_RGBA8)
+	travers.save_png(dossier + "/03_travers.png")
+	Planches.vider()
+	verifier(Planches.variantes(dossier) == 3, "trois cases : une seule, puis une planche de deux ; le fichier de 50 px est ignoré (%d)" % Planches.variantes(dossier))
+	var img: Image = Planches.image(dossier)
+	verifier(img != null and img.get_width() == c and img.get_height() == 3 * c, "l'image assemblée est une colonne de trois cases")
+	if img != null:
+		verifier(img.get_pixel(5, 5).is_equal_approx(Color(1, 0, 0, 1)) and img.get_pixel(5, c + 5).is_equal_approx(Color(0, 1, 0, 1)) and img.get_pixel(5, 2 * c + 5).is_equal_approx(Color(0, 0, 1, 1)), "rouge, vert, bleu : l'ordre des noms, puis l'ordre des cases de la planche")
+	verifier(Planches.variantes("user://planches_test/absent") == 0 and Planches.variantes("membres/nul_part") == 0, "un dossier absent : zéro variante, le code dessine")
+	verifier(Planches.index_locus("yeux", "grands") == 2 and Planches.index_locus("yeux", "inconnu") == -1, "la variante d'un trait est l'index de la valeur de son locus")
+	Planches.vider()

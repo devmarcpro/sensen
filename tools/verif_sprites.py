@@ -72,3 +72,52 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# ---------------------------------------------------------------- les planches (Direction artistique, 2026-09-06, 20 h 50)
+# Un dossier par membre (assets/membres/<segment>/), par trait du visage (assets/visage/<trait>/), par objet
+# (assets/objets/<id>/) : chaque PNG une case de 64 ou une planche de cases. On lit la taille dans l'en-tête PNG
+# (sans Pillow) et l'on signale ce qui n'est pas un multiple de la case.
+import struct
+
+MEMBRES = ["torse", "tete", "bras_haut", "bras_bas", "main", "jambe_haut", "jambe_bas", "pied"]
+TRAITS = ["tete", "oreilles", "cheveux", "yeux", "nez", "bouche", "barbe", "sourcils", "machoire", "menton", "pommettes", "implantation", "paupieres", "marque"]
+
+
+def taille_png(chemin):
+    with open(chemin, "rb") as f:
+        en_tete = f.read(24)
+    if len(en_tete) < 24 or en_tete[:8] != b"\x89PNG\r\n\x1a\n":
+        return None
+    return struct.unpack(">II", en_tete[16:24])
+
+
+def planches():
+    styles = json.load(open(os.path.join(DATA, "styles.json"), encoding="utf-8"))
+    case = int(styles.get("planches", {}).get("case", 64))
+    racine_assets = os.path.join(RACINE, "godot", "assets")
+    dossiers = [("membres", m) for m in MEMBRES] + [("visage", t) for t in TRAITS]
+    for d in sorted(glob.glob(os.path.join(ASSETS, "*", ""))):
+        dossiers.append(("objets", os.path.basename(os.path.dirname(d))))
+    fautes = 0
+    presents = 0
+    for famille, nom in dossiers:
+        dossier = os.path.join(racine_assets, famille, nom)
+        if not os.path.isdir(dossier):
+            continue
+        cases = 0
+        for png in sorted(glob.glob(os.path.join(dossier, "*.png"))):
+            t = taille_png(png)
+            if t is None or t[0] % case != 0 or t[1] % case != 0 or t[0] == 0:
+                print("  planche %s/%s : %s fait %s, pas un multiple de %d" % (famille, nom, os.path.basename(png), t, case))
+                fautes += 1
+                continue
+            cases += (t[0] // case) * (t[1] // case)
+        if cases:
+            presents += 1
+            print("  planche %s/%s : %d variante(s)" % (famille, nom, cases))
+    print("planches : %d dossier(s) garni(s), %d fichier(s) hors format" % (presents, fautes))
+
+
+if __name__ == "__main__":
+    planches()

@@ -309,14 +309,60 @@ func _dessine_segment(m: Dictionary, col: Color, contour: float, nom: String) ->
 		var r := l * 0.5 * float(fact.get(str(_ap.get("tete", "ronde")), 1.0)) * float(_ap.get("curseurs", {}).get("largeur_visage", 1.0))
 		var c := o + d * l * 0.5
 		var peau := col if _ap.is_empty() else _teinte_de("teintes_peau", str(_ap.get("teinte_peau", "")), col)
-		draw_circle(c, r, peau)
-		if contour > 0.0:
-			draw_arc(c, r, 0.0, TAU, 16, peau.darkened(0.45), contour)
+		if not _planche_visage("tete", c, r, d, p, peau, str(_ap.get("tete", "ronde"))):   # la forme de la tête par planche, sinon le disque
+			draw_circle(c, r, peau)
+			if contour > 0.0:
+				draw_arc(c, r, 0.0, TAU, 16, peau.darkened(0.45), contour)
 		if not _ap.is_empty():
 			_dessine_visage(c, r, d, p, peau)
 		return
+	if _planche_membre(nom, m, col):   # le membre par sa planche (assets/membres/<segment>/), sinon le polygone
+		return
 	draw_colored_polygon(poly, col)
 	draw_polyline(PackedVector2Array([poly[0], poly[1], poly[2], poly[3], poly[0]]), col.darkened(0.45), maxf(0.7, contour))
+
+
+## Un membre par sa planche (designer 2026-09-06, 20 h 50 : « pour chaque membre et item ; s'il n'y a pas de sprite, fallback
+## dessiné par code ») : le dossier `assets/membres/<segment sans côté>/` ; la case est CARRÉE et fait la LONGUEUR du segment,
+## centrée sur son axe — le dessin part du bas de la case (l'origine du segment) vers le haut (son bout) ; le côté gauche
+## est le miroir du droit ; la variante suit la carrure ; la case prend la couleur du segment (la peau, ou la matière qui le
+## couvre — les planches se dessinent en blanc-gris pour cela).
+func _planche_membre(nom: String, m: Dictionary, col: Color) -> bool:
+	var base := nom.trim_suffix("_G").trim_suffix("_D")
+	var dossier := "membres/" + base
+	if Planches.variantes(dossier) <= 0:
+		return false
+	var l: float = m.longueur
+	var d: Vector2 = m.direction
+	var p: Vector2 = m.perp
+	var o: Vector2 = m.origine
+	var k := l / float(Planches.case())   # la case fait l unités de rig
+	var local := Transform2D(p * k, -d * k, o + d * l - p * (l * 0.5))   # (0,0) de la case : en haut à gauche, le bout du segment
+	draw_set_transform_matrix(Transform2D(0.0, _decalage) * Transform2D().scaled(Vector2(_echelle_dessin, _echelle_dessin)) * local)
+	var variante := maxi(0, Planches.index_locus("carrure", str(_ap.get("carrure", "moyenne"))))
+	var c := float(Planches.case())
+	Planches.dessiner(self, dossier, variante, Rect2(0, 0, c, c), col, nom.ends_with("_G"))
+	draw_set_transform(_decalage, 0.0, Vector2(_echelle_dessin, _echelle_dessin))
+	return true
+
+
+## Un trait du visage par sa planche (`assets/visage/<trait>/`) : la case est la tête entière — un carré de
+## `planches.visage_boite` × le rayon de la tête, centré sur elle, le haut de la case vers le haut de la tête — et le trait y
+## est dessiné à sa place ; la variante est l'index de la valeur du locus (l'ordre de apparence.json). Faux sans planche.
+func _planche_visage(trait_id: String, c: Vector2, r: float, d: Vector2, p: Vector2, teinte: Color, valeur: String) -> bool:
+	if _vue_tete == "dos" and trait_id != "cheveux":
+		return false
+	var dossier := "visage/" + trait_id
+	if Planches.variantes(dossier) <= 0:
+		return false
+	var cote := r * float(GameData.config("styles").get("planches", {}).get("visage_boite", 2.6))
+	var k := cote / float(Planches.case())
+	var local := Transform2D(p * k, -d * k, c - p * (cote * 0.5) + d * (cote * 0.5))
+	draw_set_transform_matrix(Transform2D(0.0, _decalage) * Transform2D().scaled(Vector2(_echelle_dessin, _echelle_dessin)) * local)
+	var cc := float(Planches.case())
+	Planches.dessiner(self, dossier, maxi(0, Planches.index_locus(trait_id, valeur)), Rect2(0, 0, cc, cc), teinte)
+	draw_set_transform(_decalage, 0.0, Vector2(_echelle_dessin, _echelle_dessin))
+	return true
 
 
 ## L'arme à l'ancrage `prise` de la main d'arme, le bouclier à celle de l'autre main.
@@ -404,7 +450,10 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 	var encre := peau.darkened(0.55)
 	var o_brut: Variant = _ap.get("oreilles", 0.0)   # une valeur de locus, ou l'ancienne longueur chiffrée
 	var oreille := float(GameData.config("apparence").get("facteurs", {}).get("oreilles", {}).get(str(o_brut), 0.0)) if o_brut is String else float(o_brut)
-	if oreille > 0.0 and _vue_tete != "dos":   # les oreilles pointent vers le haut et vers l'extérieur
+	var pv := func(trait_id: String, teinte_t: Color) -> bool: return _planche_visage(trait_id, c, r, d, p, teinte_t, str(_ap.get(trait_id, "")))
+	if pv.call("oreilles", peau):
+		pass
+	elif oreille > 0.0 and _vue_tete != "dos":   # les oreilles pointent vers le haut et vers l'extérieur
 		for cote in [-1.0, 1.0]:
 			var base: Vector2 = c + p * (r * 0.9 * cote)
 			draw_colored_polygon(PackedVector2Array([
@@ -412,7 +461,9 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 				base + p * (oreille * cote) + d * (oreille * 0.6),
 			]), peau)
 	var coif := str(_ap.get("cheveux", "courts"))
-	if coif == "crete":   # une crête dressée : pas de calotte, une bande sur le sommet
+	if pv.call("cheveux", cheveux):
+		pass
+	elif coif == "crete":   # une crête dressée : pas de calotte, une bande sur le sommet
 		draw_line(c + d * r * 0.9, c + d * r * 1.5, cheveux, maxf(1.5, r * 0.4))
 	elif coif != "chauve":   # la calotte, vue de face comme de dos
 		var ang := d.angle()   # la calotte suit le haut du crâne, quelle que soit l'inclinaison de la tête
@@ -436,7 +487,9 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 	var f_nez := float(cur.get("longueur_nez", 1.0))
 	var f_bouche := float(cur.get("largeur_bouche", 1.0))
 	var ecart := (0.42 if _vue_tete == "face" else 0.18) * f_ecart
-	match str(_ap.get("yeux", "points")):
+	match ("planche" if pv.call("yeux", encre) else str(_ap.get("yeux", "points"))):
+		"planche":
+			pass
 		"grands":
 			for cote3 in [-1.0, 1.0]:
 				draw_circle(c + p * (r * ecart * cote3) + d * r * (0.15 + f_haut), maxf(0.8, r * 0.2), encre)
@@ -457,7 +510,9 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 				draw_circle(c + p * (r * ecart * cote5) + d * r * (0.15 + f_haut), maxf(0.6, r * 0.12), encre)
 	var nez := str(_ap.get("nez", "droit"))
 	var haut_nez: Vector2 = c + d * r * 0.05
-	if nez == "fin":
+	if pv.call("nez", encre):
+		pass
+	elif nez == "fin":
 		draw_line(haut_nez, haut_nez - d * r * 0.3 * f_nez, encre, maxf(0.5, r * 0.05))
 	elif nez == "busque":
 		draw_line(haut_nez + d * r * 0.1, haut_nez - d * r * 0.15 + p * r * 0.08, encre, maxf(0.7, r * 0.1))
@@ -471,7 +526,9 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 	var bouche := str(_ap.get("bouche", "fine"))
 	var y_bouche: Vector2 = c - d * r * 0.5
 	var demi := r * (0.3 if bouche == "large" else 0.18) * f_bouche
-	if bouche == "boudeuse":
+	if pv.call("bouche", encre):
+		pass
+	elif bouche == "boudeuse":
 		draw_arc(y_bouche - d * r * 0.24, r * 0.3, PI * 0.2, PI * 0.8, 10, encre, maxf(0.7, r * 0.09))
 	elif bouche == "sourire":
 		draw_arc(y_bouche + d * r * 0.2, r * 0.32, PI * 1.15, PI * 1.85, 10, encre, maxf(0.7, r * 0.09))
@@ -479,36 +536,50 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 		draw_line(y_bouche - p * demi, y_bouche + p * demi, encre, maxf(0.7, r * 0.09))
 	var b_brut: Variant = _ap.get("barbe", 0.0)
 	var barbe := float(GameData.config("apparence").get("facteurs", {}).get("barbe", {}).get(str(b_brut), 0.0)) if b_brut is String else float(b_brut)
-	if barbe > 0.0:
+	if pv.call("barbe", cheveux):
+		pass
+	elif barbe > 0.0:
 		draw_colored_polygon(PackedVector2Array([
 			c - p * r * 0.8 - d * r * 0.1, c + p * r * 0.8 - d * r * 0.1,
 			c + p * r * 0.35 - d * (r + barbe), c - p * r * 0.35 - d * (r + barbe),
 		]), cheveux)
 	var sourcils := str(_ap.get("sourcils", "fins"))
-	if sourcils != "aucun":
+	if pv.call("sourcils", cheveux):
+		pass
+	elif sourcils != "aucun":
 		for cote9 in [-1.0, 1.0]:
 			var o9: Vector2 = c + p * (r * ecart * cote9) + d * r * 0.42
 			draw_line(o9 - p * r * 0.16, o9 + p * r * 0.16, cheveux, maxf(0.8, r * (0.16 if sourcils == "epais" else 0.08)))
-	if str(_ap.get("machoire", "")) != "":   # la mâchoire : un trait sous les pommettes, plus ou moins large
+	if pv.call("machoire", encre.lightened(0.1)):
+		pass
+	elif str(_ap.get("machoire", "")) != "":   # la mâchoire : un trait sous les pommettes, plus ou moins large
 		var lg_m: float = float({"fine": 0.42, "carree": 0.66, "lourde": 0.80}.get(str(_ap.machoire), 0.55))
 		draw_line(c - p * r * lg_m - d * r * 0.55, c + p * r * lg_m - d * r * 0.55, encre.lightened(0.1), maxf(0.6, r * 0.07))
-	match str(_ap.get("menton", "")):
+	match ("planche" if pv.call("menton", peau) else str(_ap.get("menton", ""))):
+		"planche":
+			pass
 		"pointu":
 			draw_colored_polygon(PackedVector2Array([c - p * r * 0.2 - d * r * 0.8, c + p * r * 0.2 - d * r * 0.8, c - d * r * 1.1]), peau.darkened(0.05))
 		"fendu":
 			draw_line(c - d * r * 0.78, c - d * r * 0.95, encre, maxf(0.6, r * 0.08))
-	match str(_ap.get("pommettes", "")):
+	match ("planche" if pv.call("pommettes", encre.lightened(0.2)) else str(_ap.get("pommettes", ""))):
+		"planche":
+			pass
 		"hautes", "saillantes":
 			for cote_p in [-1.0, 1.0]:
 				var o_p: Vector2 = c + p * (r * 0.62 * cote_p) + d * r * (0.05 if str(_ap.pommettes) == "hautes" else -0.02)
 				draw_line(o_p - d * r * 0.12, o_p + d * r * 0.12, encre.lightened(0.2), maxf(0.6, r * (0.10 if str(_ap.pommettes) == "saillantes" else 0.06)))
-	match str(_ap.get("implantation", "")):
+	match ("planche" if pv.call("implantation", cheveux) else str(_ap.get("implantation", ""))):
+		"planche":
+			pass
 		"en_pointe":
 			draw_colored_polygon(PackedVector2Array([c - p * r * 0.22 + d * r * 0.72, c + p * r * 0.22 + d * r * 0.72, c + d * r * 0.42]), cheveux)
 		"degarnie":
 			for cote_i in [-1.0, 1.0]:
 				draw_circle(c + p * (r * 0.6 * cote_i) + d * r * 0.62, r * 0.2, peau)
-	match str(_ap.get("paupieres", "")):
+	match ("planche" if pv.call("paupieres", encre) else str(_ap.get("paupieres", ""))):
+		"planche":
+			pass
 		"lourdes":
 			for cote_pa in [-1.0, 1.0]:
 				var o_pa: Vector2 = c + p * (r * ecart * cote_pa) + d * r * (0.30 + f_haut)
@@ -517,7 +588,9 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 			for cote_pl in [-1.0, 1.0]:
 				var o_pl: Vector2 = c + p * (r * ecart * cote_pl) + d * r * (0.33 + f_haut)
 				draw_arc(o_pl, r * 0.2, PI * 1.1, PI * 1.9, 8, encre, maxf(0.5, r * 0.06))
-	match str(_ap.get("marque", "aucune")):
+	match ("planche" if pv.call("marque", encre.lightened(0.25)) else str(_ap.get("marque", "aucune"))):
+		"planche":
+			pass
 		"cicatrice":
 			draw_line(c + p * r * 0.5 + d * r * 0.5, c + p * r * 0.25 - d * r * 0.45, encre.lightened(0.25), maxf(0.6, r * 0.08))
 		"tatouage":
