@@ -1,0 +1,97 @@
+# La pré-publication d'une étiquette (designer 2026-09-07 : « fais tout ce qu'il faut pour pouvoir publier sur
+# github »). Le poste de travail n'a pas de jeton GitHub — « gh » n'y est pas connecté et la lecture du mot de
+# passe du gestionnaire d'identifiants est refusée. Actions, lui, reçoit son propre jeton : la publication se
+# fait donc chez GitHub, déclenchée par l'étiquette qu'on pousse, et non depuis la machine.
+#
+# « Une release sans binaire n'est pas une release » ([[Prompt de la boucle]]) : l'exécutable est EXPORTÉ ici,
+# depuis l'étiquette, avant l'annonce. Si l'export échoue, rien n'est publié. Le noyau C++ n'est pas rebâti —
+# la DLL versionnée est dans le dépôt, à côté du code qui l'a produite.
+#
+# Le corps de l'annonce est le message de l'étiquette annotée (« git tag -a v0.5.7-alpha -m "…" »). Une étiquette
+# qui porte alpha, beta ou rc est publiée en PRÉ-version. L'action est idempotente : si l'annonce existe déjà,
+# elle ne fait rien — on peut donc rejouer la main pour une étiquette déjà poussée.
+name: Pré-publication
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      etiquette:
+        description: "L'étiquette à publier (v0.5.6-alpha) — pour rattraper une étiquette déjà poussée"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  GODOT: "4.6.3"
+
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Le dépôt, avec ses étiquettes annotées
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: L'étiquette et son message
+        id: etiquette
+        env:
+          MAIN: ${{ inputs.etiquette }}
+        run: |
+          set -euo pipefail
+          tag="${MAIN:-${GITHUB_REF#refs/tags/}}"
+          git rev-parse -q --verify "refs/tags/$tag" >/dev/null || { echo "l'étiquette $tag n'existe pas"; exit 1; }
+          git checkout --detach "$tag"
+          corps="$(git tag -l --format='%(contents)' "$tag")"
+          [ -n "$corps" ] || corps="$(git log -1 --pretty=%s "$tag")"
+          case "$tag" in
+            *alpha*|*beta*|*rc*) pre="--prerelease" ;;
+            *)                   pre="--latest" ;;
+          esac
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "pre=$pre" >> "$GITHUB_OUTPUT"
+          { echo "corps<<FIN"; echo "$corps"; echo "FIN"; } >> "$GITHUB_OUTPUT"
+
+      - name: Godot et ses gabarits d'export
+        run: |
+          set -euo pipefail
+          base="https://github.com/godotengine/godot/releases/download/${GODOT}-stable"
+          curl -fL -o godot.zip "$base/Godot_v${GODOT}-stable_linux.x86_64.zip"
+          curl -fL -o gabarits.tpz "$base/Godot_v${GODOT}-stable_export_templates.tpz"
+          unzip -q godot.zip && mv "Godot_v${GODOT}-stable_linux.x86_64" /usr/local/bin/godot && chmod +x /usr/local/bin/godot
+          unzip -q gabarits.tpz
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT}.stable"
+          mv templates/* "$HOME/.local/share/godot/export_templates/${GODOT}.stable/"
+
+      - name: L'exécutable Windows, exporté depuis l'étiquette
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          # Le premier passage importe les ressources (le cache des classes : sans lui rien ne compile).
+          godot --headless --path godot --import || true
+          godot --headless --path godot --export-release "Windows Desktop" "$PWD/build/Sensen.exe"
+          test -s build/Sensen.exe || { echo "l'export n'a pas produit d'exécutable"; exit 1; }
+          # Godot dépose la DLL du noyau à côté de l'exécutable : le zip porte les deux, et rien d'autre.
+          test -n "$(ls build/*.dll 2>/dev/null)" || { echo "la DLL du noyau manque à côté de l'exécutable"; exit 1; }
+          cd build && zip -qj "../Sensen-${{ steps.etiquette.outputs.tag }}-win64.zip" Sensen.exe *.dll && cd ..
+          ls -la "Sensen-${{ steps.etiquette.outputs.tag }}-win64.zip"
+
+      - name: L'annonce, avec son binaire
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.etiquette.outputs.tag }}
+          PRE: ${{ steps.etiquette.outputs.pre }}
+          CORPS: ${{ steps.etiquette.outputs.corps }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "l'annonce de $TAG existe déjà : on lui joint le binaire s'il manque"
+            gh release upload "$TAG" "Sensen-$TAG-win64.zip" --clobber
+            exit 0
+          fi
+          printf '%s\n' "$CORPS" > notes.md
+          gh release create "$TAG" --title "$TAG" --notes-file notes.md $PRE "Sensen-$TAG-win64.zip"
