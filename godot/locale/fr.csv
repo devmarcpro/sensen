@@ -3685,3 +3685,133 @@ titre.persane.dictature.m,Sardar
 titre.persane.dictature.f,Sardara
 titre.persane.guilde_maitre.m,Ostad
 titre.persane.guilde_maitre.f,Ostada
+culture.germanique.name,Germanique
+titre.germanique.monarchie_hereditaire.m,Kaiser
+titre.germanique.monarchie_hereditaire.f,Kaiserin
+titre.germanique.republique.m,Burgermeister
+titre.germanique.republique.f,Burgermeisterin
+titre.germanique.theocratie.m,Hochmeister
+titre.germanique.theocratie.f,Hochmeisterin
+titre.germanique.ploutocratie.m,Handelsherr
+titre.germanique.ploutocratie.f,Handelsfrau
+titre.germanique.dictature.m,Feldherr
+titre.germanique.dictature.f,Feldherrin
+titre.germanique.guilde_maitre.m,Zunftmeister
+titre.germanique.guilde_maitre.f,Zunftmeisterin
+culture.italienne.name,Italienne
+titre.italienne.monarchie_hereditaire.m,Doge
+titre.italienne.monarchie_hereditaire.f,Dogaressa
+titre.italienne.republique.m,Gonfalonier
+titre.italienne.republique.f,Gonfalonière
+titre.italienne.theocratie.m,Primat
+titre.italienne.theocratie.f,Primatesse
+titre.italienne.ploutocratie.m,Banchiere
+titre.italienne.ploutocratie.f,Banchiera
+titre.italienne.dictature.m,Condottiere
+titre.italienne.dictature.f,Condottiera
+titre.italienne.guilde_maitre.m,Maestro d'Arte
+titre.italienne.guilde_maitre.f,Maestra d'Arte
+culture.francaise.name,Française
+titre.francaise.monarchie_hereditaire.m,Roi
+titre.francaise.monarchie_hereditaire.f,Reine
+titre.francaise.republique.m,Prévôt
+titre.francaise.republique.f,Prévôte
+titre.francaise.theocratie.m,Grand Abbé
+titre.francaise.theocratie.f,Grande Abbesse
+titre.francaise.ploutocratie.m,Grand Argentier
+titre.francaise.ploutocratie.f,Grande Argentière
+titre.francaise.dictature.m,Connétable
+titre.francaise.dictature.f,Connétable
+titre.francaise.guilde_maitre.m,Maître Juré
+titre.francaise.guilde_maitre.f,Maîtresse Jurée
+culture.suedoise.name,Suédoise
+titre.suedoise.monarchie_hereditaire.m,Konung
+titre.suedoise.monarchie_hereditaire.f,Drottning
+titre.suedoise.republique.m,Landshövding
+titre.suedoise.republique.f,Landshövdingska
+titre.suedoise.theocratie.m,Ärkebiskop
+titre.suedoise.theocratie.f,Ärkebiskopinna
+titre.suedoise.ploutocratie.m,Handelsman
+titre.suedoise.ploutocratie.f,Handelskvinna
+titre.suedoise.dictature.m,Riksmarsk
+titre.suedoise.dictature.f,Riksmarskinna
+titre.suedoise.guilde_maitre.m,Skråmästare
+titre.suedoise.guilde_maitre.f,Skråmästarinna
+culture.iberique.name,Ibérique
+titre.iberique.monarchie_hereditaire.m,Rey
+titre.iberique.monarchie_hereditaire.f,Reina
+titre.iberique.republique.m,Alcalde Mayor
+titre.iberique.republique.f,Alcaldesa Mayor
+titre.iberique.theocratie.m,Gran Prior
+titre.iberique.theocratie.f,Gran Priora
+titre.iberique.ploutocratie.m,Mercader Mayor
+titre.iberique.ploutocratie.f,Mercadera Mayor
+titre.iberique.dictature.m,Adelantado
+titre.iberique.dictature.f,Adelantada
+titre.iberique.guilde_maitre.m,Maestre de Gremio
+titre.iberique.guilde_maitre.f,Maestra de Gremio
+culture.magyare.name,Magyare
+titre.magyare.monarchie_hereditaire.m,Kiraly
+titre.magyare.monarchie_hereditaire.f,Kiralyno
+titre.magyare.republique.m,Ispan
+titre.magyare.republique.f,Ispanno
+titre.magyare.theocratie.m,Foppap
+titre.magyare.theocratie.f,Foppapno
+titre.magyare.ploutocratie.m,Kereskedo
+titre.magyare.ploutocratie.f,Kereskedono
+titre.magyare.dictature.m,Nador
+titre.magyare.dictature.f,Nadorno
+titre.magyare.guilde_maitre.m,Cehmester
+titre.magyare.guilde_maitre.f,Cehmesterno
+culture.turque.name,Turque
+titre.turque.monarchie_hereditaire.m,Sultan
+titre.turque.monarchie_hereditaire.f,Sultane
+titre.turque.republique.m,Reis
+titre.turque.republique.f,Reise
+titre.turque.theocratie.m,Cheikh
+titre.turque.theocratie.f,Cheikha
+titre.turque.ploutocratie.m,Bezirgan
+titre.turque.ploutocratie.f,Bezirgane
+titre.turque.dictature.m,Serdar
+titre.turque.dictature.f,Serdare
+titre.turque.guilde_maitre.m,Lonca Ustasi
+titre.turque.guilde_maitre.f,Lonca Ustasi
+culture.coreenne.name,Coréenne
+titre.coreenne.monarchie_hereditaire.m,Wang
+titre.coreenne.monarchie_hereditaire.f,Wanghu
+titre.coreenne.republique.m,Chonjang
+titre.coreenne.republique.f,Chonjang
+titre.coreenne.theocratie.m,Daesa
+titre.coreenne.theocratie.f,Daesa
+titre.coreenne.ploutocratie.m,Sangdo
+titre.coreenne.ploutocratie.f,Sangdo
+titre.coreenne.dictature.m,Janggun
+titre.coreenne.dictature.f,Janggun
+titre.coreenne.guilde_maitre.m,Gongjang
+titre.coreenne.guilde_maitre.f,Gongjang
+culture.mongole.name,Mongole
+titre.mongole.monarchie_hereditaire.m,Khan
+titre.mongole.monarchie_hereditaire.f,Khatun
+titre.mongole.republique.m,Noyan
+titre.mongole.republique.f,Noyanne
+titre.mongole.theocratie.m,Bo
+titre.mongole.theocratie.f,Udgan
+titre.mongole.ploutocratie.m,Ortoq
+titre.mongole.ploutocratie.f,Ortoq
+titre.mongole.dictature.m,Orlok
+titre.mongole.dictature.f,Orlok
+titre.mongole.guilde_maitre.m,Darkhan
+titre.mongole.guilde_maitre.f,Darkhan
+culture.nilotique.name,Nilotique
+titre.nilotique.monarchie_hereditaire.m,Pharaon
+titre.nilotique.monarchie_hereditaire.f,Pharaonne
+titre.nilotique.republique.m,Nomarque
+titre.nilotique.republique.f,Nomarque
+titre.nilotique.theocratie.m,Grand Prêtre
+titre.nilotique.theocratie.f,Grande Prêtresse
+titre.nilotique.ploutocratie.m,Maître du Grenier
+titre.nilotique.ploutocratie.f,Maîtresse du Grenier
+titre.nilotique.dictature.m,Général du Nord
+titre.nilotique.dictature.f,Générale du Nord
+titre.nilotique.guilde_maitre.m,Chef des Artisans
+titre.nilotique.guilde_maitre.f,Cheffe des Artisans

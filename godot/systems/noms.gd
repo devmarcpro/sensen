@@ -12,23 +12,24 @@ static func _pick(rng: RandomNumberGenerator, pool: Array) -> String:
 	return str(pool[rng.randi_range(0, pool.size() - 1)])
 
 
-## Le prénom : une liste explicite du genre demandé si la culture en a une (designer 2026-09-07, « développe beaucoup
-## plus les noms, fais la séparation homme et femme » — soixante prénoms par genre et par culture au lieu de quarante
-## assemblages de syllabes), sinon l'assemblage syllabique d'avant, qui reste le repli d'une culture sans listes.
+## Le prénom : un début et une fin (designer 2026-09-07, « fais du syllabique pour tout »). Les pools sont minés sur
+## des listes de vrais noms de la culture, coupés à une frontière de syllabe : la saveur reste, et le nombre de noms
+## possibles n'a plus de limite — de deux à cinq mille par genre et par culture, au lieu de soixante écrits à la main.
+## La séparation homme/femme se joue sur la FIN : aucune désinence n'est dans les deux pools.
 static func prenom(culture: Dictionary, genre: String, rng: RandomNumberGenerator) -> String:
-	var liste: Array = culture.get("prenoms_f", []) if genre == "f" else culture.get("prenoms_m", [])
-	if not liste.is_empty():
-		return _pick(rng, liste)
-	return _pick(rng, culture.prenom_a) + _pick(rng, culture.prenom_b_f if genre == "f" else culture.prenom_b_m)
+	# Le DÉBUT est genré lui aussi : une culture aux noms courts (le chinois) garde ses noms entiers en début, et
+	# « Wei » ne doit pas servir à une femme. `prenom_a` reste le repli d'une culture qui ne genre que la fin.
+	var debuts: Array = culture.get("prenom_a_f", []) if genre == "f" else culture.get("prenom_a_m", [])
+	if debuts.is_empty():
+		debuts = culture.prenom_a
+	return _pick(rng, debuts) + _pick(rng, culture.prenom_b_f if genre == "f" else culture.prenom_b_m)
 
 
-## Le nom de famille : la liste de la culture, sinon l'assemblage. Le genre ne le change pas dans les cultures
-## écrites à ce jour ; il reste passé pour les cultures à suffixe genré (le repli syllabique l'utilise).
-static func famille(culture: Dictionary, genre: String, rng: RandomNumberGenerator) -> String:
-	var liste: Array = culture.get("familles", [])
-	if not liste.is_empty():
-		return _pick(rng, liste)
-	return _pick(rng, culture.famille_a) + _pick(rng, culture.famille_b_f if genre == "f" else culture.famille_b_m)
+## Le nom de famille : même assemblage, SANS genre (designer 2026-09-07 : « un nom de famille n'a pas de sexe »).
+## Le patronyme nordique lui-même prend « -sson » pour tous, comme la Suède moderne où une femme est Andersson.
+## Le paramètre `genre` reste dans la signature — les appelants le passent — mais il ne décide plus rien.
+static func famille(culture: Dictionary, _genre: String, rng: RandomNumberGenerator) -> String:
+	return _pick(rng, culture.famille_a) + _pick(rng, culture.famille_b_m)
 
 
 static func ville(culture: Dictionary, rng: RandomNumberGenerator) -> String:

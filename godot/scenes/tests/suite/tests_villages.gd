@@ -7,7 +7,7 @@ extends TestsBase
 func test_village() -> void:
 	var planete: Dictionary = GameData.config("planete")
 	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
-	verifier(GameData.catalogues.name_cultures.size() == 11 and GameData.catalogues.dialogue.size() >= 31 and GameData.catalogues.functions.size() >= 6, "11 cultures, au moins 31 répliques (%d), les fonctions" % GameData.catalogues.dialogue.size())
+	verifier(GameData.catalogues.name_cultures.size() == 21 and GameData.catalogues.dialogue.size() >= 31 and GameData.catalogues.functions.size() >= 6, "21 cultures, au moins 31 répliques (%d), les fonctions" % GameData.catalogues.dialogue.size())
 	# Un nom par culture, genré ; la fonction d'affichage unique.
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
@@ -17,25 +17,22 @@ func test_village() -> void:
 	var nip: Dictionary = GameData.catalogues.name_cultures.nipponne
 	var nm := Noms.generer("nipponne", nip, "m", rng)
 	verifier(Noms.afficher(nm) == nm.nom_famille + " " + nm.prenom, "nom puis prénom pour la culture nipponne (%s)" % Noms.afficher(nm))
-	# Les listes explicites, genrées (designer 2026-09-07) : chaque culture porte ses prénoms d'homme, ses prénoms de
-	# femme et ses noms de famille, et aucun prénom ne se trouve dans les deux listes — la séparation doit être nette.
+	# Tout est syllabique (designer 2026-09-07) : un début genré et une fin genrée. On vérifie que chaque culture a de
+	# quoi nommer une ville entière sans se répéter, et qu'un début d'homme ne sert jamais à une femme.
 	var maigres: Array[String] = []
-	var melanges: Array[String] = []
-	var n_noms := 0
+	var n_combi := 0
 	for cid in GameData.catalogues.name_cultures.keys():
 		var c: Dictionary = GameData.catalogues.name_cultures[cid]
-		var pm: Array = c.get("prenoms_m", [])
-		var pf: Array = c.get("prenoms_f", [])
-		var fam: Array = c.get("familles", [])
-		n_noms += pm.size() + pf.size() + fam.size()
-		if pm.size() < 40 or pf.size() < 40 or fam.size() < 30:
-			maigres.append("%s (%d/%d/%d)" % [str(cid), pm.size(), pf.size(), fam.size()])
-		for p_h in pm:
-			if p_h in pf:
-				melanges.append("%s : %s" % [str(cid), str(p_h)])
-	verifier(maigres.is_empty(), "chaque culture a ses listes fournies (au moins 40/40/30) %s" % str(maigres))
-	verifier(melanges.is_empty(), "aucun prénom d'homme dans la liste des femmes %s" % str(melanges))
-	verifier(n_noms >= 1000, "%d noms écrits en tout" % n_noms)
+		var am: Array = c.get("prenom_a_m", c.prenom_a)
+		var af: Array = c.get("prenom_a_f", c.prenom_a)
+		var h: int = am.size() * (c.prenom_b_m as Array).size()
+		var f_c: int = af.size() * (c.prenom_b_f as Array).size()
+		var fam: int = (c.famille_a as Array).size() * (c.famille_b_m as Array).size()
+		n_combi += h + f_c
+		if h < 150 or f_c < 150 or fam < 40:
+			maigres.append("%s (%d H, %d F, %d familles)" % [str(cid), h, f_c, fam])
+	verifier(maigres.is_empty(), "chaque culture peut nommer sans se répéter (150 H, 150 F, 40 familles au moins) %s" % str(maigres))
+	verifier(n_combi >= 20000, "%d prénoms possibles dans le monde" % n_combi)
 	# Le tirage suit bien le genre demandé, et les deux genres puisent dans des mondes différents.
 	var vus_h := {}
 	var vus_f := {}
@@ -46,7 +43,19 @@ func test_village() -> void:
 	for p_h in vus_h.keys():
 		if vus_f.has(p_h):
 			croises += 1
-	verifier(vus_h.size() > 30 and vus_f.size() > 30 and croises == 0, "deux cents tirages : %d prénoms d'homme, %d de femme, %d en commun" % [vus_h.size(), vus_f.size(), croises])
+	# Deux assemblages peuvent tomber sur le même nom (Sig|rid et Sigr|id font tous deux Sigrid) : on tolère l'accident,
+	# pas le mélange — au-delà de 2 %, c'est que les désinences des deux genres ne sont plus disjointes.
+	verifier(vus_h.size() > 60 and vus_f.size() > 60 and croises <= maxi(1, vus_h.size() / 50), "deux cents tirages nordiques : %d prénoms d'homme, %d de femme, %d en commun" % [vus_h.size(), vus_f.size(), croises])
+	# Un nom de famille n'a pas de sexe (designer 2026-09-07) : les deux genres puisent dans le MÊME pool, et le
+	# patronyme nordique prend « sson » pour tous, comme la Suède moderne.
+	var genres_famille: Array[String] = []
+	for cid2 in GameData.catalogues.name_cultures.keys():
+		var c2: Dictionary = GameData.catalogues.name_cultures[cid2]
+		if (c2.famille_b_m as Array) != (c2.famille_b_f as Array):
+			genres_famille.append(str(cid2))
+	verifier(genres_famille.is_empty(), "aucune culture ne genre son nom de famille %s" % str(genres_famille))
+	var nf2 := Noms.generer("nordique", nord, "f", rng)
+	verifier(str(nf2.nom_famille).ends_with("sson"), "une nordique porte le patronyme en sson comme son frère (%s)" % str(nf2.nom_famille))
 	# Un hameau quelque part : on cherche une cellule à POI village.
 	var cell_v := Vector2i(-1, -1)
 	var dep_v: Array = [0, 0]   # on cherche autour du camp réel de cette partie
