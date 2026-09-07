@@ -1711,6 +1711,8 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 	var en: Dictionary = cfg.get("enclos", {})
 	var especes: Array = _liste_par_biome(en.get("especes_par_biome", {}), tags_b)
 	var n_enclos: int = int(en.get("par_quartier", {}).get(quartier, 0))
+	if quartier == "centre" and palier in en.get("paliers_sans_centre", []):
+		n_enclos = 0   # le cœur d'un bourg et plus est trop bâti : ses bêtes sont dans ses quartiers agricoles
 	if n_enclos > 0 or quartier == "agricole":
 		n_enclos += int(voc.get("enclos_bonus", 0))   # une ville pastorale a ses parcs à bêtes, pas ses champs
 	for k in n_enclos:

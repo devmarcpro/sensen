@@ -68,6 +68,11 @@ Toute gestion de ville/village/base (cultures, élevage, boutique passive — [[
 > - **Il se voit** : ses tuiles portent un contenu à elles (`verger`, `verger_mur`) — un vert sombre qui rougit à maturité, distinct des rangs clairs d'un champ de céréales. Hors de sa saison, un buisson met le même temps de retard qu'une culture (la règle d'`hors_saison` vaut pour lui).
 > Ce que ça ne fait pas encore : les arbres fruitiers hauts (le verger est un buisson, pas un pommier — les arbres bloquent la vue et il faudrait décider si l'on passe dessous), le vin (la vigne rend du raisin, pas du vin : il y faudrait une cuve et une recette), et la cueillette à la main par le joueur dans le verger d'un PNJ (elle marche, mais personne ne s'en offusque).
 
+> [!important] Décidé le 2026-09-07, 14 h — un village garde des bêtes : l'enclos descend au centre des petites agglomérations
+> La revue en images (`capture.tscn -- --palier village --sur enclos`) a répondu « AUCUN enclos trouvé ». Ce n'était pas un défaut de l'outil : les enclos ne se posaient que dans les quartiers **agricoles**, qui n'apparaissent qu'à partir du bourg (quatre cellules). Un hameau et un village n'avaient donc **aucune bête** — alors que ce sont précisément les plus petites agglomérations qui vivent de leur troupeau.
+> Le centre d'un hameau ou d'un village reçoit désormais son enclos, comme il reçoit déjà ses champs (`champs.quartiers` contient « centre » depuis B2). Le cœur d'un bourg et plus reste sans enclos (`enclos.paliers_sans_centre`) : ses bêtes sont dans ses quartiers agricoles, et l'on ne parque pas un troupeau sur le parvis d'un château.
+> Ce que la capture montre : un enclos clôturé, ses bêtes dedans (un mouflon, un sanglier — l'élevage du jeu domestique des espèces sauvages, il n'y a pas de vache au catalogue), le champ en damier à côté. Cela se lit.
+
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Biomes — schéma]], [[Rôles de cases]], [[Application des stats de matériau]]
 - **Alimente** : [[Faim]], [[Cuisine et alchimie]], [[Abstraction hors-site]], [[Population et exploitation]], [[Plantes]]

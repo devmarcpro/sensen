@@ -419,7 +419,8 @@
       5
     ],
     "par_quartier": {
-      "agricole": 1
+      "agricole": 1,
+      "centre": 1
     },
     "betes": [
       2,
@@ -478,7 +479,7 @@
         "n": 1
       }
     },
-    "_doc": "Les enclos (Villes B2 ; le troupeau qui vit, 2026-09-06) : taille, nombre par quartier, bêtes de départ, profil d'IA, espèces par tag de biome, produits hebdomadaires par espèce (une matière brute ; `saison` limite le produit à une saison — la laine au printemps). troupeau : ce que le troupeau mange, sa croissance, son abattage.",
+    "_doc": "Les enclos (Villes B2 ; le troupeau qui vit, 2026-09-06) : taille, nombre par quartier, bêtes de départ, profil d'IA, espèces par tag de biome, produits hebdomadaires par espèce (une matière brute ; `saison` limite le produit à une saison — la laine au printemps). troupeau : ce que le troupeau mange, sa croissance, son abattage. par_quartier (2026-09-07) : le centre d un hameau ou d un village a son enclos — ce sont les plus petites agglomerations qui gardent des betes ; paliers_sans_centre : les paliers dont le centre est trop bati pour un enclos (ils en ont dans leurs quartiers agricoles).",
     "troupeau": {
       "capacite": 8,
       "fourrage_par_bete": 1,
@@ -490,7 +491,12 @@
         "cuir": 1,
         "suif": 1
       }
-    }
+    },
+    "paliers_sans_centre": [
+      "bourg",
+      "ville",
+      "cite"
+    ]
   },
   "economie": {
     "categories": {
