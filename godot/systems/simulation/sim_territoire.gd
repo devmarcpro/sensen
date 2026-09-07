@@ -395,6 +395,81 @@ static func _veines_de_mine(sim: Simulation, profondeur: int, graine: int, id_do
 	return n
 
 
+## Les poches de gaz scellées dans le plein d'un étage (Gaz dans le sol, designer 2026-09-07) : un bruit dédié, comme les
+## veines, marque des tuiles pleines ; la part de chaque gaz suit la bande de profondeur. Déterministe : la même galerie
+## retrouve ses poches, et une tuile déjà creusée n'est plus pleine — la poche ouverte ne se ressème pas. Rend le compte.
+static func _poches_de_gaz(sim: Simulation, profondeur: int, graine: int, id_donjon: int, est_mine: bool) -> int:
+	sim.poches_gaz.clear()
+	var cfg: Dictionary = GameData.config("gaz").get("poches", {})
+	if cfg.is_empty() or profondeur < int(cfg.get("mine_etage_min" if est_mine else "etage_min", 2)):
+		return 0
+	var parts: Dictionary = {}
+	for b in cfg.get("part_par_profondeur", []):
+		if profondeur >= int(b[0]) and profondeur <= int(b[1]):
+			parts = b[2]
+			break
+	if parts.is_empty():
+		return 0
+	var ids: Array = parts.keys()
+	ids.sort()
+	var total := 0.0
+	for g in ids:
+		total += float(parts[g])
+	var bruit := FastNoiseLite.new()
+	bruit.seed = hash([graine, "gaz", id_donjon, profondeur])
+	bruit.frequency = float(cfg.get("frequence", 0.11))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "gaz_nature", id_donjon, profondeur])
+	var seuil := float(cfg.get("seuil", 0.84))
+	var n := 0
+	for y in sim.grille.hauteur_grille:
+		for x in sim.grille.largeur:
+			var t := Vector2i(x, y)
+			if not ("destructible" in sim.grille.contenu_de(t).get("tags", [])):
+				continue
+			if (bruit.get_noise_2d(float(x), float(y)) + 1.0) * 0.5 <= seuil:
+				continue
+			var tirage := rng.randf() * total
+			var gaz := str(ids[ids.size() - 1])
+			for g in ids:
+				tirage -= float(parts[g])
+				if tirage < 0.0:
+					gaz = str(g)
+					break
+			sim.poches_gaz[sim.grille.idx(t)] = gaz
+			n += 1
+	return n
+
+
+## Les autres poches du sous-sol (Gaz dans le sol, 18 h 40) : la nappe d'eau, la géode, le magma — chacune son bruit,
+## sur les tuiles pleines qui n'ont pas déjà un gaz. Rend le compte.
+static func _poches_du_sous_sol(sim: Simulation, profondeur: int, graine: int, id_donjon: int, est_mine: bool) -> int:
+	sim.poches_sous_sol.clear()
+	var cfg: Dictionary = GameData.config("sous_sol")
+	var n := 0
+	for genre in ["eau", "geode", "magma"]:
+		var c: Dictionary = cfg.get("geodes" if genre == "geode" else genre, {})
+		if c.is_empty() or profondeur < int(c.get("mine_etage_min" if est_mine else "etage_min", 3)):
+			continue
+		var bruit := FastNoiseLite.new()
+		bruit.seed = hash([graine, "sous_sol", genre, id_donjon, profondeur])
+		bruit.frequency = float(c.get("frequence", 0.1))
+		var seuil := float(c.get("seuil", 0.8))
+		for y in sim.grille.hauteur_grille:
+			for x in sim.grille.largeur:
+				var t := Vector2i(x, y)
+				var i := sim.grille.idx(t)
+				if sim.poches_gaz.has(i) or sim.poches_sous_sol.has(i):
+					continue
+				if not ("destructible" in sim.grille.contenu_de(t).get("tags", [])):
+					continue
+				if (bruit.get_noise_2d(float(x), float(y)) + 1.0) * 0.5 <= seuil:
+					continue
+				sim.poches_sous_sol[i] = genre
+				n += 1
+	return n
+
+
 ## Le matériau des murs d'un étage (Stratification verticale) : le thème en surface, la palette en profondeur.
 static func materiau_mur_etage(sim: Simulation, theme: Dictionary, etage: int) -> String:
 	var pal: Dictionary = GameData.config("minerais_par_etage").get("palette_mur", {})

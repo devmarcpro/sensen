@@ -4196,3 +4196,27 @@ titre.samie.dictature.m,Soahteoaivi
 titre.samie.dictature.f,Soahteoaivi
 titre.samie.guilde_maitre.m,Duojár
 titre.samie.guilde_maitre.f,Duojár
+journal.gaz_echappe,"a gust of {gaz} escapes the rock ({n} tiles)"
+journal.gaz_blesse,"{nom} breathes {gaz} ({degats})"
+journal.gaz_explose,"the {gaz} ignites and explodes!"
+zone.gaz,Gas cloud
+journal.gaz_soigne,"the {gaz} heal {nom} (+{n})"
+journal.gaz_mana,"the {gaz} restores mana to {nom} (+{n})"
+gaz.azote,nitrogen
+gaz.dioxyde_de_carbone,carbon dioxide
+gaz.methane,methane (firedamp)
+gaz.monoxyde_de_carbone,carbon monoxide
+gaz.sulfure_d_hydrogene,hydrogen sulphide
+gaz.dioxyde_de_soufre,sulphur dioxide
+gaz.vapeur_d_eau,steam
+gaz.radon,radon
+gaz.hydrogene,hydrogen
+gaz.ammoniac,ammonia
+gaz.ethane,ethane
+gaz.helium,helium
+gaz.argon,argon
+gaz.vapeur_de_mercure,mercury vapour
+gaz.arsine,arsine
+journal.nappe_percee,"the pick breaks into an aquifer: water gushes at ({x},{y})"
+journal.geode,"a geode opens: {n} rough gem(s) on the ground"
+journal.magma_perce,"the pick breaks into a magma pocket at ({x},{y})!"

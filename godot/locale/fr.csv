@@ -4205,3 +4205,27 @@ titre.samie.dictature.m,Soahteoaivi
 titre.samie.dictature.f,Soahteoaivi
 titre.samie.guilde_maitre.m,Duojár
 titre.samie.guilde_maitre.f,Duojár
+journal.gaz_echappe,"un souffle de {gaz} s'échappe de la roche ({n} tuiles)"
+journal.gaz_blesse,"{nom} respire du {gaz} ({degats})"
+journal.gaz_explose,"le {gaz} s'enflamme et explose !"
+zone.gaz,Nuage de gaz
+journal.gaz_soigne,"les {gaz} soignent {nom} (+{n})"
+journal.gaz_mana,"la {gaz} rend du mana à {nom} (+{n})"
+gaz.azote,azote
+gaz.dioxyde_de_carbone,dioxyde de carbone
+gaz.methane,méthane (grisou)
+gaz.monoxyde_de_carbone,monoxyde de carbone
+gaz.sulfure_d_hydrogene,sulfure d'hydrogène
+gaz.dioxyde_de_soufre,dioxyde de soufre
+gaz.vapeur_d_eau,vapeur d'eau
+gaz.radon,radon
+gaz.hydrogene,hydrogène
+gaz.ammoniac,ammoniac
+gaz.ethane,éthane
+gaz.helium,hélium
+gaz.argon,argon
+gaz.vapeur_de_mercure,vapeur de mercure
+gaz.arsine,arsine
+journal.nappe_percee,"la pioche perce une nappe : l'eau jaillit en ({x},{y})"
+journal.geode,"une géode s'ouvre : {n} gemme(s) brute(s) au sol"
+journal.magma_perce,"la pioche perce une poche de magma en ({x},{y}) !"

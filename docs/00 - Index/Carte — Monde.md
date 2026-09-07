@@ -6,7 +6,7 @@ statut: décidé
 etape: 8
 ---
 
-Le monde continu : sa génération, sa structure, ce qui l'habite et ce qui le fait vivre. 28 notes.
+Le monde continu : sa génération, sa structure, ce qui l'habite et ce qui le fait vivre. 29 notes.
 
 **Génération**
 - **[[Génération par couches de bruit]]** — le principe fondateur : 8 couches qui définissent biomes et contenu.
@@ -15,6 +15,7 @@ Le monde continu : sa génération, sa structure, ce qui l'habite et ce qui le f
 - **[[Terrain spectaculaire]]** — ridged noise, domain warping, terrasses. « Plat avec un peu de relief » est un anti-but.
 - **[[Stratification verticale]]** — plus on descend, plus la roche est dure : un verrou de progression naturel.
 - **[[Minerais par profondeur]]** — cinq bandes ; risque, dureté et valeur montent ensemble.
+- **[[Gaz dans le sol]]** — onze gaz scellés dans le plein ; la pioche les libère, la flamme allume le grisou.
 
 **Structure**
 - **[[Décision — Monde fini, continents et océan]]** — le monde est une **planète**, pas un plan infini : 1024×1024 cellules, ~35 % de terres, 5 à 7 continents nés de la **tectonique**. C'est ce qui donne aux royaumes des frontières naturelles et au bateau une raison d'exister.

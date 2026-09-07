@@ -308,6 +308,143 @@ static func _enflammer(sim: Simulation, t: Vector2i) -> bool:
 	return true
 
 
+## Une poche percée (Gaz dans le sol) : le gaz remplit par inondation `volume` tuiles d'air à partir de la brèche — les
+## galeries ouvertes, pas la roche — en zones au sol qui se dissipent après `duree_ticks`. Rend le nombre de tuiles.
+static func _liberer_gaz(sim: Simulation, breche: Vector2i, gaz_id: String, tick: int) -> int:
+	var cfg: Dictionary = GameData.config("gaz")
+	var lib: Dictionary = cfg.get("liberation", {})
+	var volume := maxi(1, int(lib.get("volume", 14)))
+	var duree := int(lib.get("duree_ticks", 400))
+	sim.poches_gaz.erase(sim.grille.idx(breche))
+	var vus := {breche: true}
+	var file: Array[Vector2i] = [breche]
+	var tete := 0
+	var n := 0
+	while tete < file.size() and n < volume:
+		var t: Vector2i = file[tete]
+		tete += 1
+		sim.zones.append({"pos": t, "type": "gaz", "gaz": gaz_id, "fin": tick + duree, "source": "", "params": {}})
+		EventBus.emettre(&"tile_changed", [t])
+		n += 1
+		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var q: Vector2i = t + dd
+			if vus.has(q) or not sim.grille.dans(q) or sim.grille.bloque_passage(q):
+				continue
+			vus[q] = true
+			file.append(q)
+	EventBus.emettre(&"journal", [&"journal.gaz_echappe", {"gaz": "gaz." + gaz_id, "n": n}])
+	return n
+
+
+## Une autre poche percée (Gaz dans le sol, 18 h 40) : la nappe fait de la brèche une source et l'automate d'eau inonde
+## la galerie ; la géode rend ses gemmes brutes au sol ; le magma fait de la brèche de la lave.
+static func _liberer_sous_sol(sim: Simulation, breche: Vector2i, genre: String, tick: int) -> void:
+	var cfg: Dictionary = GameData.config("sous_sol")
+	var i := sim.grille.idx(breche)
+	sim.poches_sous_sol.erase(i)
+	match genre:
+		"eau":
+			sim.grille.poser_contenu(breche, "eau")
+			sim.grille.poser_eau(i, 8)
+			sim.grille.marquer(breche)
+			sim.eau_active[i] = true
+			sim.lumiere_sale = true
+			EventBus.emettre(&"journal", [&"journal.nappe_percee", {"x": breche.x, "y": breche.y}])
+		"geode":
+			var c: Dictionary = cfg.get("geodes", {})
+			var profondeur := int(sim.donjon.get("profondeur", int(sim.donjon.get("etage", 1))))
+			var gemmes: Array = []
+			for b in c.get("gemmes_par_profondeur", []):
+				if profondeur >= int(b[0]) and profondeur <= int(b[1]):
+					gemmes = b[2]
+			var rng := RandomNumberGenerator.new()
+			rng.seed = hash([sim.graine, "geode", i, tick])
+			var uids: Array = []
+			var n := maxi(1, sim.des.jet(str(c.get("quantite", "1d3"))))
+			for k in n:
+				var choix: Array = gemmes.filter(func(g: String) -> bool: return GameData.catalogues.materials.has(g))
+				if choix.is_empty():
+					break
+				var brut: Dictionary = SimObjets.generer_objet(sim, "materiau_brut", 1, {}, "commun", 0)
+				if brut.is_empty():
+					break
+				brut.materiau = str(choix[rng.randi_range(0, choix.size() - 1)])
+				brut["forme"] = "brut"
+				brut.quantite = 1
+				uids.append(brut.uid)
+			if not uids.is_empty():
+				SimObjets._poser_contenant(sim, breche, uids, "butin")
+			EventBus.emettre(&"journal", [&"journal.geode", {"n": uids.size()}])
+		"magma":
+			sim.grille.poser_contenu(breche, "lave")
+			sim.grille.poser_danger(i)
+			sim.grille.marquer(breche)
+			sim.lumiere_sale = true
+			EventBus.emettre(&"journal", [&"journal.magma_perce", {"x": breche.x, "y": breche.y}])
+	EventBus.emettre(&"tile_changed", [breche])
+
+
+## Le pas du gaz (Gaz dans le sol), à la cadence de `gaz.periode_ticks` : chaque zone de gaz fait sa nature à son
+## occupant (dégâts, statut) ; un gaz inflammable qu'une flamme touche — une lumière en main, un feu au sol, de la lave
+## voisine — explose avec la formule des Explosions, et tout le nuage de ce gaz part d'un coup.
+static func _tiquer_gaz(sim: Simulation, tick: int) -> void:
+	if tick < sim.gaz_prochain_pas:
+		return
+	var cfg: Dictionary = GameData.config("gaz")
+	sim.gaz_prochain_pas = tick + int(cfg.get("periode_ticks", 10))
+	var defs: Dictionary = cfg.get("gaz", {})
+	for z in sim.zones.duplicate():
+		if str(z.get("type", "")) != "gaz":
+			continue
+		var d: Dictionary = defs.get(str(z.gaz), {})
+		if d.is_empty():
+			continue
+		var t: Vector2i = z.pos
+		var occ := sim.grille.occupant(t)
+		var x: Dictionary = sim.entites.get(occ, {}) if not occ.is_empty() else {}
+		if bool(d.get("eteint_feux", false)) and sim.feux.has(sim.grille.idx(t)):   # le nuage étouffe le feu sous lui
+			sim.feux.erase(sim.grille.idx(t))
+			sim.grille.oter_danger(sim.grille.idx(t))
+			sim.lumiere_sale = true
+			EventBus.emettre(&"tile_changed", [t])
+		if not x.is_empty() and bool(x.get("vivant", false)):
+			if not str(d.get("degats", "")).is_empty():
+				var deg := sim.des.jet(str(d.degats))
+				sim._appliquer_degats(x, deg, "", {"type": "gaz", "element": d.get("element", {})})
+				EventBus.emettre(&"journal", [&"journal.gaz_blesse", {"nom": x.name_key, "gaz": "gaz." + str(z.gaz), "degats": deg}])
+			if not str(d.get("statut", "")).is_empty():
+				sim.appliquer_statut(x, str(d.statut), int(d.get("statut_ticks", 30)), "")
+			if not str(d.get("soigne", "")).is_empty() and int(x.sante) < int(x.sante_max):
+				var soin := mini(sim.des.jet(str(d.soigne)), int(x.sante_max) - int(x.sante))
+				x.sante = int(x.sante) + soin
+				EventBus.emettre(&"journal", [&"journal.gaz_soigne", {"nom": x.name_key, "gaz": "gaz." + str(z.gaz), "n": soin}])
+			if not str(d.get("mana", "")).is_empty() and x.has("mana_max") and int(x.get("mana", 0)) < int(x.mana_max):
+				var plus := mini(sim.des.jet(str(d.mana)), int(x.mana_max) - int(x.get("mana", 0)))
+				x.mana = int(x.get("mana", 0)) + plus
+				EventBus.emettre(&"journal", [&"journal.gaz_mana", {"nom": x.name_key, "gaz": "gaz." + str(z.gaz), "n": plus}])
+		if not bool(d.get("inflammable", false)):
+			continue
+		var flamme := sim.feux.has(sim.grille.idx(t)) or (not x.is_empty() and sim.lumiere_de(x) >= int(d.get("lumiere_min", 1)))
+		if not flamme:
+			for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var q: Vector2i = t + dd
+				if sim.grille.dans(q) and "lave" in sim.grille.contenu_de(q).get("tags", []):
+					flamme = true
+		if not flamme:
+			continue
+		var restantes: Array[Dictionary] = []   # tout le nuage de ce gaz part d'un coup
+		for z2 in sim.zones:
+			if str(z2.get("type", "")) == "gaz" and str(z2.gaz) == str(z.gaz):
+				EventBus.emettre(&"tile_changed", [z2.pos])
+			else:
+				restantes.append(z2)
+		sim.zones = restantes
+		var ex: Dictionary = d.get("explosion", {})
+		EventBus.emettre(&"journal", [&"journal.gaz_explose", {"gaz": "gaz." + str(z.gaz)}])
+		sim._exploser({"pos": t, "rayon": int(ex.get("rayon", 2)), "puissance": float(ex.get("puissance", 25)), "degats": str(ex.get("degats", "4d6")), "source": ""})
+		return   # les zones ont changé : le reste attend le pas suivant
+
+
 ## Le pas du feu : brûle qui s'y tient, gagne ses voisines, s'éteint sous la pluie, consume la tuile au bout de sa durée.
 static func _tiquer_feux(sim: Simulation, tick: int) -> void:
 	if sim.feux.is_empty() or tick < sim.feu_prochain_pas:
@@ -637,6 +774,10 @@ static func _creuser(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int) 
 	sim.grille.materiaux.erase(sim.grille.idx(vers))
 	sim.grille.hauteurs[sim.grille.idx(vers)] = sim.grille.h(e.pos)   # la brèche est au niveau de celui qui creuse
 	sim.grille.marquer(vers)
+	if sim.poches_gaz.has(sim.grille.idx(vers)):   # la pioche perce une poche : le gaz s'échappe (Gaz dans le sol)
+		_liberer_gaz(sim, vers, str(sim.poches_gaz[sim.grille.idx(vers)]), tick)
+	elif sim.poches_sous_sol.has(sim.grille.idx(vers)):   # la nappe, la géode, le magma
+		_liberer_sous_sol(sim, vers, str(sim.poches_sous_sol[sim.grille.idx(vers)]), tick)
 	e.vigueur = maxi(0, int(e.vigueur) - int(cr.vigueur))
 	e.compteur = tick + sim._ticks_avec_statuts(e, ticks)
 	if recolte:

@@ -254,6 +254,8 @@ static func _verifier_fenetre(sim: Simulation, e: Dictionary) -> void:
 	sim.grille = nouvelle
 	_vider_etats_tuiles(sim)   # la fenêtre a glissé : les index de l'ancienne grille ne veulent plus rien dire
 	nouvelle.modifies.clear()
+	sim.poches_gaz.clear()   # les poches de gaz sont des index de l'étage : une fenêtre de surface n'en a pas (Gaz dans le sol)
+	sim.poches_sous_sol.clear()
 	for id in sim.ordre:
 		if sim.entites[id].vivant:
 			if sim.entites[id].has("dormant_depuis"):
@@ -582,6 +584,8 @@ static func charger_donjon(sim: Simulation, theme_id: String, graine: int, id_do
 	var etage_matiere: int = Mine.profondeur_de(etage) if est_mine else etage
 	sim.grille.materiau_defaut = SimTerritoire.materiau_mur_etage(sim, theme, etage_matiere)
 	SimTerritoire._poches_de_strates(sim, theme, etage_matiere, graine, id_donjon)
+	SimTerritoire._poches_de_gaz(sim, etage_matiere, graine, id_donjon, est_mine)   # les gaz scellés dans le plein (Gaz dans le sol)
+	SimTerritoire._poches_du_sous_sol(sim, etage_matiere, graine, id_donjon, est_mine)   # la nappe, la géode, le magma
 	if est_mine:   # les veines : ce qu'on vient chercher en creusant (Mine sous une cellule, 2026-09-07)
 		SimTerritoire._veines_de_mine(sim, etage_matiere, graine, id_donjon)
 	for idx in e.filons.keys():
@@ -718,6 +722,7 @@ static func _vider_etats_tuiles(sim: Simulation, change_de_lieu: bool = false) -
 		sim.bombes.clear()   # une bombe lancée au camp n'explose pas au fond du donjon
 		sim.affuts.clear()
 	sim.feux.clear()
+	sim.gaz_prochain_pas = 0
 	sim.eau_active.clear()
 	sim.glyphes.clear()
 	sim.obstacles.clear()

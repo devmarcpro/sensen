@@ -1,0 +1,53 @@
+{
+  "_doc": "Les autres poches du sous-sol (Gaz dans le sol, designer 2026-09-07 : « rajoute d autres choses du monde reel ») : semees comme les poches de gaz (etage_min pour le gouffre, mine_etage_min pour la mine, frequence et seuil du bruit), sur les tuiles pleines qui n ont pas deja un gaz. eau : la nappe — percee, la breche devient une source et l automate d eau inonde la galerie. geodes : percee, la breche rend quantite (des) gemmes brutes, tirees dans gemmes_par_profondeur = [[etage_min, etage_max, [gemmes]]] (des identifiants de materials/gemme). magma : percee, la breche est de la lave (la regle de la lave s applique).",
+  "eau": {
+    "etage_min": 3,
+    "mine_etage_min": 2,
+    "frequence": 0.09,
+    "seuil": 0.76
+  },
+  "geodes": {
+    "etage_min": 3,
+    "mine_etage_min": 2,
+    "frequence": 0.15,
+    "seuil": 0.8,
+    "quantite": "1d3",
+    "gemmes_par_profondeur": [
+      [
+        1,
+        5,
+        [
+          "quartz",
+          "agate",
+          "onyx"
+        ]
+      ],
+      [
+        6,
+        12,
+        [
+          "amethyste",
+          "grenat",
+          "jade",
+          "opale",
+          "aigue_marine"
+        ]
+      ],
+      [
+        13,
+        999,
+        [
+          "emeraude",
+          "rubis",
+          "diamant"
+        ]
+      ]
+    ]
+  },
+  "magma": {
+    "etage_min": 9,
+    "mine_etage_min": 7,
+    "frequence": 0.07,
+    "seuil": 0.8
+  }
+}

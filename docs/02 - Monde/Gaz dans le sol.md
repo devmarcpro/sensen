@@ -17,3 +17,29 @@ etape: 9
 > - **Il se dissipe** : chaque zone de gaz expire après `duree_ticks` ; tant qu'il dure, le pas d'automate (`_tiquer_gaz`, la cadence de la lave) applique l'effet à l'occupant et cherche l'allumage.
 > - **Où** : dans la **mine** (l'ouvrage du joueur, [[Mine sous une cellule]]) et dans les **étages profonds du gouffre** (`etage_min`), les deux plein de roche à percer. Pas en surface.
 > **Ce que je ne fais pas**, et pourquoi : pas de canari ni de détecteur (rien ne prévient — c'est la règle du risque, et un objet de détection est un contenu à part) ; pas de gaz qui monte d'étage en étage (un étage est une grille) ; pas de gaz plus lourd que l'air qui coule dans les creux (les hauteurs d'un étage de mine sont plates). **À juger**, les nombres : la densité des poches, le volume libéré, la durée, et surtout la puissance du grisou — un mineur qui meurt à son premier coup de pioche n'apprend rien.
+
+> [!important] Décidé le 2026-09-07, 18 h 35 — « uniquement des gaz qui existent dans le monde réel, comme le reste des matériaux » (designer)
+> La liste de 18 h 30 mêlait le réel et l'inventé (brume de mana, vapeurs curatives, gaz hilarant, fumée noire). La règle du designer est celle des matériaux : **le catalogue est le monde réel**. Neuf gaz, tous attestés dans les mines, les grottes ou les sols volcaniques, chacun avec son effet réel — le vocabulaire d'un gaz reste celui de 18 h 30 (`degats` + `element`, `statut`, `eteint_feux`, `inflammable` + `explosion` ; `soigne` et `mana` restent dans le vocabulaire mais aucun gaz réel ne les porte) :
+> - **azote** (N₂, le « mauvais air » des galeries fermées) — épuisement, et il **étouffe les feux** ; partout, surtout en haut.
+> - **dioxyde de carbone** (CO₂, la « mofette » des caves et des volcans) — épuisement, étouffe les feux ; en haut et au milieu.
+> - **méthane** (CH₄, le **grisou** des houillères) — inerte jusqu'à la flamme, puis **explose** (25 / rayon 2 / 4d6) ; partout, de plus en plus bas.
+> - **monoxyde de carbone** (CO, des feux de couche) — un dégât léger, affaibli, et il brûle faiblement ; au milieu et au fond.
+> - **sulfure d'hydrogène** (H₂S, le gaz des eaux soufrées) — 1d4 et poison, et il brûle ; au milieu et au fond.
+> - **dioxyde de soufre** (SO₂, volcanique) — 1d2 et **armure fendue** (avec l'humidité, il fait de l'acide) ; au milieu et au fond.
+> - **vapeur d'eau** (les fumerolles près de la lave) — 1d6 de feu et brûlure ; au milieu et au fond.
+> - **radon** (Rn, des roches granitiques) — rien sur le moment, **affaibli** longtemps : on ne le sent pas, on le paie ; en haut et au fond.
+> - **hydrogène** (H₂, des roches profondes et des serpentinites) — **explose** plus fort que le méthane (30 / rayon 2 / 5d6), c'est tout ; au fond, rare.
+> Les nombres sont à juger ; la règle tient : ce qu'on trouve en bas fait plus de mal.
+
+> [!important] Décidé le 2026-09-07, 18 h 40 — « rajoutes-en encore, rajoute d'autres choses du monde réel si t'as de bonnes idées » (designer)
+> **Six gaz réels de plus, quinze en tout** : l'**ammoniac** (NH₃, des dépôts de guano des grottes — 1d2 et **aveugle** : il brûle les yeux), l'**éthane** (C₂H₆, le second gaz des gisements, **explose** 20 / rayon 2 / 3d6), l'**hélium** (He, des gisements de gaz — inerte, il ne fait qu'ôter l'air : épuisement ; en haut, rare), l'**argon** (Ar, du même genre, au fond), la **vapeur de mercure** (Hg, des mines de cinabre — rien sur le moment, **poison** long : 100 ticks), l'**arsine** (AsH₃, des filons arsénifères — 1d6 et poison : le plus meurtrier des quinze ; au fond, rare).
+> **Et trois autres poches du sous-sol**, parce que le monde réel ne scelle pas que du gaz dans la roche — le même bruit, la même règle « la pioche ouvre, le sol répond », dans `sous_sol.json` :
+> - **la nappe d'eau** : percée, la brèche devient une **source** et l'automate d'eau ([[Eau et liquides]]) fait le reste — l'eau descend la galerie, remplit les creux, et une mine mal creusée s'inonde. Dès le deuxième étage d'une mine.
+> - **la géode** : une cavité tapissée de cristaux — percée, elle rend **une à trois gemmes brutes** au sol (`quantite`), tirées dans la bande de profondeur (quartz, agate et onyx en haut ; améthyste, grenat, jade, opale, aigue-marine au milieu ; émeraude, rubis, diamant au fond). La récompense du mineur, à côté des veines.
+> - **la poche de magma** : au fond seulement — percée, la brèche est de la **lave** (la règle de la lave existe : elle brûle, enflamme, se fige à l'eau). Le vrai danger des grandes profondeurs.
+> Une tuile ne porte qu'une poche : le gaz d'abord, puis le reste. Tout cela se sème à la charge de l'étage, se vide avec la grille, et le test le joue (`test_gaz_dans_le_sol`). **À juger** : les densités — une mine où chaque coup de pioche ouvre quelque chose n'est plus une mine.
+
+## Liens
+- **Dépend de** : [[Mine sous une cellule]], [[Minerais par profondeur]], [[Explosions]]
+- **Alimente** : [[Génération de donjon]], [[Niveau de danger]], [[Trésors et artefacts]]
+- **Voir aussi** : [[Eau et liquides]], [[Destruction du terrain]], [[Éclairage]]

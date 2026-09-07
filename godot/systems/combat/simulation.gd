@@ -50,6 +50,9 @@ var peremption_heure := -1   # la dernière heure où le butin de mort périmé 
 var eau_active: Dictionary = {}   # idx → true : tuiles de liquide à propager (Eau et liquides)
 var feux: Dictionary = {}   # idx → {reste} : tuiles en feu (Météo : le feu de tuile)
 var feu_prochain_pas := 0
+var poches_gaz: Dictionary = {}   # idx → gaz : les poches scellées dans le plein de l'étage (Gaz dans le sol)
+var poches_sous_sol: Dictionary = {}   # idx → eau | geode | magma : les autres poches du plein (Gaz dans le sol, 18 h 40)
+var gaz_prochain_pas := 0
 var canicule_heure := -1
 var arrachage_heure := -1   # la dernière heure de tempête où le vent a arraché (Météo)
 var eau_prochain_pas := 0
@@ -850,6 +853,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 		SimTerrain._tiquer_eau(self, tick)
 		SimTerrain._tiquer_lave(self, tick)
 		SimTerrain._tiquer_feux(self, tick)
+		SimTerrain._tiquer_gaz(self, tick)
 		var h_per := int(SimTerrain._cycle(self).get("ticks_par_jour", 24000)) / 24
 		if tick / h_per != peremption_heure:
 			peremption_heure = tick / h_per
@@ -4942,6 +4946,15 @@ func _enflammer(t: Vector2i) -> bool:
 
 func _tiquer_feux(tick: int) -> void:
 	SimTerrain._tiquer_feux(self, tick)
+
+func _tiquer_gaz(tick: int) -> void:
+	SimTerrain._tiquer_gaz(self, tick)
+
+func _liberer_gaz(breche: Vector2i, gaz_id: String, tick: int) -> int:
+	return SimTerrain._liberer_gaz(self, breche, gaz_id, tick)
+
+func _liberer_sous_sol(breche: Vector2i, genre: String, tick: int) -> void:
+	SimTerrain._liberer_sous_sol(self, breche, genre, tick)
 
 func _arracher(t: Vector2i, durete_max: int) -> bool:
 	return SimTerrain._arracher(self, t, durete_max)

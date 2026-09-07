@@ -1859,3 +1859,159 @@ func test_arenes_autonomes() -> void:
 
 
 # ---------------------------------------------------------------- Wu Xing : domination, jauge de chaîne
+
+
+## Les gaz dans le sol (designer 2026-09-07) : des poches semées dans le plein d'une mine à partir de son étage minimal ;
+## la pioche qui en perce une libère un nuage de zones qui remplit les galeries ouvertes ; le gaz toxique blesse qui s'y
+## tient au pas d'automate ; le grisou explose au contact d'une flamme — ici la lave voisine — et tout le nuage part.
+func test_gaz_dans_le_sol() -> void:
+	var cfg: Dictionary = GameData.config("gaz")
+	var s := Simulation.new(51)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var cell: Vector2i = s.monde.cellule_de(j.pos)
+	s.monde.claims[cell] = {"role": "base"}
+	j.vigueur = int(j.vigueur_max)
+	verifier(s.creuser_un_puits(j, 0), "le puits s'ouvre sur la cellule du camp")
+	verifier(s.poches_gaz.is_empty(), "au premier étage de la mine, aucune poche (elles commencent à la profondeur %d)" % int(cfg.poches.mine_etage_min))
+	var cible := 8
+	var garde := 0
+	while int(s.donjon.etage) < cible and garde < 30:
+		garde += 1
+		j = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+		j.vigueur = int(j.vigueur_max)
+		if not s.creuser_un_puits(j, 0):
+			break
+	verifier(int(s.donjon.etage) == cible and not s.poches_gaz.is_empty(), "à l'étage %d (%d), des poches dans le plein : %d" % [cible, int(s.donjon.etage), s.poches_gaz.size()])
+	var nature := {}
+	for g in s.poches_gaz.values():
+		nature[str(g)] = int(nature.get(str(g), 0)) + 1
+		verifier(cfg.gaz.has(str(g)), "chaque poche porte un gaz connu (%s)" % str(g))
+		break
+	# Une poche de gaz toxique, posée sur une tuile pleine voisine du joueur : la pioche la perce, le nuage sort.
+	var journal: Array = []
+	EventBus.journal.connect(func(cle: String, params: Dictionary) -> void: journal.append(str(cle)))
+	# Le joueur arrive au centre d'une chambre ouverte : on le pose sur une tuile libre qui touche le plein.
+	var pleine := Vector2i(-1, -1)
+	for r in range(1, 6):
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				var q: Vector2i = j.pos + Vector2i(dx, dy)
+				if pleine != Vector2i(-1, -1) or not s.grille.dans(q) or s.grille.bloque_passage(q) or not s.grille.occupant(q).is_empty():
+					continue
+				for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+					if s.grille.dans(q + dd) and "destructible" in s.grille.contenu_de(q + dd).get("tags", []):
+						s.grille.liberer(j.pos)
+						j.pos = q
+						s.grille.placer(j.id, q)
+						pleine = q + dd
+						break
+	verifier(pleine != Vector2i(-1, -1), "une tuile pleine touche le joueur")
+	s.zones.clear()
+	s.poches_gaz[s.grille.idx(pleine)] = "sulfure_d_hydrogene"
+	j.vigueur = int(j.vigueur_max)
+	verifier(s._creuser(j, pleine, 0), "la pioche perce la poche")
+	var nuage: Array = s.zones.filter(func(z: Dictionary) -> bool: return str(z.type) == "gaz")
+	var meme_gaz := true
+	for z in nuage:
+		if str(z.gaz) != "sulfure_d_hydrogene":
+			meme_gaz = false
+	# Neuf gaz réels (« rajoute plein de gaz », « uniquement des gaz qui existent dans le monde réel ») : chacun fait au moins une chose, ses statuts existent, les bandes ne nomment que lui.
+	var incomplets: Array = []
+	for gid in cfg.gaz.keys():
+		var gd: Dictionary = cfg.gaz[gid]
+		var agit := not str(gd.get("degats", "")).is_empty() or not str(gd.get("statut", "")).is_empty() or not str(gd.get("soigne", "")).is_empty() or not str(gd.get("mana", "")).is_empty() or bool(gd.get("eteint_feux", false)) or bool(gd.get("inflammable", false))
+		var statut_ok := str(gd.get("statut", "")).is_empty() or s.statuts_defs.has(str(gd.statut))
+		if not agit or not statut_ok or not gd.has("teinte"):
+			incomplets.append(str(gid))
+	var inconnus: Array = []
+	for b in cfg.poches.part_par_profondeur:
+		for gid in b[2].keys():
+			if not cfg.gaz.has(str(gid)):
+				inconnus.append(str(gid))
+	verifier(cfg.gaz.size() >= 15 and incomplets.is_empty() and inconnus.is_empty(), "%d gaz, chacun agit et ses statuts existent ; les bandes ne nomment que des gaz connus (%s %s)" % [cfg.gaz.size(), str(incomplets), str(inconnus)])
+	verifier(nuage.size() >= 1 and nuage.size() <= int(cfg.liberation.volume) and meme_gaz and not s.poches_gaz.has(s.grille.idx(pleine)), "le gaz s'échappe : %d tuiles de nuage (au plus %d), la poche est vidée" % [nuage.size(), int(cfg.liberation.volume)])
+	# Le joueur dans le nuage : le pas d'automate le blesse.
+	s.grille.liberer(j.pos)
+	j.pos = pleine
+	s.grille.placer(j.id, pleine)
+	var pv0 := int(j.sante)
+	s.gaz_prochain_pas = 0
+	s._tiquer_gaz(0)
+	verifier(int(j.sante) < pv0, "le gaz toxique blesse qui s'y tient (%d → %d PV)" % [pv0, int(j.sante)])
+	# Les autres poches du sous-sol (18 h 40) : la nappe fait de la brèche une source qui inonde ; la géode rend ses gemmes.
+	var ssc: Dictionary = GameData.config("sous_sol")
+	verifier(not s.poches_sous_sol.is_empty(), "à l'étage %d, des poches d'eau et des géodes dans le plein : %d" % [cible, s.poches_sous_sol.size()])
+	var trouver_pleine := func() -> Vector2i:
+		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			if s.grille.dans(j.pos + dd) and "destructible" in s.grille.contenu_de(j.pos + dd).get("tags", []):
+				return j.pos + dd
+		return Vector2i(-1, -1)
+	var p_geode: Vector2i = trouver_pleine.call()
+	verifier(p_geode != Vector2i(-1, -1), "une tuile pleine pour la géode")
+	s.poches_gaz.erase(s.grille.idx(p_geode))
+	s.poches_sous_sol[s.grille.idx(p_geode)] = "geode"
+	j.vigueur = int(j.vigueur_max)
+	verifier(s._creuser(j, p_geode, 0), "la pioche ouvre la géode")
+	var gemmes_au_sol := 0
+	for uid in s.contenants.get(s.grille.idx(p_geode), []):   # contenants : idx → les uids posés là
+		var it: Dictionary = s.items.get(uid, {})
+		if str(GameData.catalogues.materials.get(str(it.get("materiau", "")), {}).get("category", "")) == "gemme":
+			gemmes_au_sol += 1
+	verifier(gemmes_au_sol >= 1 and gemmes_au_sol <= 3 and not s.poches_sous_sol.has(s.grille.idx(p_geode)), "la géode rend ses gemmes brutes au sol (%d)" % gemmes_au_sol)
+	s.grille.liberer(j.pos)
+	j.pos = p_geode
+	s.grille.placer(j.id, p_geode)
+	var p_eau: Vector2i = trouver_pleine.call()
+	verifier(p_eau != Vector2i(-1, -1), "une tuile pleine pour la nappe")
+	s.poches_gaz.erase(s.grille.idx(p_eau))
+	s.poches_sous_sol[s.grille.idx(p_eau)] = "eau"
+	j.vigueur = int(j.vigueur_max)
+	verifier(s._creuser(j, p_eau, 0), "la pioche perce la nappe")
+	verifier(s.grille.niveau_liquide(p_eau) >= 8 and s.eau_active.has(s.grille.idx(p_eau)), "la brèche est une source (niveau %d), et l'automate d'eau la tient" % s.grille.niveau_liquide(p_eau))
+	s.eau_prochain_pas = 0
+	SimTerrain._tiquer_eau(s, 0)
+	var mouillees := 0
+	for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		if s.grille.dans(p_eau + dd) and s.grille.niveau_liquide(p_eau + dd) > 0:
+			mouillees += 1
+	verifier(mouillees >= 1, "au premier pas, l'eau gagne la galerie (%d tuile(s) voisine(s) mouillée(s))" % mouillees)
+	s.zones.clear()
+	# Le grisou : une poche percée, de la lave à côté du nuage — il explose, et tout le nuage part.
+	s.zones.clear()
+	journal.clear()
+	var pleine2 := Vector2i(-1, -1)
+	for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		if "destructible" in s.grille.contenu_de(j.pos + dd).get("tags", []):
+			pleine2 = j.pos + dd
+			break
+	verifier(pleine2 != Vector2i(-1, -1), "une seconde tuile pleine touche le joueur")
+	s.poches_gaz[s.grille.idx(pleine2)] = "methane"
+	j.vigueur = int(j.vigueur_max)
+	verifier(s._creuser(j, pleine2, 0), "la pioche perce la poche de grisou")
+	var grisou: Array = s.zones.filter(func(z: Dictionary) -> bool: return str(z.type) == "gaz")
+	verifier(grisou.size() >= 1, "le grisou se répand (%d tuiles)" % grisou.size())
+	# Une lumière en main est une flamme : si le joueur en porte une, le premier pas d'automate suffit ; sinon la
+	# lave voisine s'en charge. Les deux chemins de l'allumage sont ainsi couverts selon le kit de départ.
+	var lum := s.lumiere_de(j)
+	s.gaz_prochain_pas = 0
+	s._tiquer_gaz(0)
+	var reste := s.zones.filter(func(z: Dictionary) -> bool: return str(z.type) == "gaz").size()
+	if lum >= int(cfg.gaz.methane.get("lumiere_min", 1)):
+		verifier(reste == 0, "la lumière en main (%d) allume le grisou dès le premier pas : tout le nuage part" % lum)
+		SimLieux._sortir(s, j)
+		return
+	verifier(reste == grisou.size(), "sans flamme, le grisou reste là (%d tuiles)" % reste)
+	var lave := Vector2i(-1, -1)   # une tuile d'air voisine d'une tuile du nuage, où poser la lave
+	for z in grisou:
+		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var q: Vector2i = z.pos + dd
+			if s.grille.dans(q) and not s.grille.bloque_passage(q) and s.grille.occupant(q).is_empty() and lave == Vector2i(-1, -1):
+				lave = q
+	verifier(lave != Vector2i(-1, -1), "une tuile libre touche le nuage")
+	s.grille.poser_contenu(lave, "lave")
+	s.gaz_prochain_pas = 0
+	s._tiquer_gaz(0)
+	verifier(s.zones.filter(func(z: Dictionary) -> bool: return str(z.type) == "gaz").is_empty(), "la lave allume le grisou : explosion, et tout le nuage part")
+	SimLieux._sortir(s, j)
+

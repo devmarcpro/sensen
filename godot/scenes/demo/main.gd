@@ -2025,7 +2025,10 @@ func _dessiner_superpositions() -> void:
 			if src.is_empty() or (src.id != joueur_id and sim.ennemis(j, src)):
 				continue
 		var cz := _ecran(z.pos, g.h(z.pos))
-		_losange(z.pos, COULEUR_ZONE.get(str(z.type), Color(0.7, 0.7, 0.7, 0.35)))
+		var cz_col: Color = COULEUR_ZONE.get(str(z.type), Color(0.7, 0.7, 0.7, 0.35))
+		if str(z.type) == "gaz":   # un nuage à la teinte de son gaz (Gaz dans le sol)
+			cz_col = _couleur_liste(GameData.config("gaz").get("gaz", {}).get(str(z.get("gaz", "")), {}).get("teinte", [0.7, 0.7, 0.7, 0.35]))
+		_losange(z.pos, cz_col)
 	for gl in sim.glyphes:   # les glyphes : un losange cerclé à la teinte de leur élément
 		var cg := _ecran(gl.pos, g.h(gl.pos))
 		var teinte := sim.wuxing.teinte(sim.wuxing.dominante(gl.elements)) if not gl.elements.is_empty() else Color(0.8, 0.8, 0.9)
