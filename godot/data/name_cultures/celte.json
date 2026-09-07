@@ -57,21 +57,35 @@
   ],
   "ville_a": [
     "Dun",
-    "Caer",
+    "Kil",
+    "Llan",
+    "Aber",
     "Inver",
     "Bally",
+    "Caer",
+    "Tre",
     "Glen",
-    "Kil",
-    "Aber",
-    "Llan"
+    "Lough",
+    "Ard",
+    "Cill",
+    "Rath",
+    "Pen",
+    "Strath",
+    "Carn"
   ],
   "ville_b": [
     "more",
-    "keld",
-    "wyn",
     "dara",
     "loch",
-    "brae"
+    "wen",
+    "beg",
+    "muir",
+    "cairn",
+    "gwyn",
+    "avon",
+    "derry",
+    "nock",
+    "vaig"
   ],
   "titres": {
     "monarchie_hereditaire": {

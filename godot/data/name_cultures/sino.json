@@ -42,20 +42,36 @@
     ""
   ],
   "ville_a": [
-    "Bei",
     "Nan",
+    "Bei",
     "Shang",
-    "Hang",
+    "Xi",
+    "Dong",
+    "Jin",
     "Chang",
-    "Guang"
+    "Yun",
+    "Tai",
+    "Hua",
+    "Long",
+    "Qing",
+    "Fu",
+    "Guang",
+    "Lan",
+    "Zhong"
   ],
   "ville_b": [
-    "jing",
     "hai",
-    "zhou",
-    "yang",
+    "jing",
     "an",
-    "sha"
+    "zhou",
+    "shan",
+    "yang",
+    "chuan",
+    "ling",
+    "cheng",
+    "kou",
+    "feng",
+    "tan"
   ],
   "titres": {
     "monarchie_hereditaire": {

@@ -54,22 +54,36 @@
     "vik"
   ],
   "ville_a": [
-    "Nord",
-    "Frost",
-    "Jarn",
-    "Hav",
-    "Skog",
     "Sten",
-    "Ulfs",
-    "Vind"
+    "Nord",
+    "Vik",
+    "Berg",
+    "Fjord",
+    "Hav",
+    "Ulf",
+    "Bjorn",
+    "Iso",
+    "Skog",
+    "Vald",
+    "Hjal",
+    "Rane",
+    "Thors",
+    "Gud",
+    "Eld"
   ],
   "ville_b": [
-    "heim",
     "vik",
-    "borg",
-    "fjord",
+    "gard",
+    "heim",
     "dal",
-    "gard"
+    "borg",
+    "fjell",
+    "havn",
+    "strand",
+    "berg",
+    "stad",
+    "nes",
+    "sund"
   ],
   "titres": {
     "monarchie_hereditaire": {

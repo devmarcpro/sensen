@@ -60,7 +60,15 @@
     "Lamu",
     "Bag",
     "Tang",
-    "Pemb"
+    "Pemb",
+    "Kilwa",
+    "Mafia",
+    "Rufi",
+    "Sela",
+    "Miko",
+    "Ukere",
+    "Bwej",
+    "Chak"
   ],
   "ville_b": [
     "essalam",
@@ -70,7 +78,11 @@
     "kwa",
     "amoyo",
     "anyika",
-    "ani"
+    "ani",
+    "ndani",
+    "juu",
+    "chini",
+    "wani"
   ],
   "titres": {
     "monarchie_hereditaire": {

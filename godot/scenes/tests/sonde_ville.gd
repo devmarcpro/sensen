@@ -32,6 +32,8 @@ func _ready() -> void:
 	var c0: Vector2i = s.monde.cellule_camp
 	# 1. Les agglomérations à portée, par palier ; la plus grande.
 	var compte := {}
+	var cultures := {}   # les cultures de nommage vraiment tirées dans ce monde (onze existent depuis le 2026-09-07)
+	var noms_vus: Array[String] = []
 	var vocs := {}   # ce dont vivent les villes du monde : une vocation qui rafle tout est une vocation mal pesée
 	var meilleure: Dictionary = {}
 	for r in range(1, rayon + 1):
@@ -45,10 +47,15 @@ func _ready() -> void:
 				var f: Dictionary = surf.fiche_agglomeration(cv)
 				compte[str(f.palier)] = int(compte.get(str(f.palier), 0)) + 1
 				vocs[str(f.get("vocation", "commune"))] = int(vocs.get(str(f.get("vocation", "commune")), 0)) + 1
+				cultures[str(f.get("culture", "?"))] = int(cultures.get(str(f.get("culture", "?")), 0)) + 1
+				if noms_vus.size() < 12:
+					noms_vus.append("%s (%s)" % [str(f.nom), str(f.get("culture", "?"))])
 				if meilleure.is_empty() or ordre.find(str(f.palier)) > ordre.find(str(meilleure.palier)) or (str(f.palier) == str(meilleure.palier) and int(f.population) > int(meilleure.population)):
 					meilleure = f
 	print("VILLES — monde %d, agglomérations à %d cellules du camp : %s" % [graine, rayon, str(compte)])
 	print("  vocations : %s" % str(vocs))
+	print("  cultures : %s" % str(cultures))
+	print("  quelques noms : %s" % ", ".join(noms_vus))
 	if meilleure.is_empty():
 		print("SONDE VILLE : aucune agglomération — rien à mesurer")
 		get_tree().quit()

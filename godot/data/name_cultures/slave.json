@@ -51,21 +51,35 @@
   ],
   "ville_a": [
     "Novo",
-    "Belo",
-    "Staro",
-    "Volko",
     "Zlato",
     "Cerno",
-    "Vyso",
-    "Mokro"
+    "Bela",
+    "Vys",
+    "Mokro",
+    "Volko",
+    "Dobro",
+    "Stara",
+    "Kamen",
+    "Lipo",
+    "Krasno",
+    "Miro",
+    "Rado",
+    "Svet",
+    "Tihо"
   ],
   "ville_b": [
     "grad",
-    "gorod",
-    "pol",
     "slav",
     "vice",
-    "dol"
+    "pol",
+    "dol",
+    "sk",
+    "bor",
+    "mir",
+    "vac",
+    "ovo",
+    "ica",
+    "yn"
   ],
   "titres": {
     "monarchie_hereditaire": {

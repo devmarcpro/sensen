@@ -55,22 +55,36 @@
     "saki"
   ],
   "ville_a": [
+    "Shiro",
+    "Fuku",
+    "Yama",
+    "Kawa",
+    "Taka",
     "Naga",
-    "Yoko",
+    "Mori",
+    "Hiro",
     "Kane",
     "Aki",
-    "Fuku",
-    "Matsu",
+    "Ise",
     "Kuro",
-    "Shiro"
+    "Miya",
+    "Oto",
+    "Suzu",
+    "Toyo"
   ],
   "ville_b": [
-    "saki",
-    "hama",
-    "zawa",
-    "oka",
     "yama",
-    "kawa"
+    "hama",
+    "shima",
+    "kawa",
+    "saki",
+    "mura",
+    "moto",
+    "gawa",
+    "dera",
+    "ura",
+    "nada",
+    "oka"
   ],
   "titres": {
     "monarchie_hereditaire": {

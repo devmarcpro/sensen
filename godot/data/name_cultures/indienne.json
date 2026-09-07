@@ -60,7 +60,15 @@
     "Mahar",
     "Nag",
     "Rajas",
-    "Uday"
+    "Uday",
+    "Bhara",
+    "Guja",
+    "Indra",
+    "Kashi",
+    "Mathu",
+    "Patta",
+    "Sura",
+    "Vija"
   ],
   "ville_b": [
     "tsar",
@@ -70,7 +78,11 @@
     "khand",
     "vati",
     "bad",
-    "sthan"
+    "sthan",
+    "dabad",
+    "kot",
+    "palli",
+    "shwar"
   ],
   "titres": {
     "monarchie_hereditaire": {

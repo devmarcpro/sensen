@@ -62,7 +62,15 @@
     "Beni",
     "Sidi",
     "Aza",
-    "Tin"
+    "Tin",
+    "Ait",
+    "Dar",
+    "Ras",
+    "Souk",
+    "Bab",
+    "Qal",
+    "Zag",
+    "Ifr"
   ],
   "ville_b": [
     "bah",
@@ -70,7 +78,13 @@
     "azert",
     "zazate",
     "mellal",
-    "ghir"
+    "ghir",
+    "ane",
+    "oura",
+    "adir",
+    "salem",
+    "medina",
+    "ouan"
   ],
   "titres": {
     "monarchie_hereditaire": {

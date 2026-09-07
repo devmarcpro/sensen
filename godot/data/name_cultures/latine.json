@@ -50,22 +50,36 @@
     "ia"
   ],
   "ville_a": [
-    "Alta",
+    "Villa",
+    "Castra",
+    "Aqua",
+    "Mon",
+    "Terra",
+    "Alba",
     "Nova",
     "Porta",
-    "Villa",
-    "Aqua",
-    "Castra",
-    "Monte",
-    "Terra"
+    "Colonia",
+    "Fontis",
+    "Silva",
+    "Ara",
+    "Bene",
+    "Lucus",
+    "Petra",
+    "Vallis"
   ],
   "ville_b": [
-    "rium",
+    "nova",
     "lia",
     "num",
-    "ona",
+    "tia",
+    "vium",
+    "cia",
+    "rium",
+    "polis",
+    "burgum",
+    "acum",
     "ensis",
-    "ura"
+    "mera"
   ],
   "titres": {
     "monarchie_hereditaire": {

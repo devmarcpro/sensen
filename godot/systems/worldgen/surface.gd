@@ -555,12 +555,20 @@ func _plaques_voisines(a: int, b: int) -> bool:
 
 ## Un nom de terre : le générateur de noms de ville d'une culture tirée au sort — les cultures portent
 ## déjà des sonorités par race, et une terre se nomme comme une ville, pas comme une personne.
-func _nom_de_terre(rng: RandomNumberGenerator, cultures: Dictionary) -> String:
+func _nom_de_terre(rng: RandomNumberGenerator, cultures: Dictionary, culture_id: String = "") -> String:
 	if cultures.is_empty():
 		return "Terre-%d" % (rng.randi() % 1000)
-	var ids: Array = cultures.keys()
-	ids.sort()
-	return Noms.ville(cultures[str(ids[rng.randi() % ids.size()])], rng)
+	if culture_id.is_empty() or not cultures.has(culture_id):
+		var ids: Array = cultures.keys()
+		ids.sort()
+		culture_id = str(ids[rng.randi() % ids.size()])
+	return Noms.ville(cultures[culture_id], rng)
+
+
+## La culture d'une région (2026-09-07) : une région entière parle la même langue, et son nom en vient. Sans cela,
+## un hameau japonais poussait au milieu des terres celtes — les cultures se répartissaient en confettis.
+func culture_de_region(c: Vector2i) -> String:
+	return str(region_de(c).get("culture", ""))
 
 
 ## Le pas du réseau de germes de région, en cellules.
@@ -618,8 +626,11 @@ func region_de(c: Vector2i) -> Dictionary:
 					sol = v
 		if sol.x != -9999:
 			break
-	var res := {"id": "%d_%d" % [g.x, g.y], "germe": g, "cellule": sol,
-		"nom": _nom_de_terre(rng, GameData.catalogues.get("name_cultures", {})),
+	# La région a SA culture, et son nom en vient (2026-09-07) : les cultures se tiennent par pays, pas par confettis.
+	var cultures_r: Dictionary = GameData.catalogues.get("name_cultures", {})
+	var culture_r := Noms.culture_pour("humain", cultures_r, rng) if not cultures_r.is_empty() else ""
+	var res := {"id": "%d_%d" % [g.x, g.y], "germe": g, "cellule": sol, "culture": culture_r,
+		"nom": _nom_de_terre(rng, cultures_r, culture_r),
 		"continent": continent_de(sol) if sol.x != -9999 else {}}
 	regions_cache[g] = res
 	return res
@@ -1120,7 +1131,12 @@ func fiche_agglomeration(centre: Vector2i) -> Dictionary:
 		var cible: int = 0 if k5 < au_centre else int(accueillants[1 + (k5 - au_centre) % maxi(1, accueillants.size() - 1)])
 		(halls_q[cible] as Array).append(str(halls[k5]))
 	var cultures: Dictionary = GameData.catalogues.name_cultures
-	var culture_id := Noms.culture_pour("humain", cultures, rng)
+	# La culture d'une agglomération : celle de son royaume s'il en a un, sinon celle de sa RÉGION (2026-09-07) — un
+	# hameau libre parle la langue de son pays, il ne tombe pas d'une autre planète. Le tirage au hasard ne reste que
+	# pour un monde sans régions nommées.
+	var culture_id := str(region_de(centre).get("culture", ""))
+	if culture_id.is_empty() or not cultures.has(culture_id):
+		culture_id = Noms.culture_pour("humain", cultures, rng)
 	if not roy.is_empty() and cultures.has(str(roy.culture)):
 		culture_id = str(roy.culture)
 	var nom := Noms.ville(cultures.get(culture_id, {}), rng) if cultures.has(culture_id) else "Hameau"
@@ -1251,6 +1267,12 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 		file.append(["auberge", "", "", "", ""])
 	if bool(comp.chapelle) and not (siege_fonction == "pretre"):
 		file.append(["chapelle", "", "", "", ""])
+	# Ce que la VOCATION fait bâtir passe avant les halls et les échoppes (2026-09-07) : un comptoir dit « port » et une
+	# écurie dit « carrefour » — c'est l'identité de la ville, elle ne doit pas tomber la dernière quand le cœur est plein.
+	if quartier == "centre":
+		for pid_v in GameData.config("villes").get("vocations", {}).get("liste", {}).get(str(agglo.get("vocation", "commune")), {}).get("prefabs", []):
+			if bats.has(str(pid_v)):
+				file.append([str(pid_v), "", "", "", ""])
 	# Halls et échoppes en alternance : si le cœur se remplit, la ville garde au moins une guilde ET un marché, au lieu
 	# de toutes ses guildes et aucune boutique.
 	var halls_f: Array = agglo.get("halls_q", []).get(int(agglo.index)) if int(agglo.index) < agglo.get("halls_q", []).size() else (agglo.halls if bool(comp.halls) else [])
@@ -1268,10 +1290,6 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 	var mou: Dictionary = cfg.get("reperes", {}).get("moulin", {})
 	if bats.has(str(mou.get("prefab", ""))) and (quartier in mou.get("quartiers", []) or str(agglo.get("vocation", "")) in mou.get("vocations", [])):
 		file.append([str(mou.prefab), "", "", "", ""])
-	if quartier == "centre":
-		for pid_v in voc.get("prefabs", []):
-			if bats.has(str(pid_v)):
-				file.append([str(pid_v), "", "", "", ""])
 	var stations: Array = cfg.stations_ateliers.duplicate()
 	var n_ateliers: int = pop / maxi(1, int(comp.ateliers_par_habitant)) if int(comp.ateliers_par_habitant) > 0 else 0
 	n_ateliers = int(round(float(n_ateliers) * float(voc.get("ateliers_mult", 1.0))))

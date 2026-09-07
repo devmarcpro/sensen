@@ -61,7 +61,15 @@
     "Palai",
     "Argo",
     "Kala",
-    "Pyr"
+    "Pyr",
+    "Chryso",
+    "Kastro",
+    "Elef",
+    "Hydra",
+    "Meso",
+    "Naus",
+    "Poly",
+    "Trik"
   ],
   "ville_b": [
     "aloniki",
@@ -71,7 +79,11 @@
     "stro",
     "gos",
     "mata",
-    "gos"
+    "pyrgos",
+    "limni",
+    "vouni",
+    "thira",
+    "kastron"
   ],
   "titres": {
     "monarchie_hereditaire": {

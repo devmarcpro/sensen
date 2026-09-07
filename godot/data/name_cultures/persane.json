@@ -53,14 +53,22 @@
     ""
   ],
   "ville_a": [
-    "Persé",
+    "Perse",
     "Isfa",
     "Shi",
     "Tab",
     "Yaz",
     "Kerm",
     "Hama",
-    "Nisha"
+    "Nisha",
+    "Ghaz",
+    "Sabz",
+    "Torb",
+    "Zanj",
+    "Bam",
+    "Qom",
+    "Rey",
+    "Susa"
   ],
   "ville_b": [
     "polis",
@@ -70,7 +78,11 @@
     "d",
     "an",
     "dan",
-    "pour"
+    "pour",
+    "abad",
+    "gerd",
+    "shahr",
+    "kola"
   ],
   "titres": {
     "monarchie_hereditaire": {
