@@ -308,7 +308,8 @@ static func _planter(sim: Simulation, e: Dictionary, base: String, tick: int) ->
 		var vers: Vector2i = e.pos + d
 		if not sim.grille.dans(vers) or not sim.grille.contenu_de(vers).is_empty() or sim.grille.meubles.has(sim.grille.idx(vers)) or sim.grille.h(vers) != sim.grille.h(e.pos):
 			continue
-		if str(sim.monde.claims.get(_cell_de(sim, vers), {}).get("role", "")) != "champs":
+		# Une cellule au rôle « champs », OU une tuile qu'on a labourée soi-même (2026-09-07) : le jardin du joueur.
+		if str(sim.monde.claims.get(_cell_de(sim, vers), {}).get("role", "")) != "champs" and not sim.territoire.get("laboure", {}).has(_pm(sim, vers)):
 			continue
 		var occupe := false
 		for x in sim.vivants():
@@ -321,7 +322,10 @@ static func _planter(sim: Simulation, e: Dictionary, base: String, tick: int) ->
 		var duree := float(pl.duree_jours) * float(SimTerrain._cycle(sim).get("ticks_par_jour", 24000))
 		if "arrose" in GameData.catalogues.weather_states.get(str(SimTerrain.meteo(sim, _cell_de(sim, vers))), {}).get("effects", []):   # Météo : pluie ET orage arrosent (tag arrose)
 			duree *= 1.0 - float(SimTerritoire._ry(sim).agriculture.pluie_bonus)
-		SimVilles._semer_tuile(sim, vers, base, tick, 1.0 - duree / (float(pl.duree_jours) * float(SimTerrain._cycle(sim).get("ticks_par_jour", 24000))))   # la pluie a déjà avancé la pousse
+		# Un buisson planté par le joueur est un VERGER : à la cueillette il repart de lui-même, comme ceux des villes.
+		var champ_j := {"verger": true, "plante": base} if str(pl.get("categorie", "")) == "buisson" else {}
+		SimVilles._semer_tuile(sim, vers, base, tick, 1.0 - duree / (float(pl.duree_jours) * float(SimTerrain._cycle(sim).get("ticks_par_jour", 24000))), champ_j)   # la pluie a déjà avancé la pousse
+		sim.territoire.get("laboure", {}).erase(_pm(sim, vers))   # la terre labourée est semée : elle n'attend plus
 		e.compteur = tick + int(sim.regles.r.actions.objet)
 		EventBus.emettre(&"tile_changed", [vers])
 		EventBus.emettre(&"journal", [&"journal.plante", {"nom": e.name_key, "plante": pl.name_key}])
@@ -361,6 +365,66 @@ static func _fertiliser(sim: Simulation, e: Dictionary, vers: Vector2i, tick: in
 		EventBus.emettre(&"journal", [&"journal.fertilise", {"fertilite": int(engrais[mat])}])
 		return true
 	return false
+
+
+## Labourer une tuile de terre voisine (Agriculture et élevage, 2026-09-07) : elle devient une parcelle nue où l'on peut
+## semer, où qu'elle soit, et la terre y gagne `labour.fertilite`. Il faut l'outil de récolte du sol en main (la pioche,
+## la faucille — ce que la catégorie du matériau demande), et la tuile doit être libre, plate et d'un sol qui se laboure.
+static func _labourer(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	if sim.monde == null or sim.lieu != "camp" or not sim.grille.dans(vers) or Grille.distance(e.pos, vers) != 1:
+		return false
+	var ag: Dictionary = SimTerritoire._ry(sim).agriculture
+	var lb: Dictionary = ag.get("labour", {})
+	if not sim.grille.contenu_de(vers).is_empty() or sim.grille.meubles.has(sim.grille.idx(vers)) or sim.grille.h(vers) != sim.grille.h(e.pos):
+		return false
+	if not (str(sim.grille.materiau_sol(vers)) in lb.get("sols", [])):
+		EventBus.emettre(&"journal", [&"journal.labour_refuse", {}])
+		return false
+	var pm := _pm(sim, vers)
+	if sim.territoire.get("laboure", {}).has(pm) or sim.territoire.cultures.has(pm):
+		return false
+	if not sim.territoire.has("laboure"):
+		sim.territoire["laboure"] = {}
+	sim.territoire.laboure[pm] = true
+	sim.territoire.fertilite[pm] = clampi(fertilite_a(sim, pm, vers) + int(lb.get("fertilite", 8)), 0, 100)
+	e.orientation = vers - e.pos
+	e.compteur = tick + sim._ticks_avec_statuts(e, int(lb.get("ticks", 30)))
+	sim.gagner_xp(e, "agriculture", int(lb.get("fertilite", 8)))
+	EventBus.emettre(&"journal", [&"journal.laboure", {"nom": e.name_key, "fertilite": int(sim.territoire.fertilite[pm])}])
+	EventBus.emettre(&"tile_changed", [vers])
+	return true
+
+
+## Arroser une parcelle qui pousse (Agriculture et élevage, 2026-09-07) : avec un seau en main, la pousse avance de
+## `arrosage.avance` du temps restant. Une parcelle déjà arrosée dans la journée ne gagne rien de plus.
+static func _arroser(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	if not sim.grille.dans(vers) or Grille.distance(e.pos, vers) != 1:
+		return false
+	var pm := _pm(sim, vers)
+	var c: Dictionary = sim.territoire.cultures.get(pm, {})
+	if c.is_empty() or bool(c.get("mure", false)) or tick >= int(c.echeance):
+		return false
+	var ar: Dictionary = SimTerritoire._ry(sim).agriculture.get("arrosage", {})
+	var seau := false   # le seau se reconnaît à sa FONCTIONNALITÉ : il y en a deux au catalogue (proto et façonné)
+	for slot in ["main_principale", "main_secondaire"]:
+		var it: Dictionary = sim.items.get(str(e.get("equipement", {}).get(slot, "")), {})
+		if str(it.get("functionality", "")) == str(ar.get("outil", "seau")):
+			seau = true
+	if not seau:
+		EventBus.emettre(&"journal", [&"journal.arrosage_sans_seau", {}])
+		return false
+	var jour := int(SimTerrain._cycle(sim).get("ticks_par_jour", 24000))
+	if tick / jour <= int(c.get("arrose_jour", -1)):
+		EventBus.emettre(&"journal", [&"journal.deja_arrose", {}])
+		return false
+	c["arrose_jour"] = tick / jour
+	c.echeance = tick + int(float(int(c.echeance) - tick) * (1.0 - float(ar.get("avance", 0.2))))
+	e.orientation = vers - e.pos
+	e.compteur = tick + int(sim.regles.r.actions.objet)
+	sim.gagner_xp(e, "agriculture", 1)
+	EventBus.emettre(&"journal", [&"journal.arrose", {"nom": e.name_key}])
+	EventBus.emettre(&"tile_changed", [vers])
+	return true
 
 
 ## Récolter une parcelle mûre : recolte_base × farming_yield(biome) × (0,5 + fertilité/100), ×0,5 en canicule.

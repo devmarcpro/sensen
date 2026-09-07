@@ -4427,3 +4427,10 @@ creature.pintade.name,Guinea fowl
 creature.pigeon.name,Pigeon
 creature.dromadaire.name,Dromedary
 item.oeuf.name,Egg
+option.labourer,Till
+option.arroser,Water
+journal.laboure,"{nom} tills the soil (fertility {fertilite})"
+journal.labour_refuse,this ground cannot be tilled
+journal.arrose,"{nom} waters the plot"
+journal.arrosage_sans_seau,a bucket in hand is needed to water
+journal.deja_arrose,this plot has already been watered today

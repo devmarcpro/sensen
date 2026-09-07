@@ -1,0 +1,6 @@
+# Ce qu'un callout « Codé » cite et que le code n'a pas — assumé, un par ligne, la raison après #.
+appliquer_espece    # cité comme RETIRÉ : « la ligne Espèce, appliquer_espece et le drapeau de capture disparaissent »
+fallback_font       # ThemeDB.fallback_font : une propriété du moteur, pas du dépôt
+get                 # Dictionary.get() : une méthode du moteur
+pop_front           # Array.pop_front() : une méthode du moteur
+systems/worldgen/camp.gd   # cité DANS la correction du 2026-09-07 qui dit précisément qu'il n'existe pas

@@ -1618,6 +1618,12 @@ func _options_tuile(t: Vector2i) -> Array:
 		res.append({"id": "prendre", "vers": t})
 	if "parcelle" in tags:
 		res.append({"id": "recolter" if "mure" in tags else "fertiliser", "vers": t})
+		if not ("mure" in tags):   # arroser une parcelle qui pousse (Agriculture et élevage, 2026-09-07)
+			res.append({"id": "arroser", "vers": t})
+	elif sim.lieu == "camp" and g.contenu_de(t).is_empty() and not g.meubles.has(idx) and g.h(t) == g.h(j.pos) \
+			and str(g.materiau_sol(t)) in sim.regles.r.royaume.agriculture.get("labour", {}).get("sols", []) \
+			and not sim.territoire.get("laboure", {}).has(sim._pm(t)) and not sim.territoire.cultures.has(sim._pm(t)):
+		res.append({"id": "labourer", "vers": t})   # préparer la terre : on pourra y semer, où que ce soit
 	if sim.lieu == "camp" and sim.monde != null:
 		var vil: Dictionary = sim.village_a(t)
 		if not vil.is_empty() and sim.monde.pos_monde(sim._cell_de(t), vil.centre) == t and not sim.monde.claims.has(sim._cell_de(t)):
@@ -1710,6 +1716,10 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "dormir", "vers": opt.vers})
 		"prendre", "caisse", "recolter":
 			sim.intention(joueur_id, {"type": "prendre", "vers": opt.vers})
+		"labourer":
+			sim.intention(joueur_id, {"type": "labourer", "vers": opt.vers})
+		"arroser":
+			sim.intention(joueur_id, {"type": "arroser", "vers": opt.vers})
 		"fertiliser":
 			if not sim.intention(joueur_id, {"type": "fertiliser", "vers": opt.vers}):
 				_log(tr("journal.culture_pas_mure"))

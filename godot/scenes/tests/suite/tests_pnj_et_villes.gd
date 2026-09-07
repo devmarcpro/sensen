@@ -1933,3 +1933,78 @@ func test_agriculture_refondue() -> void:
 	verifier(GameData.catalogues.creatures.has("dinde") and GameData.catalogues.creatures.has("pintade") and GameData.catalogues.creatures.has("pigeon"), "la dinde, la pintade et le pigeon")
 	verifier(recettes.has("faire_vinaigre") and recettes.has("distiller_vin") and recettes.has("faire_savon") and recettes.has("faire_encre"), "le vinaigre, l'alcool, le savon et l'encre ont enfin une recette")
 
+
+## Le jardin du joueur (designer 2026-09-07, 20 h : « ok fais le nécessaire ») : labourer une tuile de terre pour pouvoir
+## y semer où que ce soit, arroser une parcelle au seau, et planter un arbre fruitier qui repart de lui-même.
+func test_jardin_du_joueur() -> void:
+	var ag: Dictionary = GameData.config("combat_rules").royaume.agriculture
+	verifier(ag.has("labour") and ag.has("arrosage") and int(ag.labour.fertilite) > 0 and float(ag.arrosage.avance) > 0.0, "les nombres du jardin sont en données (labour +%d, arrosage %.2f)" % [int(ag.labour.fertilite), float(ag.arrosage.avance)])
+	var s := Simulation.new(4242)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var tick := s.horloge_monde.ticks
+	# une tuile de terre libre, plate, à côté du joueur
+	var terre := Vector2i(-1, -1)
+	for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var q: Vector2i = j.pos + d
+		if terre == Vector2i(-1, -1) and s.grille.dans(q) and s.grille.contenu_de(q).is_empty() and s.grille.h(q) == s.grille.h(j.pos) and not s.grille.meubles.has(s.grille.idx(q)):
+			s.grille.sols[s.grille.idx(q)] = "terre"
+			s.grille.recompiler_sols()
+			terre = q
+	verifier(terre != Vector2i(-1, -1), "une tuile de terre libre touche le joueur")
+	# sans labour et hors cellule « champs », on ne sème pas
+	var cell: Vector2i = s.monde.cellule_de(terre)
+	s.monde.claims.erase(cell)
+	var o: Dictionary = s.generer_objet("ble", 1, {}, "commun", 0)
+	SimObjets.donner(s, j, o.uid)
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "planter", "base": "ble"}), "sans labour ni cellule Champs, on ne sème pas")
+	# on laboure : la terre gagne en fertilité, et la tuile attend sa graine
+	var f0 := int(SimCamp.fertilite_a(s, SimCamp._pm(s, terre), terre))
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "labourer", "vers": terre}), "on laboure la tuile de terre")
+	var f1 := int(SimCamp.fertilite_a(s, SimCamp._pm(s, terre), terre))
+	verifier(f1 == mini(100, f0 + int(ag.labour.fertilite)) and s.territoire.get("laboure", {}).has(SimCamp._pm(s, terre)), "la terre labourée gagne %d de fertilité (%d → %d)" % [int(ag.labour.fertilite), f0, f1])
+	verifier(not s.intention(j.id, {"type": "labourer", "vers": terre}), "on ne laboure pas deux fois la même tuile")
+	# et l'on sème dessus, hors de toute cellule Champs
+	s.attente[j.id] = true
+	j.compteur = tick
+	verifier(s.intention(j.id, {"type": "planter", "base": "ble"}), "on sème sur la terre labourée, hors cellule Champs")
+	var pm := SimCamp._pm(s, terre)
+	verifier(s.territoire.cultures.has(pm) and not s.territoire.get("laboure", {}).has(pm), "la parcelle est semée et la terre n'attend plus")
+	# arroser : sans seau rien, avec un seau la pousse avance, et pas deux fois le même jour
+	var avant := int(s.territoire.cultures[pm].echeance)
+	s.attente[j.id] = true
+	verifier(not s.intention(j.id, {"type": "arroser", "vers": terre}), "sans seau en main, on n'arrose pas")
+	var seau: Dictionary = s.generer_objet("proto_seau", 1, {}, "commun", 0)
+	SimObjets.donner(s, j, seau.uid)
+	SimObjets._equiper(s, j, seau.uid, s.horloge_monde.ticks)
+	s.attente[j.id] = true
+	j.compteur = s.horloge_monde.ticks
+	verifier(s.intention(j.id, {"type": "arroser", "vers": terre}), "avec un seau, on arrose")
+	var apres := int(s.territoire.cultures[pm].echeance)
+	verifier(apres < avant, "la pousse a avancé (échéance %d → %d)" % [avant, apres])
+	s.attente[j.id] = true
+	j.compteur = s.horloge_monde.ticks
+	verifier(not s.intention(j.id, {"type": "arroser", "vers": terre}), "une parcelle déjà arrosée aujourd'hui ne gagne rien de plus")
+	# planter un arbre : la parcelle est un verger, elle repart d'elle-même
+	var terre2 := Vector2i(-1, -1)
+	for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var q: Vector2i = j.pos + d
+		if terre2 == Vector2i(-1, -1) and q != terre and s.grille.dans(q) and s.grille.contenu_de(q).is_empty() and s.grille.h(q) == s.grille.h(j.pos) and not s.grille.meubles.has(s.grille.idx(q)):
+			s.grille.sols[s.grille.idx(q)] = "terre"
+			s.grille.recompiler_sols()
+			terre2 = q
+	verifier(terre2 != Vector2i(-1, -1), "une seconde tuile de terre touche le joueur")
+	s.attente[j.id] = true
+	j.compteur = s.horloge_monde.ticks
+	verifier(s.intention(j.id, {"type": "labourer", "vers": terre2}), "on laboure la seconde tuile")
+	var pommier: Dictionary = s.generer_objet("pomme", 1, {}, "commun", 0)
+	SimObjets.donner(s, j, pommier.uid)
+	s.attente[j.id] = true
+	j.compteur = s.horloge_monde.ticks
+	verifier(s.intention(j.id, {"type": "planter", "base": "pomme"}), "on plante un pommier")
+	var pm2 := SimCamp._pm(s, terre2)
+	verifier(s.territoire.cultures.has(pm2) and str(s.territoire.cultures[pm2].plante) == "pomme", "la parcelle porte le pommier")
+	verifier(SimVilles.plante_a_semer(s, {"verger": true, "plante": "pomme"}) == "pomme", "un verger replante le même arbre : on plante une fois, on cueille des années")
+

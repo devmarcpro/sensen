@@ -726,6 +726,24 @@
         "guano": 95,
         "phosphorite": 80,
         "tourbe_compactee": 55
+      },
+      "labour": {
+        "ticks": 30,
+        "fertilite": 8,
+        "sols": [
+          "terre",
+          "terre_fertile",
+          "humus",
+          "limon",
+          "argile",
+          "sable",
+          "marne",
+          "tourbe"
+        ]
+      },
+      "arrosage": {
+        "avance": 0.2,
+        "outil": "seau"
       }
     },
     "boutique": {

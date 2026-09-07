@@ -1142,6 +1142,10 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = SimElevage._livrer_commande(self, e, str(i.get("pnj", "")), h.ticks)
 		"planter":
 			ok = SimCamp._planter(self, e, str(i.get("base", "")), h.ticks)
+		"labourer":
+			ok = SimCamp._labourer(self, e, i.get("vers", Vector2i(-1, -1)), h.ticks)
+		"arroser":
+			ok = SimCamp._arroser(self, e, i.get("vers", Vector2i(-1, -1)), h.ticks)
 		"fertiliser":
 			ok = SimCamp._fertiliser(self, e, i.get("vers", e.pos), h.ticks)
 		"apprivoiser":
@@ -5379,6 +5383,12 @@ func _lancer_raid_reel(force: float, tick: int) -> void:
 	SimRoyaumes._lancer_raid_reel(self, force, tick)
 
 # SimCamp
+
+func _labourer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	return SimCamp._labourer(self, e, vers, tick)
+
+func _arroser(e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	return SimCamp._arroser(self, e, vers, tick)
 
 func _pm(vers: Vector2i) -> Vector2i:
 	return SimCamp._pm(self, vers)
