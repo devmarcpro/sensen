@@ -57,3 +57,6 @@ RENDU — échantillonnage des chunks explorés dans un rayon autour du
 - **Dépend de** : [[Grille continue]], [[IA des créatures]], [[Sauvegarde]]
 - **Alimente** : [[Écrans d'interface]], [[Donjons — structure et intégration]]
 - **Voir aussi** : [[Décision — Minimap en 2D]], [[Carte du monde]], [[EventBus]], [[Ordre de construction]]
+
+> [!success] Codé le 2026-09-07, 17 h — la minimap par le noyau C++ (designer : « réécriture C++ et optimisation »)
+> Le redessin complet de la minimap coûtait ~50 ms et se produisait **à chaque tuile découverte** (sa clé de cache compte les tuiles découvertes) : en exploration, une saccade jusqu'à sept fois par seconde. Les 4 096 tuiles sont désormais teintées par le noyau (`SensenGrille.minimap`, référence `PassesGD.minimap`) et l'`Image` se crée depuis les octets ; les icônes restent en GDScript. Le détail et la mesure dans [[Modules de la simulation et le C++]] (callout du 2026-09-07, 17 h).

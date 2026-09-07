@@ -39,6 +39,64 @@ static func visibles(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_ci
 	return res
 
 
+## La minimap (Minimap.rafraichir, 2026-09-07) : la cellule du joueur en octets RGBA8, `taille` × `taille` px — chaque
+## tuile découverte a sa teinte (eau, végétation, mur ou roche, porte, sol du matériau éclairci par la hauteur), le reste
+## est `fond`. La référence GDScript de `SensenGrille.minimap` ; le client crée l'Image depuis les octets.
+static func minimap(g: Grille, cell: Rect2i, taille: int, mat_col: Dictionary, fond: Color) -> PackedByteArray:
+	var res := PackedByteArray()
+	res.resize(taille * taille * 4)
+	var f := [_octet(fond.r), _octet(fond.g), _octet(fond.b), _octet(fond.a)]
+	for k in taille * taille:
+		res[k * 4] = f[0]
+		res[k * 4 + 1] = f[1]
+		res[k * 4 + 2] = f[2]
+		res[k * 4 + 3] = f[3]
+	var px := float(taille) / float(maxi(cell.size.x, cell.size.y))
+	var cote := maxi(1, int(ceil(px)))
+	for dy in cell.size.y:
+		for dx in cell.size.x:
+			var t: Vector2i = cell.position + Vector2i(dx, dy)
+			if not g.dans(t) or not g.decouvert.has(g.idx(t)):
+				continue
+			var col := Color(0.35, 0.3, 0.22)
+			var ct: Dictionary = g.contenu_de(t)
+			var tags: Array = ct.get("tags", [])
+			if "liquide" in tags or g.niveau_liquide(t) > 0:
+				col = Color(0.2, 0.4, 0.7)
+			elif "vegetation" in tags:
+				col = Color(0.2, 0.45, 0.2)
+			elif bool(ct.get("bloque_passage", false)):
+				col = Color(0.5, 0.5, 0.52) if "mur" in tags else Color(0.42, 0.4, 0.38)
+			elif "porte" in tags:
+				col = Color(0.7, 0.5, 0.25)
+			else:
+				var sol: String = g.materiau_sol(t)
+				if not sol.is_empty() and mat_col.has(sol):
+					col = (mat_col[sol] as Color).darkened(0.2)
+				var k := clampf((g.h(t) - 4) / 12.0, 0.0, 1.0)   # plus haut, plus clair
+				col = col.lightened(k * 0.25)
+			# Le carré de la tuile, rogné à l'image — écrit ici même : un PackedByteArray passé à une fonction est COPIÉ à
+			# la première écriture, la fonction remplirait sa copie.
+			var x0 := int(dx * px)
+			var y0 := int(dy * px)
+			var r := _octet(col.r)
+			var gg := _octet(col.g)
+			var b := _octet(col.b)
+			var a := _octet(col.a)
+			for yy in range(maxi(0, y0), mini(taille, y0 + cote)):
+				for xx in range(maxi(0, x0), mini(taille, x0 + cote)):
+					var kk := (yy * taille + xx) * 4
+					res[kk] = r
+					res[kk + 1] = gg
+					res[kk + 2] = b
+					res[kk + 3] = a
+	return res
+
+
+static func _octet(v: float) -> int:
+	return clampi(int(round(v * 255.0)), 0, 255)
+
+
 ## La hauteur dessinée du bloc d'une tuile, en unités (main._hauteur_bloc) : celle de son contenu, ou celle du bâtiment ;
 ## le mur sud ou est du bâtiment du joueur (`bat_j`) est un muret de `mur_coupe_u`.
 static func hauteur_bloc(g: Grille, t: Vector2i, bat_j: int, niveau_u: int, mur_coupe_u: int) -> int:

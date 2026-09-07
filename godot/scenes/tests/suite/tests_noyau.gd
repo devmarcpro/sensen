@@ -1440,6 +1440,22 @@ func test_noyau_passes() -> void:
 		if f & 1:
 			n_vus += 1
 	verifier(v_gd == v_cpp and v_gd.size() == positions.size() and n_vus > 0, "visibles : les mêmes drapeaux pour %d positions (%d en vue)" % [positions.size(), n_vus])
+	# la minimap : les mêmes octets pour la cellule du joueur (Minimap et brouillard de guerre, 2026-09-07)
+	var mini_col := {}
+	for mid in GameData.catalogues.materials.keys():
+		if GameData.catalogues.materials[mid].has("color"):
+			mini_col[str(mid)] = Color.html(str(GameData.catalogues.materials[mid].color))
+	var taille_mini := int(GameData.config("planete").taille_cellule)
+	var cell_mini := Rect2i(s.monde.cellule_de(j.pos) * taille_mini, Vector2i(taille_mini, taille_mini))
+	var tmini0 := Time.get_ticks_usec()
+	var mini_gd := PassesGD.minimap(g, cell_mini, 128, mini_col, Color(0.02, 0.02, 0.03))
+	var tmini1 := Time.get_ticks_usec()
+	var mini_cpp: PackedByteArray = g._noyau.minimap(g, cell_mini.position, cell_mini.size, 128, mini_col, Color(0.02, 0.02, 0.03))
+	var tmini2 := Time.get_ticks_usec()
+	var teintes_mini := {}
+	for k in 128 * 128:
+		teintes_mini[mini_gd.slice(k * 4, k * 4 + 3)] = true
+	verifier(mini_gd == mini_cpp and mini_gd.size() == 128 * 128 * 4 and teintes_mini.size() >= 4, "minimap : les mêmes octets (%d teintes ; GDScript %.1f ms, C++ %.2f ms)" % [teintes_mini.size(), float(tmini1 - tmini0) / 1000.0, float(tmini2 - tmini1) / 1000.0])
 	# les morceaux de terrain autour du joueur : les mêmes triangles, les mêmes coupures, les mêmes végétaux
 	var mat_col := {}
 	var mat_st := {}

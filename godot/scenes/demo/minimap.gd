@@ -10,6 +10,17 @@ const TAILLE := 128
 var main: Node
 var image: Image
 var derniere_cle := ""                 # évite de recalculer l'image si rien n'a bougé
+const FOND := Color(0.02, 0.02, 0.03)
+var _mat_col_cache: Dictionary = {}   # matériau → couleur, bâti une fois (Color.html d'une chaîne par tuile coûtait)
+
+
+func _mat_col() -> Dictionary:
+	if _mat_col_cache.is_empty():
+		var mats: Dictionary = GameData.catalogues.materials
+		for mid in mats.keys():
+			if mats[mid].has("color"):
+				_mat_col_cache[str(mid)] = Color.html(str(mats[mid].color))
+	return _mat_col_cache
 
 
 func _ready() -> void:
@@ -55,32 +66,14 @@ func rafraichir(force: bool = false) -> void:
 		_icones(j, cell)
 		return
 	derniere_cle = cle
-	var px := float(TAILLE) / float(maxi(cell.size.x, cell.size.y))
-	image.fill(Color(0.02, 0.02, 0.03))
-	var mats: Dictionary = GameData.catalogues.materials
-	for dy in cell.size.y:
-		for dx in cell.size.x:
-			var t: Vector2i = cell.position + Vector2i(dx, dy)
-			if not g.dans(t) or not g.decouvert.has(g.idx(t)):
-				continue
-			var col := Color(0.35, 0.3, 0.22)
-			var ct: Dictionary = g.contenu_de(t)
-			var tags: Array = ct.get("tags", [])
-			if "liquide" in tags or g.niveau_liquide(t) > 0:
-				col = Color(0.2, 0.4, 0.7)
-			elif "vegetation" in tags:
-				col = Color(0.2, 0.45, 0.2)
-			elif g.bloque_passage(t):
-				col = Color(0.5, 0.5, 0.52) if "mur" in tags else Color(0.42, 0.4, 0.38)
-			elif "porte" in tags:
-				col = Color(0.7, 0.5, 0.25)
-			else:
-				var sol: String = g.materiau_sol(t)
-				if not sol.is_empty() and mats.has(sol):
-					col = Color.html(str(mats[sol].color)).darkened(0.2)
-				var k := clampf((g.h(t) - 4) / 12.0, 0.0, 1.0)   # plus haut, plus clair
-				col = col.lightened(k * 0.25)
-			image.fill_rect(Rect2i(int(dx * px), int(dy * px), maxi(1, int(ceil(px))), maxi(1, int(ceil(px)))), col)
+	# Les 4 096 tuiles par le noyau (référence : PassesGD.minimap) — le redessin complet coûtait ~50 ms en GDScript et
+	# se produisait à chaque tuile découverte (2026-09-07, designer : « réécriture C++ et optimisation »).
+	var octets: PackedByteArray
+	if Grille.noyau_actif and g._noyau_pret():
+		octets = g._noyau.minimap(g, cell.position, cell.size, TAILLE, _mat_col(), FOND)
+	else:
+		octets = PassesGD.minimap(g, cell, TAILLE, _mat_col(), FOND)
+	image = Image.create_from_data(TAILLE, TAILLE, false, Image.FORMAT_RGBA8, octets)
 	_icones(j, cell)
 
 

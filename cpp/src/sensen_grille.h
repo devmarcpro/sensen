@@ -126,6 +126,7 @@ public:
 	Dictionary regions_cellule(Object *grille, Vector2i origine, int n, const PackedInt32Array &classes);
 	Dictionary morceau(Object *grille, Vector2i coin, int taille_morceau, const Dictionary &p);
 	PackedByteArray visibles(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, int bat_j, const PackedVector2Array &positions);
+	PackedByteArray minimap(Object *grille, Vector2i coin, Vector2i taille_cell, int taille, const Dictionary &mat_col, Color fond);
 	Dictionary brouillard(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, Vector2i origine_dessin,
 			double tw, double th, double hstep, int niveau_u, int bat_j, int mur_coupe_u, Color voile, Color voile_jamais);
 	Dictionary toits(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, Vector2i origine_dessin,

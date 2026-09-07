@@ -90,6 +90,7 @@ void SensenGrille::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("regions_cellule", "grille", "origine", "n", "classes"), &SensenGrille::regions_cellule);
 	ClassDB::bind_method(D_METHOD("morceau", "grille", "coin", "taille_morceau", "p"), &SensenGrille::morceau);
 	ClassDB::bind_method(D_METHOD("visibles", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "bat_j", "positions"), &SensenGrille::visibles);
+	ClassDB::bind_method(D_METHOD("minimap", "grille", "coin", "taille_cell", "taille", "mat_col", "fond"), &SensenGrille::minimap);
 	ClassDB::bind_method(D_METHOD("brouillard", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "origine_dessin", "tw", "th", "hstep", "niveau_u", "bat_j", "mur_coupe_u", "voile", "voile_jamais"), &SensenGrille::brouillard);
 	ClassDB::bind_method(D_METHOD("toits", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "origine_dessin", "tw", "th", "hstep", "niveau_u", "bat_j", "bat_couleurs", "bat_styles", "pente_t", "haut_toit", "ombre_min", "soleil_h", "soleil_ok", "soleil_force", "uv_haut", "sombre_jamais", "sombre_memorise"), &SensenGrille::toits);
 	ClassDB::bind_method(D_METHOD("ombres", "grille", "dir", "pente", "coin", "taille", "max_pas", "unites_par_niveau"), &SensenGrille::ombres);
@@ -1465,6 +1466,87 @@ PackedByteArray SensenGrille::visibles(Object *grille, const Dictionary &vue, bo
 			}
 		}
 		w[k] = f;
+	}
+	return res;
+}
+
+
+// ---------------------------------------------------------------- la minimap (PassesGD.minimap, 2026-09-07)
+// Transcription de PassesGD.minimap : la cellule du joueur en octets RGBA8, `taille` × `taille` px — chaque tuile
+// découverte a sa teinte (eau, végétation, mur ou roche, porte, sol du matériau éclairci par la hauteur), le reste est
+// `fond`. Les 4 096 tuiles en GDScript coûtaient ~50 ms, à chaque tuile découverte.
+namespace {
+inline uint8_t octet_couleur(real_t v) {
+	int k = (int)Math::round(v * 255.0);
+	return (uint8_t)std::max(0, std::min(255, k));
+}
+inline void remplir_minimap(uint8_t *w, int taille, int x, int y, int cote, const Color &col) {
+	uint8_t r = octet_couleur(col.r), g = octet_couleur(col.g), b = octet_couleur(col.b), a = octet_couleur(col.a);
+	for (int yy = std::max(0, y); yy < std::min(taille, y + cote); ++yy) {
+		for (int xx = std::max(0, x); xx < std::min(taille, x + cote); ++xx) {
+			int k = (yy * taille + xx) * 4;
+			w[k] = r;
+			w[k + 1] = g;
+			w[k + 2] = b;
+			w[k + 3] = a;
+		}
+	}
+}
+} // namespace
+
+PackedByteArray SensenGrille::minimap(Object *grille, Vector2i coin, Vector2i taille_cell, int taille, const Dictionary &mat_col, Color fond) {
+	PackedByteArray res;
+	res.resize(std::max(0, taille * taille * 4));
+	uint8_t *w = res.ptrw();
+	uint8_t fr = octet_couleur(fond.r), fg = octet_couleur(fond.g), fb = octet_couleur(fond.b), fa = octet_couleur(fond.a);
+	for (int k = 0; k < taille * taille; ++k) {
+		w[k * 4] = fr;
+		w[k * 4 + 1] = fg;
+		w[k * 4 + 2] = fb;
+		w[k * 4 + 3] = fa;
+	}
+	Etat s;
+	if (!charger(grille, s)) {
+		return res;
+	}
+	static const StringName sn_decouvert("decouvert"), sn_sols("sols");
+	Dictionary decouvert = grille->get(sn_decouvert);
+	Dictionary sols = grille->get(sn_sols);
+	double px = (double)taille / (double)std::max(taille_cell.x, taille_cell.y);
+	int cote = std::max(1, (int)Math::ceil(px));
+	for (int dy = 0; dy < taille_cell.y; ++dy) {
+		for (int dx = 0; dx < taille_cell.x; ++dx) {
+			int x = coin.x + dx, y = coin.y + dy;
+			if (!s.dans(x, y)) {
+				continue;
+			}
+			int i = s.idx(x, y);
+			if (!decouvert.has(i)) {
+				continue;
+			}
+			Color col(0.35, 0.3, 0.22);
+			int fl = drapeaux(s, i);
+			if ((fl & F_LIQUIDE) || niveau_liquide(s, i) > 0) {
+				col = Color(0.2, 0.4, 0.7);
+			} else if (fl & F_VEGETATION) {
+				col = Color(0.2, 0.45, 0.2);
+			} else if (fl & F_BLOQUE_PASSAGE) {
+				col = (fl & F_MUR) ? Color(0.5, 0.5, 0.52) : Color(0.42, 0.4, 0.38);
+			} else if (fl & F_PORTE) {
+				col = Color(0.7, 0.5, 0.25);
+			} else {
+				Variant vs = sols.get(i, Variant());
+				if (vs.get_type() == Variant::STRING) {
+					String sol = vs;
+					if (!sol.is_empty() && mat_col.has(sol)) {
+						col = ((Color)mat_col[sol]).darkened(0.2);
+					}
+				}
+				double k = std::max(0.0, std::min(1.0, ((double)s.h[i] - 4) / 12.0));   // plus haut, plus clair
+				col = col.lightened((real_t)(k * 0.25));
+			}
+			remplir_minimap(w, taille, (int)(dx * px), (int)(dy * px), cote, col);
+		}
 	}
 	return res;
 }
