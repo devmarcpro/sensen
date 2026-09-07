@@ -7,7 +7,7 @@ extends TestsBase
 func test_village() -> void:
 	var planete: Dictionary = GameData.config("planete")
 	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
-	verifier(GameData.catalogues.name_cultures.size() == 7 and GameData.catalogues.dialogue.size() >= 31 and GameData.catalogues.functions.size() >= 6, "7 cultures, au moins 31 répliques (%d), les fonctions" % GameData.catalogues.dialogue.size())
+	verifier(GameData.catalogues.name_cultures.size() == 11 and GameData.catalogues.dialogue.size() >= 31 and GameData.catalogues.functions.size() >= 6, "11 cultures, au moins 31 répliques (%d), les fonctions" % GameData.catalogues.dialogue.size())
 	# Un nom par culture, genré ; la fonction d'affichage unique.
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
@@ -17,6 +17,36 @@ func test_village() -> void:
 	var nip: Dictionary = GameData.catalogues.name_cultures.nipponne
 	var nm := Noms.generer("nipponne", nip, "m", rng)
 	verifier(Noms.afficher(nm) == nm.nom_famille + " " + nm.prenom, "nom puis prénom pour la culture nipponne (%s)" % Noms.afficher(nm))
+	# Les listes explicites, genrées (designer 2026-09-07) : chaque culture porte ses prénoms d'homme, ses prénoms de
+	# femme et ses noms de famille, et aucun prénom ne se trouve dans les deux listes — la séparation doit être nette.
+	var maigres: Array[String] = []
+	var melanges: Array[String] = []
+	var n_noms := 0
+	for cid in GameData.catalogues.name_cultures.keys():
+		var c: Dictionary = GameData.catalogues.name_cultures[cid]
+		var pm: Array = c.get("prenoms_m", [])
+		var pf: Array = c.get("prenoms_f", [])
+		var fam: Array = c.get("familles", [])
+		n_noms += pm.size() + pf.size() + fam.size()
+		if pm.size() < 40 or pf.size() < 40 or fam.size() < 30:
+			maigres.append("%s (%d/%d/%d)" % [str(cid), pm.size(), pf.size(), fam.size()])
+		for p_h in pm:
+			if p_h in pf:
+				melanges.append("%s : %s" % [str(cid), str(p_h)])
+	verifier(maigres.is_empty(), "chaque culture a ses listes fournies (au moins 40/40/30) %s" % str(maigres))
+	verifier(melanges.is_empty(), "aucun prénom d'homme dans la liste des femmes %s" % str(melanges))
+	verifier(n_noms >= 1000, "%d noms écrits en tout" % n_noms)
+	# Le tirage suit bien le genre demandé, et les deux genres puisent dans des mondes différents.
+	var vus_h := {}
+	var vus_f := {}
+	for k_n in 200:
+		vus_h[Noms.prenom(nord, "m", rng)] = true
+		vus_f[Noms.prenom(nord, "f", rng)] = true
+	var croises := 0
+	for p_h in vus_h.keys():
+		if vus_f.has(p_h):
+			croises += 1
+	verifier(vus_h.size() > 30 and vus_f.size() > 30 and croises == 0, "deux cents tirages : %d prénoms d'homme, %d de femme, %d en commun" % [vus_h.size(), vus_f.size(), croises])
 	# Un hameau quelque part : on cherche une cellule à POI village.
 	var cell_v := Vector2i(-1, -1)
 	var dep_v: Array = [0, 0]   # on cherche autour du camp réel de cette partie

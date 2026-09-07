@@ -3633,3 +3633,55 @@ meuble.tombe.name,Tombe
 tile_content.verger.name,Verger
 tile_content.verger_mur.name,Verger mûr
 ui.tombe,"Ci-gît {nom}, {metier} · an {an}"
+culture.hellenique.name,Hellénique
+titre.hellenique.monarchie_hereditaire.m,Basileus
+titre.hellenique.monarchie_hereditaire.f,Basilissa
+titre.hellenique.republique.m,Archonte
+titre.hellenique.republique.f,Archontesse
+titre.hellenique.theocratie.m,Hiérophante
+titre.hellenique.theocratie.f,Hiérophantide
+titre.hellenique.ploutocratie.m,Naucléros
+titre.hellenique.ploutocratie.f,Naucléra
+titre.hellenique.dictature.m,Stratège
+titre.hellenique.dictature.f,Stratège
+titre.hellenique.guilde_maitre.m,Maître de la Stoa
+titre.hellenique.guilde_maitre.f,Maîtresse de la Stoa
+culture.indienne.name,Indienne
+titre.indienne.monarchie_hereditaire.m,Maharaja
+titre.indienne.monarchie_hereditaire.f,Maharani
+titre.indienne.republique.m,Sabhapati
+titre.indienne.republique.f,Sabhapatni
+titre.indienne.theocratie.m,Acharya
+titre.indienne.theocratie.f,Acharyini
+titre.indienne.ploutocratie.m,Seth
+titre.indienne.ploutocratie.f,Sethani
+titre.indienne.dictature.m,Senapati
+titre.indienne.dictature.f,Senapatni
+titre.indienne.guilde_maitre.m,Shreshthin
+titre.indienne.guilde_maitre.f,Shreshthini
+culture.swahili.name,Swahilie
+titre.swahili.monarchie_hereditaire.m,Mfalme
+titre.swahili.monarchie_hereditaire.f,Malkia
+titre.swahili.republique.m,Mwenyekiti
+titre.swahili.republique.f,Mwenyekiti
+titre.swahili.theocratie.m,Mwalimu Mkuu
+titre.swahili.theocratie.f,Mwalimu Mkuu
+titre.swahili.ploutocratie.m,Tajiri
+titre.swahili.ploutocratie.f,Tajiri
+titre.swahili.dictature.m,Jemadari
+titre.swahili.dictature.f,Jemadari
+titre.swahili.guilde_maitre.m,Fundi Mkuu
+titre.swahili.guilde_maitre.f,Fundi Mkuu
+culture.persane.name,Persane
+titre.persane.monarchie_hereditaire.m,Shah
+titre.persane.monarchie_hereditaire.f,Shahbanou
+titre.persane.republique.m,Vakil
+titre.persane.republique.f,Vakila
+titre.persane.theocratie.m,Mobad
+titre.persane.theocratie.f,Mobada
+titre.persane.ploutocratie.m,Bazargan
+titre.persane.ploutocratie.f,Bazargana
+titre.persane.dictature.m,Sardar
+titre.persane.dictature.f,Sardara
+titre.persane.guilde_maitre.m,Ostad
+titre.persane.guilde_maitre.f,Ostada

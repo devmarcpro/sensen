@@ -12,11 +12,22 @@ static func _pick(rng: RandomNumberGenerator, pool: Array) -> String:
 	return str(pool[rng.randi_range(0, pool.size() - 1)])
 
 
+## Le prénom : une liste explicite du genre demandé si la culture en a une (designer 2026-09-07, « développe beaucoup
+## plus les noms, fais la séparation homme et femme » — soixante prénoms par genre et par culture au lieu de quarante
+## assemblages de syllabes), sinon l'assemblage syllabique d'avant, qui reste le repli d'une culture sans listes.
 static func prenom(culture: Dictionary, genre: String, rng: RandomNumberGenerator) -> String:
+	var liste: Array = culture.get("prenoms_f", []) if genre == "f" else culture.get("prenoms_m", [])
+	if not liste.is_empty():
+		return _pick(rng, liste)
 	return _pick(rng, culture.prenom_a) + _pick(rng, culture.prenom_b_f if genre == "f" else culture.prenom_b_m)
 
 
+## Le nom de famille : la liste de la culture, sinon l'assemblage. Le genre ne le change pas dans les cultures
+## écrites à ce jour ; il reste passé pour les cultures à suffixe genré (le repli syllabique l'utilise).
 static func famille(culture: Dictionary, genre: String, rng: RandomNumberGenerator) -> String:
+	var liste: Array = culture.get("familles", [])
+	if not liste.is_empty():
+		return _pick(rng, liste)
 	return _pick(rng, culture.famille_a) + _pick(rng, culture.famille_b_f if genre == "f" else culture.famille_b_m)
 
 
