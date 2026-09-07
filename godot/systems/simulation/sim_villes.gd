@@ -834,17 +834,27 @@ static func enterrer(sim: Simulation, mort: Dictionary) -> bool:
 			continue
 		var taille: int = int(e.largeur)
 		var r: Rect2i = v.cimetiere
-		var tombes: Array = v.get("tombes", [])
+		# Les tombes vivent dans le MONDE, pas dans la cellule (2026-09-07) : une cellule se régénère de sa graine à
+		# chaque chargement, et n'en garderait rien. `monde.tombes` est sauvegardé, et la tuile est inscrite aux
+		# modifications de la cellule — c'est ce que le rechargement rejoue.
+		var tombes: Array = sim.monde.tombes.get(cell, [])
+		var prises := {}
+		for t_p in tombes:
+			prises[Vector2i(t_p.tuile)] = true
 		var nom_m := Noms.afficher(mort.get("nom", {})) if mort.has("nom") else str(mort.get("name_key", ""))
 		for y in range(1, r.size.y - 1):   # l'intérieur seul : la clôture reste
 			for x in range(1, r.size.x - 1):
 				var q := r.position + Vector2i(x, y)
 				var i := q.y * taille + q.x
-				if e.meubles.has(i):
+				if e.meubles.has(i) or prises.has(q):
 					continue
 				e.meubles[i] = "tombe"
 				tombes.append({"tuile": q, "nom": nom_m, "fonction": str(mort.get("fonction", "")), "an": int(sim.date_courante().get("annee", 0))})
-				v["tombes"] = tombes
+				sim.monde.tombes[cell] = tombes
+				if not sim.monde.modifications.has(cell):
+					sim.monde.modifications[cell] = {}
+				sim.monde.modifications[cell][i] = {"h": int(e.hauteurs[i]), "contenu": "", "materiau": "", "meuble": "tombe",
+					"station": "", "sol": str(e.sols.get(i, "")), "eau": 0}
 				var pm: Vector2i = sim.monde.pos_monde(cell, q)
 				if sim.grille != null and sim.grille.dans(pm):   # la ville est sous les yeux : la tombe s'y voit tout de suite
 					sim.grille.meubles[sim.grille.idx(pm)] = "tombe"
@@ -865,7 +875,7 @@ static func epitaphe(sim: Simulation, pos: Vector2i) -> Dictionary:
 	if v.is_empty():
 		return {}
 	var locale: Vector2i = pos - cell * int(GameData.config("planete").taille_cellule)
-	for t in v.get("tombes", []):
+	for t in sim.monde.tombes.get(cell, []):   # la mémoire du monde, pas celle d'une cellule qui se régénère
 		if Vector2i(t.tuile) == locale:
 			return t
 	return {}

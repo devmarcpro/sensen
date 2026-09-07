@@ -40,6 +40,7 @@ var claims: Dictionary = {}            # Vector2i (cellule) → {role} : le terr
 var vacances: Dictionary = {}          # id de royaume → semaine de résolution : trône vacant (Familles et succession)
 var heritiers: Dictionary = {}         # id de royaume → id de l'héritier désigné à la mort du dirigeant
 var vacances_guildes: Dictionary = {}  # "guilde|village" → semaine de résolution : hall sans maître
+var tombes: Dictionary = {}            # cellule → [{tuile locale, nom, fonction, an}] : les morts enterrés (Villes — les repères, 2026-09-07)
 var villages: Dictionary = {}          # nom de village → {cellule, royaume, conquis_par, defense_jusqua, abandonne} (Conquête de village)
 var tresors_royaumes: Dictionary = {}  # id de royaume → or prélevé sur ses villes (Villes B3 ; les royaumes-pays de D)
 var etats_royaumes: Dictionary = {}    # id de royaume → son état (population, armée, humeur, règne, ère, blason, guerres, journal) — Royaumes-pays (D)

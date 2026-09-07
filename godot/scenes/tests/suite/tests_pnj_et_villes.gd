@@ -1437,7 +1437,7 @@ func test_tombes_nommees() -> void:
 	if cell_c == Vector2i(-9999, -9999):
 		return
 	var v_c: Dictionary = s.monde.cellules[cell_c].village
-	var avant: int = v_c.get("tombes", []).size()
+	var avant: int = s.monde.tombes.get(cell_c, []).size()   # les tombes sont une mémoire du MONDE, pas de la cellule
 	# Un habitant de cette ville meurt : il rejoint le cimetière, où qu'il soit tombé.
 	var habitants: Array = s.vivants().filter(func(x: Dictionary) -> bool: return str(x.get("village", "")) == str(fiche.nom) and "civil" in x.get("tags", []))
 	verifier(not habitants.is_empty(), "%d habitants de %s dans la fenêtre" % [habitants.size(), str(fiche.nom)])
@@ -1446,17 +1446,24 @@ func test_tombes_nommees() -> void:
 	var mort: Dictionary = habitants[0]
 	var nom_attendu := Noms.afficher(mort.get("nom", {}))
 	verifier(SimVilles.enterrer(s, mort), "l'habitant est enterré chez lui")
-	var tombes: Array = v_c.get("tombes", [])
+	var tombes: Array = s.monde.tombes.get(cell_c, [])
 	verifier(tombes.size() == avant + 1 and str(tombes[tombes.size() - 1].nom) == nom_attendu, "la tombe porte son nom (%s)" % nom_attendu)
 	var t_pos: Vector2i = s.monde.pos_monde(cell_c, Vector2i(tombes[tombes.size() - 1].tuile))
 	verifier(str(s.monde.cellules[cell_c].meubles.get(int(tombes[tombes.size() - 1].tuile.y) * s.monde.taille + int(tombes[tombes.size() - 1].tuile.x), "")) == "tombe", "la cellule porte le meuble")
 	var ep: Dictionary = SimVilles.epitaphe(s, t_pos)
 	verifier(str(ep.get("nom", "")) == nom_attendu and int(ep.get("an", -1)) > 0, "l'épitaphe se lit à sa tuile (%s, an %d)" % [str(ep.get("nom", "")), int(ep.get("an", -1))])
+	# La cellule se régénère de sa graine à chaque chargement : la tombe doit survivre à cela (2026-09-07).
+	verifier(s.monde.modifications.get(cell_c, {}).has(int(tombes[tombes.size() - 1].tuile.y) * s.monde.taille + int(tombes[tombes.size() - 1].tuile.x)), "la tuile est inscrite aux modifications de la cellule")
+	s.monde.cellules.erase(cell_c)
+	var e_neuf: Dictionary = s.monde.cellule(cell_c)
+	verifier(not e_neuf.is_empty(), "la cellule se régénère")
+	var ep2: Dictionary = SimVilles.epitaphe(s, t_pos)
+	verifier(str(ep2.get("nom", "")) == nom_attendu, "après régénération de la cellule, l'épitaphe tient (%s)" % str(ep2.get("nom", "")))
 	# Un cimetière plein n'accepte plus personne.
 	var garde_fou := 0
 	while SimVilles.enterrer(s, mort) and garde_fou < 200:
 		garde_fou += 1
-	verifier(garde_fou < 200 and not SimVilles.enterrer(s, mort), "le cimetière plein (%d tombes) n'accepte plus personne" % v_c.get("tombes", []).size())
+	verifier(garde_fou < 200 and not SimVilles.enterrer(s, mort), "le cimetière plein (%d tombes) n'accepte plus personne" % s.monde.tombes.get(cell_c, []).size())
 
 
 ## Le verger (Agriculture et élevage, 2026-09-07) : des buissons plantés une fois, cueillis des années — ni rotation,
