@@ -149,7 +149,7 @@ static func brouillard(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_
 ## bâtiment), sombre si aucune tuile du bâtiment n'est en vue, le versant éclairé par le soleil ; les UV sont ceux du dessus.
 static func toits(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_ci: int, jp: Vector2i, rayon: int, origine_dessin: Vector2i,
 		tw: float, th: float, hstep: float, niveau_u: int, bat_j: int, bat_couleurs: PackedColorArray, bat_styles: PackedFloat32Array,
-		pente_t: float, haut_toit: float, ombre_min: float, soleil_h: Vector2, soleil_ok: bool, soleil_force: float, uv_haut: float, sombre_jamais: float = 0.75) -> Dictionary:
+		pente_t: float, haut_toit: float, ombre_min: float, soleil_h: Vector2, soleil_ok: bool, soleil_force: float, uv_haut: float, sombre_jamais: float = 0.75, sombre_memorise: float = 0.55) -> Dictionary:
 	var res := _vide()
 	if g.batiments_liste.is_empty():
 		_indices(res)
@@ -187,7 +187,7 @@ static func toits(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_ci: i
 			if not g.decouvert.has(idx):   # jamais vu : le toit, très sombre (plus de fond gris, 2026-09-06)
 				col = col.darkened(sombre_jamais)
 			elif not bool(vus.get(b, false)):
-				col = col.darkened(0.55)
+				col = col.darkened(sombre_memorise)   # memorise mais hors de vue : styles.brouillard.toit_memorise
 			var r: Rect2i = g.batiments_liste[b - 1].rect
 			var base_px := float(g.h(t) * hstep + n * niveau_u * hstep)
 			var coins := [Vector2i(t.x, t.y), Vector2i(t.x + 1, t.y), Vector2i(t.x + 1, t.y + 1), Vector2i(t.x, t.y + 1)]

@@ -91,7 +91,7 @@ void SensenGrille::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("morceau", "grille", "coin", "taille_morceau", "p"), &SensenGrille::morceau);
 	ClassDB::bind_method(D_METHOD("visibles", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "bat_j", "positions"), &SensenGrille::visibles);
 	ClassDB::bind_method(D_METHOD("brouillard", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "origine_dessin", "tw", "th", "hstep", "niveau_u", "bat_j", "mur_coupe_u", "voile", "voile_jamais"), &SensenGrille::brouillard);
-	ClassDB::bind_method(D_METHOD("toits", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "origine_dessin", "tw", "th", "hstep", "niveau_u", "bat_j", "bat_couleurs", "bat_styles", "pente_t", "haut_toit", "ombre_min", "soleil_h", "soleil_ok", "soleil_force", "uv_haut", "sombre_jamais"), &SensenGrille::toits);
+	ClassDB::bind_method(D_METHOD("toits", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "origine_dessin", "tw", "th", "hstep", "niveau_u", "bat_j", "bat_couleurs", "bat_styles", "pente_t", "haut_toit", "ombre_min", "soleil_h", "soleil_ok", "soleil_force", "uv_haut", "sombre_jamais", "sombre_memorise"), &SensenGrille::toits);
 	ClassDB::bind_method(D_METHOD("ombres", "grille", "dir", "pente", "coin", "taille", "max_pas", "unites_par_niveau"), &SensenGrille::ombres);
 	ClassDB::bind_method(D_METHOD("propager_lumiere", "grille", "sources_idx", "sources_niv", "ambiante", "bloque_par_contenu"), &SensenGrille::propager_lumiere);
 	ClassDB::bind_method(D_METHOD("carte_lumiere", "grille", "ciel", "locale", "teinte_locale", "force_locale", "dir", "pente", "max_pas", "unites_par_niveau", "ombre_portee", "coin", "taille"), &SensenGrille::carte_lumiere);
@@ -1330,7 +1330,8 @@ Dictionary SensenGrille::brouillard(Object *grille, const Dictionary &vue, bool 
 
 Dictionary SensenGrille::toits(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, Vector2i origine_dessin,
 		double tw, double th, double hstep, int niveau_u, int bat_j, const PackedColorArray &bat_couleurs, const PackedFloat32Array &bat_styles,
-		double pente_t, double haut_toit, double ombre_min, Vector2 soleil_h, bool soleil_ok, double soleil_force, double uv_haut, double sombre_jamais) {
+		double pente_t, double haut_toit, double ombre_min, Vector2 soleil_h, bool soleil_ok, double soleil_force, double uv_haut, double sombre_jamais,
+		double sombre_memorise) {
 	Triangles tr;
 	PackedInt32Array rien;
 	Etat s;
@@ -1392,8 +1393,8 @@ Dictionary SensenGrille::toits(Object *grille, const Dictionary &vue, bool tout_
 			double st = (b - 1 < bat_styles.size()) ? (double)bat_styles[b - 1] : 0.0;
 			if (!decouvert.has(i)) {
 				col = col.darkened((real_t)sombre_jamais);
-			} else if (!vus[b - 1]) {
-				col = col.darkened(0.55);
+			} else if (!vus[b - 1]) {   // memorise mais hors de vue : styles.brouillard.toit_memorise
+				col = col.darkened((real_t)sombre_memorise);
 			}
 			const Rect2i &r = rects[b - 1];
 			int ex = r.position.x + r.size.x, ey = r.position.y + r.size.y;

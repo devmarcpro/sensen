@@ -2794,11 +2794,13 @@ func _dessiner_toits(ci: CanvasItem) -> void:
 	var vide_ci := g.contenu_ids.find("vide")
 	var res: Dictionary
 	var t0 := Time.get_ticks_usec()
-	var sombre_jamais := float(GameData.config("styles").get("brouillard", {}).get("toit_jamais_vu", 0.75))
+	var st_br: Dictionary = GameData.config("styles").get("brouillard", {})
+	var sombre_jamais := float(st_br.get("toit_jamais_vu", 0.75))
+	var sombre_memorise := float(st_br.get("toit_memorise", 0.55))   # le toit vu jadis, hors de vue maintenant
 	if g.noyau_actif and g._noyau_pret():
-		res = g._noyau.toits(g, vue, tout_vu, zj, vide_ci, jp, rayon_vue, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, bat_j, bat_couleurs, bat_styles, pente_t, haut_toit, ombre_min, soleil_h, soleil_ok, _soleil_force, float(UV_HAUT), sombre_jamais)
+		res = g._noyau.toits(g, vue, tout_vu, zj, vide_ci, jp, rayon_vue, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, bat_j, bat_couleurs, bat_styles, pente_t, haut_toit, ombre_min, soleil_h, soleil_ok, _soleil_force, float(UV_HAUT), sombre_jamais, sombre_memorise)
 	else:
-		res = PassesGD.toits(g, vue, tout_vu, zj, vide_ci, jp, rayon_vue, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, bat_j, bat_couleurs, bat_styles, pente_t, haut_toit, ombre_min, soleil_h, soleil_ok, _soleil_force, float(UV_HAUT), sombre_jamais)
+		res = PassesGD.toits(g, vue, tout_vu, zj, vide_ci, jp, rayon_vue, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, bat_j, bat_couleurs, bat_styles, pente_t, haut_toit, ombre_min, soleil_h, soleil_ok, _soleil_force, float(UV_HAUT), sombre_jamais, sombre_memorise)
 	_top_client("toits.tableaux", t0)
 	if res.points.size() > 0:
 		RenderingServer.canvas_item_add_triangle_array(ci.get_canvas_item(), res.indices, res.points, res.couleurs, res.uvs)

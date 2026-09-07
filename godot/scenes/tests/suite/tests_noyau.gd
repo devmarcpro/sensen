@@ -1395,10 +1395,10 @@ func test_noyau_passes() -> void:
 		var vue: Dictionary = j.get("vue", {})
 		var t0 := Time.get_ticks_usec()
 		var b_gd := PassesGD.brouillard(g, vue, tout_vu, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85))
-		var t_gd := PassesGD.toits(g, vue, tout_vu, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, couleurs, styles, 1.0, 8.0, 0.72, cas[2], cas[3], cas[4], 4096.0, 0.75)
+		var t_gd := PassesGD.toits(g, vue, tout_vu, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, couleurs, styles, 1.0, 8.0, 0.72, cas[2], cas[3], cas[4], 4096.0, 0.75, 0.55)
 		var t1 := Time.get_ticks_usec()
 		var b_cpp: Dictionary = g._noyau.brouillard(g, vue, tout_vu, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85))
-		var t_cpp: Dictionary = g._noyau.toits(g, vue, tout_vu, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, couleurs, styles, 1.0, 8.0, 0.72, cas[2], cas[3], cas[4], 4096.0, 0.75)
+		var t_cpp: Dictionary = g._noyau.toits(g, vue, tout_vu, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, couleurs, styles, 1.0, 8.0, 0.72, cas[2], cas[3], cas[4], 4096.0, 0.75, 0.55)
 		var t2 := Time.get_ticks_usec()
 		chrono_gd += float(t1 - t0) / 1000.0
 		chrono_cpp += float(t2 - t1) / 1000.0
@@ -1416,6 +1416,15 @@ func test_noyau_passes() -> void:
 					print("  écart (%s, %s) au triangle %d : %s / %s, %s / %s" % [str(cas[0]), str(paire[2]), i / 3, str(a.points[i]), str(b.points[i]), str(a.couleurs[i]), str(b.couleurs[i])])
 					break
 	verifier(ecarts == 0 and n_tri > 100, "brouillard et toits : le noyau rend les mêmes tableaux que PassesGD (%d triangles sur trois cas, GDScript %.1f ms, C++ %.1f ms)" % [n_tri, chrono_gd, chrono_cpp])
+	# Le toit MÉMORISÉ, hors de vue, s'assombrissait de 0,55 écrit en dur dans les deux implémentations, alors que
+	# `styles.brouillard.toit_memorise` porte la valeur et que le `_doc` la promet (2026-09-07). On vérifie que le
+	# réglage est vivant des deux côtés : une autre valeur doit donner d'autres couleurs, et les mêmes des deux.
+	# Une vue VIDE et tout_vu faux : tout ce qui est decouvert tombe dans la branche « memorise, hors de vue ».
+	var vue0: Dictionary = {}
+	var clair := PassesGD.toits(g, vue0, false, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, couleurs, styles, 1.0, 8.0, 0.72, Vector2(0.6, 0.4), true, 0.8, 4096.0, 0.75, 0.0)
+	var sombre := PassesGD.toits(g, vue0, false, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, couleurs, styles, 1.0, 8.0, 0.72, Vector2(0.6, 0.4), true, 0.8, 4096.0, 0.75, 0.9)
+	var clair_c: Dictionary = g._noyau.toits(g, vue0, false, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, couleurs, styles, 1.0, 8.0, 0.72, Vector2(0.6, 0.4), true, 0.8, 4096.0, 0.75, 0.0)
+	verifier(clair.couleurs != sombre.couleurs and clair.couleurs == clair_c.couleurs, "toit_memorise est un réglage vivant : 0,0 et 0,9 ne rendent pas les mêmes toits, et le noyau suit le GDScript")
 	# ce que le client montre de chaque être : les mêmes drapeaux
 	var positions := PackedVector2Array()
 	for x in s.vivants():
@@ -1509,6 +1518,6 @@ func test_noyau_passes() -> void:
 		var vue_e: Dictionary = j.get("vue", {})
 		var b_gd := PassesGD.brouillard(g, vue_e, false, 1, g.contenu_ids.find("vide"), Grille.plat(haut), 24, od, 40.0, 20.0, 4.0, 6, bj, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85))
 		var b_cpp: Dictionary = g._noyau.brouillard(g, vue_e, false, 1, g.contenu_ids.find("vide"), Grille.plat(haut), 24, od, 40.0, 20.0, 4.0, 6, bj, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85))
-		var t_gd := PassesGD.toits(g, vue_e, false, 1, g.contenu_ids.find("vide"), Grille.plat(haut), 24, od, 40.0, 20.0, 4.0, 6, bj, couleurs, styles, 1.0, 8.0, 0.72, Vector2(0.6, 0.4), true, 0.8, 4096.0, 0.75)
-		var t_cpp: Dictionary = g._noyau.toits(g, vue_e, false, 1, g.contenu_ids.find("vide"), Grille.plat(haut), 24, od, 40.0, 20.0, 4.0, 6, bj, couleurs, styles, 1.0, 8.0, 0.72, Vector2(0.6, 0.4), true, 0.8, 4096.0, 0.75)
+		var t_gd := PassesGD.toits(g, vue_e, false, 1, g.contenu_ids.find("vide"), Grille.plat(haut), 24, od, 40.0, 20.0, 4.0, 6, bj, couleurs, styles, 1.0, 8.0, 0.72, Vector2(0.6, 0.4), true, 0.8, 4096.0, 0.75, 0.55)
+		var t_cpp: Dictionary = g._noyau.toits(g, vue_e, false, 1, g.contenu_ids.find("vide"), Grille.plat(haut), 24, od, 40.0, 20.0, 4.0, 6, bj, couleurs, styles, 1.0, 8.0, 0.72, Vector2(0.6, 0.4), true, 0.8, 4096.0, 0.75, 0.55)
 		verifier(b_gd.points == b_cpp.points and b_gd.couleurs == b_cpp.couleurs and t_gd.points == t_cpp.points and t_gd.couleurs == t_cpp.couleurs and b_gd.points.size() > 0, "à l'étage, la rue vue par l'air : les mêmes tableaux (%d triangles de brouillard)" % (b_gd.points.size() / 3))
