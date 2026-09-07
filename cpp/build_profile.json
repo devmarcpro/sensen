@@ -1,3 +1,20 @@
 {
-	"enabled_classes": ["Object", "RefCounted", "OS", "Engine", "ClassDB", "ProjectSettings", "FileAccess", "Image", "Mutex", "WorkerThreadPool", "XMLParser", "EditorPlugin", "RandomNumberGenerator"]
+	"enabled_classes": [
+		"Object",
+		"RefCounted",
+		"OS",
+		"Engine",
+		"ClassDB",
+		"ProjectSettings",
+		"FileAccess",
+		"Image",
+		"Mutex",
+		"WorkerThreadPool",
+		"XMLParser",
+		"EditorPlugin",
+		"RandomNumberGenerator",
+		"Noise",
+		"FastNoiseLite",
+		"Resource"
+	]
 }

@@ -675,7 +675,12 @@ func _plaques_proches(q: Vector2) -> Array:
 ## Continentalité en un point (tuiles) : base ±1 de la plaque, bordure adoucie, warp obligatoire, bruit lent, points chauds.
 func _continentalite(p: Vector2) -> float:
 	var q := _warpe(p)
-	var pp := _plaques_proches(q)
+	return _continentalite_q(p, q, _plaques_proches(q))
+
+
+## La même, quand l'appelant a DÉJÀ le point warpé et ses deux plaques (2026-09-07) : `tectonique_a` les
+## recalculait après coup — deux appels de bruit et un balayage des plaques pour rien, à chaque échantillon.
+func _continentalite_q(p: Vector2, q: Vector2, pp: Array) -> float:
 	var base: float = 1.0 if plaques[pp[0]].continentale else -1.0
 	var bordure: float = clampf((float(pp[3]) - float(pp[1])) / float(planete.get("tectonique", {}).get("bordure_tuiles", 20000.0)), 0.0, 1.0)
 	var c := base * (0.35 + 0.65 * bordure) + conti.get_noise_2d(q.x, q.y) * 0.6
@@ -716,9 +721,9 @@ func _continentalite(p: Vector2) -> float:
 ## sismicité 0..1 (proximité d'une suture), déterministes.
 func tectonique_a(x: int, y: int) -> Dictionary:
 	var p := Vector2(float(x), float(y))
-	var c := _continentalite(p)
 	var q := _warpe(p)
 	var pp := _plaques_proches(q)
+	var c := _continentalite_q(p, q, pp)
 	var i1: int = pp[0]
 	var i2: int = pp[2]
 	var suture := 1.0 - clampf((float(pp[3]) - float(pp[1])) / float(planete.get("tectonique", {}).get("suture_tuiles", 6000.0)), 0.0, 1.0)
@@ -780,15 +785,18 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 	var mer_alt := float(planete.get("mer", {}).get("altitude", 0.30))   # hors boucle : 16 384 tuiles
 	var mer_h := int(planete.get("mer", {}).get("hauteur", 8))
 	var nb := (taille + PAS_BRUIT - 1) / PAS_BRUIT
+	var noyau: RefCounted = ClassDB.instantiate(&"SensenGrille") if (noyau_actif and Grille.noyau_present()) else null   # un par cellule : la génération tourne en thread
+	# Les couches des blocs : le noyau les lit toutes d'un coup (file 109). Le GDScript reste la référence.
+	var lot: Dictionary = couches_blocs(noyau, taille, ox, oy, nb)
+	var noms_c: Array = bruits.keys()
 	for by in nb:   # les blocs d'abord, dans l'ordre où la boucle des tuiles les rencontrait (ligne par ligne)
 		for bx in nb:
 			var cle := Vector2i(bx, by)
-			var v := couches_a(ox + cle.x * PAS_BRUIT + PAS_BRUIT / 2, oy + cle.y * PAS_BRUIT + PAS_BRUIT / 2)
-			var b0 := _biome_de(v)
+			var v: Dictionary = lot.blocs[by * nb + bx]
+			var b0 := str(lot.biomes[by * nb + bx])
 			par_bloc[cle] = {"couches": v, "biome": b0, "sol": str(biomes.get(b0, {}).get("surface_material", "terre")),
 				"mer": float(v.get("altitude", 1.0)) < mer_alt}
 			e.biomes_vus[b0] = true
-	var noyau: RefCounted = ClassDB.instantiate(&"SensenGrille") if (noyau_actif and Grille.noyau_present()) else null   # un par cellule : la génération tourne en thread
 	_sol(e, taille, bord, par_bloc, mer_h, nb, noyau)
 	t_c = _top("cellule.sol", t_c)
 	# 2. Le relief : des accidents posés, hors de la zone d'arrivée si un camp s'y greffe.
@@ -2011,6 +2019,77 @@ func _poser_batiment(e: Dictionary, bat: Dictionary, origine: Vector2i, palette:
 	if not info.has("poste"):   # sans case de travail nommée : la porte
 		info["poste"] = info.porte
 	e.village.batiments.append(info)
+
+
+## Les couches des nb×nb blocs d'une cellule (file 109, 2026-09-07) : le noyau lit les bruits lui-même — ce sont LES
+## MÊMES objets FastNoiseLite que le GDScript, passés tels quels, donc les mêmes valeurs. Sans noyau, la boucle
+## GDScript d'origine (`couches_a` par bloc). Rend {blocs: Array[Dictionary]}, dans l'ordre ligne par ligne.
+func couches_blocs(noyau: RefCounted, taille: int, ox: int, oy: int, nb: int) -> Dictionary:
+	var blocs: Array = []
+	if noyau == null or not noyau.has_method("couches_cellule"):
+		var noms_b: Array = []
+		for by in nb:
+			for bx in nb:
+				var v0 := couches_a(ox + bx * PAS_BRUIT + PAS_BRUIT / 2, oy + by * PAS_BRUIT + PAS_BRUIT / 2)
+				blocs.append(v0)
+				noms_b.append(_biome_de(v0))
+		return {"blocs": blocs, "biomes": noms_b}
+	var noms: Array = bruits.keys()
+	var liste_b: Array = []
+	for nom in noms:
+		liste_b.append(bruits[nom])
+	var centres := PackedVector2Array()
+	var continentales := PackedByteArray()
+	for pl in plaques:
+		centres.append(pl.centre)
+		continentales.append(1 if bool(pl.continentale) else 0)
+	var chauds := PackedVector2Array()
+	for pc in points_chauds:
+		chauds.append(pc)
+	# Les biomes compilés pour le noyau : les conditions en [emplacement, min, max] et les priorités, dans l'ordre
+	# des clés — à priorité égale, le premier gagne, comme dans `_biome_de`.
+	var ids_b: Array = biomes.keys()
+	var cond_b: Array = []
+	var prio_b := PackedInt32Array()
+	for id_b in ids_b:
+		var liste_b2: Array = []
+		for couche_b in biomes[id_b].conditions.keys():
+			var f_b: Array = biomes[id_b].conditions[couche_b]
+			# « altitude » et « sismique » sont AUSSI des couches de bruit, mais `couches_a` les écrase par la
+			# tectonique : leurs conditions doivent lire la valeur tectonique, pas le bruit (2026-09-07).
+			var slot := -1
+			if str(couche_b) == "altitude":
+				slot = noms.size()
+			elif str(couche_b) == "sismique":
+				slot = noms.size() + 1
+			else:
+				slot = noms.find(str(couche_b))
+			liste_b2.append([slot, float(f_b[0]), float(f_b[1])])
+		cond_b.append(liste_b2)
+		prio_b.append(int(biomes[id_b].priority))
+	var tec: Dictionary = planete.get("tectonique", {})
+	var larg := float(int(planete.monde_cellules) * int(planete.taille_cellule))
+	var r: Dictionary = noyau.couches_cellule(taille, PAS_BRUIT, ox, oy, liste_b, warp, conti, cote, ridged, centres, continentales, chauds, {
+		"seuil_mer": seuil_mer, "suture_tuiles": float(tec.get("suture_tuiles", 6000.0)), "bordure_tuiles": float(tec.get("bordure_tuiles", 20000.0)),
+		"warp_amplitude": float(tec.get("warp_amplitude", 6000.0)), "cote_amplitude": float(tec.get("cote_amplitude", 0.0)),
+		"cote_fenetre": float(tec.get("cote_fenetre", 0.35)), "point_chaud_rayon": float(tec.get("point_chaud_rayon", 9000.0)),
+		"ocean_bord": float(tec.get("ocean_bord", 0.10)), "largeur": larg, "hauteur": larg * float(planete.get("monde_ratio", 1.0)),
+	}, cond_b, prio_b)
+	var vals: PackedFloat64Array = r.couches
+	var alt: PackedFloat64Array = r.altitude
+	var sis: PackedFloat64Array = r.sismique
+	var n_c := noms.size()
+	var idx_b: PackedInt32Array = r.get("biome", PackedInt32Array())
+	var noms_biome: Array = []
+	for i in nb * nb:
+		var v := {}
+		for k in n_c:
+			v[noms[k]] = vals[i * n_c + k]
+		v["altitude"] = alt[i]
+		v["sismique"] = sis[i]
+		blocs.append(v)
+		noms_biome.append(str(ids_b[int(idx_b[i])]) if i < idx_b.size() and int(idx_b[i]) >= 0 else "")
+	return {"blocs": blocs, "biomes": noms_biome}
 
 
 ## Le noyau C++ génère (file 109, 2026-09-06) : `noyau_actif` à false force le GDScript — la référence, que le noyau transcrit.

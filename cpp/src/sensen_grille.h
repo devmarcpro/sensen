@@ -137,6 +137,9 @@ public:
 	PackedByteArray carte_lumiere(Object *grille, Color ciel, const PackedByteArray &locale, Color teinte_locale, double force_locale,
 			Vector2 dir, double pente, int max_pas, int unites_par_niveau, double ombre_portee, Vector2i coin, Vector2i taille);
 	Dictionary sol_cellule(int taille, bool bord, int pas, const PackedStringArray &bloc_sol, const PackedByteArray &bloc_mer, int mer_h, const PackedByteArray &hauteurs);
+	Dictionary couches_cellule(int taille, int pas, int ox, int oy, const Array &bruits, Object *warp, Object *conti, Object *cote, Object *ridged,
+			const PackedVector2Array &plaques_centres, const PackedByteArray &plaques_continentales, const PackedVector2Array &points_chauds,
+			const Dictionary &p, const Array &biomes_conditions, const PackedInt32Array &biomes_priorite);
 	Dictionary vegetation_cellule(Object *rng, int taille, int pas, const PackedInt32Array &sol_keys, const Dictionary &eau, Rect2i reserve,
 			const PackedInt32Array &bloc_biome, const PackedFloat64Array &bloc_veg, const PackedFloat64Array &bloc_res, const PackedFloat64Array &bloc_danger,
 			const Array &biomes, const PackedFloat64Array &seuils, double filons_seuil, double filons_densite, const Array &tiers);

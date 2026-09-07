@@ -1,5 +1,6 @@
 #include "sensen_grille.h"
 
+#include <godot_cpp/classes/fast_noise_lite.hpp>
 #include <godot_cpp/classes/random_number_generator.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/packed_string_array.hpp>
@@ -95,6 +96,7 @@ void SensenGrille::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("propager_lumiere", "grille", "sources_idx", "sources_niv", "ambiante", "bloque_par_contenu"), &SensenGrille::propager_lumiere);
 	ClassDB::bind_method(D_METHOD("carte_lumiere", "grille", "ciel", "locale", "teinte_locale", "force_locale", "dir", "pente", "max_pas", "unites_par_niveau", "ombre_portee", "coin", "taille"), &SensenGrille::carte_lumiere);
 	ClassDB::bind_method(D_METHOD("sol_cellule", "taille", "bord", "pas", "bloc_sol", "bloc_mer", "mer_h", "hauteurs"), &SensenGrille::sol_cellule);
+	ClassDB::bind_method(D_METHOD("couches_cellule", "taille", "pas", "ox", "oy", "bruits", "warp", "conti", "cote", "ridged", "plaques_centres", "plaques_continentales", "points_chauds", "p", "biomes_conditions", "biomes_priorite"), &SensenGrille::couches_cellule);
 	ClassDB::bind_method(D_METHOD("vegetation_cellule", "rng", "taille", "pas", "sol_keys", "eau", "reserve", "bloc_biome", "bloc_veg", "bloc_res", "bloc_danger", "biomes", "seuils", "filons_seuil", "filons_densite", "tiers"), &SensenGrille::vegetation_cellule);
 }
 
@@ -135,6 +137,193 @@ Dictionary SensenGrille::sol_cellule(int taille, bool bord, int pas, const Packe
 	res["sols"] = sols;
 	res["eau"] = eau;
 	res["hauteurs"] = h;
+	return res;
+}
+
+namespace {
+// Le bruit d'un objet FastNoiseLite passé par le GDScript : on l'appelle par son nom, comme le ferait le script —
+// la MÊME implémentation et les mêmes réglages, donc la même valeur au bit près (file 109 : le GDScript reste la
+// référence). L'appel direct depuis le C++ coûte une fraction de l'appel depuis GDScript, et c'est tout le gain.
+inline double bruit2d(FastNoiseLite *n, double x, double y) {
+	if (n == nullptr) {
+		return 0.0;
+	}
+	return (double)n->get_noise_2d(x, y);
+}
+inline double clampd(double v, double a, double b) { return v < a ? a : (v > b ? b : v); }
+} // namespace
+
+// Les couches du monde sur les blocs d'une cellule (Surface.couches_a + tectonique_a + _continentalite, file 109) :
+// une lecture par bloc de `pas` tuiles, transcrite ligne à ligne du GDScript — même ordre d'opérations, mêmes
+// arrondis. Rend {couches (nb×nb×n, dans l'ordre des bruits donnés), altitude, sismique, continentalite}.
+Dictionary SensenGrille::couches_cellule(int taille, int pas, int ox, int oy, const Array &bruits, Object *warp, Object *conti, Object *cote, Object *ridged,
+		const PackedVector2Array &plaques_centres, const PackedByteArray &plaques_continentales, const PackedVector2Array &points_chauds,
+		const Dictionary &p, const Array &biomes_conditions, const PackedInt32Array &biomes_priorite) {
+	if (pas <= 0) {
+		pas = 1;
+	}
+	const int nb = (taille + pas - 1) / pas;
+	const int n_couches = bruits.size();
+	// Les bruits arrivent tels quels du GDScript : mêmes graines, mêmes fréquences, même implémentation.
+	std::vector<FastNoiseLite *> bn(n_couches, nullptr);
+	for (int k = 0; k < n_couches; ++k) {
+		Ref<FastNoiseLite> rb = bruits[k];   // le tableau garde la référence : le pointeur vaut le temps de l appel
+		bn[k] = rb.ptr();
+	}
+	FastNoiseLite *n_warp = Object::cast_to<FastNoiseLite>(warp);
+	FastNoiseLite *n_conti = Object::cast_to<FastNoiseLite>(conti);
+	FastNoiseLite *n_cote = Object::cast_to<FastNoiseLite>(cote);
+	FastNoiseLite *n_ridged = Object::cast_to<FastNoiseLite>(ridged);
+	const double seuil_mer = (double)p.get("seuil_mer", 0.0);
+	const double suture_tuiles = (double)p.get("suture_tuiles", 6000.0);
+	const double bordure_tuiles = (double)p.get("bordure_tuiles", 20000.0);
+	const double warp_amp = (double)p.get("warp_amplitude", 6000.0);
+	const double cote_amp = (double)p.get("cote_amplitude", 0.0);
+	const double cote_fen = (double)p.get("cote_fenetre", 0.35);
+	const double pc_rayon = (double)p.get("point_chaud_rayon", 9000.0);
+	const double ocean_bord = (double)p.get("ocean_bord", 0.10);
+	const double larg = (double)p.get("largeur", 0.0);
+	const double haut = (double)p.get("hauteur", 0.0);
+	const double marge = std::min(larg, haut) * ocean_bord;
+	const int n_plaques = plaques_centres.size();
+	const int n_chauds = points_chauds.size();
+
+	// Les biomes compilés : par biome, ses conditions [emplacement, min, max] — l'emplacement est l'indice de la
+	// couche, ou n_couches pour l'altitude et n_couches+1 pour la sismicité. L'ORDRE du tableau est celui du
+	// GDScript (`biomes.keys()`) : à priorité égale, le premier rencontré gagne, comme dans `_biome_de`.
+	struct CondB {
+		int slot;
+		double bas, haut;
+	};
+	std::vector<std::vector<CondB>> b_cond;
+	b_cond.reserve(biomes_conditions.size());
+	for (int k = 0; k < biomes_conditions.size(); ++k) {
+		Array liste = biomes_conditions[k];
+		std::vector<CondB> cs;
+		cs.reserve(liste.size());
+		for (int j = 0; j < liste.size(); ++j) {
+			Array t = liste[j];
+			CondB c;
+			c.slot = (int)t[0];
+			c.bas = (double)t[1];
+			c.haut = (double)t[2];
+			cs.push_back(c);
+		}
+		b_cond.push_back(cs);
+	}
+	std::vector<double> vals(n_couches + 2, 0.0);
+	PackedInt32Array biome_idx;
+	biome_idx.resize(nb * nb);
+	int32_t *pc_biome = biome_idx.ptrw();
+	PackedFloat64Array couches, altitude, sismique, continentalite;
+	couches.resize(nb * nb * n_couches);
+	altitude.resize(nb * nb);
+	sismique.resize(nb * nb);
+	continentalite.resize(nb * nb);
+	double *pc_couches = couches.ptrw();
+	double *pc_alt = altitude.ptrw();
+	double *pc_sis = sismique.ptrw();
+	double *pc_con = continentalite.ptrw();
+
+	for (int by = 0; by < nb; ++by) {
+		for (int bx = 0; bx < nb; ++bx) {
+			const int bi = by * nb + bx;
+			const double x = (double)(ox + bx * pas + pas / 2);
+			const double y = (double)(oy + by * pas + pas / 2);
+			for (int k = 0; k < n_couches; ++k) {
+				pc_couches[bi * n_couches + k] = clampd((bruit2d(bn[k], x, y) + 1.0) * 0.5, 0.0, 1.0);
+			}
+			// _warpe — en Vector2 (32 bits), comme le GDScript : q doit être le MÊME point, au bit près
+			const Vector2 pv((float)x, (float)y);
+			const Vector2 q = pv + Vector2((float)bruit2d(n_warp, pv.x, pv.y), (float)bruit2d(n_warp, (double)pv.x + 7919.0, (double)pv.y - 1013.0)) * (float)warp_amp;
+			const double qx = (double)q.x;
+			const double qy = (double)q.y;
+			// _plaques_proches : les deux plus proches, dans l'ordre du balayage
+			double d1 = 1e300, d2 = 1e300;
+			int i1 = -1, i2 = -1;
+			for (int k = 0; k < n_plaques; ++k) {
+				const double d = (double)q.distance_to(plaques_centres[k]);
+				if (d < d1) {
+					d2 = d1;
+					i2 = i1;
+					d1 = d;
+					i1 = k;
+				} else if (d < d2) {
+					d2 = d;
+					i2 = k;
+				}
+			}
+			// _continentalite_q
+			const bool c1 = (i1 >= 0 && i1 < plaques_continentales.size()) ? (plaques_continentales[i1] != 0) : false;
+			const bool c2 = (i2 >= 0 && i2 < plaques_continentales.size()) ? (plaques_continentales[i2] != 0) : false;
+			const double base = c1 ? 1.0 : -1.0;
+			const double bordure = clampd((d2 - d1) / bordure_tuiles, 0.0, 1.0);
+			double c = base * (0.35 + 0.65 * bordure) + bruit2d(n_conti, qx, qy) * 0.6;
+			if (cote_amp > 0.0 && n_cote != nullptr) {
+				const double brut = bruit2d(n_cote, qx, qy);
+				const double decoupe = brut + 0.45 * bruit2d(n_cote, qx * 2.7 + 4111.0, qy * 2.7 - 907.0);
+				const double fen = (cote_fen <= 0.0) ? 0.0 : std::max(0.0, 1.0 - std::abs(c - seuil_mer) / cote_fen);
+				c += decoupe * cote_amp * fen;
+			}
+			for (int k = 0; k < n_chauds; ++k) {
+				const double dp = (double)q.distance_to(points_chauds[k]);
+				if (dp < pc_rayon) {
+					c += (1.0 - dp / pc_rayon) * 1.4;
+				}
+			}
+			if (marge > 0.0) {
+				const double d_bord = std::min(std::min(x, larg - x), std::min(y, haut - y));
+				if (d_bord < marge) {
+					c -= (1.0 - clampd(d_bord / marge, 0.0, 1.0)) * 6.0;
+				}
+			}
+			// tectonique_a
+			const double suture = 1.0 - clampd((d2 - d1) / suture_tuiles, 0.0, 1.0);
+			double alt;
+			if (c < seuil_mer) {
+				alt = clampd(0.30 * (1.0 - (seuil_mer - c) / 1.5), 0.0, 0.30);
+			} else {
+				const double terre = clampd((c - seuil_mer) / 1.2, 0.0, 1.0);
+				alt = 0.30 + 0.25 * terre;
+				if (i1 >= 0 && i2 >= 0 && c1 && c2) {
+					alt += suture * ((bruit2d(n_ridged, qx, qy) + 1.0) * 0.5) * 0.45;
+				} else if (i1 >= 0 && i2 >= 0 && c1 != c2) {
+					alt += suture * ((bruit2d(n_ridged, qx, qy) + 1.0) * 0.5) * 0.2;
+				}
+			}
+			pc_alt[bi] = clampd(alt, 0.0, 1.0);
+			pc_sis[bi] = suture;
+			pc_con[bi] = c;
+			// _biome_de : toutes les conditions satisfaites, la priorité la plus haute (strictement) l'emporte
+			for (int k = 0; k < n_couches; ++k) {
+				vals[k] = pc_couches[bi * n_couches + k];
+			}
+			vals[n_couches] = pc_alt[bi];
+			vals[n_couches + 1] = pc_sis[bi];
+			int meilleur = -1, prio = -1;
+			for (size_t k = 0; k < b_cond.size(); ++k) {
+				bool ok = true;
+				for (const CondB &cd : b_cond[k]) {
+					const double v = (cd.slot >= 0 && cd.slot < (int)vals.size()) ? vals[cd.slot] : 0.5;
+					if (v < cd.bas || v > cd.haut) {
+						ok = false;
+						break;
+					}
+				}
+				if (ok && (int)biomes_priorite[k] > prio) {
+					prio = (int)biomes_priorite[k];
+					meilleur = (int)k;
+				}
+			}
+			pc_biome[bi] = meilleur;
+		}
+	}
+	Dictionary res;
+	res["couches"] = couches;
+	res["altitude"] = altitude;
+	res["sismique"] = sismique;
+	res["continentalite"] = continentalite;
+	res["biome"] = biome_idx;
 	return res;
 }
 

@@ -174,6 +174,30 @@ func test_noyau_cpp() -> void:
 	# La génération d'une cellule de surface (file 109) : le sol et la végétation par le noyau, la même cellule au bit près
 	# — le même RNG consommé dans le même ordre, donc le même quartier de village derrière.
 	var c0: Vector2i = sv.monde.cellule_camp
+	# Les couches d'abord, valeur par valeur (2026-09-07) : une dérive sous le seuil d'un biome ne changerait pas le
+	# sol, mais elle voudrait dire que le noyau ne lit pas le monde comme le GDScript.
+	var noyau_c: RefCounted = ClassDB.instantiate(&"SensenGrille")
+	var nb_c: int = (sv.monde.taille + Surface.PAS_BRUIT - 1) / Surface.PAS_BRUIT
+	var ecarts_c := 0
+	var pire_c := 0.0
+	var n_val := 0
+	for d_c in [Vector2i(0, 0), Vector2i(3, -2), Vector2i(-4, 5)]:
+		var cc: Vector2i = c0 + d_c
+		var lot_gd: Dictionary = surf.couches_blocs(null, sv.monde.taille, cc.x * sv.monde.taille, cc.y * sv.monde.taille, nb_c)
+		var lot_c: Dictionary = surf.couches_blocs(noyau_c, sv.monde.taille, cc.x * sv.monde.taille, cc.y * sv.monde.taille, nb_c)
+		for i_c in lot_gd.blocs.size():
+			var a_c: Dictionary = lot_gd.blocs[i_c]
+			var b_c: Dictionary = lot_c.blocs[i_c]
+			if a_c.keys() != b_c.keys():
+				ecarts_c += 1
+				continue
+			for cle_c in a_c.keys():
+				n_val += 1
+				var ec: float = absf(float(a_c[cle_c]) - float(b_c[cle_c]))
+				pire_c = maxf(pire_c, ec)
+				if ec > 0.0:
+					ecarts_c += 1
+	verifier(n_val > 0 and ecarts_c == 0, "les couches des blocs : %d valeurs, %d écart(s), pire %.9f" % [n_val, ecarts_c, pire_c])
 	var ecarts_gen := 0
 	var n_gen := 0
 	var t_gen_gd := 0
