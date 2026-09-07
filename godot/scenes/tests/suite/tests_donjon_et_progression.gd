@@ -4,6 +4,59 @@ extends TestsBase
 ## `test_combat.gd`, tels quels ; le lanceur les appelle par leur nom, dans l'ordre de sa liste.
 
 
+## Les veines d'une mine (Mine sous une cellule, 2026-09-07) : on creuse un mur et l'on en récolte la matière — une
+## veine est donc une tuile dont le mur est du minerai, et son palier suit la profondeur. Déterministe : la même
+## galerie retrouve les siennes.
+func test_veines_de_mine() -> void:
+	var cfg: Dictionary = GameData.config("planete").mine.veines
+	var tiers: Dictionary = GameData.config("minerais_par_etage").tiers
+	var s := Simulation.new(51)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var cell: Vector2i = s.monde.cellule_de(j.pos)
+	s.monde.claims[cell] = {"role": "base"}
+	j.vigueur = int(j.vigueur_max)
+	verifier(s.creuser_un_puits(j, 0), "le puits s'ouvre sur la cellule du camp")
+	var compter := func() -> Dictionary:
+		var v := {}
+		for i_v in s.grille.materiaux.keys():
+			var m_v := str(s.grille.materiaux[i_v])
+			if m_v == str(s.grille.materiau_defaut) or str(GameData.catalogues.materials.get(m_v, {}).get("category", "")) == "roche":
+				continue
+			v[m_v] = int(v.get(m_v, 0)) + 1
+		return v
+	verifier(compter.call().is_empty(), "au premier étage, rien que de la roche (les veines commencent à %d)" % int(cfg.etage_min))
+	# On descend jusqu'à un étage profond : le palier du minerai doit suivre.
+	var cible := 16
+	var garde := 0
+	while int(s.donjon.etage) < cible and garde < 40:
+		garde += 1
+		j = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+		j.vigueur = int(j.vigueur_max)
+		if not s.creuser_un_puits(j, 0):
+			break
+	verifier(int(s.donjon.etage) == cible, "on descend jusqu'à l'étage %d (%d)" % [cible, int(s.donjon.etage)])
+	var v_fond: Dictionary = compter.call()
+	var n_fond := 0
+	for n in v_fond.values():
+		n_fond += int(n)
+	verifier(n_fond > 0, "des veines au fond : %d tuiles, %d minerais" % [n_fond, v_fond.size()])
+	var tier_attendu := 0
+	var prof := Mine.profondeur_de(cible)
+	for b in cfg.tier_par_profondeur:
+		if prof >= int(b[0]) and prof <= int(b[1]):
+			tier_attendu = int(b[2])
+	var hors := []
+	for m_v in v_fond.keys():
+		if not (str(m_v) in tiers.get(str(tier_attendu), [])):
+			hors.append(str(m_v))
+	verifier(hors.is_empty(), "à la profondeur %d, toutes les veines sont du palier %d %s" % [prof, tier_attendu, str(hors)])
+	# Déterminisme : on remonte, on redescend, on retrouve les mêmes veines.
+	var avant := v_fond.duplicate()
+	SimLieux.charger_donjon(s, "ruine", s.graine, Mine.id_de(s.graine, cell), cible, j)
+	verifier(compter.call() == avant, "la même galerie retrouve ses veines")
+
+
 func test_camp() -> void:
 	var s := Simulation.new(23)
 	s.planete_options = _planete_test()   # monde de test : la fenêtre est vérifiée autour d'un départ connu

@@ -59,7 +59,20 @@ func _ready() -> void:
 		var mat: String = sim.grille.materiau_defaut
 		var d: float = float(GameData.catalogues.materials.get(mat, {}).get("stats", {}).get("durete", 0))
 		duretes.append(d)
-		print("  etage %2d : %s (durete %d) — %d tuiles degagees sur %d, %d creature(s)" % [etage, mat, d, libres, total, betes])
+		# Les veines (2026-09-07) : les murs dont le materiau n'est pas la roche de la bande — c'est ce qu'on vient
+		# chercher en creusant, et c'est ce chiffre qui dit si un puits vaut la peine.
+		var veines := {}
+		var n_veines := 0
+		for i_v in sim.grille.materiaux.keys():
+			var m_v := str(sim.grille.materiaux[i_v])
+			if m_v == mat:
+				continue
+			var cat := str(GameData.catalogues.materials.get(m_v, {}).get("category", ""))
+			if cat == "roche":
+				continue   # une poche de strate : de la roche voisine, pas une veine
+			veines[m_v] = int(veines.get(m_v, 0)) + 1
+			n_veines += 1
+		print("  etage %2d : %s (durete %d) — %d tuiles degagees sur %d, %d creature(s) · veines %d tuiles (%.1f %%) %s" % [etage, mat, d, libres, total, betes, n_veines, 100.0 * float(n_veines) / float(total), str(veines)])
 		if libres > total / 20:
 			soucis.append("  etage %d : %d tuiles degagees — une mine doit etre PLEINE" % [etage, libres])
 		if betes > 0:

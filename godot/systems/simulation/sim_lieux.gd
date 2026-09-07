@@ -582,6 +582,8 @@ static func charger_donjon(sim: Simulation, theme_id: String, graine: int, id_do
 	var etage_matiere: int = Mine.profondeur_de(etage) if est_mine else etage
 	sim.grille.materiau_defaut = SimTerritoire.materiau_mur_etage(sim, theme, etage_matiere)
 	SimTerritoire._poches_de_strates(sim, theme, etage_matiere, graine, id_donjon)
+	if est_mine:   # les veines : ce qu'on vient chercher en creusant (Mine sous une cellule, 2026-09-07)
+		SimTerritoire._veines_de_mine(sim, etage_matiere, graine, id_donjon)
 	for idx in e.filons.keys():
 		sim.grille.materiaux[idx] = e.filons[idx]
 		sim.grille.poser_contenu(Vector2i(int(idx) % sim.grille.largeur, int(idx) / sim.grille.largeur), "filon")

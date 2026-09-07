@@ -223,9 +223,17 @@
     },
     "lumiere": {
       "_doc": "La lumière d'une tuile (designer 2026-09-06) est un NIVEAU et une TEINTE : le ciel de l'heure (jour, aube, crépuscule, nuit — des couleurs, dont la luminance est le niveau), assombri de soleil.ombre_portee à l'ombre, plus la lumière locale propagée (torches, meubles, feux) à torche_teinte × torche_force — un tour à l'ombre à midi reste plus clair que la nuit, une torche teinte la nuit et n'ajoute rien au plein soleil. Sous terre le ciel est nul et la lueur de l'étage porte donjon_teinte.",
-      "torche_teinte": [1.0, 0.85, 0.6],
+      "torche_teinte": [
+        1.0,
+        0.85,
+        0.6
+      ],
       "torche_force": 0.7,
-      "donjon_teinte": [0.82, 0.82, 0.92],
+      "donjon_teinte": [
+        0.82,
+        0.82,
+        0.92
+      ],
       "jour": [
         1.0,
         1.0,
@@ -439,6 +447,29 @@
     "etages_max": 999,
     "ticks_puits": 40,
     "vigueur_puits": 20,
-    "xp_puits": 12
+    "xp_puits": 12,
+    "veines": {
+      "_doc": "Les veines d une mine (designer 2026-09-07, rappel du minage en profondeur) : un bruit dedie par etage seme des tuiles dont le MUR est du minerai — on creuse deja un mur et l on en recolte la matiere. Le palier du minerai suit la profondeur (tier_par_profondeur), et le tirage est deterministe (graine, mine, etage).",
+      "etage_min": 2,
+      "frequence": 0.16,
+      "seuil": 0.78,
+      "tier_par_profondeur": [
+        [
+          1,
+          3,
+          1
+        ],
+        [
+          4,
+          7,
+          2
+        ],
+        [
+          8,
+          999,
+          3
+        ]
+      ]
+    }
   }
 }

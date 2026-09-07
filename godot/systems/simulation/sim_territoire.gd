@@ -360,6 +360,41 @@ static func _poches_de_strates(sim: Simulation, theme: Dictionary, etage: int, g
 				sim.grille.materiaux[sim.grille.idx(t)] = tendre
 
 
+## Les veines d'une mine (Mine sous une cellule, 2026-09-07) : un bruit dédié par étage change le MATÉRIAU de certains
+## murs en minerai — on creuse déjà un mur et l'on en récolte la matière, il n'y a donc rien de neuf à inventer. Le
+## palier du minerai suit la profondeur, et le tirage est déterministe : la même galerie retrouve ses veines.
+## Rend le nombre de tuiles changées (la sonde et le test le lisent).
+static func _veines_de_mine(sim: Simulation, profondeur: int, graine: int, id_donjon: int) -> int:
+	var cfg: Dictionary = GameData.config("planete").get("mine", {}).get("veines", {})
+	if cfg.is_empty() or profondeur < int(cfg.get("etage_min", 2)):
+		return 0
+	var tier := 0
+	for b in cfg.get("tier_par_profondeur", []):
+		if profondeur >= int(b[0]) and profondeur <= int(b[1]):
+			tier = int(b[2])
+			break
+	var pool: Array = GameData.config("minerais_par_etage").get("tiers", {}).get(str(tier), [])
+	if pool.is_empty():
+		return 0
+	var bruit := FastNoiseLite.new()
+	bruit.seed = hash([graine, "veines", id_donjon, profondeur])
+	bruit.frequency = float(cfg.get("frequence", 0.16))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([graine, "veine_materiau", id_donjon, profondeur])
+	var seuil := float(cfg.get("seuil", 0.78))
+	var n := 0
+	for y in sim.grille.hauteur_grille:
+		for x in sim.grille.largeur:
+			var t := Vector2i(x, y)
+			if not ("destructible" in sim.grille.contenu_de(t).get("tags", [])):
+				continue
+			if (bruit.get_noise_2d(float(x), float(y)) + 1.0) * 0.5 <= seuil:
+				continue
+			sim.grille.materiaux[sim.grille.idx(t)] = str(pool[rng.randi_range(0, pool.size() - 1)])
+			n += 1
+	return n
+
+
 ## Le matériau des murs d'un étage (Stratification verticale) : le thème en surface, la palette en profondeur.
 static func materiau_mur_etage(sim: Simulation, theme: Dictionary, etage: int) -> String:
 	var pal: Dictionary = GameData.config("minerais_par_etage").get("palette_mur", {})
