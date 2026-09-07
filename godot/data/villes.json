@@ -761,7 +761,7 @@
     "ouvriers_max": 6
   },
   "vocations": {
-    "_doc": "Ce dont une ville vit (designer 2026-09-07, « que chaque ville soit unique et realiste ») : chaque vocation note l agglomeration a partir des couches du monde lues a son centre — ressources, vegetation, humidite, altitude, temperature — prises en ECART A LA MEDIANE (valeur - 0,5 : seul un lieu remarquable marque des points), et de deux faits pris tels quels (mer : une cellule d eau voisine ; route : une route passe). La mieux notee l emporte si elle atteint seuil_min, sinon la ville est « commune » — et beaucoup doivent l etre. Effets : boutiques servies en premier, multiplicateurs d ateliers / de champs, enclos en plus, zones de recolte ajoutees au quartier, prefabs de plus au centre.",
+    "_doc": "Ce dont une ville vit (designer 2026-09-07, « que chaque ville soit unique et realiste ») : chaque vocation note l agglomeration a partir des couches du monde lues a son centre — ressources, vegetation, humidite, altitude, temperature — prises en ECART A LA MEDIANE (valeur - 0,5 : seul un lieu remarquable marque des points), et de deux faits pris tels quels (mer : une cellule d eau voisine ; route : une route passe). La mieux notee l emporte si elle atteint seuil_min, sinon la ville est « commune » — et beaucoup doivent l etre. Effets : boutiques servies en premier, multiplicateurs d ateliers / de champs, enclos en plus, zones de recolte ajoutees au quartier, prefabs de plus au centre. filons (2026-09-07) : les cellules d une agglomeration miniere recoivent le seuil de planete.filons multiplie par seuil_mult et la densite par densite_mult — sans quoi une ville peut etre miniere sans un seul filon dans son sol.",
     "seuil_min": 0.2,
     "liste": {
       "miniere": {
@@ -782,7 +782,11 @@
         ],
         "prefabs": [
           "atelier"
-        ]
+        ],
+        "filons": {
+          "seuil_mult": 0.72,
+          "densite_mult": 3.0
+        }
       },
       "forestiere": {
         "mesures": {

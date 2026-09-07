@@ -804,7 +804,17 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 	_poser_accidents(e, reserve, rng)
 	t_c = _top("cellule.relief", t_c)
 	# 3. Arbres, rochers, filons selon le biome de chaque tuile et les couches vegetation / ressources.
-	_vegetation(e, taille, par_bloc, reserve, rng, nb, noyau)
+	# Le sol suit la vocation de la ville qui s'y trouve (Villes, 2026-09-07) : une cité minière doit avoir du minerai
+	# sous les pieds, sinon elle n'a ni mine, ni mineur, et ses ateliers travaillent le vide.
+	var f_seuil := float(planete.filons.seuil)
+	var f_dens := float(planete.filons.densite)
+	var agglo_v := agglomeration_de(Vector2i(cx, cy)) if camp.is_empty() else {}
+	if not agglo_v.is_empty():
+		var fv: Dictionary = GameData.config("villes").get("vocations", {}).get("liste", {}).get(str(agglo_v.get("vocation", "")), {}).get("filons", {})
+		if not fv.is_empty():
+			f_seuil *= float(fv.get("seuil_mult", 1.0))
+			f_dens *= float(fv.get("densite_mult", 1.0))
+	_vegetation(e, taille, par_bloc, reserve, rng, nb, noyau, f_seuil, f_dens)
 	var mp: Dictionary = GameData.config("minerais_par_etage")   # les POI en ont encore besoin (filon majeur)
 	var seuils: Array = planete.tiers_corruption
 	t_c = _top("cellule.vegetation", t_c)
@@ -2136,7 +2146,11 @@ func _sol_gd(e: Dictionary, taille: int, bord: bool, par_bloc: Dictionary, mer_h
 
 
 ## Étape 3 : arbres, plantes, cueillette, rochers et filons, un tirage par tuile de sol — le même RNG, dans le même ordre.
-func _vegetation(e: Dictionary, taille: int, par_bloc: Dictionary, reserve: Rect2i, rng: RandomNumberGenerator, nb: int, noyau: RefCounted) -> void:
+func _vegetation(e: Dictionary, taille: int, par_bloc: Dictionary, reserve: Rect2i, rng: RandomNumberGenerator, nb: int, noyau: RefCounted, f_seuil: float = -1.0, f_dens: float = -1.0) -> void:
+	if f_seuil < 0.0:
+		f_seuil = float(planete.filons.seuil)
+	if f_dens < 0.0:
+		f_dens = float(planete.filons.densite)
 	var mp: Dictionary = GameData.config("minerais_par_etage")
 	var seuils: Array = planete.tiers_corruption
 	if noyau != null:
@@ -2178,14 +2192,18 @@ func _vegetation(e: Dictionary, taille: int, par_bloc: Dictionary, reserve: Rect
 		for sv in seuils:
 			seuils_f.append(float(sv))
 		var r: Dictionary = noyau.vegetation_cellule(rng, taille, PAS_BRUIT, PackedInt32Array(e.sol.keys()), e.eau, reserve, bloc_biome, bloc_veg, bloc_res, bloc_danger,
-			table, seuils_f, float(planete.filons.seuil), float(planete.filons.densite), tiers)
+			table, seuils_f, f_seuil, f_dens, tiers)
 		for cle in ["arbres", "plantes", "cueillette", "rochers", "filons"]:
 			e[cle].merge(r[cle], true)
 		return
-	_vegetation_gd(e, taille, par_bloc, reserve, rng, mp, seuils)
+	_vegetation_gd(e, taille, par_bloc, reserve, rng, mp, seuils, f_seuil, f_dens)
 
 
-func _vegetation_gd(e: Dictionary, taille: int, par_bloc: Dictionary, reserve: Rect2i, rng: RandomNumberGenerator, mp: Dictionary, seuils: Array) -> void:
+func _vegetation_gd(e: Dictionary, taille: int, par_bloc: Dictionary, reserve: Rect2i, rng: RandomNumberGenerator, mp: Dictionary, seuils: Array, f_seuil: float = -1.0, f_dens: float = -1.0) -> void:
+	if f_seuil < 0.0:
+		f_seuil = float(planete.filons.seuil)
+	if f_dens < 0.0:
+		f_dens = float(planete.filons.densite)
 	for i in e.sol.keys():
 		var x: int = i % taille
 		var y: int = i / taille
@@ -2229,7 +2247,7 @@ func _vegetation_gd(e: Dictionary, taille: int, par_bloc: Dictionary, reserve: R
 				break
 		if pose:
 			continue
-		if res > float(planete.filons.seuil) and tire < float(planete.filons.densite) * float(b.get("filons_mult", 1.0)):
+		if res > f_seuil and tire < f_dens * float(b.get("filons_mult", 1.0)):
 			var danger: float = float(bloc.couches.danger) * 100.0
 			var tier := 1
 			for k in range(1, seuils.size()):

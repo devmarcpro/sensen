@@ -96,7 +96,7 @@ func _ready() -> void:
 			per_types[str(per.type)] = int(per_types.get(str(per.type), 0)) + per.tuiles.size()
 		lits_total += lits
 		pnj_total += v.pnj.size()
-		print("  cellule %s · %s · %d habitants prévus · %d bâtiments %s · %d lits · %d PNJ %s · rues : %d/%d portes jointes · périmètres %s · %d stations · %d champs · %d bêtes · %.0f ms" % [str(c), str(v.quartier), int(v.population_quartier), v.batiments.size(), str(par_id), lits, v.pnj.size(), str(fonctions), portes_jointes, v.batiments.size(), str(per_types), e.get("stations", {}).size(), v.get("champs", []).size(), v.get("betes", []).size(), dt])
+		print("  cellule %s · %s · %d habitants prévus · %d bâtiments %s · %d lits · %d PNJ %s · rues : %d/%d portes jointes · périmètres %s · à récolter { arbres %d, filons %d, plantes %d } · %d stations · %d champs · %d bêtes · %.0f ms" % [str(c), str(v.quartier), int(v.population_quartier), v.batiments.size(), str(par_id), lits, v.pnj.size(), str(fonctions), portes_jointes, v.batiments.size(), str(per_types), e.get("arbres", {}).size(), e.get("filons", {}).size(), e.get("plantes", {}).size(), e.get("stations", {}).size(), v.get("champs", []).size(), v.get("betes", []).size(), dt])
 		if lits < int(v.population_quartier) * 3 / 4:   # un quartier plein loge son surplus chez ses voisins : le compte qui vaut est celui de la ville (plus bas)
 			soucis.append("cellule %s (%s) : %d lits pour %d habitants" % [str(c), str(v.quartier), lits, int(v.population_quartier)])
 		if portes_jointes < v.batiments.size():

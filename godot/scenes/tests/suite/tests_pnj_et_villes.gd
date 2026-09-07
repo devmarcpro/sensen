@@ -1680,6 +1680,20 @@ func test_vocation_des_villes() -> void:
 		var favorites: Array = liste.miniere.boutiques
 		verifier(premieres.is_empty() or str(premieres[0]) in favorites, "sa première boutique est de sa vocation (%s parmi %s)" % [str(premieres), str(favorites)])
 		verifier(float(liste.miniere.ateliers_mult) > 1.0 and float(liste.miniere.champs_mult) < 1.0 and "minerai" in liste.miniere.zones, "une ville minière : plus d'ateliers, moins de champs, une zone de minerai")
+		# Et surtout : du minerai SOUS LES PIEDS (2026-09-07). La vocation se lit sur la couche `ressources`, les filons
+		# se posaient sur un seuil plus haut : une cité minière pouvait n'avoir pas un filon, donc pas un mineur.
+		var filons_v := 0
+		var mineurs_v := 0
+		var cellules_v := 0
+		for cell_v in f.cellules:
+			var e_v: Dictionary = surf.generer_cellule(int(cell_v.x), int(cell_v.y), {}, false)
+			cellules_v += 1
+			filons_v += e_v.get("filons", {}).size()
+			for per_v in e_v.get("village", {}).get("territoire", {}).get("perimetres", []):
+				if str(per_v.type) == "minerai":
+					mineurs_v += 1
+		verifier(filons_v > 0, "%d filons dans les %d cellules de la cité minière %s" % [filons_v, cellules_v, str(f.nom)])
+		verifier(mineurs_v > 0, "elle a %d zone(s) de minerai — donc des mineurs" % mineurs_v)
 
 
 func test_plan_de_ville() -> void:
