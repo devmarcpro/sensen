@@ -1663,6 +1663,43 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 				pj["fonction"] = "fermier"
 				pj["perimetre"] = per.size() - 1
 				n_f += 1
+	# Le verger (Agriculture et élevage, 2026-09-07) : des buissons qu'on plante une fois et qu'on cueille des années —
+	# ni rotation ni jachère. Il se pose aux abords comme un champ, sans la préférence pour l'eau.
+	var vg: Dictionary = cfg.get("vergers", {})
+	var n_vergers: int = int(vg.get("par_quartier", {}).get(quartier, 0))
+	if quartier == "centre" and palier in vg.get("paliers_sans_centre", []):
+		n_vergers = 0   # le cœur d'un bourg et plus est trop bâti : ses vergers sont dans ses autres quartiers
+	if n_vergers > 0:
+		n_vergers += int(vg.get("vocations_bonus", {}).get(str(agglo.get("vocation", "")), 0))
+	var especes_v: Array = _liste_par_biome(vg.get("especes_par_biome", {}), tags_b)
+	for k in n_vergers:
+		if especes_v.is_empty():
+			break
+		var r := _terrain_culture(e, occupe, taille, Vector2i(int(vg.taille[0]), int(vg.taille[1])), tuiles_triees, false, PackedByteArray())
+		if r.position == Vector2i(-1, -1):
+			break
+		pris.append(r)
+		_occuper(occupe, taille, r, 1)
+		var tuiles_v: Array = []
+		for y in r.size.y:
+			for x in r.size.x:
+				var q := r.position + Vector2i(x, y)
+				var i_v := q.y * taille + q.x
+				_degager(e, i_v)
+				lots[i_v] = true
+				tuiles_v.append(q)
+		var espece := str(especes_v[(k + rng.randi_range(0, especes_v.size() - 1)) % especes_v.size()])
+		e.village.champs.append({"rect": r, "plante": espece, "tuiles": tuiles_v, "cultures": [espece], "verger": true})
+		per.append({"type": "champs", "tuiles": tuiles_v, "plante": espece, "cultures": [espece], "verger": true,
+			"contenu": str(vg.get("contenu", "verger")), "contenu_mur": str(vg.get("contenu_mur", "verger_mur"))})
+		var n_v := 0   # un cueilleur : un verger demande moins de bras qu'un champ
+		for pj in e.village.pnj:
+			if n_v >= 1:
+				break
+			if not pj.has("perimetre") and str(pj.get("fonction", "oisif")) in ["fermier", "oisif"] and str(pj.get("creature", "")) in ["villageois", "fermier"]:
+				pj["fonction"] = "fermier"
+				pj["perimetre"] = per.size() - 1
+				n_v += 1
 	var en: Dictionary = cfg.get("enclos", {})
 	var especes: Array = _liste_par_biome(en.get("especes_par_biome", {}), tags_b)
 	var n_enclos: int = int(en.get("par_quartier", {}).get(quartier, 0))

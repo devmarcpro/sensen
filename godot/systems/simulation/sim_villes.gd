@@ -449,21 +449,23 @@ static func _semer_champs_ville(sim: Simulation, cell: Vector2i, v: Dictionary) 
 				continue
 			if de_saison.is_empty():
 				continue   # l'hiver : les champs de la ville sont nus
-			_semer_tuile(sim, p, de_saison, sim.horloge_monde.ticks, rng.randf_range(0.0, 0.9))
+			var contenus_c := {"contenu": str(GameData.config("villes").get("vergers", {}).get("contenu", "verger")), "contenu_mur": str(GameData.config("villes").get("vergers", {}).get("contenu_mur", "verger_mur"))} if bool(champ.get("verger", false)) else {}
+			_semer_tuile(sim, p, de_saison, sim.horloge_monde.ticks, rng.randf_range(0.0, 0.9), contenus_c)
 
 
 ## Semer une tuile du territoire courant : la parcelle, son échéance (déjà avancée de `avancement`), le contenu.
 ## Hors de ses saisons (Agriculture et élevage, 2026-09-06), une culture met `hors_saison.duree` fois plus longtemps :
 ## la parcelle garde `hors_saison` et son rendement en pâtira.
-static func _semer_tuile(sim: Simulation, vers: Vector2i, base: String, tick: int, avancement: float = 0.0) -> void:
+static func _semer_tuile(sim: Simulation, vers: Vector2i, base: String, tick: int, avancement: float = 0.0, champ: Dictionary = {}) -> void:
 	var pl: Dictionary = GameData.catalogues.plants[base]
 	var hs: Dictionary = GameData.config("villes").get("champs", {}).get("hors_saison", {})
 	var dans_saison := est_de_saison(sim, base, tick)
 	var duree := float(pl.duree_jours) * float(SimTerrain._cycle(sim).get("ticks_par_jour", 24000))
 	if not dans_saison:
 		duree *= float(hs.get("duree", 1.8))
-	sim.territoire.cultures[SimCamp._pm(sim, vers)] = {"plante": base, "semis": tick - int(duree * avancement), "echeance": tick + int(duree * (1.0 - avancement)), "mure": false, "hors_saison": not dans_saison}
-	sim.grille.poser_contenu(vers, "culture")
+	var jeune := str(champ.get("contenu", "culture"))
+	sim.territoire.cultures[SimCamp._pm(sim, vers)] = {"plante": base, "semis": tick - int(duree * avancement), "echeance": tick + int(duree * (1.0 - avancement)), "mure": false, "hors_saison": not dans_saison, "mur_id": str(champ.get("contenu_mur", "culture_mure"))}
+	sim.grille.poser_contenu(vers, jeune)
 	sim.grille.marquer(vers)
 
 
@@ -479,6 +481,8 @@ static func est_de_saison(sim: Simulation, base: String, tick: int = -1) -> bool
 
 ## La culture à semer dans un champ : de saison d'abord, différente de la précédente (rotation), parmi celles du champ.
 static func plante_a_semer(sim: Simulation, champ: Dictionary, tick: int = -1) -> String:
+	if bool(champ.get("verger", false)):
+		return str(champ.get("plante", champ.get("derniere_plante", "")))   # un verger ne tourne pas : on replante le même buisson
 	var liste: Array = champ.get("cultures", [str(champ.get("plante", ""))])
 	if liste.is_empty():
 		return str(champ.get("plante", ""))
@@ -601,7 +605,7 @@ static func _recolter_champs(sim: Simulation) -> void:
 				sim.grille.poser_contenu(pm, "")
 				sim.grille.marquer(pm)
 			continue
-		_semer_tuile(sim, pm, suivante, tick)
+		_semer_tuile(sim, pm, suivante, tick, 0.0, champ)
 	_jacheres(sim, types, tick)
 	if total > 0:
 		var noms: Array[String] = []
@@ -621,6 +625,8 @@ static func _jacheres(sim: Simulation, types: Dictionary, tick: int) -> void:
 		var pr: Dictionary = SimPerimetres.perimetres(sim)[pid]
 		if not bool(types.get(str(pr.type), {}).get("champs", false)) or not pr.has("tuiles"):
 			continue
+		if bool(pr.get("verger", false)):
+			continue   # un verger ne se repose pas : on ne laboure pas un framboisier
 		var fin := int(pr.get("jachere_jusqua", 0))
 		if fin > tick:
 			continue
@@ -631,7 +637,7 @@ static func _jacheres(sim: Simulation, types: Dictionary, tick: int) -> void:
 			for pm in SimPerimetres.tuiles_de_perimetre(sim, str(pid)):
 				sim.territoire.fertilite[pm] = clampi(SimCamp.fertilite_a(sim, pm, pm) + int(ja.get("fertilite_rendue", 12)), int(ja.get("fertilite_min", 15)), int(ja.get("fertilite_max", 95)))
 				if not suivante.is_empty() and sim.grille.dans(pm) and sim.grille.contenu_de(pm).is_empty() and not sim.territoire.cultures.has(pm):
-					_semer_tuile(sim, pm, suivante, tick)
+					_semer_tuile(sim, pm, suivante, tick, 0.0, pr)
 			continue
 		pr["recoltes"] = int(pr.get("recoltes", 0)) + 1
 		if int(pr.recoltes) < int(ja.get("recoltes_avant_jachere", 4)):
@@ -795,6 +801,10 @@ static func _creer_perimetres_ville(sim: Simulation, cell: Vector2i, v: Dictiona
 			pr["recoltes"] = 0
 			pr["jachere_jusqua"] = 0
 			pr["irrigue"] = champ_irrigue(sim, per.tuiles.map(func(q: Variant) -> Vector2i: return sim.monde.pos_monde(cell, q)))
+			if bool(per.get("verger", false)):   # un verger : ni rotation ni jachère, et ses tuiles à lui
+				pr["verger"] = true
+				pr["contenu"] = str(per.get("contenu", "verger"))
+				pr["contenu_mur"] = str(per.get("contenu_mur", "verger_mur"))
 	var pid_stock := ""
 	for k in pids.size():
 		if str(plan[k].type) == "stockage" and not str(pids[k]).is_empty():

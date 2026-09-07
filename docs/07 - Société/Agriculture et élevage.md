@@ -61,6 +61,13 @@ Toute gestion de ville/village/base (cultures, élevage, boutique passive — [[
 > Un champ se posait sur le premier rectangle libre tiré au hasard dans la cellule : on en trouvait entre deux maisons, au pied de la place. Désormais la génération les cherche **depuis les bords du quartier vers le centre** (la ville au milieu, les terres autour, comme partout où l'on a bâti avant les tracteurs) et **préfère les abords de l'eau** : parmi les emplacements libres, celui dont une tuile touche l'eau à `irrigation.distance` gagne — c'est lui qui sera irrigué et qui tiendra la canicule. Sans eau dans la cellule, le premier terrain des abords fait l'affaire. L'enclos suit la même règle, sans la préférence pour l'eau.
 > Ce que ça donne : une ville de rivière a ses champs le long de la berge et nourrit plus de monde ; une ville de plateau a ses champs en couronne et souffre l'été. La règle de rendement (irrigation) existait déjà — c'est la génération qui lui donne enfin de quoi mordre.
 
+> [!important] Décidé le 2026-09-07, 7 h — le verger : ce qui pousse sans qu'on le ressème (designer : « l'agriculture donc avec les champs et les enclos »)
+> Un champ, on le laboure, on le sème, on le récolte, on le change de culture. Un **verger** ne se conduit pas ainsi : on plante une fois, on cueille des années, et l'on n'y fait ni rotation ni jachère. Il entre dans la génération à côté des champs :
+> - **Un enclos de buissons** (framboisier, myrtillier, vigne, houblon selon le biome), aux abords comme les champs, dans les quartiers agricoles et résidentiels — et une ville **grenier** ou **forestière** en a un de plus.
+> - **Il ne tourne pas** : à la cueillette, la même espèce repart (`plante_a_semer` rend la plante du verger). **Il ne se repose pas** : la jachère l'ignore, la terre d'un verger ne s'épuise pas comme celle d'un champ.
+> - **Il se voit** : ses tuiles portent un contenu à elles (`verger`, `verger_mur`) — un vert sombre qui rougit à maturité, distinct des rangs clairs d'un champ de céréales. Hors de sa saison, un buisson met le même temps de retard qu'une culture (la règle d'`hors_saison` vaut pour lui).
+> Ce que ça ne fait pas encore : les arbres fruitiers hauts (le verger est un buisson, pas un pommier — les arbres bloquent la vue et il faudrait décider si l'on passe dessous), le vin (la vigne rend du raisin, pas du vin : il y faudrait une cuve et une recette), et la cueillette à la main par le joueur dans le verger d'un PNJ (elle marche, mais personne ne s'en offusque).
+
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Biomes — schéma]], [[Rôles de cases]], [[Application des stats de matériau]]
 - **Alimente** : [[Faim]], [[Cuisine et alchimie]], [[Abstraction hors-site]], [[Population et exploitation]], [[Plantes]]

@@ -903,5 +903,45 @@
       ],
       "prefab": "moulin"
     }
+  },
+  "vergers": {
+    "_doc": "Le verger (designer 2026-09-07) : un enclos de buissons qu on plante une fois et qu on cueille des annees — ni rotation ni jachere. par_quartier : combien par quartier ; vocations_bonus : un de plus pour ces vocations ; especes_par_biome comme les champs ; contenu / contenu_mur : les tuiles du verger, jeunes et a maturite. paliers_sans_centre : les paliers dont le centre est trop batî pour un verger (il en a dans ses autres quartiers).",
+    "par_quartier": {
+      "agricole": 1,
+      "residentiel": 1,
+      "centre": 1
+    },
+    "taille": [
+      8,
+      6
+    ],
+    "vocations_bonus": {
+      "grenier": 1,
+      "forestiere": 1
+    },
+    "contenu": "verger",
+    "contenu_mur": "verger_mur",
+    "especes_par_biome": {
+      "_defaut": [
+        "framboisier",
+        "myrtillier"
+      ],
+      "chaud": [
+        "vigne",
+        "framboisier"
+      ],
+      "froid": [
+        "myrtillier"
+      ],
+      "humide": [
+        "framboisier",
+        "houblon"
+      ]
+    },
+    "paliers_sans_centre": [
+      "bourg",
+      "ville",
+      "cite"
+    ]
   }
 }

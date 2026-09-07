@@ -3621,3 +3621,5 @@ journal.betail_abattu,"{n} beast(s) slaughtered: meat, leather and tallow to the
 journal.betail_famine,"{n} beast(s) starved — the pens are short of fodder"
 meuble.puits.name,Well
 meuble.tombe.name,Grave
+tile_content.verger.name,Orchard
+tile_content.verger_mur.name,Ripe orchard

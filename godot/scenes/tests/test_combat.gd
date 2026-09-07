@@ -259,6 +259,7 @@ func _ready() -> void:
 	_lancer("test_plan_de_ville")
 	_lancer("test_vocation_des_villes")
 	_lancer("test_reperes_de_ville")
+	_lancer("test_verger")
 	_lancer("test_anneau_moyen")
 	_lancer("test_population_villes")
 	_lancer("test_lod_pnj")

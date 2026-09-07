@@ -429,7 +429,7 @@ static func _heure_parcelles(sim: Simulation, t: int) -> void:
 		sim.territoire.absence.mures = int(sim.territoire.absence.mures) + 1
 		var local: Vector2i = pm
 		if sim.grille.dans(local):
-			sim.grille.poser_contenu(local, "culture_mure")
+			sim.grille.poser_contenu(local, str(c.get("mur_id", "culture_mure")))   # un verger mûrit en verger, pas en blé
 			sim.grille.marquer(local)
 			EventBus.emettre(&"tile_changed", [local])
 		if str(sim.territoire.get("id", "joueur")) == "joueur":   # les deux cents parcelles d'une ville ne s'annoncent pas une à une (Villes B2)

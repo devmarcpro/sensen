@@ -520,7 +520,16 @@ func test_champs_et_betes() -> void:
 	var e: Dictionary = surf.generer_cellule(cell_a.x, cell_a.y, {}, false)
 	var v: Dictionary = e.village
 	var attendu := int(v.population_quartier) / int(cfg.champs.par_habitant)
-	verifier(v.champs.size() >= mini(attendu, 2) and v.champs.size() <= attendu, "le quartier agricole a %d champs pour %d habitants (au plus %d)" % [v.champs.size(), int(v.population_quartier), attendu])
+	# Les vergers sont dans la même liste que les champs (ils se sèment pareil) mais ne comptent pas au ratio :
+	# on plante un verger parce qu'on a de la place, pas parce qu'on a des bouches (2026-09-07).
+	var n_champs_v := 0
+	var n_vergers_v := 0
+	for c_v in v.champs:
+		if bool(c_v.get("verger", false)):
+			n_vergers_v += 1
+		else:
+			n_champs_v += 1
+	verifier(n_champs_v >= mini(attendu, 2) and n_champs_v <= attendu, "le quartier agricole a %d champs pour %d habitants (au plus %d) et %d verger(s)" % [n_champs_v, int(v.population_quartier), attendu, n_vergers_v])
 	verifier(v.betes.size() >= int(cfg.enclos.betes[0]), "un enclos de %d bêtes" % v.betes.size())
 	var fermiers_champs := 0
 	for pj in v.pnj:
@@ -1339,6 +1348,53 @@ func test_champs_saisons_et_troupeau() -> void:
 
 ## Le plan d'une ville (Villes, designer 2026-09-06, 23 h 45) : un archétype par agglomération, des rues tracées qui
 ## suivent le terrain et se rejoignent d'une cellule à l'autre, des bâtiments dont la porte donne sur la rue.
+## Le verger (Agriculture et élevage, 2026-09-07) : des buissons plantés une fois, cueillis des années — ni rotation,
+## ni jachère, et des tuiles à eux.
+func test_verger() -> void:
+	var cfg: Dictionary = GameData.config("villes").vergers
+	var tc: Dictionary = GameData.config("tile_contents")
+	verifier(tc.has(str(cfg.contenu)) and tc.has(str(cfg.contenu_mur)), "les tuiles du verger sont au catalogue (%s, %s)" % [str(cfg.contenu), str(cfg.contenu_mur)])
+	var especes := {}
+	for liste in cfg.especes_par_biome.values():
+		for b in liste:
+			especes[str(b)] = true
+			verifier(GameData.catalogues.plants.has(str(b)) and str(GameData.catalogues.plants[str(b)].categorie) == "buisson", "%s est un buisson du catalogue" % str(b))
+	# 1. Un verger ne tourne pas : la même espèce repart, en toute saison.
+	var s := Simulation.new(11)
+	s.charger_camp()
+	var jour := int(GameData.config("planete").cycle.ticks_par_jour)
+	var verger := {"verger": true, "plante": "framboisier", "cultures": ["framboisier"], "derniere_plante": "framboisier"}
+	s.horloge_monde.ticks = 10 * jour
+	var au_printemps := SimVilles.plante_a_semer(s, verger)
+	s.horloge_monde.ticks = 300 * jour   # l'hiver : un champ ne sème rien, un verger garde ses buissons
+	var l_hiver := SimVilles.plante_a_semer(s, verger)
+	verifier(au_printemps == "framboisier" and l_hiver == "framboisier", "le verger replante le même buisson en toute saison (%s, %s)" % [au_printemps, l_hiver])
+	var champ := {"cultures": ["ble", "orge", "carotte"], "derniere_plante": "ble"}
+	s.horloge_monde.ticks = 10 * jour
+	verifier(SimVilles.plante_a_semer(s, champ) != "ble", "un champ, lui, tourne")
+	# 2. Une ville en a : ses périmètres de verger portent leurs tuiles et leur espèce.
+	var surf: Surface = s.monde.surface
+	var c0: Vector2i = s.monde.cellule_camp
+	var vergers := 0
+	var tuiles := 0
+	var cellules := 0
+	for dy in range(-14, 15):
+		for dx in range(-14, 15):
+			if vergers > 0 and cellules >= 6:
+				break
+			var cv := c0 + Vector2i(dx, dy)
+			if not (surf.terre_a(cv) and bool(surf.poi_de(cv).get("village", false))):
+				continue
+			cellules += 1
+			var e: Dictionary = surf.generer_cellule(cv.x, cv.y, {}, false)
+			for per in e.get("village", {}).get("territoire", {}).get("perimetres", []):
+				if bool(per.get("verger", false)):
+					vergers += 1
+					tuiles += (per.tuiles as Array).size()
+					verifier(especes.has(str(per.plante)) and str(per.contenu) == str(cfg.contenu), "le verger de %s : %s, tuiles « %s »" % [str(e.village.get("quartier", "")), str(per.plante), str(per.contenu)])
+	verifier(vergers >= 1 and tuiles >= vergers * 20, "%d verger(s) sur %d cellules de village, %d tuiles" % [vergers, cellules, tuiles])
+
+
 ## Les repères d'une ville (Villes, 2026-09-07) : le puits sur la place d'un village, le cimetière clos de tombes avec
 ## sa grille, le moulin des quartiers agricoles.
 func test_reperes_de_ville() -> void:
