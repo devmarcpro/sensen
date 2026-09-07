@@ -1,0 +1,77 @@
+{
+  "name_key": "creature.mouton.name",
+  "race": "mouton",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 7,
+      "dexterite": 8,
+      "endurance": 9,
+      "volonte": 4,
+      "perception": 9,
+      "charisme": 4
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "coup_de_tete",
+    "charge"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 0.6,
+    "metal": 0.4
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.85,
+    0.82,
+    0.75
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "domestique"
+  ],
+  "competences": {
+    "athletisme": 34
+  },
+  "depouille": [
+    "viande_crue"
+  ],
+  "drops_chasse": [
+    "peau",
+    "corne",
+    "os"
+  ],
+  "elevage": {
+    "produits": [
+      {
+        "materiau": "laine",
+        "n": 2,
+        "saison": "printemps"
+      },
+      {
+        "materiau": "lait",
+        "n": 1
+      }
+    ],
+    "fourrage": 1,
+    "naissance_chance": 0.12,
+    "abattage": {
+      "viande_crue": 3,
+      "cuir": 1,
+      "suif": 1
+    },
+    "biomes": [
+      "tempere",
+      "froid",
+      "montagne",
+      "plaine"
+    ]
+  }
+}

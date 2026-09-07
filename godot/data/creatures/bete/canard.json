@@ -1,0 +1,71 @@
+{
+  "name_key": "creature.canard.name",
+  "race": "canard",
+  "skeleton_template": "volant",
+  "corps": {
+    "stats": {
+      "force": 4,
+      "dexterite": 9,
+      "endurance": 6,
+      "volonte": 4,
+      "perception": 10,
+      "charisme": 4
+    },
+    "silhouette": "volant"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "becquetage"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "eau": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.4,
+    0.5,
+    0.35
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "domestique"
+  ],
+  "competences": {
+    "athletisme": 22
+  },
+  "depouille": [
+    "viande_crue"
+  ],
+  "drops_chasse": [
+    "plume"
+  ],
+  "elevage": {
+    "produits": [
+      {
+        "materiau": "oeuf",
+        "n": 2
+      },
+      {
+        "materiau": "plume",
+        "n": 1
+      }
+    ],
+    "fourrage": 1,
+    "naissance_chance": 0.2,
+    "abattage": {
+      "viande_crue": 1,
+      "plume": 1
+    },
+    "biomes": [
+      "humide",
+      "marecage",
+      "cote",
+      "tempere"
+    ]
+  }
+}

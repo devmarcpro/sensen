@@ -1,0 +1,29 @@
+{
+  "name_key": "plant.colza.name",
+  "categorie": "culture",
+  "nutrition": 4,
+  "bonus_potentiel": {
+    "perception": 1
+  },
+  "wuxing": {
+    "feu": 0.4,
+    "bois": 0.6
+  },
+  "duree_jours": 6,
+  "recolte_base": 3,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "automne"
+  ],
+  "besoin_eau": 0.5,
+  "famille": "oleagineux",
+  "conditions": {
+    "biomes": [
+      "tempere",
+      "froid"
+    ],
+    "fertilite_min": 30
+  }
+}

@@ -18,5 +18,13 @@
     "ete",
     "fin_ete"
   ],
-  "besoin_eau": 0.8
+  "besoin_eau": 0.8,
+  "famille": "legume",
+  "conditions": {
+    "biomes": [
+      "chaud",
+      "tempere"
+    ],
+    "fertilite_min": 30
+  }
 }

@@ -1,0 +1,29 @@
+{
+  "name_key": "plant.panais.name",
+  "categorie": "culture",
+  "nutrition": 7,
+  "bonus_potentiel": {
+    "endurance": 1
+  },
+  "wuxing": {
+    "terre": 0.6,
+    "bois": 0.4
+  },
+  "duree_jours": 6,
+  "recolte_base": 4,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "printemps"
+  ],
+  "besoin_eau": 0.5,
+  "famille": "racine",
+  "conditions": {
+    "biomes": [
+      "froid",
+      "tempere"
+    ],
+    "fertilite_min": 20
+  }
+}

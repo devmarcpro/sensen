@@ -18,5 +18,13 @@
     "printemps",
     "automne"
   ],
-  "besoin_eau": 0.5
+  "besoin_eau": 0.5,
+  "famille": "cereale",
+  "conditions": {
+    "biomes": [
+      "tempere",
+      "plaine"
+    ],
+    "fertilite_min": 30
+  }
 }

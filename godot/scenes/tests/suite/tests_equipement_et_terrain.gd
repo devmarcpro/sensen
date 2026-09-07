@@ -162,12 +162,12 @@ func test_niveaux_recette() -> void:
 # ---------------------------------------------------------------- Compensation de l'arme mixte
 
 func test_plantes() -> void:
-	verifier(GameData.catalogues.plants.size() == 22, "22 plantes au catalogue (%d)" % GameData.catalogues.plants.size())
+	verifier(GameData.catalogues.plants.size() >= 22, "au moins les 22 plantes d'origine au catalogue (%d — la refonte de l'agriculture en a ajouté, 2026-09-07)" % GameData.catalogues.plants.size())
 	var cats := {}
 	for pid in GameData.catalogues.plants.keys():
 		var c := str(GameData.catalogues.plants[pid].categorie)
 		cats[c] = int(cats.get(c, 0)) + 1
-	verifier(int(cats.get("culture", 0)) == 8 and int(cats.get("buisson", 0)) == 4 and int(cats.get("herbe", 0)) == 6 and int(cats.get("champignon", 0)) == 2 and int(cats.get("decorative", 0)) == 2, "8 cultures, 4 buissons, 6 herbes, 2 champignons, 2 décoratives")
+	verifier(int(cats.get("culture", 0)) >= 8 and int(cats.get("buisson", 0)) >= 4 and int(cats.get("herbe", 0)) == 6 and int(cats.get("champignon", 0)) == 2 and int(cats.get("decorative", 0)) == 2, "%d cultures et %d buissons (au moins 8 et 4), 6 herbes, 2 champignons, 2 décoratives" % [int(cats.get("culture", 0)), int(cats.get("buisson", 0))])
 	var s := Simulation.new(142)
 	s.charger_camp()
 	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]

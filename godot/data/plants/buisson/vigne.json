@@ -14,5 +14,14 @@
   "recolte_base": 4,
   "tags": [
     "buisson"
-  ]
+  ],
+  "famille": "fruit",
+  "conditions": {
+    "biomes": [
+      "chaud",
+      "tempere",
+      "cote"
+    ],
+    "fertilite_min": 25
+  }
 }

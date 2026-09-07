@@ -1,0 +1,70 @@
+{
+  "name_key": "creature.buffle.name",
+  "race": "buffle",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 14,
+      "dexterite": 5,
+      "endurance": 14,
+      "volonte": 4,
+      "perception": 7,
+      "charisme": 3
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "charge",
+    "coup_de_tete"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.3,
+    0.3,
+    0.3
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "domestique"
+  ],
+  "competences": {
+    "athletisme": 30
+  },
+  "depouille": [
+    "viande_crue"
+  ],
+  "drops_chasse": [
+    "peau",
+    "corne",
+    "os"
+  ],
+  "elevage": {
+    "produits": [
+      {
+        "materiau": "lait",
+        "n": 2
+      }
+    ],
+    "fourrage": 3,
+    "naissance_chance": 0.07,
+    "abattage": {
+      "viande_crue": 9,
+      "cuir": 3,
+      "suif": 2
+    },
+    "biomes": [
+      "humide",
+      "marecage",
+      "chaud"
+    ]
+  }
+}

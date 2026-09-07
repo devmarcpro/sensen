@@ -1,0 +1,30 @@
+{
+  "name_key": "plant.courgette.name",
+  "categorie": "culture",
+  "nutrition": 5,
+  "bonus_potentiel": {
+    "volonte": 1
+  },
+  "wuxing": {
+    "bois": 0.8,
+    "eau": 0.2
+  },
+  "duree_jours": 3,
+  "recolte_base": 5,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "printemps",
+    "ete"
+  ],
+  "besoin_eau": 0.7,
+  "famille": "legume",
+  "conditions": {
+    "biomes": [
+      "chaud",
+      "tempere"
+    ],
+    "fertilite_min": 30
+  }
+}

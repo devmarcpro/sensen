@@ -1,0 +1,71 @@
+{
+  "name_key": "creature.oie.name",
+  "race": "oie",
+  "skeleton_template": "volant",
+  "corps": {
+    "stats": {
+      "force": 5,
+      "dexterite": 8,
+      "endurance": 7,
+      "volonte": 5,
+      "perception": 11,
+      "charisme": 4
+    },
+    "silhouette": "volant"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "becquetage"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "eau": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.9,
+    0.9,
+    0.9
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "domestique"
+  ],
+  "competences": {
+    "athletisme": 22
+  },
+  "depouille": [
+    "viande_crue"
+  ],
+  "drops_chasse": [
+    "plume"
+  ],
+  "elevage": {
+    "produits": [
+      {
+        "materiau": "oeuf",
+        "n": 1
+      },
+      {
+        "materiau": "plume",
+        "n": 2,
+        "saison": "ete"
+      }
+    ],
+    "fourrage": 1,
+    "naissance_chance": 0.15,
+    "abattage": {
+      "viande_crue": 2,
+      "plume": 1
+    },
+    "biomes": [
+      "froid",
+      "tempere",
+      "humide"
+    ]
+  }
+}

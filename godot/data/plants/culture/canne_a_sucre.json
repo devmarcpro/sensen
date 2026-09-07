@@ -1,0 +1,29 @@
+{
+  "name_key": "plant.canne_a_sucre.name",
+  "categorie": "culture",
+  "nutrition": 8,
+  "bonus_potentiel": {
+    "endurance": 1
+  },
+  "wuxing": {
+    "bois": 0.6,
+    "terre": 0.4
+  },
+  "duree_jours": 8,
+  "recolte_base": 5,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "printemps"
+  ],
+  "besoin_eau": 0.9,
+  "famille": "cereale",
+  "conditions": {
+    "biomes": [
+      "chaud",
+      "humide"
+    ],
+    "fertilite_min": 35
+  }
+}

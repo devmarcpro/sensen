@@ -1,0 +1,32 @@
+{
+  "name_key": "plant.olivier.name",
+  "categorie": "buisson",
+  "nutrition": 8,
+  "bonus_potentiel": {
+    "charisme": 1
+  },
+  "wuxing": {
+    "bois": 0.5,
+    "eau": 0.3,
+    "feu": 0.2
+  },
+  "duree_jours": 10,
+  "recolte_base": 3,
+  "tags": [
+    "buisson",
+    "verger"
+  ],
+  "saisons": [
+    "printemps"
+  ],
+  "besoin_eau": 0.2,
+  "famille": "fruit",
+  "conditions": {
+    "biomes": [
+      "chaud",
+      "cote",
+      "desert"
+    ],
+    "fertilite_min": 10
+  }
+}

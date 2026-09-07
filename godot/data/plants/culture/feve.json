@@ -1,0 +1,30 @@
+{
+  "name_key": "plant.feve.name",
+  "categorie": "culture",
+  "nutrition": 8,
+  "bonus_potentiel": {
+    "force": 1
+  },
+  "wuxing": {
+    "bois": 0.7,
+    "terre": 0.3
+  },
+  "duree_jours": 4,
+  "recolte_base": 4,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "automne",
+    "printemps"
+  ],
+  "besoin_eau": 0.5,
+  "famille": "legumineuse",
+  "conditions": {
+    "biomes": [
+      "tempere",
+      "cote"
+    ],
+    "fertilite_min": 15
+  }
+}

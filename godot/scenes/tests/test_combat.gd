@@ -265,6 +265,7 @@ func _ready() -> void:
 	_lancer("test_sauvegarde_ville")
 	_lancer("test_veines_de_mine")
 	_lancer("test_gaz_dans_le_sol")   # les gaz dans le sol (designer 2026-09-07)
+	_lancer("test_agriculture_refondue")   # la refonte de l'agriculture (designer 2026-09-07)
 	_lancer("test_anneau_moyen")
 	_lancer("test_population_villes")
 	_lancer("test_lod_pnj")

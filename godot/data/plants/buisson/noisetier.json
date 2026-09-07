@@ -1,0 +1,32 @@
+{
+  "name_key": "plant.noisetier.name",
+  "categorie": "buisson",
+  "nutrition": 9,
+  "bonus_potentiel": {
+    "charisme": 1
+  },
+  "wuxing": {
+    "bois": 0.5,
+    "eau": 0.3,
+    "feu": 0.2
+  },
+  "duree_jours": 8,
+  "recolte_base": 3,
+  "tags": [
+    "buisson",
+    "verger"
+  ],
+  "saisons": [
+    "printemps"
+  ],
+  "besoin_eau": 0.4,
+  "famille": "fruit",
+  "conditions": {
+    "biomes": [
+      "tempere",
+      "foret",
+      "froid"
+    ],
+    "fertilite_min": 15
+  }
+}

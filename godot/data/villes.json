@@ -353,25 +353,103 @@
     "tuiles_par_fermier_semaine": 30,
     "cultures_par_biome": {
       "_defaut": [
-        "ble",
         "carotte",
-        "chou",
-        "oignon"
+        "oignon",
+        "radis"
       ],
       "chaud": [
-        "orge",
         "tomate",
-        "oignon"
+        "millet",
+        "riz",
+        "mais",
+        "ail",
+        "courgette",
+        "concombre",
+        "aubergine",
+        "poivron",
+        "haricot",
+        "lentille",
+        "tournesol",
+        "canne_a_sucre"
+      ],
+      "cote": [
+        "poireau",
+        "feve"
+      ],
+      "desert": [
+        "millet",
+        "lentille"
       ],
       "froid": [
-        "pomme_de_terre",
+        "orge",
         "chou",
-        "orge"
+        "pomme_de_terre",
+        "seigle",
+        "avoine",
+        "sarrasin",
+        "navet",
+        "panais",
+        "poireau",
+        "epinard",
+        "pois",
+        "lin",
+        "colza"
       ],
       "humide": [
-        "citrouille",
         "chou",
-        "carotte"
+        "citrouille",
+        "avoine",
+        "riz",
+        "laitue",
+        "concombre",
+        "chanvre",
+        "canne_a_sucre"
+      ],
+      "marecage": [
+        "riz"
+      ],
+      "montagne": [
+        "orge",
+        "pomme_de_terre",
+        "seigle",
+        "sarrasin",
+        "epeautre"
+      ],
+      "plaine": [
+        "ble",
+        "millet",
+        "mais",
+        "betterave",
+        "tournesol"
+      ],
+      "tempere": [
+        "ble",
+        "orge",
+        "chou",
+        "pomme_de_terre",
+        "tomate",
+        "citrouille",
+        "seigle",
+        "avoine",
+        "mais",
+        "sarrasin",
+        "epeautre",
+        "navet",
+        "betterave",
+        "panais",
+        "poireau",
+        "ail",
+        "laitue",
+        "epinard",
+        "courgette",
+        "haricot",
+        "pois",
+        "lentille",
+        "feve",
+        "lin",
+        "chanvre",
+        "tournesol",
+        "colza"
       ]
     },
     "_doc": "Les champs (Villes B2, saisons et jachère le 2026-09-06) : taille et nombre par habitant, cultures par tag de biome, quota de récolte par fermier et par semaine ; jachere : après recoltes_avant_jachere récoltes le champ se repose jours_jachere jours et regagne fertilite_rendue, chaque récolte coûtant fertilite_par_recolte ; rotation_bonus : semer autre chose que la récolte précédente ; irrigation : une tuile d'eau à distance tuiles donne bonus de rendement et protège de la canicule ; hors_saison : une culture semée hors de ses saisons met duree fois plus de temps et rend rendement.",
@@ -394,6 +472,12 @@
       "saisons_sans_semis": [
         "hiver"
       ]
+    },
+    "hors_climat": {
+      "rendement": 0.5
+    },
+    "legumineuse": {
+      "fertilite_rendue": 6
     }
   },
   "anneau_moyen": {
@@ -429,22 +513,78 @@
     "profil": "proie",
     "especes_par_biome": {
       "_defaut": [
-        "mouflon",
-        "sanglier",
-        "canard_sauvage"
-      ],
-      "froid": [
-        "renne",
-        "mouflon"
+        "vache",
+        "mouton",
+        "cochon",
+        "poule"
       ],
       "chaud": [
-        "chameau",
-        "mouflon"
+        "chevre",
+        "poule",
+        "ane",
+        "buffle",
+        "dromadaire"
+      ],
+      "cote": [
+        "canard"
+      ],
+      "desert": [
+        "chevre",
+        "ane",
+        "dromadaire"
+      ],
+      "foret": [
+        "cochon",
+        "lapin"
+      ],
+      "froid": [
+        "vache",
+        "mouton",
+        "oie",
+        "yak",
+        "lama"
+      ],
+      "humide": [
+        "vache",
+        "cochon",
+        "poule",
+        "oie",
+        "canard",
+        "buffle"
+      ],
+      "marecage": [
+        "canard",
+        "buffle"
+      ],
+      "montagne": [
+        "mouton",
+        "chevre",
+        "ane",
+        "yak",
+        "lama"
       ],
       "plaine": [
-        "bison",
-        "cheval_sauvage",
-        "mouflon"
+        "vache",
+        "mouton",
+        "cochon",
+        "poule",
+        "lapin",
+        "cheval"
+      ],
+      "tempere": [
+        "vache",
+        "mouton",
+        "chevre",
+        "cochon",
+        "poule",
+        "oie",
+        "canard",
+        "lapin",
+        "ane",
+        "cheval"
+      ],
+      "toundra": [
+        "yak"
       ]
     },
     "produits": {
@@ -941,14 +1081,71 @@
       ],
       "chaud": [
         "vigne",
-        "framboisier"
+        "prunier",
+        "figuier",
+        "olivier",
+        "oranger",
+        "dattier",
+        "amandier",
+        "bananier"
+      ],
+      "cote": [
+        "vigne",
+        "figuier",
+        "olivier",
+        "oranger",
+        "amandier"
+      ],
+      "desert": [
+        "olivier",
+        "dattier",
+        "amandier"
+      ],
+      "foret": [
+        "framboisier",
+        "myrtillier",
+        "noisetier",
+        "noyer"
       ],
       "froid": [
-        "myrtillier"
+        "framboisier",
+        "myrtillier",
+        "fraisier",
+        "groseillier",
+        "cassissier",
+        "pommier",
+        "cerisier",
+        "noisetier"
       ],
       "humide": [
+        "houblon",
+        "fraisier",
+        "cassissier",
+        "bananier"
+      ],
+      "littoral": [
+        "oranger"
+      ],
+      "marecage": [
+        "bananier"
+      ],
+      "montagne": [
+        "myrtillier",
+        "cerisier"
+      ],
+      "tempere": [
         "framboisier",
-        "houblon"
+        "vigne",
+        "houblon",
+        "fraisier",
+        "groseillier",
+        "cassissier",
+        "pommier",
+        "poirier",
+        "prunier",
+        "cerisier",
+        "noisetier",
+        "noyer"
       ]
     },
     "paliers_sans_centre": [

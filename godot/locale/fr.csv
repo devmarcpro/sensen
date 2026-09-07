@@ -4229,3 +4229,104 @@ gaz.arsine,arsine
 journal.nappe_percee,"la pioche perce une nappe : l'eau jaillit en ({x},{y})"
 journal.geode,"une géode s'ouvre : {n} gemme(s) brute(s) au sol"
 journal.magma_perce,"la pioche perce une poche de magma en ({x},{y}) !"
+plant.seigle.name,Seigle
+item.seigle.name,Seigle
+plant.avoine.name,Avoine
+item.avoine.name,Avoine
+plant.millet.name,Millet
+item.millet.name,Millet
+plant.riz.name,Riz
+item.riz.name,Riz
+plant.mais.name,Maïs
+item.mais.name,Maïs
+plant.sarrasin.name,Sarrasin
+item.sarrasin.name,Sarrasin
+plant.epeautre.name,Épeautre
+item.epeautre.name,Épeautre
+plant.navet.name,Navet
+item.navet.name,Navet
+plant.betterave.name,Betterave
+item.betterave.name,Betterave
+plant.radis.name,Radis
+item.radis.name,Radis
+plant.panais.name,Panais
+item.panais.name,Panais
+plant.poireau.name,Poireau
+item.poireau.name,Poireau
+plant.ail.name,Ail
+item.ail.name,Ail
+plant.laitue.name,Laitue
+item.laitue.name,Laitue
+plant.epinard.name,Épinard
+item.epinard.name,Épinard
+plant.courgette.name,Courgette
+item.courgette.name,Courgette
+plant.concombre.name,Concombre
+item.concombre.name,Concombre
+plant.aubergine.name,Aubergine
+item.aubergine.name,Aubergine
+plant.poivron.name,Poivron
+item.poivron.name,Poivron
+plant.haricot.name,Haricot
+item.haricot.name,Haricot
+plant.pois.name,Pois
+item.pois.name,Pois
+plant.lentille.name,Lentille
+item.lentille.name,Lentille
+plant.feve.name,Fève
+item.feve.name,Fève
+plant.lin.name,Lin
+item.lin.name,Graines de lin
+plant.chanvre.name,Chanvre
+item.chanvre.name,Graines de chanvre
+plant.tournesol.name,Tournesol
+item.tournesol.name,Graines de tournesol
+plant.colza.name,Colza
+item.colza.name,Graines de colza
+plant.canne_a_sucre.name,Canne à sucre
+item.canne_a_sucre.name,Canne à sucre
+plant.fraisier.name,Fraisier
+item.fraisier.name,Fraise
+plant.groseillier.name,Groseillier
+item.groseillier.name,Groseille
+plant.cassissier.name,Cassissier
+item.cassissier.name,Cassis
+plant.pommier.name,Pommier
+item.pommier.name,Pomme
+plant.poirier.name,Poirier
+item.poirier.name,Poire
+plant.prunier.name,Prunier
+item.prunier.name,Prune
+plant.cerisier.name,Cerisier
+item.cerisier.name,Cerise
+plant.figuier.name,Figuier
+item.figuier.name,Figue
+plant.olivier.name,Olivier
+item.olivier.name,Olive
+plant.oranger.name,Oranger
+item.oranger.name,Orange
+plant.dattier.name,Dattier
+item.dattier.name,Datte
+plant.noisetier.name,Noisetier
+item.noisetier.name,Noisette
+plant.noyer.name,Noyer
+item.noyer.name,Noix
+plant.amandier.name,Amandier
+item.amandier.name,Amande
+plant.bananier.name,Bananier
+item.bananier.name,Banane
+creature.vache.name,Vache
+creature.mouton.name,Mouton
+creature.chevre.name,Chèvre
+creature.cochon.name,Cochon
+creature.poule.name,Poule
+creature.oie.name,Oie
+creature.canard.name,Canard
+creature.lapin.name,Lapin
+creature.ane.name,Âne
+creature.cheval.name,Cheval
+creature.buffle.name,Buffle
+creature.yak.name,Yak
+creature.lama.name,Lama
+creature.dromadaire.name,Dromadaire
+item.oeuf.name,Œuf

@@ -1,0 +1,69 @@
+{
+  "name_key": "creature.dromadaire.name",
+  "race": "dromadaire",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 12,
+      "dexterite": 7,
+      "endurance": 15,
+      "volonte": 6,
+      "perception": 9,
+      "charisme": 4
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "ruade",
+    "coup_de_tete"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 0.7,
+    "feu": 0.3
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.75,
+    0.6,
+    0.4
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "domestique"
+  ],
+  "competences": {
+    "athletisme": 30
+  },
+  "depouille": [
+    "viande_crue"
+  ],
+  "drops_chasse": [
+    "peau"
+  ],
+  "monture": true,
+  "elevage": {
+    "produits": [
+      {
+        "materiau": "lait",
+        "n": 2
+      }
+    ],
+    "fourrage": 2,
+    "naissance_chance": 0.05,
+    "abattage": {
+      "viande_crue": 8,
+      "cuir": 2,
+      "suif": 3
+    },
+    "biomes": [
+      "desert",
+      "chaud"
+    ]
+  }
+}

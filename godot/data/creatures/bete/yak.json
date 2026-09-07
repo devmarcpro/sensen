@@ -1,0 +1,75 @@
+{
+  "name_key": "creature.yak.name",
+  "race": "yak",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 13,
+      "dexterite": 5,
+      "endurance": 14,
+      "volonte": 5,
+      "perception": 8,
+      "charisme": 3
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "charge",
+    "coup_de_tete"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.25,
+    0.2,
+    0.18
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "domestique"
+  ],
+  "competences": {
+    "athletisme": 30
+  },
+  "depouille": [
+    "viande_crue"
+  ],
+  "drops_chasse": [
+    "peau",
+    "corne",
+    "os"
+  ],
+  "elevage": {
+    "produits": [
+      {
+        "materiau": "lait",
+        "n": 1
+      },
+      {
+        "materiau": "laine",
+        "n": 2,
+        "saison": "printemps"
+      }
+    ],
+    "fourrage": 2,
+    "naissance_chance": 0.07,
+    "abattage": {
+      "viande_crue": 7,
+      "cuir": 2,
+      "suif": 2
+    },
+    "biomes": [
+      "froid",
+      "montagne",
+      "toundra"
+    ]
+  }
+}

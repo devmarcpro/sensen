@@ -1,0 +1,69 @@
+{
+  "name_key": "creature.cheval.name",
+  "race": "cheval",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 12,
+      "dexterite": 11,
+      "endurance": 13,
+      "volonte": 6,
+      "perception": 10,
+      "charisme": 6
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "ruade"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "bois": 0.5,
+    "terre": 0.5
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.5,
+    0.35,
+    0.25
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "domestique"
+  ],
+  "competences": {
+    "athletisme": 40
+  },
+  "depouille": [
+    "viande_crue"
+  ],
+  "drops_chasse": [
+    "peau",
+    "os"
+  ],
+  "monture": true,
+  "elevage": {
+    "produits": [
+      {
+        "materiau": "crin",
+        "n": 1,
+        "saison": "ete"
+      }
+    ],
+    "fourrage": 2,
+    "naissance_chance": 0.05,
+    "abattage": {
+      "viande_crue": 6,
+      "cuir": 2
+    },
+    "biomes": [
+      "plaine",
+      "tempere"
+    ]
+  }
+}

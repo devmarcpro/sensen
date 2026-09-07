@@ -18,5 +18,14 @@
     "printemps",
     "ete"
   ],
-  "besoin_eau": 0.55
+  "besoin_eau": 0.55,
+  "famille": "racine",
+  "conditions": {
+    "biomes": [
+      "froid",
+      "tempere",
+      "montagne"
+    ],
+    "fertilite_min": 15
+  }
 }

@@ -1,0 +1,30 @@
+{
+  "name_key": "plant.avoine.name",
+  "categorie": "culture",
+  "nutrition": 9,
+  "bonus_potentiel": {
+    "endurance": 1
+  },
+  "wuxing": {
+    "bois": 0.6,
+    "terre": 0.4
+  },
+  "duree_jours": 5,
+  "recolte_base": 4,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "printemps"
+  ],
+  "besoin_eau": 0.5,
+  "famille": "cereale",
+  "conditions": {
+    "biomes": [
+      "froid",
+      "tempere",
+      "humide"
+    ],
+    "fertilite_min": 20
+  }
+}

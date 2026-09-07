@@ -1,0 +1,71 @@
+{
+  "name_key": "creature.vache.name",
+  "race": "vache",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 11,
+      "dexterite": 6,
+      "endurance": 12,
+      "volonte": 4,
+      "perception": 8,
+      "charisme": 4
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "charge",
+    "coup_de_tete"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.55,
+    0.45,
+    0.35
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "domestique"
+  ],
+  "competences": {
+    "athletisme": 30
+  },
+  "depouille": [
+    "viande_crue"
+  ],
+  "drops_chasse": [
+    "peau",
+    "corne",
+    "os"
+  ],
+  "elevage": {
+    "produits": [
+      {
+        "materiau": "lait",
+        "n": 3
+      }
+    ],
+    "fourrage": 2,
+    "naissance_chance": 0.08,
+    "abattage": {
+      "viande_crue": 8,
+      "cuir": 2,
+      "suif": 2
+    },
+    "biomes": [
+      "tempere",
+      "plaine",
+      "humide",
+      "froid"
+    ]
+  }
+}

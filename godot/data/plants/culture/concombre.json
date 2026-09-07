@@ -1,0 +1,29 @@
+{
+  "name_key": "plant.concombre.name",
+  "categorie": "culture",
+  "nutrition": 3,
+  "bonus_potentiel": {
+    "volonte": 1
+  },
+  "wuxing": {
+    "bois": 0.8,
+    "eau": 0.2
+  },
+  "duree_jours": 3,
+  "recolte_base": 5,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "ete"
+  ],
+  "besoin_eau": 0.8,
+  "famille": "legume",
+  "conditions": {
+    "biomes": [
+      "chaud",
+      "humide"
+    ],
+    "fertilite_min": 30
+  }
+}

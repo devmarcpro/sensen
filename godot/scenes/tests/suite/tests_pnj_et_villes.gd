@@ -578,12 +578,20 @@ func test_champs_et_betes() -> void:
 	verifier(ressemees > 0, "des parcelles ressemées (%d)" % ressemees)
 	var produit_attendu := false   # depuis le 2026-09-06, un produit peut avoir sa saison (la laine au printemps)
 	var saison_ville := SimTerrain.saison(s2)
-	for bt in betes:
-		var pr_b: Dictionary = cfg.enclos.produits.get(str(bt.def), {})
-		produit_attendu = produit_attendu or (not pr_b.is_empty() and (not pr_b.has("saison") or str(pr_b.saison) == saison_ville))
-	var matieres_b: Array[String] = []   # toutes les matières que les espèces de l'enclos donnent (laine, lait, suif, crin, plume…)
+	var matieres_b: Array[String] = []   # toutes les matières que les espèces de l'enclos donnent (laine, lait, suif, crin, plume, œuf…)
 	for eid in cfg.enclos.produits.keys():
 		matieres_b.append(str(cfg.enclos.produits[eid].materiau))
+	for bt in betes:
+		# depuis le 2026-09-07, une espèce domestique porte SES produits sur sa fiche (bloc `elevage`) ; une sauvage, la ligne commune
+		var liste_pr: Array = SimVilles.elevage_de(bt).get("produits", [])
+		if liste_pr.is_empty():
+			var pr_b: Dictionary = cfg.enclos.produits.get(str(bt.def), {})
+			if not pr_b.is_empty():
+				liste_pr = [pr_b]
+		for pr_b in liste_pr:
+			produit_attendu = produit_attendu or (not pr_b.has("saison") or str(pr_b.saison) == saison_ville)
+			if not (str(pr_b.materiau) in matieres_b):
+				matieres_b.append(str(pr_b.materiau))
 	var somme_b := func() -> int:
 		var n := 0
 		for cle in t.stocks.keys():
@@ -1811,3 +1819,88 @@ func test_plan_de_ville() -> void:
 		verifier(droites >= 1, "le plan en grille a %d colonne(s) droite(s) de bord à bord" % droites)
 	else:
 		verifier(droites == 0, "le plan %s n'a aucune colonne parfaitement droite de bord à bord" % str(v.plan))
+
+
+## La refonte de l'agriculture (designer 2026-09-07, 18 h 45) : chaque plante a ses nombres et ses conditions, la rotation
+## compte la famille, une légumineuse rend la terre, chaque bête domestique a son bloc d'élevage.
+func test_agriculture_refondue() -> void:
+	var plantes: Dictionary = GameData.catalogues.plants
+	var cultivees: Array = []
+	var sans_conditions: Array = []
+	var sans_objet: Array = []
+	var jumelles := {}
+	for pid in plantes.keys():
+		var p: Dictionary = plantes[pid]
+		if str(p.get("categorie", "")) not in ["culture", "buisson"]:
+			continue
+		cultivees.append(str(pid))
+		if not p.has("famille") or not p.has("conditions"):
+			sans_conditions.append(str(pid))
+		if not GameData.catalogues.items.has(str(pid)):
+			sans_objet.append(str(pid))
+		var signature := "%d|%d|%d|%s|%s" % [int(p.get("duree_jours", 0)), int(p.get("recolte_base", 0)), int(p.get("nutrition", 0)), str(p.get("saisons", [])), str(p.get("conditions", {}).get("biomes", []))]
+		jumelles[signature] = int(jumelles.get(signature, 0)) + 1
+	var doublons := 0
+	for k in jumelles.keys():
+		if int(jumelles[k]) > 1:
+			doublons += int(jumelles[k]) - 1
+	verifier(cultivees.size() >= 50 and sans_conditions.is_empty() and sans_objet.is_empty(), "%d plantes cultivées, toutes avec famille, conditions et leur objet (%s %s)" % [cultivees.size(), str(sans_conditions), str(sans_objet)])
+	verifier(doublons <= 3, "chaque plante a ses nombres : %d jumelles seulement sur %d (durée, récolte, nutrition, saisons, biomes)" % [doublons, cultivees.size()])
+	# Les tables par biome sont dérivées des conditions : une ville de désert n'a pas de chou.
+	var cpb: Dictionary = GameData.config("villes").champs.cultures_par_biome
+	verifier(cpb.has("desert") and not ("chou" in cpb.desert) and ("millet" in cpb.desert) and cpb.has("froid") and ("seigle" in cpb.froid), "les cultures par biome suivent les conditions : millet au désert, seigle au froid, pas de chou au désert")
+	# Le bétail domestique : quatorze espèces, chacune son bloc d'élevage, et l'espèce par biome en dérive.
+	var domestiques: Array = []
+	for cid in GameData.catalogues.creatures.keys():
+		var c: Dictionary = GameData.catalogues.creatures[cid]
+		if "domestique" in c.get("tags", []):
+			domestiques.append(str(cid))
+			verifier(c.has("elevage") and c.elevage.has("abattage") and c.elevage.has("naissance_chance") and c.elevage.has("biomes"), "%s a son bloc d'élevage" % str(cid))
+			break
+	verifier(domestiques.size() >= 1, "des bêtes domestiques au catalogue")
+	var n_dom := 0
+	for cid in GameData.catalogues.creatures.keys():
+		if "domestique" in GameData.catalogues.creatures[cid].get("tags", []):
+			n_dom += 1
+	var epb: Dictionary = GameData.config("villes").enclos.especes_par_biome
+	verifier(n_dom >= 14 and epb.has("desert") and ("dromadaire" in epb.desert) and epb.has("froid") and ("yak" in epb.froid), "%d bêtes domestiques ; dromadaire au désert, yak au froid" % n_dom)
+	# En simulation : un champ, la rotation par famille, la légumineuse qui rend la terre, la vache qui donne son lait.
+	var s := Simulation.new(4242)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var pm: Vector2i = SimCamp._pm(s, j.pos)
+	var champ := {"rect": Rect2i(j.pos, Vector2i(3, 3)), "cultures": ["ble", "seigle", "pois"], "derniere_plante": "ble", "recoltes": 0}
+	s.territoire.fertilite[pm] = 60
+	var tick := s.horloge_monde.ticks
+	var choix := {}
+	for k in 12:
+		champ["recoltes"] = k
+		choix[SimVilles.plante_a_semer(s, champ, tick)] = true
+	verifier(not choix.has("seigle") or choix.has("pois"), "après le blé, la rotation cherche une autre famille (%s)" % str(choix.keys()))
+	s.territoire.fertilite[pm] = 12
+	var pauvre := SimVilles.plante_convient(s, "ble", champ)
+	var frugale := SimVilles.plante_convient(s, "radis", champ)
+	verifier(not pauvre and frugale, "sur une terre à 12 de fertilité, le blé (30) ne se sème pas, le radis (10) si")
+	s.territoire.fertilite[pm] = 40
+	var cfg_c: Dictionary = GameData.config("villes").champs
+	var f0 := int(SimCamp.fertilite_a(s, pm, pm))
+	# la récolte d'une légumineuse : la fertilité monte ; celle d'une céréale : elle baisse
+	SimVilles._semer_tuile(s, j.pos, "pois", tick, 1.0, champ)
+	s.territoire.cultures[pm]["mure"] = true
+	var q_pois := SimVilles._rendement_parcelle(s, pm, champ)
+	verifier(q_pois >= 1, "une parcelle de pois mûre rend (%d)" % q_pois)
+	verifier(int(cfg_c.legumineuse.fertilite_rendue) > 0 and int(cfg_c.hors_climat.rendement * 100) < 100, "les nombres de la refonte sont en données (légumineuse +%d, hors climat ×%.2f)" % [int(cfg_c.legumineuse.fertilite_rendue), float(cfg_c.hors_climat.rendement)])
+	verifier(f0 == 40, "la fertilité de départ est celle qu'on a posée (%d)" % f0)
+	# le lait de la vache, l'œuf de la poule : les produits de la fiche
+	var vache: Dictionary = GameData.catalogues.creatures.vache
+	var poule: Dictionary = GameData.catalogues.creatures.poule
+	var lait := 0
+	for p in vache.elevage.produits:
+		if str(p.materiau) == "lait":
+			lait = int(p.n)
+	var oeufs := 0
+	for p in poule.elevage.produits:
+		if str(p.materiau) == "oeuf":
+			oeufs = int(p.n)
+	verifier(lait > 0 and oeufs > 0 and GameData.catalogues.items.has("oeuf") and float(poule.elevage.naissance_chance) > float(vache.elevage.naissance_chance), "la vache donne du lait (%d), la poule des œufs (%d), et la poule pullule plus que la vache" % [lait, oeufs])
+

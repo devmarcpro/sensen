@@ -1,0 +1,31 @@
+{
+  "name_key": "plant.groseillier.name",
+  "categorie": "buisson",
+  "nutrition": 3,
+  "bonus_potentiel": {
+    "charisme": 1
+  },
+  "wuxing": {
+    "bois": 0.5,
+    "eau": 0.3,
+    "feu": 0.2
+  },
+  "duree_jours": 4,
+  "recolte_base": 3,
+  "tags": [
+    "buisson",
+    "verger"
+  ],
+  "saisons": [
+    "printemps"
+  ],
+  "besoin_eau": 0.5,
+  "famille": "fruit",
+  "conditions": {
+    "biomes": [
+      "froid",
+      "tempere"
+    ],
+    "fertilite_min": 15
+  }
+}

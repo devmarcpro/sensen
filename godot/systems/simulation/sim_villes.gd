@@ -493,16 +493,66 @@ static func plante_a_semer(sim: Simulation, champ: Dictionary, tick: int = -1) -
 			de_saison.append(str(c))
 	if de_saison.is_empty():
 		return ""   # rien de cette liste ne se sème maintenant (l'hiver) : le champ attend
-	var autres: Array[String] = []
+	# Les conditions de la plante (Agriculture et élevage, 2026-09-07) : ses biomes, la fertilité de la terre. Un fermier
+	# sème ce qui vient chez lui ; s'il n'a rien qui convienne, il sème ce qu'il a.
+	var qui_convient: Array[String] = []
 	for c in de_saison:
-		if c != derniere:
-			autres.append(c)
-	var final: Array[String] = autres
-	if final.is_empty():
-		final = de_saison
+		if plante_convient(sim, str(c), champ):
+			qui_convient.append(c)
+	if not qui_convient.is_empty():
+		de_saison = qui_convient
+	# La rotation compte la FAMILLE, pas l'espèce : semer du seigle après du blé n'est pas tourner.
+	var fam_derniere := famille_de(derniere)
+	var autre_famille: Array[String] = []
+	var autre_espece: Array[String] = []
+	for c in de_saison:
+		if c == derniere:
+			continue
+		autre_espece.append(c)
+		if fam_derniere.is_empty() or famille_de(c) != fam_derniere:
+			autre_famille.append(c)
+	# Une autre famille d'abord ; sinon une autre espèce ; sinon ce qu'on a — la terre ne reste pas nue pour une règle.
+	var final: Array[String] = autre_famille if not autre_famille.is_empty() else (autre_espece if not autre_espece.is_empty() else de_saison)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([sim.graine, "rotation", champ.get("rect", Rect2i()), int(champ.get("recoltes", 0))])
 	return final[rng.randi_range(0, final.size() - 1)]
+
+
+## La famille d'une plante (céréale, légumineuse…) ; vide si la fiche n'en a pas.
+static func famille_de(base: String) -> String:
+	return str(GameData.catalogues.plants.get(base, {}).get("famille", ""))
+
+
+## Les tags de biome de la cellule d'un champ (ou de la tuile donnée).
+static func tags_biome_de(sim: Simulation, pm: Vector2i) -> Array:
+	if sim.monde == null:
+		return []
+	var cell: Vector2i = SimCamp._cell_de(sim, pm)
+	return GameData.catalogues.biomes.get(str(sim.monde.cellule(cell).get("biome", "")), {}).get("tags", [])
+
+
+## La plante pousse-t-elle à plein ici ? (ses `conditions.biomes` admettent la cellule — une liste vide admet tout)
+static func plante_dans_son_climat(sim: Simulation, base: String, pm: Vector2i) -> bool:
+	var biomes: Array = GameData.catalogues.plants.get(base, {}).get("conditions", {}).get("biomes", [])
+	if biomes.is_empty():
+		return true
+	for t in tags_biome_de(sim, pm):
+		if str(t) in biomes:
+			return true
+	return false
+
+
+## Un fermier sèmerait-il cette plante dans ce champ : de son climat, et la terre assez fertile (`conditions.fertilite_min`).
+static func plante_convient(sim: Simulation, base: String, champ: Dictionary) -> bool:
+	var cond: Dictionary = GameData.catalogues.plants.get(base, {}).get("conditions", {})
+	if cond.is_empty():
+		return true
+	if not champ.has("rect"):
+		return true
+	var pm: Vector2i = SimCamp._pm(sim, champ.rect.position)   # la fertilité et la cellule se lisent en coordonnées de parcelle
+	if not plante_dans_son_climat(sim, base, pm):
+		return false
+	return SimCamp.fertilite_a(sim, pm, pm) >= int(cond.get("fertilite_min", 0))
 
 
 ## Un champ est-il irrigué : une tuile d'eau à `irrigation.distance` de son rectangle (Agriculture et élevage, 2026-09-06).
@@ -531,7 +581,11 @@ static func _rendement_parcelle(sim: Simulation, pm: Vector2i, champ: Dictionary
 	if bool(c.get("hors_saison", false)):
 		q *= float(cfg.get("hors_saison", {}).get("rendement", 0.45))
 	if not champ.is_empty() and str(champ.get("derniere_plante", "")) != "" and str(champ.derniere_plante) != str(c.plante):
-		q *= 1.0 + float(cfg.get("rotation_bonus", 0.2))   # la rotation : une autre culture que la précédente
+		var fd := famille_de(str(champ.derniere_plante))
+		if fd.is_empty() or fd != famille_de(str(c.plante)):   # la rotation : une autre FAMILLE que la précédente (2026-09-07)
+			q *= 1.0 + float(cfg.get("rotation_bonus", 0.2))
+	if not plante_dans_son_climat(sim, str(c.plante), pm):   # hors de son climat, une plante rend la moitié
+		q *= float(cfg.get("hors_climat", {}).get("rendement", 0.5))
 	var irrigue := bool(champ.get("irrigue", false))
 	if irrigue:
 		q *= 1.0 + float(cfg.get("irrigation", {}).get("bonus", 0.35)) * float(pl.get("besoin_eau", 0.5))
@@ -596,7 +650,10 @@ static func _recolter_champs(sim: Simulation) -> void:
 			continue
 		# La terre s'épuise à chaque récolte (Agriculture et élevage, 2026-09-06) ; la jachère la rendra.
 		var ja: Dictionary = cfg.get("jachere", {})
-		sim.territoire.fertilite[pm] = clampi(SimCamp.fertilite_a(sim, pm, pm) - int(ja.get("fertilite_par_recolte", 3)), int(ja.get("fertilite_min", 15)), int(ja.get("fertilite_max", 95)))
+		var delta_f := -int(ja.get("fertilite_par_recolte", 3))
+		if famille_de(str(c.plante)) == "legumineuse":   # une légumineuse nourrit la terre au lieu de la fatiguer (2026-09-07)
+			delta_f = int(cfg.get("legumineuse", {}).get("fertilite_rendue", 6))
+		sim.territoire.fertilite[pm] = clampi(SimCamp.fertilite_a(sim, pm, pm) + delta_f, int(ja.get("fertilite_min", 15)), int(ja.get("fertilite_max", 95)))
 		champ["derniere_plante"] = str(c.plante)
 		var suivante := plante_a_semer(sim, champ, tick)
 		if suivante.is_empty():   # rien ne se sème en cette saison : la parcelle reste nue jusqu'au printemps
@@ -650,6 +707,12 @@ static func _jacheres(sim: Simulation, types: Dictionary, tick: int) -> void:
 				sim.grille.marquer(pm2)
 
 
+## Le bloc `elevage` de l'espèce d'une bête (produits, fourrage, naissance_chance, abattage, biomes) ; vide pour une
+## espèce sauvage, qui retombe sur la ligne commune de `villes.enclos` (2026-09-07).
+static func elevage_de(x: Dictionary) -> Dictionary:
+	return GameData.catalogues.creatures.get(str(x.get("def", "")), {}).get("elevage", {})
+
+
 ## Le troupeau du territoire, chaque semaine (Villes B2 ; le troupeau qui vit, 2026-09-06) : il mange le fourrage des
 ## stocks, il produit (à sa saison), il naît, il meurt de faim, et son surplus part à la boucherie.
 static func _semaine_betail(sim: Simulation) -> void:
@@ -670,12 +733,14 @@ static func _semaine_betail(sim: Simulation) -> void:
 					troupeaux.get_or_add(cell, []).append(x)
 					dormants_de[x.id] = cell
 	var n_betes := 0
+	var besoin := 0   # chaque espèce mange à sa mesure (`elevage.fourrage`, 2026-09-07) ; une bête sauvage, la ligne commune
 	for c in troupeaux:
-		n_betes += (troupeaux[c] as Array).size()
+		for x in troupeaux[c]:
+			n_betes += 1
+			besoin += int(elevage_de(x).get("fourrage", tr.get("fourrage_par_bete", 1)))
 	if n_betes == 0:
 		return
 	# 1. Le fourrage : le troupeau mange les cultures des stocks (le plus gros tas d'abord).
-	var besoin := n_betes * int(tr.get("fourrage_par_bete", 1))
 	var mange := 0
 	var cles: Array = sim.territoire.stocks.keys().filter(func(k: Variant) -> bool: return GameData.catalogues.plants.has(str(k)))
 	cles.sort_custom(func(a: Variant, b: Variant) -> bool: return int(sim.territoire.stocks[a]) > int(sim.territoire.stocks[b]))
@@ -694,17 +759,24 @@ static func _semaine_betail(sim: Simulation) -> void:
 	var total := 0
 	for c in troupeaux:
 		for x in troupeaux[c]:
-			var p: Dictionary = produits.get(str(x.get("def", "")), {})
-			if p.is_empty() or (p.has("saison") and str(p.saison) != saison):
-				continue
-			var cle := str(p.materiau) + "|brut"
-			sim.territoire.stocks[cle] = int(sim.territoire.stocks.get(cle, 0)) + int(p.n)
-			prod[str(p.materiau)] = int(prod.get(str(p.materiau), 0)) + int(p.n)
-			total += int(p.n)
+			var liste_p: Array = elevage_de(x).get("produits", [])   # la fiche de l'espèce d'abord (la vache, la poule…)
+			if liste_p.is_empty():
+				var p0: Dictionary = produits.get(str(x.get("def", "")), {})
+				if not p0.is_empty():
+					liste_p = [p0]
+			for p in liste_p:
+				if p.has("saison") and str(p.saison) != saison:
+					continue
+				var m := str(p.materiau)
+				var cle := m if GameData.catalogues.items.has(m) else m + "|brut"   # l'œuf est un objet, le lait une matière
+				sim.territoire.stocks[cle] = int(sim.territoire.stocks.get(cle, 0)) + int(p.n)
+				prod[m] = int(prod.get(m, 0)) + int(p.n)
+				total += int(p.n)
 	if total > 0:
 		var noms: Array[String] = []
 		for m in prod.keys():
-			noms.append("%s ×%d" % [TranslationServer.translate(str(GameData.catalogues.materials.get(str(m), {}).get("name_key", str(m)))), int(prod[m])])
+			var fiche: Dictionary = GameData.catalogues.materials.get(str(m), GameData.catalogues.items.get(str(m), {}))
+			noms.append("%s ×%d" % [TranslationServer.translate(str(fiche.get("name_key", str(m)))), int(prod[m])])
 		EventBus.emettre(&"journal", [&"journal.betail_produit", {"n": total, "produits": " · ".join(noms)}])
 	# 3. La faim, les naissances, l'abattage du surplus — enclos par enclos.
 	var rng := RandomNumberGenerator.new()
@@ -729,16 +801,17 @@ static func _semaine_betail(sim: Simulation) -> void:
 			for x in betes:
 				if naissances >= n_max:
 					break
-				if rng.randf() >= float(tr.get("naissance_chance", 0.12)):
+				if rng.randf() >= float(elevage_de(x).get("naissance_chance", tr.get("naissance_chance", 0.12))):   # le lapin pullule, le cheval non
 					continue
 				if _naitre_bete(sim, x, cell, dormants_de.has(x.id)):
 					naissances += 1
 		elif betes.size() > capacite:   # le surplus part à la boucherie : viande, cuir, suif
 			for k in betes.size() - capacite:
 				var b: Dictionary = betes[k]
-				for cle_a in tr.get("abattage", {}).keys():
+				var ab: Dictionary = elevage_de(b).get("abattage", tr.get("abattage", {}))   # ce que l'espèce rend à la boucherie
+				for cle_a in ab.keys():
 					var cle_s := str(cle_a) if GameData.catalogues.items.has(str(cle_a)) else str(cle_a) + "|brut"
-					sim.territoire.stocks[cle_s] = int(sim.territoire.stocks.get(cle_s, 0)) + int(tr.abattage[cle_a])
+					sim.territoire.stocks[cle_s] = int(sim.territoire.stocks.get(cle_s, 0)) + int(ab[cle_a])
 				_oter_bete(sim, b, dormants_de.get(b.id, Vector2i(-9999, -9999)))
 				abattues += 1
 	if naissances > 0:

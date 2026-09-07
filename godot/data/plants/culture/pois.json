@@ -1,0 +1,29 @@
+{
+  "name_key": "plant.pois.name",
+  "categorie": "culture",
+  "nutrition": 8,
+  "bonus_potentiel": {
+    "force": 1
+  },
+  "wuxing": {
+    "bois": 0.7,
+    "terre": 0.3
+  },
+  "duree_jours": 3,
+  "recolte_base": 4,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "printemps"
+  ],
+  "besoin_eau": 0.5,
+  "famille": "legumineuse",
+  "conditions": {
+    "biomes": [
+      "tempere",
+      "froid"
+    ],
+    "fertilite_min": 15
+  }
+}

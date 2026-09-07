@@ -13,5 +13,14 @@
   "recolte_base": 3,
   "tags": [
     "buisson"
-  ]
+  ],
+  "famille": "fruit",
+  "conditions": {
+    "biomes": [
+      "froid",
+      "foret",
+      "montagne"
+    ],
+    "fertilite_min": 10
+  }
 }

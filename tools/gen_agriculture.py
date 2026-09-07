@@ -36,6 +36,10 @@ PLANTES = [
     ("pomme_de_terre", "culture", "racine", None, None, None, None, None, None, None, ["froid", "tempere", "montagne"], 15),
     ("tomate", "culture", "legume", None, None, None, None, None, None, None, ["chaud", "tempere"], 30),
     ("citrouille", "culture", "legume", None, None, None, None, None, None, None, ["humide", "tempere"], 30),
+    ("framboisier", "buisson", "fruit", None, None, None, None, None, None, None, ["tempere", "froid", "foret"], 15),
+    ("myrtillier", "buisson", "fruit", None, None, None, None, None, None, None, ["froid", "foret", "montagne"], 10),
+    ("vigne", "buisson", "fruit", None, None, None, None, None, None, None, ["chaud", "tempere", "cote"], 25),
+    ("houblon", "buisson", "fruit", None, None, None, None, None, None, None, ["tempere", "humide"], 25),
     # les céréales
     ("seigle", "culture", "cereale", "Seigle", "Rye", 6, 4, 9, ["automne"], 0.4, ["froid", "montagne", "tempere"], 15),
     ("avoine", "culture", "cereale", "Avoine", "Oats", 5, 4, 9, ["printemps"], 0.5, ["froid", "tempere", "humide"], 20),

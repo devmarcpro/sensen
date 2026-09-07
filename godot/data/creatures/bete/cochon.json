@@ -1,0 +1,68 @@
+{
+  "name_key": "creature.cochon.name",
+  "race": "cochon",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 10,
+      "dexterite": 7,
+      "endurance": 11,
+      "volonte": 4,
+      "perception": 9,
+      "charisme": 3
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "coup_de_defenses",
+    "charge"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "terre": 0.6,
+    "metal": 0.4
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.9,
+    0.7,
+    0.7
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "domestique"
+  ],
+  "competences": {
+    "athletisme": 15
+  },
+  "depouille": [
+    "viande_crue",
+    "viande_crue"
+  ],
+  "drops_chasse": [
+    "peau",
+    "defense",
+    "os"
+  ],
+  "elevage": {
+    "produits": [],
+    "fourrage": 2,
+    "naissance_chance": 0.25,
+    "abattage": {
+      "viande_crue": 6,
+      "cuir": 1,
+      "suif": 3
+    },
+    "biomes": [
+      "tempere",
+      "humide",
+      "foret",
+      "plaine"
+    ]
+  }
+}

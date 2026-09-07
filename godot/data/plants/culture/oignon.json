@@ -18,5 +18,10 @@
     "printemps",
     "fin_ete"
   ],
-  "besoin_eau": 0.4
+  "besoin_eau": 0.4,
+  "famille": "legume",
+  "conditions": {
+    "biomes": [],
+    "fertilite_min": 20
+  }
 }

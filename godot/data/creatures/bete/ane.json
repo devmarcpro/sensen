@@ -1,0 +1,65 @@
+{
+  "name_key": "creature.ane.name",
+  "race": "ane",
+  "skeleton_template": "quadrupede",
+  "corps": {
+    "stats": {
+      "force": 11,
+      "dexterite": 7,
+      "endurance": 13,
+      "volonte": 6,
+      "perception": 9,
+      "charisme": 4
+    },
+    "silhouette": "quadrupede"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "ruade"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "bois": 0.5,
+    "terre": 0.5
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.5,
+    0.45,
+    0.4
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "domestique"
+  ],
+  "competences": {
+    "athletisme": 40
+  },
+  "depouille": [
+    "viande_crue"
+  ],
+  "drops_chasse": [
+    "peau",
+    "os"
+  ],
+  "monture": true,
+  "elevage": {
+    "produits": [],
+    "fourrage": 2,
+    "naissance_chance": 0.05,
+    "abattage": {
+      "viande_crue": 4,
+      "cuir": 2
+    },
+    "biomes": [
+      "chaud",
+      "montagne",
+      "desert",
+      "tempere"
+    ]
+  }
+}

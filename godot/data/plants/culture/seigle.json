@@ -1,0 +1,30 @@
+{
+  "name_key": "plant.seigle.name",
+  "categorie": "culture",
+  "nutrition": 9,
+  "bonus_potentiel": {
+    "endurance": 1
+  },
+  "wuxing": {
+    "bois": 0.6,
+    "terre": 0.4
+  },
+  "duree_jours": 6,
+  "recolte_base": 4,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "automne"
+  ],
+  "besoin_eau": 0.4,
+  "famille": "cereale",
+  "conditions": {
+    "biomes": [
+      "froid",
+      "montagne",
+      "tempere"
+    ],
+    "fertilite_min": 15
+  }
+}

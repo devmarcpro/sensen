@@ -1,0 +1,30 @@
+{
+  "name_key": "plant.mais.name",
+  "categorie": "culture",
+  "nutrition": 11,
+  "bonus_potentiel": {
+    "endurance": 1
+  },
+  "wuxing": {
+    "bois": 0.6,
+    "terre": 0.4
+  },
+  "duree_jours": 6,
+  "recolte_base": 6,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "printemps"
+  ],
+  "besoin_eau": 0.6,
+  "famille": "cereale",
+  "conditions": {
+    "biomes": [
+      "chaud",
+      "tempere",
+      "plaine"
+    ],
+    "fertilite_min": 35
+  }
+}
