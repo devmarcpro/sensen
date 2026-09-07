@@ -907,6 +907,22 @@ func test_royaume_pays() -> void:
 	var av0 := int(ea.avenement)
 	s._nouvelle_ere("roy_a", {"nom": {"prenom": "Titus", "nom_famille": "Aurelius", "titre": "", "genre": "m", "culture": "latine", "name_order": "prenom_nom"}})
 	verifier(int(ea.avenement) == s.annee_courante() and str(ea.dirigeant) == "Titus Aurelius" and (str(ea.ere) != ere0 or GameData.catalogues.name_cultures.latine.eres.size() == 1) and ea.journal.size() == 4, "une succession ouvre une ère nouvelle (%s → %s, avènement %d → %d)" % [ere0, str(ea.ere), av0, int(ea.avenement)])
+	# L'impôt de couronne : le trésor n'était nourri que par la ville que la simulation a sous les yeux, si bien
+	# qu'il restait à zéro pour tout le monde — et « tresor_pct » prélevait une part de rien (2026-09-07).
+	var pa: Dictionary = s._ry().pays
+	s.monde.tresors_royaumes["roy_a"] = 0
+	ea.tresor = 0
+	ea.population_libre = 400
+	ea.armee = 10
+	s._impot_de_couronne("roy_a", ra, ea, pa)
+	var attendu := int(round(400.0 * float(pa.impot_par_habitant) * 0.08)) - int(round(10.0 * float(pa.solde_par_soldat)))
+	verifier(attendu > 0 and int(ea.tresor) == attendu and int(s.monde.tresors_royaumes.roy_a) == attendu, "l'impôt de couronne lève sur la population non simulée et paie la solde (%d attendu, %d au trésor)" % [attendu, int(ea.tresor)])
+	ea.population_libre = 0
+	ea.humeur = 55
+	s.monde.tresors_royaumes["roy_a"] = 0
+	ea.tresor = 0
+	s._impot_de_couronne("roy_a", ra, ea, pa)
+	verifier(int(ea.tresor) == 0 and int(ea.humeur) == 55 + int(pa.humeur_caisse_vide), "une caisse vide ne paie pas sa solde, et l'humeur le paie (%d)" % int(ea.humeur))
 	# La semaine des pays tourne sur les royaumes connus.
 	s._semaine_royaumes_pays()
 	verifier(int(ea.population) >= 0 and int(ea.armee) >= int(s._ry().pays.armee_base.petit), "la semaine recompte : armée de base %d" % int(ea.armee))

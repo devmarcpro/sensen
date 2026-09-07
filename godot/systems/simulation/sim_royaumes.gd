@@ -47,6 +47,7 @@ static func etat_royaume(sim: Simulation, id: String) -> Dictionary:
 ## La population et l'armée d'un royaume : la somme des fiches de ses agglomérations, une lecture pure.
 static func _recompter_royaume(sim: Simulation, id: String, roy: Dictionary, etat: Dictionary) -> void:
 	var pop := 0
+	var libre := 0
 	var vues: Dictionary = {}   # une agglomération à plusieurs cellules compte une fois (2026-09-06)
 	for c in roy.territory_cells:
 		if not bool(sim.monde.surface.poi_de(c).get("village", false)):
@@ -59,8 +60,11 @@ static func _recompter_royaume(sim: Simulation, id: String, roy: Dictionary, eta
 		if sim.territoires.has(nom) and sim.territoires[nom].has("agglomeration"):   # une ville connue : ses résidents, qui naissent, migrent et meurent (anneau moyen v2)
 			pop += SimTerritoire._dans_territoire(sim, nom, func() -> int: return SimTerritoire.residents(sim).size())
 		else:
-			pop += int(f.get("population", 0))
+			var p := int(f.get("population", 0))
+			pop += p
+			libre += p   # la ville que la simulation n'a pas sous les yeux : c'est elle qui paie l'impôt de couronne
 	etat.population = pop
+	etat.population_libre = libre
 	var pays: Dictionary = SimTerritoire._ry(sim).get("pays", {})
 	etat.armee = int(pays.get("armee_base", {}).get(str(roy.taille), 2)) + pop / maxi(1, int(GameData.config("villes").get("gardes_par_habitant", 25)))
 	etat.tresor = int(sim.monde.tresors_royaumes.get(id, 0))
@@ -122,6 +126,7 @@ static func _semaine_royaumes_pays(sim: Simulation) -> void:
 			if etat.is_empty():
 				continue
 			_recompter_royaume(sim, str(id), roy, etat)
+			_impot_de_couronne(sim, str(id), roy, etat, pays)
 			# L'humeur des résidents chargés compte ; sinon elle revient vers sa base.
 			var n := 0
 			var somme := 0
@@ -142,6 +147,20 @@ static func _semaine_royaumes_pays(sim: Simulation) -> void:
 					continue
 				_appliquer_evenement(sim, str(id), roy, etat, ev)
 			etat.humeur = clampi(int(etat.humeur), 0, 100)
+
+
+## L'impôt de couronne d'une semaine : le royaume lève sa part sur la population qu'il n'a pas sous les yeux
+## (celle des villes chargées paie déjà par `SimTerritoire._taxe_royaume`, on ne compte pas deux fois), puis il
+## paie la solde de son armée. Sans cela le trésor restait à zéro et `tresor_pct` prélevait une part de rien.
+static func _impot_de_couronne(sim: Simulation, id: String, roy: Dictionary, etat: Dictionary, pays: Dictionary) -> void:
+	var impot := int(round(float(etat.get("population_libre", 0)) * float(pays.get("impot_par_habitant", 0.6)) * float(roy.taxes.get("base_rate", 0.08))))
+	var solde := int(round(float(etat.get("armee", 0)) * float(pays.get("solde_par_soldat", 0.8))))
+	var tresor := int(sim.monde.tresors_royaumes.get(id, 0)) + impot
+	if tresor < solde:   # une caisse vide ne paie pas ses soldats, et cela se sait
+		etat.humeur = clampi(int(etat.humeur) + int(pays.get("humeur_caisse_vide", -2)), 0, 100)
+		solde = tresor
+	sim.monde.tresors_royaumes[id] = maxi(0, tresor - solde)
+	etat.tresor = int(sim.monde.tresors_royaumes[id])
 
 
 static func _conditions_evenement(sim: Simulation, id: String, roy: Dictionary, etat: Dictionary, c: Dictionary) -> bool:

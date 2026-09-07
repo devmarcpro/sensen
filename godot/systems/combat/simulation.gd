@@ -5175,6 +5175,9 @@ func _nouvelle_ere(id: String, dirigeant: Dictionary) -> void:
 func _semaine_royaumes_pays() -> void:
 	SimRoyaumes._semaine_royaumes_pays(self)
 
+func _impot_de_couronne(id: String, roy: Dictionary, etat: Dictionary, pays: Dictionary) -> void:
+	SimRoyaumes._impot_de_couronne(self, id, roy, etat, pays)
+
 func _conditions_evenement(id: String, roy: Dictionary, etat: Dictionary, c: Dictionary) -> bool:
 	return SimRoyaumes._conditions_evenement(self, id, roy, etat, c)
 

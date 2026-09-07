@@ -1053,7 +1053,10 @@
         "grand": 40
       },
       "avenement_max": 30,
-      "journal_max": 10
+      "journal_max": 10,
+      "impot_par_habitant": 3.0,
+      "solde_par_soldat": 0.8,
+      "humeur_caisse_vide": -2
     }
   },
   "alchimie": {

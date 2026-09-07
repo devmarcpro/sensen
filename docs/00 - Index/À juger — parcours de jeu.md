@@ -731,3 +731,17 @@ Les tuiles redessinées par-dessus un être (les murs devant lui, pour qu'il pas
 - **Ce que tu verras.** Rien à l'œil, c'est le but : le même jeu, des ticks moins chers. Les chiffres (sonde d'échelle, capture en ville) sont dans [[Budgets de performance]].
 - **Ce que ça ouvre, à ton choix.** Avec un A* à ~50 µs au lieu de 15 ms, le budget de nœuds d'un chemin d'IA (`planete.routine.astar_noeuds_max`, 800) et la distance sous laquelle l'A* remplace le pas glouton (`astar_sous`, 20 tuiles) peuvent monter — des PNJ qui trouvent leur chemin autour d'un quartier au lieu de buter contre un mur. Je ne l'ai pas fait : c'est un choix de comportement, pas de performance.
 - **Ce que le C++ ne fera pas.** Le rendu en ville (une dizaine de millisecondes de Godot lui-même pour deux cents êtres et le terrain) : là, la marche suivante reste les sprites et un dessin du terrain par tableaux de triangles, en GDScript.
+
+## 2026-09-07 — Le trésor des royaumes bouge enfin, et ses deux nombres sont à toi
+
+Douze pays, douze semaines, **« trésor 0 » pour tous les douze** : le trésor n'était nourri que par la ville que la simulation a sous les yeux, et l'effet d'un événement est une *part* du trésor — sur zéro, `levee_de_taxes` prélevait zéro, pour toujours. Corrigé ([[Royaumes — état, ères, blasons et événements]]) : chaque semaine un royaume lève son impôt sur la population qu'il n'a pas sous les yeux et paie la solde de son armée.
+
+**Ce que ça donne**, sur les douze royaumes autour du camp après douze semaines : de **25** (Tangbasa, un hameau de seize âmes) à **252** (Marraane). Le grand BeniThoth, 247 âmes mais 49 soldats, n'a que 60 — son armée mange sa recette, ce qui me paraît juste.
+
+**À juger, parce que ce sont des chiffres de jeu et pas de code** (`combat_rules.json → royaume.pays`) :
+- `impot_par_habitant` **3,0** — ce qu'un habitant rend à la couronne en une semaine, avant le taux du royaume (0,08 au départ, +0,02 à chaque `levee_de_taxes`). Je l'ai réglé pour qu'un pays ordinaire soit tout juste bénéficiaire ; à 0,6 tout le monde était à sec en permanence, ce qui n'était pas plus intéressant que zéro.
+- `solde_par_soldat` **0,8** — un pays « grand » démarre à 40 soldats quelle que soit sa population, si bien que l'armée est le vrai poids du budget. C'est peut-être `armee_base` qu'il faut revoir plutôt que la solde.
+- `humeur_caisse_vide` **−2** par semaine où la solde n'est pas payée. C'est aujourd'hui la seule conséquence : personne ne déserte, aucune garnison ne fond. **Faut-il qu'une caisse vide coûte des soldats ?**
+
+Et la question de fond : **est-ce que le joueur verra jamais ce trésor ?** Il ne s'affiche nulle part aujourd'hui. Un pays riche devrait-il se voir — plus de gardes, une fête, un chantier — ou est-ce un rouage qui n'a besoin d'exister que pour nourrir les événements ?
+
