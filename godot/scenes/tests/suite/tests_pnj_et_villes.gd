@@ -2081,3 +2081,37 @@ func test_ville_batit() -> void:
 	var avant := SimPerimetres._stock_famille(s, "bois")
 	verifier(avant == 30 and SimPerimetres._stock_famille(s, "bois") == 30, "compter le stock d'une famille n'en prend rien")
 
+
+## La ville porte le deuil (2026-09-07) : l'enterrement est le moment où elle apprend la mort — les siens perdent de
+## l'humeur, la famille bien davantage, et le tueur est démasqué même s'il a frappé loin et sans témoin.
+func test_deuil_de_la_ville() -> void:
+	var cfg: Dictionary = GameData.config("villes").deuil
+	verifier(int(cfg.humeur_famille) > int(cfg.humeur_ville) and int(cfg.reputation_ville) > 0, "les trois nombres du deuil sont en données (ville −%d, famille −%d, réputation −%d)" % [int(cfg.humeur_ville), int(cfg.humeur_famille), int(cfg.reputation_ville)])
+	var s := Simulation.new(4242)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	# trois habitants d'une même ville : le mort, son enfant, un voisin
+	var mort := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	var enfant := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	var voisin := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	for x in [mort, enfant, voisin]:
+		x["village"] = "Bourgade"
+		x["humeur"] = 60
+		x["tags"] = ["civil"]
+	enfant["family"] = {"child_of": [str(mort.id)]}
+	mort["family"] = {"children": [str(enfant.id)]}
+	mort["nom"] = {"prenom": "Jean", "nom_famille": "Dubois", "titre": "", "genre": "m", "culture": "francaise", "name_order": "prenom_nom"}
+	var rep0 := int(j.get("reputations", {}).get("Bourgade", 0))
+	SimVilles._porter_le_deuil(s, mort, "Bourgade", str(j.id))
+	verifier(int(voisin.humeur) == 60 - int(cfg.humeur_ville), "un voisin pleure un peu (60 → %d)" % int(voisin.humeur))
+	verifier(int(enfant.humeur) == 60 - int(cfg.humeur_famille) and int(enfant.humeur) < int(voisin.humeur), "son enfant pleure davantage (60 → %d)" % int(enfant.humeur))
+	verifier(int(j.get("reputations", {}).get("Bourgade", 0)) == rep0 - int(cfg.reputation_ville), "le tueur est démasqué à l'enterrement : réputation %d → %d dans SA ville" % [rep0, int(j.reputations.Bourgade)])
+	# une autre ville n'en sait rien, et une mort dont le joueur n'est pas la cause ne l'accuse pas
+	var ailleurs := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	ailleurs["village"] = "Autreville"
+	ailleurs["humeur"] = 60
+	var rep_a := int(j.get("reputations", {}).get("Autreville", 0))
+	SimVilles._porter_le_deuil(s, mort, "Bourgade", "")
+	verifier(int(ailleurs.humeur) == 60 and int(j.get("reputations", {}).get("Autreville", 0)) == rep_a, "une autre ville ne porte pas ce deuil")
+	verifier(int(j.reputations.Bourgade) == rep0 - int(cfg.reputation_ville), "sans tueur nommé, personne n'est accusé")
+

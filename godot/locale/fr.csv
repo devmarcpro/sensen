@@ -4445,3 +4445,5 @@ journal.arrosage_sans_seau,il faut un seau en main pour arroser
 journal.deja_arrose,"cette parcelle a déjà été arrosée aujourd'hui"
 journal.denrees_perdues,"{n} unité(s) de denrées se sont gâtées"
 journal.ville_batit,"{ville} bâtit {n} maison(s) : elle loge maintenant {logements} habitants"
+journal.deuil,"{village} porte le deuil : {n} habitant(s), dont {proches} proche(s)"
+journal.deuil_accuse,"à {village}, on sait qui l'a tué (réputation {reputation})"

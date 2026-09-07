@@ -1271,5 +1271,11 @@
     "logements_par_maison": 2,
     "max_par_semaine": 1,
     "humeur_min": 30
+  },
+  "deuil": {
+    "_doc": "La ville porte le deuil (Villes, 2026-09-07) : quand une tombe recoit un habitant, les residents de sa ville perdent humeur_ville, sa famille humeur_famille, et si le joueur l a tue sa reputation dans cette ville tombe de reputation_ville — au moment de l enterrement, meme sans temoin au moment du coup.",
+    "humeur_ville": 2,
+    "humeur_famille": 10,
+    "reputation_ville": 8
   }
 }

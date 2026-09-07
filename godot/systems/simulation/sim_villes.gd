@@ -999,7 +999,7 @@ static func _creer_perimetres_ville(sim: Simulation, cell: Vector2i, v: Dictiona
 ## Enterrer un habitant chez lui (Villes — les repères, 2026-09-07) : une tombe libre du cimetière de SA ville reçoit
 ## son nom, son métier et l'année, où qu'il soit tombé. Rend true si une tombe l'a reçu (le cimetière peut être plein,
 ## la ville hors fenêtre, ou le mort n'être de nulle part).
-static func enterrer(sim: Simulation, mort: Dictionary) -> bool:
+static func enterrer(sim: Simulation, mort: Dictionary, source: String = "") -> bool:
 	var cfg: Dictionary = GameData.config("villes").get("reperes", {}).get("cimetiere", {})
 	if not bool(cfg.get("enterrement", true)) or sim.monde == null:
 		return false
@@ -1039,9 +1039,47 @@ static func enterrer(sim: Simulation, mort: Dictionary) -> bool:
 					sim.grille.meubles[sim.grille.idx(pm)] = "tombe"
 					sim.grille.marquer(pm)
 					EventBus.emettre(&"tile_changed", [pm])
+				_porter_le_deuil(sim, mort, village, source)   # la ville apprend la mort au moment où elle reçoit le corps
 				return true
 		return false   # le cimetière de sa ville est plein
 	return false
+
+
+## Le deuil d'une ville (Villes, 2026-09-07) : les siens perdent de l'humeur — la famille bien davantage — et, si c'est
+## le joueur qui a tué, sa réputation dans CETTE ville tombe au moment où le corps rentre, même s'il a frappé loin et
+## sans témoin. C'est l'enterrement qui fait savoir, pas le coup.
+static func _porter_le_deuil(sim: Simulation, mort: Dictionary, village: String, source: String) -> void:
+	var cfg: Dictionary = GameData.config("villes").get("deuil", {})
+	if cfg.is_empty():
+		return
+	var proches := {}   # parents, enfants, conjoint : leur peine n'est pas celle des voisins
+	var fam: Dictionary = mort.get("family", {})
+	for cle in ["child_of", "children", "spouse"]:
+		var v: Variant = fam.get(cle, [])
+		for pid in (v if v is Array else [v]):
+			if not str(pid).is_empty():
+				proches[str(pid)] = true
+	var n_ville := 0
+	var n_proches := 0
+	for x in sim.vivants():
+		if not x.vivant or str(x.get("village", "")) != village or x.id == str(mort.get("id", "")):
+			continue
+		var perte := int(cfg.get("humeur_famille", 10)) if proches.has(str(x.id)) else int(cfg.get("humeur_ville", 2))
+		x["humeur"] = clampi(int(x.get("humeur", SimTerritoire._ry(sim).humeur_base)) - perte, 0, 100)
+		n_ville += 1
+		if proches.has(str(x.id)):
+			n_proches += 1
+	if n_ville > 0:
+		EventBus.emettre(&"journal", [&"journal.deuil", {"village": village, "n": n_ville, "proches": n_proches}])
+	# Le tueur, démasqué à l'enterrement : la ville sait de qui elle porte le deuil.
+	var tueur: Dictionary = sim.entites.get(source, {})
+	if tueur.is_empty() or str(tueur.get("controle", "")) != "joueur":
+		return
+	if not tueur.has("reputations"):
+		tueur["reputations"] = {}
+	var rep := int(tueur.reputations.get(village, 0)) - int(cfg.get("reputation_ville", 8))
+	tueur.reputations[village] = clampi(rep, -100, 100)
+	EventBus.emettre(&"journal", [&"journal.deuil_accuse", {"village": village, "reputation": int(tueur.reputations[village])}])
 
 
 ## L'épitaphe d'une tuile, s'il y a une tombe nommée (le client la lit au survol) : {"nom", "fonction", "an"}.

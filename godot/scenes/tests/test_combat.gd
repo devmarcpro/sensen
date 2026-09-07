@@ -269,6 +269,7 @@ func _ready() -> void:
 	_lancer("test_jardin_du_joueur")   # labourer, arroser, planter un arbre (designer 2026-09-07)
 	_lancer("test_denrees_perissent")   # les denrées pourrissent et le prix bouge (designer 2026-09-07)
 	_lancer("test_ville_batit")   # une ville riche bâtit (2026-09-07)
+	_lancer("test_deuil_de_la_ville")   # la ville porte le deuil (2026-09-07)
 	_lancer("test_anneau_moyen")
 	_lancer("test_population_villes")
 	_lancer("test_lod_pnj")

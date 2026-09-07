@@ -4436,3 +4436,5 @@ journal.arrosage_sans_seau,a bucket in hand is needed to water
 journal.deja_arrose,this plot has already been watered today
 journal.denrees_perdues,"{n} unit(s) of food spoiled"
 journal.ville_batit,"{ville} builds {n} house(s): it now houses {logements}"
+journal.deuil,"{village} mourns: {n} inhabitant(s), {proches} of them kin"
+journal.deuil_accuse,"in {village}, they know who killed him (reputation {reputation})"
