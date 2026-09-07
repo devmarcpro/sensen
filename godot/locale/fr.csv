@@ -4049,3 +4049,159 @@ titre.nguni.dictature.m,Induna Yempi
 titre.nguni.dictature.f,Induna Yempi
 titre.nguni.guilde_maitre.m,Ingcweti
 titre.nguni.guilde_maitre.f,Ingcweti
+culture.basque.name,Basque
+titre.basque.monarchie_hereditaire.m,Jaun
+titre.basque.monarchie_hereditaire.f,Andere
+titre.basque.republique.m,Alkate Nagusi
+titre.basque.republique.f,Alkate Nagusi
+titre.basque.theocratie.m,Apaiz Nagusi
+titre.basque.theocratie.f,Apaiz Nagusi
+titre.basque.ploutocratie.m,Merkatari Nagusi
+titre.basque.ploutocratie.f,Merkatari Nagusi
+titre.basque.dictature.m,Gudalburu
+titre.basque.dictature.f,Gudalburu
+titre.basque.guilde_maitre.m,Maisu
+titre.basque.guilde_maitre.f,Maistra
+culture.albanaise.name,Albanaise
+titre.albanaise.monarchie_hereditaire.m,Mbret
+titre.albanaise.monarchie_hereditaire.f,Mbretëreshë
+titre.albanaise.republique.m,Kryeplak
+titre.albanaise.republique.f,Kryeplake
+titre.albanaise.theocratie.m,Kryeprift
+titre.albanaise.theocratie.f,Kryepriftëreshë
+titre.albanaise.ploutocratie.m,Tregtar i Madh
+titre.albanaise.ploutocratie.f,Tregtare e Madhe
+titre.albanaise.dictature.m,Kryekomandant
+titre.albanaise.dictature.f,Kryekomandante
+titre.albanaise.guilde_maitre.m,Mjeshtër
+titre.albanaise.guilde_maitre.f,Mjeshtre
+culture.kurde.name,Kurde
+titre.kurde.monarchie_hereditaire.m,Mîr
+titre.kurde.monarchie_hereditaire.f,Mîre
+titre.kurde.republique.m,Serok
+titre.kurde.republique.f,Seroke
+titre.kurde.theocratie.m,Şêx
+titre.kurde.theocratie.f,Şêxe
+titre.kurde.ploutocratie.m,Bazirgan
+titre.kurde.ploutocratie.f,Bazirgane
+titre.kurde.dictature.m,Serdar
+titre.kurde.dictature.f,Serdare
+titre.kurde.guilde_maitre.m,Ustad
+titre.kurde.guilde_maitre.f,Ustade
+culture.ouzbeke.name,Ouzbèke
+titre.ouzbeke.monarchie_hereditaire.m,Xon
+titre.ouzbeke.monarchie_hereditaire.f,Xonim
+titre.ouzbeke.republique.m,Oqsoqol
+titre.ouzbeke.republique.f,Oqsoqol
+titre.ouzbeke.theocratie.m,Bosh Imom
+titre.ouzbeke.theocratie.f,Bosh Imom
+titre.ouzbeke.ploutocratie.m,Savdogar
+titre.ouzbeke.ploutocratie.f,Savdogar
+titre.ouzbeke.dictature.m,Amir
+titre.ouzbeke.dictature.f,Amira
+titre.ouzbeke.guilde_maitre.m,Usta
+titre.ouzbeke.guilde_maitre.f,Usta
+culture.tamoule.name,Tamoule
+titre.tamoule.monarchie_hereditaire.m,Mannan
+titre.tamoule.monarchie_hereditaire.f,Rani
+titre.tamoule.republique.m,Peraiyar
+titre.tamoule.republique.f,Peraiyar
+titre.tamoule.theocratie.m,Kurukkal
+titre.tamoule.theocratie.f,Kurukkal
+titre.tamoule.ploutocratie.m,Chettiar
+titre.tamoule.ploutocratie.f,Chettichi
+titre.tamoule.dictature.m,Senathipathi
+titre.tamoule.dictature.f,Senathipathi
+titre.tamoule.guilde_maitre.m,Aasan
+titre.tamoule.guilde_maitre.f,Aasan
+culture.bengalie.name,Bengalie
+titre.bengalie.monarchie_hereditaire.m,Maharaj
+titre.bengalie.monarchie_hereditaire.f,Maharani
+titre.bengalie.republique.m,Sabhapati
+titre.bengalie.republique.f,Sabhanetri
+titre.bengalie.theocratie.m,Purohit
+titre.bengalie.theocratie.f,Purohita
+titre.bengalie.ploutocratie.m,Banik
+titre.bengalie.ploutocratie.f,Banik
+titre.bengalie.dictature.m,Senapati
+titre.bengalie.dictature.f,Senapati
+titre.bengalie.guilde_maitre.m,Karigar Pradhan
+titre.bengalie.guilde_maitre.f,Karigar Pradhan
+culture.birmane.name,Birmane
+titre.birmane.monarchie_hereditaire.m,Min
+titre.birmane.monarchie_hereditaire.f,Mibaya
+titre.birmane.republique.m,Myothugyi
+titre.birmane.republique.f,Myothugyi
+titre.birmane.theocratie.m,Sayadaw
+titre.birmane.theocratie.f,Sayadaw
+titre.birmane.ploutocratie.m,Thutay
+titre.birmane.ploutocratie.f,Thutay
+titre.birmane.dictature.m,Bo Gyoke
+titre.birmane.dictature.f,Bo Gyoke
+titre.birmane.guilde_maitre.m,Saya Gyi
+titre.birmane.guilde_maitre.f,Saya Gyi
+culture.haoussa.name,Haoussa
+titre.haoussa.monarchie_hereditaire.m,Sarki
+titre.haoussa.monarchie_hereditaire.f,Sarauniya
+titre.haoussa.republique.m,Shugaba
+titre.haoussa.republique.f,Shugaba
+titre.haoussa.theocratie.m,Limamin Juma
+titre.haoussa.theocratie.f,Limamin Juma
+titre.haoussa.ploutocratie.m,Attajiri
+titre.haoussa.ploutocratie.f,Attajiriya
+titre.haoussa.dictature.m,Madawaki
+titre.haoussa.dictature.f,Madawaki
+titre.haoussa.guilde_maitre.m,Sarkin Sana'a
+titre.haoussa.guilde_maitre.f,Sarkin Sana'a
+culture.akan.name,Akan
+titre.akan.monarchie_hereditaire.m,Ohene
+titre.akan.monarchie_hereditaire.f,Ohemaa
+titre.akan.republique.m,Odikro
+titre.akan.republique.f,Obaapanin
+titre.akan.theocratie.m,Okomfo
+titre.akan.theocratie.f,Okomfo
+titre.akan.ploutocratie.m,Osikani
+titre.akan.ploutocratie.f,Osikani
+titre.akan.dictature.m,Safohene
+titre.akan.dictature.f,Safohemaa
+titre.akan.guilde_maitre.m,Adwumfo Panin
+titre.akan.guilde_maitre.f,Adwumfo Panin
+culture.maya.name,Maya
+titre.maya.monarchie_hereditaire.m,Ajaw
+titre.maya.monarchie_hereditaire.f,Ix Ajaw
+titre.maya.republique.m,Batab
+titre.maya.republique.f,Ix Batab
+titre.maya.theocratie.m,Ah Kin
+titre.maya.theocratie.f,Ix Kin
+titre.maya.ploutocratie.m,Ppolm
+titre.maya.ploutocratie.f,Ppolm
+titre.maya.dictature.m,Nacom
+titre.maya.dictature.f,Nacom
+titre.maya.guilde_maitre.m,Ah Men
+titre.maya.guilde_maitre.f,Ix Men
+culture.guarani.name,Guaranie
+titre.guarani.monarchie_hereditaire.m,Mburuvicha Guasu
+titre.guarani.monarchie_hereditaire.f,Mburuvicha Guasu
+titre.guarani.republique.m,Tendota
+titre.guarani.republique.f,Tendota
+titre.guarani.theocratie.m,Paje
+titre.guarani.theocratie.f,Paje
+titre.guarani.ploutocratie.m,Ñemuha
+titre.guarani.ploutocratie.f,Ñemuha
+titre.guarani.dictature.m,Ruvicha
+titre.guarani.dictature.f,Ruvicha
+titre.guarani.guilde_maitre.m,Mbaapo Ruvicha
+titre.guarani.guilde_maitre.f,Mbaapo Ruvicha
+culture.samie.name,Samie
+titre.samie.monarchie_hereditaire.m,Noaidi Stuoris
+titre.samie.monarchie_hereditaire.f,Noaidi Stuoris
+titre.samie.republique.m,Siidaisit
+titre.samie.republique.f,Siidaisit
+titre.samie.theocratie.m,Noaidi
+titre.samie.theocratie.f,Noaidi
+titre.samie.ploutocratie.m,Gávpe Isit
+titre.samie.ploutocratie.f,Gávpe Isit
+titre.samie.dictature.m,Soahteoaivi
+titre.samie.dictature.f,Soahteoaivi
+titre.samie.guilde_maitre.m,Duojár
+titre.samie.guilde_maitre.f,Duojár

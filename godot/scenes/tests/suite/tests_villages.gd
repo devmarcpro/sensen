@@ -7,7 +7,7 @@ extends TestsBase
 func test_village() -> void:
 	var planete: Dictionary = GameData.config("planete")
 	var surf := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete, 4242)
-	verifier(GameData.catalogues.name_cultures.size() == 39 and GameData.catalogues.dialogue.size() >= 31 and GameData.catalogues.functions.size() >= 6, "39 cultures, au moins 31 répliques (%d), les fonctions" % GameData.catalogues.dialogue.size())
+	verifier(GameData.catalogues.name_cultures.size() == 51 and GameData.catalogues.dialogue.size() >= 31 and GameData.catalogues.functions.size() >= 6, "51 cultures, au moins 31 répliques (%d), les fonctions" % GameData.catalogues.dialogue.size())
 	# Un nom par culture, genré ; la fonction d'affichage unique.
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
