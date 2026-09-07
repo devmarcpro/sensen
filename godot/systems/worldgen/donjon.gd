@@ -476,35 +476,66 @@ func _reparer_connexite(e: Dictionary) -> void:
 	var origine: Vector2i = _centre_libre(e, e.pieces[0])
 	for essai in 4:
 		var atteint := _bfs(e, origine)
+		var vu_a: PackedByteArray = atteint.vu
 		var repare := false
 		for p in e.pieces:
 			var c := _centre_libre(e, p)
-			if not atteint.has(c.y * e.largeur + c.x):
-				_tranchee(e, c, _plus_proche_atteint(e, c, atteint))
+			if vu_a[c.y * e.largeur + c.x] == 0:
+				_tranchee(e, c, _plus_proche_atteint(e, c, atteint.ordre))
 				repare = true
 		if not repare:
 			return
 
 
+## Le BFS d'un étage sur des TABLEAUX COMPACTS (2026-09-07) : un curseur au lieu de `pop_front` (qui décale toute la
+## file à chaque pas), des index plutôt que des Vector2i, et un octet par tuile au lieu d'un dictionnaire — le hachage
+## de trois mille clés coûtait plus que le parcours lui-même. Même ordre de visite, même résultat ; 6,5 → moins de 1 ms.
 func _bfs(e: Dictionary, depart: Vector2i) -> Dictionary:
-	var vu := {depart.y * e.largeur + depart.x: true}
-	var file: Array[Vector2i] = [depart]
-	var dirs := [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
-	while not file.is_empty():
-		var c: Vector2i = file.pop_front()
-		for d in dirs:
-			var v: Vector2i = c + d
-			var idx: int = v.y * e.largeur + v.x
-			if v.x >= 0 and v.y >= 0 and v.x < e.largeur and v.y < e.hauteur and e.sol.has(idx) and not vu.has(idx):
-				vu[idx] = true
-				file.append(v)
-	return vu
+	var n: int = e.largeur * e.hauteur
+	var vu := PackedByteArray()
+	vu.resize(n)
+	var sol := PackedByteArray()   # `e.sol` est un dictionnaire : on le lit UNE fois, pas quatre fois par tuile
+	sol.resize(n)
+	for i in e.sol.keys():
+		sol[int(i)] = 1
+	var i0: int = depart.y * e.largeur + depart.x
+	vu[i0] = 1
+	var file := PackedInt32Array()
+	file.append(i0)
+	var tete := 0
+	var larg: int = e.largeur
+	var haut: int = e.hauteur
+	while tete < file.size():
+		var ci: int = file[tete]
+		tete += 1
+		var cx: int = ci % larg
+		@warning_ignore("integer_division")
+		var cy: int = ci / larg
+		# Les quatre voisins déroulés, dans l'ordre de `dirs` (est, ouest, sud, nord) : écrire `[1, -1, 0, 0][k]`
+		# alloue un tableau à CHAQUE tuile visitée — mesuré, c'était plus cher que le dictionnaire qu'on remplaçait.
+		if cx + 1 < larg and sol[ci + 1] != 0 and vu[ci + 1] == 0:
+			vu[ci + 1] = 1
+			file.append(ci + 1)
+		if cx - 1 >= 0 and sol[ci - 1] != 0 and vu[ci - 1] == 0:
+			vu[ci - 1] = 1
+			file.append(ci - 1)
+		if cy + 1 < haut and sol[ci + larg] != 0 and vu[ci + larg] == 0:
+			vu[ci + larg] = 1
+			file.append(ci + larg)
+		if cy - 1 >= 0 and sol[ci - larg] != 0 and vu[ci - larg] == 0:
+			vu[ci - larg] = 1
+			file.append(ci - larg)
+	# `ordre` est la file elle-même : les tuiles dans l'ordre où le BFS les a atteintes — c'est-à-dire l'ordre
+	# qu'avaient les clés du dictionnaire d'avant. `_plus_proche_atteint` départage à égalité de distance par
+	# le PREMIER rencontré : sans cet ordre, les mêmes graines ne rendraient plus les mêmes étages.
+	return {"vu": vu, "ordre": file}
 
 
-func _plus_proche_atteint(e: Dictionary, c: Vector2i, atteint: Dictionary) -> Vector2i:
+func _plus_proche_atteint(e: Dictionary, c: Vector2i, ordre: PackedInt32Array) -> Vector2i:
 	var meilleur := c
 	var dmin := 1 << 30
-	for idx in atteint.keys():
+	for idx in ordre:
+		@warning_ignore("integer_division")
 		var p := Vector2i(idx % e.largeur, idx / e.largeur)
 		var d := absi(p.x - c.x) + absi(p.y - c.y)
 		if d < dmin:
@@ -524,23 +555,46 @@ func _tranchee(e: Dictionary, de: Vector2i, vers: Vector2i) -> void:
 
 func _piece_la_plus_loin(e: Dictionary, depart: Vector2i) -> int:
 	# Distance de marche (BFS) : la salle la plus lointaine reçoit l'escalier ou le boss.
-	var dist := {depart.y * e.largeur + depart.x: 0}
-	var file: Array[Vector2i] = [depart]
-	var dirs := [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
-	while not file.is_empty():
-		var c: Vector2i = file.pop_front()
-		var dc: int = dist[c.y * e.largeur + c.x]
-		for d in dirs:
-			var v: Vector2i = c + d
-			var idx: int = v.y * e.largeur + v.x
-			if v.x >= 0 and v.y >= 0 and v.x < e.largeur and v.y < e.hauteur and e.sol.has(idx) and not dist.has(idx):
-				dist[idx] = dc + 1
-				file.append(v)
+	# Les mêmes tableaux compacts que `_bfs` : la distance en int32, la file en index (2026-09-07).
+	var n: int = e.largeur * e.hauteur
+	var dist := PackedInt32Array()
+	dist.resize(n)
+	dist.fill(-1)
+	var sol := PackedByteArray()
+	sol.resize(n)
+	for i_s in e.sol.keys():
+		sol[int(i_s)] = 1
+	var larg: int = e.largeur
+	var haut: int = e.hauteur
+	var i0: int = depart.y * larg + depart.x
+	dist[i0] = 0
+	var file := PackedInt32Array()
+	file.append(i0)
+	var tete := 0
+	while tete < file.size():
+		var ci: int = file[tete]
+		tete += 1
+		var cx: int = ci % larg
+		@warning_ignore("integer_division")
+		var cy: int = ci / larg
+		var dc: int = dist[ci]
+		if cx + 1 < larg and sol[ci + 1] != 0 and dist[ci + 1] < 0:
+			dist[ci + 1] = dc + 1
+			file.append(ci + 1)
+		if cx - 1 >= 0 and sol[ci - 1] != 0 and dist[ci - 1] < 0:
+			dist[ci - 1] = dc + 1
+			file.append(ci - 1)
+		if cy + 1 < haut and sol[ci + larg] != 0 and dist[ci + larg] < 0:
+			dist[ci + larg] = dc + 1
+			file.append(ci + larg)
+		if cy - 1 >= 0 and sol[ci - larg] != 0 and dist[ci - larg] < 0:
+			dist[ci - larg] = dc + 1
+			file.append(ci - larg)
 	var meilleur := 0
 	var dmax := -1
 	for i in range(1, e.pieces.size()):
 		var c := _centre_libre(e, e.pieces[i])
-		var d: int = int(dist.get(c.y * e.largeur + c.x, -1))
+		var d: int = int(dist[c.y * larg + c.x])
 		if d > dmax:
 			dmax = d
 			meilleur = i

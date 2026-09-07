@@ -800,8 +800,10 @@ static func villes_reliees(sim: Simulation, centre: Vector2i, distance_max: int)
 	var res: Array = []
 	var vus := {centre: 0}
 	var file: Array = [centre]
-	while not file.is_empty():
-		var c: Vector2i = file.pop_front()
+	var tete := 0
+	while tete < file.size():
+		var c: Vector2i = file[tete]
+		tete += 1
 		var d: int = int(vus[c])
 		if d >= distance_max:
 			continue

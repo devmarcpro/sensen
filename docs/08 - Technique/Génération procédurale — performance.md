@@ -42,6 +42,14 @@ la cellule uniquement (hash déterministe).
 > - **Le tirage pondéré** parcourait le dictionnaire des poids **deux fois** (une pour le total, une pour tirer) et allouait trois fois son tableau de clés — deux cent quarante chaînes par tirage. Le total et les poids sont désormais rangés en tableaux compacts à la mise en cache ; la soustraction successive garde le MÊME ordre, donc le même matériau sort pour le même tirage. Et le palier d'une matière se lit dans une table, pas par deux recherches dans le catalogue. 18,9 → 9,6 ms.
 > Ce qui reste : `objet.generer` (12 ms — les affixes, la rareté, le nom : de la règle de jeu), `comp.tirage` (9,6 — la pondération que le cache ne peut pas éviter quand le pool change), `comp.appliquer` (4,1). Et la géométrie de l'étage, 21,6 ms, dont la connexité (7,2) et les escaliers (8,0) — deux parcours de graphe, candidats au noyau C++ si le budget le redemande.
 
+> [!success] Mesuré et corrigé le 2026-09-07, 8 h — la géométrie d'un étage : 21,6 → 12,2 ms (le chargement 125 → 79 ms à froid, 94 → 60 à chaud)
+> Après le butin, ce qui restait d'un étage était deux parcours de graphe : la **connexité** (6,6 ms) et le choix de l'**escalier** (7,3 ms), tous deux des BFS sur les trois mille tuiles de sol. Ce que la mesure a appris, étape par étape :
+> - **`pop_front()` n'était pas le coupable** : le remplacer par un curseur n'a rien gagné (6,9 au lieu de 7,2). Il fallait mesurer plus fin — un chrono autour du BFS lui-même a montré qu'il portait 6,5 des 6,6 ms.
+> - **Le dictionnaire, oui** : `vu` et `dist` en dictionnaire, la file en `Vector2i`, et `e.sol.has(idx)` interrogé quatre fois par tuile. En tableaux compacts (un octet par tuile pour le vu, un int32 pour la distance, la file en index, le sol lu **une** fois), le parcours devient linéaire et sans hachage.
+> - **Le piège qui a doublé le coût avant de le diviser** : écrire les quatre directions `[1, -1, 0, 0][k]` dans la boucle **alloue un tableau à chaque tuile visitée** — la première version « optimisée » était plus lente que l'originale (7,9 contre 6,6). Les quatre voisins déroulés à la main : 1,6 ms.
+> - **L'ordre de visite est un résultat, pas un détail** : `_plus_proche_atteint` départage à égalité de distance par le premier rencontré. Le BFS rend donc sa file (l'ordre d'atteinte) en plus du tableau des tuiles vues — sans quoi les mêmes graines ne rendraient plus les mêmes étages.
+> Preuve : `sonde_signature_etage` (nouvelle) imprime la signature de six étages (trois graines × deux profondeurs : sol, murs, entrée, escalier, pièces, coffres, spawns, et un hash de tout). Avant et après, les six hashs sont identiques. C'est l'outil à relancer avant de toucher à la génération de donjon.
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Unification macro-micro]], [[Catalogue des couches de bruit]]
 - **Alimente** : [[Terrain spectaculaire]], [[Génération de donjon]], [[Génération des royaumes PNJ]]

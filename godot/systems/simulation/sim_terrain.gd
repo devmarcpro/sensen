@@ -475,8 +475,10 @@ static func _frapper_foudre(sim: Simulation, t: Vector2i) -> void:
 	var rayon := int(ea.get("foudre_rayon_mer", 8)) if sim.grille.niveau_liquide(t) >= 8 else int(ea.get("foudre_rayon_eau", 5))
 	var nappe: Dictionary = {sim.grille.idx(t): true}
 	var file: Array[Vector2i] = [t]
-	while not file.is_empty():
-		var c: Vector2i = file.pop_front()
+	var tete := 0
+	while tete < file.size():
+		var c: Vector2i = file[tete]
+		tete += 1
 		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			var q: Vector2i = c + dd
 			if sim.grille.dans(q) and not nappe.has(sim.grille.idx(q)) and Grille.distance(q, t) <= rayon and sim.grille.niveau_liquide(q) > 0:
