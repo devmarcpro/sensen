@@ -1,7 +1,7 @@
 extends Node
 const GrandeBase := preload("res://scenes/tests/grande_base.gd")
 ## Capture d'écran automatique de la scène principale (fenêtrée, pas headless) :
-##   & Godot --path godot res://scenes/tests/capture.tscn -- --sortie C:/chemin/capture.png [--arene N] [--frames 60] [--ville | --palier hameau|village|bourg|ville|cite --graine G --heure H --dans-batiment | --a-l-etage] [--dump-lumiere]
+##   & Godot --path godot res://scenes/tests/capture.tscn -- --sortie C:/chemin/capture.png [--arene N] [--frames 60] [--ville | --palier hameau|village|bourg|ville|cite | --sur cimetiere|verger|champs|moulin|enclos|puits --graine G --heure H --dans-batiment | --a-l-etage] [--dump-lumiere]
 ## Sert à vérifier le rendu sans œil humain disponible ; ne remplace pas le jugement de game feel.
 
 var gif_images := 0      # --gif N : N images espacées, pour un GIF monté hors du jeu
@@ -219,6 +219,50 @@ func _ready() -> void:
 						meilleur_e = d_e
 						centre_v = libre_b
 			sv.grille.liberer(jv.pos)
+			# --sur <repere> (2026-09-07) : viser ce qu'on veut juger plutôt que la place — le cimetière, un verger, un
+			# champ, le moulin, un enclos, un puits. Sans lui, tout ce qu'on a ajouté aux abords reste hors cadre.
+			var sur := ""
+			for i_s in args.size():
+				if args[i_s] == "--sur" and i_s + 1 < args.size():
+					sur = str(args[i_s + 1])
+			if not sur.is_empty():
+				var vise := Vector2i(-9999, -9999)
+				for cell_s in sv.monde.cellules.keys():
+					if vise.x != -9999:
+						break
+					var es: Dictionary = sv.monde.cellules[cell_s]
+					var vs: Dictionary = es.get("village", {})
+					if vs.is_empty():
+						continue
+					match sur:
+						"cimetiere":
+							if vs.has("cimetiere"):
+								vise = sv.monde.pos_monde(cell_s, Vector2i(vs.cimetiere.position) + Vector2i(vs.cimetiere.size) / 2)
+						"moulin":
+							for b_s in vs.get("batiments", []):
+								if str(b_s.id) == "moulin":
+									vise = sv.monde.pos_monde(cell_s, Vector2i(b_s.porte))
+									break
+						"verger", "champs":
+							for c_s in vs.get("champs", []):
+								if bool(c_s.get("verger", false)) == (sur == "verger"):
+									vise = sv.monde.pos_monde(cell_s, Vector2i(c_s.rect.position) + Vector2i(c_s.rect.size) / 2)
+									break
+						"enclos":
+							if not vs.get("betes", []).is_empty():
+								vise = sv.monde.pos_monde(cell_s, Vector2i(vs.betes[0].pos))
+						"puits":
+							for i_m in es.meubles.keys():
+								if str(es.meubles[i_m]) == "puits":
+									@warning_ignore("integer_division")
+									vise = sv.monde.pos_monde(cell_s, Vector2i(int(i_m) % int(es.largeur), int(i_m) / int(es.largeur)))
+									break
+				if vise.x != -9999 and sv.grille.dans(vise):
+					var libre_s: Vector2i = sv._tuile_libre_autour(vise)
+					centre_v = libre_s if libre_s != Vector2i(-1, -1) else vise
+					print("sur : %s en %s" % [sur, str(centre_v)])
+				else:
+					print("sur : AUCUN %s trouvé dans les cellules chargées" % sur)
 			jv.pos = centre_v
 			sv.grille.placer(jv.id, centre_v)
 			jv["vue_sale"] = true

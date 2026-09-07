@@ -213,6 +213,7 @@ Trente-cinq scènes `scenes/tests/sonde_*.tscn`, chacune mesure une chose et l'�
 & $godot --headless --path godot res://scenes/tests/sonde_ecrans.tscn            # chaque écran à quatre tailles de fenêtre : rien ne sort du cadre
 & $godot --headless --path godot res://scenes/tests/sonde_perf_etage.tscn        # où passent les millisecondes d'un étage de donjon (budget É2 : 100 ms)
 & $godot --headless --path godot res://scenes/tests/sonde_signature_etage.tscn  # la signature de six étages : à relancer avant/après tout changement de génération de donjon
+# Viser un repère plutôt que la place : capture.tscn -- --palier village --sur cimetiere|verger|champs|moulin|enclos|puits
 & $godot --headless --path godot res://scenes/tests/sonde_perf_generation.tscn   # le coût d'un objet généré
 & $godot --headless --path godot res://scenes/tests/sonde_ia.tscn                # errance, cible, meute
 & $godot --headless --path godot res://scenes/tests/sonde_ia_pnj.tscn            # ennemis et alliés, scène par scène (--seulement compagnons,camp)
