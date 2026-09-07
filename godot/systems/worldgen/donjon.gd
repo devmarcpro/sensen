@@ -64,6 +64,13 @@ static func puissance_creature(c: Dictionary, bonus_action: float) -> float:
 	return p
 
 
+## Où passe le temps d'un étage (file 109, comme Surface.chrono) : la sonde vide la table, génère, et lit les étapes.
+static var chrono: Dictionary = {}
+static func _top(cle: String, t0: int) -> int:
+	chrono[cle] = float(chrono.get(cle, 0.0)) + float(Time.get_ticks_usec() - t0) / 1000.0
+	return Time.get_ticks_usec()
+
+
 func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dernier: bool, taille: int = -1) -> Dictionary:
 	if taille < 0:
 		taille = int(GameData.config("planete").taille_cellule)   # un étage = une cellule (Grille continue)
@@ -75,6 +82,7 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 	for i in taille:
 		for b in [Vector2i(i, 0), Vector2i(i, taille - 1), Vector2i(0, i), Vector2i(taille - 1, i)]:
 			e.bord[b.y * taille + b.x] = true
+	var t_e := Time.get_ticks_usec()
 	# 1. Les salles : petites, moyennes, grandes, posées au hasard sans chevauchement.
 	var essais := 0
 	while _nb_salles(e) < nb_salles and essais < nb_salles * ESSAIS_SALLE:
@@ -87,6 +95,7 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 		if not _libre(e, r):
 			continue
 		_placer_rectangle(e, r)
+	t_e = _top("etage.salles", t_e)
 	# 2. Les couloirs : chaque salle vers ses plus proches voisines (réseau maillé), puis des
 	#    boucles et des impasses — plusieurs chemins mènent partout.
 	var couloirs: Dictionary = theme.get("couloirs", {})
@@ -117,12 +126,16 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 	var f_impasses: Array = couloirs.get("impasses", [2, 5])
 	for k in rng.randi_range(int(f_impasses[0]), int(f_impasses[1])):
 		_impasse(e, couloirs)
+	t_e = _top("etage.couloirs", t_e)
 	# 3. Connexité.
 	_reparer_connexite(e)
+	t_e = _top("etage.connexite", t_e)
 	# 3 bis. Les décors de salles (Génération de donjon, 2026-08-30) : piliers cassables, estrades, fosses.
 	_poser_decors(e)
+	t_e = _top("etage.decors", t_e)
 	# 3 ter. Les portes : certaines salles ont leurs seuils fermés (theme.portes).
 	_poser_portes(e)
+	t_e = _top("etage.portes", t_e)
 	# 4. Les escaliers : l'arrivée dans la première salle, la descente dans la plus lointaine.
 	var p0: Dictionary = e.pieces[0]
 	e.entree = _centre_libre(e, p0)
@@ -133,12 +146,17 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 		e.pieces[loin]["boss_room"] = true
 	else:
 		e.escalier = _centre_libre(e, e.pieces[loin])
+	t_e = _top("etage.escaliers", t_e)
 	# 5. Peuplement, contenants, filons.
 	_peupler(e, etage)
+	t_e = _top("etage.peupler", t_e)
 	_poser_coffres(e)
+	t_e = _top("etage.coffres", t_e)
 	_poser_filons(e, etage)
+	t_e = _top("etage.filons", t_e)
 	_poser_lave(e, etage)
 	_poser_meubles_rituels(e, etage)
+	_top("etage.lave_rituels", t_e)
 	return e
 
 

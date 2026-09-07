@@ -4858,6 +4858,7 @@ var _meteo_courante: String = ""
 var _jour_annonce := -1   # le dernier jour dont le journal a dit la date (Calendrier)
 var _cache_familles: Dictionary = {}   # (famille, catégories) → candidats : le pool se recalcule sinon à chaque objet
 var _cache_hors_attente: Dictionary = {}   # slot + attendues → les matières hors attente et leur poids
+var _cache_pool_composant: Dictionary = {}   # (composant, catégories) → les matières que ses recettes proposent, dédupliquées
 var _cache_poids_paliers: Dictionary = {}   # (candidats, niveau) → poids par matériau : le tirage est appelé des milliers de fois par étage
 
 

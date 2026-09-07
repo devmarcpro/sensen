@@ -95,16 +95,29 @@ static func _garnir_stock(sim: Simulation, e: Dictionary, selection: Array) -> v
 		e["stock_garni"] = e.stock.size()   # un garnissage complet : le plafond du jour de marché en dépend (Calendrier)
 
 
+## Où passe le temps d'un objet généré (file 109, comme Surface.chrono) : la sonde vide la table et lit les étapes.
+static var chrono: Dictionary = {}
+static func _top(cle: String, t0: int) -> int:
+	chrono[cle] = float(chrono.get(cle, 0.0)) + float(Time.get_ticks_usec() - t0) / 1000.0
+	return Time.get_ticks_usec()
+
+
 static func generer_objet(sim: Simulation, base_id: String, profondeur: int, provenance: Dictionary = {}, rarete: String = "", nb_affixes: int = -1) -> Dictionary:
+	var t_t := Time.get_ticks_usec()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([sim.graine, "loot", sim.objets.size(), base_id, profondeur])
+	var t_o := _top("objet.rng", t_t)
 	var inst := sim.loot.generer(base_id, profondeur, rng, provenance, rarete, nb_affixes)
+	t_o = _top("objet.generer", t_o)
 	if inst.is_empty():
 		return {}
+	var t_r := Time.get_ticks_usec()
 	sim.objets[inst.uid] = inst
 	sim.items[inst.uid] = inst
+	_top("objet.rangement", t_r)
 	if "assemble" in inst.get("tags", []) and not bool(provenance.get("assemblage", false)):
-		_composer_loot(sim, inst, profondeur, rng, provenance.get("categories_materiau", []))   # un objet assemblé trouvé est composé : manche, tête, fixations tirés (designer, 2026-08-30)
+		_composer_loot(sim, inst, profondeur, rng, provenance.get("categories_materiau", []))
+		_top("objet.composer", t_o)   # un objet assemblé trouvé est composé : manche, tête, fixations tirés (designer, 2026-08-30)
 	return inst
 
 
@@ -118,11 +131,10 @@ static func _composer_loot(sim: Simulation, inst: Dictionary, profondeur: int, r
 	var niveau := int(la.get("niveau_base", 8)) + int(la.get("niveau_par_profondeur", 6)) * maxi(0, profondeur)
 	var pieces: Array[Dictionary] = []
 	for slot in def.slots.keys():
+		var t_c := Time.get_ticks_usec()
 		var comp_id := str(def.slots[slot])
-		var recettes: Array = []
-		for rid in GameData.catalogues.component_recipes.keys():
-			if str(GameData.catalogues.component_recipes[rid].component) == comp_id:
-				recettes.append(GameData.catalogues.component_recipes[rid])
+		var recettes: Array = _recettes_du_composant(comp_id)
+		t_c = _top("comp.recettes", t_c)
 		if recettes.is_empty():
 			continue
 		# Les candidats de TOUTES les recettes du composant sont réunis avant le tirage (designer
@@ -133,19 +145,28 @@ static func _composer_loot(sim: Simulation, inst: Dictionary, profondeur: int, r
 		# par objet, quatre-vingts objets par etage — six millions de comparaisons pour un plancher de
 		# donjon. Un dictionnaire repond en temps constant et rend exactement le meme pool, dans le meme
 		# ordre. Mesure : le butin des coffres passe de 53 ms a ce que dit la sonde de perf d'etage.
+		var cats_slot: Array = cats_mat if slot in ["tete", "plaque", "monture"] else []
+		var cle_pool := comp_id + "|" + ",".join(PackedStringArray(cats_slot))
 		var pool: Array[String] = []
-		var vus_pool := {}
-		for r in recettes:
-			var fam: Dictionary = GameData.config("material_families").get(str(r.material_family), {})
-			for m in _candidats_famille(sim, fam, cats_mat if slot in ["tete", "plaque", "monture"] else []):
-				if not vus_pool.has(m):
-					vus_pool[m] = true
-					pool.append(m)
+		if sim._cache_pool_composant.has(cle_pool):
+			pool = sim._cache_pool_composant[cle_pool]
+		else:
+			var vus_pool := {}
+			for r in recettes:
+				var fam: Dictionary = GameData.config("material_families").get(str(r.material_family), {})
+				for m in _candidats_famille(sim, fam, cats_slot):
+					if not vus_pool.has(m):
+						vus_pool[m] = true
+						pool.append(m)
+			sim._cache_pool_composant[cle_pool] = pool
 		# Le butin n'est pas limite aux matieres ATTENDUES pour ce composant (designer 2026-09-02) :
 		# toutes peuvent sortir, mais celles qui s'eloignent de l'attendu deviennent rares. Un plastron
 		# de metal est l'ordinaire, un plastron d'eau de mer existe et ne se voit presque jamais.
+		t_c = _top("comp.pool", t_c)
 		var hors_slot := _hors_attente(sim, pool, slot)
+		t_c = _top("comp.hors", t_c)
 		var mat_id := _tirer_materiau(sim, pool, profondeur, rng, hors_slot, slot)
+		t_c = _top("comp.tirage", t_c)
 		if mat_id.is_empty():
 			continue
 		var mat: Dictionary = GameData.entree("materials", mat_id)
@@ -160,7 +181,38 @@ static func _composer_loot(sim: Simulation, inst: Dictionary, profondeur: int, r
 		return
 	var borne: Array = sim.regles.r.craft.qualite.jet_assemblage
 	var jet := clampf(sim.regles.qualite_craft(niveau, rng), float(borne[0]), float(borne[1]))
+	var t_a := Time.get_ticks_usec()
 	_appliquer_composition(sim, inst, def, pieces, jet)
+	_top("comp.appliquer", t_a)
+
+
+## Le palier de chaque matériau, rangé une fois (2026-09-07) : le lire par `GameData.catalogues.materials.get(m, {})
+## .get("palier", 1)` faisait deux recherches et un dictionnaire temporaire par matière, sur deux cent quarante
+## matières, à chaque pondération reconstruite.
+static var _palier_materiau: Dictionary = {}
+static func _palier_de(mid: String) -> int:
+	if _palier_materiau.size() != GameData.catalogues.materials.size():   # le catalogue a changé (rechargement) : on refait la table
+		_palier_materiau.clear()
+		for k in GameData.catalogues.materials.keys():
+			_palier_materiau[str(k)] = int(GameData.catalogues.materials[k].get("palier", 1))
+	return int(_palier_materiau.get(mid, 1))
+
+
+## Les recettes d'un composant, rangées une fois pour toutes (2026-09-07) : les chercher balayait les deux cents
+## fiches de `component_recipes` à CHAQUE emplacement de CHAQUE objet — six mille balayages par étage de donjon.
+static var _recettes_par_composant: Dictionary = {}
+static var _n_recettes_rangees: int = -1
+static func _recettes_du_composant(comp_id: String) -> Array:
+	if _n_recettes_rangees != GameData.catalogues.component_recipes.size():   # le catalogue a changé : on refait la table
+		_recettes_par_composant.clear()
+		_n_recettes_rangees = GameData.catalogues.component_recipes.size()
+		for rid in GameData.catalogues.component_recipes.keys():
+			var r: Dictionary = GameData.catalogues.component_recipes[rid]
+			var c := str(r.component)
+			if not _recettes_par_composant.has(c):
+				_recettes_par_composant[c] = []
+			(_recettes_par_composant[c] as Array).append(r)
+	return _recettes_par_composant.get(comp_id, [])
 
 
 ## Un matériau d'une famille (Recettes de composants) pour le loot : les minerais des étages ≤ profondeur pèsent plus.
@@ -273,14 +325,17 @@ static func _tirer_materiau(sim: Simulation, candidats: Array[String], profondeu
 	var cle_poids := slot + ":" + str(candidats.size()) + ":" + str(niv) + ":" + str(hors.size()) + ":" + str(candidats[0]) + str(candidats[candidats.size() - 1])
 	if sim._cache_poids_paliers.has(cle_poids):
 		return _tirer_pondere_cache(sim, sim._cache_poids_paliers[cle_poids], rng)
+	# La profondeur minimale de chaque palier, lue une fois : la chercher matière par matière refaisait la même
+	# recherche deux cent quarante fois par pondération (2026-09-07).
+	var mini_pal := {}
+	for cle_pal in pm.keys():
+		mini_pal[int(str(cle_pal))] = int(pm[cle_pal].get("profondeur_min", 0))
 	var poids := {}
 	for m in hors.keys():   # tout le catalogue, au poids de l'ecart
-		var pal_h := str(int(GameData.catalogues.materials.get(m, {}).get("palier", 1)))
-		if int(pm.get(pal_h, {}).get("profondeur_min", 0)) <= niv:
+		if int(mini_pal.get(_palier_de(str(m)), 0)) <= niv:
 			poids[m] = float(hors[m])
 	for m in candidats:
-		var pal := str(int(GameData.catalogues.materials.get(m, {}).get("palier", 1)))
-		var mini := int(pm.get(pal, {}).get("profondeur_min", 0))
+		var mini := int(mini_pal.get(_palier_de(str(m)), 0))
 		if mini <= niv:
 			poids[m] = 1.0
 		elif mini <= niv + au_dela:
@@ -288,20 +343,33 @@ static func _tirer_materiau(sim: Simulation, candidats: Array[String], profondeu
 	if poids.is_empty():   # aucun candidat à portée : on ne rend pas la main vide
 		for m in candidats:
 			poids[m] = 1.0
-	sim._cache_poids_paliers[cle_poids] = poids
-	return _tirer_pondere_cache(sim, poids, rng)
+	# Le tirage se fait sur des TABLEAUX, pas sur le dictionnaire (2026-09-07) : `poids.keys()` alloue deux cent
+	# quarante chaînes à chaque appel, et l'on parcourait le dictionnaire deux fois — une fois pour le total, une
+	# fois pour tirer. Le total et les poids se calculent ici, une seule fois par entrée de cache ; la soustraction
+	# successive reste dans le MÊME ordre, donc le même matériau sort pour le même tirage.
+	var cles_p := PackedStringArray()
+	var w_p := PackedFloat64Array()
+	var total_p := 0.0
+	for m in poids.keys():
+		cles_p.append(str(m))
+		w_p.append(float(poids[m]))
+		total_p += float(poids[m])
+	var entree := {"cles": cles_p, "poids": w_p, "total": total_p}
+	sim._cache_poids_paliers[cle_poids] = entree
+	return _tirer_pondere_cache(sim, entree, rng)
 
 
-static func _tirer_pondere_cache(sim: Simulation, poids: Dictionary, rng: RandomNumberGenerator) -> String:
-	var total := 0.0
-	for m in poids.keys():
-		total += float(poids[m])
-	var t := rng.randf() * total
-	for m in poids.keys():
-		t -= float(poids[m])
+static func _tirer_pondere_cache(_sim: Simulation, entree: Dictionary, rng: RandomNumberGenerator) -> String:
+	var cles: PackedStringArray = entree.cles
+	var poids: PackedFloat64Array = entree.poids
+	if cles.is_empty():
+		return ""
+	var t := rng.randf() * float(entree.total)
+	for i in cles.size():
+		t -= poids[i]
 		if t < 0.0:
-			return str(m)
-	return str(poids.keys()[poids.size() - 1])
+			return cles[i]
+	return cles[cles.size() - 1]
 
 
 ## Ce que les composants font à l'objet (Stats et qualité de l'assemblage) : stats = Σ stat × poids, durete_base avant

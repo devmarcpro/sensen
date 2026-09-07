@@ -7,10 +7,15 @@ func _ready() -> void:
 	var theme: Dictionary = GameData.entree("dungeon_themes", "ruine")
 	var gen := Donjon.new(GameData.catalogues.get("dungeon_rooms", {}), GameData.catalogues.get("dungeon_connectors", {}), theme)
 	var t0 := Time.get_ticks_usec()
+	Donjon.chrono.clear()
 	for k in 5:
 		gen.generer_etage(51, 4, 1, 8, false)
 	var dt_gen := (Time.get_ticks_usec() - t0) / 5000.0
 	print("generer_etage (geometrie + peuplement) : %.1f ms" % dt_gen)
+	var parts_e: Array[String] = []   # où passe un étage, étape par étape (file 109)
+	for cle_e in Donjon.chrono.keys():
+		parts_e.append("%s %.1f" % [cle_e, float(Donjon.chrono[cle_e]) / 5.0])
+	print("  par etage : %s" % ", ".join(parts_e))
 	var s := Simulation.new(51)
 	t0 = Time.get_ticks_usec()
 	s.charger_donjon("ruine", 51, 4, 1)
@@ -34,9 +39,14 @@ func _ready() -> void:
 	for c in e2.get("coffres", []):
 		n_pieces += (c.bases as Array).size()
 	t0 = Time.get_ticks_usec()
+	SimObjets.chrono.clear()
 	for c2 in e2.get("coffres", []):
 		for base in c2.bases:
 			s2.generer_objet(str(base), 4, {"donjon": "ruine", "etage": 1})
+	var parts_o: Array[String] = []
+	for cle_o in SimObjets.chrono.keys():
+		parts_o.append("%s %.1f" % [cle_o, float(SimObjets.chrono[cle_o])])
+	print("  detail du butin (ms cumulees) : %s" % ", ".join(parts_o))
 	print("  dont butin des coffres (%d coffres, %d pieces) : %.1f ms" % [n_coffres, n_pieces, (Time.get_ticks_usec() - t0) / 1000.0])
 	t0 = Time.get_ticks_usec()
 	var g2 := Grille.depuis_etage(e2, GameData.config("tile_contents"), s2.regles.r.deplacement, int(s2.regles.r.vision.hauteur_oeil))
