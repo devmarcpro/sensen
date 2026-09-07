@@ -3806,3 +3806,107 @@ titre.nilotique.dictature.m,General of the North
 titre.nilotique.dictature.f,General of the North
 titre.nilotique.guilde_maitre.m,Chief of Artisans
 titre.nilotique.guilde_maitre.f,Chief of Artisans
+culture.finnoise.name,Finnic
+titre.finnoise.monarchie_hereditaire.m,Kuningas
+titre.finnoise.monarchie_hereditaire.f,Kuningatar
+titre.finnoise.republique.m,Puhemies
+titre.finnoise.republique.f,Puhenainen
+titre.finnoise.theocratie.m,Ylipappi
+titre.finnoise.theocratie.f,Ylipapitar
+titre.finnoise.ploutocratie.m,Kauppias
+titre.finnoise.ploutocratie.f,Kauppiatar
+titre.finnoise.dictature.m,Sotamarsalkka
+titre.finnoise.dictature.f,Sotamarsalkka
+titre.finnoise.guilde_maitre.m,Kiltamestari
+titre.finnoise.guilde_maitre.f,Kiltamestaritar
+culture.balte.name,Baltic
+titre.balte.monarchie_hereditaire.m,Karalius
+titre.balte.monarchie_hereditaire.f,Karaliene
+titre.balte.republique.m,Seniunas
+titre.balte.republique.f,Seniune
+titre.balte.theocratie.m,Vaidila
+titre.balte.theocratie.f,Vaidilute
+titre.balte.ploutocratie.m,Pirklys
+titre.balte.ploutocratie.f,Pirkle
+titre.balte.dictature.m,Kunigaikstis
+titre.balte.dictature.f,Kunigaikstiene
+titre.balte.guilde_maitre.m,Cecho Meistras
+titre.balte.guilde_maitre.f,Cecho Meistre
+culture.roumaine.name,Romanian
+titre.roumaine.monarchie_hereditaire.m,Domn
+titre.roumaine.monarchie_hereditaire.f,Doamna
+titre.roumaine.republique.m,Staroste
+titre.roumaine.republique.f,Starosta
+titre.roumaine.theocratie.m,Mitropolit
+titre.roumaine.theocratie.f,Mitropolita
+titre.roumaine.ploutocratie.m,Negustor
+titre.roumaine.ploutocratie.f,Negustoreasa
+titre.roumaine.dictature.m,Voievod
+titre.roumaine.dictature.f,Voievodesa
+titre.roumaine.guilde_maitre.m,Staroste de Breasla
+titre.roumaine.guilde_maitre.f,Starosta de Breasla
+culture.neerlandaise.name,Dutch
+titre.neerlandaise.monarchie_hereditaire.m,Stadhouder
+titre.neerlandaise.monarchie_hereditaire.f,Stadhoudster
+titre.neerlandaise.republique.m,Raadpensionaris
+titre.neerlandaise.republique.f,Raadpensionaris
+titre.neerlandaise.theocratie.m,Hoogpriester
+titre.neerlandaise.theocratie.f,Hoogpriesteres
+titre.neerlandaise.ploutocratie.m,Koopman
+titre.neerlandaise.ploutocratie.f,Koopvrouw
+titre.neerlandaise.dictature.m,Veldheer
+titre.neerlandaise.dictature.f,Veldheerin
+titre.neerlandaise.guilde_maitre.m,Gildemeester
+titre.neerlandaise.guilde_maitre.f,Gildemeesteres
+culture.vietnamienne.name,Vietnamese
+titre.vietnamienne.monarchie_hereditaire.m,Vua
+titre.vietnamienne.monarchie_hereditaire.f,Hoang Hau
+titre.vietnamienne.republique.m,Chu Tich
+titre.vietnamienne.republique.f,Chu Tich
+titre.vietnamienne.theocratie.m,Thay Ca
+titre.vietnamienne.theocratie.f,Thay Ca
+titre.vietnamienne.ploutocratie.m,Phu Thuong
+titre.vietnamienne.ploutocratie.f,Phu Thuong
+titre.vietnamienne.dictature.m,Tuong Quan
+titre.vietnamienne.dictature.f,Tuong Quan
+titre.vietnamienne.guilde_maitre.m,Thay Ca Phuong
+titre.vietnamienne.guilde_maitre.f,Thay Ca Phuong
+culture.polynesienne.name,Polynesian
+titre.polynesienne.monarchie_hereditaire.m,Ariki
+titre.polynesienne.monarchie_hereditaire.f,Ariki Wahine
+titre.polynesienne.republique.m,Rangatira
+titre.polynesienne.republique.f,Rangatira Wahine
+titre.polynesienne.theocratie.m,Tohunga
+titre.polynesienne.theocratie.f,Tohunga Wahine
+titre.polynesienne.ploutocratie.m,Kaihokohoko
+titre.polynesienne.ploutocratie.f,Kaihokohoko
+titre.polynesienne.dictature.m,Toa Nui
+titre.polynesienne.dictature.f,Toa Nui
+titre.polynesienne.guilde_maitre.m,Tohunga Whakairo
+titre.polynesienne.guilde_maitre.f,Tohunga Whakairo
+culture.quechua.name,Quechua
+titre.quechua.monarchie_hereditaire.m,Sapa Inca
+titre.quechua.monarchie_hereditaire.f,Coya
+titre.quechua.republique.m,Curaca
+titre.quechua.republique.f,Curaca
+titre.quechua.theocratie.m,Willaq Umu
+titre.quechua.theocratie.f,Mama Cuna
+titre.quechua.ploutocratie.m,Qollqa Kamayuq
+titre.quechua.ploutocratie.f,Qollqa Kamayuq
+titre.quechua.dictature.m,Apuskipay
+titre.quechua.dictature.f,Apuskipay
+titre.quechua.guilde_maitre.m,Kamayuq
+titre.quechua.guilde_maitre.f,Kamayuq
+culture.yoruba.name,Yoruba
+titre.yoruba.monarchie_hereditaire.m,Oba
+titre.yoruba.monarchie_hereditaire.f,Olori
+titre.yoruba.republique.m,Baale
+titre.yoruba.republique.f,Iyaloja
+titre.yoruba.theocratie.m,Babalawo
+titre.yoruba.theocratie.f,Iyanifa
+titre.yoruba.ploutocratie.m,Iyaloja
+titre.yoruba.ploutocratie.f,Iyaloja
+titre.yoruba.dictature.m,Balogun
+titre.yoruba.dictature.f,Iyalode
+titre.yoruba.guilde_maitre.m,Olori Ise
+titre.yoruba.guilde_maitre.f,Olori Ise
