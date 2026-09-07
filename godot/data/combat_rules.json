@@ -233,13 +233,12 @@
     "ia_ticks_sans_vue": 100,
     "detection_par_perception": 1.0,
     "lumiere_detection": 0.5,
-    "lumiere_rayon": 3,
     "discretion_par_niveau": 0.02,
     "discretion_max_pct": 0.6,
     "portee_min": 1
   },
   "ia": {
-    "_doc": "IA des creatures. DECISION : ticks_entre_decisions (une decision tous les 10 ticks) ; types d'ennemis (2026-08-30) : soin_seuil = fraction de PV sous laquelle un soigneur soigne un allie ; reculer_distance = un tireur recule si la cible est a cette distance ou moins ; guet_distance = un embusqueur attend tant que la cible est plus loin. ROAM et AGGRO (designer 2026-09-03) : un etre qui erre choisit un BUT dans son rayon et y va, au lieu de tirer une case adjacente au hasard a chaque tick — une marche au hasard ne s'eloigne que d'une dizaine de tuiles en cent pas, si bien que personne n'allait nulle part ; arrive, il souffle roam_pause_ticks. Chaque etre tient une table d'aggro « qui m'a fait quoi » et vise celle qui pese le plus, pas la plus proche : frapper monte de aggro_par_degat x degats, voir un ennemi de aggro_par_vue ; elle decroit de aggro_decroissance par tick et sous aggro_seuil_oubli l'etre rentre ; elle se transmet aux allies dans aggro_rayon_alerte a aggro_part_alerte de sa valeur. (Une cle « ia » dupliquee a ecrase les reglages de decision le 2026-08-31 ; la meme faute a ete refaite le 2026-09-03 en REMPLACANT le bloc au lieu de l'etendre — ce bloc se fusionne, il ne se reecrit pas.)",
+    "_doc": "IA des creatures. DECISION : ticks_entre_decisions (une decision tous les 10 ticks) ; types d'ennemis (2026-08-30) : soin_seuil = fraction de PV sous laquelle un soigneur soigne un allie ; reculer_distance = un tireur recule si la cible est a cette distance ou moins ; guet_distance = un embusqueur attend tant que la cible est plus loin. ROAM et AGGRO (designer 2026-09-03) : un etre qui erre choisit un BUT dans son rayon et y va, au lieu de tirer une case adjacente au hasard a chaque tick — une marche au hasard ne s'eloigne que d'une dizaine de tuiles en cent pas, si bien que personne n'allait nulle part ; arrive, il souffle roam_pause_ticks. Chaque etre tient une table d'aggro « qui m'a fait quoi » et vise celle qui pese le plus, pas la plus proche : frapper monte de aggro_par_degat x degats, voir un ennemi de aggro_par_vue ; elle decroit de aggro_decroissance par tick et sous aggro_seuil_oubli l'etre rentre ; elle se transmet aux allies dans aggro_rayon_alerte a aggro_part_alerte de sa valeur. (Une cle « ia » dupliquee a ecrase les reglages de decision le 2026-08-31 ; la meme faute a ete refaite le 2026-09-03 en REMPLACANT le bloc au lieu de l'etendre — ce bloc se fusionne, il ne se reecrit pas.) ticks_entre_decisions n'est LU PAR RIEN : l'IA decide quand son compteur d'action echoit, pas a cadence fixe — c'est un reste d'une cadence plus ancienne. Il a deja ete efface par megarde et restaure deux fois ; on le garde avec cette note plutot que de rouvrir le sujet (2026-09-07).",
     "ticks_entre_decisions": 10,
     "soin_seuil": 0.7,
     "reculer_distance": 1,
@@ -509,8 +508,7 @@
     "periode_zero": 300,
     "pct_sante_max": 1,
     "tooltip_seuil": 60,
-    "degats_par_palier": 2,
-    "ticks_par_palier": 40
+    "degats_par_palier": 2
   },
   "poids": {
     "_doc": "Poids porté (docs: Armures et poids porté) : capacite = base + force × par_force ; poids d'un matériau = densité / densite_div par unité ; surcharge : ticks × (1 + (ratio − 1) × pente), plafond.",
@@ -1101,7 +1099,6 @@
       0.16
     ],
     "couvees_par_semaine": 1,
-    "age_adulte_semaines": 1,
     "paliers": {
       "_doc": "Vivarium — registre et paliers : [seuil, effet, valeur]. Effets : potentiel (+n sur Élevage), capture (+n au jet), eclosion (mult sur l'âge de maturité), chatoyant (mult, lu par elevage.chatoyant), potentiel_vie (+n sur la branche Vie), commande_mult (×n), couvees (+n par habitat), commande_pct (+n % sur les commandes).",
       "varietes": [

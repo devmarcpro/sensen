@@ -703,7 +703,7 @@ static func _ressusciter(sim: Simulation, e: Dictionary, uid_ame: String, tick: 
 	if not (x.id in sim.ordre):
 		sim.ordre.append(x.id)
 	sim._dus_invalider()   # ressuscité : il rentre dans la file du monde
-	sim.appliquer_statut(x, "affaibli", int(c.affaibli_ticks), e.id)
+	sim.appliquer_statut(x, str(c.get("statut_resurrection", "affaibli")), int(c.affaibli_ticks), e.id)
 	x["affaibli_mult"] = float(c.affaibli_mult)
 	Etres.recalculer(x, sim.items, sim.affixes_defs, sim.regles)
 	EventBus.emettre(&"journal", [&"journal.ressuscite", {"nom": x.name_key, "or": cout}])
