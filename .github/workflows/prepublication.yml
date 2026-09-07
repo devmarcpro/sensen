@@ -44,10 +44,14 @@ jobs:
         run: |
           set -euo pipefail
           tag="${MAIN:-${GITHUB_REF#refs/tags/}}"
+          # L'etiquette est refetchee EXPLICITEMENT : la v0.5.7-alpha a publie le message du dernier commit
+          # au lieu de l'annonce, parce que la copie posee par checkout n'avait pas l'objet annote — et
+          # « %(contents) » d'une etiquette legere est vide.
+          git fetch --force --no-tags origin "refs/tags/$tag:refs/tags/$tag" || true
           git rev-parse -q --verify "refs/tags/$tag" >/dev/null || { echo "l'étiquette $tag n'existe pas"; exit 1; }
           git checkout --detach "$tag"
-          corps="$(git tag -l --format='%(contents)' "$tag")"
-          [ -n "$corps" ] || corps="$(git log -1 --pretty=%s "$tag")"
+          corps="$(git for-each-ref --format='%(contents)' "refs/tags/$tag")"
+          [ -n "$corps" ] || corps="$(git log -1 --pretty=%B "$tag")"
           case "$tag" in
             *alpha*|*beta*|*rc*) pre="--prerelease" ;;
             *)                   pre="--latest" ;;
@@ -88,10 +92,11 @@ jobs:
           CORPS: ${{ steps.etiquette.outputs.corps }}
         run: |
           set -euo pipefail
+          printf '%s\n' "$CORPS" > notes.md
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "l'annonce de $TAG existe déjà : on lui joint le binaire s'il manque"
+            echo "l'annonce de $TAG existe deja : on remet son corps et son binaire"
+            gh release edit "$TAG" --notes-file notes.md
             gh release upload "$TAG" "Sensen-$TAG-win64.zip" --clobber
             exit 0
           fi
-          printf '%s\n' "$CORPS" > notes.md
           gh release create "$TAG" --title "$TAG" --notes-file notes.md $PRE "Sensen-$TAG-win64.zip"
