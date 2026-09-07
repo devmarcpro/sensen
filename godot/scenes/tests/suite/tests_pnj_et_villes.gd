@@ -1348,6 +1348,66 @@ func test_champs_saisons_et_troupeau() -> void:
 
 ## Le plan d'une ville (Villes, designer 2026-09-06, 23 h 45) : un archétype par agglomération, des rues tracées qui
 ## suivent le terrain et se rejoignent d'une cellule à l'autre, des bâtiments dont la porte donne sur la rue.
+## Ce qu'une ville garde après une sauvegarde (2026-09-07) : une cellule se régénère de sa graine, la sauvegarde ne
+## conserve que les modifications de tuiles et l'état des territoires — ce test dit lesquels de nos ajouts survivent.
+func test_sauvegarde_ville() -> void:
+	var s := Simulation.new(31)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var c0: Vector2i = s.monde.cellule_camp
+	var fiche: Dictionary = {}
+	for dy in range(-14, 15):
+		for dx in range(-14, 15):
+			var cv := c0 + Vector2i(dx, dy)
+			if surf.terre_a(cv) and bool(surf.poi_de(cv).get("village", false)):
+				var f2: Dictionary = surf.fiche_agglomeration(cv)
+				if not f2.is_empty() and (fiche.is_empty() or int(f2.population) > int(fiche.population)):
+					fiche = f2
+	if fiche.is_empty():
+		verifier(false, "une agglomération à quatorze cellules du camp")
+		return
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var n_g: int = s.monde.taille / 32
+	s.monde.explores[Vector2i(int(fiche.centre.x) * n_g, int(fiche.centre.y) * n_g)] = true
+	s.voyager(j, fiche.centre)
+	# 1. Un mort enterré : sa tombe et son nom.
+	var habitants: Array = s.vivants().filter(func(x: Dictionary) -> bool: return str(x.get("village", "")) == str(fiche.nom) and "civil" in x.get("tags", []))
+	verifier(not habitants.is_empty(), "des habitants de %s" % str(fiche.nom))
+	if habitants.is_empty():
+		return
+	verifier(SimVilles.enterrer(s, habitants[0]), "un habitant enterré avant la sauvegarde")
+	var cell_t := Vector2i(-9999, -9999)
+	for cell in s.monde.tombes.keys():
+		cell_t = cell
+	var nom_t := str(s.monde.tombes[cell_t][0].nom)
+	var pos_t: Vector2i = s.monde.pos_monde(cell_t, Vector2i(s.monde.tombes[cell_t][0].tuile))
+	# 2. L'état d'un champ (ses cultures, sa rotation) et les stocks de la ville.
+	var tid := str(fiche.nom) if s.territoires.has(str(fiche.nom)) else ""
+	var stocks0 := {}
+	var n_per := 0
+	if not tid.is_empty():
+		if not s.territoires[tid].has("stocks"):
+			s.territoires[tid]["stocks"] = {}
+		s.territoires[tid].stocks["baies"] = 42   # un stock qu'on reconnaîtra : comparer 0 à 0 ne prouverait rien
+		stocks0 = s.territoires[tid].stocks.duplicate()
+		n_per = SimTerritoire._dans_territoire(s, tid, func() -> int: return SimPerimetres.perimetres(s).size())
+	s.horloge_monde.avancer(500)
+	verifier(s.sauvegarder("test_sensen2"), "sauvegarder dans une ville")
+	# 3. Une simulation neuve recharge et l'on regarde ce qui est revenu.
+	var s2 := Simulation.new(1)
+	verifier(s2.charger_sauvegarde("test_sensen2"), "recharger la partie")
+	var ep2: Dictionary = SimVilles.epitaphe(s2, pos_t)
+	verifier(str(ep2.get("nom", "")) == nom_t, "la tombe et son nom sont revenus (%s)" % str(ep2.get("nom", "")))
+	verifier(s2.monde.modifications.get(cell_t, {}).size() > 0, "la tuile de la tombe est dans les modifications rechargées")
+	if not tid.is_empty():
+		verifier(s2.territoires.has(tid), "le territoire de la ville est revenu")
+		if s2.territoires.has(tid):
+			var n_per2: int = SimTerritoire._dans_territoire(s2, tid, func() -> int: return SimPerimetres.perimetres(s2).size())
+			verifier(n_per2 == n_per, "ses %d périmètres (champs, vergers, zones) sont revenus (%d)" % [n_per, n_per2])
+			verifier(int(s2.territoires[tid].get("stocks", {}).get("baies", 0)) == 42, "ses stocks sont revenus (baies %d, attendu 42)" % int(s2.territoires[tid].get("stocks", {}).get("baies", 0)))
+	Sauvegarde.effacer("test_sensen2")
+
+
 ## À la majorité, on quitte le lit de ses parents (Villes, 2026-09-07) : une ville pleine cesse de grossir — l'adulte
 ## qui n'a plus de lit perd de l'humeur, et c'est elle qui le fera partir. Une ville qui a de la place ne chasse personne.
 func test_majorite_quitte_le_lit() -> void:

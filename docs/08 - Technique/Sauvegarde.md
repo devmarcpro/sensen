@@ -67,6 +67,13 @@ connexion, exporté à la déconnexion).
 > Rechargement vérifié : 5 253 cellules écrites, 5 253 relues.
 
 
+> [!important] Règle du 2026-09-07 — trois endroits où un état du monde peut vivre, et un seul survit vraiment
+> Une cellule de surface **se régénère de sa graine** à chaque chargement : tout ce qu'on écrit dans son dictionnaire (`e.meubles`, `e.village.…`) disparaît dès qu'elle sort de la fenêtre. La sauvegarde n'en garde que trois choses : les **modifications de tuiles**, les tuiles découvertes, les contenants et les dormants. D'où la grille à appliquer à tout nouvel état :
+> - **Dans la cellule** — perdu au rechargement. C'est le bon endroit pour ce qui se **regénère à l'identique** (les bâtiments, les champs, les périmètres : la graine les refait tels quels).
+> - **Dans `Monde.modifications`** — rejoué au rechargement, tuile par tuile (hauteur, contenu, matériau, meuble, station, sol, eau). C'est là que va une tuile qu'un événement a changée. `Monde.capturer(g)` le fait **automatiquement pour ce que la fenêtre a modifié** — donc pas pour un changement écrit dans une cellule non chargée : celui-là doit s'inscrire à la main.
+> - **Dans `Monde`** (un champ propre, ajouté à `world.json`) — sauvegardé tel quel. C'est là que va une mémoire qui n'est pas une tuile : les tombes et leurs noms (`Monde.tombes`), les vacances de trône, les trésors des royaumes.
+> Le piège est qu'un état mal rangé **marche parfaitement pendant une session** : tant que la ville reste chargée, on ne voit rien. Il ne se révèle qu'après un aller-retour. `test_sauvegarde_ville` fait cet aller-retour : il enterre un habitant, note un stock reconnaissable, sauvegarde, recharge dans une simulation neuve, et vérifie que la tombe, son nom, la tuile, le territoire, ses périmètres et ses stocks sont revenus.
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Arborescence du projet]]
 - **Alimente** : [[Multijoueur]], [[Abstraction hors-site]], [[Minimap et brouillard de guerre]], [[Donjons — structure et intégration]]
