@@ -279,7 +279,8 @@
     "chateau": "seigneur",
     "comptoir": "syndic",
     "caserne": "commandant",
-    "ecurie": "commercant"
+    "ecurie": "commercant",
+    "moulin": "fermier"
   },
   "fiches": {
     "atelier": "villageois",
