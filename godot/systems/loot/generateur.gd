@@ -11,6 +11,9 @@ var items: Dictionary       # catalogue data/items (les bases)
 var elements: Array         # les cinq éléments (wuxing.json)
 var modules: Dictionary = {}    # le catalogue des modules (pour les livres)
 var _n := 0
+var _affixes_par_slot: Dictionary = {}   # emplacement → les affixes qui l'admettent, dans l'ordre du catalogue (2026-09-07)
+var _plafond_rarete := -1                # la plus haute ligne de la table des raretés, lue une fois
+var _modules_par_type: Dictionary = {}   # les modules d'un parchemin par type, triés, bâtis une fois
 
 
 func _init(p_regles: Dictionary, p_affixes: Dictionary, p_items: Dictionary, p_elements: Array) -> void:
@@ -28,11 +31,12 @@ func rarete_pour(profondeur: int, rng: RandomNumberGenerator) -> String:
 	# butin etait plate de bout en bout (mesure du 2026-09-03 : 15 % d'exceptionnel au niveau 5 comme au
 	# niveau 90). C'est aussi un nombre de gameplay en dur, ce que les contraintes du projet interdisent.
 	# On prend desormais la plus haute ligne que la TABLE declare, et le plafond redevient une donnee.
-	var plafond := 0
-	for k in table.keys():
-		if str(k).is_valid_int():
-			plafond = maxi(plafond, int(k))
-	var cle := str(mini(profondeur, plafond))
+	if _plafond_rarete < 0:   # lu une fois : la table ne change pas en cours de partie
+		_plafond_rarete = 0
+		for k in table.keys():
+			if str(k).is_valid_int():
+				_plafond_rarete = maxi(_plafond_rarete, int(k))
+	var cle := str(mini(profondeur, _plafond_rarete))
 	while not table.has(cle) and int(cle) > 0:
 		cle = str(int(cle) - 1)
 	var poids: Array = table.get(cle, [70, 25, 5, 0])
@@ -102,13 +106,15 @@ func generer(base_id: String, profondeur: int, rng: RandomNumberGenerator, prove
 ## prêt à partir, gratuitement ; la profondeur décide du nombre de charges et de la générosité.
 func _composer_parchemin(inst: Dictionary, profondeur: int, rng: RandomNumberGenerator) -> void:
 	var cfg: Dictionary = GameData.config("loot_rules").get("parchemins", {})
-	var par_type := {"portee": [], "forme": [], "noyau": [], "modificateur": []}
-	var ids: Array = GameData.catalogues.modules.keys()
-	ids.sort()
-	for mid in ids:
-		var t := str(GameData.catalogues.modules[mid].get("module_type", ""))
-		if par_type.has(t):
-			par_type[t].append(str(mid))
+	if _modules_par_type.is_empty():   # le catalogue trié par type, une fois — pas à chaque parchemin
+		_modules_par_type = {"portee": [], "forme": [], "noyau": [], "modificateur": []}
+		var ids: Array = GameData.catalogues.modules.keys()
+		ids.sort()
+		for mid in ids:
+			var t := str(GameData.catalogues.modules[mid].get("module_type", ""))
+			if _modules_par_type.has(t):
+				_modules_par_type[t].append(str(mid))
+	var par_type: Dictionary = _modules_par_type
 	if par_type.forme.is_empty() or par_type.noyau.is_empty():
 		return
 	var seq: Array = []
@@ -205,10 +211,14 @@ static func _dominante(v: Dictionary) -> String:
 
 
 func _affixes_pour(slot: String) -> Array[Dictionary]:
+	if _affixes_par_slot.has(slot):
+		return _affixes_par_slot[slot]
+	# Balayé une fois par emplacement, dans l'ordre du catalogue : le même ordre qu'avant, donc le même tirage.
 	var res: Array[Dictionary] = []
 	for a: Dictionary in affixes.values():
 		if slot in a.slots_valides:
 			res.append(a)
+	_affixes_par_slot[slot] = res
 	return res
 
 

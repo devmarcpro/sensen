@@ -1,0 +1,86 @@
+{
+  "_doc": "Les gaz dans le sol (Gaz dans le sol, designer 2026-09-07). poches : ou et combien — etage_min (gouffre) et mine_etage_min (mine), frequence et seuil du bruit (comme planete.mine.veines), part_par_profondeur = [[etage_min, etage_max, {gaz: poids}]]. liberation : volume = tuiles d air remplies depuis la breche, duree_ticks = vie d une zone de gaz. gaz : par identifiant — teinte [r,g,b,a] du lisere, degats (des) et statut (+ statut_ticks) par pas d automate a l occupant, inflammable (le grisou : une flamme dans le nuage l allume — torche en main a partir de lumiere_min, feu au sol, lave voisine) et son explosion (puissance, rayon, degats : la formule des Explosions). periode_ticks : la cadence du pas d automate.",
+  "poches": {
+    "etage_min": 4,
+    "mine_etage_min": 2,
+    "frequence": 0.11,
+    "seuil": 0.84,
+    "part_par_profondeur": [
+      [
+        1,
+        5,
+        {
+          "gaz_asphyxiant": 3,
+          "grisou": 1
+        }
+      ],
+      [
+        6,
+        12,
+        {
+          "grisou": 3,
+          "gaz_toxique": 2,
+          "gaz_asphyxiant": 2
+        }
+      ],
+      [
+        13,
+        999,
+        {
+          "grisou": 4,
+          "gaz_toxique": 3,
+          "gaz_asphyxiant": 1
+        }
+      ]
+    ]
+  },
+  "liberation": {
+    "volume": 14,
+    "duree_ticks": 400
+  },
+  "periode_ticks": 10,
+  "gaz": {
+    "grisou": {
+      "teinte": [
+        0.85,
+        0.9,
+        0.55,
+        0.35
+      ],
+      "degats": "",
+      "statut": "",
+      "statut_ticks": 0,
+      "inflammable": true,
+      "lumiere_min": 1,
+      "explosion": {
+        "puissance": 25,
+        "rayon": 2,
+        "degats": "4d6"
+      }
+    },
+    "gaz_toxique": {
+      "teinte": [
+        0.55,
+        0.75,
+        0.35,
+        0.4
+      ],
+      "degats": "1d4",
+      "statut": "poison",
+      "statut_ticks": 30,
+      "inflammable": false
+    },
+    "gaz_asphyxiant": {
+      "teinte": [
+        0.6,
+        0.6,
+        0.7,
+        0.35
+      ],
+      "degats": "",
+      "statut": "epuisement",
+      "statut_ticks": 40,
+      "inflammable": false
+    }
+  }
+}
