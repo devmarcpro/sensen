@@ -1,0 +1,11 @@
+# Les reglages lus que rien n ecrit et qu on assume : une surcharge facultative, un
+# marqueur interne, une condition offerte mais inutilisee. Un par ligne, la raison apres #.
+__alt__            # marqueur interne d une sequence de capacite alternee, jamais une donnee
+ecaille_choix      # surcharge facultative : une creature a ecailles peut nommer son element, sinon feu
+humeur_min         # condition d evenement de royaume offerte, qu aucun evenement n utilise encore
+icone              # surcharge facultative d un picto, sinon dessine par code
+meteo_locale       # surcharge facultative : une meteo propre a un etre, sinon celle de sa cellule
+race_dominante     # le terme mort de la diplomatie : aucun biome n en porte depuis le retrait des races
+                   # inventees, garde pour le jour ou une race non humaine reviendra (2026-09-07)
+sim                # Node.get("sim") sur un proprietaire de scene, pas une cle de donnees
+statue_mult        # surcharge facultative d une creature sur la chance de laisser une statue

@@ -197,6 +197,7 @@
     "visage_boite": 2.6
   },
   "sprites": {
+    "px_par_unite": 8,
     "picto_tenu_unites": 14,
     "pictos_tenus": {
       "_doc": "Ce qu'on tient sans montage pre-rendu (designer 2026-09-06 : le meme sprite qu'a l'inventaire) : la case du pictogramme fait picto_tenu_unites unites de rig ; par nom de pictogramme, le point de prise (en dixiemes de case, comme le picto est dessine) et l'axe qui se pose sur la main — la diagonale bas-gauche vers haut-droite pour une lame.",

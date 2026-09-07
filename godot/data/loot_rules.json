@@ -718,5 +718,6 @@
     "charges_max": 5,
     "chance_modificateur": 0.35,
     "chance_modificateur_par_etage": 0.1
-  }
+  },
+  "grille_poche": "poche"
 }

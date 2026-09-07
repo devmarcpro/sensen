@@ -63,6 +63,7 @@ $godot = "C:\Users\ciryl\Documents\Godot_v4.6.3-stable_win64.exe"
 & $godot --headless --path godot res://scenes/demo/main.tscn --quit-after 60
 python tools/check_vault.py ; python tools/audit_donnees.py
 python tools/i18n_couverture.py ; python tools/verif_scripts.py ; python tools/verif_doc_code.py
+python tools/verif_reglages.py   # un reglage lu que rien n'ecrit : la branche morte silencieuse
 ```
 
 Plus **les sondes concernées** (`godot/scenes/tests/sonde_*.tscn` : écrans, IA, faune, mine, butin, armes, jet, espèce, journal, monde, noyaux par stat, constructions, perf de génération…), `verif_classes.tscn` (les kits des classes tiennent-ils dans leur grille), `test_modules.tscn` (« essaye tout », dix mille plans) et **une capture d'écran réellement regardée** si un écran a changé.

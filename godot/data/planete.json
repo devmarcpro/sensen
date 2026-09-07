@@ -188,7 +188,9 @@
         "_doc": "Une nouvelle partie commence toujours avec un donjon a portee : la cellule d'amorce est tiree entre rayon_min et rayon_max cases du camp (designer 2026-09-01). Nettoyee, elle redevient ordinaire.",
         "rayon_min": 3,
         "rayon_max": 6
-      }
+      },
+      "grappes_par_region": 2,
+      "rayon_grappe": 1
     }
   },
   "cycle": {
@@ -294,7 +296,8 @@
           -10
         ]
       ]
-    }
+    },
+    "discretion_nuit": 4
   },
   "meteo": {
     "_doc": "Météo (E.28) : bruit spatial lent (frequence_spatiale) + temporel (ticks_par_front) ; seuils de précipitation ; températures en °C depuis la couche temperature ; confort ; isolation.",
