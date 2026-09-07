@@ -1,0 +1,30 @@
+{
+  "name_key": "plant.safran.name",
+  "categorie": "culture",
+  "nutrition": 1,
+  "bonus_potentiel": {
+    "perception": 1
+  },
+  "wuxing": {
+    "feu": 0.7,
+    "bois": 0.3
+  },
+  "duree_jours": 5,
+  "recolte_base": 1,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "automne"
+  ],
+  "besoin_eau": 0.3,
+  "famille": "epice",
+  "conditions": {
+    "biomes": [
+      "chaud",
+      "tempere",
+      "montagne"
+    ],
+    "fertilite_min": 20
+  }
+}

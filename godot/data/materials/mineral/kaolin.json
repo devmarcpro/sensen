@@ -1,0 +1,47 @@
+{
+  "name_key": "material.kaolin.name",
+  "category": "mineral",
+  "palier": 2,
+  "stats": {
+    "durete": 5,
+    "densite": 9,
+    "valeur_base": 8,
+    "conductivite_mana": 10,
+    "flammabilite": 0,
+    "isolation": 40,
+    "conductivite_electrique": 2,
+    "flottabilite": 10,
+    "luminosite": 0,
+    "fertilite": 5,
+    "transparence": 0,
+    "elasticite": 6,
+    "friction": 45
+  },
+  "tags": [],
+  "color": "#EDE9E0",
+  "noise": {
+    "type": "procedural",
+    "seed_offset": 202,
+    "amplitude": 0.08,
+    "scale": 4
+  },
+  "harvest": {
+    "tool_category": "pioche",
+    "skill": "minage"
+  },
+  "world_gen": {
+    "mode": "biome",
+    "biome_tags": []
+  },
+  "wuxing": {
+    "terre": 0.9,
+    "eau": 0.1
+  },
+  "composition": null,
+  "stats_base": {
+    "durete": 5,
+    "valeur_base": 8,
+    "conductivite_mana": 10
+  },
+  "sous_categorie": "minerai"
+}

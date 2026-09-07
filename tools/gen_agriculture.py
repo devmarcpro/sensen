@@ -27,6 +27,9 @@ DATA = os.path.join(RACINE, 'data')
 
 # id, categorie, famille, fr, en, duree_jours, recolte_base, nutrition, saisons, besoin_eau, biomes, fertilite_min
 PLANTES = [
+    # Un identifiant de plante ne doit JAMAIS être celui d'un matériau : le pommier, le cerisier, le noyer, le
+    # noisetier, le châtaignier et l'olivier sont des BOIS du catalogue, le lin et le chanvre des fibres. On nomme donc
+    # la plante d'après ce qu'on récolte (pomme, cerise, noix, tiges de lin) ; son nom AFFICHÉ reste l'arbre.
     # les huit d'origine : famille et conditions seulement (le reste est gardé tel quel)
     ("ble", "culture", "cereale", None, None, None, None, None, None, None, ["tempere", "plaine"], 30),
     ("orge", "culture", "cereale", None, None, None, None, None, None, None, ["froid", "tempere", "montagne"], 25),
@@ -68,41 +71,86 @@ PLANTES = [
     ("lentille", "culture", "legumineuse", "Lentille", "Lentil", 4, 3, 9, ["printemps"], 0.3, ["chaud", "desert", "tempere"], 10),
     ("feve", "culture", "legumineuse", "Fève", "Broad bean", 4, 4, 8, ["automne", "printemps"], 0.5, ["tempere", "cote"], 15),
     # les fibres et les oléagineux
-    ("lin", "culture", "fibre", "Lin", "Flax", 4, 3, 2, ["printemps"], 0.5, ["tempere", "froid"], 25),
-    ("chanvre", "culture", "fibre", "Chanvre", "Hemp", 4, 3, 3, ["printemps"], 0.5, ["tempere", "humide"], 20),
+    ("tige_de_lin", "culture", "fibre", "Lin", "Flax", 4, 3, 2, ["printemps"], 0.5, ["tempere", "froid"], 25),
+    ("tige_de_chanvre", "culture", "fibre", "Chanvre", "Hemp", 4, 3, 3, ["printemps"], 0.5, ["tempere", "humide"], 20),
     ("tournesol", "culture", "oleagineux", "Tournesol", "Sunflower", 5, 3, 6, ["printemps"], 0.4, ["chaud", "tempere", "plaine"], 25),
     ("colza", "culture", "oleagineux", "Colza", "Rapeseed", 6, 3, 4, ["automne"], 0.5, ["tempere", "froid"], 30),
     ("canne_a_sucre", "culture", "cereale", "Canne à sucre", "Sugar cane", 8, 5, 8, ["printemps"], 0.9, ["chaud", "humide"], 35),
+    # les épices, les teintures, le tabac (« ensuite encore plus », 2026-09-07)
+    ("poivre", "culture", "epice", "Poivrier", "Pepper vine", 9, 2, 1, ["printemps"], 0.7, ["chaud", "humide"], 25),
+    ("safran", "culture", "epice", "Safran", "Saffron", 5, 1, 1, ["automne"], 0.3, ["chaud", "tempere", "montagne"], 20),
+    ("gingembre", "culture", "epice", "Gingembre", "Ginger", 7, 3, 2, ["printemps"], 0.8, ["chaud", "humide"], 30),
+    ("cannelle", "buisson", "epice", "Cannelier", "Cinnamon tree", 10, 2, 1, ["printemps"], 0.7, ["chaud", "humide", "cote"], 20),
+    ("garance", "culture", "teinture", "Garance", "Madder", 8, 3, 0, ["printemps"], 0.4, ["tempere", "chaud"], 20),
+    ("indigo", "culture", "teinture", "Indigotier", "Indigo", 6, 3, 0, ["printemps", "ete"], 0.6, ["chaud", "humide"], 25),
+    ("pastel", "culture", "teinture", "Pastel", "Woad", 5, 3, 0, ["printemps"], 0.5, ["tempere", "froid"], 20),
+    ("tabac", "culture", "tabac", "Tabac", "Tobacco", 5, 3, 0, ["printemps"], 0.6, ["chaud", "tempere"], 30),
+    # « encore plus » (seconde fois) : les aromates, les champignons, les cultures du monde
+    ("thym", "culture", "aromate", "Thym", "Thyme", 4, 2, 1, ["printemps"], 0.2, ["chaud", "tempere", "montagne"], 5),
+    ("romarin", "culture", "aromate", "Romarin", "Rosemary", 6, 2, 1, ["printemps"], 0.2, ["chaud", "cote", "tempere"], 5),
+    ("basilic", "culture", "aromate", "Basilic", "Basil", 2, 3, 1, ["printemps", "ete"], 0.7, ["chaud", "tempere"], 20),
+    ("lavande", "culture", "aromate", "Lavande", "Lavender", 6, 2, 0, ["printemps"], 0.2, ["chaud", "montagne", "cote"], 5),
+    ("origan", "culture", "aromate", "Origan", "Oregano", 4, 2, 1, ["printemps"], 0.3, ["chaud", "tempere", "montagne"], 10),
+    ("persil", "culture", "aromate", "Persil", "Parsley", 3, 3, 2, ["printemps", "automne"], 0.6, ["tempere", "humide"], 20),
+    ("coriandre", "culture", "aromate", "Coriandre", "Coriander", 3, 2, 1, ["printemps"], 0.5, ["chaud", "tempere", "desert"], 15),
+    ("aneth", "culture", "aromate", "Aneth", "Dill", 3, 2, 1, ["printemps", "ete"], 0.5, ["tempere", "froid", "cote"], 15),
+    ("cepe", "champignon", "champignon", "Cèpe", "Porcini", 2, 2, 5, ["automne"], 0.8, ["foret", "tempere", "montagne"], 20),
+    ("girolle", "champignon", "champignon", "Girolle", "Chanterelle", 2, 2, 4, ["ete", "automne"], 0.8, ["foret", "tempere", "humide"], 20),
+    ("truffe", "champignon", "champignon", "Truffe", "Truffle", 14, 1, 6, ["automne"], 0.5, ["foret"], 40),
+    ("soja", "culture", "legumineuse", "Soja", "Soybean", 5, 4, 9, ["printemps"], 0.6, ["chaud", "tempere", "humide"], 20),
+    ("pois_chiche", "culture", "legumineuse", "Pois chiche", "Chickpea", 5, 3, 9, ["printemps"], 0.3, ["chaud", "desert", "cote"], 10),
+    ("sorgho", "culture", "cereale", "Sorgho", "Sorghum", 5, 4, 9, ["printemps", "ete"], 0.2, ["chaud", "desert", "plaine"], 10),
+    ("quinoa", "culture", "cereale", "Quinoa", "Quinoa", 5, 3, 10, ["printemps"], 0.3, ["montagne", "froid"], 10),
+    ("patate_douce", "culture", "racine", "Patate douce", "Sweet potato", 5, 5, 9, ["printemps"], 0.5, ["chaud", "tempere"], 15),
+    ("manioc", "culture", "racine", "Manioc", "Cassava", 9, 6, 10, ["printemps"], 0.4, ["chaud", "humide"], 5),
+    ("igname", "culture", "racine", "Igname", "Yam", 8, 5, 9, ["printemps"], 0.6, ["chaud", "humide", "foret"], 15),
+    ("taro", "culture", "racine", "Taro", "Taro", 7, 4, 8, ["printemps"], 0.9, ["humide", "marecage", "chaud"], 20),
+    ("melon", "culture", "legume", "Melon", "Melon", 4, 4, 4, ["printemps", "ete"], 0.7, ["chaud", "tempere"], 30),
+    ("pasteque", "culture", "legume", "Pastèque", "Watermelon", 4, 5, 3, ["ete"], 0.8, ["chaud", "desert", "plaine"], 25),
+    ("courge", "culture", "legume", "Courge", "Squash", 5, 5, 5, ["printemps", "ete"], 0.6, ["tempere", "chaud", "humide"], 25),
+    ("pecher", "buisson", "fruit", "Pêcher", "Peach tree", 7, 5, 5, ["printemps"], 0.5, ["chaud", "tempere"], 25),
+    ("abricotier", "buisson", "fruit", "Abricotier", "Apricot tree", 7, 4, 5, ["printemps"], 0.4, ["chaud", "tempere", "montagne"], 20),
+    ("cognassier", "buisson", "fruit", "Cognassier", "Quince tree", 8, 4, 4, ["printemps"], 0.5, ["tempere"], 20),
+    ("chataigne", "buisson", "fruit", "Châtaignier", "Chestnut tree", 12, 5, 10, ["printemps"], 0.4, ["tempere", "foret", "montagne"], 10),
+    ("grenadier", "buisson", "fruit", "Grenadier", "Pomegranate tree", 8, 4, 5, ["printemps"], 0.3, ["chaud", "desert", "cote"], 10),
+    ("citronnier", "buisson", "fruit", "Citronnier", "Lemon tree", 9, 5, 3, ["printemps"], 0.5, ["chaud", "cote", "littoral"], 25),
+    ("ananas", "buisson", "fruit", "Ananas", "Pineapple", 10, 3, 6, ["printemps", "ete"], 0.7, ["chaud", "humide"], 25),
+    ("murier", "buisson", "fruit", "Mûrier", "Mulberry tree", 7, 4, 4, ["printemps"], 0.5, ["tempere", "chaud"], 15),
     # les fruits : des buissons et des arbres, plantés une fois (le verger)
     ("fraisier", "buisson", "fruit", "Fraisier", "Strawberry", 3, 3, 4, ["printemps"], 0.6, ["tempere", "froid", "humide"], 20),
     ("groseillier", "buisson", "fruit", "Groseillier", "Currant bush", 4, 3, 3, ["printemps"], 0.5, ["froid", "tempere"], 15),
     ("cassissier", "buisson", "fruit", "Cassissier", "Blackcurrant bush", 4, 3, 4, ["printemps"], 0.6, ["froid", "tempere", "humide"], 15),
-    ("pommier", "buisson", "fruit", "Pommier", "Apple tree", 8, 6, 6, ["printemps"], 0.5, ["tempere", "froid"], 20),
+    ("pomme", "buisson", "fruit", "Pommier", "Apple tree", 8, 6, 6, ["printemps"], 0.5, ["tempere", "froid"], 20),
     ("poirier", "buisson", "fruit", "Poirier", "Pear tree", 8, 5, 6, ["printemps"], 0.5, ["tempere"], 25),
     ("prunier", "buisson", "fruit", "Prunier", "Plum tree", 7, 5, 5, ["printemps"], 0.5, ["tempere", "chaud"], 20),
-    ("cerisier", "buisson", "fruit", "Cerisier", "Cherry tree", 6, 4, 5, ["printemps"], 0.5, ["tempere", "froid", "montagne"], 20),
+    ("cerise", "buisson", "fruit", "Cerisier", "Cherry tree", 6, 4, 5, ["printemps"], 0.5, ["tempere", "froid", "montagne"], 20),
     ("figuier", "buisson", "fruit", "Figuier", "Fig tree", 7, 4, 7, ["printemps", "ete"], 0.3, ["chaud", "cote"], 15),
-    ("olivier", "buisson", "fruit", "Olivier", "Olive tree", 10, 3, 8, ["printemps"], 0.2, ["chaud", "cote", "desert"], 10),
+    ("olive", "buisson", "fruit", "Olivier", "Olive tree", 10, 3, 8, ["printemps"], 0.2, ["chaud", "cote", "desert"], 10),
     ("oranger", "buisson", "fruit", "Oranger", "Orange tree", 9, 5, 5, ["printemps"], 0.5, ["chaud", "littoral", "cote"], 25),
     ("dattier", "buisson", "fruit", "Dattier", "Date palm", 12, 5, 11, ["ete"], 0.3, ["desert", "chaud"], 5),
-    ("noisetier", "buisson", "fruit", "Noisetier", "Hazel", 8, 3, 9, ["printemps"], 0.4, ["tempere", "foret", "froid"], 15),
-    ("noyer", "buisson", "fruit", "Noyer", "Walnut tree", 12, 4, 12, ["printemps"], 0.5, ["tempere", "foret"], 25),
+    ("noisette", "buisson", "fruit", "Noisetier", "Hazel", 8, 3, 9, ["printemps"], 0.4, ["tempere", "foret", "froid"], 15),
+    ("noix", "buisson", "fruit", "Noyer", "Walnut tree", 12, 4, 12, ["printemps"], 0.5, ["tempere", "foret"], 25),
     ("amandier", "buisson", "fruit", "Amandier", "Almond tree", 9, 3, 10, ["printemps"], 0.2, ["chaud", "desert", "cote"], 10),
     ("bananier", "buisson", "fruit", "Bananier", "Banana plant", 6, 6, 9, ["printemps", "ete"], 0.9, ["chaud", "humide", "marecage"], 30),
 ]
 
 WUXING = {"cereale": {"bois": 0.6, "terre": 0.4}, "legume": {"bois": 0.8, "eau": 0.2}, "racine": {"terre": 0.6, "bois": 0.4},
           "legumineuse": {"bois": 0.7, "terre": 0.3}, "fruit": {"bois": 0.5, "eau": 0.3, "feu": 0.2}, "fibre": {"bois": 1.0},
-          "oleagineux": {"feu": 0.4, "bois": 0.6}}
+          "oleagineux": {"feu": 0.4, "bois": 0.6}, "epice": {"feu": 0.7, "bois": 0.3}, "teinture": {"eau": 0.5, "bois": 0.5}, "tabac": {"feu": 0.6, "terre": 0.4},
+          "aromate": {"bois": 0.6, "feu": 0.4}, "champignon": {"terre": 0.5, "eau": 0.5}}
 POTENTIEL = {"cereale": {"endurance": 1}, "legume": {"volonte": 1}, "racine": {"endurance": 1}, "legumineuse": {"force": 1},
-             "fruit": {"charisme": 1}, "fibre": {}, "oleagineux": {"perception": 1}}
+             "fruit": {"charisme": 1}, "fibre": {}, "oleagineux": {"perception": 1}, "epice": {"perception": 1}, "teinture": {}, "tabac": {"volonte": 1}, "aromate": {"volonte": 1}, "champignon": {"perception": 1}}
 # ce que le fruit rend en plus au sac : la fibre n'est pas un aliment mais on en mange les graines
-NOM_FRUIT = {"pommier": ("Pomme", "Apple"), "poirier": ("Poire", "Pear"), "prunier": ("Prune", "Plum"), "cerisier": ("Cerise", "Cherry"),
-             "figuier": ("Figue", "Fig"), "olivier": ("Olive", "Olive"), "oranger": ("Orange", "Orange"), "dattier": ("Datte", "Date"),
-             "noisetier": ("Noisette", "Hazelnut"), "noyer": ("Noix", "Walnut"), "amandier": ("Amande", "Almond"), "bananier": ("Banane", "Banana"),
+NOM_FRUIT = {"pomme": ("Pomme", "Apple"), "poirier": ("Poire", "Pear"), "prunier": ("Prune", "Plum"), "cerise": ("Cerise", "Cherry"),
+             "figuier": ("Figue", "Fig"), "olive": ("Olive", "Olive"), "oranger": ("Orange", "Orange"), "dattier": ("Datte", "Date"),
+             "noisette": ("Noisette", "Hazelnut"), "noix": ("Noix", "Walnut"), "amandier": ("Amande", "Almond"), "bananier": ("Banane", "Banana"),
              "fraisier": ("Fraise", "Strawberry"), "groseillier": ("Groseille", "Currant"), "cassissier": ("Cassis", "Blackcurrant"),
-             "lin": ("Graines de lin", "Flax seeds"), "chanvre": ("Graines de chanvre", "Hemp seeds"), "tournesol": ("Graines de tournesol", "Sunflower seeds"),
-             "colza": ("Graines de colza", "Rapeseed"), "canne_a_sucre": ("Canne à sucre", "Sugar cane")}
+             "tige_de_lin": ("Tiges de lin", "Flax stalks"), "tige_de_chanvre": ("Tiges de chanvre", "Hemp stalks"), "tournesol": ("Graines de tournesol", "Sunflower seeds"),
+             "colza": ("Graines de colza", "Rapeseed"), "canne_a_sucre": ("Canne à sucre", "Sugar cane"),
+             "poivre": ("Poivre", "Pepper"), "cannelle": ("Cannelle", "Cinnamon"), "garance": ("Racine de garance", "Madder root"),
+             "indigo": ("Feuilles d'indigo", "Indigo leaves"), "pastel": ("Feuilles de pastel", "Woad leaves"), "tabac": ("Feuilles de tabac", "Tobacco leaves"),
+             "pecher": ("Pêche", "Peach"), "abricotier": ("Abricot", "Apricot"), "cognassier": ("Coing", "Quince"), "chataigne": ("Châtaigne", "Chestnut"),
+             "grenadier": ("Grenade", "Pomegranate"), "citronnier": ("Citron", "Lemon"), "murier": ("Mûre", "Mulberry")}
 
 # id, gabarit (l'espèce sauvage dont on copie le corps), fr, en, teinte, stats (force, dex, end, vol, per, cha),
 # elevage : produits [(materiau, n, saison)], fourrage, naissance_chance, abattage {…}, biomes
@@ -120,6 +168,9 @@ BETAIL = [
     ("buffle", "bison", "Buffle", "Water buffalo", [0.3, 0.3, 0.3], (14, 5, 14, 4, 7, 3), [("lait", 2, "")], 3, 0.07, {"viande_crue": 9, "cuir": 3, "suif": 2}, ["humide", "marecage", "chaud"]),
     ("yak", "bison", "Yak", "Yak", [0.25, 0.2, 0.18], (13, 5, 14, 5, 8, 3), [("lait", 1, ""), ("laine", 2, "printemps")], 2, 0.07, {"viande_crue": 7, "cuir": 2, "suif": 2}, ["froid", "montagne", "toundra"]),
     ("lama", "mouflon", "Lama", "Llama", [0.8, 0.7, 0.55], (8, 9, 11, 5, 10, 5), [("laine", 2, "printemps")], 1, 0.08, {"viande_crue": 3, "cuir": 1}, ["montagne", "froid"]),
+    ("dinde", "canard_sauvage", "Dinde", "Turkey", [0.35, 0.25, 0.25], (6, 7, 8, 4, 9, 3), [("oeuf", 1, ""), ("plume", 1, "")], 1, 0.15, {"viande_crue": 4, "plume": 2}, ["tempere", "plaine", "foret"]),
+    ("pintade", "canard_sauvage", "Pintade", "Guinea fowl", [0.45, 0.45, 0.5], (4, 10, 7, 4, 12, 3), [("oeuf", 2, "")], 1, 0.2, {"viande_crue": 2, "plume": 1}, ["chaud", "desert", "plaine"]),
+    ("pigeon", "canard_sauvage", "Pigeon", "Pigeon", [0.55, 0.55, 0.6], (2, 11, 4, 3, 11, 3), [("oeuf", 1, "")], 1, 0.3, {"viande_crue": 1, "plume": 1}, ["tempere", "chaud", "cote", "montagne"]),
     ("dromadaire", "chameau", "Dromadaire", "Dromedary", [0.75, 0.6, 0.4], (12, 7, 15, 6, 9, 4), [("lait", 2, "")], 2, 0.05, {"viande_crue": 8, "cuir": 2, "suif": 3}, ["desert", "chaud"]),
 ]
 
@@ -173,7 +224,7 @@ def main():
         else:
             d = collections.OrderedDict([("name_key", "plant.%s.name" % pid), ("categorie", cat), ("nutrition", nutrition),
                 ("bonus_potentiel", POTENTIEL[fam]), ("wuxing", WUXING[fam]), ("duree_jours", duree), ("recolte_base", recolte),
-                ("tags", [cat] if cat == "culture" else ["buisson", "verger"]), ("saisons", saisons), ("besoin_eau", eau)])
+                ("tags", ["buisson", "verger"] if cat == "buisson" else [cat]), ("saisons", saisons), ("besoin_eau", eau)])
         d["famille"] = fam
         d["conditions"] = collections.OrderedDict([("biomes", biomes), ("fertilite_min", fert)])
         ecrire(p, d)
@@ -185,8 +236,17 @@ def main():
             it["nutrition"] = nutrition
             it["potentiel"] = POTENTIEL[fam]
             it["wuxing"] = WUXING[fam]
-            it["tags"] = ["consommable", "empilable", "culture" if cat == "culture" else "fruit", "ingredient"]
+            it["tags"] = ["consommable", "empilable", "fruit" if cat == "buisson" else cat, "ingredient"]
             ecrire(pi, it)
+        # la famille de la plante est un TAG de son objet (une recette « deux céréales » vaut pour tous les grains) ;
+        # l'olive presse comme un oléagineux
+        it2 = lire(pi)
+        tags = list(it2.get("tags", []))
+        for t in [fam] + (["oleagineux"] if pid == "olive" else []):
+            if t not in tags:
+                tags.append(t)
+        it2["tags"] = tags
+        ecrire(pi, it2)
         if nfr is not None:
             fr.append(("plant.%s.name" % pid, nfr))
             en.append(("plant.%s.name" % pid, nen))

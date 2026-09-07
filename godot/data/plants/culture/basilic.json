@@ -1,0 +1,30 @@
+{
+  "name_key": "plant.basilic.name",
+  "categorie": "culture",
+  "nutrition": 1,
+  "bonus_potentiel": {
+    "volonte": 1
+  },
+  "wuxing": {
+    "bois": 0.6,
+    "feu": 0.4
+  },
+  "duree_jours": 2,
+  "recolte_base": 3,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "printemps",
+    "ete"
+  ],
+  "besoin_eau": 0.7,
+  "famille": "aromate",
+  "conditions": {
+    "biomes": [
+      "chaud",
+      "tempere"
+    ],
+    "fertilite_min": 20
+  }
+}

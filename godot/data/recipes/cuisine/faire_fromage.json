@@ -1,0 +1,23 @@
+{
+  "name_key": "recipe.faire_fromage.name",
+  "station": "cuisine",
+  "craft_skill": "cuisine",
+  "inputs": [
+    {
+      "material": "lait",
+      "forme": "brut",
+      "amount": 3
+    },
+    {
+      "material": "sel_gemme",
+      "forme": "brut",
+      "amount": 1,
+      "optionnel": true
+    }
+  ],
+  "output": {
+    "item": "fromage",
+    "amount": 2
+  },
+  "fuel": null
+}

@@ -1,0 +1,66 @@
+{
+  "name_key": "creature.pintade.name",
+  "race": "pintade",
+  "skeleton_template": "volant",
+  "corps": {
+    "stats": {
+      "force": 4,
+      "dexterite": 10,
+      "endurance": 7,
+      "volonte": 4,
+      "perception": 12,
+      "charisme": 3
+    },
+    "silhouette": "volant"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "becquetage"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "eau": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.45,
+    0.45,
+    0.5
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "domestique"
+  ],
+  "competences": {
+    "athletisme": 22
+  },
+  "depouille": [
+    "viande_crue"
+  ],
+  "drops_chasse": [
+    "plume"
+  ],
+  "elevage": {
+    "produits": [
+      {
+        "materiau": "oeuf",
+        "n": 2
+      }
+    ],
+    "fourrage": 1,
+    "naissance_chance": 0.2,
+    "abattage": {
+      "viande_crue": 2,
+      "plume": 1
+    },
+    "biomes": [
+      "chaud",
+      "desert",
+      "plaine"
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name_key": "recipe.rouir_chanvre.name",
+  "station": "atelier_tissage",
+  "craft_skill": "tissage",
+  "inputs": [
+    {
+      "item": "tige_de_chanvre",
+      "forme": "",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "material": "chanvre",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null
+}

@@ -4220,6 +4220,33 @@ gaz.arsine,arsine
 journal.nappe_percee,"the pick breaks into an aquifer: water gushes at ({x},{y})"
 journal.geode,"a geode opens: {n} rough gem(s) on the ground"
 journal.magma_perce,"the pick breaks into a magma pocket at ({x},{y})!"
+item.farine.name,Flour
+item.fromage.name,Cheese
+item.beurre.name,Butter
+item.sucre.name,Sugar
+item.biere.name,Beer
+item.vin.name,Wine
+recipe.moudre_farine.name,Grind flour
+recipe.cuire_pain.name,Bake bread
+recipe.faire_fromage.name,Make cheese
+recipe.baratter_beurre.name,Churn butter
+recipe.presser_huile.name,Press oil
+recipe.raffiner_sucre.name,Refine sugar
+recipe.brasser_biere.name,Brew beer
+recipe.vinifier.name,Make wine
+recipe.rouir_lin.name,Ret flax
+recipe.rouir_chanvre.name,Ret hemp
+item.viande_salee.name,Salted meat
+item.viande_fumee.name,Smoked meat
+recipe.saler_viande.name,Salt meat
+recipe.fumer_viande.name,Smoke meat
+item.chandelle.name,Candle
+material.uraninite.name,Uraninite
+material.kaolin.name,Kaolin
+recipe.faire_vinaigre.name,Make vinegar
+recipe.distiller_vin.name,Distil wine
+recipe.faire_savon.name,Make soap
+recipe.faire_encre.name,Make ink
 plant.seigle.name,Rye
 item.seigle.name,Rye
 plant.avoine.name,Oats
@@ -4266,42 +4293,118 @@ plant.lentille.name,Lentil
 item.lentille.name,Lentil
 plant.feve.name,Broad bean
 item.feve.name,Broad bean
-plant.lin.name,Flax
-item.lin.name,Flax seeds
-plant.chanvre.name,Hemp
-item.chanvre.name,Hemp seeds
+plant.tige_de_lin.name,Flax
+item.tige_de_lin.name,Flax stalks
+plant.tige_de_chanvre.name,Hemp
+item.tige_de_chanvre.name,Hemp stalks
 plant.tournesol.name,Sunflower
 item.tournesol.name,Sunflower seeds
 plant.colza.name,Rapeseed
 item.colza.name,Rapeseed
 plant.canne_a_sucre.name,Sugar cane
 item.canne_a_sucre.name,Sugar cane
+plant.poivre.name,Pepper vine
+item.poivre.name,Pepper
+plant.safran.name,Saffron
+item.safran.name,Saffron
+plant.gingembre.name,Ginger
+item.gingembre.name,Ginger
+plant.cannelle.name,Cinnamon tree
+item.cannelle.name,Cinnamon
+plant.garance.name,Madder
+item.garance.name,Madder root
+plant.indigo.name,Indigo
+item.indigo.name,Indigo leaves
+plant.pastel.name,Woad
+item.pastel.name,Woad leaves
+plant.tabac.name,Tobacco
+item.tabac.name,Tobacco leaves
+plant.thym.name,Thyme
+item.thym.name,Thyme
+plant.romarin.name,Rosemary
+item.romarin.name,Rosemary
+plant.basilic.name,Basil
+item.basilic.name,Basil
+plant.lavande.name,Lavender
+item.lavande.name,Lavender
+plant.origan.name,Oregano
+item.origan.name,Oregano
+plant.persil.name,Parsley
+item.persil.name,Parsley
+plant.coriandre.name,Coriander
+item.coriandre.name,Coriander
+plant.aneth.name,Dill
+item.aneth.name,Dill
+plant.cepe.name,Porcini
+item.cepe.name,Porcini
+plant.girolle.name,Chanterelle
+item.girolle.name,Chanterelle
+plant.truffe.name,Truffle
+item.truffe.name,Truffle
+plant.soja.name,Soybean
+item.soja.name,Soybean
+plant.pois_chiche.name,Chickpea
+item.pois_chiche.name,Chickpea
+plant.sorgho.name,Sorghum
+item.sorgho.name,Sorghum
+plant.quinoa.name,Quinoa
+item.quinoa.name,Quinoa
+plant.patate_douce.name,Sweet potato
+item.patate_douce.name,Sweet potato
+plant.manioc.name,Cassava
+item.manioc.name,Cassava
+plant.igname.name,Yam
+item.igname.name,Yam
+plant.taro.name,Taro
+item.taro.name,Taro
+plant.melon.name,Melon
+item.melon.name,Melon
+plant.pasteque.name,Watermelon
+item.pasteque.name,Watermelon
+plant.courge.name,Squash
+item.courge.name,Squash
+plant.pecher.name,Peach tree
+item.pecher.name,Peach
+plant.abricotier.name,Apricot tree
+item.abricotier.name,Apricot
+plant.cognassier.name,Quince tree
+item.cognassier.name,Quince
+plant.chataigne.name,Chestnut tree
+item.chataigne.name,Chestnut
+plant.grenadier.name,Pomegranate tree
+item.grenadier.name,Pomegranate
+plant.citronnier.name,Lemon tree
+item.citronnier.name,Lemon
+plant.ananas.name,Pineapple
+item.ananas.name,Pineapple
+plant.murier.name,Mulberry tree
+item.murier.name,Mulberry
 plant.fraisier.name,Strawberry
 item.fraisier.name,Strawberry
 plant.groseillier.name,Currant bush
 item.groseillier.name,Currant
 plant.cassissier.name,Blackcurrant bush
 item.cassissier.name,Blackcurrant
-plant.pommier.name,Apple tree
-item.pommier.name,Apple
+plant.pomme.name,Apple tree
+item.pomme.name,Apple
 plant.poirier.name,Pear tree
 item.poirier.name,Pear
 plant.prunier.name,Plum tree
 item.prunier.name,Plum
-plant.cerisier.name,Cherry tree
-item.cerisier.name,Cherry
+plant.cerise.name,Cherry tree
+item.cerise.name,Cherry
 plant.figuier.name,Fig tree
 item.figuier.name,Fig
-plant.olivier.name,Olive tree
-item.olivier.name,Olive
+plant.olive.name,Olive tree
+item.olive.name,Olive
 plant.oranger.name,Orange tree
 item.oranger.name,Orange
 plant.dattier.name,Date palm
 item.dattier.name,Date
-plant.noisetier.name,Hazel
-item.noisetier.name,Hazelnut
-plant.noyer.name,Walnut tree
-item.noyer.name,Walnut
+plant.noisette.name,Hazel
+item.noisette.name,Hazelnut
+plant.noix.name,Walnut tree
+item.noix.name,Walnut
 plant.amandier.name,Almond tree
 item.amandier.name,Almond
 plant.bananier.name,Banana plant
@@ -4319,5 +4422,8 @@ creature.cheval.name,Horse
 creature.buffle.name,Water buffalo
 creature.yak.name,Yak
 creature.lama.name,Llama
+creature.dinde.name,Turkey
+creature.pintade.name,Guinea fowl
+creature.pigeon.name,Pigeon
 creature.dromadaire.name,Dromedary
 item.oeuf.name,Egg

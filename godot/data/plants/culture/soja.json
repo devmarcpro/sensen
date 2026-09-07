@@ -1,0 +1,30 @@
+{
+  "name_key": "plant.soja.name",
+  "categorie": "culture",
+  "nutrition": 9,
+  "bonus_potentiel": {
+    "force": 1
+  },
+  "wuxing": {
+    "bois": 0.7,
+    "terre": 0.3
+  },
+  "duree_jours": 5,
+  "recolte_base": 4,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "printemps"
+  ],
+  "besoin_eau": 0.6,
+  "famille": "legumineuse",
+  "conditions": {
+    "biomes": [
+      "chaud",
+      "tempere",
+      "humide"
+    ],
+    "fertilite_min": 20
+  }
+}

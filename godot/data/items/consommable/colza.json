@@ -18,7 +18,8 @@
     "consommable",
     "empilable",
     "culture",
-    "ingredient"
+    "ingredient",
+    "oleagineux"
   ],
   "wuxing": {
     "feu": 0.4,

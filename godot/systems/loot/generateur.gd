@@ -63,7 +63,11 @@ func generer(base_id: String, profondeur: int, rng: RandomNumberGenerator, prove
 	var r: Dictionary = regles.raretes[rarete]
 	_n += 1
 	var inst: Dictionary = base.duplicate(true)
-	inst["uid"] = "%s#%d_%d" % [base_id, profondeur, _n + rng.randi() % 1000]
+	# Le compteur et l'aléa sont deux CHAMPS, pas une somme : « _n + rng.randi() % 1000 » pouvait rendre deux fois
+	# le même uid (n et n+2 avec deux tirages qui diffèrent de 2), et le second objet écrasait le premier dans
+	# `sim.items` — le sac gardait deux fois le même identifiant. Trouvé le 2026-09-07 : une lame façonnée devenait
+	# la garde façonnée deux crans plus tard, et l'assemblage de la dague n'avait plus de lame.
+	inst["uid"] = "%s#%d_%d_%d" % [base_id, profondeur, _n, rng.randi() % 1000]
 	inst["base"] = base_id
 	inst["rarete"] = rarete
 	inst["affixes"] = []

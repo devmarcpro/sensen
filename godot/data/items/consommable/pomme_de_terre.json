@@ -18,7 +18,8 @@
     "consommable",
     "empilable",
     "culture",
-    "ingredient"
+    "ingredient",
+    "racine"
   ],
   "wuxing": {
     "terre": 0.7,

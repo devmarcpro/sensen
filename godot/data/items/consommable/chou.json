@@ -18,7 +18,8 @@
     "consommable",
     "empilable",
     "culture",
-    "ingredient"
+    "ingredient",
+    "legume"
   ],
   "wuxing": {
     "bois": 0.8,

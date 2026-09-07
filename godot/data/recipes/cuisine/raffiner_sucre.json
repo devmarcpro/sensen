@@ -1,0 +1,17 @@
+{
+  "name_key": "recipe.raffiner_sucre.name",
+  "station": "cuisine",
+  "craft_skill": "cuisine",
+  "inputs": [
+    {
+      "item": "canne_a_sucre",
+      "forme": "",
+      "amount": 3
+    }
+  ],
+  "output": {
+    "item": "sucre",
+    "amount": 2
+  },
+  "fuel": null
+}

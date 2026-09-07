@@ -1,0 +1,23 @@
+{
+  "name_key": "recipe.cuire_pain.name",
+  "station": "cuisine",
+  "craft_skill": "cuisine",
+  "inputs": [
+    {
+      "item": "farine",
+      "forme": "",
+      "amount": 2
+    },
+    {
+      "material": "sel_gemme",
+      "forme": "brut",
+      "amount": 1,
+      "optionnel": true
+    }
+  ],
+  "output": {
+    "item": "pain",
+    "amount": 2
+  },
+  "fuel": null
+}

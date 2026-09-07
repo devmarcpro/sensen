@@ -1,0 +1,30 @@
+{
+  "name_key": "plant.igname.name",
+  "categorie": "culture",
+  "nutrition": 9,
+  "bonus_potentiel": {
+    "endurance": 1
+  },
+  "wuxing": {
+    "terre": 0.6,
+    "bois": 0.4
+  },
+  "duree_jours": 8,
+  "recolte_base": 5,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "printemps"
+  ],
+  "besoin_eau": 0.6,
+  "famille": "racine",
+  "conditions": {
+    "biomes": [
+      "chaud",
+      "humide",
+      "foret"
+    ],
+    "fertilite_min": 15
+  }
+}

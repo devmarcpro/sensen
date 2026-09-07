@@ -1,0 +1,17 @@
+{
+  "name_key": "recipe.moudre_farine.name",
+  "station": "cuisine",
+  "craft_skill": "cuisine",
+  "inputs": [
+    {
+      "tag": "cereale",
+      "forme": "",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "item": "farine",
+    "amount": 2
+  },
+  "fuel": null
+}

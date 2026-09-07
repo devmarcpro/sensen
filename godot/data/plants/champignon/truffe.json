@@ -1,0 +1,28 @@
+{
+  "name_key": "plant.truffe.name",
+  "categorie": "champignon",
+  "nutrition": 6,
+  "bonus_potentiel": {
+    "perception": 1
+  },
+  "wuxing": {
+    "terre": 0.5,
+    "eau": 0.5
+  },
+  "duree_jours": 14,
+  "recolte_base": 1,
+  "tags": [
+    "champignon"
+  ],
+  "saisons": [
+    "automne"
+  ],
+  "besoin_eau": 0.5,
+  "famille": "champignon",
+  "conditions": {
+    "biomes": [
+      "foret"
+    ],
+    "fertilite_min": 40
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.fumer_viande.name",
+  "station": "cuisine",
+  "craft_skill": "cuisine",
+  "inputs": [
+    {
+      "item": "viande_crue",
+      "forme": "",
+      "amount": 1
+    },
+    {
+      "category": "bois",
+      "forme": "brut",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "viande_fumee",
+    "amount": 1
+  },
+  "fuel": null
+}

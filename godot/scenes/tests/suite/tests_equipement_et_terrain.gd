@@ -167,7 +167,7 @@ func test_plantes() -> void:
 	for pid in GameData.catalogues.plants.keys():
 		var c := str(GameData.catalogues.plants[pid].categorie)
 		cats[c] = int(cats.get(c, 0)) + 1
-	verifier(int(cats.get("culture", 0)) >= 8 and int(cats.get("buisson", 0)) >= 4 and int(cats.get("herbe", 0)) == 6 and int(cats.get("champignon", 0)) == 2 and int(cats.get("decorative", 0)) == 2, "%d cultures et %d buissons (au moins 8 et 4), 6 herbes, 2 champignons, 2 décoratives" % [int(cats.get("culture", 0)), int(cats.get("buisson", 0))])
+	verifier(int(cats.get("culture", 0)) >= 8 and int(cats.get("buisson", 0)) >= 4 and int(cats.get("herbe", 0)) == 6 and int(cats.get("champignon", 0)) >= 2 and int(cats.get("decorative", 0)) == 2, "%d cultures, %d buissons et %d champignons (au moins 8, 4 et 2), 6 herbes, 2 décoratives" % [int(cats.get("culture", 0)), int(cats.get("buisson", 0)), int(cats.get("champignon", 0))])
 	var s := Simulation.new(142)
 	s.charger_camp()
 	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]

@@ -1,0 +1,30 @@
+{
+  "name_key": "plant.coriandre.name",
+  "categorie": "culture",
+  "nutrition": 1,
+  "bonus_potentiel": {
+    "volonte": 1
+  },
+  "wuxing": {
+    "bois": 0.6,
+    "feu": 0.4
+  },
+  "duree_jours": 3,
+  "recolte_base": 2,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "printemps"
+  ],
+  "besoin_eau": 0.5,
+  "famille": "aromate",
+  "conditions": {
+    "biomes": [
+      "chaud",
+      "tempere",
+      "desert"
+    ],
+    "fertilite_min": 15
+  }
+}

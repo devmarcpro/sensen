@@ -1,0 +1,17 @@
+{
+  "name_key": "recipe.vinifier.name",
+  "station": "alambic",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "item": "vigne",
+      "forme": "",
+      "amount": 3
+    }
+  ],
+  "output": {
+    "item": "vin",
+    "amount": 2
+  },
+  "fuel": null
+}

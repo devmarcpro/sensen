@@ -1,0 +1,23 @@
+{
+  "name_key": "recipe.faire_encre.name",
+  "station": "etabli",
+  "craft_skill": "menuiserie",
+  "inputs": [
+    {
+      "material": "charbon_de_bois",
+      "forme": "brut",
+      "amount": 1
+    },
+    {
+      "material": "huile",
+      "forme": "brut",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "material": "encre",
+    "forme": "brut",
+    "amount": 2
+  },
+  "fuel": null
+}

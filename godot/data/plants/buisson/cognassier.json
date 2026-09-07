@@ -1,0 +1,30 @@
+{
+  "name_key": "plant.cognassier.name",
+  "categorie": "buisson",
+  "nutrition": 4,
+  "bonus_potentiel": {
+    "charisme": 1
+  },
+  "wuxing": {
+    "bois": 0.5,
+    "eau": 0.3,
+    "feu": 0.2
+  },
+  "duree_jours": 8,
+  "recolte_base": 4,
+  "tags": [
+    "buisson",
+    "verger"
+  ],
+  "saisons": [
+    "printemps"
+  ],
+  "besoin_eau": 0.5,
+  "famille": "fruit",
+  "conditions": {
+    "biomes": [
+      "tempere"
+    ],
+    "fertilite_min": 20
+  }
+}

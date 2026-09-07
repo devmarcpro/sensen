@@ -1,0 +1,23 @@
+{
+  "name_key": "recipe.faire_savon.name",
+  "station": "cuisine",
+  "craft_skill": "cuisine",
+  "inputs": [
+    {
+      "material": "suif",
+      "forme": "brut",
+      "amount": 1
+    },
+    {
+      "material": "lessive_de_cendre",
+      "forme": "brut",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "material": "savon",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null
+}

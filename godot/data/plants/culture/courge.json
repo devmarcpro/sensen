@@ -1,0 +1,31 @@
+{
+  "name_key": "plant.courge.name",
+  "categorie": "culture",
+  "nutrition": 5,
+  "bonus_potentiel": {
+    "volonte": 1
+  },
+  "wuxing": {
+    "bois": 0.8,
+    "eau": 0.2
+  },
+  "duree_jours": 5,
+  "recolte_base": 5,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "printemps",
+    "ete"
+  ],
+  "besoin_eau": 0.6,
+  "famille": "legume",
+  "conditions": {
+    "biomes": [
+      "tempere",
+      "chaud",
+      "humide"
+    ],
+    "fertilite_min": 25
+  }
+}

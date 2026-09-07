@@ -1903,4 +1903,33 @@ func test_agriculture_refondue() -> void:
 		if str(p.materiau) == "oeuf":
 			oeufs = int(p.n)
 	verifier(lait > 0 and oeufs > 0 and GameData.catalogues.items.has("oeuf") and float(poule.elevage.naissance_chance) > float(vache.elevage.naissance_chance), "la vache donne du lait (%d), la poule des œufs (%d), et la poule pullule plus que la vache" % [lait, oeufs])
+	# Les transformations de la ferme (Cuisine et alchimie, 2026-09-07) : neuf recettes, leurs objets, et le tag de famille.
+	var recettes: Dictionary = GameData.catalogues.recipes
+	var manquantes: Array = []
+	for rid in ["moudre_farine", "cuire_pain", "faire_fromage", "baratter_beurre", "presser_huile", "raffiner_sucre", "brasser_biere", "vinifier", "rouir_lin", "rouir_chanvre"]:
+		if not recettes.has(rid):
+			manquantes.append(rid)
+	var cereales := 0
+	for iid in GameData.catalogues.items.keys():
+		if "cereale" in GameData.catalogues.items[iid].get("tags", []):
+			cereales += 1
+	verifier(manquantes.is_empty() and cereales >= 9 and GameData.catalogues.items.has("fromage") and GameData.catalogues.items.has("vin") and "oleagineux" in GameData.catalogues.items.olive.get("tags", []), "les neuf transformations existent, %d grains portent le tag céréale, l'olive presse (%s)" % [cereales, str(manquantes)])
+	# « ensuite encore plus » : la conservation, la chandelle, les épices et les teintures, deux minerais réels.
+	var mats: Dictionary = GameData.catalogues.materials
+	var items: Dictionary = GameData.catalogues.items
+	verifier(recettes.has("saler_viande") and recettes.has("fumer_viande") and items.has("viande_salee") and items.has("viande_fumee") and "conserve" in items.viande_salee.tags, "la salaison et le fumage : deux conserves de viande")
+	verifier(items.has("chandelle") and int(items.chandelle.luminosite) > 0 and int(items.chandelle.luminosite) < int(items.torche.luminosite), "la chandelle éclaire, moins que la torche (%d < %d)" % [int(items.chandelle.luminosite), int(items.torche.luminosite)])
+	var epices := 0
+	var teintures := 0
+	for iid in items.keys():
+		var tg: Array = items[iid].get("tags", [])
+		if "epice" in tg:
+			epices += 1
+		if "teinture" in tg:
+			teintures += 1
+	verifier(epices >= 4 and teintures >= 3 and plantes.has("tabac") and mats.has("uraninite") and mats.has("kaolin") and int(mats.uraninite.palier) > int(mats.kaolin.palier), "%d épices, %d teintures, le tabac ; l'uraninite (palier %d) et le kaolin (%d)" % [epices, teintures, int(mats.uraninite.palier), int(mats.kaolin.palier)])
+	# « encore plus » (seconde fois) : aromates, champignons réels, cultures du monde, trois volailles, quatre matières enfin produites.
+	verifier(plantes.has("thym") and plantes.has("truffe") and str(plantes.truffe.categorie) == "champignon" and int(plantes.truffe.duree_jours) > int(plantes.cepe.duree_jours) and plantes.has("quinoa") and plantes.has("manioc"), "les aromates, la truffe (plus lente que le cèpe), le quinoa et le manioc sont au catalogue")
+	verifier(GameData.catalogues.creatures.has("dinde") and GameData.catalogues.creatures.has("pintade") and GameData.catalogues.creatures.has("pigeon"), "la dinde, la pintade et le pigeon")
+	verifier(recettes.has("faire_vinaigre") and recettes.has("distiller_vin") and recettes.has("faire_savon") and recettes.has("faire_encre"), "le vinaigre, l'alcool, le savon et l'encre ont enfin une recette")
 

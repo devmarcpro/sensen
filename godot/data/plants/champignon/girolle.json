@@ -1,0 +1,31 @@
+{
+  "name_key": "plant.girolle.name",
+  "categorie": "champignon",
+  "nutrition": 4,
+  "bonus_potentiel": {
+    "perception": 1
+  },
+  "wuxing": {
+    "terre": 0.5,
+    "eau": 0.5
+  },
+  "duree_jours": 2,
+  "recolte_base": 2,
+  "tags": [
+    "champignon"
+  ],
+  "saisons": [
+    "ete",
+    "automne"
+  ],
+  "besoin_eau": 0.8,
+  "famille": "champignon",
+  "conditions": {
+    "biomes": [
+      "foret",
+      "tempere",
+      "humide"
+    ],
+    "fertilite_min": 20
+  }
+}

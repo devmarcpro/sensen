@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.brasser_biere.name",
+  "station": "alambic",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "tag": "cereale",
+      "forme": "",
+      "amount": 2
+    },
+    {
+      "item": "houblon",
+      "forme": "",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "biere",
+    "amount": 2
+  },
+  "fuel": null
+}

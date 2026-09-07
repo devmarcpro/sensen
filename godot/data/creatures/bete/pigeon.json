@@ -1,0 +1,67 @@
+{
+  "name_key": "creature.pigeon.name",
+  "race": "pigeon",
+  "skeleton_template": "volant",
+  "corps": {
+    "stats": {
+      "force": 2,
+      "dexterite": 11,
+      "endurance": 4,
+      "volonte": 3,
+      "perception": 11,
+      "charisme": 3
+    },
+    "silhouette": "volant"
+  },
+  "esprit": null,
+  "ai_profile": "proie",
+  "actions": [
+    "becquetage"
+  ],
+  "equipement": [],
+  "ratelier": [],
+  "chain_gauge": false,
+  "elements": {
+    "eau": 1.0
+  },
+  "rare_chance": 0.0,
+  "teinte": [
+    0.55,
+    0.55,
+    0.6
+  ],
+  "tags": [
+    "bete",
+    "paisible",
+    "domestique"
+  ],
+  "competences": {
+    "athletisme": 22
+  },
+  "depouille": [
+    "viande_crue"
+  ],
+  "drops_chasse": [
+    "plume"
+  ],
+  "elevage": {
+    "produits": [
+      {
+        "materiau": "oeuf",
+        "n": 1
+      }
+    ],
+    "fourrage": 1,
+    "naissance_chance": 0.3,
+    "abattage": {
+      "viande_crue": 1,
+      "plume": 1
+    },
+    "biomes": [
+      "tempere",
+      "chaud",
+      "cote",
+      "montagne"
+    ]
+  }
+}

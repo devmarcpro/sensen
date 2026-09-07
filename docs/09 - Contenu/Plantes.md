@@ -37,6 +37,9 @@ Les 22 plantes non-arbres — réelles, récolte Herboristerie/Agriculture.
 > [!success] Codé le 2026-09-07, 19 h — cinquante-et-une plantes, chacune avec ses nombres (designer : « chaque plant a des stats uniques »)
 > Les 22 deviennent 65 : 43 plantes réelles de plus, écrites par `tools/gen_agriculture.py` depuis une table (identifiant, catégorie, famille, durée, récolte, nutrition, saisons, eau, biomes, fertilité minimale). Deux champs nouveaux sur toute plante cultivée : `famille` et `conditions` — le détail dans [[Agriculture et élevage]] (callout du 2026-09-07, 18 h 45). Les arbres fruitiers sont des `buisson` au sens du jeu (ils vivent comme le verger) : la question des arbres hauts reste ouverte.
 
+> [!success] Codé le 2026-09-07, 19 h 10 — « encore plus » (designer, seconde fois) : vingt-huit plantes réelles de plus, trois volailles
+> Au générateur d'agriculture : huit **aromates** (thym, romarin, basilic, lavande, origan, persil, coriandre, aneth — famille `aromate`, des ingrédients de cuisine et de potion), trois **champignons** réels (cèpe, girolle, **truffe** — la truffe est lente, rare, chère, et ne vient qu'en forêt), huit **fruits** (pêcher, abricotier, cognassier, châtaignier, grenadier, citronnier, ananas, mûrier) et neuf **cultures du monde** (soja et pois chiche — des légumineuses —, sorgho, quinoa des montagnes, patate douce, manioc, igname, taro des marais, melon et pastèque, courge). Et trois volailles domestiques de plus : la **dinde**, la **pintade** (des biomes chauds), le **pigeon**. Quatre-vingt-treize plantes au catalogue, dix-sept bêtes domestiques.
+
 ## Liens
 - **Dépend de** : [[Agriculture et élevage]], [[Catégories de matériaux]], [[Biomes — schéma]]
 - **Alimente** : [[Cuisine et alchimie]], [[Potions]], [[Nourriture]], [[Catalogue matériaux — Végétaux et fibres]]

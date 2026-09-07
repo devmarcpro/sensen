@@ -1,0 +1,29 @@
+{
+  "name_key": "plant.poivre.name",
+  "categorie": "culture",
+  "nutrition": 1,
+  "bonus_potentiel": {
+    "perception": 1
+  },
+  "wuxing": {
+    "feu": 0.7,
+    "bois": 0.3
+  },
+  "duree_jours": 9,
+  "recolte_base": 2,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "printemps"
+  ],
+  "besoin_eau": 0.7,
+  "famille": "epice",
+  "conditions": {
+    "biomes": [
+      "chaud",
+      "humide"
+    ],
+    "fertilite_min": 25
+  }
+}

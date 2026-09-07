@@ -1,0 +1,28 @@
+{
+  "name_key": "item.chandelle.name",
+  "type": "outil",
+  "equip_slot": "main_secondaire",
+  "hands": 1,
+  "luminosite": 40,
+  "poids": 0,
+  "tags": [
+    "outil",
+    "lumiere"
+  ],
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie",
+    "inputs": [
+      {
+        "material": "cire",
+        "forme": "brut",
+        "amount": 1
+      },
+      {
+        "category": "vegetal",
+        "forme": "brut",
+        "amount": 1
+      }
+    ]
+  }
+}

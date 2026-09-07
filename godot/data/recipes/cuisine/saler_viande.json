@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.saler_viande.name",
+  "station": "cuisine",
+  "craft_skill": "cuisine",
+  "inputs": [
+    {
+      "item": "viande_crue",
+      "forme": "",
+      "amount": 1
+    },
+    {
+      "material": "sel_gemme",
+      "forme": "brut",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "viande_salee",
+    "amount": 1
+  },
+  "fuel": null
+}

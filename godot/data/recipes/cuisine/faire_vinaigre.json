@@ -1,0 +1,18 @@
+{
+  "name_key": "recipe.faire_vinaigre.name",
+  "station": "cuisine",
+  "craft_skill": "cuisine",
+  "inputs": [
+    {
+      "item": "vin",
+      "forme": "",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "material": "vinaigre",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null
+}

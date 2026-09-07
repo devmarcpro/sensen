@@ -370,15 +370,48 @@
         "haricot",
         "lentille",
         "tournesol",
-        "canne_a_sucre"
+        "canne_a_sucre",
+        "poivre",
+        "safran",
+        "gingembre",
+        "garance",
+        "indigo",
+        "tabac",
+        "thym",
+        "romarin",
+        "basilic",
+        "lavande",
+        "origan",
+        "coriandre",
+        "soja",
+        "pois_chiche",
+        "sorgho",
+        "patate_douce",
+        "manioc",
+        "igname",
+        "taro",
+        "melon",
+        "pasteque",
+        "courge"
       ],
       "cote": [
         "poireau",
-        "feve"
+        "feve",
+        "romarin",
+        "lavande",
+        "aneth",
+        "pois_chiche"
       ],
       "desert": [
         "millet",
-        "lentille"
+        "lentille",
+        "coriandre",
+        "pois_chiche",
+        "sorgho",
+        "pasteque"
+      ],
+      "foret": [
+        "igname"
       ],
       "froid": [
         "orge",
@@ -392,8 +425,11 @@
         "poireau",
         "epinard",
         "pois",
-        "lin",
-        "colza"
+        "tige_de_lin",
+        "colza",
+        "pastel",
+        "aneth",
+        "quinoa"
       ],
       "humide": [
         "chou",
@@ -402,25 +438,42 @@
         "riz",
         "laitue",
         "concombre",
-        "chanvre",
-        "canne_a_sucre"
+        "tige_de_chanvre",
+        "canne_a_sucre",
+        "poivre",
+        "gingembre",
+        "indigo",
+        "persil",
+        "soja",
+        "manioc",
+        "igname",
+        "taro",
+        "courge"
       ],
       "marecage": [
-        "riz"
+        "riz",
+        "taro"
       ],
       "montagne": [
         "orge",
         "pomme_de_terre",
         "seigle",
         "sarrasin",
-        "epeautre"
+        "epeautre",
+        "safran",
+        "thym",
+        "lavande",
+        "origan",
+        "quinoa"
       ],
       "plaine": [
         "ble",
         "millet",
         "mais",
         "betterave",
-        "tournesol"
+        "tournesol",
+        "sorgho",
+        "pasteque"
       ],
       "tempere": [
         "ble",
@@ -446,10 +499,25 @@
         "pois",
         "lentille",
         "feve",
-        "lin",
-        "chanvre",
+        "tige_de_lin",
+        "tige_de_chanvre",
         "tournesol",
-        "colza"
+        "colza",
+        "safran",
+        "garance",
+        "pastel",
+        "tabac",
+        "thym",
+        "romarin",
+        "basilic",
+        "origan",
+        "persil",
+        "coriandre",
+        "aneth",
+        "soja",
+        "patate_douce",
+        "melon",
+        "courge"
       ]
     },
     "_doc": "Les champs (Villes B2, saisons et jachère le 2026-09-06) : taille et nombre par habitant, cultures par tag de biome, quota de récolte par fermier et par semaine ; jachere : après recoltes_avant_jachere récoltes le champ se repose jours_jachere jours et regagne fertilite_rendue, chaque récolte coûtant fertilite_par_recolte ; rotation_bonus : semer autre chose que la récolte précédente ; irrigation : une tuile d'eau à distance tuiles donne bonus de rendement et protège de la canicule ; hors_saison : une culture semée hors de ses saisons met duree fois plus de temps et rend rendement.",
@@ -523,19 +591,24 @@
         "poule",
         "ane",
         "buffle",
+        "pintade",
+        "pigeon",
         "dromadaire"
       ],
       "cote": [
-        "canard"
+        "canard",
+        "pigeon"
       ],
       "desert": [
         "chevre",
         "ane",
+        "pintade",
         "dromadaire"
       ],
       "foret": [
         "cochon",
-        "lapin"
+        "lapin",
+        "dinde"
       ],
       "froid": [
         "vache",
@@ -561,7 +634,8 @@
         "chevre",
         "ane",
         "yak",
-        "lama"
+        "lama",
+        "pigeon"
       ],
       "plaine": [
         "vache",
@@ -569,7 +643,9 @@
         "cochon",
         "poule",
         "lapin",
-        "cheval"
+        "cheval",
+        "dinde",
+        "pintade"
       ],
       "tempere": [
         "vache",
@@ -581,7 +657,9 @@
         "canard",
         "lapin",
         "ane",
-        "cheval"
+        "cheval",
+        "dinde",
+        "pigeon"
       ],
       "toundra": [
         "yak"
@@ -1081,9 +1159,16 @@
       ],
       "chaud": [
         "vigne",
+        "cannelle",
+        "pecher",
+        "abricotier",
+        "grenadier",
+        "citronnier",
+        "ananas",
+        "murier",
         "prunier",
         "figuier",
-        "olivier",
+        "olive",
         "oranger",
         "dattier",
         "amandier",
@@ -1091,21 +1176,26 @@
       ],
       "cote": [
         "vigne",
+        "cannelle",
+        "grenadier",
+        "citronnier",
         "figuier",
-        "olivier",
+        "olive",
         "oranger",
         "amandier"
       ],
       "desert": [
-        "olivier",
+        "grenadier",
+        "olive",
         "dattier",
         "amandier"
       ],
       "foret": [
         "framboisier",
         "myrtillier",
-        "noisetier",
-        "noyer"
+        "chataigne",
+        "noisette",
+        "noix"
       ],
       "froid": [
         "framboisier",
@@ -1113,17 +1203,20 @@
         "fraisier",
         "groseillier",
         "cassissier",
-        "pommier",
-        "cerisier",
-        "noisetier"
+        "pomme",
+        "cerise",
+        "noisette"
       ],
       "humide": [
         "houblon",
+        "cannelle",
+        "ananas",
         "fraisier",
         "cassissier",
         "bananier"
       ],
       "littoral": [
+        "citronnier",
         "oranger"
       ],
       "marecage": [
@@ -1131,21 +1224,28 @@
       ],
       "montagne": [
         "myrtillier",
-        "cerisier"
+        "abricotier",
+        "chataigne",
+        "cerise"
       ],
       "tempere": [
         "framboisier",
         "vigne",
         "houblon",
+        "pecher",
+        "abricotier",
+        "cognassier",
+        "chataigne",
+        "murier",
         "fraisier",
         "groseillier",
         "cassissier",
-        "pommier",
+        "pomme",
         "poirier",
         "prunier",
-        "cerisier",
-        "noisetier",
-        "noyer"
+        "cerise",
+        "noisette",
+        "noix"
       ]
     },
     "paliers_sans_centre": [

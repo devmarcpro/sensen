@@ -240,7 +240,10 @@ func test_assemblage() -> void:
 		s.attente[j.id] = true
 		verifier(s.intention(j.id, {"type": "fabriquer", "recette": rid}), "façonner " + rid)
 	var comps: Array = j.sac.filter(func(uid: String) -> bool: return s.items[uid].get("type", "") == "composant")
-	verifier(comps.size() == 3, "3 composants dans le sac (%d)" % comps.size())
+	var uids_uniques := {}
+	for u in comps:
+		uids_uniques[u] = true
+	verifier(comps.size() == 3 and uids_uniques.size() == 3, "3 composants dans le sac, à trois identifiants distincts (%d, %d uid) — deux objets ont porté le même uid le 2026-09-07" % [comps.size(), uids_uniques.size()])
 	var lame: Dictionary = s.items[comps[0]]
 	var durete_fer := int(GameData.catalogues.materials.fer.stats.durete)
 	verifier(lame.composant == "lame_courte" and lame.materiau == "fer" and int(lame.stats.durete) == durete_fer and lame.elements.has("metal"), "la lame porte les stats du fer (%d) et son élément" % durete_fer)

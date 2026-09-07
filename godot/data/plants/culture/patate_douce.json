@@ -1,0 +1,29 @@
+{
+  "name_key": "plant.patate_douce.name",
+  "categorie": "culture",
+  "nutrition": 9,
+  "bonus_potentiel": {
+    "endurance": 1
+  },
+  "wuxing": {
+    "terre": 0.6,
+    "bois": 0.4
+  },
+  "duree_jours": 5,
+  "recolte_base": 5,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "printemps"
+  ],
+  "besoin_eau": 0.5,
+  "famille": "racine",
+  "conditions": {
+    "biomes": [
+      "chaud",
+      "tempere"
+    ],
+    "fertilite_min": 15
+  }
+}

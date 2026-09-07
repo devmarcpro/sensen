@@ -1,0 +1,29 @@
+{
+  "name_key": "plant.manioc.name",
+  "categorie": "culture",
+  "nutrition": 10,
+  "bonus_potentiel": {
+    "endurance": 1
+  },
+  "wuxing": {
+    "terre": 0.6,
+    "bois": 0.4
+  },
+  "duree_jours": 9,
+  "recolte_base": 6,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "printemps"
+  ],
+  "besoin_eau": 0.4,
+  "famille": "racine",
+  "conditions": {
+    "biomes": [
+      "chaud",
+      "humide"
+    ],
+    "fertilite_min": 5
+  }
+}

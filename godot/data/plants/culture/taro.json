@@ -1,0 +1,30 @@
+{
+  "name_key": "plant.taro.name",
+  "categorie": "culture",
+  "nutrition": 8,
+  "bonus_potentiel": {
+    "endurance": 1
+  },
+  "wuxing": {
+    "terre": 0.6,
+    "bois": 0.4
+  },
+  "duree_jours": 7,
+  "recolte_base": 4,
+  "tags": [
+    "culture"
+  ],
+  "saisons": [
+    "printemps"
+  ],
+  "besoin_eau": 0.9,
+  "famille": "racine",
+  "conditions": {
+    "biomes": [
+      "humide",
+      "marecage",
+      "chaud"
+    ],
+    "fertilite_min": 20
+  }
+}
