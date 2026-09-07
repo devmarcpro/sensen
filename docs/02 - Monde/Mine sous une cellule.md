@@ -48,6 +48,11 @@ Elles restent au designer, et j'ai posé une hypothèse pour ne pas bloquer :
 1. **La mine partage-t-elle l'échelle de profondeur du gouffre, ou tient-elle la sienne ?** *Hypothèse retenue* : la sienne, plus lente. Un étage de mine vaut environ **la moitié** d'un étage de gouffre en profondeur de matériau, parce qu'on descend à la pioche et non par un escalier déjà construit. Si le designer veut la même échelle, c'est un chiffre.
 2. **Est-ce que des créatures y descendent ?** *Hypothèse retenue* : **non** — on n'y risque que l'effondrement, l'endurance et la faim. C'est ce qui la sépare le plus nettement du gouffre, et c'est réversible d'une ligne : le peuplement d'étage existe déjà.
 
+> [!success] Vérifié le 2026-09-07, 16 h 30 — la mine et les villes minières se rejoignent déjà, sans rien ajouter
+> Rappel du designer pendant la boucle : « on avait fait en sorte qu'on puisse miner dans les profondeurs en descendant d'un niveau Z avec un escalier à chaque fois, comme dans Dwarf Fortress ». La sonde le confirme intact après la journée : le puits s'ouvre, l'étage est plein (9 tuiles dégagées sur 4 096), la roche durcit en descendant (pierre 13 → brèche volcanique 21 → basalte 48 de dureté), et ce qu'on a creusé est encore ouvert au retour.
+> **Ce que la règle dit, et qu'il ne faut pas défaire** : une mine ne s'ouvre que sur une cellule **revendiquée** — « une mine est un ouvrage, pas une excursion ». Or **conquérir un village revendique sa cellule** (`SimRoyaumes` pose `claims[cell] = {"role": "habitation"}`). Les deux systèmes se rejoignent donc tout seuls : on prend la ville minière, et l'on creuse dessous. Depuis ce jour, sa surface porte aussi des filons (la vocation commande le sol), si bien que la ville a ses mineurs et le joueur son puits.
+> `test_conquete_et_succession` prouve la chaîne : conquête → la cellule est au joueur → le puits s'ouvre → on est à l'étage 1 d'une mine de CETTE cellule, pleine de 4 087 tuiles de roche → on remonte.
+
 ## Liens
 
 - **Repose sur** : [[Claims et persistance]], [[Destruction du terrain]], [[Stratification verticale]], [[Minerais par profondeur]], [[Récolte]]

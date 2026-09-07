@@ -765,6 +765,24 @@ func test_conquete_et_succession() -> void:
 		garde.competences[cle] = 0
 	var ok := s.intention(j.id, {"type": "conquerir", "vers": centre})
 	verifier(ok and s.monde.claims.has(cell) and s.monde.villages["Bourg-Test"].conquis_par == j.id, "conquête réussie : la cellule rejoint le territoire")
+	# La jonction avec la mine (designer, rappel du 2026-09-07) : « on peut miner dans les profondeurs en descendant
+	# d'un niveau Z avec un escalier à chaque fois ». Une mine ne s'ouvre que sur une cellule REVENDIQUÉE — et une
+	# ville conquise l'est. Les deux systèmes se rejoignent donc sans rien ajouter : on prend la ville, on creuse dessous.
+	var vig0: int = int(j.vigueur)
+	j.vigueur = 100
+	verifier(SimLieux.creuser_un_puits(s, j, s.horloge_monde.ticks), "sous une ville conquise, le puits s'ouvre")
+	verifier(s.lieu == "donjon" and bool(s.donjon.get("mine", false)) and Vector2i(s.donjon.cellule_mine) == cell, "on descend dans la mine de CETTE cellule (étage %d)" % int(s.donjon.get("etage", 0)))
+	var creusables := 0
+	for i_m in s.grille.n_tuiles():
+		if s.grille.bloque_passage(s.grille.pos_de(i_m)):
+			creusables += 1
+	verifier(creusables > 3000, "l'étage de mine est plein de roche à creuser (%d tuiles)" % creusables)
+	SimLieux._sortir(s, j)   # on remonte : la suite du test se joue au village, pas au fond du puits
+	verifier(s.lieu == "camp", "on remonte de la mine au village")
+	j.vigueur = vig0
+	j.pos = centre + Vector2i(1, 1)
+	if not s.grille.occupant(j.pos).is_empty():
+		j.pos = s._tuile_libre_autour(j.pos)
 	verifier(int(j.reputations.get("roy_test", 0)) == -30, "agression : −30 envers Testonie (%d)" % int(j.get("reputations", {}).get("roy_test", 0)))
 	# Les habitants deviennent assignables.
 	s.attente[j.id] = true
