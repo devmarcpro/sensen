@@ -308,6 +308,12 @@ static func _couleur_liste(l: Variant) -> Color:
 
 
 func _ready() -> void:
+	# Les planches assemblées AVANT la première image (2026-09-07) : sinon le premier villageois qui montre son
+	# visage fait charger et découper ses PNG en plein `_draw` — mesuré, c'est la saccade des premières secondes.
+	var t_pl := Time.get_ticks_usec()
+	var n_pl := Planches.prechauffer()
+	chrono["planches.prechauffe"] = float(Time.get_ticks_usec() - t_pl) / 1000.0
+	chrono["n.planches"] = float(n_pl)
 	RenderingServer.set_default_clear_color(_couleur_liste(GameData.config("styles").get("brouillard", {}).get("fond", [0.02, 0.02, 0.04])))   # le fond de la scène : la nuit du jamais-vu, pas un gris (designer 2026-09-06)
 	terrain = Terrain.new()
 	terrain.proprio = self
@@ -1050,6 +1056,14 @@ func _exit_tree() -> void:
 
 
 func _process(delta: float) -> void:
+	var t_proc := Time.get_ticks_usec()
+	_top_client("image.process", t_proc)   # marque l'entrée : le total du process se lit à la sortie
+	chrono["n.process"] = float(chrono.get("n.process", 0.0)) + 1.0
+	_process_corps(delta)
+	_top_client("image.process_total", t_proc)
+
+
+func _process_corps(delta: float) -> void:
 	if not creation.is_empty():   # l'écran de création : rien derrière
 		ui.text = ""
 		ui_bas.text = ""

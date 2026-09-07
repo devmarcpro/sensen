@@ -100,6 +100,13 @@ func _draw() -> void:
 		parent.chrono["n.paperdoll"] = float(parent.chrono.get("n.paperdoll", 0.0)) + 1.0
 
 
+func _top_pp(cle: String, t0: int) -> int:
+	var parent := get_parent()
+	if parent != null and "chrono" in parent:
+		parent.chrono[cle] = float(parent.chrono.get(cle, 0.0)) + float(Time.get_ticks_usec() - t0) / 1000.0
+	return Time.get_ticks_usec()
+
+
 func _dessiner_etre() -> void:
 	if "vehicule" in e.get("tags", []):   # un train, une calèche : une caisse et des roues tant qu'il n'y a pas de sprite (Villes B4)
 		_dessine_vehicule()
@@ -124,10 +131,13 @@ func _dessiner_etre() -> void:
 	var ech := float(_ap.get("echelle", 1.0)) * float(fac.get("taille", {}).get(str(_ap.get("taille", "moyenne")), 1.0))
 	if not is_equal_approx(ech, 1.0) or _decalage != Vector2.ZERO:
 		draw_set_transform(_decalage, 0.0, Vector2(ech, ech))   # le tremblement d'un coup reçu décale tout le dessin
+	var t_pp := Time.get_ticks_usec()
 	var monde := _poser_segments(f, miroir)
+	t_pp = _top_pp("pd.segments", t_pp)
 	_monde_dessine = monde
 	_echelle_dessin = ech
 	_peint = _segments_peints()
+	t_pp = _top_pp("pd.peints", t_pp)
 	var peint: Dictionary = _peint
 	var teinte := Color(e.teinte[0], e.teinte[1], e.teinte[2])
 	if not _ap.is_empty():   # nu : la peau peint le corps entier, l'équipement seul le recouvre (point 43)
@@ -142,7 +152,9 @@ func _dessiner_etre() -> void:
 			col = peint[nom].couleur
 			contour = float(CONTOURS.get(peint[nom].construction, 1.0))
 		_dessine_segment(m, col, contour, nom)
+		t_pp = _top_pp("pd.seg." + nom, t_pp)
 	_dessine_tenus(monde)
+	t_pp = _top_pp("pd.tenus", t_pp)
 	if e.has("blason"):   # le garde porte le fanion de son royaume (D)
 		var col := Color.html(str(e.blason))
 		var h_f := float(rig.hauteur_pieds) + 6.0

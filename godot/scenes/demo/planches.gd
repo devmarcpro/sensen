@@ -12,6 +12,26 @@ extends RefCounted
 static var _cache: Dictionary = {}   # dossier → {"n": int, "image": Image, "texture": Texture2D (à la demande), "fichiers": int}
 
 
+## Préchauffer TOUTES les planches (2026-09-07) : assembler un dossier lit ses PNG sur le disque et les découpe en
+## cases — trois à cinquante millisecondes. Fait au premier dessin, c'est une saccade en pleine partie, la première
+## fois qu'un villageois montre son visage. Fait ici, pendant l'écran de chargement, c'est du temps qu'on avait déjà.
+## Rend le nombre de dossiers assemblés (la sonde et les tests le lisent).
+static func prechauffer() -> int:
+	var n := 0
+	for racine: String in ["membres", "visage", "objets"]:
+		var dir := DirAccess.open(chemin(racine))
+		if dir == null:
+			continue
+		if variantes(racine) > 0:   # un dossier peut porter ses propres PNG en plus de ses sous-dossiers
+			n += 1
+		for sous in dir.get_directories():
+			var d: String = racine + "/" + str(sous)
+			if variantes(d) > 0:
+				var _t := texture(d)   # la texture aussi : elle se crée au premier dessin, pas à l'assemblage
+				n += 1
+	return n
+
+
 ## La taille d'une case, en pixels (styles.json → planches.case).
 static func case() -> int:
 	return int(GameData.config("styles").get("planches", {}).get("case", 64))
