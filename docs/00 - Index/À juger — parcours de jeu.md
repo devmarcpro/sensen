@@ -745,3 +745,14 @@ Douze pays, douze semaines, **« trésor 0 » pour tous les douze** : le trésor
 
 Et la question de fond : **est-ce que le joueur verra jamais ce trésor ?** Il ne s'affiche nulle part aujourd'hui. Un pays riche devrait-il se voir — plus de gardes, une fête, un chantier — ou est-ce un rouage qui n'a besoin d'exister que pour nourrir les événements ?
 
+## 2026-09-07 — Le monde se fait la guerre pour la première fois
+
+Douze pays, douze semaines, **zéro guerre** — alors que l'événement a 4 % de chance par royaume et par semaine. Trois défauts empilés, tous « une règle qui lit un état qui n'existe pas », détaillés dans [[Génération des royaumes PNJ]] : un score de compatibilité dont le premier terme était devenu une constante (+0,3 « même race » dans un monde entièrement humain), une diplomatie qui ne franchissait pas la frontière de secteur (douze royaumes ne faisaient que **quatre paires**), et une passe de routes qui refusait les hostiles en lisant une diplomatie **pas encore calculée**.
+
+**Ce que ça donne** sur les neuf secteurs autour du camp : 47 paires — 25 cordiales, 15 en tension, 6 alliances, 1 hostilité — et **quatre guerres en cours** après douze semaines, avec des paix signées (Jizzaxgan a déclaré puis fait la paix, +10 d'humeur).
+
+**À juger, parce que c'est du rythme de jeu et pas du code** :
+- **Quatre guerres pour douze pays en trois mois, est-ce trop ?** La chance de l'événement (4 % par royaume et par semaine) n'a pas bougé ; ce qui a changé, c'est qu'elle peut enfin s'appliquer. Si le monde doit être plus calme, c'est `royaumes_evenements/guerre.json → chance` qu'il faut baisser, pas la diplomatie.
+- **Les poids des relations** (`combat_rules.json → royaume.pays.diplomatie`) : une culture partagée vaut +0,25, une culture étrangère −0,2, une frontière commune −0,25. J'ai réglé pour que l'hostilité franche ne soit possible **qu'entre voisins de frontière** — on ne hait pas un pays qu'on ne touche pas. Une seule hostilité sur 47 paires, est-ce assez pour que ça se sente ?
+- **Et surtout : une guerre ne fait rien.** Elle arrête les caravanes, coûte 5 d'humeur à la déclaration, en rend 10 à la paix. Personne ne meurt, aucune frontière ne bouge, aucune armée ne marche. **Que doit faire une guerre que le joueur ne visite pas ?** Coûter des soldats et du trésor aux deux camps ? Déplacer une frontière quand l'un est bien plus fort que l'autre ? Ou rester un décor qui change le prix du pain et l'humeur des gens ?
+

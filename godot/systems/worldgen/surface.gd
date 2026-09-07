@@ -236,6 +236,11 @@ func _royaumes_secteur_calc(sect: Vector2i) -> Dictionary:
 				q = p0
 			if not (cap in r.routes):
 				r.routes.append(cap)
+	# La diplomatie du secteur se noue AVANT les routes : la passe des routes se refuse aux royaumes hostiles,
+	# et elle lisait jusqu'ici une diplomatie encore vide — la branche était morte (2026-09-07).
+	for i in ordre.size():
+		for j in range(i + 1, ordre.size()):
+			_lier_royaumes(res[ordre[i]], res[ordre[j]])
 	# Les routes commerciales entre royaumes voisins non hostiles (Unification macro-micro) : capitale à capitale,
 	# par les deux territoires seulement — une route est un lien de confiance, elle ne traverse pas un tiers.
 	for i in ordre.size():
@@ -256,23 +261,66 @@ func _royaumes_secteur_calc(sect: Vector2i) -> Dictionary:
 			if not voisins:
 				continue
 			_route_entre(ra.capital_poi, rb.capital_poi, passables, cfg)
-	# Diplomatie initiale entre royaumes du secteur : compatibilité de gouvernance et de race.
-	for i in ordre.size():
-		for j in ordre.size():
-			if i == j:
+	# Diplomatie : elle se lit sur ce qui VARIE dans ce monde-ci — la culture (cinquante-et-une), la gouvernance,
+	# le voisinage des territoires, l'écart de taille. Le terme de race reste mais il est constant tant qu'aucun
+	# biome ne porte de race dominante, et c'est lui qui gelait toutes les relations sur « cordial » : aucun
+	# voisin n'était jamais hostile, donc aucune guerre n'éclatait jamais. Et elle franchit désormais la
+	# frontière de secteur — douze royaumes sur neuf secteurs ne faisaient que quatre paires
+	# ([[Génération des royaumes PNJ]], callout du 2026-09-07, 15 h 20).
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var sv := sect + Vector2i(dx, dy)
+			if sv == sect or not royaumes_cache.has(sv):   # jamais engendrer un secteur pour lier : on ne lie que le connu
 				continue
-			var a: Dictionary = res[ordre[i]]
-			var b2: Dictionary = res[ordre[j]]
-			var score := 0.0
-			score += 0.3 if a.race == b2.race else -0.2
-			score += 0.2 if a.government_type == b2.government_type else 0.0
-			if a.government_type == "dictature_militaire" and b2.government_type == "dictature_militaire":
-				score -= 0.6
-			if a.government_type == "anarchie" or b2.government_type == "anarchie":
-				score -= 0.3
-			score += rng.randf_range(-0.3, 0.3)
-			a.diplomacy[b2.id] = "hostile" if score < -0.3 else ("tension" if score < 0.0 else ("cordial" if score < 0.4 else "allie"))
+			for autre in royaumes_cache[sv].values():
+				for id2 in ordre:
+					_lier_royaumes(res[id2], autre)
 	return res
+
+
+## La relation entre deux royaumes, écrite dans les deux sens. Elle est une fonction PURE de la graine et de la
+## paire — l'aléa est tiré sur `hash(graine, les deux ids triés)` et non sur le fil du secteur —, si bien qu'elle
+## vaut la même chose quel que soit l'ordre où les secteurs ont été engendrés. C'est ce qui permet de lier deux
+## royaumes de secteurs différents. Elle est mutuelle : elle était tirée deux fois, une par sens, avec deux aléas,
+## et A pouvait tenir B pour allié pendant que B le tenait pour hostile — alors que la guerre, elle, est mutuelle.
+func _lier_royaumes(a: Dictionary, b: Dictionary) -> void:
+	if str(a.id) == str(b.id) or a.diplomacy.has(str(b.id)):
+		return
+	var cfg: Dictionary = GameData.config("combat_rules").royaume.pnj
+	var dip: Dictionary = GameData.config("combat_rules").royaume.pays.get("diplomatie", {})
+	var rang: Dictionary = {}
+	for t in cfg.tailles.size():
+		rang[str(cfg.tailles[t][0])] = t
+	var score := float(dip.get("meme_race", 0.3)) if a.race == b.race else float(dip.get("race_differente", -0.2))
+	score += float(dip.get("meme_culture", 0.25)) if a.culture == b.culture else float(dip.get("culture_differente", -0.15))
+	if a.government_type == b.government_type:
+		score += float(dip.get("meme_gouvernance", 0.2))
+	if a.government_type == "dictature_militaire" and b.government_type == "dictature_militaire":
+		score += float(dip.get("deux_dictatures", -0.6))
+	if a.government_type == "anarchie" or b.government_type == "anarchie":
+		score += float(dip.get("anarchie", -0.3))
+	if _territoires_voisins(a.territory_cells, b.territory_cells):   # deux frontières qui se touchent se disputent
+		score += float(dip.get("voisins", -0.15))
+	score += float(dip.get("par_cran_de_taille", -0.08)) * float(absi(int(rang.get(a.taille, 0)) - int(rang.get(b.taille, 0))))
+	var r := RandomNumberGenerator.new()
+	r.seed = hash([graine, str(a.id), str(b.id)] if str(a.id) < str(b.id) else [graine, str(b.id), str(a.id)])
+	var al := float(dip.get("alea", 0.3))
+	score += r.randf_range(-al, al)
+	var rel := "hostile" if score < float(dip.get("seuil_hostile", -0.3)) else ("tension" if score < float(dip.get("seuil_tension", 0.0)) else ("cordial" if score < float(dip.get("seuil_cordial", 0.4)) else "allie"))
+	a.diplomacy[str(b.id)] = rel
+	b.diplomacy[str(a.id)] = rel
+
+
+## Deux territoires se touchent-ils ? Une cellule de l'un a une cellule de l'autre pour voisine orthogonale.
+func _territoires_voisins(a: Array, b: Array) -> bool:
+	var vus: Dictionary = {}
+	for c in b:
+		vus[c] = true
+	for c in a:
+		for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			if vus.has(c + d):
+				return true
+	return false
 
 
 ## Une route entre deux points, par le plus court chemin à coût dans un ensemble de cellules autorisées.

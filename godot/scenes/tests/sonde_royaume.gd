@@ -33,6 +33,20 @@ func _ready() -> void:
 		var roy := s.royaume_par_id(id)
 		var e := s.etat_royaume(id)
 		print("  %s (%s, %s, %s) : %s, an %d de l'ère de %s · %d âmes · armée %d · humeur %d · blason %s au %s · %d cellules, %d lois" % [str(roy.nom), str(roy.taille), str(roy.government_type), str(roy.culture), str(e.dirigeant), s.an_de_regne(e), str(e.ere), int(e.population), int(e.armee), int(e.humeur), str(e.blason.couleurs[0]), str(e.blason.motif), roy.territory_cells.size(), roy.laws.size()])
+	# Les relations du secteur : c'est ce compte qui a montré que la diplomatie etait gelee sur « cordial » et
+	# qu'aucune guerre ne pouvait donc eclater (2026-09-07).
+	var relations := {}
+	var paires := {}
+	for id in ids:
+		var roy := s.royaume_par_id(id)
+		for autre in roy.get("diplomacy", {}).keys():
+			var cle := "%s|%s" % [id, str(autre)] if id < str(autre) else "%s|%s" % [str(autre), id]
+			if paires.has(cle):
+				continue
+			paires[cle] = true
+			var r := str(roy.diplomacy[autre])
+			relations[r] = int(relations.get(r, 0)) + 1
+	print("  relations entre royaumes d'un meme secteur : %s (%d paires)" % [str(relations), paires.size()])
 	var journal: Array = []
 	EventBus.journal.connect(func(cle: String, params: Dictionary) -> void: journal.append({"cle": cle, "params": params}))
 	var evenements := {}

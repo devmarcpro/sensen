@@ -1056,7 +1056,22 @@
       "journal_max": 10,
       "impot_par_habitant": 3.0,
       "solde_par_soldat": 0.8,
-      "humeur_caisse_vide": -2
+      "humeur_caisse_vide": -2,
+      "diplomatie": {
+        "meme_race": 0.3,
+        "race_differente": -0.2,
+        "meme_culture": 0.25,
+        "culture_differente": -0.2,
+        "meme_gouvernance": 0.2,
+        "deux_dictatures": -0.6,
+        "anarchie": -0.3,
+        "voisins": -0.25,
+        "par_cran_de_taille": -0.08,
+        "alea": 0.3,
+        "seuil_hostile": -0.3,
+        "seuil_tension": 0.0,
+        "seuil_cordial": 0.4
+      }
     }
   },
   "alchimie": {
