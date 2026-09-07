@@ -3910,3 +3910,133 @@ titre.yoruba.dictature.m,Balogun
 titre.yoruba.dictature.f,Iyalode
 titre.yoruba.guilde_maitre.m,Olori Ise
 titre.yoruba.guilde_maitre.f,Olori Ise
+culture.tibetaine.name,Tibetan
+titre.tibetaine.monarchie_hereditaire.m,Gyalpo
+titre.tibetaine.monarchie_hereditaire.f,Gyalmo
+titre.tibetaine.republique.m,Dzasak
+titre.tibetaine.republique.f,Dzasak
+titre.tibetaine.theocratie.m,Rinpoche
+titre.tibetaine.theocratie.f,Jetsunma
+titre.tibetaine.ploutocratie.m,Tsongpon
+titre.tibetaine.ploutocratie.f,Tsongmo
+titre.tibetaine.dictature.m,Depon
+titre.tibetaine.dictature.f,Depon
+titre.tibetaine.guilde_maitre.m,Zopon
+titre.tibetaine.guilde_maitre.f,Zopon
+culture.malaise.name,Malay
+titre.malaise.monarchie_hereditaire.m,Sultan
+titre.malaise.monarchie_hereditaire.f,Permaisuri
+titre.malaise.republique.m,Penghulu
+titre.malaise.republique.f,Penghulu
+titre.malaise.theocratie.m,Imam Besar
+titre.malaise.theocratie.f,Imam Besar
+titre.malaise.ploutocratie.m,Saudagar
+titre.malaise.ploutocratie.f,Saudagar
+titre.malaise.dictature.m,Laksamana
+titre.malaise.dictature.f,Laksamana
+titre.malaise.guilde_maitre.m,Tukang Besar
+titre.malaise.guilde_maitre.f,Tukang Besar
+culture.khmere.name,Khmer
+titre.khmere.monarchie_hereditaire.m,Preah Bat
+titre.khmere.monarchie_hereditaire.f,Preah Reachini
+titre.khmere.republique.m,Mekhum
+titre.khmere.republique.f,Mekhum
+titre.khmere.theocratie.m,Sangha Raja
+titre.khmere.theocratie.f,Sangha Raja
+titre.khmere.ploutocratie.m,Neak Chumnuonh
+titre.khmere.ploutocratie.f,Neak Chumnuonh
+titre.khmere.dictature.m,Sena Pati
+titre.khmere.dictature.f,Sena Pati
+titre.khmere.guilde_maitre.m,Kru Chang
+titre.khmere.guilde_maitre.f,Kru Chang
+culture.javanaise.name,Javanese
+titre.javanaise.monarchie_hereditaire.m,Susuhunan
+titre.javanaise.monarchie_hereditaire.f,Ratu
+titre.javanaise.republique.m,Lurah Agung
+titre.javanaise.republique.f,Lurah Agung
+titre.javanaise.theocratie.m,Pandita
+titre.javanaise.theocratie.f,Pandita
+titre.javanaise.ploutocratie.m,Juragan
+titre.javanaise.ploutocratie.f,Juragan
+titre.javanaise.dictature.m,Senapati
+titre.javanaise.dictature.f,Senapati
+titre.javanaise.guilde_maitre.m,Empu
+titre.javanaise.guilde_maitre.f,Empu
+culture.armenienne.name,Armenian
+titre.armenienne.monarchie_hereditaire.m,Arka
+titre.armenienne.monarchie_hereditaire.f,Tagouhi
+titre.armenienne.republique.m,Nakharar
+titre.armenienne.republique.f,Nakharar
+titre.armenienne.theocratie.m,Catholicos
+titre.armenienne.theocratie.f,Mayrapet
+titre.armenienne.ploutocratie.m,Vacharakan
+titre.armenienne.ploutocratie.f,Vacharakan
+titre.armenienne.dictature.m,Sparapet
+titre.armenienne.dictature.f,Sparapet
+titre.armenienne.guilde_maitre.m,Varpet
+titre.armenienne.guilde_maitre.f,Varpet
+culture.georgienne.name,Georgian
+titre.georgienne.monarchie_hereditaire.m,Mepe
+titre.georgienne.monarchie_hereditaire.f,Dedopali
+titre.georgienne.republique.m,Mamasakhlisi
+titre.georgienne.republique.f,Mamasakhlisi
+titre.georgienne.theocratie.m,Katalikosi
+titre.georgienne.theocratie.f,Katalikosi
+titre.georgienne.ploutocratie.m,Vachari
+titre.georgienne.ploutocratie.f,Vachari
+titre.georgienne.dictature.m,Sardali
+titre.georgienne.dictature.f,Sardali
+titre.georgienne.guilde_maitre.m,Ostati
+titre.georgienne.guilde_maitre.f,Ostati
+culture.ethiopienne.name,Ethiopian
+titre.ethiopienne.monarchie_hereditaire.m,Negus
+titre.ethiopienne.monarchie_hereditaire.f,Negiste
+titre.ethiopienne.republique.m,Shum
+titre.ethiopienne.republique.f,Shum
+titre.ethiopienne.theocratie.m,Abune
+titre.ethiopienne.theocratie.f,Emahoy
+titre.ethiopienne.ploutocratie.m,Nagade
+titre.ethiopienne.ploutocratie.f,Nagade
+titre.ethiopienne.dictature.m,Ras
+titre.ethiopienne.dictature.f,Ras
+titre.ethiopienne.guilde_maitre.m,Aleqa
+titre.ethiopienne.guilde_maitre.f,Aleqa
+culture.lakota.name,Lakota
+titre.lakota.monarchie_hereditaire.m,Itancan
+titre.lakota.monarchie_hereditaire.f,Itancan Winyan
+titre.lakota.republique.m,Naca
+titre.lakota.republique.f,Naca
+titre.lakota.theocratie.m,Wicasa Wakan
+titre.lakota.theocratie.f,Winyan Wakan
+titre.lakota.ploutocratie.m,Wopeton
+titre.lakota.ploutocratie.f,Wopeton
+titre.lakota.dictature.m,Blotahunka
+titre.lakota.dictature.f,Blotahunka
+titre.lakota.guilde_maitre.m,Wayupika
+titre.lakota.guilde_maitre.f,Wayupika
+culture.inuite.name,Inuit
+titre.inuite.monarchie_hereditaire.m,Angajuqqaaq
+titre.inuite.monarchie_hereditaire.f,Angajuqqaaq
+titre.inuite.republique.m,Isumataq
+titre.inuite.republique.f,Isumataq
+titre.inuite.theocratie.m,Angakkuq
+titre.inuite.theocratie.f,Angakkuq
+titre.inuite.ploutocratie.m,Niuvertoq
+titre.inuite.ploutocratie.f,Niuvertoq
+titre.inuite.dictature.m,Nalagaq
+titre.inuite.dictature.f,Nalagaq
+titre.inuite.guilde_maitre.m,Sanaji
+titre.inuite.guilde_maitre.f,Sanaji
+culture.nguni.name,Nguni
+titre.nguni.monarchie_hereditaire.m,Inkosi Enkulu
+titre.nguni.monarchie_hereditaire.f,Indlovukazi
+titre.nguni.republique.m,Induna Enkulu
+titre.nguni.republique.f,Induna Enkulu
+titre.nguni.theocratie.m,Isangoma Esikhulu
+titre.nguni.theocratie.f,Isangoma Esikhulu
+titre.nguni.ploutocratie.m,Umthengisi Omkhulu
+titre.nguni.ploutocratie.f,Umthengisi Omkhulu
+titre.nguni.dictature.m,Induna Yempi
+titre.nguni.dictature.f,Induna Yempi
+titre.nguni.guilde_maitre.m,Ingcweti
+titre.nguni.guilde_maitre.f,Ingcweti
