@@ -163,7 +163,7 @@ func _ready() -> void:
 		var cles := {}
 		for l in journal:
 			cles[str(l.cle)] = int(cles.get(str(l.cle), 0)) + 1
-		print("  semaine %d (%.0f ms) : résidents %d · stocks %s · trésor %d · dette %d · rapport %s · journal %s" % [w + 1, float(etat.get("ms", 0.0)), int(r2.residents), str(r2.stocks), int(t.tresor), int(t.dette), str(t.rapports.back().get("prod", "?")) if not t.rapports.is_empty() else "—", str(cles)])
+		print("  semaine %d (%.0f ms) : résidents %d (lits %d, occupés %d, à deux %d, sans lit %d, humeur %d) · stocks %s · trésor %d · dette %d · rapport %s · journal %s" % [w + 1, float(etat.get("ms", 0.0)), int(r2.residents), int(r2.get("lits", 0)), int(r2.get("lits_pris", 0)), int(r2.get("partages", 0)), int(r2.get("sans_lit", 0)), int(r2.get("humeur", 0)), str(r2.stocks), int(t.tresor), int(t.dette), str(t.rapports.back().get("prod", "?")) if not t.rapports.is_empty() else "—", str(cles)])
 		print("    prix : %s · trésor du royaume %s" % [str(t.get("prix", {})), str(s2.monde.tresors_royaumes)])
 		print("    chrono (ms) : %s" % str(s2.chrono))
 		if int(r2.residents) == 0:
@@ -190,7 +190,28 @@ func _etat(s2: Simulation) -> Dictionary:
 	for pid in s2.perimetres().keys():
 		var p: Dictionary = s2.perimetres()[pid]
 		pers[str(p.type)] = int(pers.get(str(p.type), 0)) + 1
-	return {"residents": s2.residents().size(), "fonctions": fonctions, "perimetres": pers, "stocks": s2.territoire.stocks.duplicate()}
+	# Les lits et les sans-logement (2026-09-07) : une ville qui grossit plus vite que ses lits couche ses gens dehors,
+	# et c'est une chose qu'il faut voir passer les semaines pour remarquer.
+	var lits := 0
+	var sans_lit := 0
+	var humeur := 0
+	for cell_l in s2.monde.cellules.keys():
+		for bat_l in s2.monde.cellules[cell_l].get("village", {}).get("batiments", []):
+			lits += (bat_l.lits as Array).size()
+	var lits_pris := {}
+	var partages := 0
+	for x2 in s2.residents():
+		humeur += int(x2.get("humeur", 0))
+		if not x2.has("lit"):
+			sans_lit += 1
+			continue
+		var cle_l := str(x2.lit)
+		if lits_pris.has(cle_l):
+			partages += 1   # deux résidents sur le MÊME lit : la ville a distribué plus de lits qu'elle n'en a
+		lits_pris[cle_l] = true
+	var n_r: int = s2.residents().size()
+	return {"residents": n_r, "fonctions": fonctions, "perimetres": pers, "stocks": s2.territoire.stocks.duplicate(),
+		"lits": lits, "sans_lit": sans_lit, "humeur": (humeur / maxi(1, n_r)), "lits_pris": lits_pris.size(), "partages": partages}
 
 
 ## Les tuiles de sol atteignables depuis `depuis` à quatre voisines (les portes comprises, les murs non).

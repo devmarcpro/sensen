@@ -1348,6 +1348,62 @@ func test_champs_saisons_et_troupeau() -> void:
 
 ## Le plan d'une ville (Villes, designer 2026-09-06, 23 h 45) : un archétype par agglomération, des rues tracées qui
 ## suivent le terrain et se rejoignent d'une cellule à l'autre, des bâtiments dont la porte donne sur la rue.
+## À la majorité, on quitte le lit de ses parents (Villes, 2026-09-07) : une ville pleine cesse de grossir — l'adulte
+## qui n'a plus de lit perd de l'humeur, et c'est elle qui le fera partir. Une ville qui a de la place ne chasse personne.
+func test_majorite_quitte_le_lit() -> void:
+	var cfg: Dictionary = GameData.config("villes").anneau_moyen.population
+	verifier(bool(cfg.get("majorite_quitte_le_lit", false)), "la règle est en données (majorite_quitte_le_lit)")
+	var s := Simulation.new(31)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var c0: Vector2i = s.monde.cellule_camp
+	var fiche: Dictionary = {}
+	for dy in range(-14, 15):
+		for dx in range(-14, 15):
+			var cv := c0 + Vector2i(dx, dy)
+			if surf.terre_a(cv) and bool(surf.poi_de(cv).get("village", false)):
+				var f2: Dictionary = surf.fiche_agglomeration(cv)
+				if not f2.is_empty() and (fiche.is_empty() or int(f2.population) > int(fiche.population)):
+					fiche = f2
+	if fiche.is_empty():
+		verifier(false, "une agglomération à quatorze cellules du camp")
+		return
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var n_g: int = s.monde.taille / 32
+	s.monde.explores[Vector2i(int(fiche.centre.x) * n_g, int(fiche.centre.y) * n_g)] = true
+	s.voyager(j, fiche.centre)
+	var tid := str(fiche.nom) if s.territoires.has(str(fiche.nom)) else ""   # le territoire d'une ville porte son nom
+	verifier(not tid.is_empty(), "le territoire de %s est chargé (%s)" % [str(fiche.nom), str(s.territoires.keys())])
+	if tid.is_empty():
+		return
+	# Un parent et son enfant devenu adulte, dans le même lit.
+	var duo: Array = SimTerritoire._dans_territoire(s, tid, func() -> Array:
+		var r: Array = SimTerritoire.residents(s)
+		return [r[0], r[1]] if r.size() >= 2 else [])
+	verifier(duo.size() == 2, "deux résidents pour jouer le parent et l'enfant")
+	if duo.size() != 2:
+		return
+	var parent: Dictionary = duo[0]
+	var enfant: Dictionary = duo[1]
+	var age_adulte := float(s.regles.r.age.adulte)
+	enfant["ne_ici"] = true
+	enfant["age"] = age_adulte + 1.0
+	enfant["family"] = {"child_of": [str(parent.id)], "parent_of": [], "spouse": ""}
+	parent["lit"] = Vector2i(parent.get("lit", parent.pos))
+	enfant["lit"] = Vector2i(parent.lit)
+	# 1. La ville a de la place : l'enfant garde le lit.
+	var t: Dictionary = s.territoires[tid]
+	var n_res: int = SimTerritoire._dans_territoire(s, tid, func() -> int: return SimTerritoire.residents(s).size())
+	t.agglomeration["population"] = n_res + 50
+	SimTerritoire._dans_territoire(s, tid, func() -> void: SimVilles._semaine_population(s))
+	verifier(enfant.has("lit"), "une ville qui a de la place ne chasse personne du lit familial")
+	# 2. La ville est pleine : l'adulte n'a plus de lit.
+	t.agglomeration["population"] = maxi(0, n_res - 10)
+	SimTerritoire._dans_territoire(s, tid, func() -> void: SimVilles._semaine_population(s))
+	verifier(not enfant.has("lit"), "dans une ville pleine, l'adulte quitte le lit de ses parents")
+	verifier(parent.has("lit"), "le parent, lui, garde le sien")
+
+
 ## Les tombes portent un nom (Villes — les repères, 2026-09-07) : un habitant mort est enterré dans le cimetière de SA
 ## ville, la tombe se lit, et un cimetière plein n'accepte plus personne.
 func test_tombes_nommees() -> void:

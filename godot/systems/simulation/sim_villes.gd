@@ -929,6 +929,18 @@ static func _semaine_population(sim: Simulation) -> void:
 				if ici:
 					EventBus.emettre(&"journal", [&"journal.majorite", {"nom": x.name_key, "metier": GameData.catalogues.functions[metier].name_key}])
 				break
+	# 2 bis. On quitte le lit de ses parents (Villes, 2026-09-07) : un enfant y dort, un adulte non. Si la ville a
+	# dépassé ce que son bâti loge, le nouvel adulte n'a plus de lit — son humeur baissera, et c'est elle qui décidera
+	# s'il reste ou s'il part. C'est indépendant du métier hérité : on devient adulte même quand ses parents sont oisifs.
+	if bool(cfg.get("majorite_quitte_le_lit", true)) and res.size() > int(sim.territoire.agglomeration.get("population", 0)):
+		for x in res:
+			if not bool(x.get("ne_ici", false)) or float(x.get("age", 0.0)) < float(ag.adulte) or not x.has("lit"):
+				continue
+			for pid in x.get("family", {}).get("child_of", []):
+				var parent_l: Dictionary = par_id.get(str(pid), {})
+				if not parent_l.is_empty() and parent_l.has("lit") and Vector2i(parent_l.lit) == Vector2i(x.lit):
+					x.erase("lit")
+					break
 	# 3. Les migrations : vers la ville connue qui a le plus de place, celle du même royaume d'abord.
 	var cibles: Array = []
 	for id in sim.territoires.keys():
