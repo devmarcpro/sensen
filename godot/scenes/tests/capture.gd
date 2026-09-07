@@ -1,7 +1,7 @@
 extends Node
 const GrandeBase := preload("res://scenes/tests/grande_base.gd")
 ## Capture d'écran automatique de la scène principale (fenêtrée, pas headless) :
-##   & Godot --path godot res://scenes/tests/capture.tscn -- --sortie C:/chemin/capture.png [--arene N] [--frames 60] [--ville | --palier hameau|village|bourg|ville|cite | --sur cimetiere|verger|champs|moulin|enclos|puits --graine G --heure H --dans-batiment | --a-l-etage] [--dump-lumiere]
+##   & Godot --path godot res://scenes/tests/capture.tscn -- --sortie C:/chemin/capture.png [--arene N] [--frames 60] [--ville | --palier hameau|village|bourg|ville|cite | --sur cimetiere|verger|champs|moulin|enclos|puits|rempart --graine G --heure H --dans-batiment | --a-l-etage] [--dump-lumiere]
 ## Sert à vérifier le rendu sans œil humain disponible ; ne remplace pas le jugement de game feel.
 
 var gif_images := 0      # --gif N : N images espacées, pour un GIF monté hors du jeu
@@ -251,6 +251,10 @@ func _ready() -> void:
 						"enclos":
 							if not vs.get("betes", []).is_empty():
 								vise = sv.monde.pos_monde(cell_s, Vector2i(vs.betes[0].pos))
+						"rempart":
+							var murs_r: Array = vs.get("remparts", [])
+							if not murs_r.is_empty():
+								vise = sv.monde.pos_monde(cell_s, Vector2i(murs_r[murs_r.size() / 2]))
 						"puits":
 							for i_m in es.meubles.keys():
 								if str(es.meubles[i_m]) == "puits":

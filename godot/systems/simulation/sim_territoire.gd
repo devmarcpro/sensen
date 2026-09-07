@@ -749,8 +749,12 @@ static func _consommer_categorie(sim: Simulation, cat: String, n: int) -> int:
 	return pris
 
 
-## La semaine économique du territoire courant (Villes B3) : le besoin par catégorie, la consommation (la nourriture
-## est mangée par `_nourrir_residents`, le reste s'use ici), le prix entre surplus et pénurie.
+## La semaine économique du territoire courant (Villes B3) : le besoin par catégorie, la consommation, le prix entre
+## surplus et pénurie. ATTENTION (2026-09-07) : seules les catégories AUTRES que la nourriture se consomment ici. La
+## nourriture n'est mangée que par `_nourrir_residents`, un repas par résident et par semaine — rien ne l'use au-delà,
+## et une ville qui récolte des milliers d'unités les empile sans fin (mesuré : 12 744 baies après un an de jeu). Le
+## commentaire d'avant disait « le reste s'use ici », ce que le code ne fait pas ; savoir si une denrée doit pourrir
+## est une question de règle, posée au designer dans [[À juger — parcours de jeu]], pas un oubli à combler en douce.
 static func _semaine_economie(sim: Simulation) -> void:
 	var eco: Dictionary = GameData.config("villes").economie
 	var pop := maxi(residents(sim).size(), int(sim.territoire.get("agglomeration", {}).get("population", 0)))
