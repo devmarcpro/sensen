@@ -1339,6 +1339,115 @@ func test_champs_saisons_et_troupeau() -> void:
 
 ## Le plan d'une ville (Villes, designer 2026-09-06, 23 h 45) : un archétype par agglomération, des rues tracées qui
 ## suivent le terrain et se rejoignent d'une cellule à l'autre, des bâtiments dont la porte donne sur la rue.
+## Les repères d'une ville (Villes, 2026-09-07) : le puits sur la place d'un village, le cimetière clos de tombes avec
+## sa grille, le moulin des quartiers agricoles.
+func test_reperes_de_ville() -> void:
+	var cfg: Dictionary = GameData.config("villes")
+	verifier(GameData.catalogues.meubles.has("puits") and GameData.catalogues.meubles.has("tombe") and GameData.catalogues.village_buildings.has("moulin"), "le puits, la tombe et le moulin sont au catalogue")
+	var s := Simulation.new(31)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var taille: int = s.monde.taille
+	var c0: Vector2i = s.monde.cellule_camp
+	# La plus grande agglomération autour du camp, et toutes ses cellules : chacune a ses repères.
+	var fiche: Dictionary = {}
+	for dy in range(-20, 21):
+		for dx in range(-20, 21):
+			var cv := c0 + Vector2i(dx, dy)
+			if surf.terre_a(cv) and bool(surf.poi_de(cv).get("village", false)):
+				var f2: Dictionary = surf.fiche_agglomeration(cv)
+				if not f2.is_empty() and (fiche.is_empty() or int(f2.population) > int(fiche.population)):
+					fiche = f2
+	verifier(not fiche.is_empty(), "une agglomération à vingt cellules du camp")
+	if fiche.is_empty():
+		return
+	var puits := 0
+	var tombes := 0
+	var moulins := 0
+	var cimetieres := 0
+	var quartiers := {}
+	for cell in fiche.cellules:
+		var e: Dictionary = surf.generer_cellule(int(cell.x), int(cell.y), {}, false)
+		var v: Dictionary = e.get("village", {})
+		if v.is_empty():
+			continue
+		quartiers[str(v.get("quartier", ""))] = true
+		for i in e.meubles.keys():
+			if str(e.meubles[i]) == "puits":
+				puits += 1
+			elif str(e.meubles[i]) == "tombe":
+				tombes += 1
+		for bat in v.get("batiments", []):
+			if str(bat.id) == "moulin":
+				moulins += 1
+		if v.has("cimetiere"):
+			cimetieres += 1
+			# La grille du cimetière : une brèche dans la clôture, sinon on ne va pas sur les tombes.
+			var r: Rect2i = v.cimetiere
+			var ouvertures := 0
+			for x in r.size.x:
+				var q := Vector2i(r.position.x + x, r.position.y + r.size.y - 1)
+				if not e.meubles.has(q.y * taille + q.x):
+					ouvertures += 1
+			verifier(ouvertures >= 1, "le cimetière de %s a sa grille (%d ouverture(s))" % [str(v.get("quartier", "")), ouvertures])
+	var attendu_t := int(cfg.reperes.cimetiere.tombes.get(str(fiche.palier), 3))
+	verifier(cimetieres == 1 and tombes >= attendu_t and tombes <= attendu_t * 2, "un seul cimetière (%d) et ses %d tombes pour un(e) %s" % [cimetieres, tombes, str(fiche.palier)])
+	verifier(puits >= quartiers.size() - 1, "%d puits pour %d quartiers %s" % [puits, quartiers.size(), str(quartiers.keys())])
+	verifier(moulins >= 1 or not ("agricole" in quartiers), "le moulin des quartiers agricoles (%d)" % moulins)
+
+
+## La vocation d'une ville (Villes, 2026-09-07) : ce dont elle vit sort de ce qui l'entoure, plusieurs vocations
+## cohabitent dans un monde, beaucoup de villes n'en ont pas, et celle qu'une ville a change ce qu'elle bâtit.
+func test_vocation_des_villes() -> void:
+	var cfg: Dictionary = GameData.config("villes")
+	var liste: Dictionary = cfg.vocations.liste
+	# 1. Les données se tiennent : les préfabs, les boutiques et les zones nommées existent.
+	var manques: Array[String] = []
+	for vid in liste.keys():
+		for pid in liste[vid].get("prefabs", []):
+			if not GameData.catalogues.village_buildings.has(str(pid)):
+				manques.append("%s → préfab %s" % [str(vid), str(pid)])
+		for bid in liste[vid].get("boutiques", []):
+			if not GameData.catalogues.shop_types.has(str(bid)):
+				manques.append("%s → boutique %s" % [str(vid), str(bid)])
+		for zid in liste[vid].get("zones", []):
+			if not (str(zid) in ["bois", "minerai", "plantes"]):
+				manques.append("%s → zone %s" % [str(vid), str(zid)])
+	verifier(manques.is_empty(), "les %d vocations nomment des préfabs, des boutiques et des zones qui existent %s" % [liste.size(), str(manques)])
+	# 2. Un monde ne vit pas d'une seule chose : plusieurs vocations, et beaucoup de villes sans vocation.
+	var s := Simulation.new(9)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var c0: Vector2i = s.monde.cellule_camp
+	var vocs := {}
+	var minieres: Array[Vector2i] = []
+	for dy in range(-20, 21):
+		for dx in range(-20, 21):
+			var cv: Vector2i = c0 + Vector2i(dx, dy)
+			if not (surf.terre_a(cv) and bool(surf.poi_de(cv).get("village", false))):
+				continue
+			var v := surf.vocation_de(cv)
+			vocs[v] = int(vocs.get(v, 0)) + 1
+			if v == "miniere":
+				minieres.append(cv)
+	var total := 0
+	for n in vocs.values():
+		total += int(n)
+	verifier(total >= 20 and vocs.size() >= 4 and int(vocs.get("commune", 0)) >= total / 5, "%d agglomérations, %d vocations, dont %d communes" % [total, vocs.size(), int(vocs.get("commune", 0))])
+	verifier(int(vocs.get("commune", 0)) < total * 4 / 5, "la vocation n'est pas l'exception : %d villes sur %d en ont une" % [total - int(vocs.get("commune", 0)), total])
+	# 3. Une ville minière sert d'abord ses forges, et bâtit plus d'ateliers et moins de champs que la règle.
+	if not minieres.is_empty():
+		var f: Dictionary = surf.fiche_agglomeration(minieres[0])
+		verifier(str(f.vocation) == "miniere", "la fiche porte la vocation du lieu (%s)" % str(f.vocation))
+		var premieres: Array = []
+		for liste_b in f.boutiques:
+			for b in liste_b:
+				premieres.append(str(b))
+		var favorites: Array = liste.miniere.boutiques
+		verifier(premieres.is_empty() or str(premieres[0]) in favorites, "sa première boutique est de sa vocation (%s parmi %s)" % [str(premieres), str(favorites)])
+		verifier(float(liste.miniere.ateliers_mult) > 1.0 and float(liste.miniere.champs_mult) < 1.0 and "minerai" in liste.miniere.zones, "une ville minière : plus d'ateliers, moins de champs, une zone de minerai")
+
+
 func test_plan_de_ville() -> void:
 	var s := Simulation.new(31)
 	s.charger_camp()

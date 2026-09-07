@@ -694,10 +694,10 @@
     "essais_parcelle": 120
   },
   "place": {
-    "_doc": "Le mobilier de la place (designer 2026-09-07) : `centre` est pose au milieu si le palier l'a, `couronne` en anneau au rayon donne (jamais sur une rue), `marchand` s'ajoute au quartier marchand. Une capitale a sa statue.",
+    "_doc": "Le mobilier de la place (designer 2026-09-07) : `centre` est pose au milieu si le palier l'a, `couronne` en anneau au rayon donne (jamais sur une rue), `marchand` s'ajoute au quartier marchand. Une capitale a sa statue. `placette` (2026-09-07) : le meuble du milieu d une place de quartier — le puits, la ou le centre a son bassin.",
     "centre": {
-      "hameau": "",
-      "village": "bassin",
+      "hameau": "puits",
+      "village": "puits",
       "bourg": "bassin",
       "ville": "bassin",
       "cite": "bassin"
@@ -718,7 +718,8 @@
       "meuble": "etal_de_vente",
       "n": 4,
       "rayon_part": 0.55
-    }
+    },
+    "placette": "puits"
   },
   "remparts": {
     "_doc": "Les remparts de la vieille ville (designer 2026-09-07) : le quartier « centre » d'un palier liste ci-dessous recoit un anneau de la pierre du village au rayon donne, irregulier (bruit), avec une porte la ou une rue le traverse.",
@@ -745,9 +746,162 @@
       "chapelle": 1,
       "caserne": 4,
       "ecurie": 1,
-      "grange": 1
+      "grange": 1,
+      "moulin": 2
     },
     "ouvriers_par_tuiles": 8,
     "ouvriers_max": 6
+  },
+  "vocations": {
+    "_doc": "Ce dont une ville vit (designer 2026-09-07, « que chaque ville soit unique et realiste ») : chaque vocation note l agglomeration a partir des couches du monde lues a son centre — ressources, vegetation, humidite, altitude, temperature — prises en ECART A LA MEDIANE (valeur - 0,5 : seul un lieu remarquable marque des points), et de deux faits pris tels quels (mer : une cellule d eau voisine ; route : une route passe). La mieux notee l emporte si elle atteint seuil_min, sinon la ville est « commune » — et beaucoup doivent l etre. Effets : boutiques servies en premier, multiplicateurs d ateliers / de champs, enclos en plus, zones de recolte ajoutees au quartier, prefabs de plus au centre.",
+    "seuil_min": 0.2,
+    "liste": {
+      "miniere": {
+        "mesures": {
+          "ressources": 2.0,
+          "altitude": 0.6,
+          "vegetation": -0.3
+        },
+        "boutiques": [
+          "forgeron",
+          "armurier"
+        ],
+        "ateliers_mult": 1.6,
+        "champs_mult": 0.5,
+        "enclos_bonus": 0,
+        "zones": [
+          "minerai"
+        ],
+        "prefabs": [
+          "atelier"
+        ]
+      },
+      "forestiere": {
+        "mesures": {
+          "vegetation": 1.6,
+          "humidite": 0.4,
+          "altitude": -0.2
+        },
+        "boutiques": [
+          "herboriste",
+          "tailleur"
+        ],
+        "ateliers_mult": 1.3,
+        "champs_mult": 0.8,
+        "enclos_bonus": 0,
+        "zones": [
+          "bois",
+          "plantes"
+        ],
+        "prefabs": [
+          "entrepot"
+        ]
+      },
+      "portuaire": {
+        "mesures": {
+          "mer": 0.45,
+          "humidite": 0.3
+        },
+        "boutiques": [
+          "epicier",
+          "tailleur"
+        ],
+        "ateliers_mult": 1.0,
+        "champs_mult": 0.7,
+        "enclos_bonus": 0,
+        "zones": [],
+        "prefabs": [
+          "comptoir",
+          "entrepot"
+        ]
+      },
+      "grenier": {
+        "mesures": {
+          "humidite": 1.2,
+          "vegetation": 0.6,
+          "altitude": -0.8
+        },
+        "boutiques": [
+          "epicier",
+          "herboriste"
+        ],
+        "ateliers_mult": 0.6,
+        "champs_mult": 1.8,
+        "enclos_bonus": 1,
+        "zones": [
+          "plantes"
+        ],
+        "prefabs": [
+          "grange"
+        ]
+      },
+      "pastorale": {
+        "mesures": {
+          "altitude": 1.7,
+          "humidite": -0.6,
+          "vegetation": -0.5
+        },
+        "boutiques": [
+          "tailleur",
+          "epicier"
+        ],
+        "ateliers_mult": 0.8,
+        "champs_mult": 0.6,
+        "enclos_bonus": 2,
+        "zones": [],
+        "prefabs": [
+          "grange"
+        ]
+      },
+      "marchande": {
+        "mesures": {
+          "route": 0.42,
+          "ressources": 0.2
+        },
+        "boutiques": [
+          "alchimiste",
+          "epicier",
+          "armurier"
+        ],
+        "ateliers_mult": 1.0,
+        "champs_mult": 0.9,
+        "enclos_bonus": 0,
+        "zones": [],
+        "prefabs": [
+          "ecurie",
+          "entrepot"
+        ]
+      }
+    }
+  },
+  "reperes": {
+    "_doc": "Les reperes d une ville (designer 2026-09-07) : le puits sur la placette d un quartier sans grande place (et sur la place d un hameau ou d un village), le cimetiere contre la chapelle — hors les murs si la ville est fortifiee —, le moulin aux quartiers agricoles et aux villes-greniers, pres des champs.",
+    "puits": {
+      "sauf_place_centre": true
+    },
+    "cimetiere": {
+      "taille": [
+        7,
+        5
+      ],
+      "tombes": {
+        "hameau": 3,
+        "village": 5,
+        "bourg": 9,
+        "ville": 14,
+        "cite": 20
+      },
+      "hors_les_murs": true,
+      "distance_chapelle": 6
+    },
+    "moulin": {
+      "quartiers": [
+        "agricole"
+      ],
+      "vocations": [
+        "grenier"
+      ],
+      "prefab": "moulin"
+    }
   }
 }

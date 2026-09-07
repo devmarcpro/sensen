@@ -32,6 +32,7 @@ func _ready() -> void:
 	var c0: Vector2i = s.monde.cellule_camp
 	# 1. Les agglomérations à portée, par palier ; la plus grande.
 	var compte := {}
+	var vocs := {}   # ce dont vivent les villes du monde : une vocation qui rafle tout est une vocation mal pesée
 	var meilleure: Dictionary = {}
 	for r in range(1, rayon + 1):
 		for dy in range(-r, r + 1):
@@ -43,15 +44,17 @@ func _ready() -> void:
 					continue
 				var f: Dictionary = surf.fiche_agglomeration(cv)
 				compte[str(f.palier)] = int(compte.get(str(f.palier), 0)) + 1
+				vocs[str(f.get("vocation", "commune"))] = int(vocs.get(str(f.get("vocation", "commune")), 0)) + 1
 				if meilleure.is_empty() or ordre.find(str(f.palier)) > ordre.find(str(meilleure.palier)) or (str(f.palier) == str(meilleure.palier) and int(f.population) > int(meilleure.population)):
 					meilleure = f
 	print("VILLES — monde %d, agglomérations à %d cellules du camp : %s" % [graine, rayon, str(compte)])
+	print("  vocations : %s" % str(vocs))
 	if meilleure.is_empty():
 		print("SONDE VILLE : aucune agglomération — rien à mesurer")
 		get_tree().quit()
 		return
 	var f := meilleure
-	print("la plus grande : %s, %s de %d habitants, %d cellule(s), royaume « %s »%s, gouvernance « %s », culture %s" % [str(f.nom), str(f.palier), int(f.population), f.cellules.size(), str(f.royaume), " (capitale)" if bool(f.capitale) else "", str(f.gouvernance), str(f.culture)])
+	print("la plus grande : %s, %s de %d habitants, %d cellule(s), royaume « %s »%s, gouvernance « %s », culture %s, vocation %s" % [str(f.nom), str(f.palier), int(f.population), f.cellules.size(), str(f.royaume), " (capitale)" if bool(f.capitale) else "", str(f.gouvernance), str(f.culture), str(f.get("vocation", "commune"))])
 	print("  boutiques par cellule : %s · halls : %s" % [str(f.boutiques), str(f.halls)])
 	var fourchette: Array = cfg.paliers[str(f.palier)].pop
 	if int(f.population) < int(fourchette[0]) or int(f.population) > int(fourchette[1]):

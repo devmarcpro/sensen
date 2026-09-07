@@ -940,6 +940,46 @@ func _tirer_liste(liste: Array, rng: RandomNumberGenerator) -> String:
 ## La fiche d'une agglomération (son centre est une cellule-village de poi_de) : palier et population selon sa
 ## situation (data/villes.json), l'emprise en spirale, le type de chaque cellule, la population de chacune, les
 ## boutiques de chacune (jamais deux du même type dans l'agglomération), la culture et le nom.
+## La vocation d'une agglomération (Villes, 2026-09-07) : ce dont elle vit, lu au centre de son emprise. Chaque
+## vocation note le lieu (`villes.json → vocations`) à partir des couches du monde et de deux faits — une mer voisine,
+## une route qui passe ; la mieux notée l'emporte si elle atteint le seuil, sinon la ville est « commune ».
+func vocation_de(centre: Vector2i) -> String:
+	var cfg: Dictionary = GameData.config("villes").get("vocations", {})
+	var liste: Dictionary = cfg.get("liste", {})
+	if liste.is_empty():
+		return "commune"
+	var t: int = int(planete.taille_cellule)
+	var x := centre.x * t + t / 2
+	var y := centre.y * t + t / 2
+	var mer := 0.0
+	for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(-1, -1)]:
+		if not terre_a(centre + d):
+			mer = 1.0
+			break
+	# Les couches comptent en ÉCART À LA MÉDIANE : seul un lieu remarquable marque des points, sinon la moitié du monde
+	# serait minière. Les deux faits (une mer voisine, une route) comptent tels quels.
+	var faits := {
+		"ressources": valeur("ressources", x, y) - 0.5,
+		"vegetation": valeur("vegetation", x, y) - 0.5,
+		"humidite": valeur("humidite", x, y) - 0.5,
+		"altitude": valeur("altitude", x, y) - 0.5,
+		"temperature": valeur("temperature", x, y) - 0.5,
+		"mer": mer,
+		"route": 1.0 if not route_de(centre).is_empty() else 0.0,
+	}
+	var meilleure := "commune"
+	var note := float(cfg.get("seuil_min", 1.0))
+	for vid in liste.keys():
+		var n := 0.0
+		var mesures: Dictionary = liste[vid].get("mesures", {})
+		for m in mesures.keys():
+			n += float(mesures[m]) * float(faits.get(str(m), 0.0))
+		if n > note:
+			note = n
+			meilleure = str(vid)
+	return meilleure
+
+
 func fiche_agglomeration(centre: Vector2i) -> Dictionary:
 	mutex_agglo.lock()
 	if fiches_agglo.has(centre):
@@ -992,6 +1032,15 @@ func fiche_agglomeration(centre: Vector2i) -> Dictionary:
 		var tmp = types[i]
 		types[i] = types[k2]
 		types[k2] = tmp
+	# La vocation sert ses boutiques en premier (Villes, 2026-09-07) : une ville minière a son forgeron avant son
+	# alchimiste — décisif pour un hameau qui n'en tient qu'une.
+	var vocation := vocation_de(centre)
+	var favorites: Array = cfg.get("vocations", {}).get("liste", {}).get(vocation, {}).get("boutiques", [])
+	for k_v in range(favorites.size() - 1, -1, -1):
+		var f_v := str(favorites[k_v])
+		if types.has(f_v):
+			types.erase(f_v)
+			types.insert(0, f_v)
 	# Les boutiques ne s'entassent pas toutes au centre (2026-09-07) : il en garde la moitié, le reste se répartit sur
 	# les quartiers qui en veulent (le marchand d'abord, à la mesure de `boutiques_par_habitant`) — une ville a des
 	# échoppes dans ses rues, pas seulement sur sa place, et son cœur reste bâtissable.
@@ -1058,7 +1107,7 @@ func fiche_agglomeration(centre: Vector2i) -> Dictionary:
 		culture_id = str(roy.culture)
 	var nom := Noms.ville(cultures.get(culture_id, {}), rng) if cultures.has(culture_id) else "Hameau"
 	var fiche := {"centre": centre, "nom": nom, "culture": culture_id, "royaume": str(roy.get("id", "")), "capitale": capitale, "gouvernance": str(roy.get("government_type", "")),
-		"palier": palier, "population": population, "cellules": cellules, "quartiers": quartiers, "populations": pops, "boutiques": boutiques, "halls": halls, "halls_q": halls_q}
+		"palier": palier, "population": population, "cellules": cellules, "quartiers": quartiers, "populations": pops, "boutiques": boutiques, "halls": halls, "halls_q": halls_q, "vocation": vocation}
 	mutex_agglo.lock()
 	fiches_agglo[centre] = fiche
 	mutex_agglo.unlock()
@@ -1137,6 +1186,37 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 	if bool(comp.place):
 		pris.append(_paver_place(e, cell, centre, rayon, palette, rue))
 		_meubler_place(e, cell, centre, rayon, palier, quartier, bool(agglo.get("capitale", false)), rue, rng)
+	else:
+		# Pas de place, mais un point d'eau quand même (Villes — les repères, 2026-09-07) : le puits se pose contre une
+		# rue, au plus près du milieu du quartier — on ne va pas chercher l'eau à la cellule d'à côté.
+		var mid := str(cfg.get("place", {}).get("placette", "puits"))
+		var pose_p := false
+		for r_p in range(1, 14):
+			if pose_p:
+				break
+			for dy_p in range(-r_p, r_p + 1):
+				for dx_p in range(-r_p, r_p + 1):
+					if absi(dx_p) != r_p and absi(dy_p) != r_p:
+						continue
+					var q_p: Vector2i = centre + Vector2i(dx_p, dy_p)
+					var i_p := q_p.y * taille + q_p.x
+					if not _dans(q_p, taille) or e.murs.has(i_p) or e.eau.has(i_p) or rue.has(i_p) or e.meubles.has(i_p):
+						continue
+					var contre_rue := false
+					for d_p in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+						var v_p: Vector2i = q_p + d_p
+						if _dans(v_p, taille) and rue.has(v_p.y * taille + v_p.x):
+							contre_rue = true
+							break
+					if not contre_rue or not GameData.catalogues.meubles.has(mid):
+						continue
+					_degager(e, i_p)
+					e.meubles[i_p] = mid
+					pris.append(Rect2i(q_p, Vector2i(1, 1)))   # le puits garde sa tuile : on ne bâtit pas dessus
+					pose_p = true
+					break
+				if pose_p:
+					break
 	t_q = _top("village.place", t_q)
 	# 3. La file des bâtiments : [préfab, boutique, guilde, station, fonction].
 	var file: Array = []
@@ -1164,8 +1244,19 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 			file.append(["hall", "", str(halls_f[k_hb]), "", ""])
 	if bool(comp.get("ecurie", false)) and bats.has("ecurie"):   # le maquignon vend des montures (Villes B4)
 		file.append(["ecurie", "", "", "", ""])
+	# La vocation de la ville (Villes, 2026-09-07) : elle bâtit plus d'ateliers, plus de champs, un comptoir au port.
+	var voc: Dictionary = cfg.get("vocations", {}).get("liste", {}).get(str(agglo.get("vocation", "commune")), {})
+	# Le moulin (Villes — les repères, 2026-09-07) : là où il y a du grain à moudre, près des champs.
+	var mou: Dictionary = cfg.get("reperes", {}).get("moulin", {})
+	if bats.has(str(mou.get("prefab", ""))) and (quartier in mou.get("quartiers", []) or str(agglo.get("vocation", "")) in mou.get("vocations", [])):
+		file.append([str(mou.prefab), "", "", "", ""])
+	if quartier == "centre":
+		for pid_v in voc.get("prefabs", []):
+			if bats.has(str(pid_v)):
+				file.append([str(pid_v), "", "", "", ""])
 	var stations: Array = cfg.stations_ateliers.duplicate()
 	var n_ateliers: int = pop / maxi(1, int(comp.ateliers_par_habitant)) if int(comp.ateliers_par_habitant) > 0 else 0
+	n_ateliers = int(round(float(n_ateliers) * float(voc.get("ateliers_mult", 1.0))))
 	for k in n_ateliers:
 		file.append(["atelier", "", "", str(stations[(k + rng.randi_range(0, stations.size() - 1)) % stations.size()]), ""])
 	for k in int(comp.entrepots):
@@ -1412,6 +1503,43 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 				pose_r = true
 		echecs = 0 if pose_r else echecs + 1
 	t_q = _top("village.rattrapage", t_q)
+	# 4 ter. Le cimetière (Villes — les repères, 2026-09-07) : un enclos de tombes contre la chapelle, hors les murs
+	# quand la ville est fortifiée — et il occupe du terrain, comme tout ce qui n'est pas une maison.
+	var cim: Dictionary = cfg.get("reperes", {}).get("cimetiere", {})
+	var n_tombes: int = int(cim.get("tombes", {}).get(palier, 0))
+	var chapelle := Vector2i(-1, -1)
+	for bat_c in e.village.batiments:
+		if str(bat_c.id) in ["chapelle", "temple"]:
+			chapelle = Vector2i(bat_c.porte)
+			break
+	# Une ville n'a qu'un cimetière : celui de sa chapelle, ou celui de son centre si elle n'en a pas.
+	if n_tombes > 0 and (chapelle != Vector2i(-1, -1) or int(agglo.get("index", 0)) == 0):
+		var dims_c := Vector2i(int(cim.taille[0]), int(cim.taille[1]))
+		var r_c := Rect2i(Vector2i(-1, -1), dims_c)
+		if (rayon_rempart > 0 and bool(cim.get("hors_les_murs", true))) or chapelle == Vector2i(-1, -1):
+			r_c = _terrain_culture(e, occupe, taille, dims_c, tuiles_triees, false, PackedByteArray())   # depuis les bords : hors les murs
+		else:
+			r_c = _terrain_pres_de(occupe, taille, dims_c, tuiles_triees, chapelle, int(cim.get("distance_chapelle", 6)))
+		if r_c.position != Vector2i(-1, -1):
+			pris.append(r_c)
+			_occuper(occupe, taille, r_c, 1)
+			var libres_c: Array[Vector2i] = []
+			var porte_c := Vector2i(r_c.position.x + r_c.size.x / 2, r_c.position.y + r_c.size.y - 1)   # la grille du cimetière
+			for y in r_c.size.y:
+				for x in r_c.size.x:
+					var q := r_c.position + Vector2i(x, y)
+					var i_c := q.y * taille + q.x
+					_degager(e, i_c)
+					lots[i_c] = true
+					if q == porte_c:
+						continue
+					if x == 0 or y == 0 or x == r_c.size.x - 1 or y == r_c.size.y - 1:
+						e.meubles[i_c] = "enclos"
+					else:
+						libres_c.append(q)
+			for k_t in mini(n_tombes, libres_c.size()):
+				e.meubles[libres_c[k_t].y * taille + libres_c[k_t].x] = "tombe"
+			e.village["cimetiere"] = r_c
 	# 5. Les gens : un résident par lit ; la fiche et la fonction du bâtiment ; le poste dans le bâtiment.
 	var residents: Dictionary = vc.residents
 	var fiches: Dictionary = cfg.fiches
@@ -1503,6 +1631,7 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 	var n_champs := 0
 	if quartier in ch.get("quartiers", []):
 		n_champs = pop / maxi(1, int(ch.par_habitant if quartier == "agricole" else ch.get("par_habitant_hors_agricole", 20)))
+		n_champs = int(round(float(n_champs) * float(voc.get("champs_mult", 1.0))))
 	var liste_c: Array = _liste_par_biome(ch.get("cultures_par_biome", {}), tags_b)
 	var carte_eau := _carte_pres_eau(e, taille, int(ch.get("irrigation", {}).get("distance", 3))) if not e.eau.is_empty() else PackedByteArray()
 	for k in n_champs:
@@ -1536,7 +1665,10 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 				n_f += 1
 	var en: Dictionary = cfg.get("enclos", {})
 	var especes: Array = _liste_par_biome(en.get("especes_par_biome", {}), tags_b)
-	for k in int(en.get("par_quartier", {}).get(quartier, 0)):
+	var n_enclos: int = int(en.get("par_quartier", {}).get(quartier, 0))
+	if n_enclos > 0 or quartier == "agricole":
+		n_enclos += int(voc.get("enclos_bonus", 0))   # une ville pastorale a ses parcs à bêtes, pas ses champs
+	for k in n_enclos:
 		if especes.is_empty():
 			break
 		var r := _terrain_culture(e, occupe, taille, Vector2i(int(en.taille[0]), int(en.taille[1])), tuiles_triees, false, PackedByteArray())
@@ -1586,7 +1718,11 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 			per.append({"type": "stockage", "tuiles": tuiles_s, "batiment": bat.id})
 			e.village.territoire.stockages.append(per.size() - 1)
 	var maxz: int = int(cfg.get("zone_tuiles_max", 40))
-	for z in comp.zones:
+	var zones_q: Array = (comp.zones as Array).duplicate()
+	for z_v in voc.get("zones", []):   # une ville forestière coupe du bois même là où la composition n'en prévoit pas
+		if not zones_q.has(str(z_v)):
+			zones_q.append(str(z_v))
+	for z in zones_q:
 		var source: Dictionary = {"bois": e.arbres, "minerai": e.filons, "plantes": e.plantes}.get(str(z), {})
 		var tuiles_z: Array = []
 		for i in source.keys():
@@ -2340,6 +2476,44 @@ func _terrain_libre(occupe: PackedByteArray, taille: int, dims: Vector2i, ordre:
 	return Rect2i(Vector2i(-1, -1), dims)
 
 
+## Un terrain libre proche d'un point (Villes — les repères, 2026-09-07) : le premier de l'ordre donné qui tombe à
+## `dist_max` de la cible ; à défaut, le premier terrain libre tout court — le cimetière veut la chapelle, mais il
+## veut d'abord exister.
+func _terrain_pres_de(occupe: PackedByteArray, taille: int, dims: Vector2i, ordre: Array, cible: Vector2i, dist_max: int) -> Rect2i:
+	var premier := Rect2i(Vector2i(-1, -1), dims)
+	var essais := 0
+	for k in ordre.size():
+		if essais > 900:
+			break
+		var i: int = int(ordre[k])
+		@warning_ignore("integer_division")
+		var o := Vector2i(i % taille, i / taille)
+		if o.x < 2 or o.y < 2 or o.x + dims.x > taille - 2 or o.y + dims.y > taille - 2:
+			continue
+		var i0 := o.y * taille + o.x
+		if occupe[i0] != 0 or occupe[i0 + dims.x - 1] != 0 or occupe[i0 + (dims.y - 1) * taille] != 0 or occupe[i0 + (dims.y - 1) * taille + dims.x - 1] != 0:
+			continue
+		essais += 1
+		var libre := true
+		for y in dims.y:
+			var base := (o.y + y) * taille + o.x
+			for x in dims.x:
+				if occupe[base + x] != 0:
+					libre = false
+					break
+			if not libre:
+				break
+		if not libre:
+			continue
+		var r := Rect2i(o, dims)
+		if premier.position == Vector2i(-1, -1):
+			premier = r
+		var milieu := o + dims / 2
+		if (milieu - cible).length_squared() <= dist_max * dist_max:
+			return r
+	return premier
+
+
 ## Marque une emprise (et sa marge d'une tuile) dans la carte d'occupation.
 func _occuper(occupe: PackedByteArray, taille: int, r: Rect2i, marge: int = 1) -> void:
 	for y in range(r.position.y - marge, r.end.y + marge):
@@ -2399,7 +2573,11 @@ func _meubler_place(e: Dictionary, cell: Vector2i, centre: Vector2i, rayon: int,
 		e.meubles[i] = mid
 		rue.erase(i)   # un meuble n'est pas une rue : les bâtiments ne s'y adossent pas
 		return true
+	# Le repère du milieu (Villes, 2026-09-07) : le bassin (ou la statue d'une capitale) sur la grande place du centre,
+	# le puits sur la placette d'un quartier — et sur la place d'un hameau ou d'un village, qui n'ont pas de bassin.
 	var au_centre := str(cfg.get("centre_capitale", "")) if capitale else str(cfg.get("centre", {}).get(palier, ""))
+	if quartier != "centre":
+		au_centre = str(cfg.get("placette", "puits"))
 	poser.call(centre, au_centre)
 	var cour: Dictionary = cfg.get("couronne", {})
 	var n := int(cour.get("n", {}).get(palier, 0))

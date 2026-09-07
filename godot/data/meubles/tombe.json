@@ -1,0 +1,11 @@
+{
+  "name_key": "meuble.tombe.name",
+  "type_meuble": "tombe",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 0,
+  "luminosite": 0,
+  "bonus_humeur": 0,
+  "couleur": "#8a8578",
+  "emprise": 0.5
+}

@@ -1,0 +1,11 @@
+{
+  "name_key": "meuble.puits.name",
+  "type_meuble": "puits",
+  "bloque_passage": true,
+  "dormir": false,
+  "capacite_slots": 4,
+  "luminosite": 0,
+  "bonus_humeur": 2,
+  "couleur": "#6e6a63",
+  "emprise": 0.7
+}

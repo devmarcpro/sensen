@@ -1,0 +1,20 @@
+{
+  "plan": [
+    "#######",
+    "#..M..#",
+    "#.....#",
+    "#.C.T.#",
+    "#.....#",
+    "###P###"
+  ],
+  "meubles": {
+    "M": "clayette",
+    "C": "coffre",
+    "T": "table"
+  },
+  "tags": [
+    "stockage",
+    "ville"
+  ],
+  "poste": "T"
+}
