@@ -876,7 +876,7 @@
     }
   },
   "reperes": {
-    "_doc": "Les reperes d une ville (designer 2026-09-07) : le puits sur la placette d un quartier sans grande place (et sur la place d un hameau ou d un village), le cimetiere contre la chapelle — hors les murs si la ville est fortifiee —, le moulin aux quartiers agricoles et aux villes-greniers, pres des champs.",
+    "_doc": "Les reperes d une ville (designer 2026-09-07) : le puits sur la placette d un quartier sans grande place (et sur la place d un hameau ou d un village), le cimetiere contre la chapelle — hors les murs si la ville est fortifiee —, le moulin aux quartiers agricoles et aux villes-greniers, pres des champs. enterrement (2026-09-07) : un habitant mort rejoint une tombe libre du cimetiere de sa ville, avec son nom, son metier et l annee.",
     "puits": {
       "sauf_place_centre": true
     },
@@ -893,7 +893,8 @@
         "cite": 20
       },
       "hors_les_murs": true,
-      "distance_chapelle": 6
+      "distance_chapelle": 6,
+      "enterrement": true
     },
     "moulin": {
       "quartiers": [

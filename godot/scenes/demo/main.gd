@@ -2907,6 +2907,12 @@ func _maj_ui() -> void:
 		var occ := g.occupant(survol)
 		if not occ.is_empty() and occ != joueur_id and j.vivant:
 			lignes.append_array(_preview(j, sim.entites[occ]))
+		# Une tombe nommée dit qui elle abrite (Villes — les repères, 2026-09-07) : la seule trace qu'un jeu garde
+		# d'un habitant qu'on a croisé.
+		if sim.lieu == "camp" and str(g.meubles.get(g.idx(survol), "")) == "tombe":
+			var ep: Dictionary = SimVilles.epitaphe(sim, survol)
+			if not ep.is_empty():
+				lignes.append("  " + tr("ui.tombe").format({"nom": str(ep.nom), "metier": tr("function.%s.name" % str(ep.get("fonction", "oisif"))), "an": int(ep.get("an", 0))}))
 	if not j.is_empty():
 		if sim.lieu == "camp" and sim.monde != null:
 			var tr_: Dictionary = sim.temperature_ressentie(j)

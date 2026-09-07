@@ -3632,3 +3632,4 @@ meuble.puits.name,Puits
 meuble.tombe.name,Tombe
 tile_content.verger.name,Verger
 tile_content.verger_mur.name,Verger mûr
+ui.tombe,"Ci-gît {nom}, {metier} · an {an}"

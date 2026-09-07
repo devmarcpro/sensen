@@ -2092,6 +2092,7 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 			SimPnj._mort_compagnon(self, cible)
 		_declencher(cible, "testament", cible.pos)   # la charge part quand le porteur tombe
 		SimObjets._drop(self, cible, source)
+		SimVilles.enterrer(self, cible)   # un habitant d'une ville rejoint le cimetière de SA ville (Villes, 2026-09-07)
 		if not expedition.is_empty() and entites.get(source, {}).get("controle", "") == "joueur":
 			expedition.tues = int(expedition.tues) + 1
 	# Déclencheurs à événement (Modules) : Ouverture au premier contact, Riposte quand le porteur est

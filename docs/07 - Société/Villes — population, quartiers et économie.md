@@ -196,6 +196,13 @@ Le village d'une cellule de [[Villages PNJ — repeuplement et décimation]] et 
 > - **Le moulin** : aux quartiers agricoles et aux villes-greniers, **près des champs**. C'est là que le grain devient farine ; il compte comme un stockage du territoire.
 > Ces trois-là ne sont pas des décorations : le puits et le cimetière **occupent** du terrain (une ville n'est pas faite que de maisons), le moulin emploie ses bras comme tout lieu de travail. Ce que ça ne fait pas encore : le lavoir, la halle couverte, le gibet, la fontaine des cités — et les tombes ne portent pas de nom (elles le pourraient : celles des PNJ morts).
 
+> [!important] Décidé le 2026-09-07, 11 h — les tombes portent un nom : le cimetière se remplit des morts de la ville
+> Le cimetière posé ce matin était un décor : des tombes anonymes, toujours les mêmes. Or une ville qui vit est une ville où l'on meurt, et c'est la seule trace qu'un jeu peut garder d'un habitant qu'on a croisé. Désormais :
+> - **Quand un habitant d'une ville meurt, il est enterré chez lui** : une tombe libre du cimetière de SA ville reçoit son nom, son métier et l'année. Peu importe où il est tombé — on ramène les siens.
+> - **La tombe se lit** : passer le curseur dessus dit « Ci-gît Prénom NOM, métier, an X ». C'est de l'information gratuite, mais c'est de l'information sur quelqu'un qu'on a peut-être connu — un marchand chez qui l'on a acheté, un garde qu'on a vu à la porte.
+> - **Le cimetière a une capacité** (`reperes.cimetiere.tombes` par palier) : plein, il n'accepte plus personne, et les tombes de fondation (celles posées à la génération) restent anonymes. Un hameau à trois tombes se remplit vite ; c'est juste.
+> Ce que ça ne fait pas encore : le deuil (personne ne pleure), les tombes qui vieillissent, le cimetière qui s'agrandit quand il déborde, et les morts du joueur qui devraient peser sur sa réputation dans la ville (le meurtre la fait déjà, l'enterrement ne l'aggrave pas).
+
 ## Liens
 - **Dépend de** : [[Un monde réel — villes, PNJ, royaumes et calendrier]], [[Villages PNJ — repeuplement et décimation]], [[Génération des royaumes PNJ]], [[Agriculture et élevage]], [[Population et exploitation]], [[Habitat des PNJ]], [[Commerce et boutiques]], [[Prix suggéré]]
 - **Alimente** : [[Économie — sources et puits]], [[Écrans d'interface]], [[Vers la production]]

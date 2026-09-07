@@ -817,6 +817,60 @@ static func _creer_perimetres_ville(sim: Simulation, cell: Vector2i, v: Dictiona
 	return pids
 
 
+## Enterrer un habitant chez lui (Villes — les repères, 2026-09-07) : une tombe libre du cimetière de SA ville reçoit
+## son nom, son métier et l'année, où qu'il soit tombé. Rend true si une tombe l'a reçu (le cimetière peut être plein,
+## la ville hors fenêtre, ou le mort n'être de nulle part).
+static func enterrer(sim: Simulation, mort: Dictionary) -> bool:
+	var cfg: Dictionary = GameData.config("villes").get("reperes", {}).get("cimetiere", {})
+	if not bool(cfg.get("enterrement", true)) or sim.monde == null:
+		return false
+	var village := str(mort.get("village", ""))
+	if village.is_empty() or not ("civil" in mort.get("tags", [])):
+		return false
+	for cell in sim.monde.cellules.keys():
+		var e: Dictionary = sim.monde.cellules[cell]
+		var v: Dictionary = e.get("village", {})
+		if v.is_empty() or str(v.get("nom", "")) != village or not v.has("cimetiere"):
+			continue
+		var taille: int = int(e.largeur)
+		var r: Rect2i = v.cimetiere
+		var tombes: Array = v.get("tombes", [])
+		var nom_m := Noms.afficher(mort.get("nom", {})) if mort.has("nom") else str(mort.get("name_key", ""))
+		for y in range(1, r.size.y - 1):   # l'intérieur seul : la clôture reste
+			for x in range(1, r.size.x - 1):
+				var q := r.position + Vector2i(x, y)
+				var i := q.y * taille + q.x
+				if e.meubles.has(i):
+					continue
+				e.meubles[i] = "tombe"
+				tombes.append({"tuile": q, "nom": nom_m, "fonction": str(mort.get("fonction", "")), "an": int(sim.date_courante().get("annee", 0))})
+				v["tombes"] = tombes
+				var pm: Vector2i = sim.monde.pos_monde(cell, q)
+				if sim.grille != null and sim.grille.dans(pm):   # la ville est sous les yeux : la tombe s'y voit tout de suite
+					sim.grille.meubles[sim.grille.idx(pm)] = "tombe"
+					sim.grille.marquer(pm)
+					EventBus.emettre(&"tile_changed", [pm])
+				return true
+		return false   # le cimetière de sa ville est plein
+	return false
+
+
+## L'épitaphe d'une tuile, s'il y a une tombe nommée (le client la lit au survol) : {"nom", "fonction", "an"}.
+static func epitaphe(sim: Simulation, pos: Vector2i) -> Dictionary:
+	if sim.monde == null:
+		return {}
+	var cell: Vector2i = sim.monde.cellule_de(pos)
+	var e: Dictionary = sim.monde.cellules.get(cell, {})
+	var v: Dictionary = e.get("village", {})
+	if v.is_empty():
+		return {}
+	var locale: Vector2i = pos - cell * int(GameData.config("planete").taille_cellule)
+	for t in v.get("tombes", []):
+		if Vector2i(t.tuile) == locale:
+			return t
+	return {}
+
+
 # ---------------------------------------------------------------- la population des villes (anneau moyen v2, 2026-09-06)
 
 ## Chaque semaine, dans le contexte d'une ville (chargée ou non) : les naissances dans les couples, la majorité qui

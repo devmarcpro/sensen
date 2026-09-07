@@ -1348,6 +1348,61 @@ func test_champs_saisons_et_troupeau() -> void:
 
 ## Le plan d'une ville (Villes, designer 2026-09-06, 23 h 45) : un archétype par agglomération, des rues tracées qui
 ## suivent le terrain et se rejoignent d'une cellule à l'autre, des bâtiments dont la porte donne sur la rue.
+## Les tombes portent un nom (Villes — les repères, 2026-09-07) : un habitant mort est enterré dans le cimetière de SA
+## ville, la tombe se lit, et un cimetière plein n'accepte plus personne.
+func test_tombes_nommees() -> void:
+	var s := Simulation.new(31)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var c0: Vector2i = s.monde.cellule_camp
+	# La plus grande agglomération autour du camp : on y voyage pour que ses cellules soient chargées.
+	var fiche: Dictionary = {}
+	for dy in range(-14, 15):
+		for dx in range(-14, 15):
+			var cv := c0 + Vector2i(dx, dy)
+			if surf.terre_a(cv) and bool(surf.poi_de(cv).get("village", false)):
+				var f2: Dictionary = surf.fiche_agglomeration(cv)
+				if not f2.is_empty() and (fiche.is_empty() or int(f2.population) > int(fiche.population)):
+					fiche = f2
+	verifier(not fiche.is_empty(), "une agglomération à quatorze cellules du camp")
+	if fiche.is_empty():
+		return
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var n_g: int = s.monde.taille / 32
+	s.monde.explores[Vector2i(int(fiche.centre.x) * n_g, int(fiche.centre.y) * n_g)] = true
+	s.voyager(j, fiche.centre)
+	# La cellule qui porte le cimetière de cette ville
+	var cell_c := Vector2i(-9999, -9999)
+	for cell in s.monde.cellules.keys():
+		var v: Dictionary = s.monde.cellules[cell].get("village", {})
+		if not v.is_empty() and str(v.get("nom", "")) == str(fiche.nom) and v.has("cimetiere"):
+			cell_c = cell
+	verifier(cell_c != Vector2i(-9999, -9999), "la ville %s a son cimetière chargé" % str(fiche.nom))
+	if cell_c == Vector2i(-9999, -9999):
+		return
+	var v_c: Dictionary = s.monde.cellules[cell_c].village
+	var avant: int = v_c.get("tombes", []).size()
+	# Un habitant de cette ville meurt : il rejoint le cimetière, où qu'il soit tombé.
+	var habitants: Array = s.vivants().filter(func(x: Dictionary) -> bool: return str(x.get("village", "")) == str(fiche.nom) and "civil" in x.get("tags", []))
+	verifier(not habitants.is_empty(), "%d habitants de %s dans la fenêtre" % [habitants.size(), str(fiche.nom)])
+	if habitants.is_empty():
+		return
+	var mort: Dictionary = habitants[0]
+	var nom_attendu := Noms.afficher(mort.get("nom", {}))
+	verifier(SimVilles.enterrer(s, mort), "l'habitant est enterré chez lui")
+	var tombes: Array = v_c.get("tombes", [])
+	verifier(tombes.size() == avant + 1 and str(tombes[tombes.size() - 1].nom) == nom_attendu, "la tombe porte son nom (%s)" % nom_attendu)
+	var t_pos: Vector2i = s.monde.pos_monde(cell_c, Vector2i(tombes[tombes.size() - 1].tuile))
+	verifier(str(s.monde.cellules[cell_c].meubles.get(int(tombes[tombes.size() - 1].tuile.y) * s.monde.taille + int(tombes[tombes.size() - 1].tuile.x), "")) == "tombe", "la cellule porte le meuble")
+	var ep: Dictionary = SimVilles.epitaphe(s, t_pos)
+	verifier(str(ep.get("nom", "")) == nom_attendu and int(ep.get("an", -1)) > 0, "l'épitaphe se lit à sa tuile (%s, an %d)" % [str(ep.get("nom", "")), int(ep.get("an", -1))])
+	# Un cimetière plein n'accepte plus personne.
+	var garde_fou := 0
+	while SimVilles.enterrer(s, mort) and garde_fou < 200:
+		garde_fou += 1
+	verifier(garde_fou < 200 and not SimVilles.enterrer(s, mort), "le cimetière plein (%d tombes) n'accepte plus personne" % v_c.get("tombes", []).size())
+
+
 ## Le verger (Agriculture et élevage, 2026-09-07) : des buissons plantés une fois, cueillis des années — ni rotation,
 ## ni jachère, et des tuiles à eux.
 func test_verger() -> void:

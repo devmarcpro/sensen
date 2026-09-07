@@ -3623,3 +3623,4 @@ meuble.puits.name,Well
 meuble.tombe.name,Grave
 tile_content.verger.name,Orchard
 tile_content.verger_mur.name,Ripe orchard
+ui.tombe,"Here lies {nom}, {metier} · year {an}"
