@@ -2045,3 +2045,39 @@ func test_denrees_perissent() -> void:
 	var prix_vide := float(t.prix.nourriture)
 	verifier(prix_plein <= float(eco.prix_min) + 0.01 and prix_vide > prix_plein, "le prix de la nourriture suit le stock : %.2f quand les greniers débordent, %.2f quand ils sont vides" % [prix_plein, prix_vide])
 
+
+## Une ville riche bâtit au lieu d'exporter ses enfants (2026-09-07) : la capacité de logement monte quand la ville a
+## le moral, les matériaux et l'or ; une ville pauvre ne bâtit pas ; et rien ne se bâtit quand tout le monde est logé.
+func test_ville_batit() -> void:
+	var cfg: Dictionary = GameData.config("villes").batir
+	var mc: Dictionary = GameData.config("combat_rules").royaume.maisons
+	verifier(int(cfg.cout_or) > 0 and int(cfg.logements_par_maison) > 0 and int(cfg.max_par_semaine) >= 1, "les nombres du chantier sont en données (or %d, +%d logements, %d par semaine)" % [int(cfg.cout_or), int(cfg.logements_par_maison), int(cfg.max_par_semaine)])
+	var s := Simulation.new(4242)
+	s.charger_camp()
+	var t: Dictionary = s.territoire
+	t["agglomeration"] = {"nom": "Bourgade", "population": 10, "materiaux": {"mur": "pin"}}
+	t["tresor"] = 1000
+	t.stocks.clear()
+	for c in mc.cout:
+		t.stocks["chene|brut"] = int(c.n) * 5   # du bois en quantité, famille « bois »
+	var cap0 := int(t.agglomeration.population)
+	# tout le monde est logé : rien ne se bâtit
+	verifier(SimVilles._batir_logements(s, 5) == 0 and int(t.agglomeration.population) == cap0, "quand tout le monde est logé, la ville ne bâtit pas")
+	# il manque des lits : elle bâtit, et sa capacité monte
+	var or0 := int(t.tresor)
+	var bois0 := SimPerimetres._stock_famille(s, "bois")
+	var n := SimVilles._batir_logements(s, 99)
+	verifier(n == int(cfg.max_par_semaine) and int(t.agglomeration.population) == cap0 + n * int(cfg.logements_par_maison), "elle bâtit %d maison(s) et loge %d habitants de plus" % [n, n * int(cfg.logements_par_maison)])
+	verifier(int(t.tresor) == or0 - n * int(cfg.cout_or) and SimPerimetres._stock_famille(s, "bois") < bois0, "le chantier a coûté son or (%d → %d) et son bois" % [or0, int(t.tresor)])
+	# une ville sans or ne bâtit pas, une ville sans bois non plus
+	t.tresor = 0
+	var cap1 := int(t.agglomeration.population)
+	verifier(SimVilles._batir_logements(s, 99) == 0 and int(t.agglomeration.population) == cap1, "sans or, la ville ne bâtit pas")
+	t.tresor = 1000
+	t.stocks.clear()
+	verifier(SimVilles._batir_logements(s, 99) == 0 and int(t.agglomeration.population) == cap1, "sans matériaux, la ville ne bâtit pas")
+	# le compteur de stock ne consomme rien : c'est ce qui permet de vérifier un coût à plusieurs familles
+	t.stocks["chene|brut"] = 30
+	var avant := SimPerimetres._stock_famille(s, "bois")
+	verifier(avant == 30 and SimPerimetres._stock_famille(s, "bois") == 30, "compter le stock d'une famille n'en prend rien")
+

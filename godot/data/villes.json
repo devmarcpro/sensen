@@ -1264,5 +1264,12 @@
       "ville",
       "cite"
     ]
+  },
+  "batir": {
+    "_doc": "Une ville riche batit (Villes, 2026-09-07) : au passage de semaine, une ville dont les residents depassent agglomeration.population batit si son humeur atteint humeur_min, si ses stocks portent royaume.maisons.cout et si son tresor a cout_or. Chaque maison ajoute logements_par_maison a la capacite ; max_par_semaine borne le chantier. Le prefab se pose vraiment quand la cellule est dans la fenetre.",
+    "cout_or": 60,
+    "logements_par_maison": 2,
+    "max_par_semaine": 1,
+    "humeur_min": 30
   }
 }

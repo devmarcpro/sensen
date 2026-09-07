@@ -4435,3 +4435,4 @@ journal.arrose,"{nom} waters the plot"
 journal.arrosage_sans_seau,a bucket in hand is needed to water
 journal.deja_arrose,this plot has already been watered today
 journal.denrees_perdues,"{n} unit(s) of food spoiled"
+journal.ville_batit,"{ville} builds {n} house(s): it now houses {logements}"

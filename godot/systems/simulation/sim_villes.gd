@@ -713,6 +713,112 @@ static func elevage_de(x: Dictionary) -> Dictionary:
 	return GameData.catalogues.creatures.get(str(x.get("def", "")), {}).get("elevage", {})
 
 
+## L'humeur moyenne des résidents d'une ville : un territoire n'en porte pas, ses habitants oui.
+static func _humeur_moyenne(sim: Simulation) -> int:
+	var res: Array = SimTerritoire.residents(sim)
+	if res.is_empty():
+		return int(SimTerritoire._ry(sim).humeur_base)
+	var somme := 0
+	for x in res:
+		somme += int(x.get("humeur", SimTerritoire._ry(sim).humeur_base))
+	return somme / res.size()
+
+
+## Une ville riche bâtit (Villes, 2026-09-07) : quand ses résidents dépassent ce que son bâti loge, qu'elle a le moral,
+## les matériaux et l'or, sa capacité de logement monte — et si la cellule est sous les yeux du joueur, le préfab se pose
+## vraiment. Rend le nombre de maisons bâties (le test et la sonde le lisent).
+static func _batir_logements(sim: Simulation, n_residents: int) -> int:
+	var cfg: Dictionary = GameData.config("villes").get("batir", {})
+	var agglo: Dictionary = sim.territoire.get("agglomeration", {})
+	if cfg.is_empty() or agglo.is_empty():
+		return 0
+	var mc: Dictionary = SimTerritoire._ry(sim).get("maisons", {})
+	var baties := 0
+	while baties < int(cfg.get("max_par_semaine", 1)):
+		if n_residents <= int(agglo.get("population", 0)):
+			break   # tout le monde est logé : rien à bâtir
+		if _humeur_moyenne(sim) < int(cfg.get("humeur_min", 30)):
+			break   # une ville qui va mal ne bâtit pas : un territoire n'a pas d'humeur, ses habitants en ont une
+		if int(sim.territoire.get("tresor", 0)) < int(cfg.get("cout_or", 60)):
+			break
+		var assez := true   # les matériaux, dans SES stocks, par famille — les mêmes que les maisons du joueur
+		for c in mc.get("cout", []):
+			if SimPerimetres._stock_famille(sim, str(c.famille)) < int(c.n):
+				assez = false
+		if not assez:
+			break
+		for c in mc.get("cout", []):
+			SimPerimetres._prendre_stock_famille(sim, str(c.famille), int(c.n))
+		sim.territoire.tresor = int(sim.territoire.tresor) - int(cfg.get("cout_or", 60))
+		agglo["population"] = int(agglo.get("population", 0)) + int(cfg.get("logements_par_maison", 2))
+		baties += 1
+		_poser_maison_de_ville(sim)   # la voir se bâtir, si l'on est là
+	if baties > 0:
+		EventBus.emettre(&"journal", [&"journal.ville_batit", {"ville": str(agglo.get("nom", "")), "n": baties, "logements": int(agglo.population)}])
+	return baties
+
+
+## Le préfab d'une maison posé dans l'emprise de la ville, quand sa cellule est dans la fenêtre — sinon la ville a
+## grandi sur le papier et son bâti se verra à la prochaine visite. Les tuiles passent par `Monde.modifications` :
+## une cellule se régénère de sa graine, elle ne garderait rien d'autre.
+static func _poser_maison_de_ville(sim: Simulation) -> bool:
+	if sim.monde == null or sim.lieu != "camp":
+		return false
+	var mc: Dictionary = SimTerritoire._ry(sim).get("maisons", {})
+	var bat: Dictionary = GameData.catalogues.get("village_buildings", {}).get(str(mc.get("plan", "chaumiere")), {})
+	if bat.is_empty():
+		return false
+	var plan: Array = bat.plan
+	for cell in sim.territoire.get("cellules", {}).keys():
+		if absi(cell.x - sim.monde.centre.x) > sim.monde.rayon or absi(cell.y - sim.monde.centre.y) > sim.monde.rayon:
+			continue
+		var o := _terrain_maison_de_ville(sim, cell, plan)
+		if o == Vector2i(-1, -1):
+			continue
+		var mur := str(sim.territoire.get("agglomeration", {}).get("materiaux", {}).get("mur", "pin"))
+		for y in plan.size():
+			var ligne: String = plan[y]
+			for x in ligne.length():
+				var t: Vector2i = o + Vector2i(x, y)
+				var c := ligne[x]
+				if c == "#":
+					sim.grille.poser_contenu(t, "mur")   # `poser_contenu` marque la tuile dans `modifies`, et
+					sim.grille.materiaux[sim.grille.idx(t)] = mur   # `Monde.capturer` la porte dans `modifications`
+				elif c == "+":
+					sim.grille.poser_contenu(t, "porte_fermee")
+				sim.grille.marquer(t)
+				EventBus.emettre(&"tile_changed", [t])
+		return true
+	return false
+
+
+## Un emplacement libre pour une maison dans une cellule de la ville : dans l'emprise, jamais sur une rue, une parcelle,
+## un meuble ou un mur. (-1,-1) si la ville n'a plus de place — elle cesse alors de bâtir, et recommence à exporter.
+static func _terrain_maison_de_ville(sim: Simulation, cell: Vector2i, plan: Array) -> Vector2i:
+	var taille: int = int(GameData.config("planete").taille_cellule)
+	var h: int = plan.size()
+	var w := 0
+	for ligne in plan:
+		w = maxi(w, str(ligne).length())
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([sim.graine, "batir", cell, sim.horloge_monde.ticks / 1000])
+	for essai in 40:
+		var o: Vector2i = sim.monde.pos_monde(cell, Vector2i(rng.randi_range(2, taille - w - 3), rng.randi_range(2, taille - h - 3)))
+		var ok := true
+		for y in range(-1, h + 1):   # une tuile de marge : on ne colle pas la maison au bâti voisin
+			for x in range(-1, w + 1):
+				var t: Vector2i = o + Vector2i(x, y)
+				if not sim.grille.dans(t) or not sim.grille.contenu_de(t).is_empty() or sim.grille.meubles.has(sim.grille.idx(t)) \
+						or sim.territoire.cultures.has(SimCamp._pm(sim, t)) or sim.grille.h(t) != sim.grille.h(o):
+					ok = false
+					break
+			if not ok:
+				break
+		if ok:
+			return o
+	return Vector2i(-1, -1)
+
+
 ## Le troupeau du territoire, chaque semaine (Villes B2 ; le troupeau qui vit, 2026-09-06) : il mange le fourrage des
 ## stocks, il produit (à sa saison), il naît, il meurt de faim, et son surplus part à la boucherie.
 static func _semaine_betail(sim: Simulation) -> void:
@@ -1024,6 +1130,8 @@ static func _semaine_population(sim: Simulation) -> void:
 				if not parent_l.is_empty() and parent_l.has("lit") and Vector2i(parent_l.lit) == Vector2i(x.lit):
 					x.erase("lit")
 					break
+	# 2 ter. Une ville riche BÂTIT plutôt que d'exporter ses enfants (Villes, 2026-09-07) : avant de regarder qui part.
+	_batir_logements(sim, res.size())
 	# 3. Les migrations : vers la ville connue qui a le plus de place, celle du même royaume d'abord.
 	var cibles: Array = []
 	for id in sim.territoires.keys():

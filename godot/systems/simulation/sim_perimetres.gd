@@ -181,6 +181,23 @@ static func _poste_de_perimetre(sim: Simulation, pid: String, depuis: Vector2i) 
 	return meilleur
 
 
+## Ce que le stock du territoire porte d'une famille de matériaux, toutes formes confondues — sans rien consommer.
+## `_prendre_stock_famille` consomme dès qu'il peut : quand un coût porte plusieurs familles, il faut pouvoir vérifier
+## qu'on a TOUT avant d'en prendre la première (2026-09-07).
+static func _stock_famille(sim: Simulation, famille: String) -> int:
+	var fam: Dictionary = GameData.config("material_families").get(famille, {})
+	var total := 0
+	for cle in sim.territoire.stocks.keys():
+		var mat_id := str(cle).split("|")[0]
+		var mat: Dictionary = GameData.catalogues.materials.get(mat_id, {})
+		var ok: bool = (fam.has("category") and str(mat.get("category", "")) == str(fam.category)) \
+			or (fam.has("material") and mat_id == str(fam.material)) \
+			or (fam.has("tag") and str(fam.tag) in mat.get("tags", []))
+		if ok:
+			total += int(sim.territoire.stocks[cle])
+	return total
+
+
 ## Prendre `n` unités d'une famille de matériaux sur le stock du territoire, n'importe quelle forme : vrai si on a pu.
 static func _prendre_stock_famille(sim: Simulation, famille: String, n: int) -> bool:
 	var fam: Dictionary = GameData.config("material_families").get(famille, {})
