@@ -810,6 +810,17 @@
           ]
         }
       ]
+    },
+    "peremption": {
+      "taux_defaut": 0.3,
+      "taux_par_tag": {
+        "conserve": 0.03,
+        "plat": 0.15,
+        "cereale": 0.08,
+        "racine": 0.08,
+        "legumineuse": 0.08
+      },
+      "garde_minimale": 4
     }
   },
   "transports": {

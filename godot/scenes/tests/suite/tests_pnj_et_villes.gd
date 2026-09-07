@@ -2008,3 +2008,40 @@ func test_jardin_du_joueur() -> void:
 	verifier(s.territoire.cultures.has(pm2) and str(s.territoire.cultures[pm2].plante) == "pomme", "la parcelle porte le pommier")
 	verifier(SimVilles.plante_a_semer(s, {"verger": true, "plante": "pomme"}) == "pomme", "un verger replante le même arbre : on plante une fois, on cueille des années")
 
+
+## Les denrées pourrissent, et le prix se remet à bouger (designer 2026-09-07, 21 h) : une conserve tient, une baie non ;
+## une ville ne perd jamais de quoi manger ; et un stock qui cesse de saturer fait remonter le prix de la nourriture.
+func test_denrees_perissent() -> void:
+	var eco: Dictionary = GameData.config("villes").economie
+	var pe: Dictionary = eco.peremption
+	verifier(float(pe.taux_defaut) > float(pe.taux_par_tag.conserve) and int(pe.garde_minimale) > 0, "les taux sont en données : cru %.2f, conserve %.2f, garde %d" % [float(pe.taux_defaut), float(pe.taux_par_tag.conserve), int(pe.garde_minimale)])
+	var s := Simulation.new(4242)
+	s.charger_camp()
+	var t: Dictionary = s.territoire
+	t["agglomeration"] = {"population": 20}
+	t.stocks.clear()
+	t.stocks["baies"] = 1000        # une denrée crue : elle pourrit vite
+	t.stocks["viande_salee"] = 1000   # une conserve : elle tient
+	t.stocks["ble"] = 1000          # une céréale : le grenier la garde
+	t.stocks["chene|brut"] = 1000   # du bois : rien ne l'abîme
+	t.stocks["laitue"] = 3          # sous la garde minimale : on n'y touche pas
+	var perdu := s._perir_denrees()
+	verifier(perdu > 0, "des denrées se sont gâtées (%d unités)" % perdu)
+	var baies := int(t.stocks.baies)
+	var salee := int(t.stocks.viande_salee)
+	var ble := int(t.stocks.ble)
+	verifier(baies < salee and salee < 1000, "la baie pourrit plus vite que la conserve (%d contre %d)" % [baies, salee])
+	verifier(ble > baies and ble < 1000, "la céréale se garde mieux que la baie, moins bien que la conserve (%d)" % ble)
+	verifier(int(t.stocks["chene|brut"]) == 1000, "le bois ne pourrit pas")
+	verifier(int(t.stocks.laitue) == 3, "sous la garde minimale, on ne perd rien : une ville garde de quoi manger")
+	# le prix : un stock saturé colle au plancher ; un stock qui fond le fait remonter
+	t.stocks.clear()
+	t.stocks["baies"] = 100000
+	s._semaine_economie()
+	var prix_plein := float(t.prix.nourriture)
+	t.stocks.clear()
+	t.stocks["baies"] = 5
+	s._semaine_economie()
+	var prix_vide := float(t.prix.nourriture)
+	verifier(prix_plein <= float(eco.prix_min) + 0.01 and prix_vide > prix_plein, "le prix de la nourriture suit le stock : %.2f quand les greniers débordent, %.2f quand ils sont vides" % [prix_plein, prix_vide])
+

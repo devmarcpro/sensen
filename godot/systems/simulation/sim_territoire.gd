@@ -870,6 +870,7 @@ static func _semaine_economie(sim: Simulation) -> void:
 	var pop := maxi(residents(sim).size(), int(sim.territoire.get("agglomeration", {}).get("population", 0)))
 	if pop <= 0:
 		return
+	_perir_denrees(sim)   # ce qui pourrit avant qu'on compte : sans cela le stock sature et le prix reste au plancher
 	var prix := {}
 	for cat in eco.consommation.keys():
 		var besoin := float(pop) * float(eco.consommation[cat])
@@ -879,6 +880,37 @@ static func _semaine_economie(sim: Simulation) -> void:
 		var ratio := clampf(float(stock) / maxf(1.0, besoin * float(eco.semaines_surplus)), 0.0, 1.0)
 		prix[str(cat)] = snappedf(lerpf(float(eco.prix_max), float(eco.prix_min), ratio), 0.01)
 	sim.territoire["prix"] = prix
+
+
+## Ce qui pourrit dans les stocks d'une ville, chaque semaine (Économie — sources et puits, 2026-09-07). La part perdue
+## dépend de ce qu'est la denrée — une conserve tient, un plat tient un peu, une baie non — et jamais on ne descend sous
+## `garde_minimale` : une ville ne perd pas de quoi manger. Rend le nombre d'unités perdues (le test et la sonde le lisent).
+static func _perir_denrees(sim: Simulation) -> int:
+	var pe: Dictionary = GameData.config("villes").economie.get("peremption", {})
+	if pe.is_empty():
+		return 0
+	var garde := int(pe.get("garde_minimale", 4))
+	var perdu := 0
+	for cle in sim.territoire.stocks.keys():
+		var base := str(cle).split("|")[0]
+		var it: Dictionary = GameData.catalogues.items.get(base, {})
+		if str(it.get("type", "")) != "consommable" or float(it.get("nutrition", 0)) <= 0.0:
+			continue   # seule une denrée pourrit : le bois, le métal et le tissu ne s'abîment pas au grenier
+		var q := int(sim.territoire.stocks[cle])
+		if q <= garde:
+			continue
+		var taux := float(pe.get("taux_defaut", 0.3))
+		for tag in it.get("tags", []):
+			if pe.get("taux_par_tag", {}).has(str(tag)):
+				taux = minf(taux, float(pe.taux_par_tag[str(tag)]))   # le tag le plus protecteur l'emporte
+		var perte: int = mini(q - garde, int(round(float(q) * taux)))
+		if perte <= 0:
+			continue
+		sim.territoire.stocks[cle] = q - perte
+		perdu += perte
+	if perdu > 0:
+		EventBus.emettre(&"journal", [&"journal.denrees_perdues", {"n": perdu}])
+	return perdu
 
 
 ## Le facteur de prix d'un objet chez un marchand : celui de sa catégorie dans le territoire de sa ville (1 sinon).

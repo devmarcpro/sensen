@@ -5229,6 +5229,9 @@ func categorie_economique(it: Dictionary) -> String:
 func _categorie_cle(cle: String) -> String:
 	return SimTerritoire._categorie_cle(self, cle)
 
+func _perir_denrees() -> int:
+	return SimTerritoire._perir_denrees(self)
+
 func _semaine_economie() -> void:
 	SimTerritoire._semaine_economie(self)
 

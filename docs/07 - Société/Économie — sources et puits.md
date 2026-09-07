@@ -32,6 +32,15 @@ Avec récolte infinie et progression sans plafond, l'inflation est structurellem
 > [!success] Mis à jour le 2026-08-30 — les entraîneurs PNJ sont codés (le « non codés » ci-dessus est périmé)
 > Le puits existe depuis le 2026-08-28 ([[Potentiel]], callout « l'entraîneur ») : PNJ tagués `entraineur` (maîtres de guilde, gardes de village), *Entraîner* au dialogue, `coût = 20 or × niveau actuel`, +10 de potentiel plafonné ; l'or va à la bourse finie du PNJ. Testé (`test_entraineur_et_commandes`). Balayage du coffre : la phrase du callout précédent était restée en retard d'une note.
 
+> [!important] Décidé le 2026-09-07, 21 h 15 — les denrées pourrissent, et le prix se remet à bouger (designer : « ok go je te laisse faire »)
+> J'avais dit au designer que « le prix ne suit pas la récolte ». **C'était faux et je le corrige** : `_semaine_economie` calcule bien le prix de chaque catégorie sur le rapport du stock au besoin, et un marchand l'applique (`facteur_economie`). Le défaut est ailleurs, et il est plus vicieux : la **nourriture ne se consomme qu'à raison d'un repas par résident et par semaine**, et rien ne l'use au-delà — douze mille sept cent quarante-quatre baies mesurées après un an de jeu. Le rapport sature à 1, et le prix de la nourriture reste **collé au plancher** dans toute ville qui récolte. Le mécanisme existait ; c'est le stock infini qui l'avait figé.
+> **La règle** : chaque semaine, une part des denrées du stock se perd (`villes.economie.peremption`). Elle dépend de ce qu'est la denrée, pas d'une horloge par objet — on reste dans l'abstraction hors-site :
+> - `taux_defaut` (30 %) pour un aliment cru — la baie, le lait, la viande crue ;
+> - `taux_par_tag` : un **plat** tient mieux (15 %), une **conserve** presque indéfiniment (3 %), une **céréale** et une **racine** se gardent au grenier (8 %) ;
+> - la perte est plafonnée par `garde_minimale` : une ville ne perd jamais tout, il reste toujours de quoi manger la semaine suivante.
+> **Ce que ça débloque, et c'est le fil qui traverse tout ce qui précède** : la salaison et le fumage servent enfin à quelque chose (c'est *pour ça* qu'on les fait) ; une ville-grenier qui produit trop voit son prix descendre puis remonter quand la récolte pourrit, au lieu de rester au plancher ; une ville de montagne qui ne récolte rien paie sa nourriture au prix fort ; et la question de l'accumulation sans fin, posée au designer dans [[À juger — parcours de jeu]] depuis le 2026-09-06, reçoit une réponse.
+> **Ce que ça ne fait pas** : le sac du joueur ne pourrit pas (seul le butin tombé à la mort périme, et c'est une autre règle) — un aliment porté se garde. Le faire pourrir dans le sac est une décision de confort qui demande une horloge par objet, et je la laisse au designer.
+
 ## Liens
 - **Dépend de** : [[Récolte]], [[Commerce et boutiques]], [[Prix suggéré]]
 - **Alimente** : [[Barèmes économiques]], [[Entretien et taxes]], [[Boutique passive]], [[Quêtes et guildes]]
