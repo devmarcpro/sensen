@@ -644,7 +644,12 @@ La sonde des villes (monde 9, « Mokroslav ») le signale : la cellule résident
 
 ## 2026-09-07 — L'agriculture et les villes organiques (3 h) : ce que j'ai fait, ce que je te laisse
 
-**À regarder** : `--ville --graine 21 --heure 10 --zoom 0.4` (la ville entière et ses rues), la minimap (la forme du tissu et l'anneau du rempart), et une ville de bord de rivière contre une ville de plateau.
+**À regarder** : les cinq paliers côte à côte dans `captures/agglos/` (pris avec `capture.tscn -- --palier hameau|village|bourg|ville|cite --graine 21 --heure 11`), la minimap de chacune (la forme du tissu et l'anneau du rempart), et une ville de bord de rivière contre une ville de plateau.
+
+> [!warning] Vu sur les captures du 2026-09-07, 8 h — ce qui me gêne, à toi de dire
+> - **Le hameau du désert de cendres sous la pluie est presque illisible** : sol sombre, murs sombres, toits sombres, pluie qui assombrit encore. On distingue la place et le puits, pas les maisons. Les autres paliers, en plaine ou en taïga, sont lisibles. Question : faut-il un plancher de luminosité en extérieur de jour, quel que soit le biome et le temps ?
+> - **La ville (206 habitants, plan grille) paraît moins dense que le bourg** (84 habitants) : entre ses maisons il reste beaucoup d'herbe. C'est l'effet du plan à la règle sur des îlots profonds de treize tuiles. Faut-il resserrer les îlots des grands paliers, ou accepter qu'une ville de plaine soit aérée ?
+> - **Ce qui marche** : les trois plans se lisent d'un coup d'œil à la minimap (la grille du bourg, l'étoile-anneau de la cité, le tracé libre du hameau) ; la place, ses étals et son puits se voient ; les champs et les vergers en damier bordent les quartiers ; le rempart se lit à la minimap.
 
 - **Le plan des villes.** Quatre archétypes tirés à la graine de l'agglomération et poussés par la gouvernance : village-rue, organique, radioconcentrique, grille. Les rues sont des tracés qui suivent le relief et se rejoignent d'une cellule à l'autre. **Ce que je n'ai pas choisi pour toi** : les poids (`villes.json → plans.poids`) — une monarchie trace-t-elle vraiment à la règle, une république laisse-t-elle vraiment pousser ? La sinuosité (0,55) et la pénalité de pente (6) décident à quel point une rue serpente ; à ton œil.
 - **Les remparts** : un bourg et plus fortifie son centre, rayon 17 à 25 selon le palier. Les quartiers voisins restent hors les murs. À juger : est-ce que la muraille se lit assez (elle est de la pierre du village, pas de bois), et faut-il des tours ?

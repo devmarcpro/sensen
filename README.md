@@ -193,7 +193,7 @@ python tools/fragmenter.py --cible ecrans --ecrire
 # Capture d'écran (fenêtré — le `--` avant les options est obligatoire)
 & $godot --path godot --disable-vsync res://scenes/tests/capture.tscn -- --arene 3 --heure 12 --frames 8 --sortie user://c.png
 #   autres options : --donjon --torche --raid --talents --carte --ecran inventaire|menu|gestion|atelier|composer
-#   --ville --graine G --heure H (la ville la plus grande à l'heure H) · --dans-batiment (le joueur dans une pièce) · --a-l-etage (à l'étage d'une maison haute)
+#   --ville --graine G --heure H (la ville la plus grande à l'heure H) · --palier hameau|village|bourg|ville|cite (la plus grande de CE palier : captures/agglos/) · --dans-batiment (le joueur dans une pièce) · --a-l-etage (à l'étage d'une maison haute)
 #   --dialogue (la carte de dialogue du PNJ le plus proche) · --choisir-objet (l'inventaire, un objet choisi et ses options) · --choisir-entree (un écran, l'entrée choisie et ses options)
 #   --dump-lumiere (la carte de lumière autour du joueur sur la sortie standard) · --traverser N (N pas en ville, le coût des passes de dessin au chrono client)
 #   --langue en · --graine N · --perimetre bois · --maison --assigner · --commerce --echange · --sorts gel+1 · --grande_base N (N semaines) · --ligne N (sélectionne la N-ième ligne de l'écran)
@@ -232,7 +232,7 @@ python -X utf8 tools/verif_sprites.py      # les sprites d'objets attendus dans 
 & $godot --headless --path godot res://scenes/tests/sonde_royaume.tscn -- --graine_monde 21 --semaines 12
 # L'échelle : la plus grande ville, puis ses résidents clonés jusqu'à 500, 1 000, 2 000 êtres — le coût d'un tick et où il part (Modules de la simulation et le C++)
 & $godot --headless --path godot res://scenes/tests/sonde_echelle.tscn -- --graine_monde 9 --cibles 500,1000,2000 --ticks 200
-# Captures : --ville (la plus grande agglomération à portée, révélée, vue reculée), --village (le hameau le plus proche), --maison, --creature, --compagnons, --arme <base>, --zoom Z, --plein-ecran
+# Captures : --ville (la plus grande agglomération à portée, révélée, vue reculée), --palier X (la plus grande du palier X), --village (le hameau le plus proche), --maison, --creature, --compagnons, --arme <base>, --zoom Z, --plein-ecran
 # Le robot joue le client : descend les étages, se bat, meurt ou pas (fenêtré ; --equiper N --sorts N pour un robot équipé ; --compagnons N pour une escorte armée, notée à chaque étage)
 & $godot --path godot res://scenes/tests/parcours.tscn -- --graine 73 --etages 4 --frames 8000 --equiper 3 --sorts 3 --sortie user://robot
 ```

@@ -1,7 +1,7 @@
 extends Node
 const GrandeBase := preload("res://scenes/tests/grande_base.gd")
 ## Capture d'écran automatique de la scène principale (fenêtrée, pas headless) :
-##   & Godot --path godot res://scenes/tests/capture.tscn -- --sortie C:/chemin/capture.png [--arene N] [--frames 60] [--ville --graine G --heure H --dans-batiment | --a-l-etage] [--dump-lumiere]
+##   & Godot --path godot res://scenes/tests/capture.tscn -- --sortie C:/chemin/capture.png [--arene N] [--frames 60] [--ville | --palier hameau|village|bourg|ville|cite --graine G --heure H --dans-batiment | --a-l-etage] [--dump-lumiere]
 ## Sert à vérifier le rendu sans œil humain disponible ; ne remplace pas le jugement de game feel.
 
 var gif_images := 0      # --gif N : N images espacées, pour un GIF monté hors du jeu
@@ -128,11 +128,17 @@ func _ready() -> void:
 		scene._commencer_monde()
 		scene.fiche_en_attente = {}
 		scene.carte.fermer()
-	if ("--village" in args or "--ville" in args) and scene.sim != null:   # --village : le village le plus proche du camp, le joueur sur sa place ; --ville : la plus grande agglomération à 40 cellules (Villes B1)
+	# --palier X (2026-09-07) : la plus grande agglomération de CE palier autour du camp — de quoi montrer un hameau,
+	# un village, un bourg, une ville et une cité côte à côte. Il se comporte comme --ville (on y voyage, on la révèle).
+	var palier_vise := ""
+	for ip in args.size():
+		if args[ip] == "--palier" and ip + 1 < args.size():
+			palier_vise = str(args[ip + 1])
+	if ("--village" in args or "--ville" in args or not palier_vise.is_empty()) and scene.sim != null:   # --village : le village le plus proche du camp, le joueur sur sa place ; --ville : la plus grande agglomération à 40 cellules (Villes B1)
 		var sv = scene.sim
 		var c0: Vector2i = sv.monde.cellule_camp
 		var cible := Vector2i(-9999, -9999)
-		if "--ville" in args:
+		if "--ville" in args or not palier_vise.is_empty():
 			var ordre_p: Array = GameData.config("villes").ordre_paliers
 			var meilleure: Dictionary = {}
 			for dy in range(-40, 41):
@@ -141,11 +147,15 @@ func _ready() -> void:
 					if not (sv.monde.surface.terre_a(cv0) and bool(sv.monde.surface.poi_de(cv0).get("village", false))):
 						continue
 					var fa: Dictionary = sv.monde.surface.fiche_agglomeration(cv0)
+					if not palier_vise.is_empty() and str(fa.palier) != palier_vise:
+						continue
 					if meilleure.is_empty() or ordre_p.find(str(fa.palier)) > ordre_p.find(str(meilleure.palier)) or (str(fa.palier) == str(meilleure.palier) and int(fa.population) > int(meilleure.population)):
 						meilleure = fa
 			if not meilleure.is_empty():
 				cible = meilleure.centre
-				print("ville : ", str(meilleure.nom), " (", str(meilleure.palier), ", ", int(meilleure.population), " habitants, ", meilleure.cellules.size(), " cellules)")
+				print("ville : ", str(meilleure.nom), " (", str(meilleure.palier), ", ", int(meilleure.population), " habitants, ", meilleure.cellules.size(), " cellules, vocation ", str(meilleure.get("vocation", "commune")), ", plan ", sv.monde.surface.plan_de_ville(meilleure), ")")
+			elif not palier_vise.is_empty():
+				print("ville : AUCUN(E) ", palier_vise, " à quarante cellules du camp (graine ", sv.graine, ")")
 		for r in range(1, 70 if cible.x == -9999 else 0):   # le monde est rectangulaire : le premier village peut être loin (2026-09-01)
 			for dy in range(-r, r + 1):
 				for dx in range(-r, r + 1):
@@ -162,10 +172,11 @@ func _ready() -> void:
 					break
 			if cible.x != -9999:
 				break
+		var mode_ville := ("--ville" in args) or not palier_vise.is_empty()
 		if cible.x != -9999:
-			sv.charger_camp({}, cible + Vector2i(2 if "--ville" in args else 1, 0))   # la cellule-camp elle-même n'a jamais de village : le camp à côté (à deux cellules d'une ville : la voisine est un quartier)
+			sv.charger_camp({}, cible + Vector2i(2 if mode_ville else 1, 0))   # la cellule-camp elle-même n'a jamais de village : le camp à côté (à deux cellules d'une ville : la voisine est un quartier)
 			var jv: Dictionary = sv.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-			if "--ville" in args:   # on y voyage : la fenêtre se centre sur la ville, ses quartiers se chargent
+			if mode_ville:   # on y voyage : la fenêtre se centre sur la ville, ses quartiers se chargent
 				var n_sub_v: int = sv.monde.taille / 32
 				for cy in n_sub_v:
 					for cx in n_sub_v:
