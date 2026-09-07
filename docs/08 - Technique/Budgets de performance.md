@@ -98,6 +98,9 @@ La stratégie d'optimisation complète, système par système, est consolidée e
 > - **Une fois les initialisations passées, l'image tient** : 14,4 à 15,2 ms de moyenne au zoom de jeu, pire image 22 à 28 ms selon les exécutions.
 > La leçon de méthode : **une mesure qui varie du simple au décuple d'une exécution à l'autre n'est pas du bruit** — c'est un coût de première fois qu'on n'a pas vu. Chercher ce qui se fait une seule fois avant de chercher ce qui se fait à chaque image.
 
+> [!success] Mesuré le 2026-09-07, 17 h 45 — la minimap par le noyau (designer : « réécriture C++ et optimisation », redit)
+> `capture --ville --graine 21 --heure 10 --traverser 24` (sans vsync, 55 images, une traversée de cellule qui découvre des tuiles) : **`max.ui.minimap` 50 ms → 4,1 ms**, cumul `ui.minimap` 21,6 ms sur 55 images. Dans `test_noyau_passes`, la même cellule : GDScript 51,0 ms, C++ 1,90 ms, octets identiques. Ce qui reste des 4 ms est la surcouche des icônes (une boucle sur les vivants, la copie de l'image et son téléversement, sept fois par seconde) — pas une boucle sur les tuiles. Le détail dans [[Modules de la simulation et le C++]] (callout du 2026-09-07, 17 h).
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Boucle de tick]]
 - **Alimente** : [[Optimisation — principes]], [[Entités et pathfinding — performance]], [[Ordre de vérification]]

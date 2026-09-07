@@ -565,6 +565,19 @@ func test_donjon() -> void:
 	verifier(e.sol.size() > tc2 * tc2 / 10 and e.sol.size() < tc2 * tc2 * 3 / 4, "salles et couloirs, avec du plein à creuser (%d tuiles de sol)" % e.sol.size())
 	# Connexité : toutes les salles et les deux escaliers sont atteignables depuis l'arrivée
 	var g := Grille.depuis_etage(e, GameData.config("tile_contents"), GameData.config("combat_rules").deplacement, 1)
+	# Le plein est posé en bloc (2026-09-07) : le même tableau `contenu` qu'une pose tuile par tuile.
+	var g_ref := Grille.new(int(e.largeur), int(e.hauteur))
+	g_ref.contenu_defs = GameData.config("tile_contents")
+	for i in g_ref.largeur * g_ref.hauteur_grille:
+		if not e.sol.has(i):
+			g_ref.poser_contenu(Vector2i(i % g_ref.largeur, i / g_ref.largeur), "roche" if e.get("bord", {}).has(i) else "mur")
+	for i in e.get("meubles", {}).keys():
+		g_ref.poser_contenu(Vector2i(int(i) % g_ref.largeur, int(i) / g_ref.largeur), "meuble")
+	for i in e.get("portes", {}).keys():
+		g_ref.poser_contenu(Vector2i(int(i) % g_ref.largeur, int(i) / g_ref.largeur), "porte_fermee")
+	for i in e.get("lave", {}).keys():
+		g_ref.poser_contenu(Vector2i(int(i) % g_ref.largeur, int(i) / g_ref.largeur), "lave")
+	verifier(g.contenu == g_ref.contenu and g.contenu_ids == g_ref.contenu_ids, "le plein posé en bloc rend le même tableau de contenus qu'une pose tuile par tuile (%d ids)" % g.contenu_ids.size())
 	var atteint := g.atteignables(e.entree, 100000)
 	var manquantes := 0
 	for p in e.pieces:

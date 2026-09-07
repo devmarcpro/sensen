@@ -139,9 +139,16 @@ static func depuis_etage(etage: Dictionary, contenus: Dictionary, regles_dep: Di
 	g.hauteur_oeil = oeil
 	g.hauteurs = etage.hauteurs.duplicate()
 	g.sols = etage.get("sols", {}).duplicate()
+	# Le plein, en bloc : ~3 500 tuiles par étage. `poser_contenu` tuile par tuile relisait le contenu d'avant (vide sur
+	# une grille neuve) et marquait chaque tuile dans `modifies` (« modifiée depuis la construction » — à la construction,
+	# c'était 3 500 entrées de dictionnaire pour rien) : 13,8 ms par étage (2026-09-07).
+	var id_roche := g.id_contenu("roche")
+	var id_mur := g.id_contenu("mur")
+	var sol_e: Dictionary = etage.sol
+	var bord_e: Dictionary = etage.get("bord", {})
 	for i in g.largeur * g.hauteur_grille:
-		if not etage.sol.has(i):
-			g.poser_contenu(Vector2i(i % g.largeur, i / g.largeur), "roche" if etage.get("bord", {}).has(i) else "mur")
+		if not sol_e.has(i):
+			g.contenu[i] = id_roche if bord_e.has(i) else id_mur
 	for i in etage.get("meubles", {}).keys():   # Talents de race : source maudite, autel du rituel
 		var pm := Vector2i(int(i) % g.largeur, int(i) / g.largeur)
 		g.meubles[int(i)] = str(etage.meubles[i])
@@ -302,12 +309,17 @@ func poser_contenu(p: Vector2i, id: String) -> void:
 	var avant: Array = contenu_de(p).get("tags", [])
 	if "liquide" in avant:   # le contenu remplacé (du butin posé sur l'eau) : la tuile reste mouillée (Eau et liquides)
 		poser_eau(idx(p), 8 if "source" in avant else int(niveau_eau.get(idx(p), 1)))
+	contenu[idx(p)] = id_contenu(id)
+	modifies[idx(p)] = true
+
+
+## L'index d'un identifiant de contenu dans `contenu_ids`, ajouté s'il est nouveau.
+func id_contenu(id: String) -> int:
 	var i := contenu_ids.find(id)
 	if i < 0:
 		contenu_ids.append(id)
 		i = contenu_ids.size() - 1
-	contenu[idx(p)] = i
-	modifies[idx(p)] = true
+	return i
 
 
 ## La tuile se nage (Eau et liquides) : tag `nage`, ou niveau d'eau mémorisé sous un contenu posé — hors gel.
