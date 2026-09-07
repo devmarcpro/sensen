@@ -642,6 +642,19 @@ La sonde des villes (monde 9, « Mokroslav ») le signale : la cellule résident
 - **La souris** atteint les tuiles de l'étage quand on y est ; en bas, elle ne monte pas — on monte par l'escalier.
 - **Les parties sauvées avant ce jour** : les PNJ qui « logeaient » à l'étage (point 99) étaient au sol ; ils y restent, leur lit est désormais à l'étage, ils y montent le soir.
 
+## 2026-09-07 — Le niveau de combat baisse quand on progresse (vu au parcours du robot)
+
+Le robot a descendu un étage de la ruine (graine 23) : 3 combats, 55 coups portés, 4 reçus, 2 kills, aucune mort, aucune erreur. Mais son **niveau de combat passe de 4,0 à 2,6** pendant qu'il gagne treize niveaux de compétence et 799 XP.
+
+Ce n'est pas un bug, c'est l'arithmétique de la règle : le niveau de combat est la **moyenne des cinq meilleures** compétences de combat, divisée par le nombre qu'on en possède réellement. Au départ il en a deux (épée 4, encaissement 4) → (4+4)/2 = **4,0**. Après avoir appris trois compétences neuves à 1 et 2 (métal, tranchant, athlétisme) → (4+4+2+2+1)/5 = **2,6**.
+
+Autrement dit : **apprendre quelque chose de nouveau fait baisser son niveau**. Le joueur lit ce nombre sur sa feuille, dans le volet et au HUD, et il paie sa résurrection 20 or × ce niveau — apprendre une compétence rend donc la mort moins chère.
+
+**À trancher** (je ne le fais pas : c'est la progression, et cela déplace un prix) :
+- **Diviser toujours par cinq**, en comptant les compétences manquantes comme zéro. Apprendre ne peut alors que faire monter. Mais un personnage neuf tombe de 4,0 à 1,6, et tous les seuils du jeu qui lisent ce nombre s'en trouvent décalés.
+- **Garder la règle** et l'expliquer à l'écran (« moyenne de tes cinq meilleures »), en acceptant qu'un spécialiste ait un plus haut niveau qu'un polyvalent — ce qui est défendable, mais alors le nombre ne mesure pas la progression.
+- **Prendre le maximum plutôt que la moyenne**, ou la somme divisée par cinq bornée. À toi.
+
 ## 2026-09-07 — L'agriculture et les villes organiques (3 h) : ce que j'ai fait, ce que je te laisse
 
 **À regarder** : les cinq paliers côte à côte dans `captures/agglos/` (pris avec `capture.tscn -- --palier hameau|village|bourg|ville|cite --graine 21 --heure 11`), la minimap de chacune (la forme du tissu et l'anneau du rempart), et une ville de bord de rivière contre une ville de plateau.
