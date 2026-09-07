@@ -17,6 +17,10 @@ static var _cache: Dictionary = {}   # dossier → {"n": int, "image": Image, "t
 ## fois qu'un villageois montre son visage. Fait ici, pendant l'écran de chargement, c'est du temps qu'on avait déjà.
 ## Rend le nombre de dossiers assemblés (la sonde et les tests le lisent).
 static func prechauffer() -> int:
+	# La PREMIÈRE texture créée dans le processus paie l'initialisation du pipeline de rendu : 180 à 230 ms, mesurés
+	# (2026-09-07). Sans ce réveil, c'est la carte de lumière qui la payait, en pleine partie, à la première image
+	# éclairée. Quatre pixels suffisent à la provoquer ici, pendant qu'il n'y a rien à l'écran.
+	var _reveil := ImageTexture.create_from_image(Image.create_empty(4, 4, false, Image.FORMAT_RGB8))
 	var n := 0
 	for racine: String in ["membres", "visage", "objets"]:
 		var dir := DirAccess.open(chemin(racine))

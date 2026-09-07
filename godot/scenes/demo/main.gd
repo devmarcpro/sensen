@@ -120,7 +120,12 @@ var tour_hud := 0
 
 
 func _top_client(cle: String, t0: int) -> int:
-	chrono[cle] = float(chrono.get(cle, 0.0)) + float(Time.get_ticks_usec() - t0) / 1000.0
+	var dt := float(Time.get_ticks_usec() - t0) / 1000.0
+	chrono[cle] = float(chrono.get(cle, 0.0)) + dt
+	# Le PIRE de chaque étape, pas seulement son total (2026-09-07) : une saccade est une étape qui a coûté cher
+	# UNE fois, et un cumul divisé par le nombre d'images la noie. C'est ce qui dit ce qu'il y a dans la pire image.
+	if dt > float(chrono.get("max." + cle, 0.0)):
+		chrono["max." + cle] = dt
 	return Time.get_ticks_usec()
 var volet: VoletLateral           # le volet latéral : monde, personnage, compagnons, journal, inventaire (designer 2026-09-04)
 var volet_visible := true
@@ -995,7 +1000,9 @@ func _maj_lumiere() -> void:
 		data = g.carte_lumiere(ciel, locale, teinte, force, dir, pente, int(sol.get("ombre_portee_max_tuiles", 8)), NIVEAU_BLOCS * BLOC_UNITES, ombre_portee, coin, taille)
 		_top_client("lumiere.carte", t_k)
 		chrono["n.lumiere"] = float(chrono.get("n.lumiere", 0.0)) + 1.0
+		var t_dup := Time.get_ticks_usec()
 		_locale_derniere = locale.duplicate()
+		_top_client("lumiere.copie", t_dup)
 		_lumiere_centre = j.pos if not j.is_empty() else Vector2i(-9999, -9999)
 	if data.size() != n * 3:   # une arène, ou rien à éclairer : tout à 1
 		_lumiere_img = null
@@ -1004,21 +1011,27 @@ func _maj_lumiere() -> void:
 		for v in noeuds_vegetaux.values():
 			v.modulate = v.get_meta("voile", Color.WHITE)
 		return
+	var t_im := Time.get_ticks_usec()
 	var img := Image.create_from_data(g.largeur, g.hauteur_grille, false, Image.FORMAT_RGB8, data)
+	t_im = _top_client("lumiere.image", t_im)
 	if _lumiere_tex == null or _lumiere_img == null or _lumiere_img.get_size() != img.get_size():
 		_lumiere_tex = ImageTexture.create_from_image(img)
 	else:
 		_lumiere_tex.update(img)
 	_lumiere_img = img
+	t_im = _top_client("lumiere.texture", t_im)
 	var dec := Vector2(g.origine - origine_dessin)
 	for m in _materiaux_grain:
 		m.set_shader_parameter("lumiere_tex", _lumiere_tex)
 		m.set_shader_parameter("lumiere_taille", Vector2(g.largeur, g.hauteur_grille))
 		m.set_shader_parameter("lumiere_decalage", dec)
 		m.set_shader_parameter("lumiere_active", 1.0)
+	t_im = _top_client("lumiere.shader", t_im)
 	for idx in noeuds_vegetaux.keys():
 		var v: Node2D = noeuds_vegetaux[idx]
 		v.modulate = _lumiere_tuile(g.pos_de(int(idx))) * v.get_meta("voile", Color.WHITE)
+	chrono["n.vegetaux"] = float(noeuds_vegetaux.size())
+	_top_client("lumiere.vegetaux", t_im)
 
 
 ## La lumière d'une tuile telle que la texture la porte (blanc sans texture ou hors de la grille).

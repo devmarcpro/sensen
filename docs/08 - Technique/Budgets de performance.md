@@ -91,6 +91,13 @@ La stratégie d'optimisation complète, système par système, est consolidée e
 > `Planches.prechauffer()` assemble les trois racines (`membres`, `visage`, `objets`) et crée leurs textures dans le `_ready` du client : **236 ms une fois au lancement** — du temps mort qu'on avait déjà — au lieu de millisecondes semées au hasard pendant le jeu. Un paperdoll redessiné passe de 0,4-3,7 ms à **0,12 ms**.
 > Où en est le budget d'image dans une cité de 247 habitants (graine 21, midi, sans vsync) : **15,2 ms de moyenne au zoom de jeu (2,0)**, 17,2 à 1,0, 23,2 à 0,45 — la pire image reste à 28 ms. Le budget (16 ms) tient en moyenne au zoom où l'on joue, pas aux zooms de survol, et la pire image le dépasse encore : ce qui reste à regarder, c'est le recalcul de la carte de lumière et les morceaux de terrain qu'un changement de tuile fait redessiner.
 
+> [!success] Outillé le 2026-09-07, 10 h — le chrono du client garde le PIRE de chaque étape, et ce qu'il a montré
+> Un cumul divisé par le nombre d'images noie les saccades : une étape qui coûte cent millisecondes **une fois** disparaît dans la moyenne. `_top_client` garde désormais `max.<étape>` à côté du cumul, et la capture les imprime. Ce que cela a montré tout de suite, dans une cité de 247 habitants :
+> - **`max.lumiere` de 10 à 263 ms selon les exécutions**, pour le même scénario. Ce n'était pas la lumière : c'était la **première texture créée du processus**, qui paie l'initialisation du pipeline de rendu (180 à 230 ms). Selon l'ordre des choses, elle tombait sur les planches ou sur la carte de lumière. `Planches.prechauffer()` crée maintenant une texture de quatre pixels avant tout le reste, pour que ce réveil ait lieu quand il n'y a rien à l'écran.
+> - **`max.ui.minimap` ≈ 50 ms** au premier tracé, puis ~2 ms toutes les 0,15 s : la minimap redessine ses 4 096 tuiles dès que le compte des tuiles découvertes change, et téléverse sa texture à chaque rafraîchissement. C'est le prix d'une minimap qui suit le brouillard ; à revoir si le budget se resserre (ne redessiner que les tuiles nouvellement découvertes).
+> - **Une fois les initialisations passées, l'image tient** : 14,4 à 15,2 ms de moyenne au zoom de jeu, pire image 22 à 28 ms selon les exécutions.
+> La leçon de méthode : **une mesure qui varie du simple au décuple d'une exécution à l'autre n'est pas du bruit** — c'est un coût de première fois qu'on n'a pas vu. Chercher ce qui se fait une seule fois avant de chercher ce qui se fait à chaque image.
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Boucle de tick]]
 - **Alimente** : [[Optimisation — principes]], [[Entités et pathfinding — performance]], [[Ordre de vérification]]
