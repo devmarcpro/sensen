@@ -53,11 +53,12 @@ jobs:
           corps="$(git for-each-ref --format='%(contents)' "refs/tags/$tag")"
           [ -n "$corps" ] || corps="$(git log -1 --pretty=%B "$tag")"
           case "$tag" in
-            *alpha*|*beta*|*rc*) pre="--prerelease" ;;
-            *)                   pre="--latest" ;;
+            *alpha*|*beta*|*rc*) pre="--prerelease"; preedit="--prerelease=true" ;;
+            *)                   pre="--latest";     preedit="--prerelease=false" ;;
           esac
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "pre=$pre" >> "$GITHUB_OUTPUT"
+          echo "preedit=$preedit" >> "$GITHUB_OUTPUT"
           { echo "corps<<FIN"; echo "$corps"; echo "FIN"; } >> "$GITHUB_OUTPUT"
 
       - name: Godot et ses gabarits d'export
@@ -89,13 +90,15 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.etiquette.outputs.tag }}
           PRE: ${{ steps.etiquette.outputs.pre }}
+          PREEDIT: ${{ steps.etiquette.outputs.preedit }}
           CORPS: ${{ steps.etiquette.outputs.corps }}
         run: |
           set -euo pipefail
           printf '%s\n' "$CORPS" > notes.md
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "l'annonce de $TAG existe deja : on remet son corps et son binaire"
-            gh release edit "$TAG" --notes-file notes.md
+            echo "l'annonce de $TAG existe deja : on remet son corps, son etat et son binaire"
+            # Supprimer l'etiquette d'une annonce publiee la fait retomber en BROUILLON : on la republie.
+            gh release edit "$TAG" --notes-file notes.md --draft=false $PREEDIT
             gh release upload "$TAG" "Sensen-$TAG-win64.zip" --clobber
             exit 0
           fi
