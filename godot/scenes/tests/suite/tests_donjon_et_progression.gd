@@ -55,6 +55,52 @@ func test_veines_de_mine() -> void:
 	var avant := v_fond.duplicate()
 	SimLieux.charger_donjon(s, "ruine", s.graine, Mine.id_de(s.graine, cell), cible, j)
 	verifier(compter.call() == avant, "la même galerie retrouve ses veines")
+	# Le minerai doit ATTERRIR : creuser un mur de veine avec le bon outil rend sa matière, et le palier d'un
+	# matériau de fond exige un meilleur outil qu'une pioche de départ (Récolte, paliers de matériau).
+	j = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	# Le joueur arrive au milieu d'une chambre de trois sur trois : le premier mur est à deux pas, pas à un.
+	var mur := Vector2i(-1, -1)
+	for r_m in range(1, 4):
+		if mur != Vector2i(-1, -1):
+			break
+		for dy_m in range(-r_m, r_m + 1):
+			for dx_m in range(-r_m, r_m + 1):
+				var q_m: Vector2i = j.pos + Vector2i(dx_m, dy_m)
+				if s.grille.dans(q_m) and "destructible" in s.grille.contenu_de(q_m).get("tags", []):
+					mur = q_m
+					break
+			if mur != Vector2i(-1, -1):
+				break
+	verifier(mur != Vector2i(-1, -1), "un mur dans la chambre d'arrivée de la mine")
+	if mur == Vector2i(-1, -1):
+		return
+	for d_p in Grille.DIRS:   # on se met à portée de bras du mur
+		var q_p: Vector2i = mur + d_p
+		if s.grille.dans(q_p) and not s.grille.bloque_passage(q_p) and s.grille.occupant(q_p).is_empty():
+			s.grille.liberer(j.pos)
+			j.pos = q_p
+			s.grille.placer(j.id, q_p)
+			break
+	s.grille.materiaux[s.grille.idx(mur)] = "cuivre"   # une veine de palier 1, à portée
+	var pioche := s.generer_objet("proto_pioche", 1, {}, "commun", 0)
+	if not pioche.is_empty():
+		j.sac.append(pioche.uid)
+		SimObjets._equiper(s, j, str(pioche.uid), s.horloge_monde.ticks)
+	var avant_cuivre := 0
+	for uid_c in j.sac:
+		if str(s.items.get(uid_c, {}).get("materiau", "")) == "cuivre":
+			avant_cuivre += int(s.items[uid_c].get("quantite", 1))
+	var essais_c := 0
+	while essais_c < 30 and s.grille.dans(mur) and "destructible" in s.grille.contenu_de(mur).get("tags", []):
+		essais_c += 1
+		s.attente[j.id] = true
+		s.intention(j.id, {"type": "creuser", "vers": mur})
+		s.horloge_monde.avancer(200)
+	var apres_cuivre := 0
+	for uid_c in j.sac:
+		if str(s.items.get(uid_c, {}).get("materiau", "")) == "cuivre":
+			apres_cuivre += int(s.items[uid_c].get("quantite", 1))
+	verifier(apres_cuivre > avant_cuivre, "la veine creusée rend son cuivre (%d → %d)" % [avant_cuivre, apres_cuivre])
 
 
 func test_camp() -> void:
