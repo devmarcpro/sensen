@@ -82,9 +82,41 @@ jamais s'ajouter à côté. Sinon on obtient six vérités qui se contredisent, 
 >
 > **Ce que le champ apporte en plus, sans une ligne de règle** : une pièce fermée garde sa chaleur (l'**isolation** du matériau freine l'échange — une paroi isolante retient, un métal donne), un corps souffre de l'air lui-même au-delà de 70 °C ou sous −12 °C (le feu et la lave gardent leur brûlure **au contact** : pas de double comptage), et le vent n'est pas perdu — il **attise la source** au lieu de doubler un tirage.
 >
-> **Une promesse de cette note que le code ne tient pas encore** (relevé le 2026-09-08) : le callout du haut annonce une diffusion « pondérée par `isolation` (ce qui retient) et `densite` (ce qui met du temps à changer) ». **Le champ codé ne lit que `isolation`** (`sim_terrain.gd`, la ligne du coefficient) : l'inertie thermique de la matière dense n'existe pas. À faire avec la stat `fusion`, quand la chaleur reprendra du service — ou à retirer de la promesse.
+> **La promesse est tenue depuis le 2026-09-08 au soir — sur une question du designer** (« est-ce qu'on a l'inertie ? c'est prévu ? »). Elle ne l'était pas : le callout annonçait une diffusion pondérée par `isolation` **et** `densite`, et le champ ne lisait que la première. Pire, je l'avais relevé le matin même sans le mettre en file — une promesse non tenue **et** non listée finit oubliée.
+> **Ce qui est codé** : le facteur d'inertie vaut `2 × inertie_ref / (inertie_ref + densite)`, donc **1 pile à la densité de référence** — le calage du matin reste intact — et la matière se différencie autour : balsa ×1,78, pin ×1,33, fer ×1,00, granit ×0,67, plomb ×0,62. Une matière dense met du temps à changer de température, une matière légère suit tout de suite. **Ce que ça donne** : un mur de pierre se réchauffe lentement et garde sa chaleur longtemps, une cloison de bois léger suit la pièce — la cave reste fraîche l'été, la forge devient invivable. Le test du feu reste vert, le voisin s'enflammant à 221 °C.
+> **Ce qui manque encore à la matière**, et c'est écrit pour ne pas l'oublier une seconde fois : `fusion`, sans quoi la chaleur ne sait toujours que **brûler** — rien ne fond, ne cuit, ne vitrifie.
 >
 > **Ce que ce champ n'absorbe PAS encore**, et il faut le dire pour ne pas mentir : la neige et le gel restent des **drapeaux de grille** (`grille.neige`, `grille.gel`) posés par la météo, pas des lectures du champ ; la température ressentie de la météo reste sa propre fonction ; le gaz inflammable garde sa règle d'allumage. Ces trois-là tomberont quand la matière saura **fondre** — c'est-à-dire avec la stat `fusion` de [[Matériaux — 13 stats]], qui n'existe pas encore.
+
+
+> [!decision] Décidé le 2026-09-08, 13 h — un module de sort est une **modulation d'une règle du monde**, jamais un effet à lui (designer : « les modules de sort vont être totalement refaits de 0, ce serait des modulations des règles du monde. Donc oui on a besoin de l'inertie — par exemple un sort qui jette un rocher droit devant »)
+> **C'est la phrase qui manquait à tout ce qui précède.** La décision du matin disait *ce qui meurt* (les 236 contenus) et *ce qui survit* (la grammaire). Celle-ci dit **ce que devient un module** : il ne produit plus d'effet, il **tourne un bouton d'une règle qui existe déjà**. Un noyau de feu ne « fait pas 3d6 de feu » — il **verse des degrés** dans le champ de chaleur, et l'herbe s'enflamme, la neige fond, le grisou explose, la bête panique, sans qu'aucune de ces lignes soit écrite. Un noyau de projection ne « pousse pas de 3 cases » — il **lance un corps à une vitesse**, et le monde décide du reste.
+>
+> **Ce que ça retourne dans l'ordre du chantier, et c'est important** : la réécriture des contenus ne peut pas précéder les règles qu'ils modulent. **On ne module que ce qui existe.** Chaque champ manquant est donc un module qu'on ne pourra pas écrire — ce qui confirme l'ordre du designer (« les champs d'abord »), mais en durcit la raison : ce n'est plus seulement une question de filet de tests, c'est que **le vocabulaire des sorts est fait de règles du monde**.
+>
+> **L'inertie devient obligatoire, et ce n'est pas celle qu'on venait de coder.** L'inertie *thermique* (la masse qui met du temps à changer de température) a été codée le jour même. Celle qu'appelle « un sort qui jette un rocher droit devant » est **l'inertie mécanique** : un corps en mouvement a une **masse** et une **quantité de mouvement**, et il la transmet.
+> **Ce qui existe aujourd'hui, et qui ne suffit pas** : un projectile est une **ligne de Bresenham résolue d'un coup** ([[Décision — Projectiles]], 2026-08-26) — la trajectoire est tracée, la cible est touchée, fin. Rien ne **voyage**, rien n'a de masse, rien ne continue.
+> **Ce qu'il faut** : un corps lancé qui traverse les tuiles au fil des ticks, avec `masse × vitesse` comme seule donnée partagée. Ce que plusieurs systèmes en liraient : les **dégâts** (un rocher lent qui pèse fait autre chose qu'une flèche rapide qui ne pèse rien), le **recul** (le léger part, le lourd encaisse), la **destruction du terrain** (un rocher casse un mur, une flèche s'y plante), le **champ de bruit** (un impact s'entend), le **support** (ce qui vole retombe), et la **grammaire des sorts** (« lancer » devient un noyau, plus un effet). Et la donnée d'entrée existe déjà : `Regles` calcule le **poids** d'un objet à partir de la `densite` de sa matière et de son volume.
+>
+> **Trois sources, une seule règle** (précisé par le designer le 2026-09-08 : « l'inertie c'est aussi pouvoir monter à l'étage et faire tomber un rocher de l'étage sur un ennemi en dessous pour l'écraser, écraser quelqu'un avec un camion »). Ce n'est pas trois mécaniques, c'est **la même donnée avec trois origines** : `masse × vitesse`, qu'elle vienne d'un **bras** (le rocher lancé), de la **hauteur** (le rocher lâché d'un étage) ou d'un **moteur** (la calèche, le train). Une masse en mouvement transmet son énergie à ce qu'elle touche — un point.
+>
+> **Ce qui existe déjà, et c'est plus qu'on ne croit** :
+> - **La chute blesse** — `Simulation` applique `Grille.degats_chute`, et le **sol qui reçoit amortit** selon son `elasticite` (tomber sur de la tourbe n'est pas tomber sur du granit).
+> - **Les couches Z, les escaliers et les étages** sont codés depuis le 2026-09-06.
+> - **Les véhicules existent** : `creatures/vehicule/caleche.json` et `train.json`, avec leur propre IA d'itinéraire.
+> - **Le poids d'un objet** est déjà calculé par `Regles` depuis la `densite` de sa matière et son volume.
+>
+> **Ce qui manque exactement, et c'est peu de choses pour beaucoup d'effet** :
+> - **`degats_chute` ne connaît que la HAUTEUR** : `(niveaux − franchise) × dégâts_par_niveau`. Un caillou et un bloc de granit font le même mal. **La masse n'entre nulle part.**
+> - **Une chute ne blesse QUE celui qui tombe.** Rien ne regarde ce qu'il y a **en dessous** : lâcher un rocher d'un étage sur un ennemi ne lui fait rien du tout, et c'est précisément l'exemple du designer.
+> - **Un véhicule ne heurte personne** : son IA suit un itinéraire, aucune règle ne dit ce qui arrive à qui se trouve sur son passage.
+>
+> **Ce que la règle unique absorberait** (et c'est la condition, comme toujours) : les dégâts de chute deviennent *la masse qui rencontre le sol*, le projectile cesse d'être une ligne résolue d'un coup, l'éboulement du champ de support devient *une masse qui tombe* au lieu d'une règle à part, et le véhicule reçoit sa collision **sans qu'on l'écrive**. Quatre règles, une donnée.
+>
+> **Ce qui n'est PAS à moi et doit être tranché avant de coder** :
+> - **Le grain de la vitesse.** Une grille à ticks n'a pas de vélocité continue : un corps avance de N tuiles par tick, ou d'une tuile toutes les N ticks. Combien de crans veut-on entre « la flèche » et « le rocher » ?
+> - **Jusqu'où va le recul.** Un corps poussé pousse-t-il à son tour ce qu'il heurte (chaîne de collisions), ou s'arrête-t-il au premier obstacle ?
+> - **Est-ce que le joueur lui-même est un corps ?** Une charge a-t-elle un élan qui l'emporte au-delà de sa cible, un personnage lourd met-il un tick de plus à changer de direction ? C'est la question que j'avais posée et qui reste ouverte : **l'inertie du déplacement** est un autre chantier que celle des projectiles, et beaucoup plus intrusif.
 
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Matériaux — 13 stats]], [[Application des stats de matériau]], [[Grille continue]]

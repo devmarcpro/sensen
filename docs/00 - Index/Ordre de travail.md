@@ -150,6 +150,8 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
 **Ce n'est donc pas un chantier, c'est cinq chantiers appariés.** Et après le palier 2, ce sont quatre chemins
 **parallèles**, pas une chaîne.
 
+22 bis. ~~**L'inertie thermique**~~ — **FAIT le 2026-09-08, sur une question du designer.** Le champ de chaleur ne lisait que `isolation` alors que la note promettait aussi `densite` (la masse thermique). Corrigé : une matière dense met du temps à changer de température. *Leçon de méthode : la promesse était relevée dans la note du matin mais absente de cette file — c'est la question du designer qui l'a rattrapée, pas moi.*
+
 23. **`fusion`** — la seule des cinq dont le consommateur existe déjà. Elle **finit** le champ de chaleur : la neige
     fond, l'eau gèle, la cire coule, le sable vitrifie, le minerai devient lingot. C'est aussi elle qui permettra à la
     chaleur d'absorber enfin la neige, le gel et la température ressentie.
@@ -174,7 +176,25 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     40 références, plus **57 capacités écrites en dur dans les 19 fiches de classe**.
     Techniquement, aucun champ ne bloque cette suppression : **c'est une décision d'ordre du designer, pas une
     dépendance** — et elle est bonne, parce qu'elle garde le filet levé pendant la partie risquée.
+27 bis. **Les corps en mouvement ont une masse et une quantité de mouvement** — *décidé le 2026-09-08 : « les modules
+    seraient des modulations des règles du monde. Donc oui on a besoin de l'inertie — par exemple un sort qui jette un
+    rocher droit devant ».* **Aujourd'hui un projectile est une ligne de Bresenham résolue d'un coup** : rien ne voyage,
+    rien n'a de masse. Il faut un corps lancé qui traverse les tuiles au fil des ticks, avec `masse × vitesse` comme
+    donnée partagée — lue par les dégâts, le recul, la destruction du terrain, le champ de bruit et le support.
+    La donnée d'entrée existe : `Regles` calcule déjà le poids d'un objet depuis la `densite` de sa matière.
+    **Trois sources, une seule règle** (précisé le 2026-09-08) : la même `masse × vitesse` qu'elle vienne d'un bras,
+    d'une hauteur ou d'un moteur. Ce qui manque est étroit : `degats_chute` ne connaît que la **hauteur** (un
+    caillou et un bloc de granit font le même mal), une chute ne blesse **que celui qui tombe** — lâcher un
+    rocher sur un ennemi d'un étage plus bas ne lui fait rien —, et un véhicule (`caleche`, `train`, codés) ne
+    heurte personne. La règle unique **absorberait** les dégâts de chute, la ligne de projectile, l'éboulement du
+    champ de support et donne au véhicule sa collision gratuitement : quatre règles, une donnée.
+    **C'est un préalable à la ligne 28** : on ne module que ce qui existe, et « lancer » doit être une règle du
+    monde avant d'être un noyau de sort. **Trois arbitrages appartiennent au designer** avant de coder — le grain de la
+    vitesse sur une grille à ticks, la propagation du recul, et si le joueur lui-même est un corps avec un élan.
+
 28. **Réécrire les contenus sur les champs** : un noyau de feu dira `{chaleur: 400}` et le reste suivra seul.
+    **Reformulé le 2026-09-08** : un module ne produit plus d'effet, il **tourne un bouton d'une règle du monde**.
+    Conséquence directe : **chaque champ manquant est un module qu'on ne pourra pas écrire.**
     **Ce palier dissout deux lignes plus bas** : les 23 sorts qui ne produisent rien disparaissent entièrement, et la
     moitié « données » du sort au contact gratuit avec eux.
 
@@ -197,34 +217,28 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
 
 ## Palier 8 — les nombres cessent de mentir
 
-32 bis. **L'équipement d'un PNJ vient du stock de sa ville** — *validé le 2026-09-08 sur un avis extérieur, voir
-    [[Vers la production]] ligne 149.* **Le fait vérifié** : `creatures/civil/garde_village.json` porte
-    `equipement: ["craft_epee", "craft_bouclier", "craft_casque", "craft_cuirasse"]`, et la matière de cette épée est
-    tirée d'un **pool par famille et par profondeur** (`SimObjets._tirer_materiau`) qui **ne regarde jamais** ce que la
-    ville possède : un garde sort en acier dans un village qui n'a pas vu un lingot de fer depuis six mois.
-    **Ce qu'il faut, si la vérification le confirme** : une simple **pondération** du pool par les stocks de la ville —
-    un lecteur de plus sur un champ qui existe, pas un système. La chaîne logistique derrière est déjà codée (mines,
-    caravanes, guerres qui les coupent) : si la mine tombe ou la caravane est pillée, les prochains gardes portent du
-    cuir et du bois **sans qu'on l'ait écrit**.
-    **Réserve honnête, en cours de levée** : tout dépend de ce qu'un village PNJ stocke réellement. S'il ne tient que
-    des denrées et aucune matière d'armurerie, ce n'est plus une pondération mais un stock à inventer — donc un
-    chantier bien plus lourd, à re-arbitrer. Trois agents attaquent la conception au moment où ces lignes sont écrites.
-
-
-**Trois lignes écrivent dans le même fichier de règles** : à faire ensemble, une seule relecture.
-
-33. **Le sort au contact qui ne coûte ni tick ni mana.** La règle est dans la **grammaire** que le designer garde :
-    elle survivra à la purge et ressuscitera au premier noyau d'arme réécrit. À corriger là, pas dans les données.
-34. **Le mana qui se régénère 160 fois plus lentement que la vigueur.** Le chiffre juste dépend du nouveau tarif des
-    sorts : **après** le palier 6, pas avant.
-35. **L'équilibrage jamais corrigé.** *Correction importante* : « légendaire » et « mythique » ne sont pas
-    inatteignables à cause de la table des paliers — c'est le **plafond de qualité d'artisanat** qui borne le produit
-    juste sous le seuil. Monter les seuils de la table, le réflexe, ne changerait rien.
-    Le palier de matière plat après le niveau 14 est **bloqué par le palier 2** (il faut écrire des matériaux).
-36. **L'XP d'armure — et ce n'est pas « deux fichiers de compétence manquants ».** La fonction qui associe une
-    compétence à une stat renvoie « volonté » pour toute clé inconnue — la porte de sortie prévue pour les modules — et
-    la compétence est créée sans broncher. **Une robe entraîne donc silencieusement la Volonté et fabrique une
-    compétence fantôme comptée dans le niveau de combat.** La tautologie du test est ce qui a permis à ça de vivre.
+32 bis. **L'équipement d'un PNJ et le stock de sa ville** — **RÉFUTÉ le 2026-09-08 sous la forme annoncée**, par trois
+    sceptiques indépendants qui convergent. Ce qui a été vérifié à la main derrière eux :
+    - **Le stock est vide à l'instant précis où un garde reçoit son épée.** `creer_territoire` pose `stocks: {}` et la
+      boucle des PNJ suit **immédiatement**, dans la même fonction. Pondérer par un dictionnaire vide = facteur 1
+      partout = la distribution d'aujourd'hui, au bit près.
+    - **Il n'y a pas de « prochains gardes ».** Le repeuplement engendre des `villageois` (équipement vide), et un garde
+      vivant n'est **jamais ré-équipé** : son kit est tiré une fois, puis sauvegardé. La boucle de rétroaction promise
+      n'a **aucun client**.
+    - **« Du cuir et du bois » est hors d'atteinte** : `chene` est **palier 3**, donc écarté du tirage à niveau 1 ;
+      `fer` est **palier 2**, donc déjà plafonné. Une pondération multiplicative ne peut pas ressusciter une clé
+      absente. Il faudrait changer la règle des paliers **pour tout le jeu, donjons compris** — autre décision.
+    **Ce qui survit, et qui est vrai** :
+    - **Le marchand itinérant et le stock d'échoppe**, eux, lisent une ville dont les stocks sont **remplis** : c'est là
+      qu'une ville appauvrie deviendrait visible sans inventer une seule donnée. *Petit, et ça marche.*
+    - **À l'engendrement, lire le PÉRIMÈTRE et non le stock** : `per.dominant` est renseigné **avant** la boucle des
+      PNJ. Résultat honnête : « un garde d'un village posé sur un filon de cuivre porte du cuivre » — de la
+      **géologie**, pas de l'économie. Et le seul écart visible dans la palette est le cuivre (orange) et le laiton
+      (doré) contre cinq gris : le paperdoll ne peint que la pièce maîtresse.
+    **À trancher par le designer** : faut-il une **relève de garnison** (un repeuplement qui puisse rendre un garde) ?
+    Sans elle, rien de ce qui précède ne peut mordre sur les gardes.
+    *Leçon de méthode : cette vérification a coûté six agents et évité d'écrire une fonctionnalité qui n'aurait rien
+    changé à l'écran. C'est exactement ce à quoi sert la réfutation avant de coder.*
 
 ## Palier 9 — le jeu montre ce qu'il sait
 

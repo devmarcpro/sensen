@@ -473,6 +473,7 @@ static func _tiquer_chaleur(sim: Simulation, tick: int) -> void:
 	var iso_ref := float(cfg.get("isolation_ref", 45.0))
 	var retour := float(cfg.get("retour_ambiante", 0.035))
 	var eps := float(cfg.get("epsilon", 1.5))
+	var inertie_ref := float(cfg.get("inertie_ref", 8.0))
 	var etendre := sim.chaleur_active.size() < int(cfg.get("actives_max", 4096))
 	var mats: Dictionary = GameData.catalogues.materials
 	var a_traiter := {}
@@ -503,12 +504,19 @@ static func _tiquer_chaleur(sim: Simulation, tick: int) -> void:
 		var cur := float(sim.carte_chaleur[i])
 		var v := cur
 		if n_v > 0:
-			# L'isolation de la matière freine l'échange : une paroi isolante garde sa chaleur, un métal la donne.
+			# Deux propriétés de la matière, et deux seulement. L'ISOLATION freine l'échange : une paroi isolante garde
+			# sa chaleur, un métal la donne. La DENSITÉ est la masse thermique : une matière dense met du temps à
+			# changer de température, une matière légère suit tout de suite. Le facteur d'inertie vaut 1 pile à la
+			# densité de référence, ce qui laisse le calage du 2026-09-08 intact ; le pin (densité 4) chauffe plus vite
+			# qu'avant, le granit (16) et le fer (8) plus lentement.
 			var mat := str(sim.grille.materiau_de(t))
 			if mat.is_empty():
 				mat = str(sim.grille.materiau_sol(t))
-			var iso := float(mats.get(mat, {}).get("stats", {}).get("isolation", 0.0))
-			v += diff * (iso_ref / maxf(1.0, iso_ref + iso)) * (somme / float(n_v) - cur)
+			var st: Dictionary = mats.get(mat, {}).get("stats", {})
+			var iso := float(st.get("isolation", 0.0))
+			var dens := float(st.get("densite", inertie_ref))
+			var inertie := clampf(2.0 * inertie_ref / maxf(0.1, inertie_ref + dens), 0.25, 2.0)
+			v += diff * (iso_ref / maxf(1.0, iso_ref + iso)) * inertie * (somme / float(n_v) - cur)
 		v += retour * (amb - v)
 		neuf[i] = v
 	for i in neuf.keys():

@@ -40,6 +40,23 @@ Les règles générales du combat : pas de jet de toucher, la géométrie décid
 > « on voit sur les captures que la portée n'est pas bonne, ça ne devrait pas être un carré ». C'était exact et visible : la zone verte formait un carré parfait alors que l'aperçu dessinait, juste à côté, un **anneau rond**. La cause : `Grille.distance` est une distance de Tchebychev (le maximum des deux écarts), et une boule de Tchebychev **est** un carré. Elle reste la mesure du **contact et du déplacement** — deux cases en diagonale sont bien voisines. Mais la **portée d'une capacité** se mesure désormais en **distance euclidienne arrondie** (`Grille.portee_entre`) : à portée 6, une cible en diagonale est à 8 cases de vol d'oiseau, donc hors de portée — ce que le carré autorisait. Le disque est ce que l'anneau de l'aperçu promettait depuis le début.
 
 
+
+> [!important] Décidé le 2026-09-08, 14 h — **chaque membre est simulé** : un personnage cesse d'être une entité avec une barre de vie (designer : « on va faire en sorte que les personnages ne soient pas juste une entité avec une barre de vie mais que chaque membre soit simulé »)
+> **La bonne nouvelle d'abord : la géométrie existe déjà, ce sont les conséquences qui manquent.** Le dépôt porte cinq zones (`tete` ×2,5, `torse` ×1,0, `bras`, `jambes` ×0,8, `pieds`) avec leur table de répartition moyenne, une **armure par pièce** (dureté composite × qualité × matrice construction/type de dégâts), un squelette (`skeleton_template`) et un paperdoll par emplacement.
+> **Ce qui n'existe pas** :
+> - **Un membre n'a pas d'état.** Tous les dégâts tombent dans un seul `sante`. Aucune blessure, aucune fracture, aucune perte de fonction.
+> - **La zone frappée n'est pas choisie** : elle est décidée par le seul **dénivelé** — l'attaquant plus haut frappe la tête, à égalité le torse, plus bas les jambes. Conséquence directe et jamais relevée : **`bras` et `pieds` ne sont jamais touchés** par un coup ordinaire, alors qu'ils figurent dans la table des moyennes.
+> - Donc la zone ne sert aujourd'hui qu'à **multiplier un nombre**. C'est exactement « une entité avec une barre de vie ».
+>
+> **Ce que la simulation par membre ferait émerger** (et pourquoi c'est une règle du monde, pas une mécanique de combat) : un bras brisé qui empêche l'arme à deux mains, une jambe qui double le coût de déplacement, une main qui lâche ce qu'elle tient, une hémorragie qui tue après le combat si on ne la soigne pas, un ennemi qui **fuit parce qu'il est estropié** et non parce qu'un seuil de PV est passé. Et surtout : **la médecine, l'infirmité durable et le temps de convalescence** deviennent du jeu.
+>
+> **Ce que ça touche, et il faut le dire avant de commencer** : `degats_finaux` et `_appliquer_degats` sont le cœur le plus chaud du code, l'IA décide sur des considérations qui liraient l'état des membres, le HUD et le paperdoll doivent le montrer, et **la suite entière suppose une seule jauge de santé**. C'est un chantier lourd — mais il se raccorde à deux décisions déjà prises : un **module de sort devient une modulation d'une règle du monde** (donc « viser un membre » est une règle, pas un effet), et la **quantité de mouvement** qui écrase (un rocher qui tombe brise un os plutôt que de retirer des points).
+>
+> **Trois questions qui ne sont pas à moi** :
+> - **Quel grain ?** Une intégrité par zone (0-100), ou des blessures nommées qu'on accumule (entaille, fracture, brûlure, hémorragie) ?
+> - **Jusqu'où va l'irréversible ?** Un membre peut-il être perdu pour de bon — et le joueur peut-il finir manchot pour le reste de la partie ?
+> - **Est-ce que ça vaut pour tout le monde ?** Les cinq zones humanoïdes ne vont ni à un loup, ni à un essaim, ni à une calèche. Faut-il des silhouettes par squelette (`silhouette: humanoide` existe déjà sur la fiche de créature) ?
+
 ## Liens
 - **Dépend de** : [[Action-time à ticks]], [[Grille continue]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[Zones de coup par dénivelé]], [[Garde en posture]], [[Attaque lourde et télégraphe]], [[XP de combat]], [[Pipeline de résolution du combat]]
