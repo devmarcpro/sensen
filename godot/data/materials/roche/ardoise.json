@@ -1,7 +1,6 @@
 {
   "name_key": "material.ardoise.name",
   "category": "roche",
-  "palier": 2,
   "stats": {
     "durete": 12,
     "densite": 14,
@@ -38,6 +37,7 @@
     "eau": 0.3
   },
   "composition": null,
+  "palier": 2,
   "stats_base": {
     "durete": 14,
     "valeur_base": 4,

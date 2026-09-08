@@ -1,7 +1,6 @@
 {
   "name_key": "material.os_fossile.name",
   "category": "fossile",
-  "palier": 1,
   "stats": {
     "durete": 6,
     "densite": 9,
@@ -38,6 +37,7 @@
     "terre": 0.6
   },
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 10,
     "valeur_base": 15,

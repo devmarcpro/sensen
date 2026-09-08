@@ -1,7 +1,6 @@
 {
   "name_key": "material.palladium.name",
   "category": "metal",
-  "palier": 4,
   "stats": {
     "durete": 30,
     "densite": 12,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 16,
     "valeur_base": 44,

@@ -1,7 +1,6 @@
 {
   "name_key": "material.bois_calcine.name",
   "category": "bois",
-  "palier": 1,
   "stats": {
     "durete": 3,
     "densite": 4,
@@ -40,6 +39,7 @@
     "bois": 0.5
   },
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 6,
     "valeur_base": 3,

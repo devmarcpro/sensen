@@ -1,7 +1,6 @@
 {
   "name_key": "material.molybdene.name",
   "category": "metal",
-  "palier": 4,
   "stats": {
     "durete": 72,
     "densite": 10,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 38,
     "valeur_base": 26,

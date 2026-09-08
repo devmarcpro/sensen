@@ -1,7 +1,6 @@
 {
   "name_key": "material.acier_trempe.name",
   "category": "metal",
-  "palier": 4,
   "stats": {
     "durete": 65,
     "densite": 8,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 34,
     "valeur_base": 20,

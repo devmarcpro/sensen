@@ -1,7 +1,6 @@
 {
   "name_key": "material.calcaire.name",
   "category": "roche",
-  "palier": 1,
   "stats": {
     "durete": 7,
     "densite": 13,
@@ -38,6 +37,7 @@
     "eau": 0.4
   },
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 12,
     "valeur_base": 2,

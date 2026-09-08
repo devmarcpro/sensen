@@ -1,7 +1,6 @@
 {
   "name_key": "material.fonte.name",
   "category": "metal",
-  "palier": 1,
   "stats": {
     "durete": 12,
     "densite": 7,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 22,
     "valeur_base": 5,

@@ -1,7 +1,6 @@
 {
   "name_key": "material.agate.name",
   "category": "gemme",
-  "palier": 1,
   "stats": {
     "durete": 19,
     "densite": 7,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 35,
     "valeur_base": 16,

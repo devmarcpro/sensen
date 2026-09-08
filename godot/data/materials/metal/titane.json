@@ -1,7 +1,6 @@
 {
   "name_key": "material.titane.name",
   "category": "metal",
-  "palier": 4,
   "stats": {
     "durete": 61,
     "densite": 5,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 32,
     "valeur_base": 40,

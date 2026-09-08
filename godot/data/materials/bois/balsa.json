@@ -1,7 +1,6 @@
 {
   "name_key": "material.balsa.name",
   "category": "bois",
-  "palier": 1,
   "stats": {
     "durete": 2,
     "densite": 1,
@@ -37,6 +36,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 3,
     "valeur_base": 6,

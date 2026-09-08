@@ -1,7 +1,6 @@
 {
   "name_key": "material.tilleul.name",
   "category": "bois",
-  "palier": 2,
   "stats": {
     "durete": 7,
     "densite": 4,
@@ -37,6 +36,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 2,
   "stats_base": {
     "durete": 8,
     "valeur_base": 5,

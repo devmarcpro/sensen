@@ -1,7 +1,6 @@
 {
   "name_key": "material.breche_volcanique.name",
   "category": "roche",
-  "palier": 3,
   "stats": {
     "durete": 21,
     "densite": 14,
@@ -38,6 +37,7 @@
     "feu": 0.2
   },
   "composition": null,
+  "palier": 3,
   "stats_base": {
     "durete": 16,
     "valeur_base": 3,

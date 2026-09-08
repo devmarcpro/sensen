@@ -1,7 +1,6 @@
 {
   "name_key": "material.geode.name",
   "category": "fossile",
-  "palier": 3,
   "stats": {
     "durete": 17,
     "densite": 11,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 3,
   "stats_base": {
     "durete": 13,
     "valeur_base": 22,

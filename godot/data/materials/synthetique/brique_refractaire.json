@@ -1,7 +1,6 @@
 {
   "name_key": "material.brique_refractaire.name",
   "category": "synthetique",
-  "palier": 4,
   "stats": {
     "durete": 38,
     "densite": 12,
@@ -41,6 +40,7 @@
     "metal": 0.15
   },
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 20,
     "valeur_base": 24,

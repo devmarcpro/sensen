@@ -1,7 +1,6 @@
 {
   "name_key": "material.mica.name",
   "category": "mineral",
-  "palier": 2,
   "stats": {
     "durete": 3,
     "densite": 9,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 2,
   "stats_base": {
     "durete": 4,
     "valeur_base": 5,

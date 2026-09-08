@@ -1,7 +1,6 @@
 {
   "name_key": "material.granit_noir.name",
   "category": "roche",
-  "palier": 4,
   "stats": {
     "durete": 66,
     "densite": 18,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 35,
     "valeur_base": 10,

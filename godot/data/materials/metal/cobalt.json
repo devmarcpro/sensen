@@ -1,7 +1,6 @@
 {
   "name_key": "material.cobalt.name",
   "category": "metal",
-  "palier": 3,
   "stats": {
     "durete": 30,
     "densite": 9,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 3,
   "stats_base": {
     "durete": 23,
     "valeur_base": 14,

@@ -1364,6 +1364,12 @@ func _classes_visibles() -> Array:
 	return res
 
 
+## Le menu de triche est-il accessible ? En développement toujours ; dans un exécutable publié, seulement si on l'a
+## demandé en ligne de commande (`Sensen.exe -- --triche`).
+func _triche_permise() -> bool:
+	return OS.is_debug_build() or ("--triche" in OS.get_cmdline_user_args())
+
+
 func _unhandled_input(ev: InputEvent) -> void:
 	if titre_ouvert:   # écran principal : seules les touches du panneau passent
 		if ev is InputEventKey and ev.pressed and not ev.echo and ecrans.est_ouvert():
@@ -1414,7 +1420,13 @@ func _unhandled_input(ev: InputEvent) -> void:
 			KEY_TAB:
 				ecrans.basculer("menu")
 			KEY_V:
-				ecrans.basculer("triche")   # menu de triche : tout obtenir, tout déclencher
+				# Le menu de triche reste sur V — le designer l'a demandé et l'a écrit ([[Écrans d'interface]], 2026-08-29,
+				# « la seule touche globale ajoutée depuis les contrôles tranchés — accord explicite »). Mais il n'a rien
+				# à faire dans la version qu'on publie : la chaîne de publication exporte en `--export-release`, donc
+				# `is_debug_build()` y est faux. Une porte de service reste ouverte pour le designer : lancer le jeu avec
+				# `-- --triche`. (Ordre de travail, palier 3 — 2026-09-08.)
+				if _triche_permise():
+					ecrans.basculer("triche")   # menu de triche : tout obtenir, tout déclencher
 			KEY_F4:
 				volet_visible = not volet_visible   # le volet latéral (aussi au menu Tab)
 			KEY_P:

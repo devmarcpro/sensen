@@ -1,7 +1,6 @@
 {
   "name_key": "material.lignite.name",
   "category": "mineral",
-  "palier": 1,
   "stats": {
     "durete": 2,
     "densite": 7,
@@ -38,6 +37,7 @@
     "terre": 0.3
   },
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 4,
     "valeur_base": 2,

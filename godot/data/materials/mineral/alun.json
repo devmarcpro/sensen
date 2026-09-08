@@ -1,7 +1,6 @@
 {
   "name_key": "material.alun.name",
   "category": "mineral",
-  "palier": 3,
   "stats": {
     "durete": 6,
     "densite": 4,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 3,
   "stats_base": {
     "durete": 5,
     "valeur_base": 9,

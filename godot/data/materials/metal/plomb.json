@@ -1,7 +1,6 @@
 {
   "name_key": "material.plomb.name",
   "category": "metal",
-  "palier": 1,
   "stats": {
     "durete": 5,
     "densite": 11,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 9,
     "valeur_base": 5,

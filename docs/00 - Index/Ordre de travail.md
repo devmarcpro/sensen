@@ -76,7 +76,10 @@ défauts du palier, plus la purge des objets du palier 11.
 
 > *Après ce palier* : une partie rechargée est la partie qu'on avait quittée.
 
-## Palier 2 — trois lignes de Python qui rouvrent tout le chantier matériaux
+## ~~Palier 2~~ — le chantier matériaux est rouvert — **FAIT le 2026-09-08**
+
+> [!success] `gen_materials.py` ne détruit plus rien et reproduit les 247 fiches champ par champ — voir [[Matériaux — 13 stats]] (callout du 2026-09-08). Il fallait bien plus que « trois lignes » : sept champs à préserver, cinq alias d'identifiant, 92 couleurs à reverser dans la note, et un motif de lecture aveugle aux minuscules. `tools/verif_generateurs.py` le prouve et empêchera la dérive de revenir.
+> **Ce qui reste** : le **sens de la vérité** (palier 0, question 1) — sans réponse, les tables et la palette rederiveront au prochain équilibrage.
 
 **Le meilleur rapport déblocage/coût de tout le graphe.** Trois corrections de quelques lignes dans un seul fichier.
 
@@ -96,11 +99,13 @@ défauts du palier, plus la purge des objets du palier 11.
 Quatre lignes dans deux fonctions du même fichier, plus une séance sur les écrans. **Deux chaînes de dépendance
 internes**, et elles comptent.
 
-13. **Trente secondes, avant tout le reste** : effacer les deux chaînes d'aide mortes des CSV. Elles décrivent des
-    touches disparues, personne ne les lit — le seul danger est que celui qui écrira l'écran d'aide les recopie.
-14. **Le menu de triche sur `V` : une garde de débogage, PAS une suppression.** Le coffre se contredit ici — la file
-    écrit « triche à retirer » quand [[Écrans d'interface]] enregistre l'accord explicite du designer sur cette touche.
-    C'est la note du designer qui gagne.
+13. ~~**Trente secondes** : effacer les chaînes d'aide mortes des CSV.~~ **FAIT le 2026-09-08** — elles étaient
+    trois, pas deux ; et le nettoyage a révélé qu'une clé vivante (`arena.banc_objets.name`) était écrite **dans** le
+    bloc que `gen_materials.py` régénère : elle a été effacée en silence, puis remise **hors** du bloc, et le
+    générateur refuse désormais d'écraser un bloc qui contient autre chose que des clés `material.`.
+14. ~~**Le menu de triche sur `V`**~~ **FAIT le 2026-09-08** — une garde, pas une suppression : la note du designer
+    l'emporte sur la file. `V` n'ouvre plus rien dans un exécutable publié (`--export-release`), et le designer garde
+    une porte de service (`Sensen.exe -- --triche`). Voir [[Écrans d'interface]].
 15. **La pause n'est pas à inventer, elle existe** : le chargement coupe déjà l'horloge du monde. Il s'agit de la
     rebrancher sur « un écran est ouvert ». **Piège** : couper l'horloge NE SUFFIT PAS — en donjon, le monde avance par
     une boucle que le drapeau n'arrête pas ; il faut le retour anticipé en plus. Et **ZQSD échappe à toutes les gardes
@@ -176,11 +181,35 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
 ## Palier 7 — les quatre champs restants, dans l'ordre du designer
 
 29. **La rumeur qui circule** (aucun bloqueur — elle pourrait se faire au palier 5 ; l'ordre du designer la place ici).
+29 bis. **Les factions par tags idéologiques** — *validé le 2026-09-08 sur un avis extérieur, voir [[Vers la production]] ligne 149.*
+    **Le fait vérifié** : `Surface._lier_royaumes` calcule la relation entre deux royaumes à partir d'**attributs
+    présents** (race, culture, gouvernance, écart de taille) plus un aléa, et son commentaire le dit lui-même —
+    « une fonction **PURE** de la graine et de la paire ». **Deux royaumes ne se haïssent jamais POUR quelque chose**,
+    et rien de ce que fait le joueur ne change une relation entre pays.
+    **Ce qu'il faut** : des actions qui portent des **tags** (`nature_detruite`, `industrie`, `sang_verse`…) et des
+    factions qui portent des **valeurs**, la réputation s'ajustant seule. La matière première existe : cultures par
+    région, types de gouvernance, réputation à trois étages, vecteurs Wu Xing.
+    **Il est ici et pas ailleurs parce qu'il est le lecteur naturel de la rumeur** : elle transporte le fait, les tags
+    décident qui s'en offusque. À faire **avec** la ligne 29, pas avant.
 30. **Le temps long** — usure, ruine, repousse — avec `alteration`.
 31. **Les besoins au-delà de la faim** : soif, sommeil, peur qui dure (aucun bloqueur non plus).
 32. **L'eau qui pèse** — pression, poids, érosion — avec `permeabilite`.
 
 ## Palier 8 — les nombres cessent de mentir
+
+32 bis. **L'équipement d'un PNJ vient du stock de sa ville** — *validé le 2026-09-08 sur un avis extérieur, voir
+    [[Vers la production]] ligne 149.* **Le fait vérifié** : `creatures/civil/garde_village.json` porte
+    `equipement: ["craft_epee", "craft_bouclier", "craft_casque", "craft_cuirasse"]`, et la matière de cette épée est
+    tirée d'un **pool par famille et par profondeur** (`SimObjets._tirer_materiau`) qui **ne regarde jamais** ce que la
+    ville possède : un garde sort en acier dans un village qui n'a pas vu un lingot de fer depuis six mois.
+    **Ce qu'il faut, si la vérification le confirme** : une simple **pondération** du pool par les stocks de la ville —
+    un lecteur de plus sur un champ qui existe, pas un système. La chaîne logistique derrière est déjà codée (mines,
+    caravanes, guerres qui les coupent) : si la mine tombe ou la caravane est pillée, les prochains gardes portent du
+    cuir et du bois **sans qu'on l'ait écrit**.
+    **Réserve honnête, en cours de levée** : tout dépend de ce qu'un village PNJ stocke réellement. S'il ne tient que
+    des denrées et aucune matière d'armurerie, ce n'est plus une pondération mais un stock à inventer — donc un
+    chantier bien plus lourd, à re-arbitrer. Trois agents attaquent la conception au moment où ces lignes sont écrites.
+
 
 **Trois lignes écrivent dans le même fichier de règles** : à faire ensemble, une seule relecture.
 
@@ -230,7 +259,7 @@ sa carte entière au changement de grille).
 45. **La carte de lumière — et c'est pire que ce qui était écrit.** Elle n'est pas refaite « quand une tuile change » :
     elle est refaite **à chaque tick de monde** dès que quelqu'un lit la lumière, et son lecteur en jeu est la vision
     de l'IA, appelée par paire observateur/cible la nuit en ville. **À refaire sur le patron de la chaleur.**
-46. **Les cellules jamais déchargées.** *Dépendance nette* : **après** la ligne 44, jamais avant — évincer les cellules
+46. **Les cellules jamais déchargées** — *l'avis extérieur du 2026-09-08 tape exactement ici : la moitié « recompresser quand le joueur part » du principe macro/micro est la seule qui manque à Sensen.* *Dépendance nette* : **après** la ligne 44, jamais avant — évincer les cellules
     tant que la pré-génération coûte 13 ms rendrait le défaut **pire** (aujourd'hui, revenir sur ses pas est gratuit).
 
 ## Palier 12 — les tests, le coffre, et l'ancienne file
@@ -240,6 +269,14 @@ sa carte entière au changement de grille).
     Plus **l'ancienne file** jamais revue : les saisonniers, le chômage qui pousse à migrer, les tombes qui
     vieillissent, les événements en zone logique, **une guerre qui ne fait rien**, le nom de la vocation à l'écran,
     l'irrigation construite, les mauvaises récoltes, la cuve et le moulin, les descriptions de modules non traduisibles.
+
+> [!warning] Deux choses **écartées** le 2026-09-08, pour qu'on ne les repropose pas
+> - **Le GOAP (planificateur d'actions)** : Sensen n'a jamais eu d'arbres de comportement — `data/ai_profiles/` est
+>   déjà une utility AI pondérée. Un planificateur serait un système entier à côté d'elle, pour des séquences dont un
+>   jeu à tuiles vues de dessus n'a pas besoin. Ce qui manque à cette IA, ce sont **les jauges** et le **champ de
+>   danger**, tous deux déjà en file.
+> - **Porter la simulation politique en C++** : le noyau sert là où c'est un balayage de tableau contigu — chemins,
+>   lumière, chaleur. Un passage hebdomadaire sur quelques centaines de royaumes est du GDScript sans problème.
 
 ## Palier 13 — ce qui n'est pas à moi
 

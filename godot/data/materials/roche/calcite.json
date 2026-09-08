@@ -1,7 +1,6 @@
 {
   "name_key": "material.calcite.name",
   "category": "roche",
-  "palier": 2,
   "stats": {
     "durete": 7,
     "densite": 10,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 2,
   "stats_base": {
     "durete": 8,
     "valeur_base": 7,

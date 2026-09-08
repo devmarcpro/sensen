@@ -1,7 +1,6 @@
 {
   "name_key": "material.cypres.name",
   "category": "bois",
-  "palier": 4,
   "stats": {
     "durete": 19,
     "densite": 4,
@@ -37,6 +36,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 10,
     "valeur_base": 8,

@@ -1,7 +1,6 @@
 {
   "name_key": "material.aluminium.name",
   "category": "metal",
-  "palier": 1,
   "stats": {
     "durete": 8,
     "densite": 3,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 14,
     "valeur_base": 9,

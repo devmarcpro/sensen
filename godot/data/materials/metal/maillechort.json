@@ -1,7 +1,6 @@
 {
   "name_key": "material.maillechort.name",
   "category": "metal",
-  "palier": 3,
   "stats": {
     "durete": 25,
     "densite": 9,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 3,
   "stats_base": {
     "durete": 19,
     "valeur_base": 12,

@@ -35,7 +35,6 @@ ui.horloge,clock {horloge} · {mode}
 ui.mode.exploration,exploration ({tps} ticks/s)
 ui.mode.combat,COMBAT — time only moves when you act
 ui.mode.donjon,DUNGEON — time only moves when you act
-ui.aide,ZQSD: move (8 directions) · click: move / strike · shift+click: heavy attack · G: guard · space: wait · tab: next arena · F5: reload data
 ui.timeline,next actions:
 journal.deplacement,{nom} moves ({cout} ticks)
 journal.chute,{nom} falls {niveaux} levels: {degats} damage
@@ -789,8 +788,6 @@ titre.slave.republique.m,Starosta
 titre.slave.republique.f,Starosta
 titre.slave.theocratie.m,Patriarch
 titre.slave.theocratie.f,Matriarch
-ui.aide.armes,1-7: switch weapon ({ticks} ticks) — {liste}
-ui.aide.capacites,I: inventory · F: workshop · C: character sheet (Esc closes) · M: world map (click a neighbouring cell: claim it) · K: territory · B: breeding register · V: tame · N: minimap zoom (Shift+N: hide) · F6 save · F7 load · F1-F3: aim an ability then click (Esc: cancel) · P: draw a perimeter (at camp) — {liste}
 ui.assigner.fonction,"{fonction} · produces: {produit} · base yield {rendement}"
 ui.assigner.rien,nothing
 ui.assigner.or_unite,"{n} gold per unit"

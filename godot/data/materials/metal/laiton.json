@@ -1,7 +1,6 @@
 {
   "name_key": "material.laiton.name",
   "category": "metal",
-  "palier": 1,
   "stats": {
     "durete": 10,
     "densite": 9,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 18,
     "valeur_base": 7,

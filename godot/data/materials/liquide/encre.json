@@ -1,7 +1,6 @@
 {
   "name_key": "material.encre.name",
   "category": "liquide",
-  "palier": 2,
   "stats": {
     "durete": 0,
     "densite": 4,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 2,
   "stats_base": {
     "durete": 0,
     "valeur_base": 9,

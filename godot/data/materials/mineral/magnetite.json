@@ -1,7 +1,6 @@
 {
   "name_key": "material.magnetite.name",
   "category": "mineral",
-  "palier": 3,
   "stats": {
     "durete": 18,
     "densite": 9,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 3,
   "stats_base": {
     "durete": 14,
     "valeur_base": 14,

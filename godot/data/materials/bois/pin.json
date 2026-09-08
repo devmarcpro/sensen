@@ -1,7 +1,6 @@
 {
   "name_key": "material.pin.name",
   "category": "bois",
-  "palier": 1,
   "stats": {
     "durete": 4,
     "densite": 4,
@@ -37,6 +36,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 8,
     "valeur_base": 2,

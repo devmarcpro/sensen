@@ -1,7 +1,6 @@
 {
   "name_key": "material.soie.name",
   "category": "animal",
-  "palier": 4,
   "stats": {
     "durete": 8,
     "densite": 1,
@@ -38,6 +37,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 4,
     "valeur_base": 18,

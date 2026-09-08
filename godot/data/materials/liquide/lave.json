@@ -1,7 +1,6 @@
 {
   "name_key": "material.lave.name",
   "category": "liquide",
-  "palier": 2,
   "stats": {
     "durete": 0,
     "densite": 25,
@@ -40,6 +39,7 @@
     "terre": 0.2
   },
   "composition": null,
+  "palier": 2,
   "stats_base": {
     "durete": 0,
     "valeur_base": 8,

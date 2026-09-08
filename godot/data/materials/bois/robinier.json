@@ -1,7 +1,6 @@
 {
   "name_key": "material.robinier.name",
   "category": "bois",
-  "palier": 4,
   "stats": {
     "durete": 28,
     "densite": 7,
@@ -37,6 +36,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 15,
     "valeur_base": 7,

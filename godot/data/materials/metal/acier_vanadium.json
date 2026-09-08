@@ -1,7 +1,6 @@
 {
   "name_key": "material.acier_vanadium.name",
   "category": "metal",
-  "palier": 5,
   "stats": {
     "durete": 129,
     "densite": 8,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 5,
   "stats_base": {
     "durete": 46,
     "valeur_base": 30,

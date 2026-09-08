@@ -1,7 +1,6 @@
 {
   "name_key": "material.erable.name",
   "category": "bois",
-  "palier": 3,
   "stats": {
     "durete": 14,
     "densite": 5,
@@ -37,6 +36,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 3,
   "stats_base": {
     "durete": 11,
     "valeur_base": 5,

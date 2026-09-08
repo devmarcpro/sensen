@@ -1,7 +1,6 @@
 {
   "name_key": "material.tourmaline.name",
   "category": "gemme",
-  "palier": 2,
   "stats": {
     "durete": 32,
     "densite": 7,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 2,
   "stats_base": {
     "durete": 38,
     "valeur_base": 28,

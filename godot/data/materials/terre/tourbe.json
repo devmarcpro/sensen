@@ -1,7 +1,6 @@
 {
   "name_key": "material.tourbe.name",
   "category": "terre",
-  "palier": 2,
   "stats": {
     "durete": 3,
     "densite": 7,
@@ -38,6 +37,7 @@
     "bois": 0.3
   },
   "composition": null,
+  "palier": 2,
   "stats_base": {
     "durete": 4,
     "valeur_base": 2,

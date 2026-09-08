@@ -1,7 +1,6 @@
 {
   "name_key": "material.gravier.name",
   "category": "terre",
-  "palier": 1,
   "stats": {
     "durete": 2,
     "densite": 11,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 4,
     "valeur_base": 1,

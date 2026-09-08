@@ -1,7 +1,6 @@
 {
   "name_key": "material.sable_noir.name",
   "category": "terre",
-  "palier": 2,
   "stats": {
     "durete": 2,
     "densite": 5,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 2,
   "stats_base": {
     "durete": 2,
     "valeur_base": 4,

@@ -69,6 +69,20 @@ Le choix du matériau dans un craft est donc un **arbitrage multidimensionnel**,
 > **Le titre de cette note ment à partir de maintenant** : elle en dira **18**. Renommée quand les colonnes sont écrites, l'alias « 13 stats » conservé pour les 39 liens du coffre.
 
 
+
+> [!success] Codé le 2026-09-08 — `gen_materials.py` désamorcé : il détruisait 24 fiches et sept champs, et il ne s'en apercevait pas parce qu'il mourait avant
+> **Ce qu'il aurait fait s'il avait tourné** (mesuré avec ses propres fonctions, avant de toucher à rien) : supprimer **24 des 247 fiches** — les **20 matières animales**, dont aucun catalogue n'était déclaré dans `CATALOGUES`, et **4 aciers et une essence** dont l'id abrégé ne se déduit pas du nom affiché (`acier_inox` contre « Acier inoxydable »). Et effacer **sept champs** ajoutés après lui : `palier`, `stats_base`, `sous_categorie`, `tags`, `noise.seed_offset`, `wuxing`, `harvest`.
+>
+> **Il ne détruisait pourtant rien** — il **plantait**, sur la première couleur de palette manquante (92 des 247 en manquaient), une ligne avant la boucle de suppression. **Ce garde-fou était accidentel** : compléter la palette l'aurait fait sauter. C'est pourquoi la préservation des champs a été faite **avant** d'y toucher.
+>
+> **Ce que la comparaison champ par champ a révélé, et qui est le vrai enseignement** : la donnée porte **partout** des décisions plus récentes que la note. 44 fiches ont une surcharge Wu Xing que la note de décision ne déclare pas ; 26 ont un outil de récolte plus fin que celui de leur catégorie (le corail se coupe à la dague, pas à la pioche — c'est à ça que sert `sous_categorie`) ; 13 ont délibérément **aucun** tag là où la règle en imposait un ; et les tags eux-mêmes sont bien plus riches que le seul `organique` que le script savait produire (`marin`, `toxique`, `industriel`, `os`, `ivoire`, `dent_croc`, `ecaille`, `carapace`).
+>
+> **La règle retenue** : le générateur ne possède plus que ce qu'il **déduit des tables** — les 13 stats, la clé de nom, la catégorie, la couleur. Tout ce qu'une main a réglé depuis lui est **rendu tel quel**. Au passage, `noise.seed_offset` était dérivé du **rang d'insertion** : ajouter un matériau au milieu d'un catalogue décalait le bruit de tous les suivants. Préservé, il ne bouge plus.
+>
+> **Le contrôle de palette dit maintenant tout ce qui manque** au lieu de mourir sur le premier — et il refuse toujours d'écrire, mais sans avoir rien supprimé. La palette a été complétée depuis les fiches (`tools/regen_palette.py`, 92 couleurs jamais reversées dans la note), et son motif de lecture accepte enfin les hexadécimaux en minuscules.
+>
+> **Preuve** : `tools/verif_generateurs.py` relance la chaîne complète et compare **chaque champ de chaque fiche**. Il dit aujourd'hui : *247 fiches après, le générateur les reproduit toutes*. À relancer après toute retouche d'un catalogue, de la palette ou du générateur.
+
 ## Liens
 - **Dépend de** : [[Data-driven design]]
 - **Alimente** : [[Application des stats de matériau]], [[Schéma matériau]], [[Stats d'un objet crafté]], [[Récolte]], [[Craft compositionnel]]

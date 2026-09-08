@@ -1,7 +1,6 @@
 {
   "name_key": "material.topaze.name",
   "category": "gemme",
-  "palier": 3,
   "stats": {
     "durete": 52,
     "densite": 9,
@@ -37,6 +36,7 @@
     "terre": 1.0
   },
   "composition": null,
+  "palier": 3,
   "stats_base": {
     "durete": 40,
     "valeur_base": 30,

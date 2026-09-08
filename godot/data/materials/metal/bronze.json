@@ -1,7 +1,6 @@
 {
   "name_key": "material.bronze.name",
   "category": "metal",
-  "palier": 2,
   "stats": {
     "durete": 17,
     "densite": 9,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 2,
   "stats_base": {
     "durete": 20,
     "valeur_base": 6,

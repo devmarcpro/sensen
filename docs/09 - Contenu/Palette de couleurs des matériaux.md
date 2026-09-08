@@ -15,25 +15,27 @@ Chaque hex est unique dans le catalogue — un doublon est une erreur bloquante 
 
 **Bois :** Pin #C8A96E · Sapin #CBB183 · Épicéa #D6BC8A · Mélèze #B98D5C · Cèdre #B57452 · Chêne #8B5A2B · Hêtre #C69C6D · Bouleau #E3CDA4 · Érable #D2A46B · Frêne #CFB489 · Orme #9C7248 · If #A66A3A · Noyer #6B4426 · Cerisier #9E4F32 · Olivier #8A7B4A · Ébène #2B211C · Gaïac #4A3B23 · Acajou #7C3B24 · Teck #8F6236 · Balsa #EFDFBC · Bambou #B9BA6D · Saule #A89A6B · Liège #B08D62 · Peuplier #DCC79B · Tilleul #E8D9B0 · Charme #C2AD85 · Robinier #A98A3F · Châtaignier #93683B · Platane #C79B72 · Aulne #B57B54 · Buis #D9C27E · Cyprès #A28A55 · Séquoia #A0522D · Palmier #C4A05A · Acacia #B4763B · Eucalyptus #A9997A · Pommier #A5643C · Noisetier #C09468 · Bois flotté #B7AC97 · Bois calciné #3A322C
 
-**Métaux :** Cuivre #C26E43 · Étain #B8BCC0 · Zinc #AEB4B8 · Bronze #B08D57 · Laiton #C9A34C · Fer #8E8E93 · Acier #A9ADB3 · Acier trempé #7E848D · Argent #D9DCE1 · Or #E8C34A · Platine #E4E6E9 · Plomb #5F6470 · Nickel #B9B6A8 · Cobalt #4A5E8F · Titane #9FA8B5 · Tungstène #55585F · Aluminium #CED3D6 · Chrome #C4CBD4 · Manganèse #8A8290 · Bismuth #B78CA8 · Antimoine #9A9AA6
+**Métaux :** Cuivre #C26E43 · Étain #B8BCC0 · Zinc #AEB4B8 · Bronze #B08D57 · Laiton #C9A34C · Fer #8E8E93 · Acier #A9ADB3 · Acier trempé #7E848D · Argent #D9DCE1 · Or #E8C34A · Platine #E4E6E9 · Plomb #5F6470 · Nickel #B9B6A8 · Cobalt #4A5E8F · Titane #9FA8B5 · Tungstène #55585F · Aluminium #CED3D6 · Chrome #C4CBD4 · Manganèse #8A8290 · Bismuth #B78CA8 · Antimoine #9A9AA6 · Acier damassé #7C8390 · Acier inoxydable #d5d9de · Acier au tungstène #8f949c · Acier au vanadium #6E7681 · Électrum #E8D98A · Fonte #5A5652 · Magnésium #D4D6D1 · Maillechort #C8C7BC · Molybdène #767C85 · Palladium #CFCFC8 · Vanadium #7E838C
 
-**Roches :** Pierre #9B9B93 · Granit #A79E96 · Granit noir #45434A · Diorite #C5C2BB · Andésite #8A8A82 · Calcaire #D6CDB4 · Dolomie #CFC4A6 · Craie #EFEBDD · Marbre #E7E3DC · Quartzite #D8CFC7 · Schiste #6E7276 · Gneiss #918878 · Basalte #4F4F52 · Tuf volcanique #B5A48C · Pierre ponce #C9C3B6 · Obsidienne #1E1B24 · Silex #6B655C · Grès #D2B285 · Ardoise #5A616B · Gypse #E9E2D2 · Rhyolite #C79C8A · Péridotite #5E6B4E · Serpentinite #5E7D62 · Travertin #DDC9A6 · Conglomérat #AF9C82 · Brèche volcanique #8D6E5C · Kimberlite #566068 · Calcite #EFE8DA
+**Roches :** Pierre #9B9B93 · Granit #A79E96 · Granit noir #45434A · Diorite #C5C2BB · Andésite #8A8A82 · Calcaire #D6CDB4 · Dolomie #CFC4A6 · Craie #EFEBDD · Marbre #E7E3DC · Quartzite #D8CFC7 · Schiste #6E7276 · Gneiss #918878 · Basalte #4F4F52 · Tuf volcanique #B5A48C · Pierre ponce #C9C3B6 · Obsidienne #1E1B24 · Silex #6B655C · Grès #D2B285 · Ardoise #5A616B · Gypse #E9E2D2 · Rhyolite #C79C8A · Péridotite #5E6B4E · Serpentinite #5E7D62 · Travertin #DDC9A6 · Conglomérat #AF9C82 · Brèche volcanique #8D6E5C · Kimberlite #566068 · Calcite #EFE8DA · Pierre de lave #3A3230
 
-**Terres :** Terre #6E4F31 · Terre fertile #4E3A22 · Tourbe #3F3428 · Sable #E4D3A1 · Argile #B0764F · Gravier #A29A8D
+**Terres :** Terre #6E4F31 · Terre fertile #4E3A22 · Tourbe #3F3428 · Sable #E4D3A1 · Argile #B0764F · Gravier #A29A8D · Cendre #9A948C · Humus #4A3A28 · Latérite #9C4A28 · Limon #8A7A5C · Marne #A79E86 · Sable noir #2E2C2C
 
-**Végétaux/fibres :** Lin #E9E2C8 · Coton #F5F1E6 · Paille #E5CE7E · Chanvre #C9BE93 · Laine #EDE6D6 · Soie #F2EBDD · Cuir #8A5A33 · Fourrure #A9885E
+**Végétaux/fibres :** Lin #E9E2C8 · Coton #F5F1E6 · Paille #E5CE7E · Chanvre #C9BE93 · Laine #EDE6D6 · Soie #F2EBDD · Cuir #8A5A33 · Fourrure #A9885E · Amidon #F1EDE0 · Écorce #6B4A30 · Gomme arabique #D4A24C · Jute #A8925E · Latex #EFE9DC · Osier #B5A06A · Résine #C08A3A · Rotin #B98F52 · Sisal #C4B893 · Tanin #7A4A28 · Varech #3F5A3A
 
-**Liquides :** Eau #3F76B8 · Eau salée #2E6494 · Lave #E2531F · Huile #6E5B23 · Goudron #26221E · Boue #5C4A35 · Sève #C79038
+**Liquides :** Eau #3F76B8 · Eau salée #2E6494 · Lave #E2531F · Huile #6E5B23 · Goudron #26221E · Boue #5C4A35 · Sève #C79038 · Alcool #E8E4D2 · Encre #141318 · Essence de térébenthine #D8CFA6 · Lait #F2EFE6 · Lessive de cendre #DCDCD2 · Mercure #B9BCC2 · Miel #D9A125 · Sang #7A1E1E · Saumure #CFD8D6 · Venin #4E7A2E · Vinaigre #D9C89A
 
-**Minéraux :** Houille #26262A · Lignite #423A32 · Anthracite #17171C · Soufre #E8D33F · Salpêtre #E5E0CB · Sel gemme #F0E8E0 · Graphite #4B4E55 · Mica #C7B98F · Pyrite #C9A83C · Malachite #2E8B57 · Argile réfractaire #C8A182 · Guano #8F8358 · Tourbe compactée #4A3E2E · Bitume #1C1A18 · Cinabre #B02A1E · Ocre #C9862B · Lapis-lazuli #26529C · Turquoise #40B5AD · Ambre #E0A030 · Fluorine #7FD48A · Amiante #C4C8BE · Phosphorite #97917B
+**Minéraux :** Houille #26262A · Lignite #423A32 · Anthracite #17171C · Soufre #E8D33F · Salpêtre #E5E0CB · Sel gemme #F0E8E0 · Graphite #4B4E55 · Mica #C7B98F · Pyrite #C9A83C · Malachite #2E8B57 · Argile réfractaire #C8A182 · Guano #8F8358 · Tourbe compactée #4A3E2E · Bitume #1C1A18 · Cinabre #B02A1E · Ocre #C9862B · Lapis-lazuli #26529C · Turquoise #40B5AD · Ambre #E0A030 · Fluorine #7FD48A · Amiante #C4C8BE · Phosphorite #97917B · Alun #E6E9EC · Azurite #2E5FA3 · Borax #F0F2EF · Chaux #EDEAE0 · Galène #8E8F94 · Hématite #6E2C2C · Kaolin #EDE9E0 · Magnétite #312F33 · Potasse #E2DCC0 · Sel marin #F5F5F0 · Uraninite #2B2B2B
 
-**Météorologiques :** Glace #B8E0EE · Neige #FAFBFD
+**Météorologiques :** Glace #B8E0EE · Neige #FAFBFD · Givre #DCEAF2 · Grêle #C9DCE8
 
-**Fossiles :** Os fossile #D8CCAE · Ammonite #B79C74 · Bois pétrifié #7A6A58 · Coquillage fossile #D9CDBD · Géode #93A0B6 · Météorite ferreuse #443F45
+**Fossiles :** Os fossile #D8CCAE · Ammonite #B79C74 · Bois pétrifié #7A6A58 · Coquillage fossile #D9CDBD · Géode #93A0B6 · Météorite ferreuse #443F45 · Corail #E4756B · Dent fossile #C6B79A · Nacre #EDE7DC · Trilobite #7A6A52
 
-**Gemmes :** Quartz #E8E4EC · Améthyste #8A4FBF · Topaze #E8B33C · Grenat #8E1F2F · Opale #DCE8E4 · Jade #3D9B6B · Rubis #C81E3C · Saphir #1E4FA8 · Émeraude #1F9E5A · Diamant #EDF5F7 · Onyx #2E3038
+**Gemmes :** Quartz #E8E4EC · Améthyste #8A4FBF · Topaze #E8B33C · Grenat #8E1F2F · Opale #DCE8E4 · Jade #3D9B6B · Rubis #C81E3C · Saphir #1E4FA8 · Émeraude #1F9E5A · Diamant #EDF5F7 · Onyx #2E3038 · Agate #B57C5A · Aigue-marine #8FD4D8 · Perle #F3ECE0 · Tourmaline #3E6B4A
 
-**Synthétiques :** Verre #C6DEE4 · Brique #A9502F · Chaume tressé #D3B76A · Papier #F3EEDF
+**Synthétiques :** Verre #C6DEE4 · Brique #A9502F · Chaume tressé #D3B76A · Papier #F3EEDF · Béton #9a9a95 · Brique réfractaire #a35a3a · Caoutchouc #3a3532 · Charbon de bois #2B2724 · Cire #E8DFA8 · Colle d'os #C9A97A · Cuir bouilli #6B4A2F · Feutre #8C8477 · Parchemin #DED2B4 · Plâtre #E9E4D8 · Poix #241D18 · Porcelaine #F4F1EA · Savon #E4E0CE · Scorie #4E4640 · Verre trempé #bfe3ea
+
+**Animal :** Boyau #D6C2A8 · Carapace #7C5A3A · Corne #D8C9A3 · Crin #4A4038 · Croc #E8DCC0 · Écaille #5F7A55 · Éponge #C9A66B · Ivoire #F2E8D0 · Os #e8e0c8 · Os de seiche #F0EBDF · Os massif #d8ccb0 · Plume #F2EDE2 · Soie d'araignée #E9E9E4 · Suif #E7DFC6 · Tendon #E3D7BE · Vessie #D8CDB4 · Soie d'araignée #E9E9E4
 
 **Validation au boot ([[Schéma matériau]]) :** GameData valide qu'aucune couleur n'est dupliquée dans tout le catalogue ET qu'aucune n'entre en collision avec les **couleurs réservées** (stand-in matériaux + marqueurs d'attache, `data/palette_materiaux.json`) — *un doublon = erreur bloquante de données*.
 

@@ -244,6 +244,50 @@
     "nom": "Antimoine",
     "hex": "#9A9AA6"
   },
+  "acier_damasse": {
+    "nom": "Acier damassé",
+    "hex": "#7C8390"
+  },
+  "acier_inox": {
+    "nom": "Acier inoxydable",
+    "hex": "#d5d9de"
+  },
+  "acier_tungstene": {
+    "nom": "Acier au tungstène",
+    "hex": "#8f949c"
+  },
+  "acier_vanadium": {
+    "nom": "Acier au vanadium",
+    "hex": "#6E7681"
+  },
+  "electrum": {
+    "nom": "Électrum",
+    "hex": "#E8D98A"
+  },
+  "fonte": {
+    "nom": "Fonte",
+    "hex": "#5A5652"
+  },
+  "magnesium": {
+    "nom": "Magnésium",
+    "hex": "#D4D6D1"
+  },
+  "maillechort": {
+    "nom": "Maillechort",
+    "hex": "#C8C7BC"
+  },
+  "molybdene": {
+    "nom": "Molybdène",
+    "hex": "#767C85"
+  },
+  "palladium": {
+    "nom": "Palladium",
+    "hex": "#CFCFC8"
+  },
+  "vanadium": {
+    "nom": "Vanadium",
+    "hex": "#7E838C"
+  },
   "pierre": {
     "nom": "Pierre",
     "hex": "#9B9B93"
@@ -356,6 +400,10 @@
     "nom": "Calcite",
     "hex": "#EFE8DA"
   },
+  "pierre_de_lave": {
+    "nom": "Pierre de lave",
+    "hex": "#3A3230"
+  },
   "terre": {
     "nom": "Terre",
     "hex": "#6E4F31"
@@ -379,6 +427,30 @@
   "gravier": {
     "nom": "Gravier",
     "hex": "#A29A8D"
+  },
+  "cendre": {
+    "nom": "Cendre",
+    "hex": "#9A948C"
+  },
+  "humus": {
+    "nom": "Humus",
+    "hex": "#4A3A28"
+  },
+  "laterite": {
+    "nom": "Latérite",
+    "hex": "#9C4A28"
+  },
+  "limon": {
+    "nom": "Limon",
+    "hex": "#8A7A5C"
+  },
+  "marne": {
+    "nom": "Marne",
+    "hex": "#A79E86"
+  },
+  "sable_noir": {
+    "nom": "Sable noir",
+    "hex": "#2E2C2C"
   },
   "lin": {
     "nom": "Lin",
@@ -412,6 +484,50 @@
     "nom": "Fourrure",
     "hex": "#A9885E"
   },
+  "amidon": {
+    "nom": "Amidon",
+    "hex": "#F1EDE0"
+  },
+  "ecorce": {
+    "nom": "Écorce",
+    "hex": "#6B4A30"
+  },
+  "gomme_arabique": {
+    "nom": "Gomme arabique",
+    "hex": "#D4A24C"
+  },
+  "jute": {
+    "nom": "Jute",
+    "hex": "#A8925E"
+  },
+  "latex": {
+    "nom": "Latex",
+    "hex": "#EFE9DC"
+  },
+  "osier": {
+    "nom": "Osier",
+    "hex": "#B5A06A"
+  },
+  "resine": {
+    "nom": "Résine",
+    "hex": "#C08A3A"
+  },
+  "rotin": {
+    "nom": "Rotin",
+    "hex": "#B98F52"
+  },
+  "sisal": {
+    "nom": "Sisal",
+    "hex": "#C4B893"
+  },
+  "tanin": {
+    "nom": "Tanin",
+    "hex": "#7A4A28"
+  },
+  "varech": {
+    "nom": "Varech",
+    "hex": "#3F5A3A"
+  },
   "eau": {
     "nom": "Eau",
     "hex": "#3F76B8"
@@ -439,6 +555,50 @@
   "seve": {
     "nom": "Sève",
     "hex": "#C79038"
+  },
+  "alcool": {
+    "nom": "Alcool",
+    "hex": "#E8E4D2"
+  },
+  "encre": {
+    "nom": "Encre",
+    "hex": "#141318"
+  },
+  "essence_terebenthine": {
+    "nom": "Essence de térébenthine",
+    "hex": "#D8CFA6"
+  },
+  "lait": {
+    "nom": "Lait",
+    "hex": "#F2EFE6"
+  },
+  "lessive_de_cendre": {
+    "nom": "Lessive de cendre",
+    "hex": "#DCDCD2"
+  },
+  "mercure": {
+    "nom": "Mercure",
+    "hex": "#B9BCC2"
+  },
+  "miel": {
+    "nom": "Miel",
+    "hex": "#D9A125"
+  },
+  "sang": {
+    "nom": "Sang",
+    "hex": "#7A1E1E"
+  },
+  "saumure": {
+    "nom": "Saumure",
+    "hex": "#CFD8D6"
+  },
+  "venin": {
+    "nom": "Venin",
+    "hex": "#4E7A2E"
+  },
+  "vinaigre": {
+    "nom": "Vinaigre",
+    "hex": "#D9C89A"
   },
   "houille": {
     "nom": "Houille",
@@ -528,6 +688,50 @@
     "nom": "Phosphorite",
     "hex": "#97917B"
   },
+  "alun": {
+    "nom": "Alun",
+    "hex": "#E6E9EC"
+  },
+  "azurite": {
+    "nom": "Azurite",
+    "hex": "#2E5FA3"
+  },
+  "borax": {
+    "nom": "Borax",
+    "hex": "#F0F2EF"
+  },
+  "chaux": {
+    "nom": "Chaux",
+    "hex": "#EDEAE0"
+  },
+  "galene": {
+    "nom": "Galène",
+    "hex": "#8E8F94"
+  },
+  "hematite": {
+    "nom": "Hématite",
+    "hex": "#6E2C2C"
+  },
+  "kaolin": {
+    "nom": "Kaolin",
+    "hex": "#EDE9E0"
+  },
+  "magnetite": {
+    "nom": "Magnétite",
+    "hex": "#312F33"
+  },
+  "potasse": {
+    "nom": "Potasse",
+    "hex": "#E2DCC0"
+  },
+  "sel_marin": {
+    "nom": "Sel marin",
+    "hex": "#F5F5F0"
+  },
+  "uraninite": {
+    "nom": "Uraninite",
+    "hex": "#2B2B2B"
+  },
   "glace": {
     "nom": "Glace",
     "hex": "#B8E0EE"
@@ -535,6 +739,14 @@
   "neige": {
     "nom": "Neige",
     "hex": "#FAFBFD"
+  },
+  "givre": {
+    "nom": "Givre",
+    "hex": "#DCEAF2"
+  },
+  "grele": {
+    "nom": "Grêle",
+    "hex": "#C9DCE8"
   },
   "os_fossile": {
     "nom": "Os fossile",
@@ -559,6 +771,22 @@
   "meteorite_ferreuse": {
     "nom": "Météorite ferreuse",
     "hex": "#443F45"
+  },
+  "corail": {
+    "nom": "Corail",
+    "hex": "#E4756B"
+  },
+  "dent_fossile": {
+    "nom": "Dent fossile",
+    "hex": "#C6B79A"
+  },
+  "nacre": {
+    "nom": "Nacre",
+    "hex": "#EDE7DC"
+  },
+  "trilobite": {
+    "nom": "Trilobite",
+    "hex": "#7A6A52"
   },
   "quartz": {
     "nom": "Quartz",
@@ -604,6 +832,22 @@
     "nom": "Onyx",
     "hex": "#2E3038"
   },
+  "agate": {
+    "nom": "Agate",
+    "hex": "#B57C5A"
+  },
+  "aigue_marine": {
+    "nom": "Aigue-marine",
+    "hex": "#8FD4D8"
+  },
+  "perle": {
+    "nom": "Perle",
+    "hex": "#F3ECE0"
+  },
+  "tourmaline": {
+    "nom": "Tourmaline",
+    "hex": "#3E6B4A"
+  },
   "verre": {
     "nom": "Verre",
     "hex": "#C6DEE4"
@@ -619,5 +863,129 @@
   "papier": {
     "nom": "Papier",
     "hex": "#F3EEDF"
+  },
+  "beton": {
+    "nom": "Béton",
+    "hex": "#9a9a95"
+  },
+  "brique_refractaire": {
+    "nom": "Brique réfractaire",
+    "hex": "#a35a3a"
+  },
+  "caoutchouc": {
+    "nom": "Caoutchouc",
+    "hex": "#3a3532"
+  },
+  "charbon_de_bois": {
+    "nom": "Charbon de bois",
+    "hex": "#2B2724"
+  },
+  "cire": {
+    "nom": "Cire",
+    "hex": "#E8DFA8"
+  },
+  "colle_d_os": {
+    "nom": "Colle d'os",
+    "hex": "#C9A97A"
+  },
+  "cuir_bouilli": {
+    "nom": "Cuir bouilli",
+    "hex": "#6B4A2F"
+  },
+  "feutre": {
+    "nom": "Feutre",
+    "hex": "#8C8477"
+  },
+  "parchemin": {
+    "nom": "Parchemin",
+    "hex": "#DED2B4"
+  },
+  "platre": {
+    "nom": "Plâtre",
+    "hex": "#E9E4D8"
+  },
+  "poix": {
+    "nom": "Poix",
+    "hex": "#241D18"
+  },
+  "porcelaine": {
+    "nom": "Porcelaine",
+    "hex": "#F4F1EA"
+  },
+  "savon": {
+    "nom": "Savon",
+    "hex": "#E4E0CE"
+  },
+  "scorie": {
+    "nom": "Scorie",
+    "hex": "#4E4640"
+  },
+  "verre_trempe": {
+    "nom": "Verre trempé",
+    "hex": "#bfe3ea"
+  },
+  "boyau": {
+    "nom": "Boyau",
+    "hex": "#D6C2A8"
+  },
+  "carapace": {
+    "nom": "Carapace",
+    "hex": "#7C5A3A"
+  },
+  "corne": {
+    "nom": "Corne",
+    "hex": "#D8C9A3"
+  },
+  "crin": {
+    "nom": "Crin",
+    "hex": "#4A4038"
+  },
+  "croc": {
+    "nom": "Croc",
+    "hex": "#E8DCC0"
+  },
+  "ecaille": {
+    "nom": "Écaille",
+    "hex": "#5F7A55"
+  },
+  "eponge": {
+    "nom": "Éponge",
+    "hex": "#C9A66B"
+  },
+  "ivoire": {
+    "nom": "Ivoire",
+    "hex": "#F2E8D0"
+  },
+  "os": {
+    "nom": "Os",
+    "hex": "#e8e0c8"
+  },
+  "os_de_seiche": {
+    "nom": "Os de seiche",
+    "hex": "#F0EBDF"
+  },
+  "os_massif": {
+    "nom": "Os massif",
+    "hex": "#d8ccb0"
+  },
+  "plume": {
+    "nom": "Plume",
+    "hex": "#F2EDE2"
+  },
+  "soie_araignee": {
+    "nom": "Soie d'araignée",
+    "hex": "#E9E9E4"
+  },
+  "suif": {
+    "nom": "Suif",
+    "hex": "#E7DFC6"
+  },
+  "tendon": {
+    "nom": "Tendon",
+    "hex": "#E3D7BE"
+  },
+  "vessie": {
+    "nom": "Vessie",
+    "hex": "#D8CDB4"
   }
 }

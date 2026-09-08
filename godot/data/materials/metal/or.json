@@ -1,7 +1,6 @@
 {
   "name_key": "material.or.name",
   "category": "metal",
-  "palier": 3,
   "stats": {
     "durete": 13,
     "densite": 19,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 3,
   "stats_base": {
     "durete": 10,
     "valeur_base": 35,

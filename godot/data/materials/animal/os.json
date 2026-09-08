@@ -1,7 +1,6 @@
 {
   "name_key": "material.os.name",
   "category": "animal",
-  "palier": 2,
   "stats": {
     "durete": 8,
     "densite": 6,
@@ -39,6 +38,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 2,
   "stats_base": {
     "durete": 10,
     "valeur_base": 6,

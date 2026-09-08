@@ -1,7 +1,6 @@
 {
   "name_key": "material.diorite.name",
   "category": "roche",
-  "palier": 4,
   "stats": {
     "durete": 49,
     "densite": 14,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 26,
     "valeur_base": 4,

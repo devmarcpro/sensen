@@ -1,7 +1,6 @@
 {
   "name_key": "material.suif.name",
   "category": "animal",
-  "palier": 2,
   "stats": {
     "durete": 1,
     "densite": 3,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 2,
   "stats_base": {
     "durete": 1,
     "valeur_base": 6,

@@ -1,7 +1,6 @@
 {
   "name_key": "material.glace.name",
   "category": "meteorologique",
-  "palier": 2,
   "stats": {
     "durete": 5,
     "densite": 4,
@@ -37,6 +36,7 @@
     "eau": 1.0
   },
   "composition": null,
+  "palier": 2,
   "stats_base": {
     "durete": 6,
     "valeur_base": 2,

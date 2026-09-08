@@ -1,7 +1,6 @@
 {
   "name_key": "material.cuir_bouilli.name",
   "category": "synthetique",
-  "palier": 4,
   "stats": {
     "durete": 27,
     "densite": 6,
@@ -37,6 +36,7 @@
     "bois": 1.0
   },
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 14,
     "valeur_base": 12,

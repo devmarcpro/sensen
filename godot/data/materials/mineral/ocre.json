@@ -1,7 +1,6 @@
 {
   "name_key": "material.ocre.name",
   "category": "mineral",
-  "palier": 1,
   "stats": {
     "durete": 2,
     "densite": 8,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 3,
     "valeur_base": 4,

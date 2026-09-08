@@ -1,7 +1,6 @@
 {
   "name_key": "material.soie_araignee.name",
   "category": "animal",
-  "palier": 4,
   "stats": {
     "durete": 10,
     "densite": 1,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 5,
     "valeur_base": 32,

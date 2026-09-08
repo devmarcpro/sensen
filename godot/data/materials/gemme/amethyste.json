@@ -1,7 +1,6 @@
 {
   "name_key": "material.amethyste.name",
   "category": "gemme",
-  "palier": 3,
   "stats": {
     "durete": 46,
     "densite": 9,
@@ -38,6 +37,7 @@
     "terre": 0.5
   },
   "composition": null,
+  "palier": 3,
   "stats_base": {
     "durete": 35,
     "valeur_base": 25,

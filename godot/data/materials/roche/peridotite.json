@@ -1,7 +1,6 @@
 {
   "name_key": "material.peridotite.name",
   "category": "roche",
-  "palier": 4,
   "stats": {
     "durete": 63,
     "densite": 21,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 33,
     "valeur_base": 8,

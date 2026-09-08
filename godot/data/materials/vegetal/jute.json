@@ -1,7 +1,6 @@
 {
   "name_key": "material.jute.name",
   "category": "vegetal",
-  "palier": 2,
   "stats": {
     "durete": 2,
     "densite": 2,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 2,
   "stats_base": {
     "durete": 2,
     "valeur_base": 4,

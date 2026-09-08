@@ -76,7 +76,6 @@ ui.horloge,horloge {horloge} · {mode}
 ui.mode.exploration,exploration ({tps} ticks/s)
 ui.mode.combat,COMBAT — le temps n'avance qu'à l'action
 ui.mode.donjon,DONJON — le temps n'avance qu'à l'action
-ui.aide,ZQSD : se déplacer (8 directions) · R : ramasser · clic : se déplacer / frapper / creuser un mur adjacent (la pioche en main récolte) · maj+clic : attaque lourde · G : garde · espace : attendre · tab : arène suivante puis le camp · F5 : recharger les données
 ui.entite.ligne,{nom} pv {pv}/{pv_max} · vig {end} · agit à t={compteur} · h={h}
 ui.case,"case ({x},{y}) h={h} · Δh vs toi : {dh}"
 ui.timeline,prochaines actions :
@@ -104,7 +103,6 @@ element.feu,Feu
 element.terre,Terre
 element.metal,Métal
 element.eau,Eau
-ui.aide.armes,1-7 : changer d'arme ({ticks} ticks) — {liste}
 ui.wuxing,{element} contre {contre} : ×{dom} · jauge {segments}/{capacite} (gain ×{gain}) · ce coup : segment {position} {transition} → ×{chaine}
 ui.chaine,chaîne : {segments}
 journal.capacite,{att} lance {capacite} sur {def} ({zone}) : {degats} dégâts
@@ -114,7 +112,6 @@ journal.condition_fausse,{capacite} ne part pas : {condition} n'est pas remplie 
 capacite.etincelle.name,Étincelle
 capacite.gel_en_ligne.name,Gel en ligne
 capacite.baume.name,Baume
-ui.aide.capacites,I : inventaire · F : atelier · C : feuille (Échap ferme) · M : carte du monde (clic sur une cellule voisine : revendiquer) · K : territoire · B : registre d'élevage · V : apprivoiser · N : zoom minimap (⇧N : masquer) · F6 sauvegarder · F7 charger · F1-F3 : viser une capacité puis cliquer (Échap : annuler) · P : dessiner un périmètre (au camp) — {liste}
 ui.capacite,{touche} {nom} [{modules}] : {forme} portée {pmin}-{pmax} taille {taille} · {ticks} ticks · {ressource} {monnaie} · {des}{bonus}
 ui.capacite.visee,VISÉE : {nom} — cliquer une tuile
 ui.capacite.preview,{nom} sur {def} : {des}{bonus} ×{dom} → zone {zone} ×{mult} − armure {armure} ⇒ {min}–{max}
@@ -1813,6 +1810,7 @@ module.veille.name,Veille
 module.vivacite.name,Vivacité
 module.voile.name,Voile
 module.voile_de_brume.name,Voile de brume
+arena.banc_objets.name,"Banc d'objets"
 # --- matériaux (tools/gen_materials.py) ---
 material.pin.name,Pin
 material.sapin.name,Sapin
@@ -1858,86 +1856,6 @@ material.cuivre.name,Cuivre
 material.etain.name,Étain
 material.zinc.name,Zinc
 material.bronze.name,Bronze
-material.palladium.name,"Palladium"
-material.vanadium.name,"Vanadium"
-material.molybdene.name,"Molybdène"
-material.magnesium.name,"Magnésium"
-material.ecorce.name,"Écorce"
-material.osier.name,"Osier"
-material.rotin.name,"Rotin"
-material.sisal.name,"Sisal"
-material.jute.name,"Jute"
-material.encre.name,"Encre"
-material.miel.name,"Miel"
-material.lait.name,"Lait"
-material.sang.name,"Sang"
-material.saumure.name,"Saumure"
-material.vinaigre.name,"Vinaigre"
-material.alcool.name,"Alcool"
-material.mercure.name,"Mercure"
-material.borax.name,"Borax"
-material.potasse.name,"Potasse"
-material.platre.name,"Plâtre"
-material.chaux.name,"Chaux"
-material.lessive_de_cendre.name,"Lessive de cendre"
-material.essence_terebenthine.name,"Essence de térébenthine"
-material.colle_d_os.name,"Colle d'os"
-material.tanin.name,"Tanin"
-material.parchemin.name,"Parchemin"
-material.savon.name,"Savon"
-material.sable_noir.name,"Sable noir"
-material.laterite.name,"Latérite"
-material.marne.name,"Marne"
-material.humus.name,"Humus"
-material.amidon.name,"Amidon"
-material.gomme_arabique.name,"Gomme arabique"
-material.latex.name,"Latex"
-material.resine.name,"Résine"
-material.venin.name,"Venin"
-material.vessie.name,"Vessie"
-material.soie_araignee.name,"Soie d'araignée"
-material.carapace.name,"Carapace"
-material.suif.name,"Suif"
-arena.banc_objets.name,"Banc d'objets"
-material.pierre_de_lave.name,"Pierre de lave"
-material.scorie.name,"Scorie"
-material.sel_marin.name,"Sel marin"
-material.eponge.name,"Éponge"
-material.varech.name,"Varech"
-material.os_de_seiche.name,"Os de seiche"
-material.nacre.name,"Nacre"
-material.corail.name,"Corail"
-material.cendre.name,"Cendre"
-material.limon.name,"Limon"
-material.grele.name,"Grêle"
-material.givre.name,"Givre"
-material.dent_fossile.name,"Dent fossile"
-material.trilobite.name,"Trilobite"
-material.tourmaline.name,"Tourmaline"
-material.aigue_marine.name,"Aigue-marine"
-material.agate.name,"Agate"
-material.perle.name,"Perle"
-material.alun.name,"Alun"
-material.azurite.name,"Azurite"
-material.galene.name,"Galène"
-material.magnetite.name,"Magnétite"
-material.hematite.name,"Hématite"
-material.maillechort.name,"Maillechort"
-material.acier_vanadium.name,"Acier au vanadium"
-material.electrum.name,"Électrum"
-material.acier_damasse.name,"Acier damassé"
-material.fonte.name,"Fonte"
-material.porcelaine.name,"Porcelaine"
-material.cire.name,"Cire"
-material.poix.name,"Poix"
-material.charbon_de_bois.name,"Charbon de bois"
-material.feutre.name,"Feutre"
-material.cuir_bouilli.name,"Cuir bouilli"
-material.boyau.name,"Boyau"
-material.crin.name,"Crin"
-material.plume.name,"Plume"
-material.tendon.name,"Tendon"
-material.corne.name,"Corne"
 material.laiton.name,Laiton
 material.fer.name,Fer
 material.acier.name,Acier
@@ -1955,6 +1873,17 @@ material.chrome.name,Chrome (chromite)
 material.manganese.name,Manganèse
 material.bismuth.name,Bismuth
 material.antimoine.name,Antimoine
+material.acier_tungstene.name,Acier au tungstène
+material.acier_vanadium.name,Acier au vanadium
+material.acier_damasse.name,Acier damassé
+material.acier_inox.name,Acier inoxydable
+material.fonte.name,Fonte
+material.magnesium.name,Magnésium
+material.maillechort.name,Maillechort
+material.molybdene.name,Molybdène
+material.palladium.name,Palladium
+material.vanadium.name,Vanadium
+material.electrum.name,Électrum
 material.pierre.name,Pierre
 material.granit.name,Granit
 material.granit_noir.name,Granit noir (gabbro)
@@ -1983,6 +1912,7 @@ material.conglomerat.name,Conglomérat
 material.breche_volcanique.name,Brèche volcanique
 material.kimberlite.name,Kimberlite
 material.calcite.name,Calcite (spath)
+material.pierre_de_lave.name,Pierre de lave
 material.houille.name,Houille
 material.lignite.name,Lignite
 material.anthracite.name,Anthracite
@@ -1994,7 +1924,6 @@ material.mica.name,Mica
 material.pyrite.name,Pyrite
 material.malachite.name,Malachite
 material.argile_refractaire.name,Argile réfractaire
-material.guano.name,Guano/salpêtre de grotte
 material.tourbe_compactee.name,Tourbe compactée
 material.bitume.name,Bitume
 material.cinabre.name,Cinabre
@@ -2005,6 +1934,18 @@ material.ambre.name,Ambre
 material.fluorine.name,Fluorine
 material.amiante.name,Amiante
 material.phosphorite.name,Phosphorite
+material.alun.name,Alun
+material.azurite.name,Azurite
+material.borax.name,Borax
+material.chaux.name,Chaux
+material.galene.name,Galène
+material.guano.name,Guano/salpêtre de grotte
+material.hematite.name,Hématite
+material.kaolin.name,Kaolin
+material.magnetite.name,Magnétite
+material.potasse.name,Potasse
+material.sel_marin.name,Sel marin
+material.uraninite.name,Uraninite
 material.quartz.name,Quartz
 material.amethyste.name,Améthyste
 material.topaze.name,Topaze
@@ -2016,20 +1957,37 @@ material.saphir.name,Saphir
 material.emeraude.name,Émeraude
 material.diamant.name,Diamant
 material.onyx.name,Onyx
+material.agate.name,Agate
+material.aigue_marine.name,Aigue-marine
+material.perle.name,Perle
+material.tourmaline.name,Tourmaline
 material.terre.name,Terre
 material.terre_fertile.name,Terre fertile
 material.tourbe.name,Tourbe
 material.sable.name,Sable
 material.argile.name,Argile
 material.gravier.name,Gravier
+material.cendre.name,Cendre
+material.humus.name,Humus
+material.laterite.name,Latérite
+material.limon.name,Limon
+material.marne.name,Marne
+material.sable_noir.name,Sable noir
 material.lin.name,Lin
 material.coton.name,Coton
 material.paille.name,Paille
 material.chanvre.name,Chanvre
-material.laine.name,Laine
-material.soie.name,Soie
-material.cuir.name,Cuir
-material.fourrure.name,Fourrure
+material.amidon.name,Amidon
+material.gomme_arabique.name,Gomme arabique
+material.jute.name,Jute
+material.latex.name,Latex
+material.osier.name,Osier
+material.rotin.name,Rotin
+material.resine.name,Résine
+material.sisal.name,Sisal
+material.tanin.name,Tanin
+material.varech.name,Varech
+material.ecorce.name,Écorce
 material.eau.name,Eau
 material.eau_salee.name,Eau salée
 material.lave.name,Lave
@@ -2037,20 +1995,70 @@ material.huile.name,Huile
 material.goudron.name,Goudron
 material.boue.name,Boue
 material.seve.name,Sève
+material.alcool.name,Alcool
+material.encre.name,Encre
+material.essence_terebenthine.name,Essence de térébenthine
+material.lait.name,Lait
+material.lessive_de_cendre.name,Lessive de cendre
+material.mercure.name,Mercure
+material.miel.name,Miel
+material.sang.name,Sang
+material.saumure.name,Saumure
+material.venin.name,Venin
+material.vinaigre.name,Vinaigre
 material.os_fossile.name,Os fossile
 material.ammonite.name,Ammonite
 material.bois_petrifie.name,Bois pétrifié
 material.coquillage_fossile.name,Coquillage fossile
 material.geode.name,Géode
 material.meteorite_ferreuse.name,Météorite ferreuse
+material.corail.name,Corail
+material.dent_fossile.name,Dent fossile
+material.nacre.name,Nacre
+material.trilobite.name,Trilobite
 material.glace.name,Glace
 material.neige.name,Neige
+material.givre.name,Givre
+material.grele.name,Grêle
 material.verre.name,Verre
 material.brique.name,Brique
 material.chaume_tresse.name,Chaume tressé
 material.papier.name,Papier
+material.brique_refractaire.name,Brique réfractaire
+material.beton.name,Béton
+material.caoutchouc.name,Caoutchouc
+material.charbon_de_bois.name,Charbon de bois
+material.cire.name,Cire
+material.colle_d_os.name,Colle d'os
+material.cuir_bouilli.name,Cuir bouilli
+material.feutre.name,Feutre
+material.parchemin.name,Parchemin
+material.platre.name,Plâtre
+material.poix.name,Poix
+material.porcelaine.name,Porcelaine
+material.savon.name,Savon
+material.scorie.name,Scorie
+material.verre_trempe.name,Verre trempé
+material.boyau.name,Boyau
+material.carapace.name,Carapace
+material.corne.name,Corne
+material.crin.name,Crin
+material.cuir.name,Cuir
+material.fourrure.name,Fourrure
+material.laine.name,Laine
 material.os.name,Os
+material.os_de_seiche.name,Os de seiche
 material.os_massif.name,Os massif
+material.plume.name,Plume
+material.soie.name,Soie
+material.soie_araignee.name,Soie d'araignée
+material.suif.name,Suif
+material.tendon.name,Tendon
+material.vessie.name,Vessie
+material.croc.name,croc
+material.ivoire.name,ivoire
+material.eponge.name,Éponge
+material.ecaille.name,écaille
 # --- fin matériaux ---
 # --- cultures de nommage (tools/gen_name_cultures.py) ---
 titre.latine.monarchie_hereditaire.m,Roi

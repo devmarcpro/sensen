@@ -1,7 +1,6 @@
 {
   "name_key": "material.os_de_seiche.name",
   "category": "animal",
-  "palier": 4,
   "stats": {
     "durete": 6,
     "densite": 1,
@@ -41,6 +40,7 @@
     "terre": 0.2
   },
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 3,
     "valeur_base": 8,

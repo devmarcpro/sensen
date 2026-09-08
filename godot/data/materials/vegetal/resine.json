@@ -1,7 +1,6 @@
 {
   "name_key": "material.resine.name",
   "category": "vegetal",
-  "palier": 4,
   "stats": {
     "durete": 6,
     "densite": 3,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 3,
     "valeur_base": 10,

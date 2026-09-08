@@ -1,7 +1,6 @@
 {
   "name_key": "material.dent_fossile.name",
   "category": "fossile",
-  "palier": 5,
   "stats": {
     "durete": 73,
     "densite": 9,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 5,
   "stats_base": {
     "durete": 26,
     "valeur_base": 26,

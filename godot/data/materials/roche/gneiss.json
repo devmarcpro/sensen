@@ -1,7 +1,6 @@
 {
   "name_key": "material.gneiss.name",
   "category": "roche",
-  "palier": 4,
   "stats": {
     "durete": 51,
     "densite": 19,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 27,
     "valeur_base": 5,

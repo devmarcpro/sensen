@@ -1,7 +1,6 @@
 {
   "name_key": "material.plume.name",
   "category": "animal",
-  "palier": 3,
   "stats": {
     "durete": 3,
     "densite": 1,
@@ -37,6 +36,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 3,
   "stats_base": {
     "durete": 2,
     "valeur_base": 5,

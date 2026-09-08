@@ -1,7 +1,6 @@
 {
   "name_key": "material.sel_gemme.name",
   "category": "mineral",
-  "palier": 1,
   "stats": {
     "durete": 2,
     "densite": 8,
@@ -38,6 +37,7 @@
     "eau": 0.4
   },
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 4,
     "valeur_base": 5,

@@ -1,7 +1,6 @@
 {
   "name_key": "material.chrome.name",
   "category": "metal",
-  "palier": 4,
   "stats": {
     "durete": 53,
     "densite": 7,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 4,
   "stats_base": {
     "durete": 28,
     "valeur_base": 22,

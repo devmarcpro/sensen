@@ -1,7 +1,6 @@
 {
   "name_key": "material.tungstene.name",
   "category": "metal",
-  "palier": 5,
   "stats": {
     "durete": 118,
     "densite": 19,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 5,
   "stats_base": {
     "durete": 42,
     "valeur_base": 55,

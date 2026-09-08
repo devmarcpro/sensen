@@ -1,7 +1,6 @@
 {
   "name_key": "material.coquillage_fossile.name",
   "category": "fossile",
-  "palier": 1,
   "stats": {
     "durete": 4,
     "densite": 8,
@@ -38,6 +37,7 @@
     "eau": 0.3
   },
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 7,
     "valeur_base": 8,

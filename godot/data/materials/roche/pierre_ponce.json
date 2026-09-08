@@ -1,7 +1,6 @@
 {
   "name_key": "material.pierre_ponce.name",
   "category": "roche",
-  "palier": 1,
   "stats": {
     "durete": 2,
     "densite": 4,
@@ -38,6 +37,7 @@
     "feu": 0.3
   },
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 4,
     "valeur_base": 4,

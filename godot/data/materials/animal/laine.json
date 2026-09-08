@@ -1,7 +1,6 @@
 {
   "name_key": "material.laine.name",
   "category": "animal",
-  "palier": 1,
   "stats": {
     "durete": 1,
     "densite": 2,
@@ -38,6 +37,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 1,
   "stats_base": {
     "durete": 2,
     "valeur_base": 6,

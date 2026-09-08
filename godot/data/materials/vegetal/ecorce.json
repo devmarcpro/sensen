@@ -1,7 +1,6 @@
 {
   "name_key": "material.ecorce.name",
   "category": "vegetal",
-  "palier": 3,
   "stats": {
     "durete": 5,
     "densite": 3,
@@ -35,6 +34,7 @@
   },
   "wuxing": null,
   "composition": null,
+  "palier": 3,
   "stats_base": {
     "durete": 4,
     "valeur_base": 3,
