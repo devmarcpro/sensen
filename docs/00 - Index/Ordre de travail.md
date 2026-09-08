@@ -30,6 +30,8 @@ d'abord, la suppression des modules ensuite », la grammaire qui survit, et l'or
 
 ---
 
+> [!question] Toutes les questions qui attendent le designer sont désormais dans **une seule note** : [[Décisions en attente]] (21 questions, écrite le 2026-09-08). Le palier 0 ci-dessous n'en garde que les deux qui commandent l'ordre de ce document.
+
 ## Palier 0 — deux questions, zéro ligne de code
 
 Elles coûtent au designer une phrase, et elles coûtent une semaine si elles arrivent tard.
@@ -306,6 +308,8 @@ sa carte entière au changement de grille).
 >   lumière, chaleur. Un passage hebdomadaire sur quelques centaines de royaumes est du GDScript sans problème.
 
 ## Palier 13 — ce qui n'est pas à moi
+
+*Le détail, et tout le reste de ce qui attend une décision : [[Décisions en attente]].*
 
 48. **Le jeu est muet** : zéro fichier audio. Je peux poser l'architecture ; les sons sont un choix du designer.
 49. **La difficulté de départ** — jugeable dès la fin du palier 3, pas plus tard : dès qu'il y a une pause et un écran
