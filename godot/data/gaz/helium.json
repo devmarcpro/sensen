@@ -1,0 +1,19 @@
+{
+  "_doc": "Le plus leger apres l hydrogene : il file au plafond et s echappe par la moindre fissure.",
+  "name_key": "gaz.helium",
+  "teinte": [
+    0.95,
+    0.95,
+    1.0,
+    0.2
+  ],
+  "masse": 0.14,
+  "degats": "",
+  "element": {},
+  "statut": "epuisement",
+  "statut_ticks": 30,
+  "soigne": "",
+  "mana": "",
+  "eteint_feux": false,
+  "inflammable": false
+}

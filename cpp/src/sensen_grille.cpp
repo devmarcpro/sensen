@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <vector>
 
 using namespace godot;
 
@@ -1168,6 +1169,9 @@ PackedInt32Array SensenGrille::composante(Object *grille, Vector2i depart, int m
 
 
 // ---------------------------------------------------------------- les passes de dessin (file 114, 2026-09-06)
+// Les aplats voiles voisins EN X, de meme hauteur et de meme voile, sont FONDUS en un parallelogramme
+// (2026-09-08) : leurs losanges partagent exactement une arete, donc un trait de N tuiles coute 2 triangles
+// au lieu de 2N. Pour N = 1 la sortie est celle d'avant, point par point.
 // Transcription de PassesGD (scenes/demo/passes_gd.gd) : le brouillard et les toits en tableaux de triangles que le
 // client soumet d'un coup (canvas_item_add_triangle_array). Les mêmes boucles, le même éventail de triangles par
 // polygone (0, i, i+1), les mêmes couleurs — test_noyau_cpp compare les tableaux.
@@ -1289,30 +1293,49 @@ Dictionary SensenGrille::brouillard(Object *grille, const Dictionary &vue, bool 
 	int x0 = std::max(s.ox, jp.x - rayon), x1 = std::min(s.ox + s.L - 1, jp.x + rayon);
 	int y0 = std::max(s.oy, jp.y - rayon), y1 = std::min(s.oy + s.H - 1, jp.y + rayon);
 	double tw2 = tw * 0.5, th2 = th * 0.5;
-	for (int sd = x0 + y0; sd <= x1 + y1; ++sd) {
-		for (int x = std::max(x0, sd - y1); x <= std::min(x1, sd - y0); ++x) {
-			int y = sd - x;
+	// La nature de chaque tuile, une fois : -1 rien (vue), -2 vegetal vu, -3 bloc a trois faces, sinon la CLE d'un
+	// aplat — hauteur * 2 + (0 memorise | 1 jamais vu) —, qui dit d'un seul nombre la hauteur ET le voile, donc
+	// exactement ce que deux voisins EN X doivent partager pour que leurs losanges fondent en un parallelogramme.
+	int lw = x1 - x0 + 1, lh = y1 - y0 + 1;
+	std::vector<int32_t> nature((size_t)lw * (size_t)lh, -1);
+	std::vector<int32_t> niveaux((size_t)lw * (size_t)lh, 0);
+	std::vector<uint8_t> vegetal_f((size_t)lw * (size_t)lh, 0);
+	for (int y = y0; y <= y1; ++y) {
+		for (int x = x0; x <= x1; ++x) {
+			int k = (y - y0) * lw + (x - x0);
 			int i = s.idx(x, y);
 			bool decouverte = decouvert.has(i);
 			int fl = drapeaux(s, i);
 			bool vegetal = (fl & F_VEGETATION) != 0;
+			vegetal_f[k] = vegetal ? 1 : 0;
 			if (decouverte && voit_e(s, vue, tout_vu, zj, vide_ci, x, y)) {
-				if (vegetal) {
-					veg_vus.push_back(i);
-				}
+				nature[k] = vegetal ? -2 : -1;
+			} else if (!vegetal && (fl & F_BLOQUE_PASSAGE) && !(fl & F_PORTE)) {
+				nature[k] = -3;
+				niveaux[k] = hauteur_bloc_e(s, nv, bd, fl, i, x, y, bat_j, rect_j, niveau_u, mur_coupe_u);
+			} else {
+				nature[k] = (int)s.h[i] * 2 + (decouverte ? 0 : 1);
+			}
+		}
+	}
+	for (int sd = x0 + y0; sd <= x1 + y1; ++sd) {
+		for (int x = std::max(x0, sd - y1); x <= std::min(x1, sd - y0); ++x) {
+			int y = sd - x;
+			int k = (y - y0) * lw + (x - x0);
+			int n = nature[k];
+			if (n == -1) {
 				continue;
 			}
-			Color col = decouverte ? voile : voile_jamais;
-			Vector2 c = ecran_e(x, y, (int)s.h[i], origine_dessin, tw, th, hstep);
-			if (vegetal) {
-				if (decouverte) {
-					veg_voiles.push_back(i);
-				} else {
-					veg_noirs.push_back(i);
-				}
-			} else if ((fl & F_BLOQUE_PASSAGE) && !(fl & F_PORTE)) {
-				double hm = hauteur_bloc_e(s, nv, bd, fl, i, x, y, bat_j, rect_j, niveau_u, mur_coupe_u) * hstep;
+			int i = s.idx(x, y);
+			if (n == -2) {
+				veg_vus.push_back(i);
+				continue;
+			}
+			if (n == -3) {
+				double hm = (double)niveaux[k] * hstep;
 				if (hm > 0) {
+					Vector2 c = ecran_e(x, y, (int)s.h[i], origine_dessin, tw, th, hstep);
+					Color col = decouvert.has(i) ? voile : voile_jamais;
 					Vector2 a[4] = { c + Vector2(-tw2, 0), c + Vector2(0, th2), c + Vector2(0, th2 - hm), c + Vector2(-tw2, -hm) };
 					Vector2 b[4] = { c + Vector2(0, th2), c + Vector2(tw2, 0), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm) };
 					Vector2 d[4] = { c + Vector2(-tw2, -hm), c + Vector2(0, -th2 - hm), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm) };
@@ -1322,7 +1345,24 @@ Dictionary SensenGrille::brouillard(Object *grille, const Dictionary &vue, bool 
 				}
 				continue;
 			}
-			Vector2 v[4] = { c + Vector2(-tw2, 0), c + Vector2(0, -th2), c + Vector2(tw2, 0), c + Vector2(0, th2) };
+			if (vegetal_f[k]) {   // un vegetal voile : son billboard a la charge du client, ET son aplat au sol
+				if ((n & 1) == 0) {
+					veg_voiles.push_back(i);
+				} else {
+					veg_noirs.push_back(i);
+				}
+			}
+			if (x > x0 && nature[k - 1] == n) {
+				continue;   // deja fondu dans le trait qui commence a sa gauche
+			}
+			int fin = x;
+			while (fin < x1 && nature[k + fin - x + 1] == n) {
+				++fin;
+			}
+			Color col = ((n & 1) == 0) ? voile : voile_jamais;
+			Vector2 ca = ecran_e(x, y, n >> 1, origine_dessin, tw, th, hstep);
+			Vector2 cb = ecran_e(fin, y, n >> 1, origine_dessin, tw, th, hstep);
+			Vector2 v[4] = { ca + Vector2(-tw2, 0), ca + Vector2(0, -th2), cb + Vector2(tw2, 0), cb + Vector2(0, th2) };
 			tr.poly(v, 4, col, nullptr);
 		}
 	}

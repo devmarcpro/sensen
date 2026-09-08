@@ -67,5 +67,9 @@
   ],
   "signature": "ecaille_elementaire",
   "classe_mere": "rodeur",
-  "cachee": true
+  "cachee": true,
+  "equipement_slots": {
+    "main_principale": "craft_epee",
+    "main_secondaire": "craft_epee"
+  }
 }

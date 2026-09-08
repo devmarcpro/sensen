@@ -67,6 +67,8 @@ et c'est le point** : les gaz d'aujourd'hui **ne sont pas un champ**. Une poche 
 pose des zones à durée fixe qui **ne diffusent jamais, ne se déplacent jamais, ne se mélangent jamais**.
 *Ce qu'il fait émerger* : se cacher devient un **lieu** et non un nombre ; un incendie tue par la fumée avant les
 flammes, et vite sous un plafond bas ; une garnison voit le panache d'un village qui brûle à l'horizon. Coût gros.
+>
+> **Reformulé le 2026-09-08 par le designer, et sa formulation est plus juste que la mienne** : « tu rajoutes le gaz dans le sol mais est-ce que tu fais pareil pour l'air ? ». Ce n'est pas « il manque la fumée » — c'est que **le système de gaz est à moitié construit** : la moitié souterraine est réelle (poches, brèche, volume, inondation, explosion), la moitié aérienne n'existe pas. Et **il n'y a pas d'air** : l'asphyxie est une étiquette. La donnée qui manquait est posée le jour même — les quinze gaz ont une **masse relative à l'air**, donc le grisou monte au plafond et la mofette coule au fond. Remonté en **24 ter** de l'[[Ordre de travail]], juste après le champ de danger.
 
 **L'humidité par tuile** — le compagnon obligé du champ de chaleur. *Vérifié absent : `humidite` est une couche de
 bruit pure, sans état, impossible à écrire.* *Ce qu'il fait émerger* : un feu de camp sous la pluie survit s'il est

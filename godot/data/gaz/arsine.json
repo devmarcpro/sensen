@@ -1,0 +1,21 @@
+{
+  "_doc": "Tres lourd et tres toxique : la mort lente des filons d arsenic.",
+  "name_key": "gaz.arsine",
+  "teinte": [
+    0.6,
+    0.55,
+    0.45,
+    0.4
+  ],
+  "masse": 2.69,
+  "degats": "1d6",
+  "element": {
+    "metal": 1.0
+  },
+  "statut": "poison",
+  "statut_ticks": 60,
+  "soigne": "",
+  "mana": "",
+  "eteint_feux": false,
+  "inflammable": false
+}

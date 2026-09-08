@@ -311,7 +311,7 @@ static func _enflammer(sim: Simulation, t: Vector2i) -> bool:
 ## Une poche percée (Gaz dans le sol) : le gaz remplit par inondation `volume` tuiles d'air à partir de la brèche — les
 ## galeries ouvertes, pas la roche — en zones au sol qui se dissipent après `duree_ticks`. Rend le nombre de tuiles.
 static func _liberer_gaz(sim: Simulation, breche: Vector2i, gaz_id: String, tick: int) -> int:
-	var cfg: Dictionary = GameData.config("gaz")
+	var cfg: Dictionary = GameData.config("gaz_regles")
 	var lib: Dictionary = cfg.get("liberation", {})
 	var volume := maxi(1, int(lib.get("volume", 14)))
 	var duree := int(lib.get("duree_ticks", 400))
@@ -382,6 +382,77 @@ static func _liberer_sous_sol(sim: Simulation, breche: Vector2i, genre: String, 
 			sim.lumiere_sale = true
 			EventBus.emettre(&"journal", [&"journal.magma_perce", {"x": breche.x, "y": breche.y}])
 	EventBus.emettre(&"tile_changed", [breche])
+
+
+## ---------------------------------------------------------------- le champ de danger (Émergence, 2026-09-08)
+
+## Ce que vaut un nuage, lu sur la fiche du gaz : des dégâts ou une explosion valent le maximum, un statut vaut moins,
+## un gaz qui ne fait qu'étouffer les feux vaut peu. Rien n'est inventé ici — tout se déduit de `gaz.json`.
+static func _danger_du_gaz(cfg: Dictionary, gaz_id: String) -> int:
+	var g: Dictionary = GameData.catalogues.gaz.get(gaz_id, {})
+	if not str(g.get("degats", "")).is_empty() or g.has("explosion"):
+		return int(cfg.get("gaz_degats", 100))
+	if not str(g.get("statut", "")).is_empty():
+		return int(cfg.get("gaz_statut", 60))
+	return int(cfg.get("gaz_inerte", 30))
+
+
+## Le pas du champ de danger. Il n'invente aucune source : il rend visibles à l'IA celles qui ne l'étaient pas.
+## Le feu, la lave et les glyphes posent DÉJÀ leur danger eux-mêmes et gardent ce privilège — le champ ne touche jamais
+## à leurs tuiles. Il n'ajoute que les deux qui manquaient, et c'est tout l'objet :
+##   · **les nuages de gaz**, qui vivaient dans `sim.zones` sans que rien ne prévienne l'IA — elle marchait dans le
+##     poison et dans le grisou ;
+##   · **la chaleur**, invisible tant qu'il n'y a pas de flamme, alors qu'une tuile à 300 °C brûle celui qui s'y tient.
+## Le code de décision de l'IA ne change pas d'une ligne : « on ne reste pas dans le danger » couvre désormais les deux.
+static func _tiquer_danger(sim: Simulation, tick: int) -> void:
+	var cfg: Dictionary = GameData.config("thermique").get("danger", {})
+	if cfg.is_empty() or tick < sim.danger_prochain_pas:
+		return
+	sim.danger_prochain_pas = tick + maxi(1, int(cfg.get("periode_ticks", 10)))
+	var voulu := {}
+	# a. Les nuages.
+	for z in sim.zones:
+		if not sim.grille.dans(z.pos):
+			continue
+		var i_z := sim.grille.idx(z.pos)
+		var v := int(cfg.get("gaz_degats", 100)) if str(z.get("type", "")) != "gaz" else _danger_du_gaz(cfg, str(z.get("gaz", "")))
+		voulu[i_z] = maxi(int(voulu.get(i_z, 0)), v)
+	# b. La chaleur, au-delà du seuil où elle blesse.
+	var seuil := float(cfg.get("chaleur_seuil", 70.0))
+	var plein := maxf(seuil + 1.0, float(cfg.get("chaleur_plein", 400.0)))
+	for idx_c in sim.chaleur_active.keys():
+		var i_c := int(idx_c)
+		if i_c < 0 or i_c >= sim.carte_chaleur.size():
+			continue
+		var c := float(sim.carte_chaleur[i_c])
+		if c < seuil:
+			continue
+		var v_c := clampi(roundi((c - seuil) / (plein - seuil) * 100.0), 1, 100)
+		voulu[i_c] = maxi(int(voulu.get(i_c, 0)), v_c)
+	# c. On retire ce que le champ avait posé et que plus rien ne justifie — sans jamais toucher au danger qu'un feu,
+	#    une coulée ou un glyphe tient lui-même.
+	for idx_a in sim.danger_champ.keys():
+		var i_a := int(idx_a)
+		if voulu.has(i_a) or _danger_tenu_ailleurs(sim, i_a):
+			continue
+		sim.grille.oter_danger(i_a)
+	sim.danger_champ = voulu
+	for i_v in voulu.keys():
+		sim.grille.poser_danger(int(i_v), maxi(int(voulu[i_v]), sim.grille.dangers.get(int(i_v), 0)))
+
+
+## Une tuile dont le danger appartient à quelqu'un d'autre que le champ : un feu qui brûle, une coulée de lave, un
+## glyphe armé. Le champ ne les retire jamais — ce sont leurs propriétaires qui le font.
+static func _danger_tenu_ailleurs(sim: Simulation, i: int) -> bool:
+	if sim.feux.has(i):
+		return true
+	var t := sim.grille.pos_de(i)
+	if "lave" in sim.grille.contenu_de(t).get("tags", []):
+		return true
+	for g in sim.glyphes:
+		if sim.grille.dans(g.pos) and sim.grille.idx(g.pos) == i:
+			return true
+	return false
 
 
 ## Les effets météo de la cellule sous la fenêtre — lus par le feu (qui s'éteint sous la neige) et par la chaleur
@@ -569,9 +640,9 @@ static func _tiquer_chaleur(sim: Simulation, tick: int) -> void:
 static func _tiquer_gaz(sim: Simulation, tick: int) -> void:
 	if tick < sim.gaz_prochain_pas:
 		return
-	var cfg: Dictionary = GameData.config("gaz")
+	var cfg: Dictionary = GameData.config("gaz_regles")
 	sim.gaz_prochain_pas = tick + int(cfg.get("periode_ticks", 10))
-	var defs: Dictionary = cfg.get("gaz", {})
+	var defs: Dictionary = GameData.catalogues.gaz   # le CATALOGUE, un fichier par gaz depuis le 2026-09-08
 	for z in sim.zones.duplicate():
 		if str(z.get("type", "")) != "gaz":
 			continue

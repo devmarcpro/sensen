@@ -76,5 +76,9 @@
     }
   ],
   "signature": "fiole",
-  "classe_mere": "erudit"
+  "classe_mere": "erudit",
+  "equipement_slots": {
+    "main_principale": "craft_epee",
+    "main_secondaire": "craft_epee"
+  }
 }

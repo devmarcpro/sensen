@@ -1,0 +1,25 @@
+{
+  "_doc": "Le plus leger de tous, et il brule. Une poche percee monte droit au toit.",
+  "name_key": "gaz.hydrogene",
+  "teinte": [
+    0.8,
+    0.9,
+    1.0,
+    0.3
+  ],
+  "masse": 0.07,
+  "degats": "",
+  "element": {},
+  "statut": "",
+  "statut_ticks": 0,
+  "soigne": "",
+  "mana": "",
+  "eteint_feux": false,
+  "inflammable": true,
+  "lumiere_min": 1,
+  "explosion": {
+    "puissance": 30,
+    "rayon": 2,
+    "degats": "5d6"
+  }
+}

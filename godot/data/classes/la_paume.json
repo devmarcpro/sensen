@@ -74,5 +74,9 @@
     }
   ],
   "signature": "baume",
-  "classe_mere": "mage"
+  "classe_mere": "mage",
+  "equipement_slots": {
+    "main_principale": "craft_epee",
+    "main_secondaire": "craft_epee"
+  }
 }

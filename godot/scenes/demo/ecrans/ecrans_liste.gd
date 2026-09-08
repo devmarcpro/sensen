@@ -58,6 +58,8 @@ static func rafraichir(ec: Ecrans) -> void:
 			EcransCreation._construire_perimetre(ec, j)
 		"echange":
 			EcransCreation._construire_echange(ec, j)
+		"coffre":
+			EcransCreation._construire_coffre(ec, j)
 		"entrainer":
 			EcransGestion._construire_entrainer(ec, j)
 		"commerce":
@@ -92,13 +94,13 @@ static func rafraichir(ec: Ecrans) -> void:
 		EcransCreation._portrait_partie(ec, str(ec.entrees[ec.selection].get("id", "")))   # `cadre_perso` reste visible : c'est le portrait de la partie
 	ec.apercu_monde.visible = ec.courant == "monde"
 	ec.inventaire_visuel.visible = ec.courant == "inventaire"
-	ec.echange_visuel.visible = ec.courant in ["commerce", "echange"]
+	ec.echange_visuel.visible = ec.courant in ["commerce", "echange", "coffre"]
 	ec.hotbar_ecran.visible = ec.courant == "inventaire" or ec.courant == "capacites"
 	ec.atelier_visuel.visible = ec.courant == "atelier"
 	ec.dialogue_visuel.visible = ec.courant == "dialogue"
 	ec.droite.visible = ec.courant != "dialogue"   # la carte de dialogue porte elle-même ses informations
 	ec.titre.visible = ec.courant != "dialogue"    # et le nom du PNJ en grand : pas de titre au-dessus
-	ec.liste.visible = not (ec.courant in ["inventaire", "atelier", "commerce", "echange", "dialogue"])
+	ec.liste.visible = not (ec.courant in ["inventaire", "atelier", "commerce", "echange", "coffre", "dialogue"])
 	ec.penta_objet.visible = ec.courant == "inventaire"   # la place qu'on lui laisse se décide plus bas, à la hauteur connue
 	# Chaque écran demandait une largeur en pixels fixes pour sa colonne de droite ; additionnée à la
 	# liste (340 px), la somme dépassait une fenêtre étroite et le contenu sortait du cadre. Ces
@@ -143,7 +145,7 @@ static func rafraichir(ec: Ecrans) -> void:
 		ec.penta_objet.custom_minimum_size = Vector2(0, cote_penta + 18.0 if cote_penta >= 96.0 else 0.0)
 		ec.inventaire_visuel.ajuster_largeur(large - ec.droite.custom_minimum_size.x)
 		ec.inventaire_visuel.reconstruire()
-	elif ec.courant in ["commerce", "echange"]:   # deux volets d'objets, le détail à droite (designer 2026-09-04)
+	elif ec.courant in ["commerce", "echange", "coffre"]:   # deux volets d'objets, le détail à droite (designer 2026-09-04)
 		ec.droite.custom_minimum_size = Vector2(part_droite.call(300.0, 0.28), 0)
 		ec.droite.size_flags_stretch_ratio = 0.6
 		ec.detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -342,7 +344,7 @@ static func _trier_objets(ec: Ecrans) -> void:
 			if str(ec.entrees[i].get("kind", "")) == "objet" and not bool(ec.entrees[i].get("equipe", false)):
 				sac.append(i)
 		_reordonner(ec, sac, func(en: Dictionary) -> Variant: return ec.inventaire_visuel.cle_uid(str(en.uid)), ec.inventaire_visuel.tri_inverse)
-	elif ec.courant in ["commerce", "echange"]:
+	elif ec.courant in ["commerce", "echange", "coffre"]:
 		for v in 2:
 			var kinds: Array = ["vente", "donner"] if v == 0 else ["achat", "reprendre"]
 			var bloc: Array[int] = []
@@ -722,7 +724,10 @@ static func _action_defaut(ec: Ecrans, en: Dictionary) -> void:
 		"stock":
 			ec.main.sim.retirer_stock(j, str(en.cle))
 		"donner", "reprendre":
-			ec.main.sim.echanger(j, ec.pnj_id, str(en.uid), str(en.kind))
+			if ec.courant == "coffre":   # un coffre : ranger ou reprendre UN objet (designer 2026-09-08)
+				ec.main.sim.intention(j.id, {"type": "ranger" if str(en.kind) == "donner" else "prendre_un", "objet": str(en.uid), "vers": ec.contenant_pos})
+			else:
+				ec.main.sim.echanger(j, ec.pnj_id, str(en.uid), str(en.kind))
 		"fonction":
 			ec.main.sim.intention(j.id, {"type": "assigner", "pnj": ec.pnj_id, "fonction": str(en.fonction), "perimetre": str(en.get("perimetre", ""))})
 			ec.fermer()

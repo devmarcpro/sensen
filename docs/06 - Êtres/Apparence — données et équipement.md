@@ -56,6 +56,14 @@ Aucune étape ne demande *quel type d'être* on dessine. C'est la contrepartie v
 >
 > Surtout, cinq **réglages continus** rejoignent les valeurs discrètes — largeur du visage, écartement et hauteur des yeux, longueur du nez, largeur de la bouche. C'est ce qui sépare un portrait-robot d'un simple catalogue : deux personnages aux mêmes traits ne se ressemblent plus. Les bornes et les pas vivent dans `apparence.json → curseurs`.
 
+
+> [!decision] Décidé le 2026-09-08 par le designer — **le visage se réduit à ce qu'on dessine**, et les couleurs se choisissent à la **roue**
+> « Enlève tous les paramètres de visage sauf tête, yeux, bouche, cheveux, pilosité, oreilles, nez, et du coup couleur pour cheveux, pilosité et la peau ; pour changer la couleur c'est une color wheel. »
+> **Ce qui reste** : `tete`, `oreilles`, `yeux`, `nez`, `bouche`, `cheveux`, `pilosite`, plus `carrure` et `taille` qui ne sont pas du visage. `barbe` devient **`pilosite`** (aucune / légère / fournie) — la pilosité, pas la seule barbe.
+> **Ce qui disparaît, partout** : sourcils, marque, mâchoire, menton, pommettes, implantation, paupières — le locus, le dossier de planches, le code de dessin et les blocs de race. *Un trait qu'on ne dessine pas n'a pas à être réglable* : chacun n'existait que sous forme de gabarit blanc, et chacun coûtait une ligne dans un écran que le joueur lit.
+> **Les trois couleurs sont libres.** Peau, cheveux, pilosité s'écrivent **en clair** (`#rrggbb`) ; `_teinte_de` lit indifféremment une couleur écrite ou un preset du catalogue, et les listes `teintes_peau` / `teintes_cheveux` ne sont plus que des **presets** — pour aller vite (← →) et pour le tirage des PNJ. Entrée sur une ligne de couleur ouvre un **ColorPicker en roue TSV**, et la ligne s'écrit dans sa propre couleur. La pilosité suit les cheveux tant qu'on ne la règle pas.
+> **Pourquoi ça compte au-delà de l'écran** : une planche du designer **porte déjà ses couleurs**, alors que le gabarit est blanc-gris et se laisse teindre. Sans couleur libre, la peau du personnage repeignait le sprite — un visage peint sortait marronnasse. `"teinte_peau": "#ffffff"` veut dire « ne teins pas », et c'est ce que porte l'Étranger.
+
 ## Liens
 - **Dépend de** : [[Blocs de l'être]], [[Squelette modulaire et points d'attache]], [[Loci — les dix types]]
 - **Alimente** : [[Vivarium — loci et variétés]], [[Équipement — 14 slots]], [[Monstres rares]]

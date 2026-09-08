@@ -184,6 +184,10 @@ static func charger_camp(sim: Simulation, joueur: Dictionary = {}, cellule_chois
 	var cont_sauves: Dictionary = sim.camp_sauve.get("contenants_pos", {})
 	sim.camp_sauve = {"entree": entree, "biome": e.biome, "cellule": depart}
 	SimVilles._peupler_fenetre(sim)
+	for pnj_id in cfg.get("pnj_depart", []):   # les PNJ posés au camp à la première venue (camp.pnj_depart)
+		var ou_pnj := sim._tuile_libre_autour(entree)
+		if sim.grille.dans(ou_pnj):
+			SimObjets.ajouter(sim, str(pnj_id), ou_pnj, "ia")
 	for id in ordre_sauves:
 		if not sim.entites.has(id) and pnj_sauves.has(id):
 			var x2: Dictionary = pnj_sauves[id]
@@ -739,6 +743,8 @@ static func _vider_etats_tuiles(sim: Simulation, change_de_lieu: bool = false) -
 	sim.chaleur_active.clear()
 	sim.chaleur_grille = null
 	sim.chaleur_prochain_pas = 0
+	sim.danger_champ.clear()   # les index du champ de danger sont ceux de la grille d'avant
+	sim.danger_prochain_pas = 0
 	sim.eau_active.clear()
 	sim.glyphes.clear()
 	sim.obstacles.clear()

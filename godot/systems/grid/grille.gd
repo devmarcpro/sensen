@@ -47,7 +47,7 @@ var materiau_defaut: String = "":         # le matériau des murs ordinaires (ma
 var meubles: Dictionary = {}              # index de tuile → id de meuble (data/meubles/)
 var stations_fixes: Dictionary = {}       # index de tuile → id de station posée
 var niveau_eau: Dictionary = {}           # index de tuile → niveau 1-7 d'un écoulement (Eau et liquides) ; une source vaut 8
-var dangers: Dictionary = {}              # index de tuile → true : à éviter en chemin (le feu, Météo) — la simulation le tient à jour
+var dangers: Dictionary = {}              # index de tuile → intensité 1-100 : à éviter en chemin (Émergence — le champ de danger, 2026-09-08). Le booléen d'avant ne disait que « oui » ; le noyau refuse toujours toute valeur non nulle, donc graduer ne change rien pour lui.
 var neige := false                        # état météo de la grille (Météo) : chaque pas coûte neige_surcout de plus
 var gel := false                          # sous 0 °C : l'eau est de la glace, elle se marche
 var sols: Dictionary = {}                 # index de tuile → id de matériau de sol (surface) ; vide = sol par défaut
@@ -69,7 +69,7 @@ var _noyau: RefCounted = null
 var _noyau_sale := true                    # règles ou œil changés : reconfigurer le noyau
 var _table_n := -1                         # taille de contenu_ids à la dernière table de drapeaux
 var occ := PackedByteArray()               # miroir de occupants : 1 = occupée
-var danger_a := PackedByteArray()          # miroir de dangers : 1 = à éviter
+var danger_a := PackedByteArray()          # miroir de dangers : l'INTENSITÉ 1-100 (Émergence, 2026-09-08), 0 = sûr. Le noyau refuse toute valeur non nulle : graduer ne change rien pour lui, et l'IA peut peser.
 var eau_a := PackedByteArray()             # miroir de niveau_eau : niveau + 1 (0 = pas d'entrée)
 var frott_a := PackedFloat64Array()        # le multiplicateur de friction de chaque tuile (sols, materiau_defaut)
 var _frott_sale := true
@@ -364,12 +364,20 @@ func liberer(p: Vector2i) -> void:
 	_n_occ = occupants.size()
 
 
-## Une tuile à éviter en chemin (le feu, la lave, un glyphe) — et son miroir pour le noyau.
-func poser_danger(i: int) -> void:
-	dangers[i] = true
+## Une tuile à éviter en chemin — et son miroir pour le noyau. L'intensité va de 1 à 100 (Émergence, 2026-09-08) :
+## 100 pour ce qui tue à coup sûr (le feu, la lave, un glyphe armé), moins pour ce qui gêne ou blesse peu. Le noyau
+## refuse toute valeur non nulle, donc les appelants d'avant, qui ne passaient rien, gardent exactement leur sens.
+func poser_danger(i: int, intensite: int = 100) -> void:
+	dangers[i] = clampi(intensite, 1, 100)
 	if i >= 0 and i < danger_a.size():
-		danger_a[i] = 1
+		danger_a[i] = clampi(intensite, 1, 100)
 	_n_danger = dangers.size()
+
+
+## Le danger d'une tuile, de 0 (sûre) à 100 (mortelle). C'est ce que l'IA lit pour CHOISIR, là où le chemin se contente
+## de refuser.
+func danger_de(p: Vector2i) -> int:
+	return int(dangers.get(idx(p), 0))
 
 
 func oter_danger(i: int) -> void:

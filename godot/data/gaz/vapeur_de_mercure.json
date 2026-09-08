@@ -1,0 +1,19 @@
+{
+  "_doc": "La vapeur du cinabre chauffe : lourde, invisible, et elle ne pardonne pas.",
+  "name_key": "gaz.vapeur_de_mercure",
+  "teinte": [
+    0.75,
+    0.75,
+    0.8,
+    0.3
+  ],
+  "masse": 6.93,
+  "degats": "",
+  "element": {},
+  "statut": "poison",
+  "statut_ticks": 100,
+  "soigne": "",
+  "mana": "",
+  "eteint_feux": false,
+  "inflammable": false
+}

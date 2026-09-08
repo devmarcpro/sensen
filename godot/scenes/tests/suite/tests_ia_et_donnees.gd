@@ -228,11 +228,15 @@ func test_discretion() -> void:
 	loup.cible = ""
 	s.combats.clear()
 	j.competences_eff["discretion"] = 30
-	verifier(s._chercher_cible(loup, 20).is_empty(), "discret : le loup ne le voit pas, pas de cible")
+	# Le camp a des habitants depuis `camp.pnj_depart` (2026-09-08) : le loup peut trouver QUELQU'UN. Ce que ce
+	# test prouve, c'est que ce quelqu'un n'est pas le joueur caché — l'assertion « aucune cible » supposait
+	# un camp désert, ce qui n'a jamais été ce qu'on voulait vérifier.
+	var c1 := s._chercher_cible(loup, 20)
+	verifier(c1.is_empty() or str(c1.id) != str(j.id), "discret : le loup ne prend pas le joueur pour cible")
 	loup.cible = j.id
 	loup.tick_derniere_vue = 20
 	s._chercher_cible(loup, 20 + int(s.regles.r.engagement.ia_ticks_sans_vue) + 1)
-	verifier(loup.cible == "", "semé en Discrétion : après ia_ticks_sans_vue sans le voir, le loup lâche")
+	verifier(str(loup.cible) != str(j.id), "semé en Discrétion : après ia_ticks_sans_vue sans le voir, le loup lâche le joueur")
 	s.monde.fermer()
 
 

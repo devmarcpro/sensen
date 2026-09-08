@@ -451,6 +451,7 @@ creature.renne.name,Reindeer
 creature.serpent_venimeux.name,Venomous snake
 creature.vautour.name,Vulture
 creature.villageois.name,Villager
+creature.etranger.name,Stranger
 species.carpe.name,Pond carp
 species.chat.name,Alley cat
 species.coquillage.name,Nacre shell
@@ -4491,3 +4492,9 @@ ui.aide.f_molette,"Wheel — zoom"
 ui.aide.d_molette,"Zoom in and out. Middle click: pan the view."
 journal.incarne_sans_chaine,"{nom} has no chain gauge: no Wu Xing chaining while you are in this body."
 journal.incarne_avec_chaine,"{nom} carries a chain gauge: Wu Xing chaining is possible again."
+gaz._template,template
+ui.apparence.pilosite,Body hair
+ui.apparence.teinte_pilosite,Body hair colour
+ui.apparence.val.legere,light
+ui.apparence.val.fournie,thick
+ui.coffre.titre,"{nom} — {n} / {cap} slots"

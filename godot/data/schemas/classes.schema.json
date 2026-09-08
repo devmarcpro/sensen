@@ -87,6 +87,9 @@
     },
     "cachee": {
       "type": "boolean"
+    },
+    "equipement_slots": {
+      "type": "object"
     }
   }
 }

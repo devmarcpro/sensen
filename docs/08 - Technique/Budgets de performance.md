@@ -101,6 +101,51 @@ La stratégie d'optimisation complète, système par système, est consolidée e
 > [!success] Mesuré le 2026-09-07, 17 h 45 — la minimap par le noyau (designer : « réécriture C++ et optimisation », redit)
 > `capture --ville --graine 21 --heure 10 --traverser 24` (sans vsync, 55 images, une traversée de cellule qui découvre des tuiles) : **`max.ui.minimap` 50 ms → 4,1 ms**, cumul `ui.minimap` 21,6 ms sur 55 images. Dans `test_noyau_passes`, la même cellule : GDScript 51,0 ms, C++ 1,90 ms, octets identiques. Ce qui reste des 4 ms est la surcouche des icônes (une boucle sur les vivants, la copie de l'image et son téléversement, sept fois par seconde) — pas une boucle sur les tuiles. Le détail dans [[Modules de la simulation et le C++]] (callout du 2026-09-07, 17 h).
 
+> [!important] Mesuré le 2026-09-08 — le lag en ville, chiffré : et **les deux passes chaudes sont DÉJÀ en C++** (designer : « énorme lag en ville », puis « tu peux pas réécrire certaines fonctions en C++ ? »)
+> **La mesure** (capture d'une ville de 107 habitants, 85 images, sur l'Intel UHD 620 du designer) : **24,1 ms en moyenne, 46,2 ms au pire** — 41 images/s en moyenne, 21 au pire. Le détail retourne l'intuition :
+> - **GPU : 5,9 ms.** **Rendu CPU de Godot : 3,3 ms.** Le matériel n'est pas le mur.
+> - **1 261 appels de dessin par image.**
+> - Le plus gros poste instrumenté est `draw.terrain` : **216 ms pour 196 redessins de morceaux** en 85 images.
+>
+> **Et voici la réponse à « pourquoi pas le C++ » : les deux passes chaudes y sont déjà.**
+> - Les **morceaux de terrain** passent par `SensenGrille.morceau` — la part **C++ coûte 0,23 ms** par morceau (`morceau.tableaux`), la **soumission au canevas 0,87 ms** (`draw.terrain`). **Le C++ est déjà la partie bon marché.**
+> - Le **brouillard** passe par `SensenGrille.brouillard` — sa part C++ culmine à 7,3 ms sur l'image d'un pas, la soumission à **12,7 ms**. Même verdict.
+> Ce qui reste coûteux est ce que **Godot doit soumettre** : ce n'est pas du calcul, c'est du dessin, et aucun portage ne le contourne.
+>
+> **Les vrais leviers, dans l'ordre du gain :**
+> 1. **Le joueur ne VOIT que 5 tuiles** (`perception × detection_par_perception` = 5 × 1,0) alors qu'on en **DESSINE 20** autour de lui. Toute la ville est donc du **mémorisé**, dessiné en silhouettes plates — et le brouillard en compte des centaines par passe, refaites à chaque pas. **Élargir la vue réduit mécaniquement ce qu'il y a à dessiner** : c'est le plus gros gain disponible, et il explique aussi le « les textures ne sont pas toujours affichées ». *C'est une décision de game design : le champ de vue du joueur et la portée de détection d'une IA partagent le même nombre, et ce ne sont pas la même chose.*
+> 2. **Ne pas refaire ce qui n'a pas changé** — la leçon du jour, appliquée deux fois : la **carte de lumière** se refaisait entièrement à chaque tick de monde (cent recalculs → zéro sur cent ticks immobiles), et les **occulteurs d'un paperdoll** gardaient les blocs de l'ancienne tuile parce que la position n'était pas dans la signature de redessin — d'où les « blocs fantômes qui suivent le joueur ».
+> 3. **Moins de triangles** : fusionner les silhouettes mémorisées adjacentes. Là, oui, le C++ servirait — mais après les deux premiers.
+>
+> **Une leçon de méthode qui n'est pas technique** : quatre processus Godot **orphelins** ont été trouvés dans la journée — des runs headless dont la tâche se termine côté harnais mais dont le processus survit, jusqu'à **823 secondes de CPU**. Ils tournaient pendant que le designer jouait. Vérifier les processus **avant** de lancer une suite fait partie de la mesure.
+
+> [!success] Corrigé le 2026-09-08 — la chasse au lag en ville, et **un A/B rigoureux qui nuance mon hypothèse**
+> **Ce que le joueur VOIT a désormais ses propres nombres.** Il empruntait `engagement.detection_par_perception` — la portée à laquelle une **IA repère une cible** —, si bien qu'en plein jour, ciel clair, il ne voyait que **cinq tuiles** quand le client en dessine vingt autour de lui. Toute la ville était donc du **mémorisé**, redessiné en silhouettes plates à chaque pas. `vision.joueur_base` (18) + `joueur_par_perception`, avec `joueur_min` comme plancher ; la nuit et la météo continuent de multiplier, une lumière en main rattrape.
+>
+> **L'A/B, à graine fixe, même ville** (KomPtah, 247 habitants, 85 images) :
+>
+> | | moyenne | **pire image** | appels de dessin |
+> |---|---|---|---|
+> | vue à **5** tuiles | 22,1 ms | **46,1 ms** | 1 236 |
+> | vue à **23** tuiles | 24,2 ms | **36,6 ms** | 1 242 |
+>
+> **La moyenne monte de 9 %, la pire image baisse de 21 %**, et le temps de script total passe de 166 à 47 ms. C'est la **pire image** qui compte ici : ce que le designer décrit comme « lag quand le joueur se déplace » est un **à-coup**, celui du brouillard entièrement reconstruit à chaque pas. Voir loin réduit ce qu'il y a à reconstruire.
+> **Honnêteté sur la méthode** : la première mesure, sans graine fixe, tombait sur une autre ville et disait le contraire (29,6 ms contre 24,1). Elle ne prouvait rien. **Deux captures ne se comparent que sur la même graine** — et il a fallu que la mesure me contredise pour que je le voie.
+>
+> **Les deux à-coups traités le même jour** : la **carte de lumière** refaite entièrement à chaque tick de monde (cent recalculs → zéro sur cent ticks immobiles, prouvé par `test_lumiere_incrementale`), et les **occulteurs d'un paperdoll** qui gardaient les blocs de l'ancienne tuile — la position n'était pas dans la signature de redessin, d'où les « blocs fantômes qui suivent le joueur et disparaissent à l'arrivée ».
+>
+> **Ce qui reste, dans l'ordre du gain** : **fusionner les silhouettes mémorisées adjacentes** (là, le C++ servirait vraiment — c'est le seul endroit de la chasse où il servirait), et **réduire les ~1 240 appels de dessin par image**.
+
+> [!failure] **CORRECTION du 2026-09-08, 18 h — la conclusion ci-dessous était FAUSSE, et la mesure qui l'aurait montrée tenait en une capture**
+> J'ai écrit « ce n'était pas un défaut de dessin, c'était un réglage ». C'était un **défaut de dessin** : le shader de grain n'atteignait pas le décor du tout. Le matériau était posé sur le nœud `terrain`, mais tout est dessiné par ses enfants `TerrainMorceau`, et un enfant de canevas sans matériau **n'hérite pas** de celui de son parent (`use_parent_material` manquait). Et par-dessus, `origine_dessin` restait à (0, 0) : les UV portaient des coordonnées monde qui noyaient le style de la matière.
+> **Ce que j'ai mal fait, précisément** : j'ai vérifié que les UV étaient posées (elles l'étaient), j'ai vu que le grain était faible (il l'était), et j'ai conclu. Je n'ai jamais vérifié que le shader **tournait sur ces pixels**. Un test d'une ligne — peindre en magenta tout ce qui passe par le shader — l'aurait dit d'un coup d'œil ; c'est celui qui a fini par trancher, six heures plus tard. **Une cause plausible n'est pas une cause démontrée.**
+> Le réglage du grain (0,26 / 0,15) reste, mais il n'explique rien : il n'était simplement jamais appliqué.
+
+> [!success] Corrigé le 2026-09-08 — « les textures ne sont pas affichées sur les blocs et les sols » : ce n'était pas un défaut de dessin, c'était un réglage
+> **Le sol reçoit bien ses UV** — le dessus d'une tuile, ses deux flancs, et même **un motif par matière** encodé dans la partie haute de `UV.x`. Le shader de grain tournait. La règle qu'il énonce (« sans UV, la matière est plate : ni soleil ni grain ») ne concernait pas le sol.
+> **Le problème était l'intensité** : `force_grain: 0.12` et `force_douce: 0.07`, soit une variation d'environ **±12 %** de la couleur. Sur une palette sombre — ±0,03 sur un vert olive — c'est **invisible**. Posé à **0,26 / 0,15** : la matière se voit sans que le décor grouille ; un essai à 0,38 / 0,22 s'est révélé trop marqué sur les toits.
+> **C'est de la direction artistique et une ligne de données** : le chiffre revient au designer, les deux captures de comparaison lui ont été envoyées.
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Boucle de tick]]
 - **Alimente** : [[Optimisation — principes]], [[Entités et pathfinding — performance]], [[Ordre de vérification]]

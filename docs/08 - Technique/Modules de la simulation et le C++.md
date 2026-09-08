@@ -117,6 +117,21 @@ Ordre : d'abord `AStarGrid2D`, l'A* en C++ **du moteur** (obstacles, poids par c
 > **Ce qui est fait** : `PassesGD.minimap` (la référence GDScript : la cellule du joueur, tuile par tuile, les mêmes teintes — eau, végétation, mur ou roche, porte, sol du matériau éclairci par la hauteur — écrites dans un `PackedByteArray` RGBA8) et sa transcription `SensenGrille.minimap`, qui lit `decouvert`, la table des drapeaux (liquide, végétation, bloque, mur, porte), `niveau_liquide`, `sols` et les hauteurs, et reçoit la table couleur-par-matériau du client. Le client fabrique l'`Image` depuis les octets (`Image.create_from_data`) au lieu de 4 096 `fill_rect`. Les icônes (le joueur, les êtres en vue) restent en GDScript : une boucle sur les vivants sept fois par seconde, pas une boucle sur les tuiles. `test_noyau_passes` compare les octets des deux côtés sur la cellule du village.
 > **Ce qui vient ensuite, dans l'ordre de la mesure** : `Grille.depuis_etage` (13,8 ms des 79 d'un étage — une construction de tableaux, pure) ; la mise à jour des nœuds des paperdolls (~2,5 ms par image en ville, mais du GDScript par être, sans boucle pure évidente) ; et `cellule.village` (2 ms), qui est de la règle et reste.
 
+
+> [!important] Mesuré le 2026-09-08, 22 h — « tu peux pas réécrire certaines fonctions en C++ pour qu'on lag moins en ville ? » (designer) : **les deux passes chaudes y sont déjà, et le C++ y est la moitié bon marché**
+> La demande revient une troisième fois, et pour la première fois la mesure répond **non** — il faut l'écrire ici, dans la note du C++, et pas seulement dans celle des budgets.
+> **Le détail, capture d'une ville sur la machine du designer** (un Intel UHD Graphics 620) :
+>
+> | passe | la part **C++** | la **soumission** au canevas |
+> |---|---|---|
+> | un morceau de terrain | `morceau.tableaux` **0,23 ms** | `draw.terrain` **0,87 ms** |
+> | le brouillard, sur l'image d'un pas | **7,3 ms** | **12,7 ms** |
+>
+> Et autour : **GPU 5,9 ms**, **rendu CPU de Godot 3,3 ms**, **~1 240 appels de dessin par image**. Le matériel n'est pas le mur, et le calcul non plus : ce qui reste coûteux est ce que **Godot doit soumettre**.
+> **Ce que ça ajoute à la règle de cette note.** Elle disait *mesurer, puis porter la boucle pure qui coûte*. La chasse au lag lui donne son symétrique : **quand la boucle pure est déjà portée, ce qui reste n'est pas de calculer plus vite, c'est d'avoir moins à soumettre.** Porter davantage serait du code, un test d'égalité et une dette d'entretien pour un gain qu'aucun instrument ne verrait — c'est exactement le verdict rendu en 114 sur les occulteurs et l'étage, et il vaut de nouveau.
+> **Le seul endroit où le C++ servirait encore, et il est précis** : **fusionner les silhouettes mémorisées adjacentes**. La part mémorisée d'une ville est dessinée en aplats, une tuile à la fois ; des tuiles voisines de même teinte pourraient n'être qu'**un rectangle**. C'est de la **réduction de géométrie**, une boucle pure, et elle a sa place dans `SensenGrille.brouillard`, qui bâtit déjà le tableau. Écrit en **ligne 45 bis** de l'[[Ordre de travail]] — parce qu'une phrase de fin dans une note ne devient jamais du travail.
+> **Et ce qui a fait tomber l'à-coup ce jour-là n'était pas du C++** : le champ de vue du joueur (une ligne de données), la carte de lumière rendue incrémentale (une signature), la signature de redessin d'un paperdoll (un hachage). **Pire image 46,1 → 36,6 ms.** C'est la mesure qui a choisi, pas le langage.
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Budgets de performance]], [[Simulation à ticks]]
 - **Alimente** : [[Arborescence du projet]], [[Entités et pathfinding — performance]], [[Simulation du monde — performance]]

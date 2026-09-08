@@ -295,6 +295,11 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > **Preuve** : `sonde_ecrans` monte `main.tscn` en entier et vérifie les trois — *« le monde avance de 1 tick écran fermé, 0 écran ouvert »*, *« l'écran de mort s'ouvre, le monde s'arrête derrière, 3 choix, se relever fonctionne »*, *« 12 actions dans l'InputMap, la marche par position, le remappage tient »*. C'est **la seule sonde qui puisse le prouver** : la suite headless ne monte jamais le client, et c'est très exactement pourquoi ces défauts ont vécu si longtemps.
 > *Au passage, le premier essai du remappage a échoué au second lancement — parce qu'il avait été **enregistré sur disque** entre les deux. Le test était faux ; la persistance, elle, était prouvée.*
 
+
+> [!success] Codé le 2026-09-08 — **zoomer beaucoup plus**, et les bornes du zoom passent en données (designer : « rajoute la possibilité de pouvoir zoomer beaucoup plus »)
+> Les bornes étaient **écrites en dur** dans la molette : `minf(2.0, zoom * 1.1)` / `maxf(0.5, …)`. Rien ne permettait de regarder un sprite de 64 × 64 à sa taille. Elles vivent maintenant dans `styles.vue.zoom` — `min` 0,4, `max` **12,0**, `pas` 1,15, `defaut` 2,0 — et le zoom de départ se lit là aussi.
+> **Le rayon dessiné suit tout de suite** (`_maj_rayon_vue` est appelé au changement de zoom) : zoomer réduit le nombre de tuiles à dessiner, reculer l'augmente, et `styles.vue.rayon_max` reste le garde-fou — au-delà, le fond réapparaît plutôt que de faire dessiner une cellule entière.
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

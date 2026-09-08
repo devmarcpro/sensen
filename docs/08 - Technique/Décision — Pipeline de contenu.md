@@ -51,6 +51,15 @@ Le registre complet vit dans `godot/data/README.md` (versionné avec les donnée
 > [!success] Rangé le 2026-08-30 — créatures et recettes en sous-dossiers
 > Dans la continuité de la demande du designer sur les modules (« vraiment trier tout ça ») : `creatures/` se lit désormais en **`bete/`**, **`humanoide/`** (hostiles, aventuriers) et **`civil/`** (villageois, gardes, marchands…) — le tag de la fiche décide ; `recipes/` en **`transformation/`** (matière → matière), **`alchimie/`**, **`cuisine/`**, **`fabrication/`**. Rien ne change pour le code : le chargement est récursif et l'id reste le nom du fichier. Le rangement suit toujours **un champ de la fiche** (tag, famille, origine, type), jamais un choix arbitraire — c'est ce qui permet de le régénérer.
 
+
+> [!success] Corrigé le 2026-09-08 — les gaz étaient une collection déguisée en configuration (designer : « je comprends pas pourquoi tu ne fais pas un fichier par gaz comme tu fais habituellement pour les autres matériaux »)
+> **Il avait raison, et cette note le décidait déjà.** `data/gaz.json` mêlait deux choses de nature différente : les **quinze gaz** — chacun avec sa teinte, sa masse, ses dégâts, son statut, son explosion, donc une **collection** — et **trois blocs de réglage** (où les poches se forment, ce qu'une brèche laisse sortir, la cadence du pas), qui sont bien une **configuration**.
+> **Séparé** : `data/gaz/` (un fichier par gaz, avec son `_template.json` commenté comme tous les autres catalogues) et `data/gaz_regles.json` (la configuration). Plus les deux schémas et l'enregistrement en catalogue.
+>
+> **Et le passage en catalogue a rendu un service immédiat** : la validation au boot s'applique enfin aux gaz — schéma, `name_key`, identifiant dupliqué. Elle a signalé d'emblée que mes `name_key` disaient `gaz.<id>.name` par habitude des matériaux, alors que les quinze clés de traduction existantes sont `gaz.<id>`. **Dans un fichier de configuration unique, rien de tout cela n'était vérifié.** C'est l'argument le plus concret pour la règle « un fichier par entrée » : ce n'est pas une question de goût, c'est ce qui met le contenu sous garde.
+>
+> **La même frontière reste à trancher pour `sous_sol.json`** (eau, géodes, magma) : trois *sortes de poche* avec leur réglage — plutôt une configuration, mais c'est discutable.
+
 ## Liens
 - **Dépend de** : [[Data-driven design]], [[Décisions d'architecture]], [[Contraintes permanentes]]
 - **Alimente** : [[Arborescence du projet]], [[Prototype de combat — spécification]], tous les schémas de l'Annexe B

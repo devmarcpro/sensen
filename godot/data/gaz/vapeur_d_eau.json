@@ -1,0 +1,21 @@
+{
+  "_doc": "La vapeur d une nappe chaude : elle monte, elle aveugle, elle ebouillante.",
+  "name_key": "gaz.vapeur_d_eau",
+  "teinte": [
+    0.95,
+    0.95,
+    0.95,
+    0.4
+  ],
+  "masse": 0.62,
+  "degats": "1d6",
+  "element": {
+    "feu": 1.0
+  },
+  "statut": "brulure",
+  "statut_ticks": 30,
+  "soigne": "",
+  "mana": "",
+  "eteint_feux": false,
+  "inflammable": false
+}

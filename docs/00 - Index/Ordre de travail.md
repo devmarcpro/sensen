@@ -162,10 +162,34 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
 23. **`fusion`** — la seule des cinq dont le consommateur existe déjà. Elle **finit** le champ de chaleur : la neige
     fond, l'eau gèle, la cire coule, le sable vitrifie, le minerai devient lingot. C'est aussi elle qui permettra à la
     chaleur d'absorber enfin la neige, le gel et la température ressentie.
-24. **Le champ de danger — et il n'a AUCUN bloqueur.** Ni stat, ni champ préalable ; ses trois sources existent déjà
+24. ~~**Le champ de danger**~~ — **FAIT le 2026-09-08.** Il gradue (1-100) et absorbe les deux sources que l'IA ne voyait pas : **les nuages de gaz** (elle marchait dans le poison) et **la chaleur** (une tuile à 300 °C sans flamme). Le code de l'IA n'a pas changé d'une ligne. *Reste : que l'IA PÈSE le grade au lieu de seulement refuser.* Voir [[Émergence — les champs partagés]].
+
+*Ce que le champ remplaçait :* Ni stat, ni champ préalable ; ses trois sources existent déjà
     (chaleur, gaz, lave) et la structure à remplacer est là, binaire, lue par le noyau C++ et par deux endroits de
     l'IA. **C'est le seul chantier de ce palier codable aujourd'hui.** L'ordre du designer le place après le bruit : je
     le signale sans le réordonner — c'est sa décision.
+24 ter. **LE CHAMP D'AIR** — *remonté ici le 2026-09-08 sur une question du designer : « tu rajoutes le gaz dans le
+    sol mais est-ce que tu fais pareil pour l'air ? ».* **Non, et l'asymétrie est exacte.**
+    **Sous terre le gaz est une vraie chose** : des poches placées par le bruit, percées à la pioche, un volume, une
+    inondation par les galeries ouvertes, l'inflammation, l'explosion.
+    **Une fois sorti, il n'existe plus.** `_liberer_gaz` fait **une seule** inondation et dépose N tuiles dans une
+    liste ; `_tiquer_zones` ne fait qu'**enlever celles qui ont expiré**. Un nuage ne diffuse jamais, ne se déplace
+    jamais, ne se mélange jamais, ne se dilue jamais. Et **il n'y a pas d'air du tout** : ni oxygène, ni confinement,
+    ni respiration — l'asphyxie est simulée par une **étiquette** (`statut: epuisement`), pas par une absence d'air.
+    **La donnée qui manquait est posée** (2026-09-08) : les quinze gaz ont désormais une **masse relative à l'air**,
+    calculée sur les masses molaires réelles. Le méthane à 0,55 **monte** — c'est le grisou qui attend une lampe au
+    toit d'une galerie ; le dioxyde de carbone à 1,52 **coule** — c'est la mofette au fond d'un puits ; le radon à 7,67
+    stagne au fond des caves. Avant, les quinze se comportaient pareil : ils restaient où ils étaient nés.
+    **Ce que le champ remplacerait** : la liste de zones figées, entièrement. Un nuage devient une **charge par tuile**
+    qui diffuse, monte ou coule selon sa masse, se dilue à l'air libre et **s'accumule dans un espace clos**. La
+    suffocation cesse d'être une étiquette.
+    **Ce qu'il lit et ce qui le lit** : il lit les **couches Z** (monter d'un étage a enfin un sens pour un gaz) et le
+    **vent** quand il existera (c'est lui qui décide si un nuage stagne ou se dilue — la ventilation d'une galerie) ;
+    il est lu par le **champ de danger** (fait), l'**ignition** du champ de chaleur, la **vue** (la fumée aveugle) et
+    demain le **champ sonore**.
+    **Il est ici, juste après le danger, et pas plus bas** : le danger vient de rendre les nuages visibles à l'IA, ce
+    champ les rend *mobiles* — c'est la suite directe, et le grisou qui monte est ce qui fait qu'une mine se joue.
+
 25. **Le champ de support** avec `portance` — l'effondrement, la seule chose qui sépare une mine d'un gouffre.
 26. **Le champ sonore** avec `absorption`. **Il ne peut pas s'appeler `bruit`** : le mot désigne déjà le bruit de
     Perlin partout dans le code. À trancher avant la première ligne.
@@ -208,7 +232,9 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
 ## Palier 7 — les quatre champs restants, dans l'ordre du designer
 
 29. **La rumeur qui circule** (aucun bloqueur — elle pourrait se faire au palier 5 ; l'ordre du designer la place ici).
-29 bis. **Les factions par tags idéologiques** — *validé le 2026-09-08 sur un avis extérieur, voir [[Vers la production]] ligne 149.*
+29 bis. **Les factions par tags idéologiques — et une faction par espèce** *(élargi le 2026-09-08 par le designer : « réputation par factions, une faction par espèce »).* La réputation existe déjà par PNJ, par village, par royaume et globalement ; **l'étage des factions manque**, et avec lui l'idée qu'une **espèce** en est une — aujourd'hui, chasser les cerfs jusqu'au dernier ne fâche personne. C'est le **lecteur naturel** de la rumeur (ligne 29) : elle transporte le fait, la faction décide qui s'en offusque. Les trois — rumeur, tags, factions — sont un seul système, à écrire ensemble.
+
+*L'analyse d'origine :* — *validé le 2026-09-08 sur un avis extérieur, voir [[Vers la production]] ligne 149.*
     **Le fait vérifié** : `Surface._lier_royaumes` calcule la relation entre deux royaumes à partir d'**attributs
     présents** (race, culture, gouvernance, écart de taille) plus un aléa, et son commentaire le dit lui-même —
     « une fonction **PURE** de la graine et de la paire ». **Deux royaumes ne se haïssent jamais POUR quelque chose**,
@@ -285,11 +311,29 @@ appelle.
 **Mesurer avant, pas pendant** : chaque champ ajouté aggrave le coût d'un recentrage de fenêtre (chaque champ remplit
 sa carte entière au changement de grille).
 
+> [!success] La **chasse au lag du 2026-09-08** (carte blanche du designer) a déjà pris les leviers bon marché de ce
+> palier : la carte de lumière (ligne 45), les occulteurs fantômes, et le **champ de vue du joueur** — qui empruntait la
+> portée de détection d'une IA et ne voyait que cinq tuiles, si bien que toute la ville était du **mémorisé**. Pire
+> image **46,1 → 36,6 ms**. Aucun de ces trois n'était du C++. Détail et méthode : [[Budgets de performance]].
+
+
 44. **Le franchissement de cellule.** *Chiffre corrigé* : ~13 ms par cellule, pas 31, depuis le portage C++ — mais
     toujours six à sept fois le budget, et trois cellules dans la même image.
-45. **La carte de lumière — et c'est pire que ce qui était écrit.** Elle n'est pas refaite « quand une tuile change » :
-    elle est refaite **à chaque tick de monde** dès que quelqu'un lit la lumière, et son lecteur en jeu est la vision
-    de l'IA, appelée par paire observateur/cible la nuit en ville. **À refaire sur le patron de la chaleur.**
+45. ~~**La carte de lumière**~~ — **FAIT le 2026-09-08** : elle était refaite **entièrement à chaque tick de monde**
+    dès que quelqu'un lisait la lumière. Refaite sur le patron de la chaleur (une signature : tuiles, porteurs de
+    lumière, heure) — **cent recalculs → zéro** sur cent ticks immobiles, prouvé par `test_lumiere_incrementale`.
+45 bis. **Fusionner les silhouettes mémorisées adjacentes — et c'est le seul endroit qui reste où le C++ servirait.**
+    *La réponse mesurée à « tu peux pas réécrire certaines fonctions en C++ ? » (designer, 2026-09-08) : les deux
+    passes chaudes **y sont déjà**, et le C++ y est la **moitié bon marché** — un morceau de terrain, c'est 0,23 ms de
+    noyau contre 0,87 ms de soumission ; le brouillard, 7,3 contre 12,7. Le calcul n'est pas le mur, la **soumission**
+    l'est.* Donc le levier n'est pas de calculer plus vite mais d'avoir **moins à soumettre** : la part mémorisée d'une
+    ville est dessinée en aplats, **une tuile à la fois**, alors que des voisines de même teinte pourraient n'être
+    **qu'un rectangle**. C'est une boucle pure, elle a sa place dans `SensenGrille.brouillard` qui bâtit déjà le
+    tableau, et c'est de la **géométrie en moins** — pas un portage de plus. Voir [[Modules de la simulation et le C++]].
+45 ter. **D'où viennent les ~1 240 appels de dessin par image ?** Le nombre n'a pas bougé d'un pouce entre les deux
+    branches de l'A/B du champ de vue (1 236 contre 1 242) : il ne dépend donc **pas** de ce qui est vu. **À
+    instrumenter avant de toucher quoi que ce soit** — je ne connais pas leur répartition, et la ligne 45 bis pourrait
+    n'en retirer aucun si les aplats mémorisés partagent déjà une commande.
 46. **Les cellules jamais déchargées** — *l'avis extérieur du 2026-09-08 tape exactement ici : la moitié « recompresser quand le joueur part » du principe macro/micro est la seule qui manque à Sensen.* *Dépendance nette* : **après** la ligne 44, jamais avant — évincer les cellules
     tant que la pré-génération coûte 13 ms rendrait le défaut **pire** (aujourd'hui, revenir sur ses pas est gratuit).
 

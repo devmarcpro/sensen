@@ -75,7 +75,10 @@ func test_noyau_cpp() -> void:
 	for i in g.largeur * g.hauteur_grille:
 		if (g.occ[i] == 1) != g.occupants.has(i):
 			miroirs += 1
-		if (g.danger_a[i] == 1) != g.dangers.has(i):
+		# Le danger est GRADUÉ depuis le 2026-09-08 (Émergence — le champ de danger) : le miroir ne porte plus 1 ou 0
+		# mais l'intensité 1-100, et c'est ce que le noyau lit (il refuse toute valeur non nulle). On vérifie donc
+		# l'ÉGALITÉ EXACTE, ce qui est plus fort que l'ancien test booléen : une intensité mal reportée se voit.
+		if int(g.danger_a[i]) != int(g.dangers.get(i, 0)):
 			miroirs += 1
 		if int(g.eau_a[i]) != (int(g.niveau_eau[i]) + 1 if g.niveau_eau.has(i) else 0):
 			miroirs += 1
@@ -1268,12 +1271,61 @@ func test_niveaux() -> void:
 
 # ---------------------------------------------------------------- Étape 1 : rigs, paperdoll, tutoriels
 
+## La CARTE DE LUMIÈRE ne se refait plus à chaque tick (2026-09-08, sur « énorme lag en ville quand le joueur se
+## déplace »). Elle était refaite ENTIÈREMENT dès qu'un tick de monde avait passé, même si rien n'avait bougé — et le
+## monde avance jusqu'à cinq ticks par image quand le joueur marche, pendant que `voit_ia` lit la lumière pour chaque
+## paire observateur/cible la nuit en ville. Une signature de l'état lumineux dit maintenant s'il faut recalculer.
+func test_lumiere_incrementale() -> void:
+	var s := Simulation.new(808)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	# Une première lecture calcule la carte.
+	s.niveau_lumiere(j.pos)
+	var n0: float = float(s.chrono.get("n.lumiere", 0.0))
+	verifier(n0 > 0.0, "une première lecture calcule la carte (%d)" % int(n0))
+	# 1. Cent ticks SANS que rien ne bouge : la carte ne doit pas se refaire une seule fois.
+	for k in 100:
+		s.horloge_monde.ticks += 1
+		s.niveau_lumiere(j.pos)
+	var n1: float = float(s.chrono.get("n.lumiere", 0.0))
+	verifier(n1 == n0, "cent ticks sans rien qui bouge : ZÉRO recalcul (avant : cent — %d)" % int(n1 - n0))
+	# 2. Une tuile qui change (`lumiere_sale`) DOIT refaire la carte : on ne casse pas la fraîcheur.
+	s.lumiere_sale = true
+	s.niveau_lumiere(j.pos)
+	var n2: float = float(s.chrono.get("n.lumiere", 0.0))
+	verifier(n2 == n1 + 1.0, "une tuile changée refait la carte, une fois")
+	# 3. Une SOURCE QUI BOUGE doit la refaire aussi — c'est ce que `lumiere_sale` ne couvrait pas, et la raison pour
+	#    laquelle le recalcul au tick existait.
+	var porteur: Dictionary = s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	var torche: Dictionary = s.generer_objet("torche", 1, {}, "commun", 0) if GameData.catalogues.items.has("torche") else {}
+	if not torche.is_empty():
+		porteur.equipement["main_secondaire"] = torche.uid
+		verifier(s.lumiere_de(porteur) > 0, "le villageois porte une lumière (%d)" % s.lumiere_de(porteur))
+		s.horloge_monde.ticks += 1
+		s.niveau_lumiere(j.pos)
+		var n3: float = float(s.chrono.get("n.lumiere", 0.0))
+		verifier(n3 > n2, "allumer une source refait la carte")
+		# Il se déplace : la carte doit suivre.
+		var ailleurs: Vector2i = s._tuile_libre_autour(porteur.pos)
+		s.grille.liberer(porteur.pos)
+		porteur.pos = ailleurs
+		s.grille.placer(porteur.id, ailleurs)
+		s.horloge_monde.ticks += 1
+		s.niveau_lumiere(j.pos)
+		verifier(float(s.chrono.get("n.lumiere", 0.0)) > n3, "et le porteur qui se DÉPLACE la refait — c'est ce que `lumiere_sale` ne voyait pas")
+		# Et à nouveau immobile : plus de recalcul.
+		var n4: float = float(s.chrono.get("n.lumiere", 0.0))
+		for k in 50:
+			s.horloge_monde.ticks += 1
+			s.niveau_lumiere(j.pos)
+		verifier(float(s.chrono.get("n.lumiere", 0.0)) == n4, "puis cinquante ticks immobiles : plus aucun recalcul")
+
 func test_paperdoll_et_tutoriels() -> void:
 	for id in ["humanoide", "quadrupede", "volant", "amorphe"]:
 		var rig: Dictionary = GameData.entree("rigs", id)
 		verifier(rig.segments.has(rig.racine) and rig.facings.has("S") and rig.facings.SW.miroir == "SE", "rig %s : racine, facings, miroir" % id)
 	var h: Dictionary = GameData.entree("rigs", "humanoide")
-	verifier(h.segments.size() == 14 and h.slots_segments.casque == ["tete"] and h.prise_arme == "main_D", "rig humanoïde : 14 segments, le casque peint la tête, l'arme à la main droite")
+	verifier(h.segments.size() == 15 and h.racine == "bassin" and h.slots_segments.casque == ["tete"] and h.prise_arme == "main_D", "rig humanoïde : 15 segments depuis la coupe du bassin, le casque peint la tête, l'arme à la main droite")
 	verifier(GameData.config("palette_materiaux").has("cuir") and GameData.config("palette_materiaux").cuir.hex == "#8A5A33", "palette : Cuir #8A5A33")
 	var s := nouvelle_sim("plaine_au_talus")
 	var j := joueur_de(s)
@@ -1286,7 +1338,7 @@ func test_paperdoll_et_tutoriels() -> void:
 	var teinte_attendue := Color.html(str(pal.hex)) if pal.has("hex") else Color(0.6, 0.6, 0.6)
 	verifier(not str(peints.torse.construction).is_empty() and peints.torse.couleur == teinte_attendue, "la construction donne la forme, le matériau (%s) la teinte" % mat_torse)
 	var monde := pd._poser_segments(h.facings.S, false)
-	verifier(monde.size() == 14 and monde.has("main_D"), "les 14 segments se placent depuis la racine")
+	verifier(monde.size() == 15 and monde.has("main_D") and monde.has("bassin"), "les 15 segments se placent depuis la racine (le bassin)")
 	var miroir := pd._poser_segments(h.facings.SE, true)
 	var droit := pd._poser_segments(h.facings.SE, false)
 	verifier(is_equal_approx(miroir.main_D.origine.x, -droit.main_D.origine.x), "le miroir inverse l'axe horizontal")
@@ -1403,6 +1455,20 @@ func test_noyau_passes() -> void:
 		chrono_gd += float(t1 - t0) / 1000.0
 		chrono_cpp += float(t2 - t1) / 1000.0
 		n_tri += b_gd.points.size() / 3 + t_gd.points.size() / 3
+		# LA FUSION DES APLATS (ligne 45 bis, 2026-09-08) : les tuiles voilées voisines en x, de même hauteur et de même
+		# voile, ne font qu'un parallélogramme. Le garde-fou : il doit sortir NETTEMENT moins de quadrilatères que de
+		# tuiles voilées — sans fusion il en sortirait un par tuile, plus trois par bloc. Si la fusion cesse d'opérer un
+		# jour (une clé qui ne se compare plus, un ordre changé), ce nombre remonte et la suite le dit.
+		if not tout_vu:
+			var voilees := 0
+			for dy in range(-24, 25):
+				for dx in range(-24, 25):
+					var tv: Vector2i = j.pos + Vector2i(dx, dy)
+					if g.dans(tv) and not vue.has(g.idx(tv)):
+						voilees += 1
+			var pts_b: PackedVector2Array = b_gd.points
+			var quads := pts_b.size() / 6
+			verifier(voilees > 200 and quads < voilees, "le brouillard fond ses aplats : %d quadrilatères pour %d tuiles voilées (%.1f par tuile)" % [quads, voilees, float(quads) / maxf(1.0, float(voilees))])
 		for paire in [[b_gd, b_cpp, "brouillard"], [t_gd, t_cpp, "toits"]]:
 			var a: Dictionary = paire[0]
 			var b: Dictionary = paire[1]
@@ -1415,6 +1481,57 @@ func test_noyau_passes() -> void:
 					ecarts += 1
 					print("  écart (%s, %s) au triangle %d : %s / %s, %s / %s" % [str(cas[0]), str(paire[2]), i / 3, str(a.points[i]), str(b.points[i]), str(a.couleurs[i]), str(b.couleurs[i])])
 					break
+	# LA PREUVE DE LA FUSION (ligne 45 bis, 2026-09-08) : le brouillard par tuile et le brouillard fondu, découpés
+	# par LA MÊME règle, doivent donner exactement les mêmes losanges. Un quadrilatère dont P1−P0 vaut (tw2, −th2)
+	# et P3−P0 (N·tw2, N·th2) est un trait de N losanges (N = 1 compris : un losange seul, ou le dessus d'un bloc) ;
+	# le reste — les deux flancs d'un bloc — garde sa forme entière. Aucun côté n'est privilégié, donc un écart est
+	# un VRAI écart : la première version de cette preuve classait les deux côtés différemment et annonçait 193
+	# différences qui n'existaient pas.
+	var vue_p: Dictionary = j.get("vue", {})
+	var av := PassesGD.brouillard_par_tuile(g, vue_p, false, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85))
+	var ap := PassesGD.brouillard(g, vue_p, false, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85))
+	var sacs: Array = [{}, {}]
+	for lequel in 2:
+		var res2: Dictionary = av if lequel == 0 else ap
+		var sac: Dictionary = sacs[lequel]
+		var p: PackedVector2Array = res2.points
+		var cl: PackedColorArray = res2.couleurs
+		var q := 0
+		while q + 5 < p.size():
+			var p0 := p[q]
+			var p1 := p[q + 1]
+			var p2 := p[q + 2]
+			var p3 := p[q + 5]
+			var col2: Color = cl[q]
+			var n_los := 0
+			if is_equal_approx(p1.x - p0.x, 20.0) and is_equal_approx(p1.y - p0.y, -10.0):
+				var h_los := (p3.y - p0.y) / 10.0
+				if h_los >= 0.99 and is_equal_approx(p3.y - p0.y, roundf(h_los) * 10.0) and is_equal_approx(p3.x - p0.x, roundf(h_los) * 20.0):
+					n_los = int(roundf(h_los))
+			if n_los > 0:
+				for u in n_los:
+					var ca2 := p0 + Vector2(20.0 * (u + 1), 10.0 * u)   # le centre du u-ième losange du trait
+					var cle2 := "L|%.1f|%.1f|%s" % [ca2.x, ca2.y, col2]
+					sac[cle2] = int(sac.get(cle2, 0)) + 1
+			else:
+				var cle3 := "Q|%.1f|%.1f|%.1f|%.1f|%.1f|%.1f|%s" % [p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, col2]
+				sac[cle3] = int(sac.get(cle3, 0)) + 1
+			q += 6
+	var sac_av: Dictionary = sacs[0]
+	var sac_ap: Dictionary = sacs[1]
+	var ecarts_f := 0
+	for cle5 in sac_av:
+		if int(sac_ap.get(cle5, 0)) != int(sac_av[cle5]):
+			ecarts_f += 1
+	for cle6 in sac_ap:
+		if not sac_av.has(cle6):
+			ecarts_f += 1
+	var pts_av: PackedVector2Array = av.points
+	var pts_ap: PackedVector2Array = ap.points
+	var quads_av := pts_av.size() / 6
+	var quads_ap := pts_ap.size() / 6
+	print("PREUVE FUSION : ancien %d formes / %d quadrilatères, fondu %d formes / %d quadrilatères, %d écarts" % [sac_av.size(), quads_av, sac_ap.size(), quads_ap, ecarts_f])
+	verifier(ecarts_f == 0 and sac_av.size() > 100, "la fusion couvre exactement les mêmes losanges que l'ancien brouillard (%d écarts, %d quadrilatères au lieu de %d)" % [ecarts_f, quads_ap, quads_av])
 	verifier(ecarts == 0 and n_tri > 100, "brouillard et toits : le noyau rend les mêmes tableaux que PassesGD (%d triangles sur trois cas, GDScript %.1f ms, C++ %.1f ms)" % [n_tri, chrono_gd, chrono_cpp])
 	# Le toit MÉMORISÉ, hors de vue, s'assombrissait de 0,55 écrit en dur dans les deux implémentations, alors que
 	# `styles.brouillard.toit_memorise` porte la valeur et que le `_doc` la promet (2026-09-07). On vérifie que le

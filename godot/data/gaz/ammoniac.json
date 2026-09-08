@@ -1,0 +1,21 @@
+{
+  "_doc": "Piquant, plus leger que l air. Il brule les yeux et la gorge bien avant de tuer.",
+  "name_key": "gaz.ammoniac",
+  "teinte": [
+    0.85,
+    0.95,
+    0.85,
+    0.35
+  ],
+  "masse": 0.59,
+  "degats": "1d2",
+  "element": {
+    "eau": 1.0
+  },
+  "statut": "aveugle",
+  "statut_ticks": 15,
+  "soigne": "",
+  "mana": "",
+  "eteint_feux": false,
+  "inflammable": false
+}

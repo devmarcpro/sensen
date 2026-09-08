@@ -70,26 +70,55 @@
   "vue": {
     "_doc": "Le rayon dessine autour du joueur suit la fenetre et le zoom (designer 2026-09-06, 23 h : « afficher plus a l'ecran, ne pas voir le fond gris ») : assez de tuiles pour couvrir l'ecran plus une marge (les blocs hauts), borne par rayon_max — au-dela (un zoom tres recule), le fond reparait.",
     "rayon_max": 56,
-    "marge": 4
+    "marge": 4,
+    "zoom": {
+      "_doc": "Les bornes du zoom (designer 2026-09-08 : « la possibilite de pouvoir zoomer beaucoup plus »). Ctrl + molette. `defaut` est le zoom d'une partie qui commence ; `pas` est le facteur d'un cran. Le plafond sert a regarder un sprite de 64 x 64 de pres ; le plancher est retenu parce qu'un zoom tres recule fait dessiner beaucoup de tuiles — au-dela de `rayon_max`, le fond reparait.",
+      "min": 0.4,
+      "max": 12.0,
+      "pas": 1.15,
+      "defaut": 2.0
+    }
   },
   "brouillard": {
     "_doc": "Le brouillard de guerre (designer 2026-09-06, 23 h) : tout le terrain se dessine, meme jamais vu — le fond de la scene est `fond` ; une tuile memorisee hors de vue porte `voile`, une tuile jamais vue `jamais_vu` (plus sombre) ; les blocs gardent leur matiere sous le voile ; les toits s'assombrissent de toit_memorise / toit_jamais_vu ; les vegetaux (billboards) se modulent de vegetal_memorise / vegetal_jamais_vu.",
-    "fond": [0.02, 0.02, 0.04],
-    "voile": [0.05, 0.05, 0.08, 0.55],
-    "jamais_vu": [0.02, 0.02, 0.04, 0.85],
+    "fond": [
+      0.02,
+      0.02,
+      0.04
+    ],
+    "voile": [
+      0.05,
+      0.05,
+      0.08,
+      0.55
+    ],
+    "jamais_vu": [
+      0.02,
+      0.02,
+      0.04,
+      0.85
+    ],
     "toit_memorise": 0.55,
     "toit_jamais_vu": 0.75,
-    "vegetal_memorise": [0.45, 0.45, 0.5],
-    "vegetal_jamais_vu": [0.18, 0.18, 0.22]
+    "vegetal_memorise": [
+      0.45,
+      0.45,
+      0.5
+    ],
+    "vegetal_jamais_vu": [
+      0.18,
+      0.18,
+      0.22
+    ]
   },
   "grain": {
-    "_doc": "Textures procédurales du décor (designer 2026-09-01, points 50 et 58) : calculées par shader, jamais une image. Les UV portent le plan de la face (le grain suit le relief) et leur partie haute encode le style de la matière. styles_par_categorie : la famille de matériau → le motif du shader.",
+    "_doc": "Textures procédurales du décor (designer 2026-09-01, points 50 et 58) : calculées par shader, jamais une image. Les UV portent le plan de la face (le grain suit le relief) et leur partie haute encode le style de la matière. styles_par_categorie : la famille de matériau → le motif du shader. Reglage releve le 2026-09-08 sur un constat du designer (« les textures ne sont pas affichees sur les blocs/sols ») : le grain etait a 0,12 / 0,07, soit une variation de +-12 % — invisible sur une palette sombre. Les UV etaient pourtant bien poses (le dessus d une tuile, ses deux flancs, et le motif de la matiere encode dans UV.x) : ce n etait pas un defaut de dessin, seulement un reglage. Pose a 0,26 / 0,15 : la matiere se voit sans que le decor grouille. Un essai a 0,38 / 0,22 est dans le journal — c est de la direction artistique, une ligne de donnees. UNE MATIERE PEUT AUSSI ETRE PEINTE (designer 2026-09-08) : un PNG de 64 x 64 dans `assets/terrain/<materiau>.png`. Les fichiers du dossier, tries par nom, sont empiles en un atlas ; le style du materiau devient `style_texture_base + sa ligne`, et le shader peint au lieu de calculer. Le soleil et la lumiere par tuile s'appliquent pareil. Une matiere sans fichier garde son motif calcule. `textures_par_materiau` dit QUELLE texture porte une matiere : le sol des biomes herbeux est `terre` et `terre_fertile`, pas `herbe` — sans cette table il aurait fallu renommer le fichier du designer ou inventer un materiau. Sans entree, une matiere prend la texture qui porte son propre nom. PRECISION (2026-09-08) : `pas_style` etait a 8192 et le premier style peint a 100, donc UV.x valait 819200 + x — un float 32 bits n'y garde plus que 16 pas par tuile, et la texture sortait en RAYURES. Le style n'a besoin que de passer au-dessus d'une coordonnee de tuile (moins de 512) : pas_style 512 et premier style peint 16 laissent plus de mille pas par tuile, et de la place pour cent textures.",
     "actif": true,
     "grains_par_tuile": 8.0,
-    "force_grain": 0.12,
-    "force_douce": 0.07,
+    "force_grain": 0.26,
+    "force_douce": 0.15,
     "echelle_douce": 0.35,
-    "pas_style": 8192.0,
+    "pas_style": 512,
     "styles": {
       "uni": 0,
       "roche": 1,
@@ -120,7 +149,11 @@
       "eau": "liquide",
       "herbe": "vegetal"
     },
-    "materiau_mur_defaut": "granit"
+    "materiau_mur_defaut": "granit",
+    "style_texture_base": 16,
+    "textures_par_materiau": {
+      "terre_fertile": "herbe"
+    }
   },
   "carte": {
     "_doc": "La carte du monde (designer 2026-09-01, point 59) : chaque cellule est peinte en sous_points × sous_points sondes, tant que la case dépasse sous_points_min_px pixels.",
@@ -201,11 +234,56 @@
     "picto_tenu_unites": 14,
     "pictos_tenus": {
       "_doc": "Ce qu'on tient sans montage pre-rendu (designer 2026-09-06 : le meme sprite qu'a l'inventaire) : la case du pictogramme fait picto_tenu_unites unites de rig ; par nom de pictogramme, le point de prise (en dixiemes de case, comme le picto est dessine) et l'axe qui se pose sur la main — la diagonale bas-gauche vers haut-droite pour une lame.",
-      "_defaut": {"prise": [2.5, 7.5], "axe": [1, -1]},
-      "arc": {"prise": [4.7, 5.0], "axe": [0, -1]},
-      "lumiere": {"prise": [4.8, 8.5], "axe": [0.2, -1]},
-      "bouclier": {"prise": [5.0, 5.0], "axe": [0, -1]},
-      "seau": {"prise": [5.0, 4.0], "axe": [0, -1]}
+      "_defaut": {
+        "prise": [
+          2.5,
+          7.5
+        ],
+        "axe": [
+          1,
+          -1
+        ]
+      },
+      "arc": {
+        "prise": [
+          4.7,
+          5.0
+        ],
+        "axe": [
+          0,
+          -1
+        ]
+      },
+      "lumiere": {
+        "prise": [
+          4.8,
+          8.5
+        ],
+        "axe": [
+          0.2,
+          -1
+        ]
+      },
+      "bouclier": {
+        "prise": [
+          5.0,
+          5.0
+        ],
+        "axe": [
+          0,
+          -1
+        ]
+      },
+      "seau": {
+        "prise": [
+          5.0,
+          4.0
+        ],
+        "axe": [
+          0,
+          -1
+        ]
+      }
     },
     "_doc": "Les sprites d'objets du designer (Direction artistique, 2026-09-05) : dossier res:// ou le jeu cherche <id sans craft_/proto_>.png, composants/<id>.png, matieres/<forme>.png ; absent = pictogramme par code.",
     "dossier": "res://assets/objets"

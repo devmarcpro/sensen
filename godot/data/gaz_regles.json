@@ -1,0 +1,59 @@
+{
+  "_doc": "Les regles des gaz (Gaz dans le sol) — ce qui n est PAS le catalogue. Le catalogue des gaz est dans data/gaz/, un fichier par gaz, comme les materiaux et les creatures (« Decision — Pipeline de contenu » : un fichier par entree pour une collection, fichier unique pour une configuration). Separe le 2026-09-08 sur une remarque du designer. poches : ou les poches se forment et lesquelles, par profondeur. liberation : ce qu une breche laisse sortir. periode_ticks : la cadence du pas.",
+  "poches": {
+    "etage_min": 4,
+    "mine_etage_min": 2,
+    "frequence": 0.13,
+    "seuil": 0.72,
+    "part_par_profondeur": [
+      [
+        1,
+        5,
+        {
+          "azote": 3,
+          "dioxyde_de_carbone": 3,
+          "methane": 2,
+          "radon": 1,
+          "ammoniac": 1,
+          "helium": 1
+        }
+      ],
+      [
+        6,
+        12,
+        {
+          "methane": 3,
+          "monoxyde_de_carbone": 2,
+          "sulfure_d_hydrogene": 2,
+          "dioxyde_de_carbone": 2,
+          "ethane": 1,
+          "vapeur_d_eau": 1,
+          "dioxyde_de_soufre": 1,
+          "azote": 1,
+          "vapeur_de_mercure": 1
+        }
+      ],
+      [
+        13,
+        999,
+        {
+          "methane": 3,
+          "sulfure_d_hydrogene": 3,
+          "dioxyde_de_soufre": 2,
+          "vapeur_d_eau": 2,
+          "ethane": 1,
+          "hydrogene": 1,
+          "monoxyde_de_carbone": 1,
+          "radon": 1,
+          "argon": 1,
+          "arsine": 1
+        }
+      ]
+    ]
+  },
+  "liberation": {
+    "volume": 14,
+    "duree_ticks": 400
+  },
+  "periode_ticks": 10
+}

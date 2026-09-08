@@ -37,7 +37,10 @@ func reconstruire(mode_: String) -> void:
 	var pnj: Dictionary = ecrans.main.sim.entites.get(ecrans.pnj_id, {})
 	var j: Dictionary = ecrans.main.joueur()
 	volets[0].titre.text = tr("ui.echange.volet_joueur").format({"n": j.get("sac", []).size(), "or": int(j.get("or", 0))})
-	volets[1].titre.text = tr("ui.echange.volet_marchand" if mode == "commerce" else "ui.echange.volet_autre").format({"nom": tr(str(pnj.get("name_key", "")))})
+	var nom_autre := tr(str(pnj.get("name_key", "")))
+	if mode == "coffre":   # le meuble, pas un être (2026-09-08)
+		nom_autre = tr(str(SimCamp._coffre_a(ecrans.main.sim, ecrans.contenant_pos).get("name_key", "")))
+	volets[1].titre.text = tr("ui.echange.volet_marchand" if mode == "commerce" else "ui.echange.volet_autre").format({"nom": nom_autre})
 	for v in volets:
 		v.vider()
 		v.montrer_prix(mode == "commerce")   # en échange, pas de colonne Prix

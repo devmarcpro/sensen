@@ -158,6 +158,28 @@ static func _ranger(sim: Simulation, e: Dictionary, uid: String, vers: Vector2i,
 	return true
 
 
+## Prendre UN objet d'un contenant adjacent (designer 2026-09-08 : le coffre s'ouvre comme un échange). Le pendant
+## exact de `_ranger` — même portée, même coût, même journal.
+static func _prendre_un(sim: Simulation, e: Dictionary, uid: String, vers: Vector2i, tick: int) -> bool:
+	if not sim.grille.dans(vers) or Grille.distance(e.pos, vers) > 1:
+		return false
+	var idx := sim.grille.idx(vers)
+	var dedans: Array = sim.contenants.get(idx, [])
+	if not (uid in dedans) or (uid in e.sac):
+		return false
+	dedans.erase(uid)
+	sim.contenants[idx] = dedans
+	e.sac.append(uid)
+	# Vider le coffre d'autrui reste un vol, objet par objet comme d'un seul coup (Royaumes et lois).
+	if sim.grille.meubles.has(idx) and sim.monde != null and sim.lieu == "camp" and e.controle == "joueur" and not sim.monde.claims.has(_cell_de(sim, vers)) and bool(sim.monde.cellule(_cell_de(sim, vers)).has("village")):
+		SimRoyaumes._infraction(sim, e, "comportement", "vol", vers, "")
+	if dedans.is_empty() and not sim.grille.meubles.has(idx):   # un butin au sol disparaît quand il est vide ; un meuble reste
+		sim.grille.contenu[idx] = 0
+	e.compteur = tick + int(sim.regles.r.actions.objet)
+	EventBus.emettre(&"journal", [&"journal.prend", {"nom": e.name_key, "objet": SimObjets.nom_objet(sim, uid)}])
+	return true
+
+
 ## Prendre tout ce qu'un coffre adjacent contient.
 static func _prendre(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	if not sim.grille.dans(vers) or Grille.distance(e.pos, vers) > 1:

@@ -34,6 +34,14 @@ Quatre niveaux de réputation en parallèle, et une échelle de conséquences pa
 > [!success] Codé le 2026-08-28 — étape 9.C, `combat_rules.reputation`
 > Les paliers de l'échelle −100..+100 tels quels : **≤ −50 hostile à vue** (`Simulation.ennemis` : un civil dont la relation avec le joueur est ≤ −50 le traite en ennemi), −49..−20 prix +25 % et **quêtes refusées**, +20..+49 prix −10 %, **≥ +50 confidences** (rumeurs qui révèlent un POI, [[L'information comme récompense]]). Trois niveaux codés : **relation par PNJ**, **réputation par village** (le royaume attend l'étape 10 : le village en tient lieu), **réputation globale** ; la race est lue mais sans rivalités encore. **Gains chiffrés (décision, la note ne l'était pas)** : frapper un civil −30 (lui) / −10 (son village) / −3 (globale) ; le tuer −50 / −20 / −5 ; quête accomplie +10 / +5 / +1 ; parler +1/jour. La relation d'un PNJ **module la vitesse** des gains (×0,5 sous −20, ×1,5 au-dessus de +50 — la note le prévoit pour race/royaume, appliqué au village).
 
+
+> [!important] Noté le 2026-09-08 — la réputation par **factions**, une faction par espèce (designer : « réputation par factions, une faction par espèce, il y a aussi la réputation par ville, par royaume, etc. »)
+> **Ce qui existe** : la réputation est déjà à **trois étages** — par PNJ, par **village**, par **royaume**, plus une réputation globale, avec une vitesse par palier, l'hostilité à vue sous un seuil, des paliers d'information, et une dérive de rédemption hebdomadaire vers zéro.
+> **Ce qui manque** : l'étage des **factions**, et l'idée que **chaque espèce en est une**. Aujourd'hui un loup abattu n'engage rien : il n'y a pas de « les loups » à qui ça pourrait déplaire. Avec une faction par espèce, chasser les cerfs jusqu'au dernier fâche quelque chose, et une meute peut se souvenir.
+> **Ce que ça donne, et pourquoi c'est plus qu'un compteur de plus** : c'est le **lecteur naturel** de deux choses déjà décidées — la **rumeur** qui circule (elle transporte le fait, la faction décide qui s'en offusque) et les **tags idéologiques** validés le même jour sur un avis extérieur (une faction porte des **valeurs**, une action porte des **tags**, la réputation s'ajuste seule). Les trois ne font qu'un seul système, et il vaut mieux les écrire ensemble.
+> **Ce qu'il faudra trancher** : une faction par espèce **et** des factions qui n'en sont pas (une guilde, un culte, une bande de brigands) — le même objet, ou deux ? Et une espèce est-elle une faction **par elle-même**, ou une faction qui se trouve n'avoir qu'une espèce ?
+> **Où ça se range** : avec la rumeur et les tags, au palier 7 de l'[[Ordre de travail]] — ce sont les mêmes lignes.
+
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Schéma créature]], [[Races]]
 - **Alimente** : [[L'information comme récompense]], [[Voie de rédemption]], [[Apprivoisement et recrutement]], [[Prix suggéré]], [[Boutique passive]]

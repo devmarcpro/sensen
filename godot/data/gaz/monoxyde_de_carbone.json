@@ -1,0 +1,25 @@
+{
+  "_doc": "Presque exactement la densite de l air : il se mele partout, sans odeur. C est ce qui le rend traitre.",
+  "name_key": "gaz.monoxyde_de_carbone",
+  "teinte": [
+    0.35,
+    0.3,
+    0.3,
+    0.4
+  ],
+  "masse": 0.97,
+  "degats": "1d2",
+  "element": {},
+  "statut": "affaibli",
+  "statut_ticks": 40,
+  "soigne": "",
+  "mana": "",
+  "eteint_feux": false,
+  "inflammable": true,
+  "lumiere_min": 1,
+  "explosion": {
+    "puissance": 12,
+    "rayon": 1,
+    "degats": "2d6"
+  }
+}

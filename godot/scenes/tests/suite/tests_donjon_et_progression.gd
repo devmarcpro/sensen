@@ -174,10 +174,14 @@ func test_camp() -> void:
 	verifier(s.intention(j.id, {"type": "equiper", "objet": hache}), "équiper la hache")
 	var arbre: Vector2i = j.pos + Vector2i(1, 0)
 	s.grille.poser_contenu(arbre, "arbre")
-	s.grille.materiaux[s.grille.idx(arbre)] = "chene"
+	# UN BOULEAU, PAS UN CHÊNE (2026-09-08) : le chêne est de palier 3 (dureté 16) et exige un outil de dureté 10 ;
+	# une hache de départ en vaut ~7. Ce test passait par chance — la matière de la hache est tirée au sort, et le
+	# moindre décalage du tirage le faisait rebondir. Le bouleau (dureté 8, palier 2, seuil 4,4) est ce qu'un
+	# débutant peut abattre ; que le chêne lui résiste est une RÈGLE, pas un défaut — voir [[Décisions en attente]].
+	s.grille.materiaux[s.grille.idx(arbre)] = "bouleau"
 	s.attente[j.id] = true
-	verifier(s.intention(j.id, {"type": "creuser", "vers": arbre}), "abattre un chêne à la hache")
-	verifier(not s._pile(j, "chene", "brut").is_empty(), "du chêne brut dans le sac")
+	verifier(s.intention(j.id, {"type": "creuser", "vers": arbre}), "abattre un bouleau à la hache")
+	verifier(not s._pile(j, "bouleau", "brut").is_empty(), "du bouleau brut dans le sac")
 	s._donner_materiau(j, "chene", 2, "planche")
 	var mur: Vector2i = j.pos + Vector2i(-1, 0)
 	s.attente[j.id] = true
@@ -688,7 +692,7 @@ func test_donjon_temps_a_l_action() -> void:
 	verifier(silhouettes41.size() >= 4, "les races ne se ressemblent pas : %d silhouettes distinctes" % silhouettes41.size())
 	var prog41 := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
 	var nain41 := Etres.creer_personnage("creature.aventurier.name", "nain", "le_sabre", {}, 1000, prog41)
-	verifier(float(nain41.get("apparence", {}).get("echelle", 1.0)) < 1.0 and str(nain41.apparence.get("barbe", "aucune")) != "aucune", "le nain naît court et barbu, sans une ligne de code par race")
+	verifier(float(nain41.get("apparence", {}).get("echelle", 1.0)) < 1.0 and str(nain41.apparence.get("pilosite", "aucune")) != "aucune", "le nain naît court et poilu, sans une ligne de code par race")
 
 	# Réglages du monde (2026-08-31, point 49) : les options surchargent la config, le monde reste fini
 	var opts49: Array = GameData.config("planete").get("generation_options", [])
@@ -1983,7 +1987,7 @@ func test_arenes_autonomes() -> void:
 ## la pioche qui en perce une libère un nuage de zones qui remplit les galeries ouvertes ; le gaz toxique blesse qui s'y
 ## tient au pas d'automate ; le grisou explose au contact d'une flamme — ici la lave voisine — et tout le nuage part.
 func test_gaz_dans_le_sol() -> void:
-	var cfg: Dictionary = GameData.config("gaz")
+	var cfg: Dictionary = GameData.config("gaz_regles")
 	var s := Simulation.new(51)
 	s.charger_camp()
 	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]

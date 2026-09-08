@@ -1,0 +1,19 @@
+{
+  "_doc": "Inerte, mais il chasse l air : on s epuise sans comprendre pourquoi.",
+  "name_key": "gaz.azote",
+  "teinte": [
+    0.6,
+    0.6,
+    0.7,
+    0.35
+  ],
+  "masse": 0.97,
+  "degats": "",
+  "element": {},
+  "statut": "epuisement",
+  "statut_ticks": 40,
+  "soigne": "",
+  "mana": "",
+  "eteint_feux": true,
+  "inflammable": false
+}

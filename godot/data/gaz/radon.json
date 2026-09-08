@@ -1,0 +1,19 @@
+{
+  "_doc": "Sept fois l air. Il stagne au fond des caves et ne se voit jamais.",
+  "name_key": "gaz.radon",
+  "teinte": [
+    0.7,
+    0.6,
+    0.8,
+    0.25
+  ],
+  "masse": 7.67,
+  "degats": "",
+  "element": {},
+  "statut": "affaibli",
+  "statut_ticks": 200,
+  "soigne": "",
+  "mana": "",
+  "eteint_feux": false,
+  "inflammable": false
+}

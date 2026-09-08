@@ -110,7 +110,7 @@ func option_monde(opt: Dictionary) -> float:
 var fiche_monde: Dictionary = {}   # la fiche créée, en attente de l'écran Monde
 var depart_donjon := false         # l'option de création « Départ : Donjon » (designer, point 34)
 const STATS := ["force", "dexterite", "endurance", "volonte", "perception", "charisme"]
-var zoom := 2.0   # au maximum par défaut (décision du designer, 2026-08-30)
+var zoom := 2.0   # le zoom de départ ; la valeur vraie vient de styles.vue.zoom.defaut au démarrage (2026-09-08)
 
 var terrain: Terrain              # couche statique : les tuiles, dessinées une fois (perf É0)
 var hud: Hud                      # couche au-dessus des êtres : barres, garde, télégraphes, jauges
@@ -231,12 +231,17 @@ func _materiau_grain() -> ShaderMaterial:
 		return null
 	var mat := ShaderMaterial.new()
 	mat.shader = sh
-	for cle in ["grains_par_tuile", "force_grain", "force_douce", "echelle_douce"]:
+	for cle in ["grains_par_tuile", "force_grain", "force_douce", "echelle_douce", "pas_style"]:   # pas_style manquait : le shader gardait sa valeur par défaut (2026-09-08)
 		if cfg.has(cle):
 			mat.set_shader_parameter(cle, float(cfg[cle]))
 	var sol: Dictionary = GameData.config("planete").get("cycle", {}).get("soleil", {})
 	mat.set_shader_parameter("ombre_min", float(sol.get("ombre_min", 0.72)))
 	mat.set_shader_parameter("elevation_max", float(sol.get("elevation_max", 65.0)))
+	_charger_atlas_matieres()   # les matières peintes (2026-09-08) : l'atlas et le seuil de style
+	if _atlas_matieres != null:
+		mat.set_shader_parameter("matieres_tex", _atlas_matieres)
+		mat.set_shader_parameter("matieres_n", float(_lignes_matieres.size()))
+		mat.set_shader_parameter("style_texture_base", float(cfg.get("style_texture_base", 100)))
 	_materiaux_grain.append(mat)   # le soleil se règle sur tous (_maj_soleil)
 	return mat
 
@@ -289,6 +294,50 @@ static func _couleur_html(s: String) -> Color:
 ## (roche veinée, terre grumeleuse, bois fibré…), un matériau nommé peut le surcharger. Le style est
 ## encodé dans la partie haute de UV.x — la 2D n'offre pas d'autre canal par sommet.
 static var _styles_grain: Dictionary = {}   # matériau → style : quatre lectures de configuration par tuile, sinon (2026-09-06)
+## LES MATIÈRES PEINTES (designer 2026-09-08 : « j'ai rajouté une texture herbe, mets-la en jeu ») : un PNG de 64 × 64
+## par matériau dans `assets/terrain/`, empilés en un atlas dans l'ordre de leurs noms. Le style d'un matériau peint
+## vaut `style_texture_base + sa ligne` — le nombre voyage dans UV.x comme n'importe quel style, donc ni `PassesGD`,
+## ni le noyau C++, ni le cache des morceaux n'ont une ligne à changer : seuls le client et le shader savent.
+static var _atlas_matieres: ImageTexture = null
+static var _lignes_matieres: Dictionary = {}   # matériau → sa ligne dans l'atlas
+static var _atlas_matieres_charge := false
+
+static func _charger_atlas_matieres() -> void:
+	if _atlas_matieres_charge:
+		return
+	_atlas_matieres_charge = true
+	var c := Planches.case()
+	var dir := DirAccess.open("res://assets/terrain/")
+	if dir == null:
+		return
+	var noms: Array[String] = []
+	for f in dir.get_files():
+		var nom := str(f)
+		if nom.ends_with(".png.import"):   # l'export ne garde que l'import : le nom du PNG est dedans
+			nom = nom.trim_suffix(".import")
+		if nom.ends_with(".png") and not (nom in noms):
+			noms.append(nom)
+	noms.sort()   # l'ordre des noms fait l'ordre des lignes : ajouter une matière ne déplace que les suivantes
+	var cases: Array[Image] = []
+	for nom in noms:
+		var chemin := "res://assets/terrain/" + nom
+		var tex := load(chemin) as Texture2D
+		var img: Image = tex.get_image() if tex != null else null
+		if img == null or img.get_width() != c or img.get_height() != c:
+			push_warning("Terrain : %s n'est pas une case de %d × %d — ignoré" % [chemin, c, c])
+			continue
+		if img.get_format() != Image.FORMAT_RGBA8:
+			img.convert(Image.FORMAT_RGBA8)
+		_lignes_matieres[nom.trim_suffix(".png")] = cases.size()
+		cases.append(img)
+	if cases.is_empty():
+		return
+	var colonne := Image.create(c, c * cases.size(), false, Image.FORMAT_RGBA8)
+	for k in cases.size():
+		colonne.blit_rect(cases[k], Rect2i(0, 0, c, c), Vector2i(0, k * c))
+	_atlas_matieres = ImageTexture.create_from_image(colonne)
+
+
 func _style_grain(materiau: String) -> float:
 	if materiau.is_empty():
 		return 0.0
@@ -296,6 +345,12 @@ func _style_grain(materiau: String) -> float:
 	if memo != null:
 		return memo
 	var cfg: Dictionary = GameData.config("styles").get("grain", {})
+	_charger_atlas_matieres()
+	var texture_nom := str(cfg.get("textures_par_materiau", {}).get(materiau, materiau))   # la matière peut pointer une texture qui ne porte pas son nom
+	if _lignes_matieres.has(texture_nom):   # une matière peinte : son style DÉSIGNE sa ligne dans l'atlas
+		var stp := (float(cfg.get("style_texture_base", 100)) + float(_lignes_matieres[texture_nom])) * float(cfg.get("pas_style", 512.0))
+		_styles_grain[materiau] = stp
+		return stp
 	var nom := str(cfg.get("styles_par_materiau", {}).get(materiau, ""))
 	if nom.is_empty():
 		var m: Dictionary = GameData.catalogues.materials.get(materiau, {})
@@ -320,6 +375,7 @@ func _ready() -> void:
 	chrono["planches.prechauffe"] = float(Time.get_ticks_usec() - t_pl) / 1000.0
 	chrono["n.planches"] = float(n_pl)
 	RenderingServer.set_default_clear_color(_couleur_liste(GameData.config("styles").get("brouillard", {}).get("fond", [0.02, 0.02, 0.04])))   # le fond de la scène : la nuit du jamais-vu, pas un gris (designer 2026-09-06)
+	zoom = float(GameData.config("styles").get("vue", {}).get("zoom", {}).get("defaut", zoom))   # le zoom de départ, en données (2026-09-08)
 	terrain = Terrain.new()
 	terrain.proprio = self
 	terrain.material = _materiau_grain()   # le décor prend son grain (point 50)
@@ -596,9 +652,14 @@ func _creer_personnage() -> void:
 	if not nom_choisi.is_empty():
 		GameData.enregistrer_nom("joueur.nom", nom_choisi)
 		fiche.name_key = "joueur.nom"
-	for t_peau in GameData.config("apparence").get("teintes_peau", []):   # le teint peint tout le corps (point 43)
-		if str(t_peau.id) == str(creation.get("apparence", {}).get("teinte_peau", fiche.get("apparence", {}).get("teinte_peau", ""))):
-			fiche.teinte = [float(t_peau.rgb[0]), float(t_peau.rgb[1]), float(t_peau.rgb[2])]
+	var peau_choisie := str(creation.get("apparence", {}).get("teinte_peau", fiche.get("apparence", {}).get("teinte_peau", "")))
+	if peau_choisie.begins_with("#"):   # la roue écrit la couleur en clair (designer 2026-09-08)
+		var cp := Color.html(peau_choisie)
+		fiche.teinte = [cp.r, cp.g, cp.b]
+	else:
+		for t_peau in GameData.config("apparence").get("teintes_peau", []):   # le teint peint tout le corps (point 43)
+			if str(t_peau.id) == peau_choisie:
+				fiche.teinte = [float(t_peau.rgb[0]), float(t_peau.rgb[1]), float(t_peau.rgb[2])]
 	if not fiche.has("modules_connus"):
 		fiche["modules_connus"] = []
 	for cap in fiche.capacites:   # les modules des capacités de départ sont connus : on peut les recombiner (Structure compétences-modules-slots)
@@ -702,6 +763,13 @@ func _charger(fiche: Dictionary = {}) -> void:
 	for e in sim.vivants():
 		if e.controle == "joueur":
 			joueur_id = e.id
+	# LES DEUX ORIGINES (2026-09-08) : `_charger` refaisait tout ce que fait `_apres_changement_de_grille` SAUF poser
+	# l'origine de dessin — elle restait à (0, 0) pendant que la grille était à (36416, 19072). Les coordonnées de
+	# tuile écrites dans les UV devenaient donc des coordonnées MONDE, qui noyaient le style de la matière encodé
+	# dans la partie haute de UV.x : le sol tirait un motif au hasard. Invisible jusqu'ici parce que le shader
+	# n'atteignait même pas les morceaux (voir `use_parent_material`).
+	origine_grille = sim.grille.origine if sim.grille != null else Vector2i(-99999, -99999)
+	origine_dessin = sim.grille.origine if sim.grille != null else Vector2i.ZERO
 	chemin_en_cours.clear()
 	telegraphes.clear()
 	journal.clear()
@@ -1305,8 +1373,18 @@ func _maj_noeuds(delta: float = 0.0) -> void:
 		# c'était le lag en ville (designer 2026-09-05). Le tremblement et l'animation ont leur propre redraw.
 		var tour := int(n.get_meta("tour", 0)) + 1   # la signature se relit une image sur quatre, en quinconce
 		n.set_meta("tour", tour)
-		if tour % 4 == 0 and not n.lointain:   # un pictogramme ne dépend ni de l'orientation ni de l'équipement
-			var sig := hash([e.get("orientation", Vector2i.ZERO), e.get("action_en_cours", {}).is_empty(), e.get("equipement", {}).hash(), bool(e.get("garde", false)), e.has("monture"), e.get("apparence", {}).hash(), e.get("blason", ""), e.get("teinte", []).hash(), e.vivant, e.get("forme_bestiale", false)])
+		# Le JOUEUR est contrôlé à chaque image, les autres une sur quatre. Le décalage en quinconce protège du lag
+		# à deux cents habitants, mais sur le joueur il laissait jusqu'à quatre images de bloc fantôme — et c'est
+		# lui, justement, dont les occulteurs sont dessinés en transparence (2026-09-08).
+		if (tour % 4 == 0 or e.id == joueur_id) and not n.lointain:   # un pictogramme ne dépend ni de l'orientation ni de l'équipement
+			# LA POSITION FAIT PARTIE DE LA SIGNATURE (2026-09-08). Elle n'y était pas, et c'était le « bloc fantôme
+			# qui reste avec le joueur et disparaît une fois arrivé sur l'autre case » : les OCCULTEURS — les tuiles
+			# redessinées par-dessus l'être — sont calculés depuis `e.pos`, mais ils ne se redessinent qu'avec le
+			# paperdoll. En marchant droit devant, l'orientation ne change pas, donc la signature non plus, donc les
+			# occulteurs gardaient les blocs de l'ANCIENNE tuile — et comme leur nœud est recalé chaque image pour
+			# compenser le glissement, ces blocs périmés semblaient VOYAGER avec le personnage. Ils disparaissaient à
+			# l'arrivée, quand un autre changement finissait par déclencher le redessin.
+			var sig := hash([e.pos, sim.grille.h(e.pos), e.get("orientation", Vector2i.ZERO), e.get("action_en_cours", {}).is_empty(), e.get("equipement", {}).hash(), bool(e.get("garde", false)), e.has("monture"), e.get("apparence", {}).hash(), e.get("blason", ""), e.get("teinte", []).hash(), e.vivant, e.get("forme_bestiale", false)])
 			if int(n.get_meta("signature", -1)) != sig:
 				n.set_meta("signature", sig)
 				n.queue_redraw()
@@ -1429,8 +1507,13 @@ func _unhandled_input(ev: InputEvent) -> void:
 		if ev.button_index == MOUSE_BUTTON_WHEEL_UP or ev.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			var haut: bool = ev.button_index == MOUSE_BUTTON_WHEEL_UP
 			if ev.ctrl_pressed:   # Ctrl + molette : le zoom (contrôles, décision du 2026-08-30)
-				zoom = minf(2.0, zoom * 1.1) if haut else maxf(0.5, zoom / 1.1)
+				# Les bornes sont en DONNÉES depuis le 2026-09-08 (designer : « pouvoir zoomer beaucoup plus ») :
+				# elles étaient écrites ici, 0,5 à 2,0, et rien ne permettait de regarder un sprite de près.
+				var zr: Dictionary = GameData.config("styles").get("vue", {}).get("zoom", {})
+				var pas := maxf(1.01, float(zr.get("pas", 1.15)))
+				zoom = clampf(zoom * (pas if haut else 1.0 / pas), float(zr.get("min", 0.4)), float(zr.get("max", 12.0)))
 				scale = Vector2.ONE * zoom
+				_maj_rayon_vue()   # moins de tuiles à dessiner en zoomant, plus en reculant : le rayon suit tout de suite
 			elif not ecrans.est_ouvert():   # molette seule : la hotbar tourne, en boucle
 				var j_m := joueur()
 				var n := hotbar_entrees(j_m).size() if not j_m.is_empty() else 0
@@ -1770,6 +1853,12 @@ func _executer_option(opt: Dictionary) -> void:
 		"dormir":
 			sim.intention(joueur_id, {"type": "dormir", "vers": opt.vers})
 		"prendre", "caisse", "recolter":
+			# UN MEUBLE CONTENANT S'OUVRE (designer 2026-09-08) : deux volets, comme un échange. Un butin au sol,
+			# lui, se ramasse toujours d'un seul geste — il n'a ni capacité ni nom, rien à y ranger.
+			if str(opt.id) == "prendre" and not SimCamp._coffre_a(sim, opt.vers).is_empty():
+				ecrans.contenant_pos = opt.vers
+				ecrans.ouvrir("coffre")
+				return
 			sim.intention(joueur_id, {"type": "prendre", "vers": opt.vers})
 		"labourer":
 			sim.intention(joueur_id, {"type": "labourer", "vers": opt.vers})
@@ -2099,7 +2188,7 @@ func _dessiner_superpositions() -> void:
 		var cz := _ecran(z.pos, g.h(z.pos))
 		var cz_col: Color = COULEUR_ZONE.get(str(z.type), Color(0.7, 0.7, 0.7, 0.35))
 		if str(z.type) == "gaz":   # un nuage à la teinte de son gaz (Gaz dans le sol)
-			cz_col = _couleur_liste(GameData.config("gaz").get("gaz", {}).get(str(z.get("gaz", "")), {}).get("teinte", [0.7, 0.7, 0.7, 0.35]))
+			cz_col = _couleur_liste(GameData.catalogues.gaz.get(str(z.get("gaz", "")), {}).get("teinte", [0.7, 0.7, 0.7, 0.35]))
 		_losange(z.pos, cz_col)
 	for gl in sim.glyphes:   # les glyphes : un losange cerclé à la teinte de leur élément
 		var cg := _ecran(gl.pos, g.h(gl.pos))
@@ -2324,6 +2413,10 @@ func _maj_morceaux(j: Dictionary) -> void:
 					var n := TerrainMorceau.new()
 					n.proprio = self
 					n.coin = k
+					n.use_parent_material = true   # LE GRAIN N'ATTEIGNAIT PAS LE SOL (2026-09-08) : un enfant de canevas
+					# sans matériau n'hérite PAS de celui de son parent — il faut le lui dire. Le shader du décor était
+					# posé sur `terrain`, mais tout est dessiné par ces morceaux : ni motif de matière, ni soleil, ni
+					# matière peinte n'arrivaient jusqu'au sol. C'est ce que le designer voyait sans pouvoir le nommer.
 					n.z_index = mx + my   # l'ordre de profondeur isométrique entre morceaux : deux morceaux de même z ne se recouvrent pas
 					terrain.add_child(n)
 					morceaux[k] = n

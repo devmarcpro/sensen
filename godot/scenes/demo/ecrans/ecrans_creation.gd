@@ -36,12 +36,53 @@ static func _lignes_apparence(ec: Ecrans, avec_visage: bool = true) -> Array:
 		for v in locus.get("valeurs", []):
 			vals.append(str(v))
 		l.append({"id": str(locus.id), "valeurs": vals})
-	for pal in (["teinte_peau", "teinte_cheveux"] if avec_visage else ["teinte_peau"]):   # sans visage : pas de couleur de cheveux
+	# Les COULEURS (designer 2026-09-08) : peau, cheveux, pilosité. Elles ne sont plus une liste fermée — Entrée
+	# ouvre la roue et écrit la couleur en clair. Les presets du catalogue restent sur gauche/droite, pour aller vite.
+	for coul in cfg.get("couleurs", []):
+		if not avec_visage and str(coul.id) != "teinte_peau":   # sans visage : la peau seule
+			continue
 		var ids: Array = []
-		for t in cfg.get("teintes_peau" if pal == "teinte_peau" else "teintes_cheveux", []):
+		for t in cfg.get(str(coul.get("palette", "")), []):
 			ids.append(str(t.id))
-		l.append({"id": pal, "valeurs": ids})
+		l.append({"id": str(coul.id), "valeurs": ids, "couleur": true})
 	return l
+
+
+## La couleur d'un locus de teinte : écrite en clair (#rrggbb), sinon un preset du catalogue, sinon le défaut.
+static func _couleur_courante(locus: String, app: Dictionary) -> Color:
+	var cfg: Dictionary = GameData.config("apparence")
+	var v := str(app.get(locus, ""))
+	if v.begins_with("#"):
+		return Color.html(v)
+	var palette := ""
+	var defaut := "#ffffff"
+	for coul in cfg.get("couleurs", []):
+		if str(coul.id) == locus:
+			palette = str(coul.get("palette", ""))
+			defaut = str(coul.get("defaut", "#ffffff"))
+	for t in cfg.get(palette, []):
+		if str(t.id) == v:
+			return Color(float(t.rgb[0]), float(t.rgb[1]), float(t.rgb[2]))
+	return Color.html(defaut)
+
+
+## La roue : un ColorPicker en TSV, dont chaque changement écrit la couleur dans l'apparence en cours.
+static func _ouvrir_roue(ec: Ecrans, locus: String, depart: Color) -> void:
+	if ec.popup_couleur != null:
+		ec.popup_couleur.queue_free()
+	ec.roue_couleur = ColorPicker.new()
+	ec.roue_couleur.color = depart
+	ec.roue_couleur.edit_alpha = false
+	ec.roue_couleur.picker_shape = ColorPicker.SHAPE_HSV_WHEEL
+	ec.roue_couleur.color_changed.connect(func(col: Color) -> void:
+		var regl: Dictionary = ec.main.creation.get("apparence", {})
+		regl[locus] = "#" + col.to_html(false)
+		ec.main.creation["apparence"] = regl
+		EcransListe.rafraichir(ec))
+	ec.popup_couleur = PopupPanel.new()
+	ec.popup_couleur.add_child(ec.roue_couleur)
+	ec.add_child(ec.popup_couleur)
+	ec.popup_couleur.popup_centered(Vector2i(340, 420))
 
 
 static func _points_creation(ec: Ecrans) -> Dictionary:
@@ -87,6 +128,15 @@ static func _construire_creation(ec: Ecrans) -> void:
 	var app: Dictionary = _apparence_apercu(ec, fiche)   # apparence : les loci visuels (designer, points 39 et 41)
 	if volet == "apparence":
 		for ligne in _lignes_apparence(ec, not app.is_empty()):
+			if bool(ligne.get("couleur", false)):   # une couleur : la ligne s'écrit DANS sa couleur, et Entrée ouvre la roue
+				var col_l := _couleur_courante(str(ligne.id), app)
+				ec.liste.add_item(ec.tr("ui.creation.app_l").format({
+					"locus": ec.tr("ui.apparence." + str(ligne.id)),
+					"valeur": "#" + col_l.to_html(false),
+				}))
+				ec.liste.set_item_custom_fg_color(ec.liste.item_count - 1, col_l)
+				ec.entrees.append({"kind": "creation", "id": "app:" + str(ligne.id)})
+				continue
 			ec.liste.add_item(ec.tr("ui.creation.app_l").format({
 				"locus": ec.tr("ui.apparence." + str(ligne.id)),
 				"valeur": ec.tr("ui.apparence.val." + str(app.get(str(ligne.id), ligne.valeurs[0] if not ligne.valeurs.is_empty() else ""))),
@@ -182,6 +232,16 @@ static func _apercu_personnage(ec: Ecrans, fiche: Dictionary) -> void:
 		it["uid"] = str(id)
 		items[str(id)] = it
 		equip[str(d.get("equip_slot", "main_principale"))] = str(id)
+	for slot_force: String in fiche.get("equipement_slots", {}).keys():   # forcer une main (2026-09-08) : l'aperçu montre ce que le jeu donnera
+		var idf := str(fiche.equipement_slots[slot_force])
+		var df: Dictionary = GameData.entree("items", idf)
+		if df.is_empty():
+			continue
+		if not items.has(idf):
+			var itf: Dictionary = df.duplicate(true)
+			itf["uid"] = idf
+			items[idf] = itf
+		equip[slot_force] = idf
 	e.equipement = equip
 	e["orientation"] = Vector2i(1, 1)
 	e["poses"] = ec.main.creation.get("poses", {}).duplicate(true)   # le pantin montre la pose qu'on articule
@@ -336,9 +396,14 @@ static func _action_creation(ec: Ecrans, id: String, sens: int) -> void:
 				var lid := id.trim_prefix("app:")
 				var courante := ""
 				var valeurs: Array = []
+				var est_couleur := false
 				for ligne2 in _lignes_apparence(ec, true):
 					if str(ligne2.id) == lid:
 						valeurs = ligne2.valeurs
+						est_couleur = bool(ligne2.get("couleur", false))
+				if est_couleur and sens == 0:   # Entrée sur une couleur : la roue (designer 2026-09-08)
+					_ouvrir_roue(ec, lid, _couleur_courante(lid, _apparence_apercu(ec, _fiche_apercu(ec))))
+					return
 				if valeurs.is_empty():
 					return
 				courante = str(_apparence_apercu(ec, _fiche_apercu(ec)).get(lid, valeurs[0]))
@@ -628,6 +693,30 @@ static func _construire_assigner(ec: Ecrans, j: Dictionary) -> void:
 
 
 ## L'échange d'équipement avec un compagnon (Compagnons) : ton sac à donner, son équipement et son sac à reprendre.
+## UN COFFRE S'OUVRE COMME UN ÉCHANGE (designer 2026-09-08 : « change les coffres pour que ce soit un meuble avec une
+## interface comme un échange avec un PNJ »). Les mêmes deux volets que le troc : le sac à gauche, le meuble à droite,
+## un objet à la fois dans les deux sens — là où « prendre » vidait le coffre entier d'un seul geste.
+static func _construire_coffre(ec: Ecrans, j: Dictionary) -> void:
+	var m: Dictionary = SimCamp._coffre_a(ec.main.sim, ec.contenant_pos)
+	if m.is_empty():
+		ec.fermer()
+		return
+	var idx: int = ec.main.sim.grille.idx(ec.contenant_pos)
+	var dedans: Array = ec.main.sim.contenants.get(idx, [])
+	var nom_m: String = ec.tr(str(m.get("name_key", "")))
+	ec.titre.text = ec.tr("ui.coffre.titre").format({"nom": nom_m, "n": dedans.size(), "cap": int(m.capacite_slots)})
+	ec.liste.add_item(ec.tr("ui.echange.donner"), null, false)
+	ec.entrees.append({"kind": "texte", "texte": ""})
+	for uid in j.sac:
+		ec.liste.add_item(EcransInventaire._nom_court(ec, str(uid)))
+		ec.entrees.append({"kind": "donner", "uid": str(uid)})
+	ec.liste.add_item(ec.tr("ui.echange.reprendre").format({"nom": nom_m}), null, false)
+	ec.entrees.append({"kind": "texte", "texte": ""})
+	for uid in dedans:
+		ec.liste.add_item(EcransInventaire._nom_court(ec, str(uid)))
+		ec.entrees.append({"kind": "reprendre", "uid": str(uid)})
+
+
 static func _construire_echange(ec: Ecrans, j: Dictionary) -> void:
 	var pnj: Dictionary = ec.main.sim.entites.get(ec.pnj_id, {})
 	if pnj.is_empty():

@@ -70,5 +70,9 @@
     }
   ],
   "signature": "eclat",
-  "classe_mere": "sentinelle"
+  "classe_mere": "sentinelle",
+  "equipement_slots": {
+    "main_principale": "craft_epee",
+    "main_secondaire": "craft_epee"
+  }
 }

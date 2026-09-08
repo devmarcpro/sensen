@@ -1,0 +1,27 @@
+{
+  "_doc": "L oeuf pourri. Plus lourd que l air, il coule vers les points bas et tue vite.",
+  "name_key": "gaz.sulfure_d_hydrogene",
+  "teinte": [
+    0.55,
+    0.75,
+    0.35,
+    0.4
+  ],
+  "masse": 1.18,
+  "degats": "1d4",
+  "element": {
+    "bois": 1.0
+  },
+  "statut": "poison",
+  "statut_ticks": 30,
+  "soigne": "",
+  "mana": "",
+  "eteint_feux": false,
+  "inflammable": true,
+  "lumiere_min": 1,
+  "explosion": {
+    "puissance": 12,
+    "rayon": 1,
+    "degats": "2d6"
+  }
+}

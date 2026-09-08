@@ -116,9 +116,19 @@ func _dessiner_etre() -> void:
 		return
 	if e.has("monture"):
 		_dessine_monture()
-	# Une seule vue : de face (designer 2026-09-01, point 54). L'orientation de l'être continue de
-	# décider la garde, les zones de coup et le champ de vision — elle ne décide plus le dessin.
-	var f: Dictionary = rig.facings.get("S", {})
+	# IL SE RETOURNE À GAUCHE ET À DROITE (designer 2026-09-08 : « tourner le paperdoll s'il va à droite ou à
+	# gauche »). Le point 54 disait « une seule vue, de face » et le rig portait pourtant ses huit orientations,
+	# inutilisées. On n'en réveille que deux : l'axe horizontal de l'isométrie est `x − y` (aller en +x ou en −y va
+	# vers la droite de l'écran), et son signe choisit E ou son miroir W. Sans mouvement horizontal, la vue de face.
+	# Le dos et les trois-quarts restent en réserve : le visage est dessiné, on ne le cache pas sans raison.
+	var o_e: Vector2i = e.get("orientation", Vector2i.ZERO)
+	var dx_ecran := o_e.x - o_e.y
+	var nom_facing := "S"
+	if dx_ecran > 0 and rig.facings.has("E"):
+		nom_facing = "E"
+	elif dx_ecran < 0 and rig.facings.has("W"):
+		nom_facing = "W"
+	var f: Dictionary = rig.facings.get(nom_facing, rig.facings.get("S", {}))
 	var miroir := false
 	if f.has("miroir"):
 		miroir = true
@@ -348,9 +358,13 @@ func _planche_membre(nom: String, m: Dictionary, col: Color) -> bool:
 	var d: Vector2 = m.direction
 	var p: Vector2 = m.perp
 	var o: Vector2 = m.origine
-	var k := l / float(Planches.case())   # la case fait l unités de rig
+	# La case est carrée et CENTRÉE sur le segment ; son côté est la plus grande des deux mesures (2026-09-08) :
+	# la longueur suffisait tant qu'un membre était plus long que large, mais le bassin est plus LARGE que long —
+	# sa planche sortait écrasée dans une case de sa longueur. Pour un membre long, `cote == l` : rien ne change.
+	var cote := maxf(l, float(m.largeur))
+	var k := cote / float(Planches.case())
 	var miroir := nom.ends_with("_G")   # le côté gauche : la case retournée, par son repère (l'axe x inversé)
-	var local := Transform2D(-p * k if miroir else p * k, -d * k, o + d * l + p * (l * 0.5) * (1.0 if miroir else -1.0))   # (0,0) de la case : en haut à gauche, le bout du segment
+	var local := Transform2D(-p * k if miroir else p * k, -d * k, o + d * (l * 0.5 + cote * 0.5) + p * (cote * 0.5) * (1.0 if miroir else -1.0))   # (0,0) de la case : en haut à gauche
 	draw_set_transform_matrix(Transform2D(0.0, _decalage) * Transform2D().scaled(Vector2(_echelle_dessin, _echelle_dessin)) * local)
 	var variante := maxi(0, Planches.index_locus("carrure", str(_ap.get("carrure", "moyenne"))))
 	var c := float(Planches.case())
@@ -382,6 +396,16 @@ func _planche_visage(trait_id: String, c: Vector2, r: float, d: Vector2, p: Vect
 func _dessine_tenus(monde: Dictionary) -> void:
 	var equip: Dictionary = e.get("equipement", {})
 	var main_arme: Variant = rig.get("prise_arme")
+	var main_bouclier_c: Variant = rig.get("prise_bouclier")
+	# CE QU'IL TIENT RESTE DU MÊME CÔTÉ (designer 2026-09-08 : « toujours garder l'item de la main droite à droite et
+	# l'item de la main gauche à gauche »). Retourner le rig échange les deux mains à l'écran ; l'arme sautait donc
+	# d'un côté à l'autre à chaque demi-tour. On la dessine sur la main la plus à DROITE, quelle qu'elle soit, et
+	# l'objet secondaire sur l'autre : le joueur voit son épée toujours du même côté, et le corps, lui, se retourne.
+	if main_arme is String and main_bouclier_c is String and monde.has(main_arme) and monde.has(main_bouclier_c):
+		if float((monde[main_bouclier_c] as Dictionary).origine.x) > float((monde[main_arme] as Dictionary).origine.x):
+			var echange: Variant = main_arme
+			main_arme = main_bouclier_c
+			main_bouclier_c = echange
 	if main_arme is String and monde.has(main_arme) and equip.has("main_principale"):
 		var it: Dictionary = items.get(equip.main_principale, {})
 		var fonct: Dictionary = fonctionnalites.get(it.get("functionality", ""), {})
@@ -393,7 +417,7 @@ func _dessine_tenus(monde: Dictionary) -> void:
 		var haut: Vector2 = -Vector2(m.direction)
 		if not _dessine_arme_sprite(it, pt, haut):   # le montage pré-rendu de l'arme, s'il existe (Squelette modulaire, 2026-09-05)
 			_dessine_tenu_picto(it, pt, haut)   # sinon le pictogramme de l'inventaire, dans la main (designer 2026-09-06)
-	var main_bouclier: Variant = rig.get("prise_bouclier")
+	var main_bouclier: Variant = main_bouclier_c
 	if main_bouclier is String and monde.has(main_bouclier) and equip.has("main_secondaire"):
 		var it: Dictionary = items.get(equip.main_secondaire, {})
 		var m: Dictionary = monde[main_bouclier]
@@ -449,7 +473,12 @@ func _dessine_arme_sprite(it: Dictionary, pt: Vector2, haut: Vector2) -> bool:
 
 
 ## Une teinte nommée d'une palette de `apparence.json` (peau, cheveux) ; la couleur de repli si l'id est inconnu.
+## Une couleur écrite en clair (« #rrggbb ») passe telle quelle (2026-09-08) : le gabarit `00_substitution.png` est
+## blanc-gris et se laisse teindre, mais une planche DÉJÀ coloriée doit se dessiner sans être multipliée — sinon la
+## peau du personnage repeint le sprite. Un visage peint se donne donc `"teinte_peau": "#ffffff"`.
 func _teinte_de(palette_id: String, id: String, repli: Color) -> Color:
+	if id.begins_with("#"):
+		return Color.html(id)
 	for t in GameData.config("apparence").get(palette_id, []):
 		if str(t.id) == id:
 			return Color(float(t.rgb[0]), float(t.rgb[1]), float(t.rgb[2]))
@@ -460,7 +489,9 @@ func _teinte_de(palette_id: String, id: String, repli: Color) -> Color:
 ## Tout vient des loci de l'être (Apparence — données et équipement) — jamais de sa race.
 func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) -> void:
 	var cheveux := _teinte_de("teintes_cheveux", str(_ap.get("teinte_cheveux", "")), peau.darkened(0.6))
-	var encre := peau.darkened(0.55)
+	# L'encre des traits (yeux, nez, bouche, mâchoire…) : la peau assombrie, sauf si l'être la déclare —
+	# une planche coloriée veut du blanc, pas de l'encre (2026-09-08).
+	var encre := _teinte_de("teintes_peau", str(_ap.get("teinte_encre", "")), peau.darkened(0.55))
 	var o_brut: Variant = _ap.get("oreilles", 0.0)   # une valeur de locus, ou l'ancienne longueur chiffrée
 	var oreille := float(GameData.config("apparence").get("facteurs", {}).get("oreilles", {}).get(str(o_brut), 0.0)) if o_brut is String else float(o_brut)
 	var pv := func(trait_id: String, teinte_t: Color) -> bool: return _planche_visage(trait_id, c, r, d, p, teinte_t, str(_ap.get(trait_id, "")))
@@ -547,67 +578,20 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 		draw_arc(y_bouche + d * r * 0.2, r * 0.32, PI * 1.15, PI * 1.85, 10, encre, maxf(0.7, r * 0.09))
 	else:
 		draw_line(y_bouche - p * demi, y_bouche + p * demi, encre, maxf(0.7, r * 0.09))
-	var b_brut: Variant = _ap.get("barbe", 0.0)
-	var barbe := float(GameData.config("apparence").get("facteurs", {}).get("barbe", {}).get(str(b_brut), 0.0)) if b_brut is String else float(b_brut)
-	if pv.call("barbe", cheveux):
+	# LA PILOSITÉ (2026-09-08, designer : « tete, yeux, bouche, cheveux, pilosité, oreilles, nez ») : ce qui reste du
+	# visage. Sourcils, marque, mâchoire, menton, pommettes, implantation et paupières ont été retirés — un trait qui
+	# n'est pas dessiné n'a pas à être réglable. La pilosité a sa propre couleur, qui retombe sur celle des cheveux.
+	var poils := _teinte_de("teintes_cheveux", str(_ap.get("teinte_pilosite", "")), cheveux)
+	var p_brut: Variant = _ap.get("pilosite", 0.0)
+	var pilosite := float(GameData.config("apparence").get("facteurs", {}).get("pilosite", {}).get(str(p_brut), 0.0)) if p_brut is String else float(p_brut)
+	if pv.call("pilosite", poils):
 		pass
-	elif barbe > 0.0:
+	elif pilosite > 0.0:
 		draw_colored_polygon(PackedVector2Array([
 			c - p * r * 0.8 - d * r * 0.1, c + p * r * 0.8 - d * r * 0.1,
-			c + p * r * 0.35 - d * (r + barbe), c - p * r * 0.35 - d * (r + barbe),
-		]), cheveux)
-	var sourcils := str(_ap.get("sourcils", "fins"))
-	if pv.call("sourcils", cheveux):
-		pass
-	elif sourcils != "aucun":
-		for cote9 in [-1.0, 1.0]:
-			var o9: Vector2 = c + p * (r * ecart * cote9) + d * r * 0.42
-			draw_line(o9 - p * r * 0.16, o9 + p * r * 0.16, cheveux, maxf(0.8, r * (0.16 if sourcils == "epais" else 0.08)))
-	if pv.call("machoire", encre.lightened(0.1)):
-		pass
-	elif str(_ap.get("machoire", "")) != "":   # la mâchoire : un trait sous les pommettes, plus ou moins large
-		var lg_m: float = float({"fine": 0.42, "carree": 0.66, "lourde": 0.80}.get(str(_ap.machoire), 0.55))
-		draw_line(c - p * r * lg_m - d * r * 0.55, c + p * r * lg_m - d * r * 0.55, encre.lightened(0.1), maxf(0.6, r * 0.07))
-	match ("planche" if pv.call("menton", peau) else str(_ap.get("menton", ""))):
-		"planche":
-			pass
-		"pointu":
-			draw_colored_polygon(PackedVector2Array([c - p * r * 0.2 - d * r * 0.8, c + p * r * 0.2 - d * r * 0.8, c - d * r * 1.1]), peau.darkened(0.05))
-		"fendu":
-			draw_line(c - d * r * 0.78, c - d * r * 0.95, encre, maxf(0.6, r * 0.08))
-	match ("planche" if pv.call("pommettes", encre.lightened(0.2)) else str(_ap.get("pommettes", ""))):
-		"planche":
-			pass
-		"hautes", "saillantes":
-			for cote_p in [-1.0, 1.0]:
-				var o_p: Vector2 = c + p * (r * 0.62 * cote_p) + d * r * (0.05 if str(_ap.pommettes) == "hautes" else -0.02)
-				draw_line(o_p - d * r * 0.12, o_p + d * r * 0.12, encre.lightened(0.2), maxf(0.6, r * (0.10 if str(_ap.pommettes) == "saillantes" else 0.06)))
-	match ("planche" if pv.call("implantation", cheveux) else str(_ap.get("implantation", ""))):
-		"planche":
-			pass
-		"en_pointe":
-			draw_colored_polygon(PackedVector2Array([c - p * r * 0.22 + d * r * 0.72, c + p * r * 0.22 + d * r * 0.72, c + d * r * 0.42]), cheveux)
-		"degarnie":
-			for cote_i in [-1.0, 1.0]:
-				draw_circle(c + p * (r * 0.6 * cote_i) + d * r * 0.62, r * 0.2, peau)
-	match ("planche" if pv.call("paupieres", encre) else str(_ap.get("paupieres", ""))):
-		"planche":
-			pass
-		"lourdes":
-			for cote_pa in [-1.0, 1.0]:
-				var o_pa: Vector2 = c + p * (r * ecart * cote_pa) + d * r * (0.30 + f_haut)
-				draw_line(o_pa - p * r * 0.2, o_pa + p * r * 0.2, encre, maxf(0.7, r * 0.11))
-		"plissees":
-			for cote_pl in [-1.0, 1.0]:
-				var o_pl: Vector2 = c + p * (r * ecart * cote_pl) + d * r * (0.33 + f_haut)
-				draw_arc(o_pl, r * 0.2, PI * 1.1, PI * 1.9, 8, encre, maxf(0.5, r * 0.06))
-	match ("planche" if pv.call("marque", encre.lightened(0.25)) else str(_ap.get("marque", "aucune"))):
-		"planche":
-			pass
-		"cicatrice":
-			draw_line(c + p * r * 0.5 + d * r * 0.5, c + p * r * 0.25 - d * r * 0.45, encre.lightened(0.25), maxf(0.6, r * 0.08))
-		"tatouage":
-			draw_arc(c - p * r * 0.45 + d * r * 0.05, r * 0.24, 0.0, TAU, 10, cheveux.lightened(0.1), maxf(0.6, r * 0.08))
+			c + p * r * 0.35 - d * (r + pilosite), c - p * r * 0.35 - d * (r + pilosite),
+		]), poils)
+
 
 ## Le segment sous un point, en coordonnées locales du nœud (designer 2026-09-01, point 68) : l'écran de
 ## pose y clique pour saisir un membre. On rend le segment dont le corps — pas l'ancrage — est le plus

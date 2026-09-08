@@ -163,6 +163,14 @@ static func _indices(res: Dictionary) -> void:
 ## les trois faces d'un bloc (sa matière reste dessous) ; `voile` sur une tuile mémorisée, `voile_jamais` (plus sombre) sur
 ## une tuile jamais vue. `veg_vus`, `veg_voiles`, `veg_noirs` : les index des végétaux vus, voilés, jamais vus, pour que le
 ## client règle leurs billboards.
+## **Les aplats voisins fondus** (2026-09-08, designer : « fusionner les silhouettes mémorisées — là le C++ servirait
+## vraiment ») : sur l'écran, les losanges de deux tuiles voisines EN X partagent exactement une arête (le bas de l'une
+## est la gauche de l'autre, la droite de l'une est le haut de l'autre), et la réunion de N losanges de même hauteur
+## alignés en x est EXACTEMENT un parallélogramme — ses deux bords sont des droites. Un trait de N tuiles voilées de
+## même voile et de même hauteur coûte donc **2 triangles au lieu de 2N**. La passe calcule d'abord la nature de chaque
+## tuile de la fenêtre (une fois par tuile), puis la parcourt dans le **même ordre de peintre** qu'avant et émet chaque
+## trait à sa **première** tuile — ce qui doit passer par-dessus (un bloc devant) vient après, comme avant. Pour N = 1,
+## la sortie est celle d'avant **point par point** : c'est ce que vérifie `test_noyau_passes` en comparant au noyau.
 static func brouillard(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_ci: int, jp: Vector2i, rayon: int, origine_dessin: Vector2i,
 		tw: float, th: float, hstep: float, niveau_u: int, bat_j: int, mur_coupe_u: int, voile: Color, voile_jamais: Color) -> Dictionary:
 	var res := _vide()
@@ -172,32 +180,64 @@ static func brouillard(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_
 	var y1 := mini(g.origine.y + g.hauteur_grille - 1, jp.y + rayon)
 	var tw2 := tw * 0.5
 	var th2 := th * 0.5
+	var lw := x1 - x0 + 1
+	# La nature de chaque tuile, une fois : -1 rien (vue), -2 végétal vu, -3 bloc à trois faces, sinon la **clé d'un
+	# aplat** — `hauteur * 2 + (0 mémorisé | 1 jamais vu)`, qui dit d'un seul nombre la hauteur ET le voile, donc
+	# exactement ce que deux voisins doivent partager pour fondre.
+	var nature := PackedInt32Array()
+	nature.resize(lw * (y1 - y0 + 1))
+	var niveaux := PackedInt32Array()   # la hauteur d'un bloc, en niveaux (× hstep à l'émission : le même nombre des deux côtés)
+	niveaux.resize(nature.size())
+	var vegetal_f := PackedByteArray()
+	vegetal_f.resize(nature.size())
+	for y in range(y0, y1 + 1):
+		for x in range(x0, x1 + 1):
+			var t := Vector2i(x, y)
+			var k := (y - y0) * lw + (x - x0)
+			var decouverte := g.decouvert.has(g.idx(t))
+			var ct := g.contenu_de(t)
+			var vegetal: bool = "vegetation" in ct.get("tags", [])
+			vegetal_f[k] = 1 if vegetal else 0
+			if decouverte and voit(g, vue, tout_vu, zj, vide_ci, t):
+				nature[k] = -2 if vegetal else -1
+			elif not vegetal and g.bloque_passage(t) and not ("porte" in ct.get("tags", [])):
+				nature[k] = -3
+				niveaux[k] = hauteur_bloc(g, t, bat_j, niveau_u, mur_coupe_u)
+			else:
+				nature[k] = g.h(t) * 2 + (0 if decouverte else 1)
 	for s in range(x0 + y0, x1 + y1 + 1):
 		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
 			var t := Vector2i(x, s - x)
-			var idx := g.idx(t)
-			var decouverte := g.decouvert.has(idx)
-			var ct := g.contenu_de(t)
-			var vegetal: bool = "vegetation" in ct.get("tags", [])
-			if decouverte and voit(g, vue, tout_vu, zj, vide_ci, t):
-				if vegetal:
-					res.veg_vus.append(idx)
+			var k := (t.y - y0) * lw + (x - x0)
+			var n := nature[k]
+			if n == -1:
 				continue
-			var col := voile if decouverte else voile_jamais
-			var c := ecran(t, g.h(t), origine_dessin, tw, th, hstep)
-			if vegetal:
-				if decouverte:
-					res.veg_voiles.append(idx)
-				else:
-					res.veg_noirs.append(idx)
-			elif g.bloque_passage(t) and not ("porte" in ct.get("tags", [])):
-				var hm := hauteur_bloc(g, t, bat_j, niveau_u, mur_coupe_u) * hstep
+			if n == -2:
+				res.veg_vus.append(g.idx(t))
+				continue
+			if n == -3:
+				var hm := float(niveaux[k]) * hstep
 				if hm > 0:   # le voile sur les trois faces du bloc : sa matière reste dessous
-					_poly(res, PackedVector2Array([c + Vector2(-tw2, 0), c + Vector2(0, th2), c + Vector2(0, th2 - hm), c + Vector2(-tw2, -hm)]), col, PackedVector2Array())
-					_poly(res, PackedVector2Array([c + Vector2(0, th2), c + Vector2(tw2, 0), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm)]), col, PackedVector2Array())
-					_poly(res, PackedVector2Array([c + Vector2(-tw2, -hm), c + Vector2(0, -th2 - hm), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm)]), col, PackedVector2Array())
+					var c := ecran(t, g.h(t), origine_dessin, tw, th, hstep)
+					var col_b := voile if g.decouvert.has(g.idx(t)) else voile_jamais
+					_poly(res, PackedVector2Array([c + Vector2(-tw2, 0), c + Vector2(0, th2), c + Vector2(0, th2 - hm), c + Vector2(-tw2, -hm)]), col_b, PackedVector2Array())
+					_poly(res, PackedVector2Array([c + Vector2(0, th2), c + Vector2(tw2, 0), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm)]), col_b, PackedVector2Array())
+					_poly(res, PackedVector2Array([c + Vector2(-tw2, -hm), c + Vector2(0, -th2 - hm), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm)]), col_b, PackedVector2Array())
 				continue
-			_poly(res, PackedVector2Array([c + Vector2(-tw2, 0), c + Vector2(0, -th2), c + Vector2(tw2, 0), c + Vector2(0, th2)]), col, PackedVector2Array())
+			if vegetal_f[k] == 1:   # un végétal voilé : son billboard à la charge du client, ET son aplat au sol
+				if (n & 1) == 0:
+					res.veg_voiles.append(g.idx(t))
+				else:
+					res.veg_noirs.append(g.idx(t))
+			if x > x0 and nature[k - 1] == n:
+				continue   # déjà fondu dans le trait qui commence à sa gauche
+			var fin := x
+			while fin < x1 and nature[k + fin - x + 1] == n:
+				fin += 1
+			var col := voile if (n & 1) == 0 else voile_jamais
+			var ca := ecran(t, n >> 1, origine_dessin, tw, th, hstep)
+			var cb := ecran(Vector2i(fin, t.y), n >> 1, origine_dessin, tw, th, hstep)
+			_poly(res, PackedVector2Array([ca + Vector2(-tw2, 0), ca + Vector2(0, -th2), cb + Vector2(tw2, 0), cb + Vector2(0, th2)]), col, PackedVector2Array())
 	_indices(res)
 	return res
 
@@ -489,5 +529,48 @@ static func morceau(g: Grille, coin: Vector2i, taille_morceau: int, p: Dictionar
 			_tuile(res, g, t, p)   # toutes les tuiles, vues ou non (designer 2026-09-06, 23 h : plus de fond gris — le brouillard voile)
 			if "vegetation" in g.contenu_de(t).get("tags", []):
 				res.vegetaux.append(idx)
+	_indices(res)
+	return res
+
+
+## LA RÉFÉRENCE PAR TUILE du brouillard — un losange par tuile, sans aucune fusion (c'est la passe telle qu'elle était
+## avant le 2026-09-08). Elle n'est plus appelée par le jeu : elle existe pour que `test_noyau_passes` prouve que la
+## version FONDUE couvre exactement les mêmes losanges, en les redécoupant. C'est la seule chose capable d'attraper une
+## erreur de géométrie dans la fusion — un écart d'une tuile ne se verrait sur aucune capture.
+static func brouillard_par_tuile(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_ci: int, jp: Vector2i, rayon: int, origine_dessin: Vector2i,
+		tw: float, th: float, hstep: float, niveau_u: int, bat_j: int, mur_coupe_u: int, voile: Color, voile_jamais: Color) -> Dictionary:
+	var res := _vide()
+	var x0 := maxi(g.origine.x, jp.x - rayon)
+	var x1 := mini(g.origine.x + g.largeur - 1, jp.x + rayon)
+	var y0 := maxi(g.origine.y, jp.y - rayon)
+	var y1 := mini(g.origine.y + g.hauteur_grille - 1, jp.y + rayon)
+	var tw2 := tw * 0.5
+	var th2 := th * 0.5
+	for s in range(x0 + y0, x1 + y1 + 1):
+		for x in range(maxi(x0, s - y1), mini(x1, s - y0) + 1):
+			var t := Vector2i(x, s - x)
+			var idx := g.idx(t)
+			var decouverte := g.decouvert.has(idx)
+			var ct := g.contenu_de(t)
+			var vegetal: bool = "vegetation" in ct.get("tags", [])
+			if decouverte and voit(g, vue, tout_vu, zj, vide_ci, t):
+				if vegetal:
+					res.veg_vus.append(idx)
+				continue
+			var col := voile if decouverte else voile_jamais
+			var c := ecran(t, g.h(t), origine_dessin, tw, th, hstep)
+			if vegetal:
+				if decouverte:
+					res.veg_voiles.append(idx)
+				else:
+					res.veg_noirs.append(idx)
+			elif g.bloque_passage(t) and not ("porte" in ct.get("tags", [])):
+				var hm := hauteur_bloc(g, t, bat_j, niveau_u, mur_coupe_u) * hstep
+				if hm > 0:   # le voile sur les trois faces du bloc : sa matière reste dessous
+					_poly(res, PackedVector2Array([c + Vector2(-tw2, 0), c + Vector2(0, th2), c + Vector2(0, th2 - hm), c + Vector2(-tw2, -hm)]), col, PackedVector2Array())
+					_poly(res, PackedVector2Array([c + Vector2(0, th2), c + Vector2(tw2, 0), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm)]), col, PackedVector2Array())
+					_poly(res, PackedVector2Array([c + Vector2(-tw2, -hm), c + Vector2(0, -th2 - hm), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm)]), col, PackedVector2Array())
+				continue
+			_poly(res, PackedVector2Array([c + Vector2(-tw2, 0), c + Vector2(0, -th2), c + Vector2(tw2, 0), c + Vector2(0, th2)]), col, PackedVector2Array())
 	_indices(res)
 	return res

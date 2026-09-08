@@ -118,6 +118,21 @@ jamais s'ajouter à côté. Sinon on obtient six vérités qui se contredisent, 
 > - **Jusqu'où va le recul.** Un corps poussé pousse-t-il à son tour ce qu'il heurte (chaîne de collisions), ou s'arrête-t-il au premier obstacle ?
 > - **Est-ce que le joueur lui-même est un corps ?** Une charge a-t-elle un élan qui l'emporte au-delà de sa cible, un personnage lourd met-il un tick de plus à changer de direction ? C'est la question que j'avais posée et qui reste ouverte : **l'inertie du déplacement** est un autre chantier que celle des projectiles, et beaucoup plus intrusif.
 
+
+> [!success] Codé le 2026-09-08 — le champ de danger, et les deux sources que l'IA ne voyait pas — `thermique.json → danger`, `SimTerrain._tiquer_danger`
+> **Le troisième champ partagé**, après la lumière et la chaleur. Et le plus petit des trois, parce que la structure existait déjà — mal.
+>
+> **Ce qui existait** : `grille.dangers`, un dictionnaire **binaire** (idx → true), posé par **trois choses seulement** — le feu, la lave, le glyphe d'un Graveur. Lu par le chemin (le noyau C++ refuse toute tuile non nulle) et par deux endroits de l'IA.
+> **Ce qu'il ratait, et c'était l'essentiel** : **les nuages de gaz n'y étaient pas.** Une poche percée pose des zones dans `sim.zones` et n'appelait **jamais** `poser_danger` — l'IA marchait dans le poison, dans le grisou, dans le nuage qui asphyxie. Le balayage du 2026-09-08 l'avait dit en une phrase (« c'est déjà vrai des gaz posés hier ») ; c'était exact. Et **la chaleur** non plus : une tuile à 300 °C, brûlante sans flamme, était invisible.
+>
+> **Ce que le champ fait** : il **gradue** — 1 à 100 au lieu d'un booléen — et il **absorbe** les deux sources manquantes. Le grade se **déduit des données**, sans rien inventer : un gaz qui blesse ou explose vaut 100, un gaz qui pose un statut vaut 60, un gaz qui ne fait qu'étouffer les feux vaut 30 ; la chaleur s'interpole entre le seuil où elle brûle (70 °C) et celui qui vaut le maximum.
+> **Et voici le point de la règle** : le code de décision de l'IA **n'a pas changé d'une ligne**. « On ne reste pas dans le danger » couvre désormais le gaz et la chaleur **sans une branche de plus**. Un champ remplace ; il ne s'ajoute pas.
+>
+> **Rétrocompatible par construction** : le noyau C++ refuse toute valeur non nulle du miroir `danger_a`, donc graduer ne change rien pour le chemin ; et `poser_danger(i)` sans intensité vaut 100, donc les trois appelants d'avant gardent exactement leur sens.
+> **Une précaution structurelle** : le champ ne retire **que ses propres tuiles**. Le feu, la lave et les glyphes gardent la leur — sinon dissiper un nuage effacerait le danger d'un feu posé au même endroit. `test_champ_de_danger` le vérifie explicitement, en plus des trois autres points.
+>
+> **Ce qu'il reste à ce champ** : l'IA se contente encore de **refuser** une tuile dangereuse ; elle ne **pèse** pas encore le grade pour choisir entre deux chemins imparfaits. C'est ce que la graduation rend possible, et ce n'est pas fait.
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Matériaux — 13 stats]], [[Application des stats de matériau]], [[Grille continue]]
 - **Alimente** : [[Mine sous une cellule]], [[Éclairage]], [[Météo]], [[IA des créatures]], [[Modules de la simulation et le C++]]

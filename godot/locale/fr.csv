@@ -1221,6 +1221,7 @@ function.garde.name,Garde
 function.dirigeant.name,Dirigeant
 function.aventurier.name,Aventurier
 creature.villageois.name,Villageois
+creature.etranger.name,Étranger
 creature.fermier.name,Fermier
 creature.forgeron.name,Forgeron
 creature.marchand.name,Marchand
@@ -4270,6 +4271,7 @@ journal.gaz_explose,"le {gaz} s'enflamme et explose !"
 zone.gaz,Nuage de gaz
 journal.gaz_soigne,"les {gaz} soignent {nom} (+{n})"
 journal.gaz_mana,"la {gaz} rend du mana à {nom} (+{n})"
+gaz._template,gabarit
 gaz.azote,azote
 gaz.dioxyde_de_carbone,dioxyde de carbone
 gaz.methane,méthane (grisou)
@@ -4511,3 +4513,8 @@ function.portefaix.name,Portefaix
 journal.chaleur_blesse,"{nom} souffre de la chaleur ({degres} °C, {degats})"
 journal.incarne_sans_chaine,"{nom} n'a pas de jauge de chaîne : plus d'enchaînement Wu Xing tant que vous êtes dans ce corps."
 journal.incarne_avec_chaine,"{nom} porte une jauge de chaîne : l'enchaînement Wu Xing est de nouveau possible."
+ui.apparence.pilosite,Pilosité
+ui.apparence.teinte_pilosite,Couleur de la pilosité
+ui.apparence.val.legere,légère
+ui.apparence.val.fournie,fournie
+ui.coffre.titre,"{nom} — {n} / {cap} emplacements"

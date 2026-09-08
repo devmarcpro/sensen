@@ -71,5 +71,9 @@
   ],
   "signature": "tourelle",
   "classe_mere": "erudit",
-  "cachee": true
+  "cachee": true,
+  "equipement_slots": {
+    "main_principale": "craft_epee",
+    "main_secondaire": "craft_epee"
+  }
 }

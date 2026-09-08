@@ -1,0 +1,19 @@
+{
+  "_doc": "Gabarit d un gaz (Gaz dans le sol). Copier, remplir, renommer. `teinte` : la couleur du nuage [r,v,b,a]. `masse` : la densite RELATIVE A L AIR SEC (air = 1,00), calculee sur la masse molaire reelle — sous 1 le gaz monte et s accumule au plafond, au-dessus il coule et noie les points bas. `degats` : un jet de des par pas, vide si le gaz ne blesse pas. `element` : le vecteur Wu Xing des degats. `statut` et `statut_ticks` : ce qu il pose a qui le respire. `soigne` / `mana` : les gaz bienfaisants. `eteint_feux` : il chasse la flamme. `inflammable` + `lumiere_min` + `explosion` : il prend feu au-dessus de cette lumiere et souffle tout le nuage.",
+  "name_key": "gaz._template",
+  "teinte": [
+    0.7,
+    0.7,
+    0.7,
+    0.35
+  ],
+  "masse": 1.0,
+  "degats": "",
+  "element": {},
+  "statut": "",
+  "statut_ticks": 0,
+  "soigne": "",
+  "mana": "",
+  "eteint_feux": false,
+  "inflammable": false
+}

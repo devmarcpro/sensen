@@ -489,6 +489,8 @@ static func _apparence_pour(sim: Simulation, race_id: String, rng: RandomNumberG
 	var cheveux: Array = cfg.get("teintes_cheveux", [])
 	if not cheveux.is_empty() and rng.randf() < 0.6:
 		ap["teinte_cheveux"] = str(cheveux[rng.randi() % cheveux.size()].id)
+	if not ap.has("teinte_pilosite"):
+		ap["teinte_pilosite"] = str(ap.get("teinte_cheveux", ""))   # la pilosité suit les cheveux, sauf réglage (2026-09-08)
 	return ap
 
 
@@ -504,7 +506,9 @@ static func _habiller_pnj(sim: Simulation, e: Dictionary, def: Dictionary, cultu
 	var genre := str(def.get("genre", "m" if rng.randf() < 0.5 else "f"))
 	e["nom"] = Noms.generer(culture_id, cultures.get(culture_id, {}), genre, rng)
 	e["genre"] = genre
-	e["apparence"] = _apparence_pour(sim, str(e.get("race", def.get("race", "humain"))), rng)   # loci visuels : le défaut de la race, varié par tirage
+	if e.get("apparence", {}).is_empty():   # une créature qui DÉCLARE son apparence la garde (2026-09-08) : le
+		# tirage ne repeint que les visages laissés au hasard.
+		e["apparence"] = _apparence_pour(sim, str(e.get("race", def.get("race", "humain"))), rng)   # loci visuels : le défaut de la race, varié par tirage
 	e["name_key"] = "pnj.%s.name" % e.id
 	GameData.enregistrer_nom(e.name_key, Noms.afficher(e.nom))
 	e["fonction"] = str(def.get("fonction", "oisif"))

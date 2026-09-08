@@ -163,6 +163,12 @@ Aucune ne figure dans la palette des matériaux ([[Palette de couleurs des maté
 > [!success] Codé le 2026-09-06, 21 h — les membres par planches, sinon par code
 > `Paperdoll._planche_membre` : un segment dont le dossier `assets/membres/<segment>/` a des cases se dessine par sa case (carrée, de la longueur du segment, centrée sur son axe, le bas à l'origine), miroir pour le côté gauche, variante par carrure, teinte du segment ; sinon le polygone d'avant. La tête et chaque trait du visage de même (`_planche_visage`, la case est la tête entière). Voir [[Direction artistique]] (callout du 2026-09-06, 21 h).
 
+
+> [!success] Codé le 2026-09-08 — le **torse se coupe en bassin + torse**, et la case d'un membre devient carrée **centrée** (designer : « sépare torse en bassin et torse »)
+> **La coupe ne déplace rien.** Le bassin part de la hanche et fait 5, le torse le prolonge et fait 9 : le cou reste à **14** de la hanche, les épaules à **12**, les hanches à **0** — exactement où ils étaient. Les jambes pendent du bassin, qui devient la **racine** du rig ; le bassin porte la zone de dégâts `torse`, donc `zone_de_coup` et tout le combat ne bougent pas d'un chiffre ; la cuirasse habille les deux segments. Le rig passe de 14 à **15 segments** (`test_noyau_passes` le vérifie, racine comprise).
+> **Et une erreur de règle trouvée en posant la planche du bassin** : la case d'un membre faisait la **longueur** du segment. Ça marchait tant qu'un membre était plus long que large — le bassin est plus **large** que long (8 contre 5), et sa planche sortait écrasée dans une case de 5. La case est désormais **carrée, centrée sur le segment, de côté `max(longueur, largeur)`** ; pour tout membre allongé, `cote == longueur` et le calcul est celui d'avant, au pixel près.
+> **Une arme dans chaque main** : `equipement` range chaque objet dans **son** emplacement, donc deux épées finissaient toutes deux dans la main principale. `equipement_slots` dit *dans quel emplacement*, s'applique après la liste et gagne — c'est ce qui permet de tenir une arme dans la seconde main sans toucher aux vingt kits de classe, dont la liste reste intacte. L'aperçu de la création refaisait cet équipement dans son coin et montrait autre chose que la partie : il lit les mêmes données maintenant.
+
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Direction artistique]], [[Décisions d'architecture]]
 - **Alimente** : [[Schéma créature]], [[Apparence — données et équipement]], [[Équipement — 14 slots]], [[Armure par zone et constructions]], [[Monstres rares]]

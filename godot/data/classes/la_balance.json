@@ -75,5 +75,9 @@
     }
   ],
   "signature": "estimation",
-  "classe_mere": "meneur"
+  "classe_mere": "meneur",
+  "equipement_slots": {
+    "main_principale": "craft_epee",
+    "main_secondaire": "craft_epee"
+  }
 }

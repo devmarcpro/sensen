@@ -57,6 +57,24 @@ Les règles générales du combat : pas de jet de toucher, la géométrie décid
 > - **Jusqu'où va l'irréversible ?** Un membre peut-il être perdu pour de bon — et le joueur peut-il finir manchot pour le reste de la partie ?
 > - **Est-ce que ça vaut pour tout le monde ?** Les cinq zones humanoïdes ne vont ni à un loup, ni à un essaim, ni à une calèche. Faut-il des silhouettes par squelette (`silhouette: humanoide` existe déjà sur la fiche de créature) ?
 
+
+> [!important] Élargi le 2026-09-08, 21 h — le corps devient un **plan de parties**, avec des membres qu'on perd, qu'on remplace, qu'on ajoute, et des **organes qui coûtent de la place** (designer : « un personnage est composé de membres, un personnage peut perdre ses membres, les membres peuvent être remplacés ou même certains rajoutés, membres et organes — plusieurs estomacs = pouvoir manger plus mais demande plus de place »)
+> **Ce que ça change par rapport au callout précédent** : celui-ci parlait de donner un *état* aux cinq zones existantes. Ici, la liste elle-même devient variable. Ce n'est plus « la tête a 40 points de vie », c'est **« ce corps a deux bras, et il pourrait en avoir un, ou trois »**.
+>
+> **Ce qui existe aujourd'hui tient en une étiquette.** L'anatomie entière est `corps.silhouette` = `"humanoide"`, plus une **liste d'exceptions** : une silhouette non humanoïde ne peut équiper que les emplacements listés dans `talents.incarnation.slots_bete` — c'est ainsi qu'un cerf refuse un casque (« pas de mains »). Il n'y a pas de partie du corps dans les données : il y a un mot, et un cas particulier.
+>
+> **Les quatre choses demandées, et ce que chacune coûte :**
+> - **Perdre un membre.** C'est la suite directe de l'état par zone : un membre a une intégrité, et sous un seuil il est perdu. Le vrai coût n'est pas là — il est en dessous.
+> - **Les emplacements d'équipement doivent DÉRIVER du corps.** C'est le point le plus lourd, et il est structurel : `e.equipement` a aujourd'hui des clés **fixes** (`main_principale`, `main_secondaire`, la tête, le torse…). Perdre un bras doit retirer un emplacement, en gagner un doit en ajouter. Tant que les emplacements sont une liste écrite d'avance, rien du reste n'est possible.
+> - **Remplacer et ajouter.** Prothèse, greffe, membre de plus : c'est un **axe de contenu entier**, et il se raccorde exactement à la réécriture des modules — une greffe est du contenu qui **module une règle du monde**, pas un effet à elle.
+> - **Les organes, et le budget de place.** C'est la partie la plus neuve, et la plus intéressante : un organe **occupe du volume** dans le corps. Deux estomacs font manger plus **et laissent moins de place** pour autre chose. Ça introduit une dimension qui n'existe nulle part aujourd'hui — une **contenance interne** — et c'est elle qui rend le choix intéressant : on n'ajoute pas, on **arbitre**.
+>
+> **Ce que ça tranche, au passage** : la question n° 6 des [[Décisions en attente]] (« les cinq zones humanoïdes valent-elles pour un loup, un essaim, une calèche ? ») **devient sans objet**. La réponse est : le corps est une **donnée**, un plan par créature, et `silhouette` en devient l'ancêtre.
+>
+> **Ce que ça touche, et il faut le dire avant de commencer** : `degats_finaux` et `_appliquer_degats` sont le cœur le plus chaud du code ; le **paperdoll dessine par emplacement**, donc un corps à géométrie variable change ce qui est dessiné ; et la suite entière suppose **à la fois** une jauge de santé unique **et** des emplacements fixes. C'est le chantier le plus intrusif de tout ce qui est en file.
+>
+> **Et c'est le modèle de Caves of Qud**, que le designer a nommé le même jour en parlant de l'exploration : des parties de corps en données, des membres perdus, des greffes et des mutations qui en ajoutent. Les deux demandes vont dans la même direction — ce n'est pas une coïncidence, et il vaudra mieux en parler ensemble.
+
 ## Liens
 - **Dépend de** : [[Action-time à ticks]], [[Grille continue]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[Zones de coup par dénivelé]], [[Garde en posture]], [[Attaque lourde et télégraphe]], [[XP de combat]], [[Pipeline de résolution du combat]]

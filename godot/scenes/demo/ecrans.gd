@@ -25,6 +25,8 @@ var portrait_perso: Paperdoll      # le même paperdoll, zoomé sur le visage (d
 var pose_edition := ""      # l'action dont on articule la pose (designer, point 63)
 var pose_segment := ""      # le membre saisi
 var menu_contextuel_objet: PopupMenu   # clic droit sur un objet du sac (designer, point 46)
+var popup_couleur: PopupPanel          # la roue des couleurs (designer 2026-09-08) : peau, cheveux, pilosité
+var roue_couleur: ColorPicker
 var barres_perso: BarresCreation   # vie, endurance, mana sous l'aperçu (designer, point 42)
 var composeur: Composeur      # le composeur en glisser-déposer (écran Composer)
 var corps: HBoxContainer      # liste + détail : caché quand le composeur est ouvert
@@ -36,6 +38,7 @@ var hauteur_panneau := HAUTEUR          # sa hauteur, même règle : une colonne
 var parties_listees: Array = []         # l'écran Charger : {slot, resume} par partie (designer 2026-09-02)
 var minuterie := 0.0
 var pnj_id := ""                     # le PNJ du dialogue / du commerce en cours
+var contenant_pos := Vector2i(-9999, -9999)   # la tuile du coffre ouvert (écran « coffre », 2026-09-08)
 var replique_key := ""
 
 
@@ -357,7 +360,7 @@ func touche(ev: InputEventKey) -> bool:
 						EcransListe.rafraichir(self)
 				return true
 		KEY_T:
-			if courant in ["commerce", "echange"]:   # T : trier le volet courant (designer 2026-09-04)
+			if courant in ["commerce", "echange", "coffre"]:   # T : trier le volet courant (designer 2026-09-04)
 				echange_visuel.trier_suivant()
 				return true
 		KEY_V:

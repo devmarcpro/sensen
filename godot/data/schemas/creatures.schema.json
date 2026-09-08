@@ -176,6 +176,12 @@
     },
     "drops_chasse": {
       "type": "array"
+    },
+    "apparence": {
+      "type": "object"
+    },
+    "equipement_slots": {
+      "type": "object"
     }
   },
   "required": [

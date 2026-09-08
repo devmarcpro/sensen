@@ -1,5 +1,5 @@
 {
-  "_doc": "Loci visuels humanoïdes (Apparence — données et équipement ; designer 2026-08-31, points 39 et 41) : le Paperdoll ne branche jamais par race, il lit ces facteurs. echelle multiplie tout le rig, carrure la largeur, tete_facteur le diamètre du crâne ; oreilles et barbe sont des longueurs en pixels. Les curseurs (designer 2026-09-01, point 53) sont des réglages CONTINUS du visage, en plus des valeurs discrètes : c'est ce qui distingue un portrait-robot d'un simple catalogue.",
+  "_doc": "Loci visuels humanoïdes (Apparence — données et équipement ; designer 2026-08-31, points 39 et 41) : le Paperdoll ne branche jamais par race, il lit ces facteurs. echelle multiplie tout le rig, carrure la largeur, tete_facteur le diamètre du crâne ; oreilles et barbe sont des longueurs en pixels. Les curseurs (designer 2026-09-01, point 53) sont des réglages CONTINUS du visage, en plus des valeurs discrètes : c'est ce qui distingue un portrait-robot d'un simple catalogue. — Les couleurs (peau, cheveux, pilosité) se choisissent à la ROUE : elles s'écrivent en clair (#rrggbb) ; les listes `teintes_*` ne sont plus que des presets, pour le tirage des PNJ (designer 2026-09-08).",
   "loci": [
     {
       "id": "tete",
@@ -9,6 +9,16 @@
         "carree",
         "allongee",
         "en_coeur"
+      ],
+      "universel": false
+    },
+    {
+      "id": "oreilles",
+      "valeurs": [
+        "rondes",
+        "pointues",
+        "longues",
+        "collees"
       ],
       "universel": false
     },
@@ -58,6 +68,15 @@
       "universel": false
     },
     {
+      "id": "pilosite",
+      "valeurs": [
+        "aucune",
+        "legere",
+        "fournie"
+      ],
+      "universel": false
+    },
+    {
       "id": "carrure",
       "valeurs": [
         "mince",
@@ -76,88 +95,6 @@
         "grande"
       ],
       "universel": true
-    },
-    {
-      "id": "sourcils",
-      "valeurs": [
-        "fins",
-        "epais",
-        "aucun"
-      ],
-      "universel": false
-    },
-    {
-      "id": "barbe",
-      "valeurs": [
-        "aucune",
-        "courte",
-        "longue"
-      ],
-      "universel": false
-    },
-    {
-      "id": "marque",
-      "valeurs": [
-        "aucune",
-        "cicatrice",
-        "tatouage"
-      ],
-      "universel": false
-    },
-    {
-      "id": "machoire",
-      "valeurs": [
-        "fine",
-        "carree",
-        "lourde"
-      ],
-      "universel": false
-    },
-    {
-      "id": "menton",
-      "valeurs": [
-        "rond",
-        "pointu",
-        "fendu"
-      ],
-      "universel": false
-    },
-    {
-      "id": "pommettes",
-      "valeurs": [
-        "basses",
-        "hautes",
-        "saillantes"
-      ],
-      "universel": false
-    },
-    {
-      "id": "oreilles",
-      "valeurs": [
-        "rondes",
-        "pointues",
-        "longues",
-        "collees"
-      ],
-      "universel": false
-    },
-    {
-      "id": "implantation",
-      "valeurs": [
-        "droite",
-        "en_pointe",
-        "degarnie"
-      ],
-      "universel": false
-    },
-    {
-      "id": "paupieres",
-      "valeurs": [
-        "ouvertes",
-        "lourdes",
-        "plissees"
-      ],
-      "universel": false
     }
   ],
   "facteurs": {
@@ -180,16 +117,16 @@
       "moyenne": 1.0,
       "grande": 1.14
     },
-    "barbe": {
-      "aucune": 0.0,
-      "courte": 2.0,
-      "longue": 4.0
-    },
     "oreilles": {
       "rondes": 0.0,
       "collees": 0.8,
       "pointues": 3.2,
       "longues": 5.5
+    },
+    "pilosite": {
+      "aucune": 0.0,
+      "legere": 2.0,
+      "fournie": 4.0
     }
   },
   "teintes_peau": [
@@ -375,6 +312,23 @@
       "max": 1.5,
       "pas": 0.05,
       "defaut": 1.0
+    }
+  ],
+  "couleurs": [
+    {
+      "id": "teinte_peau",
+      "palette": "teintes_peau",
+      "defaut": "#e8c39a"
+    },
+    {
+      "id": "teinte_cheveux",
+      "palette": "teintes_cheveux",
+      "defaut": "#4a3327"
+    },
+    {
+      "id": "teinte_pilosite",
+      "palette": "teintes_cheveux",
+      "defaut": "#4a3327"
     }
   ]
 }

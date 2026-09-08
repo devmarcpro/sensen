@@ -56,6 +56,11 @@ var carte_chaleur := PackedFloat32Array()
 var chaleur_active: Dictionary = {}
 var chaleur_prochain_pas := 0
 var chaleur_grille: Grille = null   # la grille dont la carte est dimensionnée : elle se refait si la grille change
+# Le champ de danger (Émergence) : les tuiles que le CHAMP a marquées, par opposition à celles qu'un feu, une
+# coulée ou un glyphe tiennent eux-mêmes. On ne retire que les siennes — sinon éteindre un nuage effacerait le
+# danger d'un feu posé sur la même tuile.
+var danger_champ: Dictionary = {}
+var danger_prochain_pas := 0
 var feu_prochain_pas := 0
 var poches_gaz: Dictionary = {}   # idx → gaz : les poches scellées dans le plein de l'étage (Gaz dans le sol)
 var poches_sous_sol: Dictionary = {}   # idx → eau | geode | magma : les autres poches du plein (Gaz dans le sol, 18 h 40)
@@ -744,7 +749,14 @@ func maj_vision() -> void:
 			continue   # déjà calculée à ce tick, au même endroit, sur la même grille (Villes B1 : 218 êtres, dix pas par tick)
 		_vision_tick = t_now
 		_vision_grille = grille
-		var portee := int(float(e.stats_eff.perception) * float(regles.r.engagement.detection_par_perception))
+		# CE QUE LE JOUEUR VOIT a désormais ses propres nombres (2026-09-08). Il empruntait
+		# `engagement.detection_par_perception` — la portée à laquelle une IA DÉTECTE une cible —, si bien qu'en plein
+		# jour, ciel clair, il ne voyait que Perception × 1 = CINQ tuiles, alors que le client en dessine vingt autour
+		# de lui. Toute une ville était donc du MÉMORISÉ, redessiné en silhouettes plates à chaque pas : la première
+		# cause du lag en ville, et aussi du « les textures ne sont pas toujours affichées ». Voir la mesure dans
+		# [[Budgets de performance]] (callout du 2026-09-08). Voir loin de jour n'a rien à voir avec repérer quelqu'un.
+		var vcfg: Dictionary = regles.r.get("vision", {})
+		var portee := int(float(vcfg.get("joueur_base", 18)) + float(e.stats_eff.perception) * float(vcfg.get("joueur_par_perception", 1.0)))
 		if SimTalents.a_talent(self, e, "oeil_de_la_pierre"):
 			portee = maxi(1, roundi(float(portee) * float(regles.r.talents.oeil_de_la_pierre.vision_mult)))
 		if lieu == "camp" and monde != null:
@@ -753,7 +765,7 @@ func maj_vision() -> void:
 				facteur *= maxf(float(SimTerrain._cycle(self).get("vision_nuit", 0.6)), float(lumiere_de(e)) / 100.0)   # la nuit : malus de vision, sauf une lumière en main (Éclairage)
 			var etat: Dictionary = GameData.catalogues.weather_states.get(str(e.get("meteo_locale", SimTerrain.meteo(self, monde.cellule_de(e.pos)))), {})
 			facteur *= float(etat.get("visibility_mult", 1.0))
-			portee = maxi(1, roundi(float(portee) * facteur))
+			portee = maxi(int(vcfg.get("joueur_min", 4)), roundi(float(portee) * facteur))
 		var vue := {}
 		for idx in grille.champ_de_vue(e.pos, portee):   # le noyau C++ balaie le carré et ses lignes de vue d'un trait (2026-09-06)
 			vue[idx] = true
@@ -862,6 +874,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 		SimTerrain._tiquer_feux(self, tick)
 		SimTerrain._tiquer_gaz(self, tick)
 		SimTerrain._tiquer_chaleur(self, tick)
+		SimTerrain._tiquer_danger(self, tick)
 		var h_per := int(SimTerrain._cycle(self).get("ticks_par_jour", 24000)) / 24
 		if tick / h_per != peremption_heure:
 			peremption_heure = tick / h_per
@@ -1073,6 +1086,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = SimCamp._demonter(self, e, i.get("vers", Vector2i(-1, -1)), h.ticks)
 		"ranger":
 			ok = SimCamp._ranger(self, e, str(i.get("objet", "")), i.get("vers", Vector2i(-1, -1)), h.ticks)
+		"prendre_un":   # un seul objet d'un contenant (l'écran du coffre, 2026-09-08)
+			ok = SimCamp._prendre_un(self, e, str(i.get("objet", "")), i.get("vers", Vector2i(-1, -1)), h.ticks)
 		"prendre":
 			ok = SimCamp._prendre(self, e, i.get("vers", Vector2i(-1, -1)), h.ticks)
 		"dormir":
@@ -4254,6 +4269,9 @@ func _recalculer_lumiere() -> void:
 
 static var _lum_transparents := PackedStringArray()   # les matières transparentes, lues une fois au catalogue
 static var _lum_meubles_niv: Dictionary = {}           # id de meuble → niveau de lumière (0 : n'éclaire pas)
+var _lum_signature := 0                               # l'état lumineux du dernier calcul (2026-09-08) : même signature, même carte
+var _lum_bloque := PackedByteArray()                  # les contenus qui arrêtent la lumière : ils ne changent qu'au rechargement des données
+var _lum_bloque_n := -1
 var _lum_meubles_grille: Grille = null                # la grille dont _lum_meubles_idx/_src listent les meubles lumineux
 var _lum_meubles_n := -1
 var _lum_meubles_idx := PackedInt32Array()
@@ -4292,11 +4310,16 @@ func _recalculer_lumiere_noyau() -> void:
 	t_l0 = _top("lumiere.sources", t_l0)
 	chrono["n.lumiere"] = float(chrono.get("n.lumiere", 0.0)) + 1.0
 	var seuil_t := int(GameData.config("combat_rules").get("stats_materiau", {}).get("transparence_seuil", 50))
-	var bloque := PackedByteArray()
-	bloque.resize(grille.contenu_ids.size())
-	for ci in range(1, grille.contenu_ids.size()):
-		var c: Dictionary = grille.contenu_defs.get(grille.contenu_ids[ci], {})
-		bloque[ci] = 1 if (bool(c.get("bloque_vue", false)) and int(c.get("transparence", 0)) < seuil_t) else 0
+	# La table des contenus qui arrêtent la lumière ne dépend que du CATALOGUE : elle était refaite à chaque
+	# propagation, c'est-à-dire jusqu'à cinq fois par image quand le joueur marche (2026-09-08).
+	if _lum_bloque_n != grille.contenu_ids.size():
+		_lum_bloque_n = grille.contenu_ids.size()
+		_lum_bloque = PackedByteArray()
+		_lum_bloque.resize(grille.contenu_ids.size())
+		for ci in range(1, grille.contenu_ids.size()):
+			var c: Dictionary = grille.contenu_defs.get(grille.contenu_ids[ci], {})
+			_lum_bloque[ci] = 1 if (bool(c.get("bloque_vue", false)) and int(c.get("transparence", 0)) < seuil_t) else 0
+	var bloque := _lum_bloque
 	if _lum_transparents.is_empty():   # les matières qui laissent passer la lumière (le verre) : quelques ids, lus une fois ; le noyau parcourt les tuiles
 		_lum_transparents.append("")
 		for mid in GameData.catalogues.materials.keys():
@@ -4362,10 +4385,46 @@ func _recalculer_lumiere_gd() -> void:
 	lumiere_tick = horloge_monde.ticks
 
 
-## Le niveau 0-15 d'une tuile (recalcul au plus une fois par tick de monde, et seulement quand on lit).
-func niveau_lumiere(pos: Vector2i) -> int:
-	if lumiere_sale or lumiere_tick != horloge_monde.ticks or carte_lumiere.size() != grille.n_tuiles():
+## La signature de l'état lumineux : les sources qui BOUGENT (un être qui porte une torche) et le nombre de meubles.
+## Deux ticks de suite avec la même signature donnent la même carte — c'est ce qui permet de ne pas la refaire.
+## Elle coûte une boucle sur les êtres ; la propagation qu'elle évite coûte toute la fenêtre.
+func _signature_lumiere() -> int:
+	var h := hash([grille.meubles.size(), lieu, carte_lumiere.size()])
+	for id in ordre:
+		var e: Dictionary = entites[id]
+		if not e.vivant:
+			continue
+		var l := lumiere_de(e)
+		if l > 0:
+			h = hash([h, grille.idx(e.pos), l])
+	return h
+
+
+## La carte de lumière, refaite SEULEMENT si quelque chose a changé (2026-09-08).
+## Avant, `lumiere_tick != horloge_monde.ticks` la refaisait ENTIÈREMENT à chaque tick de monde, même quand rien
+## n'avait bougé — et quand le joueur marche, le monde avance jusqu'à **cinq ticks par image**, pendant que `voit_ia`
+## lit la lumière pour chaque paire observateur/cible la nuit en ville. C'était le « énorme lag en ville quand le
+## joueur se déplace ». `lumiere_sale` disait déjà « une tuile a changé » ; ce qu'il ne couvrait pas, c'est qu'une
+## SOURCE BOUGE — d'où le test au tick, qui répondait à un vrai besoin par un marteau. La signature le couvre pour le
+## prix d'une boucle sur les êtres.
+func _lumiere_a_jour() -> void:
+	if lumiere_sale or carte_lumiere.size() != grille.n_tuiles():
 		_recalculer_lumiere()
+		_lum_signature = _signature_lumiere()
+		return
+	if lumiere_tick == horloge_monde.ticks:
+		return
+	lumiere_tick = horloge_monde.ticks
+	var sig := _signature_lumiere()
+	if sig == _lum_signature:
+		return   # rien n'a bougé : la carte d'avant est encore la bonne
+	_lum_signature = sig
+	_recalculer_lumiere()
+
+
+## Le niveau 0-15 d'une tuile (recalcul seulement quand l'état lumineux a changé, et seulement quand on lit).
+func niveau_lumiere(pos: Vector2i) -> int:
+	_lumiere_a_jour()
 	return int(carte_lumiere[grille.idx(pos)]) if grille.dans(pos) else 0
 
 
@@ -4964,6 +5023,9 @@ func _tiquer_gaz(tick: int) -> void:
 
 func _tiquer_chaleur(tick: int) -> void:
 	SimTerrain._tiquer_chaleur(self, tick)
+
+func _tiquer_danger(tick: int) -> void:
+	SimTerrain._tiquer_danger(self, tick)
 
 func chaleur_a(t: Vector2i) -> float:
 	return SimTerrain.chaleur_a(self, t)

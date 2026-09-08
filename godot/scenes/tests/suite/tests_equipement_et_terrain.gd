@@ -649,6 +649,59 @@ func test_affixes_reveilles() -> void:
 	s.monde.fermer()
 
 
+## Le CHAMP DE DANGER (Émergence — les champs partagés, 2026-09-08). Avant, `grille.dangers` était binaire et posé par
+## trois choses seulement : le feu, la lave, un glyphe. **Les nuages de gaz n'y étaient pas** — l'IA marchait dans le
+## poison et dans le grisou — et **la chaleur non plus** : une tuile à 300 °C, brûlante sans flamme, était invisible.
+## Le champ gradue et absorbe ces deux sources ; le code de décision de l'IA n'a pas changé d'une ligne.
+func test_champ_de_danger() -> void:
+	var s := Simulation.new(606)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var cfg: Dictionary = GameData.config("thermique").get("danger", {})
+	verifier(not cfg.is_empty() and int(cfg.chaleur_seuil) > 0, "les réglages du danger sont en données (seuil %d °C)" % int(cfg.chaleur_seuil))
+	# 1. LE GAZ. Un nuage toxique posé à côté du joueur : avant, rien ne le disait à l'IA.
+	var t_gaz: Vector2i = s._tuile_libre_autour(j.pos)
+	verifier(s.grille.danger_de(t_gaz) == 0, "la tuile est sûre avant le nuage")
+	s.zones.append({"pos": t_gaz, "type": "gaz", "gaz": "sulfure_d_hydrogene", "fin": 100000, "source": "", "params": {}})
+	s._tiquer_danger(0)
+	var d_gaz: int = s.grille.danger_de(t_gaz)
+	verifier(d_gaz > 0, "un nuage de gaz toxique EST un danger pour l'IA (%d/100) — il ne l'était pas" % d_gaz)
+	# Un gaz qui ne fait qu'étouffer les feux vaut moins qu'un gaz qui blesse : la fiche décide, rien n'est inventé.
+	var t_inerte: Vector2i = s._tuile_libre_autour(t_gaz)
+	s.zones.append({"pos": t_inerte, "type": "gaz", "gaz": "azote", "fin": 100000, "source": "", "params": {}})
+	s.danger_prochain_pas = 0
+	s._tiquer_danger(10)
+	verifier(s.grille.danger_de(t_inerte) > 0 and s.grille.danger_de(t_inerte) < d_gaz, "un gaz qui asphyxie sans blesser vaut moins (%d contre %d)" % [s.grille.danger_de(t_inerte), d_gaz])
+	# 2. LA CHALEUR. Une tuile brûlante SANS flamme est un danger.
+	var t_chaud: Vector2i = s._tuile_libre_autour(t_inerte)
+	s.chauffer(t_chaud, 350.0)
+	verifier(not s.feux.has(s.grille.idx(t_chaud)), "la tuile chaude ne brûle pas : c'est bien la chaleur seule qu'on teste")
+	s.danger_prochain_pas = 0
+	s._tiquer_danger(20)
+	verifier(s.grille.danger_de(t_chaud) > 0, "une tuile à 350 °C sans flamme EST un danger (%d/100)" % s.grille.danger_de(t_chaud))
+	# 3. LE CHAMP SE RETIRE quand la source s'en va — et il ne retire QUE les siennes.
+	s.zones.clear()
+	s.carte_chaleur[s.grille.idx(t_chaud)] = 15.0
+	s.chaleur_active.erase(s.grille.idx(t_chaud))
+	s.danger_prochain_pas = 0
+	s._tiquer_danger(30)
+	verifier(s.grille.danger_de(t_gaz) == 0 and s.grille.danger_de(t_chaud) == 0, "le nuage dissipé et la tuile refroidie ne sont plus des dangers")
+	# 4. LE FEU GARDE LE SIEN : le champ ne doit jamais effacer le danger d'un propriétaire.
+	var t_feu: Vector2i = Vector2i(-9999, -9999)
+	for r in range(1, 6):
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				var q: Vector2i = j.pos + Vector2i(dx, dy)
+				if t_feu == Vector2i(-9999, -9999) and s.grille.dans(q) and s.flammabilite_de(q) > 0:
+					if s._enflammer(q):
+						t_feu = q
+	if t_feu != Vector2i(-9999, -9999):
+		verifier(s.grille.danger_de(t_feu) == 100, "une tuile en feu vaut le danger maximum (%d)" % s.grille.danger_de(t_feu))
+		s.danger_prochain_pas = 0
+		s._tiquer_danger(40)
+		verifier(s.grille.danger_de(t_feu) == 100, "et le passage du champ ne le lui retire PAS — le feu tient le sien")
+
+
 func test_feu() -> void:
 	var s := Simulation.new(151)
 	s.charger_camp()

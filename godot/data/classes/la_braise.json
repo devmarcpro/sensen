@@ -78,5 +78,9 @@
     }
   ],
   "signature": "trempe",
-  "classe_mere": "guerrier"
+  "classe_mere": "guerrier",
+  "equipement_slots": {
+    "main_principale": "craft_epee",
+    "main_secondaire": "craft_epee"
+  }
 }

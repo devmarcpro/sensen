@@ -1,0 +1,19 @@
+{
+  "_doc": "Inerte et lourd : il s installe dans les creux et n en repart pas.",
+  "name_key": "gaz.argon",
+  "teinte": [
+    0.8,
+    0.85,
+    0.95,
+    0.25
+  ],
+  "masse": 1.38,
+  "degats": "",
+  "element": {},
+  "statut": "epuisement",
+  "statut_ticks": 40,
+  "soigne": "",
+  "mana": "",
+  "eteint_feux": false,
+  "inflammable": false
+}

@@ -11,14 +11,23 @@ func test_brouillard() -> void:
 	verifier(j.has("vue") and j.vue.has(s.grille.idx(j.pos)), "le joueur voit sa propre tuile")
 	verifier(s.grille.decouvert.size() == j.vue.size() and j.vue.size() > 1, "les tuiles vues sont mémorisées (%d)" % j.vue.size())
 	verifier(s.grille.decouvert.size() < s.grille.largeur * s.grille.hauteur_grille / 4, "l'étage n'est pas découvert d'emblée")
-	var portee := int(float(j.stats_eff.perception) * float(s.regles.r.engagement.detection_par_perception))
+	# CE QUE LE JOUEUR VOIT a ses propres nombres depuis le 2026-09-08 : ce test lisait
+	# `engagement.detection_par_perception` — la portée à laquelle une IA DÉTECTE une cible —, c'est-à-dire l'emprunt
+	# qui était le défaut. Il lit maintenant `vision.joueur_*`, comme le code. (Pas de facteur de nuit ni de météo ici :
+	# on est dans un donjon, et ces deux-là ne s'appliquent qu'au plein air.)
+	var vcfg: Dictionary = s.regles.r.get("vision", {})
+	var portee := int(float(vcfg.get("joueur_base", 18)) + float(j.stats_eff.perception) * float(vcfg.get("joueur_par_perception", 1.0)))
 	var trop_loin := true
 	for idx in j.vue.keys():
 		var t := Vector2i(int(idx) % s.grille.largeur, int(idx) / s.grille.largeur)
 		if Grille.distance(t, j.pos) > portee:
 			trop_loin = false
-	verifier(trop_loin, "rien au-delà de la portée de Perception (%d)" % portee)
-	var loin := Vector2i(j.pos.x + portee * 3, j.pos.y)
+	verifier(trop_loin, "rien au-delà de la portée de vue du joueur (%d)" % portee)
+	# La porte refermée sur l'emprunt : si quelqu'un rebranche la vue du joueur sur la détection d'une IA, ce test
+	# rougit. Cinq tuiles en plein jour, c'était toute la ville en mémorisé — et la première cause du lag en ville.
+	var detection := int(float(j.stats_eff.perception) * float(s.regles.r.engagement.detection_par_perception))
+	verifier(portee > detection, "le joueur voit plus loin qu'une IA ne détecte (%d contre %d)" % [portee, detection])
+	var loin := Vector2i(j.pos.x + portee + 3, j.pos.y)
 	if s.grille.dans(loin):
 		verifier(not s.voit(j, loin), "une tuile lointaine n'est pas vue")
 	var v0: int = j.vue_version

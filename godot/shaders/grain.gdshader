@@ -25,6 +25,9 @@ uniform sampler2D lumiere_tex : filter_nearest, repeat_disable;   // la lumière
 uniform vec2 lumiere_taille = vec2(1.0, 1.0);   // la taille de la grille (la texture)
 uniform vec2 lumiere_decalage = vec2(0.0, 0.0); // origine de la grille − origine de dessin, en tuiles
 uniform float lumiere_active = 0.0;             // 0 : pas de lumière par tuile (arène)
+uniform sampler2D matieres_tex : filter_nearest, repeat_disable;   // l'atlas des matières PEINTES : une case de tuile par ligne
+uniform float matieres_n = 0.0;                 // combien de lignes dans l'atlas (0 : aucune matière peinte)
+uniform float style_texture_base = 100.0;       // au-delà de ce style, UV.x ne désigne plus un motif calculé mais une LIGNE de l'atlas
 
 const float DECALAGE_HAUT = 4096.0;
 const float DECALAGE_SO = -1000.0;
@@ -75,7 +78,14 @@ void fragment() {
 	float t = doux(uv * max(echelle_douce, 0.01)) - 0.5;
 	float k = 1.0 + g * 2.0 * force_grain + t * 2.0 * force_douce;
 
-	if (style == 1.0) {          // ROCHE : des veines obliques et des éclats plus contrastés
+	// UNE MATIÈRE PEINTE (designer 2026-09-08) : son style désigne une ligne de l'atlas, et la texture REMPLACE la
+	// couleur du matériau au lieu de la moduler — un sprite porte déjà ses couleurs. Le soleil et la lumière de la
+	// tuile s'appliquent ensuite, comme pour une matière calculée ; le grain procédural, lui, ne s'y ajoute pas.
+	if (matieres_n > 0.0 && style >= style_texture_base && style < style_texture_base + matieres_n) {
+		vec2 f = fract(uv);
+		COLOR.rgb = texture(matieres_tex, vec2(f.x, (style - style_texture_base + f.y) / matieres_n)).rgb;
+		k = 1.0;
+	} else if (style == 1.0) {   // ROCHE : des veines obliques et des éclats plus contrastés
 		float veine = doux(vec2(uv.x * 1.7 + uv.y * 0.9, uv.y * 0.4) * 3.0);
 		k += (veine - 0.5) * 0.22 + g * 0.10;
 	} else if (style == 2.0) {   // TERRE : grumeleuse — de larges mottes, peu de grain fin

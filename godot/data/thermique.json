@@ -24,5 +24,14 @@
     "brulure_ticks": 20,
     "par_degre": 0.01,
     "facteur_max": 2.5
+  },
+  "danger": {
+    "periode_ticks": 10,
+    "_doc": "Le champ de danger (Emergence). Ce que l IA doit eviter, gradue de 1 a 100 au lieu d un booleen. chaleur_seuil : au-dela de cette temperature une tuile devient dangereuse meme sans flamme ; chaleur_plein : la temperature qui vaut 100. gaz_degats / gaz_statut / gaz_inerte : ce que vaut un nuage selon ce que sa fiche declare — des degats ou une explosion, un statut, ou rien qu une gene.",
+    "chaleur_seuil": 70.0,
+    "chaleur_plein": 400.0,
+    "gaz_degats": 100,
+    "gaz_statut": 60,
+    "gaz_inerte": 30
   }
 }

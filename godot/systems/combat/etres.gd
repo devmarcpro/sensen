@@ -16,6 +16,15 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 			push_error("Etres : objet « %s » inconnu pour %s" % [item_id, id])
 			continue
 		equip[item.equip_slot] = item_id
+	# `equipement_slots` dit DANS QUEL EMPLACEMENT (designer 2026-09-08 : « une épée dans chaque main ») : la liste
+	# `equipement` range chaque objet dans SON emplacement, donc deux épées finissaient toutes deux dans la main
+	# principale. Ceci s'applique après, et gagne — c'est ainsi qu'on tient une arme dans la seconde main.
+	for slot_force: String in def.get("equipement_slots", {}).keys():
+		var force_id := str(def.equipement_slots[slot_force])
+		if items.has(force_id):
+			equip[slot_force] = force_id
+		else:
+			push_error("Etres : objet « %s » inconnu pour %s (%s)" % [force_id, id, slot_force])
 	return {
 		"id": id,
 		"def": def.id,
@@ -108,7 +117,7 @@ static func creer_personnage(nom_key: String, race_id: String, classe_id: String
 	return {
 		"id": "joueur", "name_key": nom_key, "race": race_id, "classe": classe_id, "fonction": "aventurier", "skeleton_template": "humanoide",
 		"corps": {"stats": stats, "silhouette": "humanoide"}, "esprit": null, "ai_profile": "compagnon",
-		"actions": [], "equipement": classe.get("equipement", []).duplicate(), "ratelier": classe.get("ratelier", []).duplicate(),
+		"actions": [], "equipement": classe.get("equipement", []).duplicate(), "equipement_slots": classe.get("equipement_slots", {}).duplicate(), "ratelier": classe.get("ratelier", []).duplicate(),
 		"sac": ["station_etabli"],   # chaque personnage part avec un établi portatif (Stations de transformation, décidé le 2026-08-28)
 		"competences": classe.get("competences", {}).duplicate(), "chain_gauge": true, "elements": null,
 		"rare_chance": 0.0, "teinte": [0.28, 0.62, 0.92], "tags": ["humanoide", "joueur"] + race.get("tags", []),

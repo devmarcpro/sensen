@@ -1,0 +1,19 @@
+{
+  "_doc": "LA MOFETTE. Une fois et demie l air : elle noie le fond d un puits et l on s y couche sans le voir.",
+  "name_key": "gaz.dioxyde_de_carbone",
+  "teinte": [
+    0.55,
+    0.65,
+    0.65,
+    0.35
+  ],
+  "masse": 1.52,
+  "degats": "",
+  "element": {},
+  "statut": "epuisement",
+  "statut_ticks": 50,
+  "soigne": "",
+  "mana": "",
+  "eteint_feux": true,
+  "inflammable": false
+}
