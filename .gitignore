@@ -13,6 +13,11 @@ godot/.godot/
 build/
 captures_ecran/
 
+# La RACINE est la boite de depot du designer : il y pose ses PNG (sprites, textures, planches) et je les range
+# dans godot/assets/. Un fichier qui attend d etre range n a rien a faire dans le depot — le 2026-09-08, un
+# « git add -A » en a commis un par accident.
+/*.png
+
 # Le noyau C++ (cpp/) : seule la DLL est versionnée
 godot/addons/sensen_grille/bin/*.lib
 godot/addons/sensen_grille/bin/*.exp
