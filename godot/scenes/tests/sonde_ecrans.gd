@@ -33,6 +33,9 @@ func _ready() -> void:
 			_verifier(ec, nom, t)
 		ec.fermer()
 	_verifier_pages_et_tri(scene, ec)
+	await _verifier_pause(scene, ec)
+	await _verifier_ecran_mort(scene, ec)
+	_verifier_controles()
 	for f in fautes:
 		print(f)
 	if not fautes.is_empty():
@@ -88,6 +91,124 @@ func _chemin(n: Node, jusqu_a: Node) -> String:
 ## Les pages et le tri (designer 2026-09-06, 19 h 20 : « le tri affecte que la page, pas l'inventaire dans sa totalité ») :
 ## quarante matières dans le sac, le tri par nom, puis toutes les pages parcourues — la suite des noms doit être triée
 ## d'un bout à l'autre, et compter tout le sac.
+## LA PAUSE (Ordre de travail, palier 3 — 2026-09-08). Le monde ne doit pas avancer pendant qu'un écran est ouvert.
+## C'est la seule sonde qui puisse le prouver : elle monte `main.tscn` en entier, donc `_process_corps` tourne pour de
+## vrai. La suite headless, elle, ne monte jamais le client — c'est pourquoi ce défaut a vécu si longtemps.
+func _verifier_pause(scene: Node, ec) -> void:
+	ec.fermer()
+	for k in 4:
+		await get_tree().process_frame
+	# 1. écran fermé : le monde DOIT avancer, sinon la sonde ne prouverait rien.
+	var avant: int = int(scene.sim.horloge_monde.ticks)
+	for k in 20:
+		await get_tree().process_frame
+	var ouvert_avance: int = int(scene.sim.horloge_monde.ticks) - avant
+	# 2. écran ouvert : le monde ne doit plus bouger d'un tick.
+	ec.ouvrir("inventaire")
+	for k in 4:
+		await get_tree().process_frame
+	var fige: int = int(scene.sim.horloge_monde.ticks)
+	for k in 20:
+		await get_tree().process_frame
+	var pendant: int = int(scene.sim.horloge_monde.ticks) - fige
+	ec.fermer()
+	if ouvert_avance <= 0:
+		fautes.append("  pause : le monde n'avance meme pas ecran ferme (%d ticks) — la sonde ne prouve rien" % ouvert_avance)
+	if pendant != 0:
+		fautes.append("  pause : le monde a avance de %d ticks avec un ecran ouvert (attendu 0)" % pendant)
+	if ouvert_avance > 0 and pendant == 0:
+		print("  pause : le monde avance de %d ticks ecran ferme, 0 ecran ouvert" % ouvert_avance)
+
+
+## L'ÉCRAN DE MORT (Ordre de travail, palier 3 — 2026-09-08). Avant, la défaite était une ligne de journal et
+## n'importe quelle touche relevait le joueur. On vérifie qu'un joueur mort ouvre l'écran, que le monde s'arrête
+## derrière, et que « Se relever » — et lui seul — le remet debout.
+func _verifier_ecran_mort(scene: Node, ec) -> void:
+	ec.fermer()
+	for k in 3:
+		await get_tree().process_frame
+	var j: Dictionary = scene.joueur()
+	if j.is_empty():
+		fautes.append("  mort : pas de joueur pour l'essai")
+		return
+	j.vivant = false   # on le tue à la main : la sonde juge l'écran, pas le combat
+	var touche := InputEventKey.new()
+	touche.keycode = KEY_W
+	touche.pressed = true
+	scene._unhandled_input(touche)
+	for k in 3:
+		await get_tree().process_frame
+	if str(ec.courant) != "mort":
+		fautes.append("  mort : une touche sur un joueur mort n'ouvre pas l'ecran (courant = %s)" % str(ec.courant))
+		j.vivant = true
+		ec.fermer()
+		return
+	if j.vivant:
+		fautes.append("  mort : la touche a releve le joueur au lieu d'ouvrir l'ecran — c'est le defaut qu'on repare")
+	var avant: int = int(scene.sim.horloge_monde.ticks)
+	for k in 15:
+		await get_tree().process_frame
+	if int(scene.sim.horloge_monde.ticks) != avant:
+		fautes.append("  mort : le monde avance (%d ticks) derriere l'ecran de mort" % (int(scene.sim.horloge_monde.ticks) - avant))
+	var options := 0
+	for en in ec.entrees:
+		if str(en.get("kind", "")) == "mort":
+			options += 1
+	if options < 2:
+		fautes.append("  mort : l'ecran n'offre que %d choix (attendu au moins « se relever » et « titre »)" % options)
+	ec.fermer()
+	scene._relever_le_joueur()
+	for k in 3:
+		await get_tree().process_frame
+	if not scene.joueur().get("vivant", false):
+		fautes.append("  mort : « se relever » n'a pas remis le joueur debout")
+	else:
+		print("  mort : l'ecran s'ouvre, le monde s'arrete derriere, %d choix, « se relever » fonctionne" % options)
+
+
+## L'INPUTMAP (Ordre de travail, palier 3 — 2026-09-08). La section `[input]` de `project.godot` était LITTÉRALEMENT
+## vide et les quatorze touches de `main.gd` étaient écrites en dur : le jeu n'était jouable qu'en AZERTY. On vérifie
+## que chaque action déclarée existe avec une touche, que la marche passe bien par la POSITION physique (c'est elle qui
+## rend ZQSD et WASD équivalents), et qu'un remappage tient puis se relit.
+func _verifier_controles() -> void:
+	var actions: Dictionary = Reglages.actions()
+	if actions.is_empty():
+		fautes.append("  controles : aucune action declaree")
+		return
+	for nom in actions.keys():
+		if not InputMap.has_action(StringName(nom)):
+			fautes.append("  controles : l'action %s n'est pas dans l'InputMap" % str(nom))
+			continue
+		var evs: Array = InputMap.action_get_events(StringName(nom))
+		if evs.is_empty():
+			fautes.append("  controles : l'action %s n'a aucune touche" % str(nom))
+			continue
+		var ev: InputEventKey = evs[0]
+		var veut_physique: bool = bool(actions[nom].get("physique", true))
+		var est_physique: bool = ev.physical_keycode != KEY_NONE
+		if veut_physique != est_physique:
+			fautes.append("  controles : %s devrait etre %s" % [str(nom), "physique" if veut_physique else "une lettre"])
+		if str(Reglages.touche_de(str(nom))).is_empty() or Reglages.touche_de(str(nom)) == "?":
+			fautes.append("  controles : %s n'a pas de nom de touche lisible" % str(nom))
+	# Un remappage tient, et Echap refuse d'etre remappe. On compare au DEFAUT DES DONNEES et non a la valeur
+	# courante : `remapper` ECRIT dans user://options.cfg, donc un essai precedent survit d'un lancement a l'autre —
+	# ce qui prouve la persistance, mais rendait ce controle faux la seconde fois. On nettoie derriere soi.
+	var defaut := str(actions["ramasser"].get("touche", ""))
+	if not Reglages.remapper("ramasser", "K"):
+		fautes.append("  controles : impossible de remapper une action pourtant remappable")
+	elif Reglages.touche_de("ramasser") != "K":
+		fautes.append("  controles : le remappage n'a pas pris (%s)" % Reglages.touche_de("ramasser"))
+	Reglages.remappages.erase("ramasser")
+	Reglages.construire_input_map()
+	Reglages.enregistrer()   # sinon l'essai fuit dans les reglages du joueur et fausse le prochain lancement
+	if Reglages.touche_de("ramasser") != defaut:
+		fautes.append("  controles : le retour au defaut n'a pas marche (%s au lieu de %s)" % [Reglages.touche_de("ramasser"), defaut])
+	if Reglages.remapper("annuler", "K"):
+		fautes.append("  controles : Echap s'est laisse remapper alors qu'il est declare non remappable")
+	if fautes.is_empty():
+		print("  controles : %d actions dans l'InputMap, la marche par position, le remappage tient" % actions.size())
+
+
 func _verifier_pages_et_tri(scene: Node, ec: Node) -> void:
 	var sim = scene.sim
 	var j: Dictionary = scene.joueur()

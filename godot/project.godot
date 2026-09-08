@@ -23,6 +23,7 @@ config/features=PackedStringArray("4.6")
 GameData="*res://autoload/game_data.gd"
 EventBus="*res://autoload/event_bus.gd"
 TickManager="*res://autoload/tick_manager.gd"
+Reglages="*res://autoload/reglages.gd"
 
 [display]
 

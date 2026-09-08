@@ -277,6 +277,24 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 >
 > **Et une bombe désamorcée en chemin** : `arena.banc_objets.name` avait été écrite **à l'intérieur du bloc de `fr.csv` que `gen_materials.py` régénère**. Le premier passage du générateur l'a effacée en silence. La clé est remise **avant** le marqueur, et le générateur **refuse désormais d'écraser un bloc qui contient autre chose que des clés `material.`** — vérifié en y posant un intrus : il sort en erreur et n'écrit rien.
 
+
+> [!success] Codé le 2026-09-08 — le palier 3 : la pause, l'écran de mort, l'InputMap et des réglages qui survivent à la fermeture
+> **La pause.** Un écran ouvert arrête le monde — et il fallait **les deux gestes**, parce que le monde avance par deux chemins qu'on prend l'un pour l'autre : au camp l'horloge est en temps réel et tourne d'elle-même (`active = false` l'arrête) ; **en donjon elle est en mode action et le monde n'avance QUE par la boucle `while sim.pas("monde")` de `_process_corps`**, que le drapeau n'arrête pas du tout. D'où le retour anticipé, comme pour l'écran de chargement.
+> Et c'est **le même retour** qui corrige ZQSD : les touches de marche sont **sondées**, pas reçues en événement — aucune garde posée dans les écrans ne pouvait les arrêter. Comme le designer a décidé « une option = une lettre », les quatre touches de marche **sont** quatre lettres d'option : taper « D » pour choisir une option faisait marcher le personnage sous le panneau.
+>
+> **L'écran de mort.** Avant, la défaite était une ligne de journal et **n'importe quelle touche relevait le joueur sur-le-champ**. Maintenant un écran s'ouvre — donc le monde se met en pause, par la pause du même jour — et il faut un choix : se relever, charger une partie, revenir au titre.
+> **Une correction au passage** : le balayage prétendait qu'« avant d'avoir dormi une fois, mourir ne coûte rien ». **C'est faux** — [[Mort et pénalité]] *décide* que sans lit activé on repart du point d'entrée, et les pertes de sac et d'or s'appliquent dans les deux cas.
+> **Un détail de conception qui a changé en route** : les pertes sont appliquées par `_respawn`, donc **au relèvement** et pas à la mort. L'écran annonce donc ce que ça **va** coûter — où l'on se relèvera, les 10 % d'or, la part du sac qui tombe et sa péremption. C'est un **choix éclairé**, pas un constat.
+>
+> **L'InputMap.** La section `[input]` de `project.godot` était **littéralement vide** et les quatorze touches de `main.gd` écrites en dur. Douze actions vivent maintenant dans `data/controles.json`, et l'autoload `Reglages` construit l'InputMap au démarrage.
+> **Le choix qui compte** : les touches de marche sont déclarées par leur **position physique**. Sur un clavier AZERTY, la touche Z occupe la place du W de QWERTY — déclarer la position donne donc **ZQSD à l'un et WASD à l'autre, sans rien demander au joueur**. Les **lettres d'option** ne passent pas par là : la lettre qu'on affiche doit être celle qu'on tape. Les chiffres non plus : ce sont des **rangs de râtelier**, pas des actions.
+> `Reglages.touche_de()` est désormais la **seule source** du nom d'une touche : quand l'écran d'aide sera écrit, il la lira au lieu d'être une **troisième** liste à la main, après le README et les chaînes d'aide qu'on vient de supprimer.
+>
+> **Les réglages survivent enfin.** Il n'existait **ni `ConfigFile` ni fichier de réglages dans tout le dépôt** : la langue et le plein écran se perdaient à la fermeture. Ils vivent dans `user://options.cfg`, avec les remappages.
+>
+> **Preuve** : `sonde_ecrans` monte `main.tscn` en entier et vérifie les trois — *« le monde avance de 1 tick écran fermé, 0 écran ouvert »*, *« l'écran de mort s'ouvre, le monde s'arrête derrière, 3 choix, se relever fonctionne »*, *« 12 actions dans l'InputMap, la marche par position, le remappage tient »*. C'est **la seule sonde qui puisse le prouver** : la suite headless ne monte jamais le client, et c'est très exactement pourquoi ces défauts ont vécu si longtemps.
+> *Au passage, le premier essai du remappage a échoué au second lancement — parce qu'il avait été **enregistré sur disque** entre les deux. Le test était faux ; la persistance, elle, était prouvée.*
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

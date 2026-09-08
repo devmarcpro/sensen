@@ -1,0 +1,77 @@
+{
+  "_doc": "Les controles (Ordre de travail, palier 3 — 2026-09-08). Chaque action porte sa touche par DEFAUT et la cle de traduction de son nom. `physique` = vrai : la touche est designee par sa POSITION sur le clavier, pas par la lettre gravee dessus — c est ce qui rend le jeu jouable en QWERTY sans rien reconfigurer (ZQSD en AZERTY tombe exactement sur WASD en QWERTY). `physique` = faux : la lettre compte, parce que c est elle qui est affichee. `rebindable` = faux pour ce qui ne doit pas bouger (Echap, Entree). Les remappages du joueur sont ecrits dans user://options.cfg par l autoload Reglages, jamais ici.",
+  "actions": {
+    "marcher_haut": {
+      "touche": "W",
+      "physique": true,
+      "nom_cle": "ui.controle.marcher_haut",
+      "rebindable": true
+    },
+    "marcher_bas": {
+      "touche": "S",
+      "physique": true,
+      "nom_cle": "ui.controle.marcher_bas",
+      "rebindable": true
+    },
+    "marcher_gauche": {
+      "touche": "A",
+      "physique": true,
+      "nom_cle": "ui.controle.marcher_gauche",
+      "rebindable": true
+    },
+    "marcher_droite": {
+      "touche": "D",
+      "physique": true,
+      "nom_cle": "ui.controle.marcher_droite",
+      "rebindable": true
+    },
+    "menu": {
+      "touche": "TAB",
+      "physique": true,
+      "nom_cle": "ui.controle.menu",
+      "rebindable": true
+    },
+    "interagir": {
+      "touche": "E",
+      "physique": true,
+      "nom_cle": "ui.controle.interagir",
+      "rebindable": true
+    },
+    "ramasser": {
+      "touche": "R",
+      "physique": true,
+      "nom_cle": "ui.controle.ramasser",
+      "rebindable": true
+    },
+    "volet": {
+      "touche": "F4",
+      "physique": true,
+      "nom_cle": "ui.controle.volet",
+      "rebindable": true
+    },
+    "perimetre": {
+      "touche": "P",
+      "physique": true,
+      "nom_cle": "ui.controle.perimetre",
+      "rebindable": true
+    },
+    "triche": {
+      "touche": "V",
+      "physique": true,
+      "nom_cle": "ui.controle.triche",
+      "rebindable": true
+    },
+    "annuler": {
+      "touche": "ESCAPE",
+      "physique": false,
+      "nom_cle": "ui.controle.annuler",
+      "rebindable": false
+    },
+    "valider": {
+      "touche": "ENTER",
+      "physique": false,
+      "nom_cle": "ui.controle.valider",
+      "rebindable": false
+    }
+  }
+}

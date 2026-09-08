@@ -68,6 +68,22 @@ La couche stratégique : une vue abstraite de la même grille, servant de voyage
 >
 > **Codé à 8 h 50** (`carte.gd` réécrit, `capture.tscn -- --carte` attend la peinture). La carte se prépare **dès le chargement du monde** (`Carte.preparer`), pas à la première ouverture : les tranches autour du joueur d'abord, une tâche du `WorkerThreadPool` à la fois, le fil ne lit que des fonctions pures de la surface (bruit, biome, terre) — **jamais `royaume_de`**, qui calcule un secteur entier de royaumes sous mutex (la première version y passait des minutes sans rien montrer) : les teintes de royaumes viennent des secteurs déjà calculés, et la base se repeint à l'ouverture s'il y en a de nouveaux. Mesuré : une tranche de huit lignes (8 192 cellules) en 0,3 s, le monde entier en une vingtaine de secondes de fil ; une tuile de détail (4 096 cellules, 25 sondes chacune) en quelques secondes, retenue dans la sauvegarde. Une image de carte en 12 ms avec toutes les couches. Ce qui reste : sauver la base en PNG par graine pour la partie reprise ; un pic de 150 ms à la pose d'une tuile de détail (à mesurer).
 
+
+> [!important] Décidé le 2026-09-08, 15 h — le voyage devient un TRAJET, pas une téléportation (designer : « plutôt que de se déplacer de case en case à la Dragon Quest, un système comme Fallout 1 où le joueur clique n'importe où sur la carte et le personnage s'y déplace petit à petit avec événements »)
+> **L'état des lieux, vérifié dans le code** — il y a aujourd'hui *deux* voyages, et aucun des deux n'est celui-là :
+> - **Cliquer une cellule lointaine TÉLÉPORTE.** `SimCamp.voyager` calcule le coût en ticks (la distance en tuiles × le coût d'un pas de cet être, sa charge comprise, × `route_mult` si départ et arrivée sont sur une route), pose le joueur à l'arrivée, **avance l'horloge du coût entier d'un seul coup**, écrit une ligne de journal, et ferme la carte. Aucune cellule n'est traversée, rien ne peut arriver en chemin.
+> - **Le pas à pas de cellule en cellule** (`_pas_sur_la_carte`) a été ajouté le 2026-09-05 à la demande du designer, et c'est très exactement le « Dragon Quest » dont il parle aujourd'hui.
+>
+> **Ce qui change, et c'est plus petit qu'il n'y paraît** : les pièces existent déjà. Le coût par cellule est calculé, les routes le réduisent, l'arrivée est gérée (entrer dans un donjon, chercher une tuile marchable), et le pas d'une cellule existe. Le trajet, c'est **une file de cellules, une cadence, et un point d'interruption**. Le joueur clique loin, le personnage avance cellule par cellule sur la carte restée ouverte, et **tout peut l'arrêter**.
+> **Ce que le monde y gagne** : la route cesse d'être un décor (on la SUIT, on ne fait pas que payer moins), la distance devient un risque et pas seulement un prix, et les **événements en zone logique** — déjà en file, jamais faits — trouvent enfin leur théâtre. Une rencontre, une tempête, une caravane croisée, un raid qu'on surprend : ce sont les mêmes événements que le passage hebdomadaire résout aujourd'hui dans le vide.
+> **Ce qu'il faut noter honnêtement** : l'horloge avance DÉJÀ du coût entier, donc le monde vit déjà pendant le trajet — le passage hebdomadaire, les royaumes, les prix. Le trajet n'ajoute pas de la simulation : il ajoute de l'**interruptibilité** et un endroit où poser les événements.
+>
+> **Ce qui n'est pas à moi** :
+> - **Que voit-on pendant le trajet ?** La carte du monde (Fallout 1), ou le terrain qui défile ? La première est franchement moins chère et se raccorde au brouillard de carte existant.
+> - **Qu'est-ce qui interrompt ?** Une rencontre hostile seulement, ou aussi une découverte, la nuit, la faim, l'épuisement ?
+> - **Peut-on annuler ou reprendre** un trajet interrompu, et à quel prix ?
+> - **La fréquence des rencontres** : au tirage par cellule, ou pondérée par le champ de danger — qui n'existe pas encore et qui est en file.
+
 ## Liens
 - **Dépend de** : [[Décision — Monde fini, continents et océan]], [[Grille continue]], [[Unification macro-micro]], [[Génération par couches de bruit]]
 - **Alimente** : [[Début de partie]], [[Boucle de jeu]], [[Donjons — structure et intégration]], [[Minimap et brouillard de guerre]]

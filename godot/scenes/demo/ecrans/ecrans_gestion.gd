@@ -434,6 +434,36 @@ static func _valider_composition(ec: Ecrans) -> void:
 
 
 ## L'écran principal (Écrans d'interface, 2026-08-30) : Nouvelle partie, Continuer, Charger, Options, Quitter.
+## L'écran de MORT (Ordre de travail, palier 3 — 2026-09-08). Avant, la défaite était une ligne de journal et
+## n'importe quelle touche relevait le joueur sur-le-champ : il ne savait ni où il repartirait, ni ce que ça coûterait.
+## L'écran dit les deux et demande un choix. Étant un écran, il met aussi le monde en pause (la pause du même jour).
+## Les pertes étant appliquées par `_respawn`, donc AU RELÈVEMENT, l'écran annonce ce que ça VA coûter : c'est un choix
+## éclairé, pas un constat.
+static func _construire_mort(ec: Ecrans, j: Dictionary) -> void:
+	ec.titre.text = ec.tr("ui.ecran.mort")
+	var m: Dictionary = ec.main.sim.regles.r.get("mort", {})
+	var lignes: Array[String] = []
+	# Où l'on se relève — la seule information vraiment décisive. [[Mort et pénalité]] : sans lit activé, on repart du
+	# point d'entrée ; avec un lit, mourir en donjon termine l'expédition et ramène au camp.
+	lignes.append(ec.tr("ui.mort.au_lit" if j.has("lit") else "ui.mort.a_l_entree"))
+	var pc := roundi(float(m.get("perte_or", 0.0)) * 100.0)
+	if pc > 0 and int(j.get("or", 0)) > 0:
+		lignes.append(ec.tr("ui.mort.or").format({"pc": pc, "or": int(floor(float(j.or) * float(m.get("perte_or", 0.0))))}))
+	if not j.get("sac", []).is_empty():
+		lignes.append(ec.tr("ui.mort.sac").format({"n": int(j.sac.size()), "jours": int(m.get("peremption_jours", 1))}))
+	else:
+		lignes.append(ec.tr("ui.mort.sac_vide"))
+	var recap := "\n".join(lignes)
+	var ids: Array[String] = ["relever"]
+	if not ec.main.parties_presentes().is_empty():
+		ids.append("charger")
+	ids.append("titre")
+	for id in ids:
+		ec.liste.add_item(ec.tr("ui.mort." + id))
+		# Le détail montre TOUJOURS le récapitulatif, quel que soit le choix survolé : c'est l'information qui compte.
+		ec.entrees.append({"kind": "mort", "id": id, "texte": recap + "\n\n" + ec.tr("ui.mort.d_" + id)})
+
+
 static func _construire_titre(ec: Ecrans) -> void:
 	ec.titre.text = ec.tr("ui.ecran.titre")
 	# Plusieurs parties, UNE sauvegarde par partie (designer 2026-09-02) : « Continuer » reprend la

@@ -1811,6 +1811,18 @@ module.vivacite.name,Vivacité
 module.voile.name,Voile
 module.voile_de_brume.name,Voile de brume
 arena.banc_objets.name,"Banc d'objets"
+ui.ecran.mort,"Vous êtes mort"
+ui.mort.au_lit,"Vous vous relèverez au dernier lit où vous avez dormi. L'expédition en cours est terminée."
+ui.mort.a_l_entree,"Vous n'avez pas encore de lit : vous vous relèverez au point d'entrée."
+ui.mort.or,"Vous perdrez {pc} % de l'or porté, soit {or} pièces."
+ui.mort.sac,"Une part de votre sac ({n} objets) tombera sur place — récupérable pendant {jours} jour."
+ui.mort.sac_vide,"Votre sac est vide : rien à perdre de ce côté."
+ui.mort.relever,"Se relever"
+ui.mort.d_relever,"Payer le prix et repartir."
+ui.mort.charger,"Charger une partie"
+ui.mort.d_charger,"Reprendre à la dernière sauvegarde : rien n'est perdu, mais rien de ce qui a été fait depuis n'est gardé."
+ui.mort.titre,"Revenir à l'écran principal"
+ui.mort.d_titre,"Quitter la partie en cours."
 # --- matériaux (tools/gen_materials.py) ---
 material.pin.name,Pin
 material.sapin.name,Sapin

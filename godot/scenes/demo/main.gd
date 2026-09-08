@@ -1094,18 +1094,35 @@ func _process_corps(delta: float) -> void:
 		if chargement_restant <= 0.0:
 			_fermer_chargement()
 		return
+	# LA PAUSE (Ordre de travail, palier 3 — 2026-09-08). Un écran ouvert arrête le monde, et il faut les DEUX gestes,
+	# parce que le monde avance par deux chemins différents :
+	#   · au camp, l'horloge est en TEMPS_REEL et tourne d'elle-même — `active = false` l'arrête ;
+	#   · en donjon, elle est en mode ACTION et le monde n'avance QUE par la boucle `while sim.pas("monde")` quarante
+	#     lignes plus bas, que `active` n'arrête pas du tout. D'où le retour anticipé, exactement comme pour l'écran de
+	#     chargement juste au-dessus.
+	# Et c'est le même retour qui corrige ZQSD : les touches de marche sont SONDÉES ici (`Input.is_key_pressed`), pas
+	# reçues en événement — aucune garde posée dans les écrans ne pouvait les arrêter, et comme le designer a décidé
+	# « une option = une lettre », les quatre touches de marche SONT quatre lettres d'option. Taper « D » pour choisir
+	# une option faisait marcher le personnage sous le panneau.
+	if ecrans.est_ouvert():
+		sim.horloge_monde.active = false
+		_maj_noeuds(delta)   # les nœuds finissent de se poser : on fige un monde au repos, pas un monde en plein pas
+		return
+	sim.horloge_monde.active = true
 	_recentrer()
-	# ZQSD (8 directions d'écran) : Z = haut, S = bas, Q = gauche, D = droite ; deux touches = diagonale.
+	# La marche (8 directions d'écran), par l'InputMap et par POSITION PHYSIQUE (palier 3, 2026-09-08). Avant, les
+	# quatre touches étaient sondées en dur (`Input.is_key_pressed(KEY_Z)`) et le jeu n'était jouable qu'en AZERTY.
+	# Déclarées par leur position, elles donnent ZQSD sur un clavier français et WASD sur un anglais, sans réglage.
 	minuterie_clavier -= delta
 	if sim.attente.has(joueur_id) and visee < 0 and minuterie_clavier <= 0.0:
 		var dir := Vector2i.ZERO
-		if Input.is_key_pressed(KEY_Z):
+		if Input.is_action_pressed(&"marcher_haut"):
 			dir += Vector2i(-1, -1)
-		if Input.is_key_pressed(KEY_S):
+		if Input.is_action_pressed(&"marcher_bas"):
 			dir += Vector2i(1, 1)
-		if Input.is_key_pressed(KEY_D):
+		if Input.is_action_pressed(&"marcher_droite"):
 			dir += Vector2i(1, -1)
-		if Input.is_key_pressed(KEY_Q):
+		if Input.is_action_pressed(&"marcher_gauche"):
 			dir += Vector2i(-1, 1)
 		dir = Vector2i(signi(dir.x), signi(dir.y))
 		if dir != Vector2i.ZERO:
@@ -1370,15 +1387,36 @@ func _triche_permise() -> bool:
 	return OS.is_debug_build() or ("--triche" in OS.get_cmdline_user_args())
 
 
+## « Se relever » : l'intention que n'importe quelle touche déclenchait avant, désormais choisie. C'est ici que les
+## pertes du sac et de l'or sont appliquées, par `SimObjets._respawn`.
+func _relever_le_joueur() -> void:
+	sim.intention(joueur_id, {"type": "respawn"})
+	_apres_changement_de_grille()
+
+
+## L'action que porte cet événement, ou "" (palier 3, 2026-09-08). Une seule boucle sur les actions déclarées :
+## `event_is_action` sait comparer la position physique comme la lettre, selon ce que `Reglages` a posé dans l'InputMap.
+func _action_de(ev: InputEvent) -> StringName:
+	for nom in Reglages.actions().keys():
+		if InputMap.has_action(StringName(nom)) and InputMap.event_is_action(ev, StringName(nom)):
+			return StringName(nom)
+	return &""
+
+
 func _unhandled_input(ev: InputEvent) -> void:
 	if titre_ouvert:   # écran principal : seules les touches du panneau passent
 		if ev is InputEventKey and ev.pressed and not ev.echo and ecrans.est_ouvert():
 			ecrans.touche(ev)
 		return
 	var j := joueur()
-	if not j.is_empty() and not j.vivant and ev is InputEventKey and ev.pressed and not ev.echo:
-		sim.intention(joueur_id, {"type": "respawn"})
-		_apres_changement_de_grille()
+	if not j.is_empty() and not j.vivant:
+		# La mort ouvre un ÉCRAN (palier 3, 2026-09-08). Avant, n'importe quelle touche relevait le joueur sur-le-champ
+		# et la défaite n'était qu'une ligne de journal. L'écran étant un écran, il met aussi le monde en pause — c'est
+		# la pause codée le même jour qui le permet.
+		if not ecrans.est_ouvert():
+			ecrans.ouvrir("mort")
+		if ev is InputEventKey and ev.pressed and not ev.echo:
+			ecrans.touche(ev)
 		return
 	if not ecran_fin.is_empty() and ((ev is InputEventMouseButton and ev.pressed) or (ev is InputEventKey and ev.pressed)):
 		ecran_fin.clear()   # un clic l'efface tout de suite ; sinon il part de lui-même
@@ -1416,10 +1454,21 @@ func _unhandled_input(ev: InputEvent) -> void:
 				return
 			carte.touche(ev)
 			return
-		match ev.keycode:
-			KEY_TAB:
+		# Les chiffres changent d'arme : ce sont des RANGS de râtelier, pas des actions remappables.
+		if ev.keycode >= KEY_0 and ev.keycode <= KEY_9:
+			var n_touche: int = 9 if ev.keycode == KEY_0 else int(ev.keycode) - int(KEY_1)
+			if ev.ctrl_pressed:   # Ctrl + chiffre : changer de page de hotbar (designer 2026-09-02)
+				_changer_page_hotbar(n_touche)
+			else:
+				_hotbar(n_touche)
+			return
+		# Les touches globales passent par l'InputMap (palier 3, 2026-09-08) : elles sont donc REMAPPABLES, et le rappel
+		# des touches en jeu pourra les LIRE au lieu d'être une troisième liste écrite à la main après le README et les
+		# chaînes d'aide mortes. Les lettres d'option, elles, restent des lettres : « une option = une lettre ».
+		match _action_de(ev):
+			&"menu":
 				ecrans.basculer("menu")
-			KEY_V:
+			&"triche":
 				# Le menu de triche reste sur V — le designer l'a demandé et l'a écrit ([[Écrans d'interface]], 2026-08-29,
 				# « la seule touche globale ajoutée depuis les contrôles tranchés — accord explicite »). Mais il n'a rien
 				# à faire dans la version qu'on publie : la chaîne de publication exporte en `--export-release`, donc
@@ -1427,29 +1476,23 @@ func _unhandled_input(ev: InputEvent) -> void:
 				# `-- --triche`. (Ordre de travail, palier 3 — 2026-09-08.)
 				if _triche_permise():
 					ecrans.basculer("triche")   # menu de triche : tout obtenir, tout déclencher
-			KEY_F4:
+			&"volet":
 				volet_visible = not volet_visible   # le volet latéral (aussi au menu Tab)
-			KEY_P:
+			&"perimetre":
 				if sim.lieu == "camp" and sim.monde != null:   # dessiner un périmètre de récolte (Décision — Gestion de base)
 					ecrans.basculer("perimetre")
-			KEY_E:
+			&"interagir":
 				_interagir()
-			KEY_R:
+			&"ramasser":
 				if sim.attente.has(joueur_id):
 					if not sim.intention(joueur_id, {"type": "ramasser"}):
 						_log(tr("journal.rien_a_ramasser"))
-			KEY_ESCAPE:
+			&"annuler":
 				visee = -1
 				hotbar_sel = -1
 				mode_perimetre = {}   # un dessin de périmètre en cours s'annule
 				lourde_armee = false
 				visee_objet = ""
-			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_0:
-				var n_touche: int = 9 if ev.keycode == KEY_0 else int(ev.keycode) - int(KEY_1)
-				if ev.ctrl_pressed:   # Ctrl + chiffre : changer de page de hotbar (designer 2026-09-02)
-					_changer_page_hotbar(n_touche)
-				else:
-					_hotbar(n_touche)
 
 
 ## La hotbar (Écrans d'interface, contrôles) : armes du râtelier, capacités, lourde, garde, attendre — dix cases.

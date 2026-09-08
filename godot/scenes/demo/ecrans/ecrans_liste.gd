@@ -30,6 +30,8 @@ static func rafraichir(ec: Ecrans) -> void:
 			EcransGestion._construire_gestion(ec, j)
 		"menu":
 			EcransCreation._construire_menu(ec, j)
+		"mort":
+			EcransGestion._construire_mort(ec, j)
 		"titre":
 			EcransGestion._construire_titre(ec)
 		"creation":
@@ -629,7 +631,7 @@ static func _detail_de(ec: Ecrans, en: Dictionary) -> void:
 			var it_c: Dictionary = ec.main.sim.items.get(str(en.uid), {})
 			ec.penta_objet.visible = not ec.main.sim.inconnu(it_c)
 			ec.penta_objet.montrer({"elements": ec.main.sim.vecteur_objet(it_c)})
-		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer", "menu", "contexte", "capacite", "nouvelle_capacite", "module_composer", "triche", "triche_catalogue", "triche_item", "titre", "monde", "options", "charger_slot":
+		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer", "menu", "contexte", "capacite", "nouvelle_capacite", "module_composer", "triche", "triche_catalogue", "triche_item", "titre", "mort", "monde", "options", "charger_slot":
 			ec.detail.text = str(en.get("texte", ""))
 		"creation":
 			ec.detail.text = EcransCreation._detail_creation(ec, str(en.id))
@@ -731,6 +733,17 @@ static func _action_defaut(ec: Ecrans, en: Dictionary) -> void:
 		"creation":
 			EcransCreation._action_creation(ec, str(en.id), 0 if str(en.id) == "pose" else 1)
 			return
+		"mort":
+			match str(en.id):
+				"relever":
+					ec.fermer()
+					ec.main._relever_le_joueur()
+				"charger":
+					ec.ouvrir("charger")
+				"titre":
+					ec.fermer()
+					ec.main._ouvrir_titre()
+			return
 		"titre":
 			match str(en.id):
 				"nouvelle": ec.main._nouvelle_partie()
@@ -755,9 +768,15 @@ static func _action_defaut(ec: Ecrans, en: Dictionary) -> void:
 					return
 		"options":
 			match str(en.id):
-				"langue": TranslationServer.set_locale("en" if TranslationServer.get_locale().begins_with("fr") else "fr")
+				# Les réglages passent par `Reglages` (palier 3, 2026-09-08) : ils étaient posés à chaud et PERDUS à la
+				# fermeture — il n'existait ni ConfigFile ni fichier de réglages dans tout le dépôt. Ils vivent
+				# maintenant dans user://options.cfg, avec les remappages de touches.
+				"langue":
+					Reglages.regler("langue", "en" if TranslationServer.get_locale().begins_with("fr") else "fr")
+					TranslationServer.set_locale(str(Reglages.options.langue))
 				"plein_ecran":
 					var plein: bool = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+					Reglages.regler("plein_ecran", not plein)
 					DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if plein else DisplayServer.WINDOW_MODE_FULLSCREEN)
 				"retour":
 					ec.ouvrir("titre" if ec.main.titre_ouvert else "menu")

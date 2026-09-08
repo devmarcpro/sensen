@@ -94,7 +94,10 @@ défauts du palier, plus la purge des objets du palier 11.
 > *Après ce palier* : tout chantier matériaux redevient sûr — donc les cinq stats s'ouvrent, donc trois champs
 > s'ouvrent derrière elles.
 
-## Palier 3 — la séance `main.gd` : le jeu redevient un jeu
+## ~~Palier 3~~ — la séance `main.gd` : le jeu redevient un jeu — **FAIT le 2026-09-08**
+
+> [!success] Pause, écran de mort, `InputMap` et réglages persistés — prouvés par `sonde_ecrans`, qui monte `main.tscn` en entier. Voir [[Écrans d'interface]] (callout du 2026-09-08).
+> **Ce qui reste de ce palier** : le **rappel des touches en jeu** (il peut maintenant LIRE l'InputMap au lieu d'être une troisième liste à la main), l'**écran d'options complété** (résolution, taille de texte, remappage à la souris), et **Options + Quitter au menu Tab**. Le socle est là ; il ne manque que l'écran qui l'affiche.
 
 Quatre lignes dans deux fonctions du même fichier, plus une séance sur les écrans. **Deux chaînes de dépendance
 internes**, et elles comptent.
@@ -251,6 +254,16 @@ appelle.
 39. **Le refus visible** : aujourd'hui il part au journal, que le panneau recouvre.
 
 ## Palier 10 — ce qui existe et qu'on ne verra jamais
+
+39 bis. **Le voyage devient un TRAJET** — ⚠️ **SUSPENDU le 2026-09-08 à 15 h 30** : le designer veut revoir l'exploration et la génération du monde en entier (« plus Caves of Qud / Dwarf Fortress que JRPG classique / Elin / Elona », [[Vers la production]] ligne 154). Un trajet cellule par cellule sur un écran de carte est une amélioration *dans* le modèle actuel ; si le modèle change, elle devient sans objet. **Ne pas coder avant d'en avoir reparlé.** — *décidé le 2026-09-08 : « un système comme Fallout 1 où le joueur clique
+    n'importe où sur la carte et le personnage s'y déplace petit à petit avec événements ».* Aujourd'hui cliquer loin
+    **téléporte** (l'horloge avance du coût entier d'un coup) et le pas à pas de cellule en cellule est le « Dragon
+    Quest » que le designer veut remplacer. Les pièces existent : coût par cellule, réduction par la route, gestion de
+    l'arrivée, pas d'une cellule. Le trajet, c'est **une file de cellules, une cadence et un point d'interruption**.
+    **Il est ici et pas plus haut parce qu'il est le théâtre des « événements en zone logique »** (ligne 43), qui n'ont
+    aujourd'hui aucun endroit où se produire, et parce que la fréquence des rencontres voudra lire le **champ de
+    danger** (ligne 24). Le faire avant, c'est le faire deux fois. Voir [[Carte du monde]].
+
 
 40. **Effacer le code mort de la génération de village.** *La ligne d'origine était fausse et à l'envers* : les
     bâtiments **se rangent** le long des rues depuis le 2026-09-07 ; ce sont deux autres fonctions qui n'ont plus

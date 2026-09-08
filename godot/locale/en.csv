@@ -4438,3 +4438,15 @@ journal.deuil_accuse,"in {village}, they know who killed him (reputation {reputa
 function.journalier.name,Day labourer
 function.portefaix.name,Porter
 journal.chaleur_blesse,"{nom} suffers from the heat ({degres} °C, {degats})"
+ui.ecran.mort,"You died"
+ui.mort.au_lit,"You will rise at the last bed you slept in. The current expedition is over."
+ui.mort.a_l_entree,"You have no bed yet: you will rise at the entrance."
+ui.mort.or,"You will lose {pc}% of the gold you carry, that is {or} coins."
+ui.mort.sac,"Part of your bag ({n} items) will drop here — recoverable for {jours} day."
+ui.mort.sac_vide,"Your bag is empty: nothing to lose there."
+ui.mort.relever,"Rise"
+ui.mort.d_relever,"Pay the price and go on."
+ui.mort.charger,"Load a game"
+ui.mort.d_charger,"Resume from the last save: nothing is lost, but nothing done since is kept."
+ui.mort.titre,"Back to the title screen"
+ui.mort.d_titre,"Leave the current game."
