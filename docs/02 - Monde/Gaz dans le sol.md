@@ -39,6 +39,20 @@ etape: 9
 > - **la poche de magma** : au fond seulement — percée, la brèche est de la **lave** (la règle de la lave existe : elle brûle, enflamme, se fige à l'eau). Le vrai danger des grandes profondeurs.
 > Une tuile ne porte qu'une poche : le gaz d'abord, puis le reste. Tout cela se sème à la charge de l'étage, se vide avec la grille, et le test le joue (`test_gaz_dans_le_sol`). **À juger** : les densités — une mine où chaque coup de pioche ouvre quelque chose n'est plus une mine.
 
+
+> [!decision] Conçu le 2026-09-08 — **la forme du champ d'air**, avant la première ligne de code (ligne 24 ter de l'[[Ordre de travail]])
+> **Ce qu'il remplace, entièrement** : la liste `sim.zones` de type `gaz`. Aujourd'hui `_liberer_gaz` inonde N tuiles **une fois**, pose N entrées avec une date de fin, et `_tiquer_zones` ne fait qu'enlever celles qui ont expiré. Un nuage ne diffuse jamais, ne monte jamais, ne coule jamais, ne se dilue jamais. Le champ le rend **mobile**, et la date de fin disparaît : un nuage s'éteint parce qu'il s'est dilué, pas parce qu'un compteur est arrivé au bout.
+> **La forme, sur le patron de la chaleur et du danger** — deux tableaux plats de la taille de la grille, jamais un dictionnaire :
+> - `gaz_a : PackedByteArray` — l'**indice** du gaz dominant d'une tuile (0 = de l'air, sinon l'index dans le catalogue trié) ;
+> - `gaz_c : PackedByteArray` — sa **charge**, 0 à 255, où 255 est une tuile pleine.
+> **Un seul gaz par tuile, le dominant.** C'est le choix qui rend le champ tenable : quinze charges par tuile seraient quinze tableaux, et aucune règle de jeu ne lit un mélange. Deux nuages qui se rencontrent : le plus chargé garde la tuile, l'autre y perd la différence — le mélange est un **arbitrage**, pas une moyenne.
+> **Le tick, toutes les `periode_ticks`** (comme la chaleur), et seulement sur les tuiles chargées (une file, jamais un balayage) :
+> 1. **Diffusion** vers les voisins franchissables, proportionnelle à l'écart de charge ;
+> 2. **Poussée verticale** par la `masse_relative` déjà en donnée : au-dessus de 1 la charge descend d'un niveau Z quand il y en a un (la mofette au fond du puits), en dessous elle monte (le grisou au toit de la galerie) ;
+> 3. **Dilution** : une tuile à ciel ouvert perd une part fixe par tick, une tuile close n'en perd aucune — c'est ce qui fait qu'un gaz **s'accumule** dans une galerie et se dissipe dehors, sans qu'aucune date de fin ne soit écrite nulle part.
+> **Ce qui le lit** : le champ de **danger** (aujourd'hui `_danger_du_gaz` parcourt les zones — il lira le tableau), l'**ignition** du champ de chaleur (un gaz inflammable au-dessus d'un seuil et une flamme : l'explosion), la **vue** (la fumée aveugle) et demain le champ sonore.
+> **Ce qui reste à trancher, et que je ne tranche pas seul** : l'**air** lui-même. Ce champ transporte des gaz étrangers ; il ne dit pas encore combien il reste d'oxygène. La suffocation restera donc une étiquette tant qu'un `air_c` (la respirabilité d'une tuile) n'existe pas — c'est la deuxième moitié, et elle demande de décider si un être **consomme** l'air qu'il respire.
+
 ## Liens
 - **Dépend de** : [[Mine sous une cellule]], [[Minerais par profondeur]], [[Explosions]]
 - **Alimente** : [[Génération de donjon]], [[Niveau de danger]], [[Trésors et artefacts]]
