@@ -300,19 +300,19 @@
       "offsets": {
         "epaule_G": [
           0,
-          4
+          2.0
         ],
         "epaule_D": [
           0,
-          -3
+          -1.5
         ],
         "hanche_G": [
           0,
-          2
+          1.0
         ],
         "hanche_D": [
           0,
-          -1.5
+          -0.75
         ]
       },
       "vue_tete": "profil"
