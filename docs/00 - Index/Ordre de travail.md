@@ -41,7 +41,11 @@ Elles coûtent au designer une phrase, et elles coûtent une semaine si elles ar
 2. **Les champs avant ou après le jeu fini ?** Le designer a tranché l'ordre *des six champs entre eux*, pas leur place
    par rapport à la pause, la mort et les touches. Cet ordre-ci les place après (paliers 1 à 3), en le disant.
 
-## Palier 1 — la séance `sim_sauvegarde.gd` : la partie te revient entière
+## ~~Palier 1~~ — la séance `sim_sauvegarde.gd` : la partie te revient entière — **FAIT le 2026-09-08**
+
+> [!success] Les six défauts sont corrigés et prouvés — voir [[Sauvegarde]] (callout du 2026-09-08).
+> `test_sauvegarde_des_lieux` couvre la mine, le gouffre et le donjon de corruption ; `test_sauvegarde_ne_touche_pas_la_partie` vérifie qu'une sauvegarde en plein combat ne le dissout pas.
+> **Reste de ce palier** : le **thread** et la copie-sur-écriture (la sauvegarde s'écrit toujours en entier sur le fil principal, alors que cette note exige un thread) — la seule ligne du palier qui demande encore du travail.
 
 **Six des sept lignes vivent dans deux fichiers seulement.** Une seule séance sur `sim_sauvegarde.gd` couvre quatre
 défauts du palier, plus la purge des objets du palier 11.

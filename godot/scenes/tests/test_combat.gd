@@ -235,6 +235,8 @@ func _ready() -> void:
 	_lancer("test_loot_assemble")
 	_lancer("test_budgets")
 	_lancer("test_sauvegarde_partout")
+	_lancer("test_sauvegarde_des_lieux")
+	_lancer("test_sauvegarde_ne_touche_pas_la_partie")
 	_lancer("test_boss_et_artefact")
 	_lancer("test_loot")
 	_lancer("test_coffres_et_rares")

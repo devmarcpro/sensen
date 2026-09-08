@@ -575,11 +575,21 @@ static func charger_donjon(sim: Simulation, theme_id: String, graine: int, id_do
 	var e: Dictionary = Mine.generer_etage(graine, id_donjon, etage) if est_mine else gen.generer_etage(graine, id_donjon, etage, nb, etage == etages)
 	var cr: Dictionary = GameData.config("planete").get("corruption", {})
 	var corruption_etage := minf(100.0, corruption_locale + float(etage) * float(cr.get("corruption_par_etage", 8)))
+	# Le dictionnaire du donjon est FUSIONNÉ, plus jamais remplacé (2026-09-08). L'écriture d'avant écrasait les clés
+	# que POSENT les entrées juste avant d'appeler cette fonction — `gouffre`, `region`, `corrompu`, `niveau`,
+	# `cellules` — et le défaut frappait en session vivante, pas seulement au rechargement : descendre d'un étage dans
+	# un gouffre perdait déjà `gouffre`, ce qui rendait inatteignable le marquage de `gouffres_vides` quarante lignes
+	# plus bas, et un donjon de corruption vaincu ne se notait jamais comme nettoyé.
+	var identite := {}
+	for cle_id in ["gouffre", "region", "corrompu", "niveau", "cellules", "etages_fixes"]:
+		if sim.donjon.has(cle_id):
+			identite[cle_id] = sim.donjon[cle_id]
 	sim.donjon = {"theme": theme_id, "graine": graine, "id": id_donjon, "etage": etage, "etages": etages,
 		"salles": gen._nb_salles(e), "escalier": e.escalier, "boss": e.boss, "entree": e.entree,
 		"corruption": corruption_locale, "corruption_etage": corruption_etage, "cellule": cellule_donjon,
 		"mine": est_mine, "cellule_mine": cellule_mine,
 		"profondeur": etage + int(corruption_etage / float(cr.get("profondeur_par_corruption", 25)))}
+	sim.donjon.merge(identite)   # ce que l'entrée avait posé survit au changement d'étage
 	sim.grille = Grille.depuis_etage(e, GameData.config("tile_contents"), sim.regles.r.deplacement, int(sim.regles.r.vision.hauteur_oeil))
 	var etage_matiere: int = Mine.profondeur_de(etage) if est_mine else etage
 	sim.grille.materiau_defaut = SimTerritoire.materiau_mur_etage(sim, theme, etage_matiere)

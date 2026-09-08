@@ -1364,6 +1364,112 @@ func test_sauvegarde_partout() -> void:
 	verifier(s3.intention(j3b.id, {"type": "attendre"}), "et cette partie-là continue aussi")
 
 
+## Les trois lieux que la sauvegarde perdait (Ordre de travail, palier 1 — 2026-09-08). Un seul aller-retour du dépôt
+## entrait en donjon, et c'était un donjon ordinaire : la mine, le gouffre et le donjon de corruption n'étaient
+## couverts par rien. Six défauts y vivaient. Ce test les tient tous.
+func test_sauvegarde_des_lieux() -> void:
+	# 1. LA MINE. Le drapeau `mine` ne partait pas dans l'expédition, et `mines_creusees` se relisait APRÈS le `return`
+	#    de la branche donjon : recharger dans sa mine rendait un donjon à salles, galerie perdue.
+	var s := Simulation.new(4321)
+	s.graine_monde = 4321
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var cell: Vector2i = s.monde.cellule_de(j.pos)
+	s.donjon = {"etages_fixes": [9, 9], "corruption": 0.0, "cellule": cell, "mine": true, "cellule_mine": cell}
+	s.charger_donjon("ruine", 4321, 777, 1, j)
+	verifier(bool(s.donjon.get("mine", false)), "la mine reste une mine après charger_donjon (la fusion de sim.donjon)")
+	verifier(s.donjon.has("etages_fixes"), "et les étages fixes posés par l'entrée survivent au changement d'étage")
+	var jm: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	# La chambre d'arrivée est ouverte : on place le joueur sur une tuile libre qui TOUCHE le plein (même motif que le
+	# test des gaz), sinon il n'a rien sous la pioche.
+	var creuse := Vector2i(-9999, -9999)
+	for r in range(1, 7):
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				var q: Vector2i = jm.pos + Vector2i(dx, dy)
+				if creuse != Vector2i(-9999, -9999) or not s.grille.dans(q) or s.grille.bloque_passage(q) or not s.grille.occupant(q).is_empty():
+					continue
+				for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+					if creuse == Vector2i(-9999, -9999) and s.grille.dans(q + dd) and "destructible" in s.grille.contenu_de(q + dd).get("tags", []):
+						s.grille.liberer(jm.pos)
+						jm.pos = q
+						s.grille.placer(jm.id, q)
+						jm.vigueur = int(jm.vigueur_max)
+						if s._creuser(jm, q + dd, 100):
+							creuse = q + dd
+	verifier(creuse != Vector2i(-9999, -9999) and not s.mines_creusees.is_empty(), "une tuile creusée dans la mine (%s), mémorisée" % str(creuse))
+	verifier(s.sauvegarder("test_lieux_mine"), "sauvegarder au fond de la mine")
+	var s2 := Simulation.new(1)
+	verifier(s2.charger_sauvegarde("test_lieux_mine"), "recharger")
+	verifier(s2.lieu == "donjon" and bool(s2.donjon.get("mine", false)), "on rouvre une MINE, pas un donjon à salles")
+	verifier(not s2.mines_creusees.is_empty(), "la galerie creusée traverse la session (%d étage(s) mémorisé(s))" % s2.mines_creusees.size())
+	verifier(s2.grille.dans(creuse) and not s2.grille.bloque_passage(creuse), "et la tuile creusée est toujours ouverte (%s)" % str(creuse))
+	Sauvegarde.effacer("test_lieux_mine")
+
+	# 2. LE GOUFFRE. `charger_donjon` écrasait `gouffre` : le marquage de `gouffres_vides` était inatteignable, et la
+	#    profondeur atteinte se perdait au rechargement.
+	var s3 := Simulation.new(4322)
+	s3.graine_monde = 4322
+	s3.charger_camp()
+	var j3: Dictionary = s3.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	s3.donjon = {"etages_fixes": [99, 99], "corruption": 0.0, "cellule": s3.monde.cellule_de(j3.pos), "gouffre": 55, "region": "Essai"}
+	s3.charger_donjon("ruine", 4322, 55, 2, j3)
+	verifier(s3.donjon.has("gouffre") and int(s3.donjon.gouffre) == 55, "le gouffre reste un gouffre après charger_donjon")
+	verifier(str(s3.donjon.get("region", "")) == "Essai", "et sa région avec lui")
+	s3.gouffres_vides["55|1"] = true
+	verifier(s3.sauvegarder("test_lieux_gouffre"), "sauvegarder dans le gouffre")
+	var s4 := Simulation.new(1)
+	verifier(s4.charger_sauvegarde("test_lieux_gouffre"), "recharger")
+	verifier(s4.donjon.has("gouffre") and int(s4.donjon.gouffre) == 55, "on rouvre le gouffre, pas un donjon ordinaire")
+	verifier(s4.gouffres_vides.has("55|1"), "et les étages déjà vidés le restent")
+	Sauvegarde.effacer("test_lieux_gouffre")
+
+	# 3. LE DONJON DE CORRUPTION. `corrompu` et `niveau` étaient écrasés — l'écran ne pouvait plus dire sa difficulté —
+	#    et `Monde.nettoyages` n'était pas sauvegardé du tout : un donjon vaincu revenait.
+	var s5 := Simulation.new(4323)
+	s5.graine_monde = 4323
+	s5.charger_camp()
+	var j5: Dictionary = s5.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var cell5: Vector2i = s5.monde.cellule_de(j5.pos)
+	s5.donjon = {"etages_fixes": [3, 3], "corruption": 60.0, "cellule": cell5, "corrompu": true, "niveau": 4, "cellules": 2}
+	s5.charger_donjon("ruine", 4323, 88, 1, j5)
+	verifier(bool(s5.donjon.get("corrompu", false)) and int(s5.donjon.get("niveau", 0)) == 4, "le donjon corrompu garde sa nature et son niveau après charger_donjon")
+	s5.monde.nettoyages[cell5] = 12
+	verifier(s5.sauvegarder("test_lieux_corr"), "sauvegarder dans le donjon de corruption")
+	var s6 := Simulation.new(1)
+	verifier(s6.charger_sauvegarde("test_lieux_corr"), "recharger")
+	verifier(bool(s6.donjon.get("corrompu", false)) and int(s6.donjon.get("niveau", 0)) == 4, "la corruption et le niveau survivent au rechargement")
+	verifier(int(s6.monde.nettoyages.get(cell5, -1)) == 12, "un donjon de corruption vaincu le RESTE (Monde.nettoyages sauvegardé)")
+	Sauvegarde.effacer("test_lieux_corr")
+
+
+## Sauvegarder ne doit RIEN changer à la partie en cours : la fonction normalisait les êtres et vidait `sim.combats`
+## sur la simulation vivante — sauvegarder au milieu d'un combat le dissolvait sur place (2026-09-08).
+func test_sauvegarde_ne_touche_pas_la_partie() -> void:
+	var s := Simulation.new(4324)
+	s.graine_monde = 4324
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var loup: Dictionary = s.ajouter("loup", s._tuile_libre_autour(j.pos), "ia")
+	s._engager_combat(j, loup)
+	var n_combats: int = s.combats.size()
+	var horloges := {}
+	for x in s.entites.values():
+		horloges[x.id] = str(x.get("horloge", "monde"))
+	verifier(n_combats > 0, "un combat est engagé (%d)" % n_combats)
+	verifier(s.sauvegarder("test_pas_touche"), "on sauvegarde en plein combat")
+	verifier(s.combats.size() == n_combats, "le combat en cours n'a pas été dissous (%d → %d)" % [n_combats, s.combats.size()])
+	var change := 0
+	for x in s.entites.values():
+		if str(x.get("horloge", "monde")) != str(horloges.get(x.id, "monde")):
+			change += 1
+	verifier(change == 0, "et aucun être n'a changé d'horloge sous nos pieds (%d changé(s))" % change)
+	var s2 := Simulation.new(1)
+	verifier(s2.charger_sauvegarde("test_pas_touche"), "la partie rechargée est valide")
+	verifier(s2.combats.is_empty(), "et aucun combat n'y survit — la normalisation s'est faite sur la COPIE écrite")
+	Sauvegarde.effacer("test_pas_touche")
+
+
 func test_boss_et_artefact() -> void:
 	# Trésors et artefacts : le dernier étage porte le boss ; sa mort marque le donjon vaincu et lâche un artefact (majeur ≥ 4).
 	var s := Simulation.new(95)

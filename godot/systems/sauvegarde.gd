@@ -96,16 +96,33 @@ static func ecrire(nom: String, fichier: String, donnees: Variant) -> bool:
 	f.close()
 	var abs_tmp := ProjectSettings.globalize_path(tmp)
 	var abs_cible := ProjectSettings.globalize_path(cible)
-	if FileAccess.file_exists(cible):
-		DirAccess.remove_absolute(abs_cible)
+	# Windows refuse `rename_absolute` sur une cible qui existe : on ne peut donc pas renommer par-dessus, et c'est
+	# pour ça que la cible était EFFACÉE d'abord — ce qui ouvrait une fenêtre où elle n'existait plus du tout, et où
+	# une coupure ne laissait rien. Depuis le 2026-09-08 on la met de côté en `.bak`, on renomme le neuf en place, puis
+	# on jette le `.bak`. Une coupure au mauvais moment laisse alors soit la cible intacte, soit un `.bak` que `lire`
+	# sait rattraper ; et un renommage raté rend l'ancien fichier au lieu de le perdre. Ce n'est toujours pas une
+	# transaction sur les cinq fichiers — mais plus aucune écriture ne peut faire disparaître un fichier valide.
+	var bak := cible + ".bak"
+	var abs_bak := ProjectSettings.globalize_path(bak)
+	var avait := FileAccess.file_exists(cible)
+	if avait:
+		if FileAccess.file_exists(bak):
+			DirAccess.remove_absolute(abs_bak)
+		DirAccess.rename_absolute(abs_cible, abs_bak)
 	var r := DirAccess.rename_absolute(abs_tmp, abs_cible)
 	if r != OK:
 		push_error("Sauvegarde : rename %s → %s : %s" % [abs_tmp, abs_cible, error_string(r)])
+		if avait:
+			DirAccess.rename_absolute(abs_bak, abs_cible)   # l'écriture ratée ne détruit pas la sauvegarde d'avant
+	elif avait:
+		DirAccess.remove_absolute(abs_bak)
 	return r == OK
 
 
 static func lire(nom: String, fichier: String) -> Variant:
 	var chemin := RACINE + nom + "/" + fichier
+	if not FileAccess.file_exists(chemin) and FileAccess.file_exists(chemin + ".bak"):
+		chemin += ".bak"   # coupé entre les deux renommages : le fichier d'avant est encore là (2026-09-08)
 	if not FileAccess.file_exists(chemin):
 		return null
 	var f := FileAccess.open(chemin, FileAccess.READ)
@@ -121,7 +138,10 @@ static func lire(nom: String, fichier: String) -> Variant:
 
 
 static func existe(nom: String) -> bool:
-	return FileAccess.file_exists(RACINE + nom + "/world.json")
+	# `world.json` est le dernier fichier écrit d'une sauvegarde : c'est lui qui rend la partie visible à l'écran
+	# Charger, et c'est voulu (voir `SimSauvegarde.sauvegarder`). Son `.bak` compte aussi — sinon une coupure entre
+	# les deux renommages ferait disparaître la partie de la liste.
+	return FileAccess.file_exists(RACINE + nom + "/world.json") or FileAccess.file_exists(RACINE + nom + "/world.json.bak")
 
 
 ## Efface un emplacement (récursif) — les tests et sondes nettoient derrière eux : l'écran Charger ne doit lister que de vraies parties.
