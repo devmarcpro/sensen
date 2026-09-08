@@ -237,10 +237,14 @@ static func _dormir(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int) -
 	e["lit"] = vers
 	e["spawn"] = vers
 	# Le monde avance pendant le sommeil (les êtres agissent ; le dormeur est vulnérable).
-	var pas_max := 200
+	# La tranche et le plafond sont en DONNÉES depuis le 2026-09-08 : ils valaient 100 et 200, écrits en dur, et le
+	# passage du tick à la milliseconde les a rendus faux d'un facteur cent — une nuit de 800 000 ticks n'en
+	# avançait plus que 20 000, et le dormeur se réveillait douze minutes plus tard au lieu du matin.
+	var pas_max := int(cp.get("sommeil_tranches_max", 400))
+	var tranche := maxi(1, int(cp.get("sommeil_tranche_ticks", 10000)))
 	var reste := duree
 	while reste > 0 and pas_max > 0:
-		var n := mini(reste, 100)
+		var n := mini(reste, tranche)
 		sim.horloge_monde.avancer(n)
 		reste -= n
 		pas_max -= 1

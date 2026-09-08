@@ -53,7 +53,7 @@
   },
   "liberation": {
     "volume": 14,
-    "duree_ticks": 400
+    "duree_ticks": 40000
   },
-  "periode_ticks": 10
+  "periode_ticks": 1000
 }

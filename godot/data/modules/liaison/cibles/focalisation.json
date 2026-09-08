@@ -8,7 +8,7 @@
   "tags": [
     "liaison"
   ],
-  "surcout_ticks": 8,
+  "surcout_ticks": 800,
   "effet": {
     "concentration": true
   },

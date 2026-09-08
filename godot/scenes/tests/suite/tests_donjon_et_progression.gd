@@ -95,7 +95,7 @@ func test_veines_de_mine() -> void:
 		essais_c += 1
 		s.attente[j.id] = true
 		s.intention(j.id, {"type": "creuser", "vers": mur})
-		s.horloge_monde.avancer(200)
+		s.horloge_monde.avancer(20000)
 	var apres_cuivre := 0
 	for uid_c in j.sac:
 		if str(s.items.get(uid_c, {}).get("materiau", "")) == "cuivre":
@@ -162,7 +162,7 @@ func test_camp() -> void:
 	s.gagner_xp(j, "minage", 30)
 	s.gagner_xp(j, "forge", 10)
 	var pot0: int = int(j.potentiels.get("minage", 80))
-	s.horloge_monde.ticks = 12000   # midi : pas de saut de nuit, un sommeil de 8 h
+	s.horloge_monde.ticks = 1200000   # midi : pas de saut de nuit, un sommeil de 8 h
 	var t0: int = s.horloge_monde.ticks
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "dormir", "vers": devant}), "dormir sur le lit")
@@ -618,19 +618,19 @@ func test_donjon() -> void:
 				j.pos = v - Vector2i(1, 0)
 				s.grille.placer(j.id, j.pos)
 				break
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	var t: int = s.horloge_monde.ticks
 	verifier(mur.x >= 0 and s.intention(j.id, {"type": "creuser", "vers": mur}), "creuser un mur adjacent")
-	verifier(not s.grille.bloque_passage(mur) and j.compteur == t + 10 and float(j.xp_competences.get("terrassement", 0.0)) > 0.0, "la tuile redevient sol, 10 ticks, XP de Terrassement")
+	verifier(not s.grille.bloque_passage(mur) and j.compteur == t + int(s.regles.r.creuser.ticks) and float(j.xp_competences.get("terrassement", 0.0)) > 0.0, "la tuile redevient sol, 10 ticks, XP de Terrassement")
 	j.compteur = t
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	verifier(not s.intention(j.id, {"type": "creuser", "vers": Vector2i(0, j.pos.y)}) , "la roche du bord ne se creuse pas (hors adjacence ou indestructible)")
 	j.sante = 30
 	s.grille.liberer(j.pos)
 	j.pos = s.donjon.escalier
 	s.grille.placer(j.id, j.pos)
 	j.compteur = s.horloge_monde.ticks
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	verifier(s.intention(j.id, {"type": "descendre"}), "descendre depuis l'escalier descendant")
 	verifier(s.donjon.etage == 2 and joueur_de(s).sante == 30 and joueur_de(s).id == j.id, "étage 2, le même être avec ses PV")
 
@@ -975,7 +975,7 @@ func test_recuperation() -> void:
 		j.competences_eff = j.competences.duplicate()
 		j.vigueur = 10
 		j.tick_vigueur = h.ticks
-		s._regenerer(j, h.ticks + 20)
+		s._regenerer(j, h.ticks + 2000)
 		repris[essai] = j.vigueur - 10
 	verifier(repris[1] > repris[0], "le confirmé récupère plus vite (%d contre %d sur 20 ticks)" % [repris[1], repris[0]])
 	# Récupérer entraîne, mais pas à endurance pleine.
@@ -984,13 +984,13 @@ func test_recuperation() -> void:
 	var xp_avant: float = float(j.get("xp_competences", {}).get(str(cfg.competence), 0.0))
 	j.vigueur = 10
 	j.tick_vigueur = h.ticks
-	s._regenerer(j, h.ticks + 60)
+	s._regenerer(j, h.ticks + 6000)
 	var xp_apres: float = float(j.get("xp_competences", {}).get(str(cfg.competence), 0.0))
 	verifier(xp_apres > xp_avant, "récupérer entraîne (%.1f → %.1f)" % [xp_avant, xp_apres])
 	j.vigueur = int(j.vigueur_max)
-	j.tick_vigueur = h.ticks + 60
+	j.tick_vigueur = h.ticks + 6000
 	var xp_plein: float = float(j.get("xp_competences", {}).get(str(cfg.competence), 0.0))
-	s._regenerer(j, h.ticks + 120)
+	s._regenerer(j, h.ticks + 12000)
 	verifier(is_equal_approx(float(j.get("xp_competences", {}).get(str(cfg.competence), 0.0)), xp_plein), "à endurance pleine, rien ne s'apprend")
 
 ## Les serments (designer 2026-09-01) : une contrainte tenue toute la partie contre un don permanent,
@@ -1335,7 +1335,7 @@ func test_sauvegarde_partout() -> void:
 	j.pos = pas_loin
 	s.grille.placer(j.id, pas_loin)
 	s.maj_vision()
-	verifier(s.appliquer_statut(j, "poison", 60, ""), "un poison avant la sauvegarde")
+	verifier(s.appliquer_statut(j, "poison", 6000, ""), "un poison avant la sauvegarde")
 	var n_decouvert: int = s.grille.decouvert.size()
 	var vivants_avant: int = s.vivants().size()
 	verifier(s.sauvegarder("test_partout"), "sauvegarder en plein donjon")
@@ -1549,7 +1549,7 @@ func test_loot() -> void:
 	var anneau := s.generer_objet("proto_anneau", 2, {}, "rare", 1)
 	anneau.affixes = [{"id": "passif_stat", "params": {"stat": "force", "n": 3}, "compteur": 0, "etat": {}}]
 	s.donner(j, anneau.uid)
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	var t: int = s.horloge_monde.ticks
 	verifier(s.intention(j.id, {"type": "equiper", "objet": anneau.uid}), "équiper l'anneau")
 	# Meme raison : on compare l'AVANT et l'APRES, pas une valeur absolue. Ce que le test dit vraiment,
@@ -1561,7 +1561,7 @@ func test_loot() -> void:
 	amulette.affixes = [{"id": "meca_vigueur_max", "params": {"n": 10}, "compteur": 0, "etat": {}}, {"id": "wuxing_segment", "params": {}, "compteur": 0, "etat": {}}]
 	s.donner(j, amulette.uid)
 	j.compteur = s.horloge_monde.ticks
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	s.intention(j.id, {"type": "equiper", "objet": amulette.uid})
 	verifier(j.vigueur_max == s.regles.vigueur_max(j.stats_eff) + 10 and j.chaine.capacite == 6, "l'affixe ajoute 10 à la vigueur du personnage, jauge à 6 segments")
 	# Affixe rythmique : « une attaque sur 2 porte Feu » — le 2e coup pose un segment Feu
@@ -1569,7 +1569,7 @@ func test_loot() -> void:
 	epee.affixes = [{"id": "cadence_element", "params": {"n": 2, "element": "feu"}, "compteur": 0, "etat": {}}]
 	s.donner(j, epee.uid)
 	j.compteur = s.horloge_monde.ticks
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	verifier(s.intention(j.id, {"type": "equiper", "objet": epee.uid}), "équiper l'épée rare")
 	verifier(j.equipement.main_principale == epee.uid and not j.sac.is_empty(), "l'ancienne épée va au sac")
 	var loup: Dictionary = s.entites["loup_2"]
@@ -1650,11 +1650,11 @@ func test_coffres_et_rares() -> void:
 	s.grille.liberer(j.pos)
 	j.pos = pos
 	s.grille.placer(j.id, pos)
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	verifier(s.intention(j.id, {"type": "ramasser"}), "ramasser sur la tuile du coffre")
 	verifier(j.sac.size() == n_objets and not s.contenants.has(idx) and s.grille.contenu[idx] == 0, "le contenu va au sac, le coffre disparaît")
 	j.compteur = s.horloge_monde.ticks
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	verifier(not s.intention(j.id, {"type": "ramasser"}), "rien à ramasser : refusé")
 	# Monstre rare forcé : stats ×2.5, teinte or, épithète, drop garanti exceptionnel à 3 affixes
 	var a := nouvelle_sim("plaine_au_talus")
@@ -1691,7 +1691,7 @@ func test_gemmes_et_livres() -> void:
 	var epee := s.generer_objet("proto_epee", 3, {}, "exceptionnel")
 	epee.sertissures.nombre = 3
 	s.donner(j, epee.uid)
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	s.intention(j.id, {"type": "equiper", "objet": epee.uid})
 	var g1 := s.generer_objet("gemme_onyx", 3)
 	g1.taille = {"type": "competence", "competence": "magie_metal", "valeur": 10, "qualite": 1.5}
@@ -1703,13 +1703,13 @@ func test_gemmes_et_livres() -> void:
 		s.donner(j, g.uid)
 	for g in [g1, g2, g3]:
 		j.compteur = s.horloge_monde.ticks
-		s.horloge_monde.avancer(1)
+		s.horloge_monde.avancer(100)
 		verifier(s.intention(j.id, {"type": "sertir", "objet": epee.uid, "gemme": g.uid}), "sertir " + g.base)
 	verifier(epee.sertissures.contenu.size() == 3 and j.sac.size() == 1, "trois gemmes serties, l'ancienne épée reste au sac")
 	verifier(int(j.competences_eff.get("magie_metal", 0)) == 15, "plafond : +15 par compétence toutes gemmes confondues (10 + 10 → 15)")
 	verifier(int(j.degats_element.get("metal", 0)) == 3, "+3 dégâts Métal plats")
 	j.compteur = s.horloge_monde.ticks
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	var g4 := s.generer_objet("gemme_saphir", 3)
 	s.donner(j, g4.uid)
 	verifier(not s.intention(j.id, {"type": "sertir", "objet": epee.uid, "gemme": g4.uid}), "plus d'emplacement : refusé")
@@ -1738,7 +1738,7 @@ func test_gemmes_et_livres() -> void:
 	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
 	s.donner(j, livre.uid)
 	j.compteur = s.horloge_monde.ticks
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	var lus := [0]
 	EventBus.book_read.connect(func(_id: String, _l: String, _ok: bool) -> void: lus[0] += 1)
 	verifier(s.intention(j.id, {"type": "lire", "objet": livre.uid}), "lire le grimoire")
@@ -1755,7 +1755,7 @@ func test_gemmes_et_livres() -> void:
 	var pv: int = j.sante
 	var mana: int = j.mana
 	j.compteur = s.horloge_monde.ticks
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	var connus_avant: int = j.modules_connus.size()
 	verifier(s.intention(j.id, {"type": "lire", "objet": dur.uid}), "tenter un livre impossible")
 	verifier(not (dur.uid in j.sac) and j.modules_connus.size() == connus_avant, "échec : livre perdu, rien d'appris")
@@ -1766,7 +1766,7 @@ func test_gemmes_et_livres() -> void:
 	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
 	s.donner(j, lm.uid)
 	j.compteur = s.horloge_monde.ticks
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	var mod_lm := str(lm.modules[0])
 	s.attente[j.id] = true   # l'effet d'échec précédent (invocation, téléportation) peut avoir sorti le joueur de la file
 	verifier(s.intention(j.id, {"type": "lire", "objet": lm.uid}), "lire le livre de module")
@@ -1878,20 +1878,21 @@ func test_progression() -> void:
 	verifier(faces_vues.has(0) and faces_vues.has(4) and faces_vues.size() >= 3, "le sac tombe sur un jet de dé : rien, tout, et des parts entre les deux (%d faces vues sur 60 morts)" % faces_vues.size())
 	# Faim : la régénération de santé d'équipement suit les paliers (< 50 : −10 %, < 25 : plus rien)
 	jp["mecaniques"] = {"regen_sante": {"pct": 100}}
+	var span_r := 20 * maxi(1, int(p.regles.r.effets_equipement.regen_base_ticks))   # vingt périodes pleines (2026-09-08)
 	jp.faim = 100
 	jp.sante = 1
 	jp.tick_vigueur = 0
-	p._regenerer(jp, 2000)
+	p._regenerer(jp, span_r)
 	var regen_plein: int = int(jp.sante) - 1
 	jp.faim = 40
 	jp.sante = 1
 	jp.tick_vigueur = 0
-	p._regenerer(jp, 2000)
+	p._regenerer(jp, span_r)
 	var regen_faim: int = int(jp.sante) - 1
 	jp.faim = 10
 	jp.sante = 1
 	jp.tick_vigueur = 0
-	p._regenerer(jp, 2000)
+	p._regenerer(jp, span_r)
 	verifier(regen_plein > 0 and regen_faim < regen_plein and int(jp.sante) == 1, "faim : régén %d à 100, %d sous 50, rien sous 25" % [regen_plein, regen_faim])
 	jp.faim = 100
 	jp.erase("mecaniques")
@@ -1923,14 +1924,14 @@ func test_expedition() -> void:
 	s.grille.liberer(j.pos)
 	j.pos = s.donjon.escalier
 	s.grille.placer(j.id, j.pos)
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	verifier(s.intention(j.id, {"type": "descendre"}), "descendre")
 	verifier(s.donjon.etage == 2 and s.etages_visites.has(1), "l'étage 1 est mis de côté")
 	j.compteur = s.horloge_monde.ticks
 	s.grille.liberer(j.pos)
 	j.pos = s.donjon.entree
 	s.grille.placer(j.id, j.pos)
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	verifier(s.intention(j.id, {"type": "remonter"}), "remonter")
 	verifier(s.donjon.etage == 1 and s.ordre.size() == n_ent and not s.entites[loup.id].vivant and j.pos == s.donjon.escalier, "étage 1 restauré : mêmes êtres, le loup toujours mort, joueur sur la cage")
 	# Sortir depuis l'entrée de l'étage 1 : expédition terminée, nouvelle expédition, même être
@@ -1943,7 +1944,7 @@ func test_expedition() -> void:
 	j.pos = s.donjon.entree
 	s.grille.placer(j.id, j.pos)
 	j.compteur = s.horloge_monde.ticks
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	verifier(s.intention(j.id, {"type": "remonter"}), "sortir par l'entrée de l'étage 1")
 	verifier(not recap[0].is_empty() and recap[0].tues == 1 and recap[0].sac == 1, "récapitulatif : 1 tué, 1 objet au sac")
 	verifier(s.donjon.id == 4 and s.donjon.etage == 1 and s.etages_visites.is_empty() and joueur_de(s).competences.epee == 7 and o.uid in joueur_de(s).sac, "nouvelle expédition (donjon 4), le même être avec son sac et ses niveaux")
@@ -1976,7 +1977,7 @@ func test_arenes_autonomes() -> void:
 				engage = true
 				s.pas(j.horloge)
 			else:
-				s.horloge_monde.avancer(1)
+				s.horloge_monde.avancer(100)
 		verifier(engage and degats[0] > 0, "%s : combat engagé, %d dégâts échangés, joueur %s" % [arene, degats[0], "vivant" if j.vivant else "mort"])
 
 

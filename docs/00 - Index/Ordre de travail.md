@@ -200,6 +200,111 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     donc **dans l'autre sens** : c'est la carte de lumière qu'il faudra refaire sur le patron de la chaleur. Celui qui
     écrira le son doit copier la chaleur, surtout pas la lumière.
 
+26 ter. **UNE TUILE TIENT UNE PILE** — êtres ET meubles *(designer 2026-09-08 : « les entités peuvent se stack sur la
+    même case, un PNJ peut porter un PNJ qui porte un PNJ ; si un PNJ non hostile bloque une porte le joueur peut
+    passer par-dessus », puis « on peut aussi mettre des meubles les uns sur les autres »).*
+    **L'état du 2026-09-08** : une tuile tient **un** occupant (`occupants` : index → un id) et **un** meuble
+    (`meubles` : index → un id). Le contournement posé ce jour-là — marcher sur un non-hostile **échange** les deux
+    places — donne le bon résultat en jeu mais ne fait pas une pile ; le designer a tranché : il veut la pile.
+    **Ce que ça touche, et il faut le dire avant de commencer** : `occupant()` est lu à **179 endroits**, et surtout
+    le **noyau C++** lit `occupants` pour le pathfinding (`s.occupants.get(vi, String())` : une tuile occupée ne se
+    traverse que si l'occupant est celui qu'on ignore) et en tient un **miroir d'octets** `occ`. Une pile veut dire :
+    `occupant()` rend le **sommet** (les 179 lecteurs continuent de marcher), `occupants_de()` rend la pile, `liberer`
+    retire **un id** au lieu de vider la tuile, le noyau apprend à ignorer **un ensemble** d'ids, et le dessin empile
+    les paperdolls au lieu de les superposer.
+    **Et « porter » n'est pas « être au même endroit »** : un PNJ qui en porte un autre le **déplace avec lui**. C'est
+    une relation, pas une coïncidence de position — elle se range avec le corps (28 bis) et les cadavres (28 ter),
+    parce que porter un corps est le premier usage qu'on en fera.
+    **Pourquoi ici** : la pile est un changement de modèle. La faire avant la mort des 236 contenus, c'est la refaire
+    après ; la faire après le corps-plan-de-parties, c'est se priver de porter un cadavre pendant tout le palier.
+
+26 quater. **UN ÉTAGE NE MONTRE QUE SON NIVEAU** *(designer 2026-09-08 : « pour les étages, quand on est à un autre
+    étage, est seulement rendu ce qu'il y a à ce niveau Z »).* **C'est un RENVERSEMENT de la décision du 2026-09-06**,
+    et il faut le dire : les couches Z ont été posées avec la règle inverse — « à l'étage, par-dessus les murs de son
+    niveau, l'air se voit, et la rue par lui ». Le champ de vue le fait exprès (`simulation.gd`, `maj_vision`), la
+    passe `_dessiner_etage` ne dessine que les tuiles du bâtiment du joueur **par-dessus** un terrain toujours dessiné
+    au niveau 0, et le brouillard reçoit `zj` pour laisser voir la rue.
+    **Ce que le designer demande à la place** : un étage est un **niveau à part entière**, comme dans Dwarf Fortress
+    et Caves of Qud — les deux jeux qu'il a nommés pour la refonte de l'exploration. À l'étage 1, on voit l'étage 1 ;
+    dehors, il n'y a rien à cet endroit-là, et c'est le vide qu'il faut montrer.
+    **Ce que ça touche** : la passe des morceaux de terrain dessine les tuiles **plates** (`s.idx(x, y)`) — elle doit
+    dessiner `Grille.en_couche(t, zj)` ; le brouillard et les toits pareil ; `_dessiner_etage` disparaît, absorbée
+    par la passe principale ; et la **vision** cesse de traverser vers le bas. Côté noyau C++, les trois passes
+    prennent un `zj` de plus.
+    **Ce qu'il faut trancher avec le designer avant** : ce qu'on voit **par une ouverture** — un escalier, un trou,
+    un balcon. Ne rien montrer du niveau du dessous rend un étage aveugle ; tout montrer, c'est l'état actuel.
+    **UN DÉFAUT VISIBLE DÈS AUJOURD'HUI, ET IL EST DANS CE CODE-LÀ** *(designer 2026-09-08 : « vérifie pas juste le
+    mur le plus bas mais aussi ceux qui sont rendus plus haut »)* : depuis un étage, le décor sort en **damier** —
+    une tuile dessinée, une tuile noire. La règle est dans `PassesGD.voit` : à `zj > 0`, une tuile du sol n'est vue
+    que si **la tuile juste au-dessus d'elle, au niveau du joueur, est de l'AIR** (`contenu == vide`) et dans son
+    champ de vue. Partout où la couche du joueur porte quelque chose, le sol dessous devient invisible — d'où
+    l'alternance. C'est la conséquence exacte de la règle « l'air se voit, et la rue par lui », et **elle disparaît
+    avec elle** : ne rien réparer ici, la réécriture par niveau la remplace en entier.
+
+~~26 quater bis. **LA PROFONDEUR DU SQUELETTE**~~ — **FAITE le 2026-09-08 au soir** *(designer : « tu te souviens
+    de la profondeur pour les rigs des pantins ? on peut s'en occuper maintenant ? »)*. Un segment est désormais une
+    **orientation dans l'espace du corps** : `x` la droite de l'écran, `y` le bas (le corps est debout, cet axe ne
+    tourne pas), `z` la profondeur. `angle` garde son sens — l'angle dans le plan (x, y) —, `profondeur` (degrés) fait
+    sortir le segment de ce plan, et un ancrage porte trois nombres. Le corps subit un **lacet** continu tiré de son
+    orientation de grille (`atan2(x − y, x + y)` : l'isométrie regarde la grille depuis le sud-est), puis tout est
+    projeté — une unité de profondeur vaut `styles.sprites.profondeur_ecran`, la même demi-hauteur que les tuiles.
+    **Ce qui a disparu** : les huit `ordre` et les huit `offsets` de chacun des six rigs. Il reste **un** `ordre` par
+    rig, qui ne fait que départager deux segments à la même profondeur. L'ordre de dessin est le tri par `z`.
+    **Ce qu'on gagne, visible** : les **huit angles** au lieu de trois (`capture.tscn -- --pantins` en fait la
+    planche), et une pose peut dire `[angle, profondeur]` — un bras qui part en arrière, que la 2D ne savait pas dire.
+    **Le compromis assumé** : la LARGEUR d'un segment reste face à la caméra (seule sa mesure se raccourcit, jamais
+    en dessous de `largeur_min_profil`) — sinon un bras vu de tranche devient un trait. La longueur, elle, se
+    raccourcit pour de bon : c'est ça, la profondeur.
+    **Ce qui reste** : les rigs **animaux** (quadrupède, arachnide, serpentin, volant) sont encore écrits dans le plan
+    de l'écran — un quadrupède est dessiné de profil, pas de face — donc ils portent `lacet_actif: false` et ne
+    tournent pas encore. Les réécrire en espace du corps leur donnerait, comme à l'humanoïde, une vue de face et une
+    vue de dos gratuites. **C'est la ligne 26 septies.**
+
+26 septies. **LES RIGS ANIMAUX EN ESPACE DU CORPS.** Le quadrupède, l'arachnide, le serpentin et le volant sont
+    écrits comme des dessins de profil : leur axe long est l'axe `x` de l'écran, et leur séparation gauche/droite
+    était un décalage vertical. Ce décalage est déjà passé en **profondeur vraie** (c'est lui qui trie les pattes
+    proches devant les lointaines), mais leur axe long, lui, est toujours un axe d'écran : leur faire subir le lacet
+    les réduirait à un moignon. Les réécrire, c'est poser leur corps le long de l'axe `z` et laisser le lacet faire
+    le reste — une vue de face et une vue de dos gratuites pour toute la faune.
+
+26 quinquies. **LE CORPS BOUGE** — glissement, marche, une pose par état, et les mains tournées *(designer 2026-09-08 :
+    « j'aimerais que les déplacements soient plus fluides, qu'il y ait des animations de déplacement, que tu fasses
+    des poses dédiées pour chaque état (repos, marche, dormir, mort etc.) et — très technique — que les mains soient
+    tournées de façon à ce que l'arme équipée soit à 45 degrés vers l'extérieur »).*
+    **Ce qui existe** : le paperdoll **glisse** déjà d'une tuile à l'autre (`position.lerp(cible, k)`), le système de
+    **poses** existe en entier — `poses.json` déclare repos, marche, attaque, sort, garde, sommeil, mort, et
+    `_pose_action` choisit déjà la bonne selon l'état (mort, dort, garde, attaque) —, et l'animation par **pivots**
+    fonctionne (une frappe fait tourner le bras, `frapper()`).
+    **Ce qui manque, et c'est du contenu autant que du code** : (a) les poses **ne sont pas écrites** — un être neuf
+    a `poses = {}` et rien ne s'applique ; « marche » n'est même pas branchée dans `_pose_action` ; (b) le glissement
+    est un `lerp` par image, donc une **décélération asymptotique** — il n'arrive jamais tout à fait, ce qui donne
+    exactement l'impression de flottement que le designer décrit ; une marche va à **vitesse constante** et arrive
+    quand l'action finit ; (c) rien ne fait **alterner les jambes** ; (d) la main tient l'arme dans l'axe du bras,
+    là où elle devrait la présenter à **45° vers l'extérieur**.
+    **Le point le plus rentable est le (b)** : passer d'un lerp à une interpolation qui arrive à l'échéance de
+    l'action rend le déplacement lisible sans dessiner une seule pose.
+
+~~26 sexies. **LES TEXTURES DES TUILES SE FONDENT ENTRE ELLES**~~ — **FAIT le 2026-09-08 au soir** *(designer :
+    « rajouter de quoi fondre les textures des tuiles entre elles », puis « une tuile a une texture que je fais et
+    une teinte celle du matériau »).*
+    **Ce que j'avais écrit le matin et qui était faux** : que la couleur par sommet était libre pour une matière
+    peinte, puisque le shader la remplaçait par la texture. Le designer dit le contraire — une tuile porte SA texture
+    ET la teinte de sa matière. La texture est donc désormais **modulée** par la teinte (`teinte_matiere_peinte`,
+    et `teinte_matiere_normalisee` ramène la teinte à sa plus haute composante pour qu'elle colore sans assombrir).
+    **En prime, c'est ce qui rend le fondu intéressant** : une seule texture « terre » sert la terre, l'argile et le
+    sable, chacune avec sa couleur.
+    **Le fondu** : après le sol d'un morceau, on repose sur chaque tuile de bordure **un triangle par voisin de
+    matière différente**, du centre du losange vers l'arête partagée, avec la matière DU VOISIN et une opacité qui
+    va de zéro au centre à `fondu_tuiles_force` sur l'arête. Le voisin déborde en fondu ; la limite cesse d'être un
+    trait qui suit la grille.
+    **Ce que ça coûte** : un triangle par arête qui change de matière — aucun sur une grande plage uniforme, quatre
+    au plus sur une tuile isolée —, et **une seule commande de dessin** pour tout le morceau, parce que le style
+    d'une matière voyage dans les UV et non dans un uniforme. La fusion des morceaux de terrain n'est pas touchée :
+    c'est une passe qui s'ajoute, pas une passe qui remplace. *J'avais annoncé le contraire le matin (« la fusion
+    tombe sur les bordures ») : c'était vrai de la route que j'avais imaginée, pas de celle qu'on a prise.*
+    **Ce qui reste** : les faces des blocs et des murs ne se fondent pas — seul le SOL le fait. Une frange sur une
+    paroi demande de connaître le voisin par la face, ce qui n'est pas la même géométrie. À rouvrir si ça se voit.
+
 ## Palier 6 — les 236 contenus meurent, la grammaire reste
 
 27. **Supprimer les 236 contenus de modules**, les branches d'effet en dur et les listes des fiches de classe.
@@ -228,6 +333,43 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     Conséquence directe : **chaque champ manquant est un module qu'on ne pourra pas écrire.**
     **Ce palier dissout deux lignes plus bas** : les 23 sorts qui ne produisent rien disparaissent entièrement, et la
     moitié « données » du sort au contact gratuit avec eux.
+
+28 bis. **LE CORPS DEVIENT UN PLAN DE PARTIES** — membres et organes *(designer 2026-09-08 : « un personnage est composé
+    de membres, un personnage peut perdre ses membres, les membres peuvent être remplacés ou même certains rajoutés,
+    membres et organes — plusieurs estomacs = pouvoir manger plus mais demande plus de place »).*
+    **Elle est ici, et pas plus tôt, pour une raison** : une prothèse ou une greffe est **du contenu qui module une
+    règle du monde** — exactement ce que la grammaire des modules devient aux lignes 27 et 28. La poser avant, ce
+    serait l'écrire deux fois.
+    **Le point structurel, et il commande tout le reste** : `e.equipement` a des clés **fixes** (`main_principale`,
+    `tete`, `torse`…). Perdre un bras doit **retirer** un emplacement, en gagner un doit en **ajouter**. Tant que les
+    emplacements sont une liste écrite d'avance, ni la perte, ni la prothèse, ni le membre surnuméraire ne sont
+    possibles. C'est **le chantier le plus intrusif de toute la file** : `degats_finaux` et `_appliquer_degats` sont
+    le cœur le plus chaud du code, le paperdoll dessine **par emplacement**, et la suite entière suppose à la fois
+    une jauge de santé unique et des emplacements fixes.
+    **Ce qu'il apporte de neuf** : les organes introduisent une **contenance interne** qui n'existe nulle part —
+    deux estomacs font manger plus **et** laissent moins de place. On n'ajoute pas, on **arbitre**.
+    **Trois questions au designer avant la première ligne** (n° 6, 6 bis et 6 ter des [[Décisions en attente]]) : la
+    granularité d'un corps, si les emplacements doivent vraiment dériver du corps, et l'unité de la contenance.
+    Détail : [[Combat tactique sur grille]] (callout du 2026-09-08, 21 h).
+
+28 ter. **LES CADAVRES RESTENT, ET SE DÉMONTENT** *(designer 2026-09-08 : « il va falloir faire en sorte que les
+    cadavres restent, comme ça le joueur peut loot, faire le nécromancien, récupérer des membres, des organes — pour
+    se les greffer, les vendre, les greffer sur un PNJ, construire une chimère, porter le corps et s'en servir comme
+    projectile »).*
+    **Ce qui existe déjà, et c'est plus que je ne croyais** : un être mort n'est **pas effacé** — `vivant = false`, sa
+    tuile est libérée, et il reste dans `sim.entites` avec son corps, son équipement et son sac. Le **Fossoyeur** sait
+    déjà en trouver un au sol (`not x.vivant and x.pos == q`) et le relever. La dépouille (`depouille`) fait déjà
+    tomber la viande et le cuir.
+    **Ce qui manque, et c'est net** : `vivants()` filtre les morts, donc un cadavre n'est **ni dessiné, ni sauvegardé,
+    ni visé** — il existe dans la mémoire de la partie et nulle part ailleurs. Il faut : le **dessiner** (la pose
+    « mort » du rig existe), le **persister**, en faire une **cible d'interaction** (le fouiller comme un coffre —
+    l'écran du coffre du 2026-09-08 est déjà le bon écran), et le faire **pourrir** (le temps long, ligne 30).
+    **Et pour en retirer un membre ou un organe, il faut la ligne 28 bis** : tant que le corps est une étiquette et
+    les emplacements des clés fixes, il n'y a rien à prélever. C'est pour ça que cette ligne est ici et pas ailleurs.
+    **Porter un corps et le lancer** demande en plus la **masse et la quantité de mouvement** de la ligne 27 bis :
+    un cadavre est le projectile le plus lourd qu'un personnage puisse tenir.
+    **Ce que ça ouvre** : le nécromancien, la greffe, la chimère, la vente d'organes — et le cadavre qui traîne, qui
+    est aussi ce qui rend une bataille lisible une heure après.
 
 ## Palier 7 — les quatre champs restants, dans l'ordre du designer
 

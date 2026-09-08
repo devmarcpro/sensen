@@ -108,11 +108,11 @@ func _ready() -> void:
 ## `chauffe` ticks pour sortir de la ruée (tout le monde part vers son poste), puis `n` ticks mesurés.
 func _mesurer(s: Simulation, titre: String, chauffe: int, n: int) -> void:
 	for k in chauffe:
-		s.horloge_monde.avancer(1)
+		s.horloge_monde.avancer(100)
 	s.chrono.clear()
 	var t0 := Time.get_ticks_usec()
 	for k in n:
-		s.horloge_monde.avancer(1)
+		s.horloge_monde.avancer(100)
 	var ms_tick := (Time.get_ticks_usec() - t0) / 1000.0 / float(n)
 	var cles: Array = s.chrono.keys()
 	cles.sort_custom(func(a: String, b: String) -> bool: return float(s.chrono[a]) > float(s.chrono[b]))

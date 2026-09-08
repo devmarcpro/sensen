@@ -117,7 +117,7 @@ func test_sauvegarde() -> void:
 	s.intention(j.id, {"type": "poser_mur", "vers": mur})
 	var dague := s.generer_objet("proto_dague", 1, {}, "commun", 0)
 	j.sac.append(dague.uid)
-	s.horloge_monde.avancer(1234)
+	s.horloge_monde.avancer(123400)
 	var pos0: Vector2i = j.pos
 	var sac0: int = j.sac.size()
 	verifier(s.sauvegarder("test_sensen"), "sauvegarder au camp")
@@ -315,20 +315,20 @@ func test_cycle_et_meteo() -> void:
 	var s := Simulation.new(47)
 	s.charger_camp()
 	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	verifier(is_equal_approx(s.heure(0), 0.0) and is_equal_approx(s.heure(12000), 12.0) and s.phase(12000) == "jour" and s.phase(0) == "nuit" and s.phase(6000) == "aube", "l'heure et les phases (24 000 ticks par jour)")
+	verifier(is_equal_approx(s.heure(0), 0.0) and is_equal_approx(s.heure(1200000), 12.0) and s.phase(1200000) == "jour" and s.phase(0) == "nuit" and s.phase(600000) == "aube", "l'heure et les phases (24 000 ticks par jour)")
 	verifier(GameData.catalogues.weather_states.size() == 10, "10 états météo en données")
 	var cell: Vector2i = s.monde.cellule_de(j.pos)
-	var m1 := s.meteo(cell, 5000)
-	verifier(GameData.catalogues.weather_states.has(m1) and m1 == s.meteo(cell, 5000), "la météo est un état connu, déterministe")
+	var m1 := s.meteo(cell, 500000)
+	verifier(GameData.catalogues.weather_states.has(m1) and m1 == s.meteo(cell, 500000), "la météo est un état connu, déterministe")
 	var varie := false
 	for k in 40:
-		if s.meteo(cell, k * 24000) != m1:
+		if s.meteo(cell, k * 2400000) != m1:
 			varie = true
 	verifier(varie, "la météo change avec le temps")
 	var tr_ := s.temperature_ressentie(j)
 	verifier(tr_.temp >= -60.0 and tr_.temp <= 70.0 and tr_.has("ecart"), "température ressentie calculée (%.0f °C)" % float(tr_.temp))
 	# La nuit réduit la vue, le jour non.
-	s.horloge_monde.ticks = 12000
+	s.horloge_monde.ticks = 1200000
 	s.maj_vision()
 	var vue_jour: int = j.vue.size()
 	s.horloge_monde.ticks = 0
@@ -343,7 +343,7 @@ func test_cycle_et_meteo() -> void:
 		s.grille.contenu[s.grille.idx(devant)] = 0
 	s.attente[j.id] = true
 	s.intention(j.id, {"type": "poser", "objet": lit.uid, "vers": devant})
-	s.horloge_monde.ticks = 22 * 1000   # 22 h
+	s.horloge_monde.ticks = 22 * 100000   # 22 h
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "dormir", "vers": devant}), "dormir à 22 h")
 	verifier(is_equal_approx(s.heure(), 5.0) or absf(s.heure() - 5.0) < 0.2, "réveil à l'aube, 5 h (%.1f h)" % s.heure())
@@ -357,12 +357,12 @@ func test_cycle_et_meteo() -> void:
 	j["ecart_confort"] = 0.0
 	j.vigueur = 0
 	j.tick_vigueur = s.horloge_monde.ticks
-	s._regenerer(j, s.horloge_monde.ticks + 10)
+	s._regenerer(j, s.horloge_monde.ticks + 1000)
 	var regen_confort: int = int(j.vigueur)
 	j["ecart_confort"] = -25.0
 	j.vigueur = 0
 	j.tick_vigueur = s.horloge_monde.ticks
-	s._regenerer(j, s.horloge_monde.ticks + 10)
+	s._regenerer(j, s.horloge_monde.ticks + 1000)
 	verifier(int(j.vigueur) < regen_confort, "hors confort, la vigueur régénère moins qu'au confort (%d contre %d)" % [int(j.vigueur), regen_confort])
 	s.monde.fermer()
 

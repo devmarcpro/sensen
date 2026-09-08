@@ -98,7 +98,7 @@ static func sauvegarder(sim: Simulation, nom: String = "") -> bool:
 	# seul qui décide si l'écran Charger liste la partie. Écrit en premier, une coupure au milieu laissait une partie
 	# annoncée valide dont les quatre autres fichiers étaient ceux d'avant. Les cinq écritures ne forment toujours pas
 	# une transaction — mais la moitié du risque tient dans cet ordre.
-	var monde_json := {"version": 1, "resume": resume_partie(sim), "graine": sim.graine, "graine_monde": sim.graine_monde, "planete_options": sim.planete_options, "identifies": sim.identifies, "ticks": sim.horloge_monde.ticks, "prochain_donjon": sim.prochain_donjon, "n_entites": sim._n_entites,
+	var monde_json := {"version": int(GameData.config("combat_rules").get("sauvegarde", {}).get("version", 2)), "resume": resume_partie(sim), "graine": sim.graine, "graine_monde": sim.graine_monde, "planete_options": sim.planete_options, "identifies": sim.identifies, "ticks": sim.horloge_monde.ticks, "prochain_donjon": sim.prochain_donjon, "n_entites": sim._n_entites,
 		"cellule_camp": sim.monde.cellule_camp, "camp": {"entree": sim.camp_sauve.get("entree", Vector2i.ZERO), "biome": sim.camp_sauve.get("biome", ""), "cellule": sim.camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": sim.monde.explores,
 		"delta": sim.monde.delta, "foyers": sim.monde.foyers, "faune_densite": sim.monde.faune_densite, "semaine": sim.monde.semaine_courante, "peuplees": sim.monde.peuplees, "claims": sim.territoires.joueur.cellules, "territoire": sim.territoires.joueur, "territoires": sim.territoires, "tresors_royaumes": sim.monde.tresors_royaumes, "etats_royaumes": sim.monde.etats_royaumes, "vacances": sim.monde.vacances, "villages": sim.monde.villages, "tombes": sim.monde.tombes, "heritiers": sim.monde.heritiers, "vacances_guildes": sim.monde.vacances_guildes,
 		"modifs_terrain": sim.modifs_terrain, "portails": sim.portails, "gouffres_vides": sim.gouffres_vides, "mines_creusees": sim.mines_creusees,
@@ -200,6 +200,13 @@ static func charger_sauvegarde(sim: Simulation, nom: String = "") -> bool:
 			sim.monde.contenants_hors[cell] = sc.contenants
 		if not sc.dormants.is_empty():
 			sim.monde.dormants[cell] = sc.dormants
+	# UN TICK EST DEVENU UNE MILLISECONDE (2026-09-08) : une partie enregistrée avant comptait en ticks de 100 ms.
+	# On met son horloge à l'échelle ici, avant que quoi que ce soit la lise — sans quoi le calendrier reculerait de
+	# plusieurs jours et la corruption rejouerait des semaines. Les compteurs des êtres sont bornés à l'horloge plus
+	# bas ; les statuts d'une vieille partie expirent, et c'est le prix visible du changement d'unité.
+	var sv: Dictionary = GameData.config("combat_rules").get("sauvegarde", {})
+	if int(w.get("version", 1)) < int(sv.get("version", 2)):
+		w["ticks"] = int(w.get("ticks", 0)) * int(sv.get("echelle_v1_vers_v2", 100))
 	# Le joueur, puis la fenêtre autour de lui (les cellules mémorisées y sont rejouées).
 	var joueur_sauve: Dictionary = pj.etre
 	var exp: Variant = Sauvegarde.lire(nom, "expedition.json")

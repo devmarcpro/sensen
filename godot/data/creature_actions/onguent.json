@@ -11,7 +11,7 @@
   "taille": 1,
   "cible": "allie",
   "ligne_de_vue": false,
-  "cout_ticks": 10,
+  "cout_ticks": 1000,
   "cout_vigueur": 4,
   "degats_des": null,
   "type_degats": null,

@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": null,
   "power_base": "2d4",
-  "cout_ticks": 12,
+  "cout_ticks": 1200,
   "cout_mana": 12,
   "cout_vigueur": 0,
   "effets": [
@@ -23,7 +23,7 @@
   "effet": {
     "terrain": {
       "zone": "blessure",
-      "duree_ticks": 50,
+      "duree_ticks": 5000,
       "degats": "1d6"
     }
   },

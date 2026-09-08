@@ -1,21 +1,91 @@
 {
-  "_doc": "Rig d'un template de squelette (docs: Squelette modulaire et points d'attache). Généré par tools/gen_rigs.py. Un segment = {parent, ancrage (sur le parent), longueur, largeur, angle de repos (90 = vers le bas de l'écran), ancrages portés [le_long, en_travers], zone de coup}. facings : ordre de calque (du fond vers l'avant) + décalages d'ancrage ; W/NW/SW par miroir. slots_segments : quel slot d'armure peint quels segments. Les sprites remplaceront les rectangles, le rig reste.",
-  "name_key": "rig.<id>.name",
-  "racine": "torse",
-  "hauteur_pieds": 13,
-  "segments": {
-    "torse": { "parent": null, "ancrage": null, "longueur": 14, "largeur": 9, "angle": -90, "ancrages": { "cou": [14, 0], "epaule_G": [12, -5], "epaule_D": [12, 5] }, "zone": "torse" },
-    "tete": { "parent": "torse", "ancrage": "cou", "longueur": 8, "largeur": 8, "angle": -90, "ancrages": {}, "zone": "tete" }
+ "_doc": "Rig d'un template de squelette (docs: Squelette modulaire et points d'attache). Généré par tools/gen_rigs.py. Un segment = {parent, ancrage (sur le parent), longueur, largeur, angle de repos dans le plan du corps (90 = vers le bas de l'écran), profondeur (degrés hors de ce plan, positif = vers l'avant), ancrages portés [le_long, en_travers, en_profondeur], zone de coup}. `orientations` : le lacet du corps et la vue de la tête pour chacune des huit directions ; `ordre` ne sert qu'à départager deux segments à la même profondeur, c'est la profondeur qui décide du dessin. `lacet_actif` : faux pour un rig encore écrit dans le plan de l'écran (les animaux). slots_segments : quel slot d'armure peint quels segments.",
+ "name_key": "rig.<id>.name",
+ "racine": "torse",
+ "hauteur_pieds": 13,
+ "lacet_actif": true,
+ "segments": {
+  "torse": {
+   "parent": null,
+   "ancrage": null,
+   "longueur": 14,
+   "largeur": 9,
+   "angle": -90,
+   "ancrages": {
+    "cou": [
+     14,
+     0,
+     0
+    ],
+    "epaule_G": [
+     12,
+     -5,
+     -1.5
+    ],
+    "epaule_D": [
+     12,
+     5,
+     -1.5
+    ]
+   },
+   "zone": "torse"
   },
-  "facings": {
-    "S": { "ordre": ["torse", "tete"], "offsets": {}, "vue_tete": "face" },
-    "SE": { "ordre": ["torse", "tete"], "offsets": {}, "vue_tete": "face" },
-    "E": { "ordre": ["torse", "tete"], "offsets": {}, "vue_tete": "profil" },
-    "NE": { "ordre": ["tete", "torse"], "offsets": {}, "vue_tete": "dos" },
-    "N": { "ordre": ["tete", "torse"], "offsets": {}, "vue_tete": "dos" },
-    "SW": { "miroir": "SE" }, "W": { "miroir": "E" }, "NW": { "miroir": "NE" }
+  "tete": {
+   "parent": "torse",
+   "ancrage": "cou",
+   "longueur": 8,
+   "largeur": 8,
+   "angle": -90,
+   "ancrages": {},
+   "zone": "tete"
+  }
+ },
+ "ordre": [
+  "torse",
+  "tete"
+ ],
+ "slots_segments": {
+  "casque": [
+   "tete"
+  ],
+  "cuirasse": [
+   "torse"
+  ]
+ },
+ "prise_arme": null,
+ "prise_bouclier": null,
+ "orientations": {
+  "S": {
+   "lacet": 0,
+   "vue_tete": "face"
   },
-  "slots_segments": { "casque": ["tete"], "cuirasse": ["torse"] },
-  "prise_arme": null,
-  "prise_bouclier": null
+  "SE": {
+   "lacet": 45,
+   "vue_tete": "face"
+  },
+  "E": {
+   "lacet": 90,
+   "vue_tete": "profil"
+  },
+  "NE": {
+   "lacet": 135,
+   "vue_tete": "dos"
+  },
+  "N": {
+   "lacet": 180,
+   "vue_tete": "dos"
+  },
+  "NW": {
+   "lacet": -135,
+   "vue_tete": "dos"
+  },
+  "W": {
+   "lacet": -90,
+   "vue_tete": "profil"
+  },
+  "SW": {
+   "lacet": -45,
+   "vue_tete": "face"
+  }
+ }
 }

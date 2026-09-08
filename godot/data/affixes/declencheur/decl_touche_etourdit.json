@@ -10,8 +10,8 @@
   ],
   "parametres": {
     "duree_ticks": [
-      4,
-      8
+      400,
+      800
     ],
     "chance": [
       10,

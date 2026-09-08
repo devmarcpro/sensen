@@ -3,7 +3,7 @@
   "degats_des": null,
   "element": null,
   "periode_ticks": 0,
-  "duree_ticks": 60,
+  "duree_ticks": 6000,
   "controle": false,
   "cumule": false,
   "modifiers": [],

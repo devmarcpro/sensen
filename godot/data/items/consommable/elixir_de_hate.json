@@ -6,7 +6,7 @@
   "soin_des": "",
   "mana": 0,
   "statut": "hate",
-  "statut_ticks": 100,
+  "statut_ticks": 10000,
   "risque": {},
   "potentiel": {},
   "cru": false,

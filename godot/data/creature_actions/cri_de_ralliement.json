@@ -11,7 +11,7 @@
   "taille": 4,
   "cible": "allie",
   "ligne_de_vue": false,
-  "cout_ticks": 12,
+  "cout_ticks": 1200,
   "cout_vigueur": 6,
   "degats_des": null,
   "type_degats": null,
@@ -20,7 +20,7 @@
     {
       "type": "statut",
       "id": "ralliement",
-      "duree_ticks": 40
+      "duree_ticks": 4000
     }
   ],
   "tags": [

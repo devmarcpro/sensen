@@ -40,7 +40,7 @@
     "bonus_hors_ordre": 0.2,
     "bonus_engendrement": 0.45,
     "gain_par_segment": 0.05,
-    "decroissance_ticks": 30,
+    "decroissance_ticks": 3000,
     "resolveur_non_offensif": 0.7
   },
   "teintes": {

@@ -9,7 +9,7 @@
     "modificateur"
   ],
   "famille": "Puissance",
-  "surcout_ticks": 3,
+  "surcout_ticks": 300,
   "surcout_ressource": "×1.5",
   "effet": {
     "des": 2

@@ -13,7 +13,7 @@
     "eau": 1.0
   },
   "statut": "aveugle",
-  "statut_ticks": 15,
+  "statut_ticks": 1500,
   "soigne": "",
   "mana": "",
   "eteint_feux": false,

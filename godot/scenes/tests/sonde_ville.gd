@@ -150,11 +150,11 @@ func _ready() -> void:
 		soucis.append("le contexte n'est pas revenu au joueur")
 	# 4. Le tempo : deux cents ticks du monde à l'allure du jeu, le coût d'un tick (le client en paie dix par seconde).
 	for k in 300:   # la ruée du premier matin (tout le monde part vers son poste) n'est pas le régime de croisière
-		s2.horloge_monde.avancer(1)
+		s2.horloge_monde.avancer(100)
 	var t_tempo := Time.get_ticks_usec()
 	s2.chrono.clear()
 	for k in 200:
-		s2.horloge_monde.avancer(1)
+		s2.horloge_monde.avancer(100)
 	var ms_tick := (Time.get_ticks_usec() - t_tempo) / 1000.0 / 200.0
 	print("tempo : %.2f ms par tick du monde avec %d êtres (pas %.0f ms sur 200 ticks) · chrono %s" % [ms_tick, s2.vivants().size(), float(s2.chrono.get("pas", 0.0)), str(s2.chrono)])
 	var budget_tick := float(GameData.config("combat_rules").get("tempo", {}).get("ms_max_par_image", 12))

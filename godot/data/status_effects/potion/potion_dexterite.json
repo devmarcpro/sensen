@@ -2,8 +2,8 @@
   "name_key": "status.potion_dexterite.name",
   "degats_des": null,
   "element": null,
-  "periode_ticks": 100,
-  "duree_ticks": 3000,
+  "periode_ticks": 10000,
+  "duree_ticks": 300000,
   "controle": false,
   "cumule": false,
   "modifiers": [

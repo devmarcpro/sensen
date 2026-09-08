@@ -8,7 +8,7 @@
   "tags": [
     "liaison"
   ],
-  "surcout_ticks": 6,
+  "surcout_ticks": 600,
   "effet": {
     "boucle": true,
     "des": -1

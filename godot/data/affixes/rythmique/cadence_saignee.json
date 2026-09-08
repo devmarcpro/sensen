@@ -13,7 +13,7 @@
   "effet": {
     "type": "cadence_statut",
     "statut": "saignement",
-    "duree_ticks": 30
+    "duree_ticks": 3000
   },
   "meilleur": {
     "n": "bas"

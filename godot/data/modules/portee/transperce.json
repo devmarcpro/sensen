@@ -12,7 +12,7 @@
     1,
     5
   ],
-  "surcout_ticks": 5,
+  "surcout_ticks": 500,
   "ligne_de_vue": false,
   "origine": "cible",
   "motif": "ligne",

@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": null,
   "power_base": null,
-  "cout_ticks": 10,
+  "cout_ticks": 1000,
   "cout_mana": 18,
   "cout_vigueur": 0,
   "effets": [
@@ -27,7 +27,7 @@
     },
     "statut": {
       "id": "levite",
-      "duree_ticks": 25
+      "duree_ticks": 2500
     }
   },
   "style": "mobilite",

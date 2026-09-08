@@ -9,7 +9,7 @@
     "modificateur"
   ],
   "famille": "Discrétion",
-  "surcout_ticks": 2,
+  "surcout_ticks": 200,
   "surcout_ressource": "+4",
   "effet": {
     "silencieux": true

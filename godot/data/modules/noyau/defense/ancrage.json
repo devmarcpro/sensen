@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": null,
   "power_base": null,
-  "cout_ticks": 4,
+  "cout_ticks": 400,
   "cout_mana": 0,
   "cout_vigueur": 8,
   "effets": [
@@ -23,7 +23,7 @@
   "effet": {
     "statut": {
       "id": "ancrage",
-      "duree_ticks": 40
+      "duree_ticks": 4000
     },
     "cible": "allie"
   },

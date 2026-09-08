@@ -128,7 +128,7 @@ public:
 	PackedByteArray visibles(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, int bat_j, const PackedVector2Array &positions);
 	PackedByteArray minimap(Object *grille, Vector2i coin, Vector2i taille_cell, int taille, const Dictionary &mat_col, Color fond);
 	Dictionary brouillard(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, Vector2i origine_dessin,
-			double tw, double th, double hstep, int niveau_u, int bat_j, int mur_coupe_u, Color voile, Color voile_jamais);
+			double tw, double th, double hstep, int niveau_u, int bat_j, int mur_coupe_u, Color voile, Color voile_jamais, Color voile_bloc, Color jamais_vu_bloc);
 	Dictionary toits(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, Vector2i origine_dessin,
 			double tw, double th, double hstep, int niveau_u, int bat_j, const PackedColorArray &bat_couleurs, const PackedFloat32Array &bat_styles,
 			double pente_t, double haut_toit, double ombre_min, Vector2 soleil_h, bool soleil_ok, double soleil_force, double uv_haut, double sombre_jamais,

@@ -8,7 +8,7 @@
   "tags": [
     "declencheur"
   ],
-  "surcout_ticks": 3,
+  "surcout_ticks": 300,
   "effet": {
     "declencheur": "veille",
     "pct": 40

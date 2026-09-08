@@ -2,6 +2,7 @@
  "name_key": "rig.amorphe.name",
  "racine": "torse",
  "hauteur_pieds": 2,
+ "lacet_actif": false,
  "segments": {
   "torse": {
    "parent": null,
@@ -13,53 +14,44 @@
    "zone": "torse"
   }
  },
- "facings": {
+ "ordre": [
+  "torse"
+ ],
+ "slots_segments": {},
+ "prise_arme": null,
+ "prise_bouclier": null,
+ "orientations": {
   "S": {
-   "ordre": [
-    "torse"
-   ],
-   "offsets": {},
+   "lacet": 0,
    "vue_tete": "face"
   },
   "SE": {
-   "ordre": [
-    "torse"
-   ],
-   "offsets": {},
+   "lacet": 45,
    "vue_tete": "face"
   },
   "E": {
-   "ordre": [
-    "torse"
-   ],
-   "offsets": {},
-   "vue_tete": "face"
+   "lacet": 90,
+   "vue_tete": "profil"
   },
   "NE": {
-   "ordre": [
-    "torse"
-   ],
-   "offsets": {},
-   "vue_tete": "face"
+   "lacet": 135,
+   "vue_tete": "dos"
   },
   "N": {
-   "ordre": [
-    "torse"
-   ],
-   "offsets": {},
-   "vue_tete": "face"
-  },
-  "SW": {
-   "miroir": "SE"
-  },
-  "W": {
-   "miroir": "E"
+   "lacet": 180,
+   "vue_tete": "dos"
   },
   "NW": {
-   "miroir": "NE"
+   "lacet": -135,
+   "vue_tete": "dos"
+  },
+  "W": {
+   "lacet": -90,
+   "vue_tete": "profil"
+  },
+  "SW": {
+   "lacet": -45,
+   "vue_tete": "face"
   }
- },
- "slots_segments": {},
- "prise_arme": null,
- "prise_bouclier": null
+ }
 }

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cebef5elw2bsm"
-path="res://.godot/imported/00_substitution.png-b4d26f9cfc1f71aa040e210042ee7897.ctex"
+uid="uid://c3jky018bsswu"
+path="res://.godot/imported/00_jambe_haut.png-f58b560c4fc6f0a5cbb82abd32de0890.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/membres/jambe_haut/00_substitution.png"
-dest_files=["res://.godot/imported/00_substitution.png-b4d26f9cfc1f71aa040e210042ee7897.ctex"]
+source_file="res://assets/membres/jambe_haut/00_jambe_haut.png"
+dest_files=["res://.godot/imported/00_jambe_haut.png-f58b560c4fc6f0a5cbb82abd32de0890.ctex"]
 
 [params]
 

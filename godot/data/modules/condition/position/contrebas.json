@@ -20,7 +20,7 @@
     },
     "bonus_structure": {
       "portee": 2,
-      "ticks": -1
+      "ticks": -100
     },
     "echec_ticks_rendus": 0.5
   },

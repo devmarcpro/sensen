@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": null,
   "power_base": null,
-  "cout_ticks": 10,
+  "cout_ticks": 1000,
   "cout_mana": 12,
   "cout_vigueur": 0,
   "effets": [
@@ -23,7 +23,7 @@
   "effet": {
     "terrain": {
       "zone": "brume",
-      "duree_ticks": 60
+      "duree_ticks": 6000
     }
   },
   "style": "terrain",

@@ -207,11 +207,12 @@ func test_village_vivant() -> void:
 			break
 	var profil: Dictionary = s.profils_ia.civil
 	var jour_calme := 4 * int(GameData.config("planete").cycle.ticks_par_jour)
-	s.horloge_monde.ticks = jour_calme + 23000
+	var par_heure := int(GameData.config("planete").cycle.ticks_par_jour) / 24   # une heure du monde, en ticks (2026-09-08)
+	s.horloge_monde.ticks = jour_calme + 23 * par_heure
 	verifier(s._cible_routine(v, profil) == v.lit, "23 h : au lit")
-	s.horloge_monde.ticks = jour_calme + 12000
+	s.horloge_monde.ticks = jour_calme + 12 * par_heure
 	verifier(s._cible_routine(v, profil) == v.poste, "midi : au poste")
-	s.horloge_monde.ticks = jour_calme + 21000
+	s.horloge_monde.ticks = jour_calme + 21 * par_heure
 	verifier(s._cible_routine(v, profil) == s._coin_de_place(v), "21 h : sur son coin de la place")
 	# Un villageois loin de sa cible s'en rapproche par la routine.
 	var loin: Vector2i = s._coin_de_place(v) + Vector2i(6, 0)
@@ -245,7 +246,7 @@ func test_village_vivant() -> void:
 	# La faune : après quelques tirages, des bêtes hors de vue, sous le budget ; la nuit, plus de loups.
 	var fa: Dictionary = GameData.config("planete").faune
 	var n0: int = s.vivants().filter(func(x: Dictionary) -> bool: return "bete" in x.get("tags", [])).size()
-	s.horloge_monde.ticks = 12000
+	s.horloge_monde.ticks = 1200000
 	for k in 40:
 		s._tiquer_faune(12000 + k * int(fa.intervalle_ticks))
 	var betes: Array = s.vivants().filter(func(x: Dictionary) -> bool: return "bete" in x.get("tags", []) and x.get("spawn_faune", false))
@@ -554,7 +555,7 @@ func test_agriculture_et_boutique() -> void:
 		s.attente[j.id] = true
 		verifier(not s.intention(j.id, {"type": "prendre", "vers": loc}), "pas mûre : la récolte est refusée")
 		var ech: int = int(s.territoire.cultures[pm].echeance)
-		var reste := ech - s.horloge_monde.ticks + 1000
+		var reste := ech - s.horloge_monde.ticks + 100000
 		while reste > 0:
 			var n := mini(reste, 4000)
 			s.horloge_monde.avancer(n)
@@ -591,7 +592,7 @@ func test_agriculture_et_boutique() -> void:
 			s.intention(j.id, {"type": "ranger", "objet": ob.uid, "vers": et})
 		verifier(s._stock_etal(s._pm(et)).size() == 3, "trois pains à l'étal")
 		s.regles.r.royaume.boutique.clients_base = 3.0
-		s.horloge_monde.avancer(4000)
+		s.horloge_monde.avancer(400000)
 		verifier(int(s.territoire.caisse) > 0 and s._stock_etal(s._pm(et)).size() < 3, "des clients ont acheté : caisse %d or" % int(s.territoire.caisse))
 		var or0: int = int(j.or)
 		var caisse: int = int(s.territoire.caisse)
@@ -646,7 +647,7 @@ func test_defense_et_raids() -> void:
 	var d0 := Grille.distance(s.entites[str(rd.ids[0])].pos, coeur)
 	s.attente[j.id] = true
 	for k in 6:
-		s.horloge_monde.avancer(100)
+		s.horloge_monde.avancer(10000)
 	var d1 := Grille.distance(s.entites[str(rd.ids[0])].pos, coeur)
 	verifier(d1 < d0, "l'assaillant avance vers le cœur (%d → %d)" % [d0, d1])
 	# Une tourelle près de l'assaillant : elle tire pendant le raid.
@@ -666,13 +667,13 @@ func test_defense_et_raids() -> void:
 		sante_avant += int(s.entites[str(id)].sante)
 	s.territoire.raid["prochain_tir"] = 0
 	for k in 4:
-		s.horloge_monde.avancer(20)
+		s.horloge_monde.avancer(2000)
 	var sante_apres := 0
 	for id in rd.ids:
 		sante_apres += int(s.entites[str(id)].sante)
 	verifier(sante_apres < sante_avant, "la tourelle a tiré : santé des assaillants %d → %d" % [sante_avant, sante_apres])
 	s.territoire.raid.fin = s.horloge_monde.ticks
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	verifier(s.territoire.raid.is_empty() and not bool(s.territoire.dernier_raid.victoire) and s.entites[str(rd.ids[0])].ai_profile == "hostile", "à l'échéance le raid est résolu, les survivants restent hostiles")
 	# Gouvernance : royaume, transition de 4 semaines, −10 d'humeur.
 	verifier(not s.changer_gouvernance("dictature_militaire"), "pas de royaume : pas de régime")

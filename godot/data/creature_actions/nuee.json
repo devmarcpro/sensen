@@ -11,7 +11,7 @@
   "taille": 1,
   "cible": "toute_entite",
   "ligne_de_vue": false,
-  "cout_ticks": 10,
+  "cout_ticks": 1000,
   "cout_vigueur": 0,
   "degats_des": "1",
   "type_degats": "perforant",

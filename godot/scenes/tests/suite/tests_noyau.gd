@@ -327,8 +327,8 @@ func test_grille() -> void:
 	var g := s.grille
 	verifier(g.largeur == 32 and g.hauteur_grille == 32, "arène 32×32 chargée depuis JSON")
 	# Rampe sud : 10 → 9 → 8 → 7 : descente = 2 ticks, montée +1 = 5 ticks
-	verifier(g.cout_pas(Vector2i(16, 31), Vector2i(16, 30)) == 2, "descente −1 : 2 ticks")
-	verifier(g.cout_pas(Vector2i(16, 30), Vector2i(16, 31)) == 5, "montée +1 : 5 ticks")
+	verifier(g.cout_pas(Vector2i(16, 31), Vector2i(16, 30)) == 200, "descente −1 : 200 ticks (2 dixièmes de seconde)")
+	verifier(g.cout_pas(Vector2i(16, 30), Vector2i(16, 31)) == 500, "montée +1 : 500 ticks (une demi-seconde)")
 	# Rive (10) → fond (7) : Δ−3 = chute, Δ+3 = falaise
 	verifier(g.cout_pas(Vector2i(12, 15), Vector2i(13, 15)) == -1, "Δ−3 : pas un pas normal")
 	verifier(g.est_chute(Vector2i(12, 15), Vector2i(13, 15)), "Δ−3 : chute autorisée")
@@ -351,8 +351,8 @@ func test_grille() -> void:
 	synth.hauteurs[0] = 10
 	synth.hauteurs[1] = 12
 	synth.hauteurs[2] = 10
-	verifier(synth.cout_pas(Vector2i(0, 0), Vector2i(1, 0)) == 8 and synth.cout_pas(Vector2i(1, 0), Vector2i(2, 0)) == 2, "montée +2 : 8 ; descente −2 : 2")
-	verifier(g.cout_pas(Vector2i(10, 10), Vector2i(9, 10)) == 5, "rampe du plateau")
+	verifier(synth.cout_pas(Vector2i(0, 0), Vector2i(1, 0)) == 800 and synth.cout_pas(Vector2i(1, 0), Vector2i(2, 0)) == 200, "montée +2 : 800 ; descente −2 : 200")
+	verifier(g.cout_pas(Vector2i(10, 10), Vector2i(9, 10)) == 500, "rampe du plateau")
 	# Ligne de vue : la falaise coupe la vue entre le fond (7) et la rive lointaine
 	verifier(not g.ligne_de_vue(Vector2i(16, 15), Vector2i(3, 15)), "le plateau (13) coupe la vue depuis le fond (7)")
 	verifier(g.ligne_de_vue(Vector2i(16, 15), Vector2i(16, 20)), "vue dégagée le long de la gorge")
@@ -404,9 +404,14 @@ func test_regles() -> void:
 	verifier(r.degats_finaux(2.0, 1.0, 10.0, false) == 1, "dégâts finaux minimum 1")
 	verifier(r.degats_finaux(10.0, 2.5, 5.0, false) == 20, "(10 × 2.5 − 5) = 20")
 	verifier(r.degats_finaux(10.0, 1.0, 0.0, true) == 2, "la garde retire 80 %")
-	verifier(r.ticks_attaque(GameData.entree("functionalities", "epee"), false) == 5, "épée : 10 / 2.0 = 5 ticks")
-	verifier(r.ticks_attaque(GameData.entree("functionalities", "dague"), false) == 3, "dague : 3 ticks")
-	verifier(r.ticks_attaque(GameData.entree("functionalities", "masse"), true) == 16, "masse lourde : 8 × 2 = 16 ticks")
+	var att_b := float(GameData.config("combat_rules").actions.attaque_base)
+	var f_epee: Dictionary = GameData.entree("functionalities", "epee")
+	verifier(r.ticks_attaque(f_epee, false) == roundi(att_b / float(f_epee.vitesse_base)), "épée : %d / %.1f = %d ticks" % [int(att_b), float(f_epee.vitesse_base), r.ticks_attaque(f_epee, false)])
+	var f_dague: Dictionary = GameData.entree("functionalities", "dague")
+	verifier(r.ticks_attaque(f_dague, false) == roundi(att_b / float(f_dague.vitesse_base)), "dague : %d ticks — et le tick à la milliseconde les dit exactement, là où 3 ticks de 100 ms arrondissaient" % r.ticks_attaque(f_dague, false))
+	var f_masse: Dictionary = GameData.entree("functionalities", "masse")
+	var mult_l := int(GameData.config("combat_rules").actions.lourde_mult_ticks)
+	verifier(r.ticks_attaque(f_masse, true) == roundi(att_b / float(f_masse.vitesse_base)) * mult_l, "masse lourde : %d × %d ticks" % [roundi(att_b / float(f_masse.vitesse_base)), mult_l])
 	verifier(r.portee_de(GameData.entree("functionalities", "lance")) == Vector2i(2, 2), "lance : portée [2, 2] (zone morte au contact)")
 	verifier(Regles.direction_relative(Vector2i(0, 1), Vector2i(0, 1)) == "front", "coup de face")
 	verifier(Regles.direction_relative(Vector2i(0, 1), Vector2i(1, 0)) == "flanc", "coup de flanc")
@@ -449,9 +454,9 @@ func test_simulation() -> void:
 	s._payer(j, plan_sf)
 	verifier(int(j.sante) < pv_sf, "sang-froid à vide : le déficit se paie en PV (%d → %d)" % [pv_sf, int(j.sante)])
 	# Et il ne remonte qu'à l'immobilité : c'est l'inverse des deux autres monnaies.
-	j["immobile_depuis"] = s.horloge_monde.ticks - 100
+	j["immobile_depuis"] = s.horloge_monde.ticks - 10000
 	j.tick_vigueur = s.horloge_monde.ticks
-	s._regenerer(j, s.horloge_monde.ticks + 10)
+	s._regenerer(j, s.horloge_monde.ticks + 1000)
 	verifier(int(j.get("sang_froid", 0)) > 0, "immobile, le sang-froid remonte (%d)" % int(j.get("sang_froid", 0)))
 
 	# --- la perception allonge le tir, et seulement le tir (solution B) ----------------------------
@@ -482,11 +487,27 @@ func test_simulation() -> void:
 		verifier(s._onde_sonore(j, loups[0], faux_arme, cor_f, 10) == 0, "hors du rayon, l'onde ne touche personne")
 	verifier(s.vivants().size() == 4, "1 joueur + 3 loups")
 	# Hors combat : le joueur attend une intention dès que l'horloge du monde le rend dû.
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	verifier(s.attente.has(j.id), "en exploration, le joueur est en attente d'intention")
 	var avant: int = j.compteur
 	verifier(s.intention(j.id, {"type": "deplacer", "vers": j.pos + Vector2i(0, -1)}), "intention de déplacement acceptée")
-	verifier(j.compteur == s.horloge_monde.ticks + 3, "déplacement plat : 3 ticks")
+	verifier(j.compteur == s.horloge_monde.ticks + 300, "déplacement plat : 300 ticks")
+	# ON NE SE BLOQUE PLUS ENTRE AMIS (designer 2026-09-08) : marcher sur un non-hostile ÉCHANGE les deux places ;
+	# un ennemi, lui, barre toujours le passage — c'est lui qu'on attaque, pas qu'on contourne.
+	var ami := s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
+	ami.camp = "civil"
+	var pos_ami: Vector2i = ami.pos
+	var pos_j: Vector2i = j.pos
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "deplacer", "vers": pos_ami}), "marcher sur un PNJ non hostile est accepté")
+	verifier(j.pos == pos_ami and ami.pos == pos_j, "les deux places sont échangées (%s ↔ %s)" % [str(j.pos), str(ami.pos)])
+	verifier(s.grille.occupant(pos_ami) == j.id and s.grille.occupant(pos_j) == ami.id, "la grille suit l'échange")
+	var hostile := s.ajouter("loup", j.pos + Vector2i(1, 0), "ia")
+	s.attente[j.id] = true
+	var pos_avant_h: Vector2i = j.pos
+	s.intention(j.id, {"type": "deplacer", "vers": hostile.pos})
+	verifier(j.pos == pos_avant_h, "un hostile barre toujours le passage")
+	s.attente.erase(j.id)   # le refus n'a pas consommé l'attente : on la rend, l'assertion suivante la teste
 	verifier(not s.intention(j.id, {"type": "deplacer", "vers": j.pos + Vector2i(0, -1)}), "pas d'intention hors attente")
 	verifier(not s.attente.has(j.id), "intention consommée")
 	# Placer un loup adjacent et le faire détecter : combat, horloge dédiée, compteurs rebasés.
@@ -495,7 +516,7 @@ func test_simulation() -> void:
 	loup.pos = j.pos + Vector2i(1, 0)
 	s.grille.placer(loup.id, loup.pos)
 	loup.compteur = s.horloge_monde.ticks
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	verifier(s.en_combat(j) and s.en_combat(loup) and loup.horloge == j.horloge, "détection → les deux entités partagent une horloge de combat")
 	var hc := s.horloge_de(j)
 	verifier(hc.mode == Horloge.Mode.ACTION and s.combats.size() == 1, "l'horloge de combat est en mode action")
@@ -545,12 +566,12 @@ func test_garde_et_lourde() -> void:
 	s._engager_combat(j, bandit)
 	var h := s.horloge_de(j)
 	j.compteur = h.ticks
-	bandit.compteur = h.ticks + 100
+	bandit.compteur = h.ticks + 10000
 	s.pas(j.horloge)
 	verifier(s.attente.has(j.id), "le joueur est dû")
 	j.orientation = Vector2i(0, -1)   # face au bandit
 	verifier(s.intention(j.id, {"type": "garde"}), "prendre la garde")
-	verifier(j.garde and j.compteur == h.ticks + 2, "garde : 2 ticks, posture active")
+	verifier(j.garde and j.compteur == h.ticks + 200, "garde : 2 ticks, posture active")
 	# Le bandit frappe de face : la garde tient, −80 %, endurance à l'impact.
 	var coups: Array = []
 	EventBus.damage_dealt.connect(func(_s: String, c: String, _d: int, detail: Dictionary) -> void: if c == j.id: coups.append(detail))
@@ -567,13 +588,13 @@ func test_garde_et_lourde() -> void:
 	bandit.pos = j.pos + Vector2i(1, 0)
 	s.grille.placer(bandit.id, bandit.pos)
 	bandit.compteur = h.ticks
-	j.compteur = h.ticks + 100
+	j.compteur = h.ticks + 10000
 	pv = j.sante
 	s.pas(j.horloge)
 	verifier(coups.size() == 2 and not coups[1].garde and coups[1].direction == "flanc", "de flanc, la garde est ignorée (perdu %d)" % (pv - j.sante))
 	# Attaque lourde du joueur : télégraphée (engagée, résolue à l'échéance), ×2 ticks, brise la garde.
 	j.compteur = h.ticks
-	bandit.compteur = h.ticks + 100
+	bandit.compteur = h.ticks + 10000
 	bandit.garde = true
 	bandit.orientation = Vector2i(-1, 0)
 	s.pas(j.horloge)
@@ -589,15 +610,15 @@ func test_garde_et_lourde() -> void:
 	# Attendre : 5 ticks, +20 d'endurance.
 	j.vigueur = 10
 	j.compteur = h.ticks
-	bandit.compteur = h.ticks + 100
+	bandit.compteur = h.ticks + 10000
 	s.pas(j.horloge)
 	var t: int = h.ticks
 	verifier(s.intention(j.id, {"type": "attendre"}), "attendre")
-	verifier(j.vigueur == 30 and j.compteur == t + 5, "attendre : +20 endurance, 5 ticks")
+	verifier(j.vigueur == 30 and j.compteur == t + 500, "attendre : +20 endurance, 500 ticks")
 	# À zéro d'endurance : garde impossible.
 	j.vigueur = 0
-	j.tick_vigueur = h.ticks + 100
-	j.compteur = h.ticks + 5
+	j.tick_vigueur = h.ticks + 10000
+	j.compteur = h.ticks + 500
 	s.pas(j.horloge)
 	verifier(not s.intention(j.id, {"type": "garde"}), "à zéro d'endurance, garde impossible")
 
@@ -607,13 +628,13 @@ func test_garde_et_lourde() -> void:
 func test_horloges() -> void:
 	var s := nouvelle_sim("plaine_au_talus")
 	var j := joueur_de(s)
-	s.horloge_monde.avancer(50)
-	verifier(s.horloge_monde.ticks == 50, "l'horloge du monde avance en temps réel")
+	s.horloge_monde.avancer(5000)
+	verifier(s.horloge_monde.ticks == 5000, "l'horloge du monde avance en temps réel")
 	var loup: Dictionary = s.entites["loup_2"]
 	s._engager_combat(j, loup)
 	var hc := s.horloge_de(j)
 	verifier(hc.ticks == 0 and hc.nom.begins_with("combat_"), "un combat naît avec sa propre horloge à 0")
-	s.horloge_monde.avancer(100)
+	s.horloge_monde.avancer(10000)
 	verifier(hc.ticks == 0, "le combat est hors du temps du monde")
 	loup.sante = 0
 	loup.vivant = false
@@ -659,13 +680,14 @@ func test_wuxing() -> void:
 	# Décroissance : un segment tous les 30 ticks, le dernier posé en premier
 	j = w.jauge_neuve()
 	w.poser(j, "bois", 0)
-	w.poser(j, "feu", 10)
-	w.decroitre(j, 39)
-	verifier(j.segments.size() == 2, "à 29 ticks du dernier segment : rien ne tombe")
-	w.decroitre(j, 40)
-	verifier(j.segments.size() == 1 and j.segments[0].element == "bois", "à 30 ticks : le dernier posé tombe")
-	w.decroitre(j, 70)
-	verifier(j.segments.is_empty(), "à 60 ticks : la barre est vide")
+	var dec_w := int(GameData.config("wuxing").chaine.decroissance_ticks)
+	w.poser(j, "feu", dec_w / 3)
+	w.decroitre(j, dec_w / 3 + dec_w - 100)
+	verifier(j.segments.size() == 2, "à %d ticks du dernier segment : rien ne tombe" % (dec_w - 100))
+	w.decroitre(j, dec_w / 3 + dec_w)
+	verifier(j.segments.size() == 1 and j.segments[0].element == "bois", "à %d ticks : le dernier posé tombe" % dec_w)
+	w.decroitre(j, 2 * dec_w + dec_w / 3)
+	verifier(j.segments.is_empty(), "à %d ticks : la barre est vide" % (2 * dec_w))
 	verifier(w.interrompre(j) == false, "interrompre une barre vide : rien")
 	# En simulation : l'aventurier porte une jauge (chain_gauge), un loup non ; un coup qui touche pose un segment
 	var s := nouvelle_sim("plaine_au_talus")
@@ -690,7 +712,7 @@ func test_wuxing() -> void:
 func test_ratelier() -> void:
 	var s := nouvelle_sim("plaine_au_talus")
 	var j := joueur_de(s)
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	verifier(s.attente.has(j.id), "joueur dû")
 	var t: int = s.horloge_monde.ticks
 	# Tout l'équipement est assemblé (designer 2026-09-02) : le râtelier porte des UID, pas des ids de
@@ -709,15 +731,15 @@ func test_ratelier() -> void:
 	var ts: int = int(s.regles.r.actions.changer_arme)
 	verifier(j.equipement.main_principale == masse and j.compteur == t + ts, "swap : %d ticks (combat_rules)" % ts)
 	j.compteur = t
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	verifier(s.intention(j.id, {"type": "changer_arme", "item": bouclier}), "prendre le bouclier")
 	verifier(j.equipement.get("main_secondaire", "") == bouclier, "bouclier en main secondaire")
 	j.compteur = s.horloge_monde.ticks
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	verifier(s.intention(j.id, {"type": "changer_arme", "item": lance}), "prendre la lance (deux mains)")
 	verifier(not j.equipement.has("main_secondaire"), "une arme à deux mains range le bouclier")
 	j.compteur = s.horloge_monde.ticks
-	s.horloge_monde.avancer(1)
+	s.horloge_monde.avancer(100)
 	verifier(not s.intention(j.id, {"type": "changer_arme", "item": bouclier}), "pas de bouclier avec une arme à deux mains")
 	verifier(not s.intention(j.id, {"type": "changer_arme", "item": "inconnu"}), "objet hors râtelier refusé")
 
@@ -728,16 +750,16 @@ func test_capacites() -> void:
 	var cap := Capacites.new(GameData.catalogues["modules"])
 	# L'exemple chiffré de la note Modules : [Ligne] + [Flamme] + [Concentration] = 12 ticks, 12 mana, 3d6
 	var p := cap.assembler(["ligne", "flamme", "concentration"], 5, "2d6", {"metal": 1.0})
-	verifier(p.erreurs.is_empty() and p.ticks == 12 and p.monnaie == "mana" and p.ressource == 12, "[Ligne]+[Flamme]+[Concentration] : 12 ticks · 12 mana")
+	verifier(p.erreurs.is_empty() and p.ticks == 1200 and p.monnaie == "mana" and p.ressource == 12, "[Ligne]+[Flamme]+[Concentration] : 12 ticks · 12 mana")
 	verifier(p.des == "2d6" and p.des_bonus == 2 and p.geometrie == "ligne" and p.taille == 4 and p.elements == {"feu": 1.0}, "4d6 de Feu sur 4 tuiles en ligne (Flamme, palier moyen : +1 dé ; Concentration : +1)")
 	# [Ligne] + [Frappe] + [Concentration] avec une épée : 9 ticks · 10 endurance, à l'élément de l'arme
 	p = cap.assembler(["ligne", "frappe", "concentration"], 5, "2d6", {"metal": 1.0})
-	verifier(p.ticks == 9 and p.monnaie == "vigueur" and p.ressource == 10 and p.elements == {"metal": 1.0}, "[Ligne]+[Frappe]+[Concentration] : 9 ticks · 10 vigueur · Métal")
+	verifier(p.ticks == 900 and p.monnaie == "vigueur" and p.ressource == 10 and p.elements == {"metal": 1.0}, "[Ligne]+[Frappe]+[Concentration] : 9 ticks · 10 vigueur · Métal")
 	# Vivacité : −3 ticks, ressource ×1.3 ; Soi rend 2 ticks
 	p = cap.assembler(["point", "etincelle", "vivacite"], 5, "1d4", {})
 	verifier(p.ticks == 1 and p.ressource == 4, "Étincelle + Vivacité : max(1, 3−3) tick · 3×1.3 ≈ 4 mana")
 	p = cap.assembler(["soi", "baume"], 5, "1d4", {})
-	verifier(p.ticks == 6 and p.ressource == 10 and p.geometrie == "soi", "[Soi]+[Baume] : 6 ticks · 10 mana")
+	verifier(p.ticks == 600 and p.ressource == 10 and p.geometrie == "soi", "[Soi]+[Baume] : 600 ticks · 10 mana")
 	var deux := cap.assembler(["ligne", "flamme", "gel"], 5, "1d4", {})
 	verifier(deux.erreurs.is_empty() and deux.charges_sup.size() == 1 and deux.ressource == 16, "deux noyaux : aucune limite, chacun paie (8 + 8 = %d mana)" % deux.ressource)
 	verifier(Capacites.lire_surcout("×1.3").mult == 1.3 and Capacites.lire_surcout("−2").plus == -2, "lecture des surcoûts")
@@ -924,21 +946,21 @@ func test_statuts() -> void:
 		e.compteur = 500
 	j.compteur = h.ticks
 	# Poison : 1d3 par 10 ticks pendant 50 ticks — tiqué en fin de pas
-	verifier(s.appliquer_statut(j, "poison", 50, chef.id), "poison appliqué")
+	verifier(s.appliquer_statut(j, "poison", 5000, chef.id), "poison appliqué")
 	var pv: int = j.sante
-	chef.compteur = h.ticks + 10
-	j.compteur = h.ticks + 100
+	chef.compteur = h.ticks + 1000
+	j.compteur = h.ticks + 10000
 	s.pas(j.horloge)   # le chef agit à t+10 : le poison tique
 	verifier(j.sante < pv and j.statuts.size() == 1, "le poison fait des dégâts périodiques")
 	# Anti-stunlock : un contrôle dur est plafonné à 20 ticks, puis verrouillé 50 ticks
-	verifier(s.appliquer_statut(j, "enracinement", 40, chef.id), "enracinement appliqué")
+	verifier(s.appliquer_statut(j, "enracinement", 4000, chef.id), "enracinement appliqué")
 	var enr: Dictionary = j.statuts.back()
-	verifier(int(enr.fin) - h.ticks <= 20, "contrôle dur plafonné à 20 ticks")
-	verifier(not s.appliquer_statut(j, "etourdi", 10, chef.id), "réapplication refusée (verrou 50 ticks)")
-	verifier(int(j.anti_stunlock_jusqua) == h.ticks + 20 + 50, "verrou = fin + 50")
+	verifier(int(enr.fin) - h.ticks <= 2000, "contrôle dur plafonné à 2000 ticks (deux secondes)")
+	verifier(not s.appliquer_statut(j, "etourdi", 1000, chef.id), "réapplication refusée (verrou 50 ticks)")
+	verifier(int(j.anti_stunlock_jusqua) == h.ticks + 2000 + 5000, "verrou = fin + 5000")
 	# Enraciné : le déplacement est refusé
 	j.compteur = h.ticks
-	chef.compteur = h.ticks + 500
+	chef.compteur = h.ticks + 50000
 	s.pas(j.horloge)
 	verifier(not s.intention(j.id, {"type": "deplacer", "vers": j.pos + Vector2i(0, 1)}), "enraciné : pas de déplacement")
 	verifier(s.intention(j.id, {"type": "attendre"}), "mais on peut attendre")
@@ -947,16 +969,16 @@ func test_statuts() -> void:
 	chef.chaine.tick_ref = h.ticks
 	chef.anti_stunlock_jusqua = -1
 	chef.action_en_cours = {"type": "arme", "cible": j.id, "lourde": true, "ticks": 10, "name_key": "x"}
-	verifier(s.appliquer_statut(chef, "etourdi", 10, j.id), "Étourdi sur le chef")
+	verifier(s.appliquer_statut(chef, "etourdi", 1000, j.id), "Étourdi sur le chef")
 	verifier(chef.action_en_cours.is_empty() and chef.chaine.segments.size() == 1, "interruption : action coupée, dernier segment retiré")
 	# Ralliement : ×1.15 dégâts ; Ralentissement : coûts ticks ×1.3
-	s.appliquer_statut(j, "ralentissement", 30, chef.id)
+	s.appliquer_statut(j, "ralentissement", 3000, chef.id)
 	j.compteur = h.ticks
 	s.pas(j.horloge)
 	var t: int = h.ticks
 	j.statuts = j.statuts.filter(func(x: Dictionary) -> bool: return x.id != "enracinement")
 	verifier(s.intention(j.id, {"type": "deplacer", "vers": j.pos + Vector2i(0, 1)}), "déplacement ralenti")
-	verifier(j.compteur == t + 4, "3 ticks × 1.3 ≈ 4")
+	verifier(j.compteur == t + 390, "300 ticks × 1.3 = 390")
 	# XP des trois pistes : un coup d'épée sur le chef verse aux pistes métal / epee / tranchant
 	j.statuts.clear()
 	s.grille.liberer(j.pos)
@@ -984,9 +1006,9 @@ func test_liaisons() -> void:
 	var cap := Capacites.new(GameData.catalogues["modules"])
 	var p := cap.assembler(["point", "etincelle", "a_l_impact", "croix", "bruine"], 5, "1d4", {})
 	verifier(p.erreurs.is_empty() and p.charge_suivante.declencheur == "impact" and p.charge_suivante.geometrie == "croix", "À l'impact encapsule [Croix]+[Bruine]")
-	verifier(p.ticks == 3 + 1 + (3 + 3) and p.ressource == 3 and p.charge_suivante.ressource == 3, "ticks : 3 + 1 + 6 ; chaque charge paie son mana")
+	verifier(p.ticks == 300 + 100 + (300 + 300) and p.ressource == 3 and p.charge_suivante.ressource == 3, "ticks : 3 + 1 + 6 ; chaque charge paie son mana")
 	p = cap.assembler(["point", "flamme", "repetition"], 5, "1d4", {})
-	verifier(p.ticks == 12 and p.liaisons.size() == 1 and p.liaisons[0].rejoue == 2, "[Point]+[Flamme]+[Répétition] : 12 ticks, rejoue 2 fois")
+	verifier(p.ticks == 1200 and p.liaisons.size() == 1 and p.liaisons[0].rejoue == 2, "[Point]+[Flamme]+[Répétition] : 12 ticks, rejoue 2 fois")
 	var s := nouvelle_sim("plaine_au_talus")
 	var j := joueur_de(s)
 	var loups: Array[Dictionary] = [s.entites["loup_2"], s.entites["loup_3"], s.entites["loup_4"]]
@@ -1080,7 +1102,7 @@ func test_glyphes_terrain() -> void:
 	loup.pos = glyphe_pos + Vector2i(0, -1)
 	s.grille.placer(loup.id, loup.pos)
 	loup.compteur = h.ticks
-	j.compteur = h.ticks + 500
+	j.compteur = h.ticks + 50000
 	var seg_avant: int = j.chaine.segments.size()
 	s._deplacer(loup, glyphe_pos, h.ticks)
 	verifier(s.glyphes.is_empty() and Etres.bloque_statuts(loup, "deplacement", s.statuts_defs), "à l'entrée : le glyphe part, le loup est enraciné")
@@ -1092,13 +1114,13 @@ func test_glyphes_terrain() -> void:
 		s.crediter_module(j, str(m0), 99)
 	j.capacites[3] = {"id": "m", "name_key": "capacite.etincelle.name", "modules": ["meche", "point", "jet_court", "etincelle"]}
 	j.compteur = h.ticks
-	loup.compteur = h.ticks + 500
+	loup.compteur = h.ticks + 50000
 	s.pas(j.horloge)
 	var pv: int = loup.sante
 	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": loup.pos}), "Mèche + Étincelle")
 	verifier(s.differes.size() == 1 and loup.sante == pv, "la charge est différée, rien ne part encore")
-	loup.compteur = h.ticks + 25
-	j.compteur = h.ticks + 600
+	loup.compteur = h.ticks + 2500
+	j.compteur = h.ticks + 60000
 	s.pas(j.horloge)   # le loup agit à t+25 : la mèche (t+20) est tiquée en fin de pas
 	verifier(s.differes.is_empty() and loup.sante < pv, "20 ticks plus tard, l'Étincelle part")
 	# Barrière : occupe la tuile, bloque le passage, disparaît après 50 ticks
@@ -1108,14 +1130,14 @@ func test_glyphes_terrain() -> void:
 		s.crediter_module(j, str(m0), 99)
 	j.capacites[3] = {"id": "b", "name_key": "capacite.etincelle.name", "modules": ["tuile", "jet_court", "barriere"]}
 	j.compteur = h.ticks
-	loup.compteur = h.ticks + 500
+	loup.compteur = h.ticks + 50000
 	s.pas(j.horloge)
 	var mur_pos: Vector2i = j.pos + Vector2i(1, -1)
 	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": mur_pos}), "Barrière")
 	s.pas(j.horloge)   # 15 ticks : télégraphée
 	verifier(s.grille.bloque_passage(mur_pos) and s.obstacles.size() == 1, "la barrière bloque la tuile")
-	loup.compteur = h.ticks + 60
-	j.compteur = h.ticks + 600
+	loup.compteur = h.ticks + 6000
+	j.compteur = h.ticks + 60000
 	s.pas(j.horloge)
 	verifier(not s.grille.bloque_passage(mur_pos) and s.obstacles.is_empty(), "après 50 ticks, la barrière disparaît")
 	# Exhaussement : +1 niveau ; Fosse : −3 niveaux et ce qui est dessus chute
@@ -1125,7 +1147,7 @@ func test_glyphes_terrain() -> void:
 		s.crediter_module(j, str(m0), 99)
 	j.capacites[3] = {"id": "e", "name_key": "capacite.etincelle.name", "modules": ["tuile", "jet_court", "exhaussement"]}
 	j.compteur = h.ticks
-	loup.compteur = h.ticks + 500
+	loup.compteur = h.ticks + 50000
 	s.pas(j.horloge)
 	var t_pos: Vector2i = j.pos + Vector2i(-1, -1)
 	var h_avant: int = s.grille.h(t_pos)
@@ -1138,7 +1160,7 @@ func test_glyphes_terrain() -> void:
 		s.crediter_module(j, str(m0), 99)
 	j.capacites[3] = {"id": "f", "name_key": "capacite.etincelle.name", "modules": ["tuile", "jet_court", "fosse"]}
 	j.compteur = h.ticks
-	loup.compteur = h.ticks + 500
+	loup.compteur = h.ticks + 50000
 	s.pas(j.horloge)
 	h_avant = s.grille.h(loup.pos)
 	pv = loup.sante
@@ -1172,7 +1194,7 @@ func test_evenements() -> void:
 	verifier(j.declencheurs_armes.size() == 1 and j.declencheurs_armes[0].evenement == "riposte", "la Riposte attend")
 	var pv0: int = loups[0].sante
 	loups[0].compteur = h.ticks
-	j.compteur = h.ticks + 500
+	j.compteur = h.ticks + 50000
 	s.pas(j.horloge)   # le loup mord
 	verifier(j.declencheurs_armes.is_empty() and loups[0].sante < pv0, "touché : l'Étincelle part sur l'attaquant")
 	# Cadence : tous les 3 emplois, la charge qui suit part aussi
@@ -1185,7 +1207,7 @@ func test_evenements() -> void:
 	EventBus.damage_dealt.connect(func(src: String, _c: String, _d: int, _det: Dictionary) -> void: if src == j.id: coups[0] += 1)
 	for k in 3:
 		j.compteur = h.ticks
-		loups[0].compteur = h.ticks + 500
+		loups[0].compteur = h.ticks + 50000
 		s.pas(j.horloge)
 		s.intention(j.id, {"type": "capacite", "index": 3, "cible": loups[0].pos})
 	verifier(coups[0] == 4, "3 emplois → 3 Étincelles + 1 Bruine (%d coups)" % coups[0])
@@ -1260,13 +1282,13 @@ func test_niveaux() -> void:
 	verifier(int(loup.competences.get("athletisme", 0)) == 25, "le loup part avec Athlétisme 25 (modificateur de race)")
 	var t: int = s.horloge_monde.ticks
 	s._deplacer(loup, loup.pos + Vector2i(0, 1), t)
-	verifier(loup.compteur == t + 2, "le loup se déplace en 2 ticks")
+	verifier(loup.compteur == t + 200, "le loup se déplace en 200 ticks")
 	# Modules : ticks / skill_factor, plancher 50 % ; ressource / skill_factor
 	var cap := Capacites.new(GameData.catalogues["modules"])
 	var p := cap.assembler(["ligne", "flamme", "concentration"], 5, "2d6", {}, {"flamme": 50, "ligne": 50, "concentration": 50})
-	verifier(p.ticks == 4 + 1 + 1 and p.ressource == 4 + 4, "niveau 50 partout : (8+2+2)/2 = 6 ticks · 8/2 + 4 = 8 mana")
+	verifier(p.ticks == 400 + 100 + 100 and p.ressource == 4 + 4, "niveau 50 partout : (8+2+2)/2 = 6 ticks · 8/2 + 4 = 8 mana")
 	p = cap.assembler(["ligne", "flamme"], 5, "2d6", {}, {"flamme": 1000})
-	verifier(p.ticks == 4 + 2, "plancher : Flamme ne descend jamais sous 4 ticks")
+	verifier(p.ticks == 400 + 200, "plancher : Flamme ne descend jamais sous 400 ticks")
 
 
 # ---------------------------------------------------------------- Étape 1 : rigs, paperdoll, tutoriels
@@ -1323,7 +1345,7 @@ func test_lumiere_incrementale() -> void:
 func test_paperdoll_et_tutoriels() -> void:
 	for id in ["humanoide", "quadrupede", "volant", "amorphe"]:
 		var rig: Dictionary = GameData.entree("rigs", id)
-		verifier(rig.segments.has(rig.racine) and rig.facings.has("S") and rig.facings.SW.miroir == "SE", "rig %s : racine, facings, miroir" % id)
+		verifier(rig.segments.has(rig.racine) and rig.orientations.has("S") and int(rig.orientations.W.lacet) == -90 and rig.ordre.size() == rig.segments.size(), "rig %s : racine, huit orientations (lacet), un ordre de départage complet" % id)
 	var h: Dictionary = GameData.entree("rigs", "humanoide")
 	verifier(h.segments.size() == 15 and h.racine == "bassin" and h.slots_segments.casque == ["tete"] and h.prise_arme == "main_D", "rig humanoïde : 15 segments depuis la coupe du bassin, le casque peint la tête, l'arme à la main droite")
 	verifier(GameData.config("palette_materiaux").has("cuir") and GameData.config("palette_materiaux").cuir.hex == "#8A5A33", "palette : Cuir #8A5A33")
@@ -1337,11 +1359,22 @@ func test_paperdoll_et_tutoriels() -> void:
 	var pal: Dictionary = GameData.config("palette_materiaux").get(mat_torse, {})   # le paperdoll lit la PALETTE, pas la couleur du matériau
 	var teinte_attendue := Color.html(str(pal.hex)) if pal.has("hex") else Color(0.6, 0.6, 0.6)
 	verifier(not str(peints.torse.construction).is_empty() and peints.torse.couleur == teinte_attendue, "la construction donne la forme, le matériau (%s) la teinte" % mat_torse)
-	var monde := pd._poser_segments(h.facings.S, false)
+	var monde := pd._poser_segments()
 	verifier(monde.size() == 15 and monde.has("main_D") and monde.has("bassin"), "les 15 segments se placent depuis la racine (le bassin)")
-	var miroir := pd._poser_segments(h.facings.SE, true)
-	var droit := pd._poser_segments(h.facings.SE, false)
-	verifier(is_equal_approx(miroir.main_D.origine.x, -droit.main_D.origine.x), "le miroir inverse l'axe horizontal")
+	# LA PROFONDEUR (designer 2026-09-08, ordre de travail 26 quater bis) : de face, les deux épaules s'écartent à
+	# l'écran ; de profil, elles se superposent et leur écart passe en PROFONDEUR — et c'est la profondeur, non plus
+	# une liste écrite à la main, qui envoie le bras du fond derrière le torse.
+	var face := pd._poser_segments()
+	pd._lacet = deg_to_rad(90.0)   # le corps tourné vers la droite de l'écran
+	var profil := pd._poser_segments()
+	pd._lacet = 0.0
+	var ecart_face: float = absf(float(face.bras_haut_G.origine.x) - float(face.bras_haut_D.origine.x))
+	var ecart_profil: float = absf(float(profil.bras_haut_G.origine.x) - float(profil.bras_haut_D.origine.x))
+	verifier(ecart_face > 8.0 and ecart_profil < 1.0 and not is_equal_approx(float(profil.bras_haut_G.z), float(profil.bras_haut_D.z)), "la profondeur : de face les épaules s'écartent (%.1f px), de profil elles se superposent (%.1f) et se séparent en profondeur" % [ecart_face, ecart_profil])
+	var ordre_profil: Array = pd._ordre_profondeur(profil)
+	var bras_fond := "bras_haut_D" if float(profil.bras_haut_D.z) > float(profil.bras_haut_G.z) else "bras_haut_G"
+	var bras_devant := "bras_haut_G" if bras_fond == "bras_haut_D" else "bras_haut_D"
+	verifier(ordre_profil.find(bras_fond) < ordre_profil.find("torse") and ordre_profil.find(bras_devant) > ordre_profil.find("torse"), "de profil, le bras du fond passe derrière le torse et l'autre devant (%s / %s)" % [bras_fond, bras_devant])
 	pd.free()
 	# Tutoriels : le premier combat déclenche « bascule tactique », une seule fois
 	var tuto := Tutoriels.new()
@@ -1446,10 +1479,10 @@ func test_noyau_passes() -> void:
 		var tout_vu: bool = cas[1]
 		var vue: Dictionary = j.get("vue", {})
 		var t0 := Time.get_ticks_usec()
-		var b_gd := PassesGD.brouillard(g, vue, tout_vu, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85))
+		var b_gd := PassesGD.brouillard(g, vue, tout_vu, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85), Color(0.05, 0.05, 0.08, 0.88), Color(0.02, 0.02, 0.04, 0.98))
 		var t_gd := PassesGD.toits(g, vue, tout_vu, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, couleurs, styles, 1.0, 8.0, 0.72, cas[2], cas[3], cas[4], 4096.0, 0.75, 0.55)
 		var t1 := Time.get_ticks_usec()
-		var b_cpp: Dictionary = g._noyau.brouillard(g, vue, tout_vu, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85))
+		var b_cpp: Dictionary = g._noyau.brouillard(g, vue, tout_vu, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85), Color(0.05, 0.05, 0.08, 0.88), Color(0.02, 0.02, 0.04, 0.98))
 		var t_cpp: Dictionary = g._noyau.toits(g, vue, tout_vu, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, couleurs, styles, 1.0, 8.0, 0.72, cas[2], cas[3], cas[4], 4096.0, 0.75, 0.55)
 		var t2 := Time.get_ticks_usec()
 		chrono_gd += float(t1 - t0) / 1000.0
@@ -1488,8 +1521,8 @@ func test_noyau_passes() -> void:
 	# un VRAI écart : la première version de cette preuve classait les deux côtés différemment et annonçait 193
 	# différences qui n'existaient pas.
 	var vue_p: Dictionary = j.get("vue", {})
-	var av := PassesGD.brouillard_par_tuile(g, vue_p, false, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85))
-	var ap := PassesGD.brouillard(g, vue_p, false, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85))
+	var av := PassesGD.brouillard_par_tuile(g, vue_p, false, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85), Color(0.05, 0.05, 0.08, 0.88), Color(0.02, 0.02, 0.04, 0.98))
+	var ap := PassesGD.brouillard(g, vue_p, false, 0, g.contenu_ids.find("vide"), j.pos, 24, od, 40.0, 20.0, 4.0, 6, bat_j, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85), Color(0.05, 0.05, 0.08, 0.88), Color(0.02, 0.02, 0.04, 0.98))
 	var sacs: Array = [{}, {}]
 	for lequel in 2:
 		var res2: Dictionary = av if lequel == 0 else ap
@@ -1649,8 +1682,8 @@ func test_noyau_passes() -> void:
 		s.maj_vision()
 		var bj := int(g.bat_de[g.idx(haut)])
 		var vue_e: Dictionary = j.get("vue", {})
-		var b_gd := PassesGD.brouillard(g, vue_e, false, 1, g.contenu_ids.find("vide"), Grille.plat(haut), 24, od, 40.0, 20.0, 4.0, 6, bj, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85))
-		var b_cpp: Dictionary = g._noyau.brouillard(g, vue_e, false, 1, g.contenu_ids.find("vide"), Grille.plat(haut), 24, od, 40.0, 20.0, 4.0, 6, bj, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85))
+		var b_gd := PassesGD.brouillard(g, vue_e, false, 1, g.contenu_ids.find("vide"), Grille.plat(haut), 24, od, 40.0, 20.0, 4.0, 6, bj, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85), Color(0.05, 0.05, 0.08, 0.88), Color(0.02, 0.02, 0.04, 0.98))
+		var b_cpp: Dictionary = g._noyau.brouillard(g, vue_e, false, 1, g.contenu_ids.find("vide"), Grille.plat(haut), 24, od, 40.0, 20.0, 4.0, 6, bj, 1, Color(0.05, 0.05, 0.08, 0.55), Color(0.02, 0.02, 0.04, 0.85), Color(0.05, 0.05, 0.08, 0.88), Color(0.02, 0.02, 0.04, 0.98))
 		var t_gd := PassesGD.toits(g, vue_e, false, 1, g.contenu_ids.find("vide"), Grille.plat(haut), 24, od, 40.0, 20.0, 4.0, 6, bj, couleurs, styles, 1.0, 8.0, 0.72, Vector2(0.6, 0.4), true, 0.8, 4096.0, 0.75, 0.55)
 		var t_cpp: Dictionary = g._noyau.toits(g, vue_e, false, 1, g.contenu_ids.find("vide"), Grille.plat(haut), 24, od, 40.0, 20.0, 4.0, 6, bj, couleurs, styles, 1.0, 8.0, 0.72, Vector2(0.6, 0.4), true, 0.8, 4096.0, 0.75, 0.55)
 		verifier(b_gd.points == b_cpp.points and b_gd.couleurs == b_cpp.couleurs and t_gd.points == t_cpp.points and t_gd.couleurs == t_cpp.couleurs and b_gd.points.size() > 0, "à l'étage, la rue vue par l'air : les mêmes tableaux (%d triangles de brouillard)" % (b_gd.points.size() / 3))

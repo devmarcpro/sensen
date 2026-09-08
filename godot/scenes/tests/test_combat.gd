@@ -14,6 +14,16 @@ var _filtre := ""
 
 var _lances: Array[String] = []   # ce que la suite a lancé : un test défini mais absent de la liste est un échec (2026-09-04)
 
+## LES TESTS DES MODULES DE SORTS SONT DÉSACTIVÉS (designer 2026-09-08 : « on en a rien à battre des modules de
+## sorts, n'y touche plus, c'est désactivé »). Les 236 contenus de modules meurent au **palier 6** de l'Ordre de
+## travail, et la grammaire sera réécrite sur les champs du monde : entretenir leurs tests, c'est entretenir ce qui
+## va disparaître — et c'est ce qui restait le plus cher à réparer au changement d'unité du temps.
+## Ils restent **définis**, pas supprimés : on ne jette pas le code tant que son remplaçant n'existe pas. Ils ne sont
+## simplement plus lancés, et le garde-fou « un test défini et jamais lancé est un échec » les laisse passer.
+const DESACTIVES: Array[String] = ["test_capacites", "test_liaisons", "test_glyphes_terrain", "test_glyphes_visibles",
+	"test_grille_sort", "test_element_module", "test_composer_capacites", "test_charges_de_modules",
+	"test_creation_de_sorts"]
+
 
 ## Les fichiers de la suite (découpée le 2026-09-06 : `tools/fragmenter_tests.py`), chacun un domaine ; les tests y sont tels quels.
 const MODULES: Array = [
@@ -51,7 +61,7 @@ func _verifier_tous_lances() -> void:
 	for mod in _modules:
 		for m in mod.get_method_list():
 			var nom := str(m.name)
-			if nom.begins_with("test_") and not (nom in _lances):
+			if nom.begins_with("test_") and not (nom in _lances) and not (nom in DESACTIVES):
 				verifier(false, "test défini mais jamais lancé : %s" % nom)
 
 
@@ -79,11 +89,11 @@ func _ready() -> void:
 	_lancer("test_horloges")
 	_lancer("test_wuxing")
 	_lancer("test_ratelier")
-	_lancer("test_capacites")
+	# DÉSACTIVÉ : _lancer("test_capacites")
 	_lancer("test_projectiles")
 	_lancer("test_statuts")
-	_lancer("test_liaisons")
-	_lancer("test_glyphes_terrain")
+	# DÉSACTIVÉ : _lancer("test_liaisons")
+	# DÉSACTIVÉ : _lancer("test_glyphes_terrain")
 	_lancer("test_evenements")
 	_lancer("test_niveaux")
 	_lancer("test_paperdoll_et_tutoriels")
@@ -183,7 +193,7 @@ func _ready() -> void:
 	_lancer("test_suiveur_territorial")
 	_lancer("test_transmutation")
 	_lancer("test_arrachage")
-	_lancer("test_glyphes_visibles")
+	# DÉSACTIVÉ : _lancer("test_glyphes_visibles")
 	_lancer("test_derobade")
 	_lancer("test_alternance")
 	_lancer("test_meute_liaison")
@@ -192,8 +202,8 @@ func _ready() -> void:
 	_lancer("test_sauvegarde_terrain")
 	_lancer("test_uniques_artefacts")
 	_lancer("test_bombes")
-	_lancer("test_grille_sort")
-	_lancer("test_element_module")
+	# DÉSACTIVÉ : _lancer("test_grille_sort")
+	# DÉSACTIVÉ : _lancer("test_element_module")
 	_lancer("test_flottabilite")
 	_lancer("test_grilles_possedees")
 	_lancer("test_trames")
@@ -209,10 +219,10 @@ func _ready() -> void:
 	_lancer("test_compagnons_defendent")
 	_lancer("test_dette_paliers")
 	_lancer("test_classes_des_pnj")
-	_lancer("test_composer_capacites")
-	_lancer("test_charges_de_modules")
+	# DÉSACTIVÉ : _lancer("test_composer_capacites")
+	# DÉSACTIVÉ : _lancer("test_charges_de_modules")
 	_lancer("test_assemblage_sans_limite")
-	_lancer("test_creation_de_sorts")
+	# DÉSACTIVÉ : _lancer("test_creation_de_sorts")
 	_lancer("test_zones_au_sol")
 	_lancer("test_conditions_et_modificateurs")
 	_lancer("test_camp")

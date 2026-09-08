@@ -14,7 +14,7 @@
   },
   "element_special": null,
   "power_base": null,
-  "cout_ticks": 14,
+  "cout_ticks": 1400,
   "cout_mana": 18,
   "cout_vigueur": 0,
   "effets": [
@@ -26,7 +26,7 @@
     "invocation": {
       "mode": "creature",
       "creature": "feu_follet",
-      "duree_ticks": 60
+      "duree_ticks": 6000
     }
   },
   "style": "terrain",

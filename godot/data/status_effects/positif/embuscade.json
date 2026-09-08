@@ -2,8 +2,8 @@
   "name_key": "status.embuscade.name",
   "degats_des": null,
   "element": null,
-  "periode_ticks": 10,
-  "duree_ticks": 20,
+  "periode_ticks": 1000,
+  "duree_ticks": 2000,
   "controle": false,
   "cumule": false,
   "modifiers": [

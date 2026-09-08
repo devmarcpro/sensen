@@ -13,7 +13,7 @@
     "metal": 1.0
   },
   "statut": "poison",
-  "statut_ticks": 60,
+  "statut_ticks": 6000,
   "soigne": "",
   "mana": "",
   "eteint_feux": false,

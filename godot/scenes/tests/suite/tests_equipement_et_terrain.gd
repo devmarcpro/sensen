@@ -15,11 +15,12 @@ func test_effets_equipement() -> void:
 	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
 	verifier(j.mecaniques.has("vitesse_deplacement") and j.mecaniques.has("regen_sante") and "immunite_poison" in j.tags_acquis, "les mécaniques et le tag sont collectés (%s)" % str(j.mecaniques.keys()))
 	verifier(s.poids_de(j).capacite == cap0 + 40.0, "capacité de poids +40 (%.0f → %.0f)" % [cap0, s.poids_de(j).capacite])
-	verifier(not s.appliquer_statut(j, "poison", 100, ""), "immunisé au poison")
+	verifier(not s.appliquer_statut(j, "poison", 10000, ""), "immunisé au poison")
 	j.sante = 10
 	j.tick_vigueur = 0
-	s._regenerer(j, 1000)
-	verifier(int(j.sante) == 15, "régénération : +5 PV en 1000 ticks à +100 %% (%d)" % int(j.sante))
+	var per_rg := maxi(1, roundi(float(s.regles.r.effets_equipement.regen_base_ticks) * 100.0 / 100.0))   # pct 100 : une période pleine par PV
+	s._regenerer(j, 5 * per_rg)
+	verifier(int(j.sante) == 15, "régénération : +5 PV en %d ticks à +100 %% (%d)" % [5 * per_rg, int(j.sante)])
 	var t: Vector2i = j.pos + Vector2i(1, 0)
 	s.grille.contenu[s.grille.idx(t)] = 0
 	s.grille.contenu[s.grille.idx(t + Vector2i(1, 0))] = 0
@@ -113,11 +114,11 @@ func test_arme_mixte() -> void:
 	verifier(j.chaine.segments.size() == 1 and str(j.chaine.segments[0].element) == "feu", "sans préférence : le dominant (feu)")
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "segment_prefere", "element": "metal"}) and str(j.segment_prefere) == "metal", "préférer le métal (0 tick)")
-	s._poser_segment(j, s.vecteur_arme(mixte), h.ticks + 1)
+	s._poser_segment(j, s.vecteur_arme(mixte), h.ticks + 100)
 	verifier(str(j.chaine.segments[j.chaine.segments.size() - 1].element) == "metal", "avec préférence : le segment posé est métal")
 	s.attente[j.id] = true
 	s.intention(j.id, {"type": "segment_prefere", "element": "eau"})
-	s._poser_segment(j, s.vecteur_arme(mixte), h.ticks + 2)
+	s._poser_segment(j, s.vecteur_arme(mixte), h.ticks + 200)
 	verifier(str(j.chaine.segments[j.chaine.segments.size() - 1].element) == "feu", "une préférence hors du vecteur est ignorée : dominant")
 
 
@@ -217,25 +218,25 @@ func test_statuts_complets() -> void:
 	var h := s.horloge_de(j)
 	# Régénération
 	j.sante = 10
-	s.appliquer_statut(j, "regeneration", 50, "")
-	s._tiquer_statuts(j, h.ticks + 30)
+	s.appliquer_statut(j, "regeneration", 5000, "")
+	s._tiquer_statuts(j, h.ticks + 3000)
 	verifier(int(j.sante) >= 13, "Régénération : +1d4 par période (%d PV après 3 périodes)" % int(j.sante))
 	j.statuts = []
 	# Gel : immobilisé, jet de Force pour se libérer
 	j.stats_eff.force = 40
-	s.appliquer_statut(j, "gel", 20, "")
+	s.appliquer_statut(j, "gel", 2000, "")
 	verifier(Etres.bloque_statuts(j, "deplacement", s.statuts_defs), "gelé : ne bouge plus")
-	s._tiquer_statuts(j, h.ticks + 10)
+	s._tiquer_statuts(j, h.ticks + 1000)
 	verifier(not Etres.a_statut_id(j, "gel"), "Force 40 : libéré au premier jet")
 	# Béni : +1 dé
-	s.appliquer_statut(j, "beni", 3000, "")
+	s.appliquer_statut(j, "beni", 300000, "")
 	verifier(int(Etres.add_statuts(j, "des", s.statuts_defs)) == 1, "Béni : +1 dé aux jets")
 	# Peau de pierre : +5 d'armure dans la résolution
-	s.appliquer_statut(j, "peau_de_pierre", 100, "")
+	s.appliquer_statut(j, "peau_de_pierre", 10000, "")
 	verifier(int(Etres.add_statuts(j, "armure", s.statuts_defs)) == 5, "Peau de pierre : +5 d'armure")
 	j.statuts = []
 	# L'eau éteint la brûlure
-	s.appliquer_statut(j, "brulure", 30, "")
+	s.appliquer_statut(j, "brulure", 3000, "")
 	var bord: Vector2i = j.pos + Vector2i(1, 0)
 	var eau: Vector2i = j.pos + Vector2i(2, 0)
 	s.grille.contenu[s.grille.idx(bord)] = 0
@@ -251,20 +252,20 @@ func test_statuts_complets() -> void:
 func test_potions_completes() -> void:
 	var s := nouvelle_sim("plaine_au_talus")
 	var j := joueur_de(s)
-	s.appliquer_statut(j, "vision_nocturne_potion", 3000, "")
+	s.appliquer_statut(j, "vision_nocturne_potion", 300000, "")
 	verifier("vision_nocturne" in j.tags_acquis, "la potion de vision nocturne accorde le tag")
-	s.appliquer_statut(j, "antipoison", 1500, "")
-	verifier(not s.appliquer_statut(j, "poison", 100, ""), "antipoison : immunisé")
+	s.appliquer_statut(j, "antipoison", 150000, "")
+	verifier(not s.appliquer_statut(j, "poison", 10000, ""), "antipoison : immunisé")
 	j.statuts = []
 	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
-	s.appliquer_statut(j, "resistance_froid", 3000, "")
+	s.appliquer_statut(j, "resistance_froid", 300000, "")
 	verifier(int(Etres.add_statuts(j, "isolation", s.statuts_defs)) == 40, "résistance au froid : isolation +40")
 	j.statuts = []
 	var loup: Dictionary = s.entites["loup_2"]
 	s.grille.liberer(loup.pos)
 	loup.pos = j.pos + Vector2i(1, 0)
 	s.grille.placer(loup.id, loup.pos)
-	s.appliquer_statut(j, "lame_empoisonnee", 1500, "")
+	s.appliquer_statut(j, "lame_empoisonnee", 150000, "")
 	s.attente[j.id] = true
 	s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false})
 	var h := s.horloge_de(j)
@@ -309,7 +310,7 @@ func test_nage() -> void:
 	for t in [eau, eau2]:
 		s.grille.poser_contenu(t, "eau")
 		s.grille.hauteurs[s.grille.idx(t)] = s.grille.h(j.pos)
-	verifier(not s.grille.bloque_passage(eau) and s.grille.cout_pas(j.pos, eau) == 6, "l'eau se traverse : coût de pas 6")
+	verifier(not s.grille.bloque_passage(eau) and s.grille.cout_pas(j.pos, eau) == 600, "l'eau se traverse : coût de pas 600")
 	s.attente[j.id] = true
 	var c0 := int(j.compteur)
 	verifier(s.intention(j.id, {"type": "deplacer", "vers": eau}) and j.pos == eau and int(j.compteur) - c0 >= 4, "nager : %d ticks" % (int(j.compteur) - c0))
@@ -380,11 +381,14 @@ func test_neige_et_gel() -> void:
 	s.horloge_monde.ticks = int(s._cycle().ticks_par_jour) / 2
 	s._maj_etats_meteo()
 	var c_plat := s.grille.cout_pas(j.pos, plat)
-	verifier(not s.grille.neige and s.grille.cout_pas(j.pos, eau) == 6, "ciel clair : pas de neige, l'eau se nage (6)")
+	verifier(not s.grille.neige and s.grille.cout_pas(j.pos, eau) == 600, "ciel clair : pas de neige, l'eau se nage (600)")
 	s.meteo_force = "blizzard"
 	s._maj_etats_meteo()
-	verifier(s.grille.neige and s.grille.cout_pas(j.pos, plat) == c_plat + 1, "blizzard : la neige ralentit (%d → %d)" % [c_plat, s.grille.cout_pas(j.pos, plat)])
-	verifier(s.temperature_cellule() < 0.0 and s.grille.gel and not s.dans_l_eau(eau) and s.grille.cout_pas(j.pos, eau) == c_plat + 1, "−25 °C : la mer gèle, elle se marche (%.0f °C, coût %d)" % [s.temperature_cellule(), s.grille.cout_pas(j.pos, eau)])
+	# Le coût est `round((base + surcout) / friction)` : le surcoût passe par la MÊME division que la base, et
+	# avec des coûts à trois chiffres l'arrondi ne le cache plus (2026-09-08). On attend donc ce que la formule dit.
+	var attendu_neige := roundi(float(int(s.regles.r.deplacement.cout_base) + int(s.regles.r.deplacement.neige_surcout)) * float(c_plat) / float(int(s.regles.r.deplacement.cout_base)))
+	verifier(s.grille.neige and s.grille.cout_pas(j.pos, plat) == attendu_neige, "blizzard : la neige ralentit (%d → %d, attendu %d)" % [c_plat, s.grille.cout_pas(j.pos, plat), attendu_neige])
+	verifier(s.temperature_cellule() < 0.0 and s.grille.gel and not s.dans_l_eau(eau) and s.grille.cout_pas(j.pos, eau) == attendu_neige, "−25 °C : la mer gèle, elle se marche (%.0f °C, coût %d)" % [s.temperature_cellule(), s.grille.cout_pas(j.pos, eau)])
 	s.meteo_force = "canicule"
 	s._maj_etats_meteo()
 	verifier(not s.grille.gel and not s.grille.neige, "canicule : la glace fond")
@@ -415,8 +419,9 @@ func test_automate_eau() -> void:
 	s.grille.hauteurs[s.grille.idx(tranchee)] = h0 - 1
 	verifier(not s.eau_active.is_empty(), "creuser au bord réveille le lac")
 	var tick := s.horloge_monde.ticks
+	var per_eau := int(s.regles.r.eau.periode_ticks)   # l'automate ne tique qu'une fois par période (2026-09-08)
 	for k in 10:
-		s._tiquer_eau(tick + k * 5)
+		s._tiquer_eau(tick + k * per_eau)
 	verifier(s.grille.niveau_liquide(tranchee) == 7, "la tranchée (plus basse) s'inonde : niveau 7")
 	var plat: Vector2i = lac + Vector2i(-2, 0)
 	var loin: Vector2i = lac + Vector2i(-4, 0)
@@ -502,9 +507,10 @@ func test_retrait_eau() -> void:
 	var tranchee: Vector2i = lac + Vector2i(-1, 0)
 	s.grille.hauteurs[s.grille.idx(tranchee)] = h0 - 1
 	s.eau_active[s.grille.idx(lac)] = true
-	var tick := 1000
+	var per_eau2 := int(s.regles.r.eau.periode_ticks)
+	var tick := 2 * per_eau2
 	for k in 12:
-		s._tiquer_eau(tick + k * 5)
+		s._tiquer_eau(tick + k * per_eau2)
 	var plat: Vector2i = lac + Vector2i(1, 0)
 	verifier(s.grille.niveau_liquide(tranchee) == 7 and s.grille.niveau_liquide(plat) == 7, "la nappe est en place (tranchée 7, plat 7)")
 	# Persistance du niveau avec la cellule
@@ -514,7 +520,7 @@ func test_retrait_eau() -> void:
 	# La source comblée : la nappe à plat se retire, la tranchée (un creux) garde son eau
 	s._retirer_source(lac)
 	for k in 400:   # la nappe se rétracte de proche en proche : lentement
-		s._tiquer_eau(tick + 100 + k * 5)
+		s._tiquer_eau(tick + (12 + k) * per_eau2)
 	verifier(s.grille.niveau_liquide(lac) == 0, "la source comblée a disparu")
 	verifier(s.grille.niveau_liquide(plat) == 0 and s.grille.niveau_liquide(lac + Vector2i(3, 0)) == 0, "la nappe à plat s'est retirée (%d, %d)" % [s.grille.niveau_liquide(plat), s.grille.niveau_liquide(lac + Vector2i(3, 0))])
 	verifier(s.grille.niveau_liquide(tranchee) == 7, "la tranchée, un creux, garde son eau (%d)" % s.grille.niveau_liquide(tranchee))
@@ -727,11 +733,14 @@ func test_feu() -> void:
 	# La propagation passe désormais par le CHAMP DE CHALEUR (Émergence — les champs partagés) : le feu chauffe sa
 	# tuile, la chaleur diffuse, et le pin voisin s'enflamme quand elle atteint le seuil de sa matière (70 → 215 °C).
 	# Plus de tirage, donc plus de réglage à forcer : le test regarde la physique, pas un dé.
+	var per_feu := maxi(int(s.regles.r.feu.periode_ticks), int(GameData.config("thermique").periode_ticks))   # les deux champs (2026-09-08)
+	var t_f := tick
 	var propage := false
 	var monte := 0.0
 	for k in 30:
-		s._tiquer_feux(tick + k * 10)
-		s._tiquer_chaleur(tick + k * 10)
+		t_f = tick + k * per_feu
+		s._tiquer_feux(t_f)
+		s._tiquer_chaleur(t_f)
 		if not propage:   # la temperature qui a DECLENCHE, pas celle du voisin une fois en flammes
 			monte = maxf(monte, s.chaleur_a(base + Vector2i(1, 0)))
 		if s.feux.size() > 1:
@@ -747,16 +756,18 @@ func test_feu() -> void:
 	var loup := s.ajouter("loup", herbe, "ia")
 	s._enflammer(herbe)
 	var pv := int(loup.sante)
-	s._tiquer_feux(tick + 1000)
+	t_f += per_feu
+	s._tiquer_feux(t_f)
 	verifier(int(loup.sante) < pv and Etres.a_statut_id(loup, "brulure"), "le loup sur la tuile en feu brûle (%d → %d) et prend Brûlure" % [pv, int(loup.sante)])
 	# On contourne le feu : un chemin ne traverse pas une tuile en flammes, et l'IA en sort
 	var sortie := s.grille.chemin(loup.pos + Vector2i(-2, 0), loup.pos + Vector2i(2, 0))
 	verifier(not sortie.is_empty() and not (herbe in sortie), "le chemin contourne la tuile en feu")
-	s._decider_ia(loup, tick + 1005)
+	s._decider_ia(loup, t_f + 5)
 	verifier(loup.pos != herbe, "le loup sort des flammes d'un pas")
 	# La pluie éteint tout
 	s.meteo_force = "pluie"
-	s._tiquer_feux(tick + 1010)
+	t_f += per_feu
+	s._tiquer_feux(t_f)
 	verifier(s.feux.is_empty() and s.grille.dangers.is_empty(), "la pluie éteint les feux, plus rien à éviter")
 	s.meteo_force = ""
 	s.monde.fermer()

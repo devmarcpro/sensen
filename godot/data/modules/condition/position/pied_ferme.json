@@ -16,7 +16,7 @@
   "effet": {
     "predicat_structure": {
       "type": "porteur_immobile_depuis",
-      "ticks": 20
+      "ticks": 2000
     },
     "bonus_structure": {
       "des": 2

@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": null,
   "power_base": null,
-  "cout_ticks": 11,
+  "cout_ticks": 1100,
   "cout_mana": 14,
   "cout_vigueur": 0,
   "effets": [
@@ -23,7 +23,7 @@
   "effet": {
     "statut": {
       "id": "terreur",
-      "duree_ticks": 20
+      "duree_ticks": 2000
     }
   },
   "style": "controle",

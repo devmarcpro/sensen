@@ -11,7 +11,7 @@
   "taille": 1,
   "cible": "ennemi",
   "ligne_de_vue": true,
-  "cout_ticks": 16,
+  "cout_ticks": 1600,
   "cout_vigueur": 14,
   "degats_des": "2d8",
   "type_degats": "contondant",

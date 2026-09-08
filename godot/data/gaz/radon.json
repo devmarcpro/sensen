@@ -11,7 +11,7 @@
   "degats": "",
   "element": {},
   "statut": "affaibli",
-  "statut_ticks": 200,
+  "statut_ticks": 20000,
   "soigne": "",
   "mana": "",
   "eteint_feux": false,

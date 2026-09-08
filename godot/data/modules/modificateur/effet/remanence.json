@@ -9,7 +9,7 @@
     "modificateur"
   ],
   "famille": "Effet",
-  "surcout_ticks": 3,
+  "surcout_ticks": 300,
   "surcout_ressource": "+8",
   "effet": {
     "remanence": 30

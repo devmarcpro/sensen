@@ -132,13 +132,13 @@
     ]
   },
   "voyage": {
-    "ticks_par_cellule": 192,
+    "ticks_par_cellule": 19200,
     "route_mult": 0.6,
     "_doc": "Voyage rapide (Carte du monde) : ticks par cellule ; route_mult quand départ et arrivée sont sur une route."
   },
   "corruption": {
     "_doc": "Dérive de la corruption (E.20) : delta borné, infection par foyer actif, plafonds mineur/majeur, nettoyage, répit, décroissance, civilisation, grâce après nettoyage.",
-    "ticks_par_semaine": 168000,
+    "ticks_par_semaine": 16800000,
     "delta_min": -40,
     "delta_max": 40,
     "infection_cellule": 2,
@@ -151,7 +151,7 @@
     "repit_majeur": 12,
     "decroissance": 1,
     "civilisation": 1,
-    "grace_ticks": 36000,
+    "grace_ticks": 3600000,
     "etages_mineur": [
       2,
       3
@@ -195,7 +195,7 @@
   },
   "cycle": {
     "_doc": "Cycle jour-nuit (E.21) : 1 jour = ticks_par_jour ; phases en heures ; nuit : corruption +10 %, vision × vision_nuit ; saut de nuit jusqu'à heure_reveil ; heure_depart = l'heure du monde à la nouvelle partie (designer, 2026-08-30 : 8 h).",
-    "ticks_par_jour": 24000,
+    "ticks_par_jour": 2400000,
     "heure_depart": 8,
     "aube": [
       5,
@@ -302,7 +302,7 @@
   "meteo": {
     "_doc": "Météo (E.28) : bruit spatial lent (frequence_spatiale) + temporel (ticks_par_front) ; seuils de précipitation ; températures en °C depuis la couche temperature ; confort ; isolation.",
     "frequence_spatiale": 0.0003,
-    "ticks_par_front": 24000,
+    "ticks_par_front": 2400000,
     "seed_offset": 77,
     "seuils": {
       "couvert": 0.45,
@@ -327,7 +327,7 @@
     },
     "vigueur_regen_hors_confort": 0.5,
     "degats_hors_confort_ecart": 10.0,
-    "degats_periode": 300
+    "degats_periode": 30000
   },
   "village": {
     "_doc": "Hameau (Villages PNJ) : batiments [min, max], rayon de la place, presets de population (fonction → fiche), le marchand habite l'échoppe, le garde tient la place.",
@@ -357,7 +357,7 @@
   },
   "faune": {
     "_doc": "Faune de surface (Créatures, Cycle jour-nuit) : intervalle entre tirages, budget de bêtes dans la fenêtre, anneau de spawn hors de vue, despawn, densité ×nuit_mult la nuit (volet faune_nuit en plus).",
-    "intervalle_ticks": 200,
+    "intervalle_ticks": 20000,
     "budget": 12,
     "anneau": [
       12,
@@ -377,13 +377,13 @@
     "_doc": "Routines des PNJ (IA des créatures) : rayon de patrouille des gardes, distance à laquelle l'A* remplace le pas glouton. projection_min_ticks (LOD de simulation, 2026-09-04) : une absence hors fenetre plus courte ne projette pas le PNJ sur sa routine. astar_noeuds_max (Villes B1) : le budget de noeuds d'un chemin d'IA, au-dela le pas glouton prend le relais.",
     "rayon_patrouille": 8,
     "astar_sous": 20,
-    "projection_min_ticks": 100,
+    "projection_min_ticks": 10000,
     "astar_noeuds_max": 800,
     "lod": {
       "_doc": "Le LOD de simulation des PNJ (designer 2026-09-06 : « aucune raison d'autant lagger en ville puisque là j'avais que 2 PNJ à l'écran ») : un civil hors combat à plus de rayon_plein tuiles de tout joueur est un figurant — un bond de pas_par_decision tuiles vers sa cible de routine par décision (les murs se traversent, personne ne le voit), le temps de marche payé, puis attente_ticks sur place avant de redécider. Ni chemin, ni vision, ni portes.",
       "rayon_plein": 28,
       "pas_par_decision": 6,
-      "attente_ticks": 200
+      "attente_ticks": 20000
     }
   },
   "monde": {
@@ -448,7 +448,7 @@
     "_doc": "La mine sous une cellule du joueur (designer 2026-09-02, voir « Mine sous une cellule »). On y descend en creusant un PUITS depuis la tuile ou l'on se tient, sur une cellule revendiquee. profondeur_par_etage : un etage de mine vaut cette part d'un etage de gouffre pour la bande de materiau — hypothese en attente d'arbitrage, un seul chiffre a changer.",
     "profondeur_par_etage": 0.5,
     "etages_max": 999,
-    "ticks_puits": 40,
+    "ticks_puits": 4000,
     "vigueur_puits": 20,
     "xp_puits": 12,
     "veines": {

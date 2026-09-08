@@ -121,7 +121,7 @@ func test_bombes() -> void:
 	s.intention(j.id, {"type": "lancer", "objet": b2.uid, "cible": j.pos + Vector2i(3, 2)})
 	verifier(s.bombes.size() == 2, "deux bombes en attente")
 	s.bombes[0].fin = s.horloge_monde.ticks
-	s.bombes[1].fin = s.horloge_monde.ticks + 1000
+	s.bombes[1].fin = s.horloge_monde.ticks + 100000
 	s.attente.erase(j.id)
 	s.pas("monde")
 	verifier(s.bombes.is_empty(), "la première explosion amorce la seconde (chaîne)")
@@ -165,7 +165,7 @@ func test_grille_sort() -> void:
 	# guerrier en tient deux — là où la ligne du tireur n'en tiendra jamais qu'un.
 	verifier(g2.emboiter(["gros_a", "gros_b"], g.grille_de("force", 10)).ok, "deux carrés tiennent dans le bloc du guerrier au palier 10")
 	# Le retour arrière : trois dominos distincts dans un 2×3 tiennent ; quatre ne tiennent pas, et le manque est dit.
-	var dom := {"d1": {"module_type": "noyau", "cout_ticks": 5}, "d2": {"module_type": "noyau", "cout_ticks": 5}, "d3": {"module_type": "noyau", "cout_ticks": 5}, "d4": {"module_type": "noyau", "cout_ticks": 5}}
+	var dom := {"d1": {"module_type": "noyau", "cout_ticks": 500}, "d2": {"module_type": "noyau", "cout_ticks": 500}, "d3": {"module_type": "noyau", "cout_ticks": 500}, "d4": {"module_type": "noyau", "cout_ticks": 500}}
 	var g3 := GrilleSort.new(s.regles.r.grille, dom)
 	var deux_trois := GrilleSort._cases_des_lignes(["##", "##", "##"])
 	verifier(g3.emboiter(["d1", "d2", "d3"], deux_trois).ok, "trois dominos remplissent un 2×3")
@@ -392,7 +392,7 @@ func test_lod_projection() -> void:
 	verifier(Grille.distance(v.pos, lit) <= 1, "à vingt-trois heures, il est au lit (%s)" % str(v.pos))
 	# une absence trop courte ne projette rien, et le drapeau est effacé dans tous les cas
 	v.pos = poste
-	v["dormant_depuis"] = s.horloge_monde.ticks - 10
+	v["dormant_depuis"] = s.horloge_monde.ticks - 1000
 	s._projeter_routine(v)
 	verifier(v.pos == poste and not v.has("dormant_depuis"), "dix ticks d'absence : il n'a pas bougé, et le drapeau est effacé")
 	# un être sans routine (une bête) n'est jamais projeté

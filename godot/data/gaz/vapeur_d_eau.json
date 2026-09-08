@@ -13,7 +13,7 @@
     "feu": 1.0
   },
   "statut": "brulure",
-  "statut_ticks": 30,
+  "statut_ticks": 3000,
   "soigne": "",
   "mana": "",
   "eteint_feux": false,

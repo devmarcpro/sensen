@@ -11,7 +11,7 @@
   "degats": "",
   "element": {},
   "statut": "poison",
-  "statut_ticks": 100,
+  "statut_ticks": 10000,
   "soigne": "",
   "mana": "",
   "eteint_feux": false,

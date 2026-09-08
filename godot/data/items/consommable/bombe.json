@@ -15,7 +15,7 @@
   "bombe": {
     "puissance": 40,
     "rayon": 2,
-    "retard_ticks": 20,
+    "retard_ticks": 2000,
     "degats": "3d6"
   },
   "tags": [

@@ -9,7 +9,7 @@
     "forme"
   ],
   "geometrie": "tuile",
-  "surcout_ticks": 1,
+  "surcout_ticks": 100,
   "taille_base": 1,
   "famille": "Formes",
   "style": "neutre",

@@ -28,6 +28,8 @@ uniform float lumiere_active = 0.0;             // 0 : pas de lumière par tuile
 uniform sampler2D matieres_tex : filter_nearest, repeat_disable;   // l'atlas des matières PEINTES : une case de tuile par ligne
 uniform float matieres_n = 0.0;                 // combien de lignes dans l'atlas (0 : aucune matière peinte)
 uniform float style_texture_base = 100.0;       // au-delà de ce style, UV.x ne désigne plus un motif calculé mais une LIGNE de l'atlas
+uniform float teinte_matiere = 1.0;             // combien la teinte du matériau colore une matière PEINTE (0 : la texture seule)
+uniform float teinte_normalisee = 1.0;          // 1 : la teinte est ramenée à sa plus haute composante — elle colore sans assombrir
 
 const float DECALAGE_HAUT = 4096.0;
 const float DECALAGE_SO = -1000.0;
@@ -82,8 +84,15 @@ void fragment() {
 	// couleur du matériau au lieu de la moduler — un sprite porte déjà ses couleurs. Le soleil et la lumière de la
 	// tuile s'appliquent ensuite, comme pour une matière calculée ; le grain procédural, lui, ne s'y ajoute pas.
 	if (matieres_n > 0.0 && style >= style_texture_base && style < style_texture_base + matieres_n) {
+		// UNE TUILE A SA TEXTURE **ET** LA TEINTE DE SA MATIÈRE (designer 2026-09-08). La texture remplaçait la
+		// couleur ; elle la MODULE. Une seule texture peut donc servir plusieurs matières — la terre, l'argile, le
+		// sable —, ce qui est exactement ce qui rend le fondu entre deux tuiles intéressant. La teinte est ramenée
+		// à sa plus haute composante quand `teinte_normalisee` vaut 1 : elle colore le dessin sans l'assombrir.
 		vec2 f = fract(uv);
-		COLOR.rgb = texture(matieres_tex, vec2(f.x, (style - style_texture_base + f.y) / matieres_n)).rgb;
+		vec3 t_mat = COLOR.rgb;
+		float pic = max(t_mat.r, max(t_mat.g, t_mat.b));
+		t_mat = mix(t_mat, t_mat / max(pic, 0.001), teinte_normalisee);
+		COLOR.rgb = texture(matieres_tex, vec2(f.x, (style - style_texture_base + f.y) / matieres_n)).rgb * mix(vec3(1.0), t_mat, teinte_matiere);
 		k = 1.0;
 	} else if (style == 1.0) {   // ROCHE : des veines obliques et des éclats plus contrastés
 		float veine = doux(vec2(uv.x * 1.7 + uv.y * 0.9, uv.y * 0.4) * 3.0);

@@ -15,7 +15,7 @@
   },
   "element_special": null,
   "power_base": "0",
-  "cout_ticks": 20,
+  "cout_ticks": 2000,
   "cout_mana": 40,
   "cout_vigueur": 0,
   "effets": [

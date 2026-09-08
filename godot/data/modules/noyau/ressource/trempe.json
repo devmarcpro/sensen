@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": "arme",
   "power_base": null,
-  "cout_ticks": 8,
+  "cout_ticks": 800,
   "cout_mana": 0,
   "cout_vigueur": 10,
   "effets": [
@@ -23,7 +23,7 @@
   "effet": {
     "statut": {
       "id": "trempe",
-      "duree_ticks": 60
+      "duree_ticks": 6000
     },
     "cible": "allie"
   },

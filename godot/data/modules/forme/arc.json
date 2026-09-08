@@ -9,7 +9,7 @@
     "forme"
   ],
   "geometrie": "arc",
-  "surcout_ticks": 3,
+  "surcout_ticks": 300,
   "taille_base": 2,
   "famille": "Formes",
   "style": "neutre",

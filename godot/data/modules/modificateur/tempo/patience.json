@@ -9,7 +9,7 @@
     "modificateur"
   ],
   "famille": "Tempo",
-  "surcout_ticks": 5,
+  "surcout_ticks": 500,
   "surcout_ressource": "×0.6",
   "effet": {},
   "style": "neutre",

@@ -9,7 +9,7 @@
     "forme"
   ],
   "geometrie": "chemin",
-  "surcout_ticks": 2,
+  "surcout_ticks": 200,
   "taille_base": 5,
   "famille": "Formes",
   "style": "neutre",

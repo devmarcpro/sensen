@@ -2,8 +2,8 @@
   "name_key": "status.gravure.name",
   "degats_des": null,
   "element": null,
-  "periode_ticks": 10,
-  "duree_ticks": 6,
+  "periode_ticks": 1000,
+  "duree_ticks": 600,
   "controle": false,
   "cumule": false,
   "modifiers": [

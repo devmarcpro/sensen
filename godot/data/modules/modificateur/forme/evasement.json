@@ -9,7 +9,7 @@
     "modificateur"
   ],
   "famille": "Forme",
-  "surcout_ticks": 1,
+  "surcout_ticks": 100,
   "surcout_ressource": "+3",
   "effet": {
     "geometrie_map": {

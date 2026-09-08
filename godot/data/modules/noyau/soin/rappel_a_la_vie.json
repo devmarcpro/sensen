@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": null,
   "power_base": null,
-  "cout_ticks": 40,
+  "cout_ticks": 4000,
   "cout_mana": 45,
   "cout_vigueur": 0,
   "effets": [

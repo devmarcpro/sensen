@@ -2,6 +2,7 @@
  "name_key": "rig.volant.name",
  "racine": "torse",
  "hauteur_pieds": 18,
+ "lacet_actif": false,
  "segments": {
   "torse": {
    "parent": null,
@@ -12,15 +13,18 @@
    "ancrages": {
     "cou": [
      10,
-     -1
+     -1,
+     0
     ],
     "aile_G": [
      5,
-     2
+     0,
+     -4
     ],
     "aile_D": [
      5,
-     -2
+     0,
+     4
     ]
    },
    "zone": "torse"
@@ -53,67 +57,12 @@
    "zone": "bras"
   }
  },
- "facings": {
-  "S": {
-   "ordre": [
-    "aile_D",
-    "torse",
-    "tete",
-    "aile_G"
-   ],
-   "offsets": {},
-   "vue_tete": "face"
-  },
-  "SE": {
-   "ordre": [
-    "aile_D",
-    "torse",
-    "tete",
-    "aile_G"
-   ],
-   "offsets": {},
-   "vue_tete": "face"
-  },
-  "E": {
-   "ordre": [
-    "aile_D",
-    "torse",
-    "tete",
-    "aile_G"
-   ],
-   "offsets": {},
-   "vue_tete": "profil"
-  },
-  "NE": {
-   "ordre": [
-    "tete",
-    "aile_D",
-    "torse",
-    "aile_G"
-   ],
-   "offsets": {},
-   "vue_tete": "dos"
-  },
-  "N": {
-   "ordre": [
-    "tete",
-    "aile_D",
-    "torse",
-    "aile_G"
-   ],
-   "offsets": {},
-   "vue_tete": "dos"
-  },
-  "SW": {
-   "miroir": "SE"
-  },
-  "W": {
-   "miroir": "E"
-  },
-  "NW": {
-   "miroir": "NE"
-  }
- },
+ "ordre": [
+  "aile_D",
+  "torse",
+  "tete",
+  "aile_G"
+ ],
  "slots_segments": {
   "casque": [
    "tete"
@@ -123,5 +72,39 @@
   ]
  },
  "prise_arme": null,
- "prise_bouclier": null
+ "prise_bouclier": null,
+ "orientations": {
+  "S": {
+   "lacet": 0,
+   "vue_tete": "face"
+  },
+  "SE": {
+   "lacet": 45,
+   "vue_tete": "face"
+  },
+  "E": {
+   "lacet": 90,
+   "vue_tete": "profil"
+  },
+  "NE": {
+   "lacet": 135,
+   "vue_tete": "dos"
+  },
+  "N": {
+   "lacet": 180,
+   "vue_tete": "dos"
+  },
+  "NW": {
+   "lacet": -135,
+   "vue_tete": "dos"
+  },
+  "W": {
+   "lacet": -90,
+   "vue_tete": "profil"
+  },
+  "SW": {
+   "lacet": -45,
+   "vue_tete": "face"
+  }
+ }
 }

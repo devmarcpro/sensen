@@ -9,7 +9,7 @@
     "forme"
   ],
   "geometrie": "damier",
-  "surcout_ticks": 4,
+  "surcout_ticks": 400,
   "taille_base": 2,
   "famille": "Formes",
   "style": "neutre",

@@ -9,7 +9,7 @@
     "forme"
   ],
   "geometrie": "ligne",
-  "surcout_ticks": 2,
+  "surcout_ticks": 200,
   "taille_base": 4,
   "famille": "Formes",
   "style": "neutre",

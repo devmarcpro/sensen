@@ -4,8 +4,8 @@ extends Node2D
 ## d'architecture). Tout vient des données : la silhouette du rig (`data/rigs/`), les pièces
 ## d'équipement aux ancrages (Squelette modulaire et points d'attache), la teinte du matériau
 ## (Palette de couleurs des matériaux). Aucune branche par type d'être (Apparence — données).
-## Les sprites n'existent pas encore : chaque segment est un rectangle procédural accroché à
-## son ancrage — le rig, l'ordre de calque, les décalages et le miroir sont déjà les vrais.
+## Un segment est une ORIENTATION DANS L'ESPACE du corps depuis le 2026-09-08 : le lacet le tourne, l'isométrie le
+## projette, et la profondeur donne l'ordre de dessin — plus un seul ordre de calque ni un seul décalage à la main.
 
 ## Orientation de grille → facing d'écran (géométrie de la vue, pas du gameplay).
 ## Épaisseur de contour par construction — « la construction est la forme, le matériau la teinte ».
@@ -30,6 +30,11 @@ var _ap: Dictionary = {}       # loci visuels de l'être (Apparence — données
 var _vue_tete := "face"
 var _carrure := 1.0
 var _pose_courante: Dictionary = {}   # la pose du joueur pour l'action en cours (point 63)
+var _pose_marche: Dictionary = {}     # l'oscillation du pas (designer 2026-09-08) : recalculée quand `avancement` bouge
+var avancement := -1.0                # 0 → 1 pendant un pas, −1 à l'arrêt ; le client la règle à chaque image
+var _lacet := 0.0                     # le lacet du corps, en radians (la profondeur, designer 2026-09-08)
+var _prof_ecran := Vector2(0.0, -0.5) # ce qu'une unité de profondeur (vers le FOND) fait à l'écran
+var _largeur_min := 0.35              # ce qu'un segment vu de tranche garde de sa largeur : il s'amincit, il ne disparaît pas
 var _monde_dessine: Dictionary = {}   # dernier placement des segments — l'écran de pose y clique (point 68)
 var _echelle_dessin := 1.0
 var _peint: Dictionary = {}
@@ -116,33 +121,28 @@ func _dessiner_etre() -> void:
 		return
 	if e.has("monture"):
 		_dessine_monture()
-	# IL SE RETOURNE À GAUCHE ET À DROITE (designer 2026-09-08 : « tourner le paperdoll s'il va à droite ou à
-	# gauche »). Le point 54 disait « une seule vue, de face » et le rig portait pourtant ses huit orientations,
-	# inutilisées. On n'en réveille que deux : l'axe horizontal de l'isométrie est `x − y` (aller en +x ou en −y va
-	# vers la droite de l'écran), et son signe choisit E ou son miroir W. Sans mouvement horizontal, la vue de face.
-	# Le dos et les trois-quarts restent en réserve : le visage est dessiné, on ne le cache pas sans raison.
+	# IL TOURNE POUR DE BON (designer 2026-09-08 : « rajouter la profondeur, comme ça on pourrait avoir les
+	# personnages dans les 8 angles »). Le corps n'a plus un facing choisi parmi trois, il a un LACET continu tiré de
+	# son orientation de grille : la composante « vers la caméra » est x + y (l'isométrie regarde la grille depuis le
+	# sud-est), la composante « vers la droite de l'écran » est x − y. Les huit orientations du rig ne servent plus
+	# qu'à nommer le lacet le plus proche pour choisir la vue de la tête.
 	var o_e: Vector2i = e.get("orientation", Vector2i.ZERO)
-	var dx_ecran := o_e.x - o_e.y
-	var nom_facing := "S"
-	if dx_ecran > 0 and rig.facings.has("E"):
-		nom_facing = "E"
-	elif dx_ecran < 0 and rig.facings.has("W"):
-		nom_facing = "W"
-	var f: Dictionary = rig.facings.get(nom_facing, rig.facings.get("S", {}))
-	var miroir := false
-	if f.has("miroir"):
-		miroir = true
-		f = rig.facings[f.miroir]
+	_lacet = 0.0
+	if o_e != Vector2i.ZERO and bool(rig.get("lacet_actif", false)):
+		_lacet = atan2(float(o_e.x - o_e.y), float(o_e.x + o_e.y))
+	var st_pd: Dictionary = GameData.config("styles").get("sprites", {})
+	_prof_ecran = Vector2(float(st_pd.get("profondeur_ecran", [0.0, -0.5])[0]), float(st_pd.get("profondeur_ecran", [0.0, -0.5])[1]))
+	_largeur_min = float(st_pd.get("largeur_min_profil", 0.35))
 	_ap = e.get("apparence", {})
 	_pose_courante = _pose_action()
-	_vue_tete = str(f.get("vue_tete", "face"))
+	_vue_tete = str(_orientation_proche().get("vue_tete", "face"))
 	var fac: Dictionary = GameData.config("apparence").get("facteurs", {})
 	_carrure = float(fac.get("carrure", {}).get(str(_ap.get("carrure", "moyenne")), 1.0))
 	var ech := float(_ap.get("echelle", 1.0)) * float(fac.get("taille", {}).get(str(_ap.get("taille", "moyenne")), 1.0))
 	if not is_equal_approx(ech, 1.0) or _decalage != Vector2.ZERO:
 		draw_set_transform(_decalage, 0.0, Vector2(ech, ech))   # le tremblement d'un coup reçu décale tout le dessin
 	var t_pp := Time.get_ticks_usec()
-	var monde := _poser_segments(f, miroir)
+	var monde := _poser_segments()
 	t_pp = _top_pp("pd.segments", t_pp)
 	_monde_dessine = monde
 	_echelle_dessin = ech
@@ -152,7 +152,7 @@ func _dessiner_etre() -> void:
 	var teinte := Color(e.teinte[0], e.teinte[1], e.teinte[2])
 	if not _ap.is_empty():   # nu : la peau peint le corps entier, l'équipement seul le recouvre (point 43)
 		teinte = _teinte_de("teintes_peau", str(_ap.get("teinte_peau", "")), teinte)
-	for nom: String in f.ordre:
+	for nom: String in _ordre_profondeur(monde):
 		if not monde.has(nom):
 			continue
 		var m: Dictionary = monde[nom]
@@ -232,14 +232,26 @@ func _dessine_monture() -> void:
 		draw_line(Vector2(x, -h + 6.0), Vector2(x, -h + 10.0), col.darkened(0.2), 1.5)
 
 
-## Place chaque segment dans le repère du nœud : {origine, direction, perp, longueur, largeur}.
-func _poser_segments(f: Dictionary, miroir: bool) -> Dictionary:
+## LE SQUELETTE A UNE PROFONDEUR (designer 2026-09-08 : « rajouter la profondeur, comme ça on pourrait avoir les
+## personnages dans les 8 angles et faire des poses plus complexes » — ordre de travail 26 quater bis).
+##
+## Un segment n'est plus un angle d'écran, c'est une orientation dans l'ESPACE DU CORPS : `x` la droite de l'écran,
+## `y` le bas de l'écran (le corps est debout, cet axe ne tourne pas), `z` la profondeur vers le fond. `angle` reste
+## l'angle dans le plan (x, y) — les chiffres du rig n'ont pas changé de sens ; `profondeur` (degrés) fait sortir le
+## segment de ce plan, vers l'avant quand elle est positive. Chaque frame est ensuite tournée du lacet du corps,
+## puis projetée.
+##
+## Ce que ça supprime : les ordres de calque et les décalages d'ancrage écrits à la main pour les huit facings de
+## chacun des six rigs — de la profondeur simulée, que la vraie calcule. Il ne reste qu'un `ordre` par rig, qui
+## départage les ex æquo.
+## Place chaque segment : {origine, direction, perp, longueur, largeur} à l'écran, et {origine3, dir3, perp3, norm3,
+## z} dans l'espace du corps — c'est `z` qui décide de l'ordre de dessin.
+func _poser_segments() -> Dictionary:
 	var monde := {}
 	var racine: String = rig.racine
-	var offsets: Dictionary = f.get("offsets", {})
 	var restants: Array = rig.segments.keys()
 	var herite := {racine: _delta_pose(racine)}   # ce que chaque segment transmet à ses enfants
-	monde[racine] = _placer(racine, Vector2(0, -float(rig.hauteur_pieds)), miroir)
+	monde[racine] = _placer(racine, Vector3(0.0, -float(rig.hauteur_pieds), 0.0), Vector2.ZERO)
 	restants.erase(racine)
 	var garde_fou := 64
 	while not restants.is_empty() and garde_fou > 0:
@@ -249,28 +261,104 @@ func _poser_segments(f: Dictionary, miroir: bool) -> Dictionary:
 			if not monde.has(s.parent):
 				continue
 			var p: Dictionary = monde[s.parent]
-			var a: Array = rig.segments[s.parent].ancrages.get(s.ancrage, [0, 0])
-			var off: Array = offsets.get(s.ancrage, [0, 0])
-			var along := float(a[0]) + float(off[0])
-			var across := float(a[1]) + float(off[1])
-			var pt: Vector2 = p.origine + p.direction * along + p.perp * across
-			var h: float = float(herite.get(str(s.parent), 0.0))
-			monde[nom] = _placer(nom, pt, miroir, h)
+			var a: Array = rig.segments[s.parent].ancrages.get(s.ancrage, [0, 0, 0])
+			var pt3: Vector3 = p.origine3 + p.dir3 * float(a[0]) + p.perp3 * float(a[1])
+			if a.size() > 2:
+				pt3 += p.norm3 * float(a[2])   # l'ancrage a une profondeur : l'épaule est DEVANT le plan du torse
+			var h: Vector2 = herite.get(str(s.parent), Vector2.ZERO)
+			monde[nom] = _placer(nom, pt3, h)
 			herite[nom] = h + _delta_pose(nom)
 			restants.erase(nom)
 	return monde
 
 
-## Ce qu'un segment ajoute à l'angle de ses enfants : sa propre rotation de pose, rien d'autre —
-## l'angle de repos du rig est déjà absolu et ne doit pas se propager deux fois.
-func _delta_pose(nom: String) -> float:
-	return float(pose.get(nom, 0.0)) + float(_pose_courante.get(nom, 0.0))
+## L'ordre de dessin : du plus loin au plus près. `rig.ordre` ne sert qu'à départager deux segments à la même
+## profondeur (un serpent à plat, une méduse) — sans lui, `sort_custom` n'est pas stable et le pantin scintillerait.
+func _ordre_profondeur(monde: Dictionary) -> Array:
+	var rangs := {}
+	var liste: Array = rig.get("ordre", [])
+	for k in liste.size():
+		rangs[str(liste[k])] = k
+	var noms: Array = monde.keys()
+	noms.sort_custom(func(a: String, b: String) -> bool:
+		var za := float((monde[a] as Dictionary).z)
+		var zb := float((monde[b] as Dictionary).z)
+		if not is_equal_approx(za, zb):
+			return za > zb   # le fond d'abord
+		return int(rangs.get(a, 999)) < int(rangs.get(b, 999)))
+	return noms
+
+
+## L'orientation nommée dont le lacet est le plus proche de celui du corps : elle ne sert plus qu'à choisir la vue
+## de la tête (face, profil, dos), c'est-à-dire les planches du visage.
+func _orientation_proche() -> Dictionary:
+	var orients: Dictionary = rig.get("orientations", {})
+	if orients.is_empty():
+		return {}
+	var deg := rad_to_deg(_lacet)
+	var meilleure: Dictionary = {}
+	var ecart_min := 1e9
+	for nom: String in orients.keys():
+		var o: Dictionary = orients[nom]
+		var d := absf(wrapf(float(o.get("lacet", 0.0)) - deg, -180.0, 180.0))
+		if d < ecart_min:
+			ecart_min = d
+			meilleure = o
+	return meilleure
+
+
+## Ce qu'un segment ajoute à ses enfants : sa rotation de pose dans le plan (x) et en profondeur (y). L'angle de
+## repos du rig est déjà absolu et ne doit pas se propager deux fois. Une pose vaut un nombre (l'angle seul, comme
+## avant) ou un couple [angle, profondeur] — un bras qui part en arrière est une pose que la 2D ne savait pas dire.
+func _delta_pose(nom: String) -> Vector2:
+	return _val_pose(pose, nom) + _val_pose(_pose_courante, nom) + _val_pose(_pose_marche, nom)
+
+
+func _val_pose(d: Dictionary, nom: String) -> Vector2:
+	if not d.has(nom):
+		return Vector2.ZERO
+	var v: Variant = d[nom]
+	if v is Array:
+		var t: Array = v
+		return Vector2(float(t[0]), float(t[1]) if t.size() > 1 else 0.0)
+	return Vector2(float(v), 0.0)
+
+
+## Une unité de profondeur, projetée à l'écran : l'isométrie du monde écrase la profondeur de moitié et la fait
+## monter. C'est la seule chose qui distingue le pantin d'un dessin plat.
+func _projeter(v: Vector3) -> Vector2:
+	return Vector2(v.x + v.z * _prof_ecran.x, v.y + v.z * _prof_ecran.y)
+
+
+func _tourner(v: Vector3, c: float, sn: float) -> Vector3:
+	return Vector3(v.x * c - v.z * sn, v.y, v.x * sn + v.z * c)
 
 
 ## La pose enregistrée par le joueur pour l'action en cours (designer 2026-09-01, point 63) :
 ## un dictionnaire segment → angle, appliqué par-dessus le rig. Sans pose, le rig parle seul.
+## LA MARCHE (designer 2026-09-08) : le client donne l'avancement du pas, les jambes et les bras oscillent. Ce n'est
+## pas une pose figée mais une amplitude — un aller-retour complet par tuile franchie, pris dans `poses.marche`.
+func marcher(av: float) -> void:
+	var a := -1.0 if av < 0.0 else clampf(av, 0.0, 1.0)
+	if is_equal_approx(a, avancement):
+		return
+	avancement = a
+	_pose_marche = {}
+	if a >= 0.0:
+		var m: Dictionary = GameData.config("poses").get("marche", {})
+		var phase := sin(a * TAU)
+		for seg: String in m.keys():
+			if seg != "_doc":
+				_pose_marche[seg] = float(m[seg]) * phase
+	queue_redraw()
+
+
+## La pose de l'action en cours. Une fiche peut porter les siennes (`poses`, point 63) ; sinon celles de
+## `poses.defauts`, pour que TOUT être ait une pose par état — sans elles, `poses` vide ne posait rien (2026-09-08).
 func _pose_action() -> Dictionary:
 	var poses: Dictionary = e.get("poses", {})
+	if poses.is_empty():
+		poses = GameData.config("poses").get("defauts", {})
 	if poses.is_empty():
 		return {}
 	var act := "repos"
@@ -285,20 +373,38 @@ func _pose_action() -> Dictionary:
 	return poses.get(act, poses.get("repos", {}))
 
 
-func _placer(nom: String, origine: Vector2, miroir: bool, herite: float = 0.0) -> Dictionary:
+func _placer(nom: String, origine3: Vector3, herite: Vector2) -> Dictionary:
 	var s: Dictionary = rig.segments[nom]
-	# `herite` : la somme des rotations de pose des PARENTS. L'origine d'un segment suivait déjà son
-	# parent, mais pas sa direction : tourner un bras laissait l'avant-bras pointer dans son ancienne
-	# direction, et la chaîne se cassait au coude. Un pantin se manipule d'un bloc (point 68).
-	var angle := float(s.angle) + float(pose.get(nom, 0.0)) + float(_pose_courante.get(nom, 0.0)) + herite
-	if miroir:
-		angle = 180.0 - angle
-	var d := Vector2.from_angle(deg_to_rad(angle))
-	var perp := Vector2(-d.y, d.x) * (-1.0 if miroir else 1.0)
+	# `herite` : la somme des rotations de pose des PARENTS, dans le plan ET en profondeur. L'origine d'un segment
+	# suivait déjà son parent, mais pas sa direction : tourner un bras laissait l'avant-bras pointer dans son
+	# ancienne direction, et la chaîne se cassait au coude. Un pantin se manipule d'un bloc (point 68).
+	var dp := _delta_pose(nom)
+	var a := deg_to_rad(float(s.angle) + dp.x + herite.x)
+	var p := deg_to_rad(float(s.get("profondeur", 0.0)) + dp.y + herite.y)
+	# La direction dans le plan du corps, puis sa sortie du plan : une rotation autour de `perp`, qui ne bouge pas.
+	# `profondeur` positive envoie le segment vers l'AVANT, donc vers les z négatifs.
+	var perp3 := Vector3(-sin(a), cos(a), 0.0)
+	var dir3 := Vector3(cos(a) * cos(p), sin(a) * cos(p), -sin(p))
+	# Le lacet du corps : une rotation autour de la verticale de l'écran, qui mélange la droite et la profondeur.
+	var c := cos(_lacet)
+	var sn := sin(_lacet)
+	dir3 = _tourner(dir3, c, sn)
+	perp3 = _tourner(perp3, c, sn)
+	var norm3 := dir3.cross(perp3)
 	var lg := float(s.largeur)
 	if not nom.begins_with("tete"):
 		lg *= _carrure
-	return {"origine": origine, "direction": d, "perp": perp, "longueur": float(s.longueur), "largeur": lg}
+	# À l'écran : la direction se raccourcit d'elle-même quand le segment plonge vers nous (c'est la profondeur qui
+	# se voit), mais la LARGEUR reste face à la caméra — un membre vu de tranche s'amincit, il ne devient pas un
+	# trait. On garde donc l'axe de largeur perpendiculaire à l'écran et on ne foreshortene que sa mesure.
+	var d2 := _projeter(dir3)
+	var u := d2.normalized() if d2.length() > 0.0001 else Vector2.RIGHT
+	var perp2 := Vector2(-u.y, u.x)
+	var lg_vue := lg * clampf(absf(_projeter(perp3).dot(perp2)), _largeur_min, 1.0)
+	return {"origine": _projeter(origine3), "direction": d2, "perp": perp2,
+		"longueur": float(s.longueur), "largeur": lg_vue,
+		"origine3": origine3, "dir3": dir3, "perp3": perp3, "norm3": norm3,
+		"z": origine3.z + dir3.z * float(s.longueur) * 0.5}
 
 
 ## Quels segments l'équipement peint, et de quelle couleur (slot → segments du rig).
@@ -392,6 +498,10 @@ func _planche_visage(trait_id: String, c: Vector2, r: float, d: Vector2, p: Vect
 	return true
 
 
+func _angle_arme() -> float:
+	return float(GameData.config("styles").get("sprites", {}).get("arme_angle_deg", 45.0))
+
+
 ## L'arme à l'ancrage `prise` de la main d'arme, le bouclier à celle de l'autre main.
 func _dessine_tenus(monde: Dictionary) -> void:
 	var equip: Dictionary = e.get("equipement", {})
@@ -414,7 +524,11 @@ func _dessine_tenus(monde: Dictionary) -> void:
 		var pt: Vector2 = m.origine + m.direction * float(prise[0]) + m.perp * float(prise[1])
 		# L'arme suit la MAIN, pas la verticale de l'écran : elle était dessinée vers le haut absolu, si
 		# bien qu'articuler le bras la laissait droite dans le vide, détachée du poing (point 68).
-		var haut: Vector2 = -Vector2(m.direction)
+		# LA MAIN PRÉSENTE L'ARME VERS L'EXTÉRIEUR (designer 2026-09-08) : elle la tenait dans l'axe du bras, donc
+		# droite le long du corps. Inclinée de `arme_angle_deg`, la droite part à droite et la gauche à gauche —
+		# le signe vient de la position de la main par rapport à l'axe du corps, pas du nom du segment, pour que
+		# le retournement du paperdoll n'inverse rien.
+		var haut: Vector2 = (-Vector2(m.direction)).rotated(deg_to_rad(_angle_arme()) * (1.0 if pt.x >= 0.0 else -1.0))
 		if not _dessine_arme_sprite(it, pt, haut):   # le montage pré-rendu de l'arme, s'il existe (Squelette modulaire, 2026-09-05)
 			_dessine_tenu_picto(it, pt, haut)   # sinon le pictogramme de l'inventaire, dans la main (designer 2026-09-06)
 	var main_bouclier: Variant = main_bouclier_c
@@ -423,7 +537,7 @@ func _dessine_tenus(monde: Dictionary) -> void:
 		var m: Dictionary = monde[main_bouclier]
 		var prise: Array = rig.segments[main_bouclier].ancrages.get("prise", [0, 0])
 		var pt: Vector2 = m.origine + m.direction * float(prise[0]) + m.perp * float(prise[1])
-		var haut: Vector2 = -Vector2(m.direction)
+		var haut: Vector2 = (-Vector2(m.direction)).rotated(deg_to_rad(_angle_arme()) * (1.0 if pt.x >= 0.0 else -1.0))
 		if not _dessine_arme_sprite(it, pt, haut):   # l'autre main : un bouclier, une torche, une dague — son montage ou son pictogramme
 			_dessine_tenu_picto(it, pt, haut)
 

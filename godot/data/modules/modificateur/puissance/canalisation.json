@@ -9,12 +9,12 @@
     "modificateur"
   ],
   "famille": "Puissance",
-  "surcout_ticks": 6,
+  "surcout_ticks": 600,
   "surcout_ressource": "×1.2",
   "effet": {
     "canalisation": {
       "des_par": 1,
-      "ticks": 5
+      "ticks": 500
     }
   },
   "style": "neutre",

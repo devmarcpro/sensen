@@ -242,6 +242,8 @@ func _materiau_grain() -> ShaderMaterial:
 		mat.set_shader_parameter("matieres_tex", _atlas_matieres)
 		mat.set_shader_parameter("matieres_n", float(_lignes_matieres.size()))
 		mat.set_shader_parameter("style_texture_base", float(cfg.get("style_texture_base", 100)))
+		mat.set_shader_parameter("teinte_matiere", float(cfg.get("teinte_matiere_peinte", 1.0)))       # une tuile a sa texture ET la teinte de sa matière (2026-09-08)
+		mat.set_shader_parameter("teinte_normalisee", 1.0 if bool(cfg.get("teinte_matiere_normalisee", true)) else 0.0)
 	_materiaux_grain.append(mat)   # le soleil se règle sur tous (_maj_soleil)
 	return mat
 
@@ -1333,7 +1335,8 @@ func _maj_rayon_vue() -> void:
 func _maj_noeuds(delta: float = 0.0) -> void:
 	var vivants := {}
 	var j := joueur()
-	var k := 1.0 - exp(-delta * 12.0)   # glissement exponentiel : ≈ 0,2 s pour rejoindre la tuile
+	var glissement_s := float(GameData.config("styles").get("tempo", {}).get("glissement_s", 0.22))   # la durée d'un pas quand l'horloge ne coule pas (donjon)
+	var pas_px := Vector2(float(TW) * 0.5, float(TH) * 0.5).length()   # ce que fait un pas à l'écran : la phase de la marche s'y mesure
 	var seuil_picto := int(sim.regles.r.get("tempo", {}).get("pictogramme_au_dela", 0))   # 0 : jamais de pictogramme
 	_calculer_visibles(j)
 	for ke in _vivants_image.size():
@@ -1360,10 +1363,24 @@ func _maj_noeuds(delta: float = 0.0) -> void:
 			n.lointain = loin
 			n.queue_redraw()
 		var cible := _ecran(e.pos, sim.grille.h(e.pos))
-		if not n.visible or n.position.distance_to(cible) > TW * 3.0:
+		var d_reste := n.position.distance_to(cible)
+		if not n.visible or d_reste > TW * 3.0:
 			n.position = cible   # apparition ou saut (changement de grille, respawn) : pas de glissement
+			n.marcher(-1.0)
+		elif d_reste <= 0.5:
+			n.position = cible
+			n.marcher(-1.0)   # arrivé : les jambes reviennent au repos
 		else:
-			n.position = n.position.lerp(cible, k)
+			# LE PAS NE FLOTTE PLUS (designer 2026-09-08 : « j'aimerais que les déplacements soient plus fluides »).
+			# C'était un lerp exponentiel — une décélération asymptotique qui n'arrive JAMAIS tout à fait, et c'est
+			# exactement ce qu'on lisait comme du flottement. Un être avance maintenant à VITESSE CONSTANTE et
+			# arrive quand son action finit : la distance restante divisée par le temps restant. En temps à
+			# l'action (donjon), l'horloge ne coule pas toute seule — on retombe sur une durée fixe, en données.
+			var t_reste := glissement_s
+			if sim.horloge_monde.mode == Horloge.Mode.TEMPS_REEL and sim.horloge_monde.ticks_par_seconde > 0.0:
+				t_reste = maxf(delta, float(int(e.get("compteur", 0)) - sim.horloge_monde.ticks) / sim.horloge_monde.ticks_par_seconde)
+			n.position = n.position.move_toward(cible, d_reste * minf(1.0, delta / maxf(0.001, t_reste)))
+			n.marcher(clampf(1.0 - d_reste / pas_px, 0.0, 1.0))   # une oscillation complète par tuile franchie
 		n.visible = true
 		if n.occulteurs != null:
 			n.occulteurs.position = cible - n.position   # les tuiles redessinées par-dessus lui restent à leur place pendant qu'il glisse
@@ -2483,8 +2500,88 @@ func _dessiner_morceau(ci: CanvasItem, coin: Vector2i) -> void:
 				_dessiner_sprite_tuile(ci, g, t, c, teinte)
 	if pts.size() > debut:
 		_soumettre_triangles(rid, pts, cols, uvs, debut, pts.size())
+	_franges_matieres(rid, g, coin, p, teinte, coupures)
 	for idx in res.vegetaux:
 		_assurer_vegetal(g.pos_de(idx))
+
+
+## LES TEXTURES DES TUILES SE FONDENT (designer 2026-09-08 : « rajouter de quoi fondre les textures des tuiles entre
+## elles »). Le sol d'une tuile est un losange d'UNE matière : la limite entre l'herbe et la terre suivait donc
+## exactement le losange, et le regard lisait la grille au lieu du terrain.
+##
+## Après le sol du morceau, on repose sur chaque tuile de bordure UN TRIANGLE par voisin de matière différente — du
+## centre du losange vers l'arête partagée —, avec la matière DU VOISIN et une opacité qui va de zéro au centre à
+## `fondu_tuiles_force` sur l'arête. Le voisin déborde donc sur nous, en fondu.
+##
+## Le coût est d'un triangle par arête qui change de matière : aucun sur les grandes plages uniformes, quatre au plus
+## sur une tuile isolée. Et tous partent en UNE commande, parce que le style d'une matière voyage dans les UV et non
+## dans un uniforme — un seul lot suffit pour toutes les matières du morceau.
+func _franges_matieres(rid: RID, g: Grille, coin: Vector2i, p: Dictionary, teinte: Color, coupures: PackedInt32Array) -> void:
+	var stg: Dictionary = GameData.config("styles").get("grain", {})
+	if not bool(stg.get("fondu_tuiles", true)):
+		return
+	var force := float(stg.get("fondu_tuiles_force", 0.85))
+	var tw2 := float(TW) * 0.5
+	var th2 := float(TH) * 0.5
+	var uvh := float(p.uv_haut)
+	# Les quatre arêtes du losange, dans le repère du sol : N (0,0), E (1,0), S (1,1), O (0,1). Le voisin en +x est
+	# en bas à droite (l'isométrie), donc l'arête partagée avec lui va de E à S ; et ainsi de suite.
+	var dirs := [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)]
+	var aretes := [[Vector2(1, 0), Vector2(1, 1)], [Vector2(1, 1), Vector2(0, 1)], [Vector2(0, 1), Vector2(0, 0)], [Vector2(0, 0), Vector2(1, 0)]]
+	var pts := PackedVector2Array()
+	var cols := PackedColorArray()
+	var uvs := PackedVector2Array()
+	# Les tuiles qui ont produit une COUPURE portent un dessin propre (une porte, une caisse, un meuble) déjà posé :
+	# la frange passerait par-dessus. On les saute — c'est la liste exacte, pas une devinette sur le contenu.
+	var posees := {}
+	@warning_ignore("integer_division")
+	for kc in coupures.size() / 3:
+		posees[coupures[kc * 3 + 1]] = true
+	# `coin` est l'INDICE du morceau, pas une tuile : la tuile de départ est origine + coin × MORCEAU (PassesGD.morceau).
+	var t0 := g.origine + coin * MORCEAU
+	for dy in MORCEAU:
+		for dx in MORCEAU:
+			var t := t0 + Vector2i(dx, dy)
+			if not g.dans(t) or g.bloque_passage(t):
+				continue
+			if posees.has(g.idx(t)):
+				continue   # une tuile qui porte déjà son dessin : on ne repeint pas par-dessus
+			var h_t := g.h(t)
+			var st_t := float(p.mat_st.get(g.materiau_sol(t), 0.0))
+			var c := _ecran(t, h_t)
+			var l: Vector2i = Grille.plat(t) - origine_dessin
+			for k in 4:
+				var n: Vector2i = t + dirs[k]
+				if not g.dans(n) or g.bloque_passage(n) or g.h(n) != h_t:
+					continue   # une marche a déjà son flanc : le fondu ne vaut que pour un raccord à plat
+				var sol_n := g.materiau_sol(n)
+				var st_n := float(p.mat_st.get(sol_n, 0.0))
+				if is_equal_approx(st_n, st_t):
+					continue
+				var col_n := _couleur_sol(sol_n, g.h(n), p) * teinte
+				var a: Vector2 = aretes[k][0]
+				var b: Vector2 = aretes[k][1]
+				pts.append(c)
+				pts.append(c + Vector2((a.x - a.y) * tw2, (a.x + a.y - 1.0) * th2))
+				pts.append(c + Vector2((b.x - b.y) * tw2, (b.x + b.y - 1.0) * th2))
+				cols.append(Color(col_n.r, col_n.g, col_n.b, 0.0))
+				cols.append(Color(col_n.r, col_n.g, col_n.b, force))
+				cols.append(Color(col_n.r, col_n.g, col_n.b, force))
+				uvs.append(Vector2(st_n + float(l.x) + 0.5, uvh + float(l.y) + 0.5))
+				uvs.append(Vector2(st_n + float(l.x) + a.x, uvh + float(l.y) + a.y))
+				uvs.append(Vector2(st_n + float(l.x) + b.x, uvh + float(l.y) + b.y))
+	if not pts.is_empty():
+		_soumettre_triangles(rid, pts, cols, uvs, 0, pts.size())
+
+
+## La couleur du sol d'une tuile — la MÊME formule que la passe du terrain, pour que la frange d'un voisin soit
+## exactement de sa couleur (PassesGD._sol).
+func _couleur_sol(sol_id: String, h: int, p: Dictionary) -> Color:
+	var k := clampf((float(h) - 4.0) / 12.0, 0.0, 1.0)
+	var col := Color(0.20, 0.34, 0.18).lerp(Color(0.62, 0.66, 0.42), k)
+	if not sol_id.is_empty() and p.mat_col.has(sol_id):
+		col = (p.mat_col[sol_id] as Color).lerp(Color(0.35, 0.5, 0.25), 0.35 if sol_id.begins_with("terre") else 0.0).darkened(0.25 - k * 0.3)
+	return col
 
 
 ## Une tranche de tableaux de triangles, en une commande.
@@ -2716,6 +2813,10 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 	var stb: Dictionary = GameData.config("styles").get("brouillard", {})
 	var voile := _couleur_liste(stb.get("voile", [0.05, 0.05, 0.08, 0.55]))   # le sol mémorisé, hors de vue
 	var voile_jamais := _couleur_liste(stb.get("jamais_vu", [0.02, 0.02, 0.04, 0.85]))   # jamais vu : plus sombre, mais le terrain est là
+	# Un MUR mémorisé n'est pas une vitre (designer 2026-09-08) : son voile est presque opaque, là où celui du sol
+	# reste léger. Le même voile pour les deux laissait voir le pavé à travers un mur depuis que le décor a du grain.
+	var voile_bloc := _couleur_liste(stb.get("voile_bloc", [0.05, 0.05, 0.08, 0.88]))
+	var jamais_bloc := _couleur_liste(stb.get("jamais_vu_bloc", [0.02, 0.02, 0.04, 0.98]))
 	var veg_memo := _couleur_liste(stb.get("vegetal_memorise", [0.45, 0.45, 0.5]))
 	var veg_noir := _couleur_liste(stb.get("vegetal_jamais_vu", [0.18, 0.18, 0.22]))
 	var jp := Grille.plat(j.pos)
@@ -2726,9 +2827,9 @@ func _dessiner_brouillard(ci: CanvasItem) -> void:
 	var res: Dictionary
 	var t0 := Time.get_ticks_usec()
 	if g.noyau_actif and g._noyau_pret():
-		res = g._noyau.brouillard(g, vue, tout_vu, zj, vide_ci, jp, rayon_vue, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, _bat_joueur, MUR_COUPE_UNITES, voile, voile_jamais)
+		res = g._noyau.brouillard(g, vue, tout_vu, zj, vide_ci, jp, rayon_vue, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, _bat_joueur, MUR_COUPE_UNITES, voile, voile_jamais, voile_bloc, jamais_bloc)
 	else:
-		res = PassesGD.brouillard(g, vue, tout_vu, zj, vide_ci, jp, rayon_vue, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, _bat_joueur, MUR_COUPE_UNITES, voile, voile_jamais)
+		res = PassesGD.brouillard(g, vue, tout_vu, zj, vide_ci, jp, rayon_vue, origine_dessin, float(TW), float(TH), float(HSTEP), NIVEAU_BLOCS * BLOC_UNITES, _bat_joueur, MUR_COUPE_UNITES, voile, voile_jamais, voile_bloc, jamais_bloc)
 	_top_client("brouillard.tableaux", t0)
 	for idx in res.veg_vus:
 		if noeuds_vegetaux.has(idx):
@@ -3161,20 +3262,30 @@ func _dessiner_bulle(ci: CanvasItem) -> void:
 	for l in lignes_b:
 		larg = minf(420.0, maxf(larg, ThemeDB.fallback_font.get_string_size(str(l), HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x + 8.0))   # 420 px au plus
 	var haut := 14.0 * lignes_b.size() + 8.0
-	var pb := _ecran(cible.pos, g.h(cible.pos)) + Vector2(-larg * 0.5 - 6.0, -70.0 - haut)
+	# EN PIXELS D'ÉCRAN, PAS EN COORDONNÉES DU MONDE (designer 2026-09-08 : « les noms de PNJ ne s'affichent plus »).
+	# La couche `Hud` est un enfant de la scène : elle hérite du zoom et du recentrage de la caméra. Le bornage posé
+	# le 2026-09-05 comparait ces coordonnées-là à `get_viewport_rect()`, qui est en pixels d'écran — deux espaces
+	# sans rapport. Sur une grille de ville, la bulle était rabattue vers l'origine de dessin, à des milliers de
+	# pixels du joueur ; en arène, où l'origine est sous les pieds du joueur, l'erreur ne se voyait pas.
+	# On passe donc dans l'espace de l'écran pour placer ET pour dessiner : la bulle ne grossit plus avec le zoom.
+	var vers_ecran := ci.get_global_transform_with_canvas()
+	var ancre := vers_ecran * _ecran(cible.pos, g.h(cible.pos))
+	var pb := ancre + Vector2(-larg * 0.5 - 6.0, -70.0 - haut)
 	# La bulle ne recouvre ni le bloc d'information du haut ni le volet, et ne sort pas de l'écran (Écrans d'interface,
 	# 2026-09-05) : quand elle n'a pas la place au-dessus de l'être, elle passe dessous.
 	var ecran_l := get_viewport_rect().size
 	var bas_info := ui.position.y + ui.get_combined_minimum_size().y + 6.0
 	if pb.y < bas_info and pb.x < ui.position.x + ui.size.x:
-		pb.y = _ecran(cible.pos, g.h(cible.pos)).y + 24.0
+		pb.y = ancre.y + 24.0
 	var droite := ecran_l.x - ((volet.largeur) if volet != null and volet.visible else 0.0)
 	pb.x = clampf(pb.x, 6.0, maxf(6.0, droite - larg - 18.0))
 	pb.y = clampf(pb.y, 6.0, maxf(6.0, ecran_l.y - haut - 6.0))
+	ci.draw_set_transform_matrix(vers_ecran.affine_inverse())   # ce qui suit s'écrit en pixels d'écran
 	ci.draw_rect(Rect2(pb, Vector2(larg + 12.0, haut)), Color(0.05, 0.05, 0.08, 0.9))
 	ci.draw_rect(Rect2(pb, Vector2(larg + 12.0, haut)), Color(0.9, 0.3, 0.25) if sim.ennemis(j, cible) else Color(0.35, 0.8, 0.45), false, 1.0)
 	for k in lignes_b.size():
 		ci.draw_string(ThemeDB.fallback_font, pb + Vector2(6.0, 14.0 * (k + 1) - 2.0), str(lignes_b[k]), HORIZONTAL_ALIGNMENT_LEFT, larg + 2.0, 11, Color(0.95, 0.95, 0.9) if k > 0 else Color(1.0, 0.9, 0.6))   # bornée au cadre
+	ci.draw_set_transform_matrix(Transform2D.IDENTITY)   # la suite du HUD reste ancrée au monde
 
 
 ## La bulle au survol d'une cible (Écrans d'interface, 2026-08-30) : PV, fourchette de l'arme, résistance Wu Xing, armure.

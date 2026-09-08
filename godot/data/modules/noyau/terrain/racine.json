@@ -14,7 +14,7 @@
   },
   "element_special": null,
   "power_base": null,
-  "cout_ticks": 11,
+  "cout_ticks": 1100,
   "cout_mana": 12,
   "cout_vigueur": 0,
   "effets": [
@@ -26,13 +26,13 @@
   "effet": {
     "terrain": {
       "zone": "entrave",
-      "duree_ticks": 50,
+      "duree_ticks": 5000,
       "statut": "enracinement",
-      "statut_ticks": 20
+      "statut_ticks": 2000
     },
     "statut": {
       "id": "enracinement",
-      "duree_ticks": 10
+      "duree_ticks": 1000
     }
   },
   "style": "terrain",

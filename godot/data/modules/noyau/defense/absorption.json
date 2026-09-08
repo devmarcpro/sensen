@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": null,
   "power_base": "3d8",
-  "cout_ticks": 7,
+  "cout_ticks": 700,
   "cout_mana": 14,
   "cout_vigueur": 0,
   "effets": [
@@ -23,7 +23,7 @@
   "effet": {
     "statut": {
       "id": "absorption",
-      "duree_ticks": 60
+      "duree_ticks": 6000
     },
     "cible": "allie"
   },

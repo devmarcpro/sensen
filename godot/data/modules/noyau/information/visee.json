@@ -13,7 +13,7 @@
   "elements": {},
   "element_special": null,
   "power_base": null,
-  "cout_ticks": 6,
+  "cout_ticks": 600,
   "cout_mana": 0,
   "cout_vigueur": 0,
   "cout_sang_froid": 10,
@@ -25,7 +25,7 @@
   "effet": {
     "statut": {
       "id": "visee",
-      "duree_ticks": 40,
+      "duree_ticks": 4000,
       "sur": "soi"
     }
   },

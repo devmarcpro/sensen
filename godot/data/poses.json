@@ -1,5 +1,5 @@
 {
-  "_doc": "Les poses articulées par le joueur (designer 2026-09-01, point 63) : les actions que l'on peut mettre en scène, et l'amplitude de rotation permise par segment.",
+  "_doc": "Les poses articulées par le joueur (designer 2026-09-01, point 63) : les actions que l'on peut mettre en scène, et l'amplitude de rotation permise par segment. LES POSES PAR DÉFAUT (designer 2026-09-08) : `defauts` donne à TOUT être une pose par état, là où `poses` sur la fiche restait vide et où rien ne s'appliquait. Chaque entrée est segment → delta d'angle, en degrés, ajouté à l'angle de repos du rig. `marche` n'est pas une pose figée mais une AMPLITUDE : les jambes et les bras oscillent entre −amplitude et +amplitude au fil du pas.",
   "actions": [
     {
       "id": "repos",
@@ -32,5 +32,54 @@
   ],
   "amplitude_max": 170.0,
   "pas_degres": 6.0,
-  "marge_saisie": 6.0
+  "marge_saisie": 6.0,
+  "defauts": {
+    "repos": {
+      "bras_haut_G": 6.0,
+      "bras_haut_D": -6.0,
+      "bras_bas_G": 8.0,
+      "bras_bas_D": -8.0
+    },
+    "garde": {
+      "bras_haut_G": -28.0,
+      "bras_bas_G": -45.0,
+      "bras_haut_D": 18.0,
+      "bras_bas_D": -55.0,
+      "jambe_haut_G": 10.0,
+      "jambe_haut_D": -10.0
+    },
+    "sommeil": {
+      "torse": 74.0,
+      "tete": 8.0,
+      "bras_haut_G": 30.0,
+      "bras_haut_D": -30.0,
+      "jambe_haut_G": 34.0,
+      "jambe_haut_D": 26.0,
+      "jambe_bas_G": -40.0,
+      "jambe_bas_D": -34.0
+    },
+    "mort": {
+      "bassin": 86.0,
+      "torse": 6.0,
+      "tete": -18.0,
+      "bras_haut_G": 62.0,
+      "bras_haut_D": -70.0,
+      "bras_bas_G": 20.0,
+      "bras_bas_D": -14.0,
+      "jambe_haut_G": -16.0,
+      "jambe_haut_D": 22.0,
+      "jambe_bas_G": 26.0,
+      "jambe_bas_D": -18.0
+    }
+  },
+  "marche": {
+    "_doc": "L'amplitude de chaque segment pendant un pas, en degrés : le signe dit qui part en avant. La phase fait un aller-retour complet par tuile franchie.",
+    "jambe_haut_G": 26.0,
+    "jambe_haut_D": -26.0,
+    "jambe_bas_G": -14.0,
+    "jambe_bas_D": 14.0,
+    "bras_haut_G": -14.0,
+    "bras_haut_D": 14.0,
+    "torse": 2.5
+  }
 }

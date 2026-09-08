@@ -11,7 +11,7 @@
   "degats": "",
   "element": {},
   "statut": "epuisement",
-  "statut_ticks": 30,
+  "statut_ticks": 3000,
   "soigne": "",
   "mana": "",
   "eteint_feux": false,

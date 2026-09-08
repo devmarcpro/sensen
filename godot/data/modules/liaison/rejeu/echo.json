@@ -8,10 +8,10 @@
   "tags": [
     "liaison"
   ],
-  "surcout_ticks": 3,
+  "surcout_ticks": 300,
   "effet": {
     "echo": 0.5,
-    "apres_ticks": 20
+    "apres_ticks": 2000
   },
   "famille": "Rejeu",
   "style": "ruse",

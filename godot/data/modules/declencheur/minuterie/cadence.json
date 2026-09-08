@@ -8,7 +8,7 @@
   "tags": [
     "declencheur"
   ],
-  "surcout_ticks": 1,
+  "surcout_ticks": 100,
   "effet": {
     "declencheur": "cadence",
     "n": 3

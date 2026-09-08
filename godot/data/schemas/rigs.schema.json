@@ -1,86 +1,123 @@
 {
-  "type": "object",
-  "required": [
-    "name_key",
-    "racine",
-    "hauteur_pieds",
-    "segments",
-    "facings",
-    "slots_segments"
-  ],
-  "properties": {
-    "name_key": {
-      "type": "string"
-    },
-    "racine": {
-      "type": "string"
-    },
-    "hauteur_pieds": {
+ "type": "object",
+ "required": [
+  "name_key",
+  "racine",
+  "hauteur_pieds",
+  "segments",
+  "orientations",
+  "ordre",
+  "slots_segments"
+ ],
+ "properties": {
+  "name_key": {
+   "type": "string"
+  },
+  "racine": {
+   "type": "string"
+  },
+  "hauteur_pieds": {
+   "type": "number"
+  },
+  "segments": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "parent",
+     "ancrage",
+     "longueur",
+     "largeur",
+     "angle",
+     "ancrages"
+    ],
+    "properties": {
+     "parent": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "ancrage": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "longueur": {
       "type": "number"
-    },
-    "segments": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "required": [
-          "parent",
-          "ancrage",
-          "longueur",
-          "largeur",
-          "angle",
-          "ancrages"
-        ],
-        "properties": {
-          "parent": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "ancrage": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "longueur": {
-            "type": "number"
-          },
-          "largeur": {
-            "type": "number"
-          },
-          "angle": {
-            "type": "number"
-          },
-          "ancrages": {
-            "type": "object"
-          },
-          "zone": {
-            "type": [
-              "string",
-              "null"
-            ]
-          }
-        }
-      }
-    },
-    "facings": {
+     },
+     "largeur": {
+      "type": "number"
+     },
+     "angle": {
+      "type": "number"
+     },
+     "ancrages": {
       "type": "object"
-    },
-    "slots_segments": {
-      "type": "object"
-    },
-    "prise_arme": {
+     },
+     "zone": {
       "type": [
-        "string",
-        "null"
+       "string",
+       "null"
       ]
-    },
-    "prise_bouclier": {
-      "type": [
-        "string",
-        "null"
-      ]
+     },
+     "profondeur": {
+      "type": "number",
+      "minimum": -180,
+      "maximum": 180
+     }
     }
+   }
+  },
+  "slots_segments": {
+   "type": "object"
+  },
+  "prise_arme": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "prise_bouclier": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "orientations": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "lacet"
+    ],
+    "properties": {
+     "lacet": {
+      "type": "number",
+      "minimum": -180,
+      "maximum": 180
+     },
+     "vue_tete": {
+      "type": "string",
+      "enum": [
+       "face",
+       "profil",
+       "dos"
+      ]
+     }
+    }
+   }
+  },
+  "ordre": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   },
+   "minItems": 1
+  },
+  "lacet_actif": {
+   "type": "boolean"
   }
+ }
 }

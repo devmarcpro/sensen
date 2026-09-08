@@ -300,6 +300,12 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > Les bornes étaient **écrites en dur** dans la molette : `minf(2.0, zoom * 1.1)` / `maxf(0.5, …)`. Rien ne permettait de regarder un sprite de 64 × 64 à sa taille. Elles vivent maintenant dans `styles.vue.zoom` — `min` 0,4, `max` **12,0**, `pas` 1,15, `defaut` 2,0 — et le zoom de départ se lit là aussi.
 > **Le rayon dessiné suit tout de suite** (`_maj_rayon_vue` est appelé au changement de zoom) : zoomer réduit le nombre de tuiles à dessiner, reculer l'augmente, et `styles.vue.rayon_max` reste le garde-fou — au-delà, le fond réapparaît plutôt que de faire dessiner une cellule entière.
 
+> [!failure] Corrigé le 2026-09-08 — **la bulle au survol se dessinait hors de l'écran** (designer : « les noms de PNJ ne s'affichent plus »)
+> Le nom d'un PNJ ne s'écrit qu'ici : les barres au-dessus des têtes ont été retirées le 2026-08-30 parce que « la bulle au survol et le pentagramme du HUD les disent ». Quand la bulle disparaît, le nom disparaît avec elle.
+> **La cause** : la couche `Hud` est un enfant de la scène — elle hérite du zoom et du recentrage de la caméra, donc ses coordonnées sont celles du **monde**. Le bornage ajouté le 2026-09-05 pour qu'elle « ne sorte pas de l'écran » comparait ces coordonnées à `get_viewport_rect()`, en **pixels d'écran**. Deux espaces sans rapport : sur une grille de ville, la bulle était rabattue vers l'origine de dessin, à des milliers de pixels du joueur.
+> **Pourquoi ça a tenu trois jours** : en arène, l'origine de dessin est sous les pieds du joueur — l'erreur y vaut zéro. Le défaut n'apparaît qu'avec une **fenêtre de monde**, c'est-à-dire au camp et en ville.
+> **Le correctif** : la bulle est placée ET dessinée en pixels d'écran (`draw_set_transform_matrix` avec l'inverse de la transformation de canvas). Effet de bord voulu : elle ne grossit plus avec le zoom, ce qui comptait depuis que le zoom monte à ×12.
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

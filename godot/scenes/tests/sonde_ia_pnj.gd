@@ -123,7 +123,7 @@ func _ronde(s: Simulation, j: Dictionary, action: Dictionary = {"type": "attendr
 	s.intention(j.id, action)
 	var garde := 300
 	if s.horloge_monde.mode == Horloge.Mode.TEMPS_REEL:
-		s.horloge_monde.avancer(3)
+		s.horloge_monde.avancer(300)
 		while garde > 0 and s.pas("monde"):
 			garde -= 1
 	elif str(j.get("horloge", "monde")) == "monde":

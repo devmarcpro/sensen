@@ -13,7 +13,7 @@
   "elements": {},
   "element_special": null,
   "power_base": "arme",
-  "cout_ticks": 6,
+  "cout_ticks": 600,
   "cout_mana": 0,
   "cout_vigueur": 12,
   "cout_sang_froid": 0,
@@ -26,7 +26,7 @@
   "effet": {
     "statut": {
       "id": "armure_fendue",
-      "duree_ticks": 40
+      "duree_ticks": 4000
     }
   },
   "style": "assaut",

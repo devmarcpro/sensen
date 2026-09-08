@@ -80,7 +80,7 @@
     }
   },
   "brouillard": {
-    "_doc": "Le brouillard de guerre (designer 2026-09-06, 23 h) : tout le terrain se dessine, meme jamais vu — le fond de la scene est `fond` ; une tuile memorisee hors de vue porte `voile`, une tuile jamais vue `jamais_vu` (plus sombre) ; les blocs gardent leur matiere sous le voile ; les toits s'assombrissent de toit_memorise / toit_jamais_vu ; les vegetaux (billboards) se modulent de vegetal_memorise / vegetal_jamais_vu.",
+    "_doc": "Le brouillard de guerre (designer 2026-09-06, 23 h) : tout le terrain se dessine, meme jamais vu — le fond de la scene est `fond` ; une tuile memorisee hors de vue porte `voile`, une tuile jamais vue `jamais_vu` (plus sombre) ; les blocs gardent leur matiere sous le voile ; les toits s'assombrissent de toit_memorise / toit_jamais_vu ; les vegetaux (billboards) se modulent de vegetal_memorise / vegetal_jamais_vu. UN BLOC A SON PROPRE VOILE (2026-09-08) : `voile_bloc` et `jamais_vu_bloc`. Le sol memorise garde 55 % — un souvenir de sol se voit en sourdine —, mais un MUR memorise a 55 % laissait voir le pave a travers lui depuis que le decor a son grain. Un mur dont on se souvient est une masse, pas une vitre.",
     "fond": [
       0.02,
       0.02,
@@ -92,11 +92,23 @@
       0.08,
       0.55
     ],
+    "voile_bloc": [
+      0.05,
+      0.05,
+      0.08,
+      0.88
+    ],
     "jamais_vu": [
       0.02,
       0.02,
       0.04,
       0.85
+    ],
+    "jamais_vu_bloc": [
+      0.02,
+      0.02,
+      0.04,
+      0.98
     ],
     "toit_memorise": 0.55,
     "toit_jamais_vu": 0.75,
@@ -112,7 +124,7 @@
     ]
   },
   "grain": {
-    "_doc": "Textures procédurales du décor (designer 2026-09-01, points 50 et 58) : calculées par shader, jamais une image. Les UV portent le plan de la face (le grain suit le relief) et leur partie haute encode le style de la matière. styles_par_categorie : la famille de matériau → le motif du shader. Reglage releve le 2026-09-08 sur un constat du designer (« les textures ne sont pas affichees sur les blocs/sols ») : le grain etait a 0,12 / 0,07, soit une variation de +-12 % — invisible sur une palette sombre. Les UV etaient pourtant bien poses (le dessus d une tuile, ses deux flancs, et le motif de la matiere encode dans UV.x) : ce n etait pas un defaut de dessin, seulement un reglage. Pose a 0,26 / 0,15 : la matiere se voit sans que le decor grouille. Un essai a 0,38 / 0,22 est dans le journal — c est de la direction artistique, une ligne de donnees. UNE MATIERE PEUT AUSSI ETRE PEINTE (designer 2026-09-08) : un PNG de 64 x 64 dans `assets/terrain/<materiau>.png`. Les fichiers du dossier, tries par nom, sont empiles en un atlas ; le style du materiau devient `style_texture_base + sa ligne`, et le shader peint au lieu de calculer. Le soleil et la lumiere par tuile s'appliquent pareil. Une matiere sans fichier garde son motif calcule. `textures_par_materiau` dit QUELLE texture porte une matiere : le sol des biomes herbeux est `terre` et `terre_fertile`, pas `herbe` — sans cette table il aurait fallu renommer le fichier du designer ou inventer un materiau. Sans entree, une matiere prend la texture qui porte son propre nom. PRECISION (2026-09-08) : `pas_style` etait a 8192 et le premier style peint a 100, donc UV.x valait 819200 + x — un float 32 bits n'y garde plus que 16 pas par tuile, et la texture sortait en RAYURES. Le style n'a besoin que de passer au-dessus d'une coordonnee de tuile (moins de 512) : pas_style 512 et premier style peint 16 laissent plus de mille pas par tuile, et de la place pour cent textures.",
+    "_doc": "Textures procédurales du décor (designer 2026-09-01, points 50 et 58) : calculées par shader, jamais une image. Les UV portent le plan de la face (le grain suit le relief) et leur partie haute encode le style de la matière. styles_par_categorie : la famille de matériau → le motif du shader. Reglage releve le 2026-09-08 sur un constat du designer (« les textures ne sont pas affichees sur les blocs/sols ») : le grain etait a 0,12 / 0,07, soit une variation de +-12 % — invisible sur une palette sombre. Les UV etaient pourtant bien poses (le dessus d une tuile, ses deux flancs, et le motif de la matiere encode dans UV.x) : ce n etait pas un defaut de dessin, seulement un reglage. Pose a 0,26 / 0,15 : la matiere se voit sans que le decor grouille. Un essai a 0,38 / 0,22 est dans le journal — c est de la direction artistique, une ligne de donnees. UNE MATIERE PEUT AUSSI ETRE PEINTE (designer 2026-09-08) : un PNG de 64 x 64 dans `assets/terrain/<materiau>.png`. Les fichiers du dossier, tries par nom, sont empiles en un atlas ; le style du materiau devient `style_texture_base + sa ligne`, et le shader peint au lieu de calculer. Le soleil et la lumiere par tuile s'appliquent pareil. Une matiere sans fichier garde son motif calcule. `textures_par_materiau` dit QUELLE texture porte une matiere : le sol des biomes herbeux est `terre` et `terre_fertile`, pas `herbe` — sans cette table il aurait fallu renommer le fichier du designer ou inventer un materiau. Sans entree, une matiere prend la texture qui porte son propre nom. PRECISION (2026-09-08) : `pas_style` etait a 8192 et le premier style peint a 100, donc UV.x valait 819200 + x — un float 32 bits n'y garde plus que 16 pas par tuile, et la texture sortait en RAYURES. Le style n'a besoin que de passer au-dessus d'une coordonnee de tuile (moins de 512) : pas_style 512 et premier style peint 16 laissent plus de mille pas par tuile, et de la place pour cent textures. UNE TUILE A SA TEXTURE ET SA TEINTE (designer 2026-09-08) : `teinte_matiere_peinte` dit combien la couleur du matériau colore une matière peinte (0 : la texture seule, 1 : pleinement), `teinte_matiere_normalisee` ramène cette teinte à sa plus haute composante — elle colore sans assombrir, ce qui permet à une seule texture de servir plusieurs matières. LE FONDU (même jour) : `fondu_tuiles` pose, sur chaque tuile de bordure, un triangle par voisin de matière différente, du centre du losange vers l'arête partagée, à l'opacité `fondu_tuiles_force` sur l'arête et zéro au centre — la limite entre deux matières cesse de suivre le losange.",
     "actif": true,
     "grains_par_tuile": 8.0,
     "force_grain": 0.26,
@@ -153,7 +165,11 @@
     "style_texture_base": 16,
     "textures_par_materiau": {
       "terre_fertile": "herbe"
-    }
+    },
+    "teinte_matiere_peinte": 1.0,
+    "teinte_matiere_normalisee": true,
+    "fondu_tuiles": true,
+    "fondu_tuiles_force": 0.85
   },
   "carte": {
     "_doc": "La carte du monde (designer 2026-09-01, point 59) : chaque cellule est peinte en sous_points × sous_points sondes, tant que la case dépasse sous_points_min_px pixels.",
@@ -231,7 +247,7 @@
   },
   "sprites": {
     "px_par_unite": 8,
-    "picto_tenu_unites": 14,
+    "picto_tenu_unites": 21,
     "pictos_tenus": {
       "_doc": "Ce qu'on tient sans montage pre-rendu (designer 2026-09-06 : le meme sprite qu'a l'inventaire) : la case du pictogramme fait picto_tenu_unites unites de rig ; par nom de pictogramme, le point de prise (en dixiemes de case, comme le picto est dessine) et l'axe qui se pose sur la main — la diagonale bas-gauche vers haut-droite pour une lame.",
       "_defaut": {
@@ -285,8 +301,14 @@
         ]
       }
     },
-    "_doc": "Les sprites d'objets du designer (Direction artistique, 2026-09-05) : dossier res:// ou le jeu cherche <id sans craft_/proto_>.png, composants/<id>.png, matieres/<forme>.png ; absent = pictogramme par code.",
-    "dossier": "res://assets/objets"
+    "_doc": "Les sprites d'objets du designer (Direction artistique, 2026-09-05) : dossier res:// ou le jeu cherche <id sans craft_/proto_>.png, composants/<id>.png, matieres/<forme>.png ; absent = pictogramme par code. `arme_angle_deg` (designer 2026-09-08) : la main ne présente plus l'arme dans l'axe du bras mais inclinée de tant de degrés VERS L'EXTÉRIEUR — la droite vers la droite, la gauche vers la gauche.`picto_tenu_unites` doublee le 2026-09-08 a la demande du designer (« augmente la taille des armes portees », x2 puis x1,5 a la relecture) : de 14 a 21 unites de rig. Le corps venait d'etre recale sur les proportions du rig, ce qui a rendu l'arme petite a cote. LA PROFONDEUR DU PANTIN (designer 2026-09-08) : `profondeur_ecran` est ce qu'une unité de profondeur VERS LE FOND fait à l'écran — l'isométrie l'écrase de moitié et la fait monter ; `largeur_min_profil` est ce qu'un segment vu de tranche garde de sa largeur, pour qu'un bras s'amincisse sans devenir un trait.",
+    "dossier": "res://assets/objets",
+    "arme_angle_deg": 45.0,
+    "profondeur_ecran": [
+      0.0,
+      -0.5
+    ],
+    "largeur_min_profil": 0.35
   },
   "coups": {
     "_doc": "Le retour d'un coup recu (designer 2026-09-05, 13 h : « quand quelqu'un recoit des degats, un tremblement du personnage et un leger clignotement rouge ») : secousse_px = amplitude du tremblement en pixels, secousse_s = sa duree, rouge = la teinte du clignotement, rouge_s = sa duree.",
@@ -294,5 +316,8 @@
     "secousse_s": 0.22,
     "rouge": "#ff6a5a",
     "rouge_s": 0.16
+  },
+  "tempo": {
+    "glissement_s": 0.22
   }
 }

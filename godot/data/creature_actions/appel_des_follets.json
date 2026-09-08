@@ -11,7 +11,7 @@
   "taille": 0,
   "cible": "soi",
   "ligne_de_vue": false,
-  "cout_ticks": 14,
+  "cout_ticks": 1400,
   "cout_vigueur": 8,
   "degats_des": null,
   "type_degats": null,
@@ -22,7 +22,7 @@
       "creature": "feu_follet",
       "n": 1,
       "max": 2,
-      "duree_ticks": 120
+      "duree_ticks": 12000
     }
   ],
   "tags": [

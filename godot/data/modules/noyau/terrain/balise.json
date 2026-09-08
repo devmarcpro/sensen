@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": null,
   "power_base": null,
-  "cout_ticks": 6,
+  "cout_ticks": 600,
   "cout_mana": 10,
   "cout_vigueur": 0,
   "effets": [
@@ -23,7 +23,7 @@
   "effet": {
     "terrain": {
       "zone": "balise",
-      "duree_ticks": 80,
+      "duree_ticks": 8000,
       "des": 1
     }
   },

@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": null,
   "power_base": "(h−2)×5",
-  "cout_ticks": 5,
+  "cout_ticks": 500,
   "cout_mana": 0,
   "cout_vigueur": 10,
   "effets": [

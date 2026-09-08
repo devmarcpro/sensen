@@ -9,7 +9,7 @@
     "modificateur"
   ],
   "famille": "Taille",
-  "surcout_ticks": 3,
+  "surcout_ticks": 300,
   "surcout_ressource": "×1.4",
   "effet": {
     "taille": 1

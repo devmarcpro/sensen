@@ -184,7 +184,7 @@ func test_fabrication() -> void:
 	var xp0: int = int(j.xp_competences.get("forge", 0))
 	verifier(s.intention(j.id, {"type": "fabriquer", "recette": "fondre_lingot"}), "fondre un lingot")
 	verifier(int(s._pile(j, "fer", "brut").quantite) == 1 and int(s._pile(j, "fer", "lingot").quantite) == 1, "2 fer brut consommés, 1 lingot de fer produit")
-	verifier(j.compteur == 20, "20 ticks au niveau 0 (%d)" % j.compteur)
+	verifier(j.compteur == 2000, "2000 ticks (deux secondes) au niveau 0 (%d)" % j.compteur)
 	var dxp: int = int(j.xp_competences.get("forge", 0)) - xp0
 	verifier(dxp > 0 and dxp <= 25, "XP de Forge = dureté du fer (25) × potentiel (%d)" % dxp)
 	s.attente[j.id] = true
@@ -274,7 +274,7 @@ func test_assemblage() -> void:
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "equiper", "objet": dague.uid}), "la dague assemblée s'équipe")
 	var fonct: Dictionary = s.fonctionnalites.dague
-	verifier(s.regles.ticks_attaque(fonct, false, dague) == roundi(10.0 / 3.0 * 0.94), "le manche pèse sur les ticks d'attaque")
+	verifier(s.regles.ticks_attaque(fonct, false, dague) == roundi(float(s.regles.r.actions.attaque_base) / 3.0 * 0.94), "le manche pèse sur les ticks d'attaque")
 	var n := s.nom_objet(dague.uid)
 	verifier(n.has("materiau") and n.materiau == "material.fer.name", "le nom se décrit par le matériau de la tête")
 

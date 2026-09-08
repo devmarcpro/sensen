@@ -14,7 +14,7 @@
   },
   "element_special": null,
   "power_base": "1d4",
-  "cout_ticks": 3,
+  "cout_ticks": 300,
   "cout_mana": 3,
   "cout_vigueur": 0,
   "effets": [

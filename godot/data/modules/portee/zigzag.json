@@ -12,7 +12,7 @@
     1,
     5
   ],
-  "surcout_ticks": 4,
+  "surcout_ticks": 400,
   "ligne_de_vue": true,
   "origine": "cible",
   "motif": "zigzag",

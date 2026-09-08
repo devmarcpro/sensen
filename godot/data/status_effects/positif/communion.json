@@ -2,8 +2,8 @@
   "name_key": "status.communion.name",
   "degats_des": null,
   "element": null,
-  "periode_ticks": 10,
-  "duree_ticks": 60,
+  "periode_ticks": 1000,
+  "duree_ticks": 6000,
   "controle": false,
   "cumule": false,
   "modifiers": [

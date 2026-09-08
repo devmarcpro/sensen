@@ -1,7 +1,7 @@
 extends Node
 const GrandeBase := preload("res://scenes/tests/grande_base.gd")
 ## Capture d'écran automatique de la scène principale (fenêtrée, pas headless) :
-##   & Godot --path godot res://scenes/tests/capture.tscn -- --sortie C:/chemin/capture.png [--arene N] [--frames 60] [--ville | --palier hameau|village|bourg|ville|cite | --sur cimetiere|verger|champs|moulin|enclos|puits|rempart --graine G --heure H --dans-batiment | --a-l-etage] [--dump-lumiere]
+##   & Godot --path godot res://scenes/tests/capture.tscn -- --sortie C:/chemin/capture.png [--arene N] [--frames 60] [--ville | --palier hameau|village|bourg|ville|cite | --sur cimetiere|verger|champs|moulin|enclos|puits|rempart --graine G --heure H --dans-batiment | --a-l-etage] [--dump-lumiere] [--pantins]
 ## Sert à vérifier le rendu sans œil humain disponible ; ne remplace pas le jugement de game feel.
 
 var gif_images := 0      # --gif N : N images espacées, pour un GIF monté hors du jeu
@@ -490,7 +490,7 @@ func _ready() -> void:
 				scene.sim.attente[jt.id] = true
 				if not scene.sim.intention(jt.id, {"type": "deplacer", "vers": jt.pos + Vector2i(1, 0)}):
 					scene.sim.intention(jt.id, {"type": "deplacer", "vers": jt.pos + Vector2i(1, 1)})
-				scene.sim.horloge_monde.avancer(1)
+				scene.sim.horloge_monde.avancer(100)
 			scene.sim.maj_vision()
 			print("traversée : le joueur en %s, cellule %s, origine %s" % [str(jt.pos), str(scene.sim.monde.cellule_de(jt.pos)), str(scene.sim.grille.origine)])
 	scene.recentrage_leger = not ("--recentrage-complet" in args)
@@ -742,6 +742,39 @@ func _ready() -> void:
 	# autres, ressortait vide et je l'ai cru cassé (2026-09-02).
 	if "--sauvegarder" in args and scene.sim != null:
 		print("sauvegarde : ", scene.sim.sauvegarder("essai_capture"))   # jamais « monde », qui peut être une vraie partie
+	# --pantins : LA PLANCHE DES HUIT ANGLES (2026-09-08, la profondeur du squelette). Le même être dessiné aux huit
+	# orientations, côte à côte, sur fond neutre : c'est le seul moyen de JUGER une profondeur — une capture de jeu
+	# ne montre jamais qu'un angle, et l'orientation d'un être en jeu ne se commande pas.
+	if "--pantins" in args and scene != null and scene.sim != null:
+		var jp: Dictionary = scene.joueur()
+		var banc := Node2D.new()
+		banc.z_index = 4095
+		add_child(banc)
+		var fond := ColorRect.new()
+		fond.color = Color(0.10, 0.11, 0.13)
+		fond.size = get_viewport().get_visible_rect().size
+		var couche := CanvasLayer.new()
+		couche.layer = 90
+		add_child(couche)
+		couche.add_child(fond)
+		var dirs: Array = [Vector2i(1, 1), Vector2i(1, 0), Vector2i(1, -1), Vector2i(0, -1),
+			Vector2i(-1, -1), Vector2i(-1, 0), Vector2i(-1, 1), Vector2i(0, 1)]
+		var noms: Array = ["S", "SE", "E", "NE", "N", "NW", "W", "SW"]
+		var ech := 5.0
+		for i_p in dirs.size():
+			var copie: Dictionary = jp.duplicate(true)
+			copie["orientation"] = dirs[i_p]
+			var pd := Paperdoll.new()
+			pd.configurer(copie, GameData.entree("rigs", str(jp.corps.get("silhouette", "humanoide"))),
+				scene.sim.items, scene.sim.fonctionnalites, GameData.config("palette_materiaux"))
+			pd.position = Vector2(90.0 + float(i_p) * 145.0, 460.0)
+			pd.scale = Vector2(ech, ech)
+			couche.add_child(pd)
+			var etiq := Label.new()
+			etiq.text = "%s  (%d°)" % [str(noms[i_p]), roundi(rad_to_deg(atan2(float(dirs[i_p].x - dirs[i_p].y), float(dirs[i_p].x + dirs[i_p].y))))]
+			etiq.position = Vector2(60.0 + float(i_p) * 145.0, 500.0)
+			couche.add_child(etiq)
+		print("pantins : huit orientations du rig %s" % str(jp.corps.get("silhouette", "humanoide")))
 	if "--debug-survol" in args:
 		print("survol=", scene.survol, " occ=", scene.sim.grille.occupant(scene.survol), " voit=", scene.sim.voit(j, scene.survol), " ecran=", scene.ecrans.est_ouvert(), " j=", j.pos)
 
@@ -794,7 +827,7 @@ func _process(delta: float) -> void:
 			for _t in gif_ticks:
 				# L'horloge du monde avance d'un tick (les êtres agissent, les timers tournent) : un simple pas("monde")
 				# ne faisait rien tant que personne n'était dû — un raid restait à 25 tuiles pendant tout le film (2026-09-04).
-				scene.sim.horloge_monde.avancer(1)
+				scene.sim.horloge_monde.avancer(100)
 				for nom_c in scene.sim.combats.keys():
 					scene.sim.pas(nom_c)
 			scene._apres_changement_de_grille()
@@ -803,6 +836,20 @@ func _process(delta: float) -> void:
 			get_tree().quit()
 			return
 		return
+	if frames >= 5 and scene != null and scene.sim != null and not ("--sans-survol" in OS.get_cmdline_user_args()):
+		# LE SURVOL SUIT SA CIBLE (2026-09-08) : posé à la mise en place, il désignait une tuile que la créature avait
+		# quittée depuis longtemps quand l'image est prise — et la bulle, jugée absente, n'avait simplement personne
+		# à décrire. On le repose À CHAQUE IMAGE sur la créature la plus proche, comme le ferait une souris qui suit :
+		# le reposer une seule fois avant la capture ne suffisait pas, car l'image lue est celle de l'image PRÉCÉDENTE.
+		var js: Dictionary = scene.joueur()
+		var d_min := 999999
+		for e_s in scene.sim.vivants():
+			if not js.is_empty() and e_s.id != js.id and Grille.distance(e_s.pos, js.pos) < d_min:
+				d_min = Grille.distance(e_s.pos, js.pos)
+				scene.survol = e_s.pos
+		if frames >= cible - 1 and "--debug-survol" in OS.get_cmdline_user_args():
+			var occ_s: String = scene.sim.grille.occupant(scene.survol)
+			print("survol (image %d) = %s occ=%s vivant=%s voit=%s ecran=%s titre=%s zoom=%.2f" % [frames, str(scene.survol), occ_s, str(scene.sim.entites.get(occ_s, {}).get("vivant", null)), str(scene.sim.voit(js, scene.survol)), str(scene.ecrans.est_ouvert()), str(scene.titre_ouvert), scene.zoom])
 	if frames == cible:
 		var img := get_viewport().get_texture().get_image()
 		if img == null or img.is_empty():   # headless : pas d'image — on quitte quand même (sinon le processus reste)

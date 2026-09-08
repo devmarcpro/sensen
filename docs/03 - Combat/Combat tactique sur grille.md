@@ -75,6 +75,13 @@ Les règles générales du combat : pas de jet de toucher, la géométrie décid
 >
 > **Et c'est le modèle de Caves of Qud**, que le designer a nommé le même jour en parlant de l'exploration : des parties de corps en données, des membres perdus, des greffes et des mutations qui en ajoutent. Les deux demandes vont dans la même direction — ce n'est pas une coïncidence, et il vaudra mieux en parler ensemble.
 
+
+> [!success] Codé le 2026-09-08 — **on ne se bloque plus entre amis** (designer : « possible d'être sur la même case qu'un PNJ non hostile »)
+> **Ce que la grille permet, et ce qu'elle ne permet pas** : elle ne tient qu'**un occupant par tuile** — et son miroir `occ` dans le noyau C++ non plus. Deux êtres ne peuvent donc pas s'y tenir vraiment sans changer le modèle d'occupation, le pathfinding, le ciblage et la passe de dessin.
+> **Ce qui est fait à la place, et qui donne le même résultat en jeu** : marcher sur un être **non hostile** **ÉCHANGE** les deux places. Un villageois ne ferme plus une porte ni un couloir, un compagnon ne coince plus son maître dans un cul-de-sac. Celui qu'on croise ne paie rien : c'est une politesse, pas une action.
+> **Deux refus subsistent, et ils sont voulus** : un **ennemi** barre toujours le passage — c'est lui qu'on attaque, pas qu'on contourne ; et un être **enraciné** (statut qui bloque le déplacement) ou **à cheval** ne se pousse pas.
+> `test_simulation` le prouve dans les deux sens : l'échange accepté et la grille qui suit, le pas refusé sur un hostile.
+
 ## Liens
 - **Dépend de** : [[Action-time à ticks]], [[Grille continue]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[Zones de coup par dénivelé]], [[Garde en posture]], [[Attaque lourde et télégraphe]], [[XP de combat]], [[Pipeline de résolution du combat]]

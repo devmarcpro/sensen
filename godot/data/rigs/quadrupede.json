@@ -2,6 +2,7 @@
  "name_key": "rig.quadrupede.name",
  "racine": "torse",
  "hauteur_pieds": 10,
+ "lacet_actif": false,
  "segments": {
   "torse": {
    "parent": null,
@@ -12,27 +13,33 @@
    "ancrages": {
     "cou": [
      20,
-     -3
+     -3,
+     0
     ],
     "epaule_AV_G": [
      17,
-     2
+     0,
+     -4
     ],
     "epaule_AV_D": [
      17,
-     -2
+     0,
+     4
     ],
     "epaule_AR_G": [
      3,
-     2
+     0,
+     -4
     ],
     "epaule_AR_D": [
      3,
-     -2
+     0,
+     4
     ],
     "dos": [
      10,
-     -4
+     -4,
+     0
     ]
    },
    "zone": "torse"
@@ -55,6 +62,7 @@
    "ancrages": {
     "pied": [
      6,
+     0,
      0
     ]
    },
@@ -69,6 +77,7 @@
    "ancrages": {
     "pied": [
      6,
+     0,
      0
     ]
    },
@@ -83,6 +92,7 @@
    "ancrages": {
     "pied": [
      6,
+     0,
      0
     ]
    },
@@ -97,6 +107,7 @@
    "ancrages": {
     "pied": [
      6,
+     0,
      0
     ]
    },
@@ -139,97 +150,18 @@
    "zone": "pieds"
   }
  },
- "facings": {
-  "S": {
-   "ordre": [
-    "patte_AR_D",
-    "pied_AR_D",
-    "patte_AV_D",
-    "pied_AV_D",
-    "torse",
-    "patte_AR_G",
-    "pied_AR_G",
-    "patte_AV_G",
-    "pied_AV_G",
-    "tete"
-   ],
-   "offsets": {},
-   "vue_tete": "face"
-  },
-  "SE": {
-   "ordre": [
-    "patte_AR_D",
-    "pied_AR_D",
-    "patte_AV_D",
-    "pied_AV_D",
-    "torse",
-    "patte_AR_G",
-    "pied_AR_G",
-    "patte_AV_G",
-    "pied_AV_G",
-    "tete"
-   ],
-   "offsets": {},
-   "vue_tete": "face"
-  },
-  "E": {
-   "ordre": [
-    "patte_AR_D",
-    "pied_AR_D",
-    "patte_AV_D",
-    "pied_AV_D",
-    "torse",
-    "tete",
-    "patte_AR_G",
-    "pied_AR_G",
-    "patte_AV_G",
-    "pied_AV_G"
-   ],
-   "offsets": {},
-   "vue_tete": "profil"
-  },
-  "NE": {
-   "ordre": [
-    "tete",
-    "patte_AR_D",
-    "pied_AR_D",
-    "patte_AV_D",
-    "pied_AV_D",
-    "torse",
-    "patte_AR_G",
-    "pied_AR_G",
-    "patte_AV_G",
-    "pied_AV_G"
-   ],
-   "offsets": {},
-   "vue_tete": "dos"
-  },
-  "N": {
-   "ordre": [
-    "tete",
-    "patte_AR_D",
-    "pied_AR_D",
-    "patte_AV_D",
-    "pied_AV_D",
-    "torse",
-    "patte_AR_G",
-    "pied_AR_G",
-    "patte_AV_G",
-    "pied_AV_G"
-   ],
-   "offsets": {},
-   "vue_tete": "dos"
-  },
-  "SW": {
-   "miroir": "SE"
-  },
-  "W": {
-   "miroir": "E"
-  },
-  "NW": {
-   "miroir": "NE"
-  }
- },
+ "ordre": [
+  "patte_AR_D",
+  "pied_AR_D",
+  "patte_AV_D",
+  "pied_AV_D",
+  "torse",
+  "patte_AR_G",
+  "pied_AR_G",
+  "patte_AV_G",
+  "pied_AV_G",
+  "tete"
+ ],
  "slots_segments": {
   "casque": [
    "tete"
@@ -242,5 +174,39 @@
   ]
  },
  "prise_arme": null,
- "prise_bouclier": null
+ "prise_bouclier": null,
+ "orientations": {
+  "S": {
+   "lacet": 0,
+   "vue_tete": "face"
+  },
+  "SE": {
+   "lacet": 45,
+   "vue_tete": "face"
+  },
+  "E": {
+   "lacet": 90,
+   "vue_tete": "profil"
+  },
+  "NE": {
+   "lacet": 135,
+   "vue_tete": "dos"
+  },
+  "N": {
+   "lacet": 180,
+   "vue_tete": "dos"
+  },
+  "NW": {
+   "lacet": -135,
+   "vue_tete": "dos"
+  },
+  "W": {
+   "lacet": -90,
+   "vue_tete": "profil"
+  },
+  "SW": {
+   "lacet": -45,
+   "vue_tete": "face"
+  }
+ }
 }

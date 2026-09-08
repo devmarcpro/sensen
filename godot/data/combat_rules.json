@@ -1,48 +1,48 @@
 {
   "_doc": "Règles chiffrées du combat (configuration unique). Chaque valeur cite sa note : aucune n'est inventée ici, aucune n'est en dur dans le code.",
-  "ticks_par_seconde_exploration": 10,
+  "ticks_par_seconde_exploration": 1000,
   "donjon": {
     "_doc": "Boucle de tick (2026-08-30) : en donjon, l'horloge du monde passe en mode action — le temps n'avance que quand le joueur agit",
     "temps_a_l_action": true
   },
   "deplacement": {
     "_doc": "Hauteur de terrain ±10 · Boucle de tick · poussee_des_par_tuile : degats (des) par tuile perdue quand une projection/attraction bute ; poussee_part_occupant : part encaissee par l'etre qui bloque",
-    "cout_base": 3,
-    "montee_1": 5,
-    "montee_2": 8,
+    "cout_base": 300,
+    "montee_1": 500,
+    "montee_2": 800,
     "falaise_delta": 3,
-    "descente": 2,
+    "descente": 200,
     "chute_delta": 3,
     "chute_degats_par_niveau": 5,
     "chute_franchise": 2,
-    "nage": 6,
-    "neige_surcout": 1,
+    "nage": 600,
+    "neige_surcout": 100,
     "gel_seuil": 0.0,
     "poussee_des_par_tuile": "1d4",
     "poussee_part_occupant": 0.5,
     "escalade": {
       "_doc": "Escalade (designer 2026-09-01, point 56) : franchir une paroi de dh niveaux coûte ticks_par_niveau × dh², divisé par le facteur de la compétence escalade ; au-delà de hauteur_max, la paroi reste infranchissable.",
       "competence": "escalade",
-      "ticks_par_niveau": 14,
+      "ticks_par_niveau": 1400,
       "hauteur_max": 6
     },
     "nage_progressive": {
       "_doc": "Nage (designer 2026-09-01, point 57) : chaque tuile d'eau coûte ticks_par_tuile, divisé par le facteur de la compétence nage et multiplié par la charge portée.",
       "competence": "nage",
-      "ticks_par_tuile": 6
+      "ticks_par_tuile": 600
     }
   },
   "actions": {
     "_doc": "Boucle de tick · Attaque lourde et télégraphe · Décision — Vocabulaire d'attaque des créatures",
-    "attaque_base": 10,
+    "attaque_base": 1000,
     "lourde_mult_ticks": 2,
     "lourde_mult_degats": 2.2,
-    "changer_arme": 3,
-    "objet": 5,
-    "garde": 2,
-    "attendre": 5,
+    "changer_arme": 300,
+    "objet": 500,
+    "garde": 200,
+    "attendre": 500,
     "attendre_vigueur": 20,
-    "telegraphe_seuil_ticks": 10
+    "telegraphe_seuil_ticks": 1000
   },
   "vigueur": {
     "_doc": "Endurance (A.6.1) ; epuisement_mult : deficit d'endurance d'un sort inflige en PV x mult (le pendant de la surchauffe du mana) | VIGUEUR (designer 2026-09-03) : la barre n'a plus un plafond fixe, elle est portee par la stat FORCE — max_base + force x max_par_force. A force 10 elle vaut 100, la valeur fixe d'avant : un personnage moyen ne sent rien, ce sont les extremes qui parlent. `max` reste comme repli pour tout ce qui n'a pas de stats sous la main.",
@@ -51,12 +51,12 @@
     "lourde": 18,
     "garde_impact_base": 12,
     "garde_impact_div": 4,
-    "regen_par_tick": 2,
+    "regen_par_tick": 0.02,
     "a_zero_degats_mult": 0.6,
     "epuisement_mult": 1,
     "competence": "recuperation",
     "regen_par_niveau": 0.05,
-    "xp_periode_ticks": 20,
+    "xp_periode_ticks": 2000,
     "max_base": 60,
     "max_par_force": 4
   },
@@ -202,7 +202,7 @@
   },
   "mana": {
     "_doc": "Mana (A.5) : régénération tous les 10 ticks, 1 chance sur 8, 1 + N_meditation × 0.2 ; surchauffe = déficit × 2 en PV | tranches_exactes (2026-09-06) : au-delà de ce nombre de tranches à rattraper d'un coup (un réveil après une nuit, une semaine passée en accéléré), la régénération prend son espérance (tranches × chance, la fraction tirée une fois) au lieu de jouer chaque tranche — une nuit de deux cents dormeurs, c'était cent soixante mille jets",
-    "periode_ticks": 10,
+    "periode_ticks": 1000,
     "chance": 0.125,
     "tranches_exactes": 100,
     "regen_base": 1,
@@ -232,9 +232,9 @@
   "engagement": {
     "_doc": "Décision — Fuite et désengagement · IA des créatures (détection = Perception en tuiles) · Éclairage : la nuit, cible non éclairée vue à portée × vision_nuit, cible éclairée à portée × (1 + lumière/100 × lumiere_detection) ; lumiere_rayon = portée des meubles lumineux. Discretion de la cible : portee × (1 − min(discretion_max_pct, niveau × discretion_par_niveau)), jamais sous portee_min.",
     "sortie_distance": 12,
-    "sortie_ticks_sans_vue": 30,
+    "sortie_ticks_sans_vue": 3000,
     "ia_distance_ancre": 20,
-    "ia_ticks_sans_vue": 100,
+    "ia_ticks_sans_vue": 10000,
     "detection_par_perception": 1.0,
     "lumiere_detection": 0.5,
     "discretion_par_niveau": 0.02,
@@ -243,12 +243,12 @@
   },
   "ia": {
     "_doc": "IA des creatures. DECISION : ticks_entre_decisions (une decision tous les 10 ticks) ; types d'ennemis (2026-08-30) : soin_seuil = fraction de PV sous laquelle un soigneur soigne un allie ; reculer_distance = un tireur recule si la cible est a cette distance ou moins ; guet_distance = un embusqueur attend tant que la cible est plus loin. ROAM et AGGRO (designer 2026-09-03) : un etre qui erre choisit un BUT dans son rayon et y va, au lieu de tirer une case adjacente au hasard a chaque tick — une marche au hasard ne s'eloigne que d'une dizaine de tuiles en cent pas, si bien que personne n'allait nulle part ; arrive, il souffle roam_pause_ticks. Chaque etre tient une table d'aggro « qui m'a fait quoi » et vise celle qui pese le plus, pas la plus proche : frapper monte de aggro_par_degat x degats, voir un ennemi de aggro_par_vue ; elle decroit de aggro_decroissance par tick et sous aggro_seuil_oubli l'etre rentre ; elle se transmet aux allies dans aggro_rayon_alerte a aggro_part_alerte de sa valeur. (Une cle « ia » dupliquee a ecrase les reglages de decision le 2026-08-31 ; la meme faute a ete refaite le 2026-09-03 en REMPLACANT le bloc au lieu de l'etendre — ce bloc se fusionne, il ne se reecrit pas.) ticks_entre_decisions n'est LU PAR RIEN : l'IA decide quand son compteur d'action echoit, pas a cadence fixe — c'est un reste d'une cadence plus ancienne. Il a deja ete efface par megarde et restaure deux fois ; on le garde avec cette note plutot que de rouvrir le sujet (2026-09-07).",
-    "ticks_entre_decisions": 10,
+    "ticks_entre_decisions": 1000,
     "soin_seuil": 0.7,
     "reculer_distance": 1,
     "guet_distance": 3,
     "roam_rayon": 14,
-    "roam_pause_ticks": 12,
+    "roam_pause_ticks": 1200,
     "roam_essais": 12,
     "aggro_par_degat": 1.0,
     "aggro_par_vue": 2.0,
@@ -260,8 +260,8 @@
   },
   "anti_stunlock": {
     "_doc": "Statuts de contrôle et anti-stunlock : aucun contrôle dur > 20 ticks, pas de réapplication dans les 50 ticks suivant la fin",
-    "max_ticks": 20,
-    "verrou_ticks": 50
+    "max_ticks": 2000,
+    "verrou_ticks": 5000
   },
   "projectiles": {
     "_doc": "Décision — Projectiles : trajectoire réelle, tir refusé si un allié masque, 50 % des munitions récupérées en fin de combat",
@@ -347,20 +347,20 @@
   },
   "creuser": {
     "_doc": "Destruction du terrain : détruire un mur (la tuile redevient sol). Coût en ticks d'une tuile de mur ; XP versée à Terrassement. Décision du 2026-08-27.",
-    "ticks": 10,
+    "ticks": 1000,
     "xp": 5,
     "vigueur": 6
   },
   "recolte": {
     "_doc": "Récolte : ticks = ceil(durete_mat / (durete_outil × qualite × skill_factor(N)) × ticks_par_seconde) ; irrécoltable si durete_outil × qualite < durete_mat × seuil_irrecoltable ; quantite = 1 + N / niveaux_par_unite ; XP = durete_mat.",
-    "ticks_par_seconde": 10,
+    "ticks_par_seconde": 1000,
     "seuil_irrecoltable": 0.5,
     "mains_nues_durete": 1,
     "des": "1d2"
   },
   "craft": {
     "_doc": "Fabrication : ticks = ceil(ticks_base / skill_factor(N)). qualite (A.3) = max(min, N/(N+pivot) × max × aléa) sur la compétence de la station ; jet_assemblage = même formule bornée. poids : poids de slots. vitesse : ticks d'attaque × (1 + (densite_manche − densite_reference) × par_point).",
-    "ticks_base": 20,
+    "ticks_base": 2000,
     "qualite": {
       "pivot": 25,
       "max": 2.0,
@@ -488,10 +488,10 @@
     }
   },
   "camp": {
-    "_doc": "Camp de base : poser_ticks (poser/démonter) ; dormir_ticks = durée du sommeil (8 h à 24 000 ticks/jour) ; repose_ticks / repose_xp_mult = buff Reposé ; repose_potentiel / repose_top = +potentiel aux N compétences les plus travaillées depuis le dernier repos ; mur_familles : ce qui fait un mur.",
-    "poser_ticks": 10,
-    "dormir_ticks": 8000,
-    "repose_ticks": 4000,
+    "_doc": "Camp de base : poser_ticks (poser/démonter) ; dormir_ticks = durée du sommeil (8 h à 24 000 ticks/jour) ; repose_ticks / repose_xp_mult = buff Reposé ; repose_potentiel / repose_top = +potentiel aux N compétences les plus travaillées depuis le dernier repos ; mur_familles : ce qui fait un mur.LE SOMMEIL AVANCE PAR TRANCHES (2026-09-08) : le monde ne saute pas la nuit d'un bloc, il avance par `sommeil_tranche_ticks` pour que les etres agissent, au plus `sommeil_tranches_max` fois. Ces deux nombres etaient ECRITS EN DUR (100 et 200) : au passage du tick a la milliseconde, une nuit de 800 000 ticks n'en avancait plus que 20 000 — le dormeur se reveillait douze minutes plus tard. Le produit des deux doit couvrir `dormir_ticks`.",
+    "poser_ticks": 1000,
+    "dormir_ticks": 800000,
+    "repose_ticks": 400000,
     "repose_xp_mult": 1.05,
     "repose_potentiel": 2,
     "repose_top": 5,
@@ -500,16 +500,18 @@
       "bois",
       "brique"
     ],
-    "porte_famille": "bois"
+    "porte_famille": "bois",
+    "sommeil_tranche_ticks": 10000,
+    "sommeil_tranches_max": 400
   },
   "faim": {
     "_doc": "La faim peut tuer (designer 2026-09-01, point 52) : à zéro, la famine ronge les PV par paliers jusqu'à la mort.",
-    "ticks_par_point": 900,
+    "ticks_par_point": 90000,
     "seuil_regen": 50,
     "malus_regen": 0.9,
     "seuil_stats": 25,
     "malus_stats": 0.9,
-    "periode_zero": 300,
+    "periode_zero": 30000,
     "pct_sante_max": 1,
     "tooltip_seuil": 60,
     "degats_par_palier": 2
@@ -646,7 +648,7 @@
     "or_par_niveau": 20,
     "autel_mult": 1.5,
     "affaibli_mult": 0.8,
-    "affaibli_ticks": 24000,
+    "affaibli_ticks": 2400000,
     "pretre_mult": 1.0,
     "statut_resurrection": "affaibli",
     "distance_engagement": 6,
@@ -732,7 +734,7 @@
         "tourbe_compactee": 55
       },
       "labour": {
-        "ticks": 30,
+        "ticks": 3000,
         "fertilite": 8,
         "sols": [
           "terre",
@@ -777,7 +779,7 @@
       "dette_gardes": 4,
       "tourelle_tir": {
         "portee": 6,
-        "cadence_ticks": 20,
+        "cadence_ticks": 2000,
         "degats": "1d6",
         "type": "perforant"
       }
@@ -800,7 +802,7 @@
         2,
         8
       ],
-      "duree_ticks": 6000,
+      "duree_ticks": 600000,
       "perte_bornes": [
         0.1,
         0.5
@@ -1226,29 +1228,29 @@
     },
     "graveur": {
       "mana_mult": 2,
-      "gravure_ticks": 6,
+      "gravure_ticks": 600,
       "portee_declenchement": 8
     },
     "releveur": {
-      "duree_ticks": 60,
+      "duree_ticks": 6000,
       "portee": 2,
       "reputation": -10
     },
     "affut": {
       "portee": 6,
-      "cadence_ticks": 4,
+      "cadence_ticks": 400,
       "degats": "1d6",
       "type": "perforant"
     },
     "soif_de_sang": {
       "degats_morsure": "1d6",
-      "refresh_ticks": 200
+      "refresh_ticks": 20000
     },
     "sans_chair": {
       "corruption_seuil": 70,
       "physique_mult": 0.3,
       "capacite_poids": 5,
-      "terreur_ticks": 20,
+      "terreur_ticks": 2000,
       "slots_refuses": [
         "casque",
         "cuirasse",
@@ -1261,7 +1263,7 @@
         "griffure",
         "morsure_puissante"
       ],
-      "ticks_transformation": 4,
+      "ticks_transformation": 400,
       "nuit_forcee_toutes_les": 30
     },
     "incarnation": {
@@ -1288,7 +1290,7 @@
   },
   "terrasser": {
     "_doc": "Destruction du terrain : abaisser ou élever une tuile de ±1 (Hauteur de terrain ±10, plancher 0, plafond 20) ; l'élévation demande une pioche en main. XP à Terrassement.",
-    "ticks": 12,
+    "ticks": 1200,
     "vigueur": 8,
     "xp": 5,
     "h_min": 0,
@@ -1301,9 +1303,9 @@
   "armes_fantomes": {
     "_doc": "Armes fantomatiques : lame invoquée d'élément pur, ×degats_mult, cout_mana à l'invocation, entretien_mana toutes les entretien_ticks ; durete = durete_reference × (1 + volonte/volonte_div + niveau(competence)/niveau_div).",
     "cout_mana": 10,
-    "ticks": 4,
+    "ticks": 400,
     "entretien_mana": 1,
-    "entretien_ticks": 10,
+    "entretien_ticks": 1000,
     "degats_mult": 0.7,
     "functionality": "epee",
     "competence": "magie",
@@ -1319,7 +1321,7 @@
   },
   "effets_equipement": {
     "_doc": "Effets d'équipement types : regen_sante = 1 PV toutes les regen_base_ticks × 100 / pct ticks hors combat ; pas_silencieux = portée de détection × silence_mult ; detection_tresors = contenants à tresors_rayon tuiles. densite_mana_seuil : couche mana de la surface au-delà de laquelle l'affixe des sources joue.",
-    "regen_base_ticks": 200,
+    "regen_base_ticks": 20000,
     "silence_mult": 0.7,
     "tresors_rayon": 10,
     "densite_mana_seuil": 0.6
@@ -1331,11 +1333,11 @@
     "confusion_chance": 0.3
   },
   "nage": {
-    "_doc": "Eau et liquides : souffle_max = souffle_base + endurance × souffle_par_endurance ; à 0, degats_des par periode_ticks ; mêlée des_malus dans l'eau ; le Feu ne part pas.",
-    "souffle_base": 300,
-    "souffle_par_endurance": 2,
+    "_doc": "Eau et liquides : souffle_max = souffle_base + endurance × souffle_par_endurance ; à 0, degats_des par periode_ticks ; mêlée des_malus dans l'eau ; le Feu ne part pas. | LE SOUFFLE EST UNE DUREE EN TICKS (2026-09-08) : `souffle_base` et `souffle_par_endurance` se decomptent tick a tick, mais leur nom ne dit pas « tick » et la migration au tick d'une milliseconde les avait laissees. Trente secondes de souffle etaient devenues trois dixiemes de seconde.",
+    "souffle_base": 30000,
+    "souffle_par_endurance": 200,
     "degats_des": "1d6",
-    "periode_ticks": 10,
+    "periode_ticks": 1000,
     "des_malus": 2,
     "refus_surcharge": true
   },
@@ -1345,7 +1347,7 @@
   },
   "eau": {
     "_doc": "Eau et liquides : automate — periode_ticks entre deux pas, tuiles_par_pas traitées par pas, portee = niveau de départ d'un écoulement à plat (7), pluie_tuiles = creux remplis par heure de pluie. Foudre (Météo, orage) : foudre_des en zone 1 et dans l'eau connexe (rayon foudre_rayon_eau, foudre_rayon_mer sur une source), cible choisie parmi foudre_candidats tuiles dans foudre_portee_joueur, pondérées par hauteur et conductivité électrique. Courant : courant_chance = chance de pousser d'une tuile par pas, courant_poids = part de la capacité de poids au-delà de laquelle un être tient debout.",
-    "periode_ticks": 5,
+    "periode_ticks": 500,
     "tuiles_par_pas": 64,
     "portee": 7,
     "pluie_tuiles": 20,
@@ -1359,11 +1361,11 @@
   },
   "feu": {
     "_doc": "Météo : le feu de tuile. periode_ticks entre deux pas, duree_ticks avant consumation, vent_mult sous vent/tempête (il attise la source de chaleur — la propagation par jet a été retirée le 2026-09-08 : le feu chauffe, et une voisine s'enflamme par le champ de chaleur, voir thermique.json), degats par pas à qui s'y tient (+ Brûlure brulure_ticks), canicule_chance par heure d'ignition, canicule_portee autour du joueur. Tempête (Météo) : arrachage_tuiles tuiles tentées par heure dans arrachage_portee, arrachées si dureté du matériau ≤ arrachage_durete et tuile non abritée.",
-    "periode_ticks": 10,
-    "duree_ticks": 80,
+    "periode_ticks": 1000,
+    "duree_ticks": 8000,
     "vent_mult": 2.0,
     "degats": "1d6",
-    "brulure_ticks": 30,
+    "brulure_ticks": 3000,
     "canicule_chance": 0.15,
     "canicule_portee": 20,
     "flamm_culture": 60,
@@ -1384,26 +1386,26 @@
       20
     ],
     "degats": "3d6",
-    "brulure_ticks": 40,
+    "brulure_ticks": 4000,
     "obsidienne_source": "obsidienne",
     "pierre_ecoulement": "basalte"
   },
   "invocations": {
     "_doc": "Noyaux d'invocation (Modules) : la charge posée par Bombe, la tourelle de Tourelle, la créature d'Écho de chair.",
     "bombe": {
-      "retard_ticks": 20,
+      "retard_ticks": 2000,
       "puissance": 40.0,
       "rayon": 2,
       "degats": "3d6"
     },
     "tourelle": {
-      "duree_ticks": 120,
-      "cadence_ticks": 6,
+      "duree_ticks": 12000,
+      "cadence_ticks": 600,
       "degats": "1d6",
       "portee": 6
     },
     "echo_de_chair": {
-      "duree_ticks": 80,
+      "duree_ticks": 8000,
       "creature": "echo_de_chair"
     }
   },
@@ -1451,7 +1453,7 @@
   "fin_combat": {
     "_doc": "L'écran de fin de combat (designer, point 13) : il s'efface seul au bout de `secondes`, et ne s'affiche pas pour un combat de moins de `ticks_min` ticks sans XP ni niveau gagné.",
     "secondes": 6.0,
-    "ticks_min": 1
+    "ticks_min": 100
   },
   "surface": {
     "dilution": {
@@ -1479,7 +1481,7 @@
     "_doc": "Une condition paie en ticks ce qu'elle promet (designer 2026-09-01) : le surcout se DEDUIT du bonus, jamais ecrit par fichier. Si la condition est fausse au lancer, le sort ne part pas et rend echec_ticks_rendus de ces ticks.",
     "cout_par_de": 3,
     "cout_par_dixieme_mult": 2,
-    "cout_par_tick_rendu": 1,
+    "cout_par_tick_rendu": 0.01,
     "cout_par_portee": 2,
     "cout_par_taille": 3,
     "cout_min": 1
@@ -1500,8 +1502,8 @@
   "sang_froid": {
     "_doc": "Sang-froid (designer 2026-09-03) : la troisieme monnaie, celle du groupe perception + dexterite. La DEXTERITE en DEPEND — feintes, desarmements, empoignes sont tout son combat — et porte donc la reserve ; la PERCEPTION s'en sert en BONUS, par-dessus sa propre rarete qui est la portee et l'information. Son comportement est l'INVERSE des deux autres : elle ne se gagne pas en agissant, elle se gagne en NE bougeant PAS. Hors combat elle revient seule ; en combat il faut etre immobile depuis `seuil_ticks` pour qu'elle monte — celui qui se replace perd son sang-froid, celui qui tient sa ligne le construit. C'est le tireur qui retient son souffle, et c'est aussi ce qui donne enfin un prix a la vitesse de la dexterite. Dépenser a vide se paie en PV, comme la surchauffe du mana et l'epuisement de la vigueur.",
     "max_base": 20,
-    "regen_par_tick": 1,
-    "seuil_ticks": 6,
+    "regen_par_tick": 0.01,
+    "seuil_ticks": 600,
     "epuisement_mult": 2,
     "max_par_dexterite": 3
   },
@@ -1527,7 +1529,7 @@
     "formes_par_type": {
       "noyau": [
         {
-          "ticks_min": 20,
+          "ticks_min": 2000,
           "cellules": [
             [
               0,
@@ -1548,7 +1550,7 @@
           ]
         },
         {
-          "ticks_min": 10,
+          "ticks_min": 1000,
           "cellules": [
             [
               0,
@@ -1565,7 +1567,7 @@
           ]
         },
         {
-          "ticks_min": 5,
+          "ticks_min": 500,
           "cellules": [
             [
               0,
@@ -1589,7 +1591,7 @@
       ],
       "forme": [
         {
-          "ticks_min": 3,
+          "ticks_min": 300,
           "cellules": [
             [
               0,
@@ -1621,7 +1623,7 @@
       ],
       "portee": [
         {
-          "ticks_min": 5,
+          "ticks_min": 500,
           "cellules": [
             [
               0,
@@ -1638,7 +1640,7 @@
           ]
         },
         {
-          "ticks_min": 1,
+          "ticks_min": 100,
           "cellules": [
             [
               0,
@@ -1662,7 +1664,7 @@
       ],
       "modificateur": [
         {
-          "ticks_min": 4,
+          "ticks_min": 400,
           "cellules": [
             [
               0,
@@ -1697,7 +1699,7 @@
       ],
       "liaison": [
         {
-          "ticks_min": 5,
+          "ticks_min": 500,
           "cellules": [
             [
               0,
@@ -1872,5 +1874,10 @@
       "bonus_aime": 8
     },
     "opinions_par_pnj": 2
+  },
+  "sauvegarde": {
+    "_doc": "Un tick est devenu une MILLISECONDE le 2026-09-08 (il valait 100 ms). Une partie enregistree avant porte une horloge en ticks de 100 ms : `version` 1. Au chargement, son horloge est multipliee par `echelle_v1_vers_v2`, sinon le calendrier recule de plusieurs jours.",
+    "version": 2,
+    "echelle_v1_vers_v2": 100
   }
 }

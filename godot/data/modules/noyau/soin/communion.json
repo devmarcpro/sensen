@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": null,
   "power_base": null,
-  "cout_ticks": 9,
+  "cout_ticks": 900,
   "cout_mana": 16,
   "cout_vigueur": 0,
   "effets": [
@@ -23,7 +23,7 @@
   "effet": {
     "statut": {
       "id": "communion",
-      "duree_ticks": 60
+      "duree_ticks": 6000
     },
     "cible": "allie"
   },

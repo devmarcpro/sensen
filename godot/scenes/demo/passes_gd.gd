@@ -172,7 +172,8 @@ static func _indices(res: Dictionary) -> void:
 ## trait à sa **première** tuile — ce qui doit passer par-dessus (un bloc devant) vient après, comme avant. Pour N = 1,
 ## la sortie est celle d'avant **point par point** : c'est ce que vérifie `test_noyau_passes` en comparant au noyau.
 static func brouillard(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_ci: int, jp: Vector2i, rayon: int, origine_dessin: Vector2i,
-		tw: float, th: float, hstep: float, niveau_u: int, bat_j: int, mur_coupe_u: int, voile: Color, voile_jamais: Color) -> Dictionary:
+		tw: float, th: float, hstep: float, niveau_u: int, bat_j: int, mur_coupe_u: int, voile: Color, voile_jamais: Color,
+		voile_bloc: Color = voile, jamais_vu_bloc: Color = voile_jamais) -> Dictionary:
 	var res := _vide()
 	var x0 := maxi(g.origine.x, jp.x - rayon)
 	var x1 := mini(g.origine.x + g.largeur - 1, jp.x + rayon)
@@ -219,7 +220,7 @@ static func brouillard(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_
 				var hm := float(niveaux[k]) * hstep
 				if hm > 0:   # le voile sur les trois faces du bloc : sa matière reste dessous
 					var c := ecran(t, g.h(t), origine_dessin, tw, th, hstep)
-					var col_b := voile if g.decouvert.has(g.idx(t)) else voile_jamais
+					var col_b := voile_bloc if g.decouvert.has(g.idx(t)) else jamais_vu_bloc   # un mur n'est pas une vitre (2026-09-08)
 					_poly(res, PackedVector2Array([c + Vector2(-tw2, 0), c + Vector2(0, th2), c + Vector2(0, th2 - hm), c + Vector2(-tw2, -hm)]), col_b, PackedVector2Array())
 					_poly(res, PackedVector2Array([c + Vector2(0, th2), c + Vector2(tw2, 0), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm)]), col_b, PackedVector2Array())
 					_poly(res, PackedVector2Array([c + Vector2(-tw2, -hm), c + Vector2(0, -th2 - hm), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm)]), col_b, PackedVector2Array())
@@ -538,7 +539,8 @@ static func morceau(g: Grille, coin: Vector2i, taille_morceau: int, p: Dictionar
 ## version FONDUE couvre exactement les mêmes losanges, en les redécoupant. C'est la seule chose capable d'attraper une
 ## erreur de géométrie dans la fusion — un écart d'une tuile ne se verrait sur aucune capture.
 static func brouillard_par_tuile(g: Grille, vue: Dictionary, tout_vu: bool, zj: int, vide_ci: int, jp: Vector2i, rayon: int, origine_dessin: Vector2i,
-		tw: float, th: float, hstep: float, niveau_u: int, bat_j: int, mur_coupe_u: int, voile: Color, voile_jamais: Color) -> Dictionary:
+		tw: float, th: float, hstep: float, niveau_u: int, bat_j: int, mur_coupe_u: int, voile: Color, voile_jamais: Color,
+		voile_bloc: Color = voile, jamais_vu_bloc: Color = voile_jamais) -> Dictionary:
 	var res := _vide()
 	var x0 := maxi(g.origine.x, jp.x - rayon)
 	var x1 := mini(g.origine.x + g.largeur - 1, jp.x + rayon)
@@ -566,10 +568,11 @@ static func brouillard_par_tuile(g: Grille, vue: Dictionary, tout_vu: bool, zj: 
 					res.veg_noirs.append(idx)
 			elif g.bloque_passage(t) and not ("porte" in ct.get("tags", [])):
 				var hm := hauteur_bloc(g, t, bat_j, niveau_u, mur_coupe_u) * hstep
-				if hm > 0:   # le voile sur les trois faces du bloc : sa matière reste dessous
-					_poly(res, PackedVector2Array([c + Vector2(-tw2, 0), c + Vector2(0, th2), c + Vector2(0, th2 - hm), c + Vector2(-tw2, -hm)]), col, PackedVector2Array())
-					_poly(res, PackedVector2Array([c + Vector2(0, th2), c + Vector2(tw2, 0), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm)]), col, PackedVector2Array())
-					_poly(res, PackedVector2Array([c + Vector2(-tw2, -hm), c + Vector2(0, -th2 - hm), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm)]), col, PackedVector2Array())
+				var col_bloc := voile_bloc if decouverte else jamais_vu_bloc   # un mur n'est pas une vitre (2026-09-08)
+				if hm > 0:   # le voile sur les trois faces du bloc : sa matière reste dessous, mais à peine
+					_poly(res, PackedVector2Array([c + Vector2(-tw2, 0), c + Vector2(0, th2), c + Vector2(0, th2 - hm), c + Vector2(-tw2, -hm)]), col_bloc, PackedVector2Array())
+					_poly(res, PackedVector2Array([c + Vector2(0, th2), c + Vector2(tw2, 0), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm)]), col_bloc, PackedVector2Array())
+					_poly(res, PackedVector2Array([c + Vector2(-tw2, -hm), c + Vector2(0, -th2 - hm), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm)]), col_bloc, PackedVector2Array())
 				continue
 			_poly(res, PackedVector2Array([c + Vector2(-tw2, 0), c + Vector2(0, -th2), c + Vector2(tw2, 0), c + Vector2(0, th2)]), col, PackedVector2Array())
 	_indices(res)

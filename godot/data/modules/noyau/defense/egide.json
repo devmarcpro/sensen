@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": null,
   "power_base": null,
-  "cout_ticks": 7,
+  "cout_ticks": 700,
   "cout_mana": 12,
   "cout_vigueur": 0,
   "effets": [
@@ -23,7 +23,7 @@
   "effet": {
     "statut": {
       "id": "egide",
-      "duree_ticks": 50
+      "duree_ticks": 5000
     },
     "cible": "allie"
   },

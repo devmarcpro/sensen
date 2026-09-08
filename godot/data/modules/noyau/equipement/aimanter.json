@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": null,
   "power_base": null,
-  "cout_ticks": 7,
+  "cout_ticks": 700,
   "cout_mana": 9,
   "cout_vigueur": 0,
   "effets": [
@@ -23,7 +23,7 @@
   "effet": {
     "statut": {
       "id": "aimante",
-      "duree_ticks": 120
+      "duree_ticks": 12000
     }
   },
   "style": "controle",

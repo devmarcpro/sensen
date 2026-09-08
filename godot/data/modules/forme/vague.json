@@ -9,7 +9,7 @@
     "forme"
   ],
   "geometrie": "vague",
-  "surcout_ticks": 4,
+  "surcout_ticks": 400,
   "taille_base": 5,
   "famille": "Formes",
   "style": "neutre",

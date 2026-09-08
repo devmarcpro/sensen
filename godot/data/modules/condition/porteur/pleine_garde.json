@@ -18,7 +18,7 @@
       "type": "porteur_en_posture"
     },
     "bonus_structure": {
-      "ticks": -2,
+      "ticks": -200,
       "des": 1
     },
     "echec_ticks_rendus": 0.5

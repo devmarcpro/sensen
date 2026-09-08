@@ -9,7 +9,7 @@
     "forme"
   ],
   "geometrie": "colonne",
-  "surcout_ticks": 3,
+  "surcout_ticks": 300,
   "taille_base": 1,
   "famille": "Formes",
   "style": "neutre",

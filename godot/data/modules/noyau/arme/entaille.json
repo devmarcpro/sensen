@@ -13,7 +13,7 @@
   "elements": {},
   "element_special": null,
   "power_base": "arme",
-  "cout_ticks": 4,
+  "cout_ticks": 400,
   "cout_mana": 0,
   "cout_vigueur": 0,
   "cout_sang_froid": 8,
@@ -26,7 +26,7 @@
   "effet": {
     "statut": {
       "id": "saignement",
-      "duree_ticks": 20
+      "duree_ticks": 2000
     }
   },
   "style": "assaut",

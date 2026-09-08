@@ -13,7 +13,7 @@
   "elements": {},
   "element_special": null,
   "power_base": "arme",
-  "cout_ticks": 8,
+  "cout_ticks": 800,
   "cout_mana": 0,
   "cout_vigueur": 14,
   "cout_sang_froid": 0,

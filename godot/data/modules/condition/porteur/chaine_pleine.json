@@ -19,7 +19,7 @@
     },
     "bonus_structure": {
       "des": 3,
-      "ticks": -3
+      "ticks": -300
     },
     "echec_ticks_rendus": 0.5
   },

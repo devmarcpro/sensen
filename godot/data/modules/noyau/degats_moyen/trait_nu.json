@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": null,
   "power_base": "1d8",
-  "cout_ticks": 5,
+  "cout_ticks": 500,
   "cout_mana": 4,
   "cout_vigueur": 0,
   "effets": [

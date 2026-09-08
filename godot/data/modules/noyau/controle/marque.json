@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": null,
   "power_base": null,
-  "cout_ticks": 4,
+  "cout_ticks": 400,
   "cout_mana": 5,
   "cout_vigueur": 0,
   "effets": [
@@ -23,7 +23,7 @@
   "effet": {
     "statut": {
       "id": "marque",
-      "duree_ticks": 60
+      "duree_ticks": 6000
     }
   },
   "style": "controle",

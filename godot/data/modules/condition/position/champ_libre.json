@@ -18,7 +18,7 @@
       "type": "ligne_de_vue_degagee"
     },
     "bonus_structure": {
-      "ticks": -2
+      "ticks": -200
     },
     "echec_ticks_rendus": 0.5
   },

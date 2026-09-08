@@ -831,14 +831,14 @@
         14,
         20
       ],
-      "attente_ticks": 600,
+      "attente_ticks": 60000,
       "prix_par_cellule": 5,
-      "ticks_par_cellule": 200,
+      "ticks_par_cellule": 20000,
       "distance_max": 12
     },
     "caleches": {
       "creature": "caleche",
-      "attente_ticks": 300,
+      "attente_ticks": 30000,
       "prix_par_quartier": 3,
       "paliers": [
         "bourg",
@@ -847,7 +847,7 @@
       ],
       "heure_debut": 7,
       "heure_fin": 21,
-      "ticks_trajet": 120
+      "ticks_trajet": 12000
     },
     "montures": {
       "facteur_vitesse": 0.5,

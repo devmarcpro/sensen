@@ -11,7 +11,7 @@
   "taille": 1,
   "cible": "toute_entite",
   "ligne_de_vue": false,
-  "cout_ticks": 8,
+  "cout_ticks": 800,
   "cout_vigueur": 4,
   "degats_des": "1d4",
   "type_degats": "perforant",
@@ -23,7 +23,7 @@
     {
       "type": "statut",
       "id": "poison",
-      "duree_ticks": 20
+      "duree_ticks": 2000
     }
   ],
   "tags": [

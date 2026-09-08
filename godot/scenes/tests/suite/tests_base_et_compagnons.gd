@@ -424,7 +424,7 @@ func test_composer_capacites() -> void:
 	verifier(idx >= 0 and s.intention(j.id, {"type": "capacite", "index": idx, "cible": j.pos}), "lancer Renaissance sur soi")
 	for k in 20:   # la capacité est engagée (18 ticks) : l'horloge du monde avance jusqu'à sa résolution
 		s.attente.erase(j.id)
-		s.horloge_monde.avancer(5)
+		s.horloge_monde.avancer(500)
 		if j.action_en_cours.is_empty():
 			break
 	verifier(v.vivant and int(j.mana) < 100 and int(j.or) == 0, "le compagnon revient, payé en mana (%d), pas en or [action en cours : %s]" % [int(j.mana), str(j.action_en_cours.get("name_key", "-"))])
@@ -733,7 +733,7 @@ func test_assemblage_sans_limite() -> void:
 	if s.grille.occupant(loup.pos).is_empty():
 		s.grille.placer(loup.id, loup.pos)
 	loup["ecaille_choix"] = "feu"
-	s.appliquer_statut(loup, "ecaille_elementaire", 100, j.id)
+	s.appliquer_statut(loup, "ecaille_elementaire", 10000, j.id)
 	# Des PV réels, pas gonflés à la main : un coup qui fait monter Encaissement recalcule sante_max
 	loup.corps.stats.endurance = 250
 	Etres.recalculer(loup, s.items, s.affixes_defs, s.regles)
@@ -747,7 +747,7 @@ func test_assemblage_sans_limite() -> void:
 	verifier(int(loup.sante) == pv0 - 250, "l'Eau passe telle quelle")
 	var arme_j := Etres.arme(j, s.items)
 	var v0: Dictionary = s._vecteur_arme_de(j, arme_j)
-	s.appliquer_statut(j, "trempe", 60, j.id)
+	s.appliquer_statut(j, "trempe", 6000, j.id)
 	var v1: Dictionary = s._vecteur_arme_de(j, arme_j)
 	verifier(v1 == {"feu": 1.0} and v0 != v1, "Trempe : l'arme passe au Feu (%s → %s)" % [str(v0), str(v1)])
 	s._retirer_statut(j, "trempe")
@@ -1047,31 +1047,34 @@ func test_conditions_et_modificateurs() -> void:
 	# 2. Ombre : vrai seulement quand le lanceur est Dissimulé — et la capacité ne part pas sinon
 	var plan_ombre: Dictionary = plan_de.call(["ombre", "etincelle"])
 	verifier(not s._evaluer_conditions(j, plan_ombre, loup.pos).is_empty(), "Ombre : sans Dissimulé, la condition est fausse")
-	s.appliquer_statut(j, "dissimule", 200, j.id)
+	s.appliquer_statut(j, "dissimule", 20000, j.id)
 	verifier(s._evaluer_conditions(j, plan_de.call(["ombre", "etincelle"]), loup.pos).is_empty(), "Ombre : Dissimulé, la condition passe")
 	s._retirer_statut(j, "dissimule")
 
 	# 3. Prise : vrai quand la cible est saisie ou lévitée
 	verifier(not s._evaluer_conditions(j, plan_de.call(["prise", "etincelle"]), loup.pos).is_empty(), "Prise : cible libre, condition fausse")
-	s.appliquer_statut(loup, "levite", 50, j.id)
+	s.appliquer_statut(loup, "levite", 5000, j.id)
 	verifier(s._evaluer_conditions(j, plan_de.call(["prise", "etincelle"]), loup.pos).is_empty(), "Prise : cible lévitée, condition vraie")
 	s._retirer_statut(loup, "levite")
 
 	# 4. Pied ferme : le lanceur n'a pas bougé depuis 20 ticks
 	j["immobile_depuis"] = s.tick_de(j)
 	verifier(not s._evaluer_conditions(j, plan_de.call(["pied_ferme", "etincelle"]), loup.pos).is_empty(), "Pied ferme : à peine arrêté, condition fausse")
-	j["immobile_depuis"] = s.tick_de(j) - 50
-	verifier(s._evaluer_conditions(j, plan_de.call(["pied_ferme", "etincelle"]), loup.pos).is_empty(), "Pied ferme : 50 ticks immobile, condition vraie")
+	var seuil_pf := int(GameData.catalogues.modules.pied_ferme.effet.predicat_structure.ticks)
+	j["immobile_depuis"] = s.tick_de(j) - seuil_pf
+	verifier(s._evaluer_conditions(j, plan_de.call(["pied_ferme", "etincelle"]), loup.pos).is_empty(), "Pied ferme : %d ticks immobile, condition vraie" % seuil_pf)
 
 	# 5. Évasement : la géométrie s'ouvre
 	verifier(str(plan_de.call(["ligne", "etincelle"]).geometrie) == "ligne" and str(plan_de.call(["ligne", "evasement", "etincelle"]).geometrie) == "cone", "Évasement : la Ligne devient un Cône")
 
 	# 6. Canalisation : les dés de l'immobilité
 	var plan_can: Dictionary = plan_de.call(["canalisation", "etincelle"])
-	j["immobile_depuis"] = s.tick_de(j) - 25
+	var tranche_can := int(GameData.catalogues.modules.canalisation.effet.canalisation.ticks)
+	var des_can := int(GameData.catalogues.modules.canalisation.effet.canalisation.des_par)
+	j["immobile_depuis"] = s.tick_de(j) - 5 * tranche_can
 	var des0: int = int(plan_can.des_bonus)
 	s._executer_capacite(j, plan_can, loup.pos)
-	verifier(int(plan_can.des_bonus) == des0 + 5, "Canalisation : 25 ticks immobile = +5 dés (%d)" % int(plan_can.des_bonus))
+	verifier(int(plan_can.des_bonus) == des0 + 5 * des_can, "Canalisation : cinq tranches de %d ticks = +%d dés (%d)" % [tranche_can, 5 * des_can, int(plan_can.des_bonus)])
 
 	# 7. Emprise : ce qui est touché est enraciné
 	loup.statuts.clear()

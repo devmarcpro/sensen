@@ -13,7 +13,7 @@
   "elements": {},
   "element_special": null,
   "power_base": null,
-  "cout_ticks": 4,
+  "cout_ticks": 400,
   "cout_mana": 0,
   "cout_vigueur": 0,
   "cout_sang_froid": 7,
@@ -25,7 +25,7 @@
   "effet": {
     "statut": {
       "id": "aux_aguets",
-      "duree_ticks": 60,
+      "duree_ticks": 6000,
       "sur": "soi"
     }
   },

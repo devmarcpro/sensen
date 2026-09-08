@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b4sc4tfnacd2c"
-path="res://.godot/imported/00_substitution.png-f4a8183f3f7a68d7c3713de5d68c5efc.ctex"
+uid="uid://djsmfynlaarbk"
+path="res://.godot/imported/00_pied.png-b8ab978fce2bb4f0fe2e1000b4ba4eff.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/membres/pied/00_substitution.png"
-dest_files=["res://.godot/imported/00_substitution.png-f4a8183f3f7a68d7c3713de5d68c5efc.ctex"]
+source_file="res://assets/membres/pied/00_pied.png"
+dest_files=["res://.godot/imported/00_pied.png-b8ab978fce2bb4f0fe2e1000b4ba4eff.ctex"]
 
 [params]
 

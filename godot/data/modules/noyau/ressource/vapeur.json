@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": null,
   "power_base": null,
-  "cout_ticks": 10,
+  "cout_ticks": 1000,
   "cout_mana": 14,
   "cout_vigueur": 0,
   "effets": [
@@ -24,13 +24,13 @@
   "effet": {
     "terrain": {
       "zone": "vapeur",
-      "duree_ticks": 40,
+      "duree_ticks": 4000,
       "statut": "confusion",
-      "statut_ticks": 20
+      "statut_ticks": 2000
     },
     "statut": {
       "id": "confusion",
-      "duree_ticks": 20
+      "duree_ticks": 2000
     }
   },
   "style": "ruse",

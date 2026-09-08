@@ -120,7 +120,7 @@ func _ready() -> void:
 		m.sante = 30 if vise_allie else 60   # blessé : un soin se voit
 		if vise_allie:
 			m.camp = j.camp
-			s.appliquer_statut(m, "au_sol", 30, j.id)   # une purge a quelque chose à purger
+			s.appliquer_statut(m, "au_sol", 3000, j.id)   # une purge a quelque chose à purger
 		j.sante = 30
 		j.sante_max = 40
 		j.mana = 40

@@ -3,7 +3,7 @@
   "mineur": [
     {
       "statut": "etourdi",
-      "duree_ticks": 20
+      "duree_ticks": 2000
     },
     {
       "mana": -15
@@ -12,7 +12,7 @@
   "grave": [
     {
       "statut": "etourdi",
-      "duree_ticks": 20,
+      "duree_ticks": 2000,
       "mana": -30
     },
     {

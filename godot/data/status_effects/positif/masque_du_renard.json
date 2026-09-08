@@ -2,8 +2,8 @@
   "name_key": "status.masque_du_renard.name",
   "degats_des": null,
   "element": null,
-  "periode_ticks": 1000,
-  "duree_ticks": 1000000,
+  "periode_ticks": 100000,
+  "duree_ticks": 100000000,
   "controle": false,
   "cumule": false,
   "modifiers": [

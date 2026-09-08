@@ -11,7 +11,7 @@
   "surcout_ticks": 0,
   "effet": {
     "declencheur": "apres_ticks",
-    "ticks": 20
+    "ticks": 2000
   },
   "famille": "Minuterie",
   "style": "ruse",

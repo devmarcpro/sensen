@@ -46,7 +46,7 @@ func test_brouillard() -> void:
 func test_bete_engage_sur_son_horloge() -> void:
 	var s := nouvelle_sim("gorge")
 	var j := joueur_de(s)
-	s.horloge_monde.ticks = 8000   # loin de zéro : un tampon du monde ne peut pas passer pour celui d'un combat
+	s.horloge_monde.ticks = 800000   # loin de zéro : un tampon du monde ne peut pas passer pour celui d'un combat
 	var r: Dictionary = s.ajouter("rat_geant", j.pos + Vector2i(1, 0), "ia")
 	verifier(not r.is_empty() and s.ennemis(r, j), "un rat géant hostile au contact du joueur")
 	for k in 6:
@@ -57,7 +57,7 @@ func test_bete_engage_sur_son_horloge() -> void:
 			break
 	verifier(s.en_combat(r), "le rat a ouvert le combat de lui-même")
 	var h: int = s.horloge_de(r).ticks
-	verifier(int(r.compteur) >= h and int(r.compteur) <= h + 100, "le rat rejoue sur l'horloge du combat (compteur %d, combat à t=%d)" % [int(r.compteur), h])
+	verifier(int(r.compteur) >= h and int(r.compteur) <= h + 10000, "le rat rejoue sur l'horloge du combat (compteur %d, combat à t=%d)" % [int(r.compteur), h])
 	var sante0 := int(j.sante)
 	for k in 12:   # et il joue vraiment : le joueur qui attend prend des morsures
 		s.attente[j.id] = true
@@ -72,7 +72,7 @@ func test_bete_engage_sur_son_horloge() -> void:
 func test_cri_de_ralliement() -> void:
 	var s := nouvelle_sim("gorge")
 	var j := joueur_de(s)
-	s.horloge_monde.ticks = 8000
+	s.horloge_monde.ticks = 800000
 	var chef: Dictionary = s.ajouter("chef_de_bande", j.pos + Vector2i(3, 0), "ia")
 	var acolyte: Dictionary = s.ajouter("bandit", j.pos + Vector2i(4, 1), "ia")
 	verifier(not chef.is_empty() and not acolyte.is_empty(), "un chef de bande et son acolyte")
@@ -81,7 +81,7 @@ func test_cri_de_ralliement() -> void:
 	for k in 30:
 		s.attente[j.id] = true
 		s.intention(j.id, {"type": "attendre"})
-		s.horloge_monde.avancer(3)
+		s.horloge_monde.avancer(300)
 		var garde := 100
 		while garde > 0 and s.pas("monde"):
 			garde -= 1
@@ -116,7 +116,7 @@ func test_routine_civile() -> void:
 	for k in 30:
 		s.attente[j.id] = true
 		s.intention(j.id, {"type": "attendre"})
-		s.horloge_monde.avancer(3)
+		s.horloge_monde.avancer(300)
 		var garde := 100
 		while garde > 0 and s.pas("monde"):
 			garde -= 1
@@ -134,7 +134,7 @@ func test_proie_n_engage_pas() -> void:
 	for k in 12:
 		s.attente[j.id] = true
 		s.intention(j.id, {"type": "attendre"})
-		s.horloge_monde.avancer(3)
+		s.horloge_monde.avancer(300)
 		var garde := 100
 		while garde > 0 and s.pas("monde"):
 			garde -= 1
@@ -276,11 +276,11 @@ func test_calendrier() -> void:
 	# Dans le monde : le premier jour dit sa date et le Nouvel An, les civils ont eu leur humeur, la routine vise la place.
 	var s2 := Simulation.new(31)
 	s2.charger_camp()
-	s2.horloge_monde.ticks = 8000   # le jour 0, le Nouvel An (une partie commence le 3 du Rat depuis le 5 septembre au soir)
+	s2.horloge_monde.ticks = 800000   # le jour 0, le Nouvel An (une partie commence le 3 du Rat depuis le 5 septembre au soir)
 	var journal: Array = []
 	var cb := func(cle: String, _params: Dictionary) -> void: journal.append(cle)
 	EventBus.journal.connect(cb)
-	s2.horloge_monde.avancer(1)
+	s2.horloge_monde.avancer(100)
 	EventBus.dispatcher()
 	EventBus.journal.disconnect(cb)
 	verifier("journal.date" in journal and "journal.fete" in journal, "le premier jour dit sa date et le Nouvel An (%s)" % str(journal))
@@ -294,9 +294,9 @@ func test_calendrier() -> void:
 		s2._nouveau_jour(0)
 	var v: Dictionary = civils[0]
 	verifier(int(v.get("humeur", 0)) == clampi(int(s2._ry().humeur_base) + int(s2.trait_somme(v, "humeur")) + int(GameData.config("calendrier").fetes.humeur), 0, 100), "le Nouvel An a donné son humeur au civil (%d, traits compris)" % int(v.get("humeur", 0)))
-	s2.horloge_monde.ticks = 12000
+	s2.horloge_monde.ticks = 1200000
 	verifier(s2._cible_routine(v, s2.profils_ia.civil) == s2._coin_de_place(v), "midi, jour de fête : son coin de la place")
-	s2.horloge_monde.ticks = 2 * jour + 12000   # le 3 du Rat : rien pour un sino, Yennayer pour un arabo-berbère
+	s2.horloge_monde.ticks = 2 * jour + jour / 2   # midi le 3 du Rat : rien pour un sino, Yennayer pour un arabo-berbère
 	v.social.culture = "sino"
 	verifier(s2._cible_routine(v, s2.profils_ia.civil) == v.poste, "midi, un jour sans fête : le poste")
 	verifier(v.has("signe") and not v.signe.is_empty() and v.has("anniversaire"), "un PNJ a un signe et un anniversaire")
@@ -1045,8 +1045,9 @@ func test_batiment_etages() -> void:
 		if pas == haut:
 			passe_escalier = true
 	verifier(not ch.is_empty() and ch.back() == chevet and passe_escalier and ch == ch_gd, "un chemin de la rue au chevet du lit de l'étage passe l'escalier (%d pas), noyau et GDScript d'accord" % ch.size())
-	var att := g.atteignables(voisin, 60)
-	var att_gd := g._atteignables_gd(voisin, 60)
+	var budget_att := 20 * int(s.regles.r.deplacement.cout_base)   # vingt pas de terrain plat (2026-09-08 : le budget est en ticks)
+	var att := g.atteignables(voisin, budget_att)
+	var att_gd := g._atteignables_gd(voisin, budget_att)
 	verifier(att.has(haut) and att == att_gd, "les atteignables franchissent l'escalier (%d tuiles), noyau et GDScript d'accord" % att.size())
 	# Monter : un pas sur l'escalier arrive en haut, toujours en ville
 	var n_ent := s.ordre.size()
@@ -1424,7 +1425,7 @@ func test_sauvegarde_ville() -> void:
 		s.territoires[tid].stocks["baies"] = 42   # un stock qu'on reconnaîtra : comparer 0 à 0 ne prouverait rien
 		stocks0 = s.territoires[tid].stocks.duplicate()
 		n_per = SimTerritoire._dans_territoire(s, tid, func() -> int: return SimPerimetres.perimetres(s).size())
-	s.horloge_monde.avancer(500)
+	s.horloge_monde.avancer(50000)
 	verifier(s.sauvegarder("test_sensen2"), "sauvegarder dans une ville")
 	# 3. Une simulation neuve recharge et l'on regarde ce qui est revenu.
 	var s2 := Simulation.new(1)

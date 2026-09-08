@@ -92,7 +92,7 @@ void SensenGrille::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("morceau", "grille", "coin", "taille_morceau", "p"), &SensenGrille::morceau);
 	ClassDB::bind_method(D_METHOD("visibles", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "bat_j", "positions"), &SensenGrille::visibles);
 	ClassDB::bind_method(D_METHOD("minimap", "grille", "coin", "taille_cell", "taille", "mat_col", "fond"), &SensenGrille::minimap);
-	ClassDB::bind_method(D_METHOD("brouillard", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "origine_dessin", "tw", "th", "hstep", "niveau_u", "bat_j", "mur_coupe_u", "voile", "voile_jamais"), &SensenGrille::brouillard);
+	ClassDB::bind_method(D_METHOD("brouillard", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "origine_dessin", "tw", "th", "hstep", "niveau_u", "bat_j", "mur_coupe_u", "voile", "voile_jamais", "voile_bloc", "jamais_vu_bloc"), &SensenGrille::brouillard);
 	ClassDB::bind_method(D_METHOD("toits", "grille", "vue", "tout_vu", "zj", "vide_ci", "jp", "rayon", "origine_dessin", "tw", "th", "hstep", "niveau_u", "bat_j", "bat_couleurs", "bat_styles", "pente_t", "haut_toit", "ombre_min", "soleil_h", "soleil_ok", "soleil_force", "uv_haut", "sombre_jamais", "sombre_memorise"), &SensenGrille::toits);
 	ClassDB::bind_method(D_METHOD("ombres", "grille", "dir", "pente", "coin", "taille", "max_pas", "unites_par_niveau"), &SensenGrille::ombres);
 	ClassDB::bind_method(D_METHOD("propager_lumiere", "grille", "sources_idx", "sources_niv", "ambiante", "bloque_par_contenu"), &SensenGrille::propager_lumiere);
@@ -1267,7 +1267,8 @@ static int hauteur_bloc_e(const SensenGrille::Etat &s, const uint8_t *nv, const 
 }
 
 Dictionary SensenGrille::brouillard(Object *grille, const Dictionary &vue, bool tout_vu, int zj, int vide_ci, Vector2i jp, int rayon, Vector2i origine_dessin,
-		double tw, double th, double hstep, int niveau_u, int bat_j, int mur_coupe_u, Color voile, Color voile_jamais) {
+		double tw, double th, double hstep, int niveau_u, int bat_j, int mur_coupe_u, Color voile, Color voile_jamais,
+		Color voile_bloc, Color jamais_vu_bloc) {
 	Triangles tr;
 	PackedInt32Array veg_vus, veg_voiles, veg_noirs;
 	Etat s;
@@ -1335,7 +1336,9 @@ Dictionary SensenGrille::brouillard(Object *grille, const Dictionary &vue, bool 
 				double hm = (double)niveaux[k] * hstep;
 				if (hm > 0) {
 					Vector2 c = ecran_e(x, y, (int)s.h[i], origine_dessin, tw, th, hstep);
-					Color col = decouvert.has(i) ? voile : voile_jamais;
+					// Un MUR memorise n'est pas une vitre (designer 2026-09-08) : son voile est presque opaque,
+					// la ou celui du sol reste leger. Le meme pour les deux laissait voir le pave a travers lui.
+					Color col = decouvert.has(i) ? voile_bloc : jamais_vu_bloc;
 					Vector2 a[4] = { c + Vector2(-tw2, 0), c + Vector2(0, th2), c + Vector2(0, th2 - hm), c + Vector2(-tw2, -hm) };
 					Vector2 b[4] = { c + Vector2(0, th2), c + Vector2(tw2, 0), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm) };
 					Vector2 d[4] = { c + Vector2(-tw2, -hm), c + Vector2(0, -th2 - hm), c + Vector2(tw2, -hm), c + Vector2(0, th2 - hm) };

@@ -1246,8 +1246,18 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 					break
 			if not marche_ok:
 				return false
+	# ON NE SE BLOQUE PLUS ENTRE AMIS (designer 2026-09-08 : « possible d'être sur la même case qu'un PNJ non
+	# hostile »). La grille ne tient qu'UN occupant par tuile — son miroir dans le noyau C++ non plus —, donc deux
+	# êtres ne peuvent pas s'y tenir vraiment : on ÉCHANGE les deux places. En jeu c'est ce qui compte, un villageois
+	# ne ferme plus une porte ni un couloir ; et le modèle d'occupation, lui, ne bouge pas d'une ligne.
+	var echange: Dictionary = {}
 	if not grille.occupant(vers).is_empty():
-		return false
+		var occupe: Dictionary = entites.get(grille.occupant(vers), {})
+		if occupe.is_empty() or not occupe.vivant or SimPnj.ennemis(self, e, occupe):
+			return false   # un ennemi barre toujours le passage : c'est lui qu'on attaque, pas qu'on contourne
+		if Etres.bloque_statuts(occupe, "deplacement", statuts_defs) or occupe.has("monture"):
+			return false   # enraciné, ou à cheval : il ne se pousse pas
+		echange = occupe
 	if not par_escalier and grille.a_lien(vers):
 		arrivee = grille.lien_de(vers)
 		if not grille.occupant(arrivee).is_empty():
@@ -1277,6 +1287,13 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 		return false
 	_quitter_garde(e)
 	grille.liberer(e.pos)
+	if not echange.is_empty():   # l'échange : celui qu'on croise prend la place qu'on quitte, sans rien payer
+		var depart_ech: Vector2i = e.pos
+		grille.liberer(echange.pos)
+		echange.pos = depart_ech
+		echange.orientation = Grille.plat(depart_ech) - Grille.plat(vers)
+		echange["vue_sale"] = true
+		grille.placer(echange.id, depart_ech)
 	e.orientation = Grille.plat(vers) - Grille.plat(e.pos)
 	if arrivee != vers or par_escalier:   # l'escalier franchi : on est à l'autre bout, un étage plus haut ou plus bas
 		vers = arrivee

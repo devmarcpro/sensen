@@ -512,7 +512,11 @@ func test_masque_et_sceau() -> void:
 	loup.pos = j.pos + Vector2i(0, -4)
 	s.grille.placer(loup.id, loup.pos)
 	for id in ["loup_2", "loup_3", "loup_4"]:
-		s.entites[id].compteur = 500
+		# « ILS NE JOUERONT PAS » (2026-09-08) : 500 ticks valait cinquante secondes quand un tick faisait cent
+		# millisecondes ; il en vaut une demi. Les loups passaient donc AVANT le joueur et mangeaient son tour —
+		# la capacité télégraphiée du joueur (1 700 ticks) ne se résolvait jamais. Le compteur est désormais
+		# exprimé en attaques : cent attaques plus loin que tout ce que le joueur peut faire dans ce test.
+		s.entites[id].compteur = 100 * int(s.regles.r.actions.attaque_base)
 	s._engager_combat(j, loup)
 	var h := s.horloge_de(j)
 	j.mana = 300
@@ -523,7 +527,7 @@ func test_masque_et_sceau() -> void:
 	var mana0 := int(j.mana)
 	verifier(s.intention(j.id, {"type": "capacite", "index": j.capacites.size() - 1, "cible": glyphe_pos}), "poser le glyphe")
 	s.pas(j.horloge)
-	verifier(s.glyphes.size() == 1 and int(s.glyphes[0].fin) > h.ticks + 100000 and Etres.bloque_statuts(j, "deplacement", s.statuts_defs), "glyphe permanent, graveur immobile (mana %d → %d)" % [mana0, int(j.mana)])
+	verifier(s.glyphes.size() == 1 and int(s.glyphes[0].fin) > h.ticks + 10000000 and Etres.bloque_statuts(j, "deplacement", s.statuts_defs), "glyphe permanent, graveur immobile (mana %d → %d)" % [mana0, int(j.mana)])
 	s.grille.liberer(loup.pos)
 	loup.pos = glyphe_pos
 	s.grille.placer(loup.id, glyphe_pos)
@@ -553,7 +557,7 @@ func test_fossoyeur_et_engrenage() -> void:
 	s.attente[j.id] = true
 	verifier(not s.intention(j.id, {"type": "relever", "cible": loup.id}), "un cadavre ne se relève qu'une fois")
 	var h := s.horloge_de(j)
-	h.avancer(61)
+	h.avancer(6100)
 	s._tiquer_differes(j.horloge, h.ticks)
 	verifier(not releve.vivant, "après 60 ticks, le relevé retourne à la terre")
 	# L'Engrenage : un affût qui mange le carquois
@@ -568,12 +572,12 @@ func test_fossoyeur_et_engrenage() -> void:
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "affut", "cible": j.pos + Vector2i(1, 0)}) and s.affuts.size() == 1, "affût déployé")
 	var pv0 := int(loup3.sante)
-	s._tirs_d_affuts(j.horloge, h.ticks + 100)
+	s._tirs_d_affuts(j.horloge, h.ticks + 10000)
 	verifier(int(loup3.sante) < pv0 and int(j.munitions) == mun0 - 1, "il tire sur le loup (%d → %d) et consomme une flèche (%d → %d)" % [pv0, int(loup3.sante), mun0, int(j.munitions)])
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "affut", "cible": j.pos + Vector2i(0, 1)}) and s.affuts.size() == 1 and s.affuts[0].pos == j.pos + Vector2i(0, 1), "redéployer déplace l'affût")
 	j.munitions = 0
-	s._tirs_d_affuts(j.horloge, h.ticks + 200)
+	s._tirs_d_affuts(j.horloge, h.ticks + 20000)
 	verifier(s.affuts.is_empty(), "sans munition, l'affût se replie")
 
 
@@ -865,10 +869,11 @@ func test_armes_fantomes() -> void:
 	verifier(int(loup.sante) < pv0, "la lame frappe (%d → %d)" % [pv0, int(loup.sante)])
 	verifier(not s._sertir(j, "fantome_" + j.id, "", h.ticks), "ni sertissable ni enchantable")
 	var mana1 := int(j.mana)
-	s._tiquer_armes_fantomes(j.horloge, int(s.items["fantome_" + j.id].dernier_tick) + 100)
-	verifier(int(j.mana) == mana1 - 10, "entretien : 100 ticks = −10 mana (%d → %d)" % [mana1, int(j.mana)])
+	var ent_f := int(s.regles.r.armes_fantomes.entretien_ticks)
+	s._tiquer_armes_fantomes(j.horloge, int(s.items["fantome_" + j.id].dernier_tick) + 10 * ent_f)
+	verifier(int(j.mana) == mana1 - 10 * int(s.regles.r.armes_fantomes.entretien_mana), "entretien : dix périodes de %d ticks = −10 mana (%d → %d)" % [ent_f, mana1, int(j.mana)])
 	j.mana = 0
-	s._tiquer_armes_fantomes(j.horloge, int(s.items["fantome_" + j.id].dernier_tick) + 10)
+	s._tiquer_armes_fantomes(j.horloge, int(s.items["fantome_" + j.id].dernier_tick) + ent_f)
 	verifier(not s.items.has("fantome_" + j.id) and not j.equipement.has("main_principale"), "à mana 0, la lame se dissipe")
 
 
@@ -885,7 +890,11 @@ func test_cataclysme() -> void:
 	loup.pos = j.pos + Vector2i(0, -4)
 	s.grille.placer(loup.id, loup.pos)
 	for id in ["loup_2", "loup_3", "loup_4"]:
-		s.entites[id].compteur = 500
+		# « ILS NE JOUERONT PAS » (2026-09-08) : 500 ticks valait cinquante secondes quand un tick faisait cent
+		# millisecondes ; il en vaut une demi. Les loups passaient donc AVANT le joueur et mangeaient son tour —
+		# la capacité télégraphiée du joueur (1 700 ticks) ne se résolvait jamais. Le compteur est désormais
+		# exprimé en attaques : cent attaques plus loin que tout ce que le joueur peut faire dans ce test.
+		s.entites[id].compteur = 100 * int(s.regles.r.actions.attaque_base)
 	s._engager_combat(j, loup)
 	var h := s.horloge_de(j)
 	j.mana = 99999   # un cataclysme 7 × 7 remodèle 49 tuiles : 49 × 40 = 1 960 mana — le prix suit la surface

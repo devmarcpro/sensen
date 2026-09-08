@@ -12,7 +12,7 @@
   "elements": {},
   "element_special": null,
   "power_base": "3d6",
-  "cout_ticks": 8,
+  "cout_ticks": 800,
   "cout_mana": 18,
   "cout_vigueur": 0,
   "effets": [
@@ -24,7 +24,7 @@
   "effet": {
     "statut": {
       "id": "reserve",
-      "duree_ticks": 200
+      "duree_ticks": 20000
     },
     "cible": "allie"
   },

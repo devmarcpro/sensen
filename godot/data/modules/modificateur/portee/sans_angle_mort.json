@@ -9,7 +9,7 @@
     "modificateur"
   ],
   "famille": "Portée",
-  "surcout_ticks": 1,
+  "surcout_ticks": 100,
   "surcout_ressource": "+2",
   "effet": {
     "portee_min": 1
