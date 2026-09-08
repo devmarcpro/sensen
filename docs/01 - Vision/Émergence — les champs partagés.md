@@ -54,6 +54,17 @@ jamais s'ajouter à côté. Sinon on obtient six vérités qui se contredisent, 
 >
 > **À juger, et ce n'est pas à moi** : l'ordre de ces six-là, et surtout s'il faut les faire **avant** de finir le jeu (pause, écran de mort, touches reconfigurables, sauvegarde fiable). Un monde profond dans un jeu qu'on ne peut pas mettre en pause reste une démo.
 
+> [!decision] Décidé le 2026-09-08, 6 h 30 — les 236 modules meurent, la grammaire reste, et les champs passent devant (designer : « on va supprimer tous les modules de capacités, bien déterminer et coder tous les noyaux de systèmes émergents et ensuite refaire les modules »)
+> **Le diagnostic est juste, et le balayage l'avait chiffré sans que j'en tire la conclusion** : 23 sorts sur 86 ne produisent rien d'observable, 41 modules portent une `classe_signature` que personne ne lit, un sort au contact ne coûte ni tick ni mana. Ce n'est pas de la malchance — c'est ce qui arrive quand **236 contenus possèdent chacun leur propre règle**. Un noyau le montre à nu : `effets: ["degats", "tempo"]` et `effet: {tempo: 9}`, c'est-à-dire des **noms d'effets résolus par des branches de code**. Avec les champs, un noyau de feu dira `{chaleur: 400}` et le reste suivra seul : l'herbe s'enflamme, la neige fond, le grisou explose, la bête panique — sans qu'aucune de ces quatre lignes soit écrite.
+>
+> **Ce qui meurt** : les **236 contenus** de `data/modules/**` et les branches d'effet écrites en dur dans `simulation.gd`, plus les listes de modules des 19 fiches de classe.
+> **Ce qui survit** : la **grammaire** — portée + forme + noyau + modificateur —, la grille de composition, les coûts (ticks, mana, vigueur, sang-froid), les emplacements, l'aperçu du sort, les parchemins et les grimoires. C'est le vocabulaire que l'interface, le butin et les classes parlent déjà ; ce qu'on jette, ce sont les mots, pas la langue.
+>
+> **L'ordre, et pourquoi il compte** : **les champs d'abord, la suppression ensuite.** 13 fichiers de tests sur 215 tests enregistrés dépendent des modules — supprimer d'abord, c'est faire la partie la plus risquée du chantier (toucher le cœur de la simulation) **avec le filet baissé**. On code donc la chaleur et le support pendant que la suite est verte, on les prouve, et l'on ne supprime qu'au moment de réécrire.
+> **Le risque assumé de cet ordre** : concevoir les champs en regardant ce que les modules font aujourd'hui. La parade est la règle du haut de cette note — **un champ remplace, il ne s'ajoute pas** : si la chaleur n'absorbe pas le feu, la lave, le gaz, la neige et la météo, elle est ratée, quoi qu'en disent les modules.
+>
+> **Ce que la suppression n'excuse pas** : la sauvegarde ment toujours (recharger dans une mine régénère un donjon à salles, un donjon de corruption vaincu revient, sauvegarder en combat dissout le combat). Six défauts vérifiés à la main, qui restent en tête de file après les champs.
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Matériaux — 13 stats]], [[Application des stats de matériau]], [[Grille continue]]
 - **Alimente** : [[Mine sous une cellule]], [[Éclairage]], [[Météo]], [[IA des créatures]], [[Modules de la simulation et le C++]]
