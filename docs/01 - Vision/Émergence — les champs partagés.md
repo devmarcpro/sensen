@@ -52,6 +52,8 @@ jamais s'ajouter à côté. Sinon on obtient six vérités qui se contredisent, 
 >
 > **Ce que je NE ferais pas**, et pourquoi : pas de physique continue (la grille est un champ de hauteurs, pas un voxel — et le pivot l'a tranché) ; pas de chimie générale (combiner deux matières pour en faire une troisième relève des recettes, pas d'un champ) ; pas d'économie à agents (les prix suivent le stock depuis le 2026-09-07, et une bourse à agents coûterait cent fois ce qu'elle rendrait à l'écran).
 >
+> **Confirmé par le designer le 2026-09-08, 7 h** : il a renvoyé la liste des six mot pour mot, dans son ordre à lui — **bruit et odeur d'abord** (« et c'est le plus criant »), puis le champ de danger, la rumeur, le temps long, les besoins, et **l'eau qui pèse en dernier**. C'est le classement qui fait foi ; la numérotation ci-dessus reste celle de la rédaction.
+>
 > **À juger, et ce n'est pas à moi** : l'ordre de ces six-là, et surtout s'il faut les faire **avant** de finir le jeu (pause, écran de mort, touches reconfigurables, sauvegarde fiable). Un monde profond dans un jeu qu'on ne peut pas mettre en pause reste une démo.
 
 > [!decision] Décidé le 2026-09-08, 6 h 30 — les 236 modules meurent, la grammaire reste, et les champs passent devant (designer : « on va supprimer tous les modules de capacités, bien déterminer et coder tous les noyaux de systèmes émergents et ensuite refaire les modules »)
@@ -64,6 +66,23 @@ jamais s'ajouter à côté. Sinon on obtient six vérités qui se contredisent, 
 > **Le risque assumé de cet ordre** : concevoir les champs en regardant ce que les modules font aujourd'hui. La parade est la règle du haut de cette note — **un champ remplace, il ne s'ajoute pas** : si la chaleur n'absorbe pas le feu, la lave, le gaz, la neige et la météo, elle est ratée, quoi qu'en disent les modules.
 >
 > **Ce que la suppression n'excuse pas** : la sauvegarde ment toujours (recharger dans une mine régénère un donjon à salles, un donjon de corruption vaincu revient, sauvegarder en combat dissout le combat). Six défauts vérifiés à la main, qui restent en tête de file après les champs.
+
+
+> [!success] Codé le 2026-09-08 — le champ de chaleur, et les deux règles qu'il remplace — `data/thermique.json`, `SimTerrain._tiquer_chaleur`
+> **Le premier champ partagé, et il obéit à la règle du haut de cette note : il REMPLACE.** La chaleur est un `PackedFloat32Array` en **degrés** sur la couche 0 de la fenêtre, **jamais sauvegardé** — il se reconstruit de ses sources comme la carte de lumière, et il se vide quand la fenêtre glisse (ses index sont ceux de la grille d'avant).
+>
+> **Ce qui a disparu du code**, et c'est le point :
+> - **Le jet de propagation du feu.** `_tiquer_feux` tirait un dé par voisine, `flammabilite/100 × propagation × vent`. Supprimé, avec sa clé `feu.propagation` dans `combat_rules.json`. Le feu ne fait plus que **chauffer sa tuile** (1 100 °C, la température réelle du cœur d'une flamme de bois).
+> - **L'ignition directe par la lave.** `_tiquer_lave` appelait `_enflammer` sur chaque voisine sèche. Supprimé. La coulée **chauffe** (1150 °C).
+> Une tuile s'enflamme désormais quand **sa propre chaleur atteint le seuil de sa matière**, interpolé sur sa flammabilité entre 110 °C (flammabilité 100) et 400 °C (flammabilité 0). Un pin (70) prend à **197 °C**, une culture (60) à 226, une plante sauvage (50) à 255 ; un meuble (40) demande 284 °C et une matière peu inflammable (20) 342 — ceux-là veulent de la lave ou un brasier, pas un feu de camp. **Une seule règle d'ignition là où il y en avait deux**, et elle sort des stats du matériau.
+>
+> **L'incrémental, dès le premier jour** — c'était le deuxième piège écrit plus haut. `chaleur_active` ne contient que les tuiles qui s'écartent de l'ambiante de plus de 1,5 °C, exactement comme `eau_active` ; le pas ne balaie que celles-là et leurs voisines, jamais la fenêtre. Quand rien ne brûle, **le pas coûte le parcours de deux dictionnaires vides et rend la main** : le champ EST l'ambiante. Un garde-fou (`actives_max`) arrête l'expansion si le front dépasse 4 096 tuiles.
+>
+> **Le déterminisme** — le premier piège. Les index à traiter sont **triés** avant diffusion, et le pas est en **double tampon** (on lit l'ancien, on écrit le neuf) : deux exécutions donnent le même champ au flottant près. Plus aucun `RandomNumberGenerator` dans la propagation du feu — le test qui forçait `propagation = 1,5` pour être déterministe n'a plus rien à forcer, il regarde la physique. **Le calage s'est fait SUR LA MESURE, pas sur un modèle** : le premier jeu de nombres a échoué d'un degré (le voisin montait à 214 °C pour un seuil à 215). Le modèle Python que j'avais écrit avant de coder était 30 % trop chaud. Le test dit maintenant à quelle température le voisin a pris.
+>
+> **Ce que le champ apporte en plus, sans une ligne de règle** : une pièce fermée garde sa chaleur (l'**isolation** du matériau freine l'échange — une paroi isolante retient, un métal donne), un corps souffre de l'air lui-même au-delà de 70 °C ou sous −12 °C (le feu et la lave gardent leur brûlure **au contact** : pas de double comptage), et le vent n'est pas perdu — il **attise la source** au lieu de doubler un tirage.
+>
+> **Ce que ce champ n'absorbe PAS encore**, et il faut le dire pour ne pas mentir : la neige et le gel restent des **drapeaux de grille** (`grille.neige`, `grille.gel`) posés par la météo, pas des lectures du champ ; la température ressentie de la météo reste sa propre fonction ; le gaz inflammable garde sa règle d'allumage. Ces trois-là tomberont quand la matière saura **fondre** — c'est-à-dire avec la stat `fusion` de [[Matériaux — 13 stats]], qui n'existe pas encore.
 
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Matériaux — 13 stats]], [[Application des stats de matériau]], [[Grille continue]]

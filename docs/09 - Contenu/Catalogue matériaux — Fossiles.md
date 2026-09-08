@@ -8,16 +8,20 @@ etape: 6
 
 Les 6 fossiles et curiosités — objets de collection, vente aux érudits, décoration.
 
-**Fossiles & curiosités souterraines (6) — outil : pioche, compétence Minage — objets de collection, vente aux érudits, déco**
+**Fossiles & curiosités souterraines (10) — outil : pioche, compétence Minage — objets de collection, vente aux érudits, déco**
 
-| Matériau | Dur | Den | Val | CMa | Fla | Iso | CÉl | Flo | Lum | Fer | Tra | Éla | Fri | Notes |
-|---|--|--|--|--|--|--|--|--|--|--|--|--|--|---|
-| Os fossile | 10 | 9 | 15 | 12 | 3 | 20 | 6 | 15 | 0 | 5 | 0 | 6 | 45 | Squelettes géants dans les strates profondes |
-| Ammonite | 9 | 9 | 18 | 15 | 0 | 20 | 6 | 12 | 0 | 0 | 0 | 4 | 42 | Spirales fossiles, prisées des érudits |
-| Bois pétrifié | 16 | 13 | 14 | 18 | 0 | 22 | 8 | 4 | 0 | 0 | 0 | 3 | 48 | Bois devenu pierre — constructible, esthétique unique |
-| Coquillage fossile | 7 | 8 | 8 | 10 | 0 | 22 | 6 | 18 | 0 | 3 | 0 | 4 | 44 | Anciennes mers, trouvé en calcaire |
-| Géode | 13 | 11 | 22 | 45 | 0 | 18 | 12 | 4 | 15 | 0 | 20 | 2 | 36 | À briser : contient des cristaux aléatoires |
-| Météorite ferreuse | 38 | 20 | 60 | 40 | 0 | 8 | 65 | 1 | 0 | 0 | 0 | 7 | 26 | Fer météorique — rare, forge d'exception |
+| Matériau | Dur | Den | Val | CMa | Fla | Iso | CÉl | Flo | Lum | Fer | Tra | Éla | Fri |
+|---|--|--|--|--|--|--|--|--|--|--|--|--|--|
+| Os fossile | 6 | 9 | 8 | 7 | 3 | 20 | 6 | 15 | 0 | 5 | 0 | 6 | 45 |
+| Ammonite | 8 | 9 | 15 | 13 | 0 | 20 | 6 | 12 | 0 | 0 | 0 | 4 | 42 |
+| Bois pétrifié | 14 | 13 | 12 | 15 | 0 | 22 | 8 | 4 | 0 | 0 | 0 | 3 | 48 |
+| Coquillage fossile | 4 | 8 | 4 | 6 | 0 | 22 | 6 | 18 | 0 | 3 | 0 | 4 | 44 |
+| Géode | 17 | 11 | 29 | 58 | 0 | 18 | 12 | 4 | 15 | 0 | 20 | 2 | 36 |
+| Météorite ferreuse | 106 | 20 | 168 | 112 | 0 | 8 | 65 | 1 | 0 | 0 | 0 | 7 | 26 |
+| Corail | 21 | 6 | 26 | 58 | 0 | 22 | 3 | 25 | 4 | 0 | 10 | 8 | 30 |
+| Dent fossile | 73 | 9 | 73 | 84 | 0 | 26 | 3 | 14 | 0 | 0 | 0 | 6 | 34 |
+| Nacre | 23 | 5 | 49 | 95 | 0 | 20 | 2 | 22 | 18 | 0 | 20 | 7 | 14 |
+| Trilobite | 30 | 8 | 42 | 65 | 0 | 24 | 3 | 12 | 0 | 0 | 0 | 4 | 30 |
 
 **Placement ([[Minerais par profondeur]]) :** os/ammonites/coquillages dans les **roches sédimentaires** (calcaire, schiste, grès) à toutes profondeurs ; **bois pétrifié** dans le tuf ; **météorite ferreuse** : poches ultra-rares à toute profondeur + **sites d'impact de surface** (POI rare). Les **géodes** apparaissent dans la bande −80 → −220.
 

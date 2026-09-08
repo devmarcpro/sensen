@@ -49,6 +49,13 @@ var evapo_heure := -1   # la dernière heure de canicule où les flaques ont bai
 var peremption_heure := -1   # la dernière heure où le butin de mort périmé a été balayé (Mort et pénalité)
 var eau_active: Dictionary = {}   # idx → true : tuiles de liquide à propager (Eau et liquides)
 var feux: Dictionary = {}   # idx → {reste} : tuiles en feu (Météo : le feu de tuile)
+# Le champ de chaleur (Émergence — les champs partagés) : en degrés, sur la couche 0 de la fenêtre, jamais
+# sauvegardé — il se reconstruit de ses sources comme la carte de lumière. `chaleur_active` le rend incrémental :
+# seules les tuiles qui s'écartent de l'ambiante y sont, comme `eau_active`.
+var carte_chaleur := PackedFloat32Array()
+var chaleur_active: Dictionary = {}
+var chaleur_prochain_pas := 0
+var chaleur_grille: Grille = null   # la grille dont la carte est dimensionnée : elle se refait si la grille change
 var feu_prochain_pas := 0
 var poches_gaz: Dictionary = {}   # idx → gaz : les poches scellées dans le plein de l'étage (Gaz dans le sol)
 var poches_sous_sol: Dictionary = {}   # idx → eau | geode | magma : les autres poches du plein (Gaz dans le sol, 18 h 40)
@@ -854,6 +861,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 		SimTerrain._tiquer_lave(self, tick)
 		SimTerrain._tiquer_feux(self, tick)
 		SimTerrain._tiquer_gaz(self, tick)
+		SimTerrain._tiquer_chaleur(self, tick)
 		var h_per := int(SimTerrain._cycle(self).get("ticks_par_jour", 24000)) / 24
 		if tick / h_per != peremption_heure:
 			peremption_heure = tick / h_per
@@ -4953,6 +4961,15 @@ func _tiquer_feux(tick: int) -> void:
 
 func _tiquer_gaz(tick: int) -> void:
 	SimTerrain._tiquer_gaz(self, tick)
+
+func _tiquer_chaleur(tick: int) -> void:
+	SimTerrain._tiquer_chaleur(self, tick)
+
+func chaleur_a(t: Vector2i) -> float:
+	return SimTerrain.chaleur_a(self, t)
+
+func chauffer(t: Vector2i, degres: float) -> void:
+	SimTerrain.chauffer(self, t, degres)
 
 func _liberer_gaz(breche: Vector2i, gaz_id: String, tick: int) -> int:
 	return SimTerrain._liberer_gaz(self, breche, gaz_id, tick)

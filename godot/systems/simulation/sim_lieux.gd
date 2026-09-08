@@ -723,6 +723,10 @@ static func _vider_etats_tuiles(sim: Simulation, change_de_lieu: bool = false) -
 		sim.affuts.clear()
 	sim.feux.clear()
 	sim.gaz_prochain_pas = 0
+	sim.carte_chaleur = PackedFloat32Array()   # le champ de chaleur est indexé sur la grille : il se refait
+	sim.chaleur_active.clear()
+	sim.chaleur_grille = null
+	sim.chaleur_prochain_pas = 0
 	sim.eau_active.clear()
 	sim.glyphes.clear()
 	sim.obstacles.clear()

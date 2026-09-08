@@ -6,13 +6,14 @@ statut: décidé
 etape: 6
 ---
 
-Les catalogues prêts à transcrire en JSON. 35 notes.
+Les catalogues prêts à transcrire en JSON. 36 notes.
 
 *Toutes les valeurs sont fixées et implémentables telles quelles ; le playtest les ajuste, il n'a rien à inventer.*
 
 **Les matériaux (153, monde réel uniquement)**
 - **[[Catalogue matériaux — Bois]]** (40) — *chaque essence a un rôle : l'essence se choisit comme la gemme.*
 - **[[Catalogue matériaux — Métaux]]** — le Fer (dureté 25) est l'étalon des armes.
+- **[[Catalogue matériaux — Animal]]** — les matières du dépeçage, écrites le 2026-09-08 depuis les fiches : elles n'avaient jamais eu de catalogue.
 - **[[Catalogue matériaux — Roches]]** — les paliers serrés de dureté sont **voulus**.
 - **[[Catalogue matériaux — Terres]]** (6) · **[[Catalogue matériaux — Végétaux et fibres]]** (8) · **[[Catalogue matériaux — Liquides]]** (7)
 - **[[Catalogue matériaux — Minéraux]]** — combustibles, pigments, engrais, isolants.

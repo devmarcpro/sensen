@@ -44,7 +44,7 @@ Puis, selon le besoin : **[[Vers la production]]** (ce qui reste avant de coder)
 | **[[Carte — Êtres]]** | l'être unique, apparence, IA, compagnons, familles | 19 |
 | **[[Carte — Société]]** | relations, guildes, économie, royaumes, lois | 37 |
 | **[[Carte — Technique]]** | architecture Godot, données, performance, réseau | 23 |
-| **[[Carte — Contenu]]** | les catalogues prêts à transcrire en JSON | 35 |
+| **[[Carte — Contenu]]** | les catalogues prêts à transcrire en JSON | 36 |
 | **[[Carte — Ouvert]]** | décisions, défauts fixés, et ce qui reste ouvert | 44 |
 
 ---

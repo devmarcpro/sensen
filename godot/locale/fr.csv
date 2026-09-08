@@ -4449,3 +4449,4 @@ journal.deuil,"{village} porte le deuil : {n} habitant(s), dont {proches} proche
 journal.deuil_accuse,"à {village}, on sait qui l'a tué (réputation {reputation})"
 function.journalier.name,Journalier
 function.portefaix.name,Portefaix
+journal.chaleur_blesse,"{nom} souffre de la chaleur ({degres} °C, {degats})"

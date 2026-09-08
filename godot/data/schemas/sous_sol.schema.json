@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "required": [
+    "eau",
+    "geodes",
+    "magma"
+  ]
+}

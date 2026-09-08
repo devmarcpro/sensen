@@ -4440,3 +4440,4 @@ journal.deuil,"{village} mourns: {n} inhabitant(s), {proches} of them kin"
 journal.deuil_accuse,"in {village}, they know who killed him (reputation {reputation})"
 function.journalier.name,Day labourer
 function.portefaix.name,Porter
+journal.chaleur_blesse,"{nom} suffers from the heat ({degres} °C, {degats})"

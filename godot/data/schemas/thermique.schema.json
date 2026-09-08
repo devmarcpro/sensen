@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "required": [
+    "periode_ticks",
+    "diffusion",
+    "isolation_ref",
+    "retour_ambiante",
+    "epsilon",
+    "sources",
+    "ignition",
+    "degats"
+  ]
+}

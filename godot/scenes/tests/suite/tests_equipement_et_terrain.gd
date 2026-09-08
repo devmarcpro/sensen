@@ -671,13 +671,19 @@ func test_feu() -> void:
 	verifier(s.flammabilite_de(base) == 70 and s.flammabilite_de(pierre) == 0 and s.flammabilite_de(base + Vector2i(0, 1)) == 0, "un pin brûle (70), le granit et le sol nu non")
 	verifier(s._enflammer(base) and not s._enflammer(base) and not s._enflammer(pierre), "le premier pin prend feu, une seule fois ; le granit jamais")
 	var tick := 2000
-	s.regles.r.feu["propagation"] = 1.5   # déterministe pour le test : un pin voisin prend à coup sûr
+	# La propagation passe désormais par le CHAMP DE CHALEUR (Émergence — les champs partagés) : le feu chauffe sa
+	# tuile, la chaleur diffuse, et le pin voisin s'enflamme quand elle atteint le seuil de sa matière (70 → 215 °C).
+	# Plus de tirage, donc plus de réglage à forcer : le test regarde la physique, pas un dé.
 	var propage := false
+	var monte := 0.0
 	for k in 30:
 		s._tiquer_feux(tick + k * 10)
+		s._tiquer_chaleur(tick + k * 10)
+		if not propage:   # la temperature qui a DECLENCHE, pas celle du voisin une fois en flammes
+			monte = maxf(monte, s.chaleur_a(base + Vector2i(1, 0)))
 		if s.feux.size() > 1:
 			propage = true
-	verifier(propage, "le feu gagne les pins voisins")
+	verifier(propage, "le feu gagne les pins voisins par le champ de chaleur (le voisin est monté à %.0f °C)" % monte)
 	verifier(s.grille.contenu_de(base).is_empty() and s.modifs_terrain.has(base), "le premier pin est consumé, terrain mémorisé")
 	# Brûler : un loup posé sur une tuile en feu
 	for idx in s.feux.keys().duplicate():

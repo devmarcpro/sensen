@@ -8,21 +8,25 @@ etape: 3
 
 Les 11 gemmes — chacune a un rôle, le choix n'est plus esthétique mais tactique.
 
-**Gemmes & cristaux (11) — outil : pioche, compétence Minage, transformation : Table d'enchantement**
+**Gemmes & cristaux (15) — outil : pioche, compétence Minage, transformation : Table d'enchantement**
 
-| Matériau | Dur | Den | Val | CMa | Fla | Iso | CÉl | Flo | Lum | Fer | Tra | Éla | Fri | Notes |
-|---|--|--|--|--|--|--|--|--|--|--|--|--|--|---|
-| Quartz | 20 | 9 | 8 | 45 | 0 | 15 | 25 | 3 | 10 | 0 | 70 | 2 | 30 | générique abordable |
-| Améthyste | 22 | 9 | 25 | 75 | 0 | 15 | 45 | 3 | 25 | 0 | 68 | 2 | 30 | équilibre mana/foudre |
-| Topaze | 28 | 9 | 30 | 60 | 0 | 10 | 70 | 3 | 14 | 0 | 66 | 2 | 30 | LA gemme de foudre |
-| Grenat | 24 | 10 | 18 | 55 | 0 | 12 | 24 | 3 | 10 | 0 | 58 | 2 | 30 | le "budget" du mage |
-| Opale | 12 | 7 | 45 | 92 | 0 | 18 | 22 | 4 | 45 | 0 | 55 | 5 | 32 | reine du mana, FRAGILE |
-| Jade | 26 | 10 | 38 | 50 | 0 | 35 | 15 | 3 | 8 | 0 | 40 | 25 | 34 | la plus tenace (élastique) |
-| Rubis | 27 | 9 | 40 | 78 | 0 | 0 | 25 | 3 | 22 | 0 | 62 | 2 | 30 | affinité feu (iso 0) |
-| Saphir | 27 | 9 | 40 | 78 | 0 | 80 | 28 | 3 | 12 | 0 | 66 | 2 | 30 | affinité froid (iso 80) |
-| Émeraude | 24 | 9 | 50 | 82 | 0 | 15 | 26 | 3 | 12 | 0 | 64 | 2 | 30 | mana haut, la + précieuse hors diamant |
-| Diamant | 40 | 9 | 80 | 55 | 0 | 15 | 12 | 3 | 20 | 0 | 85 | 1 | 28 | dureté inégalée, mana moyen |
-| Onyx | 26 | 9 | 30 | 65 | 0 | 12 | 20 | 3 | 5 | 0 | 30 | 2 | 30 | LA gemme de Métal (sertissage Métal) — ajoutée 2026-08-26 |
+| Matériau | Dur | Den | Val | CMa | Fla | Iso | CÉl | Flo | Lum | Fer | Tra | Éla | Fri |
+|---|--|--|--|--|--|--|--|--|--|--|--|--|--|
+| Quartz | 30 | 9 | 7 | 38 | 0 | 15 | 2 | 3 | 10 | 0 | 70 | 2 | 30 |
+| Améthyste | 46 | 9 | 32 | 98 | 0 | 15 | 2 | 3 | 25 | 0 | 68 | 2 | 30 |
+| Topaze | 52 | 9 | 39 | 78 | 0 | 10 | 2 | 3 | 14 | 0 | 66 | 2 | 30 |
+| Grenat | 46 | 10 | 23 | 72 | 0 | 12 | 2 | 3 | 10 | 0 | 58 | 2 | 30 |
+| Opale | 53 | 7 | 86 | 175 | 0 | 18 | 2 | 4 | 45 | 0 | 55 | 5 | 32 |
+| Jade | 61 | 10 | 72 | 95 | 0 | 35 | 2 | 3 | 8 | 0 | 40 | 25 | 34 |
+| Rubis | 86 | 9 | 76 | 148 | 0 | 0 | 2 | 3 | 22 | 0 | 62 | 2 | 30 |
+| Saphir | 86 | 9 | 76 | 148 | 0 | 80 | 2 | 3 | 12 | 0 | 66 | 2 | 30 |
+| Émeraude | 74 | 9 | 95 | 156 | 0 | 15 | 2 | 3 | 12 | 0 | 64 | 2 | 30 |
+| Diamant | 140 | 9 | 224 | 154 | 0 | 15 | 2 | 3 | 20 | 0 | 85 | 1 | 28 |
+| Onyx | 30 | 9 | 26 | 55 | 0 | 12 | 2 | 3 | 5 | 0 | 30 | 2 | 30 |
+| Agate | 19 | 7 | 9 | 22 | 0 | 22 | 2 | 10 | 0 | 0 | 35 | 5 | 18 |
+| Aigue-marine | 49 | 7 | 44 | 81 | 0 | 20 | 2 | 9 | 8 | 0 | 70 | 5 | 16 |
+| Perle | 8 | 6 | 23 | 30 | 0 | 25 | 2 | 20 | 20 | 0 | 15 | 6 | 12 |
+| Tourmaline | 32 | 7 | 24 | 49 | 0 | 21 | 2 | 9 | 4 | 0 | 45 | 5 | 17 |
 
 *(Colonne "Notes" ajoutée : chaque gemme a désormais un rôle — le choix n'est plus esthétique mais tactique.)*
 

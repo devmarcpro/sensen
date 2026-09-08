@@ -2124,18 +2124,37 @@ func test_metiers_sans_batiment() -> void:
 	for f in ["journalier", "portefaix"]:
 		var fd: Dictionary = GameData.catalogues.functions.get(f, {})
 		verifier(not fd.is_empty() and "sans_batiment" in fd.get("tags", []) and not str(fd.get("skill", "")).is_empty(), "la fonction %s existe, marquée sans_batiment, avec sa compétence (%s)" % [f, str(fd.get("skill", ""))])
-	# une ville engendrée : combien de bras, combien d'oisifs
-	# On part d'un monde chargé : ses cellules peuplées sont déjà là, et l'on n'en engendre pas cent soixante-neuf
-	# à l'aveugle (la première version balayait 13 × 13 cellules sans trouver un village de vingt âmes).
-	var s := Simulation.new(4242)
+	# Une vraie ville : combien de bras, combien d'oisifs.
+	# Deux versions ont échoué avant celle-ci : la première engendrait 169 cellules à l'aveugle sans trouver de village
+	# de vingt âmes ; la seconde lisait `monde.cellules` d'un camp fraîchement chargé — mais seule la fenêtre autour du
+	# joueur y est, et le camp n'est pas une ville. On reprend donc le motif de `test_tombes_nommees` : on CHERCHE la
+	# plus grande agglomération dans les fiches de surface (qui n'engendrent aucune tuile), puis on y VOYAGE.
+	var s := Simulation.new(31)
 	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var c0: Vector2i = s.monde.cellule_camp
+	var fiche: Dictionary = {}
+	for dy in range(-14, 15):
+		for dx in range(-14, 15):
+			var cv := c0 + Vector2i(dx, dy)
+			if surf.terre_a(cv) and bool(surf.poi_de(cv).get("village", false)):
+				var f2: Dictionary = surf.fiche_agglomeration(cv)
+				if not f2.is_empty() and (fiche.is_empty() or int(f2.population) > int(fiche.population)):
+					fiche = f2
+	verifier(not fiche.is_empty(), "une agglomération à quatorze cellules du camp")
+	if fiche.is_empty():
+		return
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var n_g: int = s.monde.taille / 32
+	s.monde.explores[Vector2i(int(fiche.centre.x) * n_g, int(fiche.centre.y) * n_g)] = true
+	s.voyager(j, fiche.centre)
 	var trouvee := false
 	for cell in s.monde.cellules.keys():
-		if not trouvee:
-			var e: Dictionary = s.monde.cellules[cell]
-			var v: Dictionary = e.get("village", {})
-			if v.is_empty() or v.get("pnj", []).size() < 8:
-				continue
+		if trouvee:
+			break
+		var v: Dictionary = s.monde.cellules[cell].get("village", {})
+		if v.is_empty() or v.get("pnj", []).size() < 8:
+			continue
 		trouvee = true
 		var par_fonction := {}
 		for pj in v.pnj:
@@ -2149,5 +2168,5 @@ func test_metiers_sans_batiment() -> void:
 			if str(pj.get("fonction", "")) == "journalier":
 				verifier(pj.has("poste"), "un journalier a un poste où aller")
 				break
-	verifier(trouvee, "une ville peuplée a été trouvée dans le monde chargé pour la mesure")
+	verifier(trouvee, "une ville d'au moins huit âmes sous la main pour la mesure (%s, %d habitants)" % [str(fiche.nom), int(fiche.population)])
 

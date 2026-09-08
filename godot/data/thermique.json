@@ -1,0 +1,27 @@
+{
+  "_doc": "Le champ de chaleur (Emergence — les champs partages, 2026-09-08). Un champ en DEGRES sur la couche 0 de la fenetre, recalcule de ses sources, jamais sauvegarde. periode_ticks : la cadence du pas. diffusion : la part de l ecart avec la moyenne des quatre voisines transferee a chaque pas, moderee par l isolation de la matiere de la tuile (isolation_ref = l isolation qui divise la diffusion par deux). retour_ambiante : ce qui ramene chaque tuile vers l ambiante a chaque pas. epsilon : sous cet ecart a l ambiante une tuile quitte le champ actif — c est ce qui rend le champ incremental. actives_max : au-dela, le champ cesse de s etendre aux voisines (garde-fou de cout). ambiante_souterraine : l ambiante hors du camp, la roche tempere. sources : la temperature imposee par ce qui chauffe ; le vent attise le feu par feu.vent_mult des regles de combat. ignition : une tuile s enflamme quand sa chaleur atteint le seuil de sa matiere, interpole lineairement entre seuil_min (flammabilite 100) et seuil_max (flammabilite 0) — CE CHAMP REMPLACE le jet de propagation du feu et l ignition directe par la lave. degats : ce que la chaleur ou le froid font a l occupant d une tuile qui n est ni en feu ni de la lave (ces deux-la brulent au contact, c est leur regle propre) ; le multiplicateur est plafonne par facteur_max. Cale le 2026-09-08 SUR LA MESURE DU JEU, pas sur un modele : un premier calage a echoue d un degre (le voisin montait a 214 C pour un seuil a 215). Avec un feu a 1100 C — la temperature reelle du coeur d une flamme de bois — une tuile voisine monte a ~248 C ; les seuils donnent alors le pin (flammabilite 70) a 176 C, une culture (60) a 208, une plante sauvage (50) a 240 : les trois prennent d un feu voisin avec 40 a 70 degres de marge. Un meuble (40) demande 272 C et une matiere peu inflammable (20) 336 : ceux-la veulent de la lave ou un brasier, pas un feu de camp.",
+  "periode_ticks": 10,
+  "diffusion": 0.45,
+  "isolation_ref": 45.0,
+  "retour_ambiante": 0.035,
+  "epsilon": 1.5,
+  "actives_max": 4096,
+  "ambiante_souterraine": 12.0,
+  "sources": {
+    "feu": 1100.0,
+    "lave": 1150.0
+  },
+  "ignition": {
+    "seuil_min": 110.0,
+    "seuil_max": 400.0,
+    "flammabilite_min": 1
+  },
+  "degats": {
+    "seuil_chaud": 70.0,
+    "seuil_froid": -12.0,
+    "des": "1d4",
+    "brulure_ticks": 20,
+    "par_degre": 0.01,
+    "facteur_max": 2.5
+  }
+}

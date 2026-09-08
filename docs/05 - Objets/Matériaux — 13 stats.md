@@ -51,6 +51,24 @@ Le choix du matériau dans un craft est donc un **arbitrage multidimensionnel**,
 > Cinquante-huit corrections sur quarante-cinq fiches. La courbe du butin par niveau de donjon ne bouge pas.
 
 
+> [!important] Décidé le 2026-09-08 — cinq stats manquent aux matériaux, et ce sont exactement celles que les champs liraient (designer : « il doit manquer des stats aux matériaux pour mettre tous les systèmes en place non ? »)
+> **La question est juste, et la réponse se déduit** : chaque champ de [[Émergence — les champs partagés]] a besoin d'une propriété de matière pour dire *comment* la tuile réagit, et treize stats n'en offrent que la moitié. Le champ de chaleur codé ce matin lit `isolation`, `flammabilite` et `densite` — il n'a rien pour dire qu'une chose **fond**. Les cinq suivantes ne sont pas des décorations : chacune est **la stat sans laquelle un champ décidé ne peut pas exister**.
+>
+> | Stat | Ce qu'elle dit | Le champ qui la lit | Ce qu'on perd sans elle |
+> |---|---|---|---|
+> | `fusion` | la température (°C) où la matière change d'état ; **0 = elle ne fond pas** (elle brûle, se décompose, ou tient jusqu'à disparaître) | **chaleur** | La chaleur ne sait que **brûler**. Rien ne fond, rien ne cuit, rien ne vitrifie : ni la glace au soleil, ni la cire près d'une flamme, ni le sable en verre, ni le minerai en lingot. Le four et la forge restent des recettes hors du monde. |
+> | `portance` | combien la matière tient **en porte-à-faux** avant de céder (0-100) | **support / gravité** | Pas d'effondrement possible : la seule chose qui sépare une mine d'un gouffre ([[Mine sous une cellule]]) reste non codée, et **étayer** ne peut pas devenir un geste. |
+> | `absorption` | ce que la matière **étouffe du bruit** (0-100) | **bruit** | Un cri traverse un donjon comme s'il n'y avait pas de murs. Le champ de bruit — « celui qui manque le plus » — serait une simple distance, pas un lieu. |
+> | `permeabilite` | ce que l'**eau** traverse (0-100) | **eau qui pèse** | Une nappe n'a aucune raison d'exister (c'est l'argile imperméable qui la retient), un barrage ne tient pas, et le sable ne filtre pas. Les poches d'eau du 2026-09-07 restent des robinets. |
+> | `alteration` | la vitesse à laquelle la matière **se dégrade exposée** (0-100) | **temps long** | Rien ne vieillit : pas de ruine, pas de rouille, pas de reconquête par la nature. |
+>
+> **Ce qui n'est PAS une stat manquante**, et pourquoi : la *chaleur spécifique* — `densite` la porte déjà (une matière dense change de température lentement) ; la *conductivité thermique* — `isolation` est son inverse, en avoir deux serait deux vérités ; la *toxicité* — elle appartient au gaz et à la plante, pas à la tuile ([[Gaz dans le sol]] a son propre fichier) ; la *résistance chimique* — la chimie générale est explicitement hors périmètre.
+>
+> **La contrainte de méthode, et elle s'est révélée pire que prévu** : `tools/gen_materials.py` **efface et régénère** les 248 fiches depuis les tables des onze catalogues — « la table fait foi, pas le script ». Sauf que la vérification faite le 2026-09-08 dit que **ce n'est plus vrai** : 94 matériaux sur 248 n'ont plus de ligne de table, et sur les 154 restants la dureté diverge sur 140 fiches (le diamant : 40 dans la note, 140 dans la donnée). Les cinq stats entreront bien comme **cinq colonnes des tables**, mais **après** la remise en accord des catalogues — voir [[Vers la production]], ligne 141. Et les valeurs suivent la règle de la passe du 2026-09-02 : **respecter l'ordre du monde réel, pas ses unités** — un joueur ignore le point de fusion du plomb, mais il sait que le plomb fond avant le fer et que la glace fond avant tout.
+>
+> **Le titre de cette note ment à partir de maintenant** : elle en dira **18**. Renommée quand les colonnes sont écrites, l'alias « 13 stats » conservé pour les 39 liens du coffre.
+
+
 ## Liens
 - **Dépend de** : [[Data-driven design]]
 - **Alimente** : [[Application des stats de matériau]], [[Schéma matériau]], [[Stats d'un objet crafté]], [[Récolte]], [[Craft compositionnel]]

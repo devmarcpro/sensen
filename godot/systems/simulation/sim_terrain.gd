@@ -259,8 +259,8 @@ static func _tiquer_lave(sim: Simulation, tick: int) -> void:
 				sim.grille.oter_eau(sim.grille.idx(q))
 				sim.grille.marquer(q)
 				EventBus.emettre(&"tile_changed", [q])
-			else:
-				_enflammer(sim, q)
+			# Plus d'ignition directe : la coulée CHAUFFE (Émergence — les champs partagés) et la voisine s'enflamme
+			# quand sa chaleur atteint le seuil de sa matière. C'est la même règle que pour le feu.
 		if not fige.is_empty():
 			_figer_lave(sim, t, fige)
 
@@ -384,6 +384,177 @@ static func _liberer_sous_sol(sim: Simulation, breche: Vector2i, genre: String, 
 	EventBus.emettre(&"tile_changed", [breche])
 
 
+## Les effets météo de la cellule sous la fenêtre — lus par le feu (qui s'éteint sous la neige) et par la chaleur
+## (le vent attise). Extrait le 2026-09-08 pour que les deux disent la même chose.
+static func _effets_meteo(sim: Simulation) -> Array:
+	if sim.lieu != "camp" or sim.monde == null:
+		return []
+	var centre := sim.grille.pos_de(sim.grille.largeur * sim.grille.hauteur_grille / 2)
+	return GameData.catalogues.weather_states.get(meteo(sim, sim.monde.cellule_de(centre)), {}).get("effects", [])
+
+
+## ---------------------------------------------------------------- le champ de chaleur (Émergence, 2026-09-08)
+
+## La chaleur d'une tuile, en degrés. Hors du champ actif c'est l'ambiante : le champ ne stocke que ce qui s'en écarte.
+static func chaleur_a(sim: Simulation, t: Vector2i) -> float:
+	if sim.carte_chaleur.is_empty() or not sim.grille.dans(t):
+		return ambiante_de(sim)
+	var i := sim.grille.idx(t)
+	if i < 0 or i >= sim.carte_chaleur.size():
+		return ambiante_de(sim)
+	return float(sim.carte_chaleur[i])
+
+
+## L'ambiante : la température de la cellule au camp, une valeur fixe ailleurs — sous terre, la roche tempère.
+static func ambiante_de(sim: Simulation) -> float:
+	if sim.lieu == "camp" and sim.monde != null:
+		return temperature_cellule(sim)
+	return float(GameData.config("thermique").get("ambiante_souterraine", 12.0))
+
+
+## Verser des degrés sur une tuile — le geste qu'emploie tout ce qui chauffe : un feu, une coulée, et demain un noyau
+## de sort. La tuile entre dans le champ actif, et c'est ce qui réveille la diffusion autour d'elle.
+static func chauffer(sim: Simulation, t: Vector2i, degres: float) -> void:
+	if not sim.grille.dans(t):
+		return
+	_chaleur_dimensionner(sim)
+	var i := sim.grille.idx(t)
+	if i < 0 or i >= sim.carte_chaleur.size():
+		return
+	sim.carte_chaleur[i] = maxf(float(sim.carte_chaleur[i]), degres)
+	sim.chaleur_active[i] = true
+
+
+## La carte, dimensionnée sur la couche 0 de la grille courante et remplie de l'ambiante. Elle se refait quand la
+## grille change : ses index ne veulent rien dire ailleurs.
+static func _chaleur_dimensionner(sim: Simulation) -> void:
+	var n := sim.grille.largeur * sim.grille.hauteur_grille
+	if sim.chaleur_grille == sim.grille and sim.carte_chaleur.size() == n:
+		return
+	sim.chaleur_grille = sim.grille
+	sim.carte_chaleur = PackedFloat32Array()
+	sim.carte_chaleur.resize(n)
+	sim.chaleur_active.clear()
+	var amb := ambiante_de(sim)
+	for i in n:
+		sim.carte_chaleur[i] = amb
+
+
+## Le pas du champ de chaleur. Les sources imposent leur température, la chaleur diffuse vers les quatre voisines
+## (modérée par l'isolation de la matière), tout revient vers l'ambiante, et ce qui l'a rejointe quitte le champ actif.
+## Puis les CONSOMMATEURS : une tuile s'enflamme quand sa chaleur atteint le seuil de sa matière — ce qui remplace le
+## jet de propagation du feu et l'ignition directe par la lave — et l'occupant d'une tuile trop chaude ou trop froide
+## en souffre (sauf sur le feu et la lave eux-mêmes : ceux-là brûlent au contact, c'est leur règle propre).
+static func _tiquer_chaleur(sim: Simulation, tick: int) -> void:
+	var cfg: Dictionary = GameData.config("thermique")
+	if cfg.is_empty() or tick < sim.chaleur_prochain_pas:
+		return
+	sim.chaleur_prochain_pas = tick + maxi(1, int(cfg.get("periode_ticks", 10)))
+	var amb := ambiante_de(sim)
+	# 1. Les sources. Le vent attise le feu — c'est ce qui reste de `vent_mult` après le retrait du jet.
+	var src: Dictionary = cfg.get("sources", {})
+	var effets: Array = _effets_meteo(sim)
+	var vent := 1.0
+	if "vent" in effets or "tempete" in effets:
+		vent = float(sim.regles.r.get("feu", {}).get("vent_mult", 2.0))
+	var laves := {}
+	for idx in sim.feux.keys():
+		chauffer(sim, sim.grille.pos_de(int(idx)), float(src.get("feu", 950.0)) * vent)
+	for idx in sim.grille.dangers.keys():
+		var td := sim.grille.pos_de(int(idx))
+		if "lave" in sim.grille.contenu_de(td).get("tags", []):
+			laves[int(idx)] = true
+			chauffer(sim, td, float(src.get("lave", 1150.0)))
+	if sim.chaleur_active.is_empty():
+		return   # rien ne chauffe : le champ EST l'ambiante, et le pas ne coûte rien
+	_chaleur_dimensionner(sim)
+	# 2. La diffusion, sur les seules tuiles actives et leurs voisines — jamais sur la fenêtre entière.
+	var diff := float(cfg.get("diffusion", 0.45))
+	var iso_ref := float(cfg.get("isolation_ref", 45.0))
+	var retour := float(cfg.get("retour_ambiante", 0.035))
+	var eps := float(cfg.get("epsilon", 1.5))
+	var etendre := sim.chaleur_active.size() < int(cfg.get("actives_max", 4096))
+	var mats: Dictionary = GameData.catalogues.materials
+	var a_traiter := {}
+	for idx in sim.chaleur_active.keys():
+		a_traiter[int(idx)] = true
+		if not etendre:
+			continue
+		var tv := sim.grille.pos_de(int(idx))
+		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			if sim.grille.dans(tv + dd):
+				a_traiter[sim.grille.idx(tv + dd)] = true
+	var cles: Array = a_traiter.keys()
+	cles.sort()   # un ordre FIXE : la suite compare des résultats exacts, un champ diffusé ne peut pas dépendre du hasard
+	var neuf := {}
+	for idx in cles:
+		var i := int(idx)
+		if i < 0 or i >= sim.carte_chaleur.size():
+			continue
+		var t := sim.grille.pos_de(i)
+		var somme := 0.0
+		var n_v := 0
+		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var q: Vector2i = t + dd
+			if not sim.grille.dans(q):
+				continue
+			somme += chaleur_a(sim, q)
+			n_v += 1
+		var cur := float(sim.carte_chaleur[i])
+		var v := cur
+		if n_v > 0:
+			# L'isolation de la matière freine l'échange : une paroi isolante garde sa chaleur, un métal la donne.
+			var mat := str(sim.grille.materiau_de(t))
+			if mat.is_empty():
+				mat = str(sim.grille.materiau_sol(t))
+			var iso := float(mats.get(mat, {}).get("stats", {}).get("isolation", 0.0))
+			v += diff * (iso_ref / maxf(1.0, iso_ref + iso)) * (somme / float(n_v) - cur)
+		v += retour * (amb - v)
+		neuf[i] = v
+	for i in neuf.keys():
+		sim.carte_chaleur[int(i)] = float(neuf[i])
+		if absf(float(neuf[i]) - amb) <= eps:
+			sim.chaleur_active.erase(int(i))
+		else:
+			sim.chaleur_active[int(i)] = true
+	# 3. Les consommateurs.
+	var ig: Dictionary = cfg.get("ignition", {})
+	var dg: Dictionary = cfg.get("degats", {})
+	var s_min := float(ig.get("seuil_min", 110.0))
+	var s_max := float(ig.get("seuil_max", 460.0))
+	var chaud := float(dg.get("seuil_chaud", 70.0))
+	var froid := float(dg.get("seuil_froid", -12.0))
+	for idx in sim.chaleur_active.keys():
+		var i := int(idx)
+		var t := sim.grille.pos_de(i)
+		var c := float(sim.carte_chaleur[i])
+		# a. L'ignition : le seuil d'une tuile s'interpole sur sa flammabilité. C'est ce qui REMPLACE les deux jets.
+		var fl := flammabilite_de(sim, t)
+		if fl >= int(ig.get("flammabilite_min", 1)) and not sim.feux.has(i):
+			if c >= s_max - clampf(float(fl) / 100.0, 0.0, 1.0) * (s_max - s_min):
+				_enflammer(sim, t)
+		# b. Ce qu'un corps prend de l'air lui-même. Le feu et la lave brûlent au contact : leur tuile n'est pas ici.
+		if sim.feux.has(i) or laves.has(i):
+			continue
+		var occ := sim.grille.occupant(t)
+		if occ.is_empty() or not sim.entites.has(occ) or not sim.entites[occ].vivant:
+			continue
+		var c_ecart := 0.0
+		if c >= chaud:
+			c_ecart = c - chaud
+		elif c <= froid:
+			c_ecart = froid - c
+		if c_ecart <= 0.0:
+			continue
+		var x: Dictionary = sim.entites[occ]
+		var fact := minf(float(dg.get("facteur_max", 2.5)), 1.0 + c_ecart * float(dg.get("par_degre", 0.01)))
+		var deg := maxi(1, roundi(float(sim.des.jet(str(dg.get("des", "1d4")))) * fact))
+		sim._appliquer_degats(x, deg, "", {"type": "chaleur", "element": {"feu": 1.0} if c >= chaud else {"eau": 1.0}})
+		if c >= chaud:
+			sim.appliquer_statut(x, "brulure", int(dg.get("brulure_ticks", 20)), "")
+		EventBus.emettre(&"journal", [&"journal.chaleur_blesse", {"nom": x.name_key, "degres": int(c), "degats": deg}])
+
+
 ## Le pas du gaz (Gaz dans le sol), à la cadence de `gaz.periode_ticks` : chaque zone de gaz fait sa nature à son
 ## occupant (dégâts, statut) ; un gaz inflammable qu'une flamme touche — une lumière en main, un feu au sol, de la lave
 ## voisine — explose avec la formule des Explosions, et tout le nuage de ce gaz part d'un coup.
@@ -452,9 +623,7 @@ static func _tiquer_feux(sim: Simulation, tick: int) -> void:
 	var fe: Dictionary = sim.regles.r.get("feu", {})
 	var periode := int(fe.get("periode_ticks", 10))
 	sim.feu_prochain_pas = tick + periode
-	var effets: Array = []
-	if sim.lieu == "camp" and sim.monde != null:
-		effets = GameData.catalogues.weather_states.get(meteo(sim, sim.monde.cellule_de(sim.grille.pos_de(sim.grille.largeur * sim.grille.hauteur_grille / 2))), {}).get("effects", [])
+	var effets: Array = _effets_meteo(sim)
 	if "eteint_feux" in effets or "neige" in effets or sim.grille.neige:
 		var n := sim.feux.size()
 		for idx in sim.feux.keys():
@@ -464,9 +633,6 @@ static func _tiquer_feux(sim: Simulation, tick: int) -> void:
 		sim.lumiere_sale = true
 		EventBus.emettre(&"journal", [&"journal.feux_eteints", {"n": n}])
 		return
-	var vent := float(fe.get("vent_mult", 2.0)) if ("vent" in effets or "tempete" in effets) else 1.0
-	var rng := RandomNumberGenerator.new()
-	rng.seed = hash([sim.graine, "feu", tick])
 	for idx in sim.feux.keys():
 		var t := sim.grille.pos_de(int(idx))
 		var occ := sim.grille.occupant(t)
@@ -476,11 +642,9 @@ static func _tiquer_feux(sim: Simulation, tick: int) -> void:
 			sim._appliquer_degats(x, deg, "", {"type": "feu", "element": {"feu": 1.0}})
 			sim.appliquer_statut(x, "brulure", int(fe.get("brulure_ticks", 30)), "")
 			EventBus.emettre(&"journal", [&"journal.brule", {"nom": x.name_key, "degats": deg}])
-		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-			var q: Vector2i = t + dd
-			var fl := flammabilite_de(sim, q)
-			if fl > 0 and not sim.feux.has(sim.grille.idx(q)) and rng.randf() < float(fl) / 100.0 * float(fe.get("propagation", 0.35)) * vent:
-				_enflammer(sim, q)
+		# La propagation par jet a été RETIRÉE le 2026-09-08 (Émergence — les champs partagés) : le feu ne fait plus
+		# que CHAUFFER sa tuile, et une voisine s'enflamme quand sa propre chaleur atteint le seuil de sa matière.
+		# Le vent n'est pas perdu — il attise la source de chaleur au lieu de doubler un tirage.
 		sim.feux[idx].reste = int(sim.feux[idx].reste) - periode
 		if int(sim.feux[idx].reste) <= 0:
 			_consumer(sim, t)
