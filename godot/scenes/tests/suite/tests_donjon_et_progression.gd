@@ -1478,12 +1478,24 @@ func test_boss_et_artefact() -> void:
 	s.donjon = {"etages": 4}
 	s.charger_donjon("ruine", 95, 12, 4, j)
 	verifier(s.donjon.escalier == null and s.donjon.boss != null, "dernier étage : pas d'escalier plus bas, une position de boss")
+	# On cherche le drapeau `boss_donjon`, posé par le générateur sur la créature de la salle du fond (2026-09-08).
+	# Avant, le test se contentait du tag « elite » et la simulation, elle, se contentait de `chain_gauge` — la jauge
+	# de chaîne Wu Xing, que portent trois créatures ordinaires : une brute de couloir déclarait le donjon vaincu.
 	var boss := {}
+	var n_marques := 0
 	for x in s.vivants():
-		if x.id != j.id and "elite" in x.get("tags", []):
+		if bool(x.get("boss_donjon", false)):
 			boss = x
-	verifier(not boss.is_empty(), "le boss est présent (%s)" % str(boss.get("name_key", "-")))
+			n_marques += 1
+	verifier(not boss.is_empty() and n_marques == 1, "un seul être porte le drapeau du boss (%s, %d marqué(s))" % [str(boss.get("name_key", "-")), n_marques])
+	verifier("elite" in boss.get("tags", []), "et c'est bien une élite")
 	verifier(not s._boss_vaincu(), "vivant : le donjon n'est pas vaincu")
+	# La preuve du défaut corrigé : tuer une brute de couloir ne vainc PAS le donjon.
+	var brute := s.ajouter("brute", s._tuile_libre_autour(j.pos), "ia")
+	if not brute.is_empty():
+		verifier(bool(brute.get("chain_gauge", false)), "une brute porte bien la jauge de chaîne (le drapeau emprunté d'avant)")
+		s._appliquer_degats(brute, 9999, j.id, {})
+		verifier(not s._boss_vaincu(), "une brute tuée ne déclare PAS le donjon vaincu (c'était le défaut)")
 	s._appliquer_degats(boss, 9999, j.id, {})
 	verifier(s._boss_vaincu(), "boss tué : le donjon est vaincu")
 	var art := false

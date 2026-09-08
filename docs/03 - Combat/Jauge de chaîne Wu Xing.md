@@ -82,6 +82,25 @@ JAUGE DE CHAÎNE — 5 SEGMENTS DE BASE, EXTENSIBLE JUSQU'À 10 :
 > « une capacité peut poser plusieurs segments Wu Xing tant que c'est segmenté ». La règle précédente — *une capacité qui touche pose UN segment, quel que soit le nombre de cibles* — visait les groupes d'ennemis : elle empêchait qu'un carré sur cinq loups remplisse la jauge d'un coup. Elle reste vraie **par étape** : une étape qui touche pose un segment, cinq cibles ou une seule. Mais un sort à plusieurs étapes est plusieurs actes, séparés par leurs déclencheurs et payés chacun en ticks : **chaque étape qui touche pose le sien**, de son propre élément. Un sort à cinq étapes de cinq éléments peut donc parcourir la chaîne entière — au prix des ticks des cinq étapes, ce qui est exactement le pari. Les charges différées étaient jusqu'ici exécutées avec `segment = false`, exprès ; ce n'est plus le cas.
 
 
+
+> [!success] Codé le 2026-09-08 — le mot `chain_gauge` cesse de vouloir dire « c'est le boss », et changer de corps ne perd plus sa jauge en silence
+> **Trois défauts, un seul emprunt de vocabulaire.** `chain_gauge` est le drapeau de CETTE jauge — celle que porte, dit la note ci-dessus, « tout être dont la fiche a `chain_gauge: true` ». Or le code s'en servait aussi pour dire **« c'est le boss du donjon »**, et **trois créatures le portent** : l'aventurier, la brute, le chef de bande.
+> - **`_boss_vaincu` rendait vrai dès qu'un porteur mourait, à n'importe quel étage.** Tuer une **brute de couloir** au premier étage d'un donjon de quatre le déclarait vaincu : le foyer de corruption était nettoyé, la quête se fermait, l'expédition se soldait par une victoire qui n'avait pas eu lieu.
+> - **`est_boss_final` exigeait bien le dernier étage, mais acceptait n'importe quel porteur qui s'y trouvait** : l'**artefact garanti** tombait sur une brute.
+> - **Et une faute d'indentation** : `_quetes_sur_donjon` et le signal `dungeon_cleared` étaient sous le `elif` de la branche « donjon corrompu, boss **NON** vaincu ». La quête « videz le donjon » ne se validait donc **que si l'on avait échoué**, et **jamais dans un donjon ordinaire**.
+>
+> **Et il y en avait deux de plus, que seule la suite a révélés** — ma première correction était incomplète, et le défaut pire que le balayage ne le disait :
+> - **Le drop de l'artefact ne faisait AUCUN test d'étage.** Le balayage disait « au dernier étage » ; la vérité est qu'il n'y avait pas de condition du tout : `if chain_gauge and lieu != "camp"`. N'importe quel porteur en lâchait un **n'importe où hors du camp**, couloir du premier étage compris.
+> - **La bourse** : « un boss porte une vraie bourse », multipliée par six, sur le même drapeau emprunté.
+>
+> **Et le test qui aurait dû l'attraper était lui-même faux** : il posait `chain_gauge` sur un **loup** à l'**étage 1** d'un donjon de cinq, et il passait — précisément parce que ce chemin-là ne vérifiait rien. Il est recalé sur les **deux** vraies conditions (quatre étages pour que l'artefact soit garanti plutôt que tiré à 25 %, et le dernier étage pour que ce soit le boss). *Un test vert peut être la preuve d'un bug, pas de son absence.*
+>
+> **La correction pose un vrai drapeau** : `boss_donjon`, écrit par le générateur sur la créature qu'il place dans la salle du fond — laquelle **n'existe qu'au dernier étage**, puisqu'elle y remplace l'escalier. `chain_gauge` redevient ce qu'il est, et le [[Vocabulaire]] écrit le même jour dit pourquoi : **un mot déjà pris ne se reprend pas.**
+>
+> **Les deux tests qui encodaient le défaut sont corrigés et durcis** : l'un posait `chain_gauge` sur un **loup** pour obtenir un artefact, l'autre se contentait du tag « élite ». Le test du donjon vérifie maintenant qu'**un seul** être porte le drapeau, que c'est bien une élite, et surtout que **tuer une brute ne déclare PAS le donjon vaincu** — le défaut d'hier est devenu une assertion.
+>
+> **Et changer de corps ne se fait plus en silence.** Le balayage disait « incarner un compagnon fait perdre la jauge de chaîne Wu Xing » comme d'un bug ; **ce n'en est pas un** : la note ci-dessus décide que la jauge appartient au **corps** (« zéro test de contrôle »), donc incarner un cerf fait légitimement perdre l'enchaînement. Le défaut était le dernier mot de la phrase — **en silence**. Le journal le dit désormais dans les deux sens, en entrant dans un corps sans jauge comme en en retrouvant une. Le test grave la règle : le cerf n'en a pas, **l'ancien corps la garde**.
+
 ## Liens
 - **Dépend de** : [[Wu Xing — cycles et vecteurs]], [[Domination et multiplicateurs]], [[Action-time à ticks]]
 - **Alimente** : [[XP de combat]], [[Cinq accès au cycle]], [[Attaque lourde et télégraphe]]

@@ -130,7 +130,9 @@ internes**, et elles comptent.
 
 > *Après ce palier* : on peut le mettre en pause, mourir, et le jouer avec ses mains.
 
-## Palier 4 — le donjon dit la vérité
+## ~~Palier 4~~ — le donjon dit la vérité — **FAIT le 2026-09-08**
+
+> [!success] Les quatre lignes sont faites et prouvées — voir [[Jauge de chaîne Wu Xing]] (callout du 2026-09-08). **Trois des quatre étaient un seul emprunt de vocabulaire** : `chain_gauge`, le drapeau de la jauge de chaîne Wu Xing, servait à dire « c'est le boss ». La quatrième n'était pas le bug annoncé : perdre la jauge en changeant de corps est **voulu** (elle est au corps, pas au joueur) ; ce qui manquait, c'était de le **dire**.
 
 Débloqué par la ligne 4, et **il partage vingt-cinq lignes de code avec le palier 1** : `Monde.nettoyages` s'écrit dans
 le bloc exact qu'il faut rouvrir. Les deux se font dans la même passe, ou l'on édite ce bloc deux fois.

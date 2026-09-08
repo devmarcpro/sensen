@@ -652,7 +652,10 @@ func _peupler(e: Dictionary, etage: int) -> void:
 		if p.get("boss_room", false):
 			var boss: String = str(theme.get("boss", ""))
 			if not boss.is_empty():
-				e.spawns.append({"creature": boss, "pos": e.boss})
+				# Le boss est MARQUÉ (2026-09-08) : le code se servait de `chain_gauge` — le drapeau de la jauge de
+				# chaîne Wu Xing — pour dire « c'est le boss », et trois créatures le portent (aventurier, brute,
+				# chef de bande). Une brute de couloir valait donc un boss.
+				e.spawns.append({"creature": boss, "pos": e.boss, "boss": true})
 		var poses := {}
 		for k in n:
 			var c: Dictionary = pool_etage[rng.randi_range(0, pool_etage.size() - 1)]

@@ -134,6 +134,14 @@ static func _incarner(sim: Simulation, e: Dictionary, pnj_id: String, tick: int)
 	sim.attente[c.id] = true
 	c.compteur = tick + int(sim.regles.r.actions.objet)
 	EventBus.emettre(&"journal", [&"journal.incarne", {"nom": c.name_key, "ancien": e.name_key}])
+	# Changer de corps change ce que le corps SAIT FAIRE, et la jauge de chaîne Wu Xing en est le meilleur exemple :
+	# [[Jauge de chaîne Wu Xing]] dit « tout être dont la fiche a `chain_gauge: true` — zéro test de contrôle », donc
+	# elle appartient au CORPS et pas au joueur. Incarner un loup fait donc légitimement perdre l'enchaînement — mais
+	# ça se faisait EN SILENCE, et le joueur perdait une mécanique entière sans un mot (2026-09-08).
+	if e.has("chaine") and not c.has("chaine"):
+		EventBus.emettre(&"journal", [&"journal.incarne_sans_chaine", {"nom": c.name_key}])
+	elif c.has("chaine") and not e.has("chaine"):
+		EventBus.emettre(&"journal", [&"journal.incarne_avec_chaine", {"nom": c.name_key}])
 	EventBus.emettre(&"controle_change", [c.id])
 	return true
 

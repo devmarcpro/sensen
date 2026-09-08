@@ -975,7 +975,10 @@ static func niveau_loot(sim: Simulation) -> int:
 
 ## Le boss du dernier étage : celui qui garde le fond. Le gouffre n'en a pas — il n'a pas de fond.
 static func est_boss_final(sim: Simulation, cible: Dictionary) -> bool:
-	if not bool(cible.get("chain_gauge", false)) or sim.lieu != "donjon" or sim.donjon.has("gouffre"):
+	# `boss_donjon` et non `chain_gauge` (2026-09-08) : le second est le drapeau de la jauge de chaîne Wu Xing, que
+	# portent trois créatures ordinaires. L'artefact garanti tombait donc sur n'importe quelle brute qui se trouvait
+	# au dernier étage.
+	if not bool(cible.get("boss_donjon", false)) or sim.lieu != "donjon" or sim.donjon.has("gouffre"):
 		return false
 	return int(sim.donjon.get("etage", 0)) >= int(sim.donjon.get("etages", 0))
 
@@ -1030,7 +1033,11 @@ static func _drop(sim: Simulation, cible: Dictionary, source: String) -> void:
 			if not ob.is_empty():
 				uids.append(ob.uid)
 	# Le boss d'un donjon : un artefact, garanti si le donjon est majeur (Trésors et artefacts).
-	if bool(cible.get("chain_gauge", false)) and sim.lieu != "camp" and lr.drops.has("artefact"):
+	# `boss_donjon` et non `chain_gauge` (2026-09-08). C'était le PIRE des trois emprunts : il n'y avait ici aucun test
+	# d'étage — n'importe quel porteur de la jauge de chaîne Wu Xing (l'aventurier, la BRUTE, le chef de bande) lâchait
+	# un artefact n'importe où hors du camp, y compris dans un couloir du premier étage. Le drapeau du générateur, lui,
+	# n'existe que sur la créature de la salle du fond, au dernier étage.
+	if bool(cible.get("boss_donjon", false)) and sim.lieu != "camp" and lr.drops.has("artefact"):
 		var majeur := int(sim.donjon.get("etages", 1)) >= int(lr.drops.artefact.etages_majeur)
 		if majeur or rng.randf() < float(lr.drops.artefact.chance_boss):
 			var art := generer_objet(sim, str(sim.loot._base_pour(rng, profondeur, true)), profondeur, {"boss": cible.name_key}, "artefact")
@@ -1041,7 +1048,7 @@ static func _drop(sim: Simulation, cible: Dictionary, source: String) -> void:
 	var lo: Dictionary = lr.drops.get("or", {})
 	if cible.controle == "ia" and not lo.is_empty() and rng.randf() < float(lo.get("chance", 0.0)):
 		var pieces := float(lo.get("base", 3)) + float(cible.get("sante_max", 10)) * float(lo.get("par_pv", 0.25)) + float(profondeur) * float(lo.get("par_etage", 4))
-		if bool(cible.get("chain_gauge", false)):   # un boss porte une vraie bourse
+		if bool(cible.get("boss_donjon", false)):   # un boss porte une vraie bourse (2026-09-08 : le drapeau du générateur, plus la jauge de chaîne)
 			pieces *= float(lo.get("mult_boss", 6))
 		pieces *= 1.0 + (rng.randf() * 2.0 - 1.0) * float(lo.get("variance", 0.4))
 		var n_or := maxi(1, roundi(pieces))

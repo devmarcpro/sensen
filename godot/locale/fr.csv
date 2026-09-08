@@ -4509,3 +4509,5 @@ journal.deuil_accuse,"à {village}, on sait qui l'a tué (réputation {reputatio
 function.journalier.name,Journalier
 function.portefaix.name,Portefaix
 journal.chaleur_blesse,"{nom} souffre de la chaleur ({degres} °C, {degats})"
+journal.incarne_sans_chaine,"{nom} n'a pas de jauge de chaîne : plus d'enchaînement Wu Xing tant que vous êtes dans ce corps."
+journal.incarne_avec_chaine,"{nom} porte une jauge de chaîne : l'enchaînement Wu Xing est de nouveau possible."

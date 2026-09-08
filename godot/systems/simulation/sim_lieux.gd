@@ -633,7 +633,9 @@ static func charger_donjon(sim: Simulation, theme_id: String, graine: int, id_do
 	var k_spawn := 0
 	for s: Dictionary in e.spawns:
 		if sim.grille.occupant(s.pos).is_empty():
-			SimObjets.ajouter(sim, s.creature, s.pos, "ia")
+			var ne: Dictionary = SimObjets.ajouter(sim, s.creature, s.pos, "ia")
+			if bool(s.get("boss", false)) and not ne.is_empty():
+				ne["boss_donjon"] = true   # LE boss de cet étage, celui que le générateur a posé (2026-09-08)
 			k_spawn += 1
 	var i_extra := 0
 	while k_spawn < n_spawns and not e.spawns.is_empty() and i_extra < e.spawns.size():
@@ -862,6 +864,10 @@ static func _sortir(sim: Simulation, e: Dictionary) -> bool:
 				sim.grille.placer(e.id, e.pos)
 				sim.maj_vision()
 				EventBus.emettre(&"journal", [&"journal.repousse_corruption", {}])
+		# La quête et le signal sortent du `elif` (2026-09-08). Ils étaient indentés SOUS la branche « donjon corrompu,
+		# boss NON vaincu » : la quête « videz le donjon » ne se validait donc que si l'on avait ÉCHOUÉ, et jamais dans
+		# un donjon ordinaire. Ils appartiennent à la victoire, quel que soit le genre du donjon.
+		if recap.boss_vaincu and cell_donjon != Vector2i(-9999, -9999):
 			SimPnj._quetes_sur_donjon(sim, cell_donjon, e.id)
 			EventBus.emettre(&"dungeon_cleared", [cell_donjon, e.id])
 		SimSauvegarde.sauvegarder(sim)   # autosave au retour (Sauvegarde : sur événements clés)
@@ -871,13 +877,18 @@ static func _sortir(sim: Simulation, e: Dictionary) -> bool:
 	return true
 
 
+## Le boss du donjon a-t-il été vaincu ? On cherche `boss_donjon` — le drapeau que le générateur pose sur la créature
+## de la salle du fond, au DERNIER étage seulement (elle y remplace l'escalier).
+## Avant le 2026-09-08 on cherchait `chain_gauge`, qui est le drapeau de la **jauge de chaîne Wu Xing** et que portent
+## trois créatures ordinaires : tuer une brute au premier étage d'un donjon de quatre le déclarait vaincu, nettoyait le
+## foyer de corruption et fermait la quête. Le vocabulaire emprunté coûtait une victoire fausse à chaque partie.
 static func _boss_vaincu(sim: Simulation) -> bool:
 	for etage in sim.etages_visites.keys():
 		for id in sim.etages_visites[etage].ordre:
 			var x: Dictionary = sim.etages_visites[etage].entites[id]
-			if x.get("chain_gauge", false) and not x.vivant:
+			if bool(x.get("boss_donjon", false)) and not x.vivant:
 				return true
 	for x in sim.entites.values():
-		if x.get("chain_gauge", false) and x.controle == "ia" and not x.vivant:
+		if bool(x.get("boss_donjon", false)) and x.controle == "ia" and not x.vivant:
 			return true
 	return false

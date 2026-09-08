@@ -98,10 +98,17 @@ func test_artefacts() -> void:
 				if spec is Array and spec.size() == 2 and not (spec[0] is String) and str(def.meilleur.get(nom, "")) == "haut" and int(ax.params[nom]) > int(spec[1]):
 					depasse = true
 	verifier(depasse, "des paramètres au-dessus de la fourchette normale")
-	# Le boss d'un donjon majeur (7 étages) laisse un artefact garanti.
-	s.donjon.etages = 5
+	# Le boss d'un donjon MAJEUR laisse un artefact garanti. Il faut les deux conditions, et l'ancien test n'en tenait
+	# aucune : `etages >= etages_majeur` (4) pour que l'artefact soit garanti au lieu d'être tiré à 25 %, et
+	# `etage >= etages` pour que ce soit le DERNIER étage. L'ancien test posait `chain_gauge` sur un loup à l'étage 1
+	# d'un donjon de cinq — il passait parce qu'aucun test d'étage n'était fait sur ce chemin (2026-09-08).
+	s.donjon.etages = 4
+	s.donjon.etage = 4
 	var boss := s.ajouter("loup", j.pos + Vector2i(2, 0), "ia")
-	boss["chain_gauge"] = true
+	# `boss_donjon` et non `chain_gauge` (2026-09-08) : ce test posait la jauge de chaîne Wu Xing sur un LOUP pour
+	# obtenir un artefact — il encodait le défaut qu'on vient de corriger (n'importe quel porteur de `chain_gauge`
+	# passait pour le boss). Le drapeau du boss est désormais posé par le générateur sur la créature de la salle du fond.
+	boss["boss_donjon"] = true
 	s._appliquer_degats(boss, 9999, j.id, {})
 	var trouve := false
 	for uid in s.contenants.get(s.grille.idx(boss.pos), []):
@@ -750,6 +757,11 @@ func test_incarnation() -> void:
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "incarner", "pnj": cerf.id}) and cerf.controle == "joueur" and j.controle == "ia" and str(j.maitre) == cerf.id, "le contrôle passe au cerf ; l'ancien corps devient compagnon")
 	verifier(s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur").size() == 1, "un seul corps contrôlé")
+	# La jauge de chaîne appartient au CORPS, pas au joueur ([[Jauge de chaîne Wu Xing]] : « zéro test de contrôle ») :
+	# incarner un cerf fait donc légitimement perdre l'enchaînement Wu Xing. Ce qui était un défaut, c'est que ça se
+	# faisait EN SILENCE (2026-09-08) — le joueur perdait une mécanique entière sans un mot.
+	verifier(not cerf.has("chaine"), "le cerf n'a pas de jauge de chaîne : l'enchaînement est bien perdu")
+	verifier(s.entites[ancien_id].has("chaine"), "et l'ancien corps la garde — elle est au corps, pas au joueur")
 	var casque := s.generer_objet("proto_casque_cuir", 1, {}, "commun", 0)
 	cerf.sac.append(casque.uid)
 	s.attente[cerf.id] = true
