@@ -2115,3 +2115,39 @@ func test_deuil_de_la_ville() -> void:
 	verifier(int(ailleurs.humeur) == 60 and int(j.get("reputations", {}).get("Autreville", 0)) == rep_a, "une autre ville ne porte pas ce deuil")
 	verifier(int(j.reputations.Bourgade) == rep0 - int(cfg.reputation_ville), "sans tueur nommé, personne n'est accusé")
 
+
+## Les métiers sans bâtiment (2026-09-07) : quand les lieux de travail sont pleins, une part de ceux qui restent devient
+## journalier (aux champs) ou portefaix (sur la place) — le reste demeure oisif, et une ville a moins de bras perdus.
+func test_metiers_sans_batiment() -> void:
+	var sb: Dictionary = GameData.config("villes").emplois.sans_batiment
+	verifier(sb.has("journalier") and sb.has("portefaix") and float(sb.journalier) > 0.0, "les parts sont en données (journalier %.2f, portefaix %.2f)" % [float(sb.journalier), float(sb.portefaix)])
+	for f in ["journalier", "portefaix"]:
+		var fd: Dictionary = GameData.catalogues.functions.get(f, {})
+		verifier(not fd.is_empty() and "sans_batiment" in fd.get("tags", []) and not str(fd.get("skill", "")).is_empty(), "la fonction %s existe, marquée sans_batiment, avec sa compétence (%s)" % [f, str(fd.get("skill", ""))])
+	# une ville engendrée : combien de bras, combien d'oisifs
+	# On part d'un monde chargé : ses cellules peuplées sont déjà là, et l'on n'en engendre pas cent soixante-neuf
+	# à l'aveugle (la première version balayait 13 × 13 cellules sans trouver un village de vingt âmes).
+	var s := Simulation.new(4242)
+	s.charger_camp()
+	var trouvee := false
+	for cell in s.monde.cellules.keys():
+		if not trouvee:
+			var e: Dictionary = s.monde.cellules[cell]
+			var v: Dictionary = e.get("village", {})
+			if v.is_empty() or v.get("pnj", []).size() < 8:
+				continue
+		trouvee = true
+		var par_fonction := {}
+		for pj in v.pnj:
+			var f := str(pj.get("fonction", "oisif"))
+			par_fonction[f] = int(par_fonction.get(f, 0)) + 1
+		var oisifs := int(par_fonction.get("oisif", 0))
+		var bras := int(par_fonction.get("journalier", 0)) + int(par_fonction.get("portefaix", 0))
+		verifier(bras > 0, "la ville a des bras sans bâtiment : %d journaliers et portefaix sur %d habitants (%d oisifs)" % [bras, v.pnj.size(), oisifs])
+		verifier(float(oisifs) < float(v.pnj.size()) * 0.5, "moins de la moitié de la ville est oisive (%d sur %d)" % [oisifs, v.pnj.size()])
+		for pj in v.pnj:
+			if str(pj.get("fonction", "")) == "journalier":
+				verifier(pj.has("poste"), "un journalier a un poste où aller")
+				break
+	verifier(trouvee, "une ville peuplée a été trouvée dans le monde chargé pour la mesure")
+

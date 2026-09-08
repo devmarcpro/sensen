@@ -1,0 +1,23 @@
+{
+  "name_key": "function.journalier.name",
+  "skill": "agriculture",
+  "rendement_base": 0.03,
+  "horaires": {
+    "6-20": "poste",
+    "20-22": "social",
+    "22-6": "lit"
+  },
+  "classes_possibles": [
+    "la_trace",
+    "la_braise"
+  ],
+  "leadership": false,
+  "portefeuille": 12,
+  "tags": [
+    "sans_batiment"
+  ],
+  "produit": {
+    "item": "baies",
+    "par_unite": 0.6
+  }
+}

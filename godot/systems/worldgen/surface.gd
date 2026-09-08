@@ -1685,6 +1685,34 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 			pj_e["fonction"] = fonction_e
 			pj_e["poste"] = poste_e
 			pj_e["batiment"] = str(bat.id)
+	# 5 ter. Les métiers SANS bâtiment (Villes, 2026-09-07) : quand les lieux de travail sont pleins, une part de ceux
+	# qui restent prend un métier de bras — le journalier aux champs, le portefaix sur la place. Le reste demeure oisif.
+	var sans_bat: Dictionary = cfg.get("emplois", {}).get("sans_batiment", {})
+	if not sans_bat.is_empty():
+		var restants: Array = []
+		for pj in e.village.pnj:
+			if str(pj.get("fonction", "oisif")) == "oisif" and not pj.has("perimetre") and str(pj.get("creature", "")) in ["villageois", "fermier"]:
+				restants.append(pj)
+		var donnes := 0   # `pris` est déjà le tableau des rectangles occupés de cette fonction
+		for fonction_s in sans_bat.keys():
+			var n_s := int(floor(float(restants.size()) * float(sans_bat[fonction_s])))
+			for k in n_s:
+				if donnes >= restants.size():
+					break
+				var pj_s: Dictionary = restants[donnes]
+				donnes += 1
+				pj_s["fonction"] = str(fonction_s)
+				# Le journalier va au champ le plus proche de son lit ; le portefaix se tient sur la place.
+				var poste_s: Vector2i = centre
+				if str(fonction_s) == "journalier":
+					var meilleure := -1.0
+					for ch in e.village.get("champs", []):
+						var c_pos: Vector2i = Rect2i(ch.rect).get_center() if ch.has("rect") else centre
+						var dd := float((c_pos - Vector2i(pj_s.lit)).length_squared())
+						if meilleure < 0.0 or dd < meilleure:
+							meilleure = dd
+							poste_s = c_pos
+				pj_s["poste"] = poste_s
 	# 6. Les gardes : un sur la place du centre, puis un par `gardes_par_habitant`, aux croisements.
 	var n_gardes: int = (1 if quartier == "centre" else 0) + pop / maxi(1, int(cfg.gardes_par_habitant))
 	for k in n_gardes:

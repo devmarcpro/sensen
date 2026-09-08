@@ -987,7 +987,12 @@
       "moulin": 2
     },
     "ouvriers_par_tuiles": 8,
-    "ouvriers_max": 6
+    "ouvriers_max": 6,
+    "sans_batiment": {
+      "journalier": 0.35,
+      "portefaix": 0.1
+    },
+    "_doc_sans_batiment": "Les metiers sans batiment (Villes, 2026-09-07) : apres les batiments et les zones de recolte, cette part des residents encore sans metier prend la fonction — le journalier va aux champs, le portefaix porte sur la place. Le reste demeure oisif."
   },
   "vocations": {
     "_doc": "Ce dont une ville vit (designer 2026-09-07, « que chaque ville soit unique et realiste ») : chaque vocation note l agglomeration a partir des couches du monde lues a son centre — ressources, vegetation, humidite, altitude, temperature — prises en ECART A LA MEDIANE (valeur - 0,5 : seul un lieu remarquable marque des points), et de deux faits pris tels quels (mer : une cellule d eau voisine ; route : une route passe). La mieux notee l emporte si elle atteint seuil_min, sinon la ville est « commune » — et beaucoup doivent l etre. Effets : boutiques servies en premier, multiplicateurs d ateliers / de champs, enclos en plus, zones de recolte ajoutees au quartier, prefabs de plus au centre. filons (2026-09-07) : les cellules d une agglomeration miniere recoivent le seuil de planete.filons multiplie par seuil_mult et la densite par densite_mult — sans quoi une ville peut etre miniere sans un seul filon dans son sol.",

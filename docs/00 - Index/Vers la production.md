@@ -643,6 +643,82 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 
 > [!important] Demande du designer (2026-09-07, 11 h) : 127. **Fait le 2026-09-07, 14 h** — « pourquoi t'arrives pas à mettre les pre-release sur github », puis « fais tout ce qu'il faut pour pouvoir publier sur github, je t'autorise tout » : les 37 annonces existent bel et bien, toutes en pré-version avec leur zip, jusqu'à v0.5.6-alpha — ce qui manque, c'est le **jeton sur ce poste** (`gh` n'y est connecté à aucun hôte, la lecture du gestionnaire d'identifiants y est refusée) → [[Ordre de vérification]] (callout du 2026-09-07, 14 h) : `.github/workflows/prepublication.yml` publie **chez GitHub**, déclenché par l'étiquette poussée, avec l'exécutable exporté dans l'action ; il reste au designer à autoriser Actions à écrire, une fois.
 
+> [!important] Demande du designer (2026-09-08, 6 h) : 139. **Décidé, à coder après la sauvegarde** — « il faudrait qu'on ait une vraie thermodynamique, une vraie gravité, etc », puis « note tout ça, quoi d'autre pour que le jeu soit vraiment émergent » → [[Émergence — les champs partagés]] : la règle du **champ partagé** (un champ nouveau REMPLACE les règles ad hoc qui l'imitaient, jamais ne s'ajoute), la **chaleur** diffusée qui absorbe cinq règles existantes, le **support** qui fait s'effondrer une galerie mal creusée, et les six autres champs qui manquent à l'émergence — le **bruit et l'odeur** en tête, parce que le jeu a une Discrétion, des meutes et des odeurs de cuisine, et rien pour les porter.
+
+> [!todo] File d'attente de la boucle (2026-09-08, 0 h 30) — le balayage à douze angles, et ce qu'il a trouvé
+> Le designer, deux fois : « je pense qu'il reste encore d'autres choses à faire que tu n'as pas mis dans la file ». Il avait raison — ma première file venait d'un seul angle (les phrases « ce que ça ne fait pas » des notes). Un balayage à **douze angles indépendants** (les 24 notes `Ouvert`, les marques TODO du code, les branches mortes, l'interface, la sauvegarde, le contenu orphelin, l'équilibrage constaté, la boucle de jeu vue d'un joueur, les contradictions entre notes, les budgets et fragilités, les tests absents ou faibles, ce qui manque à un jeu fini) a rendu **116 manques**, chacun avec fichier et ligne.
+> **Honnêteté sur la vérification** : chaque manque devait passer deux juges adversariaux (l'un cherche à prouver que c'est déjà fait, l'autre que ça n'en vaut pas la peine). La limite de session a coupé la moitié du jugement : **16 ont passé les deux juges** (marqués ✔), les autres sont **à vérifier avant d'y toucher** — ils citent leurs preuves, mais personne ne les a attaqués.
+>
+> **1. La sauvegarde ment (le plus grave, et tout est ✔)**
+> - ✔ **Recharger dans une mine régénère un donjon à salles** : le drapeau `mine` n'est pas sauvegardé (gros).
+> - ✔ **La branche « sauvegarde en donjon » sort avant de relire** `mines_creusees`, `gouffres_vides` et `carte_cache` (gros).
+> - ✔ **`charger_donjon` écrase `sim.donjon`** et perd `gouffre`, `corrompu` et `niveau` — trois persistances mortes (gros).
+> - ✔ **`Monde.nettoyages` n'est jamais sauvegardé** : un donjon de corruption vaincu revient au rechargement (moyen).
+> - ✔ **`sauvegarder()` dissout le combat en cours** dans la partie vivante, sans passer par la fin de combat (moyen).
+> - ✔ **L'« écriture atomique » supprime la cible avant de renommer**, et les cinq fichiers ne forment pas une transaction (moyen).
+> - La sauvegarde s'écrit **en entier sur le fil principal** alors que la note exige un thread ; l'autosave réécrit les cinq fichiers entiers (gros).
+> - Le test de sauvegarde en expédition **ne couvre que le donjon ordinaire** — ni mine, ni gouffre, ni donjon de corruption (petit).
+>
+> **2. Le jeu n'est pas un jeu fini**
+> - **Aucun `InputMap`** : les touches sont câblées en dur, le jeu n'est jouable qu'en AZERTY, rien ne se reconfigure (gros).
+> - **Aucune pause** : le monde avance pendant qu'un écran est ouvert — et **ZQSD n'est pas bloqué** quand un écran est ouvert, taper une lettre d'option fait marcher le personnage (gros + moyen).
+> - **Aucun écran de mort** : la défaite est une ligne de journal, n'importe quelle touche fait renaître aussitôt ; **avant d'avoir dormi une fois, mourir ne coûte rien** (gros + moyen).
+> - **Aucune sortie propre** : fermer la fenêtre ou revenir au titre perd jusqu'à cinq minutes, sans sauvegarde ni confirmation ; les options ne sont jamais enregistrées ; effacer une partie n'est branché que sur le fuzz (moyen).
+> - **Le menu de triche est sur V, sans garde de débogage, dans la version publiée** (gros).
+> - **Aucun rappel des touches en jeu** : elles ne vivent que dans le README, et les chaînes d'aide qui restent décrivent des touches disparues (gros).
+> - Aucun réglage de résolution ni de taille de texte ; le menu Tab n'a ni Options ni Quitter (moyen).
+>
+> **3. Ce que le joueur ne voit pas de ce que la simulation sait**
+> - ✔ **Aucun journal de quêtes** : une quête acceptée ne se consulte qu'en retournant voir le PNJ qui l'a donnée (gros).
+> - ✔ **L'onboarding tombe dans un journal de neuf lignes**, n'est pas sauvegardé, n'est jamais relisible ; ✔ **quatre de ses seize textes décrivent une interface retirée** ; ✔ **les tutoriels se rejouent à chaque lancement** et le « mode vétéran » n'a aucun interrupteur (moyen ×2, petit).
+> - **Le coût d'une capacité n'est écrit nulle part** au moment de la lancer, alors que le déficit se paie en points de vie (gros).
+> - **La réputation par village, royaume et globale** est simulée, ferme des portes, et n'est affichée nulle part (moyen).
+> - **Toute action refusée dans un écran est invisible** : le refus part au journal, que le panneau recouvre (moyen).
+> - L'infobulle exhaustive d'une capacité est écrite, traduite, jamais affichée ; la zone d'une action télégraphiée est calculée par une fonction que rien n'appelle ; la surcharge n'est jamais annoncée ; changer de langue ne rafraîchit que la moitié de l'écran (moyen ×2, petit ×2).
+>
+> **4. Le donjon et le combat**
+> - ✔ **`chain_gauge` sert de « c'est le boss » au butin** et une brute de couloir le porte : artefact garanti et donjon marqué nettoyé sans avoir vu le boss (gros). *Le même défaut sous deux autres angles : tuer n'importe quelle élite « vainc » le donjon ; la quête « videz le donjon » ne se valide que si l'on n'a PAS tué le boss.*
+> - ✔ **Le même chef de bande garde les huit thèmes** : les douze créatures de folklore ne sont jamais boss (moyen).
+> - ✔ **Incarner un compagnon fait perdre la jauge de chaîne Wu Xing, en silence** (moyen).
+> - **Un sort au contact ne coûte ni tick ni mana** et emprunte les dés de l'arme ; un sort à distance paie les trois (gros).
+> - **Le mana se régénère 160 fois plus lentement que la vigueur**, pour 55 % des noyaux du catalogue (moyen).
+> - **Vingt-trois sorts sur quatre-vingt-six ne produisent rien d'observable** (moyen).
+> - La formule de peuplement compte une action de soutien comme une menace ; le tapis de coffres n'a jamais été plafonné (petit ×2).
+>
+> **5. L'équilibrage constaté et jamais corrigé** (l'audit du 2026-09-03 est resté lettre morte)
+> - **Le palier de matière est plat après le niveau 14** (gros) · **deux des huit paliers de qualité sont mathématiquement inatteignables** — « légendaire » et « mythique » sont du texte mort (moyen) · **l'accélération d'XP du 2026-09-05 a rendu la fin de partie 16 à 39 % plus lente** (moyen) · **la base du joueur reste un puits d'or** (moyen) · le critère ±15 de la règle d'anneau n'a pas été atteint : c'est le test qui est descendu à ±4 (petit).
+>
+> **6. Le contenu qu'on ne verra jamais**
+> - ✔ **Quinze recettes de composants en matière animale sont refusées d'office** : le code croit encore que l'os n'a pas de source, alors que le dépeçage en donne depuis le 2026-09-02 (moyen).
+> - ✔ **Les trines et oppositions astrologiques** sont en données, exigées par le schéma, lues par personne (moyen).
+> - **30 des 40 bois du catalogue ne peuvent apparaître nulle part** dans le monde — dont tout le palier 4 sauf l'olivier (moyen).
+> - **La bibliothèque de préfabs de donjon** (12 salles + 8 connecteurs) est chargée à chaque démarrage et jamais posée (gros).
+> - **41 modules portent une `classe_signature` qu'aucun code ne lit** ; la compétence `dual_wielding` n'est nommée par personne ; la fonction « couturier » n'est attribuée nulle part ; le billot de boucher n'a aucune recette ; le souhait « miel » ne peut être exaucé par aucun objet ; quatre goûts de cadeau pointent des tags qu'aucun objet ne porte ; deux recettes s'adossent à des matières que le monde ne produit pas (moyen ×2, petit ×5).
+> - **Douze signaux de l'EventBus sont émis sans auditeur**, un treizième n'est jamais émis (gros).
+> - ✔ **Onze fonctions livrées ne sont appelées par personne**, dont deux que les notes décrivent comme actives (petit).
+> - **Les bâtiments de village se posent au hasard** : la fonction qui les rangeait le long des rues n'a plus d'appelant (gros).
+>
+> **7. La performance et la robustesse, mesurées contre leurs propres budgets**
+> - **Un pas qui franchit une cellule engendre jusqu'à trois cellules de 31 ms dans la même image**, alors que le budget dit « chunk généré < 2 ms » (gros).
+> - **`sim.objets` n'est jamais purgé** : 78 % des objets d'une vraie sauvegarde sont des fantômes déjà consommés (moyen).
+> - **`Monde.cellules` n'est jamais déchargé** alors que sa docstring promet le contraire ; le passage hebdomadaire balaie toutes les cellules jamais explorées ; le budget « ~64 entités actives par zone » n'existe nulle part ; une seule tuile changée refait toute la carte de lumière (moyen ×4).
+> - La liaison « propagation » tourne dans un `while true` sans borne ; `decouvertes_recentes` est rempli à chaque être et lu par personne ; le filtre d'horloge des vampires ne filtre que les vampires (moyen, petit ×2).
+>
+> **8. Les tests qui ne prouvent rien**
+> - **L'XP d'armure n'est vérifiée que par une tautologie**, et derrière elle **huit armures pointent vers des compétences qui n'existent pas** (gros).
+> - La fourchette de dégâts affichée au joueur n'est testée nulle part **et ne dit déjà pas la vérité** (moyen) · les dégâts de froid et de chaud n'ont aucun test alors que le test de météo annonce les vérifier (moyen) · les effets d'échec de lecture sont provoqués puis effacés sans être vérifiés (moyen) · le test des budgets de performance garde « 2,6 fois le budget » et le budget de tick peut disparaître en silence (moyen) · trois assertions qui ne peuvent pas échouer (composition de capacités, apprivoisement, « les compagnons défendent ») · une sonde compte ses soucis et sort quand même avec le code 0 (petit ×4).
+>
+> **9. Le coffre qui se contredit** (chaque ligne est une note contre une donnée, vérifiable en une minute)
+> - Le mana de la Méditation (+2 par niveau promis, zéro donné) · le portefeuille du roi (15 000 annoncés, 2 000 en fiche) · trois nombres pour le catalogue des statuts (14, 17, 67 — il y en a 83) · le catalogue des modules décrit 176 briques en six types, il y en a 236 en sept · la faim qui « ne tue jamais » et qui tue · l'interdiction du GDExtension attribuée à une note qui ne l'a jamais contenue · les enclos qui nomment sept bêtes sauvages disparues · « il n'y a pas de vache au catalogue » quatre heures avant qu'on en ajoute une · les patronymes genrés annulés dont les notes fondatrices sont intactes · dix-sept cultures semées que le coffre ne nomme nulle part · la liste d'objets pour les sprites, jamais régénérée depuis le 2026-09-05 (90 consommables manquants).
+>
+> **10. Ce que je ne peux pas faire seul** — le jeu est **muet** (zéro fichier audio, zéro `AudioStreamPlayer`) ; la difficulté de départ (le robot meurt aux étages 1 et 2) se tranche en regardant ; le Dark Continent a sa barrière (l'océan) et rien ne la franchit ; le lore ne parle que par quatre métiers sur vingt-deux.
+>
+> **Restent de l'ancienne file, non revus par le balayage** : les saisonniers ; le chômage qui pousse à migrer ; les tombes qui vieillissent et le cimetière qui s'agrandit ; les événements en zone logique ; **une guerre qui ne fait rien** ; le nom de la vocation à l'écran ; races, lignées, pâturage et maladies du troupeau ; l'irrigation construite et les engrais ; les mauvaises récoltes et les famines ; la cuve et le moulin comme stations ; le sac du joueur qui ne pourrit pas ; les arbres fruitiers hauts ; **description_key** (236 descriptions non traduites) ; les lignes longues à 900 × 560 ; **place_tile / modify_tile** (étape 11).
+>
+> **L'ordre que je propose** : la sauvegarde d'abord (elle perd du jeu, aujourd'hui, en silence), puis le jeu fini (pause, mort, touches, triche à retirer), puis le donjon (le boss et l'artefact garanti), puis le reste. Le détail de chaque ligne, avec fichiers et lignes, est dans le balayage du 2026-09-08 (`build/balayage.json` et `build/candidates.json` — hors dépôt, à relire avant d'attaquer une ligne).
+
+> [!important] Boucle autonome (2026-09-07, 22 h 40) : 138. **Fait** — les métiers sans bâtiment que [[Villes — population, quartiers et économie]] réclamait : le **journalier** (aux champs) et le **portefaix** (sur la place) prennent une part des oisifs qu'aucun bâtiment n'emploie.
+
 > [!important] Boucle autonome (2026-09-07, 22 h 20) : 137. **Fait** — le deuil et le meurtre discret, les deux manques que [[Villes — population, quartiers et économie]] annonçait au bout de la note des tombes : les siens pleurent quand une tombe reçoit un habitant, et le tueur est démasqué à l'enterrement même s'il a frappé loin et sans témoin.
 
 > [!important] Boucle autonome (2026-09-07, 22 h) : 136. **Fait** — la suite que [[Villes — population, quartiers et économie]] appelait « naturelle » : une ville riche **bâtit** (capacité de logement, matériaux et or de ses propres stocks, préfab posé si la cellule est sous les yeux) au lieu d'exporter ses enfants.

@@ -238,6 +238,13 @@ Le village d'une cellule de [[Villages PNJ — repeuplement et décimation]] et 
 > - **La règle ne double pas la peine** : `reputation.tuer` s'applique déjà quand on tue **devant témoin** ; le deuil, lui, frappe la ville du mort, qu'il y ait eu témoin ou non. Un meurtre au grand jour coûte donc les deux, un meurtre discret coûte le deuil — et l'on ne peut plus tuer sans conséquence.
 > **Ce que ça ne fait pas** : les tombes ne vieillissent pas, le cimetière ne s'agrandit pas quand il déborde, et le deuil ne dure pas (l'humeur baisse d'un coup et remonte par la dérive hebdomadaire ordinaire). **À juger** : les trois nombres.
 
+> [!important] Décidé le 2026-09-07, 22 h 40 — les métiers sans bâtiment : le journalier et le portefaix
+> La note des bras finissait par « Ce que ça ne fait pas encore : les métiers sans bâtiment (portefaix, journalier) ». Un atelier emploie deux personnes, une échoppe une, une caserne quatre — et quand les bâtiments sont pleins, **le reste d'une ville restait oisif**, plus de la moitié dans les mesures. Or un journalier n'a jamais eu besoin d'un atelier : il va aux champs à la journée ; un portefaix porte les sacs sur la place.
+> - **Deux fonctions de plus** (`data/functions/`) : le **journalier**, qui travaille aux champs (compétence Agriculture, son poste est la parcelle la plus proche de son lit) et le **portefaix**, qui porte (Athlétisme, son poste est la place). Toutes deux à faible rendement : ce sont des bras, pas des métiers de maîtrise.
+> - **Qui les prend** : après les bâtiments et les zones de récolte, une part des résidents encore sans métier (`emplois.sans_batiment`, par fonction) — le reste demeure oisif, et c'est juste : les enfants, les vieux, et ceux dont la ville n'a pas l'usage.
+> - **Pourquoi ce n'est pas cosmétique** : un journalier **produit** comme un fermier (moins), un portefaix compte dans les bras d'une ville. Une ville qui passait de 117 oisifs sur 199 à moins de la moitié voit ses stocks bouger, donc ses prix — depuis ce soir, ses denrées pourrissent aussi.
+> **Ce que ça ne fait pas** : les saisonniers (les moissons n'appellent toujours pas tout le monde aux champs), et le chômage ne pousse toujours pas à migrer — la migration regarde l'humeur, pas l'emploi.
+
 ## Liens
 - **Dépend de** : [[Un monde réel — villes, PNJ, royaumes et calendrier]], [[Villages PNJ — repeuplement et décimation]], [[Génération des royaumes PNJ]], [[Agriculture et élevage]], [[Population et exploitation]], [[Habitat des PNJ]], [[Commerce et boutiques]], [[Prix suggéré]]
 - **Alimente** : [[Économie — sources et puits]], [[Écrans d'interface]], [[Vers la production]]

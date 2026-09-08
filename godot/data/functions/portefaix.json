@@ -1,0 +1,19 @@
+{
+  "name_key": "function.portefaix.name",
+  "skill": "athletisme",
+  "rendement_base": 0.02,
+  "horaires": {
+    "6-20": "poste",
+    "20-22": "social",
+    "22-6": "lit"
+  },
+  "classes_possibles": [
+    "la_braise",
+    "le_roc"
+  ],
+  "leadership": false,
+  "portefeuille": 12,
+  "tags": [
+    "sans_batiment"
+  ]
+}
