@@ -82,6 +82,8 @@ jamais s'ajouter à côté. Sinon on obtient six vérités qui se contredisent, 
 >
 > **Ce que le champ apporte en plus, sans une ligne de règle** : une pièce fermée garde sa chaleur (l'**isolation** du matériau freine l'échange — une paroi isolante retient, un métal donne), un corps souffre de l'air lui-même au-delà de 70 °C ou sous −12 °C (le feu et la lave gardent leur brûlure **au contact** : pas de double comptage), et le vent n'est pas perdu — il **attise la source** au lieu de doubler un tirage.
 >
+> **Une promesse de cette note que le code ne tient pas encore** (relevé le 2026-09-08) : le callout du haut annonce une diffusion « pondérée par `isolation` (ce qui retient) et `densite` (ce qui met du temps à changer) ». **Le champ codé ne lit que `isolation`** (`sim_terrain.gd`, la ligne du coefficient) : l'inertie thermique de la matière dense n'existe pas. À faire avec la stat `fusion`, quand la chaleur reprendra du service — ou à retirer de la promesse.
+>
 > **Ce que ce champ n'absorbe PAS encore**, et il faut le dire pour ne pas mentir : la neige et le gel restent des **drapeaux de grille** (`grille.neige`, `grille.gel`) posés par la météo, pas des lectures du champ ; la température ressentie de la météo reste sa propre fonction ; le gaz inflammable garde sa règle d'allumage. Ces trois-là tomberont quand la matière saura **fondre** — c'est-à-dire avec la stat `fusion` de [[Matériaux — 13 stats]], qui n'existe pas encore.
 
 ## Liens
