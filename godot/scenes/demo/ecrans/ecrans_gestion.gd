@@ -434,6 +434,30 @@ static func _valider_composition(ec: Ecrans) -> void:
 
 
 ## L'écran principal (Écrans d'interface, 2026-08-30) : Nouvelle partie, Continuer, Charger, Options, Quitter.
+## LE RAPPEL DES TOUCHES (Ordre de travail, palier 3 — 2026-09-08). Il n'y en avait aucun en jeu : les contrôles ne
+## vivaient que dans le README et dans trois chaînes `ui.aide` que personne ne lisait et qui décrivaient des touches
+## disparues (supprimées le même jour).
+## Le point qui compte : cet écran **LIT l'InputMap** (`Reglages.touche_de`). Ce n'est donc pas une quatrième liste
+## écrite à la main — il dit ce que les touches SONT, remappages du joueur compris, et il ne peut pas mentir.
+static func _construire_aide(ec: Ecrans, _j: Dictionary) -> void:
+	ec.titre.text = ec.tr("ui.ecran.aide")
+	for nom in Reglages.actions().keys():
+		var a: Dictionary = Reglages.actions()[nom]
+		var libelle := ec.tr(str(a.get("nom_cle", "ui.controle." + str(nom))))
+		var touche := Reglages.touche_de(str(nom))
+		ec.liste.add_item("%s   —   %s" % [touche, libelle])
+		var d := ec.tr("ui.controle.d_" + str(nom))
+		if not bool(a.get("rebindable", true)):
+			d += "\n\n" + ec.tr("ui.aide.non_remappable")
+		# `touche` est portée par l'entrée et pas seulement écrite dans le libellé : la ligne affichée est préfixée
+		# par sa lettre d'option (« une option = une lettre »), donc on ne peut pas la relire de façon fiable.
+		ec.entrees.append({"kind": "aide", "id": str(nom), "touche": touche, "texte": d})
+	# Ce qui n'est pas une action et qu'il faut dire quand même : la souris et les chiffres.
+	for fixe in ["clic", "maj_clic", "chiffres", "ctrl_chiffres", "molette"]:
+		ec.liste.add_item(ec.tr("ui.aide.f_" + fixe))
+		ec.entrees.append({"kind": "aide", "id": fixe, "texte": ec.tr("ui.aide.d_" + fixe)})
+
+
 ## L'écran de MORT (Ordre de travail, palier 3 — 2026-09-08). Avant, la défaite était une ligne de journal et
 ## n'importe quelle touche relevait le joueur sur-le-champ : il ne savait ni où il repartirait, ni ce que ça coûterait.
 ## L'écran dit les deux et demande un choix. Étant un écran, il met aussi le monde en pause (la pause du même jour).

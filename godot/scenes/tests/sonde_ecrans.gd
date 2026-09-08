@@ -36,6 +36,7 @@ func _ready() -> void:
 	await _verifier_pause(scene, ec)
 	await _verifier_ecran_mort(scene, ec)
 	_verifier_controles()
+	await _verifier_aide(scene, ec)
 	for f in fautes:
 		print(f)
 	if not fautes.is_empty():
@@ -207,6 +208,43 @@ func _verifier_controles() -> void:
 		fautes.append("  controles : Echap s'est laisse remapper alors qu'il est declare non remappable")
 	if fautes.is_empty():
 		print("  controles : %d actions dans l'InputMap, la marche par position, le remappage tient" % actions.size())
+
+
+## LE RAPPEL DES TOUCHES (palier 3, 2026-09-08). Il n'y en avait aucun en jeu. Ce qui compte n'est pas qu'il existe,
+## c'est qu'il LISE l'InputMap : on remappe une touche et on vérifie que l'écran le dit — s'il affichait une liste
+## écrite à la main, il continuerait à montrer l'ancienne, comme le README et les chaînes `ui.aide` supprimées.
+func _verifier_aide(_scene: Node, ec) -> void:
+	ec.ouvrir("aide")
+	await get_tree().process_frame
+	var n_actions: int = Reglages.actions().size()
+	var lignes: int = ec.entrees.size()
+	if lignes < n_actions:
+		fautes.append("  aide : %d lignes pour %d actions declarees" % [lignes, n_actions])
+	# On lit l'ENTREE et pas le libelle affiche : la ligne est prefixee par sa lettre d'option, donc son texte ne
+	# commence pas par la touche.
+	var avait := false
+	for en in ec.entrees:
+		if str(en.get("id", "")) == "ramasser" and str(en.get("touche", "")) == Reglages.touche_de("ramasser"):
+			avait = true
+	if not avait:
+		fautes.append("  aide : la touche de « ramasser » (%s) n'apparait pas" % Reglages.touche_de("ramasser"))
+	# La preuve : on remappe, et l'ecran doit suivre.
+	Reglages.remapper("ramasser", "K")
+	ec.fermer()
+	ec.ouvrir("aide")
+	await get_tree().process_frame
+	var suit := false
+	for en in ec.entrees:
+		if str(en.get("id", "")) == "ramasser" and str(en.get("touche", "")) == "K":
+			suit = true
+	Reglages.remappages.erase("ramasser")
+	Reglages.construire_input_map()
+	Reglages.enregistrer()
+	ec.fermer()
+	if not suit:
+		fautes.append("  aide : l'ecran n'a pas suivi le remappage — il n'est donc pas branche sur l'InputMap")
+	else:
+		print("  aide : %d lignes, et l'ecran suit le remappage (il LIT l'InputMap)" % lignes)
 
 
 func _verifier_pages_et_tri(scene: Node, ec: Node) -> void:

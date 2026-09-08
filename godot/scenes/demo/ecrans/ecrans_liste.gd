@@ -30,6 +30,8 @@ static func rafraichir(ec: Ecrans) -> void:
 			EcransGestion._construire_gestion(ec, j)
 		"menu":
 			EcransCreation._construire_menu(ec, j)
+		"aide":
+			EcransGestion._construire_aide(ec, j)
 		"mort":
 			EcransGestion._construire_mort(ec, j)
 		"titre":
@@ -631,7 +633,7 @@ static func _detail_de(ec: Ecrans, en: Dictionary) -> void:
 			var it_c: Dictionary = ec.main.sim.items.get(str(en.uid), {})
 			ec.penta_objet.visible = not ec.main.sim.inconnu(it_c)
 			ec.penta_objet.montrer({"elements": ec.main.sim.vecteur_objet(it_c)})
-		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer", "menu", "contexte", "capacite", "nouvelle_capacite", "module_composer", "triche", "triche_catalogue", "triche_item", "titre", "mort", "monde", "options", "charger_slot":
+		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer", "menu", "contexte", "capacite", "nouvelle_capacite", "module_composer", "triche", "triche_catalogue", "triche_item", "titre", "mort", "aide", "monde", "options", "charger_slot":
 			ec.detail.text = str(en.get("texte", ""))
 		"creation":
 			ec.detail.text = EcransCreation._detail_creation(ec, str(en.id))
@@ -733,6 +735,8 @@ static func _action_defaut(ec: Ecrans, en: Dictionary) -> void:
 		"creation":
 			EcransCreation._action_creation(ec, str(en.id), 0 if str(en.id) == "pose" else 1)
 			return
+		"aide":
+			return   # l'aide ne fait rien : elle se lit
 		"mort":
 			match str(en.id):
 				"relever":

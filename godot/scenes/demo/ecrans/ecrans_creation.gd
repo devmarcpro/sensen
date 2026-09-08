@@ -529,7 +529,10 @@ static func _texte_production(ec: Ecrans, pr: Dictionary) -> String:
 ## Le menu (Tab) : les écrans et les actions générales (Écrans d'interface, contrôles).
 static func _construire_menu(ec: Ecrans, _j: Dictionary) -> void:
 	ec.titre.text = ec.tr("ui.ecran.menu")
-	var ids: Array = ["inventaire", "atelier", "feuille", "capacites", "carte", "gestion", "perimetre", "registre", "sauvegarder", "volet", "minimap_zoom", "minimap_masquer", "titre", "arene", "banc_objets", "recharger", "fermer"]
+	# « aide », « options » et « quitter » ajoutés le 2026-09-08 (Ordre de travail, palier 3) : le menu n'offrait aucun
+	# moyen de voir les contrôles, de régler quoi que ce soit ni de quitter proprement — et le README annonçait déjà une
+	# entrée de débogage qui n'existait pas.
+	var ids: Array = ["inventaire", "atelier", "feuille", "capacites", "carte", "gestion", "perimetre", "registre", "aide", "options", "sauvegarder", "volet", "minimap_zoom", "minimap_masquer", "titre", "quitter", "arene", "banc_objets", "recharger", "fermer"]
 	for id in ids:
 		if id in ["carte", "gestion", "perimetre"] and ec.main.sim.lieu != "camp":
 			continue

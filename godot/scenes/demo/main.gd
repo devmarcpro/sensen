@@ -1842,6 +1842,13 @@ func _action_menu(id: String) -> void:
 		"gestion":
 			if sim.lieu == "camp":
 				ecrans.ouvrir("gestion")
+		"aide", "options":
+			ecrans.ouvrir(id)
+		"quitter":   # quitter proprement : on sauvegarde d'abord, sinon on perd jusqu'à cinq minutes sans un mot
+			ecrans.fermer()
+			if sim.monde != null and not sim.sauvegarder():
+				_log(tr("journal.sauvegarde_impossible"))
+			get_tree().quit()
 		"volet":
 			volet_visible = not volet_visible
 		"perimetre":   # la même chose que P — le menu ne cache aucun raccourci global (README, contrôles)
