@@ -55,9 +55,16 @@ func _ready() -> void:
 	var sim2 := Simulation.new(0x51E5)
 	sim2.graine_monde = 4242
 	sim2.charger_camp()
+	# LA FENÊTRE D'OBSERVATION SE COMPTE EN TIRAGES, PAS EN TICKS (2026-09-09). On avançait de trois ticks à la
+	# fois sur douze mille : mille deux cents secondes de camp quand un tick faisait cent millisecondes, DOUZE
+	# secondes depuis — c'est-à-dire moins d'UN intervalle de tirage. La sonde ne voyait donc qu'un seul tirage et
+	# concluait que « les pools ne suffisent pas », alors que ses propres tables, dix lignes plus haut, montrent
+	# 88 % d'espèces paisibles en plaine tempérée. Une sonde qui ment fait corriger du contenu qui va bien.
 	var vus := {}
-	for k in 4000:
-		sim2._tiquer_faune(k * 3)
+	var inter_f := int(GameData.config("planete").faune.intervalle_ticks)
+	var tirages := 60
+	for k in tirages:
+		sim2._tiquer_faune(k * inter_f)
 		for x in sim2.vivants():
 			if x.get("spawn_faune", false):
 				vus[str(x.def)] = int(vus.get(str(x.def), 0)) + 1
@@ -67,7 +74,7 @@ func _ready() -> void:
 	for cid in noms:
 		if "paisible" in GameData.catalogues.creatures.get(cid, {}).get("tags", []):
 			paisibles += 1
-	print("sur pied, en 12000 ticks de camp : %d especes vues, dont %d paisibles" % [noms.size(), paisibles])
+	print("sur pied, en %d tirages de faune (%d ticks de camp, %.0f minutes de monde) : %d especes vues, dont %d paisibles" % [tirages, tirages * inter_f, float(tirages * inter_f) / float(GameData.config("combat_rules").ticks_par_seconde_exploration) / 60.0, noms.size(), paisibles])
 	print("  ", ", ".join(noms))
 	if paisibles == 0:
 		soucis.append("  aucune bete paisible n'apparait vraiment : les pools ne suffisent pas")

@@ -39,6 +39,14 @@ Tous les systèmes (combat, mana [[Mana]], faim [[Faim]], IA, croissance des cul
 > **Le garde-fou du script** : il **échoue** s'il rencontre un champ temporel qu'aucune de ses trois listes ne nomme, et il ne **commence à écrire qu'après** avoir tout classé — le premier jet écrivait au fil de l'eau, s'arrêtait sur les refus et laissait la donnée à moitié migrée. Il a fallu restaurer depuis git pour s'en apercevoir.
 > **Les sauvegardes** portent une `version` : une partie d'avant est multipliée au chargement, sinon son calendrier reculerait de plusieurs jours.
 
+> [!failure] Le 2026-09-09 — **la migration du tick avait un angle mort, et c'étaient les OUTILS**
+> Le changement d'unité (100 ms → 1 ms) a été mené sur les données et prouvé par la suite de tests. La suite ne voit pas les **sondes** : vingt-cinq programmes qui font tourner le jeu et jugent ce qu'ils voient. Les avoir passées une à une, ce jour-là, a donné **trois défauts, tous le même** — une durée écrite en clair, restée dans l'ancienne unité, que rien ne relisait :
+> - `sonde_ia_pnj` : seuil de « figé » à **300** ticks. Au tick d'une milliseconde, la moindre attaque en coûte cinq cents — **tout être qui venait d'agir** était déclaré figé. Trente-neuf soucis, trente-sept faux.
+> - `sonde_ville` et `sonde_echelle` : **100 ticks** par itération, soit dix secondes de monde avant, un dixième après. Elles mesuraient **cent fois moins de vie simulée** qu'avant, sous le même nom. Ce sont les outils qui décident des investissements de performance.
+> - `sonde_faune` : une fenêtre de **12 000 ticks**, c'est-à-dire **moins d'un seul intervalle de tirage** (20 000). La sonde ne voyait qu'un tirage et concluait « les pools ne suffisent pas » — alors que ses propres tables, dix lignes plus haut, montrent 88 % d'espèces paisibles en plaine tempérée. *Une sonde qui ment fait corriger du contenu qui va bien.*
+> **La règle qui en sort** : un changement d'UNITÉ ne se termine pas quand la suite est verte. Il se termine quand **tout ce qui écrit une durée en clair** a été relu — et les outils sont l'angle mort, précisément parce que rien ne les lit. Les trois se disent maintenant en unités qui ne peuvent pas rouiller : des **périodes de l'automate**, des **images de jeu**, des **tirages**.
+> **Et un nom qui fabriquait le bug** : `tempo.ticks_max_par_image` comptait des **actions**, pas des ticks. Une sonde s'en servait comme d'une avance en ticks *à cause du nom*, et le plan de migration prévoyait de le multiplier par dix. Il s'appelle `actions_max_par_image` depuis.
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Action-time à ticks]], [[Contraintes permanentes]]
 - **Alimente** : [[Boucle de tick]], [[Réseau]], [[Simulation du monde — performance]]
