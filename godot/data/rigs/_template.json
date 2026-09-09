@@ -63,10 +63,6 @@
    "lacet": 90,
    "vue_tete": "profil"
   },
-  "N": {
-   "lacet": 180,
-   "vue_tete": "dos"
-  },
   "W": {
    "lacet": -90,
    "vue_tete": "profil"

@@ -127,11 +127,10 @@ func _dessiner_etre() -> void:
 	# son orientation de grille : la composante « vers la caméra » est x + y (l'isométrie regarde la grille depuis le
 	# sud-est), la composante « vers la droite de l'écran » est x − y. Les huit orientations du rig ne servent plus
 	# qu'à nommer le lacet le plus proche pour choisir la vue de la tête.
-	# QUATRE DIRECTIONS, PAS HUIT (designer 2026-09-09 : « on va faire que 4 directions par personnages
-	# finalement »). Le corps se CALE sur l'orientation la plus proche parmi celles que le rig DÉCLARE : c'est la
-	# table du rig, et elle seule, qui dit combien de vues existent — quatre aujourd'hui, la face, le dos et les
-	# deux profils, ce que le designer dessine à la main. En rajouter quatre rendrait les huit angles sans toucher
-	# une ligne de code.
+	# TROIS DIRECTIONS (designer 2026-09-09 : « on va faire 3 orientations pour les personnages, droite gauche et de
+	# face »). Le corps se CALE sur l'orientation la plus proche parmi celles que le rig DÉCLARE : c'est la table du
+	# rig, et elle seule, qui dit combien de vues existent — trois aujourd'hui, la face et les deux profils, ce que
+	# le designer dessine à la main. Y rajouter le dos ou les trois-quarts suffirait, sans une ligne de code.
 	var o_e: Vector2i = e.get("orientation", Vector2i.ZERO)
 	var ori := {}
 	_lacet = 0.0
@@ -326,6 +325,9 @@ func _orientation_proche(dir_ecran: Vector2) -> Dictionary:
 		var t := deg_to_rad(float(o.get("lacet", 0.0)))
 		var regard := Vector2(sin(t), cos(t) * 0.5).normalized()
 		var d := regard.dot(dir_ecran)
+		# `>` strict : À ÉGALITÉ, LA PREMIÈRE DÉCLARÉE GAGNE. Avec trois vues, un pas droit vers le haut de l'écran
+		# — s'éloigner — met les deux profils à égalité parfaite, puisque aucun des deux ne regarde de ce côté.
+		# L'ordre de la table du rig tranche donc, et c'est le seul endroit où il compte.
 		if d > meilleur:
 			meilleur = d
 			meilleure = o

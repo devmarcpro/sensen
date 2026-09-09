@@ -1419,10 +1419,18 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 			var complet := essai == 3 or essai == 7
 			if complet and sans_place.has(cle_taille):
 				continue
+			# LE DÉTAIL DE LA POSE, PAR GENRE D'ESSAI (2026-09-09) : `village.parcelles` est le poste le plus cher
+			# d'une cellule de cité (85 ms sur 125 mesurés), mais il recouvre quatre choses très différentes — la
+			# recherche bornée le long des rues, le balayage COMPLET des rues, la recherche bornée d'un terrain, et
+			# le balayage complet du sol. Sans les séparer, on ne sait pas laquelle payer.
+			var t_p := Time.get_ticks_usec()
 			if essai < 4:
 				origine = _parcelle_sur_rue(e, sens, plan, occupe, rues_triees, essais_max if not complet else rues_triees.size(), curseur_rue)
+				t_p = _top("village.parcelles.rue_complet" if complet else "village.parcelles.rue", t_p)
 			else:
 				origine = _terrain_ruelle(e, cell, plan, sens, occupe, taille, tuiles_triees, rue, palette, rues_triees, curseur_terrain_f, 900 if not complet else 0)
+				t_p = _top("village.parcelles.sol_complet" if complet else "village.parcelles.sol", t_p)
+			chrono["village.parcelles.n_essais"] = float(chrono.get("village.parcelles.n_essais", 0.0)) + 1.0
 			if origine == Vector2i(-2, -2):
 				sans_place[cle_taille] = true   # le quartier n'a plus un terrain de cette taille : les suivants non plus
 				continue

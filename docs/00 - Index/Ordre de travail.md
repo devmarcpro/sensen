@@ -335,6 +335,21 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     silhouette est la projection de cette ellipse : un torse vu de profil fait son épaisseur, pas une fraction
     arbitraire de sa largeur. La borne ne sert plus que de plancher absolu (0,12).
 
+26 terdecies. **DEUX BÂTIMENTS SUR TREIZE SONT ENCLAVÉS DANS UNE CELLULE DE VILLE.** Constaté par `sonde_ville
+    --graine_monde 3`, cellule (510, 205) : *« écurie en (22, 54) : mur, mur, poche, poche | échoppe en (52, 43) :
+    mur, mur, poche, poche »*. La sonde dit désormais **ce que la porte a devant elle**, et c'est ce qui rend le
+    défaut lisible : les deux portes ouvrent bien sur du sol **marchable** — ce n'est donc ni un pavage manquant ni
+    une porte contre un mur —, mais ce sol est **déconnecté** du centre de la cellule. Ce sont des **enclaves** :
+    l'écurie et l'échoppe sont enfermées derrière les murs d'autres bâtiments.
+    **Ce que ça veut dire pour le joueur** : deux commerces où l'on ne peut pas entrer, et deux occupants qui ne
+    peuvent pas sortir. Le pavage de la porte vers la rue s'arrête à huit pas ; ici il ne manque pas de pavés, il
+    manque un **passage**.
+    **Les deux routes, et leur prix** : (a) *empêcher* — vérifier à la pose que la porte reste reliée au réseau de
+    rues, ce qui coûte une inondation par bâtiment posé et ferait grossir `village.parcelles`, déjà le poste le plus
+    cher ; (b) *rattraper* — un passage après coup, comme le rattrapage des lits qui existe déjà : inonder une fois
+    depuis les rues, trouver les portes non atteintes, et ouvrir le mur le plus court qui sépare l'enclave du reste.
+    **(b) est moins cher et se mesure** ; c'est celle à écrire, avec un test qui prouve que toute porte est atteinte.
+
 ## Palier 6 — les 236 contenus meurent, la grammaire reste
 
 27. **Supprimer les 236 contenus de modules**, les branches d'effet en dur et les listes des fiches de classe.

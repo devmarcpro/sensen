@@ -83,6 +83,7 @@ func _ready() -> void:
 		var par_id := {}
 		var lits := 0
 		var portes_jointes := 0
+		var portes_bloquees: Array[String] = []
 		var atteint := _atteignable(e, Vector2i(e.largeur / 2, e.largeur / 2))
 		for bat in v.batiments:
 			par_id[str(bat.id)] = int(par_id.get(str(bat.id), 0)) + 1
@@ -95,6 +96,25 @@ func _ready() -> void:
 					voisines += 1
 			if voisines > 0:
 				portes_jointes += 1
+			else:
+				# UNE SONDE DIT LA CAUSE (2026-09-09) : « la porte ne rejoint pas la rue » ne se corrige pas — il
+				# faut savoir CE QU'ELLE A devant elle. On dit le bâtiment, la porte, et l'état de ses quatre
+				# voisines : un mur, de l'eau, pas de sol du tout, ou du sol que le flot n'atteint pas (une poche).
+				var etats: Array[String] = []
+				for d2 in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
+					var q2: Vector2i = porte + d2
+					var i2: int = q2.y * int(e.largeur) + q2.x
+					if q2.x < 0 or q2.y < 0 or q2.x >= e.largeur or q2.y >= e.largeur:
+						etats.append("hors")
+					elif e.murs.has(i2):
+						etats.append("mur")
+					elif e.eau.has(i2):
+						etats.append("eau")
+					elif not (e.sol.has(i2) or e.portes.has(i2)):
+						etats.append("sans sol")
+					else:
+						etats.append("poche")   # marchable, mais le flot depuis le centre n'y arrive pas
+				portes_bloquees.append("%s en %s : %s" % [str(bat.id), str(porte), ", ".join(etats)])
 		var fonctions := {}
 		for pj in v.pnj:
 			fonctions[str(pj.get("fonction", "?"))] = int(fonctions.get(str(pj.get("fonction", "?")), 0)) + 1
@@ -107,7 +127,7 @@ func _ready() -> void:
 		if lits < int(v.population_quartier) * 3 / 4:   # un quartier plein loge son surplus chez ses voisins : le compte qui vaut est celui de la ville (plus bas)
 			soucis.append("cellule %s (%s) : %d lits pour %d habitants" % [str(c), str(v.quartier), lits, int(v.population_quartier)])
 		if portes_jointes < v.batiments.size():
-			soucis.append("cellule %s : %d porte(s) sur %d ne rejoignent pas la rue" % [str(c), v.batiments.size() - portes_jointes, v.batiments.size()])
+			soucis.append("cellule %s : %d porte(s) sur %d ne rejoignent pas la rue — %s" % [str(c), v.batiments.size() - portes_jointes, v.batiments.size(), " | ".join(portes_bloquees)])
 		if dt > budget:
 			var detail := ""   # ce que la pose du quartier a coûté, par étape (Surface.chrono) : où passe le budget
 			for cle in Surface.chrono.keys():
