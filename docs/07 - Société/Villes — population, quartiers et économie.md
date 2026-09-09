@@ -245,6 +245,12 @@ Le village d'une cellule de [[Villages PNJ — repeuplement et décimation]] et 
 > - **Pourquoi ce n'est pas cosmétique** : un journalier **produit** comme un fermier (moins), un portefaix compte dans les bras d'une ville. Une ville qui passait de 117 oisifs sur 199 à moins de la moitié voit ses stocks bouger, donc ses prix — depuis ce soir, ses denrées pourrissent aussi.
 > **Ce que ça ne fait pas** : les saisonniers (les moissons n'appellent toujours pas tout le monde aux champs), et le chômage ne pousse toujours pas à migrer — la migration regarde l'humeur, pas l'emploi.
 
+> [!success] Codé le 2026-09-09 — **aucun bâtiment n'est enclavé** (le rattrapage des portes)
+> Un bâtiment dont la porte ouvre sur un sol coupé du reste de la cellule, c'est **un commerce où l'on ne peut pas entrer et un occupant qui ne peut pas sortir**. `sonde_ville --graine_monde 3` en trouvait deux sur treize.
+> **La génération ouvre maintenant un passage**, et choisit le geste le plus doux : d'abord un obstacle **naturel** à dégager — un arbre s'abat, et c'est ce qui séparait les deux cas mesurés —, un mur percé d'une **porte** seulement si l'enclave n'est bornée que par de la pierre. Un trou dans un mur laisserait une maison ouverte au vent ; une porte est une structure que le monde pose déjà, et que les PNJ ouvrent en passant.
+> **Elle dit ce qu'elle a réparé** : `village.portes_rattrapees` porte le bâtiment, la tuile et la nature du passage ; `village.portes_enclavees` ce qu'elle n'a pas su ouvrir. Sans ça, un rattrapage silencieux ne se distingue pas d'un défaut qui aurait disparu tout seul.
+> **Le coût** : une seule fois par cellule, un découpage du sol en composantes connexes — pas une vérification par bâtiment posé, qui aurait alourdi le poste de génération déjà le plus cher.
+
 ## Liens
 - **Dépend de** : [[Un monde réel — villes, PNJ, royaumes et calendrier]], [[Villages PNJ — repeuplement et décimation]], [[Génération des royaumes PNJ]], [[Agriculture et élevage]], [[Population et exploitation]], [[Habitat des PNJ]], [[Commerce et boutiques]], [[Prix suggéré]]
 - **Alimente** : [[Économie — sources et puits]], [[Écrans d'interface]], [[Vers la production]]

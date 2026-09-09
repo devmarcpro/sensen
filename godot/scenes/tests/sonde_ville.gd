@@ -126,6 +126,10 @@ func _ready() -> void:
 		print("  cellule %s · %s · %d habitants prévus · %d bâtiments %s · %d lits · %d PNJ %s · rues : %d/%d portes jointes · périmètres %s · à récolter { arbres %d, filons %d, plantes %d } · %d stations · %d champs · %d bêtes · %.0f ms" % [str(c), str(v.quartier), int(v.population_quartier), v.batiments.size(), str(par_id), lits, v.pnj.size(), str(fonctions), portes_jointes, v.batiments.size(), str(per_types), e.get("arbres", {}).size(), e.get("filons", {}).size(), e.get("plantes", {}).size(), e.get("stations", {}).size(), v.get("champs", []).size(), v.get("betes", []).size(), dt])
 		if lits < int(v.population_quartier) * 3 / 4:   # un quartier plein loge son surplus chez ses voisins : le compte qui vaut est celui de la ville (plus bas)
 			soucis.append("cellule %s (%s) : %d lits pour %d habitants" % [str(c), str(v.quartier), lits, int(v.population_quartier)])
+		if not v.get("portes_rattrapees", []).is_empty():
+			print("  cellule %s : %d enclave(s) ouverte(s) à la génération — %s" % [str(c), v.portes_rattrapees.size(), str(v.portes_rattrapees)])
+		if not v.get("portes_enclavees", []).is_empty():
+			soucis.append("cellule %s : %d enclave(s) que la génération n'a pas su ouvrir — %s" % [str(c), v.portes_enclavees.size(), str(v.portes_enclavees)])
 		if portes_jointes < v.batiments.size():
 			soucis.append("cellule %s : %d porte(s) sur %d ne rejoignent pas la rue — %s" % [str(c), v.batiments.size() - portes_jointes, v.batiments.size(), " | ".join(portes_bloquees)])
 		if dt > budget:

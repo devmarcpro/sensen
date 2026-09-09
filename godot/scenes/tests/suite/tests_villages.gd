@@ -173,6 +173,76 @@ func test_village() -> void:
 
 # ---------------------------------------------------------------- Étape 10.1 : territoire, résidents, semaine
 
+## AUCUN BÂTIMENT N'EST ENCLAVÉ (ordre de travail 26 terdecies, 2026-09-09). Un bâtiment dont la porte ouvre sur un
+## sol coupé du reste de la cellule, c'est un commerce où l'on ne peut pas entrer et un occupant qui ne peut pas
+## sortir. `sonde_ville --graine_monde 3` en trouvait deux sur treize ; la génération ouvre désormais un passage —
+## un arbre abattu de préférence, une porte percée si l'enclave n'est bornée que par de la pierre.
+##
+## Le test refait exactement la cellule qui échouait, et vérifie les deux choses qui comptent : que la génération a
+## bien eu à rattraper (sinon le test ne prouverait plus rien le jour où le monde changera), et qu'il ne reste
+## aucune porte hors de la plus grande composante marchable de la cellule.
+func test_portes_sans_enclave() -> void:
+	var planete_e: Dictionary = GameData.config("planete")
+	var surf_e := Surface.new(GameData.config("noise_layers"), GameData.catalogues.biomes, planete_e, 3)
+	var e_e: Dictionary = surf_e.generer_cellule(510, 205, {}, false)
+	var v_e: Dictionary = e_e.get("village", {})
+	verifier(not v_e.is_empty() and v_e.get("batiments", []).size() >= 10, "la cellule (510, 205) porte bien son quartier (%d bâtiments)" % v_e.get("batiments", []).size())
+	verifier(not v_e.get("portes_rattrapees", []).is_empty(), "la génération a eu une enclave à ouvrir, et l'a ouverte (%s)" % str(v_e.get("portes_rattrapees", [])))
+	verifier(v_e.get("portes_enclavees", []).is_empty(), "aucune enclave n'est restée fermée (%s)" % str(v_e.get("portes_enclavees", [])))
+	# Et la preuve indépendante : on refait le découpage en composantes sur la cellule FINIE, et toute porte touche
+	# la plus grande. C'est la même mesure que la sonde, mais sans point de départ choisi.
+	var taille_e: int = e_e.largeur
+	var comp_e := {}
+	var n_e := 0
+	for i0_e in e_e.sol.keys():
+		var dep_e: int = int(i0_e)
+		if comp_e.has(dep_e):
+			continue
+		n_e += 1
+		var file_e: Array[int] = [dep_e]
+		comp_e[dep_e] = n_e
+		var tete_e := 0
+		while tete_e < file_e.size():
+			var i_e: int = file_e[tete_e]
+			tete_e += 1
+			@warning_ignore("integer_division")
+			var p_e := Vector2i(i_e % taille_e, i_e / taille_e)
+			for d_e in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
+				var q_e: Vector2i = p_e + d_e
+				if q_e.x < 0 or q_e.y < 0 or q_e.x >= taille_e or q_e.y >= taille_e:
+					continue
+				var iq_e: int = q_e.y * taille_e + q_e.x
+				if comp_e.has(iq_e) or e_e.murs.has(iq_e) or e_e.eau.has(iq_e):
+					continue
+				if not (e_e.sol.has(iq_e) or e_e.portes.has(iq_e)):
+					continue
+				comp_e[iq_e] = n_e
+				file_e.append(iq_e)
+	var tailles_e := {}
+	for c_e in comp_e.values():
+		tailles_e[c_e] = int(tailles_e.get(c_e, 0)) + 1
+	var ville_e := -1
+	var max_e := 0
+	for cid_e in tailles_e.keys():
+		if int(tailles_e[cid_e]) > max_e:
+			max_e = int(tailles_e[cid_e])
+			ville_e = int(cid_e)
+	var hors := 0
+	for bat_e in v_e.batiments:
+		var porte_e: Vector2i = bat_e.get("porte", Vector2i(-1, -1))
+		if porte_e.x < 0:
+			continue
+		var touche := false
+		for d_e in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
+			var iv_e: int = (porte_e.y + d_e.y) * taille_e + porte_e.x + d_e.x
+			if comp_e.has(iv_e) and int(comp_e[iv_e]) == ville_e:
+				touche = true
+				break
+		if not touche:
+			hors += 1
+	verifier(hors == 0, "les %d portes du quartier touchent toutes la ville (%d hors, %d composantes)" % [v_e.batiments.size(), hors, tailles_e.size()])
+
+
 func test_village_vivant() -> void:
 	# On visite un village habité du monde de la partie (rectangulaire depuis le point 49) : y planter
 	# le camp le remplacerait par une esplanade, et une zone en dur tomberait aujourd'hui dans l'océan.

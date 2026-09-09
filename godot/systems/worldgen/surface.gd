@@ -400,7 +400,7 @@ func _poser_route(e: Dictionary, cell: Vector2i) -> void:
 					e.sols[i] = sol
 					_degager(e, i)
 					e.route[i] = true
-			var iq := q.y * taille + q.x
+			var iq: int = q.y * taille + q.x
 			if rail and _dans(q, taille) and not e.eau.has(iq) and not e.murs.has(iq):
 				e.rails[iq] = true
 				dernier_rail = q
@@ -1595,6 +1595,11 @@ func _poser_quartier(e: Dictionary, cell: Vector2i, rng: RandomNumberGenerator, 
 				pose_r = true
 		echecs = 0 if pose_r else echecs + 1
 	t_q = _top("village.rattrapage", t_q)
+	# 4 ter. LE RATTRAPAGE DES PORTES (2026-09-09) : un bâtiment peut se retrouver ENCLAVÉ — sa porte ouvre sur du
+	# sol marchable, mais ce sol est coupé du reste de la cellule par les murs des voisins. Mesuré par
+	# `sonde_ville --graine_monde 3` : deux bâtiments sur treize, deux commerces où l'on ne peut pas entrer.
+	_rattraper_portes(e, palette, rue)
+	t_q = _top("village.portes", t_q)
 	# 4 ter. Le cimetière (Villes — les repères, 2026-09-07) : un enclos de tombes contre la chapelle, hors les murs
 	# quand la ville est fortifiée — et il occupe du terrain, comme tout ce qui n'est pas une maison.
 	var cim: Dictionary = cfg.get("reperes", {}).get("cimetiere", {})
@@ -2009,6 +2014,157 @@ func _parcelle(e: Dictionary, sens: String, w: int, h: int, centre: Vector2i, la
 				continue
 			return origine
 	return Vector2i(-1, -1)
+
+## LE RATTRAPAGE DES PORTES (ordre de travail 26 terdecies, 2026-09-09). Un bâtiment peut se retrouver ENCLAVÉ :
+## sa porte ouvre sur du sol marchable, mais ce sol est coupé du reste de la cellule.
+##
+## DEUX PIÈGES, tous deux payés avant d'arriver ici, et tous deux du même genre — juger sur un état qui n'est pas
+## celui qui comptera :
+## 1. Inonder depuis les tuiles de `rue` ne mesure pas « relié à la ville » mais « pavé » : le chemin qui relie une
+##    porte à la rue dépose jusqu'à huit pavés DEVANT elle, même quand il n'aboutit nulle part. On découpe donc le
+##    sol en COMPOSANTES CONNEXES et on appelle « la ville » la plus grande — aucun point de départ à choisir.
+## 2. La cellule retire les arbres, les rochers, les filons et l'eau du sol marchable À LA TOUTE FIN de sa
+##    génération, après le village. Cette passe tourne avant : elle doit donc juger la marchabilité TELLE QU'ELLE
+##    SERA, en excluant ces obstacles elle-même. Sans ça elle voit une seule composante là où le jeu en aura deux.
+##
+## Le passage à ouvrir suit la même idée de moindre violence : on cherche d'abord un obstacle NATUREL à dégager —
+## un arbre s'abat, et c'est ce qui sépare l'enclave neuf fois sur dix — et on ne perce un mur que si l'enclave
+## n'est bornée que par de la pierre. Le percement pose alors une PORTE, pas un trou : le mur appartient à un
+## bâtiment, et une porte est une structure que le monde pose déjà (`porte_fermee`), que les PNJ ouvrent en passant.
+##
+## Ce qui reste enclavé malgré tout est écrit dans `village.portes_enclavees` : une cellule qui ne peut pas se
+## rattraper le DIT, elle ne le cache pas.
+func _rattraper_portes(e: Dictionary, palette: Dictionary, _rue: Dictionary) -> void:
+	var v: Dictionary = e.get("village", {})
+	if v.is_empty() or v.get("batiments", []).is_empty():
+		return
+	var taille: int = e.largeur
+	var comp: Dictionary = _composantes_marchables(e)
+	var tailles := {}
+	for i_c in comp.values():
+		tailles[i_c] = int(tailles.get(i_c, 0)) + 1
+	var ville := -1
+	var plus_grande := 0
+	for c_id in tailles.keys():
+		if int(tailles[c_id]) > plus_grande:
+			plus_grande = int(tailles[c_id])
+			ville = int(c_id)
+	if ville < 0:
+		return
+	for bat in v.batiments:
+		var porte: Vector2i = bat.get("porte", Vector2i(-1, -1))
+		if porte.x < 0:
+			continue
+		var sienne := -1
+		for d in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
+			var iv: int = (porte.y + d.y) * taille + porte.x + d.x
+			if comp.has(iv):
+				if int(comp[iv]) == ville:
+					sienne = ville
+					break
+				sienne = int(comp[iv])
+		if sienne == ville or sienne < 0:
+			continue
+		# Ce qui sépare l'enclave de la ville : une tuile qui touche les deux. On préfère un obstacle NATUREL (un
+		# arbre, un rocher, un filon) — il s'abat — à un mur, qu'il faudrait percer d'une porte.
+		var naturel := -1
+		var mur := -1
+		for i_s in _separateurs(e, comp, sienne, ville):
+			if e.murs.has(i_s):
+				if mur < 0:
+					mur = int(i_s)
+			else:
+				naturel = int(i_s)
+				break
+		var ouvert: int = naturel if naturel >= 0 else mur
+		if ouvert < 0:
+			var bloques: Array = v.get("portes_enclavees", [])
+			bloques.append({"id": str(bat.get("id", "")), "porte": porte})
+			v["portes_enclavees"] = bloques
+			continue
+		# LA CELLULE DIT CE QU'ELLE A RÉPARÉ : `portes_rattrapees` porte, pour chaque enclave ouverte, le bâtiment,
+		# la tuile ouverte et sa NATURE — un arbre abattu ou une porte percée. Sans ça, un rattrapage silencieux ne
+		# se distingue pas d'un défaut qui a disparu tout seul, et on ne sait pas ce qu'on a mesuré.
+		var ouverts: Array = v.get("portes_rattrapees", [])
+		ouverts.append({"id": str(bat.get("id", "")), "tuile": ouvert, "nature": "mur percé" if e.murs.has(ouvert) else "obstacle dégagé"})
+		v["portes_rattrapees"] = ouverts
+		if e.murs.has(ouvert):
+			e.murs.erase(ouvert)
+			e.portes[ouvert] = true
+		e.sols[ouvert] = str(palette.sol)
+		_degager(e, ouvert)   # l'arbre tombe, le rocher part : la tuile devient du sol
+		comp[ouvert] = ville
+		for ip in comp.keys():   # l'enclave rejoint la ville : les portes suivantes la verront reliée
+			if int(comp[ip]) == sienne:
+				comp[ip] = ville
+
+
+## Les tuiles NON marchables qui touchent à la fois la composante `a` et la composante `b` : les candidates à
+## l'ouverture d'un passage.
+func _separateurs(e: Dictionary, comp: Dictionary, a: int, b: int) -> Array[int]:
+	var taille: int = e.largeur
+	var res: Array[int] = []
+	var vu := {}
+	for ic in comp.keys():
+		if int(comp[ic]) != a:
+			continue
+		@warning_ignore("integer_division")
+		var p := Vector2i(int(ic) % taille, int(ic) / taille)
+		for d in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
+			var q: Vector2i = p + d
+			if q.x < 1 or q.y < 1 or q.x >= taille - 1 or q.y >= taille - 1:
+				continue
+			var iq: int = q.y * taille + q.x
+			if comp.has(iq) or vu.has(iq) or e.eau.has(iq):
+				continue   # marchable (donc pas un séparateur) ou déjà vue ; l'eau ne s'ouvre pas
+			vu[iq] = true
+			for d2 in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
+				var iq2: int = (q.y + d2.y) * taille + q.x + d2.x
+				if comp.has(iq2) and int(comp[iq2]) == b:
+					res.append(iq)
+					break
+	return res
+
+
+## Les composantes connexes du sol marchable TEL QU'IL SERA : la cellule retire les arbres, les rochers, les filons
+## et l'eau du sol à la toute fin de sa génération, après le village. Une passe qui tourne avant doit les exclure
+## elle-même, sinon elle juge un monde sans obstacles — c'est ce qui a rendu les deux premières versions aveugles.
+func _composantes_marchables(e: Dictionary) -> Dictionary:
+	var taille: int = e.largeur
+	var comp := {}
+	var n := 0
+	for i0 in e.sol.keys():
+		var depart: int = int(i0)
+		if comp.has(depart) or _obstrue(e, depart):
+			continue
+		n += 1
+		var file: Array[int] = [depart]
+		comp[depart] = n
+		var tete := 0
+		while tete < file.size():
+			var i: int = file[tete]
+			tete += 1
+			@warning_ignore("integer_division")
+			var p := Vector2i(i % taille, i / taille)
+			for d in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
+				var q: Vector2i = p + d
+				if q.x < 0 or q.y < 0 or q.x >= taille or q.y >= taille:
+					continue
+				var iq: int = q.y * taille + q.x
+				if comp.has(iq) or _obstrue(e, iq):
+					continue
+				if not (e.sol.has(iq) or e.portes.has(iq)):
+					continue
+				comp[iq] = n
+				file.append(iq)
+	return comp
+
+
+## Ce qui barre une tuile dans la cellule FINIE : un mur, de l'eau, et les trois obstacles que la génération retire
+## du sol à sa dernière ligne — un arbre, un rocher, un filon.
+func _obstrue(e: Dictionary, i: int) -> bool:
+	return e.murs.has(i) or e.eau.has(i) or e.arbres.has(i) or e.rochers.has(i) or e.filons.has(i)
+
 
 func _degager(e: Dictionary, i: int) -> void:
 	e.arbres.erase(i)

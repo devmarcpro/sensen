@@ -335,20 +335,29 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     silhouette est la projection de cette ellipse : un torse vu de profil fait son épaisseur, pas une fraction
     arbitraire de sa largeur. La borne ne sert plus que de plancher absolu (0,12).
 
-26 terdecies. **DEUX BÂTIMENTS SUR TREIZE SONT ENCLAVÉS DANS UNE CELLULE DE VILLE.** Constaté par `sonde_ville
-    --graine_monde 3`, cellule (510, 205) : *« écurie en (22, 54) : mur, mur, poche, poche | échoppe en (52, 43) :
-    mur, mur, poche, poche »*. La sonde dit désormais **ce que la porte a devant elle**, et c'est ce qui rend le
-    défaut lisible : les deux portes ouvrent bien sur du sol **marchable** — ce n'est donc ni un pavage manquant ni
-    une porte contre un mur —, mais ce sol est **déconnecté** du centre de la cellule. Ce sont des **enclaves** :
-    l'écurie et l'échoppe sont enfermées derrière les murs d'autres bâtiments.
-    **Ce que ça veut dire pour le joueur** : deux commerces où l'on ne peut pas entrer, et deux occupants qui ne
-    peuvent pas sortir. Le pavage de la porte vers la rue s'arrête à huit pas ; ici il ne manque pas de pavés, il
-    manque un **passage**.
-    **Les deux routes, et leur prix** : (a) *empêcher* — vérifier à la pose que la porte reste reliée au réseau de
-    rues, ce qui coûte une inondation par bâtiment posé et ferait grossir `village.parcelles`, déjà le poste le plus
-    cher ; (b) *rattraper* — un passage après coup, comme le rattrapage des lits qui existe déjà : inonder une fois
-    depuis les rues, trouver les portes non atteintes, et ouvrir le mur le plus court qui sépare l'enclave du reste.
-    **(b) est moins cher et se mesure** ; c'est celle à écrire, avec un test qui prouve que toute porte est atteinte.
+~~26 terdecies. **DEUX BÂTIMENTS SUR TREIZE SONT ENCLAVÉS DANS UNE CELLULE DE VILLE.**~~ — **FAIT le 2026-09-09.**
+    La génération ouvre désormais un passage vers toute porte coupée du reste de la cellule, et **dit ce qu'elle a
+    réparé** (`village.portes_rattrapees` : le bâtiment, la tuile, et si c'est un obstacle dégagé ou un mur percé).
+    Ce qu'elle ne sait pas ouvrir va dans `village.portes_enclavees` — une cellule qui échoue le dit.
+    **Ce n'étaient pas des murs, c'étaient des ARBRES**, et je ne l'ai su qu'à la troisième version. Le passage
+    cherche donc d'abord un obstacle **naturel** à dégager — un arbre s'abat — et ne perce une porte dans un mur que
+    si l'enclave n'est bornée que par de la pierre.
+    **DEUX VERSIONS FAUSSES AVANT LA BONNE, ET LES DEUX FOIS LA MÊME ERREUR** : juger sur un état qui n'est pas
+    celui qui comptera.
+    1. La première inondait depuis les tuiles de `rue`. Or le chemin qui relie une porte à la rue dépose jusqu'à
+       huit pavés **devant elle**, même quand il n'aboutit nulle part : l'inondation partait donc de l'intérieur de
+       l'enclave et la déclarait atteinte. Elle mesurait « pavé », pas « relié à la ville ». Remède : découper le
+       sol en **composantes connexes** et appeler « la ville » la plus grande — plus aucun point de départ à choisir.
+    2. La seconde jugeait la marchabilité **au moment où elle tournait**. Mais la cellule retire les arbres, les
+       rochers, les filons et l'eau du sol à sa **toute dernière ligne**, après le village : la passe voyait
+       3 559 tuiles de sol là où il en resterait 3 311, donc une composante là où le jeu en aurait deux. Remède :
+       exclure ces obstacles elle-même — juger la marchabilité **telle qu'elle sera**.
+    **Et les trois fois, c'est la trace qui a tranché, jamais le raisonnement.** Chaque hypothèse a été fausse ; ce
+    qui a fait avancer, c'est d'imprimer ce que le code **voyait** — la composante de chaque porte, la taille des
+    inondations des deux côtés, puis les compteurs de `sol`, `murs` et `portes` au moment exact de chaque passe.
+    **Le test** (`test_portes_sans_enclave`) refait la cellule qui échouait et vérifie les deux choses : que la
+    génération a bien eu à rattraper — sinon il ne prouverait plus rien le jour où le monde changera — et qu'aucune
+    porte ne reste hors de la plus grande composante.
 
 ## Palier 6 — les 236 contenus meurent, la grammaire reste
 

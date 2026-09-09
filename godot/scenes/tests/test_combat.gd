@@ -109,6 +109,7 @@ func _ready() -> void:
 	_lancer("test_corruption")
 	_lancer("test_cycle_et_meteo")
 	_lancer("test_village")
+	_lancer("test_portes_sans_enclave")
 	_lancer("test_village_vivant")
 	_lancer("test_reputation_et_quetes")
 	_lancer("test_rang_de_guilde")
