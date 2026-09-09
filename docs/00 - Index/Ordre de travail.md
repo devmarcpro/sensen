@@ -36,10 +36,22 @@ d'abord, la suppression des modules ensuite », la grammaire qui survit, et l'or
 
 Elles coûtent au designer une phrase, et elles coûtent une semaine si elles arrivent tard.
 
-1. **Le sens de la vérité des catalogues.** La note redevient-elle la source (il faut alors valider à la main les 94
-   lignes reversées et les chiffres étirés), ou la donnée devient-elle la source et la note son reflet ? **Tant que ce
-   n'est pas tranché, les tables réalignées le 2026-09-08 rederiveront au prochain équilibrage** — c'est exactement ce
-   qui est arrivé une première fois.
+~~1. **Le sens de la vérité des catalogues.**~~ — **TRANCHÉ par le designer le 2026-09-09 : « la note est la
+   source ».** La flèche va donc de la note vers la donnée, et elle n'a plus le droit de tourner : `gen_materials.py`
+   (tables → fiches) est le seul chemin de travail, `regen_catalogues.py` (fiches → tables) **refuse désormais de
+   s'exécuter** sans `--vraiment` — c'est un outil de sauvetage, plus une passe d'entretien.
+   **La validation à la main que cette question annonçait n'a plus lieu d'être** : les 94 lignes reversées et les
+   chiffres étirés du 2026-09-08 sont dans les tables depuis, et les deux sens s'accordent maintenant **exactement** —
+   `regen_catalogues.py --verifier` rend douze catalogues « à jour », 0 ajout, 0 correction, et
+   `verif_generateurs.py` prouve l'aller. La décision ne coûte donc rien : elle scelle un accord déjà atteint.
+   **Ce qu'il a fallu réparer pour le dire** : `regen_catalogues.py` portait un en-tête à treize colonnes et aurait
+   **effacé les 247 points de fusion** ; et son `--verifier` annonçait six matériaux « à ajouter » à chaque passage
+   parce qu'il ignorait les cinq alias d'identifiant et le nom à rallonge du guano. *Un vérificateur qui crie toujours
+   au loup n'est plus lu.*
+   **Ce que la décision NE couvre pas, et il faut le dire** : huit champs des fiches n'ont aucune note pour source —
+   `palier`, `palier_fixe`, `stats_base`, `sous_categorie`, `tags`, `noise`, `wuxing`, `harvest`. Le générateur les
+   **préserve** au lieu de les écrire. `sous_categorie` est lu par le jeu sur 76 fiches. Les reverser dans des notes
+   est le prolongement naturel de la décision ; c'est un chantier à part, et il n'est pas fait.
 2. **Les champs avant ou après le jeu fini ?** Le designer a tranché l'ordre *des six champs entre eux*, pas leur place
    par rapport à la pause, la mort et les touches. Cet ordre-ci les place après (paliers 1 à 3), en le disant.
 
@@ -175,9 +187,24 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
 
 22 bis. ~~**L'inertie thermique**~~ — **FAIT le 2026-09-08, sur une question du designer.** Le champ de chaleur ne lisait que `isolation` alors que la note promettait aussi `densite` (la masse thermique). Corrigé : une matière dense met du temps à changer de température. *Leçon de méthode : la promesse était relevée dans la note du matin mais absente de cette file — c'est la question du designer qui l'a rattrapée, pas moi.*
 
-23. **`fusion`** — la seule des cinq dont le consommateur existe déjà. Elle **finit** le champ de chaleur : la neige
-    fond, l'eau gèle, la cire coule, le sable vitrifie, le minerai devient lingot. C'est aussi elle qui permettra à la
-    chaleur d'absorber enfin la neige, le gel et la température ressentie.
+~~23. **`fusion`**~~ — **FAIT le 2026-09-09.** 247 points de fusion en **degrés réels**, entrés comme 14e colonne des
+    douze tables (la table fait foi ; `verif_generateurs.py` prouve la reproduction des 247 fiches). **Le blocage
+    annoncé n'existait plus** : la note renvoyait à « la remise en accord des catalogues », faite au palier 2 — les
+    tables et les fiches se correspondent 247 pour 247. Mesuré avant d'être cru.
+    **La définition du 2026-09-08 était fausse** : elle disait « 0 = elle ne fond pas », or 0 °C est le point de fusion
+    RÉEL de la glace, de la neige, du givre, de la grêle, de l'eau et du sang — les matières que cette ligne cite en
+    premier. Ce qui ne fond pas porte donc **9999** ; les liquides portent leur point de **congélation**, négatif.
+    **Le consommateur** (`SimTerrain._fondre`) : le sol qui cuit (gypse → plâtre à 150 °C, calcaire → chaux à 825,
+    argile → brique à 1000) et le filon qui coule (malachite → cuivre à 200, cinabre → mercure à 580, galène → plomb
+    à 1114). Le tableau de `thermique.fusion` ne porte **aucune température** : il dit ce que la chose devient, le
+    seuil est sur la fiche. **`test_fusion` prouve par un contrôle NÉGATIF** — deux sols chauffés à la même
+    température, un seul cuit.
+    **Ce que la donnée a refusé** : un feu monte à 1100 °C, une coulée à 1150 ; le **sable** fond à 1710 et ne
+    vitrifiera donc jamais ainsi, alors que « le sable vitrifie » était dans l'énoncé. Il faut un four. *Baisser le
+    nombre pour rendre la démonstration jolie aurait été mentir sur le monde réel.* Et le branchement a corrigé un
+    nombre : la lave à 1200 se serait figée à l'instant, la source imposant 1150 — le solidus d'un basalte est 900.
+    **Reste** : « la neige fond, l'eau gèle, la cire coule » demandent que la neige, le gel et la cire soient des
+    **tuiles** ; ce sont aujourd'hui deux drapeaux de fenêtre et une matière d'objet.
 24. ~~**Le champ de danger**~~ — **FAIT le 2026-09-08.** Il gradue (1-100) et absorbe les deux sources que l'IA ne voyait pas : **les nuages de gaz** (elle marchait dans le poison) et **la chaleur** (une tuile à 300 °C sans flamme). Le code de l'IA n'a pas changé d'une ligne. **Et le reste est fait le 2026-09-09 : le chemin PÈSE le grade.** Deux nombres en données — `danger_refus` (100 : ce qui tue à coup sûr ne se négocie pas, et sans seuil un coût finit toujours par être payé) et `danger_cout_par_grade` (100 ticks le point, un pas en coûtant 300). **Le calibrage est venu de ce que le champ émet vraiment** : à 50, un gaz à statut (60) serait resté refusé comme avant et le grade aurait été lu sans rien changer pour lui. **Un défaut trouvé en chemin** : le garde-fou des miroirs recompilait `danger_a` avec 1 au lieu du grade — invisible tant que le chemin ne faisait que refuser, faux le jour où le grade se paie. `test_danger_pese` demande un **comportement**, pas seulement l'égalité GDScript/C++ : deux implémentations qui refusent tout seraient d'accord. Voir [[Émergence — les champs partagés]].
 
 *Ce que le champ remplaçait :* Ni stat, ni champ préalable ; ses trois sources existent déjà

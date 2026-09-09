@@ -14,7 +14,8 @@
     "fertilite": 0,
     "transparence": 0,
     "elasticite": 6,
-    "friction": 34
+    "friction": 34,
+    "fusion": 1670
   },
   "tags": [],
   "color": "#C6B79A",

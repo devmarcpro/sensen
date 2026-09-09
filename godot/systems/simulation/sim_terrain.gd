@@ -384,6 +384,41 @@ static func _liberer_sous_sol(sim: Simulation, breche: Vector2i, genre: String, 
 	EventBus.emettre(&"tile_changed", [breche])
 
 
+## LA FUSION (ordre de travail 23, 2026-09-09) — la matière change d'état quand la chaleur atteint SON point de
+## fusion. **Aucun seuil n'est écrit ici** : chacun est lu sur la fiche de la matière, en degrés réels, et la donnée
+## de `thermique.fusion` ne dit que ce que la chose DEVIENT. C'est pour cela que le tableau est court et que le
+## comportement est riche — l'étain coule à 232 et l'hématite tient à 1565 sans qu'une ligne le dise.
+## **Ce qui est atteignable, c'est la donnée qui le décide** : un feu impose 1100 °C et une coulée 1150, donc le gypse
+## (150) rend du plâtre au bord d'un feu, le calcaire (825) de la chaux, la malachite (200) son cuivre, le cinabre
+## (580) son mercure ; la galène (1114) demande une coulée ; et le SABLE (1710) ne vitrifie jamais ainsi — il faut un
+## four. C'est la vérité du monde réel, et elle vaut mieux qu'un nombre baissé pour rendre la démonstration jolie.
+static func _fondre(sim: Simulation, t: Vector2i, i: int, degres: float, fu: Dictionary, mats: Dictionary) -> void:
+	# a. Le SOL qui cuit : un dallage de calcaire devient de la chaux, le gypse du plâtre. C'est un four sans recette.
+	var sols: Dictionary = fu.get("sols", {})
+	var sid := sim.grille.materiau_sol(t)
+	if sols.has(sid) and degres >= _fusion_de(mats, sid):
+		sim.grille.sols[i] = str(sols[sid])
+		sim.grille.recompiler_sols()
+		sim.grille.marquer(t)
+		EventBus.emettre(&"journal", [&"journal.sol_cuit", {"avant": sid, "apres": str(sols[sid]), "x": t.x, "y": t.y}])
+		EventBus.emettre(&"tile_changed", [t])
+	# b. Le FILON qui coule : le minerai rend son métal, et le lingot est ce qu'on en extrait ensuite. La malachite
+	#    grillée au bord d'un feu devient du cuivre dans la paroi — personne n'a écrit cette scène, elle se déduit.
+	var filons: Dictionary = fu.get("filons", {})
+	var mid := str(sim.grille.materiaux.get(i, ""))
+	if filons.has(mid) and degres >= _fusion_de(mats, mid):
+		sim.grille.materiaux[i] = str(filons[mid])
+		sim.grille.marquer(t)
+		EventBus.emettre(&"journal", [&"journal.filon_fondu", {"avant": mid, "apres": str(filons[mid]), "x": t.x, "y": t.y}])
+		EventBus.emettre(&"tile_changed", [t])
+
+
+## Le point de fusion d'une matière, en degrés. 9999 : elle ne fond pas — elle brûle, se décompose, ou tient jusqu'à
+## disparaître. Zéro serait un VRAI point de fusion, celui de la glace : c'est pourquoi le sentinelle est en haut.
+static func _fusion_de(mats: Dictionary, id: String) -> float:
+	return float(mats.get(id, {}).get("stats", {}).get("fusion", 9999))
+
+
 ## ---------------------------------------------------------------- le champ de danger (Émergence, 2026-09-08)
 
 ## Ce que vaut un nuage, lu sur la fiche du gaz : des dégâts ou une explosion valent le maximum, un statut vaut moins,
@@ -601,6 +636,7 @@ static func _tiquer_chaleur(sim: Simulation, tick: int) -> void:
 	var dg: Dictionary = cfg.get("degats", {})
 	var s_min := float(ig.get("seuil_min", 110.0))
 	var s_max := float(ig.get("seuil_max", 460.0))
+	var fu: Dictionary = cfg.get("fusion", {})
 	var chaud := float(dg.get("seuil_chaud", 70.0))
 	var froid := float(dg.get("seuil_froid", -12.0))
 	for idx in sim.chaleur_active.keys():
@@ -612,7 +648,11 @@ static func _tiquer_chaleur(sim: Simulation, tick: int) -> void:
 		if fl >= int(ig.get("flammabilite_min", 1)) and not sim.feux.has(i):
 			if c >= s_max - clampf(float(fl) / 100.0, 0.0, 1.0) * (s_max - s_min):
 				_enflammer(sim, t)
-		# b. Ce qu'un corps prend de l'air lui-même. Le feu et la lave brûlent au contact : leur tuile n'est pas ici.
+		# b. LA FUSION (ordre de travail 23, 2026-09-09) : la matière change d'état quand la chaleur atteint SON
+		#    point de fusion. Jusqu'ici la chaleur ne savait que BRÛLER.
+		if not fu.is_empty():
+			_fondre(sim, t, i, c, fu, mats)
+		# c. Ce qu'un corps prend de l'air lui-même. Le feu et la lave brûlent au contact : leur tuile n'est pas ici.
 		if sim.feux.has(i) or laves.has(i):
 			continue
 		var occ := sim.grille.occupant(t)

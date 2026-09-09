@@ -10,12 +10,12 @@ Les 2 matériaux qui apparaissent et disparaissent selon la météo — mais res
 
 **Météorologiques (2) — apparaissent/disparaissent selon la météo ([[Météo]]) ; récoltables**
 
-| Matériau | Dur | Den | Val | CMa | Fla | Iso | CÉl | Flo | Lum | Fer | Tra | Éla | Fri |
-|---|--|--|--|--|--|--|--|--|--|--|--|--|--|
-| Glace | 5 | 4 | 2 | 17 | 0 | 30 | 25 | 40 | 0 | 0 | 70 | 2 | 5 |
-| Neige | 1 | 3 | 1 | 6 | 0 | 60 | 5 | 50 | 0 | 5 | 5 | 30 | 30 |
-| Givre | 2 | 3 | 1 | 26 | 0 | 55 | 8 | 90 | 15 | 0 | 60 | 4 | 10 |
-| Grêle | 3 | 4 | 1 | 24 | 0 | 50 | 8 | 88 | 10 | 0 | 50 | 6 | 12 |
+| Matériau | Dur | Den | Val | CMa | Fla | Iso | CÉl | Flo | Lum | Fer | Tra | Éla | Fri | Fus |
+|---|--|--|--|--|--|--|--|--|--|--|--|--|--|--|
+| Glace | 5 | 4 | 2 | 17 | 0 | 30 | 25 | 40 | 0 | 0 | 70 | 2 | 5 | 0 |
+| Neige | 1 | 3 | 1 | 6 | 0 | 60 | 5 | 50 | 0 | 5 | 5 | 30 | 30 | 0 |
+| Givre | 2 | 3 | 1 | 26 | 0 | 55 | 8 | 90 | 15 | 0 | 60 | 4 | 10 | 0 |
+| Grêle | 3 | 4 | 1 | 24 | 0 | 50 | 8 | 88 | 10 | 0 | 50 | 6 | 12 | 0 |
 
 **Décision ([[Météo]]) :** *Glace et Neige ajoutés au catalogue — matériaux réels à part entière (constructibles : la glace est une vraie tuile, transparente, glissante ; fond près des sources de chaleur).*
 

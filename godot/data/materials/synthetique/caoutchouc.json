@@ -14,7 +14,8 @@
     "fertilite": 0,
     "transparence": 0,
     "elasticite": 90,
-    "friction": 80
+    "friction": 80,
+    "fusion": 180
   },
   "tags": [
     "industriel"

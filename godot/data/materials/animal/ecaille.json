@@ -14,7 +14,8 @@
     "fertilite": 0,
     "transparence": 0,
     "elasticite": 60,
-    "friction": 55
+    "friction": 55,
+    "fusion": 130
   },
   "tags": [
     "organique",

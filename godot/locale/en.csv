@@ -1951,6 +1951,8 @@ journal.lame_empoisonnee,"{nom}: the blade poisons {cible}"
 journal.lance,"{nom} throws {cible} ({degats})"
 journal.lave_brule,"{nom} touches the lava ({degats})"
 journal.lave_figee,"the lava cools where it meets the water ({x},{y})"
+journal.sol_cuit,"the heat bakes the ground: {avant} becomes {apres} ({x},{y})"
+journal.filon_fondu,"the vein runs: {avant} yields its {apres} ({x},{y})"
 journal.lecture_echouee,"{nom} fails to read {livre} — the book is lost ({grave})"
 journal.lecture_reussie,{nom} reads {livre}: {n} module(s) learnt
 journal.liberation,"{nom} breaks free: {statut}"

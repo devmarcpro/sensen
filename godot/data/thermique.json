@@ -33,5 +33,30 @@
     "gaz_degats": 100,
     "gaz_statut": 60,
     "gaz_inerte": 30
+  },
+  "fusion": {
+    "_doc": "LA FUSION (ordre de travail 23, 2026-09-09). Ce tableau ne porte AUCUNE temperature : le seuil de chaque matiere est sa stat `fusion`, en degres reels, sur sa propre fiche. Il ne dit que ce que la chose DEVIENT. `sols` : le dallage qui cuit — le gypse rend du platre a 150 °C, le calcaire et ses cousins de la chaux a 825, le sable du verre a 1710 (hors de portee d un feu a 1100 ou d une coulee a 1150 : il faut un four, et c est la verite du monde reel). `filons` : le minerai qui coule et rend son metal — la malachite et l azurite leur cuivre a 200, le cinabre son mercure a 580, la pyrite son fer a 743, la galene son plomb a 1114 (une coulee, pas un feu). Le lingot est ce qu on en extrait ensuite.",
+    "sols": {
+      "gypse": "platre",
+      "calcaire": "chaux",
+      "craie": "chaux",
+      "marbre": "chaux",
+      "travertin": "chaux",
+      "dolomie": "chaux",
+      "calcite": "chaux",
+      "argile": "brique",
+      "sable": "verre",
+      "sable_noir": "verre",
+      "quartzite": "verre"
+    },
+    "filons": {
+      "malachite": "cuivre",
+      "azurite": "cuivre",
+      "cinabre": "mercure",
+      "pyrite": "fer",
+      "galene": "plomb",
+      "hematite": "fer",
+      "magnetite": "fer"
+    }
   }
 }

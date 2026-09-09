@@ -655,6 +655,71 @@ func test_affixes_reveilles() -> void:
 	s.monde.fermer()
 
 
+## LA FUSION (ordre de travail 23, 2026-09-09) — la chaleur ne sait plus seulement BRÛLER. Une matière change d'état
+## quand la chaleur atteint SON point de fusion, lu sur sa fiche en degrés réels : le gypse rend du plâtre à 150 °C,
+## le calcaire de la chaux à 825, la malachite son cuivre à 200, l'hématite tient jusqu'à 1565.
+## **La preuve qui compte est un contrôle négatif.** Voir un sol de gypse cuire à 400 °C ne prouverait rien — un seuil
+## écrit en dur à 100 le ferait passer aussi. Ce test pose donc deux sols côte à côte et les chauffe à LA MÊME
+## température : l'un cuit, l'autre pas. La différence ne peut venir que de la fiche.
+func test_fusion() -> void:
+	var s := Simulation.new(607)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var mats: Dictionary = GameData.catalogues.materials
+	var fu: Dictionary = GameData.config("thermique").get("fusion", {})
+	verifier(not fu.is_empty() and fu.has("sols") and fu.has("filons"), "ce que la matière DEVIENT est en données (%d sols, %d filons)" % [int(fu.get("sols", {}).size()), int(fu.get("filons", {}).size())])
+	verifier(int(mats.gypse.stats.fusion) == 150 and int(mats.calcaire.stats.fusion) == 825, "les deux sols du test ont bien des points de fusion éloignés (gypse %d °C, calcaire %d °C)" % [int(mats.gypse.stats.fusion), int(mats.calcaire.stats.fusion)])
+	verifier(int(mats.chene.stats.fusion) == 9999, "ce qui ne fond pas porte 9999, pas 0 — zéro est le point de fusion de la glace (chêne %d, glace %d)" % [int(mats.chene.stats.fusion), int(mats.glace.stats.fusion)])
+
+	# 1. DEUX SOLS, LA MÊME CHALEUR. 400 °C passe le gypse (150) et pas le calcaire (825).
+	var t_g: Vector2i = s._tuile_libre_autour(j.pos)
+	var t_c: Vector2i = s._tuile_libre_autour(t_g)
+	s.grille.sols[s.grille.idx(t_g)] = "gypse"
+	s.grille.sols[s.grille.idx(t_c)] = "calcaire"
+	s.grille.recompiler_sols()
+	s.chauffer(t_g, 400.0)
+	s.chauffer(t_c, 400.0)
+	s.chaleur_prochain_pas = 0
+	s._tiquer_chaleur(100)
+	verifier(s.grille.materiau_sol(t_g) == "platre", "à 400 °C le gypse a cuit en plâtre (%s)" % s.grille.materiau_sol(t_g))
+	verifier(s.grille.materiau_sol(t_c) == "calcaire", "à LA MÊME température le calcaire n'a pas bougé — le seuil vient de la fiche, pas du code (%s)" % s.grille.materiau_sol(t_c))
+
+	# 2. LE CALCAIRE CUIT QUAND ON L'AMÈNE À SON SEUIL À LUI — ici la température d'une coulée de lave (1150 °C).
+	#    900 °C ne suffisait PAS, et c'est instructif : la diffusion tourne AVANT les consommateurs, si bien qu'une
+	#    tuile posée à 900 au milieu de l'ambiante retombe à ~720 dans le même pas. Ce qui compte est la chaleur
+	#    qu'une tuile GARDE, pas celle qu'on y verse.
+	s.chauffer(t_c, 1150.0)
+	s.chaleur_prochain_pas = 0
+	s._tiquer_chaleur(200)
+	verifier(s.grille.materiau_sol(t_c) == "chaux", "à la chaleur d'une coulée le calcaire devient de la chaux (%s, %.0f °C gardés)" % [s.grille.materiau_sol(t_c), s.chaleur_a(t_c)])
+
+	# 3. DEUX FILONS, LA MÊME CHALEUR. La malachite (200) rend son cuivre, l'hématite (1565) tient.
+	var t_m: Vector2i = s._tuile_libre_autour(t_c)
+	var t_h: Vector2i = s._tuile_libre_autour(t_m)
+	s.grille.materiaux[s.grille.idx(t_m)] = "malachite"
+	s.grille.materiaux[s.grille.idx(t_h)] = "hematite"
+	s.chauffer(t_m, 400.0)
+	s.chauffer(t_h, 400.0)
+	s.chaleur_prochain_pas = 0
+	s._tiquer_chaleur(300)
+	verifier(str(s.grille.materiaux[s.grille.idx(t_m)]) == "cuivre", "à 400 °C la malachite a rendu son cuivre (%s)" % str(s.grille.materiaux[s.grille.idx(t_m)]))
+	verifier(str(s.grille.materiaux[s.grille.idx(t_h)]) == "hematite", "à LA MÊME température l'hématite tient (%s)" % str(s.grille.materiaux[s.grille.idx(t_h)]))
+
+	# 4. LES 247 FICHES ONT LEUR POINT DE FUSION, et l'ordre du monde réel tient : l'étain coule avant le plomb, le
+	#    plomb avant le cuivre, le cuivre avant le fer, le fer avant le tungstène. C'est ce que le joueur sait déjà.
+	var sans := 0
+	for mid in mats.keys():
+		if not (mats[mid] as Dictionary).get("stats", {}).has("fusion"):
+			sans += 1
+	verifier(sans == 0, "les %d matières portent toutes `fusion` (%d sans)" % [mats.size(), sans])
+	var ordre := ["etain", "plomb", "zinc", "argent", "or", "cuivre", "fer", "titane", "tungstene"]
+	var monte := true
+	for k in range(1, ordre.size()):
+		if int(mats[ordre[k]].stats.fusion) <= int(mats[ordre[k - 1]].stats.fusion):
+			monte = false
+	verifier(monte, "l'ordre du monde réel tient : étain %d < plomb %d < … < fer %d < tungstène %d" % [int(mats.etain.stats.fusion), int(mats.plomb.stats.fusion), int(mats.fer.stats.fusion), int(mats.tungstene.stats.fusion)])
+
+
 ## Le CHAMP DE DANGER (Émergence — les champs partagés, 2026-09-08). Avant, `grille.dangers` était binaire et posé par
 ## trois choses seulement : le feu, la lave, un glyphe. **Les nuages de gaz n'y étaient pas** — l'IA marchait dans le
 ## poison et dans le grisou — et **la chaleur non plus** : une tuile à 300 °C, brûlante sans flamme, était invisible.

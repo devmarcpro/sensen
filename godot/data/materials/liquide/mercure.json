@@ -14,7 +14,8 @@
     "fertilite": 0,
     "transparence": 0,
     "elasticite": 2,
-    "friction": 8
+    "friction": 8,
+    "fusion": -39
   },
   "tags": [
     "toxique"

@@ -14,7 +14,8 @@
     "fertilite": 10,
     "transparence": 40,
     "elasticite": 20,
-    "friction": 3
+    "friction": 3,
+    "fusion": 0
   },
   "tags": [
     "liquide"

@@ -18,6 +18,7 @@ a la fin, par ordre alphabetique. La categorie `animal`, qui n avait aucun catal
     python regen_catalogues.py [--verifier]
 """
 import collections
+import sys
 import glob
 import io
 import json
@@ -31,10 +32,14 @@ DOCS = os.path.join(RACINE, 'docs', '09 - Contenu')
 MATS = os.path.join(RACINE, 'godot', 'data', 'materials')
 LOCALE = os.path.join(RACINE, 'godot', 'locale', 'fr.csv')
 
+# LA COLONNE `Fus` (2026-09-09) : sans elle ici, ce script REPOSERAIT un en-tete a treize colonnes et effacerait
+# les 247 points de fusion de la table. Un outil du chemin inverse qui ignore une colonne ne la laisse pas tranquille :
+# il la supprime. Les deux listes sont donc tenues ensemble, ici et dans gen_materials.py.
 STATS = ["durete", "densite", "valeur_base", "conductivite_mana", "flammabilite", "isolation",
-         "conductivite_electrique", "flottabilite", "luminosite", "fertilite", "transparence", "elasticite", "friction"]
-ENTETE = "| Matériau | Dur | Den | Val | CMa | Fla | Iso | CÉl | Flo | Lum | Fer | Tra | Éla | Fri |"
-SEPAR = "|---|--|--|--|--|--|--|--|--|--|--|--|--|--|"
+         "conductivite_electrique", "flottabilite", "luminosite", "fertilite", "transparence", "elasticite", "friction",
+         "fusion"]
+ENTETE = "| Matériau | Dur | Den | Val | CMa | Fla | Iso | CÉl | Flo | Lum | Fer | Tra | Éla | Fri | Fus |"
+SEPAR = "|---|--|--|--|--|--|--|--|--|--|--|--|--|--|--|"
 
 CAT_FICHIER = {
     "bois": "Bois", "metal": "Métaux", "roche": "Roches", "mineral": "Minéraux", "gemme": "Gemmes",
@@ -43,11 +48,26 @@ CAT_FICHIER = {
 }
 
 
+# LES CINQ ALIAS ET LE NOM A RALLONGE (2026-09-09) — la meme table que dans gen_materials.py, et pour la meme
+# raison : cinq fiches portent un id ABREGE que le slug de leur nom affiche ne rend pas, et « Guano/salpetre de
+# grotte » se lit `guano`. Sans cela, `--verifier` annoncait SIX materiaux « a ajouter » a chaque passage alors que
+# leurs lignes etaient la : un verificateur qui crie toujours au loup n est plus lu.
+ALIAS = {
+    "acier_inoxydable": "acier_inox",
+    "acier_au_tungstene": "acier_tungstene",
+    "acier_au_vanadium": "acier_vanadium",
+    "essence_de_terebenthine": "essence_terebenthine",
+    "soie_d_araignee": "soie_araignee",
+}
+
+
 def slug(n):
     n = unicodedata.normalize('NFD', n)
     n = ''.join(c for c in n if unicodedata.category(c) != 'Mn')
     n = re.sub(r"\s*\(.*?\)", "", n).replace("*", "").strip().lower()
-    return re.sub(r"[^a-z0-9]+", "_", n).strip("_")
+    n = n.split("/")[0].strip()   # « Guano/salpetre de grotte » -> `guano`
+    s = re.sub(r"[^a-z0-9]+", "_", n).strip("_")
+    return ALIAS.get(s, s)
 
 
 # ------------------------------------------------------------------ les donnees font foi
@@ -67,12 +87,32 @@ for f in sorted(glob.glob(os.path.join(MATS, '**', '*.json'), recursive=True)):
     par_cat[d.get('category', 'divers')].append(i)
 
 
+def cellule(cle, st):
+    # `fusion` s ecrit `—` dans la table quand la matiere NE FOND PAS. Sans ce retour, l aller-retour ne serait pas
+    # stable : la table dirait `—`, ce script y remettrait 9999, et 130 lignes se signaleraient comme « corrigees »
+    # a chaque passage — un faux positif qui userait la confiance dans l outil.
+    v = int(st.get(cle, 0))
+    if cle == "fusion" and v >= 9999:
+        return "—"
+    return str(v)
+
+
 def ligne(i):
     st = fiches[i].get('stats', {})
-    return "| %s | %s |" % (noms.get(i, i), " | ".join(str(int(st.get(k, 0))) for k in STATS))
+    return "| %s | %s |" % (noms.get(i, i), " | ".join(cellule(k, st) for k in STATS))
 
 
 verifier = '--verifier' in sys.argv
+
+# LE SENS DE LA VERITE EST TRANCHE (designer, 2026-09-09) : « la note est la source ». Ce script va dans l AUTRE
+# sens — il reecrit les tables depuis les fiches — et il n a plus qu un usage : rattraper une donnee qui aurait
+# derive, une fois, en connaissance de cause. Le laisser tourner sans le dire, c est retourner la fleche en silence
+# et perdre la decision. Il faut donc `--vraiment`, et `--verifier` reste libre puisqu il n ecrit rien.
+if not verifier and "--vraiment" not in sys.argv:
+    print("REFUS : la NOTE est la source des catalogues (designer, 2026-09-09) — ce script ecrit les tables DEPUIS")
+    print("        les fiches, c est le chemin inverse. Pour ecrire les fiches depuis les tables, c est")
+    print("        `python tools/gen_materials.py`. Si tu veux vraiment retourner la fleche, ajoute --vraiment.")
+    sys.exit(2)
 rapport = []
 
 for cat, fich in sorted(CAT_FICHIER.items()):

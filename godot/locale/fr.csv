@@ -472,6 +472,8 @@ tile_content.lave.name,Lave
 tile_content.obsidienne_figee.name,Roche figée
 journal.lave_brule,"{nom} touche la lave ({degats})"
 journal.lave_figee,"la lave se fige au contact de l'eau ({x},{y})"
+journal.sol_cuit,"la chaleur cuit le sol : {avant} devient {apres} ({x},{y})"
+journal.filon_fondu,"le filon coule : {avant} rend son {apres} ({x},{y})"
 option.cueillir,Cueillir
 journal.cueillette,"{nom} cueille {plante} ×{n}"
 tile_content.eau.name,Eau

@@ -14,7 +14,8 @@
     "fertilite": 0,
     "transparence": 5,
     "elasticite": 20,
-    "friction": 35
+    "friction": 35,
+    "fusion": 825
   },
   "tags": [
     "marin",

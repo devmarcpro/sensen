@@ -4,7 +4,7 @@
     python tools/gen_materials.py
 
 Sources (la note fait foi, jamais ce script) :
-  - les tables des 11 catalogues (13 stats, colonnes Dur…Fri) — « la table fait foi » ;
+  - les tables des 12 catalogues (14 stats, colonnes Dur…Fus) — « la table fait foi » ;
   - la palette (data/palette_materiaux.json, transcrite de Palette de couleurs des matériaux) ;
   - les surcharges Wu Xing (docs: Décision — Surcharges Wu Xing des matériaux) ;
   - les catégories (data/material_categories.json : outil, compétence, station).
@@ -18,8 +18,16 @@ SORTIE = os.path.join(RACINE, "godot", "data", "materials")
 PALETTE = os.path.join(RACINE, "godot", "data", "palette_materiaux.json")
 CATEGORIES = os.path.join(RACINE, "godot", "data", "material_categories.json")
 LOCALE = os.path.join(RACINE, "godot", "locale", "fr.csv")
+# LA 14e COLONNE, `fusion` (ordre de travail 23, 2026-09-09) : la temperature en DEGRES CELSIUS ou la matiere change
+# d etat, prise dans le monde reel — le champ de chaleur est deja en degres, il n y a donc pas d unite a inventer.
+# Ce qui NE FOND PAS s ecrit `—` dans la table et NE_FOND_PAS ici. La note de decision disait « 0 = elle ne fond pas » :
+# c etait faux, et d une facon qu on ne voit qu en ecrivant les valeurs — 0 °C est le point de fusion REEL de la glace,
+# de la neige, du givre, de la grele, de l eau et du sang, c est-a-dire des six matieres que la ligne 23 cite en
+# premier. Le sentinelle et la donnee se confondaient exactement la ou ca comptait.
+NE_FOND_PAS = 9999
 STATS = ["durete", "densite", "valeur_base", "conductivite_mana", "flammabilite", "isolation",
-         "conductivite_electrique", "flottabilite", "luminosite", "fertilite", "transparence", "elasticite", "friction"]
+         "conductivite_electrique", "flottabilite", "luminosite", "fertilite", "transparence", "elasticite", "friction",
+         "fusion"]
 # fichier de catalogue → catégorie (Catégories de matériaux : 11 catégories figées)
 CATALOGUES = {
     "Bois": "bois", "Métaux": "metal", "Roches": "roche", "Minéraux": "mineral", "Gemmes": "gemme",
@@ -110,13 +118,16 @@ for fichier, cat in CATALOGUES.items():
         if not ligne.startswith("|") or ligne.startswith("|---") or ligne.startswith("| Matériau"):
             continue
         cellules = [c.strip() for c in ligne.strip().strip("|").split("|")]
-        if len(cellules) < 14:
+        if len(cellules) < 15:
             continue
         nom = cellules[0].replace("**", "").strip()
-        valeurs = cellules[1:14]
+        valeurs = cellules[1:15]
         stats = {}
         for cle, v in zip(STATS, valeurs):
-            stats[cle] = 0 if v in ("—", "-", "") else int(v)
+            # Un tiret vaut zero partout — sauf pour `fusion`, ou il veut dire « ne fond pas » : 9999, que rien
+            # n'atteint. Zero y serait un vrai point de fusion, celui de la glace.
+            vide = v in ("—", "-", "")
+            stats[cle] = (NE_FOND_PAS if cle == "fusion" else 0) if vide else int(v)
         ident = ALIAS.get(slug(nom_court(nom)), slug(nom_court(nom)))
         if ident not in palette:
             sans_couleur.append("%s (%s)" % (nom, ident))

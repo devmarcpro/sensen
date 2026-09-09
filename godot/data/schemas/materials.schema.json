@@ -44,7 +44,8 @@
         "fertilite",
         "transparence",
         "elasticite",
-        "friction"
+        "friction",
+        "fusion"
       ],
       "properties": {
         "durete": {
@@ -98,6 +99,12 @@
         "friction": {
           "type": "integer",
           "minimum": 0
+        },
+        "fusion": {
+          "type": "integer",
+          "minimum": -273,
+          "maximum": 9999,
+          "description": "Temperature en degres Celsius ou la matiere change d'etat ; negative pour un liquide (son point de congelation) ; 9999 = elle ne fond pas."
         }
       }
     },

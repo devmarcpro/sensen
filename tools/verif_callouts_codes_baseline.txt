@@ -4,3 +4,5 @@ fallback_font       # ThemeDB.fallback_font : une propriété du moteur, pas du 
 get                 # Dictionary.get() : une méthode du moteur
 pop_front           # Array.pop_front() : une méthode du moteur
 systems/worldgen/camp.gd   # cité DANS la correction du 2026-09-07 qui dit précisément qu'il n'existe pas
+data/gaz.json       # cité comme CE QUI EXISTAIT AVANT la scission du 2026-09-07 : le callout raconte précisément qu'un seul fichier mêlait la collection des quinze gaz et trois blocs de réglage, et qu'il a été séparé en data/gaz/ et gaz_regles.json
+get_viewport_rect   # cité comme LE DÉFAUT retiré le 2026-09-09 : le callout dit que le bornage de la bulle comparait des coordonnées du monde à ce rectangle-là, et que c'est ce qu'on a supprimé

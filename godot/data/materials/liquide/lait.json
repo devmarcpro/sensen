@@ -14,7 +14,8 @@
     "fertilite": 30,
     "transparence": 8,
     "elasticite": 3,
-    "friction": 14
+    "friction": 14,
+    "fusion": 0
   },
   "tags": [
     "animal"
