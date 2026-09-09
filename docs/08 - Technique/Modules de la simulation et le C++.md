@@ -132,6 +132,11 @@ Ordre : d'abord `AStarGrid2D`, l'A* en C++ **du moteur** (obstacles, poids par c
 > **Le seul endroit où le C++ servirait encore, et il est précis** : **fusionner les silhouettes mémorisées adjacentes**. La part mémorisée d'une ville est dessinée en aplats, une tuile à la fois ; des tuiles voisines de même teinte pourraient n'être qu'**un rectangle**. C'est de la **réduction de géométrie**, une boucle pure, et elle a sa place dans `SensenGrille.brouillard`, qui bâtit déjà le tableau. Écrit en **ligne 45 bis** de l'[[Ordre de travail]] — parce qu'une phrase de fin dans une note ne devient jamais du travail.
 > **Et ce qui a fait tomber l'à-coup ce jour-là n'était pas du C++** : le champ de vue du joueur (une ligne de données), la carte de lumière rendue incrémentale (une signature), la signature de redessin d'un paperdoll (un hachage). **Pire image 46,1 → 36,6 ms.** C'est la mesure qui a choisi, pas le langage.
 
+> [!success] Codé le 2026-09-09 — **le noyau apprend qui barre qui** (ordre de travail 26 nonies)
+> `chemin` et `atteignables` prennent un paramètre de plus : `bloque_a`, un `PackedByteArray` de la forme du miroir `occ` — 1 = cette tuile barre celui qui cherche. Vide ou de la mauvaise taille, le noyau retombe sur `occ`, ce qui était la règle d'avant : **aucun appelant existant n'a changé de comportement**, et c'est ce qui permet de faire les deux côtés dans le même commit sans rien casser.
+> **La leçon de forme** : on aurait pu passer un ensemble d'ids à ignorer. Une recherche de chemin visite des milliers de tuiles ; une recherche dans un dictionnaire à chaque nœud aurait coûté bien plus que la construction du tableau. Un octet par tuile, c'est `O(1)` par nœud — et la construction, elle, se fait une fois par camp et par tick côté simulation.
+> `DEFVAL(PackedByteArray())` dans `bind_method` donne la valeur par défaut côté GDScript.
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Budgets de performance]], [[Simulation à ticks]]
 - **Alimente** : [[Arborescence du projet]], [[Entités et pathfinding — performance]], [[Simulation du monde — performance]]

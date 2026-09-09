@@ -569,7 +569,7 @@ static func _ia_par_portail(sim: Simulation, e: Dictionary, but: Vector2i, tick:
 		return false
 	if entree == e.pos:
 		return _traverser(sim, e, tick)
-	var pas := sim.grille.chemin(e.pos, entree, Etres.est_volant(e), "", sim.refuse_nage(e))
+	var pas := sim.grille.chemin(e.pos, entree, Etres.est_volant(e), "", sim.refuse_nage(e), 0, sim.bloque_pour(e))
 	return not pas.is_empty() and sim._deplacer(e, pas[0], tick)
 
 

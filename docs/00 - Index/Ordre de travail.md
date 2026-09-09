@@ -217,25 +217,31 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     un PNJ qui porte un PNJ »). Un ennemi ne s'escalade jamais : c'est lui qu'on attaque.
     **CE QUI RESTE, et c'est la ligne 26 nonies** : le CHEMIN ne traverse toujours pas un ami.
 
-26 nonies. **LE CHEMIN TRAVERSE LES AMIS.** Le pas passe depuis le 2026-09-09 (on monte sur la pile), mais le
-    **pathfinding** refuse encore toute tuile occupée : le noyau C++ lit le miroir `occ` et n'ignore qu'**un seul**
-    id, celui qu'on lui passe. Un villageois dans une embrasure ne bloque donc plus le pas, mais bloque encore
-    l'itinéraire — un clic lointain contourne, ou échoue. C'est la moitié visible de ce que le designer demandait.
-    **La solution que j'ai instruite le 2026-09-09, pour ne pas la redériver** : *pas* un ensemble d'ids passé à
-    chaque appel — le construire coûterait `O(êtres)` par recherche de chemin, soit quarante mille insertions par
-    tick dans une cité. Ce qu'il faut est un **second miroir d'octets** `occ_camp` : pour chaque tuile, l'**indice de
-    camp** de son occupant (0 = libre, 255 = pile de plusieurs, qui bloque par prudence), tenu par `_poser_pile`
-    comme `occ` l'est déjà. Le chercheur de chemin reçoit alors une **table de 256 octets** « ce camp me barre-t-il »,
-    que l'appelant construit en `O(nombre de camps)` — cinq, pas deux cents.
-    **Pourquoi ça suffit** : `SimPnj.ennemis` est presque entièrement affaire de camp — même camp, amis ; `joueur` et
-    `civil` ensemble, amis *sauf* si la relation tombe sous `reputation.hostile_seuil`. Ce seul cas est **par être**
-    et non par camp : il se traite en passant, à côté de la table, la poignée d'ids qui font exception (les civils
-    fâchés contre le joueur), ce qui est court et borné.
-    **Ce que ça touche** : `Grille` (le miroir et son garde-fou), `_chemin_gd`, `atteignables` et `champ_de_cout`
-    côté GDScript ; les mêmes dans `cpp/src/sensen_grille.cpp`, plus la reconstruction de la DLL
-    (`tools/build_cpp.ps1`) ; et `test_noyau_cpp`, qui compare les deux sur des centaines de paires et prouvera
-    l'égalité. **Faire les deux côtés dans le même commit** : un noyau et un GDScript qui divergent, c'est le test
-    d'égalité qui tombe, et on ne sait plus lequel a raison.
+~~26 nonies. **LE CHEMIN TRAVERSE LES AMIS**~~ — **FAIT le 2026-09-09** *(designer 2026-09-08 : « si un PNJ non
+    hostile bloque une porte le joueur peut passer par-dessus »).* Le pas passait depuis le matin ; c'était
+    l'**itinéraire** qui restait fermé — un villageois dans une embrasure ne bloquait plus le pas mais bloquait
+    encore le chemin, donc un clic lointain contournait ou échouait.
+    **La forme choisie, et pourquoi** : ni un ensemble d'ids passé à chaque appel (une recherche visite des milliers
+    de tuiles ; une recherche dans un dictionnaire par tuile visitée coûte cher), ni un balayage des êtres par appel.
+    Un **miroir d'octets** `bloque_a`, de la même forme que `occ` : 1 = cette tuile barre CE marcheur-là. C'est
+    `O(1)` par nœud visité, exactement comme avant. `Simulation.bloque_pour(e)` le construit en partant d'`occ` et en
+    **effaçant** les tuiles de ceux qui ne lui sont pas hostiles — `O(êtres)` une fois, **en cache par camp et par
+    tick**, parce que `SimPnj.ennemis` est affaire de camp partout sauf pour un civil fâché contre le joueur (la clé
+    du cache porte alors l'id).
+    **Un tableau vide garde le sens d'avant** — toute tuile occupée barre —, donc la génération, les sondes et les
+    tests n'ont rien eu à changer, et le noyau C++ non plus tant qu'on ne lui passe rien.
+    **Les deux côtés dans le même commit** : `chemin` et `atteignables` en GDScript **et** en C++ (DLL reconstruite),
+    et le test prouve sur un couloir d'une tuile de large que les deux rendent le même chemin et les mêmes
+    atteignables à travers l'ami — sans le miroir, l'autre bout reste hors d'atteinte.
+
+26 duodecies. **LE VILLAGEOIS NE REJOINT PAS SON COIN DE PLACE À 21 H.** Constaté par `sonde_ia_pnj` le 2026-09-09,
+    et **vérifié comme antérieur** au chemin qui traverse les amis (en neutralisant `bloque_pour`, le souci persiste
+    à l'identique). Sur la même distance de dix tuiles, le villageois rejoint son **lit** à 23 h et son **poste** à
+    midi : ce n'est donc ni la marche ni la routine en général. La cible de 21 h est la seule qui ne vienne pas de
+    la fiche du villageois mais d'un calcul — `_coin_de_place(v)`, le coin de la place qui lui revient. Deux pistes,
+    dans l'ordre : ce coin tombe-t-il sur une tuile **atteignable** dans le camp synthétique de la sonde, et le test
+    de `tests_villages` (qui, lui, passe) prouve-t-il seulement que `_cible_routine` **désigne** la bonne tuile sans
+    prouver qu'on peut y **aller** ?
 
 26 decies. **PORTER N'EST PAS ÊTRE AU MÊME ENDROIT.** La pile est une coïncidence de position ; **porter** est une
     relation — celui qui porte déplace l'autre avec lui. C'est ce que le designer voulait dire par « un PNJ peut

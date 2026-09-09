@@ -2060,7 +2060,7 @@ func _clic(t: Vector2i, lourde: bool) -> void:
 			return
 		chemin_en_cours = [t]   # un pas direct : autorise la chute volontaire
 		return
-	chemin_en_cours = sim.grille.chemin(j.pos, t, Etres.est_volant(j), "", sim.refuse_nage(j))
+	chemin_en_cours = sim.grille.chemin(j.pos, t, Etres.est_volant(j), "", sim.refuse_nage(j), 0, sim.bloque_pour(j))   # un ami ne ferme plus le couloir (26 nonies)
 	if chemin_en_cours.is_empty() and t != j.pos:
 		_log(tr("journal.inaccessible"))
 

@@ -81,8 +81,8 @@ inline const double *reels_ou_nul(const PackedFloat64Array &tab, int n) {
 
 void SensenGrille::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("configurer", "dep", "oeil", "table"), &SensenGrille::configurer);
-	ClassDB::bind_method(D_METHOD("chemin", "grille", "depart", "arrivee", "volant", "ignorer", "eviter_nage", "max_noeuds"), &SensenGrille::chemin);
-	ClassDB::bind_method(D_METHOD("atteignables", "grille", "depart", "budget", "volant", "eviter_nage"), &SensenGrille::atteignables);
+	ClassDB::bind_method(D_METHOD("chemin", "grille", "depart", "arrivee", "volant", "ignorer", "eviter_nage", "max_noeuds", "bloque_a"), &SensenGrille::chemin, DEFVAL(PackedByteArray()));
+	ClassDB::bind_method(D_METHOD("atteignables", "grille", "depart", "budget", "volant", "eviter_nage", "bloque_a"), &SensenGrille::atteignables, DEFVAL(PackedByteArray()));
 	ClassDB::bind_method(D_METHOD("ligne_de_vue", "grille", "a", "b"), &SensenGrille::ligne_de_vue);
 	ClassDB::bind_method(D_METHOD("premier_obstacle_vue", "grille", "a", "b"), &SensenGrille::premier_obstacle_vue);
 	ClassDB::bind_method(D_METHOD("champ_de_vue", "grille", "pos", "portee"), &SensenGrille::champ_de_vue);
@@ -779,7 +779,7 @@ int SensenGrille::cout_pas_entre(Object *grille, Vector2i de, Vector2i vers, boo
 }
 
 // Grille.chemin : A* 8 directions, le même tas, le même ordre de voisins, la même heuristique — le même chemin.
-Array SensenGrille::chemin(Object *grille, Vector2i depart, Vector2i arrivee, bool volant, const String &ignorer, bool eviter_nage, int max_noeuds) {
+Array SensenGrille::chemin(Object *grille, Vector2i depart, Vector2i arrivee, bool volant, const String &ignorer, bool eviter_nage, int max_noeuds, const PackedByteArray &bloque_a) {
 	Array vide;
 	vide.set_typed(Variant::VECTOR2I, StringName(), Variant());
 	Etat s;
@@ -841,8 +841,11 @@ Array SensenGrille::chemin(Object *grille, Vector2i depart, Vector2i arrivee, bo
 			}
 			int vx = s.px(vi), vy = s.py(vi);
 			bool est_arrivee = (vx == arrivee.x && vy == arrivee.y);
-			if (s.o && s.o[vi] && !est_arrivee) {
-				// Occupée : on passe seulement si l'occupant est celui qu'on ignore.
+			// QUI BARRE QUI (2026-09-09) : `bloque_a` dit tuile par tuile ce qui gene CE marcheur-la ; sans lui,
+			// la regle d'avant — toute tuile occupee barre.
+			const uint8_t *ob = (bloque_a.size() == n) ? bloque_a.ptr() : s.o;
+			if (ob && ob[vi] && !est_arrivee) {
+				// Barree : on passe seulement si l'occupant est celui qu'on ignore.
 				if (ignorer_vide) {
 					continue;
 				}
@@ -866,7 +869,7 @@ Array SensenGrille::chemin(Object *grille, Vector2i depart, Vector2i arrivee, bo
 }
 
 // Grille.atteignables : Dijkstra borné, le dictionnaire dans l'ordre d'insertion de l'original.
-Dictionary SensenGrille::atteignables(Object *grille, Vector2i depart, int budget, bool volant, bool eviter_nage) {
+Dictionary SensenGrille::atteignables(Object *grille, Vector2i depart, int budget, bool volant, bool eviter_nage, const PackedByteArray &bloque_a) {
 	Dictionary res;
 	Etat s;
 	if (!charger(grille, s) || !s.dans(depart.x, depart.y)) {
@@ -908,7 +911,8 @@ Dictionary SensenGrille::atteignables(Object *grille, Vector2i depart, int budge
 					vi = s.li[vi];   // l'escalier mène à l'autre bout
 				}
 			}
-			if (s.o && s.o[vi]) {
+			const uint8_t *ob = (bloque_a.size() == n) ? bloque_a.ptr() : s.o;   // qui barre qui (2026-09-09)
+			if (ob && ob[vi]) {
 				continue;
 			}
 			int nc = g_cout[c] + cout;

@@ -657,15 +657,19 @@ func degats_chute(niveaux: int) -> int:
 
 ## A* 8-directions sur les coûts de pente. Retourne les étapes SANS la case de départ.
 ## `ignorer` : id d'entité dont on ignore l'occupation (la cible, pour s'approcher d'elle).
-func chemin(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignorer: String = "", eviter_nage: bool = false, max_noeuds: int = 0) -> Array[Vector2i]:
+## `bloque_a` (2026-09-09, ordre de travail 26 nonies) : un miroir d'octets de la forme d'`occ` — 1 = cette tuile
+## barre CELUI QUI CHERCHE. Vide, on retombe sur `occ` : toute tuile occupée barre, ce qui était la règle d'avant.
+## L'appelant qui connaît l'hostilité (`Simulation.bloque_pour`) efface les tuiles de ceux qui ne lui sont pas
+## hostiles, et le chemin les traverse — un villageois dans une embrasure ne ferme plus le couloir.
+func chemin(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignorer: String = "", eviter_nage: bool = false, max_noeuds: int = 0, bloque_a: PackedByteArray = PackedByteArray()) -> Array[Vector2i]:
 	if _noyau_pret():
-		var res: Array[Vector2i] = _noyau.chemin(self, depart, arrivee, volant, ignorer, eviter_nage, max_noeuds)
+		var res: Array[Vector2i] = _noyau.chemin(self, depart, arrivee, volant, ignorer, eviter_nage, max_noeuds, bloque_a)
 		return res
-	return _chemin_gd(depart, arrivee, volant, ignorer, eviter_nage, max_noeuds)
+	return _chemin_gd(depart, arrivee, volant, ignorer, eviter_nage, max_noeuds, bloque_a)
 
 
 ## La version GDScript du chemin — la référence dont le noyau C++ est la transcription.
-func _chemin_gd(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignorer: String = "", eviter_nage: bool = false, max_noeuds: int = 0) -> Array[Vector2i]:
+func _chemin_gd(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignorer: String = "", eviter_nage: bool = false, max_noeuds: int = 0, bloque_a: PackedByteArray = PackedByteArray()) -> Array[Vector2i]:
 	var vide: Array[Vector2i] = []
 	if depart == arrivee or not dans(arrivee):
 		return vide
@@ -703,8 +707,7 @@ func _chemin_gd(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignor
 		for k in voisins.size():
 			var voisin: Vector2i = voisins[k]
 			var cout: int = couts[k]
-			var occ := occupant(voisin)
-			if not occ.is_empty() and occ != ignorer and voisin != arrivee:
+			if _barre(voisin, bloque_a) and occupant(voisin) != ignorer and voisin != arrivee:
 				continue
 			if dangers.has(idx(voisin)) and voisin != arrivee:   # on contourne le feu
 				continue
@@ -755,14 +758,23 @@ static func _tas_pop(tas: Array[Vector3i]) -> Vector3i:
 	return racine
 
 
+## Cette tuile barre-t-elle celui qui cherche ? Avec un `bloque_a` de la bonne taille, c'est lui qui décide — il
+## dit tuile par tuile qui gêne CE marcheur-là. Sans lui, la règle d'avant : toute tuile occupée barre.
+func _barre(t: Vector2i, bloque_a: PackedByteArray) -> bool:
+	if bloque_a.size() != occ.size():
+		return not occupant(t).is_empty()
+	var i := idx(t)
+	return i >= 0 and i < bloque_a.size() and bloque_a[i] != 0
+
+
 ## Dijkstra borné : tuile → coût en ticks pour l'atteindre (UI : coûts sur les tuiles atteignables).
-func atteignables(depart: Vector2i, budget: int, volant: bool = false, eviter_nage: bool = false) -> Dictionary:
+func atteignables(depart: Vector2i, budget: int, volant: bool = false, eviter_nage: bool = false, bloque_a: PackedByteArray = PackedByteArray()) -> Dictionary:
 	if _noyau_pret():
-		return _noyau.atteignables(self, depart, budget, volant, eviter_nage)
-	return _atteignables_gd(depart, budget, volant, eviter_nage)
+		return _noyau.atteignables(self, depart, budget, volant, eviter_nage, bloque_a)
+	return _atteignables_gd(depart, budget, volant, eviter_nage, bloque_a)
 
 
-func _atteignables_gd(depart: Vector2i, budget: int, volant: bool = false, eviter_nage: bool = false) -> Dictionary:
+func _atteignables_gd(depart: Vector2i, budget: int, volant: bool = false, eviter_nage: bool = false, bloque_a: PackedByteArray = PackedByteArray()) -> Dictionary:
 	var couts := {depart: 0}
 	var file: Array[Vector2i] = [depart]
 	while not file.is_empty():
@@ -786,7 +798,7 @@ func _atteignables_gd(depart: Vector2i, budget: int, volant: bool = false, evite
 			couts_v.append(int(dep["cout_base"]))
 		for kv in voisins.size():
 			var v: Vector2i = voisins[kv]
-			if not occupant(v).is_empty():
+			if _barre(v, bloque_a):
 				continue
 			var nc: int = couts[c] + couts_v[kv]
 			if nc <= budget and nc < int(couts.get(v, 1 << 30)):

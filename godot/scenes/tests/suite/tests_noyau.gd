@@ -361,6 +361,34 @@ func test_pile_sur_une_tuile() -> void:
 	verifier(not s.intention(b.id, {"type": "deplacer", "vers": loup.pos}) or b.pos != loup.pos, "un ennemi barre le passage : on ne lui monte pas dessus")
 	# La hauteur de pile est en données, et elle borne.
 	verifier(int(s.regles.r.deplacement.pile_max) >= 3, "pile_max vaut au moins trois : « un PNJ peut porter un PNJ qui porte un PNJ »")
+	# LE CHEMIN TRAVERSE LES AMIS (ordre de travail 26 nonies ; designer 2026-09-08 : « si un PNJ non hostile bloque
+	# une porte le joueur peut passer par-dessus »). Le pas passait déjà ; c'est l'ITINÉRAIRE qu'on prouve ici.
+	# On bouche l'unique passage d'un couloir avec un ami, puis avec un ennemi.
+	# Un couloir d'une seule tuile de large : la tuile du milieu est le SEUL passage, sans avoir besoin de murs
+	# (une grille nue n'a pas le catalogue des contenus, et un relief se grimpe depuis le point 56).
+	var g2 := Grille.new(9, 1)
+	g2.dep = g.dep   # une grille nue n'a pas les règles de déplacement : on lui donne celles de la partie
+	for x2 in 9:
+		g2.hauteurs[g2.idx(Vector2i(x2, 0))] = 10
+	var goulet := Vector2i(4, 0)
+	g2.placer("gardien", goulet)
+	var libre := g2.chemin(Vector2i(0, 0), Vector2i(8, 0))
+	verifier(libre.is_empty(), "sans rien dire, un occupant ferme le goulet : aucun chemin")
+	var passe := g2.occ.duplicate()
+	passe[g2.idx(goulet)] = 0   # ce gardien-là ne me barre pas : c'est un ami
+	var avec := g2.chemin(Vector2i(0, 0), Vector2i(8, 0), false, "", false, 0, passe)
+	verifier(not avec.is_empty() and goulet in avec, "avec le miroir, le chemin PASSE par la tuile de l'ami (%d pas)" % avec.size())
+	var avec_gd := g2._chemin_gd(Vector2i(0, 0), Vector2i(8, 0), false, "", false, 0, passe)
+	verifier(avec == avec_gd, "le noyau C++ et le GDScript rendent le MÊME chemin à travers l'ami")
+	var att_a := g2.atteignables(Vector2i(0, 0), 3000, false, false, passe)
+	var att_gd := g2._atteignables_gd(Vector2i(0, 0), 3000, false, false, passe)
+	verifier(att_a.has(goulet) and att_a == att_gd, "les atteignables franchissent l'ami, noyau et GDScript d'accord (%d tuiles)" % att_a.size())
+	verifier(not g2.atteignables(Vector2i(0, 0), 3000).has(Vector2i(8, 0)), "sans le miroir, l'autre bout reste hors d'atteinte")
+	# Et le miroir que la simulation construit efface bien les amis, pas les ennemis.
+	var bl := s.bloque_pour(j)
+	verifier(bl.size() == s.grille.occ.size(), "le miroir a la taille de la grille")
+	verifier(int(bl[s.grille.idx(b.pos)]) == 0, "un villageois du même camp n'y barre rien")
+	verifier(int(bl[s.grille.idx(loup.pos)]) == 1, "un loup hostile y barre sa tuile")
 
 
 func test_grille() -> void:

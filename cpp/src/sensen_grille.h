@@ -116,8 +116,10 @@ public:
 	void configurer(const Dictionary &dep, int p_oeil, const PackedInt32Array &p_table);
 	inline int drapeaux_public(const Etat &s, int i) const { return drapeaux(s, i); }
 	inline int niveau_liquide_public(const Etat &s, int i) const { return niveau_liquide(s, i); }
-	Array chemin(Object *grille, Vector2i depart, Vector2i arrivee, bool volant, const String &ignorer, bool eviter_nage, int max_noeuds);
-	Dictionary atteignables(Object *grille, Vector2i depart, int budget, bool volant, bool eviter_nage);
+	// `bloque_a` (2026-09-09) : miroir d'octets de la forme de `occ`, 1 = cette tuile barre celui qui cherche.
+	// Vide ou de la mauvaise taille, on retombe sur `occ` : toute tuile occupee barre, la regle d'avant.
+	Array chemin(Object *grille, Vector2i depart, Vector2i arrivee, bool volant, const String &ignorer, bool eviter_nage, int max_noeuds, const PackedByteArray &bloque_a = PackedByteArray());
+	Dictionary atteignables(Object *grille, Vector2i depart, int budget, bool volant, bool eviter_nage, const PackedByteArray &bloque_a = PackedByteArray());
 	bool ligne_de_vue(Object *grille, Vector2i a, Vector2i b);
 	Vector2i premier_obstacle_vue(Object *grille, Vector2i a, Vector2i b);
 	PackedInt32Array champ_de_vue(Object *grille, Vector2i pos, int portee);

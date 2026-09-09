@@ -298,7 +298,7 @@ static func _projeter_routine(sim: Simulation, x: Dictionary) -> void:
 	var avant: Vector2i = sim._cible_routine(x, profil, tick - depuis_debut - 1)
 	var dest := cible
 	if cible != avant:
-		var chemin: Array = sim.grille.chemin(avant, cible, Etres.est_volant(x), "", sim.refuse_nage(x))
+		var chemin: Array = sim.grille.chemin(avant, cible, Etres.est_volant(x), "", sim.refuse_nage(x), 0, sim.bloque_pour(x))
 		var pas := sim.regles.ticks_deplacement(int(sim.regles.r.deplacement.cout_base), x.get("competences_eff", {}), false)
 		var faits := depuis_debut / maxi(1, pas)
 		if not chemin.is_empty() and faits < chemin.size():

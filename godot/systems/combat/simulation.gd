@@ -1197,6 +1197,35 @@ func cout_pas_affixes(e: Dictionary, cout: int) -> int:
 	return maxi(1, roundi(c))
 
 
+## LES TUILES QUI BARRENT CET ÊTRE-LÀ (ordre de travail 26 nonies, 2026-09-09). Le chemin refusait toute tuile
+## occupée ; il ne doit refuser que celles où se tient quelqu'un d'HOSTILE — un villageois dans une embrasure ne
+## ferme plus le couloir, puisqu'on lui monte dessus depuis la pile.
+##
+## La forme est un miroir d'octets de `occ` : 1 = ça me barre. On part d'`occ` (tout ce qui est occupé) et on EFFACE
+## les tuiles de ceux qui ne me sont pas hostiles — donc O(êtres) une fois, et O(1) par nœud visité ensuite. Le
+## résultat ne dépend que du CAMP du marcheur dans la quasi-totalité des cas (`SimPnj.ennemis` est affaire de camp,
+## sauf un civil fâché contre le joueur) : on le garde donc en cache par camp, vidé à chaque tick.
+var _bloque_cache: Dictionary = {}      # camp → miroir d'octets
+var _bloque_cache_tick := -1
+
+func bloque_pour(e: Dictionary) -> PackedByteArray:
+	var cle := "%s|%s" % [str(e.get("camp", "")), str(e.id) if str(e.get("camp", "")) in ["joueur", "civil"] else ""]
+	var t := horloge_de(e).ticks
+	if _bloque_cache_tick != t:
+		_bloque_cache.clear()
+		_bloque_cache_tick = t
+	if _bloque_cache.has(cle):
+		return _bloque_cache[cle]
+	var a := grille.occ.duplicate()
+	for x in vivants():
+		if x.id == e.id or not SimPnj.ennemis(self, e, x):
+			var i := grille.idx(x.pos)
+			if i >= 0 and i < a.size():
+				a[i] = 0
+	_bloque_cache[cle] = a
+	return a
+
+
 ## La densité de mana au point d'un être (Loot : « des sources ») : la couche `mana` de la surface, rien en donjon.
 func densite_mana(pos: Vector2i) -> float:
 	if monde == null or lieu != "camp":
@@ -4601,7 +4630,7 @@ func _ia_pas_routine(e: Dictionary, cible: Vector2i, tick: int) -> void:
 		var chemin: Array = cache.get("chemin", []) if cache.get("cible", Vector2i(-9999, -9999)) == cible and cache.get("depuis", Vector2i(-9999, -9999)) == e.pos else []
 		if chemin.is_empty():
 			var t0 := Time.get_ticks_usec()
-			chemin = grille.chemin(e.pos, cible, Etres.est_volant(e), "", refuse_nage(e), int(GameData.config("planete").routine.get("astar_noeuds_max", 0)))
+			chemin = grille.chemin(e.pos, cible, Etres.est_volant(e), "", refuse_nage(e), int(GameData.config("planete").routine.get("astar_noeuds_max", 0)), bloque_pour(e))
 			_top("ia.chemin_routine", t0)
 			chrono["n.chemin_routine"] = float(chrono.get("n.chemin_routine", 0.0)) + 1.0
 		if chemin.size() > 0:
@@ -4659,7 +4688,7 @@ func _ia_errer(e: Dictionary, tick: int) -> void:
 		var q: Vector2i = e.ancre + Vector2i(rng.randi_range(-rayon, rayon), rng.randi_range(-rayon, rayon))
 		if not grille.dans(q) or grille.bloque_passage(q) or not grille.occupant(q).is_empty() or q == e.pos:
 			continue
-		if grille.chemin(e.pos, q, Etres.est_volant(e), "", refuse_nage(e)).is_empty():
+		if grille.chemin(e.pos, q, Etres.est_volant(e), "", refuse_nage(e), 0, bloque_pour(e)).is_empty():
 			continue   # un but injoignable fait pietiner : on en cherche un autre plutot que de s'entêter
 		if paisible and not _pature_proche(q):
 			if repli.x < -9000:
@@ -4744,7 +4773,7 @@ func _ia_attaquer(e: Dictionary, cible: Dictionary, tick: int) -> void:
 func _ia_pas_vers(e: Dictionary, but: Vector2i, tick: int, ignorer: String) -> void:
 	if SimTalents._ia_par_portail(self, e, but, tick):   # Talents de classe : une brèche ouverte sert à tout le monde
 		return
-	var pas := grille.chemin(e.pos, but, Etres.est_volant(e), ignorer, refuse_nage(e), int(GameData.config("planete").routine.get("astar_noeuds_max", 0)))
+	var pas := grille.chemin(e.pos, but, Etres.est_volant(e), ignorer, refuse_nage(e), int(GameData.config("planete").routine.get("astar_noeuds_max", 0)), bloque_pour(e))
 	if pas.is_empty() or pas[0] == but and not grille.occupant(but).is_empty():
 		_attendre(e, tick)
 		return

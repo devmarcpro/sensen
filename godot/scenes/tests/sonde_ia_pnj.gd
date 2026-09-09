@@ -140,8 +140,13 @@ func _ronde(s: Simulation, j: Dictionary, action: Dictionary = {"type": "attendr
 
 
 ## Un être en combat dont le compteur est loin devant l'horloge de son combat ne rejouera jamais.
+## « Figé » : un compteur si loin devant l'horloge qu'aucune action ne l'explique. Le seuil était écrit 300 —
+## trois ticks de cent millisecondes, l'unité d'avant le 2026-09-08. Au tick d'une milliseconde, la moindre attaque
+## coûte cinq cents ticks : TOUT être qui venait d'agir était déclaré figé, et la sonde criait trente-sept fois.
+## Le seuil se lit maintenant dans la donnée — trois attaques de retard, ce n'est plus une action en cours.
 func _fige(s: Simulation, e: Dictionary) -> bool:
-	return s.en_combat(e) and int(e.compteur) - s.horloge_de(e).ticks > 300
+	var seuil := 3 * int(s.regles.r.actions.attaque_base) * int(s.regles.r.actions.lourde_mult_ticks)
+	return s.en_combat(e) and int(e.compteur) - s.horloge_de(e).ticks > seuil
 
 
 func _pas_du_joueur(s: Simulation, j: Dictionary, vers: Vector2i) -> void:
