@@ -1420,7 +1420,8 @@
   },
   "soins": {
     "reserve_seuil_pct": 30,
-    "_doc": "Soins dormants (Modules — Réserve) : le seuil de PV en pourcentage sous lequel la réserve se déclenche."
+    "_doc": "Soins dormants (Modules — Réserve) : le seuil de PV en pourcentage sous lequel la réserve se déclenche. | LE SOIN PAR PARTIE (2026-09-09) : sans lui, la sante par partie serait un cliquet — rien ne la rendait, si bien que l usure ordinaire d une longue partie finissait par mutiler tout le monde. Hors combat, chaque partie entamee regagne `parties_par_tick` de sa reserve par tick ; a 0,00004 et 300 ticks le pas, une partie a moitie vide se remet en une poignee d heures de jeu, bien plus lentement que la sante globale — une blessure profonde se soigne, mais elle DURE, et c est ce qui la rend memorable. Un membre PERDU ne revient pas : c est la prothese qui le remplacera, pas le temps.",
+    "parties_par_tick": 4e-05
   },
   "modules": {
     "_doc": "Le joueur commence avec les seuls modules de sa classe (designer 2026-08-31, point 47) ; tout le reste s'apprend dans les livres. `tout_au_depart` reste un interrupteur de test.",

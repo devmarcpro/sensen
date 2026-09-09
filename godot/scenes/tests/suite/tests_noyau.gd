@@ -1430,6 +1430,18 @@ func test_niveaux() -> void:
 ## SANTÉ PAR PARTIES).
 ## **Ce test doit prouver que ce n'est pas la même liste déguisée** — sinon on aurait déplacé du code sans rien
 ## gagner. Il coupe donc un bras et compte ; puis il crève un cœur.
+## Les règles de la simulation qui a fabriqué cet être — le test en a besoin pour appeler le soin par partie.
+var _regles_test: Regles = null
+
+
+func s_regles_de(_e: Dictionary) -> Regles:
+	return _regles_test
+
+
+func j3_regles(r: Regles) -> Regles:
+	return r
+
+
 func j_test_vide() -> Dictionary:
 	return {"corps": {"silhouette": "humanoide"}}
 
@@ -1578,6 +1590,42 @@ func test_plan_corps() -> void:
 	verifier(Etres.blesser_partie(j2, "jambe_D", 100000) == "perdue" and not Etres.partie_intacte(j2, "jambe_D"), "assez de dégâts sur la même jambe, et elle tombe")
 	verifier(not Etres.partie_intacte(j2, "pied_D") and Etres.partie_intacte(j2, "pied_G"), "le pied qu'elle portait tombe avec elle, l'autre non")
 	verifier(Etres.blesser_partie(j2, "coeur", 100000) == "vitale", "un cœur crevé se dit VITAL — et c'est l'appelant qui en tire la mort, pas ce module")
+
+	# LE SOIN PAR PARTIE — et c'est une correction, pas un ajout : sans lui, la santé par partie était un CLIQUET,
+	# et l'usure ordinaire d'une longue partie finissait par mutiler tout le monde.
+	var s3 := nouvelle_sim("gorge")
+	_regles_test = s3.regles
+	var j3 := joueur_de(s3)
+	verifier(Etres.blesser_partie(j3, "bras_G", Etres.sante_partie_max(j3, "bras_G") / 2) == "", "un bras à demi entamé tient encore")
+	var avant_soin := Etres.sante_partie(j3, "bras_G")
+	Etres.soigner_parties(j3, 20000, j3_regles(s_regles_de(j3)))
+	verifier(Etres.sante_partie(j3, "bras_G") > avant_soin, "hors du combat, il se répare (%d → %d)" % [avant_soin, Etres.sante_partie(j3, "bras_G")])
+	Etres.soigner_parties(j3, 100000000, j3_regles(s_regles_de(j3)))
+	verifier(Etres.sante_partie(j3, "bras_G") == Etres.sante_partie_max(j3, "bras_G") and not j3.corps.get("sante_parties", {}).has("bras_G"), "et le temps le remet à plein — l'entrée disparaît, un corps intact ne coûte rien")
+	Etres.perdre_partie(j3, "bras_D")
+	Etres.soigner_parties(j3, 100000000, j3_regles(s_regles_de(j3)))
+	verifier(not Etres.partie_intacte(j3, "bras_D"), "mais un bras PERDU ne repousse pas : c'est la prothèse qui le remplacera, pas le temps")
+
+	# CE QUE COÛTE LA PERTE D'UN ORGANE. Jusqu'ici ils ne faisaient qu'une chose : tuer si on les crevait.
+	var s4 := nouvelle_sim("gorge")
+	var j4 := joueur_de(s4)
+	var vig0: int = int(j4.vigueur_max)
+	Etres.perdre_partie(j4, "poumon_D")
+	Etres.recalculer(j4, s4.items, s4.affixes_defs, s4.regles)
+	verifier(int(j4.vigueur_max) < vig0, "un poumon perdu retranche à la vigueur maximale : on respire encore, moins bien (%d → %d)" % [vig0, int(j4.vigueur_max)])
+	verifier(Etres.sens_actif(j4, "ouie"), "et cela ne touche à aucun sens : un poumon n'entend pas")
+	Etres.perdre_partie(j4, "estomac")
+	Etres.recalculer(j4, s4.items, s4.affixes_defs, s4.regles)
+	verifier(float(j4.get("faim_vitesse", 1.0)) > 1.0, "un estomac perdu fait creuser plus vite (×%.2f)" % float(j4.get("faim_vitesse", 1.0)))
+	# ET LE CODE NE CONNAÎT AUCUN NOM D'ORGANE : tout est déclaré sur l'organe, dans son bloc `perdu`.
+	var sans_bloc := 0
+	for nom_o: String in (plans.humanoide.parties as Dictionary).keys():
+		var po: Dictionary = plans.humanoide.parties[nom_o]
+		# Un organe peut ne rien coûter ENCORE — mais il doit dire ce qu'il attend. Un manque écrit vaut mieux
+		# qu'un manque tu : les reins attendent l'hydratation, et c'est dans la donnée, pas dans ma tête.
+		if bool(po.get("interne", false)) and not po.has("perdu") and str(po.get("sens", "")).is_empty() and not bool(po.get("vital", false)) and str(po.get("attend", "")).is_empty():
+			sans_bloc += 1
+	verifier(sans_bloc == 0, "tout organe non vital et sans sens dit ce que sa perte coûte, ou ce qu'elle attend (%d muet(s))" % sans_bloc)
 	# Le tirage de la partie touchée reste dans la zone demandée, et il atteint les organes.
 	var vus := {}
 	for k in 400:

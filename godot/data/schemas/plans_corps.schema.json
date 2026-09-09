@@ -64,6 +64,24 @@
               "ouie",
               "odorat"
             ]
+          },
+          "perdu": {
+            "type": "object",
+            "properties": {
+              "vigueur_max_pct": {
+                "type": "number",
+                "minimum": -100,
+                "maximum": 100
+              },
+              "faim_vitesse_mult": {
+                "type": "number",
+                "minimum": 0.1,
+                "maximum": 5.0
+              }
+            }
+          },
+          "attend": {
+            "type": "string"
           }
         }
       }

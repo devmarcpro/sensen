@@ -278,7 +278,23 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 		vigueur_bonus += int(regles.r.get("talents", {}).get("carapace", {}).get("vigueur_max", -15))
 	if talent_race != null and str(talent_race) == "oeil_de_la_pierre" and not ("detection_filons" in tags):
 		tags.append("detection_filons")
+	# CE QUE COÛTE LA PERTE D'UN ORGANE (2026-09-09). Jusqu'ici les organes ne faisaient qu'une chose : tuer si on
+	# les crevait. Un poumon en moins retranche désormais à la vigueur maximale — on respire encore, moins bien — et
+	# un estomac en moins fait creuser plus vite. **Tout est déclaré sur l'organe**, dans son bloc `perdu` : le code
+	# ne connaît aucun nom d'organe, il additionne ce que le plan lui donne.
+	var faim_mult := 1.0
+	var pct_vig := 0.0
+	for nom_pc: String in (plan_corps(e).get("parties", {}) as Dictionary).keys():
+		var pc: Dictionary = plan_corps(e).parties[nom_pc]
+		if not pc.has("perdu") or partie_intacte(e, nom_pc):
+			continue
+		pct_vig += float((pc.perdu as Dictionary).get("vigueur_max_pct", 0.0))
+		faim_mult *= float((pc.perdu as Dictionary).get("faim_vitesse_mult", 1.0))
+	if not is_equal_approx(faim_mult, 1.0) or e.has("faim_vitesse"):
+		e["faim_vitesse"] = faim_mult
 	var end_max: int = regles.vigueur_max(stats) + vigueur_bonus
+	if not is_zero_approx(pct_vig):
+		end_max = maxi(1, roundi(float(end_max) * (1.0 + pct_vig / 100.0)))
 	e.vigueur = mini(int(e.vigueur), end_max) if int(e.vigueur_max) != end_max else int(e.vigueur)
 	e.vigueur_max = end_max
 	# Le sang-froid suit la dextérité comme la vigueur suit la force : la barre du propriétaire de la
@@ -482,6 +498,30 @@ static func sens_actif(e: Dictionary, sens: String) -> bool:
 		if partie_intacte(e, nom):
 			return true
 	return not declare
+
+
+## LE SOIN PAR PARTIE (2026-09-09) — et c'est une correction, pas un ajout. La santé par partie était un CLIQUET :
+## rien ne la rendait, si bien que l'usure ordinaire d'une longue partie finissait par mutiler tout le monde. Hors
+## combat, une partie entamée regagne une part de sa réserve à chaque tick.
+## **Bien plus lentement que la santé globale**, et c'est voulu : une blessure profonde se soigne, mais elle DURE —
+## c'est ce qui la rend mémorable. Un membre PERDU ne revient pas : c'est la prothèse qui le remplacera, pas le temps.
+## On efface l'entrée dès qu'elle est pleine : un corps intact ne coûte rien, comme les piles de tuiles.
+static func soigner_parties(e: Dictionary, ticks: int, regles: Regles) -> void:
+	var etat: Dictionary = e.get("corps", {}).get("sante_parties", {})
+	if etat.is_empty() or ticks <= 0:
+		return
+	var par_tick := float(regles.r.get("soins", {}).get("parties_par_tick", 0.0))
+	if par_tick <= 0.0:
+		return
+	for nom: String in etat.keys().duplicate():
+		if not partie_intacte(e, nom):
+			continue   # une partie tombée ne se recoud pas toute seule
+		var maxi_p := sante_partie_max(e, nom)
+		var v := mini(maxi_p, int(etat[nom]) + maxi(1, roundi(float(maxi_p) * par_tick * float(ticks))))
+		if v >= maxi_p:
+			etat.erase(nom)
+		else:
+			etat[nom] = v
 
 
 ## LA PARTIE TOUCHÉE dans une zone : un tirage pondéré par `poids_coup` parmi les parties INTACTES de cette zone.

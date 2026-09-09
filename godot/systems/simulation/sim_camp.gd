@@ -307,6 +307,10 @@ static func _dormir(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int) -
 	if not e.vivant:
 		return true
 	e.sante = e.sante_max
+	# Une nuit entière remet le corps d'aplomb, partie par partie — mais elle ne rend pas un bras : ce qui est tombé
+	# est tombé, et c'est la prothèse qui le remplacera (ordre de travail 28 bis).
+	if e.get("corps", {}).has("sante_parties"):
+		e.corps.sante_parties.clear()
 	e["sang"] = 0
 	e.mana = e.mana_max
 	e.vigueur = e.vigueur_max

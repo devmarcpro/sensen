@@ -1000,6 +1000,8 @@ func _regenerer(e: Dictionary, tick: int) -> void:
 		var immobile_sf := tick - int(e.get("immobile_depuis", tick))
 		if not en_combat(e) or immobile_sf >= int(sf_r.get("seuil_ticks", 6)):
 			e["sang_froid"] = mini(int(e.get("sang_froid_max", 0)), int(e.get("sang_froid", 0)) + int(round(float(ecoules) * float(sf_r.get("regen_par_tick", 1)))))
+		if not en_combat(e):   # Le soin par partie : le corps se répare hors du combat, lentement (2026-09-09)
+			Etres.soigner_parties(e, ecoules, regles)
 		var f_faim: Dictionary = regles.r.faim
 		var faim_e := int(e.get("faim", 100))
 		if e.get("mecaniques", {}).has("regen_sante") and not en_combat(e) and faim_e >= int(f_faim.seuil_stats):   # Effets d'équipement : 1 PV toutes les 200 × 100 / pct ticks ; Faim : plus de régén sous seuil_stats
