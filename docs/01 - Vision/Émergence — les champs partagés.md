@@ -204,6 +204,19 @@ jamais s'ajouter à côté. Sinon on obtient six vérités qui se contredisent, 
 >
 > **Ce qui reste** : le combat, la mort et les portes ne sonnent pas encore (leur volume est écrit, pas branché) ; le champ ne connaît pas les couches Z ; et l'**odeur**, l'autre moitié du point 1, n'existe pas.
 
+> [!success] Codé le 2026-09-09 — **le champ d'odeur**, l'autre moitié du point 1 — `odeur.json`, `SimTerrain.tracer`
+> **Il est l'exact contraire du champ sonore, et c'est ce qui le rend utile.** Le son est instantané et s'efface vite : il dit **où quelqu'un est**, maintenant. L'odeur est lente et elle traîne : elle dit **où quelqu'un est passé**, et depuis combien de temps. L'un sert à surprendre, l'autre à pister. Mesuré : `fondu` 0,03 contre 0,50 — une odeur survit douze pas de champ là où un bruit s'était éteint.
+>
+> **LA PISTE N'A BESOIN D'AUCUN HORODATAGE**, et c'est le point de conception qui fait tout marcher. Un être dépose une trace là où il passe, et le champ s'efface un peu à chaque pas : une piste laissée au fil du temps **décroît donc vers l'ancien**. Le dernier pas est le plus fort ; **remonter la pente mène au dépôt le plus frais**, c'est-à-dire là où l'être vient d'aller. La meute suit la piste jusqu'à celui qui l'a laissée, et rien ne mémorise l'heure.
+> La diffusion est **faible à dessein** : une piste est une ligne, pas un nuage. Ce qui s'étale, c'est une **dépouille**, qui sent tant qu'elle est là — son odeur est réémise, elle ne s'éteint pas d'un coup. C'est « le prédateur qu'attire une carcasse laissée là ».
+> Et la **Discrétion** cesse une deuxième fois d'être un facteur sur une portée : un rôdeur discret laisse une piste **plus pâle** (18 contre 30), que la meute perd plus tôt.
+>
+> **LES ORGANES DE SENS SONT LE LECTEUR DE CES CHAMPS** *(designer, le même jour : « tout ce qui est nez yeux oreilles etc font partie des organes »).* Et cela tombe juste, parce que les trois champs qu'ils interrogent existent depuis ce jour-là : la **vue** lit la lumière, l'**ouïe** le champ sonore, l'**odorat** le champ d'odeur. Perdre l'organe, c'est perdre l'accès au champ.
+> Chaque espèce a les siens, et ce sont **ceux du monde réel** : le serpent n'a **aucune oreille externe** et sent par son **organe de Jacobson** ; l'araignée a **huit yeux** et perçoit par ses **soies sensorielles** ; l'oiseau a des **narines** et des **conduits auditifs**, pas de pavillons.
+> **La règle de prudence est explicite** : un sens n'est perdu que si le plan DÉCLARE des organes pour lui ET qu'ils sont TOUS tombés. Un œil crevé ne rend pas aveugle ; une gelée qui ne déclare aucun œil perçoit comme avant ; et le serpent, qui n'a pas d'oreille, n'est pas sourd pour autant — *la règle ne punit pas une anatomie d'être ce qu'elle est.*
+>
+> **Ce qui reste** : le combat, la mort et les portes ne sonnent pas encore ; les deux champs ignorent les couches Z ; et l'odeur **ne distingue pas ce qui sent** — un loup suit la piste d'un loup aussi bien que celle du joueur.
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Matériaux — 13 stats]], [[Application des stats de matériau]], [[Grille continue]]
 - **Alimente** : [[Mine sous une cellule]], [[Éclairage]], [[Météo]], [[IA des créatures]], [[Modules de la simulation et le C++]]

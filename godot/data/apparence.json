@@ -1,5 +1,5 @@
 {
-  "_doc": "Loci visuels humanoïdes (Apparence — données et équipement ; designer 2026-08-31, points 39 et 41) : le Paperdoll ne branche jamais par race, il lit ces facteurs. echelle multiplie tout le rig, carrure la largeur, tete_facteur le diamètre du crâne ; oreilles et barbe sont des longueurs en pixels. Les curseurs (designer 2026-09-01, point 53) sont des réglages CONTINUS du visage, en plus des valeurs discrètes : c'est ce qui distingue un portrait-robot d'un simple catalogue. — Les couleurs (peau, cheveux, pilosité) se choisissent à la ROUE : elles s'écrivent en clair (#rrggbb) ; les listes `teintes_*` ne sont plus que des presets, pour le tirage des PNJ (designer 2026-09-08).",
+  "_doc": "Loci visuels humanoïdes (Apparence — données et équipement ; designer 2026-08-31, points 39 et 41) : le Paperdoll ne branche jamais par race, il lit ces facteurs. echelle multiplie tout le rig, carrure la largeur, tete_facteur le diamètre du crâne ; oreilles et barbe sont des longueurs en pixels. Les curseurs (designer 2026-09-01, point 53) sont des réglages CONTINUS du visage, en plus des valeurs discrètes : c'est ce qui distingue un portrait-robot d'un simple catalogue. — Les couleurs (peau, cheveux, pilosité) se choisissent à la ROUE : elles s'écrivent en clair (#rrggbb) ; les listes `teintes_*` ne sont plus que des presets, pour le tirage des PNJ (designer 2026-09-08). | LES TRAITS INSECTOIDES (designer 2026-09-09) sont ajoutes EN FIN de chaque liste de valeurs : la note des planches dit que l index d une variante ne bouge pas quand on en ajoute, et cet index est justement celui de la valeur ici. Ajouter au milieu aurait change le visage de tous les personnages sauvegardes. La bouche s appelle `mandibules` et les oreilles `antennes` plutot qu `insectoide` : un trait nomme d apres une espece ne peut plus servir a une autre.",
   "loci": [
     {
       "id": "tete",
@@ -8,7 +8,8 @@
         "ovale",
         "carree",
         "allongee",
-        "en_coeur"
+        "en_coeur",
+        "insectoide"
       ],
       "universel": false
     },
@@ -18,7 +19,8 @@
         "rondes",
         "pointues",
         "longues",
-        "collees"
+        "collees",
+        "antennes"
       ],
       "universel": false
     },
@@ -29,7 +31,8 @@
         "fentes",
         "grands",
         "en_amande",
-        "tombants"
+        "tombants",
+        "insectoide"
       ],
       "universel": false
     },
@@ -50,7 +53,8 @@
         "fine",
         "large",
         "sourire",
-        "boudeuse"
+        "boudeuse",
+        "mandibules"
       ],
       "universel": false
     },

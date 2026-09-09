@@ -11,7 +11,8 @@
    "largeur": 12,
    "angle": -90,
    "ancrages": {},
-   "zone": "torse"
+   "zone": "torse",
+   "partie": "masse"
   }
  },
  "ordre": [

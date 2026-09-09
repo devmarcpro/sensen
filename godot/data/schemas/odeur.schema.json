@@ -1,0 +1,71 @@
+{
+  "type": "object",
+  "required": [
+    "periode_ticks",
+    "trace_par_pas",
+    "fondu",
+    "seuil",
+    "sources"
+  ],
+  "properties": {
+    "_doc": {
+      "type": "string"
+    },
+    "periode_ticks": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "trace_par_pas": {
+      "type": "number",
+      "minimum": 0
+    },
+    "diffusion": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "fondu": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "seuil": {
+      "type": "number",
+      "minimum": 0
+    },
+    "tuiles_max": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0
+      }
+    },
+    "discretion_par_niveau": {
+      "type": "number",
+      "minimum": 0
+    },
+    "flair": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "seuil": {
+          "type": "number",
+          "minimum": 0
+        },
+        "pause_ticks": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

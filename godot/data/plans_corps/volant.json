@@ -1,5 +1,5 @@
 {
-  "_doc": "Le plan du corps volant (ordre de travail 28 bis, 2026-09-09). Chaque partie dit sa ZONE de coup, sa partie PARENT (la perdre emporte ce qu elle porte), les EMPLACEMENTS d equipement qu elle accorde, si elle est VITALE, son POIDS_COUP (sa chance relative d etre touchee dans sa zone) et sa PART_SANTE (sa reserve, en part de la sante maximale de l etre). Une partie INTERNE est un organe : elle est logee dans un `contenant` et se touche rarement, mais un coeur perce tue. Les organes sont ceux du monde reel — c est la regle du designer, et elle vaut ici comme pour les matieres. LES ORGANES SONT PROTEGES (corrige le 2026-09-09) : un premier reglage les rendait fragiles au point qu un coeur se crevait a chaque echange et que les cibles mouraient bien avant l heure — six tests calibres l ont dit. Leur poids de coup est le tiers du premier, et la reserve d un organe vital plus du triple : un coeur perce redevient un evenement rare. UNE PARTIE VITALE EXTERNE (le torse, la tete) EST LE CORPS LUI-MEME, et le corps a deja son compteur : la sante globale. Sa reserve est donc mise hors de portee (2.0), sans quoi un coup unique assez gros la detruirait et tuerait la ou la sante globale ne l aurait pas fait — deux compteurs de mort sur la meme chose. Ce qui se PERD, ce sont les membres et les organes ; ce qui TUE, c est le compteur global. UN TORSE EST UN TORSE (designer 2026-09-09) : une piece d armure suit la FORME du membre, pas l espece qui le porte — un torse de cheval et un torse d homme portent la meme cuirasse, a une taille pres, et la taille n est pas un type. Casque sur une tete, brassards sur un membre anterieur, jambieres sur un posterieur, bottes sur ce qui touche le sol. SEULS gardent un emplacement a eux les membres sans equivalent humain : la queue et les ailes.",
+  "_doc": "Le plan du corps volant (ordre de travail 28 bis, 2026-09-09). Chaque partie dit sa ZONE de coup, sa partie PARENT (la perdre emporte ce qu elle porte), les EMPLACEMENTS d equipement qu elle accorde, si elle est VITALE, son POIDS_COUP (sa chance relative d etre touchee dans sa zone) et sa PART_SANTE (sa reserve, en part de la sante maximale de l etre). Une partie INTERNE est un organe : elle est logee dans un `contenant` et se touche rarement, mais un coeur perce tue. Les organes sont ceux du monde reel — c est la regle du designer, et elle vaut ici comme pour les matieres. LES ORGANES SONT PROTEGES (corrige le 2026-09-09) : un premier reglage les rendait fragiles au point qu un coeur se crevait a chaque echange et que les cibles mouraient bien avant l heure — six tests calibres l ont dit. Leur poids de coup est le tiers du premier, et la reserve d un organe vital plus du triple : un coeur perce redevient un evenement rare. UNE PARTIE VITALE EXTERNE (le torse, la tete) EST LE CORPS LUI-MEME, et le corps a deja son compteur : la sante globale. Sa reserve est donc mise hors de portee (2.0), sans quoi un coup unique assez gros la detruirait et tuerait la ou la sante globale ne l aurait pas fait — deux compteurs de mort sur la meme chose. Ce qui se PERD, ce sont les membres et les organes ; ce qui TUE, c est le compteur global. UN TORSE EST UN TORSE (designer 2026-09-09) : une piece d armure suit la FORME du membre, pas l espece qui le porte — un torse de cheval et un torse d homme portent la meme cuirasse, a une taille pres, et la taille n est pas un type. Casque sur une tete, brassards sur un membre anterieur, jambieres sur un posterieur, bottes sur ce qui touche le sol. SEULS gardent un emplacement a eux les membres sans equivalent humain : la queue et les ailes. LES ORGANES DE SENS (designer 2026-09-09 : « tout ce qui est nez yeux oreilles etc font partie des organes ») portent un champ `sens` — `vue`, `ouie`, `odorat` — et ils sont LE LECTEUR du champ partage correspondant : perdre ses yeux c est perdre la vue, perdre ses oreilles c est ne plus entendre la piste, perdre son nez c est ne plus la flairer. Chaque espece a les siens, et ce sont ceux du monde reel : le serpent n a aucune oreille externe et sent par son organe de Jacobson, l araignee a huit yeux et percoit par ses soies sensorielles, l oiseau a des narines et des conduits auditifs. UN SENS N EST PERDU QUE SI le plan declare des organes pour lui ET qu ils sont TOUS tombes.",
   "racine": "torse",
   "parties": {
     "torse": {
@@ -86,14 +86,16 @@
       "interne": true,
       "contenant": "tete",
       "poids_coup": 0.047,
-      "part_sante": 0.16
+      "part_sante": 0.16,
+      "sens": "vue"
     },
     "oeil_G": {
       "zone": "tete",
       "interne": true,
       "contenant": "tete",
       "poids_coup": 0.047,
-      "part_sante": 0.16
+      "part_sante": 0.16,
+      "sens": "vue"
     },
     "coeur": {
       "zone": "torse",
@@ -152,6 +154,30 @@
       "contenant": "torse",
       "poids_coup": 0.023,
       "part_sante": 0.24
+    },
+    "conduit_auditif_D": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "sens": "ouie",
+      "poids_coup": 0.04,
+      "part_sante": 0.2
+    },
+    "conduit_auditif_G": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "sens": "ouie",
+      "poids_coup": 0.04,
+      "part_sante": 0.2
+    },
+    "narines": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "sens": "odorat",
+      "poids_coup": 0.04,
+      "part_sante": 0.2
     }
   }
 }

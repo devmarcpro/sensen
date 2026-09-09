@@ -87,6 +87,14 @@ func _ready() -> void:
 	inventaire_visuel.ecrans = self
 	inventaire_visuel.visible = false
 	h.add_child(inventaire_visuel)
+	anatomie_visuelle = AnatomieVisuelle.new()   # l'anatomie en vue de pantin (designer 2026-09-09)
+	anatomie_visuelle.ecrans = self
+	anatomie_visuelle.visible = false
+	h.add_child(anatomie_visuelle)
+	apparence_visuelle = ApparenceVisuelle.new()   # l'apparence en vignettes, roue en bas à gauche (designer 2026-09-09)
+	apparence_visuelle.ecrans = self
+	apparence_visuelle.visible = false
+	h.add_child(apparence_visuelle)
 	echange_visuel = EchangeVisuel.new()
 	echange_visuel.ecrans = self
 	echange_visuel.visible = false
@@ -182,6 +190,8 @@ func _ready() -> void:
 var reforge_objet := ""   # Main du métal : l'objet choisi, en attente de son composant
 var droite: VBoxContainer          # la colonne de droite : le détail, sous lui le Wu Xing de l'objet ou l'aperçu du sort
 var inventaire_visuel: InventaireVisuel   # l'inventaire en icônes (Écrans d'interface, 2026-08-30)
+var anatomie_visuelle: AnatomieVisuelle   # le corps en grand, cadré sur la partie choisie (designer 2026-09-09)
+var apparence_visuelle: ApparenceVisuelle   # les composants du visage en vignettes cliquables (designer 2026-09-09)
 var echange_visuel: EchangeVisuel         # commerce et échange à deux volets, comme l'inventaire (designer 2026-09-04)
 var atelier_visuel: AtelierVisuel         # l'atelier en cartes de recettes
 var dialogue_visuel: DialogueVisuel       # la carte de dialogue : portrait, nom, informations, options lettrées (designer 2026-09-06)

@@ -274,6 +274,8 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 	var talent_race = GameData.catalogues.get("races", {}).get(str(e.get("race", "")), {}).get("talent")
 	if talent_race != null and str(talent_race) == "chair_de_mana":   # Chair de mana (Talents de race)
 		vigueur_bonus += int(regles.r.get("talents", {}).get("chair_de_mana", {}).get("vigueur_max", -20))
+	if talent_race != null and str(talent_race) == "carapace":   # Carapace (Talents de race, insectoïde 2026-09-09)
+		vigueur_bonus += int(regles.r.get("talents", {}).get("carapace", {}).get("vigueur_max", -15))
 	if talent_race != null and str(talent_race) == "oeil_de_la_pierre" and not ("detection_filons" in tags):
 		tags.append("detection_filons")
 	var end_max: int = regles.vigueur_max(stats) + vigueur_bonus
@@ -461,6 +463,25 @@ static func sante_partie(e: Dictionary, partie: String) -> int:
 	if etat.has(partie):
 		return int(etat[partie])
 	return sante_partie_max(e, partie)
+
+
+## UN SENS EST-IL ENCORE LÀ ? (designer 2026-09-09 : « tout ce qui est nez yeux oreilles etc font partie des
+## organes ».) Un organe de sens n'est pas de la couleur anatomique : c'est **le lecteur d'un champ partagé**. La
+## `vue` lit la lumière et la ligne de vue, l'`ouie` lit le champ sonore, l'`odorat` lit le champ d'odeur — les
+## trois existent depuis aujourd'hui, et perdre l'organe, c'est perdre l'accès au champ.
+## **La règle de prudence est explicite** : un sens n'est perdu que si le plan DÉCLARE des organes pour lui ET
+## qu'ils sont TOUS tombés. Un être sans plan, ou dont le plan ne déclare rien pour ce sens — l'amorphe, le serpent
+## qui n'a aucune oreille externe —, perçoit comme avant : rien de ce qui marchait ne se met à échouer.
+static func sens_actif(e: Dictionary, sens: String) -> bool:
+	var parties: Dictionary = plan_corps(e).get("parties", {})
+	var declare := false
+	for nom: String in parties.keys():
+		if str((parties[nom] as Dictionary).get("sens", "")) != sens:
+			continue
+		declare = true
+		if partie_intacte(e, nom):
+			return true
+	return not declare
 
 
 ## LA PARTIE TOUCHÉE dans une zone : un tirage pondéré par `poids_coup` parmi les parties INTACTES de cette zone.

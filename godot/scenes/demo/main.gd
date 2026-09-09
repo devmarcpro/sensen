@@ -1952,7 +1952,7 @@ func _contexte(t: Vector2i) -> void:
 func _action_menu(id: String) -> void:
 	var j := joueur()
 	match id:
-		"inventaire", "atelier", "feuille", "registre", "capacites":
+		"inventaire", "atelier", "feuille", "anatomie", "registre", "capacites":
 			ecrans.ouvrir(id)
 		"gestion":
 			if sim.lieu == "camp":

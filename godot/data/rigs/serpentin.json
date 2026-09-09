@@ -24,7 +24,8 @@
    },
    "zone": "torse",
    "profondeur": 90,
-   "epaisseur": 6
+   "epaisseur": 6,
+   "partie": "corps"
   },
   "tete": {
    "parent": "torse",
@@ -35,7 +36,8 @@
    "ancrages": {},
    "zone": "tete",
    "profondeur": 70,
-   "epaisseur": 5
+   "epaisseur": 5,
+   "partie": "tete"
   },
   "c1": {
    "parent": "torse",
@@ -52,7 +54,8 @@
    },
    "zone": "torse",
    "profondeur": -120,
-   "epaisseur": 5
+   "epaisseur": 5,
+   "partie": "queue"
   },
   "c2": {
    "parent": "c1",
@@ -69,7 +72,8 @@
    },
    "zone": "torse",
    "profondeur": -60,
-   "epaisseur": 4
+   "epaisseur": 4,
+   "partie": "queue"
   },
   "c3": {
    "parent": "c2",
@@ -80,7 +84,8 @@
    "ancrages": {},
    "zone": "torse",
    "profondeur": -120,
-   "epaisseur": 3
+   "epaisseur": 3,
+   "partie": "queue"
   }
  },
  "ordre": [

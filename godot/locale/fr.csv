@@ -362,6 +362,10 @@ competence.element_terre.name,Terre (élément)
 competence.element_metal.name,Métal (élément)
 competence.element_eau.name,Eau (élément)
 race.humain.name,Humain
+race.insectoide.name,Insectoïde
+ui.apparence.val.insectoide,insectoïde
+ui.apparence.val.mandibules,mandibules
+ui.apparence.val.antennes,antennes
 race.elfe.name,Elfe
 race.nain.name,Nain
 classe.le_sabre.name,Le Sabre
@@ -477,6 +481,54 @@ journal.plancher_effondre,"le plancher de l'étage s'effondre ({x},{y})"
 journal.entend,"{nom} entend quelque chose et va voir"
 slot.protege_ailes,Protège-ailes
 slot.protege_queue,Protège-queue
+partie.conduit_auditif_D,Conduit auditif droit
+partie.conduit_auditif_G,Conduit auditif gauche
+partie.narines,Narines
+partie.nez,Nez
+partie.oeil,Œil
+partie.oeil_1,Œil 1
+partie.oeil_2,Œil 2
+partie.oeil_3,Œil 3
+partie.oeil_4,Œil 4
+partie.oeil_5,Œil 5
+partie.oeil_6,Œil 6
+partie.oeil_7,Œil 7
+partie.oeil_8,Œil 8
+partie.oreille_D,Oreille droite
+partie.oreille_G,Oreille gauche
+partie.organe_de_jacobson,Organe de Jacobson
+partie.soies_sensorielles,Soies sensorielles
+partie.truffe,Truffe
+ui.ecran.anatomie,Anatomie de {nom}
+ui.menu.anatomie,Anatomie
+ui.anatomie.vital,vital
+ui.anatomie.sens,"{sens} : {restants}/{total} — {etat}"
+ui.anatomie.sens_ok,intact
+ui.anatomie.sens_perdu,PERDU
+ui.anatomie.sans_plan,Ce corps n'a pas de plan connu.
+sens.vue,Vue
+sens.ouie,Ouïe
+sens.odorat,Odorat
+ui.anatomie.membre,"{nom}  {pv}/{pv_max}"
+ui.anatomie.organe,"   · {nom}  {pv}/{pv_max}"
+ui.anatomie.perdue,"{nom}  —"
+ui.anatomie.d_perdue,Perdu.
+ui.anatomie.d_reserve,"Réserve : {pv} / {pv_max}"
+ui.anatomie.d_nature,"{nature}{vital}"
+ui.anatomie.d_membre,Membre
+ui.anatomie.d_organe,Organe
+ui.anatomie.d_vital, — vital
+ui.anatomie.d_zone,"Zone de coup : {zone} (poids {poids})"
+ui.anatomie.d_attache,"Attaché à : {nom}"
+ui.anatomie.d_sens,"Sens : {sens} — {etat}"
+ui.anatomie.d_emplacements,"Équipement : {liste}"
+ui.anatomie.d_porte,"Porte : {liste}"
+ui.anatomie.d_loge,"Loge : {liste}"
+zone.tete,Tête
+zone.torse,Torse
+zone.bras,Bras
+zone.jambes,Jambes
+zone.pieds,Pieds
 partie.abdomen,Abdomen
 partie.aile_D,Aile droite
 partie.aile_G,Aile gauche
@@ -530,6 +582,7 @@ partie.tete,Tête
 partie.torse,Torse
 journal.partie_perdue,"{nom} perd : {partie}"
 journal.partie_vitale,"{partie} de {nom} est détruit — il s'effondre"
+journal.flaire,"{nom} flaire une piste et la suit"
 journal.effondrement,"le plafond s'effondre ({x},{y})"
 journal.effondrement_blesse,"{nom} est pris sous l'éboulement : {degats} dégâts"
 journal.lave_figee,"la lave se fige au contact de l'eau ({x},{y})"
@@ -819,6 +872,8 @@ talent.sans_maitre.name,Sans maître
 talent.sans_maitre.desc,"Commence sans talent ; apprend celui d'un PNJ (relation ≥ 75) et peut en changer."
 talent.polyvalent.name,Polyvalent
 talent.polyvalent.desc,"Porte deux talents de classe : le sien et un appris."
+talent.carapace.name,Carapace
+talent.carapace.desc,"Une chitine qui protège partout : +3 d'armure sur toutes les zones, mais −15 d'endurance maximale."
 talent.chair_de_mana.name,Chair de mana
 talent.chair_de_mana.desc,"La surchauffe coûte de la vigueur ; mana ×1,2 ; vigueur max −20."
 talent.oeil_de_la_pierre.name,Œil de la pierre
@@ -1513,12 +1568,7 @@ type.composant,composant
 degats.contondant,contondant
 degats.perforant,perforant
 degats.tranchant,tranchant
-zone.tete,tête
-zone.torse,torse
-zone.jambes,jambes
-zone.bras,bras
 zone.mains,mains
-zone.pieds,pieds
 categorie.bois,bois
 categorie.metal,métal
 categorie.roche,roche
@@ -2649,7 +2699,9 @@ creature.tsuchigumo.name,Tsuchigumo
 creature.basilic.name,Basilic
 creature.griffon.name,Griffon
 creature.golem_d_argile.name,Golem d'argile
+ui.creation.roue_de,"Couleur : {quoi}"
 ui.creation.app_l,"{locus} : {valeur} (← →)"
+ui.creation.app_couleur_l,"{locus} : {valeur}  (← → teintes · Entrée : roue de couleurs)"
 ui.apparence.tete,"Tête"
 ui.apparence.yeux,"Yeux"
 ui.apparence.nez,"Nez"

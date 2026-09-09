@@ -29,7 +29,8 @@
    },
    "zone": "torse",
    "profondeur": 90,
-   "epaisseur": 6
+   "epaisseur": 6,
+   "partie": "torse"
   },
   "tete": {
    "parent": "torse",
@@ -40,7 +41,8 @@
    "ancrages": {},
    "zone": "tete",
    "profondeur": 70,
-   "epaisseur": 4
+   "epaisseur": 4,
+   "partie": "tete"
   },
   "aile_G": {
    "parent": "torse",
@@ -50,7 +52,8 @@
    "angle": 200,
    "ancrages": {},
    "zone": "bras",
-   "epaisseur": 1.5
+   "epaisseur": 1.5,
+   "partie": "aile_G"
   },
   "aile_D": {
    "parent": "torse",
@@ -60,7 +63,8 @@
    "angle": -20,
    "ancrages": {},
    "zone": "bras",
-   "epaisseur": 1.5
+   "epaisseur": 1.5,
+   "partie": "aile_D"
   }
  },
  "ordre": [

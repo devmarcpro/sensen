@@ -56,6 +56,14 @@
             "type": "number",
             "minimum": 0.01,
             "maximum": 2.0
+          },
+          "sens": {
+            "type": "string",
+            "enum": [
+              "vue",
+              "ouie",
+              "odorat"
+            ]
           }
         }
       }

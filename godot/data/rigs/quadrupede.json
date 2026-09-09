@@ -44,7 +44,8 @@
    },
    "zone": "torse",
    "profondeur": 90,
-   "epaisseur": 9
+   "epaisseur": 9,
+   "partie": "torse"
   },
   "tete": {
    "parent": "torse",
@@ -55,7 +56,8 @@
    "ancrages": {},
    "zone": "tete",
    "profondeur": 70,
-   "epaisseur": 6
+   "epaisseur": 6,
+   "partie": "tete"
   },
   "patte_AV_G": {
    "parent": "torse",
@@ -71,7 +73,8 @@
     ]
    },
    "zone": "jambes",
-   "epaisseur": 2.5
+   "epaisseur": 2.5,
+   "partie": "patte_AV_G"
   },
   "patte_AV_D": {
    "parent": "torse",
@@ -87,7 +90,8 @@
     ]
    },
    "zone": "jambes",
-   "epaisseur": 2.5
+   "epaisseur": 2.5,
+   "partie": "patte_AV_D"
   },
   "patte_AR_G": {
    "parent": "torse",
@@ -103,7 +107,8 @@
     ]
    },
    "zone": "jambes",
-   "epaisseur": 2.5
+   "epaisseur": 2.5,
+   "partie": "patte_AR_G"
   },
   "patte_AR_D": {
    "parent": "torse",
@@ -119,7 +124,8 @@
     ]
    },
    "zone": "jambes",
-   "epaisseur": 2.5
+   "epaisseur": 2.5,
+   "partie": "patte_AR_D"
   },
   "pied_AV_G": {
    "parent": "patte_AV_G",
@@ -130,7 +136,8 @@
    "ancrages": {},
    "zone": "pieds",
    "profondeur": 35,
-   "epaisseur": 2.5
+   "epaisseur": 2.5,
+   "partie": "patte_AV_G"
   },
   "pied_AV_D": {
    "parent": "patte_AV_D",
@@ -141,7 +148,8 @@
    "ancrages": {},
    "zone": "pieds",
    "profondeur": 35,
-   "epaisseur": 2.5
+   "epaisseur": 2.5,
+   "partie": "patte_AV_D"
   },
   "pied_AR_G": {
    "parent": "patte_AR_G",
@@ -152,7 +160,8 @@
    "ancrages": {},
    "zone": "pieds",
    "profondeur": 35,
-   "epaisseur": 2.5
+   "epaisseur": 2.5,
+   "partie": "patte_AR_G"
   },
   "pied_AR_D": {
    "parent": "patte_AR_D",
@@ -163,7 +172,8 @@
    "ancrages": {},
    "zone": "pieds",
    "profondeur": 35,
-   "epaisseur": 2.5
+   "epaisseur": 2.5,
+   "partie": "patte_AR_D"
   }
  },
  "ordre": [

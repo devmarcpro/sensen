@@ -1507,7 +1507,24 @@ func test_plan_corps() -> void:
 				hors_plan.append("%s:%s" % [cid2, slot2])
 	verifier(hors_plan.is_empty(), "aucune créature n'équipe un emplacement que son plan n'accorde pas (%s)" % str(hors_plan))
 
-	# 3. COUPER UN BRAS : la preuve que la liste n'est pas une liste.
+	# 3. LES ORGANES DE SENS SONT LE LECTEUR D'UN CHAMP (designer 2026-09-09 : « tout ce qui est nez yeux oreilles
+	#    etc font partie des organes »). Les trois champs qu'ils lisent existent depuis le même jour.
+	var par_sens := {}
+	for nom_p: String in (plans.humanoide.parties as Dictionary).keys():
+		var sn := str((plans.humanoide.parties[nom_p] as Dictionary).get("sens", ""))
+		if not sn.is_empty():
+			par_sens[sn] = true
+	verifier(par_sens.has("vue") and par_sens.has("ouie") and par_sens.has("odorat"), "l'humain a ses trois sens en organes : yeux, oreilles, nez")
+	verifier(plans.serpentin.parties.has("organe_de_jacobson") and not plans.serpentin.parties.has("oreille_D"), "le serpent sent par son organe de Jacobson et n'a AUCUNE oreille externe — le monde réel, encore")
+	verifier(plans.arachnide.parties.has("oeil_8") and plans.arachnide.parties.has("soies_sensorielles"), "l'araignée a huit yeux et perçoit par ses soies sensorielles")
+	var borgne := {"corps": {"silhouette": "humanoide", "perdues": ["oeil_D"]}}
+	verifier(Etres.sens_actif(borgne, "vue"), "un œil crevé ne rend pas aveugle : il en reste un")
+	var aveugle := {"corps": {"silhouette": "humanoide", "perdues": ["oeil_D", "oeil_G"]}}
+	verifier(not Etres.sens_actif(aveugle, "vue") and Etres.sens_actif(aveugle, "ouie"), "les deux crevés, la vue n'a plus de lecteur — mais il entend encore")
+	verifier(Etres.sens_actif({"corps": {"silhouette": "amorphe"}}, "vue"), "une gelée ne déclare aucun œil : elle perçoit comme avant, rien de ce qui marchait ne se met à échouer")
+	verifier(Etres.sens_actif({"corps": {"silhouette": "serpentin"}}, "ouie"), "et le serpent, qui ne déclare aucune oreille, n'est pas sourd pour autant — la règle ne punit pas une anatomie")
+
+	# 4. COUPER UN BRAS : la preuve que la liste n'est pas une liste.
 	var s := nouvelle_sim("gorge")
 	var j := joueur_de(s)
 	# La liste d'affichage en compte SEIZE depuis qu'elle range aussi les ailes et la queue ; un homme en reçoit
@@ -1533,7 +1550,26 @@ func test_plan_corps() -> void:
 	verifier(not j.equipement.has("main_principale") and arme_uid in j.sac and j.sac.size() > sac0, "l'arme est retombée dans le sac, pas détruite (%d → %d)" % [sac0, j.sac.size()])
 	verifier(Etres.partie_intacte(j, "bras_G") and not Etres.partie_intacte(j, "main_D"), "une main ne survit pas au bras : l'état se lit par la chaîne des parents")
 
-	# 4. LA SANTÉ PAR PARTIES. Chaque partie a SA réserve, et le compteur global décide seul de la mort.
+	# 5. LE PANTIN SAIT QUELLE PARTIE IL DESSINE — c'est ce qui lui permet de ne pas dessiner un bras perdu.
+	var manques := []
+	for rid: String in GameData.catalogues.rigs.keys():
+		var rg: Dictionary = GameData.catalogues.rigs[rid]
+		for sg: String in (rg.segments as Dictionary).keys():
+			var pc2 := str((rg.segments[sg] as Dictionary).get("partie", ""))
+			if pc2.is_empty():
+				manques.append("%s/%s" % [rid, sg])
+	verifier(manques.is_empty(), "chaque segment de chaque rig dit la partie du corps qu'il dessine (%s)" % str(manques))
+	var ecarts := []
+	for rid2: String in GameData.catalogues.rigs.keys():
+		if not plans.has(rid2):
+			continue   # le gabarit n'est le corps de personne
+		for sg2: String in (GameData.catalogues.rigs[rid2].segments as Dictionary).keys():
+			var pc3 := str((GameData.catalogues.rigs[rid2].segments[sg2] as Dictionary).get("partie", ""))
+			if not (plans[rid2].parties as Dictionary).has(pc3):
+				ecarts.append("%s/%s→%s" % [rid2, sg2, pc3])
+	verifier(ecarts.is_empty(), "et cette partie existe dans le plan de la même silhouette (%s)" % str(ecarts))
+
+	# 6. LA SANTÉ PAR PARTIES. Chaque partie a SA réserve, et le compteur global décide seul de la mort.
 	var j2 := joueur_de(nouvelle_sim("gorge"))
 	var max_torse := Etres.sante_partie_max(j2, "torse")
 	var max_coeur := Etres.sante_partie_max(j2, "coeur")

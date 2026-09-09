@@ -57,6 +57,41 @@ ORIENTATIONS = {
 }
 
 
+# QUELLE PARTIE DU CORPS CHAQUE SEGMENT DESSINE (2026-09-09) — le pont entre le rig (ce qu'on voit) et le plan de
+# corps (ce qui se perd). Un segment porte déjà sa ZONE de coup ; il lui manquait la PARTIE exacte, sans quoi le
+# dessin ne saurait pas lequel des deux bras a sauté. La correspondance ne se devine pas d'une règle : `bras_haut_G`
+# et `bras_bas_G` sont le MÊME bras, `pied_AV_G` appartient à la patte avant gauche, et les huit pattes de l'araignée
+# sont numérotées ici dans un ordre qui n'est pas celui du plan. Elle s'écrit donc, une fois.
+PARTIES = {
+    "humanoide": {
+        "bassin": "torse", "torse": "torse", "tete": "tete",
+        "bras_haut_G": "bras_G", "bras_bas_G": "bras_G", "main_G": "main_G",
+        "bras_haut_D": "bras_D", "bras_bas_D": "bras_D", "main_D": "main_D",
+        "jambe_haut_G": "jambe_G", "jambe_bas_G": "jambe_G", "pied_G": "pied_G",
+        "jambe_haut_D": "jambe_D", "jambe_bas_D": "jambe_D", "pied_D": "pied_D",
+    },
+    "quadrupede": {
+        "torse": "torse", "tete": "tete",
+        "patte_AV_G": "patte_AV_G", "pied_AV_G": "patte_AV_G",
+        "patte_AV_D": "patte_AV_D", "pied_AV_D": "patte_AV_D",
+        "patte_AR_G": "patte_AR_G", "pied_AR_G": "patte_AR_G",
+        "patte_AR_D": "patte_AR_D", "pied_AR_D": "patte_AR_D",
+    },
+    "volant": {"torse": "torse", "tete": "tete", "aile_G": "aile_G", "aile_D": "aile_D"},
+    # Le serpent : les trois anneaux sont sa QUEUE, le tronc est son corps.
+    "serpentin": {"torse": "corps", "tete": "tete", "c1": "queue", "c2": "queue", "c3": "queue"},
+    # L'araignée : le tronc dessiné est le céphalothorax, et les huit pattes suivent l'ordre du plan.
+    "arachnide": {
+        "torse": "cephalothorax", "tete": "chelizeres",
+        "patte_1G": "patte_1", "patte_2G": "patte_2", "patte_3G": "patte_3", "patte_4G": "patte_4",
+        "patte_1D": "patte_5", "patte_2D": "patte_6", "patte_3D": "patte_7", "patte_4D": "patte_8",
+    },
+    "amorphe": {"torse": "masse"},
+    # Le gabarit n'est le corps de personne : ses deux segments montrent la forme d'une fiche, pas un être.
+    "_template": {"torse": "torse", "tete": "tete"},
+}
+
+
 def seg(parent, ancrage, longueur, largeur, angle=90, ancrages=None, zone=None, profondeur=0.0, epaisseur=None):
     # `epaisseur` : la mesure DE L'AVANT À L'ARRIÈRE. Un segment est un cylindre à section elliptique, pas un
     # ruban — un torse vu de profil fait son épaisseur, pas une fraction arbitraire de sa largeur. Omise, elle
@@ -72,6 +107,13 @@ def seg(parent, ancrage, longueur, largeur, angle=90, ancrages=None, zone=None, 
 
 def ecrire(nom, d):
     d["orientations"] = ORIENTATIONS
+    # Chaque segment dit la PARTIE du corps qu'il dessine : c'est ce qui permet au pantin de ne pas dessiner un bras
+    # qu'on a perdu, et de rougir une partie entamée. Un segment sans correspondance est une erreur, pas un oubli.
+    table = PARTIES.get(nom, {})
+    manquants = [k for k in d["segments"].keys() if k not in table]
+    assert not manquants, "%s : segments sans partie de corps — %s" % (nom, manquants)
+    for cle, seg_d in d["segments"].items():
+        seg_d["partie"] = table[cle]
     p = os.path.join(ROOT, nom + ".json")
     with io.open(p, "w", encoding="utf-8", newline="\n") as f:
         json.dump(d, f, ensure_ascii=False, indent=1)

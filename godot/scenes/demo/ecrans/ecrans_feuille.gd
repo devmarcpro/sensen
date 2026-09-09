@@ -6,6 +6,100 @@ extends RefCounted
 ## `ecrans.gd` par `tools/fragmenter.py --cible ecrans`, sans changement de comportement.
 
 
+## L'ÉCRAN D'ANATOMIE (designer 2026-09-09 : « rajoute un menu pour voir les membres et les organes en détail »,
+## puis « je veux une vue du pantin avec zoom sur les membres et organes avec toutes les infos à droite »).
+## Trois colonnes, et chacune fait une seule chose : **le corps à gauche** (`AnatomieVisuelle`, le vrai paperdoll
+## cadré sur la partie choisie), **la liste au milieu** pour naviguer, **tout le détail à droite**.
+## Il ne calcule rien : il LIT le plan de corps et l'état des parties, exactement comme le combat les lit.
+## **L'ordre est celui de l'arbre**, membres d'abord puis organes logés dedans — on ne cherche pas un foie dans une
+## liste alphabétique, on le cherche dans le torse.
+static func _construire_anatomie(ec: Ecrans, j: Dictionary) -> void:
+	ec.titre.text = ec.tr("ui.ecran.anatomie").format({"nom": ec.tr(j.name_key)})
+	var plan: Dictionary = Etres.plan_corps(j)
+	if plan.is_empty():
+		ec.liste.add_item(ec.tr("ui.anatomie.sans_plan"))
+		ec.entrees.append({"kind": "texte", "texte": ""})
+		return
+	var parties: Dictionary = plan.parties
+	var externes: Array[String] = []
+	var file: Array[String] = [str(plan.racine)]
+	while not file.is_empty():
+		var nom: String = file.pop_front()
+		if nom in externes:
+			continue
+		externes.append(nom)
+		for autre: String in parties.keys():
+			if str((parties[autre] as Dictionary).get("parent", "")) == nom and not (autre in externes):
+				file.append(autre)
+	for nom2: String in parties.keys():
+		if not bool((parties[nom2] as Dictionary).get("interne", false)) and not (nom2 in externes):
+			externes.append(nom2)
+	for membre in externes:
+		_ligne_partie(ec, j, membre, false)
+		for organe: String in parties.keys():
+			if bool((parties[organe] as Dictionary).get("interne", false)) and str((parties[organe] as Dictionary).get("contenant", "")) == membre:
+				_ligne_partie(ec, j, organe, true)
+
+
+## Une ligne de la colonne du milieu : le nom, ce qu'il reste, et rien de plus — le détail est à droite. Un organe
+## est décalé sous le membre qui le loge : c'est la seule chose que l'indentation dit, et elle suffit à lire un corps.
+static func _ligne_partie(ec: Ecrans, j: Dictionary, nom: String, interne: bool) -> void:
+	var intacte := Etres.partie_intacte(j, nom)
+	var cle := "ui.anatomie.perdue" if not intacte else ("ui.anatomie.organe" if interne else "ui.anatomie.membre")
+	ec.liste.add_item(ec.tr(cle).format({
+		"nom": ec.tr("partie." + nom), "pv": Etres.sante_partie(j, nom), "pv_max": Etres.sante_partie_max(j, nom)}))
+	ec.entrees.append({"kind": "partie", "id": nom, "texte": ""})
+
+
+## TOUT CE QU'ON SAIT D'UNE PARTIE, pour la colonne de droite. Rien n'est calculé ici non plus : la réserve, la zone
+## de coup, le poids qu'elle pèse dans cette zone, ce qu'elle accorde comme emplacement, le sens qu'elle porte et ce
+## qu'elle loge sont tous dans le plan. L'écran ne fait que les mettre en français.
+static func texte_partie(ec: Ecrans, nom: String) -> String:
+	var j: Dictionary = ec.main.joueur()
+	var plan: Dictionary = Etres.plan_corps(j)
+	var p: Dictionary = plan.get("parties", {}).get(nom, {})
+	if p.is_empty():
+		return ""
+	var l: Array[String] = ["[b]" + ec.tr("partie." + nom) + "[/b]"]
+	var intacte := Etres.partie_intacte(j, nom)
+	if not intacte:
+		l.append(ec.tr("ui.anatomie.d_perdue"))
+	else:
+		l.append(ec.tr("ui.anatomie.d_reserve").format({"pv": Etres.sante_partie(j, nom), "pv_max": Etres.sante_partie_max(j, nom)}))
+	l.append(ec.tr("ui.anatomie.d_nature").format({
+		"nature": ec.tr("ui.anatomie.d_organe" if bool(p.get("interne", false)) else "ui.anatomie.d_membre"),
+		"vital": ec.tr("ui.anatomie.d_vital") if bool(p.get("vital", false)) else ""}))
+	l.append(ec.tr("ui.anatomie.d_zone").format({"zone": ec.tr("zone." + str(p.get("zone", "torse"))), "poids": "%.2f" % float(p.get("poids_coup", 1.0))}))
+	var attache := str(p.get("contenant", p.get("parent", "")))
+	if not attache.is_empty():
+		l.append(ec.tr("ui.anatomie.d_attache").format({"nom": ec.tr("partie." + attache)}))
+	if not str(p.get("sens", "")).is_empty():
+		l.append(ec.tr("ui.anatomie.d_sens").format({
+			"sens": ec.tr("sens." + str(p.sens)),
+			"etat": ec.tr("ui.anatomie.sens_ok" if Etres.sens_actif(j, str(p.sens)) else "ui.anatomie.sens_perdu")}))
+	var emplacements := Etres.emplacements(j)
+	var siens: Array[String] = []
+	for slot in p.get("emplacements", []):
+		if str(slot) in emplacements:
+			siens.append(ec.tr("slot." + str(slot)))
+	if not siens.is_empty():
+		l.append(ec.tr("ui.anatomie.d_emplacements").format({"liste": ", ".join(siens)}))
+	# Ce qu'elle porte et ce qu'elle loge : c'est là qu'on comprend qu'une main tombe avec son bras.
+	var portees: Array[String] = []
+	var logees: Array[String] = []
+	for autre: String in (plan.parties as Dictionary).keys():
+		var q: Dictionary = plan.parties[autre]
+		if str(q.get("parent", "")) == nom:
+			portees.append(ec.tr("partie." + autre))
+		if str(q.get("contenant", "")) == nom:
+			logees.append(ec.tr("partie." + autre))
+	if not portees.is_empty():
+		l.append(ec.tr("ui.anatomie.d_porte").format({"liste": ", ".join(portees)}))
+	if not logees.is_empty():
+		l.append(ec.tr("ui.anatomie.d_loge").format({"liste": ", ".join(logees)}))
+	return "\n".join(l)
+
+
 static func _construire_feuille(ec: Ecrans, j: Dictionary) -> void:
 	ec.titre.text = ec.tr("ui.ecran.feuille").format({"nom": ec.tr(j.name_key)})
 	var sim = ec.main.sim

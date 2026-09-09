@@ -99,6 +99,48 @@ Comment le jeu se donne à voir : isométrique, tuiles teintées, billboards pap
 > **Le prix, et il est faible** : un triangle par arête qui change de matière (aucun sur une grande plage uniforme), et **une seule commande** pour tout le morceau, parce que le style d'une matière voyage dans les UV et non dans un uniforme. La fusion des morceaux de terrain n'est pas touchée — c'est une passe qui s'ajoute.
 > **Ce qui ne se fond pas** : les faces des blocs et des murs. Seul le sol le fait ; une frange sur une paroi demande de connaître le voisin par la face, ce qui n'est pas la même géométrie.
 
+> [!important] Demandé par le designer le 2026-09-09 : **« j'ai besoin d'un plan pour les pantins. max 64×64 pixels par sprites, quelles seraient les proportions idéales de chaque membre »**
+> **Les proportions ne sont pas à choisir : le rig les fixe déjà**, et le pantin projette chaque planche dans une case carrée. Les dessiner autrement, c'est les voir se déformer à l'écran. Ce qui suit est la traduction en pixels de `data/rigs/humanoide.json`, mesurée, pas estimée.
+>
+> **LA CONVENTION, EN TROIS RÈGLES**
+> 1. **Une case = un segment.** Son côté vaut `max(longueur, largeur)` du segment. Le membre y est **centré**, l'**articulation en bas de la case**, le **bout en haut**.
+> 2. **Le côté gauche est le miroir du droit** : on ne dessine qu'un bras, qu'une jambe, qu'un pied, qu'une main.
+> 3. **On dessine en blanc/gris** : le jeu teinte la case avec la peau, ou avec la matière qui couvre le membre.
+>
+> **LES PROPORTIONS, DANS UNE CASE DE 64 × 64**
+>
+> | planche | le membre occupe | marge |
+> |---|---|---|
+> | `torse` | 64 × 64 | pleine case |
+> | `bassin` | 64 × **40** | 12 px en haut et en bas |
+> | `bras_haut` | **24** × 64 | 20 px de chaque côté |
+> | `bras_bas` | **27** × 64 | 18 px |
+> | `jambe_haut` | **37** × 64 | 13 px |
+> | `jambe_bas` | **37** × 64 | 13 px |
+> | `pied` | **48** × 64 | 8 px |
+> | `main` | 64 × 64 | pleine case |
+>
+> Le **visage** suit une autre convention (`planches.visage_boite` = 2,6 rayons de tête) : le **disque du crâne occupe 49 px des 64**, centré, 7,5 px de marge tout autour. C'est la case que partagent la tête, les yeux, le nez, la bouche, les oreilles, les cheveux et la pilosité — un trait s'y dessine à sa place sur le visage entier, jamais recadré sur lui-même.
+>
+> **LE PIÈGE, ET C'EST LE VRAI SUJET.** Chaque case est normalisée sur **son propre** segment : une main de 64 × 64 représente 3 unités de corps, un bras de 64 × 64 en représente 8. La densité de pixels n'est donc pas la même d'une planche à l'autre, et dessiner tout au pixel donnerait une main trois fois plus fine que le torse.
+>
+> | pour un pixel d'apparence homogène | bloc à utiliser |
+> |---|---|
+> | visage | 1 px (référence) |
+> | `torse` | 1,2 px |
+> | `bassin`, `bras_haut` | 1,3 px |
+> | `bras_bas`, `jambe_haut` | 1,5 px |
+> | `jambe_bas` | 1,7 px |
+> | `pied` | **2,6 px** |
+> | `main` | **3,5 px** |
+>
+> **CE QUE 64 DONNE VRAIMENT.** Le corps entier fait **35 unités** : **70 px à l'écran au zoom par défaut** (2,0) et **420 px au zoom maximum** (12,0).
+> **64 px est exact jusqu'à un zoom de ≈ 6,2.** Au-delà, les grandes pièces sont étirées — au zoom 12, le visage demanderait 125 px et le torse 108 ; les petites sont largement suffisantes, la main n'ayant besoin que de 36.
+> **L'arbitrage revient au designer, et il n'est pas pris** : ou bien on baisse le plafond de zoom à ≈ 6 pour rester net partout, ou bien on accepte que le torse et le visage s'adoucissent dans les deux derniers crans. *Le commentaire de `styles.vue.zoom` dit que le plafond de 12 sert justement « à regarder un sprite de 64 × 64 de près » — la mesure montre que c'est vrai des petites pièces et faux des grandes.*
+>
+> **Où les poser** : `assets/membres/<segment sans côté>/` pour les membres, `assets/visage/<trait>/` pour les traits. Un dossier est une planche ; ses PNG se lisent dans l'ordre de leurs noms, numérotés, et **l'index d'une variante ne bouge pas quand on en ajoute** — on ajoute donc toujours EN FIN, jamais au milieu (pour un trait du visage, cet index est celui de la valeur dans `apparence.json`, et l'insérer au milieu changerait le visage de tous les personnages sauvegardés).
+
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Piliers d'inspiration]]
 - **Alimente** : [[Squelette modulaire et points d'attache]], [[Écrans d'interface]], [[Palette de couleurs des matériaux]]

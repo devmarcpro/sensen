@@ -129,8 +129,11 @@ static func _construire_creation(ec: Ecrans) -> void:
 	if volet == "apparence":
 		for ligne in _lignes_apparence(ec, not app.is_empty()):
 			if bool(ligne.get("couleur", false)):   # une couleur : la ligne s'écrit DANS sa couleur, et Entrée ouvre la roue
+				# ET ELLE LE DIT (2026-09-09). La roue existe depuis le 2026-09-08, mais la ligne s'écrivait comme
+				# toutes les autres — « (← →) » — et rien n'annonçait qu'Entrée l'ouvre. Une fonctionnalité qu'on ne
+				# sait pas atteindre n'existe pas pour celui qui joue.
 				var col_l := _couleur_courante(str(ligne.id), app)
-				ec.liste.add_item(ec.tr("ui.creation.app_l").format({
+				ec.liste.add_item(ec.tr("ui.creation.app_couleur_l").format({
 					"locus": ec.tr("ui.apparence." + str(ligne.id)),
 					"valeur": "#" + col_l.to_html(false),
 				}))
@@ -597,7 +600,7 @@ static func _construire_menu(ec: Ecrans, _j: Dictionary) -> void:
 	# « aide », « options » et « quitter » ajoutés le 2026-09-08 (Ordre de travail, palier 3) : le menu n'offrait aucun
 	# moyen de voir les contrôles, de régler quoi que ce soit ni de quitter proprement — et le README annonçait déjà une
 	# entrée de débogage qui n'existait pas.
-	var ids: Array = ["inventaire", "atelier", "feuille", "capacites", "carte", "gestion", "perimetre", "registre", "aide", "options", "sauvegarder", "volet", "minimap_zoom", "minimap_masquer", "titre", "quitter", "arene", "banc_objets", "recharger", "fermer"]
+	var ids: Array = ["inventaire", "atelier", "feuille", "anatomie", "capacites", "carte", "gestion", "perimetre", "registre", "aide", "options", "sauvegarder", "volet", "minimap_zoom", "minimap_masquer", "titre", "quitter", "arene", "banc_objets", "recharger", "fermer"]
 	for id in ids:
 		if id in ["carte", "gestion", "perimetre"] and ec.main.sim.lieu != "camp":
 			continue

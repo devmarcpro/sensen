@@ -32,6 +32,7 @@ var _carrure := 1.0
 var _pose_courante: Dictionary = {}   # la pose du joueur pour l'action en cours (point 63)
 var _pose_marche: Dictionary = {}     # l'oscillation du pas (designer 2026-09-08) : recalculée quand `avancement` bouge
 var avancement := -1.0                # 0 → 1 pendant un pas, −1 à l'arrêt ; le client la règle à chaque image
+var _monde_dernier: Dictionary = {}   # les segments tels qu'ils viennent d'être posés, pour qui veut les situer
 var _lacet := 0.0                     # le lacet du corps, en radians (la profondeur, designer 2026-09-08)
 var _prof_ecran := Vector2(0.0, -0.5) # ce qu'une unité de profondeur (vers le FOND) fait à l'écran
 var _largeur_min := 0.12              # le plancher absolu : un segment ne devient jamais un trait, même vu de bout
@@ -39,6 +40,11 @@ var _epaisseur_defaut := 0.7          # l'épaisseur d'un segment qui ne la déc
 var _monde_dessine: Dictionary = {}   # dernier placement des segments — l'écran de pose y clique (point 68)
 var _echelle_dessin := 1.0
 var _peint: Dictionary = {}
+
+
+## Les réglages de dessin (styles.json → sprites), lus une fois par image.
+func _st_sprites() -> Dictionary:
+	return GameData.config("styles").get("sprites", {})
 
 
 func configurer(p_e: Dictionary, p_rig: Dictionary, p_items: Dictionary, p_fonct: Dictionary, p_palette: Dictionary) -> void:
@@ -154,6 +160,7 @@ func _dessiner_etre() -> void:
 		draw_set_transform(_decalage, 0.0, Vector2(ech, ech))   # le tremblement d'un coup reçu décale tout le dessin
 	var t_pp := Time.get_ticks_usec()
 	var monde := _poser_segments()
+	_monde_dernier = monde   # ce que l'écran d'anatomie interroge : OÙ chaque segment a réellement été posé
 	t_pp = _top_pp("pd.segments", t_pp)
 	_monde_dessine = monde
 	_echelle_dessin = ech
@@ -163,6 +170,13 @@ func _dessiner_etre() -> void:
 	var teinte := Color(e.teinte[0], e.teinte[1], e.teinte[2])
 	if not _ap.is_empty():   # nu : la peau peint le corps entier, l'équipement seul le recouvre (point 43)
 		teinte = _teinte_de("teintes_peau", str(_ap.get("teinte_peau", "")), teinte)
+	# LE PANTIN MONTRE LES BLESSURES (2026-09-09). Chaque segment dit désormais QUELLE PARTIE il dessine ; on ne
+	# dessine donc pas un bras qu'on a perdu, et une partie entamée rougit à proportion de ce qui lui reste.
+	# **La garde est explicite** : sans plan de corps — le pantin de la création, un être d'une vieille sauvegarde —
+	# rien ne change. Une partie que le plan ne déclare pas se dessine comme avant. *Ce qui ne sait pas ne cache pas.*
+	var plan_c: Dictionary = Etres.plan_corps(e)
+	var coul_bl := Color.html(str(_st_sprites().get("blessure_couleur", "#8e2020")))
+	var force_bl := float(_st_sprites().get("blessure_force", 0.65))
 	for nom: String in _ordre_profondeur(monde):
 		if not monde.has(nom):
 			continue
@@ -172,6 +186,16 @@ func _dessiner_etre() -> void:
 		if peint.has(nom):
 			col = peint[nom].couleur
 			contour = float(CONTOURS.get(peint[nom].construction, 1.0))
+		if not plan_c.is_empty():
+			var pc := str((rig.segments.get(nom, {}) as Dictionary).get("partie", ""))
+			if not pc.is_empty() and (plan_c.parties as Dictionary).has(pc):
+				if not Etres.partie_intacte(e, pc):
+					continue   # ce membre n'est plus là : il ne se dessine pas
+				var pmax := Etres.sante_partie_max(e, pc)
+				if pmax > 0:
+					var reste := clampf(float(Etres.sante_partie(e, pc)) / float(pmax), 0.0, 1.0)
+					if reste < 1.0:
+						col = col.lerp(coul_bl, (1.0 - reste) * force_bl)
 		_dessine_segment(m, col, contour, nom)
 		t_pp = _top_pp("pd.seg." + nom, t_pp)
 	_dessine_tenus(monde)
@@ -195,6 +219,17 @@ func _assurer_occulteurs() -> void:
 		if dessine_apres.is_valid():
 			dessine_apres.call(self))
 	add_child(occulteurs)
+
+
+## OÙ UN SEGMENT A ÉTÉ POSÉ, dans les coordonnées du pantin — la position de son origine et celle de son bout.
+## L'écran d'anatomie s'en sert pour cadrer : demander au dessin où il a mis un bras vaut mieux que le deviner d'une
+## table de proportions écrite à côté, qui vieillirait au premier rig retouché.
+func position_segment(nom: String) -> Vector2:
+	if not _monde_dernier.has(nom):
+		return Vector2.ZERO
+	var m: Dictionary = _monde_dernier[nom]
+	var o: Vector2 = m.origine
+	return o + m.direction * float(m.longueur) * 0.5
 
 
 ## Le pictogramme d'un être lointain (Budgets de performance, 2026-09-06) : un corps et une tête à la couleur de
@@ -470,7 +505,7 @@ func _dessine_segment(m: Dictionary, col: Color, contour: float, nom: String) ->
 		var r := l * 0.5 * float(fact.get(str(_ap.get("tete", "ronde")), 1.0)) * float(_ap.get("curseurs", {}).get("largeur_visage", 1.0))
 		var c := o + d * l * 0.5
 		var peau := col if _ap.is_empty() else _teinte_de("teintes_peau", str(_ap.get("teinte_peau", "")), col)
-		if not _planche_visage("tete", c, r, d, p, peau, str(_ap.get("tete", "ronde"))):   # la forme de la tête par planche, sinon le disque
+		if not _planche_visage("tete", c, r, d, p, _teinte_partie("tete", peau), str(_ap.get("tete", "ronde"))):   # la forme de la tête par planche, sinon le disque
 			draw_circle(c, r, peau)
 			if contour > 0.0:
 				draw_arc(c, r, 0.0, TAU, 16, peau.darkened(0.45), contour)
@@ -632,6 +667,16 @@ func _teinte_de(palette_id: String, id: String, repli: Color) -> Color:
 	return repli
 
 
+## LA COULEUR PROPRE D'UNE PARTIE (designer 2026-09-09 : « sépare couleurs pour chaque parties »). Chaque trait peut
+## porter la sienne, écrite en clair sous `couleur_<trait>` ; à défaut, il garde la teinte dont il héritait — la peau
+## pour la tête et les oreilles, l'encre pour les yeux, le nez et la bouche, les cheveux pour la coiffe.
+## **C'est une SURCHARGE, pas un remplacement** : un personnage qui n'en déclare aucune se dessine exactement comme
+## avant, et les trois teintes de base (peau, cheveux, pilosité) restent ce qui habille tout le reste.
+func _teinte_partie(trait_id: String, defaut: Color) -> Color:
+	var v := str(_ap.get("couleur_" + trait_id, ""))
+	return Color.html(v) if v.begins_with("#") else defaut
+
+
 ## Le visage dessiné sur le disque du crâne : yeux, nez, bouche, cheveux, oreilles, barbe.
 ## Tout vient des loci de l'être (Apparence — données et équipement) — jamais de sa race.
 func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) -> void:
@@ -641,7 +686,7 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 	var encre := _teinte_de("teintes_peau", str(_ap.get("teinte_encre", "")), peau.darkened(0.55))
 	var o_brut: Variant = _ap.get("oreilles", 0.0)   # une valeur de locus, ou l'ancienne longueur chiffrée
 	var oreille := float(GameData.config("apparence").get("facteurs", {}).get("oreilles", {}).get(str(o_brut), 0.0)) if o_brut is String else float(o_brut)
-	var pv := func(trait_id: String, teinte_t: Color) -> bool: return _planche_visage(trait_id, c, r, d, p, teinte_t, str(_ap.get(trait_id, "")))
+	var pv := func(trait_id: String, teinte_t: Color) -> bool: return _planche_visage(trait_id, c, r, d, p, _teinte_partie(trait_id, teinte_t), str(_ap.get(trait_id, "")))
 	if pv.call("oreilles", peau):
 		pass
 	elif oreille > 0.0 and _vue_tete != "dos":   # les oreilles pointent vers le haut et vers l'extérieur

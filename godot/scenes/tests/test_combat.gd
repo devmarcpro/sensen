@@ -180,6 +180,7 @@ func _ready() -> void:
 	_lancer("test_champ_de_danger")
 	_lancer("test_fusion")
 	_lancer("test_sonore")
+	_lancer("test_odeur")
 	_lancer("test_support")
 	_lancer("test_support_etages")
 	_lancer("test_lave")

@@ -655,6 +655,79 @@ func test_affixes_reveilles() -> void:
 	s.monde.fermer()
 
 
+## LE CHAMP D'ODEUR (l'autre moitié de « le bruit et l'odeur », que le designer met en tête de ses six).
+## **Il est l'exact contraire du champ sonore** : le son dit où quelqu'un EST, l'odeur dit où quelqu'un est PASSÉ.
+## **Ce test doit prouver le point de conception qui fait tout marcher** : une piste laissée au fil du temps décroît
+## vers l'ancien, donc remonter la pente mène au dépôt le plus FRAIS — le pistage sans horodatage.
+func test_odeur() -> void:
+	var cfg: Dictionary = GameData.config("odeur")
+	verifier(not cfg.is_empty() and float(cfg.trace_par_pas) > 0.0, "les réglages de l'odeur sont en données (trace %.0f, fondu %.2f)" % [float(cfg.trace_par_pas), float(cfg.fondu)])
+	verifier(float(cfg.fondu) < float(GameData.config("sonore").fondu), "et une odeur s'efface BIEN moins vite qu'un bruit (%.2f contre %.2f) — l'une traîne, l'autre passe" % [float(cfg.fondu), float(GameData.config("sonore").fondu)])
+	var s := Simulation.new(611)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var g := s.grille
+	var c: Vector2i = Grille.plat(j.pos) + Vector2i(0, 20)
+
+	# UNE PISTE : cinq dépôts successifs, un pas de champ entre chacun. Le plus ancien s'est effacé le plus.
+	var chemin: Array[Vector2i] = []
+	for k in 5:
+		var t: Vector2i = c + Vector2i(k, 0)
+		if not g.dans(t):
+			continue
+		chemin.append(t)
+		SimTerrain.sentir(s, t, float(cfg.trace_par_pas))
+		s.odeur_prochain_pas = 0
+		s._tiquer_odeur(100 + k * 10)
+	verifier(chemin.size() == 5, "cinq pas déposés")
+	var croissante := true
+	for k2 in range(1, chemin.size()):
+		if s.odeur_a(chemin[k2]) <= s.odeur_a(chemin[k2 - 1]):
+			croissante = false
+	verifier(croissante, "LA PISTE DÉCROÎT VERS L'ANCIEN : %.1f → %.1f du premier pas au dernier — aucun horodatage n'a été nécessaire" % [s.odeur_a(chemin[0]), s.odeur_a(chemin[4])])
+
+	# REMONTER LA PENTE MÈNE AU PLUS FRAIS, c'est-à-dire là où l'être vient d'aller. C'est tout le pistage.
+	var depuis: Vector2i = chemin[1]
+	var pas: Vector2i = SimTerrain.vers_l_odeur(s, depuis)
+	verifier(pas.x > -9000 and pas.x > depuis.x, "remonter la pente va vers le dépôt le plus frais (%s → %s)" % [str(depuis), str(pas)])
+
+	# UNE ODEUR TRAÎNE : après le même nombre de pas de champ qui efface complètement un bruit, elle est encore là.
+	var reste0 := s.odeur_a(chemin[4])
+	for k3 in 12:
+		s.odeur_prochain_pas = 0
+		s._tiquer_odeur(300 + k3 * 10)
+	verifier(s.odeur_a(chemin[4]) > 0.0, "douze pas plus tard, la piste est encore là (%.1f → %.1f) là où un bruit s'était éteint" % [reste0, s.odeur_a(chemin[4])])
+
+	# LA DISCRÉTION PÂLIT LA TRACE : se cacher n'est plus un facteur sur une portée, c'est une piste plus faible.
+	var s2 := Simulation.new(612)
+	s2.charger_camp()
+	var j2: Dictionary = s2.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var t_a: Vector2i = Grille.plat(j2.pos) + Vector2i(0, 24)
+	var t_b: Vector2i = Grille.plat(j2.pos) + Vector2i(4, 24)
+	var bruyant := {"competences_eff": {}}
+	var furtif := {"competences_eff": {"discretion": 8}}
+	SimTerrain.tracer(s2, bruyant, t_a)
+	SimTerrain.tracer(s2, furtif, t_b)
+	s2.odeur_prochain_pas = 0
+	s2._tiquer_odeur(100)
+	verifier(s2.odeur_a(t_a) > s2.odeur_a(t_b) and s2.odeur_a(t_b) > 0.0, "un rôdeur discret laisse une piste plus pâle (%.1f contre %.1f)" % [s2.odeur_a(t_b), s2.odeur_a(t_a)])
+
+	# QUI A UN NEZ EST EN DONNÉES, et une dépouille sent tant qu'elle est là.
+	var fl: Dictionary = cfg.get("flair", {})
+	verifier(not (fl.get("tags", []) as Array).is_empty(), "les tags qui ont un nez sont en données (%s)" % str(fl.tags))
+	var mort := s2.vivants().filter(func(e: Dictionary) -> bool: return e.controle != "joueur")
+	if not mort.is_empty():
+		var m: Dictionary = mort[0]
+		m.vivant = false
+		s2.odeur_prochain_pas = 0
+		s2._tiquer_odeur(200)
+		var o_mort := s2.odeur_a(m.pos)
+		for k4 in 10:
+			s2.odeur_prochain_pas = 0
+			s2._tiquer_odeur(300 + k4 * 10)
+		verifier(o_mort > 0.0 and s2.odeur_a(m.pos) > 0.0, "une dépouille sent, et elle sent ENCORE dix pas plus tard : son odeur est réémise, elle ne s'éteint pas d'un coup (%.1f puis %.1f)" % [o_mort, s2.odeur_a(m.pos)])
+
+
 ## LE CHAMP SONORE (ordre de travail 26, 2026-09-09 ; le designer l'a nommé `sonore` le même jour). Le son ne se
 ## propage pas en ligne droite comme la vue : il suit le plus court chemin SONORE, contourne, et se fait manger par
 ## l'`absorption` de ce qu'il traverse.

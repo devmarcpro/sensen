@@ -9,7 +9,7 @@ extends Node
 ## reste vraie après coup, au lieu d'être vérifiée une fois puis reperdue au premier ajout.
 
 const TAILLES := [Vector2i(900, 560), Vector2i(1000, 620), Vector2i(1280, 720), Vector2i(1600, 900)]
-const ECRANS := ["inventaire", "atelier", "feuille", "menu", "options", "capacites", "quetes", "gestion"]
+const ECRANS := ["inventaire", "atelier", "feuille", "anatomie", "menu", "options", "capacites", "quetes", "gestion"]
 const MARGE := 2.0   # l'arrondi de mise en page vaut bien deux pixels ; au-delà, c'est coupé
 
 var fautes: Array = []

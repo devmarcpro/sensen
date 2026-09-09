@@ -1,0 +1,23 @@
+{
+  "_doc": "LE CHAMP D ODEUR (Emergence — les champs partages ; l autre moitie du point 1 du designer, « le bruit et l odeur — le champ qui manque le plus », 2026-09-09). Ce qui se sent, par tuile, de 0 a 100.\nIL EST L EXACT CONTRAIRE DU CHAMP SONORE, ET C EST CE QUI LE REND UTILE. Le son est instantane et s efface vite : il dit OU QUELQU UN EST, maintenant. L odeur est lente et elle TRAINE : elle dit OU QUELQU UN EST PASSE, et depuis combien de temps. L un sert a surprendre, l autre a pister.\nLA PISTE N A BESOIN D AUCUN HORODATAGE, et c est le point de conception qui fait tout marcher : un etre depose `trace_par_pas` la ou il passe, et le champ s efface de `fondu` a chaque pas. Une piste laissee dans le temps DECROIT donc vers l ancien — le dernier pas est le plus fort. Remonter la pente mene au depot le plus FRAIS, c est-a-dire la ou l etre vient d aller. La meute suit la piste sans que rien ne memorise l heure.\n`diffusion` est FAIBLE a dessein : une piste est une ligne, pas un nuage. Ce qui s etale, ce sont les sources posees — une depouille sent autour d elle. `discretion_par_niveau` retranche a la trace qu on laisse : se cacher devient un lieu ET une trace, comme pour le son. `flair` : quels etres ont un nez, a partir de quelle intensite ils vont voir, et combien de temps ils suivent avant de se lasser.",
+  "periode_ticks": 500,
+  "trace_par_pas": 30.0,
+  "diffusion": 0.1,
+  "fondu": 0.03,
+  "seuil": 2.0,
+  "tuiles_max": 4096,
+  "sources": {
+    "depouille": 55.0,
+    "sang": 40.0,
+    "feu": 30.0
+  },
+  "discretion_par_niveau": 1.5,
+  "flair": {
+    "tags": [
+      "bete",
+      "meute"
+    ],
+    "seuil": 8.0,
+    "pause_ticks": 800
+  }
+}

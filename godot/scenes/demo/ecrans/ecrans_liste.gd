@@ -22,6 +22,8 @@ static func rafraichir(ec: Ecrans) -> void:
 			EcransAtelier._construire_atelier(ec, j)
 		"feuille":
 			EcransFeuille._construire_feuille(ec, j)
+		"anatomie":
+			EcransFeuille._construire_anatomie(ec, j)
 		"dialogue":
 			EcransDialogue._construire_dialogue(ec, j)
 		"quetes":
@@ -94,6 +96,15 @@ static func rafraichir(ec: Ecrans) -> void:
 		EcransCreation._portrait_partie(ec, str(ec.entrees[ec.selection].get("id", "")))   # `cadre_perso` reste visible : c'est le portrait de la partie
 	ec.apercu_monde.visible = ec.courant == "monde"
 	ec.inventaire_visuel.visible = ec.courant == "inventaire"
+	ec.anatomie_visuelle.visible = ec.courant == "anatomie"
+	if ec.courant == "anatomie":
+		ec.anatomie_visuelle.rafraichir()
+	# LE PANNEAU D'APPARENCE ne se montre qu'au volet qui le concerne : la création a quatre volets, et les trois
+	# autres n'ont rien à voir avec des vignettes de visage.
+	var volet_app: bool = ec.courant == "creation" and str(Ecrans.VOLETS[int(ec.main.creation.get("volet", 0)) % Ecrans.VOLETS.size()]) == "apparence"
+	ec.apparence_visuelle.visible = volet_app
+	if volet_app:
+		ec.apparence_visuelle.rafraichir()
 	ec.echange_visuel.visible = ec.courant in ["commerce", "echange", "coffre"]
 	ec.hotbar_ecran.visible = ec.courant == "inventaire" or ec.courant == "capacites"
 	ec.atelier_visuel.visible = ec.courant == "atelier"
@@ -598,9 +609,15 @@ static func _montrer_detail(ec: Ecrans) -> void:
 
 
 static func _detail_de(ec: Ecrans, en: Dictionary) -> void:
+	if ec.courant == "anatomie":   # la vue suit la ligne pointée : choisir un organe y amène le cadrage
+		ec.anatomie_visuelle.rafraichir()
+	if ec.apparence_visuelle.visible:   # la roue suit la catégorie pointée : c'est ce qui la rend utile
+		ec.apparence_visuelle._suivre_selection()
 	if ec.courant == "charger":   # le portrait suit la ligne pointée, flèches comme souris (designer 2026-09-02)
 		EcransCreation._portrait_partie(ec, str(en.get("id", "")))
 	match str(en.get("kind", "")):
+		"partie":
+			ec.detail.text = EcransFeuille.texte_partie(ec, str(en.id))
 		"action_objet":
 			ec.detail.text = EcransInventaire.texte_objet_et_actions(ec, str(en.uid))
 			var it_a: Dictionary = ec.main.sim.items.get(str(en.uid), {})
@@ -738,7 +755,11 @@ static func _action_defaut(ec: Ecrans, en: Dictionary) -> void:
 			ec.main._action_menu(str(en.id))
 			return
 		"creation":
-			EcransCreation._action_creation(ec, str(en.id), 0 if str(en.id) == "pose" else 1)
+			# LE DÉFAUT QUE LE DESIGNER A VU LE PREMIER (2026-09-09 : « non la roue ne s'ouvre pas en faisant
+			# entrée ») : ce dispatch passait 1 pour TOUT sauf « pose », alors que la branche de la roue exigeait 0.
+			# Elle était écrite, testée par personne, et injoignable. *Ce qui n'a pas de chemin n'existe pas.*
+			# La roue est désormais en bas à gauche et toujours ouverte ; Entrée sur une couleur y mène quand même.
+			EcransCreation._action_creation(ec, str(en.id), 0 if (str(en.id) == "pose" or str(en.id).begins_with("app:teinte")) else 1)
 			return
 		"aide":
 			return   # l'aide ne fait rien : elle se lit

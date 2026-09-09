@@ -1284,6 +1284,11 @@
       "_doc": "Talents de race : les meubles de donjon qui ouvrent une race cachée. etage_min = premier étage qui peut en porter, chance = probabilité par étage, un seul au plus.",
       "etage_min": 4,
       "chance": 0.35
+    },
+    "carapace": {
+      "_doc": "CARAPACE (talent de race insectoide, 2026-09-09) : une chitine qui protege partout, tout le temps, et qui pese. `armure` s ajoute a l armure de zone quelle que soit la piece portee — c est la difference avec une cuirasse, qui ne couvre que le torse. `vigueur_max` est ce qu elle coute : une carapace n est pas gratuite, et un insectoide s essouffle plus vite qu un homme.",
+      "armure": 3.0,
+      "vigueur_max": -15
     }
   },
   "bombes": {

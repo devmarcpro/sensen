@@ -59,7 +59,8 @@
    },
    "zone": "torse",
    "profondeur": 90,
-   "epaisseur": 7
+   "epaisseur": 7,
+   "partie": "cephalothorax"
   },
   "tete": {
    "parent": "torse",
@@ -70,7 +71,8 @@
    "ancrages": {},
    "zone": "tete",
    "profondeur": 70,
-   "epaisseur": 4
+   "epaisseur": 4,
+   "partie": "chelizeres"
   },
   "patte_1G": {
    "parent": "torse",
@@ -80,7 +82,8 @@
    "angle": 100,
    "ancrages": {},
    "zone": "jambes",
-   "epaisseur": 1.8
+   "epaisseur": 1.8,
+   "partie": "patte_1"
   },
   "patte_2G": {
    "parent": "torse",
@@ -90,7 +93,8 @@
    "angle": 120,
    "ancrages": {},
    "zone": "jambes",
-   "epaisseur": 1.8
+   "epaisseur": 1.8,
+   "partie": "patte_2"
   },
   "patte_3G": {
    "parent": "torse",
@@ -100,7 +104,8 @@
    "angle": 140,
    "ancrages": {},
    "zone": "jambes",
-   "epaisseur": 1.8
+   "epaisseur": 1.8,
+   "partie": "patte_3"
   },
   "patte_4G": {
    "parent": "torse",
@@ -110,7 +115,8 @@
    "angle": 160,
    "ancrages": {},
    "zone": "jambes",
-   "epaisseur": 1.8
+   "epaisseur": 1.8,
+   "partie": "patte_4"
   },
   "patte_1D": {
    "parent": "torse",
@@ -120,7 +126,8 @@
    "angle": 80,
    "ancrages": {},
    "zone": "jambes",
-   "epaisseur": 1.8
+   "epaisseur": 1.8,
+   "partie": "patte_5"
   },
   "patte_2D": {
    "parent": "torse",
@@ -130,7 +137,8 @@
    "angle": 60,
    "ancrages": {},
    "zone": "jambes",
-   "epaisseur": 1.8
+   "epaisseur": 1.8,
+   "partie": "patte_6"
   },
   "patte_3D": {
    "parent": "torse",
@@ -140,7 +148,8 @@
    "angle": 40,
    "ancrages": {},
    "zone": "jambes",
-   "epaisseur": 1.8
+   "epaisseur": 1.8,
+   "partie": "patte_7"
   },
   "patte_4D": {
    "parent": "torse",
@@ -150,7 +159,8 @@
    "angle": 20,
    "ancrages": {},
    "zone": "jambes",
-   "epaisseur": 1.8
+   "epaisseur": 1.8,
+   "partie": "patte_8"
   }
  },
  "ordre": [

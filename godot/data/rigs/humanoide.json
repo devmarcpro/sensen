@@ -28,7 +28,8 @@
     ]
    },
    "zone": "torse",
-   "epaisseur": 6
+   "epaisseur": 6,
+   "partie": "torse"
   },
   "torse": {
    "parent": "bassin",
@@ -59,7 +60,8 @@
     ]
    },
    "zone": "torse",
-   "epaisseur": 6
+   "epaisseur": 6,
+   "partie": "torse"
   },
   "tete": {
    "parent": "torse",
@@ -69,7 +71,8 @@
    "angle": -90,
    "ancrages": {},
    "zone": "tete",
-   "epaisseur": 8
+   "epaisseur": 8,
+   "partie": "tete"
   },
   "bras_haut_G": {
    "parent": "torse",
@@ -85,7 +88,8 @@
     ]
    },
    "zone": "bras",
-   "profondeur": 8
+   "profondeur": 8,
+   "partie": "bras_G"
   },
   "bras_haut_D": {
    "parent": "torse",
@@ -101,7 +105,8 @@
     ]
    },
    "zone": "bras",
-   "profondeur": 8
+   "profondeur": 8,
+   "partie": "bras_D"
   },
   "bras_bas_G": {
    "parent": "bras_haut_G",
@@ -117,7 +122,8 @@
     ]
    },
    "zone": "bras",
-   "profondeur": 6
+   "profondeur": 6,
+   "partie": "bras_G"
   },
   "bras_bas_D": {
    "parent": "bras_haut_D",
@@ -133,7 +139,8 @@
     ]
    },
    "zone": "bras",
-   "profondeur": 6
+   "profondeur": 6,
+   "partie": "bras_D"
   },
   "main_G": {
    "parent": "bras_bas_G",
@@ -148,7 +155,8 @@
      0
     ]
    },
-   "zone": "bras"
+   "zone": "bras",
+   "partie": "main_G"
   },
   "main_D": {
    "parent": "bras_bas_D",
@@ -163,7 +171,8 @@
      0
     ]
    },
-   "zone": "bras"
+   "zone": "bras",
+   "partie": "main_D"
   },
   "jambe_haut_G": {
    "parent": "bassin",
@@ -178,7 +187,8 @@
      0
     ]
    },
-   "zone": "jambes"
+   "zone": "jambes",
+   "partie": "jambe_G"
   },
   "jambe_haut_D": {
    "parent": "bassin",
@@ -193,7 +203,8 @@
      0
     ]
    },
-   "zone": "jambes"
+   "zone": "jambes",
+   "partie": "jambe_D"
   },
   "jambe_bas_G": {
    "parent": "jambe_haut_G",
@@ -208,7 +219,8 @@
      -1
     ]
    },
-   "zone": "jambes"
+   "zone": "jambes",
+   "partie": "jambe_G"
   },
   "jambe_bas_D": {
    "parent": "jambe_haut_D",
@@ -223,7 +235,8 @@
      -1
     ]
    },
-   "zone": "jambes"
+   "zone": "jambes",
+   "partie": "jambe_D"
   },
   "pied_G": {
    "parent": "jambe_bas_G",
@@ -233,7 +246,8 @@
    "angle": 115,
    "ancrages": {},
    "zone": "pieds",
-   "profondeur": 40
+   "profondeur": 40,
+   "partie": "pied_G"
   },
   "pied_D": {
    "parent": "jambe_bas_D",
@@ -243,7 +257,8 @@
    "angle": 65,
    "ancrages": {},
    "zone": "pieds",
-   "profondeur": 40
+   "profondeur": 40,
+   "partie": "pied_D"
   }
  },
  "ordre": [

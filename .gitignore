@@ -22,3 +22,7 @@ captures_ecran/
 godot/addons/sensen_grille/bin/*.lib
 godot/addons/sensen_grille/bin/*.exp
 godot/addons/sensen_grille/bin/*.pdb
+# LA BOITE AUX LETTRES DU DESIGNER (2026-09-09) : il depose ses sprites a la racine et dans
+# « sprite work/ ». Ce sont ses fichiers de travail, pas ceux du jeu — ce qui entre dans le
+# depot, c est la copie rangee sous godot/assets/, avec son numero de variante.
+sprite work/

@@ -76,6 +76,13 @@ var sonore_grille: Grille = null
 var sonore_actif: Dictionary = {}
 var sonore_sources: Dictionary = {}
 var sonore_prochain_pas := 0
+## Le champ d'odeur (Émergence, 2026-09-09) : ce qui se sent, par tuile. Jamais sauvegardé. Contrairement au son, il
+## TRAÎNE — c'est ce qui permet de pister plutôt que de surprendre.
+var carte_odeur := PackedFloat32Array()
+var odeur_grille: Grille = null
+var odeur_actif: Dictionary = {}
+var odeur_sources: Dictionary = {}
+var odeur_prochain_pas := 0
 var feu_prochain_pas := 0
 var poches_gaz: Dictionary = {}   # idx → gaz : les poches scellées dans le plein de l'étage (Gaz dans le sol)
 var poches_sous_sol: Dictionary = {}   # idx → eau | geode | magma : les autres poches du plein (Gaz dans le sol, 18 h 40)
@@ -894,6 +901,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 		SimTerrain._tiquer_danger(self, tick)
 		SimTerrain._tiquer_support(self, tick)
 		SimTerrain._tiquer_sonore(self, tick)
+		SimTerrain._tiquer_odeur(self, tick)
 		var h_per := int(SimTerrain._cycle(self).get("ticks_par_jour", 24000)) / 24
 		if tick / h_per != peremption_heure:
 			peremption_heure = tick / h_per
@@ -1349,6 +1357,7 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 			EventBus.emettre(&"journal", [&"journal.monte_etage" if Grille.z_de(vers) > Grille.z_de(e.pos) else &"journal.descend_etage", {"nom": e.name_key, "etage": Grille.z_de(vers), "batiment": ""}])
 	e.pos = vers
 	grille.placer(e.id, vers)
+	SimTerrain.tracer(self, e, vers)   # on laisse une odeur là où l'on passe (Émergence — le champ d'odeur)
 	var ticks_dep := regles.ticks_deplacement(cout, e.competences_eff, en_combat(e))
 	if e.controle == "joueur":   # surcharge (Armures et poids porté) : sur les ticks d'Athlétisme, jamais sur une stat
 		ticks_dep = ceili(float(ticks_dep) * poids_de(e).facteur)
@@ -1938,6 +1947,8 @@ func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degat
 		* float(Etres.mult_statuts(cible, "armure", statuts_defs))   # Rupture : −50 % de réduction de zone
 	for ax in Etres.affixes_equipes(cible, items, affixes_defs, "meca_armure"):
 		armure += float(ax.params.n)
+	if SimTalents.a_talent(self, cible, "carapace"):   # Carapace (insectoïde) : une chitine qui protège PARTOUT —
+		armure += float(regles.r.get("talents", {}).get("carapace", {}).get("armure", 3.0))   # c'est ce qui la sépare d'une cuirasse, qui ne couvre que le torse
 	# La GARDE de l'arme tenue protege son porteur : une piece d'armure minuscule, toujours au bon
 	# endroit (designer 2026-09-03, option C — chaque troisieme piece a un effet mecanique propre).
 	for slot_g in ["main_principale", "main_secondaire"]:
@@ -4540,6 +4551,8 @@ func lumiere_a(pos: Vector2i) -> int:
 
 ## Une IA voit-elle un être ? (portée de Perception et ligne de vue ; la nuit, la lumière locale module — Éclairage)
 func voit_ia(e: Dictionary, autre: Dictionary) -> bool:
+	if not Etres.sens_actif(e, "vue"):
+		return false   # les yeux crevés : le champ de vue n'a plus de lecteur (Le corps est un plan de parties)
 	if Etres.a_statut_tag(autre, "dissimule", statuts_defs) and Grille.distance(e.pos, autre.pos) > int(regles.r.talents.dissimulation.vu_a):   # L'Ombre
 		return false
 	var portee := float(e.corps.stats.perception) * float(regles.r.engagement.detection_par_perception)
@@ -4717,8 +4730,27 @@ func _ia_errer(e: Dictionary, tick: int) -> void:
 	# quelque chose chez lui, il REMONTE LA PENTE du champ vers le plus fort. Il n'a pas besoin de savoir ce qu'il
 	# a entendu ni d'où ça vient — le champ le sait pour lui, et le son a contourné les murs tout seul.
 	# C'est ce que la note appelait « la meute qui suit une piste au lieu de voir à travers les murs ».
+	# LE FLAIR (Émergence — le champ d'odeur, 2026-09-09). Une bête qui n'a rien en vue et qui sent quelque chose
+	# REMONTE LA PISTE. Comme la piste décroît vers l'ancien, la pente mène au dépôt le plus frais : la meute suit
+	# la trace jusqu'à celui qui l'a laissée, sans que rien ne mémorise l'heure. C'est « la meute qui suit une piste
+	# au lieu de voir à travers les murs », et « le prédateur qu'attire une carcasse laissée là ».
+	var cfg_o: Dictionary = GameData.config("odeur")
+	if not cfg_o.is_empty() and int(e.get("sourd_jusqu_a", 0)) <= tick and Etres.sens_actif(e, "odorat"):
+		var fl: Dictionary = cfg_o.get("flair", {})
+		var a_du_nez := false
+		for tg in fl.get("tags", []):
+			if str(tg) in e.get("tags", []):
+				a_du_nez = true
+				break
+		if a_du_nez and odeur_a(e.pos) >= float(fl.get("seuil", 8.0)):
+			var piste: Vector2i = SimTerrain.vers_l_odeur(self, e.pos)
+			if piste.x > -9000:
+				e["sourd_jusqu_a"] = tick + int(fl.get("pause_ticks", 800))
+				EventBus.emettre(&"journal", [&"journal.flaire", {"nom": e.name_key}])
+				_ia_pas_vers(e, piste, tick, "")
+				return
 	var cfg_s: Dictionary = GameData.config("sonore")
-	if not cfg_s.is_empty() and int(e.get("sourd_jusqu_a", 0)) <= tick:
+	if not cfg_s.is_empty() and int(e.get("sourd_jusqu_a", 0)) <= tick and Etres.sens_actif(e, "ouie"):
 		var enq: Dictionary = cfg_s.get("enquete", {})
 		if sonore_a(e.pos) >= float(enq.get("seuil", 12.0)):
 			var vers: Vector2i = SimTerrain.vers_le_bruit(self, e.pos)
@@ -5154,6 +5186,14 @@ func _tiquer_sonore(tick: int) -> void:
 
 func sonore_a(t: Vector2i) -> float:
 	return SimTerrain.sonore_a(self, t)
+
+
+func _tiquer_odeur(tick: int) -> void:
+	SimTerrain._tiquer_odeur(self, tick)
+
+
+func odeur_a(t: Vector2i) -> float:
+	return SimTerrain.odeur_a(self, t)
 
 func chaleur_a(t: Vector2i) -> float:
 	return SimTerrain.chaleur_a(self, t)

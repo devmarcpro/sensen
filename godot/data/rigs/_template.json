@@ -28,7 +28,8 @@
      -1.5
     ]
    },
-   "zone": "torse"
+   "zone": "torse",
+   "partie": "torse"
   },
   "tete": {
    "parent": "torse",
@@ -37,7 +38,8 @@
    "largeur": 8,
    "angle": -90,
    "ancrages": {},
-   "zone": "tete"
+   "zone": "tete",
+   "partie": "tete"
   }
  },
  "ordre": [

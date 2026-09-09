@@ -419,6 +419,130 @@ static func _fusion_de(mats: Dictionary, id: String) -> float:
 	return float(mats.get(id, {}).get("stats", {}).get("fusion", 9999))
 
 
+## ---------------------------------------------------------------- le champ d'odeur (Émergence, 2026-09-09)
+
+## LE CHAMP D'ODEUR — l'autre moitié de « le bruit et l'odeur », le point que le designer met en tête de ses six.
+##
+## **IL EST L'EXACT CONTRAIRE DU CHAMP SONORE, ET C'EST CE QUI LE REND UTILE.** Le son est instantané et s'efface
+## vite : il dit **où quelqu'un est**, maintenant. L'odeur est lente et elle traîne : elle dit **où quelqu'un est
+## passé**, et depuis combien de temps. L'un sert à surprendre, l'autre à pister.
+##
+## **LA PISTE N'A BESOIN D'AUCUN HORODATAGE**, et c'est le point de conception qui fait tout marcher. Un être dépose
+## `trace_par_pas` là où il passe, et le champ s'efface de `fondu` à chaque pas. Une piste laissée au fil du temps
+## **décroît donc vers l'ancien** : le dernier pas est le plus fort. Remonter la pente mène au dépôt le plus FRAIS,
+## c'est-à-dire là où l'être vient d'aller. La meute suit la piste sans que rien ne mémorise l'heure.
+static func sentir(sim: Simulation, t: Vector2i, valeur: float) -> void:
+	if valeur <= 0.0 or not sim.grille.dans(t):
+		return
+	var i := sim.grille.idx(t)
+	sim.odeur_sources[i] = maxf(float(sim.odeur_sources.get(i, 0.0)), valeur)
+
+
+## La trace qu'un être laisse en passant, moins ce que sa Discrétion lui épargne. C'est ici que se cacher cesse
+## d'être un facteur sur une portée : un rôdeur discret laisse une piste plus pâle, et la meute la perd plus tôt.
+static func tracer(sim: Simulation, e: Dictionary, t: Vector2i) -> void:
+	var cfg: Dictionary = GameData.config("odeur")
+	if cfg.is_empty():
+		return
+	var v := float(cfg.get("trace_par_pas", 30.0))
+	v -= float(sim.regles.niveau(e.get("competences_eff", {}), "discretion")) * float(cfg.get("discretion_par_niveau", 0.0))
+	sentir(sim, t, v)
+
+
+static func odeur_a(sim: Simulation, t: Vector2i) -> float:
+	if sim.carte_odeur.is_empty() or not sim.grille.dans(t):
+		return 0.0
+	var i := sim.grille.idx(t)
+	if i < 0 or i >= sim.carte_odeur.size():
+		return 0.0
+	return float(sim.carte_odeur[i])
+
+
+static func _odeur_dimensionner(sim: Simulation) -> void:
+	var n := sim.grille.n_tuiles()
+	if sim.odeur_grille == sim.grille and sim.carte_odeur.size() == n:
+		return
+	sim.odeur_grille = sim.grille
+	sim.carte_odeur = PackedFloat32Array()
+	sim.carte_odeur.resize(n)
+	sim.odeur_actif.clear()
+
+
+## Le pas du champ : ce qui traîne s'efface un peu, s'étale un peu, et les dépôts nouveaux s'ajoutent. La diffusion
+## est FAIBLE à dessein — une piste est une ligne, pas un nuage ; ce qui s'étale, c'est une dépouille qui sent autour
+## d'elle. Les morts sentent tant qu'ils sont là : leur odeur est réémise, elle ne s'éteint pas d'un coup.
+static func _tiquer_odeur(sim: Simulation, tick: int) -> void:
+	var cfg: Dictionary = GameData.config("odeur")
+	if cfg.is_empty() or tick < sim.odeur_prochain_pas:
+		return
+	sim.odeur_prochain_pas = tick + maxi(1, int(cfg.get("periode_ticks", 500)))
+	var seuil := float(cfg.get("seuil", 2.0))
+	var v_dep := float(cfg.get("sources", {}).get("depouille", 0.0))
+	if v_dep > 0.0:
+		for id_m: String in sim.entites.keys():
+			var m: Dictionary = sim.entites[id_m]
+			if not m.get("vivant", true) and sim.grille.dans(m.get("pos", Vector2i(-9999, -9999))):
+				sentir(sim, m.pos, v_dep)
+	if sim.odeur_actif.is_empty() and sim.odeur_sources.is_empty():
+		return
+	_odeur_dimensionner(sim)
+	var fondu := clampf(float(cfg.get("fondu", 0.03)), 0.0, 1.0)
+	var diff := clampf(float(cfg.get("diffusion", 0.1)), 0.0, 1.0)
+	var plafond := int(cfg.get("tuiles_max", 4096))
+	# 1. Ce qui traîne s'efface, et s'étale un peu vers les quatre voisines libres.
+	var cles: Array = sim.odeur_actif.keys()
+	cles.sort()   # un ordre FIXE : deux exécutions doivent rendre la même piste
+	var ajouts := {}
+	for idx in cles:
+		var i := int(idx)
+		var v := float(sim.carte_odeur[i]) * (1.0 - fondu)
+		sim.carte_odeur[i] = v
+		if v < seuil:
+			sim.carte_odeur[i] = 0.0
+			sim.odeur_actif.erase(i)
+			continue
+		if diff <= 0.0 or sim.odeur_actif.size() >= plafond:
+			continue
+		var t := sim.grille.pos_de(i)
+		for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var q: Vector2i = t + d
+			if sim.grille.dans(q) and not sim.grille.bloque_passage(q):
+				var iq := sim.grille.idx(q)
+				ajouts[iq] = maxf(float(ajouts.get(iq, 0.0)), v * diff)
+	for i2 in ajouts.keys():
+		var i3 := int(i2)
+		if float(sim.carte_odeur[i3]) < float(ajouts[i2]):
+			sim.carte_odeur[i3] = float(ajouts[i2])
+			if float(ajouts[i2]) >= seuil:
+				sim.odeur_actif[i3] = true
+	# 2. Les dépôts nouveaux — ils écrasent ce qui traînait, puisqu'ils sont plus frais.
+	for idx2 in sim.odeur_sources.keys():
+		var i4 := int(idx2)
+		if i4 < 0 or i4 >= sim.carte_odeur.size():
+			continue
+		var v4 := minf(100.0, maxf(float(sim.carte_odeur[i4]), float(sim.odeur_sources[idx2])))
+		sim.carte_odeur[i4] = v4
+		if v4 >= seuil:
+			sim.odeur_actif[i4] = true
+	sim.odeur_sources.clear()
+
+
+## La tuile voisine qui sent le plus fort — la pente du champ. Comme la piste décroît vers l'ancien, la remonter mène
+## au dépôt le plus frais : c'est le pistage, et il n'a coûté aucune mémoire.
+static func vers_l_odeur(sim: Simulation, t: Vector2i) -> Vector2i:
+	var mieux := odeur_a(sim, t)
+	var but := Vector2i(-9999, -9999)
+	for d in Grille.DIRS:
+		var q: Vector2i = t + d
+		if not sim.grille.dans(q) or sim.grille.bloque_passage(q):
+			continue
+		var v := odeur_a(sim, q)
+		if v > mieux:
+			mieux = v
+			but = q
+	return but
+
+
 ## ---------------------------------------------------------------- le champ sonore (Émergence, 2026-09-09)
 
 ## LE CHAMP SONORE — « celui qui manque le plus » selon le classement du designer. Le nom est le sien (2026-09-09) :

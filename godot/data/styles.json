@@ -311,7 +311,9 @@
     "largeur_min_profil": 0.12,
     "epaisseur_defaut": 0.7,
     "pile_hauteur": 22.0,
-    "pile_hauteur_meuble": 10.0
+    "pile_hauteur_meuble": 10.0,
+    "blessure_couleur": "#8e2020",
+    "blessure_force": 0.65
   },
   "coups": {
     "_doc": "Le retour d'un coup recu (designer 2026-09-05, 13 h : « quand quelqu'un recoit des degats, un tremblement du personnage et un leger clignotement rouge ») : secousse_px = amplitude du tremblement en pixels, secousse_s = sa duree, rouge = la teinte du clignotement, rouge_s = sa duree.",

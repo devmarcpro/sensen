@@ -265,6 +265,10 @@ classe.le_sabre.name,The Sabre
 classe.le_sceau.name,The Seal
 classe.le_souffle.name,The Breath
 classe.le_vent.name,The Wind
+race.insectoide.name,Insectoid
+ui.apparence.val.insectoide,insectoid
+ui.apparence.val.mandibules,mandibles
+ui.apparence.val.antennes,antennae
 race.elfe.name,Elf
 race.humain.name,Human
 race.lycanthrope.name,Lycanthrope
@@ -1308,6 +1312,8 @@ talent.breche.name,Breach
 talent.breche.desc,"Two paired portals, repositionable; max mana −30 %."
 talent.chaine_d_amorces.name,Chain of Primers
 talent.chaine_d_amorces.desc,"An explosion primes the bombs in its radius — yours too."
+talent.carapace.name,Carapace
+talent.carapace.desc,"Chitin that shields everywhere: +3 armour on every zone, but −15 max stamina."
 talent.chair_de_mana.name,Mana Flesh
 talent.chair_de_mana.desc,"Overheat costs vigor; mana ×1.2; max vigor −20."
 talent.communion_des_cinq.name,Communion of the Five
@@ -1803,12 +1809,7 @@ weather.orage.name,Thunderstorm
 weather.pluie.name,Rain
 weather.tempete.name,Storm
 weather.vent_fort.name,Strong wind
-zone.bras,arms
-zone.jambes,legs
 zone.mains,hands
-zone.pieds,feet
-zone.tete,head
-zone.torse,torso
 journal.accord,"{nom} accepts: {accord}"
 journal.accord_refuse,"{nom} refuses: {accord} (reputation too low or incompatible regime)"
 journal.achete,"{nom} buys {objet} for {n} gold"
@@ -1957,6 +1958,54 @@ journal.plancher_effondre,"the upper floor gives way ({x},{y})"
 journal.entend,"{nom} hears something and goes to look"
 slot.protege_ailes,Wing guards
 slot.protege_queue,Tail guard
+partie.conduit_auditif_D,Right ear canal
+partie.conduit_auditif_G,Left ear canal
+partie.narines,Nostrils
+partie.nez,Nose
+partie.oeil,Eye
+partie.oeil_1,Eye 1
+partie.oeil_2,Eye 2
+partie.oeil_3,Eye 3
+partie.oeil_4,Eye 4
+partie.oeil_5,Eye 5
+partie.oeil_6,Eye 6
+partie.oeil_7,Eye 7
+partie.oeil_8,Eye 8
+partie.oreille_D,Right ear
+partie.oreille_G,Left ear
+partie.organe_de_jacobson,Jacobson's organ
+partie.soies_sensorielles,Sensory setae
+partie.truffe,Muzzle
+ui.ecran.anatomie,{nom}'s anatomy
+ui.menu.anatomie,Anatomy
+ui.anatomie.vital,vital
+ui.anatomie.sens,"{sens}: {restants}/{total} — {etat}"
+ui.anatomie.sens_ok,intact
+ui.anatomie.sens_perdu,LOST
+ui.anatomie.sans_plan,This body has no known plan.
+sens.vue,Sight
+sens.ouie,Hearing
+sens.odorat,Smell
+ui.anatomie.membre,"{nom}  {pv}/{pv_max}"
+ui.anatomie.organe,"   · {nom}  {pv}/{pv_max}"
+ui.anatomie.perdue,"{nom}  —"
+ui.anatomie.d_perdue,Lost.
+ui.anatomie.d_reserve,"Reserve: {pv} / {pv_max}"
+ui.anatomie.d_nature,"{nature}{vital}"
+ui.anatomie.d_membre,Limb
+ui.anatomie.d_organe,Organ
+ui.anatomie.d_vital, — vital
+ui.anatomie.d_zone,"Hit zone: {zone} (weight {poids})"
+ui.anatomie.d_attache,"Attached to: {nom}"
+ui.anatomie.d_sens,"Sense: {sens} — {etat}"
+ui.anatomie.d_emplacements,"Equipment: {liste}"
+ui.anatomie.d_porte,"Carries: {liste}"
+ui.anatomie.d_loge,"Houses: {liste}"
+zone.tete,Head
+zone.torse,Torso
+zone.bras,Arms
+zone.jambes,Legs
+zone.pieds,Feet
 partie.abdomen,Abdomen
 partie.aile_D,Right wing
 partie.aile_G,Left wing
@@ -2010,6 +2059,7 @@ partie.tete,Head
 partie.torse,Torso
 journal.partie_perdue,"{nom} loses: {partie}"
 journal.partie_vitale,"{nom}'s {partie} is destroyed — they collapse"
+journal.flaire,"{nom} catches a scent and follows it"
 journal.effondrement,"the ceiling caves in ({x},{y})"
 journal.effondrement_blesse,"{nom} is caught in the cave-in: {degats} damage"
 journal.lave_figee,"the lava cools where it meets the water ({x},{y})"
@@ -2578,7 +2628,9 @@ creature.tsuchigumo.name,Tsuchigumo
 creature.basilic.name,Basilisk
 creature.griffon.name,Griffin
 creature.golem_d_argile.name,Clay golem
+ui.creation.roue_de,"Colour: {quoi}"
 ui.creation.app_l,"{locus}: {valeur} (← →)"
+ui.creation.app_couleur_l,"{locus}: {valeur}  (← → presets · Enter: colour wheel)"
 ui.apparence.tete,"Head"
 ui.apparence.yeux,"Eyes"
 ui.apparence.nez,"Nose"

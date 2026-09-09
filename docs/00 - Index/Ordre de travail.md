@@ -517,6 +517,40 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     **Ce que ça ouvre** : le nécromancien, la greffe, la chimère, la vente d'organes — et le cadavre qui traîne, qui
     est aussi ce qui rend une bataille lisible une heure après.
 
+28 quater. **CE QUI ARRIVE À UN CORPS : maladies, drogues, vaccins, médicaments, déformations, mutations**
+    *(designer 2026-09-09, en marge de l'anatomie : « à noter, maladies, drogues, vaccins, médicaments,
+    déformations, mutations, etc »).* **Noté, pas codé.**
+    **Elles se rangent ici, et pas ailleurs, pour une raison** : ce sont toutes des choses qui **modulent une règle
+    du monde sur un corps** — exactement ce que la grammaire des lignes 27-28 doit devenir, et exactement là où la
+    prothèse et la greffe attendent déjà (28 bis, 28 ter). Les écrire avant, c'est écrire deux fois la même
+    grammaire.
+    **Le porteur existe depuis le 2026-09-09** : le corps est un **plan de parties** avec ses organes, sa santé par
+    partie et ses sens. Chacune de ces six choses a donc déjà un endroit où s'accrocher, et c'est ce qui rend la
+    ligne peu coûteuse le jour venu :
+    · une **maladie** attaque un organe nommé — une pneumonie prend les poumons, une néphrite les reins ; sa
+      contagion est un champ partagé de plus, et il faudra dire lequel (le contact ? l'air ? l'eau ?) ;
+    · un **médicament** rend de la santé À UNE PARTIE, ce que rien ne sait faire aujourd'hui (le soin par partie
+      manque, et il manque déjà sans les médicaments) ;
+    · un **vaccin** est le premier effet du jeu qui agit sur ce qui n'est **pas encore arrivé** — une immunité, donc
+      un état du corps et non un statut à durée ;
+    · une **drogue** est un modificateur à contrepartie, avec accoutumance et manque : c'est le cas d'école du
+      module qui n'est pas qu'un bonus ;
+    · une **déformation** et une **mutation** touchent au plan lui-même — ajouter une partie, en changer les
+      chiffres, en supprimer une. **C'est le seul de ces six qui demande que le plan de corps devienne modifiable
+      PAR ÊTRE**, alors qu'il est aujourd'hui partagé par silhouette. À voir en premier le jour venu.
+    **LES TROIS QUESTIONS SONT TRANCHÉES — designer, 2026-09-09 : « oui pour tout ».**
+    · **La contagion est un CHAMP PARTAGÉ**, au même titre que le bruit et l'odeur. C'est la réponse la plus lourde
+      des trois, et la plus cohérente : une épidémie devient un **lieu** et non un compteur par individu, elle se
+      propage, elle s'atténue, elle stagne dans une pièce close — et l'on peut **fuir** un quartier malade, ce qu'un
+      jet de contagion par contact ne permet pas. Elle hérite du patron de la chaleur, comme les quatre autres.
+    · **Une mutation est HÉRITABLE.** Elle ne peut donc pas être un simple statut : elle doit vivre dans le **plan de
+      corps de l'être** et se transmettre à la naissance. C'est ce qui exige que le plan devienne modifiable PAR
+      ÊTRE — le point signalé ci-dessus devient obligatoire, plus seulement souhaitable. L'élevage (les bêtes
+      domestiques du 2026-09-07) en devient un terrain d'expérience : on sélectionne ce qu'on reproduit.
+    · **Une maladie touche AUSSI les bêtes.** Rien ne réserve la pathologie aux êtres pensants : un troupeau qui
+      tombe malade est une catastrophe de village, et la faune malade est un signal que le joueur peut lire.
+    *Ces trois réponses agrandissent la ligne plutôt qu'elles ne la simplifient — c'est noté, et c'est assumé.*
+
 ## Palier 7 — les quatre champs restants, dans l'ordre du designer
 
 29. **La rumeur qui circule** (aucun bloqueur — elle pourrait se faire au palier 5 ; l'ordre du designer la place ici).
