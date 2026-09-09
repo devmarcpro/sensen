@@ -53,7 +53,7 @@ var meubles: Dictionary = {}              # index de tuile → id du meuble AU S
 var piles_meubles: Dictionary = {}        # index de tuile → Array[String], du bas vers le haut
 var stations_fixes: Dictionary = {}       # index de tuile → id de station posée
 var niveau_eau: Dictionary = {}           # index de tuile → niveau 1-7 d'un écoulement (Eau et liquides) ; une source vaut 8
-var dangers: Dictionary = {}              # index de tuile → intensité 1-100 : à éviter en chemin (Émergence — le champ de danger, 2026-09-08). Le booléen d'avant ne disait que « oui » ; le noyau refuse toujours toute valeur non nulle, donc graduer ne change rien pour lui.
+var dangers: Dictionary = {}              # index de tuile → intensité 1-100 : le chemin la PÈSE depuis le 2026-09-09 (à `danger_refus` et au-delà la tuile reste infranchissable, en dessous chaque point coûte des ticks).
 var neige := false                        # état météo de la grille (Météo) : chaque pas coûte neige_surcout de plus
 var gel := false                          # sous 0 °C : l'eau est de la glace, elle se marche
 var sols: Dictionary = {}                 # index de tuile → id de matériau de sol (surface) ; vide = sol par défaut
@@ -75,7 +75,7 @@ var _noyau: RefCounted = null
 var _noyau_sale := true                    # règles ou œil changés : reconfigurer le noyau
 var _table_n := -1                         # taille de contenu_ids à la dernière table de drapeaux
 var occ := PackedByteArray()               # miroir de occupants : 1 = occupée
-var danger_a := PackedByteArray()          # miroir de dangers : l'INTENSITÉ 1-100 (Émergence, 2026-09-08), 0 = sûr. Le noyau refuse toute valeur non nulle : graduer ne change rien pour lui, et l'IA peut peser.
+var danger_a := PackedByteArray()          # miroir de dangers : l'INTENSITÉ 1-100 (Émergence, 2026-09-08), 0 = sûr. Le noyau LIT cette intensité depuis le 2026-09-09 — elle doit donc être le grade, jamais un simple 1.
 var eau_a := PackedByteArray()             # miroir de niveau_eau : niveau + 1 (0 = pas d'entrée)
 var frott_a := PackedFloat64Array()        # le multiplicateur de friction de chaque tuile (sols, materiau_defaut)
 var _frott_sale := true
@@ -460,8 +460,9 @@ func _poser_pile_meubles(i: int, pile: Array) -> void:
 
 
 ## Une tuile à éviter en chemin — et son miroir pour le noyau. L'intensité va de 1 à 100 (Émergence, 2026-09-08) :
-## 100 pour ce qui tue à coup sûr (le feu, la lave, un glyphe armé), moins pour ce qui gêne ou blesse peu. Le noyau
-## refuse toute valeur non nulle, donc les appelants d'avant, qui ne passaient rien, gardent exactement leur sens.
+## 100 pour ce qui tue à coup sûr (le feu, la lave, un glyphe armé), moins pour ce qui gêne ou blesse peu. Depuis le
+## 2026-09-09 le chemin PÈSE ce nombre : seul `danger_refus` (100) reste infranchissable, en dessous le grade se paie
+## en ticks. Les appelants d'avant, qui ne passaient rien, posent donc toujours du refus pur.
 func poser_danger(i: int, intensite: int = 100) -> void:
 	dangers[i] = clampi(intensite, 1, 100)
 	if i >= 0 and i < danger_a.size():
@@ -511,11 +512,14 @@ func _miroirs_a_jour() -> void:
 				occ[i] = 1
 		_n_occ = occupants.size()
 	if dangers.size() != _n_danger:
+		# LE GRADE, PAS UN 1 (2026-09-09) : tant que le chemin ne faisait que refuser, 1 et 47 disaient la même
+		# chose et ce rattrapage pouvait aplatir. Depuis que le grade se paie, écrire 1 pour un feu à 100 le
+		# rendrait presque gratuit — le miroir doit rendre l'intensité.
 		danger_a.fill(0)
 		for k in dangers:
 			var i := int(k)
 			if i >= 0 and i < n:
-				danger_a[i] = 1
+				danger_a[i] = clampi(int(dangers[k]), 1, 100)
 		_n_danger = dangers.size()
 	if niveau_eau.size() != _n_eau:
 		eau_a.fill(0)
@@ -677,6 +681,8 @@ func _chemin_gd(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignor
 	var g := {depart: 0}
 	var vient_de := {}
 	var base: int = dep["cout_base"]
+	var dg_refus: int = int(dep.get("danger_refus", 100))
+	var dg_cout: int = int(dep.get("danger_cout_par_grade", 100))
 	var explores := 0
 	while not ouverts.is_empty():
 		explores += 1
@@ -709,8 +715,16 @@ func _chemin_gd(depart: Vector2i, arrivee: Vector2i, volant: bool = false, ignor
 			var cout: int = couts[k]
 			if _barre(voisin, bloque_a) and occupant(voisin) != ignorer and voisin != arrivee:
 				continue
-			if dangers.has(idx(voisin)) and voisin != arrivee:   # on contourne le feu
-				continue
+			# LE DANGER SE PÈSE (2026-09-09) : à `danger_refus` et au-delà la tuile reste infranchissable — ce
+			# qui tue à coup sûr ne se négocie pas, et sans ce seuil un coût finit toujours par être payé —, en
+			# dessous chaque point de grade coûte des ticks : on contourne s'il y a moyen, on traverse s'il
+			# faudrait faire le tour du monde. L'arrivée garde son passe-droit : on vise une tuile dangereuse
+			# pour y entrer (éteindre un feu) ou pour y frapper ce qui s'y tient.
+			var dg: int = int(dangers.get(idx(voisin), 0))
+			if dg > 0 and voisin != arrivee:
+				if dg >= dg_refus:
+					continue
+				cout += dg * dg_cout
 			var ng: int = g[courant] + cout
 			if ng < int(g.get(voisin, 1 << 30)):
 				g[voisin] = ng

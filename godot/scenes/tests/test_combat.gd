@@ -79,6 +79,7 @@ func _ready() -> void:
 	_lancer("test_pile_sur_une_tuile")
 	_lancer("test_grille")
 	_lancer("test_noyau_cpp")
+	_lancer("test_danger_pese")
 	_lancer("test_lumiere_incrementale")
 	_lancer("test_regen_longue")
 	_lancer("test_planches")

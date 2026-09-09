@@ -232,6 +232,66 @@ func test_noyau_cpp() -> void:
 	sv.monde.fermer()
 
 
+## LE DANGER SE PÈSE (ordre de travail 24, 2026-09-09). Le champ de danger gradue de 1 à 100 depuis la veille, mais
+## les deux chercheurs de chemin refusaient TOUTE valeur non nulle : une tuile graduée 1 barrait autant que la lave,
+## et le grade était écrit sans jamais être lu.
+## Un test d'égalité entre les deux implémentations ne prouverait rien à lui seul — si toutes deux refusaient tout,
+## elles seraient d'accord. Celui-ci demande donc un COMPORTEMENT, sur un terrain plat bâti pour la question : une
+## barrière de danger en travers du passage, et l'on regarde où le chemin la franchit.
+func test_danger_pese() -> void:
+	var s := nouvelle_sim("gorge")
+	var regles: Dictionary = s.grille.dep
+	var g := Grille.new(25, 11)
+	g.dep = regles
+	g.hauteur_oeil = s.grille.hauteur_oeil
+	var refus: int = int(regles.get("danger_refus", 100))
+	var par_grade: int = int(regles.get("danger_cout_par_grade", 100))
+	verifier(refus > 1 and par_grade > 0, "les deux nombres du danger sont en données (refus %d, %d ticks le point)" % [refus, par_grade])
+
+	# a. La barrière : grade 20 sur toute la colonne 12, sauf la rangée 5 à 1. Le détour vers la rangée 5 est gratuit
+	#    en pas (les diagonales avancent aussi en x), donc le chemin doit franchir PAR la rangée bon marché.
+	for y in g.hauteur_grille:
+		g.poser_danger(g.idx(Vector2i(12, y)), 1 if y == 5 else 20)
+	var depart := Vector2i(2, 0)
+	var arrivee := Vector2i(22, 0)
+	var c_gd := g._chemin_gd(depart, arrivee)
+	verifier(not c_gd.is_empty(), "un chemin franchit une barrière graduée sous le refus (%d tuiles)" % c_gd.size())
+	var franchi := -1
+	for p in c_gd:
+		if p.x == 12:
+			franchi = p.y
+	verifier(franchi == 5, "il la franchit par la rangée la moins dangereuse (rangée %d, grade %d)" % [franchi, g.danger_de(Vector2i(12, maxi(franchi, 0)))])
+	_meme_chemin(g, depart, arrivee, c_gd, "barrière graduée")
+
+	# b. La même barrière à 100 : ce qui tue à coup sûr ne se négocie pas, il n'y a plus de chemin.
+	for y in g.hauteur_grille:
+		g.poser_danger(g.idx(Vector2i(12, y)), 100)
+	var c_mur := g._chemin_gd(depart, arrivee)
+	verifier(c_mur.is_empty(), "une barrière au grade du refus reste infranchissable (%d tuiles)" % c_mur.size())
+	_meme_chemin(g, depart, arrivee, c_mur, "barrière au refus")
+
+	# c. Grade 20 partout, sans passage bon marché : on paie plutôt que de renoncer.
+	for y in g.hauteur_grille:
+		g.poser_danger(g.idx(Vector2i(12, y)), 20)
+	var c_paye := g._chemin_gd(depart, arrivee)
+	verifier(not c_paye.is_empty(), "sans passage bon marché, on paie et l'on traverse (%d tuiles)" % c_paye.size())
+	_meme_chemin(g, depart, arrivee, c_paye, "barrière uniforme")
+
+	# d. La tuile d'ARRIVÉE garde son passe-droit : on vise volontairement une tuile dangereuse — c'est ainsi qu'on
+	#    entre dans le feu pour l'éteindre, ou qu'on frappe ce qui s'y tient.
+	var c_vers = g._chemin_gd(depart, Vector2i(12, 5))
+	verifier(not c_vers.is_empty(), "un chemin VERS une tuile dangereuse existe encore (%d tuiles)" % c_vers.size())
+	_meme_chemin(g, depart, Vector2i(12, 5), c_vers, "vers le danger")
+
+
+## Le noyau C++ rend exactement ce que le GDScript rend — sans lui, le test dit que tout se calcule en GDScript.
+func _meme_chemin(g: Grille, a: Vector2i, b: Vector2i, attendu: Array[Vector2i], nom: String) -> void:
+	if not Grille.noyau_present() or not g._noyau_pret():
+		return
+	var obtenu: Array[Vector2i] = g._noyau.chemin(g, a, b, false, "", false, 0)
+	verifier(obtenu == attendu, "%s : le noyau C++ rend le même chemin (%d contre %d tuiles)" % [nom, obtenu.size(), attendu.size()])
+
+
 ## La régénération rattrapée d'un coup (Mana, 2026-09-06) : après une longue absence, le mana prend son espérance en un
 ## calcul, pas une tranche à la fois ; en dessous du seuil, tranche par tranche comme avant.
 func test_regen_longue() -> void:

@@ -133,6 +133,23 @@ jamais s'ajouter à côté. Sinon on obtient six vérités qui se contredisent, 
 >
 > **Ce qu'il reste à ce champ** : l'IA se contente encore de **refuser** une tuile dangereuse ; elle ne **pèse** pas encore le grade pour choisir entre deux chemins imparfaits. C'est ce que la graduation rend possible, et ce n'est pas fait.
 
+> [!success] Codé le 2026-09-09 — **le danger se pèse** (ce qui restait de l'ordre de travail 24) — `combat_rules.deplacement`, `grille.gd`, `sensen_grille.cpp`
+> Le champ graduait depuis la veille ; **personne ne lisait le grade.** Les deux chercheurs de chemin — le GDScript et sa transcription C++ — refusaient toute valeur non nulle, si bien qu'une tuile graduée **1 barrait exactement comme la lave**. La graduation était donc, pour le chemin, une écriture sans lecture : le travail de la veille avait produit un nombre juste et un comportement inchangé. *C'est le genre de défaut qu'aucun test ne signale, parce que rien n'est faux — c'est seulement inutile.*
+>
+> **Deux nombres en données, et la raison de chacun.**
+> · `danger_refus` (100) — à ce grade et au-delà, la tuile reste **infranchissable**. Sans ce seuil, un coût, si grand soit-il, finit toujours par être payé : un être enfermé derrière un mur de flammes traverserait le feu plutôt que d'attendre. **Ce qui tue à coup sûr ne se négocie pas.**
+> · `danger_cout_par_grade` (100 ticks) — ce qu'un point de grade ajoute au pas.
+>
+> **Les deux nombres sont calibrés sur ce que le champ émet vraiment**, et c'est en allant le lire que le premier réglage est tombé. J'avais posé le seuil à 50 : or un **gaz à statut vaut 60** — il serait resté refusé tout comme avant, et le grade aurait été lu sans rien changer pour lui. À 100, seuls sont refusés le feu, la lave, un glyphe armé et un gaz qui blesse ou explose ; le reste se pèse. Un pas coûte 300 ticks, donc un gaz inerte (30) demande **dix pas de détour**, un gaz à statut (60) **vingt**, un sol à 350 °C (79) **vingt-six** — et chacun se traverse quand même s'il n'y a pas d'autre chemin. La tuile d'**arrivée** garde son passe-droit : on vise volontairement une tuile dangereuse, c'est ainsi qu'on entre dans un feu pour l'éteindre ou qu'on frappe ce qui s'y tient.
+>
+> **Un défaut découvert en chemin, et il n'existait qu'à cause de ce changement.** Le garde-fou des miroirs — celui qui recompile `danger_a` quand un dictionnaire a été écrit sans passer par les méthodes — écrivait **1** dans chaque case, pas le grade. Tant que le chemin ne faisait que refuser, `1` et `47` disaient la même chose et l'aplatissement était invisible ; du jour où le grade se paie, ce rattrapage rendait **un feu à 100 presque gratuit**. Un raccourci qui dormait sans nuire est devenu faux le jour où la donnée a commencé à compter.
+>
+> **Ce qu'un test d'égalité GDScript/C++ ne prouve pas.** Si les deux implémentations refusaient tout, elles seraient parfaitement d'accord — et le test passerait. `test_danger_pese` demande donc un **comportement**, sur un terrain plat bâti pour la question : une barrière de danger en travers du passage, de grade 20 partout sauf une rangée à 1. Le chemin la franchit, et **il la franchit par la rangée à 1** — le détour ne lui coûte aucun pas, les diagonales avançant aussi en x. La même barrière à 100 : plus de chemin du tout. À 20 partout : il paie et traverse. Et à chaque fois le noyau C++ rend la même chose, tuile pour tuile.
+>
+> **Et un second défaut, du même genre, dans la règle qui fait fuir.** « On ne reste pas dans le feu » exigeait, pour le pas de sortie, une tuile **sans aucun danger**. Cela ne coûtait rien tant que le danger était binaire — hors du feu, c'était forcément zéro. Depuis qu'il se gradue, un être au milieu d'un **large nuage** n'a plus une seule sortie propre à portée : il ne trouvait aucune case et **restait à mourir sur place**. Il va maintenant vers la tuile **la moins dangereuse** de ses huit voisines, ce qui est le même pas qu'avant dès qu'il y a du sol sain à côté, et un pas vers l'air libre quand il n'y en a pas. *Graduer une donnée ne casse pas ses lecteurs ; cela révèle ceux qui la lisaient comme un oui-ou-non.*
+>
+> **Ce qui reste** : `atteignables` — la portée de déplacement — ignore toujours le danger, comme avant ce changement. C'est cohérent (elle mesure ce qu'on peut atteindre, pas la route qu'on choisit), mais un jour il faudra dire si une zone n'est atteignable qu'*au prix* du danger.
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Matériaux — 13 stats]], [[Application des stats de matériau]], [[Grille continue]]
 - **Alimente** : [[Mine sous une cellule]], [[Éclairage]], [[Météo]], [[IA des créatures]], [[Modules de la simulation et le C++]]

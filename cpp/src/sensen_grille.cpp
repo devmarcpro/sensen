@@ -647,6 +647,8 @@ void SensenGrille::configurer(const Dictionary &dep, int p_oeil, const PackedInt
 	falaise_delta = (int)dep.get("falaise_delta", 3);
 	chute_delta = (int)dep.get("chute_delta", 3);
 	neige_surcout = (int)dep.get("neige_surcout", 1);
+	danger_refus = (int)dep.get("danger_refus", 100);
+	danger_cout = (int)dep.get("danger_cout_par_grade", 100);
 	Dictionary np = dep.get("nage_progressive", Dictionary());
 	Variant tpt = np.get("ticks_par_tuile", Variant());
 	if (tpt.get_type() == Variant::NIL) {
@@ -854,8 +856,15 @@ Array SensenGrille::chemin(Object *grille, Vector2i depart, Vector2i arrivee, bo
 					continue;
 				}
 			}
+			// LE DANGER SE PESE (2026-09-09) : a `danger_refus` et au-dela la tuile reste infranchissable — ce qui
+			// tue a coup sur ne se negocie pas —, en dessous chaque point de grade coute des ticks. Transcription
+			// ligne a ligne de grille.gd ; test_noyau_cpp prouve que les deux repondent pareil.
 			if (s.d && s.d[vi] && !est_arrivee) {
-				continue;
+				int dg = (int)s.d[vi];
+				if (dg >= danger_refus) {
+					continue;
+				}
+				cout += dg * danger_cout;
 			}
 			int ng = gc + cout;
 			if (ng < g_cout[vi]) {

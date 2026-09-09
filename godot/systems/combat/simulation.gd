@@ -4018,13 +4018,27 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 		if m0.is_empty() or monde == null or lieu != "camp" or not monde.claims.has(SimCamp._cell_de(self, m0.pos)):
 			EventBus.emettre(&"journal", [&"journal.suiveur_fin", {"nom": e.name_key}])
 			SimPnj._fin_suiveur(self, e)
-	if grille.dangers.has(grille.idx(e.pos)):   # Météo : on ne reste pas dans le feu — un pas hors des flammes
+	# Météo : on ne reste pas dans le feu — un pas hors des flammes. VERS LE MOINS DANGEREUX (2026-09-09) : la règle
+	# d'avant exigeait une tuile SANS aucun danger, ce qui ne coûtait rien tant que le danger était binaire ; depuis
+	# qu'il se gradue, un être au milieu d'un large nuage n'avait plus une seule sortie propre et restait à mourir sur
+	# place. Il va maintenant vers la tuile la moins dangereuse à sa portée — c'est le même pas qu'avant dès qu'il y a
+	# du sol sain à côté, et c'est un pas vers l'air libre quand il n'y en a pas.
+	var dg_ici := grille.danger_de(e.pos)
+	if dg_ici > 0:
 		var sorties: Array[Vector2i] = []
+		var moins := dg_ici
 		for d in Grille.DIRS:
 			var q: Vector2i = e.pos + d
-			if grille.dans(q) and not grille.dangers.has(grille.idx(q)) and grille.cout_pas(e.pos, q, Etres.est_volant(e)) >= 0 and grille.occupant(q).is_empty():
-				sorties.append(q)
-		if not sorties.is_empty() and _deplacer(e, sorties[des.entier(0, sorties.size() - 1)], tick):
+			if not grille.dans(q) or grille.cout_pas(e.pos, q, Etres.est_volant(e)) < 0 or not grille.occupant(q).is_empty():
+				continue
+			var dq := grille.danger_de(q)
+			if dq > moins:
+				continue
+			if dq < moins:
+				moins = dq
+				sorties.clear()
+			sorties.append(q)
+		if moins < dg_ici and not sorties.is_empty() and _deplacer(e, sorties[des.entier(0, sorties.size() - 1)], tick):
 			return
 	if e.camp == "civil":   # les civils fuient un spectre à vue (Talents de race)
 		for x in vivants():

@@ -6,7 +6,7 @@
     "temps_a_l_action": true
   },
   "deplacement": {
-    "_doc": "Hauteur de terrain ±10 · Boucle de tick · poussee_des_par_tuile : degats (des) par tuile perdue quand une projection/attraction bute ; poussee_part_occupant : part encaissee par l'etre qui bloque | LA PILE (designer 2026-09-08, code 2026-09-09) : `pile_max` etres sur une meme tuile — « un PNJ peut porter un PNJ qui porte un PNJ », donc trois. Un ennemi n'est jamais escalade : c'est lui qu'on attaque.",
+    "_doc": "Hauteur de terrain ±10 · Boucle de tick · poussee_des_par_tuile : degats (des) par tuile perdue quand une projection/attraction bute ; poussee_part_occupant : part encaissee par l'etre qui bloque | LA PILE (designer 2026-09-08, code 2026-09-09) : `pile_max` etres sur une meme tuile — « un PNJ peut porter un PNJ qui porte un PNJ », donc trois. Un ennemi n'est jamais escalade : c'est lui qu'on attaque. | LE DANGER SE PESE (2026-09-09, ordre de travail 24) : le champ de danger gradue de 1 a 100 depuis le 2026-09-08, mais les deux chercheurs de chemin refusaient toute valeur non nulle — une tuile graduee 1 barrait autant que la lave, et le grade etait ecrit sans jamais etre lu. A `danger_refus` et au-dela la tuile reste infranchissable : ce qui tue a coup sur ne se negocie pas, et sans ce seuil un cout fini toujours par etre paye — un etre enferme derriere un mur de flammes traverserait le feu plutot que d attendre. En dessous, chaque point de grade ajoute `danger_cout_par_grade` ticks au pas. Les deux nombres sont calibres sur ce que le champ emet vraiment : 100 pour le feu, la lave, un glyphe arme et un gaz qui blesse ou explose — seuls refuses ; 60 pour un gaz a statut, 30 pour un gaz inerte, 1 a 100 pour la chaleur. A 100 ticks le point et 300 ticks le pas, un gaz inerte vaut dix pas de detour, un gaz a statut vingt, un sol a 350 degres vingt-six — et chacun se traverse quand meme s il n y a pas d autre chemin. La tuile d ARRIVEE garde son passe-droit : on vise volontairement une tuile dangereuse pour y entrer (eteindre un feu) ou pour y frapper ce qui s y tient.",
     "cout_base": 300,
     "montee_1": 500,
     "montee_2": 800,
@@ -31,7 +31,9 @@
       "competence": "nage",
       "ticks_par_tuile": 600
     },
-    "pile_max": 3
+    "pile_max": 3,
+    "danger_refus": 100,
+    "danger_cout_par_grade": 100
   },
   "actions": {
     "_doc": "Boucle de tick · Attaque lourde et télégraphe · Décision — Vocabulaire d'attaque des créatures",

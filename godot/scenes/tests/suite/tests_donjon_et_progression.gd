@@ -2070,6 +2070,7 @@ func test_arenes_autonomes() -> void:
 ## tient au pas d'automate ; le grisou explose au contact d'une flamme — ici la lave voisine — et tout le nuage part.
 func test_gaz_dans_le_sol() -> void:
 	var cfg: Dictionary = GameData.config("gaz_regles")
+	var gaz_cat: Dictionary = GameData.catalogues.gaz   # les FICHES des gaz (data/gaz/) — `cfg` ne porte que les règles
 	var s := Simulation.new(51)
 	s.charger_camp()
 	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
@@ -2087,11 +2088,20 @@ func test_gaz_dans_le_sol() -> void:
 		if not s.creuser_un_puits(j, 0):
 			break
 	verifier(int(s.donjon.etage) == cible and not s.poches_gaz.is_empty(), "à l'étage %d (%d), des poches dans le plein : %d" % [cible, int(s.donjon.etage), s.poches_gaz.size()])
+	# LE CATALOGUE DES GAZ, PAS LES RÈGLES (corrigé le 2026-09-09). SIX lignes de ce test lisaient `cfg.gaz`, or
+	# `cfg` est `gaz_regles` — les poches, la libération, la période ; les FICHES sont dans `data/gaz/`, séparées le
+	# 2026-09-07. L'accès invalide TUAIT la fonction à sa première occurrence, si bien que tout ce qui suit — le
+	# nuage qui sort de la poche percée, le gaz toxique qui blesse, le grisou qui explose au contact de la lave, et
+	# la vérification des quinze fiches — n'était plus joué depuis deux jours. La suite disait « tout passe » : une
+	# erreur de script n'échoue nulle part. C'est `tools/lancer_tests.py` qui la compte désormais.
+	# Et l'on vérifie TOUTES les poches, là où un `break` n'en regardait qu'une.
 	var nature := {}
+	var poches_inconnues: Array[String] = []
 	for g in s.poches_gaz.values():
 		nature[str(g)] = int(nature.get(str(g), 0)) + 1
-		verifier(cfg.gaz.has(str(g)), "chaque poche porte un gaz connu (%s)" % str(g))
-		break
+		if not gaz_cat.has(str(g)) and not (str(g) in poches_inconnues):
+			poches_inconnues.append(str(g))
+	verifier(poches_inconnues.is_empty(), "les %d poches portent toutes un gaz connu (%d natures)%s" % [s.poches_gaz.size(), nature.size(), "" if poches_inconnues.is_empty() else " — inconnus : " + str(poches_inconnues)])
 	# Une poche de gaz toxique, posée sur une tuile pleine voisine du joueur : la pioche la perce, le nuage sort.
 	var journal: Array = []
 	EventBus.journal.connect(func(cle: String, params: Dictionary) -> void: journal.append(str(cle)))
@@ -2122,8 +2132,8 @@ func test_gaz_dans_le_sol() -> void:
 			meme_gaz = false
 	# Neuf gaz réels (« rajoute plein de gaz », « uniquement des gaz qui existent dans le monde réel ») : chacun fait au moins une chose, ses statuts existent, les bandes ne nomment que lui.
 	var incomplets: Array = []
-	for gid in cfg.gaz.keys():
-		var gd: Dictionary = cfg.gaz[gid]
+	for gid in gaz_cat.keys():
+		var gd: Dictionary = gaz_cat[gid]
 		var agit := not str(gd.get("degats", "")).is_empty() or not str(gd.get("statut", "")).is_empty() or not str(gd.get("soigne", "")).is_empty() or not str(gd.get("mana", "")).is_empty() or bool(gd.get("eteint_feux", false)) or bool(gd.get("inflammable", false))
 		var statut_ok := str(gd.get("statut", "")).is_empty() or s.statuts_defs.has(str(gd.statut))
 		if not agit or not statut_ok or not gd.has("teinte"):
@@ -2131,9 +2141,9 @@ func test_gaz_dans_le_sol() -> void:
 	var inconnus: Array = []
 	for b in cfg.poches.part_par_profondeur:
 		for gid in b[2].keys():
-			if not cfg.gaz.has(str(gid)):
+			if not gaz_cat.has(str(gid)):
 				inconnus.append(str(gid))
-	verifier(cfg.gaz.size() >= 15 and incomplets.is_empty() and inconnus.is_empty(), "%d gaz, chacun agit et ses statuts existent ; les bandes ne nomment que des gaz connus (%s %s)" % [cfg.gaz.size(), str(incomplets), str(inconnus)])
+	verifier(gaz_cat.size() >= 15 and incomplets.is_empty() and inconnus.is_empty(), "%d gaz, chacun agit et ses statuts existent ; les bandes ne nomment que des gaz connus (%s %s)" % [gaz_cat.size(), str(incomplets), str(inconnus)])
 	verifier(nuage.size() >= 1 and nuage.size() <= int(cfg.liberation.volume) and meme_gaz and not s.poches_gaz.has(s.grille.idx(pleine)), "le gaz s'échappe : %d tuiles de nuage (au plus %d), la poche est vidée" % [nuage.size(), int(cfg.liberation.volume)])
 	# Le joueur dans le nuage : le pas d'automate le blesse.
 	s.grille.liberer(j.pos)
@@ -2201,7 +2211,7 @@ func test_gaz_dans_le_sol() -> void:
 	s.gaz_prochain_pas = 0
 	s._tiquer_gaz(0)
 	var reste := s.zones.filter(func(z: Dictionary) -> bool: return str(z.type) == "gaz").size()
-	if lum >= int(cfg.gaz.methane.get("lumiere_min", 1)):
+	if lum >= int(gaz_cat.methane.get("lumiere_min", 1)):
 		verifier(reste == 0, "la lumière en main (%d) allume le grisou dès le premier pas : tout le nuage part" % lum)
 		SimLieux._sortir(s, j)
 		return

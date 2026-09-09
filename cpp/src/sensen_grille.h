@@ -86,6 +86,9 @@ public:
 private:
 	// Les règles de déplacement (combat_rules.deplacement) et l'œil (visibilité.hauteur_oeil).
 	int cout_base = 10, montee_1 = 15, montee_2 = 20, descente = 8, falaise_delta = 3, chute_delta = 3, neige_surcout = 1;
+	// Le danger se PESE (2026-09-09) : a `danger_refus` et au-dela la tuile reste infranchissable, en dessous
+	// chaque point de grade (1-100) ajoute `danger_cout` ticks au pas.
+	int danger_refus = 100, danger_cout = 100;
 	double nage_ticks = 20.0, escalade_ticks_par_niveau = 14.0;
 	int oeil = 1;
 	std::vector<int32_t> table; // drapeaux par index de contenu
