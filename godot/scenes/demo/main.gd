@@ -1231,7 +1231,7 @@ func _process_corps(delta: float) -> void:
 		# (128 pas × 60 images/s = le « dès qu'on rentre en combat ça lag énormément », 2026-08-31) —
 		# temporalités parallèles : pendant un combat, le reste de l'étage attend.
 		var tempo: Dictionary = sim.regles.r.get("tempo", {})
-		var garde_pas := int(tempo.get("ticks_max_par_image", 5))   # au plus 5 ticks par image (designer, point 46)
+		var garde_pas := int(tempo.get("actions_max_par_image", 5))   # au plus 5 ACTIONS par image (designer, point 46) — des êtres qui agissent, pas des ticks
 		var t_debut := Time.get_ticks_msec()
 		var budget_ms := int(tempo.get("ms_max_par_image", 12))     # et jamais plus de 12 ms : plus de gel
 		while garde_pas > 0 and sim.pas("monde"):

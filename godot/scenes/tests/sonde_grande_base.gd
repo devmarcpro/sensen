@@ -75,7 +75,10 @@ func _ready() -> void:
 			s.production_de(x)
 		print("  profil %-28s %7.1f ms" % ["production_de ×résidents", (Time.get_ticks_usec() - t2) / 1000.0])
 	if "--tempo" in args:   # le coût d'une image de jeu au camp avec la base peuplée : 5 ticks par image (combat_rules.tempo)
-		var par_image: int = int(s.regles.r.get("tempo", {}).get("ticks_max_par_image", 5))
+		# UNE IMAGE AVANCE DE VRAIS TICKS (2026-09-09) : `actions_max_par_image` compte des ÊTRES QUI AGISSENT, pas
+		# des ticks d'horloge — s'en servir comme d'une avance en ticks était une erreur que son ancien nom
+		# (`ticks_max_par_image`) fabriquait. Une image de jeu avance `ticks_par_seconde_exploration / 60` ticks.
+		var par_image: int = maxi(1, int(s.regles.r.ticks_par_seconde_exploration) / 60)
 		var budget_ms: float = float(s.regles.r.get("tempo", {}).get("ms_max_par_image", 12))
 		var images := 300
 		var t3 := Time.get_ticks_usec()

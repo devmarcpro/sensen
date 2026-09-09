@@ -180,33 +180,17 @@
    "lacet": 0,
    "vue_tete": "face"
   },
-  "SE": {
-   "lacet": 45,
-   "vue_tete": "face"
-  },
   "E": {
    "lacet": 90,
    "vue_tete": "profil"
-  },
-  "NE": {
-   "lacet": 135,
-   "vue_tete": "dos"
   },
   "N": {
    "lacet": 180,
    "vue_tete": "dos"
   },
-  "NW": {
-   "lacet": -135,
-   "vue_tete": "dos"
-  },
   "W": {
    "lacet": -90,
    "vue_tete": "profil"
-  },
-  "SW": {
-   "lacet": -45,
-   "vue_tete": "face"
   }
  }
 }

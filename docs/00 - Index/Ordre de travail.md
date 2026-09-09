@@ -302,8 +302,10 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     projeté — une unité de profondeur vaut `styles.sprites.profondeur_ecran`, la même demi-hauteur que les tuiles.
     **Ce qui a disparu** : les huit `ordre` et les huit `offsets` de chacun des six rigs. Il reste **un** `ordre` par
     rig, qui ne fait que départager deux segments à la même profondeur. L'ordre de dessin est le tri par `z`.
-    **Ce qu'on gagne, visible** : les **huit angles** au lieu de trois (`capture.tscn -- --pantins` en fait la
+    **Ce qu'on gagne, visible** : autant d'angles que le rig en DÉCLARE, au lieu de trois (`capture.tscn -- --pantins` en fait la
     planche), et une pose peut dire `[angle, profondeur]` — un bras qui part en arrière, que la 2D ne savait pas dire.
+    *Le designer en a demandé **quatre** le 2026-09-09 — la face, le dos et les deux profils, ce qu'il dessine à la main. La
+    profondeur reste entière dessous : c'est la table des orientations qui borne les vues, pas le modèle.*
     **Le compromis assumé** : la LARGEUR d'un segment reste face à la caméra (seule sa mesure se raccourcit, jamais
     en dessous de `largeur_min_profil`) — sinon un bras vu de tranche devient un trait. La longueur, elle, se
     raccourcit pour de bon : c'est ça, la profondeur.

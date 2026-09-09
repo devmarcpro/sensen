@@ -127,17 +127,27 @@ func _dessiner_etre() -> void:
 	# son orientation de grille : la composante « vers la caméra » est x + y (l'isométrie regarde la grille depuis le
 	# sud-est), la composante « vers la droite de l'écran » est x − y. Les huit orientations du rig ne servent plus
 	# qu'à nommer le lacet le plus proche pour choisir la vue de la tête.
+	# QUATRE DIRECTIONS, PAS HUIT (designer 2026-09-09 : « on va faire que 4 directions par personnages
+	# finalement »). Le corps se CALE sur l'orientation la plus proche parmi celles que le rig DÉCLARE : c'est la
+	# table du rig, et elle seule, qui dit combien de vues existent — quatre aujourd'hui, la face, le dos et les
+	# deux profils, ce que le designer dessine à la main. En rajouter quatre rendrait les huit angles sans toucher
+	# une ligne de code.
 	var o_e: Vector2i = e.get("orientation", Vector2i.ZERO)
+	var ori := {}
 	_lacet = 0.0
 	if o_e != Vector2i.ZERO and bool(rig.get("lacet_actif", false)):
-		_lacet = atan2(float(o_e.x - o_e.y), float(o_e.x + o_e.y))
+		ori = _orientation_proche(_dir_ecran(o_e))
+		if ori.has("lacet"):
+			_lacet = deg_to_rad(float(ori.lacet))
+	if ori.is_empty():
+		ori = _orientation_proche(Vector2(0.0, 1.0))   # sans mouvement : la vue qui regarde vers nous
 	var st_pd: Dictionary = GameData.config("styles").get("sprites", {})
 	_prof_ecran = Vector2(float(st_pd.get("profondeur_ecran", [0.0, -0.5])[0]), float(st_pd.get("profondeur_ecran", [0.0, -0.5])[1]))
 	_largeur_min = float(st_pd.get("largeur_min_profil", 0.12))
 	_epaisseur_defaut = float(st_pd.get("epaisseur_defaut", 0.7))
 	_ap = e.get("apparence", {})
 	_pose_courante = _pose_action()
-	_vue_tete = str(_orientation_proche().get("vue_tete", "face"))
+	_vue_tete = str(ori.get("vue_tete", "face"))
 	var fac: Dictionary = GameData.config("apparence").get("facteurs", {})
 	_carrure = float(fac.get("carrure", {}).get(str(_ap.get("carrure", "moyenne")), 1.0))
 	var ech := float(_ap.get("echelle", 1.0)) * float(fac.get("taille", {}).get(str(_ap.get("taille", "moyenne")), 1.0))
@@ -291,20 +301,33 @@ func _ordre_profondeur(monde: Dictionary) -> Array:
 	return noms
 
 
-## L'orientation nommée dont le lacet est le plus proche de celui du corps : elle ne sert plus qu'à choisir la vue
-## de la tête (face, profil, dos), c'est-à-dire les planches du visage.
-func _orientation_proche() -> Dictionary:
+## Où va, À L'ÉCRAN, un pas dans cette direction de grille. C'est la projection du monde : `x − y` vers la droite,
+## `x + y` vers le bas — et la seconde est écrasée de moitié par l'isométrie. C'est cet écrasement qui fait qu'un pas
+## le long d'un axe de la grille se lit comme un déplacement LATÉRAL, et non comme une diagonale à quarante-cinq degrés.
+func _dir_ecran(o: Vector2i) -> Vector2:
+	return Vector2(float(o.x - o.y), float(o.x + o.y) * 0.5).normalized()
+
+
+## L'orientation déclarée dont le regard, À L'ÉCRAN, ressemble le plus à la direction donnée. On compare des
+## directions d'écran et non des angles de grille : sur un angle, les quatre pas le long des axes tombent à égalité
+## parfaite entre deux vues (45° est à mi-chemin de 0 et de 90) et il faut trancher par une règle arbitraire — or
+## toute règle arbitraire est un choix de design déguisé en détail technique. L'isométrie, elle, tranche seule.
+##
+## Le regard d'une vue de lacet θ va à l'écran vers `(sin θ ; cos θ / 2)` : la face regarde vers le bas (vers nous),
+## le profil droit vers la droite. Même écrasement que pour le mouvement, donc la comparaison est juste.
+func _orientation_proche(dir_ecran: Vector2) -> Dictionary:
 	var orients: Dictionary = rig.get("orientations", {})
 	if orients.is_empty():
 		return {}
-	var deg := rad_to_deg(_lacet)
 	var meilleure: Dictionary = {}
-	var ecart_min := 1e9
+	var meilleur := -2.0
 	for nom: String in orients.keys():
 		var o: Dictionary = orients[nom]
-		var d := absf(wrapf(float(o.get("lacet", 0.0)) - deg, -180.0, 180.0))
-		if d < ecart_min:
-			ecart_min = d
+		var t := deg_to_rad(float(o.get("lacet", 0.0)))
+		var regard := Vector2(sin(t), cos(t) * 0.5).normalized()
+		var d := regard.dot(dir_ecran)
+		if d > meilleur:
+			meilleur = d
 			meilleure = o
 	return meilleure
 

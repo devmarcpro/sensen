@@ -148,18 +148,26 @@ func _ready() -> void:
 		soucis.append("aucun résident dans le territoire de la ville")
 	if s2.territoire.id != "joueur":
 		soucis.append("le contexte n'est pas revenu au joueur")
-	# 4. Le tempo : deux cents ticks du monde à l'allure du jeu, le coût d'un tick (le client en paie dix par seconde).
-	for k in 300:   # la ruée du premier matin (tout le monde part vers son poste) n'est pas le régime de croisière
-		s2.horloge_monde.avancer(100)
+	# 4. LE TEMPO SE MESURE EN IMAGES DE JEU (2026-09-09). On avançait de 100 ticks par itération : dix secondes de
+	# monde quand un tick faisait cent millisecondes, un dixième de seconde depuis qu'il en fait une. La sonde
+	# mesurait donc cent fois moins de vie simulée qu'avant sous le même nom. Une image avance
+	# `ticks_par_seconde_exploration / 60` ticks — c'est ce que le client fait —, et le résultat se compare au
+	# budget d'une image. La chauffe se compte en secondes de monde, par grands sauts : l'horloge saute, elle ne
+	# boucle pas, donc cinquante minutes de monde coûtent soixante appels et non cent quatre-vingt mille.
+	var tps_v := int(s2.regles.r.ticks_par_seconde_exploration)
+	var par_image_v := maxi(1, tps_v / 60)
+	for k in 60:   # la ruée du premier matin (tout le monde part vers son poste) n'est pas le régime de croisière
+		s2.horloge_monde.avancer(50 * tps_v)
 	var t_tempo := Time.get_ticks_usec()
 	s2.chrono.clear()
-	for k in 200:
-		s2.horloge_monde.avancer(100)
-	var ms_tick := (Time.get_ticks_usec() - t_tempo) / 1000.0 / 200.0
-	print("tempo : %.2f ms par tick du monde avec %d êtres (pas %.0f ms sur 200 ticks) · chrono %s" % [ms_tick, s2.vivants().size(), float(s2.chrono.get("pas", 0.0)), str(s2.chrono)])
+	var images_v := 300
+	for k in images_v:
+		s2.horloge_monde.avancer(par_image_v)
+	var ms_image := (Time.get_ticks_usec() - t_tempo) / 1000.0 / float(images_v)
+	print("tempo : %.2f ms par image de jeu avec %d êtres (%d ticks par image, pas %.0f ms sur %d images) · chrono %s" % [ms_image, s2.vivants().size(), par_image_v, float(s2.chrono.get("pas", 0.0)), images_v, str(s2.chrono)])
 	var budget_tick := float(GameData.config("combat_rules").get("tempo", {}).get("ms_max_par_image", 12))
-	if ms_tick > budget_tick:
-		soucis.append("tempo : %.2f ms par tick, plus que le budget d'une image (%.0f)" % [ms_tick, budget_tick])
+	if ms_image > budget_tick:
+		soucis.append("tempo : %.2f ms par image, plus que le budget d'une image (%.0f)" % [ms_image, budget_tick])
 	# 5. Les semaines.
 	var journal: Array = []
 	EventBus.journal.connect(func(cle: String, params: Dictionary) -> void: journal.append({"cle": cle, "params": params}))

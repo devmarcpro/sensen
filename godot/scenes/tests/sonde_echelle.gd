@@ -13,7 +13,7 @@ func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
 	var graine := 9
 	var cibles: Array[int] = [500, 1000, 2000]
-	var ticks := 200
+	var ticks := 200   # des IMAGES de jeu mesurées, pas des ticks d'horloge (2026-09-09)
 	var rayon := 60
 	for i in args.size():
 		if args[i] == "--graine_monde" and i + 1 < args.size():
@@ -64,7 +64,7 @@ func _ready() -> void:
 	s.invincible = true
 	print("fenêtre : %d × %d tuiles, %d êtres" % [s.grille.largeur, s.grille.largeur, s.vivants().size()])
 	# 1. Tel quel.
-	_mesurer(s, "tel quel", 300, ticks)
+	_mesurer(s, "tel quel", 60, ticks)   # soixante sauts de cinquante secondes : cinquante minutes de monde
 	# 2. Les paliers d'échelle : des clones des résidents, jusqu'au compte demandé.
 	var modeles: Array = []
 	for x in s.vivants():
@@ -101,18 +101,24 @@ func _ready() -> void:
 				x["stock"] = []
 		if s.vivants().size() < cible:
 			soucis.append("échelle %d : seulement %d êtres placés (plus de tuiles libres ?)" % [cible, s.vivants().size()])
-		_mesurer(s, "échelle %d" % cible, 100, ticks)
+		_mesurer(s, "échelle %d" % cible, 20, ticks)   # vingt sauts : la population clonée est déjà en régime
 	_fin()
 
 
-## `chauffe` ticks pour sortir de la ruée (tout le monde part vers son poste), puis `n` ticks mesurés.
+## `chauffe` sauts de cinquante secondes de monde pour sortir de la ruée (tout le monde part vers son poste), puis
+## `n` IMAGES DE JEU mesurées. On avançait de 100 ticks par itération : dix secondes de monde quand un tick faisait
+## cent millisecondes, un dixième de seconde depuis qu'il en fait une — la sonde mesurait cent fois moins de vie
+## simulée qu'avant, sous le même nom (2026-09-09). Une image avance `ticks_par_seconde_exploration / 60` ticks,
+## c'est ce que le client fait ; la chauffe saute, parce que l'horloge du monde saute et ne boucle pas.
 func _mesurer(s: Simulation, titre: String, chauffe: int, n: int) -> void:
+	var tps_m := int(s.regles.r.ticks_par_seconde_exploration)
+	var par_image_m := maxi(1, tps_m / 60)
 	for k in chauffe:
-		s.horloge_monde.avancer(100)
+		s.horloge_monde.avancer(50 * tps_m)
 	s.chrono.clear()
 	var t0 := Time.get_ticks_usec()
 	for k in n:
-		s.horloge_monde.avancer(100)
+		s.horloge_monde.avancer(par_image_m)
 	var ms_tick := (Time.get_ticks_usec() - t0) / 1000.0 / float(n)
 	var cles: Array = s.chrono.keys()
 	cles.sort_custom(func(a: String, b: String) -> bool: return float(s.chrono[a]) > float(s.chrono[b]))
@@ -120,7 +126,7 @@ func _mesurer(s: Simulation, titre: String, chauffe: int, n: int) -> void:
 	for c in cles.slice(0, 10):
 		parts.append("%s %.2f" % [c, float(s.chrono[c]) / float(n)])
 	var vivants := s.vivants().size()
-	print("%s : %.2f ms par tick du monde, %d êtres (%.1f µs par être) · par tick : %s" % [titre, ms_tick, vivants, ms_tick * 1000.0 / maxi(1, vivants), ", ".join(parts)])
+	print("%s : %.2f ms par image de jeu, %d êtres (%.1f µs par être) · par image : %s" % [titre, ms_tick, vivants, ms_tick * 1000.0 / maxi(1, vivants), ", ".join(parts)])
 	var budget_tick := float(GameData.config("combat_rules").get("tempo", {}).get("ms_max_par_image", 12))
 	if ms_tick > budget_tick:
 		print("  (au-dessus du budget d'une image : %.0f ms)" % budget_tick)

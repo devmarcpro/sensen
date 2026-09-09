@@ -780,7 +780,12 @@ func _ready() -> void:
 			etiq.text = "%s  (%d°)" % [str(noms[i_p]), roundi(rad_to_deg(atan2(float(dirs[i_p].x - dirs[i_p].y), float(dirs[i_p].x + dirs[i_p].y))))]
 			etiq.position = Vector2(60.0 + float(i_p) * 145.0, 500.0)
 			couche.add_child(etiq)
-		print("pantins : huit orientations du rig %s" % rig_p)
+		# On dessine les HUIT orientations de grille, mais le rig n'en déclare qu'un certain nombre (quatre depuis le
+		# 2026-09-09) : deux colonnes identiques disent qu'une direction de marche se cale sur la même vue qu'une
+		# autre. C'est exactement ce qu'il faut voir pour juger un jeu de sprites dessinés à la main.
+		print("pantins : les huit directions de marche du rig %s, calées sur ses %d orientations déclarées (%s)" % [
+			rig_p, int(GameData.entree("rigs", rig_p).get("orientations", {}).size()),
+			", ".join(PackedStringArray(GameData.entree("rigs", rig_p).get("orientations", {}).keys()))])
 	if "--debug-survol" in args:
 		print("survol=", scene.survol, " occ=", scene.sim.grille.occupant(scene.survol), " voit=", scene.sim.voit(j, scene.survol), " ecran=", scene.ecrans.est_ouvert(), " j=", j.pos)
 

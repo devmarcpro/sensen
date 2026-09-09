@@ -1418,7 +1418,7 @@ func test_lumiere_incrementale() -> void:
 func test_paperdoll_et_tutoriels() -> void:
 	for id in ["humanoide", "quadrupede", "volant", "amorphe"]:
 		var rig: Dictionary = GameData.entree("rigs", id)
-		verifier(rig.segments.has(rig.racine) and rig.orientations.has("S") and int(rig.orientations.W.lacet) == -90 and rig.ordre.size() == rig.segments.size(), "rig %s : racine, huit orientations (lacet), un ordre de départage complet" % id)
+		verifier(rig.segments.has(rig.racine) and rig.orientations.size() == 4 and int(rig.orientations.W.lacet) == -90 and rig.ordre.size() == rig.segments.size(), "rig %s : racine, quatre orientations déclarées (face, dos, deux profils), un ordre de départage complet" % id)
 	var h: Dictionary = GameData.entree("rigs", "humanoide")
 	verifier(h.segments.size() == 15 and h.racine == "bassin" and h.slots_segments.casque == ["tete"] and h.prise_arme == "main_D", "rig humanoïde : 15 segments depuis la coupe du bassin, le casque peint la tête, l'arme à la main droite")
 	verifier(GameData.config("palette_materiaux").has("cuir") and GameData.config("palette_materiaux").cuir.hex == "#8A5A33", "palette : Cuir #8A5A33")

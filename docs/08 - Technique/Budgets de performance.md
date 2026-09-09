@@ -146,6 +146,16 @@ La stratégie d'optimisation complète, système par système, est consolidée e
 > **Le problème était l'intensité** : `force_grain: 0.12` et `force_douce: 0.07`, soit une variation d'environ **±12 %** de la couleur. Sur une palette sombre — ±0,03 sur un vert olive — c'est **invisible**. Posé à **0,26 / 0,15** : la matière se voit sans que le décor grouille ; un essai à 0,38 / 0,22 s'est révélé trop marqué sur les toits.
 > **C'est de la direction artistique et une ligne de données** : le chiffre revient au designer, les deux captures de comparaison lui ont été envoyées.
 
+> [!failure] Corrigé le 2026-09-09 — **les sondes de performance mesuraient cent fois trop peu de monde**
+> Elles avançaient l'horloge de `100` ticks par itération. C'était **dix secondes de monde** quand un tick faisait cent millisecondes ; c'en est **un dixième** depuis qu'il en fait une. `sonde_ville` et `sonde_echelle` mesuraient donc cent fois moins de vie simulée qu'avant, et l'annonçaient sous le même nom — « ms par tick du monde ».
+> **C'est plus grave qu'un faux positif.** Une sonde de performance qui ment fait **prendre des décisions** : c'est elle qui a fermé deux points de la file en montrant que le C++ n'apporterait rien là où on le croyait. Un chiffre mesuré sur un centième du monde attendu peut dire « tout va bien » d'un système qui s'effondre à l'échelle réelle.
+> **Ce qu'elles mesurent maintenant** : des **images de jeu**. Une image avance `ticks_par_seconde_exploration / 60` ticks — ce que le client fait réellement —, et le résultat se compare à `ms_max_par_image`, le budget d'une image. La chauffe se compte en **secondes de monde** et se fait par grands sauts, parce que l'horloge du monde *saute* (un `avancer(n)` résout tout ce qui est dû) : cinquante minutes de monde coûtent soixante appels et non cent quatre-vingt mille.
+> **Première mesure honnête** : `sonde_ville` donne **0,36 ms par image de jeu avec 209 êtres**, seize ticks par image — très en dessous des douze millisecondes de budget.
+
+> [!warning] Un nom qui fabriquait le bug (2026-09-09) — `ticks_max_par_image` est devenu `actions_max_par_image`
+> Ce champ ne compte pas des ticks : le client en fait `while garde_pas > 0 and sim.pas("monde")`, c'est-à-dire des **êtres qui agissent**. `sonde_grande_base` s'en servait comme d'une **avance en ticks**, précisément à cause du nom — et le plan de migration du tick, écrit le 2026-09-08, prévoyait de le **multiplier par dix** « sans quoi l'horloge ne suit plus », ce qui aurait fait résoudre dix fois plus d'actions par image. Il n'a pas été touché, ce qui était juste par accident.
+> **La leçon** : un nom faux ne se contente pas de gêner la lecture, il fait écrire du code faux — deux fois ici, dans une sonde et dans un plan.
+
 ## Liens
 - **Dépend de** : [[Décisions d'architecture]], [[Boucle de tick]]
 - **Alimente** : [[Optimisation — principes]], [[Entités et pathfinding — performance]], [[Ordre de vérification]]
