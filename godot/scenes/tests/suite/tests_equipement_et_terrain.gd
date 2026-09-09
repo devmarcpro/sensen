@@ -811,7 +811,34 @@ func test_sonore() -> void:
 	s._tiquer_sonore(300)
 	verifier(s.sonore_a(gauche) > 0.0, "une ouverture dans le mur, et le son passe par elle : il contourne (%.1f)" % s.sonore_a(gauche))
 
-	# 5. LE BRUIT S'EFFACE : un pas de champ sans source, et il ne reste plus rien d'audible.
+	# 5. LE COMBAT SONNE (2026-09-09). Les volumes du coup, de la mort et de la porte étaient écrits dans les
+	#    données et n'avaient AUCUN émetteur : une bataille était muette pour l'IA. On le vérifie là où ça compte —
+	#    sur le passage obligé de tous les dégâts, quelle que soit leur source.
+	s.carte_sonore.fill(0.0)
+	s.sonore_actif.clear()
+	s.sonore_sources.clear()
+	var cible_c: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle != "joueur")[0]
+	s._appliquer_degats(cible_c, 3, "", {"type": "contondant", "element": {}})
+	s.sonore_prochain_pas = 0
+	s._tiquer_sonore(500)
+	var apres_coup := s.sonore_a(cible_c.pos)
+	verifier(apres_coup > 0.0, "un coup s'entend là où il tombe (%.1f) — le volume était écrit et n'avait aucun émetteur" % apres_coup)
+	s.carte_sonore.fill(0.0)
+	s.sonore_actif.clear()
+	s.sonore_sources.clear()
+	s._appliquer_degats(cible_c, int(cible_c.sante) + 50, "", {"type": "contondant", "element": {}})
+	s.sonore_prochain_pas = 0
+	s._tiquer_sonore(600)
+	verifier(not cible_c.vivant and s.sonore_a(cible_c.pos) > apres_coup, "et un cri porte plus loin qu'un coup (%.1f contre %.1f)" % [s.sonore_a(cible_c.pos), apres_coup])
+
+	# 6. LE BRUIT S'EFFACE : un pas de champ sans source, et il ne reste plus rien d'audible. On repart d'une carte
+	#    propre, puisque le combat vient d'y écrire.
+	s.carte_sonore.fill(0.0)
+	s.sonore_actif.clear()
+	s.sonore_sources.clear()
+	SimTerrain.sonner(s, c, float(cfg.volumes.pioche))
+	s.sonore_prochain_pas = 0
+	s._tiquer_sonore(700)
 	var avant := s.sonore_a(droite)
 	for k in 12:
 		s.sonore_prochain_pas = 0

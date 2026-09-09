@@ -272,8 +272,14 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     monde silencieux. **L'IA remonte la pente du champ** sans savoir ce qu'elle a entendu, et la **Discrétion**
     retranche au volume qu'on ÉMET — se cacher devient un lieu. `test_sonore` écoute à la même distance des deux
     côtés du même couloir et ne change que la matière du mur.
-    **Reste** : le combat, la mort et les portes ne sonnent pas encore (volumes écrits, pas branchés) ; le champ
-    ignore les couches Z ; et l'**odeur**, l'autre moitié du point 1, n'existe pas.
+    **Le combat sonne depuis le 2026-09-09 au soir** *(question du designer : « que veux-tu dire par le combat qui
+    ne sonne pas encore »).* Les volumes de `coup`, `mort` et `porte` étaient écrits dans les données et n'avaient
+    **aucun émetteur** — une bataille était muette pour l'IA, on pouvait égorger quelqu'un à six tuiles d'un garde
+    sans qu'il tourne la tête. Le coup sonne sur le **passage obligé de tous les dégâts** (une arme, une action de
+    créature, une explosion, un statut : tout passe par là), le cri porte plus loin que le coup, et la porte est
+    atténuée par la Discrétion de qui l'ouvre. *C'était le défaut du champ de danger, reproduit le soir même sur le
+    champ sonore : un nombre écrit et lu par personne.*
+    **Reste** : le champ ignore les couches Z — un combat à l'étage ne s'entend pas d'en bas.
     *(Note : le module `absorption` existe aussi dans le catalogue des noyaux — il meurt au palier 6, mais tout grep
     sera ambigu pendant les deux chantiers.)*
     **Et une bonne nouvelle mesurée** : le piège annoncé — « bâtie sur le patron de la lumière, elle hériterait du
@@ -409,7 +415,7 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     plus pauvre qu'un profil. La planche des huit angles est dans [[À juger — parcours de jeu]] ; si la vue de face
     ne te plaît pas, `lacet_actif: false` sur un rig le rend immobile, et c'est **un booléen par rig**, rien d'autre.
 
-26 octies. **UN SEGMENT A UNE ÉPAISSEUR** — *fait le 2026-09-09, dans la foulée.* La profondeur avait laissé un
+~~26 octies. **UN SEGMENT A UNE ÉPAISSEUR**~~ — **FAIT le 2026-09-09**, dans la foulée. *(Rayée le 2026-09-09 au soir : elle se disait faite dans son propre texte sans être barrée — une file qu'on ne raye pas fait relire du travail fini.)* La profondeur avait laissé un
     chiffre magique : un segment vu de tranche gardait `largeur × 0,35`, une borne posée pour qu'un bras ne devienne
     pas un trait. C'était un manque de modèle — un corps a **deux** mesures de travers, d'une épaule à l'autre et de
     la poitrine au dos. Un segment est désormais un **cylindre à section elliptique** (`largeur`, `epaisseur`) et sa

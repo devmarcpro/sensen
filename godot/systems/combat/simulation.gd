@@ -2169,6 +2169,12 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 			EventBus.emettre(&"journal", [&"journal.second_souffle", {"nom": cible.name_key, "soin": soin}])
 	if SimTalents.a_talent(self, cible, "jauge_de_sang"):   # L'Écarlate : les dégâts subis remplissent la jauge
 		cible["sang"] = mini(int(regles.r.talents.jauge_de_sang.max), int(cible.get("sang", 0)) + degats)
+	# UN COUP S'ENTEND (2026-09-09). Le volume était écrit dans `sonore.json` et n'avait aucun émetteur : une
+	# bataille était MUETTE pour l'IA — on pouvait égorger quelqu'un à six tuiles d'un garde sans qu'il tourne la
+	# tête, alors que le champ savait parfaitement porter le bruit jusqu'à lui. C'est ici que tout coup passe, quelle
+	# que soit sa source, et c'est donc ici que le monde l'entend.
+	if degats > 0:
+		SimTerrain.sonner_de(self, cible.pos, "coup")
 	if degats > 0:
 		_monter_aggro(cible, source, float(degats) * float(regles.r.get("ia", {}).get("aggro_par_degat", 1.0)), true)
 	EventBus.emettre(&"damage_dealt", [source, cible.id, degats, detail])
@@ -2195,6 +2201,7 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 	if cible.sante <= 0 and cible.vivant:
 		cible.vivant = false
 		grille.liberer(cible.pos, cible.id)
+		SimTerrain.sonner_de(self, cible.pos, "mort")   # un cri porte plus loin qu'un coup (Émergence — le champ sonore)
 		EventBus.emettre(&"journal", [&"journal.mort", {"nom": cible.name_key}])
 		EventBus.emettre(&"creature_killed", [cible.id, source])
 		SimPnj._quetes_sur_mort(self, cible, source)
@@ -2252,6 +2259,7 @@ func _basculer_porte(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 		return false
 	if "fermee" in tags:
 		grille.poser_contenu(vers, "porte")
+		SimTerrain.sonner_de(self, vers, "porte", e)   # « une porte qui claque » — la première source que la note citait
 		EventBus.emettre(&"journal", [&"journal.porte_ouverte", {"nom": e.name_key}])
 	else:
 		if not grille.occupant(vers).is_empty():
