@@ -185,10 +185,15 @@ static func _maj_contenu_pile(sim: Simulation, vers: Vector2i) -> void:
 
 
 static func _coffre_a(sim: Simulation, vers: Vector2i) -> Dictionary:
-	if not sim.grille.dans(vers) or not sim.grille.meubles.has(sim.grille.idx(vers)):
+	if not sim.grille.dans(vers):
 		return {}
-	var m: Dictionary = GameData.entree("meubles", str(sim.grille.meubles[sim.grille.idx(vers)]))
-	return m if int(m.capacite_slots) > 0 else {}
+	# ON CHERCHE DANS LA PILE (2026-09-09) : `meubles[i]` ne donne que le SOMMET depuis que les meubles s'empilent,
+	# si bien qu'un coffre sous une lanterne devenait introuvable — l'écran ne s'ouvrait plus, sans rien dire.
+	for mid in sim.grille.meubles_de(sim.grille.idx(vers)):
+		var m: Dictionary = GameData.entree("meubles", str(mid))
+		if int(m.capacite_slots) > 0:
+			return m
+	return {}
 
 
 ## Ranger un objet du sac dans un coffre adjacent (capacité du meuble).

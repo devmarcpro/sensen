@@ -169,7 +169,9 @@
     "teinte_matiere_peinte": 1.0,
     "teinte_matiere_normalisee": true,
     "fondu_tuiles": true,
-    "fondu_tuiles_force": 0.85
+    "fondu_tuiles_force": 1.0,
+    "fondu_pixels": true,
+    "_doc_fondu": "LE FONDU ENTRE DEUX MATIERES (designer 2026-09-09 : « j aimerais bien un melange des pixels random, actuellement c est degueulasse »). `fondu_tuiles` l allume, `fondu_tuiles_force` est l alpha atteint sur l arete partagee, et `fondu_pixels` transforme cet alpha en PROBABILITE par pixel de grain au lieu d un degrade lisse. A 1,0 sur l arete, un pixel sur deux appartient au voisin au milieu du chemin, presque tous au bord : l oeil lit un entremelement, pas un flou. Le tirage se fait sur la case de grain en coordonnees de TUILE, donc il ne bouge ni avec la camera ni d une image a l autre."
   },
   "carte": {
     "_doc": "La carte du monde (designer 2026-09-01, point 59) : chaque cellule est peinte en sous_points × sous_points sondes, tant que la case dépasse sous_points_min_px pixels.",

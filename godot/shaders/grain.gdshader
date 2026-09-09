@@ -30,6 +30,7 @@ uniform float matieres_n = 0.0;                 // combien de lignes dans l'atla
 uniform float style_texture_base = 100.0;       // au-delà de ce style, UV.x ne désigne plus un motif calculé mais une LIGNE de l'atlas
 uniform float teinte_matiere = 1.0;             // combien la teinte du matériau colore une matière PEINTE (0 : la texture seule)
 uniform float teinte_normalisee = 1.0;          // 1 : la teinte est ramenée à sa plus haute composante — elle colore sans assombrir
+uniform float fondu_pixels = 1.0;               // 1 : le fondu entre deux matières se fait par PIXELS TIRÉS, pas par un dégradé
 
 const float DECALAGE_HAUT = 4096.0;
 const float DECALAGE_SO = -1000.0;
@@ -76,6 +77,19 @@ void fragment() {
 	}
 	vec2 uv = vec2(u, v);
 	vec2 p = uv * max(grains_par_tuile, 1.0);
+	// LE FONDU ENTRE DEUX MATIÈRES SE FAIT PAR PIXELS TIRÉS (designer 2026-09-09 : « j'aimerais bien un mélange des
+	// pixels random, actuellement c'est dégueulasse »). Le client dessine la frange d'un voisin en faisant descendre
+	// l'ALPHA du bord vers le centre — un dégradé lisse, qui sur un décor en pixels fait une bouillie floue.
+	// Ici, cet alpha devient une PROBABILITÉ : chaque pixel de grain est gardé ou jeté selon un tirage. Près de
+	// l'arête presque tous restent, vers le centre presque aucun — et l'œil lit un entremêlement, pas un flou.
+	// Le tirage est fait sur la case de GRAIN, dans les coordonnées de la tuile : il ne bouge donc ni avec la caméra
+	// ni d'une image à l'autre. Deux matières voisines s'entremêlent toujours de la même façon.
+	if (fondu_pixels > 0.5 && COLOR.a < 0.999) {
+		if (hache(floor(p) + vec2(17.0, 43.0)) > COLOR.a) {
+			discard;
+		}
+		COLOR.a = 1.0;   // gardé : il est PLEIN — c'est un pixel de l'autre matière, pas un voile
+	}
 	float g = hache(p) - 0.5;                          // le grain commun à toutes les matières
 	float t = doux(uv * max(echelle_douce, 0.01)) - 0.5;
 	float k = 1.0 + g * 2.0 * force_grain + t * 2.0 * force_douce;

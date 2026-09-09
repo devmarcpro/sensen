@@ -119,6 +119,13 @@ Un critère de performance à valider avant de passer à l'étape suivante. **Un
 > Le compteur et l'aléa sont désormais **deux champs** (`base#profondeur_n_alea`) : le compteur est monotone, l'unicité est structurelle. Et le test compte maintenant les identifiants **distincts**, pas seulement les objets — la vérification qui aurait vu le défaut.
 > **La leçon** : quand un test sans rapport rougit après un ajout de contenu, c'est souvent qu'on a déplacé une graine. Chercher ce que le contenu a *décalé* avant de chercher ce qu'il a *cassé*.
 
+> [!bug] 2026-09-09 — la suite était verte pendant que deux gestes du joueur étaient cassés
+> Le designer a signalé « impossible d'équiper d'interagir avec les items dans l'inventaire » et « l'interface de coffres ne s'ouvre même pas ». La **suite complète passait**, sans une seule erreur de script.
+> **Elle ne pouvait pas les voir** : elle teste la *simulation* — `sim.intention(...)`, les règles, les nombres — et jamais le chemin qu'un joueur emprunte réellement : **choisir un objet, voir ses options, en activer une**. Entre les deux il y a l'écran, et l'écran n'était vérifié que sur un point : *rien ne dépasse du cadre*.
+> **Le défaut du coffre le montre bien** : l'option qui ouvre le contenant n'était offerte que s'il contenait déjà quelque chose. La règle de simulation était juste, l'écran était bien dessiné — et pourtant un coffre ne pouvait jamais servir. Aucune vérification existante ne regardait là.
+> `sonde_ecrans` **pilote maintenant les objets** : elle met une arme dans le sac, la choisit par l'écran, vérifie que ses options apparaissent, active « équiper » et vérifie que l'arme passe en main ; puis elle pose un coffre vide et vérifie qu'il s'ouvre — y compris sous un autre meuble.
+> *Un test qui ne passe pas par où le joueur passe ne protège pas le joueur.*
+
 > [!decision] Tranché par le designer le 2026-09-09 — **la note est la source des catalogues**, et la flèche ne tourne plus
 > La question du palier 0 attendait depuis le 2026-09-08 : la note redevient-elle la source, ou la donnée ? **La note.** La flèche va donc de `docs/09 - Contenu/Catalogue matériaux — *.md` vers `data/materials/`, par `tools/gen_materials.py`, et jamais dans l'autre sens sans le dire.
 > **Deux outils, deux directions, et un seul chemin de travail** :

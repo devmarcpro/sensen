@@ -224,13 +224,13 @@
     }
   },
   "vision": {
-    "_doc": "Hauteur de terrain ±10 : un relief plus haut que la ligne tireur→cible coupe la vue | La PERCEPTION allonge le tir (designer 2026-09-03, solution B : chaque stat desserre une rarete qui existe deja). Ce bloc etait le seul des six a etre vide — la force avait `poids.par_force`, le charisme `compagnons.par_charisme`, l'endurance et la volonte leurs barres. Une arme a projectile gagne perception x portee_par_perception tuiles ; le contact n'y gagne rien.",
+    "_doc": "Hauteur de terrain ±10 : un relief plus haut que la ligne tireur→cible coupe la vue | La PERCEPTION allonge le tir (designer 2026-09-03, solution B : chaque stat desserre une rarete qui existe deja). Ce bloc etait le seul des six a etre vide — la force avait `poids.par_force`, le charisme `compagnons.par_charisme`, l'endurance et la volonte leurs barres. Une arme a projectile gagne perception x portee_par_perception tuiles ; le contact n'y gagne rien. | LA PORTEE DE VUE DU JOUEUR (designer 2026-09-09 : « la ligne de vue va beaucoup trop loin par defaut »). Elle vaut `joueur_base + perception x joueur_par_perception`, bornee en bas par `joueur_min` quand la nuit ou la meteo la reduisent. CES TROIS NOMBRES N EXISTAIENT PAS : le code tournait sur ses valeurs de repli — 18 + 1 x perception, soit 27 tuiles pour un joueur a 9 en perception, bien au-dela de ce que l ecran montre au zoom par defaut. Ils sont en donnees maintenant, donc reglables sans toucher au code : 10 + 0,4 x perception donne 13 tuiles au meme joueur, et la perception continue de compter sans faire du monde entier une carte ouverte.",
     "hauteur_oeil": 1,
     "portee_par_perception": 0.5,
     "etage_surplomb": 2,
     "_doc_etage": "etage_surplomb (les couches Z, 2026-09-06) : à l'étage, l'œil s'élève d'autant au-dessus de hauteur_oeil pour voir PAR-DESSUS les murs de son niveau (hauteur_vue 2) — l'air alentour se voit, et la rue par lui ; les pièces des autres bâtiments restent derrière leurs murs.",
-    "joueur_base": 18,
-    "joueur_par_perception": 1.0,
+    "joueur_base": 10,
+    "joueur_par_perception": 0.4,
     "joueur_min": 4,
     "_doc_joueur": "CE QUE LE JOUEUR VOIT, et c est autre chose que la portee a laquelle une IA DETECTE une cible (2026-09-08). Les deux partageaient le meme nombre — engagement.detection_par_perception — si bien qu en plein jour, ciel clair, le joueur ne voyait que Perception x 1 = CINQ tuiles, alors que le client en dessine vingt autour de lui : toute une ville etait donc du MEMORISE, redessine en silhouettes plates a chaque pas. C etait la premiere cause du lag en ville, et aussi du « les textures ne sont pas affichees ». joueur_base : la portee en plein jour ; joueur_par_perception : ce que la Perception y ajoute ; joueur_min : le plancher, meme la nuit sous la tempete. La nuit et la meteo continuent de multiplier cette portee, et une lumiere en main la rattrape."
   },

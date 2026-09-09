@@ -246,6 +246,7 @@ func _materiau_grain() -> ShaderMaterial:
 		mat.set_shader_parameter("style_texture_base", float(cfg.get("style_texture_base", 100)))
 		mat.set_shader_parameter("teinte_matiere", float(cfg.get("teinte_matiere_peinte", 1.0)))       # une tuile a sa texture ET la teinte de sa matière (2026-09-08)
 		mat.set_shader_parameter("teinte_normalisee", 1.0 if bool(cfg.get("teinte_matiere_normalisee", true)) else 0.0)
+	mat.set_shader_parameter("fondu_pixels", 1.0 if bool(cfg.get("fondu_pixels", true)) else 0.0)   # le fondu par pixels tirés (designer 2026-09-09)
 	_materiaux_grain.append(mat)   # le soleil se règle sur tous (_maj_soleil)
 	return mat
 
@@ -1298,7 +1299,15 @@ var _visibles_image := PackedByteArray()
 
 
 func _calculer_visibles(j: Dictionary) -> void:
+	# LES CADAVRES SE VOIENT (ordre de travail 28 ter, 2026-09-09). Un mort n'était NI DESSINÉ ni visé : il existait
+	# dans la mémoire de la partie et nulle part ailleurs. Or il est déjà sauvegardé (l'écriture ne filtre pas les
+	# morts) et le pantin connaît déjà la pose « mort » — il ne manquait que de le mettre dans la liste que le client
+	# dessine. **Seule cette liste-là les prend** : `sim.vivants()` garde son sens partout ailleurs, et c'est ce qui
+	# évite qu'un cadavre se mette à compter comme un assaillant ou à parler au journal.
 	_vivants_image = sim.vivants()
+	for m in sim.entites.values():
+		if not m.get("vivant", true) and sim.grille.dans(m.get("pos", Vector2i(-9999, -9999))):
+			_vivants_image.append(m)
 	var positions := PackedVector2Array()
 	positions.resize(_vivants_image.size())
 	for k in _vivants_image.size():
@@ -1776,8 +1785,15 @@ func _options_tuile(t: Vector2i) -> Array:
 			res.append({"id": "dormir", "vers": t})
 		if str(m.type_meuble) == "etal" and int(sim.territoire.caisse) > 0:
 			res.append({"id": "caisse", "vers": t})
-		if int(m.capacite_slots) > 0 and sim.contenants.get(idx, []).size() > 0:
-			res.append({"id": "prendre", "vers": t})
+		# UN COFFRE VIDE S'OUVRE AUSSI (designer 2026-09-09 : « l'interface de coffres ne s'ouvre même pas »). La
+		# condition portait « et il contient quelque chose » : elle venait du temps où « prendre » voulait dire
+		# ramasser un butin. L'écran de coffre du 2026-09-08 en a fait « ouvrir le contenant », et la condition est
+		# restée — un coffre ne devenait donc utilisable qu'une fois rempli, ce qui était impossible.
+		# **On cherche dans la PILE** : depuis que les meubles s'empilent, un coffre peut être sous un autre meuble.
+		for mid in g.meubles_de(idx):
+			if int((GameData.entree("meubles", str(mid)) as Dictionary).capacite_slots) > 0:
+				res.append({"id": "prendre", "vers": t})
+				break
 	if "contenant" in tags and sim.contenants.get(idx, []).size() > 0:
 		res.append({"id": "prendre", "vers": t})
 	if "parcelle" in tags:

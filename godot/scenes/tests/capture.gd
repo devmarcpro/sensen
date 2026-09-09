@@ -69,6 +69,9 @@ func _ready() -> void:
 			DisplayServer.window_set_size(Vector2i(int(args[it + 1]), int(args[it + 2])))
 	scene = load("res://scenes/demo/main.tscn").instantiate()
 	add_child(scene)
+	for iz in args.size():   # --zoom Z : rapprocher la vue pour JUGER un détail (le fondu des tuiles, un sprite)
+		if args[iz] == "--zoom" and iz + 1 < args.size():
+			scene.zoom = clampf(float(args[iz + 1]), 0.4, 12.0)
 	for ig in args.size():   # --graine N : un monde CONNU pour les captures (sinon chaque prise tombe ailleurs)
 		if args[ig] == "--graine" and ig + 1 < args.size():
 			scene.graine_monde = int(args[ig + 1])

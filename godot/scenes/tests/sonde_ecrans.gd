@@ -33,6 +33,8 @@ func _ready() -> void:
 			_verifier(ec, nom, t)
 		ec.fermer()
 	_verifier_pages_et_tri(scene, ec)
+	await _verifier_objets(scene, ec)
+	await _verifier_coffre(scene, ec)
 	await _verifier_pause(scene, ec)
 	await _verifier_ecran_mort(scene, ec)
 	_verifier_controles()
@@ -245,6 +247,95 @@ func _verifier_aide(_scene: Node, ec) -> void:
 		fautes.append("  aide : l'ecran n'a pas suivi le remappage — il n'est donc pas branche sur l'InputMap")
 	else:
 		print("  aide : %d lignes, et l'ecran suit le remappage (il LIT l'InputMap)" % lignes)
+
+
+## ÉQUIPER UN OBJET PAR L'ÉCRAN (designer 2026-09-09 : « impossible d'équiper d'interagir avec les items dans
+## l'inventaire »). La suite complète était verte : elle ne teste que la simulation, jamais le chemin qu'un joueur
+## emprunte — choisir un objet, voir ses options, en activer une. C'est ce chemin-là qu'on parcourt ici.
+func _verifier_objets(scene: Node, ec: Node) -> void:
+	var sim = scene.sim
+	var j: Dictionary = scene.joueur()
+	if sim == null or j.is_empty():
+		fautes.append("  objets : pas de joueur")
+		return
+	var arme: Dictionary = sim.generer_objet("proto_pioche", 1, {}, "commun", 0)
+	if arme.is_empty() or not arme.has("uid"):
+		fautes.append("  objets : le prototype d'essai n'existe pas")
+		return
+	j.sac.append(str(arme.uid))
+	ec.ouvrir("inventaire")
+	await get_tree().process_frame
+	# 1. CHOISIR l'objet : ses options doivent apparaître.
+	var i_obj := -1
+	for i in ec.entrees.size():
+		if str(ec.entrees[i].get("kind", "")) == "objet" and str(ec.entrees[i].get("uid", "")) == arme.uid:
+			i_obj = i
+	if i_obj < 0:
+		fautes.append("  objets : l'arme du sac n'apparaît pas dans l'écran")
+		ec.fermer()
+		return
+	ec.selection = i_obj
+	EcransListe._sur_selection(ec, i_obj)
+	EcransListe._action_principale(ec)
+	await get_tree().process_frame
+	var options := 0
+	var i_equiper := -1
+	for i2 in ec.entrees.size():
+		if str(ec.entrees[i2].get("kind", "")) == "action_objet":
+			options += 1
+			if str(ec.entrees[i2].get("action", "")) == "equiper":
+				i_equiper = i2
+	if options == 0 or i_equiper < 0:
+		fautes.append("  objets : choisir l'arme n'offre AUCUNE option (%d)" % options)
+		ec.fermer()
+		return
+	# 2. ACTIVER « équiper » : l'arme doit passer en main.
+	EcransListe._sur_selection(ec, i_equiper)
+	EcransListe._action_principale(ec)
+	sim.horloge_monde.avancer(3000)
+	await get_tree().process_frame
+	if not (arme.uid in j.equipement.values()):
+		fautes.append("  objets : « équiper » ne met rien en main (options %d)" % options)
+	else:
+		print("  objets : l'arme du sac s'équipe par l'écran (%d options offertes)" % options)
+	ec.fermer()
+
+
+## OUVRIR UN COFFRE VIDE (designer 2026-09-09 : « l'interface de coffres ne s'ouvre même pas »). Le défaut était réel
+## et ancien : l'option n'était offerte que si le coffre contenait DÉJÀ quelque chose — un coffre ne devenait donc
+## utilisable qu'une fois rempli, ce qui était impossible. Et il se cherche dans la PILE depuis que les meubles
+## s'empilent : un coffre sous une lanterne devenait introuvable.
+func _verifier_coffre(scene: Node, ec: Node) -> void:
+	var sim = scene.sim
+	var j: Dictionary = scene.joueur()
+	if sim == null or j.is_empty():
+		fautes.append("  coffre : pas de joueur")
+		return
+	var t: Vector2i = sim._tuile_libre_autour(j.pos)
+	if t.x < 0:
+		fautes.append("  coffre : aucune tuile libre")
+		return
+	# On pose le coffre COMME LE JEU LE POSE : `poser_meuble` seul ne met pas à jour le contenu de la tuile, et
+	# c'est ce contenu que le menu contextuel interroge. Une sonde qui triche sur la pose ne mesure rien.
+	sim.grille.poser_meuble(sim.grille.idx(t), "coffre")
+	SimCamp._maj_contenu_pile(sim, t)
+	var opts: Array = scene._options_tuile(t)
+	var a_prendre := false
+	for o in opts:
+		if str((o as Dictionary).get("id", "")) == "prendre":
+			a_prendre = true
+	if not a_prendre:
+		fautes.append("  coffre : un coffre VIDE n'offre aucune option — on ne peut donc jamais rien y ranger")
+	if SimCamp._coffre_a(sim, t).is_empty():
+		fautes.append("  coffre : le coffre n'est pas trouvé sur sa tuile")
+	# … et sous un autre meuble : depuis les piles, `meubles[i]` ne donne que le sommet.
+	sim.grille.poser_meuble(sim.grille.idx(t), "torchere")
+	SimCamp._maj_contenu_pile(sim, t)
+	if SimCamp._coffre_a(sim, t).is_empty():
+		fautes.append("  coffre : un coffre SOUS un autre meuble devient introuvable")
+	if a_prendre and not SimCamp._coffre_a(sim, t).is_empty():
+		print("  coffre : un coffre vide s'ouvre, et il se trouve même sous un autre meuble")
+	sim.grille.vider_meubles(sim.grille.idx(t))
 
 
 func _verifier_pages_et_tri(scene: Node, ec: Node) -> void:
