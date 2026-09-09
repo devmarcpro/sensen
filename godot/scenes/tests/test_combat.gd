@@ -228,6 +228,7 @@ func _ready() -> void:
 	_lancer("test_zones_au_sol")
 	_lancer("test_conditions_et_modificateurs")
 	_lancer("test_camp")
+	_lancer("test_boss_par_theme")
 	_lancer("test_geographie")
 	_lancer("test_faim_et_poids")
 	_lancer("test_donjon")

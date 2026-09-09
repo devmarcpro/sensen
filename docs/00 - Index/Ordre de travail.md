@@ -137,18 +137,34 @@ internes**, et elles comptent.
 Débloqué par la ligne 4, et **il partage vingt-cinq lignes de code avec le palier 1** : `Monde.nettoyages` s'écrit dans
 le bloc exact qu'il faut rouvrir. Les deux se font dans la même passe, ou l'on édite ce bloc deux fois.
 
-19. **`chain_gauge` cesse de vouloir dire « c'est le boss »** — aujourd'hui une brute de couloir donne un artefact
-    garanti et marque le donjon nettoyé.
-20. **Le troisième angle du même défaut est une faute d'indentation** : la quête « videz le donjon » et le signal
-    `dungeon_cleared` sont sous la branche « donjon corrompu, boss **non** vaincu ». La quête ne se valide donc que si
-    l'on a échoué — et jamais dans un donjon ordinaire.
-21. **Un boss propre par thème** (les douze créatures de folklore). **Bloqué par la ligne 19, et c'est contre-intuitif** :
-    ça ressemble à huit valeurs JSON, mais poser le drapeau sur des créatures de folklore **multiplie le défaut 19 par
-    douze** tant qu'il signifie « artefact garanti ».
-22. **Incarner un compagnon cesse de faire perdre la jauge de chaîne en silence** (dix lignes, aucun bloqueur : peut
-    sauter n'importe où, y compris dans la journée du palier 1).
-    **Deux tests encodent le bug et tomberont volontairement** — ils posent le drapeau sur un loup pour exiger un
-    artefact, et attendent le chef de bande en dur.
+~~19. **`chain_gauge` cesse de vouloir dire « c'est le boss »**~~ — **DÉJÀ FAIT le 2026-09-08**, et cette file ne
+    l'avait pas enregistré (constaté le 2026-09-09 en la relisant). La victoire se lit sur `boss_donjon`, le drapeau
+    que le générateur pose sur la créature de la salle du fond du DERNIER étage ; `chain_gauge` ne veut plus dire que
+    ce qu'il dit, une jauge de chaîne Wu Xing.
+~~20. **La faute d'indentation de la quête**~~ — **DÉJÀ FAIT le 2026-09-08.** La quête « videz le donjon » et le
+    signal `dungeon_cleared` sont sortis du `elif` « donjon corrompu, boss non vaincu » : ils appartiennent à la
+    victoire, quel que soit le genre du donjon.
+~~21. **Un boss propre par thème**~~ — **FAIT le 2026-09-09.** Les sept thèmes partageaient `chef_de_bande` : un
+    chef de bandits gardait le donjon de feu, celui d'eau et celui de métal — et il n'appartenait au pool d'**aucun**
+    d'entre eux, pas même celui de la ruine. Désormais kitsune dans les bois, lindworm dans l'eau, jorogumo dans le
+    feu, basilic dans le métal, tengu au repaire, griffon dans les ruines, tsuchigumo dans la terre.
+    **La règle se vérifie plutôt qu'elle ne se discute**, et un test la tient : le boss est une créature **du pool de
+    son thème** — la culmination de ce qu'on a croisé, pas un étranger — et c'est **la plus forte** du pool, parce
+    que `boss_donjon` ne fait que le désigner et ne le renforce pas. **C'est le test qui m'a appris la règle
+    exacte** : mes deux critères entrent en tension dès qu'un pool en recoupe un autre (le repaire partage la
+    jorogumo avec le feu), et la formulation juste, indépendante de l'ordre de lecture, est « aucune créature du pool
+    n'est plus forte que le boss, **sauf si elle garde déjà un autre thème** ».
+    **DEUX TESTS ENCODAIENT L'ANCIEN CONTENU, ET L'UN D'EUX ÉTAIT UN PIÈGE.** Le premier attendait `chef_de_bande`
+    en dur. Le second exigeait le tag `elite` — et la tentation était de le donner aux sept nouveaux boss pour le
+    faire passer. **C'aurait été refaire le défaut de la ligne 19** : poser sur une **espèce** un tag qui décrit un
+    **rôle**, si bien que chaque kitsune serait devenue une élite jusque dans les couloirs. `elite` n'est d'ailleurs
+    lu par aucune ligne de code. Les deux tests disent maintenant la règle : l'être marqué est la créature que son
+    thème déclare.
+~~22. **Incarner un compagnon cesse de faire perdre la jauge de chaîne en silence**~~ — **DÉJÀ FAIT** : l'incarnation
+    dit maintenant au journal si le corps qu'on prend porte une jauge de chaîne (`journal.incarne_sans_chaine`,
+    `journal.incarne_avec_chaine`).
+    *La leçon vaut d'être gardée : une file de travail qui n'est pas rayée à mesure fait relire trois fois du travail
+    fini. Ces trois lignes ont été vérifiées dans le code avant d'être rayées, pas de mémoire.*
 
 ## Palier 5 — les champs, chacun apparié à sa stat
 

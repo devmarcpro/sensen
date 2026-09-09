@@ -428,6 +428,61 @@ func test_camp() -> void:
 
 ## Continents et régions (designer 2026-09-02) : la découpe géographique du monde, immuable et lue à la
 ## demande. Ce qui compte : elle est déterministe, elle ne dépend pas des royaumes, et une région a un sol.
+## UN BOSS PROPRE PAR THÈME (ordre de travail 21, 2026-09-09). Les sept thèmes partageaient `chef_de_bande` — un
+## chef de bandits gardait le donjon de feu, celui d'eau et celui de métal, et il n'appartenait au pool d'AUCUN
+## d'entre eux. La règle qui les remplace se vérifie plutôt qu'elle ne se discute, et c'est ce que fait ce test :
+##   · le boss est une créature DU POOL de son thème — la culmination de ce qu'on a croisé, pas un étranger ;
+##   · c'est la PLUS FORTE du pool, parce que `boss_donjon` ne fait que le désigner et ne le renforce pas ;
+##   · deux thèmes ne partagent pas leur boss.
+## Sans ce test, la règle serait une intention dans un commentaire ; avec lui, elle tient au prochain contenu ajouté.
+func test_boss_par_theme() -> void:
+	var vus := {}
+	var n_themes := 0
+	for tid: String in GameData.catalogues.dungeon_themes.keys():
+		var th: Dictionary = GameData.catalogues.dungeon_themes[tid]
+		var boss := str(th.get("boss", ""))
+		if boss.is_empty():
+			continue
+		n_themes += 1
+		var pool: Array[String] = []
+		for c in th.get("creatures", []):
+			var cid := str((c as Dictionary).get("id", ""))
+			if not cid.is_empty() and not (cid in pool):
+				pool.append(cid)
+		verifier(boss in pool, "%s : son boss (%s) est une créature de son propre pool" % [tid, boss])
+		# LA PLUS FORTE DU POOL QU'AUCUN AUTRE THÈME N'A PRISE. Les deux critères entrent en tension dès qu'un pool
+		# en recoupe un autre — le repaire partage la jorogumo avec le feu —, et c'est le test qui me l'a appris.
+		# La règle exacte est donc celle-ci, et elle ne dépend pas de l'ordre dans lequel on lit les thèmes : aucune
+		# créature de son pool n'est plus forte que son boss, SAUF si elle garde déjà un autre thème.
+		var f_boss := _somme_stats(boss)
+		var plus_fort := ""
+		for cid2 in pool:
+			if _somme_stats(cid2) > f_boss and not _est_boss_ailleurs(cid2, tid):
+				plus_fort = cid2
+		verifier(plus_fort.is_empty(), "%s : son boss (%s, %d) est le plus fort de son pool que nul autre thème n'a pris%s" % [tid, boss, f_boss, "" if plus_fort.is_empty() else " — mais %s fait %d et est libre" % [plus_fort, _somme_stats(plus_fort)]])
+		verifier(not vus.has(boss), "%s : son boss (%s) ne garde pas déjà un autre thème" % [tid, boss])
+		vus[boss] = tid
+	verifier(n_themes >= 7, "les %d thèmes de donjon ont chacun un boss" % n_themes)
+
+
+## Cette créature garde-t-elle déjà un AUTRE thème ? C'est ce qui autorise un thème à prendre moins fort que le plus
+## fort de son pool : douze créatures de folklore pour sept thèmes, chacun son visage.
+func _est_boss_ailleurs(cid: String, sauf: String) -> bool:
+	for tid2: String in GameData.catalogues.dungeon_themes.keys():
+		if tid2 != sauf and str(GameData.catalogues.dungeon_themes[tid2].get("boss", "")) == cid:
+			return true
+	return false
+
+
+func _somme_stats(cid: String) -> int:
+	var d: Dictionary = GameData.catalogues.creatures.get(cid, {})
+	var st: Dictionary = d.get("corps", {}).get("stats", {})
+	var t := 0
+	for k in st.keys():
+		t += int(st[k])
+	return t
+
+
 func test_geographie() -> void:
 	var s := Simulation.new(77)
 	s.charger_camp()
@@ -608,11 +663,15 @@ func test_donjon() -> void:
 	verifier(g.bloque_passage(Vector2i(0, 0)) and "roche" in g.contenu_de(Vector2i(0, 0)).tags, "le bord de la cellule est de la roche")
 	var fin := gen.generer_etage(42, 1, 2, 10, true)
 	verifier(fin.boss != null and fin.escalier == null, "dernier étage : boss, pas d'escalier descendant")
+	# LE BOSS EST CELUI QUE SON THÈME DÉCLARE (2026-09-09) : ce test attendait `chef_de_bande` en dur, et il le
+	# faisait passer pour une règle alors que les sept thèmes partageaient simplement le même boss. Depuis que
+	# chacun a le sien (ordre de travail 21), on lit le thème au lieu d'écrire un nom.
+	var boss_theme := str(GameData.entree("dungeon_themes", "ruine").get("boss", ""))
 	var a_boss := false
 	for sp in fin.spawns:
-		if sp.creature == "chef_de_bande":
+		if str(sp.creature) == boss_theme:
 			a_boss = true
-	verifier(a_boss and fin.spawns.size() > 1, "le boss du thème et des créatures du pool sont posés")
+	verifier(a_boss and fin.spawns.size() > 1, "le boss de la ruine (%s) et des créatures du pool sont posés" % boss_theme)
 	# En simulation : charger, creuser un mur, descendre avec son état
 	var s := Simulation.new(7)
 	s.charger_donjon("ruine", 7, 1, 1)
@@ -1508,7 +1567,13 @@ func test_boss_et_artefact() -> void:
 			boss = x
 			n_marques += 1
 	verifier(not boss.is_empty() and n_marques == 1, "un seul être porte le drapeau du boss (%s, %d marqué(s))" % [str(boss.get("name_key", "-")), n_marques])
-	verifier("elite" in boss.get("tags", []), "et c'est bien une élite")
+	# CE QUI FAIT UN BOSS, C'EST SON THÈME, PAS UN TAG (2026-09-09). Ce test exigeait le tag `elite` — une propriété
+	# du `chef_de_bande` que les sept thèmes partageaient, pas une règle : `elite` n'est lu par aucune ligne de code,
+	# et le poser sur une espèce en ferait une élite jusque dans les couloirs, exactement le défaut que `chain_gauge`
+	# avait déjà causé. L'invariant vrai est que l'être marqué est la créature que SON thème déclare.
+	var theme_id := str(s.donjon.get("theme", ""))
+	var attendu := str(GameData.entree("dungeon_themes", theme_id).get("boss", ""))
+	verifier(str(boss.get("def", "")) == attendu, "et c'est la créature que le thème « %s » déclare (%s)" % [theme_id, attendu])
 	verifier(not s._boss_vaincu(), "vivant : le donjon n'est pas vaincu")
 	# La preuve du défaut corrigé : tuer une brute de couloir ne vainc PAS le donjon.
 	var brute := s.ajouter("brute", s._tuile_libre_autour(j.pos), "ia")

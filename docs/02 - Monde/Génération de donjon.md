@@ -120,6 +120,11 @@ NETTOYAGE ET DISPARITION (3.5) : à la mort du boss (`creature_killed`
 > [!success] Constaté le 2026-09-03 — `taille_salles` est renommé `tailles_salles` dans les thèmes
 > La clé du thème est au pluriel (`tailles_salles`, à côté de `salles_par_etage`, `poids_salles`, `salles_carrees`) ; le callout ci-dessus l'écrivait au singulier.
 
+> [!success] Codé le 2026-09-09 — **un boss propre par thème** (ordre de travail 21)
+> Les sept thèmes partageaient `chef_de_bande`, qui n'appartenait au pool d'aucun d'eux. Désormais : **kitsune** dans les bois, **lindworm** dans l'eau, **jorogumo** dans le feu, **basilic** dans le métal, **tengu** au repaire, **griffon** dans les ruines, **tsuchigumo** dans la terre.
+> **La règle, vérifiée par `test_boss_par_theme`** : le boss est une créature **du pool de son thème** — la culmination de ce qu'on a croisé en chemin, pas un étranger — et c'est **la plus forte** de ce pool, parce que le drapeau `boss_donjon` ne fait que le désigner et ne lui donne aucun bonus. Formulation exacte, indépendante de l'ordre de lecture : *aucune créature du pool n'est plus forte que le boss, sauf si elle garde déjà un autre thème.* Sept thèmes, sept visages.
+> **Le piège écarté** : un test exigeait le tag `elite` sur le boss. Le poser sur les sept nouvelles espèces aurait refait le défaut de `chain_gauge` — un tag qui décrit un **rôle** collé à une **espèce**, si bien que chaque kitsune serait une élite jusque dans les couloirs. `elite` n'est lu par aucune ligne de code ; ce qui fait un boss, c'est que son thème le déclare.
+
 ## Liens
 - **Dépend de** : [[Donjons — structure et intégration]], [[Salles et connecteurs]], [[Unification macro-micro]], [[Dérive de la corruption]]
 - **Alimente** : [[Loot — affixes, gemmes et rareté]], [[Trésors et artefacts]], [[Créatures]], [[Gabarit de quête]]
